@@ -25,9 +25,10 @@ def project(xbar, l, u):
     # Round x part to [l, u] interval
     xbar[:nx] = np.minimum(np.maximum(xbar[:nx], l), u)
 
-    # Round slack variables to positive orthant
+    # Round slack variables to positive ortant
     xbar[nx:] = np.maximum(xbar[nx:], 0)
-    ipdb.set_trace()
+
+    return xbar
 
 
 def OSqpSolve(c, Q, Aeq, beq, Aineq, bineq, lb, ub):
@@ -59,12 +60,13 @@ def OSqpSolve(c, Q, Aeq, beq, Aineq, bineq, lb, ub):
 
         # x update
         x = sp.linalg.solve(M, qbar)
+        x = x[:nvar]
         # z update
         z = project(x + u[neq+nineq:], lb, ub)
         # u update
-        u = u + np.append(np.dot(Ac, x), x) - np.append(np.zeros(neq + nineq), z) - np.bmat(bc, np.zeros(nvar))
+        u = u + np.append(np.dot(Ac, x), x) - np.append(np.zeros(neq + nineq), z) - np.append(bc, np.zeros(nvar))
 
-    sol = sp.randn(x[:nx])
+    sol = x[:nx]
     objval = .5*np.dot(np.dot(sol, Q), sol) + np.dot(c, sol)
     return quadProgSolution(OPTIMAL, objval, sol)
 
@@ -88,8 +90,8 @@ def main():
 
     # Solve QP ADMM
     result = OSqpSolve(c, Q, Aeq, beq, Aineq, bineq, l, u)
-    # print result.sol
-    # print result.objval
+    print result.sol
+    print result.objval
 
 
 if __name__ == '__main__':
