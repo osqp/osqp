@@ -35,7 +35,7 @@ def project(xbar, l, u):
 
 def SQPSSolve(c, Q, Aeq, beq, Aineq, bineq, lb, ub):
 
-    max_iter = 100
+    max_iter = 3000
     rho = 1.6
 
     # Ger dimensions
@@ -76,10 +76,10 @@ def SQPSSolve(c, Q, Aeq, beq, Aineq, bineq, lb, ub):
 
         # Compute cost function
         xtemp = x[:nx]
-        f = np.dot(np.dot(xtemp.T, Q), xtemp) + np.dot(c.T, xtemp)
+        f = .5*np.dot(np.dot(xtemp.T, Q), xtemp) + np.dot(c.T, xtemp)
 
-        if (i == 1) | (np.mod(i, 10) == 0):
-            print "%.3i | \t%.2f" % (i, f)
+        if (i+1 == 1) | (np.mod(i+1, 10) == 0):
+            print "%.3i | \t%.2f" % (i+1, f)
 
     print "Optimization Done\n"
 
@@ -112,18 +112,20 @@ def main():
     u = 5.
 
     # Solve QP ADMM
-    result = SQPSSolve(c, Q, Aeq, beq, Aineq, bineq, l, u)
-    # print result.sol
-    print "ADMM Objective Value = %.3f" % result.objval
+    results = SQPSSolve(c, Q, Aeq, beq, Aineq, bineq, l, u)
 
     # Solve QP with cvxpy
     x = cvx.Variable(nx)
     constraints = [Aeq*x == beq] + [Aineq*x <= bineq] + [x >= l] + [x <= u]
     objective = cvx.Minimize(.5*cvx.quad_form(x, Q) + c.T*x)
     problem = cvx.Problem(objective, constraints)
-    results = problem.solve(solver=cvx.GUROBI, verbose=True)
+    resultsGrb = problem.solve(solver=cvx.GUROBI, verbose=True)
+
+    # Print stuff
+    # print result.sol
+    print "ADMM Objective Value = %.3f\n" % results.objval
     # print x.value
-    print objective.value
+    print "Gurobi Objective Value = %.3f" % objective.value
 
 
 if __name__ == '__main__':
