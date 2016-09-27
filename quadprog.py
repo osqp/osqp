@@ -42,12 +42,13 @@ def OSqpSolve(c, Q, Aeq, beq, Aineq, bineq, lb, ub):
     nvar = nx + nineq  # Number of variables in standard form: x and s variables
 
     # Form complete (c) matrices for inequality constraints
-    Ac = np.asarray(np.bmat([[Aeq, np.zeros((neq, nineq))], [Aineq, np.eye(nineq)]]))
+    Ac = np.vstack([np.hstack([Aeq, np.zeros((neq, nineq))]), np.hstack([Aineq, np.eye(nineq)])])
     bc = np.append(beq, bineq)
     Qc = spla.block_diag(Q, np.zeros((nineq, nineq)))
     cc = np.append(c, np.zeros(nineq))
+
     # Factorize Matrices (Later)
-    M = np.asarray(np.bmat([[Qc + rho*np.eye(nvar), Ac.T], [Ac, -1./rho*np.eye(nineq + neq)]]))
+    M = np.vstack([np.hstack([Qc + rho*np.eye(nvar), Ac.T]), np.hstack([Ac, -1./rho*np.eye(nineq + neq)])])
 
     # Run ADMM
     z = np.zeros(nvar)
@@ -60,7 +61,7 @@ def OSqpSolve(c, Q, Aeq, beq, Aineq, bineq, lb, ub):
 
         # x update
         x = sp.linalg.solve(M, qbar)
-        x = x[:nvar]
+        x = x[:nvar]  # Select only first nvar elements
         # z update
         z = project(x + u[neq+nineq:], lb, ub)
         # u update
