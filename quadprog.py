@@ -30,7 +30,7 @@ def project(xbar, l, u):
     ipdb.set_trace()
 
 
-def OSqpSolve(c, Q, Aeq, beq, Aineq, bineq, l, u):
+def OSqpSolve(c, Q, Aeq, beq, Aineq, bineq, lb, ub):
 
     max_iter = 100
     rho = 1.6
@@ -41,12 +41,12 @@ def OSqpSolve(c, Q, Aeq, beq, Aineq, bineq, l, u):
     nvar = nx + nineq  # Number of variables in standard form: x and s variables
 
     # Form complete (c) matrices for inequality constraints
-    Ac = np.bmat([[Aeq, np.zeros((neq, nineq))], [Aineq, np.eye(nineq)]])
+    Ac = np.asarray(np.bmat([[Aeq, np.zeros((neq, nineq))], [Aineq, np.eye(nineq)]]))
     bc = np.append(beq, bineq)
     Qc = spla.block_diag(Q, np.zeros((nineq, nineq)))
     cc = np.append(c, np.zeros(nineq))
     # Factorize Matrices (Later)
-    M = np.bmat([[Qc + rho*np.eye(nvar), Ac.T], [Ac, -1./rho*np.eye(nineq + neq)]])
+    M = np.asarray(np.bmat([[Qc + rho*np.eye(nvar), Ac.T], [Ac, -1./rho*np.eye(nineq + neq)]]))
 
     # Run ADMM
     z = np.zeros(nvar)
@@ -54,14 +54,13 @@ def OSqpSolve(c, Q, Aeq, beq, Aineq, bineq, l, u):
 
     for i in range(max_iter):
         qtemp = -cc + rho*(z + np.dot(Ac.T, bc) - np.dot(Ac.T, u[:neq + nineq]) - u[neq + nineq:])
-        qtemp = qtemp.reshape((nvar,))
-        ipdb.set_trace()
+
         qbar = np.append(qtemp, np.zeros(nineq+neq))
 
         # x update
         x = sp.linalg.solve(M, qbar)
         # z update
-        z = project(x + u[neq+nineq:], l, u)
+        z = project(x + u[neq+nineq:], lb, ub)
         # u update
         u = u + np.append(np.dot(Ac, x), x) - np.append(np.zeros(neq + nineq), z) - np.bmat(bc, np.zeros(nvar))
 
