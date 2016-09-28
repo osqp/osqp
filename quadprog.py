@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
+import sys
 import numpy as np
 from numpy import linalg as npla
 from scipy import linalg as spla
 import cvxpy as cvx
+from cvxopt import cholmod
 
 import scipy as sp
 import matplotlib.pyplot as plt
@@ -27,11 +29,11 @@ class quadProgSolution:
 		self.sol = sol
 
 
-def project(xbar, l, u):
-	nx = np.size(l)
+def project(xbar, lb, ub):
+	nx = np.size(lb)
 	
 	# Round x part to [l, u] interval
-	xbar[:nx] = np.minimum(np.maximum(xbar[:nx], l), u)
+	xbar[:nx] = np.minimum(np.maximum(xbar[:nx], lb), ub)
 	
 	# Round slack variables to positive ortant
 	xbar[nx:] = np.maximum(xbar[nx:], 0)
@@ -56,6 +58,9 @@ def SQPSSolve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, x0=0, max_iter=500, rho=1.6)
 	nineq = bineq.shape[0]
 	nvar = nx + nineq  # Number of variables in standard form: x and s variables
 	
+	# Reformat missing data
+	
+	
 	# Form complete (c) matrices for inequality constraints
 	Ac = np.vstack([np.hstack([Aeq, np.zeros((neq, nineq))]), np.hstack([Aineq, np.eye(nineq)])])
 	bc = np.append(beq, bineq)
@@ -65,10 +70,12 @@ def SQPSSolve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, x0=0, max_iter=500, rho=1.6)
 	# Factorize Matrices (Later)
 	M = np.vstack([np.hstack([Qc + rho*np.eye(nvar), Ac.T]), np.hstack([Ac, -1./rho*np.eye(nineq + neq)])])
 	
-	print("Splitting QP Solver")
-	print("-------------------\n")
+	# Factorize matrix M using LU decomposition
+	LU, piv = spla.lu_factor(M)
 	
-	print("iter |\tcost \n")
+	print "Splitting QP Solver"
+	print "-------------------\n"
+	print "iter |\t %6s\n" % 'cost'
 	
 	# Run ADMM
 	z = np.zeros(nvar)
@@ -80,8 +87,7 @@ def SQPSSolve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, x0=0, max_iter=500, rho=1.6)
 		qbar = np.append(qtemp, np.zeros(nineq+neq))
 		
 		# x update
-		x = sp.linalg.solve(M, qbar)
-		x = x[:nvar]  # Select only first nvar elements
+		x = spla.lu_solve((LU, piv), qbar)[:nvar]	# Select only first nvar elements
 		# z update
 		z = project(x + u[neq+nineq:], lb, ub)
 		# u update
@@ -92,7 +98,7 @@ def SQPSSolve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, x0=0, max_iter=500, rho=1.6)
 		f = .5*np.dot(np.dot(xtemp.T, Q), xtemp) + np.dot(c.T, xtemp)
 		
 		if (i+1 == 1) | (np.mod(i+1, 25) == 0):
-			print "%4s | \t%.2f" % (i+1, f)
+			print "%4s | \t%7.2f" % (i+1, f)
 	
 	print "Optimization Done\n"
 	
@@ -106,8 +112,13 @@ def isPSD(A, tol=1e-8):
 	return np.all(E > -tol)
 
 
-# Define problem and solve it
-def main():
+
+
+
+def main(argv=[]):
+    """
+    Handle command line arguments from the operating system
+    """
 	
 	# Select an example QP
 	expl = 'random' # {'small', 'random'}
@@ -127,15 +138,13 @@ def main():
 		ub = 5.*np.ones(nx)
 	elif expl == 'small':
 		nx = 2
-		neq = 1
-		nineq = 0
 		# Generate a small example
 		Q = np.array([ [4., 1.], [1., 2.] ])
 		c = np.ones(2)
 		Aeq = np.ones((1,2))
 		beq = np.array([1.0])
 		Aineq = np.zeros((0,nx))
-		bineq = np.array([])
+		bineq = np.zeros(0)
 		lb = np.zeros(2)
 		ub = np.Inf*np.ones(2)
 	else:
@@ -155,22 +164,24 @@ def main():
 		constraints = constraints + [x >= lb]
 	if ub.size:
 		constraints = constraints + [x >= lb]
-	#constraints = [Aeq*x == beq] + [Aineq*x <= bineq] + [x >= lb] + [x <= ub]
-	
 	objective = cvx.Minimize(.5*cvx.quad_form(x, Q) + c.T*x)
 	problem = cvx.Problem(objective, constraints)
 	resultECOS = problem.solve(solver=cvx.ECOS, verbose=False)
 	
-	# Print stuff
-	# print result.sol
-	print "ADMM Objective Value = %.3f\n" % results.objval
-	# print x.value
+	# Compare solutions
+	print "ADMM Objective Value = %.3f\n" % results.objval,
 	print "ECOS Objective Value = %.3f" % objective.value
 	
-	ipdb.set_trace()
+	#ipdb.set_trace()
 
 
+
+	
+# Parsing optional command line arguments
 if __name__ == '__main__':
-	main()
+	if len(sys.argv) == 1:
+		main()
+	else:
+		main(sys.argv[1:])
 
 	
