@@ -46,7 +46,7 @@ def project(xbar, lb, ub):
 
 
 # Base QP Solver
-def SQPSSolve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, x0=0, max_iter=500, rho=1.6, printiter=25):
+def OSQP(Q, c, Aeq, beq, Aineq, bineq, lb, ub, x0=0, max_iter=500, rho=1.6, printiter=25, scaling=False):
 	"""
 	Operator splitting solver for a QP problem given
 	in the following form
@@ -67,9 +67,18 @@ def SQPSSolve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, x0=0, max_iter=500, rho=1.6,
 	cc = np.append(c, np.zeros(nineq))
 	Ac = np.vstack([np.hstack([Aeq, np.zeros((neq, nineq))]), np.hstack([Aineq, np.eye(nineq)])])
 	bc = np.append(beq, bineq)
-	  
+	
+	# Scaling (s): Normalize rows of Ac
+	if scaling:
+		scaler = np.sqrt(np.square(Ac).sum(1))	# norm of each row of Ac
+		As = Ac / scaler[:,None]
+		bs = bc / scaler
+	else:
+		As = Ac
+		bs = bc
+	
 	# Factorize KKT matrix using LU decomposition (for now)
-	KKT = np.vstack([np.hstack([Qc + rho*np.eye(nvar), Ac.T]), np.hstack([Ac, -1./rho*np.eye(nineq + neq)])])
+	KKT = np.vstack([np.hstack([Qc + rho*np.eye(nvar), As.T]), np.hstack([As, -1./rho*np.eye(nineq + neq)])])
 	LU, piv = spla.lu_factor(KKT)
 	
 	print "Splitting QP Solver"
@@ -83,7 +92,7 @@ def SQPSSolve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, x0=0, max_iter=500, rho=1.6,
 	for i in range(max_iter):
 	
 		# Update RHS of KKT system
-		qtemp = -cc + rho*(z + np.dot(Ac.T, bc) - np.dot(Ac.T, u[:neq + nineq]) - u[neq + nineq:])
+		qtemp = -cc + rho*(z + np.dot(As.T, bs) - np.dot(As.T, u[:neq + nineq]) - u[neq + nineq:])
 		qbar = np.append(qtemp, np.zeros(nineq+neq))
 		
 		# x update
@@ -91,7 +100,7 @@ def SQPSSolve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, x0=0, max_iter=500, rho=1.6,
 		# z update
 		z = project(x + u[neq+nineq:], lb, ub)
 		# u update
-		u = u + np.append(np.dot(Ac, x), x) - np.append(np.zeros(neq + nineq), z) - np.append(bc, np.zeros(nvar))
+		u = u + np.append(np.dot(As, x), x) - np.append(np.zeros(neq + nineq), z) - np.append(bs, np.zeros(nvar))
 		
 		#todo: Stopping criterion
 		
@@ -102,6 +111,13 @@ def SQPSSolve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, x0=0, max_iter=500, rho=1.6,
 			print "%4s | \t%7.2f" % (i+1, f)
 	print "Optimization Done\n"
 	
+	# Rescale (r) dual variables
+	if scaling:
+		dual_vars = rho*u[:neq+nineq] / scaler
+	else:
+		dual_vars = rho*u[:neq+nineq]
+	
+	
 	#todo: What is a status of the obtained solution?
 	
 	#todo: Solution polishing
@@ -111,8 +127,8 @@ def SQPSSolve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, x0=0, max_iter=500, rho=1.6,
 	objval = .5*np.dot(np.dot(sol_prim, Q), sol_prim) + np.dot(c, sol_prim)
 	
 	# Retrieve dual variables
-	sol_dual_eq = rho*u[:neq]
-	sol_dual_ineq = rho*u[neq:neq+nineq]	
+	sol_dual_eq = dual_vars[:neq]
+	sol_dual_ineq = dual_vars[neq:]	
 	stat_cond = np.dot(Q, sol_prim) + c + np.dot(Aeq.T, sol_dual_eq) + np.dot(Aineq.T, sol_dual_ineq)
 	sol_dual_lb = -np.minimum(stat_cond, 0)
 	sol_dual_ub = np.maximum(stat_cond, 0)
@@ -163,13 +179,15 @@ def main():
 	else:
 		assert False, "Unknown example"
 	
+	#todo: Generate QPs coming from MPC, finance, SVM, etc.
+	
 	# Solve QP via ADMM
-	solADMM = SQPSSolve(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
+	solADMM = OSQP(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
 	
 	# Solve QP via cvxpy+ECOS
 	x = cvx.Variable(nx)
 	dict_constr = {}	# dict_constr has keys of all given constraints
-	constraints = []
+	constraints = []	# list of constraints
 	if beq.size:  # if beq is nonempty
 		constraints = constraints + [Aeq*x == beq]
 		dict_constr['eq'] = len(constraints)-1	# value assigned to each key is an index of the constraint
@@ -197,15 +215,16 @@ def main():
 	
 	# Compare dual variables of ADMM and ECOS solutions
 	if 'eq' in dict_constr.keys():
-		print "dual_eq DIFF   = %.2f" % npla.norm(dual_eq - solADMM.sol_dual_eq)
+		print "dual_eq DIFF   = %.4f" % npla.norm(dual_eq - solADMM.sol_dual_eq)
 	if 'ineq' in dict_constr.keys():
-		print "dual_ineq DIFF = %.2f" % npla.norm(dual_ineq - solADMM.sol_dual_ineq)
+		print "dual_ineq DIFF = %.4f" % npla.norm(dual_ineq - solADMM.sol_dual_ineq)
 	if 'lb' in dict_constr.keys():
-		print "dual_lb DIFF   = %.2f" % npla.norm(dual_lb - solADMM.sol_dual_lb)
+		print "dual_lb DIFF   = %.4f" % npla.norm(dual_lb - solADMM.sol_dual_lb)
 	if 'ub' in dict_constr.keys():
-		print "dual_ub DIFF   = %.2f" % npla.norm(dual_ub - solADMM.sol_dual_ub)
+		print "dual_ub DIFF   = %.4f" % npla.norm(dual_ub - solADMM.sol_dual_ub)
 	
 
+	
 	
 # Parsing optional command line arguments
 if __name__ == '__main__':
