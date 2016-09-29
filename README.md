@@ -10,6 +10,7 @@ subject to      Aeq x = beq
 
 ## TODO
 
+- [ ] Stopping criterion
 - [ ] Do preconditioning/equilibration
 - [ ] JIT Compilation (Numba ?) to speedup results
 - [ ] Timer and compare to other QP solvers
