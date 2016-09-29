@@ -48,7 +48,7 @@ def main():
 
     # Solve QP via ADMM
     solADMM = osqp.OSQP(Q, c, Aeq, beq, Aineq, bineq, lb, ub,
-                        max_iter=5000, print_iter=100)
+                        max_iter=5000, print_level=1)
 
     # Solve QP via cvxpy+ECOS
     x = cvx.Variable(nx)
@@ -69,7 +69,7 @@ def main():
         dict_constr['ub'] = len(constraints) - 1
     objective = cvx.Minimize(.5 * cvx.quad_form(x, Q) + c.T * x)
     problem = cvx.Problem(objective, constraints)
-    problem.solve(solver=cvx.CVXOPT, verbose=False)
+    problem.solve(solver=cvx.GUROBI, verbose=True)
 
     # Get dual variables
     dual_eq = np.asarray(
@@ -102,7 +102,7 @@ def main():
     if 'ub' in dict_constr.keys():
         print "dual_ub DIFF   = %.4f" % \
             npla.norm(dual_ub - solADMM.sol_dual_ub)
-    
+
     ipdb.set_trace()
 
 # Parsing optional command line arguments
