@@ -5,7 +5,10 @@ import numpy as np
 from numpy import linalg as npla
 import scipy as sp
 import cvxpy as cvx
+import ipdb		# ipdb.set_trace()
 import osqp
+
+reload(osqp)
 
 
 def main():
@@ -23,7 +26,7 @@ def main():
         beq = sp.randn(neq)
         Aineq = sp.randn(nineq, nx)
         bineq = 100 * sp.rand(nineq)
-        lb = -3. * np.ones(nx)
+        lb = 0. * np.ones(nx)
         ub = 5. * np.ones(nx)
     elif expl == 'small':
         nx = 2
@@ -37,14 +40,15 @@ def main():
         Aineq = np.zeros((0, nx))
         bineq = np.zeros(0)
         lb = np.zeros(nx)
-        ub = np.Inf * np.ones(nx)
+        ub = 0.7 * np.ones(nx)
     else:
         assert False, "Unknown example"
 
     # todo: Generate QPs coming from MPC, finance, SVM, etc.
 
     # Solve QP via ADMM
-    solADMM = osqp.OSQP(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
+    solADMM = osqp.OSQP(Q, c, Aeq, beq, Aineq, bineq, lb, ub,
+                        max_iter=5000, print_iter=100)
 
     # Solve QP via cvxpy+ECOS
     x = cvx.Variable(nx)
@@ -61,11 +65,11 @@ def main():
         constraints = constraints + [x >= lb]
         dict_constr['lb'] = len(constraints) - 1
     if ub.size:
-        constraints = constraints + [x >= lb]
+        constraints = constraints + [x <= ub]
         dict_constr['ub'] = len(constraints) - 1
     objective = cvx.Minimize(.5 * cvx.quad_form(x, Q) + c.T * x)
     problem = cvx.Problem(objective, constraints)
-    problem.solve(solver=cvx.ECOS, verbose=False)
+    problem.solve(solver=cvx.CVXOPT, verbose=False)
 
     # Get dual variables
     dual_eq = np.asarray(
@@ -82,7 +86,7 @@ def main():
         if 'ub' in dict_constr.keys() else np.zeros(0)
 
     # Compare solutions
-    print "ADMM Objective Value = %.3f\n" % solADMM.objval,
+    print "ADMM Objective Value = %.3f" % solADMM.objval
     print "ECOS Objective Value = %.3f" % objective.value
 
     # Compare dual variables of ADMM and ECOS solutions
@@ -98,6 +102,8 @@ def main():
     if 'ub' in dict_constr.keys():
         print "dual_ub DIFF   = %.4f" % \
             npla.norm(dual_ub - solADMM.sol_dual_ub)
+    
+    ipdb.set_trace()
 
 # Parsing optional command line arguments
 if __name__ == '__main__':
