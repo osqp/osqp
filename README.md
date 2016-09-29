@@ -14,7 +14,7 @@ subject to      Aeq x = beq
 - [ ] JIT Compilation (Numba ?) to speedup results
 - [ ] Timer and compare to other QP solvers
 - [ ] Presolver
-- [ ] Infeasibility detection
+- [ ] Infeasibility detection: e.g. http://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=7040300
 - [ ] Unboundedness detection
 - [ ] Stepsize selection
 - [ ] Warm starting
