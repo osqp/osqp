@@ -19,3 +19,9 @@ subject to      Aeq x = beq
 - [ ] Stepsize selection
 - [ ] Warm starting
 - [ ] Polishing
+
+
+## Test Problems
+
+- QPLIB2014 http://www.lamsade.dauphine.fr/QPlib2014/doku.php
+- Maros and Meszaros Convex Quadratic Programming Test Problem Set: https://github.com/YimingYAN/QP-Test-Problems
