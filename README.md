@@ -22,6 +22,9 @@ subject to      Aeq x = beq
 - [ ] Polishing
 
 
+## Problems
+- [ ] Maros and Meszaros Test set: CVXQP1_S.mat --> Need 50k iterations to converge!
+
 ## Test Problems
 
 - QPLIB2014 http://www.lamsade.dauphine.fr/QPlib2014/doku.php
