@@ -19,7 +19,7 @@ subject to      Aeq x = beq
 - [ ] Unboundedness detection
 - [ ] Stepsize selection
 - [ ] Warm starting
-- [ ] Polishing
+- [ ] Polishing: see https://arxiv.org/pdf/1609.07478.pdf
 
 
 ## Problems
