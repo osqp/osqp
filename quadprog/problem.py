@@ -44,7 +44,7 @@ class quadprogProblem(object):
         self.lb = lb
         self.ub = ub
 
-    def solve(self, solver=s.GUROBI):
+    def solve(self, solver=s.GUROBI, **kwargs):
         """
         Solve Quadratic Program with desired solver
         Supported solvers: CPLEX, GUROBI, OSQP
@@ -57,9 +57,12 @@ class quadprogProblem(object):
         elif solver == s.CPLEX:
                 from solvers.cplex_qpif import CPLEX
                 solver = CPLEX()  # Initialize solver
+        elif solver == s.OSQP:
+                from solvers.osqp_qpif import OSQP
+                solver = OSQP(**kwargs)  # Initialize solver
 
         # Solve problem
         results = solver.solve(self)  # Solve problem
-        
+
 
         return results

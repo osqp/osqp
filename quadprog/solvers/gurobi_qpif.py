@@ -81,7 +81,6 @@ class GUROBI(object):
         # Solve
         m.optimize()
 
-
         # Return results
         # Get objective value
         objval = m.objVal
@@ -92,16 +91,19 @@ class GUROBI(object):
 
         # Get dual variables
         constrs = m.getConstrs()
-        sol_dual_eq = np.array([constrs[i].Pi for i in range(neq)])
+        sol_dual_eq = -np.array([constrs[i].Pi for i in range(neq)]) # Gurobi uses swapped signs (-1)
         sol_dual_ineq = np.array([constrs[i+neq].Pi for i in range(nineq)])
+
+        # Bounds
+        sol_dual_ub = np.array(nx)
+        sol_dual_lb = np.array(nx)
+
         RCx = [x[i].RC for i in range(nx)]  # Get reduced costs
         for i in range(nx):
             if RCx[i] >= 1e-07:
-                sol_dual_lb = RCx[i]
-                sol_dual_ub = 0.0
+                sol_dual_lb[i] = RCx[i]
             else:
-                sol_dual_lb = 0.0
-                sol_dual_ub = -RCx[i]
+                sol_dual_ub[i] = -RCx[i]
 
         # Get computation time
         cputime = m.Runtime

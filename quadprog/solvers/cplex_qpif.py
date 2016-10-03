@@ -92,16 +92,19 @@ class CPLEX(object):
 
         # Get dual values
         duals = m.solution.get_dual_values()
-        sol_dual_eq = np.array(duals[:neq])
+        sol_dual_eq = -np.array(duals[:neq])  # Cplex uses swapped signs (-1)
         sol_dual_ineq = np.array(duals[neq:])
+
+        # Bounds
+        sol_dual_ub = np.zeros(nx)
+        sol_dual_lb = np.zeros(nx)
+
         RCx = m.solution.get_reduced_costs()  # Get reduced costs
         for i in range(nx):
             if RCx[i] >= 1e-07:
-                sol_dual_lb = RCx[i]
-                sol_dual_ub = 0.0
+                sol_dual_lb[i] = RCx[i]
             else:
-                sol_dual_lb = 0.0
-                sol_dual_ub = -RCx[i]
+                sol_dual_ub[i] = -RCx[i]
 
         # Get computation time
         cputime = end-start

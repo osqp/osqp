@@ -1,42 +1,20 @@
 import numpy as np
 from scipy import linalg as spla
 import scipy as sp
+import scipy.sparse as spspa
+import scipy.sparse.linalg as spalinalg
+from quadprog.results import quadprogResults  # Import results class
+import quadprog.problem as qp   # Import statuses
+import time   # Time execution
 import ipdb		# ipdb.set_trace()
 
-# Solver Constants
-OPTIMAL = "optimal"
-UNSOLVED = "optimal_inaccurate"
-INFEASIBLE = "infeasible"
-UNBOUNDED = "unbounded"
 
-
-class quadProgSolution:
-    """
-    Stores solution of a QP.
-    """
-
-    def __init__(self, status, objval, sol_prim, sol_dual_eq,
-                 sol_dual_ineq, sol_dual_lb, sol_dual_ub,
-                 LU, piv, z, u):
-        self.status = status
-        self.objval = objval
-        self.sol_prim = sol_prim
-        self.sol_dual_eq = sol_dual_eq
-        self.sol_dual_ineq = sol_dual_ineq
-        self.sol_dual_lb = sol_dual_lb
-        self.sol_dual_ub = sol_dual_ub
-        self.lu_kkt = LU
-        self.piv_kkt = piv
-        self.ADMM_z_iter = z
-        self.ADMM_u_iter = u
-
-
-def isPSD(A, tol=1e-8):
-    """
-    Check if the given matrix is positive semidefinite.
-    """
-    eigs, _ = sp.linalg.eigh(A)
-    return np.all(eigs > -tol)
+# def isPSD(A, tol=1e-8):
+#     """
+#     Check if the given matrix is positive semidefinite.
+#     """
+#     eigs, _ = sp.linalg.eigh(A)
+#     return np.all(eigs > -tol)
 
 
 def project(xbar, lb, ub):
@@ -54,9 +32,7 @@ def project(xbar, lb, ub):
 
 
 # Base QP Solver
-def OSQP(Q, c, Aeq, beq, Aineq, bineq, lb, ub,
-         max_iter=500, rho=1.6, alpha=1.0, print_level=2, scaling=False,
-         prev_sol=None):
+def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
     """
     Operator splitting solver for a QP given
     in the following form
@@ -65,6 +41,17 @@ def OSQP(Q, c, Aeq, beq, Aineq, bineq, lb, ub,
                         Aineq x <= bineq
                         lb <= x <= ub
     """
+
+    # Set passed options and set default values
+    max_iter = kwargs.pop('max_iter', 500)
+    rho = kwargs.pop('rho', 1.6)
+    alpha = kwargs.pop('alpha', 1.0)
+    print_level = kwargs.pop('print_level', 2)
+    scaling = kwargs.pop('scaling', False)
+    # prev_sol = kwargs.pop('prev_sol', False)  TODO: Add warm starting
+
+    # Start timer
+    t = time.time()
 
     # Get dimensions
     nx = c.shape[0]
@@ -76,10 +63,10 @@ def OSQP(Q, c, Aeq, beq, Aineq, bineq, lb, ub,
     #       minimize	1/2 z' Qc z + cc'z
     #       subject to	Ac z == bc
     #                   z \in Z
-    Qc = spla.block_diag(Q, np.zeros((nineq, nineq)))
+    Qc = spspa.block_diag((Q, spspa.csc_matrix((nineq, nineq))))
     cc = np.append(c, np.zeros(nineq))
-    Ac = np.vstack([np.hstack([Aeq, np.zeros((neq, nineq))]),
-                    np.hstack([Aineq, np.eye(nineq)])])
+    Ac = spspa.vstack([spspa.hstack([Aeq, spspa.csc_matrix((neq, nineq))]),
+                       spspa.hstack([Aineq, spspa.eye(nineq)])])
     bc = np.append(beq, bineq)
 
     # Scaling (s): Normalize rows of Ac.
@@ -91,22 +78,24 @@ def OSQP(Q, c, Aeq, beq, Aineq, bineq, lb, ub,
         As = Ac
         bs = bc
 
-    # Warm starting
-    if prev_sol:    # If the previous solution is passed as an argument
-        # Reuse the factorization from previous solution
-        LU = prev_sol.lu_kkt
-        piv = prev_sol.piv_kkt
-        # Set initial condition to previous solution
-        z = prev_sol.ADMM_z_iter
-        u = prev_sol.ADMM_u_iter
-    else:
-        # Factorize KKT matrix using LU decomposition (for now)
-        KKT = np.vstack([np.hstack([Qc + rho * np.eye(nvar), As.T]),
-                         np.hstack([As, -1. / rho * np.eye(nineq + neq)])])
-        LU, piv = spla.lu_factor(KKT)
-        # Set initial conditions to zero
-        z = np.zeros(nvar)
-        u = np.zeros(neq + nineq + nvar)
+    # # Warm starting (TODO: add later)
+    # if prev_sol:    # If the previous solution is passed as an argument
+    #     # Reuse the factorization from previous solution
+    #     LU = prev_sol.lu_kkt
+    #     piv = prev_sol.piv_kkt
+    #     # Set initial condition to previous solution
+    #     z = prev_sol.ADMM_z_iter
+    #     u = prev_sol.ADMM_u_iter
+    # else:
+
+    # Factorize KKT matrix using LU decomposition (for now)
+    KKT = spspa.vstack([spspa.hstack([Qc + rho * spspa.eye(nvar), As.T]),
+                       spspa.hstack([As, -1. / rho * spspa.eye(nineq + neq)])])
+    luKKT = spalinalg.splu(KKT.tocsc())  # Perform sparse LU factorization
+
+    # Set initial conditions to zero
+    z = np.zeros(nvar)
+    u = np.zeros(neq + nineq + nvar)
 
     print "Splitting QP Solver"
     print "-------------------\n"
@@ -118,17 +107,17 @@ def OSQP(Q, c, Aeq, beq, Aineq, bineq, lb, ub,
     for i in range(max_iter):
 
         # Update RHS of KKT system
-        qtemp = -cc + rho * (z + np.dot(As.T, bs) -
-                             np.dot(As.T, u[:neq + nineq]) - u[neq + nineq:])
+        qtemp = -cc + rho * (z + As.T.dot(bs) -
+                             As.T.dot(u[:neq + nineq]) - u[neq + nineq:])
         qbar = np.append(qtemp, np.zeros(nineq + neq))
 
         # x update
-        x = spla.lu_solve((LU, piv), qbar)[:nvar]  # Select first nvar elements
+        x = luKKT.solve(qbar)[:nvar]  # Select first nvar elements
         # z update
         z_old = z
         z = project(alpha*x + (1.-alpha)*z_old + u[neq + nineq:], lb, ub)
         # u update
-        u = u + alpha*np.append(np.dot(As, x), x) - \
+        u = u + alpha*np.append(As.dot(x), x) - \
             np.append(np.zeros(neq + nineq), z - (1.-alpha)*z_old) - \
             alpha*np.append(bs, np.zeros(nvar))
 
@@ -138,9 +127,13 @@ def OSQP(Q, c, Aeq, beq, Aineq, bineq, lb, ub,
                     (np.mod(i + 1, np.floor(np.float(max_iter) / 20.0)) == 0) \
                     | (print_level == 3):
                             xtemp = z[:nx]
-                            f = .5 * np.dot(np.dot(xtemp.T, Q), xtemp) + \
-                                np.dot(c.T, xtemp)
+                            f = .5 * np.dot(xtemp.T, Q.dot(xtemp)) + \
+                                c.T.dot(xtemp)
                             print "%4s | \t%7.2f" % (i + 1, f)
+
+    # End timer
+    cputime = time.time() - t
+
     print "Optimization Done\n"
 
     # Rescale (r) dual variables
@@ -158,18 +151,21 @@ def OSQP(Q, c, Aeq, beq, Aineq, bineq, lb, ub,
     # TODO: Solution polishing
 
     # Recover primal solution
-    sol_prim = z[:nx]
-    objval = .5 * np.dot(np.dot(sol_prim, Q), sol_prim) + np.dot(c, sol_prim)
+    x = z[:nx]
+    objval = .5 * np.dot(x, Q.dot(x)) + np.dot(c, x)
 
     # Recover dual solution
     sol_dual_eq = dual_vars[:neq]
     sol_dual_ineq = dual_vars[neq:]
-    stat_cond_resid = np.dot(Q, sol_prim) + c + \
-        np.dot(Aeq.T, sol_dual_eq) + np.dot(Aineq.T, sol_dual_ineq)
+    stat_cond_resid = Q.dot(x) + c + \
+        Aeq.T.dot(sol_dual_eq) + Aineq.T.dot(sol_dual_ineq)
     sol_dual_lb = np.maximum(stat_cond_resid, 0)
     sol_dual_ub = -np.minimum(stat_cond_resid, 0)
 
-    # Return solution as a quadProgSolution object
-    return quadProgSolution(OPTIMAL, objval, sol_prim, sol_dual_eq,
-                            sol_dual_ineq, sol_dual_lb, sol_dual_ub,
-                            LU, piv, z, u)
+    # Return status
+    status = qp.OPTIMAL
+
+    # Return solution as a quadprogResults object
+    return quadprogResults(status, objval, x, sol_dual_eq,
+                           sol_dual_ineq, sol_dual_lb, sol_dual_ub,
+                           cputime)

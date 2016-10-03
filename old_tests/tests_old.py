@@ -143,7 +143,7 @@ def solveGUROBI(Q, c, Aeq, beq, Aineq, bineq, lb, ub):
 def main():
     # for file in os.listdir('tests/maros_meszaros'):
     # Do all the tests
-    p = spio.loadmat('tests/maros_meszaros/CVXQP1_S.mat')
+    p = spio.loadmat('tests/maros_meszaros/CVXQP2_S.mat')
     # p = spio.loadmat('tests/maros_meszaros/AUG2D.mat')
     Q = p['Q'].astype(float)  # Convert to dense matrix (To remove)
     c = p['c'].T.flatten().astype(float)
@@ -156,8 +156,8 @@ def main():
     bineq = np.array([0.0])
 
     # Solve problem with OSQP, CPLEX and GUROBi
-    # solOSQP = osqp.OSQP(Q, c, Aeq, beq, Aineq, bineq, lb, ub,
-    #                     max_iter=5000, print_level=2)
+    solOSQP = osqp.OSQP(Q, c, Aeq, beq, Aineq, bineq, lb, ub,
+                        max_iter=5000, print_level=2)
 
     solCPLEX = solveCPLEX(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
     solGUROBI, cGUROBI, xGUROBI = solveGUROBI(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
@@ -165,13 +165,12 @@ def main():
     print "Objective Gurobi = %.2f" % solGUROBI.getObjective().getValue()
     print "Objective CPLEX = %.2f" % solCPLEX.solution.get_objective_value()
 
+    print "Norm of objective value difference %.4f" % \
+        np.linalg.norm(solOSQP.objval*2. - solCPLEX.solution.get_objective_value())
+    print "Norm of solution difference %.4f" % \
+        np.linalg.norm(solOSQP.sol_prim - solCPLEX.solution.get_values())
+
     ipdb.set_trace()
-
-    # print "Norm of objective value difference %.4f" % \
-    #     np.linalg.norm(solOSQP.objval - solCPLEX.solution.get_objective_value())
-    # print "Norm of solution difference %.4f" % \
-    #     np.linalg.norm(solOSQP.sol_prim - solCPLEX.solution.get_values())
-
 
 
 
