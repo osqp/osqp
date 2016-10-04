@@ -33,7 +33,7 @@ def load_maros_meszaros_problem(f):
 
 
 def main():
-    example = 'random'  # {'small', 'random', 'maros_meszaros'}
+    example = 'small'  # {'small', 'random', 'maros_meszaros'}
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
@@ -53,7 +53,7 @@ def main():
         bineq = np.zeros(0)
         lb = 0.6*np.zeros(2)
         ub = 0.7 * np.ones(2)
-        p = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
+        p = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq)
     elif example == 'random':
         # Random Example
         nx = 50

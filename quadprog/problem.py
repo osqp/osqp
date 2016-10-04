@@ -34,15 +34,15 @@ class quadprogProblem(object):
     lb, ub
     """
 
-    def __init__(self, Q, c, Aeq, beq, Aineq, bineq, lb, ub):
+    def __init__(self, Q, c, Aeq, beq, Aineq, bineq, lb=None, ub=None):
         self.Q = Q
         self.c = c
         self.Aeq = Aeq
         self.beq = beq
         self.Aineq = Aineq
         self.bineq = bineq
-        self.lb = lb
-        self.ub = ub
+        self.lb = lb if lb is not None else -np.inf*np.ones(c.size)
+        self.ub = ub if ub is not None else np.inf*np.ones(c.size)
 
     def solve(self, solver=s.GUROBI, **kwargs):
         """
