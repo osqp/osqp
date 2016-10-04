@@ -43,9 +43,11 @@ def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
     """
 
     # Set passed options and set default values
-    max_iter = kwargs.pop('max_iter', 500)
+    max_iter = kwargs.pop('max_iter', 5000)
     rho = kwargs.pop('rho', 1.6)
     alpha = kwargs.pop('alpha', 1.0)
+    eps_abs = kwargs.pop('eps_abs', 0.0)
+    eps_rel = kwargs.pop('eps_rel', 1e-6)
     print_level = kwargs.pop('print_level', 2)
     scaling = kwargs.pop('scaling', False)
     # prev_sol = kwargs.pop('prev_sol', False)  TODO: Add warm starting
@@ -68,6 +70,7 @@ def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
     Ac = spspa.vstack([spspa.hstack([Aeq, spspa.csc_matrix((neq, nineq))]),
                        spspa.hstack([Aineq, spspa.eye(nineq)])])
     bc = np.append(beq, bineq)
+    M = neq + nineq
 
     # Scaling (s): Normalize rows of Ac.
     if scaling:
@@ -90,12 +93,12 @@ def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
 
     # Factorize KKT matrix using LU decomposition (for now)
     KKT = spspa.vstack([spspa.hstack([Qc + rho * spspa.eye(nvar), As.T]),
-                       spspa.hstack([As, -1. / rho * spspa.eye(nineq + neq)])])
+                       spspa.hstack([As, -1. / rho * spspa.eye(M)])])
     luKKT = spalinalg.splu(KKT.tocsc())  # Perform sparse LU factorization
 
     # Set initial conditions to zero
     z = np.zeros(nvar)
-    u = np.zeros(neq + nineq + nvar)
+    u = np.zeros(M + nvar)
 
     print "Splitting QP Solver"
     print "-------------------\n"
@@ -108,7 +111,7 @@ def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
 
         # Update RHS of KKT system
         qtemp = -cc + rho * (z + As.T.dot(bs) -
-                             As.T.dot(u[:neq + nineq]) - u[neq + nineq:])
+                             As.T.dot(u[:M]) - u[M:])
         qbar = np.append(qtemp, np.zeros(nineq + neq))
 
         # x update
@@ -120,6 +123,24 @@ def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
         u = u + alpha*np.append(As.dot(x), x) - \
             np.append(np.zeros(neq + nineq), z - (1.-alpha)*z_old) - \
             alpha*np.append(bs, np.zeros(nvar))
+
+        # Compute primal and dual residuals
+        resid_prim = np.append(As.dot(x) - bs, x - z)   # eq constr violation
+        resid_dual = rho*(z - z_old)
+
+        # Check the stopping criterion
+        eps_prim = (neq + nineq + nvar) * eps_abs \
+            + eps_rel * np.max([spla.norm(As.dot(x)) + spla.norm(x),
+                                spla.norm(z),
+                                spla.norm(bs)])
+
+        eps_dual = nvar * eps_abs + eps_rel * rho * \
+            (spla.norm(As.T.dot(u[:M])) + spla.norm(u[M:]))
+        if spla.norm(resid_prim) <= eps_prim and \
+            spla.norm(resid_dual) <= eps_dual:
+            # Stop the algorithm
+            ipdb.set_trace()
+            break
 
         # Print cost function depending on print level
         if print_level > 1:
@@ -133,6 +154,7 @@ def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
 
     # End timer
     cputime = time.time() - t
+    total_iter = i
 
     print "Optimization Done\n"
 
@@ -168,4 +190,4 @@ def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
     # Return solution as a quadprogResults object
     return quadprogResults(status, objval, x, sol_dual_eq,
                            sol_dual_ineq, sol_dual_lb, sol_dual_ub,
-                           cputime)
+                           cputime, total_iter)

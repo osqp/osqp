@@ -3,6 +3,7 @@ import numpy as np
 import quadprog.problem as qp
 from quadprog.results import quadprogResults
 import cplex as cpx
+import ipdb
 
 
 class CPLEX(object):
@@ -109,5 +110,9 @@ class CPLEX(object):
         # Get computation time
         cputime = end-start
 
+        # Get total number of iterations
+        total_iter = int(m.solution.progress.get_num_barrier_iterations())
+
         return quadprogResults(status, objval, sol, sol_dual_eq,
-                               sol_dual_ineq, sol_dual_lb, sol_dual_ub, cputime)
+                               sol_dual_ineq, sol_dual_lb, sol_dual_ub,
+                               cputime, total_iter)

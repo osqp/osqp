@@ -10,6 +10,7 @@ import ipdb
 import quadprog.problem as qp
 from quadprog.solvers.solvers import *
 
+reload(qp)
 
 def load_maros_meszaros_problem(f):
     # Load file
@@ -33,7 +34,7 @@ def load_maros_meszaros_problem(f):
 
 
 def main():
-    example = 'small'  # {'small', 'random', 'maros_meszaros'}
+    example = 'random'  # {'small', 'random', 'maros_meszaros'}
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
@@ -79,8 +80,8 @@ def main():
     # Solve with GUROBI
     resultsGUROBI = p.solve(solver=CPLEX)
 
-    # Solve with OSQP
-    resultsOSQP = p.solve(solver=OSQP, max_iter=5000)  # You can pass options to OSQP solver
+    # Solve with OSQP. You can pass options to OSQP solver
+    resultsOSQP = p.solve(solver=OSQP, max_iter=5000)
 
     print "\n"
     print("Comparison CPLEX - GUROBI")

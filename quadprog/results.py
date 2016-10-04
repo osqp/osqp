@@ -6,7 +6,7 @@ class quadprogResults(object):
     """
 
     def __init__(self, status, objval, x, sol_dual_eq,
-                 sol_dual_ineq, sol_dual_lb, sol_dual_ub, cputime):
+                 sol_dual_ineq, sol_dual_lb, sol_dual_ub, cputime, total_iter):
         self.status = status
         self.objval = objval
         self.x = x
@@ -15,3 +15,4 @@ class quadprogResults(object):
         self.sol_dual_lb = sol_dual_lb
         self.sol_dual_ub = sol_dual_ub
         self.cputime = cputime
+        self.total_iter = total_iter

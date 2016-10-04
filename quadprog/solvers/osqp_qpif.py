@@ -3,7 +3,6 @@ import numpy as np
 import quadprog.problem as qp
 import osqp.osqp as osqp
 
-
 class OSQP(object):
     """
     An interface for the OSQP QP solver.
