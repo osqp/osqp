@@ -17,20 +17,38 @@ import ipdb		# ipdb.set_trace()
 #     return np.all(eigs > -tol)
 
 
-# def polishedSolution(Q, c, Aeq, beq, Aineq, bineq, lb, ub, QP_sol):
-#     """
-#     Try to reconstruct the actual solution of a QP by guessing which
-#     bounds are active. It boils down to solving a linear system.
-#     """
-#     # Check which of the ub-x, x-lb and dual variables corresponding to bound
-#     # constraints has the largest value
-#     x_range = ub - lb
-#     dv_range = max(np.max(QP_sol.sol_dual_lb), np.max(QP_sol.sol_dual_ub))
-#     K = np.array([(ub - QP_sol.x) / x_range, (QP_sol.x - lb) / x_range,
-#                  QP_sol.sol_dual_lb / dv_range, QP_sol.sol_dual_ub / dv_range])
-#     K_maxind = np.argmax(K, axis=0)
-#
-#     # Deduce which variables are active
+def polishedSolution(Q, c, Aeq, beq, Aineq, bineq, lb, ub, QP_sol):
+    """
+    Try to reconstruct the actual solution of a QP by guessing which
+    bounds are active. It boils down to solving a linear system.
+    """
+
+    sol_x = QP_sol.x
+    sol_lb = QP_sol.sol_dual_lb
+    sol_ub = QP_sol.sol_dual_ub
+    max_dual = np.maximum(np.max(sol_lb), np.max(sol_ub))
+
+    # Try to guess from an approximate solution which bounds are active
+    x_free = np.logical_or(
+                np.logical_and(sol_x <= (lb + ub) / 2,
+                               (sol_x - lb) / (ub - lb) > sol_lb / max_dual),
+                np.logical_and(sol_x > (lb + ub) / 2,
+                               (sol_x - lb) / (ub - lb) > sol_ub / max_dual))
+    x_lb = np.logical_and(sol_x <= (lb + ub) / 2,
+                          (sol_x - lb) / (ub - lb) <= sol_ub / max_dual)
+    x_ub = np.logical_and(sol_x > (lb + ub) / 2,
+                          (sol_x - lb) / (ub - lb) <= sol_ub / max_dual)
+
+    # Try to guess which inequality constraints are active
+    ineq_act = np.abs(QP_sol.sol_dual_ineq) < 1e-4 * (ub - lb)
+    ineq_inact = np.logical_not(ineq_act)
+
+
+
+    #ipdb.set_trace()
+
+    # For now just return an approximate solution
+    return QP_sol
 
 
 
@@ -208,9 +226,9 @@ def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
                              sol_dual_ineq, sol_dual_lb, sol_dual_ub,
                              cputime, total_iter)
 
-    # # Solution polishing (try to guess the active set and solve a lin. sys.)
-    # if status == qp.OPTIMAL:
-    #     QP_sol = polishedSolution(Q, c, Aeq, beq, Aineq, bineq, lb, ub, QP_sol)
+    # Solution polishing (try to guess the active set and solve a lin. sys.)
+    if status == qp.OPTIMAL:
+        QP_sol = polishedSolution(Q, c, Aeq, beq, Aineq, bineq, lb, ub, QP_sol)
 
     # Return solution
     return QP_sol
