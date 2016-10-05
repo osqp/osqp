@@ -108,9 +108,5 @@ class GUROBI(object):
         # Get computation time
         cputime = m.Runtime
 
-        # Get total number of iterations
-        total_iter = m.BarIterCount
-
         return quadprogResults(status, objval, sol, sol_dual_eq,
-                               sol_dual_ineq, sol_dual_lb, sol_dual_ub,
-                               cputime, total_iter)
+                               sol_dual_ineq, sol_dual_lb, sol_dual_ub, cputime)
