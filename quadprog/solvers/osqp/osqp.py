@@ -17,6 +17,24 @@ import ipdb		# ipdb.set_trace()
 #     return np.all(eigs > -tol)
 
 
+# def polishedSolution(Q, c, Aeq, beq, Aineq, bineq, lb, ub, QP_sol):
+#     """
+#     Try to reconstruct the actual solution of a QP by guessing which
+#     bounds are active. It boils down to solving a linear system.
+#     """
+#     # Check which of the ub-x, x-lb and dual variables corresponding to bound
+#     # constraints has the largest value
+#     x_range = ub - lb
+#     dv_range = max(np.max(QP_sol.sol_dual_lb), np.max(QP_sol.sol_dual_ub))
+#     K = np.array([(ub - QP_sol.x) / x_range, (QP_sol.x - lb) / x_range,
+#                  QP_sol.sol_dual_lb / dv_range, QP_sol.sol_dual_ub / dv_range])
+#     K_maxind = np.argmax(K, axis=0)
+#
+#     # Deduce which variables are active
+
+
+
+
 def project(xbar, lb, ub):
     """
     Project first nx (size of lb) elements on interval [lb, ub],
@@ -47,7 +65,7 @@ def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
     rho = kwargs.pop('rho', 1.6)
     alpha = kwargs.pop('alpha', 1.0)
     eps_abs = kwargs.pop('eps_abs', 0.0)
-    eps_rel = kwargs.pop('eps_rel', 1e-6)
+    eps_rel = kwargs.pop('eps_rel', 1e-7)
     print_level = kwargs.pop('print_level', 2)
     scaling = kwargs.pop('scaling', False)
     # prev_sol = kwargs.pop('prev_sol', False)  TODO: Add warm starting
@@ -103,15 +121,14 @@ def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
     print "Splitting QP Solver"
     print "-------------------\n"
     if print_level > 1:
-        print "iter |\t   cost\n"
+        print "iter | \t   cost\t |   prim_res\t |   dual_res\n"
 
     # Run ADMM: alpha \in (0, 2) is a relaxation parameter.
     #           Nominal ADMM is obtained for alpha=1.0
     for i in range(max_iter):
 
         # Update RHS of KKT system
-        qtemp = -cc + rho * (z + As.T.dot(bs) -
-                             As.T.dot(u[:M]) - u[M:])
+        qtemp = -cc + rho * (z + As.T.dot(bs) - As.T.dot(u[:M]) - u[M:])
         qbar = np.append(qtemp, np.zeros(nineq + neq))
 
         # x update
@@ -125,21 +142,19 @@ def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
             alpha*np.append(bs, np.zeros(nvar))
 
         # Compute primal and dual residuals
-        resid_prim = np.append(As.dot(x) - bs, x - z)   # eq constr violation
-        resid_dual = rho*(z - z_old)
+        resid_prim = spla.norm(np.append(Ac.dot(x) - bc, x - z)) # eq constr violation
+        resid_dual = rho*spla.norm(z - z_old)
 
         # Check the stopping criterion
         eps_prim = (neq + nineq + nvar) * eps_abs \
-            + eps_rel * np.max([spla.norm(As.dot(x)) + spla.norm(x),
+            + eps_rel * np.max([spla.norm(Ac.dot(x)) + spla.norm(x),
                                 spla.norm(z),
-                                spla.norm(bs)])
+                                spla.norm(bc)])
 
         eps_dual = nvar * eps_abs + eps_rel * rho * \
             (spla.norm(As.T.dot(u[:M])) + spla.norm(u[M:]))
-        if spla.norm(resid_prim) <= eps_prim and \
-            spla.norm(resid_dual) <= eps_dual:
+        if resid_prim <= eps_prim and resid_dual <= eps_dual:
             # Stop the algorithm
-            ipdb.set_trace()
             break
 
         # Print cost function depending on print level
@@ -147,16 +162,17 @@ def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
             if (i + 1 == 1) | (print_level == 2) & \
                     (np.mod(i + 1, np.floor(np.float(max_iter) / 20.0)) == 0) \
                     | (print_level == 3):
-                            xtemp = z[:nx]
-                            f = .5 * np.dot(xtemp.T, Q.dot(xtemp)) + \
-                                c.T.dot(xtemp)
-                            print "%4s | \t%7.2f" % (i + 1, f)
+                        xtemp = z[:nx]
+                        f = .5 * np.dot(xtemp.T, Q.dot(xtemp)) + \
+                            c.T.dot(xtemp)
+                        print "%4s | \t%7.2f\t |   %8.4f\t |   %8.4f" \
+                            % (i+1, f, resid_prim, resid_dual)
 
     # End timer
     cputime = time.time() - t
     total_iter = i
 
-    print "Optimization Done\n"
+    print "Optimization Done in %.2fs\n" % cputime
 
     # Rescale (r) dual variables
     if scaling:
@@ -187,7 +203,14 @@ def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
     # Return status
     status = qp.OPTIMAL
 
-    # Return solution as a quadprogResults object
-    return quadprogResults(status, objval, x, sol_dual_eq,
-                           sol_dual_ineq, sol_dual_lb, sol_dual_ub,
-                           cputime, total_iter)
+    # Store solution as a quadprogResults object
+    QP_sol = quadprogResults(status, objval, x, sol_dual_eq,
+                             sol_dual_ineq, sol_dual_lb, sol_dual_ub,
+                             cputime, total_iter)
+
+    # # Solution polishing (try to guess the active set and solve a lin. sys.)
+    # if status == qp.OPTIMAL:
+    #     QP_sol = polishedSolution(Q, c, Aeq, beq, Aineq, bineq, lb, ub, QP_sol)
+
+    # Return solution
+    return QP_sol

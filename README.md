@@ -10,10 +10,10 @@ subject to      Aeq x = beq
 
 ## TODO
 
-- [ ] Stopping criterion
+- [x] Stopping criterion
 - [ ] Do preconditioning/equilibration
 - [ ] JIT Compilation (Numba ?) to speedup results
-- [ ] Timer and compare to other QP solvers
+- [x] Timer and compare to other QP solvers
 - [ ] Presolver
 - [ ] Infeasibility detection: e.g. http://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=7040300
 - [ ] Unboundedness detection
