@@ -93,8 +93,8 @@ class CPLEX(object):
 
         # Get dual values
         duals = m.solution.get_dual_values()
-        sol_dual_eq = -np.array(duals[:neq])  # Cplex uses swapped signs (-1)
-        sol_dual_ineq = np.array(duals[neq:])
+        sol_dual_eq = -np.array(duals[:neq])    # Cplex uses swapped signs (-1)
+        sol_dual_ineq = -np.array(duals[neq:])  # Cplex uses swapped signs (-1)
 
         # Bounds
         sol_dual_ub = np.zeros(nx)
