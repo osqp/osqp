@@ -22,35 +22,60 @@ def polishedSolution(Q, c, Aeq, beq, Aineq, bineq, lb, ub, QP_sol):
     Try to reconstruct the actual solution of a QP by guessing which
     bounds are active. It boils down to solving a linear system.
     """
-
     sol_x = QP_sol.x
     sol_lb = QP_sol.sol_dual_lb
     sol_ub = QP_sol.sol_dual_ub
-    max_dual = np.maximum(np.max(sol_lb), np.max(sol_ub))
+    nx = c.shape[0]
+    neq = Aeq.shape[0]
+    nineq = Aineq.shape[0]
 
     # Try to guess from an approximate solution which bounds are active
-    x_free = np.logical_or(
-                np.logical_and(sol_x <= (lb + ub) / 2,
-                               (sol_x - lb) / (ub - lb) > sol_lb / max_dual),
-                np.logical_and(sol_x > (lb + ub) / 2,
-                               (sol_x - lb) / (ub - lb) > sol_ub / max_dual))
-    x_lb = np.logical_and(sol_x <= (lb + ub) / 2,
-                          (sol_x - lb) / (ub - lb) <= sol_ub / max_dual)
-    x_ub = np.logical_and(sol_x > (lb + ub) / 2,
-                          (sol_x - lb) / (ub - lb) <= sol_ub / max_dual)
+    ind_free = np.where(np.logical_or(
+                np.logical_and(sol_x <= (lb + ub) / 2, sol_x - lb > sol_lb),
+                np.logical_and(sol_x > (lb + ub) / 2, sol_x - lb > sol_ub)))[0]
+    ind_lb = np.where(np.logical_and(sol_x <= (lb + ub) / 2,
+                                     sol_x - lb <= sol_ub))[0]
+    ind_ub = np.where(np.logical_and(sol_x > (lb + ub) / 2,
+                                     sol_x - lb <= sol_ub))[0]
 
     # Try to guess which inequality constraints are active
-    ineq_act = np.abs(QP_sol.sol_dual_ineq) < 1e-4 * (ub - lb)
-    ineq_inact = np.logical_not(ineq_act)
+    ineq_act = np.abs(QP_sol.sol_dual_ineq) > 1e-4   # s = 0, Fx = g, mu > 0
+    ind_act = np.where(ineq_act)[0]
+    ind_inact = np.where(np.logical_not(ineq_act))[0]
 
+    # Solve the corresponding linear system
+    KKT = spspa.vstack([
+        spspa.hstack([Q, Aeq.T, Aineq.T, spspa.eye(nx)]),
+        spspa.hstack([Aeq, spspa.csr_matrix((neq, neq+nineq+nx))]),
+        spspa.hstack([Aineq[ind_act],
+                      spspa.csr_matrix((len(ind_act), neq+nineq+nx))]),
+        spspa.hstack([spspa.csr_matrix((len(ind_inact), nx+neq)),
+                      spspa.eye(nineq).tocsr()[ind_inact],
+                      spspa.csr_matrix((len(ind_inact), nx))]),
+        spspa.hstack([spspa.csr_matrix((len(ind_free), nx+neq+nineq)),
+                      spspa.eye(nx).tocsr()[ind_free]]),
+        spspa.hstack([spspa.eye(nx).tocsr()[ind_lb],
+                      spspa.csr_matrix((len(ind_lb), neq+nineq+nx))]),
+        spspa.hstack([spspa.eye(nx).tocsr()[ind_ub],
+                      spspa.csr_matrix((len(ind_ub), neq+nineq+nx))]),
+        ]).tocsr()
+    rhs = np.hstack([-c, beq, bineq[ind_act],
+                     np.zeros(len(ind_inact) + len(ind_free)),
+                     lb[ind_lb], ub[ind_ub]])
+    sol_pol = spalinalg.spsolve(KKT, rhs)
 
+    # Check if the solution satisfies constraints
+    x_pol = sol_pol[:nx]
+    pol_dual_eq = sol_pol[nx:nx+neq]
+    pol_dual_ineq = sol_pol[nx+neq:nx+neq+nineq]
+    if all(x_pol > lb - tol) and all(x_pol < ub + tol) and \
+        all(pol_dual_ineq > -tol):
+        print "Voila!"
 
-    #ipdb.set_trace()
+    ipdb.set_trace()
 
     # For now just return an approximate solution
     return QP_sol
-
-
 
 
 def project(xbar, lb, ub):
@@ -226,9 +251,9 @@ def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
                              sol_dual_ineq, sol_dual_lb, sol_dual_ub,
                              cputime, total_iter)
 
-    # Solution polishing (try to guess the active set and solve a lin. sys.)
-    if status == qp.OPTIMAL:
-        QP_sol = polishedSolution(Q, c, Aeq, beq, Aineq, bineq, lb, ub, QP_sol)
+    # # Solution polishing (try to guess the active set and solve a lin. sys.)
+    # if status == qp.OPTIMAL:
+    #     QP_sol = polishedSolution(Q, c, Aeq, beq, Aineq, bineq, lb, ub, QP_sol)
 
     # Return solution
     return QP_sol

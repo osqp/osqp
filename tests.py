@@ -78,7 +78,7 @@ def main():
     resultsCPLEX = p.solve(solver=CPLEX)
 
     # Solve with GUROBI
-    resultsGUROBI = p.solve(solver=CPLEX)
+    resultsGUROBI = p.solve(solver=GUROBI)
 
     # Solve with OSQP. You can pass options to OSQP solver
     resultsOSQP = p.solve(solver=OSQP, max_iter=5000)
@@ -115,7 +115,7 @@ def main():
     print "Norm of dual lb difference %.4f" % \
         np.linalg.norm(resultsOSQP.sol_dual_lb - resultsGUROBI.sol_dual_lb)
 
-    ipdb.set_trace()
+    #ipdb.set_trace()
 
 # Parsing optional command line arguments
 if __name__ == '__main__':
