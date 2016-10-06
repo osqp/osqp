@@ -17,10 +17,10 @@ import ipdb		# ipdb.set_trace()
 #     return np.all(eigs > -tol)
 
 
-def polishedSolution(Q, c, Aeq, beq, Aineq, bineq, lb, ub, QP_sol):
+def polishSolution(Q, c, Aeq, beq, Aineq, bineq, lb, ub, QP_sol, tol=1e-5):
     """
     Try to reconstruct the actual solution of a QP by guessing which
-    bounds are active. It boils down to solving a linear system.
+    constraints are active. The problem boils down to solving a linear system.
     """
     sol_x = QP_sol.x
     sol_lb = QP_sol.sol_dual_lb
@@ -30,18 +30,17 @@ def polishedSolution(Q, c, Aeq, beq, Aineq, bineq, lb, ub, QP_sol):
     nineq = Aineq.shape[0]
 
     # Try to guess from an approximate solution which bounds are active
-    ind_free = np.where(np.logical_or(
-                np.logical_and(sol_x <= (lb + ub) / 2, sol_x - lb > sol_lb),
-                np.logical_and(sol_x > (lb + ub) / 2, sol_x - lb > sol_ub)))[0]
-    ind_lb = np.where(np.logical_and(sol_x <= (lb + ub) / 2,
-                                     sol_x - lb <= sol_ub))[0]
-    ind_ub = np.where(np.logical_and(sol_x > (lb + ub) / 2,
-                                     sol_x - lb <= sol_ub))[0]
+    bool_lb = np.logical_and(sol_x < (lb + ub) / 2., sol_lb > sol_x - lb)
+    bool_ub = np.logical_and(sol_x > (lb + ub) / 2., sol_ub > ub - sol_x)
+    ind_lb = np.where(bool_lb)[0]
+    ind_ub = np.where(bool_ub)[0]
+    # All the other elements of x are free
+    ind_free = np.where(np.logical_not(np.logical_or(bool_lb, bool_ub)))[0]
 
     # Try to guess which inequality constraints are active
-    ineq_act = np.abs(QP_sol.sol_dual_ineq) > 1e-4   # s = 0, Fx = g, mu > 0
-    ind_act = np.where(ineq_act)[0]
-    ind_inact = np.where(np.logical_not(ineq_act))[0]
+    ineq_act = QP_sol.sol_dual_ineq > (bineq - Aineq.dot(sol_x))
+    ind_act = np.where(ineq_act)[0]                     # Aineq x = bineq
+    ind_inact = np.where(np.logical_not(ineq_act))[0]   # Aineq x < bineq
 
     # Solve the corresponding linear system
     KKT = spspa.vstack([
@@ -62,19 +61,30 @@ def polishedSolution(Q, c, Aeq, beq, Aineq, bineq, lb, ub, QP_sol):
     rhs = np.hstack([-c, beq, bineq[ind_act],
                      np.zeros(len(ind_inact) + len(ind_free)),
                      lb[ind_lb], ub[ind_ub]])
-    sol_pol = spalinalg.spsolve(KKT, rhs)
+    pol_sol = spalinalg.spsolve(KKT, rhs)
 
-    # Check if the solution satisfies constraints
-    x_pol = sol_pol[:nx]
-    pol_dual_eq = sol_pol[nx:nx+neq]
-    pol_dual_ineq = sol_pol[nx+neq:nx+neq+nineq]
-    if all(x_pol > lb - tol) and all(x_pol < ub + tol) and \
-        all(pol_dual_ineq > -tol):
-        print "Voila!"
+    # Check if the above solution satisfies constraints
+    pol_x = pol_sol[:nx]
+    pol_dual_eq = pol_sol[nx:nx+neq]
+    pol_dual_ineq = pol_sol[nx+neq:nx+neq+nineq]
+    pol_dual_lb = np.zeros(nx)
+    pol_dual_lb[ind_lb] = -pol_sol[nx+neq+nineq:][ind_lb]
+    pol_dual_ub = np.zeros(nx)
+    pol_dual_ub[ind_ub] = pol_sol[nx+neq+nineq:][ind_ub]
+    if all(pol_x > lb - tol) and all(pol_x < ub + tol) and \
+        all(pol_dual_ineq > -tol) and all(pol_dual_lb > -tol) and \
+            all(pol_dual_ub > -tol):
+            # Return the computed high-precision solution
+            print "Polishing successful !"
+            QP_sol.x = pol_x
+            QP_sol.sol_dual_eq = pol_dual_eq
+            QP_sol.sol_dual_ineq = pol_dual_ineq
+            QP_sol.sol_dual_lb = pol_dual_lb
+            QP_sol.sol_dual_ub = pol_dual_ub
+            QP_sol.objval = .5 * np.dot(pol_x.T, Q.dot(pol_x)) + c.T.dot(pol_x)
+    else:
+        print "Polishing failed !"
 
-    ipdb.set_trace()
-
-    # For now just return an approximate solution
     return QP_sol
 
 
@@ -107,8 +117,8 @@ def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
     max_iter = kwargs.pop('max_iter', 5000)
     rho = kwargs.pop('rho', 1.6)
     alpha = kwargs.pop('alpha', 1.0)
-    eps_abs = kwargs.pop('eps_abs', 0.0)
-    eps_rel = kwargs.pop('eps_rel', 1e-7)
+    eps_abs = kwargs.pop('eps_abs', 1e-8)
+    eps_rel = kwargs.pop('eps_rel', 1e-6)
     print_level = kwargs.pop('print_level', 2)
     scaling = kwargs.pop('scaling', False)
     # prev_sol = kwargs.pop('prev_sol', False)  TODO: Add warm starting
@@ -197,6 +207,12 @@ def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
         eps_dual = nvar * eps_abs + eps_rel * rho * \
             (spla.norm(As.T.dot(u[:M])) + spla.norm(u[M:]))
         if resid_prim <= eps_prim and resid_dual <= eps_dual:
+            # Print the progress in last iterations
+            if print_level > 1:
+                xtemp = z[:nx]
+                f = .5 * np.dot(xtemp.T, Q.dot(xtemp)) + c.T.dot(xtemp)
+                print "%4s | \t%7.2f\t |   %8.4f\t |   %8.4f" \
+                    % (i+1, f, resid_prim, resid_dual)
             # Stop the algorithm
             break
 
@@ -225,8 +241,6 @@ def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
 
     # TODO: Scale Qc matrix as well
 
-    # TODO: Stopping criterion
-
     # TODO: What is a status of the obtained solution?
 
     # TODO: Solution polishing
@@ -251,9 +265,12 @@ def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
                              sol_dual_ineq, sol_dual_lb, sol_dual_ub,
                              cputime, total_iter)
 
-    # # Solution polishing (try to guess the active set and solve a lin. sys.)
-    # if status == qp.OPTIMAL:
-    #     QP_sol = polishedSolution(Q, c, Aeq, beq, Aineq, bineq, lb, ub, QP_sol)
+    # Solution polishing (try to guess the active set and solve a lin. sys.)
+    if status == qp.OPTIMAL:
+        QP_sol = polishSolution(Q, c, Aeq, beq, Aineq, bineq, lb, ub, QP_sol)
+
+    # TODO: Define a class for storing factorization and z,u iterates
+    #       (for warm starting)
 
     # Return solution
     return QP_sol

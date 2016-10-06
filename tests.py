@@ -86,33 +86,33 @@ def main():
     print "\n"
     print("Comparison CPLEX - GUROBI")
     print("-------------------------")
-    print "Norm of objective value difference %.4f" % \
+    print "Norm of objective value difference %.8f" % \
         np.linalg.norm(resultsCPLEX.objval - resultsGUROBI.objval)
-    print "Norm of solution difference %.4f" % \
+    print "Norm of solution difference %.8f" % \
         np.linalg.norm(resultsCPLEX.x - resultsGUROBI.x)
-    print "Norm of dual eq difference %.4f" % \
+    print "Norm of dual eq difference %.8f" % \
         np.linalg.norm(resultsCPLEX.sol_dual_eq - resultsGUROBI.sol_dual_eq)
-    print "Norm of dual ineq difference %.4f" % \
+    print "Norm of dual ineq difference %.8f" % \
         np.linalg.norm(resultsCPLEX.sol_dual_ineq - resultsGUROBI.sol_dual_ineq)
-    print "Norm of dual ub difference %.4f" % \
+    print "Norm of dual ub difference %.8f" % \
         np.linalg.norm(resultsCPLEX.sol_dual_ub - resultsGUROBI.sol_dual_ub)
-    print "Norm of dual lb difference %.4f" % \
+    print "Norm of dual lb difference %.8f" % \
         np.linalg.norm(resultsCPLEX.sol_dual_lb - resultsGUROBI.sol_dual_lb)
 
     print "\n"
     print("Comparison OSQP - GUROBI")
     print("-------------------------")
-    print "Norm of objective value difference %.4f" % \
+    print "Norm of objective value difference %.8f" % \
         np.linalg.norm(resultsOSQP.objval - resultsGUROBI.objval)
-    print "Norm of solution difference %.4f" % \
+    print "Norm of solution difference %.8f" % \
         np.linalg.norm(resultsOSQP.x - resultsGUROBI.x)
-    print "Norm of dual eq difference %.4f" % \
+    print "Norm of dual eq difference %.8f" % \
         np.linalg.norm(resultsOSQP.sol_dual_eq - resultsGUROBI.sol_dual_eq)
-    print "Norm of dual ineq difference %.4f" % \
+    print "Norm of dual ineq difference %.8f" % \
         np.linalg.norm(resultsOSQP.sol_dual_ineq - resultsGUROBI.sol_dual_ineq)
-    print "Norm of dual ub difference %.4f" % \
+    print "Norm of dual ub difference %.8f" % \
         np.linalg.norm(resultsOSQP.sol_dual_ub - resultsGUROBI.sol_dual_ub)
-    print "Norm of dual lb difference %.4f" % \
+    print "Norm of dual lb difference %.8f" % \
         np.linalg.norm(resultsOSQP.sol_dual_lb - resultsGUROBI.sol_dual_lb)
 
     #ipdb.set_trace()
