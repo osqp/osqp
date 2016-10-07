@@ -4,7 +4,7 @@ from scipy import linalg as spla
 import scipy.sparse as spspa
 import scipy.sparse.linalg as spalinalg
 import time   # Time execution
-# import ipdb		# ipdb.set_trace()
+import ipdb		# ipdb.set_trace()
 
 # Solver Constants
 OPTIMAL = "optimal"
@@ -65,6 +65,10 @@ class problem(object):
         self.lb = lb if lb is not None else -np.inf*np.ones(self.nx)
         self.ub = ub if ub is not None else np.inf*np.ones(self.nx)
 
+    def objval(self, x):
+        # Compute quadratic objective value for the given x
+        return .5 * np.dot(x, self.Q.dot(x)) + np.dot(self.c, x)
+
 
 class options(object):
     """
@@ -92,7 +96,7 @@ class options(object):
         self.print_level = kwargs.pop('print_level', 2)
         self.scaling = kwargs.pop('scaling', False)
         self.polish_tol = kwargs.pop('polish_tol', 1e-05)
-        self.splitting = kwargs.pop('splitting', 1)
+        self.splitting = kwargs.pop('splitting', 2)
         # prev_sol = kwargs.pop('prev_sol', False)  TODO: Add warm starting
 
 
@@ -246,9 +250,7 @@ class OSQP(object):
                 solution.sol_dual_ineq = pol_dual_ineq
                 solution.sol_dual_lb = pol_dual_lb
                 solution.sol_dual_ub = pol_dual_ub
-                solution.objval = \
-                    .5 * np.dot(pol_x.T, self.problem.Q.dot(pol_x)) + \
-                    self.problem.c.T.dot(pol_x)
+                solution.objval = self.problem.objval(pol_x)
         else:
             print "Polishing failed!"
 
@@ -328,24 +330,24 @@ class OSQP(object):
         #     u = prev_sol.ADMM_u_iter
         # else:
 
-        # Factorize KKT matrix using LU decomposition (for now)
+        # Factorize KKT matrix using sparse LU decomposition
         KKT = spspa.vstack([
             spspa.hstack([Qc + self.options.rho * spspa.eye(nvar), As.T]),
             spspa.hstack([As, -1. / self.options.rho * spspa.eye(nconstr)])])
-        luKKT = spalinalg.splu(KKT.tocsc())  # Perform sparse LU factorization
+        luKKT = spalinalg.splu(KKT.tocsc())
 
         # Set initial conditions to zero
         z = np.zeros(nvar)
         u = np.zeros(nconstr + nvar)
 
-        print "Splitting QP Solver"
+        print "Splitting1 QP Solver"
         print "-------------------\n"
         if self.options.print_level > 1:
             print "Iter | \t   Cost\t    Prim Res\t    Dual Res"
 
         # Run ADMM: alpha \in (0, 2) is a relaxation parameter.
         #           Nominal ADMM is obtained for alpha=1.0
-        for i in range(self.options.max_iter):
+        for i in xrange(self.options.max_iter):
 
             # Update RHS of KKT system
             qtemp = -cc + self.options.rho * \
@@ -369,21 +371,19 @@ class OSQP(object):
             resid_dual = self.options.rho*spla.norm(z - z_old)
 
             # Check the stopping criterion
-            eps_prim = (nconstr + nvar) * self.options.eps_abs \
+            eps_prim = np.sqrt(nconstr + nvar) * self.options.eps_abs \
                 + self.options.eps_rel * \
                 np.max([spla.norm(Ac.dot(x)) + spla.norm(x),
                         spla.norm(z),
                         spla.norm(bc)])
-
-            eps_dual = nvar * self.options.eps_abs + \
+            eps_dual = np.sqrt(nvar) * self.options.eps_abs + \
                 self.options.eps_rel * self.options.rho * \
                 (spla.norm(As.T.dot(u[:nconstr])) + spla.norm(u[nconstr:]))
+
             if resid_prim <= eps_prim and resid_dual <= eps_dual:
                 # Print the progress in last iterations
                 if self.options.print_level > 1:
-                    xtemp = z[:self.problem.nx]
-                    f = .5 * np.dot(xtemp.T, self.problem.Q.dot(xtemp)) + \
-                        self.problem.c.T.dot(xtemp)
+                    f = self.problem.objval(z[:self.problem.nx])
                     print "%4s | \t%7.2f\t    %8.4f\t    %8.4f" \
                         % (i+1, f, resid_prim, resid_dual)
                 # Stop the algorithm
@@ -395,9 +395,7 @@ class OSQP(object):
                         (np.mod(i + 1,
                          np.floor(np.float(self.options.max_iter)/20.0)) == 0)\
                         | (self.options.print_level == 3):
-                            xtemp = z[:self.problem.nx]
-                            f = .5*np.dot(xtemp.T, self.problem.Q.dot(xtemp))\
-                                + self.problem.c.T.dot(xtemp)
+                            f = self.problem.objval(z[:self.problem.nx])
                             print "%4s | \t%7.2f\t    %8.4f\t    %8.4f" \
                                 % (i+1, f, resid_prim, resid_dual)
 
@@ -419,8 +417,7 @@ class OSQP(object):
 
         # Recover primal solution
         x = z[:self.problem.nx]
-        objval = .5 * np.dot(x, self.problem.Q.dot(x)) + \
-            np.dot(self.problem.c, x)
+        objval = self.problem.objval(x)
 
         # Recover dual solution
         sol_dual_eq = dual_vars[:self.problem.neq]
@@ -453,10 +450,113 @@ class OSQP(object):
         """"
         Solve splitting problem with splitting of the form (after introducing
         slack variables for both equality and inequality constraints)
-            minimize	1/2 x' Q x + c'x  + I_{Ax=b}(x) + I_C(z)
+            minimize	1/2 x' Q x + c'x  + I_{Ax=b}(x) + I_Z(z)
             subject to	x == z
-        where C = [lb, ub]^nx x {0}^neq x R+^nineq
+        where Z = [lb, ub]^nx x {0}^neq x R+^nineq.
+        Slack variable for equality constraints is introduced for dealing with
+        an issue of KKT matrix being singular when Aeq does not have full rank.
         """
 
         # Start timer
         t = time.time()
+
+        # Number of variables (x,s1,s2) and constraints
+        nvar = self.problem.nx + self.problem.neq + self.problem.nineq
+        nconstr = self.problem.neq + self.problem.nineq
+
+        # Form compact (c) matrices for standard QP from:
+        #       minimize	1/2 z' Qc z + cc'z
+        #       subject to	Ac z == bc
+        #                   z \in Z
+        Qc = spspa.block_diag((self.problem.Q,
+                               spspa.csc_matrix((nconstr, nconstr))))
+        cc = np.append(self.problem.c, np.zeros(nconstr))
+        Ac = spspa.vstack([
+                spspa.hstack([self.problem.Aeq, spspa.eye(self.problem.neq),
+                              spspa.csc_matrix((self.problem.neq,
+                                                self.problem.nineq))]),
+                spspa.hstack([self.problem.Aineq,
+                              spspa.csc_matrix((self.problem.nineq,
+                                                self.problem.neq)),
+                              spspa.eye(self.problem.nineq)])])
+        bc = np.append(self.problem.beq, self.problem.bineq)
+
+        # Factorize KKT matrix using sparse LU decomposition
+        KKT = spspa.vstack([
+            spspa.hstack([Qc + self.options.rho * spspa.eye(nvar), Ac.T]),
+            spspa.hstack([Ac, spspa.csc_matrix((nconstr, nconstr))])])
+        luKKT = spalinalg.splu(KKT.tocsc())
+
+        # Set initial conditions to zero
+        z = np.zeros(nvar)
+        u = np.zeros(nvar)
+
+        print "Splitting2 QP Solver"
+        print "-------------------\n"
+        if self.options.print_level > 1:
+            print "Iter | \t   Cost\t    Prim Res\t    Dual Res"
+
+        # Run ADMM: alpha \in (0, 2) is a relaxation parameter.
+        #           Nominal ADMM is obtained for alpha=1.0
+        for i in xrange(self.options.max_iter):
+            # x update
+            rhs = np.append(self.options.rho * (z - u) - cc, bc)
+            x = luKKT.solve(rhs)[:nvar]
+            # z update
+            z_old = z
+            z = self.project(self.options.alpha*x +
+                             (1.-self.options.alpha)*z_old + u)
+            # u update
+            u = u + self.options.alpha*x + (1.-self.options.alpha)*z_old - z
+
+            # Compute primal and dual residuals
+            resid_prim = spla.norm(x - z)
+            resid_dual = self.options.rho*spla.norm(z - z_old)
+
+            # Check the stopping criterion
+            eps_prim = np.sqrt(nconstr) * self.options.eps_abs \
+                + self.options.eps_rel * np.max([spla.norm(x), spla.norm(z)])
+            eps_dual = np.sqrt(nvar) * self.options.eps_abs + \
+                self.options.eps_rel * self.options.rho * spla.norm(u)
+
+            if resid_prim <= eps_prim and resid_dual <= eps_dual:
+                # Print the progress in last iterations
+                if self.options.print_level > 1:
+                    f = self.problem.objval(z[:self.problem.nx])
+                    print "%4s | \t%7.2f\t    %8.4f\t    %8.4f" \
+                        % (i+1, f, resid_prim, resid_dual)
+                # Stop the algorithm
+                break
+
+            # Print cost function depending on print level
+            if self.options.print_level > 1:
+                if (i + 1 == 1) | (self.options.print_level == 2) & \
+                        (np.mod(i + 1,
+                         np.floor(np.float(self.options.max_iter)/20.0)) == 0)\
+                        | (self.options.print_level == 3):
+                            f = self.problem.objval(z[:self.problem.nx])
+                            print "%4s | \t%7.2f\t    %8.4f\t    %8.4f" \
+                                % (i+1, f, resid_prim, resid_dual)
+
+        # End timer
+        cputime = time.time() - t
+        total_iter = i
+
+        print "Optimization Done in %.2fs\n" % cputime
+
+        # Recover primal solution
+        x = z[:self.problem.nx]
+        objval = self.problem.objval(x)
+
+        ipdb.set_trace()
+
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        #
