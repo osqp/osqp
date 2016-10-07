@@ -115,7 +115,7 @@ def main():
     print "Norm of dual lb difference %.8f" % \
         np.linalg.norm(resultsOSQP.sol_dual_lb - resultsGUROBI.sol_dual_lb)
 
-    #ipdb.set_trace()
+    # ipdb.set_trace()
 
 # Parsing optional command line arguments
 if __name__ == '__main__':

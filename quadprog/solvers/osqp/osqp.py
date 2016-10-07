@@ -4,7 +4,7 @@ from scipy import linalg as spla
 import scipy.sparse as spspa
 import scipy.sparse.linalg as spalinalg
 import time   # Time execution
-import ipdb		# ipdb.set_trace()
+# import ipdb		# ipdb.set_trace()
 
 # Solver Constants
 OPTIMAL = "optimal"
@@ -416,13 +416,13 @@ class OSQP(object):
         # TODO: What is a status of the obtained solution?
 
         # Recover primal solution
-        x = z[:self.problem.nx]
-        objval = self.problem.objval(x)
+        sol_x = z[:self.problem.nx]
+        objval = self.problem.objval(sol_x)
 
         # Recover dual solution
         sol_dual_eq = dual_vars[:self.problem.neq]
         sol_dual_ineq = dual_vars[self.problem.neq:]
-        stat_cond_resid = self.problem.Q.dot(x) + self.problem.c + \
+        stat_cond_resid = self.problem.Q.dot(sol_x) + self.problem.c + \
             self.problem.Aeq.T.dot(sol_dual_eq) + \
             self.problem.Aineq.T.dot(sol_dual_ineq)
         sol_dual_lb = np.maximum(stat_cond_resid, 0)
@@ -432,7 +432,7 @@ class OSQP(object):
         status = OPTIMAL
 
         # Store solution as a quadprogResults object
-        solution = results(status, objval, x, sol_dual_eq,
+        solution = results(status, objval, sol_x, sol_dual_eq,
                            sol_dual_ineq, sol_dual_lb, sol_dual_ub,
                            cputime, total_iter)
 
@@ -542,21 +542,37 @@ class OSQP(object):
         cputime = time.time() - t
         total_iter = i
 
-        print "Optimization Done in %.2fs\n" % cputime
+        print "Optimization done in %.2fs\n" % cputime
 
         # Recover primal solution
-        x = z[:self.problem.nx]
-        objval = self.problem.objval(x)
+        sol_x = z[:self.problem.nx]
+        objval = self.problem.objval(sol_x)
 
-        ipdb.set_trace()
+        # Recover dual solution
+        dual_vars = -self.options.rho * u
+        sol_dual_eq = dual_vars[self.problem.nx:
+                                self.problem.nx+self.problem.neq]
+        sol_dual_ineq = dual_vars[-self.problem.nineq:]
+        stat_cond_resid = self.problem.Q.dot(sol_x) + self.problem.c + \
+            self.problem.Aeq.T.dot(sol_dual_eq) + \
+            self.problem.Aineq.T.dot(sol_dual_ineq)
+        sol_dual_lb = np.maximum(stat_cond_resid, 0)
+        sol_dual_ub = -np.minimum(stat_cond_resid, 0)
 
-        #
-        #
-        #
-        #
-        #
-        #
-        #
-        #
-        #
-        #
+        # Return status
+        status = OPTIMAL
+
+        # Store solution as a quadprogResults object
+        solution = results(status, objval, sol_x, sol_dual_eq,
+                           sol_dual_ineq, sol_dual_lb, sol_dual_ub,
+                           cputime, total_iter)
+
+        # Solution polishing
+        if status == OPTIMAL:
+            solution = self.polish(solution)
+
+        # TODO: Define a class for storing factorization and z,u iterates
+        #       (for warm starting)
+
+        # Return solution
+        return solution
