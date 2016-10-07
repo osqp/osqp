@@ -61,7 +61,18 @@ def polishSolution(Q, c, Aeq, beq, Aineq, bineq, lb, ub, QP_sol, tol=1e-5):
     rhs = np.hstack([-c, beq, bineq[ind_act],
                      np.zeros(len(ind_inact) + len(ind_free)),
                      lb[ind_lb], ub[ind_ub]])
-    pol_sol = spalinalg.spsolve(KKT, rhs)
+    try:
+        pol_sol = spalinalg.spsolve(KKT, rhs)
+    except:
+        # Failed to factorize KKT matrix
+        print "Polishing failed. Failed to factorize KKT matrix."
+        return QP_sol
+
+    # If the KKT matrix is singular, spsolve return an array of NaNs
+    if any(np.isnan(pol_sol)):
+        # Terminate
+        print "Polishing failed. KKT matrix is singular."
+        return QP_sol
 
     # Check if the above solution satisfies constraints
     pol_x = pol_sol[:nx]
