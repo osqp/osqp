@@ -6,7 +6,6 @@ import scipy.sparse.linalg as spalinalg
 import time   # Time execution
 # import ipdb		# ipdb.set_trace()
 
-
 # Solver Constants
 OPTIMAL = "optimal"
 # OPTIMAL_INACCURATE = "optimal_inaccurate"
@@ -307,7 +306,7 @@ class OSQP(object):
         print "Splitting QP Solver"
         print "-------------------\n"
         if self.options.print_level > 1:
-            print "iter | \t   cost\t |   prim_res\t |   dual_res\n"
+            print "Iter | \t   Cost\t    Prim Res\t    Dual Res"
 
         # Run ADMM: alpha \in (0, 2) is a relaxation parameter.
         #           Nominal ADMM is obtained for alpha=1.0
@@ -351,7 +350,7 @@ class OSQP(object):
                     xtemp = z[:nx]
                     f = .5 * np.dot(xtemp.T, self.problem.Q.dot(xtemp)) + \
                         self.problem.c.T.dot(xtemp)
-                    print "%4s | \t%7.2f\t |   %8.4f\t |   %8.4f" \
+                    print "%4s | \t%7.2f\t    %8.4f\t    %8.4f" \
                         % (i+1, f, resid_prim, resid_dual)
                 # Stop the algorithm
                 break
@@ -365,7 +364,7 @@ class OSQP(object):
                             xtemp = z[:nx]
                             f = .5*np.dot(xtemp.T, self.problem.Q.dot(xtemp))\
                                 + self.problem.c.T.dot(xtemp)
-                            print "%4s | \t%7.2f\t |   %8.4f\t |   %8.4f" \
+                            print "%4s | \t%7.2f\t    %8.4f\t    %8.4f" \
                                 % (i+1, f, resid_prim, resid_dual)
 
         # End timer

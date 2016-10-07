@@ -34,7 +34,7 @@ def load_maros_meszaros_problem(f):
 
 
 def main():
-    example = 'maros_meszaros'  # {'small', 'random', 'maros_meszaros'}
+    example = 'random'  # {'small', 'random', 'maros_meszaros'}
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
