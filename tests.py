@@ -34,7 +34,7 @@ def load_maros_meszaros_problem(f):
 
 
 def main():
-    example = 'random'  # {'small', 'random', 'maros_meszaros'}
+    example = 'random'  # {'small1', 'small2', 'random', 'maros_meszaros'}
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
@@ -43,9 +43,9 @@ def main():
         f = 'tests/maros_meszaros/QBANDM.mat'
         p = load_maros_meszaros_problem(f)
 
-    elif example == 'small':
+    elif example == 'small1':
         # Our Examples
-        # Small Example
+        # Small Example 1
         Q = spspa.csc_matrix(np.array([[4., 1.], [1., 2.]]))
         c = np.ones(2)
         Aeq = spspa.csc_matrix(np.ones((1, 2)))
@@ -54,6 +54,17 @@ def main():
         bineq = np.zeros(0)
         lb = 0.6*np.zeros(2)
         ub = 0.7 * np.ones(2)
+        p = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq)
+    elif example == 'small2':
+        # Small Example 2
+        nx = 2
+        Q = spspa.csc_matrix(np.array([[1., 0.], [0., 0.]]))
+        c = np.array([3, 4])
+        Aeq = spspa.csc_matrix(np.ones((0, nx)))
+        beq = np.zeros(0)
+        Aineq = spspa.csc_matrix(np.array([[-1, 0], [0, -1], [-1, -3],
+                                            [2, 5], [3, 4]]))
+        bineq = np.array([0, 0, -15, 100, 80])
         p = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq)
     elif example == 'random':
         # Random Example
