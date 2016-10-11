@@ -52,10 +52,10 @@ def main():
             options = {'eps_abs': 0.,
                        'eps_rel': 0.,
                        'splitting': 2,
-                    #    'kkt_method': 'indirect',
-                    #    'kkt_ind_alg': 'gmres',
-                    #    'kkt_ind_tol': 1e-5,
-                    #    'kkt_ind_maxiter': 10
+                       #    'kkt_method': 'indirect',
+                       #    'kkt_ind_alg': 'gmres',
+                       #    'kkt_ind_tol': 1e-5,
+                       #    'kkt_ind_maxiter': 10
                        }
             probOSQP = osqp.OSQP(**options)
             probOSQP.problem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
@@ -73,7 +73,8 @@ def main():
         print "Norm of dual eq difference %.8f" % \
             np.linalg.norm(resultsOSQP.sol_dual_eq - resultsGUROBI.sol_dual_eq)
         print "Norm of dual ineq difference %.8f" % \
-            np.linalg.norm(resultsOSQP.sol_dual_ineq - resultsGUROBI.sol_dual_ineq)
+            np.linalg.norm(resultsOSQP.sol_dual_ineq -
+                           resultsGUROBI.sol_dual_ineq)
         print "Norm of dual ub difference %.8f" % \
             np.linalg.norm(resultsOSQP.sol_dual_ub - resultsGUROBI.sol_dual_ub)
         print "Norm of dual lb difference %.8f" % \

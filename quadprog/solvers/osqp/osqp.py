@@ -17,7 +17,6 @@ MAXITER_REACHED = "maxiter_reached"
 # SOLVER_ERROR = "solver_error"
 
 
-
 class results(object):
     """
     Stores OSQP results
@@ -257,16 +256,16 @@ class OSQP(object):
             # Project first nx elements on interval [lb, ub],
             # and the rest on positive orthant.
             xbar[:self.problem.nx] = np.minimum(
-                                        np.maximum(xbar[:self.problem.nx],
-                                        self.problem.lb), self.problem.ub)
+                np.maximum(xbar[:self.problem.nx],
+                           self.problem.lb), self.problem.ub)
             xbar[self.problem.nx:] = np.maximum(xbar[self.problem.nx:], 0.0)
         elif self.options.splitting == 2:
             # Project first nx elements on interval [lb, ub],
             # next neq elements on zero, and the rest on positive
             # orthant.
             xbar[:self.problem.nx] = np.minimum(
-                                        np.maximum(xbar[:self.problem.nx],
-                                        self.problem.lb), self.problem.ub)
+                    np.maximum(xbar[:self.problem.nx],
+                               self.problem.lb), self.problem.ub)
             xbar[self.problem.nx:self.problem.nx+self.problem.neq] = 0.0
             xbar[self.problem.nx+self.problem.neq:] = np.maximum(
                                 xbar[self.problem.nx+self.problem.neq:], 0.0)
@@ -457,8 +456,10 @@ class OSQP(object):
             if self.options.kkt_method == 'direct':
                 # Create KKT matrix
                 KKT = spspa.vstack([
-                    spspa.hstack([Qc + self.options.rho*spspa.eye(nvar), As.T]),
-                    spspa.hstack([As, -1./self.options.rho*spspa.eye(nconstr)])])
+                    spspa.hstack([Qc + self.options.rho*spspa.eye(nvar),
+                                 As.T]),
+                    spspa.hstack([As,
+                                 -1./self.options.rho*spspa.eye(nconstr)])])
                 kkt_factor = spalinalg.splu(KKT.tocsc())
                 if self.options.kkt_dir_reuse_factor:
                     # Store factorization
@@ -514,17 +515,17 @@ class OSQP(object):
                     (self.options.rho*spspa.eye(nvar),
                      -1./self.options.rho*spspa.eye(nconstr)))
                 if self.options.kkt_ind_alg == 'cg':  # Apply conj gradient
-                    kktsol, _ = spalinalg.cg(KKT,  # KKT mat with current rho
-                                             qbar,  # Current rhs
-                                             x0=kktsol,  # use prev kkt sol
-                                             tol=self.options.kkt_ind_tol,
-                                             maxiter=self.options.kkt_ind_maxiter)
+                    kktsol, _ = spalinalg.cg(
+                        KKT, qbar,
+                        x0=kktsol,  # use prev kkt sol
+                        tol=self.options.kkt_ind_tol,
+                        maxiter=self.options.kkt_ind_maxiter)
                 elif self.options.kkt_ind_alg == 'gmres':  # Apply gmres
-                    kktsol, _ = spalinalg.gmres(KKT,  # KKT mat with current rho
-                                                qbar,  # Current rhs
-                                                x0=kktsol,  # use prev kkt sol
-                                                tol=self.options.kkt_ind_tol,
-                                                maxiter=self.options.kkt_ind_maxiter)
+                    kktsol, _ = spalinalg.gmres(
+                        KKT,  qbar,
+                        x0=kktsol,  # use prev kkt sol
+                        tol=self.options.kkt_ind_tol,
+                        maxiter=self.options.kkt_ind_maxiter)
                 else:
                     assert False, "Invalid indirect algorithm for solving \
                     KKT system provided!"
@@ -664,7 +665,8 @@ class OSQP(object):
             Qc = spspa.block_diag((self.problem.Q,
                                    spspa.csc_matrix((nconstr, nconstr))))
             Ac = spspa.vstack([
-                    spspa.hstack([self.problem.Aeq, spspa.eye(self.problem.neq),
+                    spspa.hstack([self.problem.Aeq,
+                                 spspa.eye(self.problem.neq),
                                   spspa.csc_matrix((self.problem.neq,
                                                     self.problem.nineq))]),
                     spspa.hstack([self.problem.Aineq,
@@ -676,7 +678,8 @@ class OSQP(object):
             if self.options.kkt_method == 'direct':
                 # Create KKT matrix
                 KKT = spspa.vstack([
-                    spspa.hstack([Qc + self.options.rho * spspa.eye(nvar), Ac.T]),
+                    spspa.hstack([Qc + self.options.rho * spspa.eye(nvar),
+                                 Ac.T]),
                     spspa.hstack([Ac, spspa.csc_matrix((nconstr, nconstr))])])
                 kkt_factor = spalinalg.splu(KKT.tocsc())
                 if self.options.kkt_dir_reuse_factor:
@@ -692,9 +695,9 @@ class OSQP(object):
 
         # Set initial conditions
         if self.options.warm_start and self.z_prev is not None \
-            and self.u_prev is not None:
-            z = self.z_prev
-            u = self.u_prev
+                and self.u_prev is not None:
+                z = self.z_prev
+                u = self.u_prev
         else:
             z = np.zeros(nvar)
             u = np.zeros(nvar)
@@ -711,7 +714,7 @@ class OSQP(object):
         #           Nominal ADMM is obtained for alpha=1.0
         for i in xrange(self.options.max_iter):
             # x update
-            rhs = np.append(self.options.rho * (z - u) - cc, bc)  # construct rhs
+            rhs = np.append(self.options.rho * (z - u) - cc, bc)
 
             if self.options.kkt_method == 'direct':
                 x = kkt_factor.solve(rhs)[:nvar]
@@ -722,17 +725,17 @@ class OSQP(object):
                      spspa.csr_matrix((nconstr, nconstr))))
                 # Solve KKT system
                 if self.options.kkt_ind_alg == 'cg':  # Apply conj gradient
-                    kktsol, _ = spalinalg.cg(KKT,
-                                             rhs,
-                                             x0=kktsol,  # use prev kkt sol
-                                             tol=self.options.kkt_ind_tol,
-                                             maxiter=self.options.kkt_ind_maxiter)
+                    kktsol, _ = spalinalg.cg(
+                        KKT, rhs,
+                        x0=kktsol,  # use prev kkt sol
+                        tol=self.options.kkt_ind_tol,
+                        maxiter=self.options.kkt_ind_maxiter)
                 elif self.options.kkt_ind_alg == 'gmres':  # Apply gmres
-                    kktsol, _ = spalinalg.gmres(KKT,
-                                                rhs,
-                                                x0=kktsol,  # use prev kkt sol
-                                                tol=self.options.kkt_ind_tol,
-                                                maxiter=self.options.kkt_ind_maxiter)
+                    kktsol, _ = spalinalg.gmres(
+                        KKT, rhs,
+                        x0=kktsol,  # use prev kkt sol
+                        tol=self.options.kkt_ind_tol,
+                        maxiter=self.options.kkt_ind_maxiter)
                 else:
                     assert False, "Invalid indirect algorithm for solving \
                     KKT system provided!"
@@ -773,6 +776,18 @@ class OSQP(object):
                             f = self.problem.objval(z[:self.problem.nx])
                             print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
                                 % (i+1, f, resid_prim, resid_dual)
+
+            # # If indirect method, update rho
+            # if self.options.kkt_method == 'indirect':
+            #     # update rho
+            #     if np.norm(resid_prim) > \
+            #             self.options.kkt_ind_mu*np.norm(resid_dual):
+            #         self.options.rho = self.options.kkt_ind_tau * \
+            #             self.options.rho
+            #     elif np.norm(resid_dual) > \
+            #             self.options.kkt_ind_mu*np.norm(resid_prim):
+            #         self.options.rho = 1./self.options.kkt_ind_tau * \
+            #             self.options.rho
 
         # End timer
         cputime = time.time() - t
