@@ -74,22 +74,36 @@ class options(object):
     """
     OSQP Solver Options
 
-    Attributes
+    Attributes (General)
     ----------
-    max_iter [5000]     - Maximum number of iterations
-    rho  [1.0]          - Step in ADMM procedure
-    alpha [1.0]         - Relaxation parameter
-    eps_abs  [1e-8]     - Absolute tolerance
-    eps_rel  [1e-06]    - Relative tolerance
-    print_level [2]     - Printing level
-    scaling  [False]    - Prescaling/Equilibration
-    polish_tol [1e-5]   - Polishing tolerance to detect active constraints
-    splitting [2]       - Splitting options
-    reuse_factor [True] - Reuse factorization of KKT matrix from previous solve
-    warm_start [False]  - Reuse solution from previous solve
+    max_iter [5000]            - Maximum number of iterations
+    rho  [1.0]                 - Step in ADMM procedure
+    alpha [1.0]                - Relaxation parameter
+    eps_abs  [1e-8]            - Absolute tolerance
+    eps_rel  [1e-06]           - Relative tolerance
+    print_level [2]            - Printing level
+    scaling  [False]           - Prescaling/Equilibration
+    polish_tol [1e-5]          - Polishing tolerance to detect active constrs
+    splitting [2]              - Splitting option
+    warm_start [False]         - Reuse solution from previous solve
+
+
+    KKT Solution
+    ------------
+    kkt_method  ['direct']        - KKT solution method: 'direct' or 'indirect'
+
+    -> Direct method options:
+    kkt_dir_reuse_factor [True]   - KKT factorization from previous solve
+
+    -> Indirect method options (dynamic rho update):
+    kkt_ind_alg ['cg']            - Algorithm
+    kkt_ind_mu [10]               - rho update trigger ratio between residuals
+    kkt_ind_tau [2]               - rho update factor
     """
 
     def __init__(self, **kwargs):
+
+        # Set general options
         self.max_iter = kwargs.pop('max_iter', 5000)
         self.rho = kwargs.pop('rho', 1.6)
         self.alpha = kwargs.pop('alpha', 1.0)
@@ -100,8 +114,15 @@ class options(object):
         self.polish = kwargs.pop('polish', True)
         self.polish_tol = kwargs.pop('polish_tol', 1e-05)
         self.splitting = kwargs.pop('splitting', 2)
-        self.reuse_factor = kwargs.pop('reuse_factor', True)
-        self.warm_start = kwargs.pop('reuse_factor', False)
+        self.warm_start = kwargs.pop('warm_start', False)
+
+        # Set KKT system solution options
+        self.kkt_method = kwargs.pop('kkt_method', 'direct')
+        self.kkt_dir_reuse_factor = kwargs.pop('kkt_dir_reuse_factor',
+                                               True)
+        self.kkt_ind_alg = kwargs.pop('kkt_ind_alg', 'cg')
+        self.kkt_ind_tau = kwargs.pop('kkt_ind_tau', 10.)
+        self.kkt_ind_mu = kwargs.pop('kkt_ind_mu', 10.)
 
 
 # class prev_solution(object):
@@ -123,7 +144,9 @@ class OSQP(object):
     ----------
     problem          - QP problem
     options          - Solver options
-    factorizations   - Matrices factorizations
+    kkt_factor       - KKT Matrix factorization (direct method)
+    z_prev           - Previous primal solution
+    u_prev           - Previous dual solution
     """
 
     def __init__(self, **kwargs):
@@ -131,7 +154,7 @@ class OSQP(object):
         Define OSQP Solver by passing solver options
         """
         self.options = options(**kwargs)
-        self.factor = None
+        self.kkt_factor = None
         # self.scaler = None
         self.z_prev = None
         self.u_prev = None
@@ -154,36 +177,39 @@ class OSQP(object):
         if 'Q' in kwargs.keys() and kwargs['Q'].tocsr() != self.problem.Q:
             self.problem.Q = kwargs['Q'].tocsr()
             # Reset factorization
-            self.factor = None
+            self.kkt_factor = None
         if 'Aeq' in kwargs.keys() and \
                 kwargs['Aeq'].tocsr() != self.problem.Aeq:
             self.problem.Aeq = kwargs['Aeq'].tocsr()
             # Reset factorization
-            self.factor = None
+            self.kkt_factor = None
         if 'Aineq' in kwargs.keys() and \
                 kwargs['Aineq'].tocsr() != self.problem.Aineq:
             self.problem.Aineq = kwargs['Aineq'].tocsr()
             # Reset factorization
-            self.factor = None
+            self.kkt_factor = None
         self.problem.c = kwargs.pop('c', self.problem.c)
         self.problem.beq = kwargs.pop('beq', self.problem.beq)
         self.problem.bineq = kwargs.pop('bineq', self.problem.bineq)
         self.problem.lb = kwargs.pop('lb', self.problem.lb)
+        self.problem.ub = kwargs.pop('ub', self.problem.ub)
 
     def set_option(self, **kwargs):
         """
         Set solver options. Reset factorization if rho or splitting
         is changed.
         """
+
+        # General options
         if 'rho' in kwargs.keys() and kwargs['rho'] != self.options.rho:
             self.options.rho = kwargs['rho']
             # Reset factorization
-            self.factor = None
+            self.kkt_factor = None
         if 'splitting' in kwargs.keys() and \
                 kwargs['splitting'] != self.options.splitting:
             self.options.splitting = kwargs['splitting']
             # Reset factorization
-            self.factor = None
+            self.kkt_factor = None
         self.options.max_iter = kwargs.pop('max_iter', self.options.max_iter)
         self.options.alpha = kwargs.pop('alpha', self.options.alpha)
         self.options.eps_abs = kwargs.pop('eps_abs', self.options.eps_abs)
@@ -194,8 +220,22 @@ class OSQP(object):
         self.options.polish = kwargs.pop('polish', self.options.polish)
         self.options.polish_tol = kwargs.pop('polish_tol',
                                              self.options.polish_tol)
-        self.options.reuse_factor = kwargs.pop('reuse_factor',
-                                               self.options.reuse_factor)
+
+        #  KKT System solution options
+        self.options.kkt_method = kwargs.pop('kkt_method',
+                                             self.options.kkt_method)
+        self.options.kkt_dir_reuse_factor = kwargs.pop(
+            'kkt_dir_reuse_factor',
+            self.options.kkt_dir_reuse_factor)
+        self.options.kkt_ind_alg = kwargs.pop(
+            'kkt_ind_alg',
+            'cg')
+        self.options.kkt_ind_mu = kwargs.pop(
+            'kkt_ind_mu',
+            self.options.kkt_ind_mu)
+        self.options.kkt_ind_tau = kwargs.pop(
+            'kkt_ind_tau',
+            self.options.kkt_ind_tau)
 
     def project(self, xbar):
         """
@@ -337,6 +377,9 @@ class OSQP(object):
                             lb <= x <= ub
         """
 
+        print "Operator Splitting QP Solver"
+        print "----------------------------\n"
+
         # Choose splitting based on the options
         if self.options.splitting == 1:
             solution = self.solve_splitting1()
@@ -366,8 +409,8 @@ class OSQP(object):
         nconstr = self.problem.neq + self.problem.nineq
 
         # Check whether the problem matrices have already been constructed
-        if self.options.reuse_factor and self.factor is not None:
-            luKKT = self.factor
+        if self.options.kkt_dir_reuse_factor and self.kkt_factor is not None:
+            kkt_factor = self.kkt_factor
             As = self.As
             # scaler = self.scaler
         else:
@@ -394,10 +437,10 @@ class OSQP(object):
             KKT = spspa.vstack([
                 spspa.hstack([Qc + self.options.rho*spspa.eye(nvar), As.T]),
                 spspa.hstack([As, -1./self.options.rho*spspa.eye(nconstr)])])
-            luKKT = spalinalg.splu(KKT.tocsc())
-            if self.options.reuse_factor:
+            kkt_factor = spalinalg.splu(KKT.tocsc())
+            if self.options.kkt_dir_reuse_factor:
                 # Store factorization
-                self.factor = luKKT
+                self.factor = kkt_factor
                 self.As = As
 
         cc = np.append(self.problem.c, np.zeros(self.problem.nineq))
@@ -416,8 +459,10 @@ class OSQP(object):
             z = np.zeros(nvar)
             u = np.zeros(nconstr + nvar)
 
-        print "Splitting1 QP Solver"
-        print "-------------------\n"
+        # Print parameters
+        print "Splitting method 1"
+        print "KKT solution: " + self.options.kkt_method + "\n"
+
         if self.options.print_level > 1:
             print "Iter | \t   Cost\t    Prim Res\t    Dual Res"
 
@@ -431,7 +476,7 @@ class OSQP(object):
             qbar = np.append(qtemp, np.zeros(nconstr))
 
             # x update
-            x = luKKT.solve(qbar)[:nvar]  # Select first nvar elements
+            x = kkt_factor.solve(qbar)[:nvar]  # Select first nvar elements
             # z update
             z_old = z
             z = self.project(self.options.alpha*x +
@@ -479,7 +524,7 @@ class OSQP(object):
         cputime = time.time() - t
         total_iter = i
 
-        print "Optimization Done in %.2fs\n" % cputime
+        print "Optimization Done in %.3fs\n" % cputime
 
         # Rescale (r) dual variables
         if self.options.scaling:
@@ -542,8 +587,8 @@ class OSQP(object):
         nconstr = self.problem.neq + self.problem.nineq
 
         # Check whether the problem matrices have already been constructed
-        if self.options.reuse_factor and self.factor is not None:
-            luKKT = self.factor
+        if self.options.kkt_dir_reuse_factor and self.kkt_factor is not None:
+            kkt_factor = self.kkt_factor
             # scaler = self.scaler
         else:
             # Form compact (c) matrices for standard QP from:
@@ -564,10 +609,10 @@ class OSQP(object):
             KKT = spspa.vstack([
                 spspa.hstack([Qc + self.options.rho * spspa.eye(nvar), Ac.T]),
                 spspa.hstack([Ac, spspa.csc_matrix((nconstr, nconstr))])])
-            luKKT = spalinalg.splu(KKT.tocsc())
-            if self.options.reuse_factor:
+            kkt_factor = spalinalg.splu(KKT.tocsc())
+            if self.options.kkt_dir_reuse_factor:
                 # Store factorization
-                self.factor = luKKT
+                self.kkt_factor = kkt_factor
 
         cc = np.append(self.problem.c, np.zeros(nconstr))
         bc = np.append(self.problem.beq, self.problem.bineq)
@@ -581,8 +626,10 @@ class OSQP(object):
             z = np.zeros(nvar)
             u = np.zeros(nvar)
 
-        print "Splitting2 QP Solver"
-        print "-------------------\n"
+        # Print parameters
+        print "Splitting method 2"
+        print "KKT solution: " + self.options.kkt_method + "\n"
+
         if self.options.print_level > 1:
             print "Iter | \t   Cost\t    Prim Res\t    Dual Res"
 
@@ -591,7 +638,7 @@ class OSQP(object):
         for i in xrange(self.options.max_iter):
             # x update
             rhs = np.append(self.options.rho * (z - u) - cc, bc)
-            x = luKKT.solve(rhs)[:nvar]
+            x = kkt_factor.solve(rhs)[:nvar]
             # z update
             z_old = z
             z = self.project(self.options.alpha*x +
@@ -632,7 +679,7 @@ class OSQP(object):
         cputime = time.time() - t
         total_iter = i
 
-        print "Optimization done in %.2fs\n" % cputime
+        print "Optimization done in %.3fs\n" % cputime
 
         # Recover primal solution
         sol_x = z[:self.problem.nx]

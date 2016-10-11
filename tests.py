@@ -12,6 +12,7 @@ from quadprog.solvers.solvers import *
 
 reload(qp)
 
+
 def load_maros_meszaros_problem(f):
     # Load file
     m = spio.loadmat(f)
@@ -36,7 +37,7 @@ def load_maros_meszaros_problem(f):
 def main():
     example = 'random'  # {'small1', 'small2', 'random', 'maros_meszaros'}
 
-    if example == 'maros_meszaros':
+    if example == 'random':
         # Maros Meszaros Examples
         # f = 'tests/maros_meszaros/CVXQP2_S.mat'
         # f = 'tests/maros_meszaros/PRIMAL3.mat'
@@ -94,11 +95,11 @@ def main():
     # Solve with OSQP. You can pass options to OSQP solver
     resultsOSQP = p.solve(solver=OSQP, max_iter=5000)
 
-    # Reuse factorizations
-    if example == 'random':
-        c = sp.randn(nx)
-        beq = sp.randn(neq)
-        bineq = 100 * sp.rand(nineq)
+    # # Reuse factorizations
+    # if example == 'random':
+    #     c = sp.randn(nx)
+    #     beq = sp.randn(neq)
+    #     bineq = 100 * sp.rand(nineq)
 
 
     print "\n"
