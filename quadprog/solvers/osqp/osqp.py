@@ -4,7 +4,7 @@ from scipy import linalg as spla
 import scipy.sparse as spspa
 import scipy.sparse.linalg as spalinalg
 import time   # Time execution
-# import ipdb		# ipdb.set_trace()
+import ipdb		# ipdb.set_trace()
 
 # Solver Constants
 OPTIMAL = "optimal"
@@ -56,11 +56,11 @@ class problem(object):
         self.neq = beq.size
         self.nineq = bineq.size
         # Set problem data
-        self.Q = Q
+        self.Q = Q.tocsr()
         self.c = c
-        self.Aeq = Aeq
+        self.Aeq = Aeq.tocsr()
         self.beq = beq
-        self.Aineq = Aineq
+        self.Aineq = Aineq.tocsr()
         self.bineq = bineq
         self.lb = lb if lb is not None else -np.inf*np.ones(self.nx)
         self.ub = ub if ub is not None else np.inf*np.ones(self.nx)
@@ -76,28 +76,43 @@ class options(object):
 
     Attributes
     ----------
-    max_iter [5000]    - Maximum number of iterations
-    rho  [1.0]         - Step in ADMM procedure
-    alpha [1.0]        - Relaxation aprameter
-    eps_abs  [1e-8]    - Absolute tolerance
-    eps_rel  [1e-06]   - Relative tolerance
-    print_level [2]    - Printing level
-    scaling  [False]   - Prescaling/Equilibration
-    polish_tol [1e-5]  - Polishing tolerance to detect active constraints
-    splitting [1]      - Splitting options
+    max_iter [5000]     - Maximum number of iterations
+    rho  [1.0]          - Step in ADMM procedure
+    alpha [1.0]         - Relaxation parameter
+    eps_abs  [1e-8]     - Absolute tolerance
+    eps_rel  [1e-06]    - Relative tolerance
+    print_level [2]     - Printing level
+    scaling  [False]    - Prescaling/Equilibration
+    polish_tol [1e-5]   - Polishing tolerance to detect active constraints
+    splitting [2]       - Splitting options
+    reuse_factor [True] - Reuse factorization of KKT matrix from previous solve
+    warm_start [False]  - Reuse solution from previous solve
     """
 
     def __init__(self, **kwargs):
         self.max_iter = kwargs.pop('max_iter', 5000)
         self.rho = kwargs.pop('rho', 1.6)
         self.alpha = kwargs.pop('alpha', 1.0)
-        self.eps_abs = kwargs.pop('eps_abs', 1e-8)
+        self.eps_abs = kwargs.pop('eps_abs', 1e-6)
         self.eps_rel = kwargs.pop('eps_rel', 1e-6)
         self.print_level = kwargs.pop('print_level', 2)
         self.scaling = kwargs.pop('scaling', False)
+        self.polish = kwargs.pop('polish', True)
         self.polish_tol = kwargs.pop('polish_tol', 1e-05)
         self.splitting = kwargs.pop('splitting', 2)
-        # prev_sol = kwargs.pop('prev_sol', False)  TODO: Add warm starting
+        self.reuse_factor = kwargs.pop('reuse_factor', True)
+        self.warm_start = kwargs.pop('reuse_factor', False)
+
+
+# class prev_solution(object):
+#     """
+#
+#     """
+#     def __init__(self, splitting, factor, z_prev, u_prev):
+#         self.splitting = splitting
+#         self.factor = factor
+#         self.z_prev = z_prev
+#         self.u_prev = u_prev
 
 
 class OSQP(object):
@@ -116,6 +131,10 @@ class OSQP(object):
         Define OSQP Solver by passing solver options
         """
         self.options = options(**kwargs)
+        self.factor = None
+        # self.scaler = None
+        self.z_prev = None
+        self.u_prev = None
 
     def problem(self, Q, c, Aeq, beq, Aineq, bineq, lb=None, ub=None):
         """
@@ -127,9 +146,60 @@ class OSQP(object):
         """
         self.problem = problem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
 
+    def set_problem_data(self, **kwargs):
+        """
+        Set QP problem data. Reset factorization if Q, Aeq or Aineq
+        is changed.
+        """
+        if 'Q' in kwargs.keys() and kwargs['Q'].tocsr() != self.problem.Q:
+            self.problem.Q = kwargs['Q'].tocsr()
+            # Reset factorization
+            self.factor = None
+        if 'Aeq' in kwargs.keys() and \
+                kwargs['Aeq'].tocsr() != self.problem.Aeq:
+            self.problem.Aeq = kwargs['Aeq'].tocsr()
+            # Reset factorization
+            self.factor = None
+        if 'Aineq' in kwargs.keys() and \
+                kwargs['Aineq'].tocsr() != self.problem.Aineq:
+            self.problem.Aineq = kwargs['Aineq'].tocsr()
+            # Reset factorization
+            self.factor = None
+        self.problem.c = kwargs.pop('c', self.problem.c)
+        self.problem.beq = kwargs.pop('beq', self.problem.beq)
+        self.problem.bineq = kwargs.pop('bineq', self.problem.bineq)
+        self.problem.lb = kwargs.pop('lb', self.problem.lb)
+
+    def set_option(self, **kwargs):
+        """
+        Set solver options. Reset factorization if rho or splitting
+        is changed.
+        """
+        if 'rho' in kwargs.keys() and kwargs['rho'] != self.options.rho:
+            self.options.rho = kwargs['rho']
+            # Reset factorization
+            self.factor = None
+        if 'splitting' in kwargs.keys() and \
+                kwargs['splitting'] != self.options.splitting:
+            self.options.splitting = kwargs['splitting']
+            # Reset factorization
+            self.factor = None
+        self.options.max_iter = kwargs.pop('max_iter', self.options.max_iter)
+        self.options.alpha = kwargs.pop('alpha', self.options.alpha)
+        self.options.eps_abs = kwargs.pop('eps_abs', self.options.eps_abs)
+        self.options.eps_rel = kwargs.pop('eps_rel', self.options.eps_rel)
+        self.options.print_level = kwargs.pop('print_level',
+                                              self.options.print_level)
+        self.options.scaling = kwargs.pop('scaling', self.options.scaling)
+        self.options.polish = kwargs.pop('polish', self.options.polish)
+        self.options.polish_tol = kwargs.pop('polish_tol',
+                                             self.options.polish_tol)
+        self.options.reuse_factor = kwargs.pop('reuse_factor',
+                                               self.options.reuse_factor)
+
     def project(self, xbar):
         """
-        Project a vector xbar onto the constraint set C.
+        Project a vector xbar onto constraint set.
         """
         if self.options.splitting == 1:
             # Project first nx elements on interval [lb, ub],
@@ -295,50 +365,56 @@ class OSQP(object):
         nvar = self.problem.nx + self.problem.nineq     # (x,s)
         nconstr = self.problem.neq + self.problem.nineq
 
-        # Form compact (c) matrices for standard QP from:
-        #       minimize	1/2 z' Qc z + cc'z
-        #       subject to	Ac z == bc
-        #                   z \in Z
-        Qc = spspa.block_diag((self.problem.Q,
-                               spspa.csc_matrix((self.problem.nineq,
-                                                 self.problem.nineq))))
-        cc = np.append(self.problem.c, np.zeros(self.problem.nineq))
-        Ac = spspa.vstack([spspa.hstack([self.problem.Aeq,
-                                        spspa.csc_matrix(
-                                            (self.problem.neq,
-                                             self.problem.nineq))]),
-                           spspa.hstack([self.problem.Aineq,
-                                        spspa.eye(self.problem.nineq)])])
-        bc = np.append(self.problem.beq, self.problem.bineq)
+        # Check whether the problem matrices have already been constructed
+        if self.options.reuse_factor and self.factor is not None:
+            luKKT = self.factor
+            As = self.As
+            # scaler = self.scaler
+        else:
+            # Form compact (c) matrices for standard QP from:
+            #       minimize	1/2 z' Qc z + cc'z
+            #       subject to	Ac z == bc
+            #                   z \in Z
+            Qc = spspa.block_diag((self.problem.Q,
+                                   spspa.csc_matrix((self.problem.nineq,
+                                                     self.problem.nineq))))
+            Ac = spspa.vstack([spspa.hstack([self.problem.Aeq,
+                                            spspa.csc_matrix(
+                                                (self.problem.neq,
+                                                 self.problem.nineq))]),
+                               spspa.hstack([self.problem.Aineq,
+                                            spspa.eye(self.problem.nineq)])])
+            # Scaling (s): Normalize rows of Ac.
+            if self.options.scaling:
+                scaler = np.sqrt(np.square(Ac).sum(1))  # norm of rows of Ac
+                As = Ac / scaler[:, None]
+            else:
+                As = Ac
+            # Factorize KKT matrix using sparse LU decomposition
+            KKT = spspa.vstack([
+                spspa.hstack([Qc + self.options.rho*spspa.eye(nvar), As.T]),
+                spspa.hstack([As, -1./self.options.rho*spspa.eye(nconstr)])])
+            luKKT = spalinalg.splu(KKT.tocsc())
+            if self.options.reuse_factor:
+                # Store factorization
+                self.factor = luKKT
+                self.As = As
 
-        # Scaling (s): Normalize rows of Ac.
+        cc = np.append(self.problem.c, np.zeros(self.problem.nineq))
+        bc = np.append(self.problem.beq, self.problem.bineq)
         if self.options.scaling:
-            scaler = np.sqrt(np.square(Ac).sum(1))  # norm of each row of Ac
-            As = Ac / scaler[:, None]
             bs = bc / scaler
         else:
-            As = Ac
             bs = bc
 
-        # # Warm starting (TODO: add later)
-        # if prev_sol:    # If the previous solution is passed as an argument
-        #     # Reuse the factorization from previous solution
-        #     LU = prev_sol.lu_kkt
-        #     piv = prev_sol.piv_kkt
-        #     # Set initial condition to previous solution
-        #     z = prev_sol.ADMM_z_iter
-        #     u = prev_sol.ADMM_u_iter
-        # else:
-
-        # Factorize KKT matrix using sparse LU decomposition
-        KKT = spspa.vstack([
-            spspa.hstack([Qc + self.options.rho * spspa.eye(nvar), As.T]),
-            spspa.hstack([As, -1. / self.options.rho * spspa.eye(nconstr)])])
-        luKKT = spalinalg.splu(KKT.tocsc())
-
-        # Set initial conditions to zero
-        z = np.zeros(nvar)
-        u = np.zeros(nconstr + nvar)
+        # Set initial conditions
+        if self.options.warm_start and self.z_prev is not None \
+                and self.u_prev is not None:
+            z = self.z_prev
+            u = self.u_prev
+        else:
+            z = np.zeros(nvar)
+            u = np.zeros(nconstr + nvar)
 
         print "Splitting1 QP Solver"
         print "-------------------\n"
@@ -439,9 +515,10 @@ class OSQP(object):
         # Solution polishing
         if status == OPTIMAL:
             solution = self.polish(solution)
-
-        # TODO: Define a class for storing factorization and z,u iterates
-        #       (for warm starting)
+            # Store last iterates for warm starting
+            if self.options.warm_start:
+                self.z_prev = z
+                self.u_prev = u
 
         # Return solution
         return solution
@@ -464,32 +541,45 @@ class OSQP(object):
         nvar = self.problem.nx + self.problem.neq + self.problem.nineq
         nconstr = self.problem.neq + self.problem.nineq
 
-        # Form compact (c) matrices for standard QP from:
-        #       minimize	1/2 z' Qc z + cc'z
-        #       subject to	Ac z == bc
-        #                   z \in Z
-        Qc = spspa.block_diag((self.problem.Q,
-                               spspa.csc_matrix((nconstr, nconstr))))
+        # Check whether the problem matrices have already been constructed
+        if self.options.reuse_factor and self.factor is not None:
+            luKKT = self.factor
+            # scaler = self.scaler
+        else:
+            # Form compact (c) matrices for standard QP from:
+            #       minimize	1/2 z' Qc z + cc'z
+            #       subject to	Ac z == bc
+            #                   z \in Z
+            Qc = spspa.block_diag((self.problem.Q,
+                                   spspa.csc_matrix((nconstr, nconstr))))
+            Ac = spspa.vstack([
+                    spspa.hstack([self.problem.Aeq, spspa.eye(self.problem.neq),
+                                  spspa.csc_matrix((self.problem.neq,
+                                                    self.problem.nineq))]),
+                    spspa.hstack([self.problem.Aineq,
+                                  spspa.csc_matrix((self.problem.nineq,
+                                                    self.problem.neq)),
+                                  spspa.eye(self.problem.nineq)])])
+            # Factorize KKT matrix using sparse LU decomposition
+            KKT = spspa.vstack([
+                spspa.hstack([Qc + self.options.rho * spspa.eye(nvar), Ac.T]),
+                spspa.hstack([Ac, spspa.csc_matrix((nconstr, nconstr))])])
+            luKKT = spalinalg.splu(KKT.tocsc())
+            if self.options.reuse_factor:
+                # Store factorization
+                self.factor = luKKT
+
         cc = np.append(self.problem.c, np.zeros(nconstr))
-        Ac = spspa.vstack([
-                spspa.hstack([self.problem.Aeq, spspa.eye(self.problem.neq),
-                              spspa.csc_matrix((self.problem.neq,
-                                                self.problem.nineq))]),
-                spspa.hstack([self.problem.Aineq,
-                              spspa.csc_matrix((self.problem.nineq,
-                                                self.problem.neq)),
-                              spspa.eye(self.problem.nineq)])])
         bc = np.append(self.problem.beq, self.problem.bineq)
 
-        # Factorize KKT matrix using sparse LU decomposition
-        KKT = spspa.vstack([
-            spspa.hstack([Qc + self.options.rho * spspa.eye(nvar), Ac.T]),
-            spspa.hstack([Ac, spspa.csc_matrix((nconstr, nconstr))])])
-        luKKT = spalinalg.splu(KKT.tocsc())
-
-        # Set initial conditions to zero
-        z = np.zeros(nvar)
-        u = np.zeros(nvar)
+        # Set initial conditions
+        if self.options.warm_start and self.z_prev is not None \
+            and self.u_prev is not None:
+            z = self.z_prev
+            u = self.u_prev
+        else:
+            z = np.zeros(nvar)
+            u = np.zeros(nvar)
 
         print "Splitting2 QP Solver"
         print "-------------------\n"
@@ -567,12 +657,14 @@ class OSQP(object):
                            sol_dual_ineq, sol_dual_lb, sol_dual_ub,
                            cputime, total_iter)
 
-        # Solution polishing
         if status == OPTIMAL:
-            solution = self.polish(solution)
-
-        # TODO: Define a class for storing factorization and z,u iterates
-        #       (for warm starting)
+            if self.options.polish:
+                # Solution polishing
+                solution = self.polish(solution)
+            # Store last iterates for warm starting
+            if self.options.warm_start:
+                self.z_prev = z
+                self.u_prev = u
 
         # Return solution
         return solution

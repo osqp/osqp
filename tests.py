@@ -94,6 +94,13 @@ def main():
     # Solve with OSQP. You can pass options to OSQP solver
     resultsOSQP = p.solve(solver=OSQP, max_iter=5000)
 
+    # Reuse factorizations
+    if example == 'random':
+        c = sp.randn(nx)
+        beq = sp.randn(neq)
+        bineq = 100 * sp.rand(nineq)
+
+
     print "\n"
     print("Comparison CPLEX - GUROBI")
     print("-------------------------")
@@ -113,7 +120,7 @@ def main():
     print "\n"
     print("Comparison OSQP - GUROBI")
     print("-------------------------")
-    print "Norm of objective value difference %.8f" % \
+    print "Difference in objective value %.8f" % \
         np.linalg.norm(resultsOSQP.objval - resultsGUROBI.objval)
     print "Norm of solution difference %.8f" % \
         np.linalg.norm(resultsOSQP.x - resultsGUROBI.x)

@@ -26,9 +26,7 @@ class OSQP(object):
         m.problem(p.Q, p.c, p.Aeq, p.beq, p.Aineq, p.bineq, p.lb, p.ub)
 
         # Solve QP with OSQP
-        r = m.solve()
+        res = m.solve()
 
         # Return quadprogResults
-        return quadprogResults(r.status, r.objval, r.x, r.sol_dual_eq,
-                               r.sol_dual_ineq, r.sol_dual_lb, r.sol_dual_ub,
-                               r.cputime, r.total_iter)
+        return res
