@@ -8,12 +8,14 @@ import ipdb		# ipdb.set_trace()
 
 # Solver Constants
 OPTIMAL = "optimal"
-# OPTIMAL_INACCURATE = "optimal_inaccurate"
+OPTIMAL_INACCURATE = "optimal_inaccurate"
+MAXITER_REACHED = "maxiter_reached"
 # INFEASIBLE = "infeasible"
 # INFEASIBLE_INACCURATE = "infeasible_inaccurate"
 # UNBOUNDED = "unbounded"
 # UNBOUNDED_INACCURATE = "unbounded_inaccurate"
 # SOLVER_ERROR = "solver_error"
+
 
 
 class results(object):
@@ -97,6 +99,8 @@ class options(object):
 
     -> Indirect method options (dynamic rho update):
     kkt_ind_alg ['cg']            - Algorithm
+    kkt_ind_tol [1e-5]            - Indirect algorithm tolerance
+    kkt_ind_maxiter [100]         - Indirect algorithm maximum number of iter
     kkt_ind_mu [10]               - rho update trigger ratio between residuals
     kkt_ind_tau [2]               - rho update factor
     """
@@ -121,7 +125,9 @@ class options(object):
         self.kkt_dir_reuse_factor = kwargs.pop('kkt_dir_reuse_factor',
                                                True)
         self.kkt_ind_alg = kwargs.pop('kkt_ind_alg', 'cg')
-        self.kkt_ind_tau = kwargs.pop('kkt_ind_tau', 10.)
+        self.kkt_ind_tol = kwargs.pop('kkt_ind_tol', 1e-5)
+        self.kkt_ind_maxiter = kwargs.pop('kkt_ind_maxiter', 100)
+        self.kkt_ind_tau = kwargs.pop('kkt_ind_tau', 2.)
         self.kkt_ind_mu = kwargs.pop('kkt_ind_mu', 10.)
 
 
@@ -230,6 +236,12 @@ class OSQP(object):
         self.options.kkt_ind_alg = kwargs.pop(
             'kkt_ind_alg',
             'cg')
+        self.options.kkt_ind_tol = kwargs.pop(
+            'kkt_ind_tol',
+            self.options.kkt_ind_tol)
+        self.options.kkt_ind_maxiter = kwargs.pop(
+            'kkt_ind_maxiter',
+            self.options.kkt_ind_maxiter)
         self.options.kkt_ind_mu = kwargs.pop(
             'kkt_ind_mu',
             self.options.kkt_ind_mu)
@@ -412,11 +424,13 @@ class OSQP(object):
         nvar = self.problem.nx + self.problem.nineq     # (x,s)
         nconstr = self.problem.neq + self.problem.nineq
 
-        # Check whether the problem matrices have already been constructed
-        if self.options.kkt_dir_reuse_factor and self.kkt_factor is not None:
-            kkt_factor = self.kkt_factor
-            As = self.As
-            # scaler = self.scaler
+        # If direct method is used, decompose kkt matrix if necessary
+        if self.options.kkt_method == 'direct' and \
+            self.options.kkt_dir_reuse_factor and \
+                self.kkt_factor is not None:  #
+                    kkt_factor = self.kkt_factor
+                    As = self.As
+                    # scaler = self.scaler
         else:
             # Form compact (c) matrices for standard QP from:
             #       minimize	1/2 z' Qc z + cc'z
@@ -437,16 +451,25 @@ class OSQP(object):
                 As = Ac / scaler[:, None]
             else:
                 As = Ac
-            # Factorize KKT matrix using sparse LU decomposition
-            KKT = spspa.vstack([
-                spspa.hstack([Qc + self.options.rho*spspa.eye(nvar), As.T]),
-                spspa.hstack([As, -1./self.options.rho*spspa.eye(nconstr)])])
-            kkt_factor = spalinalg.splu(KKT.tocsc())
-            if self.options.kkt_dir_reuse_factor:
-                # Store factorization
-                self.factor = kkt_factor
-                self.As = As
 
+            # If direct methiod appled, construct and factorize KKT matrix
+            if self.options.kkt_method == 'direct':
+                # Create KKT matrix
+                KKT = spspa.vstack([
+                    spspa.hstack([Qc + self.options.rho*spspa.eye(nvar), As.T]),
+                    spspa.hstack([As, -1./self.options.rho*spspa.eye(nconstr)])])
+                kkt_factor = spalinalg.splu(KKT.tocsc())
+                if self.options.kkt_dir_reuse_factor:
+                    # Store factorization
+                    self.factor = kkt_factor
+                    self.As = As
+            else:  # Indirect method, construct part of KKT
+                # Create part of KKT matrix (to be updated)
+                KKTbase = spspa.vstack([
+                    spspa.hstack([Qc, As.T]),
+                    spspa.hstack([As, spspa.csc_matrix((nconstr, nconstr))])])
+
+        # Construct other vectors
         cc = np.append(self.problem.c, np.zeros(self.problem.nineq))
         bc = np.append(self.problem.beq, self.problem.bineq)
         if self.options.scaling:
@@ -463,10 +486,13 @@ class OSQP(object):
             z = np.zeros(nvar)
             u = np.zeros(nconstr + nvar)
 
-
+        # If indirect method:
+        # initialize kktsol to store initial solution of CG algorithm
+        if self.options.kkt_method == 'indirect':
+            kktsol = np.append(z, np.zeros(nconstr))
 
         if self.options.print_level > 1:
-            print "Iter \t    Cost \tPrim Res \tDual Res"
+            print "Iter \t  Objective \tPrim Res \tDual Res"
 
         # Run ADMM: alpha \in (0, 2) is a relaxation parameter.
         #           Nominal ADMM is obtained for alpha=1.0
@@ -478,7 +504,28 @@ class OSQP(object):
             qbar = np.append(qtemp, np.zeros(nconstr))
 
             # x update
-            x = kkt_factor.solve(qbar)[:nvar]  # Select first nvar elements
+            if self.options.kkt_method == 'direct':
+                x = kkt_factor.solve(qbar)[:nvar]  # Select first nvar elements
+            else:   # Indirect method
+                # Construct KKT matrix with new rho
+                KKT = KKTbase + spspa.block_diag(
+                    (self.options.rho*spspa.eye(nvar),
+                     -1./self.options.rho*spspa.eye(nconstr)))
+                if self.options.kkt_ind_alg == 'cg':  # Apply conj gradient
+                    kktsol, _ = spalinalg.cg(KKT,  # KKT mat with current rho
+                                             qbar,  # Current rhs
+                                             x0=kktsol,  # use prev kkt sol
+                                             tol=self.options.kkt_ind_tol,
+                                             maxiter=self.options.kkt_ind_maxiter)
+                elif self.options.kkt_ind_alg == 'gmres':  # Apply gmres
+                    kktsol, _ = spalinalg.gmres(KKT,  # KKT mat with current rho
+                                                qbar,  # Current rhs
+                                                x0=kktsol,  # use prev kkt sol
+                                                tol=self.options.kkt_ind_tol,
+                                                maxiter=self.options.kkt_ind_maxiter)
+                x = kktsol[:nvar]
+                # ipdb.set_trace()
+
             # z update
             z_old = z
             z = self.project(self.options.alpha*x +
@@ -526,7 +573,16 @@ class OSQP(object):
         cputime = time.time() - t
         total_iter = i
 
-        print "Optimization Done in %.3fs\n" % cputime
+        # Return status
+        print "\n"
+        if i == self.options.max_iter - 1:
+            print "Maximum number of iterations exceeded!"
+            status = MAXITER_REACHED
+        else:
+            print "Optimal solution found"
+            status = OPTIMAL
+
+        print "Elapsed time: %.3fs\n" % cputime
 
         # Rescale (r) dual variables
         if self.options.scaling:
@@ -551,15 +607,12 @@ class OSQP(object):
         sol_dual_lb = np.maximum(stat_cond_resid, 0)
         sol_dual_ub = -np.minimum(stat_cond_resid, 0)
 
-        # Return status
-        status = OPTIMAL
-
         # Store solution as a quadprogResults object
         solution = results(status, objval, sol_x, sol_dual_eq,
                            sol_dual_ineq, sol_dual_lb, sol_dual_ub,
                            cputime, total_iter)
 
-        # Solution polishing
+        # Polish only if optimal solution reached
         if status == OPTIMAL:
             solution = self.polish(solution)
             # Store last iterates for warm starting
@@ -632,9 +685,8 @@ class OSQP(object):
             z = np.zeros(nvar)
             u = np.zeros(nvar)
 
-
         if self.options.print_level > 1:
-            print "Iter \t    Cost \tPrim Res \tDual Res"
+            print "Iter \t  Objective \tPrim Res \tDual Res"
 
         # Run ADMM: alpha \in (0, 2) is a relaxation parameter.
         #           Nominal ADMM is obtained for alpha=1.0
@@ -682,7 +734,16 @@ class OSQP(object):
         cputime = time.time() - t
         total_iter = i
 
-        print "Optimization done in %.3fs\n" % cputime
+        # Return status
+        print "\n"
+        if i == self.options.max_iter - 1:
+            print "Maximum number of iterations exceeded!"
+            status = MAXITER_REACHED
+        else:
+            print "Optimal solution found"
+            status = OPTIMAL
+
+        print "Elapsed time: %.3fs\n" % cputime
 
         # Recover primal solution
         sol_x = z[:self.problem.nx]
@@ -699,14 +760,12 @@ class OSQP(object):
         sol_dual_lb = np.maximum(stat_cond_resid, 0)
         sol_dual_ub = -np.minimum(stat_cond_resid, 0)
 
-        # Return status
-        status = OPTIMAL
-
         # Store solution as a quadprogResults object
         solution = results(status, objval, sol_x, sol_dual_eq,
                            sol_dual_ineq, sol_dual_lb, sol_dual_ub,
                            cputime, total_iter)
 
+        # Polish only if optimal solution reached
         if status == OPTIMAL:
             if self.options.polish:
                 # Solution polishing

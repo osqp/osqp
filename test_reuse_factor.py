@@ -12,6 +12,9 @@ GUROBI = "GUROBI"
 
 
 def main():
+    # Reset random number generator  (Solve the same random problem!)
+    np.random.seed(2)
+
     example = 'random'  # {'small1', 'small2', 'random', 'maros_meszaros'}
 
     if example == 'random':
@@ -46,7 +49,14 @@ def main():
 
         # Solve with OSQP
         if i == 0:
-            options = {'eps_abs': 0., 'eps_rel': 0.}
+            options = {'eps_abs': 0.,
+                       'eps_rel': 0.,
+                       'splitting': 1,
+                    #    'kkt_method': 'indirect',
+                    #    'kkt_ind_alg': 'gmres',
+                    #    'kkt_ind_tol': 1e-10,
+                    #    'kkt_ind_maxiter': 100
+                       }
             probOSQP = osqp.OSQP(**options)
             probOSQP.problem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
         else:
