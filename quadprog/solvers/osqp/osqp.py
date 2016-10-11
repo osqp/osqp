@@ -424,12 +424,13 @@ class OSQP(object):
         nvar = self.problem.nx + self.problem.nineq     # (x,s)
         nconstr = self.problem.neq + self.problem.nineq
 
-        # If direct method is used, decompose kkt matrix if necessary
+        # If direct method is used and factorization used, get it
         if self.options.kkt_method == 'direct' and \
             self.options.kkt_dir_reuse_factor and \
                 self.kkt_factor is not None:  #
                     kkt_factor = self.kkt_factor
                     As = self.As
+                    Ac = self.Ac
                     # scaler = self.scaler
         else:
             # Form compact (c) matrices for standard QP from:
@@ -461,8 +462,9 @@ class OSQP(object):
                 kkt_factor = spalinalg.splu(KKT.tocsc())
                 if self.options.kkt_dir_reuse_factor:
                     # Store factorization
-                    self.factor = kkt_factor
+                    self.kkt_factor = kkt_factor
                     self.As = As
+                    self.Ac = Ac
             else:  # Indirect method, construct part of KKT
                 # Create part of KKT matrix (to be updated)
                 KKTbase = spspa.vstack([
@@ -487,7 +489,7 @@ class OSQP(object):
             u = np.zeros(nconstr + nvar)
 
         # If indirect method:
-        # initialize kktsol to store initial solution of CG algorithm
+        # initialize kktsol to store initial solution of kkt algorithm
         if self.options.kkt_method == 'indirect':
             kktsol = np.append(z, np.zeros(nconstr))
 
@@ -523,8 +525,10 @@ class OSQP(object):
                                                 x0=kktsol,  # use prev kkt sol
                                                 tol=self.options.kkt_ind_tol,
                                                 maxiter=self.options.kkt_ind_maxiter)
+                else:
+                    assert False, "Invalid indirect algorithm for solving \
+                    KKT system provided!"
                 x = kktsol[:nvar]
-                # ipdb.set_trace()
 
             # z update
             z_old = z
@@ -645,8 +649,11 @@ class OSQP(object):
         nvar = self.problem.nx + self.problem.neq + self.problem.nineq
         nconstr = self.problem.neq + self.problem.nineq
 
-        # Check whether the problem matrices have already been constructed
-        if self.options.kkt_dir_reuse_factor and self.kkt_factor is not None:
+        # Check whether the problem matrices have already been constructed.
+        # If direct method is used and factorization stored, get it
+        if self.options.kkt_method == 'direct' and \
+            self.options.kkt_dir_reuse_factor and \
+                self.kkt_factor is not None:
             kkt_factor = self.kkt_factor
             # scaler = self.scaler
         else:
@@ -664,14 +671,21 @@ class OSQP(object):
                                   spspa.csc_matrix((self.problem.nineq,
                                                     self.problem.neq)),
                                   spspa.eye(self.problem.nineq)])])
-            # Factorize KKT matrix using sparse LU decomposition
-            KKT = spspa.vstack([
-                spspa.hstack([Qc + self.options.rho * spspa.eye(nvar), Ac.T]),
-                spspa.hstack([Ac, spspa.csc_matrix((nconstr, nconstr))])])
-            kkt_factor = spalinalg.splu(KKT.tocsc())
-            if self.options.kkt_dir_reuse_factor:
-                # Store factorization
-                self.kkt_factor = kkt_factor
+
+            # If direct methiod appled, construct and factorize KKT matrix
+            if self.options.kkt_method == 'direct':
+                # Create KKT matrix
+                KKT = spspa.vstack([
+                    spspa.hstack([Qc + self.options.rho * spspa.eye(nvar), Ac.T]),
+                    spspa.hstack([Ac, spspa.csc_matrix((nconstr, nconstr))])])
+                kkt_factor = spalinalg.splu(KKT.tocsc())
+                if self.options.kkt_dir_reuse_factor:
+                    # Store factorization
+                    self.kkt_factor = kkt_factor
+            else:  # indirect method, construct part of KKT matrix
+                KKTbase = spspa.vstack([
+                    spspa.hstack([Qc, Ac.T]),
+                    spspa.hstack([Ac, spspa.csc_matrix((nconstr, nconstr))])])
 
         cc = np.append(self.problem.c, np.zeros(nconstr))
         bc = np.append(self.problem.beq, self.problem.bineq)
@@ -685,6 +699,11 @@ class OSQP(object):
             z = np.zeros(nvar)
             u = np.zeros(nvar)
 
+        # If indirect method:
+        # initialize kktsol to store initial solution of kkt algorithm
+        if self.options.kkt_method == 'indirect':
+            kktsol = np.append(z, np.zeros(nconstr))
+
         if self.options.print_level > 1:
             print "Iter \t  Objective \tPrim Res \tDual Res"
 
@@ -692,8 +711,33 @@ class OSQP(object):
         #           Nominal ADMM is obtained for alpha=1.0
         for i in xrange(self.options.max_iter):
             # x update
-            rhs = np.append(self.options.rho * (z - u) - cc, bc)
-            x = kkt_factor.solve(rhs)[:nvar]
+            rhs = np.append(self.options.rho * (z - u) - cc, bc)  # construct rhs
+
+            if self.options.kkt_method == 'direct':
+                x = kkt_factor.solve(rhs)[:nvar]
+            else:
+                # Construct KKT matrix with new rho
+                KKT = KKTbase + spspa.block_diag(
+                    (self.options.rho*spspa.eye(nvar),
+                     spspa.csr_matrix((nconstr, nconstr))))
+                # Solve KKT system
+                if self.options.kkt_ind_alg == 'cg':  # Apply conj gradient
+                    kktsol, _ = spalinalg.cg(KKT,
+                                             rhs,
+                                             x0=kktsol,  # use prev kkt sol
+                                             tol=self.options.kkt_ind_tol,
+                                             maxiter=self.options.kkt_ind_maxiter)
+                elif self.options.kkt_ind_alg == 'gmres':  # Apply gmres
+                    kktsol, _ = spalinalg.gmres(KKT,
+                                                rhs,
+                                                x0=kktsol,  # use prev kkt sol
+                                                tol=self.options.kkt_ind_tol,
+                                                maxiter=self.options.kkt_ind_maxiter)
+                else:
+                    assert False, "Invalid indirect algorithm for solving \
+                    KKT system provided!"
+                x = kktsol[:nvar]
+
             # z update
             z_old = z
             z = self.project(self.options.alpha*x +

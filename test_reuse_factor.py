@@ -19,7 +19,7 @@ def main():
 
     if example == 'random':
         # Random Example
-        nx = 50
+        nx = 100
         neq = 10
         nineq = 20
         # Generate random Matrices
@@ -51,11 +51,11 @@ def main():
         if i == 0:
             options = {'eps_abs': 0.,
                        'eps_rel': 0.,
-                       'splitting': 1,
+                       'splitting': 2,
                     #    'kkt_method': 'indirect',
                     #    'kkt_ind_alg': 'gmres',
-                    #    'kkt_ind_tol': 1e-10,
-                    #    'kkt_ind_maxiter': 100
+                    #    'kkt_ind_tol': 1e-5,
+                    #    'kkt_ind_maxiter': 10
                        }
             probOSQP = osqp.OSQP(**options)
             probOSQP.problem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
