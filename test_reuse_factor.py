@@ -46,8 +46,8 @@ def main():
 
         # Solve with OSQP
         if i == 0:
-            # options = {'max_iter': 5000}
-            probOSQP = osqp.OSQP()
+            options = {'eps_abs': 0., 'eps_rel': 0.}
+            probOSQP = osqp.OSQP(**options)
             probOSQP.problem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
         else:
             probOSQP.set_problem_data(c=c, beq=beq, bineq=bineq)
