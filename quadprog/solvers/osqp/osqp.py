@@ -401,6 +401,10 @@ class OSQP(object):
         where C is a set of lower and upper bounds
         """
 
+        # Print parameters
+        print "Splitting method 1"
+        print "KKT solution: " + self.options.kkt_method + "\n"
+
         # Start timer
         t = time.time()
 
@@ -459,12 +463,10 @@ class OSQP(object):
             z = np.zeros(nvar)
             u = np.zeros(nconstr + nvar)
 
-        # Print parameters
-        print "Splitting method 1"
-        print "KKT solution: " + self.options.kkt_method + "\n"
+
 
         if self.options.print_level > 1:
-            print "Iter | \t   Cost\t    Prim Res\t    Dual Res"
+            print "Iter \t    Cost \tPrim Res \tDual Res"
 
         # Run ADMM: alpha \in (0, 2) is a relaxation parameter.
         #           Nominal ADMM is obtained for alpha=1.0
@@ -505,7 +507,7 @@ class OSQP(object):
                 # Print the progress in last iterations
                 if self.options.print_level > 1:
                     f = self.problem.objval(z[:self.problem.nx])
-                    print "%4s | \t%7.2f\t    %8.4f\t    %8.4f" \
+                    print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
                         % (i+1, f, resid_prim, resid_dual)
                 # Stop the algorithm
                 break
@@ -517,7 +519,7 @@ class OSQP(object):
                          np.floor(np.float(self.options.max_iter)/20.0)) == 0)\
                         | (self.options.print_level == 3):
                             f = self.problem.objval(z[:self.problem.nx])
-                            print "%4s | \t%7.2f\t    %8.4f\t    %8.4f" \
+                            print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
                                 % (i+1, f, resid_prim, resid_dual)
 
         # End timer
@@ -579,6 +581,10 @@ class OSQP(object):
         an issue of KKT matrix being singular when Aeq does not have full rank.
         """
 
+        # Print parameters
+        print "Splitting method 2"
+        print "KKT solution: " + self.options.kkt_method + "\n"
+
         # Start timer
         t = time.time()
 
@@ -626,12 +632,9 @@ class OSQP(object):
             z = np.zeros(nvar)
             u = np.zeros(nvar)
 
-        # Print parameters
-        print "Splitting method 2"
-        print "KKT solution: " + self.options.kkt_method + "\n"
 
         if self.options.print_level > 1:
-            print "Iter | \t   Cost\t    Prim Res\t    Dual Res"
+            print "Iter \t    Cost \tPrim Res \tDual Res"
 
         # Run ADMM: alpha \in (0, 2) is a relaxation parameter.
         #           Nominal ADMM is obtained for alpha=1.0
@@ -660,7 +663,7 @@ class OSQP(object):
                 # Print the progress in last iterations
                 if self.options.print_level > 1:
                     f = self.problem.objval(z[:self.problem.nx])
-                    print "%4s | \t%7.2f\t    %8.4f\t    %8.4f" \
+                    print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
                         % (i+1, f, resid_prim, resid_dual)
                 # Stop the algorithm
                 break
@@ -672,7 +675,7 @@ class OSQP(object):
                          np.floor(np.float(self.options.max_iter)/20.0)) == 0)\
                         | (self.options.print_level == 3):
                             f = self.problem.objval(z[:self.problem.nx])
-                            print "%4s | \t%7.2f\t    %8.4f\t    %8.4f" \
+                            print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
                                 % (i+1, f, resid_prim, resid_dual)
 
         # End timer
