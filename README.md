@@ -12,15 +12,18 @@ subject to      Aeq x = beq
 
 - [x] Stopping criterion
 - [ ] Do preconditioning/equilibration
-- [ ] JIT Compilation (Numba ?) to speedup results
+- [ ] JIT Compilation (Numba ?) to speedup results: numba does not work well
 - [x] Timer and compare to other QP solvers
 - [ ] Presolver
-- [ ] Infeasibility detection: e.g. http://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=7040300
+- [ ] Infeasibility detection:
+    - Generalize [result](http://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=7040300) to non strongly convex problems
 - [ ] Unboundedness detection
-- [ ] Stepsize selection
-- [ ] Warm starting
-- [ ] Polishing: see https://arxiv.org/pdf/1609.07478.pdf
-
+- [ ] Stepsize selection: maybe choose
+- [x] Warm starting
+- [ ] Polishing:
+    - It works but not very robust yet
+    - See [this article](https://arxiv.org/pdf/1609.07478.pdf)
+- [ ] Add testing script
 
 ## Problems
 - [ ] Maros and Meszaros Test set: CVXQP1_S.mat --> Need 50k iterations to converge!
