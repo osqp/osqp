@@ -5,6 +5,7 @@ import gurobipy as grb
 import quadprog.problem as qp
 import ipdb
 
+
 class GUROBI(object):
     """
     An interface for the Gurobi QP solver.
@@ -25,6 +26,9 @@ class GUROBI(object):
                   11: qp.SOLVER_ERROR,
                   12: qp.SOLVER_ERROR,
                   13: qp.SOLVER_ERROR}
+
+    def __init__(self, **kwargs):
+        self.options = kwargs
 
     def solve(self, p):
 
@@ -77,6 +81,13 @@ class GUROBI(object):
             obj.add(.5*p.Q.data[i]*x[p.Q.row[i]]*x[p.Q.col[i]])
         obj.add(grb.LinExpr(p.c, x))  # Add linear part
         m.setObjective(obj)  # Set objective
+
+        # Update model
+        m.update()
+
+        # Set parameters
+        for param, value in self.options.iteritems():
+            m.setParam(param, value)
 
         # Update model
         m.update()

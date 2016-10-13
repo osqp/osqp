@@ -45,7 +45,7 @@ def main():
             p = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
 
         # Solve with GUROBI
-        resultsGUROBI = p.solve(solver=GUROBI)
+        resultsGUROBI = p.solve(solver=GUROBI, OutputFlag=0)
 
         # Solve with OSQP
         if i == 0:

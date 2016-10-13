@@ -17,6 +17,9 @@ class CPLEX(object):
                   2: qp.UNBOUNDED,
                   6: qp.OPTIMAL_INACCURATE}
 
+    def __init__(self, **kwargs):
+        self.options = kwargs
+
     def solve(self, p):
 
         # Convert Matrices in CSR format
@@ -75,6 +78,14 @@ class CPLEX(object):
             qmat.append([p.Q.indices[start:end].tolist(),
                         p.Q.data[start:end].tolist()])
         m.objective.set_quadratic(qmat)
+
+        # Set parameters
+        for param, value in self.options.iteritems():
+            if param == "verbose":
+                if value == 0:
+                    m.set_results_stream(None)
+            else:
+                exec("m.parameters.%s.set(%d)" % (param, value))
 
         # Solve problem
         start = m.get_time()

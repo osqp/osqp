@@ -53,10 +53,10 @@ class quadprogProblem(object):
         # Set solver
         if solver == s.GUROBI:
             from solvers.gurobi_qpif import GUROBI
-            solver = GUROBI()  # Initialize solver
+            solver = GUROBI(**kwargs)  # Initialize solver
         elif solver == s.CPLEX:
                 from solvers.cplex_qpif import CPLEX
-                solver = CPLEX()  # Initialize solver
+                solver = CPLEX(**kwargs)  # Initialize solver
         elif solver == s.OSQP:
                 from solvers.osqp_qpif import OSQP
                 solver = OSQP(**kwargs)  # Initialize solver

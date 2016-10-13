@@ -87,10 +87,10 @@ def main():
         assert False, "Unknown example"
 
     # Solve with CPLEX
-    resultsCPLEX = p.solve(solver=CPLEX)
+    resultsCPLEX = p.solve(solver=CPLEX, verbose=0)
 
     # Solve with GUROBI
-    resultsGUROBI = p.solve(solver=GUROBI)
+    resultsGUROBI = p.solve(solver=GUROBI, OutputFlag=0)
 
     # Solve with OSQP. You can pass options to OSQP solver
     resultsOSQP = p.solve(solver=OSQP, max_iter=5000, splitting=2)
