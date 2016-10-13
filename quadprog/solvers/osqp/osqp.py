@@ -113,6 +113,8 @@ class options(object):
         self.eps_abs = kwargs.pop('eps_abs', 1e-6)
         self.eps_rel = kwargs.pop('eps_rel', 1e-6)
         self.print_level = kwargs.pop('print_level', 2)
+        if kwargs.pop('verbose') == 0:
+            self.print_level = 0
         self.scaling = kwargs.pop('scaling', False)
         self.polish = kwargs.pop('polish', True)
         self.polish_tol = kwargs.pop('polish_tol', 1e-05)

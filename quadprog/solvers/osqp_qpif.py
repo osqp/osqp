@@ -1,6 +1,4 @@
 # OSQP interface to solve QP problems
-# import quadprog.problem as qp
-from quadprog.results import quadprogResults
 import osqp.osqp as osqp
 
 
