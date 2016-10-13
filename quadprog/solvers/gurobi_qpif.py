@@ -87,7 +87,11 @@ class GUROBI(object):
 
         # Set parameters
         for param, value in self.options.iteritems():
-            m.setParam(param, value)
+            if param == "verbose":
+                if value == 0:
+                    m.setParam("OutputFlag", 0)
+            else:
+                m.setParam(param, value)
 
         # Update model
         m.update()
@@ -96,37 +100,45 @@ class GUROBI(object):
         m.optimize()
 
         # Return results
-        # Get objective value
-        objval = m.objVal
-
         # Get status
         status = self.STATUS_MAP.get(m.Status, qp.SOLVER_ERROR)
 
-        # Get solution
-        sol = np.array([x[i].X for i in range(nx)])
+        if (status != qp.SOLVER_ERROR) & (status != qp.INFEASIBLE):
+            # Get objective value
+            objval = m.objVal
 
-        # Get dual variables  (Gurobi uses swapped signs (-1))
-        constrs = m.getConstrs()
-        sol_dual_eq = -np.array([constrs[i].Pi for i in range(neq)])
-        sol_dual_ineq = -np.array([constrs[i+neq].Pi for i in range(nineq)])
+            # Get solution
+            sol = np.array([x[i].X for i in range(nx)])
 
-        # Bounds
-        sol_dual_ub = np.zeros(nx)
-        sol_dual_lb = np.zeros(nx)
+            # Get dual variables  (Gurobi uses swapped signs (-1))
+            constrs = m.getConstrs()
+            sol_dual_eq = -np.array([constrs[i].Pi for i in range(neq)])
+            sol_dual_ineq = -np.array([constrs[i+neq].Pi for i in range(nineq)])
 
-        RCx = [x[i].RC for i in range(nx)]  # Get reduced costs
-        for i in range(nx):
-            if RCx[i] >= 1e-07:
-                sol_dual_lb[i] = RCx[i]
-            else:
-                sol_dual_ub[i] = -RCx[i]
+            # Bounds
+            sol_dual_ub = np.zeros(nx)
+            sol_dual_lb = np.zeros(nx)
 
-        # Get computation time
-        cputime = m.Runtime
+            RCx = [x[i].RC for i in range(nx)]  # Get reduced costs
+            for i in range(nx):
+                if RCx[i] >= 1e-07:
+                    sol_dual_lb[i] = RCx[i]
+                else:
+                    sol_dual_ub[i] = -RCx[i]
 
-        # Total Number of iterations
-        total_iter = m.BarIterCount
+            # Get computation time
+            cputime = m.Runtime
 
-        return quadprogResults(status, objval, sol, sol_dual_eq,
-                               sol_dual_ineq, sol_dual_lb, sol_dual_ub,
-                               cputime, total_iter)
+            # Total Number of iterations
+            total_iter = m.BarIterCount
+
+            return quadprogResults(status, objval, sol, sol_dual_eq,
+                                   sol_dual_ineq, sol_dual_lb, sol_dual_ub,
+                                   cputime, total_iter)
+        else:  # Error
+            # Get computation time
+            cputime = m.Runtime
+
+            return quadprogResults(status, None, None, None,
+                                   None, None, None,
+                                   cputime, None)

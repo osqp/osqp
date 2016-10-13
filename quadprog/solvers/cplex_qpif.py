@@ -43,6 +43,19 @@ class CPLEX(object):
             if p.lb[i] == np.inf:
                 p.lb[i] = cpx.infinity
 
+        # Adjust infinity values in rhs
+        for i in range(neq):
+            if p.beq[i] == np.inf:
+                p.beq[i] = cpx.infinity
+            elif p.beq[i] == -np.inf:
+                p.beq[i] = -cpx.infinity
+
+        for i in range(nineq):
+            if p.bineq[i] == np.inf:
+                p.bineq[i] = cpx.infinity
+            elif p.bineq[i] == -np.inf:
+                p.bineq[i] = -cpx.infinity
+
         # Define CPLEX problem
         m = cpx.Cplex()
 
@@ -84,6 +97,9 @@ class CPLEX(object):
             if param == "verbose":
                 if value == 0:
                     m.set_results_stream(None)
+                    m.set_log_stream(None)
+                    m.set_error_stream(None)
+                    m.set_warning_stream(None)
             else:
                 exec("m.parameters.%s.set(%d)" % (param, value))
 
@@ -93,37 +109,46 @@ class CPLEX(object):
         end = m.get_time()
 
         # Return results
-        # Get objective value
-        objval = m.solution.get_objective_value()
 
         # Get status
         status = self.STATUS_MAP.get(m.solution.get_status(), qp.SOLVER_ERROR)
 
-        # Get solution
-        sol = np.array(m.solution.get_values())
-
-        # Get dual values
-        duals = m.solution.get_dual_values()
-        sol_dual_eq = -np.array(duals[:neq])    # Cplex uses swapped signs (-1)
-        sol_dual_ineq = -np.array(duals[neq:])  # Cplex uses swapped signs (-1)
-
-        # Bounds
-        sol_dual_ub = np.zeros(nx)
-        sol_dual_lb = np.zeros(nx)
-
-        RCx = m.solution.get_reduced_costs()  # Get reduced costs
-        for i in range(nx):
-            if RCx[i] >= 1e-07:
-                sol_dual_lb[i] = RCx[i]
-            else:
-                sol_dual_ub[i] = -RCx[i]
-
         # Get computation time
         cputime = end-start
 
-        # Get total number of iterations
-        total_iter = int(m.solution.progress.get_num_barrier_iterations())
+        if (status != qp.SOLVER_ERROR) & (status != qp.INFEASIBLE):
+            # Get objective value
+            objval = m.solution.get_objective_value()
 
-        return quadprogResults(status, objval, sol, sol_dual_eq,
-                               sol_dual_ineq, sol_dual_lb, sol_dual_ub,
-                               cputime, total_iter)
+            # Get solution
+            sol = np.array(m.solution.get_values())
+
+            # Get dual values
+            duals = m.solution.get_dual_values()
+            sol_dual_eq = -np.array(duals[:neq])    # Cplex uses swapped signs (-1)
+            sol_dual_ineq = -np.array(duals[neq:])  # Cplex uses swapped signs (-1)
+
+            # Bounds
+            sol_dual_ub = np.zeros(nx)
+            sol_dual_lb = np.zeros(nx)
+
+            RCx = m.solution.get_reduced_costs()  # Get reduced costs
+            for i in range(nx):
+                if RCx[i] >= 1e-07:
+                    sol_dual_lb[i] = RCx[i]
+                else:
+                    sol_dual_ub[i] = -RCx[i]
+
+            # Get computation time
+            cputime = end-start
+
+            # Get total number of iterations
+            total_iter = int(m.solution.progress.get_num_barrier_iterations())
+
+            return quadprogResults(status, objval, sol, sol_dual_eq,
+                                   sol_dual_ineq, sol_dual_lb, sol_dual_ub,
+                                   cputime, total_iter)
+        else:
+            return quadprogResults(status, None, None, None,
+                                   None, None, None,
+                                   cputime, None)
