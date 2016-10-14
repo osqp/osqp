@@ -2,7 +2,7 @@
 
 Python implementation of the operator splitting QP solver for problems in the form
 ```
-minimize        x'Qx + c'x
+minimize        1/2*x'Qx + c'x
 subject to      Aeq x = beq
                 Aineq x <= bineq
                 l <= x <= u

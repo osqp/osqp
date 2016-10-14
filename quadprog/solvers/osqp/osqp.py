@@ -113,7 +113,7 @@ class options(object):
         self.eps_abs = kwargs.pop('eps_abs', 1e-6)
         self.eps_rel = kwargs.pop('eps_rel', 1e-6)
         self.print_level = kwargs.pop('print_level', 2)
-        if kwargs.pop('verbose') == 0:
+        if kwargs.pop('verbose', 1) == 0:
             self.print_level = 0
         self.scaling = kwargs.pop('scaling', False)
         self.polish = kwargs.pop('polish', True)
@@ -422,8 +422,11 @@ class OSQP(object):
         t = time.time()
 
         # Number of variables and constraints in standard form
-        nvar = self.problem.nx + self.problem.nineq     # (x,s)
-        nconstr = self.problem.neq + self.problem.nineq
+        nx = self.problem.nx
+        neq = self.problem.neq
+        nineq = self.problem.nineq
+        nvar = nx + nineq     # (x,s)
+        nconstr = neq + nineq
 
         # If direct method is used and factorization used, get it
         if self.options.kkt_method == 'direct' and \
@@ -442,11 +445,9 @@ class OSQP(object):
                                    spspa.csc_matrix((self.problem.nineq,
                                                      self.problem.nineq))))
             Ac = spspa.vstack([spspa.hstack([self.problem.Aeq,
-                                            spspa.csc_matrix(
-                                                (self.problem.neq,
-                                                 self.problem.nineq))]),
+                                            spspa.csc_matrix((neq, nineq))]),
                                spspa.hstack([self.problem.Aineq,
-                                            spspa.eye(self.problem.nineq)])])
+                                             spspa.eye(nineq)])])
             # Scaling (s): Normalize rows of Ac.
             if self.options.scaling:
                 scaler = np.sqrt(np.square(Ac).sum(1))  # norm of rows of Ac
@@ -560,7 +561,7 @@ class OSQP(object):
             if resid_prim <= eps_prim and resid_dual <= eps_dual:
                 # Print the progress in last iterations
                 if self.options.print_level > 1:
-                    f = self.problem.objval(z[:self.problem.nx])
+                    f = self.problem.objval(z[:nx])
                     print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
                         % (i+1, f, resid_prim, resid_dual)
                 # Stop the algorithm
@@ -572,7 +573,7 @@ class OSQP(object):
                         (np.mod(i + 1,
                          np.floor(np.float(self.options.max_iter)/20.0)) == 0)\
                         | (self.options.print_level == 3):
-                            f = self.problem.objval(z[:self.problem.nx])
+                            f = self.problem.objval(z[:nx])
                             print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
                                 % (i+1, f, resid_prim, resid_dual)
 
@@ -602,12 +603,12 @@ class OSQP(object):
         # TODO: What is a status of the obtained solution?
 
         # Recover primal solution
-        sol_x = z[:self.problem.nx]
+        sol_x = z[:nx]
         objval = self.problem.objval(sol_x)
 
         # Recover dual solution
-        sol_dual_eq = dual_vars[:self.problem.neq]
-        sol_dual_ineq = dual_vars[self.problem.neq:]
+        sol_dual_eq = dual_vars[:neq]
+        sol_dual_ineq = dual_vars[neq:]
         stat_cond_resid = self.problem.Q.dot(sol_x) + self.problem.c + \
             self.problem.Aeq.T.dot(sol_dual_eq) + \
             self.problem.Aineq.T.dot(sol_dual_ineq)
@@ -649,8 +650,11 @@ class OSQP(object):
         t = time.time()
 
         # Number of variables (x,s1,s2) and constraints
-        nvar = self.problem.nx + self.problem.neq + self.problem.nineq
-        nconstr = self.problem.neq + self.problem.nineq
+        nx = self.problem.nx
+        neq = self.problem.neq
+        nineq = self.problem.nineq
+        nvar = nx + neq + nineq
+        nconstr = neq + nineq
 
         # Check whether the problem matrices have already been constructed.
         # If direct method is used and factorization stored, get it
@@ -669,20 +673,20 @@ class OSQP(object):
             Ac = spspa.vstack([
                     spspa.hstack([self.problem.Aeq,
                                  spspa.eye(self.problem.neq),
-                                  spspa.csc_matrix((self.problem.neq,
-                                                    self.problem.nineq))]),
+                                  spspa.csc_matrix((neq, nineq))]),
                     spspa.hstack([self.problem.Aineq,
-                                  spspa.csc_matrix((self.problem.nineq,
-                                                    self.problem.neq)),
-                                  spspa.eye(self.problem.nineq)])])
+                                  spspa.csc_matrix((nineq, neq)),
+                                  spspa.eye(nineq)])])
 
             # If direct methiod appled, construct and factorize KKT matrix
             if self.options.kkt_method == 'direct':
-                # Create KKT matrix
+                # Construct KKT matrix
+                Aconstr = spspa.vstack([self.problem.Aeq, self.problem.Aineq])
                 KKT = spspa.vstack([
-                    spspa.hstack([Qc + self.options.rho * spspa.eye(nvar),
-                                 Ac.T]),
-                    spspa.hstack([Ac, spspa.csc_matrix((nconstr, nconstr))])])
+                    spspa.hstack([self.problem.Q + self.options.rho *
+                                  spspa.eye(nx), Aconstr.T]),
+                    spspa.hstack([Aconstr,
+                                  -1./self.options.rho * spspa.eye(nconstr)])])
                 kkt_factor = spalinalg.splu(KKT.tocsc())
                 if self.options.kkt_dir_reuse_factor:
                     # Store factorization
@@ -716,11 +720,14 @@ class OSQP(object):
         #           Nominal ADMM is obtained for alpha=1.0
         for i in xrange(self.options.max_iter):
             # x update
-            rhs = np.append(self.options.rho * (z - u) - cc, bc)
-
             if self.options.kkt_method == 'direct':
-                x = kkt_factor.solve(rhs)[:nvar]
+                rhs = np.append(self.options.rho * (z[:nx] - u[:nx]) -
+                                self.problem.c, bc - z[nx:] + u[nx:])
+                sol_kkt = kkt_factor.solve(rhs)
+                x = np.append(sol_kkt[:nx], z[nx:] - u[nx:] -
+                              1./self.options.rho * sol_kkt[nx:])
             else:
+                rhs = np.append(self.options.rho * (z - u) - cc, bc)
                 # Construct KKT matrix with new rho
                 KKT = KKTbase + spspa.block_diag(
                     (self.options.rho*spspa.eye(nvar),
@@ -763,7 +770,7 @@ class OSQP(object):
             if resid_prim <= eps_prim and resid_dual <= eps_dual:
                 # Print the progress in last iterations
                 if self.options.print_level > 1:
-                    f = self.problem.objval(z[:self.problem.nx])
+                    f = self.problem.objval(z[:nx])
                     print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
                         % (i+1, f, resid_prim, resid_dual)
                 # Stop the algorithm
@@ -775,7 +782,7 @@ class OSQP(object):
                         (np.mod(i + 1,
                          np.floor(np.float(self.options.max_iter)/20.0)) == 0)\
                         | (self.options.print_level == 3):
-                            f = self.problem.objval(z[:self.problem.nx])
+                            f = self.problem.objval(z[:nx])
                             print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
                                 % (i+1, f, resid_prim, resid_dual)
 
@@ -807,14 +814,13 @@ class OSQP(object):
         print "Elapsed time: %.3fs\n" % cputime
 
         # Recover primal solution
-        sol_x = z[:self.problem.nx]
+        sol_x = z[:nx]
         objval = self.problem.objval(sol_x)
 
         # Recover dual solution
         dual_vars = -self.options.rho * u
-        sol_dual_eq = dual_vars[self.problem.nx:
-                                self.problem.nx+self.problem.neq]
-        sol_dual_ineq = dual_vars[-self.problem.nineq:]
+        sol_dual_eq = dual_vars[nx:nx+neq]
+        sol_dual_ineq = dual_vars[nx+neq:]
         stat_cond_resid = self.problem.Q.dot(sol_x) + self.problem.c + \
             self.problem.Aeq.T.dot(sol_dual_eq) + \
             self.problem.Aineq.T.dot(sol_dual_ineq)
