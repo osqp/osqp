@@ -37,7 +37,7 @@ def load_maros_meszaros_problem(f):
 def main():
     example = 'random'  # {'small1', 'small2', 'random', 'maros_meszaros'}
 
-    if example == 'small1':
+    if example == 'maros_meszaros':
         # Maros Meszaros Examples
         # f = 'tests/maros_meszaros/CVXQP2_S.mat'
         # f = 'tests/maros_meszaros/PRIMAL3.mat'
@@ -105,7 +105,7 @@ def main():
     print "\n"
     print("Comparison CPLEX - GUROBI")
     print("-------------------------")
-    print "Norm of objective value difference %.8f" % \
+    print "Difference in objective value %.8f" % \
         np.linalg.norm(resultsCPLEX.objval - resultsGUROBI.objval)
     print "Norm of solution difference %.8f" % \
         np.linalg.norm(resultsCPLEX.x - resultsGUROBI.x)
