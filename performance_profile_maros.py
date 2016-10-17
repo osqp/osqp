@@ -5,12 +5,20 @@ import sys
 import os   # List directories
 import scipy.io as spio
 import scipy.sparse as spspa
+#  import scipy.sparse.linalg as spspalinalg
 # import scipy as sp
 import numpy as np
 import quadprog.problem as qp
 from quadprog.solvers.solvers import GUROBI, CPLEX  # OSQP
+
+# Generate Plots without using Xserver
+import matplotlib
+matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 import seaborn as sns  # Nicer plots
+import ipdb
+
 sns.set_style("whitegrid")
 # Use Latex Labels in Plots
 plt.rc('text', usetex=True)
@@ -18,7 +26,14 @@ plt.rc('font', family='serif')
 
 # Fix Seaborn Default set_style
 sns.set_context("paper", font_scale=1.5)
-import ipdb
+
+
+#  def isPSD(A, tol=1e-8):
+    #  if A.shape[0] > 6:
+        #  E, _ = spspalinalg.eigs(A)
+    #  else:
+        #  E, _ = np.linalg.eigh(A.todense())
+    #  return np.all(E > -tol)
 
 
 def load_maros_meszaros_problem(f):
@@ -53,12 +68,12 @@ def main():
 
     # Count number of problems
     nprob = len([name for name in lst_probs
-             if os.path.isfile(name)])
+                 if os.path.isfile(prob_dir + "/" + name)])
     p = 0
 
     # DEBUG: To Remove
     # count so that you do not solve all
-    nprob = 50
+    # nprob = 50
 
     # Preallocate times
     t = np.zeros((nprob, nsolvers))
@@ -70,32 +85,35 @@ def main():
 
     # Solve all Maroz Meszaros problems for all solvers
     for f in lst_probs:
-        if p in range(nprob):  # Solve only first problems
-            m = load_maros_meszaros_problem(prob_dir + "/" + f)  # Load problem
-            print "Problem %i\n" % p
+        #  if p in range(nprob):  # Solve only first problems
+        m = load_maros_meszaros_problem(prob_dir + "/" + f)  # Load problem
+        print "Problem %i: %s \n" % (p, f[:-4])
 
-            # Solve with all solvers
-            for s in xrange(nsolvers):
-                res = m.solve(solver=solvers[s], verbose=0)  # Suppress verbosity
-                if res.status == qp.OPTIMAL:  # If optimal solution found
-                    t[p, s] = res.cputime
-                else:
-                    t[p, s] = np.inf
+        #  if isPSD(m.Q):
+        # Solve with all solvers
+        for s in xrange(nsolvers):
+            res = m.solve(solver=solvers[s], verbose=0)  # No verbosity
+            if res.status == qp.OPTIMAL:  # If optimal solution found
+                t[p, s] = res.cputime
+            else:
+                t[p, s] = np.inf
 
-            # Get minimum time
-            mint[p] = np.amin(t[p, :])
+        # Get minimum time
+        mint[p] = np.amin(t[p, :])
 
-            # compute r values
-            for s in xrange(nsolvers):
-                if t[p, s] != np.inf:
-                    r[p, s] = t[p, s]/mint[p]
-                else:
-                    r[p, s] = rM
+        # compute r values
+        for s in xrange(nsolvers):
+            if t[p, s] != np.inf:
+                r[p, s] = t[p, s]/mint[p]
+            else:
+                r[p, s] = rM
         p += 1  # Increment p problem index
+    #  else:
+        #  nprob -= 1  # One problem is not "usable" (Non convex)
 
     # Compute rho curve for all solvers
     ntau = 100
-    tauvec = np.linspace(0, 20, ntau)
+    tauvec = np.linspace(0, 10, ntau)
     rho = np.zeros((nsolvers, ntau))
 
     for s in xrange(nsolvers):  # Compute curve for all solvers
@@ -113,12 +131,9 @@ def main():
     plt.legend(loc='best')
     plt.ylabel(r'$\rho_{s}$')
     plt.xlabel(r'$\tau$')
-    plt.show(block=False)
-    plt.savefig('results_maros_meszaros.pdf')
-
-
     ipdb.set_trace()
-
+    #  plt.show(block=False)
+    plt.savefig('results_maros_meszaros.pdf')
 
 
 

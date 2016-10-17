@@ -96,8 +96,15 @@ class GUROBI(object):
         # Update model
         m.update()
 
-        # Solve
-        m.optimize()
+        # Solve problem
+        try:
+            # Solve
+            m.optimize()
+        except:  # Error in the solution
+            print "Error in Gurobi solution\n"
+            return quadprogResults(qp.SOLVER_ERROR, None, None, None,
+                                   None, None, None,
+                                   np.inf, None)
 
         # Return results
         # Get status

@@ -104,9 +104,15 @@ class CPLEX(object):
                 exec("m.parameters.%s.set(%d)" % (param, value))
 
         # Solve problem
-        start = m.get_time()
-        m.solve()
-        end = m.get_time()
+        try:
+            start = m.get_time()
+            m.solve()
+            end = m.get_time()
+        except:  # Error in the solution
+            print "Error in CPLEX solution\n"
+            return quadprogResults(qp.SOLVER_ERROR, None, None, None,
+                                   None, None, None,
+                                   np.inf, None)
 
         # Return results
 
