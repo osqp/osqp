@@ -80,7 +80,7 @@ class options(object):
     max_iter [5000]            - Maximum number of iterations
     rho  [1.0]                 - Step in ADMM procedure
     alpha [1.0]                - Relaxation parameter
-    eps_abs  [1e-8]            - Absolute tolerance
+    eps_abs  [1e-06]            - Absolute tolerance
     eps_rel  [1e-06]           - Relative tolerance
     print_level [2]            - Printing level
     scaling  [False]           - Prescaling/Equilibration
@@ -108,7 +108,7 @@ class options(object):
 
         # Set general options
         self.max_iter = kwargs.pop('max_iter', 5000)
-        self.rho = kwargs.pop('rho', 1.6)
+        self.rho = kwargs.pop('rho', 1.0)
         self.alpha = kwargs.pop('alpha', 1.0)
         self.eps_abs = kwargs.pop('eps_abs', 1e-6)
         self.eps_rel = kwargs.pop('eps_rel', 1e-6)
@@ -622,7 +622,8 @@ class OSQP(object):
 
         # Polish only if optimal solution reached
         if status == OPTIMAL:
-            solution = self.polish(solution)
+            if self.options.polish:
+                solution = self.polish(solution)
             # Store last iterates for warm starting
             if self.options.warm_start:
                 self.z_prev = z
@@ -821,11 +822,13 @@ class OSQP(object):
         dual_vars = -self.options.rho * u
         sol_dual_eq = dual_vars[nx:nx+neq]
         sol_dual_ineq = dual_vars[nx+neq:]
-        stat_cond_resid = self.problem.Q.dot(sol_x) + self.problem.c + \
-            self.problem.Aeq.T.dot(sol_dual_eq) + \
-            self.problem.Aineq.T.dot(sol_dual_ineq)
-        sol_dual_lb = np.maximum(stat_cond_resid, 0)
-        sol_dual_ub = -np.minimum(stat_cond_resid, 0)
+        #  stat_cond_resid = self.problem.Q.dot(sol_x) + self.problem.c + \
+            #  self.problem.Aeq.T.dot(sol_dual_eq) + \
+            #  self.problem.Aineq.T.dot(sol_dual_ineq)
+        #  sol_dual_lb = np.maximum(stat_cond_resid, 0)
+        #  sol_dual_ub = -np.minimum(stat_cond_resid, 0)
+        sol_dual_lb = np.maximum(dual_vars[:nx], 0)
+        sol_dual_ub = -np.minimum(dual_vars[:nx], 0)
 
         # Store solution as a quadprogResults object
         solution = results(status, objval, sol_x, sol_dual_eq,
