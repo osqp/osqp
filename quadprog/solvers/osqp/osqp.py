@@ -1,8 +1,9 @@
 import numpy as np
 from scipy import linalg as spla
-# import scipy as sp
+import scipy as sp
 import scipy.sparse as spspa
 import scipy.sparse.linalg as spalinalg
+import numpy.linalg as nplinalg
 import time   # Time execution
 import ipdb		# ipdb.set_trace()
 
@@ -318,7 +319,7 @@ class OSQP(object):
             self.polish()
 
         # Rescale solution back
-        self.solution.z = self.rescale_solution(self.solution.z)
+        self.rescale_solution()
 
         # End timer
         self.cputime = time.time() - t
@@ -380,7 +381,8 @@ class OSQP(object):
                 spspa.hstack([Ac, spspa.csc_matrix((nconstr, nconstr))])])
 
             # Run Scaling
-            KKT2 = np.square(KKT)  # Elementwise square of KKT matrix
+            KKT2 = KKT.copy()
+            KKT2.data = np.square(KKT2.data)  # Elementwise square of KKT matrix
 
             # Iterate Scaling
             for i in range(self.options.scale_steps):
@@ -388,11 +390,21 @@ class OSQP(object):
                 #  d = np.reciprocal(KKT2.T.dot(d))
                 #  d = np.minimum(np.maximum(d, -1e01), 1e-01)  # Regularize
                 print "Scaling step %i\n" % i
-                print(d)
+            
+                # DEBUG STUFF
+                S = spspa.diags(d)
+                KKTeq = S.dot(KKT.dot(S))
+                condKKT = nplinalg.cond(KKT.todense())
+                condKKTeq = nplinalg.cond(KKTeq.todense())
+                print "Condition number of KKT matrix %.4f" % condKKT
+                print "Condition number of KKTeq matrix %.4f" % condKKTeq 
 
+            ipdb.set_trace()
+            
             # Obtain Scaler Matrices
             D = spspa.diags(d[:self.problem.nx])
             E = spspa.diags(np.ones(self.problem.neq + self.problem.nineq))
+
 
             # Scale problem Matrices
             Q = D.dot(self.problem.Q.dot(D))
@@ -582,21 +594,28 @@ class OSQP(object):
         else:
             print "Polishing failed! Constraints not satisfied"
 
-    def scale_solution(self, z):
+    def scale_solution(self):
         """
         Scale given solution with diagonal scaling
         """
-        z_scaled_x = self.scaler_matrices.Dinv.dot(z[:self.problem.nx])
+        self.solution.z[:self.problem.nx] = self.scaler_matrices.Dinv.dot(
+                self.solution.z[:self.problem.nx])
+        u_x_scaled = \
+            self.scaler_matrices.D.dot(self.solution.u[:self.problem.nx])
+        u_s_scaled = \
+            self.scaler_matrices.E.dot(self.solution.u[self.problem.nx:])
+        self.solution.u = np.append(u_x_scaled, u_s_scaled)
 
-        return np.append(z_scaled_x, z[self.problem.nx:])
-
-    def rescale_solution(self, z):
+    def rescale_solution(self):
         """
         Rescale solution back to user-given units
         """
-        z_unscaled_x = self.scaler_matrices.D.dot(z[:self.problem.nx])
-
-        return np.append(z_unscaled_x, z[self.problem.nx:])
+        self.solution.z[:self.problem.nx] = self.scaler_matrices.D.dot(self.solution.z[:self.problem.nx])
+        u_x_unscaled = \
+            self.scaler_matrices.Dinv.dot(self.solution.u[:self.problem.nx])
+        u_s_unscaled = \
+            self.scaler_matrices.Einv.dot(self.solution.u[self.problem.nx:])
+        self.solution.u = np.append(u_x_unscaled, u_s_unscaled)
 
     def solve_admm(self):
         """" 
@@ -646,7 +665,8 @@ class OSQP(object):
         # Set initial conditions
         if self.options.warm_start and self.z_prev is not None \
                 and self.u_prev is not None:
-                z = self.scale_solution(self.solution.z)
+                self.scale_solution()
+                z = self.solution.z
                 u = self.solution.u
         else:
             z = np.zeros(nvar)
