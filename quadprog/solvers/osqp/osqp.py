@@ -93,7 +93,6 @@ class options(object):
     ------------
     scale_problem [True]       - Scale Optimization Problem
     scaling_steps [10]         - Number of Steps for Scaling Method
-    scaled [False]             - Has the system been scaled yet?
 
     KKT Solution
     ------------
@@ -150,6 +149,25 @@ class options(object):
 #         self.z_prev = z_prev
 #         self.u_prev = u_prev
 
+class scaler_matrices(object):
+    """
+    Matrices for Scaling
+    """
+    def __init__(self):
+        self.D = None
+        self.F = None
+        self.Dinv = None
+        self.Finv = None
+
+
+class solver_solution(object):
+    """
+    Solver solution vectors z, u 
+    """
+    def __init__(self):
+        self.z = None
+        self.u = None
+
 
 class OSQP(object):
     """
@@ -158,11 +176,14 @@ class OSQP(object):
     Attributes
     ----------
     problem          - QP problem
-    scaled_problem   - scaled QP problem
+    scaled_problem   - Scaled QP problem
+    scaler_matrices  - Diagonal scaling matrices
     options          - Solver options
     kkt_factor       - KKT Matrix factorization (direct method)
-    z_prev           - Previous primal solution
-    u_prev           - Previous dual solution
+    status           - Solver status
+    total_iter       - Total number of iterations
+    cputime          - Elapsed cputime
+    solution         - Solution
     """
 
     def __init__(self, **kwargs):
@@ -171,9 +192,8 @@ class OSQP(object):
         """
         self.options = options(**kwargs)
         self.kkt_factor = None
-        # self.scaler = None
-        self.z_prev = None
-        self.u_prev = None
+        self.scaler_matrices = scaler_matrices()
+        self.solution = solver_solution()
 
     def problem(self, Q, c, Aeq, beq, Aineq, bineq, lb=None, ub=None):
         """
@@ -271,31 +291,191 @@ class OSQP(object):
                           #  -1./self.options.rho * spspa.eye(nconstr)])])
         
 
+    def solve(self):
+        """
+        Operator splitting solver for a QP given
+        in the following form
+                minimize	1/2 x' Q x + c'x
+                subject to	Aeq x == beq
+                            Aineq x <= bineq
+                            lb <= x <= ub
+        """
+
+        print "Operator Splitting QP Solver"
+        print "----------------------------\n"
+
+        # Start timer
+        t = time.time()
+        
+        # Scale problem
+        self.scale_problem()
+        
+        # Choose splitting based on the options
+        self.solve_admm()
+        
+        # Polish solution if optimal
+        if (self.status == OPTIMAL) & self.options.polish:
+            self.polish()
+
+        # Rescale solution back
+        self.solution.z = self.rescale_solution(self.solution.z)
+
+        # End timer
+        self.cputime = time.time() - t
+        print "Elapsed time: %.3fs\n" % self.cputime
+
+        ipdb.set_trace()
+        # Return QP solution
+        solution = self.get_qp_solution()
+
+        return solution
+
+    def get_qp_solution(self):
+
+        # Get problem dimensions
+        nx = self.problem.nx
+        neq = self.problem.neq
+
+        # Recover primal solution
+        sol_x = self.solution.z[:nx]
+        objval = self.problem.objval(sol_x)
+
+        # Recover dual solution
+        dual_vars = -self.options.rho * self.solution.u
+        sol_dual_eq = dual_vars[nx:nx+neq]
+        sol_dual_ineq = dual_vars[nx+neq:]
+        sol_dual_lb = np.maximum(dual_vars[:nx], 0)
+        sol_dual_ub = -np.minimum(dual_vars[:nx], 0)
+
+        # Store solution as a quadprogResults object
+        solution = results(self.status, objval, sol_x, sol_dual_eq,
+                           sol_dual_ineq, sol_dual_lb, sol_dual_ub,
+                           self.cputime, self.total_iter)
+
+        # Return solution
+        return solution
+
+    def scale_problem(self):
+        """
+        Perform symmetric diagonal scaling via equilibration
+        """
+        # Predefine scaling vector
+        nvar = self.problem.nx + self.problem.neq + self.problem.nineq
+        nconstr = self.problem.neq + self.problem.nineq
+        #  d = np.multiply(sp.rand(nvar), np.ones(nvar))
+        d = np.ones(nvar)
+        
+        if self.options.scale_problem:
+       
+            print "Perform Symmetric Scaling of KKT matrix: %i Steps\n" % \
+                self.options.scale_steps
+
+            # Stack up equalities and inequalities
+            Ac = spspa.vstack([self.problem.Aeq, self.problem.Aineq])
+            bc = np.hstack([self.problem.beq, self.problem.bineq])
+
+            # Define reduced KKT matrix to scale
+            KKT = spspa.vstack([
+                spspa.hstack([self.problem.Q, Ac.T]),
+                spspa.hstack([Ac, spspa.csc_matrix((nconstr, nconstr))])])
+
+            # Run Scaling
+            KKT2 = np.square(KKT)  # Elementwise square of KKT matrix
+
+            # Iterate Scaling
+            for i in range(self.options.scale_steps):
+                d = np.reciprocal(KKT2.dot(d))
+                #  d = np.reciprocal(KKT2.T.dot(d))
+                #  d = np.minimum(np.maximum(d, -1e01), 1e-01)  # Regularize
+                print "Scaling step %i\n" % i
+                print(d)
+
+            # Obtain Scaler Matrices
+            D = spspa.diags(d[:self.problem.nx])
+            E = spspa.diags(np.ones(self.problem.neq + self.problem.nineq))
+
+            # Scale problem Matrices
+            Q = D.dot(self.problem.Q.dot(D))
+            Ac = E.dot(Ac.dot(D))
+            Aeq = Ac[:self.problem.neq, :]
+            Aineq = Ac[self.problem.neq:, :]
+            c = D.dot(self.problem.c)
+            b = E.dot(bc)
+            beq = b[:self.problem.neq]
+            bineq = b[self.problem.neq:]
+            lb = np.multiply(np.reciprocal(D.diagonal()),
+                             self.problem.lb)
+            ub = np.multiply(np.reciprocal(D.diagonal()),
+                             self.problem.ub)
+
+            # Assign scaled problem
+            self.scaled_problem = problem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
+
+            # Assign scaler matrices
+            self.scaler_matrices.D = D
+            self.scaler_matrices.E = E
+            self.scaler_matrices.Dinv = \
+                spspa.diags(np.reciprocal(D.diagonal()))
+            self.scaler_matrices.Einv = \
+                spspa.diags(np.reciprocal(E.diagonal()))
+            #  # DEBUG STUFF
+            #  Dinv = self.scaler_matrices.Dinv
+            #  Einv = self.scaler_matrices.Einv
+            #  #  Dinv = spspa.linalg.inv(D.tocsr())
+            #  #  Einv = spspa.csr_matrix(spspa.linalg.inv(F.tocsr()))
+            #  Qtest = Dinv.dot(Q.dot(Dinv))
+            #  Actest = Einv.dot(Ac.dot(Dinv))
+            #  ctest = Dinv.dot(c)
+            #  btest = Einv.dot(b)
+            #  lbtest = D.dot(lb)
+            #  ubtest = D.dot(ub)
+            #  ipdb.set_trace()
+        else:
+            # Obtain Scaler Matrices
+            self.scaler_matrices.D = spspa.diags(d[:self.problem.nx])
+            self.scaler_matrices.E = spspa.diags(np.ones(self.problem.neq + 
+                                                 self.problem.nineq))
+            self.scaler_matrices.Dinv = self.scaler_matrices.D
+            self.scaler_matrices.Einv = self.scaler_matrices.E
+            
+            # Assign scaled problem to same one
+            self.scaled_problem = self.problem
+
     def project(self, xbar):
         """
         Project a vector xbar onto constraint set.
         """
         # Project first nx elements on interval [lb, ub],
         # next neq elements on zero, and the rest on positive
-        # orthant.
+        # orthant. (Using scaled problem bounds)
         xbar[:self.problem.nx] = np.minimum(
                 np.maximum(xbar[:self.problem.nx],
-                           self.problem.lb), self.problem.ub)
+                           self.scaled_problem.lb), self.scaled_problem.ub)
         xbar[self.problem.nx:self.problem.nx+self.problem.neq] = 0.0
         xbar[self.problem.nx+self.problem.neq:] = np.maximum(
                 xbar[self.problem.nx+self.problem.neq:], 0.0)
         return xbar
 
-    def polish(self, solution):
+    def polish(self):
         """
         Try to reconstruct the actual solution of a QP by guessing which
         constraints are active. The problem boils down to solving a linear
         system.
         """
-        sol_x = solution.x
-        sol_lb = solution.sol_dual_lb
-        sol_ub = solution.sol_dual_ub
+        # Get variables from solution
+        nx = self.scaled_problem.nx
+        neq = self.scaled_problem.neq
+        nineq = self.scaled_problem.nineq
+        
+        # Recover primal solution
+        sol_x = self.solution.z[:nx]
 
+        # Recover dual solution
+        dual_vars = -self.options.rho * self.solution.u
+        sol_ineq = dual_vars[nx+neq:]
+        sol_lb = np.maximum(dual_vars[:nx], 0)
+        sol_ub = -np.minimum(dual_vars[:nx], 0)
+        
         # Try to guess from an approximate solution which bounds are active
         bool_lb = np.logical_and(sol_x < (self.problem.lb+self.problem.ub)/2.,
                                  sol_lb > sol_x - self.problem.lb)
@@ -307,7 +487,7 @@ class OSQP(object):
         ind_free = np.where(np.logical_not(np.logical_or(bool_lb, bool_ub)))[0]
 
         # Try to guess which inequality constraints are active
-        ineq_act = solution.sol_dual_ineq > \
+        ineq_act = sol_ineq > \
             (self.problem.bineq - self.problem.Aineq.dot(sol_x))
         ind_act = np.where(ineq_act)[0]                     # Aineq x = bineq
         ind_inact = np.where(np.logical_not(ineq_act))[0]   # Aineq x < bineq
@@ -351,13 +531,11 @@ class OSQP(object):
         except:
             # Failed to factorize KKT matrix
             print "Polishing failed. Failed to factorize KKT matrix."
-            return solution
 
         # If the KKT matrix is singular, spsolve return an array of NaNs
         if any(np.isnan(pol_sol)):
             # Terminate
             print "Polishing failed. KKT matrix is singular."
-            return solution
 
         # Check if the above solution satisfies constraints
         pol_x = pol_sol[:self.problem.nx]
@@ -378,34 +556,47 @@ class OSQP(object):
                 and all(pol_dual_ub > -self.options.polish_tol):
                 # Return the computed high-precision solution
                 print "Polishing successful!"
-                solution.x = pol_x
-                solution.sol_dual_eq = pol_dual_eq
-                solution.sol_dual_ineq = pol_dual_ineq
-                solution.sol_dual_lb = pol_dual_lb
-                solution.sol_dual_ub = pol_dual_ub
-                solution.objval = self.problem.objval(pol_x)
+
+                # Substitute new z and u in the solution
+                # Get slack variable
+                if self.scaled_problem.Aineq.shape[0]:  # Aineq not null
+                    sineq = self.scaled_problem.bineq - \
+                        self.scaled_problem.Aineq.dot(pol_x)
+                else:
+                    sineq = np.zeros(nineq)
+
+                # Reconstruct primal variable
+                self.solution.z = np.hstack([pol_x, np.zeros(neq), sineq])
+
+                # reconstruct dual variable
+                self.solution.u = -1./self.options.rho * \
+                    np.hstack([pol_dual_lb - pol_dual_ub,
+                              pol_dual_eq,
+                              pol_dual_ineq])
+                #  solution.x = pol_x
+                #  solution.sol_dual_eq = pol_dual_eq
+                #  solution.sol_dual_ineq = pol_dual_ineq
+                #  solution.sol_dual_lb = pol_dual_lb
+                #  solution.sol_dual_ub = pol_dual_ub
+                #  solution.objval = self.problem.objval(pol_x)
         else:
-            print "Polishing failed!"
+            print "Polishing failed! Constraints not satisfied"
 
-        return solution
-
-    def solve(self):
+    def scale_solution(self, z):
         """
-        Operator splitting solver for a QP given
-        in the following form
-                minimize	1/2 x' Q x + c'x
-                subject to	Aeq x == beq
-                            Aineq x <= bineq
-                            lb <= x <= ub
+        Scale given solution with diagonal scaling
         """
+        z_scaled_x = self.scaler_matrices.Dinv.dot(z[:self.problem.nx])
 
-        print "Operator Splitting QP Solver"
-        print "----------------------------\n"
+        return np.append(z_scaled_x, z[self.problem.nx:])
 
-        # Choose splitting based on the options
-        solution = self.solve_admm()
+    def rescale_solution(self, z):
+        """
+        Rescale solution back to user-given units
+        """
+        z_unscaled_x = self.scaler_matrices.D.dot(z[:self.problem.nx])
 
-        return solution
+        return np.append(z_unscaled_x, z[self.problem.nx:])
 
     def solve_admm(self):
         """" 
@@ -422,13 +613,10 @@ class OSQP(object):
         #  print "Splitting method 2"
         #  print "KKT solution: " + self.options.kkt_method + "\n"
 
-        # Start timer
-        t = time.time()
-
         # Number of variables (x,s1,s2) and constraints
-        nx = self.problem.nx
-        neq = self.problem.neq
-        nineq = self.problem.nineq
+        nx = self.scaled_problem.nx
+        neq = self.scaled_problem.neq
+        nineq = self.scaled_problem.nineq
         nvar = nx + neq + nineq
         nconstr = neq + nineq
 
@@ -440,9 +628,10 @@ class OSQP(object):
             # scaler = self.scaler
         else:
             # Construct reduced KKT matrix
-            Ac = spspa.vstack([self.problem.Aeq, self.problem.Aineq])
+            Ac = spspa.vstack([self.scaled_problem.Aeq, 
+                              self.scaled_problem.Aineq])
             KKT = spspa.vstack([
-                spspa.hstack([self.problem.Q + self.options.rho *
+                spspa.hstack([self.scaled_problem.Q + self.options.rho *
                               spspa.eye(nx), Ac.T]),
                 spspa.hstack([Ac,
                               -1./self.options.rho * spspa.eye(nconstr)])])
@@ -452,13 +641,13 @@ class OSQP(object):
                 self.kkt_factor = kkt_factor
 
         # Construct augmented b vector
-        bc = np.append(self.problem.beq, self.problem.bineq)
+        bc = np.append(self.scaled_problem.beq, self.scaled_problem.bineq)
 
         # Set initial conditions
         if self.options.warm_start and self.z_prev is not None \
                 and self.u_prev is not None:
-                z = self.z_prev
-                u = self.u_prev
+                z = self.scale_solution(self.solution.z)
+                u = self.solution.u
         else:
             z = np.zeros(nvar)
             u = np.zeros(nvar)
@@ -471,7 +660,7 @@ class OSQP(object):
         for i in xrange(self.options.max_iter):
             # x update
             rhs = np.append(self.options.rho * (z[:nx] - u[:nx]) -
-                            self.problem.c, bc - z[nx:] + u[nx:])
+                            self.scaled_problem.c, bc - z[nx:] + u[nx:])
             sol_kkt = kkt_factor.solve(rhs)
             x = np.append(sol_kkt[:nx], z[nx:] - u[nx:] -
                           1./self.options.rho * sol_kkt[nx:])
@@ -495,7 +684,7 @@ class OSQP(object):
             if resid_prim <= eps_prim and resid_dual <= eps_dual:
                 # Print the progress in last iterations
                 if self.options.print_level > 1:
-                    f = self.problem.objval(z[:nx])
+                    f = self.scaled_problem.objval(z[:nx])
                     print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
                         % (i+1, f, resid_prim, resid_dual)
                 # Stop the algorithm
@@ -507,50 +696,23 @@ class OSQP(object):
                         (np.mod(i + 1,
                          np.floor(np.float(self.options.max_iter)/20.0)) == 0)\
                         | (self.options.print_level == 3):
-                            f = self.problem.objval(z[:nx])
+                            f = self.scaled_problem.objval(z[:nx])
                             print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
                                 % (i+1, f, resid_prim, resid_dual)
 
-        # End timer
-        cputime = time.time() - t
-        total_iter = i
+        # Total iterations 
+        self.total_iter = i
 
         # Return status
         print "\n"
         if i == self.options.max_iter - 1:
             print "Maximum number of iterations exceeded!"
-            status = MAXITER_REACHED
+            self.status = MAXITER_REACHED
         else:
             print "Optimal solution found"
-            status = OPTIMAL
+            self.status = OPTIMAL
 
-        print "Elapsed time: %.3fs\n" % cputime
-
-        # Recover primal solution
-        sol_x = z[:nx]
-        objval = self.problem.objval(sol_x)
-
-        # Recover dual solution
-        dual_vars = -self.options.rho * u
-        sol_dual_eq = dual_vars[nx:nx+neq]
-        sol_dual_ineq = dual_vars[nx+neq:]
-        sol_dual_lb = np.maximum(dual_vars[:nx], 0)
-        sol_dual_ub = -np.minimum(dual_vars[:nx], 0)
-
-        # Store solution as a quadprogResults object
-        solution = results(status, objval, sol_x, sol_dual_eq,
-                           sol_dual_ineq, sol_dual_lb, sol_dual_ub,
-                           cputime, total_iter)
-
-        # Polish only if optimal solution reached
-        if status == OPTIMAL:
-            if self.options.polish:
-                # Solution polishing
-                solution = self.polish(solution)
-            # Store last iterates for warm starting
-            if self.options.warm_start:
-                self.z_prev = z
-                self.u_prev = u
-
-        # Return solution
-        return solution
+        # Save z and u solution
+        self.solution.z = z
+        self.solution.u = u
+        
