@@ -36,13 +36,13 @@ def load_maros_meszaros_problem(f):
 
 def main():
     sp.random.seed(2)
-    example = 'random'  # {'small1', 'small2', 'random', 'maros_meszaros'}
+    example = 'maros_meszaros'  # {'small1', 'small2', 'random', 'maros_meszaros'}
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
-        # f = 'tests/maros_meszaros/CVXQP2_S.mat'
-        # f = 'tests/maros_meszaros/PRIMAL3.mat'
-        f = 'tests/maros_meszaros/QBANDM.mat'
+        #  f = 'tests/maros_meszaros/CVXQP2_S.mat'
+        f = 'tests/maros_meszaros/PRIMAL3.mat'
+        #  f = 'tests/maros_meszaros/QBANDM.mat'
         p = load_maros_meszaros_problem(f)
 
     elif example == 'small1':
@@ -95,9 +95,9 @@ def main():
 
     # Solve with OSQP. You can pass options to OSQP solver
     resultsOSQP = p.solve(solver=OSQP, max_iter=10000, splitting=2,
-            eps_rel=1e-10,
-            eps_abs=1e-10,
-            scale_steps=10,
+            eps_rel=1e-6,
+            eps_abs=1e-6,
+            scale_steps=3,
             scale_problem=True,
             polish=False)
 

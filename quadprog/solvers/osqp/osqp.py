@@ -93,7 +93,7 @@ class options(object):
     Scaling
     ------------
     scale_problem [True]       - Scale Optimization Problem
-    scaling_steps [10]         - Number of Steps for Scaling Method
+    scaling_steps [3]         - Number of Steps for Scaling Method
 
     KKT Solution
     ------------
@@ -386,9 +386,12 @@ class OSQP(object):
 
             # Iterate Scaling
             for i in range(self.options.scale_steps):
-                d = np.reciprocal(KKT2.dot(d))
+                print np.max(KKT2.dot(d))
+                # Regularize components
+                KKT2d = np.minimum(np.maximum(KKT2.dot(d), -1e+08), 1e+08) 
+                # Prevent division by 0
+                d = np.reciprocal(KKT2d + 1e-06)
                 #  d = np.reciprocal(KKT2.T.dot(d))
-                #  d = np.minimum(np.maximum(d, -1e01), 1e-01)  # Regularize
                 print "Scaling step %i\n" % i
             
                 # DEBUG STUFF
@@ -673,7 +676,7 @@ class OSQP(object):
             u = np.zeros(nvar)
 
         if self.options.print_level > 1:
-            print "Iter \t  Objective \tPrim Res \tDual Res"
+            print "Iter \t  Objective       \tPrim Res \tDual Res"
 
         # Run ADMM: alpha \in (0, 2) is a relaxation parameter.
         #           Nominal ADMM is obtained for alpha=1.0
