@@ -699,7 +699,7 @@ class OSQP(object):
             resid_dual = self.options.rho*spla.norm(z - z_old)
 
             # Check the stopping criterion
-            eps_prim = np.sqrt(nconstr) * self.options.eps_abs \
+            eps_prim = np.sqrt(nvar) * self.options.eps_abs \
                 + self.options.eps_rel * np.max([spla.norm(x), spla.norm(z)])
             eps_dual = np.sqrt(nvar) * self.options.eps_abs + \
                 self.options.eps_rel * self.options.rho * spla.norm(u)
