@@ -36,7 +36,8 @@ def load_maros_meszaros_problem(f):
 
 def main():
     sp.random.seed(2)
-    example = 'maros_meszaros'  # {'small1', 'small2', 'random', 'maros_meszaros'}
+    # Possible ops:  {'small1', 'small2', 'random', 'maros_meszaros', 'lp'}
+    example = 'lp'  
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
@@ -84,6 +85,21 @@ def main():
         lb = 0. * np.ones(nx)
         ub = 5. * np.ones(nx)
         p = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
+    elif example == 'lp':
+        # Random Example
+        nx = 50
+        neq = 10
+        nineq = 20
+        # Generate random Matrices
+        Q = spspa.csc_matrix(np.zeros((nx, nx)))
+        c = sp.randn(nx)
+        Aeq = spspa.csc_matrix(sp.randn(neq, nx))
+        beq = sp.randn(neq)
+        Aineq = spspa.csc_matrix(sp.randn(nineq, nx))
+        bineq = 100 * sp.rand(nineq)
+        lb = 0. * np.ones(nx)
+        ub = 5. * np.ones(nx)
+        p = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
     else:
         assert False, "Unknown example"
 
@@ -95,10 +111,10 @@ def main():
 
     # Solve with OSQP. You can pass options to OSQP solver
     resultsOSQP = p.solve(solver=OSQP, max_iter=10000, splitting=2,
-            eps_rel=1e-6,
-            eps_abs=1e-6,
+            eps_rel=1e-5,
+            eps_abs=1e-5,
             scale_steps=3,
-            scale_problem=True,
+            scale_problem=False,
             polish=False)
 
     # # Reuse factorizations
