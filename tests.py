@@ -37,7 +37,7 @@ def load_maros_meszaros_problem(f):
 def main():
     sp.random.seed(2)
     # Possible ops:  {'small1', 'small2', 'random', 'maros_meszaros', 'lp'}
-    example = 'lp'
+    example = 'random'
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
@@ -114,7 +114,7 @@ def main():
             eps_rel=1e-5,
             eps_abs=1e-5,
             scale_steps=3,
-            scale_problem=False,
+            scale_problem=True,
             polish=False)
 
     # # Reuse factorizations

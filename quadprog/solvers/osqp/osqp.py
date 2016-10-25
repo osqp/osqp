@@ -365,7 +365,7 @@ class OSQP(object):
         nvar = self.problem.nx + self.problem.neq + self.problem.nineq
         nconstr = self.problem.neq + self.problem.nineq
         #  d = np.multiply(sp.rand(nvar), np.ones(nvar))
-        
+
 
         if self.options.scale_problem:
 
@@ -691,7 +691,7 @@ class OSQP(object):
             u = np.zeros(nvar)
 
         if self.options.print_level > 1:
-            print "Iter \t  Objective       \tPrim Res \tDual Res"
+            print "Iter \t Objective       \tPrim Res \tDual Res"
 
         # Run ADMM: alpha \in (0, 2) is a relaxation parameter.
         #           Nominal ADMM is obtained for alpha=1.0
@@ -723,7 +723,7 @@ class OSQP(object):
                 # Print the progress in last iterations
                 if self.options.print_level > 1:
                     f = self.scaled_problem.objval(z[:nx])
-                    print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
+                    print "%4s \t% 1.7e  \t%1.2e  \t%1.2e" \
                         % (i+1, f, resid_prim, resid_dual)
                 # Stop the algorithm
                 break
@@ -735,7 +735,7 @@ class OSQP(object):
                          np.floor(np.float(self.options.max_iter)/20.0)) == 0)\
                         | (self.options.print_level == 3):
                             f = self.scaled_problem.objval(z[:nx])
-                            print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
+                            print "%4s \t% 1.7e  \t%1.2e  \t%1.2e" \
                                 % (i+1, f, resid_prim, resid_dual)
 
         # Total iterations
