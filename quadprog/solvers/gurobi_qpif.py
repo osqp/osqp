@@ -77,8 +77,9 @@ class GUROBI(object):
 
         # Define objective
         obj = grb.QuadExpr()  # Set quadratic part
-        for i in range(p.Q.nnz):
-            obj.add(.5*p.Q.data[i]*x[p.Q.row[i]]*x[p.Q.col[i]])
+        if p.Q.count_nonzero():  # If there are any nonzero elms in Q
+            for i in range(p.Q.nnz):
+                obj.add(.5*p.Q.data[i]*x[p.Q.row[i]]*x[p.Q.col[i]])
         obj.add(grb.LinExpr(p.c, x))  # Add linear part
         m.setObjective(obj)  # Set objective
 
