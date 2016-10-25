@@ -163,7 +163,7 @@ class scaler_matrices(object):
 
 class solver_solution(object):
     """
-    Solver solution vectors z, u 
+    Solver solution vectors z, u
     """
     def __init__(self):
         self.z = None
@@ -232,7 +232,7 @@ class OSQP(object):
         self.problem.ub = kwargs.pop('ub', self.problem.ub)
 
     def set_option(self, **kwargs):
-        """ 
+        """
         Set solver options. Reset factorization if rho or splitting
         is changed.
         """
@@ -290,7 +290,7 @@ class OSQP(object):
                           #  spspa.eye(nx), Ac.T]),
             #  spspa.hstack([Ac,
                           #  -1./self.options.rho * spspa.eye(nconstr)])])
-        
+
 
     def solve(self):
         """
@@ -307,13 +307,13 @@ class OSQP(object):
 
         # Start timer
         t = time.time()
-        
+
         # Scale problem
         self.scale_problem()
-        
+
         # Choose splitting based on the options
         self.solve_admm()
-        
+
         # Polish solution if optimal
         if (self.status == OPTIMAL) & self.options.polish:
             self.polish()
@@ -365,9 +365,9 @@ class OSQP(object):
         nconstr = self.problem.neq + self.problem.nineq
         #  d = np.multiply(sp.rand(nvar), np.ones(nvar))
         d = np.ones(nvar)
-        
+
         if self.options.scale_problem:
-       
+
             print "Perform Symmetric Scaling of KKT matrix: %i Steps\n" % \
                 self.options.scale_steps
 
@@ -388,22 +388,22 @@ class OSQP(object):
             for i in range(self.options.scale_steps):
                 print np.max(KKT2.dot(d))
                 # Regularize components
-                KKT2d = np.minimum(np.maximum(KKT2.dot(d), -1e+08), 1e+08) 
+                KKT2d = np.minimum(np.maximum(KKT2.dot(d), -1e+08), 1e+08)
                 # Prevent division by 0
                 d = np.reciprocal(KKT2d + 1e-06)
                 #  d = np.reciprocal(KKT2.T.dot(d))
                 print "Scaling step %i\n" % i
-            
+
                 # DEBUG STUFF
                 S = spspa.diags(d)
                 KKTeq = S.dot(KKT.dot(S))
                 condKKT = nplinalg.cond(KKT.todense())
                 condKKTeq = nplinalg.cond(KKTeq.todense())
                 print "Condition number of KKT matrix %.4f" % condKKT
-                print "Condition number of KKTeq matrix %.4f" % condKKTeq 
+                print "Condition number of KKTeq matrix %.4f" % condKKTeq
 
-            ipdb.set_trace()
-            
+            #ipdb.set_trace()
+
             # Obtain Scaler Matrices
             D = spspa.diags(d[:self.problem.nx])
             E = spspa.diags(np.ones(self.problem.neq + self.problem.nineq))
@@ -448,11 +448,11 @@ class OSQP(object):
         else:
             # Obtain Scaler Matrices
             self.scaler_matrices.D = spspa.diags(d[:self.problem.nx])
-            self.scaler_matrices.E = spspa.diags(np.ones(self.problem.neq + 
+            self.scaler_matrices.E = spspa.diags(np.ones(self.problem.neq +
                                                  self.problem.nineq))
             self.scaler_matrices.Dinv = self.scaler_matrices.D
             self.scaler_matrices.Einv = self.scaler_matrices.E
-            
+
             # Assign scaled problem to same one
             self.scaled_problem = self.problem
 
@@ -477,11 +477,11 @@ class OSQP(object):
         constraints are active. The problem boils down to solving a linear
         system.
         """
-        # Get variables from solution
         nx = self.scaled_problem.nx
         neq = self.scaled_problem.neq
         nineq = self.scaled_problem.nineq
-        
+        tol = self.options.polish_tol
+
         # Recover primal solution
         sol_x = self.solution.z[:nx]
 
@@ -490,7 +490,7 @@ class OSQP(object):
         sol_ineq = dual_vars[nx+neq:]
         sol_lb = np.maximum(dual_vars[:nx], 0)
         sol_ub = -np.minimum(dual_vars[:nx], 0)
-        
+
         # Try to guess from an approximate solution which bounds are active
         bool_lb = np.logical_and(sol_x < (self.problem.lb+self.problem.ub)/2.,
                                  sol_lb > sol_x - self.problem.lb)
@@ -510,32 +510,20 @@ class OSQP(object):
         # Solve the corresponding linear system
         KKT = spspa.vstack([
             spspa.hstack([self.problem.Q, self.problem.Aeq.T,
-                         self.problem.Aineq.T, spspa.eye(self.problem.nx)]),
+                         self.problem.Aineq.T, spspa.eye(nx)]),
             spspa.hstack([self.problem.Aeq,
-                         spspa.csr_matrix((self.problem.neq, self.problem.neq +
-                                           self.problem.nineq +
-                                           self.problem.nx))]),
+                         spspa.csr_matrix((neq, neq + nineq + nx))]),
             spspa.hstack([self.problem.Aineq[ind_act],
-                          spspa.csr_matrix((len(ind_act), self.problem.neq +
-                                            self.problem.nineq +
-                                            self.problem.nx))]),
-            spspa.hstack([spspa.csr_matrix((len(ind_inact),
-                                            self.problem.nx+self.problem.neq)),
-                          spspa.eye(self.problem.nineq).tocsr()[ind_inact],
-                          spspa.csr_matrix((len(ind_inact),
-                                            self.problem.nx))]),
-            spspa.hstack([spspa.csr_matrix((len(ind_free), self.problem.nx +
-                                            self.problem.neq +
-                                            self.problem.nineq)),
-                          spspa.eye(self.problem.nx).tocsr()[ind_free]]),
-            spspa.hstack([spspa.eye(self.problem.nx).tocsr()[ind_lb],
-                          spspa.csr_matrix((len(ind_lb), self.problem.neq +
-                                            self.problem.nineq +
-                                            self.problem.nx))]),
-            spspa.hstack([spspa.eye(self.problem.nx).tocsr()[ind_ub],
-                          spspa.csr_matrix((len(ind_ub), self.problem.neq +
-                                            self.problem.nineq +
-                                            self.problem.nx))]),
+                          spspa.csr_matrix((len(ind_act), neq + nineq + nx))]),
+            spspa.hstack([spspa.csr_matrix((len(ind_inact), nx + neq)),
+                          spspa.eye(nineq).tocsr()[ind_inact],
+                          spspa.csr_matrix((len(ind_inact), nx))]),
+            spspa.hstack([spspa.csr_matrix((len(ind_free), nx + neq + nineq)),
+                          spspa.eye(nx).tocsr()[ind_free]]),
+            spspa.hstack([spspa.eye(nx).tocsr()[ind_lb],
+                          spspa.csr_matrix((len(ind_lb), neq + nineq + nx))]),
+            spspa.hstack([spspa.eye(nx).tocsr()[ind_ub],
+                          spspa.csr_matrix((len(ind_ub), neq + nineq + nx))]),
             ]).tocsr()
         rhs = np.hstack([-self.problem.c, self.problem.beq,
                         self.problem.bineq[ind_act],
@@ -553,22 +541,18 @@ class OSQP(object):
             print "Polishing failed. KKT matrix is singular."
 
         # Check if the above solution satisfies constraints
-        pol_x = pol_sol[:self.problem.nx]
-        pol_dual_eq = pol_sol[self.problem.nx:self.problem.nx+self.problem.neq]
-        pol_dual_ineq = pol_sol[self.problem.nx+self.problem.neq:
-                                self.problem.nx + self.problem.neq +
-                                self.problem.nineq]
-        pol_dual_lb = np.zeros(self.problem.nx)
-        pol_dual_lb[ind_lb] = -pol_sol[self.problem.nx + self.problem.neq +
-                                       self.problem.nineq:][ind_lb]
-        pol_dual_ub = np.zeros(self.problem.nx)
-        pol_dual_ub[ind_ub] = pol_sol[self.problem.nx + self.problem.neq +
-                                      self.problem.nineq:][ind_ub]
-        if all(pol_x > self.problem.lb - self.options.polish_tol) and\
-                all(pol_x < self.problem.ub + self.options.polish_tol)\
-                and all(pol_dual_ineq > -self.options.polish_tol)\
-                and all(pol_dual_lb > -self.options.polish_tol)\
-                and all(pol_dual_ub > -self.options.polish_tol):
+        pol_x = pol_sol[:nx]
+        pol_dual_eq = pol_sol[nx:nx + neq]
+        pol_dual_ineq = pol_sol[nx + neq:nx + neq + nineq]
+        pol_dual_lb = np.zeros(nx)
+        pol_dual_lb[ind_lb] = -pol_sol[nx + neq + nineq:][ind_lb]
+        pol_dual_ub = np.zeros(nx)
+        pol_dual_ub[ind_ub] = pol_sol[nx + neq + nineq:][ind_ub]
+        if all(pol_x > self.problem.lb - tol)\
+                and all(pol_x < self.problem.ub + tol)\
+                and all(pol_dual_ineq > -tol)\
+                and all(pol_dual_lb > -tol)\
+                and all(pol_dual_ub > -tol):
                 # Return the computed high-precision solution
                 print "Polishing successful!"
 
@@ -621,7 +605,7 @@ class OSQP(object):
         self.solution.u = np.append(u_x_unscaled, u_s_unscaled)
 
     def solve_admm(self):
-        """" 
+        """"
         Solve splitting problem with splitting of the form (after introducing
         slack variables for both equality and inequality constraints)
             minimize	1/2 x' Q x + c'x  + I_{Ax=b}(x) + I_Z(z)
@@ -650,7 +634,7 @@ class OSQP(object):
             # scaler = self.scaler
         else:
             # Construct reduced KKT matrix
-            Ac = spspa.vstack([self.scaled_problem.Aeq, 
+            Ac = spspa.vstack([self.scaled_problem.Aeq,
                               self.scaled_problem.Aineq])
             KKT = spspa.vstack([
                 spspa.hstack([self.scaled_problem.Q + self.options.rho *
@@ -723,7 +707,7 @@ class OSQP(object):
                             print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
                                 % (i+1, f, resid_prim, resid_dual)
 
-        # Total iterations 
+        # Total iterations
         self.total_iter = i
 
         # Return status
@@ -738,4 +722,3 @@ class OSQP(object):
         # Save z and u solution
         self.solution.z = z
         self.solution.u = u
-        

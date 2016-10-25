@@ -36,7 +36,7 @@ def load_maros_meszaros_problem(f):
 
 def main():
     sp.random.seed(2)
-    example = 'maros_meszaros'  # {'small1', 'small2', 'random', 'maros_meszaros'}
+    example = 'random'  # {'small1', 'small2', 'random', 'maros_meszaros'}
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
