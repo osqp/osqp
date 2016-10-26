@@ -1,7 +1,5 @@
 #ifndef LIN_ALG_H
 #define LIN_ALG_H
-#define EPS 1e-4
-
 #include <math.h>
 
 

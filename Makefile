@@ -14,14 +14,6 @@ OSQP_OBJECTS = src/osqp.o src/lin_alg.o
 SRC_FILES = $(wildcard src/*.c)
 INC_FILES = $(wildcard include/*.h)
 
-# define the C object files
-# This uses Suffix Replacement within a macro:
-#   $(name:string1=string2)
-#         For each word in 'name' replace 'string1' with 'string2'
-# Below we are replacing the suffix .c of all words in the macro SRCS
-# with the .o suffix
-# OBJ_FILES = $(SRCS:.c=.o)
-
 
 # Compile all C code
 .PHONY: default
