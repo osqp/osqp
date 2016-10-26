@@ -8,7 +8,7 @@ CFLAGS += -Iinclude
 TARGET = $(OUT)/osqp_demo
 
 # Define objects to compile
-OSQP_OBJECTS = src/osqp.o src/lin_alg.o
+OSQP_OBJECTS = src/osqp.o src/lin_alg.o src/cs.o
 
 # Define source and include files
 SRC_FILES = $(wildcard src/*.c)
@@ -32,6 +32,7 @@ default: $(TARGET) $(OUT)/libosqp.a
 # Define objects dependencies
 src/osqp.o: $(SRC_FILES) $(INC_FILES)
 src/lin_alg.o: src/lin_alg.c  include/lin_alg.h
+src/cs.o	: src/cs.c include/cs.h
 
 # Build osqp library
 $(OUT)/libosqp.a: $(OSQP_OBJECTS)

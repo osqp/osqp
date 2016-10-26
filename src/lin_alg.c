@@ -1,2 +1,2 @@
 #include "lin_alg.h"
-#include "math.h"
+#include <math.h>
