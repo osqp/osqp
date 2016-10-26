@@ -1,7 +1,12 @@
+# Add clang_complete files
+.clang_complete
+
 # Add vim files
 *.swp
+
 # Add Gurobi
 gurobi.log
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
