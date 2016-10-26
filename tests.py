@@ -37,13 +37,7 @@ def load_maros_meszaros_problem(f):
 def main():
     sp.random.seed(2)
     # Possible ops:  {'small1', 'small2', 'random', 'maros_meszaros', 'lp'}
-<<<<<<< HEAD
     example = 'small2'
-||||||| merged common ancestors
-    example = 'lp'
-=======
-    example = 'random'
->>>>>>> b26b366eb7eb6c478f09dd2147ceeea3f0893e87
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
@@ -117,12 +111,12 @@ def main():
 
     # Solve with OSQP. You can pass options to OSQP solver
     resultsOSQP = p.solve(solver=OSQP, max_iter=50000, splitting=2,
-            eps_rel=1e-6,
-            eps_abs=1e-6,
-            alpha = 1.6,
-            scale_steps=3,
-            scale_problem=True,
-            polish=False)
+                          eps_rel=1e-6,
+                          eps_abs=1e-6,
+                          alpha=1.6,
+                          scale_steps=3,
+                          scale_problem=True,
+                          polish=False)
 
     # # Reuse factorizations
     # if example == 'random':
