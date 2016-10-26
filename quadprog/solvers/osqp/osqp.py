@@ -79,7 +79,7 @@ class options(object):
     Attributes (General)
     ----------
     max_iter [5000]            - Maximum number of iterations
-    rho  [1.0]                 - Step in ADMM procedure
+    rho  [1.6]                 - Step in ADMM procedure
     alpha [1.0]                - Relaxation parameter
     eps_abs  [1e-06]            - Absolute tolerance
     eps_rel  [1e-06]           - Relative tolerance
@@ -112,7 +112,7 @@ class options(object):
 
         # Set general options
         self.max_iter = kwargs.pop('max_iter', 5000)
-        self.rho = kwargs.pop('rho', 1.0)
+        self.rho = kwargs.pop('rho', 1.6)
         self.alpha = kwargs.pop('alpha', 1.0)
         self.eps_abs = kwargs.pop('eps_abs', 1e-6)
         self.eps_rel = kwargs.pop('eps_rel', 1e-6)
@@ -373,69 +373,113 @@ class OSQP(object):
             Ac = spspa.vstack([self.problem.Aeq, self.problem.Aineq])
             bc = np.hstack([self.problem.beq, self.problem.bineq])
 
+            #  if self.problem.Q.count_nonzero():  # If there are nonzero elements
             d = np.ones(nvar)
+            
+            # Define reduced KKT matrix to scale
+            KKT = spspa.vstack([
+                spspa.hstack([self.problem.Q, Ac.T]),
+                spspa.hstack([Ac, spspa.csc_matrix((nconstr, nconstr))])])
+            #  KKT = spspa.vstack([
+                #  spspa.hstack([self.problem.Q + spspa.eye(nx), Ac.T]),
+                #  spspa.hstack([Ac, -spspa.eye(nconstr)])])
 
-            if self.problem.Q.count_nonzero():  # If there are nonzero elements
+            # Run Scaling
+            KKT2 = KKT.copy()
+            KKT2.data = np.absolute(KKT2.data)  # Elementwise square of KKT matrix
+
+            # Perform Scalings as in GLPK solver: https://en.wikibooks.org/wiki/GLPK/Scaling
+            # 1: Check if problem is well scaled
+            #  if False:
+            if (np.min(KKT2.data) >= 0.1) & (np.max(KKT2.data) <= 10):
+                print "Problem already well scaled. No Scaling Required\n"
+            else:
+                #  print "Perform geometric scaling of KKT matrix: %i Steps\n" % \
+                    #  self.options.scale_steps
+                #  for i in range(self.options.scale_steps):
+                    #  di = np.zeros(nvar)
+                    #  for j in range(nvar):  # Iterate over all rows of KKT
+                        #  maxj = np.max((KKT2.tocsc())[j, :]) + 1e-08
+                        #  minj = np.min((KKT2.tocsc())[j, :]) + 1e-08
+                        #  di[j] = 1./np.sqrt(maxj * minj)
+                    #  d = np.multiply(di, d)
+                    #  # DEBUG STUFF
+                    #  S = spspa.diags(d)
+                    #  KKTeq = S.dot(KKT.dot(S))
+                    #  print "Norm of first row of KKT %.4e" % \
+                        #  nplinalg.norm((KKT.todense())[1, :])
+                    #  print "Norm of first row of KKTeq %.4e" % \
+                        #  nplinalg.norm((KKTeq.todense())[1, :])
+                    #  condKKT = nplinalg.cond(KKT.todense())
+                    #  condKKTeq = nplinalg.cond(KKTeq.todense())
+                    #  print "Condition number of KKT matrix %.4e" % condKKT
+                    #  print "Condition number of KKTeq matrix %.4e" % condKKTeq
+                    #  ipdb.set_trace()
+
                 print "Perform symmetric scaling of KKT matrix: %i Steps\n" % \
                     self.options.scale_steps
-                # Define reduced KKT matrix to scale
-                KKT = spspa.vstack([
-                    spspa.hstack([self.problem.Q, Ac.T]),
-                    spspa.hstack([Ac, spspa.csc_matrix((nconstr, nconstr))])])
-
-                # Run Scaling
-                KKT2 = KKT.copy()
-                KKT2.data = np.square(KKT2.data)  # Elementwise square of KKT matrix
 
                 # Iterate Scaling
                 for i in range(self.options.scale_steps):
-                    print np.max(KKT2.dot(d))
+                    #  print np.max(KKT2.dot(d))
+                    #  ipdb.set_trace()
                     # Regularize components
-                    KKT2d = np.minimum(np.maximum(KKT2.dot(d), -1e+08), 1e+08)
+                    KKT2d = KKT2.dot(d)
                     # Prevent division by 0
-                    d = np.reciprocal(KKT2d + 1e-06)
+                    d = np.reciprocal(KKT2d + 1e-10)
+                    d = np.minimum(np.maximum(d, -1e+10), 1e+10)
+                    print d
+                    #  d = np.reciprocal(KKT2d)
                     print "Scaling step %i\n" % i
 
                     # DEBUG STUFF
                     S = spspa.diags(d)
                     KKTeq = S.dot(KKT.dot(S))
+                    print "Norm of first row of KKT %.4e" % \
+                        nplinalg.norm((KKT.todense())[1, :])
+                    print "Norm of first row of KKTeq %.4e" % \
+                        nplinalg.norm((KKTeq.todense())[1, :])
                     condKKT = nplinalg.cond(KKT.todense())
                     condKKTeq = nplinalg.cond(KKTeq.todense())
-                    print "Condition number of KKT matrix %.4f" % condKKT
-                    print "Condition number of KKTeq matrix %.4f" % condKKTeq
-            else:  # Q matrix is zero (LP)
-                print "Perform scaling of Ac constraints matrix: %i Steps\n" % \
-                    self.options.scale_steps
-                # Run scaling
-                Ac2 = Ac.copy()
-                Ac2.data = np.square(Ac2.data)
-                d1 = np.ones(nconstr)
-                d2 = np.ones(nx)
+                    print "Condition number of KKT matrix %.4e" % condKKT
+                    print "Condition number of KKTeq matrix %.4e" % condKKTeq
+            #  else:  # Q matrix is zero (LP)
+                #  print "Perform scaling of Ac constraints matrix: %i Steps\n" % \
+                    #  self.options.scale_steps
+                #  # Run scaling
+                #  Ac2 = Ac.copy()
+                #  Ac2.data = np.square(Ac2.data)
+                #  d1 = np.ones(nconstr)
+                #  d2 = np.ones(nx)
 
-                # Iterate scaling
-                for i in range(self.options.scale_steps):
-                    #  print(np.max(Ac2.dot(d1)))
-                    # Regularize components
-                    Ac2d2 = np.minimum(np.maximum(Ac2.dot(d2), -1e+08), 1e+08)
-                    # Avoid dividing by 0
-                    d1 = np.reciprocal(Ac2d2 + 1e-06)
-                    # Regularize components
-                    Ac2Td1 =  np.minimum(np.maximum(Ac2.T.dot(d1), -1e+08), 1e+08)
-                    # Avoid dividing by 0
-                    d2 = np.reciprocal(Ac2Td1 + 1e-06)
-                    # DEBUG STUFF
-                    D1 = spspa.diags(d1)
-                    D2 = spspa.diags(d2)
-                    Aceq = D1.dot(Ac.dot(D2))
-                    condAc = nplinalg.cond(Ac.todense())
-                    condAceq = nplinalg.cond(Aceq.todense())
-                    print "Condition number of Ac matrix %.4f" % condAc
-                    print "Condition number of Aceq matrix %.4f" % condAceq
-                d = np.append(d1, d2)
+                #  # Iterate scaling
+                #  for i in range(self.options.scale_steps):
+                    #  #  print(np.max(Ac2.dot(d1)))
+                    #  # Regularize components
+                    #  Ac2d2 = np.minimum(np.maximum(Ac2.dot(d2), -1e+10), 1e+10)
+                    #  # Avoid dividing by 0
+                    #  d1 = np.reciprocal(Ac2d2 + 1e-10)
+                    #  # Regularize components
+                    #  Ac2Td1 =  np.minimum(np.maximum(Ac2.T.dot(d1), -1e+10),
+                            #  1e+10)
+                    #  # Avoid dividing by 0
+                    #  d2 = np.reciprocal(Ac2Td1 + 1e-10)
+                    #  # DEBUG STUFF
+                    #  D1 = spspa.diags(d1)
+                    #  D2 = spspa.diags(d2)
+                    #  Aceq = D1.dot(Ac.dot(D2))
+                    #  condAc = nplinalg.cond(Ac.todense())
+                    #  condAceq = nplinalg.cond(Aceq.todense())
+                    #  print "Condition number of Ac matrix %.4f" % condAc
+                    #  print "Condition number of Aceq matrix %.4f" % condAceq
+                #  d = np.append(d1, d2)
 
+            # DEBUG STUFF
+            #  d = sp.rand(nvar)
             # Obtain Scaler Matrices
             D = spspa.diags(d[:self.problem.nx])
-            E = spspa.diags(np.ones(self.problem.neq + self.problem.nineq))
+            E = spspa.diags(d[self.problem.nx:])
+            #  E = spspa.diags(np.ones(self.problem.neq + self.problem.nineq))
 
 
             # Scale problem Matrices
@@ -621,7 +665,7 @@ class OSQP(object):
         u_x_scaled = \
             self.scaler_matrices.D.dot(self.solution.u[:self.problem.nx])
         u_s_scaled = \
-            self.scaler_matrices.E.dot(self.solution.u[self.problem.nx:])
+            self.scaler_matrices.Einv.dot(self.solution.u[self.problem.nx:])
         self.solution.u = np.append(u_x_scaled, u_s_scaled)
 
     def rescale_solution(self):
@@ -632,7 +676,7 @@ class OSQP(object):
         u_x_unscaled = \
             self.scaler_matrices.Dinv.dot(self.solution.u[:self.problem.nx])
         u_s_unscaled = \
-            self.scaler_matrices.Einv.dot(self.solution.u[self.problem.nx:])
+            self.scaler_matrices.E.dot(self.solution.u[self.problem.nx:])
         self.solution.u = np.append(u_x_unscaled, u_s_unscaled)
 
     def solve_admm(self):

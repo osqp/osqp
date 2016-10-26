@@ -37,7 +37,7 @@ def load_maros_meszaros_problem(f):
 def main():
     sp.random.seed(2)
     # Possible ops:  {'small1', 'small2', 'random', 'maros_meszaros', 'lp'}
-    example = 'lp'
+    example = 'small2'
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
@@ -61,7 +61,7 @@ def main():
     elif example == 'small2':
         # Small Example 2
         nx = 2
-        Q = spspa.csc_matrix(np.array([[1., 0.], [0., 0.]]))
+        Q = spspa.csc_matrix(np.array([[11., 0.], [0., 0.]]))
         c = np.array([3, 4])
         Aeq = spspa.csc_matrix(np.ones((0, nx)))
         beq = np.zeros(0)
@@ -72,8 +72,8 @@ def main():
     elif example == 'random':
         # Random Example
         nx = 50
-        neq = 10
-        nineq = 20
+        neq = 20
+        nineq = 15
         # Generate random Matrices
         Qt = sp.randn(nx, nx)
         Q = spspa.csc_matrix(np.dot(Qt.T, Qt))
@@ -110,11 +110,11 @@ def main():
     resultsGUROBI = p.solve(solver=GUROBI, OutputFlag=0)
 
     # Solve with OSQP. You can pass options to OSQP solver
-    resultsOSQP = p.solve(solver=OSQP, max_iter=10000, splitting=2,
+    resultsOSQP = p.solve(solver=OSQP, max_iter=20000, splitting=2,
             eps_rel=1e-5,
             eps_abs=1e-5,
             scale_steps=3,
-            scale_problem=False,
+            scale_problem=True,
             polish=False)
 
     # # Reuse factorizations
@@ -156,7 +156,7 @@ def main():
     print "Norm of dual lb difference %.8f" % \
         np.linalg.norm(resultsOSQP.sol_dual_lb - resultsGUROBI.sol_dual_lb)
 
-    # ipdb.set_trace()
+    ipdb.set_trace()
 
 # Parsing optional command line arguments
 if __name__ == '__main__':
