@@ -53,35 +53,3 @@ clean:
 purge: clean
 	@rm -rf $(OUT)
 
-
-
-
-
-#
-#
-# .PHONY: default all clean
-#
-# default: $(TARGET)
-# all: default
-#
-# OBJECTS = $(patsubst %.c, %.o, $(wildcard src/*.c))
-# # SRC_FILES = $(wildcard src/*.c)
-# # INC_FILES = $(wildcard include/*.h)
-#
-#
-# %.o: src/%.c
-# 	$(CC) $(CFLAGS) -c $< -o $@
-#
-# # Specify dependencies
-# hellomake.o: src/hellomake.c include/hellomake.h
-#
-#
-#
-# .PRECIOUS: $(TARGET) $(OBJECTS)
-#
-# $(TARGET): $(OBJECTS)
-# 	$(CC) $(OBJECTS) -Wall $(LIBS) -o $@
-#
-# clean:
-# 	-rm -f *.o
-# 	-rm -f $(TARGET)
