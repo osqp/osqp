@@ -428,7 +428,7 @@ class OSQP(object):
                     # Prevent division by 0
                     d = np.reciprocal(KKT2d + 1e-10)
                     d = np.minimum(np.maximum(d, -1e+10), 1e+10)
-                    print d
+                    #  print d
                     #  d = np.reciprocal(KKT2d)
                     print "Scaling step %i\n" % i
 
@@ -476,6 +476,7 @@ class OSQP(object):
 
             # DEBUG STUFF
             #  d = sp.rand(nvar)
+            #  d = 2.*np.ones(nvar)
             # Obtain Scaler Matrices
             D = spspa.diags(d[:self.problem.nx])
             E = spspa.diags(d[self.problem.nx:])
@@ -767,7 +768,7 @@ class OSQP(object):
                 # Print the progress in last iterations
                 if self.options.print_level > 1:
                     f = self.scaled_problem.objval(z[:nx])
-                    print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
+                    print "%4s \t %1.7e  \t%1.2e  \t%1.2e" \
                         % (i+1, f, resid_prim, resid_dual)
                 # Stop the algorithm
                 break
@@ -779,7 +780,7 @@ class OSQP(object):
                          np.floor(np.float(self.options.max_iter)/20.0)) == 0)\
                         | (self.options.print_level == 3):
                             f = self.scaled_problem.objval(z[:nx])
-                            print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
+                            print "%4s \t %1.7e  \t%1.2e  \t%1.2e" \
                                 % (i+1, f, resid_prim, resid_dual)
 
         # Total iterations

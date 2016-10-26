@@ -110,9 +110,10 @@ def main():
     resultsGUROBI = p.solve(solver=GUROBI, OutputFlag=0)
 
     # Solve with OSQP. You can pass options to OSQP solver
-    resultsOSQP = p.solve(solver=OSQP, max_iter=20000, splitting=2,
-            eps_rel=1e-5,
-            eps_abs=1e-5,
+    resultsOSQP = p.solve(solver=OSQP, max_iter=50000, splitting=2,
+            eps_rel=1e-6,
+            eps_abs=1e-6,
+            alpha = 1.6,
             scale_steps=3,
             scale_problem=True,
             polish=False)
