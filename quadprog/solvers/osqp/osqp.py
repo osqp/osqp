@@ -93,7 +93,8 @@ class options(object):
     Scaling
     ------------
     scale_problem [True]       - Scale Optimization Problem
-    scaling_steps [3]         - Number of Steps for Scaling Method
+    scale_steps [3]          - Number of Steps for Scaling Method
+    scale_norm [2]           - Scaling norm in SK algorithm 
 
     KKT Solution
     ------------
@@ -128,6 +129,7 @@ class options(object):
         # Set scaling options
         self.scale_problem = kwargs.pop('scale_problem', True)
         self.scale_steps = kwargs.pop('scale_steps', 10)
+        self.scale_norm = kwargs.pop('scale_norm', 2)
 
         # Set KKT system solution options
         self.kkt_method = kwargs.pop('kkt_method', 'direct')
@@ -258,6 +260,14 @@ class OSQP(object):
         self.options.polish_tol = kwargs.pop('polish_tol',
                                              self.options.polish_tol)
 
+        # Set scaling options
+        self.scale_problem = kwargs.pop('scale_problem',
+                                        self.options.scale_problem)
+        self.scale_steps = kwargs.pop('scale_steps', 
+                                      self.options.scale_steps)
+        self.scale_norm = kwargs.pop('scale_norm',
+                                     self.options.scale_norm)
+        
         #  KKT System solution options
         self.options.kkt_method = kwargs.pop('kkt_method',
                                              self.options.kkt_method)
@@ -386,7 +396,11 @@ class OSQP(object):
 
             # Run Scaling
             KKT2 = KKT.copy()
-            KKT2.data = np.absolute(KKT2.data)  # Elementwise square of KKT matrix
+            if self.options.scale_norm == 2:
+                KKT2.data = np.square(KKT2.data)  # Elementwise square
+            elif self.options.scale_norm == 1:
+                KKT2.data = np.absolute(KKT2.data)  # Elementwise absolute value
+
 
             # Perform Scalings as in GLPK solver: https://en.wikibooks.org/wiki/GLPK/Scaling
             # 1: Check if problem is well scaled
@@ -426,9 +440,9 @@ class OSQP(object):
                     # Regularize components
                     KKT2d = KKT2.dot(d)
                     # Prevent division by 0
-                    d = np.reciprocal(KKT2d + 1e-10)
-                    d = np.minimum(np.maximum(d, -1e+10), 1e+10)
-                    #  print d
+                    d = nvar*np.reciprocal(KKT2d + 1e-8)  
+                    # Prevent too large elements 
+                    d = np.minimum(np.maximum(d, -1e+10), 1e+10)               
                     #  d = np.reciprocal(KKT2d)
                     print "Scaling step %i\n" % i
 
@@ -477,7 +491,9 @@ class OSQP(object):
             # DEBUG STUFF
             #  d = sp.rand(nvar)
             #  d = 2.*np.ones(nvar)
+
             # Obtain Scaler Matrices
+            d = np.power(d, 1./self.options.scale_norm)
             D = spspa.diags(d[:self.problem.nx])
             E = spspa.diags(d[self.problem.nx:])
             #  E = spspa.diags(np.ones(self.problem.neq + self.problem.nineq))
