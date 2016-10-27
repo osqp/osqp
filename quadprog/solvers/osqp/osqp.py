@@ -211,17 +211,17 @@ class OSQP(object):
         Set QP problem data. Reset factorization if Q, Aeq or Aineq
         is changed.
         """
-        if 'Q' in kwargs.keys() and kwargs['Q'].tocsr() != self.problem.Q:
+        if 'Q' in kwargs.keys():  # and kwargs['Q'].tocsr() != self.problem.Q:
             self.problem.Q = kwargs['Q'].tocsr()
             # Reset factorization
             self.kkt_factor = None
-        if 'Aeq' in kwargs.keys() and \
-                kwargs['Aeq'].tocsr() != self.problem.Aeq:
+        if 'Aeq' in kwargs.keys():  # and \
+                # kwargs['Aeq'].tocsr() != self.problem.Aeq:
             self.problem.Aeq = kwargs['Aeq'].tocsr()
             # Reset factorization
             self.kkt_factor = None
-        if 'Aineq' in kwargs.keys() and \
-                kwargs['Aineq'].tocsr() != self.problem.Aineq:
+        if 'Aineq' in kwargs.keys():  # and \
+                # kwargs['Aineq'].tocsr() != self.problem.Aineq:
             self.problem.Aineq = kwargs['Aineq'].tocsr()
             # Reset factorization
             self.kkt_factor = None
@@ -325,7 +325,7 @@ class OSQP(object):
         self.cputime = time.time() - t
         print "Elapsed time: %.3fs\n" % self.cputime
 
-        ipdb.set_trace()
+        # ipdb.set_trace()
         # Return QP solution
         solution = self.get_qp_solution()
 
@@ -375,7 +375,7 @@ class OSQP(object):
 
             #  if self.problem.Q.count_nonzero():  # If there are nonzero elements
             d = np.ones(nvar)
-            
+
             # Define reduced KKT matrix to scale
             KKT = spspa.vstack([
                 spspa.hstack([self.problem.Q, Ac.T]),
@@ -481,7 +481,6 @@ class OSQP(object):
             D = spspa.diags(d[:self.problem.nx])
             E = spspa.diags(d[self.problem.nx:])
             #  E = spspa.diags(np.ones(self.problem.neq + self.problem.nineq))
-
 
             # Scale problem Matrices
             Q = D.dot(self.problem.Q.dot(D))
@@ -673,7 +672,8 @@ class OSQP(object):
         """
         Rescale solution back to user-given units
         """
-        self.solution.z[:self.problem.nx] = self.scaler_matrices.D.dot(self.solution.z[:self.problem.nx])
+        self.solution.z[:self.problem.nx] = \
+            self.scaler_matrices.D.dot(self.solution.z[:self.problem.nx])
         u_x_unscaled = \
             self.scaler_matrices.Dinv.dot(self.solution.u[:self.problem.nx])
         u_s_unscaled = \
