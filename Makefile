@@ -5,7 +5,8 @@ include osqp.mk
 CFLAGS += -Iinclude
 
 # target executable
-TARGET = $(OUT)/osqp_demo
+TARGET = $(OUT)/osqp_demo 
+TARGET += $(OUT)/test_lin_alg  # Add tests for linear algebra functions
 
 # Define objects to compile
 OSQP_OBJECTS = src/osqp.o src/lin_alg.o src/cs.o
@@ -29,7 +30,7 @@ default: $(TARGET) $(OUT)/libosqp.a
 %.o : src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Define objects dependencies
+# Define OSQP objects dependencies
 src/osqp.o: $(SRC_FILES) $(INC_FILES)
 src/lin_alg.o: src/lin_alg.c  include/lin_alg.h
 src/cs.o	: src/cs.c include/cs.h
@@ -42,6 +43,10 @@ $(OUT)/libosqp.a: $(OSQP_OBJECTS)
 
 # Build target (demo file)
 $(OUT)/osqp_demo: examples/c/osqp_demo.c $(OUT)/libosqp.a
+	$(CC) $(CFLAGS) $^ -o $@  $(LDFLAGS)
+	
+# Build target (linear algebra tests)
+$(OUT)/tests_lin_alg: examples/c/tests_lin_alg.c examples/c/tests_matrices/matrices.h $(OUT)/libosqp.a
 	$(CC) $(CFLAGS) $^ -o $@  $(LDFLAGS)
 
 
