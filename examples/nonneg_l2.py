@@ -9,66 +9,58 @@ import quadprog.solvers.osqp.osqp as osqp
 
 
 # Generate and solve a Portfolio optimization problem
-class portfolio(object):
+class nonneg_l2(object):
     """
-    Portfolio optimization problem is defined as
-            maximize	mu.T * x - gamma x.T (F * F.T + D) x
-            subjec to   1.T x = 1
-                        x >= 0
+    Nonnegative least-squares problem is defined as
+            minimize	|| Ax - b ||^2
+            subjec to   x >= 0
 
     Arguments
     ---------
-    k, n        - Dimensions of matrix F        <int>
+    m, n        - Dimensions of matrix A        <int>
     osqp_opts   - Parameters of OSQP solver
     dens_lvl    - Density level of matrix A     <float>
     version     - QP reformulation              ['dense', 'sparse']
     """
 
-    def __init__(self, k, n, dens_lvl=1.0, version='dense',
+    def __init__(self, m, n, dens_lvl=1.0, version='dense',
                  osqp_opts={}):
         # Generate data
-        F = spspa.random(n, k, density=dens_lvl, format='csc')
-        D = spspa.diags(np.random.rand(n) * np.sqrt(k), format='csc')
-        mu = np.random.randn(n)
-        gamma = 1
+        A = spspa.random(m, n, density=dens_lvl, format='csc')
+        x_true = np.ones(n) / n + np.random.randn(n) / np.sqrt(n)
+        b = A.dot(x_true) + 0.5*np.random.randn(m)
 
         # Construct the problem
         if version == 'dense':
-            #       minimize	x.T (F * F.T + D) x - mu.T / gamma * x
-            #       subject to  1.T x = 1
-            #                   0 <= x <= 1
-            Q = 2 * (F.dot(F.T) + D)
-            c = -mu / gamma
-            Aeq = spspa.csc_matrix(np.ones((1, n)))
-            beq = np.array([1.])
+            #       minimize	1/2 x.T (A.T * A) x - (A.T * b).T * x
+            #       subject to  x >= 0
+            Q = A.T.dot(A)
+            c = -A.T.dot(b)
+            Aeq = spspa.csc_matrix((0, n))
+            beq = np.zeros(0)
             Aineq = spspa.csc_matrix((0, n))
             bineq = np.zeros(0)
             lb = np.zeros(n)
-            ub = np.ones(n)
         elif version == 'sparse':
-            #       minimize	x.T*D*x + y.T*y - mu.T / gamma * x
-            #       subject to  1.T x = 1
-            #                   F.T x = y
-            #                   0 <= x <= 1
-            Q = spspa.block_diag((2*D, 2*spspa.eye(k)), format='csc')
-            c = np.append(-mu / gamma, np.zeros(k))
-            Aeq = spspa.vstack([
-                    spspa.hstack([spspa.csc_matrix(np.ones((1, n))),
-                                  spspa.csc_matrix(np.zeros((1, k)))]),
-                    spspa.hstack([F.T, -spspa.eye(k)])]).tocsr()
-            beq = np.append(1., np.zeros(k))
-            Aineq = spspa.csc_matrix((0, n + k))
+            #       minimize	1/2 y.T*y
+            #       subject to  y = Ax - b
+            #                   x >= 0
+            Im = spspa.eye(m)
+            Q = spspa.block_diag((spspa.csc_matrix((n, n)), Im), format='csc')
+            c = np.zeros(n + m)
+            Aeq = spspa.hstack([A, -Im]).tocsr()
+            beq = b
+            Aineq = spspa.csc_matrix((0, n + m))
             bineq = np.zeros(0)
-            lb = np.append(np.zeros(n), -np.inf*np.ones(k))
-            ub = np.append(np.ones(n), np.inf*np.ones(k))
+            lb = np.append(np.zeros(n), -np.inf*np.ones(m))
         else:
             assert False, "Unhandled version"
 
         # Create a quadprogProblem and store it in a private variable
-        self._prob = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
+        self._prob = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq, lb)
         # Create an OSQP object and store it in a private variable
         self._osqp = osqp.OSQP(**osqp_opts)
-        self._osqp.problem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
+        self._osqp.problem(Q, c, Aeq, beq, Aineq, bineq, lb)
 
     def solve(self, solver=OSQP):
         """
@@ -93,8 +85,8 @@ class portfolio(object):
 sp.random.seed(1)
 
 # Set problem
-k = 20
-n = 10*k
+m = 20
+n = 5*m
 numofinst = 5
 
 # Set options of the OSQP solver
@@ -107,13 +99,13 @@ options = {'eps_abs':       1e-4,
            'warm_start':    True}
 
 # Create a lasso object
-portfolio_obj = portfolio(k, n, dens_lvl=0.3, version='dense',
+nonneg_l2__obj = nonneg_l2(m, n, dens_lvl=0.3, version='dense',
                           osqp_opts=options)
 
 # Solve with different solvers
-resultsCPLEX = portfolio_obj.solve(solver=CPLEX)
-resultsGUROBI = portfolio_obj.solve(solver=GUROBI)
-resultsOSQP = portfolio_obj.solve(solver=OSQP)
+resultsCPLEX = nonneg_l2__obj.solve(solver=CPLEX)
+resultsGUROBI = nonneg_l2__obj.solve(solver=GUROBI)
+resultsOSQP = nonneg_l2__obj.solve(solver=OSQP)
 
 # Print timings
 print "CPLEX  CPU time: %.3f" % resultsCPLEX.cputime

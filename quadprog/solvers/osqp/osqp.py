@@ -372,7 +372,7 @@ class OSQP(object):
         #  d = np.multiply(sp.rand(nvar), np.ones(nvar))
 
         if self.options.scale_problem:
-            
+
             # Check if the problem has already been scaled
             if self.scaled_problem is not None and \
                     self.scaler_matrices.D is not None and \
@@ -497,7 +497,11 @@ class OSQP(object):
             # Obtain Scaler Matrices
             d = np.power(d, 1./self.options.scale_norm)
             D = spspa.diags(d[:self.problem.nx])
-            E = spspa.diags(d[self.problem.nx:])
+            if nconstr == 0:
+                # spspa.diags() will throw an error if fed with an empty array
+                E = spspa.csc_matrix((0, 0))
+            else:
+                E = spspa.diags(d[self.problem.nx:])
             #  E = spspa.diags(np.ones(self.problem.neq + self.problem.nineq))
 
             # Scale problem Matrices
@@ -519,11 +523,14 @@ class OSQP(object):
 
             # Assign scaler matrices
             self.scaler_matrices.D = D
-            self.scaler_matrices.E = E
             self.scaler_matrices.Dinv = \
                 spspa.diags(np.reciprocal(D.diagonal()))
-            self.scaler_matrices.Einv = \
-                spspa.diags(np.reciprocal(E.diagonal()))
+            self.scaler_matrices.E = E
+            if nconstr == 0:
+                self.scaler_matrices.Einv = E
+            else:
+                self.scaler_matrices.Einv = \
+                    spspa.diags(np.reciprocal(E.diagonal()))
             #  # DEBUG STUFF
             #  Dinv = self.scaler_matrices.Dinv
             #  Einv = self.scaler_matrices.Einv
@@ -541,9 +548,12 @@ class OSQP(object):
 
             # Obtain Scaler Matrices
             self.scaler_matrices.D = spspa.diags(d[:self.problem.nx])
-            self.scaler_matrices.E = spspa.diags(np.ones(self.problem.neq +
-                                                 self.problem.nineq))
             self.scaler_matrices.Dinv = self.scaler_matrices.D
+            if nconstr == 0:
+                self.scaler_matrices.E = spspa.csc_matrix((0, 0))
+            else:
+                self.scaler_matrices.E = spspa.diags(np.ones(self.problem.neq +
+                                                     self.problem.nineq))
             self.scaler_matrices.Einv = self.scaler_matrices.E
 
             # Assign scaled problem to same one

@@ -66,7 +66,7 @@ class lasso(object):
 
         # Create a quadprogProblem and store it in a private variable
         self._prob = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq)
-        # Create an OSQP object and store in a private variable
+        # Create an OSQP object and store it in a private variable
         self._osqp = osqp.OSQP(**osqp_opts)
         self._osqp.problem(Q, c, Aeq, beq, Aineq, bineq)
 
@@ -129,7 +129,7 @@ options = {'eps_abs':       1e-4,
            'warm_start':    True}
 
 # Create a lasso object
-lasso_obj = lasso(m, n, inst=numofinst, version='sparse', osqp_opts=options)
+lasso_obj = lasso(m, n, inst=numofinst, version='dense', osqp_opts=options)
 for i in range(numofinst):
     # Solve with different solvers
     resultsCPLEX = lasso_obj.solve(solver=CPLEX)
