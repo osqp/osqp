@@ -101,9 +101,10 @@ numofinst = 5
 options = {'eps_abs':       1e-4,
            'eps_rel':       1e-4,
            'alpha':         1.6,
-           'scale_problem': False,
+           'scale_problem': True,
+           'scale_steps':   4,
            'polish':        False,
-           'warm_start':    False}
+           'warm_start':    True}
 
 # Create a lasso object
 portfolio_obj = portfolio(k, n, dens_lvl=0.3, version='dense',

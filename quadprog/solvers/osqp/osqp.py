@@ -94,14 +94,11 @@ class options(object):
     ------------
     scale_problem [True]       - Scale Optimization Problem
     scale_steps [3]          - Number of Steps for Scaling Method
-    scale_norm [2]           - Scaling norm in SK algorithm 
+    scale_norm [2]           - Scaling norm in SK algorithm
 
     KKT Solution
     ------------
     kkt_method  ['direct']        - KKT solution method: 'direct' (only direct)
-
-    -> Direct method options:
-    kkt_dir_reuse_factor [True]   - KKT factorization from previous solve
     """
     #  -> Indirect method options (dynamic rho update):
     #  kkt_ind_alg ['cg']            - Algorithm
@@ -133,8 +130,7 @@ class options(object):
 
         # Set KKT system solution options
         self.kkt_method = kwargs.pop('kkt_method', 'direct')
-        self.kkt_dir_reuse_factor = kwargs.pop('kkt_dir_reuse_factor',
-                                               True)
+        # self.kkt_dir_reuse_factor = kwargs.pop('kkt_dir_reuse_factor', True)
         #  self.kkt_ind_alg = kwargs.pop('kkt_ind_alg', 'cg')
         #  self.kkt_ind_tol = kwargs.pop('kkt_ind_tol', 1e-5)
         #  self.kkt_ind_maxiter = kwargs.pop('kkt_ind_maxiter', 100)
@@ -158,9 +154,9 @@ class scaler_matrices(object):
     """
     def __init__(self):
         self.D = None
-        self.F = None
+        self.E = None
         self.Dinv = None
-        self.Finv = None
+        self.Einv = None
 
 
 class solver_solution(object):
@@ -195,6 +191,7 @@ class OSQP(object):
         """
         self.options = options(**kwargs)
         self.kkt_factor = None
+        self.scaled_problem = None
         self.scaler_matrices = scaler_matrices()
         self.solution = solver_solution()
 
@@ -213,17 +210,15 @@ class OSQP(object):
         Set QP problem data. Reset factorization if Q, Aeq or Aineq
         is changed.
         """
-        if 'Q' in kwargs.keys():  # and kwargs['Q'].tocsr() != self.problem.Q:
+        if 'Q' in kwargs.keys():
             self.problem.Q = kwargs['Q'].tocsr()
             # Reset factorization
             self.kkt_factor = None
-        if 'Aeq' in kwargs.keys():  # and \
-                # kwargs['Aeq'].tocsr() != self.problem.Aeq:
+        if 'Aeq' in kwargs.keys():
             self.problem.Aeq = kwargs['Aeq'].tocsr()
             # Reset factorization
             self.kkt_factor = None
-        if 'Aineq' in kwargs.keys():  # and \
-                # kwargs['Aineq'].tocsr() != self.problem.Aineq:
+        if 'Aineq' in kwargs.keys():
             self.problem.Aineq = kwargs['Aineq'].tocsr()
             # Reset factorization
             self.kkt_factor = None
@@ -263,17 +258,17 @@ class OSQP(object):
         # Set scaling options
         self.scale_problem = kwargs.pop('scale_problem',
                                         self.options.scale_problem)
-        self.scale_steps = kwargs.pop('scale_steps', 
+        self.scale_steps = kwargs.pop('scale_steps',
                                       self.options.scale_steps)
         self.scale_norm = kwargs.pop('scale_norm',
                                      self.options.scale_norm)
-        
+
         #  KKT System solution options
         self.options.kkt_method = kwargs.pop('kkt_method',
                                              self.options.kkt_method)
-        self.options.kkt_dir_reuse_factor = kwargs.pop(
-            'kkt_dir_reuse_factor',
-            self.options.kkt_dir_reuse_factor)
+        # self.options.kkt_dir_reuse_factor = kwargs.pop(
+        #     'kkt_dir_reuse_factor',
+        #     self.options.kkt_dir_reuse_factor)
         #  self.options.kkt_ind_alg = kwargs.pop(
             #  'kkt_ind_alg',
             #  'cg')
@@ -371,13 +366,20 @@ class OSQP(object):
         Perform symmetric diagonal scaling via equilibration
         """
         # Predefine scaling vector
-        nx = self.problem.nx
+        # nx = self.problem.nx
         nvar = self.problem.nx + self.problem.neq + self.problem.nineq
         nconstr = self.problem.neq + self.problem.nineq
         #  d = np.multiply(sp.rand(nvar), np.ones(nvar))
 
-
         if self.options.scale_problem:
+            
+            # Check if the problem has already been scaled
+            if self.scaled_problem is not None and \
+                    self.scaler_matrices.D is not None and \
+                    self.scaler_matrices.E is not None and \
+                    self.scaler_matrices.Dinv is not None and \
+                    self.scaler_matrices.Einv is not None:
+                return
 
             # Stack up equalities and inequalities
             Ac = spspa.vstack([self.problem.Aeq, self.problem.Aineq])
@@ -440,23 +442,23 @@ class OSQP(object):
                     # Regularize components
                     KKT2d = KKT2.dot(d)
                     # Prevent division by 0
-                    d = nvar*np.reciprocal(KKT2d + 1e-8)  
-                    # Prevent too large elements 
-                    d = np.minimum(np.maximum(d, -1e+10), 1e+10)               
+                    d = nvar*np.reciprocal(KKT2d + 1e-8)
+                    # Prevent too large elements
+                    d = np.minimum(np.maximum(d, -1e+10), 1e+10)
                     #  d = np.reciprocal(KKT2d)
-                    print "Scaling step %i\n" % i
+                    #  print "Scaling step %i\n" % i
 
-                    # DEBUG STUFF
-                    S = spspa.diags(d)
-                    KKTeq = S.dot(KKT.dot(S))
-                    print "Norm of first row of KKT %.4e" % \
-                        nplinalg.norm((KKT.todense())[1, :])
-                    print "Norm of first row of KKTeq %.4e" % \
-                        nplinalg.norm((KKTeq.todense())[1, :])
-                    condKKT = nplinalg.cond(KKT.todense())
-                    condKKTeq = nplinalg.cond(KKTeq.todense())
-                    print "Condition number of KKT matrix %.4e" % condKKT
-                    print "Condition number of KKTeq matrix %.4e" % condKKTeq
+                    # # DEBUG STUFF
+                    # S = spspa.diags(d)
+                    # KKTeq = S.dot(KKT.dot(S))
+                    # print "Norm of first row of KKT %.4e" % \
+                    #     nplinalg.norm((KKT.todense())[1, :])
+                    # print "Norm of first row of KKTeq %.4e" % \
+                    #     nplinalg.norm((KKTeq.todense())[1, :])
+                    # condKKT = nplinalg.cond(KKT.todense())
+                    # condKKTeq = nplinalg.cond(KKTeq.todense())
+                    # print "Condition number of KKT matrix %.4e" % condKKT
+                    # print "Condition number of KKTeq matrix %.4e" % condKKTeq
             #  else:  # Q matrix is zero (LP)
                 #  print "Perform scaling of Ac constraints matrix: %i Steps\n" % \
                     #  self.options.scale_steps
@@ -718,13 +720,8 @@ class OSQP(object):
         nvar = nx + neq + nineq
         nconstr = neq + nineq
 
-        # Check whether the problem matrices have already been constructed.
-        # If direct method is used and factorization stored, get it
-        if self.options.kkt_dir_reuse_factor and \
-                self.kkt_factor is not None:
-            kkt_factor = self.kkt_factor
-            # scaler = self.scaler
-        else:
+        # Factorize KKT matrix if this has not been done yet
+        if self.kkt_factor is None:
             # Construct reduced KKT matrix
             Ac = spspa.vstack([self.scaled_problem.Aeq,
                               self.scaled_problem.Aineq])
@@ -733,20 +730,20 @@ class OSQP(object):
                               spspa.eye(nx), Ac.T]),
                 spspa.hstack([Ac,
                               -1./self.options.rho * spspa.eye(nconstr)])])
-            kkt_factor = spalinalg.splu(KKT.tocsc())
-            if self.options.kkt_dir_reuse_factor:
-                # Store factorization
-                self.kkt_factor = kkt_factor
+            self.kkt_factor = spalinalg.splu(KKT.tocsc())
+            # if self.options.kkt_dir_reuse_factor:
+            #     # Store factorization
+            #     self.kkt_factor = kkt_factor
 
         # Construct augmented b vector
         bc = np.append(self.scaled_problem.beq, self.scaled_problem.bineq)
 
         # Set initial conditions
-        if self.options.warm_start and self.z_prev is not None \
-                and self.u_prev is not None:
-                self.scale_solution()
-                z = self.solution.z
-                u = self.solution.u
+        if self.options.warm_start and self.solution.z is not None \
+                and self.solution.u is not None:
+            self.scale_solution()
+            z = self.solution.z
+            u = self.solution.u
         else:
             z = np.zeros(nvar)
             u = np.zeros(nvar)
@@ -760,7 +757,7 @@ class OSQP(object):
             # x update
             rhs = np.append(self.options.rho * (z[:nx] - u[:nx]) -
                             self.scaled_problem.c, bc - z[nx:] + u[nx:])
-            sol_kkt = kkt_factor.solve(rhs)
+            sol_kkt = self.kkt_factor.solve(rhs)
             x = np.append(sol_kkt[:nx], z[nx:] - u[nx:] -
                           1./self.options.rho * sol_kkt[nx:])
             # z update

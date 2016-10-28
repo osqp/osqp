@@ -115,7 +115,7 @@ class lasso(object):
 sp.random.seed(1)
 
 # Set problem
-m = 10
+m = 20
 n = 10*m
 numofinst = 5
 
@@ -123,9 +123,10 @@ numofinst = 5
 options = {'eps_abs':       1e-4,
            'eps_rel':       1e-4,
            'alpha':         1.6,
-           'scale_problem': False,
+           'scale_problem': True,
+           'scale_steps':   4,
            'polish':        False,
-           'warm_start':    False}
+           'warm_start':    True}
 
 # Create a lasso object
 lasso_obj = lasso(m, n, inst=numofinst, version='sparse', osqp_opts=options)
