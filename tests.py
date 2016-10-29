@@ -37,12 +37,13 @@ def load_maros_meszaros_problem(f):
 def main():
     sp.random.seed(2)
     # Possible ops:  {'small1', 'small2', 'random', 'maros_meszaros', 'lp'}
-    example = 'small2'
+    example = 'random'
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
         #  f = 'tests/maros_meszaros/CVXQP2_S.mat'
-        f = 'tests/maros_meszaros/PRIMAL3.mat'
+        f = 'tests/maros_meszaros/CVXQP1_S.mat'
+        #  f = 'tests/maros_meszaros/PRIMAL3.mat'
         #  f = 'tests/maros_meszaros/QBANDM.mat'
         p = load_maros_meszaros_problem(f)
 
