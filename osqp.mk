@@ -11,7 +11,7 @@ CFLAGS = -g -Wall
 
 # additional library paths
 # -lm: Basic math library
-LDFLAGS += -lm
+LDFLAGS = -lm
 
 
 # Output directory

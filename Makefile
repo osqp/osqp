@@ -5,8 +5,11 @@ include osqp.mk
 CFLAGS += -Iinclude
 
 # target executable
-TARGET = $(OUT)/osqp_demo 
-TARGET += $(OUT)/test_lin_alg  # Add tests for linear algebra functions
+TARGETS = $(OUT)/osqp_demo
+
+# Tests
+TEST_TARGETS = $(OUT)/osqp_tester  # Add tests for linear algebra functions
+TEST_INCLUDES = -Itests/c
 
 # Define objects to compile
 OSQP_OBJECTS = src/osqp.o src/lin_alg.o src/cs.o
@@ -18,22 +21,23 @@ INC_FILES = $(wildcard include/*.h)
 
 # Compile all C code
 .PHONY: default
-default: $(TARGET) $(OUT)/libosqp.a
-	@echo "****************************************************************************************"
+default: $(TARGETS) $(OUT)/libosqp.a
+	@echo "********************************************************************"
 	@echo "Successfully compiled OSQP!"
 	@echo "Copyright ...."
-	@echo "To test, type '$(OUT)/osqp_demo'"
-	@echo "****************************************************************************************"
+	@echo "To try the demo, type '$(OUT)/osqp_demo'"
+	@echo "********************************************************************"
 
 
 # For every object file file compile relative .c file in src/
-%.o : src/%.c
+# -c flag tells the compiler to stop after the compilation phase without linking
+%.o: src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Define OSQP objects dependencies
 src/osqp.o: $(SRC_FILES) $(INC_FILES)
 src/lin_alg.o: src/lin_alg.c  include/lin_alg.h
-src/cs.o	: src/cs.c include/cs.h
+src/cs.o: src/cs.c include/cs.h
 
 # Build osqp library
 $(OUT)/libosqp.a: $(OSQP_OBJECTS)
@@ -41,14 +45,20 @@ $(OUT)/libosqp.a: $(OSQP_OBJECTS)
 	$(ARCHIVE) $@ $^  # Create archive of objects
 	- $(RANLIB) $@    # Add object files in static library and create index
 
-# Build target (demo file)
+# Build osqp target (demo file)
 $(OUT)/osqp_demo: examples/c/osqp_demo.c $(OUT)/libosqp.a
 	$(CC) $(CFLAGS) $^ -o $@  $(LDFLAGS)
-	
-# Build target (linear algebra tests)
-$(OUT)/tests_lin_alg: examples/c/tests_lin_alg.c examples/c/tests_matrices/matrices.h $(OUT)/libosqp.a
-	$(CC) $(CFLAGS) $^ -o $@  $(LDFLAGS)
 
+# Build tests
+.PHONY: test
+test: $(TEST_TARGETS)
+	@echo "********************************************************************"
+	@echo "Successfully compiled tests!"
+	@echo "To try the tests, type '$(OUT)/osqp_tester'"
+	@echo "********************************************************************"
+	
+$(OUT)/osqp_tester: tests/c/osqp_tester.c $(OUT)/libosqp.a
+	$(CC) $(CFLAGS) $(TEST_INCLUDES) $^ -o $@  $(LDFLAGS)
 
 
 .PHONY: clean
@@ -57,4 +67,3 @@ clean:
 	@rm -rf $(OUT)/*.dSYM
 purge: clean
 	@rm -rf $(OUT)
-
