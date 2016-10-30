@@ -8,32 +8,23 @@ static char * tests_lin_alg()
 {
     /* local variables */
     int exitflag;
+    csc * Asp;  // Sparse matrix allocation
+    c_float * Asp_dns;  // Conversion to dense matrix
 
-    // /* local variables */
-    // pwork *mywork;
-    // idxint exitflag;
-    //
-    // /* set up data */
-	// mywork = ECOS_setup(MPC01_n, MPC01_m, MPC01_p, MPC01_l, MPC01_ncones, MPC01_q, 0,
-    //                     MPC01_Gpr, MPC01_Gjc, MPC01_Gir,
-    //                     MPC01_Apr, MPC01_Ajc, MPC01_Air,
-    //                     MPC01_c, MPC01_h, MPC01_b);
-    // if( mywork != NULL ){
-    //
-    //     /* solve */
-    //     exitflag = ECOS_solve(mywork); }
-    //
-    // else exitflag = ECOS_FATAL;
-    //
-    // /* clean up memory */
-    // ECOS_cleanup(mywork, 0);
+    printf("Linear algebra tests\n");
+    printf("--------------------\n");
 
+    printf("1) Construct sparse matrix\n");
 
-    printf("Linear algebra tests...\n");
+    Asp = csc_matrix(m, n, Asp_nnz, Asp_x, Asp_i, Asp_p);
 
-    char *Aname = "A";
+    // char *Aname = "A";
+    // print_dns_matrix(A, m, n, Aname);
 
-    print_dns_matrix(A, m, n, Aname);
+    Asp_dns =  csc_to_dns(Asp);
+
+    print_dns_matrix(A, m, n, "Afile");
+    print_dns_matrix(Asp_dns, m, n, "Aconverted");
 
     exitflag = 1;
     mu_assert("Error in linear algebra tests", exitflag == 1 );

@@ -63,10 +63,15 @@ c_float * csc_to_dns(csc * M)
         i = M->i[idx];
 
         // Get column index (increase if necessary)
-        if (M->p[idx] == idx & j < M->n) j++;
-
+		while (M->p[j+1] <= idx) {
+			j++;
+		}
+		
         // Assign values to A
-        A[i*M->m+j] = M->x[idx];
+        A[j*(M->m)+i] = M->x[idx];
+
+		// DEBUG
+		c_print("A[%i, %i] = %.2f\n", i, j, M->x[idx]);
     }
     return A;
 }
@@ -100,20 +105,16 @@ void print_csc_matrix(csc* M, char * name)
 /* Print a dense matrix */
 void print_dns_matrix(c_float * M, c_int m, c_int n, char *name)
 {
-    c_print("%s = [\t", name);
-    for(c_int i =0; i<m; i++){
-        for(c_int j=0; j<n; j++){
+    c_print("%s = \n\t", name);
+	for(c_int i=0; i<m; i++){  // Cycle over rows
+		for(c_int j=0; j<n; j++){  // Cycle over columns
             if (j < n - 1)
-                c_print("% 14.12e,  ",M[i*n+j]);
+                c_print("% 14.12e,  ", M[j*m+i]);
             else
-                c_print("% 14.12e ",M[i*n+j]);
+                c_print("% 14.12e;  ", M[j*m+i]);
         }
         if (i < m - 1){
             c_print("\n\t");
-        }
-        else
-        {
-            c_print("]");
         }
     }
     c_print("\n");
