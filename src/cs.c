@@ -5,7 +5,9 @@
 #include "cs.h"
 
 
-/* Create Compressed-Column-Sparse matrix from existing arrays (no MALLOC) */
+/* Create Compressed-Column-Sparse matrix from existing arrays
+(no MALLOC to create inner arrays x, i, p)
+*/
 csc* csc_matrix(c_int m, c_int n, c_int nnz, c_float* x, c_int* i, c_int* p)
 {
 	csc* M = (csc *)c_malloc(sizeof(csc));
@@ -20,7 +22,9 @@ csc* csc_matrix(c_int m, c_int n, c_int nnz, c_float* x, c_int* i, c_int* p)
 }
 
 
-/* Create uninitialized Compressed-Column-Sparse matrix (uses MALLOC) */
+/* Create uninitialized Compressed-Column-Sparse matrix
+(uses MALLOC to create inner arrays x, i, p)
+*/
 csc* new_csc_matrix(c_int m, c_int n, c_int nnz)
 {
     c_float * x = (c_float *)c_malloc((nnz)*sizeof(c_float));
@@ -30,7 +34,9 @@ csc* new_csc_matrix(c_int m, c_int n, c_int nnz)
 	return csc_matrix(m, n, nnz, x, i, p);
 }
 
-/* Free sparse matrix (uses FREE) */
+/* Free sparse matrix
+(uses FREE to free inner arrays x, i, p)
+ */
 void free_csc_matrix(csc * M)
 {
     // Free allocated memory

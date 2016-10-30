@@ -23,13 +23,19 @@ typedef struct    /* matrix in compressed-column or triplet form */
 } csc ;
 
 
-/* Create Compressed-Column-Sparse matrix from existing arrays (no MALLOC) */
+/* Create Compressed-Column-Sparse matrix from existing arrays
+(no MALLOC to create inner arrays x, i, p)
+*/
 csc* csc_matrix(c_int m, c_int n, c_int nnz, c_float* x, c_int* i, c_int* p);
 
-/* Create uninitialized Compressed-Column-Sparse matrix (uses MALLOC) */
+/* Create uninitialized Compressed-Column-Sparse matrix
+(uses MALLOC to create inner arrays x, i, p)
+*/
 csc* new_csc_matrix(c_int m, c_int n, c_int nnz);
 
-/* Free sparse matrix (uses FREE) */
+/* Free sparse matrix
+(uses FREE to free inner arrays x, i, p)
+ */
 void free_csc_matrix(csc * M);
 
 /* Convert sparse to dense */
