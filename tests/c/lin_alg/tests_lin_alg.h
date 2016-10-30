@@ -20,6 +20,10 @@ c_int test_constr_sparse_mat(){
     // Compute norm of the elementwise difference with
     norm_diff = vec_norm2_diff(Adns, A, m*n);
 
+    // Free memory
+    c_free(Asp);  // Do not free with function free_csc_matrix because of vars from file matrices.h
+    c_free(Adns);
+
     return (norm_diff > LINALG_TOL);
 }
 
