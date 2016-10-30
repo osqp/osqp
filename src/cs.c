@@ -23,9 +23,9 @@ csc* csc_matrix(c_int m, c_int n, c_int nnz, c_float* x, c_int* i, c_int* p)
 /* Create uninitialized Compressed-Column-Sparse matrix (uses MALLOC) */
 csc* new_csc_matrix(c_int m, c_int n, c_int nnz)
 {
-    c_float * x = (c_float *)malloc((nnz)*sizeof(c_float));
-    c_int * i = (c_int *)malloc((nnz)*sizeof(c_int));
-    c_int * p = (c_int *)malloc((n+1)*sizeof(c_int));
+    c_float * x = (c_float *)c_malloc((nnz)*sizeof(c_float));
+    c_int * i = (c_int *)c_malloc((nnz)*sizeof(c_int));
+    c_int * p = (c_int *)c_malloc((n+1)*sizeof(c_int));
     p[n] = nnz;  // Last element corresponds to number of nonzeros
 	return csc_matrix(m, n, nnz, x, i, p);
 }
