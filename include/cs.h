@@ -5,8 +5,11 @@
 #ifndef CS_H
 #define CS_H
 
-// #include <stdlib.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "constants.h"
+#include <math.h>
+
 
 typedef struct    /* matrix in compressed-column or triplet form */
 {

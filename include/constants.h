@@ -27,6 +27,10 @@
 typedef int c_int;                   /* for indeces */
 typedef double c_float;              /* for numerical values  */
 
+/* Use customized operations */
+#define c_sqrt sqrt  // Doubles
+#define c_sqrtf sqrtf  // Floats
+
 
 /* Custom printing functins ------------------------------------------------- */
 #if PRINTLEVEL > 0

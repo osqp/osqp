@@ -2,11 +2,7 @@
  Tim Davis et. al., for the full package please visit
  http://www.cise.ufl.edu/research/sparse/CSparse/ */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
 #include "cs.h"
-#include "constants.h"
 
 
 /* Create Compressed-Column-Sparse matrix from existing arrays (no MALLOC) */
@@ -66,12 +62,12 @@ c_float * csc_to_dns(csc * M)
 		while (M->p[j+1] <= idx) {
 			j++;
 		}
-		
+
         // Assign values to A
         A[j*(M->m)+i] = M->x[idx];
 
 		// DEBUG
-		c_print("A[%i, %i] = %.2f\n", i, j, M->x[idx]);
+		// c_print("A[%i, %i] = %.2f\n", i, j, M->x[idx]);
     }
     return A;
 }
