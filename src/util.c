@@ -54,8 +54,7 @@ c_int is_eq_csc(csc *A, csc *B){
 
         for (i=A->p[j]; i<A->p[j+1]; i++){  // Cycle rows i in column j
             if (A->i[i] != B->i[i] ||   // Different row indeces
-                A->x[i] - B->x[i] > TESTS_TOL ||
-                B->x[i] - A->x[i] < -TESTS_TOL){
+                c_abs(A->x[i] - B->x[i]) > TESTS_TOL){
                 return 0;
             }
         }
