@@ -54,7 +54,7 @@ function write_float(f, x, name)
 end
 
 # Reset seed
-srand(5)
+srand(10)
 
 # Open file
 f = open("matrices.h", "w+")

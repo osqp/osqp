@@ -5,7 +5,7 @@
 #include "minunit.h"
 #include "lin_alg/matrices.h"
 
-#define LINALG_TOL 1e-05
+#define LINALG_TESTS_TOL 1e-05
 
 c_int test_constr_sparse_mat(){
     csc * Asp;  // Sparse matrix allocation
@@ -32,7 +32,7 @@ c_int test_constr_sparse_mat(){
     c_free(Asp);  // Do not free with function free_csc_matrix because of vars from file matrices.h
     c_free(Adns);
 
-    return (norm_diff > LINALG_TOL);
+    return (norm_diff > LINALG_TESTS_TOL);
 }
 
 c_int test_vec_norms(){
@@ -42,7 +42,7 @@ c_int test_vec_norms(){
 
     // Norm of the difference
     norm2_diff = vec_norm2_diff(t2_v1, t2_v2, t2_n);
-    if (c_abs(norm2_diff - t2_norm2_diff)>LINALG_TOL) {
+    if (c_abs(norm2_diff - t2_norm2_diff)>LINALG_TESTS_TOL) {
         // c_print("norm2_diff = %.4f\n", norm2_diff);
         // c_print("t2_norm2_diff = %.4f\n", t2_norm2_diff);
         // c_print("difference = %.4e\n", c_abs(norm2_diff - t2_norm2_diff));
@@ -53,28 +53,28 @@ c_int test_vec_norms(){
     // Add scaled
     vec_copy(add_scaled, t2_v1, t2_n);  // Copy vector v1 in another vector
     vec_add_scaled(add_scaled, t2_v2, t2_n, t2_sc);
-    if(vec_norm2_diff(add_scaled, t2_add_scaled, t2_n)>LINALG_TOL) {
+    if(vec_norm2_diff(add_scaled, t2_add_scaled, t2_n)>LINALG_TESTS_TOL) {
         c_print("\nError in add scaled test!");
         exitflag = 1;
     }
 
     // Norm2 squared
     norm2_sq = vec_norm2_sq(t2_v1, t2_n);
-    if (c_abs(norm2_sq - t2_norm2_sq)>LINALG_TOL) {
+    if (c_abs(norm2_sq - t2_norm2_sq)>LINALG_TESTS_TOL) {
         c_print("\nError in norm 2 squared test!");
         exitflag = 1;
     }
 
     // Norm2
     norm2 = vec_norm2(t2_v1, t2_n);
-    if (c_abs(norm2 - t2_norm2)>LINALG_TOL) {
+    if (c_abs(norm2 - t2_norm2)>LINALG_TESTS_TOL) {
         c_print("\nError in norm 2 test!");
         exitflag = 1;
     }
 
     // NormInf
     normInf = vec_normInf(t2_v1, t2_n);
-    if (c_abs(normInf - t2_normInf)>LINALG_TOL) {
+    if (c_abs(normInf - t2_normInf)>LINALG_TESTS_TOL) {
         c_print("\nError in norm inf test!");
         exitflag = 1;
     }
@@ -91,8 +91,8 @@ c_int test_mat_concat(){
     c_int exitflag = 0;
 
     // Construct sparse matrices
-    t3_A = csc_matrix(m, n, t3_A_nnz, t3_A_x, t3_A_i, t3_A_p);
-    t3_B = csc_matrix(m, n, t3_B_nnz, t3_B_x, t3_B_i, t3_B_p);
+    t3_A = csc_matrix(t3_mA, t3_nA, t3_A_nnz, t3_A_x, t3_A_i, t3_A_p);
+    t3_B = csc_matrix(t3_mB, t3_nA, t3_B_nnz, t3_B_x, t3_B_i, t3_B_p);
 
     // Stack matrices and store in ABcat
     ABcat = vstack(t3_A, t3_B);
@@ -106,10 +106,10 @@ c_int test_mat_concat(){
 
 
     // DEBUG: print matrices
-    print_dns_matrix(t3_AB, t3_mA + t3_mB, t3_nA, "t3_AB");
-    print_dns_matrix(ABcat_dns, t3_mA + t3_mB, t3_nA, "ABcat_dns");
+    // print_dns_matrix(t3_AB, t3_mA + t3_mB, t3_nA, "t3_AB");
+    // print_dns_matrix(ABcat_dns, t3_mA + t3_mB, t3_nA, "ABcat_dns");
 
-    if (norm_diff>LINALG_TOL) {
+    if (norm_diff>LINALG_TESTS_TOL) {
         c_print("\nError in matrix concatenation test!");
         exitflag = 1;
     }

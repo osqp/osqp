@@ -61,10 +61,10 @@ c_float * csc_to_dns(csc * M)
     // Allocate elements
     for (c_int idx = 0; idx < M->nnz; idx++)
     {
-        // Get row index
+        // Get row index i (starting from 1)
         i = M->i[idx];
 
-        // Get column index (increase if necessary)
+        // Get column index j (increase if necessary) (starting from 1)
 		while (M->p[j]-1 <= idx) {
 			j++;
 		}

@@ -30,9 +30,12 @@ void print_dns_matrix(c_float * M, c_int m, c_int n, char *name)
 	for(c_int i=0; i<m; i++){  // Cycle over rows
 		for(c_int j=0; j<n; j++){  // Cycle over columns
             if (j < n - 1)
-                c_print("% 14.12e,  ", M[j*m+i]);
+                // c_print("% 14.12e,  ", M[j*m+i]);
+                c_print("% 1.4e,  ", M[j*m+i]);
+
             else
-                c_print("% 14.12e;  ", M[j*m+i]);
+                // c_print("% 14.12e;  ", M[j*m+i]);
+                c_print("% 1.4e;  ", M[j*m+i]);
         }
         if (i < m - 1){
             c_print("\n\t");
