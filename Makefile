@@ -59,6 +59,7 @@ test: $(TEST_TARGETS)
 	@echo "********************************************************************"
 
 $(OUT)/osqp_tester: tests/c/osqp_tester.c $(OUT)/libosqp.a
+	cd tests/c/lin_alg/; julia generate_mat.jl
 	$(CC) $(CFLAGS) $(TEST_INCLUDES) $^ -o $@  $(LDFLAGS)
 
 
