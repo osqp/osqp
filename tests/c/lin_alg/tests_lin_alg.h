@@ -119,8 +119,8 @@ c_int test_vec_operations(){
 // }
 
 c_int test_mat_operations(){
-    csc *t3_A, *t3_Ad, *t3_dA, *t3_A_ewsq;     // Matrices from matrices.h
-    csc *Ad, *dA, *A_ewsq;                     // Matrices used for tests
+    csc *t3_A, *t3_Ad, *t3_dA, *t3_A_ewsq, *t3_A_ewabs; // Matrices from matrices.h
+    csc *Ad, *dA, *A_ewsq, *A_ewabs;                    // Matrices used for tests
     c_int exitflag=0;
 
     // Compute sparse matrix A from vectors stored in matrices.h
@@ -128,16 +128,19 @@ c_int test_mat_operations(){
     t3_Ad = csc_matrix(t3_n, t3_n, t3_Ad_nnz, t3_Ad_x, t3_Ad_i, t3_Ad_p);
     t3_dA = csc_matrix(t3_n, t3_n, t3_dA_nnz, t3_dA_x, t3_dA_i, t3_dA_p);
     t3_A_ewsq = csc_matrix(t3_n, t3_n, t3_A_ewsq_nnz, t3_A_ewsq_x, t3_A_ewsq_i, t3_A_ewsq_p);
+    t3_A_ewabs = csc_matrix(t3_n, t3_n, t3_A_ewabs_nnz, t3_A_ewabs_x, t3_A_ewabs_i, t3_A_ewabs_p);
 
     // Initialize test matrices
     Ad = new_csc_matrix(t3_n, t3_n, t3_A_nnz);
     dA = new_csc_matrix(t3_n, t3_n, t3_A_nnz);
     A_ewsq = new_csc_matrix(t3_n, t3_n, t3_A_nnz);
+    A_ewabs = new_csc_matrix(t3_n, t3_n, t3_A_nnz);
 
     // Copy values of matrix A in all of test matrices
     copy_csc_mat(t3_A, Ad);
     copy_csc_mat(t3_A, dA);
     copy_csc_mat(t3_A, A_ewsq);
+    copy_csc_mat(t3_A, A_ewabs);
 
     // Premultiply matrix A
     mat_premult_diag(dA, t3_d);
@@ -155,11 +158,17 @@ c_int test_mat_operations(){
         exitflag = 1;
     }
 
-
     // Elementwise square
     mat_ew_sq(A_ewsq);
     if (!is_eq_csc(A_ewsq, t3_A_ewsq)) {
         c_print("\nError in elementwise square test!");
+        exitflag = 1;
+    }
+
+    // Elementwise absolute value
+    mat_ew_abs(A_ewabs);
+    if (!is_eq_csc(A_ewabs, t3_A_ewabs)) {
+        c_print("\nError in elementwise absolute value test!");
         exitflag = 1;
     }
 

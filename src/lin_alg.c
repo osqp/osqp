@@ -109,6 +109,16 @@ void mat_ew_sq(csc * A){
 }
 
 
+/* Elementwise absolute value of matrix M
+used in matrix equilibration
+*/
+void mat_ew_abs(csc * A){
+    c_int i;
+    for (i=0; i<A->nnz; i++)
+    {
+        A->x[i] = c_abs(A->x[i]);
+    }
+}
 
 /* Vertically concatenate arrays Z = [A' B']'
 (uses MALLOC to create inner arrays x, i, p within Z)
