@@ -30,7 +30,7 @@ function write_vec_float(f, x, name)
 	write(f, "c_float " * name)
 	@printf(f, "[%d] = {", n)
 	for i in 1:n
-		@printf(f, "%f, ", x[i])
+		@printf(f, "%.20f, ", x[i])
 	end
 	write(f, "};\n")
 end
@@ -40,7 +40,7 @@ function write_vec_int(f, x, name)
 	write(f, "c_int " * name)
 	@printf(f, "[%d] = {", n)
 	for i in 1:n
-		@printf(f, "%f, ", x[i])
+		@printf(f, "%d, ", x[i])
 	end
 	write(f, "};\n")
 end
@@ -50,7 +50,7 @@ function write_int(f, x, name)
 end
 
 function write_float(f, x, name)
-	@printf(f, "c_float %s = %f;\n", name, x)
+	@printf(f, "c_float %s = %.20f;\n", name, x)
 end
 
 # Reset seed
@@ -87,7 +87,7 @@ write_mat_sparse(f, Asp, "Asp")
 # write_vec_int(f, Asp_i, "Asp_i")
 # write_vec_int(f, Asp_p, "Asp_p")
 
-# 2) Test vector norms
+# 2) Test vector operations
 #-------------------------------------------------------------------------------
 # Define data
 t2_n = 10  # Second test vectors length
@@ -117,8 +117,13 @@ t2_norm2 = norm(t2_v1)
 write_float(f, t2_norm2, "t2_norm2")
 
 # NormInf
-t2_normInf = norm(t2_v1, Inf)
-write_float(f, t2_normInf, "t2_normInf")
+# t2_normInf = norm(t2_v1, Inf)
+# write_float(f, t2_normInf, "t2_normInf")
+
+# Elementwise reciprocal
+t2_ew_reciprocal = 1./t2_v1
+write_vec_float(f, t2_ew_reciprocal, "t2_ew_reciprocal")
+
 
 
 # 3) Vertically concatenate matrices

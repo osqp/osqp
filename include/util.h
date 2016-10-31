@@ -6,6 +6,10 @@
 
 /* ================================= DEBUG FUNCTIONS ======================= */
 #if PRINTLEVEL > 2
+
+/* Convert sparse CSC to dense */
+c_float * csc_to_dns(csc * M);
+
 /* Print a sparse matrix */
 void print_csc_matrix(csc* M, char * name);
 

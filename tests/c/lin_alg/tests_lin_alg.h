@@ -5,7 +5,7 @@
 #include "minunit.h"
 #include "lin_alg/matrices.h"
 
-#define LINALG_TESTS_TOL 1e-05
+#define LINALG_TESTS_TOL 1e-10
 
 c_int test_constr_sparse_mat(){
     csc * Asp;  // Sparse matrix allocation
@@ -37,15 +37,12 @@ c_int test_constr_sparse_mat(){
 
 c_int test_vec_norms(){
     c_int exitflag = 0;  // Initialize exitflag to 0
-    c_float norm2_diff, norm2_sq, norm2, normInf;
-    c_float add_scaled[t2_n];
+    c_float norm2_diff, norm2_sq, norm2; // normInf;
+    c_float add_scaled[t2_n], ew_reciprocal[t2_n];
 
     // Norm of the difference
     norm2_diff = vec_norm2_diff(t2_v1, t2_v2, t2_n);
     if (c_abs(norm2_diff - t2_norm2_diff)>LINALG_TESTS_TOL) {
-        // c_print("norm2_diff = %.4f\n", norm2_diff);
-        // c_print("t2_norm2_diff = %.4f\n", t2_norm2_diff);
-        // c_print("difference = %.4e\n", c_abs(norm2_diff - t2_norm2_diff));
         c_print("\nError in norm of difference test!");
         exitflag = 1;
     }
@@ -72,10 +69,16 @@ c_int test_vec_norms(){
         exitflag = 1;
     }
 
-    // NormInf
-    normInf = vec_normInf(t2_v1, t2_n);
-    if (c_abs(normInf - t2_normInf)>LINALG_TESTS_TOL) {
-        c_print("\nError in norm inf test!");
+    // // NormInf
+    // normInf = vec_normInf(t2_v1, t2_n);
+    // if (c_abs(normInf - t2_normInf)>LINALG_TESTS_TOL) {
+    //     c_print("\nError in norm inf test!");
+    //     exitflag = 1;
+    // }
+
+    vec_ew_recipr(t2_v1, ew_reciprocal, t2_n);
+    if(vec_norm2_diff(ew_reciprocal, t2_ew_reciprocal, t2_n)>LINALG_TESTS_TOL) {
+        c_print("\nError in elementwise reciprocal test!");
         exitflag = 1;
     }
 
@@ -84,39 +87,39 @@ c_int test_vec_norms(){
     return exitflag;
 }
 
-c_int test_mat_concat(){
-    csc * ABcat, * t3_A, * t3_B;
-    c_float * ABcat_dns;
-    c_float norm_diff;
-    c_int exitflag = 0;
-
-    // Construct sparse matrices
-    t3_A = csc_matrix(t3_mA, t3_nA, t3_A_nnz, t3_A_x, t3_A_i, t3_A_p);
-    t3_B = csc_matrix(t3_mB, t3_nA, t3_B_nnz, t3_B_x, t3_B_i, t3_B_p);
-
-    // Stack matrices and store in ABcat
-    ABcat = vstack(t3_A, t3_B);
-
-    // Convert sparse to dense
-    ABcat_dns =  csc_to_dns(ABcat);
-
-
-    // Compute norm of the elementwise difference with
-    norm_diff = vec_norm2_diff(ABcat_dns, t3_AB, ABcat->m*ABcat->n);
-
-
-    // DEBUG: print matrices
-    // print_dns_matrix(t3_AB, t3_mA + t3_mB, t3_nA, "t3_AB");
-    // print_dns_matrix(ABcat_dns, t3_mA + t3_mB, t3_nA, "ABcat_dns");
-
-    if (norm_diff>LINALG_TESTS_TOL) {
-        c_print("\nError in matrix concatenation test!");
-        exitflag = 1;
-    }
-
-    return exitflag;
-
-}
+// c_int test_mat_concat(){
+//     csc * ABcat, * t3_A, * t3_B;
+//     c_float * ABcat_dns;
+//     c_float norm_diff;
+//     c_int exitflag = 0;
+//
+//     // Construct sparse matrices
+//     t3_A = csc_matrix(t3_mA, t3_nA, t3_A_nnz, t3_A_x, t3_A_i, t3_A_p);
+//     t3_B = csc_matrix(t3_mB, t3_nA, t3_B_nnz, t3_B_x, t3_B_i, t3_B_p);
+//
+//     // Stack matrices and store in ABcat
+//     ABcat = vstack(t3_A, t3_B);
+//
+//     // Convert sparse to dense
+//     ABcat_dns =  csc_to_dns(ABcat);
+//
+//
+//     // Compute norm of the elementwise difference with
+//     norm_diff = vec_norm2_diff(ABcat_dns, t3_AB, ABcat->m*ABcat->n);
+//
+//
+//     // DEBUG: print matrices
+//     // print_dns_matrix(t3_AB, t3_mA + t3_mB, t3_nA, "t3_AB");
+//     // print_dns_matrix(ABcat_dns, t3_mA + t3_mB, t3_nA, "ABcat_dns");
+//
+//     if (norm_diff>LINALG_TESTS_TOL) {
+//         c_print("\nError in matrix concatenation test!");
+//         exitflag = 1;
+//     }
+//
+//     return exitflag;
+//
+// }
 
 
 static char * tests_lin_alg()
@@ -137,10 +140,10 @@ static char * tests_lin_alg()
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 
-    printf("3) Test matrix concatenation: ");
-    tempflag = test_mat_concat();
-    if (!tempflag) c_print("OK!\n");
-    exitflag += tempflag;
+    // printf("3) Test matrix concatenation: ");
+    // tempflag = test_mat_concat();
+    // if (!tempflag) c_print("OK!\n");
+    // exitflag += tempflag;
 
 
     mu_assert("Error in linear algebra tests", exitflag != 1 );

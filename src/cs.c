@@ -48,32 +48,3 @@ void free_csc_matrix(csc * M)
     c_free(M);
 
 }
-
-
-/* Convert sparse to dense */
-c_float * csc_to_dns(csc * M)
-{
-    c_int i, j=1;  // Predefine row index and column index
-
-    // Initialize matrix of zeros
-    c_float * A = (c_float *)c_calloc(M->m * M->n, sizeof(c_float));
-
-    // Allocate elements
-    for (c_int idx = 0; idx < M->nnz; idx++)
-    {
-        // Get row index i (starting from 1)
-        i = M->i[idx];
-
-        // Get column index j (increase if necessary) (starting from 1)
-		while (M->p[j]-1 <= idx) {
-			j++;
-		}
-
-        // Assign values to A
-        A[(j-1)*(M->m)+(i-1)] = M->x[idx];
-
-		// DEBUG
-		// c_print("A[%i, %i] = %.2f\n", i, j, M->x[idx]);
-    }
-    return A;
-}
