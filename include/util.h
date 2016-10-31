@@ -7,8 +7,16 @@
 /* ================================= DEBUG FUNCTIONS ======================= */
 #if PRINTLEVEL > 2
 
+#define TESTS_TOL 1e-10
+
 /* Convert sparse CSC to dense */
 c_float * csc_to_dns(csc * M);
+
+/* Copy sparse CSC matrix B = A*/
+void copy_csc_mat(const csc* A, csc *B);
+
+/* Compare CSC matrices */
+c_int is_eq_csc(csc *A, csc *B);
 
 /* Print a sparse matrix */
 void print_csc_matrix(csc* M, char * name);

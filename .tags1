@@ -4,9 +4,7 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
-vec_norm2_diff	/Users/sidereus/Dropbox/Oxford/Research/Code/projects/osqp/src/lin_alg.c	/^c_float vec_norm2_diff(const c_float *a, const c_float *b, c_int l) {$/;"	function	line:9	signature:(const c_float *a, const c_float *b, c_int l)
-vec_add_scaled	/Users/sidereus/Dropbox/Oxford/Research/Code/projects/osqp/src/lin_alg.c	/^void vec_add_scaled(c_float *a, const c_float *b, c_int n, const c_float sc) {$/;"	function	line:20	signature:(c_float *a, const c_float *b, c_int n, const c_float sc)
-vec_norm2_sq	/Users/sidereus/Dropbox/Oxford/Research/Code/projects/osqp/src/lin_alg.c	/^c_float vec_norm2_sq(const c_float *v, c_int l) {$/;"	function	line:28	signature:(const c_float *v, c_int l)
-vec_norm2	/Users/sidereus/Dropbox/Oxford/Research/Code/projects/osqp/src/lin_alg.c	/^c_float vec_norm2(const c_float *v, c_int l) {$/;"	function	line:38	signature:(const c_float *v, c_int l)
-vec_copy	/Users/sidereus/Dropbox/Oxford/Research/Code/projects/osqp/src/lin_alg.c	/^void vec_copy(c_float *a, c_float *b, c_int n) {$/;"	function	line:58	signature:(c_float *a, c_float *b, c_int n)
-vec_ew_recipr	/Users/sidereus/Dropbox/Oxford/Research/Code/projects/osqp/src/lin_alg.c	/^void vec_ew_recipr(c_float *a, c_float *b, c_int n){$/;"	function	line:66	signature:(c_float *a, c_float *b, c_int n)
+test_constr_sparse_mat	/Users/sidereus/Dropbox/Oxford/Research/Code/projects/osqp/tests/c/lin_alg/tests_lin_alg.h	/^c_int test_constr_sparse_mat(){$/;"	function	line:9	signature:()
+test_vec_operations	/Users/sidereus/Dropbox/Oxford/Research/Code/projects/osqp/tests/c/lin_alg/tests_lin_alg.h	/^c_int test_vec_operations(){$/;"	function	line:30	signature:()
+tests_mat_operations	/Users/sidereus/Dropbox/Oxford/Research/Code/projects/osqp/tests/c/lin_alg/tests_lin_alg.h	/^c_int tests_mat_operations(){$/;"	function	line:116	signature:()
+tests_lin_alg	/Users/sidereus/Dropbox/Oxford/Research/Code/projects/osqp/tests/c/lin_alg/tests_lin_alg.h	/^static char * tests_lin_alg()$/;"	function	line:126	signature:()

@@ -17,7 +17,7 @@ c_float vec_norm2_diff(const c_float *a, const c_float *b, c_int l) {
 }
 
 /* a += sc*b */
-void vec_add_scaled(c_float *a, const c_float *b, c_int n, const c_float sc) {
+void vec_add_scaled(c_float *a, const c_float *b, c_int n, c_float sc) {
     c_int i;
     for (i = 0; i < n; ++i) {
         a[i] += sc * b[i];
@@ -39,7 +39,7 @@ c_float vec_norm2(const c_float *v, c_int l) {
     return c_sqrt(vec_norm2_sq(v, l));
 }
 
-// /* ||v||_inf */
+// /* ||v||_inf (TODO: delete or keep it? not needed now)*/
 // c_float vec_normInf(const c_float *a, c_int l) {
 //     c_float tmp, max = 0.0;
 //     c_int i;
@@ -55,7 +55,7 @@ c_float vec_norm2(const c_float *v, c_int l) {
 /* copy vector b into a
 (TODO: if it is only needed for tests remove it and put it in util.h)
 */
-void vec_copy(c_float *a, c_float *b, c_int n) {
+void vec_copy(c_float *a, const c_float *b, c_int n) {
     for (c_int i=0; i<n; i++) {
         a[i] = b[i];
     }
@@ -63,7 +63,7 @@ void vec_copy(c_float *a, c_float *b, c_int n) {
 
 
 /* Vector elementwise reciprocal b = 1./a*/
-void vec_ew_recipr(c_float *a, c_float *b, c_int n){
+void vec_ew_recipr(const c_float *a, c_float *b, c_int n){
     c_int i;
     for (i=0; i<n; i++){
         b[i] = 1.0/a[i];
@@ -72,6 +72,44 @@ void vec_ew_recipr(c_float *a, c_float *b, c_int n){
 
 
 /* MATRIX FUNCTIONS ----------------------------------------------------------*/
+/* Premultiply matrix A by diagonal matrix with diagonal d,
+i.e. scale the rows of A by d
+*/
+void mat_premult_diag(csc *A, const c_float *d){
+    int j, i;
+    for (j=0; j<A->n; j++){  // Cycle over columns
+        for (i=A->p[j]; i<A->p[j+1]; i++){   // Cycle every row in the column
+            A->x[i] *= d[A->i[i]];  // Scale by corresponding element of d for row i
+        }
+    }
+}
+
+/* Premultiply matrix A by diagonal matrix with diagonal d,
+i.e. scale the columns of A by d
+*/
+void mat_postmult_diag(csc *A, const c_float *d){
+    int j, i;
+    for (j=0; j<A->n; j++){  // Cycle over columns j
+        for (i=A->p[j]; i<A->p[j+1]; i++){  // Cycle every row i in column j
+            A->x[i] *= d[j];  // Scale by corresponding element of d for column j
+        }
+    }
+}
+
+
+/* Elementwise square matrix M
+used in matrix equilibration
+*/
+void mat_ew_sq(csc * A){
+    c_int i;
+    for (i=0; i<A->nnz; i++)
+    {
+        A->x[i] = A->x[i]*A->x[i];
+    }
+}
+
+
+
 /* Vertically concatenate arrays Z = [A' B']'
 (uses MALLOC to create inner arrays x, i, p within Z)
 */
@@ -84,24 +122,24 @@ void vec_ew_recipr(c_float *a, c_float *b, c_int n){
 //     Z = new_csc_matrix(A->m + B->m, A->n, A->p[A->n] + B->p[B->n]);
 //
 //     // Assign elements
-//     Z->p[0] = 1;
+//     Z->p[0] = 0;
 //
 //
 //     for (j=0; j<A->n; j++){ // Cycle over columns
 //         // Shift column pointer to include elements of both matrices
-//         Z->p[j+1] = A->p[j+1] + B->p[j+1] - 1;
+//         Z->p[j] = A->p[j] + B->p[j];
 //
 //         // Add A elements
-//         for (i=A->p[j]; i<A->p[j+1]; i++){ // Add all elements in column j
-//             Z->i[z_count] = A->i[i-1];
-//             Z->x[z_count] = A->x[i-1];
+//         for (i=A->p[j-1]; i<A->p[j]; i++){ // Add all elements in column j
+//             Z->i[z_count] = A->i[i];
+//             Z->x[z_count] = A->x[i];
 //             z_count++;
 //         }
 //
 //         // Add B elements
-//         for (i=B->p[j]; i<B->p[j+1]; i++){ // Add all elements in column j
-//             Z->i[z_count] = B->i[i-1] + A->m; // Shift row idx by height of A
-//             Z->x[z_count] = B->x[i-1];
+//         for (i=B->p[j-1]; i<B->p[j]; i++){ // Add all elements in column j
+//             Z->i[z_count] = B->i[i] + A->m; // Shift row idx by height of A
+//             Z->x[z_count] = B->x[i];
 //             z_count++;
 //         }
 //     }

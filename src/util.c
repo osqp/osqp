@@ -3,10 +3,12 @@
 /* ================================= DEBUG FUNCTIONS ======================= */
 #if PRINTLEVEL > 2
 
+#include <string.h>  // For memcpy function
+
 /* Convert sparse CSC to dense */
 c_float * csc_to_dns(csc * M)
 {
-    c_int i, j=1;  // Predefine row index and column index
+    c_int i, j=0;  // Predefine row index and column index
 
     // Initialize matrix of zeros
     c_float * A = (c_float *)c_calloc(M->m * M->n, sizeof(c_float));
@@ -18,15 +20,47 @@ c_float * csc_to_dns(csc * M)
         i = M->i[idx];
 
         // Get column index j (increase if necessary) (starting from 1)
-		while (M->p[j]-1 <= idx) {
+		while (M->p[j+1] <= idx) {
 			j++;
 		}
 
         // Assign values to A
-        A[(j-1)*(M->m)+(i-1)] = M->x[idx];
+        A[j*(M->m)+i] = M->x[idx];
 
     }
     return A;
+}
+
+/* Copy sparse CSC matrix B = A. B has been previously created with
+new_csc_matrix(...) function
+*/
+void copy_csc_mat(const csc* A, csc *B){
+    memcpy(B->p, A->p, (A->n+1)*sizeof(c_int));
+    memcpy(B->i, A->i, (A->nnz)*sizeof(c_int));
+    memcpy(B->x, A->x, (A->nnz)*sizeof(c_float));
+}
+
+
+/* Compare sparse matrices */
+c_int is_eq_csc(csc *A, csc *B){
+    c_int j, i;
+    // If number of columns does not coincide, they are not equal.
+    if (A->n != B->n) return 0;
+
+    for (j=0; j<A->n; j++){      // Cycle over columns j
+
+        // if column pointer does not coincide, they are not equal
+        if (A->p[j] != B->p[j])  return 0;
+
+        for (i=A->p[j]; i<A->p[j+1]; i++){  // Cycle rows i in column j
+            if (A->i[i] != B->i[i] ||   // Different row indeces
+                A->x[i] - B->x[i] > TESTS_TOL ||
+                B->x[i] - A->x[i] < -TESTS_TOL){
+                return 0;
+            }
+        }
+    }
+    return(1);
 }
 
 
@@ -43,7 +77,7 @@ void print_csc_matrix(csc* M, char * name)
             continue;
         else {
             for(i=row_start; i<row_stop; i++ ){
-                c_print("\t[%3u,%3u] = %g\n", M->i[i-1], j+1, M->x[k++]);
+                c_print("\t[%3u,%3u] = %g\n", M->i[i], j, M->x[k++]);
             }
         }
     }

@@ -18,9 +18,9 @@ typedef struct    /* matrix in compressed-column or triplet form */
     c_int nzmax ;	        /* maximum number of entries */
     c_int m ;	            /* number of rows */
     c_int n ;	            /* number of columns */
-    c_int *p ;	            /* column pointers (size n+1) or col indices (size nzmax) */
-    c_int *i ;	            /* row indices, size nzmax */
-    c_float *x ;	            /* numerical values, size nzmax */
+    c_int *p ;	            /* column pointers (size n+1) or col indices (size nzmax) starting from 0 */
+    c_int *i ;	            /* row indices, size nzmax starting from 0*/
+    c_float *x ;	        /* numerical values, size nzmax */
     c_int nnz ;	            /* # of entries in triplet matrix, -1 for compressed-col */
 } csc ;
 
