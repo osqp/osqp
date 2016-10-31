@@ -25,7 +25,7 @@ class lasso(object):
     def __init__(self, m, n, dens_lvl=1.0, inst=1, version='dense',
                  osqp_opts={}):
         # Generate data
-        A = spspa.random(m, n, density=dens_lvl, format='csc')
+        A = spspa.random(m, n, density=dens_lvl)
         x_true = np.multiply((np.random.rand(n) > 0.5).astype(float),
                              np.random.randn(n)) / np.sqrt(n)
         b = A.dot(x_true) + .5*np.random.randn(m)
@@ -36,7 +36,7 @@ class lasso(object):
 
         # Construct the problem
         if version == 'dense':
-            #       minimize	|| Ax - b ||^2 + gamma * np.ones(b).T * t
+            #       minimize	|| Ax - b ||^2 + gamma * np.ones(n).T * t
             #       subject to  -t <= x <= t
             Q = spspa.block_diag((2*A.T.dot(A), spspa.csc_matrix((n, n))),
                                  format='csc')
@@ -48,7 +48,7 @@ class lasso(object):
                                   spspa.hstack([-In, -In])]).tocsc()
             bineq = np.zeros(2*n)
         elif version == 'sparse':
-            #       minimize	y.T * y + gamma * np.ones(b).T * t
+            #       minimize	y.T * y + gamma * np.ones(n).T * t
             #       subject to  y = Ax
             #                   -t <= x <= t
             Q = spspa.block_diag((spspa.csc_matrix((n, n)), 2*spspa.eye(m),

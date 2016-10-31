@@ -95,7 +95,6 @@ sp.random.seed(1)
 # Set problem
 k = 20
 n = 10*k
-numofinst = 5
 
 # Set options of the OSQP solver
 options = {'eps_abs':       1e-4,

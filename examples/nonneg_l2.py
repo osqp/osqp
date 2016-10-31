@@ -87,7 +87,6 @@ sp.random.seed(1)
 # Set problem
 m = 20
 n = 5*m
-numofinst = 5
 
 # Set options of the OSQP solver
 options = {'eps_abs':       1e-4,

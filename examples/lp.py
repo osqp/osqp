@@ -8,11 +8,12 @@ from quadprog.solvers.solvers import GUROBI, CPLEX, OSQP
 import quadprog.solvers.osqp.osqp as osqp
 
 
-# Generate and solve an SVM problem
-class svm(object):
+# Generate and solve a linear program
+class lp(object):
     """
-    Support vector machine problem is defined as
-            minimize	|| x ||^2 + gamma * 1.T * max(0, diag(b) A x + 1)
+    Linear program in the inequality from is defined as
+            minimize	c.T * x
+            subjec to   Ax <= b
 
     Arguments
     ---------
@@ -23,35 +24,19 @@ class svm(object):
 
     def __init__(self, m, n, dens_lvl=1.0, osqp_opts={}):
         # Generate data
-        if m % 2 == 1:
-            m = m + 1
-        N = m / 2
-        gamma = 1.0
-        b = np.append(np.ones(N), -np.ones(N))
-        A_upp = spspa.random(N, n, density=dens_lvl)
-        A_low = spspa.random(N, n, density=dens_lvl)
-        A = spspa.vstack([
-                A_upp / np.sqrt(n) + (A_upp != 0.).astype(float) / n,
-                A_low / np.sqrt(n) - (A_low != 0.).astype(float) / n]).tocsc()
-
-        # Construct the problem
-        #       minimize	 x.T * x + gamma 1.T * t
-        #       subject to  t >= diag(b) A x + 1
-        #                   t >= 0
-        Q = spspa.block_diag((2*spspa.eye(n), spspa.csc_matrix((m, m))),
-                             format='csc')
-        c = np.append(np.zeros(n), gamma*np.ones(m))
-        Aeq = spspa.csc_matrix((0, n + m))
+        Aeq = spspa.csc_matrix((0, n))
         beq = np.zeros(0)
-        Aineq = spspa.hstack([spspa.diags(b).dot(A), -spspa.eye(m)]).tocsc()
-        bineq = -np.ones(m)
-        lb = np.append(-np.inf*np.ones(n), np.zeros(m))
+        x_true = np.random.randn(n) / np.sqrt(n)
+        Aineq = spspa.random(m, n, density=dens_lvl, format='csc')
+        bineq = Aineq.dot(x_true) + 0.1*np.random.rand(m)
+        c = -Aineq.T.dot(np.random.rand(m))
+        Q = spspa.csc_matrix((n, n))
 
         # Create a quadprogProblem and store it in a private variable
-        self._prob = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq, lb)
+        self._prob = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq)
         # Create an OSQP object and store it in a private variable
         self._osqp = osqp.OSQP(**osqp_opts)
-        self._osqp.problem(Q, c, Aeq, beq, Aineq, bineq, lb)
+        self._osqp.problem(Q, c, Aeq, beq, Aineq, bineq)
 
     def solve(self, solver=OSQP):
         """
@@ -77,7 +62,7 @@ sp.random.seed(1)
 
 # Set problem
 n = 20
-m = 10*n
+m = 100
 
 # Set options of the OSQP solver
 options = {'eps_abs':       1e-4,
@@ -88,12 +73,12 @@ options = {'eps_abs':       1e-4,
            'polish':        False}
 
 # Create an svm object
-svm_obj = svm(m, n, dens_lvl=0.3, osqp_opts=options)
+lp_obj = lp(m, n, dens_lvl=0.3, osqp_opts=options)
 
 # Solve with different solvers
-resultsCPLEX = svm_obj.solve(solver=CPLEX)
-resultsGUROBI = svm_obj.solve(solver=GUROBI)
-resultsOSQP = svm_obj.solve(solver=OSQP)
+resultsCPLEX = lp_obj.solve(solver=CPLEX)
+resultsGUROBI = lp_obj.solve(solver=GUROBI)
+resultsOSQP = lp_obj.solve(solver=OSQP)
 
 # Print timings
 print "CPLEX  CPU time: %.3f" % resultsCPLEX.cputime

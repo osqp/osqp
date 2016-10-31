@@ -8,11 +8,12 @@ from quadprog.solvers.solvers import GUROBI, CPLEX, OSQP
 import quadprog.solvers.osqp.osqp as osqp
 
 
-# Generate and solve an SVM problem
-class svm(object):
+# Generate and solve a basis pursuit problem
+class basis_pursuit(object):
     """
-    Support vector machine problem is defined as
-            minimize	|| x ||^2 + gamma * 1.T * max(0, diag(b) A x + 1)
+    the basis purusit problem is defined as
+            minimize	|| x ||_1
+            subjec to   Ax = b
 
     Arguments
     ---------
@@ -23,35 +24,29 @@ class svm(object):
 
     def __init__(self, m, n, dens_lvl=1.0, osqp_opts={}):
         # Generate data
-        if m % 2 == 1:
-            m = m + 1
-        N = m / 2
-        gamma = 1.0
-        b = np.append(np.ones(N), -np.ones(N))
-        A_upp = spspa.random(N, n, density=dens_lvl)
-        A_low = spspa.random(N, n, density=dens_lvl)
-        A = spspa.vstack([
-                A_upp / np.sqrt(n) + (A_upp != 0.).astype(float) / n,
-                A_low / np.sqrt(n) - (A_low != 0.).astype(float) / n]).tocsc()
+        A = spspa.random(m, n, density=dens_lvl)
+        x_true = np.multiply((np.random.rand(n) > 0.5).astype(float),
+                             np.random.randn(n)) / np.sqrt(n)
+        b = A.dot(x_true)
 
         # Construct the problem
-        #       minimize	 x.T * x + gamma 1.T * t
-        #       subject to  t >= diag(b) A x + 1
-        #                   t >= 0
-        Q = spspa.block_diag((2*spspa.eye(n), spspa.csc_matrix((m, m))),
-                             format='csc')
-        c = np.append(np.zeros(n), gamma*np.ones(m))
-        Aeq = spspa.csc_matrix((0, n + m))
-        beq = np.zeros(0)
-        Aineq = spspa.hstack([spspa.diags(b).dot(A), -spspa.eye(m)]).tocsc()
-        bineq = -np.ones(m)
-        lb = np.append(-np.inf*np.ones(n), np.zeros(m))
+        #       minimize	np.ones(n).T * t
+        #       subject to  Ax = b
+        #                   -t <= x <= t
+        Q = spspa.csc_matrix((2*n, 2*n))
+        c = np.append(np.zeros(n), np.ones(n))
+        Aeq = spspa.hstack([A, spspa.csc_matrix((m, n))])
+        beq = b
+        In = spspa.eye(n)
+        Aineq = spspa.vstack([spspa.hstack([In, -In]),
+                              spspa.hstack([-In, -In])]).tocsc()
+        bineq = np.zeros(2*n)
 
         # Create a quadprogProblem and store it in a private variable
-        self._prob = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq, lb)
+        self._prob = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq)
         # Create an OSQP object and store it in a private variable
         self._osqp = osqp.OSQP(**osqp_opts)
-        self._osqp.problem(Q, c, Aeq, beq, Aineq, bineq, lb)
+        self._osqp.problem(Q, c, Aeq, beq, Aineq, bineq)
 
     def solve(self, solver=OSQP):
         """
@@ -77,7 +72,7 @@ sp.random.seed(1)
 
 # Set problem
 n = 20
-m = 10*n
+m = 200
 
 # Set options of the OSQP solver
 options = {'eps_abs':       1e-4,
@@ -88,12 +83,12 @@ options = {'eps_abs':       1e-4,
            'polish':        False}
 
 # Create an svm object
-svm_obj = svm(m, n, dens_lvl=0.3, osqp_opts=options)
+basis_pursuit_obj = basis_pursuit(m, n, dens_lvl=0.3, osqp_opts=options)
 
 # Solve with different solvers
-resultsCPLEX = svm_obj.solve(solver=CPLEX)
-resultsGUROBI = svm_obj.solve(solver=GUROBI)
-resultsOSQP = svm_obj.solve(solver=OSQP)
+resultsCPLEX = basis_pursuit_obj.solve(solver=CPLEX)
+resultsGUROBI = basis_pursuit_obj.solve(solver=GUROBI)
+resultsOSQP = basis_pursuit_obj.solve(solver=OSQP)
 
 # Print timings
 print "CPLEX  CPU time: %.3f" % resultsCPLEX.cputime
