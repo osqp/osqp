@@ -55,7 +55,7 @@ class portfolio(object):
             Aeq = spspa.vstack([
                     spspa.hstack([spspa.csc_matrix(np.ones((1, n))),
                                   spspa.csc_matrix(np.zeros((1, k)))]),
-                    spspa.hstack([F.T, -spspa.eye(k)])]).tocsr()
+                    spspa.hstack([F.T, -spspa.eye(k)])]).tocsc()
             beq = np.append(1., np.zeros(k))
             Aineq = spspa.csc_matrix((0, n + k))
             bineq = np.zeros(0)
@@ -103,8 +103,7 @@ options = {'eps_abs':       1e-4,
            'alpha':         1.6,
            'scale_problem': True,
            'scale_steps':   4,
-           'polish':        False,
-           'warm_start':    True}
+           'polish':        False}
 
 # Create a lasso object
 portfolio_obj = portfolio(k, n, dens_lvl=0.3, version='dense',

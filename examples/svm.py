@@ -8,53 +8,44 @@ from quadprog.solvers.solvers import GUROBI, CPLEX, OSQP
 import quadprog.solvers.osqp.osqp as osqp
 
 
-# Generate and solve a nonnegative least-squares problem
-class nonneg_l2(object):
+# Generate and solve an SVM problem
+class svm(object):
     """
-    Nonnegative least-squares problem is defined as
-            minimize	|| Ax - b ||^2
-            subjec to   x >= 0
+    Support vector machine problem is defined as
+            minimize	|| x ||^2 + gamma * 1.T * max(0, diag(b) A x + 1)
 
     Arguments
     ---------
     m, n        - Dimensions of matrix A        <int>
     osqp_opts   - Parameters of OSQP solver
     dens_lvl    - Density level of matrix A     <float>
-    version     - QP reformulation              ['dense', 'sparse']
     """
 
-    def __init__(self, m, n, dens_lvl=1.0, version='dense',
-                 osqp_opts={}):
+    def __init__(self, m, n, dens_lvl=1.0, osqp_opts={}):
         # Generate data
-        A = spspa.random(m, n, density=dens_lvl, format='csc')
-        x_true = np.ones(n) / n + np.random.randn(n) / np.sqrt(n)
-        b = A.dot(x_true) + 0.5*np.random.randn(m)
+        if m % 2 == 1:
+            m = m + 1
+        N = m / 2
+        gamma = 1.0
+        b = np.append(np.ones(N), -np.ones(N))
+        A_upp = spspa.random(N, n, density=dens_lvl)
+        A_low = spspa.random(N, n, density=dens_lvl)
+        A = spspa.vstack([
+                A_upp / np.sqrt(n) + (A_upp != 0.).astype(float) / n,
+                A_low / np.sqrt(n) - (A_low != 0.).astype(float) / n]).tocsc()
 
         # Construct the problem
-        if version == 'dense':
-            #       minimize	1/2 x.T (A.T * A) x - (A.T * b).T * x
-            #       subject to  x >= 0
-            Q = A.T.dot(A)
-            c = -A.T.dot(b)
-            Aeq = spspa.csc_matrix((0, n))
-            beq = np.zeros(0)
-            Aineq = spspa.csc_matrix((0, n))
-            bineq = np.zeros(0)
-            lb = np.zeros(n)
-        elif version == 'sparse':
-            #       minimize	1/2 y.T*y
-            #       subject to  y = Ax - b
-            #                   x >= 0
-            Im = spspa.eye(m)
-            Q = spspa.block_diag((spspa.csc_matrix((n, n)), Im), format='csc')
-            c = np.zeros(n + m)
-            Aeq = spspa.hstack([A, -Im]).tocsc()
-            beq = b
-            Aineq = spspa.csc_matrix((0, n + m))
-            bineq = np.zeros(0)
-            lb = np.append(np.zeros(n), -np.inf*np.ones(m))
-        else:
-            assert False, "Unhandled version"
+        #       minimize	 x.T * x + gamma 1.T * t
+        #       subject to  t >= diag(b) A x + 1
+        #                   t >= 0
+        Q = spspa.block_diag((2*spspa.eye(n), spspa.csc_matrix((m, m))),
+                             format='csc')
+        c = np.append(np.zeros(n), gamma*np.ones(m))
+        Aeq = spspa.csc_matrix((0, n + m))
+        beq = np.zeros(0)
+        Aineq = spspa.hstack([spspa.diags(b).dot(A), -spspa.eye(m)]).tocsc()
+        bineq = -np.ones(m)
+        lb = np.append(-np.inf*np.ones(n), np.zeros(m))
 
         # Create a quadprogProblem and store it in a private variable
         self._prob = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq, lb)
@@ -85,8 +76,8 @@ class nonneg_l2(object):
 sp.random.seed(1)
 
 # Set problem
-m = 20
-n = 5*m
+n = 20
+m = 10*n
 numofinst = 5
 
 # Set options of the OSQP solver
@@ -97,14 +88,13 @@ options = {'eps_abs':       1e-4,
            'scale_steps':   4,
            'polish':        False}
 
-# Create a lasso object
-nonneg_l2__obj = nonneg_l2(m, n, dens_lvl=0.3, version='dense',
-                           osqp_opts=options)
+# Create an svm object
+svm_obj = svm(m, n, dens_lvl=0.3, osqp_opts=options)
 
 # Solve with different solvers
-resultsCPLEX = nonneg_l2__obj.solve(solver=CPLEX)
-resultsGUROBI = nonneg_l2__obj.solve(solver=GUROBI)
-resultsOSQP = nonneg_l2__obj.solve(solver=OSQP)
+resultsCPLEX = svm_obj.solve(solver=CPLEX)
+resultsGUROBI = svm_obj.solve(solver=GUROBI)
+resultsOSQP = svm_obj.solve(solver=OSQP)
 
 # Print timings
 print "CPLEX  CPU time: %.3f" % resultsCPLEX.cputime
