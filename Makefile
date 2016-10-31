@@ -12,7 +12,7 @@ TEST_TARGETS = $(OUT)/osqp_tester  # Add tests for linear algebra functions
 TEST_INCLUDES = -Itests/c
 
 # Define objects to compile
-OSQP_OBJECTS = src/osqp.o src/lin_alg.o src/cs.o
+OSQP_OBJECTS = src/osqp.o src/cs.o src/util.o src/lin_alg.o
 
 # Define source and include files
 SRC_FILES = $(wildcard src/*.c)
@@ -36,6 +36,7 @@ default: $(TARGETS) $(OUT)/libosqp.a
 
 # Define OSQP objects dependencies
 src/osqp.o: $(SRC_FILES) $(INC_FILES)
+src/util.o	: src/util.c include/util.h
 src/lin_alg.o: src/lin_alg.c  include/lin_alg.h
 src/cs.o: src/cs.c include/cs.h
 
@@ -56,7 +57,7 @@ test: $(TEST_TARGETS)
 	@echo "Successfully compiled tests!"
 	@echo "To try the tests, type '$(OUT)/osqp_tester'"
 	@echo "********************************************************************"
-	
+
 $(OUT)/osqp_tester: tests/c/osqp_tester.c $(OUT)/libosqp.a
 	$(CC) $(CFLAGS) $(TEST_INCLUDES) $^ -o $@  $(LDFLAGS)
 

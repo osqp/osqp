@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "osqp.h"
 #include "cs.h"
+#include "util.h"
 #include "minunit.h"
 #include "lin_alg/matrices.h"
 
@@ -16,6 +17,13 @@ c_int test_constr_sparse_mat(){
 
     // Convert sparse to dense
     Adns =  csc_to_dns(Asp);
+
+
+    // DEBUG: Print matrices
+    // print_csc_matrix(Asp, "Asp");
+    // print_dns_matrix(Adns, m, n, "Adns");
+    // print_dns_matrix(A, m, n, "A");
+
 
     // Compute norm of the elementwise difference with
     norm_diff = vec_norm2_diff(Adns, A, m*n);
@@ -76,6 +84,40 @@ c_int test_vec_norms(){
     return exitflag;
 }
 
+c_int test_mat_concat(){
+    csc * ABcat, * t3_A, * t3_B;
+    c_float * ABcat_dns;
+    c_float norm_diff;
+    c_int exitflag = 0;
+
+    // Construct sparse matrices
+    t3_A = csc_matrix(m, n, t3_A_nnz, t3_A_x, t3_A_i, t3_A_p);
+    t3_B = csc_matrix(m, n, t3_B_nnz, t3_B_x, t3_B_i, t3_B_p);
+
+    // Stack matrices and store in ABcat
+    ABcat = vstack(t3_A, t3_B);
+
+    // Convert sparse to dense
+    ABcat_dns =  csc_to_dns(ABcat);
+
+
+    // Compute norm of the elementwise difference with
+    norm_diff = vec_norm2_diff(ABcat_dns, t3_AB, ABcat->m*ABcat->n);
+
+
+    // DEBUG: print matrices
+    print_dns_matrix(t3_AB, t3_mA + t3_mB, t3_nA, "t3_AB");
+    print_dns_matrix(ABcat_dns, t3_mA + t3_mB, t3_nA, "ABcat_dns");
+
+    if (norm_diff>LINALG_TOL) {
+        c_print("\nError in matrix concatenation test!");
+        exitflag = 1;
+    }
+
+    return exitflag;
+
+}
+
 
 static char * tests_lin_alg()
 {
@@ -92,6 +134,11 @@ static char * tests_lin_alg()
 
     printf("2) Test vector norms: ");
     tempflag = test_vec_norms();
+    if (!tempflag) c_print("OK!\n");
+    exitflag += tempflag;
+
+    printf("3) Test matrix concatenation: ");
+    tempflag = test_mat_concat();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 

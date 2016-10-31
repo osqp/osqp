@@ -53,7 +53,7 @@ void free_csc_matrix(csc * M)
 /* Convert sparse to dense */
 c_float * csc_to_dns(csc * M)
 {
-    c_int i, j=0;  // Predefine row index and column index
+    c_int i, j=1;  // Predefine row index and column index
 
     // Initialize matrix of zeros
     c_float * A = (c_float *)c_calloc(M->m * M->n, sizeof(c_float));
@@ -65,63 +65,15 @@ c_float * csc_to_dns(csc * M)
         i = M->i[idx];
 
         // Get column index (increase if necessary)
-		while (M->p[j+1] <= idx) {
+		while (M->p[j]-1 <= idx) {
 			j++;
 		}
 
         // Assign values to A
-        A[j*(M->m)+i] = M->x[idx];
+        A[(j-1)*(M->m)+(i-1)] = M->x[idx];
 
 		// DEBUG
 		// c_print("A[%i, %i] = %.2f\n", i, j, M->x[idx]);
     }
     return A;
 }
-
-
-
-
-/* ================================= DEBUG FUNCTIONS ======================= */
-#if PRINTLEVEL > 2
-
-/* Print a sparse matrix */
-void print_csc_matrix(csc* M, char * name)
-{
-    c_print("%s :\n", name);
-    c_int j, i, row_strt, row_stop;
-    c_int k = 0;
-    for(j=0; j<M->n; j++){
-        row_strt = M->p[j];
-        row_stop = M->p[j+1];
-        if (row_strt == row_stop)
-            continue;
-        else {
-            for(i=row_strt; i<row_stop; i++ ){
-                c_print("\t(%3u,%3u) = %g\n", (int)M->i[i]+1, (int)j+1, M->x[k++]);
-            }
-        }
-    }
-}
-
-
-/* Print a dense matrix */
-void print_dns_matrix(c_float * M, c_int m, c_int n, char *name)
-{
-    c_print("%s = \n\t", name);
-	for(c_int i=0; i<m; i++){  // Cycle over rows
-		for(c_int j=0; j<n; j++){  // Cycle over columns
-            if (j < n - 1)
-                c_print("% 14.12e,  ", M[j*m+i]);
-            else
-                c_print("% 14.12e;  ", M[j*m+i]);
-        }
-        if (i < m - 1){
-            c_print("\n\t");
-        }
-    }
-    c_print("\n");
-}
-
-
-
-#endif

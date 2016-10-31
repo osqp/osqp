@@ -44,14 +44,4 @@ void free_csc_matrix(csc * M);
 c_float * csc_to_dns(csc * M);
 
 
-/* ================================= DEBUG FUNCTIONS ======================= */
-#if PRINTLEVEL > 2
-/* Print a sparse matrix */
-void print_csc_matrix(csc* M, char * name);
-
-/* Print a dense matrix */
-void print_dns_matrix(c_float * M, c_int m, c_int n, char *name);
-
-#endif
-
 #endif
