@@ -7,8 +7,10 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "constants.h"
 #include <math.h>
+#include "constants.h"
+#include "glob_opts.h"
+
 
 
 typedef struct    /* matrix in compressed-column or triplet form */

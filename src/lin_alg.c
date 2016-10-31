@@ -34,3 +34,22 @@ c_float vec_norm2_sq(const c_float *v, c_int len) {
 c_float vec_norm2(const c_float *v, c_int len) {
     return c_sqrtf(vec_norm2_sq(v, len));
 }
+
+/* ||v||_inf */
+c_float vec_normInf(const c_float *a, c_int l) {
+    c_float tmp, max = 0.0;
+    c_int i;
+    for (i = 0; i < l; ++i) {
+        tmp = c_abs(a[i]);
+        if (tmp > max)
+            max = tmp;
+    }
+    return max;
+}
+
+/* copy vector b into a */
+void vec_copy(c_float *a, c_float *b, c_int n) {
+    for (c_int i=0; i<n; i++) {
+        a[i] = b[i];
+    }
+}

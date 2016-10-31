@@ -4,6 +4,7 @@
 
 /* Includes */
 #include "constants.h"
+#include "glob_opts.h"
 #include "lin_alg.h"
 
 

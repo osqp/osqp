@@ -37,12 +37,18 @@ function write_int(f, x, name)
 	@printf(f, "c_int %s = %d;\n", name, x)
 end
 
+function write_float(f, x, name)
+	@printf(f, "c_float %s = %f;\n", name, x)
+end
+
 # Reset seed
 srand(3)
 
 # Open file
 f = open("matrices.h", "w+")
 
+# 1) Test sparse matrix construction
+#-------------------------------------------------------------------------------
 # Define dimensions
 m = 5
 n = 6
@@ -68,6 +74,43 @@ write_int(f, Asp_nnz, "Asp_nnz")
 # @printf(f, "c_int Asp_nnz = %d;\n", Asp_nnz)
 write_vec_int(f, Asp_i, "Asp_i")
 write_vec_int(f, Asp_p, "Asp_p")
+
+# 2) Test vector norms
+#-------------------------------------------------------------------------------
+# Define data
+t2_n = 10  # Second test vectors length
+t2_v1 = randn(t2_n)
+t2_v2 = randn(t2_n)
+t2_sc = randn()
+write_int(f, t2_n, "t2_n")
+write_vec_float(f, t2_v1, "t2_v1")
+write_vec_float(f, t2_v2, "t2_v2")
+write_float(f, t2_sc, "t2_sc")
+
+
+# Norm of difference
+t2_norm2_diff = norm(t2_v1 - t2_v2)
+write_float(f, t2_norm2_diff, "t2_norm2_diff")
+
+# Add scaled
+t2_add_scaled = t2_v1 + t2_sc * t2_v2
+write_vec_float(f, t2_add_scaled, "t2_add_scaled")
+
+# Norm2 Squared
+t2_norm2_sq = norm(t2_v1)^2
+write_float(f, t2_norm2_sq, "t2_norm2_sq")
+
+# Norm2
+t2_norm2 = norm(t2_v1)
+write_float(f, t2_norm2, "t2_norm2")
+
+# NormInf
+t2_normInf = norm(t2_v1, Inf)
+write_float(f, t2_normInf, "t2_normInf")
+
+
+
+
 
 # Close file
 close(f)

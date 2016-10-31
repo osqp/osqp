@@ -2,6 +2,7 @@
 #define LIN_ALG_H
 #include <math.h>
 #include "constants.h"
+#include "glob_opts.h"
 
 /* ||a - b||_2 */
 c_float vec_norm2_diff(const c_float *a, const c_float *b, c_int l);
@@ -14,5 +15,12 @@ c_float vec_norm2_sq(const c_float *v, c_int len);
 
 /* ||v||_2 */
 c_float vec_norm2(const c_float *v, c_int len);
+
+/* ||v||_inf */
+c_float vec_normInf(const c_float *a, c_int l);
+
+/* copy vector b into a */
+void vec_copy(c_float *a, c_float *b, c_int n);
+
 
 #endif
