@@ -60,6 +60,6 @@ void mat_ew_abs(csc * A);
  *    y  =  A*x  (if plus_eq == 0)
  *    y +=  A*x  (if plus_eq == 1)
  */
-void mat_vec(csc *A, const c_float *x, c_float *y, c_int plus_eq);
+void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq);
 
 #endif
