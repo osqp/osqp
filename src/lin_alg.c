@@ -121,6 +121,26 @@ void mat_ew_abs(csc * A){
     }
 }
 
+
+/* Matrix-vector multiplication
+ *    y  =  A*x  (if plus_eq == 0)
+ *    y +=  A*x  (if plus_eq == 1)
+*/
+void mat_vec(csc *A, const c_float *x, c_float *y, c_int plus_eq){
+    int j, i;
+    if (plus_eq == 0){
+      // y = 0
+      for(i=0; i<A->m; i++){
+        y[i] = 0;
+      }
+    }
+    for (j=0; j<A->n; j++){
+        for (i=A->p[j]; i<A->p[j+1]; i++){
+            y[A->i[i]] += A->x[i] * x[j];
+        }
+    }
+}
+
 /* Vertically concatenate arrays Z = [A' B']'
 (uses MALLOC to create inner arrays x, i, p within Z)
 */

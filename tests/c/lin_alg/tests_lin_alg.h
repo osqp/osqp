@@ -176,6 +176,31 @@ c_int test_mat_operations(){
 }
 
 
+c_int test_mat_vec_operations(){
+    csc *A;   // Matrix from matrices.h
+    c_float Ax[t4_m], Ax_cum[t4_m];
+    c_int exitflag=0;
+
+    // Compute sparse matrix A from vectors stored in matrices.h
+    A = csc_matrix(t4_m, t4_n, t4_A_nnz, t4_A_x, t4_A_i, t4_A_p);
+
+    // Matrix-vector multiplication:  y = Ax
+    mat_vec(A, t4_x, Ax, 0);
+    if(vec_norm2_diff(Ax, t4_Ax, t4_m) > TESTS_TOL){
+        c_print("\nError in matrix-vector multiplication!");
+        exitflag = 1;
+    }
+
+    // Cumulative matrix-vector multiplication:  y += Ax
+    vec_copy(Ax_cum, t4_y, t4_m);
+    mat_vec(A, t4_x, Ax_cum, 1);
+    if(vec_norm2_diff(Ax_cum, t4_Ax_cum, t4_m) > TESTS_TOL){
+        c_print("\nError in cumulative matrix-vector multiplication!");
+        exitflag = 1;
+    }
+
+    return exitflag;
+}
 
 static char * tests_lin_alg()
 {
@@ -205,9 +230,12 @@ static char * tests_lin_alg()
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 
+    printf("4) Test matrix-vector operations: ");
+    tempflag = test_mat_vec_operations();
+    if (!tempflag) c_print("OK!\n");
+    exitflag += tempflag;
 
-
-    mu_assert("Error in linear algebra tests", exitflag != 1 );
+    mu_assert("\nError in linear algebra tests.", exitflag == 0 );
 
     return 0;
 }

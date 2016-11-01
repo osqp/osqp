@@ -56,4 +56,10 @@ void mat_ew_sq(csc * A);
 /* Elementwise absolute value of matrix M */
 void mat_ew_abs(csc * A);
 
+/* Matrix-vector multiplication
+ *    y  =  A*x  (if plus_eq == 0)
+ *    y +=  A*x  (if plus_eq == 1)
+ */
+void mat_vec(csc *A, const c_float *x, c_float *y, c_int plus_eq);
+
 #endif

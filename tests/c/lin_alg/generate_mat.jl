@@ -70,6 +70,8 @@ t2_n = 10  # Second test vectors length
 t2_v1 = randn(t2_n)
 t2_v2 = randn(t2_n)
 t2_sc = randn()
+
+# Write data
 write_int(f, t2_n, "t2_n")
 write_vec_float(f, t2_v1, "t2_v1")
 write_vec_float(f, t2_v2, "t2_v2")
@@ -131,8 +133,29 @@ t3_A_ewabs = abs(t3_A)
 write_mat_sparse(f, sparse(t3_A_ewabs), "t3_A_ewabs")
 
 
+# 4) Matrix-vector operations
+#-------------------------------------------------------------------------------
+# Define data
+t4_m = 5
+t4_n = 4
+t4_A = randn(t4_m, t4_n)
+t4_x = randn(t4_n)
+t4_y = randn(t4_m)
 
+# Write data
+write_int(f, t4_m, "t4_m")
+write_int(f, t4_n, "t4_n")
+write_mat_sparse(f, sparse(t4_A), "t4_A")
+write_vec_float(f, t4_x, "t4_x")
+write_vec_float(f, t4_y, "t4_y")
 
+# Matrix-vector multiplication:  y = Ax
+t4_Ax = t4_A*t4_x
+write_vec_float(f, t4_Ax, "t4_Ax")
+
+# Matrix-vector multiplication (cumulative):  y += Ax
+t4_Ax_cum = t4_A*t4_x + t4_y
+write_vec_float(f, t4_Ax_cum, "t4_Ax_cum")
 
 # Close file
 close(f)
