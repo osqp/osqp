@@ -39,7 +39,7 @@ c_float vec_norm2(const c_float *v, c_int l) {
     return c_sqrt(vec_norm2_sq(v, l));
 }
 
-// /* ||v||_inf (TODO: delete or keep it? not needed now)*/
+// /* ||v||_inf (TODO: delete or keep it? not needed now) */
 // c_float vec_normInf(const c_float *a, c_int l) {
 //     c_float tmp, max = 0.0;
 //     c_int i;
@@ -111,6 +111,7 @@ void mat_ew_sq(csc * A){
 
 /* Elementwise absolute value of matrix M
 used in matrix equilibration
+TODO: delete or keep it? We may not need this function.
 */
 void mat_ew_abs(csc * A){
     c_int i;
