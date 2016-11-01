@@ -12,7 +12,7 @@
 /* Convert sparse CSC to dense */
 c_float * csc_to_dns(csc * M);
 
-/* Copy sparse CSC matrix B = A*/
+/* Copy sparse CSC matrix B = A */
 void copy_csc_mat(const csc* A, csc *B);
 
 /* Compare CSC matrices */

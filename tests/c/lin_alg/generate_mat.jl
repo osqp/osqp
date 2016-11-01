@@ -126,7 +126,9 @@ write_mat_sparse(f, sparse(t3_Ad), "t3_Ad")
 t3_A_ewsq = t3_A.^2
 write_mat_sparse(f, sparse(t3_A_ewsq), "t3_A_ewsq")
 
-
+# Elementwise absolute value
+t3_A_ewabs = abs(t3_A)
+write_mat_sparse(f, sparse(t3_A_ewabs), "t3_A_ewabs")
 
 
 

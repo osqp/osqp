@@ -53,5 +53,7 @@ void mat_postmult_diag(csc *A, const c_float *d);
 /* Elementwise square matrix M */
 void mat_ew_sq(csc * A);
 
+/* Elementwise absolute value of matrix M */
+void mat_ew_abs(csc * A);
 
 #endif
