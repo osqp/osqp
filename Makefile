@@ -18,6 +18,12 @@ OSQP_OBJECTS = src/osqp.o src/cs.o src/util.o src/lin_alg.o
 SRC_FILES = $(wildcard src/*.c)
 INC_FILES = $(wildcard include/*.h)
 
+# SuiteSparse
+SUITESPARSE_DIR = linsys/direct/external/suitesparse
+CFLAGS += -I$(SUITESPARSE_DIR) -I$(SUITESPARSE_DIR)/amd/include -I$(SUITESPARSE_DIR)/ldl/include
+AMD_SRC_FILES = $(wildcard $(SUITESPARSE_DIR)/amd/src/amd_*.c)
+AMD_OBJECTS = $(AMD_SRC_FILES:.c=.o)
+SUITESPARSE_OBJS = $(SUITESPARSE_DIR)/ldl/src/ldl.o $(AMD_OBJECTS)
 
 # Compile all C code
 .PHONY: default
@@ -41,7 +47,7 @@ src/lin_alg.o: src/lin_alg.c  include/lin_alg.h
 src/cs.o: src/cs.c include/cs.h
 
 # Build osqp library
-$(OUT)/libosqp.a: $(OSQP_OBJECTS)
+$(OUT)/libosqp.a: $(OSQP_OBJECTS) $(SUITESPARSE_OBJS)
 	mkdir -p $(OUT)   # Create output directory
 	$(ARCHIVE) $@ $^  # Create archive of objects
 	- $(RANLIB) $@    # Add object files in static library and create index
@@ -65,7 +71,7 @@ $(OUT)/osqp_tester: tests/c/osqp_tester.c $(OUT)/libosqp.a
 
 .PHONY: clean
 clean:
-	@rm -rf $(TARGETS) $(OSQP_OBJECTS)
+	@rm -rf $(TARGETS) $(OSQP_OBJECTS) $(SUITESPARSE_OBJS)
 	@rm -rf $(OUT)/*.dSYM
 purge: clean
 	@rm -rf $(OUT)
