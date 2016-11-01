@@ -22,3 +22,9 @@ OUT = out
 ARFLAGS = rv
 ARCHIVE = $(AR) $(ARFLAGS)
 RANLIB = ranlib
+
+
+# Linear systems directories
+LINSYS = lin_sys
+DIRSRC = $(LINSYS)/direct
+DIRSRCEXT = $(DIRSRC)/external
