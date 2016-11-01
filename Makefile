@@ -5,21 +5,21 @@ include osqp.mk
 CFLAGS += -Iinclude
 
 # target executable
-TARGETS = $(OUT)/osqp_demo
+TARGETS = $(OUT)/osqp_demo_direct
 
 # Tests
-TEST_TARGETS = $(OUT)/osqp_tester  # Add tests for linear algebra functions
+TEST_TARGETS = $(OUT)/osqp_tester_direct  # Add tests for linear algebra functions
 TEST_INCLUDES = -Itests/c
 
 # Define objects to compile
-OSQP_OBJECTS = src/osqp.o src/cs.o src/util.o src/lin_alg.o src/kkt.o
+OSQP_OBJECTS = src/osqp.o src/cs.o src/util.o src/lin_alg.o
 
 # Define source and include files
 SRC_FILES = $(wildcard src/*.c)
 INC_FILES = $(wildcard include/*.h)
 
 # SuiteSparse
-SUITESPARSE_DIR = linsys/direct/external/suitesparse
+SUITESPARSE_DIR = $(DIRSRCEXT)/suitesparse
 CFLAGS += -I$(SUITESPARSE_DIR) -I$(SUITESPARSE_DIR)/amd/include -I$(SUITESPARSE_DIR)/ldl/include
 AMD_SRC_FILES = $(wildcard $(SUITESPARSE_DIR)/amd/src/amd_*.c)
 AMD_OBJECTS = $(AMD_SRC_FILES:.c=.o)
@@ -27,11 +27,11 @@ SUITESPARSE_OBJS = $(SUITESPARSE_DIR)/ldl/src/ldl.o $(AMD_OBJECTS)
 
 # Compile all C code
 .PHONY: default
-default: $(TARGETS) $(OUT)/libosqp.a
+default: $(TARGETS) $(OUT)/libosqpdir.a
 	@echo "********************************************************************"
 	@echo "Successfully compiled OSQP!"
 	@echo "Copyright ...."
-	@echo "To try the demo, type '$(OUT)/osqp_demo'"
+	@echo "To try the demo, type '$(OUT)/osqp_demo_direct'"
 	@echo "********************************************************************"
 
 
@@ -44,17 +44,23 @@ default: $(TARGETS) $(OUT)/libosqp.a
 src/osqp.o: $(SRC_FILES) $(INC_FILES)
 src/util.o	: src/util.c include/util.h
 src/lin_alg.o: src/lin_alg.c  include/lin_alg.h
-src/kkt.o: src/kkt.c  include/kkt.h
+# src/lin_sys.o: src/lin_sys.c  include/lin_sys.h
 src/cs.o: src/cs.c include/cs.h
 
-# Build osqp library
-$(OUT)/libosqp.a: $(OSQP_OBJECTS) $(SUITESPARSE_OBJS)
+
+# Define linear systems solvers objects and dependencies
+# Direct
+$(DIRSRC)/private.o: $(DIRSRC)/private.c  $(DIRSRC)/private.h
+
+
+# Build osqp library (direct method)
+$(OUT)/libosqpdir.a: $(OSQP_OBJECTS) $(DIRSRC)/private.o $(SUITESPARSE_OBJS) $(LINSYS)/common.o
 	mkdir -p $(OUT)   # Create output directory
 	$(ARCHIVE) $@ $^  # Create archive of objects
 	- $(RANLIB) $@    # Add object files in static library and create index
 
-# Build osqp target (demo file)
-$(OUT)/osqp_demo: examples/c/osqp_demo.c $(OUT)/libosqp.a
+# Build osqp target (demo file for direct method)
+$(OUT)/osqp_demo_direct: examples/c/osqp_demo_direct.c $(OUT)/libosqpdir.a
 	$(CC) $(CFLAGS) $^ -o $@  $(LDFLAGS)
 
 # Build tests
@@ -62,17 +68,17 @@ $(OUT)/osqp_demo: examples/c/osqp_demo.c $(OUT)/libosqp.a
 test: $(TEST_TARGETS)
 	@echo "********************************************************************"
 	@echo "Successfully compiled tests!"
-	@echo "To try the tests, type '$(OUT)/osqp_tester'"
+	@echo "To try the tests, type '$(OUT)/osqp_tester_direct'"
 	@echo "********************************************************************"
 
-$(OUT)/osqp_tester: tests/c/osqp_tester.c $(OUT)/libosqp.a
+$(OUT)/osqp_tester_direct: tests/c/osqp_tester_direct.c $(OUT)/libosqpdir.a
 	cd tests/c/lin_alg/; julia generate_mat.jl
 	$(CC) $(CFLAGS) $(TEST_INCLUDES) $^ -o $@  $(LDFLAGS)
 
 
 .PHONY: clean
 clean:
-	@rm -rf $(TARGETS) $(OSQP_OBJECTS) $(SUITESPARSE_OBJS)
+	@rm -rf $(TARGETS) $(OSQP_OBJECTS) $(SUITESPARSE_OBJS) $(LINSYS)/*.o $(DIRSRC)/*.o
 	@rm -rf $(OUT)/*.dSYM
 purge: clean
 	@rm -rf $(OUT)
