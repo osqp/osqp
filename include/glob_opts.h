@@ -8,7 +8,11 @@
 #define c_calloc calloc
 #define c_free free
 
-/* Use customized number representation ---------- */
+/* Use customized constants -----------------------------------------------   */
+#define OSQP_NULL 0
+
+
+/* Use customized number representation -----------------------------------   */
 typedef int c_int;                   /* for indeces */
 typedef double c_float;              /* for numerical values  */
 
@@ -24,21 +28,22 @@ typedef double c_float;              /* for numerical values  */
 #define c_max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-#define OSQP_NULL 0
+/* Use customized functions -----------------------------------------------   */
 
-// #ifndef c_max
-// #define c_max(a, b) (((a) > (b)) ? (a) : (b))
-// #endif
-//
-// #ifndef c_min
-// #define c_min(a, b) (((a) < (b)) ? (a) : (b))
-// #endif
-
-
-/* Custom printing functins ------------------------------------------------- */
 #if PRINTLEVEL > 0
 #define c_print printf
 #endif
+
+
+/* Use customized structures names */
+typedef struct OSQP_PROBLEM_DATA Data;
+typedef struct OSQP_SETTINGS Settings;
+typedef struct OSQP_SOL_VARS Sol;
+typedef struct OSQP_INFO Info;
+typedef struct OSQP_SCALING Scaling;
+typedef struct OSQP_WORK Work;
+
+
 
 
 #endif

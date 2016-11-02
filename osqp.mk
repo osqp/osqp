@@ -28,3 +28,25 @@ RANLIB = ranlib
 LINSYS = lin_sys
 DIRSRC = $(LINSYS)/direct
 DIRSRCEXT = $(DIRSRC)/external
+
+
+# Optional FLAGS to be passed to the C code
+#-------------------------------------------------------------------------------
+# Set Print Levels
+# 0: no prints
+# 1: only final info
+# 2: progress print per iteration
+# 3: debug level, enables print & dump fcns
+PRINTLEVEL = 3
+OPT_FLAGS = -DPRINTLEVEL=$(PRINTLEVEL)
+
+# Set Profiling
+# 0: no timing information
+# 1: runtime (divided in setup and solve)
+# 2: detailed profiling
+PROFILING = 1
+OPT_FLAGS += -DPROFILING=$(PROFILING)
+
+
+# Add Optional Flags to CFLAGS
+CFLAGS += $(OPT_FLAGS)
