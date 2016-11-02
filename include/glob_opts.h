@@ -20,6 +20,12 @@ typedef double c_float;              /* for numerical values  */
 #define c_abs(x) (((x) < 0) ? -(x) : (x))
 #endif
 
+#ifndef c_max
+#define c_max(a, b) (((a) > (b)) ? (a) : (b))
+#endif
+
+#define OSQP_NULL 0
+
 // #ifndef c_max
 // #define c_max(a, b) (((a) > (b)) ? (a) : (b))
 // #endif

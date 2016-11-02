@@ -131,16 +131,17 @@ c_int test_mat_operations(){
     t3_A_ewabs = csc_matrix(t3_n, t3_n, t3_A_ewabs_nnz, t3_A_ewabs_x, t3_A_ewabs_i, t3_A_ewabs_p);
 
     // Initialize test matrices
-    Ad = new_csc_matrix(t3_n, t3_n, t3_A_nnz);
-    dA = new_csc_matrix(t3_n, t3_n, t3_A_nnz);
-    A_ewsq = new_csc_matrix(t3_n, t3_n, t3_A_nnz);
-    A_ewabs = new_csc_matrix(t3_n, t3_n, t3_A_nnz);
+    Ad = csc_spalloc(t3_n, t3_n, t3_A_nnz, 1, 0);
+    dA = csc_spalloc(t3_n, t3_n, t3_A_nnz, 1, 0);
+    A_ewsq = csc_spalloc(t3_n, t3_n, t3_A_nnz, 1, 0);
+    A_ewabs = csc_spalloc(t3_n, t3_n, t3_A_nnz, 1, 0);
 
     // Copy values of matrix A in all of test matrices
     copy_csc_mat(t3_A, Ad);
     copy_csc_mat(t3_A, dA);
     copy_csc_mat(t3_A, A_ewsq);
     copy_csc_mat(t3_A, A_ewabs);
+
 
     // Premultiply matrix A
     mat_premult_diag(dA, t3_d);
@@ -153,6 +154,8 @@ c_int test_mat_operations(){
     // Postmultiply matrix A
     mat_postmult_diag(Ad, t3_d);
 
+    // print_csc_matrix(Ad, "Ad");
+    // print_csc_matrix(t3_Ad, "t3_Ad");
     if (!is_eq_csc(Ad, t3_Ad)) {
         c_print("\nError in postmultiply test!");
         exitflag = 1;
