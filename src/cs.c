@@ -1,50 +1,125 @@
 /* NB: this is a subset of the routines in the CSPARSE package by
- Tim Davis et. al., for the full package please visit
- http://www.cise.ufl.edu/research/sparse/CSparse/ */
+   Tim Davis et. al., for the full package please visit
+   http://www.cise.ufl.edu/research/sparse/CSparse/ */
 
 #include "cs.h"
 
 
+/* wrapper for malloc */
+static void *csc_malloc(c_int n, c_int size) {
+        return (c_malloc(n * size));
+}
+
+/* wrapper for calloc */
+static void *csc_calloc(c_int n, c_int size) {
+        return (c_calloc(n, size));
+}
+
+/* wrapper for free */
+static void *csc_free(void *p) {
+        if (p) c_free(p); /* free p if it is not already SCS_NULL */
+        return (OSQP_NULL); /* return OSQP_NULL to simplify the use of cs_free */
+}
+
+
 /* Create Compressed-Column-Sparse matrix from existing arrays
-(no MALLOC to create inner arrays x, i, p)
-*/
+   (no MALLOC to create inner arrays x, i, p)
+ */
 csc* csc_matrix(c_int m, c_int n, c_int nnz, c_float* x, c_int* i, c_int* p)
 {
-	csc* M = (csc *)c_malloc(sizeof(csc));
-	M->m = m;
-	M->n = n;
-	M->nnz = nnz;
-	M->x = x;
-    M->i = i;
-    M->p = p;
-	// if (M->p) M->p[n] = nnz;  // useless
-	return M;
+        csc* M = (csc *)c_malloc(sizeof(csc));
+        M->m = m;
+        M->n = n;
+        M->nnz = nnz;
+        M->nzmax = nnz;
+        M->x = x;
+        M->i = i;
+        M->p = p;
+        // if (M->p) M->p[n] = nnz;  // useless
+        return M;
 }
 
-
-/* Create uninitialized Compressed-Column-Sparse matrix
-(uses MALLOC to create inner arrays x, i, p)
-*/
-csc* new_csc_matrix(c_int m, c_int n, c_int nnz)
-{
-    c_float * x = (c_float *)c_malloc((nnz)*sizeof(c_float));
-    c_int * i = (c_int *)c_malloc((nnz)*sizeof(c_int));
-    c_int * p = (c_int *)c_malloc((n+1)*sizeof(c_int));
-    p[n] = nnz;  // Last element corresponds to number of nonzeros
-	return csc_matrix(m, n, nnz, x, i, p);
+/* Create uninitialized CSC matrix atricture
+   (uses MALLOC to create inner arrays x, i, p)
+   Arguments
+   ---------
+   m,n: dimensions
+   nzmax: max number of nonzero elements
+   values: 1/0 allocate values
+   triplet: 1/0 allocate matrix for CSC or Triplet format
+ */
+csc *csc_spalloc(c_int m, c_int n, c_int nzmax, c_int values, c_int triplet) {
+        csc *A = csc_calloc(1, sizeof(csc)); /* allocate the csc struct */
+        if (!A) return (OSQP_NULL); /* out of memory */
+        A->m = m;          /* define dimensions and nzmax */
+        A->n = n;
+        A->nzmax = nzmax = c_max(nzmax, 1);
+        A->nnz = triplet ? 0 : -1; /* allocate triplet or comp.col */
+        A->p = csc_malloc(triplet ? nzmax : n + 1, sizeof(c_int));
+        A->i = csc_malloc(nzmax,  sizeof(c_int));
+        A->x = values ? csc_malloc(nzmax,  sizeof(c_float)) : OSQP_NULL;
+        return ((!A->p || !A->i || (values && !A->x)) ? csc_spfree(A) : A);
 }
+
 
 /* Free sparse matrix
-(uses FREE to free inner arrays x, i, p)
+   (uses FREE to free inner arrays x, i, p)
  */
-void free_csc_matrix(csc * M)
-{
-    // Free allocated memory
-    if (M->x) c_free(M->x);
-    if (M->i) c_free(M->i);
-    if (M->p) c_free(M->p);
+csc *csc_spfree(csc *A) {
+        if (!A) return (OSQP_NULL); /* do nothing if A already SCS_NULL */
+        csc_free(A->p);
+        csc_free(A->i);
+        csc_free(A->x);
+        return ((csc *)csc_free(A)); /* free the cs struct and return SCS_NULL */
+}
 
-    // Free actual structure
-    c_free(M);
 
+/* C = compressed-column CSC from matrix T in triplet form */
+csc *triplet_to_csc(const csc *T) {
+        c_int m, n, nnz, p, k, *Cp, *Ci, *w, *Ti, *Tj;
+        c_float *Cx, *Tx;
+        csc *C;
+        m = T->m;
+        n = T->n;
+        Ti = T->i;
+        Tj = T->p;
+        Tx = T->x;
+        nnz = T->nnz;
+        C = csc_spalloc(m, n, nnz, Tx != OSQP_NULL, 0); /* allocate result */
+        w = csc_calloc(n, sizeof(c_int));       /* get workspace */
+        if (!C || !w) return (csc_done(C, w, OSQP_NULL, 0)); /* out of memory */
+        Cp = C->p;
+        Ci = C->i;
+        Cx = C->x;
+        for (k = 0; k < nnz; k++)
+                w[Tj[k]]++; /* column counts */
+        csc_cumsum(Cp, w, n); /* column pointers */
+        for (k = 0; k < nnz; k++) {
+                Ci[p = w[Tj[k]]++] = Ti[k]; /* A(i,j) is the pth entry in C */
+                if (Cx) Cx[p] = Tx[k];
+        }
+        return (csc_done(C, w, OSQP_NULL, 1)); /* success; free w and return C */
+}
+
+
+/* p [0..n] = cumulative sum of c [0..n-1], and then copy p [0..n-1] into c */
+c_int csc_cumsum(c_int *p, c_int *c, c_int n){
+        c_int i, nnz = 0;
+        if (!p || !c) return (-1);  /* check inputs */
+        for (i = 0; i < n; i++)
+        {
+                p [i] = nnz;
+                nnz += c [i];
+                c [i] = p [i];
+        }
+        p [n] = nnz;
+        return (nnz);       /* return sum (c [0..n-1]) */
+}
+
+
+/* free workspace and return a sparse matrix result */
+csc * csc_done(csc *C, void *w, void *x, c_int ok){
+        csc_free(w);        /* free workspace */
+        csc_free(x);
+        return(ok ? C : csc_spfree(C)); /* return result if OK, else free it */
 }

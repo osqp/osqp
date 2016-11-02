@@ -31,13 +31,13 @@ c_float * csc_to_dns(csc * M)
     return A;
 }
 
-/* Copy sparse CSC matrix B = A. B has been previously created with
-new_csc_matrix(...) function
+/* Copy sparse CSC matrix B = A. B has been previously created with csc_spalloc(...)
 */
 void copy_csc_mat(const csc* A, csc *B){
     memcpy(B->p, A->p, (A->n+1)*sizeof(c_int));
     memcpy(B->i, A->i, (A->nnz)*sizeof(c_int));
     memcpy(B->x, A->x, (A->nnz)*sizeof(c_float));
+    B->nnz = A->nnz;
 }
 
 
