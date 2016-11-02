@@ -26,8 +26,8 @@ c_int test_constr_sparse_mat(){
     norm_diff = vec_norm2_diff(Adns, A, m*n);
 
     // Free memory
-    c_free(Asp);  // Do not free with function free_csc_matrix because of vars from file matrices.h
-    c_free(Adns);
+    c_free(Asp);  // Do not free with function free_csc_matrix
+    c_free(Adns); // because of vars from file matrices.h
 
     return (norm_diff > TESTS_TOL);
 }
