@@ -3,6 +3,10 @@
 
 #include "constants.h"
 #include "cs.h"
+#include "osqp.h"
+
+/* ================================= OTHER FUNCTIONS ======================== */
+// Add timings, etc....
 
 /* ================================= DEBUG FUNCTIONS ======================= */
 #if PRINTLEVEL > 2
@@ -29,7 +33,6 @@ void print_vec(c_float * V, c_int n, char *name);
 
 #endif
 
-/* ================================= OTHER FUNCTIONS ======================== */
-// Add timings, etc....
+
 
 #endif

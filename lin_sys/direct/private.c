@@ -44,21 +44,21 @@ N.B. Only the upper triangular part is stuffed!
 //
 // }
 
-/* TODO: Adjust arguments of the function with other linear system solvers */
-c_int solveLinSys(const c_priv *p, scs_float *b) {
-    /* returns solution to linear system */
-    /* Ax = b with solution stored in b */
-    LDLSolve(b, b, p->L, p->D, p->P, p->bp);
-    return 0;
-}
-
-void LDLSolve(c_float *x, c_float *b, csc *L, c_float *D, c_int *P,
-              c_float *bp) {
-    /* solves PLDL'P' x = b for x */
-    c_int n = L->n;
-    LDL_perm(n, bp, b, P);
-    LDL_lsolve(n, bp, L->p, L->i, L->x);
-    LDL_dsolve(n, bp, D);
-    LDL_ltsolve(n, bp, L->p, L->i, L->x);
-    LDL_permt(n, x, bp, P);
-}
+// /* TODO: Adjust arguments of the function with other linear system solvers */
+// c_int solveLinSys(const c_priv *p, scs_float *b) {
+//     /* returns solution to linear system */
+//     /* Ax = b with solution stored in b */
+//     LDLSolve(b, b, p->L, p->D, p->P, p->bp);
+//     return 0;
+// }
+//
+// void LDLSolve(c_float *x, c_float *b, csc *L, c_float *D, c_int *P,
+//               c_float *bp) {
+//     /* solves PLDL'P' x = b for x */
+//     c_int n = L->n;
+//     LDL_perm(n, bp, b, P);
+//     LDL_lsolve(n, bp, L->p, L->i, L->x);
+//     LDL_dsolve(n, bp, D);
+//     LDL_ltsolve(n, bp, L->p, L->i, L->x);
+//     LDL_permt(n, x, bp, P);
+// }
