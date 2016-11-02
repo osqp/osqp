@@ -44,13 +44,11 @@ N.B. Only the upper triangular part is stuffed!
 //
 // }
 
-/* TODO: Adjust arguments of the function with other linear system solvers */
-c_int solveLinSys(const c_priv *p, scs_float *b) {
-    /* returns solution to linear system */
-    /* Ax = b with solution stored in b */
-    LDLSolve(b, b, p->L, p->D, p->P, p->bp);
-    return 0;
-}
+
+// c_priv *initPriv(const AMatrix *A, const Settings *stgs) {
+//     c_priv *p = c_calloc(1, sizeof(c_priv));
+//
+// }
 
 void LDLSolve(c_float *x, c_float *b, csc *L, c_float *D, c_int *P,
               c_float *bp) {
@@ -62,3 +60,12 @@ void LDLSolve(c_float *x, c_float *b, csc *L, c_float *D, c_int *P,
     LDL_ltsolve(n, bp, L->p, L->i, L->x);
     LDL_permt(n, x, bp, P);
 }
+
+
+// /* TODO: Adjust arguments of the function with other linear system solvers */
+// c_int solveLinSys(const c_priv *p, c_float *b) {
+//     /* returns solution to linear system */
+//     /* Ax = b with solution stored in b */
+//     LDLSolve(b, b, p->L, p->D, p->P, p->bp);
+//     return 0;
+// }

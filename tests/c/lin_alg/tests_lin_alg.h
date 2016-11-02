@@ -3,8 +3,11 @@
 #include "cs.h"
 #include "util.h"
 #include "minunit.h"
-#include "lin_alg/matrices.h"
 
+#ifndef MATRICES_H
+#define MATRICES_H
+#include "lin_alg/matrices.h"
+#endif
 
 c_int test_constr_sparse_mat(){
     csc * Asp;  // Sparse matrix allocation
@@ -179,7 +182,7 @@ c_int test_mat_operations(){
 }
 
 
-c_int test_mat_vec_operations(){
+c_int test_mat_vec_multiplication(){
     csc *A;   // Matrix from matrices.h
     c_float Ax[t4_m], Ax_cum[t4_m];
     c_int exitflag=0;
@@ -204,6 +207,7 @@ c_int test_mat_vec_operations(){
 
     return exitflag;
 }
+
 
 static char * tests_lin_alg()
 {
@@ -233,8 +237,8 @@ static char * tests_lin_alg()
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 
-    printf("4) Test matrix-vector operations: ");
-    tempflag = test_mat_vec_operations();
+    printf("4) Test matrix-vector multiplication: ");
+    tempflag = test_mat_vec_multiplication();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 

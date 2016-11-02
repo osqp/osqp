@@ -9,6 +9,7 @@
 
 // Include tests
 #include "lin_alg/tests_lin_alg.h"
+#include "lin_alg/tests_solve_linsys.h"
 
 
 int tests_run = 0;
@@ -16,6 +17,7 @@ int tests_run = 0;
 
 static char * all_tests() {
     mu_run_test(tests_lin_alg);
+    mu_run_test(tests_solve_linsys);
     return 0;
 }
 
