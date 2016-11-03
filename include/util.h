@@ -11,7 +11,7 @@
 /* ================================= DEBUG FUNCTIONS ======================= */
 #if PRINTLEVEL > 2
 
-#define TESTS_TOL 1e-10
+#define TESTS_TOL 1e-10  // Define tests tolerance 
 
 /* Convert sparse CSC to dense */
 c_float * csc_to_dns(csc * M);

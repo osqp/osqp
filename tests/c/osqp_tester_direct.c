@@ -6,11 +6,9 @@
 #include "minunit.h"
 #include "osqp.h"
 
-
 // Include tests
 #include "lin_alg/tests_lin_alg.h"
-#include "lin_alg/tests_solve_linsys.h"
-
+#include "solve_linsys/tests_solve_linsys.h"
 
 int tests_run = 0;
 

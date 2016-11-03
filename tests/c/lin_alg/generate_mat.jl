@@ -1,47 +1,5 @@
-function write_mat_sparse(f, Asp, name)
-	Asp_x = Asp.nzval
-	Asp_nnz = length(Asp.nzval)
-	Asp_i = Asp.rowval -1
-	Asp_p = Asp.colptr -1
-	write_vec_float(f, Asp_x, string(name,"_x"))
-	write_int(f, Asp_nnz, string(name, "_nnz"))
-	write_vec_int(f, Asp_i, string(name, "_i"))
-	write_vec_int(f, Asp_p, string(name, "_p"))
-end
-
-function write_vec_float(f, x, name)
-	n = size(x)[1]
-	write(f, "c_float " * name)
-	@printf(f, "[%d] = {", n)
-	for i in 1:n
-		@printf(f, "%.20f, ", x[i])
-	end
-	write(f, "};\n")
-end
-
-function write_vec_int(f, x, name)
-	n = size(x)[1]
-	write(f, "c_int " * name)
-	@printf(f, "[%d] = {", n)
-	for i in 1:n
-		@printf(f, "%d, ", x[i])
-	end
-	write(f, "};\n")
-end
-
-function write_int(f, x, name)
-	@printf(f, "c_int %s = %d;\n", name, x)
-end
-
-function write_float(f, x, name)
-	@printf(f, "c_float %s = %.20f;\n", name, x)
-end
-
-# Reset seed
-srand(10)
-
 # Open file
-f = open("matrices.h", "w+")
+f = open("lin_alg/matrices.h", "w+")
 
 
 # 1) Test sparse matrix construction
@@ -157,26 +115,6 @@ write_vec_float(f, t4_Ax, "t4_Ax")
 t4_Ax_cum = t4_A*t4_x + t4_y
 write_vec_float(f, t4_Ax_cum, "t4_Ax_cum")
 
-
-# 5) Linear system solve
-#-------------------------------------------------------------------------------
-# Define data
-t5_n = 2
-t5_A = [4. 1.; 1. 2.]
-t5_L = [0. 0.; 0.25 0.]		# Unit diagonal is assumed !!
-t5_D = [4.; 1.75]
-t5_P = [0; 1]
-t5_b = [1.; 2.]
-t5_x = t5_A \ t5_b
-
-# Write data
-write_int(f, t5_n, "t5_n")
-write_mat_sparse(f, sparse(t5_A), "t5_A")
-write_mat_sparse(f, sparse(t5_L), "t5_L")
-write_vec_float(f, t5_D, "t5_D")
-write_vec_float(f, t5_b, "t5_b")
-write_vec_float(f, t5_x, "t5_x")
-write_vec_int(f, t5_P, "t5_P")
 
 
 # Close file

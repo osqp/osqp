@@ -4,10 +4,20 @@
 #include "util.h"
 #include "minunit.h"
 #include "lin_sys.h"
-#ifndef MATRICES_H
-#define MATRICES_H
-#include "lin_alg/matrices.h"
+#ifndef SOLVE_LINSYS_MATRICES_H
+#define SOLVE_LINSYS_MATRICES_H
+#include "solve_linsys/matrices.h"
 #endif
+
+
+// c_int test_formKKT(){
+//
+//
+//     formKKT(csc * P, csc * A, c_float rho);
+//
+//
+//
+// }
 
 c_int test_LDL_solve(){
     csc *L;   // Matrix from matrices.h

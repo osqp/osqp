@@ -4,8 +4,8 @@
 #include "util.h"
 #include "minunit.h"
 
-#ifndef MATRICES_H
-#define MATRICES_H
+#ifndef LIN_ALG_MATRICES_H
+#define LIN_ALG_MATRICES_H
 #include "lin_alg/matrices.h"
 #endif
 
