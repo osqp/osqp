@@ -61,9 +61,9 @@ csc * formKKT(const csc * P, const  csc * A, c_float rho){
             i = P->i[ptr];
 
             //DEBUG
-            c_print("\n\nP(%i, %i) = %.4f\n", i, j, P->x[z_P]);
-            c_print("P->p[j] = %i\n", P->p[j]);
-            c_print("P->p[j+1] = %i\n", P->p[j+1]);
+            // c_print("\n\nP(%i, %i) = %.4f\n", i, j, P->x[z_P]);
+            // c_print("P->p[j] = %i\n", P->p[j]);
+            // c_print("P->p[j+1] = %i\n", P->p[j+1]);
 
 
             // Add element of P
@@ -126,8 +126,8 @@ csc * formKKT(const csc * P, const  csc * A, c_float rho){
     // c_print("KKT_trip->nz = %i\n", KKT_trip->nz);
     // c_print("KKT_trip->nzmax = %i\n", KKT_trip->nzmax);
 
-    c_float * KKTdns =  csc_to_dns(KKT);
-    print_dns_matrix(KKTdns, P->n + A->n, P->n + A->n, "KKTdns");
+    // c_float * KKTdns =  csc_to_dns(KKT);
+    // print_dns_matrix(KKTdns, P->n + A->n, P->n + A->n, "KKTdns");
 
     // Clean matrix in triplet format and return result
     csc_spfree(KKT_trip);
@@ -150,10 +150,14 @@ Priv *initPriv(const csc * P, const csc * A, const Settings *settings){
     // Sparse matrix L (lower triangular)
     // Set nzmax to 1 and null pointer to elements (to be filled during factorization)
     p->L = csc_spalloc(n_plus_m, n_plus_m, 1, 0, 0);
+    // Diagonal matrix stored as a vector D
+    p->D = c_malloc(sizeof(c_float) * n_plus_m);
     // Permutation vector P
     p->P = c_malloc(sizeof(c_int) * n_plus_m);
     // Working vector
     p->bp = c_malloc(sizeof(c_float) * n_plus_m);
+    // Solve time (for reporting)
+    p->solveTime = 0.0;
 
     // Form KKT matrix
     KKT = formKKT(P, A, settings->rho);
@@ -172,6 +176,23 @@ Priv *initPriv(const csc * P, const csc * A, const Settings *settings){
 }
 
 
+// Initialize private variable with given matrix L, and vector D and P
+Priv *setPriv(csc *L, c_float *D, c_int *P){
+    Priv * p;   // LDL structure
+    c_int n = L->n;
+    // Allocate pointers
+    p = c_calloc(1, sizeof(Priv));
+    // Set LDL factorization data: L, D, P
+    p->L = L;   // lower triangular matrix (stored without unit diagonal)
+    p->D = D;   // diagonal matrix (stored as a vector)
+    p->P = P;   // permutation matrix (stored as a vector)
+    // Working vector
+    p->bp = c_malloc(sizeof(c_float) * n);
+    // Solve time (for reporting)
+    p->solveTime = 0.0;
+    return p;
+}
+
 void LDLSolve(c_float *x, c_float *b, csc *L, c_float *D, c_int *P,
               c_float *bp) {
     /* solves PLDL'P' x = b for x */
@@ -184,10 +205,10 @@ void LDLSolve(c_float *x, c_float *b, csc *L, c_float *D, c_int *P,
 }
 
 
-// /* TODO: Adjust arguments of the function with other linear system solvers */
-// c_int solveLinSys(const c_priv *p, c_float *b) {
-//     /* returns solution to linear system */
-//     /* Ax = b with solution stored in b */
-//     LDLSolve(b, b, p->L, p->D, p->P, p->bp);
-//     return 0;
-// }
+/* TODO: Adjust arguments of the function with other linear system solvers */
+c_int solveLinSys(const Settings *settings, Priv *p, c_float *b) {
+    /* returns solution to linear system */
+    /* Ax = b with solution stored in b */
+    LDLSolve(b, b, p->L, p->D, p->P, p->bp);
+    return 0;
+}

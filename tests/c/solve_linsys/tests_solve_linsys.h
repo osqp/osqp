@@ -13,43 +13,79 @@
 c_int test_formKKT(){
     c_int exitflag = 0;
     csc *t6_P, *t6_A, *t6_KKT;
-    Priv * p; // Private structure to form KKT factorization
-    Settings * settings = c_malloc(sizeof(Settings)); // Settings
+    csc * KKT;
 
     // Construct sparse matrices from matrices.h
     t6_KKT = csc_matrix(t6_n+t6_m, t6_n+t6_m, t6_KKT_nnz, t6_KKT_x, t6_KKT_i, t6_KKT_p);
     t6_P = csc_matrix(t6_n, t6_n, t6_P_nnz, t6_P_x, t6_P_i, t6_P_p);
     t6_A = csc_matrix(t6_m, t6_m, t6_A_nnz, t6_A_x, t6_A_i, t6_A_p);
 
-    // Define settings
-    settings->rho = t6_rho;
-    p = initPriv(t6_P, t6_A, settings);
+
+    // Construct KKT matrix
+    KKT = formKKT(t6_P, t6_A, t6_rho);
 
     // Print results // Only for DEBUG
-    // print_csc_matrix(t6_KKT, "t6_KKT");
+    print_csc_matrix(t6_KKT, "t6_KKT");
+    print_csc_matrix(KKT, "KKT");
+
     // c_print("t6_KKT_n = %i\n", t6_n + t6_m);
 
-    // if (!is_eq_csc(, t3_dA)) {
-    //     c_print("\nError in premultiply test!");
-    //     exitflag = 1;
-    // }
+    if (!is_eq_csc(KKT, t6_KKT)) {
+        c_print("\nError in forming KKT matrix!");
+        exitflag = 1;
+    }
 
     return exitflag;
 }
 
-c_int test_LDL_solve(){
-    csc *L;   // Matrix from matrices.h
-    c_float x[t5_n], x_ws[t5_n], diff;
-    c_int exitflag=0;
 
-    // Compute sparse matrix A from vectors stored in matrices.h
+c_int test_LDL_solve_simple(){
+    c_int exitflag=0;
+    csc *L;   // Matrix from matrices.h
+    Priv * p; // Private structure for storing LDL factorization
+    Settings *settings = c_malloc(sizeof(Settings)); // Settings
+
+    // Convert matrix L from matrices.h to CSC format
     L = csc_matrix(t5_n, t5_n, t5_L_nnz, t5_L_x, t5_L_i, t5_L_p);
 
+    // Store L, D, P in a private variable
+    p = setPriv(L, t5_D, t5_P);
+
     // Solve  Ax = b via LDL given factorization
-    LDLSolve(x, t5_b, L, t5_D, t5_P, x_ws);
-    diff = vec_norm2_diff(x, t5_x, t5_n);
-    if(diff > TESTS_TOL){
-        c_print("\nError in the LDL linear system solve!");
+    solveLinSys(settings, p, t5_b);
+
+    if(vec_norm2_diff(t5_b, t5_x, t5_n) > TESTS_TOL){
+        c_print("\nError in the simple LDL linear system solve!");
+        exitflag = 1;
+    }
+
+    return exitflag;
+}
+
+
+c_int test_LDL_solve_random(){
+    c_int exitflag=0;
+    csc *L;   // Matrix from matrices.h
+    Priv * p; // Private structure to form KKT factorization
+    Settings *settings = c_malloc(sizeof(Settings)); // Settings
+
+    // Convert matrix L from matrices.h to CSC format
+    L = csc_matrix(t7_n, t7_n, t7_L_nnz, t7_L_x, t7_L_i, t7_L_p);
+
+    // Store L, D, P in a private variable
+    p = setPriv(L, t7_D, t7_P);
+
+    // Solve  Ax = b via LDL given factorization
+    solveLinSys(settings, p, t7_b);
+
+    // DEBUG
+    c_print("\n");
+    print_vec(t7_x, t7_n, "\nx_true");
+    print_vec(t7_b, t7_n, "x_ldl ");
+    c_print("\ndiff = %.10f\n", vec_norm2_diff(t7_b, t7_x, t7_n));
+
+    if(vec_norm2_diff(t7_b, t7_x, t7_n) > TESTS_TOL){
+        c_print("\nError in the random LDL linear system solve!");
         exitflag = 1;
     }
 
@@ -70,8 +106,13 @@ static char * tests_solve_linsys()
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 
-    printf("1) Test linear system solve via LDL: ");
-    tempflag = test_LDL_solve();
+    printf("1) Test simple linear system solve via LDL: ");
+    tempflag = test_LDL_solve_simple();
+    if (!tempflag) c_print("OK!\n");
+    exitflag += tempflag;
+
+    printf("2) Test random linear system solve via LDL: ");
+    tempflag = test_LDL_solve_random();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 
