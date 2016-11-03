@@ -37,17 +37,17 @@ t6_PrhoI = t6_P + t6_rho*speye(size(t6_P,1))
 t6_A = sprandn(t6_m, t6_n, t6_p)
 
 # KKT (only one part)
-t6_KKT = [t6_PrhoI            spzeros(size(t6_A')...);
-          spzeros(size(t6_A)...)     spzeros(size(t6_A,1), size(t6_A,1))]
+# t6_KKT = [t6_PrhoI            spzeros(size(t6_A')...);
+#           spzeros(size(t6_A)...)     spzeros(size(t6_A,1), size(t6_A,1))]
 # Complete KKT
-# t6_KKT = [t6_PrhoI            t6_A');
-#           t6_A     -1./t6_rho*speye(size(t6_A,1))]
+t6_KKT = [t6_PrhoI            t6_A';
+          spzeros(size(t6_A)...)     -1./t6_rho*speye(size(t6_A,1))]
 
 
 # Save data and matrices  to file
 write_float(f, t6_rho, "t6_rho")
-write_float(f, t6_n, "t6_n")
-write_float(f, t6_m, "t6_m")
+write_int(f, t6_n, "t6_n")
+write_int(f, t6_m, "t6_m")
 
 write_mat_sparse(f, t6_P, "t6_P")
 write_mat_sparse(f, t6_PrhoI, "t6_PrhoI")

@@ -38,7 +38,7 @@ function write_float(f, x, name)
 end
 
 # Reset seed
-srand(10)
+srand(11)
 
 
 

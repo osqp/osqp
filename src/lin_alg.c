@@ -102,7 +102,7 @@ used in matrix equilibration
 */
 void mat_ew_sq(csc * A){
     c_int i;
-    for (i=0; i<A->nnz; i++)
+    for (i=0; i<A->nzmax; i++)
     {
         A->x[i] = A->x[i]*A->x[i];
     }
@@ -115,7 +115,7 @@ TODO: delete or keep it? We may not need this function.
 */
 void mat_ew_abs(csc * A){
     c_int i;
-    for (i=0; i<A->nnz; i++)
+    for (i=0; i<A->nzmax; i++)
     {
         A->x[i] = c_abs(A->x[i]);
     }

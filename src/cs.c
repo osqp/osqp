@@ -25,17 +25,16 @@ static void *csc_free(void *p) {
 /* Create Compressed-Column-Sparse matrix from existing arrays
    (no MALLOC to create inner arrays x, i, p)
  */
-csc* csc_matrix(c_int m, c_int n, c_int nnz, c_float* x, c_int* i, c_int* p)
+csc* csc_matrix(c_int m, c_int n, c_int nzmax, c_float* x, c_int* i, c_int* p)
 {
         csc* M = (csc *)c_malloc(sizeof(csc));
         M->m = m;
         M->n = n;
-        M->nnz = nnz;
-        M->nzmax = nnz;
+        M->nz = -1;
+        M->nzmax = nzmax;
         M->x = x;
         M->i = i;
         M->p = p;
-        // if (M->p) M->p[n] = nnz;  // useless
         return M;
 }
 
@@ -54,7 +53,7 @@ csc *csc_spalloc(c_int m, c_int n, c_int nzmax, c_int values, c_int triplet) {
         A->m = m;          /* define dimensions and nzmax */
         A->n = n;
         A->nzmax = nzmax = c_max(nzmax, 1);
-        A->nnz = triplet ? 0 : -1; /* allocate triplet or comp.col */
+        A->nz = triplet ? 0 : -1; /* allocate triplet or comp.col */
         A->p = csc_malloc(triplet ? nzmax : n + 1, sizeof(c_int));
         A->i = csc_malloc(nzmax,  sizeof(c_int));
         A->x = values ? csc_malloc(nzmax,  sizeof(c_float)) : OSQP_NULL;
@@ -76,7 +75,7 @@ csc *csc_spfree(csc *A) {
 
 /* C = compressed-column CSC from matrix T in triplet form */
 csc *triplet_to_csc(const csc *T) {
-        c_int m, n, nnz, p, k, *Cp, *Ci, *w, *Ti, *Tj;
+        c_int m, n, nz, p, k, *Cp, *Ci, *w, *Ti, *Tj;
         c_float *Cx, *Tx;
         csc *C;
         m = T->m;
@@ -84,17 +83,17 @@ csc *triplet_to_csc(const csc *T) {
         Ti = T->i;
         Tj = T->p;
         Tx = T->x;
-        nnz = T->nnz;
-        C = csc_spalloc(m, n, nnz, Tx != OSQP_NULL, 0); /* allocate result */
+        nz = T->nz;
+        C = csc_spalloc(m, n, nz, Tx != OSQP_NULL, 0); /* allocate result */
         w = csc_calloc(n, sizeof(c_int));       /* get workspace */
         if (!C || !w) return (csc_done(C, w, OSQP_NULL, 0)); /* out of memory */
         Cp = C->p;
         Ci = C->i;
         Cx = C->x;
-        for (k = 0; k < nnz; k++)
+        for (k = 0; k < nz; k++)
                 w[Tj[k]]++; /* column counts */
         csc_cumsum(Cp, w, n); /* column pointers */
-        for (k = 0; k < nnz; k++) {
+        for (k = 0; k < nz; k++) {
                 Ci[p = w[Tj[k]]++] = Ti[k]; /* A(i,j) is the pth entry in C */
                 if (Cx) Cx[p] = Tx[k];
         }
@@ -104,16 +103,16 @@ csc *triplet_to_csc(const csc *T) {
 
 /* p [0..n] = cumulative sum of c [0..n-1], and then copy p [0..n-1] into c */
 c_int csc_cumsum(c_int *p, c_int *c, c_int n){
-        c_int i, nnz = 0;
+        c_int i, nz = 0;
         if (!p || !c) return (-1);  /* check inputs */
         for (i = 0; i < n; i++)
         {
-                p [i] = nnz;
-                nnz += c [i];
+                p [i] = nz;
+                nz += c [i];
                 c [i] = p [i];
         }
-        p [n] = nnz;
-        return (nnz);       /* return sum (c [0..n-1]) */
+        p [n] = nz;
+        return (nz);       /* return sum (c [0..n-1]) */
 }
 
 

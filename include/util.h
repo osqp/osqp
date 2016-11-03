@@ -11,7 +11,7 @@
 /* ================================= DEBUG FUNCTIONS ======================= */
 #if PRINTLEVEL > 2
 
-#define TESTS_TOL 1e-10  // Define tests tolerance 
+#define TESTS_TOL 1e-10  // Define tests tolerance
 
 /* Convert sparse CSC to dense */
 c_float * csc_to_dns(csc * M);
@@ -22,8 +22,11 @@ void copy_csc_mat(const csc* A, csc *B);
 /* Compare CSC matrices */
 c_int is_eq_csc(csc *A, csc *B);
 
-/* Print a sparse matrix */
+/* Print a csc sparse matrix */
 void print_csc_matrix(csc* M, char * name);
+
+/* Print a triplet format sparse matrix */
+void print_trip_matrix(csc* M, char * name);
 
 /* Print a dense matrix */
 void print_dns_matrix(c_float * M, c_int m, c_int n, char *name);

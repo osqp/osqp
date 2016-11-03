@@ -21,7 +21,7 @@ typedef struct    /* matrix in compressed-column or triplet form */
         c_int *p;        /* column pointers (size n+1) or col indices (size nzmax) start from 0 */
         c_int *i;        /* row indices, size nzmax starting from 0*/
         c_float *x;      /* numerical values, size nzmax */
-        c_int nnz;       /* # of entries in triplet matrix, -1 for compressed-col */
+        c_int nz;       /* # of entries in triplet matrix, -1 for compressed-col */
 } csc;
 
 
@@ -40,7 +40,7 @@ typedef struct    /* matrix in compressed-column or triplet form */
 /* Create Compressed-Column-Sparse matrix from existing arrays
    (no MALLOC to create inner arrays x, i, p)
  */
-csc* csc_matrix(c_int m, c_int n, c_int nnz, c_float* x, c_int* i, c_int* p);
+csc* csc_matrix(c_int m, c_int n, c_int nzmax, c_float* x, c_int* i, c_int* p);
 
 
 /* Create uninitialized CSC matrix atricture

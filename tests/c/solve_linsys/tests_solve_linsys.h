@@ -19,14 +19,20 @@ c_int test_formKKT(){
     // Construct sparse matrices from matrices.h
     t6_KKT = csc_matrix(t6_n+t6_m, t6_n+t6_m, t6_KKT_nnz, t6_KKT_x, t6_KKT_i, t6_KKT_p);
     t6_P = csc_matrix(t6_n, t6_n, t6_P_nnz, t6_P_x, t6_P_i, t6_P_p);
-    t6_A = csc_matrix(t6_n, t6_n, t6_A_nnz, t6_A_x, t6_A_i, t6_A_p);
+    t6_A = csc_matrix(t6_m, t6_m, t6_A_nnz, t6_A_x, t6_A_i, t6_A_p);
 
     // Define settings
     settings->rho = t6_rho;
     p = initPriv(t6_P, t6_A, settings);
 
-    // Print results
-    print_csc_matrix(t6_KKT, "t6_KKT");
+    // Print results // Only for DEBUG
+    // print_csc_matrix(t6_KKT, "t6_KKT");
+    // c_print("t6_KKT_n = %i\n", t6_n + t6_m);
+
+    // if (!is_eq_csc(, t3_dA)) {
+    //     c_print("\nError in premultiply test!");
+    //     exitflag = 1;
+    // }
 
     return exitflag;
 }

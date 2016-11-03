@@ -32,7 +32,7 @@ c_float * csc_to_dns(csc * M)
         c_float * A = (c_float *)c_calloc(M->m * M->n, sizeof(c_float));
 
         // Allocate elements
-        for (c_int idx = 0; idx < M->nnz; idx++)
+        for (c_int idx = 0; idx < M->nzmax; idx++)
         {
                 // Get row index i (starting from 1)
                 i = M->i[idx];
@@ -53,9 +53,9 @@ c_float * csc_to_dns(csc * M)
  */
 void copy_csc_mat(const csc* A, csc *B){
         memcpy(B->p, A->p, (A->n+1)*sizeof(c_int));
-        memcpy(B->i, A->i, (A->nnz)*sizeof(c_int));
-        memcpy(B->x, A->x, (A->nnz)*sizeof(c_float));
-        B->nnz = A->nnz;
+        memcpy(B->i, A->i, (A->nzmax)*sizeof(c_int));
+        memcpy(B->x, A->x, (A->nzmax)*sizeof(c_float));
+        B->nzmax = A->nzmax;
 }
 
 
@@ -81,7 +81,7 @@ c_int is_eq_csc(csc *A, csc *B){
 }
 
 
-/* Print a sparse matrix */
+/* Print a csc sparse matrix */
 void print_csc_matrix(csc* M, char * name)
 {
         c_print("%s :\n", name);
@@ -100,6 +100,16 @@ void print_csc_matrix(csc* M, char * name)
         }
 }
 
+/* Print a triplet format sparse matrix */
+void print_trip_matrix(csc* M, char * name)
+{
+        c_print("%s :\n", name);
+        c_int k = 0;
+        for (k=0; k<M->nz; k++){
+            c_print("\t[%3u, %3u] = %g\n", M->i[k], M->p[k], M->x[k]);
+        }
+}
+
 
 /* Print a dense matrix */
 void print_dns_matrix(c_float * M, c_int m, c_int n, char *name)
@@ -109,11 +119,11 @@ void print_dns_matrix(c_float * M, c_int m, c_int n, char *name)
                 for(c_int j=0; j<n; j++) { // Cycle over columns
                         if (j < n - 1)
                                 // c_print("% 14.12e,  ", M[j*m+i]);
-                                c_print("% 1.6e,  ", M[j*m+i]);
+                                c_print("% .5f,  ", M[j*m+i]);
 
                         else
                                 // c_print("% 14.12e;  ", M[j*m+i]);
-                                c_print("% 1.6e;  ", M[j*m+i]);
+                                c_print("% .5f;  ", M[j*m+i]);
                 }
                 if (i < m - 1) {
                         c_print("\n\t");
