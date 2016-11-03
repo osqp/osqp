@@ -29,20 +29,20 @@ csc * formKKT(const csc * P, const  csc * A, c_float rho){
     c_int z_P=0, z_KKT=0;   // Counter for total number of elements in P and in KKT
 
     // Get matrix dimensions
-    nKKT = P->n + A->n;
+    nKKT = P->m + A->m;
 
     // Get maximum number of nonzero elements (only upper triangular part)
     nnzKKTmax = P->nzmax +           // Number of elements in P
-                P->n +               // Number of elements in rhoI
+                P->m +               // Number of elements in rhoI
                 A->nzmax +           // Number of nonzeros in A
-                A->n;                // Number of elements in -1/rho I
+                A->m;                // Number of elements in -1/rho I
 
     // Preallocate KKT matrix in triplet format
     KKT_trip = csc_spalloc(nKKT, nKKT, nnzKKTmax, 1, 1);
 
-    #if PRINTLEVEL > 2
-        c_print("Forming KKT matrix\n");
-    #endif
+    // #if PRINTLEVEL > 2
+    //     c_print("Forming KKT matrix\n");
+    // #endif
 
     if (!KKT_trip) return OSQP_NULL;  // Failed to preallocate matrix
 
@@ -93,6 +93,9 @@ csc * formKKT(const csc * P, const  csc * A, c_float rho){
     // A' at top right
     for (j = 0; j < A->n; j++) {  // Cycle over columns of A
         for (ptr = A->p[j]; ptr < A->p[j + 1]; ptr++) {
+            // DEBUG
+            // c_print("A(%i, %i) = %.4f\n", A->i[ptr], j, A->x[ptr]);
+
             KKT_trip->p[z_KKT] = P->m + A->i[ptr];  // Assign column index from row index of A
             KKT_trip->i[z_KKT] = j; // Assign row index from column index of A
             KKT_trip->x[z_KKT] = A->x[ptr];  // Assign A value element
@@ -146,7 +149,7 @@ Priv *initPriv(const csc * P, const csc * A, const Settings *settings){
     // Allocate pointers
     p = c_calloc(1, sizeof(Priv));
     // Size of KKT
-    c_int n_plus_m = P->n + A->n;
+    c_int n_plus_m = P->m + A->m;
     // Sparse matrix L (lower triangular)
     // Set nzmax to 1 and null pointer to elements (to be filled during factorization)
     p->L = csc_spalloc(n_plus_m, n_plus_m, 1, 0, 0);
