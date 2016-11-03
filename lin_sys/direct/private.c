@@ -6,6 +6,11 @@
 // formKKT, factorize... (see scs)
 
 
+
+
+
+
+
 /* Form square symmetric KKT matrix of the form
    [P + rho I,         A';
     A           -1/rhoI]
@@ -17,7 +22,7 @@ A: linear equalities matrix
 rho: ADMM step
 N.B. Only the upper triangular part is stuffed!
 */
-csc * formKKT(csc * P, csc * A, c_float rho){
+csc * formKKT(const csc * P, const  csc * A, c_float rho){
     c_int nKKT, nnzKKTmax; // Size, number of nonzeros and max number of nonzeros in KKT matrix
     csc *KKT_trip, *KKT;           // KKT matrix in triplet format and CSC format
     c_int i, j, z=0;   // Counters for elements (i,j) and for total number of elements z
@@ -68,8 +73,14 @@ csc * formKKT(csc * P, csc * A, c_float rho){
     // Allocate number of nonzeros
     KKT_trip->nnz = z;
 
+    // DEBUG: Print matrix
+    print_csc_matrix(KKT_trip, "KKT_trip");
+
     // Convert triplet matrix to csc format
     KKT = triplet_to_csc(KKT_trip);
+
+    print_csc_matrix(KKT, "KKT");
+
 
     // Clean matrix in triplet format and return result
     csc_spfree(KKT_trip);
@@ -78,10 +89,41 @@ csc * formKKT(csc * P, csc * A, c_float rho){
 }
 
 
-// c_priv *initPriv(const AMatrix *A, const Settings *stgs) {
-//     c_priv *p = c_calloc(1, sizeof(c_priv));
-//
-// }
+// Initialize Private Factorization structure
+Priv *initPriv(const csc * P, const csc * A, const Settings *settings){
+    // Define Variables
+    csc * KKT;  // KKT Matrix
+    Priv * p;   // KKT factorization structure
+
+    // Allocate private structure to store KKT factorization
+    // Allocate pointers
+    p = c_calloc(1, sizeof(Priv));
+    // Size of KKT
+    c_int n_plus_m = P->n + A->n;
+    // Sparse matrix L (lower triangular)
+    // Set nzmax to 1 and null pointer to elements (to be filled during factorization)
+    p->L = csc_spalloc(n_plus_m, n_plus_m, 1, 0, 0);
+    // Permutation vector P
+    p->P = c_malloc(sizeof(c_int) * n_plus_m);
+    // Working vector
+    p->bp = c_malloc(sizeof(c_float) * n_plus_m);
+
+    // Form KKT matrix
+    KKT = formKKT(P, A, settings->rho);
+
+
+    // Factorize TODO: complete
+
+    // TODO: add check and store timings
+    // if (factorize(A, stgs, p) < 0) {
+    //     freePriv(p);
+    //     return SCS_NULL;
+    // }
+    // p->totalSolveTime = 0.0;
+
+    return p;
+}
+
 
 void LDLSolve(c_float *x, c_float *b, csc *L, c_float *D, c_int *P,
               c_float *bp) {

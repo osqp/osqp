@@ -27,8 +27,32 @@ write_vec_int(f, t5_P, "t5_P")
 # Define data
 t6_n = 5
 t6_m = 4
-p = 0.3  # Control sparsity level
-t6_Q = sprandn(n, n, p); t6_Q *= t6_Q  # Create symmetric matrix
+t6_p = 0.3  # Control sparsity level
+t6_rho = 1.6
+t6_P = sprandn(t6_n, t6_n, t6_p); t6_P = (t6_P + t6_P')/2.0  # Create symmetric matrix
+t6_P = triu(t6_P)# Store only upper triangular part of P
+
+# Compute KKT
+t6_PrhoI = t6_P + t6_rho*speye(size(t6_P,1))
+t6_A = sprandn(t6_m, t6_n, t6_p)
+
+# KKT (only one part)
+t6_KKT = [t6_PrhoI            spzeros(size(t6_A')...);
+          spzeros(size(t6_A)...)     spzeros(size(t6_A,1), size(t6_A,1))]
+# Complete KKT
+# t6_KKT = [t6_PrhoI            t6_A');
+#           t6_A     -1./t6_rho*speye(size(t6_A,1))]
+
+
+# Save data and matrices  to file
+write_float(f, t6_rho, "t6_rho")
+write_float(f, t6_n, "t6_n")
+write_float(f, t6_m, "t6_m")
+
+write_mat_sparse(f, t6_P, "t6_P")
+write_mat_sparse(f, t6_PrhoI, "t6_PrhoI")
+write_mat_sparse(f, t6_A, "t6_A")
+write_mat_sparse(f, t6_KKT, "t6_KKT")
 
 
 # Close file

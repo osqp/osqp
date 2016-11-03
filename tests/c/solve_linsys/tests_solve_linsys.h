@@ -10,14 +10,26 @@
 #endif
 
 
-// c_int test_formKKT(){
-//
-//
-//     formKKT(csc * P, csc * A, c_float rho);
-//
-//
-//
-// }
+c_int test_formKKT(){
+    c_int exitflag = 0;
+    csc *t6_P, *t6_A, *t6_KKT;
+    Priv * p; // Private structure to form KKT factorization
+    Settings * settings = c_malloc(sizeof(Settings)); // Settings
+
+    // Construct sparse matrices from matrices.h
+    t6_KKT = csc_matrix(t6_n+t6_m, t6_n+t6_m, t6_KKT_nnz, t6_KKT_x, t6_KKT_i, t6_KKT_p);
+    t6_P = csc_matrix(t6_n, t6_n, t6_P_nnz, t6_P_x, t6_P_i, t6_P_p);
+    t6_A = csc_matrix(t6_n, t6_n, t6_A_nnz, t6_A_x, t6_A_i, t6_A_p);
+
+    // Define settings
+    settings->rho = t6_rho;
+    p = initPriv(t6_P, t6_A, settings);
+
+    // Print results
+    print_csc_matrix(t6_KKT, "t6_KKT");
+
+    return exitflag;
+}
 
 c_int test_LDL_solve(){
     csc *L;   // Matrix from matrices.h
@@ -46,6 +58,11 @@ static char * tests_solve_linsys()
     printf("\n");
     printf("Solving linear systems tests\n");
     printf("----------------------------\n");
+
+    printf("0) Form KKT matrix: ");
+    tempflag = test_formKKT();
+    if (!tempflag) c_print("OK!\n");
+    exitflag += tempflag;
 
     printf("1) Test linear system solve via LDL: ");
     tempflag = test_LDL_solve();
