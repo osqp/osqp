@@ -128,7 +128,7 @@ void mat_ew_abs(csc * A){
 */
 void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq){
     int j, i;
-    if (plus_eq == 0){
+    if (!plus_eq){
       // y = 0
       for(i=0; i<A->m; i++){
         y[i] = 0;
