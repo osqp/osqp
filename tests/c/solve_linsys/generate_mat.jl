@@ -1,7 +1,7 @@
 # Open file
 f = open("solve_linsys/matrices.h", "w+")
 
-# 5) Linear system solve
+# 5) Simple linear system solve
 #-------------------------------------------------------------------------------
 # Define data
 t5_n = 2
@@ -53,6 +53,32 @@ write_mat_sparse(f, t6_P, "t6_P")
 write_mat_sparse(f, t6_PrhoI, "t6_PrhoI")
 write_mat_sparse(f, t6_A, "t6_A")
 write_mat_sparse(f, t6_KKT, "t6_KKT")
+
+
+# 7) Larger linear system solve
+#-------------------------------------------------------------------------------
+# Define data
+srand(1)
+n = 8
+In = eye(n)
+P = randperm(n)-1
+half_n = round(Int, n/2)
+D_upp = rand(half_n) + 0.1
+D_low = -rand(n-half_n) - 0.1
+D = [D_upp; D_low]
+L = tril(randn(n, n), -1) # We do not store unit diagonal
+# A = P'LDL'P
+A = In[:,P+1] * (L + In) * diagm(D) * (L' + In) * In[P+1,:]
+b = randn(n)
+x = A \ b
+
+# Write data
+write_int(f, n, "t7_n")
+write_vec_int(f, P, "t7_P")
+write_mat_sparse(f, sparse(L), "t7_L")
+write_vec_float(f, D, "t7_D")
+write_vec_float(f, b, "t7_b")
+write_vec_float(f, x, "t7_x")
 
 
 # Close file
