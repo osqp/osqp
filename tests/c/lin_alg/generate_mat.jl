@@ -133,7 +133,7 @@ t3_A_ewabs = abs(t3_A)
 write_mat_sparse(f, sparse(t3_A_ewabs), "t3_A_ewabs")
 
 
-# 4) Matrix-vector operations
+# 4) Matrix-vector multiplication
 #-------------------------------------------------------------------------------
 # Define data
 t4_m = 5
@@ -156,6 +156,28 @@ write_vec_float(f, t4_Ax, "t4_Ax")
 # Matrix-vector multiplication (cumulative):  y += Ax
 t4_Ax_cum = t4_A*t4_x + t4_y
 write_vec_float(f, t4_Ax_cum, "t4_Ax_cum")
+
+
+# 5) Linear system solve
+#-------------------------------------------------------------------------------
+# Define data
+t5_n = 2
+t5_A = [4. 1.; 1. 2.]
+t5_L = [0. 0.; 0.25 0.]		# Unit diagonal is assumed !!
+t5_D = [4.; 1.75]
+t5_P = [0; 1]
+t5_b = [1.; 2.]
+t5_x = t5_A \ t5_b
+
+# Write data
+write_int(f, t5_n, "t5_n")
+write_mat_sparse(f, sparse(t5_A), "t5_A")
+write_mat_sparse(f, sparse(t5_L), "t5_L")
+write_vec_float(f, t5_D, "t5_D")
+write_vec_float(f, t5_b, "t5_b")
+write_vec_float(f, t5_x, "t5_x")
+write_vec_int(f, t5_P, "t5_P")
+
 
 # Close file
 close(f)
