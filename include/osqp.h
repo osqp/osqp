@@ -97,6 +97,10 @@ struct OSQP_INFO {
  * It also sets the linear system solver:
  * - direct solver: KKT matrix factorization is performed here
  *
+ *
+ * N.B. This is the only function that allocates dynamic memory. During code
+ * generation it is going to be removed.
+ *
  * @param  data   Problem data
  * @param  info   Solver information
  * @return        Solver workspace
