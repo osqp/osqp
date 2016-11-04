@@ -84,13 +84,14 @@ class CPLEX(object):
                                  rhs=np.hstack([p.beq, p.bineq]).tolist())
 
         # Set quadratic Cost
-        qmat = []
-        for i in range(nx):
-            start = p.Q.indptr[i]
-            end = p.Q.indptr[i+1]
-            qmat.append([p.Q.indices[start:end].tolist(),
-                        p.Q.data[start:end].tolist()])
-        m.objective.set_quadratic(qmat)
+        if p.Q.count_nonzero():  # Only if quadratic form is not null
+            qmat = []
+            for i in range(nx):
+                start = p.Q.indptr[i]
+                end = p.Q.indptr[i+1]
+                qmat.append([p.Q.indices[start:end].tolist(),
+                            p.Q.data[start:end].tolist()])
+            m.objective.set_quadratic(qmat)
 
         # Set parameters
         for param, value in self.options.iteritems():

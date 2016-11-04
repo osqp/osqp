@@ -1,8 +1,9 @@
 import numpy as np
 from scipy import linalg as spla
-# import scipy as sp
+import scipy as sp
 import scipy.sparse as spspa
 import scipy.sparse.linalg as spalinalg
+import numpy.linalg as nplinalg
 import time   # Time execution
 import ipdb		# ipdb.set_trace()
 
@@ -78,7 +79,7 @@ class options(object):
     Attributes (General)
     ----------
     max_iter [5000]            - Maximum number of iterations
-    rho  [1.0]                 - Step in ADMM procedure
+    rho  [1.6]                 - Step in ADMM procedure
     alpha [1.0]                - Relaxation parameter
     eps_abs  [1e-06]            - Absolute tolerance
     eps_rel  [1e-06]           - Relative tolerance
@@ -89,26 +90,27 @@ class options(object):
     warm_start [False]         - Reuse solution from previous solve
 
 
+    Scaling
+    ------------
+    scale_problem [True]       - Scale Optimization Problem
+    scale_steps [3]          - Number of Steps for Scaling Method
+    scale_norm [2]           - Scaling norm in SK algorithm
+
     KKT Solution
     ------------
-    kkt_method  ['direct']        - KKT solution method: 'direct' or 'indirect'
-
-    -> Direct method options:
-    kkt_dir_reuse_factor [True]   - KKT factorization from previous solve
-
-    -> Indirect method options (dynamic rho update):
-    kkt_ind_alg ['cg']            - Algorithm
-    kkt_ind_tol [1e-5]            - Indirect algorithm tolerance
-    kkt_ind_maxiter [100]         - Indirect algorithm maximum number of iter
-    kkt_ind_mu [10]               - rho update trigger ratio between residuals
-    kkt_ind_tau [2]               - rho update factor
+    kkt_method  ['direct']        - KKT solution method: 'direct' (only direct)
     """
-
+    #  -> Indirect method options (dynamic rho update):
+    #  kkt_ind_alg ['cg']            - Algorithm
+    #  kkt_ind_tol [1e-5]            - Indirect algorithm tolerance
+    #  kkt_ind_maxiter [100]         - Indirect algorithm maximum number of iter
+    #  kkt_ind_mu [10]               - rho update trigger ratio between residuals
+    #  kkt_ind_tau [2]               - rho update factor
     def __init__(self, **kwargs):
 
         # Set general options
         self.max_iter = kwargs.pop('max_iter', 5000)
-        self.rho = kwargs.pop('rho', 1.0)
+        self.rho = kwargs.pop('rho', 1.6)
         self.alpha = kwargs.pop('alpha', 1.0)
         self.eps_abs = kwargs.pop('eps_abs', 1e-6)
         self.eps_rel = kwargs.pop('eps_rel', 1e-6)
@@ -121,15 +123,19 @@ class options(object):
         self.splitting = kwargs.pop('splitting', 2)
         self.warm_start = kwargs.pop('warm_start', False)
 
+        # Set scaling options
+        self.scale_problem = kwargs.pop('scale_problem', True)
+        self.scale_steps = kwargs.pop('scale_steps', 10)
+        self.scale_norm = kwargs.pop('scale_norm', 2)
+
         # Set KKT system solution options
         self.kkt_method = kwargs.pop('kkt_method', 'direct')
-        self.kkt_dir_reuse_factor = kwargs.pop('kkt_dir_reuse_factor',
-                                               True)
-        self.kkt_ind_alg = kwargs.pop('kkt_ind_alg', 'cg')
-        self.kkt_ind_tol = kwargs.pop('kkt_ind_tol', 1e-5)
-        self.kkt_ind_maxiter = kwargs.pop('kkt_ind_maxiter', 100)
-        self.kkt_ind_tau = kwargs.pop('kkt_ind_tau', 2.)
-        self.kkt_ind_mu = kwargs.pop('kkt_ind_mu', 10.)
+        # self.kkt_dir_reuse_factor = kwargs.pop('kkt_dir_reuse_factor', True)
+        #  self.kkt_ind_alg = kwargs.pop('kkt_ind_alg', 'cg')
+        #  self.kkt_ind_tol = kwargs.pop('kkt_ind_tol', 1e-5)
+        #  self.kkt_ind_maxiter = kwargs.pop('kkt_ind_maxiter', 100)
+        #  self.kkt_ind_tau = kwargs.pop('kkt_ind_tau', 2.)
+        #  self.kkt_ind_mu = kwargs.pop('kkt_ind_mu', 10.)
 
 
 # class prev_solution(object):
@@ -142,6 +148,25 @@ class options(object):
 #         self.z_prev = z_prev
 #         self.u_prev = u_prev
 
+class scaler_matrices(object):
+    """
+    Matrices for Scaling
+    """
+    def __init__(self):
+        self.D = None
+        self.E = None
+        self.Dinv = None
+        self.Einv = None
+
+
+class solver_solution(object):
+    """
+    Solver solution vectors z, u
+    """
+    def __init__(self):
+        self.z = None
+        self.u = None
+
 
 class OSQP(object):
     """
@@ -150,10 +175,14 @@ class OSQP(object):
     Attributes
     ----------
     problem          - QP problem
+    scaled_problem   - Scaled QP problem
+    scaler_matrices  - Diagonal scaling matrices
     options          - Solver options
     kkt_factor       - KKT Matrix factorization (direct method)
-    z_prev           - Previous primal solution
-    u_prev           - Previous dual solution
+    status           - Solver status
+    total_iter       - Total number of iterations
+    cputime          - Elapsed cputime
+    solution         - Solution
     """
 
     def __init__(self, **kwargs):
@@ -162,9 +191,9 @@ class OSQP(object):
         """
         self.options = options(**kwargs)
         self.kkt_factor = None
-        # self.scaler = None
-        self.z_prev = None
-        self.u_prev = None
+        self.scaled_problem = None
+        self.scaler_matrices = scaler_matrices()
+        self.solution = solver_solution()
 
     def problem(self, Q, c, Aeq, beq, Aineq, bineq, lb=None, ub=None):
         """
@@ -181,17 +210,15 @@ class OSQP(object):
         Set QP problem data. Reset factorization if Q, Aeq or Aineq
         is changed.
         """
-        if 'Q' in kwargs.keys() and kwargs['Q'].tocsr() != self.problem.Q:
+        if 'Q' in kwargs.keys():
             self.problem.Q = kwargs['Q'].tocsr()
             # Reset factorization
             self.kkt_factor = None
-        if 'Aeq' in kwargs.keys() and \
-                kwargs['Aeq'].tocsr() != self.problem.Aeq:
+        if 'Aeq' in kwargs.keys():
             self.problem.Aeq = kwargs['Aeq'].tocsr()
             # Reset factorization
             self.kkt_factor = None
-        if 'Aineq' in kwargs.keys() and \
-                kwargs['Aineq'].tocsr() != self.problem.Aineq:
+        if 'Aineq' in kwargs.keys():
             self.problem.Aineq = kwargs['Aineq'].tocsr()
             # Reset factorization
             self.kkt_factor = None
@@ -228,158 +255,48 @@ class OSQP(object):
         self.options.polish_tol = kwargs.pop('polish_tol',
                                              self.options.polish_tol)
 
+        # Set scaling options
+        self.scale_problem = kwargs.pop('scale_problem',
+                                        self.options.scale_problem)
+        self.scale_steps = kwargs.pop('scale_steps',
+                                      self.options.scale_steps)
+        self.scale_norm = kwargs.pop('scale_norm',
+                                     self.options.scale_norm)
+
         #  KKT System solution options
         self.options.kkt_method = kwargs.pop('kkt_method',
                                              self.options.kkt_method)
-        self.options.kkt_dir_reuse_factor = kwargs.pop(
-            'kkt_dir_reuse_factor',
-            self.options.kkt_dir_reuse_factor)
-        self.options.kkt_ind_alg = kwargs.pop(
-            'kkt_ind_alg',
-            'cg')
-        self.options.kkt_ind_tol = kwargs.pop(
-            'kkt_ind_tol',
-            self.options.kkt_ind_tol)
-        self.options.kkt_ind_maxiter = kwargs.pop(
-            'kkt_ind_maxiter',
-            self.options.kkt_ind_maxiter)
-        self.options.kkt_ind_mu = kwargs.pop(
-            'kkt_ind_mu',
-            self.options.kkt_ind_mu)
-        self.options.kkt_ind_tau = kwargs.pop(
-            'kkt_ind_tau',
-            self.options.kkt_ind_tau)
+        # self.options.kkt_dir_reuse_factor = kwargs.pop(
+        #     'kkt_dir_reuse_factor',
+        #     self.options.kkt_dir_reuse_factor)
+        #  self.options.kkt_ind_alg = kwargs.pop(
+            #  'kkt_ind_alg',
+            #  'cg')
+        #  self.options.kkt_ind_tol = kwargs.pop(
+            #  'kkt_ind_tol',
+            #  self.options.kkt_ind_tol)
+        #  self.options.kkt_ind_maxiter = kwargs.pop(
+            #  'kkt_ind_maxiter',
+            #  self.options.kkt_ind_maxiter)
+        #  self.options.kkt_ind_mu = kwargs.pop(
+            #  'kkt_ind_mu',
+            #  self.options.kkt_ind_mu)
+        #  self.options.kkt_ind_tau = kwargs.pop(
+            #  'kkt_ind_tau',
+            #  self.options.kkt_ind_tau)
 
-    def project(self, xbar):
-        """
-        Project a vector xbar onto constraint set.
-        """
-        if self.options.splitting == 1:
-            # Project first nx elements on interval [lb, ub],
-            # and the rest on positive orthant.
-            xbar[:self.problem.nx] = np.minimum(
-                np.maximum(xbar[:self.problem.nx],
-                           self.problem.lb), self.problem.ub)
-            xbar[self.problem.nx:] = np.maximum(xbar[self.problem.nx:], 0.0)
-        elif self.options.splitting == 2:
-            # Project first nx elements on interval [lb, ub],
-            # next neq elements on zero, and the rest on positive
-            # orthant.
-            xbar[:self.problem.nx] = np.minimum(
-                    np.maximum(xbar[:self.problem.nx],
-                               self.problem.lb), self.problem.ub)
-            xbar[self.problem.nx:self.problem.nx+self.problem.neq] = 0.0
-            xbar[self.problem.nx+self.problem.neq:] = np.maximum(
-                                xbar[self.problem.nx+self.problem.neq:], 0.0)
-        else:
-            assert False, "Unknown splitting"
+    #  def scale_problem(self):
+        #  """
+        #  Perform diagonal scaling via equilibration
+        #  """
+        #  # Define reduced KKT matrix to scale
+        #  KKT = spspa.vstack([
+            #  spspa.hstack([self.problem.Q + self.options.rho *
+                          #  spspa.eye(nx), Ac.T]),
+            #  spspa.hstack([Ac,
+                          #  -1./self.options.rho * spspa.eye(nconstr)])])
 
-        return xbar
 
-    def polish(self, solution):
-        """
-        Try to reconstruct the actual solution of a QP by guessing which
-        constraints are active. The problem boils down to solving a linear
-        system.
-        """
-        sol_x = solution.x
-        sol_lb = solution.sol_dual_lb
-        sol_ub = solution.sol_dual_ub
-
-        # Try to guess from an approximate solution which bounds are active
-        bool_lb = np.logical_and(sol_x < (self.problem.lb+self.problem.ub)/2.,
-                                 sol_lb > sol_x - self.problem.lb)
-        bool_ub = np.logical_and(sol_x > (self.problem.lb+self.problem.ub)/2.,
-                                 sol_ub > self.problem.ub - sol_x)
-        ind_lb = np.where(bool_lb)[0]
-        ind_ub = np.where(bool_ub)[0]
-        # All the other elements of x are free
-        ind_free = np.where(np.logical_not(np.logical_or(bool_lb, bool_ub)))[0]
-
-        # Try to guess which inequality constraints are active
-        ineq_act = solution.sol_dual_ineq > \
-            (self.problem.bineq - self.problem.Aineq.dot(sol_x))
-        ind_act = np.where(ineq_act)[0]                     # Aineq x = bineq
-        ind_inact = np.where(np.logical_not(ineq_act))[0]   # Aineq x < bineq
-
-        # Solve the corresponding linear system
-        KKT = spspa.vstack([
-            spspa.hstack([self.problem.Q, self.problem.Aeq.T,
-                         self.problem.Aineq.T, spspa.eye(self.problem.nx)]),
-            spspa.hstack([self.problem.Aeq,
-                         spspa.csr_matrix((self.problem.neq, self.problem.neq +
-                                           self.problem.nineq +
-                                           self.problem.nx))]),
-            spspa.hstack([self.problem.Aineq[ind_act],
-                          spspa.csr_matrix((len(ind_act), self.problem.neq +
-                                            self.problem.nineq +
-                                            self.problem.nx))]),
-            spspa.hstack([spspa.csr_matrix((len(ind_inact),
-                                            self.problem.nx+self.problem.neq)),
-                          spspa.eye(self.problem.nineq).tocsr()[ind_inact],
-                          spspa.csr_matrix((len(ind_inact),
-                                            self.problem.nx))]),
-            spspa.hstack([spspa.csr_matrix((len(ind_free), self.problem.nx +
-                                            self.problem.neq +
-                                            self.problem.nineq)),
-                          spspa.eye(self.problem.nx).tocsr()[ind_free]]),
-            spspa.hstack([spspa.eye(self.problem.nx).tocsr()[ind_lb],
-                          spspa.csr_matrix((len(ind_lb), self.problem.neq +
-                                            self.problem.nineq +
-                                            self.problem.nx))]),
-            spspa.hstack([spspa.eye(self.problem.nx).tocsr()[ind_ub],
-                          spspa.csr_matrix((len(ind_ub), self.problem.neq +
-                                            self.problem.nineq +
-                                            self.problem.nx))]),
-            ]).tocsr()
-        rhs = np.hstack([-self.problem.c, self.problem.beq,
-                        self.problem.bineq[ind_act],
-                        np.zeros(len(ind_inact) + len(ind_free)),
-                        self.problem.lb[ind_lb], self.problem.ub[ind_ub]])
-        try:
-            pol_sol = spalinalg.spsolve(KKT, rhs)
-        except:
-            # Failed to factorize KKT matrix
-            print "Polishing failed. Failed to factorize KKT matrix."
-            return solution
-
-        # If the KKT matrix is singular, spsolve return an array of NaNs
-        if any(np.isnan(pol_sol)):
-            # Terminate
-            print "Polishing failed. KKT matrix is singular."
-            return solution
-
-        # Check if the above solution satisfies constraints
-        pol_x = pol_sol[:self.problem.nx]
-        pol_dual_eq = pol_sol[self.problem.nx:self.problem.nx+self.problem.neq]
-        pol_dual_ineq = pol_sol[self.problem.nx+self.problem.neq:
-                                self.problem.nx + self.problem.neq +
-                                self.problem.nineq]
-        pol_dual_lb = np.zeros(self.problem.nx)
-        pol_dual_lb[ind_lb] = -pol_sol[self.problem.nx + self.problem.neq +
-                                       self.problem.nineq:][ind_lb]
-        pol_dual_ub = np.zeros(self.problem.nx)
-        pol_dual_ub[ind_ub] = pol_sol[self.problem.nx + self.problem.neq +
-                                      self.problem.nineq:][ind_ub]
-        if all(pol_x > self.problem.lb - self.options.polish_tol) and\
-                all(pol_x < self.problem.ub + self.options.polish_tol)\
-                and all(pol_dual_ineq > -self.options.polish_tol)\
-                and all(pol_dual_lb > -self.options.polish_tol)\
-                and all(pol_dual_ub > -self.options.polish_tol):
-                # Return the computed high-precision solution
-                print "Polishing successful!"
-                solution.x = pol_x
-                solution.sol_dual_eq = pol_dual_eq
-                solution.sol_dual_ineq = pol_dual_ineq
-                solution.sol_dual_lb = pol_dual_lb
-                solution.sol_dual_ub = pol_dual_ub
-                solution.objval = self.problem.objval(pol_x)
-        else:
-            print "Polishing failed!"
-
-        return solution
-
-    # def solve(Q, c, Aeq, beq, Aineq, bineq, lb, ub, **kwargs):
     def solve(self):
         """
         Operator splitting solver for a QP given
@@ -393,246 +310,405 @@ class OSQP(object):
         print "Operator Splitting QP Solver"
         print "----------------------------\n"
 
-        # Choose splitting based on the options
-        if self.options.splitting == 1:
-            solution = self.solve_splitting1()
-        elif self.options.splitting == 2:
-            solution = self.solve_splitting2()
-        else:
-            assert False, "Unknown splitting"
-
-        return solution
-
-    def solve_splitting1(self):
-        """"
-        Solve splitting problem with splitting of the form (after introducing
-        slack variables for inequalities)
-            minimize	1/2 x' Q x + c'x
-            subject to	[A] x - [0]z = [b]
-                        [I]     [I]    [0]
-                        z in C
-        where C is a set of lower and upper bounds
-        """
-
-        # Print parameters
-        print "Splitting method 1"
-        print "KKT solution: " + self.options.kkt_method + "\n"
-
         # Start timer
         t = time.time()
 
-        # Number of variables and constraints in standard form
-        nx = self.problem.nx
-        neq = self.problem.neq
-        nineq = self.problem.nineq
-        nvar = nx + nineq     # (x,s)
-        nconstr = neq + nineq
+        # Scale problem
+        self.scale_problem()
 
-        # If direct method is used and factorization used, get it
-        if self.options.kkt_method == 'direct' and \
-            self.options.kkt_dir_reuse_factor and \
-                self.kkt_factor is not None:  #
-                    kkt_factor = self.kkt_factor
-                    As = self.As
-                    Ac = self.Ac
-                    # scaler = self.scaler
-        else:
-            # Form compact (c) matrices for standard QP from:
-            #       minimize	1/2 z' Qc z + cc'z
-            #       subject to	Ac z == bc
-            #                   z \in Z
-            Qc = spspa.block_diag((self.problem.Q,
-                                   spspa.csc_matrix((self.problem.nineq,
-                                                     self.problem.nineq))))
-            Ac = spspa.vstack([spspa.hstack([self.problem.Aeq,
-                                            spspa.csc_matrix((neq, nineq))]),
-                               spspa.hstack([self.problem.Aineq,
-                                             spspa.eye(nineq)])])
-            # Scaling (s): Normalize rows of Ac.
-            if self.options.scaling:
-                scaler = np.sqrt(np.square(Ac).sum(1))  # norm of rows of Ac
-                As = Ac / scaler[:, None]
-            else:
-                As = Ac
+        # Choose splitting based on the options
+        self.solve_admm()
 
-            # If direct methiod appled, construct and factorize KKT matrix
-            if self.options.kkt_method == 'direct':
-                # Create KKT matrix
-                KKT = spspa.vstack([
-                    spspa.hstack([Qc + self.options.rho*spspa.eye(nvar),
-                                 As.T]),
-                    spspa.hstack([As,
-                                 -1./self.options.rho*spspa.eye(nconstr)])])
-                kkt_factor = spalinalg.splu(KKT.tocsc())
-                if self.options.kkt_dir_reuse_factor:
-                    # Store factorization
-                    self.kkt_factor = kkt_factor
-                    self.As = As
-                    self.Ac = Ac
-            else:  # Indirect method, construct part of KKT
-                # Create part of KKT matrix (to be updated)
-                KKTbase = spspa.vstack([
-                    spspa.hstack([Qc, As.T]),
-                    spspa.hstack([As, spspa.csc_matrix((nconstr, nconstr))])])
+        # Polish solution if optimal
+        if (self.status == OPTIMAL) & self.options.polish:
+            self.polish()
 
-        # Construct other vectors
-        cc = np.append(self.problem.c, np.zeros(self.problem.nineq))
-        bc = np.append(self.problem.beq, self.problem.bineq)
-        if self.options.scaling:
-            bs = bc / scaler
-        else:
-            bs = bc
-
-        # Set initial conditions
-        if self.options.warm_start and self.z_prev is not None \
-                and self.u_prev is not None:
-            z = self.z_prev
-            u = self.u_prev
-        else:
-            z = np.zeros(nvar)
-            u = np.zeros(nconstr + nvar)
-
-        # If indirect method:
-        # initialize kktsol to store initial solution of kkt algorithm
-        if self.options.kkt_method == 'indirect':
-            kktsol = np.append(z, np.zeros(nconstr))
-
-        if self.options.print_level > 1:
-            print "Iter \t  Objective \tPrim Res \tDual Res"
-
-        # Run ADMM: alpha \in (0, 2) is a relaxation parameter.
-        #           Nominal ADMM is obtained for alpha=1.0
-        for i in xrange(self.options.max_iter):
-
-            # Update RHS of KKT system
-            qtemp = -cc + self.options.rho * \
-                    (z + As.T.dot(bs) - As.T.dot(u[:nconstr]) - u[nconstr:])
-            qbar = np.append(qtemp, np.zeros(nconstr))
-
-            # x update
-            if self.options.kkt_method == 'direct':
-                x = kkt_factor.solve(qbar)[:nvar]  # Select first nvar elements
-            else:   # Indirect method
-                # Construct KKT matrix with new rho
-                KKT = KKTbase + spspa.block_diag(
-                    (self.options.rho*spspa.eye(nvar),
-                     -1./self.options.rho*spspa.eye(nconstr)))
-                if self.options.kkt_ind_alg == 'cg':  # Apply conj gradient
-                    kktsol, _ = spalinalg.cg(
-                        KKT, qbar,
-                        x0=kktsol,  # use prev kkt sol
-                        tol=self.options.kkt_ind_tol,
-                        maxiter=self.options.kkt_ind_maxiter)
-                elif self.options.kkt_ind_alg == 'gmres':  # Apply gmres
-                    kktsol, _ = spalinalg.gmres(
-                        KKT,  qbar,
-                        x0=kktsol,  # use prev kkt sol
-                        tol=self.options.kkt_ind_tol,
-                        maxiter=self.options.kkt_ind_maxiter)
-                else:
-                    assert False, "Invalid indirect algorithm for solving \
-                    KKT system provided!"
-                x = kktsol[:nvar]
-
-            # z update
-            z_old = z
-            z = self.project(self.options.alpha*x +
-                             (1.-self.options.alpha)*z_old + u[nconstr:])
-            # u update
-            u = u + self.options.alpha * np.append(As.dot(x), x) \
-                - np.append(np.zeros(nconstr),
-                            z - (1.-self.options.alpha)*z_old) \
-                - self.options.alpha*np.append(bs, np.zeros(nvar))
-
-            # Compute primal and dual residuals
-            resid_prim = spla.norm(np.append(Ac.dot(x) - bc, x - z))  # eq
-            resid_dual = self.options.rho*spla.norm(z - z_old)
-
-            # Check the stopping criterion
-            eps_prim = np.sqrt(nconstr + nvar) * self.options.eps_abs \
-                + self.options.eps_rel * \
-                np.max([spla.norm(Ac.dot(x)) + spla.norm(x),
-                        spla.norm(z),
-                        spla.norm(bc)])
-            eps_dual = np.sqrt(nvar) * self.options.eps_abs + \
-                self.options.eps_rel * self.options.rho * \
-                (spla.norm(As.T.dot(u[:nconstr])) + spla.norm(u[nconstr:]))
-
-            if resid_prim <= eps_prim and resid_dual <= eps_dual:
-                # Print the progress in last iterations
-                if self.options.print_level > 1:
-                    f = self.problem.objval(z[:nx])
-                    print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
-                        % (i+1, f, resid_prim, resid_dual)
-                # Stop the algorithm
-                break
-
-            # Print cost function depending on print level
-            if self.options.print_level > 1:
-                if (i + 1 == 1) | (self.options.print_level == 2) & \
-                        (np.mod(i + 1,
-                         np.floor(np.float(self.options.max_iter)/20.0)) == 0)\
-                        | (self.options.print_level == 3):
-                            f = self.problem.objval(z[:nx])
-                            print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
-                                % (i+1, f, resid_prim, resid_dual)
+        # Rescale solution back
+        self.rescale_solution()
 
         # End timer
-        cputime = time.time() - t
-        total_iter = i
+        self.cputime = time.time() - t
+        print "Elapsed time: %.3fs\n" % self.cputime
 
-        # Return status
-        print "\n"
-        if i == self.options.max_iter - 1:
-            print "Maximum number of iterations exceeded!"
-            status = MAXITER_REACHED
-        else:
-            print "Optimal solution found"
-            status = OPTIMAL
+        # ipdb.set_trace()
+        # Return QP solution
+        solution = self.get_qp_solution()
 
-        print "Elapsed time: %.3fs\n" % cputime
+        return solution
 
-        # Rescale (r) dual variables
-        if self.options.scaling:
-            dual_vars = self.options.rho * u[:nconstr] / scaler
-        else:
-            dual_vars = self.options.rho * u[:nconstr]
+    def get_qp_solution(self):
 
-        # TODO: Scale Qc matrix as well
-
-        # TODO: What is a status of the obtained solution?
+        # Get problem dimensions
+        nx = self.problem.nx
+        neq = self.problem.neq
 
         # Recover primal solution
-        sol_x = z[:nx]
+        sol_x = self.solution.z[:nx]
         objval = self.problem.objval(sol_x)
 
         # Recover dual solution
-        sol_dual_eq = dual_vars[:neq]
-        sol_dual_ineq = dual_vars[neq:]
-        stat_cond_resid = self.problem.Q.dot(sol_x) + self.problem.c + \
-            self.problem.Aeq.T.dot(sol_dual_eq) + \
-            self.problem.Aineq.T.dot(sol_dual_ineq)
-        sol_dual_lb = np.maximum(stat_cond_resid, 0)
-        sol_dual_ub = -np.minimum(stat_cond_resid, 0)
+        dual_vars = -self.options.rho * self.solution.u
+        sol_dual_eq = dual_vars[nx:nx+neq]
+        sol_dual_ineq = dual_vars[nx+neq:]
+        sol_dual_lb = np.maximum(dual_vars[:nx], 0)
+        sol_dual_ub = -np.minimum(dual_vars[:nx], 0)
 
         # Store solution as a quadprogResults object
-        solution = results(status, objval, sol_x, sol_dual_eq,
+        solution = results(self.status, objval, sol_x, sol_dual_eq,
                            sol_dual_ineq, sol_dual_lb, sol_dual_ub,
-                           cputime, total_iter)
-
-        # Polish only if optimal solution reached
-        if status == OPTIMAL:
-            if self.options.polish:
-                solution = self.polish(solution)
-            # Store last iterates for warm starting
-            if self.options.warm_start:
-                self.z_prev = z
-                self.u_prev = u
+                           self.cputime, self.total_iter)
 
         # Return solution
         return solution
 
-    def solve_splitting2(self):
+    def scale_problem(self):
+        """
+        Perform symmetric diagonal scaling via equilibration
+        """
+        # Predefine scaling vector
+        # nx = self.problem.nx
+        nvar = self.problem.nx + self.problem.neq + self.problem.nineq
+        nconstr = self.problem.neq + self.problem.nineq
+        #  d = np.multiply(sp.rand(nvar), np.ones(nvar))
+
+        if self.options.scale_problem:
+
+            # Check if the problem has already been scaled
+            if self.scaled_problem is not None and \
+                    self.scaler_matrices.D is not None and \
+                    self.scaler_matrices.E is not None and \
+                    self.scaler_matrices.Dinv is not None and \
+                    self.scaler_matrices.Einv is not None:
+                return
+
+            # Stack up equalities and inequalities
+            Ac = spspa.vstack([self.problem.Aeq, self.problem.Aineq])
+            bc = np.hstack([self.problem.beq, self.problem.bineq])
+
+            #  if self.problem.Q.count_nonzero():  # If there are nonzero elements
+            d = np.ones(nvar)
+
+            # Define reduced KKT matrix to scale
+            KKT = spspa.vstack([
+                spspa.hstack([self.problem.Q, Ac.T]),
+                spspa.hstack([Ac, spspa.csc_matrix((nconstr, nconstr))])])
+            #  KKT = spspa.vstack([
+                #  spspa.hstack([self.problem.Q + spspa.eye(nx), Ac.T]),
+                #  spspa.hstack([Ac, -spspa.eye(nconstr)])])
+
+            # Run Scaling
+            KKT2 = KKT.copy()
+            if self.options.scale_norm == 2:
+                KKT2.data = np.square(KKT2.data)  # Elementwise square
+            elif self.options.scale_norm == 1:
+                KKT2.data = np.absolute(KKT2.data)  # Elementwise absolute value
+
+
+            # Perform Scalings as in GLPK solver: https://en.wikibooks.org/wiki/GLPK/Scaling
+            # 1: Check if problem is well scaled
+            #  if False:
+            if (np.min(KKT2.data) >= 0.1) & (np.max(KKT2.data) <= 10):
+                print "Problem already well scaled. No Scaling Required\n"
+            else:
+                #  print "Perform geometric scaling of KKT matrix: %i Steps\n" % \
+                    #  self.options.scale_steps
+                #  for i in range(self.options.scale_steps):
+                    #  di = np.zeros(nvar)
+                    #  for j in range(nvar):  # Iterate over all rows of KKT
+                        #  maxj = np.max((KKT2.tocsc())[j, :]) + 1e-08
+                        #  minj = np.min((KKT2.tocsc())[j, :]) + 1e-08
+                        #  di[j] = 1./np.sqrt(maxj * minj)
+                    #  d = np.multiply(di, d)
+                    #  # DEBUG STUFF
+                    #  S = spspa.diags(d)
+                    #  KKTeq = S.dot(KKT.dot(S))
+                    #  print "Norm of first row of KKT %.4e" % \
+                        #  nplinalg.norm((KKT.todense())[1, :])
+                    #  print "Norm of first row of KKTeq %.4e" % \
+                        #  nplinalg.norm((KKTeq.todense())[1, :])
+                    #  condKKT = nplinalg.cond(KKT.todense())
+                    #  condKKTeq = nplinalg.cond(KKTeq.todense())
+                    #  print "Condition number of KKT matrix %.4e" % condKKT
+                    #  print "Condition number of KKTeq matrix %.4e" % condKKTeq
+                    #  ipdb.set_trace()
+
+                print "Perform symmetric scaling of KKT matrix: %i Steps\n" % \
+                    self.options.scale_steps
+
+                # Iterate Scaling
+                for i in range(self.options.scale_steps):
+                    #  print np.max(KKT2.dot(d))
+                    #  ipdb.set_trace()
+                    # Regularize components
+                    KKT2d = KKT2.dot(d)
+                    # Prevent division by 0
+                    d = nvar*np.reciprocal(KKT2d + 1e-8)
+                    # Prevent too large elements
+                    d = np.minimum(np.maximum(d, -1e+10), 1e+10)
+                    #  d = np.reciprocal(KKT2d)
+                    #  print "Scaling step %i\n" % i
+
+                    # # DEBUG STUFF
+                    # S = spspa.diags(d)
+                    # KKTeq = S.dot(KKT.dot(S))
+                    # print "Norm of first row of KKT %.4e" % \
+                    #     nplinalg.norm((KKT.todense())[1, :])
+                    # print "Norm of first row of KKTeq %.4e" % \
+                    #     nplinalg.norm((KKTeq.todense())[1, :])
+                    # condKKT = nplinalg.cond(KKT.todense())
+                    # condKKTeq = nplinalg.cond(KKTeq.todense())
+                    # print "Condition number of KKT matrix %.4e" % condKKT
+                    # print "Condition number of KKTeq matrix %.4e" % condKKTeq
+            #  else:  # Q matrix is zero (LP)
+                #  print "Perform scaling of Ac constraints matrix: %i Steps\n" % \
+                    #  self.options.scale_steps
+                #  # Run scaling
+                #  Ac2 = Ac.copy()
+                #  Ac2.data = np.square(Ac2.data)
+                #  d1 = np.ones(nconstr)
+                #  d2 = np.ones(nx)
+
+                #  # Iterate scaling
+                #  for i in range(self.options.scale_steps):
+                    #  #  print(np.max(Ac2.dot(d1)))
+                    #  # Regularize components
+                    #  Ac2d2 = np.minimum(np.maximum(Ac2.dot(d2), -1e+10), 1e+10)
+                    #  # Avoid dividing by 0
+                    #  d1 = np.reciprocal(Ac2d2 + 1e-10)
+                    #  # Regularize components
+                    #  Ac2Td1 =  np.minimum(np.maximum(Ac2.T.dot(d1), -1e+10),
+                            #  1e+10)
+                    #  # Avoid dividing by 0
+                    #  d2 = np.reciprocal(Ac2Td1 + 1e-10)
+                    #  # DEBUG STUFF
+                    #  D1 = spspa.diags(d1)
+                    #  D2 = spspa.diags(d2)
+                    #  Aceq = D1.dot(Ac.dot(D2))
+                    #  condAc = nplinalg.cond(Ac.todense())
+                    #  condAceq = nplinalg.cond(Aceq.todense())
+                    #  print "Condition number of Ac matrix %.4f" % condAc
+                    #  print "Condition number of Aceq matrix %.4f" % condAceq
+                #  d = np.append(d1, d2)
+
+            # DEBUG STUFF
+            #  d = sp.rand(nvar)
+            #  d = 2.*np.ones(nvar)
+
+            # Obtain Scaler Matrices
+            d = np.power(d, 1./self.options.scale_norm)
+            D = spspa.diags(d[:self.problem.nx])
+            if nconstr == 0:
+                # spspa.diags() will throw an error if fed with an empty array
+                E = spspa.csc_matrix((0, 0))
+            else:
+                E = spspa.diags(d[self.problem.nx:])
+            #  E = spspa.diags(np.ones(self.problem.neq + self.problem.nineq))
+
+            # Scale problem Matrices
+            Q = D.dot(self.problem.Q.dot(D))
+            Ac = E.dot(Ac.dot(D))
+            Aeq = Ac[:self.problem.neq, :]
+            Aineq = Ac[self.problem.neq:, :]
+            c = D.dot(self.problem.c)
+            b = E.dot(bc)
+            beq = b[:self.problem.neq]
+            bineq = b[self.problem.neq:]
+            lb = np.multiply(np.reciprocal(D.diagonal()),
+                             self.problem.lb)
+            ub = np.multiply(np.reciprocal(D.diagonal()),
+                             self.problem.ub)
+
+            # Assign scaled problem
+            self.scaled_problem = problem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
+
+            # Assign scaler matrices
+            self.scaler_matrices.D = D
+            self.scaler_matrices.Dinv = \
+                spspa.diags(np.reciprocal(D.diagonal()))
+            self.scaler_matrices.E = E
+            if nconstr == 0:
+                self.scaler_matrices.Einv = E
+            else:
+                self.scaler_matrices.Einv = \
+                    spspa.diags(np.reciprocal(E.diagonal()))
+            #  # DEBUG STUFF
+            #  Dinv = self.scaler_matrices.Dinv
+            #  Einv = self.scaler_matrices.Einv
+            #  #  Dinv = spspa.linalg.inv(D.tocsr())
+            #  #  Einv = spspa.csr_matrix(spspa.linalg.inv(F.tocsr()))
+            #  Qtest = Dinv.dot(Q.dot(Dinv))
+            #  Actest = Einv.dot(Ac.dot(Dinv))
+            #  ctest = Dinv.dot(c)
+            #  btest = Einv.dot(b)
+            #  lbtest = D.dot(lb)
+            #  ubtest = D.dot(ub)
+            #  ipdb.set_trace()
+        else:
+            d = np.ones(nvar)
+
+            # Obtain Scaler Matrices
+            self.scaler_matrices.D = spspa.diags(d[:self.problem.nx])
+            self.scaler_matrices.Dinv = self.scaler_matrices.D
+            if nconstr == 0:
+                self.scaler_matrices.E = spspa.csc_matrix((0, 0))
+            else:
+                self.scaler_matrices.E = spspa.diags(np.ones(self.problem.neq +
+                                                     self.problem.nineq))
+            self.scaler_matrices.Einv = self.scaler_matrices.E
+
+            # Assign scaled problem to same one
+            self.scaled_problem = self.problem
+
+    def project(self, xbar):
+        """
+        Project a vector xbar onto constraint set.
+        """
+        # Project first nx elements on interval [lb, ub],
+        # next neq elements on zero, and the rest on positive
+        # orthant. (Using scaled problem bounds)
+        xbar[:self.problem.nx] = np.minimum(
+                np.maximum(xbar[:self.problem.nx],
+                           self.scaled_problem.lb), self.scaled_problem.ub)
+        xbar[self.problem.nx:self.problem.nx+self.problem.neq] = 0.0
+        xbar[self.problem.nx+self.problem.neq:] = np.maximum(
+                xbar[self.problem.nx+self.problem.neq:], 0.0)
+        return xbar
+
+    def polish(self):
+        """
+        Try to reconstruct the actual solution of a QP by guessing which
+        constraints are active. The problem boils down to solving a linear
+        system.
+        """
+        nx = self.scaled_problem.nx
+        neq = self.scaled_problem.neq
+        nineq = self.scaled_problem.nineq
+        tol = self.options.polish_tol
+
+        # Recover primal solution
+        sol_x = self.solution.z[:nx]
+
+        # Recover dual solution
+        dual_vars = -self.options.rho * self.solution.u
+        sol_ineq = dual_vars[nx+neq:]
+        sol_lb = np.maximum(dual_vars[:nx], 0)
+        sol_ub = -np.minimum(dual_vars[:nx], 0)
+
+        # Try to guess from an approximate solution which bounds are active
+        bool_lb = np.logical_and(sol_x < (self.problem.lb+self.problem.ub)/2.,
+                                 sol_lb > sol_x - self.problem.lb)
+        bool_ub = np.logical_and(sol_x > (self.problem.lb+self.problem.ub)/2.,
+                                 sol_ub > self.problem.ub - sol_x)
+        ind_lb = np.where(bool_lb)[0]
+        ind_ub = np.where(bool_ub)[0]
+        # All the other elements of x are free
+        ind_free = np.where(np.logical_not(np.logical_or(bool_lb, bool_ub)))[0]
+
+        # Try to guess which inequality constraints are active
+        ineq_act = sol_ineq > \
+            (self.problem.bineq - self.problem.Aineq.dot(sol_x))
+        ind_act = np.where(ineq_act)[0]                     # Aineq x = bineq
+        ind_inact = np.where(np.logical_not(ineq_act))[0]   # Aineq x < bineq
+
+        # Solve the corresponding linear system
+        KKT = spspa.vstack([
+            spspa.hstack([self.problem.Q, self.problem.Aeq.T,
+                         self.problem.Aineq.T, spspa.eye(nx)]),
+            spspa.hstack([self.problem.Aeq,
+                         spspa.csr_matrix((neq, neq + nineq + nx))]),
+            spspa.hstack([self.problem.Aineq[ind_act],
+                          spspa.csr_matrix((len(ind_act), neq + nineq + nx))]),
+            spspa.hstack([spspa.csr_matrix((len(ind_inact), nx + neq)),
+                          spspa.eye(nineq).tocsr()[ind_inact],
+                          spspa.csr_matrix((len(ind_inact), nx))]),
+            spspa.hstack([spspa.csr_matrix((len(ind_free), nx + neq + nineq)),
+                          spspa.eye(nx).tocsr()[ind_free]]),
+            spspa.hstack([spspa.eye(nx).tocsr()[ind_lb],
+                          spspa.csr_matrix((len(ind_lb), neq + nineq + nx))]),
+            spspa.hstack([spspa.eye(nx).tocsr()[ind_ub],
+                          spspa.csr_matrix((len(ind_ub), neq + nineq + nx))]),
+            ]).tocsr()
+        rhs = np.hstack([-self.problem.c, self.problem.beq,
+                        self.problem.bineq[ind_act],
+                        np.zeros(len(ind_inact) + len(ind_free)),
+                        self.problem.lb[ind_lb], self.problem.ub[ind_ub]])
+        try:
+            pol_sol = spalinalg.spsolve(KKT, rhs)
+        except:
+            # Failed to factorize KKT matrix
+            print "Polishing failed. Failed to factorize KKT matrix."
+
+        # If the KKT matrix is singular, spsolve return an array of NaNs
+        if any(np.isnan(pol_sol)):
+            # Terminate
+            print "Polishing failed. KKT matrix is singular."
+
+        # Check if the above solution satisfies constraints
+        pol_x = pol_sol[:nx]
+        pol_dual_eq = pol_sol[nx:nx + neq]
+        pol_dual_ineq = pol_sol[nx + neq:nx + neq + nineq]
+        pol_dual_lb = np.zeros(nx)
+        pol_dual_lb[ind_lb] = -pol_sol[nx + neq + nineq:][ind_lb]
+        pol_dual_ub = np.zeros(nx)
+        pol_dual_ub[ind_ub] = pol_sol[nx + neq + nineq:][ind_ub]
+        if all(pol_x > self.problem.lb - tol)\
+                and all(pol_x < self.problem.ub + tol)\
+                and all(pol_dual_ineq > -tol)\
+                and all(pol_dual_lb > -tol)\
+                and all(pol_dual_ub > -tol):
+                # Return the computed high-precision solution
+                print "Polishing successful!"
+
+                # Substitute new z and u in the solution
+                # Get slack variable
+                if self.scaled_problem.Aineq.shape[0]:  # Aineq not null
+                    sineq = self.scaled_problem.bineq - \
+                        self.scaled_problem.Aineq.dot(pol_x)
+                else:
+                    sineq = np.zeros(nineq)
+
+                # Reconstruct primal variable
+                self.solution.z = np.hstack([pol_x, np.zeros(neq), sineq])
+
+                # reconstruct dual variable
+                self.solution.u = -1./self.options.rho * \
+                    np.hstack([pol_dual_lb - pol_dual_ub,
+                              pol_dual_eq,
+                              pol_dual_ineq])
+                #  solution.x = pol_x
+                #  solution.sol_dual_eq = pol_dual_eq
+                #  solution.sol_dual_ineq = pol_dual_ineq
+                #  solution.sol_dual_lb = pol_dual_lb
+                #  solution.sol_dual_ub = pol_dual_ub
+                #  solution.objval = self.problem.objval(pol_x)
+        else:
+            print "Polishing failed! Constraints not satisfied"
+
+    def scale_solution(self):
+        """
+        Scale given solution with diagonal scaling
+        """
+        self.solution.z[:self.problem.nx] = self.scaler_matrices.Dinv.dot(
+                self.solution.z[:self.problem.nx])
+        u_x_scaled = \
+            self.scaler_matrices.D.dot(self.solution.u[:self.problem.nx])
+        u_s_scaled = \
+            self.scaler_matrices.Einv.dot(self.solution.u[self.problem.nx:])
+        self.solution.u = np.append(u_x_scaled, u_s_scaled)
+
+    def rescale_solution(self):
+        """
+        Rescale solution back to user-given units
+        """
+        self.solution.z[:self.problem.nx] = \
+            self.scaler_matrices.D.dot(self.solution.z[:self.problem.nx])
+        u_x_unscaled = \
+            self.scaler_matrices.Dinv.dot(self.solution.u[:self.problem.nx])
+        u_s_unscaled = \
+            self.scaler_matrices.E.dot(self.solution.u[self.problem.nx:])
+        self.solution.u = np.append(u_x_unscaled, u_s_unscaled)
+
+    def solve_admm(self):
         """"
         Solve splitting problem with splitting of the form (after introducing
         slack variables for both equality and inequality constraints)
@@ -644,113 +720,56 @@ class OSQP(object):
         """
 
         # Print parameters
-        print "Splitting method 2"
-        print "KKT solution: " + self.options.kkt_method + "\n"
-
-        # Start timer
-        t = time.time()
+        #  print "Splitting method 2"
+        #  print "KKT solution: " + self.options.kkt_method + "\n"
 
         # Number of variables (x,s1,s2) and constraints
-        nx = self.problem.nx
-        neq = self.problem.neq
-        nineq = self.problem.nineq
+        nx = self.scaled_problem.nx
+        neq = self.scaled_problem.neq
+        nineq = self.scaled_problem.nineq
         nvar = nx + neq + nineq
         nconstr = neq + nineq
 
-        # Check whether the problem matrices have already been constructed.
-        # If direct method is used and factorization stored, get it
-        if self.options.kkt_method == 'direct' and \
-            self.options.kkt_dir_reuse_factor and \
-                self.kkt_factor is not None:
-            kkt_factor = self.kkt_factor
-            # scaler = self.scaler
-        else:
-            # Form compact (c) matrices for standard QP from:
-            #       minimize	1/2 z' Qc z + cc'z
-            #       subject to	Ac z == bc
-            #                   z \in Z
-            Qc = spspa.block_diag((self.problem.Q,
-                                   spspa.csc_matrix((nconstr, nconstr))))
-            Ac = spspa.vstack([
-                    spspa.hstack([self.problem.Aeq,
-                                 spspa.eye(self.problem.neq),
-                                  spspa.csc_matrix((neq, nineq))]),
-                    spspa.hstack([self.problem.Aineq,
-                                  spspa.csc_matrix((nineq, neq)),
-                                  spspa.eye(nineq)])])
+        # Factorize KKT matrix if this has not been done yet
+        if self.kkt_factor is None:
+            # Construct reduced KKT matrix
+            Ac = spspa.vstack([self.scaled_problem.Aeq,
+                              self.scaled_problem.Aineq])
+            KKT = spspa.vstack([
+                spspa.hstack([self.scaled_problem.Q + self.options.rho *
+                              spspa.eye(nx), Ac.T]),
+                spspa.hstack([Ac,
+                              -1./self.options.rho * spspa.eye(nconstr)])])
+            self.kkt_factor = spalinalg.splu(KKT.tocsc())
+            # if self.options.kkt_dir_reuse_factor:
+            #     # Store factorization
+            #     self.kkt_factor = kkt_factor
 
-            # If direct methiod appled, construct and factorize KKT matrix
-            if self.options.kkt_method == 'direct':
-                # Construct KKT matrix
-                Aconstr = spspa.vstack([self.problem.Aeq, self.problem.Aineq])
-                KKT = spspa.vstack([
-                    spspa.hstack([self.problem.Q + self.options.rho *
-                                  spspa.eye(nx), Aconstr.T]),
-                    spspa.hstack([Aconstr,
-                                  -1./self.options.rho * spspa.eye(nconstr)])])
-                kkt_factor = spalinalg.splu(KKT.tocsc())
-                if self.options.kkt_dir_reuse_factor:
-                    # Store factorization
-                    self.kkt_factor = kkt_factor
-            else:  # indirect method, construct part of KKT matrix
-                KKTbase = spspa.vstack([
-                    spspa.hstack([Qc, Ac.T]),
-                    spspa.hstack([Ac, spspa.csc_matrix((nconstr, nconstr))])])
-
-        cc = np.append(self.problem.c, np.zeros(nconstr))
-        bc = np.append(self.problem.beq, self.problem.bineq)
+        # Construct augmented b vector
+        bc = np.append(self.scaled_problem.beq, self.scaled_problem.bineq)
 
         # Set initial conditions
-        if self.options.warm_start and self.z_prev is not None \
-                and self.u_prev is not None:
-                z = self.z_prev
-                u = self.u_prev
+        if self.options.warm_start and self.solution.z is not None \
+                and self.solution.u is not None:
+            self.scale_solution()
+            z = self.solution.z
+            u = self.solution.u
         else:
             z = np.zeros(nvar)
             u = np.zeros(nvar)
 
-        # If indirect method:
-        # initialize kktsol to store initial solution of kkt algorithm
-        if self.options.kkt_method == 'indirect':
-            kktsol = np.append(z, np.zeros(nconstr))
-
         if self.options.print_level > 1:
-            print "Iter \t  Objective \tPrim Res \tDual Res"
+            print "Iter \t  Objective       \tPrim Res \tDual Res"
 
         # Run ADMM: alpha \in (0, 2) is a relaxation parameter.
         #           Nominal ADMM is obtained for alpha=1.0
         for i in xrange(self.options.max_iter):
             # x update
-            if self.options.kkt_method == 'direct':
-                rhs = np.append(self.options.rho * (z[:nx] - u[:nx]) -
-                                self.problem.c, bc - z[nx:] + u[nx:])
-                sol_kkt = kkt_factor.solve(rhs)
-                x = np.append(sol_kkt[:nx], z[nx:] - u[nx:] -
-                              1./self.options.rho * sol_kkt[nx:])
-            else:
-                rhs = np.append(self.options.rho * (z - u) - cc, bc)
-                # Construct KKT matrix with new rho
-                KKT = KKTbase + spspa.block_diag(
-                    (self.options.rho*spspa.eye(nvar),
-                     spspa.csr_matrix((nconstr, nconstr))))
-                # Solve KKT system
-                if self.options.kkt_ind_alg == 'cg':  # Apply conj gradient
-                    kktsol, _ = spalinalg.cg(
-                        KKT, rhs,
-                        x0=kktsol,  # use prev kkt sol
-                        tol=self.options.kkt_ind_tol,
-                        maxiter=self.options.kkt_ind_maxiter)
-                elif self.options.kkt_ind_alg == 'gmres':  # Apply gmres
-                    kktsol, _ = spalinalg.gmres(
-                        KKT, rhs,
-                        x0=kktsol,  # use prev kkt sol
-                        tol=self.options.kkt_ind_tol,
-                        maxiter=self.options.kkt_ind_maxiter)
-                else:
-                    assert False, "Invalid indirect algorithm for solving \
-                    KKT system provided!"
-                x = kktsol[:nvar]
-
+            rhs = np.append(self.options.rho * (z[:nx] - u[:nx]) -
+                            self.scaled_problem.c, bc - z[nx:] + u[nx:])
+            sol_kkt = self.kkt_factor.solve(rhs)
+            x = np.append(sol_kkt[:nx], z[nx:] - u[nx:] -
+                          1./self.options.rho * sol_kkt[nx:])
             # z update
             z_old = z
             z = self.project(self.options.alpha*x +
@@ -763,7 +782,7 @@ class OSQP(object):
             resid_dual = self.options.rho*spla.norm(z - z_old)
 
             # Check the stopping criterion
-            eps_prim = np.sqrt(nconstr) * self.options.eps_abs \
+            eps_prim = np.sqrt(nvar) * self.options.eps_abs \
                 + self.options.eps_rel * np.max([spla.norm(x), spla.norm(z)])
             eps_dual = np.sqrt(nvar) * self.options.eps_abs + \
                 self.options.eps_rel * self.options.rho * spla.norm(u)
@@ -771,8 +790,8 @@ class OSQP(object):
             if resid_prim <= eps_prim and resid_dual <= eps_dual:
                 # Print the progress in last iterations
                 if self.options.print_level > 1:
-                    f = self.problem.objval(z[:nx])
-                    print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
+                    f = self.scaled_problem.objval(z[:nx])
+                    print "%4s \t % 1.7e  \t%1.2e  \t%1.2e" \
                         % (i+1, f, resid_prim, resid_dual)
                 # Stop the algorithm
                 break
@@ -783,67 +802,22 @@ class OSQP(object):
                         (np.mod(i + 1,
                          np.floor(np.float(self.options.max_iter)/20.0)) == 0)\
                         | (self.options.print_level == 3):
-                            f = self.problem.objval(z[:nx])
-                            print "%4s \t%1.7e  \t%1.2e  \t%1.2e" \
+                            f = self.scaled_problem.objval(z[:nx])
+                            print "%4s \t % 1.7e  \t%1.2e  \t%1.2e" \
                                 % (i+1, f, resid_prim, resid_dual)
 
-            # # If indirect method, update rho
-            # if self.options.kkt_method == 'indirect':
-            #     # update rho
-            #     if np.norm(resid_prim) > \
-            #             self.options.kkt_ind_mu*np.norm(resid_dual):
-            #         self.options.rho = self.options.kkt_ind_tau * \
-            #             self.options.rho
-            #     elif np.norm(resid_dual) > \
-            #             self.options.kkt_ind_mu*np.norm(resid_prim):
-            #         self.options.rho = 1./self.options.kkt_ind_tau * \
-            #             self.options.rho
-
-        # End timer
-        cputime = time.time() - t
-        total_iter = i
+        # Total iterations
+        self.total_iter = i
 
         # Return status
         print "\n"
         if i == self.options.max_iter - 1:
             print "Maximum number of iterations exceeded!"
-            status = MAXITER_REACHED
+            self.status = MAXITER_REACHED
         else:
             print "Optimal solution found"
-            status = OPTIMAL
+            self.status = OPTIMAL
 
-        print "Elapsed time: %.3fs\n" % cputime
-
-        # Recover primal solution
-        sol_x = z[:nx]
-        objval = self.problem.objval(sol_x)
-
-        # Recover dual solution
-        dual_vars = -self.options.rho * u
-        sol_dual_eq = dual_vars[nx:nx+neq]
-        sol_dual_ineq = dual_vars[nx+neq:]
-        #  stat_cond_resid = self.problem.Q.dot(sol_x) + self.problem.c + \
-            #  self.problem.Aeq.T.dot(sol_dual_eq) + \
-            #  self.problem.Aineq.T.dot(sol_dual_ineq)
-        #  sol_dual_lb = np.maximum(stat_cond_resid, 0)
-        #  sol_dual_ub = -np.minimum(stat_cond_resid, 0)
-        sol_dual_lb = np.maximum(dual_vars[:nx], 0)
-        sol_dual_ub = -np.minimum(dual_vars[:nx], 0)
-
-        # Store solution as a quadprogResults object
-        solution = results(status, objval, sol_x, sol_dual_eq,
-                           sol_dual_ineq, sol_dual_lb, sol_dual_ub,
-                           cputime, total_iter)
-
-        # Polish only if optimal solution reached
-        if status == OPTIMAL:
-            if self.options.polish:
-                # Solution polishing
-                solution = self.polish(solution)
-            # Store last iterates for warm starting
-            if self.options.warm_start:
-                self.z_prev = z
-                self.u_prev = u
-
-        # Return solution
-        return solution
+        # Save z and u solution
+        self.solution.z = z
+        self.solution.u = u
