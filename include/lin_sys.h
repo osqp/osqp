@@ -11,7 +11,7 @@ typedef struct c_priv Priv;
 
 
 // Initialize private variable for solver
-Priv *initPriv(const csc * Q, const csc * A, const Settings *settings);
+Priv *initPriv(const csc * P, const csc * A, const Settings *settings);
 
 /* solves Ax = b for x, and stores result in b */
 c_int solveLinSys(const Settings *settings, Priv *p, c_float *b);

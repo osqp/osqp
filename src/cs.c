@@ -18,7 +18,7 @@ static void *csc_calloc(c_int n, c_int size) {
 /* wrapper for free */
 static void *csc_free(void *p) {
         if (p) c_free(p); /* free p if it is not already SCS_NULL */
-        return (OSQP_NULL); /* return OSQP_NULL to simplify the use of cs_free */
+        return (OSQP_NULL); /* return OSQP_NULL to simplify the use of csc_free */
 }
 
 
@@ -69,7 +69,7 @@ csc *csc_spfree(csc *A) {
         csc_free(A->p);
         csc_free(A->i);
         csc_free(A->x);
-        return ((csc *)csc_free(A)); /* free the cs struct and return SCS_NULL */
+        return ((csc *)csc_free(A)); /* free the cs struct and return OSQP_NULL */
 }
 
 
@@ -113,6 +113,66 @@ c_int csc_cumsum(c_int *p, c_int *c, c_int n){
         }
         p [n] = nz;
         return (nz);       /* return sum (c [0..n-1]) */
+}
+
+/* Compute inverse of permuation matrix stored in the vector p.
+ * The computed inverse is also stored in a vector.
+ */
+c_int *csc_pinv(c_int const *p, c_int n) {
+    c_int k, *pinv;
+    if (!p)
+        return (OSQP_NULL);                /* p = OSQP_NULL denotes identity */
+    pinv = csc_malloc(n, sizeof(c_int));   /* allocate result */
+    if (!pinv)
+        return (OSQP_NULL); /* out of memory */
+    for (k = 0; k < n; k++)
+        pinv[p[k]] = k; /* invert the permutation */
+    return (pinv);      /* return result */
+}
+
+
+/* Symmetric permutation of matrix A:  C = P A P' */
+csc *csc_symperm(const csc *A, const c_int *pinv, c_int values) {
+    c_int i, j, p, q, i2, j2, n, *Ap, *Ai, *Cp, *Ci, *w;
+    c_float *Cx, *Ax;
+    csc *C;
+    n = A->n;
+    Ap = A->p;
+    Ai = A->i;
+    Ax = A->x;
+    C = csc_spalloc(n, n, Ap[n], values && (Ax != OSQP_NULL),
+                   0);                 /* alloc result*/
+    w = csc_calloc(n, sizeof(c_int)); /* get workspace */
+    if (!C || !w)
+        return (csc_done(C, w, OSQP_NULL, 0)); /* out of memory */
+    Cp = C->p;
+    Ci = C->i;
+    Cx = C->x;
+    for (j = 0; j < n; j++) /* count entries in each column of C */
+    {
+        j2 = pinv ? pinv[j] : j; /* column j of A is column j2 of C */
+        for (p = Ap[j]; p < Ap[j + 1]; p++) {
+            i = Ai[p];
+            if (i > j)
+                continue;            /* skip lower triangular part of A */
+            i2 = pinv ? pinv[i] : i; /* row i of A is row i2 of C */
+            w[c_max(i2, j2)]++;        /* column count of C */
+        }
+    }
+    csc_cumsum(Cp, w, n); /* compute column pointers of C */
+    for (j = 0; j < n; j++) {
+        j2 = pinv ? pinv[j] : j; /* column j of A is column j2 of C */
+        for (p = Ap[j]; p < Ap[j + 1]; p++) {
+            i = Ai[p];
+            if (i > j)
+                continue;            /* skip lower triangular part of A*/
+            i2 = pinv ? pinv[i] : i; /* row i of A is row i2 of C */
+            Ci[q = w[c_max(i2, j2)]++] = c_min(i2, j2);
+            if (Cx)
+                Cx[q] = Ax[p];
+        }
+    }
+    return (csc_done(C, w, OSQP_NULL, 1)); /* success; free workspace, return C */
 }
 
 

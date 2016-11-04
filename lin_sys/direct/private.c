@@ -7,8 +7,20 @@
 
 
 
-
-
+// Free LDL Factorization structure
+void freePriv(Priv *p) {
+    if (p) {
+        if (p->L)
+            csc_spfree(p->L);
+        if (p->P)
+            c_free(p->P);
+        if (p->D)
+            c_free(p->D);
+        if (p->bp)
+            c_free(p->bp);
+        c_free(p);
+    }
+}
 
 
 /* Form square symmetric KKT matrix of the form
@@ -139,7 +151,87 @@ csc * formKKT(const csc * P, const  csc * A, c_float rho){
 }
 
 
-// Initialize Private Factorization structure
+/**
+ * Compute LDL factorization of matrix P A P'. If P = Pinv = OSQP_NULL,
+ * then factorize matrix A.
+ * @param  A    Matrix to be factorized
+ * @param  P    Permutation matrix (stored as a vector)
+ * @param  Pinv Inverse of the permutation matrix (stored as a vector)
+ * @param  L    <out> Lower triangular matrix
+ *              NB: Diagonal of L is assumed to be unit, and is not stored
+ * @param  D    Diagonal matrix (stored as a vector)
+ * @return      Status of the routine
+ */
+c_int LDLFactor(csc *A, c_int P[], c_int Pinv[], csc **L, c_float **D) {
+    c_int kk, n = A->n;
+    c_int *Parent = c_malloc(n * sizeof(c_int));
+    c_int *Lnz = c_malloc(n * sizeof(c_int));
+    c_int *Flag = c_malloc(n * sizeof(c_int));
+    c_int *Pattern = c_malloc(n * sizeof(c_int));
+    c_float *Y = c_malloc(n * sizeof(c_float));
+    (*L)->p = (c_int *)c_malloc((1 + n) * sizeof(c_int));
+
+    // Symbolic factorization
+    LDL_symbolic(n, A->p, A->i, (*L)->p, Parent, Lnz, Flag, P, Pinv);
+
+    (*L)->nzmax = *((*L)->p + n);
+    (*L)->x = (c_float *)c_malloc((*L)->nzmax * sizeof(c_float));
+    (*L)->i = (c_int *)c_malloc((*L)->nzmax * sizeof(c_int));
+    *D = (c_float *)c_malloc(n * sizeof(c_float));
+
+    if (!(*D) || !(*L)->i || !(*L)->x || !Y || !Pattern || !Flag || !Lnz ||
+        !Parent)
+        return -1;
+
+    // Numeric factorization
+    kk = LDL_numeric(n, A->p, A->i, A->x, (*L)->p, Parent, Lnz, (*L)->i,
+                     (*L)->x, *D, Y, Pattern, Flag, P, Pinv);
+
+    // Memory clean-up
+    c_free(Parent);
+    c_free(Lnz);
+    c_free(Flag);
+    c_free(Pattern);
+    c_free(Y);
+    return (kk - n);
+}
+
+
+
+
+/**
+ *  Factorize matrix A using sparse LDL factorization with pivoting as:
+ *      P A P' = L D L'
+ *  The result is stored in the LDL Factorization structure Priv.
+ */
+c_int factorize(csc *A, Priv *p) {
+    c_float *info;
+    c_int *Pinv, amd_status, ldl_status;
+    csc *C;
+    info = (c_float *)c_malloc(AMD_INFO * sizeof(c_float));
+
+    // Compute permutation metrix P using SuiteSparse/AMD
+    amd_status = amd_order(A->n, A->p, A->i, p->P, (c_float *)OSQP_NULL, info);
+    if (amd_status < 0)
+        return (amd_status);
+
+    // Compute inverse of permutation matrix P
+    Pinv = csc_pinv(p->P, A->n);
+    // Symmetric permutation of A:  permA = P A P'
+    C = csc_symperm(A, Pinv, 1);
+
+    // Compute LDL factorization of  C = P A P'
+    ldl_status = LDLFactor(C, OSQP_NULL, OSQP_NULL, &p->L, &p->D);
+
+    // Memory clean-up
+    csc_spfree(C);
+    c_free(Pinv);
+    c_free(info);
+    return (ldl_status);
+}
+
+
+// Initialize LDL Factorization structure
 Priv *initPriv(const csc * P, const csc * A, const Settings *settings){
     // Define Variables
     csc * KKT;  // KKT Matrix
@@ -160,20 +252,20 @@ Priv *initPriv(const csc * P, const csc * A, const Settings *settings){
     // Working vector
     p->bp = c_malloc(sizeof(c_float) * n_plus_m);
     // Solve time (for reporting)
-    p->solveTime = 0.0;
+    p->total_solve_time = 0.0;
 
     // Form KKT matrix
     KKT = formKKT(P, A, settings->rho);
 
+    // Factorize the KKT matrix
+    // TODO: Store factorization timings
+    if (factorize(KKT, p) < 0) {
+        freePriv(p);
+        return OSQP_NULL;
+    }
 
-    // Factorize TODO: complete
-
-    // TODO: add check and store timings
-    // if (factorize(A, stgs, p) < 0) {
-    //     freePriv(p);
-    //     return SCS_NULL;
-    // }
-    // p->totalSolveTime = 0.0;
+    // Memory clean-up
+    csc_spfree(KKT);
 
     return p;
 }
@@ -192,7 +284,7 @@ Priv *setPriv(csc *L, c_float *D, c_int *P){
     // Working vector
     p->bp = c_malloc(sizeof(c_float) * n);
     // Solve time (for reporting)
-    p->solveTime = 0.0;
+    p->total_solve_time = 0.0;
     return p;
 }
 

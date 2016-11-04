@@ -86,11 +86,11 @@ c_int test_LDL_solve_random(){
     // Solve  Ax = b via LDL given factorization
     solveLinSys(settings, p, t7_b);
 
-    // DEBUG
-    c_print("\n");
-    print_vec(t7_x, t7_n, "\nx_true");
-    print_vec(t7_b, t7_n, "x_ldl ");
-    c_print("\ndiff = %.10f\n", vec_norm2_diff(t7_b, t7_x, t7_n));
+    // // DEBUG
+    // c_print("\n");
+    // print_vec(t7_x, t7_n, "\nx_true");
+    // print_vec(t7_b, t7_n, "x_ldl ");
+    // c_print("\ndiff = %.10f\n", vec_norm2_diff(t7_b, t7_x, t7_n));
 
     if(vec_norm2_diff(t7_b, t7_x, t7_n) > TESTS_TOL){
         c_print("\nError in the random LDL linear system solve!");

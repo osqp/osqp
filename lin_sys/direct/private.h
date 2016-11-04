@@ -15,7 +15,7 @@ struct c_priv{
     c_int *P;     /* permutation of KKT matrix for factorization  */
     c_float *bp;  /* workspace memory for solves                  */
     /* reporting */
-    c_float solveTime;
+    c_float total_solve_time;
 };
 
 //TODO: Add structure for KKT factorization (see scs)

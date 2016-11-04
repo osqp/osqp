@@ -69,6 +69,14 @@ c_float * csc_to_dns(csc * M);
 /* p [0..n] = cumulative sum of c [0..n-1], and then copy p [0..n-1] into c */
 c_int csc_cumsum(c_int *p, c_int *c, c_int n);
 
+/* Compute inverse of permuation matrix stored in the vector p.
+ * The computed inverse is also stored in a vector.
+ */
+c_int *csc_pinv(c_int const *p, c_int n);
+
+/* Symmetric permutation of matrix A:  C = P A P' */
+csc *csc_symperm(const csc *A, const c_int *pinv, c_int values);
+
 /* free workspace and return a sparse matrix result */
 csc * csc_done(csc *C, void *w, void *x, c_int ok);
 

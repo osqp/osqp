@@ -23,7 +23,7 @@ SUITESPARSE_DIR = $(DIRSRCEXT)/suitesparse
 CFLAGS += -I$(SUITESPARSE_DIR) -I$(SUITESPARSE_DIR)/amd/include -I$(SUITESPARSE_DIR)/ldl/include
 AMD_SRC_FILES = $(wildcard $(SUITESPARSE_DIR)/amd/src/amd_*.c)
 AMD_OBJECTS = $(AMD_SRC_FILES:.c=.o)
-SUITESPARSE_OBJS = $(SUITESPARSE_DIR)/ldl/src/ldl.o $(AMD_OBJECTS)
+SUITESPARSE_OBJS = $(SUITESPARSE_DIR)/SuiteSparse_config.o $(SUITESPARSE_DIR)/ldl/src/ldl.o $(AMD_OBJECTS)
 
 # Compile all C code
 .PHONY: default

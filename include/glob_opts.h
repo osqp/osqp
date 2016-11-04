@@ -28,6 +28,10 @@ typedef double c_float;              /* for numerical values  */
 #define c_max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
+#ifndef c_min
+#define c_min(a, b) (((a) < (b)) ? (a) : (b))
+#endif
+
 /* Use customized functions -----------------------------------------------   */
 
 #if PRINTLEVEL > 0
