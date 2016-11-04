@@ -101,6 +101,40 @@ c_int test_LDL_solve_random(){
 }
 
 
+c_int test_solveKKT(){
+    c_int exitflag=0;
+    Priv * p; // Private structure to form KKT factorization
+    Settings *settings = c_malloc(sizeof(Settings)); // Settings
+    csc *Pu, *A;
+
+    // Construct sparse matrices from matrices.h
+    Pu = csc_matrix(t8_n, t6_n, t8_Pu_nnz, t6_P_x, t6_P_i, t6_P_p);
+    A = csc_matrix(t8_m, t8_n, t8_A_nnz, t8_A_x, t8_A_i, t6_A_p);
+
+    // Form and factorize KKT matrix
+    settings->rho = t8_rho;
+    p = initPriv(Pu, A, settings);
+
+    // Solve  KKT x = b via LDL given factorization
+    solveLinSys(settings, p, t8_rhs);
+
+    // DEBUG
+    c_print("\n");
+    print_vec(t8_x, t8_m + t8_n, "\nx_true");
+    print_vec(t8_rhs, t8_m + t8_n, "x_ldl ");
+    c_print("\ndiff = %.10f\n", vec_norm2_diff(t8_rhs, t8_x, t8_m + t8_n));
+
+    if(vec_norm2_diff(t8_rhs, t8_x, t8_m + t8_n) > TESTS_TOL){
+        c_print("\nError in the KKT solve!");
+        exitflag = 1;
+    }
+
+    // TODO: Memory clean-up
+
+    return exitflag;
+}
+
+
 static char * tests_solve_linsys()
 {
     /* local variables */
@@ -121,6 +155,11 @@ static char * tests_solve_linsys()
 
     printf("2) Test random linear system solve via LDL: ");
     tempflag = test_LDL_solve_random();
+    if (!tempflag) c_print("OK!\n");
+    exitflag += tempflag;
+
+    printf("3) Test form and solve KKT system: ");
+    tempflag = test_solveKKT();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 

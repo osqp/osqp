@@ -11,6 +11,7 @@ typedef struct c_priv Priv;
 
 
 // Initialize private variable for solver
+// NB: Only the upper triangular part of P is stuffed!
 Priv *initPriv(const csc * P, const csc * A, const Settings *settings);
 
 /* solves Ax = b for x, and stores result in b */

@@ -55,7 +55,7 @@ write_mat_sparse(f, t6_A, "t6_A")
 write_mat_sparse(f, t6_KKT, "t6_KKT")
 
 
-# 7) Larger linear system solve
+# 7) Random linear system solve
 #-------------------------------------------------------------------------------
 # Define data
 srand(1)
@@ -76,10 +76,40 @@ x = A \ b
 write_int(f, n, "t7_n")
 write_vec_int(f, P, "t7_P")
 write_mat_sparse(f, sparse(L), "t7_L")
+write_mat_sparse(f, sparse(A), "t7_A")
 write_vec_float(f, D, "t7_D")
 write_vec_float(f, b, "t7_b")
 write_vec_float(f, x, "t7_x")
 
+
+# 8) Factorize KKT and solve a linear system
+#-------------------------------------------------------------------------------
+# Define data
+srand(1)
+n = 5
+m = 6
+p = 0.3  # Control sparsity level
+
+# Create matrices A and P
+A = sprandn(m, n, p)
+P = sprandn(n, n, p);
+P = P * P'  # Create symmetric PSD matrix
+Pu = triu(P) # Store only upper triangular part of P
+
+# Form KKT
+rho = 1.6
+KKT = [P + rho*speye(n) A'; A -1./rho*speye(m)]
+rhs = randn(m+n)
+x = KKT \ rhs
+
+# Write data
+write_int(f, n, "t8_m")
+write_int(f, n, "t8_n")
+write_float(f, rho, "t8_rho")
+write_mat_sparse(f, sparse(A), "t8_A")
+write_mat_sparse(f, sparse(Pu), "t8_Pu")
+write_vec_float(f, rhs, "t8_rhs")
+write_vec_float(f, x, "t8_x")
 
 # Close file
 close(f)
