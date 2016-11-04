@@ -21,7 +21,8 @@ struct OSQP_PROBLEM_DATA {
 
         /* these can change for multiple runs for the same call to osqp_init */
         c_float *q; /* dense array for linear part of cost function (size n) */
-        c_float *l, *u; /* dense arrays for bounds l, u (size m)*/
+        c_float *lA, *uA; /* dense arrays for bounds lA, uA (size m)*/
+        c_float *lx, *ux; /* dense arrays for bounds lx, ux (size n)*/
 
         Settings *settings; /* contains solver settings specified by user */
 };
@@ -52,7 +53,8 @@ struct OSQP_WORK {
         c_float *q; // Cost function vector q, dimension n
 
         csc * A; // Constraints matrix, dimension (m x n)
-        c_float *lb, *ub; // Lower and upper bounds vectors for constraints, dimension m
+        c_float *lA, *uA; // Lower and upper bounds for constraints, dimension m
+        c_float *lx, *ux; /* dense arrays for bounds lx, ux (size n)*/
 
         Priv *p; // Linear System solver structure
 

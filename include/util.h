@@ -6,10 +6,14 @@
 #include "osqp.h"
 
 /* ================================= OTHER FUNCTIONS ======================== */
-// Add timings, etc....
+/* Set default settings from constants.h file */
+/* assumes d->stgs already allocated memory */
+void set_default_settings(Data *d);
 
 /* ================================= DEBUG FUNCTIONS ======================= */
 #if PRINTLEVEL > 2
+#include <stdio.h>
+
 
 #define TESTS_TOL 1e-10  // Define tests tolerance
 

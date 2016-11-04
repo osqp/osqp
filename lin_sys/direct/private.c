@@ -3,12 +3,12 @@
 
 // TODO: Add functions for defining factorizing and solving linear systems with direct methods
 
-// formKKT, factorize... (see scs)
+// form_KKT, factorize... (see scs)
 
 
 
 // Free LDL Factorization structure
-void freePriv(Priv *p) {
+void free_priv(Priv *p) {
     if (p) {
         if (p->L)
             csc_spfree(p->L);
@@ -34,7 +34,7 @@ A: linear equalities matrix
 rho: ADMM step
 N.B. Only the upper triangular part is stuffed!
 */
-csc * formKKT(const csc * P, const  csc * A, c_float rho){
+csc * form_KKT(const csc * P, const  csc * A, c_float rho){
     c_int nKKT, nnzKKTmax; // Size, number of nonzeros and max number of nonzeros in KKT matrix
     csc *KKT_trip, *KKT;           // KKT matrix in triplet format and CSC format
     c_int ptr, i, j; // Counters for elements (i,j) and index pointer
@@ -232,7 +232,7 @@ c_int factorize(csc *A, Priv *p) {
 
 
 // Initialize LDL Factorization structure
-Priv *initPriv(const csc * P, const csc * A, const Settings *settings){
+Priv *init_priv(const csc * P, const csc * A, const Settings *settings){
     // Define Variables
     csc * KKT;  // KKT Matrix
     Priv * p;   // KKT factorization structure
@@ -255,12 +255,12 @@ Priv *initPriv(const csc * P, const csc * A, const Settings *settings){
     p->total_solve_time = 0.0;
 
     // Form KKT matrix
-    KKT = formKKT(P, A, settings->rho);
+    KKT = form_KKT(P, A, settings->rho);
 
     // Factorize the KKT matrix
     // TODO: Store factorization timings
     if (factorize(KKT, p) < 0) {
-        freePriv(p);
+        free_priv(p);
         return OSQP_NULL;
     }
 
@@ -272,7 +272,7 @@ Priv *initPriv(const csc * P, const csc * A, const Settings *settings){
 
 
 // Initialize private variable with given matrix L, and vector D and P
-Priv *setPriv(csc *L, c_float *D, c_int *P){
+Priv *set_priv(csc *L, c_float *D, c_int *P){
     Priv * p;   // LDL structure
     c_int n = L->n;
     // Allocate pointers
@@ -301,7 +301,7 @@ void LDLSolve(c_float *x, c_float *b, csc *L, c_float *D, c_int *P,
 
 
 /* TODO: Adjust arguments of the function with other linear system solvers */
-c_int solveLinSys(const Settings *settings, Priv *p, c_float *b) {
+c_int solve_lin_sys(const Settings *settings, Priv *p, c_float *b) {
     /* returns solution to linear system */
     /* Ax = b with solution stored in b */
     LDLSolve(b, b, p->L, p->D, p->P, p->bp);

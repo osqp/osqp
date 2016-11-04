@@ -45,3 +45,4 @@ srand(9)
 # Include files
 include("lin_alg/generate_mat.jl")
 include("solve_linsys/generate_mat.jl")
+include("basic_qp/generate_mat.jl")

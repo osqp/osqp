@@ -7,7 +7,7 @@
 
 /* Set default settings from constants.h file */
 /* assumes d->stgs already allocated memory */
-void setDefaultSettings(Data *d) {
+void set_default_settings(Data *d) {
         d->settings->max_iter = MAX_ITER; /* maximum iterations to take */
         d->settings->eps = EPS;         /* convergence tolerance */
         d->settings->alpha = ALPHA;     /* relaxation parameter */

@@ -10,7 +10,7 @@
 #endif
 
 
-c_int test_formKKT(){
+c_int test_form_KKT(){
     c_int exitflag = 0;
     csc *t6_P, *t6_A, *t6_KKT;
     csc * KKT;
@@ -23,7 +23,7 @@ c_int test_formKKT(){
 
 
     // Construct KKT matrix
-    KKT = formKKT(t6_P, t6_A, t6_rho);
+    KKT = form_KKT(t6_P, t6_A, t6_rho);
 
     // DEBUG
     // KKTdns =  csc_to_dns(KKT);
@@ -57,10 +57,10 @@ c_int test_LDL_solve_simple(){
     L = csc_matrix(t5_n, t5_n, t5_L_nnz, t5_L_x, t5_L_i, t5_L_p);
 
     // Store L, D, P in a private variable
-    p = setPriv(L, t5_D, t5_P);
+    p = set_priv(L, t5_D, t5_P);
 
     // Solve  Ax = b via LDL given factorization
-    solveLinSys(settings, p, t5_b);
+    solve_lin_sys(settings, p, t5_b);
 
     if(vec_norm2_diff(t5_b, t5_x, t5_n) > TESTS_TOL){
         c_print("\nError in the simple LDL linear system solve!");
@@ -81,10 +81,10 @@ c_int test_LDL_solve_random(){
     L = csc_matrix(t7_n, t7_n, t7_L_nnz, t7_L_x, t7_L_i, t7_L_p);
 
     // Store L, D, P in a private variable
-    p = setPriv(L, t7_D, t7_P);
+    p = set_priv(L, t7_D, t7_P);
 
     // Solve  Ax = b via LDL given factorization
-    solveLinSys(settings, p, t7_b);
+    solve_lin_sys(settings, p, t7_b);
 
     // // DEBUG
     // c_print("\n");
@@ -113,10 +113,10 @@ c_int test_solveKKT(){
 
     // Form and factorize KKT matrix
     settings->rho = t8_rho;
-    p = initPriv(Pu, A, settings);
+    p = init_priv(Pu, A, settings);
 
     // Solve  KKT x = b via LDL given factorization
-    solveLinSys(settings, p, t8_rhs);
+    solve_lin_sys(settings, p, t8_rhs);
 
     // // DEBUG
     // c_print("\n");
@@ -144,7 +144,7 @@ static char * tests_solve_linsys()
     printf("----------------------------\n");
 
     printf("0) Form KKT matrix: ");
-    tempflag = test_formKKT();
+    tempflag = test_form_KKT();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 
