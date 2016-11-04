@@ -1,7 +1,81 @@
-# Add vim files
+# C language
+# -------------------------------------------------------------------
+# Out folder
+out/
+
+# Prerequisites
+*.d
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Linker output
+*.ilk
+*.map
+*.exp
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+# Add clang_complete files
+.clang_complete
+
+# Vim files
+# -------------------------------------------------------------------
 *.swp
-# Add Gurobi
+.ycm_extra_conf.py
+
+# Gurobi
+# -------------------------------------------------------------------
 gurobi.log
+
+
+# Tags
+# -------------------------------------------------------------------
+tags
+.tags
+.tags1
+
+# Python Language
+# -------------------------------------------------------------------
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
