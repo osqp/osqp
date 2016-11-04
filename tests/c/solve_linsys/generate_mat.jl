@@ -58,7 +58,7 @@ write_mat_sparse(f, t6_KKT, "t6_KKT")
 # 7) Random linear system solve
 #-------------------------------------------------------------------------------
 # Define data
-srand(1)
+#srand(1)
 n = 8
 In = eye(n)
 P = randperm(n)-1
@@ -103,7 +103,7 @@ rhs = randn(m+n)
 x = KKT \ rhs
 
 # Write data
-write_int(f, n, "t8_m")
+write_int(f, m, "t8_m")
 write_int(f, n, "t8_n")
 write_float(f, rho, "t8_rho")
 write_mat_sparse(f, sparse(A), "t8_A")
