@@ -1,0 +1,15 @@
+c_float basic_qp_P_x[4] = {4.00000000000000000000, 1.00000000000000000000, 1.00000000000000000000, 2.00000000000000000000, };
+c_int basic_qp_P_nnz = 4;
+c_int basic_qp_P_i[4] = {0, 1, 0, 1, };
+c_int basic_qp_P_p[3] = {0, 2, 4, };
+c_float basic_qp_q[2] = {1.00000000000000000000, 1.00000000000000000000, };
+c_float basic_qp_A_x[2] = {1.00000000000000000000, 1.00000000000000000000, };
+c_int basic_qp_A_nnz = 2;
+c_int basic_qp_A_i[2] = {0, 0, };
+c_int basic_qp_A_p[3] = {0, 1, 2, };
+c_float basic_qp_lA[1] = {1.00000000000000000000, };
+c_float basic_qp_uA[1] = {1.00000000000000000000, };
+c_float basic_qp_lx[1] = {1.00000000000000000000, };
+c_float basic_qp_ux[1] = {1.00000000000000000000, };
+c_int basic_qp_n = 5;
+c_int basic_qp_m = 6;
