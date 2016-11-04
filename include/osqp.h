@@ -5,8 +5,11 @@
 /* Includes */
 #include "constants.h"
 #include "glob_opts.h"
+#include <string.h>
 #include "lin_alg.h"
 #include "lin_sys.h"
+#include "cs.h"
+
 
 /*****************************
  * Structures and Data Types *
@@ -24,14 +27,13 @@ struct OSQP_PROBLEM_DATA {
         c_float *lA, *uA; /* dense arrays for bounds lA, uA (size m)*/
         c_float *lx, *ux; /* dense arrays for bounds lx, ux (size n)*/
 
-        Settings *settings; /* contains solver settings specified by user */
 };
 
 
 /* Settings struct */
 struct OSQP_SETTINGS {
         /* these *cannot* change for multiple runs with the same call to osqp_init */
-        // c_int normalize; /* boolean, heuristic data rescaling: 1 */
+        c_int normalize; /* boolean, heuristic data rescaling: 1 */
         c_float rho; /* ADMM step rho*/
 
         /* these can change for multiple runs with the same call to osqp_init */
@@ -48,7 +50,7 @@ struct OSQP_SETTINGS {
 struct OSQP_WORK {
         // Problem Data (possibly Scaled)
         c_int n; // Number of variables
-        c_int m; // Number of constraints
+        c_int m; // Number of linear constraints
         csc * P; // Cost Function Matrix, dimension n x n
         c_float *q; // Cost function vector q, dimension n
 
@@ -56,7 +58,7 @@ struct OSQP_WORK {
         c_float *lA, *uA; // Lower and upper bounds for constraints, dimension m
         c_float *lx, *ux; /* dense arrays for bounds lx, ux (size n)*/
 
-        Priv *p; // Linear System solver structure
+        Priv *priv; // Linear System solver structure
 
         Settings *settings; // Problem settings
         Scaling *scaling; // Scaling Vectors
@@ -103,11 +105,11 @@ struct OSQP_INFO {
  * N.B. This is the only function that allocates dynamic memory. During code
  * generation it is going to be removed.
  *
- * @param  data   Problem data
- * @param  info   Solver information
- * @return        Solver workspace
+ * @param  data         Problem data
+ * @param  settings     Solver settings
+ * @return              Solver workspace
  */
-Work * osqp_setup(const Data * data, Info *info);
+Work * osqp_setup(const Data * data, Settings *settings);
 
 
 /**

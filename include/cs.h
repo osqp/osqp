@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "constants.h"
+#include <string.h>
 #include "glob_opts.h"
 
 
@@ -79,5 +79,11 @@ csc *csc_symperm(const csc *A, const c_int *pinv, c_int values);
 
 /* free workspace and return a sparse matrix result */
 csc * csc_done(csc *C, void *w, void *x, c_int ok);
+
+/**
+ *  Copy sparse CSC matrix A to output.
+ *  output is allocated by this function (uses MALLOC)
+ */
+csc * copy_csc_mat(const csc* A);
 
 #endif

@@ -240,17 +240,23 @@ Priv *init_priv(const csc * P, const csc * A, const Settings *settings){
     // Allocate private structure to store KKT factorization
     // Allocate pointers
     p = c_calloc(1, sizeof(Priv));
+
     // Size of KKT
     c_int n_plus_m = P->m + A->m;
+
     // Sparse matrix L (lower triangular)
     // Set nzmax to 1 and null pointer to elements (to be filled during factorization)
     p->L = csc_spalloc(n_plus_m, n_plus_m, 1, 0, 0);
+
     // Diagonal matrix stored as a vector D
     p->D = c_malloc(sizeof(c_float) * n_plus_m);
+
     // Permutation vector P
     p->P = c_malloc(sizeof(c_int) * n_plus_m);
+
     // Working vector
     p->bp = c_malloc(sizeof(c_float) * n_plus_m);
+
     // Solve time (for reporting)
     p->total_solve_time = 0.0;
 

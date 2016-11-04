@@ -8,7 +8,7 @@
 /* ================================= OTHER FUNCTIONS ======================== */
 /* Set default settings from constants.h file */
 /* assumes d->stgs already allocated memory */
-void set_default_settings(Data *d);
+void set_default_settings(Settings * settings);
 
 /* ================================= DEBUG FUNCTIONS ======================= */
 #if PRINTLEVEL > 2
@@ -19,9 +19,6 @@ void set_default_settings(Data *d);
 
 /* Convert sparse CSC to dense */
 c_float * csc_to_dns(csc * M);
-
-/* Copy sparse CSC matrix B = A */
-void copy_csc_mat(const csc* A, csc *B);
 
 /* Compare CSC matrices */
 c_int is_eq_csc(csc *A, csc *B);

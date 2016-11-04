@@ -176,6 +176,21 @@ csc *csc_symperm(const csc *A, const c_int *pinv, c_int values) {
 }
 
 
+/**
+ *  Copy sparse CSC matrix A to output.
+ *  output is allocated by this function (uses MALLOC)
+ */
+csc * copy_csc_mat(const csc* A){
+        csc * B = csc_spalloc(A->m, A->n, A->nzmax, 1, 0);
+
+        memcpy(B->p, A->p, (A->n+1)*sizeof(c_int));
+        memcpy(B->i, A->i, (A->nzmax)*sizeof(c_int));
+        memcpy(B->x, A->x, (A->nzmax)*sizeof(c_float));
+
+        return B;
+}
+
+
 /* free workspace and return a sparse matrix result */
 csc * csc_done(csc *C, void *w, void *x, c_int ok){
         csc_free(w);        /* free workspace */

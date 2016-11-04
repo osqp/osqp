@@ -133,17 +133,23 @@ c_int test_mat_operations(){
     t3_A_ewsq = csc_matrix(t3_n, t3_n, t3_A_ewsq_nnz, t3_A_ewsq_x, t3_A_ewsq_i, t3_A_ewsq_p);
     t3_A_ewabs = csc_matrix(t3_n, t3_n, t3_A_ewabs_nnz, t3_A_ewabs_x, t3_A_ewabs_i, t3_A_ewabs_p);
 
-    // Initialize test matrices
-    Ad = csc_spalloc(t3_n, t3_n, t3_A_nnz, 1, 0);
-    dA = csc_spalloc(t3_n, t3_n, t3_A_nnz, 1, 0);
-    A_ewsq = csc_spalloc(t3_n, t3_n, t3_A_nnz, 1, 0);
-    A_ewabs = csc_spalloc(t3_n, t3_n, t3_A_nnz, 1, 0);
+    // // Initialize test matrices
+    // Ad = csc_spalloc(t3_n, t3_n, t3_A_nnz, 1, 0);
+    // dA = csc_spalloc(t3_n, t3_n, t3_A_nnz, 1, 0);
+    // A_ewsq = csc_spalloc(t3_n, t3_n, t3_A_nnz, 1, 0);
+    // A_ewabs = csc_spalloc(t3_n, t3_n, t3_A_nnz, 1, 0);
+    //
+    // // Copy values of matrix A in all of test matrices
+    // copy_csc_mat(t3_A, Ad);
+    // copy_csc_mat(t3_A, dA);
+    // copy_csc_mat(t3_A, A_ewsq);
+    // copy_csc_mat(t3_A, A_ewabs);
 
-    // Copy values of matrix A in all of test matrices
-    copy_csc_mat(t3_A, Ad);
-    copy_csc_mat(t3_A, dA);
-    copy_csc_mat(t3_A, A_ewsq);
-    copy_csc_mat(t3_A, A_ewabs);
+    // Copy matrices
+    Ad = copy_csc_mat(t3_A);
+    dA = copy_csc_mat(t3_A);
+    A_ewsq = copy_csc_mat(t3_A);
+    A_ewabs = copy_csc_mat(t3_A);
 
 
     // Premultiply matrix A

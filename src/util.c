@@ -7,12 +7,13 @@
 
 /* Set default settings from constants.h file */
 /* assumes d->stgs already allocated memory */
-void set_default_settings(Data *d) {
-        d->settings->max_iter = MAX_ITER; /* maximum iterations to take */
-        d->settings->eps = EPS;         /* convergence tolerance */
-        d->settings->alpha = ALPHA;     /* relaxation parameter */
-        d->settings->verbose = VERBOSE;     /* x equality constraint scaling: 1e-3 */
-        d->settings->warm_start = WARM_START;     /* x equality constraint scaling: 1e-3 */
+void set_default_settings(Settings * settings) {
+        settings->normalize = NORMALIZE; /* heuristic problem scaling */
+        settings->max_iter = MAX_ITER; /* maximum iterations to take */
+        settings->eps = EPS;         /* convergence tolerance */
+        settings->alpha = ALPHA;     /* relaxation parameter */
+        settings->verbose = VERBOSE;     /* x equality constraint scaling: 1e-3 */
+        settings->warm_start = WARM_START;     /* x equality constraint scaling: 1e-3 */
 }
 
 
@@ -20,8 +21,6 @@ void set_default_settings(Data *d) {
 
 /* ================================= DEBUG FUNCTIONS ======================= */
 #if PRINTLEVEL > 2
-
-#include <string.h>  // For memcpy function
 
 /* Convert sparse CSC to dense */
 c_float * csc_to_dns(csc * M)
@@ -47,15 +46,6 @@ c_float * csc_to_dns(csc * M)
 
         }
         return A;
-}
-
-/* Copy sparse CSC matrix B = A. B has been previously created with csc_spalloc(...)
- */
-void copy_csc_mat(const csc* A, csc *B){
-        memcpy(B->p, A->p, (A->n+1)*sizeof(c_int));
-        memcpy(B->i, A->i, (A->nzmax)*sizeof(c_int));
-        memcpy(B->x, A->x, (A->nzmax)*sizeof(c_float));
-        B->nzmax = A->nzmax;
 }
 
 
