@@ -18,7 +18,7 @@ static void *csc_calloc(c_int n, c_int size) {
 /* wrapper for free */
 static void *csc_free(void *p) {
         if (p) c_free(p); /* free p if it is not already SCS_NULL */
-        return (OSQP_NULL); /* return OSQP_NULL to simplify the use of cs_free */
+        return (OSQP_NULL); /* return OSQP_NULL to simplify the use of csc_free */
 }
 
 
