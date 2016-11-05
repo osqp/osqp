@@ -129,6 +129,21 @@ write_int(f, t_ut_n, "t_ut_n")
 write_mat_sparse(f, t_ut_A, "t_ut_A")
 write_mat_sparse(f, t_ut_Atriu, "t_ut_Atriu")
 
+# 6) Compute quadratic form using upper triangular matrix
+#-------------------------------------------------------------------------------
+t_qpform_n = t_ut_n
+t_qpform_Atriu = t_ut_Atriu
+t_qpform_A = t_qpform_Atriu + t_qpform_Atriu' - diagm(diag(t_qpform_Atriu))
+t_qpform_x = randn(t_qpform_n)
+t_qpform_value = (.5 * t_qpform_x' * t_qpform_A * t_qpform_x)[1]
+
+# save data to file
+# write_mat_sparse(f, t_qpform_A, "t_qpform_A")
+write_mat_sparse(f, t_qpform_Atriu, "t_qpform_Atriu")
+write_int(f, t_qpform_n, "t_qpform_n")
+write_vec_float(f, t_qpform_x, "t_qpform_x")
+write_float(f, t_qpform_value, "t_qpform_value")
+
 
 # Close file
 close(f)

@@ -65,4 +65,13 @@ void mat_ew_abs(csc * A);
  */
 void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq);
 
+
+/**
+ * Compute quadratic form f(x) = 1/2 x' P x
+ * @param  P quadratic matrix in CSC form (only upper triangular)
+ * @param  x argument float vector
+ * @return   quadratic form value
+ */
+c_float quad_form(const csc * P, const c_float * x);
+
 #endif

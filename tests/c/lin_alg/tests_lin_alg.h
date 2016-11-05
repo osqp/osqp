@@ -258,6 +258,27 @@ c_int test_extract_upper_triangular(){
     return exitflag;
 }
 
+c_int test_quad_form_upper_triang(){
+    c_int exitflag = 0;
+    c_float quad_form_t;
+
+    // Get matrices from data
+    csc * Atriu = csc_matrix(t_qpform_n, t_qpform_n, t_qpform_Atriu_nnz, t_qpform_Atriu_x, t_qpform_Atriu_i, t_qpform_Atriu_p);
+
+    // Compute quadratic form
+    quad_form_t = quad_form(Atriu, t_qpform_x);
+
+    if (c_abs(quad_form_t - t_qpform_value) >  TESTS_TOL) {
+        c_print("\nError in computing quadratic form using upper triangular matrix!");
+        exitflag = 1;
+    }
+
+    // c_print("quadform_t = %.4f\n", quad_form_t);
+    // c_print("t_qpform_value = %.4f\n", t_qpform_value);
+
+
+    return exitflag;
+}
 
 static char * tests_lin_alg()
 {
@@ -294,6 +315,11 @@ static char * tests_lin_alg()
 
     printf("5) Test extract upper triangular: ");
     tempflag = test_extract_upper_triangular();
+    if (!tempflag) c_print("OK!\n");
+    exitflag += tempflag;
+
+    printf("6) Test compute QP form from upper triangular matrix: ");
+    tempflag = test_quad_form_upper_triang();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 

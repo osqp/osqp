@@ -148,42 +148,31 @@ void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq){
     }
 }
 
-/* Vertically concatenate arrays Z = [A' B']'
-(uses MALLOC to create inner arrays x, i, p within Z)
-*/
-// csc * vstack(csc *A, csc *B){
-//     c_int j, i;  // row i,  col j
-//     c_int z_count=0;
-//     csc * Z;
-//
-//     // Initialize Z variable (concatenate dims horizontally, add also nnz)
-//     Z = new_csc_matrix(A->m + B->m, A->n, A->p[A->n] + B->p[B->n]);
-//
-//     // Assign elements
-//     Z->p[0] = 0;
-//
-//
-//     for (j=0; j<A->n; j++){ // Cycle over columns
-//         // Shift column pointer to include elements of both matrices
-//         Z->p[j] = A->p[j] + B->p[j];
-//
-//         // Add A elements
-//         for (i=A->p[j-1]; i<A->p[j]; i++){ // Add all elements in column j
-//             Z->i[z_count] = A->i[i];
-//             Z->x[z_count] = A->x[i];
-//             z_count++;
-//         }
-//
-//         // Add B elements
-//         for (i=B->p[j-1]; i<B->p[j]; i++){ // Add all elements in column j
-//             Z->i[z_count] = B->i[i] + A->m; // Shift row idx by height of A
-//             Z->x[z_count] = B->x[i];
-//             z_count++;
-//         }
-//     }
-//
-//     // DEBUG: Print resulting sparse matrix
-//     // print_csc_matrix(Z, "Z");
-//
-//     return Z;
-// }
+
+/**
+ * Compute quadratic form f(x) = 1/2 x' P x
+ * @param  P quadratic matrix in CSC form (only upper triangular)
+ * @param  x argument float vector
+ * @return   quadratic form value
+ */
+c_float quad_form(const csc * P, const c_float * x){
+    c_float quad_form = 0.;
+    c_int i, j, ptr;  // Pointers to iterate over matrix: (i,j) a element pointer
+
+    for (j = 0; j < P->n; j++){ // Iterate over columns
+        for (ptr = P->p[j]; ptr < P->p[j+1]; ptr++){  // Iterate over rows
+            i = P->i[ptr]; // Row index
+
+            if (i == j){  // Diagonal element
+                quad_form += .5*P->x[ptr]*x[i]*x[i];
+            }
+            else if (i < j) {  // Off-diagonal element
+                quad_form += P->x[ptr]*x[i]*x[j];
+            }
+            else { // Element in lower diagonal part
+                c_print("ERROR: quad_form matrix is not upper triangular\n");
+            }
+        }
+    }
+    return quad_form;
+}
