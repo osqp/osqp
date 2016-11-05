@@ -38,7 +38,8 @@ c_int test_constr_sparse_mat(){
 c_int test_vec_operations(){
     c_int exitflag = 0;  // Initialize exitflag to 0
     c_float norm2_diff, norm2_sq, norm2; // normInf;
-    c_float add_scaled[t2_n], ew_reciprocal[t2_n];
+    c_float ew_reciprocal[t2_n];
+    c_float * add_scaled;
 
     // Norm of the difference
     norm2_diff = vec_norm2_diff(t2_v1, t2_v2, t2_n);
@@ -48,7 +49,7 @@ c_int test_vec_operations(){
     }
 
     // Add scaled
-    vec_copy(add_scaled, t2_v1, t2_n);  // Copy vector v1 in another vector
+    add_scaled = vec_copy(t2_v1, t2_n);
     vec_add_scaled(add_scaled, t2_v2, t2_n, t2_sc);
     if(vec_norm2_diff(add_scaled, t2_add_scaled, t2_n)>TESTS_TOL) {
         c_print("\nError in add scaled test!");
@@ -82,6 +83,8 @@ c_int test_vec_operations(){
         exitflag = 1;
     }
 
+    // cleanup
+    c_free(add_scaled);
 
     if (exitflag == 1) c_print("\n");  // Print line for aesthetic reasons
     return exitflag;
@@ -184,13 +187,21 @@ c_int test_mat_operations(){
         exitflag = 1;
     }
 
+
+    // cleanup
+    c_free(Ad);
+    c_free(dA);
+    c_free(A_ewsq);
+    c_free(A_ewabs);
+
     return exitflag;
 }
 
 
 c_int test_mat_vec_multiplication(){
     csc *A;   // Matrix from matrices.h
-    c_float Ax[t4_m], Ax_cum[t4_m];
+    c_float Ax[t4_m];
+    c_float * Ax_cum;
     c_int exitflag=0;
 
     // Compute sparse matrix A from vectors stored in matrices.h
@@ -204,12 +215,45 @@ c_int test_mat_vec_multiplication(){
     }
 
     // Cumulative matrix-vector multiplication:  y += Ax
-    vec_copy(Ax_cum, t4_y, t4_m);
+    Ax_cum = vec_copy(t4_y, t4_m);
     mat_vec(A, t4_x, Ax_cum, 1);
     if(vec_norm2_diff(Ax_cum, t4_Ax_cum, t4_m) > TESTS_TOL){
         c_print("\nError in cumulative matrix-vector multiplication!");
         exitflag = 1;
     }
+
+    // cleanup
+    c_free(Ax_cum);
+
+    return exitflag;
+}
+
+
+c_int test_extract_upper_triangular(){
+    c_int exitflag = 0;
+    // c_float * Atriudns, * A_t_triudns;
+    // Compute sparse matrix A from vectors stored in matrices.h
+    csc * A = csc_matrix(t_ut_n, t_ut_n, t_ut_A_nnz, t_ut_A_x, t_ut_A_i, t_ut_A_p);
+    csc * A_ut_triu = csc_matrix(t_ut_n, t_ut_n, t_ut_Atriu_nnz, t_ut_Atriu_x, t_ut_Atriu_i, t_ut_Atriu_p);
+
+    csc * Atriu = csc_to_triu(A);
+
+    if (!is_eq_csc(A_ut_triu, Atriu)) {
+        c_print("\nError in forming upper triangular matrix!");
+        exitflag = 1;
+    }
+
+    // DEBUG Print
+    // print_csc_matrix(A_ut_triu, "A_ut_triu");
+    // print_csc_matrix(Atriu, "Atriu");
+    // Atriudns = csc_to_dns(Atriu);
+    // A_t_triudns = csc_to_dns(A_ut_triu);
+    // print_dns_matrix(Atriudns, t_ut_n, t_ut_n, "Atriudns");
+    // print_dns_matrix(A_t_triudns, t_ut_n, t_ut_n, "A_t_triudns");
+
+
+    // Cleanup
+    c_free(Atriu);
 
     return exitflag;
 }
@@ -245,6 +289,11 @@ static char * tests_lin_alg()
 
     printf("4) Test matrix-vector multiplication: ");
     tempflag = test_mat_vec_multiplication();
+    if (!tempflag) c_print("OK!\n");
+    exitflag += tempflag;
+
+    printf("5) Test extract upper triangular: ");
+    tempflag = test_extract_upper_triangular();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 

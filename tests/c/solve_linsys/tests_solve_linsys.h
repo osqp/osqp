@@ -43,6 +43,9 @@ c_int test_form_KKT(){
         exitflag = 1;
     }
 
+    // Cleanup
+    c_free(KKT);
+
     return exitflag;
 }
 
@@ -66,6 +69,10 @@ c_int test_LDL_solve_simple(){
         c_print("\nError in the simple LDL linear system solve!");
         exitflag = 1;
     }
+
+    // Cleanup
+    c_free(p);
+    c_free(settings);
 
     return exitflag;
 }
@@ -96,6 +103,10 @@ c_int test_LDL_solve_random(){
         c_print("\nError in the random LDL linear system solve!");
         exitflag = 1;
     }
+
+    // Cleanup
+    c_free(p);
+    c_free(settings);
 
     return exitflag;
 }
@@ -129,7 +140,9 @@ c_int test_solveKKT(){
         exitflag = 1;
     }
 
-    // TODO: Memory clean-up
+    // Cleanup
+    free_priv(p);
+    c_free(settings);
 
     return exitflag;
 }

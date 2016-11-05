@@ -52,12 +52,19 @@ c_float vec_norm2(const c_float *v, c_int l) {
 // }
 
 
-/* copy vector b into a
-(TODO: if it is only needed for tests remove it and put it in util.h)
-*/
-void vec_copy(c_float *a, const c_float *b, c_int n) {
+/* copy vector a into output */
+c_float * vec_copy(c_float *a, c_int n) {
+    c_float * b;
+    b = c_malloc(n * sizeof(c_float));
+    memcpy(b, a, n * sizeof(c_float));
+    return b;
+}
+
+
+/* copy vector a into preallocated vector b */
+void prea_vec_copy(c_float *a, c_float * b, c_int n){
     for (c_int i=0; i<n; i++) {
-        a[i] = b[i];
+        b[i] = a[i];
     }
 }
 

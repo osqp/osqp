@@ -46,7 +46,7 @@ struct OSQP_SETTINGS {
 };
 
 
-/* Workspace */
+/* OSQP Environment */
 struct OSQP_WORK {
         // Problem Data (possibly Scaled)
         c_int n; // Number of variables
@@ -56,10 +56,15 @@ struct OSQP_WORK {
 
         csc * A; // Constraints matrix, dimension (m x n)
         c_float *lA, *uA; // Lower and upper bounds for constraints, dimension m
-        c_float *lx, *ux; /* dense arrays for bounds lx, ux (size n)*/
+        c_float *lx, *ux; // dense arrays for bounds lx, ux (size n)
 
-        Priv *priv; // Linear System solver structure
+        // Linear System solver structure
+        Priv *priv;
 
+        // Internal solver variables
+        c_float *x, *z, *u;
+
+        // Other internal structures
         Settings *settings; // Problem settings
         Scaling *scaling; // Scaling Vectors
         Solution *solution; // Problem Solution
@@ -107,7 +112,7 @@ struct OSQP_INFO {
  *
  * @param  data         Problem data
  * @param  settings     Solver settings
- * @return              Solver workspace
+ * @return              Solver environment
  */
 Work * osqp_setup(const Data * data, Settings *settings);
 

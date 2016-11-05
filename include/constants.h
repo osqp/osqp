@@ -26,12 +26,14 @@
  * Solver Parameters and Settings *
  **********************************/
 /* TODO: complete parameters, these are just a couple of examples */
+
+#define NORMALIZE (1)
+#define RHO (1.6)
 #define MAX_ITER (2500)
 #define EPS (1E-5)
 #define ALPHA (1.6)
 #define VERBOSE (1)
 #define WARM_START (0)
-#define NORMALIZE (1)
 
 
 

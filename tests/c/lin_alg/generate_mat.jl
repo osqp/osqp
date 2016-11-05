@@ -116,6 +116,19 @@ t4_Ax_cum = t4_A*t4_x + t4_y
 write_vec_float(f, t4_Ax_cum, "t4_Ax_cum")
 
 
+# 5) Extract upper triangular matrix
+#-------------------------------------------------------------------------------
+# Define data
+t_ut_n = 5
+t_ut_A = full(sprandn(t_ut_n, t_ut_n, 0.3))
+t_ut_Atriu = sparse(triu(t_ut_A))
+t_ut_A = sparse(t_ut_A)
+
+# Write data
+write_int(f, t_ut_n, "t_ut_n")
+write_mat_sparse(f, t_ut_A, "t_ut_A")
+write_mat_sparse(f, t_ut_Atriu, "t_ut_Atriu")
+
 
 # Close file
 close(f)

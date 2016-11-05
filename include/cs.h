@@ -25,17 +25,9 @@ typedef struct    /* matrix in compressed-column or triplet form */
 } csc;
 
 
-/* They are commented because these functions are not used outside cs.c */
-/* wrapper for malloc */
-// static void *csc_malloc(c_int n, c_int size);
-
-/* wrapper for calloc */
-// static void *csc_calloc(c_int n, c_int size);
-
-/* wrapper for free */
-// static void *csc_free(void *p);
-
-
+/*****************************************************************************
+ * Create and free CSC Matrices                                              *
+ *****************************************************************************/
 
 /* Create Compressed-Column-Sparse matrix from existing arrays
    (no MALLOC to create inner arrays x, i, p)
@@ -60,11 +52,48 @@ csc *csc_spalloc(c_int m, c_int n, c_int nzmax, c_int values, c_int triplet);
  */
 csc *csc_spfree(csc *A);
 
+
+/* free workspace and return a sparse matrix result */
+csc * csc_done(csc *C, void *w, void *x, c_int ok);
+
+/*****************************************************************************
+ * Copy Matrices                                                             *
+ *****************************************************************************/
+ /**
+  *  Copy sparse CSC matrix A to output.
+  *  output is allocated by this function (uses MALLOC)
+  */
+ csc * copy_csc_mat(const csc* A);
+
+
+ /**
+  *  Copy sparse CSC matrix A to B (B is preallocated, NO MALOC)
+  */
+ void prea_copy_csc_mat(const csc* A, csc* B);
+
+
+/*****************************************************************************
+ * Matrices Conversion                                                       *
+ *****************************************************************************/
+
+
 /* C = compressed-column CSC from matrix T in triplet form */
 csc *triplet_to_csc(const csc *T);
 
 /* Convert sparse to dense */
 c_float * csc_to_dns(csc * M);
+
+
+/**
+ * Convert CSC matrix into upper triangular one
+ */
+csc * csc_to_triu(csc * M);
+
+
+
+/*****************************************************************************
+ * Extra operations                                                          *
+ *****************************************************************************/
 
 /* p [0..n] = cumulative sum of c [0..n-1], and then copy p [0..n-1] into c */
 c_int csc_cumsum(c_int *p, c_int *c, c_int n);
@@ -77,13 +106,8 @@ c_int *csc_pinv(c_int const *p, c_int n);
 /* Symmetric permutation of matrix A:  C = P A P' */
 csc *csc_symperm(const csc *A, const c_int *pinv, c_int values);
 
-/* free workspace and return a sparse matrix result */
-csc * csc_done(csc *C, void *w, void *x, c_int ok);
 
-/**
- *  Copy sparse CSC matrix A to output.
- *  output is allocated by this function (uses MALLOC)
- */
-csc * copy_csc_mat(const csc* A);
+
+
 
 #endif

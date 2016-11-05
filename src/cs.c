@@ -190,10 +190,76 @@ csc * copy_csc_mat(const csc* A){
         return B;
 }
 
+/**
+ *  Copy sparse CSC matrix A to B (B is preallocated, NO MALOC)
+ */
+void prea_copy_csc_mat(const csc* A, csc* B){
+    memcpy(B->p, A->p, (A->n+1)*sizeof(c_int));
+    memcpy(B->i, A->i, (A->nzmax)*sizeof(c_int));
+    memcpy(B->x, A->x, (A->nzmax)*sizeof(c_float));
+    B->nzmax = A->nzmax;
+}
+
 
 /* free workspace and return a sparse matrix result */
 csc * csc_done(csc *C, void *w, void *x, c_int ok){
         csc_free(w);        /* free workspace */
         csc_free(x);
         return(ok ? C : csc_spfree(C)); /* return result if OK, else free it */
+}
+
+
+
+/**
+ * Convert square CSC matrix into upper triangular one
+ */
+csc * csc_to_triu(csc * M){
+    csc * M_trip;  // Matrix in triplet format
+    csc * M_triu;  // Resulting upper triangular matrix
+    c_int nnzmaxM; // Estimated maximum number of elements of M
+    c_int n;  // Dimension of M
+    c_int ptr, i, j;  // Counters for (i,j) and index in M
+    c_int z_M=0; // Counter for elements in M_trip
+
+    // Check if matrix is square
+    if (M->m != M->n){
+        c_print("ERROR: Matrix M not square!\n");
+    }
+    n = M->m;
+
+    // Estimate nnzmaxM
+    nnzmaxM = n*(n+1)/2;  // Full upper triangular matrix
+
+    // Allocate M_trip
+    M_trip = csc_spalloc(n, n, nnzmaxM, 1, 1); // Triplet format
+
+    // Fill M_trip with only elements in M which are in the upper triangular
+    for (j=0; j < n; j++){  // Cycle over columns
+        for (ptr = M->p[j]; ptr < M->p[j+1]; ptr++){
+            // Get row index
+            i = M->i[ptr];
+
+
+
+            // Assign element only if in the upper triangular
+            if (i <= j){
+                // c_print("\nM(%i, %i) = %.4f", M->i[ptr], j, M->x[ptr]);
+
+                M_trip->i[z_M] = i;
+                M_trip->p[z_M] = j;
+                M_trip->x[z_M] = M->x[ptr];
+                z_M++;
+            }
+        }
+    }
+
+    // Set number of nonzeros
+    M_trip->nz = z_M;
+
+    // Convert triplet matrix to csc format
+    M_triu = triplet_to_csc(M_trip);
+
+    // Cleanup and return result
+    csc_spfree(M_trip);
+    return M_triu;
 }

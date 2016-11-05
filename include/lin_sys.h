@@ -17,6 +17,8 @@ Priv *init_priv(const csc * P, const csc * A, const Settings *settings);
 /* solves Ax = b for x, and stores result in b */
 c_int solve_lin_sys(const Settings *settings, Priv *p, c_float *b);
 
+// Free LDL Factorization structure
+void free_priv(Priv *p);
 
 
 // TODO: Remove these functions
