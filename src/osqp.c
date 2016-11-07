@@ -137,14 +137,18 @@ c_int osqp_solve(Work * work){
         solve_lin_sys(work->settings, work->priv, work->x);
         update_x(work);
 
-        // DEBUG
+        // // DEBUG
+        // c_print("\n");
         // print_vec(work->x, work->data->n + work->data->m, "x (after linsys)");
+        // c_print("\n");
 
         /* Second step: z_{k+1} */
         project_x(work);
 
-        // DEBUG
+        // // DEBUG
+        // c_print("\n");
         // print_vec(work->z, work->data->n + work->data->m, "z (after proj)");
+        // c_print("\n");
 
         /* Third step: u_{k+1} */
         update_u(work);
