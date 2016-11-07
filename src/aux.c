@@ -104,7 +104,7 @@ c_float compute_obj_val(Data * data, c_float * x){
  * @return      Norm of primal residual
  */
 c_float compute_pri_res(Work * work){
-    return vec_norm2_diff(work->x, work->z, work->data->n);
+    return vec_norm2_diff(work->x, work->z, work->data->n + work->data->m);
 }
 
 
@@ -152,7 +152,7 @@ void update_status_string(Info *info){
         strcpy(info->status, "Infeasible");
     else if (info->status_val == OSQP_UNSOLVED)
         strcpy(info->status, "Unsolved");
-        
+
 }
 
 

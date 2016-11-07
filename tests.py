@@ -56,9 +56,9 @@ def main():
         beq = np.array([1.0])
         Aineq = spspa.csc_matrix(np.zeros((0, 2)))
         bineq = np.zeros(0)
-        lb = 0.6*np.zeros(2)
+        lb = np.zeros(2)
         ub = 0.7 * np.ones(2)
-        p = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq)
+        p = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
     elif example == 'small2':
         # Small Example 2
         nx = 2
@@ -118,7 +118,8 @@ def main():
                           rho=1.6,
                           scale_steps=3,
                           scale_problem=False,
-                          polish=False)
+                          polish=False,
+                          print_level=3)
 
     # # Reuse factorizations
     # if example == 'random':
@@ -159,7 +160,7 @@ def main():
     print "Norm of dual lb difference %.8f" % \
         np.linalg.norm(resultsOSQP.sol_dual_lb - resultsGUROBI.sol_dual_lb)
 
-    ipdb.set_trace()
+    # ipdb.set_trace()
 
 # Parsing optional command line arguments
 if __name__ == '__main__':
