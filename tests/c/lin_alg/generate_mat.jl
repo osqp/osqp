@@ -60,6 +60,11 @@ write_float(f, t2_norm2, "t2_norm2")
 t2_ew_reciprocal = 1./t2_v1
 write_vec_float(f, t2_ew_reciprocal, "t2_ew_reciprocal")
 
+# Vector product
+t2_vec_prod = t2_v1 * t2_v2
+write_float(f, t2_vec_prod, "t2_vec_prod")
+
+
 
 # 3) Matrix operations
 #-------------------------------------------------------------------------------

@@ -78,6 +78,18 @@ void vec_ew_recipr(const c_float *a, c_float *b, c_int n){
 }
 
 
+/* Inner product a'b */
+c_float vec_prod(const c_float *a, const c_float *b, c_int n){
+    c_float prod = 0.0;
+    c_int i; // Index
+
+    for(i = 0;  i < n; i++){
+        prod += a[i] * b[i];
+    }
+    
+    return prod;
+}
+
 /* MATRIX FUNCTIONS ----------------------------------------------------------*/
 /* Premultiply matrix A by diagonal matrix with diagonal d,
 i.e. scale the rows of A by d

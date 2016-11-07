@@ -35,6 +35,9 @@ c_float vec_norm2(const c_float *v, c_int l);
 void vec_ew_recipr(const c_float *a, c_float *b, c_int n);
 
 
+/* Inner product a'b */
+c_float vec_prod(const c_float *a, const c_float *b, c_int n);
+
 /* MATRIX FUNCTIONS ----------------------------------------------------------*/
 /* Vertically concatenate arrays and return Z = [A' B']'
 (uses MALLOC to create inner arrays x, i, p within Z)

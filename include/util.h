@@ -20,6 +20,9 @@ void print_setup_header(const Data *data, const Settings *settings);
 /* Print Header with data to be displayed per iteration */
 void print_header();
 
+/* Print iteration summary */
+void print_summary(Info * info);
+
 
 /* ================================= DEBUG FUNCTIONS ======================= */
 #if PRINTLEVEL > 2

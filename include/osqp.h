@@ -55,7 +55,7 @@ struct OSQP_WORK {
         Priv * priv;
 
         // Internal solver variables
-        c_float *x, *z, *u;
+        c_float *x, *z, *u, *rhs, *z_prev;
 
         // Other internal structures
         Settings *settings; // Problem settings
@@ -81,9 +81,9 @@ struct OSQP_INFO {
         c_int iter;      /* number of iterations taken */
         char status[32]; /* status string, e.g. 'Solved' */
         c_int status_val; /* status as c_int, defined in constants.h */
-        c_int obj_val;  /* primal objective */
+        c_float obj_val;  /* primal objective */
         c_float pri_res; /* primal residual */
-        c_float dual_res; /* dual residual */
+        c_float dua_res; /* dual residual */
         c_float setup_time; /* time taken for setup phase (milliseconds) */
         c_float solve_time; /* time taken for solve phase (milliseconds) */
 };

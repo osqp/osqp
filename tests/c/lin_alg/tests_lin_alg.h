@@ -37,7 +37,7 @@ c_int test_constr_sparse_mat(){
 
 c_int test_vec_operations(){
     c_int exitflag = 0;  // Initialize exitflag to 0
-    c_float norm2_diff, norm2_sq, norm2; // normInf;
+    c_float norm2_diff, norm2_sq, norm2, vecprod; // normInf;
     c_float ew_reciprocal[t2_n];
     c_float * add_scaled;
 
@@ -80,6 +80,13 @@ c_int test_vec_operations(){
     vec_ew_recipr(t2_v1, ew_reciprocal, t2_n);
     if(vec_norm2_diff(ew_reciprocal, t2_ew_reciprocal, t2_n)>TESTS_TOL) {
         c_print("\nError in elementwise reciprocal test!");
+        exitflag = 1;
+    }
+
+
+    vecprod = vec_prod(t2_v1, t2_v2, t2_n);
+    if(c_abs(vecprod - t2_vec_prod) > TESTS_TOL){
+        c_print("\nError in vector product");
         exitflag = 1;
     }
 

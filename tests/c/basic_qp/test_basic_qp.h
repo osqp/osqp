@@ -47,7 +47,7 @@ static char * test_basic_qp()
     work = osqp_setup(data, settings);
 
     // Solve Problem
-    osqp_solve(work);
+    // osqp_solve(work);
 
     // Clean workspace
     osqp_cleanup(work);

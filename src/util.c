@@ -49,6 +49,16 @@ void print_setup_header(const Data *data, const Settings *settings) {
 }
 
 
+/* Print iteration summary */
+void print_summary(Info * info){
+    c_print("%*.i| ", (int)strlen(HEADER[0]), info->iter);
+    c_print("%*.2e ", (int)HSPACE, info->obj_val);
+    c_print("%*.2e ", (int)HSPACE, info->pri_res);
+    c_print("%*.2e ", (int)HSPACE, info->dua_res);
+    c_print("\n");
+}
+
+
 
 
 
