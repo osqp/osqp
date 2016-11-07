@@ -60,6 +60,12 @@
  void update_info(Work *work, c_int iter);
 
 
+/**
+ * Update solver status (string)
+ * @param work Workspace
+ */
+void update_status_string(Info *info);
+
 
  /**
   * Check if residuals norm meet the required tolerance

@@ -140,6 +140,24 @@ void update_info(Work *work, c_int iter){
 
 
 /**
+ * Update solver status (string)
+ * @param work Workspace
+ */
+void update_status_string(Info *info){
+    // Update status string depending on status val
+
+    if(info->status_val == OSQP_SOLVED)
+        strcpy(info->status, "Solved");
+    else if (info->status_val == OSQP_INFEASIBLE)
+        strcpy(info->status, "Infeasible");
+    else if (info->status_val == OSQP_UNSOLVED)
+        strcpy(info->status, "Unsolved");
+        
+}
+
+
+
+/**
  * Check if residuals norm meet the required tolerance
  * @param  work Workspace
  * @return      Redisuals check
