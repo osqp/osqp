@@ -24,7 +24,10 @@
 Work * osqp_setup(const Data * data, Settings *settings){
     Work * work; // Workspace
 
-    //TODO: Add timing in setup phase
+    #if PROFILING > 0
+    timer tsetup; // Timer
+    tic(&tsetup); // Start timer
+    #endif
 
     // Allocate empty workspace
     work = c_calloc(1, sizeof(Work));
@@ -82,13 +85,16 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->info->status_val = OSQP_UNSOLVED;
     update_status_string(work->info);
 
-    // TODO: Add status strings!
-    // It is needed only at the beginning and at the end
-    // work->info->status = ...;
-
+    // Allocate timing information
+    #if PROFILING > 0
+    work->info->solve_time = 0.0; // Solve time to zero
+    work->info->setup_time = toc(&tsetup); // Updater timer information
+    #endif
 
     // Print header
+    #if PRINTLEVEL > 1
     if (work->settings->verbose) print_setup_header(work->data, settings);
+    #endif
 
     return work;
 }
@@ -110,10 +116,17 @@ c_int osqp_solve(Work * work){
     c_int exitflag = 0;
     c_int iter;
 
+    #if PROFILING > 0
+    timer tsolve; // Timer
+    tic(&tsolve); // Start timer
+    #endif
+
+    #if PRINTLEVEL > 1
     if (work->settings->verbose){
         // Print Header for every column
         print_header();
     }
+    #endif
 
     // Initialize variables (cold start or warm start depending on settings)
     // TODO: Add proper warmstart
@@ -167,9 +180,10 @@ c_int osqp_solve(Work * work){
         // getchar();
 
         /* Print summary */
-        if (work->settings->verbose && iter % PRINT_INTERVAL == 0){
+        #if PRINTLEVEL > 1
+        if (work->settings->verbose && iter % PRINT_INTERVAL == 0)
             print_summary(work->info);
-        }
+        #endif
 
         if (residuals_check(work)){
             // Update final information
@@ -179,17 +193,25 @@ c_int osqp_solve(Work * work){
 
     }
 
+
     /* Print summary for last iteration */
+    #if PRINTLEVEL > 1
     print_summary(work->info);
+    #endif
 
 
     /* Update final status */
     update_status_string(work->info);
 
-    /* Update timings */
-    // TODO: Add Timings
+    /* Update timing */
+    #if PROFILING > 0
+    work->info->solve_time += toc(&tsolve);
+    #endif
 
+    /* Print final footer */
+    #if PRINTLEVEL > 0
     print_footer(work->info);
+    #endif
 
     // Store solution
     prea_vec_copy(work->z, work->solution->x, work->data->n);

@@ -86,8 +86,11 @@ struct OSQP_INFO {
         c_float obj_val;  /* primal objective */
         c_float pri_res; /* norm of primal residual */
         c_float dua_res; /* norm of dual residual */
+
+        #if PROFILING > 0
         c_float setup_time; /* time taken for setup phase (milliseconds) */
         c_float solve_time; /* time taken for solve phase (milliseconds) */
+        #endif
 };
 
 

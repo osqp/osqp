@@ -11,7 +11,11 @@ static const c_int HSPACE = 12;
 static const c_int HEADER_LEN = 4;
 static const c_int LINE_LEN = 76;
 
-/* ================================= PRINTING FUNCTIONS ==================== */
+/**********************
+ * Utility Functions  *
+ **********************/
+
+#if PRINTLEVEL > 1
 
 static void print_line(){
     for (c_int i = 0; i < LINE_LEN; ++i)
@@ -33,7 +37,7 @@ void print_setup_header(const Data *data, const Settings *settings) {
 
     // Print variables and constraints
     c_print("Problem:  ");
-    c_print("variables n = %i, constraints m = %i\n\n", data->n, data->m);
+    c_print("variables n = %i, constraints m = %i\n", data->n, data->m);
 
     // Print Settings
     // Print variables and constraints
@@ -60,9 +64,10 @@ void print_summary(Info * info){
 }
 
 
+#endif /* End PRINTLEVEL > 1 */
 
 
-
+#if PRINTLEVEL > 0
 /* Print Footer */
 void print_footer(Info * info){
     c_print("\n"); // Add space after iterations
@@ -71,10 +76,15 @@ void print_footer(Info * info){
     if (info->status_val == OSQP_SOLVED)
         c_print("Optimal objective: %.4f\n", info->obj_val);
 
+    #if PROFILING > 0
+    c_print("Timing: setup_time = %.6f [ms]\n        solve_time = %.6f [ms]\n",
+            info->setup_time, info->solve_time);
+    #endif
+
 }
 
+#endif
 
-/* ================================= OTHER FUNCTIONS ======================= */
 
 /* Set default settings from constants.h file */
 /* assumes d->stgs already allocated memory */
@@ -106,6 +116,93 @@ Settings * copy_settings(Settings * settings){
 
     return new;
 }
+
+
+
+
+/*******************
+* Timer Functions *
+*******************/
+
+ #if PROFILING > 0
+
+// Windows
+#if (defined WIN32 || _WIN64)
+
+void tic(timer* t)
+{
+        QueryPerformanceFrequency(&t->freq);
+        QueryPerformanceCounter(&t->tic);
+}
+
+c_float toc(timer* t)
+{
+        QueryPerformanceCounter(&t->toc);
+        return ((t->toc.QuadPart - t->tic.QuadPart) / (pfloat)t->freq.QuadPart);
+}
+
+// Mac
+#elif (defined __APPLE__)
+
+void tic(timer* t)
+{
+        /* read current clock cycles */
+        t->tic = mach_absolute_time();
+}
+
+c_float toc(timer* t)
+{
+
+        uint64_t duration; /* elapsed time in clock cycles*/
+
+        t->toc = mach_absolute_time();
+        duration = t->toc - t->tic;
+
+        /*conversion from clock cycles to nanoseconds*/
+        mach_timebase_info(&(t->tinfo));
+        duration *= t->tinfo.numer;
+        duration /= t->tinfo.denom;
+
+        return (c_float)duration / 1000000000;
+}
+
+
+// Linux
+#else
+
+/* read current time */
+void tic(timer* t)
+{
+        clock_gettime(CLOCK_MONOTONIC, &t->tic);
+}
+
+
+/* return time passed since last call to tic on this timer */
+c_float toc(timer* t)
+{
+        struct timespec temp;
+
+        clock_gettime(CLOCK_MONOTONIC, &t->toc);
+
+        if ((t->toc.tv_nsec - t->tic.tv_nsec)<0) {
+                temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec-1;
+                temp.tv_nsec = 1000000000+t->toc.tv_nsec - t->tic.tv_nsec;
+        } else {
+                temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec;
+                temp.tv_nsec = t->toc.tv_nsec - t->tic.tv_nsec;
+        }
+        return (pfloat)temp.tv_sec + (pfloat)temp.tv_nsec / 1000000000;
+}
+
+#endif
+
+#endif // If Profiling end
+
+
+
+
+
+
 
 /* ================================= DEBUG FUNCTIONS ======================= */
 #if PRINTLEVEL > 2

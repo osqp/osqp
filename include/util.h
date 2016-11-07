@@ -5,15 +5,19 @@
 #include "cs.h"
 #include "osqp.h"
 
+/**********************
+ * Utility Functions  *
+ **********************/
 
-/* ================================= OTHER FUNCTIONS ======================== */
-/* Set default settings from constants.h file */
-/* assumes d->stgs already allocated memory */
+/* Set default settings from constants.h file
+ * assumes settings already allocated inmemory
+*/
 void set_default_settings(Settings * settings);
 
 /* Copy settings creating a new settings structure */
 Settings * copy_settings(Settings * settings);
 
+#if PRINTLEVEL > 1
 /* Print Header before running the algorithm */
 void print_setup_header(const Data *data, const Settings *settings);
 
@@ -23,8 +27,66 @@ void print_header();
 /* Print iteration summary */
 void print_summary(Info * info);
 
+#endif
+
+#if PRINTLEVEL > 0
+
 /* Print Footer */
 void print_footer(Info * info);
+
+#endif
+
+
+/*********************************
+ * Timer Structs and Functions * *
+ *********************************/
+
+#if PROFILING > 0
+
+// Windows
+#if (defined _WIN32 || defined _WIN64 || defined _WINDLL )
+
+#include <windows.h>
+
+typedef struct timer{
+	LARGE_INTEGER tic;
+	LARGE_INTEGER toc;
+	LARGE_INTEGER freq;
+} timer;
+
+// Mac
+#elif (defined __APPLE__)
+
+#include <mach/mach_time.h>
+
+/* Use MAC OSX  mach_time for timing */
+typedef struct timer{
+	uint64_t tic;
+	uint64_t toc;
+	mach_timebase_info_data_t tinfo;
+} timer;
+
+// Linux
+#else
+
+/* Use POSIX clocl_gettime() for timing on non-Windows machines */
+#include <time.h>
+#include <sys/time.h>
+
+typedef struct timer{
+	struct timespec tic;
+	struct timespec toc;
+} timer;
+
+#endif
+
+/**
+ * Timer Methods
+ */
+void tic(timer* t);
+c_float toc(timer* t);
+
+#endif /* END IF PROFILING > 0 */
 
 
 
