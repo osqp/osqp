@@ -4,12 +4,14 @@
 /************************************
  * Printing Constants to set Layout *
  ************************************/
+#if PRINTLEVEL > 1
 static const char *HEADER[] = {
  "Iter",   " Obj  Val ",  "  Pri  Res ", "    Dua  Res "
 };
 static const c_int HSPACE = 12;
 static const c_int HEADER_LEN = 4;
 static const c_int LINE_LEN = 76;
+#endif
 
 /**********************
  * Utility Functions  *
@@ -70,10 +72,14 @@ void print_summary(Info * info){
 #if PRINTLEVEL > 0
 /* Print Footer */
 void print_footer(Info * info){
+    #if PRINTLEVEL > 1
     c_print("\n"); // Add space after iterations
+    #endif
+
     c_print("Status: %s\n", info->status);
 
     if (info->status_val == OSQP_SOLVED)
+        c_print("Number of iterations: %i\n", info->iter);
         c_print("Optimal objective: %.4f\n", info->obj_val);
 
     #if PROFILING > 0
@@ -205,7 +211,6 @@ c_float toc(timer* t)
 
 
 /* ================================= DEBUG FUNCTIONS ======================= */
-#if PRINTLEVEL > 2
 
 /* Convert sparse CSC to dense */
 c_float * csc_to_dns(csc * M)
@@ -235,7 +240,7 @@ c_float * csc_to_dns(csc * M)
 
 
 /* Compare sparse matrices */
-c_int is_eq_csc(csc *A, csc *B){
+c_int is_eq_csc(csc *A, csc *B, c_float tol){
         c_int j, i;
         // If number of columns does not coincide, they are not equal.
         if (A->n != B->n) return 0;
@@ -247,7 +252,7 @@ c_int is_eq_csc(csc *A, csc *B){
 
                 for (i=A->p[j]; i<A->p[j+1]; i++) { // Cycle rows i in column j
                         if (A->i[i] != B->i[i] || // Different row indices
-                            c_abs(A->x[i] - B->x[i]) > TESTS_TOL) {
+                            c_abs(A->x[i] - B->x[i]) > tol) {
                                 return 0;
                         }
                 }
@@ -255,6 +260,7 @@ c_int is_eq_csc(csc *A, csc *B){
         return(1);
 }
 
+#if PRINTLEVEL > 2
 
 /* Print a csc sparse matrix */
 void print_csc_matrix(csc* M, char * name)

@@ -91,17 +91,17 @@ c_float toc(timer* t);
 
 
 /* ================================= DEBUG FUNCTIONS ======================= */
-#if PRINTLEVEL > 2
-#include <stdio.h>
+// TODO: Remove debug functions!
 
-
-#define TESTS_TOL 1e-10  // Define tests tolerance
+/* Compare CSC matrices */
+c_int is_eq_csc(csc *A, csc *B, c_float tol);
 
 /* Convert sparse CSC to dense */
 c_float * csc_to_dns(csc * M);
 
-/* Compare CSC matrices */
-c_int is_eq_csc(csc *A, csc *B);
+#if PRINTLEVEL > 2
+#include <stdio.h>
+
 
 /* Print a csc sparse matrix */
 void print_csc_matrix(csc* M, char * name);

@@ -165,7 +165,7 @@ c_int test_mat_operations(){
     // Premultiply matrix A
     mat_premult_diag(dA, t3_d);
 
-    if (!is_eq_csc(dA, t3_dA)) {
+    if (!is_eq_csc(dA, t3_dA, TESTS_TOL)) {
         c_print("\nError in premultiply test!");
         exitflag = 1;
     }
@@ -175,21 +175,21 @@ c_int test_mat_operations(){
 
     // print_csc_matrix(Ad, "Ad");
     // print_csc_matrix(t3_Ad, "t3_Ad");
-    if (!is_eq_csc(Ad, t3_Ad)) {
+    if (!is_eq_csc(Ad, t3_Ad, TESTS_TOL)) {
         c_print("\nError in postmultiply test!");
         exitflag = 1;
     }
 
     // Elementwise square
     mat_ew_sq(A_ewsq);
-    if (!is_eq_csc(A_ewsq, t3_A_ewsq)) {
+    if (!is_eq_csc(A_ewsq, t3_A_ewsq, TESTS_TOL)) {
         c_print("\nError in elementwise square test!");
         exitflag = 1;
     }
 
     // Elementwise absolute value
     mat_ew_abs(A_ewabs);
-    if (!is_eq_csc(A_ewabs, t3_A_ewabs)) {
+    if (!is_eq_csc(A_ewabs, t3_A_ewabs, TESTS_TOL)) {
         c_print("\nError in elementwise absolute value test!");
         exitflag = 1;
     }
@@ -245,7 +245,7 @@ c_int test_extract_upper_triangular(){
 
     csc * Atriu = csc_to_triu(A);
 
-    if (!is_eq_csc(A_ut_triu, Atriu)) {
+    if (!is_eq_csc(A_ut_triu, Atriu, TESTS_TOL)) {
         c_print("\nError in forming upper triangular matrix!");
         exitflag = 1;
     }

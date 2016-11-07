@@ -137,51 +137,22 @@ c_int osqp_solve(Work * work){
         // Update z_prev (preallocated, no malloc)
         prea_vec_copy(work->z, work->z_prev, work->data->n + work->data->m);
 
-        // DEBUG
-        // print_vec(work->z, work->data->n + work->data->m, "z");
-        // print_vec(work->z, work->data->n + work->data->m, "z_prev");
-
         /* ADMM STEPS */
         /* First step: x_{k+1} */
-        // DEBUG
-        // print_vec(work->x, work->data->n + work->data->m, "x (before linsys)");
-
         compute_rhs(work);
         solve_lin_sys(work->settings, work->priv, work->x);
         update_x(work);
 
-        // // DEBUG
-        // c_print("\n");
-        // print_vec(work->x, work->data->n + work->data->m, "x (after linsys)");
-        // c_print("\n");
-
         /* Second step: z_{k+1} */
         project_x(work);
 
-        // // DEBUG
-        // c_print("\n");
-        // print_vec(work->z, work->data->n + work->data->m, "z (after proj)");
-        // c_print("\n");
-
         /* Third step: u_{k+1} */
         update_u(work);
-
-        // DEBUG
-        // print_vec(work->u, work->data->n + work->data->m, "u (after update)");
-
-
         /* End of ADMM Steps */
 
 
         /* Update information */
         update_info(work, iter);
-
-        // DEBUG
-        // c_print("f(x) = %.2f\n", work->info->obj_val);
-        // print_vec(work->x, work->data->n + work->data->m, "x");
-        // print_vec(work->z, work->data->n + work->data->m, "z");
-        // print_vec(work->u, work->data->n + work->data->m, "u");
-        // getchar();
 
         /* Print summary */
         #if PRINTLEVEL > 1

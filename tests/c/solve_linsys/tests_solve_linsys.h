@@ -38,7 +38,7 @@ c_int test_form_KKT(){
 
     // c_print("t6_KKT_n = %i\n", t6_n + t6_m);
 
-    if (!is_eq_csc(KKT, t6_KKT)) {
+    if (!is_eq_csc(KKT, t6_KKT, TESTS_TOL)) {
         c_print("\nError in forming KKT matrix!");
         exitflag = 1;
     }

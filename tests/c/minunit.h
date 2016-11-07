@@ -5,3 +5,5 @@
 #define mu_run_test(test) do { char *message = test(); tests_run++; \
                                if (message) return message; } while (0)
 extern int tests_run;
+
+#define TESTS_TOL 1e-10  // Define tests tolerance
