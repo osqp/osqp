@@ -14,7 +14,7 @@ c_float * vec_copy(c_float *a, c_int n);
 void prea_vec_copy(c_float *a, c_float * b, c_int n);
 
 
-/* ||a - b||_2 (TODO: if it is only needed for tests remove it and put it in util.h)
+/* ||a - b||_2
 */
 c_float vec_norm2_diff(const c_float *a, const c_float *b, c_int l);
 
@@ -24,7 +24,7 @@ void vec_add_scaled(c_float *a, const c_float *b, c_int n, c_float sc);
 /* ||v||_2^2 */
 c_float vec_norm2_sq(const c_float *v, c_int l);
 
-/* ||v||_2 */
+/* ||v||_2 */ 
 c_float vec_norm2(const c_float *v, c_int l);
 
 // /* ||v||_inf */

@@ -17,7 +17,7 @@
 #define OSQP_SOLVED_INACCURATE (2)
 #define OSQP_INFEASIBLE (-2) /* primal infeasible, dual unbounded   */
 #define OSQP_UNBOUNDED (-1)  /* primal unbounded, dual infeasible   */
-
+#define OSQP_UNSOLVED (-10)  /* Unsolved. Only setup function has been called */
 
 
 
@@ -29,7 +29,8 @@
 #define NORMALIZE (1)
 #define RHO (1.6)
 #define MAX_ITER (2500)
-#define EPS (1E-5)
+#define EPS_ABS (1E-5)
+#define EPS_REL (1E-5)
 #define ALPHA (1.6)
 #define VERBOSE (1)
 #define WARM_START (0)

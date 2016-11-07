@@ -5,9 +5,9 @@
  * Printing Constants to set Layout *
  ************************************/
 static const char *HEADER[] = {
- "Iter ",   " Objective ",  " Pri Res ", " Dua Res "
+ "Iter ",   " Obj  Val ",  "  Pri  Res ", "    Dua  Res "
 };
-static const c_int HSPACE = 9;
+static const c_int HSPACE = 12;
 static const c_int HEADER_LEN = 4;
 static const c_int LINE_LEN = 76;
 
@@ -21,7 +21,7 @@ static void print_line(){
 
 void print_header(){
     c_print("%s| ", HEADER[0]);
-    for (c_int i=1; i < HEADER_LEN - 1; i++) c_print("%s ", HEADER[i]);
+    for (c_int i=1; i < HEADER_LEN - 1; i++) c_print("  %s", HEADER[i]);
     c_print("%s\n", HEADER[HEADER_LEN - 1]);
 }
 
@@ -32,18 +32,18 @@ void print_setup_header(const Data *data, const Settings *settings) {
     print_line();
 
     // Print variables and constraints
-    c_print("Problem\n-------\n");
+    c_print("Problem:  ");
     c_print("variables n = %i, constraints m = %i\n\n", data->n, data->m);
 
     // Print Settings
     // Print variables and constraints
-    c_print("Settings\n--------\n");
-    c_print("eps = %.2e, rho = %.2f, alpha = %.2f, max_iter = %i\n",
-            settings->eps, settings->rho, settings->alpha, settings->max_iter);
+    c_print("Settings: ");
+    c_print("eps_abs = %.2e, eps_rel = %.2e,\n          rho = %.2f, alpha = %.2f, max_iter = %i\n",
+            settings->eps_abs, settings->eps_rel, settings->rho, settings->alpha, settings->max_iter);
     if (settings->normalize)
-        c_print("scaling: active\n");
+        c_print("          scaling: active\n");
     else
-        c_print("scaling: inactive\n");
+        c_print("          scaling: inactive\n");
     c_print("\n");
 
 }
@@ -52,9 +52,9 @@ void print_setup_header(const Data *data, const Settings *settings) {
 /* Print iteration summary */
 void print_summary(Info * info){
     c_print("%*.i| ", (int)strlen(HEADER[0]), info->iter);
-    c_print("%*.2e ", (int)HSPACE, info->obj_val);
-    c_print("%*.2e ", (int)HSPACE, info->pri_res);
-    c_print("%*.2e ", (int)HSPACE, info->dua_res);
+    c_print("%*.4e ", (int)HSPACE, info->obj_val);
+    c_print("%*.4e ", (int)HSPACE, info->pri_res);
+    c_print("%*.4e ", (int)HSPACE, info->dua_res);
     c_print("\n");
 }
 
@@ -72,7 +72,8 @@ void print_summary(Info * info){
 void set_default_settings(Settings * settings) {
         settings->normalize = NORMALIZE; /* heuristic problem scaling */
         settings->max_iter = MAX_ITER; /* maximum iterations to take */
-        settings->eps = EPS;         /* convergence tolerance */
+        settings->eps_abs = EPS_ABS;         /* absolute convergence tolerance */
+        settings->eps_rel = EPS_REL;         /* relative convergence tolerance */
         settings->alpha = ALPHA;     /* relaxation parameter */
         settings->verbose = VERBOSE;     /* x equality constraint scaling: 1e-3 */
         settings->warm_start = WARM_START;     /* x equality constraint scaling: 1e-3 */
@@ -86,7 +87,8 @@ Settings * copy_settings(Settings * settings){
     // Copy settings
     new->normalize = settings->normalize;
     new->max_iter = settings->max_iter;
-    new->eps = settings->eps;
+    new->eps_abs = settings->eps_abs;
+    new->eps_rel = settings->eps_rel;
     new->alpha = settings->alpha;
     new->verbose = settings->verbose;
     new->warm_start = settings->warm_start;

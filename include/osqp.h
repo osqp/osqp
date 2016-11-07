@@ -8,6 +8,7 @@
 #include <string.h>
 #include "lin_alg.h"
 #include "lin_sys.h"
+#include "aux.h"
 #include "cs.h"
 
 
@@ -38,7 +39,8 @@ struct OSQP_SETTINGS {
 
         /* these can change for multiple runs with the same call to osqp_init */
         c_int max_iter; /* maximum iterations to take: 2500 */
-        c_float eps;  /* convergence tolerance  */
+        c_float eps_abs;  /* absolute convergence tolerance  */
+        c_float eps_rel;  /* relative convergence tolerance  */
         c_float alpha; /* relaxation parameter */
         c_int verbose; /* boolean, write out progress: 1 */
         c_int warm_start; /* boolean, warm start (put initial guess in Sol
@@ -82,8 +84,8 @@ struct OSQP_INFO {
         char status[32]; /* status string, e.g. 'Solved' */
         c_int status_val; /* status as c_int, defined in constants.h */
         c_float obj_val;  /* primal objective */
-        c_float pri_res; /* primal residual */
-        c_float dua_res; /* dual residual */
+        c_float pri_res; /* norm of primal residual */
+        c_float dua_res; /* norm of dual residual */
         c_float setup_time; /* time taken for setup phase (milliseconds) */
         c_float solve_time; /* time taken for solve phase (milliseconds) */
 };

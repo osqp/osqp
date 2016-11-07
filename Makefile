@@ -12,7 +12,7 @@ TEST_TARGETS = $(OUT)/osqp_tester_direct  # Add tests for linear algebra functio
 TEST_INCLUDES = -Itests/c
 
 # Define objects to compile
-OSQP_OBJECTS = src/osqp.o src/cs.o src/util.o src/lin_alg.o
+OSQP_OBJECTS = src/osqp.o src/aux.o src/cs.o src/util.o src/lin_alg.o
 
 # Define source and include files
 SRC_FILES = $(wildcard src/*.c)

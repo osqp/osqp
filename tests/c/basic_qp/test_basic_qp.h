@@ -42,12 +42,13 @@ static char * test_basic_qp()
 
     // Define Solver settings as default
     set_default_settings(settings);
+    settings->max_iter = 200;
 
     // Setup workspace
     work = osqp_setup(data, settings);
 
     // Solve Problem
-    // osqp_solve(work);
+    osqp_solve(work);
 
     // Clean workspace
     osqp_cleanup(work);
