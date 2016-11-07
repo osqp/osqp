@@ -7,7 +7,7 @@
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 
-/* copy vector a into output */
+/* copy vector a into output (Uses MALLOC)*/
 c_float * vec_copy(c_float *a, c_int n);
 
 /* copy vector a into preallocated vector b */

@@ -239,8 +239,6 @@ csc * csc_to_triu(csc * M){
             // Get row index
             i = M->i[ptr];
 
-
-
             // Assign element only if in the upper triangular
             if (i <= j){
                 // c_print("\nM(%i, %i) = %.4f", M->i[ptr], j, M->x[ptr]);

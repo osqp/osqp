@@ -5,8 +5,7 @@
 /*******************
  * OSQP Versioning *
  *******************/
-/* TODO: Add versioning */
-// #define OSQP_VERSION ("0.1") /* string literals automatically null-terminated */
+#define OSQP_VERSION ("0.1") /* string literals automatically null-terminated */
 
 
 
@@ -34,6 +33,9 @@
 #define ALPHA (1.6)
 #define VERBOSE (1)
 #define WARM_START (0)
+
+
+
 
 
 

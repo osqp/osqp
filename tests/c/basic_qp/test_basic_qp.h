@@ -37,18 +37,20 @@ static char * test_basic_qp()
     //TODO: FIX SEGMENTATION FAULT WHEN CREATING lx and ux
 
 
-    printf("\nTest basic QP problem\n");
-    printf("---------------------\n");
+    c_print("\nTest basic QP problem\n");
+    c_print("---------------------\n");
 
     // Define Solver settings as default
     set_default_settings(settings);
 
     // Setup workspace
-    // work = osqp_setup(data, settings);
+    work = osqp_setup(data, settings);
 
+    // Solve Problem
+    osqp_solve(work);
 
-
-
+    // Clean workspace
+    osqp_cleanup(work);
 
     mu_assert("\nError in basic QP test.", exitflag == 0 );
 

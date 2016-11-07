@@ -5,10 +5,21 @@
 #include "cs.h"
 #include "osqp.h"
 
+
 /* ================================= OTHER FUNCTIONS ======================== */
 /* Set default settings from constants.h file */
 /* assumes d->stgs already allocated memory */
 void set_default_settings(Settings * settings);
+
+/* Copy settings creating a new settings structure */
+Settings * copy_settings(Settings * settings);
+
+/* Print Header before running the algorithm */
+void print_setup_header(const Data *data, const Settings *settings);
+
+/* Print Header with data to be displayed per iteration */
+void print_header();
+
 
 /* ================================= DEBUG FUNCTIONS ======================= */
 #if PRINTLEVEL > 2

@@ -48,18 +48,11 @@ struct OSQP_SETTINGS {
 
 /* OSQP Environment */
 struct OSQP_WORK {
-        // Problem Data (possibly Scaled)
-        c_int n; // Number of variables
-        c_int m; // Number of linear constraints
-        csc * P; // Cost Function Matrix, dimension n x n
-        c_float *q; // Cost function vector q, dimension n
-
-        csc * A; // Constraints matrix, dimension (m x n)
-        c_float *lA, *uA; // Lower and upper bounds for constraints, dimension m
-        c_float *lx, *ux; // dense arrays for bounds lx, ux (size n)
+        // Problem Data to work on (possibly Scaled)
+        Data * data;
 
         // Linear System solver structure
-        Priv *priv;
+        Priv * priv;
 
         // Internal solver variables
         c_float *x, *z, *u;
@@ -125,8 +118,13 @@ Work * osqp_setup(const Data * data, Settings *settings);
 c_int osqp_solve(Work * work);
 
 
-//TODO: Add cleanup functions
-//TODO: Complete osqp.c with true functions
+/**
+ * Cleanup workspace
+ * @param  work Workspace
+ * @return      Exitflag for errors
+ */
+c_int osqp_cleanup(Work * work);
+
 
 
 /********************************************
