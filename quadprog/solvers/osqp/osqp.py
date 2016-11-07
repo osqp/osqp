@@ -569,9 +569,11 @@ class OSQP(object):
         xbar[:self.problem.nx] = np.minimum(
                 np.maximum(xbar[:self.problem.nx],
                            self.scaled_problem.lb), self.scaled_problem.ub)
-        xbar[self.problem.nx:self.problem.nx+self.problem.neq] = 0.0
-        xbar[self.problem.nx+self.problem.neq:] = np.maximum(
-                xbar[self.problem.nx+self.problem.neq:], 0.0)
+        xbar[self.problem.nx:self.problem.nx+self.problem.neq] = \
+            self.scaled_problem.beq
+        xbar[self.problem.nx+self.problem.neq:] = np.minimum(
+                xbar[self.problem.nx+self.problem.neq:],
+                self.scaled_problem.bineq)
         return xbar
 
     def polish(self):
@@ -745,8 +747,8 @@ class OSQP(object):
             #     # Store factorization
             #     self.kkt_factor = kkt_factor
 
-        # Construct augmented b vector
-        bc = np.append(self.scaled_problem.beq, self.scaled_problem.bineq)
+        # # Construct augmented b vector
+        # bc = np.append(self.scaled_problem.beq, self.scaled_problem.bineq)
 
         # Set initial conditions
         if self.options.warm_start and self.solution.z is not None \
@@ -766,9 +768,9 @@ class OSQP(object):
         for i in xrange(self.options.max_iter):
             # x update
             rhs = np.append(self.options.rho * (z[:nx] - u[:nx]) -
-                            self.scaled_problem.c, bc - z[nx:] + u[nx:])
+                            self.scaled_problem.c, z[nx:] - u[nx:])
             sol_kkt = self.kkt_factor.solve(rhs)
-            x = np.append(sol_kkt[:nx], z[nx:] - u[nx:] -
+            x = np.append(sol_kkt[:nx], z[nx:] - u[nx:] +
                           1./self.options.rho * sol_kkt[nx:])
             # z update
             z_old = z
