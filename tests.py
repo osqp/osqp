@@ -37,7 +37,7 @@ def load_maros_meszaros_problem(f):
 def main():
     sp.random.seed(2)
     # Possible ops:  {'small1', 'small2', 'random', 'maros_meszaros', 'lp'}
-    example = 'random'
+    example = 'small1'
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
@@ -111,12 +111,13 @@ def main():
     resultsGUROBI = p.solve(solver=GUROBI, OutputFlag=0)
 
     # Solve with OSQP. You can pass options to OSQP solver
-    resultsOSQP = p.solve(solver=OSQP, max_iter=50000, splitting=2,
-                          eps_rel=1e-6,
-                          eps_abs=1e-6,
+    resultsOSQP = p.solve(solver=OSQP, max_iter=50000,
+                          eps_rel=1e-5,
+                          eps_abs=1e-5,
                           alpha=1.6,
+                          rho=1.6,
                           scale_steps=3,
-                          scale_problem=True,
+                          scale_problem=False,
                           polish=False)
 
     # # Reuse factorizations

@@ -53,7 +53,6 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->x = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
     work->z = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
     work->u = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
-    work->rhs = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
     work->z_prev = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
 
     // TODO: Add Validaiton for settings
@@ -75,7 +74,7 @@ Work * osqp_setup(const Data * data, Settings *settings){
     // Allocate solution
     work->solution = c_calloc(1, sizeof(Solution));
     work->solution->x = c_calloc(1, work->data->n * sizeof(c_float)); // Allocate primal solution
-    work->solution->u = c_calloc(1, work->data->m * sizeof(c_float)); // Allocate dual solution
+    work->solution->u = c_calloc(1, (work->data->n + work->data->m) * sizeof(c_float)); // Allocate dual solution
 
 
     // Allocate information
@@ -123,26 +122,52 @@ c_int osqp_solve(Work * work){
         // Update z_prev (preallocated, no malloc)
         prea_vec_copy(work->z, work->z_prev, work->data->n + work->data->m);
 
+        // DEBUG
+        // print_vec(work->z, work->data->n + work->data->m, "z");
+        // print_vec(work->z, work->data->n + work->data->m, "z_prev");
 
         /* ADMM STEPS */
         /* First step: x_{k+1} */
+        // DEBUG
+        // print_vec(work->x, work->data->n + work->data->m, "x (before linsys)");
+
         compute_rhs(work);
         solve_lin_sys(work->settings, work->priv, work->x);
         update_x(work);
 
+        // DEBUG
+        // print_vec(work->x, work->data->n + work->data->m, "x (after linsys)");
+
         /* Second step: z_{k+1} */
         project_x(work);
 
+        // DEBUG
+        // print_vec(work->z, work->data->n + work->data->m, "z (after proj)");
+
         /* Third step: u_{k+1} */
         update_u(work);
+
+        // DEBUG
+        // print_vec(work->u, work->data->n + work->data->m, "u (after update)");
+
+
         /* End of ADMM Steps */
 
 
         /* Update information */
         update_info(work, iter);
 
+        // DEBUG
+        // c_print("f(x) = %.2f\n", work->info->obj_val);
+        // print_vec(work->x, work->data->n + work->data->m, "x");
+        // print_vec(work->z, work->data->n + work->data->m, "z");
+        // print_vec(work->u, work->data->n + work->data->m, "u");
+        // getchar();
+
         /* Print summary */
-        print_summary(work->info);
+        if (work->settings->verbose && iter % PRINT_INTERVAL == 0){
+            print_summary(work->info);
+        }
 
         if (residuals_check(work)){
             break;
@@ -151,8 +176,10 @@ c_int osqp_solve(Work * work){
     }
 
 
+
+
     // Store solution
-    prea_vec_copy(work->z, work->solution->x, work->data->n + work->data->m);
+    prea_vec_copy(work->z, work->solution->x, work->data->n);
     prea_vec_copy(work->u, work->solution->u, work->data->n + work->data->m);
 
     return exitflag;
@@ -185,6 +212,8 @@ c_int osqp_cleanup(Work * work){
     c_free(work->x);
     c_free(work->u);
     c_free(work->z);
+    c_free(work->z_prev);
+
 
     // Free Settings
     c_free(work->settings);

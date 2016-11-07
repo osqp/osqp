@@ -57,7 +57,7 @@ struct OSQP_WORK {
         Priv * priv;
 
         // Internal solver variables
-        c_float *x, *z, *u, *rhs, *z_prev;
+        c_float *x, *z, *u, *z_prev;
 
         // Other internal structures
         Settings *settings; // Problem settings

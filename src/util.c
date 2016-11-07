@@ -5,7 +5,7 @@
  * Printing Constants to set Layout *
  ************************************/
 static const char *HEADER[] = {
- "Iter ",   " Obj  Val ",  "  Pri  Res ", "    Dua  Res "
+ "Iter",   " Obj  Val ",  "  Pri  Res ", "    Dua  Res "
 };
 static const c_int HSPACE = 12;
 static const c_int HEADER_LEN = 4;
@@ -20,7 +20,7 @@ static void print_line(){
 }
 
 void print_header(){
-    c_print("%s| ", HEADER[0]);
+    c_print("%s ", HEADER[0]);
     for (c_int i=1; i < HEADER_LEN - 1; i++) c_print("  %s", HEADER[i]);
     c_print("%s\n", HEADER[HEADER_LEN - 1]);
 }
@@ -51,11 +51,12 @@ void print_setup_header(const Data *data, const Settings *settings) {
 
 /* Print iteration summary */
 void print_summary(Info * info){
-    c_print("%*.i| ", (int)strlen(HEADER[0]), info->iter);
+    c_print("%*i ", (int)strlen(HEADER[0]), info->iter);
     c_print("%*.4e ", (int)HSPACE, info->obj_val);
     c_print("%*.4e ", (int)HSPACE, info->pri_res);
     c_print("%*.4e ", (int)HSPACE, info->dua_res);
     c_print("\n");
+
 }
 
 
@@ -71,6 +72,7 @@ void print_summary(Info * info){
 /* assumes d->stgs already allocated memory */
 void set_default_settings(Settings * settings) {
         settings->normalize = NORMALIZE; /* heuristic problem scaling */
+        settings->rho = RHO; /* ADMM step */
         settings->max_iter = MAX_ITER; /* maximum iterations to take */
         settings->eps_abs = EPS_ABS;         /* absolute convergence tolerance */
         settings->eps_rel = EPS_REL;         /* relative convergence tolerance */
@@ -86,6 +88,7 @@ Settings * copy_settings(Settings * settings){
 
     // Copy settings
     new->normalize = settings->normalize;
+    new->rho = settings->rho;
     new->max_iter = settings->max_iter;
     new->eps_abs = settings->eps_abs;
     new->eps_rel = settings->eps_rel;

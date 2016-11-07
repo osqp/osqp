@@ -43,9 +43,21 @@ static char * test_basic_qp()
     // Define Solver settings as default
     set_default_settings(settings);
     settings->max_iter = 200;
+    settings->alpha = 1.6;
 
     // Setup workspace
     work = osqp_setup(data, settings);
+
+    // DEBUG
+    // print_csc_matrix(work->data->P, "P");
+    // print_vec(work->data->q, work->data->n, "q");
+    // print_csc_matrix(work->data->A, "A");
+    // print_vec(work->data->lA, work->data->m, "lA");
+    // print_vec(work->data->uA, work->data->m, "uA");
+    // print_vec(work->data->lx, work->data->n, "lx");
+    // print_vec(work->data->ux, work->data->n, "ux");
+
+
 
     // Solve Problem
     osqp_solve(work);

@@ -72,7 +72,7 @@ test: $(TEST_TARGETS)
 	@echo "********************************************************************"
 
 $(OUT)/osqp_tester_direct: tests/c/osqp_tester_direct.c $(OUT)/libosqpdir.a
-	cd tests/c/; julia generate_tests.jl
+	# cd tests/c/; julia generate_tests.jl
 	$(CC) $(CFLAGS) $(TEST_INCLUDES) $^ -o $@  $(LDFLAGS)
 
 

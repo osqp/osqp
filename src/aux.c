@@ -1,5 +1,5 @@
 #include "aux.h"
-
+#include "util.h"
 
 /***********************************************************
  * Auxiliary functions needed to compute ADMM iterations * *
@@ -31,6 +31,7 @@ void compute_rhs(Work *work){
         // Cycle over dual variable within first step (nu)
         work->x[i] = work->z[i] - work->u[i];
     }
+
 }
 
 
@@ -66,9 +67,8 @@ void project_x(Work *work){
         // Part related to slack variables
         work->z[i] = c_min(c_max(work->settings->alpha * work->x[i] +
                      (1.0 - work->settings->alpha) * work->z_prev[i] +
-                     work->u[i], work->data->lA[i]), work->data->uA[i]);
+                     work->u[i], work->data->lA[i - work->data->n]), work->data->uA[i - work->data->n]);
     }
-
 
 }
 

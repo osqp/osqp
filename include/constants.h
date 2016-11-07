@@ -26,7 +26,7 @@
  **********************************/
 /* TODO: complete parameters, these are just a couple of examples */
 
-#define NORMALIZE (1)
+#define NORMALIZE (0)
 #define RHO (1.6)
 #define MAX_ITER (2500)
 #define EPS_ABS (1E-5)
@@ -34,6 +34,11 @@
 #define ALPHA (1.6)
 #define VERBOSE (1)
 #define WARM_START (0)
+
+
+
+/* Printing */
+#define PRINT_INTERVAL 10
 
 
 
