@@ -89,22 +89,22 @@ void update_u(Work *work){
 
 }
 
-c_float compute_obj_val(Data * data, c_float * x){
-    c_float obj_val = 0;
-    obj_val = quad_form(data->P, x) + 
-
-}
+// c_float compute_obj_val(Data * data, c_float * x){
+//     c_float obj_val = 0;
+//     obj_val = quad_form(data->P, x) +
+//
+// }
 
 /**
  * Update solver information
  * @param work Workspace
  */
-void update_info(Work *work, c_int iter){
-    work->info->iter = iter; // Update iteration number
-    work->obj_val =
-    //TODO: COntinue from here. N.B. STATUS and STATUS VAL SET AT SETUP TIME
-    // FORGET ABOUT TIMERS for now
-}
+// void update_info(Work *work, c_int iter){
+//     work->info->iter = iter; // Update iteration number
+//     work->obj_val =
+//     //TODO: COntinue from here. N.B. STATUS and STATUS VAL SET AT SETUP TIME
+//     // FORGET ABOUT TIMERS for now
+// }
 
 
 /**********************
@@ -243,10 +243,10 @@ c_int osqp_solve(Work * work){
 
 
         /* Update information */
-        update_info(work, iter);
+        // update_info(work, iter);
 
         /* Print summary */
-        print_summary(work->info);
+        // print_summary(work->info);
 
 
     }
