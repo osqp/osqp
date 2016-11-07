@@ -23,6 +23,10 @@ void print_header();
 /* Print iteration summary */
 void print_summary(Info * info);
 
+/* Print Footer */
+void print_footer(Info * info);
+
+
 
 /* ================================= DEBUG FUNCTIONS ======================= */
 #if PRINTLEVEL > 2

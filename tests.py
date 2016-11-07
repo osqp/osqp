@@ -108,7 +108,7 @@ def main():
     resultsCPLEX = p.solve(solver=CPLEX, verbose=0)
 
     # Solve with GUROBI
-    resultsGUROBI = p.solve(solver=GUROBI, OutputFlag=0)
+    resultsGUROBI = p.solve(solver=GUROBI, OutputFlag=1)
 
     # Solve with OSQP. You can pass options to OSQP solver
     resultsOSQP = p.solve(solver=OSQP, max_iter=50000,

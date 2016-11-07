@@ -63,7 +63,15 @@ void print_summary(Info * info){
 
 
 
+/* Print Footer */
+void print_footer(Info * info){
+    c_print("\n"); // Add space after iterations
+    c_print("Status: %s\n", info->status);
 
+    if (info->status_val == OSQP_SOLVED)
+        c_print("Optimal objective: %.4f\n", info->obj_val);
+
+}
 
 
 /* ================================= OTHER FUNCTIONS ======================= */

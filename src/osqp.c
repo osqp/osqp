@@ -80,6 +80,8 @@ Work * osqp_setup(const Data * data, Settings *settings){
     // Allocate information
     work->info = c_calloc(1, sizeof(Info));
     work->info->status_val = OSQP_UNSOLVED;
+    update_status_string(work->info);
+
     // TODO: Add status strings!
     // It is needed only at the beginning and at the end
     // work->info->status = ...;
@@ -170,13 +172,24 @@ c_int osqp_solve(Work * work){
         }
 
         if (residuals_check(work)){
+            // Update final information
+            work->info->status_val = OSQP_SOLVED;
             break;
         }
 
     }
 
+    /* Print summary for last iteration */
+    print_summary(work->info);
 
 
+    /* Update final status */
+    update_status_string(work->info);
+
+    /* Update timings */
+    // TODO: Add Timings
+
+    print_footer(work->info);
 
     // Store solution
     prea_vec_copy(work->z, work->solution->x, work->data->n);
