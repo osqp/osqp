@@ -136,6 +136,10 @@ void update_info(Work *work, c_int iter){
     work->info->obj_val = compute_obj_val(work->data, work->z);
     work->info->pri_res = compute_pri_res(work);
     work->info->dua_res = compute_dua_res(work);
+
+    #if PROFILING > 0
+    work->info->solve_time = toc(work->timer);
+    #endif
 }
 
 

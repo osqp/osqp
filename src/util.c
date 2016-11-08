@@ -5,11 +5,18 @@
  * Printing Constants to set Layout *
  ************************************/
 #if PRINTLEVEL > 1
+#if PROFILING > 0
+static const char *HEADER[] = {
+ "Iter",   " Obj  Val ",  "  Pri  Res ", "  Dua  Res ", "    Time "
+};
+static const c_int HEADER_LEN = 5;
+#else
 static const char *HEADER[] = {
  "Iter",   " Obj  Val ",  "  Pri  Res ", "    Dua  Res "
 };
-static const c_int HSPACE = 12;
 static const c_int HEADER_LEN = 4;
+#endif
+static const c_int HSPACE = 12;
 static const c_int LINE_LEN = 76;
 #endif
 
@@ -61,6 +68,9 @@ void print_summary(Info * info){
     c_print("%*.4e ", (int)HSPACE, info->obj_val);
     c_print("%*.4e ", (int)HSPACE, info->pri_res);
     c_print("%*.4e ", (int)HSPACE, info->dua_res);
+    #if PROFILING > 0
+    c_print("%*.2f ", 7, info->setup_time + info->solve_time);
+    #endif
     c_print("\n");
 
 }
@@ -130,18 +140,18 @@ Settings * copy_settings(Settings * settings){
 * Timer Functions *
 *******************/
 
- #if PROFILING > 0
+#if PROFILING > 0
 
 // Windows
 #if (defined WIN32 || _WIN64)
 
-void tic(timer* t)
+void tic(Timer* t)
 {
         QueryPerformanceFrequency(&t->freq);
         QueryPerformanceCounter(&t->tic);
 }
 
-c_float toc(timer* t)
+c_float toc(Timer* t)
 {
         QueryPerformanceCounter(&t->toc);
         return ((t->toc.QuadPart - t->tic.QuadPart) / (pfloat)t->freq.QuadPart);
@@ -150,13 +160,13 @@ c_float toc(timer* t)
 // Mac
 #elif (defined __APPLE__)
 
-void tic(timer* t)
+void tic(Timer* t)
 {
         /* read current clock cycles */
         t->tic = mach_absolute_time();
 }
 
-c_float toc(timer* t)
+c_float toc(Timer* t)
 {
 
         uint64_t duration; /* elapsed time in clock cycles*/
@@ -177,14 +187,14 @@ c_float toc(timer* t)
 #else
 
 /* read current time */
-void tic(timer* t)
+void tic(Timer* t)
 {
         clock_gettime(CLOCK_MONOTONIC, &t->tic);
 }
 
 
 /* return time passed since last call to tic on this timer */
-c_float toc(timer* t)
+c_float toc(Timer* t)
 {
         struct timespec temp;
 

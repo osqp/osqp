@@ -1,6 +1,6 @@
-#include "osqp.h"
 #include "aux.h"
 #include "util.h"
+#include "osqp.h"
 
 /**********************
  * Main API Functions *
@@ -24,16 +24,17 @@
 Work * osqp_setup(const Data * data, Settings *settings){
     Work * work; // Workspace
 
-    #if PROFILING > 0
-    timer tsetup; // Timer
-    tic(&tsetup); // Start timer
-    #endif
-
     // Allocate empty workspace
     work = c_calloc(1, sizeof(Work));
     if (!work){
         c_print("ERROR: allocating work failure!\n");
     }
+
+    // Start and allocate directly timer
+    #if PROFILING > 0
+    work->timer = c_malloc(sizeof(Timer));
+    tic(work->timer);
+    #endif
 
     // TODO: Add validation for problem data
 
@@ -88,7 +89,7 @@ Work * osqp_setup(const Data * data, Settings *settings){
     // Allocate timing information
     #if PROFILING > 0
     work->info->solve_time = 0.0; // Solve time to zero
-    work->info->setup_time = toc(&tsetup); // Updater timer information
+    work->info->setup_time = toc(work->timer); // Updater timer information
     #endif
 
     // Print header
@@ -117,8 +118,7 @@ c_int osqp_solve(Work * work){
     c_int iter;
 
     #if PROFILING > 0
-    timer tsolve; // Timer
-    tic(&tsolve); // Start timer
+    tic(work->timer); // Start timer
     #endif
 
     #if PRINTLEVEL > 1
@@ -174,13 +174,12 @@ c_int osqp_solve(Work * work){
     print_summary(work->info);
     #endif
 
-
     /* Update final status */
     update_status_string(work->info);
 
     /* Update timing */
     #if PROFILING > 0
-    work->info->solve_time += toc(&tsolve);
+    work->info->solve_time += toc(work->timer);
     #endif
 
     /* Print final footer */
@@ -235,6 +234,11 @@ c_int osqp_cleanup(Work * work){
 
     // Free information
     c_free(work->info);
+
+    // Free timer
+    #if PROFILING > 0
+    c_free(work->timer);
+    #endif
 
     return exitflag;
 }

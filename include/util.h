@@ -48,11 +48,11 @@ void print_footer(Info * info);
 
 #include <windows.h>
 
-typedef struct timer{
+struct OSQP_TIMER {
 	LARGE_INTEGER tic;
 	LARGE_INTEGER toc;
 	LARGE_INTEGER freq;
-} timer;
+};
 
 // Mac
 #elif (defined __APPLE__)
@@ -60,11 +60,11 @@ typedef struct timer{
 #include <mach/mach_time.h>
 
 /* Use MAC OSX  mach_time for timing */
-typedef struct timer{
+struct OSQP_TIMER {
 	uint64_t tic;
 	uint64_t toc;
 	mach_timebase_info_data_t tinfo;
-} timer;
+};
 
 // Linux
 #else
@@ -73,18 +73,18 @@ typedef struct timer{
 #include <time.h>
 #include <sys/time.h>
 
-typedef struct timer{
+struct OSQP_TIMER {
 	struct timespec tic;
 	struct timespec toc;
-} timer;
+};
 
 #endif
 
 /**
  * Timer Methods
  */
-void tic(timer* t);
-c_float toc(timer* t);
+void tic(Timer* t);
+c_float toc(Timer* t);
 
 #endif /* END IF PROFILING > 0 */
 
