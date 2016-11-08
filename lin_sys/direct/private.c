@@ -14,8 +14,8 @@ void free_priv(Priv *p) {
             csc_spfree(p->L);
         if (p->P)
             c_free(p->P);
-        if (p->D)
-            c_free(p->D);
+        if (p->Dinv)
+            c_free(p->Dinv);
         if (p->bp)
             c_free(p->bp);
         c_free(p);
@@ -221,7 +221,11 @@ c_int factorize(csc *A, Priv *p) {
     C = csc_symperm(A, Pinv, 1);
 
     // Compute LDL factorization of  C = P A P'
-    ldl_status = LDLFactor(C, OSQP_NULL, OSQP_NULL, &p->L, &p->D);
+    // NB: D matrix is stored in Dinv.
+    ldl_status = LDLFactor(C, OSQP_NULL, OSQP_NULL, &p->L, &p->Dinv);
+
+    // Invert elements of D that are stored in p->Dinv
+    vec_ew_recipr(p->Dinv, p->Dinv, A->n);
 
     // Memory clean-up
     csc_spfree(C);
@@ -249,7 +253,7 @@ Priv *init_priv(const csc * P, const csc * A, const Settings *settings){
     p->L = csc_spalloc(n_plus_m, n_plus_m, 1, 0, 0);
 
     // Diagonal matrix stored as a vector D
-    p->D = c_malloc(sizeof(c_float) * n_plus_m);
+    p->Dinv = c_malloc(sizeof(c_float) * n_plus_m);
 
     // Permutation vector P
     p->P = c_malloc(sizeof(c_int) * n_plus_m);
@@ -278,14 +282,14 @@ Priv *init_priv(const csc * P, const csc * A, const Settings *settings){
 
 
 // Initialize private variable with given matrix L, and vector D and P
-Priv *set_priv(csc *L, c_float *D, c_int *P){
+Priv *set_priv(csc *L, c_float *Dinv, c_int *P){
     Priv * p;   // LDL structure
     c_int n = L->n;
     // Allocate pointers
     p = c_calloc(1, sizeof(Priv));
     // Set LDL factorization data: L, D, P
     p->L = L;   // lower triangular matrix (stored without unit diagonal)
-    p->D = D;   // diagonal matrix (stored as a vector)
+    p->Dinv = Dinv;   // diagonal matrix (stored as a vector)
     p->P = P;   // permutation matrix (stored as a vector)
     // Working vector
     p->bp = c_malloc(sizeof(c_float) * n);
@@ -294,13 +298,15 @@ Priv *set_priv(csc *L, c_float *D, c_int *P){
     return p;
 }
 
-void LDLSolve(c_float *x, c_float *b, csc *L, c_float *D, c_int *P,
+void LDLSolve(c_float *x, c_float *b, csc *L, c_float *Dinv, c_int *P,
               c_float *bp) {
     /* solves PLDL'P' x = b for x */
-    c_int n = L->n;
+    c_int i, n = L->n;
     LDL_perm(n, bp, b, P);
     LDL_lsolve(n, bp, L->p, L->i, L->x);
-    LDL_dsolve(n, bp, D);
+    for (i = 0 ; i < n ; i++){
+        bp[i] *= Dinv[i];   // LDL_dsolve(n, bp, D);
+    }
     LDL_ltsolve(n, bp, L->p, L->i, L->x);
     LDL_permt(n, x, bp, P);
 }
@@ -310,6 +316,6 @@ void LDLSolve(c_float *x, c_float *b, csc *L, c_float *D, c_int *P,
 c_int solve_lin_sys(const Settings *settings, Priv *p, c_float *b) {
     /* returns solution to linear system */
     /* Ax = b with solution stored in b */
-    LDLSolve(b, b, p->L, p->D, p->P, p->bp);
+    LDLSolve(b, b, p->L, p->Dinv, p->P, p->bp);
     return 0;
 }

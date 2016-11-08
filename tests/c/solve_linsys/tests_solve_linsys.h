@@ -60,7 +60,7 @@ c_int test_LDL_solve_simple(){
     L = csc_matrix(t5_n, t5_n, t5_L_nnz, t5_L_x, t5_L_i, t5_L_p);
 
     // Store L, D, P in a private variable
-    p = set_priv(L, t5_D, t5_P);
+    p = set_priv(L, t5_Dinv, t5_P);
 
     // Solve  Ax = b via LDL given factorization
     solve_lin_sys(settings, p, t5_b);
@@ -88,7 +88,7 @@ c_int test_LDL_solve_random(){
     L = csc_matrix(t7_n, t7_n, t7_L_nnz, t7_L_x, t7_L_i, t7_L_p);
 
     // Store L, D, P in a private variable
-    p = set_priv(L, t7_D, t7_P);
+    p = set_priv(L, t7_Dinv, t7_P);
 
     // Solve  Ax = b via LDL given factorization
     solve_lin_sys(settings, p, t7_b);
