@@ -182,3 +182,58 @@ c_int residuals_check(Work *work){
     return exitflag;
 
 }
+
+
+/**
+ * Validate problem data
+ * @param  data Data to be validated
+ * @return      Exitflag to check
+ */
+c_int validate_data(const Data * data){
+        if(!data){
+            c_print("ERROR: Missing data!\n");
+            return 1;
+        }
+
+        if (data->n <= 0 || data->m <= 0){
+            c_print("n and m must be both greater than 0; n = %i, m = %i\n",
+                     data->n, data->m);
+            return 1;
+        }
+
+        // TODO: Complete with other checks
+
+        return 0;
+}
+
+
+/**
+ * Validate problem settings
+ * @param  data Data to be validated
+ * @return      Exitflag to check
+ */
+c_int validate_settings(const Settings * settings){
+    if (!settings){
+        c_print("ERROR: Missing settings!\n");
+        return 1;
+    }
+    if (settings->max_iter <= 0) {
+        c_print("max_iter must be positive\n");
+        return 1;
+    }
+    if (settings->rho <= 0) {
+        c_print("rho must be positive\n");
+        return 1;
+    }
+    if (settings->alpha <= 0) {
+        c_print("alpha must be positive\n");
+        return 1;
+    }
+
+
+
+
+
+    return 0;
+
+}

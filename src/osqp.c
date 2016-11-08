@@ -24,6 +24,18 @@
 Work * osqp_setup(const Data * data, Settings *settings){
     Work * work; // Workspace
 
+    // Validate data
+    if (validate_data(data)){
+        c_print("ERROR: Data validation returned failure!\n");
+        return OSQP_NULL;
+    }
+
+    // Validate settings
+    if (validate_settings(settings)){
+        c_print("ERROR: Settings validation returned failure!\n");
+        return OSQP_NULL;
+    }
+
     // Allocate empty workspace
     work = c_calloc(1, sizeof(Work));
     if (!work){
@@ -36,7 +48,6 @@ Work * osqp_setup(const Data * data, Settings *settings){
     tic(work->timer);
     #endif
 
-    // TODO: Add validation for problem data
 
     // Copy problem data into workspace
     work->data = c_malloc(sizeof(Data));
