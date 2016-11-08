@@ -179,7 +179,7 @@ c_int osqp_solve(Work * work){
 
     /* Update timing */
     #if PROFILING > 0
-    work->info->solve_time += toc(work->timer);
+    work->info->solve_time = toc(work->timer);
     #endif
 
     /* Print final footer */
