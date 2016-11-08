@@ -62,6 +62,11 @@ static char * test_basic_qp()
     // Solve Problem
     osqp_solve(work);
 
+    // Print solution
+    print_vec(work->solution->x, work->data->n, "x");
+    print_vec(work->solution->mu, work->data->n, "mu");
+    print_vec(work->solution->lambda, work->data->m, "lambda");
+
     // Clean workspace
     osqp_cleanup(work);
 

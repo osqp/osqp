@@ -78,7 +78,9 @@ Work * osqp_setup(const Data * data, Settings *settings){
     // Allocate solution
     work->solution = c_calloc(1, sizeof(Solution));
     work->solution->x = c_calloc(1, work->data->n * sizeof(c_float)); // Allocate primal solution
-    work->solution->u = c_calloc(1, (work->data->n + work->data->m) * sizeof(c_float)); // Allocate dual solution
+    // work->solution->u = c_calloc(1, (work->data->n + work->data->m) * sizeof(c_float)); // Allocate dual solution
+    work->solution->mu = c_calloc(1, work->data->n * sizeof(c_float));
+    work->solution->lambda = c_calloc(1, work->data->m * sizeof(c_float));
 
 
     // Allocate information
@@ -189,7 +191,13 @@ c_int osqp_solve(Work * work){
 
     // Store solution
     prea_vec_copy(work->z, work->solution->x, work->data->n);
-    prea_vec_copy(work->u, work->solution->u, work->data->n + work->data->m);
+    // prea_vec_copy(work->u, work->solution->u, work->data->n + work->data->m);
+
+    // Recover dual solution from u
+    vec_add_scaled(work->solution->mu, work->u,
+                   work->data->n, work->settings->rho);
+    vec_add_scaled(work->solution->lambda, (work->u + work->data->n),
+                   work->data->m, work->settings->rho);
 
     return exitflag;
 }
@@ -229,7 +237,8 @@ c_int osqp_cleanup(Work * work){
 
     // Free solution
     c_free(work->solution->x);
-    c_free(work->solution->u);
+    c_free(work->solution->mu);
+    c_free(work->solution->lambda);
     c_free(work->solution);
 
     // Free information

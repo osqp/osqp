@@ -77,7 +77,9 @@ struct OSQP_SCALING {
 
 /* Primal and dual solutions */
 struct OSQP_SOLUTION {
-        c_float *x, *u;
+        c_float *x;       // Primal solution
+        c_float *mu;      // Lagrange multiplier associated to lx <= x <= ux
+        c_float *lambda;  // Lagrange multiplier associated to lA <= Ax <= uA
 };
 
 
