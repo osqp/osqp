@@ -47,6 +47,7 @@ typedef struct OSQP_SOLUTION Solution;
 typedef struct OSQP_INFO Info;
 typedef struct OSQP_SCALING Scaling;
 typedef struct OSQP_WORK Work;
+typedef struct OSQP_TIMER Timer;
 
 
 

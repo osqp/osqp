@@ -8,8 +8,8 @@
 #include <string.h>
 #include "lin_alg.h"
 #include "lin_sys.h"
-#include "aux.h"
 #include "cs.h"
+#include "util.h"
 
 
 /*****************************
@@ -65,6 +65,9 @@ struct OSQP_WORK {
         Solution *solution; // Problem Solution
         Info * info; // Solver information
 
+        #if PROFILING > 0
+        Timer * timer;  // Timer object
+        #endif
 };
 
 /* Problem scaling */

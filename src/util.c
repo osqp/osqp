@@ -5,11 +5,18 @@
  * Printing Constants to set Layout *
  ************************************/
 #if PRINTLEVEL > 1
+#if PROFILING > 0
+static const char *HEADER[] = {
+ "Iter",   " Obj  Val ",  "  Pri  Res ", "  Dua  Res ", "   Time "
+};
+static const c_int HEADER_LEN = 5;
+#else
 static const char *HEADER[] = {
  "Iter",   " Obj  Val ",  "  Pri  Res ", "    Dua  Res "
 };
-static const c_int HSPACE = 12;
 static const c_int HEADER_LEN = 4;
+#endif
+static const c_int HSPACE = 12;
 static const c_int LINE_LEN = 76;
 #endif
 
@@ -61,6 +68,9 @@ void print_summary(Info * info){
     c_print("%*.4e ", (int)HSPACE, info->obj_val);
     c_print("%*.4e ", (int)HSPACE, info->pri_res);
     c_print("%*.4e ", (int)HSPACE, info->dua_res);
+    #if PROFILING > 0
+    c_print("%*.2f ", 6, info->setup_time + info->solve_time);
+    #endif
     c_print("\n");
 
 }
@@ -83,8 +93,8 @@ void print_footer(Info * info){
         c_print("Optimal objective: %.4f\n", info->obj_val);
 
     #if PROFILING > 0
-    c_print("Timing: setup_time = %.6f [ms]\n        solve_time = %.6f [ms]\n",
-            info->setup_time, info->solve_time);
+    c_print("Timing: total_time = %.2f ms\n        setup_time = %.2f ms\n        solve_time = %.2f ms\n",
+            info->setup_time + info->solve_time, info->setup_time, info->solve_time);
     #endif
 
 }
@@ -130,33 +140,33 @@ Settings * copy_settings(Settings * settings){
 * Timer Functions *
 *******************/
 
- #if PROFILING > 0
+#if PROFILING > 0
 
 // Windows
 #if (defined WIN32 || _WIN64)
 
-void tic(timer* t)
+void tic(Timer* t)
 {
         QueryPerformanceFrequency(&t->freq);
         QueryPerformanceCounter(&t->tic);
 }
 
-c_float toc(timer* t)
+c_float toc(Timer* t)
 {
         QueryPerformanceCounter(&t->toc);
-        return ((t->toc.QuadPart - t->tic.QuadPart) / (pfloat)t->freq.QuadPart);
+        return (1e3 * (t->toc.QuadPart - t->tic.QuadPart) / (pfloat)t->freq.QuadPart);
 }
 
 // Mac
 #elif (defined __APPLE__)
 
-void tic(timer* t)
+void tic(Timer* t)
 {
         /* read current clock cycles */
         t->tic = mach_absolute_time();
 }
 
-c_float toc(timer* t)
+c_float toc(Timer* t)
 {
 
         uint64_t duration; /* elapsed time in clock cycles*/
@@ -169,7 +179,7 @@ c_float toc(timer* t)
         duration *= t->tinfo.numer;
         duration /= t->tinfo.denom;
 
-        return (c_float)duration / 1000000000;
+        return (c_float)duration / 1e6;
 }
 
 
@@ -177,14 +187,14 @@ c_float toc(timer* t)
 #else
 
 /* read current time */
-void tic(timer* t)
+void tic(Timer* t)
 {
         clock_gettime(CLOCK_MONOTONIC, &t->tic);
 }
 
 
 /* return time passed since last call to tic on this timer */
-c_float toc(timer* t)
+c_float toc(Timer* t)
 {
         struct timespec temp;
 
@@ -192,12 +202,12 @@ c_float toc(timer* t)
 
         if ((t->toc.tv_nsec - t->tic.tv_nsec)<0) {
                 temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec-1;
-                temp.tv_nsec = 1000000000+t->toc.tv_nsec - t->tic.tv_nsec;
+                temp.tv_nsec = 1e9+t->toc.tv_nsec - t->tic.tv_nsec;
         } else {
                 temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec;
                 temp.tv_nsec = t->toc.tv_nsec - t->tic.tv_nsec;
         }
-        return (c_float)temp.tv_sec + (c_float)temp.tv_nsec / 1000000000;
+        return (c_float)temp.tv_sec * 1e3 + (c_float)temp.tv_nsec / 1e6;
 }
 
 #endif

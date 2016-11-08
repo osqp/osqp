@@ -105,7 +105,7 @@ def main():
         assert False, "Unknown example"
 
     # Solve with CPLEX
-    resultsCPLEX = p.solve(solver=CPLEX, verbose=0)
+    resultsCPLEX = p.solve(solver=CPLEX, verbose=1)
 
     # Solve with GUROBI
     resultsGUROBI = p.solve(solver=GUROBI, OutputFlag=1)
