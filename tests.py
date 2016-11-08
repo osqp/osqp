@@ -37,7 +37,7 @@ def load_maros_meszaros_problem(f):
 def main():
     sp.random.seed(2)
     # Possible ops:  {'small1', 'small2', 'random', 'maros_meszaros', 'lp'}
-    example = 'small1'
+    example = 'small2'
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
@@ -67,7 +67,7 @@ def main():
         Aeq = spspa.csc_matrix(np.ones((0, nx)))
         beq = np.zeros(0)
         Aineq = spspa.csc_matrix(np.array([[-1, 0], [0, -1], [-1, -3],
-                                            [2, 5], [3, 4]]))
+                                           [2, 5], [3, 4]]))
         bineq = np.array([0, 0, -15, 100, 80])
         p = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq)
     elif example == 'random':
@@ -119,7 +119,7 @@ def main():
                           scale_steps=3,
                           scale_problem=False,
                           polish=False,
-                          print_level=3)
+                          print_level=2)
 
     # # Reuse factorizations
     # if example == 'random':

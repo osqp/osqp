@@ -207,7 +207,7 @@ c_float toc(Timer* t)
                 temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec;
                 temp.tv_nsec = t->toc.tv_nsec - t->tic.tv_nsec;
         }
-        return (pfloat)temp.tv_sec + (pfloat)temp.tv_nsec / 1000000000;
+        return (c_float)temp.tv_sec + (c_float)temp.tv_nsec / 1000000000;
 }
 
 #endif

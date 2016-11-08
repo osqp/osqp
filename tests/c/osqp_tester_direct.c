@@ -10,6 +10,7 @@
 #include "lin_alg/tests_lin_alg.h"
 #include "solve_linsys/tests_solve_linsys.h"
 #include "basic_qp/test_basic_qp.h"
+#include "basic_qp2/test_basic_qp2.h"
 
 
 int tests_run = 0;
@@ -19,6 +20,7 @@ static char * all_tests() {
     mu_run_test(tests_lin_alg);
     mu_run_test(tests_solve_linsys);
     mu_run_test(test_basic_qp);
+    mu_run_test(test_basic_qp2);
     return 0;
 }
 
