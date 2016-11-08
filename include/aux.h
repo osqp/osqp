@@ -74,4 +74,21 @@ void update_status_string(Info *info);
   */
  c_int residuals_check(Work *work);
 
+
+
+/**
+ * Validate problem data
+ * @param  data Data to be validated
+ * @return      Exitflag to check
+ */
+ c_int validate_data(const Data * data);
+
+
+/**
+ * Validate problem settings
+ * @param  data Data to be validated
+ * @return      Exitflag to check
+ */
+c_int validate_settings(const Settings * settings);
+
  #endif

@@ -48,6 +48,11 @@ static char * test_basic_qp()
     // Setup workspace
     work = osqp_setup(data, settings);
 
+    if (!work) {
+        c_print("Setup error!\n");
+        exitflag = 1;
+    }
+    else {
     // DEBUG
     // print_csc_matrix(work->data->P, "P");
     // print_vec(work->data->q, work->data->n, "q");
@@ -69,6 +74,8 @@ static char * test_basic_qp()
 
     // Clean workspace
     osqp_cleanup(work);
+
+    }
 
     mu_assert("\nError in basic QP test.", exitflag == 0 );
 

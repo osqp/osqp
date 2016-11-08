@@ -7,7 +7,7 @@
 #if PRINTLEVEL > 1
 #if PROFILING > 0
 static const char *HEADER[] = {
- "Iter",   " Obj  Val ",  "  Pri  Res ", "  Dua  Res ", "   Time "
+ "Iter",   " Obj  Val ",  "  Pri  Res ", "  Dua  Res ", "      Time "
 };
 static const c_int HEADER_LEN = 5;
 #else
@@ -69,7 +69,7 @@ void print_summary(Info * info){
     c_print("%*.4e ", (int)HSPACE, info->pri_res);
     c_print("%*.4e ", (int)HSPACE, info->dua_res);
     #if PROFILING > 0
-    c_print("%*.2f ", 6, info->setup_time + info->solve_time);
+    c_print("%*.2fs", 9, info->setup_time + info->solve_time);
     #endif
     c_print("\n");
 
@@ -93,8 +93,12 @@ void print_footer(Info * info){
         c_print("Optimal objective: %.4f\n", info->obj_val);
 
     #if PROFILING > 0
-    c_print("Timing: total_time = %.2f ms\n        setup_time = %.2f ms\n        solve_time = %.2f ms\n",
+    if (info->setup_time + info->solve_time > 1e-03){ // Time more than 1ms
+    c_print("Timing: total_time = %.3fs\n        setup_time = %.3fs\n        solve_time = %.3fs\n",
             info->setup_time + info->solve_time, info->setup_time, info->solve_time);
+    } else
+        c_print("Timing: total_time = %.3fms\n        setup_time = %.3fms\n        solve_time = %.3fms\n",
+                1e03*(info->setup_time + info->solve_time), 1e03*info->setup_time, 1e03*info->solve_time);
     #endif
 
 }
@@ -154,7 +158,7 @@ void tic(Timer* t)
 c_float toc(Timer* t)
 {
         QueryPerformanceCounter(&t->toc);
-        return (1e3 * (t->toc.QuadPart - t->tic.QuadPart) / (pfloat)t->freq.QuadPart);
+        return ((t->toc.QuadPart - t->tic.QuadPart) / (pfloat)t->freq.QuadPart);
 }
 
 // Mac
@@ -179,7 +183,7 @@ c_float toc(Timer* t)
         duration *= t->tinfo.numer;
         duration /= t->tinfo.denom;
 
-        return (c_float)duration / 1e6;
+        return (c_float)duration / 1e9;
 }
 
 
@@ -207,7 +211,7 @@ c_float toc(Timer* t)
                 temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec;
                 temp.tv_nsec = t->toc.tv_nsec - t->tic.tv_nsec;
         }
-        return (c_float)temp.tv_sec * 1e3 + (c_float)temp.tv_nsec / 1e6;
+        return (c_float)temp.tv_sec + (c_float)temp.tv_nsec / 1e9;
 }
 
 #endif
