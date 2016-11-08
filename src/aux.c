@@ -118,7 +118,7 @@ c_float compute_pri_res(Work * work){
 c_float compute_dua_res(Work * work){
     c_int i;
     c_float norm_sq = 0, temp;
-    for (i = 0; i < work->data->n; i++){
+    for (i = 0; i < work->data->n + work->data->m; i++){
         temp = work->settings->rho * (work->z[i] - work->z_prev[i]);
         norm_sq += temp*temp;
     }
