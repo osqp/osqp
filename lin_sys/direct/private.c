@@ -298,15 +298,21 @@ Priv *set_priv(csc *L, c_float *Dinv, c_int *P){
     return p;
 }
 
+// x = Dinv*x
+void LDL_dinvsolve(c_int n, c_float *x, c_float *Dinv){
+    c_int i;
+    for (i = 0 ; i < n ; i++){
+        x[i] *= Dinv[i];
+    }
+}
+
 void LDLSolve(c_float *x, c_float *b, csc *L, c_float *Dinv, c_int *P,
               c_float *bp) {
     /* solves PLDL'P' x = b for x */
-    c_int i, n = L->n;
+    c_int n = L->n;
     LDL_perm(n, bp, b, P);
     LDL_lsolve(n, bp, L->p, L->i, L->x);
-    for (i = 0 ; i < n ; i++){
-        bp[i] *= Dinv[i];   // LDL_dsolve(n, bp, D);
-    }
+    LDL_dinvsolve(n, bp, Dinv);
     LDL_ltsolve(n, bp, L->p, L->i, L->x);
     LDL_permt(n, x, bp, P);
 }
