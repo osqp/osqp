@@ -57,6 +57,10 @@ void print_setup_header(const Data *data, const Settings *settings) {
         c_print("          scaling: active\n");
     else
         c_print("          scaling: inactive\n");
+    if (settings->warm_start)
+        c_print("          warm start: active\n");
+    else
+        c_print("          warm start: inactive\n");
     c_print("\n");
 
 }
@@ -94,10 +98,10 @@ void print_footer(Info * info){
 
     #if PROFILING > 0
     if (info->setup_time + info->solve_time > 1e-03){ // Time more than 1ms
-    c_print("Timing: total_time = %.3fs\n        setup_time = %.3fs\n        solve_time = %.3fs\n",
+    c_print("Timing: total time = %.3fs\n        setup time = %.3fs\n        solve time = %.3fs\n",
             info->setup_time + info->solve_time, info->setup_time, info->solve_time);
     } else
-        c_print("Timing: total_time = %.3fms\n        setup_time = %.3fms\n        solve_time = %.3fms\n",
+        c_print("Timing: total time = %.3fms\n        setup time = %.3fms\n        solve time = %.3fms\n",
                 1e03*(info->setup_time + info->solve_time), 1e03*info->setup_time, 1e03*info->solve_time);
     #endif
 

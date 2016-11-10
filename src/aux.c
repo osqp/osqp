@@ -191,13 +191,31 @@ c_int residuals_check(Work *work){
  */
 c_int validate_data(const Data * data){
         if(!data){
-            c_print("ERROR: Missing data!\n");
+            c_print("Missing data!\n");
             return 1;
         }
 
+        // General dimensions Tests
         if (data->n <= 0 || data->m <= 0){
             c_print("n and m must be both greater than 0; n = %i, m = %i\n",
                      data->n, data->m);
+            return 1;
+        }
+
+        // Matrix P
+        if (data->P->m != data->n ){
+            c_print("P does not have dimension n x n with n = %i\n", data->n);
+            return 1;
+        }
+        if (data->P->m != data->P->n ){
+            c_print("P is not square\n");
+            return 1;
+        }
+
+        // Matrix A
+        if (data->A->m != data->m || data->A->n != data->n){
+            c_print("A does not have dimension m x n with m = %i and n = %i\n",
+                    data->m, data->n);
             return 1;
         }
 
@@ -214,24 +232,45 @@ c_int validate_data(const Data * data){
  */
 c_int validate_settings(const Settings * settings){
     if (!settings){
-        c_print("ERROR: Missing settings!\n");
+        c_print("Missing settings!\n");
         return 1;
     }
-    if (settings->max_iter <= 0) {
-        c_print("max_iter must be positive\n");
+    if (settings->normalize != 0 &&  settings->normalize != 1) {
+        c_print("normalize must be either 0 or 1\n");
         return 1;
     }
     if (settings->rho <= 0) {
         c_print("rho must be positive\n");
         return 1;
     }
+
+
+    if (settings->max_iter <= 0) {
+        c_print("max_iter must be positive\n");
+        return 1;
+    }
+    if (settings->eps_abs <= 0) {
+        c_print("eps_abs must be positive\n");
+        return 1;
+    }
+    if (settings->eps_rel <= 0) {
+        c_print("eps_rel must be positive\n");
+        return 1;
+    }
     if (settings->alpha <= 0) {
         c_print("alpha must be positive\n");
         return 1;
     }
+    if (settings->verbose != 0 &&  settings->verbose != 1) {
+        c_print("verbose must be either 0 or 1\n");
+        return 1;
+    }
+    if (settings->warm_start != 0 &&  settings->warm_start != 1) {
+        c_print("warm_start must be either 0 or 1\n");
+        return 1;
+    }
 
-
-
+    // TODO: Complete with other checks
 
 
     return 0;
