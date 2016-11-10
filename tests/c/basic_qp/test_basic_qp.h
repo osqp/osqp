@@ -16,14 +16,14 @@ static char * test_basic_qp()
     c_int exitflag = 0;  // No errors
 
     // Problem settings
-    Settings * settings = c_malloc(sizeof(Settings));
+    Settings * settings = (Settings *)c_malloc(sizeof(Settings));
 
     // Structures
     Work * work;  // Workspace
     Data * data;  // Data
 
     // Populate data from matrices.h
-    data = c_malloc(sizeof(Data));
+    data = (Data *)c_malloc(sizeof(Data));
 
     data->n = basic_qp_n;
     data->m = basic_qp_m;
@@ -68,12 +68,15 @@ static char * test_basic_qp()
     osqp_solve(work);
 
     // Print solution
-    print_vec(work->solution->x, work->data->n, "x");
-    print_vec(work->solution->mu, work->data->n, "mu");
-    print_vec(work->solution->lambda, work->data->m, "lambda");
+    // print_vec(work->solution->x, work->data->n, "x");
+    // print_vec(work->solution->mu, work->data->n, "mu");
+    // print_vec(work->solution->lambda, work->data->m, "lambda");
 
     // Clean workspace
     osqp_cleanup(work);
+    c_free(data->A);
+    c_free(data->P);
+    c_free(data);
 
     }
 

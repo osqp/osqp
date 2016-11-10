@@ -196,10 +196,15 @@ c_int test_mat_operations(){
 
 
     // cleanup
-    c_free(Ad);
-    c_free(dA);
-    c_free(A_ewsq);
-    c_free(A_ewabs);
+    c_free(t3_A);
+    c_free(t3_Ad);
+    c_free(t3_dA);
+    c_free(t3_A_ewsq);
+    c_free(t3_A_ewabs);
+    csc_spfree(Ad);
+    csc_spfree(dA);
+    csc_spfree(A_ewsq);
+    csc_spfree(A_ewabs);
 
     return exitflag;
 }
@@ -231,6 +236,7 @@ c_int test_mat_vec_multiplication(){
 
     // cleanup
     c_free(Ax_cum);
+    c_free(A);
 
     return exitflag;
 }
@@ -260,7 +266,9 @@ c_int test_extract_upper_triangular(){
 
 
     // Cleanup
-    c_free(Atriu);
+    c_free(A);
+    c_free(A_ut_triu);
+    csc_spfree(Atriu);
 
     return exitflag;
 }
@@ -283,6 +291,8 @@ c_int test_quad_form_upper_triang(){
     // c_print("quadform_t = %.4f\n", quad_form_t);
     // c_print("t_qpform_value = %.4f\n", t_qpform_value);
 
+    // cleanup
+    c_free(Atriu);
 
     return exitflag;
 }
@@ -292,40 +302,36 @@ static char * tests_lin_alg()
     /* local variables */
     c_int exitflag = 0, tempflag;  // No errors
 
-    printf("Linear algebra tests\n");
-    printf("--------------------\n");
+    c_print("Linear algebra tests\n");
+    c_print("--------------------\n");
 
-    printf("1) Construct sparse matrix: ");
+    c_print("1) Construct sparse matrix: ");
     tempflag = test_constr_sparse_mat();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 
-    printf("2) Test vector operations: ");
+    c_print("2) Test vector operations: ");
     tempflag = test_vec_operations();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 
-    // printf("3) Test matrix concatenation: ");
-    // tempflag = test_mat_concat();
-    // if (!tempflag) c_print("OK!\n");
-    // exitflag += tempflag;
 
-    printf("3) Test matrix operations: ");
+    c_print("3) Test matrix operations: ");
     tempflag = test_mat_operations();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 
-    printf("4) Test matrix-vector multiplication: ");
+    c_print("4) Test matrix-vector multiplication: ");
     tempflag = test_mat_vec_multiplication();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 
-    printf("5) Test extract upper triangular: ");
+    c_print("5) Test extract upper triangular: ");
     tempflag = test_extract_upper_triangular();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 
-    printf("6) Test compute QP form from upper triangular matrix: ");
+    c_print("6) Test compute QP form from upper triangular matrix: ");
     tempflag = test_quad_form_upper_triang();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;

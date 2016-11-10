@@ -22,10 +22,11 @@ void free_priv(Priv *p);
 
 
 // TODO: Remove these functions
+
 // Initialize private variable with given matrix L, and vector D and P
-Priv *set_priv(csc *L, c_float *D, c_int *P);
+// Priv *set_priv(csc *L, c_float *D, c_int *P);
 
 // Form KKT matrix
-csc * form_KKT(const csc * P, const  csc * A, c_float rho);
+// csc * form_KKT(const csc * P, const  csc * A, c_float rho);
 
 #endif

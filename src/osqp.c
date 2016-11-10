@@ -224,8 +224,6 @@ c_int osqp_solve(Work * work){
 c_int osqp_cleanup(Work * work){
     c_int exitflag=0;
 
-    // TODO: Add checks for proper cleaning!
-
     // Free Data
     csc_spfree(work->data->P);
     c_free(work->data->q);
@@ -242,6 +240,8 @@ c_int osqp_cleanup(Work * work){
     c_free(work->z);
     c_free(work->z_prev);
 
+    // Free private structure
+    free_priv(work->priv);
 
     // Free Settings
     c_free(work->settings);
@@ -259,6 +259,9 @@ c_int osqp_cleanup(Work * work){
     #if PROFILING > 0
     c_free(work->timer);
     #endif
+
+    // Free work
+    c_free(work);
 
     return exitflag;
 }

@@ -91,8 +91,8 @@ endif
 # 0: no prints
 # 1: only final info
 # 2: progress print per iteration
-# 3: debug level, enables print & dump fcns
-PRINTLEVEL = 3
+# 3: debug level
+PRINTLEVEL = 2
 OPT_FLAGS = -DPRINTLEVEL=$(PRINTLEVEL)
 
 # Set Profiling
