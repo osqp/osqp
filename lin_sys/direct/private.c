@@ -177,7 +177,7 @@ c_int LDLFactor(csc *A, c_int P[], c_int Pinv[], csc **L, c_float **D) {
     (*L)->nzmax = *((*L)->p + n);
     (*L)->x = (c_float *)c_malloc((*L)->nzmax * sizeof(c_float));
     (*L)->i = (c_int *)c_malloc((*L)->nzmax * sizeof(c_int));
-    *D = (c_float *)c_malloc(n * sizeof(c_float));
+    // *D = (c_float *)c_malloc(n * sizeof(c_float));
 
     if (!(*D) || !(*L)->i || !(*L)->x || !Y || !Pattern || !Flag || !Lnz ||
         !Parent)
@@ -249,8 +249,13 @@ Priv *init_priv(const csc * P, const csc * A, const Settings *settings){
     c_int n_plus_m = P->m + A->m;
 
     // Sparse matrix L (lower triangular)
-    // Set nzmax to 1 and null pointer to elements (to be filled during factorization)
-    p->L = csc_spalloc(n_plus_m, n_plus_m, 1, 0, 0);
+    // N.B. Do not allocate L completely (CSC elements)
+    //      L will be allocated during the factorization depending on the
+    //      resulting number of elements.      
+    p->L = c_malloc(sizeof(csc));
+    p->L->m = n_plus_m;
+    p->L->n = n_plus_m;
+    p->L->nz = -1;
 
     // Diagonal matrix stored as a vector D
     p->Dinv = c_malloc(sizeof(c_float) * n_plus_m);
