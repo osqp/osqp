@@ -235,6 +235,96 @@ c_int factorize(csc *A, Priv *p) {
 }
 
 
+
+
+
+
+
+
+
+// Initialize polishing structure
+Polish *init_polish(const csc * P, const csc * A) {
+    // Allocate memory for polishing structure
+    Polish * plsh = c_calloc(1, sizeof(Polish));
+
+    // Dimensions of matrices
+    c_int m_red = c_min(A->m, A->n);   // upper bound on number of rows in reduced A
+    c_int nKKT = m_red + A->n;  // reduced KKT ==> [P Ared'; Ared 0]
+
+    // Maximum number of nnz elements in L and KKT
+    c_int Ared_nz = c_min(A->n * m_red, A->nzmax);
+    c_int Lred_nz = P->nzmax + Ared_nz;
+    c_int KKTred_nz = Lred_nz + nKKT;
+
+    // Allocate memory for storing reduced KKT in triplet format
+    plsh->KKT_trip = csc_spalloc(nKKT, nKKT, KKTred_nz, 1, 1);
+
+    // Allocate memory for storing reduced KKT in CSC format
+    plsh->KKT = csc_spalloc(nKKT, nKKT, KKTred_nz, 1, 0);
+
+    // Allocate memory for storing LDL factorization of reduced KKT
+    plsh->L = csc_spalloc(nKKT, nKKT, Lred_nz, 1, 0);   // Lower triang matrix
+    plsh->Dinv = c_malloc(sizeof(c_float) * nKKT);  // Inverse of diag matrix
+    plsh->P = c_malloc(sizeof(c_int) * nKKT);       // Permutation vector
+    plsh->bp = c_malloc(sizeof(c_float) * nKKT);    // Working vector
+
+    // // Allocate memory for active constraints
+    // ind_lA = c_calloc(1, A->m * sizeof(c_int));
+    // ind_uA = c_calloc(1, A->m * sizeof(c_int));
+    // ind_fA = c_calloc(1, A->m * sizeof(c_int));
+
+    // Form reduced KKT matrix
+
+    return plsh;
+}
+
+
+// Free polishing structure
+void free_polish(Polish *plsh) {
+    if (plsh) {
+        if (plsh->KKT_trip)
+            csc_spfree(plsh->KKT_trip);
+        if (plsh->KKT)
+            csc_spfree(plsh->KKT);
+        if (plsh->Dinv)
+            c_free(plsh->Dinv);
+        if (plsh->P)
+            c_free(plsh->P);
+        if (plsh->bp)
+            c_free(plsh->bp);
+        // if (plsh->ind_lA)
+        //     c_free(plsh->ind_lA);
+        // if (plsh->ind_uA)
+        //     c_free(plsh->ind_uA);
+        // if (plsh->ind_fA)
+        //     c_free(plsh->ind_fA);
+        c_free(plsh);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Initialize LDL Factorization structure
 Priv *init_priv(const csc * P, const csc * A, const Settings *settings){
     // Define Variables
@@ -280,7 +370,7 @@ Priv *init_priv(const csc * P, const csc * A, const Settings *settings){
     return p;
 }
 
-
+// TODO: Remove this function
 // Initialize private variable with given matrix L, and vector D and P
 Priv *set_priv(csc *L, c_float *Dinv, c_int *P){
     Priv * p;   // LDL structure

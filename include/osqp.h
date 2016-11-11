@@ -45,6 +45,7 @@ struct OSQP_SETTINGS {
         c_int verbose; /* boolean, write out progress: 1 */
         c_int warm_start; /* boolean, warm start (put initial guess in Sol
                                struct): 0 */
+        c_float delta; /* regularization parameter for polishing */
 };
 
 
@@ -55,6 +56,9 @@ struct OSQP_WORK {
 
         // Linear System solver structure
         Priv * priv;
+
+        // Polishing structure
+        Polish * plsh;
 
         // Internal solver variables
         c_float *x, *z, *u, *z_prev;

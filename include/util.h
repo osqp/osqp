@@ -115,6 +115,7 @@ void print_dns_matrix(c_float * M, c_int m, c_int n, char *name);
 /* Print vector  */
 void print_vec(c_float * V, c_int n, char *name);
 
+
 #endif
 
 

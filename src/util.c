@@ -117,6 +117,7 @@ void set_default_settings(Settings * settings) {
         settings->alpha = ALPHA;     /* relaxation parameter */
         settings->verbose = VERBOSE;     /* x equality constraint scaling: 1e-3 */
         settings->warm_start = WARM_START;     /* x equality constraint scaling: 1e-3 */
+        settings->delta = DELTA;    /* regularization parameter for polishing */
 }
 
 
@@ -331,5 +332,6 @@ void print_dns_matrix(c_float * M, c_int m, c_int n, char *name)
 void print_vec(c_float * V, c_int n, char *name){
         print_dns_matrix(V, 1, n, name);
 }
+
 
 #endif

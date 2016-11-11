@@ -18,6 +18,20 @@ struct c_priv{
     c_float total_solve_time;
 };
 
+struct c_polish{
+    csc *KKT_trip;  /* KKT matrix in triplet form */
+    csc *KKT;       /* KKT matrix in CSC form */
+    // c_int *w_KKT,   /* workspace for KKT format conversion */
+    csc *L;         /* lower triangular matrix in LDL factorization */
+    c_float *Dinv;  /* inverse of diag matrix in LDL (as a vector)  */
+    c_int *P;       /* permutation of KKT matrix for factorization  */
+    c_float *bp;    /* workspace memory for solves                  */
+    // /* active constraints */
+    // c_int *ind_lA, n_lA=0;  // lower-active
+    // c_int *ind_uA, n_uA=0;  // upper-active
+    // c_int *ind_fA, n_fA=0;  // free
+};
+
 //TODO: Add structure for KKT factorization (see scs)
 
 

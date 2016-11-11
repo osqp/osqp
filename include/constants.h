@@ -33,7 +33,7 @@
 #define ALPHA (1.6)
 #define VERBOSE (1)
 #define WARM_START (0)
-
+#define DELTA (1E-6)
 
 
 /* Printing */

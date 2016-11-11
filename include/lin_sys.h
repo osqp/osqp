@@ -9,6 +9,9 @@
  * interacts with this struct */
 typedef struct c_priv Priv;
 
+/* stores the necessary workspace for polishing */
+typedef struct c_polish Polish;
+
 
 // Initialize private variable for solver
 // NB: Only the upper triangular part of P is stuffed!
@@ -19,6 +22,16 @@ c_int solve_lin_sys(const Settings *settings, Priv *p, c_float *b);
 
 // Free LDL Factorization structure
 void free_priv(Priv *p);
+
+
+// Initialize workspace for polishing.
+Polish *init_polish(const csc * P, const csc * A);
+
+/* TODO: solves KKT x = b for x, and stores result in b */
+// c_int solve_polish(const Settings *settings, Polish *pol, c_float *b);
+
+// Free polishing workspace
+void free_polish(Polish *plsh);
 
 
 // TODO: Remove these functions

@@ -1,4 +1,5 @@
 #include "aux.h"
+#include "polish.h"
 #include "util.h"
 #include "osqp.h"
 
@@ -76,6 +77,9 @@ Work * osqp_setup(const Data * data, Settings *settings){
 
     // Initialize linear system solver private structure
     work->priv = init_priv(work->data->P, work->data->A, work->settings);
+
+    // Initialize polishing structure
+    work->plsh = init_polish(work->data->P, work->data->A);
 
     // Allocate scaling
     if (settings->normalize){
@@ -195,6 +199,9 @@ c_int osqp_solve(Work * work){
     work->info->solve_time = toc(work->timer);
     #endif
 
+    // // TODO: Polish the obtained solution
+    solve_polish(work);
+
     /* Print final footer */
     #if PRINTLEVEL > 0
     print_footer(work->info);
@@ -202,8 +209,6 @@ c_int osqp_solve(Work * work){
 
     // Store solution
     prea_vec_copy(work->z, work->solution->x, work->data->n);
-    // prea_vec_copy(work->u, work->solution->u, work->data->n + work->data->m);
-
     // Recover dual solution from u
     vec_add_scaled(work->solution->mu, work->u,
                    work->data->n, work->settings->rho);
@@ -236,12 +241,17 @@ c_int osqp_cleanup(Work * work){
     c_free(work->data->ux);
     c_free(work->data);
 
+    // Free private structure for linear system solver_solution
+    free_priv(work->priv);
+
+    // Free polishing structure
+    free_polish(work->plsh);
+
     // Free work Variables
     c_free(work->x);
     c_free(work->u);
     c_free(work->z);
     c_free(work->z_prev);
-
 
     // Free Settings
     c_free(work->settings);
