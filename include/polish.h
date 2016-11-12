@@ -7,7 +7,7 @@
  *   Polishing of the solution obtained from the ADMM    * *
  ***********************************************************/
 
-void solve_polish(Work *work);
+//void solve_polish(Work *work);
 
 
 #endif

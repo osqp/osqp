@@ -27,8 +27,8 @@ void free_priv(Priv *p);
 // Initialize workspace for polishing.
 Polish *init_polish(const csc * P, const csc * A);
 
-/* TODO: solves KKT x = b for x, and stores result in b */
-// c_int solve_polish(const Settings *settings, Polish *pol, c_float *b);
+/*  Solves KKT * x = b for x, and stores result in b */
+c_int solve_polish(Work *work);
 
 // Free polishing workspace
 void free_polish(Polish *plsh);

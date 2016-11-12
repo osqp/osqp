@@ -242,6 +242,94 @@ c_int factorize(csc *A, Priv *p) {
 
 
 
+
+
+
+
+
+
+
+/*  Reduced KKT with regularization delta
+ *             [ P + delta*I   Ared'  ]
+ *  KKT_red =  [    Ared     -delta*I ]
+ */
+void form_redKKT(Work * work) {
+    c_int ptr, i, j;
+    c_int z_P=0, z_KKT=0;   // Counter for total number of elements in P and in KKT
+
+    // Set (1,1) block of reduced KKT matrix: P + delta I
+    for (j = 0; j < work->data->n; j++) {    // cycle over columns
+
+        // No elements in column j => add diagonal element delta
+        if (work->data->P->p[j] == work->data->P->p[j+1]) {
+            work->plsh->KKT_trip->i[z_KKT] = j;
+            work->plsh->KKT_trip->p[z_KKT] = j;
+            work->plsh->KKT_trip->x[z_KKT++] = work->settings->delta;
+        }
+
+        for (ptr = work->data->P->p[j]; ptr < work->data->P->p[j + 1]; ptr++) {
+
+            // Get current row
+            i = work->data->P->i[ptr];
+
+            // Add element of P
+            work->plsh->KKT_trip->i[z_KKT] = i;
+            work->plsh->KKT_trip->p[z_KKT] = j;
+            work->plsh->KKT_trip->x[z_KKT] = work->data->P->x[z_P];
+            if (i == j) { // P has a diagonal element, add rho
+                work->plsh->KKT_trip->x[z_KKT] += work->settings->delta;
+            }
+            z_P++;
+            z_KKT++;
+
+            // Add diagonal rho in case
+            if ((i < j) && // Diagonal element not reached
+                (ptr + 1 == work->data->P->p[j+1])) { // last element of column j
+
+                // Add diagonal element rho
+                work->plsh->KKT_trip->i[z_KKT] = j;
+                work->plsh->KKT_trip->p[z_KKT] = j;
+                work->plsh->KKT_trip->x[z_KKT] = work->settings->delta;
+                z_KKT++;
+            }
+        }
+    }
+
+    // Set (1,2) block to Ared'
+    for (j = 0; j < work->data->n; j++) {  // Cycle over columns of Ared
+        for (ptr = work->data->A->p[j]; ptr < work->data->A->p[j + 1]; ptr++) {
+            if (work->plsh->tableA[work->data->A->i[ptr]] != -1) {
+                // if row of A should be added to Ared
+                work->plsh->KKT_trip->p[z_KKT] = work->data->P->m
+                    + work->plsh->tableA[work->data->A->i[ptr]];
+                work->plsh->KKT_trip->i[z_KKT] = j;
+                work->plsh->KKT_trip->x[z_KKT++] = work->data->A->x[ptr];
+            }
+        }
+    }
+
+    // Set (2,2) block to -delta*I
+    for (j = 0; j < work->plsh->n_lA + work->plsh->n_uA; j++) {
+        work->plsh->KKT_trip->i[z_KKT] = j + work->data->n;
+        work->plsh->KKT_trip->p[z_KKT] = j + work->data->n;
+        work->plsh->KKT_trip->x[z_KKT++] = -work->settings->delta;
+    }
+
+}
+
+
+
+// Print int array
+// TODO: This function is only for debugging. To be removed.
+void print_vec_int(c_int * x, c_int n, char *name) {
+    c_print("%s = [", name);
+    for(c_int i=0; i<n; i++) {
+        c_print(" %d ", x[i]);
+    }
+    c_print("]\n");
+}
+
+
 // Initialize polishing structure
 Polish *init_polish(const csc * P, const csc * A) {
     // Allocate memory for polishing structure
@@ -263,21 +351,63 @@ Polish *init_polish(const csc * P, const csc * A) {
     plsh->KKT = csc_spalloc(nKKT, nKKT, KKTred_nz, 1, 0);
 
     // Allocate memory for storing LDL factorization of reduced KKT
-    plsh->L = csc_spalloc(nKKT, nKKT, Lred_nz, 1, 0);   // Lower triang matrix
-    plsh->Dinv = c_malloc(sizeof(c_float) * nKKT);  // Inverse of diag matrix
-    plsh->P = c_malloc(sizeof(c_int) * nKKT);       // Permutation vector
+    plsh->L = csc_spalloc(nKKT, nKKT, Lred_nz, 1, 0); // Lower triang matrix
+    plsh->Dinv = c_malloc(sizeof(c_float) * nKKT);    // Inverse of diag matrix
+    plsh->P = c_malloc(sizeof(c_int) * nKKT);         // Permutation vector
     plsh->bp = c_malloc(sizeof(c_float) * nKKT);    // Working vector
 
-    // // Allocate memory for active constraints
-    // ind_lA = c_calloc(1, A->m * sizeof(c_int));
-    // ind_uA = c_calloc(1, A->m * sizeof(c_int));
-    // ind_fA = c_calloc(1, A->m * sizeof(c_int));
-
-    // Form reduced KKT matrix
+    // Allocate memory for active constraints
+    plsh->n_lA = 0;
+    plsh->n_uA = 0;
+    plsh->n_fA = 0;
+    plsh->ind_lA = c_calloc(1, A->m * sizeof(c_int));
+    plsh->ind_uA = c_calloc(1, A->m * sizeof(c_int));
+    plsh->ind_fA = c_calloc(1, A->m * sizeof(c_int));
+    plsh->tableA = c_calloc(1, A->m * sizeof(c_int));
 
     return plsh;
 }
 
+
+c_int solve_polish(Work *work) {
+    c_int i, cnt=0;
+
+    // Guess which linear constraints are lower-active, upper-active and free
+    for (i = 0; i < work->data->m; i++) {
+        if ( work->z[work->data->n + i] - work->data->lA[i] <
+             -work->settings->rho * work->u[work->data->n + i] ) {
+                work->plsh->ind_lA[work->plsh->n_lA++] = i;     // lower-active
+                work->plsh->tableA[i] = cnt++;
+        }
+        else if ( work->data->uA[i] - work->z[work->data->n + i] <
+                  work->settings->rho * work->u[work->data->n + i] ) {
+                    work->plsh->ind_uA[work->plsh->n_uA++] = i; // upper-active
+                    work->plsh->tableA[i] = cnt++;
+        }
+        else {
+            work->plsh->ind_fA[work->plsh->n_fA++] = i;         // free
+            work->plsh->tableA[i] = -1;
+        }
+    }
+
+    // DEBUG
+    print_vec_int(work->plsh->ind_lA, work->plsh->n_lA, "ind_lA");
+    print_vec_int(work->plsh->ind_uA, work->plsh->n_uA, "ind_uA");
+    print_vec_int(work->plsh->ind_fA, work->plsh->n_fA, "ind_fA");
+    print_vec_int(work->plsh->tableA, work->data->m, "tableA");
+    c_print("\n");
+    print_vec(work->z + work->data->n, work->data->m, "Ax");
+    print_vec(work->data->uA, work->data->m, "uA");
+
+
+    // TODO: Form reduced KKT matrix
+
+
+    // Check whether the dual vars stored in rhs have correct signs
+
+    // If yes, update solution. Otherwise, keep the old solution.
+    return 0;
+}
 
 // Free polishing structure
 void free_polish(Polish *plsh) {
@@ -292,12 +422,12 @@ void free_polish(Polish *plsh) {
             c_free(plsh->P);
         if (plsh->bp)
             c_free(plsh->bp);
-        // if (plsh->ind_lA)
-        //     c_free(plsh->ind_lA);
-        // if (plsh->ind_uA)
-        //     c_free(plsh->ind_uA);
-        // if (plsh->ind_fA)
-        //     c_free(plsh->ind_fA);
+        if (plsh->ind_lA)
+            c_free(plsh->ind_lA);
+        if (plsh->ind_uA)
+            c_free(plsh->ind_uA);
+        if (plsh->ind_fA)
+            c_free(plsh->ind_fA);
         c_free(plsh);
     }
 }

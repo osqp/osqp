@@ -26,10 +26,11 @@ struct c_polish{
     c_float *Dinv;  /* inverse of diag matrix in LDL (as a vector)  */
     c_int *P;       /* permutation of KKT matrix for factorization  */
     c_float *bp;    /* workspace memory for solves                  */
-    // /* active constraints */
-    // c_int *ind_lA, n_lA=0;  // lower-active
-    // c_int *ind_uA, n_uA=0;  // upper-active
-    // c_int *ind_fA, n_fA=0;  // free
+    /* active constraints */
+    c_int *ind_lA, n_lA;  // lower-active
+    c_int *ind_uA, n_uA;  // upper-active
+    c_int *ind_fA, n_fA;  // free
+    c_int *tableA;        // table that maps rows of A to rows of Ared
 };
 
 //TODO: Add structure for KKT factorization (see scs)

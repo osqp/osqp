@@ -1,5 +1,4 @@
 #include "aux.h"
-#include "polish.h"
 #include "util.h"
 #include "osqp.h"
 
