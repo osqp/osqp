@@ -1,6 +1,6 @@
 #include "osqp.h"     // OSQP API
-#include "cs.h"       // CSC data structure
-#include "util.h"     // Utilities for testing
+// #include "cs.h"       // CSC data structure
+// #include "util.h"     // Utilities for testing
 #include "minunit.h"  // Basic testing script header
 
 #ifndef BASIC_QP2_MATRICES_H
@@ -16,14 +16,14 @@ static char * test_basic_qp2()
     c_int exitflag = 0;  // No errors
 
     // Problem settings
-    Settings * settings = c_malloc(sizeof(Settings));
+    Settings * settings = (Settings *)c_malloc(sizeof(Settings));
 
     // Structures
     Work * work;  // Workspace
     Data * data;  // Data
 
     // Populate data from matrices.h
-    data = c_malloc(sizeof(Data));
+    data = (Data *)c_malloc(sizeof(Data));
 
     data->n = basic_qp2_n;
     data->m = basic_qp2_m;
@@ -34,7 +34,6 @@ static char * test_basic_qp2()
     data->uA = basic_qp2_uA;
     data->lx = basic_qp2_lx;
     data->ux = basic_qp2_ux;
-    //TODO: FIX SEGMENTATION FAULT WHEN CREATING lx and ux
 
 
     c_print("\nTest basic QP problem 2\n");
@@ -68,9 +67,9 @@ static char * test_basic_qp2()
     osqp_solve(work);
 
     // Print solution
-    print_vec(work->solution->x, work->data->n, "x");
-    print_vec(work->solution->mu, work->data->n, "mu");
-    print_vec(work->solution->lambda, work->data->m, "lambda");
+    // print_vec(work->solution->x, work->data->n, "x");
+    // print_vec(work->solution->mu, work->data->n, "mu");
+    // print_vec(work->solution->lambda, work->data->m, "lambda");
 
     // Clean workspace
     osqp_cleanup(work);
@@ -81,6 +80,9 @@ static char * test_basic_qp2()
 
     // Cleanup
     c_free(settings);
+    c_free(data->A);
+    c_free(data->P);
+    c_free(data);
 
     return 0;
 }

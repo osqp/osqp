@@ -10,7 +10,7 @@
 
 /* Use customized constants -----------------------------------------------   */
 #define OSQP_NULL 0
-#define OSQP_INFTY = 1.0e20;  // Numerical value of infinity
+#define OSQP_INFTY 1.0e20;  // Numerical value of infinity
 
 
 /* Use customized number representation -----------------------------------   */

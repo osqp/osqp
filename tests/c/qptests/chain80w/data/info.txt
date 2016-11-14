@@ -1,0 +1,51 @@
+*******************************************************************************
+*                                                                             *
+*  ONLINE QP BENCHMARK COLLECTION                                             *
+*  http://homes.esat.kuleuven.be/~optec/software/onlineQP                     *
+*                                                                             *
+*  maintained by: Moritz Diehl and Hans Joachim Ferreau                       *
+*                                                                             *
+*******************************************************************************
+
+
+Benchmark problem:
+==================
+
+chain80w
+
+
+Dimensions:
+===========
+
+101 QPs,
+240 variables (bounded),
+709 constraints,
+0 equality constraints
+
+
+Description:
+============
+
+This test problem aims at regulating a chain of nine masses connected by 
+springs into a certain steady-state. One end of the chain is fixed on a 
+wall while the three velocity components of the other end are used as 
+control input. Besides fixed lower and upper input bounds, also state 
+constraints are included into the optimisation problem in order to ensure 
+that the chain does not hit a vertical wall close to the steady-state. 
+The prediction horizon of 16 seconds is divided into 80 control intervals. 
+The model equations are derived from linearisation of the nonlinear ODE 
+model (with 57 states) at the steady-state. Deviation from the 
+steady-state, the velocities of all masses and the control action are 
+penalised via the objective function.
+
+In order to obtain the QP series we simulated in a closed-loop manner 
+integrating the nonlinear ODE system to obtain the movements of the chain. 
+Starting at the steady-state, a strong perturbation was exerted to the 
+chain by moving the free end with a given constant velocity for 3 seconds. 
+Then the MPC controller took over and tried to return the chain into its 
+original steady-state while not hitting against the wall.
+
+
+*******************************************************************************
+* end of file                                                                 *
+*******************************************************************************

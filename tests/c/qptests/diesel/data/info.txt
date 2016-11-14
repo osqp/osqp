@@ -1,0 +1,49 @@
+*******************************************************************************
+*                                                                             *
+*  ONLINE QP BENCHMARK COLLECTION                                             *
+*  http://homes.esat.kuleuven.be/~optec/software/onlineQP                     *
+*                                                                             *
+*  maintained by: Moritz Diehl and Hans Joachim Ferreau                       *
+*                                                                             *
+*******************************************************************************
+
+
+Benchmark problem:
+==================
+
+diesel
+
+
+Dimensions:
+===========
+
+600 QPs,
+20 variables (bounded),
+20 constraints,
+0 equality constraints
+
+
+
+Description:
+============
+
+This test problem aims at controlling a real-world direct injection turbo 
+charged Diesel engine. The data has been obtained by closed-loop simulations 
+using a linear model linearised for an operating area with engine speeds of 
+2100-2500 rpm and injected fuel mass of 0-30 mg/stroke. The engine speed as 
+well as the amount of injected fuel is kept constant at 2300 rpm and 
+15 mg/stroke, respectively and the controller shall track two step changes 
+of the setpoints for the mass air flow (MAF) and the intake manifold pressure 
+(MAP).
+
+Inputs are the slew rates of the exhaust gas recirculation (EGR) valve and 
+the position of the variable geometry turbocharger (VGT). Lower and upper 
+bounds on these slew rates as well as on the absolute value of the EGR valve 
+and the VGT position are imposed. A control horizon of 10 intervals (each of 
+50ms length) and a prediction horizon of 4s had been chosen for a sampling 
+rate of 50ms.
+
+
+*******************************************************************************
+* end of file                                                                 *
+*******************************************************************************
