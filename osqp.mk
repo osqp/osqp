@@ -30,6 +30,9 @@ LINSYS = lin_sys
 DIRSRC = $(LINSYS)/direct
 DIRSRCEXT = $(DIRSRC)/external
 
+# Tests folders
+TESTSDIR = tests
+
 
 # Check which operative systems we are running
 #----------------------------------------------

@@ -9,7 +9,11 @@ TARGETS = $(OUT)/osqp_demo_direct
 
 # Tests
 TEST_TARGETS = $(OUT)/osqp_tester_direct  # Add tests for linear algebra functions
-TEST_INCLUDES = -Itests/c
+TEST_INCLUDES = -I$(TESTSDIR)/c
+# OnlineQP Lib tests
+QPTESTSDIR = $(TESTSDIR)/c/qptests
+# TEST_OBJECTS = $(QPTESTSDIR)/chain80w/chain80w.o
+TEST_OBJECTS = $(QPTESTSDIR)/diesel/diesel.o
 
 # Define objects to compile
 OSQP_OBJECTS = src/osqp.o src/util.o src/aux.o src/cs.o  src/lin_alg.o
@@ -37,20 +41,20 @@ default: $(TARGETS) $(OUT)/libosqpdir.a
 
 # For every object file file compile relative .c file in src/
 # -c flag tells the compiler to stop after the compilation phase without linking
-%.o: src/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+# %.o: src/%.c
+#	 $(CC) $(CFLAGS) -c $< -o $@
 
 # Define OSQP objects dependencies
-src/osqp.o: $(SRC_FILES) $(INC_FILES)
-src/util.o	: src/util.c include/util.h
-src/lin_alg.o: src/lin_alg.c  include/lin_alg.h
+# src/osqp.o: $(SRC_FILES) $(INC_FILES)
+# src/util.o	: src/util.c include/util.h
+# src/lin_alg.o: src/lin_alg.c  include/lin_alg.h
 # src/lin_sys.o: src/lin_sys.c  include/lin_sys.h
-src/cs.o: src/cs.c include/cs.h
+# src/cs.o: src/cs.c include/cs.h
 
 
 # Define linear systems solvers objects and dependencies
 # Direct
-$(DIRSRC)/private.o: $(DIRSRC)/private.c  $(DIRSRC)/private.h
+# $(DIRSRC)/private.o: $(DIRSRC)/private.c  $(DIRSRC)/private.h
 
 
 # Build osqp library (direct method)
@@ -71,14 +75,20 @@ test: $(TEST_TARGETS)
 	@echo "To try the tests, type '$(OUT)/osqp_tester_direct'"
 	@echo "********************************************************************"
 
-$(OUT)/osqp_tester_direct: tests/c/osqp_tester_direct.c $(OUT)/libosqpdir.a
+# $(QPTESTSDIR)/chain80w/chain80w.o: $(QPTESTSDIR)/chain80w/chain80w.c $(QPTESTSDIR)/chain80w/chain80w.h
+# 	@echo "Vaffa!"
+
+$(OUT)/osqp_tester_direct: tests/c/osqp_tester_direct.c $(OUT)/libosqpdir.a $(TEST_OBJECTS)
 	# cd tests/c/; julia generate_tests.jl
 	$(CC) $(CFLAGS) $(TEST_INCLUDES) $^ -o $@  $(LDFLAGS)
+
+
 
 
 .PHONY: clean
 clean:
 	@rm -rf $(TARGETS) $(OSQP_OBJECTS) $(SUITESPARSE_OBJS) $(LINSYS)/*.o $(DIRSRC)/*.o
 	@rm -rf $(OUT)/*.dSYM
+	@rm -rf $(TEST_OBJECTS)
 purge: clean
 	@rm -rf $(OUT)
