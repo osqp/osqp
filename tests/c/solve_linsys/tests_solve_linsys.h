@@ -23,7 +23,7 @@ c_int test_form_KKT(){
 
 
     // Construct KKT matrix
-    KKT = form_KKT(t6_P, t6_A, t6_rho);
+    KKT = form_KKT(t6_P, t6_A, t6_rho, 1);
 
     // DEBUG
     // KKTdns =  csc_to_dns(KKT);

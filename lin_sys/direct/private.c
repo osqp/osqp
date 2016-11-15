@@ -1,10 +1,6 @@
 #include "private.h"
 #include "util.h"
 
-// TODO: Add functions for defining factorizing and solving linear systems with direct methods
-
-// form_KKT, factorize... (see scs)
-
 
 
 // Free LDL Factorization structure
@@ -30,11 +26,12 @@ void free_priv(Priv *p) {
 Arguments
 ---------
 P : cost matrix (already just upper triangular part)
-A: linear equalities matrix
+A: linear constraint matrix
 rho: ADMM step
+rho_inv:
 N.B. Only the upper triangular part is stuffed!
 */
-csc * form_KKT(const csc * P, const  csc * A, c_float rho){
+csc * form_KKT(const csc * P, const  csc * A, c_float rho, c_int rho_inv){
     c_int nKKT, nnzKKTmax; // Size, number of nonzeros and max number of nonzeros in KKT matrix
     csc *KKT_trip, *KKT;           // KKT matrix in triplet format and CSC format
     c_int ptr, i, j; // Counters for elements (i,j) and index pointer
@@ -115,12 +112,23 @@ csc * form_KKT(const csc * P, const  csc * A, c_float rho){
         }
     }
 
-    // /* -1./rho I at bottom right */
-    for (j = 0; j < A->m; j++) {
-        KKT_trip->i[z_KKT] = j + P->n;
-        KKT_trip->p[z_KKT] = j + P->n;
-        KKT_trip->x[z_KKT] = -1./rho;
-        z_KKT++;
+    // rho_inv = 1:  -1/rho*I at bottom right
+    // rho_inv = 0:     rho*I at bottom right
+    if (rho_inv > 0) {
+        for (j = 0; j < A->m; j++) {
+            KKT_trip->i[z_KKT] = j + P->n;
+            KKT_trip->p[z_KKT] = j + P->n;
+            KKT_trip->x[z_KKT] = -1./rho;
+            z_KKT++;
+        }
+    }
+    else {
+        for (j = 0; j < A->m; j++) {
+            KKT_trip->i[z_KKT] = j + P->n;
+            KKT_trip->p[z_KKT] = j + P->n;
+            KKT_trip->x[z_KKT] = -rho;
+            z_KKT++;
+        }
     }
 
 
@@ -235,226 +243,6 @@ c_int factorize(csc *A, Priv *p) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*  Reduced KKT with regularization delta
- *             [ P + delta*I   Ared'  ]
- *  KKT_red =  [    Ared     -delta*I ]
- */
-void form_redKKT(Work * work) {
-    c_int ptr, i, j;
-    c_int z_P=0, z_KKT=0;   // Counter for total number of elements in P and in KKT
-
-    // Set (1,1) block of reduced KKT matrix: P + delta I
-    for (j = 0; j < work->data->n; j++) {    // cycle over columns
-
-        // No elements in column j => add diagonal element delta
-        if (work->data->P->p[j] == work->data->P->p[j+1]) {
-            work->plsh->KKT_trip->i[z_KKT] = j;
-            work->plsh->KKT_trip->p[z_KKT] = j;
-            work->plsh->KKT_trip->x[z_KKT++] = work->settings->delta;
-        }
-
-        for (ptr = work->data->P->p[j]; ptr < work->data->P->p[j + 1]; ptr++) {
-
-            // Get current row
-            i = work->data->P->i[ptr];
-
-            // Add element of P
-            work->plsh->KKT_trip->i[z_KKT] = i;
-            work->plsh->KKT_trip->p[z_KKT] = j;
-            work->plsh->KKT_trip->x[z_KKT] = work->data->P->x[z_P];
-            if (i == j) { // P has a diagonal element, add rho
-                work->plsh->KKT_trip->x[z_KKT] += work->settings->delta;
-            }
-            z_P++;
-            z_KKT++;
-
-            // Add diagonal rho in case
-            if ((i < j) && // Diagonal element not reached
-                (ptr + 1 == work->data->P->p[j+1])) { // last element of column j
-
-                // Add diagonal element rho
-                work->plsh->KKT_trip->i[z_KKT] = j;
-                work->plsh->KKT_trip->p[z_KKT] = j;
-                work->plsh->KKT_trip->x[z_KKT] = work->settings->delta;
-                z_KKT++;
-            }
-        }
-    }
-
-    // Set (1,2) block to Ared'
-    for (j = 0; j < work->data->n; j++) {  // Cycle over columns of Ared
-        for (ptr = work->data->A->p[j]; ptr < work->data->A->p[j + 1]; ptr++) {
-            if (work->plsh->tableA[work->data->A->i[ptr]] != -1) {
-                // if row of A should be added to Ared
-                work->plsh->KKT_trip->p[z_KKT] = work->data->P->m
-                    + work->plsh->tableA[work->data->A->i[ptr]];
-                work->plsh->KKT_trip->i[z_KKT] = j;
-                work->plsh->KKT_trip->x[z_KKT++] = work->data->A->x[ptr];
-            }
-        }
-    }
-
-    // Set (2,2) block to -delta*I
-    for (j = 0; j < work->plsh->n_lA + work->plsh->n_uA; j++) {
-        work->plsh->KKT_trip->i[z_KKT] = j + work->data->n;
-        work->plsh->KKT_trip->p[z_KKT] = j + work->data->n;
-        work->plsh->KKT_trip->x[z_KKT++] = -work->settings->delta;
-    }
-
-}
-
-
-
-// Print int array
-// TODO: This function is only for debugging. To be removed.
-void print_vec_int(c_int * x, c_int n, char *name) {
-    c_print("%s = [", name);
-    for(c_int i=0; i<n; i++) {
-        c_print(" %d ", x[i]);
-    }
-    c_print("]\n");
-}
-
-
-// Initialize polishing structure
-Polish *init_polish(const csc * P, const csc * A) {
-    // Allocate memory for polishing structure
-    Polish * plsh = c_calloc(1, sizeof(Polish));
-
-    // Dimensions of matrices
-    c_int m_red = c_min(A->m, A->n);   // upper bound on number of rows in reduced A
-    c_int nKKT = m_red + A->n;  // reduced KKT ==> [P Ared'; Ared 0]
-
-    // Maximum number of nnz elements in L and KKT
-    c_int Ared_nz = c_min(A->n * m_red, A->nzmax);
-    c_int Lred_nz = P->nzmax + Ared_nz;
-    c_int KKTred_nz = Lred_nz + nKKT;
-
-    // Allocate memory for storing reduced KKT in triplet format
-    plsh->KKT_trip = csc_spalloc(nKKT, nKKT, KKTred_nz, 1, 1);
-
-    // Allocate memory for storing reduced KKT in CSC format
-    plsh->KKT = csc_spalloc(nKKT, nKKT, KKTred_nz, 1, 0);
-
-    // Allocate memory for storing LDL factorization of reduced KKT
-    plsh->L = csc_spalloc(nKKT, nKKT, Lred_nz, 1, 0); // Lower triang matrix
-    plsh->Dinv = c_malloc(sizeof(c_float) * nKKT);    // Inverse of diag matrix
-    plsh->P = c_malloc(sizeof(c_int) * nKKT);         // Permutation vector
-    plsh->bp = c_malloc(sizeof(c_float) * nKKT);    // Working vector
-
-    // Allocate memory for active constraints
-    plsh->n_lA = 0;
-    plsh->n_uA = 0;
-    plsh->n_fA = 0;
-    plsh->ind_lA = c_calloc(1, A->m * sizeof(c_int));
-    plsh->ind_uA = c_calloc(1, A->m * sizeof(c_int));
-    plsh->ind_fA = c_calloc(1, A->m * sizeof(c_int));
-    plsh->tableA = c_calloc(1, A->m * sizeof(c_int));
-
-    return plsh;
-}
-
-
-c_int solve_polish(Work *work) {
-    c_int i, cnt=0;
-
-    // Guess which linear constraints are lower-active, upper-active and free
-    for (i = 0; i < work->data->m; i++) {
-        if ( work->z[work->data->n + i] - work->data->lA[i] <
-             -work->settings->rho * work->u[work->data->n + i] ) {
-                work->plsh->ind_lA[work->plsh->n_lA++] = i;     // lower-active
-                work->plsh->tableA[i] = cnt++;
-        }
-        else if ( work->data->uA[i] - work->z[work->data->n + i] <
-                  work->settings->rho * work->u[work->data->n + i] ) {
-                    work->plsh->ind_uA[work->plsh->n_uA++] = i; // upper-active
-                    work->plsh->tableA[i] = cnt++;
-        }
-        else {
-            work->plsh->ind_fA[work->plsh->n_fA++] = i;         // free
-            work->plsh->tableA[i] = -1;
-        }
-    }
-
-    // DEBUG
-    print_vec_int(work->plsh->ind_lA, work->plsh->n_lA, "ind_lA");
-    print_vec_int(work->plsh->ind_uA, work->plsh->n_uA, "ind_uA");
-    print_vec_int(work->plsh->ind_fA, work->plsh->n_fA, "ind_fA");
-    print_vec_int(work->plsh->tableA, work->data->m, "tableA");
-    c_print("\n");
-    print_vec(work->z + work->data->n, work->data->m, "Ax");
-    print_vec(work->data->uA, work->data->m, "uA");
-
-
-    // TODO: Form reduced KKT matrix
-
-
-    // Check whether the dual vars stored in rhs have correct signs
-
-    // If yes, update solution. Otherwise, keep the old solution.
-    return 0;
-}
-
-// Free polishing structure
-void free_polish(Polish *plsh) {
-    if (plsh) {
-        if (plsh->KKT_trip)
-            csc_spfree(plsh->KKT_trip);
-        if (plsh->KKT)
-            csc_spfree(plsh->KKT);
-        if (plsh->Dinv)
-            c_free(plsh->Dinv);
-        if (plsh->P)
-            c_free(plsh->P);
-        if (plsh->bp)
-            c_free(plsh->bp);
-        if (plsh->ind_lA)
-            c_free(plsh->ind_lA);
-        if (plsh->ind_uA)
-            c_free(plsh->ind_uA);
-        if (plsh->ind_fA)
-            c_free(plsh->ind_fA);
-        c_free(plsh);
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Initialize LDL Factorization structure
 Priv *init_priv(const csc * P, const csc * A, const Settings *settings){
     // Define Variables
@@ -485,7 +273,7 @@ Priv *init_priv(const csc * P, const csc * A, const Settings *settings){
     p->total_solve_time = 0.0;
 
     // Form KKT matrix
-    KKT = form_KKT(P, A, settings->rho);
+    KKT = form_KKT(P, A, settings->rho, 1);
 
     // Factorize the KKT matrix
     // TODO: Store factorization timings
@@ -544,4 +332,105 @@ c_int solve_lin_sys(const Settings *settings, Priv *p, c_float *b) {
     /* Ax = b with solution stored in b */
     LDLSolve(b, b, p->L, p->Dinv, p->P, p->bp);
     return 0;
+}
+
+
+void polish(Work *work){
+    c_int j, ptr, mred=0, Ared_nnz=0;
+    Priv *plsh = c_calloc(1, sizeof(Priv));
+
+    // Initialize counters for active/inactive constraints
+    work->act->n_lAct = 0;
+    work->act->n_uAct = 0;
+    work->act->n_free = 0;
+    // Guess which linear constraints are lower-active, upper-active and free
+    for (j = 0; j < work->data->m; j++) {
+        if ( work->z[work->data->n + j] - work->data->lA[j] <
+             -work->settings->rho * work->u[work->data->n + j] ) {
+                work->act->ind_lAct[work->act->n_lAct++] = j;     // lower-active
+                work->act->A2Ared[j] = mred++;
+        }
+        else if ( work->data->uA[j] - work->z[work->data->n + j] <
+                  work->settings->rho * work->u[work->data->n + j] ) {
+                    work->act->ind_uAct[work->act->n_uAct++] = j; // upper-active
+                    work->act->A2Ared[j] = mred++;
+        }
+        else {
+            work->act->ind_free[work->act->n_free++] = j;        // free
+            work->act->A2Ared[j] = -1;
+        }
+    }
+    work->act->lambda_red = c_malloc(mred * sizeof(c_float));
+    c_print("mred = %d\n", mred);
+
+    // Count number of elements in Ared
+    for (j = 0; j < work->data->A->nzmax; j++) {
+        if (work->act->A2Ared[work->data->A->i[j]] != -1)
+            Ared_nnz++;
+    }
+    // Form Ared
+    csc *Ared = csc_spalloc(mred, work->data->n, Ared_nnz, 1, 0);
+    Ared_nnz = 0;
+    for (j = 0; j < work->data->n; j++) {  // Cycle over columns of A
+        Ared->p[j] = Ared_nnz;
+        for (ptr = work->data->A->p[j]; ptr < work->data->A->p[j + 1]; ptr++) {
+            if (work->act->A2Ared[work->data->A->i[ptr]] != -1) {
+                // if row of A should be added to Ared
+                Ared->i[Ared_nnz] = work->act->A2Ared[work->data->A->i[ptr]];
+                Ared->x[Ared_nnz++] = work->data->A->x[ptr];
+            }
+        }
+    }
+    Ared->p[work->data->n] = Ared_nnz;
+
+    // Form and factorize reduced KKT
+    csc *KKTred= form_KKT(work->data->P, Ared, work->settings->delta, 0);
+    c_int n_KKTred = work->data->n + mred;
+    plsh->L = csc_spalloc(n_KKTred, n_KKTred, 1, 0, 0);
+    plsh->Dinv = c_malloc(sizeof(c_float) * n_KKTred);
+    plsh->P = c_malloc(sizeof(c_int) * n_KKTred);
+    plsh->bp = c_malloc(sizeof(c_float) * n_KKTred);
+    if (factorize(KKTred, plsh) < 0) {
+        free_priv(plsh);
+    }
+
+    // Form the rhs of the reduced KKT linear system
+    c_float *rhs = c_malloc(sizeof(c_float) * n_KKTred);
+    for (j = 0; j < work->data->n; j++) {
+        rhs[j] = -work->data->q[j];
+    }
+    for (j = 0; j < work->act->n_lAct; j++) {
+        rhs[work->data->n + j] = work->data->lA[work->act->ind_lAct[j]];
+    }
+    for (j = 0; j < work->act->n_uAct; j++) {
+        rhs[work->data->n + work->act->n_lAct + j] =
+            work->data->uA[work->act->ind_uAct[j]];
+    }
+
+    // Solve the reduced KKT system
+    LDLSolve(rhs, rhs, plsh->L, plsh->Dinv, plsh->P, plsh->bp);
+    prea_vec_copy(rhs, work->act->x, work->data->n);
+    prea_vec_copy(rhs + work->data->n, work->act->lambda_red, mred);
+
+    // Check if the obtained solution is primal/dual feasible
+    work->act->polish_success = 1;
+    for (j = 0; j < work->act->n_lAct; j++) {
+        if (work->act->x[work->act->ind_lAct[j]] >= POLISH_TOL) {
+            work->act->polish_success = 0;
+            break;
+        }
+    }
+    for (j = 0; j < work->act->n_uAct; j++) {
+        if (work->act->x[work->act->ind_uAct[j]] <= -POLISH_TOL) {
+            work->act->polish_success = 0;
+            break;
+        }
+    }
+    // TODO: Check if Ax is between the bound [lb, ub]
+
+    // Memory clean-up
+    csc_spfree(Ared);
+    csc_spfree(KKTred);
+    free_priv(plsh);
+    c_free(rhs);
 }

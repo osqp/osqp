@@ -77,8 +77,14 @@ Work * osqp_setup(const Data * data, Settings *settings){
     // Initialize linear system solver private structure
     work->priv = init_priv(work->data->P, work->data->A, work->settings);
 
-    // Initialize polishing structure
-    work->plsh = init_polish(work->data->P, work->data->A);
+    // Initialize active constraints structure
+    work->act = c_malloc(sizeof(Active));
+    work->act->ind_lAct = c_malloc(work->data->m * sizeof(c_int));
+    work->act->ind_uAct = c_malloc(work->data->m * sizeof(c_int));
+    work->act->ind_free = c_malloc(work->data->m * sizeof(c_int));
+    work->act->A2Ared = c_malloc(work->data->m * sizeof(c_int));
+    work->act->lambda_red = OSQP_NULL;
+    work->act->x = c_malloc(work->data->n * sizeof(c_float));
 
     // Allocate scaling
     if (settings->normalize){
@@ -198,8 +204,8 @@ c_int osqp_solve(Work * work){
     work->info->solve_time = toc(work->timer);
     #endif
 
-    // // TODO: Polish the obtained solution
-    solve_polish(work);
+    // Polish the obtained solution
+    polish(work);
 
     /* Print final footer */
     #if PRINTLEVEL > 0
@@ -243,8 +249,15 @@ c_int osqp_cleanup(Work * work){
     // Free private structure for linear system solver_solution
     free_priv(work->priv);
 
-    // Free polishing structure
-    free_polish(work->plsh);
+    // Free active constraints structure
+    c_free(work->act->ind_lAct);
+    c_free(work->act->ind_uAct);
+    c_free(work->act->ind_free);
+    c_free(work->act->A2Ared);
+    c_free(work->act->x);
+    if (work->act->lambda_red)
+        c_free(work->act->lambda_red);
+    c_free(work->act);
 
     // Free work Variables
     c_free(work->x);

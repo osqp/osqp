@@ -134,6 +134,7 @@ Settings * copy_settings(Settings * settings){
     new->alpha = settings->alpha;
     new->verbose = settings->verbose;
     new->warm_start = settings->warm_start;
+    new->delta = settings->delta;
 
     return new;
 }
@@ -331,6 +332,16 @@ void print_dns_matrix(c_float * M, c_int m, c_int n, char *name)
 /* Print vector */
 void print_vec(c_float * V, c_int n, char *name){
         print_dns_matrix(V, 1, n, name);
+}
+
+
+// Print int array
+void print_vec_int(c_int * x, c_int n, char *name) {
+    c_print("%s = [", name);
+    for(c_int i=0; i<n; i++) {
+        c_print(" %d ", x[i]);
+    }
+    c_print("]\n");
 }
 
 

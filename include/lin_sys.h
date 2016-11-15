@@ -24,14 +24,8 @@ c_int solve_lin_sys(const Settings *settings, Priv *p, c_float *b);
 void free_priv(Priv *p);
 
 
-// Initialize workspace for polishing.
-Polish *init_polish(const csc * P, const csc * A);
-
-/*  Solves KKT * x = b for x, and stores result in b */
-c_int solve_polish(Work *work);
-
-// Free polishing workspace
-void free_polish(Polish *plsh);
+// Solution polishing: Solve equality constrained QP with assumed active constr.
+void polish(Work *work);
 
 
 // TODO: Remove these functions
@@ -39,6 +33,6 @@ void free_polish(Polish *plsh);
 Priv *set_priv(csc *L, c_float *D, c_int *P);
 
 // Form KKT matrix
-csc * form_KKT(const csc * P, const  csc * A, c_float rho);
+csc * form_KKT(const csc * P, const  csc * A, c_float rho, c_int rho_inv);
 
 #endif
