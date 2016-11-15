@@ -16,7 +16,6 @@ def gen_chain80w_test():
     q = np.loadtxt(direct+'g.oqp')
 
     # Get only first elements of lbA and q
-
     lA = lA[0, :]
     uA = uA[0, :]
     q = q[0, :]
@@ -27,11 +26,7 @@ def gen_chain80w_test():
     # P = spspa.eye(A.shape[1]).tocsc()
     # q = sp.rand(P.shape[0])
 
-    # Write bounds as +/0 infinity
-    lx = -1*np.inf*np.ones(P.shape[0])
-    ux = np.inf*np.ones(P.shape[0])
-
     # Name of the problem
     problem_name = "chain80w"
 
-    cu.generate_code(P, q, A, lA, uA, lx, ux, problem_name)
+    cu.generate_code(P, q, A, lA, uA, problem_name)

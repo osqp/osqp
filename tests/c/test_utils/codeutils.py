@@ -161,7 +161,7 @@ def clean_mat(f, name, *args):
     f.write("%s);\n" % name)
 
 
-def generate_code(P, q, A, lA, uA, lx, ux, problem_name):
+def generate_code(P, q, A, lA, uA, problem_name):
 
     # Get problem dimension
     n = P.shape[0]
@@ -216,8 +216,6 @@ def generate_code(P, q, A, lA, uA, lx, ux, problem_name):
     f.write("// Problem vectors\n")
     write_vec_float(f, lA, "lA", "data")
     write_vec_float(f, uA, "uA", "data")
-    write_vec_float(f, lx, "lx", "data")
-    write_vec_float(f, ux, "ux", "data")
     write_vec_float(f, q, "q", "data")
     f.write("\n")
 
@@ -237,8 +235,6 @@ def generate_code(P, q, A, lA, uA, lx, ux, problem_name):
     f.write("// Clean vectors\n")
     clean_vec(f, "lA", "data")
     clean_vec(f, "uA", "data")
-    clean_vec(f, "lx", "data")
-    clean_vec(f, "ux", "data")
     clean_vec(f, "q", "data")
     f.write("\n")
 

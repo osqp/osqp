@@ -13,8 +13,7 @@ TEST_INCLUDES = -I$(TESTSDIR)/c
 # OnlineQP Lib tests
 QPTESTSDIR = $(TESTSDIR)/c/qptests
 # TEST_OBJECTS = $(QPTESTSDIR)/chain80w/chain80w.o
-# TEST_OBJECTS = $(QPTESTSDIR)/diesel/diesel.o
-# TEST_OBJECTS = 
+TEST_OBJECTS = $(QPTESTSDIR)/diesel/diesel.o
 
 # Define objects to compile
 OSQP_OBJECTS = src/osqp.o src/util.o src/aux.o src/cs.o  src/lin_alg.o

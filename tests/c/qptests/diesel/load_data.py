@@ -2,6 +2,7 @@
 import numpy as np
 import scipy.sparse as spspa
 import test_utils.codeutils as cu
+import ipdb
 
 
 def gen_diesel_test():
@@ -9,16 +10,15 @@ def gen_diesel_test():
     direct = "qptests/diesel/data/"
     # Load data (convert to sparse)
     A = spspa.csc_matrix(np.loadtxt(direct + 'A.oqp'))
+    A = spspa.vstack([A, spspa.eye(A.shape[1])]).tocsc()
     lA = np.loadtxt(direct + 'lbA.oqp')
     uA = np.loadtxt(direct + 'ubA.oqp')
-    lx = np.loadtxt(direct + 'lb.oqp')
-    ux = np.loadtxt(direct + 'ub.oqp')
+    lA = np.vstack([lA, np.loadtxt(direct + 'lb.oqp')])
+    uA = np.vstack([uA, np.loadtxt(direct + 'ub.oqp')])
     P = spspa.csc_matrix(np.loadtxt(direct + 'H.oqp'))
     q = np.loadtxt(direct + 'g.oqp')
 
     # Get only first elements of lbA and q
-    lx = lx[0, :]
-    ux = ux[0, :]
     lA = lA[0, :]
     uA = uA[0, :]
     q = q[0, :]
@@ -36,4 +36,4 @@ def gen_diesel_test():
     # Name of the problem
     problem_name = "diesel"
 
-    cu.generate_code(P, q, A, lA, uA, lx, ux, problem_name)
+    cu.generate_code(P, q, A, lA, uA, problem_name)
