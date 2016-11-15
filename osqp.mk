@@ -95,7 +95,7 @@ endif
 # 1: only final info
 # 2: progress print per iteration
 # 3: debug level
-PRINTLEVEL = 2
+PRINTLEVEL = 3
 OPT_FLAGS = -DPRINTLEVEL=$(PRINTLEVEL)
 
 # Set Profiling

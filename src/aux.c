@@ -12,7 +12,7 @@
 void cold_start(Work *work) {
     memset(work->x, 0, (work->data->n + work->data->m) * sizeof(c_float));
     memset(work->z, 0, (work->data->n + work->data->m) * sizeof(c_float));
-    memset(work->u, 0, (work->data->n + work->data->m) * sizeof(c_float));
+    memset(work->u, 0, (work->data->m) * sizeof(c_float));
 }
 
 
@@ -24,12 +24,11 @@ void compute_rhs(Work *work){
     c_int i; // Index
     for (i=0; i < work->data->n; i++){
         // Cycle over part related to original x variables
-        work->x[i] = work->settings->rho * (work->z[i] - work->u[i])
-                       - work->data->q[i];
+        work->x[i] = work->settings->rho * work->z[i] - work->data->q[i];
     }
     for (i = work->data->n; i < work->data->n + work->data->m; i++){
         // Cycle over dual variable within first step (nu)
-        work->x[i] = work->z[i] - work->u[i];
+        work->x[i] = work->z[i] - work->u[i - work->data->n];
     }
 
 }
@@ -44,7 +43,7 @@ void compute_rhs(Work *work){
 void update_x(Work *work){
     c_int i; // Index
     for (i = work->data->n; i < work->data->n + work->data->m; i++){
-        work->x[i] = 1./work->settings->rho * work->x[i] + work->z[i] - work->u[i];
+        work->x[i] = 1./work->settings->rho * work->x[i] + work->z[i] - work->u[i - work->data->n];
         //TODO: Remove 1/rho operation (store 1/rho during setup)
     }
 }
@@ -56,18 +55,18 @@ void update_x(Work *work){
  */
 void project_x(Work *work){
     c_int i;
+
     for (i = 0; i < work->data->n; i++){
-        // Part related to original x variables
-        work->z[i] = c_min(c_max(work->settings->alpha * work->x[i] +
-                     (1.0 - work->settings->alpha) * work->z_prev[i] +
-                     work->u[i], work->data->lx[i]), work->data->ux[i]);
+        // Part related to original x variables (no projection)
+        work->z[i] = work->settings->alpha * work->x[i] +
+                     (1.0 - work->settings->alpha) * work->z_prev[i];
     }
 
     for (i = work->data->n; i < work->data->n + work->data->m; i++){
         // Part related to slack variables
         work->z[i] = c_min(c_max(work->settings->alpha * work->x[i] +
                      (1.0 - work->settings->alpha) * work->z_prev[i] +
-                     work->u[i], work->data->lA[i - work->data->n]), work->data->uA[i - work->data->n]);
+                     work->u[i - work->data->n], work->data->lA[i - work->data->n]), work->data->uA[i - work->data->n]);
     }
 
 }
@@ -78,12 +77,11 @@ void project_x(Work *work){
  */
 void update_u(Work *work){
     c_int i; // Index
-    for (i = 0; i < work->data->n + work->data->m; i++){
-        work->u[i] += work->settings->alpha * work->x[i] +
+    for (i = work->data->n; i < work->data->n + work->data->m; i++){
+        work->u[i - work->data->n] += work->settings->alpha * work->x[i] +
                       (1.0 - work->settings->alpha) * work->z_prev[i] -
                       work->z[i];
     }
-
 }
 
 /**
@@ -169,13 +167,13 @@ void update_status_string(Info *info){
 c_int residuals_check(Work *work){
     c_float eps_pri, eps_dua;
     c_int exitflag = 0;
-    //TODO: Remove sqrt(n+m) computation (precompute at the beginning)
+    //TODO: REDEFINE BETTER TERMINATION CONDITIONS
 
     eps_pri = c_sqrt(work->data->n + work->data->m) * work->settings->eps_abs +
               work->settings->eps_rel * c_max(vec_norm2(work->x, work->data->n + work->data->m),
                                               vec_norm2(work->z, work->data->n + work->data->m));
-    eps_dua = c_sqrt(work->data->n + work->data->m) * work->settings->eps_abs +
-              work->settings->eps_rel * work->settings->rho * vec_norm2(work->u, work->data->n + work->data->m);
+    eps_dua = c_sqrt(work->data->m) * work->settings->eps_abs +
+              work->settings->eps_rel * work->settings->rho * vec_norm2(work->u, work->data->m);
 
     if (work->info->pri_res < eps_pri && work->info->dua_res < eps_dua) exitflag = 1;
 

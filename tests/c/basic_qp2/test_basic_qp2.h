@@ -32,8 +32,8 @@ static char * test_basic_qp2()
     data->A = csc_matrix(data->m, data->n, basic_qp2_A_nnz, basic_qp2_A_x, basic_qp2_A_i, basic_qp2_A_p);
     data->lA = basic_qp2_lA;
     data->uA = basic_qp2_uA;
-    data->lx = basic_qp2_lx;
-    data->ux = basic_qp2_ux;
+    // data->lx = basic_qp2_lx;
+    // data->ux = basic_qp2_ux;
 
 
     c_print("\nTest basic QP problem 2\n");
@@ -67,9 +67,10 @@ static char * test_basic_qp2()
     osqp_solve(work);
 
     // Print solution
-    // print_vec(work->solution->x, work->data->n, "x");
-    // print_vec(work->solution->mu, work->data->n, "mu");
-    // print_vec(work->solution->lambda, work->data->m, "lambda");
+    #if PRINTLEVEL > 2
+    print_vec(work->solution->x, work->data->n, "x");
+    print_vec(work->solution->lambda, work->data->m, "lambda");
+    #endif
 
     // Clean workspace
     osqp_cleanup(work);

@@ -26,8 +26,6 @@ struct OSQP_PROBLEM_DATA {
         /* these can change for multiple runs for the same call to osqp_init */
         c_float *q; /* dense array for linear part of cost function (size n) */
         c_float *lA, *uA; /* dense arrays for bounds lA, uA (size m)*/
-        c_float *lx, *ux; /* dense arrays for bounds lx, ux (size n)*/
-
 };
 
 
@@ -63,7 +61,7 @@ struct OSQP_WORK {
         Settings *settings; // Problem settings
         Scaling *scaling; // Scaling Vectors
         Solution *solution; // Problem Solution
-        Info * info; // Solver information
+        Info *info; // Solver information
 
         #if PROFILING > 0
         Timer * timer;  // Timer object
@@ -78,7 +76,6 @@ struct OSQP_SCALING {
 /* Primal and dual solutions */
 struct OSQP_SOLUTION {
         c_float *x;       // Primal solution
-        c_float *mu;      // Lagrange multiplier associated to lx <= x <= ux
         c_float *lambda;  // Lagrange multiplier associated to lA <= Ax <= uA
 };
 

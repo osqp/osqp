@@ -58,8 +58,6 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->data->A = copy_csc_mat(data->A);         // Linear constraints matrix
     work->data->lA = vec_copy(data->lA, data->m);  // Lower bounds on constraints
     work->data->uA = vec_copy(data->uA, data->m);  // Upper bounds on constraints
-    work->data->lx = vec_copy(data->lx, data->n);  // lower bounds on variables
-    work->data->ux = vec_copy(data->ux, data->n);  // upper bounds on variables
 
     /* Allocate internal solver variables (ADMM steps)
      *
@@ -67,7 +65,7 @@ Work * osqp_setup(const Data * data, Settings *settings){
      */
     work->x = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
     work->z = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
-    work->u = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
+    work->u = c_malloc(work->data->m * sizeof(c_float));
     work->z_prev = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
 
     // TODO: Add Validaiton for settings
@@ -89,8 +87,6 @@ Work * osqp_setup(const Data * data, Settings *settings){
     // Allocate solution
     work->solution = c_calloc(1, sizeof(Solution));
     work->solution->x = c_calloc(1, work->data->n * sizeof(c_float)); // Allocate primal solution
-    // work->solution->u = c_calloc(1, (work->data->n + work->data->m) * sizeof(c_float)); // Allocate dual solution
-    work->solution->mu = c_calloc(1, work->data->n * sizeof(c_float));
     work->solution->lambda = c_calloc(1, work->data->m * sizeof(c_float));
 
 
@@ -150,18 +146,44 @@ c_int osqp_solve(Work * work){
         // Update z_prev (preallocated, no malloc)
         prea_vec_copy(work->z, work->z_prev, work->data->n + work->data->m);
 
+
+        // // DEBUG
+        // #if PRINTLEVEL > 2
+        // print_vec(work->z_prev, work->data->n + work->data->m, "z_prev");
+        // #endif
+
         /* ADMM STEPS */
         /* First step: x_{k+1} */
         compute_rhs(work);
+        // // DEBUG
+        // #if PRINTLEVEL > 2
+        // print_vec(work->x, work->data->n + work->data->m, "rhs");
+        // #endif
+
         solve_lin_sys(work->settings, work->priv, work->x);
         update_x(work);
+
+        // // DEBUG
+        // #if PRINTLEVEL > 2
+        // print_vec(work->x, work->data->n + work->data->m, "x");
+        // #endif
 
         /* Second step: z_{k+1} */
         project_x(work);
 
+        // // DEBUG
+        // #if PRINTLEVEL > 2
+        // print_vec(work->z, work->data->n + work->data->m, "z");
+        // #endif
+
         /* Third step: u_{k+1} */
         update_u(work);
         /* End of ADMM Steps */
+
+        // // DEBUG
+        // #if PRINTLEVEL > 2
+        // print_vec(work->u, work->data->m, "u");
+        // #endif
 
 
         /* Update information */
@@ -205,8 +227,6 @@ c_int osqp_solve(Work * work){
     // prea_vec_copy(work->u, work->solution->u, work->data->n + work->data->m);
 
     // Recover dual solution from u
-    vec_add_scaled(work->solution->mu, work->u,
-                   work->data->n, work->settings->rho);
     vec_add_scaled(work->solution->lambda, (work->u + work->data->n),
                    work->data->m, work->settings->rho);
 
@@ -230,8 +250,6 @@ c_int osqp_cleanup(Work * work){
     csc_spfree(work->data->A);
     c_free(work->data->lA);
     c_free(work->data->uA);
-    c_free(work->data->lx);
-    c_free(work->data->ux);
     c_free(work->data);
 
     // Free work Variables
@@ -248,7 +266,6 @@ c_int osqp_cleanup(Work * work){
 
     // Free solution
     c_free(work->solution->x);
-    c_free(work->solution->mu);
     c_free(work->solution->lambda);
     c_free(work->solution);
 

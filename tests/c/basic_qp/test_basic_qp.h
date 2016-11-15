@@ -32,8 +32,8 @@ static char * test_basic_qp()
     data->A = csc_matrix(data->m, data->n, basic_qp_A_nnz, basic_qp_A_x, basic_qp_A_i, basic_qp_A_p);
     data->lA = basic_qp_lA;
     data->uA = basic_qp_uA;
-    data->lx = basic_qp_lx;
-    data->ux = basic_qp_ux;
+    // data->lx = basic_qp_lx;
+    // data->ux = basic_qp_ux;
     //TODO: FIX SEGMENTATION FAULT WHEN CREATING lx and ux
 
 
@@ -42,7 +42,7 @@ static char * test_basic_qp()
 
     // Define Solver settings as default
     set_default_settings(settings);
-    settings->max_iter = 200;
+    settings->max_iter = 100;
     settings->alpha = 1.6;
 
     // Setup workspace
@@ -54,11 +54,7 @@ static char * test_basic_qp()
     }
     else {
     // DEBUG
-    // print_csc_matrix(work->data->P, "P");
-    // print_vec(work->data->q, work->data->n, "q");
-    // print_csc_matrix(work->data->A, "A");
-    // print_vec(work->data->lA, work->data->m, "lA");
-    // print_vec(work->data->uA, work->data->m, "uA");
+
     // print_vec(work->data->lx, work->data->n, "lx");
     // print_vec(work->data->ux, work->data->n, "ux");
 
@@ -68,9 +64,15 @@ static char * test_basic_qp()
     osqp_solve(work);
 
     // Print solution
-    // print_vec(work->solution->x, work->data->n, "x");
-    // print_vec(work->solution->mu, work->data->n, "mu");
-    // print_vec(work->solution->lambda, work->data->m, "lambda");
+    #if PRINTLEVEL > 2
+    // print_csc_matrix(work->data->P, "P");
+    // print_vec(work->data->q, work->data->n, "q");
+    // print_csc_matrix(work->data->A, "A");
+    // print_vec(work->data->lA, work->data->m, "lA");
+    // print_vec(work->data->uA, work->data->m, "uA");
+    print_vec(work->solution->x, work->data->n, "x");
+    print_vec(work->solution->lambda, work->data->m, "lambda");
+    #endif
 
     // Clean workspace
     osqp_cleanup(work);

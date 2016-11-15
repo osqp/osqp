@@ -332,8 +332,8 @@ void print_dns_matrix(c_float * M, c_int m, c_int n, char *name)
 }
 
 /* Print vector */
-void print_vec(c_float * V, c_int n, char *name){
-        print_dns_matrix(V, 1, n, name);
+void print_vec(c_float * v, c_int n, char *name){
+        print_dns_matrix(v, 1, n, name);
 }
 
 #endif
