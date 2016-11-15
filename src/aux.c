@@ -1,0 +1,276 @@
+#include "aux.h"
+#include "util.h"
+
+/***********************************************************
+ * Auxiliary functions needed to compute ADMM iterations * *
+ ***********************************************************/
+
+/**
+ * Cold start workspace variables
+ * @param work Workspace
+ */
+void cold_start(Work *work) {
+    memset(work->x, 0, (work->data->n + work->data->m) * sizeof(c_float));
+    memset(work->z, 0, (work->data->n + work->data->m) * sizeof(c_float));
+    memset(work->u, 0, (work->data->m) * sizeof(c_float));
+}
+
+
+/**
+ * Update RHS during first tep of ADMM iteration (store it into x)
+ * @param  work Workspace
+ */
+void compute_rhs(Work *work){
+    c_int i; // Index
+    for (i=0; i < work->data->n; i++){
+        // Cycle over part related to original x variables
+        work->x[i] = work->settings->rho * work->z[i] - work->data->q[i];
+    }
+    for (i = work->data->n; i < work->data->n + work->data->m; i++){
+        // Cycle over dual variable within first step (nu)
+        work->x[i] = work->z[i] - work->u[i - work->data->n];
+    }
+
+}
+
+
+/**
+ * Update x variable (slacks s related part)
+ * after solving linear system (first ADMM step)
+ *
+ * @param work Workspace
+ */
+void update_x(Work *work){
+    c_int i; // Index
+    for (i = work->data->n; i < work->data->n + work->data->m; i++){
+        work->x[i] = 1./work->settings->rho * work->x[i] + work->z[i] - work->u[i - work->data->n];
+        //TODO: Remove 1/rho operation (store 1/rho during setup)
+    }
+}
+
+
+/**
+ * Project x (second ADMM step)
+ * @param work Workspace
+ */
+void project_x(Work *work){
+    c_int i;
+
+    for (i = 0; i < work->data->n; i++){
+        // Part related to original x variables (no projection)
+        work->z[i] = work->settings->alpha * work->x[i] +
+                     (1.0 - work->settings->alpha) * work->z_prev[i];
+    }
+
+    for (i = work->data->n; i < work->data->n + work->data->m; i++){
+        // Part related to slack variables
+        work->z[i] = c_min(c_max(work->settings->alpha * work->x[i] +
+                     (1.0 - work->settings->alpha) * work->z_prev[i] +
+                     work->u[i - work->data->n], work->data->lA[i - work->data->n]), work->data->uA[i - work->data->n]);
+    }
+
+}
+
+/**
+ * Update u variable (third ADMM step)
+ * @param work Workspace
+ */
+void update_u(Work *work){
+    c_int i; // Index
+    for (i = work->data->n; i < work->data->n + work->data->m; i++){
+        work->u[i - work->data->n] += work->settings->alpha * work->x[i] +
+                      (1.0 - work->settings->alpha) * work->z_prev[i] -
+                      work->z[i];
+    }
+}
+
+/**
+ * Compute objective function from data at value x
+ * @param  data Data structure
+ * @param  x    Value x
+ * @return      Objective function value
+ */
+c_float compute_obj_val(Data * data, c_float * x){
+    return quad_form(data->P, x) + vec_prod(data->q, x, data->n);
+}
+
+
+/**
+ * Return norm of primal residual
+ * TODO: Use more tailored residual (not general one)
+ * @param  work Workspace
+ * @return      Norm of primal residual
+ */
+c_float compute_pri_res(Work * work){
+    return vec_norm2_diff(work->x, work->z, work->data->n + work->data->m);
+}
+
+
+
+/**
+ * Return norm of dual residual
+ * TODO: Use more tailored residual (not general one)
+ * @param  work Workspace
+ * @return      Norm of dual residual
+ */
+c_float compute_dua_res(Work * work){
+    c_int i;
+    c_float norm_sq = 0, temp;
+    for (i = 0; i < work->data->n + work->data->m; i++){
+        temp = work->settings->rho * (work->z[i] - work->z_prev[i]);
+        norm_sq += temp*temp;
+    }
+    return c_sqrt(norm_sq);
+}
+
+
+
+/**
+ * Update solver information
+ * @param work Workspace
+ */
+void update_info(Work *work, c_int iter){
+    work->info->iter = iter; // Update iteration number
+    work->info->obj_val = compute_obj_val(work->data, work->z);
+    work->info->pri_res = compute_pri_res(work);
+    work->info->dua_res = compute_dua_res(work);
+
+    #if PROFILING > 0
+    work->info->solve_time = toc(work->timer);
+    #endif
+}
+
+
+/**
+ * Update solver status (string)
+ * @param work Workspace
+ */
+void update_status_string(Info *info){
+    // Update status string depending on status val
+
+    if(info->status_val == OSQP_SOLVED)
+        strcpy(info->status, "Solved");
+    else if (info->status_val == OSQP_INFEASIBLE)
+        strcpy(info->status, "Infeasible");
+    else if (info->status_val == OSQP_UNSOLVED)
+        strcpy(info->status, "Unsolved");
+
+}
+
+
+
+/**
+ * Check if residuals norm meet the required tolerance
+ * @param  work Workspace
+ * @return      Redisuals check
+ */
+c_int residuals_check(Work *work){
+    c_float eps_pri, eps_dua;
+    c_int exitflag = 0;
+    //TODO: REDEFINE BETTER TERMINATION CONDITIONS
+
+    eps_pri = c_sqrt(work->data->n + work->data->m) * work->settings->eps_abs +
+              work->settings->eps_rel * c_max(vec_norm2(work->x, work->data->n + work->data->m),
+                                              vec_norm2(work->z, work->data->n + work->data->m));
+    eps_dua = c_sqrt(work->data->m) * work->settings->eps_abs +
+              work->settings->eps_rel * work->settings->rho * vec_norm2(work->u, work->data->m);
+
+    if (work->info->pri_res < eps_pri && work->info->dua_res < eps_dua) exitflag = 1;
+
+    return exitflag;
+
+}
+
+
+/**
+ * Validate problem data
+ * @param  data Data to be validated
+ * @return      Exitflag to check
+ */
+c_int validate_data(const Data * data){
+        if(!data){
+            c_print("Missing data!\n");
+            return 1;
+        }
+
+        // General dimensions Tests
+        if (data->n <= 0 || data->m <= 0){
+            c_print("n and m must be both greater than 0; n = %i, m = %i\n",
+                     data->n, data->m);
+            return 1;
+        }
+
+        // Matrix P
+        if (data->P->m != data->n ){
+            c_print("P does not have dimension n x n with n = %i\n", data->n);
+            return 1;
+        }
+        if (data->P->m != data->P->n ){
+            c_print("P is not square\n");
+            return 1;
+        }
+
+        // Matrix A
+        if (data->A->m != data->m || data->A->n != data->n){
+            c_print("A does not have dimension m x n with m = %i and n = %i\n",
+                    data->m, data->n);
+            return 1;
+        }
+
+        // TODO: Complete with other checks
+
+        return 0;
+}
+
+
+/**
+ * Validate problem settings
+ * @param  data Data to be validated
+ * @return      Exitflag to check
+ */
+c_int validate_settings(const Settings * settings){
+    if (!settings){
+        c_print("Missing settings!\n");
+        return 1;
+    }
+    if (settings->normalize != 0 &&  settings->normalize != 1) {
+        c_print("normalize must be either 0 or 1\n");
+        return 1;
+    }
+    if (settings->rho <= 0) {
+        c_print("rho must be positive\n");
+        return 1;
+    }
+
+
+    if (settings->max_iter <= 0) {
+        c_print("max_iter must be positive\n");
+        return 1;
+    }
+    if (settings->eps_abs <= 0) {
+        c_print("eps_abs must be positive\n");
+        return 1;
+    }
+    if (settings->eps_rel <= 0) {
+        c_print("eps_rel must be positive\n");
+        return 1;
+    }
+    if (settings->alpha <= 0) {
+        c_print("alpha must be positive\n");
+        return 1;
+    }
+    if (settings->verbose != 0 &&  settings->verbose != 1) {
+        c_print("verbose must be either 0 or 1\n");
+        return 1;
+    }
+    if (settings->warm_start != 0 &&  settings->warm_start != 1) {
+        c_print("warm_start must be either 0 or 1\n");
+        return 1;
+    }
+
+    // TODO: Complete with other checks
+
+
+    return 0;
+
+}
