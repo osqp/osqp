@@ -64,7 +64,7 @@ $(OUT)/libosqpdir.a: $(OSQP_OBJECTS) $(DIRSRC)/private.o $(SUITESPARSE_OBJS) $(L
 	- $(RANLIB) $@    # Add object files in static library and create index
 
 # Build osqp target (demo file for direct method)
-$(OUT)/osqp_demo_direct: examples/c/osqp_demo_direct.c $(OUT)/libosqpdir.a
+$(OUT)/osqp_demo_direct: examples/osqp_demo_direct.c $(OUT)/libosqpdir.a
 	$(CC) $(CFLAGS) $^ -o $@  $(LDFLAGS)
 
 # Build tests
