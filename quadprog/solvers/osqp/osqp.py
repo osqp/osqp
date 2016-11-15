@@ -23,15 +23,11 @@ class results(object):
     Stores OSQP results
     """
 
-    def __init__(self, status, objval, x, sol_dual_eq,
-                 sol_dual_ineq, sol_dual_lb, sol_dual_ub, cputime, total_iter):
+    def __init__(self, status, objval, x, dual, cputime, total_iter):
         self.status = status
         self.objval = objval
         self.x = x
-        self.sol_dual_eq = sol_dual_eq
-        self.sol_dual_ineq = sol_dual_ineq
-        self.sol_dual_lb = sol_dual_lb
-        self.sol_dual_ub = sol_dual_ub
+        self.dual = dual
         self.cputime = cputime
         self.total_iter = total_iter
 
@@ -39,37 +35,29 @@ class results(object):
 class problem(object):
     """
     QP problem of the form
-        minimize	1/2 x' Q x + c'x
-        subject to	Aeq x == beq
-                    Aineq x <= bineq
-                    lb <= x <= ub
+        minimize	1/2 x' P x + q' x
+        subject to	lA <= A x <= uA
 
     Attributes
     ----------
-    Q, c
-    Aeq, beq
-    Aineq, bineq
-    lb, ub
+    P, q
+    A, lA, uA
     """
 
-    def __init__(self, Q, c, Aeq, beq, Aineq, bineq, lb=None, ub=None):
+    def __init__(self, P, q, A, lA=None, uA=None):
         # Set problem dimensions
-        self.nx = c.size
-        self.neq = beq.size
-        self.nineq = bineq.size
+        self.n = q.size
+        self.m = lA.size
         # Set problem data
-        self.Q = Q.tocsr()
-        self.c = c
-        self.Aeq = Aeq.tocsr()
-        self.beq = beq
-        self.Aineq = Aineq.tocsr()
-        self.bineq = bineq
-        self.lb = lb if lb is not None else -np.inf*np.ones(self.nx)
-        self.ub = ub if ub is not None else np.inf*np.ones(self.nx)
+        self.P = P.tocsr()
+        self.q = q
+        self.A = A.tocsr()
+        self.lA = lA if lA is not None else -np.inf*np.ones(self.m)
+        self.uA = uA if uA is not None else -np.inf*np.ones(self.m)
 
     def objval(self, x):
         # Compute quadratic objective value for the given x
-        return .5 * np.dot(x, self.Q.dot(x)) + np.dot(self.c, x)
+        return .5 * np.dot(x, self.P.dot(x)) + np.dot(self.q, x)
 
 
 class options(object):
@@ -195,38 +183,29 @@ class OSQP(object):
         self.scaler_matrices = scaler_matrices()
         self.solution = solver_solution()
 
-    def problem(self, Q, c, Aeq, beq, Aineq, bineq, lb=None, ub=None):
+    def problem(self, P, q, A, lA=None, uA=None):
         """
         Defines QP problem of the form
-            minimize	1/2 x' Q x + c'x
-            subject to	Aeq x == beq
-                        Aineq x <= bineq
-                        lb <= x <= ub
+            minimize	1/2 x' P x + q'x
+            subject to	lA <= A x <= uA
         """
-        self.problem = problem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
+        self.problem = problem(P, q, A, lA, uA)
 
     def set_problem_data(self, **kwargs):
         """
-        Set QP problem data. Reset factorization if Q, Aeq or Aineq
-        is changed.
+        Set QP problem data. Reset factorization if P or A is changed.
         """
-        if 'Q' in kwargs.keys():
-            self.problem.Q = kwargs['Q'].tocsr()
+        if 'P' in kwargs.keys():
+            self.problem.P = kwargs['P'].tocsr()
             # Reset factorization
             self.kkt_factor = None
-        if 'Aeq' in kwargs.keys():
-            self.problem.Aeq = kwargs['Aeq'].tocsr()
+        if 'A' in kwargs.keys():
+            self.problem.A = kwargs['A'].tocsr()
             # Reset factorization
             self.kkt_factor = None
-        if 'Aineq' in kwargs.keys():
-            self.problem.Aineq = kwargs['Aineq'].tocsr()
-            # Reset factorization
-            self.kkt_factor = None
-        self.problem.c = kwargs.pop('c', self.problem.c)
-        self.problem.beq = kwargs.pop('beq', self.problem.beq)
-        self.problem.bineq = kwargs.pop('bineq', self.problem.bineq)
-        self.problem.lb = kwargs.pop('lb', self.problem.lb)
-        self.problem.ub = kwargs.pop('ub', self.problem.ub)
+        self.problem.q = kwargs.pop('q', self.problem.q)
+        self.problem.lA = kwargs.pop('lA', self.problem.lA)
+        self.problem.uA = kwargs.pop('uA', self.problem.uA)
 
     def set_option(self, **kwargs):
         """
@@ -301,10 +280,8 @@ class OSQP(object):
         """
         Operator splitting solver for a QP given
         in the following form
-                minimize	1/2 x' Q x + c'x
-                subject to	Aeq x == beq
-                            Aineq x <= bineq
-                            lb <= x <= ub
+                minimize	1/2 x' P x + q'x
+                subject to	lA <= A x <= uA
         """
 
         print "Operator Splitting QP Solver"
@@ -320,11 +297,11 @@ class OSQP(object):
         self.solve_admm()
 
         # Polish solution if optimal
-        if (self.status == OPTIMAL) & self.options.polish:
-            self.polish()
+        # if (self.status == OPTIMAL) & self.options.polish:
+            # self.polish()
 
         # Rescale solution back
-        self.rescale_solution()
+        # self.rescale_solution()
 
         # End timer
         self.cputime = time.time() - t
@@ -338,24 +315,15 @@ class OSQP(object):
 
     def get_qp_solution(self):
 
-        # Get problem dimensions
-        nx = self.problem.nx
-        neq = self.problem.neq
-
         # Recover primal solution
-        sol_x = self.solution.z[:nx]
+        sol_x = self.solution.z[:self.problem.n]
         objval = self.problem.objval(sol_x)
 
         # Recover dual solution
-        dual_vars = -self.options.rho * self.solution.u
-        sol_dual_eq = dual_vars[nx:nx+neq]
-        sol_dual_ineq = dual_vars[nx+neq:]
-        sol_dual_lb = np.maximum(dual_vars[:nx], 0)
-        sol_dual_ub = -np.minimum(dual_vars[:nx], 0)
+        dual = self.options.rho * self.solution.u
 
         # Store solution as a quadprogResults object
-        solution = results(self.status, objval, sol_x, sol_dual_eq,
-                           sol_dual_ineq, sol_dual_lb, sol_dual_ub,
+        solution = results(self.status, objval, sol_x, dual,
                            self.cputime, self.total_iter)
 
         # Return solution
@@ -367,9 +335,11 @@ class OSQP(object):
         """
         # Predefine scaling vector
         # nx = self.problem.nx
-        nvar = self.problem.nx + self.problem.neq + self.problem.nineq
-        nconstr = self.problem.neq + self.problem.nineq
+        # nvar = self.problem.nx + self.problem.neq + self.problem.nineq
+        # nconstr = self.problem.neq + self.problem.nineq
         #  d = np.multiply(sp.rand(nvar), np.ones(nvar))
+        n = self.problem.n
+        m = self.problem.m
 
         if self.options.scale_problem:
 
@@ -543,18 +513,18 @@ class OSQP(object):
             #  lbtest = D.dot(lb)
             #  ubtest = D.dot(ub)
             #  ipdb.set_trace()
-        else:
-            d = np.ones(nvar)
-
-            # Obtain Scaler Matrices
-            self.scaler_matrices.D = spspa.diags(d[:self.problem.nx])
-            self.scaler_matrices.Dinv = self.scaler_matrices.D
-            if nconstr == 0:
-                self.scaler_matrices.E = spspa.csc_matrix((0, 0))
-            else:
-                self.scaler_matrices.E = spspa.diags(np.ones(self.problem.neq +
-                                                     self.problem.nineq))
-            self.scaler_matrices.Einv = self.scaler_matrices.E
+        else: # TODO: FIX SCALED PROBLEM
+            # d = np.ones(nvar)
+            #
+            # # Obtain Scaler Matrices
+            # self.scaler_matrices.D = spspa.diags(d[:self.problem.nx])
+            # self.scaler_matrices.Dinv = self.scaler_matrices.D
+            # if nconstr == 0:
+            #     self.scaler_matrices.E = spspa.csc_matrix((0, 0))
+            # else:
+            #     self.scaler_matrices.E = spspa.diags(np.ones(self.problem.neq +
+            #                                          self.problem.nineq))
+            # self.scaler_matrices.Einv = self.scaler_matrices.E
 
             # Assign scaled problem to same one
             self.scaled_problem = self.problem
@@ -563,18 +533,10 @@ class OSQP(object):
         """
         Project a vector xbar onto constraint set.
         """
-        # Project first nx elements on interval [lb, ub],
-        # next neq elements on zero, and the rest on positive
-        # orthant. (Using scaled problem bounds)
-        xbar[:self.problem.nx] = np.minimum(
-                np.maximum(xbar[:self.problem.nx],
-                           self.scaled_problem.lb), self.scaled_problem.ub)
-        xbar[self.problem.nx:self.problem.nx+self.problem.neq] = \
-            self.scaled_problem.beq
-        xbar[self.problem.nx+self.problem.neq:] = np.minimum(
-                xbar[self.problem.nx+self.problem.neq:],
-                self.scaled_problem.bineq)
-        return xbar
+        # Project only last m elements between bounds lA, uA
+        xproj = np.minimum(np.maximum(xbar,
+                           self.scaled_problem.lA), self.scaled_problem.uA)
+        return xproj
 
     def polish(self):
         """
@@ -714,11 +676,9 @@ class OSQP(object):
         """"
         Solve splitting problem with splitting of the form (after introducing
         slack variables for both equality and inequality constraints)
-            minimize	1/2 x' Q x + c'x  + I_{Ax=b}(x) + I_Z(z)
+            minimize	1/2 x' Pbar x + qbar'x  + I_{Abar z=0}(z) + I_Z(z)
             subject to	x == z
-        where Z = [lb, ub]^nx x {0}^neq x R+^nineq.
-        Slack variable for equality constraints is introduced for dealing with
-        an issue of KKT matrix being singular when Aeq does not have full rank.
+        where Z = R^n x [lA, uA]^{m}.
         """
 
         # Print parameters
@@ -726,22 +686,17 @@ class OSQP(object):
         #  print "KKT solution: " + self.options.kkt_method + "\n"
 
         # Number of variables (x,s1,s2) and constraints
-        nx = self.scaled_problem.nx
-        neq = self.scaled_problem.neq
-        nineq = self.scaled_problem.nineq
-        nvar = nx + neq + nineq
-        nconstr = neq + nineq
+        n = self.scaled_problem.n
+        m = self.scaled_problem.m
 
         # Factorize KKT matrix if this has not been done yet
         if self.kkt_factor is None:
             # Construct reduced KKT matrix
-            Ac = spspa.vstack([self.scaled_problem.Aeq,
-                              self.scaled_problem.Aineq])
             KKT = spspa.vstack([
-                spspa.hstack([self.scaled_problem.Q + self.options.rho *
-                              spspa.eye(nx), Ac.T]),
-                spspa.hstack([Ac,
-                              -1./self.options.rho * spspa.eye(nconstr)])])
+                spspa.hstack([self.scaled_problem.P + self.options.rho *
+                              spspa.eye(n), self.scaled_problem.A.T]),
+                spspa.hstack([self.scaled_problem.A,
+                              -1./self.options.rho * spspa.eye(m)])])
             self.kkt_factor = spalinalg.splu(KKT.tocsc())
             # if self.options.kkt_dir_reuse_factor:
             #     # Store factorization
@@ -757,8 +712,8 @@ class OSQP(object):
             z = self.solution.z
             u = self.solution.u
         else:
-            z = np.zeros(nvar)
-            u = np.zeros(nvar)
+            z = np.zeros(n + m)
+            u = np.zeros(m)
 
         if self.options.print_level > 1:
             print "Iter \t  Objective       \tPrim Res \tDual Res"
@@ -767,32 +722,44 @@ class OSQP(object):
         #           Nominal ADMM is obtained for alpha=1.0
         for i in xrange(self.options.max_iter):
             # x update
-            rhs = np.append(self.options.rho * (z[:nx] - u[:nx]) -
-                            self.scaled_problem.c, z[nx:] - u[nx:])
+            rhs = np.append(self.options.rho * z[:n] -
+                            self.scaled_problem.q, z[n:] - u)
             sol_kkt = self.kkt_factor.solve(rhs)
-            x = np.append(sol_kkt[:nx], z[nx:] - u[nx:] +
-                          1./self.options.rho * sol_kkt[nx:])
+            x = np.append(sol_kkt[:n], z[n:] - u +
+                          1./self.options.rho * sol_kkt[n:])
             # z update
-            z_old = z
-            z = self.project(self.options.alpha*x +
-                             (1.-self.options.alpha)*z_old + u)
+            z_old = np.copy(z)
+            z[:n] = self.options.alpha*x[:n] + \
+                (1.-self.options.alpha)*z_old[:n]  # First part not projected
+            z[n:] = self.project(self.options.alpha*x[n:] +
+                                 (1.-self.options.alpha)*z_old[n:] + u)
             # u update
-            u = u + self.options.alpha*x + (1.-self.options.alpha)*z_old - z
+            u = u + self.options.alpha*x[n:] + \
+                (1.-self.options.alpha)*z_old[n:] - z[n:]
+
+            # # DEBUG
+            # print "x = "
+            # print x
+            # print "z = "
+            # print z
+            # print "u = "
+            # print u
 
             # Compute primal and dual residuals
+            # ipdb.set_trace()
             resid_prim = spla.norm(x - z)
             resid_dual = self.options.rho*spla.norm(z - z_old)
 
             # Check the stopping criterion
-            eps_prim = np.sqrt(nvar) * self.options.eps_abs \
+            eps_prim = np.sqrt(n + m) * self.options.eps_abs \
                 + self.options.eps_rel * np.max([spla.norm(x), spla.norm(z)])
-            eps_dual = np.sqrt(nvar) * self.options.eps_abs + \
+            eps_dual = np.sqrt(m) * self.options.eps_abs + \
                 self.options.eps_rel * self.options.rho * spla.norm(u)
 
             if resid_prim <= eps_prim and resid_dual <= eps_dual:
                 # Print the progress in last iterations
                 if self.options.print_level > 1:
-                    f = self.scaled_problem.objval(z[:nx])
+                    f = self.scaled_problem.objval(z[:n])
                     print "%4s \t % 1.7e  \t%1.2e  \t%1.2e" \
                         % (i+1, f, resid_prim, resid_dual)
                 # Stop the algorithm
@@ -804,7 +771,7 @@ class OSQP(object):
                         (np.mod(i + 1,
                          np.floor(np.float(self.options.max_iter)/20.0)) == 0)\
                         | (self.options.print_level == 3):
-                            f = self.scaled_problem.objval(z[:nx])
+                            f = self.scaled_problem.objval(z[:n])
                             print "%4s \t % 1.7e  \t%1.2e  \t%1.2e" \
                                 % (i+1, f, resid_prim, resid_dual)
 

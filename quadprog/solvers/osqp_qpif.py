@@ -13,18 +13,17 @@ class OSQP(object):
     def solve(self, p):
 
         # Convert Matrices in CSR format
-        p.Aeq = p.Aeq.tocsr()
-        p.Aineq = p.Aineq.tocsr()
-        p.Q = p.Q.tocsr()
+        p.A = p.A.tocsr()
+        p.P = p.P.tocsr()
 
         # Define OSQP object
-        m = osqp.OSQP(**self.options)
+        model = osqp.OSQP(**self.options)
 
         # Define QP problem
-        m.problem(p.Q, p.c, p.Aeq, p.beq, p.Aineq, p.bineq, p.lb, p.ub)
+        model.problem(p.P, p.q, p.A, p.lA, p.uA)
 
         # Solve QP with OSQP
-        res = m.solve()
+        res = model.solve()
 
         # Return quadprogResults
         return res

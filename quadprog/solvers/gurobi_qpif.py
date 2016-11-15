@@ -33,120 +33,104 @@ class GUROBI(object):
     def solve(self, p):
 
         # Convert Matrices in CSR format
-        p.Aeq = p.Aeq.tocsr()
-        p.Aineq = p.Aineq.tocsr()
+        p.A = p.A.tocsr()
 
-        # Convert Q matrix to COO format
-        p.Q = p.Q.tocoo()
+        # Convert P matrix to COO format
+        p.P = p.P.tocoo()
 
         # Get problem dimensions
-        nx = p.Q.shape[0]
-        neq = p.Aeq.shape[0]
-        nineq = p.Aineq.shape[0]
+        n = p.P.shape[0]
+        m = p.A.shape[0]
 
         # Create a new model
-        m = grb.Model("qp")
+        model = grb.Model("qp")
 
         # Add variables
-        for i in range(nx):
-            m.addVar(lb=p.lb[i], ub=p.ub[i])
-        m.update()
-        x = m.getVars()
-
-        # Add equality constraints: iterate over the rows of Aeq
-        # adding each row into the model
-        for i in range(neq):
-            start = p.Aeq.indptr[i]
-            end = p.Aeq.indptr[i+1]
-            variables = [x[j] for j in p.Aeq.indices[start:end]]  # Get nnz
-            coeff = p.Aeq.data[start:end]
-            expr = grb.LinExpr(coeff, variables)
-            m.addConstr(lhs=expr, sense=grb.GRB.EQUAL, rhs=p.beq[i])
-        m.update()
+        for i in range(n):
+            model.addVar(ub=grb.GRB.INFINITY, lb=-grb.GRB.INFINITY)
+        model.update()
+        x = model.getVars()
 
         # Add inequality constraints: iterate over the rows of Aeq
         # adding each row into the model
-        for i in range(nineq):
-            start = p.Aineq.indptr[i]
-            end = p.Aineq.indptr[i+1]
-            variables = [x[j] for j in p.Aineq.indices[start:end]]  # Get nnz
-            coeff = p.Aineq.data[start:end]
+        for i in range(m):
+            start = p.A.indptr[i]
+            end = p.A.indptr[i+1]
+            variables = [x[j] for j in p.A.indices[start:end]]  # Get nnz
+            coeff = p.A.data[start:end]
             expr = grb.LinExpr(coeff, variables)
-            m.addConstr(lhs=expr, sense=grb.GRB.LESS_EQUAL, rhs=p.bineq[i])
-        m.update()
+            model.addRange(expr, lower=p.lA[i], upper=p.uA[i])
+        model.update()
 
         # Define objective
         obj = grb.QuadExpr()  # Set quadratic part
-        if p.Q.count_nonzero():  # If there are any nonzero elms in Q
-            for i in range(p.Q.nnz):
-                obj.add(.5*p.Q.data[i]*x[p.Q.row[i]]*x[p.Q.col[i]])
-        obj.add(grb.LinExpr(p.c, x))  # Add linear part
-        m.setObjective(obj)  # Set objective
+        if p.P.count_nonzero():  # If there are any nonzero elms in P
+            for i in range(p.P.nnz):
+                obj.add(.5*p.P.data[i]*x[p.P.row[i]]*x[p.P.col[i]])
+        obj.add(grb.LinExpr(p.q, x))  # Add linear part
+        model.setObjective(obj)  # Set objective
 
         # Update model
-        m.update()
+        model.update()
 
         # Set parameters
         for param, value in self.options.iteritems():
             if param == "verbose":
                 if value == 0:
-                    m.setParam("OutputFlag", 0)
+                    model.setParam("OutputFlag", 0)
             else:
-                m.setParam(param, value)
+                model.setParam(param, value)
 
         # Update model
-        m.update()
+        model.update()
 
         # Solve problem
         try:
             # Solve
-            m.optimize()
+            model.optimize()
         except:  # Error in the solution
             print "Error in Gurobi solution\n"
             return quadprogResults(qp.SOLVER_ERROR, None, None, None,
-                                   None, None, None,
                                    np.inf, None)
 
         # Return results
         # Get status
-        status = self.STATUS_MAP.get(m.Status, qp.SOLVER_ERROR)
+        status = self.STATUS_MAP.get(model.Status, qp.SOLVER_ERROR)
 
         if (status != qp.SOLVER_ERROR) & (status != qp.INFEASIBLE):
             # Get objective value
-            objval = m.objVal
+            objval = model.objVal
 
             # Get solution
-            sol = np.array([x[i].X for i in range(nx)])
+            sol = np.array([x[i].X for i in range(n)])
 
             # Get dual variables  (Gurobi uses swapped signs (-1))
-            constrs = m.getConstrs()
-            sol_dual_eq = -np.array([constrs[i].Pi for i in range(neq)])
-            sol_dual_ineq = -np.array([constrs[i+neq].Pi for i in range(nineq)])
+            constrs = model.getConstrs()
+            dual = -np.array([constrs[i].Pi for i in range(m)])
+            # sol_dual_ineq = -np.array([constrs[i+neq].Pi for i in range(m)])
 
             # Bounds
-            sol_dual_ub = np.zeros(nx)
-            sol_dual_lb = np.zeros(nx)
+            # sol_dual_ub = np.zeros(n)
+            # sol_dual_lb = np.zeros(n)
 
-            RCx = [x[i].RC for i in range(nx)]  # Get reduced costs
-            for i in range(nx):
-                if RCx[i] >= 1e-07:
-                    sol_dual_lb[i] = RCx[i]
-                else:
-                    sol_dual_ub[i] = -RCx[i]
+            # RCx = [x[i].RC for i in range(n)]  # Get reduced costs
+            # for i in range(n):
+            #     if RCx[i] >= 1e-07:
+            #         sol_dual_lb[i] = RCx[i]
+            #     else:
+            #         sol_dual_ub[i] = -RCx[i]
 
             # Get computation time
-            cputime = m.Runtime
+            cputime = model.Runtime
 
             # Total Number of iterations
-            total_iter = m.BarIterCount
+            total_iter = model.BarIterCount
 
-            return quadprogResults(status, objval, sol, sol_dual_eq,
-                                   sol_dual_ineq, sol_dual_lb, sol_dual_ub,
+            return quadprogResults(status, objval, sol, dual,
                                    cputime, total_iter)
         else:  # Error
             # Get computation time
-            cputime = m.Runtime
+            cputime = model.Runtime
 
             return quadprogResults(status, None, None, None,
-                                   None, None, None,
                                    cputime, None)

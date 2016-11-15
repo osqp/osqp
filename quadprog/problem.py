@@ -21,28 +21,23 @@ INF_OR_UNB = [INFEASIBLE, INFEASIBLE_INACCURATE,
 class quadprogProblem(object):
     """
     Defines QP problem of the form
-        minimize	1/2 x' Q x + c'x
-        subject to	Aeq x == beq
-                    Aineq x <= bineq
-                    lb <= x <= ub
+        minimize	1/2 x' P x + q' x
+        subject to	lA <= A x <= uA
 
     Attributes
     ----------
-    Q, c
-    Aeq, beq
-    Aineq, bineq
-    lb, ub
+    P, q
+    A, lA, uA
     """
 
-    def __init__(self, Q, c, Aeq, beq, Aineq, bineq, lb=None, ub=None):
-        self.Q = Q
-        self.c = c
-        self.Aeq = Aeq
-        self.beq = beq
-        self.Aineq = Aineq
-        self.bineq = bineq
-        self.lb = lb if lb is not None else -np.inf*np.ones(c.size)
-        self.ub = ub if ub is not None else np.inf*np.ones(c.size)
+    def __init__(self, P, q, A, lA=None, uA=None):
+        self.n = P.shape[0]
+        self.m = A.shape[0]
+        self.P = P
+        self.q = q
+        self.A = A
+        self.lA = lA if lA is not None else -np.inf*np.ones(P.shape[0])
+        self.uA = uA if uA is not None else np.inf*np.ones(P.shape[0])
 
     def solve(self, solver=s.GUROBI, **kwargs):
         """
@@ -63,6 +58,5 @@ class quadprogProblem(object):
 
         # Solve problem
         results = solver.solve(self)  # Solve problem
-
 
         return results

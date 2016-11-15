@@ -18,9 +18,14 @@ def load_maros_meszaros_problem(f):
     m = spio.loadmat(f)
 
     # Convert matrices
-    Q = m['Q'].astype(float)
-    c = m['c'].T.flatten().astype(float)
-    Aeq = m['A'].astype(float)
+    P = m['Q'].astype(float)
+    q = m['c'].T.flatten().astype(float)
+    A = m['A'].astype(float)
+    uA = m['ru'].T.flatten().astype(float)
+    lA = m['rl'].T.flatten().astype(float)
+
+    # TODO: Finish this
+
     beq = m['ru'].T.flatten().astype(float)
     lb = m['lb'].T.flatten().astype(float)
     ub = m['ub'].T.flatten().astype(float)
@@ -37,7 +42,7 @@ def load_maros_meszaros_problem(f):
 def main():
     sp.random.seed(2)
     # Possible ops:  {'small1', 'small2', 'random', 'maros_meszaros', 'lp'}
-    example = 'small1'
+    example = 'random'
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
@@ -50,57 +55,51 @@ def main():
     elif example == 'small1':
         # Our Examples
         # Small Example 1
-        Q = spspa.csc_matrix(np.array([[4., 1.], [1., 2.]]))
-        c = np.ones(2)
-        Aeq = spspa.csc_matrix(np.ones((1, 2)))
-        beq = np.array([1.0])
-        Aineq = spspa.csc_matrix(np.zeros((0, 2)))
-        bineq = np.zeros(0)
-        lb = np.zeros(2)
-        ub = 0.7 * np.ones(2)
-        p = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
+        P = spspa.csc_matrix(np.array([[4., 1.], [1., 2.]]))
+        q = np.ones(2)
+        A = spspa.vstack([spspa.csc_matrix(np.ones((1, 2))),
+                         spspa.eye(P.shape[0])]).tocsc()
+        lA = np.array([1.0, 0.0, 0.0])
+        uA = np.array([1.0, 0.7, 0.7])
+
+        p = qp.quadprogProblem(P, q, A, lA, uA)
     elif example == 'small2':
         # Small Example 2
-        nx = 2
-        Q = spspa.csc_matrix(np.array([[11., 0.], [0., 0.]]))
-        c = np.array([3, 4])
-        Aeq = spspa.csc_matrix(np.ones((0, nx)))
-        beq = np.zeros(0)
-        Aineq = spspa.csc_matrix(np.array([[-1, 0], [0, -1], [-1, -3],
-                                           [2, 5], [3, 4]]))
-        bineq = np.array([0, 0, -15, 100, 80])
-        p = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq)
+        P = spspa.csc_matrix(np.array([[11., 0.], [0., 0.]]))
+        q = np.array([3, 4])
+        A = spspa.csc_matrix(np.array([[-1, 0], [0, -1], [-1, -3],
+                                      [2, 5], [3, 4]]))
+        uA = np.array([0., 0., -15, 100, 80])
+        lA = -np.inf * np.ones(len(uA))
+        p = qp.quadprogProblem(P, q, A, lA, uA)
     elif example == 'random':
         # Random Example
-        nx = 50
-        neq = 20
-        nineq = 15
+        n = 50
+        m = 20
         # Generate random Matrices
-        Qt = sp.randn(nx, nx)
-        Q = spspa.csc_matrix(np.dot(Qt.T, Qt))
-        c = sp.randn(nx)
-        Aeq = spspa.csc_matrix(sp.randn(neq, nx))
-        beq = sp.randn(neq)
-        Aineq = spspa.csc_matrix(sp.randn(nineq, nx))
-        bineq = 100 * sp.rand(nineq)
-        lb = 0. * np.ones(nx)
-        ub = 5. * np.ones(nx)
-        p = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
-    elif example == 'lp':
-        # Random Example
-        nx = 50
-        neq = 10
-        nineq = 20
-        # Generate random Matrices
-        Q = spspa.csc_matrix(np.zeros((nx, nx)))
-        c = sp.randn(nx)
-        Aeq = spspa.csc_matrix(sp.randn(neq, nx))
-        beq = sp.randn(neq)
-        Aineq = spspa.csc_matrix(sp.randn(nineq, nx))
-        bineq = 100 * sp.rand(nineq)
-        lb = 0. * np.ones(nx)
-        ub = 5. * np.ones(nx)
-        p = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
+        Pt = sp.randn(n, n)
+        P = spspa.csc_matrix(np.dot(Pt.T, Pt))
+        q = sp.randn(n)
+        A = spspa.csc_matrix(sp.randn(m, n))
+        uA = 3 + sp.randn(m)
+        lA = -3 + sp.randn(m)
+
+        p = qp.quadprogProblem(P, q, A, lA, uA)
+    # elif example == 'lp':
+    #     # Random Example
+    #     nx = 50
+    #     neq = 10
+    #     nineq = 20
+    #     # Generate random Matrices
+    #     Q = spspa.csc_matrix(np.zeros((nx, nx)))
+    #     c = sp.randn(nx)
+    #     Aeq = spspa.csc_matrix(sp.randn(neq, nx))
+    #     beq = sp.randn(neq)
+    #     Aineq = spspa.csc_matrix(sp.randn(nineq, nx))
+    #     bineq = 100 * sp.rand(nineq)
+    #     lb = 0. * np.ones(nx)
+    #     ub = 5. * np.ones(nx)
+    #     p = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
     else:
         assert False, "Unknown example"
 
@@ -111,9 +110,9 @@ def main():
     resultsGUROBI = p.solve(solver=GUROBI, OutputFlag=1)
 
     # Solve with OSQP. You can pass options to OSQP solver
-    resultsOSQP = p.solve(solver=OSQP, max_iter=50000,
-                          eps_rel=1e-5,
-                          eps_abs=1e-5,
+    resultsOSQP = p.solve(solver=OSQP, max_iter=1500,
+                          eps_rel=1e-10,
+                          eps_abs=1e-10,
                           alpha=1.6,
                           rho=1.6,
                           scale_steps=3,
@@ -127,7 +126,6 @@ def main():
     #     beq = sp.randn(neq)
     #     bineq = 100 * sp.rand(nineq)
 
-
     print "\n"
     print("Comparison CPLEX - GUROBI")
     print("-------------------------")
@@ -135,14 +133,8 @@ def main():
         np.linalg.norm(resultsCPLEX.objval - resultsGUROBI.objval)
     print "Norm of solution difference %.8f" % \
         np.linalg.norm(resultsCPLEX.x - resultsGUROBI.x)
-    print "Norm of dual eq difference %.8f" % \
-        np.linalg.norm(resultsCPLEX.sol_dual_eq - resultsGUROBI.sol_dual_eq)
-    print "Norm of dual ineq difference %.8f" % \
-        np.linalg.norm(resultsCPLEX.sol_dual_ineq - resultsGUROBI.sol_dual_ineq)
-    print "Norm of dual ub difference %.8f" % \
-        np.linalg.norm(resultsCPLEX.sol_dual_ub - resultsGUROBI.sol_dual_ub)
-    print "Norm of dual lb difference %.8f" % \
-        np.linalg.norm(resultsCPLEX.sol_dual_lb - resultsGUROBI.sol_dual_lb)
+    print "Norm of dual difference %.8f" % \
+        np.linalg.norm(resultsCPLEX.dual - resultsGUROBI.dual)
 
     print "\n"
     print("Comparison OSQP - GUROBI")
@@ -151,15 +143,8 @@ def main():
         np.linalg.norm(resultsOSQP.objval - resultsGUROBI.objval)
     print "Norm of solution difference %.8f" % \
         np.linalg.norm(resultsOSQP.x - resultsGUROBI.x)
-    print "Norm of dual eq difference %.8f" % \
-        np.linalg.norm(resultsOSQP.sol_dual_eq - resultsGUROBI.sol_dual_eq)
-    print "Norm of dual ineq difference %.8f" % \
-        np.linalg.norm(resultsOSQP.sol_dual_ineq - resultsGUROBI.sol_dual_ineq)
-    print "Norm of dual ub difference %.8f" % \
-        np.linalg.norm(resultsOSQP.sol_dual_ub - resultsGUROBI.sol_dual_ub)
-    print "Norm of dual lb difference %.8f" % \
-        np.linalg.norm(resultsOSQP.sol_dual_lb - resultsGUROBI.sol_dual_lb)
-
+    print "Norm of dual difference %.8f" % \
+        np.linalg.norm(resultsOSQP.dual - resultsGUROBI.dual)
     ipdb.set_trace()
 
 # Parsing optional command line arguments
