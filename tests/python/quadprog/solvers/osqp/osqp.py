@@ -53,7 +53,7 @@ class problem(object):
         self.q = q
         self.A = A.tocsr()
         self.lA = lA if lA is not None else -np.inf*np.ones(self.m)
-        self.uA = uA if uA is not None else -np.inf*np.ones(self.m)
+        self.uA = uA if uA is not None else np.inf*np.ones(self.m)
 
     def objval(self, x):
         # Compute quadratic objective value for the given x
@@ -363,12 +363,18 @@ class OSQP(object):
                 spspa.hstack([self.problem.P, self.problem.A.T]),
                 spspa.hstack([self.problem.A, spspa.csc_matrix((m, m))])])
 
+            # KKT = spspa.vstack([
+            #     spspa.hstack([self.problem.P + spspa.eye(n), self.problem.A.T]),
+            #     spspa.hstack([self.problem.A, -spspa.eye(m)])])
+
             # Run Scaling
             KKT2 = KKT.copy()
             if self.options.scale_norm == 2:
                 KKT2.data = np.square(KKT2.data)  # Elementwise square
             elif self.options.scale_norm == 1:
                 KKT2.data = np.absolute(KKT2.data)  # Elementwise absolute value
+
+            # ipdb.set_trace()
 
 
             # Perform Scalings as in GLPK solver: https://en.wikibooks.org/wiki/GLPK/Scaling
@@ -409,23 +415,23 @@ class OSQP(object):
                     # Regularize components
                     KKT2d = KKT2.dot(d)
                     # Prevent division by 0
-                    d = (n + m)*np.reciprocal(KKT2d + 1e-8)
+                    d = (n + m)*np.reciprocal(KKT2d + 1e-6)
                     # Prevent too large elements
                     d = np.minimum(np.maximum(d, -1e+10), 1e+10)
                     #  d = np.reciprocal(KKT2d)
                     # print "Scaling step %i\n" % i
 
                     # # DEBUG STUFF
-                    # S = spspa.diags(d)
-                    # KKTeq = S.dot(KKT.dot(S))
-                    # print "Norm of first row of KKT %.4e" % \
-                    #     nplinalg.norm((KKT.todense())[1, :])
-                    # print "Norm of first row of KKTeq %.4e" % \
-                    #     nplinalg.norm((KKTeq.todense())[1, :])
-                    # condKKT = nplinalg.cond(KKT.todense())
-                    # condKKTeq = nplinalg.cond(KKTeq.todense())
-                    # print "Condition number of KKT matrix %.4e" % condKKT
-                    # print "Condition number of KKTeq matrix %.4e" % condKKTeq
+                    S = spspa.diags(d)
+                    KKTeq = S.dot(KKT.dot(S))
+                    print "Norm of first row of KKT %.4e" % \
+                        nplinalg.norm((KKT.todense())[1, :])
+                    print "Norm of first row of KKTeq %.4e" % \
+                        nplinalg.norm((KKTeq.todense())[1, :])
+                    condKKT = nplinalg.cond(KKT.todense())
+                    condKKTeq = nplinalg.cond(KKTeq.todense())
+                    print "Condition number of KKT matrix %.4e" % condKKT
+                    print "Condition number of KKTeq matrix %.4e" % condKKTeq
                     # ipdb.set_trace()
             #  else:  # Q matrix is zero (LP)
                 #  print "Perform scaling of Ac constraints matrix: %i Steps\n" % \
@@ -476,8 +482,10 @@ class OSQP(object):
             P = D.dot(self.problem.P.dot(D))
             A = E.dot(self.problem.A.dot(D))
             q = D.dot(self.problem.q)
-            lA = np.multiply(E.diagonal(), self.problem.lA)
-            uA = np.multiply(E.diagonal(), self.problem.uA)
+            lA = E.dot(self.problem.lA)
+            uA = E.dot(self.problem.uA)
+            # lA = np.multiply(E.diagonal(), self.problem.lA)
+            # uA = np.multiply(E.diagonal(), self.problem.uA)
             # lA = np.multiply(np.reciprocal(E.diagonal()),
             #                  self.problem.lA)
             # uA = np.multiply(np.reciprocal(E.diagonal()),
@@ -666,6 +674,19 @@ class OSQP(object):
         self.solution.u = \
             self.scaler_matrices.E.dot(self.solution.u)
 
+    def norm_pri_res(self, z):
+        pri_res = np.minimum(z[self.scaled_problem.n:] - self.scaled_problem.lA, 0) + \
+            np.maximum(z[self.scaled_problem.n:] - self.scaled_problem.uA, 0)
+        return np.linalg.norm(pri_res)
+
+    def norm_dua_res(self, z_prev, z, x):
+        temp_vec = (2 - self.options.alpha)*z_prev - z - \
+            (1 - self.options.alpha)*x
+        dua_res = temp_vec[:self.scaled_problem.n] + \
+            self.scaled_problem.A.T.dot(temp_vec[self.scaled_problem.n:])
+        dua_res *= self.options.rho
+        return np.linalg.norm(dua_res)
+
     def solve_admm(self):
         """"
         Solve splitting problem with splitting of the form (after introducing
@@ -741,21 +762,26 @@ class OSQP(object):
 
             # Compute primal and dual residuals
             # ipdb.set_trace()
-            resid_prim = spla.norm(x - z)
-            resid_dual = self.options.rho*spla.norm(z - z_old)
+            norm_pri_res = self.norm_pri_res(z)
+            norm_dua_res = self.norm_dua_res(z_old, z, x)
 
             # Check the stopping criterion
-            eps_prim = np.sqrt(n + m) * self.options.eps_abs \
-                + self.options.eps_rel * np.max([spla.norm(x), spla.norm(z)])
-            eps_dual = np.sqrt(m) * self.options.eps_abs + \
-                self.options.eps_rel * self.options.rho * spla.norm(u)
+            eps_prim = np.sqrt(m) * self.options.eps_abs \
+                + self.options.eps_rel * np.max([np.linalg.norm(x[n:]),
+                                                 np.linalg.norm(
+                                                    self.scaled_problem.lA),
+                                                 np.linalg.norm(
+                                                    self.scaled_problem.uA)])
+            eps_dual = np.sqrt(n) * self.options.eps_abs + \
+                self.options.eps_rel * self.options.rho * \
+                np.linalg.norm(self.scaled_problem.A.T.dot(u))
 
-            if resid_prim <= eps_prim and resid_dual <= eps_dual:
+            if norm_pri_res <= eps_prim and norm_dua_res <= eps_dual:
                 # Print the progress in last iterations
                 if self.options.print_level > 1:
                     f = self.scaled_problem.objval(z[:n])
                     print "%4s \t % 1.7e  \t%1.2e  \t%1.2e" \
-                        % (i+1, f, resid_prim, resid_dual)
+                        % (i+1, f, norm_pri_res, norm_dua_res)
                 # Stop the algorithm
                 break
 
@@ -767,7 +793,7 @@ class OSQP(object):
                         | (self.options.print_level == 3):
                             f = self.scaled_problem.objval(z[:n])
                             print "%4s \t % 1.7e  \t%1.2e  \t%1.2e" \
-                                % (i+1, f, resid_prim, resid_dual)
+                                % (i+1, f, norm_pri_res, norm_dua_res)
 
         # Total iterations
         self.total_iter = i
