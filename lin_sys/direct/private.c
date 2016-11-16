@@ -337,13 +337,17 @@ c_int solve_lin_sys(const Settings *settings, Priv *p, c_float *b) {
 
 void polish(Work *work){
     c_int j, ptr, mred=0, Ared_nnz=0;
+    c_float *Ax, *prim_resid, *dual_resid, tmp, prim_resid_norm, dual_resid_norm;
     Priv *plsh = c_calloc(1, sizeof(Priv));
 
     // Initialize counters for active/inactive constraints
     work->act->n_lAct = 0;
     work->act->n_uAct = 0;
     work->act->n_free = 0;
-    // Guess which linear constraints are lower-active, upper-active and free
+    /* Guess which linear constraints are lower-active, upper-active and free
+     *    A2Ared[j] = -1    (if j-th row of A is not inserted in Ared)
+     *    A2Ared[j] =  i    (if j-th row of A is inserted at i-th row of Ared)
+     */
     for (j = 0; j < work->data->m; j++) {
         if ( work->z[work->data->n + j] - work->data->lA[j] <
              -work->settings->rho * work->u[work->data->n + j] ) {
@@ -361,7 +365,6 @@ void polish(Work *work){
         }
     }
     work->act->lambda_red = c_malloc(mred * sizeof(c_float));
-    c_print("mred = %d\n", mred);
 
     // Count number of elements in Ared
     for (j = 0; j < work->data->A->nzmax; j++) {
@@ -412,25 +415,69 @@ void polish(Work *work){
     prea_vec_copy(rhs, work->act->x, work->data->n);
     prea_vec_copy(rhs + work->data->n, work->act->lambda_red, mred);
 
-    // Check if the obtained solution is primal/dual feasible
-    work->act->polish_success = 1;
-    for (j = 0; j < work->act->n_lAct; j++) {
-        if (work->act->x[work->act->ind_lAct[j]] >= POLISH_TOL) {
-            work->act->polish_success = 0;
-            break;
-        }
+    // Compute primal residual:  pr = min(Ax-lA, 0) + max(Ax-uA, 0)
+    Ax = c_malloc(work->data->m * sizeof(c_float));
+    mat_vec(work->data->A, work->act->x, Ax, 0);
+    prim_resid = c_calloc(1, work->data->m * sizeof(c_float));
+    for (j = 0; j < work->data->m; j++) {
+        tmp = Ax[j] - work->data->lA[j];
+        if (tmp < 0.)
+            prim_resid[j] += tmp;
+        tmp = Ax[j] - work->data->uA[j];
+        if (tmp > 0.)
+            prim_resid[j] += tmp;
     }
-    for (j = 0; j < work->act->n_uAct; j++) {
-        if (work->act->x[work->act->ind_uAct[j]] <= -POLISH_TOL) {
-            work->act->polish_success = 0;
-            break;
-        }
+    prim_resid_norm = vec_norm2(prim_resid, work->data->m);
+
+    // Compute dual residual:  dr = q + Ared'*lambda_red + P*x
+    dual_resid = vec_copy(work->data->q, work->data->n);          // dr = q
+    mat_vec_tpose(Ared, work->act->lambda_red, dual_resid, 1, 0); //   += Ared'*lambda
+    mat_vec(work->data->P, work->act->x, dual_resid, 1);          //   += P*x (1st part)
+    mat_vec_tpose(work->data->P, work->act->x, dual_resid, 1, 1); //   += P*x (2nd part)
+    dual_resid_norm = vec_norm2(dual_resid, work->data->n);
+
+
+    // DEBUG
+    c_print("Polished primal residual: %.2e\n", prim_resid_norm);
+    c_print("Polished dual residual:   %.2e\n", dual_resid_norm);
+
+
+    // Check if the residuals are smaller than in the ADMM solution
+    if (prim_resid_norm < work->info->pri_res &&
+        dual_resid_norm < work->info->dua_res) {
+            // Update primal and dual variables
+            prea_vec_copy(work->act->x, work->solution->x, work->data->n);
+            for (j = 0; j < work->data->m; j++) {
+                if (work->act->A2Ared[j] != -1){
+                    work->solution->lambda[j] = work->act->lambda_red[work->act->A2Ared[j]];
+                } else {
+                    work->solution->lambda[j] = 0.;
+                }
+            }
+            // Update solver information
+            work->info->pri_res = prim_resid_norm;
+            work->info->pri_res = dual_resid_norm;
+            work->info->obj_val = quad_form(work->data->P, work->act->x) +
+                                  vec_prod(work->data->q, work->act->x, work->data->n);
+            // Polishing successful
+            work->act->polish_success = 1;
+            #if PRINTLEVEL > 1
+            c_print("Polishing: Successful.\n");
+            #endif
+    } else {
+        work->act->polish_success = 0;
+        #if PRINTLEVEL > 1
+        c_print("Polishing: Unsuccessful.\n");
+        #endif
     }
-    // TODO: Check if Ax is between the bound [lb, ub]
+
 
     // Memory clean-up
     csc_spfree(Ared);
     csc_spfree(KKTred);
     free_priv(plsh);
     c_free(rhs);
+    c_free(Ax);
+    c_free(prim_resid);
+    c_free(dual_resid);
 }
