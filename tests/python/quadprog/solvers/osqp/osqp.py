@@ -674,9 +674,10 @@ class OSQP(object):
         self.solution.u = \
             self.scaler_matrices.E.dot(self.solution.u)
 
-    def norm_pri_res(self, z):
-        pri_res = np.minimum(z[self.scaled_problem.n:] - self.scaled_problem.lA, 0) + \
-            np.maximum(z[self.scaled_problem.n:] - self.scaled_problem.uA, 0)
+    def norm_pri_res(self, x):
+        pri_res = np.minimum(x[self.scaled_problem.n:] -
+                             self.scaled_problem.lA, 0) + \
+            np.maximum(x[self.scaled_problem.n:] - self.scaled_problem.uA, 0)
         return np.linalg.norm(pri_res)
 
     def norm_dua_res(self, z_prev, z, x):
@@ -762,7 +763,7 @@ class OSQP(object):
 
             # Compute primal and dual residuals
             # ipdb.set_trace()
-            norm_pri_res = self.norm_pri_res(z)
+            norm_pri_res = self.norm_pri_res(x)
             norm_dua_res = self.norm_dua_res(z_old, z, x)
 
             # Check the stopping criterion

@@ -76,6 +76,7 @@ def main():
         q = sp.randn(n)
         A = spspa.csc_matrix(sp.randn(m, n))
         uA = 3 + sp.randn(m)
+        # lA = uA
         lA = -3 + sp.randn(m)
 
         p = qp.quadprogProblem(P, q, A, lA, uA)
@@ -106,7 +107,7 @@ def main():
                           alpha=1.6,
                           rho=1.6,
                           scale_steps=3,
-                          scale_problem=False,
+                          scale_problem=True,
                           scale_norm=2,
                           polish=False,
                           print_level=2)
