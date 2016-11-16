@@ -86,7 +86,7 @@ c_float vec_prod(const c_float *a, const c_float *b, c_int n){
     for(i = 0;  i < n; i++){
         prod += a[i] * b[i];
     }
-    
+
     return prod;
 }
 
@@ -134,8 +134,7 @@ TODO: delete or keep it? We may not need this function.
 */
 void mat_ew_abs(csc * A){
     c_int i;
-    for (i=0; i<A->nzmax; i++)
-    {
+    for (i=0; i<A->nzmax; i++) {
         A->x[i] = c_abs(A->x[i]);
     }
 }
@@ -145,17 +144,61 @@ void mat_ew_abs(csc * A){
  *    y  =  A*x  (if plus_eq == 0)
  *    y +=  A*x  (if plus_eq == 1)
 */
-void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq){
-    int j, i;
+void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq) {
+    int i, j;
     if (!plus_eq){
-      // y = 0
-      for(i=0; i<A->m; i++){
-        y[i] = 0;
-      }
+        // y = 0
+        for (i=0; i<A->m; i++) {
+            y[i] = 0;
+        }
     }
-    for (j=0; j<A->n; j++){
-        for (i=A->p[j]; i<A->p[j+1]; i++){
+
+    // if A is empty
+    if (A->nzmax == 0) {
+        return;
+    }
+
+    // y +=  A*x
+    for (j=0; j<A->n; j++) {
+        for (i=A->p[j]; i<A->p[j+1]; i++) {
             y[A->i[i]] += A->x[i] * x[j];
+        }
+    }
+}
+
+/* Matrix-transpose-vector multiplication
+ *    y  =  A'*x  (if plus_eq == 0)
+ *    y +=  A'*x  (if plus_eq == 1)
+ * If skip_diag == 1, then diagonal elements of A are assumed to be zero.
+*/
+void mat_vec_tpose(const csc *A, const c_float *x, c_float *y,
+                   c_int plus_eq, c_int skip_diag) {
+    int i, j, k;
+    if (!plus_eq){
+        // y = 0
+        for (i=0; i<A->m; i++) {
+            y[i] = 0;
+        }
+    }
+
+    // if A is empty
+    if (A->nzmax == 0) {
+        return;
+    }
+
+    // y +=  A*x
+    if (skip_diag) {
+  		  for (j=0; j<A->n; j++) {
+            for (k=A->p[j]; k < A->p[j+1]; k++) {
+                i = A->i[k];
+                y[j] += i==j ? 0 : A->x[k]*x[i];
+            }
+        }
+  	} else {
+        for (j=0; j<A->n; j++) {
+            for (k=A->p[j]; k < A->p[j+1]; k++) {
+                y[j] += A->x[k]*x[A->i[k]];
+            }
         }
     }
 }

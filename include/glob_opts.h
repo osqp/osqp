@@ -42,6 +42,7 @@ typedef double c_float;              /* for numerical values  */
 
 /* Use customized structures names */
 typedef struct OSQP_PROBLEM_DATA Data;
+typedef struct OSQP_ACTIVE_CONSTRAINTS Active;
 typedef struct OSQP_SETTINGS Settings;
 typedef struct OSQP_SOLUTION Solution;
 typedef struct OSQP_INFO Info;

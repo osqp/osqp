@@ -75,6 +75,15 @@ Work * osqp_setup(const Data * data, Settings *settings){
     // Initialize linear system solver private structure
     work->priv = init_priv(work->data->P, work->data->A, work->settings);
 
+    // Initialize active constraints structure
+    work->act = c_malloc(sizeof(Active));
+    work->act->ind_lAct = c_malloc(work->data->m * sizeof(c_int));
+    work->act->ind_uAct = c_malloc(work->data->m * sizeof(c_int));
+    work->act->ind_free = c_malloc(work->data->m * sizeof(c_int));
+    work->act->A2Ared = c_malloc(work->data->m * sizeof(c_int));
+    work->act->lambda_red = OSQP_NULL;
+    work->act->x = c_malloc(work->data->n * sizeof(c_float));
+
     // Allocate scaling
     if (settings->normalize){
         //TODO: Add normalization (now doing nothing)
@@ -217,6 +226,9 @@ c_int osqp_solve(Work * work){
     work->info->solve_time = toc(work->timer);
     #endif
 
+    // Polish the obtained solution
+    polish(work);
+
     /* Print final footer */
     #if PRINTLEVEL > 0
     print_footer(work->info);
@@ -224,10 +236,8 @@ c_int osqp_solve(Work * work){
 
     // Store solution
     prea_vec_copy(work->z, work->solution->x, work->data->n);
-    // prea_vec_copy(work->u, work->solution->u, work->data->n + work->data->m);
-
     // Recover dual solution from u
-    vec_add_scaled(work->solution->lambda, (work->u + work->data->n),
+    vec_add_scaled(work->solution->lambda, work->u,
                    work->data->m, work->settings->rho);
 
     return exitflag;
@@ -252,14 +262,24 @@ c_int osqp_cleanup(Work * work){
     c_free(work->data->uA);
     c_free(work->data);
 
+    // Free private structure for linear system solver_solution
+    free_priv(work->priv);
+
+    // Free active constraints structure
+    c_free(work->act->ind_lAct);
+    c_free(work->act->ind_uAct);
+    c_free(work->act->ind_free);
+    c_free(work->act->A2Ared);
+    c_free(work->act->x);
+    if (work->act->lambda_red)
+        c_free(work->act->lambda_red);
+    c_free(work->act);
+
     // Free work Variables
     c_free(work->x);
     c_free(work->u);
     c_free(work->z);
     c_free(work->z_prev);
-
-    // Free private structure
-    free_priv(work->priv);
 
     // Free Settings
     c_free(work->settings);

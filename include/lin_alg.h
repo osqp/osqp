@@ -69,6 +69,14 @@ void mat_ew_abs(csc * A);
 void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq);
 
 
+/* Matrix-transpose-vector multiplication
+ *    y  =  A'*x  (if plus_eq == 0)
+ *    y +=  A'*x  (if plus_eq == 1)
+ * If skip_diag == 1, then diagonal elements of A are assumed to be zero.
+*/
+void mat_vec_tpose(const csc *A, const c_float *x, c_float *y,
+                   c_int plus_eq, c_int skip_diag);
+
 /**
  * Compute quadratic form f(x) = 1/2 x' P x
  * @param  P quadratic matrix in CSC form (only upper triangular)

@@ -9,6 +9,9 @@
  * interacts with this struct */
 typedef struct c_priv Priv;
 
+/* stores the necessary workspace for polishing */
+typedef struct c_polish Polish;
+
 
 // Initialize private variable for solver
 // NB: Only the upper triangular part of P is stuffed!
@@ -19,6 +22,10 @@ c_int solve_lin_sys(const Settings *settings, Priv *p, c_float *b);
 
 // Free LDL Factorization structure
 void free_priv(Priv *p);
+
+
+// Solution polishing: Solve equality constrained QP with assumed active constr.
+void polish(Work *work);
 
 
 // TODO: Remove these functions

@@ -18,7 +18,5 @@ struct c_priv{
     c_float total_solve_time;
 };
 
-//TODO: Add structure for KKT factorization (see scs)
-
 
 #endif
