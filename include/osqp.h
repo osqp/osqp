@@ -43,6 +43,7 @@ struct OSQP_SETTINGS {
         c_int verbose; /* boolean, write out progress: 1 */
         c_int warm_start; /* boolean, warm start (put initial guess in Sol
                                struct): 0 */
+        c_float delta; /* regularization parameter for polishing */
 };
 
 
@@ -53,6 +54,9 @@ struct OSQP_WORK {
 
         // Linear System solver structure
         Priv * priv;
+
+        // Active constraints structure
+        Active * act;
 
         // Internal solver variables
         c_float *x, *z, *u, *z_prev;
@@ -79,7 +83,6 @@ struct OSQP_SOLUTION {
         c_float *lambda;  // Lagrange multiplier associated to lA <= Ax <= uA
 };
 
-
 /* Solver Information */
 struct OSQP_INFO {
         c_int iter;      /* number of iterations taken */
@@ -93,6 +96,21 @@ struct OSQP_INFO {
         c_float setup_time; /* time taken for setup phase (milliseconds) */
         c_float solve_time; /* time taken for solve phase (milliseconds) */
         #endif
+};
+
+/* Active constraints */
+struct OSQP_ACTIVE_CONSTRAINTS{
+    c_int *ind_lAct;      // indices of lower-active constraints
+    c_int *ind_uAct;      // indices of upper-active constraints
+    c_int *ind_free;      // indices of inactive constraints
+    c_int n_lAct;         // number of lower-active constraints
+    c_int n_uAct;         // number of upper-active constraints
+    c_int n_free;         // number of inactive constraints
+    c_int *A2Ared;        // Table of indices that maps A to Ared
+    c_float *x;           // optimal solution obtained by polishing
+    c_float *lambda_red;  // optimal dual variables associated to Ared obtained
+                          //   by polishing
+    c_int polish_success; // was polishing successful (1) or not (0)
 };
 
 

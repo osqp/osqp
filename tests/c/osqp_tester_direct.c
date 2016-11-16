@@ -25,7 +25,7 @@ static char * all_tests() {
     mu_run_test(test_basic_qp);
     mu_run_test(test_basic_qp2);
     // mu_run_test(test_chain80w);
-    mu_run_test(test_diesel);
+    // mu_run_test(test_diesel);
     return 0;
 }
 

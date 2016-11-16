@@ -53,32 +53,33 @@ static char * test_basic_qp()
         exitflag = 1;
     }
     else {
-    // DEBUG
+        // DEBUG
 
-    // print_vec(work->data->lx, work->data->n, "lx");
-    // print_vec(work->data->ux, work->data->n, "ux");
+        // print_vec(work->data->lx, work->data->n, "lx");
+        // print_vec(work->data->ux, work->data->n, "ux");
 
 
 
-    // Solve Problem
-    osqp_solve(work);
+        // Solve Problem
+        osqp_solve(work);
 
-    // Print solution
-    #if PRINTLEVEL > 2
-    // print_csc_matrix(work->data->P, "P");
-    // print_vec(work->data->q, work->data->n, "q");
-    // print_csc_matrix(work->data->A, "A");
-    // print_vec(work->data->lA, work->data->m, "lA");
-    // print_vec(work->data->uA, work->data->m, "uA");
-    print_vec(work->solution->x, work->data->n, "x");
-    print_vec(work->solution->lambda, work->data->m, "lambda");
-    #endif
+        // Print solution
+        #if PRINTLEVEL > 2
+        // print_csc_matrix(work->data->P, "P");
+        // print_vec(work->data->q, work->data->n, "q");
+        // print_csc_matrix(work->data->A, "A");
+        // print_vec(work->data->lA, work->data->m, "lA");
+        // print_vec(work->data->uA, work->data->m, "uA");
+        print_vec(work->solution->x, work->data->n, "x");
+        print_vec(work->solution->lambda, work->data->m, "lambda");
+        #endif
 
-    // Clean workspace
-    osqp_cleanup(work);
-    c_free(data->A);
-    c_free(data->P);
-    c_free(data);
+        // Clean workspace
+        osqp_cleanup(work);
+        c_free(data->A);
+        c_free(data->P);
+        c_free(data);
+
 
     }
 

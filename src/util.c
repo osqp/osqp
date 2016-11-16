@@ -121,6 +121,7 @@ void set_default_settings(Settings * settings) {
         settings->alpha = ALPHA;     /* relaxation parameter */
         settings->verbose = VERBOSE;     /* x equality constraint scaling: 1e-3 */
         settings->warm_start = WARM_START;     /* x equality constraint scaling: 1e-3 */
+        settings->delta = DELTA;    /* regularization parameter for polishing */
 }
 
 
@@ -137,6 +138,7 @@ Settings * copy_settings(Settings * settings){
     new->alpha = settings->alpha;
     new->verbose = settings->verbose;
     new->warm_start = settings->warm_start;
+    new->delta = settings->delta;
 
     return new;
 }
@@ -335,5 +337,16 @@ void print_dns_matrix(c_float * M, c_int m, c_int n, char *name)
 void print_vec(c_float * v, c_int n, char *name){
         print_dns_matrix(v, 1, n, name);
 }
+
+
+// Print int array
+void print_vec_int(c_int * x, c_int n, char *name) {
+    c_print("%s = [", name);
+    for(c_int i=0; i<n; i++) {
+        c_print(" %d ", x[i]);
+    }
+    c_print("]\n");
+}
+
 
 #endif
