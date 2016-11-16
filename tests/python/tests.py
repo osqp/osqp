@@ -68,8 +68,8 @@ def main():
         p = qp.quadprogProblem(P, q, A, lA, uA)
     elif example == 'random':
         # Random Example
-        n = 10
-        m = 15
+        n = 5
+        m = 6
         # Generate random Matrices
         Pt = sp.randn(n, n)
         P = spspa.csc_matrix(np.dot(Pt.T, Pt))
@@ -106,7 +106,7 @@ def main():
                           eps_abs=1e-5,
                           alpha=1.6,
                           rho=1.6,
-                          scale_steps=3,
+                          scale_steps=10,
                           scale_problem=True,
                           scale_norm=2,
                           polish=False,

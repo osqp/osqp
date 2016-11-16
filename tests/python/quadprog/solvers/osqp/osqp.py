@@ -374,7 +374,7 @@ class OSQP(object):
             elif self.options.scale_norm == 1:
                 KKT2.data = np.absolute(KKT2.data)  # Elementwise absolute value
 
-            # ipdb.set_trace()
+            ipdb.set_trace()
 
 
             # Perform Scalings as in GLPK solver: https://en.wikibooks.org/wiki/GLPK/Scaling
@@ -415,7 +415,7 @@ class OSQP(object):
                     # Regularize components
                     KKT2d = KKT2.dot(d)
                     # Prevent division by 0
-                    d = (n + m)*np.reciprocal(KKT2d + 1e-6)
+                    d = (n + m)*np.reciprocal(KKT2d + 1)
                     # Prevent too large elements
                     d = np.minimum(np.maximum(d, -1e+10), 1e+10)
                     #  d = np.reciprocal(KKT2d)
@@ -432,7 +432,7 @@ class OSQP(object):
                     condKKTeq = nplinalg.cond(KKTeq.todense())
                     print "Condition number of KKT matrix %.4e" % condKKT
                     print "Condition number of KKTeq matrix %.4e" % condKKTeq
-                    # ipdb.set_trace()
+                    ipdb.set_trace()
             #  else:  # Q matrix is zero (LP)
                 #  print "Perform scaling of Ac constraints matrix: %i Steps\n" % \
                     #  self.options.scale_steps
