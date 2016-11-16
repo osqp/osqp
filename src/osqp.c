@@ -227,7 +227,7 @@ c_int osqp_solve(Work * work){
     #endif
 
     // Polish the obtained solution
-    polish(work);
+    // polish(work);
 
     /* Print final footer */
     #if PRINTLEVEL > 0
@@ -239,6 +239,11 @@ c_int osqp_solve(Work * work){
     // Recover dual solution from u
     vec_add_scaled(work->solution->lambda, work->u,
                    work->data->m, work->settings->rho);
+
+    // #if PRINTLEVEL > 2
+    // print_vec(work->u, work->data->m, "u");
+    // c_print("rho = %.2f\n", work->settings->rho);
+    // #endif
 
     return exitflag;
 }

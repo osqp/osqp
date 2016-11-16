@@ -37,7 +37,7 @@
 
 
 /* Printing */
-#define PRINT_INTERVAL 10
+#define PRINT_INTERVAL 100
 
 
 

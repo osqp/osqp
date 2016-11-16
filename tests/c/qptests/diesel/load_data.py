@@ -13,11 +13,12 @@ def gen_diesel_test():
     A = spspa.vstack([A, spspa.eye(A.shape[1])]).tocsc()
     lA = np.loadtxt(direct + 'lbA.oqp')
     uA = np.loadtxt(direct + 'ubA.oqp')
-    lA = np.vstack([lA, np.loadtxt(direct + 'lb.oqp')])
-    uA = np.vstack([uA, np.loadtxt(direct + 'ub.oqp')])
+    lA = np.hstack([lA, np.loadtxt(direct + 'lb.oqp')])
+    uA = np.hstack([uA, np.loadtxt(direct + 'ub.oqp')])
     P = spspa.csc_matrix(np.loadtxt(direct + 'H.oqp'))
     q = np.loadtxt(direct + 'g.oqp')
 
+    ipdb.set_trace()
     # Get only first elements of lbA and q
     lA = lA[0, :]
     uA = uA[0, :]

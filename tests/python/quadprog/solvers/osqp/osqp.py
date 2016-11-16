@@ -754,12 +754,12 @@ class OSQP(object):
                 (1.-self.options.alpha)*z_old[n:] - z[n:]
 
             # # DEBUG
-            # print "x = "
-            # print x
-            # print "z = "
-            # print z
-            # print "u = "
-            # print u
+            print "x = "
+            print x
+            print "z = "
+            print z
+            print "u = "
+            print u
 
             # Compute primal and dual residuals
             # ipdb.set_trace()
