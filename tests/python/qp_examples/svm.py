@@ -38,20 +38,40 @@ class svm(object):
         #       minimize	 x.T * x + gamma 1.T * t
         #       subject to  t >= diag(b) A x + 1
         #                   t >= 0
-        Q = spspa.block_diag((2*spspa.eye(n), spspa.csc_matrix((m, m))),
+
+        P = spspa.block_diag((2*spspa.eye(n), spspa.csc_matrix((m, m))),
                              format='csc')
-        c = np.append(np.zeros(n), gamma*np.ones(m))
-        Aeq = spspa.csc_matrix((0, n + m))
-        beq = np.zeros(0)
-        Aineq = spspa.hstack([spspa.diags(b).dot(A), -spspa.eye(m)]).tocsc()
-        bineq = -np.ones(m)
-        lb = np.append(-np.inf*np.ones(n), np.zeros(m))
+        q = np.append(np.zeros(n), gamma*np.ones(m))
+        A = spspa.hstack([spspa.diags(b).dot(A), -spspa.eye(m)]).tocsc()
+        uA = -np.ones(m)
+        lA = -np.inf * np.ones(m)
+
+        # Add bounds for t
+        Abounds = spspa.hstack([spspa.csc_matrix((m, n)), spspa.eye(m)])
+        A = spspa.vstack([A, Abounds])
+        uA = np.append(uA, +np.inf * np.ones(m))
+        lA = np.append(lA, np.zeros(m))
 
         # Create a quadprogProblem and store it in a private variable
-        self._prob = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq, lb)
+        self._prob = qp.quadprogProblem(P, q, A, lA, uA)
         # Create an OSQP object and store it in a private variable
         self._osqp = osqp.OSQP(**osqp_opts)
-        self._osqp.problem(Q, c, Aeq, beq, Aineq, bineq, lb)
+        self._osqp.problem(P, q, A, lA, uA)
+
+        # Q = spspa.block_diag((2*spspa.eye(n), spspa.csc_matrix((m, m))),
+        #                      format='csc')
+        # c = np.append(np.zeros(n), gamma*np.ones(m))
+        # Aeq = spspa.csc_matrix((0, n + m))
+        # beq = np.zeros(0)
+        # Aineq = spspa.hstack([spspa.diags(b).dot(A), -spspa.eye(m)]).tocsc()
+        # bineq = -np.ones(m)
+        # lb = np.append(-np.inf*np.ones(n), np.zeros(m))
+        #
+        # # Create a quadprogProblem and store it in a private variable
+        # self._prob = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq, lb)
+        # # Create an OSQP object and store it in a private variable
+        # self._osqp = osqp.OSQP(**osqp_opts)
+        # self._osqp.problem(Q, c, Aeq, beq, Aineq, bineq, lb)
 
     def solve(self, solver=OSQP):
         """
@@ -76,15 +96,15 @@ class svm(object):
 sp.random.seed(1)
 
 # Set problem
-n = 20
-m = 10*n
+n = 30
+m = 2*n
 
 # Set options of the OSQP solver
-options = {'eps_abs':       1e-4,
-           'eps_rel':       1e-4,
+options = {'eps_abs':       1e-5,
+           'eps_rel':       1e-5,
            'alpha':         1.6,
            'scale_problem': True,
-           'scale_steps':   4,
+           'scale_steps':   20,
            'polish':        False}
 
 # Create an svm object
@@ -94,6 +114,13 @@ svm_obj = svm(m, n, dens_lvl=0.3, osqp_opts=options)
 resultsCPLEX = svm_obj.solve(solver=CPLEX)
 resultsGUROBI = svm_obj.solve(solver=GUROBI)
 resultsOSQP = svm_obj.solve(solver=OSQP)
+
+
+# Print objective values
+print "CPLEX  Objective Value: %.3f" % resultsCPLEX.objval
+print "GUROBI Objective Value: %.3f" % resultsGUROBI.objval
+print "OSQP   Objective Value: %.3f" % resultsOSQP.objval
+print "\n"
 
 # Print timings
 print "CPLEX  CPU time: %.3f" % resultsCPLEX.cputime

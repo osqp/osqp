@@ -374,7 +374,7 @@ class OSQP(object):
             elif self.options.scale_norm == 1:
                 KKT2.data = np.absolute(KKT2.data)  # Elementwise absolute value
 
-            ipdb.set_trace()
+            #  ipdb.set_trace()
 
 
             # Perform Scalings as in GLPK solver: https://en.wikibooks.org/wiki/GLPK/Scaling
@@ -399,7 +399,7 @@ class OSQP(object):
                         #  nplinalg.norm((KKT.todense())[1, :])
                     #  print "Norm of first row of KKTeq %.4e" % \
                         #  nplinalg.norm((KKTeq.todense())[1, :])
-                    #  condKKT = nplinalg.cond(KKT.todense())
+                    #  condKKT = nplinalg.cond(KKT.todense1())
                     #  condKKTeq = nplinalg.cond(KKTeq.todense())
                     #  print "Condition number of KKT matrix %.4e" % condKKT
                     #  print "Condition number of KKTeq matrix %.4e" % condKKTeq
@@ -408,6 +408,10 @@ class OSQP(object):
                 print "Perform symmetric scaling of KKT matrix: %i Steps\n" % \
                     self.options.scale_steps
 
+
+                # condKKT = nplinalg.cond(KKT.todense())
+                # print "Condition number of KKT matrix %.4e" % condKKT
+
                 # Iterate Scaling
                 for i in range(self.options.scale_steps):
                     #  print np.max(KKT2.dot(d))
@@ -415,24 +419,23 @@ class OSQP(object):
                     # Regularize components
                     KKT2d = KKT2.dot(d)
                     # Prevent division by 0
-                    d = (n + m)*np.reciprocal(KKT2d + 1)
+                    d = (n + m)*np.reciprocal(KKT2d + 1e-08)
+                    # ipdb.set_trace()
                     # Prevent too large elements
                     d = np.minimum(np.maximum(d, -1e+10), 1e+10)
                     #  d = np.reciprocal(KKT2d)
                     # print "Scaling step %i\n" % i
 
                     # # DEBUG STUFF
-                    S = spspa.diags(d)
-                    KKTeq = S.dot(KKT.dot(S))
-                    print "Norm of first row of KKT %.4e" % \
-                        nplinalg.norm((KKT.todense())[1, :])
-                    print "Norm of first row of KKTeq %.4e" % \
-                        nplinalg.norm((KKTeq.todense())[1, :])
-                    condKKT = nplinalg.cond(KKT.todense())
-                    condKKTeq = nplinalg.cond(KKTeq.todense())
-                    print "Condition number of KKT matrix %.4e" % condKKT
-                    print "Condition number of KKTeq matrix %.4e" % condKKTeq
-                    ipdb.set_trace()
+                    # S = spspa.diags(d)
+                    # KKTeq = S.dot(KKT.dot(S))
+                    # #  print "Norm of first row of KKT %.4e" % \
+                    #     #  nplinalg.norm((KKT.todense())[1, :])
+                    # #  print "Norm of first row of KKTeq %.4e" % \
+                    #     #  nplinalg.norm((KKTeq.todense())[1, :])
+                    # condKKTeq = nplinalg.cond(KKTeq.todense())
+                    # print "Condition number of KKTeq matrix %.4e" % condKKTeq
+                    #  ipdb.set_trace()
             #  else:  # Q matrix is zero (LP)
                 #  print "Perform scaling of Ac constraints matrix: %i Steps\n" % \
                     #  self.options.scale_steps
@@ -754,12 +757,12 @@ class OSQP(object):
                 (1.-self.options.alpha)*z_old[n:] - z[n:]
 
             # # DEBUG
-            print "x = "
-            print x
-            print "z = "
-            print z
-            print "u = "
-            print u
+            #  print "x = "
+            #  print x
+            #  print "z = "
+            #  print z
+            #  print "u = "
+            #  print u
 
             # Compute primal and dual residuals
             # ipdb.set_trace()
