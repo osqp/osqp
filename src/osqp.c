@@ -83,6 +83,8 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->act->A2Ared = c_malloc(work->data->m * sizeof(c_int));
     work->act->lambda_red = OSQP_NULL;
     work->act->x = c_malloc(work->data->n * sizeof(c_float));
+    work->act->Ax = c_malloc(work->data->m * sizeof(c_float));
+    work->act->dua_res_ws = c_malloc(work->data->n * sizeof(c_float));
 
     // Allocate scaling
     if (settings->normalize){
@@ -196,7 +198,7 @@ c_int osqp_solve(Work * work){
 
 
         /* Update information */
-        update_info(work, iter);
+        update_info(work, iter, 0);
 
         /* Print summary */
         #if PRINTLEVEL > 1
@@ -215,7 +217,8 @@ c_int osqp_solve(Work * work){
 
     /* Print summary for last iteration */
     #if PRINTLEVEL > 1
-    print_summary(work->info);
+    if (work->settings->verbose && iter % PRINT_INTERVAL != 0)
+      print_summary(work->info);
     #endif
 
     /* Update final status */
@@ -235,10 +238,7 @@ c_int osqp_solve(Work * work){
     #endif
 
     // Store solution
-    prea_vec_copy(work->z, work->solution->x, work->data->n);
-    // Recover dual solution from u
-    vec_add_scaled(work->solution->lambda, work->u,
-                   work->data->m, work->settings->rho);
+    store_solution(work);
 
     return exitflag;
 }
@@ -266,11 +266,14 @@ c_int osqp_cleanup(Work * work){
     free_priv(work->priv);
 
     // Free active constraints structure
+    csc_spfree(work->act->Ared);
     c_free(work->act->ind_lAct);
     c_free(work->act->ind_uAct);
     c_free(work->act->ind_free);
     c_free(work->act->A2Ared);
     c_free(work->act->x);
+    c_free(work->act->Ax);
+    c_free(work->act->dua_res_ws);
     if (work->act->lambda_red)
         c_free(work->act->lambda_red);
     c_free(work->act);

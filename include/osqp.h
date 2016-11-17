@@ -85,21 +85,24 @@ struct OSQP_SOLUTION {
 
 /* Solver Information */
 struct OSQP_INFO {
-        c_int iter;      /* number of iterations taken */
-        char status[32]; /* status string, e.g. 'Solved' */
-        c_int status_val; /* status as c_int, defined in constants.h */
-        c_float obj_val;  /* primal objective */
-        c_float pri_res; /* norm of primal residual */
-        c_float dua_res; /* norm of dual residual */
+        c_int iter;          /* number of iterations taken */
+        char status[32];     /* status string, e.g. 'Solved' */
+        c_int status_val;    /* status as c_int, defined in constants.h */
+        c_int status_polish; /* polish status: successful (1), not (0) */
+        c_float obj_val;     /* primal objective */
+        c_float pri_res;     /* norm of primal residual */
+        c_float dua_res;     /* norm of dual residual */
 
         #if PROFILING > 0
-        c_float setup_time; /* time taken for setup phase (milliseconds) */
-        c_float solve_time; /* time taken for solve phase (milliseconds) */
+        c_float setup_time;  /* time taken for setup phase (milliseconds) */
+        c_float solve_time;  /* time taken for solve phase (milliseconds) */
+        c_float polish_time; /* time taken for polish phase (milliseconds) */
         #endif
 };
 
 /* Active constraints */
-struct OSQP_ACTIVE_CONSTRAINTS{
+struct OSQP_ACTIVE_CONSTRAINTS {
+    csc *Ared;            // Matrix A containing only actiev rows
     c_int *ind_lAct;      // indices of lower-active constraints
     c_int *ind_uAct;      // indices of upper-active constraints
     c_int *ind_free;      // indices of inactive constraints
@@ -108,9 +111,11 @@ struct OSQP_ACTIVE_CONSTRAINTS{
     c_int n_free;         // number of inactive constraints
     c_int *A2Ared;        // Table of indices that maps A to Ared
     c_float *x;           // optimal solution obtained by polishing
+    c_float *Ax;          // workspace for storing A*x
+    c_float *dua_res_ws;  // workspace for computing dual residual
     c_float *lambda_red;  // optimal dual variables associated to Ared obtained
                           //   by polishing
-    c_int polish_success; // was polishing successful (1) or not (0)
+    // c_int polish_success; // was polishing successful (1) or not (0)
 };
 
 

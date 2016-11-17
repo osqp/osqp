@@ -27,6 +27,9 @@ void print_header();
 /* Print iteration summary */
 void print_summary(Info * info);
 
+/* Print polishing information */
+void print_polishing(Info * info);
+
 #endif
 
 #if PRINTLEVEL > 0

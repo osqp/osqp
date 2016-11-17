@@ -76,7 +76,20 @@ void print_summary(Info * info){
     c_print("%*.2fs", 9, info->setup_time + info->solve_time);
     #endif
     c_print("\n");
+}
 
+
+/* Print polishing information */
+void print_polishing(Info * info) {
+    c_print("%*s ", (int)strlen(HEADER[0]), "PLSH");
+    c_print("%*.4e ", (int)HSPACE, info->obj_val);
+    c_print("%*.4e ", (int)HSPACE, info->pri_res);
+    c_print("%*.4e ", (int)HSPACE, info->dua_res);
+    #if PROFILING > 0
+    c_print("%*.2fs", 9, info->setup_time + info->solve_time +
+                         info->polish_time);
+    #endif
+    c_print("\n");
 }
 
 
@@ -86,23 +99,36 @@ void print_summary(Info * info){
 #if PRINTLEVEL > 0
 /* Print Footer */
 void print_footer(Info * info){
+
     #if PRINTLEVEL > 1
     c_print("\n"); // Add space after iterations
     #endif
 
     c_print("Status: %s\n", info->status);
 
+    if (info->status_polish)
+        c_print("Solution polishing: Successful\n");
+    else
+        c_print("Solution polishing: Unsuccessful\n");
+
     if (info->status_val == OSQP_SOLVED)
         c_print("Number of iterations: %i\n", info->iter);
         c_print("Optimal objective: %.4f\n", info->obj_val);
 
     #if PROFILING > 0
-    if (info->setup_time + info->solve_time > 1e-03){ // Time more than 1ms
-    c_print("Timing: total time = %.3fs\n        setup time = %.3fs\n        solve time = %.3fs\n",
-            info->setup_time + info->solve_time, info->setup_time, info->solve_time);
-    } else
-        c_print("Timing: total time = %.3fms\n        setup time = %.3fms\n        solve time = %.3fms\n",
-                1e03*(info->setup_time + info->solve_time), 1e03*info->setup_time, 1e03*info->solve_time);
+    c_float total_time = info->setup_time + info->solve_time + info->polish_time;
+    if (total_time > 1e-03){ // Time more than 1ms
+    c_print("Timing: total  time = %.3fs\n        setup  time = %.3fs\n        "
+            "solve  time = %.3fs\n        polish time = %.3fs\n",
+            total_time, info->setup_time, info->solve_time, info->polish_time);
+    } else {
+    c_print("Timing: total  time = %.3fms\n        setup  time = %.3fms\n        "
+            "solve  time = %.3fms\n        polish time = %.3fms\n",
+            1e03*total_time, 1e03*info->setup_time,
+            1e03*info->solve_time, 1e03*info->polish_time);
+        // c_print("Timing: total time = %.3fms\n        setup time = %.3fms\n        solve time = %.3fms\n",
+        //         1e03*(info->setup_time + info->solve_time), 1e03*info->setup_time, 1e03*info->solve_time);
+    }
     #endif
 
 }

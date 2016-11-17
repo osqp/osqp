@@ -342,8 +342,12 @@ c_int solve_lin_sys(const Settings *settings, Priv *p, c_float *b) {
 
 void polish(Work *work){
     c_int j, ptr, mred=0, Ared_nnz=0;
-    c_float *Ax, *prim_resid, *dual_resid, tmp, prim_resid_norm, dual_resid_norm;
+    c_float *prim_resid, tmp, prim_resid_norm, dual_resid_norm;
     Priv *plsh = c_calloc(1, sizeof(Priv));
+
+    #if PROFILING > 0
+    tic(work->timer); // Start timer
+    #endif
 
     // Initialize counters for active/inactive constraints
     work->act->n_lAct = 0;
@@ -377,22 +381,22 @@ void polish(Work *work){
             Ared_nnz++;
     }
     // Form Ared
-    csc *Ared = csc_spalloc(mred, work->data->n, Ared_nnz, 1, 0);
+    work->act->Ared = csc_spalloc(mred, work->data->n, Ared_nnz, 1, 0);
     Ared_nnz = 0;
     for (j = 0; j < work->data->n; j++) {  // Cycle over columns of A
-        Ared->p[j] = Ared_nnz;
+        work->act->Ared->p[j] = Ared_nnz;
         for (ptr = work->data->A->p[j]; ptr < work->data->A->p[j + 1]; ptr++) {
             if (work->act->A2Ared[work->data->A->i[ptr]] != -1) {
                 // if row of A should be added to Ared
-                Ared->i[Ared_nnz] = work->act->A2Ared[work->data->A->i[ptr]];
-                Ared->x[Ared_nnz++] = work->data->A->x[ptr];
+                work->act->Ared->i[Ared_nnz] = work->act->A2Ared[work->data->A->i[ptr]];
+                work->act->Ared->x[Ared_nnz++] = work->data->A->x[ptr];
             }
         }
     }
-    Ared->p[work->data->n] = Ared_nnz;
+    work->act->Ared->p[work->data->n] = Ared_nnz;
 
     // Form and factorize reduced KKT
-    csc *KKTred= form_KKT(work->data->P, Ared, work->settings->delta, 0);
+    csc *KKTred= form_KKT(work->data->P, work->act->Ared, work->settings->delta, 0);
     c_int n_KKTred = work->data->n + mred;
     plsh->L = c_malloc(sizeof(csc));
     plsh->L->m = n_KKTred;
@@ -422,33 +426,26 @@ void polish(Work *work){
     LDLSolve(rhs, rhs, plsh->L, plsh->Dinv, plsh->P, plsh->bp);
     prea_vec_copy(rhs, work->act->x, work->data->n);
     prea_vec_copy(rhs + work->data->n, work->act->lambda_red, mred);
+    mat_vec(work->data->A, work->act->x, work->act->Ax, 0);
 
     // Compute primal residual:  pr = min(Ax-lA, 0) + max(Ax-uA, 0)
-    Ax = c_malloc(work->data->m * sizeof(c_float));
-    mat_vec(work->data->A, work->act->x, Ax, 0);
     prim_resid = c_calloc(1, work->data->m * sizeof(c_float));
     for (j = 0; j < work->data->m; j++) {
-        tmp = Ax[j] - work->data->lA[j];
+        tmp = work->act->Ax[j] - work->data->lA[j];
         if (tmp < 0.)
             prim_resid[j] += tmp;
-        tmp = Ax[j] - work->data->uA[j];
+        tmp = work->act->Ax[j] - work->data->uA[j];
         if (tmp > 0.)
             prim_resid[j] += tmp;
     }
     prim_resid_norm = vec_norm2(prim_resid, work->data->m);
 
     // Compute dual residual:  dr = q + Ared'*lambda_red + P*x
-    dual_resid = vec_copy(work->data->q, work->data->n);          // dr = q
-    mat_vec_tpose(Ared, work->act->lambda_red, dual_resid, 1, 0); //   += Ared'*lambda
-    mat_vec(work->data->P, work->act->x, dual_resid, 1);          //   += P*x (1st part)
-    mat_vec_tpose(work->data->P, work->act->x, dual_resid, 1, 1); //   += P*x (2nd part)
-    dual_resid_norm = vec_norm2(dual_resid, work->data->n);
-
-
-    // DEBUG
-    c_print("Polished primal residual: %.2e\n", prim_resid_norm);
-    c_print("Polished dual residual:   %.2e\n", dual_resid_norm);
-
+    prea_vec_copy(work->data->q, work->act->dua_res_ws, work->data->n);                  // dr = q
+    mat_vec_tpose(work->act->Ared, work->act->lambda_red, work->act->dua_res_ws, 1, 0);  //   += Ared'*lambda
+    mat_vec(work->data->P, work->act->x, work->act->dua_res_ws, 1);                      //   += P*x (1st part)
+    mat_vec_tpose(work->data->P, work->act->x, work->act->dua_res_ws, 1, 1);             //   += P*x (2nd part)
+    dual_resid_norm = vec_norm2(work->act->dua_res_ws, work->data->n);
 
     // Check if the residuals are smaller than in the ADMM solution
     if (prim_resid_norm < work->info->pri_res &&
@@ -464,28 +461,28 @@ void polish(Work *work){
             }
             // Update solver information
             work->info->pri_res = prim_resid_norm;
-            work->info->pri_res = dual_resid_norm;
+            work->info->dua_res = dual_resid_norm;
             work->info->obj_val = quad_form(work->data->P, work->act->x) +
                                   vec_prod(work->data->q, work->act->x, work->data->n);
             // Polishing successful
-            work->act->polish_success = 1;
+            work->info->status_polish = 1;
+            /* Print summary */
             #if PRINTLEVEL > 1
-            c_print("Polishing: Successful.\n");
+            if (work->settings->verbose)
+                print_polishing(work->info);
             #endif
     } else {
-        work->act->polish_success = 0;
-        #if PRINTLEVEL > 1
-        c_print("Polishing: Unsuccessful.\n");
-        #endif
+        work->info->status_polish = 0;
     }
 
+    /* Update timing */
+    #if PROFILING > 0
+    work->info->polish_time = toc(work->timer);
+    #endif
 
     // Memory clean-up
-    csc_spfree(Ared);
     csc_spfree(KKTred);
     free_priv(plsh);
     c_free(rhs);
-    c_free(Ax);
     c_free(prim_resid);
-    c_free(dual_resid);
 }
