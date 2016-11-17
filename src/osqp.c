@@ -67,6 +67,8 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->z = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
     work->u = c_malloc(work->data->m * sizeof(c_float));
     work->z_prev = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
+    work->dua_res_ws_n = c_malloc(work->data->n * sizeof(c_float));
+    work->dua_res_ws_m = c_malloc(work->data->m * sizeof(c_float));
 
     // TODO: Add Validaiton for settings
     // Copy settings
@@ -84,7 +86,6 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->act->lambda_red = OSQP_NULL;
     work->act->x = c_malloc(work->data->n * sizeof(c_float));
     work->act->Ax = c_malloc(work->data->m * sizeof(c_float));
-    work->act->dua_res_ws = c_malloc(work->data->n * sizeof(c_float));
 
     // Allocate scaling
     if (settings->normalize){
@@ -273,7 +274,6 @@ c_int osqp_cleanup(Work * work){
     c_free(work->act->A2Ared);
     c_free(work->act->x);
     c_free(work->act->Ax);
-    c_free(work->act->dua_res_ws);
     if (work->act->lambda_red)
         c_free(work->act->lambda_red);
     c_free(work->act);
@@ -283,6 +283,8 @@ c_int osqp_cleanup(Work * work){
     c_free(work->u);
     c_free(work->z);
     c_free(work->z_prev);
+    c_free(work->dua_res_ws_n);
+    c_free(work->dua_res_ws_m);
 
     // Free Settings
     c_free(work->settings);

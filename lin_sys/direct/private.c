@@ -441,11 +441,11 @@ void polish(Work *work){
     prim_resid_norm = vec_norm2(prim_resid, work->data->m);
 
     // Compute dual residual:  dr = q + Ared'*lambda_red + P*x
-    prea_vec_copy(work->data->q, work->act->dua_res_ws, work->data->n);                  // dr = q
-    mat_vec_tpose(work->act->Ared, work->act->lambda_red, work->act->dua_res_ws, 1, 0);  //   += Ared'*lambda
-    mat_vec(work->data->P, work->act->x, work->act->dua_res_ws, 1);                      //   += P*x (1st part)
-    mat_vec_tpose(work->data->P, work->act->x, work->act->dua_res_ws, 1, 1);             //   += P*x (2nd part)
-    dual_resid_norm = vec_norm2(work->act->dua_res_ws, work->data->n);
+    prea_vec_copy(work->data->q, work->dua_res_ws_n, work->data->n);                  // dr = q
+    mat_vec_tpose(work->act->Ared, work->act->lambda_red, work->dua_res_ws_n, 1, 0);  //   += Ared'*lambda
+    mat_vec(work->data->P, work->act->x, work->dua_res_ws_n, 1);                      //   += P*x (1st part)
+    mat_vec_tpose(work->data->P, work->act->x, work->dua_res_ws_n, 1, 1);             //   += P*x (2nd part)
+    dual_resid_norm = vec_norm2(work->dua_res_ws_n, work->data->n);
 
     // Check if the residuals are smaller than in the ADMM solution
     if (prim_resid_norm < work->info->pri_res &&

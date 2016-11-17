@@ -147,38 +147,41 @@ c_float compute_pri_res(Work * work, c_int polish){
  * @return        Norm of dual residual
  */
 c_float compute_dua_res(Work * work, c_int polish){
-    c_int j;
-    c_float tmp, dual_resid_sq=0;
     if (polish) {
         // Called from polish() function
         // dr = q + Ared'*lambda_red + P*x
-        prea_vec_copy(work->data->q, work->act->dua_res_ws,
+        // NB: Only upper triangular part of P is stored.
+        prea_vec_copy(work->data->q, work->dua_res_ws_n,
                       work->data->n);                    // dr = q
         mat_vec_tpose(work->act->Ared, work->act->lambda_red,
-                      work->act->dua_res_ws, 1, 0);      // += Ared'*lambda_red
+                      work->dua_res_ws_n, 1, 0);      // += Ared'*lambda_red
         mat_vec(work->data->P, work->act->x,
-                work->act->dua_res_ws, 1);               // += Px (upper part)
+                work->dua_res_ws_n, 1);               // += Px (upper triang part)
         mat_vec_tpose(work->data->P, work->act->x,
-                      work->act->dua_res_ws, 1, 1);      // += Px (lower part)
-        return vec_norm2(work->act->dua_res_ws, work->data->n);
+                      work->dua_res_ws_n, 1, 1);      // += Px (lower triang part)
+        return vec_norm2(work->dua_res_ws_n, work->data->n);
     } else {
         // TODO: Update computation of the dual residual
-        for (j = 0; j < work->data->n + work->data->m; j++){
-            tmp = work->settings->rho * (work->z[j] - work->z_prev[j]);
-            dual_resid_sq += tmp*tmp;
-        }
-        return c_sqrt(dual_resid_sq);
+        // Called from ADMM algorithm
+        // -dr = rho * [I  A']( z^{k+1} + (alpha-2)*z^k + (1-alpha)*x^{k+1} )
+        // NB: I compute negative dual residual for the convenience
+        prea_vec_copy(work->z, work->dua_res_ws_n, work->data->n);  // dr = z_x
+        vec_add_scaled(work->dua_res_ws_n, work->z_prev,
+                       work->data->n, work->settings->alpha-2.0);   // += (alpha-2)*z_prev_x
+        vec_add_scaled(work->dua_res_ws_n, work->x,
+                       work->data->n, 1.0-work->settings->alpha);  // += (1-alpha)*x_x
+
+        prea_vec_copy(work->z + work->data->n, work->dua_res_ws_m,
+                      work->data->m);                       // dr = z_s
+        vec_add_scaled(work->dua_res_ws_m, work->z_prev + work->data->n,
+                       work->data->m, work->settings->alpha-2.0); // += (alpha-2)*z_prev_s
+        vec_add_scaled(work->dua_res_ws_m, work->x + work->data->n,
+                       work->data->m, 1.0-work->settings->alpha); // += (1-alpha)*x_s
+        mat_vec_tpose(work->data->A, work->dua_res_ws_m,
+                      work->dua_res_ws_n, 1, 0);
+        return (work->settings->rho * vec_norm2(work->dua_res_ws_n, work->data->n));
     }
 }
-// c_float compute_dua_res(Work * work, c_int polish){
-//     c_int i;
-//     c_float norm_sq = 0, temp;
-//     for (i = 0; i < work->data->n + work->data->m; i++){
-//         temp = work->settings->rho * (work->z[i] - work->z_prev[i]);
-//         norm_sq += temp*temp;
-//     }
-//     return c_sqrt(norm_sq);
-// }
 
 
 /**
@@ -237,15 +240,21 @@ void update_status_string(Info *info){
 c_int residuals_check(Work *work){
     c_float eps_pri, eps_dua;
     c_int exitflag = 0;
-    //TODO: REDEFINE BETTER TERMINATION CONDITIONS
 
-    eps_pri = c_sqrt(work->data->n + work->data->m) * work->settings->eps_abs +
-              work->settings->eps_rel * c_max(vec_norm2(work->x, work->data->n + work->data->m),
-                                              vec_norm2(work->z, work->data->n + work->data->m));
-    eps_dua = c_sqrt(work->data->m) * work->settings->eps_abs +
-              work->settings->eps_rel * work->settings->rho * vec_norm2(work->u, work->data->m);
+    // Compute primal tolerance
+    eps_pri = c_sqrt(work->data->m) * work->settings->eps_abs +
+              work->settings->eps_rel *
+              c_max(vec_norm2(work->x + work->data->n, work->data->m),
+                    c_max(vec_norm2(work->data->lA, work->data->m),
+                          vec_norm2(work->data->uA, work->data->m)));
+    // Compute dual tolerance
+    mat_vec_tpose(work->data->A, work->u, work->dua_res_ws_n, 0, 0); // ws = A'*u
+    eps_dua = c_sqrt(work->data->n) * work->settings->eps_abs +
+              work->settings->eps_rel * work->settings->rho *
+              vec_norm2( work->dua_res_ws_n, work->data->n);
 
-    if (work->info->pri_res < eps_pri && work->info->dua_res < eps_dua) exitflag = 1;
+    if (work->info->pri_res < eps_pri && work->info->dua_res < eps_dua)
+        exitflag = 1;
 
     return exitflag;
 

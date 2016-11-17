@@ -61,6 +61,10 @@ struct OSQP_WORK {
         // Internal solver variables
         c_float *x, *z, *u, *z_prev;
 
+        // Workspaces for computing dual residual
+        c_float *dua_res_ws_n;  // n-dimensional workspace
+        c_float *dua_res_ws_m;  // m-dimensional workspace
+
         // Other internal structures
         Settings *settings; // Problem settings
         Scaling *scaling; // Scaling Vectors
@@ -112,7 +116,6 @@ struct OSQP_ACTIVE_CONSTRAINTS {
     c_int *A2Ared;        // Table of indices that maps A to Ared
     c_float *x;           // optimal solution obtained by polishing
     c_float *Ax;          // workspace for storing A*x
-    c_float *dua_res_ws;  // workspace for computing dual residual
     c_float *lambda_red;  // optimal dual variables associated to Ared obtained
                           //   by polishing
     // c_int polish_success; // was polishing successful (1) or not (0)
