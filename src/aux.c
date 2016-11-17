@@ -201,16 +201,19 @@ void store_solution(Work *work) {
  * @param polish Called from polish function (1) or from elsewhere (0)
  */
 void update_info(Work *work, c_int iter, c_int polish){
-    work->info->iter = iter; // Update iteration number
-    // work->info->obj_val = compute_obj_val(work->data, work->x);
-    work->info->obj_val = compute_obj_val(work, polish);
-    work->info->pri_res = compute_pri_res(work, polish);
-    work->info->dua_res = compute_dua_res(work, polish);
-
-    #if PROFILING > 0
-    if (!polish)
-        work->info->solve_time = toc(work->timer);
-    #endif
+    if (!polish) {
+        work->info->iter = iter; // Update iteration number
+        work->info->obj_val = compute_obj_val(work, 0);
+        work->info->pri_res = compute_pri_res(work, 0);
+        work->info->dua_res = compute_dua_res(work, 0);
+        #if PROFILING > 0
+            work->info->solve_time = toc(work->timer);
+        #endif
+    } else {
+        work->act->obj_val = compute_obj_val(work, 1);
+        work->act->pri_res = compute_pri_res(work, 1);
+        work->act->dua_res = compute_dua_res(work, 1);
+    }
 }
 
 

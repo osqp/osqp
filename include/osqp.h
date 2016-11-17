@@ -118,7 +118,9 @@ struct OSQP_ACTIVE_CONSTRAINTS {
     c_float *Ax;          // workspace for storing A*x
     c_float *lambda_red;  // optimal dual variables associated to Ared obtained
                           //   by polishing
-    // c_int polish_success; // was polishing successful (1) or not (0)
+    c_float obj_val;      // objective value at polished solution
+    c_float pri_res;      // primal residual at polished solution
+    c_float dua_res;      // dual residual at polished solution
 };
 
 

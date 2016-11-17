@@ -23,7 +23,6 @@ c_int solve_lin_sys(const Settings *settings, Priv *p, c_float *b);
 // Free LDL Factorization structure
 void free_priv(Priv *p);
 
-
 // Solution polishing: Solve equality constrained QP with assumed active constr.
 void polish(Work *work);
 

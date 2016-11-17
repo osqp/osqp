@@ -1,5 +1,6 @@
 #include "private.h"
 #include "util.h"
+#include "aux.h"
 
 
 
@@ -342,7 +343,6 @@ c_int solve_lin_sys(const Settings *settings, Priv *p, c_float *b) {
 
 void polish(Work *work){
     c_int j, ptr, mred=0, Ared_nnz=0;
-    c_float *prim_resid, tmp, prim_resid_norm, dual_resid_norm;
     Priv *plsh = c_calloc(1, sizeof(Priv));
 
     #if PROFILING > 0
@@ -353,6 +353,7 @@ void polish(Work *work){
     work->act->n_lAct = 0;
     work->act->n_uAct = 0;
     work->act->n_free = 0;
+
     /* Guess which linear constraints are lower-active, upper-active and free
      *    A2Ared[j] = -1    (if j-th row of A is not inserted in Ared)
      *    A2Ared[j] =  i    (if j-th row of A is inserted at i-th row of Ared)
@@ -428,43 +429,25 @@ void polish(Work *work){
     prea_vec_copy(rhs + work->data->n, work->act->lambda_red, mred);
     mat_vec(work->data->A, work->act->x, work->act->Ax, 0);
 
-    // Compute primal residual:  pr = min(Ax-lA, 0) + max(Ax-uA, 0)
-    prim_resid = c_calloc(1, work->data->m * sizeof(c_float));
-    for (j = 0; j < work->data->m; j++) {
-        tmp = work->act->Ax[j] - work->data->lA[j];
-        if (tmp < 0.)
-            prim_resid[j] += tmp;
-        tmp = work->act->Ax[j] - work->data->uA[j];
-        if (tmp > 0.)
-            prim_resid[j] += tmp;
-    }
-    prim_resid_norm = vec_norm2(prim_resid, work->data->m);
-
-    // Compute dual residual:  dr = q + Ared'*lambda_red + P*x
-    prea_vec_copy(work->data->q, work->dua_res_ws_n, work->data->n);                  // dr = q
-    mat_vec_tpose(work->act->Ared, work->act->lambda_red, work->dua_res_ws_n, 1, 0);  //   += Ared'*lambda
-    mat_vec(work->data->P, work->act->x, work->dua_res_ws_n, 1);                      //   += P*x (1st part)
-    mat_vec_tpose(work->data->P, work->act->x, work->dua_res_ws_n, 1, 1);             //   += P*x (2nd part)
-    dual_resid_norm = vec_norm2(work->dua_res_ws_n, work->data->n);
+    // Compute primal and dual residuals at the polished solution
+    update_info(work, 0, 1);
 
     // Check if the residuals are smaller than in the ADMM solution
-    if (prim_resid_norm < work->info->pri_res &&
-        dual_resid_norm < work->info->dua_res) {
+    if (work->act->pri_res < work->info->pri_res &&
+        work->act->dua_res < work->info->dua_res) {
             // Update primal and dual variables
             prea_vec_copy(work->act->x, work->solution->x, work->data->n);
             for (j = 0; j < work->data->m; j++) {
                 if (work->act->A2Ared[j] != -1){
                     work->solution->lambda[j] = work->act->lambda_red[work->act->A2Ared[j]];
                 } else {
-                    work->solution->lambda[j] = 0.;
+                    work->solution->lambda[j] = 0.0;
                 }
             }
             // Update solver information
-            work->info->pri_res = prim_resid_norm;
-            work->info->dua_res = dual_resid_norm;
-            work->info->obj_val = quad_form(work->data->P, work->act->x) +
-                                  vec_prod(work->data->q, work->act->x, work->data->n);
-            // Polishing successful
+            work->info->obj_val = work->act->obj_val;
+            work->info->pri_res = work->act->pri_res;
+            work->info->dua_res = work->act->dua_res;
             work->info->status_polish = 1;
             /* Print summary */
             #if PRINTLEVEL > 1
@@ -484,5 +467,4 @@ void polish(Work *work){
     csc_spfree(KKTred);
     free_priv(plsh);
     c_free(rhs);
-    c_free(prim_resid);
 }
