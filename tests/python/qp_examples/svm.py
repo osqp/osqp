@@ -58,6 +58,7 @@ class svm(object):
         self._osqp = osqp.OSQP(**osqp_opts)
         self._osqp.problem(P, q, A, lA, uA)
 
+        # OLD FORMULATION
         # Q = spspa.block_diag((2*spspa.eye(n), spspa.csc_matrix((m, m))),
         #                      format='csc')
         # c = np.append(np.zeros(n), gamma*np.ones(m))
