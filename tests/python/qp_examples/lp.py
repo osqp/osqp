@@ -24,19 +24,18 @@ class lp(object):
 
     def __init__(self, m, n, dens_lvl=1.0, osqp_opts={}):
         # Generate data
-        Aeq = spspa.csc_matrix((0, n))
-        beq = np.zeros(0)
         x_true = np.random.randn(n) / np.sqrt(n)
-        Aineq = spspa.random(m, n, density=dens_lvl, format='csc')
-        bineq = Aineq.dot(x_true) + 0.1*np.random.rand(m)
-        c = -Aineq.T.dot(np.random.rand(m))
-        Q = spspa.csc_matrix((n, n))
+        A = spspa.random(m, n, density=dens_lvl, format='csc')
+        uA = A.dot(x_true) + 0.1*np.random.rand(m)
+        lA = -np.inf * np.ones(m)
+        q = -A.T.dot(np.random.rand(m))
+        P = spspa.csc_matrix((n, n))
 
         # Create a quadprogProblem and store it in a private variable
-        self._prob = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq)
+        self._prob = qp.quadprogProblem(P, q, A, lA, uA)
         # Create an OSQP object and store it in a private variable
         self._osqp = osqp.OSQP(**osqp_opts)
-        self._osqp.problem(Q, c, Aeq, beq, Aineq, bineq)
+        self._osqp.problem(P, q, A, lA, uA)
 
     def solve(self, solver=OSQP):
         """
@@ -65,8 +64,8 @@ n = 20
 m = 100
 
 # Set options of the OSQP solver
-options = {'eps_abs':       1e-4,
-           'eps_rel':       1e-4,
+options = {'eps_abs':       1e-5,
+           'eps_rel':       1e-5,
            'alpha':         1.6,
            'scale_problem': True,
            'scale_steps':   4,
@@ -79,6 +78,12 @@ lp_obj = lp(m, n, dens_lvl=0.3, osqp_opts=options)
 resultsCPLEX = lp_obj.solve(solver=CPLEX)
 resultsGUROBI = lp_obj.solve(solver=GUROBI)
 resultsOSQP = lp_obj.solve(solver=OSQP)
+
+# Print objective values
+print "CPLEX  Objective Value: %.3f" % resultsCPLEX.objval
+print "GUROBI Objective Value: %.3f" % resultsGUROBI.objval
+print "OSQP   Objective Value: %.3f" % resultsOSQP.objval
+print "\n"
 
 # Print timings
 print "CPLEX  CPU time: %.3f" % resultsCPLEX.cputime

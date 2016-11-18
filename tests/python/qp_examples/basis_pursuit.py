@@ -24,29 +24,34 @@ class basis_pursuit(object):
 
     def __init__(self, m, n, dens_lvl=1.0, osqp_opts={}):
         # Generate data
-        A = spspa.random(m, n, density=dens_lvl)
+        Ad = spspa.random(m, n, density=dens_lvl)
         x_true = np.multiply((np.random.rand(n) > 0.5).astype(float),
                              np.random.randn(n)) / np.sqrt(n)
-        b = A.dot(x_true)
+        bd = Ad.dot(x_true)
 
         # Construct the problem
         #       minimize	np.ones(n).T * t
         #       subject to  Ax = b
         #                   -t <= x <= t
-        Q = spspa.csc_matrix((2*n, 2*n))
-        c = np.append(np.zeros(n), np.ones(n))
-        Aeq = spspa.hstack([A, spspa.csc_matrix((m, n))])
-        beq = b
         In = spspa.eye(n)
-        Aineq = spspa.vstack([spspa.hstack([In, -In]),
-                              spspa.hstack([-In, -In])]).tocsc()
-        bineq = np.zeros(2*n)
+        P = spspa.csc_matrix((2*n, 2*n))
+        q = np.append(np.zeros(n), np.ones(n))
+        A = spspa.vstack([spspa.hstack([Ad, spspa.csc_matrix((m, n))]),
+                          spspa.hstack([In, -In]),
+                          spspa.hstack([-In, -In])])
+        uA = np.append(bd, np.zeros(2*n))
+        lA = np.append(bd, - np.inf * np.ones(2*n))
+        # Aeq = spspa.hstack([Ad, spspa.csc_matrix((m, n))])
+        # beq = bd
+        # Aineq = spspa.vstack([spspa.hstack([In, -In]),
+        #                       spspa.hstack([-In, -In])]).tocsc()
+        # bineq = np.zeros(2*n)
 
         # Create a quadprogProblem and store it in a private variable
-        self._prob = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq)
+        self._prob = qp.quadprogProblem(P, q, A, lA, uA)
         # Create an OSQP object and store it in a private variable
         self._osqp = osqp.OSQP(**osqp_opts)
-        self._osqp.problem(Q, c, Aeq, beq, Aineq, bineq)
+        self._osqp.problem(P, q, A, lA, uA)
 
     def solve(self, solver=OSQP):
         """
@@ -68,7 +73,7 @@ class basis_pursuit(object):
 # ==================================================================
 
 # Set the random number generator
-sp.random.seed(1)
+sp.random.seed(2)
 
 # Set problem
 n = 20
@@ -89,6 +94,13 @@ basis_pursuit_obj = basis_pursuit(m, n, dens_lvl=0.3, osqp_opts=options)
 resultsCPLEX = basis_pursuit_obj.solve(solver=CPLEX)
 resultsGUROBI = basis_pursuit_obj.solve(solver=GUROBI)
 resultsOSQP = basis_pursuit_obj.solve(solver=OSQP)
+
+
+# Print objective values
+print "CPLEX  Objective Value: %.3f" % resultsCPLEX.objval
+print "GUROBI Objective Value: %.3f" % resultsGUROBI.objval
+print "OSQP   Objective Value: %.3f" % resultsOSQP.objval
+print "\n"
 
 # Print timings
 print "CPLEX  CPU time: %.3f" % resultsCPLEX.cputime

@@ -204,8 +204,14 @@ class OSQP(object):
             # Reset factorization
             self.kkt_factor = None
         self.problem.q = kwargs.pop('q', self.problem.q)
+        self.scaled_problem.q = self.scaler_matrices.D.dot(self.problem.q)
+
         self.problem.lA = kwargs.pop('lA', self.problem.lA)
+        self.scaled_problem.lA = self.scaler_matrices.E.dot(self.problem.lA)
+
         self.problem.uA = kwargs.pop('uA', self.problem.uA)
+        self.scaled_problem.uA = self.scaler_matrices.E.dot(self.problem.uA)
+
 
     def set_option(self, **kwargs):
         """
