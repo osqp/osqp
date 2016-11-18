@@ -61,6 +61,10 @@ void print_setup_header(const Data *data, const Settings *settings) {
         c_print("          warm start: active\n");
     else
         c_print("          warm start: inactive\n");
+    if (settings->polishing)
+        c_print("          polishing: active\n");
+    else
+        c_print("          polishing: inactive\n");
     c_print("\n");
 
 }
@@ -98,7 +102,7 @@ void print_polishing(Info * info) {
 
 #if PRINTLEVEL > 0
 /* Print Footer */
-void print_footer(Info * info){
+void print_footer(Info * info, c_int polishing){
 
     #if PRINTLEVEL > 1
     c_print("\n"); // Add space after iterations
@@ -106,28 +110,42 @@ void print_footer(Info * info){
 
     c_print("Status: %s\n", info->status);
 
-    if (info->status_polish)
-        c_print("Solution polishing: Successful\n");
-    else
-        c_print("Solution polishing: Unsuccessful\n");
+    if (polishing) {
+        if (info->status_polish)
+            c_print("Solution polishing: Successful\n");
+        else
+            c_print("Solution polishing: Unsuccessful\n");
+    }
 
     if (info->status_val == OSQP_SOLVED)
         c_print("Number of iterations: %i\n", info->iter);
         c_print("Optimal objective: %.4f\n", info->obj_val);
 
     #if PROFILING > 0
-    c_float total_time = info->setup_time + info->solve_time + info->polish_time;
-    if (total_time > 1e-03){ // Time more than 1ms
-    c_print("Timing: total  time = %.3fs\n        setup  time = %.3fs\n        "
-            "solve  time = %.3fs\n        polish time = %.3fs\n",
-            total_time, info->setup_time, info->solve_time, info->polish_time);
-    } else {
-    c_print("Timing: total  time = %.3fms\n        setup  time = %.3fms\n        "
-            "solve  time = %.3fms\n        polish time = %.3fms\n",
-            1e03*total_time, 1e03*info->setup_time,
-            1e03*info->solve_time, 1e03*info->polish_time);
-        // c_print("Timing: total time = %.3fms\n        setup time = %.3fms\n        solve time = %.3fms\n",
-        //         1e03*(info->setup_time + info->solve_time), 1e03*info->setup_time, 1e03*info->solve_time);
+    if (polishing) {
+        c_float total_time = info->setup_time + info->solve_time + info->polish_time;
+        if (total_time > 1e-03) { // Time more than 1ms
+            c_print("Timing: total  time = %.3fs\n        setup  time = %.3fs\n        "
+                    "solve  time = %.3fs\n        polish time = %.3fs\n",
+                    total_time, info->setup_time, info->solve_time, info->polish_time);
+        } else {
+            c_print("Timing: total  time = %.3fms\n        setup  time = %.3fms\n        "
+                    "solve  time = %.3fms\n        polish time = %.3fms\n",
+                    1e03*total_time, 1e03*info->setup_time,
+                    1e03*info->solve_time, 1e03*info->polish_time);
+        }
+    } else{
+        c_float total_time = info->setup_time + info->solve_time;
+        if (total_time > 1e-03) { // Time more than 1ms
+            c_print("Timing: total  time = %.3fs\n        setup  time = %.3fs\n        "
+                    "solve  time = %.3fs\n",
+                    total_time, info->setup_time, info->solve_time);
+        } else {
+            c_print("Timing: total  time = %.3fms\n        setup  time = %.3fms\n        "
+                    "solve  time = %.3fms\n",
+                    1e03*total_time, 1e03*info->setup_time,
+                    1e03*info->solve_time);
+        }
     }
     #endif
 
@@ -145,9 +163,11 @@ void set_default_settings(Settings * settings) {
         settings->eps_abs = EPS_ABS;         /* absolute convergence tolerance */
         settings->eps_rel = EPS_REL;         /* relative convergence tolerance */
         settings->alpha = ALPHA;     /* relaxation parameter */
+        settings->delta = DELTA;    /* regularization parameter for polishing */
+        settings->polishing = POLISHING;     /* ADMM solution polishing: 1 */
         settings->verbose = VERBOSE;     /* x equality constraint scaling: 1e-3 */
         settings->warm_start = WARM_START;     /* x equality constraint scaling: 1e-3 */
-        settings->delta = DELTA;    /* regularization parameter for polishing */
+
 }
 
 
@@ -162,9 +182,10 @@ Settings * copy_settings(Settings * settings){
     new->eps_abs = settings->eps_abs;
     new->eps_rel = settings->eps_rel;
     new->alpha = settings->alpha;
+    new->delta = settings->delta;
+    new->polishing = settings->polishing;
     new->verbose = settings->verbose;
     new->warm_start = settings->warm_start;
-    new->delta = settings->delta;
 
     return new;
 }

@@ -83,7 +83,6 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->pol->ind_uAct = c_malloc(work->data->m * sizeof(c_int));
     work->pol->ind_free = c_malloc(work->data->m * sizeof(c_int));
     work->pol->A2Ared = c_malloc(work->data->m * sizeof(c_int));
-    work->pol->lambda_red = OSQP_NULL;
     work->pol->x = c_malloc(work->data->n * sizeof(c_float));
     work->pol->Ax = c_malloc(work->data->m * sizeof(c_float));
 
@@ -219,7 +218,7 @@ c_int osqp_solve(Work * work){
     /* Print summary for last iteration */
     #if PRINTLEVEL > 1
     if (work->settings->verbose && iter % PRINT_INTERVAL != 0)
-      print_summary(work->info);
+        print_summary(work->info);
     #endif
 
     /* Update final status */
@@ -231,11 +230,12 @@ c_int osqp_solve(Work * work){
     #endif
 
     // Polish the obtained solution
-    // polish(work);
+    if (work->settings->polishing)
+        polish(work);
 
     /* Print final footer */
     #if PRINTLEVEL > 0
-    print_footer(work->info);
+    print_footer(work->info, work->settings->polishing);
     #endif
 
     // Store solution
@@ -272,15 +272,12 @@ c_int osqp_cleanup(Work * work){
     free_priv(work->priv);
 
     // Free active constraints structure
-    csc_spfree(work->pol->Ared);
     c_free(work->pol->ind_lAct);
     c_free(work->pol->ind_uAct);
     c_free(work->pol->ind_free);
     c_free(work->pol->A2Ared);
     c_free(work->pol->x);
     c_free(work->pol->Ax);
-    if (work->pol->lambda_red)
-        c_free(work->pol->lambda_red);
     c_free(work->pol);
 
     // Free work Variables

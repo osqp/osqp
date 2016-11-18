@@ -31,9 +31,10 @@
 #define EPS_ABS (1E-5)
 #define EPS_REL (1E-5)
 #define ALPHA (1.6)
+#define DELTA (1E-7)
+#define POLISHING (1)
 #define VERBOSE (1)
 #define WARM_START (0)
-#define DELTA (1E-7)
 
 
 /* Printing */

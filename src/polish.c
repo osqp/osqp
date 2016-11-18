@@ -1,15 +1,14 @@
 #include "polish.h"
 
-
-
-/// Solution polishing: Solve equality constrained QP with assumed active constr.
-c_int polish(Work *work){
+/**
+ * Form reduced matrix A that contains only rows that are active at the solution.
+ * The set of active constraints is guessed from the primal and dual solution
+ * returned by the ADMM.
+ * @param  work Workspace
+ * @return      Number of rows in Ared
+ */
+c_int form_Ared(Work *work) {
     c_int j, ptr, mred=0, Ared_nnz=0;
-    Priv *plsh; // = c_calloc(1, sizeof(Priv));
-
-    #if PROFILING > 0
-    tic(work->timer); // Start timer
-    #endif
 
     // Initialize counters for active/inactive constraints
     work->pol->n_lAct = 0;
@@ -22,13 +21,13 @@ c_int polish(Work *work){
      */
     for (j = 0; j < work->data->m; j++) {
         if ( work->z[work->data->n + j] - work->data->lA[j] <
-             -work->settings->rho * work->u[j] ) {
-                work->pol->ind_lAct[work->pol->n_lAct++] = j;     // lower-active
+             -work->settings->rho * work->u[j] ) {              // lower-active
+                work->pol->ind_lAct[work->pol->n_lAct++] = j;
                 work->pol->A2Ared[j] = mred++;
         }
         else if ( work->data->uA[j] - work->z[work->data->n + j] <
-                  work->settings->rho * work->u[j] ) {
-                    work->pol->ind_uAct[work->pol->n_uAct++] = j; // upper-active
+                  work->settings->rho * work->u[j] ) {          // upper-active
+                    work->pol->ind_uAct[work->pol->n_uAct++] = j;
                     work->pol->A2Ared[j] = mred++;
         }
         else {
@@ -36,7 +35,6 @@ c_int polish(Work *work){
             work->pol->A2Ared[j] = -1;
         }
     }
-    work->pol->lambda_red = c_malloc(mred * sizeof(c_float));
 
     // Count number of elements in Ared
     for (j = 0; j < work->data->A->nzmax; j++) {
@@ -50,13 +48,31 @@ c_int polish(Work *work){
         work->pol->Ared->p[j] = Ared_nnz;
         for (ptr = work->data->A->p[j]; ptr < work->data->A->p[j + 1]; ptr++) {
             if (work->pol->A2Ared[work->data->A->i[ptr]] != -1) {
-                // if row of A should be added to Ared
+                // If row of A should be added to Ared
                 work->pol->Ared->i[Ared_nnz] = work->pol->A2Ared[work->data->A->i[ptr]];
                 work->pol->Ared->x[Ared_nnz++] = work->data->A->x[ptr];
             }
         }
     }
+    // Update the last element in Ared->p
     work->pol->Ared->p[work->data->n] = Ared_nnz;
+
+    // Return number of rows in Ared
+    return mred;
+}
+
+
+/// Solution polishing: Solve equality constrained QP with assumed active constr.
+c_int polish(Work *work) {
+    c_int j, mred;
+    Priv *plsh;
+
+    #if PROFILING > 0
+    tic(work->timer); // Start timer
+    #endif
+
+    // Form Ared by assuming the active constraints and store in work->pol->Ared
+    mred = form_Ared(work);
 
     // Form and factorize reduced KKT
     plsh = init_priv(work->data->P, work->pol->Ared, work->settings, 1);
@@ -76,8 +92,13 @@ c_int polish(Work *work){
 
     // Solve the reduced KKT system
     solve_lin_sys(work->settings, plsh, rhs);
+
+    // Store the polished solution
+    work->pol->lambda_red = c_malloc(mred * sizeof(c_float));
     prea_vec_copy(rhs, work->pol->x, work->data->n);
     prea_vec_copy(rhs + work->data->n, work->pol->lambda_red, mred);
+
+    // Compute A*x needed for computing the primal residual
     mat_vec(work->data->A, work->pol->x, work->pol->Ax, 0);
 
     // Compute primal and dual residuals at the polished solution
@@ -119,6 +140,8 @@ c_int polish(Work *work){
 
     // Memory clean-up
     free_priv(plsh);
+    csc_spfree(work->pol->Ared);
+    c_free(work->pol->lambda_red);
     c_free(rhs);
 
     return 0;

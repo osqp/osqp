@@ -41,10 +41,11 @@ struct OSQP_SETTINGS {
         c_float eps_abs;  /* absolute convergence tolerance  */
         c_float eps_rel;  /* relative convergence tolerance  */
         c_float alpha; /* relaxation parameter */
+        c_float delta; /* regularization parameter for polishing */
+        c_int polishing; /* boolean, polish ADMM solution */
         c_int verbose; /* boolean, write out progress: 1 */
         c_int warm_start; /* boolean, warm start (put initial guess in Sol
                                struct): 0 */
-        c_float delta; /* regularization parameter for polishing */
 };
 
 

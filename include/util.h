@@ -35,7 +35,7 @@ void print_polishing(Info * info);
 #if PRINTLEVEL > 0
 
 /* Print Footer */
-void print_footer(Info * info);
+void print_footer(Info * info, c_int polishing);
 
 #endif
 
