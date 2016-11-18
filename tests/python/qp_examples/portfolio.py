@@ -37,38 +37,67 @@ class portfolio(object):
             #       minimize	x.T (F * F.T + D) x - mu.T / gamma * x
             #       subject to  1.T x = 1
             #                   0 <= x <= 1
-            Q = 2 * (F.dot(F.T) + D)
-            c = -mu / gamma
-            Aeq = spspa.csc_matrix(np.ones((1, n)))
-            beq = np.array([1.])
-            Aineq = spspa.csc_matrix((0, n))
-            bineq = np.zeros(0)
-            lb = np.zeros(n)
-            ub = np.ones(n)
+            P = 2 * (F.dot(F.T) + D)
+            q = -mu / gamma
+            A = spspa.csc_matrix(np.ones((1, n)))
+            lA = np.array([1.])
+            uA = np.copy(lA)
+
+            # Add bounds
+            A = spspa.vstack([A, spspa.eye(n)])
+            lA = np.append(lA, np.zeros(n))
+            uA = np.append(uA, np.ones(n))
+
+            # OLD FORMULATION
+            # Q = 2 * (F.dot(F.T) + D)
+            # c = -mu / gamma
+            # Aeq = spspa.csc_matrix(np.ones((1, n)))
+            # beq = np.array([1.])
+            # Aineq = spspa.csc_matrix((0, n))
+            # bineq = np.zeros(0)
+            # lb = np.zeros(n)
+            # ub = np.ones(n)
+
         elif version == 'sparse':
             #       minimize	x.T*D*x + y.T*y - mu.T / gamma * x
             #       subject to  1.T x = 1
             #                   F.T x = y
             #                   0 <= x <= 1
-            Q = spspa.block_diag((2*D, 2*spspa.eye(k)), format='csc')
-            c = np.append(-mu / gamma, np.zeros(k))
-            Aeq = spspa.vstack([
+            P = spspa.block_diag((2*D, 2*spspa.eye(k)), format='csc')
+            q = np.append(-mu / gamma, np.zeros(k))
+            A = spspa.vstack([
                     spspa.hstack([spspa.csc_matrix(np.ones((1, n))),
                                   spspa.csc_matrix(np.zeros((1, k)))]),
                     spspa.hstack([F.T, -spspa.eye(k)])]).tocsc()
-            beq = np.append(1., np.zeros(k))
-            Aineq = spspa.csc_matrix((0, n + k))
-            bineq = np.zeros(0)
-            lb = np.append(np.zeros(n), -np.inf*np.ones(k))
-            ub = np.append(np.ones(n), np.inf*np.ones(k))
+            uA = np.append(1., np.zeros(k))
+            lA = np.copy(uA)
+
+            # Add bounds
+            Abounds = spspa.hstack([spspa.eye(n), spspa.csc_matrix((n, k))])
+            A = spspa.vstack([A, Abounds])
+            lA = np.append(lA, np.zeros(n))
+            uA = np.append(uA, np.ones(n))
+
+            # OLD FORMULATION
+            # Q = spspa.block_diag((2*D, 2*spspa.eye(k)), format='csc')
+            # c = np.append(-mu / gamma, np.zeros(k))
+            # Aeq = spspa.vstack([
+            #         spspa.hstack([spspa.csc_matrix(np.ones((1, n))),
+            #                       spspa.csc_matrix(np.zeros((1, k)))]),
+            #         spspa.hstack([F.T, -spspa.eye(k)])]).tocsc()
+            # beq = np.append(1., np.zeros(k))
+            # Aineq = spspa.csc_matrix((0, n + k))
+            # bineq = np.zeros(0)
+            # lb = np.append(np.zeros(n), -np.inf*np.ones(k))
+            # ub = np.append(np.ones(n), np.inf*np.ones(k))
         else:
             assert False, "Unhandled version"
 
         # Create a quadprogProblem and store it in a private variable
-        self._prob = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
+        self._prob = qp.quadprogProblem(P, q, A, lA, uA)
         # Create an OSQP object and store it in a private variable
         self._osqp = osqp.OSQP(**osqp_opts)
-        self._osqp.problem(Q, c, Aeq, beq, Aineq, bineq, lb, ub)
+        self._osqp.problem(P, q, A, lA, uA)
 
     def solve(self, solver=OSQP):
         """
@@ -97,21 +126,27 @@ k = 20
 n = 10*k
 
 # Set options of the OSQP solver
-options = {'eps_abs':       1e-4,
-           'eps_rel':       1e-4,
+options = {'eps_abs':       1e-5,
+           'eps_rel':       1e-5,
            'alpha':         1.6,
            'scale_problem': True,
-           'scale_steps':   4,
+           'scale_steps':   20,
            'polish':        False}
 
 # Create a lasso object
-portfolio_obj = portfolio(k, n, dens_lvl=0.3, version='dense',
+portfolio_obj = portfolio(k, n, dens_lvl=0.3, version='sparse',
                           osqp_opts=options)
 
 # Solve with different solvers
 resultsCPLEX = portfolio_obj.solve(solver=CPLEX)
 resultsGUROBI = portfolio_obj.solve(solver=GUROBI)
 resultsOSQP = portfolio_obj.solve(solver=OSQP)
+
+# Print objective values
+print "CPLEX  Objective Value: %.3f" % resultsCPLEX.objval
+print "GUROBI Objective Value: %.3f" % resultsGUROBI.objval
+print "OSQP   Objective Value: %.3f" % resultsOSQP.objval
+print "\n"
 
 # Print timings
 print "CPLEX  CPU time: %.3f" % resultsCPLEX.cputime

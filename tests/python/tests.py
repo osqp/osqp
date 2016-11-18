@@ -34,7 +34,7 @@ def load_maros_meszaros_problem(f):
 
 
 def main():
-    sp.random.seed(2)
+    sp.random.seed(3)
     # Possible ops:  {'small1', 'small2', 'random', 'maros_meszaros', 'lp'}
     example = 'random'
 
@@ -68,8 +68,8 @@ def main():
         p = qp.quadprogProblem(P, q, A, lA, uA)
     elif example == 'random':
         # Random Example
-        n = 10
-        m = 15
+        n = 30
+        m = 50
         # Generate random Matrices
         Pt = sp.randn(n, n)
         P = spspa.csc_matrix(np.dot(Pt.T, Pt))
@@ -105,8 +105,8 @@ def main():
                           eps_rel=1e-5,
                           eps_abs=1e-5,
                           alpha=1.6,
-                          rho=1.6,
-                          scale_steps=3,
+                          rho=0.000001,
+                          scale_steps=30,
                           scale_problem=True,
                           scale_norm=2,
                           polish=False,
