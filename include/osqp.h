@@ -10,6 +10,7 @@
 #include "lin_sys.h"
 #include "cs.h"
 #include "util.h"
+#include "polish.h"
 
 
 /*****************************
@@ -55,8 +56,8 @@ struct OSQP_WORK {
         // Linear System solver structure
         Priv * priv;
 
-        // Active constraints structure
-        Active * act;
+        // Polish` structure
+        Polish * pol;
 
         // Internal solver variables
         c_float *x, *z, *u, *z_prev;
@@ -105,7 +106,7 @@ struct OSQP_INFO {
 };
 
 /* Active constraints */
-struct OSQP_ACTIVE_CONSTRAINTS {
+struct OSQP_POLISH {
     csc *Ared;            // Matrix A containing only actiev rows
     c_int *ind_lAct;      // indices of lower-active constraints
     c_int *ind_uAct;      // indices of upper-active constraints

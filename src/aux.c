@@ -92,8 +92,8 @@ void update_u(Work *work){
  */
 c_float compute_obj_val(Work *work, c_int polish) {
     if (polish) {
-        return quad_form(work->data->P, work->act->x) +
-               vec_prod(work->data->q, work->act->x, work->data->n);
+        return quad_form(work->data->P, work->pol->x) +
+               vec_prod(work->data->q, work->pol->x, work->data->n);
     } else {
         return quad_form(work->data->P, work->x) +
                vec_prod(work->data->q, work->x, work->data->n);
@@ -114,11 +114,11 @@ c_float compute_pri_res(Work * work, c_int polish){
     if (polish) {
         // Called from polish() function
         for (j = 0; j < work->data->m; j++) {
-            if (work->act->Ax[j] < work->data->lA[j]) {
-                tmp = work->data->lA[j] - work->act->Ax[j];
+            if (work->pol->Ax[j] < work->data->lA[j]) {
+                tmp = work->data->lA[j] - work->pol->Ax[j];
                 prim_resid_sq += tmp*tmp;
-            } else if (work->act->Ax[j] > work->data->uA[j]) {
-                tmp = work->act->Ax[j] - work->data->uA[j];
+            } else if (work->pol->Ax[j] > work->data->uA[j]) {
+                tmp = work->pol->Ax[j] - work->data->uA[j];
                 prim_resid_sq += tmp*tmp;
             }
         }
@@ -153,11 +153,11 @@ c_float compute_dua_res(Work * work, c_int polish){
         // NB: Only upper triangular part of P is stored.
         prea_vec_copy(work->data->q, work->dua_res_ws_n,
                       work->data->n);                    // dr = q
-        mat_vec_tpose(work->act->Ared, work->act->lambda_red,
+        mat_vec_tpose(work->pol->Ared, work->pol->lambda_red,
                       work->dua_res_ws_n, 1, 0);      // += Ared'*lambda_red
-        mat_vec(work->data->P, work->act->x,
+        mat_vec(work->data->P, work->pol->x,
                 work->dua_res_ws_n, 1);               // += Px (upper triang part)
-        mat_vec_tpose(work->data->P, work->act->x,
+        mat_vec_tpose(work->data->P, work->pol->x,
                       work->dua_res_ws_n, 1, 1);      // += Px (lower triang part)
         return vec_norm2(work->dua_res_ws_n, work->data->n);
     } else {
@@ -210,9 +210,9 @@ void update_info(Work *work, c_int iter, c_int polish){
             work->info->solve_time = toc(work->timer);
         #endif
     } else {
-        work->act->obj_val = compute_obj_val(work, 1);
-        work->act->pri_res = compute_pri_res(work, 1);
-        work->act->dua_res = compute_dua_res(work, 1);
+        work->pol->obj_val = compute_obj_val(work, 1);
+        work->pol->pri_res = compute_pri_res(work, 1);
+        work->pol->dua_res = compute_dua_res(work, 1);
     }
 }
 

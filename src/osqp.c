@@ -75,17 +75,17 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->settings = copy_settings(settings);
 
     // Initialize linear system solver private structure
-    work->priv = init_priv(work->data->P, work->data->A, work->settings);
+    work->priv = init_priv(work->data->P, work->data->A, work->settings, 0);
 
     // Initialize active constraints structure
-    work->act = c_malloc(sizeof(Active));
-    work->act->ind_lAct = c_malloc(work->data->m * sizeof(c_int));
-    work->act->ind_uAct = c_malloc(work->data->m * sizeof(c_int));
-    work->act->ind_free = c_malloc(work->data->m * sizeof(c_int));
-    work->act->A2Ared = c_malloc(work->data->m * sizeof(c_int));
-    work->act->lambda_red = OSQP_NULL;
-    work->act->x = c_malloc(work->data->n * sizeof(c_float));
-    work->act->Ax = c_malloc(work->data->m * sizeof(c_float));
+    work->pol = c_malloc(sizeof(Polish));
+    work->pol->ind_lAct = c_malloc(work->data->m * sizeof(c_int));
+    work->pol->ind_uAct = c_malloc(work->data->m * sizeof(c_int));
+    work->pol->ind_free = c_malloc(work->data->m * sizeof(c_int));
+    work->pol->A2Ared = c_malloc(work->data->m * sizeof(c_int));
+    work->pol->lambda_red = OSQP_NULL;
+    work->pol->x = c_malloc(work->data->n * sizeof(c_float));
+    work->pol->Ax = c_malloc(work->data->m * sizeof(c_float));
 
     // Allocate scaling
     if (settings->normalize){
@@ -267,16 +267,16 @@ c_int osqp_cleanup(Work * work){
     free_priv(work->priv);
 
     // Free active constraints structure
-    csc_spfree(work->act->Ared);
-    c_free(work->act->ind_lAct);
-    c_free(work->act->ind_uAct);
-    c_free(work->act->ind_free);
-    c_free(work->act->A2Ared);
-    c_free(work->act->x);
-    c_free(work->act->Ax);
-    if (work->act->lambda_red)
-        c_free(work->act->lambda_red);
-    c_free(work->act);
+    csc_spfree(work->pol->Ared);
+    c_free(work->pol->ind_lAct);
+    c_free(work->pol->ind_uAct);
+    c_free(work->pol->ind_free);
+    c_free(work->pol->A2Ared);
+    c_free(work->pol->x);
+    c_free(work->pol->Ax);
+    if (work->pol->lambda_red)
+        c_free(work->pol->lambda_red);
+    c_free(work->pol);
 
     // Free work Variables
     c_free(work->x);
