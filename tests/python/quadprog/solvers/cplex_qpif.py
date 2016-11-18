@@ -31,15 +31,18 @@ class CPLEX(object):
         m = p.A.shape[0]
 
         # Adjust infinity values in bounds
+        uA = np.copy(p.uA)
+        lA = np.copy(p.lA)
+
         for i in range(m):
-            if p.uA[i] == -np.inf:
-                p.uA[i] = -cpx.infinity
-            if p.uA[i] == np.inf:
-                p.uA[i] = cpx.infinity
-            if p.lA[i] == -np.inf:
-                p.lA[i] = -cpx.infinity
-            if p.lA[i] == np.inf:
-                p.lA[i] = cpx.infinity
+            # if uA[i] == -np.inf:
+            #     uA[i] = -cpx.infinity
+            if uA[i] == np.inf:
+                uA[i] = cpx.infinity
+            if lA[i] == -np.inf:
+                lA[i] = -cpx.infinity
+            # if lA[i] == np.inf:
+            #     lA[i] = cpx.infinity
 
         # Define CPLEX problem
         model = cpx.Cplex()
@@ -50,20 +53,46 @@ class CPLEX(object):
         # Add variables
         model.variables.add(obj=p.q,
                             lb=-cpx.infinity*np.ones(n),
-                            ub=cpx.infinity*np.ones(n))  # Linear objective part
+                            ub=cpx.infinity*np.ones(n))  # Linear obj part
 
         # Add constraints
-        sense = ["R"] * m  # Constraints sense: (range between lA and uA)
-        rows = []
+        # sense = ["R"] * m  # Constraints sense: (range between lA and uA)
+        # rows = []
         for i in range(m):  # Add inequalities
             start = p.A.indptr[i]
             end = p.A.indptr[i+1]
-            rows.append([p.A.indices[start:end].tolist(),
-                         p.A.data[start:end].tolist()])
-        model.linear_constraints.add(lin_expr=rows,
-                                     senses=sense,
-                                     range_values=(p.lA - p.uA).tolist(),
-                                     rhs=p.uA.tolist())
+            row = [[p.A.indices[start:end].tolist(),
+                   p.A.data[start:end].tolist()]]
+            # if (p.uA[i] - p.lA[i]) < 1e-08:  # Equality constraint
+            #     model.linear_constraints.add(lin_expr=row,
+            #                                  senses=["E"],
+            #                                  rhs=[p.uA[i]])
+            # else:  # Inequality constraint
+            #     model.linear_constraints.add(lin_expr=row,
+            #                                  senses=["R"],
+            #                                  range_values=[p.lA[i] - p.uA[i]],
+            #                                  rhs=[p.uA[i]])
+            if (lA[i] != -cpx.infinity) & (uA[i] == cpx.infinity):
+                model.linear_constraints.add(lin_expr=row,
+                                             senses=["G"],
+                                             rhs=[lA[i]])
+            elif (lA[i] == -cpx.infinity) & (uA[i] != cpx.infinity):
+                model.linear_constraints.add(lin_expr=row,
+                                             senses=["L"],
+                                             rhs=[uA[i]])
+            else:
+                model.linear_constraints.add(lin_expr=row,
+                                             senses=["R"],
+                                             range_values=[lA[i] - uA[i]],
+                                             rhs=[uA[i]])
+
+            # rows.append([p.A.indices[start:end].tolist(),
+            #              p.A.data[start:end].tolist()])
+        # model.linear_constraints.add(lin_expr=rows,
+        #                              senses=sense,
+        #                              range_values=(lA - uA).tolist(),
+        #                              rhs=uA.tolist())
+        # ipdb.set_trace()
 
         # Set quadratic Cost
         if p.P.count_nonzero():  # Only if quadratic form is not null

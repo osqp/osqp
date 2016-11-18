@@ -26,41 +26,53 @@ class nonneg_l2(object):
     def __init__(self, m, n, dens_lvl=1.0, version='dense',
                  osqp_opts={}):
         # Generate data
-        A = spspa.random(m, n, density=dens_lvl, format='csc')
+        Ad = spspa.random(m, n, density=dens_lvl, format='csc')
         x_true = np.ones(n) / n + np.random.randn(n) / np.sqrt(n)
-        b = A.dot(x_true) + 0.5*np.random.randn(m)
+        bd = Ad.dot(x_true) + 0.5*np.random.randn(m)
 
         # Construct the problem
         if version == 'dense':
             #       minimize	1/2 x.T (A.T * A) x - (A.T * b).T * x
             #       subject to  x >= 0
-            Q = A.T.dot(A)
-            c = -A.T.dot(b)
-            Aeq = spspa.csc_matrix((0, n))
-            beq = np.zeros(0)
-            Aineq = spspa.csc_matrix((0, n))
-            bineq = np.zeros(0)
-            lb = np.zeros(n)
+            P = Ad.T.dot(Ad)
+            q = -Ad.T.dot(bd)
+            A = spspa.eye(n)
+            lA = np.zeros(n)
+            uA = np.inf * np.ones(n)
+            # Aeq = spspa.csc_matrix((0, n))
+            # beq = np.zeros(0)
+            # Aineq = spspa.csc_matrix((0, n))
+            # bineq = np.zeros(0)
+            # lb = np.zeros(n)
         elif version == 'sparse':
             #       minimize	1/2 y.T*y
             #       subject to  y = Ax - b
             #                   x >= 0
             Im = spspa.eye(m)
-            Q = spspa.block_diag((spspa.csc_matrix((n, n)), Im), format='csc')
-            c = np.zeros(n + m)
-            Aeq = spspa.hstack([A, -Im]).tocsc()
-            beq = b
-            Aineq = spspa.csc_matrix((0, n + m))
-            bineq = np.zeros(0)
-            lb = np.append(np.zeros(n), -np.inf*np.ones(m))
+            P = spspa.block_diag((spspa.csc_matrix((n, n)), Im), format='csc')
+            q = np.zeros(n + m)
+            A = spspa.hstack([Ad, -Im]).tocsc()
+            uA = np.copy(bd)
+            lA = np.copy(bd)
+
+            # Add bounds
+            Abounds = spspa.hstack([spspa.eye(n), spspa.csc_matrix((n, m))])
+            A = spspa.vstack([A, Abounds])
+            lA = np.append(lA, np.zeros(n))
+            uA = np.append(uA, np.inf * np.ones(n))
+
+            #
+            # Aineq = spspa.csc_matrix((0, n + m))
+            # bineq = np.zeros(0)
+            # lb = np.append(np.zeros(n), -np.inf*np.ones(m))
         else:
             assert False, "Unhandled version"
 
         # Create a quadprogProblem and store it in a private variable
-        self._prob = qp.quadprogProblem(Q, c, Aeq, beq, Aineq, bineq, lb)
+        self._prob = qp.quadprogProblem(P, q, A, lA, uA)
         # Create an OSQP object and store it in a private variable
         self._osqp = osqp.OSQP(**osqp_opts)
-        self._osqp.problem(Q, c, Aeq, beq, Aineq, bineq, lb)
+        self._osqp.problem(P, q, A, lA, uA)
 
     def solve(self, solver=OSQP):
         """
@@ -69,7 +81,7 @@ class nonneg_l2(object):
         if solver == OSQP:
             results = self._osqp.solve()
         elif solver == CPLEX:
-            results = self._prob.solve(solver=CPLEX, verbose=0)
+            results = self._prob.solve(solver=CPLEX, verbose=1)
         elif solver == GUROBI:
             results = self._prob.solve(solver=GUROBI, OutputFlag=0)
         else:
@@ -85,8 +97,8 @@ class nonneg_l2(object):
 sp.random.seed(1)
 
 # Set problem
-m = 20
-n = 5*m
+m = 3
+n = 2*m
 
 # Set options of the OSQP solver
 options = {'eps_abs':       1e-4,
@@ -104,6 +116,12 @@ nonneg_l2__obj = nonneg_l2(m, n, dens_lvl=0.3, version='dense',
 resultsCPLEX = nonneg_l2__obj.solve(solver=CPLEX)
 resultsGUROBI = nonneg_l2__obj.solve(solver=GUROBI)
 resultsOSQP = nonneg_l2__obj.solve(solver=OSQP)
+
+# Print objective values
+print "CPLEX  Objective Value: %.3f" % resultsCPLEX.objval
+print "GUROBI Objective Value: %.3f" % resultsGUROBI.objval
+print "OSQP   Objective Value: %.3f" % resultsOSQP.objval
+print "\n"
 
 # Print timings
 print "CPLEX  CPU time: %.3f" % resultsCPLEX.cputime
