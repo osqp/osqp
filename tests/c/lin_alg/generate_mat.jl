@@ -99,26 +99,48 @@ write_mat_sparse(f, sparse(t3_A_ewabs), "t3_A_ewabs")
 # 4) Matrix-vector multiplication
 #-------------------------------------------------------------------------------
 # Define data
-t4_m = 5
-t4_n = 4
-t4_A = randn(t4_m, t4_n)
-t4_x = randn(t4_n)
-t4_y = randn(t4_m)
+m = 5
+n = 4
+p = 0.4
+
+A = randn(m, n)
+P = sprandn(n, n, p);
+P = P + P'  # Create symmetric PSD matrix
+Pu = triu(P) # Store only upper triangular part of P
+x = randn(n)
+y = randn(m)
 
 # Write data
-write_int(f, t4_m, "t4_m")
-write_int(f, t4_n, "t4_n")
-write_mat_sparse(f, sparse(t4_A), "t4_A")
-write_vec_float(f, t4_x, "t4_x")
-write_vec_float(f, t4_y, "t4_y")
+write_int(f, m, "t4_m")
+write_int(f, n, "t4_n")
+write_mat_sparse(f, sparse(A), "t4_A")
+write_mat_sparse(f, Pu, "t4_Pu")
+write_vec_float(f, x, "t4_x")
+write_vec_float(f, y, "t4_y")
 
 # Matrix-vector multiplication:  y = Ax
-t4_Ax = t4_A*t4_x
-write_vec_float(f, t4_Ax, "t4_Ax")
+Ax = A*x
+write_vec_float(f, Ax, "t4_Ax")
 
 # Matrix-vector multiplication (cumulative):  y += Ax
-t4_Ax_cum = t4_A*t4_x + t4_y
-write_vec_float(f, t4_Ax_cum, "t4_Ax_cum")
+Ax_cum = A*x + y
+write_vec_float(f, Ax_cum, "t4_Ax_cum")
+
+# Matrix-transpose-vector multiplication:  x = A'*y
+ATy = A'*y
+write_vec_float(f, ATy, "t4_ATy")
+
+# Matrix-transpose-vector multiplication (cumulative):  x += A'*y
+ATy_cum = A'*y + x
+write_vec_float(f, ATy_cum, "t4_ATy_cum")
+
+# Symmetric-matrix-vector multiplication (only upper triangular part is stored)
+Px = P*x;
+write_vec_float(f, Px, "t4_Px")
+
+# Symmetric-matrix-vector multiplication (cummulative)
+Px_cum = P*x + x;
+write_vec_float(f, Px_cum, "t4_Px_cum")
 
 
 # 5) Extract upper triangular matrix

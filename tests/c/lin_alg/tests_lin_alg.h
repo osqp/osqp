@@ -211,13 +211,14 @@ c_int test_mat_operations(){
 
 
 c_int test_mat_vec_multiplication(){
-    csc *A;   // Matrix from matrices.h
-    c_float Ax[t4_m];
-    c_float * Ax_cum;
+    csc *A, *Pu;   // Matrices from matrices.h
+    c_float Ax[t4_m], ATy[t4_n], Px[t4_n];
+    c_float *Ax_cum, *ATy_cum, *Px_cum;
     c_int exitflag=0;
 
-    // Compute sparse matrix A from vectors stored in matrices.h
+    // Compute sparse matrices A and P from vectors stored in matrices.h
     A = csc_matrix(t4_m, t4_n, t4_A_nnz, t4_A_x, t4_A_i, t4_A_p);
+    Pu = csc_matrix(t4_n, t4_n, t4_Pu_nnz, t4_Pu_x, t4_Pu_i, t4_Pu_p);
 
     // Matrix-vector multiplication:  y = Ax
     mat_vec(A, t4_x, Ax, 0);
@@ -234,9 +235,44 @@ c_int test_mat_vec_multiplication(){
         exitflag = 1;
     }
 
+    // Matrix-transpose-vector multiplication:  x = A'*y
+    mat_vec_tpose(A, t4_y, ATy, 0, 0);
+    if(vec_norm2_diff(ATy, t4_ATy, t4_n) > TESTS_TOL){
+        c_print("\nError in matrix-transpose-vector multiplication!");
+        exitflag = 1;
+    }
+
+    // Cumulative matrix-transpose-vector multiplication:  x += A'*y
+    ATy_cum = vec_copy(t4_x, t4_n);
+    mat_vec_tpose(A, t4_y, ATy_cum, 1, 0);
+    if(vec_norm2_diff(ATy_cum, t4_ATy_cum, t4_n) > TESTS_TOL){
+        c_print("\nError in cumulative matrix-transpose-vector multiplication!");
+        exitflag = 1;
+    }
+
+    // Symmetric-matrix-vector multiplication (only upper part is stored)
+    mat_vec(Pu, t4_x, Px, 0);           // upper traingular part
+    mat_vec_tpose(Pu, t4_x, Px, 1, 1);  // lower traingular part (without diagonal)
+    if(vec_norm2_diff(Px, t4_Px, t4_n) > TESTS_TOL){
+        c_print("\nError in symmetric-matrix-vector multiplication!");
+        exitflag = 1;
+    }
+
+    // Cumulative symmetric-matrix-vector multiplication
+    Px_cum = vec_copy(t4_x, t4_n);
+    mat_vec(Pu, t4_x, Px_cum, 1);           // upper traingular part
+    mat_vec_tpose(Pu, t4_x, Px_cum, 1, 1);  // lower traingular part (without diagonal)
+    if(vec_norm2_diff(Px_cum, t4_Px_cum, t4_n) > TESTS_TOL){
+        c_print("\nError in symmetric-matrix-vector multiplication!");
+        exitflag = 1;
+    }
+
     // cleanup
     c_free(Ax_cum);
+    c_free(ATy_cum);
+    c_free(Px_cum);
     c_free(A);
+    c_free(Pu);
 
     return exitflag;
 }
