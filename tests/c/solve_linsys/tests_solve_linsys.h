@@ -131,7 +131,7 @@ c_int test_solveKKT(){
 
     // Form and factorize KKT matrix
     settings->rho = t8_rho;
-    p = init_priv(Pu, A, settings);
+    p = init_priv(Pu, A, settings, 0);
 
     // Solve  KKT x = b via LDL given factorization
     solve_lin_sys(settings, p, t8_rhs);

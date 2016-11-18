@@ -10,6 +10,7 @@
 #include "lin_sys.h"
 #include "cs.h"
 #include "util.h"
+#include "polish.h"
 
 
 /*****************************
@@ -40,10 +41,11 @@ struct OSQP_SETTINGS {
         c_float eps_abs;  /* absolute convergence tolerance  */
         c_float eps_rel;  /* relative convergence tolerance  */
         c_float alpha; /* relaxation parameter */
+        c_float delta; /* regularization parameter for polishing */
+        c_int polishing; /* boolean, polish ADMM solution */
         c_int verbose; /* boolean, write out progress: 1 */
         c_int warm_start; /* boolean, warm start (put initial guess in Sol
                                struct): 0 */
-        c_float delta; /* regularization parameter for polishing */
 };
 
 
@@ -55,11 +57,15 @@ struct OSQP_WORK {
         // Linear System solver structure
         Priv * priv;
 
-        // Active constraints structure
-        Active * act;
+        // Polish` structure
+        Polish * pol;
 
         // Internal solver variables
         c_float *x, *z, *u, *z_prev;
+
+        // Workspaces for computing dual residual
+        c_float *dua_res_ws_n;  // n-dimensional workspace
+        c_float *dua_res_ws_m;  // m-dimensional workspace
 
         // Other internal structures
         Settings *settings; // Problem settings
@@ -85,21 +91,24 @@ struct OSQP_SOLUTION {
 
 /* Solver Information */
 struct OSQP_INFO {
-        c_int iter;      /* number of iterations taken */
-        char status[32]; /* status string, e.g. 'Solved' */
-        c_int status_val; /* status as c_int, defined in constants.h */
-        c_float obj_val;  /* primal objective */
-        c_float pri_res; /* norm of primal residual */
-        c_float dua_res; /* norm of dual residual */
+        c_int iter;          /* number of iterations taken */
+        char status[32];     /* status string, e.g. 'Solved' */
+        c_int status_val;    /* status as c_int, defined in constants.h */
+        c_int status_polish; /* polish status: successful (1), not (0) */
+        c_float obj_val;     /* primal objective */
+        c_float pri_res;     /* norm of primal residual */
+        c_float dua_res;     /* norm of dual residual */
 
         #if PROFILING > 0
-        c_float setup_time; /* time taken for setup phase (milliseconds) */
-        c_float solve_time; /* time taken for solve phase (milliseconds) */
+        c_float setup_time;  /* time taken for setup phase (milliseconds) */
+        c_float solve_time;  /* time taken for solve phase (milliseconds) */
+        c_float polish_time; /* time taken for polish phase (milliseconds) */
         #endif
 };
 
 /* Active constraints */
-struct OSQP_ACTIVE_CONSTRAINTS{
+struct OSQP_POLISH {
+    csc *Ared;            // Matrix A containing only actiev rows
     c_int *ind_lAct;      // indices of lower-active constraints
     c_int *ind_uAct;      // indices of upper-active constraints
     c_int *ind_free;      // indices of inactive constraints
@@ -108,9 +117,12 @@ struct OSQP_ACTIVE_CONSTRAINTS{
     c_int n_free;         // number of inactive constraints
     c_int *A2Ared;        // Table of indices that maps A to Ared
     c_float *x;           // optimal solution obtained by polishing
+    c_float *Ax;          // workspace for storing A*x
     c_float *lambda_red;  // optimal dual variables associated to Ared obtained
                           //   by polishing
-    c_int polish_success; // was polishing successful (1) or not (0)
+    c_float obj_val;      // objective value at polished solution
+    c_float pri_res;      // primal residual at polished solution
+    c_float dua_res;      // dual residual at polished solution
 };
 
 

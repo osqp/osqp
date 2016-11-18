@@ -67,22 +67,24 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->z = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
     work->u = c_malloc(work->data->m * sizeof(c_float));
     work->z_prev = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
+    work->dua_res_ws_n = c_malloc(work->data->n * sizeof(c_float));
+    work->dua_res_ws_m = c_malloc(work->data->m * sizeof(c_float));
 
     // TODO: Add Validaiton for settings
     // Copy settings
     work->settings = copy_settings(settings);
 
     // Initialize linear system solver private structure
-    work->priv = init_priv(work->data->P, work->data->A, work->settings);
+    work->priv = init_priv(work->data->P, work->data->A, work->settings, 0);
 
     // Initialize active constraints structure
-    work->act = c_malloc(sizeof(Active));
-    work->act->ind_lAct = c_malloc(work->data->m * sizeof(c_int));
-    work->act->ind_uAct = c_malloc(work->data->m * sizeof(c_int));
-    work->act->ind_free = c_malloc(work->data->m * sizeof(c_int));
-    work->act->A2Ared = c_malloc(work->data->m * sizeof(c_int));
-    work->act->lambda_red = OSQP_NULL;
-    work->act->x = c_malloc(work->data->n * sizeof(c_float));
+    work->pol = c_malloc(sizeof(Polish));
+    work->pol->ind_lAct = c_malloc(work->data->m * sizeof(c_int));
+    work->pol->ind_uAct = c_malloc(work->data->m * sizeof(c_int));
+    work->pol->ind_free = c_malloc(work->data->m * sizeof(c_int));
+    work->pol->A2Ared = c_malloc(work->data->m * sizeof(c_int));
+    work->pol->x = c_malloc(work->data->n * sizeof(c_float));
+    work->pol->Ax = c_malloc(work->data->m * sizeof(c_float));
 
     // Allocate scaling
     if (settings->normalize){
@@ -196,7 +198,7 @@ c_int osqp_solve(Work * work){
 
 
         /* Update information */
-        update_info(work, iter);
+        update_info(work, iter, 0);
 
         /* Print summary */
         #if PRINTLEVEL > 1
@@ -215,7 +217,8 @@ c_int osqp_solve(Work * work){
 
     /* Print summary for last iteration */
     #if PRINTLEVEL > 1
-    print_summary(work->info);
+    if (work->settings->verbose && iter % PRINT_INTERVAL != 0)
+        print_summary(work->info);
     #endif
 
     /* Update final status */
@@ -227,18 +230,16 @@ c_int osqp_solve(Work * work){
     #endif
 
     // Polish the obtained solution
-    // polish(work);
+    if (work->settings->polishing)
+        polish(work);
 
     /* Print final footer */
     #if PRINTLEVEL > 0
-    print_footer(work->info);
+    print_footer(work->info, work->settings->polishing);
     #endif
 
     // Store solution
-    prea_vec_copy(work->z, work->solution->x, work->data->n);
-    // Recover dual solution from u
-    vec_add_scaled(work->solution->lambda, work->u,
-                   work->data->m, work->settings->rho);
+    store_solution(work);
 
     // #if PRINTLEVEL > 2
     // print_vec(work->u, work->data->m, "u");
@@ -271,20 +272,21 @@ c_int osqp_cleanup(Work * work){
     free_priv(work->priv);
 
     // Free active constraints structure
-    c_free(work->act->ind_lAct);
-    c_free(work->act->ind_uAct);
-    c_free(work->act->ind_free);
-    c_free(work->act->A2Ared);
-    c_free(work->act->x);
-    if (work->act->lambda_red)
-        c_free(work->act->lambda_red);
-    c_free(work->act);
+    c_free(work->pol->ind_lAct);
+    c_free(work->pol->ind_uAct);
+    c_free(work->pol->ind_free);
+    c_free(work->pol->A2Ared);
+    c_free(work->pol->x);
+    c_free(work->pol->Ax);
+    c_free(work->pol);
 
     // Free work Variables
     c_free(work->x);
     c_free(work->u);
     c_free(work->z);
     c_free(work->z_prev);
+    c_free(work->dua_res_ws_n);
+    c_free(work->dua_res_ws_m);
 
     // Free Settings
     c_free(work->settings);

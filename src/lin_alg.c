@@ -176,7 +176,7 @@ void mat_vec_tpose(const csc *A, const c_float *x, c_float *y,
     int i, j, k;
     if (!plus_eq){
         // y = 0
-        for (i=0; i<A->m; i++) {
+        for (i=0; i<A->n; i++) {
             y[i] = 0;
         }
     }

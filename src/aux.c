@@ -90,19 +90,51 @@ void update_u(Work *work){
  * @param  x    Value x
  * @return      Objective function value
  */
-c_float compute_obj_val(Data * data, c_float * x){
-    return quad_form(data->P, x) + vec_prod(data->q, x, data->n);
+c_float compute_obj_val(Work *work, c_int polish) {
+    if (polish) {
+        return quad_form(work->data->P, work->pol->x) +
+               vec_prod(work->data->q, work->pol->x, work->data->n);
+    } else {
+        return quad_form(work->data->P, work->x) +
+               vec_prod(work->data->q, work->x, work->data->n);
+    }
 }
 
 
 /**
  * Return norm of primal residual
  * TODO: Use more tailored residual (not general one)
- * @param  work Workspace
- * @return      Norm of primal residual
+ * @param  work   Workspace
+ * @param  polish Called from polish function (1) or from elsewhere (0)
+ * @return        Norm of primal residual
  */
-c_float compute_pri_res(Work * work){
-    return vec_norm2_diff(work->x, work->z, work->data->n + work->data->m);
+c_float compute_pri_res(Work * work, c_int polish){
+    c_int j;
+    c_float tmp, prim_resid_sq=0;
+    if (polish) {
+        // Called from polish() function
+        for (j = 0; j < work->data->m; j++) {
+            if (work->pol->Ax[j] < work->data->lA[j]) {
+                tmp = work->data->lA[j] - work->pol->Ax[j];
+                prim_resid_sq += tmp*tmp;
+            } else if (work->pol->Ax[j] > work->data->uA[j]) {
+                tmp = work->pol->Ax[j] - work->data->uA[j];
+                prim_resid_sq += tmp*tmp;
+            }
+        }
+    } else {
+        // Called from ADMM algorithm
+        for (j = 0; j < work->data->m; j++) {
+            if (work->x[work->data->n + j] < work->data->lA[j]) {
+                tmp = work->data->lA[j] - work->x[work->data->n + j];
+                prim_resid_sq += tmp*tmp;
+            } else if (work->x[work->data->n + j] > work->data->uA[j]) {
+                tmp = work->x[work->data->n + j] - work->data->uA[j];
+                prim_resid_sq += tmp*tmp;
+            }
+        }
+    }
+    return c_sqrt(prim_resid_sq);
 }
 
 
@@ -110,34 +142,78 @@ c_float compute_pri_res(Work * work){
 /**
  * Return norm of dual residual
  * TODO: Use more tailored residual (not general one)
- * @param  work Workspace
- * @return      Norm of dual residual
+ * @param  work   Workspace
+ * @param  polish Called from polish() function (1) or from elsewhere (0)
+ * @return        Norm of dual residual
  */
-c_float compute_dua_res(Work * work){
-    c_int i;
-    c_float norm_sq = 0, temp;
-    for (i = 0; i < work->data->n + work->data->m; i++){
-        temp = work->settings->rho * (work->z[i] - work->z_prev[i]);
-        norm_sq += temp*temp;
+c_float compute_dua_res(Work * work, c_int polish){
+    if (polish) {
+        // Called from polish() function
+        // dr = q + Ared'*lambda_red + P*x
+        // NB: Only upper triangular part of P is stored.
+        prea_vec_copy(work->data->q, work->dua_res_ws_n,
+                      work->data->n);                    // dr = q
+        mat_vec_tpose(work->pol->Ared, work->pol->lambda_red,
+                      work->dua_res_ws_n, 1, 0);      // += Ared'*lambda_red
+        mat_vec(work->data->P, work->pol->x,
+                work->dua_res_ws_n, 1);               // += Px (upper triang part)
+        mat_vec_tpose(work->data->P, work->pol->x,
+                      work->dua_res_ws_n, 1, 1);      // += Px (lower triang part)
+        return vec_norm2(work->dua_res_ws_n, work->data->n);
+    } else {
+        // TODO: Update computation of the dual residual
+        // Called from ADMM algorithm
+        // -dr = rho * [I  A']( z^{k+1} + (alpha-2)*z^k + (1-alpha)*x^{k+1} )
+        // NB: I compute negative dual residual for the convenience
+        prea_vec_copy(work->z, work->dua_res_ws_n, work->data->n);  // dr = z_x
+        vec_add_scaled(work->dua_res_ws_n, work->z_prev,
+                       work->data->n, work->settings->alpha-2.0);   // += (alpha-2)*z_prev_x
+        vec_add_scaled(work->dua_res_ws_n, work->x,
+                       work->data->n, 1.0-work->settings->alpha);  // += (1-alpha)*x_x
+
+        prea_vec_copy(work->z + work->data->n, work->dua_res_ws_m,
+                      work->data->m);                       // dr = z_s
+        vec_add_scaled(work->dua_res_ws_m, work->z_prev + work->data->n,
+                       work->data->m, work->settings->alpha-2.0); // += (alpha-2)*z_prev_s
+        vec_add_scaled(work->dua_res_ws_m, work->x + work->data->n,
+                       work->data->m, 1.0-work->settings->alpha); // += (1-alpha)*x_s
+        mat_vec_tpose(work->data->A, work->dua_res_ws_m,
+                      work->dua_res_ws_n, 1, 0);
+        return (work->settings->rho * vec_norm2(work->dua_res_ws_n, work->data->n));
     }
-    return c_sqrt(norm_sq);
 }
 
 
+/**
+ * Store the QP solution
+ * @param work Workspace
+ */
+void store_solution(Work *work) {
+    prea_vec_copy(work->x, work->solution->x, work->data->n);   // primal
+    vec_add_scaled(work->solution->lambda, work->u,             // dual
+                   work->data->m, work->settings->rho);
+}
 
 /**
  * Update solver information
- * @param work Workspace
+ * @param work   Workspace
+ * @param iter   Number of iterations
+ * @param polish Called from polish function (1) or from elsewhere (0)
  */
-void update_info(Work *work, c_int iter){
-    work->info->iter = iter; // Update iteration number
-    work->info->obj_val = compute_obj_val(work->data, work->z);
-    work->info->pri_res = compute_pri_res(work);
-    work->info->dua_res = compute_dua_res(work);
-
-    #if PROFILING > 0
-    work->info->solve_time = toc(work->timer);
-    #endif
+void update_info(Work *work, c_int iter, c_int polish){
+    if (!polish) {
+        work->info->iter = iter; // Update iteration number
+        work->info->obj_val = compute_obj_val(work, 0);
+        work->info->pri_res = compute_pri_res(work, 0);
+        work->info->dua_res = compute_dua_res(work, 0);
+        #if PROFILING > 0
+            work->info->solve_time = toc(work->timer);
+        #endif
+    } else {
+        work->pol->obj_val = compute_obj_val(work, 1);
+        work->pol->pri_res = compute_pri_res(work, 1);
+        work->pol->dua_res = compute_dua_res(work, 1);
+    }
 }
 
 
@@ -167,15 +243,21 @@ void update_status_string(Info *info){
 c_int residuals_check(Work *work){
     c_float eps_pri, eps_dua;
     c_int exitflag = 0;
-    //TODO: REDEFINE BETTER TERMINATION CONDITIONS
 
-    eps_pri = c_sqrt(work->data->n + work->data->m) * work->settings->eps_abs +
-              work->settings->eps_rel * c_max(vec_norm2(work->x, work->data->n + work->data->m),
-                                              vec_norm2(work->z, work->data->n + work->data->m));
-    eps_dua = c_sqrt(work->data->m) * work->settings->eps_abs +
-              work->settings->eps_rel * work->settings->rho * vec_norm2(work->u, work->data->m);
+    // Compute primal tolerance
+    eps_pri = c_sqrt(work->data->m) * work->settings->eps_abs +
+              work->settings->eps_rel *
+              c_max(vec_norm2(work->x + work->data->n, work->data->m),
+                    c_max(vec_norm2(work->data->lA, work->data->m),
+                          vec_norm2(work->data->uA, work->data->m)));
+    // Compute dual tolerance
+    mat_vec_tpose(work->data->A, work->u, work->dua_res_ws_n, 0, 0); // ws = A'*u
+    eps_dua = c_sqrt(work->data->n) * work->settings->eps_abs +
+              work->settings->eps_rel * work->settings->rho *
+              vec_norm2( work->dua_res_ws_n, work->data->n);
 
-    if (work->info->pri_res < eps_pri && work->info->dua_res < eps_dua) exitflag = 1;
+    if (work->info->pri_res < eps_pri && work->info->dua_res < eps_dua)
+        exitflag = 1;
 
     return exitflag;
 
@@ -188,38 +270,49 @@ c_int residuals_check(Work *work){
  * @return      Exitflag to check
  */
 c_int validate_data(const Data * data){
-        if(!data){
-            c_print("Missing data!\n");
-            return 1;
-        }
+    int j;
 
-        // General dimensions Tests
-        if (data->n <= 0 || data->m <= 0){
-            c_print("n and m must be both greater than 0; n = %i, m = %i\n",
-                     data->n, data->m);
-            return 1;
-        }
+    if(!data){
+        c_print("Missing data!\n");
+        return 1;
+    }
 
-        // Matrix P
-        if (data->P->m != data->n ){
-            c_print("P does not have dimension n x n with n = %i\n", data->n);
-            return 1;
-        }
-        if (data->P->m != data->P->n ){
-            c_print("P is not square\n");
-            return 1;
-        }
+    // General dimensions Tests
+    if (data->n <= 0 || data->m < 0){
+        c_print("n must be positive and m nonnegative; n = %i, m = %i\n",
+                 data->n, data->m);
+        return 1;
+    }
 
-        // Matrix A
-        if (data->A->m != data->m || data->A->n != data->n){
-            c_print("A does not have dimension m x n with m = %i and n = %i\n",
-                    data->m, data->n);
-            return 1;
+    // Matrix P
+    if (data->P->m != data->n ){
+        c_print("P does not have dimension n x n with n = %i\n", data->n);
+        return 1;
+    }
+    if (data->P->m != data->P->n ){
+        c_print("P is not square\n");
+        return 1;
+    }
+
+    // Matrix A
+    if (data->A->m != data->m || data->A->n != data->n){
+        c_print("A does not have dimension m x n with m = %i and n = %i\n",
+                data->m, data->n);
+        return 1;
+    }
+
+    // Lower and upper bounds
+    for (j = 0; j < data->m; j++) {
+        if (data->lA[j] > data->uA[j]) {
+          c_print("Lower bound at index %d is greater than upper bound: %.4e > %.4e\n",
+                  j, data->lA[j], data->uA[j]);
+          return 1;
         }
+    }
 
-        // TODO: Complete with other checks
+    // TODO: Complete with other checks
 
-        return 0;
+    return 0;
 }
 
 
