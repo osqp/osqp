@@ -23,9 +23,12 @@ class results(object):
     Stores OSQP results
     """
 
-    def __init__(self, status, objval, x, dual, cputime, total_iter):
+    def __init__(self, status, objval, # pri_res, dua_res,
+                 x, dual, cputime, total_iter):
         self.status = status
         self.objval = objval
+        # self.pri_res = pri_res
+        # self.dua_res = dua_res
         self.x = x
         self.dual = dual
         self.cputime = cputime
@@ -69,11 +72,11 @@ class options(object):
     max_iter [5000]            - Maximum number of iterations
     rho  [1.6]                 - Step in ADMM procedure
     alpha [1.0]                - Relaxation parameter
-    eps_abs  [1e-06]            - Absolute tolerance
+    eps_abs  [1e-06]           - Absolute tolerance
     eps_rel  [1e-06]           - Relative tolerance
+    delta    [1e-07]           - Regularization parameter for polishing
     print_level [2]            - Printing level
     scaling  [False]           - Prescaling/Equilibration
-    polish_tol [1e-5]          - Polishing tolerance to detect active constrs
     splitting [2]              - Splitting option
     warm_start [False]         - Reuse solution from previous solve
 
@@ -107,7 +110,7 @@ class options(object):
             self.print_level = 0
         self.scaling = kwargs.pop('scaling', False)
         self.polish = kwargs.pop('polish', True)
-        self.polish_tol = kwargs.pop('polish_tol', 1e-05)
+        self.delta = kwargs.pop('delta', 1e-07)
         self.splitting = kwargs.pop('splitting', 2)
         self.warm_start = kwargs.pop('warm_start', False)
 
@@ -152,8 +155,10 @@ class solver_solution(object):
     Solver solution vectors z, u
     """
     def __init__(self):
-        self.z = None
+        self.x = None
         self.u = None
+        self.pri_res = None
+        self.dua_res = None
 
 
 class OSQP(object):
@@ -237,8 +242,7 @@ class OSQP(object):
                                               self.options.print_level)
         self.options.scaling = kwargs.pop('scaling', self.options.scaling)
         self.options.polish = kwargs.pop('polish', self.options.polish)
-        self.options.polish_tol = kwargs.pop('polish_tol',
-                                             self.options.polish_tol)
+        self.options.delta = kwargs.pop('delta', self.options.delta)
 
         # Set scaling options
         self.scale_problem = kwargs.pop('scale_problem',
@@ -303,8 +307,8 @@ class OSQP(object):
         self.solve_admm()
 
         # Polish solution if optimal
-        # if (self.status == OPTIMAL) & self.options.polish:
-            # self.polish()
+        if (self.status == OPTIMAL) & self.options.polish:
+            self.polish()
 
         # Rescale solution back
         self.rescale_solution()
@@ -322,15 +326,19 @@ class OSQP(object):
     def get_qp_solution(self):
 
         # Recover primal solution
-        sol_x = self.solution.z[:self.problem.n]
+        sol_x = self.solution.x[:self.problem.n]
         objval = self.problem.objval(sol_x)
 
         # Recover dual solution
         dual = self.options.rho * self.solution.u
 
+        # # Compute residuals
+        # pri_res = self.norm_pri_res(self.solution.x)
+        # dua_res = self.norm_dua_res2(sol_x, dual)
+
         # Store solution as a quadprogResults object
-        solution = results(self.status, objval, sol_x, dual,
-                           self.cputime, self.total_iter)
+        solution = results(self.status, objval, # pri_res, dua_res,
+                           sol_x, dual, self.cputime, self.total_iter)
 
         # Return solution
         return solution
@@ -557,118 +565,76 @@ class OSQP(object):
         constraints are active. The problem boils down to solving a linear
         system.
         """
-        nx = self.scaled_problem.nx
-        neq = self.scaled_problem.neq
-        nineq = self.scaled_problem.nineq
-        tol = self.options.polish_tol
 
-        # Recover primal solution
-        sol_x = self.solution.z[:nx]
+        n = self.scaled_problem.n
+        m = self.scaled_problem.m
 
-        # Recover dual solution
-        dual_vars = -self.options.rho * self.solution.u
-        sol_ineq = dual_vars[nx+neq:]
-        sol_lb = np.maximum(dual_vars[:nx], 0)
-        sol_ub = -np.minimum(dual_vars[:nx], 0)
+        # Recover Ax and lambda from the ADMM solution
+        sol_Ax = self.solution.x[n:]
+        sol_lambda = self.options.rho * self.solution.u
 
-        # Try to guess from an approximate solution which bounds are active
-        bool_lb = np.logical_and(sol_x < (self.problem.lb+self.problem.ub)/2.,
-                                 sol_lb > sol_x - self.problem.lb)
-        bool_ub = np.logical_and(sol_x > (self.problem.lb+self.problem.ub)/2.,
-                                 sol_ub > self.problem.ub - sol_x)
-        ind_lb = np.where(bool_lb)[0]
-        ind_ub = np.where(bool_ub)[0]
-        # All the other elements of x are free
-        ind_free = np.where(np.logical_not(np.logical_or(bool_lb, bool_ub)))[0]
-
-        # Try to guess which inequality constraints are active
-        ineq_act = sol_ineq > \
-            (self.problem.bineq - self.problem.Aineq.dot(sol_x))
-        ind_act = np.where(ineq_act)[0]                     # Aineq x = bineq
-        ind_inact = np.where(np.logical_not(ineq_act))[0]   # Aineq x < bineq
+        # Try to guess the active bounds
+        ind_lAct = np.where(sol_Ax - self.scaled_problem.lA < -sol_lambda)[0]
+        ind_uAct = np.where(self.scaled_problem.uA - sol_Ax < sol_lambda)[0]
 
         # Solve the corresponding linear system
+        Ared = spspa.vstack([self.scaled_problem.A[ind_lAct],
+                             self.scaled_problem.A[ind_uAct]])
+        mred = Ared.shape[0]
         KKT = spspa.vstack([
-            spspa.hstack([self.problem.Q, self.problem.Aeq.T,
-                         self.problem.Aineq.T, spspa.eye(nx)]),
-            spspa.hstack([self.problem.Aeq,
-                         spspa.csr_matrix((neq, neq + nineq + nx))]),
-            spspa.hstack([self.problem.Aineq[ind_act],
-                          spspa.csr_matrix((len(ind_act), neq + nineq + nx))]),
-            spspa.hstack([spspa.csr_matrix((len(ind_inact), nx + neq)),
-                          spspa.eye(nineq).tocsr()[ind_inact],
-                          spspa.csr_matrix((len(ind_inact), nx))]),
-            spspa.hstack([spspa.csr_matrix((len(ind_free), nx + neq + nineq)),
-                          spspa.eye(nx).tocsr()[ind_free]]),
-            spspa.hstack([spspa.eye(nx).tocsr()[ind_lb],
-                          spspa.csr_matrix((len(ind_lb), neq + nineq + nx))]),
-            spspa.hstack([spspa.eye(nx).tocsr()[ind_ub],
-                          spspa.csr_matrix((len(ind_ub), neq + nineq + nx))]),
-            ]).tocsr()
-        rhs = np.hstack([-self.problem.c, self.problem.beq,
-                        self.problem.bineq[ind_act],
-                        np.zeros(len(ind_inact) + len(ind_free)),
-                        self.problem.lb[ind_lb], self.problem.ub[ind_ub]])
+                spspa.hstack([self.scaled_problem.P + self.options.delta *
+                              spspa.eye(n), Ared.T]),
+                spspa.hstack([Ared, -self.options.delta *
+                              spspa.eye(mred)])]).tocsr()
+        rhs = np.hstack([-self.scaled_problem.q,
+                         self.scaled_problem.lA[ind_lAct],
+                         self.scaled_problem.uA[ind_uAct]])
         try:
             pol_sol = spalinalg.spsolve(KKT, rhs)
         except:
             # Failed to factorize KKT matrix
             print "Polishing failed. Failed to factorize KKT matrix."
+            return
 
         # If the KKT matrix is singular, spsolve return an array of NaNs
         if any(np.isnan(pol_sol)):
             # Terminate
             print "Polishing failed. KKT matrix is singular."
+            return
 
-        # Check if the above solution satisfies constraints
-        pol_x = pol_sol[:nx]
-        pol_dual_eq = pol_sol[nx:nx + neq]
-        pol_dual_ineq = pol_sol[nx + neq:nx + neq + nineq]
-        pol_dual_lb = np.zeros(nx)
-        pol_dual_lb[ind_lb] = -pol_sol[nx + neq + nineq:][ind_lb]
-        pol_dual_ub = np.zeros(nx)
-        pol_dual_ub[ind_ub] = pol_sol[nx + neq + nineq:][ind_ub]
-        if all(pol_x > self.problem.lb - tol)\
-                and all(pol_x < self.problem.ub + tol)\
-                and all(pol_dual_ineq > -tol)\
-                and all(pol_dual_lb > -tol)\
-                and all(pol_dual_ub > -tol):
-                # Return the computed high-precision solution
-                print "Polishing successful!"
+        # Recover primal and dual polished solution
+        pol_x = pol_sol[:n]
+        pol_Ax = self.scaled_problem.A.dot(pol_x)
+        pol_lambda = np.zeros(m)
+        pol_lambda[ind_lAct] = pol_sol[n:n + len(ind_lAct)]
+        pol_lambda[ind_uAct] = pol_sol[n + len(ind_lAct):]
 
-                # Substitute new z and u in the solution
-                # Get slack variable
-                if self.scaled_problem.Aineq.shape[0]:  # Aineq not null
-                    sineq = self.scaled_problem.bineq - \
-                        self.scaled_problem.Aineq.dot(pol_x)
-                else:
-                    sineq = np.zeros(nineq)
+        # Compute primal and dual residuals
+        pol_pri_res = np.minimum(pol_Ax - self.scaled_problem.lA, 0) + \
+            np.maximum(pol_Ax - self.scaled_problem.uA, 0)
+        pol_dua_res = self.scaled_problem.P.dot(pol_x) + \
+            self.scaled_problem.q + Ared.T.dot(pol_sol[n:])
+        pol_pri_res_norm = np.linalg.norm(pol_pri_res)
+        pol_dua_res_norm = np.linalg.norm(pol_dua_res)
 
-                # Reconstruct primal variable
-                self.solution.z = np.hstack([pol_x, np.zeros(neq), sineq])
-
-                # reconstruct dual variable
-                self.solution.u = -1./self.options.rho * \
-                    np.hstack([pol_dual_lb - pol_dual_ub,
-                              pol_dual_eq,
-                              pol_dual_ineq])
-                #  solution.x = pol_x
-                #  solution.sol_dual_eq = pol_dual_eq
-                #  solution.sol_dual_ineq = pol_dual_ineq
-                #  solution.sol_dual_lb = pol_dual_lb
-                #  solution.sol_dual_ub = pol_dual_ub
-                #  solution.objval = self.problem.objval(pol_x)
-        else:
-            print "Polishing failed! Constraints not satisfied"
+        # Check if polishing was successful
+        if pol_pri_res_norm < self.solution.pri_res and \
+            pol_dua_res_norm < self.solution.pri_res:
+                self.solution.x[:self.problem.n] = pol_x
+                self.solution.u = pol_lambda / self.options.rho
+                if self.options.print_level > 1:
+                    f = self.scaled_problem.objval(pol_x)
+                    print "PLSH \t % 1.7e  \t%1.2e  \t%1.2e\n" \
+                        % (f, pol_pri_res_norm, pol_dua_res_norm)
 
     def scale_solution(self):
         """
         Scale given solution with diagonal scaling
         """
-        self.solution.z[:self.problem.n] = self.scaler_matrices.Dinv.dot(
-                self.solution.z[:self.problem.n])
-        self.solution.z[self.problem.n:] = self.scaler_matrices.Einv.dot(
-                self.solution.z[self.problem.n:])
+        self.solution.x[:self.problem.n] = self.scaler_matrices.Dinv.dot(
+                self.solution.x[:self.problem.n])
+        self.solution.x[self.problem.n:] = self.scaler_matrices.Einv.dot(
+                self.solution.x[self.problem.n:])
         self.solution.u = \
             self.scaler_matrices.Einv.dot(self.solution.u)
 
@@ -676,10 +642,10 @@ class OSQP(object):
         """
         Rescale solution back to user-given units
         """
-        self.solution.z[:self.problem.n] = \
-            self.scaler_matrices.D.dot(self.solution.z[:self.problem.n])
-        self.solution.z[self.problem.n:] = \
-            self.scaler_matrices.E.dot(self.solution.z[self.problem.n:])
+        self.solution.x[:self.problem.n] = \
+            self.scaler_matrices.D.dot(self.solution.x[:self.problem.n])
+        self.solution.x[self.problem.n:] = \
+            self.scaler_matrices.E.dot(self.solution.x[self.problem.n:])
         self.solution.u = \
             self.scaler_matrices.E.dot(self.solution.u)
 
@@ -695,6 +661,11 @@ class OSQP(object):
         dua_res = temp_vec[:self.scaled_problem.n] + \
             self.scaled_problem.A.T.dot(temp_vec[self.scaled_problem.n:])
         dua_res *= self.options.rho
+        return np.linalg.norm(dua_res)
+
+    def norm_dua_res2(self, x, lmbd):
+        dua_res = self.scaled_problem.P.dot(x) + \
+                  self.scaled_problem.q + self.scaled_problem.A.T.dot(lmbd)
         return np.linalg.norm(dua_res)
 
     def solve_admm(self):
@@ -731,10 +702,10 @@ class OSQP(object):
         # bc = np.append(self.scaled_problem.beq, self.scaled_problem.bineq)
 
         # Set initial conditions
-        if self.options.warm_start and self.solution.z is not None \
+        if self.options.warm_start and self.solution.x is not None \
                 and self.solution.u is not None:
             self.scale_solution()
-            z = self.solution.z
+            z = self.solution.x
             u = self.solution.u
         else:
             z = np.zeros(n + m)
@@ -762,16 +733,7 @@ class OSQP(object):
             u = u + self.options.alpha*x[n:] + \
                 (1.-self.options.alpha)*z_old[n:] - z[n:]
 
-            # # DEBUG
-            #  print "x = "
-            #  print x
-            #  print "z = "
-            #  print z
-            #  print "u = "
-            #  print u
-
             # Compute primal and dual residuals
-            # ipdb.set_trace()
             norm_pri_res = self.norm_pri_res(x)
             norm_dua_res = self.norm_dua_res(z_old, z, x)
 
@@ -786,10 +748,10 @@ class OSQP(object):
                 self.options.eps_rel * self.options.rho * \
                 np.linalg.norm(self.scaled_problem.A.T.dot(u))
 
-            if norm_pri_res <= eps_prim and norm_dua_res <= eps_dual:
+            if norm_pri_res < eps_prim and norm_dua_res < eps_dual:
                 # Print the progress in last iterations
                 if self.options.print_level > 1:
-                    f = self.scaled_problem.objval(z[:n])
+                    f = self.scaled_problem.objval(x[:n])
                     print "%4s \t % 1.7e  \t%1.2e  \t%1.2e" \
                         % (i+1, f, norm_pri_res, norm_dua_res)
                 # Stop the algorithm
@@ -809,14 +771,16 @@ class OSQP(object):
         self.total_iter = i
 
         # Return status
-        print "\n"
+        # print "\n"
         if i == self.options.max_iter - 1:
-            print "Maximum number of iterations exceeded!"
+            # print "Maximum number of iterations exceeded!"
             self.status = MAXITER_REACHED
         else:
-            print "Optimal solution found"
+            # print "Optimal solution found"
             self.status = OPTIMAL
 
         # Save z and u solution
-        self.solution.z = z
+        self.solution.x = x
         self.solution.u = u
+        self.solution.pri_res = norm_pri_res
+        self.solution.pri_res = norm_dua_res

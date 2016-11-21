@@ -111,10 +111,8 @@ struct OSQP_POLISH {
     csc *Ared;            // Matrix A containing only actiev rows
     c_int *ind_lAct;      // indices of lower-active constraints
     c_int *ind_uAct;      // indices of upper-active constraints
-    c_int *ind_free;      // indices of inactive constraints
     c_int n_lAct;         // number of lower-active constraints
     c_int n_uAct;         // number of upper-active constraints
-    c_int n_free;         // number of inactive constraints
     c_int *A2Ared;        // Table of indices that maps A to Ared
     c_float *x;           // optimal solution obtained by polishing
     c_float *Ax;          // workspace for storing A*x

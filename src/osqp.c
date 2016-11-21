@@ -81,7 +81,6 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->pol = c_malloc(sizeof(Polish));
     work->pol->ind_lAct = c_malloc(work->data->m * sizeof(c_int));
     work->pol->ind_uAct = c_malloc(work->data->m * sizeof(c_int));
-    work->pol->ind_free = c_malloc(work->data->m * sizeof(c_int));
     work->pol->A2Ared = c_malloc(work->data->m * sizeof(c_int));
     work->pol->x = c_malloc(work->data->n * sizeof(c_float));
     work->pol->Ax = c_malloc(work->data->m * sizeof(c_float));
@@ -274,7 +273,6 @@ c_int osqp_cleanup(Work * work){
     // Free active constraints structure
     c_free(work->pol->ind_lAct);
     c_free(work->pol->ind_uAct);
-    c_free(work->pol->ind_free);
     c_free(work->pol->A2Ared);
     c_free(work->pol->x);
     c_free(work->pol->Ax);

@@ -13,7 +13,6 @@ c_int form_Ared(Work *work) {
     // Initialize counters for active/inactive constraints
     work->pol->n_lAct = 0;
     work->pol->n_uAct = 0;
-    work->pol->n_free = 0;
 
     /* Guess which linear constraints are lower-active, upper-active and free
      *    A2Ared[j] = -1    (if j-th row of A is not inserted in Ared)
@@ -31,8 +30,7 @@ c_int form_Ared(Work *work) {
                     work->pol->A2Ared[j] = mred++;
         }
         else {
-            work->pol->ind_free[work->pol->n_free++] = j;        // free
-            work->pol->A2Ared[j] = -1;
+            work->pol->A2Ared[j] = -1;                          // free
         }
     }
 
