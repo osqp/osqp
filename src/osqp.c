@@ -206,8 +206,7 @@ c_int osqp_solve(Work * work){
         #endif
 
         if (residuals_check(work)){
-            // Update final information
-            work->info->status_val = OSQP_SOLVED;
+            // Terminate algorithm
             break;
         }
 
@@ -229,7 +228,7 @@ c_int osqp_solve(Work * work){
     #endif
 
     // Polish the obtained solution
-    if (work->settings->polishing)
+    if (work->settings->polishing && work->info->status_val == OSQP_SOLVED)
         polish(work);
 
     /* Print final footer */

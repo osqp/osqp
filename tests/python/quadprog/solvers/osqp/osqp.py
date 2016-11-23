@@ -11,9 +11,9 @@ import ipdb		# ipdb.set_trace()
 OPTIMAL = "optimal"
 OPTIMAL_INACCURATE = "optimal_inaccurate"
 MAXITER_REACHED = "maxiter_reached"
-# INFEASIBLE = "infeasible"
+INFEASIBLE = "infeasible"
 # INFEASIBLE_INACCURATE = "infeasible_inaccurate"
-# UNBOUNDED = "unbounded"
+UNBOUNDED = "unbounded"
 # UNBOUNDED_INACCURATE = "unbounded_inaccurate"
 # SOLVER_ERROR = "solver_error"
 
@@ -702,6 +702,7 @@ class OSQP(object):
         # bc = np.append(self.scaled_problem.beq, self.scaled_problem.bineq)
 
         # Set initial conditions
+        f = np.inf
         if self.options.warm_start and self.solution.x is not None \
                 and self.solution.u is not None:
             self.scale_solution()
@@ -737,35 +738,62 @@ class OSQP(object):
             norm_pri_res = self.norm_pri_res(x)
             norm_dua_res = self.norm_dua_res(z_old, z, x)
 
-            # Check the stopping criterion
+            # Compute residuals and objective value
             eps_prim = np.sqrt(m) * self.options.eps_abs \
-                + self.options.eps_rel * np.max([np.linalg.norm(x[n:]),
-                                                 np.linalg.norm(
-                                                    self.scaled_problem.lA),
-                                                 np.linalg.norm(
-                                                    self.scaled_problem.uA)])
+                + self.options.eps_rel * np.linalg.norm(x[n:])
             eps_dual = np.sqrt(n) * self.options.eps_abs + \
                 self.options.eps_rel * self.options.rho * \
                 np.linalg.norm(self.scaled_problem.A.T.dot(u))
+            f_old = f
+            f = self.scaled_problem.objval(x[:n])
 
-            if norm_pri_res < eps_prim and norm_dua_res < eps_dual:
-                # Print the progress in last iterations
-                if self.options.print_level > 1:
-                    f = self.scaled_problem.objval(x[:n])
-                    print "%4s \t % 1.7e  \t%1.2e  \t%1.2e" \
-                        % (i+1, f, norm_pri_res, norm_dua_res)
-                # Stop the algorithm
-                break
-
-            # Print cost function depending on print level
+            # Print info
             if self.options.print_level > 1:
                 if (i + 1 == 1) | (self.options.print_level == 2) & \
                         (np.mod(i + 1,
                          np.floor(np.float(self.options.max_iter)/20.0)) == 0)\
                         | (self.options.print_level == 3):
-                            f = self.scaled_problem.objval(z[:n])
                             print "%4s \t % 1.7e  \t%1.2e  \t%1.2e" \
                                 % (i+1, f, norm_pri_res, norm_dua_res)
+                            # # DEBUG
+                            # Px = np.hstack([x[:n], self.project(x[n:])])
+                            # infeas = np.linalg.norm(x-Px)/np.linalg.norm(z-Px)
+                            # print "infeas = %1.2e" % infeas
+
+            # Check termination criterion
+            if norm_pri_res < eps_prim and norm_dua_res < eps_dual:
+                # Print the progress in last iterations
+                if self.options.print_level > 1:
+                    print "%4s \t % 1.7e  \t%1.2e  \t%1.2e" \
+                        % (i+1, f, norm_pri_res, norm_dua_res)
+                # Stop the algorithm
+                self.status = OPTIMAL
+                break
+            elif norm_dua_res < eps_dual:  # and i > 0:
+                # Problem is only dual feasible
+                # if (np.abs(f-f_old) < self.options.eps_abs +
+                #         self.options.eps_rel * f):
+                if np.linalg.norm(z[n:]-self.project(x[n:])) < eps_prim:
+                        # Print the progress in last iterations
+                        if self.options.print_level > 1:
+                            print "%4s \t % 1.7e  \t%1.2e  \t%1.2e" \
+                                % (i+1, f, norm_pri_res, norm_dua_res)
+                        # Stop the algorithm
+                        self.status = INFEASIBLE
+                        break
+            elif norm_pri_res < eps_prim:
+                # Problem is only primal feasible
+                # norm(u-u_old) < eps
+                if (np.linalg.norm(self.options.alpha*x[n:] +
+                    (1.-self.options.alpha)*z_old[n:] - z[n:])) < \
+                        max(self.options.eps_abs, self.options.eps_abs):
+                    # Print the progress in last iterations
+                    if self.options.print_level > 1:
+                        print "%4s \t % 1.7e  \t%1.2e  \t%1.2e" \
+                            % (i+1, f, norm_pri_res, norm_dua_res)
+                    # Stop the algorithm
+                    self.status = UNBOUNDED
+                    break
 
         # Total iterations
         self.total_iter = i
@@ -775,9 +803,6 @@ class OSQP(object):
         if i == self.options.max_iter - 1:
             # print "Maximum number of iterations exceeded!"
             self.status = MAXITER_REACHED
-        else:
-            # print "Optimal solution found"
-            self.status = OPTIMAL
 
         # Save z and u solution
         self.solution.x = x

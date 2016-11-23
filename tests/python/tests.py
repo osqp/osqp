@@ -36,7 +36,7 @@ def load_maros_meszaros_problem(f):
 def main():
     sp.random.seed(3)
     # Possible ops:  {'small1', 'small2', 'random', 'maros_meszaros', 'lp'}
-    example = 'lp'
+    example = 'infeasible'
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
@@ -55,7 +55,6 @@ def main():
                          spspa.eye(P.shape[0])]).tocsc()
         lA = np.array([1.0, 0.0, 0.0])
         uA = np.array([1.0, 0.7, 0.7])
-
         p = qp.quadprogProblem(P, q, A, lA, uA)
     elif example == 'small2':
         # Small Example 2
@@ -65,6 +64,23 @@ def main():
                                       [2, 5], [3, 4]]))
         uA = np.array([0., 0., -15, 100, 80])
         lA = -np.inf * np.ones(len(uA))
+        p = qp.quadprogProblem(P, q, A, lA, uA)
+    elif example == 'infeasible':
+        # Infeasible example
+        # P = spspa.eye(2)
+        P = spspa.csc_matrix((2, 2))
+        q = np.ones(2)
+        A = spspa.csc_matrix(np.array([[1, 0], [0, 1], [1, 1]]))
+        lA = np.array([0., 0., -1.])
+        uA = np.array([np.inf, np.inf, -1.])
+        p = qp.quadprogProblem(P, q, A, lA, uA)
+    elif example == 'unbounded':
+        # Unbounded example
+        P = spspa.csc_matrix((2, 2))
+        q = np.array([2, -1])
+        A = spspa.eye(2)
+        lA = np.array([0., 0.])
+        uA = np.array([np.inf, np.inf])
         p = qp.quadprogProblem(P, q, A, lA, uA)
     elif example == 'random':
         # Random Example
@@ -89,7 +105,7 @@ def main():
         q = sp.randn(n)
         A = spspa.vstack([spspa.csc_matrix(sp.randn(m, n)), spspa.eye(n)])
         lA = np.append(sp.randn(m), 0. * np.ones(n))
-        uA = np.append(5 + sp.randn(m), 5. * np.ones(n))
+        uA = np.append(10 + sp.randn(m), 5. * np.ones(n))
         p = qp.quadprogProblem(P, q, A, lA, uA)
     else:
         assert False, "Unknown example"
@@ -101,7 +117,7 @@ def main():
     resultsGUROBI = p.solve(solver=GUROBI, OutputFlag=1)
 
     # Solve with OSQP. You can pass options to OSQP solver
-    resultsOSQP = p.solve(solver=OSQP, max_iter=50000,
+    resultsOSQP = p.solve(solver=OSQP, max_iter=5000,
                           eps_rel=1e-5,
                           eps_abs=1e-5,
                           alpha=1.6,
@@ -118,26 +134,30 @@ def main():
     #     beq = sp.randn(neq)
     #     bineq = 100 * sp.rand(nineq)
 
-    print "\n"
-    print("Comparison CPLEX - GUROBI")
-    print("-------------------------")
-    print "Difference in objective value %.8f" % \
-        np.linalg.norm(resultsCPLEX.objval - resultsGUROBI.objval)
-    print "Norm of solution difference %.8f" % \
-        np.linalg.norm(resultsCPLEX.x - resultsGUROBI.x)
-    print "Norm of dual difference %.8f" % \
-        np.linalg.norm(resultsCPLEX.dual - resultsGUROBI.dual)
+    if resultsGUROBI.status != 'solver_error':
+        print "\n"
+        print("Comparison CPLEX - GUROBI")
+        print("-------------------------")
+        print "Difference in objective value %.8f" % \
+            np.linalg.norm(resultsCPLEX.objval - resultsGUROBI.objval)
+        print "Norm of solution difference %.8f" % \
+            np.linalg.norm(resultsCPLEX.x - resultsGUROBI.x)
+        print "Norm of dual difference %.8f" % \
+            np.linalg.norm(resultsCPLEX.dual - resultsGUROBI.dual)
 
-    print "\n"
-    print("Comparison OSQP - GUROBI")
-    print("-------------------------")
-    print "Difference in objective value %.8f" % \
-        np.linalg.norm(resultsOSQP.objval - resultsGUROBI.objval)
-    print "Norm of solution difference %.8f" % \
-        np.linalg.norm(resultsOSQP.x - resultsGUROBI.x)
-    print "Norm of dual difference %.8f" % \
-        np.linalg.norm(resultsOSQP.dual - resultsGUROBI.dual)
-    ipdb.set_trace()
+        print "\n"
+        print("Comparison OSQP - GUROBI")
+        print("-------------------------")
+        print "Difference in objective value %.8f" % \
+            np.linalg.norm(resultsOSQP.objval - resultsGUROBI.objval)
+        print "Norm of solution difference %.8f" % \
+            np.linalg.norm(resultsOSQP.x - resultsGUROBI.x)
+        print "Norm of dual difference %.8f" % \
+            np.linalg.norm(resultsOSQP.dual - resultsGUROBI.dual)
+    else:
+        print "Problem is infeasible or unbounded"
+
+    # ipdb.set_trace()
 
 # Parsing optional command line arguments
 if __name__ == '__main__':

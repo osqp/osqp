@@ -183,6 +183,28 @@ c_float compute_dua_res(Work * work, c_int polish){
     }
 }
 
+/**
+ * Compute norm of infeasibility residual
+ * @param  work Workspace
+ * @return      Norm of infeasibility residual
+ */
+c_float compute_inf_res(Work * work){
+    c_int j;
+    c_float tmp, infeas_resid_sq=0;
+
+    for (j = 0; j < work->data->m; j++) {
+        if (work->x[work->data->n + j] < work->data->lA[j]) {
+            tmp = work->z[work->data->n + j] - work->data->lA[j];
+        } else if (work->x[work->data->n + j] > work->data->uA[j]) {
+            tmp = work->data->uA[j] - work->z[work->data->n + j];
+        } else {
+            tmp = work->x[work->data->n + j] - work->z[work->data->n + j];
+        }
+        infeas_resid_sq += tmp*tmp;
+    }
+    return c_sqrt(infeas_resid_sq);
+}
+
 
 /**
  * Store the QP solution
@@ -206,6 +228,7 @@ void update_info(Work *work, c_int iter, c_int polish){
         work->info->obj_val = compute_obj_val(work, 0);
         work->info->pri_res = compute_pri_res(work, 0);
         work->info->dua_res = compute_dua_res(work, 0);
+        work->info->inf_res = compute_inf_res(work);
         #if PROFILING > 0
             work->info->solve_time = toc(work->timer);
         #endif
@@ -247,17 +270,23 @@ c_int residuals_check(Work *work){
     // Compute primal tolerance
     eps_pri = c_sqrt(work->data->m) * work->settings->eps_abs +
               work->settings->eps_rel *
-              c_max(vec_norm2(work->x + work->data->n, work->data->m),
-                    c_max(vec_norm2(work->data->lA, work->data->m),
-                          vec_norm2(work->data->uA, work->data->m)));
+              vec_norm2(work->x + work->data->n, work->data->m);
     // Compute dual tolerance
     mat_vec_tpose(work->data->A, work->u, work->dua_res_ws_n, 0, 0); // ws = A'*u
     eps_dua = c_sqrt(work->data->n) * work->settings->eps_abs +
               work->settings->eps_rel * work->settings->rho *
               vec_norm2( work->dua_res_ws_n, work->data->n);
 
-    if (work->info->pri_res < eps_pri && work->info->dua_res < eps_dua)
+    if (work->info->pri_res < eps_pri && work->info->dua_res < eps_dua) {
+        // Update final information
+        work->info->status_val = OSQP_SOLVED;
         exitflag = 1;
+    } else if (work->info->pri_res > eps_pri && work->info->dua_res < eps_dua
+                                             && work->info->inf_res < eps_pri) {
+       // Update final information
+       work->info->status_val = OSQP_INFEASIBLE;
+       exitflag = 1;
+    }
 
     return exitflag;
 

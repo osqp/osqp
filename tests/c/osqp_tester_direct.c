@@ -11,8 +11,9 @@
 #include "solve_linsys/tests_solve_linsys.h"
 #include "basic_qp/test_basic_qp.h"
 #include "basic_qp2/test_basic_qp2.h"
+#include "infeas_qp/test_infeas_qp.h"
 // #include "qptests/chain80w/test_chain80w.h"
-#include "qptests/diesel/test_diesel.h"
+// #include "qptests/diesel/test_diesel.h"
 
 
 
@@ -24,6 +25,7 @@ static char * all_tests() {
     mu_run_test(tests_solve_linsys);
     mu_run_test(test_basic_qp);
     mu_run_test(test_basic_qp2);
+    mu_run_test(test_infeas_qp);
     // mu_run_test(test_chain80w);
     // mu_run_test(test_diesel);
     return 0;
