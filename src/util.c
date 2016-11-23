@@ -319,7 +319,7 @@ c_int is_eq_csc(csc *A, csc *B, c_float tol){
 
                 for (i=A->p[j]; i<A->p[j+1]; i++) { // Cycle rows i in column j
                         if (A->i[i] != B->i[i] || // Different row indices
-                            c_abs(A->x[i] - B->x[i]) > tol) {
+                            c_absval(A->x[i] - B->x[i]) > tol) {
                                 return 0;
                         }
                 }

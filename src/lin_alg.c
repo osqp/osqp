@@ -44,7 +44,7 @@ c_float vec_norm2(const c_float *v, c_int l) {
 //     c_float tmp, max = 0.0;
 //     c_int i;
 //     for (i = 0; i < l; ++i) {
-//         tmp = c_abs(a[i]);
+//         tmp = c_absval(a[i]);
 //         if (tmp > max)
 //             max = tmp;
 //     }
@@ -135,7 +135,7 @@ TODO: delete or keep it? We may not need this function.
 void mat_ew_abs(csc * A){
     c_int i;
     for (i=0; i<A->nzmax; i++) {
-        A->x[i] = c_abs(A->x[i]);
+        A->x[i] = c_absval(A->x[i]);
     }
 }
 
