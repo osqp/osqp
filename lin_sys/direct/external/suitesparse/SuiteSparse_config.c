@@ -8,7 +8,6 @@
  * apply to this file or to the SuiteSparse_config directory.
  * Author: Timothy A. Davis.
  */
-#define NPRINT
 
 #include <math.h>
 #include <stdlib.h>
@@ -55,9 +54,8 @@
 
 struct SuiteSparse_config_struct SuiteSparse_config =
 {
-
     // Memory allocation from glob_opts.h in OSQP
-    // c_malloc, NULL, c_realloc, c_free,
+    c_malloc, c_realloc, c_free,
 
     #if PRINTLEVEL > 0
     // Printing function from glop_opts.h in OSQP
@@ -66,119 +64,11 @@ struct SuiteSparse_config_struct SuiteSparse_config =
     NULL,
     #endif
 
-    // /* memory management functions */
-    // #ifndef NMALLOC
-    //     #ifdef MATLAB_MEX_FILE
-    //         /* MATLAB mexFunction: */
-    //         mxMalloc, mxCalloc, mxRealloc, mxFree,
-    //     #else
-    //         /* standard ANSI C: */
-    //         malloc, calloc, realloc, free,
-    //     #endif
-    // #else
-    //     /* no memory manager defined; you must define one at run-time: */
-    //     NULL, NULL, NULL, NULL,
-    // #endif
-    //
-    // /* printf function */
-    // #ifndef NPRINT
-    //     #ifdef MATLAB_MEX_FILE
-    //         /* MATLAB mexFunction: */
-    //         mexPrintf,
-    //     #else
-    //         /* standard ANSI C: */
-    //         printf,
-    //     #endif
-    // #else
-    //     /* printf is disabled */
-    //     NULL,
-    // #endif
-
     SuiteSparse_hypot,
     SuiteSparse_divcomplex
 
 } ;
 
-/* -------------------------------------------------------------------------- */
-/* SuiteSparse_start */
-/* -------------------------------------------------------------------------- */
-
-/* All applications that use SuiteSparse should call SuiteSparse_start prior
-   to using any SuiteSparse function.  Only a single thread should call this
-   function, in a multithreaded application.  Currently, this function is
-   optional, since all this function currently does is to set the four memory
-   function pointers to NULL (which tells SuiteSparse to use the default
-   functions).  In a multi- threaded application, only a single thread should
-   call this function.
-
-   Future releases of SuiteSparse might enforce a requirement that
-   SuiteSparse_start be called prior to calling any SuiteSparse function.
- */
-
-// void SuiteSparse_start ( void )
-// {
-//
-//     /* memory management functions */
-//     #ifndef NMALLOC
-//         #ifdef MATLAB_MEX_FILE
-//             /* MATLAB mexFunction: */
-//             SuiteSparse_config.malloc_func  = mxMalloc ;
-//             SuiteSparse_config.calloc_func  = mxCalloc ;
-//             SuiteSparse_config.realloc_func = mxRealloc ;
-//             SuiteSparse_config.free_func    = mxFree ;
-//         #else
-//             /* standard ANSI C: */
-//             SuiteSparse_config.malloc_func  = malloc ;
-//             SuiteSparse_config.calloc_func  = calloc ;
-//             SuiteSparse_config.realloc_func = realloc ;
-//             SuiteSparse_config.free_func    = free ;
-//         #endif
-//     #else
-//         /* no memory manager defined; you must define one after calling
-//            SuiteSparse_start */
-//         SuiteSparse_config.malloc_func  = NULL ;
-//         SuiteSparse_config.calloc_func  = NULL ;
-//         SuiteSparse_config.realloc_func = NULL ;
-//         SuiteSparse_config.free_func    = NULL ;
-//     #endif
-//
-//     /* printf function */
-//     #ifndef NPRINT
-//         #ifdef MATLAB_MEX_FILE
-//             /* MATLAB mexFunction: */
-//             SuiteSparse_config.printf_func = mexPrintf ;
-//         #else
-//             /* standard ANSI C: */
-//             SuiteSparse_config.printf_func = printf ;
-//         #endif
-//     #else
-//         /* printf is disabled */
-//         SuiteSparse_config.printf_func = NULL ;
-//     #endif
-//
-//     /* math functions */
-//     SuiteSparse_config.hypot_func = SuiteSparse_hypot ;
-//     SuiteSparse_config.divcomplex_func = SuiteSparse_divcomplex ;
-// }
-
-/* -------------------------------------------------------------------------- */
-/* SuiteSparse_finish */
-/* -------------------------------------------------------------------------- */
-
-/* This currently does nothing, but in the future, applications should call
-   SuiteSparse_start before calling any SuiteSparse function, and then
-   SuiteSparse_finish after calling the last SuiteSparse function, just before
-   exiting.  In a multithreaded application, only a single thread should call
-   this function.
-
-   Future releases of SuiteSparse might use this function for any
-   SuiteSparse-wide cleanup operations or finalization of statistics.
- */
-
-// void SuiteSparse_finish ( void )
-// {
-//     /* do nothing */ ;
-// }
 
 /* -------------------------------------------------------------------------- */
 /* SuiteSparse_malloc: malloc wrapper */
@@ -203,41 +93,13 @@ void *SuiteSparse_malloc    /* pointer to allocated block of memory */
     }
     else
     {
-        // p = (void *) (SuiteSparse_config.malloc_func) (size) ;
-        p = (void *) c_malloc(size) ;
+        p = (void *) (SuiteSparse_config.malloc_func) (size) ;
+        // p = (void *) c_malloc(size) ;
     }
     return (p) ;
 }
 
 
-/* -------------------------------------------------------------------------- */
-/* SuiteSparse_calloc: calloc wrapper */
-/* -------------------------------------------------------------------------- */
-
-// void *SuiteSparse_calloc    /* pointer to allocated block of memory */
-// (
-//     size_t nitems,          /* number of items to calloc */
-//     size_t size_of_item     /* sizeof each item */
-// )
-// {
-//     void *p ;
-//     size_t size ;
-//     if (nitems < 1) nitems = 1 ;
-//     if (size_of_item < 1) size_of_item = 1 ;
-//     size = nitems * size_of_item  ;
-//
-//     if (size != ((double) nitems) * size_of_item)
-//     {
-//         /* size_t overflow */
-//         p = NULL ;
-//     }
-//     else
-//     {
-//         // p = (void *) (SuiteSparse_config.calloc_func) (nitems, size_of_item) ;
-//         p = (void *) c_calloc(nitems, size_of_item) ;
-//     }
-//     return (p) ;
-// }
 
 /* -------------------------------------------------------------------------- */
 /* SuiteSparse_realloc: realloc wrapper */
@@ -324,8 +186,8 @@ void *SuiteSparse_free      /* always returns NULL */
 {
     if (p)
     {
-        // (SuiteSparse_config.free_func) (p) ;
-        c_free(p) ;
+        (SuiteSparse_config.free_func) (p) ;
+        // c_free(p) ;
     }
     return (NULL) ;
 }
