@@ -43,7 +43,7 @@ c_int test_vec_operations(){
 
     // Norm of the difference
     norm2_diff = vec_norm2_diff(t2_v1, t2_v2, t2_n);
-    if (c_abs(norm2_diff - t2_norm2_diff)>TESTS_TOL) {
+    if (c_absval(norm2_diff - t2_norm2_diff)>TESTS_TOL) {
         c_print("\nError in norm of difference test!");
         exitflag = 1;
     }
@@ -58,21 +58,21 @@ c_int test_vec_operations(){
 
     // Norm2 squared
     norm2_sq = vec_norm2_sq(t2_v1, t2_n);
-    if (c_abs(norm2_sq - t2_norm2_sq)>TESTS_TOL) {
+    if (c_absval(norm2_sq - t2_norm2_sq)>TESTS_TOL) {
         c_print("\nError in norm 2 squared test!");
         exitflag = 1;
     }
 
     // Norm2
     norm2 = vec_norm2(t2_v1, t2_n);
-    if (c_abs(norm2 - t2_norm2)>TESTS_TOL) {
+    if (c_absval(norm2 - t2_norm2)>TESTS_TOL) {
         c_print("\nError in norm 2 test!");
         exitflag = 1;
     }
 
     // // NormInf
     // normInf = vec_normInf(t2_v1, t2_n);
-    // if (c_abs(normInf - t2_normInf)>TESTS_TOL) {
+    // if (c_absval(normInf - t2_normInf)>TESTS_TOL) {
     //     c_print("\nError in norm inf test!");
     //     exitflag = 1;
     // }
@@ -85,7 +85,7 @@ c_int test_vec_operations(){
 
 
     vecprod = vec_prod(t2_v1, t2_v2, t2_n);
-    if(c_abs(vecprod - t2_vec_prod) > TESTS_TOL){
+    if(c_absval(vecprod - t2_vec_prod) > TESTS_TOL){
         c_print("\nError in vector product");
         exitflag = 1;
     }
@@ -319,7 +319,7 @@ c_int test_quad_form_upper_triang(){
     // Compute quadratic form
     quad_form_t = quad_form(Atriu, t_qpform_x);
 
-    if (c_abs(quad_form_t - t_qpform_value) >  TESTS_TOL) {
+    if (c_absval(quad_form_t - t_qpform_value) >  TESTS_TOL) {
         c_print("\nError in computing quadratic form using upper triangular matrix!");
         exitflag = 1;
     }
