@@ -98,14 +98,14 @@ def main():
         p = qp.quadprogProblem(P, q, A, lA, uA)
     elif example == 'lp':
         # Random Example
-        n = 50
-        m = 10
+        n = 100
+        m = 50
         # Generate random Matrices
         P = spspa.csc_matrix(np.zeros((n, n)))
         q = sp.randn(n)
         A = spspa.vstack([spspa.csc_matrix(sp.randn(m, n)), spspa.eye(n)])
-        lA = np.append(sp.randn(m), 0. * np.ones(n))
-        uA = np.append(10 + sp.randn(m), 5. * np.ones(n))
+        lA = np.append(- 3 + sp.randn(m), - 3 + sp.randn(n))
+        uA = np.append(3 + sp.randn(m), 3 + sp.randn(n))
         p = qp.quadprogProblem(P, q, A, lA, uA)
     else:
         assert False, "Unknown example"

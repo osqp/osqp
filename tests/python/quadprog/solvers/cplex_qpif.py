@@ -81,6 +81,7 @@ class CPLEX(object):
                                              senses=["L"],
                                              rhs=[uA[i]])
             else:
+                # ipdb.set_trace()
                 model.linear_constraints.add(lin_expr=row,
                                              senses=["R"],
                                              range_values=[lA[i] - uA[i]],
