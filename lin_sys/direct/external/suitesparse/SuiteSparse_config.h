@@ -44,6 +44,7 @@ extern "C" {
 
 #include <limits.h>
 #include <stdlib.h>
+#include "glob_opts.h"
 
 /* ========================================================================== */
 /* === SuiteSparse_long ===================================================== */
@@ -85,7 +86,6 @@ extern "C" {
 struct SuiteSparse_config_struct
 {
     void *(*malloc_func) (size_t) ;             /* pointer to malloc */
-    void *(*calloc_func) (size_t, size_t) ;     /* pointer to calloc */
     void *(*realloc_func) (void *, size_t) ;    /* pointer to realloc */
     void (*free_func) (void *) ;                /* pointer to free */
     int (*printf_func) (const char *, ...) ;    /* pointer to printf */
@@ -94,10 +94,6 @@ struct SuiteSparse_config_struct
 } ;
 
 extern struct SuiteSparse_config_struct SuiteSparse_config ;
-
-void SuiteSparse_start ( void ) ;   /* called to start SuiteSparse */
-
-void SuiteSparse_finish ( void ) ;  /* called to finish SuiteSparse */
 
 void *SuiteSparse_malloc    /* pointer to allocated block of memory */
 (
