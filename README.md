@@ -1,25 +1,24 @@
 # Operator Splitting QP Solver
 
-Python implementation of the operator splitting QP solver for problems in the form
+OSQP (Operator Splitting Quadratic Program) solver is a numerical optimization package for solving problems in the form
 ```
 minimize        1/2*x'Px + q'x
 subject to      lA <= A x <= uA
 ```
 
+The current version is `0.0.0`.
+
+
 ## TODO
 
-- [x] Stopping criterion
 - [x] Do preconditioning/equilibration
-- [x] Timer and compare to other QP solvers
+- [ ] Timer and compare to other QP solvers
 - [ ] Presolver
 - [ ] Infeasibility detection:
     - Generalize [result](http://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=7040300) to non strongly convex problems
 - [ ] Unboundedness detection
 - [ ] Stepsize selection: maybe choose
 - [x] Warm starting
-- [x] Polishing:
-    - It works but not very robust yet
-    - See [this article](https://arxiv.org/pdf/1609.07478.pdf)
 
 
 ### Other Test Problems
