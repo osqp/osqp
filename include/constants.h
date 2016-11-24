@@ -8,7 +8,6 @@
 #define OSQP_VERSION ("0.1") /* string literals automatically null-terminated */
 
 
-
 /******************
  * Solver Status  *
  ******************/

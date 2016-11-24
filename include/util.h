@@ -5,6 +5,14 @@
 #include "cs.h"
 #include "osqp.h"
 
+/******************
+ * Versioning     *
+ ******************/
+
+// Return OSQP version
+const char *osqp_version(void);
+
+
 /**********************
  * Utility Functions  *
  **********************/

@@ -1,5 +1,13 @@
 #include "util.h"
 
+/***************
+ * Versioning  *
+ ***************/
+const char *osqp_version(void) {
+    return OSQP_VERSION;
+}
+
+
 
 /************************************
  * Printing Constants to set Layout *
