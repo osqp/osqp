@@ -26,20 +26,26 @@ Work * osqp_setup(const Data * data, Settings *settings){
 
     // Validate data
     if (validate_data(data)){
+        #if PRINTLEVEL > 0
         c_print("ERROR: Data validation returned failure!\n");
+        #endif
         return OSQP_NULL;
     }
 
     // Validate settings
     if (validate_settings(settings)){
+        #if PRINTLEVEL > 0
         c_print("ERROR: Settings validation returned failure!\n");
+        #endif
         return OSQP_NULL;
     }
 
     // Allocate empty workspace
     work = c_calloc(1, sizeof(Work));
     if (!work){
+        #if PRINTLEVEL > 0
         c_print("ERROR: allocating work failure!\n");
+        #endif
     }
 
     // Start and allocate directly timer
