@@ -39,11 +39,6 @@ class nonneg_l2(object):
             A = spspa.eye(n)
             lA = np.zeros(n)
             uA = np.inf * np.ones(n)
-            # Aeq = spspa.csc_matrix((0, n))
-            # beq = np.zeros(0)
-            # Aineq = spspa.csc_matrix((0, n))
-            # bineq = np.zeros(0)
-            # lb = np.zeros(n)
         elif version == 'sparse':
             #       minimize	1/2 y.T*y
             #       subject to  y = Ax - b
@@ -51,20 +46,12 @@ class nonneg_l2(object):
             Im = spspa.eye(m)
             P = spspa.block_diag((spspa.csc_matrix((n, n)), Im), format='csc')
             q = np.zeros(n + m)
-            A = spspa.hstack([Ad, -Im]).tocsc()
-            uA = np.copy(bd)
-            lA = np.copy(bd)
-
-            # Add bounds
-            Abounds = spspa.hstack([spspa.eye(n), spspa.csc_matrix((n, m))])
-            A = spspa.vstack([A, Abounds])
-            lA = np.append(lA, np.zeros(n))
-            uA = np.append(uA, np.inf * np.ones(n))
-
-            #
-            # Aineq = spspa.csc_matrix((0, n + m))
-            # bineq = np.zeros(0)
-            # lb = np.append(np.zeros(n), -np.inf*np.ones(m))
+            A = spspa.vstack([
+                    spspa.hstack([Ad, -Im]),
+                    spspa.hstack([spspa.eye(n), spspa.csc_matrix((n, m))]),
+                ]).tocsc()
+            lA = np.append(bd, np.zeros(n))
+            uA = np.append(bd, np.inf * np.ones(n))
         else:
             assert False, "Unhandled version"
 
@@ -109,13 +96,13 @@ options = {'eps_abs':       1e-4,
            'polish':        False}
 
 # Create a lasso object
-nonneg_l2__obj = nonneg_l2(m, n, dens_lvl=0.3, version='dense',
-                           osqp_opts=options)
+nonneg_l2_obj = nonneg_l2(m, n, dens_lvl=0.5, version='sparse',
+                          osqp_opts=options)
 
 # Solve with different solvers
-resultsCPLEX = nonneg_l2__obj.solve(solver=CPLEX)
-resultsGUROBI = nonneg_l2__obj.solve(solver=GUROBI)
-resultsOSQP = nonneg_l2__obj.solve(solver=OSQP)
+resultsCPLEX = nonneg_l2_obj.solve(solver=CPLEX)
+resultsGUROBI = nonneg_l2_obj.solve(solver=GUROBI)
+resultsOSQP = nonneg_l2_obj.solve(solver=OSQP)
 
 # Print objective values
 print "CPLEX  Objective Value: %.3f" % resultsCPLEX.objval

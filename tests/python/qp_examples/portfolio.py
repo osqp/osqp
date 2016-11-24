@@ -39,24 +39,9 @@ class portfolio(object):
             #                   0 <= x <= 1
             P = 2 * (F.dot(F.T) + D)
             q = -mu / gamma
-            A = spspa.csc_matrix(np.ones((1, n)))
-            lA = np.array([1.])
-            uA = np.copy(lA)
-
-            # Add bounds
-            A = spspa.vstack([A, spspa.eye(n)])
-            lA = np.append(lA, np.zeros(n))
-            uA = np.append(uA, np.ones(n))
-
-            # OLD FORMULATION
-            # Q = 2 * (F.dot(F.T) + D)
-            # c = -mu / gamma
-            # Aeq = spspa.csc_matrix(np.ones((1, n)))
-            # beq = np.array([1.])
-            # Aineq = spspa.csc_matrix((0, n))
-            # bineq = np.zeros(0)
-            # lb = np.zeros(n)
-            # ub = np.ones(n)
+            A = spspa.vstack([np.ones((1, n)), spspa.eye(n)]).tocsc()
+            lA = np.append([1.], np.zeros(n))
+            uA = np.append([1.], np.ones(n))
 
         elif version == 'sparse':
             #       minimize	x.T*D*x + y.T*y - mu.T / gamma * x
@@ -67,29 +52,13 @@ class portfolio(object):
             q = np.append(-mu / gamma, np.zeros(k))
             A = spspa.vstack([
                     spspa.hstack([spspa.csc_matrix(np.ones((1, n))),
-                                  spspa.csc_matrix(np.zeros((1, k)))]),
-                    spspa.hstack([F.T, -spspa.eye(k)])]).tocsc()
-            uA = np.append(1., np.zeros(k))
-            lA = np.copy(uA)
+                                  spspa.csc_matrix((1, k))]),
+                    spspa.hstack([F.T, -spspa.eye(k)]),
+                    spspa.hstack([spspa.eye(n), spspa.csc_matrix((n, k))])
+                ]).tocsc()
+            lA = np.hstack([1., np.zeros(k), np.zeros(n)])
+            uA = np.hstack([1., np.zeros(k), np.ones(n)])
 
-            # Add bounds
-            Abounds = spspa.hstack([spspa.eye(n), spspa.csc_matrix((n, k))])
-            A = spspa.vstack([A, Abounds])
-            lA = np.append(lA, np.zeros(n))
-            uA = np.append(uA, np.ones(n))
-
-            # OLD FORMULATION
-            # Q = spspa.block_diag((2*D, 2*spspa.eye(k)), format='csc')
-            # c = np.append(-mu / gamma, np.zeros(k))
-            # Aeq = spspa.vstack([
-            #         spspa.hstack([spspa.csc_matrix(np.ones((1, n))),
-            #                       spspa.csc_matrix(np.zeros((1, k)))]),
-            #         spspa.hstack([F.T, -spspa.eye(k)])]).tocsc()
-            # beq = np.append(1., np.zeros(k))
-            # Aineq = spspa.csc_matrix((0, n + k))
-            # bineq = np.zeros(0)
-            # lb = np.append(np.zeros(n), -np.inf*np.ones(k))
-            # ub = np.append(np.ones(n), np.inf*np.ones(k))
         else:
             assert False, "Unhandled version"
 
