@@ -7,6 +7,8 @@ import quadprog.problem as qp
 from quadprog.solvers.solvers import GUROBI, CPLEX, OSQP
 import quadprog.solvers.osqp.osqp as osqp
 
+import matplotlib.pyplot as plt
+import seaborn
 
 # Generate and solve a Huber fitting problem
 class huber_fit(object):
@@ -93,12 +95,12 @@ options = {'eps_abs':       1e-4,
            'polish':        False}
 
 # Create a lasso object
-huber_fit__obj = huber_fit(m, n, dens_lvl=0.50, osqp_opts=options)
+huber_fit_obj = huber_fit(m, n, dens_lvl=0.50, osqp_opts=options)
 
 # Solve with different solvers
-resultsCPLEX = huber_fit__obj.solve(solver=CPLEX)
-resultsGUROBI = huber_fit__obj.solve(solver=GUROBI)
-resultsOSQP = huber_fit__obj.solve(solver=OSQP)
+resultsCPLEX = huber_fit_obj.solve(solver=CPLEX)
+resultsGUROBI = huber_fit_obj.solve(solver=GUROBI)
+resultsOSQP = huber_fit_obj.solve(solver=OSQP)
 
 # Print objective values
 print "CPLEX  Objective Value: %.3f" % resultsCPLEX.objval
@@ -110,3 +112,27 @@ print "\n"
 print "CPLEX  CPU time: %.3f" % resultsCPLEX.cputime
 print "GUROBI CPU time: %.3f" % resultsGUROBI.cputime
 print "OSQP   CPU time: %.3f" % resultsOSQP.cputime
+
+# ipdb.set_trace()
+
+# Recover A, x and b from the problem
+A = huber_fit_obj._osqp.problem.A[:m, :n]
+x = resultsOSQP.x[:n]
+Ax = A.dot(x)
+b = huber_fit_obj._osqp.problem.lA[:m]
+
+# Plot Ax against b
+plt.rc('font', family='serif')
+plt.figure(figsize=(10, 10))
+plt.plot(Ax, b, 'b.')
+plt.plot([np.min(Ax), np.max(Ax)], [np.min(Ax), np.max(Ax)], 'r')
+plt.xlabel('$a_i^T x$', fontsize=18)
+plt.ylabel('$b_i$', fontsize=18)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+axes = plt.gca()
+dAx = np.max(Ax) - np.min(Ax)
+db = np.max(b) - np.min(b)
+axes.set_xlim([np.min(Ax)-0.1*(dAx), np.max(Ax)+0.1*(dAx)])
+axes.set_ylim([np.min(b)-0.1*(db), np.max(b)+0.1*(db)])
+plt.show()

@@ -7,6 +7,9 @@ import quadprog.problem as qp
 from quadprog.solvers.solvers import GUROBI, CPLEX, OSQP
 import quadprog.solvers.osqp.osqp as osqp
 
+import matplotlib.pyplot as plt
+import seaborn
+
 
 # Generate and solve a (sequence of) Lasso problem(s)
 class lasso(object):
@@ -40,12 +43,12 @@ class lasso(object):
             #       subject to  -t <= x <= t
             P = spspa.block_diag((2*Ad.T.dot(Ad), spspa.csc_matrix((n, n))),
                                  format='csc')
-            q = np.append(Ad.T.dot(bd), self._gammas[0]*np.ones(n))
+            q = np.append(-2*Ad.T.dot(bd), self._gammas[0]*np.ones(n))
             In = spspa.eye(n)
             A = spspa.vstack([spspa.hstack([In, -In]),
-                             spspa.hstack([-In, -In])]).tocsc()
-            uA = np.zeros(2*n)
-            lA = -np.inf * np.ones(2*n)
+                              spspa.hstack([In, In])]).tocsc()
+            lA = np.append(-np.inf * np.ones(n), np.zeros(n))
+            uA = np.append(np.zeros(n), np.inf * np.ones(n))
         elif version == 'sparse':
             #       minimize	y.T * y + gamma * np.ones(n).T * t
             #       subject to  y = Ax
@@ -53,17 +56,14 @@ class lasso(object):
             P = spspa.block_diag((spspa.csc_matrix((n, n)), 2*spspa.eye(m),
                                   spspa.csc_matrix((n, n))), format='csc')
             q = np.append(np.zeros(m + n), self._gammas[0]*np.ones(n))
-            # A = spspa.hstack([Ad, -spspa.eye(m), spspa.csc_matrix((m, n))])
-            # uA = np.copy(bd)
-            # lA = np.copy(bd)
             In = spspa.eye(n)
             Onm = spspa.csc_matrix((n, m))
             A = spspa.vstack([spspa.hstack([Ad, -spspa.eye(m),
-                              spspa.csc_matrix((m, n))]),
+                                            spspa.csc_matrix((m, n))]),
                              spspa.hstack([In, Onm, -In]),
-                             spspa.hstack([-In, Onm, -In])]).tocsc()
-            uA = np.append(bd, np.zeros(2*n))
-            lA = np.append(bd, -np.inf * np.ones(2*n))
+                             spspa.hstack([In, Onm, In])]).tocsc()
+            lA = np.hstack([bd, -np.inf * np.ones(n), np.zeros(n)])
+            uA = np.hstack([bd, np.zeros(n), np.inf * np.ones(n)])
         else:
             assert False, "Unhandled version"
 
@@ -87,7 +87,7 @@ class lasso(object):
             assert False, "Unhandled solver"
         return results
 
-    def update_gamma(self):
+    def update_gamma(self, n):
         """
         Update parameter gamma in the problem and in
         Return:
@@ -101,8 +101,7 @@ class lasso(object):
             return 1
         # Update current q in the problem
         q = self._prob.q
-        m = self._osqp.problem.m / 2
-        q[-m:] = gamma*np.ones(n)
+        q[-n:] = gamma*np.ones(n)
         self._prob.q = q
         # Update gmma in the OSQP object
         self._osqp.set_problem_data(q=q)
@@ -132,7 +131,7 @@ options = {'eps_abs':       1e-4,
            'warm_start':    True}
 
 # Create a lasso object
-lasso_obj = lasso(m, n, inst=numofinst, version='dense', osqp_opts=options)
+lasso_obj = lasso(m, n, inst=numofinst, version='sparse', osqp_opts=options)
 for i in range(numofinst):
     # Solve with different solvers
     resultsCPLEX = lasso_obj.solve(solver=CPLEX)
@@ -148,6 +147,6 @@ for i in range(numofinst):
     # Print timings
     print "CPLEX  CPU time: %.3f" % resultsCPLEX.cputime
     print "GUROBI CPU time: %.3f" % resultsGUROBI.cputime
-    print "OSQP   CPU time: %.3f\n" % resultsOSQP.cputime
+    print "OSQP   CPU time: %.3f" % resultsOSQP.cputime
     if numofinst > 1:
-        lasso_obj.update_gamma()
+        lasso_obj.update_gamma(n)

@@ -38,14 +38,9 @@ class basis_pursuit(object):
         q = np.append(np.zeros(n), np.ones(n))
         A = spspa.vstack([spspa.hstack([Ad, spspa.csc_matrix((m, n))]),
                           spspa.hstack([In, -In]),
-                          spspa.hstack([-In, -In])])
-        uA = np.append(bd, np.zeros(2*n))
-        lA = np.append(bd, - np.inf * np.ones(2*n))
-        # Aeq = spspa.hstack([Ad, spspa.csc_matrix((m, n))])
-        # beq = bd
-        # Aineq = spspa.vstack([spspa.hstack([In, -In]),
-        #                       spspa.hstack([-In, -In])]).tocsc()
-        # bineq = np.zeros(2*n)
+                          spspa.hstack([In, In])])
+        lA = np.hstack([bd, -np.inf * np.ones(n), np.zeros(n)])
+        uA = np.hstack([bd, np.zeros(n), np.inf * np.ones(n)])
 
         # Create a quadprogProblem and store it in a private variable
         self._prob = qp.quadprogProblem(P, q, A, lA, uA)
