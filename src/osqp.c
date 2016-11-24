@@ -107,7 +107,9 @@ Work * osqp_setup(const Data * data, Settings *settings){
 
     // Allocate timing information
     #if PROFILING > 0
-    work->info->solve_time = 0.0; // Solve time to zero
+    work->info->solve_time = 0.0;  // Solve time to zero
+    work->info->polish_time = 0.0; // Polish time to zero
+    work->info->run_time = 0.0;    // Total run time to zero
     work->info->setup_time = toc(work->timer); // Updater timer information
     #endif
 
@@ -156,44 +158,19 @@ c_int osqp_solve(Work * work){
         // Update z_prev (preallocated, no malloc)
         prea_vec_copy(work->z, work->z_prev, work->data->n + work->data->m);
 
-
-        // // DEBUG
-        // #if PRINTLEVEL > 2
-        // print_vec(work->z_prev, work->data->n + work->data->m, "z_prev");
-        // #endif
-
         /* ADMM STEPS */
         /* First step: x_{k+1} */
         compute_rhs(work);
-        // // DEBUG
-        // #if PRINTLEVEL > 2
-        // print_vec(work->x, work->data->n + work->data->m, "rhs");
-        // #endif
 
         solve_lin_sys(work->settings, work->priv, work->x);
         update_x(work);
 
-        // // DEBUG
-        // #if PRINTLEVEL > 2
-        // print_vec(work->x, work->data->n + work->data->m, "x");
-        // #endif
-
         /* Second step: z_{k+1} */
         project_x(work);
-
-        // // DEBUG
-        // #if PRINTLEVEL > 2
-        // print_vec(work->z, work->data->n + work->data->m, "z");
-        // #endif
 
         /* Third step: u_{k+1} */
         update_u(work);
         /* End of ADMM Steps */
-
-        // // DEBUG
-        // #if PRINTLEVEL > 2
-        // print_vec(work->u, work->data->m, "u");
-        // #endif
 
 
         /* Update information */
@@ -222,7 +199,7 @@ c_int osqp_solve(Work * work){
     /* Update final status */
     update_status_string(work->info);
 
-    /* Update timing */
+    /* Update solve time */
     #if PROFILING > 0
     work->info->solve_time = toc(work->timer);
     #endif
@@ -231,6 +208,14 @@ c_int osqp_solve(Work * work){
     if (work->settings->polishing && work->info->status_val == OSQP_SOLVED)
         polish(work);
 
+
+    /* Update total time: setup + solve + polish*/
+    #if PROFILING > 0
+    work->info->run_time = work->info->setup_time +
+                           work->info->solve_time +
+                           work->info->polish_time;
+    #endif
+
     /* Print final footer */
     #if PRINTLEVEL > 0
     print_footer(work->info, work->settings->polishing);
@@ -238,11 +223,6 @@ c_int osqp_solve(Work * work){
 
     // Store solution
     store_solution(work);
-
-    // #if PRINTLEVEL > 2
-    // print_vec(work->u, work->data->m, "u");
-    // c_print("rho = %.2f\n", work->settings->rho);
-    // #endif
 
     return exitflag;
 }

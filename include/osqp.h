@@ -104,6 +104,7 @@ struct OSQP_INFO {
         c_float setup_time;  /* time taken for setup phase (milliseconds) */
         c_float solve_time;  /* time taken for solve phase (milliseconds) */
         c_float polish_time; /* time taken for polish phase (milliseconds) */
+        c_float run_time;    /* total time  (milliseconds) */
         #endif
 };
 
