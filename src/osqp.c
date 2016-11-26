@@ -76,9 +76,9 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->dua_res_ws_n = c_malloc(work->data->n * sizeof(c_float));
     work->dua_res_ws_m = c_malloc(work->data->m * sizeof(c_float));
 
-    // TODO: Add Validaiton for settings
     // Copy settings
     work->settings = copy_settings(settings);
+    if (work->data->m == 0) work->settings->polishing = 0;     // If no constraints->disable polishing
 
     // Initialize linear system solver private structure
     work->priv = init_priv(work->data->P, work->data->A, work->settings, 0);
@@ -215,7 +215,7 @@ c_int osqp_solve(Work * work){
         polish(work);
 
 
-    /* Update total time: setup + solve + polish*/
+    /* Update total time: setup + solve + polish */
     #if PROFILING > 0
     work->info->run_time = work->info->setup_time +
                            work->info->solve_time +

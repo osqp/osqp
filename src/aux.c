@@ -223,19 +223,30 @@ void store_solution(Work *work) {
  * @param polish Called from polish function (1) or from elsewhere (0)
  */
 void update_info(Work *work, c_int iter, c_int polish){
-    if (!polish) {
+    if (work->data->m == 0) {  // No constraints in the problem (no polishing)
         work->info->iter = iter; // Update iteration number
         work->info->obj_val = compute_obj_val(work, 0);
-        work->info->pri_res = compute_pri_res(work, 0);
+        work->info->pri_res = 0.;  // Always primal feasible
         work->info->dua_res = compute_dua_res(work, 0);
-        work->info->inf_res = compute_inf_res(work);
         #if PROFILING > 0
             work->info->solve_time = toc(work->timer);
         #endif
-    } else {
-        work->pol->obj_val = compute_obj_val(work, 1);
-        work->pol->pri_res = compute_pri_res(work, 1);
-        work->pol->dua_res = compute_dua_res(work, 1);
+    }
+    else{ // Problem has constraints
+        if (!polish) { // No polishing
+            work->info->iter = iter; // Update iteration number
+            work->info->obj_val = compute_obj_val(work, 0);
+            work->info->pri_res = compute_pri_res(work, 0);
+            work->info->dua_res = compute_dua_res(work, 0);
+            work->info->inf_res = compute_inf_res(work);
+            #if PROFILING > 0
+                work->info->solve_time = toc(work->timer);
+            #endif
+        } else { // Polishing
+            work->pol->obj_val = compute_obj_val(work, 1);
+            work->pol->pri_res = compute_pri_res(work, 1);
+            work->pol->dua_res = compute_dua_res(work, 1);
+        }
     }
 }
 
@@ -266,27 +277,55 @@ void update_status_string(Info *info){
 c_int residuals_check(Work *work){
     c_float eps_pri, eps_dua;
     c_int exitflag = 0;
+    c_int pri_check = 0, dua_check = 0, inf_check = 0;
 
-    // Compute primal tolerance
-    eps_pri = c_sqrt(work->data->m) * work->settings->eps_abs +
-              work->settings->eps_rel *
-              vec_norm2(work->x + work->data->n, work->data->m);
+
+    // Check residuals
+    if (work->data->m == 0){
+        pri_check = 1;  // No contraints -> Primal feasibility always satisfied
+    }
+    else {
+        // Compute primal tolerance
+        eps_pri = c_sqrt(work->data->m) * work->settings->eps_abs +
+                  work->settings->eps_rel *
+                  vec_norm2(work->x + work->data->n, work->data->m);
+        if (work->info->pri_res < eps_pri) pri_check = 1;
+    }
+
     // Compute dual tolerance
     mat_vec_tpose(work->data->A, work->u, work->dua_res_ws_n, 0, 0); // ws = A'*u
     eps_dua = c_sqrt(work->data->n) * work->settings->eps_abs +
               work->settings->eps_rel * work->settings->rho *
               vec_norm2( work->dua_res_ws_n, work->data->n);
 
-    if (work->info->pri_res < eps_pri && work->info->dua_res < eps_dua) {
+    if (work->info->dua_res < eps_dua) dua_check = 1;
+    if (work->info->inf_res < eps_dua) inf_check = 1;
+
+
+    // Compare checks to determine solver status
+    if(pri_check && dua_check){
         // Update final information
         work->info->status_val = OSQP_SOLVED;
         exitflag = 1;
-    } else if (work->info->pri_res > eps_pri && work->info->dua_res < eps_dua
-                                             && work->info->inf_res < eps_pri) {
-       // Update final information
-       work->info->status_val = OSQP_INFEASIBLE;
-       exitflag = 1;
     }
+    else if (!pri_check & dua_check & inf_check){
+        // Update final information
+        work->info->status_val = OSQP_INFEASIBLE;
+        exitflag = 1;
+    }
+
+
+
+    // if (work->info->pri_res < eps_pri && work->info->dua_res < eps_dua) {
+    //     // Update final information
+    //     work->info->status_val = OSQP_SOLVED;
+    //     exitflag = 1;
+    // } else if (work->info->pri_res > eps_pri && work->info->dua_res < eps_dua
+    //                                          && work->info->inf_res < eps_pri) {
+    //    // Update final information
+    //    work->info->status_val = OSQP_INFEASIBLE;
+    //    exitflag = 1;
+    // }
 
     return exitflag;
 
