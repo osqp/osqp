@@ -4,6 +4,7 @@
 
 #include "lin_sys.h"
 #include "aux.h"
+#include "kkt.h"
 #include "osqp.h"
 
 // Solution polishing: Solve equality constrained QP with assumed active constr.

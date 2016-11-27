@@ -19,145 +19,6 @@ void free_priv(Priv *p) {
 }
 
 
-/* Form square symmetric KKT matrix of the form
-   [P + rho I,         A';
-    A           -1/rhoI]
-
-Arguments
----------
-P : cost matrix (already just upper triangular part)
-A: linear constraint matrix
-rho: ADMM step
-polish: Defines how to form the KKT matrix
-N.B. Only the upper triangular part is stuffed!
-*/
-csc * form_KKT(const csc * P, const  csc * A, c_float rho, c_int polish){
-    c_int nKKT, nnzKKTmax; // Size, number of nonzeros and max number of nonzeros in KKT matrix
-    csc *KKT_trip, *KKT;           // KKT matrix in triplet format and CSC format
-    c_int ptr, i, j; // Counters for elements (i,j) and index pointer
-    c_int z_P=0, z_KKT=0;   // Counter for total number of elements in P and in KKT
-
-    // Get matrix dimensions
-    nKKT = P->m + A->m;
-
-    // Get maximum number of nonzero elements (only upper triangular part)
-    nnzKKTmax = P->nzmax +           // Number of elements in P
-                P->m +               // Number of elements in rhoI
-                A->nzmax +           // Number of nonzeros in A
-                A->m;                // Number of elements in -1/rho I
-
-    // Preallocate KKT matrix in triplet format
-    KKT_trip = csc_spalloc(nKKT, nKKT, nnzKKTmax, 1, 1);
-
-    // #if PRINTLEVEL > 2
-    //     c_print("Forming KKT matrix\n");
-    // #endif
-
-    if (!KKT_trip) return OSQP_NULL;  // Failed to preallocate matrix
-
-    // Allocate Triplet matrices
-    // P + rho I
-    for (j = 0; j < P->n; j++){ // cycle over columns
-        // No elements in column j => add diagonal element rho
-        if (P->p[j] == P->p[j+1]){
-            KKT_trip->i[z_KKT] = j;
-            KKT_trip->p[z_KKT] = j;
-            KKT_trip->x[z_KKT] = rho;
-            z_KKT++;
-        }
-        for (ptr = P->p[j]; ptr < P->p[j + 1]; ptr++) { // cycle over rows
-            // Get current row
-            i = P->i[ptr];
-
-            //DEBUG
-            // c_print("\n\nP(%i, %i) = %.4f\n", i, j, P->x[z_P]);
-            // c_print("P->p[j] = %i\n", P->p[j]);
-            // c_print("P->p[j+1] = %i\n", P->p[j+1]);
-
-
-            // Add element of P
-            KKT_trip->i[z_KKT] = i;
-            KKT_trip->p[z_KKT] = j;
-            KKT_trip->x[z_KKT] = P->x[z_P];
-            if (i == j){ // P has a diagonal element, add rho
-                KKT_trip->x[z_KKT] += rho;
-            }
-            z_P++;
-            z_KKT++;
-
-            // Add diagonal rho in case
-            if ((i < j) && // Diagonal element not reached
-                (ptr + 1 == P->p[j+1])){ // last element of column j
-
-                // Add diagonal element rho
-                KKT_trip->i[z_KKT] = j;
-                KKT_trip->p[z_KKT] = j;
-                KKT_trip->x[z_KKT] = rho;
-                z_KKT++;
-            }
-        }
-    }
-
-
-    // A' at top right
-    for (j = 0; j < A->n; j++) {  // Cycle over columns of A
-        for (ptr = A->p[j]; ptr < A->p[j + 1]; ptr++) {
-            // DEBUG
-            // c_print("A(%i, %i) = %.4f\n", A->i[ptr], j, A->x[ptr]);
-
-            KKT_trip->p[z_KKT] = P->m + A->i[ptr];  // Assign column index from row index of A
-            KKT_trip->i[z_KKT] = j; // Assign row index from column index of A
-            KKT_trip->x[z_KKT] = A->x[ptr];  // Assign A value element
-            z_KKT++;
-        }
-    }
-
-    // polish = 0:  -1/rho*I at bottom right
-    // polish = 1:     rho*I at bottom right
-    if (!polish) {
-        for (j = 0; j < A->m; j++) {
-            KKT_trip->i[z_KKT] = j + P->n;
-            KKT_trip->p[z_KKT] = j + P->n;
-            KKT_trip->x[z_KKT] = -1./rho;
-            z_KKT++;
-        }
-    } else {
-        for (j = 0; j < A->m; j++) {
-            KKT_trip->i[z_KKT] = j + P->n;
-            KKT_trip->p[z_KKT] = j + P->n;
-            KKT_trip->x[z_KKT] = -rho;
-            z_KKT++;
-        }
-    }
-
-
-    // Allocate number of nonzeros
-    KKT_trip->nz = z_KKT;
-
-    // DEBUG: Print matrix
-    // print_trip_matrix(KKT_trip, "KKT_trip");
-
-    // Convert triplet matrix to csc format
-    KKT = triplet_to_csc(KKT_trip);
-
-    // print_csc_matrix(KKT, "KKT");
-
-    // DEBUG
-    // c_print("nKKT = %i\n", nKKT);
-    // c_print("KKT->nnz = %i\n", KKT->nzmax);
-    // c_print("KKT_trip->nz = %i\n", KKT_trip->nz);
-    // c_print("KKT_trip->nzmax = %i\n", KKT_trip->nzmax);
-
-    // c_float * KKTdns =  csc_to_dns(KKT);
-    // print_dns_matrix(KKTdns, P->n + A->n, P->n + A->n, "KKTdns");
-
-    // Clean matrix in triplet format and return result
-    csc_spfree(KKT_trip);
-    return KKT;
-
-}
-
-
 /**
  * Compute LDL factorization of matrix P A P'. If P = Pinv = OSQP_NULL,
  * then factorize matrix A.
@@ -202,7 +63,6 @@ c_int LDLFactor(csc *A, c_int P[], c_int Pinv[], csc **L, c_float **D) {
     c_free(Y);
     return (kk - n);
 }
-
 
 
 
@@ -275,7 +135,7 @@ Priv *init_priv(const csc * P, const csc * A, const Settings *settings,
     p->bp = c_malloc(sizeof(c_float) * n_plus_m);
 
     // Solve time (for reporting)
-    p->total_solve_time = 0.0;
+    // p->total_solve_time = 0.0;
 
     // Form KKT matrix
     if (!polish)
@@ -286,7 +146,6 @@ Priv *init_priv(const csc * P, const csc * A, const Settings *settings,
         KKT = form_KKT(P, A, settings->delta, 1);
 
     // Factorize the KKT matrix
-    // TODO: Store factorization timings
     if (factorize(KKT, p) < 0) {
         free_priv(p);
         return OSQP_NULL;
