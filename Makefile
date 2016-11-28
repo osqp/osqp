@@ -16,7 +16,7 @@ QPTESTSDIR = $(TESTSDIR)/c/qptests
 TEST_OBJECTS = $(QPTESTSDIR)/diesel/diesel.o
 
 # Define objects to compile
-OSQP_OBJECTS = src/util.o src/aux.o src/cs.o src/lin_alg.o src/kkt.o src/polish.o  src/osqp.o
+OSQP_OBJECTS = src/util.o src/aux.o src/cs.o src/lin_alg.o src/kkt.o src/scaling.o src/polish.o  src/osqp.o
 
 # Define source and include files
 SRC_FILES = $(wildcard src/*.c)
