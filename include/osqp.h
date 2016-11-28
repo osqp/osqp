@@ -3,8 +3,8 @@
 
 
 /* Includes */
-#include "constants.h"
 #include "glob_opts.h"
+#include "constants.h"
 #include <string.h>
 #include "lin_alg.h"
 #include "lin_sys.h"

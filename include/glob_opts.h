@@ -58,13 +58,14 @@ typedef double c_float;              /* for numerical values  */
 #if PRINTLEVEL > 0
 #ifdef MATLAB_MEX_FILE
 #define c_print mexPrintf
-// #elif defined PYTHON
-// #define c_print(...)                                                           \
+/* #elif defined PYTHON
+  #define c_print(...)                                                           \
     {                                                                          \
         PyGILState_STATE gilstate = PyGILState_Ensure();                       \
         PySys_WriteStdout(__VA_ARGS__);                                        \
         PyGILState_Release(gilstate);                                          \
     }
+*/
 #else
 #define c_print printf
 #endif

@@ -34,13 +34,13 @@ static const c_int LINE_LEN = 76;
 
 #if PRINTLEVEL > 1
 
-static void print_line(){
+static void print_line(void){
     for (c_int i = 0; i < LINE_LEN; ++i)
         c_print("-");
     c_print("\n");
 }
 
-void print_header(){
+void print_header(void){
     c_print("%s ", HEADER[0]);
     for (c_int i=1; i < HEADER_LEN - 1; i++) c_print("  %s", HEADER[i]);
     c_print("%s\n", HEADER[HEADER_LEN - 1]);

@@ -1,7 +1,7 @@
 #ifndef PRIVATE_H
 #define PRIVATE_H
 
-#include "glob_opts.h"
+// #include "glob_opts.h"
 #include "osqp.h"
 #include "cs.h"
 #include "lin_sys.h"

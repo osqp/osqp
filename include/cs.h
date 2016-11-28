@@ -5,11 +5,11 @@
 #ifndef CS_H
 #define CS_H
 
+#include "glob_opts.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-#include "glob_opts.h"
 
 
 

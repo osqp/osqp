@@ -311,7 +311,7 @@ c_int residuals_check(Work *work){
         work->info->status_val = OSQP_SOLVED;
         exitflag = 1;
     }
-    else if (!pri_check & dua_check & inf_check){
+    else if ((!pri_check) & dua_check & inf_check){
         // Update final information
         work->info->status_val = OSQP_INFEASIBLE;
         exitflag = 1;

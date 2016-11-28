@@ -1,8 +1,9 @@
 #ifndef LIN_ALG_H
 #define LIN_ALG_H
+
+#include "glob_opts.h"
 #include <math.h>
 #include "constants.h"
-#include "glob_opts.h"
 #include "cs.h"
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
