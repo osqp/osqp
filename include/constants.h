@@ -34,8 +34,8 @@
 #define WARM_START (0)
 #define SCALING (1)
 #define SCALING_NORM (2)
-#define MAX_SCALING_STEPS (3)
-#define SCALING_TOL (1E-05)
+#define MAX_SCALING_ITER (3)
+#define SCALING_EPS (1E-05)
 
 
 /* Printing */

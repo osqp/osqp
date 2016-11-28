@@ -181,8 +181,8 @@ void print_footer(Info * info, c_int polishing){
 void set_default_settings(Settings * settings) {
         settings->scaling = SCALING; /* heuristic problem scaling */
         settings->scaling_norm = SCALING_NORM;
-        settings->max_scaling_steps = MAX_SCALING_STEPS;
-        settings->scaling_tol = SCALING_TOL;
+        settings->max_scaling_iter = MAX_SCALING_ITER;
+        settings->scaling_eps = SCALING_EPS;
         settings->rho = RHO; /* ADMM step */
         settings->max_iter = MAX_ITER; /* maximum iterations to take */
         settings->eps_abs = EPS_ABS;         /* absolute convergence tolerance */
@@ -203,8 +203,8 @@ Settings * copy_settings(Settings * settings){
     // Copy settings
     new->scaling = settings->scaling;
     new->scaling_norm = settings->scaling_norm;
-    new->max_scaling_steps = settings->max_scaling_steps;
-    new->scaling_tol = settings->scaling_tol;
+    new->max_scaling_iter = settings->max_scaling_iter;
+    new->scaling_eps = settings->scaling_eps;
     new->rho = settings->rho;
     new->max_iter = settings->max_iter;
     new->eps_abs = settings->eps_abs;

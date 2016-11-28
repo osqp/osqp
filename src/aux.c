@@ -423,15 +423,15 @@ c_int validate_settings(const Settings * settings){
         #endif
         return 1;
     }
-    if (settings->max_scaling_steps < 1) {
+    if (settings->max_scaling_iter < 1) {
         #if PRINTLEVEL > 0
-        c_print("max_scaling_steps must be greater than 0\n");
+        c_print("max_scaling_iter must be greater than 0\n");
         #endif
         return 1;
     }
-    if (settings->scaling_tol <= 0) {
+    if (settings->scaling_eps <= 0) {
         #if PRINTLEVEL > 0
-        c_print("scaling_tol must be greater than 0\n");
+        c_print("scaling_eps must be greater than 0\n");
         #endif
         return 1;
     }

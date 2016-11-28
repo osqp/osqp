@@ -37,7 +37,7 @@ c_int scale_data(Work * work){
         mat_ew_sq(KKT);
     }
 
-    for(i = 0; i < work->settings->max_scaling_steps; i++){
+    for(i = 0; i < work->settings->max_scaling_iter; i++){
 
         // s_prev = s
         prea_vec_copy(s, s_prev, n_plus_m);
@@ -48,7 +48,7 @@ c_int scale_data(Work * work){
         mat_vec(KKT, s_prev, s, 0);
         mat_tpose_vec(KKT, s_prev, s, 1, 1);      // += KKT' * x (lower triang part)
 
-        // s = s + scaling_tol
+        // s = s + scaling_eps
         vec_add_scalar(s, 1E-08, n_plus_m);
 
         // s = 1./s
@@ -57,12 +57,12 @@ c_int scale_data(Work * work){
         // s = (n + m) * s
         vec_mult_scalar(s, n_plus_m, n_plus_m);
 
-        if(vec_norm2_diff(s, s_prev, n_plus_m) < work->settings->scaling_tol)
+        if(vec_norm2_diff(s, s_prev, n_plus_m) < work->settings->scaling_eps)
             break;
     }
 
     #if PRINTLEVEL > 0
-    if (i == work->settings->max_scaling_steps - 1)
+    if (i == work->settings->max_scaling_iter - 1)
         c_print("maximum scaling steps reached\n");
     #endif
 

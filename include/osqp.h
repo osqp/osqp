@@ -37,8 +37,8 @@ struct OSQP_SETTINGS {
         c_float rho; /* ADMM step rho */
         c_int scaling; /* boolean, heuristic data rescaling */
         c_int scaling_norm; /* scaling norm */
-        c_int max_scaling_steps; /* maximum scaling_steps */
-        c_float scaling_tol; /* maximum scaling_steps */
+        c_int max_scaling_iter; /* maximum scaling_steps */
+        c_float scaling_eps; /* scaling tolerance */
 
         /* these can change for multiple runs with the same call to osqp_init */
         c_int max_iter; /* maximum iterations to take */
