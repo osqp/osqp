@@ -7,7 +7,7 @@
  * [P + scalar I,         A';
  * A             -1/scalar I]
  *
- * for the ADMM iterations (polishing == 0). Otherwise, if polishing == 1, it forms
+ * for the ADMM iterations (flag == 0). Otherwise, if flag == 1, it forms
  *
  * [P + scalar I,         A';
  * A               -scalar I]
@@ -16,11 +16,11 @@
  *
  * @param  P         cost matrix (already just upper triangular part)
  * @param  A         linear constraint matrix
- * @param  scalar    ADMM step rho (polish == 0), or polishing delta (polish == 1)
- * @param  polish    boolean to define if matrix is defined for polishing or not
+ * @param  scalar    ADMM step scalar (flag == 0), or other scalar (flag == 1)
+ * @param  flag      boolean to for which kind of matrix is returned
  * @return           return status flag
  */
-csc * form_KKT(const csc * P, const  csc * A, c_float rho, c_int polish){
+csc * form_KKT(const csc * P, const  csc * A, c_float scalar, c_int flag){
     c_int nKKT, nnzKKTmax; // Size, number of nonzeros and max number of nonzeros in KKT matrix
     csc *KKT_trip, *KKT;           // KKT matrix in triplet format and CSC format
     c_int ptr, i, j; // Counters for elements (i,j) and index pointer
@@ -31,9 +31,9 @@ csc * form_KKT(const csc * P, const  csc * A, c_float rho, c_int polish){
 
     // Get maximum number of nonzero elements (only upper triangular part)
     nnzKKTmax = P->nzmax +           // Number of elements in P
-                P->m +               // Number of elements in rhoI
+                P->m +               // Number of elements in scalarI
                 A->nzmax +           // Number of nonzeros in A
-                A->m;                // Number of elements in -1/rho I
+                A->m;                // Number of elements in -1/scalar I
 
     // Preallocate KKT matrix in triplet format
     KKT_trip = csc_spalloc(nKKT, nKKT, nnzKKTmax, 1, 1);
@@ -41,13 +41,13 @@ csc * form_KKT(const csc * P, const  csc * A, c_float rho, c_int polish){
     if (!KKT_trip) return OSQP_NULL;  // Failed to preallocate matrix
 
     // Allocate Triplet matrices
-    // P + rho I
+    // P + scalar I
     for (j = 0; j < P->n; j++){ // cycle over columns
-        // No elements in column j => add diagonal element rho
+        // No elements in column j => add diagonal element scalar
         if (P->p[j] == P->p[j+1]){
             KKT_trip->i[z_KKT] = j;
             KKT_trip->p[z_KKT] = j;
-            KKT_trip->x[z_KKT] = rho;
+            KKT_trip->x[z_KKT] = scalar;
             z_KKT++;
         }
         for (ptr = P->p[j]; ptr < P->p[j + 1]; ptr++) { // cycle over rows
@@ -58,20 +58,20 @@ csc * form_KKT(const csc * P, const  csc * A, c_float rho, c_int polish){
             KKT_trip->i[z_KKT] = i;
             KKT_trip->p[z_KKT] = j;
             KKT_trip->x[z_KKT] = P->x[z_P];
-            if (i == j){ // P has a diagonal element, add rho
-                KKT_trip->x[z_KKT] += rho;
+            if (i == j){ // P has a diagonal element, add scalar
+                KKT_trip->x[z_KKT] += scalar;
             }
             z_P++;
             z_KKT++;
 
-            // Add diagonal rho in case
+            // Add diagonal scalar in case
             if ((i < j) && // Diagonal element not reached
                 (ptr + 1 == P->p[j+1])){ // last element of column j
 
-                // Add diagonal element rho
+                // Add diagonal element scalar
                 KKT_trip->i[z_KKT] = j;
                 KKT_trip->p[z_KKT] = j;
-                KKT_trip->x[z_KKT] = rho;
+                KKT_trip->x[z_KKT] = scalar;
                 z_KKT++;
             }
         }
@@ -88,20 +88,20 @@ csc * form_KKT(const csc * P, const  csc * A, c_float rho, c_int polish){
         }
     }
 
-    // polish = 0:  -1/rho*I at bottom right
-    // polish = 1:    -rho*I at bottom right
-    if (!polish) {
+    // flag = 0:  -1/scalar*I at bottom right
+    // flag = 1:    -scalar*I at bottom right
+    if (!flag) {
         for (j = 0; j < A->m; j++) {
             KKT_trip->i[z_KKT] = j + P->n;
             KKT_trip->p[z_KKT] = j + P->n;
-            KKT_trip->x[z_KKT] = -1./rho;
+            KKT_trip->x[z_KKT] = -1./scalar;
             z_KKT++;
         }
     } else {
         for (j = 0; j < A->m; j++) {
             KKT_trip->i[z_KKT] = j + P->n;
             KKT_trip->p[z_KKT] = j + P->n;
-            KKT_trip->x[z_KKT] = -rho;
+            KKT_trip->x[z_KKT] = -scalar;
             z_KKT++;
         }
     }

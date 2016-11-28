@@ -22,9 +22,7 @@
 /**********************************
  * Solver Parameters and Settings *
  **********************************/
-/* TODO: complete parameters, these are just a couple of examples */
 
-#define NORMALIZE (0)
 #define RHO (1.6)
 #define MAX_ITER (2500)
 #define EPS_ABS (1E-5)
@@ -34,6 +32,10 @@
 #define POLISHING (1)
 #define VERBOSE (1)
 #define WARM_START (0)
+#define SCALING (1)
+#define SCALING_NORM (2)
+#define MAX_SCALING_STEPS (10)
+#define SCALING_TOL (1E-08)
 
 
 /* Printing */

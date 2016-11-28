@@ -11,14 +11,19 @@ The current version is `0.0.0`.
 
 ## TODO
 
-- [x] Do preconditioning/equilibration
-- [ ] Timer and compare to other QP solvers
-- [ ] Presolver
-- [ ] Infeasibility detection:
-    - Generalize [result](http://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=7040300) to non strongly convex problems
-- [ ] Unboundedness detection
-- [ ] Stepsize selection: maybe choose
-- [x] Warm starting
+-   [ ] Equilibration
+-   [ ] Warm starting
+-   [ ] Sublevel API -> Matrix factorization caching
+
+-   [x] Do preconditioning/equilibration
+-   [ ] Timer and compare to other QP solvers
+-   [ ] Presolver
+-   [ ] Infeasibility detection:
+    -   Generalize [result](http://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=7040300) to non strongly convex problems
+-   [ ] Unboundedness detection
+-   [ ] Stepsize selection: maybe choose
+
+
 
 
 ### Other Test Problems

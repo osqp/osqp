@@ -61,7 +61,7 @@ void print_setup_header(const Data *data, const Settings *settings) {
     c_print("Settings: ");
     c_print("eps_abs = %.2e, eps_rel = %.2e,\n          rho = %.2f, alpha = %.2f, max_iter = %i\n",
             settings->eps_abs, settings->eps_rel, settings->rho, settings->alpha, settings->max_iter);
-    if (settings->normalize)
+    if (settings->scaling)
         c_print("          scaling: active\n");
     else
         c_print("          scaling: inactive\n");
@@ -171,7 +171,10 @@ void print_footer(Info * info, c_int polishing){
 /* Set default settings from constants.h file */
 /* assumes d->stgs already allocated memory */
 void set_default_settings(Settings * settings) {
-        settings->normalize = NORMALIZE; /* heuristic problem scaling */
+        settings->scaling = SCALING; /* heuristic problem scaling */
+        settings->scaling_norm = SCALING_NORM;
+        settings->max_scaling_steps = MAX_SCALING_STEPS;
+        settings->scaling_tol = SCALING_TOL;
         settings->rho = RHO; /* ADMM step */
         settings->max_iter = MAX_ITER; /* maximum iterations to take */
         settings->eps_abs = EPS_ABS;         /* absolute convergence tolerance */
@@ -190,7 +193,10 @@ Settings * copy_settings(Settings * settings){
     Settings * new = c_malloc(sizeof(Settings));
 
     // Copy settings
-    new->normalize = settings->normalize;
+    new->scaling = settings->scaling;
+    new->scaling_norm = settings->scaling_norm;
+    new->max_scaling_steps = settings->max_scaling_steps;
+    new->scaling_tol = settings->scaling_tol;
     new->rho = settings->rho;
     new->max_iter = settings->max_iter;
     new->eps_abs = settings->eps_abs;

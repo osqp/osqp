@@ -36,7 +36,7 @@ def load_maros_meszaros_problem(f):
 def main():
     sp.random.seed(3)
     # Possible ops:  {'small1', 'small2', 'random', 'maros_meszaros', 'lp'}
-    example = 'infeasible'
+    example = 'small2'
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
@@ -121,11 +121,11 @@ def main():
                           eps_rel=1e-5,
                           eps_abs=1e-5,
                           alpha=1.6,
-                          rho=1.6,
-                          scale_steps=30,
-                          scale_problem=False,
+                          rho=0.000001,
+                          scale_steps=500,
+                          scale_problem=True,
                           scale_norm=2,
-                          polish=True,
+                          polish=False,
                           print_level=2)
 
     # # Reuse factorizations
@@ -157,7 +157,7 @@ def main():
     else:
         print "Problem is infeasible or unbounded"
 
-    # ipdb.set_trace()
+    ipdb.set_trace()
 
 # Parsing optional command line arguments
 if __name__ == '__main__':

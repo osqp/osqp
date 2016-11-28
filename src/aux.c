@@ -153,11 +153,11 @@ c_float compute_dua_res(Work * work, c_int polish){
         // NB: Only upper triangular part of P is stored.
         prea_vec_copy(work->data->q, work->dua_res_ws_n,
                       work->data->n);                    // dr = q
-        mat_vec_tpose(work->pol->Ared, work->pol->lambda_red,
+        mat_tpose_vec(work->pol->Ared, work->pol->lambda_red,
                       work->dua_res_ws_n, 1, 0);      // += Ared'*lambda_red
         mat_vec(work->data->P, work->pol->x,
                 work->dua_res_ws_n, 1);               // += Px (upper triang part)
-        mat_vec_tpose(work->data->P, work->pol->x,
+        mat_tpose_vec(work->data->P, work->pol->x,
                       work->dua_res_ws_n, 1, 1);      // += Px (lower triang part)
         return vec_norm2(work->dua_res_ws_n, work->data->n);
     } else {
@@ -177,7 +177,7 @@ c_float compute_dua_res(Work * work, c_int polish){
                        work->data->m, work->settings->alpha-2.0); // += (alpha-2)*z_prev_s
         vec_add_scaled(work->dua_res_ws_m, work->x + work->data->n,
                        work->data->m, 1.0-work->settings->alpha); // += (1-alpha)*x_s
-        mat_vec_tpose(work->data->A, work->dua_res_ws_m,
+        mat_tpose_vec(work->data->A, work->dua_res_ws_m,
                       work->dua_res_ws_n, 1, 0);
         return (work->settings->rho * vec_norm2(work->dua_res_ws_n, work->data->n));
     }
@@ -214,6 +214,9 @@ void store_solution(Work *work) {
     prea_vec_copy(work->x, work->solution->x, work->data->n);   // primal
     vec_add_scaled(work->solution->lambda, work->u,             // dual
                    work->data->m, work->settings->rho);
+
+    if(work->settings->scaling) // Unscale solution if scaling has been performed
+        unscale_solution(work);
 }
 
 /**
@@ -293,7 +296,7 @@ c_int residuals_check(Work *work){
     }
 
     // Compute dual tolerance
-    mat_vec_tpose(work->data->A, work->u, work->dua_res_ws_n, 0, 0); // ws = A'*u
+    mat_tpose_vec(work->data->A, work->u, work->dua_res_ws_n, 0, 0); // ws = A'*u
     eps_dua = c_sqrt(work->data->n) * work->settings->eps_abs +
               work->settings->eps_rel * work->settings->rho *
               vec_norm2( work->dua_res_ws_n, work->data->n);
@@ -341,39 +344,51 @@ c_int validate_data(const Data * data){
     int j;
 
     if(!data){
+        #if PRINTLEVEL > 0
         c_print("Missing data!\n");
+        #endif
         return 1;
     }
 
     // General dimensions Tests
     if (data->n <= 0 || data->m < 0){
+        #if PRINTLEVEL > 0
         c_print("n must be positive and m nonnegative; n = %i, m = %i\n",
                  data->n, data->m);
+        #endif
         return 1;
     }
 
     // Matrix P
     if (data->P->m != data->n ){
+        #if PRINTLEVEL > 0
         c_print("P does not have dimension n x n with n = %i\n", data->n);
+        #endif
         return 1;
     }
     if (data->P->m != data->P->n ){
+        #if PRINTLEVEL > 0
         c_print("P is not square\n");
+        #endif
         return 1;
     }
 
     // Matrix A
     if (data->A->m != data->m || data->A->n != data->n){
+        #if PRINTLEVEL > 0
         c_print("A does not have dimension m x n with m = %i and n = %i\n",
                 data->m, data->n);
+        #endif
         return 1;
     }
 
     // Lower and upper bounds
     for (j = 0; j < data->m; j++) {
         if (data->lA[j] > data->uA[j]) {
-          c_print("Lower bound at index %d is greater than upper bound: %.4e > %.4e\n",
+            #if PRINTLEVEL > 0
+            c_print("Lower bound at index %d is greater than upper bound: %.4e > %.4e\n",
                   j, data->lA[j], data->uA[j]);
+            #endif
           return 1;
         }
     }
@@ -391,46 +406,78 @@ c_int validate_data(const Data * data){
  */
 c_int validate_settings(const Settings * settings){
     if (!settings){
+        #if PRINTLEVEL > 0
         c_print("Missing settings!\n");
+        #endif
         return 1;
     }
-    if (settings->normalize != 0 &&  settings->normalize != 1) {
-        c_print("normalize must be either 0 or 1\n");
+    if (settings->scaling != 0 &&  settings->scaling != 1) {
+        #if PRINTLEVEL > 0
+        c_print("scaling must be either 0 or 1\n");
+        #endif
         return 1;
     }
+    if (settings->scaling_norm != 1 &&  settings->scaling_norm != 2) {
+        #if PRINTLEVEL > 0
+        c_print("scaling_norm must be either 1 or 2\n");
+        #endif
+        return 1;
+    }
+    if (settings->max_scaling_steps < 1) {
+        #if PRINTLEVEL > 0
+        c_print("max_scaling_steps must be greater than 0\n");
+        #endif
+        return 1;
+    }
+    if (settings->scaling_tol <= 0) {
+        #if PRINTLEVEL > 0
+        c_print("scaling_tol must be greater than 0\n");
+        #endif
+        return 1;
+    }
+
     if (settings->rho <= 0) {
+        #if PRINTLEVEL > 0
         c_print("rho must be positive\n");
+        #endif
         return 1;
     }
-
-
     if (settings->max_iter <= 0) {
+        #if PRINTLEVEL > 0
         c_print("max_iter must be positive\n");
+        #endif
         return 1;
     }
     if (settings->eps_abs <= 0) {
+        #if PRINTLEVEL > 0
         c_print("eps_abs must be positive\n");
+        #endif
         return 1;
     }
     if (settings->eps_rel <= 0) {
+        #if PRINTLEVEL > 0
         c_print("eps_rel must be positive\n");
+        #endif
         return 1;
     }
     if (settings->alpha <= 0) {
+        #if PRINTLEVEL > 0
         c_print("alpha must be positive\n");
+        #endif
         return 1;
     }
     if (settings->verbose != 0 &&  settings->verbose != 1) {
+        #if PRINTLEVEL > 0
         c_print("verbose must be either 0 or 1\n");
+        #endif
         return 1;
     }
     if (settings->warm_start != 0 &&  settings->warm_start != 1) {
+        #if PRINTLEVEL > 0
         c_print("warm_start must be either 0 or 1\n");
+        #endif
         return 1;
     }
-
-    // TODO: Complete with other checks
-
 
     return 0;
 

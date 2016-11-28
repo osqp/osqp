@@ -426,6 +426,8 @@ class OSQP(object):
                 # condKKT = nplinalg.cond(KKT.todense())
                 # print "Condition number of KKT matrix %.4e" % condKKT
 
+                # print KKT.todense()
+
                 # Iterate Scaling
                 for i in range(self.options.scale_steps):
                     #  print np.max(KKT2.dot(d))
@@ -441,6 +443,7 @@ class OSQP(object):
                     # print "Scaling step %i\n" % i
 
                     # # DEBUG STUFF
+                    # print d
                     # S = spspa.diags(d)
                     # KKTeq = S.dot(KKT.dot(S))
                     # #  print "Norm of first row of KKT %.4e" % \
@@ -769,32 +772,33 @@ class OSQP(object):
                 # Stop the algorithm
                 self.status = OPTIMAL
                 break
-            elif norm_dua_res < eps_dual:  # and i > 0:
-                # Problem is only dual feasible
-                # if (np.abs(f-f_old) < self.options.eps_abs +
-                #         self.options.eps_rel * f):
-                if np.linalg.norm(z[n:]-self.project(x[n:])) < eps_prim:
-                        # Print the progress in last iterations
-                        if self.options.print_level > 1:
-                            print "%4s \t % 1.7e  \t%1.2e  \t%1.2e" \
-                                % (i+1, f, norm_pri_res, norm_dua_res)
-                        # Stop the algorithm
-                        self.status = INFEASIBLE
-                        break
-            elif norm_pri_res < eps_prim:
-                # Problem is only primal feasible
-                # norm(u-u_old) < eps
-                if (np.linalg.norm(self.options.alpha*x[n:] +
-                    (1.-self.options.alpha)*z_old[n:] - z[n:])) < \
-                        max(self.options.eps_abs, self.options.eps_abs):
-                    # Print the progress in last iterations
-                    if self.options.print_level > 1:
-                        print "%4s \t % 1.7e  \t%1.2e  \t%1.2e" \
-                            % (i+1, f, norm_pri_res, norm_dua_res)
-                    # Stop the algorithm
-                    self.status = UNBOUNDED
-                    break
+            # elif norm_dua_res < eps_dual:  # and i > 0:
+            #     # Problem is only dual feasible
+            #     # if (np.abs(f-f_old) < self.options.eps_abs +
+            #     #         self.options.eps_rel * f):
+            #     if np.linalg.norm(z[n:]-self.project(x[n:])) < eps_prim:
+            #             # Print the progress in last iterations
+            #             if self.options.print_level > 1:
+            #                 print "%4s \t % 1.7e  \t%1.2e  \t%1.2e" \
+            #                     % (i+1, f, norm_pri_res, norm_dua_res)
+            #             # Stop the algorithm
+            #             self.status = INFEASIBLE
+            #             break
+            # elif norm_pri_res < eps_prim:
+            #     # Problem is only primal feasible
+            #     # norm(u-u_old) < eps
+            #     if (np.linalg.norm(self.options.alpha*x[n:] +
+            #         (1.-self.options.alpha)*z_old[n:] - z[n:])) < \
+            #             max(self.options.eps_abs, self.options.eps_abs):
+            #         # Print the progress in last iterations
+            #         if self.options.print_level > 1:
+            #             print "%4s \t % 1.7e  \t%1.2e  \t%1.2e" \
+            #                 % (i+1, f, norm_pri_res, norm_dua_res)
+            #         # Stop the algorithm
+            #         self.status = UNBOUNDED
+            #         break
 
+        # ipdb.set_trace()
         # Total iterations
         self.total_iter = i
 

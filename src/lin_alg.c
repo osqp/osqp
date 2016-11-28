@@ -51,6 +51,28 @@ c_float vec_norm2(const c_float *v, c_int l) {
 //     return max;
 // }
 
+/* set vector to scalar */
+void vec_set_scalar(c_float *a, c_float sc, c_int n){
+    for (c_int i=0; i<n; i++) {
+        a[i] = sc;
+    }
+}
+
+/* add scalar to vector */
+void vec_add_scalar(c_float *a, c_float sc, c_int n){
+    for (c_int i=0; i<n; i++) {
+        a[i] += sc;
+    }
+}
+
+/* multiply scalar to vector */
+void vec_mult_scalar(c_float *a, c_float sc, c_int n){
+    for (c_int i=0; i<n; i++) {
+        a[i] *= sc;
+    }
+}
+
+
 
 /* copy vector a into output */
 c_float * vec_copy(c_float *a, c_int n) {
@@ -89,6 +111,23 @@ c_float vec_prod(const c_float *a, const c_float *b, c_int n){
 
     return prod;
 }
+
+/* elementwse product a.*b stored in b*/
+void vec_ew_prod(const c_float *a, c_float *b, c_int n){
+    for(c_int i = 0;  i < n; i++){
+        b[i] *= a[i];
+    }
+}
+
+
+/* elementwise sqrt of the vector elements */
+void vec_ew_sqrt(c_float *a, c_int n){
+    for(c_int i = 0;  i < n; i++){
+        a[i] = c_sqrt(a[i]);
+    }
+}
+
+
 
 /* MATRIX FUNCTIONS ----------------------------------------------------------*/
 /* Premultiply matrix A by diagonal matrix with diagonal d,
@@ -171,7 +210,7 @@ void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq) {
  *    y +=  A'*x  (if plus_eq == 1)
  * If skip_diag == 1, then diagonal elements of A are assumed to be zero.
 */
-void mat_vec_tpose(const csc *A, const c_float *x, c_float *y,
+void mat_tpose_vec(const csc *A, const c_float *x, c_float *y,
                    c_int plus_eq, c_int skip_diag) {
     int i, j, k;
     if (!plus_eq){
@@ -225,7 +264,10 @@ c_float quad_form(const csc * P, const c_float * x){
                 quad_form += P->x[ptr]*x[i]*x[j];
             }
             else { // Element in lower diagonal part
+                #if PRINTLEVEL>0
                 c_print("ERROR: quad_form matrix is not upper triangular\n");
+                #endif
+                return OSQP_NULL;
             }
         }
     }

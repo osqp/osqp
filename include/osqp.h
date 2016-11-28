@@ -11,6 +11,7 @@
 #include "cs.h"
 #include "util.h"
 #include "polish.h"
+#include "scaling.h"
 
 
 /*****************************
@@ -33,19 +34,21 @@ struct OSQP_PROBLEM_DATA {
 /* Settings struct */
 struct OSQP_SETTINGS {
         /* these *cannot* change for multiple runs with the same call to osqp_init */
-        c_int normalize; /* boolean, heuristic data rescaling: 1 */
-        c_float rho; /* ADMM step rho*/
+        c_float rho; /* ADMM step rho */
+        c_int scaling; /* boolean, heuristic data rescaling */
+        c_int scaling_norm; /* scaling norm */
+        c_int max_scaling_steps; /* maximum scaling_steps */
+        c_float scaling_tol; /* maximum scaling_steps */
 
         /* these can change for multiple runs with the same call to osqp_init */
-        c_int max_iter; /* maximum iterations to take: 2500 */
+        c_int max_iter; /* maximum iterations to take */
         c_float eps_abs;  /* absolute convergence tolerance  */
         c_float eps_rel;  /* relative convergence tolerance  */
         c_float alpha; /* relaxation parameter */
         c_float delta; /* regularization parameter for polishing */
         c_int polishing; /* boolean, polish ADMM solution */
-        c_int verbose; /* boolean, write out progress: 1 */
-        c_int warm_start; /* boolean, warm start (put initial guess in Sol
-                               struct): 0 */
+        c_int verbose; /* boolean, write out progress  */
+        c_int warm_start; /* boolean, warm start */
 };
 
 
@@ -68,10 +71,10 @@ struct OSQP_WORK {
         c_float *dua_res_ws_m;  // m-dimensional workspace
 
         // Other internal structures
-        Settings *settings; // Problem settings
-        Scaling *scaling; // Scaling Vectors
-        Solution *solution; // Problem Solution
-        Info *info; // Solver information
+        Settings *settings;              // Problem settings
+        Scaling *scaling;                // Scaling Vectors
+        Solution *solution;              // Problem Solution
+        Info *info;                      // Solver information
 
         #if PROFILING > 0
         Timer * timer;  // Timer object
@@ -80,7 +83,8 @@ struct OSQP_WORK {
 
 /* Problem scaling */
 struct OSQP_SCALING {
-        c_float *D, *E; /* for normalization */
+        c_float *D, *E;        /* for normalization */
+        c_float *Dinv, *Einv;  /* for rescaling */
 };
 
 /* Primal and dual solutions */

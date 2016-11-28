@@ -65,6 +65,7 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->data->lA = vec_copy(data->lA, data->m);  // Lower bounds on constraints
     work->data->uA = vec_copy(data->uA, data->m);  // Upper bounds on constraints
 
+
     /* Allocate internal solver variables (ADMM steps)
      *
      * N.B. Augmented variables with slacks (n+m)
@@ -80,6 +81,14 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->settings = copy_settings(settings);
     if (work->data->m == 0) work->settings->polishing = 0;     // If no constraints->disable polishing
 
+    // Perform scaling
+    if (settings->scaling){
+        scale_data(work);
+    }
+    else {
+        work->scaling = OSQP_NULL;
+    }
+
     // Initialize linear system solver private structure
     work->priv = init_priv(work->data->P, work->data->A, work->settings, 0);
 
@@ -91,14 +100,6 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->pol->x = c_malloc(work->data->n * sizeof(c_float));
     work->pol->Ax = c_malloc(work->data->m * sizeof(c_float));
 
-    // Allocate scaling
-    if (settings->normalize){
-        //TODO: Add normalization (now doing nothing)
-        work->scaling = OSQP_NULL;
-    }
-    else {
-        work->scaling = OSQP_NULL;
-    }
 
     // Allocate solution
     work->solution = c_calloc(1, sizeof(Solution));
@@ -167,7 +168,6 @@ c_int osqp_solve(Work * work){
         /* ADMM STEPS */
         /* First step: x_{k+1} */
         compute_rhs(work);
-
         solve_lin_sys(work->settings, work->priv, work->x);
         update_x(work);
 
@@ -251,6 +251,15 @@ c_int osqp_cleanup(Work * work){
     c_free(work->data->lA);
     c_free(work->data->uA);
     c_free(work->data);
+
+    // Free scaling
+    if (work->settings->scaling){
+        c_free(work->scaling->D);
+        c_free(work->scaling->Dinv);
+        c_free(work->scaling->E);
+        c_free(work->scaling->Einv);
+        c_free(work->scaling);
+    }
 
     // Free private structure for linear system solver_solution
     free_priv(work->priv);

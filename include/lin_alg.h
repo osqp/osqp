@@ -13,9 +13,17 @@ c_float * vec_copy(c_float *a, c_int n);
 /* copy vector a into preallocated vector b */
 void prea_vec_copy(c_float *a, c_float * b, c_int n);
 
+/* set vector to scalar */
+void vec_set_scalar(c_float *a, c_float sc, c_int n);
 
-/* ||a - b||_2
-*/
+/* add scalar to vector*/
+void vec_add_scalar(c_float *a, c_float sc, c_int n);
+
+/* multiply scalar to vector*/
+void vec_mult_scalar(c_float *a, c_float sc, c_int n);
+
+
+/* ||a - b||_2 */
 c_float vec_norm2_diff(const c_float *a, const c_float *b, c_int l);
 
 /* a += sc*b */
@@ -37,6 +45,14 @@ void vec_ew_recipr(const c_float *a, c_float *b, c_int n);
 
 /* Inner product a'b */
 c_float vec_prod(const c_float *a, const c_float *b, c_int n);
+
+/* elementwse product a.*b stored in b*/
+void vec_ew_prod(const c_float *a, c_float *b, c_int n);
+
+/* elementwise sqrt of the vector elements */
+void vec_ew_sqrt(c_float *a, c_int n);
+
+
 
 /* MATRIX FUNCTIONS ----------------------------------------------------------*/
 /* Vertically concatenate arrays and return Z = [A' B']'
@@ -74,7 +90,7 @@ void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq);
  *    y +=  A'*x  (if plus_eq == 1)
  * If skip_diag == 1, then diagonal elements of A are assumed to be zero.
 */
-void mat_vec_tpose(const csc *A, const c_float *x, c_float *y,
+void mat_tpose_vec(const csc *A, const c_float *x, c_float *y,
                    c_int plus_eq, c_int skip_diag);
 
 /**

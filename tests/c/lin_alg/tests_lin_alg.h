@@ -236,7 +236,7 @@ c_int test_mat_vec_multiplication(){
     }
 
     // Matrix-transpose-vector multiplication:  x = A'*y
-    mat_vec_tpose(A, t4_y, ATy, 0, 0);
+    mat_tpose_vec(A, t4_y, ATy, 0, 0);
     if(vec_norm2_diff(ATy, t4_ATy, t4_n) > TESTS_TOL){
         c_print("\nError in matrix-transpose-vector multiplication!");
         exitflag = 1;
@@ -244,7 +244,7 @@ c_int test_mat_vec_multiplication(){
 
     // Cumulative matrix-transpose-vector multiplication:  x += A'*y
     ATy_cum = vec_copy(t4_x, t4_n);
-    mat_vec_tpose(A, t4_y, ATy_cum, 1, 0);
+    mat_tpose_vec(A, t4_y, ATy_cum, 1, 0);
     if(vec_norm2_diff(ATy_cum, t4_ATy_cum, t4_n) > TESTS_TOL){
         c_print("\nError in cumulative matrix-transpose-vector multiplication!");
         exitflag = 1;
@@ -252,7 +252,7 @@ c_int test_mat_vec_multiplication(){
 
     // Symmetric-matrix-vector multiplication (only upper part is stored)
     mat_vec(Pu, t4_x, Px, 0);           // upper traingular part
-    mat_vec_tpose(Pu, t4_x, Px, 1, 1);  // lower traingular part (without diagonal)
+    mat_tpose_vec(Pu, t4_x, Px, 1, 1);  // lower traingular part (without diagonal)
     if(vec_norm2_diff(Px, t4_Px, t4_n) > TESTS_TOL){
         c_print("\nError in symmetric-matrix-vector multiplication!");
         exitflag = 1;
@@ -261,7 +261,7 @@ c_int test_mat_vec_multiplication(){
     // Cumulative symmetric-matrix-vector multiplication
     Px_cum = vec_copy(t4_x, t4_n);
     mat_vec(Pu, t4_x, Px_cum, 1);           // upper traingular part
-    mat_vec_tpose(Pu, t4_x, Px_cum, 1, 1);  // lower traingular part (without diagonal)
+    mat_tpose_vec(Pu, t4_x, Px_cum, 1, 1);  // lower traingular part (without diagonal)
     if(vec_norm2_diff(Px_cum, t4_Px_cum, t4_n) > TESTS_TOL){
         c_print("\nError in symmetric-matrix-vector multiplication!");
         exitflag = 1;
