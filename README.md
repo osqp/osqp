@@ -11,8 +11,8 @@ The current version is `0.0.0`.
 
 ## TODO
 
--   [ ] Equilibration
--   [ ] Warm starting
+-   [x] Equilibration
+-   [ ] Warm starting: added basic one BUT need to adjust the total run_time
 -   [ ] Sublevel API -> Matrix factorization caching
 
 -   [x] Do preconditioning/equilibration

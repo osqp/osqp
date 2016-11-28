@@ -70,9 +70,11 @@ Work * osqp_setup(const Data * data, Settings *settings){
      *
      * N.B. Augmented variables with slacks (n+m)
      */
-    work->x = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
-    work->z = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
-    work->u = c_malloc(work->data->m * sizeof(c_float));
+
+    // Initialize x,z,u to zero
+    work->x = c_calloc((work->data->n + work->data->m), sizeof(c_float));
+    work->z = c_calloc((work->data->n + work->data->m), sizeof(c_float));
+    work->u = c_calloc(work->data->m, sizeof(c_float));
     work->z_prev = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
     work->dua_res_ws_n = c_malloc(work->data->n * sizeof(c_float));
     work->dua_res_ws_m = c_malloc(work->data->m * sizeof(c_float));
@@ -157,8 +159,8 @@ c_int osqp_solve(Work * work){
     #endif
 
     // Initialize variables (cold start or warm start depending on settings)
-    // TODO: Add proper warmstart
-    cold_start(work);
+    if (!work->settings->warm_start)
+        cold_start(work);     // If not warm start -> set first x, z, u to zero
 
     // Main ADMM algorithm
     for (iter = 0; iter < work->settings->max_iter; iter ++ ){
