@@ -131,37 +131,45 @@ void print_footer(Info * info, c_int polishing){
     }
 
     #if PROFILING > 0
-    if (polishing && info->status_val == OSQP_SOLVED) {
-        if (info->run_time > 1e-03) { // Time more than 1ms
-            c_print("Timing: total  time = %.3fs\n        "
-                    "setup  time = %.3fs\n        "
-                    "solve  time = %.3fs\n        "
-                    "polish time = %.3fs\n",
-                    info->run_time, info->setup_time,
-                    info->solve_time, info->polish_time);
-        } else {
-            c_print("Timing: total  time = %.3fms\n        "
-                    "setup  time = %.3fms\n        "
-                    "solve  time = %.3fms\n        "
-                    "polish time = %.3fms\n",
-                    1e03*info->run_time, 1e03*info->setup_time,
-                    1e03*info->solve_time, 1e03*info->polish_time);
-        }
-    } else{
-        if (info->run_time > 1e-03) { // Time more than 1ms
-            c_print("Timing: total  time = %.3fs\n        "
-                    "setup  time = %.3fs\n        "
-                    "solve  time = %.3fs\n",
-                    info->run_time, info->setup_time, info->solve_time);
-        } else {
-            c_print("Timing: total  time = %.3fms\n        "
-                    "setup  time = %.3fms\n        "
-                    "solve  time = %.3fms\n",
-                    1e03*info->run_time, 1e03*info->setup_time,
-                    1e03*info->solve_time);
-        }
+    if (info->run_time > 1e-03) { // Time more than 1ms
+        c_print("Run time: %.3fs\n", info->run_time);
+    } else {
+        c_print("Run time: %.3fms\n", 1e03*info->run_time);
     }
     #endif
+
+    // #if PROFILING > 0
+    // if (polishing && info->status_val == OSQP_SOLVED) {
+    //     if (info->run_time > 1e-03) { // Time more than 1ms
+    //         c_print("Timing: total  time = %.3fs\n        "
+    //                 "setup  time = %.3fs\n        "
+    //                 "solve  time = %.3fs\n        "
+    //                 "polish time = %.3fs\n",
+    //                 info->run_time, info->setup_time,
+    //                 info->solve_time, info->polish_time);
+    //     } else {
+    //         c_print("Timing: total  time = %.3fms\n        "
+    //                 "setup  time = %.3fms\n        "
+    //                 "solve  time = %.3fms\n        "
+    //                 "polish time = %.3fms\n",
+    //                 1e03*info->run_time, 1e03*info->setup_time,
+    //                 1e03*info->solve_time, 1e03*info->polish_time);
+    //     }
+    // } else{
+    //     if (info->run_time > 1e-03) { // Time more than 1ms
+    //         c_print("Timing: total  time = %.3fs\n        "
+    //                 "setup  time = %.3fs\n        "
+    //                 "solve  time = %.3fs\n",
+    //                 info->run_time, info->setup_time, info->solve_time);
+    //     } else {
+    //         c_print("Timing: total  time = %.3fms\n        "
+    //                 "setup  time = %.3fms\n        "
+    //                 "solve  time = %.3fms\n",
+    //                 1e03*info->run_time, 1e03*info->setup_time,
+    //                 1e03*info->solve_time);
+    //     }
+    // }
+    // #endif
 
 }
 

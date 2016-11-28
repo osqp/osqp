@@ -422,9 +422,8 @@ class OSQP(object):
                 print "Perform symmetric scaling of KKT matrix: %i Steps\n" % \
                     self.options.scale_steps
 
-
-                # condKKT = nplinalg.cond(KKT.todense())
-                # print "Condition number of KKT matrix %.4e" % condKKT
+                condKKT = nplinalg.cond(KKT.todense())
+                print "Condition number of KKT matrix %.4e" % condKKT
 
                 # print KKT.todense()
 
@@ -438,20 +437,20 @@ class OSQP(object):
                     d = (n + m)*np.reciprocal(KKT2d + 1e-08)
                     # ipdb.set_trace()
                     # Prevent too large elements
-                    d = np.minimum(np.maximum(d, -1e+10), 1e+10)
+                    # d = np.minimum(np.maximum(d, -1e+10), 1e+10)
                     #  d = np.reciprocal(KKT2d)
                     # print "Scaling step %i\n" % i
 
                     # # DEBUG STUFF
-                    # print d
-                    # S = spspa.diags(d)
-                    # KKTeq = S.dot(KKT.dot(S))
-                    # #  print "Norm of first row of KKT %.4e" % \
-                    #     #  nplinalg.norm((KKT.todense())[1, :])
-                    # #  print "Norm of first row of KKTeq %.4e" % \
-                    #     #  nplinalg.norm((KKTeq.todense())[1, :])
-                    # condKKTeq = nplinalg.cond(KKTeq.todense())
-                    # print "Condition number of KKTeq matrix %.4e" % condKKTeq
+                    print d
+                    S = spspa.diags(d)
+                    KKTeq = S.dot(KKT.dot(S))
+                    print "Norm of first row of KKT %.4e" % \
+                        nplinalg.norm((KKT.todense())[1, :])
+                    print "Norm of first row of KKTeq %.4e" % \
+                        nplinalg.norm((KKTeq.todense())[1, :])
+                    condKKTeq = nplinalg.cond(KKTeq.todense())
+                    print "Condition number of KKTeq matrix %.4e" % condKKTeq
                     #  ipdb.set_trace()
             #  else:  # Q matrix is zero (LP)
                 #  print "Perform scaling of Ac constraints matrix: %i Steps\n" % \

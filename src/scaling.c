@@ -87,17 +87,17 @@ c_int scale_data(Work * work){
     vec_ew_prod(work->scaling->E, work->data->uA, work->data->m);
 
     // DEBUG: print scaled data
-    #if PRINTLEVEL > 0
-    print_csc_matrix(work->data->P, "P");
-    print_csc_matrix(work->data->A, "A");
-    print_vec(work->data->q, work->data->n, "q");
-    print_vec(work->data->lA, work->data->m, "lA");
-    print_vec(work->data->uA, work->data->m, "uA");
-    print_vec(work->scaling->D, work->data->m, "D");
-    print_vec(work->scaling->Dinv, work->data->m, "Dinv");
-    print_vec(work->scaling->E, work->data->m, "E");
-    print_vec(work->scaling->Einv, work->data->m, "Einv");
-    #endif
+    // #if PRINTLEVEL > 0
+    // print_csc_matrix(work->data->P, "P");
+    // print_csc_matrix(work->data->A, "A");
+    // print_vec(work->data->q, work->data->n, "q");
+    // print_vec(work->data->lA, work->data->m, "lA");
+    // print_vec(work->data->uA, work->data->m, "uA");
+    // print_vec(work->scaling->D, work->data->m, "D");
+    // print_vec(work->scaling->Dinv, work->data->m, "Dinv");
+    // print_vec(work->scaling->E, work->data->m, "E");
+    // print_vec(work->scaling->Einv, work->data->m, "Einv");
+    // #endif
 
 
     // Free allocated variables
