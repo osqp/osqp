@@ -37,8 +37,7 @@ struct OSQP_SETTINGS {
         c_float rho; /* ADMM step rho */
         c_int scaling; /* boolean, heuristic data rescaling */
         c_int scaling_norm; /* scaling norm */
-        c_int max_scaling_iter; /* maximum scaling_steps */
-        c_float scaling_eps; /* scaling tolerance */
+        c_int scaling_iter; /* scaling iterations */
 
         /* these can change for multiple runs with the same call to osqp_init */
         c_int max_iter; /* maximum iterations to take */
@@ -47,7 +46,7 @@ struct OSQP_SETTINGS {
         c_float alpha; /* relaxation parameter */
         c_float delta; /* regularization parameter for polishing */
         c_int polishing; /* boolean, polish ADMM solution */
-        c_int pol_refine_iter; /* iterative refinement steps in polishing */ 
+        c_int pol_refine_iter; /* iterative refinement steps in polishing */
         c_int verbose; /* boolean, write out progress  */
         c_int warm_start; /* boolean, warm start */
 };

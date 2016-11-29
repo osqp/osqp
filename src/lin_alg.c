@@ -128,6 +128,19 @@ void vec_ew_sqrt(c_float *a, c_int n){
 }
 
 
+/* elementwise max between each vector component and max_val */
+void vec_ew_max(c_float *a, c_int n, c_float max_val){
+    for(c_int i = 0;  i < n; i++){
+        a[i] = c_max(a[i], max_val);
+    }
+}
+
+/* elementwise min between each vector component and max_val */
+void vec_ew_min(c_float *a, c_int n, c_float min_val){
+    for(c_int i = 0;  i < n; i++){
+        a[i] = c_min(a[i], min_val);
+    }
+}
 
 /* MATRIX FUNCTIONS ----------------------------------------------------------*/
 /* Premultiply matrix A by diagonal matrix with diagonal d,

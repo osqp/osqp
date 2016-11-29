@@ -423,21 +423,15 @@ c_int validate_settings(const Settings * settings){
         #endif
         return 1;
     }
-    if (settings->max_scaling_iter < 1) {
+    if (settings->scaling_iter < 1) {
         #if PRINTLEVEL > 0
-        c_print("max_scaling_iter must be greater than 0\n");
+        c_print("scaling_iter must be greater than 0\n");
         #endif
         return 1;
     }
     if (settings->pol_refine_iter < 0) {
         #if PRINTLEVEL > 0
         c_print("pol_refine_iter must be nonnegative\n");
-        #endif
-        return 1;
-    }
-    if (settings->scaling_eps <= 0) {
-        #if PRINTLEVEL > 0
-        c_print("scaling_eps must be greater than 0\n");
         #endif
         return 1;
     }
