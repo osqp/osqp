@@ -47,7 +47,7 @@ struct OSQP_SETTINGS {
         c_float alpha; /* relaxation parameter */
         c_float delta; /* regularization parameter for polishing */
         c_int polishing; /* boolean, polish ADMM solution */
-        c_int pol_refine_iter; /* iterative refinement steps in polishing */ 
+        c_int pol_refine_iter; /* iterative refinement steps in polishing */
         c_int verbose; /* boolean, write out progress  */
         c_int warm_start; /* boolean, warm start */
 };
@@ -158,6 +158,43 @@ Work * osqp_setup(const Data * data, Settings *settings);
  * @return      Exitflag for errors
  */
 c_int osqp_solve(Work * work);
+
+
+/**
+ * Update linear cost in the problem
+ * @param  work  Workspace
+ * @param  q_new New linear cost
+ * @return       Exitflag for errors and warnings
+ */
+c_int osqp_update_lin_cost(Work * work, c_float * q_new);
+
+
+/**
+ * Update lower and upper bounds in the problem constraints
+ * @param  work   Workspace
+ * @param  lA_new New lower bound
+ * @param  uA_new New upper bound
+ * @return        Exitflag: 1 if new lower bound is not <= than new upper bound
+ */
+c_int osqp_update_bounds(Work * work, c_float * lA_new, c_float * uA_new);
+
+
+/**
+ * Update lower bound in the problem constraints
+ * @param  work   Workspace
+ * @param  lA_new New lower bound
+ * @return        Exitflag: 1 if new lower bound is not <= than upper bound
+ */
+c_int osqp_update_lower_bound(Work * work, c_float * lA_new);
+
+
+/**
+ * Update upper bound in the problem constraints
+ * @param  work   Workspace
+ * @param  uA_new New upper bound
+ * @return        Exitflag: 1 if new upper bound is not >= than lower bound
+ */
+c_int osqp_update_upper_bound(Work * work, c_float * uA_new);
 
 
 /**

@@ -157,13 +157,17 @@ c_int polish(Work *work) {
             work->info->pri_res = work->pol->pri_res;
             work->info->dua_res = work->pol->dua_res;
             work->info->status_polish = 1;
-            // Update primal and dual variables
-            prea_vec_copy(work->pol->x, work->solution->x, work->data->n);
+            // Update primal and dual ADMM iterations
+            prea_vec_copy(work->pol->x, work->x, work->data->n);
+            prea_vec_copy(work->pol->x, work->z, work->data->n);
+            prea_vec_copy(work->pol->Ax, work->x + work->data->n, work->data->m);
+            prea_vec_copy(work->pol->Ax, work->z + work->data->n, work->data->m);
             for (j = 0; j < work->data->m; j++) {
                 if (work->pol->A2Ared[j] != -1) {
-                    work->solution->lambda[j] = work->pol->lambda_red[work->pol->A2Ared[j]];
+                    work->u[j] = work->pol->lambda_red[work->pol->A2Ared[j]] /
+                                 work->settings->rho;
                 } else {
-                    work->solution->lambda[j] = 0.0;
+                    work->u[j] = 0.0;
                 }
             }
             // Print summary

@@ -43,6 +43,7 @@ static char * test_basic_qp2()
     set_default_settings(settings);
     settings->max_iter = 1000;
     settings->alpha = 1.6;
+    settings->warm_start = 1;
 
     // Setup workspace
     work = osqp_setup(data, settings);
@@ -63,7 +64,19 @@ static char * test_basic_qp2()
 
 
 
-    // Solve Problem
+    // Solve Problem first time
+    osqp_solve(work);
+
+    // Solve Problem second time (warm start, reuse factorization)
+    osqp_solve(work);
+
+    // Modify linear cost and upper bound
+    c_float q_new[2] = {1., 1.};
+    c_float uA_new[5] = {-2., -0., -20., 100., 80.};
+    osqp_update_lin_cost(work, q_new);
+    osqp_update_upper_bound(work, uA_new);
+
+    // Solve Problem third time (with different data now)
     osqp_solve(work);
 
     // Print solution

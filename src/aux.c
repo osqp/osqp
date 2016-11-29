@@ -10,7 +10,6 @@
  * @param work Workspace
  */
 void cold_start(Work *work) {
-    memset(work->x, 0, (work->data->n + work->data->m) * sizeof(c_float));
     memset(work->z, 0, (work->data->n + work->data->m) * sizeof(c_float));
     memset(work->u, 0, (work->data->m) * sizeof(c_float));
 }
@@ -211,9 +210,9 @@ c_float compute_inf_res(Work * work){
  * @param work Workspace
  */
 void store_solution(Work *work) {
-    prea_vec_copy(work->x, work->solution->x, work->data->n);   // primal
-    vec_add_scaled(work->solution->lambda, work->u,             // dual
-                   work->data->m, work->settings->rho);
+    prea_vec_copy(work->x, work->solution->x, work->data->n);       // primal
+    prea_vec_copy(work->u, work->solution->lambda, work->data->m);  // dual
+    vec_mult_scalar(work->solution->lambda, work->settings->rho, work->data->m);
 
     if(work->settings->scaling) // Unscale solution if scaling has been performed
         unscale_solution(work);

@@ -160,10 +160,10 @@ c_int osqp_solve(Work * work){
 
     // Initialize variables (cold start or warm start depending on settings)
     if (!work->settings->warm_start)
-        cold_start(work);     // If not warm start -> set first x, z, u to zero
+        cold_start(work);     // If not warm start -> set z, u to zero
 
     // Main ADMM algorithm
-    for (iter = 0; iter < work->settings->max_iter; iter ++ ){
+    for (iter = 0; iter < work->settings->max_iter; iter ++ ) {
         // Update z_prev (preallocated, no malloc)
         prea_vec_copy(work->z, work->z_prev, work->data->n + work->data->m);
 
@@ -242,24 +242,56 @@ c_int osqp_solve(Work * work){
  * @return       Exitflag for errors and warnings
  */
 c_int osqp_update_lin_cost(Work * work, c_float * q_new) {
-    c_int exitflag=0;
 
     // Replace q by the new vector
     prea_vec_copy(q_new, work->data->q, work->data->n);
 
     // Scaling
-    if (settings->scaling) {
+    if (work->settings->scaling) {
         vec_ew_prod(work->scaling->D, work->data->q, work->data->n);
     }
 
-    return exitflag;
+    return 0;
+}
+
+/**
+ * Update lower and upper bounds in the problem constraints
+ * @param  work   Workspace
+ * @param  lA_new New lower bound
+ * @param  uA_new New upper bound
+ * @return        Exitflag: 1 if new lower bound is not <= than new upper bound
+ */
+c_int osqp_update_bounds(Work * work, c_float * lA_new, c_float * uA_new) {
+    c_int i;
+
+    // Check if lower bound is smaller than upper bound
+    for (i=0; i<work->data->m; i++) {
+        if (lA_new[i] > uA_new[i]) {
+            #if PRINTLEVEL > 0
+            c_print("lower bound must be lower than or equal to upper bound \n");
+            #endif
+            return 1;
+        }
+    }
+
+    // Replace lA and uA by the new vectors
+    prea_vec_copy(lA_new, work->data->lA, work->data->m);
+    prea_vec_copy(uA_new, work->data->uA, work->data->m);
+
+    // Scaling
+    if (work->settings->scaling) {
+        vec_ew_prod(work->scaling->E, work->data->lA, work->data->m);
+        vec_ew_prod(work->scaling->E, work->data->uA, work->data->m);
+    }
+
+    return 0;
 }
 
 /**
  * Update lower bound in the problem constraints
  * @param  work   Workspace
  * @param  lA_new New lower bound
- * @return        Exitflag: 1 if lower bound is not <= than upper bound
+ * @return        Exitflag: 1 if new lower bound is not <= than upper bound
  */
 c_int osqp_update_lower_bound(Work * work, c_float * lA_new) {
     c_int i;
@@ -268,14 +300,18 @@ c_int osqp_update_lower_bound(Work * work, c_float * lA_new) {
     prea_vec_copy(lA_new, work->data->lA, work->data->m);
 
     // Scaling
-    if (settings->scaling) {
+    if (work->settings->scaling) {
         vec_ew_prod(work->scaling->E, work->data->lA, work->data->m);
     }
 
     // Check if lower bound is smaller than upper bound
     for (i=0; i<work->data->m; i++) {
-        if (work->data->lA[i] > work->data->uA[i])
+        if (work->data->lA[i] > work->data->uA[i]) {
+            #if PRINTLEVEL > 0
+            c_print("upper bound must be greater than or equal to lower bound \n");
+            #endif
             return 1;
+        }
     }
 
     return 0;
@@ -286,7 +322,7 @@ c_int osqp_update_lower_bound(Work * work, c_float * lA_new) {
  * Update upper bound in the problem constraints
  * @param  work   Workspace
  * @param  uA_new New upper bound
- * @return        Exitflag: 1 if upper bound is not >= than lower bound
+ * @return        Exitflag: 1 if new upper bound is not >= than lower bound
  */
 c_int osqp_update_upper_bound(Work * work, c_float * uA_new) {
     c_int i;
@@ -295,16 +331,19 @@ c_int osqp_update_upper_bound(Work * work, c_float * uA_new) {
     prea_vec_copy(uA_new, work->data->uA, work->data->m);
 
     // Scaling
-    if (settings->scaling) {
+    if (work->settings->scaling) {
         vec_ew_prod(work->scaling->E, work->data->uA, work->data->m);
     }
 
     // Check if upper bound is greater than lower bound
     for (i=0; i<work->data->m; i++) {
-        if (work->data->uA[i] < work->data->lA[i])
+        if (work->data->uA[i] < work->data->lA[i]) {
+            #if PRINTLEVEL > 0
+            c_print("lower bound must be lower than or equal to upper bound \n");
+            #endif
             return 1;
+        }
     }
-
     return 0;
 }
 
