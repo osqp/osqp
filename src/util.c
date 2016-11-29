@@ -190,6 +190,8 @@ void set_default_settings(Settings * settings) {
         settings->alpha = ALPHA;     /* relaxation parameter */
         settings->delta = DELTA;    /* regularization parameter for polishing */
         settings->polishing = POLISHING;     /* ADMM solution polishing: 1 */
+        settings->pol_refine_iter = POL_REFINE_ITER; /* iterative refinement
+                                                        steps in polishing */
         settings->verbose = VERBOSE;     /* x equality constraint scaling: 1e-3 */
         settings->warm_start = WARM_START;     /* x equality constraint scaling: 1e-3 */
 
@@ -212,6 +214,7 @@ Settings * copy_settings(Settings * settings){
     new->alpha = settings->alpha;
     new->delta = settings->delta;
     new->polishing = settings->polishing;
+    new->pol_refine_iter = settings->pol_refine_iter;
     new->verbose = settings->verbose;
     new->warm_start = settings->warm_start;
 

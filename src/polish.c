@@ -59,8 +59,47 @@ c_int form_Ared(Work *work) {
     return mred;
 }
 
+/**
+ * Perform iterative refinement on the polished solution:
+ *    (repeat)
+ *    1. (K + dK) * dz = b - K*z
+ *    2. z <- z + dz
+ * @param  work Solver workspace
+ * @param  p    Private variable for solving linear system
+ * @param  b    RHS of the linear system
+ * @return      More accurate solution
+ */
+void iterative_refinement(Work *work, Priv *p, c_float *z, c_float *b) {
+    if (work->settings->pol_refine_iter > 0) {
+        c_int i, j, n;
+        n = work->data->n + work->pol->Ared->m;
+        c_float *dz = c_malloc(sizeof(c_float) * n);
+        c_float *rhs = c_malloc(sizeof(c_float) * n);
 
-/// Solution polishing: Solve equality constrained QP with assumed active constr.
+        for (i=0; i<work->settings->pol_refine_iter; i++) {
+            // Form the RHS for the iterative refinement:  b - K*z
+            prea_vec_copy(b, rhs, n);
+            mat_vec(work->data->P, z, rhs, -1);          // -= Px (upper triang)
+            mat_tpose_vec(work->data->P, z, rhs, -1, 1); // -= Px (lower triang)
+            mat_tpose_vec(work->pol->Ared, z + work->data->n,
+                          rhs, -1, 0);                   // -= Ared'*lambda_red
+            mat_vec(work->pol->Ared, z, rhs + work->data->n, -1);
+
+            // Solve linear system. Store solution in rhs
+            solve_lin_sys(work->settings, p, rhs);
+
+            // Update solution
+            for (j=0; j<n; j++) {
+                z[j] += rhs[j];
+            }
+        }
+        c_free(dz);
+        c_free(rhs);
+    }
+}
+
+
+// Solution polishing: Solve equality constrained QP with assumed active constr.
 c_int polish(Work *work) {
     c_int j, mred;
     Priv *plsh;
@@ -89,12 +128,16 @@ c_int polish(Work *work) {
     }
 
     // Solve the reduced KKT system
-    solve_lin_sys(work->settings, plsh, rhs);
+    c_float *pol_sol = vec_copy(rhs, work->data->n + mred);
+    solve_lin_sys(work->settings, plsh, pol_sol);
+
+    // Perform iterative refinement to compensate for the regularization error
+    iterative_refinement(work, plsh, pol_sol, rhs);
 
     // Store the polished solution
     work->pol->lambda_red = c_malloc(mred * sizeof(c_float));
-    prea_vec_copy(rhs, work->pol->x, work->data->n);
-    prea_vec_copy(rhs + work->data->n, work->pol->lambda_red, mred);
+    prea_vec_copy(pol_sol, work->pol->x, work->data->n);
+    prea_vec_copy(pol_sol + work->data->n, work->pol->lambda_red, mred);
 
     // Compute A*x needed for computing the primal residual
     mat_vec(work->data->A, work->pol->x, work->pol->Ax, 0);
@@ -103,8 +146,12 @@ c_int polish(Work *work) {
     update_info(work, 0, 1);
 
     // Check if polishing was successful
-    if (work->pol->pri_res < work->info->pri_res &&
-        work->pol->dua_res < work->info->dua_res) {
+    if ((work->pol->pri_res < work->info->pri_res &&
+         work->pol->dua_res < work->info->dua_res) ||
+        (work->pol->pri_res < work->info->pri_res &&
+         work->info->dua_res < 1e-10) ||          // dual residual is tiny
+        (work->pol->dua_res < work->info->dua_res &&
+         work->info->pri_res < 1e-10)) {          // primal residual is tiny
             // Update solver information
             work->info->obj_val = work->pol->obj_val;
             work->info->pri_res = work->pol->pri_res;
@@ -113,7 +160,7 @@ c_int polish(Work *work) {
             // Update primal and dual variables
             prea_vec_copy(work->pol->x, work->solution->x, work->data->n);
             for (j = 0; j < work->data->m; j++) {
-                if (work->pol->A2Ared[j] != -1){
+                if (work->pol->A2Ared[j] != -1) {
                     work->solution->lambda[j] = work->pol->lambda_red[work->pol->A2Ared[j]];
                 } else {
                     work->solution->lambda[j] = 0.0;
@@ -141,6 +188,7 @@ c_int polish(Work *work) {
     csc_spfree(work->pol->Ared);
     c_free(work->pol->lambda_red);
     c_free(rhs);
+    c_free(pol_sol);
 
     return 0;
 }

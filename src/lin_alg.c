@@ -84,7 +84,7 @@ c_float * vec_copy(c_float *a, c_int n) {
 
 
 /* copy vector a into preallocated vector b */
-void prea_vec_copy(c_float *a, c_float * b, c_int n){
+void prea_vec_copy(c_float *a, c_float * b, c_int n) {
     for (c_int i=0; i<n; i++) {
         b[i] = a[i];
     }
@@ -182,10 +182,11 @@ void mat_ew_abs(csc * A){
 /* Matrix-vector multiplication
  *    y  =  A*x  (if plus_eq == 0)
  *    y +=  A*x  (if plus_eq == 1)
+ *    y -=  A*x  (if plus_eq == -1)
 */
 void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq) {
     int i, j;
-    if (!plus_eq){
+    if (!plus_eq) {
         // y = 0
         for (i=0; i<A->m; i++) {
             y[i] = 0;
@@ -197,10 +198,19 @@ void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq) {
         return;
     }
 
-    // y +=  A*x
-    for (j=0; j<A->n; j++) {
-        for (i=A->p[j]; i<A->p[j+1]; i++) {
-            y[A->i[i]] += A->x[i] * x[j];
+    if (plus_eq == -1) {
+        // y -=  A*x
+        for (j=0; j<A->n; j++) {
+            for (i=A->p[j]; i<A->p[j+1]; i++) {
+                y[A->i[i]] -= A->x[i] * x[j];
+            }
+        }
+    } else {
+        // y +=  A*x
+        for (j=0; j<A->n; j++) {
+            for (i=A->p[j]; i<A->p[j+1]; i++) {
+                y[A->i[i]] += A->x[i] * x[j];
+            }
         }
     }
 }
@@ -208,6 +218,7 @@ void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq) {
 /* Matrix-transpose-vector multiplication
  *    y  =  A'*x  (if plus_eq == 0)
  *    y +=  A'*x  (if plus_eq == 1)
+ *    y -=  A'*x  (if plus_eq == -1)
  * If skip_diag == 1, then diagonal elements of A are assumed to be zero.
 */
 void mat_tpose_vec(const csc *A, const c_float *x, c_float *y,
@@ -225,18 +236,36 @@ void mat_tpose_vec(const csc *A, const c_float *x, c_float *y,
         return;
     }
 
-    // y +=  A*x
-    if (skip_diag) {
-  		  for (j=0; j<A->n; j++) {
-            for (k=A->p[j]; k < A->p[j+1]; k++) {
-                i = A->i[k];
-                y[j] += i==j ? 0 : A->x[k]*x[i];
+    if (plus_eq == -1) {
+        // y -=  A*x
+        if (skip_diag) {
+            for (j=0; j<A->n; j++) {
+                for (k=A->p[j]; k < A->p[j+1]; k++) {
+                    i = A->i[k];
+                    y[j] -= i==j ? 0 : A->x[k]*x[i];
+                }
+            }
+        } else {
+            for (j=0; j<A->n; j++) {
+                for (k=A->p[j]; k < A->p[j+1]; k++) {
+                    y[j] -= A->x[k]*x[A->i[k]];
+                }
             }
         }
-  	} else {
-        for (j=0; j<A->n; j++) {
-            for (k=A->p[j]; k < A->p[j+1]; k++) {
-                y[j] += A->x[k]*x[A->i[k]];
+    } else {
+        // y +=  A*x
+        if (skip_diag) {
+      		  for (j=0; j<A->n; j++) {
+                for (k=A->p[j]; k < A->p[j+1]; k++) {
+                    i = A->i[k];
+                    y[j] += i==j ? 0 : A->x[k]*x[i];
+                }
+            }
+      	} else {
+            for (j=0; j<A->n; j++) {
+                for (k=A->p[j]; k < A->p[j+1]; k++) {
+                    y[j] += A->x[k]*x[A->i[k]];
+                }
             }
         }
     }

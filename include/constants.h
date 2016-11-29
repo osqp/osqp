@@ -35,6 +35,7 @@
 #define SCALING (1)
 #define SCALING_NORM (2)
 #define MAX_SCALING_ITER (3)
+#define POL_REFINE_ITER (5)
 #define SCALING_EPS (1E-05)
 
 

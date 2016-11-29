@@ -47,6 +47,7 @@ struct OSQP_SETTINGS {
         c_float alpha; /* relaxation parameter */
         c_float delta; /* regularization parameter for polishing */
         c_int polishing; /* boolean, polish ADMM solution */
+        c_int pol_refine_iter; /* iterative refinement steps in polishing */ 
         c_int verbose; /* boolean, write out progress  */
         c_int warm_start; /* boolean, warm start */
 };
