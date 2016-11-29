@@ -306,12 +306,12 @@ c_int residuals_check(Work *work){
 
 
     // Compare checks to determine solver status
-    if(pri_check && dua_check){
+    if (pri_check && dua_check){
         // Update final information
         work->info->status_val = OSQP_SOLVED;
         exitflag = 1;
     }
-    else if (!pri_check & dua_check & inf_check){
+    else if ((!pri_check) & dua_check & inf_check){
         // Update final information
         work->info->status_val = OSQP_INFEASIBLE;
         exitflag = 1;
@@ -429,6 +429,12 @@ c_int validate_settings(const Settings * settings){
         #endif
         return 1;
     }
+    if (settings->pol_refine_iter < 0) {
+        #if PRINTLEVEL > 0
+        c_print("pol_refine_iter must be nonnegative\n");
+        #endif
+        return 1;
+    }
     if (settings->scaling_eps <= 0) {
         #if PRINTLEVEL > 0
         c_print("scaling_eps must be greater than 0\n");
@@ -439,6 +445,12 @@ c_int validate_settings(const Settings * settings){
     if (settings->rho <= 0) {
         #if PRINTLEVEL > 0
         c_print("rho must be positive\n");
+        #endif
+        return 1;
+    }
+    if (settings->delta <= 0) {
+        #if PRINTLEVEL > 0
+        c_print("delta must be positive\n");
         #endif
         return 1;
     }

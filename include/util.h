@@ -1,9 +1,9 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include "osqp.h"
 #include "constants.h"
 #include "cs.h"
-#include "osqp.h"
 
 /******************
  * Versioning     *
@@ -30,7 +30,7 @@ Settings * copy_settings(Settings * settings);
 void print_setup_header(const Data *data, const Settings *settings);
 
 /* Print Header with data to be displayed per iteration */
-void print_header();
+void print_header(void);
 
 /* Print iteration summary */
 void print_summary(Info * info);

@@ -34,13 +34,13 @@ static const c_int LINE_LEN = 76;
 
 #if PRINTLEVEL > 1
 
-static void print_line(){
+static void print_line(void){
     for (c_int i = 0; i < LINE_LEN; ++i)
         c_print("-");
     c_print("\n");
 }
 
-void print_header(){
+void print_header(void){
     c_print("%s ", HEADER[0]);
     for (c_int i=1; i < HEADER_LEN - 1; i++) c_print("  %s", HEADER[i]);
     c_print("%s\n", HEADER[HEADER_LEN - 1]);
@@ -190,6 +190,8 @@ void set_default_settings(Settings * settings) {
         settings->alpha = ALPHA;     /* relaxation parameter */
         settings->delta = DELTA;    /* regularization parameter for polishing */
         settings->polishing = POLISHING;     /* ADMM solution polishing: 1 */
+        settings->pol_refine_iter = POL_REFINE_ITER; /* iterative refinement
+                                                        steps in polishing */
         settings->verbose = VERBOSE;     /* x equality constraint scaling: 1e-3 */
         settings->warm_start = WARM_START;     /* x equality constraint scaling: 1e-3 */
 
@@ -212,6 +214,7 @@ Settings * copy_settings(Settings * settings){
     new->alpha = settings->alpha;
     new->delta = settings->delta;
     new->polishing = settings->polishing;
+    new->pol_refine_iter = settings->pol_refine_iter;
     new->verbose = settings->verbose;
     new->warm_start = settings->warm_start;
 

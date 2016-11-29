@@ -9,11 +9,13 @@
  * Author: Timothy A. Davis.
  */
 
+// Include OSQP Global options for memory management
+#include "glob_opts.h"
+
 #include <math.h>
 #include <stdlib.h>
 
-// Include OSQP Global options for memory management
-#include "glob_opts.h"
+
 
 #ifndef NPRINT
 #include <stdio.h>

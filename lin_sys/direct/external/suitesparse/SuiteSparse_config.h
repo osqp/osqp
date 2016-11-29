@@ -42,9 +42,9 @@
 extern "C" {
 #endif
 
+#include "glob_opts.h"
 #include <limits.h>
 #include <stdlib.h>
-#include "glob_opts.h"
 
 /* ========================================================================== */
 /* === SuiteSparse_long ===================================================== */
