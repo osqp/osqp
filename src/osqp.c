@@ -84,7 +84,7 @@ Work * osqp_setup(const Data * data, Settings *settings){
     if (work->data->m == 0) work->settings->polishing = 0;     // If no constraints->disable polishing
 
     // Perform scaling
-    if (settings->scaling){
+    if (settings->scaling) {
         scale_data(work);
     }
     else {
@@ -235,7 +235,78 @@ c_int osqp_solve(Work * work){
     return exitflag;
 }
 
+/**
+ * Update linear cost in the problem
+ * @param  work  Workspace
+ * @param  q_new New linear cost
+ * @return       Exitflag for errors and warnings
+ */
+c_int osqp_update_lin_cost(Work * work, c_float * q_new) {
+    c_int exitflag=0;
 
+    // Replace q by the new vector
+    prea_vec_copy(q_new, work->data->q, work->data->n);
+
+    // Scaling
+    if (settings->scaling) {
+        vec_ew_prod(work->scaling->D, work->data->q, work->data->n);
+    }
+
+    return exitflag;
+}
+
+/**
+ * Update lower bound in the problem constraints
+ * @param  work   Workspace
+ * @param  lA_new New lower bound
+ * @return        Exitflag: 1 if lower bound is not <= than upper bound
+ */
+c_int osqp_update_lower_bound(Work * work, c_float * lA_new) {
+    c_int i;
+
+    // Replace lA by the new vector
+    prea_vec_copy(lA_new, work->data->lA, work->data->m);
+
+    // Scaling
+    if (settings->scaling) {
+        vec_ew_prod(work->scaling->E, work->data->lA, work->data->m);
+    }
+
+    // Check if lower bound is smaller than upper bound
+    for (i=0; i<work->data->m; i++) {
+        if (work->data->lA[i] > work->data->uA[i])
+            return 1;
+    }
+
+    return 0;
+}
+
+
+/**
+ * Update upper bound in the problem constraints
+ * @param  work   Workspace
+ * @param  uA_new New upper bound
+ * @return        Exitflag: 1 if upper bound is not >= than lower bound
+ */
+c_int osqp_update_upper_bound(Work * work, c_float * uA_new) {
+    c_int i;
+
+    // Replace uA by the new vector
+    prea_vec_copy(uA_new, work->data->uA, work->data->m);
+
+    // Scaling
+    if (settings->scaling) {
+        vec_ew_prod(work->scaling->E, work->data->uA, work->data->m);
+    }
+
+    // Check if upper bound is greater than lower bound
+    for (i=0; i<work->data->m; i++) {
+        if (work->data->uA[i] < work->data->lA[i])
+            return 1;
+    }
+
+    return 0;
+}
 
 
 /**
