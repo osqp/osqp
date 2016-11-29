@@ -226,7 +226,8 @@ c_int osqp_solve(Work * work){
 
     /* Print final footer */
     #if PRINTLEVEL > 0
-    print_footer(work->info, work->settings->polishing);
+    if(work->settings->verbose)
+        print_footer(work->info, work->settings->polishing);
     #endif
 
     // Store solution

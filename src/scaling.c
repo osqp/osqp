@@ -1,5 +1,6 @@
 #include "scaling.h"
 
+
 // Scale data stored in workspace
 c_int scale_data(Work * work){
 
@@ -37,7 +38,7 @@ c_int scale_data(Work * work){
         mat_ew_sq(KKT);
     }
 
-    for(i = 0; i < work->settings->max_scaling_iter; i++){
+    for(i = 0; i < work->settings->scaling_iter; i++){
 
         // s_prev = s
         prea_vec_copy(s, s_prev, n_plus_m);
@@ -48,8 +49,8 @@ c_int scale_data(Work * work){
         mat_vec(KKT, s_prev, s, 0);
         mat_tpose_vec(KKT, s_prev, s, 1, 1);      // += KKT' * x (lower triang part)
 
-        // s = s + scaling_eps
-        vec_add_scalar(s, 1E-08, n_plus_m);
+        // s = s + scaling_REG
+        vec_add_scalar(s, SCALING_REG, n_plus_m);
 
         // s = 1./s
         vec_ew_recipr(s, s, n_plus_m);
@@ -57,14 +58,24 @@ c_int scale_data(Work * work){
         // s = (n + m) * s
         vec_mult_scalar(s, n_plus_m, n_plus_m);
 
-        if(vec_norm2_diff(s, s_prev, n_plus_m) < work->settings->scaling_eps)
-            break;
+        // Bound vectors between maximum and minimum allowed scaling
+        // print_vec(s, n_plus_m, "s_befscal");
+        vec_ew_max(s, n_plus_m, MIN_SCALING);
+        // print_vec(s, n_plus_m, "s_after_max");
+        vec_ew_min(s, n_plus_m, MAX_SCALING);
+        // print_vec(s, n_plus_m, "s_after_min");
+
+
+
+        // if(vec_norm2_diff(s, s_prev, n_plus_m) < work->settings->scaling_eps)
+        //     break;
     }
 
-    #if PRINTLEVEL > 0
-    if (i == work->settings->max_scaling_iter - 1)
-        c_print("maximum scaling steps reached\n");
-    #endif
+
+    // #if PRINTLEVEL > 0
+    // if (i == work->settings->max_scaling_iter - 1)
+    //     c_print("maximum scaling steps reached\n");
+    // #endif
 
 
     // Finally normalize by sqrt if 2-norm involved (see pdf)
@@ -75,6 +86,14 @@ c_int scale_data(Work * work){
     vec_ew_recipr(work->scaling->D, work->scaling->Dinv, work->data->n);
     prea_vec_copy(s + work->data->n, work->scaling->E, work->data->m);
     vec_ew_recipr(work->scaling->E, work->scaling->Einv, work->data->m);
+
+    // DEBUG
+    // c_print("n = %i\n", work->data->n);
+    // print_vec(s, n_plus_m, "s");
+    // print_vec(work->scaling->D, work->data->n, "D");
+    // print_vec(work->scaling->Dinv, work->data->n, "Dinv");
+    // print_vec(work->scaling->E, work->data->m, "E");
+    // print_vec(work->scaling->Einv, work->data->m, "Einv");
 
     // Scale data
     mat_premult_diag(work->data->P, work->scaling->D);
@@ -93,8 +112,8 @@ c_int scale_data(Work * work){
     // print_vec(work->data->q, work->data->n, "q");
     // print_vec(work->data->lA, work->data->m, "lA");
     // print_vec(work->data->uA, work->data->m, "uA");
-    // print_vec(work->scaling->D, work->data->m, "D");
-    // print_vec(work->scaling->Dinv, work->data->m, "Dinv");
+    // print_vec(work->scaling->D, work->data->n, "D");
+    // print_vec(work->scaling->Dinv, work->data->n, "Dinv");
     // print_vec(work->scaling->E, work->data->m, "E");
     // print_vec(work->scaling->Einv, work->data->m, "Einv");
     // #endif

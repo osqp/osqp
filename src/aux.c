@@ -301,8 +301,13 @@ c_int residuals_check(Work *work){
               vec_norm2( work->dua_res_ws_n, work->data->n);
 
     if (work->info->dua_res < eps_dua) dua_check = 1;
-    if (work->info->inf_res < eps_dua) inf_check = 1;
-
+    if (work->info->inf_res < eps_dua) {
+        inf_check = 1;
+        // c_print("Inf residual condition True\n");
+        // c_print("Inf residual = %e\n", work->info->inf_res);
+        // c_print("eps_dua = %e\n", eps_dua);
+        // c_print("eps_pri = %e\n", eps_pri);
+    }
 
     // Compare checks to determine solver status
     if (pri_check && dua_check){
@@ -310,11 +315,14 @@ c_int residuals_check(Work *work){
         work->info->status_val = OSQP_SOLVED;
         exitflag = 1;
     }
+    
+    #ifndef SKIP_INFEASIBILITY
     else if ((!pri_check) & dua_check & inf_check){
         // Update final information
         work->info->status_val = OSQP_INFEASIBLE;
         exitflag = 1;
     }
+    #endif
 
 
 
@@ -422,21 +430,15 @@ c_int validate_settings(const Settings * settings){
         #endif
         return 1;
     }
-    if (settings->max_scaling_iter < 1) {
+    if (settings->scaling_iter < 1) {
         #if PRINTLEVEL > 0
-        c_print("max_scaling_iter must be greater than 0\n");
+        c_print("scaling_iter must be greater than 0\n");
         #endif
         return 1;
     }
     if (settings->pol_refine_iter < 0) {
         #if PRINTLEVEL > 0
         c_print("pol_refine_iter must be nonnegative\n");
-        #endif
-        return 1;
-    }
-    if (settings->scaling_eps <= 0) {
-        #if PRINTLEVEL > 0
-        c_print("scaling_eps must be greater than 0\n");
         #endif
         return 1;
     }

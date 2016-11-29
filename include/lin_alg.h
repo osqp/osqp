@@ -53,6 +53,11 @@ void vec_ew_prod(const c_float *a, c_float *b, c_int n);
 /* elementwise sqrt of the vector elements */
 void vec_ew_sqrt(c_float *a, c_int n);
 
+/* elementwise max between each vector component and max_val */
+void vec_ew_max(c_float *a, c_int n, c_float max_val);
+
+/* elementwise min between each vector component and max_val */
+void vec_ew_min(c_float *a, c_int n, c_float min_val);
 
 
 /* MATRIX FUNCTIONS ----------------------------------------------------------*/

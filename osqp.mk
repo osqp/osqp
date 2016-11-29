@@ -106,5 +106,8 @@ PROFILING = 1
 OPT_FLAGS += -DPROFILING=$(PROFILING)
 
 
+# Skip infeasibility detection
+SKIP_INFEASIBILITY = 1
+
 # Add Optional Flags to CFLAGS
 CFLAGS += $(OPT_FLAGS)
