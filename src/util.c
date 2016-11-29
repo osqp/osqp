@@ -25,7 +25,7 @@ static const char *HEADER[] = {
 static const c_int HEADER_LEN = 4;
 #endif
 static const c_int HSPACE = 12;
-static const c_int LINE_LEN = 76;
+static const c_int LINE_LEN = 55;
 #endif
 
 /**********************
@@ -49,7 +49,7 @@ void print_header(void){
 void print_setup_header(const Data *data, const Settings *settings) {
 
     print_line();
-    c_print("\tOSQP v%s - Operator Splitting QP Solver\n\t(c) ....., University of Oxford - Stanford University 2016\n", OSQP_VERSION);
+    c_print("      OSQP v%s  -  Operator Splitting QP Solver\n     (c) .....,\n   University of Oxford  -  Stanford University 2016\n", OSQP_VERSION);
     print_line();
 
     // Print variables and constraints

@@ -302,8 +302,13 @@ c_int residuals_check(Work *work){
               vec_norm2( work->dua_res_ws_n, work->data->n);
 
     if (work->info->dua_res < eps_dua) dua_check = 1;
-    if (work->info->inf_res < eps_dua) inf_check = 1;
-
+    if (work->info->inf_res < eps_dua) {
+        inf_check = 1;
+        // c_print("Inf residual condition True\n");
+        // c_print("Inf residual = %e\n", work->info->inf_res);
+        // c_print("eps_dua = %e\n", eps_dua);
+        // c_print("eps_pri = %e\n", eps_pri);
+    }
 
     // Compare checks to determine solver status
     if (pri_check && dua_check){
@@ -311,11 +316,14 @@ c_int residuals_check(Work *work){
         work->info->status_val = OSQP_SOLVED;
         exitflag = 1;
     }
+    
+    #ifndef SKIP_INFEASIBILITY
     else if ((!pri_check) & dua_check & inf_check){
         // Update final information
         work->info->status_val = OSQP_INFEASIBLE;
         exitflag = 1;
     }
+    #endif
 
 
 
