@@ -242,7 +242,9 @@ void update_info(Work *work, c_int iter, c_int polish){
             work->info->obj_val = compute_obj_val(work, 0);
             work->info->pri_res = compute_pri_res(work, 0);
             work->info->dua_res = compute_dua_res(work, 0);
+            #if SKIP_INFEASIBILITY == 0
             work->info->inf_res = compute_inf_res(work);
+            #endif
             #if PROFILING > 0
                 work->info->solve_time = toc(work->timer);
             #endif
@@ -281,7 +283,10 @@ void update_status_string(Info *info){
 c_int residuals_check(Work *work){
     c_float eps_pri, eps_dua;
     c_int exitflag = 0;
-    c_int pri_check = 0, dua_check = 0, inf_check = 0;
+    c_int pri_check = 0, dua_check = 0;
+    #if SKIP_INFEASIBILITY == 0
+    c_int inf_check = 0;
+    #endif
 
 
     // Check residuals
@@ -296,6 +301,7 @@ c_int residuals_check(Work *work){
         // Primal feasibility check
         if (work->info->pri_res < eps_pri) pri_check = 1;
 
+        #if SKIP_INFEASIBILITY == 0
         // Infeasibility check
         if (work->info->inf_res < 1e-2*eps_pri &&
             vec_norm2(work->delta_u, work->data->m) > 1e2*eps_pri) {
@@ -305,6 +311,7 @@ c_int residuals_check(Work *work){
             // c_print("eps_dua = %e\n", eps_dua);
             // c_print("eps_pri = %e\n", eps_pri);
         }
+        #endif
     }
 
     // Compute dual tolerance
@@ -322,7 +329,7 @@ c_int residuals_check(Work *work){
         exitflag = 1;
     }
 
-    #ifndef SKIP_INFEASIBILITY
+    #if SKIP_INFEASIBILITY == 0
     else if ((!pri_check) & dua_check & inf_check){
         // Update final information
         work->info->status_val = OSQP_INFEASIBLE;
@@ -479,19 +486,19 @@ c_int validate_settings(const Settings * settings){
         #endif
         return 1;
     }
-    if (settings->alpha <= 0) {
+    if (settings->alpha <= 0 || settings->alpha >= 2) {
         #if PRINTLEVEL > 0
-        c_print("alpha must be positive\n");
+        c_print("alpha must be between 0 and 2\n");
         #endif
         return 1;
     }
-    if (settings->verbose != 0 &&  settings->verbose != 1) {
+    if (settings->verbose != 0 && settings->verbose != 1) {
         #if PRINTLEVEL > 0
         c_print("verbose must be either 0 or 1\n");
         #endif
         return 1;
     }
-    if (settings->warm_start != 0 &&  settings->warm_start != 1) {
+    if (settings->warm_start != 0 && settings->warm_start != 1) {
         #if PRINTLEVEL > 0
         c_print("warm_start must be either 0 or 1\n");
         #endif

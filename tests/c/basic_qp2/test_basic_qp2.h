@@ -27,13 +27,13 @@ static char * test_basic_qp2()
 
     data->n = basic_qp2_n;
     data->m = basic_qp2_m;
-    data->P = csc_matrix(data->n, data->n, basic_qp2_P_nnz, basic_qp2_P_x, basic_qp2_P_i, basic_qp2_P_p);
+    data->P = csc_matrix(data->n, data->n, basic_qp2_P_nnz, basic_qp2_P_x,
+                         basic_qp2_P_i, basic_qp2_P_p);
     data->q = basic_qp2_q;
-    data->A = csc_matrix(data->m, data->n, basic_qp2_A_nnz, basic_qp2_A_x, basic_qp2_A_i, basic_qp2_A_p);
+    data->A = csc_matrix(data->m, data->n, basic_qp2_A_nnz, basic_qp2_A_x,
+                         basic_qp2_A_i, basic_qp2_A_p);
     data->lA = basic_qp2_lA;
     data->uA = basic_qp2_uA;
-    // data->lx = basic_qp2_lx;
-    // data->ux = basic_qp2_ux;
 
 
     c_print("\nTest basic QP problem 2\n");
@@ -54,40 +54,35 @@ static char * test_basic_qp2()
         exitflag = 1;
     }
     else {
-    // DEBUG
-    // print_csc_matrix(work->data->P, "P");
-    // print_vec(work->data->q, work->data->n, "q");
-    // print_csc_matrix(work->data->A, "A");
-    // print_vec(work->data->lA, work->data->m, "lA");
-    // print_vec(work->data->uA, work->data->m, "uA");
-    // print_vec(work->data->lx, work->data->n, "lx");
-    // print_vec(work->data->ux, work->data->n, "ux");
+        // Solve Problem first time
+        osqp_solve(work);
 
+        // Set polishing to 0
+        osqp_update_polishing(work, 0);
+        osqp_update_max_iter(work, 200);
+        // Solve Problem second time (warm start, reuse factorization, no polishing)
+        osqp_solve(work);
 
+        // Modify linear cost and upper bound
+        c_float q_new[2] = {1., 1.};
+        c_float uA_new[5] = {-2., -0., -20., 100., 80.};
+        osqp_update_lin_cost(work, q_new);
+        osqp_update_upper_bound(work, uA_new);
+        if (osqp_update_max_iter(work, 0) != 1) {
+            c_print("Setting max_iter to 0 should result in exitflag=1!\n");
+            exitflag = 1;
+        }
+        // Solve Problem third time (with different data now)
+        osqp_solve(work);
 
-    // Solve Problem first time
-    osqp_solve(work);
+        // Print solution
+        #if PRINTLEVEL > 2
+        print_vec(work->solution->x, work->data->n, "x");
+        print_vec(work->solution->lambda, work->data->m, "lambda");
+        #endif
 
-    // Solve Problem second time (warm start, reuse factorization)
-    osqp_solve(work);
-
-    // Modify linear cost and upper bound
-    c_float q_new[2] = {1., 1.};
-    c_float uA_new[5] = {-2., -0., -20., 100., 80.};
-    osqp_update_lin_cost(work, q_new);
-    osqp_update_upper_bound(work, uA_new);
-
-    // Solve Problem third time (with different data now)
-    osqp_solve(work);
-
-    // Print solution
-    #if PRINTLEVEL > 2
-    print_vec(work->solution->x, work->data->n, "x");
-    print_vec(work->solution->lambda, work->data->m, "lambda");
-    #endif
-
-    // Clean workspace
-    osqp_cleanup(work);
+        // Clean workspace
+        osqp_cleanup(work);
     }
 
     mu_assert("\nError in basic QP 2 test.", exitflag == 0 );

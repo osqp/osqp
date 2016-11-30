@@ -180,7 +180,7 @@ static char * tests_solve_linsys()
     // if (!tempflag) c_print("OK!\n");
     // exitflag += tempflag;
 
-    printf("3) Test forming and solving KKT system: ");
+    printf("1) Test forming and solving KKT system: ");
     tempflag = test_solveKKT();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;

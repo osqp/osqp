@@ -47,9 +47,11 @@ void print_header(void){
 }
 
 void print_setup_header(const Data *data, const Settings *settings) {
-
     print_line();
-    c_print("      OSQP v%s  -  Operator Splitting QP Solver\n     (c) .....,\n   University of Oxford  -  Stanford University 2016\n", OSQP_VERSION);
+    c_print("      OSQP v%s  -  Operator Splitting QP Solver\n"
+            "     (c) .....,\n"
+            "   University of Oxford  -  Stanford University 2016\n",
+            OSQP_VERSION);
     print_line();
 
     // Print variables and constraints
@@ -59,8 +61,10 @@ void print_setup_header(const Data *data, const Settings *settings) {
     // Print Settings
     // Print variables and constraints
     c_print("Settings: ");
-    c_print("eps_abs = %.2e, eps_rel = %.2e,\n          rho = %.2f, alpha = %.2f, max_iter = %i\n",
-            settings->eps_abs, settings->eps_rel, settings->rho, settings->alpha, settings->max_iter);
+    c_print("eps_abs = %.2e, eps_rel = %.2e,\n          "
+            "rho = %.2f, alpha = %.2f, max_iter = %i\n",
+            settings->eps_abs, settings->eps_rel, settings->rho,
+            settings->alpha, settings->max_iter);
     if (settings->scaling)
         c_print("          scaling: active\n");
     else
@@ -74,7 +78,6 @@ void print_setup_header(const Data *data, const Settings *settings) {
     else
         c_print("          polishing: inactive\n");
     c_print("\n");
-
 }
 
 
@@ -137,6 +140,7 @@ void print_footer(Info * info, c_int polishing){
         c_print("Run time: %.3fms\n", 1e03*info->run_time);
     }
     #endif
+    c_print("\n");
 
     // #if PROFILING > 0
     // if (polishing && info->status_val == OSQP_SOLVED) {
