@@ -76,6 +76,8 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->z = c_calloc((work->data->n + work->data->m), sizeof(c_float));
     work->u = c_calloc(work->data->m, sizeof(c_float));
     work->z_prev = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
+    work->delta_u = c_calloc(work->data->m, sizeof(c_float));
+    work->delta_u_prev = c_calloc(work->data->m, sizeof(c_float));
     work->dua_res_ws_n = c_malloc(work->data->n * sizeof(c_float));
     work->dua_res_ws_m = c_malloc(work->data->m * sizeof(c_float));
 
@@ -164,8 +166,9 @@ c_int osqp_solve(Work * work){
 
     // Main ADMM algorithm
     for (iter = 0; iter < work->settings->max_iter; iter ++ ) {
-        // Update z_prev (preallocated, no malloc)
+        // Update z_prev and delta_u_prev (preallocated, no malloc)
         prea_vec_copy(work->z, work->z_prev, work->data->n + work->data->m);
+        prea_vec_copy(work->delta_u, work->delta_u_prev, work->data->m);
 
         /* ADMM STEPS */
         /* First step: x_{k+1} */
@@ -390,6 +393,8 @@ c_int osqp_cleanup(Work * work){
     c_free(work->u);
     c_free(work->z);
     c_free(work->z_prev);
+    c_free(work->delta_u);
+    c_free(work->delta_u_prev);
     c_free(work->dua_res_ws_n);
     c_free(work->dua_res_ws_m);
 

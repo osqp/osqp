@@ -64,7 +64,7 @@ struct OSQP_WORK {
         Polish * pol;
 
         // Internal solver variables
-        c_float *x, *z, *u, *z_prev;
+        c_float *x, *z, *u, *z_prev, *delta_u, *delta_u_prev;
 
         // Workspaces for computing dual residual
         c_float *dua_res_ws_n;  // n-dimensional workspace

@@ -77,9 +77,10 @@ void project_x(Work *work){
 void update_u(Work *work){
     c_int i; // Index
     for (i = work->data->n; i < work->data->n + work->data->m; i++){
-        work->u[i - work->data->n] += work->settings->alpha * work->x[i] +
+        work->delta_u[i - work->data->n] = work->settings->alpha * work->x[i] +
                       (1.0 - work->settings->alpha) * work->z_prev[i] -
                       work->z[i];
+        work->u[i - work->data->n] += work->delta_u[i - work->data->n];
     }
 }
 
@@ -188,20 +189,21 @@ c_float compute_dua_res(Work * work, c_int polish){
  * @return      Norm of infeasibility residual
  */
 c_float compute_inf_res(Work * work){
-    c_int j;
-    c_float tmp, infeas_resid_sq=0;
-
-    for (j = 0; j < work->data->m; j++) {
-        if (work->x[work->data->n + j] < work->data->lA[j]) {
-            tmp = work->z[work->data->n + j] - work->data->lA[j];
-        } else if (work->x[work->data->n + j] > work->data->uA[j]) {
-            tmp = work->data->uA[j] - work->z[work->data->n + j];
-        } else {
-            tmp = work->x[work->data->n + j] - work->z[work->data->n + j];
-        }
-        infeas_resid_sq += tmp*tmp;
-    }
-    return c_sqrt(infeas_resid_sq);
+    // c_int j;
+    // c_float tmp, infeas_resid_sq=0;
+    //
+    // for (j = 0; j < work->data->m; j++) {
+    //     if (work->x[work->data->n + j] < work->data->lA[j]) {
+    //         tmp = work->z[work->data->n + j] - work->data->lA[j];
+    //     } else if (work->x[work->data->n + j] > work->data->uA[j]) {
+    //         tmp = work->data->uA[j] - work->z[work->data->n + j];
+    //     } else {
+    //         tmp = work->x[work->data->n + j] - work->z[work->data->n + j];
+    //     }
+    //     infeas_resid_sq += tmp*tmp;
+    // }
+    // return c_sqrt(infeas_resid_sq);
+    return vec_norm2_diff(work->delta_u, work->delta_u_prev, work->data->m);
 }
 
 
@@ -291,7 +293,18 @@ c_int residuals_check(Work *work){
         eps_pri = c_sqrt(work->data->m) * work->settings->eps_abs +
                   work->settings->eps_rel *
                   vec_norm2(work->x + work->data->n, work->data->m);
+        // Primal feasibility check
         if (work->info->pri_res < eps_pri) pri_check = 1;
+
+        // Infeasibility check
+        if (work->info->inf_res < 1e-2*eps_pri &&
+            vec_norm2(work->delta_u, work->data->m) > 1e2*eps_pri) {
+            inf_check = 1;
+            // c_print("Inf residual condition True\n");
+            // c_print("Inf residual = %e\n", work->info->inf_res);
+            // c_print("eps_dua = %e\n", eps_dua);
+            // c_print("eps_pri = %e\n", eps_pri);
+        }
     }
 
     // Compute dual tolerance
@@ -299,15 +312,8 @@ c_int residuals_check(Work *work){
     eps_dua = c_sqrt(work->data->n) * work->settings->eps_abs +
               work->settings->eps_rel * work->settings->rho *
               vec_norm2( work->dua_res_ws_n, work->data->n);
-
+    // Dual feasibility check
     if (work->info->dua_res < eps_dua) dua_check = 1;
-    if (work->info->inf_res < eps_dua) {
-        inf_check = 1;
-        // c_print("Inf residual condition True\n");
-        // c_print("Inf residual = %e\n", work->info->inf_res);
-        // c_print("eps_dua = %e\n", eps_dua);
-        // c_print("eps_pri = %e\n", eps_pri);
-    }
 
     // Compare checks to determine solver status
     if (pri_check && dua_check){
@@ -315,7 +321,7 @@ c_int residuals_check(Work *work){
         work->info->status_val = OSQP_SOLVED;
         exitflag = 1;
     }
-    
+
     #ifndef SKIP_INFEASIBILITY
     else if ((!pri_check) & dua_check & inf_check){
         // Update final information
