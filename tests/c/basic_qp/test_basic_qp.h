@@ -32,9 +32,6 @@ static char * test_basic_qp()
     data->A = csc_matrix(data->m, data->n, basic_qp_A_nnz, basic_qp_A_x, basic_qp_A_i, basic_qp_A_p);
     data->lA = basic_qp_lA;
     data->uA = basic_qp_uA;
-    // data->lx = basic_qp_lx;
-    // data->ux = basic_qp_ux;
-    //TODO: FIX SEGMENTATION FAULT WHEN CREATING lx and ux
 
 
     c_print("\nTest basic QP problem\n");
