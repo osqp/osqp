@@ -46,6 +46,7 @@ Work * osqp_setup(const Data * data, Settings *settings){
         #if PRINTLEVEL > 0
         c_print("ERROR: allocating work failure!\n");
         #endif
+        return OSQP_NULL;
     }
 
     // Start and allocate directly timer
@@ -76,6 +77,9 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->z = c_calloc((work->data->n + work->data->m), sizeof(c_float));
     work->u = c_calloc(work->data->m, sizeof(c_float));
     work->z_prev = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
+    work->delta_u = c_calloc(work->data->m, sizeof(c_float));
+    work->delta_u_prev = c_calloc(work->data->m, sizeof(c_float));
+    work->first_run = 1;
     work->dua_res_ws_n = c_malloc(work->data->n * sizeof(c_float));
     work->dua_res_ws_m = c_malloc(work->data->m * sizeof(c_float));
 
@@ -124,7 +128,8 @@ Work * osqp_setup(const Data * data, Settings *settings){
 
     // Print header
     #if PRINTLEVEL > 1
-    if (work->settings->verbose) print_setup_header(work->data, settings);
+    if (work->settings->verbose)
+        print_setup_header(work->data, settings);
     #endif
 
     return work;
@@ -163,9 +168,10 @@ c_int osqp_solve(Work * work){
         cold_start(work);     // If not warm start -> set z, u to zero
 
     // Main ADMM algorithm
-    for (iter = 0; iter < work->settings->max_iter; iter ++ ) {
-        // Update z_prev (preallocated, no malloc)
+    for (iter = 0; iter < work->settings->max_iter; iter ++) {
+        // Update z_prev and delta_u_prev (preallocated, no malloc)
         prea_vec_copy(work->z, work->z_prev, work->data->n + work->data->m);
+        prea_vec_copy(work->delta_u, work->delta_u_prev, work->data->m);
 
         /* ADMM STEPS */
         /* First step: x_{k+1} */
@@ -216,12 +222,18 @@ c_int osqp_solve(Work * work){
     if (work->settings->polishing && work->info->status_val == OSQP_SOLVED)
         polish(work);
 
-
-    /* Update total time: setup + solve + polish */
+    /* Update total time */
     #if PROFILING > 0
-    work->info->run_time = work->info->setup_time +
-                           work->info->solve_time +
-                           work->info->polish_time;
+    if (work->first_run == 0) {
+        // total time: setup + solve + polish
+        work->info->run_time = work->info->setup_time +
+                               work->info->solve_time +
+                               work->info->polish_time;
+    } else {
+        // total time: solve + polish
+        work->info->run_time = work->info->solve_time +
+                                work->info->polish_time;
+    }
     #endif
 
     /* Print final footer */
@@ -233,119 +245,10 @@ c_int osqp_solve(Work * work){
     // Store solution
     store_solution(work);
 
+    // Indicate that the solve function has already been run
+    work->first_run = 0;
+
     return exitflag;
-}
-
-/**
- * Update linear cost in the problem
- * @param  work  Workspace
- * @param  q_new New linear cost
- * @return       Exitflag for errors and warnings
- */
-c_int osqp_update_lin_cost(Work * work, c_float * q_new) {
-
-    // Replace q by the new vector
-    prea_vec_copy(q_new, work->data->q, work->data->n);
-
-    // Scaling
-    if (work->settings->scaling) {
-        vec_ew_prod(work->scaling->D, work->data->q, work->data->n);
-    }
-
-    return 0;
-}
-
-/**
- * Update lower and upper bounds in the problem constraints
- * @param  work   Workspace
- * @param  lA_new New lower bound
- * @param  uA_new New upper bound
- * @return        Exitflag: 1 if new lower bound is not <= than new upper bound
- */
-c_int osqp_update_bounds(Work * work, c_float * lA_new, c_float * uA_new) {
-    c_int i;
-
-    // Check if lower bound is smaller than upper bound
-    for (i=0; i<work->data->m; i++) {
-        if (lA_new[i] > uA_new[i]) {
-            #if PRINTLEVEL > 0
-            c_print("lower bound must be lower than or equal to upper bound \n");
-            #endif
-            return 1;
-        }
-    }
-
-    // Replace lA and uA by the new vectors
-    prea_vec_copy(lA_new, work->data->lA, work->data->m);
-    prea_vec_copy(uA_new, work->data->uA, work->data->m);
-
-    // Scaling
-    if (work->settings->scaling) {
-        vec_ew_prod(work->scaling->E, work->data->lA, work->data->m);
-        vec_ew_prod(work->scaling->E, work->data->uA, work->data->m);
-    }
-
-    return 0;
-}
-
-/**
- * Update lower bound in the problem constraints
- * @param  work   Workspace
- * @param  lA_new New lower bound
- * @return        Exitflag: 1 if new lower bound is not <= than upper bound
- */
-c_int osqp_update_lower_bound(Work * work, c_float * lA_new) {
-    c_int i;
-
-    // Replace lA by the new vector
-    prea_vec_copy(lA_new, work->data->lA, work->data->m);
-
-    // Scaling
-    if (work->settings->scaling) {
-        vec_ew_prod(work->scaling->E, work->data->lA, work->data->m);
-    }
-
-    // Check if lower bound is smaller than upper bound
-    for (i=0; i<work->data->m; i++) {
-        if (work->data->lA[i] > work->data->uA[i]) {
-            #if PRINTLEVEL > 0
-            c_print("upper bound must be greater than or equal to lower bound \n");
-            #endif
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
-
-/**
- * Update upper bound in the problem constraints
- * @param  work   Workspace
- * @param  uA_new New upper bound
- * @return        Exitflag: 1 if new upper bound is not >= than lower bound
- */
-c_int osqp_update_upper_bound(Work * work, c_float * uA_new) {
-    c_int i;
-
-    // Replace uA by the new vector
-    prea_vec_copy(uA_new, work->data->uA, work->data->m);
-
-    // Scaling
-    if (work->settings->scaling) {
-        vec_ew_prod(work->scaling->E, work->data->uA, work->data->m);
-    }
-
-    // Check if upper bound is greater than lower bound
-    for (i=0; i<work->data->m; i++) {
-        if (work->data->uA[i] < work->data->lA[i]) {
-            #if PRINTLEVEL > 0
-            c_print("lower bound must be lower than or equal to upper bound \n");
-            #endif
-            return 1;
-        }
-    }
-    return 0;
 }
 
 
@@ -390,6 +293,8 @@ c_int osqp_cleanup(Work * work){
     c_free(work->u);
     c_free(work->z);
     c_free(work->z_prev);
+    c_free(work->delta_u);
+    c_free(work->delta_u_prev);
     c_free(work->dua_res_ws_n);
     c_free(work->dua_res_ws_m);
 
@@ -413,4 +318,312 @@ c_int osqp_cleanup(Work * work){
     c_free(work);
 
     return exitflag;
+}
+
+
+
+/************************
+ * Update problem data  *
+ ************************/
+
+/**
+ * Update linear cost in the problem
+ * @param  work  Workspace
+ * @param  q_new New linear cost
+ * @return       Exitflag for errors and warnings
+ */
+c_int osqp_update_lin_cost(Work * work, c_float * q_new) {
+
+    // Replace q by the new vector
+    prea_vec_copy(q_new, work->data->q, work->data->n);
+
+    // Scaling
+    if (work->settings->scaling) {
+        vec_ew_prod(work->scaling->D, work->data->q, work->data->n);
+    }
+
+    return 0;
+}
+
+/**
+ * Update lower and upper bounds in the problem constraints
+ * @param  work   Workspace
+ * @param  lA_new New lower bound
+ * @param  uA_new New upper bound
+ * @return        Exitflag: 1 if new lower bound is not <= than new upper bound
+ */
+c_int osqp_update_bounds(Work * work, c_float * lA_new, c_float * uA_new) {
+    c_int i;
+
+    // Check if lower bound is smaller than upper bound
+    for (i=0; i<work->data->m; i++) {
+        if (lA_new[i] > uA_new[i]) {
+            #if PRINTLEVEL > 0
+            c_print("lower bound must be lower than or equal to upper bound\n");
+            #endif
+            return 1;
+        }
+    }
+
+    // Replace lA and uA by the new vectors
+    prea_vec_copy(lA_new, work->data->lA, work->data->m);
+    prea_vec_copy(uA_new, work->data->uA, work->data->m);
+
+    // Scaling
+    if (work->settings->scaling) {
+        vec_ew_prod(work->scaling->E, work->data->lA, work->data->m);
+        vec_ew_prod(work->scaling->E, work->data->uA, work->data->m);
+    }
+
+    return 0;
+}
+
+/**
+ * Update lower bound in the problem constraints
+ * @param  work   Workspace
+ * @param  lA_new New lower bound
+ * @return        Exitflag: 1 if new lower bound is not <= than upper bound
+ */
+c_int osqp_update_lower_bound(Work * work, c_float * lA_new) {
+    c_int i;
+
+    // Replace lA by the new vector
+    prea_vec_copy(lA_new, work->data->lA, work->data->m);
+
+    // Scaling
+    if (work->settings->scaling) {
+        vec_ew_prod(work->scaling->E, work->data->lA, work->data->m);
+    }
+
+    // Check if lower bound is smaller than upper bound
+    for (i=0; i<work->data->m; i++) {
+        if (work->data->lA[i] > work->data->uA[i]) {
+            #if PRINTLEVEL > 0
+            c_print("upper bound must be greater than or equal to lower bound\n");
+            #endif
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+
+/**
+ * Update upper bound in the problem constraints
+ * @param  work   Workspace
+ * @param  uA_new New upper bound
+ * @return        Exitflag: 1 if new upper bound is not >= than lower bound
+ */
+c_int osqp_update_upper_bound(Work * work, c_float * uA_new) {
+    c_int i;
+
+    // Replace uA by the new vector
+    prea_vec_copy(uA_new, work->data->uA, work->data->m);
+
+    // Scaling
+    if (work->settings->scaling) {
+        vec_ew_prod(work->scaling->E, work->data->uA, work->data->m);
+    }
+
+    // Check if upper bound is greater than lower bound
+    for (i=0; i<work->data->m; i++) {
+        if (work->data->uA[i] < work->data->lA[i]) {
+            #if PRINTLEVEL > 0
+            c_print("lower bound must be lower than or equal to upper bound\n");
+            #endif
+            return 1;
+        }
+    }
+    return 0;
+}
+
+
+/****************************
+ * Update problem settings  *
+ ****************************/
+
+
+/**
+ * Update max_iter setting
+ * @param  work         Workspace
+ * @param  max_iter_new New max_iter setting
+ * @return              Exitflag
+ */
+c_int osqp_update_max_iter(Work * work, c_int max_iter_new) {
+    // Check that max_iter is positive
+    if (max_iter_new <= 0) {
+        #if PRINTLEVEL > 0
+        c_print("max_iter must be positive\n");
+        #endif
+        return 1;
+    }
+    // Update max_iter
+    work->settings->max_iter = max_iter_new;
+
+    return 0;
+}
+
+/**
+ * Update absolute tolernace value
+ * @param  work        Workspace
+ * @param  eps_abs_new New absolute tolerance value
+ * @return             Exitflag
+ */
+c_int osqp_update_eps_abs(Work * work, c_float eps_abs_new) {
+    // Check that eps_abs is positive
+    if (eps_abs_new <= 0.) {
+        #if PRINTLEVEL > 0
+        c_print("eps_abs must be positive\n");
+        #endif
+        return 1;
+    }
+    // Update eps_abs
+    work->settings->eps_abs = eps_abs_new;
+
+    return 0;
+}
+
+/**
+ * Update relative tolernace value
+ * @param  work        Workspace
+ * @param  eps_rel_new New relative tolerance value
+ * @return             Exitflag
+ */
+c_int osqp_update_eps_rel(Work * work, c_float eps_rel_new) {
+    // Check that eps_rel is positive
+    if (eps_rel_new <= 0.) {
+        #if PRINTLEVEL > 0
+        c_print("eps_rel must be positive\n");
+        #endif
+        return 1;
+    }
+    // Update eps_rel
+    work->settings->eps_rel = eps_rel_new;
+
+    return 0;
+}
+
+/**
+ * Update relaxation parameter alpha
+ * @param  work  Workspace
+ * @param  alpha New relaxation parameter value
+ * @return       Exitflag
+ */
+c_int osqp_update_alpha(Work * work, c_float alpha_new) {
+    // Check that alpha is between 0 and 2
+    if (alpha_new <= 0. || alpha_new >= 2.) {
+        #if PRINTLEVEL > 0
+        c_print("alpha must be between 0 and 2\n");
+        #endif
+        return 1;
+    }
+    // Update alpha
+    work->settings->alpha = alpha_new;
+
+    return 0;
+}
+
+/**
+ * Update regularization parameter in polishing
+ * @param  work      Workspace
+ * @param  delta_new New regularization parameter
+ * @return           Exitflag
+ */
+c_int osqp_update_delta(Work * work, c_float delta_new) {
+    // Check that delta is positive
+    if (delta_new <= 0.) {
+        #if PRINTLEVEL > 0
+        c_print("delta must be positive\n");
+        #endif
+        return 1;
+    }
+    // Update delta
+    work->settings->delta = delta_new;
+
+    return 0;
+}
+
+/**
+ * Update polishing setting
+ * @param  work          Workspace
+ * @param  polishing_new New polishing setting
+ * @return               Exitflag
+ */
+c_int osqp_update_polishing(Work * work, c_int polishing_new) {
+    // Check that polishing is either 0 or 1
+    if (polishing_new != 0 && polishing_new != 1) {
+      #if PRINTLEVEL > 0
+      c_print("polishing should be either 0 or 1\n");
+      #endif
+      return 1;
+    }
+    // Update polishing
+    work->settings->polishing = polishing_new;
+    // Reset polish time to zero
+    work->info->polish_time = 0.0;
+
+    return 0;
+}
+
+/**
+ * Update number of iterative refinement steps in polishing
+ * @param  work                Workspace
+ * @param  pol_refine_iter_new New iterative reginement steps
+ * @return                     Exitflag
+ */
+c_int osqp_update_pol_refine_iter(Work * work, c_int pol_refine_iter_new) {
+    // Check that pol_refine_iter is nonnegative
+    if (pol_refine_iter_new < 0) {
+        #if PRINTLEVEL > 0
+        c_print("pol_refine_iter must be nonnegative\n");
+        #endif
+        return 1;
+    }
+    // Update pol_refine_iter
+    work->settings->pol_refine_iter = pol_refine_iter_new;
+
+    return 0;
+}
+
+
+/**
+ * Update verbose setting
+ * @param  work        Workspace
+ * @param  verbose_new New verbose setting
+ * @return             Exitflag
+ */
+c_int osqp_update_verbose(Work * work, c_int verbose_new) {
+    // Check that verbose is either 0 or 1
+    if (verbose_new != 0 && verbose_new != 1) {
+      #if PRINTLEVEL > 0
+      c_print("verbose should be either 0 or 1\n");
+      #endif
+      return 1;
+    }
+    // Update verbose
+    work->settings->verbose = verbose_new;
+
+    return 0;
+}
+
+
+/**
+ * Update warm_start setting
+ * @param  work           Workspace
+ * @param  warm_start_new New warm_start setting
+ * @return                Exitflag
+ */
+c_int osqp_update_warm_start(Work * work, c_int warm_start_new) {
+    // Check that warm_start is either 0 or 1
+    if (warm_start_new != 0 && warm_start_new != 1) {
+      #if PRINTLEVEL > 0
+      c_print("warm_start should be either 0 or 1\n");
+      #endif
+      return 1;
+    }
+    // Update warm_start
+    work->settings->warm_start = warm_start_new;
+
+    return 0;
 }
