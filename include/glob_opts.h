@@ -1,7 +1,6 @@
 #ifndef GLOB_OPTS_H
 #define GLOB_OPTS_H
 
-
 /* DATA CUSTOMIZATIONS (depending on memory manager)-----------------------   */
 /* define custom printfs and memory allocation (e.g. matlab or python) */
 #ifdef MATLAB_MEX_FILE
