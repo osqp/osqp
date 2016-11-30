@@ -58,6 +58,12 @@ dkms.conf
 # Add clang_complete files
 .clang_complete
 
+# Code coverage
+*.gcda
+*.gcno
+coverage.info
+coverage_html/
+
 # Vim files
 # -------------------------------------------------------------------
 *.swp

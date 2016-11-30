@@ -83,6 +83,17 @@ $(OUT)/osqp_tester_direct: tests/c/osqp_tester_direct.c $(OUT)/libosqpdir.a $(TE
 	$(CC) $(CFLAGS) $(TEST_INCLUDES) $^ -o $@  $(LDFLAGS)
 
 
+# Create coverage statistics
+# 1) Compile test code
+# 2) run tester
+# 3) Analyze results with lcov
+# 4) Export results to coverage_html
+.PHONY: coverage
+coverage: $(OUT)/osqp_tester_direct
+	out/osqp_tester_direct
+	@lcov --capture --directory . --output-file coverage.info
+	@genhtml coverage.info --output-directory coverage_html
+
 
 
 .PHONY: clean
@@ -90,5 +101,8 @@ clean:
 	@rm -rf $(TARGETS) $(OSQP_OBJECTS) $(SUITESPARSE_OBJS) $(LINSYS)/*.o $(DIRSRC)/*.o
 	@rm -rf $(OUT)/*.dSYM
 	@rm -rf $(TEST_OBJECTS)
+	@rm -rf coverage.info coverage_html
+	@find . -name "*.gcno" -type f -delete
+	@find . -name "*.gcda" -type f -delete
 purge: clean
 	@rm -rf $(OUT)
