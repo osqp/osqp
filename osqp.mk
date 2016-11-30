@@ -9,6 +9,9 @@ CC = gcc
   #  -O3 turns on all optimizations specified by -O2 and also turns on the -finline-functions, -fweb and -frename-registers options.
 CFLAGS = -g -Wall -O3
 
+# Add coverage
+CFLAGS += --coverage
+
 
 # additional library paths
 # -lm: Basic math library
