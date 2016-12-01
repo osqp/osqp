@@ -1,15 +1,26 @@
 #ifndef GLOB_OPTS_H
 #define GLOB_OPTS_H
 
-
 /* DATA CUSTOMIZATIONS (depending on memory manager)-----------------------   */
 /* define custom printfs and memory allocation (e.g. matlab or python) */
 #ifdef MATLAB_MEX_FILE
     #include "mex.h"
-    #define c_malloc mxMalloc
-    #define c_calloc mxCalloc
+    static void* c_calloc(size_t num, size_t size){
+        void *m = mxCalloc(num,size);
+        mexMakeMemoryPersistent(m);
+        return m;
+    }
+    static void* c_malloc(size_t size){
+        void *m = mxMalloc(size);
+        mexMakeMemoryPersistent(m);
+        return m;
+    }
+    static void* c_realloc(void *ptr, size_t size){
+        void *m = mxRealloc(ptr,size);
+        mexMakeMemoryPersistent(m);
+        return m;
+    }
     #define c_free mxFree
-    #define c_realloc mxRealloc
 #elif defined PYTHON
     // Define memory allocation for python. Note that in Python 2 memory manager
     // Calloc is not implemented
@@ -57,9 +68,25 @@ typedef double c_float;              /* for numerical values  */
 
 #if PRINTLEVEL > 0
 #ifdef MATLAB_MEX_FILE
-#define c_print mexPrintf
+//call mexPrintf and immediately force print buffer flush
+//otherwise messages don't appear until solver termination
+//ugly because matlab does not provide a vprintf mex interface
+#include <stdarg.h>
+static int c_print(char *msg, ...)
+{
+  va_list argList;
+  va_start(argList, msg);
+  //message buffer
+  int bufferSize = 256;
+  char buffer[bufferSize];
+  vsnprintf(buffer,bufferSize-1, msg, argList);
+  va_end(argList);
+  int out = mexPrintf(buffer); //print to matlab display
+  mexEvalString("drawnow;");   // flush matlab print buffer
+  return out;
+}
 /* #elif defined PYTHON
-  #define c_print(...)                                                           \
+  #define c_print(...)                                                         \
     {                                                                          \
         PyGILState_STATE gilstate = PyGILState_Ensure();                       \
         PySys_WriteStdout(__VA_ARGS__);                                        \

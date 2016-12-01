@@ -210,6 +210,11 @@ c_int osqp_solve(Work * work){
         print_summary(work->info);
     #endif
 
+    /* if max iterations reached, change status accordingly */
+    if (iter == work->settings->max_iter){
+        work->info->status_val = OSQP_MAX_ITER_REACHED;
+    }
+
     /* Update final status */
     update_status_string(work->info);
 
