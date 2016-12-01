@@ -270,7 +270,8 @@ void update_status_string(Info *info){
         strcpy(info->status, "Infeasible");
     else if (info->status_val == OSQP_UNSOLVED)
         strcpy(info->status, "Unsolved");
-
+    else if (info->status_val == OSQP_MAX_ITER_REACHED)
+        strcpy(info->status, "Maximum Iterations Reached");
 }
 
 
