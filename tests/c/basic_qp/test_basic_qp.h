@@ -32,19 +32,16 @@ static char * test_basic_qp()
     data->A = csc_matrix(data->m, data->n, basic_qp_A_nnz, basic_qp_A_x, basic_qp_A_i, basic_qp_A_p);
     data->lA = basic_qp_lA;
     data->uA = basic_qp_uA;
-    // data->lx = basic_qp_lx;
-    // data->ux = basic_qp_ux;
-    //TODO: FIX SEGMENTATION FAULT WHEN CREATING lx and ux
 
 
-    c_print("\nTest basic QP problem\n");
-    c_print("---------------------\n");
+    c_print("\nTest basic QP problem 1: ");
 
     // Define Solver settings as default
     set_default_settings(settings);
     settings->max_iter = 200;
     settings->alpha = 1.6;
     settings->polishing = 0;
+    settings->verbose = 0;
 
     // Setup workspace
     work = osqp_setup(data, settings);
@@ -52,28 +49,42 @@ static char * test_basic_qp()
     if (!work) {
         c_print("Setup error!\n");
         exitflag = 1;
-    }
-    else {
-        // DEBUG
-
-        // print_vec(work->data->lx, work->data->n, "lx");
-        // print_vec(work->data->ux, work->data->n, "ux");
-
-
+    } else {
 
         // Solve Problem
         osqp_solve(work);
 
-        // Print solution
-        #if PRINTLEVEL > 2
-        // print_csc_matrix(work->data->P, "P");
-        // print_vec(work->data->q, work->data->n, "q");
-        // print_csc_matrix(work->data->A, "A");
-        // print_vec(work->data->lA, work->data->m, "lA");
-        // print_vec(work->data->uA, work->data->m, "uA");
-        print_vec(work->solution->x, work->data->n, "x");
-        print_vec(work->solution->lambda, work->data->m, "lambda");
-        #endif
+        // Check if problem is infeasible
+        if (basic_qp_sol_status == 1) {   // infeasible
+            if (work->info->status_val != OSQP_INFEASIBLE) {
+                c_print("\nError in solver status!");
+                exitflag = 1;
+            }
+        } else {
+            // Compare solver statuses
+            if ( !(work->info->status_val == OSQP_SOLVED && basic_qp_sol_status == 0) ) {
+                c_print("\nError in solver status!");
+                exitflag = 1;
+            }
+            // Compare primal solutions
+            if (vec_norm2_diff(work->solution->x, basic_qp_sol_x, basic_qp_n) /
+                vec_norm2(basic_qp_sol_x, basic_qp_n) > 1e-4) {
+                c_print("\nError in primal solution!");
+                exitflag = 1;
+            }
+            // Compare dual solutions
+            if (vec_norm2_diff(work->solution->lambda, basic_qp_sol_lambda, basic_qp_m) /
+                vec_norm2(basic_qp_sol_lambda, basic_qp_m) > 1e-4) {
+                c_print("\nError in dual solution!");
+                exitflag = 1;
+            }
+            // Compare objective values
+            if (c_absval(work->info->obj_val - basic_qp_sol_obj_value) /
+                c_absval(basic_qp_sol_obj_value) > 1e-4) {
+                c_print("\nError in objective value!");
+                exitflag = 1;
+            }
+        }
 
         // Clean workspace
         osqp_cleanup(work);
@@ -85,6 +96,8 @@ static char * test_basic_qp()
     }
 
     mu_assert("\nError in basic QP test.", exitflag == 0 );
+    if (exitflag == 0)
+        c_print("OK!\n");
 
 
     // Cleanup

@@ -35,9 +35,11 @@ static const c_int LINE_LEN = 55;
 #if PRINTLEVEL > 1
 
 static void print_line(void){
+    char theLine[LINE_LEN+1];
     for (c_int i = 0; i < LINE_LEN; ++i)
-        c_print("-");
-    c_print("\n");
+        theLine[i] = '-';
+    theLine[LINE_LEN] = '\0';
+    c_print("%s\n",theLine);
 }
 
 void print_header(void){

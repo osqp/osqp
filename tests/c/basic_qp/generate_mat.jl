@@ -3,39 +3,48 @@
 f = open("basic_qp/matrices.h", "w+")
 
 # Define Problem
-basic_qp_P = sparse([4. 1.; 1. 2.])
-basic_qp_q = ones(2)
+P = sparse([4.  1.; 1. 2.])
+q = ones(2)
 
-# basic_qp_A = sparse([1.0 1.0])
-# basic_qp_lA = [1.0]
-# basic_qp_uA = [1.0]
-#
-# basic_qp_lx = 0.6 * zeros(2)
-# basic_qp_ux = 0.7 * ones(2)
+A = sparse([1.0 1.0; eye(2)])
+lA = [1.0; 0.0 * ones(2)]
+uA = [1.0; 0.7 * ones(2)]
 
+n = size(P, 1)
+m = size(A, 1)
 
-basic_qp_A = sparse([1.0 1.0; eye(2)])
-basic_qp_lA = [1.0; 0.0 * ones(2)]
-basic_qp_uA = [1.0; 0.7 * ones(2)]
+# Compute solution using Convex.jl + ECOS
+using Convex, ECOS
 
+x = Variable(n)
+problem = minimize(0.5*quadform(x, P) + q' * x, [A * x >= lA, A * x <= uA])
+solve!(problem, ECOSSolver())
 
-basic_qp_n = size(basic_qp_P, 1)
-basic_qp_m = size(basic_qp_A, 1)
-
+sol_x = x.value
+sol_lambda = problem.constraints[2].dual - problem.constraints[1].dual
+sol_obj_value = problem.optval
+if problem.status == :Optimal
+  sol_status = 0  # optimal
+else
+  sol_status = 1  # infeasible
+end
 
 # Save data
-write_mat_sparse(f, basic_qp_P, "basic_qp_P")
-write_vec_float(f, basic_qp_q, "basic_qp_q")
+write_mat_sparse(f, P, "basic_qp_P")
+write_vec_float(f, q, "basic_qp_q")
 
-write_mat_sparse(f, basic_qp_A, "basic_qp_A")
-write_vec_float(f, basic_qp_lA, "basic_qp_lA")
-write_vec_float(f, basic_qp_uA, "basic_qp_uA")
+write_mat_sparse(f, A, "basic_qp_A")
+write_vec_float(f, lA, "basic_qp_lA")
+write_vec_float(f, uA, "basic_qp_uA")
 
-# write_vec_float(f, basic_qp_lx, "basic_qp_lx")
-# write_vec_float(f, basic_qp_ux, "basic_qp_ux")
+write_int(f, n, "basic_qp_n")
+write_int(f, m, "basic_qp_m")
 
-write_int(f, basic_qp_n, "basic_qp_n")
-write_int(f, basic_qp_m, "basic_qp_m")
+# Save solution
+write_vec_float(f, sol_x, "basic_qp_sol_x")
+write_vec_float(f, sol_lambda, "basic_qp_sol_lambda")
+write_float(f, sol_obj_value, "basic_qp_sol_obj_value")
+write_int(f, sol_status, "basic_qp_sol_status")
 
 
 close(f)
