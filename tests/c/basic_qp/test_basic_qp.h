@@ -34,7 +34,7 @@ static char * test_basic_qp()
     data->uA = basic_qp_uA;
 
 
-    c_print("\nTest basic QP problem: ");
+    c_print("\nTest basic QP problem 1: ");
 
     // Define Solver settings as default
     set_default_settings(settings);

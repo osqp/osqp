@@ -266,19 +266,30 @@ c_int osqp_cleanup(Work * work){
     c_int exitflag=0;
 
     // Free Data
-    csc_spfree(work->data->P);
-    c_free(work->data->q);
-    csc_spfree(work->data->A);
-    c_free(work->data->lA);
-    c_free(work->data->uA);
-    c_free(work->data);
+    if (work->data) {
+        if (work->data->P)
+            csc_spfree(work->data->P);
+        if (work->data->A)
+            csc_spfree(work->data->A);
+        if (work->data->q)
+            c_free(work->data->q);
+        if (work->data->lA)
+            c_free(work->data->lA);
+        if (work->data->uA)
+            c_free(work->data->uA);
+        c_free(work->data);
+    }
 
     // Free scaling
-    if (work->settings->scaling){
-        c_free(work->scaling->D);
-        c_free(work->scaling->Dinv);
-        c_free(work->scaling->E);
-        c_free(work->scaling->Einv);
+    if (work->settings->scaling) {
+        if (work->scaling->D)
+            c_free(work->scaling->D);
+        if (work->scaling->Dinv)
+            c_free(work->scaling->Dinv);
+        if (work->scaling->E)
+            c_free(work->scaling->E);
+        if (work->scaling->Einv)
+            c_free(work->scaling->Einv);
         c_free(work->scaling);
     }
 
@@ -286,41 +297,65 @@ c_int osqp_cleanup(Work * work){
     free_priv(work->priv);
 
     // Free active constraints structure
-    c_free(work->pol->ind_lAct);
-    c_free(work->pol->ind_uAct);
-    c_free(work->pol->A2Ared);
-    c_free(work->pol->x);
-    c_free(work->pol->Ax);
-    c_free(work->pol);
+    if (work->pol) {
+        if (work->pol->ind_lAct)
+            c_free(work->pol->ind_lAct);
+        if (work->pol->ind_uAct)
+            c_free(work->pol->ind_uAct);
+        if (work->pol->A2Ared)
+            c_free(work->pol->A2Ared);
+        if (work->pol->x)
+            c_free(work->pol->x);
+        if (work->pol->Ax)
+            c_free(work->pol->Ax);
+        c_free(work->pol);
+    }
 
     // Free work Variables
-    c_free(work->x);
-    c_free(work->u);
-    c_free(work->z);
-    c_free(work->z_prev);
-    c_free(work->delta_u);
-    c_free(work->delta_u_prev);
-    c_free(work->dua_res_ws_n);
-    c_free(work->dua_res_ws_m);
+    if (work) {
+        if (work->x)
+            c_free(work->x);
+        if (work->u)
+            c_free(work->u);
+        if (work->z)
+            c_free(work->z);
+        if (work->z_prev)
+            c_free(work->z_prev);
+        if (work->delta_u)
+            c_free(work->delta_u);
+        if (work->delta_u_prev)
+            c_free(work->delta_u_prev);
+        if (work->dua_res_ws_n)
+            c_free(work->dua_res_ws_n);
+        if (work->dua_res_ws_m)
+            c_free(work->dua_res_ws_m);
 
-    // Free Settings
-    c_free(work->settings);
+        // Free Settings
+        if (work->settings)
+            c_free(work->settings);
 
-    // Free solution
-    c_free(work->solution->x);
-    c_free(work->solution->lambda);
-    c_free(work->solution);
+        // Free solution
+        if (work->solution) {
+            if (work->solution->x)
+                c_free(work->solution->x);
+            if (work->solution->lambda)
+                c_free(work->solution->lambda);
+            c_free(work->solution);
+        }
 
-    // Free information
-    c_free(work->info);
+        // Free information
+        if (work->info)
+            c_free(work->info);
 
-    // Free timer
-    #if PROFILING > 0
-    c_free(work->timer);
-    #endif
+        // Free timer
+        #if PROFILING > 0
+        if (work->timer)
+            c_free(work->timer);
+        #endif
 
-    // Free work
-    c_free(work);
+        // Free work
+        c_free(work);
+    }
 
     return exitflag;
 }
