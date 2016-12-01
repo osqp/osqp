@@ -59,10 +59,12 @@ def main():
     elif example == 'small2':
         # Small Example 2
         P = spspa.csc_matrix(np.array([[11., 0.], [0., 0.]]))
-        q = np.array([3, 4])
+        q = np.array([3., 4.])
+        # q = np.array([1., 1.])
         A = spspa.csc_matrix(np.array([[-1, 0], [0, -1], [-1, -3],
                                       [2, 5], [3, 4]]))
         uA = np.array([0., 0., -15, 100, 80])
+        # uA = np.array([-2., 0., -20, 100, 80])
         lA = -np.inf * np.ones(len(uA))
         p = qp.quadprogProblem(P, q, A, lA, uA)
     elif example == 'infeasible':
