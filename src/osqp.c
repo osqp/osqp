@@ -237,7 +237,7 @@ c_int osqp_solve(Work * work){
     } else {
         // total time: solve + polish
         work->info->run_time = work->info->solve_time +
-                                work->info->polish_time;
+                               work->info->polish_time;
     }
     #endif
 

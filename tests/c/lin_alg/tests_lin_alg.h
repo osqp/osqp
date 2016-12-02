@@ -338,36 +338,35 @@ static char * tests_lin_alg()
     /* local variables */
     c_int exitflag = 0, tempflag;  // No errors
 
-    c_print("Linear algebra tests\n");
-    c_print("--------------------\n");
+    c_print("Linear algebra tests:\n");
 
-    c_print("1) Construct sparse matrix: ");
+    c_print("   Construct sparse matrix: ");
     tempflag = test_constr_sparse_mat();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 
-    c_print("2) Test vector operations: ");
+    c_print("   Vector operations: ");
     tempflag = test_vec_operations();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 
 
-    c_print("3) Test matrix operations: ");
+    c_print("   Matrix operations: ");
     tempflag = test_mat_operations();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 
-    c_print("4) Test matrix-vector multiplication: ");
+    c_print("   Matrix-vector multiplication: ");
     tempflag = test_mat_vec_multiplication();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 
-    c_print("5) Test extract upper triangular: ");
+    c_print("   Extract upper triangular: ");
     tempflag = test_extract_upper_triangular();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 
-    c_print("6) Test compute QP form from upper triangular matrix: ");
+    c_print("   Compute QP form from upper triangular matrix: ");
     tempflag = test_quad_form_upper_triang();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
