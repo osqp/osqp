@@ -136,12 +136,6 @@ c_int test_solveKKT(){
     // Solve  KKT x = b via LDL given factorization
     solve_lin_sys(settings, p, t8_rhs);
 
-    // // DEBUG
-    // c_print("\n");
-    // print_vec(t8_x, t8_m + t8_n, "\nx_true");
-    // print_vec(t8_rhs, t8_m + t8_n, "x_ldl ");
-    // c_print("\ndiff = %.10f\n", vec_norm2_diff(t8_rhs, t8_x, t8_m + t8_n));
-
     if(vec_norm2_diff(t8_rhs, t8_x, t8_m + t8_n) > TESTS_TOL){
         c_print("\nError in forming and solving KKT system!");
         exitflag = 1;
@@ -161,9 +155,7 @@ static char * tests_solve_linsys()
 {
     /* local variables */
     c_int exitflag = 0, tempflag;  // No errors
-    printf("\n");
-    printf("Solving linear systems tests\n");
-    printf("----------------------------\n");
+    printf("Test solving linear systems: ");
 
     // printf("0) Form KKT matrix: ");
     // tempflag = test_form_KKT();
@@ -180,7 +172,7 @@ static char * tests_solve_linsys()
     // if (!tempflag) c_print("OK!\n");
     // exitflag += tempflag;
 
-    printf("1) Test forming and solving KKT system: ");
+    // printf("1) Test forming and solving KKT system: ");
     tempflag = test_solveKKT();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;

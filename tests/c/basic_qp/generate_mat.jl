@@ -29,6 +29,11 @@ else
   sol_status = 1  # infeasible
 end
 
+# Dummy data
+q_new = [2.5; 3.2]
+lA_new = [0.8; -3.4; -11.]
+uA_new = [1.6; 1.0; 15.]
+
 # Save data
 write_mat_sparse(f, P, "basic_qp_P")
 write_vec_float(f, q, "basic_qp_q")
@@ -46,5 +51,9 @@ write_vec_float(f, sol_lambda, "basic_qp_sol_lambda")
 write_float(f, sol_obj_value, "basic_qp_sol_obj_value")
 write_int(f, sol_status, "basic_qp_sol_status")
 
+# Save dummy data
+write_vec_float(f, q_new, "basic_qp_q_new")
+write_vec_float(f, lA_new, "basic_qp_lA_new")
+write_vec_float(f, uA_new, "basic_qp_uA_new")
 
 close(f)

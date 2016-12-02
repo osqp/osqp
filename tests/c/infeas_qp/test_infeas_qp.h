@@ -34,7 +34,7 @@ static char * test_infeas_qp()
     data->uA = infeas_qp_uA;
 
 
-    c_print("\nTest infeasible QP problem: ");
+    c_print("Test infeasible QP problem: ");
 
     // Define Solver settings as default
     set_default_settings(settings);
