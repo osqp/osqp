@@ -168,7 +168,7 @@ c_int osqp_solve(Work * work){
         cold_start(work);     // If not warm start -> set z, u to zero
 
     // Main ADMM algorithm
-    for (iter = 0; iter < work->settings->max_iter; iter ++) {
+    for (iter = 1; iter <= work->settings->max_iter; iter ++) {
         // Update z_prev and delta_u_prev (preallocated, no malloc)
         prea_vec_copy(work->z, work->z_prev, work->data->n + work->data->m);
         prea_vec_copy(work->delta_u, work->delta_u_prev, work->data->m);
@@ -211,7 +211,7 @@ c_int osqp_solve(Work * work){
     #endif
 
     /* if max iterations reached, change status accordingly */
-    if (iter == work->settings->max_iter){
+    if (iter == work->settings->max_iter + 1){
         work->info->status_val = OSQP_MAX_ITER_REACHED;
     }
 
