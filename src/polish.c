@@ -104,7 +104,7 @@ c_int polish(Work *work) {
     c_int j, mred;
     Priv *plsh;
 
-    #if PROFILING > 0
+    #ifdef PROFILING
     tic(work->timer); // Start timer
     #endif
 
@@ -171,7 +171,7 @@ c_int polish(Work *work) {
                 }
             }
             // Print summary
-            #if PRINTLEVEL > 1
+            #ifdef PRINTING
             if (work->settings->verbose)
                 print_polishing(work->info);
             #endif
@@ -183,7 +183,7 @@ c_int polish(Work *work) {
     }
 
     /* Update timing */
-    #if PROFILING > 0
+    #ifdef PROFILING
     work->info->polish_time = toc(work->timer);
     #endif
 

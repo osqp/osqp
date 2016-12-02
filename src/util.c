@@ -12,8 +12,8 @@ const char *osqp_version(void) {
 /************************************
  * Printing Constants to set Layout *
  ************************************/
-#if PRINTLEVEL > 1
-#if PROFILING > 0
+#ifdef PRINTING
+#ifdef PROFILING
 static const char *HEADER[] = {
  "Iter",   " Obj  Val ",  "  Pri  Res ", "  Dua  Res ", "      Time "
 };
@@ -32,7 +32,7 @@ static const c_int LINE_LEN = 55;
  * Utility Functions  *
  **********************/
 
-#if PRINTLEVEL > 1
+#ifdef PRINTING
 
 static void print_line(void){
     char theLine[LINE_LEN+1];
@@ -89,7 +89,7 @@ void print_summary(Info * info){
     c_print("%*.4e ", (int)HSPACE, info->obj_val);
     c_print("%*.4e ", (int)HSPACE, info->pri_res);
     c_print("%*.4e ", (int)HSPACE, info->dua_res);
-    #if PROFILING > 0
+    #ifdef PROFILING
     c_print("%*.2fs", 9, info->setup_time + info->solve_time);
     #endif
     c_print("\n");
@@ -102,7 +102,7 @@ void print_polishing(Info * info) {
     c_print("%*.4e ", (int)HSPACE, info->obj_val);
     c_print("%*.4e ", (int)HSPACE, info->pri_res);
     c_print("%*.4e ", (int)HSPACE, info->dua_res);
-    #if PROFILING > 0
+    #ifdef PROFILING
     c_print("%*.2fs", 9, info->setup_time + info->solve_time +
                          info->polish_time);
     #endif
@@ -110,14 +110,14 @@ void print_polishing(Info * info) {
 }
 
 
-#endif /* End PRINTLEVEL > 1 */
+#endif /* End #ifdef PRINTING */
 
 
-#if PRINTLEVEL > 0
+#ifdef PRINTING
 /* Print Footer */
 void print_footer(Info * info, c_int polishing){
 
-    #if PRINTLEVEL > 1
+    #ifdef PRINTING
     c_print("\n"); // Add space after iterations
     #endif
 
@@ -135,7 +135,7 @@ void print_footer(Info * info, c_int polishing){
         c_print("Optimal objective: %.4f\n", info->obj_val);
     }
 
-    #if PROFILING > 0
+    #ifdef PROFILING
     if (info->run_time > 1e-03) { // Time more than 1ms
         c_print("Run time: %.3fs\n", info->run_time);
     } else {
@@ -144,7 +144,7 @@ void print_footer(Info * info, c_int polishing){
     #endif
     c_print("\n");
 
-    // #if PROFILING > 0
+    // #ifdef PROFILING
     // if (polishing && info->status_val == OSQP_SOLVED) {
     //     if (info->run_time > 1e-03) { // Time more than 1ms
     //         c_print("Timing: total  time = %.3fs\n        "
@@ -232,7 +232,7 @@ Settings * copy_settings(Settings * settings){
 * Timer Functions *
 *******************/
 
-#if PROFILING > 0
+#ifdef PROFILING
 
 // Windows
 #if (defined WIN32 || _WIN64)
@@ -362,7 +362,7 @@ c_int is_eq_csc(csc *A, csc *B, c_float tol){
         return(1);
 }
 
-#if PRINTLEVEL > 2
+#ifdef PRINTING
 
 /* Print a csc sparse matrix */
 void print_csc_matrix(csc* M, char * name)

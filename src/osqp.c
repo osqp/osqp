@@ -26,7 +26,7 @@ Work * osqp_setup(const Data * data, Settings *settings){
 
     // Validate data
     if (validate_data(data)){
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("ERROR: Data validation returned failure!\n");
         #endif
         return OSQP_NULL;
@@ -34,7 +34,7 @@ Work * osqp_setup(const Data * data, Settings *settings){
 
     // Validate settings
     if (validate_settings(settings)){
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("ERROR: Settings validation returned failure!\n");
         #endif
         return OSQP_NULL;
@@ -43,14 +43,14 @@ Work * osqp_setup(const Data * data, Settings *settings){
     // Allocate empty workspace
     work = c_calloc(1, sizeof(Work));
     if (!work){
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("ERROR: allocating work failure!\n");
         #endif
         return OSQP_NULL;
     }
 
     // Start and allocate directly timer
-    #if PROFILING > 0
+    #ifdef PROFILING
     work->timer = c_malloc(sizeof(Timer));
     tic(work->timer);
     #endif
@@ -119,7 +119,7 @@ Work * osqp_setup(const Data * data, Settings *settings){
     update_status_string(work->info);
 
     // Allocate timing information
-    #if PROFILING > 0
+    #ifdef PROFILING
     work->info->solve_time = 0.0;  // Solve time to zero
     work->info->polish_time = 0.0; // Polish time to zero
     work->info->run_time = 0.0;    // Total run time to zero
@@ -127,7 +127,7 @@ Work * osqp_setup(const Data * data, Settings *settings){
     #endif
 
     // Print header
-    #if PRINTLEVEL > 1
+    #ifdef PRINTING
     if (work->settings->verbose)
         print_setup_header(work->data, settings);
     #endif
@@ -152,11 +152,11 @@ c_int osqp_solve(Work * work){
     c_int exitflag = 0;
     c_int iter;
 
-    #if PROFILING > 0
+    #ifdef PROFILING
     tic(work->timer); // Start timer
     #endif
 
-    #if PRINTLEVEL > 1
+    #ifdef PRINTING
     if (work->settings->verbose){
         // Print Header for every column
         print_header();
@@ -191,7 +191,7 @@ c_int osqp_solve(Work * work){
         update_info(work, iter, 0);
 
         /* Print summary */
-        #if PRINTLEVEL > 1
+        #ifdef PRINTING
         if (work->settings->verbose && iter % PRINT_INTERVAL == 0)
             print_summary(work->info);
         #endif
@@ -205,7 +205,7 @@ c_int osqp_solve(Work * work){
 
 
     /* Print summary for last iteration */
-    #if PRINTLEVEL > 1
+    #ifdef PRINTING
     if (work->settings->verbose && iter % PRINT_INTERVAL != 0)
         print_summary(work->info);
     #endif
@@ -219,7 +219,7 @@ c_int osqp_solve(Work * work){
     update_status_string(work->info);
 
     /* Update solve time */
-    #if PROFILING > 0
+    #ifdef PROFILING
     work->info->solve_time = toc(work->timer);
     #endif
 
@@ -228,7 +228,7 @@ c_int osqp_solve(Work * work){
         polish(work);
 
     /* Update total time */
-    #if PROFILING > 0
+    #ifdef PROFILING
     if (work->first_run == 0) {
         // total time: setup + solve + polish
         work->info->run_time = work->info->setup_time +
@@ -242,7 +242,7 @@ c_int osqp_solve(Work * work){
     #endif
 
     /* Print final footer */
-    #if PRINTLEVEL > 0
+    #ifdef PRINTING
     if(work->settings->verbose)
         print_footer(work->info, work->settings->polishing);
     #endif
@@ -348,7 +348,7 @@ c_int osqp_cleanup(Work * work){
             c_free(work->info);
 
         // Free timer
-        #if PROFILING > 0
+        #ifdef PROFILING
         if (work->timer)
             c_free(work->timer);
         #endif
@@ -398,7 +398,7 @@ c_int osqp_update_bounds(Work * work, c_float * lA_new, c_float * uA_new) {
     // Check if lower bound is smaller than upper bound
     for (i=0; i<work->data->m; i++) {
         if (lA_new[i] > uA_new[i]) {
-            #if PRINTLEVEL > 0
+            #ifdef PRINTING
             c_print("lower bound must be lower than or equal to upper bound\n");
             #endif
             return 1;
@@ -438,7 +438,7 @@ c_int osqp_update_lower_bound(Work * work, c_float * lA_new) {
     // Check if lower bound is smaller than upper bound
     for (i=0; i<work->data->m; i++) {
         if (work->data->lA[i] > work->data->uA[i]) {
-            #if PRINTLEVEL > 0
+            #ifdef PRINTING
             c_print("upper bound must be greater than or equal to lower bound\n");
             #endif
             return 1;
@@ -469,7 +469,7 @@ c_int osqp_update_upper_bound(Work * work, c_float * uA_new) {
     // Check if upper bound is greater than lower bound
     for (i=0; i<work->data->m; i++) {
         if (work->data->uA[i] < work->data->lA[i]) {
-            #if PRINTLEVEL > 0
+            #ifdef PRINTING
             c_print("lower bound must be lower than or equal to upper bound\n");
             #endif
             return 1;
@@ -493,7 +493,7 @@ c_int osqp_update_upper_bound(Work * work, c_float * uA_new) {
 c_int osqp_update_max_iter(Work * work, c_int max_iter_new) {
     // Check that max_iter is positive
     if (max_iter_new <= 0) {
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("max_iter must be positive\n");
         #endif
         return 1;
@@ -513,7 +513,7 @@ c_int osqp_update_max_iter(Work * work, c_int max_iter_new) {
 c_int osqp_update_eps_abs(Work * work, c_float eps_abs_new) {
     // Check that eps_abs is positive
     if (eps_abs_new <= 0.) {
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("eps_abs must be positive\n");
         #endif
         return 1;
@@ -533,7 +533,7 @@ c_int osqp_update_eps_abs(Work * work, c_float eps_abs_new) {
 c_int osqp_update_eps_rel(Work * work, c_float eps_rel_new) {
     // Check that eps_rel is positive
     if (eps_rel_new <= 0.) {
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("eps_rel must be positive\n");
         #endif
         return 1;
@@ -553,7 +553,7 @@ c_int osqp_update_eps_rel(Work * work, c_float eps_rel_new) {
 c_int osqp_update_alpha(Work * work, c_float alpha_new) {
     // Check that alpha is between 0 and 2
     if (alpha_new <= 0. || alpha_new >= 2.) {
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("alpha must be between 0 and 2\n");
         #endif
         return 1;
@@ -573,7 +573,7 @@ c_int osqp_update_alpha(Work * work, c_float alpha_new) {
 c_int osqp_update_delta(Work * work, c_float delta_new) {
     // Check that delta is positive
     if (delta_new <= 0.) {
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("delta must be positive\n");
         #endif
         return 1;
@@ -593,7 +593,7 @@ c_int osqp_update_delta(Work * work, c_float delta_new) {
 c_int osqp_update_polishing(Work * work, c_int polishing_new) {
     // Check that polishing is either 0 or 1
     if (polishing_new != 0 && polishing_new != 1) {
-      #if PRINTLEVEL > 0
+      #ifdef PRINTING
       c_print("polishing should be either 0 or 1\n");
       #endif
       return 1;
@@ -615,7 +615,7 @@ c_int osqp_update_polishing(Work * work, c_int polishing_new) {
 c_int osqp_update_pol_refine_iter(Work * work, c_int pol_refine_iter_new) {
     // Check that pol_refine_iter is nonnegative
     if (pol_refine_iter_new < 0) {
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("pol_refine_iter must be nonnegative\n");
         #endif
         return 1;
@@ -636,7 +636,7 @@ c_int osqp_update_pol_refine_iter(Work * work, c_int pol_refine_iter_new) {
 c_int osqp_update_verbose(Work * work, c_int verbose_new) {
     // Check that verbose is either 0 or 1
     if (verbose_new != 0 && verbose_new != 1) {
-      #if PRINTLEVEL > 0
+      #ifdef PRINTING
       c_print("verbose should be either 0 or 1\n");
       #endif
       return 1;
@@ -657,7 +657,7 @@ c_int osqp_update_verbose(Work * work, c_int verbose_new) {
 c_int osqp_update_warm_start(Work * work, c_int warm_start_new) {
     // Check that warm_start is either 0 or 1
     if (warm_start_new != 0 && warm_start_new != 1) {
-      #if PRINTLEVEL > 0
+      #ifdef PRINTING
       c_print("warm_start should be either 0 or 1\n");
       #endif
       return 1;

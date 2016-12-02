@@ -33,8 +33,10 @@ static char * test_basic_qp()
     data->lA = basic_qp_lA;
     data->uA = basic_qp_uA;
 
+    c_print("QP Tests\n");
+    c_print("--------\n");
 
-    c_print("\nTest basic QP problem 1: ");
+    c_print("Test basic QP problem 1: ");
 
     // Define Solver settings as default
     set_default_settings(settings);

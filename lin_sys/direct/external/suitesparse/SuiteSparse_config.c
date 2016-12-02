@@ -59,7 +59,7 @@ struct SuiteSparse_config_struct SuiteSparse_config =
     // Memory allocation from glob_opts.h in OSQP
     c_malloc, c_realloc, c_free,
 
-    #if PRINTLEVEL > 0
+    #ifdef PRINTING
     // Printing function from glop_opts.h in OSQP
     c_print,
     #else

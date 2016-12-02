@@ -26,7 +26,7 @@ c_int scale_data(Work * work){
     csc * KKT = form_KKT(work->data->P, work->data->A, 0., 1);
 
     // DEBUG
-    // #if PRINTLEVEL > 0
+    // #ifdef PRINTING
     // print_csc_matrix(KKT, "KKT");
     // #endif
 
@@ -72,7 +72,7 @@ c_int scale_data(Work * work){
     }
 
 
-    // #if PRINTLEVEL > 0
+    // #ifdef PRINTING
     // if (i == work->settings->max_scaling_iter - 1)
     //     c_print("maximum scaling steps reached\n");
     // #endif
@@ -106,7 +106,7 @@ c_int scale_data(Work * work){
     vec_ew_prod(work->scaling->E, work->data->uA, work->data->m);
 
     // DEBUG: print scaled data
-    // #if PRINTLEVEL > 0
+    // #ifdef PRINTING
     // print_csc_matrix(work->data->P, "P");
     // print_csc_matrix(work->data->A, "A");
     // print_vec(work->data->q, work->data->n, "q");

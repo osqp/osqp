@@ -306,7 +306,7 @@ c_float quad_form(const csc * P, const c_float * x){
                 quad_form += P->x[ptr]*x[i]*x[j];
             }
             else { // Element in lower diagonal part
-                #if PRINTLEVEL>0
+                #ifdef PRINTING
                 c_print("ERROR: quad_form matrix is not upper triangular\n");
                 #endif
                 return OSQP_NULL;

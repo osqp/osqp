@@ -93,25 +93,14 @@ endif
 
 # Optional FLAGS to be passed to the C code
 #-------------------------------------------------------------------------------
-# Set Print Levels
-# 0: no prints
-# 1: only final info
-# 2: progress print per iteration
-# 3: debug level
-PRINTLEVEL = 3
-OPT_FLAGS = -DPRINTLEVEL=$(PRINTLEVEL)
+# Enable printing
+OPT_FLAGS = -DPRINTING
 
 # Set Profiling
-# 0: no timing information
-# 1: runtime (divided in setup and solve)
-# 2: detailed profiling
-PROFILING = 1
-OPT_FLAGS += -DPROFILING=$(PROFILING)
-
+OPT_FLAGS += -DPROFILING
 
 # Skip infeasibility detection
-SKIP_INFEASIBILITY = 0	
-OPT_FLAGS += -DSKIP_INFEASIBILITY=$(SKIP_INFEASIBILITY)
+# OPT_FLAGS += -DSKIP_INFEASIBILITY
 
 # Add Optional Flags to CFLAGS
 CFLAGS += $(OPT_FLAGS)

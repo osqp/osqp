@@ -35,12 +35,12 @@ static char * all_tests() {
 int main(void) {
     char *result = all_tests();
     if (result != 0) {
-        printf("%s\n", result);
+        c_print("%s\n", result);
     }
     else {
-        printf("ALL TESTS PASSED\n");
+        c_print("ALL TESTS PASSED\n");
     }
-    printf("Tests run: %d\n", tests_run);
+    c_print("Tests run: %d\n", tests_run);
 
     return result != 0;
 }

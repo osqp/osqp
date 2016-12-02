@@ -25,7 +25,7 @@ void set_default_settings(Settings * settings);
 /* Copy settings creating a new settings structure */
 Settings * copy_settings(Settings * settings);
 
-#if PRINTLEVEL > 1
+#ifdef PRINTING
 /* Print Header before running the algorithm */
 void print_setup_header(const Data *data, const Settings *settings);
 
@@ -40,7 +40,7 @@ void print_polishing(Info * info);
 
 #endif
 
-#if PRINTLEVEL > 0
+#ifdef PRINTING
 
 /* Print Footer */
 void print_footer(Info * info, c_int polishing);
@@ -52,7 +52,7 @@ void print_footer(Info * info, c_int polishing);
  * Timer Structs and Functions * *
  *********************************/
 
-#if PROFILING > 0
+#ifdef PROFILING
 
 // Windows
 #if (defined _WIN32 || defined _WIN64 || defined _WINDLL )
@@ -97,7 +97,7 @@ struct OSQP_TIMER {
 void tic(Timer* t);
 c_float toc(Timer* t);
 
-#endif /* END IF PROFILING > 0 */
+#endif /* END #ifdef PROFILING */
 
 
 
@@ -110,7 +110,7 @@ c_int is_eq_csc(csc *A, csc *B, c_float tol);
 /* Convert sparse CSC to dense */
 c_float * csc_to_dns(csc * M);
 
-#if PRINTLEVEL > 2
+#ifdef PRINTING
 #include <stdio.h>
 
 

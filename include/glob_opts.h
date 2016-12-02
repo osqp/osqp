@@ -66,7 +66,7 @@ typedef double c_float;              /* for numerical values  */
 
 /* Use customized functions -----------------------------------------------   */
 
-#if PRINTLEVEL > 0
+#ifdef PRINTING
 #ifdef MATLAB_MEX_FILE
 //call mexPrintf and immediately force print buffer flush
 //otherwise messages don't appear until solver termination

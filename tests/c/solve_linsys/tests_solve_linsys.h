@@ -161,31 +161,32 @@ static char * tests_solve_linsys()
 {
     /* local variables */
     c_int exitflag = 0, tempflag;  // No errors
-    printf("\n");
-    printf("Solving linear systems tests\n");
-    printf("----------------------------\n");
+    c_print("\n");
+    c_print("Solving linear systems tests\n");
+    c_print("----------------------------\n");
 
-    // printf("0) Form KKT matrix: ");
+    // c_print("0) Form KKT matrix: ");
     // tempflag = test_form_KKT();
     // if (!tempflag) c_print("OK!\n");
     // exitflag += tempflag;
 
-    // printf("1) Test simple linear system solve via LDL: ");
+    // c_print("1) Test simple linear system solve via LDL: ");
     // tempflag = test_LDL_solve_simple();
     // if (!tempflag) c_print("OK!\n");
     // exitflag += tempflag;
 
-    // printf("2) Test random linear system solve via LDL: ");
+    // c_print("2) Test random linear system solve via LDL: ");
     // tempflag = test_LDL_solve_random();
     // if (!tempflag) c_print("OK!\n");
     // exitflag += tempflag;
 
-    printf("1) Test forming and solving KKT system: ");
+    c_print("Test forming and solving KKT system: ");
     tempflag = test_solveKKT();
     if (!tempflag) c_print("OK!\n");
     exitflag += tempflag;
 
     mu_assert("\nError in solving linear systems tests.", exitflag == 0 );
 
+    c_print("\n");
     return 0;
 }

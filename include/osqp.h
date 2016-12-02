@@ -77,7 +77,7 @@ struct OSQP_WORK {
         Solution *solution;              // Problem Solution
         Info *info;                      // Solver information
 
-        #if PROFILING > 0
+        #ifdef PROFILING
         Timer * timer;  // Timer object
         #endif
 };
@@ -107,7 +107,7 @@ struct OSQP_INFO {
         c_float inf_res;     /* norm of infeasibility residual */
         #endif
 
-        #if PROFILING > 0
+        #ifdef PROFILING
         c_float setup_time;  /* time taken for setup phase (milliseconds) */
         c_float solve_time;  /* time taken for solve phase (milliseconds) */
         c_float polish_time; /* time taken for polish phase (milliseconds) */

@@ -232,7 +232,7 @@ void update_info(Work *work, c_int iter, c_int polish){
         work->info->obj_val = compute_obj_val(work, 0);
         work->info->pri_res = 0.;  // Always primal feasible
         work->info->dua_res = compute_dua_res(work, 0);
-        #if PROFILING > 0
+        #ifdef PROFILING
             work->info->solve_time = toc(work->timer);
         #endif
     }
@@ -245,7 +245,7 @@ void update_info(Work *work, c_int iter, c_int polish){
             #if SKIP_INFEASIBILITY == 0
             work->info->inf_res = compute_inf_res(work);
             #endif
-            #if PROFILING > 0
+            #ifdef PROFILING
                 work->info->solve_time = toc(work->timer);
             #endif
         } else { // Polishing
@@ -365,7 +365,7 @@ c_int validate_data(const Data * data){
     int j;
 
     if(!data){
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("Missing data!\n");
         #endif
         return 1;
@@ -373,7 +373,7 @@ c_int validate_data(const Data * data){
 
     // General dimensions Tests
     if (data->n <= 0 || data->m < 0){
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("n must be positive and m nonnegative; n = %i, m = %i\n",
                  data->n, data->m);
         #endif
@@ -382,13 +382,13 @@ c_int validate_data(const Data * data){
 
     // Matrix P
     if (data->P->m != data->n ){
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("P does not have dimension n x n with n = %i\n", data->n);
         #endif
         return 1;
     }
     if (data->P->m != data->P->n ){
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("P is not square\n");
         #endif
         return 1;
@@ -396,7 +396,7 @@ c_int validate_data(const Data * data){
 
     // Matrix A
     if (data->A->m != data->m || data->A->n != data->n){
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("A does not have dimension m x n with m = %i and n = %i\n",
                 data->m, data->n);
         #endif
@@ -406,7 +406,7 @@ c_int validate_data(const Data * data){
     // Lower and upper bounds
     for (j = 0; j < data->m; j++) {
         if (data->lA[j] > data->uA[j]) {
-            #if PRINTLEVEL > 0
+            #ifdef PRINTING
             c_print("Lower bound at index %d is greater than upper bound: %.4e > %.4e\n",
                   j, data->lA[j], data->uA[j]);
             #endif
@@ -427,80 +427,80 @@ c_int validate_data(const Data * data){
  */
 c_int validate_settings(const Settings * settings){
     if (!settings){
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("Missing settings!\n");
         #endif
         return 1;
     }
     if (settings->scaling != 0 &&  settings->scaling != 1) {
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("scaling must be either 0 or 1\n");
         #endif
         return 1;
     }
     if (settings->scaling_norm != 1 &&  settings->scaling_norm != 2) {
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("scaling_norm must be either 1 or 2\n");
         #endif
         return 1;
     }
     if (settings->scaling_iter < 1) {
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("scaling_iter must be greater than 0\n");
         #endif
         return 1;
     }
     if (settings->pol_refine_iter < 0) {
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("pol_refine_iter must be nonnegative\n");
         #endif
         return 1;
     }
 
     if (settings->rho <= 0) {
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("rho must be positive\n");
         #endif
         return 1;
     }
     if (settings->delta <= 0) {
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("delta must be positive\n");
         #endif
         return 1;
     }
     if (settings->max_iter <= 0) {
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("max_iter must be positive\n");
         #endif
         return 1;
     }
     if (settings->eps_abs <= 0) {
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("eps_abs must be positive\n");
         #endif
         return 1;
     }
     if (settings->eps_rel <= 0) {
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("eps_rel must be positive\n");
         #endif
         return 1;
     }
     if (settings->alpha <= 0 || settings->alpha >= 2) {
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("alpha must be between 0 and 2\n");
         #endif
         return 1;
     }
     if (settings->verbose != 0 && settings->verbose != 1) {
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("verbose must be either 0 or 1\n");
         #endif
         return 1;
     }
     if (settings->warm_start != 0 && settings->warm_start != 1) {
-        #if PRINTLEVEL > 0
+        #ifdef PRINTING
         c_print("warm_start must be either 0 or 1\n");
         #endif
         return 1;
