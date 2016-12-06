@@ -1,5 +1,5 @@
-#ifndef AUX_H
-#define AUX_H
+#ifndef AUXIL_H
+#define AUXIL_H
 
 #include "osqp.h"
 

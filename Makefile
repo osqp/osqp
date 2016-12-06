@@ -16,7 +16,7 @@ QPTESTSDIR = $(TESTSDIR)/c/qptests
 TEST_OBJECTS = $(QPTESTSDIR)/diesel/diesel.o
 
 # Define objects to compile
-OSQP_OBJECTS = src/util.o src/aux.o src/cs.o src/lin_alg.o src/kkt.o src/scaling.o src/polish.o  src/osqp.o
+OSQP_OBJECTS = src/util.o src/auxil.o src/cs.o src/lin_alg.o src/kkt.o src/scaling.o src/polish.o  src/osqp.o
 
 # Define source and include files
 SRC_FILES = $(wildcard src/*.c)
@@ -92,6 +92,7 @@ $(OUT)/osqp_tester_direct: tests/c/osqp_tester_direct.c $(OUT)/libosqpdir.a $(TE
 coverage: $(OUT)/osqp_tester_direct
 	out/osqp_tester_direct
 	@lcov --capture --directory . --output-file coverage.info
+	@lcov --remove coverage.info 'lin_sys/direct/external/suitesparse/*' 'tests/*' -o coverage.info
 	@genhtml coverage.info --output-directory coverage_html
 
 
