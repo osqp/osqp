@@ -73,19 +73,21 @@ Work * osqp_setup(const Data * data, Settings *settings){
      */
 
     // Initialize x,z,u to zero
-    work->x = c_calloc((work->data->n + work->data->m), sizeof(c_float));
-    work->z = c_calloc((work->data->n + work->data->m), sizeof(c_float));
+    work->x = c_calloc(work->data->n, sizeof(c_float));
+    work->z = c_calloc(work->data->m, sizeof(c_float));
+    work->xz_tilde = c_calloc((work->data->n + work->data->m), sizeof(c_float));
+    work->x_prev = c_calloc(work->data->n, sizeof(c_float));
+    work->z_prev = c_calloc(work->data->m, sizeof(c_float));
     work->y = c_calloc(work->data->m, sizeof(c_float));
-    work->z_prev = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
 
     #ifndef SKIP_INFEASIBILITY
-    work->delta_u = c_calloc(work->data->m, sizeof(c_float));
-    work->delta_u_prev = c_calloc(work->data->m, sizeof(c_float));
+    work->delta_y = c_calloc(work->data->m, sizeof(c_float));
+    work->delta_y_prev = c_calloc(work->data->m, sizeof(c_float));
     #endif
 
     work->first_run = 1;
-    work->dua_res_ws_n = c_malloc(work->data->n * sizeof(c_float));
-    work->dua_res_ws_m = c_malloc(work->data->m * sizeof(c_float));
+    work->pri_res_vec = c_malloc(work->data->m * sizeof(c_float));
+    work->dua_res_vec = c_malloc(work->data->n * sizeof(c_float));
 
     // Copy settings
     work->settings = copy_settings(settings);
@@ -173,24 +175,29 @@ c_int osqp_solve(Work * work){
 
     // Main ADMM algorithm
     for (iter = 1; iter <= work->settings->max_iter; iter ++) {
-        // Update z_prev and delta_u_prev (preallocated, no malloc)
-        prea_vec_copy(work->z, work->z_prev, work->data->n + work->data->m);
+        // Update x_prev, z_prev (preallocated, no malloc)
+        prea_vec_copy(work->x, work->x_prev, work->data->n);
+        prea_vec_copy(work->z, work->z_prev, work->data->m);
+
 
         #ifndef SKIP_INFEASIBILITY
-        prea_vec_copy(work->delta_u, work->delta_u_prev, work->data->m);
+        // Update delta_y_prev (preallocated, no malloc)
+        prea_vec_copy(work->delta_y, work->delta_y_prev, work->data->m);
         #endif
 
         /* ADMM STEPS */
-        /* First step: x_{k+1} */
-        compute_rhs(work);
-        solve_lin_sys(work->settings, work->priv, work->x);
+        /* Compute \tilde{x}^{k+1}, \tilde{z}^{k+1} */
+        update_xz_tilde(work);
+
+        /* Compute x^{k+1} */
         update_x(work);
 
-        /* Second step: z_{k+1} */
-        project_x(work);
+        /* Compute z^{k+1} */
+        update_z(work);
 
-        /* Third step: u_{k+1} */
+        /* Compute y^{k+1} */
         update_y(work);
+
         /* End of ADMM Steps */
 
 
@@ -322,22 +329,28 @@ c_int osqp_cleanup(Work * work){
     if (work) {
         if (work->x)
             c_free(work->x);
-        if (work->y)
-            c_free(work->y);
         if (work->z)
             c_free(work->z);
+        if (work->xz_tilde)
+            c_free(work->xz_tilde);
+        if (work->x_prev)
+            c_free(work->x_prev);
         if (work->z_prev)
             c_free(work->z_prev);
+        if (work->y)
+            c_free(work->y);
+
         #ifndef SKIP_INFEASIBILITY
-        if (work->delta_u)
-            c_free(work->delta_u);
-        if (work->delta_u_prev)
-            c_free(work->delta_u_prev);
+        if (work->delta_y)
+            c_free(work->delta_y);
+        if (work->delta_y_prev)
+            c_free(work->delta_y_prev);
         #endif
-        if (work->dua_res_ws_n)
-            c_free(work->dua_res_ws_n);
-        if (work->dua_res_ws_m)
-            c_free(work->dua_res_ws_m);
+
+        if (work->pri_res_vec)
+            c_free(work->pri_res_vec);
+        if (work->dua_res_vec)
+            c_free(work->dua_res_vec);
 
         // Free Settings
         if (work->settings)

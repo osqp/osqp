@@ -19,12 +19,12 @@ c_int form_Ared(Work *work) {
      *    A2Ared[j] =  i    (if j-th row of A is inserted at i-th row of Ared)
      */
     for (j = 0; j < work->data->m; j++) {
-        if ( work->z[work->data->n + j] - work->data->l[j] <
+        if ( work->z[j] - work->data->l[j] <
              -work->settings->rho * work->y[j] ) {              // lower-active
                 work->pol->ind_lAct[work->pol->n_lAct++] = j;
                 work->pol->A2Ared[j] = mred++;
         }
-        else if ( work->data->u[j] - work->z[work->data->n + j] <
+        else if ( work->data->u[j] - work->z[j] <
                   work->settings->rho * work->y[j] ) {          // upper-active
                     work->pol->ind_uAct[work->pol->n_uAct++] = j;
                     work->pol->A2Ared[j] = mred++;
@@ -82,7 +82,7 @@ void iterative_refinement(Work *work, Priv *p, c_float *z, c_float *b) {
             mat_vec(work->data->P, z, rhs, -1);          // -= Px (upper triang)
             mat_tpose_vec(work->data->P, z, rhs, -1, 1); // -= Px (lower triang)
             mat_tpose_vec(work->pol->Ared, z + work->data->n,
-                          rhs, -1, 0);                   // -= Ared'*lambda_red
+                          rhs, -1, 0);                   // -= Ared'*y_red
             mat_vec(work->pol->Ared, z, rhs + work->data->n, -1);
 
             // Solve linear system. Store solution in rhs
@@ -135,9 +135,9 @@ c_int polish(Work *work) {
     iterative_refinement(work, plsh, pol_sol, rhs);
 
     // Store the polished solution
-    work->pol->lambda_red = c_malloc(mred * sizeof(c_float));
+    work->pol->y_red = c_malloc(mred * sizeof(c_float));
     prea_vec_copy(pol_sol, work->pol->x, work->data->n);
-    prea_vec_copy(pol_sol + work->data->n, work->pol->lambda_red, mred);
+    prea_vec_copy(pol_sol + work->data->n, work->pol->y_red, mred);
 
     // Compute A*x needed for computing the primal residual
     mat_vec(work->data->A, work->pol->x, work->pol->Ax, 0);
@@ -164,7 +164,7 @@ c_int polish(Work *work) {
             prea_vec_copy(work->pol->Ax, work->z + work->data->n, work->data->m);
             for (j = 0; j < work->data->m; j++) {
                 if (work->pol->A2Ared[j] != -1) {
-                    work->y[j] = work->pol->lambda_red[work->pol->A2Ared[j]];
+                    work->y[j] = work->pol->y_red[work->pol->A2Ared[j]];
                 } else {
                     work->y[j] = 0.0;
                 }
@@ -189,7 +189,7 @@ c_int polish(Work *work) {
     // Memory clean-up
     free_priv(plsh);
     csc_spfree(work->pol->Ared);
-    c_free(work->pol->lambda_red);
+    c_free(work->pol->y_red);
     c_free(rhs);
     c_free(pol_sol);
 

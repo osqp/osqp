@@ -8,37 +8,36 @@
  ***********************************************************/
 
 /**
-* Cold start workspace variables
+* Cold start workspace variables xz and y
 * @param work Workspace
 */
 void cold_start(Work *work);
 
 
+
 /**
-* Update RHS during first tep of ADMM iteration (store it into x)
-* @param  work Workspace
-*/
-void compute_rhs(Work *work);
+ * Update x_tilde and z_tilde variable (first ADMM step)
+ * @param work [description]
+ */
+void update_xz_tilde(Work * work);
 
 
 /**
-* Update x variable (slacks s related part)
-* after solving linear system (first ADMM step)
-*
+* Update x (second ADMM step)
 * @param work Workspace
 */
 void update_x(Work *work);
 
 
 /**
-* Project x (second ADMM step)
+* Update z (third ADMM step)
 * @param work Workspace
 */
-void project_x(Work *work);
+void update_z(Work *work);
 
 
 /**
-* Update y variable (third ADMM step)
+* Update y variable (fourth ADMM step)
 * @param work Workspace
 */
 void update_y(Work *work);

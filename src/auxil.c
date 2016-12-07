@@ -1,5 +1,6 @@
 #include "auxil.h"
 #include "util.h"
+#include "proj.h"
 
 /***********************************************************
  * Auxiliary functions needed to compute ADMM iterations * *
@@ -10,65 +11,94 @@
  * @param work Workspace
  */
 void cold_start(Work *work) {
-    memset(work->z, 0, (work->data->n + work->data->m) * sizeof(c_float));
-    memset(work->y, 0, (work->data->m) * sizeof(c_float));
+    memset(work->x, 0, work->data->n * sizeof(c_float));
+    memset(work->z, 0, work->data->m * sizeof(c_float));
+    memset(work->y, 0, work->data->m * sizeof(c_float));
 }
 
 
 /**
- * Update RHS during first tep of ADMM iteration (store it into x)
+ * Update RHS during first tep of ADMM iteration. Store it into (x,z).
  * @param  work Workspace
  */
-void compute_rhs(Work *work){
+static void compute_rhs(Work *work){
     c_int i; // Index
     for (i=0; i < work->data->n; i++){
-        // Cycle over part related to original x variables
-        work->x[i] = work->settings->rho * work->z[i] - work->data->q[i];
+        // Cycle over part related to x variables
+        work->xz_tilde[i] = work->settings->rho * work->x[i] - work->data->q[i];
     }
-    for (i = work->data->n; i < work->data->n + work->data->m; i++){
-        // Cycle over dual variable within first step (nu)
-        work->x[i] = work->z[i] - 1./work->settings->rho * work->y[i - work->data->n];
+    for (i = 0; i < work->data->m; i++){
+        // Cycle over dual variable in the first step (nu)
+        work->xz_tilde[i + work->data->n] = work->z_prev[i] - 1./work->settings->rho * work->y[i];
     }
 
 }
 
 
 /**
- * Update x variable (slacks s related part)
- * after solving linear system (first ADMM step)
+ * Update z_tilde variable after solving linear system (first ADMM step)
  *
  * @param work Workspace
  */
-void update_x(Work *work){
+static void update_z_tilde(Work *work){
     c_int i; // Index
-    for (i = work->data->n; i < work->data->n + work->data->m; i++){
-        work->x[i] = work->z[i] + 1./work->settings->rho * (work->x[i] - work->y[i - work->data->n]);
-        //TODO: Remove 1/rho operation (store 1/rho during setup)
+    for (i = 0; i < work->data->m; i++){
+        work->xz_tilde[i + work->data->n] = work->z_prev[i] + 1./work->settings->rho * (work->xz_tilde[i + work->data->n] - work->y[i]);
     }
 }
 
 
 /**
- * Project x (second ADMM step)
- * @param work Workspace
+ * Update x_tilde and z_tilde variable (first ADMM step)
+ * @param work [description]
  */
-void project_x(Work *work){
+void update_xz_tilde(Work * work){
+    // Compute right-hand side
+    compute_rhs(work);
+
+    // Solve linear system
+    solve_lin_sys(work->settings, work->priv, work->xz_tilde);
+
+    // Update z_tilde variable after solving linear system
+    update_z_tilde(work);
+}
+
+
+/**
+* Update x (second ADMM step)
+* @param work Workspace
+*/
+void update_x(Work * work){
     c_int i;
 
+    // update x
     for (i = 0; i < work->data->n; i++){
-        // Part related to original x variables (no projection)
-        work->z[i] = work->settings->alpha * work->x[i] +
-                     (1.0 - work->settings->alpha) * work->z_prev[i];
+        work->x[i] = work->settings->alpha * work->xz_tilde[i] +
+                     (1.0 - work->settings->alpha) * work->x_prev[i];
+    }
+}
+
+
+/**
+* Update z (third ADMM step)
+* @param work Workspace
+*/
+void update_z(Work *work){
+    c_int i;
+
+    // update z
+    for (i = 0; i < work->data->m; i++){
+        work->z[i] = work->settings->alpha * work->xz_tilde[i + work->data->n] +
+                     (1.0 - work->settings->alpha) * work->z_prev[i] +
+                     1./work->settings->rho * work->y[i];
     }
 
-    for (i = work->data->n; i < work->data->n + work->data->m; i++){
-        // Part related to slack variables
-        work->z[i] = c_min(c_max(work->settings->alpha * work->x[i] +
-                     (1.0 - work->settings->alpha) * work->z_prev[i] +
-                     1./work->settings->rho * work->y[i - work->data->n], work->data->l[i - work->data->n]), work->data->u[i - work->data->n]);
-    }
+    // project z
+    project_z(work);
 
 }
+
+
 
 /**
  * Update y variable (third ADMM step)
@@ -76,20 +106,20 @@ void project_x(Work *work){
  */
 void update_y(Work *work){
     c_int i; // Index
-    for (i = work->data->n; i < work->data->n + work->data->m; i++){
+    for (i = 0; i < work->data->m; i++){
 
         #ifndef SKIP_INFEASIBILITY
 
-        work->delta_u[i - work->data->n] = work->settings->rho * (work->settings->alpha * work->x[i] +
-                      (1.0 - work->settings->alpha) * work->z_prev[i] -
-                      work->z[i]);
-        work->y[i - work->data->n] += work->delta_u[i - work->data->n];
+        work->delta_y[i] = work->settings->rho *
+                           (work->settings->alpha * work->xz_tilde[i + work->data->n] +
+                           (1.0 - work->settings->alpha) * work->z_prev[i] - work->z[i]);
+        work->y[i] += work->delta_y[i];
 
         #else
 
-        work->y[i - work->data->n] += work->settings->rho * (work->settings->alpha * work->x[i] +
-                      (1.0 - work->settings->alpha) * work->z_prev[i] -
-                      work->z[i]);
+        work->y[i] += work->settings->rho *
+                      (work->settings->alpha * work->xz_tilde[i + work->data->n] +
+                      (1.0 - work->settings->alpha) * work->z_prev[i] - work->z[i]);
 
         #endif
     }
@@ -98,8 +128,9 @@ void update_y(Work *work){
 /**
  * Compute objective function from data at value x
  * @param  data Data structure
- * @param  x    Value x
- * @return      Objective function value
+ * @param  x       Value x
+ * @param  polish  Compute obj_val from polish data or not (bool)
+ * @return         Objective function value
  */
 c_float compute_obj_val(Work *work, c_int polish) {
     if (polish) {
@@ -114,7 +145,6 @@ c_float compute_obj_val(Work *work, c_int polish) {
 
 /**
  * Return norm of primal residual
- * TODO: Use more tailored residual (not general one)
  * @param  work   Workspace
  * @param  polish Called from polish function (1) or from elsewhere (0)
  * @return        Norm of primal residual
@@ -133,19 +163,26 @@ c_float compute_pri_res(Work * work, c_int polish){
                 prim_resid_sq += tmp*tmp;
             }
         }
+        return c_sqrt(prim_resid_sq);
     } else {
         // Called from ADMM algorithm
-        for (j = 0; j < work->data->m; j++) {
-            if (work->x[work->data->n + j] < work->data->l[j]) {
-                tmp = work->data->l[j] - work->x[work->data->n + j];
-                prim_resid_sq += tmp*tmp;
-            } else if (work->x[work->data->n + j] > work->data->u[j]) {
-                tmp = work->x[work->data->n + j] - work->data->u[j];
-                prim_resid_sq += tmp*tmp;
-            }
-        }
+        mat_vec(work->data->A, work->x, work->pri_res_vec, 0);
+        return vec_norm2_diff(work->pri_res_vec, work->z, work->data->m);
+    //
+    //
+    //
+    //     for (j = 0; j < work->data->m; j++) {
+    //         if (work->x[work->data->n + j] < work->data->l[j]) {
+    //             tmp = work->data->l[j] - work->x[work->data->n + j];
+    //             prim_resid_sq += tmp*tmp;
+    //         } else if (work->x[work->data->n + j] > work->data->u[j]) {
+    //             tmp = work->x[work->data->n + j] - work->data->u[j];
+    //             prim_resid_sq += tmp*tmp;
+    //         }
+    //     }
+    // }
+    // return c_sqrt(prim_resid_sq);
     }
-    return c_sqrt(prim_resid_sq);
 }
 
 
@@ -158,41 +195,76 @@ c_float compute_pri_res(Work * work, c_int polish){
  * @return        Norm of dual residual
  */
 c_float compute_dua_res(Work * work, c_int polish){
-    if (polish) {
-        // Called from polish() function
-        // dr = q + Ared'*lambda_red + P*x
-        // NB: Only upper triangular part of P is stored.
-        prea_vec_copy(work->data->q, work->dua_res_ws_n,
-                      work->data->n);                    // dr = q
-        mat_tpose_vec(work->pol->Ared, work->pol->lambda_red,
-                      work->dua_res_ws_n, 1, 0);      // += Ared'*lambda_red
-        mat_vec(work->data->P, work->pol->x,
-                work->dua_res_ws_n, 1);               // += Px (upper triang part)
-        mat_tpose_vec(work->data->P, work->pol->x,
-                      work->dua_res_ws_n, 1, 1);      // += Px (lower triang part)
-        return vec_norm2(work->dua_res_ws_n, work->data->n);
-    } else {
-        // TODO: Update computation of the dual residual
-        // Called from ADMM algorithm
-        // -dr = rho * [I  A']( z^{k+1} + (alpha-2)*z^k + (1-alpha)*x^{k+1} )
-        // NB: I compute negative dual residual for the convenience
-        prea_vec_copy(work->z, work->dua_res_ws_n, work->data->n);  // dr = z_x
-        vec_add_scaled(work->dua_res_ws_n, work->z_prev,
-                       work->data->n, work->settings->alpha-2.0);   // += (alpha-2)*z_prev_x
-        vec_add_scaled(work->dua_res_ws_n, work->x,
-                       work->data->n, 1.0-work->settings->alpha);  // += (1-alpha)*x_x
 
-        prea_vec_copy(work->z + work->data->n, work->dua_res_ws_m,
-                      work->data->m);                       // dr = z_s
-        vec_add_scaled(work->dua_res_ws_m, work->z_prev + work->data->n,
-                       work->data->m, work->settings->alpha-2.0); // += (alpha-2)*z_prev_s
-        vec_add_scaled(work->dua_res_ws_m, work->x + work->data->n,
-                       work->data->m, 1.0-work->settings->alpha); // += (1-alpha)*x_s
-        mat_tpose_vec(work->data->A, work->dua_res_ws_m,
-                      work->dua_res_ws_n, 1, 0);
-        return (work->settings->rho * vec_norm2(work->dua_res_ws_n, work->data->n));
+    if (!polish){
+        // dual_res = q
+        prea_vec_copy(work->data->q, work->dua_res_vec, work->data->n);
+
+        // += A' * y
+        mat_tpose_vec(work->data->A, work->y, work->dua_res_vec, 1, 0);
+
+        // += P * x (upper triangular part)
+        mat_vec(work->data->P, work->x, work->dua_res_vec, 1);
+
+        // += P' * x (lower triangular part with no diagonal)
+        mat_tpose_vec(work->data->P, work->x, work->dua_res_vec, 1, 1);
+
+        // Return norm
+        return vec_norm2(work->dua_res_vec, work->data->n);
+
+    } else {
+        // Called from polish() function
+        // dr = q + Ared'*y_red + P*x
+        // NB: Only upper triangular part of P is stored.
+        prea_vec_copy(work->data->q, work->dua_res_vec,
+                      work->data->n);                    // dr = q
+        mat_tpose_vec(work->pol->Ared, work->pol->y_red,
+                      work->dua_res_vec, 1, 0);      // += Ared'*y_red
+        mat_vec(work->data->P, work->pol->x,
+                work->dua_res_vec, 1);               // += Px (upper triang part)
+        mat_tpose_vec(work->data->P, work->pol->x,
+                      work->dua_res_vec, 1, 1);      // += Px (lower triang part)
+        return vec_norm2(work->dua_res_vec, work->data->n);
     }
 }
+
+    // if (polish) {
+    //     // Called from polish() function
+    //     // dr = q + Ared'*y_red + P*x
+    //     // NB: Only upper triangular part of P is stored.
+    //     prea_vec_copy(work->data->q, work->dua_res_ws_n,
+    //                   work->data->n);                    // dr = q
+    //     mat_tpose_vec(work->pol->Ared, work->pol->y_red,
+    //                   work->dua_res_ws_n, 1, 0);      // += Ared'*y_red
+    //     mat_vec(work->data->P, work->pol->x,
+    //             work->dua_res_ws_n, 1);               // += Px (upper triang part)
+    //     mat_tpose_vec(work->data->P, work->pol->x,
+    //                   work->dua_res_ws_n, 1, 1);      // += Px (lower triang part)
+    //     return vec_norm2(work->dua_res_ws_n, work->data->n);
+    // } else {
+    //     // TODO: Update computation of the dual residual
+    //     // Called from ADMM algorithm
+    //     // -dr = rho * [I  A']( z^{k+1} + (alpha-2)*z^k + (1-alpha)*x^{k+1} )
+    //     // NB: I compute negative dual residual for the convenience
+    //     prea_vec_copy(work->z, work->dua_res_ws_n, work->data->n);  // dr = z_x
+    //     vec_add_scaled(work->dua_res_ws_n, work->z_prev,
+    //                    work->data->n, work->settings->alpha-2.0);   // += (alpha-2)*z_prev_x
+    //     vec_add_scaled(work->dua_res_ws_n, work->x,
+    //                    work->data->n, 1.0-work->settings->alpha);  // += (1-alpha)*x_x
+    //
+    //     prea_vec_copy(work->z + work->data->n, work->dua_res_ws_m,
+    //                   work->data->m);                       // dr = z_s
+    //     vec_add_scaled(work->dua_res_ws_m, work->z_prev + work->data->n,
+    //                    work->data->m, work->settings->alpha-2.0); // += (alpha-2)*z_prev_s
+    //     vec_add_scaled(work->dua_res_ws_m, work->x + work->data->n,
+    //                    work->data->m, 1.0-work->settings->alpha); // += (1-alpha)*x_s
+    //     mat_tpose_vec(work->data->A, work->dua_res_ws_m,
+    //                   work->dua_res_ws_n, 1, 0);
+    //     return (work->settings->rho * vec_norm2(work->dua_res_ws_n, work->data->n));
+    // }
+
+// }
+
 
 #ifndef SKIP_INFEASIBILITY
 /**
@@ -215,7 +287,7 @@ c_float compute_inf_res(Work * work){
     //     infeas_resid_sq += tmp*tmp;
     // }
     // return c_sqrt(infeas_resid_sq);
-    return vec_norm2_diff(work->delta_u, work->delta_u_prev, work->data->m);
+    return vec_norm2_diff(work->delta_y, work->delta_y_prev, work->data->m);
 }
 #endif
 
@@ -310,15 +382,14 @@ c_int residuals_check(Work *work){
     else {
         // Compute primal tolerance
         eps_pri = c_sqrt(work->data->m) * work->settings->eps_abs +
-                  work->settings->eps_rel *
-                  vec_norm2(work->x + work->data->n, work->data->m);
+                  work->settings->eps_rel * vec_norm2(work->z, work->data->m);
         // Primal feasibility check
         if (work->info->pri_res < eps_pri) pri_check = 1;
 
         #if SKIP_INFEASIBILITY == 0
         // Infeasibility check
         if (work->info->inf_res < 1e-2*eps_pri &&
-            vec_norm2(work->delta_u, work->data->m) > 1e2*eps_pri) {
+            vec_norm2(work->delta_y, work->data->m) > 1e2*eps_pri) {
             inf_check = 1;
             // c_print("Inf residual condition True\n");
             // c_print("Inf residual = %e\n", work->info->inf_res);
@@ -329,12 +400,13 @@ c_int residuals_check(Work *work){
     }
 
     // Compute dual tolerance
-    mat_tpose_vec(work->data->A, work->y, work->dua_res_ws_n, 0, 0); // ws = A'*u
+    mat_tpose_vec(work->data->A, work->y, work->dua_res_vec, 0, 0); // ws = A'*u
     eps_dua = c_sqrt(work->data->n) * work->settings->eps_abs +
               work->settings->eps_rel * work->settings->rho *
-              vec_norm2( work->dua_res_ws_n, work->data->n);
+              vec_norm2(work->dua_res_vec, work->data->n);
     // Dual feasibility check
     if (work->info->dua_res < eps_dua) dua_check = 1;
+
 
     // Compare checks to determine solver status
     if (pri_check && dua_check){

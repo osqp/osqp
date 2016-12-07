@@ -43,7 +43,7 @@ static char * test_basic_qp2()
     settings->max_iter = 1000;
     settings->alpha = 1.6;
     settings->warm_start = 1;
-    settings->polishing = 1;
+    settings->polishing = 0;
     settings->verbose = 0;
 
     // Setup workspace

@@ -64,15 +64,18 @@ struct OSQP_WORK {
         Polish * pol;
 
         // Internal solver variables
-        c_float *x, *z, *y, *z_prev;
-        #ifndef SKIP_INFEASIBILITY
-        c_float *delta_u, *delta_u_prev;
-        #endif
-        c_int first_run;  // flag indicating whether the solve function has been run before
+        c_float *x, *z, *x_prev, *z_prev, *xz_tilde, *y;
 
-        // Workspaces for computing dual residual
-        c_float *dua_res_ws_n;  // n-dimensional workspace
-        c_float *dua_res_ws_m;  // m-dimensional workspace
+        #ifndef SKIP_INFEASIBILITY
+        c_float *delta_y, *delta_y_prev;
+        #endif
+
+        // flag indicating whether the solve function has been run before
+        c_int first_run;
+
+        // Workspaces for computing residuals
+        c_float *pri_res_vec;  // m-dimensional workspace
+        c_float *dua_res_vec;  // n-dimensional workspace
 
         // Other internal structures
         Settings *settings;              // Problem settings
@@ -128,7 +131,7 @@ struct OSQP_POLISH {
     c_int *A2Ared;        // Table of indices that maps A to Ared
     c_float *x;           // optimal solution obtained by polishing
     c_float *Ax;          // workspace for storing A*x
-    c_float *lambda_red;  // optimal dual variables associated to Ared obtained
+    c_float *y_red;  // optimal dual variables associated to Ared obtained
                           //   by polishing
     c_float obj_val;      // objective value at polished solution
     c_float pri_res;      // primal residual at polished solution
