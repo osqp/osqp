@@ -36,7 +36,7 @@
 #define SCALING (1)
 #define SCALING_NORM (2)
 #define SCALING_ITER (3)
-#define POL_REFINE_ITER (5)
+#define POL_REFINE_ITER (3)
 
 
 /* Printing */

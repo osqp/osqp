@@ -77,12 +77,21 @@ void iterative_refinement(Work *work, Priv *p, c_float *z, c_float *b) {
         c_float *rhs = c_malloc(sizeof(c_float) * n);
 
         for (i=0; i<work->settings->pol_refine_iter; i++) {
+
             // Form the RHS for the iterative refinement:  b - K*z
             prea_vec_copy(b, rhs, n);
-            mat_vec(work->data->P, z, rhs, -1);          // -= Px (upper triang)
-            mat_tpose_vec(work->data->P, z, rhs, -1, 1); // -= Px (lower triang)
-            mat_tpose_vec(work->pol->Ared, z + work->data->n,
-                          rhs, -1, 0);                   // -= Ared'*y_red
+
+            // Upper Part: R^{n}
+            // -= Px (upper triang)
+            mat_vec(work->data->P, z, rhs, -1);
+
+            // -= Px (lower triang)
+            mat_tpose_vec(work->data->P, z, rhs, -1, 1);
+
+            // -= Ared'*y_red
+            mat_tpose_vec(work->pol->Ared, z + work->data->n, rhs, -1, 0);
+
+            // Lower Part: R^{m}
             mat_vec(work->pol->Ared, z, rhs + work->data->n, -1);
 
             // Solve linear system. Store solution in rhs
