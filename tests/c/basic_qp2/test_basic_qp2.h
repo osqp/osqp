@@ -32,8 +32,8 @@ static char * test_basic_qp2()
     data->q = basic_qp2_q1;
     data->A = csc_matrix(data->m, data->n, basic_qp2_A_nnz, basic_qp2_A_x,
                          basic_qp2_A_i, basic_qp2_A_p);
-    data->lA = basic_qp2_lA;
-    data->uA = basic_qp2_uA1;
+    data->l = basic_qp2_lA;
+    data->u = basic_qp2_uA1;
 
 
     c_print("   Test basic QP problem 2: ");
@@ -76,7 +76,7 @@ static char * test_basic_qp2()
                 exitflag = 1;
             }
             // Compare dual solutions
-            if (vec_norm2_diff(work->solution->lambda, basic_qp2_sol_lambda1, basic_qp2_m) /
+            if (vec_norm2_diff(work->solution->y, basic_qp2_sol_lambda1, basic_qp2_m) /
                 vec_norm2(basic_qp2_sol_lambda1, basic_qp2_m) > 1e-4) {
                 c_print("\nError in dual solution!");
                 exitflag = 1;
@@ -117,7 +117,7 @@ static char * test_basic_qp2()
                 exitflag = 1;
             }
             // Compare dual solutions
-            if (vec_norm2_diff(work->solution->lambda, basic_qp2_sol_lambda1, basic_qp2_m) /
+            if (vec_norm2_diff(work->solution->y, basic_qp2_sol_lambda1, basic_qp2_m) /
                 vec_norm2(basic_qp2_sol_lambda1, basic_qp2_m) > 1e-4) {
                 c_print("\nError in dual solution!");
                 exitflag = 1;
@@ -158,7 +158,7 @@ static char * test_basic_qp2()
                 exitflag = 1;
             }
             // Compare dual solutions
-            if (vec_norm2_diff(work->solution->lambda, basic_qp2_sol_lambda2, basic_qp2_m) /
+            if (vec_norm2_diff(work->solution->y, basic_qp2_sol_lambda2, basic_qp2_m) /
                 vec_norm2(basic_qp2_sol_lambda2, basic_qp2_m) > 1e-4) {
                 c_print("\nError in dual solution!");
                 exitflag = 1;

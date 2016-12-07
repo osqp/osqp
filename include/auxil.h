@@ -38,10 +38,10 @@ void project_x(Work *work);
 
 
 /**
-* Update u variable (third ADMM step)
+* Update y variable (third ADMM step)
 * @param work Workspace
 */
-void update_u(Work *work);
+void update_y(Work *work);
 
 
 /**

@@ -102,16 +102,16 @@ c_int scale_data(Work * work){
 
     mat_premult_diag(work->data->A, work->scaling->E);
     mat_postmult_diag(work->data->A, work->scaling->D);
-    vec_ew_prod(work->scaling->E, work->data->lA, work->data->m);
-    vec_ew_prod(work->scaling->E, work->data->uA, work->data->m);
+    vec_ew_prod(work->scaling->E, work->data->l, work->data->m);
+    vec_ew_prod(work->scaling->E, work->data->u, work->data->m);
 
     // DEBUG: print scaled data
     // #ifdef PRINTING
     // print_csc_matrix(work->data->P, "P");
     // print_csc_matrix(work->data->A, "A");
     // print_vec(work->data->q, work->data->n, "q");
-    // print_vec(work->data->lA, work->data->m, "lA");
-    // print_vec(work->data->uA, work->data->m, "uA");
+    // print_vec(work->data->l, work->data->m, "lA");
+    // print_vec(work->data->u, work->data->m, "uA");
     // print_vec(work->scaling->D, work->data->n, "D");
     // print_vec(work->scaling->Dinv, work->data->n, "Dinv");
     // print_vec(work->scaling->E, work->data->m, "E");
@@ -133,7 +133,7 @@ c_int scale_data(Work * work){
 //     vec_ew_prod(work->scaling->Dinv, work->solution->x, work->data->n);
 //
 //     // dual
-//     vec_ew_prod(work->scaling->Einv, work->solution->lambda, work->data->m);
+//     vec_ew_prod(work->scaling->Einv, work->solution->y, work->data->m);
 //
 //     return 0;
 // }
@@ -144,7 +144,7 @@ c_int unscale_solution(Work * work){
     vec_ew_prod(work->scaling->D, work->solution->x, work->data->n);
 
     // dual
-    vec_ew_prod(work->scaling->E, work->solution->lambda, work->data->m);
+    vec_ew_prod(work->scaling->E, work->solution->y, work->data->m);
 
     return 0;
 }

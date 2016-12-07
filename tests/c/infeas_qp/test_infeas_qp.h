@@ -30,8 +30,8 @@ static char * test_infeas_qp()
     data->P = csc_matrix(data->n, data->n, infeas_qp_P_nnz, infeas_qp_P_x, infeas_qp_P_i, infeas_qp_P_p);
     data->q = infeas_qp_q;
     data->A = csc_matrix(data->m, data->n, infeas_qp_A_nnz, infeas_qp_A_x, infeas_qp_A_i, infeas_qp_A_p);
-    data->lA = infeas_qp_lA;
-    data->uA = infeas_qp_uA;
+    data->l = infeas_qp_lA;
+    data->u = infeas_qp_uA;
 
 
     c_print("   Test infeasible QP problem: ");
@@ -73,7 +73,7 @@ static char * test_infeas_qp()
                 exitflag = 1;
             }
             // Compare dual solutions
-            if (vec_norm2_diff(work->solution->lambda, infeas_qp_sol_lambda, infeas_qp_m) /
+            if (vec_norm2_diff(work->solution->y, infeas_qp_sol_lambda, infeas_qp_m) /
                 vec_norm2(infeas_qp_sol_lambda, infeas_qp_m) > 1e-4) {
                 c_print("\nError in dual solution!");
                 exitflag = 1;

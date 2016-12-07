@@ -19,13 +19,13 @@ c_int form_Ared(Work *work) {
      *    A2Ared[j] =  i    (if j-th row of A is inserted at i-th row of Ared)
      */
     for (j = 0; j < work->data->m; j++) {
-        if ( work->z[work->data->n + j] - work->data->lA[j] <
-             -work->settings->rho * work->u[j] ) {              // lower-active
+        if ( work->z[work->data->n + j] - work->data->l[j] <
+             -work->settings->rho * work->y[j] ) {              // lower-active
                 work->pol->ind_lAct[work->pol->n_lAct++] = j;
                 work->pol->A2Ared[j] = mred++;
         }
-        else if ( work->data->uA[j] - work->z[work->data->n + j] <
-                  work->settings->rho * work->u[j] ) {          // upper-active
+        else if ( work->data->u[j] - work->z[work->data->n + j] <
+                  work->settings->rho * work->y[j] ) {          // upper-active
                     work->pol->ind_uAct[work->pol->n_uAct++] = j;
                     work->pol->A2Ared[j] = mred++;
         }
@@ -120,11 +120,11 @@ c_int polish(Work *work) {
         rhs[j] = -work->data->q[j];
     }
     for (j = 0; j < work->pol->n_lAct; j++) {
-        rhs[work->data->n + j] = work->data->lA[work->pol->ind_lAct[j]];
+        rhs[work->data->n + j] = work->data->l[work->pol->ind_lAct[j]];
     }
     for (j = 0; j < work->pol->n_uAct; j++) {
         rhs[work->data->n + work->pol->n_lAct + j] =
-            work->data->uA[work->pol->ind_uAct[j]];
+            work->data->u[work->pol->ind_uAct[j]];
     }
 
     // Solve the reduced KKT system
@@ -164,10 +164,9 @@ c_int polish(Work *work) {
             prea_vec_copy(work->pol->Ax, work->z + work->data->n, work->data->m);
             for (j = 0; j < work->data->m; j++) {
                 if (work->pol->A2Ared[j] != -1) {
-                    work->u[j] = work->pol->lambda_red[work->pol->A2Ared[j]] /
-                                 work->settings->rho;
+                    work->y[j] = work->pol->lambda_red[work->pol->A2Ared[j]];
                 } else {
-                    work->u[j] = 0.0;
+                    work->y[j] = 0.0;
                 }
             }
             // Print summary

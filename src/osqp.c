@@ -63,8 +63,8 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->data->P = csc_to_triu(data->P);         // Cost function matrix
     work->data->q = vec_copy(data->q, data->n);    // Linear part of cost function
     work->data->A = copy_csc_mat(data->A);         // Linear constraints matrix
-    work->data->lA = vec_copy(data->lA, data->m);  // Lower bounds on constraints
-    work->data->uA = vec_copy(data->uA, data->m);  // Upper bounds on constraints
+    work->data->l = vec_copy(data->l, data->m);  // Lower bounds on constraints
+    work->data->u = vec_copy(data->u, data->m);  // Upper bounds on constraints
 
 
     /* Allocate internal solver variables (ADMM steps)
@@ -75,10 +75,14 @@ Work * osqp_setup(const Data * data, Settings *settings){
     // Initialize x,z,u to zero
     work->x = c_calloc((work->data->n + work->data->m), sizeof(c_float));
     work->z = c_calloc((work->data->n + work->data->m), sizeof(c_float));
-    work->u = c_calloc(work->data->m, sizeof(c_float));
+    work->y = c_calloc(work->data->m, sizeof(c_float));
     work->z_prev = c_malloc((work->data->n + work->data->m) * sizeof(c_float));
+
+    #ifndef SKIP_INFEASIBILITY
     work->delta_u = c_calloc(work->data->m, sizeof(c_float));
     work->delta_u_prev = c_calloc(work->data->m, sizeof(c_float));
+    #endif
+
     work->first_run = 1;
     work->dua_res_ws_n = c_malloc(work->data->n * sizeof(c_float));
     work->dua_res_ws_m = c_malloc(work->data->m * sizeof(c_float));
@@ -110,7 +114,7 @@ Work * osqp_setup(const Data * data, Settings *settings){
     // Allocate solution
     work->solution = c_calloc(1, sizeof(Solution));
     work->solution->x = c_calloc(1, work->data->n * sizeof(c_float)); // Allocate primal solution
-    work->solution->lambda = c_calloc(1, work->data->m * sizeof(c_float));
+    work->solution->y = c_calloc(1, work->data->m * sizeof(c_float));
 
 
     // Allocate information
@@ -171,7 +175,10 @@ c_int osqp_solve(Work * work){
     for (iter = 1; iter <= work->settings->max_iter; iter ++) {
         // Update z_prev and delta_u_prev (preallocated, no malloc)
         prea_vec_copy(work->z, work->z_prev, work->data->n + work->data->m);
+
+        #ifndef SKIP_INFEASIBILITY
         prea_vec_copy(work->delta_u, work->delta_u_prev, work->data->m);
+        #endif
 
         /* ADMM STEPS */
         /* First step: x_{k+1} */
@@ -183,7 +190,7 @@ c_int osqp_solve(Work * work){
         project_x(work);
 
         /* Third step: u_{k+1} */
-        update_u(work);
+        update_y(work);
         /* End of ADMM Steps */
 
 
@@ -250,7 +257,7 @@ c_int osqp_solve(Work * work){
     // Store solution
     store_solution(work);
 
-    // Indicate that the solve function has already been run
+    // Indicate that the solve function has already been executed
     work->first_run = 0;
 
     return exitflag;
@@ -273,10 +280,10 @@ c_int osqp_cleanup(Work * work){
             csc_spfree(work->data->A);
         if (work->data->q)
             c_free(work->data->q);
-        if (work->data->lA)
-            c_free(work->data->lA);
-        if (work->data->uA)
-            c_free(work->data->uA);
+        if (work->data->l)
+            c_free(work->data->l);
+        if (work->data->u)
+            c_free(work->data->u);
         c_free(work->data);
     }
 
@@ -315,16 +322,18 @@ c_int osqp_cleanup(Work * work){
     if (work) {
         if (work->x)
             c_free(work->x);
-        if (work->u)
-            c_free(work->u);
+        if (work->y)
+            c_free(work->y);
         if (work->z)
             c_free(work->z);
         if (work->z_prev)
             c_free(work->z_prev);
+        #ifndef SKIP_INFEASIBILITY
         if (work->delta_u)
             c_free(work->delta_u);
         if (work->delta_u_prev)
             c_free(work->delta_u_prev);
+        #endif
         if (work->dua_res_ws_n)
             c_free(work->dua_res_ws_n);
         if (work->dua_res_ws_m)
@@ -338,8 +347,8 @@ c_int osqp_cleanup(Work * work){
         if (work->solution) {
             if (work->solution->x)
                 c_free(work->solution->x);
-            if (work->solution->lambda)
-                c_free(work->solution->lambda);
+            if (work->solution->y)
+                c_free(work->solution->y);
             c_free(work->solution);
         }
 
@@ -388,16 +397,16 @@ c_int osqp_update_lin_cost(Work * work, c_float * q_new) {
 /**
  * Update lower and upper bounds in the problem constraints
  * @param  work   Workspace
- * @param  lA_new New lower bound
- * @param  uA_new New upper bound
+ * @param  l_new New lower bound
+ * @param  u_new New upper bound
  * @return        Exitflag: 1 if new lower bound is not <= than new upper bound
  */
-c_int osqp_update_bounds(Work * work, c_float * lA_new, c_float * uA_new) {
+c_int osqp_update_bounds(Work * work, c_float * l_new, c_float * u_new) {
     c_int i;
 
     // Check if lower bound is smaller than upper bound
     for (i=0; i<work->data->m; i++) {
-        if (lA_new[i] > uA_new[i]) {
+        if (l_new[i] > u_new[i]) {
             #ifdef PRINTING
             c_print("lower bound must be lower than or equal to upper bound\n");
             #endif
@@ -406,13 +415,13 @@ c_int osqp_update_bounds(Work * work, c_float * lA_new, c_float * uA_new) {
     }
 
     // Replace lA and uA by the new vectors
-    prea_vec_copy(lA_new, work->data->lA, work->data->m);
-    prea_vec_copy(uA_new, work->data->uA, work->data->m);
+    prea_vec_copy(l_new, work->data->l, work->data->m);
+    prea_vec_copy(u_new, work->data->u, work->data->m);
 
     // Scaling
     if (work->settings->scaling) {
-        vec_ew_prod(work->scaling->E, work->data->lA, work->data->m);
-        vec_ew_prod(work->scaling->E, work->data->uA, work->data->m);
+        vec_ew_prod(work->scaling->E, work->data->l, work->data->m);
+        vec_ew_prod(work->scaling->E, work->data->u, work->data->m);
     }
 
     return 0;
@@ -421,23 +430,23 @@ c_int osqp_update_bounds(Work * work, c_float * lA_new, c_float * uA_new) {
 /**
  * Update lower bound in the problem constraints
  * @param  work   Workspace
- * @param  lA_new New lower bound
+ * @param  l_new New lower bound
  * @return        Exitflag: 1 if new lower bound is not <= than upper bound
  */
-c_int osqp_update_lower_bound(Work * work, c_float * lA_new) {
+c_int osqp_update_lower_bound(Work * work, c_float * l_new) {
     c_int i;
 
     // Replace lA by the new vector
-    prea_vec_copy(lA_new, work->data->lA, work->data->m);
+    prea_vec_copy(l_new, work->data->l, work->data->m);
 
     // Scaling
     if (work->settings->scaling) {
-        vec_ew_prod(work->scaling->E, work->data->lA, work->data->m);
+        vec_ew_prod(work->scaling->E, work->data->l, work->data->m);
     }
 
     // Check if lower bound is smaller than upper bound
     for (i=0; i<work->data->m; i++) {
-        if (work->data->lA[i] > work->data->uA[i]) {
+        if (work->data->l[i] > work->data->u[i]) {
             #ifdef PRINTING
             c_print("upper bound must be greater than or equal to lower bound\n");
             #endif
@@ -452,23 +461,23 @@ c_int osqp_update_lower_bound(Work * work, c_float * lA_new) {
 /**
  * Update upper bound in the problem constraints
  * @param  work   Workspace
- * @param  uA_new New upper bound
+ * @param  u_new New upper bound
  * @return        Exitflag: 1 if new upper bound is not >= than lower bound
  */
-c_int osqp_update_upper_bound(Work * work, c_float * uA_new) {
+c_int osqp_update_upper_bound(Work * work, c_float * u_new) {
     c_int i;
 
     // Replace uA by the new vector
-    prea_vec_copy(uA_new, work->data->uA, work->data->m);
+    prea_vec_copy(u_new, work->data->u, work->data->m);
 
     // Scaling
     if (work->settings->scaling) {
-        vec_ew_prod(work->scaling->E, work->data->uA, work->data->m);
+        vec_ew_prod(work->scaling->E, work->data->u, work->data->m);
     }
 
     // Check if upper bound is greater than lower bound
     for (i=0; i<work->data->m; i++) {
-        if (work->data->uA[i] < work->data->lA[i]) {
+        if (work->data->u[i] < work->data->l[i]) {
             #ifdef PRINTING
             c_print("lower bound must be lower than or equal to upper bound\n");
             #endif
@@ -600,8 +609,11 @@ c_int osqp_update_polishing(Work * work, c_int polishing_new) {
     }
     // Update polishing
     work->settings->polishing = polishing_new;
+
+    #ifdef PROFILING
     // Reset polish time to zero
     work->info->polish_time = 0.0;
+    #endif
 
     return 0;
 }

@@ -27,7 +27,7 @@ struct OSQP_PROBLEM_DATA {
 
         /* these can change for multiple runs for the same call to osqp_init */
         c_float *q; /* dense array for linear part of cost function (size n) */
-        c_float *lA, *uA; /* dense arrays for bounds lA, uA (size m)*/
+        c_float *l, *u; /* dense arrays for bounds lA, uA (size m)*/
 };
 
 
@@ -64,7 +64,10 @@ struct OSQP_WORK {
         Polish * pol;
 
         // Internal solver variables
-        c_float *x, *z, *u, *z_prev, *delta_u, *delta_u_prev;
+        c_float *x, *z, *y, *z_prev;
+        #ifndef SKIP_INFEASIBILITY
+        c_float *delta_u, *delta_u_prev;
+        #endif
         c_int first_run;  // flag indicating whether the solve function has been run before
 
         // Workspaces for computing dual residual
@@ -91,7 +94,7 @@ struct OSQP_SCALING {
 /* Primal and dual solutions */
 struct OSQP_SOLUTION {
         c_float *x;       // Primal solution
-        c_float *lambda;  // Lagrange multiplier associated to lA <= Ax <= uA
+        c_float *y;       // Lagrange multiplier associated to l <= Ax <= u
 };
 
 /* Solver Information */
@@ -190,29 +193,29 @@ c_int osqp_update_lin_cost(Work * work, c_float * q_new);
 /**
  * Update lower and upper bounds in the problem constraints
  * @param  work   Workspace
- * @param  lA_new New lower bound
- * @param  uA_new New upper bound
+ * @param  l_new New lower bound
+ * @param  u_new New upper bound
  * @return        Exitflag: 1 if new lower bound is not <= than new upper bound
  */
-c_int osqp_update_bounds(Work * work, c_float * lA_new, c_float * uA_new);
+c_int osqp_update_bounds(Work * work, c_float * l_new, c_float * u_new);
 
 
 /**
  * Update lower bound in the problem constraints
  * @param  work   Workspace
- * @param  lA_new New lower bound
+ * @param  l_new New lower bound
  * @return        Exitflag: 1 if new lower bound is not <= than upper bound
  */
-c_int osqp_update_lower_bound(Work * work, c_float * lA_new);
+c_int osqp_update_lower_bound(Work * work, c_float * l_new);
 
 
 /**
  * Update upper bound in the problem constraints
  * @param  work   Workspace
- * @param  uA_new New upper bound
+ * @param  u_new New upper bound
  * @return        Exitflag: 1 if new upper bound is not >= than lower bound
  */
-c_int osqp_update_upper_bound(Work * work, c_float * uA_new);
+c_int osqp_update_upper_bound(Work * work, c_float * u_new);
 
 
 

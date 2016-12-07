@@ -30,8 +30,8 @@ static char * test_basic_qp()
     data->P = csc_matrix(data->n, data->n, basic_qp_P_nnz, basic_qp_P_x, basic_qp_P_i, basic_qp_P_p);
     data->q = basic_qp_q;
     data->A = csc_matrix(data->m, data->n, basic_qp_A_nnz, basic_qp_A_x, basic_qp_A_i, basic_qp_A_p);
-    data->lA = basic_qp_lA;
-    data->uA = basic_qp_uA;
+    data->l = basic_qp_lA;
+    data->u = basic_qp_uA;
 
     c_print("QP Tests:\n");
 
@@ -76,8 +76,10 @@ static char * test_basic_qp()
                 exitflag = 1;
             }
             // Compare dual solutions
-            if (vec_norm2_diff(work->solution->lambda, basic_qp_sol_lambda, basic_qp_m) /
+            if (vec_norm2_diff(work->solution->y, basic_qp_sol_lambda, basic_qp_m) /
                 vec_norm2(basic_qp_sol_lambda, basic_qp_m) > 1e-4) {
+                print_vec(work->solution->y, basic_qp_m, "y_solution");
+                print_vec(basic_qp_sol_lambda, basic_qp_m, "y_ecos");
                 c_print("\nError in dual solution!");
                 exitflag = 1;
             }
@@ -101,15 +103,15 @@ static char * test_basic_qp()
         }
 
         // UPDATE BOUNDS
-        if (osqp_update_bounds(work, basic_qp_lA_new, basic_qp_uA_new)) {
+        if (osqp_update_bounds(work, basic_qp_l_new, basic_qp_u_new)) {
             c_print("\nError in bounds ordering!");
             exitflag = 1;
         } else {
-            if (vec_norm2_diff(work->data->lA, basic_qp_lA_new, basic_qp_m) > TESTS_TOL) {
+            if (vec_norm2_diff(work->data->l, basic_qp_l_new, basic_qp_m) > TESTS_TOL) {
               c_print("\nError in updating bounds!");
               exitflag = 1;
             }
-            if (vec_norm2_diff(work->data->uA, basic_qp_uA_new, basic_qp_m) > TESTS_TOL) {
+            if (vec_norm2_diff(work->data->u, basic_qp_u_new, basic_qp_m) > TESTS_TOL) {
               c_print("\nError in updating bounds!");
               exitflag = 1;
             }
@@ -120,7 +122,7 @@ static char * test_basic_qp()
             c_print("\nError in bounds ordering!");
             exitflag = 1;
         } else {
-            if (vec_norm2_diff(work->data->lA, basic_qp_lA, basic_qp_m) > TESTS_TOL) {
+            if (vec_norm2_diff(work->data->l, basic_qp_lA, basic_qp_m) > TESTS_TOL) {
                 c_print("\nError in updating lower bound!");
                 exitflag = 1;
             }
@@ -131,7 +133,7 @@ static char * test_basic_qp()
             c_print("\nError in bounds ordering!");
             exitflag = 1;
         } else {
-            if (vec_norm2_diff(work->data->uA, basic_qp_uA, basic_qp_m) > TESTS_TOL) {
+            if (vec_norm2_diff(work->data->u, basic_qp_uA, basic_qp_m) > TESTS_TOL) {
                 c_print("\nError in updating upper bound!");
                 exitflag = 1;
             }

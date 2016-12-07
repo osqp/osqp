@@ -31,8 +31,8 @@ end
 
 # Dummy data
 q_new = [2.5; 3.2]
-lA_new = [0.8; -3.4; -11.]
-uA_new = [1.6; 1.0; 15.]
+l_new = [0.8; -3.4; -11.]
+u_new = [1.6; 1.0; 15.]
 
 # Save data
 write_mat_sparse(f, P, "basic_qp_P")
@@ -53,7 +53,7 @@ write_int(f, sol_status, "basic_qp_sol_status")
 
 # Save dummy data
 write_vec_float(f, q_new, "basic_qp_q_new")
-write_vec_float(f, lA_new, "basic_qp_lA_new")
-write_vec_float(f, uA_new, "basic_qp_uA_new")
+write_vec_float(f, l_new, "basic_qp_l_new")
+write_vec_float(f, u_new, "basic_qp_u_new")
 
 close(f)

@@ -11,7 +11,7 @@
  */
 void cold_start(Work *work) {
     memset(work->z, 0, (work->data->n + work->data->m) * sizeof(c_float));
-    memset(work->u, 0, (work->data->m) * sizeof(c_float));
+    memset(work->y, 0, (work->data->m) * sizeof(c_float));
 }
 
 
@@ -27,7 +27,7 @@ void compute_rhs(Work *work){
     }
     for (i = work->data->n; i < work->data->n + work->data->m; i++){
         // Cycle over dual variable within first step (nu)
-        work->x[i] = work->z[i] - work->u[i - work->data->n];
+        work->x[i] = work->z[i] - 1./work->settings->rho * work->y[i - work->data->n];
     }
 
 }
@@ -42,7 +42,7 @@ void compute_rhs(Work *work){
 void update_x(Work *work){
     c_int i; // Index
     for (i = work->data->n; i < work->data->n + work->data->m; i++){
-        work->x[i] = 1./work->settings->rho * work->x[i] + work->z[i] - work->u[i - work->data->n];
+        work->x[i] = work->z[i] + 1./work->settings->rho * (work->x[i] - work->y[i - work->data->n]);
         //TODO: Remove 1/rho operation (store 1/rho during setup)
     }
 }
@@ -65,22 +65,33 @@ void project_x(Work *work){
         // Part related to slack variables
         work->z[i] = c_min(c_max(work->settings->alpha * work->x[i] +
                      (1.0 - work->settings->alpha) * work->z_prev[i] +
-                     work->u[i - work->data->n], work->data->lA[i - work->data->n]), work->data->uA[i - work->data->n]);
+                     1./work->settings->rho * work->y[i - work->data->n], work->data->l[i - work->data->n]), work->data->u[i - work->data->n]);
     }
 
 }
 
 /**
- * Update u variable (third ADMM step)
+ * Update y variable (third ADMM step)
  * @param work Workspace
  */
-void update_u(Work *work){
+void update_y(Work *work){
     c_int i; // Index
     for (i = work->data->n; i < work->data->n + work->data->m; i++){
-        work->delta_u[i - work->data->n] = work->settings->alpha * work->x[i] +
+
+        #ifndef SKIP_INFEASIBILITY
+
+        work->delta_u[i - work->data->n] = work->settings->rho * (work->settings->alpha * work->x[i] +
                       (1.0 - work->settings->alpha) * work->z_prev[i] -
-                      work->z[i];
-        work->u[i - work->data->n] += work->delta_u[i - work->data->n];
+                      work->z[i]);
+        work->y[i - work->data->n] += work->delta_u[i - work->data->n];
+
+        #else
+
+        work->y[i - work->data->n] += work->settings->rho * (work->settings->alpha * work->x[i] +
+                      (1.0 - work->settings->alpha) * work->z_prev[i] -
+                      work->z[i]);
+
+        #endif
     }
 }
 
@@ -114,22 +125,22 @@ c_float compute_pri_res(Work * work, c_int polish){
     if (polish) {
         // Called from polish() function
         for (j = 0; j < work->data->m; j++) {
-            if (work->pol->Ax[j] < work->data->lA[j]) {
-                tmp = work->data->lA[j] - work->pol->Ax[j];
+            if (work->pol->Ax[j] < work->data->l[j]) {
+                tmp = work->data->l[j] - work->pol->Ax[j];
                 prim_resid_sq += tmp*tmp;
-            } else if (work->pol->Ax[j] > work->data->uA[j]) {
-                tmp = work->pol->Ax[j] - work->data->uA[j];
+            } else if (work->pol->Ax[j] > work->data->u[j]) {
+                tmp = work->pol->Ax[j] - work->data->u[j];
                 prim_resid_sq += tmp*tmp;
             }
         }
     } else {
         // Called from ADMM algorithm
         for (j = 0; j < work->data->m; j++) {
-            if (work->x[work->data->n + j] < work->data->lA[j]) {
-                tmp = work->data->lA[j] - work->x[work->data->n + j];
+            if (work->x[work->data->n + j] < work->data->l[j]) {
+                tmp = work->data->l[j] - work->x[work->data->n + j];
                 prim_resid_sq += tmp*tmp;
-            } else if (work->x[work->data->n + j] > work->data->uA[j]) {
-                tmp = work->x[work->data->n + j] - work->data->uA[j];
+            } else if (work->x[work->data->n + j] > work->data->u[j]) {
+                tmp = work->x[work->data->n + j] - work->data->u[j];
                 prim_resid_sq += tmp*tmp;
             }
         }
@@ -183,6 +194,7 @@ c_float compute_dua_res(Work * work, c_int polish){
     }
 }
 
+#ifndef SKIP_INFEASIBILITY
 /**
  * Compute norm of infeasibility residual
  * @param  work Workspace
@@ -193,10 +205,10 @@ c_float compute_inf_res(Work * work){
     // c_float tmp, infeas_resid_sq=0;
     //
     // for (j = 0; j < work->data->m; j++) {
-    //     if (work->x[work->data->n + j] < work->data->lA[j]) {
-    //         tmp = work->z[work->data->n + j] - work->data->lA[j];
-    //     } else if (work->x[work->data->n + j] > work->data->uA[j]) {
-    //         tmp = work->data->uA[j] - work->z[work->data->n + j];
+    //     if (work->x[work->data->n + j] < work->data->l[j]) {
+    //         tmp = work->z[work->data->n + j] - work->data->l[j];
+    //     } else if (work->x[work->data->n + j] > work->data->u[j]) {
+    //         tmp = work->data->u[j] - work->z[work->data->n + j];
     //     } else {
     //         tmp = work->x[work->data->n + j] - work->z[work->data->n + j];
     //     }
@@ -205,6 +217,7 @@ c_float compute_inf_res(Work * work){
     // return c_sqrt(infeas_resid_sq);
     return vec_norm2_diff(work->delta_u, work->delta_u_prev, work->data->m);
 }
+#endif
 
 
 /**
@@ -213,8 +226,8 @@ c_float compute_inf_res(Work * work){
  */
 void store_solution(Work *work) {
     prea_vec_copy(work->x, work->solution->x, work->data->n);       // primal
-    prea_vec_copy(work->u, work->solution->lambda, work->data->m);  // dual
-    vec_mult_scalar(work->solution->lambda, work->settings->rho, work->data->m);
+    prea_vec_copy(work->y, work->solution->y, work->data->m);  // dual
+    // vec_mult_scalar(work->solution->y, work->settings->rho, work->data->m);
 
     if(work->settings->scaling) // Unscale solution if scaling has been performed
         unscale_solution(work);
@@ -242,7 +255,7 @@ void update_info(Work *work, c_int iter, c_int polish){
             work->info->obj_val = compute_obj_val(work, 0);
             work->info->pri_res = compute_pri_res(work, 0);
             work->info->dua_res = compute_dua_res(work, 0);
-            #if SKIP_INFEASIBILITY == 0
+            #ifndef SKIP_INFEASIBILITY
             work->info->inf_res = compute_inf_res(work);
             #endif
             #ifdef PROFILING
@@ -316,7 +329,7 @@ c_int residuals_check(Work *work){
     }
 
     // Compute dual tolerance
-    mat_tpose_vec(work->data->A, work->u, work->dua_res_ws_n, 0, 0); // ws = A'*u
+    mat_tpose_vec(work->data->A, work->y, work->dua_res_ws_n, 0, 0); // ws = A'*u
     eps_dua = c_sqrt(work->data->n) * work->settings->eps_abs +
               work->settings->eps_rel * work->settings->rho *
               vec_norm2( work->dua_res_ws_n, work->data->n);
@@ -405,10 +418,10 @@ c_int validate_data(const Data * data){
 
     // Lower and upper bounds
     for (j = 0; j < data->m; j++) {
-        if (data->lA[j] > data->uA[j]) {
+        if (data->l[j] > data->u[j]) {
             #ifdef PRINTING
             c_print("Lower bound at index %d is greater than upper bound: %.4e > %.4e\n",
-                  j, data->lA[j], data->uA[j]);
+                  j, data->l[j], data->u[j]);
             #endif
           return 1;
         }
