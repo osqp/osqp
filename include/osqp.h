@@ -130,7 +130,7 @@ struct OSQP_POLISH {
     c_int n_uAct;         // number of upper-active constraints
     c_int *A2Ared;        // Table of indices that maps A to Ared
     c_float *x;           // optimal solution obtained by polishing
-    c_float *Ax;          // workspace for storing A*x
+    c_float *z;          // workspace for storing z = A*x
     c_float *y_red;  // optimal dual variables associated to Ared obtained
                           //   by polishing
     c_float obj_val;      // objective value at polished solution

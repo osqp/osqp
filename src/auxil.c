@@ -155,11 +155,11 @@ c_float compute_pri_res(Work * work, c_int polish){
     if (polish) {
         // Called from polish() function
         for (j = 0; j < work->data->m; j++) {
-            if (work->pol->Ax[j] < work->data->l[j]) {
-                tmp = work->data->l[j] - work->pol->Ax[j];
+            if (work->pol->z[j] < work->data->l[j]) {
+                tmp = work->data->l[j] - work->pol->z[j];
                 prim_resid_sq += tmp*tmp;
-            } else if (work->pol->Ax[j] > work->data->u[j]) {
-                tmp = work->pol->Ax[j] - work->data->u[j];
+            } else if (work->pol->z[j] > work->data->u[j]) {
+                tmp = work->pol->z[j] - work->data->u[j];
                 prim_resid_sq += tmp*tmp;
             }
         }

@@ -110,7 +110,7 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->pol->ind_uAct = c_malloc(work->data->m * sizeof(c_int));
     work->pol->A2Ared = c_malloc(work->data->m * sizeof(c_int));
     work->pol->x = c_malloc(work->data->n * sizeof(c_float));
-    work->pol->Ax = c_malloc(work->data->m * sizeof(c_float));
+    work->pol->z = c_malloc(work->data->m * sizeof(c_float));
 
 
     // Allocate solution
@@ -320,8 +320,8 @@ c_int osqp_cleanup(Work * work){
             c_free(work->pol->A2Ared);
         if (work->pol->x)
             c_free(work->pol->x);
-        if (work->pol->Ax)
-            c_free(work->pol->Ax);
+        if (work->pol->z)
+            c_free(work->pol->z);
         c_free(work->pol);
     }
 
