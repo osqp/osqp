@@ -41,7 +41,7 @@ static char * test_basic_qp()
     set_default_settings(settings);
     settings->max_iter = 200;
     settings->alpha = 1.6;
-    settings->polishing = 0;
+    settings->polishing = 1;
     settings->scaling = 0;
     settings->verbose = 0;
     settings->warm_start = 0;

@@ -19,13 +19,11 @@ c_int form_Ared(Work *work) {
      *    A2Ared[j] =  i    (if j-th row of A is inserted at i-th row of Ared)
      */
     for (j = 0; j < work->data->m; j++) {
-        if ( work->z[j] - work->data->l[j] <
-             -work->settings->rho * work->y[j] ) {              // lower-active
+        if ( work->z[j] - work->data->l[j] < - work->y[j] ) {     // lower-active
                 work->pol->ind_lAct[work->pol->n_lAct++] = j;
                 work->pol->A2Ared[j] = mred++;
         }
-        else if ( work->data->u[j] - work->z[j] <
-                  work->settings->rho * work->y[j] ) {          // upper-active
+        else if ( work->data->u[j] - work->z[j] < work->y[j] ) {  // upper-active
                     work->pol->ind_uAct[work->pol->n_uAct++] = j;
                     work->pol->A2Ared[j] = mred++;
         }
@@ -34,11 +32,14 @@ c_int form_Ared(Work *work) {
         }
     }
 
+    // TODO: Add check if mred == 0
+
     // Count number of elements in Ared
     for (j = 0; j < work->data->A->nzmax; j++) {
         if (work->pol->A2Ared[work->data->A->i[j]] != -1)
             Ared_nnz++;
     }
+
     // Form Ared
     work->pol->Ared = csc_spalloc(mred, work->data->n, Ared_nnz, 1, 0);
     Ared_nnz = 0;
@@ -168,9 +169,10 @@ c_int polish(Work *work) {
             work->info->status_polish = 1;
             // Update primal and dual ADMM iterations
             prea_vec_copy(work->pol->x, work->x, work->data->n);
-            prea_vec_copy(work->pol->x, work->z, work->data->n);
-            prea_vec_copy(work->pol->Ax, work->x + work->data->n, work->data->m);
-            prea_vec_copy(work->pol->Ax, work->z + work->data->n, work->data->m);
+            // prea_vec_copy(work->pol->x, work->z, work->data->n);
+            // prea_vec_copy(work->pol->Ax, work->x + work->data->n, work->data->m);
+            // prea_vec_copy(work->pol->Ax, work->z + work->data->n, work->data->m);
+            prea_vec_copy(work->pol->Ax, work->z, work->data->m);
             for (j = 0; j < work->data->m; j++) {
                 if (work->pol->A2Ared[j] != -1) {
                     work->y[j] = work->pol->y_red[work->pol->A2Ared[j]];
@@ -186,6 +188,7 @@ c_int polish(Work *work) {
     } else {
         // Polishing failed
         work->info->status_polish = 0;
+        c_print("Polishing failed!\n");
         // TODO: Try to find a better solution on the line connecting ADMM
         //       and polished solution
     }
