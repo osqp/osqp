@@ -3,7 +3,7 @@
 OSQP (Operator Splitting Quadratic Program) solver is a numerical optimization package for solving problems in the form
 ```
 minimize        1/2*x'Px + q'x
-subject to      lA <= A x <= uA
+subject to      l <= A x <= u
 ```
 
 The current version is `0.0.0`.
@@ -12,16 +12,17 @@ The current version is `0.0.0`.
 ## TODO
 
 -   [x] Equilibration
--   [ ] Warm starting: added basic one BUT need to adjust the total run_time
--   [ ] Sublevel API -> Matrix factorization caching
+-   [x] Warm starting: added basic one BUT need to adjust the total run_time
+-   [x] Sublevel API -> Matrix factorization caching
+-   [ ] Stepsize selection: maybe choose
+
 
 -   [x] Do preconditioning/equilibration
--   [ ] Timer and compare to other QP solvers
+-   [x] Timer and compare to other QP solvers
 -   [ ] Presolver
 -   [ ] Infeasibility detection:
     -   Generalize [result](http://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=7040300) to non strongly convex problems
 -   [ ] Unboundedness detection
--   [ ] Stepsize selection: maybe choose
 
 
 
