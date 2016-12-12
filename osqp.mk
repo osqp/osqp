@@ -7,16 +7,18 @@ CC = gcc
   #  -g    adds debugging information to the executable file
   #  -Wall turns on most, but not all, compiler warnings
   #  -O3 turns on all optimizations specified by -O2 and also turns on the -finline-functions, -fweb and -frename-registers options.
-CFLAGS = -g -Wall -O3
+CFLAGS = -g -O3
+# CFLAGS += -Wall
 
 # Add coverage
 CFLAGS += --coverage
 
+# Enforce ANSI C
+# CFLAGS += -ansi
 
 # additional library paths
 # -lm: Basic math library
 LDFLAGS = -lm
-
 
 # Output directory
 OUT = out

@@ -36,7 +36,8 @@ static const c_int LINE_LEN = 55;
 
 static void print_line(void){
     char theLine[LINE_LEN+1];
-    for (c_int i = 0; i < LINE_LEN; ++i)
+    c_int i;
+    for (i = 0; i < LINE_LEN; ++i)
         theLine[i] = '-';
     theLine[LINE_LEN] = '\0';
     c_print("%s\n",theLine);
@@ -44,7 +45,8 @@ static void print_line(void){
 
 void print_header(void){
     c_print("%s ", HEADER[0]);
-    for (c_int i=1; i < HEADER_LEN - 1; i++) c_print("  %s", HEADER[i]);
+    c_int i;
+    for (i=1; i < HEADER_LEN - 1; i++) c_print("  %s", HEADER[i]);
     c_print("%s\n", HEADER[HEADER_LEN - 1]);
 }
 
@@ -318,12 +320,13 @@ c_float toc(Timer* t)
 c_float * csc_to_dns(csc * M)
 {
         c_int i, j=0; // Predefine row index and column index
+        c_int idx;
 
         // Initialize matrix of zeros
         c_float * A = (c_float *)c_calloc(M->m * M->n, sizeof(c_float));
 
         // Allocate elements
-        for (c_int idx = 0; idx < M->nzmax; idx++)
+        for (idx = 0; idx < M->nzmax; idx++)
         {
                 // Get row index i (starting from 1)
                 i = M->i[idx];
@@ -397,9 +400,10 @@ void print_trip_matrix(csc* M, char * name)
 /* Print a dense matrix */
 void print_dns_matrix(c_float * M, c_int m, c_int n, char *name)
 {
+        c_int i, j;
         c_print("%s = \n\t", name);
-        for(c_int i=0; i<m; i++) { // Cycle over rows
-                for(c_int j=0; j<n; j++) { // Cycle over columns
+        for(i=0; i<m; i++) { // Cycle over rows
+                for(j=0; j<n; j++) { // Cycle over columns
                         if (j < n - 1)
                                 // c_print("% 14.12e,  ", M[j*m+i]);
                                 c_print("% .5f,  ", M[j*m+i]);
@@ -423,8 +427,9 @@ void print_vec(c_float * v, c_int n, char *name){
 
 // Print int array
 void print_vec_int(c_int * x, c_int n, char *name) {
+    c_int i;
     c_print("%s = [", name);
-    for(c_int i=0; i<n; i++) {
+    for(i=0; i<n; i++) {
         c_print(" %d ", x[i]);
     }
     c_print("]\n");

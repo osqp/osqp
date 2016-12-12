@@ -53,21 +53,24 @@ c_float vec_norm2(const c_float *v, c_int l) {
 
 /* set vector to scalar */
 void vec_set_scalar(c_float *a, c_float sc, c_int n){
-    for (c_int i=0; i<n; i++) {
+    c_int i;
+    for (i=0; i<n; i++) {
         a[i] = sc;
     }
 }
 
 /* add scalar to vector */
 void vec_add_scalar(c_float *a, c_float sc, c_int n){
-    for (c_int i=0; i<n; i++) {
+    c_int i;
+    for (i=0; i<n; i++) {
         a[i] += sc;
     }
 }
 
 /* multiply scalar to vector */
 void vec_mult_scalar(c_float *a, c_float sc, c_int n){
-    for (c_int i=0; i<n; i++) {
+    c_int i;
+    for (i=0; i<n; i++) {
         a[i] *= sc;
     }
 }
@@ -85,7 +88,8 @@ c_float * vec_copy(c_float *a, c_int n) {
 
 /* copy vector a into preallocated vector b */
 void prea_vec_copy(c_float *a, c_float * b, c_int n) {
-    for (c_int i=0; i<n; i++) {
+    c_int i;
+    for (i=0; i<n; i++) {
         b[i] = a[i];
     }
 }
@@ -114,7 +118,8 @@ c_float vec_prod(const c_float *a, const c_float *b, c_int n){
 
 /* elementwse product a.*b stored in b*/
 void vec_ew_prod(const c_float *a, c_float *b, c_int n){
-    for(c_int i = 0;  i < n; i++){
+    c_int i;
+    for(i = 0;  i < n; i++){
         b[i] *= a[i];
     }
 }
@@ -122,7 +127,8 @@ void vec_ew_prod(const c_float *a, c_float *b, c_int n){
 
 /* elementwise sqrt of the vector elements */
 void vec_ew_sqrt(c_float *a, c_int n){
-    for(c_int i = 0;  i < n; i++){
+    c_int i;
+    for(i = 0;  i < n; i++){
         a[i] = c_sqrt(a[i]);
     }
 }
@@ -130,14 +136,16 @@ void vec_ew_sqrt(c_float *a, c_int n){
 
 /* elementwise max between each vector component and max_val */
 void vec_ew_max(c_float *a, c_int n, c_float max_val){
-    for(c_int i = 0;  i < n; i++){
+    c_int i;
+    for(i = 0;  i < n; i++){
         a[i] = c_max(a[i], max_val);
     }
 }
 
 /* elementwise min between each vector component and max_val */
 void vec_ew_min(c_float *a, c_int n, c_float min_val){
-    for(c_int i = 0;  i < n; i++){
+    c_int i;
+    for(i = 0;  i < n; i++){
         a[i] = c_min(a[i], min_val);
     }
 }
