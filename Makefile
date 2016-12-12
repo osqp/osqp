@@ -42,25 +42,25 @@ default: $(TARGETS) $(OUT)/libosqpdir.a
 
 # For every object file file compile relative .c file in src/
 # -c flag tells the compiler to stop after the compilation phase without linking
-%.o: src/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Define OSQP objects dependencies
-src/osqp.o: $(SRC_FILES) $(INC_FILES)
-src/cs.o: src/cs.c include/cs.h
-src/lin_alg.o: src/lin_alg.c  include/lin_alg.h
-src/lin_sys.o: src/lin_sys.c  include/lin_sys.h
-src/kkt.o	: src/kkt.c include/kkt.h
-src/util.o	: src/util.c include/util.h
-src/auxil.o	: src/auxil.c include/auxil.h
-src/polish.o	: src/polish.c include/polish.h
-src/scaling.o	: src/scaling.c include/scaling.h
+# %.o: src/%.c
+# 	$(CC) $(CFLAGS) -c $< -o $@
+#
+# # Define OSQP objects dependencies
+# src/osqp.o: $(SRC_FILES) $(INC_FILES)
+# src/cs.o: src/cs.c include/cs.h
+# src/lin_alg.o: src/lin_alg.c  include/lin_alg.h
+# src/lin_sys.o: src/lin_sys.c  include/lin_sys.h
+# src/kkt.o	: src/kkt.c include/kkt.h
+# src/util.o	: src/util.c include/util.h
+# src/auxil.o	: src/auxil.c include/auxil.h
+# src/polish.o	: src/polish.c include/polish.h
+# src/scaling.o	: src/scaling.c include/scaling.h
 
 
 
 # Define linear systems solvers objects and dependencies
 # Direct
-$(DIRSRC)/private.o: $(DIRSRC)/private.c  $(DIRSRC)/private.h
+# $(DIRSRC)/private.o: $(DIRSRC)/private.c  $(DIRSRC)/private.h
 
 
 # Build osqp library (direct method)
