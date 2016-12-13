@@ -8,26 +8,18 @@ subject to      l <= A x <= u
 
 The current version is `0.0.0`.
 
-
 ## TODO
 
--   [x] Equilibration
--   [x] Warm starting: added basic one BUT need to adjust the total run_time
--   [x] Sublevel API -> Matrix factorization caching
--   [ ] Stepsize selection: maybe choose
-
-
--   [x] Do preconditioning/equilibration
--   [x] Timer and compare to other QP solvers
--   [ ] Presolver
--   [ ] Infeasibility detection:
-    -   Generalize [result](http://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=7040300) to non strongly convex problems
--   [ ] Unboundedness detection
-
-
+-   [ ] Write infeasibility/unbounedness conditions
+-   [ ] Write compact algorithm (basic ADMM steps)
+-   [ ] Parameter Selection: `rho`, `sigma` and `alpha` from examples (data driven)
+-   [ ] Stress tests Maros Meszaros
+-   [ ] Proove convergence to vectors satisfying Farkas lemma
+-   [ ] Write examples in the paper
+-   [ ] Link to CVXPY
 
 
 ### Other Test Problems
 
-- QPLIB2014 http://www.lamsade.dauphine.fr/QPlib2014/doku.php
-- Maros and Meszaros Convex Quadratic Programming Test Problem Set: https://github.com/YimingYAN/QP-Test-Problems
+-   [QPLIB2014](http://www.lamsade.dauphine.fr/QPlib2014/doku.php)
+-   [Maros and Meszaros Convex Quadratic Programming](https://github.com/YimingYAN/QP-Test-Problems) Test Problem Set
