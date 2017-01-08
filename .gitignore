@@ -174,3 +174,6 @@ ENV/
 .ropeproject
 
 osqpmex/
+
+# Mac OSX Files
+.DS_Store
