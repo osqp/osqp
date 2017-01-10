@@ -69,7 +69,7 @@ Work * osqp_setup(const Data * data, Settings *settings){
 
     /* Allocate internal solver variables (ADMM steps)
      *
-     * N.B. Augmented variables with slacks (n+m)
+     * N.B. Augmented variables with z (n+m)
      */
 
     // Initialize x,z,u to zero

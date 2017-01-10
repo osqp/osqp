@@ -25,6 +25,7 @@
  **********************************/
 
 #define RHO (1.6)
+#define SIGMA (0.1)
 #define MAX_ITER (2500)
 #define EPS_ABS (1E-5)
 #define EPS_REL (1E-5)

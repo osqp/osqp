@@ -34,8 +34,9 @@ struct OSQP_PROBLEM_DATA {
 /* Settings struct */
 struct OSQP_SETTINGS {
         /* these *cannot* change for multiple runs with the same call to osqp_init */
-        c_float rho; /* ADMM step rho */
-        c_int scaling; /* boolean, heuristic data rescaling */
+        c_float rho;     /* ADMM step rho */
+        c_float sigma;   /* ADMM step sigma */
+        c_int scaling;   /* boolean, heuristic data rescaling */
         c_int scaling_norm; /* scaling norm */
         c_int scaling_iter; /* scaling iterations */
 

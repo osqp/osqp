@@ -22,8 +22,8 @@ c_int scale_data(Work * work){
     vec_set_scalar(s, 1., n_plus_m);
     vec_set_scalar(s_prev, 1., n_plus_m);
 
-    // Form KKT matrix to be scaled
-    csc * KKT = form_KKT(work->data->P, work->data->A, 0., 1);
+    // Form KKT matrix to be scaled (No regularization)
+    csc * KKT = form_KKT(work->data->P, work->data->A, 0., 0.);
 
     // DEBUG
     // #ifdef PRINTING

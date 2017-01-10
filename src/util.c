@@ -66,8 +66,8 @@ void print_setup_header(const Data *data, const Settings *settings) {
     // Print variables and constraints
     c_print("Settings: ");
     c_print("eps_abs = %.2e, eps_rel = %.2e,\n          "
-            "rho = %.2f, alpha = %.2f, max_iter = %i\n",
-            settings->eps_abs, settings->eps_rel, settings->rho,
+            "rho = %.2f, sigma = %.2f, alpha = %.2f, max_iter = %i\n",
+            settings->eps_abs, settings->eps_rel, settings->rho, settings->sigma,
             settings->alpha, settings->max_iter);
     if (settings->scaling)
         c_print("          scaling: active\n");
@@ -191,6 +191,7 @@ void set_default_settings(Settings * settings) {
         settings->scaling_norm = SCALING_NORM;
         settings->scaling_iter = SCALING_ITER;
         settings->rho = RHO; /* ADMM step */
+        settings->sigma = SIGMA; /* ADMM step */
         settings->max_iter = MAX_ITER; /* maximum iterations to take */
         settings->eps_abs = EPS_ABS;         /* absolute convergence tolerance */
         settings->eps_rel = EPS_REL;         /* relative convergence tolerance */
@@ -214,6 +215,7 @@ Settings * copy_settings(Settings * settings){
     new->scaling_norm = settings->scaling_norm;
     new->scaling_iter = settings->scaling_iter;
     new->rho = settings->rho;
+    new->sigma = settings->sigma;
     new->max_iter = settings->max_iter;
     new->eps_abs = settings->eps_abs;
     new->eps_rel = settings->eps_rel;

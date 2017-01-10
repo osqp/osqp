@@ -98,7 +98,8 @@ Pu = triu(P) # Store only upper triangular part of P
 
 # Form KKT
 rho = 1.6
-KKT = [P + rho*speye(n) A'; A -1./rho*speye(m)]
+sigma = 0.1
+KKT = [P + sigma*speye(n) A'; A -1./rho*speye(m)]
 rhs = randn(m+n)
 x = KKT \ rhs
 
@@ -106,6 +107,7 @@ x = KKT \ rhs
 write_int(f, m, "t8_m")
 write_int(f, n, "t8_n")
 write_float(f, rho, "t8_rho")
+write_float(f, sigma, "t8_sigma")
 write_mat_sparse(f, sparse(A), "t8_A")
 write_mat_sparse(f, sparse(Pu), "t8_Pu")
 write_vec_float(f, rhs, "t8_rhs")

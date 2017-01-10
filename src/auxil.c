@@ -25,7 +25,7 @@ static void compute_rhs(Work *work){
     c_int i; // Index
     for (i=0; i < work->data->n; i++){
         // Cycle over part related to x variables
-        work->xz_tilde[i] = work->settings->rho * work->x[i] - work->data->q[i];
+        work->xz_tilde[i] = work->settings->sigma * work->x[i] - work->data->q[i];
     }
     for (i = 0; i < work->data->m; i++){
         // Cycle over dual variable in the first step (nu)
