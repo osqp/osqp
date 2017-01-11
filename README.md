@@ -8,15 +8,24 @@ subject to      l <= A x <= u
 
 The current version is `0.0.0`.
 
-## TODO
+## TODO (Code)
 
--   [ ] Write infeasibility/unbounedness conditions
--   [ ] Write compact algorithm (basic ADMM steps)
+-   [ ] Implement cheaper dual residual computation: (only one matrix-vector computation)
+
+```
+dual_res = || rho * A' * ((alpha - 1) * z_tilde_k - z_k + (2 - alpha) * z_prev) ||_2
+```
+-   [ ] Check infeasibility in the code with new conditions
 -   [ ] Parameter Selection: `rho`, `sigma` and `alpha` from examples (data driven)
 -   [ ] Stress tests Maros Meszaros
+-   [ ] Link to CVXPY
+
+
+## TODO (Paper)
+-   [ ] Write infeasibility/unbounedness conditions
+-   [ ] Write compact algorithm (basic ADMM steps)
 -   [ ] Proove convergence to vectors satisfying Farkas lemma
 -   [ ] Write examples in the paper
--   [ ] Link to CVXPY
 
 
 ### Other Test Problems
