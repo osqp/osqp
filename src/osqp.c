@@ -265,7 +265,7 @@ c_int osqp_solve(Work * work){
     store_solution(work);
 
     // Indicate that the solve function has already been executed
-    work->first_run = 0;
+    if (work->first_run) work->first_run = 0;
 
     return exitflag;
 }
