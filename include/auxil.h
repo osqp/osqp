@@ -49,7 +49,7 @@ void update_y(Work *work);
 * @param  x    Value x
 * @return      Objective function value
 */
-c_float compute_obj_val(Work *work, c_int polish);
+c_float compute_obj_val(Data *data, c_float * x);
 
 
 

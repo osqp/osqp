@@ -129,17 +129,11 @@ void update_y(Work *work){
  * Compute objective function from data at value x
  * @param  data Data structure
  * @param  x       Value x
- * @param  polish  Compute obj_val from polish data or not (bool)
  * @return         Objective function value
  */
-c_float compute_obj_val(Work *work, c_int polish) {
-    if (polish) {
-        return quad_form(work->data->P, work->pol->x) +
-               vec_prod(work->data->q, work->pol->x, work->data->n);
-    } else {
-        return quad_form(work->data->P, work->x) +
-               vec_prod(work->data->q, work->x, work->data->n);
-    }
+c_float compute_obj_val(Data *data, c_float * x) {
+        return quad_form(data->P, x) +
+               vec_prod(data->q, x, data->n);
 }
 
 
@@ -314,7 +308,7 @@ void store_solution(Work *work) {
 void update_info(Work *work, c_int iter, c_int polish){
     if (work->data->m == 0) {  // No constraints in the problem (no polishing)
         work->info->iter = iter; // Update iteration number
-        work->info->obj_val = compute_obj_val(work, 0);
+        work->info->obj_val = compute_obj_val(work->data, work->x);
         work->info->pri_res = 0.;  // Always primal feasible
         work->info->dua_res = compute_dua_res(work, 0);
         #ifdef PROFILING
@@ -324,7 +318,7 @@ void update_info(Work *work, c_int iter, c_int polish){
     else{ // Problem has constraints
         if (!polish) { // No polishing
             work->info->iter = iter; // Update iteration number
-            work->info->obj_val = compute_obj_val(work, 0);
+            work->info->obj_val = compute_obj_val(work->data, work->x);
             work->info->pri_res = compute_pri_res(work, 0);
             work->info->dua_res = compute_dua_res(work, 0);
             #ifndef SKIP_INFEASIBILITY
@@ -334,7 +328,7 @@ void update_info(Work *work, c_int iter, c_int polish){
                 work->info->solve_time = toc(work->timer);
             #endif
         } else { // Polishing
-            work->pol->obj_val = compute_obj_val(work, 1);
+            work->pol->obj_val = compute_obj_val(work->data, work->pol->x);
             work->pol->pri_res = compute_pri_res(work, 1);
             work->pol->dua_res = compute_dua_res(work, 1);
         }
@@ -355,6 +349,8 @@ void update_status_string(Info *info){
         strcpy(info->status, "Infeasible");
     else if (info->status_val == OSQP_UNSOLVED)
         strcpy(info->status, "Unsolved");
+    else if (info->status_val == OSQP_UNBOUNDED)
+        strcpy(info->status, "Unbounded");
     else if (info->status_val == OSQP_MAX_ITER_REACHED)
         strcpy(info->status, "Maximum Iterations Reached");
 }

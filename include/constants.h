@@ -13,9 +13,10 @@
  ******************/
  // TODO: Add other statuses
 #define OSQP_SOLVED (1)
-#define OSQP_MAX_ITER_REACHED (-3)
+#define OSQP_MAX_ITER_REACHED (-2)
 // #define OSQP_SOLVED_INACCURATE (2)
-#define OSQP_INFEASIBLE (-2) /* primal infeasible, dual unbounded   */
+#define OSQP_INFEASIBLE (-3) /* primal infeasible, dual unbounded   */
+#define OSQP_UNBOUNDED (-4) /* primal unbounded, dual infeasible   */
 #define OSQP_UNSOLVED (-10)  /* Unsolved. Only setup function has been called */
 
 
