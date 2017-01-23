@@ -86,8 +86,6 @@ Work * osqp_setup(const Data * data, Settings *settings){
     #endif
 
     work->first_run = 1;
-    work->pri_res_vec = c_malloc(work->data->m * sizeof(c_float));
-    work->dua_res_vec = c_malloc(work->data->n * sizeof(c_float));
 
     // Copy settings
     work->settings = copy_settings(settings);
@@ -346,11 +344,6 @@ c_int osqp_cleanup(Work * work){
         if (work->delta_y_prev)
             c_free(work->delta_y_prev);
         #endif
-
-        if (work->pri_res_vec)
-            c_free(work->pri_res_vec);
-        if (work->dua_res_vec)
-            c_free(work->dua_res_vec);
 
         // Free Settings
         if (work->settings)

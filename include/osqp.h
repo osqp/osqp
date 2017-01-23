@@ -65,7 +65,9 @@ struct OSQP_WORK {
         Polish * pol;
 
         // Internal solver variables
-        c_float *x, *y, *z, *x_prev, *z_prev, *xz_tilde;
+        c_float *x, *y, *z, *xz_tilde; // Iterates
+        c_float *x_prev, *z_prev;      // Previous x and x.
+                                       // N.B. Used also as workspace vectors for residuals.
 
         #ifndef SKIP_INFEASIBILITY
         c_float *delta_y, *delta_y_prev;
@@ -73,10 +75,6 @@ struct OSQP_WORK {
 
         // flag indicating whether the solve function has been run before
         c_int first_run;
-
-        // Workspaces for computing residuals
-        c_float *pri_res_vec;  // m-dimensional workspace
-        c_float *dua_res_vec;  // n-dimensional workspace
 
         // Other internal structures
         Settings *settings;              // Problem settings

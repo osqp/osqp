@@ -159,23 +159,9 @@ c_float compute_pri_res(Work * work, c_int polish){
         }
         return c_sqrt(prim_resid_sq);
     } else {
-        // Called from ADMM algorithm
-        mat_vec(work->data->A, work->x, work->pri_res_vec, 0);
-        return vec_norm2_diff(work->pri_res_vec, work->z, work->data->m);
-    //
-    //
-    //
-    //     for (j = 0; j < work->data->m; j++) {
-    //         if (work->x[work->data->n + j] < work->data->l[j]) {
-    //             tmp = work->data->l[j] - work->x[work->data->n + j];
-    //             prim_resid_sq += tmp*tmp;
-    //         } else if (work->x[work->data->n + j] > work->data->u[j]) {
-    //             tmp = work->x[work->data->n + j] - work->data->u[j];
-    //             prim_resid_sq += tmp*tmp;
-    //         }
-    //     }
-    // }
-    // return c_sqrt(prim_resid_sq);
+        // Called from ADMM algorithm (store temporary vector in z_prev)
+        mat_vec(work->data->A, work->x, work->z_prev, 0);
+        return vec_norm2_diff(work->z_prev, work->z, work->data->m);
     }
 }
 
@@ -190,74 +176,39 @@ c_float compute_pri_res(Work * work, c_int polish){
  */
 c_float compute_dua_res(Work * work, c_int polish){
 
+    // N.B. Use x_prev as temporary vector
+
     if (!polish){
         // dual_res = q
-        prea_vec_copy(work->data->q, work->dua_res_vec, work->data->n);
+        prea_vec_copy(work->data->q, work->x_prev, work->data->n);
 
         // += A' * y
-        mat_tpose_vec(work->data->A, work->y, work->dua_res_vec, 1, 0);
+        mat_tpose_vec(work->data->A, work->y, work->x_prev, 1, 0);
 
         // += P * x (upper triangular part)
-        mat_vec(work->data->P, work->x, work->dua_res_vec, 1);
+        mat_vec(work->data->P, work->x, work->x_prev, 1);
 
         // += P' * x (lower triangular part with no diagonal)
-        mat_tpose_vec(work->data->P, work->x, work->dua_res_vec, 1, 1);
+        mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
 
         // Return norm
-        return vec_norm2(work->dua_res_vec, work->data->n);
+        return vec_norm2(work->x_prev, work->data->n);
 
     } else {
         // Called from polish() function
         // dr = q + Ared'*y_red + P*x
         // NB: Only upper triangular part of P is stored.
-        prea_vec_copy(work->data->q, work->dua_res_vec,
+        prea_vec_copy(work->data->q, work->x_prev,
                       work->data->n);                    // dr = q
         mat_tpose_vec(work->pol->Ared, work->pol->y_red,
-                      work->dua_res_vec, 1, 0);      // += Ared'*y_red
+                      work->x_prev, 1, 0);      // += Ared'*y_red
         mat_vec(work->data->P, work->pol->x,
-                work->dua_res_vec, 1);               // += Px (upper triang part)
+                work->x_prev, 1);               // += Px (upper triang part)
         mat_tpose_vec(work->data->P, work->pol->x,
-                      work->dua_res_vec, 1, 1);      // += Px (lower triang part)
-        return vec_norm2(work->dua_res_vec, work->data->n);
+                      work->x_prev, 1, 1);      // += Px (lower triang part)
+        return vec_norm2(work->x_prev, work->data->n);
     }
 }
-
-    // if (polish) {
-    //     // Called from polish() function
-    //     // dr = q + Ared'*y_red + P*x
-    //     // NB: Only upper triangular part of P is stored.
-    //     prea_vec_copy(work->data->q, work->dua_res_ws_n,
-    //                   work->data->n);                    // dr = q
-    //     mat_tpose_vec(work->pol->Ared, work->pol->y_red,
-    //                   work->dua_res_ws_n, 1, 0);      // += Ared'*y_red
-    //     mat_vec(work->data->P, work->pol->x,
-    //             work->dua_res_ws_n, 1);               // += Px (upper triang part)
-    //     mat_tpose_vec(work->data->P, work->pol->x,
-    //                   work->dua_res_ws_n, 1, 1);      // += Px (lower triang part)
-    //     return vec_norm2(work->dua_res_ws_n, work->data->n);
-    // } else {
-    //     // TODO: Update computation of the dual residual
-    //     // Called from ADMM algorithm
-    //     // -dr = rho * [I  A']( z^{k+1} + (alpha-2)*z^k + (1-alpha)*x^{k+1} )
-    //     // NB: I compute negative dual residual for the convenience
-    //     prea_vec_copy(work->z, work->dua_res_ws_n, work->data->n);  // dr = z_x
-    //     vec_add_scaled(work->dua_res_ws_n, work->z_prev,
-    //                    work->data->n, work->settings->alpha-2.0);   // += (alpha-2)*z_prev_x
-    //     vec_add_scaled(work->dua_res_ws_n, work->x,
-    //                    work->data->n, 1.0-work->settings->alpha);  // += (1-alpha)*x_x
-    //
-    //     prea_vec_copy(work->z + work->data->n, work->dua_res_ws_m,
-    //                   work->data->m);                       // dr = z_s
-    //     vec_add_scaled(work->dua_res_ws_m, work->z_prev + work->data->n,
-    //                    work->data->m, work->settings->alpha-2.0); // += (alpha-2)*z_prev_s
-    //     vec_add_scaled(work->dua_res_ws_m, work->x + work->data->n,
-    //                    work->data->m, 1.0-work->settings->alpha); // += (1-alpha)*x_s
-    //     mat_tpose_vec(work->data->A, work->dua_res_ws_m,
-    //                   work->dua_res_ws_n, 1, 0);
-    //     return (work->settings->rho * vec_norm2(work->dua_res_ws_n, work->data->n));
-    // }
-
-// }
 
 
 #ifndef SKIP_INFEASIBILITY
@@ -396,10 +347,10 @@ c_int residuals_check(Work *work){
     }
 
     // Compute dual tolerance
-    mat_tpose_vec(work->data->A, work->y, work->dua_res_vec, 0, 0); // ws = A'*u
+    mat_tpose_vec(work->data->A, work->y, work->x_prev, 0, 0); // ws = A'*u
     eps_dua = c_sqrt(work->data->n) * work->settings->eps_abs +
               work->settings->eps_rel * work->settings->rho *
-              vec_norm2(work->dua_res_vec, work->data->n);
+              vec_norm2(work->x_prev, work->data->n);
     // Dual feasibility check
     if (work->info->dua_res < eps_dua) dua_check = 1;
 
