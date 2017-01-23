@@ -65,7 +65,7 @@ struct OSQP_WORK {
         Polish * pol;
 
         // Internal solver variables
-        c_float *x, *z, *x_prev, *z_prev, *xz_tilde, *y;
+        c_float *x, *y, *z, *x_prev, *z_prev, *xz_tilde;
 
         #ifndef SKIP_INFEASIBILITY
         c_float *delta_y, *delta_y_prev;
