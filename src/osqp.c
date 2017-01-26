@@ -156,6 +156,14 @@ c_int osqp_solve(Work * work){
     c_int exitflag = 0;
     c_int iter;
 
+    // Check if workspace has been initialized
+    if (!work){
+        #ifdef PRINTING
+        c_print("ERROR: Workspace not initialized!\n");
+        #endif
+        return -1;
+    }
+
     #ifdef PROFILING
     tic(work->timer); // Start timer
     #endif
@@ -277,54 +285,54 @@ c_int osqp_solve(Work * work){
 c_int osqp_cleanup(Work * work){
     c_int exitflag=0;
 
-    // Free Data
-    if (work->data) {
-        if (work->data->P)
-            csc_spfree(work->data->P);
-        if (work->data->A)
-            csc_spfree(work->data->A);
-        if (work->data->q)
-            c_free(work->data->q);
-        if (work->data->l)
-            c_free(work->data->l);
-        if (work->data->u)
-            c_free(work->data->u);
-        c_free(work->data);
-    }
+    if (work) { // If workspace has been allocated
+        // Free Data
+        if (work->data) {
+            if (work->data->P)
+                csc_spfree(work->data->P);
+            if (work->data->A)
+                csc_spfree(work->data->A);
+            if (work->data->q)
+                c_free(work->data->q);
+            if (work->data->l)
+                c_free(work->data->l);
+            if (work->data->u)
+                c_free(work->data->u);
+            c_free(work->data);
+        }
 
-    // Free scaling
-    if (work->settings->scaling) {
-        if (work->scaling->D)
-            c_free(work->scaling->D);
-        if (work->scaling->Dinv)
-            c_free(work->scaling->Dinv);
-        if (work->scaling->E)
-            c_free(work->scaling->E);
-        if (work->scaling->Einv)
-            c_free(work->scaling->Einv);
-        c_free(work->scaling);
-    }
+        // Free scaling
+        if (work->settings->scaling) {
+            if (work->scaling->D)
+                c_free(work->scaling->D);
+            if (work->scaling->Dinv)
+                c_free(work->scaling->Dinv);
+            if (work->scaling->E)
+                c_free(work->scaling->E);
+            if (work->scaling->Einv)
+                c_free(work->scaling->Einv);
+            c_free(work->scaling);
+        }
 
-    // Free private structure for linear system solver_solution
-    free_priv(work->priv);
+        // Free private structure for linear system solver_solution
+        free_priv(work->priv);
 
-    // Free active constraints structure
-    if (work->pol) {
-        if (work->pol->ind_lAct)
-            c_free(work->pol->ind_lAct);
-        if (work->pol->ind_uAct)
-            c_free(work->pol->ind_uAct);
-        if (work->pol->A2Ared)
-            c_free(work->pol->A2Ared);
-        if (work->pol->x)
-            c_free(work->pol->x);
-        if (work->pol->z)
-            c_free(work->pol->z);
-        c_free(work->pol);
-    }
+        // Free active constraints structure
+        if (work->pol) {
+            if (work->pol->ind_lAct)
+                c_free(work->pol->ind_lAct);
+            if (work->pol->ind_uAct)
+                c_free(work->pol->ind_uAct);
+            if (work->pol->A2Ared)
+                c_free(work->pol->A2Ared);
+            if (work->pol->x)
+                c_free(work->pol->x);
+            if (work->pol->z)
+                c_free(work->pol->z);
+            c_free(work->pol);
+        }
 
-    // Free work Variables
-    if (work) {
+        // Free other Variables
         if (work->x)
             c_free(work->x);
         if (work->z)
