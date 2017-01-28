@@ -61,17 +61,15 @@ struct OSQP_WORK {
         // Linear System solver structure
         Priv * priv;
 
-        // Polish` structure
+        // Polish structure
         Polish * pol;
 
         // Internal solver variables
         c_float *x, *y, *z, *xz_tilde; // Iterates
         c_float *x_prev, *z_prev;      // Previous x and x.
                                        // N.B. Used also as workspace vectors for residuals.
-
-        #ifndef SKIP_INFEASIBILITY
-        c_float *delta_y, *delta_y_prev;
-        #endif
+        c_float *delta_y, *Atdelta_y;  // Infeasibility variables delta_y and
+                                       // A' * delta_y
 
         // flag indicating whether the solve function has been run before
         c_int first_run;
@@ -108,9 +106,7 @@ struct OSQP_INFO {
         c_float obj_val;     /* primal objective */
         c_float pri_res;     /* norm of primal residual */
         c_float dua_res;     /* norm of dual residual */
-        #if SKIP_INFEASIBILITY == 0
         c_float inf_res;     /* norm of infeasibility residual */
-        #endif
 
         #ifdef PROFILING
         c_float setup_time;  /* time taken for setup phase (milliseconds) */

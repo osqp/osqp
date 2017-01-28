@@ -102,26 +102,18 @@ void update_z(Work *work){
 
 /**
  * Update y variable (third ADMM step)
+ * Update also delta_y to check for infeasibility
  * @param work Workspace
  */
 void update_y(Work *work){
     c_int i; // Index
     for (i = 0; i < work->data->m; i++){
 
-        #ifndef SKIP_INFEASIBILITY
-
         work->delta_y[i] = work->settings->rho *
-                           (work->settings->alpha * work->xz_tilde[i + work->data->n] +
-                           (1.0 - work->settings->alpha) * work->z_prev[i] - work->z[i]);
+            (work->settings->alpha * work->xz_tilde[i + work->data->n] +
+            (1.0 - work->settings->alpha) * work->z_prev[i] - work->z[i]);
         work->y[i] += work->delta_y[i];
 
-        #else
-
-        work->y[i] += work->settings->rho *
-                      (work->settings->alpha * work->xz_tilde[i + work->data->n] +
-                      (1.0 - work->settings->alpha) * work->z_prev[i] - work->z[i]);
-
-        #endif
     }
 }
 
@@ -178,7 +170,7 @@ c_float compute_dua_res(Work * work, c_int polish){
 
     // N.B. Use x_prev as temporary vector
 
-    if (!polish){
+    if (!polish){ // Normal call
         // dual_res = q
         prea_vec_copy(work->data->q, work->x_prev, work->data->n);
 
@@ -194,7 +186,7 @@ c_float compute_dua_res(Work * work, c_int polish){
         // Return norm
         return vec_norm2(work->x_prev, work->data->n);
 
-    } else {
+    } else {  // Call after polish
         // Called from polish() function
         // dr = q + Ared'*y_red + P*x
         // NB: Only upper triangular part of P is stored.
@@ -211,30 +203,42 @@ c_float compute_dua_res(Work * work, c_int polish){
 }
 
 
-#ifndef SKIP_INFEASIBILITY
 /**
  * Compute norm of infeasibility residual
  * @param  work Workspace
  * @return      Norm of infeasibility residual
  */
 c_float compute_inf_res(Work * work){
-    // c_int j;
-    // c_float tmp, infeas_resid_sq=0;
-    //
-    // for (j = 0; j < work->data->m; j++) {
-    //     if (work->x[work->data->n + j] < work->data->l[j]) {
-    //         tmp = work->z[work->data->n + j] - work->data->l[j];
-    //     } else if (work->x[work->data->n + j] > work->data->u[j]) {
-    //         tmp = work->data->u[j] - work->z[work->data->n + j];
-    //     } else {
-    //         tmp = work->x[work->data->n + j] - work->z[work->data->n + j];
-    //     }
-    //     infeas_resid_sq += tmp*tmp;
-    // }
-    // return c_sqrt(infeas_resid_sq);
-    return vec_norm2_diff(work->delta_y, work->delta_y_prev, work->data->m);
+    c_int i; // Index for loops
+    c_float norm_delta_y, ineq_lhs = 0;
+
+    // Compute norm of delta_y
+    norm_delta_y = vec_norm2(work->delta_y, work->data->m);
+
+    if (norm_delta_y > 1e-15){ // ||delta_y|| > 0
+        // Normalize delta_y by its norm
+        vec_mult_scalar(work->delta_y, 1./norm_delta_y, work->data->m);
+
+        // Compute check
+        // ineq_lhs = u'*max(delta_y, 0) + l'*min(delta_y, 0) < 0
+        for (i = 0; i < work->data->m; i++){
+            ineq_lhs += work->data->u[i] * c_max(work->delta_y[i], 0) + work->data->l[i] * c_min(work->delta_y[i], 0);
+        }
+
+        if (ineq_lhs < 1e-15){ // Condition satisfied
+            // Compute and return ||A'delta_y||
+            mat_tpose_vec(work->data->A, work->delta_y, work->Atdelta_y, 0, 0);
+            return vec_norm2(work->Atdelta_y, work->data->n);
+        } else { // Condition not satisfied -> infinity residual
+            return OSQP_INFTY;
+        }
+
+
+    }else{ // ||delta_y|| = 0 -> infinity residual
+        return OSQP_INFTY;
+    }
+
 }
-#endif
 
 
 /**
@@ -242,9 +246,8 @@ c_float compute_inf_res(Work * work){
  * @param work Workspace
  */
 void store_solution(Work *work) {
-    prea_vec_copy(work->x, work->solution->x, work->data->n);       // primal
+    prea_vec_copy(work->x, work->solution->x, work->data->n);   // primal
     prea_vec_copy(work->y, work->solution->y, work->data->m);  // dual
-    // vec_mult_scalar(work->solution->y, work->settings->rho, work->data->m);
 
     if(work->settings->scaling) // Unscale solution if scaling has been performed
         unscale_solution(work);
@@ -260,28 +263,31 @@ void update_info(Work *work, c_int iter, c_int polish){
     if (work->data->m == 0) {  // No constraints in the problem (no polishing)
         work->info->iter = iter; // Update iteration number
         work->info->obj_val = compute_obj_val(work->data, work->x);
-        work->info->pri_res = 0.;  // Always primal feasible
+        work->info->pri_res = 0.;          // Always primal feasible
+        work->info->inf_res = OSQP_INFTY;  // Always feasible
         work->info->dua_res = compute_dua_res(work, 0);
         #ifdef PROFILING
             work->info->solve_time = toc(work->timer);
         #endif
     }
     else{ // Problem has constraints
-        if (!polish) { // No polishing
+        if (polish) { // polishing
+
+            work->pol->obj_val = compute_obj_val(work->data, work->pol->x);
+            work->pol->pri_res = compute_pri_res(work, 1);
+            work->pol->dua_res = compute_dua_res(work, 1);
+            
+        } else { // normal update
+
             work->info->iter = iter; // Update iteration number
             work->info->obj_val = compute_obj_val(work->data, work->x);
             work->info->pri_res = compute_pri_res(work, 0);
             work->info->dua_res = compute_dua_res(work, 0);
-            #ifndef SKIP_INFEASIBILITY
             work->info->inf_res = compute_inf_res(work);
-            #endif
+
             #ifdef PROFILING
                 work->info->solve_time = toc(work->timer);
             #endif
-        } else { // Polishing
-            work->pol->obj_val = compute_obj_val(work->data, work->pol->x);
-            work->pol->pri_res = compute_pri_res(work, 1);
-            work->pol->dua_res = compute_dua_res(work, 1);
         }
     }
 }
@@ -314,13 +320,9 @@ void update_status_string(Info *info){
  * @return      Redisuals check
  */
 c_int residuals_check(Work *work){
-    c_float eps_pri, eps_dua;
+    c_float eps_pri, eps_dua, eps_inf;
     c_int exitflag = 0;
-    c_int pri_check = 0, dua_check = 0;
-    #if SKIP_INFEASIBILITY == 0
-    c_int inf_check = 0;
-    #endif
-
+    c_int pri_check = 0, dua_check = 0, inf_check = 0;
 
     // Check residuals
     if (work->data->m == 0){
@@ -333,17 +335,11 @@ c_int residuals_check(Work *work){
         // Primal feasibility check
         if (work->info->pri_res < eps_pri) pri_check = 1;
 
-        #if SKIP_INFEASIBILITY == 0
+        // Compute infeasibility tolerance
+        eps_inf = c_sqrt(work->data->n) * work->settings->eps_abs +
+            work->settings->eps_rel * work->info->inf_res;
         // Infeasibility check
-        if (work->info->inf_res < 1e-2*eps_pri &&
-            vec_norm2(work->delta_y, work->data->m) > 1e2*eps_pri) {
-            inf_check = 1;
-            // c_print("Inf residual condition True\n");
-            // c_print("Inf residual = %e\n", work->info->inf_res);
-            // c_print("eps_dua = %e\n", eps_dua);
-            // c_print("eps_pri = %e\n", eps_pri);
-        }
-        #endif
+        if (work->info->inf_res < eps_inf) inf_check = 1;
     }
 
     // Compute dual tolerance
@@ -361,27 +357,11 @@ c_int residuals_check(Work *work){
         work->info->status_val = OSQP_SOLVED;
         exitflag = 1;
     }
-
-    #if SKIP_INFEASIBILITY == 0
-    else if ((!pri_check) & dua_check & inf_check){
+    else if (inf_check){
         // Update final information
         work->info->status_val = OSQP_INFEASIBLE;
         exitflag = 1;
     }
-    #endif
-
-
-
-    // if (work->info->pri_res < eps_pri && work->info->dua_res < eps_dua) {
-    //     // Update final information
-    //     work->info->status_val = OSQP_SOLVED;
-    //     exitflag = 1;
-    // } else if (work->info->pri_res > eps_pri && work->info->dua_res < eps_dua
-    //                                          && work->info->inf_res < eps_pri) {
-    //    // Update final information
-    //    work->info->status_val = OSQP_INFEASIBLE;
-    //    exitflag = 1;
-    // }
 
     return exitflag;
 

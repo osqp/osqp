@@ -38,6 +38,7 @@ void update_z(Work *work);
 
 /**
 * Update y variable (fourth ADMM step)
+* Update also delta_y to check for infeasibility
 * @param work Workspace
 */
 void update_y(Work *work);

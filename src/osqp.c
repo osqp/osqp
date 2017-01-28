@@ -67,12 +67,9 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->data->u = vec_copy(data->u, data->m);  // Upper bounds on constraints
 
 
-    /* Allocate internal solver variables (ADMM steps)
-     *
-     * N.B. Augmented variables with z (n+m)
+    /*
+     *  Allocate internal solver variables (ADMM steps)
      */
-
-    // Initialize x,z,u to zero
     work->x = c_calloc(work->data->n, sizeof(c_float));
     work->z = c_calloc(work->data->m, sizeof(c_float));
     work->xz_tilde = c_calloc((work->data->n + work->data->m), sizeof(c_float));
@@ -80,10 +77,9 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->z_prev = c_calloc(work->data->m, sizeof(c_float));
     work->y = c_calloc(work->data->m, sizeof(c_float));
 
-    #ifndef SKIP_INFEASIBILITY
+    // Infeasibility variables
     work->delta_y = c_calloc(work->data->m, sizeof(c_float));
-    work->delta_y_prev = c_calloc(work->data->m, sizeof(c_float));
-    #endif
+    work->Atdelta_y = c_calloc(work->data->n, sizeof(c_float));
 
     work->first_run = 1;
 
@@ -113,9 +109,8 @@ Work * osqp_setup(const Data * data, Settings *settings){
 
     // Allocate solution
     work->solution = c_calloc(1, sizeof(Solution));
-    work->solution->x = c_calloc(1, work->data->n * sizeof(c_float)); // Allocate primal solution
+    work->solution->x = c_calloc(1, work->data->n * sizeof(c_float));
     work->solution->y = c_calloc(1, work->data->m * sizeof(c_float));
-
 
     // Allocate information
     work->info = c_calloc(1, sizeof(Info));
@@ -184,12 +179,6 @@ c_int osqp_solve(Work * work){
         // Update x_prev, z_prev (preallocated, no malloc)
         prea_vec_copy(work->x, work->x_prev, work->data->n);
         prea_vec_copy(work->z, work->z_prev, work->data->m);
-
-
-        #ifndef SKIP_INFEASIBILITY
-        // Update delta_y_prev (preallocated, no malloc)
-        prea_vec_copy(work->delta_y, work->delta_y_prev, work->data->m);
-        #endif
 
         /* ADMM STEPS */
         /* Compute \tilde{x}^{k+1}, \tilde{z}^{k+1} */
@@ -346,12 +335,10 @@ c_int osqp_cleanup(Work * work){
         if (work->y)
             c_free(work->y);
 
-        #ifndef SKIP_INFEASIBILITY
         if (work->delta_y)
             c_free(work->delta_y);
-        if (work->delta_y_prev)
-            c_free(work->delta_y_prev);
-        #endif
+        if (work->Atdelta_y)
+            c_free(work->Atdelta_y);
 
         // Free Settings
         if (work->settings)
