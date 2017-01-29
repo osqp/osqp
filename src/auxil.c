@@ -276,10 +276,11 @@ c_int is_unbounded(Work * work){
                 mat_vec(work->data->A, work->delta_x, work->Adelta_x, 0);
 
                 // De Morgan Law Applied to Unboundedness conditions for A * x
+                // See Section "Detecting infeasibility and unboundedness" of
+                // OSQP Paper
                 for (i = 0; i < work->data->m; i++){
-                    if (((work->data->u[i] > OSQP_INFTY*1e-03) && (work->Adelta_x[i] < - work->settings->eps_unb)) ||
-                    ((work->data->l[i] < -OSQP_INFTY*1e-03) && (work->Adelta_x[i] > work->settings->eps_unb)) ||
-                    ((work->data->l[i] >= -OSQP_INFTY*1e-03) && (work->data->u[i] <= OSQP_INFTY*1e-03) & (c_absval(work->Adelta_x[i]) > work->settings->eps_unb))){
+                    if (((work->data->u[i] < OSQP_INFTY*1e-03) && (work->Adelta_x[i] >  work->settings->eps_unb)) ||
+                    ((work->data->l[i] > -OSQP_INFTY*1e-03) && (work->Adelta_x[i] < -work->settings->eps_unb))){
                         // At least one condition not satisfied
                         return 0;
                     }
