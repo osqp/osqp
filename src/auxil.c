@@ -278,6 +278,8 @@ c_int is_unbounded(Work * work){
                 // De Morgan Law Applied to Unboundedness conditions for A * x
                 // See Section "Detecting infeasibility and unboundedness" of
                 // OSQP Paper
+                // N.B. Note that 1e-03 is used to adjust the infinity value
+                //      in case the problem is scaled.
                 for (i = 0; i < work->data->m; i++){
                     if (((work->data->u[i] < OSQP_INFTY*1e-03) && (work->Adelta_x[i] >  work->settings->eps_unb)) ||
                     ((work->data->l[i] > -OSQP_INFTY*1e-03) && (work->Adelta_x[i] < -work->settings->eps_unb))){
