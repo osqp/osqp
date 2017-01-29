@@ -66,8 +66,9 @@ void print_setup_header(const Data *data, const Settings *settings) {
     // Print variables and constraints
     c_print("Settings: ");
     c_print("eps_abs = %.2e, eps_rel = %.2e,\n          "
+            "eps_inf = %.2e, eps_unb = %.2e,\n          "
             "rho = %.2f, sigma = %.2f, alpha = %.2f, \n          max_iter = %i\n",
-            settings->eps_abs, settings->eps_rel, settings->rho, settings->sigma,
+            settings->eps_abs, settings->eps_rel, settings->eps_inf, settings->eps_unb, settings->rho, settings->sigma,
             settings->alpha, settings->max_iter);
     if (settings->scaling)
         c_print("          scaling: active\n");
@@ -195,6 +196,8 @@ void set_default_settings(Settings * settings) {
         settings->max_iter = MAX_ITER; /* maximum iterations to take */
         settings->eps_abs = EPS_ABS;         /* absolute convergence tolerance */
         settings->eps_rel = EPS_REL;         /* relative convergence tolerance */
+        settings->eps_inf = EPS_INF;         /* infeasibility tolerance */
+        settings->eps_unb = EPS_UNB;         /* unboundedness tolerance */
         settings->alpha = ALPHA;     /* relaxation parameter */
         settings->delta = DELTA;    /* regularization parameter for polishing */
         settings->polishing = POLISHING;     /* ADMM solution polishing: 1 */
@@ -219,6 +222,8 @@ Settings * copy_settings(Settings * settings){
     new->max_iter = settings->max_iter;
     new->eps_abs = settings->eps_abs;
     new->eps_rel = settings->eps_rel;
+    new->eps_inf = settings->eps_inf;
+    new->eps_unb = settings->eps_unb;
     new->alpha = settings->alpha;
     new->delta = settings->delta;
     new->polishing = settings->polishing;

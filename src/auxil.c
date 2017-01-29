@@ -66,6 +66,7 @@ void update_xz_tilde(Work * work){
 
 /**
 * Update x (second ADMM step)
+* Update also delta_x (For unboundedness)
 * @param work Workspace
 */
 void update_x(Work * work){
@@ -76,6 +77,12 @@ void update_x(Work * work){
         work->x[i] = work->settings->alpha * work->xz_tilde[i] +
                      (1.0 - work->settings->alpha) * work->x_prev[i];
     }
+
+    // update delta_x
+    for (i = 0; i < work->data->n; i++){
+        work->delta_x[i] = work->x[i] - work->x_prev[i];
+    }
+
 }
 
 
@@ -204,18 +211,18 @@ c_float compute_dua_res(Work * work, c_int polish){
 
 
 /**
- * Compute norm of infeasibility residual
+ * Check if problem is infeasible
  * @param  work Workspace
- * @return      Norm of infeasibility residual
+ * @return      Integer for True or False
  */
-c_float compute_inf_res(Work * work){
+c_int is_infeasible(Work * work){
     c_int i; // Index for loops
     c_float norm_delta_y, ineq_lhs = 0;
 
     // Compute norm of delta_y
     norm_delta_y = vec_norm2(work->delta_y, work->data->m);
 
-    if (norm_delta_y > 1e-15){ // ||delta_y|| > 0
+    if (norm_delta_y > work->settings->eps_inf*work->settings->eps_inf){ // ||delta_y|| > 0
         // Normalize delta_y by its norm
         vec_mult_scalar(work->delta_y, 1./norm_delta_y, work->data->m);
 
@@ -225,18 +232,67 @@ c_float compute_inf_res(Work * work){
             ineq_lhs += work->data->u[i] * c_max(work->delta_y[i], 0) + work->data->l[i] * c_min(work->delta_y[i], 0);
         }
 
-        if (ineq_lhs < 1e-15){ // Condition satisfied
-            // Compute and return ||A'delta_y||
+        if (ineq_lhs < -work->settings->eps_inf){ // Condition satisfied
+            // Compute and return ||A'delta_y|| < eps_inf
             mat_tpose_vec(work->data->A, work->delta_y, work->Atdelta_y, 0, 0);
-            return vec_norm2(work->Atdelta_y, work->data->n);
-        } else { // Condition not satisfied -> infinity residual
-            return OSQP_INFTY;
+            return vec_norm2(work->Atdelta_y, work->data->n) < work->settings->eps_inf;
         }
-
-
-    }else{ // ||delta_y|| = 0 -> infinity residual
-        return OSQP_INFTY;
     }
+
+    // Conditions not satisfied -> not infeasible
+    return 0;
+
+}
+
+/**
+ * Check if problem is unbounded
+ * @param  work Workspace
+ * @return        Integer for True or False
+ */
+c_int is_unbounded(Work * work){
+    c_int i; // Index for loops
+    c_float norm_delta_x;
+
+    // Compute norm of delta_x
+    norm_delta_x = vec_norm2(work->delta_x, work->data->n);
+
+    // Prevent 0 division || delta_x || > 0
+    if (norm_delta_x > work->settings->eps_unb*work->settings->eps_unb){
+
+        // Normalize delta_x by its norm
+        vec_mult_scalar(work->delta_x, 1./norm_delta_x, work->data->n);
+
+        // Check first if q'*delta_x < 0
+        if (vec_prod(work->data->q, work->delta_x, work->data->n) <
+            -work->settings->eps_unb){
+
+            // Compute product P * delta_x
+            mat_vec(work->data->P, work->delta_x, work->Pdelta_x, 0);
+
+            // Check if || P * delta_x || = 0
+            if (vec_norm2(work->Pdelta_x, work->data->n) < work->settings->eps_unb){
+
+                // Compute A * delta_x
+                mat_vec(work->data->A, work->delta_x, work->Adelta_x, 0);
+
+                // De Morgan Law Applied to Unboundedness conditions for A * x
+                for (i = 0; i < work->data->m; i++){
+                    if (((work->data->u[i] > OSQP_INFTY*1e-03) && (work->Adelta_x[i] < - work->settings->eps_unb)) ||
+                    ((work->data->l[i] < -OSQP_INFTY*1e-03) && (work->Adelta_x[i] > work->settings->eps_unb)) ||
+                    ((work->data->l[i] >= -OSQP_INFTY*1e-03) && (work->data->u[i] <= OSQP_INFTY*1e-03) & (c_absval(work->Adelta_x[i]) > work->settings->eps_unb))){
+                        // At least one condition not satisfied
+                        return 0;
+                    }
+                }
+
+                // All conditions passed -> Unbounded
+                return 1;
+            }
+        }
+    }
+
+    // Conditions not satisfied -> not unbounded
+    return 0;
 
 }
 
@@ -264,7 +320,6 @@ void update_info(Work *work, c_int iter, c_int polish){
         work->info->iter = iter; // Update iteration number
         work->info->obj_val = compute_obj_val(work->data, work->x);
         work->info->pri_res = 0.;          // Always primal feasible
-        work->info->inf_res = OSQP_INFTY;  // Always feasible
         work->info->dua_res = compute_dua_res(work, 0);
         #ifdef PROFILING
             work->info->solve_time = toc(work->timer);
@@ -276,14 +331,13 @@ void update_info(Work *work, c_int iter, c_int polish){
             work->pol->obj_val = compute_obj_val(work->data, work->pol->x);
             work->pol->pri_res = compute_pri_res(work, 1);
             work->pol->dua_res = compute_dua_res(work, 1);
-            
+
         } else { // normal update
 
             work->info->iter = iter; // Update iteration number
             work->info->obj_val = compute_obj_val(work->data, work->x);
             work->info->pri_res = compute_pri_res(work, 0);
             work->info->dua_res = compute_dua_res(work, 0);
-            work->info->inf_res = compute_inf_res(work);
 
             #ifdef PROFILING
                 work->info->solve_time = toc(work->timer);
@@ -315,14 +369,14 @@ void update_status_string(Info *info){
 
 
 /**
- * Check if residuals norm meet the required tolerance
+ * Check if termination conditions are satisfied
  * @param  work Workspace
  * @return      Redisuals check
  */
-c_int residuals_check(Work *work){
-    c_float eps_pri, eps_dua, eps_inf;
+c_int check_termination(Work *work){
+    c_float eps_pri, eps_dua;
     c_int exitflag = 0;
-    c_int pri_check = 0, dua_check = 0, inf_check = 0;
+    c_int pri_check = 0, dua_check = 0, inf_check, unb_check;
 
     // Check residuals
     if (work->data->m == 0){
@@ -335,11 +389,8 @@ c_int residuals_check(Work *work){
         // Primal feasibility check
         if (work->info->pri_res < eps_pri) pri_check = 1;
 
-        // Compute infeasibility tolerance
-        eps_inf = c_sqrt(work->data->n) * work->settings->eps_abs +
-            work->settings->eps_rel * work->info->inf_res;
         // Infeasibility check
-        if (work->info->inf_res < eps_inf) inf_check = 1;
+        inf_check = is_infeasible(work);
     }
 
     // Compute dual tolerance
@@ -351,6 +402,9 @@ c_int residuals_check(Work *work){
     if (work->info->dua_res < eps_dua) dua_check = 1;
 
 
+    // Check unboundedness
+    unb_check = is_unbounded(work);
+
     // Compare checks to determine solver status
     if (pri_check && dua_check){
         // Update final information
@@ -360,6 +414,11 @@ c_int residuals_check(Work *work){
     else if (inf_check){
         // Update final information
         work->info->status_val = OSQP_INFEASIBLE;
+        exitflag = 1;
+    }
+    else if (unb_check){
+        // Update final information
+        work->info->status_val = OSQP_UNBOUNDED;
         exitflag = 1;
     }
 

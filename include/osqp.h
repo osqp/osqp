@@ -44,6 +44,8 @@ struct OSQP_SETTINGS {
         c_int max_iter; /* maximum iterations to take */
         c_float eps_abs;  /* absolute convergence tolerance  */
         c_float eps_rel;  /* relative convergence tolerance  */
+        c_float eps_inf;  /* infeasibility tolerance  */
+        c_float eps_unb;  /* unboundedness tolerance  */
         c_float alpha; /* relaxation parameter */
         c_float delta; /* regularization parameter for polishing */
         c_int polishing; /* boolean, polish ADMM solution */
@@ -70,6 +72,9 @@ struct OSQP_WORK {
                                        // N.B. Used also as workspace vectors for residuals.
         c_float *delta_y, *Atdelta_y;  // Infeasibility variables delta_y and
                                        // A' * delta_y
+        c_float *delta_x, *Pdelta_x, *Adelta_x; // Unboundedness variables
+                                                // delta_x, P * delta_x and
+                                                // A * delta_x
 
         // flag indicating whether the solve function has been run before
         c_int first_run;
@@ -106,7 +111,6 @@ struct OSQP_INFO {
         c_float obj_val;     /* primal objective */
         c_float pri_res;     /* norm of primal residual */
         c_float dua_res;     /* norm of dual residual */
-        c_float inf_res;     /* norm of infeasibility residual */
 
         #ifdef PROFILING
         c_float setup_time;  /* time taken for setup phase (milliseconds) */

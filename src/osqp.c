@@ -81,6 +81,11 @@ Work * osqp_setup(const Data * data, Settings *settings){
     work->delta_y = c_calloc(work->data->m, sizeof(c_float));
     work->Atdelta_y = c_calloc(work->data->n, sizeof(c_float));
 
+    // Unboundedness variables
+    work->delta_x = c_calloc(work->data->n, sizeof(c_float));
+    work->Pdelta_x = c_calloc(work->data->n, sizeof(c_float));
+    work->Adelta_x = c_calloc(work->data->m, sizeof(c_float));
+
     work->first_run = 1;
 
     // Copy settings
@@ -205,7 +210,7 @@ c_int osqp_solve(Work * work){
             print_summary(work->info);
         #endif
 
-        if (residuals_check(work)){
+        if (check_termination(work)){
             // Terminate algorithm
             break;
         }
@@ -339,6 +344,13 @@ c_int osqp_cleanup(Work * work){
             c_free(work->delta_y);
         if (work->Atdelta_y)
             c_free(work->Atdelta_y);
+
+        if (work->delta_x)
+            c_free(work->delta_x);
+        if (work->Pdelta_x)
+            c_free(work->Pdelta_x);
+        if (work->Adelta_x)
+            c_free(work->Adelta_x);
 
         // Free Settings
         if (work->settings)

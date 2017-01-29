@@ -30,6 +30,8 @@
 #define MAX_ITER (2500)
 #define EPS_ABS (1E-5)
 #define EPS_REL (1E-5)
+#define EPS_INF (1E-6)
+#define EPS_UNB (1E-6)
 #define ALPHA (1.6)
 #define DELTA (1E-7)
 #define POLISHING (1)

@@ -24,6 +24,7 @@ void update_xz_tilde(Work * work);
 
 /**
 * Update x (second ADMM step)
+* Update also delta_x (For unboundedness)
 * @param work Workspace
 */
 void update_x(Work *work);
@@ -76,11 +77,11 @@ void update_status_string(Info *info);
 
 
 /**
-* Check if residuals norm meet the required tolerance
+* Check if termination conditions are satisfied
 * @param  work Workspace
 * @return      Redisuals check
 */
-c_int residuals_check(Work *work);
+c_int check_termination(Work *work);
 
 
 
