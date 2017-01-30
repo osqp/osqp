@@ -39,18 +39,40 @@
     #define c_free free
     #define c_realloc realloc
 #endif
-/* Use customized constants -----------------------------------------------   */
-#define OSQP_NULL 0
-#define OSQP_INFTY 1.0e20  // Numerical value of infinity
 
 
 /* Use customized number representation -----------------------------------   */
+#ifndef LONG
 typedef int c_int;                   /* for indeces */
+#else
+typedef long c_int;                   /* for indeces */
+#endif
+
+#ifndef FLOAT // Doubles
 typedef double c_float;              /* for numerical values  */
+#define c_sqrt sqrt
+#else         // Floats
+typedef float c_float;                /* for numerical values  */
+#define c_sqrt sqrtf
+#endif
+
+
+
+
+/* Use customized constants -----------------------------------------------   */
+#ifndef OSQP_NULL
+#define OSQP_NULL 0
+#endif
+
+#ifndef OSQP_NAN
+#define OSQP_NAN ((c_float)0x7ff8000000000000)     // Not a Number
+#endif
+
+#ifndef OSQP_INFTY
+#define OSQP_INFTY ((c_float)1e20)   // Infinity
+#endif
 
 /* Use customized operations */
-#define c_sqrt sqrt  // Doubles
-#define c_sqrtf sqrtf  // Floats
 
 #ifndef c_absval
 #define c_absval(x) (((x) < 0) ? -(x) : (x))

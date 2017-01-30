@@ -41,7 +41,7 @@ static char * test_infeas_qp()
     settings->max_iter = 200;
     settings->alpha = 1.6;
     settings->polishing = 0;
-    settings->verbose = 1;
+    settings->verbose = 0;
 
     // Setup workspace
     work = osqp_setup(data, settings);

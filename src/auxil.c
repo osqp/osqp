@@ -305,12 +305,19 @@ c_int is_unbounded(Work * work){
  * @param work Workspace
  */
 void store_solution(Work *work) {
-    prea_vec_copy(work->x, work->solution->x, work->data->n);   // primal
-    prea_vec_copy(work->y, work->solution->y, work->data->m);  // dual
+    if ((work->info->status_val != OSQP_INFEASIBLE) &&
+        (work->info->status_val != OSQP_UNBOUNDED)){
+        prea_vec_copy(work->x, work->solution->x, work->data->n);   // primal
+        prea_vec_copy(work->y, work->solution->y, work->data->m);  // dual
 
-    if(work->settings->scaling) // Unscale solution if scaling has been performed
-        unscale_solution(work);
+        if(work->settings->scaling) // Unscale solution if scaling has been performed
+            unscale_solution(work);
+    } else { // Problem infeasible or unbounded. Solution is NaN
+        vec_set_scalar(work->solution->x, OSQP_NAN, work->data->n);
+        vec_set_scalar(work->solution->y, OSQP_NAN, work->data->m);
+    }
 }
+
 
 /**
  * Update solver information
@@ -417,11 +424,13 @@ c_int check_termination(Work *work){
     else if (inf_check){
         // Update final information
         work->info->status_val = OSQP_INFEASIBLE;
+        work->info->obj_val = OSQP_INFTY;
         exitflag = 1;
     }
     else if (unb_check){
         // Update final information
         work->info->status_val = OSQP_UNBOUNDED;
+        work->info->obj_val = -OSQP_INFTY;
         exitflag = 1;
     }
 

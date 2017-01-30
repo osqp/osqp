@@ -101,8 +101,11 @@ OPT_FLAGS = -DPRINTING
 # Set Profiling
 OPT_FLAGS += -DPROFILING
 
-# Skip infeasibility detection
-# OPT_FLAGS += -DSKIP_INFEASIBILITY
+# Use floats instead of doubles
+# OPT_FLAGS += FLOAT
+
+# Use long integers for indexing
+# OPT_FLAGS += LONG
 
 # Add Optional Flags to CFLAGS
 CFLAGS += $(OPT_FLAGS)
