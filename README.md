@@ -11,11 +11,8 @@ The current version is `0.0.0`.
 ## TODO (Code)
 
 -   [ ] Implement cheaper dual residual computation: (only one matrix-vector computation)
-
-```
-dual_res = || rho * A' * ((alpha - 1) * z_tilde_k - z_k + (2 - alpha) * z_prev) ||_2
-```
--   [ ] Check infeasibility in the code with new conditions
+-   [ ] Implement function updates for `sigma`, `eps_inf` and `eps_unb` parameters
+-   [x] Check infeasibility in the code with new conditions
 -   [ ] Parameter Selection: `rho`, `sigma` and `alpha` from examples (data driven)
 -   [ ] Stress tests Maros Meszaros
 -   [ ] Link to CVXPY
@@ -24,6 +21,7 @@ dual_res = || rho * A' * ((alpha - 1) * z_tilde_k - z_k + (2 - alpha) * z_prev) 
 ## TODO (Paper)
 -   [ ] Write infeasibility/unbounedness conditions
 -   [ ] Write compact algorithm (basic ADMM steps)
+-   [ ] Talk about paper: [Inertial Proximal ADMM for Linearly Constrained Separable Convex Optimization](http://epubs.siam.org/doi/pdf/10.1137/15100463X) (similar to our robustification idea)
 -   [ ] Proove convergence to vectors satisfying Farkas lemma
 -   [ ] Write examples in the paper
 
