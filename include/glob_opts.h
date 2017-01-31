@@ -90,31 +90,25 @@ typedef float c_float;                /* for numerical values  */
 
 #ifdef PRINTING
 #ifdef MATLAB_MEX_FILE
+#define c_print mexPrintf
+// The following trick slows down the performance a lot. Since many solvers actually 
 //call mexPrintf and immediately force print buffer flush
 //otherwise messages don't appear until solver termination
 //ugly because matlab does not provide a vprintf mex interface
-#include <stdarg.h>
-static int c_print(char *msg, ...)
-{
-  va_list argList;
-  va_start(argList, msg);
-  //message buffer
-  int bufferSize = 256;
-  char buffer[bufferSize];
-  vsnprintf(buffer,bufferSize-1, msg, argList);
-  va_end(argList);
-  int out = mexPrintf(buffer); //print to matlab display
-  mexEvalString("drawnow;");   // flush matlab print buffer
-  return out;
-}
-/* #elif defined PYTHON
-  #define c_print(...)                                                         \
-    {                                                                          \
-        PyGILState_STATE gilstate = PyGILState_Ensure();                       \
-        PySys_WriteStdout(__VA_ARGS__);                                        \
-        PyGILState_Release(gilstate);                                          \
-    }
-*/
+// #include <stdarg.h>
+// static int c_print(char *msg, ...)
+// {
+//   va_list argList;
+//   va_start(argList, msg);
+//   //message buffer
+//   int bufferSize = 256;
+//   char buffer[bufferSize];
+//   vsnprintf(buffer,bufferSize-1, msg, argList);
+//   va_end(argList);
+//   int out = mexPrintf(buffer); //print to matlab display
+//   mexEvalString("drawnow;");   // flush matlab print buffer
+//   return out;
+// }
 #else
 #define c_print printf
 #endif
