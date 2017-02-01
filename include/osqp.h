@@ -107,7 +107,7 @@ struct OSQP_INFO {
         c_int iter;          /* number of iterations taken */
         char status[32];     /* status string, e.g. 'Solved' */
         c_int status_val;    /* status as c_int, defined in constants.h */
-        c_int status_polish; /* polish status: successful (1), not (0) */
+        c_int status_polish; /* polish status: successful (1), unperformed (0), (-1) unsuccessful */
         c_float obj_val;     /* primal objective */
         c_float pri_res;     /* norm of primal residual */
         c_float dua_res;     /* norm of dual residual */

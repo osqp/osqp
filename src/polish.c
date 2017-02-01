@@ -163,81 +163,83 @@ c_int polish(Work *work) {
     // Form Ared by assuming the active constraints and store in work->pol->Ared
     mred = form_Ared(work);
 
-    // Form and factorize reduced KKT
-    plsh = init_priv(work->data->P, work->pol->Ared, work->settings, 1);
+    if (mred > 0) {  // There are active constraints -> Do polishing
+        // Form and factorize reduced KKT
+        plsh = init_priv(work->data->P, work->pol->Ared, work->settings, 1);
 
-    // Form reduced right-hand side rhs_red
-    rhs_red = form_rhs_red(work, mred);
+        // Form reduced right-hand side rhs_red
+        rhs_red = form_rhs_red(work, mred);
 
-    // Solve the reduced KKT system
-    c_float *pol_sol = vec_copy(rhs_red, work->data->n + mred);
-    solve_lin_sys(work->settings, plsh, pol_sol);
+        // Solve the reduced KKT system
+        c_float *pol_sol = vec_copy(rhs_red, work->data->n + mred);
+        solve_lin_sys(work->settings, plsh, pol_sol);
 
-    // Perform iterative refinement to compensate for the regularization error
-    iterative_refinement(work, plsh, pol_sol, rhs_red);
+        // Perform iterative refinement to compensate for the regularization error
+        iterative_refinement(work, plsh, pol_sol, rhs_red);
 
-    // Store the polished solution
-    work->pol->y_red = c_malloc(mred * sizeof(c_float));
-    prea_vec_copy(pol_sol, work->pol->x, work->data->n);
-    prea_vec_copy(pol_sol + work->data->n, work->pol->y_red, mred);
+        // Store the polished solution
+        work->pol->y_red = c_malloc(mred * sizeof(c_float));
+        prea_vec_copy(pol_sol, work->pol->x, work->data->n);
+        prea_vec_copy(pol_sol + work->data->n, work->pol->y_red, mred);
 
-    // Compute z = A*x needed for computing the primal residual
-    mat_vec(work->data->A, work->pol->x, work->pol->z, 0);
+        // Compute z = A*x needed for computing the primal residual
+        mat_vec(work->data->A, work->pol->x, work->pol->z, 0);
 
-    // Compute primal and dual residuals at the polished solution
-    update_info(work, 0, 1);
+        // Compute primal and dual residuals at the polished solution
+        update_info(work, 0, 1);
 
-    // Check if polishing was successful
-    polish_successful = (work->pol->pri_res < work->info->pri_res &&
-        work->pol->dua_res < work->info->dua_res) || // Residuals are reduced
-        (work->pol->pri_res < work->info->pri_res &&
-         work->info->dua_res < 1e-10) ||             // Dual residual already tiny
-        (work->pol->dua_res < work->info->dua_res &&
-         work->info->pri_res < 1e-10);               // Primal residual already tiny
+        // Check if polishing was successful
+        polish_successful = (work->pol->pri_res < work->info->pri_res &&
+            work->pol->dua_res < work->info->dua_res) || // Residuals are reduced
+            (work->pol->pri_res < work->info->pri_res &&
+             work->info->dua_res < 1e-10) ||             // Dual residual already tiny
+            (work->pol->dua_res < work->info->dua_res &&
+             work->info->pri_res < 1e-10);               // Primal residual already tiny
 
 
-    if (polish_successful) {
+        if (polish_successful) {
 
-            // Update solver information
-            work->info->obj_val = work->pol->obj_val;
-            work->info->pri_res = work->pol->pri_res;
-            work->info->dua_res = work->pol->dua_res;
-            work->info->status_polish = 1;
+                // Update solver information
+                work->info->obj_val = work->pol->obj_val;
+                work->info->pri_res = work->pol->pri_res;
+                work->info->dua_res = work->pol->dua_res;
+                work->info->status_polish = 1;
 
-            // Update (x, z, y) in ADMM iterations
+                // Update (x, z, y) in ADMM iterations
 
-            // Update x
-            prea_vec_copy(work->pol->x, work->x, work->data->n);
+                // Update x
+                prea_vec_copy(work->pol->x, work->x, work->data->n);
 
-            // Update z
-            prea_vec_copy(work->pol->z, work->z, work->data->m);
+                // Update z
+                prea_vec_copy(work->pol->z, work->z, work->data->m);
 
-            // Reconstruct y from y_red and active constraints
-            compute_y_from_y_red(work);
+                // Reconstruct y from y_red and active constraints
+                compute_y_from_y_red(work);
 
-            // Print summary
-            #ifdef PRINTING
-            if (work->settings->verbose)
-                print_polishing(work->info);
-            #endif
+                // Print summary
+                #ifdef PRINTING
+                if (work->settings->verbose)
+                    print_polishing(work->info);
+                #endif
 
-    } else { // Polishing failed
-        work->info->status_polish = 0;
-        // TODO: Try to find a better solution on the line connecting ADMM
-        //       and polished solution
+        } else { // Polishing failed
+            work->info->status_polish = -1;
+            // TODO: Try to find a better solution on the line connecting ADMM
+            //       and polished solution
+        }
+
+        /* Update timing */
+        #ifdef PROFILING
+        work->info->polish_time = toc(work->timer);
+        #endif
+
+        // Memory clean-up
+        free_priv(plsh);
+        csc_spfree(work->pol->Ared);
+        c_free(work->pol->y_red);
+        c_free(rhs_red);
+        c_free(pol_sol);
     }
-
-    /* Update timing */
-    #ifdef PROFILING
-    work->info->polish_time = toc(work->timer);
-    #endif
-
-    // Memory clean-up
-    free_priv(plsh);
-    csc_spfree(work->pol->Ared);
-    c_free(work->pol->y_red);
-    c_free(rhs_red);
-    c_free(pol_sol);
 
     return 0;
 }

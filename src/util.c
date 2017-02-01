@@ -127,10 +127,11 @@ void print_footer(Info * info, c_int polishing){
     c_print("Status: %s\n", info->status);
 
     if (polishing && info->status_val == OSQP_SOLVED) {
-        if (info->status_polish)
+        if (info->status_polish == 1){
             c_print("Solution polishing: Successful\n");
-        else
+        } else if (info->status_polish == -1){
             c_print("Solution polishing: Unsuccessful\n");
+        }
     }
 
     c_print("Number of iterations: %i\n", info->iter);

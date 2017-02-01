@@ -120,6 +120,7 @@ Work * osqp_setup(const Data * data, Settings *settings){
     // Allocate information
     work->info = c_calloc(1, sizeof(Info));
     work->info->status_val = OSQP_UNSOLVED;
+    work->info->status_polish = 0; // Polishing not performed
     update_status_string(work->info);
 
     // Allocate timing information
