@@ -386,7 +386,7 @@ void update_status_string(Info *info){
 c_int check_termination(Work *work){
     c_float eps_pri, eps_dua;
     c_int exitflag = 0;
-    c_int pri_check = 0, dua_check = 0, inf_check, unb_check;
+    c_int pri_check = 0, dua_check = 0, inf_check = 0, unb_check = 0;
 
     // Check residuals
     if (work->data->m == 0){

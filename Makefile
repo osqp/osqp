@@ -11,9 +11,9 @@ TARGETS = $(OUT)/osqp_demo_direct
 TEST_TARGETS = $(OUT)/osqp_tester_direct  # Add tests for linear algebra functions
 TEST_INCLUDES = -I$(TESTSDIR)/c
 # OnlineQP Lib tests
-QPTESTSDIR = $(TESTSDIR)/c/qptests
+# QPTESTSDIR = $(TESTSDIR)/c/qptests
 # TEST_OBJECTS = $(QPTESTSDIR)/chain80w/chain80w.o
-TEST_OBJECTS = $(QPTESTSDIR)/diesel/diesel.o
+# TEST_OBJECTS = $(QPTESTSDIR)/diesel/diesel.o
 
 # Define objects to compile
 OSQP_OBJECTS = src/util.o src/auxil.o src/cs.o src/lin_alg.o src/kkt.o src/proj.o src/scaling.o src/polish.o src/osqp.o
@@ -27,12 +27,15 @@ SUITESPARSE_DIR = $(DIRSRCEXT)/suitesparse
 CFLAGS += -I$(SUITESPARSE_DIR) -I$(SUITESPARSE_DIR)/amd/include -I$(SUITESPARSE_DIR)/ldl/include
 AMD_SRC_FILES = $(wildcard $(SUITESPARSE_DIR)/amd/src/amd_*.c)
 AMD_OBJECTS = $(AMD_SRC_FILES:.c=.o)
-SUITESPARSE_OBJS = $(SUITESPARSE_DIR)/SuiteSparse_config.o $(SUITESPARSE_DIR)/ldl/src/ldl.o $(AMD_OBJECTS)
+LDL_SRC_FILES = $(wildcard $(SUITESPARSE_DIR)/ldl/src/*.c)
+LDL_OBJECTS = $(LDL_SRC_FILES:.c=.o)
+
+SUITESPARSE_OBJS = $(SUITESPARSE_DIR)/SuiteSparse_config.o $(LDL_OBJECTS) $(AMD_OBJECTS)
 
 
 # Compile all C code
 .PHONY: default
-default: $(TARGETS) $(OUT)/libosqpdir.a
+default: $(TARGETS) $(OUT)/libosqpdir.a $(OUT)/libosqpdir.$(SHAREDEXT)
 	@echo "********************************************************************"
 	@echo "Successfully compiled OSQP!"
 	@echo "Copyright ...."
@@ -55,9 +58,7 @@ default: $(TARGETS) $(OUT)/libosqpdir.a
 # src/auxil.o	: src/auxil.c include/auxil.h
 # src/polish.o	: src/polish.c include/polish.h
 # src/scaling.o	: src/scaling.c include/scaling.h
-
-
-
+#
 # Define linear systems solvers objects and dependencies
 # Direct
 # $(DIRSRC)/private.o: $(DIRSRC)/private.c  $(DIRSRC)/private.h
@@ -68,6 +69,11 @@ $(OUT)/libosqpdir.a: $(OSQP_OBJECTS) $(DIRSRC)/private.o $(SUITESPARSE_OBJS) $(L
 	mkdir -p $(OUT)   # Create output directory
 	$(ARCHIVE) $@ $^  # Create archive of objects
 	- $(RANLIB) $@    # Add object files in static library and create index
+
+$(OUT)/libosqpdir.$(SHAREDEXT): $(OSQP_OBJECTS) $(DIRSRC)/private.o $(SUITESPARSE_OBJS) $(LINSYS)/common.o
+	mkdir -p $(OUT)   # Create output directory
+	$(CC) $(CFLAGS) -shared -Wl,$(SONAME),$(@:$(OUT)/%=%) -o $@ $^ $(LDFLAGS)
+
 
 # Build osqp target (demo file for direct method)
 $(OUT)/osqp_demo_direct: examples/osqp_demo_direct.c $(OUT)/libosqpdir.a

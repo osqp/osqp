@@ -76,16 +76,20 @@ endif
 ifeq ($(ISWINDOWS), 1)
 # shared library has extension .dll
 SHAREDEXT = dll
+SONAME = -soname
 
 else ifeq ($(ISMAC), 1)
 # shared library has extension .dylib
 SHAREDEXT = dylib
+SONAME = -install_name
 
 else ifeq ($(ISLINUX), 1)
 # use accurate timer from clock_gettime()
 LDFLAGS += -lrt
 # shared library has extension .so
 SHAREDEXT = so
+SONAME = -soname
+
 endif
 
 
