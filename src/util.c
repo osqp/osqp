@@ -376,7 +376,7 @@ c_int is_eq_csc(csc *A, csc *B, c_float tol){
 #ifdef PRINTING
 
 /* Print a csc sparse matrix */
-void print_csc_matrix(csc* M, char * name)
+void print_csc_matrix(csc* M, const char * name)
 {
         c_print("%s :\n", name);
         c_int j, i, row_start, row_stop;
@@ -395,7 +395,7 @@ void print_csc_matrix(csc* M, char * name)
 }
 
 /* Print a triplet format sparse matrix */
-void print_trip_matrix(csc* M, char * name)
+void print_trip_matrix(csc* M, const char * name)
 {
         c_print("%s :\n", name);
         c_int k = 0;
@@ -406,7 +406,7 @@ void print_trip_matrix(csc* M, char * name)
 
 
 /* Print a dense matrix */
-void print_dns_matrix(c_float * M, c_int m, c_int n, char *name)
+void print_dns_matrix(c_float * M, c_int m, c_int n, const char *name)
 {
         c_int i, j;
         c_print("%s = \n\t", name);
@@ -428,13 +428,13 @@ void print_dns_matrix(c_float * M, c_int m, c_int n, char *name)
 }
 
 /* Print vector */
-void print_vec(c_float * v, c_int n, char *name){
+void print_vec(c_float * v, c_int n, const char *name){
         print_dns_matrix(v, 1, n, name);
 }
 
 
 // Print int array
-void print_vec_int(c_int * x, c_int n, char *name) {
+void print_vec_int(c_int * x, c_int n, const char *name) {
     c_int i;
     c_print("%s = [", name);
     for(i=0; i<n; i++) {

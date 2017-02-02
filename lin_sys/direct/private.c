@@ -1,5 +1,4 @@
 #include "private.h"
-#include "util.h"
 
 
 
@@ -78,7 +77,11 @@ c_int factorize(csc *A, Priv *p) {
     info = (c_float *)c_malloc(AMD_INFO * sizeof(c_float));
 
     // Compute permutation metrix P using SuiteSparse/AMD
+    #ifdef DLONG
+    amd_status = amd_l_order(A->n, A->p, A->i, p->P, (c_float *)OSQP_NULL, info);
+    #else
     amd_status = amd_order(A->n, A->p, A->i, p->P, (c_float *)OSQP_NULL, info);
+    #endif
     if (amd_status < 0)
         return (amd_status);
 

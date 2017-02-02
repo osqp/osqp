@@ -42,13 +42,13 @@
 
 
 /* Use customized number representation -----------------------------------   */
-#ifndef LONG
+#ifndef DLONG
 typedef int c_int;                   /* for indeces */
 #else
 typedef long c_int;                   /* for indeces */
 #endif
 
-#ifndef FLOAT // Doubles
+#ifndef DFLOAT // Doubles
 typedef double c_float;              /* for numerical values  */
 #define c_sqrt sqrt
 #else         // Floats
@@ -91,7 +91,7 @@ typedef float c_float;                /* for numerical values  */
 #ifdef PRINTING
 #ifdef MATLAB_MEX_FILE
 #define c_print mexPrintf
-// The following trick slows down the performance a lot. Since many solvers actually 
+// The following trick slows down the performance a lot. Since many solvers actually
 //call mexPrintf and immediately force print buffer flush
 //otherwise messages don't appear until solver termination
 //ugly because matlab does not provide a vprintf mex interface
