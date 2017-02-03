@@ -38,7 +38,8 @@ static char * test_infeas_qp()
 
     // Define Solver settings as default
     set_default_settings(settings);
-    settings->max_iter = 200;
+    settings->max_iter = 2000;
+    settings->eps_inf = 1e-04;
     settings->alpha = 1.6;
     settings->polishing = 0;
     settings->verbose = 0;

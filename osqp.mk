@@ -106,7 +106,7 @@ OPT_FLAGS = -DPRINTING
 OPT_FLAGS += -DPROFILING
 
 # Use floats instead of doubles
-# OPT_FLAGS += -DDFLOAT
+OPT_FLAGS += -DDFLOAT
 
 # Use long integers for indexing
 # OPT_FLAGS += -DDLONG
