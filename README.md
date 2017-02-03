@@ -11,6 +11,7 @@ The current version is `0.0.0`.
 ## TODO (Code)
 
 -   [ ] Implement cheaper dual residual computation: (only one matrix-vector computation)
+-   [ ] Fix polishing unsuccessful when solving a feasibility problem 
 -   [ ] Implement function updates for `sigma`, `eps_inf` and `eps_unb` parameters
 -   [x] Check infeasibility in the code with new conditions
 -   [ ] Parameter Selection: `rho`, `sigma` and `alpha` from examples (data driven)
