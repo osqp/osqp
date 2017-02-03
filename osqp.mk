@@ -106,10 +106,10 @@ OPT_FLAGS = -DPRINTING
 OPT_FLAGS += -DPROFILING
 
 # Use floats instead of doubles
-# OPT_FLAGS += -DFLOAT
+# OPT_FLAGS += -DDFLOAT
 
 # Use long integers for indexing
-# OPT_FLAGS += -DLONG
+# OPT_FLAGS += -DDLONG
 
 # Add Optional Flags to CFLAGS
 CFLAGS += $(OPT_FLAGS)
