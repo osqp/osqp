@@ -148,6 +148,9 @@ int SuiteSparse_divcomplex
     c_float *cr, c_float *ci	/* real and imaginary parts of c */
 ) ;
 
+/* OSQP: disabling this timing code */
+#define NTIMER
+
 /* determine which timer to use, if any */
 #ifndef NTIMER
 #ifdef _POSIX_C_SOURCE
