@@ -1,6 +1,42 @@
 # Makefile configuration for OSQP depending on the specific architecture
 
-# compiler
+# Check which operative systems we are running
+#----------------------------------------------
+ifeq ($(OS),Windows_NT)
+UNAME = CYGWINorMINGWorMSYS
+else
+UNAME = $(shell uname -s)
+endif
+
+# Windows
+ifeq (CYGWIN, $(findstring CYGWIN, $(UNAME)))
+ISWINDOWS := 1
+else ifeq (MINGW, $(findstring MINGW, $(UNAME)))
+ISWINDOWS := 1
+else ifeq (MSYS, $(findstring MSYS, $(UNAME)))
+ISWINDOWS := 1
+else
+ISWINDOWS := 0
+endif
+
+# Mac
+ifeq ($(UNAME), Darwin)
+ISMAC :=1
+else
+ISMAC :=0
+endif
+
+# Unix
+ifeq ($(ISMAC), 0)
+ifeq ($ISWINDOWS), 0)
+ISLINUX := 1
+endif
+endif
+
+
+# Setup compiler and flagsompiler
+#-----------------
+
 CC = gcc
 
 # compiler flags:
@@ -39,38 +75,10 @@ DIRSRCEXT = $(DIRSRC)/external
 TESTSDIR = tests
 
 
-# Check which operative systems we are running
-#----------------------------------------------
-UNAME := $(shell uname)
 
-# Windows
-ifeq (CYGWIN, $(findstring CYGWIN, $(UNAME)))
-ISWINDOWS := 1
-else ifeq (MINGW, $(findstring MINGW, $(UNAME)))
-ISWINDOWS := 1
-else ifeq (MSYS, $(findstring MSYS, $(UNAME)))
-ISWINDOWS := 1
-else
-ISWINDOWS := 0
-endif
 
-# Mac
-ifeq ($(UNAME), Darwin)
-ISMAC :=1
-else
-ISMAC :=0
-endif
-
-# Unix
-ifeq ($(ISMAC), 0)
-ifeq ($ISWINDOWS), 0)
-ISLINUX := 1
-endif
-endif
-
-# Change parameters according to the operative system
+# Change flags and parameters according to the operative system
 #----------------------------------------------------
-# TODO: Add shared library!
 
 # Windows
 ifeq ($(ISWINDOWS), 1)
@@ -82,6 +90,7 @@ else ifeq ($(ISMAC), 1)
 # shared library has extension .dylib
 SHAREDEXT = dylib
 SONAME = -install_name
+CFLAGS += -fPIC
 
 else ifeq ($(ISLINUX), 1)
 # use accurate timer from clock_gettime()
@@ -89,11 +98,9 @@ LDFLAGS += -lrt
 # shared library has extension .so
 SHAREDEXT = so
 SONAME = -soname
+CFLAGS += -fPIC
 
 endif
-
-
-
 
 
 
