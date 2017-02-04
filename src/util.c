@@ -25,7 +25,7 @@ static const char *HEADER[] = {
 static const c_int HEADER_LEN = 4;
 #endif
 static const c_int HSPACE = 12;
-#define LINE_LEN 55
+#define HEADER_LINE_LEN 55
 #endif
 
 /**********************
@@ -35,11 +35,11 @@ static const c_int HSPACE = 12;
 #ifdef PRINTING
 
 static void print_line(void){
-    char theLine[LINE_LEN+1];
+    char theLine[HEADER_LINE_LEN+1];
     c_int i;
-    for (i = 0; i < LINE_LEN; ++i)
+    for (i = 0; i < HEADER_LINE_LEN; ++i)
         theLine[i] = '-';
-    theLine[LINE_LEN] = '\0';
+    theLine[HEADER_LINE_LEN] = '\0';
     c_print("%s\n",theLine);
 }
 
