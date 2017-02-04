@@ -25,7 +25,7 @@ static const char *HEADER[] = {
 static const c_int HEADER_LEN = 4;
 #endif
 static const c_int HSPACE = 12;
-static const c_int LINE_LEN = 55;
+#define LINE_LEN 55
 #endif
 
 /**********************
