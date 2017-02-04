@@ -256,7 +256,7 @@ void tic(Timer* t)
 c_float toc(Timer* t)
 {
         QueryPerformanceCounter(&t->toc);
-        return ((t->toc.QuadPart - t->tic.QuadPart) / (pfloat)t->freq.QuadPart);
+        return ((t->toc.QuadPart - t->tic.QuadPart) / (c_float)t->freq.QuadPart);
 }
 
 // Mac
