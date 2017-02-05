@@ -1,5 +1,9 @@
-#ifndef NORMALIZE_H
-#define NORMALIZE_H
+#ifndef SCALING_H
+#define SCALING_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // Functions to scale problem data
 
@@ -17,5 +21,8 @@ c_int scale_data(Work * work);
 // Unscale solution
 c_int unscale_solution(Work *work);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

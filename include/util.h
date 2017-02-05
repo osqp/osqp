@@ -1,6 +1,10 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "osqp.h"
 #include "constants.h"
 #include "cs.h"
@@ -131,6 +135,8 @@ void print_vec_int(c_int * x, c_int n, const char *name);
 
 #endif
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif

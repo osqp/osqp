@@ -3,6 +3,11 @@
 #ifndef LIN_SYS_H
 #define LIN_SYS_H
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "cs.h"
 
 /* stores the necessary private workspace, only the linear system solver
@@ -31,5 +36,10 @@ void free_priv(Priv *p);
 
 // Form KKT matrix
 // csc * form_KKT(const csc * P, const  csc * A, c_float rho);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

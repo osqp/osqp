@@ -1,6 +1,10 @@
 #ifndef AUXIL_H
 #define AUXIL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "osqp.h"
 
 /***********************************************************
@@ -99,5 +103,9 @@ c_int validate_data(const Data * data);
 * @return      Exitflag to check
 */
 c_int validate_settings(const Settings * settings);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -3,9 +3,9 @@
 
 // #include "glob_opts.h"
 #include "osqp.h"
-#include "cs.h"
-#include "lin_sys.h"
-#include "kkt.h"
+// #include "cs.h"
+// #include "lin_sys.h"
+// #include "kkt.h"
 #include "amd.h"
 #include "ldl.h"
 #include "../common.h"

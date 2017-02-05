@@ -1,6 +1,10 @@
 #ifndef GLOB_OPTS_H
 #define GLOB_OPTS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* DATA CUSTOMIZATIONS (depending on memory manager)-----------------------   */
 /* define custom printfs and memory allocation (e.g. matlab or python) */
 #ifdef MATLAB_MEX_FILE
@@ -26,11 +30,16 @@
     // Calloc is not implemented
     #include <Python.h>
     #define c_malloc PyMem_Malloc
-    #define c_calloc(n,s) ({                     \
-            void * p_calloc = c_malloc((n)*(s)); \
-            memset(p_calloc, 0, (n)*(s));        \
-            p_calloc;                            \
-        })
+    static void * c_calloc(size_t num, size_t size){
+      void *m = PyMem_Malloc(num*size);
+      memset(m, 0, num*size);
+      return m;
+    }
+    // #define c_calloc(n,s) ({                     \
+    //         void * p_calloc = c_malloc((n)*(s)); \
+    //         memset(p_calloc, 0, (n)*(s));        \
+    //         p_calloc;                            \
+    //     })
     #define c_free PyMem_Free
     #define c_realloc PyMem_Realloc
 #else
@@ -42,10 +51,14 @@
 
 
 /* Use customized number representation -----------------------------------   */
-#ifndef DLONG
-typedef int c_int;                   /* for indeces */
+#ifdef DLONG
+#ifdef _WIN64
+typedef __int64 c_int;
 #else
 typedef long c_int;                   /* for indeces */
+#endif
+#else
+typedef int c_int;                   /* for indeces */
 #endif
 
 #ifndef DFLOAT // Doubles
@@ -126,6 +139,8 @@ typedef struct OSQP_WORK Work;
 typedef struct OSQP_TIMER Timer;
 
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -44,8 +44,8 @@ static void print_line(void){
 }
 
 void print_header(void){
-    c_print("%s ", HEADER[0]);
     c_int i;
+    c_print("%s ", HEADER[0]);
     for (i=1; i < HEADER_LEN - 1; i++) c_print("  %s", HEADER[i]);
     c_print("%s\n", HEADER[HEADER_LEN - 1]);
 }
@@ -147,39 +147,6 @@ void print_footer(Info * info, c_int polishing){
     }
     #endif
     c_print("\n");
-
-    // #ifdef PROFILING
-    // if (polishing && info->status_val == OSQP_SOLVED) {
-    //     if (info->run_time > 1e-03) { // Time more than 1ms
-    //         c_print("Timing: total  time = %.3fs\n        "
-    //                 "setup  time = %.3fs\n        "
-    //                 "solve  time = %.3fs\n        "
-    //                 "polish time = %.3fs\n",
-    //                 info->run_time, info->setup_time,
-    //                 info->solve_time, info->polish_time);
-    //     } else {
-    //         c_print("Timing: total  time = %.3fms\n        "
-    //                 "setup  time = %.3fms\n        "
-    //                 "solve  time = %.3fms\n        "
-    //                 "polish time = %.3fms\n",
-    //                 1e03*info->run_time, 1e03*info->setup_time,
-    //                 1e03*info->solve_time, 1e03*info->polish_time);
-    //     }
-    // } else{
-    //     if (info->run_time > 1e-03) { // Time more than 1ms
-    //         c_print("Timing: total  time = %.3fs\n        "
-    //                 "setup  time = %.3fs\n        "
-    //                 "solve  time = %.3fs\n",
-    //                 info->run_time, info->setup_time, info->solve_time);
-    //     } else {
-    //         c_print("Timing: total  time = %.3fms\n        "
-    //                 "setup  time = %.3fms\n        "
-    //                 "solve  time = %.3fms\n",
-    //                 1e03*info->run_time, 1e03*info->setup_time,
-    //                 1e03*info->solve_time);
-    //     }
-    // }
-    // #endif
 
 }
 
@@ -378,9 +345,12 @@ c_int is_eq_csc(csc *A, csc *B, c_float tol){
 /* Print a csc sparse matrix */
 void print_csc_matrix(csc* M, const char * name)
 {
-        c_print("%s :\n", name);
         c_int j, i, row_start, row_stop;
-        c_int k = 0;
+        c_int k=0;
+
+        // Print name
+        c_print("%s :\n", name);
+
         for(j=0; j<M->n; j++) {
                 row_start = M->p[j];
                 row_stop = M->p[j+1];
@@ -397,8 +367,11 @@ void print_csc_matrix(csc* M, const char * name)
 /* Print a triplet format sparse matrix */
 void print_trip_matrix(csc* M, const char * name)
 {
-        c_print("%s :\n", name);
         c_int k = 0;
+
+        // Print name
+        c_print("%s :\n", name);
+
         for (k=0; k<M->nz; k++){
             c_print("\t[%3u, %3u] = %g\n", M->i[k], M->p[k], M->x[k]);
         }
