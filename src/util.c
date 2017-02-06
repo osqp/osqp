@@ -60,7 +60,7 @@ void print_setup_header(const Data *data, const Settings *settings) {
 
     // Print variables and constraints
     c_print("Problem:  ");
-    c_print("variables n = %i, constraints m = %i\n", data->n, data->m);
+    c_print("variables n = %i, constraints m = %i\n", (int)data->n, (int)data->m);
 
     // Print Settings
     // Print variables and constraints
@@ -69,7 +69,7 @@ void print_setup_header(const Data *data, const Settings *settings) {
             "eps_inf = %.2e, eps_unb = %.2e,\n          "
             "rho = %.2f, sigma = %.2f, alpha = %.2f, \n          max_iter = %i\n",
             settings->eps_abs, settings->eps_rel, settings->eps_inf, settings->eps_unb, settings->rho, settings->sigma,
-            settings->alpha, settings->max_iter);
+            settings->alpha, (int)settings->max_iter);
     if (settings->scaling)
         c_print("          scaling: active\n");
     else
@@ -88,7 +88,7 @@ void print_setup_header(const Data *data, const Settings *settings) {
 
 /* Print iteration summary */
 void print_summary(Info * info){
-    c_print("%*i ", (int)strlen(HEADER[0]), info->iter);
+    c_print("%*i ", (int)strlen(HEADER[0]), (int)info->iter);
     c_print("%*.4e ", (int)HSPACE, info->obj_val);
     c_print("%*.4e ", (int)HSPACE, info->pri_res);
     c_print("%*.4e ", (int)HSPACE, info->dua_res);
@@ -134,7 +134,7 @@ void print_footer(Info * info, c_int polishing){
         }
     }
 
-    c_print("Number of iterations: %i\n", info->iter);
+    c_print("Number of iterations: %i\n", (int)info->iter);
     if (info->status_val == OSQP_SOLVED) {
         c_print("Optimal objective: %.4f\n", info->obj_val);
     }
@@ -358,7 +358,7 @@ void print_csc_matrix(csc* M, const char * name)
                         continue;
                 else {
                         for(i=row_start; i<row_stop; i++ ) {
-                                c_print("\t[%3u,%3u] = %g\n", M->i[i], j, M->x[k++]);
+                                c_print("\t[%3u,%3u] = %g\n", (int)M->i[i], (int)j, M->x[k++]);
                         }
                 }
         }
@@ -373,7 +373,7 @@ void print_trip_matrix(csc* M, const char * name)
         c_print("%s :\n", name);
 
         for (k=0; k<M->nz; k++){
-            c_print("\t[%3u, %3u] = %g\n", M->i[k], M->p[k], M->x[k]);
+            c_print("\t[%3u, %3u] = %g\n", (int)M->i[k], (int)M->p[k], M->x[k]);
         }
 }
 
@@ -411,7 +411,7 @@ void print_vec_int(c_int * x, c_int n, const char *name) {
     c_int i;
     c_print("%s = [", name);
     for(i=0; i<n; i++) {
-        c_print(" %d ", x[i]);
+        c_print(" %d ", (int)x[i]);
     }
     c_print("]\n");
 }

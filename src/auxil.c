@@ -445,7 +445,7 @@ c_int check_termination(Work *work){
  * @return      Exitflag to check
  */
 c_int validate_data(const Data * data){
-    int j;
+    c_int j;
 
     if(!data){
         #ifdef PRINTING
@@ -458,7 +458,7 @@ c_int validate_data(const Data * data){
     if (data->n <= 0 || data->m < 0){
         #ifdef PRINTING
         c_print("n must be positive and m nonnegative; n = %i, m = %i\n",
-                 data->n, data->m);
+                 (int)data->n, (int)data->m);
         #endif
         return 1;
     }
@@ -466,7 +466,7 @@ c_int validate_data(const Data * data){
     // Matrix P
     if (data->P->m != data->n ){
         #ifdef PRINTING
-        c_print("P does not have dimension n x n with n = %i\n", data->n);
+        c_print("P does not have dimension n x n with n = %i\n", (int)data->n);
         #endif
         return 1;
     }
@@ -481,7 +481,7 @@ c_int validate_data(const Data * data){
     if (data->A->m != data->m || data->A->n != data->n){
         #ifdef PRINTING
         c_print("A does not have dimension m x n with m = %i and n = %i\n",
-                data->m, data->n);
+                (int)data->m, (int)data->n);
         #endif
         return 1;
     }
@@ -491,7 +491,7 @@ c_int validate_data(const Data * data){
         if (data->l[j] > data->u[j]) {
             #ifdef PRINTING
             c_print("Lower bound at index %d is greater than upper bound: %.4e > %.4e\n",
-                  j, data->l[j], data->u[j]);
+                  (int)j, data->l[j], data->u[j]);
             #endif
           return 1;
         }
