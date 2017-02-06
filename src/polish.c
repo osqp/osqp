@@ -2,33 +2,40 @@
 
 /**
  * Form reduced matrix A that contains only rows that are active at the solution.
- * The set of active constraints is guessed from the primal and dual solution
- * returned by the ADMM.
+ * Ared = vstack[Alow, Aupp]
+ * Active constraints are guessed from the primal and dual solution returned by
+ * the ADMM.
  * @param  work Workspace
  * @return      Number of rows in Ared
  */
 static c_int form_Ared(Work *work) {
-    c_int j, ptr, mred=0, Ared_nnz=0;
+    c_int j, ptr;
+    c_int Ared_nnz=0;
 
-    // Initialize counters for active/inactive constraints
-    work->pol->n_lAct = 0;
-    work->pol->n_uAct = 0;
+    // Initialize counters for active constraints
+    work->pol->n_low = 0;
+    work->pol->n_upp = 0;
 
     /* Guess which linear constraints are lower-active, upper-active and free
-     *    A2Ared[j] = -1    (if j-th row of A is not inserted in Ared)
-     *    A2Ared[j] =  i    (if j-th row of A is inserted at i-th row of Ared)
+     *    A_to_Alow[j] = -1    (if j-th row of A is not inserted in Alow)
+     *    A_to_Alow[j] =  i    (if j-th row of A is inserted at i-th row of Alow)
+     * Aupp is formed in the equivalent way.
+     * Ared is formed by stacking vertically Alow and Aupp.
      */
     for (j = 0; j < work->data->m; j++) {
-        if ( work->z[j] - work->data->l[j] < - work->y[j] ) {     // lower-active
-                work->pol->ind_lAct[work->pol->n_lAct++] = j;
-                work->pol->A2Ared[j] = mred++;
+        if ( work->z[j] - work->data->l[j] < - work->y[j] ) {   // lower-active
+            work->pol->Alow_to_A[work->pol->n_low] = j;
+            work->pol->A_to_Alow[j] = work->pol->n_low++;
+        } else {
+            work->pol->A_to_Alow[j] = -1;
         }
-        else if ( work->data->u[j] - work->z[j] < work->y[j] ) {  // upper-active
-                    work->pol->ind_uAct[work->pol->n_uAct++] = j;
-                    work->pol->A2Ared[j] = mred++;
-        }
-        else {
-            work->pol->A2Ared[j] = -1;                          // free
+    }
+    for (j = 0; j < work->data->m; j++) {
+        if ( work->data->u[j] - work->z[j] < work->y[j] ) {     // upper-active
+            work->pol->Aupp_to_A[work->pol->n_upp] = j;
+            work->pol->A_to_Aupp[j] = work->pol->n_upp++;
+        } else {
+            work->pol->A_to_Aupp[j] = -1;
         }
     }
 
@@ -36,19 +43,28 @@ static c_int form_Ared(Work *work) {
 
     // Count number of elements in Ared
     for (j = 0; j < work->data->A->nzmax; j++) {
-        if (work->pol->A2Ared[work->data->A->i[j]] != -1)
+        if (work->pol->A_to_Alow[work->data->A->i[j]] != -1 ||
+            work->pol->A_to_Aupp[work->data->A->i[j]] != -1)
             Ared_nnz++;
     }
 
     // Form Ared
-    work->pol->Ared = csc_spalloc(mred, work->data->n, Ared_nnz, 1, 0);
-    Ared_nnz = 0;
+    // Ared = vstack[Alow, Aupp]
+    work->pol->Ared = csc_spalloc(work->pol->n_low + work->pol->n_upp,
+                                  work->data->n, Ared_nnz, 1, 0);
+    Ared_nnz = 0;  // counter
     for (j = 0; j < work->data->n; j++) {  // Cycle over columns of A
         work->pol->Ared->p[j] = Ared_nnz;
         for (ptr = work->data->A->p[j]; ptr < work->data->A->p[j + 1]; ptr++) {
-            if (work->pol->A2Ared[work->data->A->i[ptr]] != -1) {
-                // If row of A should be added to Ared
-                work->pol->Ared->i[Ared_nnz] = work->pol->A2Ared[work->data->A->i[ptr]];
+            // Cycle over elements in j-th column
+            if (work->pol->A_to_Alow[work->data->A->i[ptr]] != -1) {
+                // Lower-active rows of A
+                work->pol->Ared->i[Ared_nnz] = work->pol->A_to_Alow[work->data->A->i[ptr]];
+                work->pol->Ared->x[Ared_nnz++] = work->data->A->x[ptr];
+            } else if (work->pol->A_to_Aupp[work->data->A->i[ptr]] != -1) {
+                // Upper-active rows of A
+                work->pol->Ared->i[Ared_nnz] = work->pol->A_to_Aupp[work->data->A->i[ptr]] \
+                                               + work->pol->n_low;
                 work->pol->Ared->x[Ared_nnz++] = work->data->A->x[ptr];
             }
         }
@@ -57,33 +73,29 @@ static c_int form_Ared(Work *work) {
     work->pol->Ared->p[work->data->n] = Ared_nnz;
 
     // Return number of rows in Ared
-    return mred;
+    return (work->pol->n_low + work->pol->n_upp);
 }
 
 /**
- * Form reduced right-hand side rhs_red
+ * Form reduced right-hand side rhs_red = vstack[-q, l_low, u_upp]
  * @param  work Workspace
  * @param  mred number of active constraints
  * @return      reduced rhs
  */
-static c_float * form_rhs_red(Work * work, c_int mred){
+static void form_rhs_red(Work * work, c_float * rhs){
     c_int j;
 
     // Form the rhs of the reduced KKT linear system
-    c_float *rhs = c_malloc(sizeof(c_float) * (work->data->n + mred));
-    for (j = 0; j < work->data->n; j++) {
+    for (j = 0; j < work->data->n; j++) {       // -q
         rhs[j] = -work->data->q[j];
     }
-    for (j = 0; j < work->pol->n_lAct; j++) {
-        rhs[work->data->n + j] = work->data->l[work->pol->ind_lAct[j]];
+    for (j = 0; j < work->pol->n_low; j++) {    // l_low
+        rhs[work->data->n + j] = work->data->l[work->pol->Alow_to_A[j]];
     }
-    for (j = 0; j < work->pol->n_uAct; j++) {
-        rhs[work->data->n + work->pol->n_lAct + j] =
-            work->data->u[work->pol->ind_uAct[j]];
+    for (j = 0; j < work->pol->n_upp; j++) {    // u_upp
+        rhs[work->data->n + work->pol->n_low + j] =
+            work->data->u[work->pol->Aupp_to_A[j]];
     }
-
-    return rhs;
-
 }
 
 /**
@@ -99,9 +111,11 @@ static c_float * form_rhs_red(Work * work, c_int mred){
 static void iterative_refinement(Work *work, Priv *p, c_float *z, c_float *b) {
     if (work->settings->pol_refine_iter > 0) {
         c_int i, j, n;
+        c_float *dz, *rhs;
+
         n = work->data->n + work->pol->Ared->m;
-        c_float *dz = c_malloc(sizeof(c_float) * n);
-        c_float *rhs = c_malloc(sizeof(c_float) * n);
+        dz = c_malloc(sizeof(c_float) * n);
+        rhs = c_malloc(sizeof(c_float) * n);
 
         for (i=0; i<work->settings->pol_refine_iter; i++) {
 
@@ -141,9 +155,14 @@ static void iterative_refinement(Work *work, Priv *p, c_float *z, c_float *b) {
  */
 static void compute_y_from_y_red(Work * work){
     c_int j;
+
+    // yred = vstack[ylow, yupp]
     for (j = 0; j < work->data->m; j++) {
-        if (work->pol->A2Ared[j] != -1) {
-            work->y[j] = work->pol->y_red[work->pol->A2Ared[j]];
+        if (work->pol->A_to_Alow[j] != -1) {
+            work->y[j] = work->pol->y_red[work->pol->A_to_Alow[j]];    // ylow
+        } else if (work->pol->A_to_Aupp[j] != -1) {
+            work->y[j] = work->pol->y_red[work->pol->A_to_Aupp[j] +
+                                          work->pol->n_low];       // yupp
         } else {
             work->y[j] = 0.0;
         }
@@ -168,7 +187,8 @@ c_int polish(Work *work) {
         plsh = init_priv(work->data->P, work->pol->Ared, work->settings, 1);
 
         // Form reduced right-hand side rhs_red
-        rhs_red = form_rhs_red(work, mred);
+        rhs_red = c_malloc(sizeof(c_float) * (work->data->n + mred));
+        form_rhs_red(work, rhs_red);
 
         // Solve the reduced KKT system
         c_float *pol_sol = vec_copy(rhs_red, work->data->n + mred);
@@ -188,6 +208,11 @@ c_int polish(Work *work) {
         // Compute primal and dual residuals at the polished solution
         update_info(work, 0, 1);
 
+        // Update timing
+        #ifdef PROFILING
+        work->info->polish_time = toc(work->timer);
+        #endif
+
         // Check if polishing was successful
         polish_successful = (work->pol->pri_res < work->info->pri_res &&
             work->pol->dua_res < work->info->dua_res) || // Residuals are reduced
@@ -195,7 +220,6 @@ c_int polish(Work *work) {
              work->info->dua_res < 1e-10) ||             // Dual residual already tiny
             (work->pol->dua_res < work->info->dua_res &&
              work->info->pri_res < 1e-10);               // Primal residual already tiny
-
 
         if (polish_successful) {
 
@@ -210,7 +234,7 @@ c_int polish(Work *work) {
                 // Update x
                 prea_vec_copy(work->pol->x, work->x, work->data->n);
 
-                // Update z
+                // Update z (needed for warm starting)
                 prea_vec_copy(work->pol->z, work->z, work->data->m);
 
                 // Reconstruct y from y_red and active constraints
@@ -227,11 +251,6 @@ c_int polish(Work *work) {
             // TODO: Try to find a better solution on the line connecting ADMM
             //       and polished solution
         }
-
-        /* Update timing */
-        #ifdef PROFILING
-        work->info->polish_time = toc(work->timer);
-        #endif
 
         // Memory clean-up
         free_priv(plsh);

@@ -122,16 +122,18 @@ struct OSQP_INFO {
 
 /* Active constraints */
 struct OSQP_POLISH {
-    csc *Ared;            // Matrix A containing only actiev rows
-    c_int *ind_lAct;      // indices of lower-active constraints
-    c_int *ind_uAct;      // indices of upper-active constraints
-    c_int n_lAct;         // number of lower-active constraints
-    c_int n_uAct;         // number of upper-active constraints
-    c_int *A2Ared;        // Table of indices that maps A to Ared
-    c_float *x;           // optimal solution obtained by polishing
-    c_float *z;          // workspace for storing z = A*x
-    c_float *y_red;  // optimal dual variables associated to Ared obtained
-                          //   by polishing
+    csc *Ared;            // Active rows of A
+                          //    Ared = vstack[Alow, Aupp]
+    c_int n_low;          // number of lower-active rows
+    c_int n_upp;          // number of upper-active rows
+    c_int *A_to_Alow;     // Maps indices in A to indices in Alow
+    c_int *A_to_Aupp;     // Maps indices in A to indices in Aupp
+    c_int *Alow_to_A;     // Maps indices in Alow to indices in A
+    c_int *Aupp_to_A;     // Maps indices in Aupp to indices in A
+    c_float *x;           // optimal x-solution obtained by polishing
+    c_float *z;           // optimal z-solution obtained by polishing
+    c_float *y_red;       // optimal dual variables associated to Ared obtained
+                          //    by polishing
     c_float obj_val;      // objective value at polished solution
     c_float pri_res;      // primal residual at polished solution
     c_float dua_res;      // dual residual at polished solution

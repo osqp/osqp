@@ -105,9 +105,10 @@ Work * osqp_setup(const Data * data, Settings *settings){
 
     // Initialize active constraints structure
     work->pol = c_malloc(sizeof(Polish));
-    work->pol->ind_lAct = c_malloc(work->data->m * sizeof(c_int));
-    work->pol->ind_uAct = c_malloc(work->data->m * sizeof(c_int));
-    work->pol->A2Ared = c_malloc(work->data->m * sizeof(c_int));
+    work->pol->Alow_to_A = c_malloc(work->data->m * sizeof(c_int));
+    work->pol->Aupp_to_A = c_malloc(work->data->m * sizeof(c_int));
+    work->pol->A_to_Alow = c_malloc(work->data->m * sizeof(c_int));
+    work->pol->A_to_Aupp = c_malloc(work->data->m * sizeof(c_int));
     work->pol->x = c_malloc(work->data->n * sizeof(c_float));
     work->pol->z = c_malloc(work->data->m * sizeof(c_float));
 
@@ -314,12 +315,14 @@ c_int osqp_cleanup(Work * work){
 
         // Free active constraints structure
         if (work->pol) {
-            if (work->pol->ind_lAct)
-                c_free(work->pol->ind_lAct);
-            if (work->pol->ind_uAct)
-                c_free(work->pol->ind_uAct);
-            if (work->pol->A2Ared)
-                c_free(work->pol->A2Ared);
+            if (work->pol->Alow_to_A)
+                c_free(work->pol->Alow_to_A);
+            if (work->pol->Aupp_to_A)
+                c_free(work->pol->Aupp_to_A);
+            if (work->pol->A_to_Alow)
+                c_free(work->pol->A_to_Alow);
+            if (work->pol->A_to_Aupp)
+                c_free(work->pol->A_to_Aupp);
             if (work->pol->x)
                 c_free(work->pol->x);
             if (work->pol->z)
