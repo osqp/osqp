@@ -111,11 +111,15 @@ static void form_rhs_red(Work * work, c_float * rhs){
 static void iterative_refinement(Work *work, Priv *p, c_float *z, c_float *b) {
     if (work->settings->pol_refine_iter > 0) {
         c_int i, j, n;
-        c_float *dz, *rhs;
+        c_float *dz;
+        c_float *rhs;
 
+        // Assign dimension n
         n = work->data->n + work->pol->Ared->m;
-        dz = c_malloc(sizeof(c_float) * n);
-        rhs = c_malloc(sizeof(c_float) * n);
+
+        // Allocate dz and rhs vectors
+        dz = (c_float *)c_malloc(sizeof(c_float) * n);
+        rhs = (c_float *)c_malloc(sizeof(c_float) * n);
 
         for (i=0; i<work->settings->pol_refine_iter; i++) {
 
@@ -174,6 +178,7 @@ c_int polish(Work *work) {
     c_int mred, polish_successful;
     c_float * rhs_red;
     Priv *plsh;
+    c_float *pol_sol; // Polished solution
 
     #ifdef PROFILING
     tic(work->timer); // Start timer
@@ -191,7 +196,7 @@ c_int polish(Work *work) {
         form_rhs_red(work, rhs_red);
 
         // Solve the reduced KKT system
-        c_float *pol_sol = vec_copy(rhs_red, work->data->n + mred);
+        pol_sol = vec_copy(rhs_red, work->data->n + mred);
         solve_lin_sys(work->settings, plsh, pol_sol);
 
         // Perform iterative refinement to compensate for the regularization error

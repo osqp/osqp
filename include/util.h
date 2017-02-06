@@ -1,6 +1,10 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "osqp.h"
 #include "constants.h"
 #include "cs.h"
@@ -115,22 +119,24 @@ c_float * csc_to_dns(csc * M);
 
 
 /* Print a csc sparse matrix */
-void print_csc_matrix(csc* M, char * name);
+void print_csc_matrix(csc* M, const char * name);
 
 /* Print a triplet format sparse matrix */
-void print_trip_matrix(csc* M, char * name);
+void print_trip_matrix(csc* M, const char * name);
 
 /* Print a dense matrix */
-void print_dns_matrix(c_float * M, c_int m, c_int n, char *name);
+void print_dns_matrix(c_float * M, c_int m, c_int n, const char *name);
 
 /* Print vector  */
-void print_vec(c_float * v, c_int n, char *name);
+void print_vec(c_float * v, c_int n, const char *name);
 
 // Print int array
-void print_vec_int(c_int * x, c_int n, char *name);
+void print_vec_int(c_int * x, c_int n, const char *name);
 
 #endif
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif

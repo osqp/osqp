@@ -1,6 +1,10 @@
 #ifndef PROJ_H
 #define PROJ_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "osqp.h"
 
 /* Define Projections onto set C involved in the ADMM algorithm */
@@ -12,5 +16,9 @@
  */
 void project_z(Work *work);
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

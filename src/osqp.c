@@ -208,7 +208,8 @@ c_int osqp_solve(Work * work){
 
         /* Print summary */
         #ifdef PRINTING
-        if (work->settings->verbose && iter % PRINT_INTERVAL == 0)
+        if (work->settings->verbose && 
+                ((iter % PRINT_INTERVAL == 0)||(iter == 1)))
             print_summary(work->info);
         #endif
 

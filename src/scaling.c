@@ -5,6 +5,11 @@
 c_int scale_data(Work * work){
 
     c_int i, n_plus_m; // Iteration
+    c_float * s;       // Scaling vector s
+    c_float * s_prev;   // Previous scaling vector
+    csc * KKT;         // KKT matrix
+
+    // Get n_plus_m dimension
     n_plus_m = work->data->n + work->data->m;
 
     // Allocate scaling structure
@@ -15,15 +20,15 @@ c_int scale_data(Work * work){
     work->scaling->Einv = c_malloc(work->data->m * sizeof(c_float));
 
     // Allocate scaling vectors
-    c_float * s = c_malloc(n_plus_m*sizeof(c_float));
-    c_float * s_prev = c_malloc(n_plus_m*sizeof(c_float));
+    s = c_malloc(n_plus_m*sizeof(c_float));
+    s_prev = c_malloc(n_plus_m*sizeof(c_float));
 
     // Set s to ones(n+m)
     vec_set_scalar(s, 1., n_plus_m);
     vec_set_scalar(s_prev, 1., n_plus_m);
 
     // Form KKT matrix to be scaled (No regularization)
-    csc * KKT = form_KKT(work->data->P, work->data->A, 0., 0.);
+    KKT = form_KKT(work->data->P, work->data->A, 0., 0.);
 
     // DEBUG
     // #ifdef PRINTING

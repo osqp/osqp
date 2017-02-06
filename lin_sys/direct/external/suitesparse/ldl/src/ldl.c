@@ -21,7 +21,7 @@
  * in column j are stored in Ax [Ap [j] ... Ap [j+1]-1], with corresponding row
  * indices in Ai [Ap [j] ... Ap [j+1]-1].  Ap [0] = 0 is required, and thus
  * nz = Ap [n] is the number of nonzeros in A.  Ap is an int array of size n+1.
- * The int array Ai and the double array Ax are of size nz.  This data structure
+ * The int array Ai and the c_float array Ax are of size nz.  This data structure
  * is identical to the one used by MATLAB, except for the following
  * generalizations.  The row indices in each column of A need not be in any
  * particular order, although they must be in the range 0 to n-1.  Duplicate
@@ -43,7 +43,7 @@
  *
  * The lower triangular matrix L is stored in the same compressed-column
  * form (an int Lp array of size n+1, an int Li array of size Lp [n], and a
- * double array Lx of the same size as Li).  It has a unit diagonal, which is
+ * c_float array Lx of the same size as Li).  It has a unit diagonal, which is
  * not stored.  The row indices in each column of L are always returned in
  * ascending order, with no duplicate entries.  This format is compatible with
  * MATLAB, except that it would be more convenient for MATLAB to include the
@@ -255,21 +255,21 @@ LDL_int LDL_numeric	/* returns n if successful, k if D (k,k) is zero */
     LDL_int n,		/* A and L are n-by-n, where n >= 0 */
     LDL_int Ap [ ],	/* input of size n+1, not modified */
     LDL_int Ai [ ],	/* input of size nz=Ap[n], not modified */
-    double Ax [ ],	/* input of size nz=Ap[n], not modified */
+    c_float Ax [ ],	/* input of size nz=Ap[n], not modified */
     LDL_int Lp [ ],	/* input of size n+1, not modified */
     LDL_int Parent [ ],	/* input of size n, not modified */
     LDL_int Lnz [ ],	/* output of size n, not defn. on input */
     LDL_int Li [ ],	/* output of size lnz=Lp[n], not defined on input */
-    double Lx [ ],	/* output of size lnz=Lp[n], not defined on input */
-    double D [ ],	/* output of size n, not defined on input */
-    double Y [ ],	/* workspace of size n, not defn. on input or output */
+    c_float Lx [ ],	/* output of size lnz=Lp[n], not defined on input */
+    c_float D [ ],	/* output of size n, not defined on input */
+    c_float Y [ ],	/* workspace of size n, not defn. on input or output */
     LDL_int Pattern [ ],/* workspace of size n, not defn. on input or output */
     LDL_int Flag [ ],	/* workspace of size n, not defn. on input or output */
     LDL_int P [ ],	/* optional input of size n */
     LDL_int Pinv [ ]	/* optional input of size n */
 )
 {
-    double yi, l_ki ;
+    c_float yi, l_ki ;
     LDL_int i, k, p, kk, p2, len, top ;
     for (k = 0 ; k < n ; k++)
     {
@@ -326,10 +326,10 @@ LDL_int LDL_numeric	/* returns n if successful, k if D (k,k) is zero */
 void LDL_lsolve
 (
     LDL_int n,		/* L is n-by-n, where n >= 0 */
-    double X [ ],	/* size n.  right-hand-side on input, soln. on output */
+    c_float X [ ],	/* size n.  right-hand-side on input, soln. on output */
     LDL_int Lp [ ],	/* input of size n+1, not modified */
     LDL_int Li [ ],	/* input of size lnz=Lp[n], not modified */
-    double Lx [ ]	/* input of size lnz=Lp[n], not modified */
+    c_float Lx [ ]	/* input of size lnz=Lp[n], not modified */
 )
 {
     LDL_int j, p, p2 ;
@@ -351,8 +351,8 @@ void LDL_lsolve
 void LDL_dsolve
 (
     LDL_int n,		/* D is n-by-n, where n >= 0 */
-    double X [ ],	/* size n.  right-hand-side on input, soln. on output */
-    double D [ ]	/* input of size n, not modified */
+    c_float X [ ],	/* size n.  right-hand-side on input, soln. on output */
+    c_float D [ ]	/* input of size n, not modified */
 )
 {
     LDL_int j ;
@@ -370,10 +370,10 @@ void LDL_dsolve
 void LDL_ltsolve
 (
     LDL_int n,		/* L is n-by-n, where n >= 0 */
-    double X [ ],	/* size n.  right-hand-side on input, soln. on output */
+    c_float X [ ],	/* size n.  right-hand-side on input, soln. on output */
     LDL_int Lp [ ],	/* input of size n+1, not modified */
     LDL_int Li [ ],	/* input of size lnz=Lp[n], not modified */
-    double Lx [ ]	/* input of size lnz=Lp[n], not modified */
+    c_float Lx [ ]	/* input of size lnz=Lp[n], not modified */
 )
 {
     int j, p, p2 ;
@@ -395,8 +395,8 @@ void LDL_ltsolve
 void LDL_perm
 (
     LDL_int n,		/* size of X, B, and P */
-    double X [ ],	/* output of size n. */
-    double B [ ],	/* input of size n. */
+    c_float X [ ],	/* output of size n. */
+    c_float B [ ],	/* input of size n. */
     LDL_int P [ ]	/* input permutation array of size n. */
 )
 {
@@ -415,8 +415,8 @@ void LDL_perm
 void LDL_permt
 (
     LDL_int n,		/* size of X, B, and P */
-    double X [ ],	/* output of size n. */
-    double B [ ],	/* input of size n. */
+    c_float X [ ],	/* output of size n. */
+    c_float B [ ],	/* input of size n. */
     LDL_int P [ ]	/* input permutation array of size n. */
 )
 {

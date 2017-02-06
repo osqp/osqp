@@ -158,44 +158,48 @@ static char * test_basic_qp()
         }
 
         // UPDATE ABSOLUTE TOLERANCE
-        if (osqp_update_eps_abs(work, 7.67e-10)) {
+        c_float new_eps_abs = 0.002;
+        if (osqp_update_eps_abs(work, new_eps_abs)) {
             c_print("\nError in absolute tolerance value!");
             exitflag = 1;
         } else {
-            if (work->settings->eps_abs != 7.67e-10) {
+            if ( c_absval(work->settings->eps_abs - new_eps_abs) > TESTS_TOL  ) {
                 c_print("\nError in updating absolute tolerance!");
                 exitflag = 1;
             }
         }
 
         // UPDATE RELATIVE TOLERANCE
-        if (osqp_update_eps_rel(work, 5.61e-3)) {
+        c_float new_eps_rel = 5.61e-3;
+        if (osqp_update_eps_rel(work, new_eps_rel)) {
             c_print("\nError in relative tolerance value!");
             exitflag = 1;
         } else {
-            if (work->settings->eps_rel != 5.61e-3) {
+            if ( c_absval(work->settings->eps_rel - new_eps_rel) > TESTS_TOL) {
                 c_print("\nError in updating relative tolerance!");
                 exitflag = 1;
             }
         }
 
         // UPDATE RELAXATION PARAMETER
-        if (osqp_update_alpha(work, 0.17)) {
+        c_float new_alpha = 0.17;
+        if (osqp_update_alpha(work, new_alpha)) {
             c_print("\nError in relaxation parameter value!");
             exitflag = 1;
         } else {
-            if (work->settings->alpha != 0.17) {
+            if ( c_absval(work->settings->alpha - new_alpha)> TESTS_TOL) {
                 c_print("\nError in updating relaxation parameter!");
                 exitflag = 1;
             }
         }
 
         // UPDATE REGULARIZATION PARAMETER IN POLISHING
-        if (osqp_update_delta(work, 2.2e-9)) {
+        c_float new_delta = 2.2e-04;
+        if (osqp_update_delta(work, new_delta)) {
             c_print("\nError in regularization parameter value!");
             exitflag = 1;
         } else {
-            if (work->settings->delta != 2.2e-9) {
+            if ( c_absval(work->settings->delta - new_delta)>TESTS_TOL) {
                 c_print("\nError in updating regularization parameter!");
                 exitflag = 1;
             }

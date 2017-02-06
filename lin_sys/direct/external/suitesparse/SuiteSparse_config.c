@@ -88,7 +88,7 @@ void *SuiteSparse_malloc    /* pointer to allocated block of memory */
     if (size_of_item < 1) size_of_item = 1 ;
     size = nitems * size_of_item  ;
 
-    if (size != ((double) nitems) * size_of_item)
+    if (size != ((c_float) nitems) * size_of_item)
     {
         /* size_t overflow */
         p = NULL ;
@@ -131,7 +131,7 @@ void *SuiteSparse_realloc   /* pointer to reallocated block of memory, or
     if (size_of_item < 1) size_of_item = 1 ;
     size = nitems_new * size_of_item  ;
 
-    if (size != ((double) nitems_new) * size_of_item)
+    if (size != ((c_float) nitems_new) * size_of_item)
     {
         /* size_t overflow */
         (*ok) = 0 ;
@@ -201,7 +201,7 @@ void *SuiteSparse_free      /* always returns NULL */
 
 /* Returns the number of seconds (tic [0]) and nanoseconds (tic [1]) since some
  * unspecified but fixed time in the past.  If no timer is installed, zero is
- * returned.  A scalar double precision value for 'tic' could be used, but this
+ * returned.  A scalar c_float precision value for 'tic' could be used, but this
  * might cause loss of precision because clock_getttime returns the time from
  * some distant time in the past.  Thus, an array of size 2 is used.
  *
@@ -211,7 +211,7 @@ void *SuiteSparse_free      /* always returns NULL */
  *
  * example:
  *
- *      double tic [2], r, s, t ;
+ *      c_float tic [2], r, s, t ;
  *      SuiteSparse_tic (tic) ;     // start the timer
  *      // do some work A
  *      t = SuiteSparse_toc (tic) ; // t is time for work A, in seconds
@@ -221,7 +221,7 @@ void *SuiteSparse_free      /* always returns NULL */
  *      // do some work C
  *      r = SuiteSparse_toc (tic) ; // s is time for work C, in seconds
  *
- * A double array of size 2 is used so that this routine can be more easily
+ * A c_float array of size 2 is used so that this routine can be more easily
  * ported to non-POSIX systems.  The caller does not rely on the POSIX
  * <time.h> include file.
  */
@@ -232,21 +232,21 @@ void *SuiteSparse_free      /* always returns NULL */
 
 void SuiteSparse_tic
 (
-    double tic [2]      /* output, contents undefined on input */
+    c_float tic [2]      /* output, contents undefined on input */
 )
 {
     /* POSIX C 1993 timer, requires -librt */
     struct timespec t ;
     clock_gettime (CLOCK_MONOTONIC, &t) ;
-    tic [0] = (double) (t.tv_sec) ;
-    tic [1] = (double) (t.tv_nsec) ;
+    tic [0] = (c_float) (t.tv_sec) ;
+    tic [1] = (c_float) (t.tv_nsec) ;
 }
 
 #else
 
 void SuiteSparse_tic
 (
-    double tic [2]      /* output, contents undefined on input */
+    c_float tic [2]      /* output, contents undefined on input */
 )
 {
     /* no timer installed */
@@ -268,12 +268,12 @@ void SuiteSparse_tic
  * SuiteSparse_tic and do the calculations differently.
  */
 
-double SuiteSparse_toc  /* returns time in seconds since last tic */
+c_float SuiteSparse_toc  /* returns time in seconds since last tic */
 (
-    double tic [2]  /* input, not modified from last call to SuiteSparse_tic */
+    c_float tic [2]  /* input, not modified from last call to SuiteSparse_tic */
 )
 {
-    double toc [2] ;
+    c_float toc [2] ;
     SuiteSparse_tic (toc) ;
     return ((toc [0] - tic [0]) + 1e-9 * (toc [1] - tic [1])) ;
 }
@@ -285,12 +285,12 @@ double SuiteSparse_toc  /* returns time in seconds since last tic */
 
 /* This function might not be accurate down to the nanosecond. */
 
-double SuiteSparse_time  /* returns current wall clock time in seconds */
+c_float SuiteSparse_time  /* returns current wall clock time in seconds */
 (
     void
 )
 {
-    double toc [2] ;
+    c_float toc [2] ;
     SuiteSparse_tic (toc) ;
     return (toc [0] + 1e-9 * toc [1]) ;
 }
@@ -329,15 +329,15 @@ int SuiteSparse_version
  * SuiteSparse_hypot, defined below.
  *
  * s = hypot (x,y) computes s = sqrt (x*x + y*y) but does so more accurately.
- * The NaN cases for the double relops x >= y and x+y == x are safely ignored.
+ * The NaN cases for the c_float relops x >= y and x+y == x are safely ignored.
  *
  * Source: Algorithm 312, "Absolute value and square root of a complex number,"
  * P. Friedland, Comm. ACM, vol 10, no 10, October 1967, page 665.
  */
 
-double SuiteSparse_hypot (double x, double y)
+c_float SuiteSparse_hypot (c_float x, c_float y)
 {
-    double s, r ;
+    c_float s, r ;
     x = fabs (x) ;
     y = fabs (y) ;
     if (x >= y)
@@ -373,7 +373,7 @@ double SuiteSparse_hypot (double x, double y)
 
 /* c = a/b where c, a, and b are complex.  The real and imaginary parts are
  * passed as separate arguments to this routine.  The NaN case is ignored
- * for the double relop br >= bi.  Returns 1 if the denominator is zero,
+ * for the c_float relop br >= bi.  Returns 1 if the denominator is zero,
  * 0 otherwise.
  *
  * This uses ACM Algo 116, by R. L. Smith, 1962, which tries to avoid
@@ -387,12 +387,12 @@ double SuiteSparse_hypot (double x, double y)
 
 int SuiteSparse_divcomplex
 (
-    double ar, double ai,       /* real and imaginary parts of a */
-    double br, double bi,       /* real and imaginary parts of b */
-    double *cr, double *ci      /* real and imaginary parts of c */
+    c_float ar, c_float ai,       /* real and imaginary parts of a */
+    c_float br, c_float bi,       /* real and imaginary parts of b */
+    c_float *cr, c_float *ci      /* real and imaginary parts of c */
 )
 {
-    double tr, ti, r, den ;
+    c_float tr, ti, r, den ;
     if (fabs (br) >= fabs (bi))
     {
         r = bi / br ;

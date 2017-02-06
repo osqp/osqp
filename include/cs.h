@@ -5,6 +5,10 @@
 #ifndef CS_H
 #define CS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "glob_opts.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -108,6 +112,8 @@ csc *csc_symperm(const csc *A, const c_int *pinv, c_int values);
 
 
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif

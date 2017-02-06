@@ -25,7 +25,7 @@ static const char *HEADER[] = {
 static const c_int HEADER_LEN = 4;
 #endif
 static const c_int HSPACE = 12;
-static const c_int LINE_LEN = 55;
+#define HEADER_LINE_LEN 55
 #endif
 
 /**********************
@@ -35,17 +35,17 @@ static const c_int LINE_LEN = 55;
 #ifdef PRINTING
 
 static void print_line(void){
-    char theLine[LINE_LEN+1];
+    char theLine[HEADER_LINE_LEN+1];
     c_int i;
-    for (i = 0; i < LINE_LEN; ++i)
+    for (i = 0; i < HEADER_LINE_LEN; ++i)
         theLine[i] = '-';
-    theLine[LINE_LEN] = '\0';
+    theLine[HEADER_LINE_LEN] = '\0';
     c_print("%s\n",theLine);
 }
 
 void print_header(void){
-    c_print("%s ", HEADER[0]);
     c_int i;
+    c_print("%s ", HEADER[0]);
     for (i=1; i < HEADER_LEN - 1; i++) c_print("  %s", HEADER[i]);
     c_print("%s\n", HEADER[HEADER_LEN - 1]);
 }
@@ -148,39 +148,6 @@ void print_footer(Info * info, c_int polishing){
     #endif
     c_print("\n");
 
-    // #ifdef PROFILING
-    // if (polishing && info->status_val == OSQP_SOLVED) {
-    //     if (info->run_time > 1e-03) { // Time more than 1ms
-    //         c_print("Timing: total  time = %.3fs\n        "
-    //                 "setup  time = %.3fs\n        "
-    //                 "solve  time = %.3fs\n        "
-    //                 "polish time = %.3fs\n",
-    //                 info->run_time, info->setup_time,
-    //                 info->solve_time, info->polish_time);
-    //     } else {
-    //         c_print("Timing: total  time = %.3fms\n        "
-    //                 "setup  time = %.3fms\n        "
-    //                 "solve  time = %.3fms\n        "
-    //                 "polish time = %.3fms\n",
-    //                 1e03*info->run_time, 1e03*info->setup_time,
-    //                 1e03*info->solve_time, 1e03*info->polish_time);
-    //     }
-    // } else{
-    //     if (info->run_time > 1e-03) { // Time more than 1ms
-    //         c_print("Timing: total  time = %.3fs\n        "
-    //                 "setup  time = %.3fs\n        "
-    //                 "solve  time = %.3fs\n",
-    //                 info->run_time, info->setup_time, info->solve_time);
-    //     } else {
-    //         c_print("Timing: total  time = %.3fms\n        "
-    //                 "setup  time = %.3fms\n        "
-    //                 "solve  time = %.3fms\n",
-    //                 1e03*info->run_time, 1e03*info->setup_time,
-    //                 1e03*info->solve_time);
-    //     }
-    // }
-    // #endif
-
 }
 
 #endif
@@ -256,7 +223,7 @@ void tic(Timer* t)
 c_float toc(Timer* t)
 {
         QueryPerformanceCounter(&t->toc);
-        return ((t->toc.QuadPart - t->tic.QuadPart) / (pfloat)t->freq.QuadPart);
+        return ((t->toc.QuadPart - t->tic.QuadPart) / (c_float)t->freq.QuadPart);
 }
 
 // Mac
@@ -376,11 +343,14 @@ c_int is_eq_csc(csc *A, csc *B, c_float tol){
 #ifdef PRINTING
 
 /* Print a csc sparse matrix */
-void print_csc_matrix(csc* M, char * name)
+void print_csc_matrix(csc* M, const char * name)
 {
-        c_print("%s :\n", name);
         c_int j, i, row_start, row_stop;
-        c_int k = 0;
+        c_int k=0;
+
+        // Print name
+        c_print("%s :\n", name);
+
         for(j=0; j<M->n; j++) {
                 row_start = M->p[j];
                 row_stop = M->p[j+1];
@@ -395,10 +365,13 @@ void print_csc_matrix(csc* M, char * name)
 }
 
 /* Print a triplet format sparse matrix */
-void print_trip_matrix(csc* M, char * name)
+void print_trip_matrix(csc* M, const char * name)
 {
-        c_print("%s :\n", name);
         c_int k = 0;
+
+        // Print name
+        c_print("%s :\n", name);
+
         for (k=0; k<M->nz; k++){
             c_print("\t[%3u, %3u] = %g\n", M->i[k], M->p[k], M->x[k]);
         }
@@ -406,7 +379,7 @@ void print_trip_matrix(csc* M, char * name)
 
 
 /* Print a dense matrix */
-void print_dns_matrix(c_float * M, c_int m, c_int n, char *name)
+void print_dns_matrix(c_float * M, c_int m, c_int n, const char *name)
 {
         c_int i, j;
         c_print("%s = \n\t", name);
@@ -428,13 +401,13 @@ void print_dns_matrix(c_float * M, c_int m, c_int n, char *name)
 }
 
 /* Print vector */
-void print_vec(c_float * v, c_int n, char *name){
+void print_vec(c_float * v, c_int n, const char *name){
         print_dns_matrix(v, 1, n, name);
 }
 
 
 // Print int array
-void print_vec_int(c_int * x, c_int n, char *name) {
+void print_vec_int(c_int * x, c_int n, const char *name) {
     c_int i;
     c_print("%s = [", name);
     for(i=0; i<n; i++) {

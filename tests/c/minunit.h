@@ -6,4 +6,4 @@
                                if (message) return message; } while (0)
 extern int tests_run;
 
-#define TESTS_TOL 1e-10  // Define tests tolerance
+#define TESTS_TOL 1e-4  // Define tests tolerance

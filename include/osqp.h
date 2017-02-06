@@ -1,6 +1,10 @@
 #ifndef OSQP_H
 #define OSQP_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 /* Includes */
 #include "glob_opts.h"
@@ -307,5 +311,8 @@ c_int osqp_update_verbose(Work * work, c_int verbose_new);
  */
 c_int osqp_update_warm_start(Work * work, c_int warm_start_new);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

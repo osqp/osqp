@@ -1,6 +1,10 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 /*******************
  * OSQP Versioning *
@@ -59,6 +63,8 @@
 
 
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif

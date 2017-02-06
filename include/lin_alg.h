@@ -1,6 +1,11 @@
 #ifndef LIN_ALG_H
 #define LIN_ALG_H
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "glob_opts.h"
 #include <math.h>
 #include "constants.h"
@@ -108,5 +113,10 @@ void mat_tpose_vec(const csc *A, const c_float *x, c_float *y,
  * @return   quadratic form value
  */
 c_float quad_form(const csc * P, const c_float * x);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

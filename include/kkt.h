@@ -1,6 +1,10 @@
 #ifndef KKT_H
 #define KKT_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "osqp.h"
 
 /**
@@ -19,5 +23,9 @@
  */
 csc * form_KKT(const csc * P, const  csc * A, c_float scalar1, c_float scalar2);
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -1,5 +1,4 @@
 #include "private.h"
-#include "util.h"
 
 
 
@@ -78,7 +77,11 @@ c_int factorize(csc *A, Priv *p) {
     info = (c_float *)c_malloc(AMD_INFO * sizeof(c_float));
 
     // Compute permutation metrix P using SuiteSparse/AMD
+    #ifdef DLONG
+    amd_status = amd_l_order(A->n, A->p, A->i, p->P, (c_float *)OSQP_NULL, info);
+    #else
     amd_status = amd_order(A->n, A->p, A->i, p->P, (c_float *)OSQP_NULL, info);
+    #endif
     if (amd_status < 0)
         return (amd_status);
 
@@ -106,15 +109,16 @@ c_int factorize(csc *A, Priv *p) {
 Priv *init_priv(const csc * P, const csc * A, const Settings *settings,
                 c_int polish){
     // Define Variables
-    csc * KKT;  // KKT Matrix
-    Priv * p;   // KKT factorization structure
+    csc * KKT;       // KKT Matrix
+    Priv * p;        // KKT factorization structure
+    c_int n_plus_m;  // Define n_plus_m dimension
 
     // Allocate private structure to store KKT factorization
     // Allocate pointers
     p = c_calloc(1, sizeof(Priv));
 
     // Size of KKT
-    c_int n_plus_m = P->m + A->m;
+    n_plus_m = P->m + A->m;
 
     // Sparse matrix L (lower triangular)
     // N.B. Do not allocate L completely (CSC elements)

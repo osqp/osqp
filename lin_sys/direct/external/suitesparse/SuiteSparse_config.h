@@ -89,8 +89,8 @@ struct SuiteSparse_config_struct
     void *(*realloc_func) (void *, size_t) ;    /* pointer to realloc */
     void (*free_func) (void *) ;                /* pointer to free */
     int (*printf_func) (const char *, ...) ;    /* pointer to printf */
-    double (*hypot_func) (double, double) ;     /* pointer to hypot */
-    int (*divcomplex_func) (double, double, double, double, double *, double *);
+    c_float (*hypot_func) (c_float, c_float) ;     /* pointer to hypot */
+    int (*divcomplex_func) (c_float, c_float, c_float, c_float, c_float *, c_float *);
 } ;
 
 extern struct SuiteSparse_config_struct SuiteSparse_config ;
@@ -124,29 +124,32 @@ void *SuiteSparse_free      /* always returns NULL */
 
 void SuiteSparse_tic    /* start the timer */
 (
-    double tic [2]      /* output, contents undefined on input */
+    c_float tic [2]      /* output, contents undefined on input */
 ) ;
 
-double SuiteSparse_toc  /* return time in seconds since last tic */
+c_float SuiteSparse_toc  /* return time in seconds since last tic */
 (
-    double tic [2]      /* input: from last call to SuiteSparse_tic */
+    c_float tic [2]      /* input: from last call to SuiteSparse_tic */
 ) ;
 
-double SuiteSparse_time  /* returns current wall clock time in seconds */
+c_float SuiteSparse_time  /* returns current wall clock time in seconds */
 (
     void
 ) ;
 
 /* returns sqrt (x^2 + y^2), computed reliably */
-double SuiteSparse_hypot (double x, double y) ;
+c_float SuiteSparse_hypot (c_float x, c_float y) ;
 
 /* complex division of c = a/b */
 int SuiteSparse_divcomplex
 (
-    double ar, double ai,	/* real and imaginary parts of a */
-    double br, double bi,	/* real and imaginary parts of b */
-    double *cr, double *ci	/* real and imaginary parts of c */
+    c_float ar, c_float ai,	/* real and imaginary parts of a */
+    c_float br, c_float bi,	/* real and imaginary parts of b */
+    c_float *cr, c_float *ci	/* real and imaginary parts of c */
 ) ;
+
+/* OSQP: disabling this timing code */
+#define NTIMER
 
 /* determine which timer to use, if any */
 #ifndef NTIMER
