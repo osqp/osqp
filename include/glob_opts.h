@@ -102,6 +102,8 @@ typedef float c_float;                /* for numerical values  */
 /* Use customized functions -----------------------------------------------   */
 
 #ifdef PRINTING
+#include <stdio.h>
+
 #ifdef MATLAB_MEX_FILE
 #define c_print mexPrintf
 // The following trick slows down the performance a lot. Since many solvers actually
@@ -125,6 +127,12 @@ typedef float c_float;                /* for numerical values  */
 #else
 #define c_print printf
 #endif
+
+// Enable two digits exponent in Windows
+#if defined(_WIN32) || defined(_WIN64)
+// _set_output_format(_TWO_DIGIT_EXPONENT);
+#endif
+
 #endif
 
 

@@ -163,10 +163,10 @@ static void compute_y_from_y_red(Work * work){
     // yred = vstack[ylow, yupp]
     for (j = 0; j < work->data->m; j++) {
         if (work->pol->A_to_Alow[j] != -1) {
-            work->y[j] = work->pol->y_red[work->pol->A_to_Alow[j]];    // ylow
+            work->y[j] = work->pol->y_red[work->pol->A_to_Alow[j]];     // ylow
         } else if (work->pol->A_to_Aupp[j] != -1) {
             work->y[j] = work->pol->y_red[work->pol->A_to_Aupp[j] +
-                                          work->pol->n_low];       // yupp
+                                          work->pol->n_low];            // yupp
         } else {
             work->y[j] = 0.0;
         }
@@ -187,83 +187,90 @@ c_int polish(Work *work) {
     // Form Ared by assuming the active constraints and store in work->pol->Ared
     mred = form_Ared(work);
 
-    if (mred > 0) {  // There are active constraints -> Do polishing
-        // Form and factorize reduced KKT
-        plsh = init_priv(work->data->P, work->pol->Ared, work->settings, 1);
-
-        // Form reduced right-hand side rhs_red
-        rhs_red = c_malloc(sizeof(c_float) * (work->data->n + mred));
-        form_rhs_red(work, rhs_red);
-
-        // Solve the reduced KKT system
-        pol_sol = vec_copy(rhs_red, work->data->n + mred);
-        solve_lin_sys(work->settings, plsh, pol_sol);
-
-        // Perform iterative refinement to compensate for the regularization error
-        iterative_refinement(work, plsh, pol_sol, rhs_red);
-
-        // Store the polished solution
-        work->pol->y_red = c_malloc(mred * sizeof(c_float));
-        prea_vec_copy(pol_sol, work->pol->x, work->data->n);
-        prea_vec_copy(pol_sol + work->data->n, work->pol->y_red, mred);
-
-        // Compute z = A*x needed for computing the primal residual
-        mat_vec(work->data->A, work->pol->x, work->pol->z, 0);
-
-        // Compute primal and dual residuals at the polished solution
-        update_info(work, 0, 1);
-
-        // Update timing
-        #ifdef PROFILING
-        work->info->polish_time = toc(work->timer);
-        #endif
-
-        // Check if polishing was successful
-        polish_successful = (work->pol->pri_res < work->info->pri_res &&
-            work->pol->dua_res < work->info->dua_res) || // Residuals are reduced
-            (work->pol->pri_res < work->info->pri_res &&
-             work->info->dua_res < 1e-10) ||             // Dual residual already tiny
-            (work->pol->dua_res < work->info->dua_res &&
-             work->info->pri_res < 1e-10);               // Primal residual already tiny
-
-        if (polish_successful) {
-
-                // Update solver information
-                work->info->obj_val = work->pol->obj_val;
-                work->info->pri_res = work->pol->pri_res;
-                work->info->dua_res = work->pol->dua_res;
-                work->info->status_polish = 1;
-
-                // Update (x, z, y) in ADMM iterations
-
-                // Update x
-                prea_vec_copy(work->pol->x, work->x, work->data->n);
-
-                // Update z (needed for warm starting)
-                prea_vec_copy(work->pol->z, work->z, work->data->m);
-
-                // Reconstruct y from y_red and active constraints
-                compute_y_from_y_red(work);
-
-                // Print summary
-                #ifdef PRINTING
-                if (work->settings->verbose)
-                    print_polishing(work->info);
-                #endif
-
-        } else { // Polishing failed
-            work->info->status_polish = -1;
-            // TODO: Try to find a better solution on the line connecting ADMM
-            //       and polished solution
-        }
-
-        // Memory clean-up
-        free_priv(plsh);
-        csc_spfree(work->pol->Ared);
-        c_free(work->pol->y_red);
-        c_free(rhs_red);
-        c_free(pol_sol);
+    if (mred == 0){
+        // There are no active constraints -> Terminate
+        return 1;
     }
+
+    // Form and factorize reduced KKT
+    plsh = init_priv(work->data->P, work->pol->Ared, work->settings, 1);
+
+    // Form reduced right-hand side rhs_red
+    rhs_red = c_malloc(sizeof(c_float) * (work->data->n + mred));
+    form_rhs_red(work, rhs_red);
+
+    // Solve the reduced KKT system
+    pol_sol = vec_copy(rhs_red, work->data->n + mred);
+    solve_lin_sys(work->settings, plsh, pol_sol);
+
+    // Perform iterative refinement to compensate for the regularization error
+    iterative_refinement(work, plsh, pol_sol, rhs_red);
+
+    // Store the polished solution
+    work->pol->y_red = c_malloc(mred * sizeof(c_float));
+    prea_vec_copy(pol_sol, work->pol->x, work->data->n);
+    prea_vec_copy(pol_sol + work->data->n, work->pol->y_red, mred);
+
+    // Compute z = A*x needed for computing the primal residual
+    mat_vec(work->data->A, work->pol->x, work->pol->z, 0);
+
+    // Compute primal and dual residuals at the polished solution
+    update_info(work, 0, 1);
+
+    // Update timing
+    #ifdef PROFILING
+    work->info->polish_time = toc(work->timer);
+    #endif
+
+    // Check if polishing was successful
+    polish_successful = (work->pol->pri_res < work->info->pri_res &&
+        work->pol->dua_res < work->info->dua_res) || // Residuals are reduced
+        (work->pol->pri_res < work->info->pri_res &&
+         work->info->dua_res < 1e-10) ||             // Dual residual already tiny
+        (work->pol->dua_res < work->info->dua_res &&
+         work->info->pri_res < 1e-10);               // Primal residual already tiny
+
+    if (polish_successful) {
+
+            // Update solver information
+            work->info->obj_val = work->pol->obj_val;
+            work->info->pri_res = work->pol->pri_res;
+            work->info->dua_res = work->pol->dua_res;
+            work->info->status_polish = 1;
+
+            // Update (x, z, y) in ADMM iterations
+
+            // Update x
+            prea_vec_copy(work->pol->x, work->x, work->data->n);
+
+            // Update z (needed for warm starting)
+            prea_vec_copy(work->pol->z, work->z, work->data->m);
+
+            // Reconstruct y from y_red and active constraints
+            compute_y_from_y_red(work);
+
+            // Print summary
+            #ifdef PRINTING
+            if (work->settings->verbose)
+                print_polishing(work->info);
+            #endif
+
+    } else { // Polishing failed
+        work->info->status_polish = -1;
+        // TODO: Try to find a better solution on the line connecting ADMM
+        //       and polished solution
+    }
+
+    // Memory clean-up
+    free_priv(plsh);
+    if (work->pol) {
+        if (work->pol->Ared)
+            csc_spfree(work->pol->Ared);
+        if (work->pol->y_red)
+            c_free(work->pol->y_red);
+    }
+    c_free(rhs_red);
+    c_free(pol_sol);
 
     return 0;
 }
