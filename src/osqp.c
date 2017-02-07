@@ -208,7 +208,7 @@ c_int osqp_solve(Work * work){
 
         /* Print summary */
         #ifdef PRINTING
-        if (work->settings->verbose && 
+        if (work->settings->verbose &&
                 ((iter % PRINT_INTERVAL == 0)||(iter == 1)))
             print_summary(work->info);
         #endif
@@ -454,7 +454,7 @@ c_int osqp_update_bounds(Work * work, c_float * l_new, c_float * u_new) {
 c_int osqp_update_lower_bound(Work * work, c_float * l_new) {
     c_int i;
 
-    // Replace lA by the new vector
+    // Replace l by the new vector
     prea_vec_copy(l_new, work->data->l, work->data->m);
 
     // Scaling
@@ -485,7 +485,7 @@ c_int osqp_update_lower_bound(Work * work, c_float * l_new) {
 c_int osqp_update_upper_bound(Work * work, c_float * u_new) {
     c_int i;
 
-    // Replace uA by the new vector
+    // Replace u by the new vector
     prea_vec_copy(u_new, work->data->u, work->data->m);
 
     // Scaling
@@ -504,6 +504,86 @@ c_int osqp_update_upper_bound(Work * work, c_float * u_new) {
     }
     return 0;
 }
+
+
+/**
+ * Warm start primal and dual variables
+ * @param  work Workspace structure
+ * @param  x    Primal variable
+ * @param  y    Dual variable
+ * @return      Exitflag
+ */
+c_int osqp_warm_start(Work * work, c_float * x, c_float * y){
+
+    // Update warm_start setting to true
+    if (!work->settings->warm_start) work->settings->warm_start = 1;
+
+    // Copy primal and dual variables into the iterates
+    prea_vec_copy(x, work->x, work->data->n);
+    prea_vec_copy(y, work->y, work->data->m);
+
+    // Scale iterates
+    vec_ew_prod(work->scaling->Dinv, work->x, work->data->n);
+    vec_ew_prod(work->scaling->Einv, work->y, work->data->m);
+
+    // Compute Ax = z and store it in z
+    mat_vec(work->data->A, work->x, work->z, 0);
+
+    return 0;
+}
+
+
+/**
+ * Warm start primal variable
+ * @param  work Workspace structure
+ * @param  x    Primal variable
+ * @return      Exitflag
+ */
+c_int osqp_warm_start_x(Work * work, c_float * x){
+
+    // Update warm_start setting to true
+    if (!work->settings->warm_start) work->settings->warm_start = 1;
+
+    // Copy primal variable into the iterate x
+    prea_vec_copy(x, work->x, work->data->n);
+
+    // Scale iterate
+    vec_ew_prod(work->scaling->Dinv, work->x, work->data->n);
+
+    // Compute Ax = z and store it in z
+    mat_vec(work->data->A, work->x, work->z, 0);
+
+    // Cold start y
+    memset(work->y, 0, work->data->m * sizeof(c_float));
+
+    return 0;
+}
+
+
+/**
+ * Warm start dual variable
+ * @param  work Workspace structure
+ * @param  y    Dual variable
+ * @return      Exitflag
+ */
+c_int osqp_warm_start_y(Work * work, c_float * y){
+
+    // Update warm_start setting to true
+    if (!work->settings->warm_start) work->settings->warm_start = 1;
+
+    // Copy primal variable into the iterate y
+    prea_vec_copy(y, work->y, work->data->m);
+
+    // Scale iterate
+    vec_ew_prod(work->scaling->Einv, work->y, work->data->m);
+
+    // Cold start x and z
+    memset(work->x, 0, work->data->n * sizeof(c_float));
+    memset(work->z, 0, work->data->m * sizeof(c_float));
+
+    return 0;
+}
+
 
 
 /****************************

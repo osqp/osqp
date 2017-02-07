@@ -226,6 +226,34 @@ c_int osqp_update_lower_bound(Work * work, c_float * l_new);
 c_int osqp_update_upper_bound(Work * work, c_float * u_new);
 
 
+/**
+ * Warm start primal and dual variables
+ * @param  work Workspace structure
+ * @param  x    Primal variable
+ * @param  y    Dual variable
+ * @return      Exitflag
+ */
+c_int osqp_warm_start(Work * work, c_float * x, c_float * y);
+
+
+/**
+ * Warm start primal variable
+ * @param  work Workspace structure
+ * @param  x    Primal variable
+ * @return      Exitflag
+ */
+c_int osqp_warm_start_x(Work * work, c_float * x);
+
+
+/**
+ * Warm start dual variable
+ * @param  work Workspace structure
+ * @param  y    Dual variable
+ * @return      Exitflag
+ */
+c_int osqp_warm_start_y(Work * work, c_float * y);
+
+
 
 /************************************************
  * Edit settings without performing setup again *
