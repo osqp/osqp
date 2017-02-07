@@ -223,7 +223,7 @@ c_int osqp_solve(Work * work){
 
     /* Print summary for last iteration */
     #ifdef PRINTING
-    if (work->settings->verbose && iter % PRINT_INTERVAL != 0)
+    if (work->settings->verbose && iter % PRINT_INTERVAL != 0 && iter != 1)
         print_summary(work->info);
     #endif
 
@@ -246,7 +246,7 @@ c_int osqp_solve(Work * work){
 
     /* Update total time */
     #ifdef PROFILING
-    if (work->first_run == 0) {
+    if (work->first_run) {
         // total time: setup + solve + polish
         work->info->run_time = work->info->setup_time +
                                work->info->solve_time +
