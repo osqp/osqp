@@ -198,13 +198,6 @@ c_int polish(Work *work) {
     // Form Ared by assuming the active constraints and store in work->pol->Ared
     mred = form_Ared(work);
 
-    // // TODO: We can still do polishing when there are no active constraints
-    //
-    // if (mred == 0){
-    //     // There are no active constraints -> Terminate
-    //     return 1;
-    // }
-
     // Form and factorize reduced KKT
     plsh = init_priv(work->data->P, work->pol->Ared, work->settings, 1);
 
