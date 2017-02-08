@@ -134,6 +134,7 @@ c_int scale_data(Work * work){
 
 // // Scale solution
 // c_int scale_solution(Work * work){
+//
 //     // primal
 //     vec_ew_prod(work->scaling->Dinv, work->solution->x, work->data->n);
 //
@@ -142,6 +143,7 @@ c_int scale_data(Work * work){
 //
 //     return 0;
 // }
+
 
 // Unscale solution
 c_int unscale_solution(Work * work){
