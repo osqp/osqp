@@ -39,7 +39,13 @@ static c_int form_Ared(Work *work) {
         }
     }
 
-    // TODO: Add check if mred == 0
+    // Check if there are no active constraints
+    if (work->pol->n_low + work->pol->n_upp == 0) {
+        // Form empty Ared
+        work->pol->Ared = csc_spalloc(0, work->data->n, 0, 1, 0);
+        memset(work->pol->Ared->p, 0, (work->data->n + 1) * sizeof(c_int));
+        return 0;   // mred = 0
+    }
 
     // Count number of elements in Ared
     for (j = 0; j < work->data->A->nzmax; j++) {
@@ -160,6 +166,11 @@ static void iterative_refinement(Work *work, Priv *p, c_float *z, c_float *b) {
 static void compute_y_from_y_red(Work * work){
     c_int j;
 
+    // If there are no active constraints
+    if (work->pol->n_low + work->pol->n_upp == 0) {
+        memset(work->y, 0, work->data->m * sizeof(c_float));
+        return;
+    }
     // yred = vstack[ylow, yupp]
     for (j = 0; j < work->data->m; j++) {
         if (work->pol->A_to_Alow[j] != -1) {
@@ -187,10 +198,12 @@ c_int polish(Work *work) {
     // Form Ared by assuming the active constraints and store in work->pol->Ared
     mred = form_Ared(work);
 
-    if (mred == 0){
-        // There are no active constraints -> Terminate
-        return 1;
-    }
+    // // TODO: We can still do polishing when there are no active constraints
+    //
+    // if (mred == 0){
+    //     // There are no active constraints -> Terminate
+    //     return 1;
+    // }
 
     // Form and factorize reduced KKT
     plsh = init_priv(work->data->P, work->pol->Ared, work->settings, 1);
