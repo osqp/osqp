@@ -48,7 +48,7 @@ static c_int form_Ared(Work *work) {
     }
 
     // Count number of elements in Ared
-    for (j = 0; j < work->data->A->nzmax; j++) {
+    for (j = 0; j < work->data->A->p[work->data->A->n]; j++) {
         if (work->pol->A_to_Alow[work->data->A->i[j]] != -1 ||
             work->pol->A_to_Aupp[work->data->A->i[j]] != -1)
             Ared_nnz++;

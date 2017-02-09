@@ -181,7 +181,7 @@ used in matrix equilibration
 */
 void mat_ew_sq(csc * A){
     c_int i;
-    for (i=0; i<A->nzmax; i++)
+    for (i=0; i<A->p[A->n]; i++)
     {
         A->x[i] = A->x[i]*A->x[i];
     }
@@ -194,7 +194,7 @@ TODO: delete or keep it? We may not need this function.
 */
 void mat_ew_abs(csc * A){
     c_int i;
-    for (i=0; i<A->nzmax; i++) {
+    for (i=0; i<A->p[A->n]; i++) {
         A->x[i] = c_absval(A->x[i]);
     }
 }
@@ -215,7 +215,7 @@ void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq) {
     }
 
     // if A is empty
-    if (A->nzmax == 0) {
+    if (A->p[A->n] == 0) {
         return;
     }
 
@@ -253,7 +253,7 @@ void mat_tpose_vec(const csc *A, const c_float *x, c_float *y,
     }
 
     // if A is empty
-    if (A->nzmax == 0) {
+    if (A->p[A->n] == 0) {
         return;
     }
 
