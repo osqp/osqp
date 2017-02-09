@@ -317,6 +317,9 @@ void store_solution(Work *work) {
     } else { // Problem infeasible or unbounded. Solution is NaN
         vec_set_scalar(work->solution->x, OSQP_NAN, work->data->n);
         vec_set_scalar(work->solution->y, OSQP_NAN, work->data->m);
+
+        // Cold start iterates to 0 for next runs
+        cold_start(work);
     }
 }
 
