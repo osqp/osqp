@@ -144,7 +144,7 @@ c_float compute_obj_val(Data *data, c_float * x) {
  */
 c_float compute_pri_res(Work * work, c_int polish){
     c_int j;
-    c_float tmp, prim_resid_sq=0;
+    c_float tmp, prim_resid_sq=0.0;
     if (polish) {
         // Called from polish() function
         for (j = 0; j < work->data->m; j++) {
@@ -182,7 +182,8 @@ c_float compute_dua_res(Work * work, c_int polish){
         prea_vec_copy(work->data->q, work->x_prev, work->data->n);
 
         // += A' * y
-        mat_tpose_vec(work->data->A, work->y, work->x_prev, 1, 0);
+        if (work->data->m > 0)
+            mat_tpose_vec(work->data->A, work->y, work->x_prev, 1, 0);
 
         // += P * x (upper triangular part)
         mat_vec(work->data->P, work->x, work->x_prev, 1);
@@ -199,8 +200,9 @@ c_float compute_dua_res(Work * work, c_int polish){
         // NB: Only upper triangular part of P is stored.
         prea_vec_copy(work->data->q, work->x_prev,
                       work->data->n);                    // dr = q
-        mat_tpose_vec(work->pol->Ared, work->pol->y_red,
-                      work->x_prev, 1, 0);      // += Ared'*y_red
+        if (work->data->m == 0)
+            mat_tpose_vec(work->pol->Ared, work->pol->y_red,
+                          work->x_prev, 1, 0);  // += Ared'*y_red
         mat_vec(work->data->P, work->pol->x,
                 work->x_prev, 1);               // += Px (upper triang part)
         mat_tpose_vec(work->data->P, work->pol->x,
@@ -326,33 +328,32 @@ void store_solution(Work *work) {
  * @param polish Called from polish function (1) or from elsewhere (0)
  */
 void update_info(Work *work, c_int iter, c_int polish){
-    if (work->data->m == 0) {  // No constraints in the problem (no polishing)
+    if (polish) { // polishing
+
+        work->pol->obj_val = compute_obj_val(work->data, work->pol->x);
+        if (work->data->m == 0) {
+            // No constraints -> Always primal feasible
+            work->pol->pri_res = 0.;
+        } else {
+            work->pol->pri_res = compute_pri_res(work, 1);
+        }
+        work->pol->dua_res = compute_dua_res(work, 1);
+
+    } else { // normal update
+
         work->info->iter = iter; // Update iteration number
         work->info->obj_val = compute_obj_val(work->data, work->x);
-        work->info->pri_res = 0.;          // Always primal feasible
+        if (work->data->m == 0) {
+            // No constraints -> Always primal feasible
+              work->info->pri_res = 0.;
+        } else {
+              work->info->pri_res = compute_pri_res(work, 0);
+        }
         work->info->dua_res = compute_dua_res(work, 0);
+
         #ifdef PROFILING
             work->info->solve_time = toc(work->timer);
         #endif
-    }
-    else{ // Problem has constraints
-        if (polish) { // polishing
-
-            work->pol->obj_val = compute_obj_val(work->data, work->pol->x);
-            work->pol->pri_res = compute_pri_res(work, 1);
-            work->pol->dua_res = compute_dua_res(work, 1);
-
-        } else { // normal update
-
-            work->info->iter = iter; // Update iteration number
-            work->info->obj_val = compute_obj_val(work->data, work->x);
-            work->info->pri_res = compute_pri_res(work, 0);
-            work->info->dua_res = compute_dua_res(work, 0);
-
-            #ifdef PROFILING
-                work->info->solve_time = toc(work->timer);
-            #endif
-        }
     }
 }
 

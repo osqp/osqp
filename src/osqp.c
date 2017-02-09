@@ -90,7 +90,6 @@ Work * osqp_setup(const Data * data, Settings *settings){
 
     // Copy settings
     work->settings = copy_settings(settings);
-    if (work->data->m == 0) work->settings->polishing = 0;     // If no constraints->disable polishing
 
     // Perform scaling
     if (settings->scaling) {
