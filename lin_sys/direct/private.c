@@ -31,6 +31,7 @@ void free_priv(Priv *p) {
  */
 c_int LDLFactor(csc *A, c_int P[], c_int Pinv[], csc **L, c_float **D) {
     c_int kk, n = A->n;
+    c_int check_Li_Lx;
     c_int *Parent = c_malloc(n * sizeof(c_int));
     c_int *Lnz = c_malloc(n * sizeof(c_int));
     c_int *Flag = c_malloc(n * sizeof(c_int));
@@ -46,7 +47,16 @@ c_int LDLFactor(csc *A, c_int P[], c_int Pinv[], csc **L, c_float **D) {
     (*L)->i = (c_int *)c_malloc((*L)->nzmax * sizeof(c_int));
     // *D = (c_float *)c_malloc(n * sizeof(c_float));
 
-    if (!(*D) || !(*L)->i || !(*L)->x || !Y || !Pattern || !Flag || !Lnz ||
+    // If there are no elements in L, i.e. if the matrix A is already diagona, do not check if L->x or L->i are different than zero.
+    if ((*L)->nzmax == 0) {
+        check_Li_Lx = 0;
+    }
+    else{
+        check_Li_Lx = !(*L)->i || !(*L)->x;
+    }
+
+    // Check if symbolic factorization worked our correctly
+    if (!(*D) || check_Li_Lx || !Y || !Pattern || !Flag || !Lnz ||
         !Parent)
         return -1;
 

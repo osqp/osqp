@@ -181,11 +181,11 @@ csc *csc_symperm(const csc *A, const c_int *pinv, c_int values) {
  *  output is allocated by this function (uses MALLOC)
  */
 csc * copy_csc_mat(const csc* A){
-        csc * B = csc_spalloc(A->m, A->n, A->nzmax, 1, 0);
+        csc * B = csc_spalloc(A->m, A->n, A->p[A->n], 1, 0);
 
         memcpy(B->p, A->p, (A->n+1)*sizeof(c_int));
-        memcpy(B->i, A->i, (A->nzmax)*sizeof(c_int));
-        memcpy(B->x, A->x, (A->nzmax)*sizeof(c_float));
+        memcpy(B->i, A->i, (A->p[A->n])*sizeof(c_int));
+        memcpy(B->x, A->x, (A->p[A->n])*sizeof(c_float));
 
         return B;
 }
@@ -195,8 +195,8 @@ csc * copy_csc_mat(const csc* A){
  */
 void prea_copy_csc_mat(const csc* A, csc* B){
     memcpy(B->p, A->p, (A->n+1)*sizeof(c_int));
-    memcpy(B->i, A->i, (A->nzmax)*sizeof(c_int));
-    memcpy(B->x, A->x, (A->nzmax)*sizeof(c_float));
+    memcpy(B->i, A->i, (A->p[A->n])*sizeof(c_int));
+    memcpy(B->x, A->x, (A->p[A->n])*sizeof(c_float));
     B->nzmax = A->nzmax;
 }
 

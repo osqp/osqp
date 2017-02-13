@@ -301,7 +301,7 @@ c_float * csc_to_dns(csc * M)
         c_float * A = (c_float *)c_calloc(M->m * M->n, sizeof(c_float));
 
         // Allocate elements
-        for (idx = 0; idx < M->nzmax; idx++)
+        for (idx = 0; idx < M->p[M->n]; idx++)
         {
                 // Get row index i (starting from 1)
                 i = M->i[idx];

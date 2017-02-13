@@ -101,6 +101,10 @@ Work * osqp_setup(const Data * data, Settings *settings){
 
     // Initialize linear system solver private structure
     work->priv = init_priv(work->data->P, work->data->A, work->settings, 0);
+    if (!work->priv){
+        c_print("ERROR: Linear systems solver initialization failure!\n");
+        return OSQP_NULL;
+    }
 
     // Initialize active constraints structure
     work->pol = c_malloc(sizeof(Polish));
