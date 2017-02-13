@@ -10,18 +10,18 @@ The current version is `0.0.0`.
 
 ## TODO (Code)
 
--   [ ] Implement cheaper dual residual computation: (only one matrix-vector computation)
--   [ ] Fix polishing unsuccessful when solving a feasibility problem
--   [ ] **Compute cost function only when algorithm exits**. Not at every iteration!
--   [ ] Implement function updates for `sigma`, `eps_inf` and `eps_unb` parameters
+-   [x] Fix polishing unsuccessful when solving a feasibility problem
 -   [x] Check infeasibility in the code with new conditions
 -   [ ] Parameter Selection: `rho`, `sigma` and `alpha` from examples (data driven)
+-   [ ] **Compute cost function only when algorithm exits**. Not at every iteration!
+-   [ ] Implement cheaper dual residual computation: (only one matrix-vector computation)
+-   [ ] Implement functions to update `sigma`, `eps_inf` and `eps_unb` parameters
 -   [ ] Stress tests Maros Meszaros
 -   [ ] Link to CVXPY
 
 
 ## TODO (Paper)
--   [ ] Write infeasibility/unbounedness conditions
+-   [x] Write infeasibility/unbounedness conditions
 -   [ ] Write compact algorithm (basic ADMM steps)
 -   [ ] Talk about paper: [Inertial Proximal ADMM for Linearly Constrained Separable Convex Optimization](http://epubs.siam.org/doi/pdf/10.1137/15100463X) (similar to our robustification idea)
 -   [ ] Proove convergence to vectors satisfying Farkas lemma
