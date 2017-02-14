@@ -1,3 +1,5 @@
+from __future__ import print_function
+from builtins import range
 import numpy as np
 import ipdb
 import os.path
@@ -255,8 +257,8 @@ def generate_code(P, q, A, lA, uA, problem_name):
     #
     if os.path.isfile("qptests/" + problem_name + "/test_" +
                       problem_name + ".h"):
-        print "Test file for %s_test already present. Skip creating it\n" \
-            % problem_name
+        print("Test file for %s_test already present. Skip creating it\n" \
+            % problem_name)
     else:
         f = open("qptests/" + problem_name + "/test_" +
                  problem_name + ".h", "w+")

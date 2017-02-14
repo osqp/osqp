@@ -177,3 +177,6 @@ osqpmex/
 
 # Mac OSX Files
 .DS_Store
+
+# Python 3 porting backup files
+*.bak
