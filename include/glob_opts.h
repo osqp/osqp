@@ -30,11 +30,15 @@ extern "C" {
     // Calloc is not implemented
     #include <Python.h>
     #define c_malloc PyMem_Malloc
+    #if PY_MAJOR_VERSION >= 3
+    #define c_calloc PyMem_Calloc
+    #else
     static void * c_calloc(size_t num, size_t size){
       void *m = PyMem_Malloc(num*size);
       memset(m, 0, num*size);
       return m;
     }
+    #endif
     // #define c_calloc(n,s) ({                     \
     //         void * p_calloc = c_malloc((n)*(s)); \
     //         memset(p_calloc, 0, (n)*(s));        \
