@@ -64,8 +64,9 @@ endif (LONG)
 # ----------------------------------------------
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O3 -g")
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CMAKE_C_STANDARD_LIBRARIES -lm)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
+set(CMAKE_C_STANDARD_LIBRARIES -lm)      # Include math
+# Include real time library in linux
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     set(CMAKE_C_STANDARD_LIBRARIES ${CMAKE_C_STANDARD_LIBRARIES} -lrt)
 endif()
@@ -107,6 +108,9 @@ set(
     include/util.h
 )
 
+# Create  Library
+# ----------------------------------------------
+
 # Add linear systems solver
 add_subdirectory(lin_sys)
 
@@ -120,7 +124,13 @@ target_link_libraries (osqp_demo_direct osqpdir)
 
 
 # Add testing
-# TODO:Complete!
-# include(CTest)
-# enable_testing()
-# add_test(osqp_tester_direct ${PROJECT_BINARY_DIR}/osqp_tester_direct)
+# ----------------------------------------------
+# Direct linear solver testing
+include_directories(tests/c)
+add_executable(osqp_tester_direct ${PROJECT_SOURCE_DIR}/tests/c/osqp_tester_direct.c)
+target_link_libraries (osqp_tester_direct osqpdir)
+
+# Add testing
+include(CTest)
+enable_testing()
+add_test(NAME direct COMMAND $<TARGET_FILE:osqp_tester_direct>)
