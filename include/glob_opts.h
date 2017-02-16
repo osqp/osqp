@@ -56,7 +56,7 @@ extern "C" {
 
 /* Use customized number representation -----------------------------------   */
 #ifdef DLONG
-#ifdef _WIN64
+#ifdef IS_WINDOWS
 typedef __int64 c_int;
 #else
 typedef long c_int;                   /* for indeces */
@@ -130,11 +130,6 @@ typedef float c_float;                /* for numerical values  */
 // }
 #else
 #define c_print printf
-#endif
-
-// Enable two digits exponent in Windows
-#if defined(_WIN32) || defined(_WIN64)
-// _set_output_format(_TWO_DIGIT_EXPONENT);
 #endif
 
 #endif

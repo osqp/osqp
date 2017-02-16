@@ -59,7 +59,7 @@ void print_footer(Info * info, c_int polishing);
 #ifdef PROFILING
 
 // Windows
-#if (defined _WIN32 || defined _WIN64 || defined _WINDLL )
+#if ( IS_WINDOWS )
 
 #include <windows.h>
 
@@ -70,7 +70,7 @@ struct OSQP_TIMER {
 };
 
 // Mac
-#elif (defined __APPLE__)
+#elif (IS_MAC)
 
 #include <mach/mach_time.h>
 

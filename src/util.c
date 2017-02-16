@@ -212,7 +212,7 @@ Settings * copy_settings(Settings * settings){
 #ifdef PROFILING
 
 // Windows
-#if (defined WIN32 || _WIN64)
+#if IS_WINDOWS
 
 void tic(Timer* t)
 {
@@ -227,7 +227,7 @@ c_float toc(Timer* t)
 }
 
 // Mac
-#elif (defined __APPLE__)
+#elif IS_MAC
 
 void tic(Timer* t)
 {
