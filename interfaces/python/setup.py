@@ -43,6 +43,16 @@ if DFLOAT:
 else:
     cmake_args += ['-DDFLOAT:BOOL=OFF']
 
+# Check if windows linux or mac to pass flag
+if system() == 'Windows':
+    define_macros += [('IS_WINDOWS', None)]
+elif system() == 'Linux':
+    define_macros += [('IS_LINUX', None)]
+elif system() == 'Darwin':
+    define_macros += [('IS_MAC', None)]
+
+
+
 
 # Define osqp and suitesparse directories
 osqp_dir = os.path.join('..','..')
@@ -69,12 +79,19 @@ if system() == 'Linux':
 
 
 # Add OSQP compiled library
-if system() == 'Windows':
-    lib_ext = '.lib'
-else:
-    lib_ext = '.a'
+# if system() == 'Windows':
+    # lib_ext = '.lib'
+# else:
+lib_ext = '.a'
 extra_objects = [os.path.join('src', 'libosqpdirstatic%s' % lib_ext)]
 
+
+
+# Get compiler command if windows or unix
+if system() == 'Windows':
+    make_cmd = 'mingw32-make.exe'
+else:
+    make_cmd = 'make'
 
 class build_ext_osqp(build_ext):
     def build_extensions(self):
@@ -86,14 +103,14 @@ class build_ext_osqp(build_ext):
         os.chdir(osqp_build_dir)
 
         # Compile static library with CMake
-        call(['cmake', *cmake_args, '..'])
-        call(['make', 'osqpdirstatic'])
+        call(['cmake'] + cmake_args + ['..'])
+        call([make_cmd, 'osqpdirstatic'])
 
         # Change directory back to the python interface
         os.chdir(os.path.join('..', 'interfaces', 'python'))
 
         # Copy static library to src folder
-        lib_origin = os.path.join(osqp_dir, 'build', 'lib',
+        lib_origin = os.path.join(osqp_dir, 'build', 'out',
                                   'libosqpdirstatic%s' % lib_ext)
         lib_name = os.path.split(lib_origin)[-1]
         copyfile(lib_origin, os.path.join('src', lib_name))
@@ -117,7 +134,7 @@ setup(name='osqp',
       author='Bartolomeo Stellato, Goran Banjac',
       description='This is the Python package for OSQP: Operator Splitting solver for Quadratic Programs.',
       package_dir={'': 'src'},
-      install_requires=["numpy >= 1.7", "scipy >= 0.13.2"],
+      install_requires=["numpy >= 1.7", "scipy >= 0.13.2", "future"],
       license='Apache 2.0',
       cmdclass = {'build_ext': build_ext_osqp},
       py_modules=['osqp', 'osqppurepy', '_osqppurepy'],
