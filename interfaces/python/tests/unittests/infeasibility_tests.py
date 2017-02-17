@@ -16,7 +16,6 @@ class infeeasibility_tests(unittest.TestCase):
         Setup infeasible problem
         """
 
-
         self.opts = {'verbose': False,
                      'eps_abs': 1e-05,
                      'eps_rel': 1e-05,
@@ -25,9 +24,8 @@ class infeeasibility_tests(unittest.TestCase):
                      'scaling_iter': 3,
                      'rho': 1.6,
                      'alpha': 1.6,
-                     'max_iter': 2500}
-
-
+                     'max_iter': 2500,
+                     'polishing': False}
 
     def test_infeasibility_problem(self):
 
@@ -63,9 +61,7 @@ class infeeasibility_tests(unittest.TestCase):
         self.assertEqual(res.info.status_val,
                          self.model.constant('OSQP_INFEASIBLE'))
 
-
     def test_infeasible_and_unbounded_problem(self):
-
 
         self.n = 2
         self.m = 4
@@ -75,7 +71,6 @@ class infeeasibility_tests(unittest.TestCase):
         self.l = np.array([1., 1., 0., 0.])
         self.u = np.inf * np.ones(self.m)
 
-
         self.model = osqp.OSQP()
         self.model.setup(P=self.P, q=self.q, A=self.A, l=self.l, u=self.u,
                          **self.opts)
@@ -84,4 +79,4 @@ class infeeasibility_tests(unittest.TestCase):
 
         # Assert close
         self.assertEqual(res.info.status_val,
-                         self.model.constant('OSQP_INFEASIBLE'))    
+                         self.model.constant('OSQP_INFEASIBLE'))

@@ -168,25 +168,24 @@ def main():
         print("\n")
         print("Comparison CPLEX - GUROBI")
         print("-------------------------")
-        print("Difference in objective value %.8f" % \
-            np.linalg.norm(resultsCPLEX.objval - resultsGUROBI.objval))
-        print("Norm of solution difference %.8f" % \
-            np.linalg.norm(resultsCPLEX.x - resultsGUROBI.x))
-        print("Norm of dual difference %.8f" % \
-            np.linalg.norm(resultsCPLEX.y - resultsGUROBI.y))
+        print("Difference in objective value %.8f" %
+              np.linalg.norm(resultsCPLEX.objval - resultsGUROBI.objval))
+        print("Norm of solution difference %.8f" %
+              np.linalg.norm(resultsCPLEX.x - resultsGUROBI.x))
+        print("Norm of dual difference %.8f" %
+              np.linalg.norm(resultsCPLEX.y - resultsGUROBI.y))
 
         print("\n")
         print("Comparison OSQP - GUROBI")
         print("-------------------------")
-        print("Difference in objective value %.8f" % \
-            np.linalg.norm(resultsOSQP.objval - resultsGUROBI.objval))
-        print("Norm of solution difference %.8f" % \
-            np.linalg.norm(resultsOSQP.x - resultsGUROBI.x))
-        print("Norm of dual difference %.8f" % \
-            np.linalg.norm(resultsOSQP.y - resultsGUROBI.y))
+        print("Difference in objective value %.8f" %
+              np.linalg.norm(resultsOSQP.objval - resultsGUROBI.objval))
+        print("Norm of solution difference %.8f" %
+              np.linalg.norm(resultsOSQP.x - resultsGUROBI.x))
+        print("Norm of dual difference %.8f" %
+              np.linalg.norm(resultsOSQP.y - resultsGUROBI.y))
 
-
-    ipdb.set_trace()
+ipdb.set_trace()
 
 # Parsing optional command line arguments
 if __name__ == '__main__':

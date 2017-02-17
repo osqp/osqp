@@ -24,7 +24,9 @@ class unboundedness_tests(unittest.TestCase):
                      'scaling_iter': 3,
                      'rho': 1.6,
                      'alpha': 1.6,
-                     'max_iter': 2500}
+                     'max_iter': 2500,
+                     'polishing': False,
+                     'pol_refine_iter': 4}
 
     def test_unbounded_lp(self):
 
@@ -65,7 +67,6 @@ class unboundedness_tests(unittest.TestCase):
         self.assertEqual(res.info.status_val,
                          self.model.constant('OSQP_UNBOUNDED'))
 
-
     def test_infeasible_and_unbounded_problem(self):
 
         self.n = 2
@@ -76,11 +77,9 @@ class unboundedness_tests(unittest.TestCase):
         self.l = np.array([1., 1., 0., 0.])
         self.u = np.inf * np.ones(self.m)
 
-
         self.model = osqp.OSQP()
         self.model.setup(P=self.P, q=self.q, A=self.A, l=self.l, u=self.u,
                          **self.opts)
-
 
         # Warm start to avoid infeasibility detection at first step
         x0 = 25.*np.ones(self.n)

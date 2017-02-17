@@ -28,15 +28,15 @@ class basic_tests(unittest.TestCase):
         self.n = self.P.shape[0]
         self.m = self.A.shape[0]
         self.opts = {'verbose': False,
-                     'eps_abs': 1e-08,
-                     'eps_rel': 1e-08,
+                     'eps_abs': 1e-09,
+                     'eps_rel': 1e-09,
                      'scaling': True,
                      'scaling_norm': 2,
                      'scaling_iter': 3,
                      'rho': 0.1,
                      'alpha': 1.6,
                      'max_iter': 3000,
-                     'polishing': True,
+                     'polishing': False,
                      'warm_start': True,
                      'pol_refine_iter': 4}
         self.model = osqp.OSQP()
@@ -54,6 +54,8 @@ class basic_tests(unittest.TestCase):
 
         # Assert close
         nptest.assert_array_almost_equal(res.x, resGUROBI.x)
+        nptest.assert_array_almost_equal(res.y, resGUROBI.y)
+        nptest.assert_array_almost_equal(res.info.obj_val, resGUROBI.objval)
 
     def test_update_q(self):
         # Update linear cost
@@ -66,8 +68,10 @@ class basic_tests(unittest.TestCase):
                                         self.A, self.lA, self.uA)
         resGUROBI = qp_prob.solve(solver=mpbpy.GUROBI, verbose=False)
 
-        # Assert closempbpy.
+        # Assert close
         nptest.assert_array_almost_equal(res.x, resGUROBI.x)
+        nptest.assert_array_almost_equal(res.y, resGUROBI.y)
+        nptest.assert_array_almost_equal(res.info.obj_val, resGUROBI.objval)
 
     def test_update_l(self):
         # Update lower bound
@@ -82,6 +86,8 @@ class basic_tests(unittest.TestCase):
 
         # Assert close
         nptest.assert_array_almost_equal(res.x, resGUROBI.x)
+        nptest.assert_array_almost_equal(res.y, resGUROBI.y)
+        nptest.assert_array_almost_equal(res.info.obj_val, resGUROBI.objval)
 
     def test_update_u(self):
         # Update lower bound
@@ -96,6 +102,8 @@ class basic_tests(unittest.TestCase):
 
         # Assert close
         nptest.assert_array_almost_equal(res.x, resGUROBI.x)
+        nptest.assert_array_almost_equal(res.y, resGUROBI.y)
+        nptest.assert_array_almost_equal(res.info.obj_val, resGUROBI.objval)
 
     def test_update_bounds(self):
         # Update lower bound
@@ -112,6 +120,8 @@ class basic_tests(unittest.TestCase):
 
         # Assert close
         nptest.assert_array_almost_equal(res.x, resGUROBI.x)
+        nptest.assert_array_almost_equal(res.y, resGUROBI.y)
+        nptest.assert_array_almost_equal(res.info.obj_val, resGUROBI.objval)
 
     def test_update_max_iter(self):
         self.model.update_settings(max_iter=10)

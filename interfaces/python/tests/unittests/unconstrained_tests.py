@@ -19,7 +19,7 @@ class unconstrained_tests(unittest.TestCase):
         """
         Setup unconstrained quadratic problem
         """
-        # Simple QP problem
+        # Unconstrained QP problem
         sp.random.seed(4)
 
         self.n = 30
@@ -31,17 +31,15 @@ class unconstrained_tests(unittest.TestCase):
         self.l = np.array([])
         self.u = np.array([])
         self.opts = {'verbose': False,
-                     'eps_abs': 1e-05,
-                     'eps_rel': 1e-05,
+                     'eps_abs': 1e-06,
+                     'eps_rel': 1e-06,
                      'scaling': True,
                      'scaling_norm': 2,
                      'scaling_iter': 3,
                      'rho': 0.1,
                      'alpha': 1.6,
                      'max_iter': 5000,
-                     'polishing': True,
-                     'warm_start': True,
-                     'pol_refine_iter': 4}
+                     'polishing': False}
         self.model = osqp.OSQP()
         self.model.setup(P=self.P, q=self.q, A=self.A, l=self.l, u=self.u,
                          **self.opts)
@@ -58,3 +56,5 @@ class unconstrained_tests(unittest.TestCase):
 
         # Assert close
         nptest.assert_array_almost_equal(res.x, resGUROBI.x)
+        nptest.assert_array_almost_equal(res.y, resGUROBI.y)
+        nptest.assert_array_almost_equal(res.info.obj_val, resGUROBI.objval)

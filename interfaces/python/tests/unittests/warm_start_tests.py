@@ -18,9 +18,10 @@ class warm_start_tests(unittest.TestCase):
         self.opts = {'verbose': False,
                      'eps_abs': 1e-05,
                      'eps_rel': 1e-05,
-                     'polishing': False,
                      'rho': 0.05,
-                     'sigma': 0.01}
+                     'sigma': 0.01,
+                     'polishing': False,
+                     'pol_refine_iter': 4}
 
     def test_warm_start(self):
 
@@ -35,7 +36,6 @@ class warm_start_tests(unittest.TestCase):
         P = spspa.random(self.n, self.n, density=0.9)
         self.P = P.dot(P.T).tocsc()
         self.q = sp.randn(self.n)
-
 
         # Setup solver
         self.model = osqp.OSQP()
@@ -55,7 +55,7 @@ class warm_start_tests(unittest.TestCase):
         res = self.model.solve()
         self.assertEqual(res.info.iter, tot_iter)
 
-        # Warm start with optimal values and check that number of iterations < 10
+        # Warm start with optimal values and check that number of iter < 10
         self.model.warm_start(x=x_opt, y=y_opt)
         res = self.model.solve()
         self.assertLess(res.info.iter, 10)

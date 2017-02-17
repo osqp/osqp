@@ -33,8 +33,8 @@ class feasibility_tests(unittest.TestCase):
         self.u = np.random.rand(self.m)
         self.l = self.u
         self.opts = {'verbose': False,
-                     'eps_abs': 1e-05,
-                     'eps_rel': 1e-05,
+                     'eps_abs': 1e-08,
+                     'eps_rel': 1e-08,
                      'scaling': True,
                      'scaling_norm': 2,
                      'scaling_iter': 3,
@@ -42,7 +42,7 @@ class feasibility_tests(unittest.TestCase):
                      'sigma': 0.01,
                      'alpha': 1.6,
                      'max_iter': 5000,
-                     'polishing': True,
+                     'polishing': False,
                      'warm_start': True,
                      'pol_refine_iter': 4}
         self.model = osqp.OSQP()
@@ -61,3 +61,5 @@ class feasibility_tests(unittest.TestCase):
 
         # Assert close
         nptest.assert_array_almost_equal(res.x, resGUROBI.x)
+        nptest.assert_array_almost_equal(res.y, resGUROBI.y)
+        nptest.assert_array_almost_equal(res.info.obj_val, resGUROBI.objval)
