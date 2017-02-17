@@ -200,9 +200,8 @@ c_float compute_dua_res(Work * work, c_int polish){
         // NB: Only upper triangular part of P is stored.
         prea_vec_copy(work->data->q, work->x_prev,
                       work->data->n);                    // dr = q
-        if (work->data->m == 0)
-            mat_tpose_vec(work->pol->Ared, work->pol->y_red,
-                          work->x_prev, 1, 0);  // += Ared'*y_red
+        mat_tpose_vec(work->pol->Ared, work->pol->y_red,
+                      work->x_prev, 1, 0);  // += Ared'*y_red
         mat_vec(work->data->P, work->pol->x,
                 work->x_prev, 1);               // += Px (upper triang part)
         mat_tpose_vec(work->data->P, work->pol->x,
