@@ -50,7 +50,12 @@ class build_ext_osqp(build_ext):
         os.chdir(osqp_build_dir)
 
         # Run cmake to create the static library
-        call(['cmake', '..'])
+        call(['cmake',              #  Pass settings
+              '-DPRINTING=ON',
+              '-DPROFILING=ON',
+              '-DDLONG=ON',
+              '-DDFLOAT=OFF',
+              '..'])
         call(['make', 'osqpdirstatic'])
 
         # Change directory back to the python interface
@@ -71,7 +76,6 @@ _osqp = Extension('_osqp',
                   define_macros=[('PRINTING', None),
                                  ('PROFILING', None),
                                  ('DLONG', None),
-                                 #  ('DFLOAT', None),
                                  ('PYTHON', None)],
                   libraries=libraries,
                   library_dirs=library_dirs,

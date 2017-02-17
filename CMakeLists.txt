@@ -46,18 +46,18 @@ if (PROFILING)
 endif (PROFILING)
 
 # Use floats instead of integers
-option (FLOAT "Use float numbers instead of doubles" OFF)
+option (DFLOAT "Use float numbers instead of doubles" OFF)
 message(STATUS "Floats are ${PRINTING}")
-if (FLOAT)
+if (DFLOAT)
     add_definitions(-DDFLOAT)
-endif (FLOAT)
+endif (DFLOAT)
 
 # Use long integers for indexing
-option (LONG "Use long integers for indexing" ON)
+option (DLONG "Use long integers for indexing" ON)
 message(STATUS "Long integers are ${PRINTING}")
-if (LONG)
+if (DLONG)
     add_definitions(-DDLONG)
-endif (LONG)
+endif (DLONG)
 
 
 # Set Compiler flags

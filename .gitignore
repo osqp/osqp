@@ -180,3 +180,8 @@ osqpmex/
 
 # Python 3 porting backup files
 *.bak
+
+
+
+# Data files
+interfaces/python/tests/qp_problems/results/
