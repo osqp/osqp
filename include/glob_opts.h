@@ -56,7 +56,7 @@ extern "C" {
 
 /* Use customized number representation -----------------------------------   */
 #ifdef DLONG
-#ifdef IS_WINDOWS
+#ifdef _WIN64
 typedef __int64 c_int;
 #else
 typedef long c_int;                   /* for indeces */
