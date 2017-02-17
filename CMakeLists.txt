@@ -117,6 +117,8 @@ add_subdirectory(lin_sys)
 # Create osqp shared library
 add_library (osqpdir SHARED ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_direct>)
 
+add_library (osqpdirstatic STATIC ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_direct>)
+
 # Create demo executable
 add_executable (osqp_demo_direct ${PROJECT_SOURCE_DIR}/examples/osqp_demo_direct.c)
 target_link_libraries (osqp_demo_direct osqpdir)
