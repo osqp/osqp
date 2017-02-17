@@ -601,7 +601,7 @@ static PyObject * OSQP_solve(OSQP *self)
 
         #endif
 
-        PyObject *info_list = Py_BuildValue(argparse_string,
+        info_list = Py_BuildValue(argparse_string,
                                             self->workspace->info->iter,
                                             status,
                                             self->workspace->info->status_val,

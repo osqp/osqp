@@ -10,8 +10,38 @@ import os
 
 
 # PARAMETERS
-# TODO: ADD
+PRINTING = True
+PROFILING = True
+DFLOAT = False
+DLONG = True
 
+
+# Add parameters to cmake_args and define_macros
+cmake_args = []
+define_macros = []
+if PROFILING:
+    cmake_args += ['-DPROFILING:BOOL=ON']
+    define_macros += [('PROFILING', None)]
+else:
+    cmake_args += ['-DPROFILING:BOOL=OFF']
+
+if PRINTING:
+    cmake_args += ['-DPRINTING:BOOL=ON']
+    define_macros += [('PRINTING', None)]
+else:
+    cmake_args += ['-DPRINTING:BOOL=OFF']
+
+if DLONG:
+    cmake_args += ['-DDLONG:BOOL=ON']
+    define_macros += [('DLONG', None)]
+else:
+    cmake_args += ['-DDLONG:BOOL=OFF']
+
+if DFLOAT:
+    cmake_args += ['-DDFLOAT:BOOL=ON']
+    define_macros += [('DFLOAT', None)]
+else:
+    cmake_args += ['-DDFLOAT:BOOL=OFF']
 
 
 # Define osqp and suitesparse directories
@@ -55,13 +85,8 @@ class build_ext_osqp(build_ext):
             os.makedirs(osqp_build_dir)
         os.chdir(osqp_build_dir)
 
-        # Run cmake to create the static library
-        call(['cmake',              #  Pass settings
-              '-DPRINTING:BOOL=ON',
-              '-DPROFILING:BOOL=ON',
-              '-DDLONG:BOOL=ON',
-              '-DDFLOAT:BOOL=OFF',
-              '..'])
+        # Compile static library with CMake
+        call(['cmake', *cmake_args, '..'])
         call(['make', 'osqpdirstatic'])
 
         # Change directory back to the python interface
@@ -79,10 +104,7 @@ class build_ext_osqp(build_ext):
 
 
 _osqp = Extension('_osqp',
-                  define_macros=[('PRINTING', None),
-                                 ('PROFILING', None),
-                                 ('DLONG', None),
-                                 ('PYTHON', None)],
+                  define_macros=define_macros,
                   libraries=libraries,
                   library_dirs=library_dirs,
                   include_dirs=include_dirs,
