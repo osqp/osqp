@@ -8,6 +8,12 @@ from subprocess import call
 from platform import system
 import os
 
+
+# PARAMETERS
+# TODO: ADD
+
+
+
 # Define osqp and suitesparse directories
 osqp_dir = os.path.join('..','..')
 osqp_build_dir = os.path.join(osqp_dir, 'build')
@@ -54,7 +60,7 @@ class build_ext_osqp(build_ext):
               '-DPRINTING:BOOL=ON',
               '-DPROFILING:BOOL=ON',
               '-DDLONG:BOOL=ON',
-              '-DDFLOAT:BOOL=OFF', 
+              '-DDFLOAT:BOOL=OFF',
               '..'])
         call(['make', 'osqpdirstatic'])
 

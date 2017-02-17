@@ -10,8 +10,8 @@ project (osqp)
 # set(VERSION_PATCH 0)
 
 # Set the output folder where your program will be created
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
+set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 
 
 # Detect operating system
