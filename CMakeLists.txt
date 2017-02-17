@@ -40,21 +40,21 @@ endif (PRINTING)
 
 # Is printing enabled?
 option (PROFILING "Enable solver profiling (timing)" ON)
-message(STATUS "Profiling is ${PRINTING}")
+message(STATUS "Profiling is ${PROFILING}")
 if (PROFILING)
     add_definitions(-DPROFILING)
 endif (PROFILING)
 
 # Use floats instead of integers
 option (DFLOAT "Use float numbers instead of doubles" OFF)
-message(STATUS "Floats are ${PRINTING}")
+message(STATUS "Floats are ${DFLOAT}")
 if (DFLOAT)
     add_definitions(-DDFLOAT)
 endif (DFLOAT)
 
 # Use long integers for indexing
 option (DLONG "Use long integers for indexing" ON)
-message(STATUS "Long integers are ${PRINTING}")
+message(STATUS "Long integers are ${DLONG}")
 if (DLONG)
     add_definitions(-DDLONG)
 endif (DLONG)

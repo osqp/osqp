@@ -51,10 +51,10 @@ class build_ext_osqp(build_ext):
 
         # Run cmake to create the static library
         call(['cmake',              #  Pass settings
-              '-DPRINTING=ON',
-              '-DPROFILING=ON',
-              '-DDLONG=ON',
-              '-DDFLOAT=OFF',
+              '-DPRINTING:BOOL=ON',
+              '-DPROFILING:BOOL=ON',
+              '-DDLONG:BOOL=ON',
+              '-DDFLOAT:BOOL=OFF', 
               '..'])
         call(['make', 'osqpdirstatic'])
 
