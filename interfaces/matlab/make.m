@@ -67,11 +67,7 @@ DLONG = true;
 %% Basic compile commands
 
 % Get make and mex commands
-if ispc
-    make_cmd = 'mingw32-make.exe';
-else
-    make_cmd = 'make';
-end
+make_cmd = 'cmake --build .';
 mex_cmd = sprintf('mex -g -O -silent');
 
 
@@ -80,6 +76,14 @@ cmake_args = '';
 mexoptflags = '-lm';
 
 
+% Add specific generators for windows linux or mac
+if (ispc)
+    cmake_args = sprintf('%s %s', cmake_args, '-G MinGW Makefiles');
+else
+    cmake_args = sprintf('%s %s', cmake_args, '-G "Unix Makefiles"');
+end
+
+% Add parameters options to mex and cmake
 if PROFILING
    cmake_args = sprintf('%s %s', cmake_args, '-DPROFILING:BOOL=ON');
    mexoptflags =  sprintf('%s %s', mexoptflags, '-DPROFILING');
@@ -121,18 +125,13 @@ lib_name = sprintf('libosqpdirstatic%s', lib_ext);
 osqp_dir = fullfile('..', '..');
 osqp_build_dir = sprintf('%s/build', osqp_dir);
 
-
-% % Suitesparse Directory
-% linsys_direct_dir = sprintf('./osqp/lin_sys/direct');
-% ss_dir = sprintf('./osqp/lin_sys/direct/external/suitesparse');
-
 % Include directory
 inc_dir = fullfile(sprintf('-I%s', osqp_dir), 'include');
 
 
 %% OSQP Solver
 if( any(strcmpi(what,'osqp')) || any(strcmpi(what,'all')) )
-   fprintf('Compiling OSQP solver using CMake directives...');
+   fprintf('Compiling OSQP solver using CMake directives...\n\n');
    
     % Create build directory and go inside
     if ~exist(osqp_build_dir, 'dir')
@@ -140,15 +139,20 @@ if( any(strcmpi(what,'osqp')) || any(strcmpi(what,'all')) )
     end
     cd(osqp_build_dir);
     
-    % Extend path for CMAKE on mac
+    % Extend path for CMAKE mac (via Homebrew)
     PATH = getenv('PATH');
-    if ((ismac) && (~isempty(strfind(PATH, '/usr/local/bin'))))
+    if ((ismac) && (isempty(strfind(PATH, '/usr/local/bin'))))
         setenv('PATH', [PATH ':/usr/local/bin']);
     end
     
     % Compile static library with CMake
-    system(sprintf('%s %s ..', 'cmake', cmake_args));
-    system(sprintf('%s %s', make_cmd, 'osqpdirstatic'));
+    if(system(sprintf('%s %s ..', 'cmake', cmake_args)))
+        error('Error configuring CMake environment');
+    end
+    if (system(sprintf('%s %s', make_cmd, '--target osqpdirstatic')))
+        error('Error compiling OSQP');
+    end
+
     
     % Change directory back to matlab interface
     cd(fullfile('..', 'interfaces', 'matlab'));
@@ -157,21 +161,21 @@ if( any(strcmpi(what,'osqp')) || any(strcmpi(what,'all')) )
     lib_origin = fullfile(osqp_build_dir, 'out', lib_name);
     copyfile(lib_origin, lib_name);
     
-    fprintf('\t\t\t\t[done]\n');
+    fprintf('\n[done]\n\n');
 
 end
 
 %% osqpmex
 if( any(strcmpi(what,'osqp_mex')) || any(strcmpi(what,'all')) )
     % Compile interface
-    fprintf('Compiling and linking osqpmex...');
+    fprintf('Compiling and linking osqpmex...\n\n');
         
     % Compile command
     cmd = sprintf('%s %s %s %s osqp_mex.cpp', mex_cmd, mexoptflags, inc_dir, lib_name);
 
     % Compile
     eval(cmd);
-    fprintf('\t\t\t[done]\n');
+    fprintf('\n[done]\n\n');
 
 end
 
