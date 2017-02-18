@@ -9,11 +9,10 @@ function make(varargin)
 %
 %    {}, '' (empty string) or 'all': build all components and link.
 %
-%    'osqp': builds the OSQP solver
+%    'osqp': builds the OSQP solver using CMake
 %
-%    'osqp_mex': builds the OSQP mex interface - this involves linking of
-%    the packages LDL, AMD, OSQP that must have been built
-%    before.
+%    'osqp_mex': builds the OSQP mex interface and links it to the OSQP
+%    library
 %
 %    VARARGIN{1:NARGIN-1} specifies the optional flags passed to the compiler
 %
@@ -37,7 +36,7 @@ else
 end
 
 
-% Set parameters
+% Default parameters
 PRINTING = true;
 PROFILING = true;
 DFLOAT = false;
@@ -48,7 +47,7 @@ DLONG = true;
 
 % Get make and mex commands
 make_cmd = 'cmake --build .';
-mex_cmd = sprintf('mex -g -O -silent');
+mex_cmd = sprintf('mex -O -silent');
 
 
 % Add arguments to cmake and mex compiler
