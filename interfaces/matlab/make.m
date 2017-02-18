@@ -44,26 +44,6 @@ DFLOAT = false;
 DLONG = true;
 
 
-
-
-% % Set optimization flags
-% optflags = sprintf('-DPRINTING -DPROFILING');
-% 
-% if(nargin > 1)
-%     for i=1:nargin-1
-%         optflags = sprintf('%s %s', optflags, varargin{i});
-%     end
-% end
-% 
-
-
-
-
-
-
-
-
-
 %% Basic compile commands
 
 % Get make and mex commands
@@ -73,15 +53,25 @@ mex_cmd = sprintf('mex -g -O -silent');
 
 % Add arguments to cmake and mex compiler
 cmake_args = '';
-mexoptflags = '-lm';
+mexoptflags = '';
 
 
 % Add specific generators for windows linux or mac
 if (ispc)
-    cmake_args = sprintf('%s %s', cmake_args, '-G MinGW Makefiles');
+    cmake_args = sprintf('%s %s', cmake_args, '-G "MinGW Makefiles"');
+    mexoptflags = sprintf('%s %s', mexoptflags, '-DIS_WINDOWS');
 else
     cmake_args = sprintf('%s %s', cmake_args, '-G "Unix Makefiles"');
+    if (ismac)
+      mexoptflags = sprintf('%s %s', mexoptflags, '-DIS_MAC');
+    else if (isunix)
+      mexoptflags = sprintf('%s %s', mexoptflags, '-DIS_LINUX');
+        end
+    end
 end
+
+
+
 
 % Add parameters options to mex and cmake
 if PROFILING
