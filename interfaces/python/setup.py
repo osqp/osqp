@@ -19,6 +19,19 @@ DLONG = True
 # Add parameters to cmake_args and define_macros
 cmake_args = []
 define_macros = []
+
+# Check if windows linux or mac to pass flag
+if system() == 'Windows':
+    define_macros += [('IS_WINDOWS', None)]
+    cmake_args += ['-G','MinGW Makefiles']
+else:
+    cmake_args += ['-G', 'Unix Makefiles']
+    if system() == 'Linux':
+        define_macros += [('IS_LINUX', None)]
+    elif system() == 'Darwin':
+        define_macros += [('IS_MAC', None)]
+
+
 if PROFILING:
     cmake_args += ['-DPROFILING:BOOL=ON']
     define_macros += [('PROFILING', None)]
@@ -43,14 +56,6 @@ if DFLOAT:
 else:
     cmake_args += ['-DDFLOAT:BOOL=OFF']
 
-# Check if windows linux or mac to pass flag
-if system() == 'Windows':
-    define_macros += [('IS_WINDOWS', None)]
-elif system() == 'Linux':
-    define_macros += [('IS_LINUX', None)]
-elif system() == 'Darwin':
-    define_macros += [('IS_MAC', None)]
-
 
 
 
@@ -63,6 +68,7 @@ include_dirs = [get_include(),                          # Numpy directories
                 os.path.join(osqp_dir, 'include')]      # osqp.h
 
 sources_files = glob(os.path.join('src', '*.c'))
+
 
 # Set optimizer flag
 if system() != 'Windows':
@@ -79,19 +85,9 @@ if system() == 'Linux':
 
 
 # Add OSQP compiled library
-# if system() == 'Windows':
-    # lib_ext = '.lib'
-# else:
 lib_ext = '.a'
 extra_objects = [os.path.join('src', 'libosqpdirstatic%s' % lib_ext)]
 
-
-
-# Get compiler command if windows or unix
-if system() == 'Windows':
-    make_cmd = 'mingw32-make.exe'
-else:
-    make_cmd = 'make'
 
 class build_ext_osqp(build_ext):
     def build_extensions(self):
@@ -104,15 +100,14 @@ class build_ext_osqp(build_ext):
 
         # Compile static library with CMake
         call(['cmake'] + cmake_args + ['..'])
-        call([make_cmd, 'osqpdirstatic'])
+        call(['cmake', '--build', '.', '--target', 'osqpdirstatic'])
 
         # Change directory back to the python interface
         os.chdir(os.path.join('..', 'interfaces', 'python'))
 
         # Copy static library to src folder
-        lib_origin = os.path.join(osqp_dir, 'build', 'out',
-                                  'libosqpdirstatic%s' % lib_ext)
-        lib_name = os.path.split(lib_origin)[-1]
+        lib_name = 'libosqpdirstatic%s' % lib_ext
+        lib_origin = os.path.join(osqp_build_dir, 'out', lib_name)
         copyfile(lib_origin, os.path.join('src', lib_name))
 
         # Run extension

@@ -173,15 +173,23 @@ ENV/
 # Rope project settings
 .ropeproject
 
-osqpmex/
-
 # Mac OSX Files
 .DS_Store
 
 # Python 3 porting backup files
 *.bak
 
+# Matlab
+# -------------------------------------------------------------------
+# Files generated furing compilation
+*.o
+*.m~
+*.mexmaci64*
+*.mexw64*
+*.mexa64*
+out/
 
 
-# Data files
+# Data Files
+# -------------------------------------------------------------------
 interfaces/python/tests/qp_problems/results/
