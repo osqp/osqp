@@ -94,11 +94,6 @@ if DFLOAT
 end
 
 
-% Add real time library in Linux
-if ( isunix && ~ismac )
-   mexoptflags = sprintf('%s %s', mexoptflags, '-lrt');
-end
-
 % Add large arrays support if computer 64 bit
 if (~isempty (strfind (computer, '64')))
     mexoptflags = sprintf('%s %s', mexoptflags, '-largeArrayDims');
@@ -120,7 +115,7 @@ inc_dir = fullfile(sprintf('-I%s', osqp_dir), 'include');
 
 %% OSQP Solver
 if( any(strcmpi(what,'osqp')) || any(strcmpi(what,'all')) )
-   fprintf('Compiling OSQP solver using CMake directives...\n\n');
+   fprintf('Compiling OSQP solver...');
    
     % Create build directory and go inside
     if ~exist(osqp_build_dir, 'dir')
@@ -135,10 +130,17 @@ if( any(strcmpi(what,'osqp')) || any(strcmpi(what,'all')) )
     end
     
     % Compile static library with CMake
-    if(system(sprintf('%s %s ..', 'cmake', cmake_args)))
+    [status, output] = system(sprintf('%s %s ..', 'cmake', cmake_args));
+    if(status)
+        fprintf('\n');
+        fprintf(output);
         error('Error configuring CMake environment');
     end
-    if (system(sprintf('%s %s', make_cmd, '--target osqpdirstatic')))
+    
+    [status, output] = system(sprintf('%s %s', make_cmd, '--target osqpdirstatic'));
+    if (status)
+        fprintf('\n');
+        fprintf(output);
         error('Error compiling OSQP');
     end
 
@@ -150,21 +152,21 @@ if( any(strcmpi(what,'osqp')) || any(strcmpi(what,'all')) )
     lib_origin = fullfile(osqp_build_dir, 'out', lib_name);
     copyfile(lib_origin, lib_name);
     
-    fprintf('\n[done]\n\n');
+    fprintf('\t\t\t\t\t[done]\n');
 
 end
 
 %% osqpmex
 if( any(strcmpi(what,'osqp_mex')) || any(strcmpi(what,'all')) )
     % Compile interface
-    fprintf('Compiling and linking osqpmex...\n\n');
+    fprintf('Compiling and linking osqpmex...');
         
     % Compile command
     cmd = sprintf('%s %s %s %s osqp_mex.cpp', mex_cmd, mexoptflags, inc_dir, lib_name);
 
     % Compile
     eval(cmd);
-    fprintf('\n[done]\n\n');
+    fprintf('\t\t\t[done]\n');
 
 end
 
@@ -187,13 +189,13 @@ if( any(strcmpi(what,'clean')) || any(strcmpi(what,'purge')) )
         delete(lib_name);
     end
     
-    fprintf('\t\t\t\t[done]\n');
+    fprintf('\t\t\t\t\t\t[done]\n');
 end
 
 
 %% purge
 if( any(strcmpi(what,'purge')) )
-    fprintf('Cleaning mex files and OSQP build directory...  ');
+    fprintf('Cleaning mex files and OSQP build...  ');
 
     % Delete OSQP build directory
     if exist(osqp_build_dir, 'dir')
@@ -212,7 +214,7 @@ if( any(strcmpi(what,'purge')) )
         delete(lib_name);
     end
     
-    fprintf('\t\t\t\t\t[done]\n');
+    fprintf('\t\t[done]\n');
 end
 
 
