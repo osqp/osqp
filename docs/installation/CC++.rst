@@ -9,10 +9,10 @@ Almost all linux distributions come with :code:`gcc` and :code:`cmake` commands.
 
 .. code-block:: bash
 
-   > mkdir build
-   > cd build
-   > cmake -G "Unix Makefiles" ..
-   > make
+   mkdir build
+   cd build
+   cmake -G "Unix Makefiles" ..
+   make
 
 
 Mac
