@@ -76,13 +76,9 @@ if system() != 'Windows':
 else:
     compile_args = []
 
-
 # External libraries
 libraries = []
 library_dirs = []
-if system() == 'Linux':
-    libraries += ['rt']
-
 
 # Add OSQP compiled library
 lib_ext = '.a'
