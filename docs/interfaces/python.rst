@@ -16,6 +16,8 @@ The solver is initialized by creating an OSQP object
     m = osqp.OSQP()
 
 
+.. _python_setup:
+
 Setup
 -----
 The problem is specified in the setup phase by running
@@ -25,7 +27,7 @@ The problem is specified in the setup phase by running
     m.setup(P=P, q=q, A=A, l=l, u=u, **settings)
 
 
-The arguments :code:`q`, :code:`l` and :code:`u` are numpy arrays. The elements of :code:`l` and :code:`u` can be :math:`\pm \infty` (:code:`+numpy.inf` or :code:`-numpy.inf`).
+The arguments :code:`q`, :code:`l` and :code:`u` are numpy arrays. The elements of :code:`l` and :code:`u` can be :math:`\pm \infty` ( using :code:`+numpy.inf`).
 
 The arguments :code:`P` and :code:`A` are scipy sparse matrices in CSC format. If they are sparse matrices are in another format, the interface will attemp to convert them. There is no need to specify all the arguments.
 
@@ -114,9 +116,18 @@ The :code:`results` object contains the primal solution :code:`x`, the dual solu
 
 Update
 ------
+Problem vectors and part of the settings can be updated without requiring a new problem setup.
 
 Update problem vectors
 ^^^^^^^^^^^^^^^^^^^^^^
+Vectors :code:`q`, :code:`l` and :code:`u` can be updated with new values :code:`q_new`, :code:`l_new` and :code:`u_new` by just running
+
+.. code:: python
+
+    m.update(q=q_new, l=l_new, u=u_new)
+
+
+The user does not have to specify all the keyword arguments.
 
 
 .. _python_update_settings:
@@ -124,6 +135,24 @@ Update problem vectors
 Update settings
 ^^^^^^^^^^^^^^^
 
+Settings can be updated by running
+
+.. code:: python
+
+    m.update_settings(**kwargs)
+
+
+where :code:`kwargs` are the allowed settings that can be updated marked with an * in :ref:`python_setup`.
+
 
 Warm start
 ----------
+
+Primal and dual variables can be warm-started with
+
+.. code:: python
+
+    m.warm_start(x=x0, y=y0)
+
+
+where :code:`x0` and :code:`y0` are the new primal and dual variables.
