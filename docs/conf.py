@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# osqp documentation build configuration file, created by
+# OSQP documentation build configuration file, created by
 # sphinx-quickstart on Sat Feb 18 15:49:00 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -49,7 +49,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'osqp'
+project = 'OSQP'
 copyright = '2017, Bartolomeo Stellato, Goran Banjac'
 author = 'Bartolomeo Stellato, Goran Banjac'
 
@@ -104,7 +104,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'osqpdoc'
+htmlhelp_basename = 'OSQPdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -131,7 +131,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'osqp.tex', 'osqp Documentation',
+    (master_doc, 'OSQP.tex', 'OSQP Documentation',
      'Bartolomeo Stellato, Goran Banjac', 'manual'),
 ]
 
@@ -141,7 +141,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'osqp', 'osqp Documentation',
+    (master_doc, 'OSQP', 'OSQP Documentation',
      [author], 1)
 ]
 
@@ -152,7 +152,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'osqp', 'osqp Documentation',
-     author, 'osqp', 'One line description of project.',
+    (master_doc, 'OSQP', 'OSQP Documentation',
+     author, 'OSQP', 'One line description of project.',
      'Miscellaneous'),
 ]

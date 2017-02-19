@@ -1,6 +1,6 @@
 C/C++
 =====
-The main compilation directives are specified using `CMake <https://cmake.org/>`_. The software is supposed to be compiled using `gcc <https://gcc.gnu.org/>`_.
+
 
 
 .. Linux
