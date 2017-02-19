@@ -128,8 +128,8 @@ target_link_libraries (osqp_demo_direct osqpdir)
 # Add testing
 # ----------------------------------------------
 # Direct linear solver testing
-include_directories(tests/c)
-add_executable(osqp_tester_direct ${PROJECT_SOURCE_DIR}/tests/c/osqp_tester_direct.c)
+include_directories(tests)
+add_executable(osqp_tester_direct ${PROJECT_SOURCE_DIR}/tests/osqp_tester_direct.c)
 target_link_libraries (osqp_tester_direct osqpdir)
 
 # Add testing
