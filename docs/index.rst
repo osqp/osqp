@@ -1,12 +1,7 @@
-.. osqp documentation master file, created by
-   sphinx-quickstart on Sat Feb 18 15:49:00 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to OSQP's documentation
 ================================
 
-OSQP (Operator Splitting Quadratic Program) solver is a numerical optimization package for solving convex quadratic problems in the form
+OSQP (Operator Splitting Quadratic Program) solver is a numerical optimization package for solving convex quadratic programs in the form
 
 
 .. math::
@@ -26,9 +21,32 @@ OSQP is written in C and can be used in C, C++, Python and Matlab.
 
 
 
+Citing OSQP
+-----------
+If you are using OSQP for your work, you can cite the following article:
+
+
+.. code:: latex
+
+    @article{aurhors:17,
+    }
+
+
+.. todo::
+
+    Add link to article and complete bibtex entry
+
+
+License
+-------
+OSQP is distributed under the `Apache 2.0 License <https://www.apache.org/licenses/LICENSE-2.0>`_
+
 
 .. toctree::
    :maxdepth: 2
    :caption: User Documentation
-   
+
    installation/index
+   interfaces/index
+   parsers/index
+   examples/index
