@@ -3,11 +3,7 @@
 #include "util.h"     // Utilities for testing
 #include "minunit.h"  // Basic testing script header
 
-#ifndef BASIC_QP_MATRICES_H
-#define BASIC_QP_MATRICES_H
-#include "basic_qp/matrices.h"
-#endif
-
+#include basic_qp/basic_qp.h
 
 
 static char * test_basic_qp()
@@ -23,15 +19,7 @@ static char * test_basic_qp()
     Data * data;  // Data
 
     // Populate data from matrices.h
-    data = (Data *)c_malloc(sizeof(Data));
-
-    data->n = basic_qp_n;
-    data->m = basic_qp_m;
-    data->P = csc_matrix(data->n, data->n, basic_qp_P_nnz, basic_qp_P_x, basic_qp_P_i, basic_qp_P_p);
-    data->q = basic_qp_q;
-    data->A = csc_matrix(data->m, data->n, basic_qp_A_nnz, basic_qp_A_x, basic_qp_A_i, basic_qp_A_p);
-    data->l = basic_qp_lA;
-    data->u = basic_qp_uA;
+    data = generate_problem_basic_qp();
 
     c_print("QP Tests:\n");
 
@@ -255,10 +243,7 @@ static char * test_basic_qp()
 
         // Clean workspace
         osqp_cleanup(work);
-        c_free(data->A);
-        c_free(data->P);
-        c_free(data);
-
+        clean_problem_basic_qp(data);
 
     }
 
