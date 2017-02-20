@@ -115,140 +115,114 @@ static char * test_mat_operations(){
     return 0;
 }
 
-//
-// c_int test_mat_vec_multiplication(){
-//     csc *A, *Pu;   // Matrices from matrices.h
-//     c_float Ax[t4_m], ATy[t4_n], Px[t4_n];
-//     c_float *Ax_cum, *ATy_cum, *Px_cum;
-//     c_int exitflag=0;
-//
-//     // Compute sparse matrices A and P from vectors stored in matrices.h
-//     A = csc_matrix(t4_m, t4_n, t4_A_nnz, t4_A_x, t4_A_i, t4_A_p);
-//     Pu = csc_matrix(t4_n, t4_n, t4_Pu_nnz, t4_Pu_x, t4_Pu_i, t4_Pu_p);
-//
-//     // Matrix-vector multiplication:  y = Ax
-//     mat_vec(A, t4_x, Ax, 0);
-//     if(vec_norm2_diff(Ax, t4_Ax, t4_m) > TESTS_TOL){
-//         c_print("\nError in matrix-vector multiplication!");
-//         exitflag = 1;
-//     }
-//
-//     // Cumulative matrix-vector multiplication:  y += Ax
-//     Ax_cum = vec_copy(t4_y, t4_m);
-//     mat_vec(A, t4_x, Ax_cum, 1);
-//     if(vec_norm2_diff(Ax_cum, t4_Ax_cum, t4_m) > TESTS_TOL){
-//         c_print("\nError in cumulative matrix-vector multiplication!");
-//         exitflag = 1;
-//     }
-//
-//     // Matrix-transpose-vector multiplication:  x = A'*y
-//     mat_tpose_vec(A, t4_y, ATy, 0, 0);
-//     if(vec_norm2_diff(ATy, t4_ATy, t4_n) > TESTS_TOL){
-//         c_print("\nError in matrix-transpose-vector multiplication!");
-//         exitflag = 1;
-//     }
-//
-//     // Cumulative matrix-transpose-vector multiplication:  x += A'*y
-//     ATy_cum = vec_copy(t4_x, t4_n);
-//     mat_tpose_vec(A, t4_y, ATy_cum, 1, 0);
-//     if(vec_norm2_diff(ATy_cum, t4_ATy_cum, t4_n) > TESTS_TOL){
-//         c_print("\nError in cumulative matrix-transpose-vector multiplication!");
-//         exitflag = 1;
-//     }
-//
-//     // Symmetric-matrix-vector multiplication (only upper part is stored)
-//     mat_vec(Pu, t4_x, Px, 0);           // upper traingular part
-//     mat_tpose_vec(Pu, t4_x, Px, 1, 1);  // lower traingular part (without diagonal)
-//     if(vec_norm2_diff(Px, t4_Px, t4_n) > TESTS_TOL){
-//         c_print("\nError in symmetric-matrix-vector multiplication!");
-//         exitflag = 1;
-//     }
-//
-//     // Cumulative symmetric-matrix-vector multiplication
-//     Px_cum = vec_copy(t4_x, t4_n);
-//     mat_vec(Pu, t4_x, Px_cum, 1);           // upper traingular part
-//     mat_tpose_vec(Pu, t4_x, Px_cum, 1, 1);  // lower traingular part (without diagonal)
-//     if(vec_norm2_diff(Px_cum, t4_Px_cum, t4_n) > TESTS_TOL){
-//         c_print("\nError in symmetric-matrix-vector multiplication!");
-//         exitflag = 1;
-//     }
-//
-//     // cleanup
-//     c_free(Ax_cum);
-//     c_free(ATy_cum);
-//     c_free(Px_cum);
-//     c_free(A);
-//     c_free(Pu);
-//
-//     return exitflag;
-// }
-//
-//
-// c_int test_extract_upper_triangular(){
-//     c_int exitflag = 0;
-//     // c_float * Atriudns, * A_t_triudns;
-//     // Compute sparse matrix A from vectors stored in matrices.h
-//     csc * A = csc_matrix(t_ut_n, t_ut_n, t_ut_A_nnz, t_ut_A_x, t_ut_A_i, t_ut_A_p);
-//     csc * A_ut_triu = csc_matrix(t_ut_n, t_ut_n, t_ut_Atriu_nnz, t_ut_Atriu_x, t_ut_Atriu_i, t_ut_Atriu_p);
-//
-//     csc * Atriu = csc_to_triu(A);
-//
-//     if (!is_eq_csc(A_ut_triu, Atriu, TESTS_TOL)) {
-//         c_print("\nError in forming upper triangular matrix!");
-//         exitflag = 1;
-//     }
-//
-//     // DEBUG Print
-//     // print_csc_matrix(A_ut_triu, "A_ut_triu");
-//     // print_csc_matrix(Atriu, "Atriu");
-//     // Atriudns = csc_to_dns(Atriu);
-//     // A_t_triudns = csc_to_dns(A_ut_triu);
-//     // print_dns_matrix(Atriudns, t_ut_n, t_ut_n, "Atriudns");
-//     // print_dns_matrix(A_t_triudns, t_ut_n, t_ut_n, "A_t_triudns");
-//
-//
-//     // Cleanup
-//     c_free(A);
-//     c_free(A_ut_triu);
-//     csc_spfree(Atriu);
-//
-//     return exitflag;
-// }
-//
-// c_int test_quad_form_upper_triang(){
-//     c_int exitflag = 0;
-//     c_float quad_form_t;
-//
-//     // Get matrices from data
-//     csc * Atriu = csc_matrix(t_qpform_n, t_qpform_n, t_qpform_Atriu_nnz, t_qpform_Atriu_x, t_qpform_Atriu_i, t_qpform_Atriu_p);
-//
-//     // Compute quadratic form
-//     quad_form_t = quad_form(Atriu, t_qpform_x);
-//
-//     if (c_absval(quad_form_t - t_qpform_value) >  TESTS_TOL) {
-//         c_print("\nError in computing quadratic form using upper triangular matrix!");
-//         exitflag = 1;
-//     }
-//
-//     // c_print("quadform_t = %.4f\n", quad_form_t);
-//     // c_print("t_qpform_value = %.4f\n", t_qpform_value);
-//
-//     // cleanup
-//     c_free(Atriu);
-//
-//     return exitflag;
-// }
+
+static char * test_mat_vec_multiplication(){
+    c_float *Ax, *ATy, *Px, *Ax_cum, *ATy_cum, *Px_cum;
+
+    lin_alg_sols_data *  data = generate_problem_lin_alg_sols_data();
+
+
+    // Allocate vectors
+    Ax = (c_float *)c_malloc(data->test_mat_vec_m * sizeof(c_float));
+    ATy = (c_float *)c_malloc(data->test_mat_vec_n * sizeof(c_float));
+    Px = (c_float *)c_malloc(data->test_mat_vec_n * sizeof(c_float));
+
+
+    // Matrix-vector multiplication:  y = Ax
+    mat_vec(data->test_mat_vec_A, data->test_mat_vec_x, Ax, 0);
+    mu_assert("Linear algebra tests: error in matrix-vector operation, matrix-vector multiplication", vec_norm2_diff(Ax, data->test_mat_vec_Ax, data->test_mat_vec_m) < TESTS_TOL);
+
+    // Cumulative matrix-vector multiplication:  y += Ax
+    Ax_cum = vec_copy(data->test_mat_vec_y, data->test_mat_vec_m);
+    mat_vec(data->test_mat_vec_A, data->test_mat_vec_x, Ax_cum, 1);
+    mu_assert("Linear algebra tests: error in matrix-vector operation, cumulative matrix-vector multiplication", vec_norm2_diff(Ax_cum, data->test_mat_vec_Ax_cum, data->test_mat_vec_m) < TESTS_TOL);
+
+    // Matrix-transpose-vector multiplication:  x = A'*y
+    mat_tpose_vec(data->test_mat_vec_A, data->test_mat_vec_y, ATy, 0, 0);
+    mu_assert("Linear algebra tests: error in matrix-vector operation, matrix-transpose-vector multiplication", vec_norm2_diff(ATy, data->test_mat_vec_ATy, data->test_mat_vec_n) < TESTS_TOL);
+
+    // Cumulative matrix-transpose-vector multiplication:  x += A'*y
+    ATy_cum = vec_copy(data->test_mat_vec_x, data->test_mat_vec_n);
+    mat_tpose_vec(data->test_mat_vec_A, data->test_mat_vec_y, ATy_cum, 1, 0);
+    mu_assert("Linear algebra tests: error in matrix-vector operation, cumulative matrix-transpose-vector multiplication", vec_norm2_diff(ATy_cum, data->test_mat_vec_ATy_cum, data->test_mat_vec_n) < TESTS_TOL);
+
+    // Symmetric-matrix-vector multiplication (only upper part is stored)
+    mat_vec(data->test_mat_vec_Pu, data->test_mat_vec_x, Px, 0);           // upper traingular part
+    mat_tpose_vec(data->test_mat_vec_Pu, data->test_mat_vec_x, Px, 1, 1);  // lower traingular part (without diagonal)
+    mu_assert("Linear algebra tests: error in matrix-vector operation, symmetric matrix-vector multiplication", vec_norm2_diff(Px, data->test_mat_vec_Px, data->test_mat_vec_n) < TESTS_TOL);
+
+
+    // Cumulative symmetric-matrix-vector multiplication
+    Px_cum = vec_copy(data->test_mat_vec_x, data->test_mat_vec_n);
+    mat_vec(data->test_mat_vec_Pu, data->test_mat_vec_x, Px_cum, 1);           // upper traingular part
+    mat_tpose_vec(data->test_mat_vec_Pu, data->test_mat_vec_x, Px_cum, 1, 1);  // lower traingular part (without diagonal)
+    mu_assert("Linear algebra tests: error in matrix-vector operation, cumulative symmetric matrix-vector multiplication", vec_norm2_diff(Px_cum, data->test_mat_vec_Px_cum, data->test_mat_vec_n) < TESTS_TOL);
+
+
+    // cleanup
+    c_free(Ax);
+    c_free(ATy);
+    c_free(Px);
+    c_free(Ax_cum);
+    c_free(ATy_cum);
+    c_free(Px_cum);
+    clean_problem_lin_alg_sols_data(data);
+
+    return 0;
+}
+
+
+
+
+
+static char * test_extract_upper_triangular(){
+
+
+    lin_alg_sols_data *  data = generate_problem_lin_alg_sols_data();
+
+    // Extract upper triangular part
+    csc * Ptriu = csc_to_triu(data->test_mat_extr_triu_P);
+
+    mu_assert("Linear algebra tests: error in forming upper triangular matrix!",
+              is_eq_csc(data->test_mat_extr_triu_Pu, Ptriu, TESTS_TOL));
+
+    // Cleanup
+    c_free(Ptriu);
+    clean_problem_lin_alg_sols_data(data);
+
+
+    return 0;
+}
+
+
+
+static char * test_quad_form_upper_triang(){
+    c_float quad_form_t;
+
+    lin_alg_sols_data *  data = generate_problem_lin_alg_sols_data();
+
+    // Compute quadratic form
+    quad_form_t = quad_form(data->test_qpform_Pu, data->test_qpform_x);
+
+    mu_assert("Linear algebra tests: error in computing quadratic form using upper triangular matrix!", (c_absval(quad_form_t - data->test_qpform_value) < TESTS_TOL));
+
+    // cleanup
+    clean_problem_lin_alg_sols_data(data);
+
+    return 0;
+}
+
+
 
 static char * tests_lin_alg()
 {
 
-
     mu_run_test(test_constr_sparse_mat);
     mu_run_test(test_vec_operations);
     mu_run_test(test_mat_operations);
-    // mu_run_test(test_mat_vec_multiplication);
-    // mu_run_test(test_extract_upper_triangular);
-    // mu_run_test(test_quad_form_upper_triang);
+    mu_run_test(test_mat_vec_multiplication);
+    mu_run_test(test_extract_upper_triangular);
+    mu_run_test(test_quad_form_upper_triang);
 
     return 0;
 }
