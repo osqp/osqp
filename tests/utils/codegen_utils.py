@@ -1,8 +1,12 @@
+# Compatibility with Python 2
 from __future__ import print_function
+from builtins import dict
 from builtins import range
+
+
 import numpy as np
 import os.path
-
+import osqp
 
 def write_int(f, x, name, *args):
     if any(args):
@@ -162,14 +166,27 @@ def clean_mat(f, name, *args):
     f.write("%s);\n" % name)
 
 
-def generate_code(P, q, A, l, u, problem_name):
+def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
 
     # Get problem dimension
     n = P.shape[0]
     m = A.shape[0]
 
-    # GENERATE HEADER FILE
+    # Convert problem status to integer
+    for key, value in sols_data.items():
+        if isinstance(value, str):
+            # Status test get from C code
+            osqp_model = osqp.OSQP()
+            if value == 'optimal':
+                sols_data[key] = osqp_model.constant('OSQP_SOLVED')
+            elif value == 'infeasible':
+                sols_data[key] =  osqp_model.constant('OSQP_INFEASIBLE')
+            elif value == 'unbounded':
+                sols_data[key] =  osqp_model.constant('OSQP_UNBOUNDED')
+
+
     #
+    # GENERATE HEADER FILE
     #
     f = open(problem_name + "/" + problem_name + ".h", "w")
 
@@ -181,27 +198,32 @@ def generate_code(P, q, A, l, u, problem_name):
     f.write("#include \"osqp.h\"\n")
     f.write("\n\n")
 
-    # # Add function generation
-    # f.write("/* function to generate problem data structure */\n")
-    # f.write("Data * generate_problem_%s();\n\n" % problem_name)
     #
-    # # Add function cleanup
-    # f.write("/* function to clean problem data structure */\n")
-    # f.write("c_int clean_problem_%s(Data * data);\n\n" % problem_name)
+    # Create additional data structure
     #
-    # f.write("#endif\n")
-    #
-    # f.close()
-    #
-    # # GENERATE .C FILE
-    # #
-    # #
-    # f = open(problem_name + "/" + problem_name + ".c", "w+")
-    # f.write("#include \"" + problem_name + ".h\"\n")
-    # f.write("\n")
+    f.write("/* create additional data and solutions structure */\n")
+    f.write("typedef struct {\n")
+    # Generate further data and solutions
+    for key, value in sols_data.items():
+        # Check if it is an array or a scalar
+        if isinstance(value, np.ndarray):
+            if isinstance(value[0], int):
+                f.write("c_int * %s;\n" % key)
+            elif isinstance(value[0], float):
+                f.write("c_float * %s;\n" % key)
+        else:
+            if isinstance(value, int):
+                f.write("c_int %s;\n" % key)
+            elif isinstance(value, float):
+                f.write("c_float %s;\n" % key)
+    f.write("} %s_sols_data;\n\n" % problem_name)
 
-    # Add function GENERATION
-    f.write("/* function to generate problem data structure */\n")
+
+
+    #
+    # Generate QP problem data
+    #
+    f.write("/* function to generate QP problem data */\n")
     f.write("Data * generate_problem_%s(){\n\n" % problem_name)
 
     # Initialize structure data
@@ -226,11 +248,15 @@ def generate_code(P, q, A, l, u, problem_name):
 
     # Return data and end function
     f.write("return data;\n\n")
+
     f.write("}\n\n")
 
-    # Add function CLEANUP
+
+    #
+    # Generate QP problem data
+    #
     f.write("/* function to clean problem data structure */\n")
-    f.write("c_int clean_problem_%s(Data * data){\n\n" % problem_name)
+    f.write("void clean_problem_%s(Data * data){\n\n" % problem_name)
 
     # Free vectors
     f.write("// Clean vectors\n")
@@ -245,12 +271,71 @@ def generate_code(P, q, A, l, u, problem_name):
     clean_mat(f, "P", "data")
     f.write("\n")
 
-    # Clean data structure
-    f.write("c_free(data);\n")
+    f.write("c_free(data);\n\n")
 
-    f.write("return 0;\n\n")
     f.write("}\n\n")
+
+
+
+    #
+    # Generate additional problem data for solutions
+    #
+    f.write("/* function to define solutions and additional data struct */\n")
+    f.write("%s_sols_data *  generate_problem_%s_sols_data(){\n\n" % (problem_name, problem_name))
+
+    # Initialize structure data
+    f.write("%s_sols_data * data = (%s_sols_data *)c_malloc(sizeof(%s_sols_data));\n\n" % (problem_name, problem_name, problem_name))
+
+
+    # Generate further data and solutions
+    for key, value in sols_data.items():
+        # Check if it is an array or a scalar
+        if type(value) is np.ndarray:
+            if isinstance(value[0], int):
+                write_vec_int(f, value, key, "data")
+            elif isinstance(value[0], float):
+                write_vec_float(f, value, key, "data")
+        else:
+            if isinstance(value, int):
+                write_int(f, value, key, "data")
+            elif isinstance(value, float):
+                write_float(f, value, key, "data")
+
+    # Return data and end function
+    f.write("\nreturn data;\n\n")
+
+    f.write("}\n\n")
+
+
+
+    #
+    # Clean additional problem data for solutions
+    #
+    f.write("/* function to clean solutions and additional data struct */\n")
+    f.write("void clean_problem_%s_sols_data(%s_sols_data * data){\n\n" % (problem_name, problem_name))
+    # Generate further data and solutions
+    for key, value in sols_data.items():
+        # Check if it is an array or a scalar
+        if type(value) is np.ndarray:
+            clean_vec(f, key, "data")
+
+    f.write("\nc_free(data);\n\n")
+
+    f.write("}\n\n")
+
+    # # Generate further data and solutions
+    # for key, value in data_and_sols.items():
+    #     # Check if it is a vector or an array
+    #     if type(value) is np.ndarray:
+    #         write_vec_float(f, value, key)
+    #     else:
+    #         write_vec_float(f, value, key)
+    #
+    #
+    #
+
     f.write("#endif\n")
+
 
     f.close()
 
