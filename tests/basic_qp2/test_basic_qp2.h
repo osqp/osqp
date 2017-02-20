@@ -1,6 +1,4 @@
 #include "osqp.h"     // OSQP API
-// #include "cs.h"       // CSC data structure
-// #include "util.h"     // Utilities for testing
 #include "minunit.h"  // Basic testing script header
 
 #ifndef BASIC_QP2_MATRICES_H
@@ -25,7 +23,7 @@ static char * test_basic_qp2_solve()
 
 
     // Populate data
-    data = generate_problem_basic_qp();
+    data = generate_problem_basic_qp2();
     sols_data = generate_problem_basic_qp2_sols_data();
 
 
@@ -52,11 +50,12 @@ static char * test_basic_qp2_solve()
 
     // Compare primal solutions
     mu_assert("Basic QP 2 test solve: Error in primal solution!",
-              vec_norm2_diff(work->solution->x, sols_data->x_test, data->n) < TESTS_TOL);
+              vec_norm2_diff(work->solution->x, sols_data->x_test, data->n)/vec_norm2(sols_data->x_test_new, data->n) < TESTS_TOL);
+
 
     // Compare dual solutions
     mu_assert("Basic QP 2 test solve: Error in dual solution!",
-              vec_norm2_diff(work->solution->y, sols_data->y_test, data->m) < TESTS_TOL);
+              vec_norm2_diff(work->solution->y, sols_data->y_test, data->m)/vec_norm2(sols_data->y_test_new, data->m) < TESTS_TOL);
 
 
     // Compare objective values
@@ -91,7 +90,7 @@ static char * test_basic_qp2_update()
 
 
     // Populate data
-    data = generate_problem_basic_qp();
+    data = generate_problem_basic_qp2();
     sols_data = generate_problem_basic_qp2_sols_data();
 
 
@@ -123,11 +122,11 @@ static char * test_basic_qp2_update()
 
     // Compare primal solutions
     mu_assert("Basic QP 2 test update: Error in primal solution!",
-              vec_norm2_diff(work->solution->x, sols_data->x_test_new, data->n) < TESTS_TOL);
+              vec_norm2_diff(work->solution->x, sols_data->x_test_new, data->n)/vec_norm2(sols_data->x_test_new, data->n) < TESTS_TOL);
 
     // Compare dual solutions
     mu_assert("Basic QP 2 test update: Error in dual solution!",
-              vec_norm2_diff(work->solution->y, sols_data->y_test_new, data->m) < TESTS_TOL);
+              vec_norm2_diff(work->solution->y, sols_data->y_test_new, data->m)/vec_norm2(sols_data->y_test_new, data->m) < TESTS_TOL);
 
 
     // Compare objective values

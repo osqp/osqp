@@ -5,13 +5,13 @@
 
 /* create additional data and solutions structure */
 typedef struct {
-c_float * x_test;
-c_float * q_new;
-c_float * y_test;
 c_int status_test;
+c_float * q_new;
+c_float * l_new;
+c_float * x_test;
+c_float * y_test;
 c_float * u_new;
 c_float obj_value_test;
-c_float * l_new;
 } basic_qp_sols_data;
 
 /* function to generate QP problem data */
@@ -111,26 +111,26 @@ basic_qp_sols_data *  generate_problem_basic_qp_sols_data(){
 
 basic_qp_sols_data * data = (basic_qp_sols_data *)c_malloc(sizeof(basic_qp_sols_data));
 
-data->x_test = c_malloc(2 * sizeof(c_float));
-data->x_test[0] = 0.30000000110359281713;
-data->x_test[1] = 0.69999999882402397233;
+data->status_test = 1;
 data->q_new = c_malloc(2 * sizeof(c_float));
 data->q_new[0] = 2.50000000000000000000;
 data->q_new[1] = 3.20000000000000017764;
-data->y_test = c_malloc(3 * sizeof(c_float));
-data->y_test[0] = -2.89998849516666235004;
-data->y_test[1] = -0.00000000034767583971;
-data->y_test[2] = 0.19998958767346983190;
-data->status_test = 1;
-data->u_new = c_malloc(3 * sizeof(c_float));
-data->u_new[0] = 1.60000000000000008882;
-data->u_new[1] = 1.00000000000000000000;
-data->u_new[2] = 15.00000000000000000000;
-data->obj_value_test = 1.88000000002528411258;
 data->l_new = c_malloc(3 * sizeof(c_float));
 data->l_new[0] = 0.80000000000000004441;
 data->l_new[1] = -3.39999999999999991118;
 data->l_new[2] = -11.00000000000000000000;
+data->x_test = c_malloc(2 * sizeof(c_float));
+data->x_test[0] = 0.30000000000014837021;
+data->x_test[1] = 0.69999999999982231991;
+data->y_test = c_malloc(3 * sizeof(c_float));
+data->y_test[0] = -2.89999998443827911032;
+data->y_test[1] = -0.00000000000006271846;
+data->y_test[2] = 0.19999998585527237194;
+data->u_new = c_malloc(3 * sizeof(c_float));
+data->u_new[0] = 1.60000000000000008882;
+data->u_new[1] = 1.00000000000000000000;
+data->u_new[2] = 15.00000000000000000000;
+data->obj_value_test = 1.87999999999995037747;
 
 return data;
 
@@ -139,11 +139,11 @@ return data;
 /* function to clean solutions and additional data struct */
 void clean_problem_basic_qp_sols_data(basic_qp_sols_data * data){
 
-c_free(data->x_test);
 c_free(data->q_new);
+c_free(data->l_new);
+c_free(data->x_test);
 c_free(data->y_test);
 c_free(data->u_new);
-c_free(data->l_new);
 
 c_free(data);
 
