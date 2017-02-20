@@ -77,7 +77,7 @@ def write_mat_sparse(f, A, name, *args):
     m = A.shape[0]
     n = A.shape[1]
 
-    f.write("// Matrix " + name + "\n")
+    f.write("\n// Matrix " + name + "\n")
     f.write("//")
     f.write("-"*(len("Matrix  ") + len(name)) + "\n")
 
