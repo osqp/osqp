@@ -5,7 +5,6 @@ import cvxpy
 import osqp
 
 
-import mathprogbasepy as mpbpy
 
 P = spa.csc_matrix(np.array([[11., 0.], [0., 0.]]))
 q = np.array([3., 4.])
@@ -31,10 +30,6 @@ y_test = (constraints[0].dual_value).A1
 obj_value_test = objective.value
 status_test = prob.status
 
-# p = mpbpy.QuadprogProblem(P, q, A, l, u)
-# res = p.solve(solver=mpbpy.GUROBI)
-#
-# import ipdb; ipdb.set_trace()
 
 # New data
 q_new = np.array([1., 1.])

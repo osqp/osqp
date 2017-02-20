@@ -1,17 +1,17 @@
-#ifndef BASIC_QP_H
-#define BASIC_QP_H
+#ifndef BASIC_QP_DATA_H
+#define BASIC_QP_DATA_H
 #include "osqp.h"
 
 
 /* create additional data and solutions structure */
 typedef struct {
-c_int status_test;
+c_float obj_value_test;
 c_float * q_new;
+c_float * y_test;
+c_int status_test;
+c_float * u_new;
 c_float * l_new;
 c_float * x_test;
-c_float * y_test;
-c_float * u_new;
-c_float obj_value_test;
 } basic_qp_sols_data;
 
 /* function to generate QP problem data */
@@ -111,26 +111,26 @@ basic_qp_sols_data *  generate_problem_basic_qp_sols_data(){
 
 basic_qp_sols_data * data = (basic_qp_sols_data *)c_malloc(sizeof(basic_qp_sols_data));
 
-data->status_test = 1;
+data->obj_value_test = 1.87999999999888167679;
 data->q_new = c_malloc(2 * sizeof(c_float));
 data->q_new[0] = 2.50000000000000000000;
 data->q_new[1] = 3.20000000000000017764;
+data->y_test = c_malloc(3 * sizeof(c_float));
+data->y_test[0] = -2.89999950794844485458;
+data->y_test[1] = -0.00000000000567858918;
+data->y_test[2] = 0.19999955342515576828;
+data->status_test = 1;
+data->u_new = c_malloc(3 * sizeof(c_float));
+data->u_new[0] = 1.60000000000000008882;
+data->u_new[1] = 1.00000000000000000000;
+data->u_new[2] = 15.00000000000000000000;
 data->l_new = c_malloc(3 * sizeof(c_float));
 data->l_new[0] = 0.80000000000000004441;
 data->l_new[1] = -3.39999999999999991118;
 data->l_new[2] = -11.00000000000000000000;
 data->x_test = c_malloc(2 * sizeof(c_float));
-data->x_test[0] = 0.30000000000014837021;
-data->x_test[1] = 0.69999999999982231991;
-data->y_test = c_malloc(3 * sizeof(c_float));
-data->y_test[0] = -2.89999998443827911032;
-data->y_test[1] = -0.00000000000006271846;
-data->y_test[2] = 0.19999998585527237194;
-data->u_new = c_malloc(3 * sizeof(c_float));
-data->u_new[0] = 1.60000000000000008882;
-data->u_new[1] = 1.00000000000000000000;
-data->u_new[2] = 15.00000000000000000000;
-data->obj_value_test = 1.87999999999995037747;
+data->x_test[0] = 0.30000000001690357854;
+data->x_test[1] = 0.69999999998143025426;
 
 return data;
 
@@ -140,10 +140,10 @@ return data;
 void clean_problem_basic_qp_sols_data(basic_qp_sols_data * data){
 
 c_free(data->q_new);
-c_free(data->l_new);
-c_free(data->x_test);
 c_free(data->y_test);
 c_free(data->u_new);
+c_free(data->l_new);
+c_free(data->x_test);
 
 c_free(data);
 
