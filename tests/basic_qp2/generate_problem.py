@@ -4,6 +4,9 @@ import utils.codegen_utils as cu
 import cvxpy
 import osqp
 
+
+import mathprogbasepy as mpbpy
+
 P = spa.csc_matrix(np.array([[11., 0.], [0., 0.]]))
 q = np.array([3., 4.])
 
@@ -22,13 +25,16 @@ x = cvxpy.Variable(n)
 objective = cvxpy.Minimize(0.5 * cvxpy.quad_form(x, P) + q * x )
 constraints = [A * x <= u]
 prob = cvxpy.Problem(objective, constraints)
-prob.solve()
+prob.solve(abstol=1e-10, reltol=1e-10)
 x_test = np.asarray(x.value).flatten()
 y_test = (constraints[0].dual_value).A1
 obj_value_test = objective.value
 status_test = prob.status
 
-
+# p = mpbpy.QuadprogProblem(P, q, A, l, u)
+# res = p.solve(solver=mpbpy.GUROBI)
+#
+# import ipdb; ipdb.set_trace()
 
 # New data
 q_new = np.array([1., 1.])
@@ -62,10 +68,6 @@ sols_data = {'x_test': x_test,
 
 # Generate problem data
 cu.generate_problem_data(P, q, A, l, u, 'basic_qp2', sols_data)
-
-
-# import ipdb; ipdb.set_trace()
-
 
 
 

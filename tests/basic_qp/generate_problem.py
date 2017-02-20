@@ -20,12 +20,11 @@ x = cvxpy.Variable(n)
 objective = cvxpy.Minimize(0.5 * cvxpy.quad_form(x, P) + q * x )
 constraints = [A * x <= u, l <= A * x]
 prob = cvxpy.Problem(objective, constraints)
-prob.solve()
+prob.solve(abstol=1e-10, reltol=1e-10)
 x_test = np.asarray(x.value).flatten()
 y_test = (constraints[0].dual_value - constraints[1].dual_value).A1
 obj_value_test = objective.value
 status_test = prob.status
-
 
 # New data
 q_new = np.array([2.5, 3.2])
@@ -44,16 +43,3 @@ sols_data = {'x_test': x_test,
 
 # Generate problem data
 cu.generate_problem_data(P, q, A, l, u, 'basic_qp', sols_data)
-
-
-# import ipdb; ipdb.set_trace()
-
-
-
-
-# Write new vectors
-# f = open("basic_qp/basic_qp.h", "a")
-#
-# cu.write_vec_float(f, x.value, "sol_x")
-#
-# f.close()
