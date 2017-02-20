@@ -66,86 +66,55 @@ static char * test_vec_operations(){
     return 0;
 }
 
-//
-//
-// c_int test_mat_operations(){
-//     csc *t3_A, *t3_Ad, *t3_dA, *t3_A_ewsq, *t3_A_ewabs; // Matrices from matrices.h
-//     csc *Ad, *dA, *A_ewsq, *A_ewabs;                    // Matrices used for tests
-//     c_int exitflag=0;
-//
-//     // Compute sparse matrix A from vectors stored in matrices.h
-//     t3_A = csc_matrix(t3_n, t3_n, t3_A_nnz, t3_A_x, t3_A_i, t3_A_p);
-//     t3_Ad = csc_matrix(t3_n, t3_n, t3_Ad_nnz, t3_Ad_x, t3_Ad_i, t3_Ad_p);
-//     t3_dA = csc_matrix(t3_n, t3_n, t3_dA_nnz, t3_dA_x, t3_dA_i, t3_dA_p);
-//     t3_A_ewsq = csc_matrix(t3_n, t3_n, t3_A_ewsq_nnz, t3_A_ewsq_x, t3_A_ewsq_i, t3_A_ewsq_p);
-//     t3_A_ewabs = csc_matrix(t3_n, t3_n, t3_A_ewabs_nnz, t3_A_ewabs_x, t3_A_ewabs_i, t3_A_ewabs_p);
-//
-//     // // Initialize test matrices
-//     // Ad = csc_spalloc(t3_n, t3_n, t3_A_nnz, 1, 0);
-//     // dA = csc_spalloc(t3_n, t3_n, t3_A_nnz, 1, 0);
-//     // A_ewsq = csc_spalloc(t3_n, t3_n, t3_A_nnz, 1, 0);
-//     // A_ewabs = csc_spalloc(t3_n, t3_n, t3_A_nnz, 1, 0);
-//     //
-//     // // Copy values of matrix A in all of test matrices
-//     // copy_csc_mat(t3_A, Ad);
-//     // copy_csc_mat(t3_A, dA);
-//     // copy_csc_mat(t3_A, A_ewsq);
-//     // copy_csc_mat(t3_A, A_ewabs);
-//
-//     // Copy matrices
-//     Ad = copy_csc_mat(t3_A);
-//     dA = copy_csc_mat(t3_A);
-//     A_ewsq = copy_csc_mat(t3_A);
-//     A_ewabs = copy_csc_mat(t3_A);
-//
-//
-//     // Premultiply matrix A
-//     mat_premult_diag(dA, t3_d);
-//
-//     if (!is_eq_csc(dA, t3_dA, TESTS_TOL)) {
-//         c_print("\nError in premultiply test!");
-//         exitflag = 1;
-//     }
-//
-//     // Postmultiply matrix A
-//     mat_postmult_diag(Ad, t3_d);
-//
-//     // print_csc_matrix(Ad, "Ad");
-//     // print_csc_matrix(t3_Ad, "t3_Ad");
-//     if (!is_eq_csc(Ad, t3_Ad, TESTS_TOL)) {
-//         c_print("\nError in postmultiply test!");
-//         exitflag = 1;
-//     }
-//
-//     // Elementwise square
-//     mat_ew_sq(A_ewsq);
-//     if (!is_eq_csc(A_ewsq, t3_A_ewsq, TESTS_TOL)) {
-//         c_print("\nError in elementwise square test!");
-//         exitflag = 1;
-//     }
-//
-//     // Elementwise absolute value
-//     mat_ew_abs(A_ewabs);
-//     if (!is_eq_csc(A_ewabs, t3_A_ewabs, TESTS_TOL)) {
-//         c_print("\nError in elementwise absolute value test!");
-//         exitflag = 1;
-//     }
-//
-//
-//     // cleanup
-//     c_free(t3_A);
-//     c_free(t3_Ad);
-//     c_free(t3_dA);
-//     c_free(t3_A_ewsq);
-//     c_free(t3_A_ewabs);
-//     csc_spfree(Ad);
-//     csc_spfree(dA);
-//     csc_spfree(A_ewsq);
-//     csc_spfree(A_ewabs);
-//
-//     return exitflag;
-// }
-//
+
+
+static char * test_mat_operations(){
+    csc *Ad, *dA, *A_ewsq, *A_ewabs;     // Matrices used for tests
+    c_int exitflag=0;
+
+    lin_alg_sols_data *  data = generate_problem_lin_alg_sols_data();
+
+
+    // Copy matrices
+    Ad = copy_csc_mat(data->test_mat_ops_A);
+    dA = copy_csc_mat(data->test_mat_ops_A);
+    A_ewsq = copy_csc_mat(data->test_mat_ops_A);
+    A_ewabs = copy_csc_mat(data->test_mat_ops_A);
+
+
+    // Premultiply matrix A
+    mat_premult_diag(dA, data->test_mat_ops_d);
+    mu_assert("Linear algebra tests: error in matrix operation, premultiply diagonal",
+            is_eq_csc(dA, data->test_mat_ops_prem_diag, TESTS_TOL));
+
+
+    // Postmultiply matrix A
+    mat_postmult_diag(Ad, data->test_mat_ops_d);
+    mu_assert("Linear algebra tests: error in matrix operation, postmultiply diagonal",
+            is_eq_csc(Ad, data->test_mat_ops_postm_diag, TESTS_TOL));
+
+
+    // Elementwise square
+    mat_ew_sq(A_ewsq);
+    mu_assert("Linear algebra tests: error in matrix operation, elementwise square",
+            is_eq_csc(A_ewsq, data->test_mat_ops_ew_square, TESTS_TOL));
+
+
+    // Elementwise absolute value
+    mat_ew_abs(A_ewabs);
+    mu_assert("Linear algebra tests: error in matrix operation, elementwise absolute value",
+            is_eq_csc(A_ewabs, data->test_mat_ops_ew_abs, TESTS_TOL));
+
+    // cleanup
+    csc_spfree(Ad);
+    csc_spfree(dA);
+    csc_spfree(A_ewsq);
+    csc_spfree(A_ewabs);
+    clean_problem_lin_alg_sols_data(data);
+
+    return 0;
+}
+
 //
 // c_int test_mat_vec_multiplication(){
 //     csc *A, *Pu;   // Matrices from matrices.h
@@ -276,7 +245,7 @@ static char * tests_lin_alg()
 
     mu_run_test(test_constr_sparse_mat);
     mu_run_test(test_vec_operations);
-    // mu_run_test(test_mat_operations);
+    mu_run_test(test_mat_operations);
     // mu_run_test(test_mat_vec_multiplication);
     // mu_run_test(test_extract_upper_triangular);
     // mu_run_test(test_quad_form_upper_triang);
