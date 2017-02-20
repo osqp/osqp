@@ -3,7 +3,7 @@ from __future__ import print_function
 from builtins import dict
 from builtins import range
 
-
+import scipy.sparse as spa
 import numpy as np
 import os.path
 import osqp
@@ -167,7 +167,12 @@ def clean_mat(f, name, *args):
 
 
 def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
+    """
+    Generate test problem data.
 
+    The additional structure sols_data defines the additional vectors/scalars
+    we need to perform the tests
+    """
     # Get problem dimension
     n = P.shape[0]
     m = A.shape[0]
@@ -191,8 +196,8 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
     f = open(problem_name + "/" + problem_name + ".h", "w")
 
     # Add definition check
-    f.write("#ifndef " + problem_name.upper() + "_H\n")
-    f.write("#define " + problem_name.upper() + "_H\n")
+    f.write("#ifndef " + problem_name.upper() + "_DATA_H\n")
+    f.write("#define " + problem_name.upper() + "_DATA_H\n")
 
     # Add Includes
     f.write("#include \"osqp.h\"\n")
@@ -207,9 +212,9 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
     for key, value in sols_data.items():
         # Check if it is an array or a scalar
         if isinstance(value, np.ndarray):
-            if isinstance(value[0], int):
+            if isinstance(value.flatten(order='F')[0], int):
                 f.write("c_int * %s;\n" % key)
-            elif isinstance(value[0], float):
+            elif isinstance(value.flatten(order='F')[0], float):
                 f.write("c_float * %s;\n" % key)
         else:
             if isinstance(value, int):
@@ -291,10 +296,10 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
     for key, value in sols_data.items():
         # Check if it is an array or a scalar
         if type(value) is np.ndarray:
-            if isinstance(value[0], int):
-                write_vec_int(f, value, key, "data")
-            elif isinstance(value[0], float):
-                write_vec_float(f, value, key, "data")
+            if isinstance(value.flatten(order='F')[0], int):
+                write_vec_int(f, value.flatten(order='F'), key, "data")
+            elif isinstance(value.flatten(order='F')[0], float):
+                write_vec_float(f, value.flatten(order='F'), key, "data")
         else:
             if isinstance(value, int):
                 write_int(f, value, key, "data")
@@ -323,87 +328,110 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
 
     f.write("}\n\n")
 
-    # # Generate further data and solutions
-    # for key, value in data_and_sols.items():
-    #     # Check if it is a vector or an array
-    #     if type(value) is np.ndarray:
-    #         write_vec_float(f, value, key)
-    #     else:
-    #         write_vec_float(f, value, key)
-    #
-    #
-    #
 
     f.write("#endif\n")
 
 
     f.close()
 
-    # # GENERATE TEST FILE
-    # #
-    # #
-    # if os.path.isfile("qptests/" + problem_name + "/test_" +
-    #                   problem_name + ".h"):
-    #     print("Test file for %s_test already present. Skip creating it\n" \
-    #         % problem_name)
-    # else:
-    #     f = open("qptests/" + problem_name + "/test_" +
-    #              problem_name + ".h", "w+")
-    #     f.write("#include \"osqp.h\"\n")
-    #     f.write("#include \"minunit.h\"\n")
-    #     f.write("#include \"qptests/" + problem_name +
-    #             "/" + problem_name + ".h\"\n")
+
+def generate_data(problem_name, sols_data):
+    """
+    Generate test data vectors.
+
+    The additional structure sols_data defines the additional vectors/scalars
+    we need to perform the tests
+    """
+
     #
-    #     # Add definition check
-    #     f.write("#ifndef TEST_" + problem_name.upper() + "_H\n")
-    #     f.write("#define TEST_" + problem_name.upper() + "_H\n\n")
+    # GENERATE HEADER FILE
     #
-    #     f.write("static char * test_" + problem_name + "()\n{\n")
-    #     f.write("/* local variables */\n")
-    #     f.write("c_int exitflag = 0;  // No errors\n")
-    #     f.write("\n")
-    #     f.write("// Problem settings\n")
-    #     f.write("Settings * settings = ")
-    #     f.write("(Settings *)c_malloc(sizeof(Settings));\n")
-    #     f.write("\n")
+    f = open(problem_name + "/" + problem_name + ".h", "w")
+
+    # Add definition check
+    f.write("#ifndef " + problem_name.upper() + "_DATA_H\n")
+    f.write("#define " + problem_name.upper() + "_DATA_H\n")
+
+    # Add Includes
+    f.write("#include \"osqp.h\"\n")
+    f.write("\n\n")
+
     #
-    #     f.write("// Structures\n")
-    #     f.write("Work * work;  // Workspace\n\n")
+    # Create additional data structure
     #
-    #     f.write("// Generate problem data\n")
-    #     f.write("Data * data = generate_problem_diesel();\n\n")
+    f.write("/* create data and solutions structure */\n")
+    f.write("typedef struct {\n")
+    # Generate further data and solutions
+    for key, value in sols_data.items():
+        # Check if it is an array or a scalar
+        if spa.issparse(value):  # Sparse matrix
+            f.write("csc * %s;\n" % key)
+        elif isinstance(value, np.ndarray):
+            if isinstance(value.flatten(order='F')[0], int):
+                f.write("c_int * %s;\n" % key)
+            elif isinstance(value.flatten(order='F')[0], float):
+                f.write("c_float * %s;\n" % key)
+        else:
+            if isinstance(value, int):
+                f.write("c_int %s;\n" % key)
+            elif isinstance(value, float):
+                f.write("c_float %s;\n" % key)
+    f.write("} %s_sols_data;\n\n" % problem_name)
+
+
     #
-    #     f.write("c_print(\"\\nTest %s\\n\");\n" % problem_name)
-    #     f.write("c_print(\"-------------\\n\");\n\n")
+    # Generate additional problem data for solutions
     #
-    #     f.write("// Define Solver settings as default\n")
-    #     f.write("set_default_settings(settings);\n\n")
+    f.write("/* function to define problem data */\n")
+    f.write("%s_sols_data *  generate_problem_%s_sols_data(){\n\n" % (problem_name, problem_name))
+
+    # Initialize structure data
+    f.write("%s_sols_data * data = (%s_sols_data *)c_malloc(sizeof(%s_sols_data));\n\n" % (problem_name, problem_name, problem_name))
+
+
+    # Generate further data and solutions
+    for key, value in sols_data.items():
+        # Check if it is an array or a scalar
+        if spa.issparse(value):  # Sparse matrix
+            write_mat_sparse(f, value, key, "data")
+        elif type(value) is np.ndarray:
+            if isinstance(value.flatten(order='F')[0], int):
+                write_vec_int(f, value.flatten(order='F'), key, "data")
+            elif isinstance(value.flatten(order='F')[0], float):
+                write_vec_float(f, value.flatten(order='F'), key, "data")
+        else:
+            if isinstance(value, int):
+                write_int(f, value, key, "data")
+            elif isinstance(value, float):
+                write_float(f, value, key, "data")
+
+    # Return data and end function
+    f.write("\nreturn data;\n\n")
+
+    f.write("}\n\n")
+
+
+
     #
-    #     f.write("// Setup workspace\n")
-    #     f.write("work = osqp_setup(data, settings);\n\n")
+    # Clean  data
     #
-    #     f.write("if (!work) {\n")
-    #     f.write("c_print(\"Setup error!\\n\");\n")
-    #     f.write("exitflag = 1;\n")
-    #     f.write("}\n")
-    #     f.write("else {\n")
-    #     f.write("// Solve Problem\n")
-    #     f.write("osqp_solve(work);\n\n")
-    #     f.write("// Clean workspace\n")
-    #     f.write("osqp_cleanup(work);\n\n")
-    #     f.write("}\n\n")
-    #
-    #     f.write("// Cleanup data\n")
-    #     f.write("clean_problem_diesel(data);\n\n")
-    #     f.write("mu_assert(\"\\nError in %s test.\", exitflag == 0 );\n\n"
-    #             % problem_name)
-    #
-    #     f.write("//Cleanup\n")
-    #     f.write("c_free(settings);\n\n")
-    #
-    #     f.write("return 0;\n")
-    #     f.write("}\n\n")
-    #
-    #     f.write("#endif\n")
-    #
-    #     f.close()
+    f.write("/* function to clean data struct */\n")
+    f.write("void clean_problem_%s_sols_data(%s_sols_data * data){\n\n" % (problem_name, problem_name))
+    # Generate further data and solutions
+    for key, value in sols_data.items():
+        # Check if it is an array or a scalar
+        if spa.issparse(value):  # Sparse matrix
+            clean_mat(f, key, "data")
+        elif type(value) is np.ndarray:
+            clean_vec(f, key, "data")
+
+    f.write("\nc_free(data);\n\n")
+
+    f.write("}\n\n")
+
+
+
+    f.write("#endif\n")
+
+
+    f.close()
