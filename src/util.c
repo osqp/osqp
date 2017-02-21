@@ -382,7 +382,7 @@ void print_trip_matrix(csc* M, const char * name)
 void print_dns_matrix(c_float * M, c_int m, c_int n, const char *name)
 {
         c_int i, j;
-        c_print("%s = \n\t", name);
+        c_print("%s : \n\t", name);
         for(i=0; i<m; i++) { // Cycle over rows
                 for(j=0; j<n; j++) { // Cycle over columns
                         if (j < n - 1)
