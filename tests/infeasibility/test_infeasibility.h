@@ -14,7 +14,7 @@ static char * test_infeasible_qp_solve()
     // Structures
     Work * work;  // Workspace
     Data * data;  // Data
-    infeasibility_sols_data *  sols_data = generate_problem_infeasibility_sols_data();
+    infeasibility_sols_data *  sols_data;
 
     // Populate data
     data = generate_problem_infeasibility();
