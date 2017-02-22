@@ -2,7 +2,8 @@
 
 OSQP (Operator Splitting Quadratic Program) solver is a numerical optimization package for solving problems in the form
 ```
-minimize        1/2*x'Px + q'x
+minimize        0.5 x' P x + q' x
+
 subject to      l <= A x <= u
 ```
 
