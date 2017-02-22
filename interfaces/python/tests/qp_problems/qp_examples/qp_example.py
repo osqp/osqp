@@ -45,13 +45,13 @@ class QPExample(with_metaclass(abc.ABCMeta, object)):
             len(self.sigma_vec) * len(self.alpha_vec)
         counter_prob = 1
         for i in range(self.dims_mat.shape[1]):
+            # generate problem and store statistics
+            qp = self.gen_problem(self.dims_mat[1, i],
+                                  self.dims_mat[0, i],
+                                  **self.options)
             for rho in self.rho_vec:              # iterate over rho values
                 for sigma in self.sigma_vec:      # iterate over sigma values
                     for alpha in self.alpha_vec:  # iterate over alpha values
-                        # generate problem and store statistics
-                        qp = self.gen_problem(self.dims_mat[1, i],
-                                              self.dims_mat[0, i],
-                                              **self.options)
                         print("Solving %15s: " % self.name() + \
                               "problem %8d of %8d (%.2f %%)" % \
                               (counter_prob, tot_n_probs,
@@ -79,12 +79,12 @@ class QPExample(with_metaclass(abc.ABCMeta, object)):
 
             # Dump temporary results file
             data_frame_dump = data_str.get_data_frame()
-            data_frame_dump.to_csv('tests/qp_problems/results/%s.csv' % (self.name()), index=False)
+            data_frame_dump.to_csv('results/%s.csv' % (self.name()), index=False)
             # ipdb.set_trace()
 
         # Dump final results file
         data_frame_dump = data_str.get_data_frame()
-        data_frame_dump.to_csv('tests/qp_problems/results/%s.csv' % (self.name()), index=False)
+        data_frame_dump.to_csv('results/%s.csv' % (self.name()), index=False)
 
         # return data frame object
         self.df = data_str.get_data_frame()
