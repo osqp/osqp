@@ -3,13 +3,13 @@ from mathprogbasepy import OSQP
 import numpy as np
 
 # Run QP tests from different examples
-from tests.qp_problems.qp_examples.basis_pursuit import basis_pursuit
-from tests.qp_problems.qp_examples.huber_fit import huber_fit
-from tests.qp_problems.qp_examples.lasso import lasso
-from tests.qp_problems.qp_examples.lp import lp
-from tests.qp_problems.qp_examples.nonneg_l2 import nonneg_l2
-from tests.qp_problems.qp_examples.portfolio import portfolio
-from tests.qp_problems.qp_examples.svm import svm
+from qp_examples.basis_pursuit import basis_pursuit
+from qp_examples.huber_fit import huber_fit
+from qp_examples.lasso import lasso
+from qp_examples.lp import lp
+from qp_examples.nonneg_l2 import nonneg_l2
+from qp_examples.portfolio import portfolio
+from qp_examples.svm import svm
 
 # from multiprocessing import Process, Queue
 from multiprocessing import Pool, cpu_count

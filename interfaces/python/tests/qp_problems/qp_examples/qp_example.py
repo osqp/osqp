@@ -3,7 +3,7 @@ from __future__ import print_function
 from builtins import range
 from builtins import object
 import abc
-import  tests.qp_problems.utils.data_struct as ds
+import utils.data_struct as ds
 from future.utils import with_metaclass
 
 
