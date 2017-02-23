@@ -53,7 +53,8 @@ class QPExample(with_metaclass(abc.ABCMeta, object)):
             for _ in range(self.nm_num_prob):  # Generate some random problems
 
                 # Get current seed
-                current_seed = np.random.get_state()
+                current_seed = np.random.randint(0, 4294967295)
+                np.random.seed(current_seed)
 
                 # generate problem and store statistics
                 qp = self.gen_problem(self.dims_mat[1, i],  # m
@@ -86,23 +87,23 @@ class QPExample(with_metaclass(abc.ABCMeta, object)):
                             # Increment counter
                             counter_prob += 1
 
-                            # Dump temporary results file
-                            data_frame_dump = data_str.get_data_frame()
-                            data_frame_dump.to_csv('results/%s.csv' %
-                                                   (self.name()), index=False)
-                            full_data_frame_dump = \
-                                full_data_str.get_data_frame()
-                            full_data_frame_dump.to_csv('results/%s_full.csv' %
-                                                   (self.name()), index=False)
+                            #  # Dump temporary results file
+                            #  data_frame_dump = data_str.get_data_frame()
+                            #  data_frame_dump.to_csv('results/%s.csv' %
+                                                   #  (self.name()), index=False)
+                            #  full_data_frame_dump = \
+                                #  full_data_str.get_data_frame()
+                            #  full_data_frame_dump.to_csv('results/%s_full.csv' %
+                                                   #  (self.name()), index=False)
 
                             # ipdb.set_trace()
 
-                # Dump final results file
-                data_frame_dump = data_str.get_data_frame()
-                data_frame_dump.to_csv('results/%s.csv' % (self.name()), index=False)
+            # Dump final results file
+            data_frame_dump = data_str.get_data_frame()
+            data_frame_dump.to_csv('results/%s.csv' % (self.name()), index=False)
 
-                full_data_frame_dump = full_data_str.get_data_frame()
-                full_data_frame_dump.to_csv('results/%s_full.csv' % (self.name()), index=False)
+            full_data_frame_dump = full_data_str.get_data_frame()
+            full_data_frame_dump.to_csv('results/%s_full.csv' % (self.name()), index=False)
 
         # return data frame object
         self.df = data_str.get_data_frame()

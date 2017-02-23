@@ -27,31 +27,31 @@ from time import time
 # import ipdb
 
 # Define tests ranges
-rho_vec_len = 2  # Define rho vector
+rho_vec_len = 10  # Define rho vector
 rho_vec = np.logspace(-4., 3., rho_vec_len)
 # rho_vec = np.array([1000])
 
 
-sigma_vec_len = 2  # Define sigma vector
+sigma_vec_len = 10  # Define sigma vector
 sigma_vec = np.logspace(-4., 3., sigma_vec_len)
 
-alpha_vec_len = 2  # Define alpha vector
+alpha_vec_len = 10  # Define alpha vector
 alpha_vec = np.linspace(0.1, 1.9, alpha_vec_len)
 # alpha_vec = np.array([1.6])
 
 
 
 dim_vecs_len = 1
-# n_max = 100
-# m_max = 100
-# n_vec = np.arange(10, n_max, int(n_max/dim_vecs_len))
-# m_vec = np.arange(10, m_max, int(m_max/dim_vecs_len))
+#  n_max = 50
+#  m_max = 50
+#  n_vec = np.arange(10, n_max, int(n_max/dim_vecs_len))
+#  m_vec = np.arange(10, m_max, int(m_max/dim_vecs_len))
 n_vec = np.array([20])
 m_vec = np.array([30])
 
 
 # Number of problems with the same dimensions
-nm_num_prob = 10
+nm_num_prob = 100
 
 # Test options
 options = {'solver': OSQP,
@@ -65,7 +65,7 @@ options = {'solver': OSQP,
 # test_types = ['basis_pursuit', 'huber_fit', 'lasso', 'nonneg_l2', 'lp',
             #   'portfolio', 'svm']
 
-test_types = ['svm']
+test_types = ['svm', 'lasso', 'portfolio']
 
 def run_examples(test_type, n_vec, m_vec, rho_vec, sigma_vec,
                  alpha_vec, nm_num_prob, **kwargs):
