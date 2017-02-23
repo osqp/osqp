@@ -19,21 +19,22 @@ class huber_fit(QPExample):
         return "huber_fit"
 
     @staticmethod
-    def run_tests(n_vec, m_vec, rho_vec, sigma_vec, alpha_vec, **options):
+    def run_tests(n_vec, m_vec, rho_vec, sigma_vec, alpha_vec, nm_num_prob, **options):
         prob = huber_fit(n_vec, m_vec, rho_vec, sigma_vec,
-                         alpha_vec, dens_lvl=0.4)
+                         alpha_vec, nm_num_prob, dens_lvl=0.4)
         prob.perform_tests(**options)
-        return prob.df
+        return prob.df, prob.full_df
 
     def create_dims(self, n_vec, m_vec):
         """Reduce n_vec and m_vec choosing the dimensions that make the related
            problem feasible
         """
-        self.dims_mat = np.array([], dtype=np.int64).reshape(2, 0)
+        dims_mat = np.array([], dtype=np.int64).reshape(2, 0)
         for m in m_vec[m_vec > 5]:
             for n in n_vec[n_vec > m/2]:
-                self.dims_mat = np.hstack((self.dims_mat,
-                                          np.array([[n - int(m/2)], [int(m/4)]])))
+                dims_mat = np.hstack((dims_mat,
+                                      np.array([[n - int(m/2)], [int(m/4)]])))
+        return dims_mat
 
     def gen_problem(self, m, n, dens_lvl=1.0):
         """
