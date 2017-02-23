@@ -1,4 +1,6 @@
 from __future__ import print_function
+import matplotlib as mpl
+mpl.use('Agg')  # For plotting on remote server
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
@@ -22,7 +24,7 @@ from sklearn.metrics import mean_squared_error
 if __name__ == '__main__':
 
     # Read results (only the ones less then max_iter)
-    res = pd.read_csv('tests/qp_problems/results/full_results.csv')
+    res = pd.read_csv('results/results_full.csv')
     res = res.loc[(res['iter'] < 2400)]
 
     # Select smaller dataset and consider only n, m, trP
@@ -43,11 +45,11 @@ if __name__ == '__main__':
     #                (abs(res['alpha'] - 0.668421) < 1e-04)]
 
 
-    resz = res.loc[(res['m'] == 60) &
-                   (res['n'] == 60) &
-                   (abs(res['rho'] - 0.006952) < 1e-04 ) &
-                   (abs(res['sigma'] - 14.384499) < 1e-04) &
-                   (abs(res['alpha'] - 1.521053) < 1e-04)]
+    #  resz = res.loc[(res['m'] == 60) &
+                   #  (res['n'] == 60) &
+                   #  (abs(res['rho'] - 0.006952) < 1e-04 ) &
+                   #  (abs(res['sigma'] - 14.384499) < 1e-04) &
+                   #  (abs(res['alpha'] - 1.521053) < 1e-04)]
 
     # resz = res.loc[(res['m'] == 30) &
     #                (res['n'] == 30) &
@@ -69,14 +71,14 @@ if __name__ == '__main__':
 
     # Plot contour in 2D
     #
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    plt.tripcolor(resz.froA, resz.froP, resz.iter)
-    ax.set_xlabel('froA')
-    ax.set_ylabel('froP')
-    ax.set_title('Iterations vs froA and froP with fixed rho, sigma, alpha')
-    plt.colorbar()
-    plt.show(block=False)
+    #  fig = plt.figure()
+    #  ax = fig.add_subplot(111)
+    #  plt.tripcolor(resz.froA, resz.froP, resz.iter)
+    #  ax.set_xlabel('froA')
+    #  ax.set_ylabel('froP')
+    #  ax.set_title('Iterations vs froA and froP with fixed rho, sigma, alpha')
+    #  plt.colorbar()
+    #  plt.show(block=False)
 
 
     # Plot 3D
