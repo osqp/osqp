@@ -13,21 +13,22 @@ class basis_pursuit(QPExample):
         return "basis_pursuit"
 
     @staticmethod
-    def run_tests(n_vec, m_vec, rho_vec, sigma_vec, alpha_vec, **options):
+    def run_tests(n_vec, m_vec, rho_vec, sigma_vec, alpha_vec, nm_num_prob, **options):
         prob = basis_pursuit(n_vec, m_vec, rho_vec, sigma_vec,
-                             alpha_vec, dens_lvl=0.4)
+                             alpha_vec, nm_num_prob, dens_lvl=0.4)
         prob.perform_tests(**options)
-        return prob.df
+        return prob.df, prob.full_df
 
     def create_dims(self, n_vec, m_vec):
         """Reduce n_vec and m_vec choosing the dimensions that make the related
            problem feasible
         """
-        self.dims_mat = np.array([], dtype=np.int64).reshape(2, 0)
+        dims_mat = np.array([], dtype=np.int64).reshape(2, 0)
         for n in n_vec[n_vec > 2]:
             for m in m_vec[m_vec > n + 1]:
-                self.dims_mat = np.hstack((self.dims_mat,
-                                          np.array([[int(n/2)], [m - n]])))
+                dims_mat = np.hstack((dims_mat,
+                                      np.array([[int(n/2)], [m - n]])))
+        return dims_mat
 
     def gen_problem(self, m, n, dens_lvl=0.5):
         """

@@ -27,57 +27,69 @@ from time import time
 # import ipdb
 
 # Define tests ranges
-rho_vec_len = 10  # Define rho vector
+rho_vec_len = 2  # Define rho vector
 rho_vec = np.logspace(-4., 3., rho_vec_len)
 # rho_vec = np.array([1000])
 
 
-sigma_vec_len = 10  # Define sigma vector
+sigma_vec_len = 2  # Define sigma vector
 sigma_vec = np.logspace(-4., 3., sigma_vec_len)
 
-alpha_vec_len = 10  # Define alpha vector
+alpha_vec_len = 2  # Define alpha vector
 alpha_vec = np.linspace(0.1, 1.9, alpha_vec_len)
 # alpha_vec = np.array([1.6])
-dim_vecs_len = 10
-n_max = 100
-m_max = 100
-n_vec = np.arange(10, n_max, int(n_max/dim_vecs_len))
-m_vec = np.arange(10, m_max, int(m_max/dim_vecs_len))
+
+
+
+dim_vecs_len = 1
+# n_max = 100
+# m_max = 100
+# n_vec = np.arange(10, n_max, int(n_max/dim_vecs_len))
+# m_vec = np.arange(10, m_max, int(m_max/dim_vecs_len))
+n_vec = np.array([20])
+m_vec = np.array([30])
+
+
+# Number of problems with the same dimensions
+nm_num_prob = 10
 
 # Test options
 options = {'solver': OSQP,
            'verbose': False,
            'polishing': False,
+           'scaling_norm': 2,
+           'scaling_iter': 3,
            'max_iter': 2500}
 
 # Test types
-test_types = ['basis_pursuit', 'huber_fit', 'lasso', 'nonneg_l2', 'lp',
-              'portfolio', 'svm']
+# test_types = ['basis_pursuit', 'huber_fit', 'lasso', 'nonneg_l2', 'lp',
+            #   'portfolio', 'svm']
 
+test_types = ['svm']
 
 def run_examples(test_type, n_vec, m_vec, rho_vec, sigma_vec,
-                 alpha_vec, **kwargs):
+                 alpha_vec, nm_num_prob, **kwargs):
     if test_type == 'basis_pursuit':
         return basis_pursuit.run_tests(n_vec, m_vec, rho_vec, sigma_vec,
-                                       alpha_vec, **kwargs)
+                                       alpha_vec, nm_num_prob, **kwargs)
     elif test_type == 'huber_fit':
         return huber_fit.run_tests(n_vec, m_vec, rho_vec, sigma_vec,
-                                   alpha_vec, **kwargs)
+                                   alpha_vec, nm_num_prob, **kwargs)
     elif test_type == 'lasso':
         return lasso.run_tests(n_vec, m_vec, rho_vec, sigma_vec,
-                               alpha_vec, **kwargs)
+                               alpha_vec, nm_num_prob, **kwargs)
     elif test_type == 'nonneg_l2':
         return nonneg_l2.run_tests(n_vec, m_vec, rho_vec, sigma_vec,
-                                   alpha_vec, **kwargs)
+                                   alpha_vec, nm_num_prob, **kwargs)
     elif test_type == 'lp':
         return lp.run_tests(n_vec, m_vec, rho_vec, sigma_vec,
-                            alpha_vec, **kwargs)
+                            alpha_vec, nm_num_prob, **kwargs)
     elif test_type == 'portfolio':
         return portfolio.run_tests(n_vec, m_vec, rho_vec, sigma_vec,
-                                   alpha_vec, **kwargs)
+                                   alpha_vec, nm_num_prob, **kwargs)
     elif test_type == 'svm':
         return svm.run_tests(n_vec, m_vec, rho_vec, sigma_vec,
-                             alpha_vec, **kwargs)
+                             alpha_vec, nm_num_prob, **kwargs)
 
 
 # PARALLEL IMPLEMENTATION
@@ -85,25 +97,33 @@ def run_examples(test_type, n_vec, m_vec, rho_vec, sigma_vec,
 
 partial_tests = partial(run_examples, n_vec=n_vec,
                         m_vec=m_vec, rho_vec=rho_vec, sigma_vec=sigma_vec,
-                        alpha_vec=alpha_vec, **options)
+                        alpha_vec=alpha_vec, nm_num_prob=nm_num_prob, **options)
 
 t = time()
 
 # Execute problems in parallel
 p = Pool(cpu_count())
-results = p.map(partial_tests, test_types)
+res = p.map(partial_tests, test_types)
+results = [x[0] for x in res]
+results_full = [x[1] for x in res]
 
 
-# Execute problems in series
+# # Execute problems in series
 # results = []
+# results_full = []
 # for i in range(len(test_types)):
-#     results.append(partial_tests(test_types[i]))
+#     res, res_full = partial_tests(test_types[i])
+#     results.append(res)
+#     results_full.append(res_full)
 
 cputime = time() - t
 print("total cputime = %.4f sec" % cputime)
 
 # Concatenate dataframes
 results = pd.concat(results)
+results_full = pd.concat(results_full)
+
 
 # Export results
-results.to_csv('tests/qp_problems/results/full_results.csv', index=False)
+results.to_csv('results/results.csv', index=False)
+results_full.to_csv('results/results_full.csv', index=False)
