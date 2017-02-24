@@ -193,3 +193,4 @@ out/
 # Data Files
 # -------------------------------------------------------------------
 interfaces/python/tests/qp_problems/results/
+interfaces/python/tests/qp_problems/figures/

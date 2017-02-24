@@ -3,10 +3,14 @@ from __future__ import print_function
 from builtins import range
 from builtins import object
 import numpy as np
-from utils.data_struct import data_struct, full_data_struct
+import sys   # To get maxsize
+
+# Metadata class
 import abc
 from future.utils import with_metaclass
 
+# Data structures
+from utils.data_struct import data_struct, full_data_struct
 
 class QPExample(with_metaclass(abc.ABCMeta, object)):
 
@@ -53,7 +57,7 @@ class QPExample(with_metaclass(abc.ABCMeta, object)):
             for _ in range(self.nm_num_prob):  # Generate some random problems
 
                 # Get current seed
-                current_seed = np.random.randint(0, 4294967295)
+                current_seed = np.random.randint(0, sys.maxsize)
                 np.random.seed(current_seed)
 
                 # generate problem and store statistics
