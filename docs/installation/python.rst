@@ -16,7 +16,7 @@ Pip
 
 .. code:: bash
 
-   conda install osqp
+   pip install osqp
 
 
 Sources
