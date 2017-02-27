@@ -499,7 +499,6 @@ class OSQP(object):
 
         # # DEBUG
         # if (self.work.info.iter % PRINT_INTERVAL == 0):
-        #
         #     print "\n\nValues with r_pri"
         #     r_pri = self.work.z - self.work.data.A.dot(self.work.x)
         #
@@ -516,20 +515,26 @@ class OSQP(object):
         #     Atr_pri = self.work.data.A.T.dot(r_pri)
         #     print("||A'*v|| = %6.2e" % (la.norm(Atr_pri)))
         #
-        #     print "Values with delta_y"
-        #     lhs = 0.
-        #     for i in range(self.work.data.m):
-        #         if self.work.data.u[i] < self.constant('OSQP_INFTY')*1e-03:
-        #             lhs += self.work.data.u[i] * max(self.work.delta_y[i], 0)
-        #
-        #         if self.work.data.l[i] > -self.constant('OSQP_INFTY')*1e-03:
-        #             lhs += self.work.data.l[i] * min(self.work.delta_y[i], 0)
-        #     # lhs = self.work.data.u.dot(np.maximum(self.work.delta_y, 0)) + \
-        #         self.work.data.l.dot(np.minimum(self.work.delta_y, 0))
-        #     print("u' * (v)_{+} + l' * v_{-} = %6.2e" % (lhs))
-        #     self.work.Atdelta_y = self.work.data.A.T.dot(self.work.delta_y)
-        #     print("||A'*v|| = %6.2e" % (la.norm(self.work.Atdelta_y)))
-        #     pdb.set_trace()
+
+            # lhsp = self.work.data.u.dot(np.maximum(self.work.delta_y, 0))
+            # lhsm = self.work.data.l.dot(np.minimum(self.work.delta_y, 0))
+            # print("Values with delta_y")
+            # lhs = 0.
+            # lhsp = 0.
+            # lhsm = 0.
+            # for i in range(self.work.data.m):
+            #     if self.work.data.u[i] < self.constant('OSQP_INFTY')*1e-05:
+            #         lhsp += self.work.data.u[i] * max(self.work.delta_y[i], 0)
+            #
+            #     if self.work.data.l[i] > -self.constant('OSQP_INFTY')*1e-03:
+            #         lhsm += self.work.data.l[i] * min(self.work.delta_y[i], 0)
+            # lhs = lhsp + lhsm
+            # print("u' * (v_{+}) = %6.2e" % lhsp)
+            # print("l' * (v_{-}) = %6.2e" % lhsm)
+            # print("u' * (v_{+}) + l' * (v_{-}) = %6.2e" % (lhs))
+            # self.work.Atdelta_y = self.work.data.A.T.dot(self.work.delta_y)
+            # print("||A'*v|| = %6.2e" % (la.norm(self.work.Atdelta_y)))
+            # pdb.set_trace()
 
         eps_inf = self.work.settings.eps_inf
         # Prevent 0 division
