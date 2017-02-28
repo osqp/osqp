@@ -79,17 +79,18 @@ class problem(object):
     A, l, u
     """
 
-    def __init__(self, xxx_todo_changeme, Pdata, Pindices, Pindptr, q,
+    def __init__(self, dims, Pdata, Pindices, Pindptr, q,
                  Adata, Aindices, Aindptr,
                  l, u):
         # Set problem dimensions
-        (n, m) = xxx_todo_changeme
-        self.n = q.size
-        self.m = l.size
+        (self.n, self.m) = dims
+
         # Set problem data
-        self.P = spspa.csc_matrix((Pdata, Pindices, Pindptr), shape=(n, n))
+        self.P = spspa.csc_matrix((Pdata, Pindices, Pindptr),
+                                  shape=(self.n, self.n))
         self.q = q
-        self.A = spspa.csc_matrix((Adata, Aindices, Aindptr), shape=(m, n))
+        self.A = spspa.csc_matrix((Adata, Aindices, Aindptr),
+                                  shape=(self.m, self.n))
         self.l = l if l is not None else -np.inf*np.ones(self.m)
         self.u = u if u is not None else np.inf*np.ones(self.m)
 
