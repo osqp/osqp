@@ -8,7 +8,7 @@
  * @param  work Workspace
  * @return      Number of rows in Ared
  */
-static c_int form_Ared(Work *work) {
+static c_int form_Ared(OSQPWorkspace *work) {
     c_int j, ptr;
     c_int Ared_nnz=0;
 
@@ -88,7 +88,7 @@ static c_int form_Ared(Work *work) {
  * @param  mred number of active constraints
  * @return      reduced rhs
  */
-static void form_rhs_red(Work * work, c_float * rhs){
+static void form_rhs_red(OSQPWorkspace * work, c_float * rhs){
     c_int j;
 
     // Form the rhs of the reduced KKT linear system
@@ -114,7 +114,7 @@ static void form_rhs_red(Work * work, c_float * rhs){
  * @param  b    RHS of the linear system
  * @return      More accurate solution
  */
-static void iterative_refinement(Work *work, Priv *p, c_float *z, c_float *b) {
+static void iterative_refinement(OSQPWorkspace *work, Priv *p, c_float *z, c_float *b) {
     if (work->settings->pol_refine_iter > 0) {
         c_int i, j, n;
         c_float *dz;
@@ -163,7 +163,7 @@ static void iterative_refinement(Work *work, Priv *p, c_float *z, c_float *b) {
  * Compute dual variable y from reduced on y_red
  * @param work Workspace
  */
-static void compute_y_from_y_red(Work * work){
+static void compute_y_from_y_red(OSQPWorkspace * work){
     c_int j;
 
     // If there are no active constraints
@@ -185,7 +185,7 @@ static void compute_y_from_y_red(Work * work){
 }
 
 // Solution polishing: Solve equality constrained QP with assumed active constr.
-c_int polish(Work *work) {
+c_int polish(OSQPWorkspace *work) {
     c_int mred, polish_successful;
     c_float * rhs_red;
     Priv *plsh;

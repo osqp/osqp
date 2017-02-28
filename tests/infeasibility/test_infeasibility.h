@@ -9,11 +9,11 @@
 static char * test_infeasible_qp_solve()
 {
     // Problem settings
-    Settings * settings = (Settings *)c_malloc(sizeof(Settings));
+    OSQPSettings * settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
     // Structures
-    Work * work;  // Workspace
-    Data * data;  // Data
+    OSQPWorkspace * work;  // Workspace
+    OSQPData * data;  // Data
     infeasibility_sols_data *  sols_data;
 
     // Populate data

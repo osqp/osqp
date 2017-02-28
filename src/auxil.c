@@ -1,6 +1,6 @@
 #include "auxil.h"
-#include "util.h"
-#include "proj.h"
+// #include "util.h"
+// #include "proj.h"
 
 /***********************************************************
  * Auxiliary functions needed to compute ADMM iterations * *
@@ -10,7 +10,7 @@
  * Cold start workspace variables
  * @param work Workspace
  */
-void cold_start(Work *work) {
+void cold_start(OSQPWorkspace *work) {
     memset(work->x, 0, work->data->n * sizeof(c_float));
     memset(work->z, 0, work->data->m * sizeof(c_float));
     memset(work->y, 0, work->data->m * sizeof(c_float));
@@ -21,7 +21,7 @@ void cold_start(Work *work) {
  * Update RHS during first tep of ADMM iteration. Store it into (x,z).
  * @param  work Workspace
  */
-static void compute_rhs(Work *work){
+static void compute_rhs(OSQPWorkspace *work){
     c_int i; // Index
     for (i=0; i < work->data->n; i++){
         // Cycle over part related to x variables
@@ -40,7 +40,7 @@ static void compute_rhs(Work *work){
  *
  * @param work Workspace
  */
-static void update_z_tilde(Work *work){
+static void update_z_tilde(OSQPWorkspace *work){
     c_int i; // Index
     for (i = 0; i < work->data->m; i++){
         work->xz_tilde[i + work->data->n] = work->z_prev[i] + 1./work->settings->rho * (work->xz_tilde[i + work->data->n] - work->y[i]);
@@ -52,7 +52,7 @@ static void update_z_tilde(Work *work){
  * Update x_tilde and z_tilde variable (first ADMM step)
  * @param work [description]
  */
-void update_xz_tilde(Work * work){
+void update_xz_tilde(OSQPWorkspace * work){
     // Compute right-hand side
     compute_rhs(work);
 
@@ -69,7 +69,7 @@ void update_xz_tilde(Work * work){
 * Update also delta_x (For unboundedness)
 * @param work Workspace
 */
-void update_x(Work * work){
+void update_x(OSQPWorkspace * work){
     c_int i;
 
     // update x
@@ -90,7 +90,7 @@ void update_x(Work * work){
 * Update z (third ADMM step)
 * @param work Workspace
 */
-void update_z(Work *work){
+void update_z(OSQPWorkspace *work){
     c_int i;
 
     // update z
@@ -112,7 +112,7 @@ void update_z(Work *work){
  * Update also delta_y to check for infeasibility
  * @param work Workspace
  */
-void update_y(Work *work){
+void update_y(OSQPWorkspace *work){
     c_int i; // Index
     for (i = 0; i < work->data->m; i++){
 
@@ -126,11 +126,11 @@ void update_y(Work *work){
 
 /**
  * Compute objective function from data at value x
- * @param  data Data structure
+ * @param  data OSQPData structure
  * @param  x       Value x
  * @return         Objective function value
  */
-c_float compute_obj_val(Data *data, c_float * x) {
+c_float compute_obj_val(OSQPData *data, c_float * x) {
         return quad_form(data->P, x) +
                vec_prod(data->q, x, data->n);
 }
@@ -142,7 +142,7 @@ c_float compute_obj_val(Data *data, c_float * x) {
  * @param  polish Called from polish function (1) or from elsewhere (0)
  * @return        Norm of primal residual
  */
-c_float compute_pri_res(Work * work, c_int polish){
+c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
     c_int j;
     c_float tmp, prim_resid_sq=0.0;
     if (polish) {
@@ -173,7 +173,7 @@ c_float compute_pri_res(Work * work, c_int polish){
  * @param  polish Called from polish() function (1) or from elsewhere (0)
  * @return        Norm of dual residual
  */
-c_float compute_dua_res(Work * work, c_int polish){
+c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
 
     // N.B. Use x_prev as temporary vector
 
@@ -216,7 +216,7 @@ c_float compute_dua_res(Work * work, c_int polish){
  * @param  work Workspace
  * @return      Integer for True or False
  */
-c_int is_infeasible(Work * work){
+c_int is_infeasible(OSQPWorkspace * work){
     c_int i; // Index for loops
     c_float norm_delta_y, ineq_lhs = 0;
 
@@ -250,7 +250,7 @@ c_int is_infeasible(Work * work){
  * @param  work Workspace
  * @return        Integer for True or False
  */
-c_int is_unbounded(Work * work){
+c_int is_unbounded(OSQPWorkspace * work){
     c_int i; // Index for loops
     c_float norm_delta_x;
 
@@ -305,7 +305,7 @@ c_int is_unbounded(Work * work){
  * Store the QP solution
  * @param work Workspace
  */
-void store_solution(Work *work) {
+void store_solution(OSQPWorkspace *work) {
     if ((work->info->status_val != OSQP_INFEASIBLE) &&
         (work->info->status_val != OSQP_UNBOUNDED)){
         prea_vec_copy(work->x, work->solution->x, work->data->n);   // primal
@@ -329,7 +329,7 @@ void store_solution(Work *work) {
  * @param iter   Number of iterations
  * @param polish Called from polish function (1) or from elsewhere (0)
  */
-void update_info(Work *work, c_int iter, c_int polish){
+void update_info(OSQPWorkspace *work, c_int iter, c_int polish){
     if (polish) { // polishing
 
         work->pol->obj_val = compute_obj_val(work->data, work->pol->x);
@@ -364,7 +364,7 @@ void update_info(Work *work, c_int iter, c_int polish){
  * Update solver status (string)
  * @param work Workspace
  */
-void update_status_string(Info *info){
+void update_status_string(OSQPInfo *info){
     // Update status string depending on status val
 
     if(info->status_val == OSQP_SOLVED)
@@ -386,7 +386,7 @@ void update_status_string(Info *info){
  * @param  work Workspace
  * @return      Redisuals check
  */
-c_int check_termination(Work *work){
+c_int check_termination(OSQPWorkspace *work){
     c_float eps_pri, eps_dua;
     c_int exitflag = 0;
     c_int pri_check = 0, dua_check = 0, inf_check = 0, unb_check = 0;
@@ -444,10 +444,10 @@ c_int check_termination(Work *work){
 
 /**
  * Validate problem data
- * @param  data Data to be validated
+ * @param  data OSQPData to be validated
  * @return      Exitflag to check
  */
-c_int validate_data(const Data * data){
+c_int validate_data(const OSQPData * data){
     c_int j;
 
     if(!data){
@@ -508,10 +508,10 @@ c_int validate_data(const Data * data){
 
 /**
  * Validate problem settings
- * @param  data Data to be validated
+ * @param  data OSQPData to be validated
  * @return      Exitflag to check
  */
-c_int validate_settings(const Settings * settings){
+c_int validate_settings(const OSQPSettings * settings){
     if (!settings){
         #ifdef PRINTING
         c_print("Missing settings!\n");

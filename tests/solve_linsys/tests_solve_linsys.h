@@ -13,7 +13,7 @@
 static char * test_solveKKT(){
     c_int exitflag=0;
     Priv * p; // Private structure to form KKT factorization
-    Settings *settings = (Settings *)c_malloc(sizeof(Settings)); // Settings
+    OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings)); // Settings
 
     solve_linsys_sols_data *  data = generate_problem_solve_linsys_sols_data();
 

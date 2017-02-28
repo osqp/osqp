@@ -1,7 +1,10 @@
 #ifndef PRIVATE_H
 #define PRIVATE_H
 
-#include "osqp.h"
+// #include "osqp.h"
+#include "types.h"
+#include "lin_alg.h"
+#include "kkt.h"
 #include "amd.h"
 #include "ldl.h"
 

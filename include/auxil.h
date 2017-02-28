@@ -5,7 +5,15 @@
 extern "C" {
 #endif
 
-#include "osqp.h"
+#include "types.h"
+#include "proj.h"
+#include "lin_alg.h"
+#include "constants.h"
+#include "scaling.h"
+#include "util.h"
+#include "lin_sys.h"
+
+
 
 /***********************************************************
  * Auxiliary functions needed to compute ADMM iterations * *
@@ -15,7 +23,7 @@ extern "C" {
 * Cold start workspace variables xz and y
 * @param work Workspace
 */
-void cold_start(Work *work);
+void cold_start(OSQPWorkspace *work);
 
 
 
@@ -23,7 +31,7 @@ void cold_start(Work *work);
  * Update x_tilde and z_tilde variable (first ADMM step)
  * @param work [description]
  */
-void update_xz_tilde(Work * work);
+void update_xz_tilde(OSQPWorkspace * work);
 
 
 /**
@@ -31,14 +39,14 @@ void update_xz_tilde(Work * work);
 * Update also delta_x (For unboundedness)
 * @param work Workspace
 */
-void update_x(Work *work);
+void update_x(OSQPWorkspace *work);
 
 
 /**
 * Update z (third ADMM step)
 * @param work Workspace
 */
-void update_z(Work *work);
+void update_z(OSQPWorkspace *work);
 
 
 /**
@@ -46,16 +54,16 @@ void update_z(Work *work);
 * Update also delta_y to check for infeasibility
 * @param work Workspace
 */
-void update_y(Work *work);
+void update_y(OSQPWorkspace *work);
 
 
 /**
 * Compute objective function from data at value x
-* @param  data Data structure
+* @param  data OSQPData structure
 * @param  x    Value x
 * @return      Objective function value
 */
-c_float compute_obj_val(Data *data, c_float * x);
+c_float compute_obj_val(OSQPData *data, c_float * x);
 
 
 
@@ -63,21 +71,21 @@ c_float compute_obj_val(Data *data, c_float * x);
 * Store the QP solution
 * @param work Workspace
 */
-void store_solution(Work *work);
+void store_solution(OSQPWorkspace *work);
 
 
 /**
 * Update solver information
 * @param work Workspace
 */
-void update_info(Work *work, c_int iter, c_int polish);
+void update_info(OSQPWorkspace *work, c_int iter, c_int polish);
 
 
 /**
 * Update solver status (string)
 * @param work Workspace
 */
-void update_status_string(Info *info);
+void update_status_string(OSQPInfo *info);
 
 
 /**
@@ -85,24 +93,24 @@ void update_status_string(Info *info);
 * @param  work Workspace
 * @return      Redisuals check
 */
-c_int check_termination(Work *work);
+c_int check_termination(OSQPWorkspace *work);
 
 
 
 /**
 * Validate problem data
-* @param  data Data to be validated
+* @param  data OSQPData to be validated
 * @return      Exitflag to check
 */
-c_int validate_data(const Data * data);
+c_int validate_data(const OSQPData * data);
 
 
 /**
 * Validate problem settings
-* @param  data Data to be validated
+* @param  data OSQPData to be validated
 * @return      Exitflag to check
 */
-c_int validate_settings(const Settings * settings);
+c_int validate_settings(const OSQPSettings * settings);
 
 #ifdef __cplusplus
 }

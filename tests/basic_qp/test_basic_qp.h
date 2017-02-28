@@ -9,11 +9,11 @@
 static char * test_basic_qp_solve()
 {
     // Problem settings
-    Settings * settings = (Settings *)c_malloc(sizeof(Settings));
+    OSQPSettings * settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
     // Structures
-    Work * work;  // Workspace
-    Data * data;  // Data
+    OSQPWorkspace * work;  // Workspace
+    OSQPData * data;  // Data
     basic_qp_sols_data *  sols_data;
 
     // Populate data
@@ -75,11 +75,11 @@ static char * test_basic_qp_solve()
 static char * test_basic_qp_update()
 {
     // Problem settings
-    Settings * settings = (Settings *)c_malloc(sizeof(Settings));
+    OSQPSettings * settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
     // Structures
-    Work * work;  // Workspace
-    Data * data;  // Data
+    OSQPWorkspace * work;  // Workspace
+    OSQPData * data;  // Data
     basic_qp_sols_data *  sols_data = generate_problem_basic_qp_sols_data();
 
     // Populate data

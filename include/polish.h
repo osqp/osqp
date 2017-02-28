@@ -6,13 +6,14 @@
 extern "C" {
 #endif
 
-#include "osqp.h"
-#include "lin_sys.h"
+#include "types.h"
+#include "lin_alg.h"
+#include "util.h"
 #include "auxil.h"
 #include "kkt.h"
 
 // Solution polishing: Solve equality constrained QP with assumed active constr.
-c_int polish(Work *work);
+c_int polish(OSQPWorkspace *work);
 
 
 #ifdef __cplusplus

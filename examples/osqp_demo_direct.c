@@ -21,14 +21,14 @@ int main(int argc, char **argv) {
 
 
     // Problem settings
-    Settings * settings = (Settings *)c_malloc(sizeof(Settings));
+    OSQPSettings * settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
     // Structures
-    Work * work;  // Workspace
-    Data * data;  // Data
+    OSQPWorkspace * work;  // Workspace
+    OSQPData * data;  // OSQPData
 
     // Populate data
-    data = (Data *)c_malloc(sizeof(Data));
+    data = (OSQPData *)c_malloc(sizeof(OSQPData));
     data->n = basic_qp_n;
     data->m = basic_qp_m;
     data->P = csc_matrix(data->n, data->n, basic_qp_P_nnz, basic_qp_P_x, basic_qp_P_i, basic_qp_P_p);

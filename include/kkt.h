@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "osqp.h"
+#include "types.h"
 
 /**
  * Form square symmetric KKT matrix of the form

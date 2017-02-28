@@ -1,5 +1,5 @@
-#include "auxil.h"
-#include "util.h"
+// #include "auxil.h"
+// #include "util.h"
 #include "osqp.h"
 
 /**********************
@@ -21,8 +21,8 @@
  * @param  settings     Solver settings
  * @return              Solver workspace
  */
-Work * osqp_setup(const Data * data, Settings *settings){
-    Work * work; // Workspace
+OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
+    OSQPWorkspace * work; // Workspace
 
     // Validate data
     if (validate_data(data)){
@@ -41,7 +41,7 @@ Work * osqp_setup(const Data * data, Settings *settings){
     }
 
     // Allocate empty workspace
-    work = c_calloc(1, sizeof(Work));
+    work = c_calloc(1, sizeof(OSQPWorkspace));
     if (!work){
         #ifdef PRINTING
         c_print("ERROR: allocating work failure!\n");
@@ -51,13 +51,13 @@ Work * osqp_setup(const Data * data, Settings *settings){
 
     // Start and allocate directly timer
     #ifdef PROFILING
-    work->timer = c_malloc(sizeof(Timer));
+    work->timer = c_malloc(sizeof(OSQPTimer));
     tic(work->timer);
     #endif
 
 
     // Copy problem data into workspace
-    work->data = c_malloc(sizeof(Data));
+    work->data = c_malloc(sizeof(OSQPData));
     work->data->n = data->n;    // Number of variables
     work->data->m = data->m;    // Number of linear constraints
     work->data->P = csc_to_triu(data->P);         // Cost function matrix
@@ -107,7 +107,7 @@ Work * osqp_setup(const Data * data, Settings *settings){
     }
 
     // Initialize active constraints structure
-    work->pol = c_malloc(sizeof(Polish));
+    work->pol = c_malloc(sizeof(OSQPPolish));
     work->pol->Alow_to_A = c_malloc(work->data->m * sizeof(c_int));
     work->pol->Aupp_to_A = c_malloc(work->data->m * sizeof(c_int));
     work->pol->A_to_Alow = c_malloc(work->data->m * sizeof(c_int));
@@ -117,12 +117,12 @@ Work * osqp_setup(const Data * data, Settings *settings){
 
 
     // Allocate solution
-    work->solution = c_calloc(1, sizeof(Solution));
+    work->solution = c_calloc(1, sizeof(OSQPSolution));
     work->solution->x = c_calloc(1, work->data->n * sizeof(c_float));
     work->solution->y = c_calloc(1, work->data->m * sizeof(c_float));
 
     // Allocate information
-    work->info = c_calloc(1, sizeof(Info));
+    work->info = c_calloc(1, sizeof(OSQPInfo));
     work->info->status_val = OSQP_UNSOLVED;
     work->info->status_polish = 0; // Polishing not performed
     update_status_string(work->info);
@@ -157,7 +157,7 @@ Work * osqp_setup(const Data * data, Settings *settings){
  * @param  work Workspace allocated
  * @return      Exitflag for errors
  */
-c_int osqp_solve(Work * work){
+c_int osqp_solve(OSQPWorkspace * work){
     c_int exitflag = 0;
     c_int iter;
 
@@ -282,7 +282,7 @@ c_int osqp_solve(Work * work){
  * @param  work Workspace
  * @return      Exitflag for errors
  */
-c_int osqp_cleanup(Work * work){
+c_int osqp_cleanup(OSQPWorkspace * work){
     c_int exitflag=0;
 
     if (work) { // If workspace has been allocated
@@ -402,7 +402,7 @@ c_int osqp_cleanup(Work * work){
  * @param  q_new New linear cost
  * @return       Exitflag for errors and warnings
  */
-c_int osqp_update_lin_cost(Work * work, c_float * q_new) {
+c_int osqp_update_lin_cost(OSQPWorkspace * work, c_float * q_new) {
 
     // Replace q by the new vector
     prea_vec_copy(q_new, work->data->q, work->data->n);
@@ -422,7 +422,7 @@ c_int osqp_update_lin_cost(Work * work, c_float * q_new) {
  * @param  u_new New upper bound
  * @return        Exitflag: 1 if new lower bound is not <= than new upper bound
  */
-c_int osqp_update_bounds(Work * work, c_float * l_new, c_float * u_new) {
+c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new) {
     c_int i;
 
     // Check if lower bound is smaller than upper bound
@@ -454,7 +454,7 @@ c_int osqp_update_bounds(Work * work, c_float * l_new, c_float * u_new) {
  * @param  l_new New lower bound
  * @return        Exitflag: 1 if new lower bound is not <= than upper bound
  */
-c_int osqp_update_lower_bound(Work * work, c_float * l_new) {
+c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
     c_int i;
 
     // Replace l by the new vector
@@ -485,7 +485,7 @@ c_int osqp_update_lower_bound(Work * work, c_float * l_new) {
  * @param  u_new New upper bound
  * @return        Exitflag: 1 if new upper bound is not >= than lower bound
  */
-c_int osqp_update_upper_bound(Work * work, c_float * u_new) {
+c_int osqp_update_upper_bound(OSQPWorkspace * work, c_float * u_new) {
     c_int i;
 
     // Replace u by the new vector
@@ -516,7 +516,7 @@ c_int osqp_update_upper_bound(Work * work, c_float * u_new) {
  * @param  y    Dual variable
  * @return      Exitflag
  */
-c_int osqp_warm_start(Work * work, c_float * x, c_float * y){
+c_int osqp_warm_start(OSQPWorkspace * work, c_float * x, c_float * y){
 
     // Update warm_start setting to true
     if (!work->settings->warm_start) work->settings->warm_start = 1;
@@ -542,7 +542,7 @@ c_int osqp_warm_start(Work * work, c_float * x, c_float * y){
  * @param  x    Primal variable
  * @return      Exitflag
  */
-c_int osqp_warm_start_x(Work * work, c_float * x){
+c_int osqp_warm_start_x(OSQPWorkspace * work, c_float * x){
 
     // Update warm_start setting to true
     if (!work->settings->warm_start) work->settings->warm_start = 1;
@@ -569,7 +569,7 @@ c_int osqp_warm_start_x(Work * work, c_float * x){
  * @param  y    Dual variable
  * @return      Exitflag
  */
-c_int osqp_warm_start_y(Work * work, c_float * y){
+c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y){
 
     // Update warm_start setting to true
     if (!work->settings->warm_start) work->settings->warm_start = 1;
@@ -600,7 +600,7 @@ c_int osqp_warm_start_y(Work * work, c_float * y){
  * @param  max_iter_new New max_iter setting
  * @return              Exitflag
  */
-c_int osqp_update_max_iter(Work * work, c_int max_iter_new) {
+c_int osqp_update_max_iter(OSQPWorkspace * work, c_int max_iter_new) {
     // Check that max_iter is positive
     if (max_iter_new <= 0) {
         #ifdef PRINTING
@@ -620,7 +620,7 @@ c_int osqp_update_max_iter(Work * work, c_int max_iter_new) {
  * @param  eps_abs_new New absolute tolerance value
  * @return             Exitflag
  */
-c_int osqp_update_eps_abs(Work * work, c_float eps_abs_new) {
+c_int osqp_update_eps_abs(OSQPWorkspace * work, c_float eps_abs_new) {
     // Check that eps_abs is positive
     if (eps_abs_new <= 0.) {
         #ifdef PRINTING
@@ -640,7 +640,7 @@ c_int osqp_update_eps_abs(Work * work, c_float eps_abs_new) {
  * @param  eps_rel_new New relative tolerance value
  * @return             Exitflag
  */
-c_int osqp_update_eps_rel(Work * work, c_float eps_rel_new) {
+c_int osqp_update_eps_rel(OSQPWorkspace * work, c_float eps_rel_new) {
     // Check that eps_rel is positive
     if (eps_rel_new <= 0.) {
         #ifdef PRINTING
@@ -660,7 +660,7 @@ c_int osqp_update_eps_rel(Work * work, c_float eps_rel_new) {
  * @param  alpha New relaxation parameter value
  * @return       Exitflag
  */
-c_int osqp_update_alpha(Work * work, c_float alpha_new) {
+c_int osqp_update_alpha(OSQPWorkspace * work, c_float alpha_new) {
     // Check that alpha is between 0 and 2
     if (alpha_new <= 0. || alpha_new >= 2.) {
         #ifdef PRINTING
@@ -680,7 +680,7 @@ c_int osqp_update_alpha(Work * work, c_float alpha_new) {
  * @param  delta_new New regularization parameter
  * @return           Exitflag
  */
-c_int osqp_update_delta(Work * work, c_float delta_new) {
+c_int osqp_update_delta(OSQPWorkspace * work, c_float delta_new) {
     // Check that delta is positive
     if (delta_new <= 0.) {
         #ifdef PRINTING
@@ -700,7 +700,7 @@ c_int osqp_update_delta(Work * work, c_float delta_new) {
  * @param  polishing_new New polishing setting
  * @return               Exitflag
  */
-c_int osqp_update_polishing(Work * work, c_int polishing_new) {
+c_int osqp_update_polishing(OSQPWorkspace * work, c_int polishing_new) {
     // Check that polishing is either 0 or 1
     if (polishing_new != 0 && polishing_new != 1) {
       #ifdef PRINTING
@@ -725,7 +725,7 @@ c_int osqp_update_polishing(Work * work, c_int polishing_new) {
  * @param  pol_refine_iter_new New iterative reginement steps
  * @return                     Exitflag
  */
-c_int osqp_update_pol_refine_iter(Work * work, c_int pol_refine_iter_new) {
+c_int osqp_update_pol_refine_iter(OSQPWorkspace * work, c_int pol_refine_iter_new) {
     // Check that pol_refine_iter is nonnegative
     if (pol_refine_iter_new < 0) {
         #ifdef PRINTING
@@ -746,7 +746,7 @@ c_int osqp_update_pol_refine_iter(Work * work, c_int pol_refine_iter_new) {
  * @param  verbose_new New verbose setting
  * @return             Exitflag
  */
-c_int osqp_update_verbose(Work * work, c_int verbose_new) {
+c_int osqp_update_verbose(OSQPWorkspace * work, c_int verbose_new) {
     // Check that verbose is either 0 or 1
     if (verbose_new != 0 && verbose_new != 1) {
       #ifdef PRINTING
@@ -767,7 +767,7 @@ c_int osqp_update_verbose(Work * work, c_int verbose_new) {
  * @param  warm_start_new New warm_start setting
  * @return                Exitflag
  */
-c_int osqp_update_warm_start(Work * work, c_int warm_start_new) {
+c_int osqp_update_warm_start(OSQPWorkspace * work, c_int warm_start_new) {
     // Check that warm_start is either 0 or 1
     if (warm_start_new != 0 && warm_start_new != 1) {
       #ifdef PRINTING
