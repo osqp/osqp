@@ -116,7 +116,7 @@ c_int factorize(csc *A, Priv *p) {
 
 
 // Initialize LDL Factorization structure
-Priv *init_priv(const csc * P, const csc * A, const Settings *settings,
+Priv *init_priv(const csc * P, const csc * A, const OSQPSettings *settings,
                 c_int polish){
     // Define Variables
     csc * KKT;       // KKT Matrix
@@ -194,7 +194,7 @@ void LDLSolve(c_float *x, c_float *b, csc *L, c_float *Dinv, c_int *P,
 
 
 /* TODO: Adjust arguments of the function with other linear system solvers */
-c_int solve_lin_sys(const Settings *settings, Priv *p, c_float *b) {
+c_int solve_lin_sys(const OSQPSettings *settings, Priv *p, c_float *b) {
     /* returns solution to linear system */
     /* Ax = b with solution stored in b */
     LDLSolve(b, b, p->L, p->Dinv, p->P, p->bp);

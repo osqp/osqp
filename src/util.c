@@ -50,7 +50,7 @@ void print_header(void){
     c_print("%s\n", HEADER[HEADER_LEN - 1]);
 }
 
-void print_setup_header(const Data *data, const Settings *settings) {
+void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
     print_line();
     c_print("      OSQP v%s  -  Operator Splitting QP Solver\n"
             "     (c) .....,\n"
@@ -87,7 +87,7 @@ void print_setup_header(const Data *data, const Settings *settings) {
 
 
 /* Print iteration summary */
-void print_summary(Info * info){
+void print_summary(OSQPInfo * info){
     c_print("%*i ", (int)strlen(HEADER[0]), (int)info->iter);
     c_print("%*.4e ", (int)HSPACE, info->obj_val);
     c_print("%*.4e ", (int)HSPACE, info->pri_res);
@@ -100,7 +100,7 @@ void print_summary(Info * info){
 
 
 /* Print polishing information */
-void print_polishing(Info * info) {
+void print_polishing(OSQPInfo * info) {
     c_print("%*s ", (int)strlen(HEADER[0]), "PLSH");
     c_print("%*.4e ", (int)HSPACE, info->obj_val);
     c_print("%*.4e ", (int)HSPACE, info->pri_res);
@@ -118,7 +118,7 @@ void print_polishing(Info * info) {
 
 #ifdef PRINTING
 /* Print Footer */
-void print_footer(Info * info, c_int polishing){
+void print_footer(OSQPInfo * info, c_int polishing){
 
     #ifdef PRINTING
     c_print("\n"); // Add space after iterations
@@ -155,7 +155,7 @@ void print_footer(Info * info, c_int polishing){
 
 /* Set default settings from constants.h file */
 /* assumes d->stgs already allocated memory */
-void set_default_settings(Settings * settings) {
+void set_default_settings(OSQPSettings * settings) {
         settings->scaling = SCALING; /* heuristic problem scaling */
         settings->scaling_norm = SCALING_NORM;
         settings->scaling_iter = SCALING_ITER;
@@ -178,8 +178,8 @@ void set_default_settings(Settings * settings) {
 
 
 /* Copy settings creating a new settings structure */
-Settings * copy_settings(Settings * settings){
-    Settings * new = c_malloc(sizeof(Settings));
+OSQPSettings * copy_settings(OSQPSettings * settings){
+    OSQPSettings * new = c_malloc(sizeof(OSQPSettings));
 
     // Copy settings
     new->scaling = settings->scaling;
@@ -214,13 +214,13 @@ Settings * copy_settings(Settings * settings){
 // Windows
 #if IS_WINDOWS
 
-void tic(Timer* t)
+void tic(OSQPTimer* t)
 {
         QueryPerformanceFrequency(&t->freq);
         QueryPerformanceCounter(&t->tic);
 }
 
-c_float toc(Timer* t)
+c_float toc(OSQPTimer* t)
 {
         QueryPerformanceCounter(&t->toc);
         return ((t->toc.QuadPart - t->tic.QuadPart) / (c_float)t->freq.QuadPart);
@@ -229,13 +229,13 @@ c_float toc(Timer* t)
 // Mac
 #elif IS_MAC
 
-void tic(Timer* t)
+void tic(OSQPTimer* t)
 {
         /* read current clock cycles */
         t->tic = mach_absolute_time();
 }
 
-c_float toc(Timer* t)
+c_float toc(OSQPTimer* t)
 {
 
         uint64_t duration; /* elapsed time in clock cycles*/
@@ -256,14 +256,14 @@ c_float toc(Timer* t)
 #else
 
 /* read current time */
-void tic(Timer* t)
+void tic(OSQPTimer* t)
 {
         clock_gettime(CLOCK_MONOTONIC, &t->tic);
 }
 
 
 /* return time passed since last call to tic on this timer */
-c_float toc(Timer* t)
+c_float toc(OSQPTimer* t)
 {
         struct timespec temp;
 

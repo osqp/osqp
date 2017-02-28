@@ -5,7 +5,7 @@
  * Project z onto C = [l, u]
  * @param work Workspace
  */
-void project_z(Work *work){
+void project_z(OSQPWorkspace *work){
     c_int i;
 
     for (i = 0 ; i < work->data->m; i++){

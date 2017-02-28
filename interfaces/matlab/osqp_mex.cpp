@@ -1,10 +1,7 @@
 #include "mex.h"
 #include "matrix.h"
 #include "osqp_mex.hpp"
-extern "C" {
-    #include "osqp.h"
-  }
-
+#include "osqp.h"
 
 // all of the OSQP_INFO fieldnames as strings
 const char *OSQP_INFO_FIELDS[] = {"iter",         //c_int
@@ -48,7 +45,7 @@ public:
   OsqpData(){
     work = NULL;
   }
-  Work     * work;     // Workspace
+  OSQPWorkspace     * work;     // Workspace
 };
 
 // internal utility functions
@@ -56,9 +53,9 @@ c_int*    copyToCintVector(mwIndex * vecData, c_int numel);
 c_float*  copyToCfloatVector(double * vecData, c_int numel);
 void castToDoubleArr(c_float *arr, double* arr_out, c_int len);
 void setToNaN(double* arr_out, c_int len);
-mxArray*  copyInfoToMxStruct(Info*);
-mxArray*  copySettingsToMxStruct(Settings*);
-void      copyMxStructToSettings(const mxArray*,Settings*);
+mxArray*  copyInfoToMxStruct(OSQPInfo*);
+mxArray*  copySettingsToMxStruct(OSQPSettings*);
+void      copyMxStructToSettings(const mxArray*,OSQPSettings*);
 void      copyUpdatedSettingsToWork(const mxArray* ,OsqpData*);
 
 
@@ -135,7 +132,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       //Create a Settings structure in default form and report the results
       //Useful for external solver packages (e.g. Yalmip) that want to
       //know which solver settings are supported
-      Settings* defaults = (Settings *)mxCalloc(1,sizeof(Settings));
+      OSQPSettings* defaults = (OSQPSettings *)mxCalloc(1,sizeof(OSQPSettings));
       set_default_settings(defaults);
       plhs[0] = copySettingsToMxStruct(defaults);
       mxFree(defaults);
@@ -151,8 +148,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         }
 
         //Create data and settings containers
-        Settings* settings = (Settings *)mxCalloc(1,sizeof(Settings));
-        Data*     data     = (Data *)mxCalloc(1,sizeof(Data));
+        OSQPSettings* settings = (OSQPSettings *)mxCalloc(1,sizeof(OSQPSettings));
+        OSQPData*     data     = (OSQPData *)mxCalloc(1,sizeof(OSQPData));
 
         // handle the problem data first.  Matlab-side
         // class wrapper is responsible for ensuring that
@@ -534,7 +531,7 @@ void setToNaN(double* arr_out, c_int len){
 }
 
 
-mxArray* copyInfoToMxStruct(Info* info){
+mxArray* copyInfoToMxStruct(OSQPInfo* info){
 
   //create mxArray with the right number of fields
   int nfields  = sizeof(OSQP_INFO_FIELDS) / sizeof(OSQP_INFO_FIELDS[0]);
@@ -563,7 +560,7 @@ mxArray* copyInfoToMxStruct(Info* info){
 }
 
 
-mxArray* copySettingsToMxStruct(Settings* settings){
+mxArray* copySettingsToMxStruct(OSQPSettings* settings){
 
   int nfields  = sizeof(OSQP_SETTINGS_FIELDS) / sizeof(OSQP_SETTINGS_FIELDS[0]);
   mxArray* mxPtr = mxCreateStructMatrix(1,1,nfields,OSQP_SETTINGS_FIELDS);
@@ -590,7 +587,7 @@ mxArray* copySettingsToMxStruct(Settings* settings){
   return mxPtr;
 }
 
-void copyMxStructToSettings(const mxArray* mxPtr, Settings* settings){
+void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
 
   //this function assumes that only a complete and validated structure
   //will be passed.  matlab mex-side function is responsible for checking
@@ -643,27 +640,3 @@ void copyUpdatedSettingsToWork(const mxArray* mxPtr ,OsqpData* osqpData){
   osqp_update_warm_start(osqpData->work,
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "warm_start")));
 }
-
-
-
-
-// #ifdef DFLOAT
-// /* this memory must be freed */
-// void castToFloatArr(double *arr, c_float* arr_out, c_int len) {
-//     c_int i;
-//     for (i = 0; i < len; i++) {
-//         arr_out[i] = (c_float)arr[i];
-//     }
-// }
-
-// #endif
-//
-// #ifdef DLONG
-// /* this memory must be freed */
-// void castToIntArr(mwIndex *arr, c_int* arr_out, c_int len) {
-//     c_int i;
-//     for (i = 0; i < len; i++) {
-//         arrOut[i] = (c_int)arr[i];
-//     }
-// }
-// #endif

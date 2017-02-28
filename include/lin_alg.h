@@ -6,10 +6,12 @@
 extern "C" {
 #endif
 
-#include "glob_opts.h"
-#include <math.h>
-#include "constants.h"
-#include "cs.h"
+#include "types.h"
+// #include "glob_opts.h"
+// #include <math.h>
+// #include "constants.h"
+// #include "cs.h"
+
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 

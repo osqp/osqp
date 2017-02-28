@@ -135,17 +135,6 @@ typedef float c_float;                /* for numerical values  */
 #endif
 
 
-/* Use customized structures names */
-typedef struct OSQP_PROBLEM_DATA Data;
-typedef struct OSQP_POLISH Polish;
-typedef struct OSQP_SETTINGS Settings;
-typedef struct OSQP_SOLUTION Solution;
-typedef struct OSQP_INFO Info;
-typedef struct OSQP_SCALING Scaling;
-typedef struct OSQP_WORK Work;
-typedef struct OSQP_TIMER Timer;
-
-
 #ifdef __cplusplus
 }
 #endif

@@ -34,7 +34,7 @@ typedef struct {
     PyArrayObject *Ap;
     PyArrayObject *l;
     PyArrayObject *u;
-} PyData;
+} PyOSQPData;
 
 // Get integer type from OSQP setup
 static int get_int_type(void) {
@@ -84,7 +84,7 @@ static PyArrayObject *get_contiguous(PyArrayObject *array, int typenum) {
 }
 
 
-static PyData * create_pydata(c_int n, c_int m,
+static PyOSQPData * create_pydata(c_int n, c_int m,
                      PyArrayObject *Px, PyArrayObject *Pi, PyArrayObject *Pp,
                      PyArrayObject *q, PyArrayObject *Ax, PyArrayObject *Ai,
                      PyArrayObject *Ap, PyArrayObject *l, PyArrayObject *u){
@@ -93,8 +93,8 @@ static PyData * create_pydata(c_int n, c_int m,
         int int_type = get_int_type();
         int float_type = get_float_type();
 
-        // Populate PyData structure
-        PyData * py_d = (PyData *)c_malloc(sizeof(PyData));
+        // Populate PyOSQPData structure
+        PyOSQPData * py_d = (PyOSQPData *)c_malloc(sizeof(PyOSQPData));
         py_d->n = n;
         py_d->m = m;
         py_d->Px = get_contiguous(Px, float_type);
@@ -113,12 +113,12 @@ static PyData * create_pydata(c_int n, c_int m,
 }
 
 // Create data structure from arrays
-static Data * create_data(PyData * py_d){
+static OSQPData * create_data(PyOSQPData * py_d){
 
-        // Allocate Data structure
-        Data * data = (Data *)c_malloc(sizeof(Data));
+        // Allocate OSQPData structure
+        OSQPData * data = (OSQPData *)c_malloc(sizeof(OSQPData));
 
-        // Populate Data structure
+        // Populate OSQPData structure
         data->n = py_d->n;
         data->m = py_d->m;
         data->P = csc_matrix(data->n, data->n,
@@ -139,7 +139,7 @@ static Data * create_data(PyData * py_d){
 }
 
 
-static c_int free_data(Data *data, PyData * py_d){
+static c_int free_data(OSQPData *data, PyOSQPData * py_d){
 
     // Clean contiguous PyArrayObjects
     Py_DECREF(py_d->Px);
@@ -446,7 +446,7 @@ static PyTypeObject OSQP_results_Type = {
 
 typedef struct {
     PyObject_HEAD
-    Work * workspace;  // Pointer to C workspace structure
+    OSQPWorkspace * workspace;  // Pointer to C workspace structure
 } OSQP;
 
 static PyTypeObject OSQP_Type;
@@ -669,10 +669,10 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
 
         #endif
 
-        // Data and settings
-        PyData *pydata;
-        Data * data;
-        Settings * settings = (Settings *)c_malloc(sizeof(Settings));
+        // OSQPData and settings
+        PyOSQPData *pydata;
+        OSQPData * data;
+        OSQPSettings * settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
         set_default_settings(settings);
 
         if( !PyArg_ParseTupleAndKeywords(args, kwargs, argparse_string, kwlist,

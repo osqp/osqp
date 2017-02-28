@@ -102,6 +102,7 @@ set(
     include/lin_alg.h
     include/lin_sys.h
     include/osqp.h
+    include/types.h
     include/polish.h
     include/proj.h
     include/scaling.h

@@ -14,11 +14,11 @@ static char * test_basic_qp2_solve()
     c_int exitflag = 0;  // No errors
 
     // Problem settings
-    Settings * settings = (Settings *)c_malloc(sizeof(Settings));
+    OSQPSettings * settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
     // Structures
-    Work * work;  // Workspace
-    Data * data;  // Data
+    OSQPWorkspace * work;  // Workspace
+    OSQPData * data;  // Data
     basic_qp2_sols_data *  sols_data;
 
 
@@ -81,11 +81,11 @@ static char * test_basic_qp2_update()
     c_int exitflag = 0;  // No errors
 
     // Problem settings
-    Settings * settings = (Settings *)c_malloc(sizeof(Settings));
+    OSQPSettings * settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
     // Structures
-    Work * work;  // Workspace
-    Data * data;  // Data
+    OSQPWorkspace * work;  // Workspace
+    OSQPData * data;  // Data
     basic_qp2_sols_data *  sols_data = generate_problem_basic_qp2_sols_data();
 
 

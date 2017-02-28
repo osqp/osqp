@@ -229,10 +229,10 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
     # Generate QP problem data
     #
     f.write("/* function to generate QP problem data */\n")
-    f.write("Data * generate_problem_%s(){\n\n" % problem_name)
+    f.write("OSQPData * generate_problem_%s(){\n\n" % problem_name)
 
     # Initialize structure data
-    f.write("Data * data = (Data *)c_malloc(sizeof(Data));\n\n")
+    f.write("OSQPData * data = (OSQPData *)c_malloc(sizeof(OSQPData));\n\n")
 
     # Write problem dimensions
     f.write("// Problem dimensions\n")
@@ -261,7 +261,7 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
     # Generate QP problem data
     #
     f.write("/* function to clean problem data structure */\n")
-    f.write("void clean_problem_%s(Data * data){\n\n" % problem_name)
+    f.write("void clean_problem_%s(OSQPData * data){\n\n" % problem_name)
 
     # Free vectors
     f.write("// Clean vectors\n")

@@ -5,9 +5,8 @@
 extern "C" {
 #endif
 
-#include "osqp.h"
+#include "types.h"
 #include "constants.h"
-#include "cs.h"
 
 /******************
  * Versioning     *
@@ -24,30 +23,30 @@ const char *osqp_version(void);
 /* Set default settings from constants.h file
  * assumes settings already allocated inmemory
 */
-void set_default_settings(Settings * settings);
+void set_default_settings(OSQPSettings * settings);
 
 /* Copy settings creating a new settings structure */
-Settings * copy_settings(Settings * settings);
+OSQPSettings * copy_settings(OSQPSettings * settings);
 
 #ifdef PRINTING
 /* Print Header before running the algorithm */
-void print_setup_header(const Data *data, const Settings *settings);
+void print_setup_header(const OSQPData *data, const OSQPSettings *settings);
 
 /* Print Header with data to be displayed per iteration */
 void print_header(void);
 
 /* Print iteration summary */
-void print_summary(Info * info);
+void print_summary(OSQPInfo * info);
 
 /* Print polishing information */
-void print_polishing(Info * info);
+void print_polishing(OSQPInfo * info);
 
 #endif
 
 #ifdef PRINTING
 
 /* Print Footer */
-void print_footer(Info * info, c_int polishing);
+void print_footer(OSQPInfo * info, c_int polishing);
 
 #endif
 
@@ -98,8 +97,8 @@ struct OSQP_TIMER {
 /**
  * Timer Methods
  */
-void tic(Timer* t);
-c_float toc(Timer* t);
+void tic(OSQPTimer* t);
+c_float toc(OSQPTimer* t);
 
 #endif /* END #ifdef PROFILING */
 

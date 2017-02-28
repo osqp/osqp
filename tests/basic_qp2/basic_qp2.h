@@ -5,22 +5,22 @@
 
 /* create additional data and solutions structure */
 typedef struct {
+c_int status_test_new;
 c_float obj_value_test_new;
+c_int status_test;
+c_float * x_test;
 c_float obj_value_test;
 c_float * y_test_new;
 c_float * u_new;
-c_int status_test_new;
-c_float * x_test_new;
 c_float * q_new;
-c_float * x_test;
-c_int status_test;
 c_float * y_test;
+c_float * x_test_new;
 } basic_qp2_sols_data;
 
 /* function to generate QP problem data */
-Data * generate_problem_basic_qp2(){
+OSQPData * generate_problem_basic_qp2(){
 
-Data * data = (Data *)c_malloc(sizeof(Data));
+OSQPData * data = (OSQPData *)c_malloc(sizeof(OSQPData));
 
 // Problem dimensions
 data->n = 2;
@@ -96,7 +96,7 @@ return data;
 }
 
 /* function to clean problem data structure */
-void clean_problem_basic_qp2(Data * data){
+void clean_problem_basic_qp2(OSQPData * data){
 
 // Clean vectors
 c_free(data->l);
@@ -122,7 +122,12 @@ basic_qp2_sols_data *  generate_problem_basic_qp2_sols_data(){
 
 basic_qp2_sols_data * data = (basic_qp2_sols_data *)c_malloc(sizeof(basic_qp2_sols_data));
 
+data->status_test_new = 1;
 data->obj_value_test_new = 2219.99999821535357114044;
+data->status_test = 1;
+data->x_test = c_malloc(2 * sizeof(c_float));
+data->x_test[0] = 14.99999979004714845132;
+data->x_test[1] = -0.00000004757366358703;
 data->obj_value_test = 1282.49996453762651071884;
 data->y_test_new = c_malloc(5 * sizeof(c_float));
 data->y_test_new[0] = 0.00000023554710108178;
@@ -136,23 +141,18 @@ data->u_new[1] = 0.00000000000000000000;
 data->u_new[2] = -20.00000000000000000000;
 data->u_new[3] = 100.00000000000000000000;
 data->u_new[4] = 80.00000000000000000000;
-data->status_test_new = 1;
-data->x_test_new = c_malloc(2 * sizeof(c_float));
-data->x_test_new[0] = 19.99999999193508770645;
-data->x_test_new[1] = -0.00000000230088233073;
 data->q_new = c_malloc(2 * sizeof(c_float));
 data->q_new[0] = 1.00000000000000000000;
 data->q_new[1] = 1.00000000000000000000;
-data->x_test = c_malloc(2 * sizeof(c_float));
-data->x_test[0] = 14.99999979004714845132;
-data->x_test[1] = -0.00000004757366358703;
-data->status_test = 1;
 data->y_test = c_malloc(5 * sizeof(c_float));
 data->y_test[0] = 0.00000214870518246836;
 data->y_test[1] = 508.03014794000051779221;
 data->y_test[2] = 168.01004735181336968708;
 data->y_test[3] = 0.00000046063264419062;
 data->y_test[4] = 0.00000092937866875409;
+data->x_test_new = c_malloc(2 * sizeof(c_float));
+data->x_test_new[0] = 19.99999999193508770645;
+data->x_test_new[1] = -0.00000000230088233073;
 
 return data;
 
@@ -161,12 +161,12 @@ return data;
 /* function to clean solutions and additional data struct */
 void clean_problem_basic_qp2_sols_data(basic_qp2_sols_data * data){
 
+c_free(data->x_test);
 c_free(data->y_test_new);
 c_free(data->u_new);
-c_free(data->x_test_new);
 c_free(data->q_new);
-c_free(data->x_test);
 c_free(data->y_test);
+c_free(data->x_test_new);
 
 c_free(data);
 

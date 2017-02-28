@@ -2,7 +2,7 @@
 
 
 // Scale data stored in workspace
-c_int scale_data(Work * work){
+c_int scale_data(OSQPWorkspace * work){
 
     c_int i, n_plus_m; // Iteration
     c_float * s;       // Scaling vector s
@@ -13,7 +13,7 @@ c_int scale_data(Work * work){
     n_plus_m = work->data->n + work->data->m;
 
     // Allocate scaling structure
-    work->scaling = c_malloc(sizeof(Scaling));
+    work->scaling = c_malloc(sizeof(OSQPScaling));
     work->scaling->D = c_malloc(work->data->n * sizeof(c_float));
     work->scaling->Dinv = c_malloc(work->data->n * sizeof(c_float));
     work->scaling->E = c_malloc(work->data->m * sizeof(c_float));
@@ -133,7 +133,7 @@ c_int scale_data(Work * work){
 }
 
 // // Scale solution
-// c_int scale_solution(Work * work){
+// c_int scale_solution(OSQPWorkspace * work){
 //
 //     // primal
 //     vec_ew_prod(work->scaling->Dinv, work->solution->x, work->data->n);
@@ -146,7 +146,7 @@ c_int scale_data(Work * work){
 
 
 // Unscale solution
-c_int unscale_solution(Work * work){
+c_int unscale_solution(OSQPWorkspace * work){
     // primal
     vec_ew_prod(work->scaling->D, work->solution->x, work->data->n);
 
