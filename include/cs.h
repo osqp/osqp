@@ -10,11 +10,7 @@ extern "C" {
 #endif
 
 #include "glob_opts.h"
-#include "lin_alg.h"
 
-// System libraries
-#include <stdlib.h>
-#include <math.h>
 
 typedef struct    /* matrix in compressed-column or triplet form */
 {
@@ -27,6 +23,12 @@ typedef struct    /* matrix in compressed-column or triplet form */
         c_int nz;       /* # of entries in triplet matrix, -1 for compressed-col */
 } csc;
 
+
+#include "lin_alg.h"
+
+// System libraries
+#include <stdlib.h>
+#include <math.h>
 
 /*****************************************************************************
  * Create and free CSC Matrices                                              *

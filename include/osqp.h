@@ -8,6 +8,7 @@ extern "C" {
 
 /* Includes */
 #include "types.h"
+#include "glob_opts.h"
 #include "auxil.h"
 #include "util.h"
 #include "scaling.h"

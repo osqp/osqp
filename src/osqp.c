@@ -100,9 +100,11 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
         work->scaling->E = c_malloc(work->data->m * sizeof(c_float));
         work->scaling->Einv = c_malloc(work->data->m * sizeof(c_float));
 
-        // Allocate workspace variables used in scaling (P->x and A->x)
+        // Allocate workspace variables used in scaling
         work->P_x = c_malloc(work->data->P->p[work->data->n] * sizeof(c_float));
         work->A_x = c_malloc(work->data->A->p[work->data->n] * sizeof(c_float));
+        work->D_temp = c_malloc(work->data->n * sizeof(c_float));
+        work->E_temp = c_malloc(work->data->m * sizeof(c_float));
 
         // Initialize scaling vectors to 1
         vec_set_scalar(work->scaling->D, 1., work->data->n);
@@ -330,6 +332,12 @@ c_int osqp_cleanup(OSQPWorkspace * work){
             if (work->scaling->Einv)
                 c_free(work->scaling->Einv);
             c_free(work->scaling);
+
+            // Free workspace variables
+            if (work->P_x) c_free(work->P_x);
+            if (work->A_x) c_free(work->A_x);
+            if (work->D_temp) c_free(work->D_temp);
+            if (work->E_temp) c_free(work->E_temp);
         }
 
         // Free private structure for linear system solver_solution

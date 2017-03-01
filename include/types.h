@@ -137,6 +137,7 @@ typedef struct {
                                                 // A * delta_x
         c_float *P_x, *A_x;              // Used in scaling: preallocate values
                                          //                  of P->x, A->x
+        c_float *D_temp, *E_temp;        // temporary scaling vectors
 
         // flag indicating whether the solve function has been run before
         c_int first_run;
