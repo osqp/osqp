@@ -11,15 +11,20 @@
  *
  * @param  P         cost matrix (already just upper triangular part)
  * @param  A         linear constraint matrix
- * @param  scalar1       Regularization parameter scalar1
- * @param  scalar2     Regularization parameter scalar2
+ * @param  scalar1   regularization parameter scalar1
+ * @param  scalar2   regularization parameter scalar2
+ * @param P2KKT      index mapping from elements of P to KKT matrix
+ * @param A2KT       index mapping from elements of A to KKT matrix
+ * @param P_diag_idx index mapping which elements of P are on the diagonal
  * @return           return status flag
  */
-csc * form_KKT(const csc * P, const  csc * A, c_float scalar1, c_float scalar2){
+csc * form_KKT(const csc * P, const  csc * A, c_float scalar1, c_float scalar2
+            //    c_int * P2KKT, c_int * A2KKT, c_int * P_diag_idx
+           ){
     c_int nKKT, nnzKKTmax; // Size, number of nonzeros and max number of nonzeros in KKT matrix
     csc *KKT_trip, *KKT;           // KKT matrix in triplet format and CSC format
     c_int ptr, i, j; // Counters for elements (i,j) and index pointer
-    c_int z_P=0, z_KKT=0;   // Counter for total number of elements in P and in KKT
+    c_int z_KKT=0;   // Counter for total number of elements in P and in KKT
 
     // Get matrix dimensions
     nKKT = P->m + A->m;
@@ -52,11 +57,10 @@ csc * form_KKT(const csc * P, const  csc * A, c_float scalar1, c_float scalar2){
             // Add element of P
             KKT_trip->i[z_KKT] = i;
             KKT_trip->p[z_KKT] = j;
-            KKT_trip->x[z_KKT] = P->x[z_P];
+            KKT_trip->x[z_KKT] = P->x[ptr];
             if (i == j){ // P has a diagonal element, add scalar1
                 KKT_trip->x[z_KKT] += scalar1;
             }
-            z_P++;
             z_KKT++;
 
             // Add diagonal scalar1 in case
