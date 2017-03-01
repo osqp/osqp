@@ -1,6 +1,7 @@
 /* OSQP TESTER MODULE */
 /* THE CODE FOR MINIMAL UNIT TESTING HAS BEEN TAKEN FROM http://www.jera.com/techinfo/jtns/jtn002.html */
 
+#include <stdio.h>
 
 
 #include "minunit.h"
@@ -32,12 +33,12 @@ static char * all_tests() {
 int main(void) {
     char *result = all_tests();
     if (result != 0) {
-        c_print("%s\n", result);
+        printf("%s\n", result);
     }
     else {
-        c_print("ALL TESTS PASSED\n");
+        printf("ALL TESTS PASSED\n");
     }
-    c_print("Tests run: %d\n", tests_run);
+    printf("Tests run: %d\n", tests_run);
 
     return result != 0;
 }

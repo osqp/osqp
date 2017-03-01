@@ -122,7 +122,10 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     // Initialize linear system solver private structure
     work->priv = init_priv(work->data->P, work->data->A, work->settings, 0);
     if (!work->priv){
+        #ifdef PRINTING
         c_print("ERROR: Linear systems solver initialization failure!\n");
+        #endif
+        
         return OSQP_NULL;
     }
 

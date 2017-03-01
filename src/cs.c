@@ -225,7 +225,11 @@ csc * csc_to_triu(csc * M){
 
     // Check if matrix is square
     if (M->m != M->n){
+        #ifdef PRINTING
         c_print("ERROR: Matrix M not square!\n");
+        #endif
+
+        return OSQP_NULL;
     }
     n = M->m;
 

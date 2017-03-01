@@ -28,6 +28,10 @@ void set_default_settings(OSQPSettings * settings);
 /* Copy settings creating a new settings structure */
 OSQPSettings * copy_settings(OSQPSettings * settings);
 
+
+/* Custom string copy to avoid string.h library */
+void c_strcpy(char dest[], const char source[]);
+
 #ifdef PRINTING
 /* Print Header before running the algorithm */
 void print_setup_header(const OSQPData *data, const OSQPSettings *settings);
@@ -40,10 +44,6 @@ void print_summary(OSQPInfo * info);
 
 /* Print polishing information */
 void print_polishing(OSQPInfo * info);
-
-#endif
-
-#ifdef PRINTING
 
 /* Print Footer */
 void print_footer(OSQPInfo * info, c_int polishing);

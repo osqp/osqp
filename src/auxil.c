@@ -370,15 +370,15 @@ void update_status_string(OSQPInfo *info){
     // Update status string depending on status val
 
     if(info->status_val == OSQP_SOLVED)
-        strcpy(info->status, "Solved");
+        c_strcpy(info->status, "Solved");
     else if (info->status_val == OSQP_INFEASIBLE)
-        strcpy(info->status, "Infeasible");
+        c_strcpy(info->status, "Infeasible");
     else if (info->status_val == OSQP_UNSOLVED)
-        strcpy(info->status, "Unsolved");
+        c_strcpy(info->status, "Unsolved");
     else if (info->status_val == OSQP_UNBOUNDED)
-        strcpy(info->status, "Unbounded");
+        c_strcpy(info->status, "Unbounded");
     else if (info->status_val == OSQP_MAX_ITER_REACHED)
-        strcpy(info->status, "Maximum Iterations Reached");
+        c_strcpy(info->status, "Maximum Iterations Reached");
 }
 
 
