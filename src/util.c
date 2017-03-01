@@ -176,6 +176,7 @@ void set_default_settings(OSQPSettings * settings) {
 
 }
 
+#ifndef EMBEDDED
 
 /* Copy settings creating a new settings structure */
 OSQPSettings * copy_settings(OSQPSettings * settings){
@@ -202,6 +203,7 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
     return new;
 }
 
+#endif  // #ifndef EMBEDDED
 
 
 
@@ -288,8 +290,9 @@ c_float toc(OSQPTimer* t)
 
 
 
-
 /* ================================= DEBUG FUNCTIONS ======================= */
+
+#ifndef EMBEDDED
 
 /* Convert sparse CSC to dense */
 c_float * csc_to_dns(csc * M)
@@ -339,6 +342,9 @@ c_int is_eq_csc(csc *A, csc *B, c_float tol){
         }
         return(1);
 }
+
+#endif  // #ifndef EMBEDDED
+
 
 #ifdef PRINTING
 

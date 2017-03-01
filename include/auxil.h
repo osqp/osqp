@@ -97,6 +97,8 @@ c_int check_termination(OSQPWorkspace *work);
 
 
 
+#ifndef EMBEDDED
+
 /**
 * Validate problem data
 * @param  data OSQPData to be validated
@@ -111,6 +113,10 @@ c_int validate_data(const OSQPData * data);
 * @return      Exitflag to check
 */
 c_int validate_settings(const OSQPSettings * settings);
+
+#endif  // #ifndef EMBEDDED
+
+
 
 #ifdef __cplusplus
 }

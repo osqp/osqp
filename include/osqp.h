@@ -11,12 +11,15 @@ extern "C" {
 #include "auxil.h"
 #include "util.h"
 #include "scaling.h"
+#ifndef EMBEDDED
 #include "polish.h"
-
+#endif
 
 /********************
  * Main Solver API  *
  ********************/
+
+#ifndef EMBEDDED
 
 /**
  * Initialize OSQP solver allocating memory.
@@ -34,6 +37,7 @@ extern "C" {
  */
 OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings);
 
+#endif  // #ifndef EMBEDDED
 
 /**
  * Solve Quadratic Program
@@ -43,6 +47,8 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings);
 c_int osqp_solve(OSQPWorkspace * work);
 
 
+#ifndef EMBEDDED
+
 /**
  * Cleanup workspace
  * @param  work Workspace
@@ -50,6 +56,7 @@ c_int osqp_solve(OSQPWorkspace * work);
  */
 c_int osqp_cleanup(OSQPWorkspace * work);
 
+#endif
 
 
 //TODO: Add sublevel API functions
@@ -166,6 +173,17 @@ c_int osqp_update_alpha(OSQPWorkspace * work, c_float alpha_new);
 
 
 /**
+ * Update warm_start setting
+ * @param  work           Workspace
+ * @param  warm_start_new New warm_start setting
+ * @return                Exitflag
+ */
+c_int osqp_update_warm_start(OSQPWorkspace * work, c_int warm_start_new);
+
+
+#ifndef EMBEDDED
+
+/**
  * Update regularization parameter in polishing
  * @param  work      Workspace
  * @param  delta_new New regularization parameter
@@ -200,14 +218,9 @@ c_int osqp_update_pol_refine_iter(OSQPWorkspace * work, c_int pol_refine_iter_ne
  */
 c_int osqp_update_verbose(OSQPWorkspace * work, c_int verbose_new);
 
+#endif  // #ifndef EMBEDDED
 
-/**
- * Update warm_start setting
- * @param  work           Workspace
- * @param  warm_start_new New warm_start setting
- * @return                Exitflag
- */
-c_int osqp_update_warm_start(OSQPWorkspace * work, c_int warm_start_new);
+
 
 #ifdef __cplusplus
 }

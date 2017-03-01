@@ -176,7 +176,6 @@ c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
 c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
 
     // N.B. Use x_prev as temporary vector
-
     if (!polish){ // Normal call
         // dual_res = q
         prea_vec_copy(work->data->q, work->x_prev, work->data->n);
@@ -442,6 +441,8 @@ c_int check_termination(OSQPWorkspace *work){
 }
 
 
+#ifndef EMBEDDED
+
 /**
  * Validate problem data
  * @param  data OSQPData to be validated
@@ -595,3 +596,5 @@ c_int validate_settings(const OSQPSettings * settings){
     return 0;
 
 }
+
+#endif  // #ifndef EMBEDDED

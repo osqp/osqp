@@ -1,5 +1,6 @@
 #include "scaling.h"
 
+#if EMBEDDED != 1
 
 // Scale data stored in workspace
 c_int scale_data(OSQPWorkspace * work){
@@ -131,6 +132,9 @@ c_int scale_data(OSQPWorkspace * work){
 
     return 0;
 }
+
+#endif  // end EMBEDDED
+
 
 // // Scale solution
 // c_int scale_solution(OSQPWorkspace * work){

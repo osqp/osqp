@@ -7,6 +7,8 @@
  **********************/
 
 
+#ifndef EMBEDDED
+
 /**
  * Initialize OSQP solver allocating memory.
  *
@@ -144,6 +146,7 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     return work;
 }
 
+#endif  // #ifndef EMBEDDED
 
 
 
@@ -231,7 +234,7 @@ c_int osqp_solve(OSQPWorkspace * work){
     #endif
 
     /* if max iterations reached, change status accordingly */
-    if (iter == work->settings->max_iter + 1){
+    if (work->info->status_val == OSQP_UNSOLVED){
         work->info->status_val = OSQP_MAX_ITER_REACHED;
     }
 
@@ -244,8 +247,10 @@ c_int osqp_solve(OSQPWorkspace * work){
     #endif
 
     // Polish the obtained solution
+    #ifndef EMBEDDED
     if (work->settings->polishing && work->info->status_val == OSQP_SOLVED)
         polish(work);
+    #endif
 
     /* Update total time */
     #ifdef PROFILING
@@ -276,6 +281,8 @@ c_int osqp_solve(OSQPWorkspace * work){
     return exitflag;
 }
 
+
+#ifndef EMBEDDED
 
 /**
  * Cleanup workspace
@@ -390,6 +397,7 @@ c_int osqp_cleanup(OSQPWorkspace * work){
     return exitflag;
 }
 
+#endif  // #ifndef EMBEDDED
 
 
 /************************
@@ -411,6 +419,10 @@ c_int osqp_update_lin_cost(OSQPWorkspace * work, c_float * q_new) {
     if (work->settings->scaling) {
         vec_ew_prod(work->scaling->D, work->data->q, work->data->n);
     }
+
+    // Set solver status to OSQP_UNSOLVED
+    work->info->status_val = OSQP_UNSOLVED;
+    update_status_string(work->info);
 
     return 0;
 }
@@ -445,6 +457,10 @@ c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new)
         vec_ew_prod(work->scaling->E, work->data->u, work->data->m);
     }
 
+    // Set solver status to OSQP_UNSOLVED
+    work->info->status_val = OSQP_UNSOLVED;
+    update_status_string(work->info);
+
     return 0;
 }
 
@@ -474,6 +490,10 @@ c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
             return 1;
         }
     }
+
+    // Set solver status to OSQP_UNSOLVED
+    work->info->status_val = OSQP_UNSOLVED;
+    update_status_string(work->info);
 
     return 0;
 }
@@ -505,6 +525,11 @@ c_int osqp_update_upper_bound(OSQPWorkspace * work, c_float * u_new) {
             return 1;
         }
     }
+
+    // Set solver status to OSQP_UNSOLVED
+    work->info->status_val = OSQP_UNSOLVED;
+    update_status_string(work->info);
+    
     return 0;
 }
 
@@ -675,6 +700,29 @@ c_int osqp_update_alpha(OSQPWorkspace * work, c_float alpha_new) {
 }
 
 /**
+ * Update warm_start setting
+ * @param  work           Workspace
+ * @param  warm_start_new New warm_start setting
+ * @return                Exitflag
+ */
+c_int osqp_update_warm_start(OSQPWorkspace * work, c_int warm_start_new) {
+    // Check that warm_start is either 0 or 1
+    if (warm_start_new != 0 && warm_start_new != 1) {
+      #ifdef PRINTING
+      c_print("warm_start should be either 0 or 1\n");
+      #endif
+      return 1;
+    }
+    // Update warm_start
+    work->settings->warm_start = warm_start_new;
+
+    return 0;
+}
+
+
+#ifndef EMBEDDED
+
+/**
  * Update regularization parameter in polishing
  * @param  work      Workspace
  * @param  delta_new New regularization parameter
@@ -719,6 +767,7 @@ c_int osqp_update_polishing(OSQPWorkspace * work, c_int polishing_new) {
     return 0;
 }
 
+
 /**
  * Update number of iterative refinement steps in polishing
  * @param  work                Workspace
@@ -760,23 +809,4 @@ c_int osqp_update_verbose(OSQPWorkspace * work, c_int verbose_new) {
     return 0;
 }
 
-
-/**
- * Update warm_start setting
- * @param  work           Workspace
- * @param  warm_start_new New warm_start setting
- * @return                Exitflag
- */
-c_int osqp_update_warm_start(OSQPWorkspace * work, c_int warm_start_new) {
-    // Check that warm_start is either 0 or 1
-    if (warm_start_new != 0 && warm_start_new != 1) {
-      #ifdef PRINTING
-      c_print("warm_start should be either 0 or 1\n");
-      #endif
-      return 1;
-    }
-    // Update warm_start
-    work->settings->warm_start = warm_start_new;
-
-    return 0;
-}
+#endif  // #ifndef EMBEDDED

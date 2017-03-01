@@ -6,8 +6,10 @@ extern "C" {
 #endif
 
 // Functions to scale problem data
-#include "types.h"
 #include "lin_alg.h"
+#include "types.h"
+
+#if EMBEDDED != 1
 #include "kkt.h"
 
 #define MAX_SCALING (1e3)
@@ -16,6 +18,9 @@ extern "C" {
 
 // Scale data stored in workspace
 c_int scale_data(OSQPWorkspace * work);
+
+#endif  // end EMBEDDED
+
 
 // Scale solution
 // c_int scale_solution(OSQPWorkspace *work);

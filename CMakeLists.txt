@@ -31,15 +31,34 @@ endif()
 
 # Set options
 # ----------------------------------------------
+# Is the code generated for embedded platforms?
+#   0 :   No.
+#   1 :   Yes. Matrix update not allowed.
+#   2 :   Yes. Matrix update allowed.
+set (EMBEDDED 0)
+message(STATUS "Embedded is ${EMBEDDED}")
+if(${EMBEDDED} GREATER 0)
+    message(STATUS "Passing EMBEDDED flag to compiler")
+    add_definitions(-DEMBEDDED=${EMBEDDED})
+endif()
+
 # Is printing enabled?
 option (PRINTING "Enable solver printing" ON)
+if(${EMBEDDED} GREATER 0)
+    message(STATUS "Disabling printing for embedded")
+    set(PRINTING OFF)
+endif()
 message(STATUS "Printing is ${PRINTING}")
 if (PRINTING)
     add_definitions(-DPRINTING)
 endif (PRINTING)
 
-# Is printing enabled?
+# Is profiling enabled?
 option (PROFILING "Enable solver profiling (timing)" ON)
+if(${EMBEDDED} GREATER 0)
+    message(STATUS "Disabling profiling for embedded")
+    set(PROFILING OFF)
+endif()
 message(STATUS "Profiling is ${PROFILING}")
 if (PROFILING)
     add_definitions(-DPROFILING)

@@ -25,8 +25,14 @@ const char *osqp_version(void);
 */
 void set_default_settings(OSQPSettings * settings);
 
+
+#ifndef EMBEDDED
+
 /* Copy settings creating a new settings structure */
 OSQPSettings * copy_settings(OSQPSettings * settings);
+
+#endif  // #ifndef EMBEDDED
+
 
 #ifdef PRINTING
 /* Print Header before running the algorithm */
@@ -107,11 +113,16 @@ c_float toc(OSQPTimer* t);
 /* ================================= DEBUG FUNCTIONS ======================= */
 // TODO: Remove debug functions!
 
+#ifndef EMBEDDED
+
 /* Compare CSC matrices */
 c_int is_eq_csc(csc *A, csc *B, c_float tol);
 
 /* Convert sparse CSC to dense */
 c_float * csc_to_dns(csc * M);
+
+#endif  // #ifndef EMBEDDED
+
 
 #ifdef PRINTING
 #include <stdio.h>
