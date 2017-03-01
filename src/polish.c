@@ -43,7 +43,7 @@ static c_int form_Ared(OSQPWorkspace *work) {
     if (work->pol->n_low + work->pol->n_upp == 0) {
         // Form empty Ared
         work->pol->Ared = csc_spalloc(0, work->data->n, 0, 1, 0);
-        memset(work->pol->Ared->p, 0, (work->data->n + 1) * sizeof(c_int));
+        int_vec_set_scalar(work->pol->Ared->p, 0, work->data->n + 1);
         return 0;   // mred = 0
     }
 
@@ -168,7 +168,7 @@ static void compute_y_from_y_red(OSQPWorkspace * work){
 
     // If there are no active constraints
     if (work->pol->n_low + work->pol->n_upp == 0) {
-        memset(work->y, 0, work->data->m * sizeof(c_float));
+        vec_set_scalar(work->y, 0., work->data->m);
         return;
     }
     // yred = vstack[ylow, yupp]

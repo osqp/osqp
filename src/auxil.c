@@ -11,9 +11,11 @@
  * @param work Workspace
  */
 void cold_start(OSQPWorkspace *work) {
-    memset(work->x, 0, work->data->n * sizeof(c_float));
-    memset(work->z, 0, work->data->m * sizeof(c_float));
-    memset(work->y, 0, work->data->m * sizeof(c_float));
+
+    vec_set_scalar(work->x, 0., work->data->n);
+    vec_set_scalar(work->z, 0., work->data->m);
+    vec_set_scalar(work->y, 0., work->data->m);
+
 }
 
 

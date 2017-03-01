@@ -93,6 +93,24 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
 
     // Perform scaling
     if (settings->scaling) {
+        // Allocate scaling structure
+        work->scaling = c_malloc(sizeof(OSQPScaling));
+        work->scaling->D = c_malloc(work->data->n * sizeof(c_float));
+        work->scaling->Dinv = c_malloc(work->data->n * sizeof(c_float));
+        work->scaling->E = c_malloc(work->data->m * sizeof(c_float));
+        work->scaling->Einv = c_malloc(work->data->m * sizeof(c_float));
+
+        // Allocate workspace variables used in scaling (P->x and A->x)
+        work->P_x = c_malloc(work->data->P->p[work->data->n] * sizeof(c_float));
+        work->A_x = c_malloc(work->data->A->p[work->data->n] * sizeof(c_float));
+
+        // Initialize scaling vectors to 1
+        vec_set_scalar(work->scaling->D, 1., work->data->n);
+        vec_set_scalar(work->scaling->Dinv, 1., work->data->n);
+        vec_set_scalar(work->scaling->E, 1., work->data->m);
+        vec_set_scalar(work->scaling->Einv, 1., work->data->m);
+
+        // Scale data
         scale_data(work);
     }
     else {
@@ -557,7 +575,7 @@ c_int osqp_warm_start_x(OSQPWorkspace * work, c_float * x){
     mat_vec(work->data->A, work->x, work->z, 0);
 
     // Cold start y
-    memset(work->y, 0, work->data->m * sizeof(c_float));
+    vec_set_scalar(work->y, 0., work->data->m);
 
     return 0;
 }
@@ -581,8 +599,8 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y){
     vec_ew_prod(work->scaling->Einv, work->y, work->data->m);
 
     // Cold start x and z
-    memset(work->x, 0, work->data->n * sizeof(c_float));
-    memset(work->z, 0, work->data->m * sizeof(c_float));
+    vec_set_scalar(work->x, 0., work->data->n);
+    vec_set_scalar(work->z, 0., work->data->m);
 
     return 0;
 }

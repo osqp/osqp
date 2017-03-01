@@ -128,12 +128,15 @@ typedef struct {
         // Internal solver variables
         c_float *x, *y, *z, *xz_tilde; // Iterates
         c_float *x_prev, *z_prev;      // Previous x and x.
-                                       // N.B. Used also as workspace vectors for residuals.
+                                       // N.B. Used also as workspace vectors
+                                       //      for residuals.
         c_float *delta_y, *Atdelta_y;  // Infeasibility variables delta_y and
                                        // A' * delta_y
         c_float *delta_x, *Pdelta_x, *Adelta_x; // Unboundedness variables
                                                 // delta_x, P * delta_x and
                                                 // A * delta_x
+        c_float *P_x, *A_x;              // Used in scaling: preallocate values
+                                         //                  of P->x, A->x
 
         // flag indicating whether the solve function has been run before
         c_int first_run;
