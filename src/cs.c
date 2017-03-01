@@ -183,9 +183,9 @@ csc *csc_symperm(const csc *A, const c_int *pinv, c_int values) {
 csc * copy_csc_mat(const csc* A){
         csc * B = csc_spalloc(A->m, A->n, A->p[A->n], 1, 0);
 
-        memcpy(B->p, A->p, (A->n+1)*sizeof(c_int));
-        memcpy(B->i, A->i, (A->p[A->n])*sizeof(c_int));
-        memcpy(B->x, A->x, (A->p[A->n])*sizeof(c_float));
+        prea_int_vec_copy(A->p, B->p, A->n+1);
+        prea_int_vec_copy(A->i, B->i, A->p[A->n]);
+        prea_vec_copy(A->x, B->x, A->p[A->n]);
 
         return B;
 }
@@ -194,9 +194,11 @@ csc * copy_csc_mat(const csc* A){
  *  Copy sparse CSC matrix A to B (B is preallocated, NO MALOC)
  */
 void prea_copy_csc_mat(const csc* A, csc* B){
-    memcpy(B->p, A->p, (A->n+1)*sizeof(c_int));
-    memcpy(B->i, A->i, (A->p[A->n])*sizeof(c_int));
-    memcpy(B->x, A->x, (A->p[A->n])*sizeof(c_float));
+
+    prea_int_vec_copy(A->p, B->p, A->n+1);
+    prea_int_vec_copy(A->i, B->i, A->p[A->n]);
+    prea_vec_copy(A->x, B->x, A->p[A->n]);
+
     B->nzmax = A->nzmax;
 }
 

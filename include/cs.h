@@ -10,10 +10,10 @@ extern "C" {
 #endif
 
 #include "glob_opts.h"
+#include "lin_alg.h"
 
 // System libraries
 #include <stdlib.h>
-#include <string.h>
 #include <math.h>
 
 typedef struct    /* matrix in compressed-column or triplet form */

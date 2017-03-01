@@ -21,11 +21,14 @@ c_float * vec_copy(c_float *a, c_int n);
 /* copy vector a into preallocated vector b */
 void prea_vec_copy(c_float *a, c_float * b, c_int n);
 
-/* set integer vector to scalar */
-void int_vec_set_scalar(c_int *a, c_int sc, c_int n);
+/* copy integer vector a into preallocated vector b */
+void prea_int_vec_copy(c_int *a, c_int * b, c_int n);
 
 /* set float vector to scalar */
 void vec_set_scalar(c_float *a, c_float sc, c_int n);
+
+/* set integer vector to scalar */
+void int_vec_set_scalar(c_int *a, c_int sc, c_int n);
 
 /* add scalar to vector*/
 void vec_add_scalar(c_float *a, c_float sc, c_int n);

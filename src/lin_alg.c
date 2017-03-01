@@ -89,11 +89,24 @@ void vec_mult_scalar(c_float *a, c_float sc, c_int n){
 /* copy vector a into output */
 c_float * vec_copy(c_float *a, c_int n) {
     c_float * b;
+    c_int i;
+
     b = c_malloc(n * sizeof(c_float));
-    memcpy(b, a, n * sizeof(c_float));
+    for (i=0; i<n; i++) {
+        b[i] = a[i];
+    }
+
     return b;
 }
 
+
+/* copy integer vector a into preallocated vector b */
+void prea_int_vec_copy(c_int *a, c_int * b, c_int n){
+    c_int i;
+    for (i=0; i<n; i++) {
+        b[i] = a[i];
+    }
+}
 
 /* copy vector a into preallocated vector b */
 void prea_vec_copy(c_float *a, c_float * b, c_int n) {
