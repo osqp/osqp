@@ -112,6 +112,26 @@ c_int scale_data(OSQPWorkspace * work){
     return 0;
 }
 
+
+/**
+ * Unscale problem matrices
+ * @param  work Workspace
+ * @return      exitflag
+ */
+c_int unscale_data(OSQPWorkspace * work){
+
+    mat_premult_diag(work->data->P, work->scaling->Dinv);
+    mat_postmult_diag(work->data->P, work->scaling->Dinv);
+    vec_ew_prod(work->scaling->Dinv, work->data->q, work->data->n);
+
+    mat_premult_diag(work->data->A, work->scaling->Einv);
+    mat_postmult_diag(work->data->A, work->scaling->Dinv);
+    vec_ew_prod(work->scaling->Einv, work->data->l, work->data->m);
+    vec_ew_prod(work->scaling->Einv, work->data->u, work->data->m);
+
+    return 0;
+}
+
 // // Scale solution
 // c_int scale_solution(OSQPWorkspace * work){
 //

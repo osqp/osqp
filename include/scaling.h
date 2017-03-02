@@ -17,6 +17,11 @@ extern "C" {
 // Scale data stored in workspace
 c_int scale_data(OSQPWorkspace * work);
 
+
+/* Unscale problem matrices */
+c_int unscale_data(OSQPWorkspace * work);
+
+
 // Scale solution
 // c_int scale_solution(OSQPWorkspace *work);
 
