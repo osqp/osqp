@@ -214,7 +214,7 @@ static char * test_quad_form_upper_triang(){
 
 
 
-static char * tests_lin_alg()
+static char * test_lin_alg()
 {
 
     mu_run_test(test_constr_sparse_mat);

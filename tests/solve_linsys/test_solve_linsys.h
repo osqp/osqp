@@ -37,7 +37,7 @@ static char * test_solveKKT(){
 }
 
 
-static char * tests_solve_linsys()
+static char * test_solve_linsys()
 {
     mu_run_test(test_solveKKT);
 

@@ -101,14 +101,17 @@ c_float * csc_to_dns(csc * M);
 /**
  * Convert square CSC matrix into upper triangular one
  *
- * Saves the index of diagonal elements in the new matrix Mdiag_idx and the
- * number Mdiag_n
+ * If Mdiag_idx is not OSQP_NULL, it saves the index of the diagonal
+ * elements there and the number of diagonal elements in Mdiag_n.
+ *
+ * N.B. Mdiag_idx needs to be freed!
+ *
  * @param  M         Matrix to be converted
- * @param  Mdiag_idx Index of diagonal elements in new matrix
- * @param  Mdiag_n   Address to the number of diagonal elements
+ * @param  Mdiag_idx (modified) Address of the indef of diagonal elements in new matrix
+ * @param  Mdiag_n   (modified) Address to the number of diagonal elements
  * @return           Upper triangular matrix in CSC format
  */
-csc * csc_to_triu(csc * M, c_int * Mdiag_idx, c_int * Mdiag_n);
+csc * csc_to_triu(csc * M, c_int ** Mdiag_idx, c_int * Mdiag_n);
 
 
 

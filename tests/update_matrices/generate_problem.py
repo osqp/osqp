@@ -26,7 +26,7 @@ test_form_KKT_KKTu = spa.triu(test_form_KKT_KKT).tocsc()
 
 
 
-# import ipdb; ipdb.set_trace()
+import ipdb; ipdb.set_trace()
 
 # Generate test data and solutions
 data = {'test_form_KKT_n':test_form_KKT_n,

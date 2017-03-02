@@ -1,4 +1,8 @@
 # Code to generate the unittests for OSQP C code
+import numpy as np
+
+# Set numpy seed for reproducibility
+np.random.seed(2)
 
 import basic_qp.generate_problem
 import basic_qp2.generate_problem

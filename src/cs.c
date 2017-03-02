@@ -233,11 +233,11 @@ csc * csc_done(csc *C, void *w, void *x, c_int ok){
  * N.B. Mdiag_idx needs to be freed!
  *
  * @param  M         Matrix to be converted
- * @param  Mdiag_idx (modified) Index of diagonal elements in new matrix
+ * @param  Mdiag_idx (modified) Address of the indef of diagonal elements in new matrix
  * @param  Mdiag_n   (modified) Address to the number of diagonal elements
  * @return           Upper triangular matrix in CSC format
  */
-csc * csc_to_triu(csc * M, c_int * Mdiag_idx, c_int * Mdiag_n){
+csc * csc_to_triu(csc * M, c_int ** Mdiag_idx, c_int * Mdiag_n){
     csc * M_trip;  // Matrix in triplet format
     csc * M_triu;  // Resulting upper triangular matrix
     c_int nnzmaxM; // Estimated maximum number of elements of M
@@ -266,7 +266,7 @@ csc * csc_to_triu(csc * M, c_int * Mdiag_idx, c_int * Mdiag_n){
 
     // Allocate vector of indeces on the diagonal. Worst case it has m elements
     if (Mdiag_idx != OSQP_NULL){
-        Mdiag_idx = c_malloc(M->m * sizeof(c_int));
+        *Mdiag_idx = c_malloc(M->m * sizeof(c_int));
         *Mdiag_n = 0; // Set 0 diagonal elements to start
     }
 
@@ -287,7 +287,7 @@ csc * csc_to_triu(csc * M, c_int * Mdiag_idx, c_int * Mdiag_n){
                 // It is a diagonal element and index vector pointer supplied.
                 // -> Store the index
                 if ((i == j) && (Mdiag_idx != OSQP_NULL)) {
-                        Mdiag_idx[*Mdiag_n] = z_M;
+                        *Mdiag_idx[*Mdiag_n] = z_M;
                         (*Mdiag_n)++;
                 }
 
@@ -299,7 +299,7 @@ csc * csc_to_triu(csc * M, c_int * Mdiag_idx, c_int * Mdiag_n){
 
     if (Mdiag_idx != OSQP_NULL){
         // Realloc Mdiag_idx so that it contains exactly *Mdiag_n diagonal elements
-        Mdiag_idx = c_realloc(Mdiag_idx, (*Mdiag_n) * sizeof(c_int));
+        *Mdiag_idx = c_realloc(*Mdiag_idx, (*Mdiag_n) * sizeof(c_int));
     }
 
     // Set number of nonzeros
@@ -320,7 +320,7 @@ csc * csc_to_triu(csc * M, c_int * Mdiag_idx, c_int * Mdiag_n){
 
         // Update vector of indeces Mdiag_idx
         for (i = 0; i < *Mdiag_n; i++){
-            Mdiag_idx[i] = Mtriu_TtoC[Mdiag_idx[i]];
+            *Mdiag_idx[i] = Mtriu_TtoC[*Mdiag_idx[i]];
         }
 
         // Free mapping Mtriu_TtoC
