@@ -1,6 +1,7 @@
 #include "private.h"
 
 
+#ifndef EMBEDDED
 
 // Free LDL Factorization structure
 void free_priv(Priv *p) {
@@ -170,6 +171,8 @@ Priv *init_priv(const csc * P, const csc * A, const OSQPSettings *settings,
 
     return p;
 }
+
+#endif  //end EMBEDDED
 
 
 // x = Dinv*x

@@ -184,6 +184,8 @@
  * the sum of (Lnz [k]) * (Lnz [k] + 2) for k = 0 to n-1.
  */
 
+#ifndef EMBEDDED
+
 void LDL_symbolic
 (
     LDL_int n,		/* A and L are n-by-n, where n >= 0 */
@@ -239,6 +241,7 @@ void LDL_symbolic
     }
 }
 
+#endif  //end EMBEDDED
 
 /* ========================================================================== */
 /* === ldl_numeric ========================================================== */
@@ -249,6 +252,8 @@ void LDL_symbolic
  * factorization of A or PAP'.  The outputs of this routine are arguments Li,
  * Lx, and D.  It also requires three size-n workspaces (Y, Pattern, and Flag).
  */
+
+#if EMBEDDED != 1
 
 LDL_int LDL_numeric	/* returns n if successful, k if D (k,k) is zero */
 (
@@ -318,6 +323,7 @@ LDL_int LDL_numeric	/* returns n if successful, k if D (k,k) is zero */
     return (n) ;	/* success, diagonal of D is all nonzero */
 }
 
+#endif  //end EMBEDDED
 
 /* ========================================================================== */
 /* === ldl_lsolve:  solve Lx=b ============================================== */
