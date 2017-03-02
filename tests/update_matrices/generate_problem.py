@@ -7,8 +7,8 @@ import osqp
 
 
 # Define tests
-test_form_KKT_n = 3
-test_form_KKT_m = 5
+test_form_KKT_n = 2
+test_form_KKT_m = 3
 p = 0.3
 
 test_form_KKT_A = spa.random(test_form_KKT_m, test_form_KKT_n, density=p).tocsc()
@@ -25,6 +25,21 @@ test_form_KKT_KKT = spa.vstack([
 test_form_KKT_KKTu = spa.triu(test_form_KKT_KKT).tocsc()
 
 
+# Create new P, A and KKT
+test_form_KKT_A_new = test_form_KKT_A.copy()
+test_form_KKT_A_new.data += np.random.randn(test_form_KKT_A_new.nnz)
+test_form_KKT_Pu_new = test_form_KKT_Pu.copy()
+test_form_KKT_Pu_new.data += np.random.randn(test_form_KKT_Pu_new.nnz)
+test_form_KKT_P_new = test_form_KKT_Pu_new + test_form_KKT_Pu_new.T - spa.diags(test_form_KKT_Pu_new.diagonal())
+
+test_form_KKT_KKT_new = spa.vstack([
+                        spa.hstack([test_form_KKT_P_new + test_form_KKT_sigma *
+                        spa.eye(test_form_KKT_n), test_form_KKT_A_new.T]),
+                     spa.hstack([test_form_KKT_A_new,
+                        -1./test_form_KKT_rho * spa.eye(test_form_KKT_m)])]).tocsc()
+test_form_KKT_KKTu_new = spa.triu(test_form_KKT_KKT_new).tocsc()
+
+
 
 import ipdb; ipdb.set_trace()
 
@@ -37,7 +52,12 @@ data = {'test_form_KKT_n':test_form_KKT_n,
         'test_form_KKT_rho': test_form_KKT_rho,
         'test_form_KKT_sigma': test_form_KKT_sigma,
         'test_form_KKT_KKT': test_form_KKT_KKT,
-        'test_form_KKT_KKTu': test_form_KKT_KKTu
+        'test_form_KKT_KKTu': test_form_KKT_KKTu,
+        'test_form_KKT_A_new': test_form_KKT_A_new,
+        'test_form_KKT_P_new': test_form_KKT_P_new,
+        'test_form_KKT_Pu_new': test_form_KKT_Pu_new,
+        'test_form_KKT_KKT_new': test_form_KKT_KKT_new,
+        'test_form_KKT_KKTu_new': test_form_KKT_KKTu_new
         }
 
 # Generate test data

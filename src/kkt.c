@@ -133,3 +133,51 @@ csc * form_KKT(const csc * P, const  csc * A, c_float scalar1, c_float scalar2,
     return KKT;
 
 }
+
+
+
+
+
+/**
+ * Update KKT matrix using the elements of P
+ *
+ * @param KKT       KKT matrix in CSC form (upper-triangular)
+ * @param P         P matrix in CSC form (upper-triangular)
+ * @param PtoKKT    Vector of pointers from P->x to KKT->x
+ * @param scalar1   Scalar added to the diagonal elements
+ * @param Pdiag_idx Index of diagonal elements in P->x
+ * @param Pdiag_n   Number of diagonal elements of P
+ */
+void update_KKT_P(csc * KKT, csc * P, c_int * PtoKKT, c_float scalar1, c_int * Pdiag_idx, c_int Pdiag_n){
+    c_int i, j; // Iterations
+
+    // Update elements of KKT using P
+    for (i = 0; i < P->p[P->n]; i++ ){
+        KKT->x[PtoKKT[i]] = P->x[i];
+    }
+
+    // Update diagonal elements of KKT by adding sigma
+    for (i = 0; i < Pdiag_n; i++){
+        j = Pdiag_idx[i];  // Extract ondex of the element on the diagonal
+        KKT->x[PtoKKT[j]] += scalar1;
+    }
+
+}
+
+
+/**
+ * Update KKT matrix using the elements of A
+ *
+ * @param KKT       KKT matrix in CSC form (upper-triangular)
+ * @param A         A matrix in CSC form (upper-triangular)
+ * @param AtoKKT    Vector of pointers from A->x to KKT->x
+ */
+void update_KKT_A(csc * KKT, csc * A, c_int * AtoKKT){
+    c_int i; // Iterations
+
+    // Update elements of KKT using A
+    for (i = 0; i < A->p[A->n]; i++ ){
+        KKT->x[AtoKKT[i]] = A->x[i];
+    }
+
+}
