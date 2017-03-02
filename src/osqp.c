@@ -60,7 +60,7 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     work->data = c_malloc(sizeof(OSQPData));
     work->data->n = data->n;    // Number of variables
     work->data->m = data->m;    // Number of linear constraints
-    work->data->P = csc_to_triu(data->P);         // Cost function matrix
+    work->data->P = csc_to_triu(data->P, OSQP_NULL, OSQP_NULL);         // Cost function matrix
     work->data->q = vec_copy(data->q, data->n);    // Linear part of cost function
     work->data->A = copy_csc_mat(data->A);         // Linear constraints matrix
     work->data->l = vec_copy(data->l, data->m);  // Lower bounds on constraints
@@ -125,7 +125,7 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
         #ifdef PRINTING
         c_print("ERROR: Linear systems solver initialization failure!\n");
         #endif
-        
+
         return OSQP_NULL;
     }
 

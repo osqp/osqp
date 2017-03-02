@@ -154,10 +154,10 @@ Priv *init_priv(const csc * P, const csc * A, const OSQPSettings *settings,
     // Form KKT matrix
     if (!polish)
         // Called from ADMM algorithm
-        KKT = form_KKT(P, A, settings->sigma, 1./settings->rho);
+        KKT = form_KKT(P, A, settings->sigma, 1./settings->rho, OSQP_NULL, OSQP_NULL);
     else
         // Called from polish()
-        KKT = form_KKT(P, A, settings->delta, settings->delta);
+        KKT = form_KKT(P, A, settings->delta, settings->delta, OSQP_NULL, OSQP_NULL);
 
     // Factorize the KKT matrix
     if (factorize(KKT, p) < 0) {

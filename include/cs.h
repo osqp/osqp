@@ -82,17 +82,33 @@ csc * csc_done(csc *C, void *w, void *x, c_int ok);
  *****************************************************************************/
 
 
-/* C = compressed-column CSC from matrix T in triplet form */
-csc *triplet_to_csc(const csc *T);
+ /**
+  * C = compressed-column CSC from matrix T in triplet form
+  *
+  * TtoC stores the vector of indeces from T to C
+  *  -> C[TtoC[i]] = T[i]
+  *
+  * @param  T    matrix in triplet format
+  * @param  TtoC vector of indeces from triplet to CSC format
+  * @return      matrix in CSC format
+  */
+ csc *triplet_to_csc(const csc *T, c_int * TtoC);
 
 /* Convert sparse to dense */
 c_float * csc_to_dns(csc * M);
 
 
 /**
- * Convert CSC matrix into upper triangular one
+ * Convert square CSC matrix into upper triangular one
+ *
+ * Saves the index of diagonal elements in the new matrix Mdiag_idx and the
+ * number Mdiag_n
+ * @param  M         Matrix to be converted
+ * @param  Mdiag_idx Index of diagonal elements in new matrix
+ * @param  Mdiag_n   Address to the number of diagonal elements
+ * @return           Upper triangular matrix in CSC format
  */
-csc * csc_to_triu(csc * M);
+csc * csc_to_triu(csc * M, c_int * Mdiag_idx, c_int * Mdiag_n);
 
 
 
