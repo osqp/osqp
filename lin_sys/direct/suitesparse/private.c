@@ -14,6 +14,13 @@ void free_priv(Priv *p) {
         if (p->bp)
             c_free(p->bp);
         c_free(p);
+
+        if (p->KKT)
+            csc_spfree(p->KKT);
+        if (p->PtoKKT)
+            c_free(p->PtoKKT);
+        if (p->AtoKKT)
+            c_free(p->AtoKKT);
     }
 }
 
@@ -121,26 +128,19 @@ c_int factorize(csc *A, Priv *p) {
 /**
  * Initialize LDL Factorization structure
  *
- *  KKT, PtoKKT and AtoKKT can be OSQP_NULL so that they can be ignored
- *
  * @param  P        Cost function matrix (upper triangular form)
  * @param  A        Constraints matrix
- * @param  KKT      (modified) KKT matrix pointer
- * @param  PtoKKT   (modified) Index mapping from P to KKT matrix
- * @param  AtoKKT   (modified) Index mapping from A to KKT matrix
  * @param  settings Solver settings
  * @param  polish   Flag whether we are initializing for polishing or not
  * @return          Initialized private structure
  */
-Priv *init_priv(const csc * P, const csc * A, csc * KKT, c_int * PtoKKT, c_int * AtoKKT,
-    const OSQPSettings *settings, c_int polish){
+Priv *init_priv(const csc * P, const csc * A, const OSQPSettings *settings, c_int polish){
     // Define Variables
     Priv * p;                    // KKT factorization structure
     c_int n_plus_m;              // Define n_plus_m dimension
-    csc * KKT_temp;  // Temporary KKT pointer
+    csc * KKT_temp;              // Temporary KKT pointer
 
     // Allocate private structure to store KKT factorization
-    // Allocate pointers
     p = c_calloc(1, sizeof(Priv));
 
     // Size of KKT
@@ -164,13 +164,18 @@ Priv *init_priv(const csc * P, const csc * A, csc * KKT, c_int * PtoKKT, c_int *
     // Working vector
     p->bp = c_malloc(sizeof(c_float) * n_plus_m);
 
+
     // Form KKT matrix
-    if (!polish)
-        // Called from ADMM algorithm
-        KKT_temp = form_KKT(P, A, settings->sigma, 1./settings->rho, PtoKKT, AtoKKT);
-    else
-        // Called from polish()
-        KKT_temp = form_KKT(P, A, settings->delta, settings->delta, PtoKKT, AtoKKT);
+    if (polish){ // Called from polish()
+        KKT_temp = form_KKT(P, A, settings->delta, settings->delta, OSQP_NULL, OSQP_NULL);
+    }
+    else { // Called from ADMM algorithm
+        // Allocate vectors of indeces
+        p->PtoKKT = c_malloc((P->p[P->n]) * sizeof(c_int));
+        p->AtoKKT = c_malloc((A->p[A->n]) * sizeof(c_int));
+
+        KKT_temp = form_KKT(P, A, settings->sigma, 1./settings->rho, p->PtoKKT, p->AtoKKT);
+    }
 
     if (KKT_temp == OSQP_NULL){
         #ifdef PRINTING
@@ -185,11 +190,12 @@ Priv *init_priv(const csc * P, const csc * A, csc * KKT, c_int * PtoKKT, c_int *
         return OSQP_NULL;
     }
 
-    if (KKT != OSQP_NULL){ // If KKT passed, assign it to KKT_temp
-        KKT = KKT_temp;
-    }
-    else { // If no KKT passed, cleanup KKT_temp
+    if (polish){ // If KKT passed, assign it to KKT_temp
+        // Polish, no need for KKT_temp
         csc_spfree(KKT_temp);
+    }
+    else { // Copy pointer to KKT_temp. Do not delete it.
+        p->KKT = KKT_temp;
     }
 
     return p;
@@ -217,10 +223,24 @@ void LDLSolve(c_float *x, c_float *b, csc *L, c_float *Dinv, c_int *P,
 }
 
 
-/* TODO: Adjust arguments of the function with other linear system solvers */
 c_int solve_lin_sys(const OSQPSettings *settings, Priv *p, c_float *b) {
     /* returns solution to linear system */
     /* Ax = b with solution stored in b */
     LDLSolve(b, b, p->L, p->Dinv, p->P, p->bp);
     return 0;
+}
+
+
+// Update private structure with new P and A
+void update_priv(Priv * p, const csc *P, const csc *A,
+                 const OSQPWorkspace * work, const OSQPSettings *settings){
+
+    // Update KKT matrix with new P
+    update_KKT_P(p->KKT, P, p->PtoKKT, settings->sigma, work->Pdiag_idx, work->Pdiag_n);
+
+    // Update KKT matrix with new A
+    update_KKT_A(p->KKT, A, p->AtoKKT);
+
+    // Update numeric factorization
+
 }

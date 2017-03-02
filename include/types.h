@@ -138,10 +138,8 @@ typedef struct {
         c_float *P_x, *A_x;                     // Used in scaling:
                                                 //  - preallocate values of P->x, A->x
         c_float *D_temp, *E_temp;               //  - temporary scaling vectors
-        c_int * Pdiag, Pdiag_n;                 // Used in P update:
+        c_int * Pdiag_idx, Pdiag_n;             // Used in P update:
                                                 //   - index and number of diagonal elements in P
-        csc * KKT;                              // KKT matrix in sparse form (used to update P and A matrices) 
-        c_int * PtoKKT, * AtoKKT;               // Index of elements from P and A to KKT matrix
 
         // flag indicating whether the solve function has been run before
         c_int first_run;

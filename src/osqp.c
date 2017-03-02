@@ -60,7 +60,7 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     work->data = c_malloc(sizeof(OSQPData));
     work->data->n = data->n;    // Number of variables
     work->data->m = data->m;    // Number of linear constraints
-    work->data->P = csc_to_triu(data->P, &(work->Pdiag), &(work->Pdiag_n)); // Cost function matrix
+    work->data->P = csc_to_triu(data->P, &(work->Pdiag_idx), &(work->Pdiag_n)); // Cost function matrix
     work->data->q = vec_copy(data->q, data->n);    // Linear part of cost function
     work->data->A = copy_csc_mat(data->A);         // Linear constraints matrix
     work->data->l = vec_copy(data->l, data->m);  // Lower bounds on constraints
@@ -120,12 +120,8 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     }
 
     // Initialize linear system solver private structure
-    // Allocate vectors of indeces
-    work->PtoKKT = c_malloc((work->data->P->p[work->data->n]) * sizeof(c_int));
-    work->AtoKKT = c_malloc((work->data->A->p[work->data->n])* sizeof(c_int));
     // Initialize private structure
-    work->priv = init_priv(work->data->P, work->data->A, work->KKT,
-                           work->PtoKKT, work->AtoKKT, work->settings, 0);
+    work->priv = init_priv(work->data->P, work->data->A, work->settings, 0);
     if (!work->priv){
         #ifdef PRINTING
         c_print("ERROR: Linear systems solver initialization failure!\n");
@@ -330,16 +326,8 @@ c_int osqp_cleanup(OSQPWorkspace * work){
         }
 
         // Free indeces of diagonal part of P
-        if (work->Pdiag)
-            c_free(work->Pdiag);
-
-        // Free KKT matrix and pointers
-        if (work->KKT)
-            csc_spfree(work->KKT);
-        if (work->PtoKKT)
-            c_free(work->PtoKKT);
-        if (work->AtoKKT)
-            c_free(work->AtoKKT);
+        if (work->Pdiag_idx)
+            c_free(work->Pdiag_idx);
 
         // Free scaling
         if (work->settings->scaling) {
@@ -634,6 +622,35 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y){
 }
 
 
+/**
+ * Update elements of matrix P (without changing sparsity structure)
+ * @param  work       Workspace structure
+ * @param  Px_new     Vector of new elements in P->x (upper triangular)
+ * @param  Px_new_idx Index mapping new elements to positions in P->x
+ * @param  P_new_n    Number of new elements to be changed
+ * @return            output flag
+ */
+c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, c_int P_new_n){
+    c_int i; // For indexing
+
+    // Unscale data
+    unscale_data(work);
+
+    // Update P elements
+    for (i = 0; i < P_new_n; i++){
+        work->data->P->x[Px_new_idx[i]] = Px_new[i];
+    }
+
+    // Scale data
+    scale_data(work);
+
+
+    // Update linear system private structure with new data
+    update_priv(work->priv);
+
+
+    return 0;
+}
 
 /****************************
  * Update problem settings  *

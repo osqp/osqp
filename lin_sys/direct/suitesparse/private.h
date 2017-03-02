@@ -13,6 +13,21 @@ struct c_priv{
     c_float *Dinv;  /* inverse of diag matrix in LDL (as a vector)  */
     c_int *P;       /* permutation of KKT matrix for factorization  */
     c_float *bp;    /* workspace memory for solves                  */
+
+
+    // These are required for matrix updates
+    csc * KKT;                 // KKT matrix in sparse form (used to update P and A matrices)
+    c_int * PtoKKT, * AtoKKT;  // Index of elements from P and A to KKT matrix
+    c_int * P_inv;              // Inverse of permuation matrix stored as vector
+    csc * C;                    // Symmetric matrix permutation C = P A P'
+    // LDL Numeric workspace
+    c_int *Lnz;                 // Number of nonzeros in each column of L
+    c_float *Y;                 // LDL Numeric workspace
+    c_int *Pattern, *Flag;      // LDL Numeric workspace
+    c_int *Parent;              // LDL numeric workspace
+
+
+
 };
 
 
