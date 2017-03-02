@@ -138,8 +138,11 @@ typedef struct {
         c_float *P_x, *A_x;                     // Used in scaling:
                                                 //  - preallocate values of P->x, A->x
         c_float *D_temp, *E_temp;               //  - temporary scaling vectors
+
+        #if EMBEDDED != 1
         c_int * Pdiag_idx, Pdiag_n;             // Used in P update:
                                                 //   - index and number of diagonal elements in P
+        #endif
 
         // flag indicating whether the solve function has been run before
         c_int first_run;

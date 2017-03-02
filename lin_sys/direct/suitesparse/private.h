@@ -15,18 +15,17 @@ struct c_priv{
     c_float *bp;    /* workspace memory for solves                  */
 
 
+    #if EMBEDDED != 1
     // These are required for matrix updates
     csc * KKT;                 // KKT matrix in sparse form (used to update P and A matrices)
     c_int * PtoKKT, * AtoKKT;  // Index of elements from P and A to KKT matrix
-    c_int * P_inv;              // Inverse of permuation matrix stored as vector
-    csc * C;                    // Symmetric matrix permutation C = P A P'
+    c_int * Pinv;              // Inverse of permuation matrix stored as vector
     // LDL Numeric workspace
     c_int *Lnz;                 // Number of nonzeros in each column of L
     c_float *Y;                 // LDL Numeric workspace
     c_int *Pattern, *Flag;      // LDL Numeric workspace
     c_int *Parent;              // LDL numeric workspace
-
-
+    #endif
 
 };
 

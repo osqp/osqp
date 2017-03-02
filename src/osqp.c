@@ -60,7 +60,12 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     work->data = c_malloc(sizeof(OSQPData));
     work->data->n = data->n;    // Number of variables
     work->data->m = data->m;    // Number of linear constraints
-    work->data->P = csc_to_triu(data->P, &(work->Pdiag_idx), &(work->Pdiag_n)); // Cost function matrix
+    // Cost function matrix
+    #if EMBEDDED != 1
+    work->data->P = csc_to_triu(data->P, &(work->Pdiag_idx), &(work->Pdiag_n));
+    #else
+    work->data->P = csc_to_triu(data->P, OSQP_NULL, OSQP_NULL);
+    #endif
     work->data->q = vec_copy(data->q, data->n);    // Linear part of cost function
     work->data->A = copy_csc_mat(data->A);         // Linear constraints matrix
     work->data->l = vec_copy(data->l, data->m);  // Lower bounds on constraints
@@ -621,7 +626,7 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y){
     return 0;
 }
 
-
+#if EMBEDDED != 1
 /**
  * Update elements of matrix P (without changing sparsity structure)
  * @param  work       Workspace structure
@@ -632,6 +637,7 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y){
  */
 c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, c_int P_new_n){
     c_int i; // For indexing
+    c_int exitflag; // Exit flag
 
     // Unscale data
     unscale_data(work);
@@ -646,11 +652,13 @@ c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, 
 
 
     // Update linear system private structure with new data
-    update_priv(work->priv);
+    exitflag = update_priv(work->priv, work->data->P, work->data->A,
+                           work, work->settings);
 
 
-    return 0;
+    return exitflag;
 }
+#endif
 
 /****************************
  * Update problem settings  *

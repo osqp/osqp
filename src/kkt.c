@@ -148,7 +148,7 @@ csc * form_KKT(const csc * P, const  csc * A, c_float scalar1, c_float scalar2,
  * @param Pdiag_idx Index of diagonal elements in P->x
  * @param Pdiag_n   Number of diagonal elements of P
  */
-void update_KKT_P(csc * KKT, csc * P, c_int * PtoKKT, c_float scalar1, c_int * Pdiag_idx, c_int Pdiag_n){
+void update_KKT_P(csc * KKT, const csc * P, const c_int * PtoKKT, const c_float scalar1, const c_int * Pdiag_idx, const c_int Pdiag_n){
     c_int i, j; // Iterations
 
     // Update elements of KKT using P
@@ -172,7 +172,7 @@ void update_KKT_P(csc * KKT, csc * P, c_int * PtoKKT, c_float scalar1, c_int * P
  * @param A         A matrix in CSC form (upper-triangular)
  * @param AtoKKT    Vector of pointers from A->x to KKT->x
  */
-void update_KKT_A(csc * KKT, csc * A, c_int * AtoKKT){
+void update_KKT_A(csc * KKT, const csc * A, const c_int * AtoKKT){
     c_int i; // Iterations
 
     // Update elements of KKT using A

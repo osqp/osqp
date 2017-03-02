@@ -19,8 +19,8 @@ Priv *init_priv(const csc * P, const csc * A,
 
 
 // Update private structure with new P and A
-void update_priv(Priv * p, const csc *P, const csc *A,
-                 const OSQPWorkspace * work, const OSQPSettings *settings);
+c_int update_priv(Priv * p, const csc *P, const csc *A,
+                  const OSQPWorkspace * work, const OSQPSettings *settings);
 
 
 /* solves Ax = b for x, and stores result in b */

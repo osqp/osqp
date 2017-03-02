@@ -127,7 +127,7 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y);
 
 
 
-
+#if EMBEDDED != 1
 /**
  * Update elements of matrix P (without changing sparsity structure)
  * @param  work       Workspace structure
@@ -137,7 +137,7 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y);
  * @return            output flag
  */
 c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, c_int P_new_n);
-
+#endif
 
 
 
