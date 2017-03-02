@@ -14,8 +14,9 @@ extern "C" {
 
 // Initialize private variable for solver
 // NB: Only the upper triangular part of P is stuffed!
-Priv *init_priv(const csc * P, const csc * A, const OSQPSettings *settings,
-                c_int polish);
+Priv *init_priv(const csc * P, const csc * A, csc * KKT,
+                c_int * PtoKKT, c_int * AtoKKT,
+                const OSQPSettings *settings, c_int polish);
 
 /* solves Ax = b for x, and stores result in b */
 c_int solve_lin_sys(const OSQPSettings *settings, Priv *p, c_float *b);

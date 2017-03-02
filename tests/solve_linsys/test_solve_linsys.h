@@ -20,7 +20,8 @@ static char * test_solveKKT(){
     // Form and factorize KKT matrix
     settings->rho = data->test_solve_KKT_rho;
     settings->sigma = data->test_solve_KKT_sigma;
-    p = init_priv(data->test_solve_KKT_Pu, data->test_solve_KKT_A, settings, 0);
+    p = init_priv(data->test_solve_KKT_Pu, data->test_solve_KKT_A,
+                  OSQP_NULL, OSQP_NULL, OSQP_NULL, settings, 0);
 
     // Solve  KKT x = b via LDL given factorization
     solve_lin_sys(settings, p, data->test_solve_KKT_rhs);

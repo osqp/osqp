@@ -199,7 +199,8 @@ c_int polish(OSQPWorkspace *work) {
     mred = form_Ared(work);
 
     // Form and factorize reduced KKT
-    plsh = init_priv(work->data->P, work->pol->Ared, work->settings, 1);
+    plsh = init_priv(work->data->P, work->pol->Ared,
+                    OSQP_NULL, OSQP_NULL, OSQP_NULL, work->settings, 1);
 
     // Form reduced right-hand side rhs_red
     rhs_red = c_malloc(sizeof(c_float) * (work->data->n + mred));

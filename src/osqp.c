@@ -60,7 +60,7 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     work->data = c_malloc(sizeof(OSQPData));
     work->data->n = data->n;    // Number of variables
     work->data->m = data->m;    // Number of linear constraints
-    work->data->P = csc_to_triu(data->P, OSQP_NULL, OSQP_NULL);         // Cost function matrix
+    work->data->P = csc_to_triu(data->P, &(work->Pdiag), &(work->Pdiag_n)); // Cost function matrix
     work->data->q = vec_copy(data->q, data->n);    // Linear part of cost function
     work->data->A = copy_csc_mat(data->A);         // Linear constraints matrix
     work->data->l = vec_copy(data->l, data->m);  // Lower bounds on constraints
@@ -120,7 +120,12 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     }
 
     // Initialize linear system solver private structure
-    work->priv = init_priv(work->data->P, work->data->A, work->settings, 0);
+    // Allocate vectors of indeces
+    work->PtoKKT = c_malloc((work->data->P->p[work->data->n]) * sizeof(c_int));
+    work->AtoKKT = c_malloc((work->data->A->p[work->data->n])* sizeof(c_int));
+    // Initialize private structure
+    work->priv = init_priv(work->data->P, work->data->A, work->KKT,
+                           work->PtoKKT, work->AtoKKT, work->settings, 0);
     if (!work->priv){
         #ifdef PRINTING
         c_print("ERROR: Linear systems solver initialization failure!\n");
@@ -323,6 +328,18 @@ c_int osqp_cleanup(OSQPWorkspace * work){
                 c_free(work->data->u);
             c_free(work->data);
         }
+
+        // Free indeces of diagonal part of P
+        if (work->Pdiag)
+            c_free(work->Pdiag);
+
+        // Free KKT matrix and pointers
+        if (work->KKT)
+            csc_spfree(work->KKT);
+        if (work->PtoKKT)
+            c_free(work->PtoKKT);
+        if (work->AtoKKT)
+            c_free(work->AtoKKT);
 
         // Free scaling
         if (work->settings->scaling) {

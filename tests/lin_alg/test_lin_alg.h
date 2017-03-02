@@ -187,7 +187,7 @@ static char * test_extract_upper_triangular(){
               is_eq_csc(data->test_mat_extr_triu_Pu, Ptriu, TESTS_TOL));
 
     // Cleanup
-    c_free(Ptriu);
+    csc_spfree(Ptriu);
     clean_problem_lin_alg_sols_data(data);
 
 

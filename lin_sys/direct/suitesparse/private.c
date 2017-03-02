@@ -114,14 +114,30 @@ c_int factorize(csc *A, Priv *p) {
     return (ldl_status);
 }
 
+// 1) Allocate private structure
+// 2) Form KKT matrix (according to polish or standard one)
+// 3) Factorize KKT matrix
 
-// Initialize LDL Factorization structure
-Priv *init_priv(const csc * P, const csc * A, const OSQPSettings *settings,
-                c_int polish){
+/**
+ * Initialize LDL Factorization structure
+ *
+ *  KKT, PtoKKT and AtoKKT can be OSQP_NULL so that they can be ignored
+ *
+ * @param  P        Cost function matrix (upper triangular form)
+ * @param  A        Constraints matrix
+ * @param  KKT      (modified) KKT matrix pointer
+ * @param  PtoKKT   (modified) Index mapping from P to KKT matrix
+ * @param  AtoKKT   (modified) Index mapping from A to KKT matrix
+ * @param  settings Solver settings
+ * @param  polish   Flag whether we are initializing for polishing or not
+ * @return          Initialized private structure
+ */
+Priv *init_priv(const csc * P, const csc * A, csc * KKT, c_int * PtoKKT, c_int * AtoKKT,
+    const OSQPSettings *settings, c_int polish){
     // Define Variables
-    csc * KKT;       // KKT Matrix
-    Priv * p;        // KKT factorization structure
-    c_int n_plus_m;  // Define n_plus_m dimension
+    Priv * p;                    // KKT factorization structure
+    c_int n_plus_m;              // Define n_plus_m dimension
+    csc * KKT_temp;  // Temporary KKT pointer
 
     // Allocate private structure to store KKT factorization
     // Allocate pointers
@@ -148,25 +164,33 @@ Priv *init_priv(const csc * P, const csc * A, const OSQPSettings *settings,
     // Working vector
     p->bp = c_malloc(sizeof(c_float) * n_plus_m);
 
-    // Solve time (for reporting)
-    // p->total_solve_time = 0.0;
-
     // Form KKT matrix
     if (!polish)
         // Called from ADMM algorithm
-        KKT = form_KKT(P, A, settings->sigma, 1./settings->rho, OSQP_NULL, OSQP_NULL);
+        KKT_temp = form_KKT(P, A, settings->sigma, 1./settings->rho, PtoKKT, AtoKKT);
     else
         // Called from polish()
-        KKT = form_KKT(P, A, settings->delta, settings->delta, OSQP_NULL, OSQP_NULL);
+        KKT_temp = form_KKT(P, A, settings->delta, settings->delta, PtoKKT, AtoKKT);
+
+    if (KKT_temp == OSQP_NULL){
+        #ifdef PRINTING
+            c_print("Error forming KKT matrix!\n");
+        #endif
+        return OSQP_NULL;
+    }
 
     // Factorize the KKT matrix
-    if (factorize(KKT, p) < 0) {
+    if (factorize(KKT_temp, p) < 0) {
         free_priv(p);
         return OSQP_NULL;
     }
 
-    // Memory clean-up
-    csc_spfree(KKT);
+    if (KKT != OSQP_NULL){ // If KKT passed, assign it to KKT_temp
+        KKT = KKT_temp;
+    }
+    else { // If no KKT passed, cleanup KKT_temp
+        csc_spfree(KKT_temp);
+    }
 
     return p;
 }

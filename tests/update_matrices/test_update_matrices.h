@@ -70,6 +70,10 @@ static char * test_form_KKT(){
     // Cleanup
     clean_problem_update_matrices_sols_data(data);
     c_free(Pdiag_idx);
+    csc_spfree(Ptriu);
+    csc_spfree(KKT);
+    c_free(AtoKKT);
+    c_free(PtoKKT);
     return 0;
 }
 

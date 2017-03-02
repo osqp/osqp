@@ -86,7 +86,7 @@ static char * test_basic_qp2_update()
     // Structures
     OSQPWorkspace * work;  // Workspace
     OSQPData * data;  // Data
-    basic_qp2_sols_data *  sols_data = generate_problem_basic_qp2_sols_data();
+    basic_qp2_sols_data *  sols_data;
 
 
     // Populate data
