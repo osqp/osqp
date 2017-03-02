@@ -15,16 +15,24 @@ extern "C" {
  *
  * N.B. Only the upper triangular part is stuffed!
  *
+ *
+ *  If Pdiag_idx is not OSQP_NULL, it saves the index of the diagonal
+ * elements of P there and the number of diagonal elements in Pdiag_n.
+ *
+ * N.B. Pdiag_idx needs to be freed!
+ *
  * @param  P          cost matrix (already just upper triangular part)
  * @param  A          linear constraint matrix
  * @param  scalar1    regularization parameter scalar1
  * @param  scalar2    regularization parameter scalar2
  * @param  PtoKKT     (modified) index mapping from elements of P to KKT matrix
  * @param  AtoKKT     (modified) index mapping from elements of A to KKT matrix
+ * @param  Pdiag_idx  (modified) Address of the index of diagonal elements in P
+ * @param  Pdiag_n    (modified) Address to the number of diagonal elements in P
  * @return            return status flag
  */
 csc * form_KKT(const csc * P, const  csc * A, c_float scalar1, c_float scalar2,
-               c_int * PtoKKT, c_int * AtoKKT);
+               c_int * PtoKKT, c_int * AtoKKT, c_int **Pdiag_idx, c_int *Pdiag_n);
 
 
 

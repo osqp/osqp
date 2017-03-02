@@ -227,24 +227,16 @@ csc * csc_done(csc *C, void *w, void *x, c_int ok){
 /**
  * Convert square CSC matrix into upper triangular one
  *
- * If Mdiag_idx is not OSQP_NULL, it saves the index of the diagonal
- * elements there and the number of diagonal elements in Mdiag_n.
- *
- * N.B. Mdiag_idx needs to be freed!
- *
  * @param  M         Matrix to be converted
- * @param  Mdiag_idx (modified) Address of the indef of diagonal elements in new matrix
- * @param  Mdiag_n   (modified) Address to the number of diagonal elements
  * @return           Upper triangular matrix in CSC format
  */
-csc * csc_to_triu(csc * M, c_int ** Mdiag_idx, c_int * Mdiag_n){
+csc * csc_to_triu(csc * M){
     csc * M_trip;  // Matrix in triplet format
     csc * M_triu;  // Resulting upper triangular matrix
     c_int nnzmaxM; // Estimated maximum number of elements of M
     c_int n;  // Dimension of M
     c_int ptr, i, j;  // Counters for (i,j) and index in M
     c_int z_M = 0; // Counter for elements in M_trip
-    c_int * Mtriu_TtoC;  // Pointer to vector mapping from Mtriu in triplet form to CSC
 
 
     // Check if matrix is square
@@ -264,12 +256,6 @@ csc * csc_to_triu(csc * M, c_int ** Mdiag_idx, c_int * Mdiag_n){
     M_trip = csc_spalloc(n, n, nnzmaxM, 1, 1); // Triplet format
 
 
-    // Allocate vector of indeces on the diagonal. Worst case it has m elements
-    if (Mdiag_idx != OSQP_NULL){
-        (*Mdiag_idx) = c_malloc(M->m * sizeof(c_int));
-        *Mdiag_n = 0; // Set 0 diagonal elements to start
-    }
-
     // Fill M_trip with only elements in M which are in the upper triangular
     for (j=0; j < n; j++){  // Cycle over columns
         for (ptr = M->p[j]; ptr < M->p[j+1]; ptr++){
@@ -284,48 +270,17 @@ csc * csc_to_triu(csc * M, c_int ** Mdiag_idx, c_int * Mdiag_n){
                 M_trip->p[z_M] = j;
                 M_trip->x[z_M] = M->x[ptr];
 
-                // It is a diagonal element and index vector pointer supplied.
-                // -> Store the index
-                if ((i == j) && (Mdiag_idx != OSQP_NULL)) {
-                        (*Mdiag_idx)[*Mdiag_n] = z_M;
-                        (*Mdiag_n)++;
-                }
-
                 // Increase counter for the number of elements
                 z_M++;
             }
         }
     }
 
-    if (Mdiag_idx != OSQP_NULL){
-        // Realloc Mdiag_idx so that it contains exactly *Mdiag_n diagonal elements
-        (*Mdiag_idx) = c_realloc((*Mdiag_idx), (*Mdiag_n) * sizeof(c_int));
-    }
-
     // Set number of nonzeros
     M_trip->nz = z_M;
 
     // Convert triplet matrix to csc format
-    if (Mdiag_idx == OSQP_NULL){
-        // If no index vector passed, do not store index mapping
-        M_triu = triplet_to_csc(M_trip, OSQP_NULL);
-    }
-    else {
-        // Allocate vector mapping from Trip to CSC
-        Mtriu_TtoC = c_malloc((z_M) * sizeof(c_int));
-        if(!Mtriu_TtoC) return OSQP_NULL; // Error in allocating Mtriu_TtoC vector
-
-        // Convert to CSC and store Mtriu mapping from Trip to CSC
-        M_triu = triplet_to_csc(M_trip, Mtriu_TtoC);
-
-        // Update vector of indeces Mdiag_idx
-        for (i = 0; i < *Mdiag_n; i++){
-            (*Mdiag_idx)[i] = Mtriu_TtoC[(*Mdiag_idx)[i]];
-        }
-
-        // Free mapping Mtriu_TtoC
-        c_free(Mtriu_TtoC);
-    }
+    M_triu = triplet_to_csc(M_trip, OSQP_NULL);
 
     // Cleanup and return result
     csc_spfree(M_trip);

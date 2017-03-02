@@ -181,7 +181,7 @@ static char * test_extract_upper_triangular(){
     lin_alg_sols_data *  data = generate_problem_lin_alg_sols_data();
 
     // Extract upper triangular part
-    csc * Ptriu = csc_to_triu(data->test_mat_extr_triu_P, OSQP_NULL, OSQP_NULL);
+    csc * Ptriu = csc_to_triu(data->test_mat_extr_triu_P);
 
     mu_assert("Linear algebra tests: error in forming upper triangular matrix!",
               is_eq_csc(data->test_mat_extr_triu_Pu, Ptriu, TESTS_TOL));

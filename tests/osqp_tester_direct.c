@@ -23,11 +23,11 @@ int tests_run = 0;
 
 
 static char * all_tests() {
-    mu_run_test(test_lin_alg);
-    mu_run_test(test_solve_linsys);
-    mu_run_test(test_basic_qp);
-    mu_run_test(test_basic_qp2);
-    mu_run_test(test_infeasibility);
+    // mu_run_test(test_lin_alg);
+    // mu_run_test(test_solve_linsys);
+    // mu_run_test(test_basic_qp);
+    // mu_run_test(test_basic_qp2);
+    // mu_run_test(test_infeasibility);
     mu_run_test(test_update_matrices);
     return 0;
 }

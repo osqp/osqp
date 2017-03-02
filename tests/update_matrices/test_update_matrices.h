@@ -32,10 +32,10 @@ static char * test_form_KKT(){
                     sizeof(c_int));
 
     // Form upper triangular part in P
-    Ptriu = csc_to_triu(data->test_form_KKT_P, &Pdiag_idx, &Pdiag_n);
+    Ptriu = csc_to_triu(data->test_form_KKT_P);
 
     // Form KKT matrix storing the index vectors
-    KKT = form_KKT(Ptriu, data->test_form_KKT_A, sigma, 1./rho, PtoKKT, AtoKKT);
+    KKT = form_KKT(Ptriu, data->test_form_KKT_A, sigma, 1./rho, PtoKKT, AtoKKT, &Pdiag_idx, &Pdiag_n);
 
     // Assert if KKT matrix is the same as predicted one
     mu_assert("Update matrices: error in forming KKT matrix!", is_eq_csc(KKT, data->test_form_KKT_KKTu, TESTS_TOL));
@@ -44,8 +44,8 @@ static char * test_form_KKT(){
     // print_csc_matrix(Ptriu, "P");
     // print_csc_matrix(data->test_form_KKT_A, "A");
     //
-    // print_vec_int(PtoKKT, data->test_form_KKT_Pu->p[data->test_form_KKT_Pu->n], "PtoKKT");
-    // print_vec_int(AtoKKT, data->test_form_KKT_A->p[data->test_form_KKT_A->n], "AtoKKT");
+    print_vec_int(PtoKKT, data->test_form_KKT_Pu->p[data->test_form_KKT_Pu->n], "PtoKKT");
+    print_vec_int(AtoKKT, data->test_form_KKT_A->p[data->test_form_KKT_A->n], "AtoKKT");
 
     // Update KKT matrix with new P and new A
     update_KKT_P(KKT, data->test_form_KKT_Pu_new, PtoKKT, sigma, Pdiag_idx, Pdiag_n);
@@ -56,7 +56,7 @@ static char * test_form_KKT(){
     mu_assert("Update matrices: error in updating KKT matrix!", is_eq_csc(KKT, data->test_form_KKT_KKTu_new, TESTS_TOL));
 
     // DEBUG
-    // print_vec_int(Pdiag_idx, Pdiag_n, "Pdiag");
+    print_vec_int(Pdiag_idx, Pdiag_n, "Pdiag");
 
 
     // Solve  KKT x = b via LDL given factorization

@@ -7,8 +7,8 @@ import osqp
 
 
 # Define tests
-test_form_KKT_n = 2
-test_form_KKT_m = 3
+test_form_KKT_n = 5
+test_form_KKT_m = 8
 p = 0.3
 
 test_form_KKT_A = spa.random(test_form_KKT_m, test_form_KKT_n, density=p).tocsc()

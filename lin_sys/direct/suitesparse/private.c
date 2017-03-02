@@ -17,6 +17,8 @@ void free_priv(Priv *p) {
 
         #if EMBEDDED != 1
         // These are required for matrix updates
+        if (p->Pdiag_idx)
+            c_free(p->Pdiag_idx);
         if (p->KKT)
             csc_spfree(p->KKT);
         if (p->PtoKKT)
@@ -184,7 +186,7 @@ Priv *init_priv(const csc * P, const csc * A, const OSQPSettings *settings, c_in
 
     // Form KKT matrix
     if (polish){ // Called from polish()
-        KKT_temp = form_KKT(P, A, settings->delta, settings->delta, OSQP_NULL, OSQP_NULL);
+        KKT_temp = form_KKT(P, A, settings->delta, settings->delta, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
     }
     else { // Called from ADMM algorithm
         #if EMBEDDED != 1
@@ -193,10 +195,11 @@ Priv *init_priv(const csc * P, const csc * A, const OSQPSettings *settings, c_in
         p->AtoKKT = c_malloc((A->p[A->n]) * sizeof(c_int));
 
         KKT_temp = form_KKT(P, A, settings->sigma, 1./settings->rho,
-                            p->PtoKKT, p->AtoKKT);
+                            p->PtoKKT, p->AtoKKT,
+                            &(p->Pdiag_idx), &(p->Pdiag_n));
         #else
         KKT_temp = form_KKT(P, A, settings->sigma, 1./settings->rho,
-                            OSQP_NULL, OSQP_NULL);
+                            OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
         #endif
     }
 
@@ -264,7 +267,7 @@ c_int update_priv(Priv * p, const csc *P, const csc *A,
     c_int kk;
 
     // Update KKT matrix with new P
-    update_KKT_P(p->KKT, P, p->PtoKKT, settings->sigma, work->Pdiag_idx, work->Pdiag_n);
+    update_KKT_P(p->KKT, P, p->PtoKKT, settings->sigma, p->Pdiag_idx, p->Pdiag_n);
 
     // Update KKT matrix with new A
     update_KKT_A(p->KKT, A, p->AtoKKT);

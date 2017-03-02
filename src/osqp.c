@@ -60,12 +60,7 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     work->data = c_malloc(sizeof(OSQPData));
     work->data->n = data->n;    // Number of variables
     work->data->m = data->m;    // Number of linear constraints
-    // Cost function matrix
-    #if EMBEDDED != 1
-    work->data->P = csc_to_triu(data->P, &(work->Pdiag_idx), &(work->Pdiag_n));
-    #else
-    work->data->P = csc_to_triu(data->P, OSQP_NULL, OSQP_NULL);
-    #endif
+    work->data->P = csc_to_triu(data->P);   // Cost function matrix
     work->data->q = vec_copy(data->q, data->n);    // Linear part of cost function
     work->data->A = copy_csc_mat(data->A);         // Linear constraints matrix
     work->data->l = vec_copy(data->l, data->m);  // Lower bounds on constraints
@@ -329,10 +324,6 @@ c_int osqp_cleanup(OSQPWorkspace * work){
                 c_free(work->data->u);
             c_free(work->data);
         }
-
-        // Free indeces of diagonal part of P
-        if (work->Pdiag_idx)
-            c_free(work->Pdiag_idx);
 
         // Free scaling
         if (work->settings->scaling) {
