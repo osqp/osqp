@@ -5,13 +5,24 @@
 extern "C" {
 #endif
 
-#include "cs.h"        // matrix types
-
+// #include "cs.h"        // matrix types
+#include "glob_opts.h"
 
 
 /******************
  * Internal types *
  ******************/
+
+/* matrix in compressed-column or triplet form */
+typedef struct {
+     c_int nzmax;     /* maximum number of entries */
+     c_int m;         /* number of rows */
+     c_int n;         /* number of columns */
+     c_int *p;        /* column pointers (size n+1) or col indices (size nzmax) start from 0 */
+     c_int *i;        /* row indices, size nzmax starting from 0*/
+     c_float *x;      /* numerical values, size nzmax */
+     c_int nz;       /* # of entries in triplet matrix, -1 for compressed-col */
+} csc;
 
 /* Linear system solver private structure (internal functions deal with it) */
 typedef struct c_priv Priv;

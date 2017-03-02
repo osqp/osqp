@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include "types.h"
+#include "cs.h"
 
 /**
  * Form square symmetric KKT matrix of the form

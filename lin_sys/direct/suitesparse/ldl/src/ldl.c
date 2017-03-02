@@ -325,6 +325,7 @@ LDL_int LDL_numeric	/* returns n if successful, k if D (k,k) is zero */
 
 #endif  //end EMBEDDED
 
+
 /* ========================================================================== */
 /* === ldl_lsolve:  solve Lx=b ============================================== */
 /* ========================================================================== */
@@ -350,23 +351,23 @@ void LDL_lsolve
 }
 
 
-/* ========================================================================== */
-/* === ldl_dsolve:  solve Dx=b ============================================== */
-/* ========================================================================== */
-
-void LDL_dsolve
-(
-    LDL_int n,		/* D is n-by-n, where n >= 0 */
-    c_float X [ ],	/* size n.  right-hand-side on input, soln. on output */
-    c_float D [ ]	/* input of size n, not modified */
-)
-{
-    LDL_int j ;
-    for (j = 0 ; j < n ; j++)
-    {
-	X [j] /= D [j] ;
-    }
-}
+// /* ========================================================================== */
+// /* === ldl_dsolve:  solve Dx=b ============================================== */
+// /* ========================================================================== */
+//
+// void LDL_dsolve
+// (
+//     LDL_int n,		/* D is n-by-n, where n >= 0 */
+//     c_float X [ ],	/* size n.  right-hand-side on input, soln. on output */
+//     c_float D [ ]	/* input of size n, not modified */
+// )
+// {
+//     LDL_int j ;
+//     for (j = 0 ; j < n ; j++)
+//     {
+// 	X [j] /= D [j] ;
+//     }
+// }
 
 
 /* ========================================================================== */
@@ -434,79 +435,80 @@ void LDL_permt
 }
 
 
-/* ========================================================================== */
-/* === ldl_valid_perm: check if a permutation vector is valid =============== */
-/* ========================================================================== */
 
-LDL_int LDL_valid_perm	    /* returns 1 if valid, 0 otherwise */
-(
-    LDL_int n,
-    LDL_int P [ ],	    /* input of size n, a permutation of 0:n-1 */
-    LDL_int Flag [ ]	    /* workspace of size n */
-)
-{
-    LDL_int j, k ;
-    if (n < 0 || !Flag)
-    {
-	return (0) ;	    /* n must be >= 0, and Flag must be present */
-    }
-    if (!P)
-    {
-	return (1) ;	    /* If NULL, P is assumed to be the identity perm. */
-    }
-    for (j = 0 ; j < n ; j++)
-    {
-	Flag [j] = 0 ;	    /* clear the Flag array */
-    }
-    for (k = 0 ; k < n ; k++)
-    {
-	j = P [k] ;
-	if (j < 0 || j >= n || Flag [j] != 0)
-	{
-	    return (0) ;    /* P is not valid */
-	}
-	Flag [j] = 1 ;
-    }
-    return (1) ;	    /* P is valid */
-}
-
-
-/* ========================================================================== */
-/* === ldl_valid_matrix: check if a sparse matrix is valid ================== */
-/* ========================================================================== */
-
-/* This routine checks to see if a sparse matrix A is valid for input to
- * ldl_symbolic and ldl_numeric.  It returns 1 if the matrix is valid, 0
- * otherwise.  A is in sparse column form.  The numerical values in column j
- * are stored in Ax [Ap [j] ... Ap [j+1]-1], with row indices in
- * Ai [Ap [j] ... Ap [j+1]-1].  The Ax array is not checked.
- */
-
-LDL_int LDL_valid_matrix
-(
-    LDL_int n,
-    LDL_int Ap [ ],
-    LDL_int Ai [ ]
-)
-{
-    LDL_int j, p ;
-    if (n < 0 || !Ap || !Ai || Ap [0] != 0)
-    {
-	return (0) ;	    /* n must be >= 0, and Ap and Ai must be present */
-    }
-    for (j = 0 ; j < n ; j++)
-    {
-	if (Ap [j] > Ap [j+1])
-	{
-	    return (0) ;    /* Ap must be monotonically nondecreasing */
-	}
-    }
-    for (p = 0 ; p < Ap [n] ; p++)
-    {
-	if (Ai [p] < 0 || Ai [p] >= n)
-	{
-	    return (0) ;    /* row indices must be in the range 0 to n-1 */
-	}
-    }
-    return (1) ;	    /* matrix is valid */
-}
+// /* ========================================================================== */
+// /* === ldl_valid_perm: check if a permutation vector is valid =============== */
+// /* ========================================================================== */
+//
+// LDL_int LDL_valid_perm	    /* returns 1 if valid, 0 otherwise */
+// (
+//     LDL_int n,
+//     LDL_int P [ ],	    /* input of size n, a permutation of 0:n-1 */
+//     LDL_int Flag [ ]	    /* workspace of size n */
+// )
+// {
+//     LDL_int j, k ;
+//     if (n < 0 || !Flag)
+//     {
+// 	return (0) ;	    /* n must be >= 0, and Flag must be present */
+//     }
+//     if (!P)
+//     {
+// 	return (1) ;	    /* If NULL, P is assumed to be the identity perm. */
+//     }
+//     for (j = 0 ; j < n ; j++)
+//     {
+// 	Flag [j] = 0 ;	    /* clear the Flag array */
+//     }
+//     for (k = 0 ; k < n ; k++)
+//     {
+// 	j = P [k] ;
+// 	if (j < 0 || j >= n || Flag [j] != 0)
+// 	{
+// 	    return (0) ;    /* P is not valid */
+// 	}
+// 	Flag [j] = 1 ;
+//     }
+//     return (1) ;	    /* P is valid */
+// }
+//
+//
+// /* ========================================================================== */
+// /* === ldl_valid_matrix: check if a sparse matrix is valid ================== */
+// /* ========================================================================== */
+//
+// /* This routine checks to see if a sparse matrix A is valid for input to
+//  * ldl_symbolic and ldl_numeric.  It returns 1 if the matrix is valid, 0
+//  * otherwise.  A is in sparse column form.  The numerical values in column j
+//  * are stored in Ax [Ap [j] ... Ap [j+1]-1], with row indices in
+//  * Ai [Ap [j] ... Ap [j+1]-1].  The Ax array is not checked.
+//  */
+//
+// LDL_int LDL_valid_matrix
+// (
+//     LDL_int n,
+//     LDL_int Ap [ ],
+//     LDL_int Ai [ ]
+// )
+// {
+//     LDL_int j, p ;
+//     if (n < 0 || !Ap || !Ai || Ap [0] != 0)
+//     {
+// 	return (0) ;	    /* n must be >= 0, and Ap and Ai must be present */
+//     }
+//     for (j = 0 ; j < n ; j++)
+//     {
+// 	if (Ap [j] > Ap [j+1])
+// 	{
+// 	    return (0) ;    /* Ap must be monotonically nondecreasing */
+// 	}
+//     }
+//     for (p = 0 ; p < Ap [n] ; p++)
+//     {
+// 	if (Ai [p] < 0 || Ai [p] >= n)
+// 	{
+// 	    return (0) ;    /* row indices must be in the range 0 to n-1 */
+// 	}
+//     }
+//     return (1) ;	    /* matrix is valid */
+// }

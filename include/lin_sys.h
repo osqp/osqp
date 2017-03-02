@@ -8,7 +8,10 @@
 extern "C" {
 #endif
 
+#ifndef EMBEDDED
 #include "cs.h"
+#endif
+
 #include "types.h"
 
 

@@ -4,9 +4,12 @@
 // #include "osqp.h"
 #include "types.h"
 #include "lin_alg.h"
+#include "ldl.h"
+
+#ifndef EMBEDDED
 #include "kkt.h"
 #include "amd.h"
-#include "ldl.h"
+#endif
 
 struct c_priv{
     csc *L;         /* lower triangular matrix in LDL factorization */

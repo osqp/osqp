@@ -5,6 +5,15 @@
 extern "C" {
 #endif
 
+#include <math.h>
+
+// TODO: Uncomment the EMBEDDED flag below.
+// - We do not need malloc functions in EMBEDDED.
+// - There are currently some issues with SuiteSparse_config
+
+// #ifndef EMBEDDED
+#include <stdlib.h>
+
 /* DATA CUSTOMIZATIONS (depending on memory manager)-----------------------   */
 /* define custom printfs and memory allocation (e.g. matlab or python) */
 #ifdef MATLAB_MEX_FILE
@@ -52,6 +61,9 @@ extern "C" {
     #define c_free free
     #define c_realloc realloc
 #endif
+
+// #endif  //end EMBEDDED
+
 
 
 /* Use customized number representation -----------------------------------   */

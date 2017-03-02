@@ -32,19 +32,21 @@ endif()
 # Set options
 # ----------------------------------------------
 # Is the code generated for embedded platforms?
-#   0 :   No.
 #   1 :   Yes. Matrix update not allowed.
 #   2 :   Yes. Matrix update allowed.
-set (EMBEDDED 0)
-message(STATUS "Embedded is ${EMBEDDED}")
-if(${EMBEDDED} GREATER 0)
+set (EMBEDDED 1)
+
+if (NOT DEFINED EMBEDDED)
+    message(STATUS "Embedded is OFF")
+else()
+    message(STATUS "Embedded is ${EMBEDDED}")
     message(STATUS "Passing EMBEDDED flag to compiler")
     add_definitions(-DEMBEDDED=${EMBEDDED})
 endif()
 
 # Is printing enabled?
 option (PRINTING "Enable solver printing" ON)
-if(${EMBEDDED} GREATER 0)
+if (DEFINED EMBEDDED)
     message(STATUS "Disabling printing for embedded")
     set(PRINTING OFF)
 endif()
@@ -55,7 +57,7 @@ endif (PRINTING)
 
 # Is profiling enabled?
 option (PROFILING "Enable solver profiling (timing)" ON)
-if(${EMBEDDED} GREATER 0)
+if (DEFINED EMBEDDED)
     message(STATUS "Disabling profiling for embedded")
     set(PROFILING OFF)
 endif()
@@ -98,35 +100,62 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Set sources
 # ----------------------------------------------
-set(
-    osqp_src
-    src/auxil.c
-    src/cs.c
-    src/kkt.c
-    src/lin_alg.c
-    src/osqp.c
-    src/polish.c
-    src/proj.c
-    src/scaling.c
-    src/util.c
-)
+if(NOT DEFINED EMBEDDED)
+    set(
+        osqp_src
+        src/auxil.c
+        src/cs.c
+        src/kkt.c
+        src/lin_alg.c
+        src/osqp.c
+        src/polish.c
+        src/proj.c
+        src/scaling.c
+        src/util.c
+    )
 
-set(
-    osqp_headers
-    include/auxil.h
-    include/constants.h
-    include/cs.h
-    include/glob_opts.h
-    include/kkt.h
-    include/lin_alg.h
-    include/lin_sys.h
-    include/osqp.h
-    include/types.h
-    include/polish.h
-    include/proj.h
-    include/scaling.h
-    include/util.h
-)
+    set(
+        osqp_headers
+        include/auxil.h
+        include/constants.h
+        include/cs.h
+        include/glob_opts.h
+        include/kkt.h
+        include/lin_alg.h
+        include/lin_sys.h
+        include/osqp.h
+        include/types.h
+        include/polish.h
+        include/proj.h
+        include/scaling.h
+        include/util.h
+    )
+else()
+    # If embedded is enabled, do not use cs, kkt, polish
+    set(
+        osqp_src
+        src/auxil.c
+        src/lin_alg.c
+        src/osqp.c
+        src/proj.c
+        src/scaling.c
+        src/util.c
+    )
+
+    set(
+        osqp_headers
+        include/auxil.h
+        include/constants.h
+        include/glob_opts.h
+        include/lin_alg.h
+        include/lin_sys.h
+        include/osqp.h
+        include/types.h
+        include/proj.h
+        include/scaling.h
+        include/util.h
+    )
+endif()
 
 # Create  Library
 # ----------------------------------------------

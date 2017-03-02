@@ -8,6 +8,7 @@ set(suitesparse_includes
 
 
 # AMD source files
+if(NOT DEFINED EMBEDDED)
 set(
     amd_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/amd/include/amd_internal.h
@@ -24,6 +25,7 @@ set(
     ${CMAKE_CURRENT_SOURCE_DIR}/amd/src/amd_preprocess.c
     ${CMAKE_CURRENT_SOURCE_DIR}/amd/src/amd_valid.c
 )
+endif()
 
 # LDL source files
 set(
@@ -34,13 +36,24 @@ set(
 
 
 # Suitesparse sources
-set(
-    suitesparse_sources
-    ${CMAKE_CURRENT_SOURCE_DIR}/SuiteSparse_config.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/SuiteSparse_config.c
-    ${amd_sources}
-    ${ldl_sources}
-    ${CMAKE_CURRENT_SOURCE_DIR}/private.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/private.c
-    PARENT_SCOPE
-)
+if(NOT DEFINED EMBEDDED)
+    set(
+        suitesparse_sources
+        ${CMAKE_CURRENT_SOURCE_DIR}/SuiteSparse_config.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/SuiteSparse_config.c
+        ${amd_sources}
+        ${ldl_sources}
+        ${CMAKE_CURRENT_SOURCE_DIR}/private.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/private.c
+        PARENT_SCOPE
+    )
+else()
+  # If embedded is enabled, do not use SuiteSparse_config
+  set(
+      suitesparse_sources
+      ${ldl_sources}
+      ${CMAKE_CURRENT_SOURCE_DIR}/private.h
+      ${CMAKE_CURRENT_SOURCE_DIR}/private.c
+      PARENT_SCOPE
+  )
+endif()
