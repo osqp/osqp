@@ -13,7 +13,6 @@ void free_priv(Priv *p) {
             c_free(p->Dinv);
         if (p->bp)
             c_free(p->bp);
-        c_free(p);
 
         #if EMBEDDED != 1
         // These are required for matrix updates
@@ -25,8 +24,6 @@ void free_priv(Priv *p) {
             c_free(p->PtoKKT);
         if (p->AtoKKT)
             c_free(p->AtoKKT);
-        if (p->Pinv)
-            c_free(p->Pinv);
         if (p->Parent)
             c_free(p->Parent);
         if (p->Lnz)
@@ -38,6 +35,9 @@ void free_priv(Priv *p) {
         if (p->Y)
             c_free(p->Y);
         #endif
+
+        c_free(p);
+
     }
 }
 
@@ -53,7 +53,16 @@ void free_priv(Priv *p) {
  * @param  D    Diagonal matrix (stored as a vector)
  * @return      Status of the routine
  */
-c_int LDLFactor(csc *A,  Priv * p){
+
+
+
+/**
+ * Compute LDL factorization of matrix A
+ * @param  A Matrix to be factorized
+ * @param  p Private workspace
+ * @return   [description]
+ */
+c_int LDL_factor(csc *A,  Priv * p){
     // c_int P[], c_int Pinv[], csc **L, c_float **D) {
     c_int kk, n = A->n;
     c_int check_Li_Lx;
@@ -65,9 +74,10 @@ c_int LDLFactor(csc *A,  Priv * p){
     p->L->p = (c_int *)c_malloc((1 + n) * sizeof(c_int));
 
     // Symbolic factorization
-    LDL_symbolic(n, A->p, A->i, p->L->p, Parent, Lnz, Flag, p->P, p->Pinv);
+    LDL_symbolic(n, A->p, A->i, p->L->p, Parent, Lnz, Flag,
+         OSQP_NULL, OSQP_NULL);
 
-    p->L->nzmax = *(p->L->p + n);
+    p->L->nzmax = p->L->p[n];
     p->L->x = (c_float *)c_malloc(p->L->nzmax * sizeof(c_float));
     p->L->i = (c_int *)c_malloc(p->L->nzmax * sizeof(c_int));
 
@@ -85,8 +95,10 @@ c_int LDLFactor(csc *A,  Priv * p){
         return -1;
 
     // Numeric factorization
+    //                  p->L->x, p->Dinv, Y, Pattern, Flag, p->P, Pinv);
     kk = LDL_numeric(A->n, A->p, A->i, A->x, p->L->p, Parent, Lnz, p->L->i,
-                     p->L->x, p->Dinv, Y, Pattern, Flag, p->P, p->Pinv);
+                     p->L->x, p->Dinv, Y, Pattern, Flag, OSQP_NULL, OSQP_NULL);
+
 
     // If not embedded option 1 store values into private structure
     #if EMBEDDED != 1
@@ -95,6 +107,12 @@ c_int LDLFactor(csc *A,  Priv * p){
     p->Flag = Flag;
     p->Pattern = Pattern;
     p->Y = Y;
+    #else
+    c_free(Parent);
+    c_free(Lnz);
+    c_free(Flag);
+    c_free(Pattern);
+    c_free(Y);
     #endif
 
     // return exit flag
@@ -103,46 +121,60 @@ c_int LDLFactor(csc *A,  Priv * p){
 
 
 
-/**
- *  Factorize matrix A using sparse LDL factorization with pivoting as:
- *      P A P' = L D L'
- *  The result is stored in the LDL Factorization structure Priv.
- */
-c_int factorize(csc *A, Priv *p) {
+c_int permute_KKT(csc ** KKT, Priv * p, c_int Pnz, c_int Anz, c_int * PtoKKT, c_int * AtoKKT){
     c_float *info;
-    c_int amd_status, ldl_status;
+    c_int amd_status;
     info = (c_float *)c_malloc(AMD_INFO * sizeof(c_float));
-    c_int * Pinv_temp;
+    c_int * Pinv;
+    csc *KKT_temp;
+    c_int * KtoPKPt;
+    c_int i; // Indexing
 
-    // Compute permutation metrix P using SuiteSparse/AMD
+    // Compute permutation metrix P using AMD
     #ifdef DLONG
-    amd_status = amd_l_order(A->n, A->p, A->i, p->P, (c_float *)OSQP_NULL, info);
+    amd_status = amd_l_order((*KKT)->n, (*KKT)->p, (*KKT)->i, p->P, (c_float *)OSQP_NULL, info);
     #else
-    amd_status = amd_order(A->n, A->p, A->i, p->P, (c_float *)OSQP_NULL, info);
+    amd_status = amd_order((*KKT)->n, (*KKT)->p, (*KKT)->i, p->P, (c_float *)OSQP_NULL, info);
     #endif
     if (amd_status < 0) return (amd_status);
 
-    // Compute inverse of permutation matrix P
-    Pinv_temp = csc_pinv(p->P, A->n);
-    #if EMBEDDED != 1 // if not embedded 1 store it (used to update P and A)
-        p->Pinv = Pinv_temp;
-    #endif
 
-    // Compute LDL factorization of  P A P'
-    // NB: D matrix is stored in p->Dinv.
-    ldl_status = LDLFactor(A, p);
+    // Converse of the permutation vector
+    Pinv = csc_pinv(p->P, (*KKT)->n);
 
-    // Invert elements of D that are stored in p->Dinv
-    vec_ew_recipr(p->Dinv, p->Dinv, A->n);
+    // Permute KKT matrix
+    if (!PtoKKT && !AtoKKT){  // No vectors to be stored
+        // Assign values of mapping
+        KKT_temp = csc_symperm((*KKT), Pinv, OSQP_NULL, 1);
+    }
+    else {
+        // Allocate vector of mappings from unpermuted to permuted
+        KtoPKPt = c_malloc((*KKT)->p[(*KKT)->n] * sizeof(c_int));
+        KKT_temp = csc_symperm((*KKT), Pinv, KtoPKPt, 1);
 
-    // Memory clean-up
-    #if EMBEDDED == 1
-    c_free(Pinv_temp);
-    #endif
+        // Update vectors PtoKKT and AtoKKT
+        for (i = 0; i < Pnz; i++){
+            PtoKKT[i] = KtoPKPt[PtoKKT[i]];
+        }
+        for (i = 0; i < Anz; i++){
+            AtoKKT[i] = KtoPKPt[AtoKKT[i]];
+        }
+
+        // Cleanup vector of mapping
+        c_free(KtoPKPt);
+    }
+
+    // Cleanup
+    // Free previous KKT matrix and assign pointer to new one
+    csc_spfree((*KKT));
+    (*KKT) = KKT_temp;
+    // Free Pinv
+    c_free(Pinv);
+    // Free Amd info
     c_free(info);
-    return (ldl_status);
-}
 
+    return 0;
+}
 
 /**
  * Initialize LDL Factorization structure
@@ -184,9 +216,12 @@ Priv *init_priv(const csc * P, const csc * A, const OSQPSettings *settings, c_in
     p->bp = c_malloc(sizeof(c_float) * n_plus_m);
 
 
-    // Form KKT matrix
+    // Form and permute KKT matrix
     if (polish){ // Called from polish()
         KKT_temp = form_KKT(P, A, settings->delta, settings->delta, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
+
+        // Permute matrix
+        permute_KKT(&KKT_temp, p, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
     }
     else { // Called from ADMM algorithm
         #if EMBEDDED != 1
@@ -201,20 +236,28 @@ Priv *init_priv(const csc * P, const csc * A, const OSQPSettings *settings, c_in
         KKT_temp = form_KKT(P, A, settings->sigma, 1./settings->rho,
                             OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
         #endif
+
+        // Permute matrix
+        permute_KKT(&KKT_temp, p, P->p[P->n], A->p[A->n], p->PtoKKT, p->AtoKKT);
     }
 
-    if (KKT_temp == OSQP_NULL){
+    // Check if matrix has been created
+    if (!KKT_temp){
         #ifdef PRINTING
-            c_print("Error forming KKT matrix!\n");
+            c_print("Error forming and permuting KKT matrix!\n");
         #endif
         return OSQP_NULL;
     }
 
+
     // Factorize the KKT matrix
-    if (factorize(KKT_temp, p) < 0) {
+    if (LDL_factor(KKT_temp, p) < 0) {
         free_priv(p);
         return OSQP_NULL;
     }
+
+    // Invert elements of D that are stored in p->Dinv
+    vec_ew_recipr(p->Dinv, p->Dinv, KKT_temp->n);
 
     if (polish){ // If KKT passed, assign it to KKT_temp
         // Polish, no need for KKT_temp
@@ -227,6 +270,7 @@ Priv *init_priv(const csc * P, const csc * A, const OSQPSettings *settings, c_in
         csc_spfree(KKT_temp);
         #endif
     }
+
 
     return p;
 }
@@ -275,7 +319,8 @@ c_int update_priv(Priv * p, const csc *P, const csc *A,
     // Perform numeric factorization
     kk = LDL_numeric(p->KKT->n, p->KKT->p, p->KKT->i, p->KKT->x,
                      p->L->p, p->Parent, p->Lnz, p->L->i,
-                     p->L->x, p->Dinv, p->Y, p->Pattern, p->Flag, p->P, p->Pinv);
+                     p->L->x, p->Dinv, p->Y, p->Pattern, p->Flag,
+                     OSQP_NULL, OSQP_NULL);
 
     // return exit flag
     return (kk - p->KKT->n);

@@ -20,7 +20,6 @@ struct c_priv{
     c_int * Pdiag_idx, Pdiag_n;  // index and number of diagonal elements in P
     csc * KKT;                   // KKT matrix in sparse form (used to update P and A matrices)
     c_int * PtoKKT, * AtoKKT;    // Index of elements from P and A to KKT matrix
-    c_int * Pinv;                // Inverse of permuation matrix stored as vector
     // LDL Numeric workspace
     c_int *Lnz;                  // Number of nonzeros in each column of L
     c_float *Y;                  // LDL Numeric workspace

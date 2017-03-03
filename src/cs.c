@@ -143,8 +143,16 @@ c_int *csc_pinv(c_int const *p, c_int n) {
 }
 
 
-/* Symmetric permutation of matrix A:  C = P A P' */
-csc *csc_symperm(const csc *A, const c_int *pinv, c_int values) {
+/**
+ * C = A(p,p)= PAP' where A and C are symmetric the upper part stored;
+ *  N.B. pinv not p!
+ * @param  A      Original matrix (upper-triangular)
+ * @param  pinv   Inverse of permutation vector
+ * @param  AtoC   Mapping from indeces of A-x to C->x
+ * @param  values Are values of A allocated?
+ * @return        New matrix (allocated)
+ */
+csc *csc_symperm(const csc *A, const c_int *pinv, c_int * AtoC, c_int values) {
     c_int i, j, p, q, i2, j2, n, *Ap, *Ai, *Cp, *Ci, *w;
     c_float *Cx, *Ax;
     csc *C;
@@ -182,6 +190,9 @@ csc *csc_symperm(const csc *A, const c_int *pinv, c_int values) {
             Ci[q = w[c_max(i2, j2)]++] = c_min(i2, j2);
             if (Cx)
                 Cx[q] = Ax[p];
+            if (AtoC) { // If vector AtoC passed, store values of the mapppings
+                AtoC[p] = q;
+            }
         }
     }
     return (csc_done(C, w, OSQP_NULL, 1)); /* success; free workspace, return C */

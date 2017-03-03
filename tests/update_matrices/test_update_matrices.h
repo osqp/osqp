@@ -40,13 +40,6 @@ static char * test_form_KKT(){
     // Assert if KKT matrix is the same as predicted one
     mu_assert("Update matrices: error in forming KKT matrix!", is_eq_csc(KKT, data->test_form_KKT_KKTu, TESTS_TOL));
 
-
-    // print_csc_matrix(Ptriu, "P");
-    // print_csc_matrix(data->test_form_KKT_A, "A");
-    //
-    print_vec_int(PtoKKT, data->test_form_KKT_Pu->p[data->test_form_KKT_Pu->n], "PtoKKT");
-    print_vec_int(AtoKKT, data->test_form_KKT_A->p[data->test_form_KKT_A->n], "AtoKKT");
-
     // Update KKT matrix with new P and new A
     update_KKT_P(KKT, data->test_form_KKT_Pu_new, PtoKKT, sigma, Pdiag_idx, Pdiag_n);
     update_KKT_A(KKT, data->test_form_KKT_A_new, AtoKKT);
@@ -54,9 +47,6 @@ static char * test_form_KKT(){
 
     // Assert if KKT matrix is the same as predicted one
     mu_assert("Update matrices: error in updating KKT matrix!", is_eq_csc(KKT, data->test_form_KKT_KKTu_new, TESTS_TOL));
-
-    // DEBUG
-    print_vec_int(Pdiag_idx, Pdiag_n, "Pdiag");
 
 
     // Solve  KKT x = b via LDL given factorization

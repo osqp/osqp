@@ -22,6 +22,15 @@ static char * test_solveKKT(){
     settings->sigma = data->test_solve_KKT_sigma;
     p = init_priv(data->test_solve_KKT_Pu, data->test_solve_KKT_A, settings, 0);
 
+    // Debug print KKT and LDL
+    // print_csc_mat(data->test_solve_KKT_KKT, "KKTpy");
+    // print_csc_mat(p->KKT, "KKT");
+    // c_float * KKTdnspy = csc_to_dns(data->test_solve_KKT_KKT);
+    // c_float * KKTdns = csc_to_dns(p->KKT);
+    // print_dns_matrix(KKTdnspy, data->test_solve_KKT_KKT->m, data->test_solve_KKT_KKT->n, "KKTdnspy");
+    // print_dns_matrix(KKTdns, p->KKT->m, p->KKT->n, "KKTdns");
+
+
     // Solve  KKT x = b via LDL given factorization
     solve_lin_sys(settings, p, data->test_solve_KKT_rhs);
 
