@@ -122,8 +122,8 @@ static char * test_update(){
 
 
     // Update P
-
-    osqp_update_P(work, c_float *Px_new, c_int *Px_new_idx, c_int P_new_n)
+    // Px_new_idx = c_malloc()
+    // osqp_update_P(work, c_float *Px_new, c_int *Px_new_idx, c_int P_new_n)
 
 
 

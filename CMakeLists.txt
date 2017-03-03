@@ -177,10 +177,17 @@ target_link_libraries (osqp_demo_direct osqpdir)
 
 # Add testing
 # ----------------------------------------------
+# Add custom command to generate tests
+add_custom_target(
+    create_tests_data
+    COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}/tests; python generate_tests_data.py; cd ..
+)
+
 # Direct linear solver testing
 include_directories(tests)
 add_executable(osqp_tester_direct ${PROJECT_SOURCE_DIR}/tests/osqp_tester_direct.c)
 target_link_libraries (osqp_tester_direct osqpdir)
+add_dependencies(osqp_tester_direct create_tests_data)
 
 # Add testing
 include(CTest)

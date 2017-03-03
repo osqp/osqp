@@ -2,7 +2,6 @@ import numpy as np
 import scipy.sparse as spa
 import utils.codegen_utils as cu
 import cvxpy
-import osqp
 
 
 

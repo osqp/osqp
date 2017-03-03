@@ -6,7 +6,6 @@ from builtins import range
 import scipy.sparse as spa
 import numpy as np
 import os.path
-import osqp
 
 def write_int(f, x, name, *args):
     if any(args):
@@ -178,16 +177,16 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
     m = A.shape[0]
 
     # Convert problem status to integer
-    for key, value in sols_data.items():
-        if isinstance(value, str):
-            # Status test get from C code
-            osqp_model = osqp.OSQP()
-            if value == 'optimal':
-                sols_data[key] = osqp_model.constant('OSQP_SOLVED')
-            elif value == 'infeasible':
-                sols_data[key] =  osqp_model.constant('OSQP_INFEASIBLE')
-            elif value == 'unbounded':
-                sols_data[key] =  osqp_model.constant('OSQP_UNBOUNDED')
+    # for key, value in sols_data.items():
+    #     if isinstance(value, str):
+    #         # Status test get from C code
+    #         osqp_model = osqp.OSQP()
+    #         if value == 'optimal':
+    #             sols_data[key] = osqp_model.constant('OSQP_SOLVED')
+    #         elif value == 'infeasible':
+    #             sols_data[key] =  osqp_model.constant('OSQP_INFEASIBLE')
+    #         elif value == 'unbounded':
+    #             sols_data[key] =  osqp_model.constant('OSQP_UNBOUNDED')
 
 
     #
@@ -210,8 +209,11 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
     f.write("typedef struct {\n")
     # Generate further data and solutions
     for key, value in sols_data.items():
+        if isinstance(value, str):
+            # Status test get from C code
+            f.write("c_int %s;\n" % key)
         # Check if it is an array or a scalar
-        if isinstance(value, np.ndarray):
+        elif isinstance(value, np.ndarray):
             if isinstance(value.flatten(order='F')[0], int):
                 f.write("c_int * %s;\n" % key)
             elif isinstance(value.flatten(order='F')[0], float):
@@ -294,6 +296,14 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
 
     # Generate further data and solutions
     for key, value in sols_data.items():
+        if isinstance(value, str):
+            # Status test get from C code
+            if value == 'optimal':
+                f.write("%s = %s;\n" % (key, 'OSQP_SOLVED'))
+            elif value == 'infeasible':
+                f.write("%s = %s;\n" % (key, 'OSQP_INFEASIBLE'))
+            elif value == 'unbounded':
+                f.write("%s = %s;\n" % (key, 'OSQP_UNBOUNDED'))
         # Check if it is an array or a scalar
         if type(value) is np.ndarray:
             if isinstance(value.flatten(order='F')[0], int):
@@ -334,7 +344,6 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
 
     f.close()
 
-
 def generate_data(problem_name, sols_data):
     """
     Generate test data vectors.
@@ -342,18 +351,6 @@ def generate_data(problem_name, sols_data):
     The additional structure sols_data defines the additional vectors/scalars
     we need to perform the tests
     """
-
-    # Convert problem status to integer
-    for key, value in sols_data.items():
-        if isinstance(value, str):
-            # Status test get from C code
-            osqp_model = osqp.OSQP()
-            if value == 'optimal':
-                sols_data[key] = osqp_model.constant('OSQP_SOLVED')
-            elif value == 'infeasible':
-                sols_data[key] =  osqp_model.constant('OSQP_INFEASIBLE')
-            elif value == 'unbounded':
-                sols_data[key] =  osqp_model.constant('OSQP_UNBOUNDED')
 
     #
     # GENERATE HEADER FILE
@@ -375,8 +372,11 @@ def generate_data(problem_name, sols_data):
     f.write("typedef struct {\n")
     # Generate further data and solutions
     for key, value in sols_data.items():
+        if isinstance(value, str):
+            # Status test get from C code
+            f.write("c_int %s;\n" % key)
         # Check if it is an array or a scalar
-        if spa.issparse(value):  # Sparse matrix
+        elif spa.issparse(value):  # Sparse matrix
             f.write("csc * %s;\n" % key)
         elif isinstance(value, np.ndarray):
             if isinstance(value.flatten(order='F')[0], int):
@@ -403,8 +403,16 @@ def generate_data(problem_name, sols_data):
 
     # Generate further data and solutions
     for key, value in sols_data.items():
+        if isinstance(value, str):
+            # Status test get from C code
+            if value == 'optimal':
+                f.write("%s = %s;\n" % (key, 'OSQP_SOLVED'))
+            elif value == 'infeasible':
+                f.write("%s = %s;\n" % (key, 'OSQP_INFEASIBLE'))
+            elif value == 'unbounded':
+                f.write("%s = %s;\n" % (key, 'OSQP_UNBOUNDED'))
         # Check if it is an array or a scalar
-        if spa.issparse(value):  # Sparse matrix
+        elif spa.issparse(value):  # Sparse matrix
             write_mat_sparse(f, value, key, "data")
         elif type(value) is np.ndarray:
             if isinstance(value.flatten(order='F')[0], int):

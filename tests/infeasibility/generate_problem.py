@@ -3,7 +3,6 @@ import scipy.sparse as spa
 import scipy as sp
 import utils.codegen_utils as cu
 import cvxpy
-import osqp
 
 
 n = 50

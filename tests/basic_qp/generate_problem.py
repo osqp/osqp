@@ -2,7 +2,6 @@ import numpy as np
 import scipy.sparse as spa
 import utils.codegen_utils as cu
 import cvxpy
-import osqp
 
 P = spa.csc_matrix(np.array([[4., 1.], [1., 2.]]))
 q = np.ones(2)
