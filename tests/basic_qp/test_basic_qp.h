@@ -3,7 +3,7 @@
 #include "util.h"     // Utilities for testing
 #include "minunit.h"  // Basic testing script header
 
-#include "basic_qp/basic_qp.h"
+#include "basic_qp/data.h"
 
 
 static char * test_basic_qp_solve()

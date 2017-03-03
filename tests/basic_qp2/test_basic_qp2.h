@@ -1,11 +1,8 @@
 #include "osqp.h"     // OSQP API
 #include "minunit.h"  // Basic testing script header
 
-#ifndef BASIC_QP2_MATRICES_H
-#define BASIC_QP2_MATRICES_H
-#include "basic_qp2/data.h"
-#endif
 
+#include "basic_qp2/data.h"
 
 
 static char * test_basic_qp2_solve()
