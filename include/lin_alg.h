@@ -15,8 +15,12 @@ extern "C" {
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 
+#ifndef EMBEDDED
+
 /* copy vector a into output (Uses MALLOC)*/
 c_float * vec_copy(c_float *a, c_int n);
+
+#endif
 
 /* copy vector a into preallocated vector b */
 void prea_vec_copy(c_float *a, c_float * b, c_int n);

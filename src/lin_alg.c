@@ -76,6 +76,7 @@ void vec_mult_scalar(c_float *a, c_float sc, c_int n){
 }
 
 
+#ifndef EMBEDDED
 
 /* copy vector a into output */
 c_float * vec_copy(c_float *a, c_int n) {
@@ -85,6 +86,7 @@ c_float * vec_copy(c_float *a, c_int n) {
     return b;
 }
 
+#endif  //end EMBEDDED
 
 /* copy vector a into preallocated vector b */
 void prea_vec_copy(c_float *a, c_float * b, c_int n) {

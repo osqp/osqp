@@ -34,7 +34,7 @@ endif()
 # Is the code generated for embedded platforms?
 #   1 :   Yes. Matrix update not allowed.
 #   2 :   Yes. Matrix update allowed.
-set (EMBEDDED 1)
+set (EMBEDDED 2)
 
 if (NOT DEFINED EMBEDDED)
     message(STATUS "Embedded is OFF")

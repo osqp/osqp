@@ -9,12 +9,13 @@ extern "C" {
 #include "lin_alg.h"
 #include "types.h"
 
-#if EMBEDDED != 1
-#include "kkt.h"
-
 #define MAX_SCALING (1e3)
 #define MIN_SCALING (1e-3)
 #define SCALING_REG (1e-08)
+
+#ifndef EMBEDDED
+
+#include "kkt.h"
 
 // Scale data stored in workspace
 c_int scale_data(OSQPWorkspace * work);

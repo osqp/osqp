@@ -82,10 +82,10 @@ void update_info(OSQPWorkspace *work, c_int iter, c_int polish);
 
 
 /**
-* Update solver status (string)
+* Update solver status (value and string)
 * @param work Workspace
 */
-void update_status_string(OSQPInfo *info);
+void update_status(OSQPInfo *info, c_int status_val);
 
 
 /**

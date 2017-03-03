@@ -360,21 +360,23 @@ void update_info(OSQPWorkspace *work, c_int iter, c_int polish){
 
 
 /**
- * Update solver status (string)
+ * Update solver status (value and string)
  * @param work Workspace
  */
-void update_status_string(OSQPInfo *info){
-    // Update status string depending on status val
+void update_status(OSQPInfo *info, c_int status_val) {
+    // Update status value
+    info->status_val = status_val;
 
-    if(info->status_val == OSQP_SOLVED)
+    // Update status string depending on status val
+    if(status_val == OSQP_SOLVED)
         strcpy(info->status, "Solved");
-    else if (info->status_val == OSQP_INFEASIBLE)
+    else if (status_val == OSQP_INFEASIBLE)
         strcpy(info->status, "Infeasible");
-    else if (info->status_val == OSQP_UNSOLVED)
+    else if (status_val == OSQP_UNSOLVED)
         strcpy(info->status, "Unsolved");
-    else if (info->status_val == OSQP_UNBOUNDED)
+    else if (status_val == OSQP_UNBOUNDED)
         strcpy(info->status, "Unbounded");
-    else if (info->status_val == OSQP_MAX_ITER_REACHED)
+    else if (status_val == OSQP_MAX_ITER_REACHED)
         strcpy(info->status, "Maximum Iterations Reached");
 }
 
@@ -420,18 +422,18 @@ c_int check_termination(OSQPWorkspace *work){
     // Compare checks to determine solver status
     if (pri_check && dua_check){
         // Update final information
-        work->info->status_val = OSQP_SOLVED;
+        update_status(work->info, OSQP_SOLVED);
         exitflag = 1;
     }
     else if (inf_check){
         // Update final information
-        work->info->status_val = OSQP_INFEASIBLE;
+        update_status(work->info, OSQP_INFEASIBLE);
         work->info->obj_val = OSQP_INFTY;
         exitflag = 1;
     }
     else if (unb_check){
         // Update final information
-        work->info->status_val = OSQP_UNBOUNDED;
+        update_status(work->info, OSQP_UNBOUNDED);
         work->info->obj_val = -OSQP_INFTY;
         exitflag = 1;
     }

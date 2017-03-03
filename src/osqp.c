@@ -125,9 +125,8 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
 
     // Allocate information
     work->info = c_calloc(1, sizeof(OSQPInfo));
-    work->info->status_val = OSQP_UNSOLVED;
-    work->info->status_polish = 0; // Polishing not performed
-    update_status_string(work->info);
+    work->info->status_polish = 0;  // Polishing not performed
+    update_status(work->info, OSQP_UNSOLVED);
 
     // Allocate timing information
     #ifdef PROFILING
@@ -234,12 +233,9 @@ c_int osqp_solve(OSQPWorkspace * work){
     #endif
 
     /* if max iterations reached, change status accordingly */
-    if (work->info->status_val == OSQP_UNSOLVED){
-        work->info->status_val = OSQP_MAX_ITER_REACHED;
+    if (work->info->status_val == OSQP_UNSOLVED) {
+        update_status(work->info, OSQP_MAX_ITER_REACHED);
     }
-
-    /* Update final status */
-    update_status_string(work->info);
 
     /* Update solve time */
     #ifdef PROFILING
@@ -421,8 +417,7 @@ c_int osqp_update_lin_cost(OSQPWorkspace * work, c_float * q_new) {
     }
 
     // Set solver status to OSQP_UNSOLVED
-    work->info->status_val = OSQP_UNSOLVED;
-    update_status_string(work->info);
+    update_status(work->info, OSQP_UNSOLVED);
 
     return 0;
 }
@@ -458,8 +453,7 @@ c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new)
     }
 
     // Set solver status to OSQP_UNSOLVED
-    work->info->status_val = OSQP_UNSOLVED;
-    update_status_string(work->info);
+    update_status(work->info, OSQP_UNSOLVED);
 
     return 0;
 }
@@ -492,8 +486,7 @@ c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
     }
 
     // Set solver status to OSQP_UNSOLVED
-    work->info->status_val = OSQP_UNSOLVED;
-    update_status_string(work->info);
+    update_status(work->info, OSQP_UNSOLVED);
 
     return 0;
 }
@@ -527,9 +520,8 @@ c_int osqp_update_upper_bound(OSQPWorkspace * work, c_float * u_new) {
     }
 
     // Set solver status to OSQP_UNSOLVED
-    work->info->status_val = OSQP_UNSOLVED;
-    update_status_string(work->info);
-    
+    update_status(work->info, OSQP_UNSOLVED);
+
     return 0;
 }
 

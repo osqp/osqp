@@ -1,6 +1,6 @@
 #include "scaling.h"
 
-#if EMBEDDED != 1
+#ifndef EMBEDDED
 
 // Scale data stored in workspace
 c_int scale_data(OSQPWorkspace * work){

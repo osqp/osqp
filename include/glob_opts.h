@@ -7,11 +7,10 @@ extern "C" {
 
 #include <math.h>
 
-// TODO: Uncomment the EMBEDDED flag below.
-// - We do not need malloc functions in EMBEDDED.
-// - There are currently some issues with SuiteSparse_config
 
-// #ifndef EMBEDDED
+// We do not need alloc functions if EMBEDDED is enabled
+#ifndef EMBEDDED
+
 #include <stdlib.h>
 
 /* DATA CUSTOMIZATIONS (depending on memory manager)-----------------------   */
@@ -62,7 +61,7 @@ extern "C" {
     #define c_realloc realloc
 #endif
 
-// #endif  //end EMBEDDED
+#endif  //end EMBEDDED
 
 
 
