@@ -130,7 +130,7 @@ if(NOT DEFINED EMBEDDED)
         include/util.h
     )
 else()
-    # If embedded is enabled, do not use cs, kkt, polish
+    # If embedded is enabled, do not use cs, polish
     set(
         osqp_src
         src/auxil.c

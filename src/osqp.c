@@ -633,7 +633,12 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y){
 
 #if EMBEDDED != 1
 /**
- * Update elements of matrix P (without changing sparsity structure)
+ * Update elements of matrix P (upper-diagonal)
+ * without changing sparsity structure.
+ *
+ *  If Px_new_idx is OSQP_NULL, Px_new is assumed to be as long as P->x
+ *  and the whole P->x is replaced.
+ *
  * @param  work       Workspace structure
  * @param  Px_new     Vector of new elements in P->x (upper triangular)
  * @param  Px_new_idx Index mapping new elements to positions in P->x
@@ -643,27 +648,212 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y){
 c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, c_int P_new_n){
     c_int i; // For indexing
     c_int exitflag; // Exit flag
+    c_int nnzP; // Number of nonzeros in P
+
+    nnzP = work->data->P->p[work->data->P->n];
+
+    if (Px_new_idx){ // Passing the index of elements changed
+        // Check if number of elements is less or equal than the total number of
+        // nonzeros in P
+        if (P_new_n > nnzP){
+            #ifdef PRINTING
+            c_print("Error in P update: new number of elements greater than elements in P!\n");
+            #endif
+            return -1;
+        }
+    }
 
     // Unscale data
     unscale_data(work);
 
+
     // Update P elements
-    for (i = 0; i < P_new_n; i++){
-        work->data->P->x[Px_new_idx[i]] = Px_new[i];
+    if (Px_new_idx){ // Change only Px_new_idx
+        for (i = 0; i < P_new_n; i++){
+            work->data->P->x[Px_new_idx[i]] = Px_new[i];
+        }
+    }
+    else // Change whole P
+    {
+        for (i = 0; i < nnzP; i++){
+            work->data->P->x[i] = Px_new[i];
+        }
     }
 
     // Scale data
     scale_data(work);
 
+    // Update linear system private structure with new data
+    exitflag = update_priv(work->priv, work->data->P, work->data->A,
+                           work, work->settings);
+
+   // Set solver status to OSQP_UNSOLVED
+   update_status(work->info, OSQP_UNSOLVED);
+
+    return exitflag;
+}
+
+
+/**
+ * Update elements of matrix A without changing sparsity structure.
+ *
+ *
+ *  If Ax_new_idx is OSQP_NULL, Ax_new is assumed to be as long as A->x
+ *  and the whole P->x is replaced.
+ *
+ * @param  work       Workspace structure
+ * @param  Ax_new     Vector of new elements in A->x
+ * @param  Ax_new_idx Index mapping new elements to positions in A->x
+ * @param  A_new_n    Number of new elements to be changed
+ * @return            output flag
+ */
+c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, c_int A_new_n){
+    c_int i; // For indexing
+    c_int exitflag; // Exit flag
+    c_int nnzA; // Number of nonzeros in A
+
+    nnzA = work->data->A->p[work->data->A->n];
+
+    if (Ax_new_idx){ // Passing the index of elements changed
+        // Check if number of elements is less or equal than the total number of
+        // nonzeros in A
+        if (A_new_n > nnzA){
+            #ifdef PRINTING
+            c_print("Error in A update: new number of elements greater than elements in A!\n");
+            #endif
+            return -1;
+        }
+    }
+
+    // Unscale data
+    unscale_data(work);
+
+    // Update A elements
+    if (Ax_new_idx){ // Change only Ax_new_idx
+        for (i = 0; i < A_new_n; i++){
+            work->data->A->x[Ax_new_idx[i]] = Ax_new[i];
+        }
+    }
+    else{ // Change whole A
+        for (i = 0; i < nnzA; i++){
+            work->data->A->x[Ax_new_idx[i]] = Ax_new[i];
+        }
+    }
+
+    // Scale data
+    scale_data(work);
 
     // Update linear system private structure with new data
     exitflag = update_priv(work->priv, work->data->P, work->data->A,
                            work, work->settings);
 
+   // Set solver status to OSQP_UNSOLVED
+   update_status(work->info, OSQP_UNSOLVED);
 
     return exitflag;
 }
-#endif
+
+
+
+/**
+ * Update elements of matrix P (upper-diagonal) and elements of matrix A
+ * without changing sparsity structure.
+ *
+ *
+ *  If Px_new_idx is OSQP_NULL, Px_new is assumed to be as long as P->x
+ *  and the whole P->x is replaced.
+ *
+ *  If Ax_new_idx is OSQP_NULL, Ax_new is assumed to be as long as A->x
+ *  and the whole P->x is replaced.
+ *
+ *
+ * @param  work       Workspace structure
+ * @param  Px_new     Vector of new elements in P->x (upper triangular)
+ * @param  Px_new_idx Index mapping new elements to positions in P->x
+ * @param  P_new_n    Number of new elements to be changed
+ * @param  Ax_new     Vector of new elements in A->x
+ * @param  Ax_new_idx Index mapping new elements to positions in A->x
+ * @param  A_new_n    Number of new elements to be changed
+ * @return            output flag
+ */
+c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, c_int P_new_n, c_float * Ax_new, c_int * Ax_new_idx, c_int A_new_n){
+    c_int i; // For indexing
+    c_int exitflag; // Exit flag
+    c_int nnzP, nnzA; // Number of nonzeros in P and A
+
+    nnzP = work->data->P->p[work->data->P->n];
+    nnzA = work->data->A->p[work->data->A->n];
+
+
+    if (Px_new_idx){ // Passing the index of elements changed
+        // Check if number of elements is less or equal than the total number of
+        // nonzeros in P
+        if (P_new_n > nnzP){
+            #ifdef PRINTING
+            c_print("Error in P update: new number of elements greater than elements in P!\n");
+            #endif
+            return -1;
+        }
+    }
+
+
+    if (Ax_new_idx){ // Passing the index of elements changed
+        // Check if number of elements is less or equal than the total number of
+        // nonzeros in A
+        if (A_new_n > nnzA){
+            #ifdef PRINTING
+            c_print("Error in A update: new number of elements greater than elements in A!\n");
+            #endif
+            return -1;
+        }
+    }
+
+
+    // Unscale data
+    unscale_data(work);
+
+    // Update P elements
+    if (Px_new_idx){ // Change only Px_new_idx
+        for (i = 0; i < P_new_n; i++){
+            work->data->P->x[Px_new_idx[i]] = Px_new[i];
+        }
+    }
+    else // Change whole P
+    {
+        for (i = 0; i < nnzP; i++){
+            work->data->P->x[i] = Px_new[i];
+        }
+    }
+
+    // Update A elements
+    if (Ax_new_idx){ // Change only Ax_new_idx
+        for (i = 0; i < A_new_n; i++){
+            work->data->A->x[Ax_new_idx[i]] = Ax_new[i];
+        }
+    }
+    else{ // Change whole A
+        for (i = 0; i < nnzA; i++){
+            work->data->A->x[Ax_new_idx[i]] = Ax_new[i];
+        }
+    }
+
+
+    // Scale data
+    scale_data(work);
+
+    // Update linear system private structure with new data
+    exitflag = update_priv(work->priv, work->data->P, work->data->A,
+                           work, work->settings);
+
+   // Set solver status to OSQP_UNSOLVED
+   update_status(work->info, OSQP_UNSOLVED);
+
+   return exitflag;
+
+}
+
+
+#endif // EMBEDDED != 1
 
 /****************************
  * Update problem settings  *

@@ -343,6 +343,18 @@ def generate_data(problem_name, sols_data):
     we need to perform the tests
     """
 
+    # Convert problem status to integer
+    for key, value in sols_data.items():
+        if isinstance(value, str):
+            # Status test get from C code
+            osqp_model = osqp.OSQP()
+            if value == 'optimal':
+                sols_data[key] = osqp_model.constant('OSQP_SOLVED')
+            elif value == 'infeasible':
+                sols_data[key] =  osqp_model.constant('OSQP_INFEASIBLE')
+            elif value == 'unbounded':
+                sols_data[key] =  osqp_model.constant('OSQP_UNBOUNDED')
+
     #
     # GENERATE HEADER FILE
     #

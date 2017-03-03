@@ -49,14 +49,6 @@ static char * test_form_KKT(){
     mu_assert("Update matrices: error in updating KKT matrix!", is_eq_csc(KKT, data->test_form_KKT_KKTu_new, TESTS_TOL));
 
 
-    // Solve  KKT x = b via LDL given factorization
-    // solve_lin_sys(settings, p, data->test_solve_KKT_rhs);
-
-
-
-    // mu_assert("Update matrices: error in forming KKT matrix, !", ... < TESTS_TOL);
-
-
     // Cleanup
     clean_problem_update_matrices_sols_data(data);
     c_free(Pdiag_idx);
@@ -67,10 +59,90 @@ static char * test_form_KKT(){
     return 0;
 }
 
+static char * test_update(){
+    update_matrices_sols_data *  data;
+    OSQPData * problem;
+    OSQPWorkspace * work;
+    OSQPSettings * settings;
+
+    // Update matrix P
+    c_float *Px_new;
+    c_int *Px_new_idx;
+    c_int P_new_n;
+
+    // Update matrix A
+    c_float *Ax_new;
+    c_int *Ax_new_idx;
+    c_int A_new_n;
+
+
+    // Load problem data
+    data = generate_problem_update_matrices_sols_data();
+
+    // Generate first problem data
+    problem = c_malloc(sizeof(OSQPData));
+    problem->P = data->test_solve_P;
+    problem->q = data->test_solve_q;
+    problem->A = data->test_solve_A;
+    problem->l = data->test_solve_l;
+    problem->u = data->test_solve_u;
+    problem->n = data->test_solve_P->n;
+    problem->m = data->test_solve_A->m;
+
+
+    // Define Solver settings as default
+    // Problem settings
+    settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
+    set_default_settings(settings);
+    settings->max_iter = 1000;
+    settings->alpha = 1.6;
+    settings->verbose = 0;
+
+    // Setup workspace
+    work = osqp_setup(problem, settings);
+
+    // Setup correct
+    mu_assert("Update matrices: original problem, setup error!", work != OSQP_NULL);
+
+    // Solve Problem
+    osqp_solve(work);
+
+    // Compare solver statuses
+    mu_assert("Update matrices: original problem, error in solver status!",
+              work->info->status_val == data->test_solve_status );
+
+    // Compare primal solutions
+    mu_assert("Update matrices: original problem, error in primal solution!",
+              vec_norm2_diff(work->solution->x, data->test_solve_x, data->n) < TESTS_TOL);
+
+    // Compare dual solutions
+    mu_assert("Update matrices: original problem, error in dual solution!",
+              vec_norm2_diff(work->solution->y, data->test_solve_y, data->m) < TESTS_TOL);
+
+
+
+    // Update P
+
+    osqp_update_P(work, c_float *Px_new, c_int *Px_new_idx, c_int P_new_n)
+
+
+
+
+    osqp_cleanup(work);
+
+    // Cleanup problems
+    clean_problem_update_matrices_sols_data(data);
+    c_free(problem);
+
+    return 0;
+}
+
+
 
 static char * test_update_matrices()
 {
     mu_run_test(test_form_KKT);
+    mu_run_test(test_update);
 
     return 0;
 }
