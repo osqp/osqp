@@ -9,31 +9,8 @@
 extern "C" {
 #endif
 
-// #include "glob_opts.h"
-#include "types.h"
-
-// System libraries
-// #include <stdlib.h>
-// #include <string.h>
-// #include <math.h>
-
-// typedef struct    /* matrix in compressed-column or triplet form */
-// {
-//         c_int nzmax;     /* maximum number of entries */
-//         c_int m;         /* number of rows */
-//         c_int n;         /* number of columns */
-//         c_int *p;        /* column pointers (size n+1) or col indices (size nzmax) start from 0 */
-//         c_int *i;        /* row indices, size nzmax starting from 0*/
-//         c_float *x;      /* numerical values, size nzmax */
-//         c_int nz;       /* # of entries in triplet matrix, -1 for compressed-col */
-// } csc;
-
-
-// #include "lin_alg.h"
-
-// System libraries
-// #include <stdlib.h>
-// #include <math.h>
+#include "types.h"    // CSC matrix type
+#include "lin_alg.h"  // Vector copy operations
 
 /*****************************************************************************
  * Create and free CSC Matrices                                              *

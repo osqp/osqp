@@ -1,5 +1,3 @@
-// #include "auxil.h"
-// #include "util.h"
 #include "osqp.h"
 
 /**********************

@@ -1,6 +1,4 @@
 #include "auxil.h"
-// #include "util.h"
-// #include "proj.h"
 
 /***********************************************************
  * Auxiliary functions needed to compute ADMM iterations * *

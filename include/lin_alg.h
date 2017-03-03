@@ -7,10 +7,7 @@ extern "C" {
 #endif
 
 #include "types.h"
-// #include "glob_opts.h"
-// #include <math.h>
-// #include "constants.h"
-// #include "cs.h"
+
 
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/

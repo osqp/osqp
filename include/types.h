@@ -5,7 +5,6 @@
 extern "C" {
 #endif
 
-// #include "cs.h"        // matrix types
 #include "glob_opts.h"
 
 

@@ -1,6 +1,5 @@
 #include "lin_alg.h"
-// #include "util.h" // For debugging
-// #include <math.h>
+
 
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
