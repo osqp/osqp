@@ -11,6 +11,8 @@ extern "C" {
 #include "auxil.h"
 #include "util.h"
 #include "scaling.h"
+#include "glob_opts.h"
+
 #ifndef EMBEDDED
 #include "polish.h"
 #endif
@@ -132,6 +134,21 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y);
 
 
 
+
+#if EMBEDDED != 1
+/**
+ * Update elements of matrix P (without changing sparsity structure)
+ * @param  work       Workspace structure
+ * @param  Px_new     Vector of new elements in P->x
+ * @param  Px_new_idx Index mapping new elements to positions in P->x
+ * @param  P_new_n    Number of new elements to be changed
+ * @return            output flag
+ */
+c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, c_int P_new_n);
+#endif
+
+
+
 /************************************************
  * Edit settings without performing setup again *
  ************************************************/
@@ -183,6 +200,7 @@ c_int osqp_update_warm_start(OSQPWorkspace * work, c_int warm_start_new);
 
 #ifndef EMBEDDED
 
+
 /**
  * Update regularization parameter in polishing
  * @param  work      Workspace
@@ -219,7 +237,6 @@ c_int osqp_update_pol_refine_iter(OSQPWorkspace * work, c_int pol_refine_iter_ne
 c_int osqp_update_verbose(OSQPWorkspace * work, c_int verbose_new);
 
 #endif  // #ifndef EMBEDDED
-
 
 
 #ifdef __cplusplus

@@ -11,9 +11,11 @@
  * @param work Workspace
  */
 void cold_start(OSQPWorkspace *work) {
-    memset(work->x, 0, work->data->n * sizeof(c_float));
-    memset(work->z, 0, work->data->m * sizeof(c_float));
-    memset(work->y, 0, work->data->m * sizeof(c_float));
+
+    vec_set_scalar(work->x, 0., work->data->n);
+    vec_set_scalar(work->z, 0., work->data->m);
+    vec_set_scalar(work->y, 0., work->data->m);
+
 }
 
 
@@ -369,15 +371,15 @@ void update_status(OSQPInfo *info, c_int status_val) {
 
     // Update status string depending on status val
     if(status_val == OSQP_SOLVED)
-        strcpy(info->status, "Solved");
+        c_strcpy(info->status, "Solved");
     else if (status_val == OSQP_INFEASIBLE)
-        strcpy(info->status, "Infeasible");
+        c_strcpy(info->status, "Infeasible");
     else if (status_val == OSQP_UNSOLVED)
-        strcpy(info->status, "Unsolved");
+        c_strcpy(info->status, "Unsolved");
     else if (status_val == OSQP_UNBOUNDED)
-        strcpy(info->status, "Unbounded");
+        c_strcpy(info->status, "Unbounded");
     else if (status_val == OSQP_MAX_ITER_REACHED)
-        strcpy(info->status, "Maximum Iterations Reached");
+        c_strcpy(info->status, "Maximum Iterations Reached");
 }
 
 

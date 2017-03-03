@@ -62,7 +62,7 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     work->data = c_malloc(sizeof(OSQPData));
     work->data->n = data->n;    // Number of variables
     work->data->m = data->m;    // Number of linear constraints
-    work->data->P = csc_to_triu(data->P);         // Cost function matrix
+    work->data->P = csc_to_triu(data->P);   // Cost function matrix
     work->data->q = vec_copy(data->q, data->n);    // Linear part of cost function
     work->data->A = copy_csc_mat(data->A);         // Linear constraints matrix
     work->data->l = vec_copy(data->l, data->m);  // Lower bounds on constraints
@@ -95,6 +95,26 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
 
     // Perform scaling
     if (settings->scaling) {
+        // Allocate scaling structure
+        work->scaling = c_malloc(sizeof(OSQPScaling));
+        work->scaling->D = c_malloc(work->data->n * sizeof(c_float));
+        work->scaling->Dinv = c_malloc(work->data->n * sizeof(c_float));
+        work->scaling->E = c_malloc(work->data->m * sizeof(c_float));
+        work->scaling->Einv = c_malloc(work->data->m * sizeof(c_float));
+
+        // Allocate workspace variables used in scaling
+        work->P_x = c_malloc(work->data->P->p[work->data->n] * sizeof(c_float));
+        work->A_x = c_malloc(work->data->A->p[work->data->n] * sizeof(c_float));
+        work->D_temp = c_malloc(work->data->n * sizeof(c_float));
+        work->E_temp = c_malloc(work->data->m * sizeof(c_float));
+
+        // Initialize scaling vectors to 1
+        vec_set_scalar(work->scaling->D, 1., work->data->n);
+        vec_set_scalar(work->scaling->Dinv, 1., work->data->n);
+        vec_set_scalar(work->scaling->E, 1., work->data->m);
+        vec_set_scalar(work->scaling->Einv, 1., work->data->m);
+
+        // Scale data
         scale_data(work);
     }
     else {
@@ -102,9 +122,13 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     }
 
     // Initialize linear system solver private structure
+    // Initialize private structure
     work->priv = init_priv(work->data->P, work->data->A, work->settings, 0);
     if (!work->priv){
+        #ifdef PRINTING
         c_print("ERROR: Linear systems solver initialization failure!\n");
+        #endif
+
         return OSQP_NULL;
     }
 
@@ -279,7 +303,6 @@ c_int osqp_solve(OSQPWorkspace * work){
 
 
 #ifndef EMBEDDED
-
 /**
  * Cleanup workspace
  * @param  work Workspace
@@ -315,6 +338,12 @@ c_int osqp_cleanup(OSQPWorkspace * work){
             if (work->scaling->Einv)
                 c_free(work->scaling->Einv);
             c_free(work->scaling);
+
+            // Free workspace variables
+            if (work->P_x) c_free(work->P_x);
+            if (work->A_x) c_free(work->A_x);
+            if (work->D_temp) c_free(work->D_temp);
+            if (work->E_temp) c_free(work->E_temp);
         }
 
         // Free private structure for linear system solver_solution
@@ -574,7 +603,7 @@ c_int osqp_warm_start_x(OSQPWorkspace * work, c_float * x){
     mat_vec(work->data->A, work->x, work->z, 0);
 
     // Cold start y
-    memset(work->y, 0, work->data->m * sizeof(c_float));
+    vec_set_scalar(work->y, 0., work->data->m);
 
     return 0;
 }
@@ -598,13 +627,45 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y){
     vec_ew_prod(work->scaling->Einv, work->y, work->data->m);
 
     // Cold start x and z
-    memset(work->x, 0, work->data->n * sizeof(c_float));
-    memset(work->z, 0, work->data->m * sizeof(c_float));
+    vec_set_scalar(work->x, 0., work->data->n);
+    vec_set_scalar(work->z, 0., work->data->m);
 
     return 0;
 }
 
+#if EMBEDDED != 1
+/**
+ * Update elements of matrix P (without changing sparsity structure)
+ * @param  work       Workspace structure
+ * @param  Px_new     Vector of new elements in P->x (upper triangular)
+ * @param  Px_new_idx Index mapping new elements to positions in P->x
+ * @param  P_new_n    Number of new elements to be changed
+ * @return            output flag
+ */
+c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, c_int P_new_n){
+    c_int i; // For indexing
+    c_int exitflag; // Exit flag
 
+    // Unscale data
+    unscale_data(work);
+
+    // Update P elements
+    for (i = 0; i < P_new_n; i++){
+        work->data->P->x[Px_new_idx[i]] = Px_new[i];
+    }
+
+    // Scale data
+    scale_data(work);
+
+
+    // Update linear system private structure with new data
+    exitflag = update_priv(work->priv, work->data->P, work->data->A,
+                           work, work->settings);
+
+
+    return exitflag;
+}
+#endif
 
 /****************************
  * Update problem settings  *
@@ -801,4 +862,5 @@ c_int osqp_update_verbose(OSQPWorkspace * work, c_int verbose_new) {
     return 0;
 }
 
-#endif  // #ifndef EMBEDDED
+
+#endif // EMBEDDED

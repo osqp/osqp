@@ -1,5 +1,5 @@
 #include "lin_alg.h"
-#include "util.h" // For debugging
+// #include "util.h" // For debugging
 // #include <math.h>
 
 
@@ -51,6 +51,15 @@ c_float vec_norm2(const c_float *v, c_int l) {
 //     return max;
 // }
 
+/* set integer vector to scalar */
+void int_vec_set_scalar(c_int *a, c_int sc, c_int n){
+    c_int i;
+    for (i=0; i<n; i++) {
+        a[i] = sc;
+    }
+}
+
+
 /* set vector to scalar */
 void vec_set_scalar(c_float *a, c_float sc, c_int n){
     c_int i;
@@ -81,12 +90,25 @@ void vec_mult_scalar(c_float *a, c_float sc, c_int n){
 /* copy vector a into output */
 c_float * vec_copy(c_float *a, c_int n) {
     c_float * b;
+    c_int i;
+
     b = c_malloc(n * sizeof(c_float));
-    memcpy(b, a, n * sizeof(c_float));
+    for (i=0; i<n; i++) {
+        b[i] = a[i];
+    }
+
     return b;
 }
 
 #endif  //end EMBEDDED
+
+/* copy integer vector a into preallocated vector b */
+void prea_int_vec_copy(c_int *a, c_int * b, c_int n){
+    c_int i;
+    for (i=0; i<n; i++) {
+        b[i] = a[i];
+    }
+}
 
 /* copy vector a into preallocated vector b */
 void prea_vec_copy(c_float *a, c_float * b, c_int n) {

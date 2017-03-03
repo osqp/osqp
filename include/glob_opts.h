@@ -118,6 +118,7 @@ typedef float c_float;                /* for numerical values  */
 
 #ifdef PRINTING
 #include <stdio.h>
+#include <string.h>
 
 #ifdef MATLAB_MEX_FILE
 #define c_print mexPrintf

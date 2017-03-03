@@ -8,28 +8,29 @@
 extern "C" {
 #endif
 
-#ifndef EMBEDDED
-#include "cs.h"
-#endif
-
+// #include "cs.h"
 #include "types.h"
 
-
-/* solves Ax = b for x, and stores result in b */
-c_int solve_lin_sys(const OSQPSettings *settings, Priv *p, c_float *b);
-
-
 #ifndef EMBEDDED
-
 // Initialize private variable for solver
 // NB: Only the upper triangular part of P is stuffed!
-Priv *init_priv(const csc * P, const csc * A, const OSQPSettings *settings,
-                c_int polish);
+Priv *init_priv(const csc * P, const csc * A,
+                const OSQPSettings *settings, c_int polish);
 
 // Free LDL Factorization structure
 void free_priv(Priv *p);
 
-#endif  // #end EMBEDDED
+#endif
+
+
+#if EMBEDDED != 1
+// Update private structure with new P and A
+c_int update_priv(Priv * p, const csc *P, const csc *A,
+                  const OSQPWorkspace * work, const OSQPSettings *settings);
+#endif
+
+/* solves Ax = b for x, and stores result in b */
+c_int solve_lin_sys(const OSQPSettings *settings, Priv *p, c_float *b);
 
 
 #ifdef __cplusplus

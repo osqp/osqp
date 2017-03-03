@@ -34,7 +34,6 @@ endif()
 # Is the code generated for embedded platforms?
 #   1 :   Yes. Matrix update not allowed.
 #   2 :   Yes. Matrix update allowed.
-set (EMBEDDED 2)
 
 if (NOT DEFINED EMBEDDED)
     message(STATUS "Embedded is OFF")
@@ -84,7 +83,7 @@ endif (DLONG)
 # Set Compiler flags
 # ----------------------------------------------
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O3 -g")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
 set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")      # Include math
 # Include real time library in linux
@@ -137,6 +136,7 @@ else()
         src/auxil.c
         src/lin_alg.c
         src/osqp.c
+        src/kkt.c
         src/proj.c
         src/scaling.c
         src/util.c
@@ -149,6 +149,7 @@ else()
         include/glob_opts.h
         include/lin_alg.h
         include/lin_sys.h
+        include/kkt.h
         include/osqp.h
         include/types.h
         include/proj.h

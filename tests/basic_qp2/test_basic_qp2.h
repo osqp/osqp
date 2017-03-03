@@ -1,11 +1,8 @@
 #include "osqp.h"     // OSQP API
 #include "minunit.h"  // Basic testing script header
 
-#ifndef BASIC_QP2_MATRICES_H
-#define BASIC_QP2_MATRICES_H
-#include "basic_qp2/basic_qp2.h"
-#endif
 
+#include "basic_qp2/data.h"
 
 
 static char * test_basic_qp2_solve()
@@ -86,7 +83,7 @@ static char * test_basic_qp2_update()
     // Structures
     OSQPWorkspace * work;  // Workspace
     OSQPData * data;  // Data
-    basic_qp2_sols_data *  sols_data = generate_problem_basic_qp2_sols_data();
+    basic_qp2_sols_data *  sols_data;
 
 
     // Populate data

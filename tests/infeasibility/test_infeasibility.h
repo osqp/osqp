@@ -3,7 +3,7 @@
 #include "util.h"     // Utilities for testing
 #include "minunit.h"  // Basic testing script header
 
-#include "infeasibility/infeasibility.h"
+#include "infeasibility/data.h"
 
 
 static char * test_infeasible_qp_solve()

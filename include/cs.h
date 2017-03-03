@@ -14,7 +14,7 @@ extern "C" {
 
 // System libraries
 // #include <stdlib.h>
-#include <string.h>
+// #include <string.h>
 // #include <math.h>
 
 // typedef struct    /* matrix in compressed-column or triplet form */
@@ -28,6 +28,12 @@ extern "C" {
 //         c_int nz;       /* # of entries in triplet matrix, -1 for compressed-col */
 // } csc;
 
+
+// #include "lin_alg.h"
+
+// System libraries
+// #include <stdlib.h>
+// #include <math.h>
 
 /*****************************************************************************
  * Create and free CSC Matrices                                              *
@@ -81,15 +87,27 @@ csc * csc_done(csc *C, void *w, void *x, c_int ok);
  *****************************************************************************/
 
 
-/* C = compressed-column CSC from matrix T in triplet form */
-csc *triplet_to_csc(const csc *T);
+ /**
+  * C = compressed-column CSC from matrix T in triplet form
+  *
+  * TtoC stores the vector of indeces from T to C
+  *  -> C[TtoC[i]] = T[i]
+  *
+  * @param  T    matrix in triplet format
+  * @param  TtoC vector of indeces from triplet to CSC format
+  * @return      matrix in CSC format
+  */
+ csc *triplet_to_csc(const csc *T, c_int * TtoC);
 
 /* Convert sparse to dense */
 c_float * csc_to_dns(csc * M);
 
 
 /**
- * Convert CSC matrix into upper triangular one
+ * Convert square CSC matrix into upper triangular one
+ *
+ * @param  M         Matrix to be converted
+ * @return           Upper triangular matrix in CSC format
  */
 csc * csc_to_triu(csc * M);
 
@@ -107,8 +125,16 @@ c_int csc_cumsum(c_int *p, c_int *c, c_int n);
  */
 c_int *csc_pinv(c_int const *p, c_int n);
 
-/* Symmetric permutation of matrix A:  C = P A P' */
-csc *csc_symperm(const csc *A, const c_int *pinv, c_int values);
+/**
+ * C = A(p,p)= PAP' where A and C are symmetric the upper part stored;
+ *  N.B. pinv not p!
+ * @param  A      Original matrix (upper-triangular)
+ * @param  pinv   Inverse of permutation vector
+ * @param  AtoC   Mapping from indeces of A-x to C->x
+ * @param  values Are values of A allocated?
+ * @return        New matrix (allocated)
+ */
+csc *csc_symperm(const csc *A, const c_int *pinv, c_int * AtoC, c_int values);
 
 
 

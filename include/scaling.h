@@ -6,21 +6,21 @@ extern "C" {
 #endif
 
 // Functions to scale problem data
-#include "lin_alg.h"
 #include "types.h"
+#include "lin_alg.h"
 
 #define MAX_SCALING (1e3)
 #define MIN_SCALING (1e-3)
 #define SCALING_REG (1e-08)
 
-#ifndef EMBEDDED
-
-#include "kkt.h"
+// #include "kkt.h"
 
 // Scale data stored in workspace
 c_int scale_data(OSQPWorkspace * work);
 
-#endif  // end EMBEDDED
+
+/* Unscale problem matrices */
+c_int unscale_data(OSQPWorkspace * work);
 
 
 // Scale solution

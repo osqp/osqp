@@ -73,8 +73,17 @@ csc *csc_spfree(csc *A) {
 }
 
 
-/* C = compressed-column CSC from matrix T in triplet form */
-csc *triplet_to_csc(const csc *T) {
+/**
+ * C = compressed-column CSC from matrix T in triplet form
+ *
+ * TtoC stores the vector of indeces from T to C
+ *  -> C[TtoC[i]] = T[i]
+ *
+ * @param  T    matrix in triplet format
+ * @param  TtoC vector of indeces from triplet to CSC format
+ * @return      matrix in CSC format
+ */
+csc *triplet_to_csc(const csc *T, c_int * TtoC) {
         c_int m, n, nz, p, k, *Cp, *Ci, *w, *Ti, *Tj;
         c_float *Cx, *Tx;
         csc *C;
@@ -95,7 +104,10 @@ csc *triplet_to_csc(const csc *T) {
         csc_cumsum(Cp, w, n); /* column pointers */
         for (k = 0; k < nz; k++) {
                 Ci[p = w[Tj[k]]++] = Ti[k]; /* A(i,j) is the pth entry in C */
-                if (Cx) Cx[p] = Tx[k];
+                if (Cx) {
+                    Cx[p] = Tx[k];
+                    if (TtoC != OSQP_NULL) TtoC[k] = p; // Assign vector of indeces
+                }
         }
         return (csc_done(C, w, OSQP_NULL, 1)); /* success; free w and return C */
 }
@@ -131,8 +143,16 @@ c_int *csc_pinv(c_int const *p, c_int n) {
 }
 
 
-/* Symmetric permutation of matrix A:  C = P A P' */
-csc *csc_symperm(const csc *A, const c_int *pinv, c_int values) {
+/**
+ * C = A(p,p)= PAP' where A and C are symmetric the upper part stored;
+ *  N.B. pinv not p!
+ * @param  A      Original matrix (upper-triangular)
+ * @param  pinv   Inverse of permutation vector
+ * @param  AtoC   Mapping from indeces of A-x to C->x
+ * @param  values Are values of A allocated?
+ * @return        New matrix (allocated)
+ */
+csc *csc_symperm(const csc *A, const c_int *pinv, c_int * AtoC, c_int values) {
     c_int i, j, p, q, i2, j2, n, *Ap, *Ai, *Cp, *Ci, *w;
     c_float *Cx, *Ax;
     csc *C;
@@ -170,6 +190,9 @@ csc *csc_symperm(const csc *A, const c_int *pinv, c_int values) {
             Ci[q = w[c_max(i2, j2)]++] = c_min(i2, j2);
             if (Cx)
                 Cx[q] = Ax[p];
+            if (AtoC) { // If vector AtoC passed, store values of the mapppings
+                AtoC[p] = q;
+            }
         }
     }
     return (csc_done(C, w, OSQP_NULL, 1)); /* success; free workspace, return C */
@@ -183,9 +206,9 @@ csc *csc_symperm(const csc *A, const c_int *pinv, c_int values) {
 csc * copy_csc_mat(const csc* A){
         csc * B = csc_spalloc(A->m, A->n, A->p[A->n], 1, 0);
 
-        memcpy(B->p, A->p, (A->n+1)*sizeof(c_int));
-        memcpy(B->i, A->i, (A->p[A->n])*sizeof(c_int));
-        memcpy(B->x, A->x, (A->p[A->n])*sizeof(c_float));
+        prea_int_vec_copy(A->p, B->p, A->n+1);
+        prea_int_vec_copy(A->i, B->i, A->p[A->n]);
+        prea_vec_copy(A->x, B->x, A->p[A->n]);
 
         return B;
 }
@@ -194,9 +217,11 @@ csc * copy_csc_mat(const csc* A){
  *  Copy sparse CSC matrix A to B (B is preallocated, NO MALOC)
  */
 void prea_copy_csc_mat(const csc* A, csc* B){
-    memcpy(B->p, A->p, (A->n+1)*sizeof(c_int));
-    memcpy(B->i, A->i, (A->p[A->n])*sizeof(c_int));
-    memcpy(B->x, A->x, (A->p[A->n])*sizeof(c_float));
+
+    prea_int_vec_copy(A->p, B->p, A->n+1);
+    prea_int_vec_copy(A->i, B->i, A->p[A->n]);
+    prea_vec_copy(A->x, B->x, A->p[A->n]);
+
     B->nzmax = A->nzmax;
 }
 
@@ -212,6 +237,9 @@ csc * csc_done(csc *C, void *w, void *x, c_int ok){
 
 /**
  * Convert square CSC matrix into upper triangular one
+ *
+ * @param  M         Matrix to be converted
+ * @return           Upper triangular matrix in CSC format
  */
 csc * csc_to_triu(csc * M){
     csc * M_trip;  // Matrix in triplet format
@@ -219,11 +247,16 @@ csc * csc_to_triu(csc * M){
     c_int nnzmaxM; // Estimated maximum number of elements of M
     c_int n;  // Dimension of M
     c_int ptr, i, j;  // Counters for (i,j) and index in M
-    c_int z_M=0; // Counter for elements in M_trip
+    c_int z_M = 0; // Counter for elements in M_trip
+
 
     // Check if matrix is square
     if (M->m != M->n){
+        #ifdef PRINTING
         c_print("ERROR: Matrix M not square!\n");
+        #endif
+
+        return OSQP_NULL;
     }
     n = M->m;
 
@@ -232,6 +265,7 @@ csc * csc_to_triu(csc * M){
 
     // Allocate M_trip
     M_trip = csc_spalloc(n, n, nnzmaxM, 1, 1); // Triplet format
+
 
     // Fill M_trip with only elements in M which are in the upper triangular
     for (j=0; j < n; j++){  // Cycle over columns
@@ -246,6 +280,8 @@ csc * csc_to_triu(csc * M){
                 M_trip->i[z_M] = i;
                 M_trip->p[z_M] = j;
                 M_trip->x[z_M] = M->x[ptr];
+
+                // Increase counter for the number of elements
                 z_M++;
             }
         }
@@ -255,9 +291,11 @@ csc * csc_to_triu(csc * M){
     M_trip->nz = z_M;
 
     // Convert triplet matrix to csc format
-    M_triu = triplet_to_csc(M_trip);
+    M_triu = triplet_to_csc(M_trip, OSQP_NULL);
 
     // Cleanup and return result
     csc_spfree(M_trip);
+
+    // Return matrix in triplet form
     return M_triu;
 }

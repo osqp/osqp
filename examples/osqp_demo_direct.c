@@ -5,19 +5,19 @@
 int main(int argc, char **argv) {
 
     // Load problem data
-    c_float basic_qp_P_x[4] = {4.00000000000000000000, 1.00000000000000000000, 1.00000000000000000000, 2.00000000000000000000, };
-    c_int basic_qp_P_nnz = 4;
-    c_int basic_qp_P_i[4] = {0, 1, 0, 1, };
-    c_int basic_qp_P_p[3] = {0, 2, 4, };
-    c_float basic_qp_q[2] = {1.00000000000000000000, 1.00000000000000000000, };
-    c_float basic_qp_A_x[4] = {1.00000000000000000000, 1.00000000000000000000, 1.00000000000000000000, 1.00000000000000000000, };
-    c_int basic_qp_A_nnz = 4;
-    c_int basic_qp_A_i[4] = {0, 1, 0, 2, };
-    c_int basic_qp_A_p[3] = {0, 2, 4, };
-    c_float basic_qp_lA[3] = {1.00000000000000000000, 0.00000000000000000000, 0.00000000000000000000, };
-    c_float basic_qp_uA[3] = {1.00000000000000000000, 0.69999999999999995559, 0.69999999999999995559, };
-    c_int basic_qp_n = 2;
-    c_int basic_qp_m = 3;
+    c_float P_x[4] = {4.00000000000000000000, 1.00000000000000000000, 1.00000000000000000000, 2.00000000000000000000, };
+    c_int P_nnz = 4;
+    c_int P_i[4] = {0, 1, 0, 1, };
+    c_int P_p[3] = {0, 2, 4, };
+    c_float q[2] = {1.00000000000000000000, 1.00000000000000000000, };
+    c_float A_x[4] = {1.00000000000000000000, 1.00000000000000000000, 1.00000000000000000000, 1.00000000000000000000, };
+    c_int A_nnz = 4;
+    c_int A_i[4] = {0, 1, 0, 2, };
+    c_int A_p[3] = {0, 2, 4, };
+    c_float l[3] = {1.00000000000000000000, 0.00000000000000000000, 0.00000000000000000000, };
+    c_float u[3] = {1.00000000000000000000, 0.69999999999999995559, 0.69999999999999995559, };
+    c_int n = 2;
+    c_int m = 3;
 
 
     // Problem settings
@@ -29,13 +29,13 @@ int main(int argc, char **argv) {
 
     // Populate data
     data = (OSQPData *)c_malloc(sizeof(OSQPData));
-    data->n = basic_qp_n;
-    data->m = basic_qp_m;
-    data->P = csc_matrix(data->n, data->n, basic_qp_P_nnz, basic_qp_P_x, basic_qp_P_i, basic_qp_P_p);
-    data->q = basic_qp_q;
-    data->A = csc_matrix(data->m, data->n, basic_qp_A_nnz, basic_qp_A_x, basic_qp_A_i, basic_qp_A_p);
-    data->l = basic_qp_lA;
-    data->u = basic_qp_uA;
+    data->n = n;
+    data->m = m;
+    data->P = csc_matrix(data->n, data->n, P_nnz, P_x, P_i, P_p);
+    data->q = q;
+    data->A = csc_matrix(data->m, data->n, A_nnz, A_x, A_i, A_p);
+    data->l = l;
+    data->u = u;
 
 
     // Define Solver settings as default

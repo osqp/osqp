@@ -32,6 +32,17 @@ static const c_int HSPACE = 12;
  * Utility Functions  *
  **********************/
 
+
+ /* Custom string copy to avoid string.h library */
+void c_strcpy(char dest[], const char source[]){
+int i = 0;
+    while (1) {
+       dest[i] = source[i];
+       if (dest[i] == '\0') break;
+       i++;
+ } }
+
+
 #ifdef PRINTING
 
 static void print_line(void){
@@ -290,10 +301,9 @@ c_float toc(OSQPTimer* t)
 
 
 
-/* ================================= DEBUG FUNCTIONS ======================= */
+/* ==================== DEBUG FUNCTIONS ======================= */
 
 #ifndef EMBEDDED
-
 /* Convert sparse CSC to dense */
 c_float * csc_to_dns(csc * M)
 {
@@ -347,7 +357,6 @@ c_int is_eq_csc(csc *A, csc *B, c_float tol){
 
 
 #ifdef PRINTING
-
 /* Print a csc sparse matrix */
 void print_csc_matrix(csc* M, const char * name)
 {
@@ -423,4 +432,4 @@ void print_vec_int(c_int * x, c_int n, const char *name) {
 }
 
 
-#endif
+#endif  // PRINTING

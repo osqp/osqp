@@ -3,7 +3,7 @@
 #include "util.h"     // Utilities for testing
 #include "minunit.h"  // Basic testing script header
 
-#include "basic_qp/basic_qp.h"
+#include "basic_qp/data.h"
 
 
 static char * test_basic_qp_solve()
@@ -80,7 +80,7 @@ static char * test_basic_qp_update()
     // Structures
     OSQPWorkspace * work;  // Workspace
     OSQPData * data;  // Data
-    basic_qp_sols_data *  sols_data = generate_problem_basic_qp_sols_data();
+    basic_qp_sols_data *  sols_data;
 
     // Populate data
     data = generate_problem_basic_qp();
