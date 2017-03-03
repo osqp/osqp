@@ -6,7 +6,7 @@
 #include "lin_sys.h"
 
 
-#include "solve_linsys/solve_linsys.h"
+#include "solve_linsys/data.h"
 
 
 

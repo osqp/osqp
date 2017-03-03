@@ -3,7 +3,7 @@
 
 #ifndef BASIC_QP2_MATRICES_H
 #define BASIC_QP2_MATRICES_H
-#include "basic_qp2/basic_qp2.h"
+#include "basic_qp2/data.h"
 #endif
 
 

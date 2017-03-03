@@ -193,7 +193,7 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
     #
     # GENERATE HEADER FILE
     #
-    f = open(problem_name + "/" + problem_name + ".h", "w")
+    f = open(problem_name + "/data.h", "w")
 
     # Add definition check
     f.write("#ifndef " + problem_name.upper() + "_DATA_H\n")
@@ -346,7 +346,7 @@ def generate_data(problem_name, sols_data):
     #
     # GENERATE HEADER FILE
     #
-    f = open(problem_name + "/" + problem_name + ".h", "w")
+    f = open(problem_name + "/data.h", "w")
 
     # Add definition check
     f.write("#ifndef " + problem_name.upper() + "_DATA_H\n")

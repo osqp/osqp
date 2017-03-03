@@ -2,7 +2,7 @@
 #include "osqp.h"
 #include "minunit.h"
 
-#include "lin_alg/lin_alg.h"
+#include "lin_alg/data.h"
 
 static char * test_constr_sparse_mat(){
     c_float * Adns;  // Conversion to dense matrix
