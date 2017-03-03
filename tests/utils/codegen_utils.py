@@ -299,11 +299,11 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
         if isinstance(value, str):
             # Status test get from C code
             if value == 'optimal':
-                f.write("%s = %s;\n" % (key, 'OSQP_SOLVED'))
+                f.write("data->%s = %s;\n" % (key, 'OSQP_SOLVED'))
             elif value == 'infeasible':
-                f.write("%s = %s;\n" % (key, 'OSQP_INFEASIBLE'))
+                f.write("data->%s = %s;\n" % (key, 'OSQP_INFEASIBLE'))
             elif value == 'unbounded':
-                f.write("%s = %s;\n" % (key, 'OSQP_UNBOUNDED'))
+                f.write("data->%s = %s;\n" % (key, 'OSQP_UNBOUNDED'))
         # Check if it is an array or a scalar
         if type(value) is np.ndarray:
             if isinstance(value.flatten(order='F')[0], int):
@@ -406,11 +406,11 @@ def generate_data(problem_name, sols_data):
         if isinstance(value, str):
             # Status test get from C code
             if value == 'optimal':
-                f.write("%s = %s;\n" % (key, 'OSQP_SOLVED'))
+                f.write("data->%s = %s;\n" % (key, 'OSQP_SOLVED'))
             elif value == 'infeasible':
-                f.write("%s = %s;\n" % (key, 'OSQP_INFEASIBLE'))
+                f.write("data->%s = %s;\n" % (key, 'OSQP_INFEASIBLE'))
             elif value == 'unbounded':
-                f.write("%s = %s;\n" % (key, 'OSQP_UNBOUNDED'))
+                f.write("data->%s = %s;\n" % (key, 'OSQP_UNBOUNDED'))
         # Check if it is an array or a scalar
         elif spa.issparse(value):  # Sparse matrix
             write_mat_sparse(f, value, key, "data")

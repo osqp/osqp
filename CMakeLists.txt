@@ -31,10 +31,13 @@ endif()
 
 # Set options
 # ----------------------------------------------
+
+# Are unittests generated?
+option (UNITTESTS "Enable unittests generation" ON)
+
 # Is the code generated for embedded platforms?
 #   1 :   Yes. Matrix update not allowed.
 #   2 :   Yes. Matrix update allowed.
-
 if (NOT DEFINED EMBEDDED)
     message(STATUS "Embedded is OFF")
 else()
@@ -178,18 +181,35 @@ target_link_libraries (osqp_demo_direct osqpdir)
 # Add testing
 # ----------------------------------------------
 # Add custom command to generate tests
-add_custom_target(
-    create_tests_data
-    COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}/tests; python generate_tests_data.py; cd ..
-)
+if (UNITTESTS)
+    find_package(PythonInterp)
+    if(NOT PYTHONINTERP_FOUND)
+        message( FATAL_ERROR "You need python installed to generate unittests" )
+    endif()
 
-# Direct linear solver testing
-include_directories(tests)
-add_executable(osqp_tester_direct ${PROJECT_SOURCE_DIR}/tests/osqp_tester_direct.c)
-target_link_libraries (osqp_tester_direct osqpdir)
-add_dependencies(osqp_tester_direct create_tests_data)
+    # Generating tests.stamp so that the test data are not always generated
+    set(data_timestamp ${PROJECT_SOURCE_DIR}/tests/tests_data.stamp)
+    add_custom_command(
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests
+        COMMAND ${PYTHON_EXECUTABLE} generate_tests_data.py
+        COMMAND cmake -E touch ${data_timestamp}
+        DEPENDS ${PROJECT_SOURCE_DIR}/tests/generate_tests_data.py
+        OUTPUT ${data_timestamp}
+        COMMENT "Generating unittests data files using Python"
+    )
+    add_custom_target(
+        generate_tests_data
+        DEPENDS ${data_timestamp}
+        )
 
-# Add testing
-include(CTest)
-enable_testing()
-add_test(NAME direct COMMAND $<TARGET_FILE:osqp_tester_direct>)
+    # Direct linear solver testing
+    include_directories(tests)
+    add_executable(osqp_tester_direct ${PROJECT_SOURCE_DIR}/tests/osqp_tester_direct.c)
+    target_link_libraries (osqp_tester_direct osqpdir)
+    add_dependencies(osqp_tester_direct generate_tests_data)
+
+    # Add testing
+    include(CTest)
+    enable_testing()
+    add_test(NAME direct COMMAND $<TARGET_FILE:osqp_tester_direct>)
+endif()
