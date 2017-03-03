@@ -45,6 +45,7 @@ test_form_KKT_KKTu_new = spa.triu(test_form_KKT_KKT_new).tocsc()
 
 # Test solve problem with initial P and A
 test_solve_P = test_form_KKT_P.copy()
+test_solve_Pu = test_form_KKT_Pu.copy()
 test_solve_q = np.random.randn(n)
 test_solve_A = test_form_KKT_A.copy()
 test_solve_l = -30 + np.random.randn(m)
@@ -64,6 +65,7 @@ test_solve_status = prob.status
 
 # Solve with new P
 test_solve_P_new = test_form_KKT_P_new.copy()
+test_solve_Pu_new = test_form_KKT_Pu_new.copy()
 x = cvxpy.Variable(n)
 objective = cvxpy.Minimize(0.5 * cvxpy.quad_form(x, test_solve_P_new) + test_solve_q * x )
 constraints = [test_solve_A * x <= test_solve_u, test_solve_l <= test_solve_A * x]
@@ -119,6 +121,7 @@ data = {'test_form_KKT_n':test_form_KKT_n,
         'test_form_KKT_KKT_new': test_form_KKT_KKT_new,
         'test_form_KKT_KKTu_new': test_form_KKT_KKTu_new,
         'test_solve_P': test_solve_P,
+        'test_solve_Pu': test_solve_Pu,
         'test_solve_q': test_solve_q,
         'test_solve_A': test_solve_A,
         'test_solve_l': test_solve_l,
@@ -130,11 +133,12 @@ data = {'test_form_KKT_n':test_form_KKT_n,
         'test_solve_obj_value': test_solve_obj_value,
         'test_solve_status': test_solve_status,
         'test_solve_P_new': test_solve_P_new,
-        'test_solve_A_new': test_solve_A_new,
+        'test_solve_Pu_new': test_solve_Pu_new,
         'test_solve_P_new_x': test_solve_P_new_x,
         'test_solve_P_new_y': test_solve_P_new_y,
         'test_solve_P_new_obj_value': test_solve_P_new_obj_value,
         'test_solve_P_new_status': test_solve_P_new_status,
+        'test_solve_A_new': test_solve_A_new,
         'test_solve_A_new_x': test_solve_A_new_x,
         'test_solve_A_new_y': test_solve_A_new_y,
         'test_solve_A_new_obj_value': test_solve_A_new_obj_value,

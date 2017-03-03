@@ -291,6 +291,9 @@ c_int update_priv(Priv * p, const csc *P, const csc *A,
                      p->L->x, p->Dinv, p->Y, p->Pattern, p->Flag,
                      OSQP_NULL, OSQP_NULL);
 
+     // Invert elements of D that are stored in p->Dinv
+     vec_ew_recipr(p->Dinv, p->Dinv, p->KKT->n);
+
     // return exit flag
     return (kk - p->KKT->n);
 
