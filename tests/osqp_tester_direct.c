@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 
-
 #include "minunit.h"
 #include "osqp.h"
 
@@ -14,9 +13,6 @@
 #include "basic_qp2/test_basic_qp2.h"
 #include "infeasibility/test_infeasibility.h"
 #include "update_matrices/test_update_matrices.h"
-
-
-
 
 
 int tests_run = 0;

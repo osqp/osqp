@@ -1,8 +1,9 @@
 import numpy as np
 import scipy.sparse as spa
 import utils.codegen_utils as cu
-import cvxpy
 
+# Set numpy seed for reproducibility
+np.random.seed(2)
 
 
 # Define tests
@@ -21,7 +22,7 @@ test_form_KKT_sigma = 0.1
 test_form_KKT_KKT = spa.vstack([
                         spa.hstack([test_form_KKT_P + test_form_KKT_sigma *
                         spa.eye(test_form_KKT_n), test_form_KKT_A.T]),
-                     spa.hstack([test_form_KKT_A,
+                        spa.hstack([test_form_KKT_A,
                         -1./test_form_KKT_rho * spa.eye(test_form_KKT_m)])]).tocsc()
 test_form_KKT_KKTu = spa.triu(test_form_KKT_KKT).tocsc()
 
@@ -41,8 +42,6 @@ test_form_KKT_KKT_new = spa.vstack([
 test_form_KKT_KKTu_new = spa.triu(test_form_KKT_KKT_new).tocsc()
 
 
-
-
 # Test solve problem with initial P and A
 test_solve_P = test_form_KKT_P.copy()
 test_solve_Pu = test_form_KKT_Pu.copy()
@@ -52,62 +51,18 @@ test_solve_l = -30 + np.random.randn(m)
 test_solve_u = 30 + np.random.randn(m)
 
 
-# Solve problem with cvxpy
-x = cvxpy.Variable(n)
-objective = cvxpy.Minimize(0.5 * cvxpy.quad_form(x, test_solve_P.todense()) + test_solve_q * x )
-constraints = [test_solve_A.todense() * x <= test_solve_u, test_solve_l <= test_solve_A.todense() * x]
-prob = cvxpy.Problem(objective, constraints)
-prob.solve(abstol=1e-7, reltol=1e-7)
-test_solve_x = np.asarray(x.value).flatten()
-test_solve_y = (constraints[0].dual_value - constraints[1].dual_value).A1
-test_solve_obj_value = objective.value
-test_solve_status = prob.status
-
-# Solve with new P
+# Define new P
 test_solve_P_new = test_form_KKT_P_new.copy()
 test_solve_Pu_new = test_form_KKT_Pu_new.copy()
-x = cvxpy.Variable(n)
-objective = cvxpy.Minimize(0.5 * cvxpy.quad_form(x, test_solve_P_new) + test_solve_q * x )
-constraints = [test_solve_A * x <= test_solve_u, test_solve_l <= test_solve_A * x]
-prob = cvxpy.Problem(objective, constraints)
-prob.solve(abstol=1e-7, reltol=1e-7)
-test_solve_P_new_x = np.asarray(x.value).flatten()
-test_solve_P_new_y = (constraints[0].dual_value - constraints[1].dual_value).A1
-test_solve_P_new_obj_value = objective.value
-test_solve_P_new_status = prob.status
 
 
-
-# Solve with new A
+# Define new A
 test_solve_A_new = test_form_KKT_A_new.copy()
-x = cvxpy.Variable(n)
-objective = cvxpy.Minimize(0.5 * cvxpy.quad_form(x, test_solve_P) + test_solve_q * x )
-constraints = [test_solve_A_new * x <= test_solve_u, test_solve_l <= test_solve_A_new * x]
-prob = cvxpy.Problem(objective, constraints)
-prob.solve(abstol=1e-7, reltol=1e-7)
-test_solve_A_new_x = np.asarray(x.value).flatten()
-test_solve_A_new_y = (constraints[0].dual_value - constraints[1].dual_value).A1
-test_solve_A_new_obj_value = objective.value
-test_solve_A_new_status = prob.status
-
-
-# Solve with new P and A
-x = cvxpy.Variable(n)
-objective = cvxpy.Minimize(0.5 * cvxpy.quad_form(x, test_solve_P_new) + test_solve_q * x )
-constraints = [test_solve_A_new * x <= test_solve_u, test_solve_l <= test_solve_A_new * x]
-prob = cvxpy.Problem(objective, constraints)
-prob.solve(abstol=1e-7, reltol=1e-7)
-test_solve_P_A_new_x = np.asarray(x.value).flatten()
-test_solve_P_A_new_y = (constraints[0].dual_value - constraints[1].dual_value).A1
-test_solve_P_A_new_obj_value = objective.value
-test_solve_P_A_new_status = prob.status
-
-
 
 
 # Generate test data and solutions
-data = {'test_form_KKT_n':test_form_KKT_n,
-        'test_form_KKT_m':test_form_KKT_m,
+data = {'test_form_KKT_n': test_form_KKT_n,
+        'test_form_KKT_m': test_form_KKT_m,
         'test_form_KKT_A': test_form_KKT_A,
         'test_form_KKT_P': test_form_KKT_P,
         'test_form_KKT_Pu': test_form_KKT_Pu,
@@ -128,28 +83,31 @@ data = {'test_form_KKT_n':test_form_KKT_n,
         'test_solve_u': test_solve_u,
         'n': n,
         'm': m,
-        'test_solve_x': test_solve_x,
-        'test_solve_y': test_solve_y,
-        'test_solve_obj_value': test_solve_obj_value,
-        'test_solve_status': test_solve_status,
+        'test_solve_x': np.array([-0.34967513, 1.20460722, -0.46259805,
+                                  0.59083905, -0.87685541]),
+        'test_solve_y': np.zeros(m),
+        'test_solve_obj_value': -1.7665127080483103,
+        'test_solve_status': 'optimal',
         'test_solve_P_new': test_solve_P_new,
         'test_solve_Pu_new': test_solve_Pu_new,
-        'test_solve_P_new_x': test_solve_P_new_x,
-        'test_solve_P_new_y': test_solve_P_new_y,
-        'test_solve_P_new_obj_value': test_solve_P_new_obj_value,
-        'test_solve_P_new_status': test_solve_P_new_status,
+        'test_solve_P_new_x': np.array([-0.28228879, 1.3527703, -0.69277181,
+                                        0.82445911, -1.11688134]),
+        'test_solve_P_new_y': np.zeros(m),
+        'test_solve_P_new_obj_value': -2.1490899311728526,
+        'test_solve_P_new_status': 'optimal',
         'test_solve_A_new': test_solve_A_new,
-        'test_solve_A_new_x': test_solve_A_new_x,
-        'test_solve_A_new_y': test_solve_A_new_y,
-        'test_solve_A_new_obj_value': test_solve_A_new_obj_value,
-        'test_solve_A_new_status': test_solve_A_new_status,
-        'test_solve_P_A_new_x': test_solve_P_A_new_x,
-        'test_solve_P_A_new_y': test_solve_P_A_new_y,
-        'test_solve_P_A_new_obj_value': test_solve_P_A_new_obj_value,
-        'test_solve_P_A_new_status': test_solve_P_A_new_status
+        'test_solve_A_new_x': np.array([-0.34967513, 1.20460722, -0.46259805,
+                                        0.59083905, -0.87685541]),
+        'test_solve_A_new_y': np.zeros(m),
+        'test_solve_A_new_obj_value': -1.7665127080484808,
+        'test_solve_A_new_status': 'optimal',
+        'test_solve_P_A_new_x': np.array([-0.28228879, 1.3527703, -0.69277181,
+                                          0.82445911, -1.11688134]),
+        'test_solve_P_A_new_y': np.zeros(m),
+        'test_solve_P_A_new_obj_value': -2.1490899311726253,
+        'test_solve_P_A_new_status': 'optimal'
         }
 
-# import ipdb; ipdb.set_trace()
 
 # Generate test data
 cu.generate_data('update_matrices', data)

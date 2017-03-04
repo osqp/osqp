@@ -1,7 +1,10 @@
+import numpy as np
 import scipy.sparse as spa
 import scipy as sp
 import utils.codegen_utils as cu
 
+# Set numpy seed for reproducibility
+np.random.seed(2)
 
 n = 50
 m = 150

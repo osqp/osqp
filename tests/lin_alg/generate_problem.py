@@ -2,6 +2,8 @@ import numpy as np
 import scipy.sparse as spa
 import utils.codegen_utils as cu
 
+# Set numpy seed for reproducibility
+np.random.seed(2)
 
 # Test sparse matrix construction vs dense
 test_sp_matrix_Adns = np.around(.6*np.random.rand(5, 6)) + np.random.randn(5,6)
