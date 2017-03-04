@@ -1,16 +1,11 @@
 import numpy as np
 import scipy.sparse as spa
 import utils.codegen_utils as cu
-import cvxpy
-
-
-
-# Define tests
 
 
 # Test sparse matrix construction vs dense
 test_sp_matrix_Adns = np.around(.6*np.random.rand(5, 6)) + np.random.randn(5,6)
-test_sp_matrix_A =  spa.csc_matrix(test_sp_matrix_Adns)
+test_sp_matrix_A = spa.csc_matrix(test_sp_matrix_Adns)
 
 
 # Test vector operations
@@ -36,7 +31,6 @@ test_mat_ops_ew_square = test_mat_ops_A.copy()
 test_mat_ops_ew_square.data = np.square(test_mat_ops_ew_square.data)
 test_mat_ops_ew_abs = test_mat_ops_A.copy()
 test_mat_ops_ew_abs.data = np.abs(test_mat_ops_ew_abs.data)
-
 
 
 # Test matrix vector operations
@@ -75,8 +69,6 @@ test_qpform_Pu = spa.triu(test_qpform_P).tocsc()
 test_qpform_x = np.random.randn(test_qpform_n)
 test_qpform_value = .5 * test_qpform_x.T.dot(test_qpform_P.dot(test_qpform_x))
 
-
-# import ipdb; ipdb.set_trace()
 
 # Generate test data and solutions
 data = {'test_sp_matrix_A': test_sp_matrix_A,

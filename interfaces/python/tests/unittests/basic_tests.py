@@ -23,8 +23,8 @@ class basic_tests(unittest.TestCase):
         self.q = np.array([3, 4])
         self.A = sparse.csc_matrix(np.array([[-1, 0], [0, -1], [-1, -3],
                                              [2, 5], [3, 4]]))
-        self.uA = np.array([0., 0., -15, 100, 80])
-        self.lA = -np.inf * np.ones(len(self.uA))
+        self.u = np.array([0., 0., -15, 100, 80])
+        self.l = -np.inf * np.ones(len(self.u))
         self.n = self.P.shape[0]
         self.m = self.A.shape[0]
         self.opts = {'verbose': False,
@@ -40,7 +40,7 @@ class basic_tests(unittest.TestCase):
                      'warm_start': True,
                      'pol_refine_iter': 4}
         self.model = osqp.OSQP()
-        self.model.setup(P=self.P, q=self.q, A=self.A, l=self.lA, u=self.uA,
+        self.model.setup(P=self.P, q=self.q, A=self.A, l=self.l, u=self.u,
                          **self.opts)
 
     def test_basic_QP(self):
@@ -49,7 +49,7 @@ class basic_tests(unittest.TestCase):
 
         # solve problem with gurobi
         qp_prob = mpbpy.QuadprogProblem(self.P, self.q,
-                                        self.A, self.lA, self.uA)
+                                        self.A, self.l, self.u)
         resGUROBI = qp_prob.solve(solver=mpbpy.GUROBI, verbose=False)
 
         # Assert close
@@ -65,7 +65,7 @@ class basic_tests(unittest.TestCase):
 
         # solve problem with gurobi
         qp_prob = mpbpy.QuadprogProblem(self.P, q_new,
-                                        self.A, self.lA, self.uA)
+                                        self.A, self.l, self.u)
         resGUROBI = qp_prob.solve(solver=mpbpy.GUROBI, verbose=False)
 
         # Assert close
@@ -81,7 +81,7 @@ class basic_tests(unittest.TestCase):
 
         # solve problem with gurobi
         qp_prob = mpbpy.QuadprogProblem(self.P, self.q,
-                                        self.A, l_new, self.uA)
+                                        self.A, l_new, self.u)
         resGUROBI = qp_prob.solve(solver=mpbpy.GUROBI, verbose=False)
 
         # Assert close
@@ -97,7 +97,7 @@ class basic_tests(unittest.TestCase):
 
         # solve problem with gurobi
         qp_prob = mpbpy.QuadprogProblem(self.P, self.q,
-                                        self.A, self.lA, u_new)
+                                        self.A, self.l, u_new)
         resGUROBI = qp_prob.solve(solver=mpbpy.GUROBI, verbose=False)
 
         # Assert close
