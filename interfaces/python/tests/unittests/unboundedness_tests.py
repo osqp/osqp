@@ -45,7 +45,8 @@ class unboundedness_tests(unittest.TestCase):
         res = self.model.solve()
 
         # Assert close
-        self.assertEqual(res.info.status_val, -4)
+        self.assertEqual(res.info.status_val,
+                         self.model.constant('OSQP_UNBOUNDED'))
 
     def test_unbounded_qp(self):
 

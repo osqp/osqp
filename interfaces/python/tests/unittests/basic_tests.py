@@ -3,10 +3,6 @@ import osqp
 # import osqppurepy as osqp
 import numpy as np
 from scipy import sparse
-import scipy as sp
-
-# Check solve problem with gurobi
-import mathprogbasepy as mpbpy
 
 # Unit Test
 import unittest
@@ -17,8 +13,6 @@ class basic_tests(unittest.TestCase):
 
     def setUp(self):
         # Simple QP problem
-        sp.random.seed(4)
-
         self.P = sparse.csc_matrix(np.array([[11., 0.], [0., 0.]]))
         self.q = np.array([3, 4])
         self.A = sparse.csc_matrix(np.array([[-1, 0], [0, -1], [-1, -3],
@@ -47,15 +41,11 @@ class basic_tests(unittest.TestCase):
         # Solve problem
         res = self.model.solve()
 
-        # solve problem with gurobi
-        qp_prob = mpbpy.QuadprogProblem(self.P, self.q,
-                                        self.A, self.l, self.u)
-        resGUROBI = qp_prob.solve(solver=mpbpy.GUROBI, verbose=False)
-
         # Assert close
-        nptest.assert_array_almost_equal(res.x, resGUROBI.x)
-        nptest.assert_array_almost_equal(res.y, resGUROBI.y)
-        nptest.assert_array_almost_equal(res.info.obj_val, resGUROBI.objval)
+        nptest.assert_array_almost_equal(res.x, np.array([0., 5.]))
+        nptest.assert_array_almost_equal(res.y, np.array([1.66666667, 0.,
+                                                          1.33333333, 0., 0.]))
+        nptest.assert_array_almost_equal(res.info.obj_val, 20.)
 
     def test_update_q(self):
         # Update linear cost
@@ -63,15 +53,11 @@ class basic_tests(unittest.TestCase):
         self.model.update(q=q_new)
         res = self.model.solve()
 
-        # solve problem with gurobi
-        qp_prob = mpbpy.QuadprogProblem(self.P, q_new,
-                                        self.A, self.l, self.u)
-        resGUROBI = qp_prob.solve(solver=mpbpy.GUROBI, verbose=False)
-
         # Assert close
-        nptest.assert_array_almost_equal(res.x, resGUROBI.x)
-        nptest.assert_array_almost_equal(res.y, resGUROBI.y)
-        nptest.assert_array_almost_equal(res.info.obj_val, resGUROBI.objval)
+        nptest.assert_array_almost_equal(res.x, np.array([0., 5.]))
+        nptest.assert_array_almost_equal(res.y, np.array([3.33333334, 0.,
+                                                          6.66666667, 0., 0.]))
+        nptest.assert_array_almost_equal(res.info.obj_val, 100.)
 
     def test_update_l(self):
         # Update lower bound
@@ -79,15 +65,11 @@ class basic_tests(unittest.TestCase):
         self.model.update(l=l_new)
         res = self.model.solve()
 
-        # solve problem with gurobi
-        qp_prob = mpbpy.QuadprogProblem(self.P, self.q,
-                                        self.A, l_new, self.u)
-        resGUROBI = qp_prob.solve(solver=mpbpy.GUROBI, verbose=False)
-
         # Assert close
-        nptest.assert_array_almost_equal(res.x, resGUROBI.x)
-        nptest.assert_array_almost_equal(res.y, resGUROBI.y)
-        nptest.assert_array_almost_equal(res.info.obj_val, resGUROBI.objval)
+        nptest.assert_array_almost_equal(res.x, np.array([0., 5.]))
+        nptest.assert_array_almost_equal(res.y, np.array([1.66666667, 0.,
+                                                          1.33333333, 0., 0.]))
+        nptest.assert_array_almost_equal(res.info.obj_val, 20.)
 
     def test_update_u(self):
         # Update lower bound
@@ -95,15 +77,12 @@ class basic_tests(unittest.TestCase):
         self.model.update(u=u_new)
         res = self.model.solve()
 
-        # solve problem with gurobi
-        qp_prob = mpbpy.QuadprogProblem(self.P, self.q,
-                                        self.A, self.l, u_new)
-        resGUROBI = qp_prob.solve(solver=mpbpy.GUROBI, verbose=False)
-
         # Assert close
-        nptest.assert_array_almost_equal(res.x, resGUROBI.x)
-        nptest.assert_array_almost_equal(res.y, resGUROBI.y)
-        nptest.assert_array_almost_equal(res.info.obj_val, resGUROBI.objval)
+        nptest.assert_array_almost_equal(res.x, np.array([-1.51515152e-01,
+                                                          -3.33282828e+02]))
+        nptest.assert_array_almost_equal(res.y, np.array([0., 0., 1.33333333,
+                                                          0., 0.]))
+        nptest.assert_array_almost_equal(res.info.obj_val, -1333.4595959614962)
 
     def test_update_bounds(self):
         # Update lower bound
@@ -113,15 +92,12 @@ class basic_tests(unittest.TestCase):
         self.model.update(u=u_new, l=l_new)
         res = self.model.solve()
 
-        # solve problem with gurobi
-        qp_prob = mpbpy.QuadprogProblem(self.P, self.q,
-                                        self.A, l_new, u_new)
-        resGUROBI = qp_prob.solve(solver=mpbpy.GUROBI, verbose=False)
-
         # Assert close
-        nptest.assert_array_almost_equal(res.x, resGUROBI.x)
-        nptest.assert_array_almost_equal(res.y, resGUROBI.y)
-        nptest.assert_array_almost_equal(res.info.obj_val, resGUROBI.objval)
+        nptest.assert_array_almost_equal(res.x, np.array([-0.12727273,
+                                                          -19.94909091]))
+        nptest.assert_array_almost_equal(res.y, np.array([0., 0., 0.,
+                                                          -0.8, 0.]))
+        nptest.assert_array_almost_equal(res.info.obj_val, -80.0890909023583)
 
     def test_update_max_iter(self):
         self.model.update_settings(max_iter=10)

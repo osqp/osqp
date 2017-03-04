@@ -45,7 +45,7 @@ class warm_start_tests(unittest.TestCase):
         # Solve problem with OSQP
         res = self.model.solve()
 
-        # Store optimal values\
+        # Store optimal values
         x_opt = res.x
         y_opt = res.y
         tot_iter = res.info.iter

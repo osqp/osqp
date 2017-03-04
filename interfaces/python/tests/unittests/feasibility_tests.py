@@ -5,9 +5,6 @@ import numpy as np
 from scipy import sparse
 import scipy as sp
 
-# Check solve problem with gurobi
-import mathprogbasepy as mpbpy
-
 # Unit Test
 import unittest
 import numpy.testing as nptest
@@ -54,12 +51,16 @@ class feasibility_tests(unittest.TestCase):
         # Solve problem
         res = self.model.solve()
 
-        # solve problem with gurobi
-        qp_prob = mpbpy.QuadprogProblem(self.P, self.q,
-                                        self.A, self.l, self.u)
-        resGUROBI = qp_prob.solve(solver=mpbpy.GUROBI, verbose=False)
-
         # Assert close
-        nptest.assert_array_almost_equal(res.x, resGUROBI.x)
-        nptest.assert_array_almost_equal(res.y, resGUROBI.y)
-        nptest.assert_array_almost_equal(res.info.obj_val, resGUROBI.objval)
+        nptest.assert_array_almost_equal(
+            res.x,
+            np.array([-0.0656074, 1.04194398, 0.4756959, -1.64036689,
+                      -0.34180168, -0.81696303, -1.06389178, 0.44944554,
+                      -0.44829675, -1.01289944, -0.12513655, 0.02267293,
+                      -1.15206474, 1.06817424, 1.18143313, 0.01690332,
+                      -0.11373645, -0.48115767,  0.25373436, 0.81369707,
+                      0.18883475, 0.47000419, -0.24932451, 0.09298623,
+                      1.88381076, 0.77536814, -1.35971433, 0.51511176,
+                      0.03317466, 0.90226419]))
+        nptest.assert_array_almost_equal(res.y, np.zeros(self.m))
+        nptest.assert_array_almost_equal(res.info.obj_val, 0.)
