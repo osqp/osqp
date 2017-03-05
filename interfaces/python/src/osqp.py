@@ -246,14 +246,14 @@ class OSQP(object):
         (n, m) = self._model.dimensions()
 
         if x is not None:
-            if len(x)!=n:
+            if len(x) != n:
                 raise ValueError("Wrong dimension for variable x")
 
             if y is None:
                 self._model.warm_start_x(x)
 
         if y is not None:
-            if len(y)!=m:
+            if len(y) != m:
                 raise ValueError("Wrong dimension for variable y")
 
             if x is None:

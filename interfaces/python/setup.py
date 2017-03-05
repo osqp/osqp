@@ -23,7 +23,7 @@ define_macros = []
 # Check if windows linux or mac to pass flag
 if system() == 'Windows':
     define_macros += [('IS_WINDOWS', None)]
-    cmake_args += ['-G','MinGW Makefiles']
+    cmake_args += ['-G', 'MinGW Makefiles']
 else:
     cmake_args += ['-G', 'Unix Makefiles']
     if system() == 'Linux':
@@ -56,11 +56,8 @@ if DFLOAT:
 else:
     cmake_args += ['-DDFLOAT:BOOL=OFF']
 
-
-
-
 # Define osqp and suitesparse directories
-osqp_dir = os.path.join('..','..')
+osqp_dir = os.path.join('..', '..')
 osqp_build_dir = os.path.join(osqp_dir, 'build')
 
 # Interface files
@@ -109,8 +106,6 @@ class build_ext_osqp(build_ext):
         # Run extension
         build_ext.build_extensions(self)
 
-
-
 _osqp = Extension('_osqp',
                   define_macros=define_macros,
                   libraries=libraries,
@@ -123,10 +118,11 @@ _osqp = Extension('_osqp',
 setup(name='osqp',
       version='0.0.0',
       author='Bartolomeo Stellato, Goran Banjac',
-      description='This is the Python package for OSQP: Operator Splitting solver for Quadratic Programs.',
+      description='This is the Python package for OSQP: ' +
+                  'Operator Splitting solver for Quadratic Programs.',
       package_dir={'': 'src'},
       install_requires=["numpy >= 1.7", "scipy >= 0.13.2", "future"],
       license='Apache 2.0',
-      cmdclass = {'build_ext': build_ext_osqp},
+      cmdclass={'build_ext': build_ext_osqp},
       py_modules=['osqp', 'osqppurepy', '_osqppurepy'],
       ext_modules=[_osqp])
