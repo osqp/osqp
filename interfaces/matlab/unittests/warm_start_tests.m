@@ -11,33 +11,28 @@ classdef warm_start_tests < matlab.unittest.TestCase
         n
         solver
         options
-        quadprog_opts
         tol
     end
-
+    
     methods(TestMethodSetup)
         function setup_problem(testCase)
-
+            
             % Set options
             testCase.options = struct;
             testCase.options.verbose = 0;
             testCase.options.rho = 0.01;
             testCase.options.eps_abs = 1e-04;
             testCase.options.eps_rel = 1e-04;
-
-
-            % Setup quadprog options
-            testCase.quadprog_opts.Display = 'off';
-
+            
             % Setup tolerance
             testCase.tol = 1e-04;
-
+            
         end
     end
-
+    
     methods (Test)
         function test_warm_start(testCase)
-
+            
             % big example
             rng(4)
             testCase.n = 100;
@@ -48,21 +43,15 @@ classdef warm_start_tests < matlab.unittest.TestCase
             testCase.A = sprandn(testCase.m, testCase.n, 0.8);
             testCase.u = 2*rand(testCase.m, 1);
             testCase.l = -2*rand(testCase.m, 1);
-
+            
             % Setup solver
             testCase.solver = osqp;
             testCase.solver.setup(testCase.P, testCase.q, ...
                 testCase.A, testCase.l, testCase.u, testCase.options);
-
+            
             % Solve with OSQP
             results = testCase.solver.solve();
-
-            % Solve with quadprog to double-check that it is infeasible
-            % [~, ~, ~] = quadprog(testCase.P, testCase.q, ...
-            %               [testCase.A; -testCase.A], ...
-            %               [testCase.u; -testCase.l], ...
-            %               [],[],[],[],[], testCase.quadprog_opts);
-
+            
             % Store optimal values
             x_opt = results.x;
             y_opt = results.y;
@@ -71,21 +60,15 @@ classdef warm_start_tests < matlab.unittest.TestCase
             % Warm start with zeros and check if the number of iterations is the same
             testCase.solver.warm_start('x', zeros(testCase.n, 1), 'y', zeros(testCase.m, 1));
             results = testCase.solver.solve();
-            testCase.verifyEqual(results.info.iter, ...  
-                                 tot_iter, ...
-                                 'AbsTol', testCase.tol)
+            testCase.verifyEqual(results.info.iter, tot_iter, 'AbsTol', testCase.tol)
             
-             
-            % Warm start with optimal values and check that number of
-            % iterations is < 10
+            % Warm start with optimal values and check that number of iterations is < 10
             testCase.solver.warm_start('x', x_opt, 'y', y_opt);
             results = testCase.solver.solve();
-            testCase.verifyThat(results.info.iter, matlab.unittest.constraints.IsLessThan(10));    
-
+            testCase.verifyThat(results.info.iter, matlab.unittest.constraints.IsLessThan(10));
+            
         end
-
-       
-
+        
     end
-
+    
 end

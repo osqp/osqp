@@ -11,7 +11,6 @@ classdef infeasibility_tests < matlab.unittest.TestCase
         n
         solver
         options
-        quadprog_opts
         tol
     end
 
@@ -24,12 +23,6 @@ classdef infeasibility_tests < matlab.unittest.TestCase
             testCase.options.rho = 0.01;
             testCase.options.eps_inf = 1e-05;
             testCase.options.max_iter = 2500;
-
-
-
-            % Setup quadprog options
-            testCase.quadprog_opts.Display = 'off';
-            % testCase.quadprog_opts.Algorithm = 'dual-simplex';
 
             % Setup tolerance
             testCase.tol = 1e-04;
@@ -66,12 +59,6 @@ classdef infeasibility_tests < matlab.unittest.TestCase
             
             % Solve with OSQP
             results = testCase.solver.solve();
-
-            % Solve with quadprog to double-check that it is infeasible
-            % [~, ~, ~] = quadprog(testCase.P, testCase.q, ...
-            %               [testCase.A; -testCase.A], ...
-            %               [testCase.u; -testCase.l], ...
-            %               [],[],[],[],[], testCase.quadprog_opts);
 
             % Check if they are close
             testCase.verifyEqual(results.info.status_val, ...

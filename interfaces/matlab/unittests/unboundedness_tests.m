@@ -11,7 +11,6 @@ classdef unboundedness_tests < matlab.unittest.TestCase
         n
         solver
         options
-        quadprog_opts
         tol
     end
 
@@ -25,10 +24,6 @@ classdef unboundedness_tests < matlab.unittest.TestCase
             testCase.options.eps_abs = 1e-04;
             testCase.options.eps_rel = 1e-04;
             testCase.options.eps_inf = 1e-15;  % Focus only on unboundedness
-
-
-            % Setup quadprog options
-            testCase.quadprog_opts.Display = 'off';
 
             % Setup tolerance
             testCase.tol = 1e-04;
@@ -55,12 +50,6 @@ classdef unboundedness_tests < matlab.unittest.TestCase
             % Solve with OSQP
             results = testCase.solver.solve();
 
-            % Solve with quadprog to double-check that it is infeasible
-            % [~, ~, ~] = quadprog(testCase.P, testCase.q, ...
-            %               [testCase.A; -testCase.A], ...
-            %               [testCase.u; -testCase.l], ...
-            %               [],[],[],[],[], testCase.quadprog_opts);
-
             % Check if they are close
             testCase.verifyEqual(results.info.status_val, ...
                                  testCase.solver.constant('OSQP_UNBOUNDED'), ...
@@ -85,12 +74,6 @@ classdef unboundedness_tests < matlab.unittest.TestCase
 
             % Solve with OSQP
             results = testCase.solver.solve();
-
-            % Solve with quadprog to double-check that it is infeasible
-            % [~, ~, ~] = quadprog(testCase.P, testCase.q, ...
-            %               [testCase.A; -testCase.A], ...
-            %               [testCase.u; -testCase.l], ...
-            %               [],[],[],[],[], testCase.quadprog_opts);
 
             % Check if they are close
             testCase.verifyEqual(results.info.status_val, ...

@@ -11,7 +11,6 @@ classdef feasibility_tests < matlab.unittest.TestCase
         n
         solver
         options
-        linprog_opts
         tol
     end
 
@@ -30,14 +29,11 @@ classdef feasibility_tests < matlab.unittest.TestCase
 
             % Setup solver
             testCase.solver = osqp;
-            testCase.solver.setup(testCase.P, testCase.q, ...
-                testCase.A, testCase.l, testCase.u, 'verbose', 0, 'eps_abs', 1e-05, 'eps_rel', 1e-05);
+            testCase.solver.setup(testCase.P, testCase.q, testCase.A, testCase.l, testCase.u, ...
+                'verbose', 0, 'eps_abs', 1e-05, 'eps_rel', 1e-05);
 
             % Get options
             testCase.options = testCase.solver.current_settings();
-
-            % Setup linprog options
-            testCase.linprog_opts.Display = 'off';
 
             % Setup tolerance
             testCase.tol = 1e-04;
@@ -50,16 +46,14 @@ classdef feasibility_tests < matlab.unittest.TestCase
             % Solve with OSQP
             results = testCase.solver.solve();
 
-            % Solve with quadprog
-            warning('off')
-            [test_x, ~, ~] = linprog(testCase.q, ...
-                                     [],[], ...
-                                     testCase.A,testCase.u, ...
-                                     [],[],[], testCase.linprog_opts);
-            warning('on')
-
             % Check if they are close
-            testCase.verifyEqual(results.x, test_x, 'AbsTol', testCase.tol)
+            testCase.verifyEqual(results.x, ...
+                [-4.7063; -8.3459; -8.9925; -15.2607; -4.5422; 18.0450; -1.1234; 1.4756; ...
+                 -6.4514; 3.8592; -1.3098; 2.2815; 2.2068; 11.8055; -6.0677; 0.8960; -5.9434; ...
+                 -34.0620; 18.4405; -24.3205; 4.4200; -4.9292; -2.2414; -0.2506; 30.2891; ...
+                 0.7295; 4.5628; -23.1693; 3.6001; -9.6683], 'AbsTol',testCase.tol)
+            testCase.verifyEqual(results.y, zeros(testCase.m, 1), 'AbsTol',testCase.tol)
+            testCase.verifyEqual(results.info.obj_val, 0.0, 'AbsTol', testCase.tol)
 
         end
 
