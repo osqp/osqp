@@ -65,7 +65,8 @@ osqp_build_dir = os.path.join(osqp_dir, 'build')
 
 # Interface files
 include_dirs = [get_include(),                          # Numpy directories
-                os.path.join(osqp_dir, 'include')]      # osqp.h
+                os.path.join(osqp_dir, 'include'),      # osqp.h
+                'include']                              # auxiliary files
 
 sources_files = glob(os.path.join('src', '*.c'))
 
