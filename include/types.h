@@ -46,7 +46,11 @@ typedef struct {
         c_int iter;          /* number of iterations taken */
         char status[32];     /* status string, e.g. 'Solved' */
         c_int status_val;    /* status as c_int, defined in constants.h */
+
+        #ifndef EMBEDDED
         c_int status_polish; /* polish status: successful (1), unperformed (0), (-1) unsuccessful */
+        #endif
+
         c_float obj_val;     /* primal objective */
         c_float pri_res;     /* norm of primal residual */
         c_float dua_res;     /* norm of dual residual */
@@ -60,6 +64,7 @@ typedef struct {
 } OSQPInfo;
 
 
+#ifndef EMBEDDED
 /* Polish structure */
 typedef struct {
     csc *Ared;            // Active rows of A
@@ -78,7 +83,7 @@ typedef struct {
     c_float pri_res;      // primal residual at polished solution
     c_float dua_res;      // dual residual at polished solution
 } OSQPPolish;
-
+#endif
 
 
 
@@ -117,8 +122,12 @@ typedef struct {
         c_float eps_unb;  /* unboundedness tolerance  */
         c_float alpha; /* relaxation parameter */
         c_float delta; /* regularization parameter for polish */
+
+        #ifndef EMBEDDED
         c_int polish; /* boolean, polish ADMM solution */
         c_int pol_refine_iter; /* iterative refinement steps in polish */
+        #endif
+
         c_int verbose; /* boolean, write out progress */
         c_int early_terminate; /* boolean, terminate if stopping criterion is met */
         c_int warm_start; /* boolean, warm start */
@@ -133,12 +142,14 @@ typedef struct {
         // Linear System solver structure
         Priv * priv;
 
+        #ifndef EMBEDDED
         // Polish structure
         OSQPPolish * pol;
+        #endif
 
         // Internal solver variables
         c_float *x, *y, *z, *xz_tilde;          // Iterates
-        c_float *x_prev, *z_prev;               // Previous x and x.
+        c_float *x_prev, *z_prev;               // Previous x and z.
                                                 // N.B. Used also as workspace vectors
                                                 //      for residuals.
         c_float *delta_y, *Atdelta_y;           // Infeasibility variables delta_y and
