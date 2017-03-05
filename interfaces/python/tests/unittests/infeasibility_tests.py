@@ -25,7 +25,7 @@ class infeeasibility_tests(unittest.TestCase):
                      'rho': 1.6,
                      'alpha': 1.6,
                      'max_iter': 2500,
-                     'polishing': False}
+                     'polish': False}
 
     def test_infeasibility_problem(self):
 

@@ -70,10 +70,10 @@ typedef struct {
     c_int *A_to_Aupp;     // Maps indices in A to indices in Aupp
     c_int *Alow_to_A;     // Maps indices in Alow to indices in A
     c_int *Aupp_to_A;     // Maps indices in Aupp to indices in A
-    c_float *x;           // optimal x-solution obtained by polishing
-    c_float *z;           // optimal z-solution obtained by polishing
+    c_float *x;           // optimal x-solution obtained by polish
+    c_float *z;           // optimal z-solution obtained by polish
     c_float *y_red;       // optimal dual variables associated to Ared obtained
-                          //    by polishing
+                          //    by polish
     c_float obj_val;      // objective value at polished solution
     c_float pri_res;      // primal residual at polished solution
     c_float dua_res;      // dual residual at polished solution
@@ -116,9 +116,9 @@ typedef struct {
         c_float eps_inf;  /* infeasibility tolerance  */
         c_float eps_unb;  /* unboundedness tolerance  */
         c_float alpha; /* relaxation parameter */
-        c_float delta; /* regularization parameter for polishing */
-        c_int polishing; /* boolean, polish ADMM solution */
-        c_int pol_refine_iter; /* iterative refinement steps in polishing */
+        c_float delta; /* regularization parameter for polish */
+        c_int polish; /* boolean, polish ADMM solution */
+        c_int pol_refine_iter; /* iterative refinement steps in polish */
         c_int verbose; /* boolean, write out progress  */
         c_int warm_start; /* boolean, warm start */
 } OSQPSettings;

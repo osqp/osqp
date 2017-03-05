@@ -58,7 +58,7 @@ The keyword arguments :code:`**settings` specify the solver settings as follows
 +---------------------------+-------------------------------------+----------------+
 | :code:`delta`    *        | Polishing regularization parameter  |   1e-07        |
 +---------------------------+-------------------------------------+----------------+
-| :code:`polishing` *       | Perform polishing                   |   True         |
+| :code:`polish` *          | Perform polishing                   |   True         |
 +---------------------------+-------------------------------------+----------------+
 | :code:`verbose`  *        | Print output                        |   True         |
 +---------------------------+-------------------------------------+----------------+
@@ -68,7 +68,7 @@ The keyword arguments :code:`**settings` specify the solver settings as follows
 +---------------------------+-------------------------------------+----------------+
 | :code:`scaling_iter`      | Scaling iterations                  |   3            |
 +---------------------------+-------------------------------------+----------------+
-| :code:`pol_refine_iter` * | Refinement iterations in polishing  |   5            |
+| :code:`pol_refine_iter` * | Refinement iterations in polish  |   5            |
 +---------------------------+-------------------------------------+----------------+
 
 The settings marked with * can be changed without running the setup method again. See section :ref:`python_update_settings`.

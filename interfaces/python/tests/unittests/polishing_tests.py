@@ -10,7 +10,7 @@ import unittest
 import numpy.testing as nptest
 
 
-class polishing_tests(unittest.TestCase):
+class polish_tests(unittest.TestCase):
 
     def setUp(self):
         """
@@ -25,7 +25,7 @@ class polishing_tests(unittest.TestCase):
                      'rho': 0.1,
                      'alpha': 1.6,
                      'max_iter': 2500,
-                     'polishing': True,
+                     'polish': True,
                      'pol_refine_iter': 4}
 
     def test_polish_simple(self):

@@ -151,7 +151,7 @@ class OSQP(object):
         Update OSQP solver settings
 
         It is possible to change: 'max_iter', 'eps_abs', 'eps_rel', 'alpha',
-                                  'delta', 'polishing', 'pol_refine_iter',
+                                  'delta', 'polish', 'pol_refine_iter',
                                   'verbose'
         """
 
@@ -161,7 +161,7 @@ class OSQP(object):
         eps_rel = kwargs.pop('eps_rel', None)
         alpha = kwargs.pop('alpha', None)
         delta = kwargs.pop('delta', None)
-        polishing = kwargs.pop('polishing', None)
+        polish = kwargs.pop('polish', None)
         pol_refine_iter = kwargs.pop('pol_refine_iter', None)
         verbose = kwargs.pop('verbose', None)
         warm_start = kwargs.pop('warm_start', None)
@@ -182,8 +182,8 @@ class OSQP(object):
         if delta is not None:
             self._model.update_delta(delta)
 
-        if polishing is not None:
-            self._model.update_polishing(polishing)
+        if polish is not None:
+            self._model.update_polish(polish)
 
         if pol_refine_iter is not None:
             self._model.update_pol_refine_iter(pol_refine_iter)
@@ -199,7 +199,7 @@ class OSQP(object):
            eps_rel is None and \
            alpha is None and \
            delta is None and \
-           polishing is None and \
+           polish is None and \
            pol_refine_iter is None and \
            verbose is None and \
            warm_start is None:

@@ -31,7 +31,7 @@ const char* OSQP_SETTINGS_FIELDS[] =
                                 "eps_unb",        //c_float
                                 "alpha",          //c_float
                                 "delta",          //c_float
-                                "polishing",      //c_int
+                                "polish",      //c_int
                                 "pol_refine_iter",//c_int
                                 "verbose",        //c_int
                                 "warm_start"};    //c_int
@@ -579,7 +579,7 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
   mxSetField(mxPtr, 0, "eps_unb",         mxCreateDoubleScalar(settings->eps_unb));
   mxSetField(mxPtr, 0, "alpha",           mxCreateDoubleScalar(settings->alpha));
   mxSetField(mxPtr, 0, "delta",           mxCreateDoubleScalar(settings->delta));
-  mxSetField(mxPtr, 0, "polishing",       mxCreateDoubleScalar(settings->polishing));
+  mxSetField(mxPtr, 0, "polish",       mxCreateDoubleScalar(settings->polish));
   mxSetField(mxPtr, 0, "pol_refine_iter", mxCreateDoubleScalar(settings->pol_refine_iter));
   mxSetField(mxPtr, 0, "verbose",         mxCreateDoubleScalar(settings->verbose));
   mxSetField(mxPtr, 0, "warm_start",      mxCreateDoubleScalar(settings->warm_start));
@@ -607,7 +607,7 @@ void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
   settings->eps_unb         = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_unb"));
   settings->alpha           = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "alpha"));
   settings->delta           = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "delta"));
-  settings->polishing       = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polishing"));
+  settings->polish       = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polish"));
   settings->pol_refine_iter = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "pol_refine_iter"));
   settings->verbose         = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "verbose"));
   settings->warm_start      = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "warm_start"));
@@ -631,8 +631,8 @@ void copyUpdatedSettingsToWork(const mxArray* mxPtr ,OsqpData* osqpData){
     (c_float)mxGetScalar(mxGetField(mxPtr, 0, "alpha")));
   osqp_update_delta(osqpData->work,
     (c_float)mxGetScalar(mxGetField(mxPtr, 0, "delta")));
-  osqp_update_polishing(osqpData->work,
-    (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polishing")));
+  osqp_update_polish(osqpData->work,
+    (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polish")));
   osqp_update_pol_refine_iter(osqpData->work,
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "pol_refine_iter")));
   osqp_update_verbose(osqpData->work,

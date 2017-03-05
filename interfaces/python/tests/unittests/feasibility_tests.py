@@ -39,7 +39,7 @@ class feasibility_tests(unittest.TestCase):
                      'sigma': 0.01,
                      'alpha': 1.6,
                      'max_iter': 5000,
-                     'polishing': False,
+                     'polish': False,
                      'warm_start': True,
                      'pol_refine_iter': 4}
         self.model = osqp.OSQP()

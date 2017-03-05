@@ -47,11 +47,11 @@ void print_header(void);
 /* Print iteration summary */
 void print_summary(OSQPInfo * info);
 
-/* Print polishing information */
-void print_polishing(OSQPInfo * info);
+/* Print polish information */
+void print_polish(OSQPInfo * info);
 
 /* Print Footer */
-void print_footer(OSQPInfo * info, c_int polishing);
+void print_footer(OSQPInfo * info, c_int polish);
 
 #endif
 

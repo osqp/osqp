@@ -157,7 +157,7 @@ c_int permute_KKT(csc ** KKT, Priv * p, c_int Pnz, c_int Anz, c_int * PtoKKT, c_
  * @param  P        Cost function matrix (upper triangular form)
  * @param  A        Constraints matrix
  * @param  settings Solver settings
- * @param  polish   Flag whether we are initializing for polishing or not
+ * @param  polish   Flag whether we are initializing for polish or not
  * @return          Initialized private structure
  */
 Priv *init_priv(const csc * P, const csc * A, const OSQPSettings *settings, c_int polish){

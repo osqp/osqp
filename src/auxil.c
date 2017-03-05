@@ -329,7 +329,7 @@ void store_solution(OSQPWorkspace *work) {
  * @param polish Called from polish function (1) or from elsewhere (0)
  */
 void update_info(OSQPWorkspace *work, c_int iter, c_int polish){
-    if (polish) { // polishing
+    if (polish) { // polish
 
         work->pol->obj_val = compute_obj_val(work->data, work->pol->x);
         if (work->data->m == 0) {

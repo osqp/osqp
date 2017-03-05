@@ -25,7 +25,7 @@ static char * test_basic_qp_solve()
     set_default_settings(settings);
     settings->max_iter = 200;
     settings->alpha = 1.6;
-    settings->polishing = 1;
+    settings->polish = 1;
     settings->scaling = 0;
     settings->verbose = 0;
     settings->warm_start = 0;
@@ -91,7 +91,7 @@ static char * test_basic_qp_update()
     set_default_settings(settings);
     settings->max_iter = 200;
     settings->alpha = 1.6;
-    settings->polishing = 1;
+    settings->polish = 1;
     settings->scaling = 0;
     settings->verbose = 0;
     settings->warm_start = 0;

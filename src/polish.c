@@ -184,7 +184,7 @@ static void compute_y_from_y_red(OSQPWorkspace * work){
     }
 }
 
-// Solution polishing: Solve equality constrained QP with assumed active constr.
+// Solution polish: Solve equality constrained QP with assumed active constr.
 c_int polish(OSQPWorkspace *work) {
     c_int mred, polish_successful;
     c_float * rhs_red;
@@ -228,7 +228,7 @@ c_int polish(OSQPWorkspace *work) {
     work->info->polish_time = toc(work->timer);
     #endif
 
-    // Check if polishing was successful
+    // Check if polish was successful
     polish_successful = (work->pol->pri_res < work->info->pri_res &&
         work->pol->dua_res < work->info->dua_res) || // Residuals are reduced
         (work->pol->pri_res < work->info->pri_res &&
@@ -258,7 +258,7 @@ c_int polish(OSQPWorkspace *work) {
             // Print summary
             #ifdef PRINTING
             if (work->settings->verbose)
-                print_polishing(work->info);
+                print_polish(work->info);
             #endif
 
     } else { // Polishing failed

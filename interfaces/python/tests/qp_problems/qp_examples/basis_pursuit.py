@@ -138,7 +138,7 @@ class basis_pursuit(QPExample):
 #            'alpha':             1.6,
 #            'scaling':           True,
 #            'max_scaling_iter':  4,
-#            'polishing':         False}
+#            'polish':         False}
 #
 # # Create an svm object
 # basis_pursuit_obj = basis_pursuit(m, n, dens_lvl=0.3, osqp_opts=options)

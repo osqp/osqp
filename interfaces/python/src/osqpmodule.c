@@ -647,7 +647,7 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                  "scaling", "scaling_norm", "scaling_iter",
                                  "rho", "sigma", "max_iter",
                                  "eps_abs", "eps_rel", "eps_inf", "eps_unb", "alpha",
-                                 "delta", "polishing", "pol_refine_iter", "verbose",
+                                 "delta", "polish", "pol_refine_iter", "verbose",
                                  "warm_start", NULL};               // Settings
 
 
@@ -698,7 +698,7 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                          &settings->eps_unb,
                                          &settings->alpha,
                                          &settings->delta,
-                                         &settings->polishing,
+                                         &settings->polish,
                                          &settings->pol_refine_iter,
                                          &settings->verbose,
                                          &settings->warm_start)) {
@@ -1145,8 +1145,8 @@ static PyObject *OSQP_update_delta(OSQP *self, PyObject *args){
 }
 
 
-static PyObject *OSQP_update_polishing(OSQP *self, PyObject *args){
-    c_int polishing_new;
+static PyObject *OSQP_update_polish(OSQP *self, PyObject *args){
+    c_int polish_new;
 
     #ifdef DLONG
     static char * argparse_string = "l";
@@ -1155,12 +1155,12 @@ static PyObject *OSQP_update_polishing(OSQP *self, PyObject *args){
     #endif
 
     // Parse argumentrs
-    if( !PyArg_ParseTuple(args, argparse_string, &polishing_new)) {
+    if( !PyArg_ParseTuple(args, argparse_string, &polish_new)) {
             return NULL;
     }
 
     // Perform Update
-    osqp_update_polishing(self->workspace, polishing_new);
+    osqp_update_polish(self->workspace, polish_new);
 
     // Return None
     Py_INCREF(Py_None);
@@ -1256,7 +1256,7 @@ static PyMethodDef OSQP_methods[] = {
     {"update_eps_rel",	(PyCFunction)OSQP_update_eps_rel, METH_VARARGS, PyDoc_STR("Update OSQP solver setting eps_rel")},
     {"update_alpha",	(PyCFunction)OSQP_update_alpha, METH_VARARGS, PyDoc_STR("Update OSQP solver setting alpha")},
     {"update_delta",	(PyCFunction)OSQP_update_delta, METH_VARARGS, PyDoc_STR("Update OSQP solver setting delta")},
-    {"update_polishing",	(PyCFunction)OSQP_update_polishing, METH_VARARGS, PyDoc_STR("Update OSQP solver setting polishing")},
+    {"update_polish",	(PyCFunction)OSQP_update_polish, METH_VARARGS, PyDoc_STR("Update OSQP solver setting polish")},
     {"update_pol_refine_iter",	(PyCFunction)OSQP_update_pol_refine_iter, METH_VARARGS, PyDoc_STR("Update OSQP solver setting pol_refine_iter")},
     {"update_verbose",	(PyCFunction)OSQP_update_verbose, METH_VARARGS, PyDoc_STR("Update OSQP solver setting verbose")},
     {"update_warm_start",	(PyCFunction)OSQP_update_warm_start, METH_VARARGS, PyDoc_STR("Update OSQP solver setting warm_start")},

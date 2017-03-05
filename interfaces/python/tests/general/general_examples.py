@@ -162,7 +162,7 @@ def main():
                           alpha=1.6,
                           rho=0.1,
                           sigma=0.1,
-                          polishing=True)
+                          polish=True)
 
     if resultsGUROBI.status != 'solver_error':
         print("\n")

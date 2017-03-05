@@ -89,10 +89,10 @@ void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
         c_print("          warm start: active\n");
     else
         c_print("          warm start: inactive\n");
-    if (settings->polishing)
-        c_print("          polishing: active\n");
+    if (settings->polish)
+        c_print("          polish: active\n");
     else
-        c_print("          polishing: inactive\n");
+        c_print("          polish: inactive\n");
     c_print("\n");
 }
 
@@ -110,8 +110,8 @@ void print_summary(OSQPInfo * info){
 }
 
 
-/* Print polishing information */
-void print_polishing(OSQPInfo * info) {
+/* Print polish information */
+void print_polish(OSQPInfo * info) {
     c_print("%*s ", (int)strlen(HEADER[0]), "PLSH");
     c_print("%*.4e ", (int)HSPACE, info->obj_val);
     c_print("%*.4e ", (int)HSPACE, info->pri_res);
@@ -129,7 +129,7 @@ void print_polishing(OSQPInfo * info) {
 
 #ifdef PRINTING
 /* Print Footer */
-void print_footer(OSQPInfo * info, c_int polishing){
+void print_footer(OSQPInfo * info, c_int polish){
 
     #ifdef PRINTING
     c_print("\n"); // Add space after iterations
@@ -137,11 +137,11 @@ void print_footer(OSQPInfo * info, c_int polishing){
 
     c_print("Status: %s\n", info->status);
 
-    if (polishing && info->status_val == OSQP_SOLVED) {
+    if (polish && info->status_val == OSQP_SOLVED) {
         if (info->status_polish == 1){
-            c_print("Solution polishing: Successful\n");
+            c_print("Solution polish: Successful\n");
         } else if (info->status_polish == -1){
-            c_print("Solution polishing: Unsuccessful\n");
+            c_print("Solution polish: Unsuccessful\n");
         }
     }
 
@@ -178,10 +178,10 @@ void set_default_settings(OSQPSettings * settings) {
         settings->eps_inf = EPS_INF;         /* infeasibility tolerance */
         settings->eps_unb = EPS_UNB;         /* unboundedness tolerance */
         settings->alpha = ALPHA;     /* relaxation parameter */
-        settings->delta = DELTA;    /* regularization parameter for polishing */
-        settings->polishing = POLISHING;     /* ADMM solution polishing: 1 */
+        settings->delta = DELTA;    /* regularization parameter for polish */
+        settings->polish = POLISHING;     /* ADMM solution polish: 1 */
         settings->pol_refine_iter = POL_REFINE_ITER; /* iterative refinement
-                                                        steps in polishing */
+                                                        steps in polish */
         settings->verbose = VERBOSE;     /* x equality constraint scaling: 1e-3 */
         settings->warm_start = WARM_START;     /* x equality constraint scaling: 1e-3 */
 
@@ -206,7 +206,7 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
     new->eps_unb = settings->eps_unb;
     new->alpha = settings->alpha;
     new->delta = settings->delta;
-    new->polishing = settings->polishing;
+    new->polish = settings->polish;
     new->pol_refine_iter = settings->pol_refine_iter;
     new->verbose = settings->verbose;
     new->warm_start = settings->warm_start;

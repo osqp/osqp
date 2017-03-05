@@ -1,4 +1,4 @@
-/* Solution polishing based on assuming the active set */
+/* Solution polish based on assuming the active set */
 #ifndef POLISH_H
 #define POLISH_H
 
@@ -12,7 +12,7 @@ extern "C" {
 #include "auxil.h"
 #include "kkt.h"
 
-// Solution polishing: Solve equality constrained QP with assumed active constr.
+// Solution polish: Solve equality constrained QP with assumed active constr.
 c_int polish(OSQPWorkspace *work);
 
 

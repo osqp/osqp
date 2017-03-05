@@ -14,5 +14,5 @@ u = np.array([10, 10])
 qp = mpbpy.QuadprogProblem(P, q, A, l, u)
 
 resOSQP = qp.solve(solver=mpbpy.OSQP, rho=1.1, eps_rel=1e-4, eps_abs=1e-4,
-                   polishing=True)
+                   polish=True)
 resGUROBI = qp.solve(solver=mpbpy.GUROBI)

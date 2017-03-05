@@ -36,7 +36,7 @@ class unconstrained_tests(unittest.TestCase):
                      'rho': 0.1,
                      'alpha': 1.6,
                      'max_iter': 5000,
-                     'polishing': False}
+                     'polish': False}
         self.model = osqp.OSQP()
         self.model.setup(P=self.P, q=self.q, A=self.A, l=self.l, u=self.u,
                          **self.opts)

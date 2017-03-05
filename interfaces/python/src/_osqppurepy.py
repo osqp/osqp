@@ -107,7 +107,7 @@ class settings(object):
     ----------
     -> These cannot be changed without running setup
     rho  [1.6]                 - Step in ADMM procedure
-    sigma    [1e-01]           - Regularization parameter for polishinging
+    sigma    [1e-01]           - Regularization parameter for polish
     scaling  [True]            - Prescaling/Equilibration
     scaling_iter [3]           - Number of Steps for Scaling Method
     scaling_norm [2]           - Scaling norm in SK algorithm
@@ -119,10 +119,10 @@ class settings(object):
     eps_inf  [1e-06]           - Infeasibility tolerance
     eps_unb  [1e-06]           - Unboundedness tolerance
     alpha [1.0]                - Relaxation parameter
-    delta [1.0]                - Regularization parameter for polishing
+    delta [1.0]                - Regularization parameter for polish
     verbose  [True]            - Verbosity
     warm_start [False]         - Reuse solution from previous solve
-    polishing  [True]          - Solution polishing
+    polish  [True]          - Solution polish
     pol_refine_iter  [3]       - Number of iterative refinement iterations
     """
 
@@ -143,7 +143,7 @@ class settings(object):
         self.delta = kwargs.pop('delta', 1e-7)
         self.verbose = kwargs.pop('verbose', True)
         self.warm_start = kwargs.pop('warm_start', False)
-        self.polishing = kwargs.pop('polishing', True)
+        self.polish = kwargs.pop('polish', True)
         self.pol_refine_iter = kwargs.pop('pol_refine_iter', 3)
 
 
@@ -374,10 +374,10 @@ class OSQP(object):
             print("          warm_start: active")
         else:
             print("          warm_start: inactive")
-        if settings.polishing:
-            print("          polishing: active")
+        if settings.polish:
+            print("          polish: active")
         else:
-            print("          polishing: inactive")
+            print("          polish: inactive")
         print("")
 
     def print_header(self):
@@ -467,7 +467,7 @@ class OSQP(object):
     def compute_pri_res(self, polish):
         """
         Compute primal residual ||Ax - z||
-        TODO: Add polishing case
+        TODO: Add polish case
         """
         if self.work.data.m == 0:  # No constraints
             return 0.
@@ -621,9 +621,9 @@ class OSQP(object):
              self.work.info.dua_res,
              self.work.info.setup_time + self.work.info.solve_time))
 
-    def print_polishing(self):
+    def print_polish(self):
         """
-        Print polishing information
+        Print polish information
         """
         print("PLSH %12.4e %12.4e %12.4e %9.2fs" % \
             (self.work.info.obj_val,
@@ -685,12 +685,12 @@ class OSQP(object):
         """
         print("")  # Add space after iterations
         print("Status: %s" % self.work.info.status)
-        if self.work.settings.polishing and \
+        if self.work.settings.polish and \
                 self.work.info.status_val == OSQP_SOLVED:
                     if self.work.info.status_polish == 1:
-                        print("Solution polishing: Successful")
+                        print("Solution polish: Successful")
                     elif self.work.info.status_polish == -1:
-                        print("Solution polishing: Unsuccessful")
+                        print("Solution polish: Unsuccessful")
         print("Number of iterations: %d" % self.work.info.iter)
         if self.work.info.status_val == OSQP_SOLVED:
             print("Optimal objective: %.4f" % self.work.info.obj_val)
@@ -843,8 +843,8 @@ class OSQP(object):
         # Update solve time
         self.work.info.solve_time = time.time() - self.work.timer
 
-        # Solution polishing
-        if self.work.settings.polishing and \
+        # Solution polish
+        if self.work.settings.polish and \
                 self.work.info.status_val == OSQP_SOLVED:
                     self.polish()
 
@@ -1035,26 +1035,26 @@ class OSQP(object):
 
     def update_delta(self, delta_new):
         """
-        Update delta parameter for polishing
+        Update delta parameter for polish
         """
         if delta_new <= 0:
             raise ValueError("delta must be positive")
 
         self.work.settings.delta = delta_new
 
-    def update_polishing(self, polishing_new):
+    def update_polish(self, polish_new):
         """
-        Update polishing parameter
+        Update polish parameter
         """
-        if (polishing_new is not True) & (polishing_new is not False):
-            raise ValueError("polishing should be either True or False")
+        if (polish_new is not True) & (polish_new is not False):
+            raise ValueError("polish should be either True or False")
 
-        self.work.settings.polishing = polishing_new
+        self.work.settings.polish = polish_new
         self.work.info.polish_time = 0.0
 
     def update_pol_refine_iter(self, pol_refine_iter_new):
         """
-        Update number iterative refinement iterations in polishing
+        Update number iterative refinement iterations in polish
         """
         if pol_refine_iter_new < 0:
             raise ValueError("pol_refine_iter must be nonnegative")
@@ -1118,7 +1118,7 @@ class OSQP(object):
 
     def polish(self):
         """
-        Solution polishing:
+        Solution polish:
         Solve equality constrained QP with assumed active constraints.
         """
         # Start timer
@@ -1173,7 +1173,7 @@ class OSQP(object):
         # Update polish time
         self.work.info.polish_time = time.time() - self.work.timer
 
-        # Check if polishing was successful
+        # Check if polish was successful
         pol_success = (self.work.pol.pri_res < self.work.info.pri_res) and \
                       (self.work.pol.dua_res < self.work.info.dua_res) or \
                       (self.work.pol.pri_res < self.work.info.pri_res) and \
@@ -1200,6 +1200,6 @@ class OSQP(object):
 
             # Print summary
             if self.work.settings.verbose:
-                self.print_polishing()
+                self.print_polish()
         else:
             self.work.info.status_polish = -1

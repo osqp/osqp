@@ -267,7 +267,7 @@ c_int osqp_solve(OSQPWorkspace * work){
 
     // Polish the obtained solution
     #ifndef EMBEDDED
-    if (work->settings->polishing && work->info->status_val == OSQP_SOLVED)
+    if (work->settings->polish && work->info->status_val == OSQP_SOLVED)
         polish(work);
     #endif
 
@@ -288,7 +288,7 @@ c_int osqp_solve(OSQPWorkspace * work){
     /* Print final footer */
     #ifdef PRINTING
     if(work->settings->verbose)
-        print_footer(work->info, work->settings->polishing);
+        print_footer(work->info, work->settings->polish);
     #endif
 
     // Store solution
@@ -965,7 +965,7 @@ c_int osqp_update_warm_start(OSQPWorkspace * work, c_int warm_start_new) {
 #ifndef EMBEDDED
 
 /**
- * Update regularization parameter in polishing
+ * Update regularization parameter in polish
  * @param  work      Workspace
  * @param  delta_new New regularization parameter
  * @return           Exitflag
@@ -985,21 +985,21 @@ c_int osqp_update_delta(OSQPWorkspace * work, c_float delta_new) {
 }
 
 /**
- * Update polishing setting
+ * Update polish setting
  * @param  work          Workspace
- * @param  polishing_new New polishing setting
+ * @param  polish_new New polish setting
  * @return               Exitflag
  */
-c_int osqp_update_polishing(OSQPWorkspace * work, c_int polishing_new) {
-    // Check that polishing is either 0 or 1
-    if (polishing_new != 0 && polishing_new != 1) {
+c_int osqp_update_polish(OSQPWorkspace * work, c_int polish_new) {
+    // Check that polish is either 0 or 1
+    if (polish_new != 0 && polish_new != 1) {
       #ifdef PRINTING
-      c_print("polishing should be either 0 or 1\n");
+      c_print("polish should be either 0 or 1\n");
       #endif
       return 1;
     }
-    // Update polishing
-    work->settings->polishing = polishing_new;
+    // Update polish
+    work->settings->polish = polish_new;
 
     #ifdef PROFILING
     // Reset polish time to zero
@@ -1011,7 +1011,7 @@ c_int osqp_update_polishing(OSQPWorkspace * work, c_int polishing_new) {
 
 
 /**
- * Update number of iterative refinement steps in polishing
+ * Update number of iterative refinement steps in polish
  * @param  work                Workspace
  * @param  pol_refine_iter_new New iterative reginement steps
  * @return                     Exitflag

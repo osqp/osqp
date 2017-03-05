@@ -30,7 +30,7 @@ class basic_tests(unittest.TestCase):
                      'rho': 0.1,
                      'alpha': 1.6,
                      'max_iter': 3000,
-                     'polishing': False,
+                     'polish': False,
                      'warm_start': True,
                      'pol_refine_iter': 4}
         self.model = osqp.OSQP()

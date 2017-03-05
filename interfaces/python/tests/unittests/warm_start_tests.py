@@ -20,7 +20,7 @@ class warm_start_tests(unittest.TestCase):
                      'eps_rel': 1e-05,
                      'rho': 0.05,
                      'sigma': 0.01,
-                     'polishing': False,
+                     'polish': False,
                      'pol_refine_iter': 4}
 
     def test_warm_start(self):
