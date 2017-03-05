@@ -66,9 +66,9 @@ osqp_build_dir = os.path.join(osqp_dir, 'build')
 # Interface files
 include_dirs = [get_include(),                          # Numpy directories
                 os.path.join(osqp_dir, 'include'),      # osqp.h
-                'include']                              # auxiliary files
+                os.path.join('extension', 'include')]                              # auxiliary header files
 
-sources_files = glob(os.path.join('src', '*.c'))
+sources_files = glob(os.path.join('extension','src', '*.c'))
 
 
 # Set optimizer flag
@@ -83,7 +83,7 @@ library_dirs = []
 
 # Add OSQP compiled library
 lib_ext = '.a'
-extra_objects = [os.path.join('src', 'libosqpdirstatic%s' % lib_ext)]
+extra_objects = [os.path.join('extension', 'src', 'libosqpdirstatic%s' % lib_ext)]
 
 
 class build_ext_osqp(build_ext):
@@ -105,14 +105,14 @@ class build_ext_osqp(build_ext):
         # Copy static library to src folder
         lib_name = 'libosqpdirstatic%s' % lib_ext
         lib_origin = os.path.join(osqp_build_dir, 'out', lib_name)
-        copyfile(lib_origin, os.path.join('src', lib_name))
+        copyfile(lib_origin, os.path.join('extension','src', lib_name))
 
         # Run extension
         build_ext.build_extensions(self)
 
 
 
-_osqp = Extension('_osqp',
+_osqp = Extension('osqp._osqp',
                   define_macros=define_macros,
                   libraries=libraries,
                   library_dirs=library_dirs,
@@ -121,13 +121,17 @@ _osqp = Extension('_osqp',
                   sources=sources_files,
                   extra_compile_args=compile_args)
 
+packages = ['osqp',
+            'osqp.codegen',
+            'osqppurepy']
+
 setup(name='osqp',
       version='0.0.0',
       author='Bartolomeo Stellato, Goran Banjac',
       description='This is the Python package for OSQP: Operator Splitting solver for Quadratic Programs.',
-      package_dir={'': 'src'},
+      package_dir={'osqp': 'osqp'},
       install_requires=["numpy >= 1.7", "scipy >= 0.13.2", "future"],
       license='Apache 2.0',
       cmdclass = {'build_ext': build_ext_osqp},
-      py_modules=['osqp', 'osqppurepy', '_osqppurepy'],
+      packages=packages,
       ext_modules=[_osqp])

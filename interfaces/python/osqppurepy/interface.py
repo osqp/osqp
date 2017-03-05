@@ -2,7 +2,7 @@
 OSQP solver pure python implementation
 """
 from builtins import object
-import _osqppurepy  # Internal low level module
+import osqppurepy._osqp  as _osqp # Internal low level module
 from warnings import warn
 import numpy as np
 from scipy import sparse
@@ -10,7 +10,7 @@ from scipy import sparse
 
 class OSQP(object):
     def __init__(self):
-        self._model = _osqppurepy.OSQP()
+        self._model = _osqp.OSQP()
 
     def version(self):
         return self._model.version()

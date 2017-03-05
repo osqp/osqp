@@ -3,7 +3,7 @@ Python interface module for OSQP solver v0.0.0
 """
 
 from builtins import object
-import _osqp  # Internal low level module
+import osqp._osqp  as _osqp # Internal low level module
 from warnings import warn
 import numpy as np
 from scipy import sparse
@@ -264,3 +264,17 @@ class OSQP(object):
 
         if x is None and y is None:
             raise ValueError("Unrecognized fields")
+
+    def codegen(self, folder, project_type, embedded_flag):
+        """
+        Generate embeddable C code for the problem
+        """
+
+        print("Hello!")
+        # Convert workspace to python
+
+
+        # Generate C code
+        # ...
+
+        # Call
