@@ -106,3 +106,10 @@ class basic_tests(unittest.TestCase):
         # Assert max iter reached
         self.assertEqual(res.info.status_val,
                          self.model.constant('OSQP_MAX_ITER_REACHED'))
+
+    def test_update_early_termination(self):
+        self.model.update_settings(early_terminate=False)
+        res = self.model.solve()
+
+        # Assert max iter reached
+        self.assertEqual(res.info.iter, self.opts['max_iter'])

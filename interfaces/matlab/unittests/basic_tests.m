@@ -128,6 +128,20 @@ classdef basic_tests < matlab.unittest.TestCase
             
         end
         
+        function test_update_early_termination(testCase)
+            % Update max_iter
+            opts = testCase.solver.current_settings();
+            opts.early_terminate = 0;
+            testCase.solver.update_settings(opts);
+            
+            % Solve again
+            results = testCase.solver.solve();
+            
+            % Check if they are close
+            testCase.verifyEqual(results.info.iter, testCase.options.max_iter, 'AbsTol',testCase.tol)
+            
+        end
+        
     end
     
 end
