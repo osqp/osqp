@@ -62,13 +62,15 @@ The keyword arguments :code:`**settings` specify the solver settings as follows
 +---------------------------+-------------------------------------+----------------+
 | :code:`verbose`  *        | Print output                        |   True         |
 +---------------------------+-------------------------------------+----------------+
+| :code:`early_terminate` * | Evaluate termination criteria       |   True         |
++---------------------------+-------------------------------------+----------------+
 | :code:`warm_start` *      | Perform warm starting               |   True         |
 +---------------------------+-------------------------------------+----------------+
 | :code:`scaling_norm`      | Scaling norm                        |   2            |
 +---------------------------+-------------------------------------+----------------+
 | :code:`scaling_iter`      | Scaling iterations                  |   3            |
 +---------------------------+-------------------------------------+----------------+
-| :code:`pol_refine_iter` * | Refinement iterations in polish  |   5            |
+| :code:`pol_refine_iter` * | Refinement iterations in polish     |   5            |
 +---------------------------+-------------------------------------+----------------+
 
 The settings marked with * can be changed without running the setup method again. See section :ref:`python_update_settings`.

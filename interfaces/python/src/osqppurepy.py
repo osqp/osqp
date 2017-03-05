@@ -95,7 +95,6 @@ class OSQP(object):
         u = np.minimum(u, self._model.constant('OSQP_INFTY'))
         l = np.maximum(l, -self._model.constant('OSQP_INFTY'))
 
-
         self._model.setup((n, m), P.data, P.indices, P.indptr, q,
                           A.data, A.indices, A.indptr,
                           l, u, **settings)
@@ -120,7 +119,6 @@ class OSQP(object):
                 raise ValueError("q must have length n")
             self._model.update_lin_cost(q)
 
-
         if l is not None:
             if len(l) != m:
                 raise ValueError("l must have length m")
@@ -130,7 +128,6 @@ class OSQP(object):
 
             if u is None:
                 self._model.update_lower_bound(l)
-
 
         if u is not None:
             if len(u) != m:
@@ -145,14 +142,13 @@ class OSQP(object):
         if l is not None and u is not None:
             self._model.update_bounds(l, u)
 
-
     def update_settings(self, **kwargs):
         """
         Update OSQP solver settings
 
         It is possible to change: 'max_iter', 'eps_abs', 'eps_rel', 'alpha',
                                   'delta', 'polish', 'pol_refine_iter',
-                                  'verbose'
+                                  'verbose', 'early_terminate'
         """
 
         # get arguments
@@ -164,6 +160,7 @@ class OSQP(object):
         polish = kwargs.pop('polish', None)
         pol_refine_iter = kwargs.pop('pol_refine_iter', None)
         verbose = kwargs.pop('verbose', None)
+        early_terminate = kwargs.pop('early_terminate', None)
         warm_start = kwargs.pop('warm_start', None)
 
         # update them
@@ -191,6 +188,9 @@ class OSQP(object):
         if verbose is not None:
             self._model.update_verbose(verbose)
 
+        if early_terminate is not None:
+            self._model.update_early_terminate(early_terminate)
+
         if warm_start is not None:
             self._model.update_warm_start(warm_start)
 
@@ -202,6 +202,7 @@ class OSQP(object):
            polish is None and \
            pol_refine_iter is None and \
            verbose is None and \
+           early_terminate is None and \
            warm_start is None:
             ValueError("No updatable settings has been specified!")
 

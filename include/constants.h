@@ -40,6 +40,7 @@ extern "C" {
 #define DELTA (1E-7)
 #define POLISHING (1)
 #define VERBOSE (1)
+#define EARLY_TERMINATE (1)
 #define WARM_START (1)
 #define SCALING (1)
 #define SCALING_NORM (2)

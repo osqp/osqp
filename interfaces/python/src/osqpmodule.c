@@ -236,7 +236,7 @@ static c_int OSQP_info_init( OSQP_info * self, PyObject *args)
     #endif
 
     #endif
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string,
                           &(self->iter),
                           &(self->status),
@@ -271,7 +271,7 @@ static c_int OSQP_info_init( OSQP_info * self, PyObject *args)
 
     #endif
 
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string,
                           &(self->iter),
                           &(self->status),
@@ -367,7 +367,7 @@ static c_int OSQP_results_init( OSQP_results * self, PyObject *args)
 {
     static char * argparse_string = "O!O!O!";
 
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string,
                           &PyArray_Type, &(self->x),
                           &PyArray_Type, &(self->y),
@@ -648,23 +648,23 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                  "rho", "sigma", "max_iter",
                                  "eps_abs", "eps_rel", "eps_inf", "eps_unb", "alpha",
                                  "delta", "polish", "pol_refine_iter", "verbose",
-                                 "warm_start", NULL};               // Settings
+                                 "early_terminate", "warm_start", NULL};  // Settings
 
 
         #ifdef DLONG
 
         #ifdef DFLOAT
-        static char * argparse_string = "(ll)O!O!O!O!O!O!O!O!O!|lllfflffffffllll";
+        static char * argparse_string = "(ll)O!O!O!O!O!O!O!O!O!|lllfflfffffflllll";
         #else
-        static char * argparse_string = "(ll)O!O!O!O!O!O!O!O!O!|lllddlddddddllll";
+        static char * argparse_string = "(ll)O!O!O!O!O!O!O!O!O!|lllddlddddddlllll";
         #endif
 
         #else
 
         #ifdef DFLOAT
-        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiffiffffffiiii";
+        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiffiffffffiiiii";
         #else
-        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiddiddddddiiii";
+        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiddiddddddiiiii";
         #endif
 
         #endif
@@ -701,6 +701,7 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                          &settings->polish,
                                          &settings->pol_refine_iter,
                                          &settings->verbose,
+                                         &settings->early_terminate,
                                          &settings->warm_start)) {
                 return NULL;
         }
@@ -746,7 +747,7 @@ static PyObject *OSQP_constant(OSQP *self, PyObject *args) {
 
     char * constant_name;  // String less than 32 chars
 
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, "s", &(constant_name))) {
             return NULL;
     }
@@ -805,7 +806,7 @@ static PyObject *OSQP_update_lin_cost(OSQP *self, PyObject *args){
 
     static char * argparse_string = "O!";
 
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string,
                           &PyArray_Type, &q)) {
             return NULL;
@@ -836,7 +837,7 @@ static PyObject *OSQP_update_lower_bound(OSQP *self, PyObject *args){
 
     static char * argparse_string = "O!";
 
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string,
                           &PyArray_Type, &l)) {
             return NULL;
@@ -867,7 +868,7 @@ static PyObject *OSQP_update_upper_bound(OSQP *self, PyObject *args){
 
     static char * argparse_string = "O!";
 
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string,
                           &PyArray_Type, &u)) {
             return NULL;
@@ -899,7 +900,7 @@ static PyObject *OSQP_update_bounds(OSQP *self, PyObject *args){
 
     static char * argparse_string = "O!O!";
 
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string,
                           &PyArray_Type, &l,
                           &PyArray_Type, &u)) {
@@ -934,7 +935,7 @@ static PyObject *OSQP_warm_start(OSQP *self, PyObject *args){
 
     static char * argparse_string = "O!O!";
 
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string,
                           &PyArray_Type, &x,
                           &PyArray_Type, &y)) {
@@ -969,7 +970,7 @@ static PyObject *OSQP_warm_start_x(OSQP *self, PyObject *args){
 
     static char * argparse_string = "O!";
 
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string,
                           &PyArray_Type, &x)) {
             return NULL;
@@ -1000,7 +1001,7 @@ static PyObject *OSQP_warm_start_y(OSQP *self, PyObject *args){
 
     static char * argparse_string = "O!";
 
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string,
                           &PyArray_Type, &y)) {
             return NULL;
@@ -1033,7 +1034,7 @@ static PyObject *OSQP_update_max_iter(OSQP *self, PyObject *args){
     #else
     static char * argparse_string = "i";
     #endif
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &max_iter_new)) {
             return NULL;
     }
@@ -1059,7 +1060,7 @@ static PyObject *OSQP_update_eps_abs(OSQP *self, PyObject *args){
     static char * argparse_string = "d";
     #endif
 
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &eps_abs_new)) {
             return NULL;
     }
@@ -1082,7 +1083,7 @@ static PyObject *OSQP_update_eps_rel(OSQP *self, PyObject *args){
     static char * argparse_string = "d";
     #endif
 
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &eps_rel_new)) {
             return NULL;
     }
@@ -1106,7 +1107,7 @@ static PyObject *OSQP_update_alpha(OSQP *self, PyObject *args){
     static char * argparse_string = "d";
     #endif
 
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &alpha_new)) {
             return NULL;
     }
@@ -1130,7 +1131,7 @@ static PyObject *OSQP_update_delta(OSQP *self, PyObject *args){
     static char * argparse_string = "d";
     #endif
 
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &delta_new)) {
             return NULL;
     }
@@ -1154,7 +1155,7 @@ static PyObject *OSQP_update_polish(OSQP *self, PyObject *args){
     static char * argparse_string = "i";
     #endif
 
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &polish_new)) {
             return NULL;
     }
@@ -1177,7 +1178,7 @@ static PyObject *OSQP_update_pol_refine_iter(OSQP *self, PyObject *args){
     static char * argparse_string = "i";
     #endif
 
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &pol_refine_iter_new)) {
             return NULL;
     }
@@ -1200,13 +1201,36 @@ static PyObject *OSQP_update_verbose(OSQP *self, PyObject *args){
     static char * argparse_string = "i";
     #endif
 
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &verbose_new)) {
             return NULL;
     }
 
     // Perform Update
     osqp_update_verbose(self->workspace, verbose_new);
+
+    // Return None
+    Py_INCREF(Py_None);
+    return Py_None;
+
+}
+
+static PyObject *OSQP_update_early_terminate(OSQP *self, PyObject *args){
+    c_int early_terminate_new;
+
+    #ifdef DLONG
+    static char * argparse_string = "l";
+    #else
+    static char * argparse_string = "i";
+    #endif
+
+    // Parse arguments
+    if( !PyArg_ParseTuple(args, argparse_string, &early_terminate_new)) {
+            return NULL;
+    }
+
+    // Perform Update
+    osqp_update_early_terminate(self->workspace, early_terminate_new);
 
     // Return None
     Py_INCREF(Py_None);
@@ -1223,7 +1247,7 @@ static PyObject *OSQP_update_warm_start(OSQP *self, PyObject *args){
     static char * argparse_string = "i";
     #endif
 
-    // Parse argumentrs
+    // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &warm_start_new)) {
             return NULL;
     }
@@ -1240,7 +1264,7 @@ static PyObject *OSQP_update_warm_start(OSQP *self, PyObject *args){
 
 static PyMethodDef OSQP_methods[] = {
     {"setup",	(PyCFunction)OSQP_setup,METH_VARARGS|METH_KEYWORDS, PyDoc_STR("Setup OSQP problem")},
-	{"solve",	(PyCFunction)OSQP_solve, METH_VARARGS, PyDoc_STR("Solve OSQP problem")},
+    {"solve",	(PyCFunction)OSQP_solve, METH_VARARGS, PyDoc_STR("Solve OSQP problem")},
     {"version",	(PyCFunction)OSQP_version, METH_NOARGS, PyDoc_STR("OSQP version")},
     {"constant",	(PyCFunction)OSQP_constant, METH_VARARGS, PyDoc_STR("Return internal OSQP constant")},
     {"dimensions",	(PyCFunction)OSQP_dimensions, METH_NOARGS, PyDoc_STR("Return problem dimensions (n, m)")},
@@ -1259,6 +1283,7 @@ static PyMethodDef OSQP_methods[] = {
     {"update_polish",	(PyCFunction)OSQP_update_polish, METH_VARARGS, PyDoc_STR("Update OSQP solver setting polish")},
     {"update_pol_refine_iter",	(PyCFunction)OSQP_update_pol_refine_iter, METH_VARARGS, PyDoc_STR("Update OSQP solver setting pol_refine_iter")},
     {"update_verbose",	(PyCFunction)OSQP_update_verbose, METH_VARARGS, PyDoc_STR("Update OSQP solver setting verbose")},
+    {"update_early_terminate",	(PyCFunction)OSQP_update_early_terminate, METH_VARARGS, PyDoc_STR("Update OSQP solver setting early_terminate")},
     {"update_warm_start",	(PyCFunction)OSQP_update_warm_start, METH_VARARGS, PyDoc_STR("Update OSQP solver setting warm_start")},
     {NULL,		NULL}		/* sentinel */
 };

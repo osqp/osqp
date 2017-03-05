@@ -244,8 +244,16 @@ c_int osqp_update_alpha(OSQPWorkspace * work, c_float alpha_new);
 c_int osqp_update_warm_start(OSQPWorkspace * work, c_int warm_start_new);
 
 
-#ifndef EMBEDDED
+/**
+ * Update early_terminate setting
+ * @param  work                 Workspace
+ * @param  early_terminate_new  New early_terminate setting
+ * @return                      Exitflag
+ */
+c_int osqp_update_early_terminate(OSQPWorkspace * work, c_int early_terminate_new);
 
+
+#ifndef EMBEDDED
 
 /**
  * Update regularization parameter in polish

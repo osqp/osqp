@@ -182,7 +182,8 @@ void set_default_settings(OSQPSettings * settings) {
         settings->polish = POLISHING;     /* ADMM solution polish: 1 */
         settings->pol_refine_iter = POL_REFINE_ITER; /* iterative refinement
                                                         steps in polish */
-        settings->verbose = VERBOSE;     /* x equality constraint scaling: 1e-3 */
+        settings->verbose = VERBOSE;     /* print output */
+        settings->early_terminate = EARLY_TERMINATE;     /* Evaluate termination criteria */
         settings->warm_start = WARM_START;     /* x equality constraint scaling: 1e-3 */
 
 }
@@ -209,6 +210,7 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
     new->polish = settings->polish;
     new->pol_refine_iter = settings->pol_refine_iter;
     new->verbose = settings->verbose;
+    new->early_terminate = settings->early_terminate;
     new->warm_start = settings->warm_start;
 
     return new;

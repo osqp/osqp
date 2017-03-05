@@ -230,28 +230,43 @@ c_int osqp_solve(OSQPWorkspace * work){
         /* End of ADMM Steps */
 
 
+        if (work->settings->early_terminate) {
+            /* Update information */
+            update_info(work, iter, 0);
+
+            /* Print summary */
+            #ifdef PRINTING
+            if (work->settings->verbose &&
+                    ((iter % PRINT_INTERVAL == 0)||(iter == 1)))
+                print_summary(work->info);
+            #endif
+
+            if (check_termination(work)){
+                // Terminate algorithm
+                break;
+            }
+        }
+    }
+
+    if (!work->settings->early_terminate) {
         /* Update information */
-        update_info(work, iter, 0);
+        update_info(work, iter-1, 0);
 
         /* Print summary */
         #ifdef PRINTING
-        if (work->settings->verbose &&
-                ((iter % PRINT_INTERVAL == 0)||(iter == 1)))
+        if (work->settings->verbose)
             print_summary(work->info);
         #endif
 
-        if (check_termination(work)){
-            // Terminate algorithm
-            break;
-        }
-
+        /* Check whether a termination criterion is triggered */
+        check_termination(work);
     }
-
 
     /* Print summary for last iteration */
     #ifdef PRINTING
     if (work->settings->verbose
-        && iter % PRINT_INTERVAL != 0 && iter != 1 && iter != work->settings->max_iter + 1)
+        && iter % PRINT_INTERVAL != 0 && iter != 1
+        && iter != work->settings->max_iter + 1)
         print_summary(work->info);
     #endif
 
@@ -957,6 +972,26 @@ c_int osqp_update_warm_start(OSQPWorkspace * work, c_int warm_start_new) {
     }
     // Update warm_start
     work->settings->warm_start = warm_start_new;
+
+    return 0;
+}
+
+/**
+ * Update early_terminate setting
+ * @param  work                 Workspace
+ * @param  early_terminate_new  New early_terminate setting
+ * @return                      Exitflag
+ */
+c_int osqp_update_early_terminate(OSQPWorkspace * work, c_int early_terminate_new) {
+    // Check that early_terminate is either 0 or 1
+    if (early_terminate_new != 0 && early_terminate_new != 1) {
+      #ifdef PRINTING
+      c_print("early_terminate should be either 0 or 1\n");
+      #endif
+      return 1;
+    }
+    // Update early_terminate
+    work->settings->early_terminate = early_terminate_new;
 
     return 0;
 }

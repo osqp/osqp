@@ -121,6 +121,7 @@ class settings(object):
     alpha [1.0]                - Relaxation parameter
     delta [1.0]                - Regularization parameter for polish
     verbose  [True]            - Verbosity
+    early_terminate  [True]    - Evalute termination criteria
     warm_start [False]         - Reuse solution from previous solve
     polish  [True]          - Solution polish
     pol_refine_iter  [3]       - Number of iterative refinement iterations
@@ -142,6 +143,7 @@ class settings(object):
         self.alpha = kwargs.pop('alpha', 1.6)
         self.delta = kwargs.pop('delta', 1e-7)
         self.verbose = kwargs.pop('verbose', True)
+        self.early_terminate = kwargs.pop('early_terminate', True)
         self.warm_start = kwargs.pop('warm_start', False)
         self.polish = kwargs.pop('polish', True)
         self.pol_refine_iter = kwargs.pop('pol_refine_iter', 3)
@@ -816,17 +818,29 @@ class OSQP(object):
             # Third step: update y
             self.update_y()
 
+            if self.work.settings.early_terminate:
+                # Update info
+                self.update_info(iter, 0)
+
+                # Print summary
+                if (self.work.settings.verbose) & \
+                        ((iter % PRINT_INTERVAL == 0) | (iter == 1)):
+                    self.print_summary()
+
+                # Break if converged
+                if self.check_termination():
+                    break
+
+        if not self.work.settings.early_terminate:
             # Update info
-            self.update_info(iter, 0)
+            self.update_info(self.work.settings.max_iter, 0)
 
             # Print summary
-            if (self.work.settings.verbose) & \
-                    ((iter % PRINT_INTERVAL == 0) | (iter == 1)):
+            if (self.work.settings.verbose):
                 self.print_summary()
 
             # Break if converged
-            if self.check_termination():
-                break
+            self.check_termination()
 
         # Print summary for last iteration
         if (self.work.settings.verbose) & (iter % PRINT_INTERVAL != 0):
@@ -1069,6 +1083,15 @@ class OSQP(object):
             raise ValueError("verbose should be either True or False")
 
         self.work.settings.verbose = verbose_new
+
+    def update_early_terminate(self, early_terminate_new):
+        """
+        Update early_terminate parameter
+        """
+        if (early_terminate_new is not True) & (early_terminate_new is not False):
+            raise ValueError("early_terminate should be either True or False")
+
+        self.work.settings.early_terminate = early_terminate_new
 
     def update_warm_start(self, warm_start_new):
         """

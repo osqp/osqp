@@ -588,6 +588,12 @@ c_int validate_settings(const OSQPSettings * settings){
         #endif
         return 1;
     }
+    if (settings->early_terminate != 0 && settings->early_terminate != 1) {
+        #ifdef PRINTING
+        c_print("early_terminate must be either 0 or 1\n");
+        #endif
+        return 1;
+    }
     if (settings->warm_start != 0 && settings->warm_start != 1) {
         #ifdef PRINTING
         c_print("warm_start must be either 0 or 1\n");

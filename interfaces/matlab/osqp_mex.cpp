@@ -31,9 +31,10 @@ const char* OSQP_SETTINGS_FIELDS[] =
                                 "eps_unb",        //c_float
                                 "alpha",          //c_float
                                 "delta",          //c_float
-                                "polish",      //c_int
+                                "polish",         //c_int
                                 "pol_refine_iter",//c_int
                                 "verbose",        //c_int
+                                "early_terminate",//c_int
                                 "warm_start"};    //c_int
 
 
@@ -582,6 +583,7 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
   mxSetField(mxPtr, 0, "polish",       mxCreateDoubleScalar(settings->polish));
   mxSetField(mxPtr, 0, "pol_refine_iter", mxCreateDoubleScalar(settings->pol_refine_iter));
   mxSetField(mxPtr, 0, "verbose",         mxCreateDoubleScalar(settings->verbose));
+  mxSetField(mxPtr, 0, "early_terminate", mxCreateDoubleScalar(settings->early_terminate));
   mxSetField(mxPtr, 0, "warm_start",      mxCreateDoubleScalar(settings->warm_start));
 
   return mxPtr;
@@ -610,6 +612,7 @@ void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
   settings->polish       = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polish"));
   settings->pol_refine_iter = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "pol_refine_iter"));
   settings->verbose         = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "verbose"));
+  settings->early_terminate = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "early_terminate"));
   settings->warm_start      = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "warm_start"));
 
 }
@@ -637,6 +640,8 @@ void copyUpdatedSettingsToWork(const mxArray* mxPtr ,OsqpData* osqpData){
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "pol_refine_iter")));
   osqp_update_verbose(osqpData->work,
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "verbose")));
+  osqp_update_early_terminate(osqpData->work,
+    (c_int)mxGetScalar(mxGetField(mxPtr, 0, "early_terminate")));
   osqp_update_warm_start(osqpData->work,
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "warm_start")));
 }

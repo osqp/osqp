@@ -119,7 +119,8 @@ typedef struct {
         c_float delta; /* regularization parameter for polish */
         c_int polish; /* boolean, polish ADMM solution */
         c_int pol_refine_iter; /* iterative refinement steps in polish */
-        c_int verbose; /* boolean, write out progress  */
+        c_int verbose; /* boolean, write out progress */
+        c_int early_terminate; /* boolean, terminate if stopping criterion is met */
         c_int warm_start; /* boolean, warm start */
 } OSQPSettings;
 
