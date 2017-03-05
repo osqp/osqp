@@ -46,6 +46,13 @@ else()
     add_definitions(-DEMBEDDED=${EMBEDDED})
 endif()
 
+# Is early termination enabled?
+option (EARLY_TERMINATE "Enable early termination" ON)
+message(STATUS "Early termination is ${EARLY_TERMINATE}")
+if (EARLY_TERMINATE)
+    add_definitions(-DEARLY_TERMINATE)
+endif (EARLY_TERMINATE)
+
 # Is printing enabled?
 option (PRINTING "Enable solver printing" ON)
 if (DEFINED EMBEDDED)

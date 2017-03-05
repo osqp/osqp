@@ -230,6 +230,8 @@ c_int osqp_solve(OSQPWorkspace * work){
         /* End of ADMM Steps */
 
 
+        #ifdef EARLY_TERMINATE
+
         /* Update information */
         update_info(work, iter, 0);
 
@@ -245,13 +247,31 @@ c_int osqp_solve(OSQPWorkspace * work){
             break;
         }
 
+        #endif  //end EARLY_TERMINATE
+
     }
+
+    #ifndef EARLY_TERMINATE
+    /* Update information */
+    update_info(work, iter-1, 0);
+
+    /* Print summary */
+    #ifdef PRINTING
+    if (work->settings->verbose)
+        print_summary(work->info);
+    #endif
+
+    /* Check whether a termination criterion is triggered */
+    check_termination(work);
+
+    #endif  //end EARLY_TERMINATE
 
 
     /* Print summary for last iteration */
     #ifdef PRINTING
     if (work->settings->verbose
-        && iter % PRINT_INTERVAL != 0 && iter != 1 && iter != work->settings->max_iter + 1)
+        && iter % PRINT_INTERVAL != 0 && iter != 1
+        && iter != work->settings->max_iter + 1)
         print_summary(work->info);
     #endif
 
