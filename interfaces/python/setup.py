@@ -23,7 +23,7 @@ define_macros = []
 # Check if windows linux or mac to pass flag
 if system() == 'Windows':
     define_macros += [('IS_WINDOWS', None)]
-    cmake_args += ['-G','MinGW Makefiles']
+    cmake_args += ['-G', 'MinGW Makefiles']
 else:
     cmake_args += ['-G', 'Unix Makefiles']
     if system() == 'Linux':
@@ -57,19 +57,18 @@ else:
     cmake_args += ['-DDFLOAT:BOOL=OFF']
 
 
-
-
 # Define osqp and suitesparse directories
-osqp_dir = os.path.join('..','..')
+osqp_dir = os.path.join('..', '..')
 osqp_build_dir = os.path.join(osqp_dir, 'build')
 
 # Interface files
-include_dirs = [get_include(),                          # Numpy directories
-                osqp_dir,                               # For additonal headers (private.h)
-                os.path.join(osqp_dir, 'include'),      # osqp.h
-                os.path.join('extension', 'include')]                              # auxiliary header files
+include_dirs = [
+    get_include(),                          # Numpy directories
+    osqp_dir,                               # For additonal headers (private.h)
+    os.path.join(osqp_dir, 'include'),      # osqp.h
+    os.path.join('extension', 'include')]   # auxiliary header files
 
-sources_files = glob(os.path.join('extension','src', '*.c'))
+sources_files = glob(os.path.join('extension', 'src', '*.c'))
 
 
 # Set optimizer flag
@@ -84,7 +83,18 @@ library_dirs = []
 
 # Add OSQP compiled library
 lib_ext = '.a'
-extra_objects = [os.path.join('extension', 'src', 'libosqpdirstatic%s' % lib_ext)]
+extra_objects = [os.path.join('extension', 'src',
+                 'libosqpdirstatic%s' % lib_ext)]
+
+# List with OSQP C files
+cfiles_origin = os.path.join(osqp_dir, 'src', '')
+cfiles_list = [cfiles_origin + f for f in os.listdir(cfiles_origin)
+               if f.endswith('.c') and f != 'polish.c']
+
+# List with OSQP H files
+hfiles_origin = os.path.join(osqp_dir, 'include', '')
+hfiles_list = [hfiles_origin + f for f in os.listdir(hfiles_origin)
+               if f.endswith('.h') and f != 'polish.h']
 
 
 class build_ext_osqp(build_ext):
@@ -106,11 +116,10 @@ class build_ext_osqp(build_ext):
         # Copy static library to src folder
         lib_name = 'libosqpdirstatic%s' % lib_ext
         lib_origin = os.path.join(osqp_build_dir, 'out', lib_name)
-        copyfile(lib_origin, os.path.join('extension','src', lib_name))
+        copyfile(lib_origin, os.path.join('extension', 'src', lib_name))
 
         # Run extension
         build_ext.build_extensions(self)
-
 
 
 _osqp = Extension('osqp._osqp',
@@ -129,10 +138,13 @@ packages = ['osqp',
 setup(name='osqp',
       version='0.0.0',
       author='Bartolomeo Stellato, Goran Banjac',
-      description='This is the Python package for OSQP: Operator Splitting solver for Quadratic Programs.',
+      description='This is the Python package for OSQP: ' +
+                  'Operator Splitting solver for Quadratic Programs.',
       package_dir={'osqp': 'osqp'},
+      data_files=[('osqp/codegen/source/src', cfiles_list),
+                  ('osqp/codegen/source/include', hfiles_list)],
       install_requires=["numpy >= 1.7", "scipy >= 0.13.2", "future"],
       license='Apache 2.0',
-      cmdclass = {'build_ext': build_ext_osqp},
+      cmdclass={'build_ext': build_ext_osqp},
       packages=packages,
       ext_modules=[_osqp])
