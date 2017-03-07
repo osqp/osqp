@@ -86,16 +86,36 @@ lib_ext = '.a'
 extra_objects = [os.path.join('extension', 'src',
                  'libosqpdirstatic%s' % lib_ext)]
 
+
+'''
+Copy C sources for code generation
+'''
+suitesparse_dir = os.path.join(osqp_dir, 'lin_sys', 'direct', 'suitesparse')
+
 # List with OSQP C files
-cfiles_origin = os.path.join(osqp_dir, 'src', '')
-cfiles_list = [cfiles_origin + f for f in os.listdir(cfiles_origin)
-               if f.endswith('.c') and f != 'polish.c']
+cfiles = [os.path.join(osqp_dir, 'src', f)
+          for f in os.listdir(os.path.join(osqp_dir, 'src'))
+          if f.endswith('.c') and f != 'polish.c']
+cfiles += [os.path.join(suitesparse_dir, f)
+           for f in os.listdir(suitesparse_dir)
+           if f.endswith('.c') and f != 'SuiteSparse_config.c']
+cfiles += [os.path.join(suitesparse_dir, 'ldl', 'src', f)
+           for f in os.listdir(os.path.join(suitesparse_dir, 'ldl', 'src'))
+           if f.endswith('.c')]
 
 # List with OSQP H files
-hfiles_origin = os.path.join(osqp_dir, 'include', '')
-hfiles_list = [hfiles_origin + f for f in os.listdir(hfiles_origin)
-               if f.endswith('.h') and f != 'polish.h']
+hfiles = [os.path.join(osqp_dir, 'include', f)
+          for f in os.listdir(os.path.join(osqp_dir, 'include'))
+          if f.endswith('.h') and f != 'polish.h']
+hfiles += [os.path.join(suitesparse_dir, f)
+           for f in os.listdir(suitesparse_dir)
+           if f.endswith('.h') and f != 'SuiteSparse_config.h']
+hfiles += [os.path.join(suitesparse_dir, 'ldl', 'include', f)
+           for f in os.listdir(os.path.join(suitesparse_dir, 'ldl', 'include'))
+           if f.endswith('.h')]
 
+# List Jinja files
+jinjafiles_list = glob(os.path.join('osqp','codegen', 'jinja', '*.*'))
 
 class build_ext_osqp(build_ext):
     def build_extensions(self):
@@ -141,8 +161,9 @@ setup(name='osqp',
       description='This is the Python package for OSQP: ' +
                   'Operator Splitting solver for Quadratic Programs.',
       package_dir={'osqp': 'osqp'},
-      data_files=[('osqp/codegen/source/src', cfiles_list),
-                  ('osqp/codegen/source/include', hfiles_list)],
+      data_files=[('osqp/codegen/sources/src', cfiles),
+                  ('osqp/codegen/sources/include', hfiles),
+                  ('osqp/codegen/jinja', jinjafiles_list)],
       install_requires=["numpy >= 1.7", "scipy >= 0.13.2", "future"],
       license='Apache 2.0',
       cmdclass={'build_ext': build_ext_osqp},

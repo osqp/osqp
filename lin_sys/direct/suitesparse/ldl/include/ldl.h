@@ -7,6 +7,7 @@
  */
 
 #include "SuiteSparse_config.h"
+#include "types.h"
 
 #ifdef DLONG
 #define LDL_int c_int

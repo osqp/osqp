@@ -145,6 +145,8 @@ c_float compute_obj_val(OSQPData *data, c_float * x) {
 c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
     c_int j;
     c_float tmp, prim_resid_sq = 0.0;
+    // If embedded we cannot access polish members
+    #ifndef EMBEDDED
     if (polish) {
         // Called from polish() function
         for (j = 0; j < work->data->m; j++) {
@@ -158,10 +160,14 @@ c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
         }
         return c_sqrt(prim_resid_sq);
     } else {
+    #endif
         // Called from ADMM algorithm (store temporary vector in z_prev)
         mat_vec(work->data->A, work->x, work->z_prev, 0);
         return vec_norm2_diff(work->z_prev, work->z, work->data->m);
+
+    #ifndef EMBEDDED
     }
+    #endif
 }
 
 
@@ -176,7 +182,10 @@ c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
 c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
 
     // N.B. Use x_prev as temporary vector
+
+    #ifndef EMBEDDED
     if (!polish){ // Normal call
+    #endif
         // dual_res = q
         prea_vec_copy(work->data->q, work->x_prev, work->data->n);
 
@@ -193,6 +202,7 @@ c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
         // Return norm
         return vec_norm2(work->x_prev, work->data->n);
 
+    #ifndef EMBEDDED
     } else {  // Call after polish
         // Called from polish() function
         // dr = q + Ared'*y_red + P*x
@@ -207,6 +217,7 @@ c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
                       work->x_prev, 1, 1);      // += Px (lower triang part)
         return vec_norm2(work->x_prev, work->data->n);
     }
+    #endif
 }
 
 
@@ -329,6 +340,8 @@ void store_solution(OSQPWorkspace *work) {
  * @param polish Called from polish function (1) or from elsewhere (0)
  */
 void update_info(OSQPWorkspace *work, c_int iter, c_int polish){
+
+    #ifndef EMBEDDED
     if (polish) { // polish
 
         work->pol->obj_val = compute_obj_val(work->data, work->pol->x);
@@ -341,6 +354,7 @@ void update_info(OSQPWorkspace *work, c_int iter, c_int polish){
         work->pol->dua_res = compute_dua_res(work, 1);
 
     } else { // normal update
+    #endif
 
         work->info->iter = iter; // Update iteration number
         work->info->obj_val = compute_obj_val(work->data, work->x);
@@ -355,7 +369,10 @@ void update_info(OSQPWorkspace *work, c_int iter, c_int polish){
         #ifdef PROFILING
             work->info->solve_time = toc(work->timer);
         #endif
+
+    #ifndef EMBEDDED
     }
+    #endif
 }
 
 

@@ -1,0 +1,15 @@
+#include "stdio.h"
+#include "osqp.h"
+
+#include "workspace.h"
+
+int main(int argc, char **argv) {
+
+    // Load problem
+    load_workspace(&workspace);
+
+    // Solve Problem
+    osqp_solve(&workspace);
+
+    return 0;
+};

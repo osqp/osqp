@@ -1,6 +1,7 @@
 {% import "macros.jinja" as macros %}
 
 #include "types.h"
+#include "private.h"
 
 
 #define OSQP_NDIM ({{ data['n'] }})
@@ -19,27 +20,19 @@ csc Pdata;
 c_int Pdata_i[OSQP_P_NNZ];
 c_int Pdata_p[OSQP_NDIM + 1];
 c_float Pdata_x[OSQP_P_NNZ];
-Pdata.i = &Pdata_i;
-Pdata.p = &Pdata.p;
-Pdata.x = &Pdata.x;
+
 
 csc Adata;
 c_int Adata_i[OSQP_P_NNZ];
 c_int Adata_p[OSQP_NDIM + 1];
 c_float Adata_x[OSQP_P_NNZ];
-Adata.i = &Adata_i;
-Adata.p = &Adata.p;
-Adata.x = &Adata.x;
+
 
 c_float qdata[OSQP_NDIM];
 c_float ldata[OSQP_MDIM];
 c_float udata[OSQP_MDIM];
 
-data.P = &Pdata;
-data.q = &qdata;
-data.A = &Adata;
-data.u = &udata;
-data.l = &ldata;
+
 
 
 // Define settings structure
@@ -54,10 +47,6 @@ c_float Dinvscaling[OSQP_NDIM];
 c_float Escaling[OSQP_MDIM];
 c_float Einvscaling[OSQP_MDIM];
 
-scaling.D = &Dscaling;
-scaling.Dinv = &Dinvscaling;
-scaling.E = &Escaling;
-scaling.Einv = &Einvscaling;
 
 // Define private structure
 Priv priv;
@@ -66,18 +55,12 @@ csc priv_L;
 c_int priv_L_i[OSQP_L_NNZ];
 c_int priv_L_p[OSQP_KKT_NDIM + 1];
 c_float priv_L_x[OSQP_L_NNZ];
-priv_L.i = &priv_L_i;
-priv_L.p = &priv_L_p;
-priv_L.x = &priv_L_x;
+
 
 c_float priv_Dinv[OSQP_KKT_NDIM];
 c_int priv_P[OSQP_KKT_NDIM];
 c_float priv_bp[OSQP_KKT_NDIM];
 
-priv.L = &priv_L;
-priv.Dinv = &priv_Dinv;
-priv.P = &priv_P;
-priv.bp = &priv_bp;
 
 // TODO: Add embedded_flag == 2 case!
 {% if embedded_flag != 1 %}
@@ -93,7 +76,7 @@ c_float ysolution[OSQP_MDIM];
 
 // Define info
 OSQPInfo info;
-info.status = OSQP_UNSOLVED;
+
 
 
 // Define workspace
@@ -122,38 +105,72 @@ c_float work_D_temp[OSQP_NDIM];
 c_float work_E_temp[OSQP_MDIM];
 
 
-workspace.data = &data;
-workspace.priv = &priv;
-
-work.x = &work_x;
-work.y = &work_y;
-work.z = &work_z;
-work.xz_tilde = &work_xz_tilde;
-work.x_prev = &work_x_prev;
-work.z_prev = &work_z_prev;
-work.delta_y = &work_delta_y;
-work.Atdelta_y = &work_Atdelta_y;
-work.delta_x = &work_delta_x;
-work.Pdelta_x = &work_Pdelta_x;
-work.Adelta_x = &work_Adelta_x;
-work.P_x = &work_P_x;
-work.A_x = &work_A_x;
-work.D_temp = &work_D_temp;
-work.A_temp = &work_A_temp;
 
 
-workspace.settings = &settings;
-workspace.scaling = &scaling;
-workspace.solution = &solution;
-workspace.info = &info;
+// Link structures in workspace
+void link_structures(){
+
+    Pdata.i = Pdata_i;
+    Pdata.p = Pdata_p;
+    Pdata.x = Pdata_x;
+
+    Adata.i = Adata_i;
+    Adata.p = Adata_p;
+    Adata.x = Adata_x;
+
+    data.P = &Pdata;
+    data.q = qdata;
+    data.A = &Adata;
+    data.u = udata;
+    data.l = ldata;
 
 
+    scaling.D = Dscaling;
+    scaling.Dinv = Dinvscaling;
+    scaling.E = Escaling;
+    scaling.Einv = Einvscaling;
+
+    priv_L.i = priv_L_i;
+    priv_L.p = priv_L_p;
+    priv_L.x = priv_L_x;
+
+    priv.L = &priv_L;
+    priv.Dinv = priv_Dinv;
+    priv.P = priv_P;
+    priv.bp = priv_bp;
 
 
+    workspace.x = work_x;
+    workspace.y = work_y;
+    workspace.z = work_z;
+    workspace.xz_tilde = work_xz_tilde;
+    workspace.x_prev = work_x_prev;
+    workspace.z_prev = work_z_prev;
+    workspace.delta_y = work_delta_y;
+    workspace.Atdelta_y = work_Atdelta_y;
+    workspace.delta_x = work_delta_x;
+    workspace.Pdelta_x = work_Pdelta_x;
+    workspace.Adelta_x = work_Adelta_x;
+    workspace.P_x = work_P_x;
+    workspace.A_x = work_A_x;
+    workspace.D_temp = work_D_temp;
+    workspace.E_temp = work_E_temp;
 
+    workspace.data = &data;
+    workspace.priv = &priv;
+    workspace.settings = &settings;
+    workspace.scaling = &scaling;
+    workspace.solution = &solution;
+    workspace.info = &info;
+
+
+}
 
 // Populate workspace
 void load_workspace(OSQPWorkspace * work){
+
+// Link structures
+link_structures();
 
 /* Fill data */
 
@@ -184,9 +201,12 @@ void load_workspace(OSQPWorkspace * work){
 {{ macros.fill_vec(scaling['Einv'], 'work->scaling->Einv')}}
 
 /* Fill private structure */
-{{ macros.fill_mat(priv['L'], 'work->priv->L') -}}
+{{ macros.fill_vec(priv['P'], 'work->priv->P') }}
 {{ macros.fill_vec(priv['Dinv'], 'work->priv->Dinv') -}}
-{{ macros.fill_vec(priv['P'], 'work->priv->P')}}
+{{ macros.fill_mat(priv['L'], 'work->priv->L') -}}
+
+/* Set info status to unsolved */
+work->info->status_val = OSQP_UNSOLVED;
 
 
 }
