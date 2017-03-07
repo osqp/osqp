@@ -1,8 +1,24 @@
-{% macro print_vec(vec) %}
-{
-{%- for x in vec[:-1] -%}
- {{- x -}},
-{%- endfor -%}
-{{- vec[-1] -}}
-}
-{%- endmacro -%}
+{% macro fill_vec(vec, name) %}
+{% for i in range(vec.size) %}
+{{name}}[{{i}}] = {{vec[i]}};
+{% endfor %}
+{% endmacro %}
+
+
+
+{% macro fill_mat(mat, name) %}
+{{ fill_vec(mat['i'], name+'->i') -}}
+{{ fill_vec(mat['p'], name+'->p') -}}
+{{ fill_vec(mat['x'], name+'->x') -}}
+{{name+'->x'}}->m={{mat['m']}};
+{{name+'->x'}}->n={{mat['n']}};
+{{name+'->x'}}->nz={{mat['nz']}};
+{% endmacro %}
+
+
+
+{% macro fill_settings(settings, name) %}
+{% for key, value in settings.items() %}
+{{name}}->{{key}}={{value}};
+{% endfor %}
+{% endmacro %}

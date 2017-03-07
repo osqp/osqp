@@ -275,6 +275,6 @@ class OSQP(object):
         work = self._model._get_workspace()
 
         # Generate code with codegen module
-        # cg.codegen(work, folder, project_type, embedded_flag)
+        cg.codegen(work, folder, project_type, embedded_flag)
 
         return work

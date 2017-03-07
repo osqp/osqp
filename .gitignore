@@ -198,3 +198,4 @@ out/
 interfaces/python/tests/qp_problems/results/
 interfaces/python/tests/qp_problems/figures/
 tests/**/*data.h
+interfaces/python/tests/codegen/code

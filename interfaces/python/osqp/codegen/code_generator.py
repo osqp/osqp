@@ -15,18 +15,18 @@ from subprocess import call
 # OSQP_MAKEFILE = os.path.join(OSQP_DIR, 'Makefile')
 
 
-def render(target_dir, template_vars, template_path, target_name):
-    total_template_vars = dict()
-    total_template_vars.update(template_vars)
+def render(target_dir, template_vars, template_name, target_name):
+    # total_template_vars = dict()
+    # total_template_vars.update(template_vars)
     #total_template_vars.update(DEFAULT_TEMPLATE_VARS) # TODO
 
-    env = Environment(loader=PackageLoader('osqp', ''),
+    env = Environment(loader=PackageLoader('osqp.codegen', 'jinja'),
                       lstrip_blocks=True,
                       trim_blocks=True)
 
-    template = env.get_template(template_path)
+    template = env.get_template(template_name)
     f = open(os.path.join(target_dir, target_name), 'w')
-    f.write(template.render(total_template_vars))
+    f.write(template.render(template_vars))
     f.close()
 
 
@@ -37,13 +37,36 @@ def codegen(work, target_dir, project_type, embedded_flag):
     """
 
     # Import OSQP path
-    osqp_path = osqp.__path__()
+    osqp_path = osqp.__path__[0]
 
 
     # Make target directory
     target_dir = os.path.abspath(target_dir)
+    target_include_dir = os.path.join(target_dir, 'include')
+    target_src_dir = os.path.join(target_dir, 'src')
+
     if not os.path.exists(target_dir):
         os.mkdir(target_dir)
+    if not os.path.exists(target_include_dir):
+        os.mkdir(target_include_dir)
+    if not os.path.exists(target_src_dir):
+        os.mkdir(target_src_dir)
+
+
+
+    # Define target include directory (where to put headers)
+
+
+
+
+    # Copy source files to target directory
+    #
+    #
+
+
+
+
+
 
     # if os.path.exists(target_dir):
     #     sh.rmtree(target_dir)  # TODO a bit heavy handed..
@@ -53,7 +76,7 @@ def codegen(work, target_dir, project_type, embedded_flag):
 
     # Make subdirectories
     # target_src_dir = os.path.join(target_dir, 'src')
-    target_include_dir = os.path.join(target_dir, 'include')
+
     #target_linsys_dir = os.path.join(target_dir, 'lin_sys')
     #target_cmake_dir = os.path.join(target_dir, 'CMakeFiles')
 
@@ -79,16 +102,19 @@ def codegen(work, target_dir, project_type, embedded_flag):
     template_vars = {'data'     : work['data'],
                      'settings' : work['settings'],
                      'priv'     : work['priv'],
-                     'scaling'  : work['scaling']}
+                     'scaling'  : work['scaling'],
+                     'embedded_flag': embedded_flag}
 
-    render(target_include_dir, template_vars, os.path.join(osqp_path, 'codegen', 'osqp.h.jinja'), 'osqp.h')
+    import ipdb; ipdb.set_trace()
+    render(target_include_dir, template_vars, 'workspace.h.jinja', 'workspace.h')
+
 
 
     # Generate project
-    cwd = os.getcwd()
-    os.chdir(target_dir)
-    call(["cmake", "-DEMBEDDED=%i" % embedded_flag, ".."])
-    os.chdir(cwd)
+    # cwd = os.getcwd()
+    # os.chdir(target_dir)
+    # call(["cmake", "-DEMBEDDED=%i" % embedded_flag, ".."])
+    # os.chdir(cwd)
 
     #render(target_src_dir, template_vars, 'osqp_cg_data.c.jinja',
     #       'osqp_cg_data.c')
