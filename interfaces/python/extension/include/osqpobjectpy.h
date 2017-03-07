@@ -2,12 +2,6 @@
  * OSQP Object definition and methods   *
  ****************************************/
 
-typedef struct {
-    PyObject_HEAD
-    OSQPWorkspace * workspace;  // Pointer to C workspace structure
-} OSQP;
-
-static PyTypeObject OSQP_Type;
 
 
 /* Create new OSQP Object */

@@ -144,7 +144,7 @@ c_float compute_obj_val(OSQPData *data, c_float * x) {
  */
 c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
     c_int j;
-    c_float tmp, prim_resid_sq=0.0;
+    c_float tmp, prim_resid_sq = 0.0;
     if (polish) {
         // Called from polish() function
         for (j = 0; j < work->data->m; j++) {

@@ -1,0 +1,8 @@
+{% macro print_vec(vec) %}
+{
+{%- for x in vec[:-1] -%}
+ {{- x -}},
+{%- endfor -%}
+{{- vec[-1] -}}
+}
+{%- endmacro -%}

@@ -2,6 +2,15 @@
  * OSQP Workspace creation in Python objects  *
  **********************************************/
 
+
+// TODO: Extract long integers and doubles (make sure of that!)
+//
+
+
+// Include private header to access to private structure
+#include "lin_sys/direct/suitesparse/private.h"
+
+
  static PyObject *OSQP_get_scaling(OSQP *self){
      npy_intp n = (npy_intp)self->workspace->data->n;  // Dimensions in R^n
      npy_intp m = (npy_intp)self->workspace->data->m;  // Dimensions in R^m
@@ -133,8 +142,6 @@
          "eps_rel", (double)settings->eps_rel,
          "alpha", (double)settings->alpha,
          "delta", (double)settings->delta,
-         "polish", settings->polish,
-         "pol_refine_iter", settings->pol_refine_iter,
          "verbose", settings->verbose,
          "warm_start", settings->warm_start);
 
@@ -156,6 +163,3 @@ static PyObject *OSQP_get_workspace(OSQP *self){
      // TODO do we have to decref things here?
      return return_dict;
 }
-
-
-# TO COMPLETE!!!

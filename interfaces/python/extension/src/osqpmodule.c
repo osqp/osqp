@@ -7,18 +7,28 @@
 #include "numpy/npy_math.h"        // For infinity values
 #include "osqp.h"                  // OSQP API
 
-#include "osqputilspy.h"            // Utilities functions
-#include "osqpinfopy.h"             // Info object
-#include "osqpresultspy.h"          // Results object
-#include "osqpobjectpy.h"           // OSQP object
-#include "osqpworkspace.h"          // OSQP workspace
-
 /* The PyInt variable is a PyLong in Python3.x.
  */
 #if PY_MAJOR_VERSION >= 3
 #define PyInt_AsLong PyLong_AsLong
 #define PyInt_Check PyLong_Check
 #endif
+
+
+// OSQP Object type
+typedef struct {
+    PyObject_HEAD
+    OSQPWorkspace * workspace;  // Pointer to C workspace structure
+} OSQP;
+
+static PyTypeObject OSQP_Type;
+
+
+#include "osqputilspy.h"            // Utilities functions
+#include "osqpinfopy.h"             // Info object
+#include "osqpresultspy.h"          // Results object
+#include "osqpworkspacepy.h"          // OSQP workspace
+#include "osqpobjectpy.h"           // OSQP object
 
 
 

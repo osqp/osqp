@@ -65,6 +65,7 @@ osqp_build_dir = os.path.join(osqp_dir, 'build')
 
 # Interface files
 include_dirs = [get_include(),                          # Numpy directories
+                osqp_dir,                               # For additonal headers (private.h)
                 os.path.join(osqp_dir, 'include'),      # osqp.h
                 os.path.join('extension', 'include')]                              # auxiliary header files
 

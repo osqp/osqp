@@ -1,3 +1,5 @@
+{% import macros.jinja as macros %}
+
 #include "types.h"
 
 
@@ -13,8 +15,15 @@
 // Define data structure
 OSQPData data;
 csc Pdata;
-c_int Pdata_i[];
-c_int
+c_int Pdata_i[OSQP_P_NNZ];
+c_int Pdata_p[OSQP_NDIM + 1];
+c_float Pdata_x[OSQP_P_NNZ];
+
+csc Adata;
+c_int Pdata_i[OSQP_P_NNZ];
+c_int Pdata_p[OSQP_NDIM + 1];
+c_float Pdata_x[OSQP_P_NNZ];
+
 
 
 // Define settings structure
@@ -43,9 +52,7 @@ OSQPScaling scaling;
 void load_workspace(void){
 
     // Fill data
-    {% for idx in range(data['P']['nzmax']) %}
-        P.i[{{ idx }}] = {{ data['P']['i'][idx] }};
-    {% endfor %}
+    {{macros.print_vec(work['data']['P']['i'])}}
 
 
 

@@ -38,7 +38,7 @@ extern "C" {
 #define EPS_UNB (1E-6)
 #define ALPHA (1.6)
 #define DELTA (1E-7)
-#define POLISHING (1)
+#define POLISH (1)
 #define VERBOSE (1)
 #define EARLY_TERMINATE (1)
 #define WARM_START (1)

@@ -179,10 +179,12 @@ void set_default_settings(OSQPSettings * settings) {
         settings->eps_unb = EPS_UNB;         /* unboundedness tolerance */
         settings->alpha = ALPHA;     /* relaxation parameter */
         settings->delta = DELTA;    /* regularization parameter for polish */
-        settings->polish = POLISHING;     /* ADMM solution polish: 1 */
+        #ifndef EMBEDDED
+        settings->polish = POLISH;     /* ADMM solution polish: 1 */
         settings->pol_refine_iter = POL_REFINE_ITER; /* iterative refinement
                                                         steps in polish */
         settings->verbose = VERBOSE;     /* print output */
+        #endif
         settings->early_terminate = EARLY_TERMINATE;     /* Evaluate termination criteria */
         settings->warm_start = WARM_START;     /* x equality constraint scaling: 1e-3 */
 
