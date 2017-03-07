@@ -8,6 +8,7 @@ from warnings import warn
 import numpy as np
 from scipy import sparse
 
+import osqp.codegen as cg
 
 class OSQP(object):
     def __init__(self):
@@ -265,16 +266,15 @@ class OSQP(object):
         if x is None and y is None:
             raise ValueError("Unrecognized fields")
 
-    def codegen(self, folder, project_type, embedded_flag):
+    def codegen(self, folder, project_type, embedded_flag=1):
         """
         Generate embeddable C code for the problem
         """
 
-        print("Hello!")
         # Convert workspace to python
+        work = self._model._get_workspace()
 
+        # Generate code with codegen module
+        # cg.codegen(work, folder, project_type, embedded_flag)
 
-        # Generate C code
-        # ...
-
-        # Call
+        return work

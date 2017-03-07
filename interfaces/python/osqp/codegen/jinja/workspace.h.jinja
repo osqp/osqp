@@ -1,0 +1,57 @@
+#include "types.h"
+
+
+#define OSQP_NDIM ({{ data['n'] }})
+#define OSQP_MDIM ({{ data['m'] }})
+#define OSQP_A_NNZ ({{ data['A']['nzmax'] }})
+#define OSQP_P_NNZ ({{ data['P']['nzmax'] }})
+#define OSQP_L_NNZ ({{ priv['L']['nzmax'] }})
+#define OSQP_KKT_N ({{ data['n'] + data['m'] }})
+
+
+
+// Define data structure
+OSQPData data;
+csc Pdata;
+c_int Pdata_i[];
+c_int
+
+
+// Define settings structure
+OSQPSettings settings;
+
+
+// Define scaling
+OSQPScaling scaling;
+
+
+// Define solution
+
+
+// Define info
+
+
+// Define workspace
+
+
+
+
+
+
+
+// Populate workspace
+void load_workspace(void){
+
+    // Fill data
+    {% for idx in range(data['P']['nzmax']) %}
+        P.i[{{ idx }}] = {{ data['P']['i'][idx] }};
+    {% endfor %}
+
+
+
+
+
+
+
+
+}

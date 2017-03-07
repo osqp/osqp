@@ -11,7 +11,7 @@
 #include "osqpinfopy.h"             // Info object
 #include "osqpresultspy.h"          // Results object
 #include "osqpobjectpy.h"           // OSQP object
-
+#include "osqpworkspace.h"          // OSQP workspace
 
 /* The PyInt variable is a PyLong in Python3.x.
  */
