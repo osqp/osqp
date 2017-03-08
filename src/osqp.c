@@ -253,7 +253,7 @@ c_int osqp_solve(OSQPWorkspace * work){
                 update_info(work, iter, 0, 0);
             #endif
 
-
+            // Check algorithm termination
             if (check_termination(work)){
                 // Terminate algorithm
                 break;
@@ -261,8 +261,9 @@ c_int osqp_solve(OSQPWorkspace * work){
         }
     }
 
+    // Update information and check termination condition if
+    // early terminate is chosen
     if (!work->settings->early_terminate) {
-        /* Update information */
         update_info(work, iter-1, 1, 0);
 
         /* Print summary */
@@ -274,6 +275,18 @@ c_int osqp_solve(OSQPWorkspace * work){
         /* Check whether a termination criterion is triggered */
         check_termination(work);
     }
+
+
+    // Compute objective value in case it was not
+    // computed during the iterations
+    #ifdef PRINTING
+    if (!work->settings->verbose)
+        work->info->obj_val = compute_obj_val(work->data, work->x);
+    #else
+    if (work->settings->early_terminate)
+        work->info->obj_val = compute_obj_val(work->data, work->x);
+    #endif
+
 
     /* Print summary for last iteration */
     #ifdef PRINTING
