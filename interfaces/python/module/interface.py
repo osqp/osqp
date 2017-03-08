@@ -267,7 +267,8 @@ class OSQP(object):
         if x is None and y is None:
             raise ValueError("Unrecognized fields")
 
-    def codegen(self, folder, project_type="Makefile", embedded_flag=1, early_terminate=0):
+    def codegen(self, folder, project_type="Makefile", embedded_flag=1,
+                early_terminate=0):
         """
         Generate embeddable C code for the problem
         """
