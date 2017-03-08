@@ -46,8 +46,8 @@
      npy_intp n_plus_1 = n+1;
      npy_intp m = (npy_intp)data->m;
      npy_intp m_plus_1 = m+1;
-     npy_intp Pnzmax = (npy_intp)data->P->nzmax;
-     npy_intp Anzmax = (npy_intp)data->A->nzmax;
+     npy_intp Pnzmax = (npy_intp)data->P->p[n];
+     npy_intp Anzmax = (npy_intp)data->A->p[n];
      npy_intp Pnz = (npy_intp)data->P->nz;
      npy_intp Anz = (npy_intp)data->A->nz;
 
@@ -97,7 +97,7 @@
 
      npy_intp Ln = (npy_intp)priv->L->n;
      npy_intp Ln_plus_1 = Ln+1;
-     npy_intp Lnzmax = (npy_intp)priv->L->nzmax;
+     npy_intp Lnzmax = (npy_intp)priv->L->p[Ln];
      npy_intp Lnz = (npy_intp)priv->L->nz;
 
      int float_type = get_float_type();
