@@ -64,12 +64,12 @@ suitesparse_dir = os.path.join(osqp_dir, 'lin_sys', 'direct', 'suitesparse')
 
 # Interface files
 include_dirs = [
-    get_include(),                          # Numpy directories
-    osqp_dir,                               # For additonal headers (private.h)
-    os.path.join(osqp_dir, 'include'),      # osqp.h
+    get_include(),                                      # Numpy directories
+    os.path.join(osqp_dir, 'include'),                  # osqp.h
+    os.path.join(suitesparse_dir),                      # private.h
     os.path.join(suitesparse_dir, 'ldl', 'include'),    # ldl.h
     os.path.join(suitesparse_dir, 'amd', 'include'),    # amd.h
-    os.path.join('extension', 'include')]   # auxiliary header files
+    os.path.join('extension', 'include')]               # auxiliary .h files
 
 sources_files = glob(os.path.join('extension', 'src', '*.c'))
 
