@@ -334,17 +334,20 @@ void store_solution(OSQPWorkspace *work) {
 
 
 /**
- * Update solver information
- * @param work   Workspace
- * @param iter   Number of iterations
- * @param polish Called from polish function (1) or from elsewhere (0)
- */
-void update_info(OSQPWorkspace *work, c_int iter, c_int polish){
+* Update solver information
+* @param work               Workspace
+* @param iter               Iteration number
+* @param compute_objective  Boolean (if compute the objective or not)
+* @param polish             Boolean (if called from polish)
+*/
+void update_info(OSQPWorkspace *work, c_int iter, c_int compute_objective, c_int polish){
 
     #ifndef EMBEDDED
     if (polish) { // polish
 
+        // Always compute objective value when called from polish
         work->pol->obj_val = compute_obj_val(work->data, work->pol->x);
+
         if (work->data->m == 0) {
             // No constraints -> Always primal feasible
             work->pol->pri_res = 0.;
@@ -358,11 +361,11 @@ void update_info(OSQPWorkspace *work, c_int iter, c_int polish){
 
         work->info->iter = iter; // Update iteration number
 
-        // If verbose is off skip objective value update (cheaper iters)
-        if (work->settings->verbose){
+        // Check if we need to compute the objective
+        if (compute_objective){
             work->info->obj_val = compute_obj_val(work->data, work->x);
         }
-        
+
         if (work->data->m == 0) {
             // No constraints -> Always primal feasible
               work->info->pri_res = 0.;

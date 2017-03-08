@@ -229,17 +229,30 @@ c_int osqp_solve(OSQPWorkspace * work){
 
         /* End of ADMM Steps */
 
-
+        // If early termination enabled update the information
+        // N.B. If printing and verbose are available, compute and
+        //      print the objective value.
         if (work->settings->early_terminate) {
-            /* Update information */
-            update_info(work, iter, 0);
-
-            /* Print summary */
             #ifdef PRINTING
-            if (work->settings->verbose &&
-                    ((iter % PRINT_INTERVAL == 0)||(iter == 1)))
-                print_summary(work->info);
+            if (work->settings->verbose){
+                // Update information and compute also objective value
+                update_info(work, iter, 1, 0);
+                // Print summary
+                if ((iter % PRINT_INTERVAL == 0)||(iter == 1)){
+                    print_summary(work->info);
+                }
+            } else {
+                // Update information without computing objective value
+                // N.B. Objective value is not needed during the algorithm
+                //      if we do not print it.
+                update_info(work, iter, 0, 0);
+            }
+            #else
+                // Never compute the objective value during the algorithm
+                // when PRINTING is off
+                update_info(work, iter, 0, 0);
             #endif
+
 
             if (check_termination(work)){
                 // Terminate algorithm
@@ -250,7 +263,7 @@ c_int osqp_solve(OSQPWorkspace * work){
 
     if (!work->settings->early_terminate) {
         /* Update information */
-        update_info(work, iter-1, 0);
+        update_info(work, iter-1, 1, 0);
 
         /* Print summary */
         #ifdef PRINTING
@@ -301,7 +314,7 @@ c_int osqp_solve(OSQPWorkspace * work){
     // Indicate that the solve function has already been executed
     if (work->first_run) work->first_run = 0;
     #endif
-    
+
 
     /* Print final footer */
     #ifdef PRINTING

@@ -20,6 +20,8 @@
 
 {% macro fill_settings(settings, name) %}
 {% for key, value in settings.items() %}
+{% if key != 'scaling_norm' and key != 'scaling_iter' %}
 {{name}}->{{key}} = {{value}};
+{% endif %}
 {% endfor %}
 {% endmacro %}
