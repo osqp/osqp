@@ -28,6 +28,7 @@ def codegen(work, target_dir, project_type, embedded_flag):
     osqp_path = osqp.__path__[0]
 
     # Make target directory
+    print("Creating target directories... \t\t", end='')
     target_dir = os.path.abspath(target_dir)
     target_include_dir = os.path.join(target_dir, 'include')
     target_src_dir = os.path.join(target_dir, 'src')
@@ -38,8 +39,10 @@ def codegen(work, target_dir, project_type, embedded_flag):
         os.mkdir(target_include_dir)
     if not os.path.exists(target_src_dir):
         os.makedirs(os.path.join(target_src_dir, 'osqp'))
+    print("[done]")
 
     # Copy source files to target directory
+    print("Copying OSQP sources... \t\t", end='')
     c_sources = glob(os.path.join(osqp_path, 'codegen', 'sources',
                                   'src', '*.c'))
     for source in c_sources:
@@ -49,8 +52,11 @@ def codegen(work, target_dir, project_type, embedded_flag):
                                   'include', '*.h'))
     for header in c_headers:
         sh.copy(header, target_include_dir)
+    print("[done]")
+
 
     # Variables created from the workspace
+    print("Generating customized code... \t\t", end='')
     template_vars = {'data':            work['data'],
                      'settings':        work['settings'],
                      'priv':            work['priv'],
@@ -62,11 +68,13 @@ def codegen(work, target_dir, project_type, embedded_flag):
            'workspace.h.jinja', 'workspace.h')
     render(target_src_dir, template_vars,
            'example.c.jinja', 'example.c')
+    render(target_src_dir, template_vars,
+           'emosqpmodule.c.jinja', 'emosqpmodule.c')
+    render(target_src_dir, template_vars,
+           'setup.py.jinja', 'setup.py')
     render(target_dir, template_vars,
            'CMakeLists.txt.jinja', 'CMakeLists.txt')
-
-
-
+    print("[done]")
 
 
 

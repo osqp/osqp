@@ -143,10 +143,11 @@ c_float compute_obj_val(OSQPData *data, c_float * x) {
  * @return        Norm of primal residual
  */
 c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
-    c_int j;
-    c_float tmp, prim_resid_sq = 0.0;
+
     // If embedded we cannot access polish members
     #ifndef EMBEDDED
+    c_int j;
+    c_float tmp, prim_resid_sq = 0.0;
     if (polish) {
         // Called from polish() function
         for (j = 0; j < work->data->m; j++) {

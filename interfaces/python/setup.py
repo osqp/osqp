@@ -97,7 +97,7 @@ Copy C sources for code generation
 # List with OSQP C files
 cfiles = [os.path.join(osqp_dir, 'src', f)
           for f in os.listdir(os.path.join(osqp_dir, 'src'))
-          if f.endswith('.c') and f != 'polish.c']
+          if f.endswith('.c') and f != 'polish.c' and f != 'cs.c']
 cfiles += [os.path.join(suitesparse_dir, f)
            for f in os.listdir(suitesparse_dir)
            if f.endswith('.c') and f != 'SuiteSparse_config.c']
@@ -108,7 +108,7 @@ cfiles += [os.path.join(suitesparse_dir, 'ldl', 'src', f)
 # List with OSQP H files
 hfiles = [os.path.join(osqp_dir, 'include', f)
           for f in os.listdir(os.path.join(osqp_dir, 'include'))
-          if f.endswith('.h') and f != 'polish.h']
+          if f.endswith('.h') and f != 'polish.h' and f != 'cs.c']
 hfiles += [os.path.join(suitesparse_dir, f)
            for f in os.listdir(suitesparse_dir)
            if f.endswith('.h') and f != 'SuiteSparse_config.h']
@@ -117,7 +117,7 @@ hfiles += [os.path.join(suitesparse_dir, 'ldl', 'include', f)
            if f.endswith('.h')]
 
 # List Jinja files
-jinjafiles_list = glob(os.path.join('module', 'codegen', 'jinja', '*.*'))
+jinjafiles = glob(os.path.join('module', 'codegen', 'jinja', '*.*'))
 
 
 class build_ext_osqp(build_ext):
@@ -167,7 +167,7 @@ setup(name='osqp',
                    'osqppurepy': 'modulepurepy'},
       data_files=[('osqp/codegen/sources/src', cfiles),
                   ('osqp/codegen/sources/include', hfiles),
-                  ('osqp/codegen/jinja', jinjafiles_list)],
+                  ('osqp/codegen/jinja', jinjafiles)],
       install_requires=["numpy >= 1.7", "scipy >= 0.13.2", "future"],
       license='Apache 2.0',
       cmdclass={'build_ext': build_ext_osqp},
