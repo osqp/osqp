@@ -1,4 +1,5 @@
 # from osqp import __path__
+from __future__ import print_function
 import osqp
 from jinja2 import Environment, PackageLoader, contextfilter
 import os.path
@@ -57,7 +58,6 @@ def codegen(work, target_dir, project_type, embedded_flag):
         sh.copy(header, target_include_dir)
     print("[done]")
 
-
     # Variables created from the workspace
     print("Generating customized code... \t\t", end='')
     template_vars = {'data':            work['data'],
@@ -79,7 +79,6 @@ def codegen(work, target_dir, project_type, embedded_flag):
            'CMakeLists.txt.jinja', 'CMakeLists.txt')
     print("[done]")
 
-
     # Compile python interface
     print("Compiling Python wrapper... \t\t", end='')
     current_dir = os.getcwd()
@@ -88,12 +87,12 @@ def codegen(work, target_dir, project_type, embedded_flag):
     print("[done]")
 
     # Copy compiled solver
-    print("Copying code-generated Python solver to current directory... \t\t", end='')
-    if system() is 'Linux' or 'Darwin':
+    print("Copying code-generated Python solver to current directory... \t\t",
+          end='')
+    if system() is 'Linux' or system() is 'Darwin':
         module_ext = '.so'
     else:
-        module_ext = '.so'
-    import ipdb; ipdb.set_trace()
+        module_ext = '.pyd'
     sh.copy(glob('emosqp*' + module_ext)[0], current_dir)
     os.chdir(current_dir)
     print("[done]")

@@ -1,7 +1,7 @@
 """
 Python interface module for OSQP solver v0.0.0
 """
-
+from __future__ import print_function
 from builtins import object
 import osqp._osqp  as _osqp # Internal low level module
 from warnings import warn
