@@ -14,7 +14,10 @@
  static PyObject *OSQP_get_scaling(OSQP *self){
      npy_intp n = (npy_intp)self->workspace->data->n;  // Dimensions in R^n
      npy_intp m = (npy_intp)self->workspace->data->m;  // Dimensions in R^m
+
      int float_type = get_float_type();
+
+     PyObject *return_dict;
 
      /* Build Arrays. */
      OSQPScaling *scaling = self->workspace->scaling;
@@ -30,11 +33,8 @@
      PyArray_ENABLEFLAGS((PyArrayObject *) Einv, NPY_ARRAY_OWNDATA);
 
      /* Build Python dictionary. */
-     PyObject *return_dict = Py_BuildValue("{s:O,s:O,s:O,s:O}",
-                                           "D", D,
-                                           "E", E,
-                                           "Dinv", Dinv,
-                                           "Einv", Einv);
+     return_dict = Py_BuildValue("{s:O,s:O,s:O,s:O}",
+                                 "D", D, "E", E, "Dinv", Dinv, "Einv", Einv);
 
      return return_dict;
  }
@@ -53,6 +53,8 @@
 
      int float_type = get_float_type();
      int int_type   = get_int_type();
+
+     PyObject *return_dict;
 
      /* Build Arrays. */
      PyObject *Pp   = PyArray_SimpleNewFromData(1, &n_plus_1, int_type, data->P->p);
@@ -76,7 +78,7 @@
      PyArray_ENABLEFLAGS((PyArrayObject *) l, NPY_ARRAY_OWNDATA);
      PyArray_ENABLEFLAGS((PyArrayObject *) u, NPY_ARRAY_OWNDATA);
 
-     PyObject *return_dict = Py_BuildValue(
+     return_dict = Py_BuildValue(
          "{s:i,s:i,"
          "s:{s:i,s:i,s:i,s:O,s:O,s:O,s:i},"
          "s:{s:i,s:i,s:i,s:O,s:O,s:O,s:i},"
@@ -101,6 +103,8 @@
      int float_type = get_float_type();
      int int_type   = get_int_type();
 
+     PyObject *return_dict;
+
      /* Build Arrays. */
      PyObject *Lp   = PyArray_SimpleNewFromData(1, &Ln_plus_1, int_type, priv->L->p);
      PyObject *Li   = PyArray_SimpleNewFromData(1, &Lnzmax, int_type, priv->L->i);
@@ -117,7 +121,7 @@
      PyArray_ENABLEFLAGS((PyArrayObject *) P, NPY_ARRAY_OWNDATA);
      PyArray_ENABLEFLAGS((PyArrayObject *) bp, NPY_ARRAY_OWNDATA);
 
-     PyObject *return_dict = Py_BuildValue(
+     return_dict = Py_BuildValue(
          "{s:{s:i,s:i,s:i,s:O,s:O,s:O,s:i},"
          "s:O,s:O,s:O}",
          "L", "nzmax", Lnzmax, "m", Ln, "n", Ln, "p", Lp, "i", Li, "x", Lx, "nz", Lnz,
