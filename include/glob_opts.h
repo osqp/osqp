@@ -140,6 +140,8 @@ typedef float c_float;                /* for numerical values  */
 //   mexEvalString("drawnow;");   // flush matlab print buffer
 //   return out;
 // }
+#elif defined PYTHON
+#define c_print PySys_WriteStdout
 #else
 #define c_print printf
 #endif
