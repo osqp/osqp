@@ -277,7 +277,9 @@ class OSQP(object):
         self.update_settings(early_terminate=early_terminate)
 
         # Convert workspace to python
+        print("Getting workspace from OSQP object... \t", end='')
         work = self._model._get_workspace()
+        print("[done]")
 
         if project_type == 'Makefile':
             if system() == 'Windows':
