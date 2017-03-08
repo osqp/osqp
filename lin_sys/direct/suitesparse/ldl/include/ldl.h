@@ -6,14 +6,17 @@
  * All Rights Reserved.  See LDL/Doc/License.txt for the License.
  */
 
-#include "SuiteSparse_config.h"
+
 #include "types.h"
 
 #ifdef DLONG
 #define LDL_int c_int
 
 #ifndef EMBEDDED
+#include "SuiteSparse_config.h"
 #define LDL_symbolic ldl_l_symbolic
+#else
+#define SuiteSparse_long c_int
 #endif
 
 #if EMBEDDED != 1

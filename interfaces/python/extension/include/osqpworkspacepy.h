@@ -8,7 +8,7 @@
 
 
 // Include private header to access to private structure
-#include "lin_sys/direct/suitesparse/private.h"
+#include "private.h"
 
 
  static PyObject *OSQP_get_scaling(OSQP *self){
