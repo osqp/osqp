@@ -1,3 +1,6 @@
+#ifndef OSQPINFOPY_H
+#define OSQPINFOPY_H
+
 /*******************************************
  * INFO Object definition and methods   *
  *******************************************/
@@ -169,3 +172,5 @@ static PyTypeObject OSQP_info_Type = {
     0,                                         /* tp_alloc */
     0,                                         /* tp_new */
 };
+
+#endif

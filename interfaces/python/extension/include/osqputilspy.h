@@ -1,3 +1,6 @@
+#ifndef OSQPUTILSPY_H
+#define OSQPUTILSPY_H
+
 /****************************************
  * Utilities for Main API Functions     *
  ****************************************/
@@ -153,3 +156,5 @@ static c_int free_data(OSQPData *data, PyOSQPData * py_d){
     }
 
 }
+
+#endif

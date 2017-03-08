@@ -37,13 +37,14 @@ def codegen(work, target_dir, project_type, embedded_flag):
     if not os.path.exists(target_include_dir):
         os.mkdir(target_include_dir)
     if not os.path.exists(target_src_dir):
-        os.mkdir(target_src_dir)
+        os.makedirs(os.path.join(target_src_dir, 'osqp'))
 
     # Copy source files to target directory
     c_sources = glob(os.path.join(osqp_path, 'codegen', 'sources',
                                   'src', '*.c'))
     for source in c_sources:
-        sh.copy(source, target_src_dir)
+        sh.copy(source, os.path.join(target_src_dir, 'osqp'))
+
     c_headers = glob(os.path.join(osqp_path, 'codegen', 'sources',
                                   'include', '*.h'))
     for header in c_headers:

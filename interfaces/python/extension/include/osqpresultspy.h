@@ -1,3 +1,6 @@
+#ifndef OSQPRESULTSPY_H
+#define OSQPRESULTSPY_H
+
 /*******************************************
  * RESULTS Object definition and methods   *
  *******************************************/
@@ -90,3 +93,5 @@ static PyTypeObject OSQP_results_Type = {
     0,                                         /* tp_alloc */
     0,                                         /* tp_new */
 };
+
+#endif

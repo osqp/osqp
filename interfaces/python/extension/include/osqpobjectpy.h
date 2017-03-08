@@ -1,3 +1,6 @@
+#ifndef OSQPOBJECTPY_H
+#define OSQPOBJECTPY_H
+
 /****************************************
  * OSQP Object definition and methods   *
  ****************************************/
@@ -883,3 +886,5 @@ static PyTypeObject OSQP_Type = {
     0,                                         /* tp_alloc */
     0,                                         /* tp_new */
 };
+
+#endif

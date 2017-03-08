@@ -1,3 +1,6 @@
+#ifndef OSQPWORKSPACEPY_H
+#define OSQPWORKSPACEPY_H
+
 /**********************************************
  * OSQP Workspace creation in Python objects  *
  **********************************************/
@@ -168,3 +171,5 @@ static PyObject *OSQP_get_workspace(OSQP *self){
      // TODO do we have to decref things here?
      return return_dict;
 }
+
+#endif
