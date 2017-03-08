@@ -5,6 +5,9 @@ import os.path
 import shutil as sh
 from subprocess import call
 from glob import glob
+from subprocess import call
+from platform import system
+
 
 
 def render(target_dir, template_vars, template_name, target_name):
@@ -77,6 +80,27 @@ def codegen(work, target_dir, project_type, embedded_flag):
     print("[done]")
 
 
+    # Compile python interface
+    print("Compiling Python wrapper... \t\t", end='')
+    current_dir = os.getcwd()
+    os.chdir(target_src_dir)
+    call(['python', 'setup.py', 'build_ext', '--inplace', '--quiet'])
+    print("[done]")
+
+    # Copy compiled solver
+    print("Copying code-generated Python solver to current directory... \t\t", end='')
+    if system() is 'Linux' or 'Darwin':
+        module_ext = '.so'
+    else:
+        module_ext = '.so'
+    import ipdb; ipdb.set_trace()
+    sh.copy(glob('emosqp*' + module_ext)[0], current_dir)
+    os.chdir(current_dir)
+    print("[done]")
+
+
+
+    # python setup.py build_ext --inplace --quiet
 
 
     # Generate project
