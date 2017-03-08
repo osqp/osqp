@@ -60,12 +60,15 @@ else:
 # Define osqp and suitesparse directories
 osqp_dir = os.path.join('..', '..')
 osqp_build_dir = os.path.join(osqp_dir, 'build')
+suitesparse_dir = os.path.join(osqp_dir, 'lin_sys', 'direct', 'suitesparse')
 
 # Interface files
 include_dirs = [
     get_include(),                          # Numpy directories
     osqp_dir,                               # For additonal headers (private.h)
     os.path.join(osqp_dir, 'include'),      # osqp.h
+    os.path.join(suitesparse_dir, 'ldl', 'include'),    # ldl.h
+    os.path.join(suitesparse_dir, 'amd', 'include'),    # amd.h
     os.path.join('extension', 'include')]   # auxiliary header files
 
 sources_files = glob(os.path.join('extension', 'src', '*.c'))
@@ -90,7 +93,6 @@ extra_objects = [os.path.join('extension', 'src',
 '''
 Copy C sources for code generation
 '''
-suitesparse_dir = os.path.join(osqp_dir, 'lin_sys', 'direct', 'suitesparse')
 
 # List with OSQP C files
 cfiles = [os.path.join(osqp_dir, 'src', f)
@@ -115,7 +117,8 @@ hfiles += [os.path.join(suitesparse_dir, 'ldl', 'include', f)
            if f.endswith('.h')]
 
 # List Jinja files
-jinjafiles_list = glob(os.path.join('osqp','codegen', 'jinja', '*.*'))
+jinjafiles_list = glob(os.path.join('osqp', 'codegen', 'jinja', '*.*'))
+
 
 class build_ext_osqp(build_ext):
     def build_extensions(self):
