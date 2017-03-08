@@ -2,6 +2,7 @@
 #include "osqp.h"
 
 #include "workspace.h"
+#include <string.h>
 
 int main(int argc, char **argv) {
 
@@ -10,6 +11,9 @@ int main(int argc, char **argv) {
 
     // Solve Problem
     osqp_solve(&workspace);
+
+    // Print status
+    printf("Status: %s\n", (&workspace)->info->status);
 
     return 0;
 };

@@ -1,8 +1,27 @@
 {% import "macros.jinja" as macros %}
 
 #include "types.h"
-#include "private.h"
 
+struct c_priv{
+    csc *L;         /* lower triangular matrix in LDL factorization */
+    c_float *Dinv;  /* inverse of diag matrix in LDL (as a vector)  */
+    c_int *P;       /* permutation of KKT matrix for factorization  */
+    c_float *bp;    /* workspace memory for solves                  */
+
+
+    #if EMBEDDED != 1
+    // These are required for matrix updates
+    c_int * Pdiag_idx, Pdiag_n;  // index and number of diagonal elements in P
+    csc * KKT;                   // Permuted KKT matrix in sparse form (used to update P and A matrices)
+    c_int * PtoKKT, * AtoKKT;    // Index of elements from P and A to KKT matrix
+    // LDL Numeric workspace
+    c_int *Lnz;                  // Number of nonzeros in each column of L
+    c_float *Y;                  // LDL Numeric workspace
+    c_int *Pattern, *Flag;       // LDL Numeric workspace
+    c_int *Parent;               // LDL numeric workspace
+    #endif
+
+};
 
 #define OSQP_NDIM ({{ data['n'] }})
 #define OSQP_MDIM ({{ data['m'] }})
@@ -23,9 +42,9 @@ c_float Pdata_x[OSQP_P_NNZ];
 
 
 csc Adata;
-c_int Adata_i[OSQP_P_NNZ];
+c_int Adata_i[OSQP_A_NNZ];
 c_int Adata_p[OSQP_NDIM + 1];
-c_float Adata_x[OSQP_P_NNZ];
+c_float Adata_x[OSQP_A_NNZ];
 
 
 c_float qdata[OSQP_NDIM];
@@ -140,6 +159,10 @@ void link_structures(){
     priv.bp = priv_bp;
 
 
+    solution.x = xsolution;
+    solution.y = ysolution;
+
+
     workspace.x = work_x;
     workspace.y = work_y;
     workspace.z = work_z;
@@ -174,6 +197,10 @@ link_structures();
 
 /* Fill data */
 
+// Data dimensions
+work->data->n = {{data['n']}};
+work->data->m = {{data['m']}};
+
 // Fill P
 {{ macros.fill_mat(data['P'], 'work->data->P') }}
 
@@ -205,7 +232,7 @@ link_structures();
 {{ macros.fill_vec(priv['Dinv'], 'work->priv->Dinv') -}}
 {{ macros.fill_mat(priv['L'], 'work->priv->L') -}}
 
-/* Set info status to unsolved */
+/* Set info */
 work->info->status_val = OSQP_UNSOLVED;
 
 

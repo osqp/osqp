@@ -4,8 +4,10 @@ import osqp
 
 target_dir = "build"
 
-n = 10
-m = 5
+np.random.seed(3)
+
+n = 5
+m = 10
 P = sp.rand(n, n, .2)
 P = (P.T).dot(P)
 q = np.random.randn(n)
@@ -14,7 +16,9 @@ l = np.random.randn(m) - 5
 u = np.random.randn(m) + 5
 
 m = osqp.OSQP()
-m.setup(P, q, A, l, u)
+m.setup(P, q, A, l, u, rho=0.1)
 
 # Test workspace return
-work = m.codegen("code", 'Unix Makefiles', embedded_flag=1)
+m.codegen("code", 'Unix Makefiles', embedded_flag=1)
+
+m.solve()
