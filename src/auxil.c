@@ -357,7 +357,12 @@ void update_info(OSQPWorkspace *work, c_int iter, c_int polish){
     #endif
 
         work->info->iter = iter; // Update iteration number
-        work->info->obj_val = compute_obj_val(work->data, work->x);
+
+        // If verbose is off skip objective value update (cheaper iters)
+        if (work->settings->verbose){
+            work->info->obj_val = compute_obj_val(work->data, work->x);
+        }
+        
         if (work->data->m == 0) {
             // No constraints -> Always primal feasible
               work->info->pri_res = 0.;

@@ -135,7 +135,7 @@
      OSQPSettings *settings = self->workspace->settings;
 
      PyObject *return_dict = Py_BuildValue(
-         "{s:d,s:d,s:i,s:i,s:i,s:i,s:d,s:d,s:d,s:d,s:i,s:i}",
+         "{s:d,s:d,s:i,s:i,s:i,s:i,s:d,s:d,s:d, s:d, s:d, s:i, s:i}",
          "rho", (double)settings->rho,
          "sigma", (double)settings->sigma,
          "scaling", settings->scaling,
@@ -144,20 +144,21 @@
          "max_iter", settings->max_iter,
          "eps_abs", (double)settings->eps_abs,
          "eps_rel", (double)settings->eps_rel,
+         "eps_inf", (double)settings->eps_inf,
+         "eps_unb", (double)settings->eps_unb,
          "alpha", (double)settings->alpha,
-         "delta", (double)settings->delta,
-         "verbose", settings->verbose,
-         "warm_start", settings->warm_start);
+         "warm_start", settings->warm_start,
+         "early_terminate", settings->early_terminate);
 
      return return_dict;
  }
 
 
 static PyObject *OSQP_get_workspace(OSQP *self){
-     PyObject *data_py    = OSQP_get_data(self);
-     PyObject *priv_py    = OSQP_get_priv(self);
+     PyObject *data_py = OSQP_get_data(self);
+     PyObject *priv_py = OSQP_get_priv(self);
      PyObject *scaling_py = OSQP_get_scaling(self);
-     PyObject *settings_py= OSQP_get_settings(self);
+     PyObject *settings_py = OSQP_get_settings(self);
 
      PyObject *return_dict = Py_BuildValue("{s:O,s:O,s:O,s:O}",
                                            "data", data_py,

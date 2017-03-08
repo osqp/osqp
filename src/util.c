@@ -168,8 +168,12 @@ void print_footer(OSQPInfo * info, c_int polish){
 /* assumes d->stgs already allocated memory */
 void set_default_settings(OSQPSettings * settings) {
         settings->scaling = SCALING; /* heuristic problem scaling */
+
+        #if EMBEDDED != 1
         settings->scaling_norm = SCALING_NORM;
         settings->scaling_iter = SCALING_ITER;
+        #endif
+
         settings->rho = RHO; /* ADMM step */
         settings->sigma = SIGMA; /* ADMM step */
         settings->max_iter = MAX_ITER; /* maximum iterations to take */
@@ -178,13 +182,15 @@ void set_default_settings(OSQPSettings * settings) {
         settings->eps_inf = EPS_INF;         /* infeasibility tolerance */
         settings->eps_unb = EPS_UNB;         /* unboundedness tolerance */
         settings->alpha = ALPHA;     /* relaxation parameter */
-        settings->delta = DELTA;    /* regularization parameter for polish */
+
         #ifndef EMBEDDED
+        settings->delta = DELTA;    /* regularization parameter for polish */
         settings->polish = POLISH;     /* ADMM solution polish: 1 */
         settings->pol_refine_iter = POL_REFINE_ITER; /* iterative refinement
                                                         steps in polish */
         settings->verbose = VERBOSE;     /* print output */
         #endif
+
         settings->early_terminate = EARLY_TERMINATE;     /* Evaluate termination criteria */
         settings->warm_start = WARM_START;     /* x equality constraint scaling: 1e-3 */
 

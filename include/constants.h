@@ -37,16 +37,22 @@ extern "C" {
 #define EPS_INF (1E-4)
 #define EPS_UNB (1E-4)
 #define ALPHA (1.6)
+
+#ifndef EMBEDDED
 #define DELTA (1E-7)
 #define POLISH (1)
+#define POL_REFINE_ITER (3)
 #define VERBOSE (1)
+#endif
+
 #define EARLY_TERMINATE (1)
 #define WARM_START (1)
 #define SCALING (1)
+
+#if EMBEDDED != 1
 #define SCALING_NORM (2)
 #define SCALING_ITER (3)
-#define POL_REFINE_ITER (3)
-
+#endif
 
 /* Printing */
 #define PRINT_INTERVAL 100

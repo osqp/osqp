@@ -7,6 +7,7 @@ import osqp._osqp  as _osqp # Internal low level module
 from warnings import warn
 import numpy as np
 from scipy import sparse
+from platform import system
 
 import osqp.codegen as cg
 
@@ -266,13 +267,22 @@ class OSQP(object):
         if x is None and y is None:
             raise ValueError("Unrecognized fields")
 
-    def codegen(self, folder, project_type, embedded_flag=1):
+    def codegen(self, folder, project_type="Makefile", embedded_flag=1, early_terminate=0):
         """
         Generate embeddable C code for the problem
         """
 
+        # Set early_terminate to the defined value
+        self.update_settings(early_terminate=early_terminate)
+
         # Convert workspace to python
         work = self._model._get_workspace()
+
+        if project_type == 'Makefile':
+            if system() == 'Windows':
+                project_type = "MinGW Makefiles"
+            elif system() == 'Linux' or system() == 'Darwin':
+                project_type = "Unix Makefiles"
 
         # Generate code with codegen module
         cg.codegen(work, folder, project_type, embedded_flag)

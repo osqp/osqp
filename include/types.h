@@ -111,8 +111,11 @@ typedef struct {
         c_float rho;     /* ADMM step rho */
         c_float sigma;   /* ADMM step sigma */
         c_int scaling;   /* boolean, heuristic data rescaling */
+
+        #if EMBEDDED != 1
         c_int scaling_norm; /* scaling norm */
         c_int scaling_iter; /* scaling iterations */
+        #endif
 
         /* these can change for multiple runs with the same call to osqp_init */
         c_int max_iter; /* maximum iterations to take */
@@ -121,14 +124,15 @@ typedef struct {
         c_float eps_inf;  /* infeasibility tolerance  */
         c_float eps_unb;  /* unboundedness tolerance  */
         c_float alpha; /* relaxation parameter */
-        c_float delta; /* regularization parameter for polish */
 
         #ifndef EMBEDDED
+        c_float delta; /* regularization parameter for polish */
         c_int polish; /* boolean, polish ADMM solution */
         c_int pol_refine_iter; /* iterative refinement steps in polish */
-        #endif
 
         c_int verbose; /* boolean, write out progress */
+        #endif
+
         c_int early_terminate; /* boolean, terminate if stopping criterion is met */
         c_int warm_start; /* boolean, warm start */
 } OSQPSettings;
