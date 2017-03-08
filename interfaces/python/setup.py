@@ -117,7 +117,7 @@ hfiles += [os.path.join(suitesparse_dir, 'ldl', 'include', f)
            if f.endswith('.h')]
 
 # List Jinja files
-jinjafiles_list = glob(os.path.join('osqp', 'codegen', 'jinja', '*.*'))
+jinjafiles_list = glob(os.path.join('module', 'codegen', 'jinja', '*.*'))
 
 
 class build_ext_osqp(build_ext):
