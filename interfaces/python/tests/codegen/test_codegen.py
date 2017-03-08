@@ -2,8 +2,6 @@ import numpy as np
 import scipy.sparse as sp
 import osqp
 
-target_dir = "build"
-
 np.random.seed(3)
 
 n = 5
@@ -19,6 +17,6 @@ m = osqp.OSQP()
 m.setup(P, q, A, l, u, rho=0.1)
 
 # Test workspace return
-w = m.codegen("code", 'Unix Makefiles', early_terminate=0, embedded_flag=1)
+w = m.codegen("code", 'Unix Makefiles', early_terminate=1, embedded_flag=1)
 
 res = m.solve()
