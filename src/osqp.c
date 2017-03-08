@@ -86,7 +86,6 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     work->Pdelta_x = c_calloc(work->data->n, sizeof(c_float));
     work->Adelta_x = c_calloc(work->data->m, sizeof(c_float));
 
-    work->first_run = 1;
 
     // Copy settings
     work->settings = copy_settings(settings);
@@ -156,6 +155,7 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     work->info->polish_time = 0.0; // Polish time to zero
     work->info->run_time = 0.0;    // Total run time to zero
     work->info->setup_time = toc(work->timer); // Updater timer information
+    work->first_run = 1;
     #endif
 
     // Print header
@@ -298,7 +298,10 @@ c_int osqp_solve(OSQPWorkspace * work){
         work->info->run_time = work->info->solve_time +
                                work->info->polish_time;
     }
+    // Indicate that the solve function has already been executed
+    if (work->first_run) work->first_run = 0;
     #endif
+    
 
     /* Print final footer */
     #ifdef PRINTING
@@ -308,9 +311,6 @@ c_int osqp_solve(OSQPWorkspace * work){
 
     // Store solution
     store_solution(work);
-
-    // Indicate that the solve function has already been executed
-    if (work->first_run) work->first_run = 0;
 
     return exitflag;
 }

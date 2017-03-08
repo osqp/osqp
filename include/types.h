@@ -165,8 +165,7 @@ typedef struct {
                                                 //  - preallocate values of P->x, A->x
         c_float *D_temp, *E_temp;               //  - temporary scaling vectors
 
-        // flag indicating whether the solve function has been run before
-        c_int first_run;
+
 
         // Other internal structures
         OSQPSettings *settings;          // Problem settings
@@ -176,6 +175,8 @@ typedef struct {
 
         #ifdef PROFILING
         OSQPTimer * timer;  // Timer object
+        // flag indicating whether the solve function has been run before
+        c_int first_run;
         #endif
 } OSQPWorkspace;
 
