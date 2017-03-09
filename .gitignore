@@ -203,3 +203,4 @@ interfaces/python/tests/codegen/**/*.pyd
 interfaces/python/files.txt
 interfaces/python/tests/codegen/Small/code
 interfaces/python/tests/codegen/Portfolio/code
+interfaces/python/tests/codegen/Portfolio/*.txt

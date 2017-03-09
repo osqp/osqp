@@ -89,7 +89,7 @@ def codegen(work, target_dir, project_type, embedded_flag):
     # Copy compiled solver
     print("Copying code-generated Python solver to current directory... \t\t",
           end='')
-    if system() is 'Linux' or system() is 'Darwin':
+    if system() == 'Linux' or system() == 'Darwin':
         module_ext = '.so'
     else:
         module_ext = '.pyd'

@@ -5,9 +5,9 @@ import osqp
 np.random.seed(1)
 
 # Problem parameters
-k = 20
-n = 200
-dens_lvl = 0.3
+k = 2
+n = 20
+dens_lvl = 0.5
 version = 'sparse'  # 'dense' or 'sparse'
 
 # Generate data
@@ -43,12 +43,15 @@ elif version == 'sparse':
     u = np.hstack([1., np.zeros(k), np.ones(n)])
 
 
+# Write mu vector in the file
+np.savetxt('portfolio_data.txt', mu)
+
 # Pass the data to OSQP
 m = osqp.OSQP()
 m.setup(P, q, A, l, u, rho=0.1)
 
 # Generate the code
-w = m.codegen("code", 'Unix Makefiles', early_terminate=1, embedded_flag=2)
+w = m.codegen("code", 'Unix Makefiles', early_terminate=1, embedded_flag=1)
 
 # Solve the problem
-res = m.solve()
+# res = m.solve()
