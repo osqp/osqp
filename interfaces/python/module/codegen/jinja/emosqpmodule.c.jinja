@@ -103,7 +103,7 @@ static PyObject * OSQP_solve(PyObject *self, PyObject *args)
     }
 
     // Return value
-    return Py_BuildValue("OOi", x, y, (&workspace)->info->status_val);
+    return Py_BuildValue("OOii", x, y, (&workspace)->info->status_val, (&workspace)->info->iter);
 
 }
 

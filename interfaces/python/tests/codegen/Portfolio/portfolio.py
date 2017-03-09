@@ -1,6 +1,8 @@
+from __future__ import print_function
 import numpy as np
 import scipy.sparse as sp
 import osqp
+from builtins import range
 
 np.random.seed(1)
 
@@ -53,5 +55,33 @@ m.setup(P, q, A, l, u, rho=0.1)
 # Generate the code
 w = m.codegen("code", 'Unix Makefiles', early_terminate=1, embedded_flag=1)
 
-# Solve the problem
-# res = m.solve()
+import emosqp
+
+# Generate gamma parameters
+n_gamma = 21
+gammas = np.logspace(-2, 2, n_gamma)
+for i in range(n_gamma):
+    # Update linear cost
+    q_new = np.append(-mu / gammas[i], np.zeros(k))
+    emosqp.update_lin_cost(q_new)
+
+    # Solve
+    sol = emosqp.solve()
+    x = sol[0]
+    y = sol[1]
+    status_val = sol[2]
+    numofiter = sol[3]
+
+    # Compute details
+    if status_val == 1:
+        status_string = 'Solved'
+    else:
+        status_string = 'NOT Solved'
+    objval = .5 * np.dot(x, P.dot(x)) + np.dot(q_new, x)
+
+    # Print details
+    print("Risk aversion parameter:  %f" % gammas[i])
+    print("Status:                   %s" % status_string)
+    print("Number of iterations:     %d" % numofiter)
+    print("Objective value:          %f" % objval)
+    print(" ")

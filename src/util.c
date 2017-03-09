@@ -81,6 +81,10 @@ void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
             "rho = %.2f, sigma = %.2f, alpha = %.2f, \n          max_iter = %i\n",
             settings->eps_abs, settings->eps_rel, settings->eps_inf, settings->eps_unb, settings->rho, settings->sigma,
             settings->alpha, (int)settings->max_iter);
+    if (settings->early_terminate)
+        c_print("          early_terminate: active\n");
+    else
+        c_print("          early_terminate: inactive\n");
     if (settings->scaling)
         c_print("          scaling: active\n");
     else
