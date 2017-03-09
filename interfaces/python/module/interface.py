@@ -290,4 +290,4 @@ class OSQP(object):
         # Generate code with codegen module
         cg.codegen(work, folder, project_type, embedded_flag)
 
-        return work
+        # return work
