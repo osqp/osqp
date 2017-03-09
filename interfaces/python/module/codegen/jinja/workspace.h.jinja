@@ -188,16 +188,16 @@ work->data->m = {{data['m']}};
 {{ macros.fill_mat(data['P'], 'work->data->P') }}
 
 // Fill q
-{{ macros.fill_vec(data['q'], 'work->data->q') }}
+{{ macros.fill_vec_float(data['q'], 'work->data->q') }}
 
 // Fill A
 {{ macros.fill_mat(data['A'], 'work->data->A') }}
 
 // Fill l
-{{ macros.fill_vec(data['l'], 'work->data->l') }}
+{{ macros.fill_vec_float(data['l'], 'work->data->l') }}
 
 // Fill u
-{{ macros.fill_vec(data['u'], 'work->data->u') }}
+{{ macros.fill_vec_float(data['u'], 'work->data->u') }}
 
 
 /* Fill settings */
@@ -205,14 +205,14 @@ work->data->m = {{data['m']}};
 
 
 /* Fill scaling */
-{{ macros.fill_vec(scaling['D'], 'work->scaling->D') -}}
-{{ macros.fill_vec(scaling['Dinv'], 'work->scaling->Dinv') -}}
-{{ macros.fill_vec(scaling['E'], 'work->scaling->E') -}}
-{{ macros.fill_vec(scaling['Einv'], 'work->scaling->Einv')}}
+{{ macros.fill_vec_float(scaling['D'], 'work->scaling->D') -}}
+{{ macros.fill_vec_float(scaling['Dinv'], 'work->scaling->Dinv') -}}
+{{ macros.fill_vec_float(scaling['E'], 'work->scaling->E') -}}
+{{ macros.fill_vec_float(scaling['Einv'], 'work->scaling->Einv')}}
 
 /* Fill private structure */
 {{ macros.fill_vec(priv['P'], 'work->priv->P') }}
-{{ macros.fill_vec(priv['Dinv'], 'work->priv->Dinv') -}}
+{{ macros.fill_vec_float(priv['Dinv'], 'work->priv->Dinv') -}}
 {{ macros.fill_mat(priv['L'], 'work->priv->L') -}}
 
 /* Set info */
