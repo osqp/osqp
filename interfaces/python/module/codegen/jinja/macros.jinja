@@ -29,7 +29,11 @@
 {% macro fill_settings(settings, name) %}
 {% for key, value in settings.items() %}
 {% if key != 'scaling_norm' and key != 'scaling_iter' %}
+{% if key == 'warm_start' or key == 'early_terminate' or key == 'max_iter' or key == 'scaling' %}
 {{name}}->{{key}} = {{value}};
+{% else %}
+{{name}}->{{key}} = (c_float){{value}};
+{% endif %}
 {% endif %}
 {% endfor %}
 {% endmacro %}

@@ -383,7 +383,7 @@ void LDL_ltsolve
     c_float Lx [ ]	/* input of size lnz=Lp[n], not modified */
 )
 {
-    int j, p, p2 ;
+    LDL_int j, p, p2 ;
     for (j = n-1 ; j >= 0 ; j--)
     {
 	p2 = Lp [j+1] ;

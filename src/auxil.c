@@ -29,7 +29,7 @@ static void compute_rhs(OSQPWorkspace *work){
     }
     for (i = 0; i < work->data->m; i++){
         // Cycle over dual variable in the first step (nu)
-        work->xz_tilde[i + work->data->n] = work->z_prev[i] - 1./work->settings->rho * work->y[i];
+        work->xz_tilde[i + work->data->n] = work->z_prev[i] - (c_float) 1./work->settings->rho * work->y[i];
     }
 
 }
@@ -43,7 +43,7 @@ static void compute_rhs(OSQPWorkspace *work){
 static void update_z_tilde(OSQPWorkspace *work){
     c_int i; // Index
     for (i = 0; i < work->data->m; i++){
-        work->xz_tilde[i + work->data->n] = work->z_prev[i] + 1./work->settings->rho * (work->xz_tilde[i + work->data->n] - work->y[i]);
+        work->xz_tilde[i + work->data->n] = work->z_prev[i] + (c_float) 1./work->settings->rho * (work->xz_tilde[i + work->data->n] - work->y[i]);
     }
 }
 
@@ -75,7 +75,7 @@ void update_x(OSQPWorkspace * work){
     // update x
     for (i = 0; i < work->data->n; i++){
         work->x[i] = work->settings->alpha * work->xz_tilde[i] +
-                     (1.0 - work->settings->alpha) * work->x_prev[i];
+                     ((c_float) 1.0 - work->settings->alpha) * work->x_prev[i];
     }
 
     // update delta_x
@@ -96,8 +96,8 @@ void update_z(OSQPWorkspace *work){
     // update z
     for (i = 0; i < work->data->m; i++){
         work->z[i] = work->settings->alpha * work->xz_tilde[i + work->data->n] +
-                     (1.0 - work->settings->alpha) * work->z_prev[i] +
-                     1./work->settings->rho * work->y[i];
+                     ((c_float) 1.0 - work->settings->alpha) * work->z_prev[i] +
+                     (c_float) 1./work->settings->rho * work->y[i];
     }
 
     // project z
@@ -118,7 +118,7 @@ void update_y(OSQPWorkspace *work){
 
         work->delta_y[i] = work->settings->rho *
             (work->settings->alpha * work->xz_tilde[i + work->data->n] +
-            (1.0 - work->settings->alpha) * work->z_prev[i] - work->z[i]);
+            ((c_float) 1.0 - work->settings->alpha) * work->z_prev[i] - work->z[i]);
         work->y[i] += work->delta_y[i];
 
     }
@@ -236,7 +236,7 @@ c_int is_infeasible(OSQPWorkspace * work){
 
     if (norm_delta_y > work->settings->eps_inf*work->settings->eps_inf){ // ||delta_y|| > 0
         // Normalize delta_y by its norm
-        vec_mult_scalar(work->delta_y, 1./norm_delta_y, work->data->m);
+        vec_mult_scalar(work->delta_y, (c_float) 1./norm_delta_y, work->data->m);
 
         // Compute check
         // ineq_lhs = u'*max(delta_y, 0) + l'*min(delta_y, 0) < 0
@@ -272,7 +272,7 @@ c_int is_unbounded(OSQPWorkspace * work){
     if (norm_delta_x > work->settings->eps_unb*work->settings->eps_unb){
 
         // Normalize delta_x by its norm
-        vec_mult_scalar(work->delta_x, 1./norm_delta_x, work->data->n);
+        vec_mult_scalar(work->delta_x, (c_float) 1./norm_delta_x, work->data->n);
 
         // Check first if q'*delta_x < 0
         if (vec_prod(work->data->q, work->delta_x, work->data->n) <
@@ -424,7 +424,7 @@ c_int check_termination(OSQPWorkspace *work){
     }
     else {
         // Compute primal tolerance
-        eps_pri = c_sqrt(work->data->m) * work->settings->eps_abs +
+        eps_pri = c_sqrt((c_float) work->data->m) * work->settings->eps_abs +
                   work->settings->eps_rel * vec_norm2(work->z, work->data->m);
         // Primal feasibility check
         if (work->info->pri_res < eps_pri) pri_check = 1;
@@ -435,7 +435,7 @@ c_int check_termination(OSQPWorkspace *work){
 
     // Compute dual tolerance
     mat_tpose_vec(work->data->A, work->y, work->x_prev, 0, 0); // ws = A'*u
-    eps_dua = c_sqrt(work->data->n) * work->settings->eps_abs +
+    eps_dua = c_sqrt((c_float) work->data->n) * work->settings->eps_abs +
               work->settings->eps_rel * work->settings->rho *
               vec_norm2(work->x_prev, work->data->n);
     // Dual feasibility check

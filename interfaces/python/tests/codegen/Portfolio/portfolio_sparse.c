@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
     c_float q_new[N_plus_K] = {0.0};
     c_float mu[N];
     c_float gamma_step, gamma[N_GAMMA_PLUS_1];
-    
+
     // Load mu from file
     myfile = fopen("portfolio_data.txt", "r");
     if (myfile == NULL){
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
     }
     fclose(myfile);
     printf("\n");
-    
+
     // Generate gamma parameters: (logspace(-2,2,N_GAMMA_PLUS_1))
     gamma[0] = log(1e-2);
     gamma[20] = log(1e2);
@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
     for (i=0; i<=20; i++){
         gamma[i] = exp(gamma[i]);
     }
-    
+
     // Load problem
     load_workspace(&workspace);
 

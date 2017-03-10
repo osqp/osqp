@@ -178,14 +178,14 @@ void set_default_settings(OSQPSettings * settings) {
         settings->scaling_iter = SCALING_ITER;
         #endif
 
-        settings->rho = RHO; /* ADMM step */
-        settings->sigma = SIGMA; /* ADMM step */
+        settings->rho = (c_float) RHO; /* ADMM step */
+        settings->sigma = (c_float) SIGMA; /* ADMM step */
         settings->max_iter = MAX_ITER; /* maximum iterations to take */
-        settings->eps_abs = EPS_ABS;         /* absolute convergence tolerance */
-        settings->eps_rel = EPS_REL;         /* relative convergence tolerance */
-        settings->eps_inf = EPS_INF;         /* infeasibility tolerance */
-        settings->eps_unb = EPS_UNB;         /* unboundedness tolerance */
-        settings->alpha = ALPHA;     /* relaxation parameter */
+        settings->eps_abs = (c_float) EPS_ABS;         /* absolute convergence tolerance */
+        settings->eps_rel = (c_float) EPS_REL;         /* relative convergence tolerance */
+        settings->eps_inf = (c_float) EPS_INF;         /* infeasibility tolerance */
+        settings->eps_unb = (c_float) EPS_UNB;         /* unboundedness tolerance */
+        settings->alpha = (c_float) ALPHA;     /* relaxation parameter */
 
         #ifndef EMBEDDED
         settings->delta = DELTA;    /* regularization parameter for polish */
