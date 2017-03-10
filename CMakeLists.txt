@@ -13,6 +13,8 @@ project (osqp)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 
+# Some non-standard CMake modules
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 # Detect operating system
 # ----------------------------------------------
@@ -184,29 +186,42 @@ target_link_libraries (osqp_demo_direct osqpdir)
 if (UNITTESTS)
     find_package(PythonInterp)
     if(NOT PYTHONINTERP_FOUND)
-        message( FATAL_ERROR "You need python installed to generate unittests" )
+        message( FATAL_ERROR "You need python installed to generate unittests. If you do not want to compile the unittests pass -DUNITTESTS=OFF to cmake." )
     endif()
 
+    INCLUDE(FindPythonModule)
+    find_python_module(numpy REQUIRED)
+    IF(NOT PY_NUMPY)
+        message( FATAL_ERROR "You need numpy python module installed to generate unittests. If you do not want to compile the unittests pass -DUNITTESTS=OFF to cmake." )
+    ENDIF(NOT PY_NUMPY)
+
+    find_python_module(scipy REQUIRED)
+    IF(NOT PY_SCIPY)
+        message( FATAL_ERROR "You need scipy python module installed to generate unittests. If you do not want to compile the unittests pass -DUNITTESTS=OFF to cmake." )
+    ENDIF(NOT PY_SCIPY)
+
+    # Add test_headers and codegen_test_headers
+    add_subdirectory(tests)
+
     # Generating tests.stamp so that the test data are not always generated
-    set(data_timestamp ${PROJECT_SOURCE_DIR}/tests/tests_data.stamp)
+    # set(data_timestamp ${PROJECT_SOURCE_DIR}/tests/tests_data.stamp)
     add_custom_command(
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests
         COMMAND ${PYTHON_EXECUTABLE} generate_tests_data.py
-        COMMAND cmake -E touch ${data_timestamp}
         DEPENDS ${PROJECT_SOURCE_DIR}/tests/generate_tests_data.py
-        OUTPUT ${data_timestamp}
+        OUTPUT ${codegen_test_headers}
         COMMENT "Generating unittests data files using Python"
     )
-    add_custom_target(
-        generate_tests_data
-        DEPENDS ${data_timestamp}
-        )
+
 
     # Direct linear solver testing
     include_directories(tests)
-    add_executable(osqp_tester_direct ${PROJECT_SOURCE_DIR}/tests/osqp_tester_direct.c)
+    add_executable(osqp_tester_direct
+                ${PROJECT_SOURCE_DIR}/tests/osqp_tester_direct.c ${PROJECT_SOURCE_DIR}/tests/minunit.h
+                ${test_headers}
+                ${codegen_test_headers})
     target_link_libraries (osqp_tester_direct osqpdir)
-    add_dependencies(osqp_tester_direct generate_tests_data)
+    # add_dependencies(osqp_tester_direct generate_tests_data)
 
     # Add testing
     include(CTest)
