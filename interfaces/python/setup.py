@@ -116,8 +116,8 @@ hfiles += [os.path.join(suitesparse_dir, 'ldl', 'include', f)
            for f in os.listdir(os.path.join(suitesparse_dir, 'ldl', 'include'))
            if f.endswith('.h')]
 
-# List Jinja files
-jinjafiles = glob(os.path.join('module', 'codegen', 'jinja', '*.*'))
+# List of files to generate
+files_to_generate = glob(os.path.join('module', 'codegen', 'files_to_generate', '*.*'))
 
 
 class build_ext_osqp(build_ext):
@@ -167,7 +167,7 @@ setup(name='osqp',
                    'osqppurepy': 'modulepurepy'},
       data_files=[('osqp/codegen/sources/src', cfiles),
                   ('osqp/codegen/sources/include', hfiles),
-                  ('osqp/codegen/jinja', jinjafiles)],
+                  ('osqp/codegen/files_to_generate', files_to_generate)],
       install_requires=["numpy >= 1.7", "scipy >= 0.13.2", "future"],
       license='Apache 2.0',
       cmdclass={'build_ext': build_ext_osqp},

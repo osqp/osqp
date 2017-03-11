@@ -1,26 +1,14 @@
 # from osqp import __path__
 from __future__ import print_function
 import osqp
-from jinja2 import Environment, PackageLoader, contextfilter
 import os.path
 import shutil as sh
 from subprocess import call
 from glob import glob
-from subprocess import call
 from platform import system
 
-
-
-def render(target_dir, template_vars, template_name, target_name):
-
-    env = Environment(loader=PackageLoader('osqp.codegen', 'jinja'),
-                      lstrip_blocks=True,
-                      trim_blocks=True)
-
-    template = env.get_template(template_name)
-    f = open(os.path.join(target_dir, target_name), 'w')
-    f.write(template.render(template_vars))
-    f.close()
+# import utilities
+from . import utils
 
 
 def codegen(work, target_dir, project_type, embedded_flag):
@@ -30,6 +18,10 @@ def codegen(work, target_dir, project_type, embedded_flag):
 
     # Import OSQP path
     osqp_path = osqp.__path__[0]
+
+    # Path of osqp module
+    files_to_generate_path = os.path.join(osqp_path,
+                                          'codegen', 'files_to_generate')
 
     # Make target directory
     print("Creating target directories... \t\t", end='')
@@ -66,17 +58,27 @@ def codegen(work, target_dir, project_type, embedded_flag):
                      'scaling':         work['scaling'],
                      'embedded_flag':   embedded_flag}
 
-    # Render workspace and example file
-    render(target_include_dir, template_vars,
-           'workspace.h.jinja', 'workspace.h')
-    render(target_src_dir, template_vars,
-           'example.c.jinja', 'example.c')
-    render(target_src_dir, template_vars,
-           'emosqpmodule.c.jinja', 'emosqpmodule.c')
-    render(target_src_dir, template_vars,
-           'setup.py.jinja', 'setup.py')
-    render(target_dir, template_vars,
-           'CMakeLists.txt.jinja', 'CMakeLists.txt')
+
+    # Render workspace
+    utils.render_workspace(template_vars,
+                           os.path.join(target_include_dir, 'workspace.h'))
+
+    # Render setup.py
+    utils.render_setuppy(template_vars,
+                         os.path.join(target_src_dir, 'setup.py'))
+
+    # Copy example.c
+    sh.copy(os.path.join(files_to_generate_path, 'example.c'), target_src_dir)
+
+    # Copy CMakelists.txt
+    sh.copy(os.path.join(files_to_generate_path, 'CMakeLists.txt'), target_dir)
+
+    # Copy emosqpmodule.c
+    sh.copy(os.path.join(files_to_generate_path, 'emosqpmodule.c'),
+            target_src_dir)
+
+
+
     print("[done]")
 
     # Compile python interface
