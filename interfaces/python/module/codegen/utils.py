@@ -37,7 +37,7 @@ def fill_mat(f, mat, name):
     Scipy sparse csc matrix
     """
     fill_vec(f, mat['i'], name+'->i', 'c_int')
-    fill_vec(f, mat['i'], name+'->p', 'c_int')
+    fill_vec(f, mat['p'], name+'->p', 'c_int')
     fill_vec(f, mat['x'], name+'->x', 'c_float')
     fill_scalar(f, mat['m'], "%s->m" % (name), 'c_int')
     fill_scalar(f, mat['n'], "%s->n" % (name), 'c_int')
