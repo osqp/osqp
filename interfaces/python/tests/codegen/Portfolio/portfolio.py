@@ -7,8 +7,8 @@ from builtins import range
 np.random.seed(1)
 
 # Problem parameters
-k = 2
-n = 20
+k = 10
+n = 2000
 dens_lvl = 0.5
 version = 'sparse'  # 'dense' or 'sparse'
 
@@ -53,7 +53,7 @@ m = osqp.OSQP()
 m.setup(P, q, A, l, u, rho=0.1)
 
 # Generate the code
-w = m.codegen("code", 'Unix Makefiles', early_terminate=1, embedded_flag=1)
+m.codegen("code", 'Unix Makefiles', early_terminate=1, embedded_flag=1)
 
 import emosqp
 

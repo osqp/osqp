@@ -85,16 +85,16 @@ def solve_qp_cvx(P, q, A, l, u):
     prob.solve()
     return x.value, prob.value
 
- 
+
 xstar, ustar, pstar = solve_mpc_cvx(Ad, Bd, Q, R, T, x0, umax)
 #xstar2, pstar2 = solve_qp_cvx(P, q, A, l, u)
 
 
-## Pass the data to OSQP
-#m = osqp.OSQP()
-#m.setup(sp.csc_matrix(P), q, sp.csc_matrix(A), l, u, rho=0.1)
-#
-## Generate the code
-#w = m.codegen("code", 'Unix Makefiles', early_terminate=1, embedded_flag=1)
-#
-#shutil.copy('example.c', os.path.join('code', 'src', 'example.c'))
+# Pass the data to OSQP
+# m = osqp.OSQP()
+# m.setup(sp.csc_matrix(P), q, sp.csc_matrix(A), l, u, sigma=0.0001, rho=0.005)
+
+# Generate the code
+# m.codegen("code", 'Unix Makefiles', early_terminate=1, embedded_flag=1)
+
+# shutil.copy('example.c', os.path.join('code', 'src', 'example.c'))
