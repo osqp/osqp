@@ -11,6 +11,127 @@
 #include "workspace.h"             // Include code-generated OSQP workspace
 
 
+
+
+/*********************************
+ * Timer Structs and Functions * *
+ *********************************/
+
+// Windows
+#ifdef IS_WINDOWS
+
+#include <windows.h>
+
+typedef struct {
+	LARGE_INTEGER tic;
+	LARGE_INTEGER toc;
+	LARGE_INTEGER freq;
+} PyTimer;
+
+// Mac
+#elif IS_MAC
+
+#include <mach/mach_time.h>
+
+/* Use MAC OSX  mach_time for timing */
+typedef struct {
+	uint64_t tic;
+	uint64_t toc;
+	mach_timebase_info_data_t tinfo;
+} PyTimer;
+
+// Linux
+#else
+
+/* Use POSIX clocl_gettime() for timing on non-Windows machines */
+#include <time.h>
+#include <sys/time.h>
+
+typedef struct {
+	struct timespec tic;
+	struct timespec toc;
+} PyTimer;
+
+#endif
+
+/**
+ * Timer Methods
+ */
+
+// Windows
+#if IS_WINDOWS
+
+void tic(PyTimer* t)
+{
+        QueryPerformanceFrequency(&t->freq);
+        QueryPerformanceCounter(&t->tic);
+}
+
+c_float toc(PyTimer* t)
+{
+        QueryPerformanceCounter(&t->toc);
+        return ((t->toc.QuadPart - t->tic.QuadPart) / (c_float)t->freq.QuadPart);
+}
+
+// Mac
+#elif IS_MAC
+
+void tic(PyTimer* t)
+{
+        /* read current clock cycles */
+        t->tic = mach_absolute_time();
+}
+
+c_float toc(PyTimer* t)
+{
+
+        uint64_t duration; /* elapsed time in clock cycles*/
+
+        t->toc = mach_absolute_time();
+        duration = t->toc - t->tic;
+
+        /*conversion from clock cycles to nanoseconds*/
+        mach_timebase_info(&(t->tinfo));
+        duration *= t->tinfo.numer;
+        duration /= t->tinfo.denom;
+
+        return (c_float)duration / 1e9;
+}
+
+
+// Linux
+#else
+
+/* read current time */
+void tic(PyTimer* t)
+{
+        clock_gettime(CLOCK_MONOTONIC, &t->tic);
+}
+
+
+/* return time passed since last call to tic on this timer */
+c_float toc(PyTimer* t)
+{
+        struct timespec temp;
+
+        clock_gettime(CLOCK_MONOTONIC, &t->toc);
+
+        if ((t->toc.tv_nsec - t->tic.tv_nsec)<0) {
+                temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec-1;
+                temp.tv_nsec = 1e9+t->toc.tv_nsec - t->tic.tv_nsec;
+        } else {
+                temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec;
+                temp.tv_nsec = t->toc.tv_nsec - t->tic.tv_nsec;
+        }
+        return (c_float)temp.tv_sec + (c_float)temp.tv_nsec / 1e9;
+}
+
+
+#endif
+
+
+
+
 /* The PyInt variable is a PyLong in Python3.x.
  */
 #if PY_MAJOR_VERSION >= 3
@@ -59,6 +180,10 @@ static PyArrayObject *get_contiguous(PyArrayObject *array, int typenum) {
 // Solve Optimization Problem
 static PyObject * OSQP_solve(PyObject *self, PyObject *args)
 {
+    // Allocate timer
+    PyTimer * timer;
+    c_float solve_time;
+
     // Get float types
     int float_type = get_float_type();
 
@@ -75,10 +200,17 @@ static PyObject * OSQP_solve(PyObject *self, PyObject *args)
     x_arr = PyMem_Malloc((&workspace)->data->n * sizeof(c_float));
     y_arr = PyMem_Malloc((&workspace)->data->m * sizeof(c_float));
 
+    // Initialize timer
+    timer = PyMem_Malloc(sizeof(PyTimer));
+    tic(timer);
+
     /**
      *  Solve QP Problem
      */
     osqp_solve((&workspace));
+
+    // Stop timer
+    solve_time = toc(timer);
 
     // If solution is not Infeasible or Unbounded store it
     if (((&workspace)->info->status_val != OSQP_INFEASIBLE) &&
@@ -102,8 +234,11 @@ static PyObject * OSQP_solve(PyObject *self, PyObject *args)
             y = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
     }
 
+    // Free timer
+    PyMem_Free(timer);
+
     // Return value
-    return Py_BuildValue("OOii", x, y, (&workspace)->info->status_val, (&workspace)->info->iter);
+    return Py_BuildValue("OOiid", x, y, (&workspace)->info->status_val, (&workspace)->info->iter, solve_time);
 
 }
 
