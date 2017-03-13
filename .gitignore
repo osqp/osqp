@@ -201,6 +201,7 @@ tests/**/*data.h
 interfaces/python/tests/codegen/**/*.so
 interfaces/python/tests/codegen/**/*.pyd
 interfaces/python/files.txt
-interfaces/python/tests/codegen/Small/code
-interfaces/python/tests/codegen/Portfolio/code
-interfaces/python/tests/codegen/Portfolio/*.txt
+interfaces/python/tests/codegen/small/code
+interfaces/python/tests/codegen/portfolio/code
+interfaces/python/tests/codegen/portfolio/*.txt
+interfaces/python/tests/codegen/mpc_pendulum/code
