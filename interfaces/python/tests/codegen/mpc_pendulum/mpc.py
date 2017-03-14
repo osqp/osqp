@@ -91,9 +91,8 @@ Apply MPC in closed loop
 np.random.seed(1)
 
 # Apply MPC to the system
-sim_steps = 100
+sim_steps = 20
 
-u = 0.
 B = dyn_B.T.toarray()[0]
 for i in range(sim_steps):
 

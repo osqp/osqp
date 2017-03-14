@@ -366,13 +366,8 @@ static PyObject *OSQP_update_bounds(PyObject *self, PyObject *args){
 
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string,
-                          &PyArray_Type, &u)) {
-            return NULL;
-    }
-
-    // Parse arguments
-    if( !PyArg_ParseTuple(args, argparse_string,
-                          &PyArray_Type, &l)) {
+                          &PyArray_Type, &l),
+													&PyArray_Type, &u)) {
             return NULL;
     }
 
