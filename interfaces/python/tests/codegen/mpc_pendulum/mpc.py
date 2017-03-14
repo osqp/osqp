@@ -74,7 +74,7 @@ l = np.hstack([b(x, n, N), gl])
 u = np.hstack([b(x, n, N), gu])
 
 m = osqp.OSQP()
-m.setup(P, q, A, l, u, rho=1e-1, sigma=1e-4)
+m.setup(P, q, A, l, u, rho=1e-1, sigma=1e-5)
 
 # Generate the code
 try:
@@ -101,8 +101,9 @@ for i in range(sim_steps):
     u = sol[0][(N+1)*n]
     status_val = sol[2]
     numofiter = sol[3]
+    runtime = 1000*sol[4]
 
-    print(numofiter)
+    print("iter = %4d,    runtime = %7.4f ms" % (numofiter, runtime))
 
     # Compute details
     if status_val != 1:
