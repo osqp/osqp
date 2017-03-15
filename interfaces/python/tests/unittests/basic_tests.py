@@ -100,7 +100,7 @@ class basic_tests(unittest.TestCase):
         nptest.assert_array_almost_equal(res.info.obj_val, -80.0890909023583)
 
     def test_update_max_iter(self):
-        self.model.update_settings(max_iter=10)
+        self.model.update_settings(max_iter=80)
         res = self.model.solve()
 
         # Assert max iter reached

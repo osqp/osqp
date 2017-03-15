@@ -186,7 +186,7 @@ c_int osqp_solve(OSQPWorkspace * work){
     c_int iter;
     c_int compute_cost_function;  // Boolean whether to compute the cost function
                                   // in the loop
-    c_int can_check_termination;  // Boolean whether to check termination
+    c_int can_check_termination = 0;  // Boolean whether to check termination
 
     #if PRINTING
     c_int can_print; // Boolean whether you can print

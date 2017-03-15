@@ -26,6 +26,7 @@ class unboundedness_tests(unittest.TestCase):
                      'alpha': 1.6,
                      'max_iter': 2500,
                      'polish': False,
+                     'early_terminate_interval': 1,
                      'pol_refine_iter': 4}
 
     def test_unbounded_lp(self):
