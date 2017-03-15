@@ -252,7 +252,7 @@ c_int osqp_solve(OSQPWorkspace * work){
                     ((iter % PRINT_INTERVAL == 0) || (iter == 1));
 
         if (can_check_termination || can_print){ // Update status in either of these cases
-            // Update information 
+            // Update information
             update_info(work, iter, compute_cost_function, 0);
 
             if (can_print){
@@ -283,48 +283,11 @@ c_int osqp_solve(OSQPWorkspace * work){
 
 
 
-
-
-        // If early termination enabled update the information when we hit
-        // each early_terminate_interval number of iterations
-        // N.B. If printing and verbose are available, compute and
-        //      print the objective value.
-        // if (work->settings->early_terminate &&
-        //     iter % work->settings->early_terminate_interval == 0) {
-        //     #ifdef PRINTING
-        //     if (work->settings->verbose){
-        //         // Update information and compute also objective value
-        //         update_info(work, iter, 1, 0);
-        //         // Print summary
-        //         if ((iter % PRINT_INTERVAL == 0)||(iter == 1)){
-        //             print_summary(work->info);
-        //         }
-        //     } else {
-        //         // Update information without computing objective value
-        //         // N.B. Objective value is not needed during the algorithm
-        //         //      if we do not print it.
-        //         update_info(work, iter, 0, 0);
-        //     }
-        //     #else
-        //         // Never compute the objective value during the algorithm
-        //         // when PRINTING is off
-        //         update_info(work, iter, 0, 0);
-        //     #endif
-        //
-        //     // Check algorithm termination
-        //     if (check_termination(work)){
-        //         // Terminate algorithm
-        //         break;
-        //     }
-        // }
     }
 
     // Update information and check termination condition if it hasn't been done
     // during last iteration
     if (!can_check_termination){
-    // if (!work->settings->early_terminate ||
-    //     (iter - 1) % work->settings->early_terminate_interval != 0)) {
-    //     update_info(work, iter-1, 1, 0);
 
         /* Print summary */
         #ifdef PRINTING
@@ -336,22 +299,11 @@ c_int osqp_solve(OSQPWorkspace * work){
         check_termination(work);
     }
 
-
     // Compute objective value in case it was not
     // computed during the iterations
     if (!compute_cost_function){
         work->info->obj_val = compute_obj_val(work->data, work->x);
     }
-
-    // #ifdef PRINTING
-    // if (!work->settings->verbose)
-    //     work->info->obj_val = compute_obj_val(work->data, work->x);
-    // #else
-    // if (work->settings->early_terminate ||
-    //     (iter - 1) % work->settings->early_terminate_interval != 0))
-    //     work->info->obj_val = compute_obj_val(work->data, work->x);
-    // #endif
-
 
     /* Print summary for last iteration */
     #ifdef PRINTING
