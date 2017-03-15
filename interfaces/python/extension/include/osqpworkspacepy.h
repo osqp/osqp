@@ -48,7 +48,6 @@
      npy_intp n = (npy_intp)data->n;
      npy_intp n_plus_1 = n+1;
      npy_intp m = (npy_intp)data->m;
-     npy_intp m_plus_1 = m+1;
      npy_intp Pnzmax = (npy_intp)data->P->p[n];
      npy_intp Anzmax = (npy_intp)data->A->p[n];
      npy_intp Pnz = (npy_intp)data->P->nz;
@@ -63,7 +62,7 @@
      PyObject *Pp   = PyArray_SimpleNewFromData(1, &n_plus_1, int_type, data->P->p);
      PyObject *Pi   = PyArray_SimpleNewFromData(1, &Pnzmax, int_type, data->P->i);
      PyObject *Px   = PyArray_SimpleNewFromData(1, &Pnzmax, float_type, data->P->x);
-     PyObject *Ap   = PyArray_SimpleNewFromData(1, &m_plus_1, int_type, data->A->p);
+     PyObject *Ap   = PyArray_SimpleNewFromData(1, &n_plus_1, int_type, data->A->p);
      PyObject *Ai   = PyArray_SimpleNewFromData(1, &Anzmax, int_type, data->A->i);
      PyObject *Ax   = PyArray_SimpleNewFromData(1, &Anzmax, float_type, data->A->x);
      PyObject *q    = PyArray_SimpleNewFromData(1, &n, float_type, data->q);

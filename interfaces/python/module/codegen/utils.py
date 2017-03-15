@@ -20,8 +20,9 @@ def fill_scalar(f, scalar, name, scal_type):
     """
     f.write("%s = " % (name))
     if scal_type == 'c_float':
-        f.write("(c_float)")
-    f.write(str(scalar))
+        f.write("(c_float)%.20f" % scalar)
+    else:
+        f.write("%i" % scalar)
     f.write(";\n")
 
 def fill_vec(f, vec, name, vec_type):
@@ -95,6 +96,7 @@ def render_workspace(variables, output):
     priv = variables['priv']
     scaling = variables['scaling']
     settings = variables['settings']
+    import ipdb; ipdb.set_trace()
     # embedded_flag = variables['embedded_flag']
 
     # Open output file
