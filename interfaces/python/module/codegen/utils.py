@@ -96,7 +96,6 @@ def render_workspace(variables, output):
     priv = variables['priv']
     scaling = variables['scaling']
     settings = variables['settings']
-    import ipdb; ipdb.set_trace()
     # embedded_flag = variables['embedded_flag']
 
     # Open output file
