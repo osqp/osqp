@@ -17,6 +17,6 @@ m = osqp.OSQP()
 m.setup(P, q, A, l, u, rho=0.1)
 
 # Test workspace return
-m.codegen("code", 'Unix Makefiles', early_terminate=0, embedded_flag=1)
+m.codegen("code", 'Unix Makefiles', early_terminate=1, embedded_flag=1)
 
 # res = m.solve()

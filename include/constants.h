@@ -46,6 +46,7 @@ extern "C" {
 #endif
 
 #define EARLY_TERMINATE (1)
+#define EARLY_TERMINATE_INTERVAL (50)
 #define WARM_START (1)
 #define SCALING (1)
 

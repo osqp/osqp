@@ -169,7 +169,7 @@ class OSQP(object):
 
         It is possible to change: 'max_iter', 'eps_abs', 'eps_rel', 'alpha',
                                   'delta', 'polish', 'pol_refine_iter',
-                                  'verbose', 'early_terminate'
+                                  'verbose', 'early_terminate', 'early_terminate_interval'
         """
 
         # get arguments
@@ -182,6 +182,7 @@ class OSQP(object):
         pol_refine_iter = kwargs.pop('pol_refine_iter', None)
         verbose = kwargs.pop('verbose', None)
         early_terminate = kwargs.pop('early_terminate', None)
+        early_terminate_interval = kwargs.pop('early_terminate_interval', None)
         warm_start = kwargs.pop('warm_start', None)
 
         # update them
@@ -212,6 +213,9 @@ class OSQP(object):
         if early_terminate is not None:
             self._model.update_early_terminate(early_terminate)
 
+        if early_terminate_interval is not None:
+            self._model.update_early_terminate_interval(early_terminate_interval)
+
         if warm_start is not None:
             self._model.update_warm_start(warm_start)
 
@@ -224,6 +228,7 @@ class OSQP(object):
            pol_refine_iter is None and \
            verbose is None and \
            early_terminate is None and \
+           early_terminate_interval is None and \
            warm_start is None:
             ValueError("No updatable settings has been specified!")
 

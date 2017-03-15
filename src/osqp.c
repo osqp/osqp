@@ -184,6 +184,18 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
 c_int osqp_solve(OSQPWorkspace * work){
     c_int exitflag = 0;
     c_int iter;
+    c_int compute_cost_function;  // Boolean whether to compute the cost function
+                                  // in the loop
+    c_int can_check_termination;  // Boolean whether to check termination
+
+    #if PRINTING
+    c_int can_print; // Boolean whether you can print
+    compute_cost_function = work->settings->verbose; // Compute cost function only if verbose is on
+    #else
+    compute_cost_function = 0; // Never compute cost function during the iterations if no printing enabled
+    #endif
+
+
 
     // Check if workspace has been initialized
     if (!work){
@@ -229,29 +241,36 @@ c_int osqp_solve(OSQPWorkspace * work){
 
         /* End of ADMM Steps */
 
-        // If early termination enabled update the information
-        // N.B. If printing and verbose are available, compute and
-        //      print the objective value.
-        if (work->settings->early_terminate) {
-            #ifdef PRINTING
-            if (work->settings->verbose){
-                // Update information and compute also objective value
-                update_info(work, iter, 1, 0);
+
+        // Can we check for termination ?
+        can_check_termination = work->settings->early_terminate &&
+                                (iter % work->settings->early_terminate_interval == 0);
+
+        #ifdef PRINTING
+        // Can we print ?
+        can_print = work->settings->verbose &&
+                    ((iter % PRINT_INTERVAL == 0) || (iter == 1));
+
+        if (can_check_termination || can_print){ // Update status in either of these cases
+            // Update information 
+            update_info(work, iter, compute_cost_function, 0);
+
+            if (can_print){
                 // Print summary
-                if ((iter % PRINT_INTERVAL == 0)||(iter == 1)){
-                    print_summary(work->info);
-                }
-            } else {
-                // Update information without computing objective value
-                // N.B. Objective value is not needed during the algorithm
-                //      if we do not print it.
-                update_info(work, iter, 0, 0);
+                print_summary(work->info);
             }
-            #else
-                // Never compute the objective value during the algorithm
-                // when PRINTING is off
-                update_info(work, iter, 0, 0);
-            #endif
+
+            // Check algorithm termination
+            if (check_termination(work)){
+                // Terminate algorithm
+                break;
+            }
+
+        }
+        #else
+        if (can_check_termination){
+            // Update information and compute also objective value
+            update_info(work, iter, compute_cost_function, 0);
 
             // Check algorithm termination
             if (check_termination(work)){
@@ -259,12 +278,53 @@ c_int osqp_solve(OSQPWorkspace * work){
                 break;
             }
         }
+        #endif
+
+
+
+
+
+
+        // If early termination enabled update the information when we hit
+        // each early_terminate_interval number of iterations
+        // N.B. If printing and verbose are available, compute and
+        //      print the objective value.
+        // if (work->settings->early_terminate &&
+        //     iter % work->settings->early_terminate_interval == 0) {
+        //     #ifdef PRINTING
+        //     if (work->settings->verbose){
+        //         // Update information and compute also objective value
+        //         update_info(work, iter, 1, 0);
+        //         // Print summary
+        //         if ((iter % PRINT_INTERVAL == 0)||(iter == 1)){
+        //             print_summary(work->info);
+        //         }
+        //     } else {
+        //         // Update information without computing objective value
+        //         // N.B. Objective value is not needed during the algorithm
+        //         //      if we do not print it.
+        //         update_info(work, iter, 0, 0);
+        //     }
+        //     #else
+        //         // Never compute the objective value during the algorithm
+        //         // when PRINTING is off
+        //         update_info(work, iter, 0, 0);
+        //     #endif
+        //
+        //     // Check algorithm termination
+        //     if (check_termination(work)){
+        //         // Terminate algorithm
+        //         break;
+        //     }
+        // }
     }
 
-    // Update information and check termination condition if
-    // early terminate is chosen
-    if (!work->settings->early_terminate) {
-        update_info(work, iter-1, 1, 0);
+    // Update information and check termination condition if it hasn't been done
+    // during last iteration
+    if (!can_check_termination){
+    // if (!work->settings->early_terminate ||
+    //     (iter - 1) % work->settings->early_terminate_interval != 0)) {
+    //     update_info(work, iter-1, 1, 0);
 
         /* Print summary */
         #ifdef PRINTING
@@ -279,13 +339,18 @@ c_int osqp_solve(OSQPWorkspace * work){
 
     // Compute objective value in case it was not
     // computed during the iterations
-    #ifdef PRINTING
-    if (!work->settings->verbose)
+    if (!compute_cost_function){
         work->info->obj_val = compute_obj_val(work->data, work->x);
-    #else
-    if (work->settings->early_terminate)
-        work->info->obj_val = compute_obj_val(work->data, work->x);
-    #endif
+    }
+
+    // #ifdef PRINTING
+    // if (!work->settings->verbose)
+    //     work->info->obj_val = compute_obj_val(work->data, work->x);
+    // #else
+    // if (work->settings->early_terminate ||
+    //     (iter - 1) % work->settings->early_terminate_interval != 0))
+    //     work->info->obj_val = compute_obj_val(work->data, work->x);
+    // #endif
 
 
     /* Print summary for last iteration */
@@ -1021,6 +1086,28 @@ c_int osqp_update_early_terminate(OSQPWorkspace * work, c_int early_terminate_ne
 
     return 0;
 }
+
+
+/**
+ * Update early_terminate_interval setting
+ * @param  work                          Workspace
+ * @param  early_terminate_interval_new  New early_terminate_interval setting
+ * @return                               Exitflag
+ */
+c_int osqp_update_early_terminate_interval(OSQPWorkspace * work, c_int early_terminate_interval_new) {
+    // Check that early_terminate_interval is either 0 or 1
+    if (early_terminate_interval_new <= 0) {
+      #ifdef PRINTING
+      c_print("early_terminate_interval should be positive\n");
+      #endif
+      return 1;
+    }
+    // Update early_terminate_interval
+    work->settings->early_terminate_interval = early_terminate_interval_new;
+
+    return 0;
+}
+
 
 
 #ifndef EMBEDDED

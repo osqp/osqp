@@ -82,7 +82,7 @@ void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
             settings->eps_abs, settings->eps_rel, settings->eps_inf, settings->eps_unb, settings->rho, settings->sigma,
             settings->alpha, (int)settings->max_iter);
     if (settings->early_terminate)
-        c_print("          early_terminate: active\n");
+        c_print("          early_terminate: active (interval %i)\n", (int)settings->early_terminate_interval);
     else
         c_print("          early_terminate: inactive\n");
     if (settings->scaling)
@@ -196,6 +196,7 @@ void set_default_settings(OSQPSettings * settings) {
         #endif
 
         settings->early_terminate = EARLY_TERMINATE;     /* Evaluate termination criteria */
+        settings->early_terminate_interval = EARLY_TERMINATE_INTERVAL;     /* Evaluate termination at certain interval */
         settings->warm_start = WARM_START;     /* x equality constraint scaling: 1e-3 */
 
 }
@@ -223,6 +224,7 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
     new->pol_refine_iter = settings->pol_refine_iter;
     new->verbose = settings->verbose;
     new->early_terminate = settings->early_terminate;
+    new->early_terminate_interval = settings->early_terminate_interval;
     new->warm_start = settings->warm_start;
 
     return new;

@@ -133,8 +133,10 @@ typedef struct {
         c_int verbose; /* boolean, write out progress */
         #endif
 
-        c_int early_terminate; /* boolean, terminate if stopping criterion is met */
-        c_int warm_start; /* boolean, warm start */
+        c_int early_terminate;  // boolean, terminate if stopping criterion is met
+        c_int early_terminate_interval; // boolean, interval for checking termination,
+                                        // if early_terminate == 1.
+        c_int warm_start; // boolean, warm start
 } OSQPSettings;
 
 

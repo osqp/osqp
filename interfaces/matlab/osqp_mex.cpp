@@ -24,18 +24,19 @@ const char* OSQP_SETTINGS_FIELDS[] =
                                 "scaling_norm",   //c_int
                                 "scaling_iter",   //c_int
                                 //the following subset can be changed after initilization
-                                "max_iter",       //c_int
-                                "eps_abs",        //c_float
-                                "eps_rel",        //c_float
-                                "eps_inf",        //c_float
-                                "eps_unb",        //c_float
-                                "alpha",          //c_float
-                                "delta",          //c_float
-                                "polish",         //c_int
-                                "pol_refine_iter",//c_int
-                                "verbose",        //c_int
-                                "early_terminate",//c_int
-                                "warm_start"};    //c_int
+                                "max_iter",                     //c_int
+                                "eps_abs",                      //c_float
+                                "eps_rel",                      //c_float
+                                "eps_inf",                      //c_float
+                                "eps_unb",                      //c_float
+                                "alpha",                        //c_float
+                                "delta",                        //c_float
+                                "polish",                       //c_int
+                                "pol_refine_iter",              //c_int
+                                "verbose",                      //c_int
+                                "early_terminate",              //c_int
+                                "early_terminate_interval",     //c_int
+                                "warm_start"};                  //c_int
 
 
 
@@ -584,6 +585,7 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
   mxSetField(mxPtr, 0, "pol_refine_iter", mxCreateDoubleScalar(settings->pol_refine_iter));
   mxSetField(mxPtr, 0, "verbose",         mxCreateDoubleScalar(settings->verbose));
   mxSetField(mxPtr, 0, "early_terminate", mxCreateDoubleScalar(settings->early_terminate));
+  mxSetField(mxPtr, 0, "early_terminate_interval", mxCreateDoubleScalar(settings->early_terminate_interval));
   mxSetField(mxPtr, 0, "warm_start",      mxCreateDoubleScalar(settings->warm_start));
 
   return mxPtr;
@@ -613,6 +615,7 @@ void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
   settings->pol_refine_iter = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "pol_refine_iter"));
   settings->verbose         = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "verbose"));
   settings->early_terminate = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "early_terminate"));
+  settings->early_terminate_interval = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "early_terminate_interval"));
   settings->warm_start      = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "warm_start"));
 
 }
@@ -642,6 +645,8 @@ void copyUpdatedSettingsToWork(const mxArray* mxPtr ,OsqpData* osqpData){
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "verbose")));
   osqp_update_early_terminate(osqpData->work,
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "early_terminate")));
+  osqp_update_early_terminate_interval(osqpData->work,
+      (c_int)mxGetScalar(mxGetField(mxPtr, 0, "early_terminate_interval")));
   osqp_update_warm_start(osqpData->work,
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "warm_start")));
 }
