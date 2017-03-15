@@ -24,6 +24,7 @@ classdef unboundedness_tests < matlab.unittest.TestCase
             testCase.options.eps_abs = 1e-04;
             testCase.options.eps_rel = 1e-04;
             testCase.options.eps_inf = 1e-15;  % Focus only on unboundedness
+            testCase.options.early_terminate_interval = 1;
 
             % Setup tolerance
             testCase.tol = 1e-04;
@@ -93,7 +94,7 @@ classdef unboundedness_tests < matlab.unittest.TestCase
             testCase.solver = osqp;
             testCase.solver.setup(testCase.P, testCase.q, ...
                 testCase.A, testCase.l, testCase.u, testCase.options);
-            
+
             % Set warm starting points to avoid infeasibility detection at
             % first step
             x = 25*ones(2,1);

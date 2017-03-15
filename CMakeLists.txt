@@ -82,6 +82,15 @@ if (DLONG)
     add_definitions(-DDLONG)
 endif (DLONG)
 
+# Add matlab compiler flag
+# option(MATLAB_MEX_FILE "Is OSQP compiled for MATLAB interface" OFF)
+# if (MATLAB_MEX_FILE)
+#     find_package(Matlab)
+#     if (NOT Matlab_FOUND)
+#         message( FATAL_ERROR "You need MATLAB installed to generate interface" )
+#     endif ()
+# endif (MATLAB_MEX_FILE)
+
 
 # Set Compiler flags
 # ----------------------------------------------
@@ -175,7 +184,6 @@ add_library (osqpdirstatic STATIC ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:l
 # Create demo executable
 add_executable (osqp_demo_direct ${PROJECT_SOURCE_DIR}/examples/osqp_demo_direct.c)
 target_link_libraries (osqp_demo_direct osqpdir)
-
 
 
 # Add testing
