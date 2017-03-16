@@ -289,6 +289,9 @@ c_int osqp_solve(OSQPWorkspace * work){
     // during last iteration
     if (!can_check_termination){
 
+        /* Update information */
+        update_info(work, iter-1, compute_cost_function, 0);
+
         /* Print summary */
         #ifdef PRINTING
         if (work->settings->verbose)

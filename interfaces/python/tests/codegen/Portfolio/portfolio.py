@@ -152,7 +152,11 @@ def solve_loop(qp_matrices, solver='emosqp'):
             # Solve
             x, y, status, niter[i], time[i] = emosqp.solve()
 
-            print('Numer of iterations %i' % niter[i])
+            # DEBUG
+            # solve with gurobi
+            # import mathprogbasepy as mpbpy
+            # prob = mpbpy.QuadprogProblem(qp.P, q, qp.A, qp.l, qp.u)
+            # res = prob.solve(solver=mpbpy.GUROBI)
 
             # Check status
             if status != 1:
@@ -170,7 +174,7 @@ gammas = np.logspace(-2, 2, n_gamma)
 
 
 # Assets
-n_vec = np.array([50])
+n_vec = np.array([50, 100])
 
 # Factors
 k_vec = (n_vec / 10).astype(int)
