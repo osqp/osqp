@@ -3,6 +3,14 @@ from __future__ import division
 import numpy as np
 import scipy.sparse as sp
 from builtins import range
+import sys
+
+# Get autoreload working
+from IPython import get_ipython
+ipython = get_ipython()
+if '__IPYTHON__' in globals():
+    ipython.magic('load_ext autoreload')
+
 
 # Reload function for reloading emosqp module
 try:
@@ -136,21 +144,36 @@ def solve_loop(qp_matrices, solver='emosqp'):
         m = osqp.OSQP()
         m.setup(qp.P, qp.q_vecs[:, 0], qp.A, qp.l, qp.u, rho=0.1)
 
+
+
         # Generate the code
         m.codegen("code")
-        try:
-            reload(emosqp)
-        except NameError:
-            import emosqp
+
+        # import ipdb; ipdb.set_trace()
+        # is_emosqp_imported = True
+        # try:
+        #     emosqp
+        # except Exception:
+        #     is_emosqp_imported = False
+        # if is_emosqp_imported:
+        #     reload(emosqp)
+        # else:
+        #     import emosqp
+
+        # try:
+        #     reload(emosqp)
+        # except NameError:
+        # ipython.magic('aimport emosqp')
+        import emosqp as osqp_run
 
         for i in range(n_prob):
             q = qp.q_vecs[:, i]
 
             # Update linear cost
-            emosqp.update_lin_cost(q)
+            osqp_run.update_lin_cost(q)
 
             # Solve
-            x, y, status, niter[i], time[i] = emosqp.solve()
+            x, y, status, niter[i], time[i] = osqp_run.solve()
 
             # DEBUG
             # solve with gurobi

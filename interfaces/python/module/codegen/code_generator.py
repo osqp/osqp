@@ -11,10 +11,12 @@ from platform import system
 from . import utils
 
 
-def codegen(work, target_dir, project_type, embedded_flag):
+def codegen(work, target_dir, python_ext_name, project_type, embedded_flag):
     """
     Generate code
     """
+    # Initialize response if directories or files already exist
+    resp = None
 
     # Import OSQP path
     osqp_path = osqp.__path__[0]
@@ -22,6 +24,30 @@ def codegen(work, target_dir, project_type, embedded_flag):
     # Path of osqp module
     files_to_generate_path = os.path.join(osqp_path,
                                           'codegen', 'files_to_generate')
+
+    # Module extension
+    if system() == 'Linux' or system() == 'Darwin':
+        module_ext = '.so'
+    else:
+        module_ext = '.pyd'
+
+    # Check if interface already exists
+    if os.path.isdir(target_dir):
+        while resp != 'n' and resp != 'y':
+            resp = input("Directory \"%s\" already exists." % target_dir +
+                         " Do you want to replace it? [y/n] ")
+            if resp == 'y':
+                sh.rmtree(target_dir)
+
+    # Check if python module already exists
+    if any(glob('emosqp*' + module_ext)):
+        module_name = glob('emosqp*' + module_ext)[0]
+        while resp != 'n' and resp != 'y':
+            resp = input("Python module \"%s\" already exists." %
+                         module_name +
+                         " Do you want to replace it? [y/n] ")
+            if resp == 'y':
+                os.remove(module_name)
 
     # Make target directory
     print("Creating target directories... \t\t", end='')
@@ -56,7 +82,8 @@ def codegen(work, target_dir, project_type, embedded_flag):
                      'settings':        work['settings'],
                      'priv':            work['priv'],
                      'scaling':         work['scaling'],
-                     'embedded_flag':   embedded_flag}
+                     'embedded_flag':   embedded_flag,
+                     'python_ext_name': python_ext_name}
 
 
     # Render workspace
@@ -77,8 +104,6 @@ def codegen(work, target_dir, project_type, embedded_flag):
     sh.copy(os.path.join(files_to_generate_path, 'emosqpmodule.c'),
             target_src_dir)
 
-
-
     print("[done]")
 
     # Compile python interface
@@ -91,11 +116,12 @@ def codegen(work, target_dir, project_type, embedded_flag):
     # Copy compiled solver
     print("Copying code-generated Python solver to current directory... \t\t",
           end='')
-    if system() == 'Linux' or system() == 'Darwin':
-        module_ext = '.so'
-    else:
-        module_ext = '.pyd'
-    sh.copy(glob('emosqp*' + module_ext)[0], current_dir)
+    module_name = glob('emosqp*' + module_ext)
+    if not any(module_name):
+        raise ValueError('No python module generated!' +
+                         'Some errors have occurred.')
+    module_name = module_name[0]
+    sh.copy(module_name, current_dir)
     os.chdir(current_dir)
     print("[done]")
 

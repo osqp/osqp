@@ -273,13 +273,11 @@ class OSQP(object):
             raise ValueError("Unrecognized fields")
 
     def codegen(self, folder, project_type="Makefile", embedded_flag=1,
-                early_terminate=1):
+                python_ext_name='emosqp'):
         """
         Generate embeddable C code for the problem
         """
 
-        # Set early_terminate to the defined value
-        self.update_settings(early_terminate=early_terminate)
 
         # Convert workspace to python
         print("Getting workspace from OSQP object... \t", end='')
@@ -292,7 +290,9 @@ class OSQP(object):
             elif system() == 'Linux' or system() == 'Darwin':
                 project_type = "Unix Makefiles"
 
+
         # Generate code with codegen module
-        cg.codegen(work, folder, project_type, embedded_flag)
+        cg.codegen(work, folder, python_ext_name, project_type,
+                   embedded_flag)
 
         # return work

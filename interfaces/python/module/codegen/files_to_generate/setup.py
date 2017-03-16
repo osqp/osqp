@@ -42,18 +42,18 @@ include_dirs = [get_include(),                 # Numpy includes
 '''
 Source files
 '''
-sources_files = ['emosqpmodule.c']                     # Python wrapper
+sources_files = ['PYTHON_EXT_NAMEmodule.c']                     # Python wrapper
 sources_files += glob(os.path.join('osqp', '*.c'))     # OSQP files
 
 
-emosqp = Extension('emosqp',
+PYTHON_EXT_NAME = Extension('PYTHON_EXT_NAME',
                           define_macros=define_macros,
                           include_dirs=include_dirs,
                           sources=sources_files,
                           extra_compile_args=compile_args)
 
 
-setup(name='emosqp',
+setup(name='PYTHON_EXT_NAME',
       version='0.0.0',
       author='Bartolomeo Stellato, Goran Banjac',
       description='This is the Python module for embedded OSQP: ' +
