@@ -11,7 +11,7 @@ from platform import system
 from . import utils
 
 
-def codegen(work, target_dir, python_ext_name, project_type, embedded_flag):
+def codegen(work, target_dir, python_ext_name, project_type, embedded):
     """
     Generate code
     """
@@ -40,7 +40,7 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded_flag):
                 sh.rmtree(target_dir)
 
     # Check if python module already exists
-    if any(glob('emosqp*' + module_ext)):
+    if any(glob('%s*' % python_ext_name + module_ext)):
         module_name = glob('emosqp*' + module_ext)[0]
         while resp != 'n' and resp != 'y':
             resp = input("Python module \"%s\" already exists." %
@@ -82,7 +82,7 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded_flag):
                      'settings':        work['settings'],
                      'priv':            work['priv'],
                      'scaling':         work['scaling'],
-                     'embedded_flag':   embedded_flag,
+                     'embedded_flag':   embedded,
                      'python_ext_name': python_ext_name}
 
 
@@ -94,15 +94,17 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded_flag):
     utils.render_setuppy(template_vars,
                          os.path.join(target_src_dir, 'setup.py'))
 
+    # Render emosqpmodule.c
+    utils.render_emosqpmodule(template_vars,
+                              os.path.join(target_src_dir,
+                                           '%smodule.c' % python_ext_name))
+
     # Copy example.c
     sh.copy(os.path.join(files_to_generate_path, 'example.c'), target_src_dir)
 
     # Copy CMakelists.txt
     sh.copy(os.path.join(files_to_generate_path, 'CMakeLists.txt'), target_dir)
 
-    # Copy emosqpmodule.c
-    sh.copy(os.path.join(files_to_generate_path, 'emosqpmodule.c'),
-            target_src_dir)
 
     print("[done]")
 
@@ -116,9 +118,9 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded_flag):
     # Copy compiled solver
     print("Copying code-generated Python solver to current directory... \t\t",
           end='')
-    module_name = glob('emosqp*' + module_ext)
+    module_name = glob('%s*' % python_ext_name + module_ext)
     if not any(module_name):
-        raise ValueError('No python module generated!' +
+        raise ValueError('No python module generated! ' +
                          'Some errors have occurred.')
     module_name = module_name[0]
     sh.copy(module_name, current_dir)
@@ -133,7 +135,7 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded_flag):
     # Generate project
     # cwd = os.getcwd()
     # os.chdir(target_dir)
-    # call(["cmake", "-DEMBEDDED=%i" % embedded_flag, ".."])
+    # call(["cmake", "-DEMBEDDED=%i" % embedded, ".."])
     # os.chdir(cwd)
 
     #render(target_src_dir, template_vars, 'osqp_cg_data.c.jinja',

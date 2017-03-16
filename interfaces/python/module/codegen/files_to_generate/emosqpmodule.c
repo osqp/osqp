@@ -411,7 +411,7 @@ static PyObject *OSQP_update_bounds(PyObject *self, PyObject *args){
 
 
 
-static PyMethodDef emosqp_methods[] = {
+static PyMethodDef PYTHON_EXT_NAME_methods[] = {
         {"solve", (PyCFunction)OSQP_solve, METH_NOARGS, "Solve QP"},
         {"update_lin_cost", (PyCFunction)OSQP_update_lin_cost, METH_VARARGS, "Update linear cost"},
         {"update_lower_bound", (PyCFunction)OSQP_update_lower_bound, METH_VARARGS, "Update lower bound"},
@@ -425,10 +425,10 @@ static PyMethodDef emosqp_methods[] = {
 /* Module initialization for Python 3*/
  #if PY_MAJOR_VERSION >= 3
 static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT, "emosqp",    /* m_name */
+        PyModuleDef_HEAD_INIT, "PYTHON_EXT_NAME",    /* m_name */
         "Embedded OSQP solver",             /* m_doc */
         -1,                                 /* m_size */
-        emosqp_methods,                     /* m_methods */
+        PYTHON_EXT_NAME_methods,                     /* m_methods */
         NULL,                               /* m_reload */
         NULL,                               /* m_traverse */
         NULL,                               /* m_clear */
@@ -446,7 +446,7 @@ static PyObject * moduleinit(void){
     #if PY_MAJOR_VERSION >= 3
         m = PyModule_Create(&moduledef);
     #else
-        m = Py_InitModule3("emosqp", emosqp_methods, "Embedded OSQP solver");
+        m = Py_InitModule3("PYTHON_EXT_NAME", PYTHON_EXT_NAME_methods, "Embedded OSQP solver");
     #endif
         if (m == NULL)
                 return NULL;
@@ -459,9 +459,9 @@ static PyObject * moduleinit(void){
 
 // Init Osqp Internal module
 #if PY_MAJOR_VERSION >= 3
-PyMODINIT_FUNC PyInit_emosqp(void)
+PyMODINIT_FUNC PyInit_PYTHON_EXT_NAME(void)
 #else
-PyMODINIT_FUNC initemosqp(void)
+PyMODINIT_FUNC initPYTHON_EXT_NAME(void)
 #endif
 {
 

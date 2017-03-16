@@ -81,12 +81,30 @@ def render_setuppy(variables, output):
     filedata = f.read()
     f.close()
 
-    newdata = filedata.replace("EMBEDDED_FLAG", str(embedded_flag))
-    newdata = filedata.replace("PYTHON_EXT_NAME", str(python_ext_name))
+    filedata = filedata.replace("EMBEDDED_FLAG", str(embedded_flag))
+    filedata = filedata.replace("PYTHON_EXT_NAME", str(python_ext_name))
 
 
     f = open(output,'w')
-    f.write(newdata)
+    f.write(filedata)
+    f.close()
+
+def render_emosqpmodule(variables, output):
+    """
+    Render emosqpmodule.c file
+    """
+
+    python_ext_name = variables['python_ext_name']
+
+
+    f = open(os.path.join(files_to_generate_path, 'emosqpmodule.c'))
+    filedata = f.read()
+    f.close()
+
+    filedata = filedata.replace("PYTHON_EXT_NAME", str(python_ext_name))
+
+    f = open(output, 'w')
+    f.write(filedata)
     f.close()
 
 

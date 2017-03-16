@@ -272,7 +272,7 @@ class OSQP(object):
         if x is None and y is None:
             raise ValueError("Unrecognized fields")
 
-    def codegen(self, folder, project_type="Makefile", embedded_flag=1,
+    def codegen(self, folder, project_type="Makefile", embedded=1,
                 python_ext_name='emosqp'):
         """
         Generate embeddable C code for the problem
@@ -293,6 +293,6 @@ class OSQP(object):
 
         # Generate code with codegen module
         cg.codegen(work, folder, python_ext_name, project_type,
-                   embedded_flag)
+                   embedded)
 
         # return work

@@ -60,4 +60,4 @@ setup(name='PYTHON_EXT_NAME',
                   'Operator Splitting solver for Quadratic Programs.',
       install_requires=["numpy >= 1.7", "future"],
       license='Apache 2.0',
-      ext_modules=[emosqp])
+      ext_modules=[PYTHON_EXT_NAME])
