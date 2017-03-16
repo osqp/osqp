@@ -11,7 +11,8 @@ from platform import system
 from . import utils
 
 
-def codegen(work, target_dir, python_ext_name, project_type, embedded):
+def codegen(work, target_dir, python_ext_name, project_type, embedded,
+            force_rewrite):
     """
     Generate code
     """
@@ -31,26 +32,33 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded):
     else:
         module_ext = '.pyd'
 
-    # Check if interface already exists
-    if os.path.isdir(target_dir):
-        while resp != 'n' and resp != 'y':
-            resp = input("Directory \"%s\" already exists." % target_dir +
-                         " Do you want to replace it? [y/n] ")
-            if resp == 'y':
+        # Check if interface already exists
+        if os.path.isdir(target_dir):
+            if force_rewrite:
                 sh.rmtree(target_dir)
+            else:
+                while resp != 'n' and resp != 'y':
+                    resp = input("Directory \"%s\" already exists." %
+                                 target_dir +
+                                 " Do you want to replace it? [y/n] ")
+                    if resp == 'y':
+                        sh.rmtree(target_dir)
 
-    # Check if python module already exists
-    if any(glob('%s*' % python_ext_name + module_ext)):
-        module_name = glob('emosqp*' + module_ext)[0]
-        while resp != 'n' and resp != 'y':
-            resp = input("Python module \"%s\" already exists." %
-                         module_name +
-                         " Do you want to replace it? [y/n] ")
-            if resp == 'y':
+        # Check if python module already exists
+        if any(glob('%s*' % python_ext_name + module_ext)):
+            module_name = glob('emosqp*' + module_ext)[0]
+            if force_rewrite:
                 os.remove(module_name)
+            else:
+                while resp != 'n' and resp != 'y':
+                    resp = input("Python module \"%s\" already exists." %
+                                 module_name +
+                                 " Do you want to replace it? [y/n] ")
+                    if resp == 'y':
+                        os.remove(module_name)
 
     # Make target directory
-    print("Creating target directories... \t\t", end='')
+    print("Creating target directories... \t\t\t\t\t", end='')
     target_dir = os.path.abspath(target_dir)
     target_include_dir = os.path.join(target_dir, 'include')
     target_src_dir = os.path.join(target_dir, 'src')
@@ -64,7 +72,7 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded):
     print("[done]")
 
     # Copy source files to target directory
-    print("Copying OSQP sources... \t\t", end='')
+    print("Copying OSQP sources... \t\t\t\t\t", end='')
     c_sources = glob(os.path.join(osqp_path, 'codegen', 'sources',
                                   'src', '*.c'))
     for source in c_sources:
@@ -77,7 +85,7 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded):
     print("[done]")
 
     # Variables created from the workspace
-    print("Generating customized code... \t\t", end='')
+    print("Generating customized code... \t\t\t\t\t", end='')
     template_vars = {'data':            work['data'],
                      'settings':        work['settings'],
                      'priv':            work['priv'],
@@ -109,14 +117,14 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded):
     print("[done]")
 
     # Compile python interface
-    print("Compiling Python wrapper... \t\t", end='')
+    print("Compiling Python wrapper... \t\t\t\t\t", end='')
     current_dir = os.getcwd()
     os.chdir(target_src_dir)
-    call(['python', 'setup.py', 'build_ext', '--inplace', '--quiet'])
+    call(['python', 'setup.py', '--quiet', 'build_ext', '--inplace'])
     print("[done]")
 
     # Copy compiled solver
-    print("Copying code-generated Python solver to current directory... \t\t",
+    print("Copying code-generated Python solver to current directory... \t",
           end='')
     module_name = glob('%s*' % python_ext_name + module_ext)
     if not any(module_name):

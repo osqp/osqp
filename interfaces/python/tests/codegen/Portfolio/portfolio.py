@@ -5,23 +5,9 @@ import scipy.sparse as sp
 from builtins import range
 import sys
 
-# Get autoreload working
-from IPython import get_ipython
-ipython = get_ipython()
-if '__IPYTHON__' in globals():
-    ipython.magic('load_ext autoreload')
 
-
-# Reload function for reloading emosqp module
-try:
-    reload  # Python 2.7
-except NameError:
-    try:
-        from importlib import reload  # Python 3.4+
-    except ImportError:
-        from imp import reload  # Python 3.0 - 3.3
-
-
+# For importing python modules from string
+import importlib
 
 # Import osqp
 import osqp
@@ -40,12 +26,14 @@ class QPmatrices(object):
     q_vecs is the matrix containing different linear costs
     """
     def __init__(self, P, q_vecs,
-                 A, l, u):
+                 A, l, u, n, k):
         self.P = P
         self.q_vecs = q_vecs
         self.A = A
         self.l = l
         self.u = u
+        self.n = n
+        self.k = k
 
 
 class Statistics(object):
@@ -120,15 +108,19 @@ def gen_qp_matrices(k, n, gammas):
                                       np.append(-mu / gamma, np.zeros(k))))
 
     # Return QP matrices
-    return QPmatrices(P, q_vecs, A, l, u)
+    return QPmatrices(P, q_vecs, A, l, u, n, k)
 
 
 def solve_loop(qp_matrices, solver='emosqp'):
     """
     Solve portfolio optimization loop for all gammas
     """
+
     # Shorter name for qp_matrices
     qp = qp_matrices
+
+    print('\nSolving portfolio problem loop for n = %d and solver %s' %
+          (qp.n, solver))
 
     # Get number of problems to solve
     n_prob = qp.q_vecs.shape[1]
@@ -142,38 +134,25 @@ def solve_loop(qp_matrices, solver='emosqp'):
     if solver == 'emosqp':
         # Pass the data to OSQP
         m = osqp.OSQP()
-        m.setup(qp.P, qp.q_vecs[:, 0], qp.A, qp.l, qp.u, rho=0.1)
+        m.setup(qp.P, qp.q_vecs[:, 0], qp.A, qp.l, qp.u, rho=0.1, verbose=False)
 
-
+        # Get extension name
+        module_name = 'emosqpn%s' % str(qp.n)
 
         # Generate the code
-        m.codegen("code")
+        m.codegen("code", python_ext_name=module_name, force_rewrite=True)
 
-        # import ipdb; ipdb.set_trace()
-        # is_emosqp_imported = True
-        # try:
-        #     emosqp
-        # except Exception:
-        #     is_emosqp_imported = False
-        # if is_emosqp_imported:
-        #     reload(emosqp)
-        # else:
-        #     import emosqp
-
-        # try:
-        #     reload(emosqp)
-        # except NameError:
-        # ipython.magic('aimport emosqp')
-        import emosqp as osqp_run
+        # Import module
+        emosqp = importlib.import_module(module_name)
 
         for i in range(n_prob):
             q = qp.q_vecs[:, i]
 
             # Update linear cost
-            osqp_run.update_lin_cost(q)
+            emosqp.update_lin_cost(q)
 
             # Solve
-            x, y, status, niter[i], time[i] = osqp_run.solve()
+            x, y, status, niter[i], time[i] = emosqp.solve()
 
             # DEBUG
             # solve with gurobi
@@ -201,6 +180,8 @@ n_vec = np.array([50, 100])
 
 # Factors
 k_vec = (n_vec / 10).astype(int)
+
+#
 
 for i in range(len(n_vec)):
     # Generate QP matrices
