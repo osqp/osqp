@@ -273,7 +273,7 @@ class OSQP(object):
             raise ValueError("Unrecognized fields")
 
     def codegen(self, folder, project_type="Makefile", embedded_flag=1,
-                early_terminate=0):
+                early_terminate=1):
         """
         Generate embeddable C code for the problem
         """
