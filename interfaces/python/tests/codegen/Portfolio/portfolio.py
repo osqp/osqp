@@ -12,8 +12,21 @@ import importlib
 # Import osqp
 import osqp
 
+# Import qpoases
+import qpoases
+
 # Plotting
 import matplotlib.pylab as plt
+plt.rc('axes', labelsize=20)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=15)   # fontsize of the tick labels
+plt.rc('ytick', labelsize=15)   # fontsize of the tick labels
+plt.rc('legend', fontsize=15)   # legend fontsize
+plt.rc('text', usetex=True)     # use latex
+plt.rc('font', family='serif')
+
+colors = { 'b': '#1f77b4',
+           'g': '#2ca02c',
+           'o': '#ff7f0e'}
 
 # Iterations
 import tqdm
@@ -154,6 +167,10 @@ def solve_loop(qp_matrices, solver='emosqp'):
             # Solve
             x, y, status, niter[i], time[i] = emosqp.solve()
 
+            # Check if status correct
+            if status != 1:
+                raise ValueError('OSQP did not solve the problem!')
+
             # DEBUG
             # solve with gurobi
             # import mathprogbasepy as mpbpy
@@ -164,8 +181,57 @@ def solve_loop(qp_matrices, solver='emosqp'):
             if status != 1:
                 raise ValueError('OSQP did not solve the problem')
 
-        # Return statistics
-        return Statistics(time), Statistics(niter)
+    elif solver == 'qpoases':
+
+        n_dim = qp.P.shape[0]
+        m_dim = qp.A.shape[0]
+
+        # Initialize cpu time
+        qpoases_cpu_time = np.array([200.])
+
+        # Get first vector q
+        q = qp.q_vecs[:, 0]
+
+        # Number of working set recalculations
+        nWSR = np.array([1000])
+
+        # Initialize qpOASES
+        qpoases_m = qpoases.PyQProblem(n_dim, m_dim)
+        options = qpoases.PyOptions()
+        options.printLevel = qpoases.PyPrintLevel.NONE
+        qpoases_m.setOptions(options)
+        qpoases_m.init(qp.P.todense(), q, qp.A.todense(),
+                       None, None, qp.l, qp.u,
+                       nWSR, qpoases_cpu_time)
+
+
+
+
+        for i in range(n_prob):
+            q = qp.q_vecs[:, i]
+
+            # Reset cpu time
+            qpoases_cpu_time = np.array([200.])
+
+            # Reset number of of working set recalculations
+            nWSR = np.array([1000])
+
+            # Solve new hot started problem
+            qpoases_m.hotstart(q, None, None,
+                               qp.l, qp.u, nWSR, qpoases_cpu_time)
+
+            # Save time
+            time[i] = qpoases_cpu_time[0]
+
+            # Save number of iterations
+            niter[i] = nWSR[0]
+
+    else:
+        raise ValueError('Solver not understood')
+
+
+    # Return statistics
+    return Statistics(time), Statistics(niter)
 
 '''
 Solve problems
@@ -176,44 +242,45 @@ gammas = np.logspace(-2, 2, n_gamma)
 
 
 # Assets
-n_vec = np.array([50, 100])
+n_vec = np.array([100, 200, 300, 400])
 
 # Factors
 k_vec = (n_vec / 10).astype(int)
 
-#
+
+# Define statistics for osqp and qpoases
+osqp_timing = []
+osqp_iter = []
+qpoases_timing = []
+qpoases_iter = []
+
 
 for i in range(len(n_vec)):
     # Generate QP matrices
     qp_matrices = gen_qp_matrices(k_vec[i], n_vec[i], gammas)
 
-    # Solve loop
-    stats_time, stats_niter = solve_loop(qp_matrices, 'emosqp')
+    # Solve loop with emosqp
+    timing, niter = solve_loop(qp_matrices, 'emosqp')
+    osqp_timing.append(timing)
+    osqp_iter.append(niter)
+
+    # Solving loop with qpOASES
+    timing, niter = solve_loop(qp_matrices, 'qpoases')
+    qpoases_timing.append(timing)
+    qpoases_iter.append(niter)
 
 
+# Plot timings
+osqp_avg = np.array([x.avg for x in osqp_timing])
+qpoases_avg = np.array([x.avg for x in qpoases_timing])
 
-# for i in range(n_gamma):
-#     # Update linear cost
-#     q_new = np.append(-mu / gammas[i], np.zeros(k))
-#     emosqp.update_lin_cost(q_new)
-#
-#     # Solve
-#     sol = emosqp.solve()
-#     x = sol[0]
-#     y = sol[1]
-#     status_val = sol[2]
-#     numofiter = sol[3]
-#
-#     # Compute details
-#     if status_val == 1:
-#         status_string = 'Solved'
-#     else:
-#         status_string = 'NOT Solved'
-#     objval = .5 * np.dot(x, P.dot(x)) + np.dot(q_new, x)
-#
-#     # Print details
-#     print("Risk aversion parameter:  %f" % gammas[i])
-#     print("Status:                   %s" % status_string)
-#     print("Number of iterations:     %d" % numofiter)
-#     print("Objective value:          %f" % objval)
-#     print(" ")
+plt.figure()
+ax = plt.gca()
+plt.semilogy(n_vec, osqp_avg, color=colors['b'], label='OSQP')
+plt.semilogy(n_vec, qpoases_avg, color=colors['o'], label='qpOASES')
+plt.legend()
+plt.grid()
+ax.set_xlabel(r'Number of assets $n$')
+ax.set_ylabel(r'Time [s]')
+plt.tight_layout()
+plt.show(block=False)
