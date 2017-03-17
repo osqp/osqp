@@ -32,30 +32,30 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
     else:
         module_ext = '.pyd'
 
-        # Check if interface already exists
-        if os.path.isdir(target_dir):
-            if force_rewrite:
-                sh.rmtree(target_dir)
-            else:
-                while resp != 'n' and resp != 'y':
-                    resp = input("Directory \"%s\" already exists." %
-                                 target_dir +
-                                 " Do you want to replace it? [y/n] ")
-                    if resp == 'y':
-                        sh.rmtree(target_dir)
+    # Check if interface already exists
+    if os.path.isdir(target_dir):
+        if force_rewrite:
+            sh.rmtree(target_dir)
+        else:
+            while resp != 'n' and resp != 'y':
+                resp = input("Directory \"%s\" already exists." %
+                             target_dir +
+                             " Do you want to replace it? [y/n] ")
+                if resp == 'y':
+                    sh.rmtree(target_dir)
 
-        # Check if python module already exists
-        if any(glob('%s*' % python_ext_name + module_ext)):
-            module_name = glob('emosqp*' + module_ext)[0]
-            if force_rewrite:
-                os.remove(module_name)
-            else:
-                while resp != 'n' and resp != 'y':
-                    resp = input("Python module \"%s\" already exists." %
-                                 module_name +
-                                 " Do you want to replace it? [y/n] ")
-                    if resp == 'y':
-                        os.remove(module_name)
+    # Check if python module already exists
+    if any(glob('%s*' % python_ext_name + module_ext)):
+        module_name = glob('%s*' % python_ext_name + module_ext)[0]
+        if force_rewrite:
+            os.remove(module_name)
+        else:
+            while resp != 'n' and resp != 'y':
+                resp = input("Python module \"%s\" already exists." %
+                             module_name +
+                             " Do you want to replace it? [y/n] ")
+                if resp == 'y':
+                    os.remove(module_name)
 
     # Make target directory
     print("Creating target directories... \t\t\t\t\t", end='')
