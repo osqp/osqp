@@ -1,13 +1,10 @@
 #include "stdio.h"
-#include "osqp.h"
-
-#include "workspace.h"
 #include <string.h>
 
-int main(int argc, char **argv) {
+#include "workspace.h"
+#include "osqp.h"
 
-    // Load problem
-    load_workspace(&workspace);
+int main(int argc, char **argv) {
 
     // Solve Problem
     osqp_solve(&workspace);

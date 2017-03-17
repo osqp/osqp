@@ -467,8 +467,6 @@ PyMODINIT_FUNC initPYTHON_EXT_NAME(void)
 
         import_array(); /* for numpy arrays */
 
-        load_workspace(&workspace); // Load OSQP workspace
-
         // Module initialization is not a global variable in
         // Python 3
         #if PY_MAJOR_VERSION >= 3
