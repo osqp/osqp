@@ -16,8 +16,7 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
     """
     Generate code
     """
-    # Initialize response if directories or files already exist
-    resp = None
+
 
     # Import OSQP path
     osqp_path = osqp.__path__[0]
@@ -33,6 +32,7 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
         module_ext = '.pyd'
 
     # Check if interface already exists
+    resp = None   # Initialize response
     if os.path.isdir(target_dir):
         if force_rewrite:
             sh.rmtree(target_dir)
@@ -45,6 +45,7 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
                     sh.rmtree(target_dir)
 
     # Check if python module already exists
+    resp = None  # Initialize response
     if any(glob('%s*' % python_ext_name + module_ext)):
         module_name = glob('%s*' % python_ext_name + module_ext)[0]
         if force_rewrite:
@@ -92,7 +93,6 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
                      'scaling':         work['scaling'],
                      'embedded_flag':   embedded,
                      'python_ext_name': python_ext_name}
-
 
     # Render workspace
     utils.render_workspace(template_vars,

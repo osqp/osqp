@@ -95,13 +95,13 @@ def write_mat(f, mat, name):
     # import ipdb; ipdb.set_trace()
 
     f.write("csc %s = {" % name)
-    f.write("%d, " % mat['nzmax'])
-    f.write("%d, " % mat['m'])
-    f.write("%d, " % mat['n'])
-    f.write("%s_p, " % name)
-    f.write("%s_i, " % name)
-    f.write("%s_x, " % name)
-    f.write("%d};\n" % mat['nz'])
+    f.write(".nzmax = %d, " % mat['nzmax'])
+    f.write(".m = %d, " % mat['m'])
+    f.write(".n = %d, " % mat['n'])
+    f.write(".p = %s_p, " % name)
+    f.write(".i = %s_i, " % name)
+    f.write(".x = %s_x, " % name)
+    f.write(".nz = %d};\n" % mat['nz'])
 
 
 def write_data(f, data, name):
@@ -124,9 +124,9 @@ def write_data(f, data, name):
 
     # Define data structure
     f.write("OSQPData data = {")
-    f.write("%d, " % data['n'])
-    f.write("%d, " % data['m'])
-    f.write("&Pdata, &Adata, qdata, ldata, udata")
+    f.write(".n = %d, " % data['n'])
+    f.write(".m = %d, " % data['m'])
+    f.write(".P = &Pdata, .A = &Adata, .q = qdata, .l = ldata, .u = udata")
     f.write("};\n\n")
 
 
@@ -137,22 +137,23 @@ def write_settings(f, settings, name):
     """
     f.write("// Define settings structure\n")
     f.write("OSQPSettings %s = {" % name)
-    f.write("%.20f, " % settings['rho'])
-    f.write("%.20f, " % settings['sigma'])
-    f.write("%d, " % settings['scaling'])
+    f.write(".rho = %.20f, " % settings['rho'])
+    f.write(".sigma = %.20f, " % settings['sigma'])
+    f.write(".scaling = %d, " % settings['scaling'])
 
     # TODO: Add scaling_norm and scaling_iter for EMBEDDED = 2
 
-    f.write("%d, " % settings['max_iter'])
-    f.write("%.20f, " % settings['eps_abs'])
-    f.write("%.20f, " % settings['eps_rel'])
-    f.write("%.20f, " % settings['eps_inf'])
-    f.write("%.20f, " % settings['eps_unb'])
-    f.write("%.20f, " % settings['alpha'])
+    f.write(".max_iter = %d, " % settings['max_iter'])
+    f.write(".eps_abs = %.20f, " % settings['eps_abs'])
+    f.write(".eps_rel = %.20f, " % settings['eps_rel'])
+    f.write(".eps_inf = %.20f, " % settings['eps_inf'])
+    f.write(".eps_unb = %.20f, " % settings['eps_unb'])
+    f.write(".alpha = %.20f, " % settings['alpha'])
 
-    f.write("%d, " % settings['early_terminate'])
-    f.write("%d, " % settings['early_terminate_interval'])
-    f.write("%d" % settings['warm_start'])
+    f.write(".early_terminate = %d, " % settings['early_terminate'])
+    f.write(".early_terminate_interval = %d, " %
+            settings['early_terminate_interval'])
+    f.write(".warm_start = %d" % settings['warm_start'])
 
     f.write("};\n\n")
 
@@ -167,7 +168,8 @@ def write_scaling(f, scaling, name):
     write_vec(f, scaling['E'], 'Escaling', 'c_float')
     write_vec(f, scaling['Einv'], 'Einvscaling', 'c_float')
     f.write("OSQPScaling %s = " % name)
-    f.write("{Dscaling, Dinvscaling, Escaling, Einvscaling};\n\n")
+    f.write("{.D = Dscaling, .E = Escaling, .Dinv = Dinvscaling," +
+            " .Einv = Einvscaling};\n\n")
 
 
 def write_private(f, priv, name):
@@ -182,7 +184,8 @@ def write_private(f, priv, name):
     f.write("c_float priv_bp[%d];\n" % (len(priv['Dinv'])))  # Empty rhs
 
     f.write("Priv %s = " % name)
-    f.write("{&priv_L, priv_Dinv, priv_P, priv_bp};\n\n")
+    f.write("{.L = &priv_L, .Dinv = priv_Dinv," +
+            " .P = priv_P, .bp = priv_bp};\n\n")
 
 
 def write_solution(f, data, name):
@@ -192,7 +195,7 @@ def write_solution(f, data, name):
     f.write("// Define solution\n")
     f.write("c_float xsolution[%d];\n" % data['n'])
     f.write("c_float ysolution[%d];\n\n" % data['m'])
-    f.write("OSQPSolution %s = {xsolution, ysolution};\n\n" % name)
+    f.write("OSQPSolution %s = {.x = xsolution, .y = ysolution};\n\n" % name)
 
 
 def write_info(f, name):
@@ -226,14 +229,17 @@ def write_workspace(f, data, name):
     f.write("c_float work_E_temp[%d];\n\n" % data['m'])
 
     f.write("OSQPWorkspace %s = {\n" % name)
-    f.write("&data, &priv,\n")
-    f.write("work_x, work_y, work_x, work_xz_tilde,\n")
-    f.write("work_x_prev, work_z_prev,\n")
-    f.write("work_delta_y, work_Atdelta_y,\n")
-    f.write("work_delta_x, work_Pdelta_x, work_Adelta_x,\n")
-    f.write("work_P_x, work_A_x,\n")
-    f.write("work_D_temp, work_E_temp,\n")
-    f.write("&settings, &scaling, &solution, &info};\n\n")
+    f.write(".data = &data, .priv = &priv,\n")
+    f.write(".x = work_x, .y = work_y, .z = work_z," +
+            " .xz_tilde = work_xz_tilde,\n")
+    f.write(".x_prev = work_x_prev, .z_prev = work_z_prev,\n")
+    f.write(".delta_y = work_delta_y, .Atdelta_y = work_Atdelta_y,\n")
+    f.write(".delta_x = work_delta_x, .Pdelta_x = work_Pdelta_x, " +
+            ".Adelta_x = work_Adelta_x,\n")
+    f.write(".P_x = work_P_x, .A_x = work_A_x,\n")
+    f.write(".D_temp = work_D_temp, .E_temp = work_E_temp,\n")
+    f.write(".settings = &settings, .scaling = &scaling, " +
+            ".solution = &solution, .info = &info};\n\n")
 
 
 def render_workspace(variables, output):
