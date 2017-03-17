@@ -242,7 +242,7 @@ gammas = np.logspace(-2, 2, n_gamma)
 
 
 # Assets
-n_vec = np.array([100, 200, 300, 400])
+n_vec = np.array([100, 200, 300, 400, 500, 600])
 
 # Factors
 k_vec = (n_vec / 10).astype(int)
