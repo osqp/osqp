@@ -278,7 +278,6 @@ class OSQP(object):
         Generate embeddable C code for the problem
         """
 
-
         # Convert workspace to python
         print("Getting workspace from OSQP object... \t\t\t\t", end='')
         work = self._model._get_workspace()
