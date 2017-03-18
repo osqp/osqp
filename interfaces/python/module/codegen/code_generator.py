@@ -12,7 +12,7 @@ from . import utils
 
 
 def codegen(work, target_dir, python_ext_name, project_type, embedded,
-            force_rewrite):
+            force_rewrite, loop_unrolling):
     """
     Generate code
     """
@@ -77,7 +77,10 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
     c_sources = glob(os.path.join(osqp_path, 'codegen', 'sources',
                                   'src', '*.c'))
     for source in c_sources:
-        if source != 'ldl.c':  # Do not copy ldl. We will generate it
+        if loop_unrolling:
+            if source != 'ldl.c':  # Do not copy ldl. We will generate it
+                sh.copy(source, os.path.join(target_src_dir, 'osqp'))
+        else:
             sh.copy(source, os.path.join(target_src_dir, 'osqp'))
 
     c_headers = glob(os.path.join(osqp_path, 'codegen', 'sources',
@@ -95,10 +98,10 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
                      'embedded_flag':   embedded,
                      'python_ext_name': python_ext_name}
 
-
-    # Render ldl.c file
-    utils.render_ldl(template_vars, os.path.join(target_src_dir,
-                                                 'osqp', 'ldl.c'))
+    if loop_unrolling:
+        # Render ldl.c file
+        utils.render_ldl(template_vars, os.path.join(target_src_dir,
+                                                     'osqp', 'ldl.c'))
 
     # Render workspace
     utils.render_workspace(template_vars,
