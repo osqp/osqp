@@ -27,7 +27,7 @@ define_macros += [('EMBEDDED', EMBEDDED_FLAG)]
 Define compiler flags
 '''
 if system() != 'Windows':
-    compile_args = ["-O3"]
+    compile_args = ["-O3", "-funroll-loops"]
 else:
     compile_args = []
 
@@ -35,8 +35,8 @@ else:
 '''
 Include directory
 '''
-include_dirs = [get_include(),                 # Numpy includes
-                os.path.join('..', 'include')] # OSQP includes
+include_dirs = [get_include(),                  # Numpy includes
+                os.path.join('..', 'include')]  # OSQP includes
 
 
 '''
