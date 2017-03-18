@@ -42,7 +42,7 @@ constr_fl = constr_el
 constr_fu = constr_eu
 
 # Prediction horizon
-N = 10
+N = 1
 
 '''
 MPC Matrices
@@ -77,18 +77,14 @@ m = osqp.OSQP()
 m.setup(P, q, A, l, u, rho=1e-1, sigma=1e-5)
 
 # Generate the code
-try:
-    import emosqp
-except:
-    m.codegen("code", 'MinGW Makefiles', early_terminate=1, embedded_flag=1)
-    import emosqp
+m.codegen("code", project_type="Makefile", embedded=1,
+          python_ext_name='emosqp', force_rewrite=True)
 
 '''
 Apply MPC in closed loop
 '''
 
-
-np.random.seed(1)
+import emosqp
 
 # Apply MPC to the system
 sim_steps = 20
