@@ -244,13 +244,6 @@ Priv *init_priv(const csc * P, const csc * A, const OSQPSettings *settings, c_in
 
 #endif  // EMBEDDED
 
-// x = Dinv*x
-void LDL_dinvsolve(c_int n, c_float *x, c_float *Dinv){
-    c_int i;
-    for (i = 0 ; i < n ; i++){
-        x[i] *= Dinv[i];
-    }
-}
 
 
 void LDLSolve(c_float *x, c_float *b, csc *L, c_float *Dinv, c_int *P,

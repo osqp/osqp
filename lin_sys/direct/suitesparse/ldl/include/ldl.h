@@ -24,10 +24,11 @@
 #endif
 
 #define LDL_lsolve ldl_l_lsolve
-// #define LDL_dsolve ldl_l_dsolve
+#define LDL_dinvsolve ldl_l_dinvsolve
 #define LDL_ltsolve ldl_l_ltsolve
 #define LDL_perm ldl_l_perm
 #define LDL_permt ldl_l_permt
+// #define LDL_dsolve ldl_l_dsolve
 // #define LDL_valid_perm ldl_l_valid_perm
 // #define LDL_valid_matrix ldl_l_valid_matrix
 
@@ -73,6 +74,8 @@ void ldl_lsolve (int n, c_float X [ ], int Lp [ ], int Li [ ],
 
 // void ldl_dsolve (int n, c_float X [ ], c_float D [ ]) ;
 
+void ldl_dinvsolve (int n, c_float X [ ], c_float Dinv [ ]) ;
+
 void ldl_ltsolve (int n, c_float X [ ], int Lp [ ], int Li [ ],
     c_float Lx [ ]) ;
 
@@ -107,6 +110,10 @@ void ldl_l_lsolve (SuiteSparse_long n, c_float X [ ], SuiteSparse_long Lp [ ],
     SuiteSparse_long Li [ ], c_float Lx [ ]) ;
 
 // void ldl_l_dsolve (SuiteSparse_long n, c_float X [ ], c_float D [ ]) ;
+//
+
+// x = Dinv*x
+void ldl_l_dinvsolve(SuiteSparse_long n, c_float X [ ], c_float Dinv [ ]);
 
 void ldl_l_ltsolve (SuiteSparse_long n, c_float X [ ], SuiteSparse_long Lp [ ],
     SuiteSparse_long Li [ ], c_float Lx [ ]) ;
