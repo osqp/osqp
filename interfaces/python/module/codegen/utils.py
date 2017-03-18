@@ -265,6 +265,136 @@ def render_workspace(variables, output):
     f.close()
 
 
+def write_ldl_lsolve(f, variables):
+    """
+    Write LDL_lsolve to file
+    """
+
+    data = variables['data']
+    priv = variables['priv']
+    Lp = priv['L']['p']
+
+    f.write("void LDL_lsolve(LDL_int n, c_float X [ ], LDL_int Lp [ ]")
+    f.write(", LDL_int Li [ ], c_float Lx [ ]){\n")
+    f.write("LDL_int p;\n")
+
+    # Unroll for loop
+    for j in range(data['m'] + data['n']):
+        if Lp[j+1] > Lp[j]:  # Write loop ONLY if necessary
+            f.write("for (p = %i ; p < %i ; p++){\n" % (Lp[j], Lp[j+1]))
+            f.write("X [Li [p]] -= Lx [p] * X [%i];\n" % (j))
+            f.write("}\n")
+
+    # Close function
+    f.write("}\n\n")
+
+
+def write_ldl_ltsolve(f, variables):
+    """
+    Write LDL_ltsolve to file
+    """
+    data = variables['data']
+    priv = variables['priv']
+    Lp = priv['L']['p']
+
+    f.write("void LDL_ltsolve(LDL_int n, c_float X [ ], LDL_int Lp [ ]")
+    f.write(", LDL_int Li [ ], c_float Lx [ ]){\n")
+    f.write("LDL_int p;\n")
+
+    # Unroll the loop
+    for j in range(data['m'] + data['n'] - 1, -1, -1):
+        if Lp[j+1] > Lp[j]:  # Write loop ONLY if necessary
+            f.write("for (p = %i ; p < %i ; p++){\n" % (Lp[j], Lp[j+1]))
+            f.write("X [%i] -= Lx [p] * X [Li [p]] ;\n" % (j))
+            f.write("}\n")
+
+    # Close function
+    f.write("}\n\n")
+
+
+def write_ldl_dinvsolve(f, variables):
+    """
+    Write LDL_dinvsolve
+    """
+    data = variables['data']
+
+    f.write("void LDL_dinvsolve(LDL_int n, c_float X [ ], ")
+    f.write("c_float Dinv [ ]) {\n")
+    f.write("LDL_int i;\n")
+    f.write("for (i = 0 ; i < %i ; i++){\n" % (data['m'] + data['n']))
+    f.write("X[i] *= Dinv[i];\n")
+    f.write("}\n")
+
+    # Close function
+    f.write("}\n\n")
+
+
+def write_ldl_perm(f, variables):
+    """
+    Write LDL_perm
+    """
+    data = variables['data']
+
+    f.write("void LDL_perm(LDL_int n, c_float X [ ], c_float B [ ],")
+    f.write(" LDL_int P [ ]){\n")
+    f.write("LDL_int j;\n")
+
+    f.write("for (j = 0 ; j < %i ; j++){\n" % (data['m'] + data['n']))
+    f.write("X [j] = B [P [j]];\n")
+    f.write("}\n")
+
+    # Close function
+    f.write("}\n\n")
+
+
+def write_ldl_permt(f, variables):
+    """
+    Write LDL_permt
+    """
+    data = variables['data']
+
+    f.write("void LDL_permt(LDL_int n, c_float X [ ], c_float B [ ],")
+    f.write(" LDL_int P [ ]){\n")
+    f.write("LDL_int j;\n")
+
+    f.write("for (j = 0 ; j < %i ; j++){\n" % (data['m'] + data['n']))
+    f.write("X [P [j]] = B [j] ;\n")
+    f.write("}\n")
+
+    # Close function
+    f.write("}\n\n")
+
+
+def render_ldl(variables, output):
+    """
+    Render LDL file so that loops can be unrolled
+    """
+
+    data = variables['data']
+    priv = variables['priv']
+
+    f = open(output, 'w')
+
+    # Include header
+    f.write("#include \"ldl.h\"\n\n")
+
+    # Write ldl_lsolve
+    write_ldl_lsolve(f, variables)
+
+    # Write ldl_ltsolve
+    write_ldl_ltsolve(f, variables)
+
+    # Write ldl_dinvsolve
+    write_ldl_dinvsolve(f, variables)
+
+    # Write ldl_perm
+    write_ldl_perm(f, variables)
+
+    # Write ldl_permt
+    write_ldl_permt(f, variables)
+
+    f.close()
+
 def render_setuppy(variables, output):
     """
     Render setup.py file

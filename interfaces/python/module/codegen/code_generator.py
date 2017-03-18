@@ -77,7 +77,8 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
     c_sources = glob(os.path.join(osqp_path, 'codegen', 'sources',
                                   'src', '*.c'))
     for source in c_sources:
-        sh.copy(source, os.path.join(target_src_dir, 'osqp'))
+        if source != 'ldl.c':  # Do not copy ldl. We will generate it
+            sh.copy(source, os.path.join(target_src_dir, 'osqp'))
 
     c_headers = glob(os.path.join(osqp_path, 'codegen', 'sources',
                                   'include', '*.h'))
@@ -93,6 +94,11 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
                      'scaling':         work['scaling'],
                      'embedded_flag':   embedded,
                      'python_ext_name': python_ext_name}
+
+
+    # Render ldl.c file
+    utils.render_ldl(template_vars, os.path.join(target_src_dir,
+                                                 'osqp', 'ldl.c'))
 
     # Render workspace
     utils.render_workspace(template_vars,
