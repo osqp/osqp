@@ -47,10 +47,10 @@ extern "C" {
       return m;
     }
     #endif
-    // #define c_calloc(n,s) ({                     \
-    //         void * p_calloc = c_malloc((n)*(s)); \
-    //         memset(p_calloc, 0, (n)*(s));        \
-    //         p_calloc;                            \
+    // #define c_calloc(n,s) ({
+    //         void * p_calloc = c_malloc((n)*(s));
+    //         memset(p_calloc, 0, (n)*(s));
+    //         p_calloc;
     //     })
     #define c_free PyMem_Free
     #define c_realloc PyMem_Realloc
