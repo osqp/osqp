@@ -6,6 +6,11 @@ import shutil as sh
 from subprocess import call
 from glob import glob
 from platform import system
+import sys
+
+# Import time
+import time
+
 
 # import utilities
 from . import utils
@@ -59,7 +64,8 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
                     os.remove(module_name)
 
     # Make target directory
-    print("Creating target directories... \t\t\t\t\t", end='')
+    sys.stdout.write("Creating target directories... \t\t\t\t\t")
+    sys.stdout.flush()
     target_dir = os.path.abspath(target_dir)
     target_include_dir = os.path.join(target_dir, 'include')
     target_src_dir = os.path.join(target_dir, 'src')
@@ -67,13 +73,14 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
     if not os.path.exists(target_dir):
         os.mkdir(target_dir)
     if not os.path.exists(target_include_dir):
-        os.mkdir(target_include_dir)
+            os.mkdir(target_include_dir)
     if not os.path.exists(target_src_dir):
         os.makedirs(os.path.join(target_src_dir, 'osqp'))
     print("[done]")
 
     # Copy source files to target directory
-    print("Copying OSQP sources... \t\t\t\t\t", end='')
+    sys.stdout.write("Copying OSQP sources... \t\t\t\t\t")
+    sys.stdout.flush()
     c_sources = glob(os.path.join(osqp_path, 'codegen', 'sources',
                                   'src', '*.c'))
     for source in c_sources:
@@ -90,7 +97,8 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
     print("[done]")
 
     # Variables created from the workspace
-    print("Generating customized code... \t\t\t\t\t", end='')
+    sys.stdout.write("Generating customized code... \t\t\t\t\t")
+    sys.stdout.flush()
     template_vars = {'data':            work['data'],
                      'settings':        work['settings'],
                      'priv':            work['priv'],
@@ -122,19 +130,19 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
     # Copy CMakelists.txt
     sh.copy(os.path.join(files_to_generate_path, 'CMakeLists.txt'), target_dir)
 
-
     print("[done]")
 
     # Compile python interface
-    print("Compiling Python wrapper... \t\t\t\t\t", end='')
+    sys.stdout.write("Compiling Python wrapper... \t\t\t\t\t")
+    sys.stdout.flush()
     current_dir = os.getcwd()
     os.chdir(target_src_dir)
     call(['python', 'setup.py', '--quiet', 'build_ext', '--inplace'])
     print("[done]")
 
     # Copy compiled solver
-    print("Copying code-generated Python solver to current directory... \t",
-          end='')
+    sys.stdout.write("Copying code-generated Python solver to current directory... \t")
+    sys.stdout.flush()
     module_name = glob('%s*' % python_ext_name + module_ext)
     if not any(module_name):
         raise ValueError('No python module generated! ' +
