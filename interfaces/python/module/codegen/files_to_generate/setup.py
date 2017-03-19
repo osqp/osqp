@@ -27,7 +27,7 @@ define_macros += [('EMBEDDED', EMBEDDED_FLAG)]
 Define compiler flags
 '''
 if system() != 'Windows':
-    compile_args = ["-O3", "-funroll-loops"]
+    compile_args = ["-O3"]
 else:
     compile_args = []
 
