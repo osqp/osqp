@@ -8,8 +8,8 @@ from warnings import warn
 import numpy as np
 from scipy import sparse
 from platform import system
-
 import osqp.codegen as cg
+import sys
 
 class OSQP(object):
     def __init__(self):
@@ -279,7 +279,8 @@ class OSQP(object):
         """
 
         # Convert workspace to python
-        print("Getting workspace from OSQP object... \t\t\t\t", end='')
+        sys.stdout.write("Getting workspace from OSQP object... \t\t\t\t")
+        sys.stdout.flush()
         work = self._model._get_workspace()
         print("[done]")
 
