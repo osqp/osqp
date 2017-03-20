@@ -64,7 +64,7 @@ The keyword arguments :code:`**settings` specify the solver settings as follows
 +------------------------------------+-------------------------------------+----------------+
 | :code:`early_terminate` *          | Evaluate termination criteria       |   True         |
 +------------------------------------+-------------------------------------+----------------+
-| :code:`early_terminate_interval` * | Interval for checking termination   |   True         |
+| :code:`early_terminate_interval` * | Interval for checking termination   |   25           |
 +------------------------------------+-------------------------------------+----------------+
 | :code:`warm_start` *               | Perform warm starting               |   True         |
 +------------------------------------+-------------------------------------+----------------+
