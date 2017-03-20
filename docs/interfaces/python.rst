@@ -46,13 +46,13 @@ The keyword arguments :code:`**settings` specify the solver settings as follows
 +------------------------------------+-------------------------------------+----------------+
 | :code:`max_iter` *                 | Maximum number of iterations        |   2500         |
 +------------------------------------+-------------------------------------+----------------+
-| :code:`eps_abs`  *                 | Absolute tolerance                  |   1e-05        |
+| :code:`eps_abs`  *                 | Absolute tolerance                  |   1e-03        |
 +------------------------------------+-------------------------------------+----------------+
-| :code:`eps_rel`  *                 | Relative tolerance                  |   1e-05        |
+| :code:`eps_rel`  *                 | Relative tolerance                  |   1e-03        |
 +------------------------------------+-------------------------------------+----------------+
-| :code:`eps_inf`  *                 | Infeasibility tolerance             |   1e-06        |
+| :code:`eps_inf`  *                 | Infeasibility tolerance             |   1e-04        |
 +------------------------------------+-------------------------------------+----------------+
-| :code:`eps_unb`  *                 | Unboundedness tolerance             |   1e-06        |
+| :code:`eps_unb`  *                 | Unboundedness tolerance             |   1e-04        |
 +------------------------------------+-------------------------------------+----------------+
 | :code:`alpha`    *                 | ADMM overrelaxation parameter       |   1.6          |
 +------------------------------------+-------------------------------------+----------------+
