@@ -21,7 +21,7 @@
 #include <stdio.h>
 #endif
 
-#ifdef MATLAB_MEX_FILE
+#ifdef MATLAB
 #include "mex.h"
 #include "matrix.h"
 #endif

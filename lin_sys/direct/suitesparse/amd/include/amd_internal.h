@@ -22,7 +22,7 @@
  * file, then debugging is always turned off, regardless of whether or not
  * -DNDEBUG is specified in your compiler options.
  *
- * If AMD is being compiled as a mexFunction, then MATLAB_MEX_FILE is defined,
+ * If AMD is being compiled as a mexFunction, then MATLAB is defined,
  * and mxAssert is used instead of assert.  If debugging is not enabled, no
  * MATLAB include files or functions are used.  Thus, the AMD library libamd.a
  * can be safely used in either a stand-alone C program or in another
@@ -67,7 +67,7 @@
 /* MATLAB include files (only if being used in or via MATLAB) */
 /* ------------------------------------------------------------------------- */
 
-#ifdef MATLAB_MEX_FILE
+#ifdef MATLAB
 #include "matrix.h"
 #include "mex.h"
 #endif
@@ -303,7 +303,7 @@ GLOBAL void AMD_dump
 #endif
 
 /* Use mxAssert if AMD is compiled into a mexFunction */
-#ifdef MATLAB_MEX_FILE
+#ifdef MATLAB
 #define ASSERT(expression) (mxAssert ((expression), ""))
 #else
 #define ASSERT(expression) (assert (expression))

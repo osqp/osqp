@@ -30,7 +30,7 @@ classdef feasibility_tests < matlab.unittest.TestCase
             % Setup solver
             testCase.solver = osqp;
             testCase.solver.setup(testCase.P, testCase.q, testCase.A, testCase.l, testCase.u, ...
-                'verbose', 1, 'eps_abs', 1e-05, 'eps_rel', 1e-05);
+                'verbose', 0, 'eps_abs', 1e-05, 'eps_rel', 1e-05);
 
             % Get options
             testCase.options = testCase.solver.current_settings();

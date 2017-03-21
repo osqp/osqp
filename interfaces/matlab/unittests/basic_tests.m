@@ -116,7 +116,7 @@ classdef basic_tests < matlab.unittest.TestCase
         function test_update_max_iter(testCase)
             % Update max_iter
             opts = testCase.solver.current_settings();
-            opts.max_iter = 80;
+            opts.max_iter = 30;
             testCase.solver.update_settings(opts);
 
             % Solve again

@@ -51,7 +51,7 @@ mex_cmd = sprintf('mex -O -silent');
 
 
 % Add arguments to cmake and mex compiler
-cmake_args = '-DUNITTESTS=OFF -DMATLAB_MEX_FILE=ON';
+cmake_args = '-DUNITTESTS=OFF -DMATLAB=ON';
 mexoptflags = '';
 
 
@@ -63,8 +63,9 @@ else
     cmake_args = sprintf('%s %s', cmake_args, '-G "Unix Makefiles"');
     if (ismac)
       mexoptflags = sprintf('%s %s', mexoptflags, '-DIS_MAC');
-    else if (isunix)
-      mexoptflags = sprintf('%s %s', mexoptflags, '-DIS_LINUX');
+    else
+        if (isunix)
+          mexoptflags = sprintf('%s %s', mexoptflags, '-DIS_LINUX');
         end
     end
 end
@@ -98,6 +99,10 @@ end
 if (~isempty (strfind (computer, '64')))
     mexoptflags = sprintf('%s %s', mexoptflags, '-largeArrayDims');
 end
+
+
+% Pass MATLAB flag to mex compiler
+mexoptflags = sprintf('%s %s', mexoptflags, '-DMATLAB');
 
 
 % Set library extension

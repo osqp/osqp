@@ -83,13 +83,13 @@ if (DLONG)
 endif (DLONG)
 
 # Add matlab compiler flag
-# option(MATLAB_MEX_FILE "Is OSQP compiled for MATLAB interface" OFF)
-# if (MATLAB_MEX_FILE)
+# option(MATLAB "Is OSQP compiled for MATLAB interface" OFF)
+# if (MATLAB)
 #     find_package(Matlab)
 #     if (NOT Matlab_FOUND)
 #         message( FATAL_ERROR "You need MATLAB installed to generate interface" )
 #     endif ()
-# endif (MATLAB_MEX_FILE)
+# endif (MATLAB)
 
 
 
@@ -174,24 +174,49 @@ endif()
 
 
 
-# if we are building it for Python bindings, let's look for Python
+# if we are building the Python interface, let's look for Python
 # and set some options
 # -----------------------------------------------------------------
 if (PYTHON)
+    # Look for Python libraries
     find_package(PythonLibs)
-    if (PYTHONLIBS_FOUND)
-        include_directories(${PYTHON_INCLUDE_DIRS})
-    else (PYTHONLIBS_FOUND)
+
+    if (NOT PYTHONLIBS_FOUND)
             message( FATAL_ERROR "You need Python libraries to build the Python interface" )
-    endif (PYTHONLIBS_FOUND)
+    endif (NOT PYTHONLIBS_FOUND)
+
+    # Include directories for Python headers
+    include_directories(${PYTHON_INCLUDE_DIRS})
 
     # Pass PYTHON flag to C compiler
     add_definitions(-DPYTHON)
 
     # Disable unittests
-    message(STATUS "Disabling UNITTESTS because we are building Python extension")
+    message(STATUS "Disabling UNITTESTS because we are building Python interface")
     set(UNITTESTS OFF)
 endif (PYTHON)
+
+
+# if we are building the Matlab interface, let's look for Matlab
+# and set some options
+# -----------------------------------------------------------------
+if (MATLAB)
+    find_package(Matlab)
+    if (NOT Matlab_FOUND)
+        message( FATAL_ERROR "You need Matlab libraries to build the Matlab interface" )
+    endif (NOT Matlab_FOUND)
+
+    # Include directories for Python headers
+    include_directories(${Matlab_INCLUDE_DIRS})
+
+    # Pass MATLAB flag to C compiler
+    add_definitions(-DMATLAB)
+
+    # Disable unittests
+    message(STATUS "Disabling UNITTESTS because we are building Matlab interface")
+    set(UNITTESTS OFF)
+
+endif (MATLAB)
 
 
 
@@ -204,7 +229,14 @@ endif (PYTHON)
 add_subdirectory(lin_sys)
 
 add_library (osqpdirstatic STATIC ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_direct>)
+
+if (MATLAB)
+target_link_libraries (osqpdirstatic ${Matlab_LIBRARIES})
+endif (MATLAB)
+
+if (PYTHON)
 target_link_libraries (osqpdirstatic ${PYTHON_LIBRARIES})
+endif (PYTHON)
 
 # If we are building Python or Matlab interface:
 #   - do not build shared library
