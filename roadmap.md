@@ -1,8 +1,8 @@
 ## TODO (Code)
 
--   [ ] Parameter Selection: `rho`, `sigma` and `alpha` from examples (data driven)
--   [ ] Fix functions to allocate/scale/update matrices A and P (together with problem data).
--   [ ] **Compute cost function only when algorithm exits** (if no verbosity selected). Not at every iteration!
+-   [ ] Parameter Selection: `rho`, `sigma` and `alpha` from examples (data driven). N.B. It seems that the optimal `rho` decreases with the problem dimensions
+-   [ ] Add functions to update matrices in Python and Matalab
+-   [ ] Change embedded flag with VECTOR_PARAMETERS and MATRIX_PARAMETERS
 -   [ ] Fix relative criterion for termination condition
 -   [ ] Implement cheaper dual residual computation: (only one matrix-vector computation)
 -   [ ] Implement functions to update `sigma`, `eps_inf` and `eps_unb` parameters

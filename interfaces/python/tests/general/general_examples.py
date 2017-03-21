@@ -38,14 +38,14 @@ def main():
     #                 'infeasible', 'random_infeasible',
     #                 'maros_meszaros', 'lp', 'unbounded_lp',
     #                 'unbounded_qp'}
-    example = 'random'
+    example = 'small1'
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
         # f = 'tests/maros_meszaros/CVXQP2_S.mat'
         # f = 'tests/maros_meszaros/CVXQP1_S.mat'
         # f = 'tests/maros_meszaros/AUG2D.mat'
-        f = 'tests/maros_meszaros/CONT-200.mat'
+        f = 'maros_meszaros/CONT-200.mat'
         # f = 'tests/maros_meszaros/PRIMAL3.mat'
         # f = 'tests/maros_meszaros/QBANDM.mat'
         p = load_maros_meszaros_problem(f)
@@ -144,9 +144,9 @@ def main():
         assert False, "Unknown example"
 
     # Solve with CPLEX
-    print("\nSolve with CPLEX")
-    print("-----------------")
-    resultsCPLEX = p.solve(solver=mpbpy.CPLEX, verbose=True)
+    # print("\nSolve with CPLEX")
+    # print("-----------------")
+    # resultsCPLEX = p.solve(solver=mpbpy.CPLEX, verbose=True)
 
     # Solve with GUROBI
     print("\nSolve with GUROBI")
@@ -157,35 +157,34 @@ def main():
     print("\nSolve with OSQP")
     print("-----------------")
     resultsOSQP = p.solve(solver=mpbpy.OSQP, max_iter=2500,
-                          eps_rel=1e-05,
-                          eps_abs=1e-5,
+                          eps_rel=1e-3,
+                          eps_abs=1e-3,
                           alpha=1.6,
-                          rho=0.1,
-                          sigma=0.1,
+                          rho=1e-01,
+                          sigma=0.001,
                           polish=True)
 
     if resultsGUROBI.status != 'solver_error':
-        print("\n")
-        print("Comparison CPLEX - GUROBI")
-        print("-------------------------")
-        print("Difference in objective value %.8f" %
-              np.linalg.norm(resultsCPLEX.objval - resultsGUROBI.objval))
-        print("Norm of solution difference %.8f" %
-              np.linalg.norm(resultsCPLEX.x - resultsGUROBI.x))
-        print("Norm of dual difference %.8f" %
-              np.linalg.norm(resultsCPLEX.y - resultsGUROBI.y))
+        # print("\n")
+        # print("Comparison CPLEX - GUROBI")
+        # print("-------------------------")
+        # print("Difference in objective value %.8f" %
+        #       np.linalg.norm(resultsCPLEX.objval - resultsGUROBI.objval))
+        # print("Norm of solution difference %.8f" %
+        #       np.linalg.norm(resultsCPLEX.x - resultsGUROBI.x))
+        # print("Norm of dual difference %.8f" %
+        #       np.linalg.norm(resultsCPLEX.y - resultsGUROBI.y))
 
         print("\n")
         print("Comparison OSQP - GUROBI")
         print("-------------------------")
         print("Difference in objective value %.8f" %
-              np.linalg.norm(resultsOSQP.objval - resultsGUROBI.objval))
+              np.linalg.norm(resultsOSQP.obj_val - resultsGUROBI.obj_val))
         print("Norm of solution difference %.8f" %
               np.linalg.norm(resultsOSQP.x - resultsGUROBI.x))
         print("Norm of dual difference %.8f" %
               np.linalg.norm(resultsOSQP.y - resultsGUROBI.y))
 
-ipdb.set_trace()
 
 # Parsing optional command line arguments
 if __name__ == '__main__':
