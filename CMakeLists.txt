@@ -182,9 +182,12 @@ if (PYTHON)
     # Pass PYTHON flag to C compiler
     add_definitions(-DPYTHON)
 
-    # Disable unittests
-    message(STATUS "Disabling UNITTESTS because we are building Python interface")
-    set(UNITTESTS OFF)
+    if (UNITTESTS)
+        # Disable unittests
+        message(STATUS "Disabling UNITTESTS because we are building Python interface")
+        set(UNITTESTS OFF)
+    endif (UNITTESTS)
+    
 endif (PYTHON)
 
 
@@ -203,9 +206,11 @@ if (MATLAB)
     # Pass MATLAB flag to C compiler
     add_definitions(-DMATLAB)
 
-    # Disable unittests
-    message(STATUS "Disabling UNITTESTS because we are building Matlab interface")
-    set(UNITTESTS OFF)
+    if (UNITTESTS)
+        # Disable unittests
+        message(STATUS "Disabling UNITTESTS because we are building Matlab interface")
+        set(UNITTESTS OFF)
+    endif (UNITTESTS)
 
 endif (MATLAB)
 

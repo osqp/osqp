@@ -600,6 +600,18 @@ c_int validate_settings(const OSQPSettings * settings){
         #endif
         return 1;
     }
+    if (settings->eps_prim_inf <= 0) {
+        #ifdef PRINTING
+        c_print("eps_prim_inf must be positive\n");
+        #endif
+        return 1;
+    }
+    if (settings->eps_dual_inf <= 0) {
+        #ifdef PRINTING
+        c_print("eps_dual_inf must be positive\n");
+        #endif
+        return 1;
+    }
     if (settings->alpha <= 0 || settings->alpha >= 2) {
         #ifdef PRINTING
         c_print("alpha must be between 0 and 2\n");

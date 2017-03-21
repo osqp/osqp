@@ -167,8 +167,10 @@ class OSQP(object):
         """
         Update OSQP solver settings
 
-        It is possible to change: 'max_iter', 'eps_abs', 'eps_rel', 'alpha',
-                                  'delta', 'polish', 'pol_refine_iter',
+        It is possible to change: 'max_iter', 'eps_abs', 'eps_rel',
+                                  'eps_prim_inf', 'eps_dual_inf',
+                                  'alpha', 'delta', 'polish',
+                                  'pol_refine_iter',
                                   'verbose', 'early_terminate', 'early_terminate_interval'
         """
 
@@ -176,6 +178,8 @@ class OSQP(object):
         max_iter = kwargs.pop('max_iter', None)
         eps_abs = kwargs.pop('eps_abs', None)
         eps_rel = kwargs.pop('eps_rel', None)
+        eps_prim_inf = kwargs.pop('eps_prim_inf', None)
+        eps_dual_inf = kwargs.pop('eps_dual_inf', None)
         alpha = kwargs.pop('alpha', None)
         delta = kwargs.pop('delta', None)
         polish = kwargs.pop('polish', None)
@@ -194,6 +198,12 @@ class OSQP(object):
 
         if eps_rel is not None:
             self._model.update_eps_rel(eps_rel)
+
+        if eps_prim_inf is not None:
+            self._model.update_eps_prim_inf(eps_prim_inf)
+
+        if eps_dual_inf is not None:
+            self._model.update_eps_dual_inf(eps_dual_inf)
 
         if alpha is not None:
             self._model.update_alpha(alpha)
@@ -222,6 +232,8 @@ class OSQP(object):
         if max_iter is None and \
            eps_abs is None and \
            eps_rel is None and \
+           eps_prim_inf is None and \
+           eps_dual_inf is None and \
            alpha is None and \
            delta is None and \
            polish is None and \

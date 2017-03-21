@@ -654,6 +654,56 @@ static PyObject *OSQP_update_eps_rel(OSQP *self, PyObject *args){
 
 }
 
+
+static PyObject *OSQP_update_eps_prim_inf(OSQP *self, PyObject *args){
+    c_float eps_prim_inf_new;
+
+    #ifdef DFLOAT
+    static char * argparse_string = "f";
+    #else
+    static char * argparse_string = "d";
+    #endif
+
+    // Parse arguments
+    if( !PyArg_ParseTuple(args, argparse_string, &eps_prim_inf_new)) {
+            return NULL;
+    }
+
+    // Perform Update
+    osqp_update_eps_prim_inf(self->workspace, eps_prim_inf_new);
+
+    // Return None
+    Py_INCREF(Py_None);
+    return Py_None;
+
+}
+
+static PyObject *OSQP_update_eps_dual_inf(OSQP *self, PyObject *args){
+    c_float eps_dual_inf_new;
+
+    #ifdef DFLOAT
+    static char * argparse_string = "f";
+    #else
+    static char * argparse_string = "d";
+    #endif
+
+    // Parse arguments
+    if( !PyArg_ParseTuple(args, argparse_string, &eps_dual_inf_new)) {
+            return NULL;
+    }
+
+    // Perform Update
+    osqp_update_eps_dual_inf(self->workspace, eps_dual_inf_new);
+
+    // Return None
+    Py_INCREF(Py_None);
+    return Py_None;
+
+}
+
+
+
+
 static PyObject *OSQP_update_alpha(OSQP *self, PyObject *args){
     c_float alpha_new;
 
@@ -859,6 +909,8 @@ static PyMethodDef OSQP_methods[] = {
     {"update_max_iter",	(PyCFunction)OSQP_update_max_iter, METH_VARARGS, PyDoc_STR("Update OSQP solver setting max_iter")},
     {"update_eps_abs",	(PyCFunction)OSQP_update_eps_abs, METH_VARARGS, PyDoc_STR("Update OSQP solver setting eps_abs")},
     {"update_eps_rel",	(PyCFunction)OSQP_update_eps_rel, METH_VARARGS, PyDoc_STR("Update OSQP solver setting eps_rel")},
+    {"update_eps_prim_inf",	(PyCFunction)OSQP_update_eps_prim_inf, METH_VARARGS, PyDoc_STR("Update OSQP solver setting eps_prim_inf")},
+    {"update_eps_dual_inf",	(PyCFunction)OSQP_update_eps_dual_inf, METH_VARARGS, PyDoc_STR("Update OSQP solver setting eps_dual_inf")},
     {"update_alpha",	(PyCFunction)OSQP_update_alpha, METH_VARARGS, PyDoc_STR("Update OSQP solver setting alpha")},
     {"update_delta",	(PyCFunction)OSQP_update_delta, METH_VARARGS, PyDoc_STR("Update OSQP solver setting delta")},
     {"update_polish",	(PyCFunction)OSQP_update_polish, METH_VARARGS, PyDoc_STR("Update OSQP solver setting polish")},

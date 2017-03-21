@@ -982,6 +982,54 @@ c_int osqp_update_eps_rel(OSQPWorkspace * work, c_float eps_rel_new) {
     return 0;
 }
 
+
+/**
+ * Update primal infeasibility tolerance
+ * @param  work          Workspace
+ * @param  eps_prim_inf  New primal infeasibility tolerance
+ * @return               Exitflag
+ */
+c_int osqp_update_eps_prim_inf(OSQPWorkspace * work, c_float eps_prim_inf_new){
+
+    // Check that eps_prim_inf is positive
+    if (eps_prim_inf_new <= 0.) {
+        #ifdef PRINTING
+        c_print("eps_prim_inf must be positive\n");
+        #endif
+        return 1;
+    }
+    // Update eps_prim_inf
+    work->settings->eps_prim_inf = eps_prim_inf_new;
+
+    return 0;
+}
+
+
+
+/**
+ * Update dual infeasibility tolerance
+ * @param  work          Workspace
+ * @param  eps_dual_inf  New dual infeasibility tolerance
+ * @return               Exitflag
+ */
+c_int osqp_update_eps_dual_inf(OSQPWorkspace * work, c_float eps_dual_inf_new){
+
+    // Check that eps_dual_inf is positive
+    if (eps_dual_inf_new <= 0.) {
+        #ifdef PRINTING
+        c_print("eps_dual_inf must be positive\n");
+        #endif
+        return 1;
+    }
+    // Update eps_dual_inf
+    work->settings->eps_dual_inf = eps_dual_inf_new;
+
+
+    return 0;
+}
+
+
+
 /**
  * Update relaxation parameter alpha
  * @param  work  Workspace

@@ -633,6 +633,10 @@ void copyUpdatedSettingsToWork(const mxArray* mxPtr ,OsqpData* osqpData){
     (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_abs")));
   osqp_update_eps_rel(osqpData->work,
     (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_rel")));
+  osqp_update_eps_prim_inf(osqpData->work,
+    (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_prim_inf")));
+  osqp_update_eps_dual_inf(osqpData->work,
+    (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_dual_inf")));
   osqp_update_alpha(osqpData->work,
     (c_float)mxGetScalar(mxGetField(mxPtr, 0, "alpha")));
   osqp_update_delta(osqpData->work,

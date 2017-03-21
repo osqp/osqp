@@ -21,9 +21,9 @@ q = sp.randn(n)
 
 
 osqp_opts = {'rho': 0.05,
-             'sigma': 0.01,
-             'eps_rel': 1e-08,
-             'eps_abs': 1e-08,
+            #  'sigma': 0.001,
+            #  'eps_rel': 1e-08,
+            #  'eps_abs': 1e-08,
              'polish': False,
              'scaling': True,
              'max_iter': 2500}

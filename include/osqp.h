@@ -226,6 +226,26 @@ c_int osqp_update_eps_rel(OSQPWorkspace * work, c_float eps_rel_new);
 
 
 /**
+ * Update primal infeasibility tolerance
+ * @param  work          Workspace
+ * @param  eps_prim_inf  New primal infeasibility tolerance
+ * @return               Exitflag
+ */
+c_int osqp_update_eps_prim_inf(OSQPWorkspace * work, c_float eps_prim_inf_new);
+
+
+
+/**
+ * Update dual infeasibility tolerance
+ * @param  work          Workspace
+ * @param  eps_dual_inf  New dual infeasibility tolerance
+ * @return               Exitflag
+ */
+c_int osqp_update_eps_dual_inf(OSQPWorkspace * work, c_float eps_dual_inf_new);
+
+
+
+/**
  * Update relaxation parameter alpha
  * @param  work  Workspace
  * @param  alpha New relaxation parameter value
