@@ -223,8 +223,8 @@ c_int osqp_solve(OSQPWorkspace * work){
     // Main ADMM algorithm
     for (iter = 1; iter <= work->settings->max_iter; iter ++) {
         // Update x_prev, z_prev (preallocated, no malloc)
-        prea_vec_copy(work->x, work->x_prev, work->data->n);
-        prea_vec_copy(work->z, work->z_prev, work->data->m);
+        swap_vectors(&(work->x), &(work->x_prev));
+        swap_vectors(&(work->z), &(work->z_prev));
 
         /* ADMM STEPS */
         /* Compute \tilde{x}^{k+1}, \tilde{z}^{k+1} */

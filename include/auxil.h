@@ -20,6 +20,14 @@ extern "C" {
  ***********************************************************/
 
 /**
+ * Swap c_float vector pointers
+ * @param a first vector
+ * @param b second vector
+ */
+void swap_vectors(c_float ** a, c_float ** b);
+
+
+/**
 * Cold start workspace variables xz and y
 * @param work Workspace
 */

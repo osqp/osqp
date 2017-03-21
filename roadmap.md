@@ -1,10 +1,11 @@
 ## TODO (Code)
 
 -   [ ] Parameter Selection: `rho`, `sigma` and `alpha` from examples (data driven). N.B. It seems that the optimal `rho` decreases with the problem dimensions
--   [ ] Implement functions to update `sigma`, `eps_prim_inf` and `eps_dual_inf` parameters
+-   [x] Implement functions to update `eps_prim_inf` and `eps_dual_inf` parameters
 -   [ ] Avoid square roots -> Use eps tests to the 2
--   [ ] Avoid copying temporary vectors to previous ones (use pointers swap instead)
+-   [x] Avoid copying temporary vectors to previous ones (use pointers swap instead)
 -   [ ] Add functions to update matrices in Python and Matlab
+-   [ ] Add functions to update rho and sigma (by updating the KKT matrix entries)
 -   [ ] Change embedded flag with VECTOR_PARAMETERS and MATRIX_PARAMETERS
 -   [ ] Add unittests Python for code generation
 -   [ ] Add CTRL-C interrupt close function
