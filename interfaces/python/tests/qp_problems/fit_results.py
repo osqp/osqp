@@ -72,9 +72,8 @@ def save_plot(df, name):
     # Get test case in specified location
     test_case = df.loc[location]
 
-
     # Plot behavior
-    plt.figure(figsize=(12,6))
+    plt.figure(figsize=(12, 6))
     plt.subplot(1, 2, 1)
     ax = plt.gca()
     if name is 'rho':
