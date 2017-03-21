@@ -1,18 +1,19 @@
 ## TODO (Code)
 
 -   [ ] Parameter Selection: `rho`, `sigma` and `alpha` from examples (data driven). N.B. It seems that the optimal `rho` decreases with the problem dimensions
--   [ ] Add functions to update matrices in Python and Matalab
+-   [ ] Implement functions to update `sigma`, `eps_inf` and `eps_unb` parameters
+-   [ ] Add functions to update matrices in Python and Matlab
 -   [ ] Change embedded flag with VECTOR_PARAMETERS and MATRIX_PARAMETERS
+-   [ ] Add unittests Python for code generation
+-   [ ] Implement code generation in Matlab
 -   [ ] Fix relative criterion for termination condition
 -   [ ] Implement cheaper dual residual computation: (only one matrix-vector computation)
--   [ ] Implement functions to update `sigma`, `eps_inf` and `eps_unb` parameters
+
 -   [ ] Stress tests Maros Meszaros
 -   [ ] Link to CVXPY
 
 
 ## TODO (Paper)
--   [x] Write infeasibility/unbounedness conditions
--   [x] Write compact algorithm (basic ADMM steps)
 -   [ ] Talk about paper: [Inertial Proximal ADMM for Linearly Constrained Separable Convex Optimization](http://epubs.siam.org/doi/pdf/10.1137/15100463X) (similar to our robustification idea)
 -   [ ] Proove convergence to vectors satisfying Farkas lemma
 -   [ ] Write examples in the paper
