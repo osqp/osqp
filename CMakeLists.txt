@@ -82,17 +82,6 @@ if (DLONG)
     add_definitions(-DDLONG)
 endif (DLONG)
 
-# Add matlab compiler flag
-# option(MATLAB "Is OSQP compiled for MATLAB interface" OFF)
-# if (MATLAB)
-#     find_package(Matlab)
-#     if (NOT Matlab_FOUND)
-#         message( FATAL_ERROR "You need MATLAB installed to generate interface" )
-#     endif ()
-# endif (MATLAB)
-
-
-
 
 # Set Compiler flags
 # ----------------------------------------------
