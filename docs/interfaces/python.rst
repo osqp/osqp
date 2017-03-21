@@ -50,9 +50,9 @@ The keyword arguments :code:`**settings` specify the solver settings as follows
 +------------------------------------+-------------------------------------+----------------+
 | :code:`eps_rel`  *                 | Relative tolerance                  |   1e-03        |
 +------------------------------------+-------------------------------------+----------------+
-| :code:`eps_inf`  *                 | Infeasibility tolerance             |   1e-04        |
+| :code:`eps_prim_inf`  *            | Primal infeasibility tolerance      |   1e-04        |
 +------------------------------------+-------------------------------------+----------------+
-| :code:`eps_unb`  *                 | Unboundedness tolerance             |   1e-04        |
+| :code:`eps_dual_inf`  *            | Dual infeasibility tolerance        |   1e-04        |
 +------------------------------------+-------------------------------------+----------------+
 | :code:`alpha`    *                 | ADMM overrelaxation parameter       |   1.6          |
 +------------------------------------+-------------------------------------+----------------+

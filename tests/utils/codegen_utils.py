@@ -176,19 +176,6 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
     n = P.shape[0]
     m = A.shape[0]
 
-    # Convert problem status to integer
-    # for key, value in sols_data.items():
-    #     if isinstance(value, str):
-    #         # Status test get from C code
-    #         osqp_model = osqp.OSQP()
-    #         if value == 'optimal':
-    #             sols_data[key] = osqp_model.constant('OSQP_SOLVED')
-    #         elif value == 'infeasible':
-    #             sols_data[key] =  osqp_model.constant('OSQP_INFEASIBLE')
-    #         elif value == 'unbounded':
-    #             sols_data[key] =  osqp_model.constant('OSQP_UNBOUNDED')
-
-
     #
     # GENERATE HEADER FILE
     #
@@ -300,10 +287,10 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
             # Status test get from C code
             if value == 'optimal':
                 f.write("data->%s = %s;\n" % (key, 'OSQP_SOLVED'))
-            elif value == 'infeasible':
-                f.write("data->%s = %s;\n" % (key, 'OSQP_INFEASIBLE'))
-            elif value == 'unbounded':
-                f.write("data->%s = %s;\n" % (key, 'OSQP_UNBOUNDED'))
+            elif value == 'primal_infeasible':
+                f.write("data->%s = %s;\n" % (key, 'OSQP_PRIMAL_INFEASIBLE'))
+            elif value == 'dual_infeasible':
+                f.write("data->%s = %s;\n" % (key, 'OSQP_DUAL_INFEASIBLE'))
         # Check if it is an array or a scalar
         if type(value) is np.ndarray:
             if isinstance(value.flatten(order='F')[0], int):
@@ -407,10 +394,10 @@ def generate_data(problem_name, sols_data):
             # Status test get from C code
             if value == 'optimal':
                 f.write("data->%s = %s;\n" % (key, 'OSQP_SOLVED'))
-            elif value == 'infeasible':
-                f.write("data->%s = %s;\n" % (key, 'OSQP_INFEASIBLE'))
-            elif value == 'unbounded':
-                f.write("data->%s = %s;\n" % (key, 'OSQP_UNBOUNDED'))
+            elif value == 'primal_infeasible':
+                f.write("data->%s = %s;\n" % (key, 'OSQP_PRIMAL_INFEASIBLE'))
+            elif value == 'dual_infeasible':
+                f.write("data->%s = %s;\n" % (key, 'OSQP_DUAL_INFEASIBLE'))
         # Check if it is an array or a scalar
         elif spa.issparse(value):  # Sparse matrix
             write_mat_sparse(f, value, key, "data")

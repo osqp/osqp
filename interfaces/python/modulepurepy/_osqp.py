@@ -14,8 +14,8 @@ import pdb   # Debugger
 # Solver Constants
 OSQP_SOLVED = 1
 OSQP_MAX_ITER_REACHED = -2
-OSQP_INFEASIBLE = -3
-OSQP_UNBOUNDED = -4
+OSQP_PRIMAL_INFEASIBLE = -3
+OSQP_DUAL_INFEASIBLE = -4
 OSQP_UNSOLVED = -10
 
 # Printing interval
@@ -53,12 +53,12 @@ class workspace(object):
     z                      - z iterate
     z_prev                 - previous z iterate
 
-    Infeasibility related workspace variables
+    Primal infeasibility related workspace variables
     -----------------------------------------
     delta_y                - difference of consecutive y
     Atdelta_y              - A' * delta_y
 
-    Unboundedness related workspace variables
+    Dual infeasibility related workspace variables
     -----------------------------------------
     delta_x                - difference of consecutive x
     Pdelta_x               - P * delta_x
@@ -116,8 +116,8 @@ class settings(object):
     max_iter [5000]                     - Maximum number of iterations
     eps_abs  [1e-05]                    - Absolute tolerance
     eps_rel  [1e-05]                    - Relative tolerance
-    eps_inf  [1e-06]                    - Infeasibility tolerance
-    eps_unb  [1e-06]                    - Unboundedness tolerance
+    eps_prim_inf  [1e-06]                    - Primal infeasibility tolerance
+    eps_dual_inf  [1e-06]                    - Dual infeasibility tolerance
     alpha [1.0]                         - Relaxation parameter
     delta [1.0]                         - Regularization parameter for polish
     verbose  [True]                     - Verbosity
@@ -139,8 +139,8 @@ class settings(object):
         self.max_iter = kwargs.pop('max_iter', 5000)
         self.eps_abs = kwargs.pop('eps_abs', 1e-5)
         self.eps_rel = kwargs.pop('eps_rel', 1e-5)
-        self.eps_inf = kwargs.pop('eps_inf', 1e-6)
-        self.eps_unb = kwargs.pop('eps_unb', 1e-6)
+        self.eps_prim_inf = kwargs.pop('eps_prim_inf', 1e-6)
+        self.eps_dual_inf = kwargs.pop('eps_dual_inf', 1e-6)
         self.alpha = kwargs.pop('alpha', 1.6)
         self.delta = kwargs.pop('delta', 1e-7)
         self.verbose = kwargs.pop('verbose', True)
@@ -365,8 +365,8 @@ class OSQP(object):
             (data.n, data.m))
         print("Settings: eps_abs = %.2e, eps_rel = %.2e," % \
             (settings.eps_abs, settings.eps_rel))
-        print("          eps_inf = %.2e, eps_unb = %.2e," % \
-            (settings.eps_inf, settings.eps_unb))
+        print("          eps_prim_inf = %.2e, eps_dual_inf = %.2e," % \
+            (settings.eps_prim_inf, settings.eps_dual_inf))
         print("          rho = %.2f, sigma = %.2f, alpha = %.2f," % \
             (settings.rho, settings.sigma, settings.alpha))
         print("          max_iter = %d" % settings.max_iter)
@@ -393,14 +393,14 @@ class OSQP(object):
     def update_status_string(self, status):
         if status == OSQP_SOLVED:
             return "Solved"
-        elif status == OSQP_INFEASIBLE:
-            return "Infeasible"
+        elif status == OSQP_PRIMAL_INFEASIBLE:
+            return "Primal infeasible"
         elif status == OSQP_UNSOLVED:
             return "Unsolved"
-        elif status == OSQP_UNBOUNDED:
-            return "Unbounded"
+        elif status == OSQP_DUAL_INFEASIBLE:
+            return "Dual infeasible"
         elif status == OSQP_MAX_ITER_REACHED:
-            return "Maximum Iterations Reached"
+            return "Maximum iterations reached"
 
     def cold_start(self):
         """
@@ -494,9 +494,9 @@ class OSQP(object):
                            self.work.data.q +
                            self.work.data.A.T.dot(self.work.y))
 
-    def is_infeasible(self):
+    def is_primal_infeasible(self):
         """
-        Check infeasibility
+        Check primal infeasibility
                 ||A'*v||_2 = 0
         with v = delta_y/||delta_y||_2 given that following condition holds
             u'*(v)_{+} + l'*(v)_{-} < 0
@@ -541,20 +541,20 @@ class OSQP(object):
             # print("||A'*v|| = %6.2e" % (la.norm(self.work.Atdelta_y)))
             # pdb.set_trace()
 
-        eps_inf = self.work.settings.eps_inf
+        eps_prim_inf = self.work.settings.eps_prim_inf
         # Prevent 0 division
-        if la.norm(self.work.delta_y) > eps_inf*eps_inf:
+        if la.norm(self.work.delta_y) > eps_prim_inf*eps_prim_inf:
             self.work.delta_y /= la.norm(self.work.delta_y)
             lhs = self.work.data.u.dot(np.maximum(self.work.delta_y, 0)) + \
                 self.work.data.l.dot(np.minimum(self.work.delta_y, 0))
-            if  lhs < -eps_inf:
+            if  lhs < -eps_prim_inf:
                 self.work.Atdelta_y = self.work.data.A.T.dot(self.work.delta_y)
-                return la.norm(self.work.Atdelta_y) < eps_inf
+                return la.norm(self.work.Atdelta_y) < eps_prim_inf
         return False
 
-    def is_unbounded(self):
+    def is_dual_infeasible(self):
         """
-        Check unboundedness
+        Check dual infeasibility
             ||P*v||_2 = 0
         with v = delta_x / ||delta_x||_2 given that the following
         conditions hold
@@ -563,20 +563,20 @@ class OSQP(object):
             (A * v)_i = { >= 0  if u_i = +inf
                         | <= 0  if l_i = -inf
         """
-        eps_unb = self.work.settings.eps_unb
+        eps_dual_inf = self.work.settings.eps_dual_inf
         # Prevent 0 division
-        if la.norm(self.work.delta_x, np.inf) > eps_unb*eps_unb:
+        if la.norm(self.work.delta_x, np.inf) > eps_dual_inf*eps_dual_inf:
             # Normalize delta_x
             self.work.delta_x /= la.norm(self.work.delta_x)
 
             # First check q'* v < 0
-            if self.work.data.q.dot(self.work.delta_x) < -eps_unb:
+            if self.work.data.q.dot(self.work.delta_x) < -eps_dual_inf:
 
                 # Compute P * v
                 self.work.Pdelta_x = self.work.data.P.dot(self.work.delta_x)
 
                 # Check if ||P*v||_2 = 0
-                if la.norm(self.work.Pdelta_x) < eps_unb:
+                if la.norm(self.work.Pdelta_x) < eps_dual_inf:
 
                     # Compute A * v
                     self.work.Adelta_x = self.work.data.A.dot(
@@ -586,17 +586,17 @@ class OSQP(object):
                         # De Morgan's Law applied to negate
                         # conditions in sec 4.3
                         if ((self.work.data.u[i] < OSQP_INFTY*1e-03) and
-                            (self.work.Adelta_x[i] > eps_unb)) or \
+                            (self.work.Adelta_x[i] > eps_dual_inf)) or \
                             ((self.work.data.l[i] > -OSQP_INFTY*1e-03) and
-                             (self.work.Adelta_x[i] < -eps_unb)):
+                             (self.work.Adelta_x[i] < -eps_dual_inf)):
 
                             # At least one condition not satisfied
                             return False
 
-                    # All conditions passed -> Unbounded
+                    # All conditions passed -> dual infeasible
                     return True
 
-        # No all checks managed to pass. Problem not unbounded
+        # No all checks managed to pass. Problem not dual infeasible
         return False
 
     def update_info(self, iter, polish):
@@ -642,8 +642,8 @@ class OSQP(object):
         """
         pri_check = 0
         dua_check = 0
-        inf_check = 0
-        unb_check = 0
+        prim_inf_check = 0
+        dual_inf_check = 0
 
         if self.work.data.m == 0:  # No constraints -> always  primal feasible
             pri_check = 1
@@ -658,7 +658,7 @@ class OSQP(object):
                 pri_check = 1
 
             # Check infeasibility
-            inf_check = self.is_infeasible()
+            prim_inf_check = self.is_primal_infeasible()
 
         # Compute dual tolerance
         eps_dua = np.sqrt(self.work.data.n) * self.work.settings.eps_abs + \
@@ -667,19 +667,19 @@ class OSQP(object):
         if self.work.info.dua_res < eps_dua:
             dua_check = 1
 
-        # Check unboundedness
-        unb_check = self.is_unbounded()
+        # Check dual infeasibility
+        dual_inf_check = self.is_dual_infeasible()
 
         # Compare residuals and determine solver status
         if pri_check & dua_check:
             self.work.info.status_val = OSQP_SOLVED
             return 1
-        elif inf_check:
-            self.work.info.status_val = OSQP_INFEASIBLE
+        elif prim_inf_check:
+            self.work.info.status_val = OSQP_PRIMAL_INFEASIBLE
             self.work.info.obj_val = OSQP_INFTY
             return 1
-        elif unb_check:
-            self.work.info.status_val = OSQP_UNBOUNDED
+        elif dual_inf_check:
+            self.work.info.status_val = OSQP_DUAL_INFEASIBLE
             self.work.info.obj_val = -OSQP_INFTY
             return 1
 
@@ -711,8 +711,8 @@ class OSQP(object):
         Store current primal and dual solution in solution structure
         """
 
-        if (self.work.info.status_val is not OSQP_INFEASIBLE) and \
-                (self.work.info.status_val is not OSQP_UNBOUNDED):
+        if (self.work.info.status_val is not OSQP_PRIMAL_INFEASIBLE) and \
+                (self.work.info.status_val is not OSQP_DUAL_INFEASIBLE):
             self.work.solution.x = self.work.x
             self.work.solution.y = self.work.y
 
@@ -757,7 +757,7 @@ class OSQP(object):
         self.work.x_prev = np.zeros(n)
         self.work.z_prev = np.zeros(m)
         self.work.y = np.zeros(m)
-        self.work.delta_y = np.zeros(m)       # Delta_y for infeasibility
+        self.work.delta_y = np.zeros(m)       # Delta_y for primal infeasibility
 
         # Flag indicating first run
         self.work.first_run = 1
@@ -1125,10 +1125,10 @@ class OSQP(object):
             return OSQP_SOLVED
         if constant_name == "OSQP_UNSOLVED":
             return OSQP_UNSOLVED
-        if constant_name == "OSQP_INFEASIBLE":
-            return OSQP_INFEASIBLE
-        if constant_name == "OSQP_UNBOUNDED":
-            return OSQP_UNBOUNDED
+        if constant_name == "OSQP_PRIMAL_INFEASIBLE":
+            return OSQP_PRIMAL_INFEASIBLE
+        if constant_name == "OSQP_DUAL_INFEASIBLE":
+            return OSQP_DUAL_INFEASIBLE
         if constant_name == "OSQP_MAX_ITER_REACHED":
             return OSQP_MAX_ITER_REACHED
 

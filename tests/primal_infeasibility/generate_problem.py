@@ -17,7 +17,7 @@ A = spa.random(m, n).tolil()  # Lil for efficiency
 u = 3 + sp.randn(m)
 l = -3 + sp.randn(m)
 
-# Make random problem infeasible
+# Make random problem primal infeasible
 A[int(n/2), :] = A[int(n/2)+1, :]
 l[int(n/2)] = u[int(n/2)+1] + 10 * sp.rand()
 u[int(n/2)] = l[int(n/2)] + 0.5
@@ -26,8 +26,8 @@ u[int(n/2)] = l[int(n/2)] + 0.5
 A = A.tocsc()
 
 # Generate problem solutions
-sols_data = {'status_test': 'infeasible'}
+sols_data = {'status_test': 'primal_infeasible'}
 
 
 # Generate problem data
-cu.generate_problem_data(P, q, A, l, u, 'infeasibility', sols_data)
+cu.generate_problem_data(P, q, A, l, u, 'primal_infeasibility', sols_data)

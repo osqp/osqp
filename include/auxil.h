@@ -36,7 +36,7 @@ void update_xz_tilde(OSQPWorkspace * work);
 
 /**
 * Update x (second ADMM step)
-* Update also delta_x (For unboundedness)
+* Update also delta_x (For for dual infeasibility)
 * @param work Workspace
 */
 void update_x(OSQPWorkspace *work);
@@ -51,7 +51,7 @@ void update_z(OSQPWorkspace *work);
 
 /**
 * Update y variable (fourth ADMM step)
-* Update also delta_y to check for infeasibility
+* Update also delta_y to check for primal infeasibility
 * @param work Workspace
 */
 void update_y(OSQPWorkspace *work);

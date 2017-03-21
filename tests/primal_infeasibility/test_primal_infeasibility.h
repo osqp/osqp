@@ -3,10 +3,10 @@
 #include "util.h"     // Utilities for testing
 #include "minunit.h"  // Basic testing script header
 
-#include "infeasibility/data.h"
+#include "primal_infeasibility/data.h"
 
 
-static char * test_infeasible_qp_solve()
+static char * test_primal_infeasible_qp_solve()
 {
     // Problem settings
     OSQPSettings * settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
@@ -14,11 +14,11 @@ static char * test_infeasible_qp_solve()
     // Structures
     OSQPWorkspace * work;  // Workspace
     OSQPData * data;  // Data
-    infeasibility_sols_data *  sols_data;
+    primal_infeasibility_sols_data *  sols_data;
 
     // Populate data
-    data = generate_problem_infeasibility();
-    sols_data = generate_problem_infeasibility_sols_data();
+    data = generate_problem_primal_infeasibility();
+    sols_data = generate_problem_primal_infeasibility_sols_data();
 
 
     // Define Solver settings as default
@@ -34,13 +34,13 @@ static char * test_infeasible_qp_solve()
     work = osqp_setup(data, settings);
 
     // Setup correct
-    mu_assert("Infeasible QP test solve: Setup error!", work != OSQP_NULL);
+    mu_assert("Primal infeasible QP test solve: Setup error!", work != OSQP_NULL);
 
     // Solve Problem
     osqp_solve(work);
 
     // Compare solver statuses
-    mu_assert("Infeasible QP test solve: Error in solver status!",
+    mu_assert("Primal infeasible QP test solve: Error in solver status!",
               work->info->status_val == sols_data->status_test );
 
 
@@ -49,8 +49,8 @@ static char * test_infeasible_qp_solve()
 
 
     // Cleanup data
-    clean_problem_infeasibility(data);
-    clean_problem_infeasibility_sols_data(sols_data);
+    clean_problem_primal_infeasibility(data);
+    clean_problem_primal_infeasibility_sols_data(sols_data);
 
     // Cleanup
     c_free(settings);
@@ -59,10 +59,10 @@ static char * test_infeasible_qp_solve()
 }
 
 
-static char * test_infeasibility()
+static char * test_primal_infeasibility()
 {
 
-    mu_run_test(test_infeasible_qp_solve);
+    mu_run_test(test_primal_infeasible_qp_solve);
 
 
     return 0;

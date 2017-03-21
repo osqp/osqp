@@ -77,11 +77,11 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     work->z_prev = c_calloc(work->data->m, sizeof(c_float));
     work->y = c_calloc(work->data->m, sizeof(c_float));
 
-    // Infeasibility variables
+    // Primal infeasibility variables
     work->delta_y = c_calloc(work->data->m, sizeof(c_float));
     work->Atdelta_y = c_calloc(work->data->n, sizeof(c_float));
 
-    // Unboundedness variables
+    // Dual infeasibility variables
     work->delta_x = c_calloc(work->data->n, sizeof(c_float));
     work->Pdelta_x = c_calloc(work->data->n, sizeof(c_float));
     work->Adelta_x = c_calloc(work->data->m, sizeof(c_float));

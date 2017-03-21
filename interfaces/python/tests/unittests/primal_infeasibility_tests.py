@@ -8,12 +8,12 @@ import numpy as np
 import unittest
 
 
-class infeeasibility_tests(unittest.TestCase):
+class primal_infeeasibility_tests(unittest.TestCase):
 
     def setUp(self):
         sp.random.seed(6)
         """
-        Setup infeasible problem
+        Setup primal infeasible problem
         """
 
         self.opts = {'verbose': False,
@@ -28,7 +28,7 @@ class infeeasibility_tests(unittest.TestCase):
                      'max_iter': 2500,
                      'polish': False}
 
-    def test_infeasibility_problem(self):
+    def test_primal_infeasible_problem(self):
 
         # Simple QP problem
         sp.random.seed(4)
@@ -43,7 +43,7 @@ class infeeasibility_tests(unittest.TestCase):
         self.u = 3 + sp.randn(self.m)
         self.l = -3 + sp.randn(self.m)
 
-        # Make random problem infeasible
+        # Make random problem primal infeasible
         self.A[int(self.n/2), :] = self.A[int(self.n/2)+1, :]
         self.l[int(self.n/2)] = self.u[int(self.n/2)+1] + 10 * sp.rand()
         self.u[int(self.n/2)] = self.l[int(self.n/2)] + 0.5
@@ -60,9 +60,9 @@ class infeeasibility_tests(unittest.TestCase):
 
         # Assert close
         self.assertEqual(res.info.status_val,
-                         self.model.constant('OSQP_INFEASIBLE'))
+                         self.model.constant('OSQP_PRIMAL_INFEASIBLE'))
 
-    def test_infeasible_and_unbounded_problem(self):
+    def test_primal_and_dual_infeasible_problem(self):
 
         self.n = 2
         self.m = 4
@@ -80,4 +80,4 @@ class infeeasibility_tests(unittest.TestCase):
 
         # Assert close
         self.assertEqual(res.info.status_val,
-                         self.model.constant('OSQP_INFEASIBLE'))
+                         self.model.constant('OSQP_PRIMAL_INFEASIBLE'))

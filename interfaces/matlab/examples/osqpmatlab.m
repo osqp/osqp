@@ -24,8 +24,8 @@ function [x, y, cost, status, iter] = osqpmatlab(problem, warm_start, settings) 
 %     + alpha: overrelaxation parameter
 %     + eps_abs: absolute convergence tolerance
 %     + eps_rel: relative convergence tolerance
-%     + eps_inf: infeasibility tolerance
-%     + eps_unb: unboundedness tolerance
+%     + eps_prim_inf: primal infeasibility tolerance
+%     + eps_dual_inf: dual infeasibility tolerance
 %     + max_iter: maximum number of iterations
 %     + verbose: verbosity of the solver
 %       TODO: Add these!
@@ -38,7 +38,7 @@ function [x, y, cost, status, iter] = osqpmatlab(problem, warm_start, settings) 
 %   - cost: primal cost at the optimum
 %   - status: solver status. Values: 0 Not solved (max iters reached)
 %                                    1 Solved
-%                                   -1 Infeasible
+%                                   -1 Primal infeasible
 %   - iter: number of iterations
 %
 % (C) 2017 by B. Stellato, Lucca, January 11, 2016
@@ -119,13 +119,13 @@ for iter = 1:settings.max_iter
          end
      end
 
-    % Check infeasibility
+    % Check primal infeasibility
     norm_delta_y = norm(delta_y);
-    if norm_delta_y > settings.eps_inf^2
+    if norm_delta_y > settings.eps_prim_inf^2
         delta_y = delta_y/norm_delta_y;
         ineq_lhs = problem.u'*max(delta_y, 0) + problem.l'*min(delta_y, 0);
-        if ineq_lhs < -settings.eps_inf
-            if norm(problem.A'*delta_y) < settings.eps_inf
+        if ineq_lhs < -settings.eps_prim_inf
+            if norm(problem.A'*delta_y) < settings.eps_prim_inf
                   status = -3;
                   cost = Inf;
                   x = NaN(n, 1);
@@ -135,27 +135,25 @@ for iter = 1:settings.max_iter
         end
     end
 
-    % Check unboundedness
+    % Check dual infeasibility
     norm_delta_x = norm(delta_x);
-    if norm_delta_x > settings.eps_unb^2
+    if norm_delta_x > settings.eps_dual_inf^2
        delta_x = delta_x/norm_delta_x;
-       if problem.q'*delta_x < -settings.eps_unb
-           if norm(problem.P*delta_x) < settings.eps_unb
+       if problem.q'*delta_x < -settings.eps_dual_inf
+           if norm(problem.P*delta_x) < settings.eps_dual_inf
                Adelta_x = problem.A * delta_x;
 
                for i = 1:m
-                % De Morgan Law Applied to Unboundedness conditions for A * x
-                % See Section "Detecting infeasibility and unboundedness" of
-                % OSQP Paper
-                   if (problem.u(i) < 1e+18) && (Adelta_x(i) > settings.eps_unb) || ...
-                       (problem.l(i) > -1e+18) && (Adelta_x(i) < -settings.eps_unb)
+                % De Morgan Law Applied to dual infeasibility conditions for A * x
+                   if (problem.u(i) < 1e+18) && (Adelta_x(i) > settings.eps_dual_inf) || ...
+                       (problem.l(i) > -1e+18) && (Adelta_x(i) < -settings.eps_dual_inf)
                         % At least one condition is not satisfied for
-                        % unboundedness
+                        % dual infeasibility
                         break
                    end
                end
 
-               % All conditions passed. Problem unbounded
+               % All conditions passed. Problem dual infeasible
                status = -4;
                cost = -Inf;
                x = NaN(n, 1);

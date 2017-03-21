@@ -66,7 +66,7 @@ void update_xz_tilde(OSQPWorkspace * work){
 
 /**
 * Update x (second ADMM step)
-* Update also delta_x (For unboundedness)
+* Update also delta_x (For dual infeasibility)
 * @param work Workspace
 */
 void update_x(OSQPWorkspace * work){
@@ -223,18 +223,18 @@ c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
 
 
 /**
- * Check if problem is infeasible
+ * Check if problem is primal infeasible
  * @param  work Workspace
  * @return      Integer for True or False
  */
-c_int is_infeasible(OSQPWorkspace * work){
+c_int is_primal_infeasible(OSQPWorkspace * work){
     c_int i; // Index for loops
     c_float norm_delta_y, ineq_lhs = 0;
 
     // Compute norm of delta_y
     norm_delta_y = vec_norm2(work->delta_y, work->data->m);
 
-    if (norm_delta_y > work->settings->eps_inf*work->settings->eps_inf){ // ||delta_y|| > 0
+    if (norm_delta_y > work->settings->eps_prim_inf*work->settings->eps_prim_inf){ // ||delta_y|| > 0
         // Normalize delta_y by its norm
         vec_mult_scalar(work->delta_y, (c_float) 1./norm_delta_y, work->data->m);
 
@@ -244,24 +244,24 @@ c_int is_infeasible(OSQPWorkspace * work){
             ineq_lhs += work->data->u[i] * c_max(work->delta_y[i], 0) + work->data->l[i] * c_min(work->delta_y[i], 0);
         }
 
-        if (ineq_lhs < -work->settings->eps_inf){ // Condition satisfied
-            // Compute and return ||A'delta_y|| < eps_inf
+        if (ineq_lhs < -work->settings->eps_prim_inf){ // Condition satisfied
+            // Compute and return ||A'delta_y|| < eps_prim_inf
             mat_tpose_vec(work->data->A, work->delta_y, work->Atdelta_y, 0, 0);
-            return vec_norm2(work->Atdelta_y, work->data->n) < work->settings->eps_inf;
+            return vec_norm2(work->Atdelta_y, work->data->n) < work->settings->eps_prim_inf;
         }
     }
 
-    // Conditions not satisfied -> not infeasible
+    // Conditions not satisfied -> not primal infeasible
     return 0;
 
 }
 
 /**
- * Check if problem is unbounded
+ * Check if problem is dual infeasible
  * @param  work Workspace
  * @return        Integer for True or False
  */
-c_int is_unbounded(OSQPWorkspace * work){
+c_int is_dual_infeasible(OSQPWorkspace * work){
     c_int i; // Index for loops
     c_float norm_delta_x;
 
@@ -269,44 +269,42 @@ c_int is_unbounded(OSQPWorkspace * work){
     norm_delta_x = vec_norm2(work->delta_x, work->data->n);
 
     // Prevent 0 division || delta_x || > 0
-    if (norm_delta_x > work->settings->eps_unb*work->settings->eps_unb){
+    if (norm_delta_x > work->settings->eps_dual_inf*work->settings->eps_dual_inf){
 
         // Normalize delta_x by its norm
         vec_mult_scalar(work->delta_x, (c_float) 1./norm_delta_x, work->data->n);
 
         // Check first if q'*delta_x < 0
         if (vec_prod(work->data->q, work->delta_x, work->data->n) <
-            -work->settings->eps_unb){
+            -work->settings->eps_dual_inf){
 
             // Compute product P * delta_x
             mat_vec(work->data->P, work->delta_x, work->Pdelta_x, 0);
 
             // Check if || P * delta_x || = 0
-            if (vec_norm2(work->Pdelta_x, work->data->n) < work->settings->eps_unb){
+            if (vec_norm2(work->Pdelta_x, work->data->n) < work->settings->eps_dual_inf){
 
                 // Compute A * delta_x
                 mat_vec(work->data->A, work->delta_x, work->Adelta_x, 0);
 
-                // De Morgan Law Applied to Unboundedness conditions for A * x
-                // See Section "Detecting infeasibility and unboundedness" of
-                // OSQP Paper
+                // De Morgan Law Applied to dual infeasibility conditions for A * x
                 // N.B. Note that 1e-03 is used to adjust the infinity value
                 //      in case the problem is scaled.
                 for (i = 0; i < work->data->m; i++){
-                    if (((work->data->u[i] < OSQP_INFTY*1e-03) && (work->Adelta_x[i] >  work->settings->eps_unb)) ||
-                    ((work->data->l[i] > -OSQP_INFTY*1e-03) && (work->Adelta_x[i] < -work->settings->eps_unb))){
+                    if (((work->data->u[i] < OSQP_INFTY*1e-03) && (work->Adelta_x[i] >  work->settings->eps_dual_inf)) ||
+                    ((work->data->l[i] > -OSQP_INFTY*1e-03) && (work->Adelta_x[i] < -work->settings->eps_dual_inf))){
                         // At least one condition not satisfied
                         return 0;
                     }
                 }
 
-                // All conditions passed -> Unbounded
+                // All conditions passed -> dual infeasible
                 return 1;
             }
         }
     }
 
-    // Conditions not satisfied -> not unbounded
+    // Conditions not satisfied -> not dual infeasible
     return 0;
 
 }
@@ -317,14 +315,14 @@ c_int is_unbounded(OSQPWorkspace * work){
  * @param work Workspace
  */
 void store_solution(OSQPWorkspace *work) {
-    if ((work->info->status_val != OSQP_INFEASIBLE) &&
-        (work->info->status_val != OSQP_UNBOUNDED)){
+    if ((work->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
+        (work->info->status_val != OSQP_DUAL_INFEASIBLE)){
         prea_vec_copy(work->x, work->solution->x, work->data->n);   // primal
         prea_vec_copy(work->y, work->solution->y, work->data->m);  // dual
 
         if(work->settings->scaling) // Unscale solution if scaling has been performed
             unscale_solution(work);
-    } else { // Problem infeasible or unbounded. Solution is NaN
+    } else { // Problem primal or dual infeasible. Solution is NaN
         vec_set_scalar(work->solution->x, OSQP_NAN, work->data->n);
         vec_set_scalar(work->solution->y, OSQP_NAN, work->data->m);
 
@@ -396,14 +394,14 @@ void update_status(OSQPInfo *info, c_int status_val) {
     // Update status string depending on status val
     if(status_val == OSQP_SOLVED)
         c_strcpy(info->status, "Solved");
-    else if (status_val == OSQP_INFEASIBLE)
-        c_strcpy(info->status, "Infeasible");
+    else if (status_val == OSQP_PRIMAL_INFEASIBLE)
+        c_strcpy(info->status, "Primal infeasible");
     else if (status_val == OSQP_UNSOLVED)
         c_strcpy(info->status, "Unsolved");
-    else if (status_val == OSQP_UNBOUNDED)
-        c_strcpy(info->status, "Unbounded");
+    else if (status_val == OSQP_DUAL_INFEASIBLE)
+        c_strcpy(info->status, "Dual infeasible");
     else if (status_val == OSQP_MAX_ITER_REACHED)
-        c_strcpy(info->status, "Maximum Iterations Reached");
+        c_strcpy(info->status, "Maximum iterations reached");
 }
 
 
@@ -416,21 +414,21 @@ void update_status(OSQPInfo *info, c_int status_val) {
 c_int check_termination(OSQPWorkspace *work){
     c_float eps_pri, eps_dua;
     c_int exitflag = 0;
-    c_int pri_check = 0, dua_check = 0, inf_check = 0, unb_check = 0;
+    c_int pri_res_check = 0, dua_res_check = 0, prim_inf_check = 0, dual_inf_check = 0;
 
     // Check residuals
     if (work->data->m == 0){
-        pri_check = 1;  // No contraints -> Primal feasibility always satisfied
+        pri_res_check = 1;  // No contraints -> Primal feasibility always satisfied
     }
     else {
         // Compute primal tolerance
         eps_pri = c_sqrt((c_float) work->data->m) * work->settings->eps_abs +
                   work->settings->eps_rel * vec_norm2(work->z, work->data->m);
         // Primal feasibility check
-        if (work->info->pri_res < eps_pri) pri_check = 1;
+        if (work->info->pri_res < eps_pri) pri_res_check = 1;
 
-        // Infeasibility check
-        inf_check = is_infeasible(work);
+        // Primal infeasibility check
+        prim_inf_check = is_primal_infeasible(work);
     }
 
     // Compute dual tolerance
@@ -439,27 +437,27 @@ c_int check_termination(OSQPWorkspace *work){
               work->settings->eps_rel * work->settings->rho *
               vec_norm2(work->x_prev, work->data->n);
     // Dual feasibility check
-    if (work->info->dua_res < eps_dua) dua_check = 1;
+    if (work->info->dua_res < eps_dua) dua_res_check = 1;
 
 
-    // Check unboundedness
-    unb_check = is_unbounded(work);
+    // Check dual infeasibility
+    dual_inf_check = is_dual_infeasible(work);
 
     // Compare checks to determine solver status
-    if (pri_check && dua_check){
+    if (pri_res_check && dua_res_check){
         // Update final information
         update_status(work->info, OSQP_SOLVED);
         exitflag = 1;
     }
-    else if (inf_check){
+    else if (prim_inf_check){
         // Update final information
-        update_status(work->info, OSQP_INFEASIBLE);
+        update_status(work->info, OSQP_PRIMAL_INFEASIBLE);
         work->info->obj_val = OSQP_INFTY;
         exitflag = 1;
     }
-    else if (unb_check){
+    else if (dual_inf_check){
         // Update final information
-        update_status(work->info, OSQP_UNBOUNDED);
+        update_status(work->info, OSQP_DUAL_INFEASIBLE);
         work->info->obj_val = -OSQP_INFTY;
         exitflag = 1;
     }

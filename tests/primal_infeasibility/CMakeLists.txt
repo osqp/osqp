@@ -3,7 +3,7 @@ get_directory_property(headers
                         DEFINITION headers)
 
 set(headers ${headers}
-${CMAKE_CURRENT_SOURCE_DIR}/test_infeasibility.h PARENT_SCOPE)
+${CMAKE_CURRENT_SOURCE_DIR}/test_primal_infeasibility.h PARENT_SCOPE)
 
 get_directory_property(codegen_headers
                         DIRECTORY ${CMAKE_SOURCE_DIR}/tests

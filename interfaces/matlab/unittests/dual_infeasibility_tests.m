@@ -1,5 +1,4 @@
-classdef unboundedness_tests < matlab.unittest.TestCase
-    %FEASIBILITY_TESTS Solve equality constrained feasibility problem
+classdef dual_infeasibility_tests < matlab.unittest.TestCase
 
     properties
         P
@@ -23,7 +22,7 @@ classdef unboundedness_tests < matlab.unittest.TestCase
             testCase.options.rho = 0.01;
             testCase.options.eps_abs = 1e-04;
             testCase.options.eps_rel = 1e-04;
-            testCase.options.eps_inf = 1e-15;  % Focus only on unboundedness
+            testCase.options.eps_prim_inf = 1e-15;  % Focus only on dual infeasibility
             testCase.options.early_terminate_interval = 1;
 
             % Setup tolerance
@@ -33,7 +32,7 @@ classdef unboundedness_tests < matlab.unittest.TestCase
     end
 
     methods (Test)
-        function test_unbounded_lp(testCase)
+        function test_dual_infeasible_lp(testCase)
 
 
             % unbouned example
@@ -53,12 +52,12 @@ classdef unboundedness_tests < matlab.unittest.TestCase
 
             % Check if they are close
             testCase.verifyEqual(results.info.status_val, ...
-                                 testCase.solver.constant('OSQP_UNBOUNDED'), ...
+                                 testCase.solver.constant('OSQP_DUAL_INFEASIBLE'), ...
                                  'AbsTol', testCase.tol)
 
         end
 
-        function test_unbounded_qp(testCase)
+        function test_dual_infeasible_qp(testCase)
 
 
             % unbouned example
@@ -78,12 +77,12 @@ classdef unboundedness_tests < matlab.unittest.TestCase
 
             % Check if they are close
             testCase.verifyEqual(results.info.status_val, ...
-                                 testCase.solver.constant('OSQP_UNBOUNDED'), ...
+                                 testCase.solver.constant('OSQP_DUAL_INFEASIBLE'), ...
                                  'AbsTol', testCase.tol)
 
         end
 
-        function test_unbounded_and_infeasible(testCase)
+        function test_primal_dual_infeasible(testCase)
             testCase.P = sparse(2,2);
             testCase.q = [-1;-1];
             testCase.A = sparse([1 -1; -1 1;1 0;0 1]);
@@ -95,7 +94,7 @@ classdef unboundedness_tests < matlab.unittest.TestCase
             testCase.solver.setup(testCase.P, testCase.q, ...
                 testCase.A, testCase.l, testCase.u, testCase.options);
 
-            % Set warm starting points to avoid infeasibility detection at
+            % Set warm starting points to avoid primal infeasibility detection at
             % first step
             x = 25*ones(2,1);
             y = -2*ones(4,1);
@@ -106,7 +105,7 @@ classdef unboundedness_tests < matlab.unittest.TestCase
 
             % Check if they are close
             testCase.verifyEqual(results.info.status_val, ...
-                                 testCase.solver.constant('OSQP_UNBOUNDED'), ...
+                                 testCase.solver.constant('OSQP_DUAL_INFEASIBLE'), ...
                                  'AbsTol', testCase.tol)
 
         end

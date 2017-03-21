@@ -35,9 +35,9 @@ def load_maros_meszaros_problem(f):
 def main():
     sp.random.seed(6)
     # Possible ops:  {'small1', 'small2', 'random',
-    #                 'infeasible', 'random_infeasible',
-    #                 'maros_meszaros', 'lp', 'unbounded_lp',
-    #                 'unbounded_qp'}
+    #                 'primal_infeasible', 'random_primal_infeasible',
+    #                 'maros_meszaros', 'lp', 'dual_infeasible_lp',
+    #                 'dual_infeasible_qp'}
     example = 'small1'
 
     if example == 'maros_meszaros':
@@ -69,8 +69,8 @@ def main():
         u = np.array([0., 0., -15, 100, 80])
         l = -np.inf * np.ones(len(u))
         p = mpbpy.QuadprogProblem(P, q, A, l, u)
-    elif example == 'infeasible':
-        # Infeasible example
+    elif example == 'primal_infeasible':
+        # primal_infeasible example
         # P = spspa.eye(2)
         P = spspa.csc_matrix((2, 2))
         q = np.ones(2)
@@ -78,7 +78,7 @@ def main():
         l = np.array([0., 0., -1.])
         u = np.array([np.inf, np.inf, -1.])
         p = mpbpy.QuadprogProblem(P, q, A, l, u)
-    elif example == 'random_infeasible':
+    elif example == 'random_primal_infeasible':
         # Random Example
         n = 50
         m = 500
@@ -91,7 +91,7 @@ def main():
         # l = u
         l = -3 + sp.randn(m)
 
-        # Make random problem infeasible
+        # Make random problem primal_infeasible
         A[int(n/2), :] = A[int(n/2)+1, :]
         l[int(n/2)] = u[int(n/2)+1] + 100 * sp.rand()
         u[int(n/2)] = l[int(n/2)] + 0.5
@@ -99,16 +99,16 @@ def main():
         # l[int(n/4)] = u[int(n/4)] + 50. * sp.rand()
 
         p = mpbpy.QuadprogProblem(P, q, A, l, u)
-    elif example == 'unbounded_lp':
-        # Unbounded example
+    elif example == 'dual_infeasible_lp':
+        # Dual infeasible example
         P = spspa.csc_matrix((2, 2))
         q = np.array([2, -1])
         A = spspa.eye(2)
         l = np.array([0., 0.])
         u = np.array([np.inf, np.inf])
         p = mpbpy.QuadprogProblem(P, q, A, l, u)
-    elif example == 'unbounded_qp':
-        # Unbounded example
+    elif example == 'dual_infeasible_qp':
+        # Dual infeasible example
         P = spspa.csc_matrix(np.diag(np.array([4., 0.])))
         q = np.array([0, 2])
         A = spspa.csc_matrix([[1., 1.], [-1., 1.]])

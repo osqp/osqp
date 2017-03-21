@@ -19,8 +19,8 @@ extern "C" {
 #define OSQP_SOLVED (1)
 #define OSQP_MAX_ITER_REACHED (-2)
 // #define OSQP_SOLVED_INACCURATE (2)
-#define OSQP_INFEASIBLE (-3) /* primal infeasible, dual unbounded   */
-#define OSQP_UNBOUNDED (-4) /* primal unbounded, dual infeasible   */
+#define OSQP_PRIMAL_INFEASIBLE (-3) /* primal infeasible  */
+#define OSQP_DUAL_INFEASIBLE (-4) /* dual infeasible   */
 #define OSQP_UNSOLVED (-10)  /* Unsolved. Only setup function has been called */
 
 
@@ -34,8 +34,8 @@ extern "C" {
 #define MAX_ITER (2500)
 #define EPS_ABS (1E-3)
 #define EPS_REL (1E-3)
-#define EPS_INF (1E-4)
-#define EPS_UNB (1E-4)
+#define EPS_PRIM_INF (1E-4)
+#define EPS_DUAL_INF (1E-4)
 #define ALPHA (1.6)
 
 #ifndef EMBEDDED

@@ -1,4 +1,4 @@
-%% Simple problem 
+%% Simple problem
 m = 50;
 n = 100;
 problem.A  = sparse(randn(m,n));
@@ -7,7 +7,7 @@ problem.u = +rand(m,1) * 2;
 problem.P = sprandsym(n,0.1,0.1,2);
 problem.q = randn(n,1);
 
-%% Infeasible problem
+%% Primal infeasible problem
 rng(4)
 n = 50;
 m = 500;
@@ -18,14 +18,14 @@ problem.A = sprandn(m, n, 0.8);
 problem.u = 3 + randn(m, 1);
 problem.l = -3 + randn(m, 1);
 
-% Make random problem infeasible
+% Make random problem primal infeasible
 nhalf = floor(n/2);
 problem.A(nhalf, :) = problem.A(nhalf + 1, :);
 problem.l(nhalf) = problem.u(nhalf + 1) + 10 * rand();
 problem.u(nhalf) = problem.l(nhalf) + 0.5;
 
 
-%% Unbounded problem
+%% Dual infeasible problem
 problem.P = sparse(diag([4; 0]));
 problem.q = [0; 2];
 problem.A = sparse([1 1; -1 1]);
@@ -38,8 +38,8 @@ problem.u = [2; 3];
 settings.alpha = 1.6;
 settings.rho = 0.1;
 settings.sigma = 0.1;
-settings.eps_inf = 1e-5;
-settings.eps_unb = 1e-5;
+settings.eps_prim_inf = 1e-5;
+settings.eps_dual_inf = 1e-5;
 settings.eps_rel = 1e-5;
 settings.eps_abs = 1e-5;
 settings.max_iter = 2500;

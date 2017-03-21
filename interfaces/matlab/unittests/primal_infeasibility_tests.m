@@ -1,5 +1,4 @@
-classdef infeasibility_tests < matlab.unittest.TestCase
-    %FEASIBILITY_TESTS Solve equality constrained feasibility problem
+classdef primal_infeasibility_tests < matlab.unittest.TestCase
 
     properties
         P
@@ -21,7 +20,7 @@ classdef infeasibility_tests < matlab.unittest.TestCase
             testCase.options = struct;
             testCase.options.verbose = 0;
             testCase.options.rho = 0.01;
-            testCase.options.eps_inf = 1e-05;
+            testCase.options.eps_prim_inf = 1e-05;
             testCase.options.max_iter = 2500;
             testCase.options.early_terminate_interval = 1;
 
@@ -32,7 +31,7 @@ classdef infeasibility_tests < matlab.unittest.TestCase
     end
 
     methods (Test)
-        function test_infeasibility_problem(testCase)
+        function test_primal_infeasibile_problem(testCase)
 
             % Create Problem
             rng(4)
@@ -45,7 +44,7 @@ classdef infeasibility_tests < matlab.unittest.TestCase
             testCase.u = 3 + randn(testCase.m, 1);
             testCase.l = -3 + randn(testCase.m, 1);
 
-            % Make random problem infeasible
+            % Make random problem primal infeasible
             nhalf = floor(testCase.n/2);
             testCase.A(nhalf, :) = ...
                 testCase.A(nhalf + 1, :);
@@ -63,13 +62,13 @@ classdef infeasibility_tests < matlab.unittest.TestCase
 
             % Check if they are close
             testCase.verifyEqual(results.info.status_val, ...
-                                 testCase.solver.constant('OSQP_INFEASIBLE'), ...
+                                 testCase.solver.constant('OSQP_PRIMAL_INFEASIBLE'), ...
                                  'AbsTol', testCase.tol)
 
         end
 
 
-        function test_unbounded_and_infeasible(testCase)
+        function test_primal_dual_infeasible(testCase)
             testCase.n = 2;
             testCase.m = 4;
             testCase.P = sparse(2,2);
@@ -88,7 +87,7 @@ classdef infeasibility_tests < matlab.unittest.TestCase
 
             % Check if they are close
             testCase.verifyEqual(results.info.status_val, ...
-                                 testCase.solver.constant('OSQP_INFEASIBLE'), ...
+                                 testCase.solver.constant('OSQP_PRIMAL_INFEASIBLE'), ...
                                  'AbsTol', testCase.tol)
 
         end

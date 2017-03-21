@@ -121,8 +121,8 @@ typedef struct {
         c_int max_iter; /* maximum iterations to take */
         c_float eps_abs;  /* absolute convergence tolerance  */
         c_float eps_rel;  /* relative convergence tolerance  */
-        c_float eps_inf;  /* infeasibility tolerance  */
-        c_float eps_unb;  /* unboundedness tolerance  */
+        c_float eps_prim_inf;  /* primal infeasibility tolerance  */
+        c_float eps_dual_inf;  /* dual infeasibility tolerance  */
         c_float alpha; /* relaxation parameter */
 
         #ifndef EMBEDDED
@@ -158,9 +158,9 @@ typedef struct {
         c_float *x_prev, *z_prev;               // Previous x and z.
                                                 // N.B. Used also as workspace vectors
                                                 //      for residuals.
-        c_float *delta_y, *Atdelta_y;           // Infeasibility variables delta_y and
+        c_float *delta_y, *Atdelta_y;           // Primal infeasibility variables delta_y and
                                                 // A' * delta_y
-        c_float *delta_x, *Pdelta_x, *Adelta_x; // Unboundedness variables
+        c_float *delta_x, *Pdelta_x, *Adelta_x; // Dual infeasibility variables
                                                 // delta_x, P * delta_x and
                                                 // A * delta_x
         c_float *P_x, *A_x;                     // Used in scaling:

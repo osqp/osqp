@@ -212,9 +212,9 @@ static PyObject * OSQP_solve(PyObject *self, PyObject *args)
     // Stop timer
     solve_time = toc(timer);
 
-    // If solution is not Infeasible or Unbounded store it
-    if (((&workspace)->info->status_val != OSQP_INFEASIBLE) &&
-        ((&workspace)->info->status_val != OSQP_UNBOUNDED)) {
+    // If problem is not primal or dual infeasible store it
+    if (((&workspace)->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
+        ((&workspace)->info->status_val != OSQP_DUAL_INFEASIBLE)) {
             // Store solution into temporary arrays
             // N.B. Needed to be able to store RESULTS even when OSQP structure is deleted
             prea_vec_copy((&workspace)->solution->x, x_arr, (&workspace)->data->n);
@@ -229,7 +229,7 @@ static PyObject * OSQP_solve(PyObject *self, PyObject *args)
             // Set y to own y_arr so that it is freed when y is freed
             PyArray_ENABLEFLAGS((PyArrayObject *) y, NPY_ARRAY_OWNDATA);
 
-    } else { // Problem infeasible or unbounded -> None values for x,y
+    } else { // Problem primal or dual infeasible -> None values for x,y
             x = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
             y = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
     }

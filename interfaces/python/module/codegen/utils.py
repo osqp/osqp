@@ -113,8 +113,8 @@ def write_settings(f, settings, name):
     f.write("%d, " % settings['max_iter'])
     f.write("(c_float)%.20f, " % settings['eps_abs'])
     f.write("(c_float)%.20f, " % settings['eps_rel'])
-    f.write("(c_float)%.20f, " % settings['eps_inf'])
-    f.write("(c_float)%.20f, " % settings['eps_unb'])
+    f.write("(c_float)%.20f, " % settings['eps_prim_inf'])
+    f.write("(c_float)%.20f, " % settings['eps_dual_inf'])
     f.write("(c_float)%.20f, " % settings['alpha'])
 
     f.write("%d, " % settings['early_terminate'])

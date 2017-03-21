@@ -27,8 +27,8 @@ const char* OSQP_SETTINGS_FIELDS[] =
                                 "max_iter",                     //c_int
                                 "eps_abs",                      //c_float
                                 "eps_rel",                      //c_float
-                                "eps_inf",                      //c_float
-                                "eps_unb",                      //c_float
+                                "eps_prim_inf",                      //c_float
+                                "eps_dual_inf",                      //c_float
                                 "alpha",                        //c_float
                                 "delta",                        //c_float
                                 "polish",                       //c_int
@@ -413,8 +413,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         //copy results to mxArray outputs
         //assume that three outputs will always
         //be returned to matlab-side class wrapper
-        if ((osqpData->work->info->status_val != OSQP_INFEASIBLE) &&
-            (osqpData->work->info->status_val != OSQP_UNBOUNDED)){
+        if ((osqpData->work->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
+            (osqpData->work->info->status_val != OSQP_DUAL_INFEASIBLE)){
 
             //primal variables
             castToDoubleArr(osqpData->work->solution->x, mxGetPr(plhs[0]), osqpData->work->data->n);
@@ -422,20 +422,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             //dual variables
             castToDoubleArr(osqpData->work->solution->y, mxGetPr(plhs[1]), osqpData->work->data->m);
 
-        } else { // Problem is infeasible or unbounded -> NaN values
+        } else { // Problem is primal or dual infeasible -> NaN values
 
             // Set primal and dual variables to NaN
             setToNaN(mxGetPr(plhs[0]), osqpData->work->data->n);
             setToNaN(mxGetPr(plhs[1]), osqpData->work->data->m);
         }
 
-        // If problem is infeasible, set objective value to infinity
-        if (osqpData->work->info->status_val == OSQP_INFEASIBLE){
+        // If problem is primal infeasible, set objective value to infinity
+        if (osqpData->work->info->status_val == OSQP_PRIMAL_INFEASIBLE){
             osqpData->work->info->obj_val = mxGetInf();
         }
 
-        // If problem is unbounded, set objective value to -infinity
-        if (osqpData->work->info->status_val == OSQP_UNBOUNDED){
+        // If problem is dual infeasible, set objective value to -infinity
+        if (osqpData->work->info->status_val == OSQP_DUAL_INFEASIBLE){
             osqpData->work->info->obj_val = -mxGetInf();
         }
 
@@ -468,13 +468,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             return;
         }
 
-        if (!strcmp("OSQP_INFEASIBLE", constant)){
-            plhs[0] = mxCreateDoubleScalar(OSQP_INFEASIBLE);
+        if (!strcmp("OSQP_PRIMAL_INFEASIBLE", constant)){
+            plhs[0] = mxCreateDoubleScalar(OSQP_PRIMAL_INFEASIBLE);
             return;
         }
 
-        if (!strcmp("OSQP_UNBOUNDED", constant)){
-            plhs[0] = mxCreateDoubleScalar(OSQP_UNBOUNDED);
+        if (!strcmp("OSQP_DUAL_INFEASIBLE", constant)){
+            plhs[0] = mxCreateDoubleScalar(OSQP_DUAL_INFEASIBLE);
             return;
         }
 
@@ -577,8 +577,8 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
   mxSetField(mxPtr, 0, "max_iter",        mxCreateDoubleScalar(settings->max_iter));
   mxSetField(mxPtr, 0, "eps_abs",         mxCreateDoubleScalar(settings->eps_abs));
   mxSetField(mxPtr, 0, "eps_rel",         mxCreateDoubleScalar(settings->eps_rel));
-  mxSetField(mxPtr, 0, "eps_inf",         mxCreateDoubleScalar(settings->eps_inf));
-  mxSetField(mxPtr, 0, "eps_unb",         mxCreateDoubleScalar(settings->eps_unb));
+  mxSetField(mxPtr, 0, "eps_prim_inf",         mxCreateDoubleScalar(settings->eps_prim_inf));
+  mxSetField(mxPtr, 0, "eps_dual_inf",         mxCreateDoubleScalar(settings->eps_dual_inf));
   mxSetField(mxPtr, 0, "alpha",           mxCreateDoubleScalar(settings->alpha));
   mxSetField(mxPtr, 0, "delta",           mxCreateDoubleScalar(settings->delta));
   mxSetField(mxPtr, 0, "polish",       mxCreateDoubleScalar(settings->polish));
@@ -607,8 +607,8 @@ void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
   settings->max_iter        = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "max_iter"));
   settings->eps_abs         = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_abs"));
   settings->eps_rel         = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_rel"));
-  settings->eps_inf        = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_unb"));
-  settings->eps_unb         = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_unb"));
+  settings->eps_prim_inf        = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_dual_inf"));
+  settings->eps_dual_inf         = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_dual_inf"));
   settings->alpha           = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "alpha"));
   settings->delta           = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "delta"));
   settings->polish       = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polish"));

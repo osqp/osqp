@@ -1,10 +1,11 @@
 ## TODO (Code)
 
 -   [ ] Parameter Selection: `rho`, `sigma` and `alpha` from examples (data driven). N.B. It seems that the optimal `rho` decreases with the problem dimensions
--   [ ] Implement functions to update `sigma`, `eps_inf` and `eps_unb` parameters
+-   [ ] Implement functions to update `sigma`, `eps_prim_inf` and `eps_dual_inf` parameters
 -   [ ] Add functions to update matrices in Python and Matlab
 -   [ ] Change embedded flag with VECTOR_PARAMETERS and MATRIX_PARAMETERS
 -   [ ] Add unittests Python for code generation
+-   [ ] Add CTRL-C interrupt close function!
 -   [ ] Implement code generation in Matlab
 -   [ ] Fix relative criterion for termination condition
 -   [ ] Implement cheaper dual residual computation: (only one matrix-vector computation)

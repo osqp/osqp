@@ -61,7 +61,6 @@ c_int osqp_cleanup(OSQPWorkspace * work);
 #endif
 
 
-//TODO: Add sublevel API functions
 /********************************************
  * Sublevel API                             *
  *                                          *

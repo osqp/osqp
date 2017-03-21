@@ -67,9 +67,9 @@ static PyObject * OSQP_solve(OSQP *self)
          */
         osqp_solve(self->workspace);
 
-        // If solution is not Infeasible or Unbounded store it
-        if ((self->workspace->info->status_val != OSQP_INFEASIBLE) &&
-            (self->workspace->info->status_val != OSQP_UNBOUNDED)){
+        // If problem is not primal or dual infeasible store it
+        if ((self->workspace->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
+            (self->workspace->info->status_val != OSQP_DUAL_INFEASIBLE)){
             // Store solution into temporary arrays
             // N.B. Needed to be able to store RESULTS even when OSQP structure is deleted
             x_arr = vec_copy(self->workspace->solution->x, self->workspace->data->n);
@@ -84,18 +84,18 @@ static PyObject * OSQP_solve(OSQP *self)
             y = PyArray_SimpleNewFromData(1, md, float_type, y_arr);
             // Set y to own y_arr so that it is freed when y is freed
             PyArray_ENABLEFLAGS((PyArrayObject *) y, NPY_ARRAY_OWNDATA);
-        } else { // Problem infeasible or unbounded -> None values for x,y
+        } else { // Problem primal or dual infeasible -> None values for x,y
             x = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
             y = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
         }
 
-        // If problem infeasible, set objective value to numpy infinity
-        if (self->workspace->info->status_val == OSQP_INFEASIBLE){
+        // If problem primal infeasible, set objective value to numpy infinity
+        if (self->workspace->info->status_val == OSQP_PRIMAL_INFEASIBLE){
             self->workspace->info->obj_val = NPY_INFINITY;
         }
 
-        // If problem unbounded, set objective value to numpy -infinity
-        if (self->workspace->info->status_val == OSQP_UNBOUNDED){
+        // If problem dual infeasible, set objective value to numpy -infinity
+        if (self->workspace->info->status_val == OSQP_DUAL_INFEASIBLE){
             self->workspace->info->obj_val = -NPY_INFINITY;
         }
 
@@ -201,7 +201,7 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                  "Ax", "Ai", "Ap", "l", "u",      // Constraints
                                  "scaling", "scaling_norm", "scaling_iter",
                                  "rho", "sigma", "max_iter",
-                                 "eps_abs", "eps_rel", "eps_inf", "eps_unb", "alpha",
+                                 "eps_abs", "eps_rel", "eps_prim_inf", "eps_dual_inf", "alpha",
                                  "delta", "polish", "pol_refine_iter", "verbose",
                                  "early_terminate", "early_terminate_interval",
 								 "warm_start", NULL};  // Settings
@@ -250,8 +250,8 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                          &settings->max_iter,
                                          &settings->eps_abs,
                                          &settings->eps_rel,
-                                         &settings->eps_inf,
-                                         &settings->eps_unb,
+                                         &settings->eps_prim_inf,
+                                         &settings->eps_dual_inf,
                                          &settings->alpha,
                                          &settings->delta,
                                          &settings->polish,
@@ -334,12 +334,12 @@ static PyObject *OSQP_constant(OSQP *self, PyObject *args) {
         return Py_BuildValue("i", OSQP_UNSOLVED);
     }
 
-    if(!strcmp(constant_name, "OSQP_INFEASIBLE")){
-        return Py_BuildValue("i", OSQP_INFEASIBLE);
+    if(!strcmp(constant_name, "OSQP_PRIMAL_INFEASIBLE")){
+        return Py_BuildValue("i", OSQP_PRIMAL_INFEASIBLE);
     }
 
-    if(!strcmp(constant_name, "OSQP_UNBOUNDED")){
-        return Py_BuildValue("i", OSQP_UNBOUNDED);
+    if(!strcmp(constant_name, "OSQP_DUAL_INFEASIBLE")){
+        return Py_BuildValue("i", OSQP_DUAL_INFEASIBLE);
     }
 
     if(!strcmp(constant_name, "OSQP_MAX_ITER_REACHED")){

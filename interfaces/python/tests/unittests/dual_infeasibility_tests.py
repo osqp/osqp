@@ -8,7 +8,7 @@ import scipy.sparse as spspa
 import unittest
 
 
-class unboundedness_tests(unittest.TestCase):
+class dual_infeasibility_tests(unittest.TestCase):
 
     def setUp(self):
         """
@@ -17,8 +17,8 @@ class unboundedness_tests(unittest.TestCase):
         self.opts = {'verbose': False,
                      'eps_abs': 1e-05,
                      'eps_rel': 1e-05,
-                     'eps_inf': 1e-15,  # Focus only on unboundedness
-                     'eps_unb': 1e-6,
+                     'eps_prim_inf': 1e-15,  # Focus only on dual infeasibility
+                     'eps_dual_inf': 1e-6,
                      'scaling': True,
                      'scaling_norm': 2,
                      'scaling_iter': 3,
@@ -29,9 +29,9 @@ class unboundedness_tests(unittest.TestCase):
                      'early_terminate_interval': 1,
                      'pol_refine_iter': 4}
 
-    def test_unbounded_lp(self):
+    def test_dual_infeasible_lp(self):
 
-        # Unbounded example
+        # Dual infeasible example
         self.P = spspa.csc_matrix((2, 2))
         self.q = np.array([2, -1])
         self.A = spspa.eye(2).tocsc()
@@ -47,11 +47,11 @@ class unboundedness_tests(unittest.TestCase):
 
         # Assert close
         self.assertEqual(res.info.status_val,
-                         self.model.constant('OSQP_UNBOUNDED'))
+                         self.model.constant('OSQP_DUAL_INFEASIBLE'))
 
-    def test_unbounded_qp(self):
+    def test_dual_infeasible_qp(self):
 
-        # Unbounded example
+        # Dual infeasible example
         self.P = spspa.csc_matrix(np.diag(np.array([4., 0.])))
         self.q = np.array([0, 2])
         self.A = spspa.csc_matrix([[1., 1.], [-1., 1.]])
@@ -67,9 +67,9 @@ class unboundedness_tests(unittest.TestCase):
 
         # Assert close
         self.assertEqual(res.info.status_val,
-                         self.model.constant('OSQP_UNBOUNDED'))
+                         self.model.constant('OSQP_DUAL_INFEASIBLE'))
 
-    def test_infeasible_and_unbounded_problem(self):
+    def test_primal_and_dual_infeasible_problem(self):
 
         self.n = 2
         self.m = 4
@@ -93,4 +93,4 @@ class unboundedness_tests(unittest.TestCase):
 
         # Assert close
         self.assertEqual(res.info.status_val,
-                         self.model.constant('OSQP_UNBOUNDED'))
+                         self.model.constant('OSQP_DUAL_INFEASIBLE'))

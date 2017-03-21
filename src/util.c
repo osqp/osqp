@@ -77,9 +77,9 @@ void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
     // Print variables and constraints
     c_print("Settings: ");
     c_print("eps_abs = %.2e, eps_rel = %.2e,\n          "
-            "eps_inf = %.2e, eps_unb = %.2e,\n          "
+            "eps_prim_inf = %.2e, eps_dual_inf = %.2e,\n          "
             "rho = %.2f, sigma = %.2f, alpha = %.2f, \n          max_iter = %i\n",
-            settings->eps_abs, settings->eps_rel, settings->eps_inf, settings->eps_unb, settings->rho, settings->sigma,
+            settings->eps_abs, settings->eps_rel, settings->eps_prim_inf, settings->eps_dual_inf, settings->rho, settings->sigma,
             settings->alpha, (int)settings->max_iter);
     if (settings->early_terminate)
         c_print("          early_terminate: active (interval %i)\n", (int)settings->early_terminate_interval);
@@ -183,8 +183,8 @@ void set_default_settings(OSQPSettings * settings) {
         settings->max_iter = MAX_ITER; /* maximum iterations to take */
         settings->eps_abs = (c_float) EPS_ABS;         /* absolute convergence tolerance */
         settings->eps_rel = (c_float) EPS_REL;         /* relative convergence tolerance */
-        settings->eps_inf = (c_float) EPS_INF;         /* infeasibility tolerance */
-        settings->eps_unb = (c_float) EPS_UNB;         /* unboundedness tolerance */
+        settings->eps_prim_inf = (c_float) EPS_PRIM_INF;         /* primal infeasibility tolerance */
+        settings->eps_dual_inf = (c_float) EPS_DUAL_INF;         /* dual infeasibility tolerance */
         settings->alpha = (c_float) ALPHA;     /* relaxation parameter */
 
         #ifndef EMBEDDED
@@ -216,8 +216,8 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
     new->max_iter = settings->max_iter;
     new->eps_abs = settings->eps_abs;
     new->eps_rel = settings->eps_rel;
-    new->eps_inf = settings->eps_inf;
-    new->eps_unb = settings->eps_unb;
+    new->eps_prim_inf = settings->eps_prim_inf;
+    new->eps_dual_inf = settings->eps_dual_inf;
     new->alpha = settings->alpha;
     new->delta = settings->delta;
     new->polish = settings->polish;
