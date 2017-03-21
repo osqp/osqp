@@ -11,17 +11,17 @@ def gen_diesel_test():
     # Load data (convert to sparse)
     A = spspa.csc_matrix(np.loadtxt(direct + 'A.oqp'))
     A = spspa.vstack([A, spspa.eye(A.shape[1])]).tocsc()
-    lA = np.loadtxt(direct + 'lbA.oqp')
-    uA = np.loadtxt(direct + 'ubA.oqp')
-    lA = np.hstack([lA, np.loadtxt(direct + 'lb.oqp')])
-    uA = np.hstack([uA, np.loadtxt(direct + 'ub.oqp')])
+    l = np.loadtxt(direct + 'lbA.oqp')
+    u = np.loadtxt(direct + 'ubA.oqp')
+    l = np.hstack([l, np.loadtxt(direct + 'lb.oqp')])
+    u = np.hstack([u, np.loadtxt(direct + 'ub.oqp')])
     P = spspa.csc_matrix(np.loadtxt(direct + 'H.oqp'))
     q = np.loadtxt(direct + 'g.oqp')
 
     ipdb.set_trace()
-    # Get only first elements of lbA and q
-    lA = lA[0, :]
-    uA = uA[0, :]
+    # Get only first elements of l, u and q
+    l = l[0, :]
+    u = u[0, :]
     q = q[0, :]
 
     # A = spspa.rand(4, 3, 0.3).tocsc()
@@ -37,4 +37,4 @@ def gen_diesel_test():
     # Name of the problem
     problem_name = "diesel"
 
-    cu.generate_code(P, q, A, lA, uA, problem_name)
+    cu.generate_code(P, q, A, l, u, problem_name)

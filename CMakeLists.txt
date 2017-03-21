@@ -87,7 +87,7 @@ endif (DLONG)
 
 # Set Compiler flags
 # ----------------------------------------------
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -funroll-loops -O3")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
 set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")      # Include math
@@ -163,21 +163,83 @@ else()
     )
 endif()
 
+
+
+# if we are building the Python interface, let's look for Python
+# and set some options
+# -----------------------------------------------------------------
+if (PYTHON)
+    # Look for Python libraries
+    find_package(PythonLibs)
+
+    if (NOT PYTHONLIBS_FOUND)
+            message( FATAL_ERROR "You need Python libraries to build the Python interface" )
+    endif (NOT PYTHONLIBS_FOUND)
+
+    # Include directories for Python headers
+    include_directories(${PYTHON_INCLUDE_DIRS})
+
+    # Pass PYTHON flag to C compiler
+    add_definitions(-DPYTHON)
+
+    # Disable unittests
+    message(STATUS "Disabling UNITTESTS because we are building Python interface")
+    set(UNITTESTS OFF)
+endif (PYTHON)
+
+
+# if we are building the Matlab interface, let's look for Matlab
+# and set some options
+# -----------------------------------------------------------------
+if (MATLAB)
+    find_package(Matlab)
+    if (NOT Matlab_FOUND)
+        message( FATAL_ERROR "You need Matlab libraries to build the Matlab interface" )
+    endif (NOT Matlab_FOUND)
+
+    # Include directories for Python headers
+    include_directories(${Matlab_INCLUDE_DIRS})
+
+    # Pass MATLAB flag to C compiler
+    add_definitions(-DMATLAB)
+
+    # Disable unittests
+    message(STATUS "Disabling UNITTESTS because we are building Matlab interface")
+    set(UNITTESTS OFF)
+
+endif (MATLAB)
+
+
+
+
+
 # Create  Library
 # ----------------------------------------------
 
 # Add linear systems solver
 add_subdirectory(lin_sys)
 
-# Create osqp shared library
-add_library (osqpdir SHARED ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_direct>)
-
 add_library (osqpdirstatic STATIC ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_direct>)
 
-# Create demo executable
-add_executable (osqp_demo_direct ${PROJECT_SOURCE_DIR}/examples/osqp_demo_direct.c)
-target_link_libraries (osqp_demo_direct osqpdir)
+if (MATLAB)
+target_link_libraries (osqpdirstatic ${Matlab_LIBRARIES})
+endif (MATLAB)
 
+if (PYTHON)
+target_link_libraries (osqpdirstatic ${PYTHON_LIBRARIES})
+endif (PYTHON)
+
+# If we are building Python or Matlab interface:
+#   - do not build shared library
+#   - do not build demo
+if (NOT PYTHON AND NOT MATLAB)
+    # Create osqp shared library
+    add_library (osqpdir SHARED ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_direct>)
+
+    # Create demo executable
+    add_executable (osqp_demo_direct ${PROJECT_SOURCE_DIR}/examples/osqp_demo_direct.c)
+    target_link_libraries (osqp_demo_direct osqpdir)
+endif (NOT PYTHON AND NOT MATLAB)
 
 
 # Add testing

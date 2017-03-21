@@ -28,7 +28,9 @@ function [x, y, cost, status, iter] = osqpmatlab(problem, warm_start, settings) 
 %     + eps_unb: unboundedness tolerance
 %     + max_iter: maximum number of iterations
 %     + verbose: verbosity of the solver
+%       TODO: Add these!
 %     + early_terminate: evaluate termination criteria
+%     + early_terminate_interval: interval for evaluating termination criteria
 %
 % OUTPUTS
 %   - x: primal solution

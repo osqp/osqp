@@ -23,7 +23,7 @@ static char * test_basic_qp_solve()
 
     // Define Solver settings as default
     set_default_settings(settings);
-    settings->max_iter = 200;
+    settings->max_iter = 2000;
     settings->alpha = 1.6;
     settings->polish = 1;
     settings->scaling = 0;

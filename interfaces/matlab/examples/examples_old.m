@@ -79,11 +79,12 @@ l = [1.0; 0.0; 0.0];
 u = [1.0; 0.7; 0.7];
 
 ostest = osqp;
-ostest.setup(P, q, A, l, u);
+ostest.setup(P, q, A, l, u, 'verbose', 1);
 resOSQP = ostest.solve();
 
-
+% Solve with quadprog
+[x,f,flag] = quadprog(P,q,[A; -A], [u;-l]);
 % Solve with CPLEX
-cpxopts = cplexoptimset();
-resCPLEX = cplexqp(P, q, [A; -A], [u;-l], cpxopts);
+% cpxopts = cplexoptimset();
+% resCPLEX = cplexqp(P, q, [A; -A], [u;-l], cpxopts);
 

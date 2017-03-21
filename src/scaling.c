@@ -1,5 +1,6 @@
 #include "scaling.h"
 
+#if EMBEDDED != 1
 // Scale data stored in workspace
 c_int scale_data(OSQPWorkspace * work){
     // Temporary pointers to P->x and A->x to keep them
@@ -110,7 +111,7 @@ c_int scale_data(OSQPWorkspace * work){
 
     return 0;
 }
-
+#endif
 
 /**
  * Unscale problem matrices

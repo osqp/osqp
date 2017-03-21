@@ -15,7 +15,7 @@ extern "C" {
 
 /* DATA CUSTOMIZATIONS (depending on memory manager)-----------------------   */
 /* define custom printfs and memory allocation (e.g. matlab or python) */
-#ifdef MATLAB_MEX_FILE
+#ifdef MATLAB
     #include "mex.h"
     static void* c_calloc(size_t num, size_t size){
         void *m = mxCalloc(num,size);
@@ -47,10 +47,10 @@ extern "C" {
       return m;
     }
     #endif
-    // #define c_calloc(n,s) ({                     \
-    //         void * p_calloc = c_malloc((n)*(s)); \
-    //         memset(p_calloc, 0, (n)*(s));        \
-    //         p_calloc;                            \
+    // #define c_calloc(n,s) ({
+    //         void * p_calloc = c_malloc((n)*(s));
+    //         memset(p_calloc, 0, (n)*(s));
+    //         p_calloc;
     //     })
     #define c_free PyMem_Free
     #define c_realloc PyMem_Realloc
@@ -120,7 +120,7 @@ typedef float c_float;                /* for numerical values  */
 #include <stdio.h>
 #include <string.h>
 
-#ifdef MATLAB_MEX_FILE
+#ifdef MATLAB
 #define c_print mexPrintf
 // The following trick slows down the performance a lot. Since many solvers actually
 //call mexPrintf and immediately force print buffer flush
@@ -140,6 +140,8 @@ typedef float c_float;                /* for numerical values  */
 //   mexEvalString("drawnow;");   // flush matlab print buffer
 //   return out;
 // }
+#elif defined PYTHON
+#define c_print printf
 #else
 #define c_print printf
 #endif

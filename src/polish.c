@@ -221,7 +221,7 @@ c_int polish(OSQPWorkspace *work) {
     mat_vec(work->data->A, work->pol->x, work->pol->z, 0);
 
     // Compute primal and dual residuals at the polished solution
-    update_info(work, 0, 1);
+    update_info(work, 0, 1, 1);
 
     // Update timing
     #ifdef PROFILING

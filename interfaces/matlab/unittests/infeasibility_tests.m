@@ -16,13 +16,14 @@ classdef infeasibility_tests < matlab.unittest.TestCase
 
     methods(TestMethodSetup)
         function setup_problem(testCase)
-  
+
             % Setup solver options
             testCase.options = struct;
             testCase.options.verbose = 0;
             testCase.options.rho = 0.01;
             testCase.options.eps_inf = 1e-05;
             testCase.options.max_iter = 2500;
+            testCase.options.early_terminate_interval = 1;
 
             % Setup tolerance
             testCase.tol = 1e-04;
@@ -32,7 +33,7 @@ classdef infeasibility_tests < matlab.unittest.TestCase
 
     methods (Test)
         function test_infeasibility_problem(testCase)
-            
+
             % Create Problem
             rng(4)
             testCase.n = 50;
@@ -51,12 +52,12 @@ classdef infeasibility_tests < matlab.unittest.TestCase
             testCase.l(nhalf) = testCase.u(nhalf + 1) + 10 * rand();
             testCase.u(nhalf) = testCase.l(nhalf) + 0.5;
 
-            
+
             % Setup solver
             testCase.solver = osqp;
             testCase.solver.setup(testCase.P, testCase.q, ...
                 testCase.A, testCase.l, testCase.u, testCase.options);
-            
+
             % Solve with OSQP
             results = testCase.solver.solve();
 
@@ -66,8 +67,8 @@ classdef infeasibility_tests < matlab.unittest.TestCase
                                  'AbsTol', testCase.tol)
 
         end
-        
-        
+
+
         function test_unbounded_and_infeasible(testCase)
             testCase.n = 2;
             testCase.m = 4;
@@ -81,7 +82,7 @@ classdef infeasibility_tests < matlab.unittest.TestCase
             testCase.solver = osqp;
             testCase.solver.setup(testCase.P, testCase.q, ...
                 testCase.A, testCase.l, testCase.u, testCase.options);
-            
+
             % Solve with OSQP
             results = testCase.solver.solve();
 

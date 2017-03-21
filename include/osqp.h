@@ -253,6 +253,16 @@ c_int osqp_update_warm_start(OSQPWorkspace * work, c_int warm_start_new);
 c_int osqp_update_early_terminate(OSQPWorkspace * work, c_int early_terminate_new);
 
 
+
+/**
+ * Update early_terminate setting
+ * @param  work                          Workspace
+ * @param  early_terminate_interval_new  New early_terminate setting
+ * @return                               Exitflag
+ */
+c_int osqp_update_early_terminate_interval(OSQPWorkspace * work, c_int early_terminate_interval_new);
+
+
 #ifndef EMBEDDED
 
 /**

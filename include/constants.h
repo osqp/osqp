@@ -29,24 +29,31 @@ extern "C" {
  * Solver Parameters and Settings *
  **********************************/
 
-#define RHO (1.6)
-#define SIGMA (0.1)
+#define RHO (0.1)
+#define SIGMA (0.001)
 #define MAX_ITER (2500)
-#define EPS_ABS (1E-5)
-#define EPS_REL (1E-5)
-#define EPS_INF (1E-6)
-#define EPS_UNB (1E-6)
+#define EPS_ABS (1E-3)
+#define EPS_REL (1E-3)
+#define EPS_INF (1E-4)
+#define EPS_UNB (1E-4)
 #define ALPHA (1.6)
+
+#ifndef EMBEDDED
 #define DELTA (1E-7)
-#define POLISHING (1)
+#define POLISH (1)
+#define POL_REFINE_ITER (3)
 #define VERBOSE (1)
+#endif
+
 #define EARLY_TERMINATE (1)
+#define EARLY_TERMINATE_INTERVAL (25)
 #define WARM_START (1)
 #define SCALING (1)
+
+#if EMBEDDED != 1
 #define SCALING_NORM (2)
 #define SCALING_ITER (3)
-#define POL_REFINE_ITER (3)
-
+#endif
 
 /* Printing */
 #define PRINT_INTERVAL 100

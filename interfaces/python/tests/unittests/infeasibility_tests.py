@@ -23,6 +23,7 @@ class infeeasibility_tests(unittest.TestCase):
                      'scaling_norm': 2,
                      'scaling_iter': 3,
                      'rho': 1.6,
+                     'sigma': 0.1,
                      'alpha': 1.6,
                      'max_iter': 2500,
                      'polish': False}

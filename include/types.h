@@ -46,7 +46,11 @@ typedef struct {
         c_int iter;          /* number of iterations taken */
         char status[32];     /* status string, e.g. 'Solved' */
         c_int status_val;    /* status as c_int, defined in constants.h */
+
+        #ifndef EMBEDDED
         c_int status_polish; /* polish status: successful (1), unperformed (0), (-1) unsuccessful */
+        #endif
+
         c_float obj_val;     /* primal objective */
         c_float pri_res;     /* norm of primal residual */
         c_float dua_res;     /* norm of dual residual */
@@ -60,6 +64,7 @@ typedef struct {
 } OSQPInfo;
 
 
+#ifndef EMBEDDED
 /* Polish structure */
 typedef struct {
     csc *Ared;            // Active rows of A
@@ -78,7 +83,7 @@ typedef struct {
     c_float pri_res;      // primal residual at polished solution
     c_float dua_res;      // dual residual at polished solution
 } OSQPPolish;
-
+#endif
 
 
 
@@ -106,8 +111,11 @@ typedef struct {
         c_float rho;     /* ADMM step rho */
         c_float sigma;   /* ADMM step sigma */
         c_int scaling;   /* boolean, heuristic data rescaling */
+
+        #if EMBEDDED != 1
         c_int scaling_norm; /* scaling norm */
         c_int scaling_iter; /* scaling iterations */
+        #endif
 
         /* these can change for multiple runs with the same call to osqp_init */
         c_int max_iter; /* maximum iterations to take */
@@ -116,12 +124,19 @@ typedef struct {
         c_float eps_inf;  /* infeasibility tolerance  */
         c_float eps_unb;  /* unboundedness tolerance  */
         c_float alpha; /* relaxation parameter */
+
+        #ifndef EMBEDDED
         c_float delta; /* regularization parameter for polish */
         c_int polish; /* boolean, polish ADMM solution */
         c_int pol_refine_iter; /* iterative refinement steps in polish */
+
         c_int verbose; /* boolean, write out progress */
-        c_int early_terminate; /* boolean, terminate if stopping criterion is met */
-        c_int warm_start; /* boolean, warm start */
+        #endif
+
+        c_int early_terminate;  // boolean, terminate if stopping criterion is met
+        c_int early_terminate_interval; // boolean, interval for checking termination,
+                                        // if early_terminate == 1.
+        c_int warm_start; // boolean, warm start
 } OSQPSettings;
 
 
@@ -133,12 +148,14 @@ typedef struct {
         // Linear System solver structure
         Priv * priv;
 
+        #ifndef EMBEDDED
         // Polish structure
         OSQPPolish * pol;
+        #endif
 
         // Internal solver variables
         c_float *x, *y, *z, *xz_tilde;          // Iterates
-        c_float *x_prev, *z_prev;               // Previous x and x.
+        c_float *x_prev, *z_prev;               // Previous x and z.
                                                 // N.B. Used also as workspace vectors
                                                 //      for residuals.
         c_float *delta_y, *Atdelta_y;           // Infeasibility variables delta_y and
@@ -150,8 +167,7 @@ typedef struct {
                                                 //  - preallocate values of P->x, A->x
         c_float *D_temp, *E_temp;               //  - temporary scaling vectors
 
-        // flag indicating whether the solve function has been run before
-        c_int first_run;
+
 
         // Other internal structures
         OSQPSettings *settings;          // Problem settings
@@ -161,6 +177,8 @@ typedef struct {
 
         #ifdef PROFILING
         OSQPTimer * timer;  // Timer object
+        // flag indicating whether the solve function has been run before
+        c_int first_run;
         #endif
 } OSQPWorkspace;
 

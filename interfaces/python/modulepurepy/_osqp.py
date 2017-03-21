@@ -113,18 +113,19 @@ class settings(object):
     scaling_norm [2]           - Scaling norm in SK algorithm
 
     -> These can be changed without running setup
-    max_iter [5000]            - Maximum number of iterations
-    eps_abs  [1e-05]           - Absolute tolerance
-    eps_rel  [1e-05]           - Relative tolerance
-    eps_inf  [1e-06]           - Infeasibility tolerance
-    eps_unb  [1e-06]           - Unboundedness tolerance
-    alpha [1.0]                - Relaxation parameter
-    delta [1.0]                - Regularization parameter for polish
-    verbose  [True]            - Verbosity
-    early_terminate  [True]    - Evalute termination criteria
-    warm_start [False]         - Reuse solution from previous solve
-    polish  [True]          - Solution polish
-    pol_refine_iter  [3]       - Number of iterative refinement iterations
+    max_iter [5000]                     - Maximum number of iterations
+    eps_abs  [1e-05]                    - Absolute tolerance
+    eps_rel  [1e-05]                    - Relative tolerance
+    eps_inf  [1e-06]                    - Infeasibility tolerance
+    eps_unb  [1e-06]                    - Unboundedness tolerance
+    alpha [1.0]                         - Relaxation parameter
+    delta [1.0]                         - Regularization parameter for polish
+    verbose  [True]                     - Verbosity
+    early_terminate  [True]             - Evalute termination criteria
+    early_terminate_interval  [True]    - Interval for evaluating termination criteria
+    warm_start [False]                  - Reuse solution from previous solve
+    polish  [True]                      - Solution polish
+    pol_refine_iter  [3]                - Number of iterative refinement iterations
     """
 
     def __init__(self, **kwargs):
@@ -144,6 +145,7 @@ class settings(object):
         self.delta = kwargs.pop('delta', 1e-7)
         self.verbose = kwargs.pop('verbose', True)
         self.early_terminate = kwargs.pop('early_terminate', True)
+        self.early_terminate_interval = kwargs.pop('early_terminate_interval', True)
         self.warm_start = kwargs.pop('warm_start', False)
         self.polish = kwargs.pop('polish', True)
         self.pol_refine_iter = kwargs.pop('pol_refine_iter', 3)
@@ -1092,6 +1094,15 @@ class OSQP(object):
             raise ValueError("early_terminate should be either True or False")
 
         self.work.settings.early_terminate = early_terminate_new
+
+    def update_early_terminate_interval(self, early_terminate_interval_new):
+        """
+        Update early_terminate_interval parameter
+        """
+        if (early_terminate_interval_new is not True) & (early_terminate_interval_new is not False):
+            raise ValueError("early_terminate_interval should be either True or False")
+
+        self.work.settings.early_terminate_interval = early_terminate_interval_new
 
     def update_warm_start(self, warm_start_new):
         """

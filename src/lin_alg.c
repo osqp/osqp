@@ -122,7 +122,7 @@ void prea_vec_copy(c_float *a, c_float * b, c_int n) {
 void vec_ew_recipr(const c_float *a, c_float *b, c_int n){
     c_int i;
     for (i=0; i<n; i++){
-        b[i] = 1.0/a[i];
+        b[i] = (c_float) 1.0 /a[i];
     }
 }
 
@@ -178,7 +178,7 @@ void vec_ew_min(c_float *a, c_int n, c_float min_val){
 i.e. scale the rows of A by d
 */
 void mat_premult_diag(csc *A, const c_float *d){
-    int j, i;
+    c_int j, i;
     for (j=0; j<A->n; j++){  // Cycle over columns
         for (i=A->p[j]; i<A->p[j+1]; i++){   // Cycle every row in the column
             A->x[i] *= d[A->i[i]];  // Scale by corresponding element of d for row i
@@ -190,7 +190,7 @@ void mat_premult_diag(csc *A, const c_float *d){
 i.e. scale the columns of A by d
 */
 void mat_postmult_diag(csc *A, const c_float *d){
-    int j, i;
+    c_int j, i;
     for (j=0; j<A->n; j++){  // Cycle over columns j
         for (i=A->p[j]; i<A->p[j+1]; i++){  // Cycle every row i in column j
             A->x[i] *= d[j];  // Scale by corresponding element of d for column j
@@ -229,7 +229,7 @@ void mat_ew_abs(csc * A){
  *    y -=  A*x  (if plus_eq == -1)
 */
 void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq) {
-    int i, j;
+    c_int i, j;
     if (!plus_eq) {
         // y = 0
         for (i=0; i<A->m; i++) {
@@ -267,7 +267,7 @@ void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq) {
 */
 void mat_tpose_vec(const csc *A, const c_float *x, c_float *y,
                    c_int plus_eq, c_int skip_diag) {
-    int i, j, k;
+    c_int i, j, k;
     if (!plus_eq){
         // y = 0
         for (i=0; i<A->n; i++) {
@@ -331,7 +331,7 @@ c_float quad_form(const csc * P, const c_float * x){
             i = P->i[ptr]; // Row index
 
             if (i == j){  // Diagonal element
-                quad_form += .5*P->x[ptr]*x[i]*x[i];
+                quad_form += (c_float) .5*P->x[ptr]*x[i]*x[i];
             }
             else if (i < j) {  // Off-diagonal element
                 quad_form += P->x[ptr]*x[i]*x[j];

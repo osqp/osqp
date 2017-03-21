@@ -383,7 +383,7 @@ void LDL_ltsolve
     c_float Lx [ ]	/* input of size lnz=Lp[n], not modified */
 )
 {
-    int j, p, p2 ;
+    LDL_int j, p, p2 ;
     for (j = n-1 ; j >= 0 ; j--)
     {
 	p2 = Lp [j+1] ;
@@ -394,6 +394,17 @@ void LDL_ltsolve
     }
 }
 
+/* ========================================================================== */
+/* === ldl_dinvsolve: solve Dx=b  ============================================ */
+/* ========================================================================== */
+
+// x = Dinv*x
+void LDL_dinvsolve(LDL_int n, c_float X [ ], c_float Dinv [ ]) {
+    LDL_int i;
+    for (i = 0 ; i < n ; i++){
+        X[i] *= Dinv[i];
+    }
+}
 
 /* ========================================================================== */
 /* === ldl_perm: permute a vector, x=Pb ===================================== */

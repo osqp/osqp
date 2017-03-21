@@ -76,9 +76,12 @@ void store_solution(OSQPWorkspace *work);
 
 /**
 * Update solver information
-* @param work Workspace
+* @param work               Workspace
+* @param iter               Iteration number
+* @param compute_objective  Boolean (if compute the objective or not)
+* @param polish             Boolean (if called from polish)
 */
-void update_info(OSQPWorkspace *work, c_int iter, c_int polish);
+void update_info(OSQPWorkspace *work, c_int iter, c_int compute_objective, c_int polish);
 
 
 /**

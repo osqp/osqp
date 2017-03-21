@@ -21,6 +21,7 @@ class warm_start_tests(unittest.TestCase):
                      'rho': 0.05,
                      'sigma': 0.01,
                      'polish': False,
+                     'early_terminate_interval': 1,
                      'pol_refine_iter': 4}
 
     def test_warm_start(self):

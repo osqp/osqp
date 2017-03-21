@@ -1,16 +1,19 @@
 """
-OSQP solver pure python implementation
+Python interface module for OSQP solver v0.0.0
 """
+from __future__ import print_function
 from builtins import object
-import _osqppurepy  # Internal low level module
+import osqp._osqp  as _osqp # Internal low level module
 from warnings import warn
 import numpy as np
 from scipy import sparse
-
+from platform import system
+import osqp.codegen as cg
+import sys
 
 class OSQP(object):
     def __init__(self):
-        self._model = _osqppurepy.OSQP()
+        self._model = _osqp.OSQP()
 
     def version(self):
         return self._model.version()
@@ -25,7 +28,10 @@ class OSQP(object):
         solver settings can be specified as additional keyword arguments
         """
 
+        #
         # Get problem dimensions
+        #
+
         if P is None:
             if q is not None:
                 n = len(q)
@@ -40,11 +46,10 @@ class OSQP(object):
         else:
             m = A.shape[0]
 
-        # Check if second dimension of A is correct
-        if A.shape[1] != n:
-            raise ValueError("Dimension n in A and P does not match")
+        #
+        # Create parameters if they are None
+        #
 
-        # Check if parameters are None
         if (A is None and (l is not None or u is not None)) or \
                 (A is not None and (l is None and u is None)):
             raise ValueError("A must be supplied together " +
@@ -73,7 +78,23 @@ class OSQP(object):
             l = np.zeros(A.shape[0])
             u = np.zeros(A.shape[0])
 
-        # Check if matrices are sparse
+        #
+        # Check vector dimensions (not checked from C solver)
+        #
+
+        # Check if second dimension of A is correct
+        # if A.shape[1] != n:
+        #     raise ValueError("Dimension n in A and P does not match")
+        if len(q) != n:
+            raise ValueError("Incorrect dimension of q")
+        if len(l) != m:
+            raise ValueError("Incorrect dimension of l")
+        if len(u) != m:
+            raise ValueError("Incorrect dimension of u")
+
+        #
+        # Check or Sparsify Matrices
+        #
         if not sparse.issparse(P) and isinstance(P, np.ndarray) and \
                 len(P.shape) == 2:
             raise TypeError("P is required to be a sparse matrix")
@@ -112,7 +133,7 @@ class OSQP(object):
         u = kwargs.pop('u', None)
 
         # Get problem dimensions
-        (n, m) = (self._model.work.data.n, self._model.work.data.m)
+        (n, m) = self._model.dimensions()
 
         if q is not None:
             if len(q) != n:
@@ -148,7 +169,7 @@ class OSQP(object):
 
         It is possible to change: 'max_iter', 'eps_abs', 'eps_rel', 'alpha',
                                   'delta', 'polish', 'pol_refine_iter',
-                                  'verbose', 'early_terminate'
+                                  'verbose', 'early_terminate', 'early_terminate_interval'
         """
 
         # get arguments
@@ -161,6 +182,7 @@ class OSQP(object):
         pol_refine_iter = kwargs.pop('pol_refine_iter', None)
         verbose = kwargs.pop('verbose', None)
         early_terminate = kwargs.pop('early_terminate', None)
+        early_terminate_interval = kwargs.pop('early_terminate_interval', None)
         warm_start = kwargs.pop('warm_start', None)
 
         # update them
@@ -191,6 +213,9 @@ class OSQP(object):
         if early_terminate is not None:
             self._model.update_early_terminate(early_terminate)
 
+        if early_terminate_interval is not None:
+            self._model.update_early_terminate_interval(early_terminate_interval)
+
         if warm_start is not None:
             self._model.update_warm_start(warm_start)
 
@@ -203,6 +228,7 @@ class OSQP(object):
            pol_refine_iter is None and \
            verbose is None and \
            early_terminate is None and \
+           early_terminate_interval is None and \
            warm_start is None:
             ValueError("No updatable settings has been specified!")
 
@@ -224,17 +250,17 @@ class OSQP(object):
         Warm start primal or dual variables
         """
         # get problem dimensions
-        (n, m) = (self._model.work.data.n, self._model.work.data.m)
+        (n, m) = self._model.dimensions()
 
         if x is not None:
-            if len(x)!=n:
+            if len(x) != n:
                 raise ValueError("Wrong dimension for variable x")
 
             if y is None:
                 self._model.warm_start_x(x)
 
         if y is not None:
-            if len(y)!=m:
+            if len(y) != m:
                 raise ValueError("Wrong dimension for variable y")
 
             if x is None:
@@ -242,3 +268,31 @@ class OSQP(object):
 
         if x is not None and y is not None:
             self._model.warm_start(x, y)
+
+        if x is None and y is None:
+            raise ValueError("Unrecognized fields")
+
+    def codegen(self, folder, project_type="Makefile", embedded=1,
+                python_ext_name='emosqp', force_rewrite=False, loop_unrolling=False):
+        """
+        Generate embeddable C code for the problem
+        """
+
+        # Convert workspace to python
+        sys.stdout.write("Getting workspace from OSQP object... \t\t\t\t")
+        sys.stdout.flush()
+        work = self._model._get_workspace()
+        print("[done]")
+
+        if project_type == 'Makefile':
+            if system() == 'Windows':
+                project_type = "MinGW Makefiles"
+            elif system() == 'Linux' or system() == 'Darwin':
+                project_type = "Unix Makefiles"
+
+
+        # Generate code with codegen module
+        cg.codegen(work, folder, python_ext_name, project_type,
+                   embedded, force_rewrite, loop_unrolling)
+
+        # return work

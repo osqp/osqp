@@ -81,6 +81,10 @@ void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
             "rho = %.2f, sigma = %.2f, alpha = %.2f, \n          max_iter = %i\n",
             settings->eps_abs, settings->eps_rel, settings->eps_inf, settings->eps_unb, settings->rho, settings->sigma,
             settings->alpha, (int)settings->max_iter);
+    if (settings->early_terminate)
+        c_print("          early_terminate: active (interval %i)\n", (int)settings->early_terminate_interval);
+    else
+        c_print("          early_terminate: inactive\n");
     if (settings->scaling)
         c_print("          scaling: active\n");
     else
@@ -168,22 +172,31 @@ void print_footer(OSQPInfo * info, c_int polish){
 /* assumes d->stgs already allocated memory */
 void set_default_settings(OSQPSettings * settings) {
         settings->scaling = SCALING; /* heuristic problem scaling */
+
+        #if EMBEDDED != 1
         settings->scaling_norm = SCALING_NORM;
         settings->scaling_iter = SCALING_ITER;
-        settings->rho = RHO; /* ADMM step */
-        settings->sigma = SIGMA; /* ADMM step */
+        #endif
+
+        settings->rho = (c_float) RHO; /* ADMM step */
+        settings->sigma = (c_float) SIGMA; /* ADMM step */
         settings->max_iter = MAX_ITER; /* maximum iterations to take */
-        settings->eps_abs = EPS_ABS;         /* absolute convergence tolerance */
-        settings->eps_rel = EPS_REL;         /* relative convergence tolerance */
-        settings->eps_inf = EPS_INF;         /* infeasibility tolerance */
-        settings->eps_unb = EPS_UNB;         /* unboundedness tolerance */
-        settings->alpha = ALPHA;     /* relaxation parameter */
+        settings->eps_abs = (c_float) EPS_ABS;         /* absolute convergence tolerance */
+        settings->eps_rel = (c_float) EPS_REL;         /* relative convergence tolerance */
+        settings->eps_inf = (c_float) EPS_INF;         /* infeasibility tolerance */
+        settings->eps_unb = (c_float) EPS_UNB;         /* unboundedness tolerance */
+        settings->alpha = (c_float) ALPHA;     /* relaxation parameter */
+
+        #ifndef EMBEDDED
         settings->delta = DELTA;    /* regularization parameter for polish */
-        settings->polish = POLISHING;     /* ADMM solution polish: 1 */
+        settings->polish = POLISH;     /* ADMM solution polish: 1 */
         settings->pol_refine_iter = POL_REFINE_ITER; /* iterative refinement
                                                         steps in polish */
         settings->verbose = VERBOSE;     /* print output */
+        #endif
+
         settings->early_terminate = EARLY_TERMINATE;     /* Evaluate termination criteria */
+        settings->early_terminate_interval = EARLY_TERMINATE_INTERVAL;     /* Evaluate termination at certain interval */
         settings->warm_start = WARM_START;     /* x equality constraint scaling: 1e-3 */
 
 }
@@ -211,6 +224,7 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
     new->pol_refine_iter = settings->pol_refine_iter;
     new->verbose = settings->verbose;
     new->early_terminate = settings->early_terminate;
+    new->early_terminate_interval = settings->early_terminate_interval;
     new->warm_start = settings->warm_start;
 
     return new;

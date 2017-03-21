@@ -15,9 +15,11 @@ extern "C" {
 
 // #include "kkt.h"
 
+// Enable data scaling if EMBEDDED is disabled or if EMBEDDED == 2
+#if EMBEDDED != 1
 // Scale data stored in workspace
 c_int scale_data(OSQPWorkspace * work);
-
+#endif
 
 /* Unscale problem matrices */
 c_int unscale_data(OSQPWorkspace * work);
