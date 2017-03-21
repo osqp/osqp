@@ -57,6 +57,11 @@ else:
     cmake_args += ['-DDFLOAT:BOOL=OFF']
 
 
+# Pass Python option to CMake and Python interface compilation
+cmake_args += ['-DPYTHON=ON']
+define_macros += [('PYTHON', None)]
+
+
 # Define osqp and suitesparse directories
 osqp_dir = os.path.join('..', '..')
 osqp_build_dir = os.path.join(osqp_dir, 'build')
