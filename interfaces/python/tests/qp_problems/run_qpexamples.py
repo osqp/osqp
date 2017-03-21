@@ -27,27 +27,31 @@ from time import time
 # import ipdb
 
 # Define tests ranges
-rho_vec_len = 10  # Define rho vector
+rho_vec_len = 20  # Define rho vector
 rho_vec = np.logspace(-4., 3., rho_vec_len)
 # rho_vec = np.array([1000])
 
 
-sigma_vec_len = 10  # Define sigma vector
-sigma_vec = np.logspace(-4., 3., sigma_vec_len)
+# sigma_vec_len = 10  # Define sigma vector
+# sigma_vec = np.logspace(-4., 3., sigma_vec_len)
+sigma_vec = np.array([0.001])
 
-alpha_vec_len = 10  # Define alpha vector
-alpha_vec = np.linspace(0.1, 1.9, alpha_vec_len)
+
+# alpha_vec_len = 10  # Define alpha vector
+# alpha_vec = np.linspace(0.1, 1.9, alpha_vec_len)
+alpha_vec = np.array([1.6])
 # alpha_vec = np.array([1.6])
 
 
 
-dim_vecs_len = 1
-#  n_max = 50
-#  m_max = 50
-#  n_vec = np.arange(10, n_max, int(n_max/dim_vecs_len))
-#  m_vec = np.arange(10, m_max, int(m_max/dim_vecs_len))
-n_vec = np.array([20])
-m_vec = np.array([30])
+dim_vecs_len = 10
+# n_vec = np.array([20])
+# m_vec = np.array([30])
+ n_max = 50
+ m_max = 50
+ n_vec = np.arange(10, n_max, int(n_max/dim_vecs_len))
+ m_vec = np.arange(10, m_max, int(m_max/dim_vecs_len))
+
 
 
 # Number of problems with the same dimensions
