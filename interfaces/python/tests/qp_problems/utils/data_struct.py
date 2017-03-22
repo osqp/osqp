@@ -75,6 +75,7 @@ class full_data_struct(object):
         self.condKKT_data = []
         self.condP_data = []
         self.froKKT_data = []
+        self.trP_data = []
         self.froP_data = []
         self.froA_data = []
         self.condKKT_bound_data = []
@@ -173,6 +174,7 @@ class full_data_struct(object):
         self.condP_data.append(npla.cond(qp_scaled.P.todense()))
         self.froKKT_data.append(spala.norm(KKT))
         self.froP_data.append(spala.norm(qp_scaled.P))
+        self.trP_data.append(np.sum(qp_scaled.P.diagonal()))
         self.froA_data.append(spala.norm(qp_scaled.A))
         self.condKKT_bound_data.append(self.get_cond_bound(KKT.todense()))
         self.condP_bound_data.append(self.get_cond_bound(qp_scaled.P.todense()))
@@ -196,6 +198,7 @@ class full_data_struct(object):
                 'condP': self.condP_data,
                 'froKKT': self.froKKT_data,
                 'froP': self.froP_data,
+                'trP': self.trP_data,
                 'froA': self.froA_data,
                 'condKKT_bound': self.condKKT_bound_data,
                 'condP_bound': self.condP_bound_data,
@@ -205,7 +208,7 @@ class full_data_struct(object):
 
         cols = ['n', 'm', 'rho', 'sigma', 'alpha', 'iter',
                  'name', 'time', 'seed',
-                 'condKKT', 'condP', 'froKKT', 'froP', 'froA',
+                 'condKKT', 'condP', 'froKKT', 'froP', 'trP', 'froA',
                  'condKKT_bound', 'condP_bound', 'norm_q', 'norm_l',
                  'norm_u']
 
