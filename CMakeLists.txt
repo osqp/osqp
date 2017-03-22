@@ -169,8 +169,17 @@ endif()
 # and set some options
 # -----------------------------------------------------------------
 if (PYTHON)
-    # Look for Python libraries
-    find_package(PythonLibs)
+
+    if (IS_PY2)
+      # Look for Python libraries
+      find_package(PythonInterp 2.7)
+      find_package(PythonLibs 2.7)
+    else (IS_PY2)
+      # Look for Python libraries
+      find_package(PythonInterp 3.0)
+      find_package(PythonLibs 3.0)
+    endif (IS_PY2)
+
 
     if (NOT PYTHONLIBS_FOUND)
             message( FATAL_ERROR "You need Python libraries to build the Python interface" )
@@ -181,13 +190,16 @@ if (PYTHON)
 
     # Pass PYTHON flag to C compiler
     add_definitions(-DPYTHON)
+    if (IS_PY3K)
+      add_definitions(-DIS_PY3K)
+    endif (IS_PY3K)
 
     if (UNITTESTS)
         # Disable unittests
         message(STATUS "Disabling UNITTESTS because we are building Python interface")
         set(UNITTESTS OFF)
     endif (UNITTESTS)
-    
+
 endif (PYTHON)
 
 
