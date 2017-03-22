@@ -37,7 +37,7 @@ class lasso(QPExample):
                                       np.array([[n], [m]])))
         return dims_mat
 
-    def gen_problem(self, m, n, dens_lvl=0.5, version='dense'):
+    def gen_problem(self, m, n, dens_lvl=0.5, version='sparse'):
         """
         Lasso problem is defined as
                 minimize	|| Ax - b ||^2 + gamma * || x ||_1

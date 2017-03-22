@@ -30,7 +30,7 @@ class svm(QPExample):
                                       np.array([[n], [m]])))
         return dims_mat
 
-    def gen_problem(self, m, n, dens_lvl=1.0):
+    def gen_problem(self, m, n, dens_lvl=.8):
         """
         Support vector machine problem is defined as
                 minimize	|| x ||^2 + gamma * 1.T * max(0, diag(b) A x + 1)
