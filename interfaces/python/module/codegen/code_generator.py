@@ -22,7 +22,6 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
     Generate code
     """
 
-
     # Import OSQP path
     osqp_path = osqp.__path__[0]
 
@@ -141,7 +140,8 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
     print("[done]")
 
     # Copy compiled solver
-    sys.stdout.write("Copying code-generated Python solver to current directory... \t")
+    sys.stdout.write("Copying code-generated Python solver to current" +
+                     "directory... \t")
     sys.stdout.flush()
     module_name = glob('%s*' % python_ext_name + module_ext)
     if not any(module_name):

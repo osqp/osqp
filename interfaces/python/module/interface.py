@@ -284,13 +284,22 @@ class OSQP(object):
         if x is None and y is None:
             raise ValueError("Unrecognized fields")
 
-    def codegen(self, folder, project_type="Makefile", embedded=1,
-                python_ext_name='emosqp', force_rewrite=False, loop_unrolling=False):
+    def codegen(self, folder, project_type="Makefile", parameters='vectors',
+                python_ext_name='emosqp', force_rewrite=False,
+                loop_unrolling=False):
         """
         Generate embeddable C code for the problem
         """
 
-        # Convert workspace to python
+        # Check parameters arguments
+        if parameters == 'vectors':
+            embedded = 1
+        elif parameters == 'matrices':
+            embedded = 2
+        else:
+            raise ValueError("Unknown value of 'parameters' argument.")
+
+        # Convert workspace to Python
         sys.stdout.write("Getting workspace from OSQP object... \t\t\t\t")
         sys.stdout.flush()
         work = self._model._get_workspace()
@@ -301,7 +310,6 @@ class OSQP(object):
                 project_type = "MinGW Makefiles"
             elif system() == 'Linux' or system() == 'Darwin':
                 project_type = "Unix Makefiles"
-
 
         # Generate code with codegen module
         cg.codegen(work, folder, python_ext_name, project_type,
