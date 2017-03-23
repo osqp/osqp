@@ -6,7 +6,7 @@
 -   [x] Avoid copying temporary vectors to previous ones (use pointers swap instead)
 -   [ ] Add functions to update matrices in Python and Matlab
 -   [ ] Add functions to update rho and sigma (by updating the KKT matrix entries)
--   [x] Replace embedded flag in codegen by parameters argument ('vectors', 'matrices')
+-   [ ] Replace EMBEDDED flag in C with:  EMBEDDED, EMBEDDED_PARAMETERS_VECTOS, EMBEDDED_PARAMETERS_MATRICES (all true/false)
 -   [x] Add unittests Python for code generation
 -   [ ] Add CTRL-C interrupt close function
 -   [ ] Implement code generation in Matlab
