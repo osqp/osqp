@@ -7,7 +7,7 @@
 -   [ ] Add functions to update matrices in Python and Matlab
 -   [ ] Add functions to update rho and sigma (by updating the KKT matrix entries)
 -   [ ] Change embedded flag with VECTOR_PARAMETERS and MATRIX_PARAMETERS
--   [ ] Add unittests Python for code generation
+-   [x] Add unittests Python for code generation
 -   [ ] Add CTRL-C interrupt close function
 -   [ ] Implement code generation in Matlab
 -   [ ] Fix relative criterion for termination condition
