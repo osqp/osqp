@@ -116,7 +116,6 @@ if __name__ == '__main__':
     res_w = problems.apply(weight_by_iter)
     problems_w = res_w.groupby(headings)
 
-
     # Plot behavior for fixed sigma and alpha and changing rho
     # test_name = (50.0, 60.0, 'svm', 3076953921.0)
     # test_name = (50.0, 60.0, 'svm', 107769053.0)

@@ -7,6 +7,7 @@ from glob import glob
 from subprocess import call
 from platform import system
 import os
+import sys
 
 
 # PARAMETERS
@@ -59,6 +60,8 @@ else:
 
 # Pass Python option to CMake and Python interface compilation
 cmake_args += ['-DPYTHON=ON']
+if sys.version_info[0] < 3:
+    cmake_args += ['-DIS_PY2=ON']
 define_macros += [('PYTHON', None)]
 
 
