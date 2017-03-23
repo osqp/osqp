@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import pandas as pd
-
+from tqdm import tqdm
 
 # # import sklearn tools
 # from sklearn.model_selection import train_test_split
@@ -20,6 +20,51 @@ import pandas as pd
 # #     return c0*np.power(x[0], c1*x[3] + c2*x[4])*np.power(x[1], c3)*np.power(x[2], c4)
 
 
+def get_rho_and_tr_ratio(df):
+    """
+    Get best rho and ratio of traces tr(P)/tr(A'A)
+    """
+    # Get best parameters
+    df_best = get_best_params(df)
+
+
+    # get values
+    trP = df_best['trP']
+    froA = df_best['froA']
+    trAtA = froA.values * froA.values
+
+
+    # Compute ratio
+    trP_over_trAtA = trP / trAtA
+
+    # IT IS HAPPENING HERE!!!!
+    # import ipdb; ipdb.set_trace()
+
+    # Get return dataframe
+    df_return = df_best.loc[:, ['seed', 'rho', 'trP', 'froA']]
+    df_return.loc[:, 'trAtA'] = pd.Series(trAtA,
+                                          index=df_return.index)
+    df_return.loc[:, 'trP_over_trAtA'] = pd.Series(trP_over_trAtA,
+                                                   index=df_return.index)
+
+
+    # df_return['trAtA'] = trAtA
+    # df_return['trP_over_trAtA'] = trP_over_trAtA
+
+    # # Return new dataframe
+    # df_return = pd.DataFrame({'seed': [df_best['seed']],
+    #                           'trP': [df_best['trP']],
+    #                           'froA': [df_best['froA']],
+    #                           'trAtA': [df_best['froA'] ** 2],
+    #                           'trP_over_trAtA': [trP_over_trAtA]})
+
+    # import ipdb; ipdb.set_trace()
+
+    # return new dataframe
+    return df_return
+
+
+
 def get_best_params(df):
     """
     Transform weighted frame into another frame with best parameters
@@ -28,25 +73,35 @@ def get_best_params(df):
     df_best = df.loc[df['w'] == 1.]
 
     # Get highest sigma
-    min_sigma = df_best['sigma'].min()
+    max_sigma = df_best['sigma'].max()
 
     # Get best row
-    df_best = df_best.loc[(df_best['sigma'] == min_sigma)]
+    df_best = df_best.loc[(df_best['sigma'] == max_sigma)]
 
     if len(df_best) > 1:  # If multiple values choose one with min alpha
         min_alpha = df_best['alpha'].min()
         df_best = df_best.loc[(df_best['alpha'] == min_alpha)]
 
+    if len(df_best) > 1:  # If multiple values chose one with avg rho
+        avg_rho = df_best['rho'].mean()
+
+        # Choose rho element closest to the mean
+        rho_closest_to_avg = np.abs(df_best['rho'] - avg_rho).min()
+        df_best = df_best.loc[(df_best['rho'] == rho_closest_to_avg)]
+        # import ipdb; ipdb.set_trace()
+        # df_best = df_best.iloc[[idx]]
+
+
+    # import ipdb; ipdb.set_trace()
+
     return df_best
-
-
 
 
 def weight_by_iter(df):
     """
     Weight sample using their number of iterations related to the min one
     """
-    df['w'] = df['iter'].min() / df['iter']
+    df.loc[:, 'w'] = df['iter'].min() / df['iter']
     return df
 
 
@@ -56,7 +111,7 @@ def save_plot(df, name):
     """
 
     # Dummy value always true
-    location = (df['alpha'] > 0 )
+    location = (df['alpha'] > 0)
 
     # Get best iteration values (there are many) and pick first pair sigma and alpha
     if name is not 'sigma':
@@ -103,39 +158,91 @@ if __name__ == '__main__':
 
     # Read results (only the ones less then max_iter)
     res = pd.read_csv('results/results_full.csv')
-    res = res.loc[(res['iter'] < 2499)]  # Select problems not saturated at max number of iterations
+    res = res.loc[(res['iter'] < 2499) &
+                  (res['rho'] < 100)]  # Select problems not saturated at max number of iterations
 
     # Problem headings
-    headings = ['n', 'm', 'name', 'seed']
+    # headings = ['n', 'm', 'name', 'seed']
 
     # Group problems
-    problems = res.groupby(headings)
+    # problems = res.groupby(headings)
     # n_problems = len(problems.groups)
 
     # Assign weights to samples
+    problems = res.groupby(['seed'])
     res_w = problems.apply(weight_by_iter)
-    problems_w = res_w.groupby(headings)
+    problems_w = res_w.groupby(['seed'])
 
-    # Plot behavior for fixed sigma and alpha and changing rho
+    '''
+    Plot behavior for fixed sigma and alpha and changing rho
+    '''
     # test_name = (50.0, 60.0, 'svm', 3076953921.0)
     # test_name = (50.0, 60.0, 'svm', 107769053.0)
-    test_name = (40.0, 40.0, 'lasso', 685148778.0)
+    # test_name = (40.0, 40.0, 'lasso', 685148778.0)
+    # test_name = (94.0, 96.0, 'svm', 792958971.0)
     # test_name = (40.0, 40.0, 'lasso', 4089288235.0)
 
-    test_instance = problems_w.get_group(test_name)
+    # test_instance = problems_w.get_group(test_name)
 
     # Save plots for rho, sigma and alpha
     # save_plot(test_instance, 'rho')
     # save_plot(test_instance, 'sigma')
     # save_plot(test_instance, 'alpha')
 
+    # Try to estimate value
+    # ex_val = test_instance.iloc[0]
+    # trP = ex_val['trP']
+    # froA = ex_val['froA']
+    # froA2 = froA * froA
+
+
+    '''
+    Plot behavior of optimal rho compared to tr(P)/tr(A'A)
+    '''
+
+    # Group by seed (different randomly generated problem)
+    # problems = res_w.groupby(['seed'])
+
+    # Get first 20 groups
+
+    # Compute best rho and ratio tr(P)/tr(A'A) for each group
+    # counter = 0
+    rho_and_tr_ratio = pd.DataFrame()
+    for name, group in tqdm(problems_w):
+        # if counter < 30000:
+            # print(name)
+            # if counter == 0:
+                # rho_and_tr_ratio = get_rho_and_tr_ratio(group)
+            # else:
+        rho_and_tr_ratio = \
+            rho_and_tr_ratio.append(get_rho_and_tr_ratio(group))
+        # counter += 1
+
+    # rho_and_tr_ratio_df = pd.concat(rho_and_tr_ratio)
+
+
+    # Plot
+    x = np.linspace(0.0002, 0.05)
+    y =16 * x
+    plt.figure()
+    ax = plt.gca()
+    plt.scatter(rho_and_tr_ratio['trP_over_trAtA'],
+                rho_and_tr_ratio['rho'])
+    plt.plot(x, y)
+    # ax.set_yscale('log')
+    ax.set_ylabel('rho')
+    ax.set_xlabel('trP_over_trAtA')
+    ax.set_xlim(-.3, .3)
+    plt.grid()
+    plt.show(block=False)
+
 
 
     # Get optimal parameters for lasso problem
-    same_type_probs = res_w.groupby(['name'])
-    lasso_probs = same_type_probs.get_group(('lasso'))
-    best_lasso = lasso_probs.groupby(['seed']).apply(get_best_params)
-    pd.tools.plotting.scatter_matrix(best_lasso)
+    # same_type_probs = res_w.groupby(['name'])
+    # lasso_probs = same_type_probs.get_group(('lasso'))
+    # best_lasso = lasso_probs.groupby(['seed']).apply(get_best_params)
+    # pd.tools.plotting.scatter_matrix(best_lasso)
 
 
 
