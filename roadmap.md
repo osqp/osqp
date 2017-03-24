@@ -18,7 +18,7 @@
 
 ## TODO (Paper)
 -   [ ] Talk about paper: [Inertial Proximal ADMM for Linearly Constrained Separable Convex Optimization](http://epubs.siam.org/doi/pdf/10.1137/15100463X) (similar to our robustification idea)
--   [ ] Proove convergence to vectors satisfying Farkas lemma
+-   [ ] Prove convergence to vectors satisfying Farkas lemma
 -   [ ] Write examples in the paper
 
 #### Submission: [Journal of Machine Learning Research](http://www.jmlr.org/)

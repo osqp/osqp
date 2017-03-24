@@ -181,13 +181,14 @@ ENV/
 
 # Matlab
 # -------------------------------------------------------------------
-# Files generated furing compilation
+# Files generated during compilation
 *.o
 *.m~
 *.mexmaci64*
 *.mexw64*
 *.mexa64*
 out/
+*.asv
 
 # Other data files
 *.mat
@@ -204,4 +205,3 @@ tests/**/*data.h
 interfaces/python/*.so
 interfaces/python/*.pyd
 interfaces/python/files.txt
-

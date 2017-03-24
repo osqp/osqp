@@ -70,8 +70,10 @@ else
     end
 end
 
-
-
+% Pass Matlab root to cmake
+Matlab_ROOT = strrep(matlabroot, '\', '/');
+cmake_args = sprintf('%s %s%s%s', cmake_args, ...
+    '-DMatlab_ROOT_DIR="', Matlab_ROOT, '"');
 
 % Add parameters options to mex and cmake
 if PROFILING
