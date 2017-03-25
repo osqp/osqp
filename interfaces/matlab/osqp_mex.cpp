@@ -2,9 +2,10 @@
 #include "matrix.h"
 #include "osqp_mex.hpp"
 #include "osqp.h"
+#include "private.h"
 
 // all of the OSQP_INFO fieldnames as strings
-const char *OSQP_INFO_FIELDS[] = {"iter",         //c_int
+const char* OSQP_INFO_FIELDS[] = {"iter",         //c_int
                                 "status" ,        //char*
                                 "status_val" ,    //c_int
                                 "status_polish",  //c_int
@@ -38,7 +39,37 @@ const char* OSQP_SETTINGS_FIELDS[] =
                                 "early_terminate_interval",     //c_int
                                 "warm_start"};                  //c_int
 
+// NEW
+const char* CSC_FIELDS[] = {"nzmax",    //c_int
+                            "m",        //c_int
+                            "n",        //c_int
+                            "p",        //c_int*
+                            "i",        //c_int*
+                            "x",        //c_float*
+                            "nz"};      //c_int
 
+const char* OSQP_DATA_FIELDS[] = {"n",  //c_int
+                                 "m",   //c_int
+                                 "P",   //csc
+                                 "A",   //csc
+                                 "q",   //c_float*
+                                 "l",   //c_float*
+                                 "u"};  //c_float*
+
+const char* PRIV_FIELDS[] = {"L",       //c_int
+                             "Dinv",    //c_int
+                             "P",       //c_int
+                             "bp"};     //c_float*
+
+const char* OSQP_SCALING_FIELDS[] = {"D",       //c_int
+                                     "E",       //c_int
+                                     "Dinv",    //c_int
+                                     "Einv"};   //c_float*
+
+const char* OSQP_WORKSPACE_FIELDS[] = {"data",
+                                       "priv",
+                                       "scaling",
+                                       "settings"};
 
 // wrapper class for all osqp data and settings
 class OsqpData
@@ -53,12 +84,20 @@ public:
 // internal utility functions
 c_int*    copyToCintVector(mwIndex * vecData, c_int numel);
 c_float*  copyToCfloatVector(double * vecData, c_int numel);
-void castToDoubleArr(c_float *arr, double* arr_out, c_int len);
-void setToNaN(double* arr_out, c_int len);
+void      castToDoubleArr(c_float *arr, double* arr_out, c_int len);
+void      setToNaN(double* arr_out, c_int len);
 mxArray*  copyInfoToMxStruct(OSQPInfo*);
 mxArray*  copySettingsToMxStruct(OSQPSettings*);
-void      copyMxStructToSettings(const mxArray*,OSQPSettings*);
-void      copyUpdatedSettingsToWork(const mxArray* ,OsqpData*);
+void      copyMxStructToSettings(const mxArray*, OSQPSettings*);
+void      copyUpdatedSettingsToWork(const mxArray*, OsqpData*);
+
+// NEW
+void      castCintToDoubleArr(c_int *arr, double* arr_out, c_int len);
+mxArray*  copyCscMatrixToMxStruct(csc*);
+mxArray*  copyDataToMxStruct(OSQPData*);
+mxArray*  copyPrivToMxStruct(Priv*);
+mxArray*  copyScalingToMxStruct(OSQPScaling*, int n, int m);
+mxArray*  copyWorkToMxStruct(OSQPWorkspace*);
 
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
@@ -111,6 +150,44 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       }
       //report the current settings
       plhs[0] = copySettingsToMxStruct(osqpData->work->settings);
+      return;
+    }
+
+//     // == DEBUG ==
+//     // return data structure
+//     if (!strcmp("get_data", cmd)) {
+// 
+//       //throw an error if this is called before solver is configured
+//       if(!osqpData->work){
+//         mexErrMsgTxt("Solver is uninitialized.  No data have been configured.");
+//       }
+//       //return data
+//       plhs[0] = copyDataToMxStruct(osqpData->work->data);
+//       return;
+//     }
+//     
+//     // == DEBUG ==
+//     // return private structure
+//     if (!strcmp("get_priv", cmd)) {
+// 
+//       //throw an error if this is called before solver is configured
+//       if(!osqpData->work){
+//         mexErrMsgTxt("Solver is uninitialized.  No data have been configured.");
+//       }
+//       //return data
+//       plhs[0] = copyPrivToMxStruct(osqpData->work->priv);
+//       return;
+//     }
+    
+    // return workspace structure
+    if (!strcmp("get_workspace", cmd)) {
+
+      //throw an error if this is called before solver is configured
+      if(!osqpData->work){
+        mexErrMsgTxt("Solver is uninitialized.  No data have been configured.");
+      }
+      //return data
+      plhs[0] = copyWorkToMxStruct(osqpData->work);
       return;
     }
 
@@ -167,8 +244,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         const mxArray* u = prhs[8];
 
         // Create Data Structure
-        data->n  = mxGetScalar(prhs[2]);
-        data->m  = mxGetScalar(prhs[3]);
+        data->n = (c_int) mxGetScalar(prhs[2]);
+        data->m = (c_int) mxGetScalar(prhs[3]);
         data->q = copyToCfloatVector(mxGetPr(q), data->n);
         data->l = copyToCfloatVector(mxGetPr(l), data->m);
         data->u = copyToCfloatVector(mxGetPr(u), data->m);
@@ -519,6 +596,12 @@ c_int*  copyToCintVector(mwIndex* vecData, c_int numel){
 
 }
 
+void castCintToDoubleArr(c_int *arr, double* arr_out, c_int len) {
+    for (c_int i = 0; i < len; i++) {
+        arr_out[i] = (double)arr[i];
+    }
+}
+
 void castToDoubleArr(c_float *arr, double* arr_out, c_int len) {
     for (c_int i = 0; i < len; i++) {
         arr_out[i] = (double)arr[i];
@@ -570,18 +653,18 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
   //map the OSQP_SETTINGS fields one at a time into mxArrays
   //matlab handles everything as a double
   mxSetField(mxPtr, 0, "rho",             mxCreateDoubleScalar(settings->rho));
-  mxSetField(mxPtr, 0, "sigma",             mxCreateDoubleScalar(settings->sigma));
+  mxSetField(mxPtr, 0, "sigma",           mxCreateDoubleScalar(settings->sigma));
   mxSetField(mxPtr, 0, "scaling",         mxCreateDoubleScalar(settings->scaling));
   mxSetField(mxPtr, 0, "scaling_norm",    mxCreateDoubleScalar(settings->scaling_norm));
   mxSetField(mxPtr, 0, "scaling_iter",    mxCreateDoubleScalar(settings->scaling_iter));
   mxSetField(mxPtr, 0, "max_iter",        mxCreateDoubleScalar(settings->max_iter));
   mxSetField(mxPtr, 0, "eps_abs",         mxCreateDoubleScalar(settings->eps_abs));
   mxSetField(mxPtr, 0, "eps_rel",         mxCreateDoubleScalar(settings->eps_rel));
-  mxSetField(mxPtr, 0, "eps_prim_inf",         mxCreateDoubleScalar(settings->eps_prim_inf));
-  mxSetField(mxPtr, 0, "eps_dual_inf",         mxCreateDoubleScalar(settings->eps_dual_inf));
+  mxSetField(mxPtr, 0, "eps_prim_inf",    mxCreateDoubleScalar(settings->eps_prim_inf));
+  mxSetField(mxPtr, 0, "eps_dual_inf",    mxCreateDoubleScalar(settings->eps_dual_inf));
   mxSetField(mxPtr, 0, "alpha",           mxCreateDoubleScalar(settings->alpha));
   mxSetField(mxPtr, 0, "delta",           mxCreateDoubleScalar(settings->delta));
-  mxSetField(mxPtr, 0, "polish",       mxCreateDoubleScalar(settings->polish));
+  mxSetField(mxPtr, 0, "polish",          mxCreateDoubleScalar(settings->polish));
   mxSetField(mxPtr, 0, "pol_refine_iter", mxCreateDoubleScalar(settings->pol_refine_iter));
   mxSetField(mxPtr, 0, "verbose",         mxCreateDoubleScalar(settings->verbose));
   mxSetField(mxPtr, 0, "early_terminate", mxCreateDoubleScalar(settings->early_terminate));
@@ -590,6 +673,145 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
 
   return mxPtr;
 }
+
+
+// ======================================================================
+mxArray* copyCscMatrixToMxStruct(csc* M){
+
+  int nfields  = sizeof(CSC_FIELDS) / sizeof(CSC_FIELDS[0]);
+  mxArray* mxPtr = mxCreateStructMatrix(1,1,nfields,CSC_FIELDS);
+
+  // Create vectors
+  mxArray* p = mxCreateDoubleMatrix((M->n)+1,1,mxREAL);
+  mxArray* i = mxCreateDoubleMatrix(M->nzmax,1,mxREAL);
+  mxArray* x = mxCreateDoubleMatrix(M->nzmax,1,mxREAL);
+
+  // Populate vectors
+  castCintToDoubleArr(M->p, mxGetPr(p), (M->n)+1);
+  castCintToDoubleArr(M->i, mxGetPr(i), M->nzmax);
+  castToDoubleArr(M->x,     mxGetPr(x), M->nzmax);
+
+  //map the CSC fields one at a time into mxArrays
+  //matlab handles everything as a double
+  mxSetField(mxPtr, 0, "nzmax", mxCreateDoubleScalar(M->nzmax));
+  mxSetField(mxPtr, 0, "m",     mxCreateDoubleScalar(M->m));
+  mxSetField(mxPtr, 0, "n",     mxCreateDoubleScalar(M->n));
+  mxSetField(mxPtr, 0, "p",     p);
+  mxSetField(mxPtr, 0, "i",     i);
+  mxSetField(mxPtr, 0, "x",     x);
+  mxSetField(mxPtr, 0, "nz",    mxCreateDoubleScalar(M->nz));
+
+  return mxPtr;
+}
+
+mxArray* copyDataToMxStruct(OSQPData* data){
+
+  int nfields  = sizeof(OSQP_DATA_FIELDS) / sizeof(OSQP_DATA_FIELDS[0]);
+  mxArray* mxPtr = mxCreateStructMatrix(1,1,nfields,OSQP_DATA_FIELDS);
+  
+  // Create vectors
+  mxArray* q = mxCreateDoubleMatrix(data->n,1,mxREAL);
+  mxArray* l = mxCreateDoubleMatrix(data->m,1,mxREAL);
+  mxArray* u = mxCreateDoubleMatrix(data->m,1,mxREAL);
+  
+  // Populate vectors
+  castToDoubleArr(data->q, mxGetPr(q), data->n);
+  castToDoubleArr(data->l, mxGetPr(l), data->m);
+  castToDoubleArr(data->u, mxGetPr(u), data->m);
+  
+  // Create matrices
+  mxArray* P = copyCscMatrixToMxStruct(data->P);
+  mxArray* A = copyCscMatrixToMxStruct(data->A);
+  
+  //map the OSQP_DATA fields one at a time into mxArrays
+  //matlab handles everything as a double
+  mxSetField(mxPtr, 0, "n", mxCreateDoubleScalar(data->n));
+  mxSetField(mxPtr, 0, "m", mxCreateDoubleScalar(data->m));
+  mxSetField(mxPtr, 0, "P", P);
+  mxSetField(mxPtr, 0, "A", A);
+  mxSetField(mxPtr, 0, "q", q);
+  mxSetField(mxPtr, 0, "l", l);
+  mxSetField(mxPtr, 0, "u", u);
+
+  return mxPtr;
+}
+
+mxArray* copyPrivToMxStruct(Priv* priv){
+
+  int nfields  = sizeof(PRIV_FIELDS) / sizeof(PRIV_FIELDS[0]);
+  mxArray* mxPtr = mxCreateStructMatrix(1,1,nfields,PRIV_FIELDS);
+  
+  // Create vectors
+  int n = priv->L->n;
+  mxArray* Dinv = mxCreateDoubleMatrix(n,1,mxREAL);
+  mxArray* P    = mxCreateDoubleMatrix(n,1,mxREAL);
+  mxArray* bp   = mxCreateDoubleMatrix(n,1,mxREAL);
+  
+  // Populate vectors
+  castToDoubleArr(priv->Dinv, mxGetPr(Dinv), n);
+  castCintToDoubleArr(priv->P, mxGetPr(P), n);
+  castToDoubleArr(priv->bp, mxGetPr(bp), n);
+  
+  // Create matrices
+  mxArray* L = copyCscMatrixToMxStruct(priv->L);
+  
+  //map the PRIV fields one at a time into mxArrays
+  mxSetField(mxPtr, 0, "L",    L);
+  mxSetField(mxPtr, 0, "Dinv", Dinv);
+  mxSetField(mxPtr, 0, "P",    P);
+  mxSetField(mxPtr, 0, "bp",   bp);
+
+  return mxPtr;
+}
+
+mxArray* copyScalingToMxStruct(OSQPScaling* scaling, int n, int m){
+
+  int nfields  = sizeof(OSQP_SCALING_FIELDS) / sizeof(OSQP_SCALING_FIELDS[0]);
+  mxArray* mxPtr = mxCreateStructMatrix(1,1,nfields,OSQP_SCALING_FIELDS);
+  
+  // Create vectors
+  mxArray* D    = mxCreateDoubleMatrix(n,1,mxREAL);
+  mxArray* E    = mxCreateDoubleMatrix(m,1,mxREAL);
+  mxArray* Dinv = mxCreateDoubleMatrix(n,1,mxREAL);
+  mxArray* Einv = mxCreateDoubleMatrix(m,1,mxREAL);
+  
+  // Populate vectors
+  castToDoubleArr(scaling->D,    mxGetPr(D), n);
+  castToDoubleArr(scaling->E,    mxGetPr(E), m);
+  castToDoubleArr(scaling->Dinv, mxGetPr(Dinv), n);
+  castToDoubleArr(scaling->Einv, mxGetPr(Einv), m);
+  
+  //map the SCALING fields one at a time into mxArrays
+  mxSetField(mxPtr, 0, "D",    D);
+  mxSetField(mxPtr, 0, "E",    E);
+  mxSetField(mxPtr, 0, "Dinv", Dinv);
+  mxSetField(mxPtr, 0, "Einv", Einv);
+
+  return mxPtr;
+}
+
+mxArray*  copyWorkToMxStruct(OSQPWorkspace* work){
+
+  int nfields  = sizeof(OSQP_WORKSPACE_FIELDS) / sizeof(OSQP_WORKSPACE_FIELDS[0]);
+  mxArray* mxPtr = mxCreateStructMatrix(1,1,nfields,OSQP_WORKSPACE_FIELDS);
+  
+  // Create workspace substructures
+  mxArray* data     = copyDataToMxStruct(work->data);
+  mxArray* priv     = copyPrivToMxStruct(work->priv);
+  mxArray* scaling  = copyScalingToMxStruct(work->scaling, work->data->n, work->data->m);
+  mxArray* settings = copySettingsToMxStruct(work->settings);
+  
+  //map the WORKSPACE fields one at a time into mxArrays
+  mxSetField(mxPtr, 0, "data",     data);
+  mxSetField(mxPtr, 0, "priv",     priv);
+  mxSetField(mxPtr, 0, "scaling",  scaling);
+  mxSetField(mxPtr, 0, "settings", settings);
+
+  return mxPtr;
+}
+
+// ======================================================================
+
 
 void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
 
@@ -600,18 +822,18 @@ void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
   //map the OSQP_SETTINGS fields one at a time into mxArrays
   //matlab handles everything as a double
   settings->rho             = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "rho"));
-  settings->sigma             = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "sigma"));
+  settings->sigma           = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "sigma"));
   settings->scaling         = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaling"));
   settings->scaling_norm    = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaling_norm"));
   settings->scaling_iter    = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaling_iter"));
   settings->max_iter        = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "max_iter"));
   settings->eps_abs         = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_abs"));
   settings->eps_rel         = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_rel"));
-  settings->eps_prim_inf        = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_dual_inf"));
-  settings->eps_dual_inf         = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_dual_inf"));
+  settings->eps_prim_inf    = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_dual_inf"));
+  settings->eps_dual_inf    = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_dual_inf"));
   settings->alpha           = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "alpha"));
   settings->delta           = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "delta"));
-  settings->polish       = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polish"));
+  settings->polish          = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polish"));
   settings->pol_refine_iter = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "pol_refine_iter"));
   settings->verbose         = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "verbose"));
   settings->early_terminate = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "early_terminate"));

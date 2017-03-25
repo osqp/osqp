@@ -114,10 +114,16 @@ lib_name = sprintf('libosqpdirstatic%s', lib_ext);
 
 % Set osqp directory and osqp_build directory
 osqp_dir = fullfile('..', '..');
-osqp_build_dir = sprintf('%s/build', osqp_dir);
+osqp_build_dir = fullfile(osqp_dir, 'build');
+suitesparse_dir = fullfile(osqp_dir, 'lin_sys', 'direct', 'suitesparse');
 
 % Include directory
-inc_dir = fullfile(sprintf('-I%s', osqp_dir), 'include');
+inc_dir = [
+    fullfile(sprintf(' -I%s', osqp_dir), 'include'), ...
+    sprintf(' -I%s', suitesparse_dir), ...
+    fullfile(sprintf(' -I%s', suitesparse_dir), 'ldl', 'include'), ...
+    fullfile(sprintf(' -I%s', suitesparse_dir), 'amd', 'include')
+    ];
 
 
 %% OSQP Solver

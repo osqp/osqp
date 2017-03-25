@@ -11,6 +11,7 @@ classdef osqp < handle
     %   setup             - configure solver with problem data
     %   solve             - solve the QP
     %   update            - modify problem vectors
+    %   get_workspace     - get the workspace structure
     %   warm_start        - set warm starting variables x and y
     %
     %   default_settings  - create default settings structure
@@ -20,6 +21,8 @@ classdef osqp < handle
     %   get_dimensions    - get the number of variables and constraints
     %   version           - return OSQP version
     %   constant          - return a OSQP internal constant
+    %
+    %   codegen           - generate embeddable C code for the problem
 
 
     properties (SetAccess = private, Hidden = true)
@@ -85,6 +88,24 @@ classdef osqp < handle
 
         end
 
+%         % == DEBUG ==
+%         function out = get_data(this)
+%             % GET_DATA
+%             out = osqp_mex('get_data', this.objectHandle);
+%         end
+%         
+%         % == DEBUG ==
+%         function out = get_priv(this)
+%             % GET_PRIV
+%             out = osqp_mex('get_priv', this.objectHandle);
+%         end
+        
+        %%
+        function out = get_workspace(this)
+            % GET_WORKSPACE
+            out = osqp_mex('get_workspace', this.objectHandle);
+        end
+        
         %%
         function update(this,varargin)
             % UPDATE modify the linear cost term and/or lower and upper bounds
@@ -322,6 +343,25 @@ classdef osqp < handle
             return;
         end
 
+%         %%
+%         function codegen(this, varargin)
+%             % CODEGEN generate C code for the parametric problem
+%             %
+%             %   codegen(dir_name, options)
+% 
+%             nargin = length(varargin);
+% 
+%             %dimension checks on user data. Mex function does not
+%             %perform any checks on inputs, so check everything here
+%             assert(nargin >= 1, 'incorrect number of inputs');
+%             dir_name = varargin{1};
+% 
+%             % For now just call codegen:
+%             %   assume that 
+%             osqp_mex('codegen', this.objectHandle);
+% 
+%         end
+        
     end
 end
 
