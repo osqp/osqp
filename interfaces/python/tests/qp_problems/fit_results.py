@@ -41,9 +41,11 @@ def get_rho_and_tr_ratio(df):
     # import ipdb; ipdb.set_trace()
 
     # Get return dataframe
-    df_return = df_best.loc[:, ['seed', 'rho', 'trP', 'froA']]
+    df_return = df_best.loc[:, ['seed', 'n', 'm', 'rho', 'trP', 'froA']]
     df_return.loc[:, 'trAtA'] = pd.Series(trAtA,
                                           index=df_return.index)
+    df_return.loc[:, 'n_over_m'] = pd.Series(df_best['n']/df_best['m'],
+                                                       index=df_return.index)
     df_return.loc[:, 'trP_over_trAtA'] = pd.Series(trP_over_trAtA,
                                                    index=df_return.index)
 
@@ -82,12 +84,14 @@ def get_best_params(df):
         min_alpha = df_best['alpha'].min()
         df_best = df_best.loc[(df_best['alpha'] == min_alpha)]
 
-    if len(df_best) > 1:  # If multiple values chose one with avg rho
-        avg_rho = df_best['rho'].mean()
+    if len(df_best) > 1:  # If multiple values chose one with min rho
+        # Choose min rho element
+        rho_best = df_best['rho'].min()
 
-        # Choose rho element closest to the mean
-        rho_closest_to_avg = np.abs(df_best['rho'] - avg_rho).min()
-        df_best = df_best.loc[(df_best['rho'] == rho_closest_to_avg)]
+        if rho_best > 5:
+            import ipdb; ipdb.set_trace()
+        # rho_closest_to_min = np.abs(df_best['rho'] - min_rho).min()
+        df_best = df_best.loc[(df_best['rho'] == rho_best)]
         # import ipdb; ipdb.set_trace()
         # df_best = df_best.iloc[[idx]]
 
@@ -157,9 +161,17 @@ def save_plot(df, name):
 if __name__ == '__main__':
 
     # Read results (only the ones less then max_iter)
-    res = pd.read_csv('results/results_full.csv')
-    res = res.loc[(res['iter'] < 2499) &
-                  (res['rho'] < 100)]  # Select problems not saturated at max number of iterations
+    lasso = pd.read_csv('results/lasso_full.csv')
+    nonneg_l2 = pd.read_csv('results/nonneg_l2_full.csv')
+    portfolio = pd.read_csv('results/portfolio_full.csv')
+    svm = pd.read_csv('results/svm_full.csv')
+    # res = pd.concat([lasso, nonneg_l2, portfolio, svm])
+    res = pd.concat([lasso, portfolio, nonneg_l2, svm],
+                    ignore_index=True)
+
+    # res = pd.read_csv('results/results_full.csv')
+    res = res.loc[(res['iter'] < 2499)]  # Select problems not saturated at max number of iterations
+
 
     # Problem headings
     # headings = ['n', 'm', 'name', 'seed']
@@ -222,20 +234,42 @@ if __name__ == '__main__':
 
 
     # Plot
-    x = np.linspace(0.0002, 0.05)
-    y =16 * x
+    # x = np.linspace(0.0002, 0.05)
+    # y = 16 * x
     plt.figure()
     ax = plt.gca()
     plt.scatter(rho_and_tr_ratio['trP_over_trAtA'],
                 rho_and_tr_ratio['rho'])
-    plt.plot(x, y)
+    # plt.plot(x, y)
     # ax.set_yscale('log')
     ax.set_ylabel('rho')
     ax.set_xlabel('trP_over_trAtA')
-    ax.set_xlim(-.3, .3)
+    # ax.set_xlim(-.3, .3)
     plt.grid()
     plt.show(block=False)
+    plt.savefig('behavior.pdf')
 
+
+    '''
+    Create 3D scatter plot with rho, rato, efficiency
+    '''
+
+
+    # # Plot
+    # # x = np.linspace(0.0002, 0.05)
+    # # y = 16 * x
+    # plt.figure()
+    # ax = plt.gca()
+    # plt.scatter(rho_and_tr_ratio['n_over_m'],
+    #             rho_and_tr_ratio['rho'])
+    # # plt.plot(x, y)
+    # # ax.set_yscale('log')
+    # # ax.set_xscale('log')
+    # ax.set_ylabel('rho')
+    # ax.set_xlabel('n_over_m')
+    # # ax.set_xlim(-.3, .3)
+    # plt.grid()
+    # plt.show(block=False)
 
 
     # Get optimal parameters for lasso problem
