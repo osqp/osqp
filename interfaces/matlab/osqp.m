@@ -355,7 +355,22 @@ classdef osqp < handle
             %perform any checks on inputs, so check everything here
             assert(nargin >= 1, 'incorrect number of inputs');
             target_dir = varargin{1};
-
+            
+            % Check whether the specified directory already exists
+            if exist(target_dir, 'dir')
+                while(1)
+                    prompt = sprintf('Directory "%s" already exists. Do you want to replace it? y/n [y]: ', target_dir);
+                    str = input(prompt,'s');
+                    
+                    if any(strcmpi(str, {'','y'}))
+                        rmdir(target_dir, 's');
+                        break;
+                    elseif strcmpi(str, 'n')
+                        return;
+                    end
+                end
+            end
+            
             % Import OSQP path
             [osqp_path,~,~] = fileparts(which('osqp.m'));
             
@@ -399,10 +414,12 @@ classdef osqp < handle
             % Copy CMakelists.txt
             copyfile(fullfile(files_to_generate_path, 'CMakeLists.txt'), target_dir);
             
+            % Get workspace structure
+            work = get_workspace(this);
+            
             % Write workspace in header file
             work_hfile = fullfile(target_include_dir, 'workspace.h');
             addpath(fullfile(osqp_path, 'codegen'));
-            work = get_workspace(this);
             render_workspace(work, work_hfile);
             
         end
