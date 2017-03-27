@@ -205,3 +205,5 @@ tests/**/*data.h
 interfaces/python/*.so
 interfaces/python/*.pyd
 interfaces/python/files.txt
+
+interfaces/matlab/codegen/sources

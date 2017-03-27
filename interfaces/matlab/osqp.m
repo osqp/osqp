@@ -343,24 +343,69 @@ classdef osqp < handle
             return;
         end
 
-%         %%
-%         function codegen(this, varargin)
-%             % CODEGEN generate C code for the parametric problem
-%             %
-%             %   codegen(dir_name, options)
-% 
-%             nargin = length(varargin);
-% 
-%             %dimension checks on user data. Mex function does not
-%             %perform any checks on inputs, so check everything here
-%             assert(nargin >= 1, 'incorrect number of inputs');
-%             dir_name = varargin{1};
-% 
-%             % For now just call codegen:
-%             %   assume that 
-%             osqp_mex('codegen', this.objectHandle);
-% 
-%         end
+        %%
+        function codegen(this, varargin)
+            % CODEGEN generate C code for the parametric problem
+            %
+            %   codegen(target_dir, options)
+            
+            nargin = length(varargin);
+
+            %dimension checks on user data. Mex function does not
+            %perform any checks on inputs, so check everything here
+            assert(nargin >= 1, 'incorrect number of inputs');
+            target_dir = varargin{1};
+
+            % Import OSQP path
+            [osqp_path,~,~] = fileparts(which('osqp.m'));
+            
+            % Path of osqp module
+            cg_dir = fullfile(osqp_path, 'codegen');
+            files_to_generate_path = fullfile(cg_dir, 'files_to_generate');
+            
+            % Make target directory
+            fprintf('Creating target directories...\t\t\t\t\t');
+            target_include_dir = fullfile(target_dir, 'include');
+            target_src_dir = fullfile(target_dir, 'src');
+            
+            if ~exist(target_dir, 'dir')
+                mkdir(target_dir);
+            end
+            if ~exist(target_include_dir, 'dir')
+                mkdir(target_include_dir);
+            end
+            if ~exist(target_src_dir, 'dir')
+                mkdir(fullfile(target_src_dir, 'osqp'));
+            end
+            fprintf('[done]\n');
+            
+            % Copy source files to target directory
+            fprintf('Copying OSQP source files...\t\t\t\t\t');
+            cfiles = dir(fullfile(cg_dir, 'sources', 'src', '*.c'));
+            for i = 1 : length(cfiles)
+                copyfile(fullfile(cfiles(i).folder, cfiles(i).name), ...
+                    fullfile(target_src_dir, 'osqp', cfiles(i).name));
+            end
+            hfiles = dir(fullfile(cg_dir, 'sources', 'include', '*.h'));
+            for i = 1 : length(hfiles)
+                copyfile(fullfile(hfiles(i).folder, hfiles(i).name), ...
+                    fullfile(target_include_dir, hfiles(i).name));
+            end
+            fprintf('[done]\n');
+            
+            % Copy example.c
+            copyfile(fullfile(files_to_generate_path, 'example.c'), target_src_dir);
+            
+            % Copy CMakelists.txt
+            copyfile(fullfile(files_to_generate_path, 'CMakeLists.txt'), target_dir);
+            
+            % Write workspace in header file
+            work_hfile = fullfile(target_include_dir, 'workspace.h');
+            addpath(fullfile(osqp_path, 'codegen'));
+            work = get_workspace(this);
+            render_workspace(work, work_hfile);
+            
+        end
         
     end
 end

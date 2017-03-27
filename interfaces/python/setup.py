@@ -116,7 +116,7 @@ cfiles += [os.path.join(suitesparse_dir, 'ldl', 'src', f)
 # List with OSQP H files
 hfiles = [os.path.join(osqp_dir, 'include', f)
           for f in os.listdir(os.path.join(osqp_dir, 'include'))
-          if f.endswith('.h') and f != 'polish.h' and f != 'cs.c']
+          if f.endswith('.h') and f != 'polish.h' and f != 'cs.h']
 hfiles += [os.path.join(suitesparse_dir, f)
            for f in os.listdir(suitesparse_dir)
            if f.endswith('.h') and f != 'SuiteSparse_config.h']
