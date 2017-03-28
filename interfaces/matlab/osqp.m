@@ -332,8 +332,8 @@ classdef osqp < handle
             
             % Parse input arguments
             p = inputParser;
-            defaultProject = 'Makefile';
-            expectedProject = {'Makefile', 'MinGW Makefiles', 'Unix Makefiles', 'CodeBlocks'};
+            defaultProject = '';
+            expectedProject = {'', 'Makefile', 'MinGW Makefiles', 'Unix Makefiles', 'CodeBlocks'};
             defaultParams = 'vectors';
             expectedParams = {'vectors', 'matrices'};
             defaultMexname = 'emosqp';
@@ -436,14 +436,16 @@ classdef osqp < handle
             fprintf('[done]\n');
             
             % Create project
-            fprintf('Creating project...\n');
-            orig_dir = pwd;
-            cd(target_dir);
-            mkdir('build')
-            cd('build');
-            cmd = sprintf('cmake -G "%s" ..', project_type);
-            system(cmd);
-            cd(orig_dir);
+            if ~isempty(project_type)
+                fprintf('Creating project...\n');
+                orig_dir = pwd;
+                cd(target_dir);
+                mkdir('build')
+                cd('build');
+                cmd = sprintf('cmake -G "%s" ..', project_type);
+                system(cmd);
+                cd(orig_dir);
+            end
             
             % Make mex interface to the generated code
             mex_cfile  = fullfile(files_to_generate_path, 'emosqp_mex.c');

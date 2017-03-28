@@ -62,7 +62,30 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         return;
     }
 
+    
+    // update linear cost
+    if (!strcmp("update_lin_cost", cmd)) {
 
+        // Fill q
+        const mxArray *q = prhs[1];
+
+        // Copy vector to ensure it is cast as c_float
+        c_float *q_vec;
+        if(!mxIsEmpty(q)){
+            q_vec = copyToCfloatVector(mxGetPr(q), (&workspace)->data->n);
+        }
+
+        if(!mxIsEmpty(q)){
+          osqp_update_lin_cost(&workspace, q_vec);
+        }
+
+        // Free
+        if(!mxIsEmpty(q)) mxFree(q_vec);
+
+        return;
+    }
+    
+    
     // update lower bound
     if (!strcmp("update_lower_bound", cmd)) {
 
