@@ -333,7 +333,7 @@ classdef osqp < handle
             % Parse input arguments
             p = inputParser;
             defaultProject = '';
-            expectedProject = {'', 'Makefile', 'MinGW Makefiles', 'Unix Makefiles', 'CodeBlocks'};
+            expectedProject = {'', 'Makefile', 'MinGW Makefiles', 'Unix Makefiles', 'CodeBlocks', 'Xcode'};
             defaultParams = 'vectors';
             expectedParams = {'vectors', 'matrices'};
             defaultMexname = 'emosqp';
