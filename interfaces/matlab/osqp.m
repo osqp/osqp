@@ -325,39 +325,61 @@ classdef osqp < handle
         end
 
         %%
-        function codegen(this, varargin)
+        function codegen(this, target_dir, varargin)
             % CODEGEN generate C code for the parametric problem
             %
-            %   codegen(target_dir, embedded, mex_name)
+            %   codegen(target_dir,options)
             
-            nargin = length(varargin);
-
-            %dimension checks on user data. Mex function does not
-            %perform any checks on inputs, so check everything here
-            assert(nargin >= 1, 'incorrect number of inputs');
-            target_dir = varargin{1};
-            if (nargin > 1)
-                embedded = varargin{2};
-            else
+            % Parse input arguments
+            p = inputParser;
+            defaultProject = 'Makefile';
+            expectedProject = {'Makefile', 'MinGW Makefiles', 'Unix Makefiles', 'CodeBlocks'};
+            defaultParams = 'vectors';
+            expectedParams = {'vectors', 'matrices'};
+            defaultMexname = 'emosqp';
+            defaultFW = false;
+            
+            addRequired(p, 'target_dir', @isstr);
+            addParameter(p, 'project_type', defaultProject, ...
+                         @(x) any(validatestring(x, expectedProject)));
+            addParameter(p, 'parameters', defaultParams, ...
+                         @(x) any(validatestring(x, expectedParams)));
+            addParameter(p, 'mexname', defaultMexname, @isstr);
+            addParameter(p, 'force_rewrite', defaultFW, @islogical);
+            
+            parse(p, target_dir, varargin{:});
+            
+            % Set internal variables
+            if strcmp(p.Results.parameters, 'vectors')
                 embedded = 1;
-            end
-            if (nargin > 2)
-                mex_name = varargin{3};
             else
-                mex_name = 'emosqp';
+                embedded = 2;
+            end
+            if strcmp(p.Results.project_type, 'Makefile')
+                if (ispc)
+                    project_type = 'MinGW Makefiles';   % Windows
+                elseif (ismac || isunix)
+                    project_type = 'Unix Makefiles';    % Unix
+                end
+            else
+                project_type = p.Results.project_type;
             end
             
             % Check whether the specified directory already exists
             if exist(target_dir, 'dir')
-                while(1)
-                    prompt = sprintf('Directory "%s" already exists. Do you want to replace it? y/n [y]: ', target_dir);
-                    str = input(prompt,'s');
-                    
-                    if any(strcmpi(str, {'','y'}))
-                        rmdir(target_dir, 's');
-                        break;
-                    elseif strcmpi(str, 'n')
-                        return;
+                if p.Results.force_rewrite
+                    rmdir(target_dir, 's');
+                else
+                    while(1)
+                        prompt = sprintf('Directory "%s" already exists. Do you want to replace it? y/n [y]: ', target_dir);
+                        str = input(prompt, 's');
+                        
+                        if any(strcmpi(str, {'','y'}))
+                            rmdir(target_dir, 's');
+                            break;
+                        elseif strcmpi(str, 'n')
+                            return;
+                        end
                     end
                 end
             end
@@ -406,10 +428,22 @@ classdef osqp < handle
             copyfile(fullfile(files_to_generate_path, 'CMakeLists.txt'), target_dir);
             
             % Write workspace in header file
+            fprintf('Generating workspace.h...\t\t\t\t\t\t');
             work = osqp_mex('get_workspace', this.objectHandle);
             work_hfile = fullfile(target_include_dir, 'workspace.h');
             addpath(fullfile(osqp_path, 'codegen'));
             render_workspace(work, work_hfile);
+            fprintf('[done]\n');
+            
+            % Create project
+            fprintf('Creating project...\n');
+            orig_dir = pwd;
+            cd(target_dir);
+            mkdir('build')
+            cd('build');
+            cmd = sprintf('cmake -G "%s" ..', project_type);
+            system(cmd);
+            cd(orig_dir);
             
             % Make mex interface to the generated code
             mex_cfile  = fullfile(files_to_generate_path, 'emosqp_mex.c');
@@ -417,7 +451,7 @@ classdef osqp < handle
             
             % Rename the mex file
             old_mexfile = ['emosqp_mex.', mexext];
-            new_mexfile = [mex_name, '.', mexext];
+            new_mexfile = [p.Results.mexname, '.', mexext];
             movefile(old_mexfile, new_mexfile);
             
         end
