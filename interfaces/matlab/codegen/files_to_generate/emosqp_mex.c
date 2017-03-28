@@ -3,12 +3,136 @@
 #include "workspace.h"
 
 
-// internal utility functions
+
+/*********************************
+ * Timer Structs and Functions * *
+ *********************************/
+
+// Windows
+#ifdef IS_WINDOWS
+
+#include <windows.h>
+
+typedef struct {
+    LARGE_INTEGER tic;
+	LARGE_INTEGER toc;
+	LARGE_INTEGER freq;
+} PyTimer;
+
+// Mac
+#elif IS_MAC
+
+#include <mach/mach_time.h>
+
+/* Use MAC OSX  mach_time for timing */
+typedef struct {
+	uint64_t tic;
+	uint64_t toc;
+	mach_timebase_info_data_t tinfo;
+} PyTimer;
+
+// Linux
+#else
+
+/* Use POSIX clocl_gettime() for timing on non-Windows machines */
+#include <time.h>
+#include <sys/time.h>
+
+typedef struct {
+	struct timespec tic;
+	struct timespec toc;
+} PyTimer;
+
+#endif
+
+
+/**
+ * Timer Methods
+ */
+
+// Windows
+#if IS_WINDOWS
+
+void tic(PyTimer* t)
+{
+    QueryPerformanceFrequency(&t->freq);
+    QueryPerformanceCounter(&t->tic);
+}
+
+c_float toc(PyTimer* t)
+{
+    QueryPerformanceCounter(&t->toc);
+    return ((t->toc.QuadPart - t->tic.QuadPart) / (c_float)t->freq.QuadPart);
+}
+
+// Mac
+#elif IS_MAC
+
+void tic(PyTimer* t)
+{
+    /* read current clock cycles */
+    t->tic = mach_absolute_time();
+}
+
+c_float toc(PyTimer* t)
+{
+	uint64_t duration; /* elapsed time in clock cycles*/
+
+    t->toc = mach_absolute_time();
+    duration = t->toc - t->tic;
+
+    /*conversion from clock cycles to nanoseconds*/
+    mach_timebase_info(&(t->tinfo));
+    duration *= t->tinfo.numer;
+    duration /= t->tinfo.denom;
+
+    return (c_float)duration / 1e9;
+}
+
+
+// Linux
+#else
+
+/* read current time */
+void tic(PyTimer* t)
+{
+    clock_gettime(CLOCK_MONOTONIC, &t->tic);
+}
+
+
+/* return time passed since last call to tic on this timer */
+c_float toc(PyTimer* t)
+{
+    struct timespec temp;
+
+    clock_gettime(CLOCK_MONOTONIC, &t->toc);
+
+    if ((t->toc.tv_nsec - t->tic.tv_nsec)<0) {
+        temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec-1;
+        temp.tv_nsec = 1e9+t->toc.tv_nsec - t->tic.tv_nsec;
+    } else {
+        temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec;
+        temp.tv_nsec = t->toc.tv_nsec - t->tic.tv_nsec;
+    }
+    return (c_float)temp.tv_sec + (c_float)temp.tv_nsec / 1e9;
+}
+
+
+#endif
+
+/****************************************
+ * END( Timer Structs and Functions ) * *
+ ****************************************/
+
+
+
+// Internal utility functions
 c_float* copyToCfloatVector(double * vecData, c_int numel);
 void castToDoubleArr(c_float *arr, double* arr_out, c_int len);
 void setToNaN(double* arr_out, c_int len);
 
 
+// Function handler
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
     // Get the command string
@@ -19,14 +143,23 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
     // SOLVE
     if (!strcmp("solve", cmd)) {
-        if (nlhs != 4 || nrhs != 1){
+        
+        // Allocate timer
+        double solve_time;
+        PyTimer * timer;
+        timer = mxMalloc(sizeof(PyTimer));
+        
+        if (nlhs != 5 || nrhs != 1){
             mexErrMsgTxt("Solve : wrong number of inputs / outputs");
         }
         if(!(&workspace)){
             mexErrMsgTxt("No problem data has been given.");
         }
+        
         // solve the problem
+        tic(timer);                 // start timer
         osqp_solve(&workspace);
+        solve_time = toc(timer);    // stop timer
 
 
         // Allocate space for solution
@@ -38,6 +171,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         plhs[2] = mxCreateDoubleScalar((&workspace)->info->status_val);
         // number of iterations
         plhs[3] = mxCreateDoubleScalar((&workspace)->info->iter);
+        // solve time
+        plhs[4] = mxCreateDoubleScalar(solve_time);
 
 
         //copy results to mxArray outputs
@@ -195,3 +330,5 @@ void setToNaN(double* arr_out, c_int len){
         arr_out[i] = mxGetNaN();
     }
 }
+
+

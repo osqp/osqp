@@ -48,7 +48,7 @@ classdef codegen_tests < matlab.unittest.TestCase
     methods (Test)
         function test_solve(testCase)
             % Solve with OSQP
-            [x, y, ~, ~] = emosqp('solve');
+            [x, y, ~, ~, ~] = emosqp('solve');
 
             % Check if they are close
             testCase.verifyEqual(x, [0; 5], 'AbsTol',testCase.tol)
@@ -62,7 +62,7 @@ classdef codegen_tests < matlab.unittest.TestCase
             emosqp('update_lin_cost', q_new);
 
             % Solve again
-            [x, y, ~, ~] = emosqp('solve');
+            [x, y, ~, ~, ~] = emosqp('solve');
 
             % Check if they are close
             testCase.verifyEqual(x, [0.0; 5.0], 'AbsTol',testCase.tol)
@@ -79,7 +79,7 @@ classdef codegen_tests < matlab.unittest.TestCase
             emosqp('update_lower_bound', l_new);
 
             % Solve again
-            [x, y, ~, ~] = emosqp('solve');
+            [x, y, ~, ~, ~] = emosqp('solve');
 
             % Check if they are close
             testCase.verifyEqual(x, [0.0; 5.0], 'AbsTol',testCase.tol)
@@ -96,7 +96,7 @@ classdef codegen_tests < matlab.unittest.TestCase
             emosqp('update_upper_bound', u_new);
 
             % Solve again
-            [x, y, ~, ~] = emosqp('solve');
+            [x, y, ~, ~, ~] = emosqp('solve');
 
             % Check if they are close
             testCase.verifyEqual(x, [-0.151515; -33.282828], 'AbsTol',testCase.tol)
@@ -113,7 +113,7 @@ classdef codegen_tests < matlab.unittest.TestCase
             emosqp('update_bounds', l_new, u_new);
 
             % Solve again
-            [x, y, ~, ~] = emosqp('solve');
+            [x, y, ~, ~, ~] = emosqp('solve');
 
             % Check if they are close
             testCase.verifyEqual(x, [-0.127273; -19.949091], 'AbsTol',testCase.tol)
