@@ -51,4 +51,5 @@ OSQP is distributed under the `Apache 2.0 License <https://www.apache.org/licens
    installation/index
    interfaces/index
    parsers/index
+   codegen/index
    examples/index
