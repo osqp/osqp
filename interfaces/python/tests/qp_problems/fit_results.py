@@ -176,7 +176,7 @@ if __name__ == '__main__':
     b = np.zeros((n_prob, n_rho - 1))
 
     i = 0
-    for name, group in problems_p:
+    for _, group in problems_p:
         f = group['p'].values
         rho = group['rho'].values
         for j in range(n_rho - 1):
@@ -207,14 +207,38 @@ if __name__ == '__main__':
     '''
     Solve LP with CVXPY
     '''
+    problems_p = res_p.groupby(group_headers)
+
     t = cvxpy.Variable(n_prob)
-    rho = cvxpy.Variable(n_rho)
+    rho = cvxpy.Variable(n_prob)
     x = cvxpy.Variable(2)
 
     # Add linear cost
-    cost = cvxpy.Maximize(cvxpy.sum_entries(t))
+    objective = cvxpy.Minimize(cvxpy.sum_entries(t))
+
+    # Add constraints
+    constraints = []
+
+    # Add inequality constraints
+    i = 0
+    for _, problem in tqdm(problems_p):
+        p_vec = problem['p'].values
+        for j in range(n_rho - 1):
+            if p_vec[j] < 0.1:
+                constraints += [a[0, i, j] * rho[i] + b[i, j] <= t[i]]
+        i += 1
 
     # Add equality constraints
-    # constraints = []
-    # for i in range(n_prob):
-    #     constraints
+    i = 0
+    for _, problem in tqdm(problems_p):
+        ratio = problem['trPovertrAtA'].iloc[0]
+        constraints += [x[0] + x[1] * ratio == rho[i]]
+        i += 1
+
+    # Define problem
+    prob = cvxpy.Problem(objective, constraints)
+
+    import ipdb; ipdb.set_trace()
+
+    # Solve problem
+    prob.solve(solver=cvxpy.GUROBI)
