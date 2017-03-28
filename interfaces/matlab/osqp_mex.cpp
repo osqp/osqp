@@ -153,31 +153,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       return;
     }
 
-//     // == DEBUG ==
-//     // return data structure
-//     if (!strcmp("get_data", cmd)) {
-// 
-//       //throw an error if this is called before solver is configured
-//       if(!osqpData->work){
-//         mexErrMsgTxt("Solver is uninitialized.  No data have been configured.");
-//       }
-//       //return data
-//       plhs[0] = copyDataToMxStruct(osqpData->work->data);
-//       return;
-//     }
-//     
-//     // == DEBUG ==
-//     // return private structure
-//     if (!strcmp("get_priv", cmd)) {
-// 
-//       //throw an error if this is called before solver is configured
-//       if(!osqpData->work){
-//         mexErrMsgTxt("Solver is uninitialized.  No data have been configured.");
-//       }
-//       //return data
-//       plhs[0] = copyPrivToMxStruct(osqpData->work->priv);
-//       return;
-//     }
     
     // return workspace structure
     if (!strcmp("get_workspace", cmd)) {

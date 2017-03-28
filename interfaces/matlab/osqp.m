@@ -11,7 +11,6 @@ classdef osqp < handle
     %   setup             - configure solver with problem data
     %   solve             - solve the QP
     %   update            - modify problem vectors
-    %   get_workspace     - get the workspace structure
     %   warm_start        - set warm starting variables x and y
     %
     %   default_settings  - create default settings structure
@@ -88,24 +87,6 @@ classdef osqp < handle
 
         end
 
-%         % == DEBUG ==
-%         function out = get_data(this)
-%             % GET_DATA
-%             out = osqp_mex('get_data', this.objectHandle);
-%         end
-%         
-%         % == DEBUG ==
-%         function out = get_priv(this)
-%             % GET_PRIV
-%             out = osqp_mex('get_priv', this.objectHandle);
-%         end
-        
-        %%
-        function out = get_workspace(this)
-            % GET_WORKSPACE
-            out = osqp_mex('get_workspace', this.objectHandle);
-        end
-        
         %%
         function update(this,varargin)
             % UPDATE modify the linear cost term and/or lower and upper bounds
@@ -344,18 +325,65 @@ classdef osqp < handle
         end
 
         %%
-        function codegen(this, varargin)
+        function codegen(this, target_dir, varargin)
             % CODEGEN generate C code for the parametric problem
             %
-            %   codegen(target_dir, options)
+            %   codegen(target_dir,options)
             
-            nargin = length(varargin);
-
-            %dimension checks on user data. Mex function does not
-            %perform any checks on inputs, so check everything here
-            assert(nargin >= 1, 'incorrect number of inputs');
-            target_dir = varargin{1};
-
+            % Parse input arguments
+            p = inputParser;
+            defaultProject = '';
+            expectedProject = {'', 'Makefile', 'MinGW Makefiles', 'Unix Makefiles', 'CodeBlocks', 'Xcode'};
+            defaultParams = 'vectors';
+            expectedParams = {'vectors', 'matrices'};
+            defaultMexname = 'emosqp';
+            defaultFW = false;
+            
+            addRequired(p, 'target_dir', @isstr);
+            addParameter(p, 'project_type', defaultProject, ...
+                         @(x) any(validatestring(x, expectedProject)));
+            addParameter(p, 'parameters', defaultParams, ...
+                         @(x) any(validatestring(x, expectedParams)));
+            addParameter(p, 'mexname', defaultMexname, @isstr);
+            addParameter(p, 'force_rewrite', defaultFW, @islogical);
+            
+            parse(p, target_dir, varargin{:});
+            
+            % Set internal variables
+            if strcmp(p.Results.parameters, 'vectors')
+                embedded = 1;
+            else
+                embedded = 2;
+            end
+            if strcmp(p.Results.project_type, 'Makefile')
+                if (ispc)
+                    project_type = 'MinGW Makefiles';   % Windows
+                elseif (ismac || isunix)
+                    project_type = 'Unix Makefiles';    % Unix
+                end
+            else
+                project_type = p.Results.project_type;
+            end
+            
+            % Check whether the specified directory already exists
+            if exist(target_dir, 'dir')
+                if p.Results.force_rewrite
+                    rmdir(target_dir, 's');
+                else
+                    while(1)
+                        prompt = sprintf('Directory "%s" already exists. Do you want to replace it? y/n [y]: ', target_dir);
+                        str = input(prompt, 's');
+                        
+                        if any(strcmpi(str, {'','y'}))
+                            rmdir(target_dir, 's');
+                            break;
+                        elseif strcmpi(str, 'n')
+                            return;
+                        end
+                    end
+                end
+            end
+            
             % Import OSQP path
             [osqp_path,~,~] = fileparts(which('osqp.m'));
             
@@ -400,10 +428,40 @@ classdef osqp < handle
             copyfile(fullfile(files_to_generate_path, 'CMakeLists.txt'), target_dir);
             
             % Write workspace in header file
+            fprintf('Generating workspace.h...\t\t\t\t\t\t');
+            work = osqp_mex('get_workspace', this.objectHandle);
             work_hfile = fullfile(target_include_dir, 'workspace.h');
             addpath(fullfile(osqp_path, 'codegen'));
-            work = get_workspace(this);
             render_workspace(work, work_hfile);
+            fprintf('[done]\n');
+            
+            % Create project
+            if ~isempty(project_type)
+                fprintf('Creating project...\t\t\t\t\t\t\t\t');
+                orig_dir = pwd;
+                cd(target_dir);
+                mkdir('build')
+                cd('build');
+                cmd = sprintf('cmake -G "%s" ..', project_type);
+                [status, output] = system(cmd);
+                if(status)
+                    fprintf('\n');
+                    fprintf(output);
+                    error('Error configuring CMake environment');
+                else
+                    fprintf('[done]\n');
+                end
+                cd(orig_dir);
+            end
+            
+            % Make mex interface to the generated code
+            mex_cfile  = fullfile(files_to_generate_path, 'emosqp_mex.c');
+            make_emosqp(target_dir, mex_cfile, embedded);
+            
+            % Rename the mex file
+            old_mexfile = ['emosqp_mex.', mexext];
+            new_mexfile = [p.Results.mexname, '.', mexext];
+            movefile(old_mexfile, new_mexfile);
             
         end
         

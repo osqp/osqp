@@ -186,7 +186,6 @@ for i = 1 : length(vec)
         fprintf(f, '%i,\n', vec(i));
     end
 end
-
 fprintf(f, '};\n');
 
 end
