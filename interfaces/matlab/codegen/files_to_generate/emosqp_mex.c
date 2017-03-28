@@ -1,4 +1,5 @@
-#include "mex.h"
+#include <string.h>
+#include <mex.h>
 #include "osqp.h"
 #include "workspace.h"
 
