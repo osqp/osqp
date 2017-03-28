@@ -115,11 +115,13 @@ if __name__ == '__main__':
     # Select problems not saturated at max number of iterations
     # res = res.loc[(res['iter'] < 2499)]
 
-    # Assign efficienct to samples
-    problems = res.groupby(['seed'])
-    res_e = problems.apply(get_efficiency)
-    problems_e = res_e.groupby(['seed'])
+    # Assign group headers
+    group_headers = ['seed', 'name']
 
+    # Assign efficienct to samples
+    problems = res.groupby(group_headers)
+    res_e = problems.apply(get_efficiency)
+    problems_e = res_e.groupby(group_headers)
 
     '''
     Create contour plot from 3D scatter plot with rho, ratio, efficiency
@@ -178,3 +180,11 @@ if __name__ == '__main__':
     Solve LP with CVXPY
     '''
     t = cvxpy.Variable(n_prob)
+    rho = cvxpy.Variable(n_rho)
+    x = cvxpy.Variable(2)
+
+    # Add linear cost
+    cost = cvxpy.Maximize(cvxpy.sum_entries(t))
+
+    # Add equality constraints
+    constraints =
