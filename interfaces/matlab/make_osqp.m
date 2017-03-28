@@ -54,7 +54,6 @@ mex_cmd = sprintf('mex -O -silent');
 cmake_args = '-DUNITTESTS=OFF -DMATLAB=ON';
 mexoptflags = '';
 
-
 % Add specific generators for windows linux or mac
 if (ispc)
     cmake_args = sprintf('%s %s', cmake_args, '-G "MinGW Makefiles"');
@@ -106,6 +105,10 @@ end
 % Pass MATLAB flag to mex compiler
 mexoptflags = sprintf('%s %s', mexoptflags, '-DMATLAB');
 
+% Set optimizer flag
+if (~ispc)
+    mexoptflags = sprintf('%s %s', mexoptflags, 'COPTIMFLAGS=''-O3''');
+end
 
 % Set library extension
 lib_ext = '.a';
@@ -114,10 +117,17 @@ lib_name = sprintf('libosqpdirstatic%s', lib_ext);
 
 % Set osqp directory and osqp_build directory
 osqp_dir = fullfile('..', '..');
-osqp_build_dir = sprintf('%s/build', osqp_dir);
+osqp_build_dir = fullfile(osqp_dir, 'build');
+suitesparse_dir = fullfile(osqp_dir, 'lin_sys', 'direct', 'suitesparse');
+cg_sources_dir = fullfile('codegen', 'sources');
 
 % Include directory
-inc_dir = fullfile(sprintf('-I%s', osqp_dir), 'include');
+inc_dir = [
+    fullfile(sprintf(' -I%s', osqp_dir), 'include'), ...
+    sprintf(' -I%s', suitesparse_dir), ...
+    fullfile(sprintf(' -I%s', suitesparse_dir), 'ldl', 'include'), ...
+    fullfile(sprintf(' -I%s', suitesparse_dir), 'amd', 'include')
+    ];
 
 
 %% OSQP Solver
@@ -159,7 +169,7 @@ if( any(strcmpi(what,'osqp')) || any(strcmpi(what,'all')) )
     lib_origin = fullfile(osqp_build_dir, 'out', lib_name);
     copyfile(lib_origin, lib_name);
 
-    fprintf('\t\t\t\t\t[done]\n');
+    fprintf('\t\t\t\t\t\t[done]\n');
 
 end
 
@@ -173,21 +183,58 @@ if( any(strcmpi(what,'osqp_mex')) || any(strcmpi(what,'all')) )
 
     % Compile
     eval(cmd);
-    fprintf('\t\t\t[done]\n');
+    fprintf('\t\t\t\t[done]\n');
 
 end
 
 
+%% codegen
+if( any(strcmpi(what,'codegen')) || any(strcmpi(what,'all')) )
+    fprintf('Copying source files for codegen...');
+
+    % Copy C files
+    cg_src_dir = fullfile(cg_sources_dir, 'src');
+    if ~exist(cg_src_dir, 'dir')
+        mkdir(cg_src_dir);
+    end
+    cfiles = [dir(fullfile(osqp_dir, 'src', '*.c'));
+              dir(fullfile(suitesparse_dir, '*.c'));
+              dir(fullfile(suitesparse_dir, 'ldl', 'src', '*.c'))];
+    for i = 1 : length(cfiles)
+        if ~any(strcmp(cfiles(i).name, {'cs.c', 'polish.c', 'SuiteSparse_config.c'}))
+            copyfile(fullfile(cfiles(i).folder, cfiles(i).name), ...
+                fullfile(cg_src_dir, cfiles(i).name));
+        end
+    end
+    
+    % Copy H files
+    cg_include_dir = fullfile(cg_sources_dir, 'include');
+    if ~exist(cg_include_dir, 'dir')
+        mkdir(cg_include_dir);
+    end
+    hfiles = [dir(fullfile(osqp_dir, 'include', '*.h'));
+              dir(fullfile(suitesparse_dir, '*.h'));
+              dir(fullfile(suitesparse_dir, 'ldl', 'include', '*.h'))];
+    for i = 1 : length(hfiles)
+        if ~any(strcmp(hfiles(i).name, {'cs.h', 'polish.h', 'SuiteSparse_config.h'}))
+            copyfile(fullfile(hfiles(i).folder, hfiles(i).name), ...
+                fullfile(cg_include_dir, hfiles(i).name));
+        end
+    end
+    
+    fprintf('\t\t\t\t[done]\n');
+
+end
+
 
 %% clean
 if( any(strcmpi(what,'clean')) || any(strcmpi(what,'purge')) )
-    fprintf('Cleaning mex files...  ');
+    fprintf('Cleaning mex files and library...');
 
     % Delete mex file
-    clear osqp
-    binfile = ['osqp_mex.', mexext];
-    if( exist(binfile,'file') )
-        delete(['osqp_mex.',mexext]);
+    mexfiles = dir(['*.', mexext]);
+    for i = 1 : length(mexfiles)
+        delete(mexfiles(i).name);
     end
 
     % Delete static library
@@ -195,32 +242,25 @@ if( any(strcmpi(what,'clean')) || any(strcmpi(what,'purge')) )
         delete(lib_name);
     end
 
-    fprintf('\t\t\t\t\t\t[done]\n');
+    fprintf('\t\t\t\t[done]\n');
 end
 
 
 %% purge
 if( any(strcmpi(what,'purge')) )
-    fprintf('Cleaning mex files and OSQP build...  ');
+    fprintf('Cleaning OSQP build and codegen directories...');
 
     % Delete OSQP build directory
     if exist(osqp_build_dir, 'dir')
         rmdir(osqp_build_dir, 's');
     end
 
-    % Delete mex file
-    clear osqp
-    binfile = ['osqp_mex.', mexext];
-    if( exist(binfile,'file') )
-        delete(['osqp_mex.',mexext]);
+    % Delete codegen files
+    if exist(cg_sources_dir, 'dir')
+        rmdir(cg_sources_dir, 's');
     end
-
-    % Delete static library
-    if( exist(lib_name,'file') )
-        delete(lib_name);
-    end
-
-    fprintf('\t\t[done]\n');
+    
+    fprintf('\t[done]\n');
 end
 
 

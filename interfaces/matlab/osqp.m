@@ -20,6 +20,8 @@ classdef osqp < handle
     %   get_dimensions    - get the number of variables and constraints
     %   version           - return OSQP version
     %   constant          - return a OSQP internal constant
+    %
+    %   codegen           - generate embeddable C code for the problem
 
 
     properties (SetAccess = private, Hidden = true)
@@ -322,6 +324,147 @@ classdef osqp < handle
             return;
         end
 
+        %%
+        function codegen(this, target_dir, varargin)
+            % CODEGEN generate C code for the parametric problem
+            %
+            %   codegen(target_dir,options)
+            
+            % Parse input arguments
+            p = inputParser;
+            defaultProject = '';
+            expectedProject = {'', 'Makefile', 'MinGW Makefiles', 'Unix Makefiles', 'CodeBlocks', 'Xcode'};
+            defaultParams = 'vectors';
+            expectedParams = {'vectors', 'matrices'};
+            defaultMexname = 'emosqp';
+            defaultFW = false;
+            
+            addRequired(p, 'target_dir', @isstr);
+            addParameter(p, 'project_type', defaultProject, ...
+                         @(x) any(validatestring(x, expectedProject)));
+            addParameter(p, 'parameters', defaultParams, ...
+                         @(x) any(validatestring(x, expectedParams)));
+            addParameter(p, 'mexname', defaultMexname, @isstr);
+            addParameter(p, 'force_rewrite', defaultFW, @islogical);
+            
+            parse(p, target_dir, varargin{:});
+            
+            % Set internal variables
+            if strcmp(p.Results.parameters, 'vectors')
+                embedded = 1;
+            else
+                embedded = 2;
+            end
+            if strcmp(p.Results.project_type, 'Makefile')
+                if (ispc)
+                    project_type = 'MinGW Makefiles';   % Windows
+                elseif (ismac || isunix)
+                    project_type = 'Unix Makefiles';    % Unix
+                end
+            else
+                project_type = p.Results.project_type;
+            end
+            
+            % Check whether the specified directory already exists
+            if exist(target_dir, 'dir')
+                if p.Results.force_rewrite
+                    rmdir(target_dir, 's');
+                else
+                    while(1)
+                        prompt = sprintf('Directory "%s" already exists. Do you want to replace it? y/n [y]: ', target_dir);
+                        str = input(prompt, 's');
+                        
+                        if any(strcmpi(str, {'','y'}))
+                            rmdir(target_dir, 's');
+                            break;
+                        elseif strcmpi(str, 'n')
+                            return;
+                        end
+                    end
+                end
+            end
+            
+            % Import OSQP path
+            [osqp_path,~,~] = fileparts(which('osqp.m'));
+            
+            % Path of osqp module
+            cg_dir = fullfile(osqp_path, 'codegen');
+            files_to_generate_path = fullfile(cg_dir, 'files_to_generate');
+            
+            % Make target directory
+            fprintf('Creating target directories...\t\t\t\t\t');
+            target_include_dir = fullfile(target_dir, 'include');
+            target_src_dir = fullfile(target_dir, 'src');
+            
+            if ~exist(target_dir, 'dir')
+                mkdir(target_dir);
+            end
+            if ~exist(target_include_dir, 'dir')
+                mkdir(target_include_dir);
+            end
+            if ~exist(target_src_dir, 'dir')
+                mkdir(fullfile(target_src_dir, 'osqp'));
+            end
+            fprintf('[done]\n');
+            
+            % Copy source files to target directory
+            fprintf('Copying OSQP source files...\t\t\t\t\t');
+            cfiles = dir(fullfile(cg_dir, 'sources', 'src', '*.c'));
+            for i = 1 : length(cfiles)
+                copyfile(fullfile(cfiles(i).folder, cfiles(i).name), ...
+                    fullfile(target_src_dir, 'osqp', cfiles(i).name));
+            end
+            hfiles = dir(fullfile(cg_dir, 'sources', 'include', '*.h'));
+            for i = 1 : length(hfiles)
+                copyfile(fullfile(hfiles(i).folder, hfiles(i).name), ...
+                    fullfile(target_include_dir, hfiles(i).name));
+            end
+            fprintf('[done]\n');
+            
+            % Copy example.c
+            copyfile(fullfile(files_to_generate_path, 'example.c'), target_src_dir);
+            
+            % Copy CMakelists.txt
+            copyfile(fullfile(files_to_generate_path, 'CMakeLists.txt'), target_dir);
+            
+            % Write workspace in header file
+            fprintf('Generating workspace.h...\t\t\t\t\t\t');
+            work = osqp_mex('get_workspace', this.objectHandle);
+            work_hfile = fullfile(target_include_dir, 'workspace.h');
+            addpath(fullfile(osqp_path, 'codegen'));
+            render_workspace(work, work_hfile);
+            fprintf('[done]\n');
+            
+            % Create project
+            if ~isempty(project_type)
+                fprintf('Creating project...\t\t\t\t\t\t\t\t');
+                orig_dir = pwd;
+                cd(target_dir);
+                mkdir('build')
+                cd('build');
+                cmd = sprintf('cmake -G "%s" ..', project_type);
+                [status, output] = system(cmd);
+                if(status)
+                    fprintf('\n');
+                    fprintf(output);
+                    error('Error configuring CMake environment');
+                else
+                    fprintf('[done]\n');
+                end
+                cd(orig_dir);
+            end
+            
+            % Make mex interface to the generated code
+            mex_cfile  = fullfile(files_to_generate_path, 'emosqp_mex.c');
+            make_emosqp(target_dir, mex_cfile, embedded);
+            
+            % Rename the mex file
+            old_mexfile = ['emosqp_mex.', mexext];
+            new_mexfile = [p.Results.mexname, '.', mexext];
+            movefile(old_mexfile, new_mexfile);
+            
+        end
+        
     end
 end
 
