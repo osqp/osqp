@@ -437,13 +437,20 @@ classdef osqp < handle
             
             % Create project
             if ~isempty(project_type)
-                fprintf('Creating project...\n');
+                fprintf('Creating project...\t\t\t\t\t\t\t\t');
                 orig_dir = pwd;
                 cd(target_dir);
                 mkdir('build')
                 cd('build');
                 cmd = sprintf('cmake -G "%s" ..', project_type);
-                system(cmd);
+                [status, output] = system(cmd);
+                if(status)
+                    fprintf('\n');
+                    fprintf(output);
+                    error('Error configuring CMake environment');
+                else
+                    fprintf('[done]\n');
+                end
                 cd(orig_dir);
             end
             
