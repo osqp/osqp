@@ -21,6 +21,9 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+# CVXPY
+import cvxpy
+
 
 def get_efficiency(df):
     """
@@ -100,18 +103,18 @@ def get_grid_data(x, y, z, resX=100, resY=100):
 if __name__ == '__main__':
 
     # Read results (only the ones less then max_iter)
-    lasso = pd.read_csv('results/lasso_full.csv')
-    nonneg_l2 = pd.read_csv('results/nonneg_l2_full.csv')
-    portfolio = pd.read_csv('results/portfolio_full.csv')
-    svm = pd.read_csv('results/svm_full.csv')
-    res = pd.concat([lasso, portfolio, nonneg_l2, svm],
-                    ignore_index=True)
+    # lasso = pd.read_csv('results/lasso_full.csv')
+    # nonneg_l2 = pd.read_csv('results/nonneg_l2_full.csv')
+    # portfolio = pd.read_csv('results/portfolio_full.csv')
+    # svm = pd.read_csv('results/svm_full.csv')
+    # res = pd.concat([lasso, portfolio, nonneg_l2, svm],
+    #                 ignore_index=True)
 
-    # res = pd.read_csv('results/results_full.csv')
+    res = pd.read_csv('results/results_full.csv')
 
     # Select problems not saturated at max number of iterations
-    res = res.loc[(res['iter'] < 2499)]
-xw
+    # res = res.loc[(res['iter'] < 2499)]
+
     # Assign efficienct to samples
     problems = res.groupby(['seed'])
     res_e = problems.apply(get_efficiency)
@@ -140,3 +143,38 @@ xw
     plt.tight_layout()
     plt.show(block=False)
     plt.savefig('behavior.pdf')
+
+    '''
+    Build piecewise-linear (PWL) functions f_i(rho)
+
+    n_prob is the number of problems generated (identified by a seed)
+    n_rho is the number of different rho values
+        N.B. We need to fit n_rho - 1 linear pieces.
+
+    '''
+    # get number of problems
+    n_prob = len(problems_e.groups)
+
+    # get number of rho elements per problem
+    n_rho = problems_e.size().iloc[0]  # Number of elements in first problem
+
+    a = np.zeros((1, n_prob, n_rho - 1))
+    b = np.zeros((n_prob, n_rho - 1))
+
+    i = 0
+    for name, group in problems_e:
+        f = group['e'].values
+        rho = group['rho'].values
+        for j in range(n_rho - 1):
+            # TODO: Adapt and check!
+            a[0, i, j] = (f[j + 1] - f[j]) / (rho[j + 1] - rho[j])
+            b[i, j] = f[j] - a[0, i, j] * rho[j]
+
+        # Increase problem counter
+        i += 1
+
+
+    '''
+    Solve LP with CVXPY
+    '''
+    t = cvxpy.Variable(n_prob)
