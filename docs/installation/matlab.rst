@@ -41,9 +41,9 @@ You can now build the interface by running inside Matlab
 
 .. code:: matlab
 
-   !git clone https://github.com/bstellato/osqp
+   !git clone https://github.com/oxfordcontrol/osqp
    cd osqp/interfaces/matlab
-   make
+   make_osqp
 
 
 Then you can add the interface to the search path by executing from the same directory

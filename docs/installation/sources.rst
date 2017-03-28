@@ -60,7 +60,7 @@ Run the following commands from the terminal
 
     .. code:: bash
 
-       git clone https://github.com/bstellato/osqp
+       git clone https://github.com/oxfordcontrol/osqp
        cd osqp
        mkdir build
        cd build

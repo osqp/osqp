@@ -57,8 +57,9 @@ author = 'Bartolomeo Stellato, Goran Banjac'
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-# The short X.Y version.
-version = '.'.join(__version__.split('.')[:2])
+
+version = '.'.join(__version__.split('.')[:3])
+
 # The full version, including alpha/beta/rc tags.
 release = __version__
 
@@ -78,7 +79,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 pygments_style = 'sphinx'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = True
+todo_include_todos = False
 
 
 # -- Options for HTML output ----------------------------------------------
