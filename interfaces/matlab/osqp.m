@@ -11,7 +11,6 @@ classdef osqp < handle
     %   setup             - configure solver with problem data
     %   solve             - solve the QP
     %   update            - modify problem vectors
-    %   get_workspace     - get the workspace structure
     %   warm_start        - set warm starting variables x and y
     %
     %   default_settings  - create default settings structure
@@ -88,24 +87,6 @@ classdef osqp < handle
 
         end
 
-%         % == DEBUG ==
-%         function out = get_data(this)
-%             % GET_DATA
-%             out = osqp_mex('get_data', this.objectHandle);
-%         end
-%         
-%         % == DEBUG ==
-%         function out = get_priv(this)
-%             % GET_PRIV
-%             out = osqp_mex('get_priv', this.objectHandle);
-%         end
-        
-        %%
-        function out = get_workspace(this)
-            % GET_WORKSPACE
-            out = osqp_mex('get_workspace', this.objectHandle);
-        end
-        
         %%
         function update(this,varargin)
             % UPDATE modify the linear cost term and/or lower and upper bounds
@@ -347,7 +328,7 @@ classdef osqp < handle
         function codegen(this, varargin)
             % CODEGEN generate C code for the parametric problem
             %
-            %   codegen(target_dir, options)
+            %   codegen(target_dir, embedded, mex_name)
             
             nargin = length(varargin);
 
@@ -355,6 +336,16 @@ classdef osqp < handle
             %perform any checks on inputs, so check everything here
             assert(nargin >= 1, 'incorrect number of inputs');
             target_dir = varargin{1};
+            if (nargin > 1)
+                embedded = varargin{2};
+            else
+                embedded = 1;
+            end
+            if (nargin > 2)
+                mex_name = varargin{3};
+            else
+                mex_name = 'emosqp';
+            end
             
             % Check whether the specified directory already exists
             if exist(target_dir, 'dir')
@@ -414,13 +405,20 @@ classdef osqp < handle
             % Copy CMakelists.txt
             copyfile(fullfile(files_to_generate_path, 'CMakeLists.txt'), target_dir);
             
-            % Get workspace structure
-            work = get_workspace(this);
-            
             % Write workspace in header file
+            work = osqp_mex('get_workspace', this.objectHandle);
             work_hfile = fullfile(target_include_dir, 'workspace.h');
             addpath(fullfile(osqp_path, 'codegen'));
             render_workspace(work, work_hfile);
+            
+            % Make mex interface to the generated code
+            mex_cfile  = fullfile(files_to_generate_path, 'emosqp_mex.c');
+            make_emosqp(target_dir, mex_cfile, embedded);
+            
+            % Rename the mex file
+            old_mexfile = ['emosqp_mex.', mexext];
+            new_mexfile = [mex_name, '.', mexext];
+            movefile(old_mexfile, new_mexfile);
             
         end
         

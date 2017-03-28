@@ -54,7 +54,6 @@ mex_cmd = sprintf('mex -O -silent');
 cmake_args = '-DUNITTESTS=OFF -DMATLAB=ON';
 mexoptflags = '';
 
-
 % Add specific generators for windows linux or mac
 if (ispc)
     cmake_args = sprintf('%s %s', cmake_args, '-G "MinGW Makefiles"');
@@ -230,12 +229,12 @@ end
 
 %% clean
 if( any(strcmpi(what,'clean')) || any(strcmpi(what,'purge')) )
-    fprintf('Cleaning mex file and library...');
+    fprintf('Cleaning mex files and library...');
 
     % Delete mex file
-    binfile = ['osqp_mex.', mexext];
-    if( exist(binfile,'file') )
-        delete(['osqp_mex.',mexext]);
+    mexfiles = dir(['*.', mexext]);
+    for i = 1 : length(mexfiles)
+        delete(mexfiles(i).name);
     end
 
     % Delete static library
