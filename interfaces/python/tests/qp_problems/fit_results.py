@@ -2,6 +2,7 @@ from __future__ import print_function
 
 # For plotting
 import matplotlib as mpl
+import matplotlib.colors as mc
 # mpl.use('Agg')  # For plotting on remote server
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -25,12 +26,15 @@ from tqdm import tqdm
 import cvxpy
 
 
-def get_efficiency(df):
+def get_performance(df):
     """
-    Compute sample efficiency using their number of iterations related
+    Compute sample performance using their number of iterations related
     to the min one
     """
-    df.loc[:, 'e'] = df['iter'].min() / df['iter']
+    # df.loc[:, 'p'] = df['iter'] / df['iter'].min()
+    df.loc[:, 'p'] = (df['iter'] - df['iter'].min()) / \
+        (df['iter'].max() - df['iter'].min()) * 100
+
     return df
 
 
@@ -52,13 +56,13 @@ def save_plot(df, name):
 
     # Get best iteration values (there are many) and pick first pair sigma and alpha
     if name is not 'sigma':
-        test_sigma = df.loc[(df['e'] == 1.)].sigma.values[-1]
+        test_sigma = df.loc[(df['p'] == 1.)].sigma.values[-1]
         location &= (df['sigma'] == test_sigma)
     if name is not 'alpha':
-        test_alpha = df.loc[(df['e'] == 1.)].alpha.values[-1]
+        test_alpha = df.loc[(df['p'] == 1.)].alpha.values[-1]
         location &= (df['alpha'] == test_alpha)
     if name is not 'rho':
-        test_rho = df.loc[(df['e'] == 1.)].rho.values[-1]
+        test_rho = df.loc[(df['p'] == 1.)].rho.values[-1]
         location &= (df['rho'] == test_rho)
 
     # Get test case in specified location
@@ -80,7 +84,7 @@ def save_plot(df, name):
     ax = plt.gca()
     if name is 'rho':
         ax.set_xscale('log')
-    plt.scatter(test_case[name], test_case['e'])
+    plt.scatter(test_case[name], test_case['p'])
     ax.set_ylabel('weight')
     ax.set_xlabel(name)
     plt.grid()
@@ -120,27 +124,35 @@ if __name__ == '__main__':
 
     # Assign efficienct to samples
     problems = res.groupby(group_headers)
-    res_e = problems.apply(get_efficiency)
-    problems_e = res_e.groupby(group_headers)
+    res_p = problems.apply(get_performance)
+    problems_p = res_p.groupby(group_headers)
 
     '''
     Create contour plot from 3D scatter plot with rho, ratio, efficiency
     '''
     # Get ratio for each group
-    res_e = problems_e.apply(get_ratio)
+    res_p = problems_p.apply(get_ratio)
 
     # Get grid data
-    xi, yi, zi = get_grid_data(res_e['trPovertrAtA'], res_e['rho'], res_e['e'])
+    xi, yi, zi = get_grid_data(res_p['trPovertrAtA'], res_p['rho'], res_p['p'])
 
     # Plot contour lines
-    levels = [0., 0.25, 0.5, 0.75, 0.9, 0.95, 1.]
+    # levels = [0., 0.25, 0.5, 0.75, 0.9, 0.95, 1.]
+    levels = [0., 0.1, 0.2, 0.3, 0.4, 0.6, 0.8, 1., 100.]
+
+    # use here 256 instead of len(levels)-1 becuase
+    # as it's mentioned in the documentation for the
+    # colormaps, the default colormaps use 256 colors in their
+    # definition: print(plt.cm.jet.N) for example
+    norm = mc.BoundaryNorm(levels, 256)
+
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    plt.contour(xi, yi, zi, levels)
-    plt.contourf(xi, yi, zi, levels)
+    plt.contour(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.jet_r)
+    plt.contourf(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.jet_r)
     ax.set_ylabel(r'$\rho$')
     ax.set_xlabel(r'$\frac{{\rm tr}(P)}{{\rm tr}(A^{T}A)}$')
-    ax.set_title(r'Efficiency $e$')
+    ax.set_title(r'Performance $p$')
     plt.colorbar()
     plt.tight_layout()
     plt.show(block=False)
@@ -155,17 +167,17 @@ if __name__ == '__main__':
 
     '''
     # get number of problems
-    n_prob = len(problems_e.groups)
+    n_prob = len(problems_p.groups)
 
     # get number of rho elements per problem
-    n_rho = problems_e.size().iloc[0]  # Number of elements in first problem
+    n_rho = problems_p.size().iloc[0]  # Number of elements in first problem
 
     a = np.zeros((1, n_prob, n_rho - 1))
     b = np.zeros((n_prob, n_rho - 1))
 
     i = 0
-    for name, group in problems_e:
-        f = group['e'].values
+    for name, group in problems_p:
+        f = group['p'].values
         rho = group['rho'].values
         for j in range(n_rho - 1):
             # TODO: Adapt and check!
@@ -174,6 +186,22 @@ if __name__ == '__main__':
 
         # Increase problem counter
         i += 1
+
+    # # DEBUG
+    # i = i - 1
+    #
+    # # DEBUG: Try to test PWL functions of last group
+    # plt.figure()
+    # ax = plt.gca()
+    # rho_vec = np.linspace(0, 10, 100)
+    # plt.plot(rho, f)
+    # for j in range(n_rho - 1):
+    #     if f[j] < 0.5:
+    #         f_temp = a[0, i, j] * rho_vec + b[i, j]
+    #         plt.plot(rho_vec, f_temp)
+    # ax.set_xlim(0, 0.02)
+    # ax.set_ylim(0, 6)
+    # plt.show(block=False)
 
 
     '''
@@ -187,4 +215,6 @@ if __name__ == '__main__':
     cost = cvxpy.Maximize(cvxpy.sum_entries(t))
 
     # Add equality constraints
-    constraints =
+    # constraints = []
+    # for i in range(n_prob):
+    #     constraints
