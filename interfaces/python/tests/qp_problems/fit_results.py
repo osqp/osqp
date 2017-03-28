@@ -127,36 +127,7 @@ if __name__ == '__main__':
     res_p = problems.apply(get_performance)
     problems_p = res_p.groupby(group_headers)
 
-    '''
-    Create contour plot from 3D scatter plot with rho, ratio, efficiency
-    '''
-    # Get ratio for each group
-    res_p = problems_p.apply(get_ratio)
 
-    # Get grid data
-    xi, yi, zi = get_grid_data(res_p['trPovertrAtA'], res_p['rho'], res_p['p'])
-
-    # Plot contour lines
-    # levels = [0., 0.25, 0.5, 0.75, 0.9, 0.95, 1.]
-    levels = [0., 0.1, 0.2, 0.3, 0.4, 0.6, 0.8, 1., 100.]
-
-    # use here 256 instead of len(levels)-1 becuase
-    # as it's mentioned in the documentation for the
-    # colormaps, the default colormaps use 256 colors in their
-    # definition: print(plt.cm.jet.N) for example
-    norm = mc.BoundaryNorm(levels, 256)
-
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    plt.contour(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.jet_r)
-    plt.contourf(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.jet_r)
-    ax.set_ylabel(r'$\rho$')
-    ax.set_xlabel(r'$\frac{{\rm tr}(P)}{{\rm tr}(A^{T}A)}$')
-    ax.set_title(r'Performance $p$')
-    plt.colorbar()
-    plt.tight_layout()
-    plt.show(block=False)
-    plt.savefig('behavior.pdf')
 
     '''
     Build piecewise-linear (PWL) functions f_i(rho)
@@ -209,6 +180,9 @@ if __name__ == '__main__':
     '''
     problems_p = res_p.groupby(group_headers)
 
+    # DEBUG: Solve for only 100 problems
+    # n_prob = 3000
+
     t = cvxpy.Variable(n_prob)
     rho = cvxpy.Variable(n_prob)
     x = cvxpy.Variable(2)
@@ -222,23 +196,67 @@ if __name__ == '__main__':
     # Add inequality constraints
     i = 0
     for _, problem in tqdm(problems_p):
-        p_vec = problem['p'].values
-        for j in range(n_rho - 1):
-            if p_vec[j] < 0.1:
-                constraints += [a[0, i, j] * rho[i] + b[i, j] <= t[i]]
+        # Solve for only 10 problems
+        if i < n_prob:
+            p_vec = problem['p'].values
+            for j in range(n_rho - 1):
+                if p_vec[j] < 0.5:
+                    constraints += [a[0, i, j] * rho[i] + b[i, j] <= t[i]]
         i += 1
 
     # Add equality constraints
     i = 0
     for _, problem in tqdm(problems_p):
-        ratio = problem['trPovertrAtA'].iloc[0]
-        constraints += [x[0] + x[1] * ratio == rho[i]]
+        if i < n_prob:
+            ratio = problem['trPovertrAtA'].iloc[0]
+            constraints += [x[0] + x[1] * ratio == rho[i]]
         i += 1
+
+    # Add constraints on rho
+    constraints += [rho >= 0]
 
     # Define problem
     prob = cvxpy.Problem(objective, constraints)
 
-    import ipdb; ipdb.set_trace()
-
     # Solve problem
-    prob.solve(solver=cvxpy.GUROBI)
+    prob.solve(solver=cvxpy.GUROBI, verbose=True)
+
+    '''
+    Create contour plot from 3D scatter plot with rho, ratio, efficiency
+    '''
+    # Get ratio for each group
+    res_p = problems_p.apply(get_ratio)
+
+    # Get grid data
+    xi, yi, zi = get_grid_data(res_p['trPovertrAtA'], res_p['rho'], res_p['p'])
+
+    # Plot contour lines
+    # levels = [0., 0.25, 0.5, 0.75, 0.9, 0.95, 1.]
+    levels = [0., 0.1, 0.2, 0.3, 0.4, 0.6, 0.8, 1., 100.]
+
+    # use here 256 instead of len(levels)-1 becuase
+    # as it's mentioned in the documentation for the
+    # colormaps, the default colormaps use 256 colors in their
+    # definition: print(plt.cm.jet.N) for example
+    norm = mc.BoundaryNorm(levels, 256)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.contour(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.jet_r)
+    plt.contourf(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.jet_r)
+    ax.set_ylabel(r'$\rho$')
+    ax.set_xlabel(r'$\frac{{\rm tr}(P)}{{\rm tr}(A^{T}A)}$')
+    ax.set_title(r'Performance $p$')
+    plt.colorbar()
+    plt.tight_layout()
+
+    '''
+    Plot line of fit graph
+    '''
+    x_fit = np.asarray(x.value).flatten()
+    ratio_vec = np.linspace(0, 2., 100)
+    rho_fit_vec = x_fit[0] + x_fit[1] * ratio_vec
+    plt.plot(ratio_vec, rho_fit_vec, color='g')
+
+    plt.show(block=False)
+    plt.savefig('behavior.pdf')
