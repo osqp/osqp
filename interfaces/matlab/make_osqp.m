@@ -135,9 +135,10 @@ if( any(strcmpi(what,'osqp')) || any(strcmpi(what,'all')) )
    fprintf('Compiling OSQP solver...');
 
     % Create build directory and go inside
-    if ~exist(osqp_build_dir, 'dir')
-        mkdir(osqp_build_dir);
+    if exist(osqp_build_dir, 'dir')
+        rmdir(osqp_build_dir, 's');
     end
+    mkdir(osqp_build_dir);
     cd(osqp_build_dir);
 
     % Extend path for CMAKE mac (via Homebrew)

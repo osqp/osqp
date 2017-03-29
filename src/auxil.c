@@ -3,7 +3,7 @@
 /***********************************************************
  * Auxiliary functions needed to compute ADMM iterations * *
  ***********************************************************/
-
+ #ifndef EMBEDDED
  /**
   * Automatically compute rho
   * @param work Workspace
@@ -35,6 +35,8 @@
     work->settings->rho = AUTO_RHO_OFFSET + AUTO_RHO_SLOPE * ratio;
 
  }
+ #endif // ifndef EMBEDDED
+
 
  /**
   * Swap c_float vector pointers

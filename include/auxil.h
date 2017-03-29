@@ -19,11 +19,14 @@ extern "C" {
  * Auxiliary functions needed to compute ADMM iterations * *
  ***********************************************************/
 
+#ifndef EMBEDDED
 /**
  * Automatically compute rho
  * @param work Workspace
  */
 void compute_rho(OSQPWorkspace * work);
+
+#endif // ifndef EMBEDDED
 
 /**
  * Swap c_float vector pointers

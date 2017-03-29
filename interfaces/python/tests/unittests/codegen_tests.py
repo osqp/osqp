@@ -43,9 +43,9 @@ class codegen_tests(unittest.TestCase):
         x, y, _, _, _ = emosqp.solve()
 
         # Assert close
-        nptest.assert_array_almost_equal(x, np.array([0., 5.]), decimal=5)
+        nptest.assert_array_almost_equal(x, np.array([0., 5.]), decimal=3)
         nptest.assert_array_almost_equal(
-            y, np.array([1.66666667, 0., 1.33333333, 0., 0.]), decimal=5)
+            y, np.array([1.66666667, 0., 1.33333333, 0., 0.]), decimal=3)
 
     def test_update_q(self):
         import emosqp
@@ -56,9 +56,9 @@ class codegen_tests(unittest.TestCase):
         x, y, _, _, _ = emosqp.solve()
 
         # Assert close
-        nptest.assert_array_almost_equal(x, np.array([0., 5.]), decimal=5)
+        nptest.assert_array_almost_equal(x, np.array([0., 5.]), decimal=3)
         nptest.assert_array_almost_equal(
-            y, np.array([3.33333334, 0., 6.66666667, 0., 0.]), decimal=5)
+            y, np.array([3.33333334, 0., 6.66666667, 0., 0.]), decimal=3)
 
         # Update linear cost to the original value
         emosqp.update_lin_cost(self.q)
@@ -72,9 +72,9 @@ class codegen_tests(unittest.TestCase):
         x, y, _, _, _ = emosqp.solve()
 
         # Assert close
-        nptest.assert_array_almost_equal(x, np.array([0., 5.]), decimal=5)
+        nptest.assert_array_almost_equal(x, np.array([0., 5.]), decimal=3)
         nptest.assert_array_almost_equal(
-            y, np.array([1.66666667, 0., 1.33333333, 0., 0.]), decimal=5)
+            y, np.array([1.66666667, 0., 1.33333333, 0., 0.]), decimal=3)
 
         # Update lower bound to the original value
         emosqp.update_lower_bound(self.l)
@@ -91,7 +91,7 @@ class codegen_tests(unittest.TestCase):
         nptest.assert_array_almost_equal(
            x, np.array([-1.51515152e-01, -3.33282828e+02]), decimal=3)
         nptest.assert_array_almost_equal(
-            y, np.array([0., 0., 1.33333333, 0., 0.]), decimal=5)
+            y, np.array([0., 0., 1.33333333, 0., 0.]), decimal=3)
 
         # Update upper bound to the original value
         emosqp.update_upper_bound(self.u)
@@ -107,9 +107,9 @@ class codegen_tests(unittest.TestCase):
 
         # Assert close
         nptest.assert_array_almost_equal(
-            x, np.array([-0.12727273, -19.94909091]), decimal=5)
+            x, np.array([-0.12727273, -19.94909091]), decimal=3)
         nptest.assert_array_almost_equal(
-            y, np.array([0., 0., 0., -0.8, 0.]), decimal=5)
+            y, np.array([0., 0., 0., -0.8, 0.]), decimal=3)
 
         # Update bounds to the original values
         emosqp.update_bounds(self.l, self.u)
