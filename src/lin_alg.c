@@ -233,7 +233,7 @@ c_float mat_trace(csc * M){
     c_int j, i;
     for (j = 0; j < M->n; j++){  // Cycle over columns
         for (i = M->p[j]; i < M->p[j+1]; i++){   // Cycle every row in the column
-            if (i == j){
+            if (M->i[i] == j){
                 trace += M->x[i];
             }
         }
@@ -251,9 +251,7 @@ c_float mat_fro_sq(csc * M){
     c_int j, i;
     for (j = 0; j < M->n; j++){  // Cycle over columns
         for (i = M->p[j]; i < M->p[j+1]; i++){   // Cycle every row in the column
-            if (i == j){
-                fro_sq += M->x[i] * M->x[i]
-            }
+            fro_sq += M->x[i] * M->x[i];
         }
     }
     return fro_sq;

@@ -43,14 +43,6 @@ def get_performance_and_ratio(df):
     return df
 
 
-# def get_ratio(df):
-#     """
-#     Get ratio tr(P)/tr(A'A) for the dataframe
-#     """
-#     df.loc[:, 'trPovertrAtA'] = df['trP'] / (df['froA'] * df['froA'])
-#     return df
-
-
 def save_plot(df, name):
     """
     Plot behavior of 'name' in selected dataframe
@@ -59,7 +51,8 @@ def save_plot(df, name):
     # Dummy value always true
     location = (df['alpha'] > 0)
 
-    # Get best iteration values (there are many) and pick first pair sigma and alpha
+    # Get best iteration values (there are many) and
+    # pick first pair sigma and alpha
     if name is not 'sigma':
         test_sigma = df.loc[(df['p'] == 1.)].sigma.values[-1]
         location &= (df['sigma'] == test_sigma)
@@ -138,7 +131,6 @@ def compute_pwl_lower_approx(x, y):
     return A, b
 
 
-
 # Main function
 if __name__ == '__main__':
 
@@ -150,6 +142,7 @@ if __name__ == '__main__':
     # res = pd.concat([lasso, portfolio, nonneg_l2, svm],
     #                 ignore_index=True)
 
+    # Read full results
     res = pd.read_csv('results/results_full.csv')
 
     # Select problems not saturated at max number of iterations
@@ -170,19 +163,10 @@ if __name__ == '__main__':
     '''
     Build piecewise-linear (PWL) functions f_i(rho)
     '''
-    # get number of problems
-    # n_prob = len(problems_p.groups)
-
-    # get number of rho elements per problem
-    # n_rho = problems_p.size().iloc[0]  # Number of elements in first problem
-
     # Create list of arrays
     A = []
     b = []
-    # a = np.zeros((1, n_prob, n_rho - 1))
-    # b = np.zeros((n_prob, n_rho - 1))
 
-    # i = 0
     print("\nComputing PWL lower approximations")
     for _, group in tqdm(problems_p):
         f = group['p'].values
@@ -193,15 +177,6 @@ if __name__ == '__main__':
         # Append arrays just found with list
         A.append(A_temp)
         b.append(b_temp)
-
-        #
-        # for j in range(n_rho - 1):
-        #     # TODO: Adapt and check!
-        #     a[0, i, j] = (f[j + 1] - f[j]) / (rho[j + 1] - rho[j])
-        #     b[i, j] = f[j] - a[0, i, j] * rho[j]
-
-        # Increase problem counter
-        # i += 1
 
     # # DEBUG
     # i = i - 1
@@ -224,10 +199,8 @@ if __name__ == '__main__':
     Solve LP with CVXPY
     '''
     print("\n\nSolving problem with CVXPY and GUROBI")
-    # problems_p = res_p.groupby(group_headers)
 
-    # DEBUG: Solve for only some problems
-    # n_prob = 300
+    # Solve for only n_prob problems
     n_prob = len(problems_p.groups)
 
     t = cvxpy.Variable(n_prob)
@@ -246,14 +219,8 @@ if __name__ == '__main__':
     for _, problem in tqdm(problems_p):
         # Solve for only 10 problems
         if i < n_prob:
-            # p_vec = problem['p'].values
-
             for j in range(len(b[i])):
                 constraints += [A[i][j] * rho[i] + b[i][j] <= t[i]]
-            #
-            # for j in range(n_rho - 1):
-            #     if p_vec[j] < 0.4:
-            #         constraints += [a[0, i, j] * rho[i] + b[i, j] <= t[i]]
         i += 1
 
     # Add equality constraints

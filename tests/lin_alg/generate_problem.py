@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.sparse as spa
+import scipy.sparse.linalg as sla
 import utils.codegen_utils as cu
 
 # Set numpy seed for reproducibility
@@ -63,6 +64,11 @@ test_mat_extr_triu_P = test_mat_extr_triu_P + test_mat_extr_triu_P.T
 test_mat_extr_triu_Pu = spa.triu(test_mat_extr_triu_P).tocsc()
 
 
+# Test trace and frobenius norms
+test_mat_trace_P = spa.random(4, 4, density=0.6, format='csc')
+test_mat_trace_P_trace = test_mat_trace_P.diagonal().sum()
+test_mat_trace_P_fro_sq = sla.norm(test_mat_trace_P, ord='fro') ** 2
+
 # Test compute quad form
 test_qpform_n = 4
 test_qpform_P = spa.random(test_qpform_n, test_qpform_n, density=0.8).tocsc()
@@ -109,7 +115,10 @@ data = {'test_sp_matrix_A': test_sp_matrix_A,
         'test_qpform_n': test_qpform_n,
         'test_qpform_Pu': test_qpform_Pu,
         'test_qpform_x': test_qpform_x,
-        'test_qpform_value': test_qpform_value
+        'test_qpform_value': test_qpform_value,
+        'test_mat_trace_P': test_mat_trace_P,
+        'test_mat_trace_P_trace': test_mat_trace_P_trace,
+        'test_mat_trace_P_fro_sq': test_mat_trace_P_fro_sq
         }
 
 # Generate test data
