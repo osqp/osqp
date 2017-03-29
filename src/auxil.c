@@ -11,12 +11,22 @@
  void compute_rho(OSQPWorkspace * work){
     c_float trP, trAtA, ratio, rho;
 
+    if (work->data->m == 0){ // No consraints. Use max rho
+        work->settings->rho = AUTO_RHO_MAX;
+        return;
+    }
+
     // Compute tr(P)
     trP = mat_trace(work->data->P);
 
     // Compute tr(AtA) = fro(A) ^ 2
     trAtA = mat_fro_sq(work->data->A);
     trAtA *= trAtA;
+
+    if (trAtA < 1e-05){ // tr(AtA) = 0
+        work->settings->rho = AUTO_RHO_MAX;
+        return;
+    }
 
     // Compute ratio
     ratio = trP / trAtA;

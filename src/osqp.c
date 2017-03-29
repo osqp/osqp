@@ -168,7 +168,7 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     // Print header
     #ifdef PRINTING
     if (work->settings->verbose)
-        print_setup_header(work->data, settings);
+        print_setup_header(work->data, work->settings);
     #endif
 
     return work;
@@ -268,9 +268,11 @@ c_int osqp_solve(OSQPWorkspace * work){
             }
 
             // Check algorithm termination
-            if (check_termination(work)){
-                // Terminate algorithm
-                break;
+            if (can_check_termination){
+                if (check_termination(work)){
+                    // Terminate algorithm
+                    break;
+                }
             }
 
         }

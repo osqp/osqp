@@ -46,6 +46,7 @@ extern "C" {
 #define AUTO_RHO (1)
 #define AUTO_RHO_OFFSET (1.07838081E-03)    // Not settable by the user
 #define AUTO_RHO_SLOPE (2.31511262)         // Not settable by the user
+#define AUTO_RHO_MAX (10.)                  // Not settable by user
 #endif
 
 #define EARLY_TERMINATE (1)

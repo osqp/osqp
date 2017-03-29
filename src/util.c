@@ -78,7 +78,7 @@ void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
     c_print("Settings: ");
     c_print("eps_abs = %.1e, eps_rel = %.1e,\n          ", settings->eps_abs, settings->eps_rel);
     c_print("eps_prim_inf = %.1e, eps_dual_inf = %.1e,\n          ", settings->eps_prim_inf, settings->eps_dual_inf);
-    c_print("rho = %.1e ", settings->rho);
+    c_print("rho = %.2e ", settings->rho);
     if (settings->auto_rho) c_print("(auto)");
     c_print("\n          ");
     c_print("sigma = %.1e, alpha = %.1e, \n          ", settings->sigma, settings->alpha);
