@@ -118,6 +118,12 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
         work->scaling = OSQP_NULL;
     }
 
+
+    // Compute rho automatically if specified
+    if (work->settings->auto_rho){
+        compute_rho(work);
+    }
+
     // Initialize linear system solver private structure
     // Initialize private structure
     work->priv = init_priv(work->data->P, work->data->A, work->settings, 0);
@@ -128,6 +134,7 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
 
         return OSQP_NULL;
     }
+
 
     // Initialize active constraints structure
     work->pol = c_malloc(sizeof(OSQPPolish));
@@ -161,7 +168,7 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     // Print header
     #ifdef PRINTING
     if (work->settings->verbose)
-        print_setup_header(work->data, settings);
+        print_setup_header(work->data, work->settings);
     #endif
 
     return work;
@@ -261,9 +268,11 @@ c_int osqp_solve(OSQPWorkspace * work){
             }
 
             // Check algorithm termination
-            if (check_termination(work)){
-                // Terminate algorithm
-                break;
+            if (can_check_termination){
+                if (check_termination(work)){
+                    // Terminate algorithm
+                    break;
+                }
             }
 
         }

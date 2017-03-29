@@ -57,7 +57,7 @@ class QPExample(with_metaclass(abc.ABCMeta, object)):
             for _ in range(self.nm_num_prob):  # Generate some random problems
 
                 # Get current seed
-                current_seed = np.random.randint(0, sys.maxsize)
+                current_seed = np.random.randint(0, 2**32 - 1)
                 np.random.seed(current_seed)
 
                 # generate problem and store statistics

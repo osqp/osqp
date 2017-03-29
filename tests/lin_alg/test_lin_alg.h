@@ -71,6 +71,8 @@ static char * test_vec_operations(){
 static char * test_mat_operations(){
     csc *Ad, *dA, *A_ewsq, *A_ewabs;     // Matrices used for tests
     c_int exitflag=0;
+    c_float trace, fro_sq;
+
 
     lin_alg_sols_data *  data = generate_problem_lin_alg_sols_data();
 
@@ -104,6 +106,16 @@ static char * test_mat_operations(){
     mat_ew_abs(A_ewabs);
     mu_assert("Linear algebra tests: error in matrix operation, elementwise absolute value",
             is_eq_csc(A_ewabs, data->test_mat_ops_ew_abs, TESTS_TOL));
+
+    // Trace
+    trace = mat_trace(data->test_mat_trace_P);
+    mu_assert("Linear algebra tests: error in matrix operation, trace",
+            c_absval(trace - data->test_mat_trace_P_trace) < TESTS_TOL);
+
+    // Frobenius norm squared
+    fro_sq = mat_fro_sq(data->test_mat_trace_P);
+    mu_assert("Linear algebra tests: error in matrix operation, frobenius norm squared",
+            c_absval(fro_sq - data->test_mat_trace_P_fro_sq) < TESTS_TOL);
 
     // cleanup
     csc_spfree(Ad);

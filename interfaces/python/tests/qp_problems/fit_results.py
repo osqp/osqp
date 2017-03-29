@@ -1,52 +1,45 @@
 from __future__ import print_function
+
+# For plotting
 import matplotlib as mpl
+import matplotlib.colors as mc
 # mpl.use('Agg')  # For plotting on remote server
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from scipy.interpolate import griddata
+plt.rc('axes', labelsize=18)    # fontsize of the x and y labels
+plt.rc('axes', titlesize=18)   # fontsize of the tick labels
+plt.rc('xtick', labelsize=15)   # fontsize of the tick labels
+plt.rc('ytick', labelsize=15)   # fontsize of the tick labels
+plt.rc('legend', fontsize=15)   # legend fontsize
+plt.rc('text', usetex=True)     # use latex
+plt.rc('font', family='serif')
+
+# Numerics
 import numpy as np
+from scipy.spatial import ConvexHull  # Create convex hull of PWL approximations
+
+# Dataframes
 import pandas as pd
+from tqdm import tqdm
+
+# CVXPY
+import cvxpy
 
 
-# # import sklearn tools
-# from sklearn.model_selection import train_test_split
-# from sklearn.pipeline import make_pipeline   # Make pipeline for estimators
-# from sklearn.preprocessing import PolynomialFeatures  # Construct polynomials
-# from sklearn.linear_model import (LinearRegression, HuberRegressor, Ridge)
-# from sklearn.metrics import mean_squared_error
-#
-# # # Define candidate function to be fit
-# # def func_iter(x, c0, c1, c2, c3, c4):
-# #
-# #     return c0*np.power(x[0], c1*x[3] + c2*x[4])*np.power(x[1], c3)*np.power(x[2], c4)
-
-
-def get_best_params(df):
+def get_performance_and_ratio(df):
     """
-    Transform weighted frame into another frame with best parameters
+    Compute
+        1) sample performance using their number of iterations related
+           to the min one
+        2) ratio tr(P)/tr(A'A) for the dataframe
     """
-    # Get best parameters
-    df_best = df.loc[df['w'] == 1.]
 
-    # Get highest sigma
-    min_sigma = df_best['sigma'].min()
+    df.loc[:, 'p'] = (df['iter'] - df['iter'].min()) / \
+        (df['iter'].max() - df['iter'].min()) * 100
 
-    # Get best row
-    df_best = df_best.loc[(df_best['sigma'] == min_sigma)]
+    df.loc[:, 'trPovertrAtA'] = df['trP'] / (df['froA'] * df['froA'])
 
-    if len(df_best) > 1:  # If multiple values choose one with min alpha
-        min_alpha = df_best['alpha'].min()
-        df_best = df_best.loc[(df_best['alpha'] == min_alpha)]
-
-    return df_best
-
-
-
-
-def weight_by_iter(df):
-    """
-    Weight sample using their number of iterations related to the min one
-    """
-    df['w'] = df['iter'].min() / df['iter']
     return df
 
 
@@ -56,25 +49,25 @@ def save_plot(df, name):
     """
 
     # Dummy value always true
-    location = (df['alpha'] > 0 )
+    location = (df['alpha'] > 0)
 
-    # Get best iteration values (there are many) and pick first pair sigma and alpha
+    # Get best iteration values (there are many) and
+    # pick first pair sigma and alpha
     if name is not 'sigma':
-        test_sigma = df.loc[(df['w'] == 1.)].sigma.values[-1]
+        test_sigma = df.loc[(df['p'] == 1.)].sigma.values[-1]
         location &= (df['sigma'] == test_sigma)
     if name is not 'alpha':
-        test_alpha = df.loc[(df['w'] == 1.)].alpha.values[-1]
+        test_alpha = df.loc[(df['p'] == 1.)].alpha.values[-1]
         location &= (df['alpha'] == test_alpha)
     if name is not 'rho':
-        test_rho = df.loc[(df['w'] == 1.)].rho.values[-1]
+        test_rho = df.loc[(df['p'] == 1.)].rho.values[-1]
         location &= (df['rho'] == test_rho)
 
     # Get test case in specified location
     test_case = df.loc[location]
 
-
     # Plot behavior
-    plt.figure(figsize=(12,6))
+    plt.figure(figsize=(12, 6))
     plt.subplot(1, 2, 1)
     ax = plt.gca()
     if name is 'rho':
@@ -89,7 +82,7 @@ def save_plot(df, name):
     ax = plt.gca()
     if name is 'rho':
         ax.set_xscale('log')
-    plt.scatter(test_case[name], test_case['w'])
+    plt.scatter(test_case[name], test_case['p'])
     ax.set_ylabel('weight')
     ax.set_xlabel(name)
     plt.grid()
@@ -99,146 +92,189 @@ def save_plot(df, name):
     plt.savefig('figures/%s.pdf' % name)
 
 
+def get_grid_data(x, y, z, resX=100, resY=100):
+    "Convert 3 column data to matplotlib grid"
+    xi = np.linspace(min(x), max(x), resX)
+    yi = np.linspace(min(y), max(y), resY)
+    zi = griddata((x, y), z, (xi[None, :], yi[:, None]), method='linear')
+    # X, Y = np.meshgrid(xi, yi)
+    return xi, yi, zi
+
+
+def compute_pwl_lower_approx(x, y):
+    """
+    Compute pwl lower approximation of the convex function y = f(x)
+    passing by the specified points
+    """
+    points = np.vstack((x, y)).T
+    hull = ConvexHull(points)
+    hull_eq = hull.equations
+    A_hull = hull_eq[:, :2]
+    b_hull = hull_eq[:, -1]
+
+    # Delete line passing by first and last point
+    i_idx = []
+    for i in range(A_hull.shape[0]):
+        if abs(A_hull[i, 0] * x[0] + A_hull[i, 1] * y[0] + b_hull[i]) < 1e-04:   # First point
+            if abs(A_hull[i, 0] * x[-1] + A_hull[i, 1] * y[-1] + b_hull[i]) < 1e-04:   # Last point
+                i_idx += [i]
+
+    # Delete rows
+    A_hull = np.delete(A_hull, i_idx, 0)
+    b_hull = np.delete(b_hull, i_idx)
+
+    # Return hyperplanes in form y >= A*x  + b
+    A = np.divide(-A_hull[:, 0], A_hull[:, 1])
+    b = np.divide(-b_hull[:], A_hull[:, 1])
+
+    # Return convex hull in the form A_hull * x <= b_hull
+    return A, b
+
+
 # Main function
 if __name__ == '__main__':
 
     # Read results (only the ones less then max_iter)
+    # lasso = pd.read_csv('results/lasso_full.csv')
+    # nonneg_l2 = pd.read_csv('results/nonneg_l2_full.csv')
+    # portfolio = pd.read_csv('results/portfolio_full.csv')
+    # svm = pd.read_csv('results/svm_full.csv')
+    # res = pd.concat([lasso, portfolio, nonneg_l2, svm],
+    #                 ignore_index=True)
+
+    # Read full results
     res = pd.read_csv('results/results_full.csv')
-    res = res.loc[(res['iter'] < 2499)]  # Select problems not saturated at max number of iterations
 
-    # Problem headings
-    headings = ['n', 'm', 'name', 'seed']
+    # Select problems not saturated at max number of iterations
+    res = res.loc[(res['iter'] < 1000)]
 
-    # Group problems
-    problems = res.groupby(headings)
-    # n_problems = len(problems.groups)
+    # Assign group headers
+    group_headers = ['seed', 'name']
 
-    # Assign weights to samples
-    res_w = problems.apply(weight_by_iter)
-    problems_w = res_w.groupby(headings)
+    print("Compute performance index and ratio for all problems")
+    tqdm.pandas()
+    # Assign performance and ratio to samples
+    problems = res.groupby(group_headers)
+    res_p = problems.progress_apply(get_performance_and_ratio)
+    problems_p = res_p.groupby(group_headers)
 
+    print("\nTotal number of problems: %i" % len(problems_p.groups))
 
-    # Plot behavior for fixed sigma and alpha and changing rho
-    # test_name = (50.0, 60.0, 'svm', 3076953921.0)
-    # test_name = (50.0, 60.0, 'svm', 107769053.0)
-    test_name = (40.0, 40.0, 'lasso', 685148778.0)
-    # test_name = (40.0, 40.0, 'lasso', 4089288235.0)
+    '''
+    Build piecewise-linear (PWL) functions f_i(rho)
+    '''
+    # Create list of arrays
+    A = []
+    b = []
 
-    test_instance = problems_w.get_group(test_name)
+    print("\nComputing PWL lower approximations")
+    for _, group in tqdm(problems_p):
+        f = group['p'].values
+        rho = group['rho'].values
 
-    # Save plots for rho, sigma and alpha
-    # save_plot(test_instance, 'rho')
-    # save_plot(test_instance, 'sigma')
-    # save_plot(test_instance, 'alpha')
+        A_temp, b_temp = compute_pwl_lower_approx(rho, f)
 
+        # Append arrays just found with list
+        A.append(A_temp)
+        b.append(b_temp)
 
-
-    # Get optimal parameters for lasso problem
-    same_type_probs = res_w.groupby(['name'])
-    lasso_probs = same_type_probs.get_group(('lasso'))
-    best_lasso = lasso_probs.groupby(['seed']).apply(get_best_params)
-    pd.tools.plotting.scatter_matrix(best_lasso)
-
-
-
-    # Select smaller dataset and consider only n, m, trP
-    # res = res.loc[(res['m'] < 100) & (res['n'] < 100)]
-
-
-
-    # Get only some features
-    # features = ['n', 'm', 'rho', 'sigma', 'alpha', 'iter']
-    # res = res[features]
-
-
-    # Try to get one value
-    # resz = res.loc[(res['m'] == 20) &
-    #                (res['n'] == 10) &
-    #                (abs(res['rho'] - 0.206913808111) < 1e-04 ) &
-    #                (abs(res['sigma'] - 0.016238) < 1e-04) &
-    #                (abs(res['alpha'] - 0.668421) < 1e-04)]
-
-
-    #  resz = res.loc[(res['m'] == 60) &
-                   #  (res['n'] == 60) &
-                   #  (abs(res['rho'] - 0.006952) < 1e-04 ) &
-                   #  (abs(res['sigma'] - 14.384499) < 1e-04) &
-                   #  (abs(res['alpha'] - 1.521053) < 1e-04)]
-
-    # resz = res.loc[(res['m'] == 30) &
-    #                (res['n'] == 30) &
-    #                (abs(res['rho'] - 0.006952) < 1e-04 ) &
-    #                (abs(res['sigma'] - 14.384499) < 1e-04) &
-    #                (abs(res['alpha'] - 1.521053) < 1e-04)]
-
-    # resz[['trP', 'iter']].plot(x='trP', y='iter', style='o')
-    # plt.show(block=False)
+    # # DEBUG
+    # i = i - 1
     #
-    # resz[['froP', 'iter']].plot(x='froP', y='iter', style='o')
-    # plt.show(block=False)
-    #
-    # resz[['trA', 'iter']].plot(x='trA', y='iter', style='o')
-    # plt.show(block=False)
-    # resz[['froA', 'iter']].plot(x='froA', y='iter', style='o')
+    # DEBUG: Try to test PWL functions of last group
+    # plt.figure()
+    # ax = plt.gca()
+    # rho_vec = np.linspace(0, 10, 100)
+    # plt.plot(rho, f)
+    # for j in range(len(b_temp)):
+    #     f_temp = A_temp[j] * rho_vec + b_temp[j]
+    #     plt.plot(rho_vec, f_temp)
+    # ax.set_xlim(0, 0.1)
+    # ax.set_ylim(0, 50)
     # plt.show(block=False)
 
+    # import ipdb; ipdb.set_trace()
 
-    # Plot contour in 2D
-    #
-    #  fig = plt.figure()
-    #  ax = fig.add_subplot(111)
-    #  plt.tripcolor(resz.froA, resz.froP, resz.iter)
-    #  ax.set_xlabel('froA')
-    #  ax.set_ylabel('froP')
-    #  ax.set_title('Iterations vs froA and froP with fixed rho, sigma, alpha')
-    #  plt.colorbar()
-    #  plt.show(block=False)
+    '''
+    Solve LP with CVXPY
+    '''
+    print("\n\nSolving problem with CVXPY and GUROBI")
 
+    # Solve for only n_prob problems
+    n_prob = len(problems_p.groups)
 
-    # Plot 3D
-    # fig = plt.figure()
-    # ax = Axes3D(fig)
-    # ax.plot_trisurf(resz.froA, resz.froP, resz.iter)
-    # ax.set_xlabel('froA')
-    # ax.set_ylabel('froP')
-    # ax.set_zlabel('iter')
-    # plt.show(block=False)
+    t = cvxpy.Variable(n_prob)
+    rho = cvxpy.Variable(n_prob)
+    x = cvxpy.Variable(2)
 
+    # Add linear cost
+    objective = cvxpy.Minimize(cvxpy.sum_entries(t))
 
+    # Add constraints
+    constraints = []
 
+    # Add inequality constraints
+    i = 0
+    print("Adding inequality constraints")
+    for _, problem in tqdm(problems_p):
+        # Solve for only 10 problems
+        if i < n_prob:
+            for j in range(len(b[i])):
+                constraints += [A[i][j] * rho[i] + b[i][j] <= t[i]]
+        i += 1
 
-    # # Fit curve (SKLEARN)
-    # # Split dataset in train and test (randomly)
-    # train, test = train_test_split(res, test_size = 0.2)
-    # X = train[features[:-1]].values
-    # y = train['iter'].values
-    # X_test = test[features[:-1]].values
-    # y_test = test['iter'].values
-    #
-    # estimators = [('Ridge', HuberRegressor()),
-    #             #   ('Huber', HuberRegressor()),
-    #               ('Linear', LinearRegression())
-    #               ]
-    #
-    #
-    # for name, estimator in estimators:
-    #     model = make_pipeline(PolynomialFeatures(3), estimator)
-    #     model.fit(X, y)
-    #     mse = mean_squared_error(model.predict(X_test), y_test)
-    #     print("%s mse = %.4e" % (name, mse))
+    # Add equality constraints
+    i = 0
+    print("Adding equality constraints")
+    for _, problem in tqdm(problems_p):
+        if i < n_prob:
+            ratio = problem['trPovertrAtA'].iloc[0]
+            constraints += [x[0] + x[1] * ratio == rho[i]]
+        i += 1
 
+    # Add constraints on rho
+    constraints += [rho >= 0]
 
-    # Fit curve  (SCIPY curve_fit)
-    # # Define inputs and output
-    # inputs = ['rho', 'sigma', 'alpha', 'n', 'm']
-    # output = ['iter']
-    # # Extract input vector to fit
-    # xdata = res[inputs].values.T
-    # ydata = res[output].values.flatten()
-    #
-    # # Fit function
-    # popt, pcov = curve_fit(func_iter, xdata, ydata,
-    #                        bounds=(-20*np.ones(5),
-    #                                20*np.ones(5)))
-    #
-    # perr = np.sqrt(np.diag(pcov))
+    # Define problem
+    prob = cvxpy.Problem(objective, constraints)
+
+    # Solve problem
+    prob.solve(solver=cvxpy.GUROBI, verbose=True)
+
+    '''
+    Create contour plot from 3D scatter plot with rho, ratio, efficiency
+    '''
+
+    # Get grid data
+    xi, yi, zi = get_grid_data(res_p['trPovertrAtA'], res_p['rho'], res_p['p'])
+
+    # Plot contour lines
+    # levels = [0., 0.25, 0.5, 0.75, 0.9, 0.95, 1.]
+    levels = [0., 0.3, 0.6, 1., 5., 10., 20., 100.]
+
+    # use here 256 instead of len(levels)-1 becuase
+    # as it's mentioned in the documentation for the
+    # colormaps, the default colormaps use 256 colors in their
+    # definition: print(plt.cm.jet.N) for example
+    norm = mc.BoundaryNorm(levels, 256)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.contour(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.jet_r)
+    plt.contourf(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.jet_r)
+    ax.set_ylabel(r'$\rho$')
+    ax.set_xlabel(r'$\frac{{\rm tr}(P)}{{\rm tr}(A^{T}A)}$')
+    ax.set_title(r'Performance $p$')
+    plt.colorbar()
+    plt.tight_layout()
+
+    '''
+    Plot fit line on the graph
+    '''
+    x_fit = np.asarray(x.value).flatten()
+    ratio_vec = np.linspace(0, 2., 100)
+    rho_fit_vec = x_fit[0] + x_fit[1] * ratio_vec
+    plt.plot(ratio_vec, rho_fit_vec, color='C2')
+
+    plt.show(block=False)
+    plt.savefig('behavior.pdf')

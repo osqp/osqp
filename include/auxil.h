@@ -20,6 +20,12 @@ extern "C" {
  ***********************************************************/
 
 /**
+ * Automatically compute rho
+ * @param work Workspace
+ */
+void compute_rho(OSQPWorkspace * work);
+
+/**
  * Swap c_float vector pointers
  * @param a first vector
  * @param b second vector

@@ -27,27 +27,31 @@ from time import time
 # import ipdb
 
 # Define tests ranges
-rho_vec_len = 10  # Define rho vector
+rho_vec_len = 20  # Define rho vector
 rho_vec = np.logspace(-4., 3., rho_vec_len)
 # rho_vec = np.array([1000])
 
 
-sigma_vec_len = 10  # Define sigma vector
-sigma_vec = np.logspace(-4., 3., sigma_vec_len)
+# sigma_vec_len = 10  # Define sigma vector
+# sigma_vec = np.logspace(-4., 3., sigma_vec_len)
+sigma_vec = np.array([0.001])
 
-alpha_vec_len = 10  # Define alpha vector
-alpha_vec = np.linspace(0.1, 1.9, alpha_vec_len)
+
+# alpha_vec_len = 10  # Define alpha vector
+# alpha_vec = np.linspace(0.1, 1.9, alpha_vec_len)
+alpha_vec = np.array([1.6])
 # alpha_vec = np.array([1.6])
 
 
 
-dim_vecs_len = 1
-#  n_max = 50
-#  m_max = 50
-#  n_vec = np.arange(10, n_max, int(n_max/dim_vecs_len))
-#  m_vec = np.arange(10, m_max, int(m_max/dim_vecs_len))
-n_vec = np.array([20])
-m_vec = np.array([30])
+dim_vecs_len = 20
+# n_vec = np.array([20])
+# m_vec = np.array([30])
+n_max = 50
+m_max = 50
+n_vec = np.arange(10, n_max, int(n_max/dim_vecs_len))
+m_vec = np.arange(10, m_max, int(m_max/dim_vecs_len))
+
 
 
 # Number of problems with the same dimensions
@@ -59,13 +63,14 @@ options = {'solver': OSQP,
            'polish': False,
            'scaling_norm': 2,
            'scaling_iter': 3,
+           'early_terminate_interval': 1,
            'max_iter': 2500}
 
 # Test types
 # test_types = ['basis_pursuit', 'huber_fit', 'lasso', 'nonneg_l2', 'lp',
             #   'portfolio', 'svm']
 
-test_types = ['svm', 'lasso', 'portfolio']
+test_types = ['lasso', 'svm']
 
 def run_examples(test_type, n_vec, m_vec, rho_vec, sigma_vec,
                  alpha_vec, nm_num_prob, **kwargs):
@@ -108,13 +113,13 @@ results = [x[0] for x in res]
 results_full = [x[1] for x in res]
 
 
-# # Execute problems in series
-# results = []
-# results_full = []
-# for i in range(len(test_types)):
-#     res, res_full = partial_tests(test_types[i])
-#     results.append(res)
-#     results_full.append(res_full)
+# Execute problems in series
+#  results = []
+#  results_full = []
+#  for i in range(len(test_types)):
+   #  res, res_full = partial_tests(test_types[i])
+   #  results.append(res)
+   #  results_full.append(res_full)
 
 cputime = time() - t
 print("total cputime = %.4f sec" % cputime)

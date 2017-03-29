@@ -91,12 +91,28 @@ i.e. scale the columns of A by d
 */
 void mat_postmult_diag(csc *A, const c_float *d);
 
-
+#ifndef EMBEDDEED
 /* Elementwise square matrix M */
 void mat_ew_sq(csc * A);
 
 /* Elementwise absolute value of matrix M */
 void mat_ew_abs(csc * A);
+
+/**
+ * Trace of matrix M in cdc format
+ * @param  M Input matrix
+ * @return   Trace
+ */
+c_float mat_trace(csc * M);
+
+/**
+ * Frobenius norm squared of matrix M
+ * @param  M Input matrix
+ * @return   Frobenius norm squared
+ */
+c_float mat_fro_sq(csc * M);
+#endif // ifndef embedded
+
 
 /* Matrix-vector multiplication
  *    y  =  A*x  (if plus_eq == 0)

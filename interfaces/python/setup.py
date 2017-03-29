@@ -4,6 +4,7 @@ from setuptools.command.build_ext import build_ext
 from shutil import copyfile
 from numpy import get_include
 from glob import glob
+import shutil as sh
 from subprocess import call
 from platform import system
 import os
@@ -134,8 +135,9 @@ class build_ext_osqp(build_ext):
         # Compile OSQP using CMake
 
         # Create build directory
-        if not os.path.exists(osqp_build_dir):
-            os.makedirs(osqp_build_dir)
+        if os.path.exists(osqp_build_dir):
+            sh.rmtree(osqp_build_dir)
+        os.makedirs(osqp_build_dir)
         os.chdir(osqp_build_dir)
 
         # Compile static library with CMake

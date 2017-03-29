@@ -5,6 +5,38 @@
  ***********************************************************/
 
  /**
+  * Automatically compute rho
+  * @param work Workspace
+  */
+ void compute_rho(OSQPWorkspace * work){
+    c_float trP, trAtA, ratio, rho;
+
+    if (work->data->m == 0){ // No consraints. Use max rho
+        work->settings->rho = AUTO_RHO_MAX;
+        return;
+    }
+
+    // Compute tr(P)
+    trP = mat_trace(work->data->P);
+
+    // Compute tr(AtA) = fro(A) ^ 2
+    trAtA = mat_fro_sq(work->data->A);
+    trAtA *= trAtA;
+
+    if (trAtA < 1e-05){ // tr(AtA) = 0
+        work->settings->rho = AUTO_RHO_MAX;
+        return;
+    }
+
+    // Compute ratio
+    ratio = trP / trAtA;
+
+    // Compute rho
+    work->settings->rho = AUTO_RHO_OFFSET + AUTO_RHO_SLOPE * ratio;
+
+ }
+
+ /**
   * Swap c_float vector pointers
   * @param a first vector
   * @param b second vector
@@ -579,6 +611,12 @@ c_int validate_settings(const OSQPSettings * settings){
     if (settings->pol_refine_iter < 0) {
         #ifdef PRINTING
         c_print("pol_refine_iter must be nonnegative\n");
+        #endif
+        return 1;
+    }
+    if (settings->auto_rho != 0 &&  settings->auto_rho != 1) {
+        #ifdef PRINTING
+        c_print("auto_rho must be either 0 or 1\n");
         #endif
         return 1;
     }
