@@ -25,7 +25,7 @@ static const char *HEADER[] = {
 static const c_int HEADER_LEN = 4;
 #endif
 static const c_int HSPACE = 12;
-#define HEADER_LINE_LEN 55
+#define HEADER_LINE_LEN 60
 #endif
 
 /**********************
@@ -63,9 +63,9 @@ void print_header(void){
 
 void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
     print_line();
-    c_print("      OSQP v%s  -  Operator Splitting QP Solver\n"
-            "     (c) .....,\n"
-            "   University of Oxford  -  Stanford University 2016\n",
+    c_print("        OSQP v%s  -  Operator Splitting QP Solver\n"
+            "       (c) .....,\n"
+            "     University of Oxford  -  Stanford University 2016\n",
             OSQP_VERSION);
     print_line();
 
@@ -76,11 +76,14 @@ void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
     // Print Settings
     // Print variables and constraints
     c_print("Settings: ");
-    c_print("eps_abs = %.2e, eps_rel = %.2e,\n          "
-            "eps_prim_inf = %.2e, eps_dual_inf = %.2e,\n          "
-            "rho = %.2f, sigma = %.2f, alpha = %.2f, \n          max_iter = %i\n",
-            settings->eps_abs, settings->eps_rel, settings->eps_prim_inf, settings->eps_dual_inf, settings->rho, settings->sigma,
-            settings->alpha, (int)settings->max_iter);
+    c_print("eps_abs = %.1e, eps_rel = %.1e,\n          ", settings->eps_abs, settings->eps_rel);
+    c_print("eps_prim_inf = %.1e, eps_dual_inf = %.1e,\n          ", settings->eps_prim_inf, settings->eps_dual_inf);
+    c_print("rho = %.1e ", settings->rho);
+    if (settings->auto_rho) c_print("(auto)");
+    c_print("\n          ");
+    c_print("sigma = %.1e, alpha = %.1e, \n          ", settings->sigma, settings->alpha);
+    c_print("max_iter = %i\n", (int)settings->max_iter);
+
     if (settings->early_terminate)
         c_print("          early_terminate: active (interval %i)\n", (int)settings->early_terminate_interval);
     else

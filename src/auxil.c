@@ -5,6 +5,28 @@
  ***********************************************************/
 
  /**
+  * Automatically compute rho
+  * @param work Workspace
+  */
+ void compute_rho(OSQPWorkspace * work){
+    c_float trP, trAtA, ratio, rho;
+
+    // Compute tr(P)
+    trP = mat_trace(work->data->P);
+
+    // Compute tr(AtA) = fro(A) ^ 2
+    trAtA = mat_fro_sq(work->data->A);
+    trAtA *= trAtA;
+
+    // Compute ratio
+    ratio = trP / trAtA;
+
+    // Compute rho
+    work->settings->rho = AUTO_RHO_OFFSET + AUTO_RHO_SLOPE * ratio;
+
+ }
+
+ /**
   * Swap c_float vector pointers
   * @param a first vector
   * @param b second vector
