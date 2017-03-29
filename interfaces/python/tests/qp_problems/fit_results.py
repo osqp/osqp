@@ -17,6 +17,7 @@ plt.rc('font', family='serif')
 
 # Numerics
 import numpy as np
+from scipy.spatial import ConvexHull  # Create convex hull of PWL approximations
 
 # Dataframes
 import pandas as pd
@@ -26,24 +27,28 @@ from tqdm import tqdm
 import cvxpy
 
 
-def get_performance(df):
+def get_performance_and_ratio(df):
     """
-    Compute sample performance using their number of iterations related
-    to the min one
+    Compute
+        1) sample performance using their number of iterations related
+           to the min one
+        2) ratio tr(P)/tr(A'A) for the dataframe
     """
-    # df.loc[:, 'p'] = df['iter'] / df['iter'].min()
+
     df.loc[:, 'p'] = (df['iter'] - df['iter'].min()) / \
         (df['iter'].max() - df['iter'].min()) * 100
 
-    return df
-
-
-def get_ratio(df):
-    """
-    Get ratio tr(P)/tr(A'A) for the dataframe
-    """
     df.loc[:, 'trPovertrAtA'] = df['trP'] / (df['froA'] * df['froA'])
+
     return df
+
+
+# def get_ratio(df):
+#     """
+#     Get ratio tr(P)/tr(A'A) for the dataframe
+#     """
+#     df.loc[:, 'trPovertrAtA'] = df['trP'] / (df['froA'] * df['froA'])
+#     return df
 
 
 def save_plot(df, name):
@@ -103,6 +108,37 @@ def get_grid_data(x, y, z, resX=100, resY=100):
     return xi, yi, zi
 
 
+def compute_pwl_lower_approx(x, y):
+    """
+    Compute pwl lower approximation of the convex function y = f(x)
+    passing by the specified points
+    """
+    points = np.vstack((x, y)).T
+    hull = ConvexHull(points)
+    hull_eq = hull.equations
+    A_hull = hull_eq[:, :2]
+    b_hull = hull_eq[:, -1]
+
+    # Delete line passing by first and last point
+    i_idx = []
+    for i in range(A_hull.shape[0]):
+        if abs(A_hull[i, 0] * x[0] + A_hull[i, 1] * y[0] + b_hull[i]) < 1e-04:   # First point
+            if abs(A_hull[i, 0] * x[-1] + A_hull[i, 1] * y[-1] + b_hull[i]) < 1e-04:   # Last point
+                i_idx += [i]
+
+    # Delete rows
+    A_hull = np.delete(A_hull, i_idx, 0)
+    b_hull = np.delete(b_hull, i_idx)
+
+    # Return hyperplanes in form y >= A*x  + b
+    A = np.divide(-A_hull[:, 0], A_hull[:, 1])
+    b = np.divide(-b_hull[:], A_hull[:, 1])
+
+    # Return convex hull in the form A_hull * x <= b_hull
+    return A, b
+
+
+
 # Main function
 if __name__ == '__main__':
 
@@ -117,71 +153,82 @@ if __name__ == '__main__':
     res = pd.read_csv('results/results_full.csv')
 
     # Select problems not saturated at max number of iterations
-    # res = res.loc[(res['iter'] < 2499)]
+    res = res.loc[(res['iter'] < 1000)]
 
     # Assign group headers
     group_headers = ['seed', 'name']
 
-    # Assign efficienct to samples
+    print("Compute performance index and ratio for all problems")
+    tqdm.pandas()
+    # Assign performance and ratio to samples
     problems = res.groupby(group_headers)
-    res_p = problems.apply(get_performance)
+    res_p = problems.progress_apply(get_performance_and_ratio)
     problems_p = res_p.groupby(group_headers)
 
-
+    print("\nTotal number of problems: %i" % len(problems_p.groups))
 
     '''
     Build piecewise-linear (PWL) functions f_i(rho)
-
-    n_prob is the number of problems generated (identified by a seed)
-    n_rho is the number of different rho values
-        N.B. We need to fit n_rho - 1 linear pieces.
-
     '''
     # get number of problems
-    n_prob = len(problems_p.groups)
+    # n_prob = len(problems_p.groups)
 
     # get number of rho elements per problem
-    n_rho = problems_p.size().iloc[0]  # Number of elements in first problem
+    # n_rho = problems_p.size().iloc[0]  # Number of elements in first problem
 
-    a = np.zeros((1, n_prob, n_rho - 1))
-    b = np.zeros((n_prob, n_rho - 1))
+    # Create list of arrays
+    A = []
+    b = []
+    # a = np.zeros((1, n_prob, n_rho - 1))
+    # b = np.zeros((n_prob, n_rho - 1))
 
-    i = 0
-    for _, group in problems_p:
+    # i = 0
+    print("\nComputing PWL lower approximations")
+    for _, group in tqdm(problems_p):
         f = group['p'].values
         rho = group['rho'].values
-        for j in range(n_rho - 1):
-            # TODO: Adapt and check!
-            a[0, i, j] = (f[j + 1] - f[j]) / (rho[j + 1] - rho[j])
-            b[i, j] = f[j] - a[0, i, j] * rho[j]
+
+        A_temp, b_temp = compute_pwl_lower_approx(rho, f)
+
+        # Append arrays just found with list
+        A.append(A_temp)
+        b.append(b_temp)
+
+        #
+        # for j in range(n_rho - 1):
+        #     # TODO: Adapt and check!
+        #     a[0, i, j] = (f[j + 1] - f[j]) / (rho[j + 1] - rho[j])
+        #     b[i, j] = f[j] - a[0, i, j] * rho[j]
 
         # Increase problem counter
-        i += 1
+        # i += 1
 
     # # DEBUG
     # i = i - 1
     #
-    # # DEBUG: Try to test PWL functions of last group
+    # DEBUG: Try to test PWL functions of last group
     # plt.figure()
     # ax = plt.gca()
     # rho_vec = np.linspace(0, 10, 100)
     # plt.plot(rho, f)
-    # for j in range(n_rho - 1):
-    #     if f[j] < 0.5:
-    #         f_temp = a[0, i, j] * rho_vec + b[i, j]
-    #         plt.plot(rho_vec, f_temp)
-    # ax.set_xlim(0, 0.02)
-    # ax.set_ylim(0, 6)
+    # for j in range(len(b_temp)):
+    #     f_temp = A_temp[j] * rho_vec + b_temp[j]
+    #     plt.plot(rho_vec, f_temp)
+    # ax.set_xlim(0, 0.1)
+    # ax.set_ylim(0, 50)
     # plt.show(block=False)
 
+    # import ipdb; ipdb.set_trace()
 
     '''
     Solve LP with CVXPY
     '''
-    problems_p = res_p.groupby(group_headers)
+    print("\n\nSolving problem with CVXPY and GUROBI")
+    # problems_p = res_p.groupby(group_headers)
 
-    # DEBUG: Solve for only 100 problems
-    # n_prob = 3000
+    # DEBUG: Solve for only some problems
+    # n_prob = 300
+    n_prob = len(problems_p.groups)
 
     t = cvxpy.Variable(n_prob)
     rho = cvxpy.Variable(n_prob)
@@ -195,17 +242,23 @@ if __name__ == '__main__':
 
     # Add inequality constraints
     i = 0
+    print("Adding inequality constraints")
     for _, problem in tqdm(problems_p):
         # Solve for only 10 problems
         if i < n_prob:
-            p_vec = problem['p'].values
-            for j in range(n_rho - 1):
-                if p_vec[j] < 0.5:
-                    constraints += [a[0, i, j] * rho[i] + b[i, j] <= t[i]]
+            # p_vec = problem['p'].values
+
+            for j in range(len(b[i])):
+                constraints += [A[i][j] * rho[i] + b[i][j] <= t[i]]
+            #
+            # for j in range(n_rho - 1):
+            #     if p_vec[j] < 0.4:
+            #         constraints += [a[0, i, j] * rho[i] + b[i, j] <= t[i]]
         i += 1
 
     # Add equality constraints
     i = 0
+    print("Adding equality constraints")
     for _, problem in tqdm(problems_p):
         if i < n_prob:
             ratio = problem['trPovertrAtA'].iloc[0]
@@ -224,15 +277,13 @@ if __name__ == '__main__':
     '''
     Create contour plot from 3D scatter plot with rho, ratio, efficiency
     '''
-    # Get ratio for each group
-    res_p = problems_p.apply(get_ratio)
 
     # Get grid data
     xi, yi, zi = get_grid_data(res_p['trPovertrAtA'], res_p['rho'], res_p['p'])
 
     # Plot contour lines
     # levels = [0., 0.25, 0.5, 0.75, 0.9, 0.95, 1.]
-    levels = [0., 0.1, 0.2, 0.3, 0.4, 0.6, 0.8, 1., 100.]
+    levels = [0., 0.3, 0.6, 1., 5., 10., 20., 100.]
 
     # use here 256 instead of len(levels)-1 becuase
     # as it's mentioned in the documentation for the
@@ -251,12 +302,12 @@ if __name__ == '__main__':
     plt.tight_layout()
 
     '''
-    Plot line of fit graph
+    Plot fit line on the graph
     '''
     x_fit = np.asarray(x.value).flatten()
     ratio_vec = np.linspace(0, 2., 100)
     rho_fit_vec = x_fit[0] + x_fit[1] * ratio_vec
-    plt.plot(ratio_vec, rho_fit_vec, color='g')
+    plt.plot(ratio_vec, rho_fit_vec, color='C2')
 
     plt.show(block=False)
     plt.savefig('behavior.pdf')

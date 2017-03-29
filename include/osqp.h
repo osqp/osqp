@@ -319,6 +319,7 @@ c_int osqp_update_pol_refine_iter(OSQPWorkspace * work, c_int pol_refine_iter_ne
  */
 c_int osqp_update_verbose(OSQPWorkspace * work, c_int verbose_new);
 
+
 #endif  // #ifndef EMBEDDED
 
 

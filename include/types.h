@@ -131,6 +131,7 @@ typedef struct {
         c_int pol_refine_iter; /* iterative refinement steps in polish */
 
         c_int verbose; /* boolean, write out progress */
+        c_int auto_rho; // boolean, true if rho is chosen automatically
         #endif
 
         c_int early_terminate;  // boolean, terminate if stopping criterion is met

@@ -582,6 +582,12 @@ c_int validate_settings(const OSQPSettings * settings){
         #endif
         return 1;
     }
+    if (settings->auto_rho != 0 &&  settings->auto_rho != 1) {
+        #ifdef PRINTING
+        c_print("auto_rho must be either 0 or 1\n");
+        #endif
+        return 1;
+    }
 
     if (settings->rho <= 0) {
         #ifdef PRINTING

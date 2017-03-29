@@ -43,6 +43,9 @@ extern "C" {
 #define POLISH (1)
 #define POL_REFINE_ITER (3)
 #define VERBOSE (1)
+#define AUTO_RHO (1)
+#define AUTO_RHO_OFFSET (1.07838081E-03)    // Not settable by the user
+#define AUTO_RHO_SLOPE (2.31511262)         // Not settable by the user
 #endif
 
 #define EARLY_TERMINATE (1)

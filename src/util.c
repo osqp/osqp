@@ -192,6 +192,7 @@ void set_default_settings(OSQPSettings * settings) {
         settings->polish = POLISH;     /* ADMM solution polish: 1 */
         settings->pol_refine_iter = POL_REFINE_ITER; /* iterative refinement
                                                         steps in polish */
+        settings->auto_rho = AUTO_RHO; /* automatic rho computation */
         settings->verbose = VERBOSE;     /* print output */
         #endif
 
@@ -222,6 +223,7 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
     new->delta = settings->delta;
     new->polish = settings->polish;
     new->pol_refine_iter = settings->pol_refine_iter;
+    new->auto_rho = settings->auto_rho;
     new->verbose = settings->verbose;
     new->early_terminate = settings->early_terminate;
     new->early_terminate_interval = settings->early_terminate_interval;

@@ -198,7 +198,7 @@ void mat_postmult_diag(csc *A, const c_float *d){
     }
 }
 
-
+#ifndef EMBEDDED
 /* Elementwise square matrix M
 used in matrix equilibration
 */
@@ -221,6 +221,47 @@ void mat_ew_abs(csc * A){
         A->x[i] = c_absval(A->x[i]);
     }
 }
+
+
+/**
+ * Trace of matrix M in cdc format
+ * @param  M Input matrix
+ * @return   Trace
+ */
+c_float mat_trace(csc * M){
+    c_float trace = 0.;
+    c_int j, i;
+    for (j = 0; j < M->n; j++){  // Cycle over columns
+        for (i = M->p[j]; i < M->p[j+1]; i++){   // Cycle every row in the column
+            if (i == j){
+                trace += M->x[i];
+            }
+        }
+    }
+    return trace;
+}
+
+/**
+ * Frobenius norm squared of matrix M
+ * @param  M Input matrix
+ * @return   Frobenius norm squared
+ */
+c_float mat_fro_sq(csc * M){
+    c_float fro_sq = 0.;
+    c_int j, i;
+    for (j = 0; j < M->n; j++){  // Cycle over columns
+        for (i = M->p[j]; i < M->p[j+1]; i++){   // Cycle every row in the column
+            if (i == j){
+                fro_sq += M->x[i] * M->x[i]
+            }
+        }
+    }
+    return fro_sq;
+}
+
+
+
+#endif // ifndef embedded
 
 
 /* Matrix-vector multiplication

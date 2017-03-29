@@ -33,6 +33,7 @@ const char* OSQP_SETTINGS_FIELDS[] =
                                 "delta",                        //c_float
                                 "polish",                       //c_int
                                 "pol_refine_iter",              //c_int
+                                "auto_rho",                     //c_int
                                 "verbose",                      //c_int
                                 "early_terminate",              //c_int
                                 "early_terminate_interval",     //c_int
@@ -583,6 +584,7 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
   mxSetField(mxPtr, 0, "delta",           mxCreateDoubleScalar(settings->delta));
   mxSetField(mxPtr, 0, "polish",       mxCreateDoubleScalar(settings->polish));
   mxSetField(mxPtr, 0, "pol_refine_iter", mxCreateDoubleScalar(settings->pol_refine_iter));
+  mxSetField(mxPtr, 0, "auto_rho", mxCreateDoubleScalar(settings->auto_rho));
   mxSetField(mxPtr, 0, "verbose",         mxCreateDoubleScalar(settings->verbose));
   mxSetField(mxPtr, 0, "early_terminate", mxCreateDoubleScalar(settings->early_terminate));
   mxSetField(mxPtr, 0, "early_terminate_interval", mxCreateDoubleScalar(settings->early_terminate_interval));
@@ -613,6 +615,7 @@ void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
   settings->delta           = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "delta"));
   settings->polish       = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polish"));
   settings->pol_refine_iter = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "pol_refine_iter"));
+  settings->auto_rho = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "auto_rho"));
   settings->verbose         = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "verbose"));
   settings->early_terminate = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "early_terminate"));
   settings->early_terminate_interval = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "early_terminate_interval"));

@@ -202,7 +202,7 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                  "scaling", "scaling_norm", "scaling_iter",
                                  "rho", "sigma", "max_iter",
                                  "eps_abs", "eps_rel", "eps_prim_inf", "eps_dual_inf", "alpha",
-                                 "delta", "polish", "pol_refine_iter", "verbose",
+                                 "delta", "polish", "pol_refine_iter", "auto_rho", "verbose",
                                  "early_terminate", "early_terminate_interval",
 								 "warm_start", NULL};  // Settings
 
@@ -210,17 +210,17 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
         #ifdef DLONG
 
         #ifdef DFLOAT
-        static char * argparse_string = "(ll)O!O!O!O!O!O!O!O!O!|lllfflffffffllllll";
+        static char * argparse_string = "(ll)O!O!O!O!O!O!O!O!O!|lllfflfffffflllllll";
         #else
-        static char * argparse_string = "(ll)O!O!O!O!O!O!O!O!O!|lllddlddddddllllll";
+        static char * argparse_string = "(ll)O!O!O!O!O!O!O!O!O!|lllddlddddddlllllll";
         #endif
 
         #else
 
         #ifdef DFLOAT
-        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiffiffffffiiiiii";
+        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiffiffffffiiiiiii";
         #else
-        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiddiddddddiiiiii";
+        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiddiddddddiiiiiii";
         #endif
 
         #endif
@@ -256,6 +256,7 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                          &settings->delta,
                                          &settings->polish,
                                          &settings->pol_refine_iter,
+										 &settings->auto_rho,
                                          &settings->verbose,
                                          &settings->early_terminate,
 										 &settings->early_terminate_interval,
@@ -798,6 +799,7 @@ static PyObject *OSQP_update_pol_refine_iter(OSQP *self, PyObject *args){
     return Py_None;
 
 }
+
 
 static PyObject *OSQP_update_verbose(OSQP *self, PyObject *args){
     c_int verbose_new;

@@ -126,6 +126,7 @@ class settings(object):
     warm_start [False]                  - Reuse solution from previous solve
     polish  [True]                      - Solution polish
     pol_refine_iter  [3]                - Number of iterative refinement iterations
+    auto_rho  [True]                    - Automatic rho computation
     """
 
     def __init__(self, **kwargs):
@@ -149,6 +150,8 @@ class settings(object):
         self.warm_start = kwargs.pop('warm_start', False)
         self.polish = kwargs.pop('polish', True)
         self.pol_refine_iter = kwargs.pop('pol_refine_iter', 3)
+        self.auto_rho = kwargs.pop('auto_rho', True)
+
 
 
 class scaling(object):
