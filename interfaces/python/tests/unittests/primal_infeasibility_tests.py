@@ -22,6 +22,7 @@ class primal_infeeasibility_tests(unittest.TestCase):
                      'scaling': True,
                      'scaling_norm': 2,
                      'scaling_iter': 3,
+                     'eps_dual_inf': 1e-10,
                      'rho': 1.6,
                      'sigma': 0.1,
                      'alpha': 1.6,

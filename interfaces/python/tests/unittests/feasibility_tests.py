@@ -30,13 +30,11 @@ class feasibility_tests(unittest.TestCase):
         self.u = np.random.rand(self.m)
         self.l = self.u
         self.opts = {'verbose': False,
-                     'eps_abs': 1e-08,
-                     'eps_rel': 1e-08,
+                     'eps_abs': 1e-06,
+                     'eps_rel': 1e-06,
                      'scaling': True,
                      'scaling_norm': 2,
                      'scaling_iter': 3,
-                     'rho': 0.01,
-                     'sigma': 0.01,
                      'alpha': 1.6,
                      'max_iter': 5000,
                      'polish': False,
@@ -61,6 +59,6 @@ class feasibility_tests(unittest.TestCase):
                       -0.11373645, -0.48115767,  0.25373436, 0.81369707,
                       0.18883475, 0.47000419, -0.24932451, 0.09298623,
                       1.88381076, 0.77536814, -1.35971433, 0.51511176,
-                      0.03317466, 0.90226419]))
-        nptest.assert_array_almost_equal(res.y, np.zeros(self.m))
-        nptest.assert_array_almost_equal(res.info.obj_val, 0.)
+                      0.03317466, 0.90226419]), decimal=3)
+        nptest.assert_array_almost_equal(res.y, np.zeros(self.m), decimal=3)
+        nptest.assert_array_almost_equal(res.info.obj_val, 0., decimal=3)
