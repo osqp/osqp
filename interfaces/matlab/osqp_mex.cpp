@@ -4,6 +4,19 @@
 #include "osqp.h"
 #include "private.h"
 
+// Interrupt handler
+extern "C" bool utIsInterruptPending(void);
+extern "C" bool utSetInterruptEnabled(bool);
+
+int IsInterruptPending(void){
+    return (int)utIsInterruptPending();
+}
+
+int SetInterruptEnabled(int x){
+    return (int)utSetInterruptEnabled((bool)x);
+}
+
+
 // all of the OSQP_INFO fieldnames as strings
 const char* OSQP_INFO_FIELDS[] = {"iter",         //c_int
                                 "status" ,        //char*
@@ -40,7 +53,6 @@ const char* OSQP_SETTINGS_FIELDS[] =
                                 "early_terminate_interval",     //c_int
                                 "warm_start"};                  //c_int
 
-// NEW
 const char* CSC_FIELDS[] = {"nzmax",    //c_int
                             "m",        //c_int
                             "n",        //c_int
@@ -83,17 +95,15 @@ public:
 };
 
 // internal utility functions
-c_int*    copyToCintVector(mwIndex * vecData, c_int numel);
-c_float*  copyToCfloatVector(double * vecData, c_int numel);
 void      castToDoubleArr(c_float *arr, double* arr_out, c_int len);
 void      setToNaN(double* arr_out, c_int len);
-mxArray*  copyInfoToMxStruct(OSQPInfo*);
-mxArray*  copySettingsToMxStruct(OSQPSettings*);
 void      copyMxStructToSettings(const mxArray*, OSQPSettings*);
 void      copyUpdatedSettingsToWork(const mxArray*, OsqpData*);
-
-// NEW
 void      castCintToDoubleArr(c_int *arr, double* arr_out, c_int len);
+c_int*    copyToCintVector(mwIndex * vecData, c_int numel);
+c_float*  copyToCfloatVector(double * vecData, c_int numel);
+mxArray*  copyInfoToMxStruct(OSQPInfo*);
+mxArray*  copySettingsToMxStruct(OSQPSettings*);
 mxArray*  copyCscMatrixToMxStruct(csc*);
 mxArray*  copyDataToMxStruct(OSQPData*);
 mxArray*  copyPrivToMxStruct(Priv*);

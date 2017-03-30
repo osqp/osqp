@@ -20,7 +20,8 @@ extern "C" {
 #define OSQP_MAX_ITER_REACHED (-2)
 // #define OSQP_SOLVED_INACCURATE (2)
 #define OSQP_PRIMAL_INFEASIBLE (-3) /* primal infeasible  */
-#define OSQP_DUAL_INFEASIBLE (-4) /* dual infeasible   */
+#define OSQP_DUAL_INFEASIBLE (-4) /* dual infeasible */
+#define OSQP_SIGINT (-5) /* dual infeasible */
 #define OSQP_UNSOLVED (-10)  /* Unsolved. Only setup function has been called */
 
 

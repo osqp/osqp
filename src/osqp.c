@@ -223,6 +223,11 @@ c_int osqp_solve(OSQPWorkspace * work){
     }
     #endif
 
+    #ifdef CTRLC
+    // initialize Ctrl-C support
+    startInterruptListener();
+    #endif
+
     // Initialize variables (cold start or warm start depending on settings)
     if (!work->settings->warm_start)
         cold_start(work);     // If not warm start -> set z, u to zero
@@ -248,6 +253,15 @@ c_int osqp_solve(OSQPWorkspace * work){
 
         /* End of ADMM Steps */
 
+        #ifdef CTRLC
+        // Check the interrupt signal
+        if (isInterrupted()) {
+            update_status(work->info, OSQP_SIGINT);
+            c_print("Solver interrupted\n");
+            endInterruptListener();
+            return 1;   // exitflag
+        }
+        #endif
 
         // Can we check for termination ?
         can_check_termination = work->settings->early_terminate &&
