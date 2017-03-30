@@ -8,3 +8,5 @@ subject to      l <= A x <= u
 ```
 
 The current version is `0.0.0`.
+
+**Documentation** ( [stable](http://osqp.readthedocs.io/en/stable) | [latest](http://osqp.readthedocs.io/en/latest) )
