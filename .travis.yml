@@ -1,0 +1,13 @@
+language: C
+os:
+  - linux
+  - osx
+before_install:
+    - sudo apt-get install -y lcov
+    - gem install coveralls-lcov
+script:
+    - mkdir build
+    - cd build
+    - cmake -G "Unix Makefiles" ..
+    - make
+    - out/osqp_tester_direct
