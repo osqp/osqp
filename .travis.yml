@@ -1,13 +1,18 @@
 language: C
+python:
+  # We don't actually use the Travis Python, but this keeps it organized.
+  - "3.5"
 os:
   - linux
   - osx
-before_install:
-    - sudo apt-get install -y lcov
-    - gem install coveralls-lcov
-script:
-    - mkdir build
-    - cd build
-    - cmake -G "Unix Makefiles" ..
-    - make
-    - out/osqp_tester_direct
+sudo: required
+env:
+  global:
+    - DEPS_DIR="${HOME}/deps"
+    - COVERAGE="true"
+    - PYTHON_VERSION="3.5"
+install: bash ci/install.sh
+script: bash ci/script.sh
+branches:
+  only:
+  - master
