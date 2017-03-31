@@ -1,5 +1,7 @@
 # Operator Splitting QP Solver
 
+[![Build Status](https://travis-ci.org/oxfordcontrol/osqp.svg?branch=master)](https://travis-ci.org/oxfordcontrol/osqp)
+
 OSQP (Operator Splitting Quadratic Program) solver is a numerical optimization package for solving problems in the form
 ```
 minimize        0.5 x' P x + q' x
