@@ -37,7 +37,7 @@ test_form_KKT_P_new = test_form_KKT_Pu_new + test_form_KKT_Pu_new.T - spa.diags(
 test_form_KKT_KKT_new = spa.vstack([
                         spa.hstack([test_form_KKT_P_new + test_form_KKT_sigma *
                         spa.eye(test_form_KKT_n), test_form_KKT_A_new.T]),
-                     spa.hstack([test_form_KKT_A_new,
+                        spa.hstack([test_form_KKT_A_new,
                         -1./test_form_KKT_rho * spa.eye(test_form_KKT_m)])]).tocsc()
 test_form_KKT_KKTu_new = spa.triu(test_form_KKT_KKT_new).tocsc()
 

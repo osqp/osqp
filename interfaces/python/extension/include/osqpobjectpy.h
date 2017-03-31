@@ -187,7 +187,7 @@ static PyObject * OSQP_solve(OSQP *self)
     }
     else {
         PyErr_SetString(PyExc_ValueError, "Workspace not initialized!");
-         return (PyObject *) NULL;
+        return (PyObject *) NULL;
     }
 }
 
@@ -255,11 +255,11 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                          &settings->alpha,
                                          &settings->delta,
                                          &settings->polish,
-                                         &settings->pol_refine_iter,
-										 &settings->auto_rho,
+																				 &settings->pol_refine_iter,
+																				 &settings->auto_rho,
                                          &settings->verbose,
                                          &settings->early_terminate,
-										 &settings->early_terminate_interval,
+																				 &settings->early_terminate_interval,
                                          &settings->warm_start)) {
                 return NULL;
         }
@@ -407,7 +407,7 @@ static PyObject *OSQP_update_lower_bound(OSQP *self, PyObject *args){
     // Copy array into c_float array
     l_arr = (c_float *)PyArray_DATA(l_cont);
 
-    // Update linear cost
+    // Update lower bound
     osqp_update_lower_bound(self->workspace, l_arr);
 
     // Free data
@@ -438,7 +438,7 @@ static PyObject *OSQP_update_upper_bound(OSQP *self, PyObject *args){
     // Copy array into c_float array
     u_arr = (c_float *)PyArray_DATA(u_cont);
 
-    // Update linear cost
+    // Update upper bound
     osqp_update_upper_bound(self->workspace, u_arr);
 
     // Free data
@@ -473,7 +473,7 @@ static PyObject *OSQP_update_bounds(OSQP *self, PyObject *args){
     l_arr = (c_float *)PyArray_DATA(l_cont);
     u_arr = (c_float *)PyArray_DATA(u_cont);
 
-    // Update linear cost
+    // Update bounds
     osqp_update_bounds(self->workspace, l_arr, u_arr);
 
     // Free data
@@ -484,6 +484,187 @@ static PyObject *OSQP_update_bounds(OSQP *self, PyObject *args){
     Py_INCREF(Py_None);
     return Py_None;
 
+}
+
+// Update elements of matrix P
+static PyObject * OSQP_update_P(OSQP *self, PyObject *args) {
+		PyArrayObject *Px, *Px_cont, *Px_idx, *Px_idx_cont;
+		c_float * Px_arr;
+		c_int * Px_idx_arr;
+		c_int P_n;
+		c_int return_val;
+		int float_type = get_float_type();
+		int int_type = get_int_type();
+
+		#ifdef DLONG
+		static char * argparse_string = "O!O!l";
+		#else
+		static char * argparse_string = "O!O!i";
+		#endif
+
+		// Parse arguments
+		if( !PyArg_ParseTuple(args, argparse_string,
+													&PyArray_Type, &Px,
+													&PyArray_Type, &Px_idx,
+													&P_n)) {
+						return NULL;
+		}
+
+		// Get contiguous data structure
+		Px_cont = get_contiguous(Px, float_type);
+		Px_idx_cont = get_contiguous(Px_idx, int_type);
+
+		// Copy array into c_float and c_int arrays
+		Px_arr = (c_float *)PyArray_DATA(Px_cont);
+		Px_idx_arr = (c_int *)PyArray_DATA(Px_idx_cont);
+
+		// Update matrix P
+		if (Px_idx_arr[0] == -1)
+				// Update all indices
+    		return_val = osqp_update_P(self->workspace, Px_arr, NULL, 0);
+		else
+				return_val = osqp_update_P(self->workspace, Px_arr, Px_idx_arr, P_n);
+
+    // Free data
+    Py_DECREF(Px_cont);
+    Py_DECREF(Px_idx_cont);
+
+		if (return_val == 1) {
+				PyErr_SetString(PyExc_ValueError, "Size of Px and Px_idx is too large!");
+				return (PyObject *) NULL;
+		} else if (return_val < 0) {
+				PyErr_SetString(PyExc_ValueError, "New KKT matrix is not quasidefinite!");
+				return (PyObject *) NULL;
+		}
+
+    // Return None
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+// Update elements of matrix A
+static PyObject * OSQP_update_A(OSQP *self, PyObject *args) {
+		PyArrayObject *Ax, *Ax_cont, *Ax_idx, *Ax_idx_cont;
+		c_float * Ax_arr;
+		c_int * Ax_idx_arr;
+		c_int A_n;
+		c_int return_val;
+		int float_type = get_float_type();
+		int int_type = get_int_type();
+
+		#ifdef DLONG
+		static char * argparse_string = "O!O!l";
+		#else
+		static char * argparse_string = "O!O!i";
+		#endif
+
+		// Parse arguments
+		if( !PyArg_ParseTuple(args, argparse_string,
+													&PyArray_Type, &Ax,
+													&PyArray_Type, &Ax_idx,
+													&A_n)) {
+						return NULL;
+		}
+
+		// Get contiguous data structure
+		Ax_cont = get_contiguous(Ax, float_type);
+		Ax_idx_cont = get_contiguous(Ax_idx, int_type);
+
+		// Copy array into c_float and c_int arrays
+		Ax_arr = (c_float *)PyArray_DATA(Ax_cont);
+		Ax_idx_arr = (c_int *)PyArray_DATA(Ax_idx_cont);
+
+		// Update matrix A
+		if (Ax_idx_arr[0] == -1)
+				// Update all indices
+    		return_val = osqp_update_A(self->workspace, Ax_arr, NULL, A_n);
+		else
+				return_val = osqp_update_A(self->workspace, Ax_arr, Ax_idx_arr, A_n);
+
+    // Free data
+    Py_DECREF(Ax_cont);
+    Py_DECREF(Ax_idx_cont);
+
+		if (return_val == 1) {
+				PyErr_SetString(PyExc_ValueError, "Size of Ax and Ax_idx is too large!");
+				return (PyObject *) NULL;
+		} else if (return_val < 0) {
+				PyErr_SetString(PyExc_ValueError, "New KKT matrix is not quasidefinite!");
+				return (PyObject *) NULL;
+		}
+
+    // Return None
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+// Update elements of matrices P and A
+static PyObject * OSQP_update_P_A(OSQP *self, PyObject *args) {
+		PyArrayObject *Px, *Px_cont, *Px_idx, *Px_idx_cont;
+		PyArrayObject *Ax, *Ax_cont, *Ax_idx, *Ax_idx_cont;
+		c_float * Px_arr, * Ax_arr;
+		c_int * Px_idx_arr, * Ax_idx_arr;
+		c_int P_n, A_n;
+		c_int return_val;
+		int float_type = get_float_type();
+		int int_type = get_int_type();
+
+		#ifdef DLONG
+		static char * argparse_string = "O!O!lO!O!l";
+		#else
+		static char * argparse_string = "O!O!iO!O!i";
+		#endif
+
+		// Parse arguments
+		if( !PyArg_ParseTuple(args, argparse_string,
+													&PyArray_Type, &Px,
+													&PyArray_Type, &Px_idx,
+													&P_n,
+													&PyArray_Type, &Ax,
+													&PyArray_Type, &Ax_idx,
+													&A_n)) {
+						return NULL;
+		}
+
+		// Get contiguous data structure
+		Px_cont = get_contiguous(Px, float_type);
+		Px_idx_cont = get_contiguous(Px_idx, int_type);
+		Ax_cont = get_contiguous(Ax, float_type);
+		Ax_idx_cont = get_contiguous(Ax_idx, int_type);
+
+		// Copy array into c_float and c_int arrays
+		Px_arr = (c_float *)PyArray_DATA(Px_cont);
+		Px_idx_arr = (c_int *)PyArray_DATA(Px_idx_cont);
+		Ax_arr = (c_float *)PyArray_DATA(Ax_cont);
+		Ax_idx_arr = (c_int *)PyArray_DATA(Ax_idx_cont);
+
+		// Update matrices P and A
+		if (Px_idx_arr[0] == -1 && Ax_idx_arr[0] == -1)
+    		return_val = osqp_update_P_A(self->workspace, Px_arr, NULL, P_n, Ax_arr, NULL, A_n);
+		else if (Px_idx_arr[0] == -1)
+				return_val = osqp_update_P_A(self->workspace, Px_arr, NULL, P_n, Ax_arr, Ax_idx_arr, A_n);
+		else if (Ax_idx_arr[0] == -1)
+				return_val = osqp_update_P_A(self->workspace, Px_arr, Px_idx_arr, P_n, Ax_arr, NULL, A_n);
+		else
+				return_val = osqp_update_P_A(self->workspace, Px_arr, Px_idx_arr, P_n, Ax_arr, Ax_idx_arr, A_n);
+
+    // Free data
+    Py_DECREF(Px_cont);
+    Py_DECREF(Px_idx_cont);
+		Py_DECREF(Ax_cont);
+    Py_DECREF(Ax_idx_cont);
+
+		if (return_val == 1) {
+				PyErr_SetString(PyExc_ValueError, "Size of Ax and Ax_idx is too large!");
+				return (PyObject *) NULL;
+		} else if (return_val < 0) {
+				PyErr_SetString(PyExc_ValueError, "New KKT matrix is not quasidefinite!");
+				return (PyObject *) NULL;
+		}
+
+    // Return None
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
 static PyObject *OSQP_warm_start(OSQP *self, PyObject *args){
@@ -905,6 +1086,9 @@ static PyMethodDef OSQP_methods[] = {
     {"update_lower_bound",	(PyCFunction)OSQP_update_lower_bound, METH_VARARGS, PyDoc_STR("Update OSQP problem lower bound")},
     {"update_upper_bound",	(PyCFunction)OSQP_update_upper_bound, METH_VARARGS, PyDoc_STR("Update OSQP problem upper bound")},
     {"update_bounds",	(PyCFunction)OSQP_update_bounds, METH_VARARGS, PyDoc_STR("Update OSQP problem bounds")},
+		{"update_P",	(PyCFunction)OSQP_update_P, METH_VARARGS, PyDoc_STR("Update OSQP problem quadratic cost matrix")},
+		{"update_P_A",	(PyCFunction)OSQP_update_P_A, METH_VARARGS, PyDoc_STR("Update OSQP problem matrices")},
+		{"update_A",	(PyCFunction)OSQP_update_A, METH_VARARGS, PyDoc_STR("Update OSQP problem constraint matrix")},
     {"warm_start",	(PyCFunction)OSQP_warm_start, METH_VARARGS, PyDoc_STR("Warm start primal and dual variables")},
     {"warm_start_x",	(PyCFunction)OSQP_warm_start_x, METH_VARARGS, PyDoc_STR("Warm start primal variable")},
     {"warm_start_y",	(PyCFunction)OSQP_warm_start_y, METH_VARARGS, PyDoc_STR("Warm start dual variable")},
@@ -919,7 +1103,7 @@ static PyMethodDef OSQP_methods[] = {
     {"update_pol_refine_iter",	(PyCFunction)OSQP_update_pol_refine_iter, METH_VARARGS, PyDoc_STR("Update OSQP solver setting pol_refine_iter")},
     {"update_verbose",	(PyCFunction)OSQP_update_verbose, METH_VARARGS, PyDoc_STR("Update OSQP solver setting verbose")},
     {"update_early_terminate",	(PyCFunction)OSQP_update_early_terminate, METH_VARARGS, PyDoc_STR("Update OSQP solver setting early_terminate")},
-	{"update_early_terminate_interval",	(PyCFunction)OSQP_update_early_terminate_interval, METH_VARARGS, PyDoc_STR("Update OSQP solver setting early_terminate_interval")},
+		{"update_early_terminate_interval",	(PyCFunction)OSQP_update_early_terminate_interval, METH_VARARGS, PyDoc_STR("Update OSQP solver setting early_terminate_interval")},
     {"update_warm_start",	(PyCFunction)OSQP_update_warm_start, METH_VARARGS, PyDoc_STR("Update OSQP solver setting warm_start")},
     {"_get_workspace", (PyCFunction)OSQP_get_workspace, METH_VARARGS, PyDoc_STR("Returns the OSQP workspace struct as a Python dictionary.")},
     {NULL,		NULL}		/* sentinel */

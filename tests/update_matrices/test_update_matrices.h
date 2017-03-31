@@ -125,7 +125,7 @@ static char * test_update(){
 
     // Update P
     nnzP = data->test_solve_Pu->p[data->test_solve_Pu->n];
-    Px_new_idx = c_malloc(nnzP * sizeof(c_int)); // Generate indeces going from beginning to end of P
+    Px_new_idx = c_malloc(nnzP * sizeof(c_int)); // Generate indices going from beginning to end of P
     for (i = 0; i < nnzP; i++){
         Px_new_idx[i] = i;
     }

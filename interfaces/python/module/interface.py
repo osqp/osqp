@@ -124,22 +124,28 @@ class OSQP(object):
         """
         Update OSQP problem arguments
 
-        Vectors q, l, u are supported
+        Vectors q, l, u and matrices P and A are supported
         """
 
         # get arguments
         q = kwargs.pop('q', None)
         l = kwargs.pop('l', None)
         u = kwargs.pop('u', None)
+        Px = kwargs.pop('Px', None)
+        Px_idx = kwargs.pop('Px_idx', None)
+        Ax = kwargs.pop('Ax', None)
+        Ax_idx = kwargs.pop('Ax_idx', None)
 
         # Get problem dimensions
         (n, m) = self._model.dimensions()
 
+        # Update linear cost
         if q is not None:
             if len(q) != n:
                 raise ValueError("q must have length n")
             self._model.update_lin_cost(q)
 
+        # Update lower bound
         if l is not None:
             if len(l) != m:
                 raise ValueError("l must have length m")
@@ -150,6 +156,7 @@ class OSQP(object):
             if u is None:
                 self._model.update_lower_bound(l)
 
+        # Update upper bound
         if u is not None:
             if len(u) != m:
                 raise ValueError("u must have length m")
@@ -160,8 +167,31 @@ class OSQP(object):
             if l is None:
                 self._model.update_upper_bound(u)
 
+        # Update bounds
         if l is not None and u is not None:
             self._model.update_bounds(l, u)
+
+        # Update matrix P
+        if Px is not None:
+            if Px_idx is None:
+                Px_idx = np.array([-1])
+            elif len(Px) != len(Px_idx):
+                raise ValueError("Px and Px_idx must have same lengths")
+            if Ax is None:
+                self._model.update_P(Px, Px_idx, len(Px))
+
+        # Update matrix A
+        if Ax is not None:
+            if Ax_idx is None:
+                Ax_idx = np.array([-1])
+            elif len(Ax) != len(Ax_idx):
+                    raise ValueError("Ax and Ax_idx must have same lengths")
+            if Px is None:
+                self._model.update_A(Ax, Ax_idx, len(Ax))
+
+        # Update matrices P and A
+        if Px is not None and Ax is not None:
+            self._model.update_P_A(Px, Px_idx, len(Px), Ax, Ax_idx, len(Ax))
 
     def update_settings(self, **kwargs):
         """
@@ -171,7 +201,8 @@ class OSQP(object):
                                   'eps_prim_inf', 'eps_dual_inf',
                                   'alpha', 'delta', 'polish',
                                   'pol_refine_iter',
-                                  'verbose', 'early_terminate', 'early_terminate_interval'
+                                  'verbose', 'early_terminate',
+                                  'early_terminate_interval'
         """
 
         # get arguments
