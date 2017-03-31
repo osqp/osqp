@@ -16,6 +16,7 @@ PRINTING = True
 PROFILING = True
 DFLOAT = False
 DLONG = True
+CTRLC = True
 
 
 # Add parameters to cmake_args and define_macros
@@ -45,6 +46,12 @@ if PRINTING:
     define_macros += [('PRINTING', None)]
 else:
     cmake_args += ['-DPRINTING:BOOL=OFF']
+
+if CTRLC:
+    cmake_args += ['-DCTRLC:BOOL=ON']
+    define_macros += [('CTRLC', None)]
+else:
+    cmake_args += ['-DCTRLC:BOOL=OFF']
 
 if DLONG:
     cmake_args += ['-DDLONG:BOOL=ON']

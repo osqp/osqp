@@ -5,8 +5,6 @@
 #ifndef CTRLC_H
 #define CTRLC_H
 
-#ifdef CTRLC
-
 #if defined MATLAB
 
 /* No header file available here; define the prototypes ourselves */
@@ -32,5 +30,3 @@ int isInterrupted(void);
 
 
 #endif /* END IFDEF CTRLC */
-
-#endif /* END IFDEF CTRLC_H */

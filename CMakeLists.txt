@@ -98,7 +98,7 @@ endif (DLONG)
 
 # Set Compiler flags
 # ----------------------------------------------
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -std=c99")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
 set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")      # Include math

@@ -9,8 +9,6 @@
 
 #include "ctrlc.h"
 
-#ifdef CTRLC
-
 #if defined MATLAB
 
 static int istate;
@@ -52,7 +50,7 @@ int isInterrupted(void) {
 #else /* Unix */
 
 #include <signal.h>
-static c_int int_detected;
+static int int_detected;
 struct sigaction oact;
 void handle_ctrlc(int dummy) {
     int_detected = dummy ? dummy : -1;
@@ -77,5 +75,3 @@ int isInterrupted(void) {
 }
 
 #endif /* END IF IS_MATLAB / WINDOWS */
-
-#endif /* END IFDEF CTRLC */
