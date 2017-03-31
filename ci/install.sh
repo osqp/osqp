@@ -50,5 +50,5 @@ source activate testenv
 cd ${TRAVIS_BUILD_DIR}
 mkdir build
 cd build
-cmake -G "Unix Makefiles" ..
+cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
 make

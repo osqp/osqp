@@ -13,6 +13,7 @@ env:
     - PYTHON_VERSION="3.5"
 install: bash ci/install.sh
 script: bash ci/script.sh
+after_success: bash ci/coverage.sh
 branches:
   only:
   - master
