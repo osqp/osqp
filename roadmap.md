@@ -8,7 +8,7 @@
 -   [ ] Add functions to update rho and sigma (by updating the KKT matrix entries)
 -   [ ] Replace EMBEDDED flag in C with:  EMBEDDED, EMBEDDED_PARAMETERS_VECTORS, EMBEDDED_PARAMETERS_MATRICES (all true/false)
 -   [x] Add unittests Python for code generation
--   [ ] Add CTRL-C interrupt close function
+-   [x] Add CTRL-C interrupt close function
 -   [x] Implement code generation in Matlab
 -   [ ] Fix relative criterion for termination condition
 -   [ ] Implement cheaper dual residual computation: (only one matrix-vector computation (maybe?))
