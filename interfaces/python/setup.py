@@ -16,6 +16,7 @@ PRINTING = True
 PROFILING = True
 DFLOAT = False
 DLONG = True
+CTRLC = True
 
 
 # Add parameters to cmake_args and define_macros
@@ -45,6 +46,12 @@ if PRINTING:
     define_macros += [('PRINTING', None)]
 else:
     cmake_args += ['-DPRINTING:BOOL=OFF']
+
+if CTRLC:
+    cmake_args += ['-DCTRLC:BOOL=ON']
+    define_macros += [('CTRLC', None)]
+else:
+    cmake_args += ['-DCTRLC:BOOL=OFF']
 
 if DLONG:
     cmake_args += ['-DDLONG:BOOL=ON']
@@ -106,7 +113,7 @@ Copy C sources for code generation
 # List with OSQP C files
 cfiles = [os.path.join(osqp_dir, 'src', f)
           for f in os.listdir(os.path.join(osqp_dir, 'src'))
-          if f.endswith('.c') and f != 'polish.c' and f != 'cs.c']
+          if f.endswith('.c') and f not in ('cs.c', 'ctrlc.c', 'polish.c')]
 cfiles += [os.path.join(suitesparse_dir, f)
            for f in os.listdir(suitesparse_dir)
            if f.endswith('.c') and f != 'SuiteSparse_config.c']
@@ -117,7 +124,7 @@ cfiles += [os.path.join(suitesparse_dir, 'ldl', 'src', f)
 # List with OSQP H files
 hfiles = [os.path.join(osqp_dir, 'include', f)
           for f in os.listdir(os.path.join(osqp_dir, 'include'))
-          if f.endswith('.h') and f != 'polish.h' and f != 'cs.h']
+          if f.endswith('.h') and f not in ('cs.h', 'ctrlc.h', 'polish.h')]
 hfiles += [os.path.join(suitesparse_dir, f)
            for f in os.listdir(suitesparse_dir)
            if f.endswith('.h') and f != 'SuiteSparse_config.h']

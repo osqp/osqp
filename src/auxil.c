@@ -449,6 +449,8 @@ void update_status(OSQPInfo *info, c_int status_val) {
         c_strcpy(info->status, "Dual infeasible");
     else if (status_val == OSQP_MAX_ITER_REACHED)
         c_strcpy(info->status, "Maximum iterations reached");
+    else if (status_val == OSQP_SIGINT)
+        c_strcpy(info->status, "Interrupted");
 }
 
 

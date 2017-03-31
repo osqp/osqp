@@ -70,6 +70,17 @@ if (PROFILING)
     add_definitions(-DPROFILING)
 endif (PROFILING)
 
+# Is user interrupt enabled?
+option (CTRLC "Enable user interrupt (Ctrl-C)" ON)
+if (DEFINED EMBEDDED)
+    message(STATUS "Disabling user interrupt for embedded")
+    set(CTRLC OFF)
+endif()
+message(STATUS "User interrupt is ${CTRLC}")
+if (CTRLC)
+    add_definitions(-DCTRLC)
+endif (CTRLC)
+
 # Use floats instead of integers
 option (DFLOAT "Use float numbers instead of doubles" OFF)
 message(STATUS "Floats are ${DFLOAT}")
@@ -87,7 +98,7 @@ endif (DLONG)
 
 # Set Compiler flags
 # ----------------------------------------------
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -funroll-loops -O3")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
 set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")      # Include math
@@ -109,6 +120,7 @@ if(NOT DEFINED EMBEDDED)
         osqp_src
         src/auxil.c
         src/cs.c
+        src/ctrlc.c
         src/kkt.c
         src/lin_alg.c
         src/osqp.c
@@ -123,6 +135,7 @@ if(NOT DEFINED EMBEDDED)
         include/auxil.h
         include/constants.h
         include/cs.h
+        include/ctrlc.h
         include/glob_opts.h
         include/kkt.h
         include/lin_alg.h
