@@ -1,7 +1,7 @@
 Welcome to OSQP's documentation
 ================================
 
-OSQP (Operator Splitting Quadratic Program) solver is a numerical optimization package for solving convex quadratic programs in the form
+The OSQP (Operator Splitting Quadratic Program) solver is a numerical optimization package for solving convex quadratic programs in the form
 
 
 .. math::
