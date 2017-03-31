@@ -11,9 +11,9 @@ env:
     - DEPS_DIR="${HOME}/deps"
     - COVERAGE="true"
     - PYTHON_VERSION="3.5"
-install: bash ci/install.sh
-script: bash ci/script.sh
-after_success: bash ci/coverage.sh
+install: bash ci/travis/install.sh
+script: bash ci/travis/script.sh
+after_success: bash ci/travis/coverage.sh
 branches:
   only:
   - master
