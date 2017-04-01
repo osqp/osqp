@@ -40,7 +40,6 @@ const char* OSQP_SETTINGS_FIELDS[] =
                                 "early_terminate_interval",     //c_int
                                 "warm_start"};                  //c_int
 
-// NEW
 const char* CSC_FIELDS[] = {"nzmax",    //c_int
                             "m",        //c_int
                             "n",        //c_int
@@ -83,17 +82,16 @@ public:
 };
 
 // internal utility functions
-c_int*    copyToCintVector(mwIndex * vecData, c_int numel);
-c_float*  copyToCfloatVector(double * vecData, c_int numel);
 void      castToDoubleArr(c_float *arr, double* arr_out, c_int len);
 void      setToNaN(double* arr_out, c_int len);
-mxArray*  copyInfoToMxStruct(OSQPInfo*);
-mxArray*  copySettingsToMxStruct(OSQPSettings*);
 void      copyMxStructToSettings(const mxArray*, OSQPSettings*);
 void      copyUpdatedSettingsToWork(const mxArray*, OsqpData*);
-
-// NEW
 void      castCintToDoubleArr(c_int *arr, double* arr_out, c_int len);
+c_int*    copyToCintVector(mwIndex * vecData, c_int numel);
+c_int*    copyDoubleToCintVector(double* vecData, c_int numel);
+c_float*  copyToCfloatVector(double * vecData, c_int numel);
+mxArray*  copyInfoToMxStruct(OSQPInfo*);
+mxArray*  copySettingsToMxStruct(OSQPSettings*);
 mxArray*  copyCscMatrixToMxStruct(csc*);
 mxArray*  copyDataToMxStruct(OSQPData*);
 mxArray*  copyPrivToMxStruct(Priv*);
@@ -154,7 +152,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       return;
     }
 
-    
+
     // return workspace structure
     if (!strcmp("get_workspace", cmd)) {
 
@@ -306,12 +304,23 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         const mxArray *q = prhs[2];
         const mxArray *l = prhs[3];
         const mxArray *u = prhs[4];
+        const mxArray *Px = prhs[5];
+        const mxArray *Px_idx = prhs[6];
+        const mxArray *Ax = prhs[8];
+        const mxArray *Ax_idx = prhs[9];
 
+        int Px_n, Ax_n;
+        Px_n = mxGetScalar(prhs[7]);
+        Ax_n = mxGetScalar(prhs[10]);
 
         // Copy vectors to ensure they are cast as c_float
         c_float *q_vec;
         c_float *l_vec;
         c_float *u_vec;
+        c_float *Px_vec;
+        c_float *Ax_vec;
+        c_int *Px_idx_vec = NULL;
+        c_int *Ax_idx_vec = NULL;
         if(!mxIsEmpty(q)){
             q_vec = copyToCfloatVector(mxGetPr(q),
                                        osqpData->work->data->n);
@@ -324,24 +333,50 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             u_vec = copyToCfloatVector(mxGetPr(u),
                                        osqpData->work->data->m);
         }
+        if(!mxIsEmpty(Px)){
+            Px_vec = copyToCfloatVector(mxGetPr(Px), Px_n);
+        }
+        if(!mxIsEmpty(Ax)){
+            Ax_vec = copyToCfloatVector(mxGetPr(Ax), Ax_n);
+        }
+        if(!mxIsEmpty(Px_idx)){
+            Px_idx_vec = copyDoubleToCintVector(mxGetPr(Px_idx), Px_n);
+        }
+        if(!mxIsEmpty(Ax_idx)){
+            Ax_idx_vec = copyDoubleToCintVector(mxGetPr(Ax_idx), Ax_n);
+        }
 
         if(!mxIsEmpty(q)){
-          osqp_update_lin_cost(osqpData->work,q_vec);
+            osqp_update_lin_cost(osqpData->work,q_vec);
         }
-        if(!mxIsEmpty(l) && !mxIsEmpty(u) ){
-          osqp_update_bounds(osqpData->work,l_vec,u_vec);
+        if(!mxIsEmpty(l) && !mxIsEmpty(u)){
+            osqp_update_bounds(osqpData->work,l_vec,u_vec);
         }
         else if(!mxIsEmpty(l)){
-          osqp_update_lower_bound(osqpData->work,l_vec);
+            osqp_update_lower_bound(osqpData->work,l_vec);
         }
         else if(!mxIsEmpty(u)){
-          osqp_update_upper_bound(osqpData->work,u_vec);
+            osqp_update_upper_bound(osqpData->work,u_vec);
+        }
+        if(!mxIsEmpty(Px) && !mxIsEmpty(Ax)){
+            osqp_update_P_A(osqpData->work, Px_vec, Px_idx_vec, Px_n,
+                                          Ax_vec, Ax_idx_vec, Ax_n);
+        }
+        else if(!mxIsEmpty(Px)){
+            osqp_update_P(osqpData->work, Px_vec, Px_idx_vec, Px_n);
+        }
+        else if(!mxIsEmpty(Ax)){
+            osqp_update_A(osqpData->work, Ax_vec, Ax_idx_vec, Ax_n);
         }
 
         // Free vectors
         if(!mxIsEmpty(q)) mxFree(q_vec);
         if(!mxIsEmpty(l)) mxFree(l_vec);
         if(!mxIsEmpty(u)) mxFree(u_vec);
+        if(!mxIsEmpty(Px)) mxFree(Px_vec);
+        if(!mxIsEmpty(Ax)) mxFree(Ax_vec);
+        if(!mxIsEmpty(Px_idx)) mxFree(Px_idx_vec);
+        if(!mxIsEmpty(Ax_idx)) mxFree(Ax_idx_vec);
 
         return;
     }
@@ -560,7 +595,19 @@ c_float*  copyToCfloatVector(double* vecData, c_int numel){
 
 }
 
-c_int*  copyToCintVector(mwIndex* vecData, c_int numel){
+c_int* copyToCintVector(mwIndex* vecData, c_int numel){
+  // This memory needs to be freed!
+  c_int* out = (c_int*)c_malloc(numel * sizeof(c_int));
+
+  //copy data
+  for(c_int i=0; i < numel; i++){
+      out[i] = (c_int)vecData[i];
+  }
+  return out;
+
+}
+
+c_int* copyDoubleToCintVector(double* vecData, c_int numel){
   // This memory needs to be freed!
   c_int* out = (c_int*)c_malloc(numel * sizeof(c_int));
 
@@ -642,7 +689,7 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
   mxSetField(mxPtr, 0, "delta",           mxCreateDoubleScalar(settings->delta));
   mxSetField(mxPtr, 0, "polish",          mxCreateDoubleScalar(settings->polish));
   mxSetField(mxPtr, 0, "pol_refine_iter", mxCreateDoubleScalar(settings->pol_refine_iter));
-  mxSetField(mxPtr, 0, "auto_rho", mxCreateDoubleScalar(settings->auto_rho));
+  mxSetField(mxPtr, 0, "auto_rho",        mxCreateDoubleScalar(settings->auto_rho));
   mxSetField(mxPtr, 0, "verbose",         mxCreateDoubleScalar(settings->verbose));
   mxSetField(mxPtr, 0, "early_terminate", mxCreateDoubleScalar(settings->early_terminate));
   mxSetField(mxPtr, 0, "early_terminate_interval", mxCreateDoubleScalar(settings->early_terminate_interval));
@@ -685,21 +732,21 @@ mxArray* copyDataToMxStruct(OSQPData* data){
 
   int nfields  = sizeof(OSQP_DATA_FIELDS) / sizeof(OSQP_DATA_FIELDS[0]);
   mxArray* mxPtr = mxCreateStructMatrix(1,1,nfields,OSQP_DATA_FIELDS);
-  
+
   // Create vectors
   mxArray* q = mxCreateDoubleMatrix(data->n,1,mxREAL);
   mxArray* l = mxCreateDoubleMatrix(data->m,1,mxREAL);
   mxArray* u = mxCreateDoubleMatrix(data->m,1,mxREAL);
-  
+
   // Populate vectors
   castToDoubleArr(data->q, mxGetPr(q), data->n);
   castToDoubleArr(data->l, mxGetPr(l), data->m);
   castToDoubleArr(data->u, mxGetPr(u), data->m);
-  
+
   // Create matrices
   mxArray* P = copyCscMatrixToMxStruct(data->P);
   mxArray* A = copyCscMatrixToMxStruct(data->A);
-  
+
   //map the OSQP_DATA fields one at a time into mxArrays
   //matlab handles everything as a double
   mxSetField(mxPtr, 0, "n", mxCreateDoubleScalar(data->n));
@@ -717,21 +764,21 @@ mxArray* copyPrivToMxStruct(Priv* priv){
 
   int nfields  = sizeof(PRIV_FIELDS) / sizeof(PRIV_FIELDS[0]);
   mxArray* mxPtr = mxCreateStructMatrix(1,1,nfields,PRIV_FIELDS);
-  
+
   // Create vectors
   int n = priv->L->n;
   mxArray* Dinv = mxCreateDoubleMatrix(n,1,mxREAL);
   mxArray* P    = mxCreateDoubleMatrix(n,1,mxREAL);
   mxArray* bp   = mxCreateDoubleMatrix(n,1,mxREAL);
-  
+
   // Populate vectors
   castToDoubleArr(priv->Dinv, mxGetPr(Dinv), n);
   castCintToDoubleArr(priv->P, mxGetPr(P), n);
   castToDoubleArr(priv->bp, mxGetPr(bp), n);
-  
+
   // Create matrices
   mxArray* L = copyCscMatrixToMxStruct(priv->L);
-  
+
   //map the PRIV fields one at a time into mxArrays
   mxSetField(mxPtr, 0, "L",    L);
   mxSetField(mxPtr, 0, "Dinv", Dinv);
@@ -745,19 +792,19 @@ mxArray* copyScalingToMxStruct(OSQPScaling* scaling, int n, int m){
 
   int nfields  = sizeof(OSQP_SCALING_FIELDS) / sizeof(OSQP_SCALING_FIELDS[0]);
   mxArray* mxPtr = mxCreateStructMatrix(1,1,nfields,OSQP_SCALING_FIELDS);
-  
+
   // Create vectors
   mxArray* D    = mxCreateDoubleMatrix(n,1,mxREAL);
   mxArray* E    = mxCreateDoubleMatrix(m,1,mxREAL);
   mxArray* Dinv = mxCreateDoubleMatrix(n,1,mxREAL);
   mxArray* Einv = mxCreateDoubleMatrix(m,1,mxREAL);
-  
+
   // Populate vectors
   castToDoubleArr(scaling->D,    mxGetPr(D), n);
   castToDoubleArr(scaling->E,    mxGetPr(E), m);
   castToDoubleArr(scaling->Dinv, mxGetPr(Dinv), n);
   castToDoubleArr(scaling->Einv, mxGetPr(Einv), m);
-  
+
   //map the SCALING fields one at a time into mxArrays
   mxSetField(mxPtr, 0, "D",    D);
   mxSetField(mxPtr, 0, "E",    E);
@@ -771,13 +818,13 @@ mxArray*  copyWorkToMxStruct(OSQPWorkspace* work){
 
   int nfields  = sizeof(OSQP_WORKSPACE_FIELDS) / sizeof(OSQP_WORKSPACE_FIELDS[0]);
   mxArray* mxPtr = mxCreateStructMatrix(1,1,nfields,OSQP_WORKSPACE_FIELDS);
-  
+
   // Create workspace substructures
   mxArray* data     = copyDataToMxStruct(work->data);
   mxArray* priv     = copyPrivToMxStruct(work->priv);
   mxArray* scaling  = copyScalingToMxStruct(work->scaling, work->data->n, work->data->m);
   mxArray* settings = copySettingsToMxStruct(work->settings);
-  
+
   //map the WORKSPACE fields one at a time into mxArrays
   mxSetField(mxPtr, 0, "data",     data);
   mxSetField(mxPtr, 0, "priv",     priv);

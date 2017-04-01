@@ -491,7 +491,7 @@ static PyObject * OSQP_update_P(OSQP *self, PyObject *args) {
 		PyArrayObject *Px, *Px_cont, *Px_idx, *Px_idx_cont;
 		c_float * Px_arr;
 		c_int * Px_idx_arr;
-		c_int P_n;
+		c_int Px_n;
 		c_int return_val;
 		int float_type = get_float_type();
 		int int_type = get_int_type();
@@ -506,7 +506,7 @@ static PyObject * OSQP_update_P(OSQP *self, PyObject *args) {
 		if( !PyArg_ParseTuple(args, argparse_string,
 													&PyArray_Type, &Px,
 													&PyArray_Type, &Px_idx,
-													&P_n)) {
+													&Px_n)) {
 						return NULL;
 		}
 
@@ -523,7 +523,7 @@ static PyObject * OSQP_update_P(OSQP *self, PyObject *args) {
 				// Update all indices
     		return_val = osqp_update_P(self->workspace, Px_arr, NULL, 0);
 		else
-				return_val = osqp_update_P(self->workspace, Px_arr, Px_idx_arr, P_n);
+				return_val = osqp_update_P(self->workspace, Px_arr, Px_idx_arr, Px_n);
 
     // Free data
     Py_DECREF(Px_cont);
@@ -547,7 +547,7 @@ static PyObject * OSQP_update_A(OSQP *self, PyObject *args) {
 		PyArrayObject *Ax, *Ax_cont, *Ax_idx, *Ax_idx_cont;
 		c_float * Ax_arr;
 		c_int * Ax_idx_arr;
-		c_int A_n;
+		c_int Ax_n;
 		c_int return_val;
 		int float_type = get_float_type();
 		int int_type = get_int_type();
@@ -562,7 +562,7 @@ static PyObject * OSQP_update_A(OSQP *self, PyObject *args) {
 		if( !PyArg_ParseTuple(args, argparse_string,
 													&PyArray_Type, &Ax,
 													&PyArray_Type, &Ax_idx,
-													&A_n)) {
+													&Ax_n)) {
 						return NULL;
 		}
 
@@ -577,9 +577,9 @@ static PyObject * OSQP_update_A(OSQP *self, PyObject *args) {
 		// Update matrix A
 		if (Ax_idx_arr[0] == -1)
 				// Update all indices
-    		return_val = osqp_update_A(self->workspace, Ax_arr, NULL, A_n);
+    		return_val = osqp_update_A(self->workspace, Ax_arr, NULL, Ax_n);
 		else
-				return_val = osqp_update_A(self->workspace, Ax_arr, Ax_idx_arr, A_n);
+				return_val = osqp_update_A(self->workspace, Ax_arr, Ax_idx_arr, Ax_n);
 
     // Free data
     Py_DECREF(Ax_cont);
@@ -604,7 +604,7 @@ static PyObject * OSQP_update_P_A(OSQP *self, PyObject *args) {
 		PyArrayObject *Ax, *Ax_cont, *Ax_idx, *Ax_idx_cont;
 		c_float * Px_arr, * Ax_arr;
 		c_int * Px_idx_arr, * Ax_idx_arr;
-		c_int P_n, A_n;
+		c_int Px_n, Ax_n;
 		c_int return_val;
 		int float_type = get_float_type();
 		int int_type = get_int_type();
@@ -619,10 +619,10 @@ static PyObject * OSQP_update_P_A(OSQP *self, PyObject *args) {
 		if( !PyArg_ParseTuple(args, argparse_string,
 													&PyArray_Type, &Px,
 													&PyArray_Type, &Px_idx,
-													&P_n,
+													&Px_n,
 													&PyArray_Type, &Ax,
 													&PyArray_Type, &Ax_idx,
-													&A_n)) {
+													&Ax_n)) {
 						return NULL;
 		}
 
@@ -640,13 +640,13 @@ static PyObject * OSQP_update_P_A(OSQP *self, PyObject *args) {
 
 		// Update matrices P and A
 		if (Px_idx_arr[0] == -1 && Ax_idx_arr[0] == -1)
-    		return_val = osqp_update_P_A(self->workspace, Px_arr, NULL, P_n, Ax_arr, NULL, A_n);
+    		return_val = osqp_update_P_A(self->workspace, Px_arr, NULL, Px_n, Ax_arr, NULL, Ax_n);
 		else if (Px_idx_arr[0] == -1)
-				return_val = osqp_update_P_A(self->workspace, Px_arr, NULL, P_n, Ax_arr, Ax_idx_arr, A_n);
+				return_val = osqp_update_P_A(self->workspace, Px_arr, NULL, Px_n, Ax_arr, Ax_idx_arr, Ax_n);
 		else if (Ax_idx_arr[0] == -1)
-				return_val = osqp_update_P_A(self->workspace, Px_arr, Px_idx_arr, P_n, Ax_arr, NULL, A_n);
+				return_val = osqp_update_P_A(self->workspace, Px_arr, Px_idx_arr, Px_n, Ax_arr, NULL, Ax_n);
 		else
-				return_val = osqp_update_P_A(self->workspace, Px_arr, Px_idx_arr, P_n, Ax_arr, Ax_idx_arr, A_n);
+				return_val = osqp_update_P_A(self->workspace, Px_arr, Px_idx_arr, Px_n, Ax_arr, Ax_idx_arr, Ax_n);
 
     // Free data
     Py_DECREF(Px_cont);

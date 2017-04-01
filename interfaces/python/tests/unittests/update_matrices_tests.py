@@ -106,7 +106,7 @@ class update_matrices_tests(unittest.TestCase):
         nptest.assert_array_almost_equal(res.info.obj_val, -0.79990427087463)
 
     def test_update_P_A_indP_indA(self):
-        # Update matrix P
+        # Update matrices P and A
         Pnew_triu = sparse.triu(self.P_new).tocsc()
         Px = Pnew_triu.data
         Px_idx = np.arange(Pnew_triu.nnz)
@@ -123,7 +123,7 @@ class update_matrices_tests(unittest.TestCase):
         nptest.assert_array_almost_equal(res.info.obj_val, -0.8249598023368026)
 
     def test_update_P_A_indP(self):
-        # Update matrix P
+        # Update matrices P and A
         Pnew_triu = sparse.triu(self.P_new).tocsc()
         Px = Pnew_triu.data
         Px_idx = np.arange(Pnew_triu.nnz)
@@ -139,7 +139,7 @@ class update_matrices_tests(unittest.TestCase):
         nptest.assert_array_almost_equal(res.info.obj_val, -0.8249598023368026)
 
     def test_update_P_A_indA(self):
-        # Update matrix P
+        # Update matrices P and A
         Pnew_triu = sparse.triu(self.P_new).tocsc()
         Px = Pnew_triu.data
         Ax = self.A_new.data
@@ -155,7 +155,7 @@ class update_matrices_tests(unittest.TestCase):
         nptest.assert_array_almost_equal(res.info.obj_val, -0.8249598023368026)
 
     def test_update_P_A_allind(self):
-        # Update matrix P
+        # Update matrices P and A
         Pnew_triu = sparse.triu(self.P_new).tocsc()
         Px = Pnew_triu.data
         Ax = self.A_new.data
