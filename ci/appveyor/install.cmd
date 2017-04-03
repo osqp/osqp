@@ -1,5 +1,9 @@
 @echo on
 
+:: Workaround for CMake not wanting sh.exe on PATH for MinGW
+set PATH=%PATH:C:\Program Files (x86)\Git\bin;=%
+set PATH=C:\MinGW\bin;%PATH%
+
 :: Activate test environment anaconda
 set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%
 conda config --set always_yes yes --set changeps1 no
