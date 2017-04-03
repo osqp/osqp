@@ -19,7 +19,8 @@ branches:
     - continuous_integration
 
 init:
-  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  # Uncomment for remote desktop debug
+  # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
   - ECHO %PYTHON_VERSION% %MINICONDA%
 
 install:
@@ -28,6 +29,6 @@ install:
 test_script:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\script.cmd"
 
-
-on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# Uncomment for remote desktop debug
+# on_finish:
+#   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
