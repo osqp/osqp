@@ -1,6 +1,19 @@
 #!/bin/bash
 set -ev
 
+
+# Update variables from install
+# CMake
+if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+    export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+fi
+
+# Anaconda
+export PATH=${DEPS_DIR}/miniconda/bin:$PATH
+hash -r
+source activate testenv
+
+
 # Test C interface
 # ---------------------------------------------------
 
