@@ -1,4 +1,7 @@
-# The Operator Splitting QP Solver [![Coverage Status](https://coveralls.io/repos/github/oxfordcontrol/osqp/badge.svg?branch=master)](https://coveralls.io/github/oxfordcontrol/osqp?branch=master) [![Gitter](https://badges.gitter.im/oxfordcontrol/osqp.svg)](https://gitter.im/oxfordcontrol/osqp?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+# The Operator Splitting QP Solver
+[** Join our forum**](https://groups.google.com/forum/#!forum/osqp) for any questions related to the solver!
+
+**The documentation** is available at [**osqp.readthedocs.io**](http://osqp.readthedocs.io/)
 
 The OSQP (Operator Splitting Quadratic Program) solver is a numerical optimization package for solving problems in the form
 ```
@@ -6,6 +9,7 @@ minimize        0.5 x' P x + q' x
 
 subject to      l <= A x <= u
 ```
+
 
 <br>
 
@@ -27,5 +31,3 @@ subject to      l <= A x <= u
 </table>
 
 <br>
-
-#### Documentation ( [stable](http://osqp.readthedocs.io/en/stable) | [latest](http://osqp.readthedocs.io/en/latest) )
