@@ -1,4 +1,4 @@
-# Not a .NET project. We build it in the install: script
+# Not a .NET project. We build it in the install script
 build: false
 
 platform:
@@ -19,6 +19,7 @@ branches:
     - continuous_integration
 
 init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
   - ECHO %PYTHON_VERSION% %MINICONDA%
 
 install:
@@ -26,3 +27,7 @@ install:
 
 test_script:
   - ci\appveyor\script.cmd
+
+
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
