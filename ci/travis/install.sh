@@ -44,17 +44,3 @@ conda config --set always_yes yes --set changeps1 no
 conda update --yes -q conda
 conda create -n testenv --yes python=$PYTHON_VERSION pip nose numpy scipy future
 source activate testenv
-
-
-# Compile OSQP
-echo "Change directory to Travis build ${TRAVIS_BUILD_DIR}"
-cd ${TRAVIS_BUILD_DIR}
-mkdir build
-cd build
-cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
-make
-
-
-# Compile Python interface
-cd ${TRAVIS_BUILD_DIR}/interfaces/python
-python setup.py install

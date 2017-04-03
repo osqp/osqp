@@ -17,15 +17,8 @@ conda create -q -n test-environment python=%PYTHON_VERSION% numpy scipy nose fut
 :: N.B. Need to run with call otherwise the script hangs
 call activate test-environment
 
-:: Build OSQP
-mkdir build
-cd build
-cmake -G "%CMAKE_PROJECT%" ..
-cmake --build .
 
 
-:: Build Python interface
-cd %APPVEYOR_BUILD_FOLDER%\interfaces\python
-python setup.py install
+
 
 @echo off
