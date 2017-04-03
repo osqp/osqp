@@ -47,6 +47,7 @@ source activate testenv
 
 
 # Compile OSQP
+echo "Change directory to Travis build ${TRAVIS_BUILD_DIR}"
 cd ${TRAVIS_BUILD_DIR}
 mkdir build
 cd build
