@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cd python
-$PYTHON setup.py install 
+cd interfaces/python
+$PYTHON setup.py install
