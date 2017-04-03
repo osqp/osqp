@@ -9,7 +9,7 @@
   * @param work Workspace
   */
  void compute_rho(OSQPWorkspace * work){
-    c_float trP, trAtA, ratio, rho;
+    c_float trP, trAtA, ratio;
 
     if (work->data->m == 0){ // No consraints. Use max rho
         work->settings->rho = AUTO_RHO_MAX;
