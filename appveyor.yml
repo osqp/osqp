@@ -22,7 +22,7 @@ init:
   - ECHO %PYTHON_VERSION% %MINICONDA%
 
 install:
-  - cmd .\\ci\\appveyor\\install.cmd
+  - \ci\appveyor\install.cmd
 
 test_script:
-  - cmd .\\ci\\appveyor\\script.cmd
+  - \ci\appveyor\script.cmd
