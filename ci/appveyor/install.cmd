@@ -10,5 +10,5 @@ activate test-environment
 :: Compile osqp
 mkdir build
 cd build
-cmake -G "MinGW Makefiles" ..
+cmake -G"%GENERATOR%" ..
 cmake --build .
