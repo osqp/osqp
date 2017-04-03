@@ -26,7 +26,7 @@ subject to      l <= A x <= u
   </tr>
   <tr>
     <td>Windows</td>
-    <td><a href="https://ci.appveyor.com/project/bstellato/osqp/"><img src="https://ci.appveyor.com/api/projects/status/ik6ct0203pq5esxh?svg=true"></a></td>
+    <td><a href="https://ci.appveyor.com/project/bstellato/osqp/"><img src="https://ci.appveyor.com/api/projects/status/ik6ct0203pq5esxh/branch/master?svg=true"></a></td>
   </tr>
 </table>
 
