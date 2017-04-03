@@ -96,6 +96,9 @@ if (DLONG)
 endif (DLONG)
 
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
+
 # Set Compiler flags
 # ----------------------------------------------
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
@@ -206,10 +209,6 @@ if (PYTHON)
 
     # Include directories for Python headers
     include_directories(${PYTHON_INCLUDE_DIRS})
-
-    # Echo python include directories
-    message( STATUS "Python Include dirs: ${PYTHON_INCLUDE_DIRS}" )
-
 
     # Pass PYTHON flag to C compiler
     add_definitions(-DPYTHON)
