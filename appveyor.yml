@@ -9,14 +9,20 @@ environment:
   matrix:
     - PYTHON_VERSION: 2.7
       MINICONDA: C:\Miniconda
+      CMAKE_PROJECT: "MinGW Makefiles"
     - PYTHON_VERSION: 3.4
       MINICONDA: C:\Miniconda3
+      CMAKE_PROJECT: "MinGW Makefiles"
+
+branches:
+  only:
+    - continuous_integration
 
 init:
-  - "ECHO %PYTHON_VERSION% %MINICONDA%"
+    - ECHO %PYTHON_VERSION% %MINICONDA%
 
 install:
-  - %comspec% .\\ci\\appveyor\\install.cmd
+    -  %comspec% .\\ci\\appveyor\\install.cmd
 
 test_script:
-  - %comspec% .\\ci\\appveyor\\script.cmd
+    -  %comspec% .\\ci\\appveyor\\script.cmd
