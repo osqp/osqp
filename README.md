@@ -1,5 +1,5 @@
 # The Operator Splitting QP Solver
-[** Join our forum**](https://groups.google.com/forum/#!forum/osqp) for any questions related to the solver!
+[**Join our forum**](https://groups.google.com/forum/#!forum/osqp) for any questions related to the solver!
 
 **The documentation** is available at [**osqp.readthedocs.io**](http://osqp.readthedocs.io/)
 
