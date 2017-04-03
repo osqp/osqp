@@ -207,6 +207,10 @@ if (PYTHON)
     # Include directories for Python headers
     include_directories(${PYTHON_INCLUDE_DIRS})
 
+    # Echo python include directories
+    message( STATUS "Python Include dirs: ${PYTHON_INCLUDE_DIRS}" )
+
+
     # Pass PYTHON flag to C compiler
     add_definitions(-DPYTHON)
     if (IS_PY3K)

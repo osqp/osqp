@@ -1,7 +1,5 @@
 @echo on
 
-:: Ensure activation of the Python version
-call activate test-environment
 
 :: Perform C Tests
 :: -----------------------------------------------------
