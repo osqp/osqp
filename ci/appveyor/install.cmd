@@ -7,9 +7,6 @@
 set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
 set PATH=C:\MinGW\bin;%PATH%
 
-:: Workaround for CMake not wanting sh.exe on PATH for MinGW
-REM set PATH=%PATH:C:\Program Files (x86)\Git\bin;=%
-REM REM set PATH=C:\MinGW\bin;%PATH%
 
 :: Activate test environment anaconda
 set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%
