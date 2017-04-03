@@ -11,7 +11,7 @@ activate test-environment
 :: Compile osqp
 mkdir build
 cd build
-cmake -G"%GENERATOR%" ..
+cmake -G "%CMAKE_PROJECT%" ..
 cmake --build .
 
 
