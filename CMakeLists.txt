@@ -272,9 +272,9 @@ if (NOT PYTHON AND NOT MATLAB)
     # Create osqp shared library
     add_library (osqpdir SHARED ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_direct>)
 
-    # Create demo executable
+    # Create demo executable (linked to static library)
     add_executable (osqp_demo_direct ${PROJECT_SOURCE_DIR}/examples/osqp_demo_direct.c)
-    target_link_libraries (osqp_demo_direct osqpdir)
+    target_link_libraries (osqp_demo_direct osqpdirstatic)
 endif (NOT PYTHON AND NOT MATLAB)
 
 
