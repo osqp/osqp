@@ -53,3 +53,8 @@ mkdir build
 cd build
 cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
 make
+
+
+# Compile Python interface
+cd ${TRAVIS_BUILD_DIR}/interfaces/python
+python setup.py install
