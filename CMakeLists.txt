@@ -298,6 +298,11 @@ if (UNITTESTS)
         message( FATAL_ERROR "You need scipy python module installed to generate unittests. If you do not want to compile the unittests pass -DUNITTESTS=OFF to cmake." )
     ENDIF(NOT PY_SCIPY)
 
+    find_python_module(__future__ REQUIRED)
+    IF(NOT PY___FUTURE__)
+        message( FATAL_ERROR "You need future python module installed to generate unittests. If you do not want to compile the unittests pass -DUNITTESTS=OFF to cmake." )
+    ENDIF(NOT PY___FUTURE__)
+
     # Add test_headers and codegen_test_headers
     add_subdirectory(tests)
 
