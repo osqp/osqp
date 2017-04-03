@@ -43,7 +43,7 @@ test:
     - osqp
 
 about:
-  home: http://osqp.readthedocs.io/en/latest/
+  home: http://osqp.readthedocs.io/
   license: Apache 2.0
   license_file: LICENSE
   summary: 'OSQP: The Operator Splitting QP Solver'
