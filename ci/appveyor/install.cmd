@@ -24,4 +24,8 @@ cmake -G "%CMAKE_PROJECT%" ..
 cmake --build .
 
 
+:: Build Python interface
+cd %APPVEYOR_BUILD_FOLDER%\interfaces\python
+python setup.py install
+
 @echo off
