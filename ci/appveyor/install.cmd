@@ -8,7 +8,7 @@ conda info -a
 conda create -q -n test-environment python=%PYTHON_VERSION% numpy scipy nose
 activate test-environment
 
-:: Compile osqp
+
 mkdir build
 cd build
 cmake -G "%CMAKE_PROJECT%" ..
