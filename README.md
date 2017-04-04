@@ -35,9 +35,12 @@ where `x in R^n` is the optimization variable. The objective function is defined
 
 
 
-### Features
--   **Efficient**:  OSQP exploits sparse linear algebra t
--   **Robust**:
--   **Library-free**:
--   **Embeddable**:
--   
+
+### Credits
+
+The following people have been involved in the development of OSQP:
+-  [Bartolomeo Stellato](https://bstellato.github.io/) (main development)
+-  [Goran Banjac](http://users.ox.ac.uk/~sedm4978/) (main development)
+-  [Paul Goulart](http://users.ox.ac.uk/~engs1373/) (methods, maths and Matlab interface)
+-  [Alberto Bemporad](http://cse.lab.imtlucca.it/~bemporad/) (methods and maths)
+-  [Stephen Boyd](http://web.stanford.edu/~boyd/) (methods and maths)

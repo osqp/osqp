@@ -1,3 +1,10 @@
+/* Default header fonts are ugly */
+h1, h2, h3, h4, h5, h6 {
+    font-family:  "Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+
+
 /* Link Styling */
 a,a:visited, a:focus {
 	color: rgb(46, 118, 176);  /* Light blue*/
@@ -74,4 +81,8 @@ a:hover, a:active {
 /* Change text color for tt literal */
 .rst-content tt.literal, .rst-content tt.literal, .rst-content code.literal{
     color: rgb(46, 118, 176);  /* Light blue*/
+}
+
+.s1{
+	color: rgb(46, 118, 176);  /* Light blue*/
 }

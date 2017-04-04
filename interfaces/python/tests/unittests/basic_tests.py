@@ -48,7 +48,6 @@ class basic_tests(unittest.TestCase):
                                                           1.33333333, 0., 0.]))
         nptest.assert_array_almost_equal(res.info.obj_val, 20.)
 
-
     def test_update_q(self):
         # Update linear cost
         q_new = np.array([10, 20])
