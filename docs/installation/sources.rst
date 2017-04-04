@@ -86,3 +86,15 @@ Run the following commands from the terminal
     .. code:: bash
 
        cmake --build .
+
+
+Thanks to CMake, it is possible to create projects for a wide variety of IDEs; see `here <https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html>`_ for more details. For example, to create a project for Visual Studio 14 2015, it is just necessary to run
+
+.. code:: bash
+
+   cmake -G "Visual Studio 14 2015" ..
+
+
+The compilation will generate in the :code:`build/out/` directory the demo :code:`osqp_demo_direct` and the unittests :code:`osqp_tester_direct` executables. Run them to check that the compilation was correct.
+
+The compilation also generates in the :code:`build/out/` folder a static library :code:`libosqpdirstatic.a` and a shared library :code:`libosqpdir.ext` where :code:`ext` is platform-dependent. See :ref:`c_cpp_interface` for details how to use them.

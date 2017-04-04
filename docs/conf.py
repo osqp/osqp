@@ -18,7 +18,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
 # import sphinx_rtd_theme
-import os
+import os, subprocess
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
@@ -34,7 +34,7 @@ __version__ = "0.0.0"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.todo', 'sphinx.ext.imgmath', 'breathe']
+extensions = ['sphinx.ext.todo', 'sphinx.ext.mathjax', 'breathe']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -170,7 +170,10 @@ man_pages = [
 
 # -- Options for breathe ---------------------------------------
 
-breathe_projects = { "osqp": "doxygen_out/xml/" }
+# Generate doxygen documentation
+subprocess.call('doxygen doxygen.conf', shell=True)
+
+breathe_projects = {"osqp": "doxygen_out/xml/"}
 breathe_default_project = "osqp"
 
 

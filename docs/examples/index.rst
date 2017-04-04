@@ -3,7 +3,6 @@ Examples
 
 
 .. toctree::
-   :maxdepth: 1
-   :glob:
+   :maxdepth: 2
 
-   *
+   C/index

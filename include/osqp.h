@@ -34,6 +34,8 @@ extern "C" {
 /**
  * Initialize OSQP solver allocating memory.
  *
+ * All the inputs must be already allocated in memory before calling.
+ *
  * It performs:
  * - data and settings validation
  * - problem data scaling
@@ -54,9 +56,9 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings);
 /**
  * Solve quadratic program
  *
- * The final solver information will be in the  \a work->info  structure
+ * The final solver information is stored in the \a work->info  structure
  *
- * The solution will be in the  \a work->solution  structure
+ * The solution is stored in the  \a work->solution  structure
  *
  * @param  work Workspace allocated
  * @return      Exitflag for errors
