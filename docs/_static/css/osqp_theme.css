@@ -45,6 +45,12 @@ a:hover, a:active {
 }
 
 
+/* Change color of the line at the top of Read the Docs box at the bottom left
+   corner */
+.rst-versions{
+    border-top:solid 10px rgb(0, 32, 72); /* Oxford blue */
+}
+
 
 /* Change color of top left name */
 .wy-side-nav-search>a{
