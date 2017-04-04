@@ -12,6 +12,7 @@ cmake --build .
 
 :: Test C
 %APPVEYOR_BUILD_FOLDER%\build\out\osqp_tester_direct.exe
+if errorlevel 1 exit /b 1
 
 :: Perform Python tests
 :: -------------------------------------------------------
@@ -22,6 +23,6 @@ python setup.py install
 :: Test python interface
 cd %APPVEYOR_BUILD_FOLDER%\interfaces\python
 nosetests
-
+if errorlevel 1 exit /b 1
 
 @echo off

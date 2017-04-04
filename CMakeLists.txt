@@ -96,9 +96,6 @@ if (DLONG)
 endif (DLONG)
 
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-
-
 # Set Compiler flags
 # ----------------------------------------------
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
