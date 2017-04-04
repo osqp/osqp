@@ -17,8 +17,8 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-# import sphinx_rtd_theme
-import os
+import sphinx_rtd_theme
+# import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
@@ -84,33 +84,11 @@ todo_include_todos = False
 
 # -- Options for HTML output ----------------------------------------------
 
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-
-if not on_rtd:  # only import and set the theme if we're building docs locally
-    import sphinx_rtd_theme
-    html_theme = 'sphinx_rtd_theme'
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-
-    # Override default css to get a larger width for local build
-    def setup(app):
-        app.add_stylesheet('osqp_theme.css')
-else:
-    html_context = {
-        'css_files': [
-            'https://media.readthedocs.org/css/sphinx_rtd_theme.css',
-            'https://media.readthedocs.org/css/readthedocs-doc-embed.css',
-            '_static/css/osqp_theme.css',
-        ],
-    }
-
-
-
-
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-# html_theme = "sphinx_rtd_theme"
-# html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme = "sphinx_rtd_theme"
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -126,11 +104,8 @@ html_favicon = "_static/img/favicon.ico"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-
-html_context = {
-    'css_files': ['_static/css/osqp_theme.css'],
-}
-
+# Load custom theme
+html_style = 'css/osqp_theme.css'
 
 
 # -- Options for HTMLHelp output ------------------------------------------
