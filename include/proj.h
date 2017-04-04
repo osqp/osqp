@@ -11,7 +11,7 @@ extern "C" {
 /* Define Projections onto set C involved in the ADMM algorithm */
 
 /**
- * Project z onto C = [l, u]
+ * Project z onto \f$C = [l, u]\f$
  * @param work Workspace
  */
 void project_z(OSQPWorkspace *work);

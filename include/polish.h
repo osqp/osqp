@@ -12,7 +12,11 @@ extern "C" {
 #include "auxil.h"
 #include "kkt.h"
 
-// Solution polish: Solve equality constrained QP with assumed active constr.
+/**
+ * Solution polish: Solve equality constrained QP with assumed active constraints
+ * @param  work Workspace
+ * @return      Exitflag
+ */
 c_int polish(OSQPWorkspace *work);
 
 

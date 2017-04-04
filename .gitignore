@@ -63,6 +63,9 @@ dkms.conf
 coverage.info
 coverage_html/
 
+# Doxygen output
+docs/doxygen_out
+
 # Vim files
 # -------------------------------------------------------------------
 *.swp

@@ -33,7 +33,6 @@ static const c_int HSPACE = 12;
  **********************/
 
 
- /* Custom string copy to avoid string.h library */
 void c_strcpy(char dest[], const char source[]){
 int i = 0;
     while (1) {
@@ -104,7 +103,6 @@ void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
 }
 
 
-/* Print iteration summary */
 void print_summary(OSQPInfo * info){
     c_print("%*i ", (int)strlen(HEADER[0]), (int)info->iter);
     c_print("%*.4e ", (int)HSPACE, info->obj_val);
@@ -117,7 +115,6 @@ void print_summary(OSQPInfo * info){
 }
 
 
-/* Print polish information */
 void print_polish(OSQPInfo * info) {
     c_print("%*s ", (int)strlen(HEADER[0]), "PLSH");
     c_print("%*.4e ", (int)HSPACE, info->obj_val);
@@ -135,7 +132,7 @@ void print_polish(OSQPInfo * info) {
 
 
 #ifdef PRINTING
-/* Print Footer */
+
 void print_footer(OSQPInfo * info, c_int polish){
 
     #ifdef PRINTING
@@ -171,8 +168,6 @@ void print_footer(OSQPInfo * info, c_int polish){
 #endif
 
 
-/* Set default settings from constants.h file */
-/* assumes d->stgs already allocated memory */
 void set_default_settings(OSQPSettings * settings) {
         settings->scaling = SCALING; /* heuristic problem scaling */
 
@@ -207,7 +202,6 @@ void set_default_settings(OSQPSettings * settings) {
 
 #ifndef EMBEDDED
 
-/* Copy settings creating a new settings structure */
 OSQPSettings * copy_settings(OSQPSettings * settings){
     OSQPSettings * new = c_malloc(sizeof(OSQPSettings));
 
@@ -324,8 +318,9 @@ c_float toc(OSQPTimer* t)
 
 /* ==================== DEBUG FUNCTIONS ======================= */
 
+
 #ifndef EMBEDDED
-/* Convert sparse CSC to dense */
+
 c_float * csc_to_dns(csc * M)
 {
         c_int i, j=0; // Predefine row index and column index
@@ -353,7 +348,6 @@ c_float * csc_to_dns(csc * M)
 }
 
 
-/* Compare sparse matrices */
 c_int is_eq_csc(csc *A, csc *B, c_float tol){
         c_int j, i;
         // If number of columns does not coincide, they are not equal.
@@ -378,7 +372,7 @@ c_int is_eq_csc(csc *A, csc *B, c_float tol){
 
 
 #ifdef PRINTING
-/* Print a csc sparse matrix */
+
 void print_csc_matrix(csc* M, const char * name)
 {
         c_int j, i, row_start, row_stop;
@@ -400,7 +394,7 @@ void print_csc_matrix(csc* M, const char * name)
         }
 }
 
-/* Print a triplet format sparse matrix */
+
 void print_trip_matrix(csc* M, const char * name)
 {
         c_int k = 0;
@@ -414,7 +408,7 @@ void print_trip_matrix(csc* M, const char * name)
 }
 
 
-/* Print a dense matrix */
+
 void print_dns_matrix(c_float * M, c_int m, c_int n, const char *name)
 {
         c_int i, j;
@@ -436,13 +430,13 @@ void print_dns_matrix(c_float * M, c_int m, c_int n, const char *name)
         c_print("\n");
 }
 
-/* Print vector */
+
 void print_vec(c_float * v, c_int n, const char *name){
         print_dns_matrix(v, 1, n, name);
 }
 
 
-// Print int array
+
 void print_vec_int(c_int * x, c_int n, const char *name) {
     c_int i;
     c_print("%s = [", name);

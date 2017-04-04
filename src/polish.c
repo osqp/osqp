@@ -184,7 +184,7 @@ static void compute_y_from_y_red(OSQPWorkspace * work){
     }
 }
 
-// Solution polish: Solve equality constrained QP with assumed active constr.
+
 c_int polish(OSQPWorkspace *work) {
     c_int mred, polish_successful;
     c_float * rhs_red;

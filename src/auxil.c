@@ -4,10 +4,8 @@
  * Auxiliary functions needed to compute ADMM iterations * *
  ***********************************************************/
  #ifndef EMBEDDED
- /**
-  * Automatically compute rho
-  * @param work Workspace
-  */
+
+
  void compute_rho(OSQPWorkspace * work){
     c_float trP, trAtA, ratio;
 
@@ -38,11 +36,7 @@
  #endif // ifndef EMBEDDED
 
 
- /**
-  * Swap c_float vector pointers
-  * @param a first vector
-  * @param b second vector
-  */
+
  void swap_vectors(c_float ** a, c_float ** b){
      c_float * temp;
      temp = *b;
@@ -51,10 +45,6 @@
  }
 
 
-/**
- * Cold start workspace variables
- * @param work Workspace
- */
 void cold_start(OSQPWorkspace *work) {
 
     vec_set_scalar(work->x, 0., work->data->n);
@@ -64,10 +54,6 @@ void cold_start(OSQPWorkspace *work) {
 }
 
 
-/**
- * Update RHS during first tep of ADMM iteration. Store it into (x,z).
- * @param  work Workspace
- */
 static void compute_rhs(OSQPWorkspace *work){
     c_int i; // Index
     for (i=0; i < work->data->n; i++){
@@ -82,11 +68,6 @@ static void compute_rhs(OSQPWorkspace *work){
 }
 
 
-/**
- * Update z_tilde variable after solving linear system (first ADMM step)
- *
- * @param work Workspace
- */
 static void update_z_tilde(OSQPWorkspace *work){
     c_int i; // Index
     for (i = 0; i < work->data->m; i++){
@@ -95,10 +76,6 @@ static void update_z_tilde(OSQPWorkspace *work){
 }
 
 
-/**
- * Update x_tilde and z_tilde variable (first ADMM step)
- * @param work [description]
- */
 void update_xz_tilde(OSQPWorkspace * work){
     // Compute right-hand side
     compute_rhs(work);
@@ -111,11 +88,6 @@ void update_xz_tilde(OSQPWorkspace * work){
 }
 
 
-/**
-* Update x (second ADMM step)
-* Update also delta_x (For dual infeasibility)
-* @param work Workspace
-*/
 void update_x(OSQPWorkspace * work){
     c_int i;
 
@@ -132,11 +104,6 @@ void update_x(OSQPWorkspace * work){
 
 }
 
-
-/**
-* Update z (third ADMM step)
-* @param work Workspace
-*/
 void update_z(OSQPWorkspace *work){
     c_int i;
 
@@ -154,11 +121,6 @@ void update_z(OSQPWorkspace *work){
 
 
 
-/**
- * Update y variable (third ADMM step)
- * Update also delta_y to check for infeasibility
- * @param work Workspace
- */
 void update_y(OSQPWorkspace *work){
     c_int i; // Index
     for (i = 0; i < work->data->m; i++){
@@ -171,24 +133,13 @@ void update_y(OSQPWorkspace *work){
     }
 }
 
-/**
- * Compute objective function from data at value x
- * @param  data OSQPData structure
- * @param  x       Value x
- * @return         Objective function value
- */
+
 c_float compute_obj_val(OSQPData *data, c_float * x) {
         return quad_form(data->P, x) +
                vec_prod(data->q, x, data->n);
 }
 
 
-/**
- * Return norm of primal residual
- * @param  work   Workspace
- * @param  polish Called from polish function (1) or from elsewhere (0)
- * @return        Norm of primal residual
- */
 c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
 
     // If embedded we cannot access polish members
@@ -220,13 +171,6 @@ c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
 
 
 
-/**
- * Return norm of dual residual
- * TODO: Use more tailored residual (not general one)
- * @param  work   Workspace
- * @param  polish Called from polish() function (1) or from elsewhere (0)
- * @return        Norm of dual residual
- */
 c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
 
     // N.B. Use x_prev as temporary vector
@@ -269,11 +213,6 @@ c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
 }
 
 
-/**
- * Check if problem is primal infeasible
- * @param  work Workspace
- * @return      Integer for True or False
- */
 c_int is_primal_infeasible(OSQPWorkspace * work){
     c_int i; // Index for loops
     c_float norm_delta_y, ineq_lhs = 0;
@@ -303,11 +242,7 @@ c_int is_primal_infeasible(OSQPWorkspace * work){
 
 }
 
-/**
- * Check if problem is dual infeasible
- * @param  work Workspace
- * @return        Integer for True or False
- */
+
 c_int is_dual_infeasible(OSQPWorkspace * work){
     c_int i; // Index for loops
     c_float norm_delta_x;
@@ -357,10 +292,6 @@ c_int is_dual_infeasible(OSQPWorkspace * work){
 }
 
 
-/**
- * Store the QP solution
- * @param work Workspace
- */
 void store_solution(OSQPWorkspace *work) {
     if ((work->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
         (work->info->status_val != OSQP_DUAL_INFEASIBLE)){
@@ -379,13 +310,6 @@ void store_solution(OSQPWorkspace *work) {
 }
 
 
-/**
-* Update solver information
-* @param work               Workspace
-* @param iter               Iteration number
-* @param compute_objective  Boolean (if compute the objective or not)
-* @param polish             Boolean (if called from polish)
-*/
 void update_info(OSQPWorkspace *work, c_int iter, c_int compute_objective, c_int polish){
 
     #ifndef EMBEDDED
@@ -430,10 +354,6 @@ void update_info(OSQPWorkspace *work, c_int iter, c_int compute_objective, c_int
 }
 
 
-/**
- * Update solver status (value and string)
- * @param work Workspace
- */
 void update_status(OSQPInfo *info, c_int status_val) {
     // Update status value
     info->status_val = status_val;
@@ -455,11 +375,6 @@ void update_status(OSQPInfo *info, c_int status_val) {
 
 
 
-/**
- * Check if termination conditions are satisfied
- * @param  work Workspace
- * @return      Redisuals check
- */
 c_int check_termination(OSQPWorkspace *work){
     c_float eps_pri, eps_dua;
     c_int exitflag = 0;
@@ -518,11 +433,7 @@ c_int check_termination(OSQPWorkspace *work){
 
 #ifndef EMBEDDED
 
-/**
- * Validate problem data
- * @param  data OSQPData to be validated
- * @return      Exitflag to check
- */
+
 c_int validate_data(const OSQPData * data){
     c_int j;
 
@@ -582,11 +493,6 @@ c_int validate_data(const OSQPData * data){
 }
 
 
-/**
- * Validate problem settings
- * @param  data OSQPData to be validated
- * @return      Exitflag to check
- */
 c_int validate_settings(const OSQPSettings * settings){
     if (!settings){
         #ifdef PRINTING

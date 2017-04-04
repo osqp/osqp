@@ -24,8 +24,21 @@ int SetInterruptEnabled(int x);
 #endif
 
 /* METHODS are the same for both */
+
+/**
+ * Start listner for ctrl-c interrupts
+ */
 void startInterruptListener(void);
+
+/**
+ * End listner for ctrl-c interrupts
+ */
 void endInterruptListener(void);
+
+/**
+ * Check if the solver has been interrupted
+ * @return  Boolean indicating if the solver has been interrupted
+ */
 int isInterrupted(void);
 
 
