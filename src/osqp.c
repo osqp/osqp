@@ -364,11 +364,7 @@ c_int osqp_solve(OSQPWorkspace * work){
 
 
 #ifndef EMBEDDED
-/**
- * Cleanup workspace
- * @param  work Workspace
- * @return      Exitflag for errors
- */
+
 c_int osqp_cleanup(OSQPWorkspace * work){
     c_int exitflag=0;
 

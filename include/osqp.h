@@ -41,8 +41,7 @@ extern "C" {
  * - setup linear system solver:
  *      - direct solver: KKT matrix factorization is performed here
  *
- * N.B. This is the only function that allocates dynamic memory. During code
- * generation it is replaced.
+ * N.B. This is the only function that allocates dynamic memory and is not used during code generation
  *
  * @param  data         Problem data
  * @param  settings     Solver settings
@@ -53,10 +52,11 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings);
 #endif  // #ifndef EMBEDDED
 
 /**
- * Solve Quadratic Program
+ * Solve quadratic program
  *
- * The final solver information will be in work->info structure
- * The solution will be in the work->solution structure
+ * The final solver information will be in the  \a work->info  structure
+ *
+ * The solution will be in the  \a work->solution  structure
  *
  * @param  work Workspace allocated
  * @return      Exitflag for errors
