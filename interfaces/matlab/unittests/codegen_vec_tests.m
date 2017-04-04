@@ -1,4 +1,4 @@
-classdef codegen_tests < matlab.unittest.TestCase
+classdef codegen_vec_tests < matlab.unittest.TestCase
     %TEST_BASIC_QP Solve Basic QP Problem
 
     properties

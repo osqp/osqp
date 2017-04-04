@@ -129,8 +129,11 @@ c_float toc(PyTimer* t)
 
 // Internal utility functions
 c_float* copyToCfloatVector(double * vecData, c_int numel);
-void castToDoubleArr(c_float *arr, double* arr_out, c_int len);
-void setToNaN(double* arr_out, c_int len);
+void     castToDoubleArr(c_float *arr, double* arr_out, c_int len);
+void     setToNaN(double* arr_out, c_int len);
+#if EMBEDDED != 1
+c_int*   copyDoubleToCintVector(double* vecData, c_int numel);
+#endif
 
 
 // Function handler
@@ -296,11 +299,71 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         return;
     }
 
+    #if EMBEDDED != 1
+    // update matrix P
+    if (!strcmp("update_P", cmd)) {
 
+        // Fill Px and Px_idx
+        const mxArray *Px = prhs[1];
+        const mxArray *Px_idx = prhs[2];
+        
+        int Px_n = mxGetScalar(prhs[3]);
+
+        // Copy vectors to ensure they are cast as c_float and c_int
+        c_float *Px_vec;
+        c_int *Px_idx_vec = NULL;
+        if(!mxIsEmpty(Px)){
+            Px_vec = copyToCfloatVector(mxGetPr(Px), Px_n);
+        }
+        if(!mxIsEmpty(Px_idx)){
+            Px_idx_vec = copyDoubleToCintVector(mxGetPr(Px_idx), Px_n);
+        }
+
+        if(!mxIsEmpty(Px)){
+            osqp_update_P((&workspace), Px_vec, Px_idx_vec, Px_n);
+        }
+
+        // Free
+        if(!mxIsEmpty(Px)) mxFree(Px_vec);
+        if(!mxIsEmpty(Px_idx)) mxFree(Px_idx_vec);
+
+        return;
+    }
+    
+    // update matrix A
+    if (!strcmp("update_A", cmd)) {
+
+        // Fill Ax and Ax_idx
+        const mxArray *Ax = prhs[1];
+        const mxArray *Ax_idx = prhs[2];
+        
+        int Ax_n = mxGetScalar(prhs[3]);
+
+        // Copy vectors to ensure they are cast as c_float and c_int
+        c_float *Ax_vec;
+        c_int *Ax_idx_vec = NULL;
+        if(!mxIsEmpty(Ax)){
+            Ax_vec = copyToCfloatVector(mxGetPr(Ax), Ax_n);
+        }
+        if(!mxIsEmpty(Ax_idx)){
+            Ax_idx_vec = copyDoubleToCintVector(mxGetPr(Ax_idx), Ax_n);
+        }
+
+        if(!mxIsEmpty(Ax)){
+            osqp_update_A((&workspace), Ax_vec, Ax_idx_vec, Ax_n);
+        }
+
+        // Free
+        if(!mxIsEmpty(Ax)) mxFree(Ax_vec);
+        if(!mxIsEmpty(Ax_idx)) mxFree(Ax_idx_vec);
+
+        return;
+    }
+    #endif  // end EMBEDDED
+    
     // Got here, so command not recognized
     mexErrMsgTxt("Command not recognized.");
 }
-
 
 c_float* copyToCfloatVector(double* vecData, c_int numel){
     // This memory needs to be freed!
@@ -332,4 +395,20 @@ void setToNaN(double* arr_out, c_int len){
     }
 }
 
+#if EMBEDDED != 1
+c_int* copyDoubleToCintVector(double* vecData, c_int numel){
+  // This memory needs to be freed!
+  
+  c_int* out;
+  c_int i;
+  
+  out = mxMalloc(numel * sizeof(c_int));
 
+  //copy data
+  for(i=0; i < numel; i++){
+      out[i] = (c_int)vecData[i];
+  }
+  return out;
+
+}
+#endif  // end EMBEDDED
