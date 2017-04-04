@@ -188,7 +188,7 @@ static PyObject * OSQP_solve(PyObject *self, PyObject *args)
     int float_type = get_float_type();
 
     // Create solution objects
-    PyObject * x, *y, *return_struct;
+    PyObject * x, *y;
 
     // Temporary solution
     c_float *x_arr, *y_arr; // Primal dual solutions
@@ -236,13 +236,12 @@ static PyObject * OSQP_solve(PyObject *self, PyObject *args)
             y = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
     }
 
-    // Return struct
-    return_struct =  Py_BuildValue("OOiid", x, y, (&workspace)->info->status_val, (&workspace)->info->iter, solve_time);
-
 		// Free timer
     PyMem_Free(timer);
 
-		return return_struct;
+    // Return struct
+    return Py_BuildValue("OOiid", x, y, (&workspace)->info->status_val, (&workspace)->info->iter, solve_time);
+
 }
 
 
