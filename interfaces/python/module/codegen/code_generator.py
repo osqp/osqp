@@ -123,11 +123,12 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
                               os.path.join(target_src_dir,
                                            '%smodule.c' % python_ext_name))
 
+    # Copy CMakelists.txt
+    utils.render_cmakelists(template_vars,
+                            os.path.join(target_dir, 'CMakeLists.txt'))
+
     # Copy example.c
     sh.copy(os.path.join(files_to_generate_path, 'example.c'), target_src_dir)
-
-    # Copy CMakelists.txt
-    sh.copy(os.path.join(files_to_generate_path, 'CMakeLists.txt'), target_dir)
 
     print("[done]")
 

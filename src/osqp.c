@@ -865,7 +865,7 @@ c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx
             #ifdef PRINTING
             c_print("Error in P update: new number of elements greater than elements in P!\n");
             #endif
-            return -1;
+            return 1;
         }
     }
 
@@ -877,7 +877,7 @@ c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx
             #ifdef PRINTING
             c_print("Error in A update: new number of elements greater than elements in A!\n");
             #endif
-            return -1;
+            return 2;
         }
     }
 

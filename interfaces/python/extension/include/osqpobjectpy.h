@@ -125,11 +125,11 @@ static PyObject * OSQP_solve(OSQP *self)
         #endif
 
         info_list = Py_BuildValue(argparse_string,
-                                  self->workspace->info->iter,
-                                  status,
-                                  self->workspace->info->status_val,
-                                  self->workspace->info->status_polish,
-                                  self->workspace->info->obj_val,
+																	self->workspace->info->iter,
+																	status,
+																	self->workspace->info->status_val,
+																	self->workspace->info->status_polish,
+																	self->workspace->info->obj_val,
                                   self->workspace->info->pri_res,
                                   self->workspace->info->dua_res,
                                   self->workspace->info->setup_time,
@@ -157,13 +157,13 @@ static PyObject * OSQP_solve(OSQP *self)
         #endif
 
         info_list = Py_BuildValue(argparse_string,
-                                            self->workspace->info->iter,
-                                            status,
-                                            self->workspace->info->status_val,
-                                            self->workspace->info->status_polish,
-                                            self->workspace->info->obj_val,
-                                            self->workspace->info->pri_res,
-                                            self->workspace->info->dua_res);
+                                  self->workspace->info->iter,
+																	status,
+																	self->workspace->info->status_val,
+																	self->workspace->info->status_polish,
+																	self->workspace->info->obj_val,
+																	self->workspace->info->pri_res,
+																	self->workspace->info->dua_res);
         #endif
 
         info = PyObject_CallObject((PyObject *) &OSQP_info_Type, info_list);
@@ -577,7 +577,7 @@ static PyObject * OSQP_update_A(OSQP *self, PyObject *args) {
 		// Update matrix A
 		if (Ax_idx_arr[0] == -1)
 				// Update all indices
-    		return_val = osqp_update_A(self->workspace, Ax_arr, NULL, Ax_n);
+    		return_val = osqp_update_A(self->workspace, Ax_arr, NULL, 0);
 		else
 				return_val = osqp_update_A(self->workspace, Ax_arr, Ax_idx_arr, Ax_n);
 
@@ -640,11 +640,11 @@ static PyObject * OSQP_update_P_A(OSQP *self, PyObject *args) {
 
 		// Update matrices P and A
 		if (Px_idx_arr[0] == -1 && Ax_idx_arr[0] == -1)
-    		return_val = osqp_update_P_A(self->workspace, Px_arr, NULL, Px_n, Ax_arr, NULL, Ax_n);
+    		return_val = osqp_update_P_A(self->workspace, Px_arr, NULL, 0, Ax_arr, NULL, 0);
 		else if (Px_idx_arr[0] == -1)
-				return_val = osqp_update_P_A(self->workspace, Px_arr, NULL, Px_n, Ax_arr, Ax_idx_arr, Ax_n);
+				return_val = osqp_update_P_A(self->workspace, Px_arr, NULL, 0, Ax_arr, Ax_idx_arr, Ax_n);
 		else if (Ax_idx_arr[0] == -1)
-				return_val = osqp_update_P_A(self->workspace, Px_arr, Px_idx_arr, Px_n, Ax_arr, NULL, Ax_n);
+				return_val = osqp_update_P_A(self->workspace, Px_arr, Px_idx_arr, Px_n, Ax_arr, NULL, 0);
 		else
 				return_val = osqp_update_P_A(self->workspace, Px_arr, Px_idx_arr, Px_n, Ax_arr, Ax_idx_arr, Ax_n);
 
@@ -655,8 +655,11 @@ static PyObject * OSQP_update_P_A(OSQP *self, PyObject *args) {
     Py_DECREF(Ax_idx_cont);
 
 		if (return_val == 1) {
-				PyErr_SetString(PyExc_ValueError, "Size of Ax and Ax_idx is too large!");
-				return (PyObject *) NULL;
+				PySys_WriteStdout("Size of Px and Px_idx is too large!");
+				return NULL;
+		} else if (return_val == 2) {
+				PySys_WriteStdout("Size of Ax and Ax_idx is too large!");
+				return NULL;
 		} else if (return_val < 0) {
 				PyErr_SetString(PyExc_ValueError, "New KKT matrix is not quasidefinite!");
 				return (PyObject *) NULL;

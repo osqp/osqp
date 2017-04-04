@@ -188,7 +188,7 @@ static PyObject * OSQP_solve(PyObject *self, PyObject *args)
     int float_type = get_float_type();
 
     // Create solution objects
-    PyObject * x, *y;
+    PyObject * x, *y, *return_struct;
 
     // Temporary solution
     c_float *x_arr, *y_arr; // Primal dual solutions
@@ -207,7 +207,9 @@ static PyObject * OSQP_solve(PyObject *self, PyObject *args)
     /**
      *  Solve QP Problem
      */
-    osqp_solve((&workspace));
+     if (osqp_solve((&workspace)) == -1){
+			 	PySys_WriteStdout("Error: Workspace not initialized!\n");
+		 }
 
     // Stop timer
     solve_time = toc(timer);
@@ -234,12 +236,13 @@ static PyObject * OSQP_solve(PyObject *self, PyObject *args)
             y = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
     }
 
-    // Free timer
+    // Return struct
+    return_struct =  Py_BuildValue("OOiid", x, y, (&workspace)->info->status_val, (&workspace)->info->iter, solve_time);
+
+		// Free timer
     PyMem_Free(timer);
 
-    // Return value
-    return Py_BuildValue("OOiid", x, y, (&workspace)->info->status_val, (&workspace)->info->iter, solve_time);
-
+		return return_struct;
 }
 
 
@@ -409,15 +412,245 @@ static PyObject *OSQP_update_bounds(PyObject *self, PyObject *args){
 
 }
 
+#if EMBEDDED != 1
+
+// Get integer type from OSQP setup
+static int get_int_type(void) {
+    switch (sizeof(c_int)) {
+    case 1:
+        return NPY_INT8;
+    case 2:
+        return NPY_INT16;
+    case 4:
+        return NPY_INT32;
+    case 8:
+        return NPY_INT64;
+    default:
+        return NPY_INT32; /* defaults to 4 byte int */
+    }
+}
+
+// Update elements of matrix P
+static PyObject * OSQP_update_P(PyObject *self, PyObject *args) {
+		PyArrayObject *Px, *Px_cont, *Px_idx, *Px_idx_cont;
+		c_float * Px_arr;
+		c_int * Px_idx_arr;
+		c_int Px_n;
+		c_int return_val;
+		int float_type = get_float_type();
+		int int_type = get_int_type();
+
+		#ifdef DLONG
+		static char * argparse_string = "O!O!l";
+		#else
+		static char * argparse_string = "O!O!i";
+		#endif
+
+		// Parse arguments
+		if( !PyArg_ParseTuple(args, argparse_string,
+													&PyArray_Type, &Px,
+													&PyArray_Type, &Px_idx,
+													&Px_n)) {
+						return NULL;
+		}
+
+		// Get contiguous data structure
+		Px_cont = get_contiguous(Px, float_type);
+		Px_idx_cont = get_contiguous(Px_idx, int_type);
+
+		// Copy array into c_float and c_int arrays
+		Px_arr = (c_float *)PyArray_DATA(Px_cont);
+		Px_idx_arr = (c_int *)PyArray_DATA(Px_idx_cont);
+
+		// Check dimension
+		if (Px_idx_arr[0] != -1 && PyArray_DIM(Px, 0) != PyArray_DIM(Px_idx, 0)){
+				PySys_WriteStdout("Error in Px and Px_idx sizes!\n");
+				return NULL;
+		}
+
+		// Update matrix P
+		if (Px_idx_arr[0] == -1)
+				// Update all indices
+    		return_val = osqp_update_P((&workspace), Px_arr, NULL, 0);
+		else
+				return_val = osqp_update_P((&workspace), Px_arr, Px_idx_arr, Px_n);
+
+    // Free data
+    Py_DECREF(Px_cont);
+    Py_DECREF(Px_idx_cont);
+
+		if (return_val == 1) {
+				PySys_WriteStdout("Size of Px and Px_idx is too large!");
+				return NULL;
+		} else if (return_val < 0) {
+				PySys_WriteStdout("New KKT matrix is not quasidefinite!");
+				return NULL;
+		}
+
+    // Return None
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+// Update elements of matrix A
+static PyObject * OSQP_update_A(PyObject *self, PyObject *args) {
+		PyArrayObject *Ax, *Ax_cont, *Ax_idx, *Ax_idx_cont;
+		c_float * Ax_arr;
+		c_int * Ax_idx_arr;
+		c_int Ax_n;
+		c_int return_val;
+		int float_type = get_float_type();
+		int int_type = get_int_type();
+
+		#ifdef DLONG
+		static char * argparse_string = "O!O!l";
+		#else
+		static char * argparse_string = "O!O!i";
+		#endif
+
+		// Parse arguments
+		if( !PyArg_ParseTuple(args, argparse_string,
+													&PyArray_Type, &Ax,
+													&PyArray_Type, &Ax_idx,
+													&Ax_n)) {
+						return NULL;
+		}
+
+		// Get contiguous data structure
+		Ax_cont = get_contiguous(Ax, float_type);
+		Ax_idx_cont = get_contiguous(Ax_idx, int_type);
+
+		// Copy array into c_float and c_int arrays
+		Ax_arr = (c_float *)PyArray_DATA(Ax_cont);
+		Ax_idx_arr = (c_int *)PyArray_DATA(Ax_idx_cont);
+
+		// Check dimension
+		if (Ax_idx_arr[0] != -1 && PyArray_DIM(Ax, 0) != PyArray_DIM(Ax_idx, 0)){
+				PySys_WriteStdout("Error in Ax and Ax_idx sizes!\n");
+				return NULL;
+		}
+
+		// Update matrix P
+		if (Ax_idx_arr[0] == -1)
+				// Update all indices
+    		return_val = osqp_update_A((&workspace), Ax_arr, NULL, 0);
+		else
+				return_val = osqp_update_A((&workspace), Ax_arr, Ax_idx_arr, Ax_n);
+
+    // Free data
+    Py_DECREF(Ax_cont);
+    Py_DECREF(Ax_idx_cont);
+
+		if (return_val == 1) {
+				PySys_WriteStdout("Size of Ax and Ax_idx is too large!");
+				return NULL;
+		} else if (return_val < 0) {
+				PySys_WriteStdout("New KKT matrix is not quasidefinite!");
+				return NULL;
+		}
+
+    // Return None
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+// Update elements of matrix A
+static PyObject * OSQP_update_P_A(PyObject *self, PyObject *args) {
+		PyArrayObject *Px, *Px_cont, *Px_idx, *Px_idx_cont;
+		PyArrayObject *Ax, *Ax_cont, *Ax_idx, *Ax_idx_cont;
+		c_float * Px_arr, * Ax_arr;
+		c_int * Px_idx_arr, * Ax_idx_arr;
+		c_int Px_n, Ax_n;
+		c_int return_val;
+		int float_type = get_float_type();
+		int int_type = get_int_type();
+
+		#ifdef DLONG
+		static char * argparse_string = "O!O!lO!O!l";
+		#else
+		static char * argparse_string = "O!O!iO!O!i";
+		#endif
+
+		// Parse arguments
+		if( !PyArg_ParseTuple(args, argparse_string,
+													&PyArray_Type, &Px,
+													&PyArray_Type, &Px_idx,
+													&Px_n,
+													&PyArray_Type, &Ax,
+													&PyArray_Type, &Ax_idx,
+													&Ax_n)) {
+						return NULL;
+		}
+
+		// Get contiguous data structure
+		Px_cont = get_contiguous(Px, float_type);
+		Px_idx_cont = get_contiguous(Px_idx, int_type);
+		Ax_cont = get_contiguous(Ax, float_type);
+		Ax_idx_cont = get_contiguous(Ax_idx, int_type);
+
+		// Copy array into c_float and c_int arrays
+		Px_arr = (c_float *)PyArray_DATA(Px_cont);
+		Px_idx_arr = (c_int *)PyArray_DATA(Px_idx_cont);
+		Ax_arr = (c_float *)PyArray_DATA(Ax_cont);
+		Ax_idx_arr = (c_int *)PyArray_DATA(Ax_idx_cont);
+
+		// Check dimension
+		if (Px_idx_arr[0] != -1 && PyArray_DIM(Px, 0) != PyArray_DIM(Px_idx, 0)){
+				PySys_WriteStdout("Error in Px and Px_idx sizes!\n");
+				return NULL;
+		}
+		if (Ax_idx_arr[0] != -1 && PyArray_DIM(Ax, 0) != PyArray_DIM(Ax_idx, 0)){
+				PySys_WriteStdout("Error in Ax and Ax_idx sizes!\n");
+				return NULL;
+		}
+
+		// Update matrices P and A
+		if (Px_idx_arr[0] == -1 && Ax_idx_arr[0] == -1)
+    		return_val = osqp_update_P_A((&workspace), Px_arr, NULL, 0, Ax_arr, NULL, 0);
+		else if (Px_idx_arr[0] == -1)
+				return_val = osqp_update_P_A((&workspace), Px_arr, NULL, 0, Ax_arr, Ax_idx_arr, Ax_n);
+		else if (Ax_idx_arr[0] == -1)
+				return_val = osqp_update_P_A((&workspace), Px_arr, Px_idx_arr, Px_n, Ax_arr, NULL, 0);
+		else
+				return_val = osqp_update_P_A((&workspace), Px_arr, Px_idx_arr, Px_n, Ax_arr, Ax_idx_arr, Ax_n);
+
+    // Free data
+    Py_DECREF(Px_cont);
+    Py_DECREF(Px_idx_cont);
+    Py_DECREF(Ax_cont);
+    Py_DECREF(Ax_idx_cont);
+
+		if (return_val == 1) {
+				PySys_WriteStdout("Size of Px and Px_idx is too large! Px_n = %d", (int)Px_n);
+				return NULL;
+		} else if (return_val == 2) {
+				PySys_WriteStdout("Size of Ax and Ax_idx is too large!");
+				return NULL;
+		} else if (return_val < 0) {
+				PySys_WriteStdout("New KKT matrix is not quasidefinite!");
+				return NULL;
+		}
+
+    // Return None
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+#endif	// end EMBEDDED
 
 
 static PyMethodDef PYTHON_EXT_NAME_methods[] = {
-        {"solve", (PyCFunction)OSQP_solve, METH_NOARGS, "Solve QP"},
-        {"update_lin_cost", (PyCFunction)OSQP_update_lin_cost, METH_VARARGS, "Update linear cost"},
-        {"update_lower_bound", (PyCFunction)OSQP_update_lower_bound, METH_VARARGS, "Update lower bound"},
-        {"update_upper_bound", (PyCFunction)OSQP_update_upper_bound, METH_VARARGS, "Update upper bound"},
-        {"update_bounds", (PyCFunction)OSQP_update_bounds, METH_VARARGS, "Update solver bounds"},
-        {NULL, NULL, 0, NULL}
+    {"solve", (PyCFunction)OSQP_solve, METH_NOARGS, "Solve QP"},
+    {"update_lin_cost", (PyCFunction)OSQP_update_lin_cost, METH_VARARGS, "Update linear cost"},
+    {"update_lower_bound", (PyCFunction)OSQP_update_lower_bound, METH_VARARGS, "Update lower bound"},
+    {"update_upper_bound", (PyCFunction)OSQP_update_upper_bound, METH_VARARGS, "Update upper bound"},
+		{"update_bounds", (PyCFunction)OSQP_update_bounds, METH_VARARGS, "Update bounds"},
+		#if EMBEDDED != 1
+		{"update_P", (PyCFunction)OSQP_update_P, METH_VARARGS, "Update matrix P"},
+		{"update_A", (PyCFunction)OSQP_update_A, METH_VARARGS, "Update matrix A"},
+		{"update_P_A", (PyCFunction)OSQP_update_P_A, METH_VARARGS, "Update matrices P and A"},
+		#endif
+		{NULL, NULL, 0, NULL}
 };
 
 
@@ -425,14 +658,14 @@ static PyMethodDef PYTHON_EXT_NAME_methods[] = {
 /* Module initialization for Python 3*/
  #if PY_MAJOR_VERSION >= 3
 static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT, "PYTHON_EXT_NAME",    /* m_name */
-        "Embedded OSQP solver",             /* m_doc */
-        -1,                                 /* m_size */
-        PYTHON_EXT_NAME_methods,                     /* m_methods */
-        NULL,                               /* m_reload */
-        NULL,                               /* m_traverse */
-        NULL,                               /* m_clear */
-        NULL,                               /* m_free */
+    PyModuleDef_HEAD_INIT, "PYTHON_EXT_NAME",    /* m_name */
+    "Embedded OSQP solver",             /* m_doc */
+    -1,                                 /* m_size */
+    PYTHON_EXT_NAME_methods,                     /* m_methods */
+    NULL,                               /* m_reload */
+    NULL,                               /* m_traverse */
+    NULL,                               /* m_clear */
+    NULL,                               /* m_free */
 };
  #endif
 
@@ -440,9 +673,9 @@ static struct PyModuleDef moduledef = {
 
 static PyObject * moduleinit(void){
 
-        PyObject *m;
+		PyObject *m;
 
-        // Initialize module (no methods. all inside OSQP object)
+    // Initialize module (no methods. all inside OSQP object)
     #if PY_MAJOR_VERSION >= 3
         m = PyModule_Create(&moduledef);
     #else

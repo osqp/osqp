@@ -198,7 +198,7 @@ void mat_postmult_diag(csc *A, const c_float *d){
     }
 }
 
-#ifndef EMBEDDED
+#if EMBEDDED != 1
 /* Elementwise square matrix M
 used in matrix equilibration
 */
@@ -221,8 +221,11 @@ void mat_ew_abs(csc * A){
         A->x[i] = c_absval(A->x[i]);
     }
 }
+#endif // end embedded
 
 
+
+#ifndef EMBEDDED
 /**
  * Trace of matrix M in cdc format
  * @param  M Input matrix
