@@ -1,5 +1,5 @@
-Welcome to the OSQP solver documentation
-========================================
+OSQP solver documentation
+==========================
 **Join our** `forum <https://groups.google.com/forum/#!forum/osqp>`_ **for any questions related to the solver!**
 
 The OSQP (Operator Splitting Quadratic Program) solver is a numerical optimization package for solving convex quadratic programs in the form

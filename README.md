@@ -36,7 +36,7 @@ where `x in R^n` is the optimization variable. The objective function is defined
 
 
 
-### Credits
+## Credits
 
 The following people have been involved in the development of OSQP:
 -  [Bartolomeo Stellato](https://bstellato.github.io/) (main development)
