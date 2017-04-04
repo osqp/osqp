@@ -1,5 +1,6 @@
 Welcome to OSQP's documentation
 ================================
+**Join our** `forum <https://groups.google.com/forum/#!forum/osqp>`_ **for any questions related to the solver!**
 
 The OSQP (Operator Splitting Quadratic Program) solver is a numerical optimization package for solving convex quadratic programs in the form
 
@@ -13,7 +14,18 @@ The OSQP (Operator Splitting Quadratic Program) solver is a numerical optimizati
 where :math:`x\in\mathbf{R}^{n}` is the optimization variable. The objective function is defined by a positive semidefinite matrix :math:`P \in \mathbf{S}^{n}_{+}` and vector :math:`q\in \mathbf{R}^{n}`. The linear constraints are defined by matrix :math:`A\in\mathbf{R}^{m \times n}` and vectors :math:`l \in \mathbf{R}^{m} \cup \{-\infty\}^{m}`, :math:`u \in \mathbf{R}^{m} \cup \{+\infty\}^{m}`.
 
 
+Features
+--------
+* Bla
+* Bla
+
+
 OSQP is written in C and can be used in C, C++, Python and Matlab.
+
+
+
+
+
 
 
 .. todo::

@@ -1,0 +1,77 @@
+/* Link Styling */
+a,a:visited, a:focus {
+	color: rgb(46, 118, 176);  /* Light blue*/
+	text-decoration: none;
+}
+a:hover, a:active {
+	color: rgb(0, 32, 72);  /*  blue*/
+	text-decoration: none;
+}
+
+/* Make bar oxford blue*/
+.wy-side-nav-search {
+    background-color: rgb(0, 32, 72); /* Oxford blue */
+}
+
+.wy-nav-side {
+    background: rgb(0, 32, 72); /* Oxford blue */
+}
+
+
+.wy-nav-content-wrap, .wy-menu li.current > a  {
+    background-color: #fff;
+}
+
+@media screen and (min-width: 1400px) {
+    .wy-nav-content-wrap {
+        /*background-color: rgba(0, 0, 0, 0.0470588);*/
+        background-color: rgb(245, 245, 245); /* Light grey */
+    }
+
+    .wy-nav-content {
+        background-color: #fff;
+    }
+}
+
+.wy-nav-top {
+    background-color: rgb(0, 32, 72); /* Oxford blue */
+}
+
+
+
+/* Change color of top left name */
+.wy-side-nav-search>a{
+    color: rgb(255, 255, 255); /* White text*/
+}
+.wy-side-nav-search>div.version{
+    color: rgb(245, 245, 245); /* Light grey text*/
+}
+.wy-nav-top a{
+    color: rgb(255, 255, 255); /* White text*/
+}
+
+
+
+/* Navigation bar text */
+.wy-menu-vertical header, .wy-menu-vertical p.caption {
+    color: rgb(255, 255, 255); /* White text*/
+}
+
+.wy-menu-vertical a{
+    color: rgb(178, 188, 200); /* Grey */
+}
+
+.wy-menu-vertical a:hover{
+    background: rgb(46, 118, 176);
+    color: rgb(255, 255, 255); /* White text*/
+}
+
+
+
+
+
+
+/* Change text color for tt literal */
+.rst-content tt.literal, .rst-content tt.literal, .rst-content code.literal{
+    color: rgb(46, 118, 176);  /* Light blue*/
+}
