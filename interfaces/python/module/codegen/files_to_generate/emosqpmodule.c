@@ -7,7 +7,6 @@
 #include "numpy/npy_math.h"        // For infinity values
 #include "osqp.h"                  // OSQP API
 
-
 #include "workspace.h"             // Include code-generated OSQP workspace
 
 
