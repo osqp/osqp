@@ -104,8 +104,9 @@ html_favicon = "_static/img/favicon.ico"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-# Load custom theme
-html_style = 'css/osqp_theme.css'
+html_context = {
+    'css_files': ['_static/css/osqp_theme.css'],
+}
 
 
 # -- Options for HTMLHelp output ------------------------------------------
