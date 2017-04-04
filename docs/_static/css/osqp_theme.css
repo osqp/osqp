@@ -44,6 +44,9 @@ a:hover, a:active {
     background-color: rgb(0, 32, 72); /* Oxford blue */
 }
 
+.rst-versions{
+    border-top:solid 10px rgb(0, 32, 72); /* Oxford blue */
+}
 
 
 /* Change color of top left name */
