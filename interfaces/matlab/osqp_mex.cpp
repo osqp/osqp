@@ -56,14 +56,24 @@ const char* OSQP_DATA_FIELDS[] = {"n",  //c_int
                                  "l",   //c_float*
                                  "u"};  //c_float*
 
-const char* PRIV_FIELDS[] = {"L",       //c_int
-                             "Dinv",    //c_int
-                             "P",       //c_int
-                             "bp"};     //c_float*
+const char* PRIV_FIELDS[] = {"L",           //csc
+                             "Dinv",        //c_float*
+                             "P",           //c_int*
+                             "bp",          //c_float*
+                             "Pdiag_idx",   //c_int*
+                             "Pdiag_n",     //c_int
+                             "KKT",         //csc
+                             "PtoKKT",      //c_int*
+                             "AtoKKT",      //c_int*
+                             "Lnz",         //c_int*
+                             "Y",           //c_float*
+                             "Pattern",     //c_int*
+                             "Flag",        //c_int*
+                             "Parent"};     //c_int*
 
-const char* OSQP_SCALING_FIELDS[] = {"D",       //c_int
-                                     "E",       //c_int
-                                     "Dinv",    //c_int
+const char* OSQP_SCALING_FIELDS[] = {"D",       //c_float*
+                                     "E",       //c_float*
+                                     "Dinv",    //c_float*
                                      "Einv"};   //c_float*
 
 const char* OSQP_WORKSPACE_FIELDS[] = {"data",
@@ -94,7 +104,7 @@ mxArray*  copyInfoToMxStruct(OSQPInfo*);
 mxArray*  copySettingsToMxStruct(OSQPSettings*);
 mxArray*  copyCscMatrixToMxStruct(csc*);
 mxArray*  copyDataToMxStruct(OSQPData*);
-mxArray*  copyPrivToMxStruct(Priv*);
+mxArray*  copyPrivToMxStruct(Priv*, OSQPData*);
 mxArray*  copyScalingToMxStruct(OSQPScaling*, int n, int m);
 mxArray*  copyWorkToMxStruct(OSQPWorkspace*);
 
@@ -760,31 +770,64 @@ mxArray* copyDataToMxStruct(OSQPData* data){
   return mxPtr;
 }
 
-mxArray* copyPrivToMxStruct(Priv* priv){
+mxArray* copyPrivToMxStruct(Priv* priv, OSQPData* data){
 
   int nfields  = sizeof(PRIV_FIELDS) / sizeof(PRIV_FIELDS[0]);
   mxArray* mxPtr = mxCreateStructMatrix(1,1,nfields,PRIV_FIELDS);
 
-  // Create vectors
+  // Dimensions
   int n = priv->L->n;
-  mxArray* Dinv = mxCreateDoubleMatrix(n,1,mxREAL);
-  mxArray* P    = mxCreateDoubleMatrix(n,1,mxREAL);
-  mxArray* bp   = mxCreateDoubleMatrix(n,1,mxREAL);
+  int Pdiag_n = priv->Pdiag_n;
+  int Pnzmax = data->P->p[data->P->n];
+  int Anzmax = data->A->p[data->A->n];
+  int m_plus_n = data->m + data->n;
+  
+  // Create vectors
+  mxArray* Dinv      = mxCreateDoubleMatrix(n,1,mxREAL);
+  mxArray* P         = mxCreateDoubleMatrix(n,1,mxREAL);
+  mxArray* bp        = mxCreateDoubleMatrix(n,1,mxREAL);
+  mxArray* Pdiag_idx = mxCreateDoubleMatrix(Pdiag_n,1,mxREAL);
+  mxArray* PtoKKT    = mxCreateDoubleMatrix(Pnzmax,1,mxREAL);
+  mxArray* AtoKKT    = mxCreateDoubleMatrix(Anzmax,1,mxREAL);
+  mxArray* Lnz       = mxCreateDoubleMatrix(m_plus_n,1,mxREAL);
+  mxArray* Y         = mxCreateDoubleMatrix(m_plus_n,1,mxREAL);
+  mxArray* Pattern	 = mxCreateDoubleMatrix(m_plus_n,1,mxREAL);
+  mxArray* Flag      = mxCreateDoubleMatrix(m_plus_n,1,mxREAL);
+  mxArray* Parent    = mxCreateDoubleMatrix(m_plus_n,1,mxREAL);
 
   // Populate vectors
   castToDoubleArr(priv->Dinv, mxGetPr(Dinv), n);
   castCintToDoubleArr(priv->P, mxGetPr(P), n);
   castToDoubleArr(priv->bp, mxGetPr(bp), n);
+  castCintToDoubleArr(priv->Pdiag_idx, mxGetPr(Pdiag_idx), Pdiag_n);
+  castCintToDoubleArr(priv->PtoKKT, mxGetPr(PtoKKT), Pnzmax);
+  castCintToDoubleArr(priv->AtoKKT, mxGetPr(AtoKKT), Anzmax);
+  castCintToDoubleArr(priv->Lnz, mxGetPr(Lnz), m_plus_n);
+  castToDoubleArr(priv->Y, mxGetPr(Y), m_plus_n);
+  castCintToDoubleArr(priv->Pattern, mxGetPr(Pattern), m_plus_n);
+  castCintToDoubleArr(priv->Flag, mxGetPr(Flag), m_plus_n);
+  castCintToDoubleArr(priv->Parent, mxGetPr(Parent), m_plus_n);
 
   // Create matrices
-  mxArray* L = copyCscMatrixToMxStruct(priv->L);
+  mxArray* L   = copyCscMatrixToMxStruct(priv->L);
+  mxArray* KKT = copyCscMatrixToMxStruct(priv->KKT);
 
   //map the PRIV fields one at a time into mxArrays
-  mxSetField(mxPtr, 0, "L",    L);
-  mxSetField(mxPtr, 0, "Dinv", Dinv);
-  mxSetField(mxPtr, 0, "P",    P);
-  mxSetField(mxPtr, 0, "bp",   bp);
-
+  mxSetField(mxPtr, 0, "L",         L);
+  mxSetField(mxPtr, 0, "Dinv",      Dinv);
+  mxSetField(mxPtr, 0, "P",         P);
+  mxSetField(mxPtr, 0, "bp",        bp);
+  mxSetField(mxPtr, 0, "Pdiag_idx", Pdiag_idx);
+  mxSetField(mxPtr, 0, "Pdiag_n",   mxCreateDoubleScalar(priv->Pdiag_n));
+  mxSetField(mxPtr, 0, "KKT",       KKT);
+  mxSetField(mxPtr, 0, "PtoKKT",    PtoKKT);
+  mxSetField(mxPtr, 0, "AtoKKT",    AtoKKT);
+  mxSetField(mxPtr, 0, "Lnz",       Lnz);
+  mxSetField(mxPtr, 0, "Y",         Y);
+  mxSetField(mxPtr, 0, "Pattern",   Pattern);
+  mxSetField(mxPtr, 0, "Flag",      Flag);
+  mxSetField(mxPtr, 0, "Parent",	Parent);
+  
   return mxPtr;
 }
 
@@ -821,7 +864,7 @@ mxArray*  copyWorkToMxStruct(OSQPWorkspace* work){
 
   // Create workspace substructures
   mxArray* data     = copyDataToMxStruct(work->data);
-  mxArray* priv     = copyPrivToMxStruct(work->priv);
+  mxArray* priv     = copyPrivToMxStruct(work->priv, work->data);
   mxArray* scaling  = copyScalingToMxStruct(work->scaling, work->data->n, work->data->m);
   mxArray* settings = copySettingsToMxStruct(work->settings);
 

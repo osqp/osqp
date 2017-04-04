@@ -394,10 +394,16 @@ classdef osqp < handle
 
             % Import OSQP path
             [osqp_path,~,~] = fileparts(which('osqp.m'));
+            
+            % Add codegen directory to path
+            addpath(fullfile(osqp_path, 'codegen'));
 
             % Path of osqp module
             cg_dir = fullfile(osqp_path, 'codegen');
             files_to_generate_path = fullfile(cg_dir, 'files_to_generate');
+            
+            % Get workspace structure
+            work = osqp_mex('get_workspace', this.objectHandle);
 
             % Make target directory
             fprintf('Creating target directories...\t\t\t\t\t');
@@ -432,15 +438,22 @@ classdef osqp < handle
             % Copy example.c
             copyfile(fullfile(files_to_generate_path, 'example.c'), target_src_dir);
 
-            % Copy CMakelists.txt
-            copyfile(fullfile(files_to_generate_path, 'CMakeLists.txt'), target_dir);
+            % Render CMakeLists.txt
+            fidi = fopen(fullfile(files_to_generate_path, 'CMakeLists.txt'),'r');
+            fido = fopen(fullfile(target_dir, 'CMakeLists.txt'),'w');
+            while ~feof(fidi)
+                l = fgetl(fidi);   % read line
+                % Replace EMBEDDED_FLAG in CMakeLists.txt by a numerical value
+                newl = strrep(l, 'EMBEDDED_FLAG', num2str(embedded));
+                fprintf(fido, '%s\n', newl);
+            end
+            fclose(fidi);
+            fclose(fido);
 
-            % Write workspace in header file
-            fprintf('Generating workspace.h...\t\t\t\t\t\t');
-            work = osqp_mex('get_workspace', this.objectHandle);
+            % Render workspace.h
             work_hfile = fullfile(target_include_dir, 'workspace.h');
-            addpath(fullfile(osqp_path, 'codegen'));
-            render_workspace(work, work_hfile);
+            fprintf('Generating workspace.h...\t\t\t\t\t\t');
+            render_workspace(work, work_hfile, embedded);
             fprintf('[done]\n');
 
             % Create project
