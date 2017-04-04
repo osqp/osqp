@@ -207,10 +207,6 @@ static char * test_basic_qp_early_terminate()
     mu_assert("Basic QP test solve: Error in objective value!",
               c_absval(work->info->obj_val - sols_data->obj_value_test) < TESTS_TOL);
 
-
-    // DEBUG: Make tests fail
-    mu_assert("Basic QP test update: BEBUG FAKE ERROR!", 1 != 1);
-
     // Clean workspace
     osqp_cleanup(work);
 
