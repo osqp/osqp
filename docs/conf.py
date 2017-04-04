@@ -34,7 +34,7 @@ __version__ = "0.0.0"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.mathjax', 'sphinx.ext.todo']
+extensions = ['sphinx.ext.todo', 'sphinx.ext.imgmath', 'breathe']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -167,6 +167,12 @@ man_pages = [
     (master_doc, 'OSQP', 'OSQP Documentation',
      [author], 1)
 ]
+
+# -- Options for breathe ---------------------------------------
+
+breathe_projects = { "osqp": "doxygen_out/xml/" }
+breathe_default_project = "osqp"
+
 
 
 # -- Options for Texinfo output -------------------------------------------
