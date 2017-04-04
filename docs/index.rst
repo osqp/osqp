@@ -26,7 +26,7 @@ Features
         The algorithm is absolutely division free after the setup and it requires no assumptions on problem data (the problem only needs to be convex). It just works!
 
     Detects primal / dual infeasible problems
-        When the problem is primal or dual infeasible, OSQP detects it. It is the first-order solver based on first order methods able to do so without homogeneous self-dual embedding.
+        When the problem is primal or dual infeasible, OSQP detects it. It is the first available QP solver based on first-order methods able to do so.
 
     Embeddable
         It has an easy interface to generate customized embeddable C code with no memory manager required.
