@@ -139,6 +139,106 @@ classdef codegen_mat_tests < matlab.unittest.TestCase
 
         end
         
+        function test_update_P_A_indP_indA(testCase)
+            % Update matrix P
+            Pnew = speye(2);
+            Pnew_triu = triu(Pnew);
+            [~,~,Px] = find(Pnew_triu(:));
+            Px_idx = (1:length(Px))'-1;
+            Anew = sparse([-1. 0; 0 -1; -2 -2; 2  5; 3  4]);
+            [~,~,Ax] = find(Anew(:));
+            Ax_idx = (1:length(Ax))'-1;
+            emosqp('update_P_A', Px, Px_idx, length(Px), Ax, Ax_idx, length(Ax));
+            
+            % Solve with OSQP
+            [x, y, ~, ~, ~] = emosqp('solve');
+
+            % Check if they are close
+            testCase.verifyEqual(x, [4.25; 3.25], 'AbsTol',testCase.tol)
+            testCase.verifyEqual(y, [0; 0; 3.625; 0; 0], 'AbsTol',testCase.tol)
+            
+            % Update matrix P to the original value
+            P_triu = triu(testCase.P);
+            [~,~,Px] = find(P_triu(:));
+            [~,~,Ax] = find(testCase.A(:));
+            emosqp('update_P_A', Px, [], length(Px), Ax, [], length(Ax));
+
+        end
+        
+        function test_update_P_A_indP(testCase)
+            % Update matrix P
+            Pnew = speye(2);
+            Pnew_triu = triu(Pnew);
+            [~,~,Px] = find(Pnew_triu(:));
+            Px_idx = (1:length(Px))'-1;
+            Anew = sparse([-1. 0; 0 -1; -2 -2; 2  5; 3  4]);
+            [~,~,Ax] = find(Anew(:));
+            emosqp('update_P_A', Px, Px_idx, length(Px), Ax, [], length(Ax));
+            
+            % Solve with OSQP
+            [x, y, ~, ~, ~] = emosqp('solve');
+
+            % Check if they are close
+            testCase.verifyEqual(x, [4.25; 3.25], 'AbsTol',testCase.tol)
+            testCase.verifyEqual(y, [0; 0; 3.625; 0; 0], 'AbsTol',testCase.tol)
+            
+            % Update matrix P to the original value
+            P_triu = triu(testCase.P);
+            [~,~,Px] = find(P_triu(:));
+            [~,~,Ax] = find(testCase.A(:));
+            emosqp('update_P_A', Px, [], length(Px), Ax, [], length(Ax));
+
+        end
+        
+        function test_update_P_A_indA(testCase)
+            % Update matrix P
+            Pnew = speye(2);
+            Pnew_triu = triu(Pnew);
+            [~,~,Px] = find(Pnew_triu(:));
+            Anew = sparse([-1. 0; 0 -1; -2 -2; 2  5; 3  4]);
+            [~,~,Ax] = find(Anew(:));
+            Ax_idx = (1:length(Ax))'-1;
+            emosqp('update_P_A', Px, [], length(Px), Ax, Ax_idx, length(Ax));
+            
+            % Solve with OSQP
+            [x, y, ~, ~, ~] = emosqp('solve');
+
+            % Check if they are close
+            testCase.verifyEqual(x, [4.25; 3.25], 'AbsTol',testCase.tol)
+            testCase.verifyEqual(y, [0; 0; 3.625; 0; 0], 'AbsTol',testCase.tol)
+            
+            % Update matrix P to the original value
+            P_triu = triu(testCase.P);
+            [~,~,Px] = find(P_triu(:));
+            [~,~,Ax] = find(testCase.A(:));
+            emosqp('update_P_A', Px, [], length(Px), Ax, [], length(Ax));
+
+        end
+        
+        function test_update_P_A_allind(testCase)
+            % Update matrix P
+            Pnew = speye(2);
+            Pnew_triu = triu(Pnew);
+            [~,~,Px] = find(Pnew_triu(:));
+            Anew = sparse([-1. 0; 0 -1; -2 -2; 2  5; 3  4]);
+            [~,~,Ax] = find(Anew(:));
+            emosqp('update_P_A', Px, [], length(Px), Ax, [], length(Ax));
+            
+            % Solve with OSQP
+            [x, y, ~, ~, ~] = emosqp('solve');
+
+            % Check if they are close
+            testCase.verifyEqual(x, [4.25; 3.25], 'AbsTol',testCase.tol)
+            testCase.verifyEqual(y, [0; 0; 3.625; 0; 0], 'AbsTol',testCase.tol)
+            
+            % Update matrix P to the original value
+            P_triu = triu(testCase.P);
+            [~,~,Px] = find(P_triu(:));
+            [~,~,Ax] = find(testCase.A(:));
+            emosqp('update_P_A', Px, [], length(Px), Ax, [], length(Ax));
+
+        end
+        
     end
 
 end

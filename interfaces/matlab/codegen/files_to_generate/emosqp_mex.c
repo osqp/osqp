@@ -359,6 +359,49 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
         return;
     }
+    
+    // update matrices P and A
+    if (!strcmp("update_P_A", cmd)) {
+
+        // Fill vectors
+        const mxArray *Px = prhs[1];
+        const mxArray *Px_idx = prhs[2];
+        const mxArray *Ax = prhs[4];
+        const mxArray *Ax_idx = prhs[5];
+        
+        int Px_n = mxGetScalar(prhs[3]);
+        int Ax_n = mxGetScalar(prhs[6]);
+
+        // Copy vectors to ensure they are cast as c_float and c_int
+        c_float *Px_vec, *Ax_vec;
+        c_int *Px_idx_vec = NULL;
+        c_int *Ax_idx_vec = NULL;
+        if(!mxIsEmpty(Px)){
+            Px_vec = copyToCfloatVector(mxGetPr(Px), Px_n);
+        }
+        if(!mxIsEmpty(Px_idx)){
+            Px_idx_vec = copyDoubleToCintVector(mxGetPr(Px_idx), Px_n);
+        }
+        if(!mxIsEmpty(Ax)){
+            Ax_vec = copyToCfloatVector(mxGetPr(Ax), Ax_n);
+        }
+        if(!mxIsEmpty(Ax_idx)){
+            Ax_idx_vec = copyDoubleToCintVector(mxGetPr(Ax_idx), Ax_n);
+        }
+
+        if(!mxIsEmpty(Ax) && !mxIsEmpty(Px)){
+            osqp_update_P_A((&workspace), Px_vec, Px_idx_vec, Px_n,
+                                          Ax_vec, Ax_idx_vec, Ax_n);
+        }
+
+        // Free
+        if(!mxIsEmpty(Px)) mxFree(Px_vec);
+        if(!mxIsEmpty(Px_idx)) mxFree(Px_idx_vec);
+        if(!mxIsEmpty(Ax)) mxFree(Ax_vec);
+        if(!mxIsEmpty(Ax_idx)) mxFree(Ax_idx_vec);
+
+        return;
+    }
     #endif  // end EMBEDDED
     
     // Got here, so command not recognized
