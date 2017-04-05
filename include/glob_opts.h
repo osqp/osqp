@@ -5,7 +5,6 @@
 extern "C" {
 #endif
 
-#include <math.h>
 
 
 // We do not need alloc functions if EMBEDDED is enabled
@@ -65,6 +64,7 @@ extern "C" {
 
 #endif  //end EMBEDDED
 
+#include <math.h>
 
 
 /* Use customized number representation -----------------------------------   */
