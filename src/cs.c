@@ -5,26 +5,20 @@
 #include "cs.h"
 
 
-/* wrapper for malloc */
 static void *csc_malloc(c_int n, c_int size) {
         return (c_malloc(n * size));
 }
 
-/* wrapper for calloc */
 static void *csc_calloc(c_int n, c_int size) {
         return (c_calloc(n, size));
 }
 
-/* wrapper for free */
 static void *csc_free(void *p) {
         if (p) c_free(p); /* free p if it is not already SCS_NULL */
         return (OSQP_NULL); /* return OSQP_NULL to simplify the use of csc_free */
 }
 
 
-/* Create Compressed-Column-Sparse matrix from existing arrays
-   (no MALLOC to create inner arrays x, i, p)
- */
 csc* csc_matrix(c_int m, c_int n, c_int nzmax, c_float* x, c_int* i, c_int* p)
 {
         csc* M = (csc *)c_malloc(sizeof(csc));
@@ -38,15 +32,7 @@ csc* csc_matrix(c_int m, c_int n, c_int nzmax, c_float* x, c_int* i, c_int* p)
         return M;
 }
 
-/* Create uninitialized CSC matrix atricture
-   (uses MALLOC to create inner arrays x, i, p)
-   Arguments
-   ---------
-   m,n: dimensions
-   nzmax: max number of nonzero elements
-   values: 1/0 allocate values
-   triplet: 1/0 allocate matrix for CSC or Triplet format
- */
+
 csc *csc_spalloc(c_int m, c_int n, c_int nzmax, c_int values, c_int triplet) {
         csc *A = csc_calloc(1, sizeof(csc)); /* allocate the csc struct */
         if (!A) return (OSQP_NULL); /* out of memory */
@@ -61,9 +47,6 @@ csc *csc_spalloc(c_int m, c_int n, c_int nzmax, c_int values, c_int triplet) {
 }
 
 
-/* Free sparse matrix
-   (uses FREE to free inner arrays x, i, p)
- */
 csc *csc_spfree(csc *A) {
         if (!A) return (OSQP_NULL); /* do nothing if A already SCS_NULL */
         csc_free(A->p);
@@ -73,16 +56,6 @@ csc *csc_spfree(csc *A) {
 }
 
 
-/**
- * C = compressed-column CSC from matrix T in triplet form
- *
- * TtoC stores the vector of indeces from T to C
- *  -> C[TtoC[i]] = T[i]
- *
- * @param  T    matrix in triplet format
- * @param  TtoC vector of indeces from triplet to CSC format
- * @return      matrix in CSC format
- */
 csc *triplet_to_csc(const csc *T, c_int * TtoC) {
         c_int m, n, nz, p, k, *Cp, *Ci, *w, *Ti, *Tj;
         c_float *Cx, *Tx;
@@ -112,8 +85,6 @@ csc *triplet_to_csc(const csc *T, c_int * TtoC) {
         return (csc_done(C, w, OSQP_NULL, 1)); /* success; free w and return C */
 }
 
-
-/* p [0..n] = cumulative sum of c [0..n-1], and then copy p [0..n-1] into c */
 c_int csc_cumsum(c_int *p, c_int *c, c_int n){
         c_int i, nz = 0;
         if (!p || !c) return (-1);  /* check inputs */
@@ -127,9 +98,6 @@ c_int csc_cumsum(c_int *p, c_int *c, c_int n){
         return (nz);       /* return sum (c [0..n-1]) */
 }
 
-/* Compute inverse of permuation matrix stored in the vector p.
- * The computed inverse is also stored in a vector.
- */
 c_int *csc_pinv(c_int const *p, c_int n) {
     c_int k, *pinv;
     if (!p)
@@ -143,15 +111,6 @@ c_int *csc_pinv(c_int const *p, c_int n) {
 }
 
 
-/**
- * C = A(p,p)= PAP' where A and C are symmetric the upper part stored;
- *  N.B. pinv not p!
- * @param  A      Original matrix (upper-triangular)
- * @param  pinv   Inverse of permutation vector
- * @param  AtoC   Mapping from indeces of A-x to C->x
- * @param  values Are values of A allocated?
- * @return        New matrix (allocated)
- */
 csc *csc_symperm(const csc *A, const c_int *pinv, c_int * AtoC, c_int values) {
     c_int i, j, p, q, i2, j2, n, *Ap, *Ai, *Cp, *Ci, *w;
     c_float *Cx, *Ax;
@@ -199,10 +158,6 @@ csc *csc_symperm(const csc *A, const c_int *pinv, c_int * AtoC, c_int values) {
 }
 
 
-/**
- *  Copy sparse CSC matrix A to output.
- *  output is allocated by this function (uses MALLOC)
- */
 csc * copy_csc_mat(const csc* A){
         csc * B = csc_spalloc(A->m, A->n, A->p[A->n], 1, 0);
 
@@ -213,9 +168,7 @@ csc * copy_csc_mat(const csc* A){
         return B;
 }
 
-/**
- *  Copy sparse CSC matrix A to B (B is preallocated, NO MALOC)
- */
+
 void prea_copy_csc_mat(const csc* A, csc* B){
 
     prea_int_vec_copy(A->p, B->p, A->n+1);
@@ -226,7 +179,6 @@ void prea_copy_csc_mat(const csc* A, csc* B){
 }
 
 
-/* free workspace and return a sparse matrix result */
 csc * csc_done(csc *C, void *w, void *x, c_int ok){
         csc_free(w);        /* free workspace */
         csc_free(x);
@@ -235,12 +187,6 @@ csc * csc_done(csc *C, void *w, void *x, c_int ok){
 
 
 
-/**
- * Convert square CSC matrix into upper triangular one
- *
- * @param  M         Matrix to be converted
- * @return           Upper triangular matrix in CSC format
- */
 csc * csc_to_triu(csc * M){
     csc * M_trip;  // Matrix in triplet format
     csc * M_triu;  // Resulting upper triangular matrix

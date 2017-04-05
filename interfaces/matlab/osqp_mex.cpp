@@ -4,6 +4,19 @@
 #include "osqp.h"
 #include "private.h"
 
+// Interrupt handler
+extern "C" bool utIsInterruptPending(void);
+extern "C" bool utSetInterruptEnabled(bool);
+
+int IsInterruptPending(void){
+    return (int)utIsInterruptPending();
+}
+
+int SetInterruptEnabled(int x){
+    return (int)utSetInterruptEnabled((bool)x);
+}
+
+
 // all of the OSQP_INFO fieldnames as strings
 const char* OSQP_INFO_FIELDS[] = {"iter",         //c_int
                                 "status" ,        //char*
@@ -781,7 +794,7 @@ mxArray* copyPrivToMxStruct(Priv* priv, OSQPData* data){
   int Pnzmax = data->P->p[data->P->n];
   int Anzmax = data->A->p[data->A->n];
   int m_plus_n = data->m + data->n;
-  
+
   // Create vectors
   mxArray* Dinv      = mxCreateDoubleMatrix(n,1,mxREAL);
   mxArray* P         = mxCreateDoubleMatrix(n,1,mxREAL);
@@ -827,7 +840,7 @@ mxArray* copyPrivToMxStruct(Priv* priv, OSQPData* data){
   mxSetField(mxPtr, 0, "Pattern",   Pattern);
   mxSetField(mxPtr, 0, "Flag",      Flag);
   mxSetField(mxPtr, 0, "Parent",	Parent);
-  
+
   return mxPtr;
 }
 

@@ -70,6 +70,17 @@ if (PROFILING)
     add_definitions(-DPROFILING)
 endif (PROFILING)
 
+# Is user interrupt enabled?
+option (CTRLC "Enable user interrupt (Ctrl-C)" ON)
+if (DEFINED EMBEDDED)
+    message(STATUS "Disabling user interrupt for embedded")
+    set(CTRLC OFF)
+endif()
+message(STATUS "User interrupt is ${CTRLC}")
+if (CTRLC)
+    add_definitions(-DCTRLC)
+endif (CTRLC)
+
 # Use floats instead of integers
 option (DFLOAT "Use float numbers instead of doubles" OFF)
 message(STATUS "Floats are ${DFLOAT}")
@@ -87,8 +98,10 @@ endif (DLONG)
 
 # Set Compiler flags
 # ----------------------------------------------
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -funroll-loops -O3")
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+
+
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g --coverage")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
 set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")      # Include math
 # Include real time library in linux
@@ -96,6 +109,10 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lrt")
 endif()
 
+
+# Set things for debug
+# ----------------------------------------------
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g --coverage")
 
 # Include header directory
 # ----------------------------------------------
@@ -109,6 +126,7 @@ if(NOT DEFINED EMBEDDED)
         osqp_src
         src/auxil.c
         src/cs.c
+        src/ctrlc.c
         src/kkt.c
         src/lin_alg.c
         src/osqp.c
@@ -123,6 +141,7 @@ if(NOT DEFINED EMBEDDED)
         include/auxil.h
         include/constants.h
         include/cs.h
+        include/ctrlc.h
         include/glob_opts.h
         include/kkt.h
         include/lin_alg.h
@@ -253,9 +272,9 @@ if (NOT PYTHON AND NOT MATLAB)
     # Create osqp shared library
     add_library (osqpdir SHARED ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_direct>)
 
-    # Create demo executable
+    # Create demo executable (linked to static library)
     add_executable (osqp_demo_direct ${PROJECT_SOURCE_DIR}/examples/osqp_demo_direct.c)
-    target_link_libraries (osqp_demo_direct osqpdir)
+    target_link_libraries (osqp_demo_direct osqpdirstatic)
 endif (NOT PYTHON AND NOT MATLAB)
 
 
@@ -278,6 +297,11 @@ if (UNITTESTS)
     IF(NOT PY_SCIPY)
         message( FATAL_ERROR "You need scipy python module installed to generate unittests. If you do not want to compile the unittests pass -DUNITTESTS=OFF to cmake." )
     ENDIF(NOT PY_SCIPY)
+
+    find_python_module(__future__ REQUIRED)
+    IF(NOT PY___FUTURE__)
+        message( FATAL_ERROR "You need future python module installed to generate unittests. If you do not want to compile the unittests pass -DUNITTESTS=OFF to cmake." )
+    ENDIF(NOT PY___FUTURE__)
 
     # Add test_headers and codegen_test_headers
     add_subdirectory(tests)

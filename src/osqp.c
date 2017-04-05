@@ -7,20 +7,7 @@
 
 #ifndef EMBEDDED
 
-/**
- * Initialize OSQP solver allocating memory.
- *
- * It also sets the linear system solver:
- * - direct solver: KKT matrix factorization is performed here
- *
- *
- * N.B. This is the only function that allocates dynamic memory. During code
- * generation it is going to be removed.
- *
- * @param  data         Problem data
- * @param  settings     Solver settings
- * @return              Solver workspace
- */
+
 OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     OSQPWorkspace * work; // Workspace
 
@@ -179,15 +166,6 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
 
 
 
-/**
- * Solve Quadratic Program
- *
- * Main ADMM iteration.
- * Iteration variables are the usual ADMM ones: x, z, u
- *
- * @param  work Workspace allocated
- * @return      Exitflag for errors
- */
 c_int osqp_solve(OSQPWorkspace * work){
     c_int exitflag = 0;
     c_int iter;
@@ -223,6 +201,11 @@ c_int osqp_solve(OSQPWorkspace * work){
     }
     #endif
 
+    #ifdef CTRLC
+    // initialize Ctrl-C support
+    startInterruptListener();
+    #endif
+
     // Initialize variables (cold start or warm start depending on settings)
     if (!work->settings->warm_start)
         cold_start(work);     // If not warm start -> set z, u to zero
@@ -248,6 +231,15 @@ c_int osqp_solve(OSQPWorkspace * work){
 
         /* End of ADMM Steps */
 
+        #ifdef CTRLC
+        // Check the interrupt signal
+        if (isInterrupted()) {
+            update_status(work->info, OSQP_SIGINT);
+            c_print("Solver interrupted\n");
+            endInterruptListener();
+            return 1;   // exitflag
+        }
+        #endif
 
         // Can we check for termination ?
         can_check_termination = work->settings->early_terminate &&
@@ -372,11 +364,7 @@ c_int osqp_solve(OSQPWorkspace * work){
 
 
 #ifndef EMBEDDED
-/**
- * Cleanup workspace
- * @param  work Workspace
- * @return      Exitflag for errors
- */
+
 c_int osqp_cleanup(OSQPWorkspace * work){
     c_int exitflag=0;
 
@@ -498,12 +486,7 @@ c_int osqp_cleanup(OSQPWorkspace * work){
  * Update problem data  *
  ************************/
 
-/**
- * Update linear cost in the problem
- * @param  work  Workspace
- * @param  q_new New linear cost
- * @return       Exitflag for errors and warnings
- */
+
 c_int osqp_update_lin_cost(OSQPWorkspace * work, c_float * q_new) {
 
     // Replace q by the new vector
@@ -520,13 +503,7 @@ c_int osqp_update_lin_cost(OSQPWorkspace * work, c_float * q_new) {
     return 0;
 }
 
-/**
- * Update lower and upper bounds in the problem constraints
- * @param  work   Workspace
- * @param  l_new New lower bound
- * @param  u_new New upper bound
- * @return        Exitflag: 1 if new lower bound is not <= than new upper bound
- */
+
 c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new) {
     c_int i;
 
@@ -556,12 +533,7 @@ c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new)
     return 0;
 }
 
-/**
- * Update lower bound in the problem constraints
- * @param  work   Workspace
- * @param  l_new New lower bound
- * @return        Exitflag: 1 if new lower bound is not <= than upper bound
- */
+
 c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
     c_int i;
 
@@ -590,12 +562,7 @@ c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
 }
 
 
-/**
- * Update upper bound in the problem constraints
- * @param  work   Workspace
- * @param  u_new New upper bound
- * @return        Exitflag: 1 if new upper bound is not >= than lower bound
- */
+
 c_int osqp_update_upper_bound(OSQPWorkspace * work, c_float * u_new) {
     c_int i;
 
@@ -624,13 +591,7 @@ c_int osqp_update_upper_bound(OSQPWorkspace * work, c_float * u_new) {
 }
 
 
-/**
- * Warm start primal and dual variables
- * @param  work Workspace structure
- * @param  x    Primal variable
- * @param  y    Dual variable
- * @return      Exitflag
- */
+
 c_int osqp_warm_start(OSQPWorkspace * work, c_float * x, c_float * y){
 
     // Update warm_start setting to true
@@ -651,12 +612,6 @@ c_int osqp_warm_start(OSQPWorkspace * work, c_float * x, c_float * y){
 }
 
 
-/**
- * Warm start primal variable
- * @param  work Workspace structure
- * @param  x    Primal variable
- * @return      Exitflag
- */
 c_int osqp_warm_start_x(OSQPWorkspace * work, c_float * x){
 
     // Update warm_start setting to true
@@ -678,12 +633,7 @@ c_int osqp_warm_start_x(OSQPWorkspace * work, c_float * x){
 }
 
 
-/**
- * Warm start dual variable
- * @param  work Workspace structure
- * @param  y    Dual variable
- * @return      Exitflag
- */
+
 c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y){
 
     // Update warm_start setting to true
@@ -956,13 +906,6 @@ c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx
  * Update problem settings  *
  ****************************/
 
-
-/**
- * Update max_iter setting
- * @param  work         Workspace
- * @param  max_iter_new New max_iter setting
- * @return              Exitflag
- */
 c_int osqp_update_max_iter(OSQPWorkspace * work, c_int max_iter_new) {
     // Check that max_iter is positive
     if (max_iter_new <= 0) {
@@ -977,12 +920,7 @@ c_int osqp_update_max_iter(OSQPWorkspace * work, c_int max_iter_new) {
     return 0;
 }
 
-/**
- * Update absolute tolernace value
- * @param  work        Workspace
- * @param  eps_abs_new New absolute tolerance value
- * @return             Exitflag
- */
+
 c_int osqp_update_eps_abs(OSQPWorkspace * work, c_float eps_abs_new) {
     // Check that eps_abs is positive
     if (eps_abs_new <= 0.) {
@@ -997,12 +935,6 @@ c_int osqp_update_eps_abs(OSQPWorkspace * work, c_float eps_abs_new) {
     return 0;
 }
 
-/**
- * Update relative tolernace value
- * @param  work        Workspace
- * @param  eps_rel_new New relative tolerance value
- * @return             Exitflag
- */
 c_int osqp_update_eps_rel(OSQPWorkspace * work, c_float eps_rel_new) {
     // Check that eps_rel is positive
     if (eps_rel_new <= 0.) {
@@ -1017,13 +949,6 @@ c_int osqp_update_eps_rel(OSQPWorkspace * work, c_float eps_rel_new) {
     return 0;
 }
 
-
-/**
- * Update primal infeasibility tolerance
- * @param  work          Workspace
- * @param  eps_prim_inf  New primal infeasibility tolerance
- * @return               Exitflag
- */
 c_int osqp_update_eps_prim_inf(OSQPWorkspace * work, c_float eps_prim_inf_new){
 
     // Check that eps_prim_inf is positive
@@ -1041,12 +966,6 @@ c_int osqp_update_eps_prim_inf(OSQPWorkspace * work, c_float eps_prim_inf_new){
 
 
 
-/**
- * Update dual infeasibility tolerance
- * @param  work          Workspace
- * @param  eps_dual_inf  New dual infeasibility tolerance
- * @return               Exitflag
- */
 c_int osqp_update_eps_dual_inf(OSQPWorkspace * work, c_float eps_dual_inf_new){
 
     // Check that eps_dual_inf is positive
@@ -1064,13 +983,6 @@ c_int osqp_update_eps_dual_inf(OSQPWorkspace * work, c_float eps_dual_inf_new){
 }
 
 
-
-/**
- * Update relaxation parameter alpha
- * @param  work  Workspace
- * @param  alpha New relaxation parameter value
- * @return       Exitflag
- */
 c_int osqp_update_alpha(OSQPWorkspace * work, c_float alpha_new) {
     // Check that alpha is between 0 and 2
     if (alpha_new <= 0. || alpha_new >= 2.) {
@@ -1085,12 +997,7 @@ c_int osqp_update_alpha(OSQPWorkspace * work, c_float alpha_new) {
     return 0;
 }
 
-/**
- * Update warm_start setting
- * @param  work           Workspace
- * @param  warm_start_new New warm_start setting
- * @return                Exitflag
- */
+
 c_int osqp_update_warm_start(OSQPWorkspace * work, c_int warm_start_new) {
     // Check that warm_start is either 0 or 1
     if (warm_start_new != 0 && warm_start_new != 1) {
@@ -1105,12 +1012,7 @@ c_int osqp_update_warm_start(OSQPWorkspace * work, c_int warm_start_new) {
     return 0;
 }
 
-/**
- * Update early_terminate setting
- * @param  work                 Workspace
- * @param  early_terminate_new  New early_terminate setting
- * @return                      Exitflag
- */
+
 c_int osqp_update_early_terminate(OSQPWorkspace * work, c_int early_terminate_new) {
     // Check that early_terminate is either 0 or 1
     if (early_terminate_new != 0 && early_terminate_new != 1) {
@@ -1126,12 +1028,6 @@ c_int osqp_update_early_terminate(OSQPWorkspace * work, c_int early_terminate_ne
 }
 
 
-/**
- * Update early_terminate_interval setting
- * @param  work                          Workspace
- * @param  early_terminate_interval_new  New early_terminate_interval setting
- * @return                               Exitflag
- */
 c_int osqp_update_early_terminate_interval(OSQPWorkspace * work, c_int early_terminate_interval_new) {
     // Check that early_terminate_interval is either 0 or 1
     if (early_terminate_interval_new <= 0) {
@@ -1150,12 +1046,6 @@ c_int osqp_update_early_terminate_interval(OSQPWorkspace * work, c_int early_ter
 
 #ifndef EMBEDDED
 
-/**
- * Update regularization parameter in polish
- * @param  work      Workspace
- * @param  delta_new New regularization parameter
- * @return           Exitflag
- */
 c_int osqp_update_delta(OSQPWorkspace * work, c_float delta_new) {
     // Check that delta is positive
     if (delta_new <= 0.) {
@@ -1170,12 +1060,6 @@ c_int osqp_update_delta(OSQPWorkspace * work, c_float delta_new) {
     return 0;
 }
 
-/**
- * Update polish setting
- * @param  work          Workspace
- * @param  polish_new New polish setting
- * @return               Exitflag
- */
 c_int osqp_update_polish(OSQPWorkspace * work, c_int polish_new) {
     // Check that polish is either 0 or 1
     if (polish_new != 0 && polish_new != 1) {
@@ -1196,12 +1080,6 @@ c_int osqp_update_polish(OSQPWorkspace * work, c_int polish_new) {
 }
 
 
-/**
- * Update number of iterative refinement steps in polish
- * @param  work                Workspace
- * @param  pol_refine_iter_new New iterative reginement steps
- * @return                     Exitflag
- */
 c_int osqp_update_pol_refine_iter(OSQPWorkspace * work, c_int pol_refine_iter_new) {
     // Check that pol_refine_iter is nonnegative
     if (pol_refine_iter_new < 0) {
@@ -1217,12 +1095,6 @@ c_int osqp_update_pol_refine_iter(OSQPWorkspace * work, c_int pol_refine_iter_ne
 }
 
 
-/**
- * Update verbose setting
- * @param  work        Workspace
- * @param  verbose_new New verbose setting
- * @return             Exitflag
- */
 c_int osqp_update_verbose(OSQPWorkspace * work, c_int verbose_new) {
     // Check that verbose is either 0 or 1
     if (verbose_new != 0 && verbose_new != 1) {

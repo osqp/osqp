@@ -12,7 +12,10 @@ extern "C" {
  * Versioning     *
  ******************/
 
-// Return OSQP version
+/**
+ * Return OSQP version
+ * @return  OSQP version
+ */
 const char *osqp_version(void);
 
 
@@ -20,37 +23,63 @@ const char *osqp_version(void);
  * Utility Functions  *
  **********************/
 
-/* Set default settings from constants.h file
- * assumes settings already allocated inmemory
-*/
+/**
+ * Set default settings from constants.h file
+ * assumes settings already allocated in memory
+ * @param settings settings structure
+ */
 void set_default_settings(OSQPSettings * settings);
 
 
 #ifndef EMBEDDED
 
-/* Copy settings creating a new settings structure */
+/**
+ * Copy settings creating a new settings structure (uses MALLOC)
+ * @param  settings Settings to be copied
+ * @return          New settings structure
+ */
 OSQPSettings * copy_settings(OSQPSettings * settings);
 
 #endif // #ifndef EMBEDDED
 
-/* Custom string copy to avoid string.h library */
+/**
+ * Custom string copy to avoid string.h library
+ * @param dest   destination string
+ * @param source source string
+ */
 void c_strcpy(char dest[], const char source[]);
 
 
 #ifdef PRINTING
-/* Print Header before running the algorithm */
+/**
+ * Print Header before running the algorithm
+ * @param data     problem data
+ * @param settings osqp settings
+ */
 void print_setup_header(const OSQPData *data, const OSQPSettings *settings);
 
-/* Print Header with data to be displayed per iteration */
+/**
+ * Print header with data to be displayed per iteration
+ */
 void print_header(void);
 
-/* Print iteration summary */
+/**
+ * Print iteration summary
+ * @param info current information
+ */
 void print_summary(OSQPInfo * info);
 
-/* Print polish information */
+/**
+ * Print information after polish
+ * @param info information structure
+ */
 void print_polish(OSQPInfo * info);
 
-/* Print Footer */
+/**
+ * Print footer when algorithm terminates
+ * @param info   info structure
+ * @param polish is polish enabled?
+ */
 void print_footer(OSQPInfo * info, c_int polish);
 
 #endif
@@ -59,6 +88,7 @@ void print_footer(OSQPInfo * info, c_int polish);
 /*********************************
  * Timer Structs and Functions * *
  *********************************/
+ /*! \cond PRIVATE */
 
 #ifdef PROFILING
 
@@ -92,6 +122,7 @@ struct OSQP_TIMER {
 #include <time.h>
 #include <sys/time.h>
 
+
 struct OSQP_TIMER {
 	struct timespec tic;
 	struct timespec toc;
@@ -99,10 +130,23 @@ struct OSQP_TIMER {
 
 #endif
 
+/*! \endcond */
+
 /**
  * Timer Methods
  */
+
+/**
+ * Start timer
+ * @param t Timer object
+ */
 void tic(OSQPTimer* t);
+
+/**
+ * Report time
+ * @param  t Timer object
+ * @return   Reported time
+ */
 c_float toc(OSQPTimer* t);
 
 #endif /* END #ifdef PROFILING */
@@ -110,7 +154,9 @@ c_float toc(OSQPTimer* t);
 
 
 /* ================================= DEBUG FUNCTIONS ======================= */
-// TODO: Remove debug functions!
+
+/*! \cond PRIVATE */
+
 
 #ifndef EMBEDDED
 
@@ -125,6 +171,7 @@ c_float * csc_to_dns(csc * M);
 
 #ifdef PRINTING
 #include <stdio.h>
+
 
 
 /* Print a csc sparse matrix */
@@ -143,6 +190,9 @@ void print_vec(c_float * v, c_int n, const char *name);
 void print_vec_int(c_int * x, c_int n, const char *name);
 
 #endif
+
+/*! \endcond */
+
 
 #ifdef __cplusplus
 }

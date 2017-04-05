@@ -3,8 +3,7 @@
 
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
-/* ||a - b||_2
-(TODO: is it needed or only for debug? If it is needed only for debug it should go into the util.c file)*/
+
 c_float vec_norm2_diff(const c_float *a, const c_float *b, c_int l) {
     c_float nmDiff = 0.0, tmp;
     c_int i;
@@ -15,7 +14,6 @@ c_float vec_norm2_diff(const c_float *a, const c_float *b, c_int l) {
     return c_sqrt(nmDiff);
 }
 
-/* a += sc*b */
 void vec_add_scaled(c_float *a, const c_float *b, c_int n, c_float sc) {
     c_int i;
     for (i = 0; i < n; ++i) {
@@ -23,7 +21,6 @@ void vec_add_scaled(c_float *a, const c_float *b, c_int n, c_float sc) {
     }
 }
 
-/* ||v||_2^2 */
 c_float vec_norm2_sq(const c_float *v, c_int l) {
     c_int i;
     c_float nmsq = 0.0;
@@ -33,24 +30,11 @@ c_float vec_norm2_sq(const c_float *v, c_int l) {
     return nmsq;
 }
 
-/* ||v||_2 */
 c_float vec_norm2(const c_float *v, c_int l) {
     return c_sqrt(vec_norm2_sq(v, l));
 }
 
-// /* ||v||_inf (TODO: delete or keep it? not needed now) */
-// c_float vec_normInf(const c_float *a, c_int l) {
-//     c_float tmp, max = 0.0;
-//     c_int i;
-//     for (i = 0; i < l; ++i) {
-//         tmp = c_absval(a[i]);
-//         if (tmp > max)
-//             max = tmp;
-//     }
-//     return max;
-// }
 
-/* set integer vector to scalar */
 void int_vec_set_scalar(c_int *a, c_int sc, c_int n){
     c_int i;
     for (i=0; i<n; i++) {
@@ -59,7 +43,6 @@ void int_vec_set_scalar(c_int *a, c_int sc, c_int n){
 }
 
 
-/* set vector to scalar */
 void vec_set_scalar(c_float *a, c_float sc, c_int n){
     c_int i;
     for (i=0; i<n; i++) {
@@ -67,7 +50,6 @@ void vec_set_scalar(c_float *a, c_float sc, c_int n){
     }
 }
 
-/* add scalar to vector */
 void vec_add_scalar(c_float *a, c_float sc, c_int n){
     c_int i;
     for (i=0; i<n; i++) {
@@ -75,7 +57,6 @@ void vec_add_scalar(c_float *a, c_float sc, c_int n){
     }
 }
 
-/* multiply scalar to vector */
 void vec_mult_scalar(c_float *a, c_float sc, c_int n){
     c_int i;
     for (i=0; i<n; i++) {
@@ -86,7 +67,6 @@ void vec_mult_scalar(c_float *a, c_float sc, c_int n){
 
 #ifndef EMBEDDED
 
-/* copy vector a into output */
 c_float * vec_copy(c_float *a, c_int n) {
     c_float * b;
     c_int i;
@@ -101,7 +81,6 @@ c_float * vec_copy(c_float *a, c_int n) {
 
 #endif  //end EMBEDDED
 
-/* copy integer vector a into preallocated vector b */
 void prea_int_vec_copy(c_int *a, c_int * b, c_int n){
     c_int i;
     for (i=0; i<n; i++) {
@@ -109,7 +88,6 @@ void prea_int_vec_copy(c_int *a, c_int * b, c_int n){
     }
 }
 
-/* copy vector a into preallocated vector b */
 void prea_vec_copy(c_float *a, c_float * b, c_int n) {
     c_int i;
     for (i=0; i<n; i++) {
@@ -118,7 +96,6 @@ void prea_vec_copy(c_float *a, c_float * b, c_int n) {
 }
 
 
-/* Vector elementwise reciprocal b = 1./a*/
 void vec_ew_recipr(const c_float *a, c_float *b, c_int n){
     c_int i;
     for (i=0; i<n; i++){
@@ -127,7 +104,6 @@ void vec_ew_recipr(const c_float *a, c_float *b, c_int n){
 }
 
 
-/* Inner product a'b */
 c_float vec_prod(const c_float *a, const c_float *b, c_int n){
     c_float prod = 0.0;
     c_int i; // Index
@@ -139,7 +115,6 @@ c_float vec_prod(const c_float *a, const c_float *b, c_int n){
     return prod;
 }
 
-/* elementwse product a.*b stored in b*/
 void vec_ew_prod(const c_float *a, c_float *b, c_int n){
     c_int i;
     for(i = 0;  i < n; i++){
@@ -148,7 +123,6 @@ void vec_ew_prod(const c_float *a, c_float *b, c_int n){
 }
 
 
-/* elementwise sqrt of the vector elements */
 void vec_ew_sqrt(c_float *a, c_int n){
     c_int i;
     for(i = 0;  i < n; i++){
@@ -157,7 +131,6 @@ void vec_ew_sqrt(c_float *a, c_int n){
 }
 
 
-/* elementwise max between each vector component and max_val */
 void vec_ew_max(c_float *a, c_int n, c_float max_val){
     c_int i;
     for(i = 0;  i < n; i++){
@@ -165,7 +138,6 @@ void vec_ew_max(c_float *a, c_int n, c_float max_val){
     }
 }
 
-/* elementwise min between each vector component and max_val */
 void vec_ew_min(c_float *a, c_int n, c_float min_val){
     c_int i;
     for(i = 0;  i < n; i++){
@@ -174,9 +146,7 @@ void vec_ew_min(c_float *a, c_int n, c_float min_val){
 }
 
 /* MATRIX FUNCTIONS ----------------------------------------------------------*/
-/* Premultiply matrix A by diagonal matrix with diagonal d,
-i.e. scale the rows of A by d
-*/
+
 void mat_premult_diag(csc *A, const c_float *d){
     c_int j, i;
     for (j=0; j<A->n; j++){  // Cycle over columns
@@ -186,9 +156,6 @@ void mat_premult_diag(csc *A, const c_float *d){
     }
 }
 
-/* Premultiply matrix A by diagonal matrix with diagonal d,
-i.e. scale the columns of A by d
-*/
 void mat_postmult_diag(csc *A, const c_float *d){
     c_int j, i;
     for (j=0; j<A->n; j++){  // Cycle over columns j
@@ -199,9 +166,6 @@ void mat_postmult_diag(csc *A, const c_float *d){
 }
 
 #if EMBEDDED != 1
-/* Elementwise square matrix M
-used in matrix equilibration
-*/
 void mat_ew_sq(csc * A){
     c_int i;
     for (i=0; i<A->p[A->n]; i++)
@@ -211,10 +175,6 @@ void mat_ew_sq(csc * A){
 }
 
 
-/* Elementwise absolute value of matrix M
-used in matrix equilibration
-TODO: delete or keep it? We may not need this function.
-*/
 void mat_ew_abs(csc * A){
     c_int i;
     for (i=0; i<A->p[A->n]; i++) {
@@ -224,13 +184,7 @@ void mat_ew_abs(csc * A){
 #endif // end embedded
 
 
-
 #ifndef EMBEDDED
-/**
- * Trace of matrix M in cdc format
- * @param  M Input matrix
- * @return   Trace
- */
 c_float mat_trace(csc * M){
     c_float trace = 0.;
     c_int j, i;
@@ -244,11 +198,6 @@ c_float mat_trace(csc * M){
     return trace;
 }
 
-/**
- * Frobenius norm squared of matrix M
- * @param  M Input matrix
- * @return   Frobenius norm squared
- */
 c_float mat_fro_sq(csc * M){
     c_float fro_sq = 0.;
     c_int j, i;
@@ -265,11 +214,6 @@ c_float mat_fro_sq(csc * M){
 #endif // ifndef embedded
 
 
-/* Matrix-vector multiplication
- *    y  =  A*x  (if plus_eq == 0)
- *    y +=  A*x  (if plus_eq == 1)
- *    y -=  A*x  (if plus_eq == -1)
-*/
 void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq) {
     c_int i, j;
     if (!plus_eq) {
@@ -301,12 +245,6 @@ void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq) {
     }
 }
 
-/* Matrix-transpose-vector multiplication
- *    y  =  A'*x  (if plus_eq == 0)
- *    y +=  A'*x  (if plus_eq == 1)
- *    y -=  A'*x  (if plus_eq == -1)
- * If skip_diag == 1, then diagonal elements of A are assumed to be zero.
-*/
 void mat_tpose_vec(const csc *A, const c_float *x, c_float *y,
                    c_int plus_eq, c_int skip_diag) {
     c_int i, j, k;
@@ -358,12 +296,6 @@ void mat_tpose_vec(const csc *A, const c_float *x, c_float *y,
 }
 
 
-/**
- * Compute quadratic form f(x) = 1/2 x' P x
- * @param  P quadratic matrix in CSC form (only upper triangular)
- * @param  x argument float vector
- * @return   quadratic form value
- */
 c_float quad_form(const csc * P, const c_float * x){
     c_float quad_form = 0.;
     c_int i, j, ptr;  // Pointers to iterate over matrix: (i,j) a element pointer

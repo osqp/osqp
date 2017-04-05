@@ -85,7 +85,7 @@ static c_int form_Ared(OSQPWorkspace *work) {
 /**
  * Form reduced right-hand side rhs_red = vstack[-q, l_low, u_upp]
  * @param  work Workspace
- * @param  mred number of active constraints
+ * @param  rhs right-hand-side
  * @return      reduced rhs
  */
 static void form_rhs_red(OSQPWorkspace * work, c_float * rhs){
@@ -111,6 +111,7 @@ static void form_rhs_red(OSQPWorkspace * work, c_float * rhs){
  *    2. z <- z + dz
  * @param  work Solver workspace
  * @param  p    Private variable for solving linear system
+ * @param  z    Initial z value
  * @param  b    RHS of the linear system
  * @return      More accurate solution
  */
@@ -184,7 +185,7 @@ static void compute_y_from_y_red(OSQPWorkspace * work){
     }
 }
 
-// Solution polish: Solve equality constrained QP with assumed active constr.
+
 c_int polish(OSQPWorkspace *work) {
     c_int mred, polish_successful;
     c_float * rhs_red;

@@ -1,7 +1,7 @@
 #include "scaling.h"
 
 #if EMBEDDED != 1
-// Scale data stored in workspace
+
 c_int scale_data(OSQPWorkspace * work){
     // Temporary pointers to P->x and A->x to keep them
     c_float * P_x_temp;
@@ -113,11 +113,7 @@ c_int scale_data(OSQPWorkspace * work){
 }
 #endif
 
-/**
- * Unscale problem matrices
- * @param  work Workspace
- * @return      exitflag
- */
+
 c_int unscale_data(OSQPWorkspace * work){
 
     mat_premult_diag(work->data->P, work->scaling->Dinv);
@@ -147,7 +143,6 @@ c_int unscale_data(OSQPWorkspace * work){
 // }
 
 
-// Unscale solution
 c_int unscale_solution(OSQPWorkspace * work){
     // primal
     vec_ew_prod(work->scaling->D, work->solution->x, work->data->n);

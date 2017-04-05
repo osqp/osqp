@@ -207,7 +207,6 @@ static char * test_basic_qp_early_terminate()
     mu_assert("Basic QP test solve: Error in objective value!",
               c_absval(work->info->obj_val - sols_data->obj_value_test) < TESTS_TOL);
 
-
     // Clean workspace
     osqp_cleanup(work);
 

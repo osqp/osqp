@@ -6,13 +6,13 @@ import numpy as np
 # import mathprogbasepy as mpbpy
 sp.random.seed(2)
 
-n = 500
-m = 1000
-A = sparse.random(m, n, density=0.9, format='csr')
+n = 1000
+m = 10000
+A = sparse.random(m, n, density=0.9, format='csc')
 lA = -sp.rand(m) * 2.
 uA = sp.rand(m) * 2.
 
-P = sparse.random(n, n, density=0.9, format='csr')
+P = sparse.random(n, n, density=0.9, format='csc')
 P = P.dot(P.T)
 q = sp.randn(n)
 

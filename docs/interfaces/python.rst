@@ -9,17 +9,18 @@ The OSQP module is can be imported with
 
     import osqp
 
+
+.. _python_setup:
+
+Setup
+-----
+
 The solver is initialized by creating an OSQP object
 
 .. code:: python
 
     m = osqp.OSQP()
 
-
-.. _python_setup:
-
-Setup
------
 The problem is specified in the setup phase by running
 
 .. code:: python
@@ -27,57 +28,12 @@ The problem is specified in the setup phase by running
     m.setup(P=P, q=q, A=A, l=l, u=u, **settings)
 
 
-The arguments :code:`q`, :code:`l` and :code:`u` are numpy arrays. The elements of :code:`l` and :code:`u` can be :math:`\pm \infty` ( using :code:`+numpy.inf`).
+The arguments :code:`q`, :code:`l` and :code:`u` are numpy arrays. The elements of :code:`l` and :code:`u` can be :math:`\pm \infty` ( using :code:`numpy.inf`).
 
 The arguments :code:`P` and :code:`A` are scipy sparse matrices in CSC format. If they are sparse matrices are in another format, the interface will attemp to convert them. There is no need to specify all the arguments.
 
 
-The keyword arguments :code:`**settings` specify the solver settings as follows
-
-
-+------------------------------------+-------------------------------------+----------------+
-| Argument                           | Description                         | Default value  |
-+====================================+=====================================+================+
-| :code:`scaling`                    | Perform data scaling                |   True         |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`rho`                        | ADMM rho step                       | Auto computed  |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`auto_rho`                   | ADMM rho step automatic selection   |   True         |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`sigma`                      | ADMM sigma step                     |   0.001        |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`max_iter` *                 | Maximum number of iterations        |   2500         |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`eps_abs`  *                 | Absolute tolerance                  |   1e-03        |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`eps_rel`  *                 | Relative tolerance                  |   1e-03        |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`eps_prim_inf`  *            | Primal infeasibility tolerance      |   1e-04        |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`eps_dual_inf`  *            | Dual infeasibility tolerance        |   1e-04        |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`alpha`    *                 | ADMM overrelaxation parameter       |   1.6          |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`delta`    *                 | Polishing regularization parameter  |   1e-07        |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`polish` *                   | Perform polishing                   |   True         |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`verbose`  *                 | Print output                        |   True         |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`early_terminate` *          | Evaluate termination criteria       |   True         |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`early_terminate_interval` * | Interval for checking termination   |   25           |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`warm_start` *               | Perform warm starting               |   True         |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`scaling_norm`               | Scaling norm                        |   2            |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`scaling_iter`               | Scaling iterations                  |   3            |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`pol_refine_iter` *          | Refinement iterations in polish     |   5            |
-+------------------------------------+-------------------------------------+----------------+
-
-The settings marked with * can be changed without running the setup method again. See section :ref:`python_update_settings`.
+The keyword arguments :code:`**settings` specify the solver settings. The allowed parameters are defined in :ref:`solver_settings`.
 
 Solve
 -----
@@ -122,7 +78,7 @@ The :code:`results` object contains the primal solution :code:`x`, the dual solu
 
 Update
 ------
-Problem vectors and part of the settings can be updated without requiring a new problem setup.
+Part of problem data and settings can be updated without requiring a new problem setup.
 
 Update problem vectors
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -148,7 +104,7 @@ Settings can be updated by running
     m.update_settings(**kwargs)
 
 
-where :code:`kwargs` are the allowed settings that can be updated marked with an * in :ref:`python_setup`.
+where :code:`kwargs` are the settings that can be updated which are marked with an * in :ref:`solver_settings`.
 
 
 Warm start

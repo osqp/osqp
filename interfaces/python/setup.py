@@ -16,6 +16,7 @@ PRINTING = True
 PROFILING = True
 DFLOAT = False
 DLONG = True
+CTRLC = True
 
 
 # Add parameters to cmake_args and define_macros
@@ -45,6 +46,12 @@ if PRINTING:
     define_macros += [('PRINTING', None)]
 else:
     cmake_args += ['-DPRINTING:BOOL=OFF']
+
+if CTRLC:
+    cmake_args += ['-DCTRLC:BOOL=ON']
+    define_macros += [('CTRLC', None)]
+else:
+    cmake_args += ['-DCTRLC:BOOL=OFF']
 
 if DLONG:
     cmake_args += ['-DDLONG:BOOL=ON']
@@ -106,7 +113,7 @@ Copy C sources for code generation
 # List with OSQP C files
 cfiles = [os.path.join(osqp_dir, 'src', f)
           for f in os.listdir(os.path.join(osqp_dir, 'src'))
-          if f.endswith('.c') and f != 'polish.c' and f != 'cs.c']
+          if f.endswith('.c') and f not in ('cs.c', 'ctrlc.c', 'polish.c')]
 cfiles += [os.path.join(suitesparse_dir, f)
            for f in os.listdir(suitesparse_dir)
            if f.endswith('.c') and f != 'SuiteSparse_config.c']
@@ -117,7 +124,7 @@ cfiles += [os.path.join(suitesparse_dir, 'ldl', 'src', f)
 # List with OSQP H files
 hfiles = [os.path.join(osqp_dir, 'include', f)
           for f in os.listdir(os.path.join(osqp_dir, 'include'))
-          if f.endswith('.h') and f != 'polish.h' and f != 'cs.h']
+          if f.endswith('.h') and f not in ('cs.h', 'ctrlc.h', 'polish.h')]
 hfiles += [os.path.join(suitesparse_dir, f)
            for f in os.listdir(suitesparse_dir)
            if f.endswith('.h') and f != 'SuiteSparse_config.h']
@@ -172,8 +179,7 @@ packages = ['osqp',
 setup(name='osqp',
       version='0.0.0',
       author='Bartolomeo Stellato, Goran Banjac',
-      description='This is the Python package for OSQP: ' +
-                  'Operator Splitting solver for Quadratic Programs.',
+      description='OSQP: The Operator Splitting QP Solver',
       package_dir={'osqp': 'module',
                    'osqppurepy': 'modulepurepy'},
       data_files=[('osqp/codegen/sources/src', cfiles),
@@ -181,6 +187,7 @@ setup(name='osqp',
                   ('osqp/codegen/files_to_generate', files_to_generate)],
       install_requires=["numpy >= 1.7", "scipy >= 0.13.2", "future"],
       license='Apache 2.0',
+      url="http://osqp.readthedocs.io/",
       cmdclass={'build_ext': build_ext_osqp},
       packages=packages,
       ext_modules=[_osqp])

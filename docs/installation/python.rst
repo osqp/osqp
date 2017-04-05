@@ -1,7 +1,7 @@
 Python
 ======
 
-Python interface supports Python 2.7 and 3.4 or newer on Linux and Mac. Windows version is supports only Python 2.7 at the moment.
+Python interface supports Python 2.7 and 3.4 or newer on Linux and Mac. Windows version supports only Python 2.7 at the moment.
 
 Anaconda
 ----------

@@ -16,31 +16,50 @@ extern "C" {
  * Create and free CSC Matrices                                              *
  *****************************************************************************/
 
-/* Create Compressed-Column-Sparse matrix from existing arrays
-   (no MALLOC to create inner arrays x, i, p)
+/**
+ * Create Compressed-Column-Sparse matrix from existing arrays
+    (no MALLOC to create inner arrays x, i, p)
+ * @param  m     First dimension
+ * @param  n     Second dimension
+ * @param  nzmax Maximum number of nonzero elements
+ * @param  x     Vector of data
+ * @param  i     Vector of row indeces
+ * @param  p     Vector of column pointers
+ * @return       New matrix pointer
  */
 csc* csc_matrix(c_int m, c_int n, c_int nzmax, c_float* x, c_int* i, c_int* p);
 
 
-/* Create uninitialized CSC matrix atricture
-   (uses MALLOC to create inner arrays x, i, p)
-   Arguments
-   ---------
-   m,n: dimensions
-   nzmax: max number of nonzero elements
-   values: 1/0 allocate values
-   triplet: 1/0 allocate matrix for CSC or Triplet format
+/**
+ * Create uninitialized CSC matrix atricture
+    (uses MALLOC to create inner arrays x, i, p)
+ * @param  m       First dimension
+ * @param  n       Second dimension
+ * @param  nzmax   Maximum number of nonzero elements
+ * @param  values  Allocate values (0/1)
+ * @param  triplet Allocate CSC or triplet format matrix (1/0)
+ * @return         Matrix pointer
  */
 csc *csc_spalloc(c_int m, c_int n, c_int nzmax, c_int values, c_int triplet);
 
 
-/* Free sparse matrix
-   (uses FREE to free inner arrays x, i, p)
+/**
+ * Free sparse matrix
+    (uses FREE to free inner arrays x, i, p)
+ * @param  A Matrix in CSC format
+ * @return   return NULL pointer if everything works
  */
 csc *csc_spfree(csc *A);
 
 
-/* free workspace and return a sparse matrix result */
+/**
+ * free workspace and return a sparse matrix result
+ * @param  C  CSC matrix
+ * @param  w  Workspace vector
+ * @param  x  Workspace vector
+ * @param  ok flag
+ * @return    Return result C if OK, otherwise free it
+ */
 csc * csc_done(csc *C, void *w, void *x, c_int ok);
 
 /*****************************************************************************
@@ -76,7 +95,9 @@ csc * csc_done(csc *C, void *w, void *x, c_int ok);
   */
  csc *triplet_to_csc(const csc *T, c_int * TtoC);
 
-/* Convert sparse to dense */
+/**
+ * Convert sparse to dense
+ */
 c_float * csc_to_dns(csc * M);
 
 
@@ -94,10 +115,18 @@ csc * csc_to_triu(csc * M);
  * Extra operations                                                          *
  *****************************************************************************/
 
-/* p [0..n] = cumulative sum of c [0..n-1], and then copy p [0..n-1] into c */
+/**
+ * p [0..n] = cumulative sum of c [0..n-1], and then copy p [0..n-1] into c
+ *
+ * @param  p Create cumulative sum into p
+ * @param  c Vector of which we compute cumulative sum
+ * @param  n Number of elements
+ * @return   Exitflag
+ */
 c_int csc_cumsum(c_int *p, c_int *c, c_int n);
 
-/* Compute inverse of permuation matrix stored in the vector p.
+/**
+ * Compute inverse of permuation matrix stored in the vector p.
  * The computed inverse is also stored in a vector.
  */
 c_int *csc_pinv(c_int const *p, c_int n);

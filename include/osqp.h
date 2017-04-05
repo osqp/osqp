@@ -13,6 +13,10 @@ extern "C" {
 #include "scaling.h"
 #include "glob_opts.h"
 
+#ifdef CTRLC
+#include "ctrlc.h"
+#endif
+
 #ifndef EMBEDDED
 #include "polish.h"
 #endif
@@ -20,18 +24,26 @@ extern "C" {
 /********************
  * Main Solver API  *
  ********************/
+ /**
+  * @name Main solver API
+  * @{
+  */
 
 #ifndef EMBEDDED
 
 /**
  * Initialize OSQP solver allocating memory.
  *
- * It also sets the linear system solver:
- * - direct solver: KKT matrix factorization is performed here
+ * All the inputs must be already allocated in memory before calling.
  *
+ * It performs:
+ * - data and settings validation
+ * - problem data scaling
+ * - automatic parameters tuning (if enabled)
+ * - setup linear system solver:
+ *      - direct solver: KKT matrix factorization is performed here
  *
- * N.B. This is the only function that allocates dynamic memory. During code
- * generation it is going to be removed.
+ * N.B. This is the only function that allocates dynamic memory and is not used during code generation
  *
  * @param  data         Problem data
  * @param  settings     Solver settings
@@ -42,7 +54,12 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings);
 #endif  // #ifndef EMBEDDED
 
 /**
- * Solve Quadratic Program
+ * Solve quadratic program
+ *
+ * The final solver information is stored in the \a work->info  structure
+ *
+ * The solution is stored in the  \a work->solution  structure
+ *
  * @param  work Workspace allocated
  * @return      Exitflag for errors
  */
@@ -52,7 +69,9 @@ c_int osqp_solve(OSQPWorkspace * work);
 #ifndef EMBEDDED
 
 /**
- * Cleanup workspace
+ * Cleanup workspace by deallocating memory
+ *
+ * This function is not used in code generation
  * @param  work Workspace
  * @return      Exitflag for errors
  */
@@ -60,12 +79,18 @@ c_int osqp_cleanup(OSQPWorkspace * work);
 
 #endif
 
+/** @} */
+
 
 /********************************************
  * Sublevel API                             *
  *                                          *
  * Edit data without performing setup again *
  ********************************************/
+ /**
+  * @name Sublevel API
+  * @{
+  */
 
 /**
  * Update linear cost in the problem
@@ -199,11 +224,14 @@ c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx
 
 #endif
 
+/** @} */
 
 
-/************************************************
- * Edit settings without performing setup again *
- ************************************************/
+/**
+ * @name Update settings
+ * @{
+ */
+
 
 /**
 * Update max_iter setting
@@ -235,7 +263,7 @@ c_int osqp_update_eps_rel(OSQPWorkspace * work, c_float eps_rel_new);
 /**
  * Update primal infeasibility tolerance
  * @param  work          Workspace
- * @param  eps_prim_inf  New primal infeasibility tolerance
+ * @param  eps_prim_inf_new  New primal infeasibility tolerance
  * @return               Exitflag
  */
 c_int osqp_update_eps_prim_inf(OSQPWorkspace * work, c_float eps_prim_inf_new);
@@ -245,7 +273,7 @@ c_int osqp_update_eps_prim_inf(OSQPWorkspace * work, c_float eps_prim_inf_new);
 /**
  * Update dual infeasibility tolerance
  * @param  work          Workspace
- * @param  eps_dual_inf  New dual infeasibility tolerance
+ * @param  eps_dual_inf_new  New dual infeasibility tolerance
  * @return               Exitflag
  */
 c_int osqp_update_eps_dual_inf(OSQPWorkspace * work, c_float eps_dual_inf_new);
@@ -255,7 +283,7 @@ c_int osqp_update_eps_dual_inf(OSQPWorkspace * work, c_float eps_dual_inf_new);
 /**
  * Update relaxation parameter alpha
  * @param  work  Workspace
- * @param  alpha New relaxation parameter value
+ * @param  alpha_new New relaxation parameter value
  * @return       Exitflag
  */
 c_int osqp_update_alpha(OSQPWorkspace * work, c_float alpha_new);
@@ -328,6 +356,8 @@ c_int osqp_update_verbose(OSQPWorkspace * work, c_int verbose_new);
 
 
 #endif  // #ifndef EMBEDDED
+
+/** @} */
 
 
 #ifdef __cplusplus

@@ -44,11 +44,3 @@ conda config --set always_yes yes --set changeps1 no
 conda update --yes -q conda
 conda create -n testenv --yes python=$PYTHON_VERSION pip nose numpy scipy future
 source activate testenv
-
-
-# Compile OSQP
-cd ${TRAVIS_BUILD_DIR}
-mkdir build
-cd build
-cmake -G "Unix Makefiles" ..
-make

@@ -39,6 +39,7 @@ end
 % Default parameters
 PRINTING = true;
 PROFILING = true;
+CTRLC = true;
 DFLOAT = false;
 DLONG = true;
 
@@ -48,6 +49,7 @@ DLONG = true;
 % Get make and mex commands
 make_cmd = 'cmake --build .';
 mex_cmd = sprintf('mex -O -silent');
+mex_libs = '';
 
 
 % Add arguments to cmake and mex compiler
@@ -85,8 +87,15 @@ if PRINTING
    mexoptflags =  sprintf('%s %s', mexoptflags, '-DPRINTING');
 end
 
+if CTRLC
+   cmake_args = sprintf('%s %s', cmake_args, '-DCTRLC:BOOL=ON');
+   mexoptflags =  sprintf('%s %s', mexoptflags, '-DCTRLC');
+   mex_libs = sprintf('%s %s', mex_libs, '-lut');
+end
+
 if DLONG
    cmake_args = sprintf('%s %s', cmake_args, '-DDLONG:BOOL=ON');
+   mexoptflags =  sprintf('%s %s', mexoptflags, '-DDLONG');
    mexoptflags =  sprintf('%s %s', mexoptflags, '-DDLONG');
 end
 
@@ -151,14 +160,14 @@ if( any(strcmpi(what,'osqp')) || any(strcmpi(what,'all')) )
     [status, output] = system(sprintf('%s %s ..', 'cmake', cmake_args));
     if(status)
         fprintf('\n');
-        fprintf(output);
+        disp(output);
         error('Error configuring CMake environment');
     end
 
     [status, output] = system(sprintf('%s %s', make_cmd, '--target osqpdirstatic'));
     if (status)
         fprintf('\n');
-        fprintf(output);
+        disp(output);
         error('Error compiling OSQP');
     end
 
@@ -180,8 +189,10 @@ if( any(strcmpi(what,'osqp_mex')) || any(strcmpi(what,'all')) )
     fprintf('Compiling and linking osqpmex...');
 
     % Compile command
-    cmd = sprintf('%s %s %s %s osqp_mex.cpp', mex_cmd, mexoptflags, inc_dir, lib_name);
-
+    %cmd = sprintf('%s %s %s %s osqp_mex.cpp', mex_cmd, mexoptflags, inc_dir, lib_name);
+    cmd = sprintf('%s %s %s %s osqp_mex.cpp %s', ...
+        mex_cmd, mexoptflags, inc_dir, lib_name, mex_libs);
+    
     % Compile
     eval(cmd);
     fprintf('\t\t\t\t[done]\n');
@@ -202,12 +213,12 @@ if( any(strcmpi(what,'codegen')) || any(strcmpi(what,'all')) )
               dir(fullfile(suitesparse_dir, '*.c'));
               dir(fullfile(suitesparse_dir, 'ldl', 'src', '*.c'))];
     for i = 1 : length(cfiles)
-        if ~any(strcmp(cfiles(i).name, {'cs.c', 'polish.c', 'SuiteSparse_config.c'}))
+        if ~any(strcmp(cfiles(i).name, {'cs.c', 'ctrlc.c', 'polish.c', 'SuiteSparse_config.c'}))
             copyfile(fullfile(cfiles(i).folder, cfiles(i).name), ...
                 fullfile(cg_src_dir, cfiles(i).name));
         end
     end
-    
+
     % Copy H files
     cg_include_dir = fullfile(cg_sources_dir, 'include');
     if ~exist(cg_include_dir, 'dir')
@@ -217,12 +228,12 @@ if( any(strcmpi(what,'codegen')) || any(strcmpi(what,'all')) )
               dir(fullfile(suitesparse_dir, '*.h'));
               dir(fullfile(suitesparse_dir, 'ldl', 'include', '*.h'))];
     for i = 1 : length(hfiles)
-        if ~any(strcmp(hfiles(i).name, {'cs.h', 'polish.h', 'SuiteSparse_config.h'}))
+        if ~any(strcmp(hfiles(i).name, {'cs.h', 'ctrlc.h', 'polish.h', 'SuiteSparse_config.h'}))
             copyfile(fullfile(hfiles(i).folder, hfiles(i).name), ...
                 fullfile(cg_include_dir, hfiles(i).name));
         end
     end
-    
+
     fprintf('\t\t\t\t[done]\n');
 
 end
@@ -260,7 +271,7 @@ if( any(strcmpi(what,'purge')) )
     if exist(cg_sources_dir, 'dir')
         rmdir(cg_sources_dir, 's');
     end
-    
+
     fprintf('\t[done]\n');
 end
 

@@ -2,10 +2,6 @@ Matlab
 ======
 OSQP Matlab interface required Matlab 2016b or newer.
 
-
-Binaries
---------
-
 .. todo::
 
     Find a proper way to distribute binaries

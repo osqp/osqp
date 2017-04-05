@@ -103,7 +103,8 @@ void update_info(OSQPWorkspace *work, c_int iter, c_int compute_objective, c_int
 
 /**
 * Update solver status (value and string)
-* @param work Workspace
+* @param info OSQPInfo
+* @param status_val new status value
 */
 void update_status(OSQPInfo *info, c_int status_val);
 
@@ -129,7 +130,7 @@ c_int validate_data(const OSQPData * data);
 
 /**
 * Validate problem settings
-* @param  data OSQPData to be validated
+* @param  settings OSQPSettings to be validated
 * @return      Exitflag to check
 */
 c_int validate_settings(const OSQPSettings * settings);
