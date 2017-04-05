@@ -22,9 +22,9 @@
 #include <windows.h>
 
 typedef struct {
-	LARGE_INTEGER tic;
-	LARGE_INTEGER toc;
-	LARGE_INTEGER freq;
+		LARGE_INTEGER tic;
+		LARGE_INTEGER toc;
+		LARGE_INTEGER freq;
 } PyTimer;
 
 // Mac
@@ -34,9 +34,9 @@ typedef struct {
 
 /* Use MAC OSX  mach_time for timing */
 typedef struct {
-	uint64_t tic;
-	uint64_t toc;
-	mach_timebase_info_data_t tinfo;
+		uint64_t tic;
+		uint64_t toc;
+		mach_timebase_info_data_t tinfo;
 } PyTimer;
 
 // Linux
@@ -47,8 +47,8 @@ typedef struct {
 #include <sys/time.h>
 
 typedef struct {
-	struct timespec tic;
-	struct timespec toc;
+		struct timespec tic;
+		struct timespec toc;
 } PyTimer;
 
 #endif
@@ -60,41 +60,36 @@ typedef struct {
 // Windows
 #if IS_WINDOWS
 
-void tic(PyTimer* t)
-{
-        QueryPerformanceFrequency(&t->freq);
-        QueryPerformanceCounter(&t->tic);
+void tic(PyTimer* t) {
+    QueryPerformanceFrequency(&t->freq);
+    QueryPerformanceCounter(&t->tic);
 }
 
-c_float toc(PyTimer* t)
-{
-        QueryPerformanceCounter(&t->toc);
-        return ((t->toc.QuadPart - t->tic.QuadPart) / (c_float)t->freq.QuadPart);
+c_float toc(PyTimer* t) {
+    QueryPerformanceCounter(&t->toc);
+    return ((t->toc.QuadPart - t->tic.QuadPart) / (c_float)t->freq.QuadPart);
 }
 
 // Mac
 #elif IS_MAC
 
-void tic(PyTimer* t)
-{
-        /* read current clock cycles */
-        t->tic = mach_absolute_time();
+void tic(PyTimer* t) {
+    /* read current clock cycles */
+    t->tic = mach_absolute_time();
 }
 
-c_float toc(PyTimer* t)
-{
+c_float toc(PyTimer* t) {
+		uint64_t duration; /* elapsed time in clock cycles*/
 
-        uint64_t duration; /* elapsed time in clock cycles*/
+		t->toc = mach_absolute_time();
+		duration = t->toc - t->tic;
 
-        t->toc = mach_absolute_time();
-        duration = t->toc - t->tic;
+		/*conversion from clock cycles to nanoseconds*/
+		mach_timebase_info(&(t->tinfo));
+		duration *= t->tinfo.numer;
+		duration /= t->tinfo.denom;
 
-        /*conversion from clock cycles to nanoseconds*/
-        mach_timebase_info(&(t->tinfo));
-        duration *= t->tinfo.numer;
-        duration /= t->tinfo.denom;
-
-        return (c_float)duration / 1e9;
+return (c_float)duration / 1e9;
 }
 
 
@@ -104,25 +99,24 @@ c_float toc(PyTimer* t)
 /* read current time */
 void tic(PyTimer* t)
 {
-        clock_gettime(CLOCK_MONOTONIC, &t->tic);
+		clock_gettime(CLOCK_MONOTONIC, &t->tic);
 }
 
 
 /* return time passed since last call to tic on this timer */
-c_float toc(PyTimer* t)
-{
-        struct timespec temp;
+c_float toc(PyTimer* t) {
+		struct timespec temp;
 
-        clock_gettime(CLOCK_MONOTONIC, &t->toc);
+		clock_gettime(CLOCK_MONOTONIC, &t->toc);
 
-        if ((t->toc.tv_nsec - t->tic.tv_nsec)<0) {
-                temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec-1;
-                temp.tv_nsec = 1e9+t->toc.tv_nsec - t->tic.tv_nsec;
-        } else {
-                temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec;
-                temp.tv_nsec = t->toc.tv_nsec - t->tic.tv_nsec;
-        }
-        return (c_float)temp.tv_sec + (c_float)temp.tv_nsec / 1e9;
+		if ((t->toc.tv_nsec - t->tic.tv_nsec)<0) {
+		        temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec-1;
+		        temp.tv_nsec = 1e9+t->toc.tv_nsec - t->tic.tv_nsec;
+		} else {
+		        temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec;
+		        temp.tv_nsec = t->toc.tv_nsec - t->tic.tv_nsec;
+		}
+		return (c_float)temp.tv_sec + (c_float)temp.tv_nsec / 1e9;
 }
 
 
@@ -158,16 +152,16 @@ static int get_float_type(void) {
  * reordered in some way or the data type doesn't quite match
  */
 static PyArrayObject *get_contiguous(PyArrayObject *array, int typenum) {
-        /*
-        * the "tmp_arr" pointer has to have Py_DECREF called on it; new_owner
-        * owns the "new" array object created by PyArray_Cast
-        */
-        PyArrayObject *tmp_arr;
-        PyArrayObject *new_owner;
-        tmp_arr = PyArray_GETCONTIGUOUS(array);
-        new_owner = (PyArrayObject *) PyArray_Cast(tmp_arr, typenum);
-        Py_DECREF(tmp_arr);
-        return new_owner;
+		/*
+		* the "tmp_arr" pointer has to have Py_DECREF called on it; new_owner
+		* owns the "new" array object created by PyArray_Cast
+		*/
+		PyArrayObject *tmp_arr;
+		PyArrayObject *new_owner;
+		tmp_arr = PyArray_GETCONTIGUOUS(array);
+		new_owner = (PyArrayObject *) PyArray_Cast(tmp_arr, typenum);
+		Py_DECREF(tmp_arr);
+		return new_owner;
 }
 
 
@@ -255,7 +249,7 @@ static PyObject *OSQP_update_lin_cost(PyObject *self, PyObject *args){
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string,
                           &PyArray_Type, &q)) {
-            return NULL;
+        return NULL;
     }
 
     // Check dimension
@@ -292,7 +286,7 @@ static PyObject *OSQP_update_lower_bound(PyObject *self, PyObject *args){
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string,
                           &PyArray_Type, &l)) {
-            return NULL;
+        return NULL;
     }
 
     // Check dimension
@@ -329,7 +323,7 @@ static PyObject *OSQP_update_upper_bound(PyObject *self, PyObject *args){
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string,
                           &PyArray_Type, &u)) {
-            return NULL;
+        return NULL;
     }
 
     // Check dimension
@@ -369,7 +363,7 @@ static PyObject *OSQP_update_bounds(PyObject *self, PyObject *args){
     if( !PyArg_ParseTuple(args, argparse_string,
                           &PyArray_Type, &l,
 													&PyArray_Type, &u)) {
-            return NULL;
+        return NULL;
     }
 
     // Check dimension
@@ -447,13 +441,16 @@ static PyObject * OSQP_update_P(PyObject *self, PyObject *args) {
 
 		// Parse arguments
 		if( !PyArg_ParseTuple(args, argparse_string, &Px, &Px_idx, &Px_n)) {
-						return NULL;
+				return NULL;
 		}
 
-		// Px_idx is passed
+		// Check if Px_idx is passed
 		if((PyObject *)Px_idx != Py_None){
-			Px_idx_cont = get_contiguous(Px_idx, int_type);
-			Px_idx_arr = (c_int *)PyArray_DATA(Px_idx_cont);
+				Px_idx_cont = get_contiguous(Px_idx, int_type);
+				Px_idx_arr = (c_int *)PyArray_DATA(Px_idx_cont);
+		} else {
+				Px_idx_cont = OSQP_NULL;
+				Px_idx_arr = OSQP_NULL;
 		}
 
 
@@ -465,28 +462,23 @@ static PyObject * OSQP_update_P(PyObject *self, PyObject *args) {
 
 		// Check dimension
 		if ((PyObject *)Px_idx != Py_None && PyArray_DIM(Px, 0) != PyArray_DIM(Px_idx, 0)){
-			PyErr_SetString(PyExc_ValueError, "Error in updating P: Px and Px_idx must have the same length!");
-	        return (PyObject *) NULL;
+				PyErr_SetString(PyExc_ValueError, "Error in updating P: Px and Px_idx must have the same length!");
+	      return (PyObject *) NULL;
 		}
 
 		// Update matrix P
-		if ((PyObject *)Px_idx == Py_None){
-			// Update all indices
-    		return_val = osqp_update_P((&workspace), Px_arr, OSQP_NULL, 0);
-		} else {
-			return_val = osqp_update_P((&workspace), Px_arr, Px_idx_arr, Px_n);
-		}
+		return_val = osqp_update_P((&workspace), Px_arr, Px_idx_arr, Px_n);
 
     // Free data
     Py_DECREF(Px_cont);
-	if ((PyObject *)Px_idx != Py_None) Py_DECREF(Px_idx_cont);
+		if ((PyObject *)Px_idx != Py_None) Py_DECREF(Px_idx_cont);
 
 		if (return_val == 1) {
-			PyErr_SetString(PyExc_ValueError, "Error in updating P: length of Px and Px_idx is too large!");
-	        return (PyObject *) NULL;
+				PyErr_SetString(PyExc_ValueError, "Error in updating P: length of Px and Px_idx is too large!");
+	      return (PyObject *) NULL;
 		} else if (return_val < 0) {\
-			PyErr_SetString(PyExc_ValueError, "Error in updating P: new KKT matrix is not quasidefinite!");
-			return (PyObject *) NULL;
+				PyErr_SetString(PyExc_ValueError, "Error in updating P: new KKT matrix is not quasidefinite!");
+				return (PyObject *) NULL;
 		}
 
     // Return None
@@ -512,13 +504,16 @@ static PyObject * OSQP_update_A(PyObject *self, PyObject *args) {
 
 		// Parse arguments
 		if( !PyArg_ParseTuple(args, argparse_string, &Ax, &Ax_idx, &Ax_n)) {
-						return NULL;
+				return NULL;
 		}
 
-		// Ax_idx is passed
+		// Check if Ax_idx is passed
 		if((PyObject *)Ax_idx != Py_None){
-			Ax_idx_cont = get_contiguous(Ax_idx, int_type);
-			Ax_idx_arr = (c_int *)PyArray_DATA(Ax_idx_cont);
+				Ax_idx_cont = get_contiguous(Ax_idx, int_type);
+				Ax_idx_arr = (c_int *)PyArray_DATA(Ax_idx_cont);
+		} else {
+				Ax_idx_cont = OSQP_NULL;
+				Ax_idx_arr = OSQP_NULL;
 		}
 
 		// Get contiguous data structure
@@ -528,31 +523,25 @@ static PyObject * OSQP_update_A(PyObject *self, PyObject *args) {
 		Ax_arr = (c_float *)PyArray_DATA(Ax_cont);
 
 		// Check dimension
-		if ((PyObject *)Ax_idx != Py_None &&
-		    PyArray_DIM(Ax, 0) != PyArray_DIM(Ax_idx, 0)){
-			PyErr_SetString(PyExc_ValueError, "Error in updating A: Ax and Ax_idx must have the same length!");
-	        return (PyObject *) NULL;
+		if ((PyObject *)Ax_idx != Py_None && PyArray_DIM(Ax, 0) != PyArray_DIM(Ax_idx, 0)){
+				PyErr_SetString(PyExc_ValueError, "Error in updating A: Ax and Ax_idx must have the same length!");
+	      return (PyObject *) NULL;
 		}
 
 		// Update matrix P
-		if ((PyObject *)Ax_idx == Py_None){
-			// Update all indices
-    		return_val = osqp_update_A((&workspace), Ax_arr, OSQP_NULL, 0);
-		} else {
-			return_val = osqp_update_A((&workspace), Ax_arr, Ax_idx_arr, Ax_n);
-		}
+		return_val = osqp_update_A((&workspace), Ax_arr, Ax_idx_arr, Ax_n);
 
     // Free data
     Py_DECREF(Ax_cont);
-	if ((PyObject *)Ax_idx != Py_None) Py_DECREF(Ax_idx_cont);
+		if ((PyObject *)Ax_idx != Py_None) Py_DECREF(Ax_idx_cont);
 
-	if (return_val == 1) {
-		PyErr_SetString(PyExc_ValueError, "Error in updating A: length of Ax and Ax_idx is too large!");
-		return (PyObject *) NULL;
-	} else if (return_val < 0) {\
-		PyErr_SetString(PyExc_ValueError, "Error in updating A: new KKT matrix is not quasidefinite!");
-		return (PyObject *) NULL;
-	}
+		if (return_val == 1) {
+				PyErr_SetString(PyExc_ValueError, "Error in updating A: length of Ax and Ax_idx is too large!");
+				return (PyObject *) NULL;
+		} else if (return_val < 0) {\
+				PyErr_SetString(PyExc_ValueError, "Error in updating A: new KKT matrix is not quasidefinite!");
+				return (PyObject *) NULL;
+		}
 
     // Return None
     Py_INCREF(Py_None);
@@ -579,19 +568,25 @@ static PyObject * OSQP_update_P_A(PyObject *self, PyObject *args) {
 		// Parse arguments
 		if( !PyArg_ParseTuple(args, argparse_string, &Px, &Px_idx, &Px_n,
 												     &Ax, &Ax_idx, &Ax_n)) {
-						return NULL;
+				return NULL;
 		}
 
 		// Ax_idx is passed
 		if((PyObject *)Ax_idx != Py_None){
-			Ax_idx_cont = get_contiguous(Ax_idx, int_type);
-			Ax_idx_arr = (c_int *)PyArray_DATA(Ax_idx_cont);
+				Ax_idx_cont = get_contiguous(Ax_idx, int_type);
+				Ax_idx_arr = (c_int *)PyArray_DATA(Ax_idx_cont);
+		} else {
+				Ax_idx_cont = OSQP_NULL;
+				Ax_idx_arr = OSQP_NULL;
 		}
 
 		// Px_idx is passed
 		if((PyObject *)Px_idx != Py_None){
-			Px_idx_cont = get_contiguous(Px_idx, int_type);
-			Px_idx_arr = (c_int *)PyArray_DATA(Px_idx_cont);
+				Px_idx_cont = get_contiguous(Px_idx, int_type);
+				Px_idx_arr = (c_int *)PyArray_DATA(Px_idx_cont);
+		} else {
+				Px_idx_cont = OSQP_NULL;
+				Px_idx_arr = OSQP_NULL;
 		}
 
 		// Get contiguous data structure
@@ -604,24 +599,16 @@ static PyObject * OSQP_update_P_A(PyObject *self, PyObject *args) {
 
 		// Check dimension
 		if ((PyObject *)Px_idx != Py_None && PyArray_DIM(Px, 0) != PyArray_DIM(Px_idx, 0)){
-			PyErr_SetString(PyExc_ValueError, "Error in updating P and A: Px and Px_idx must have the same length!");
-			return (PyObject *) NULL;
+				PyErr_SetString(PyExc_ValueError, "Error in updating P and A: Px and Px_idx must have the same length!");
+				return (PyObject *) NULL;
 		}
 		if ((PyObject *)Ax_idx != Py_None && PyArray_DIM(Ax, 0) != PyArray_DIM(Ax_idx, 0)){
 				PyErr_SetString(PyExc_ValueError, "Error in updating P and A: Ax and Ax_idx must have the same length!");
-		        return (PyObject *) NULL;
+		    return (PyObject *) NULL;
 		}
 
 		// Update matrices P and A
-		if ((PyObject *)Px_idx == Py_None && (PyObject *)Ax_idx == Py_None){
-    		return_val = osqp_update_P_A((&workspace), Px_arr, OSQP_NULL, 0, Ax_arr, OSQP_NULL, 0);
-		} else if ((PyObject *)Px_idx == Py_None) {
-				return_val = osqp_update_P_A((&workspace), Px_arr, OSQP_NULL, 0, Ax_arr, Ax_idx_arr, Ax_n);
-		} else if ((PyObject *)Ax_idx == Py_None){
-				return_val = osqp_update_P_A((&workspace), Px_arr, Px_idx_arr, Px_n, Ax_arr, OSQP_NULL, 0);
-		}else{
-				return_val = osqp_update_P_A((&workspace), Px_arr, Px_idx_arr, Px_n, Ax_arr, Ax_idx_arr, Ax_n);
-		}
+		return_val = osqp_update_P_A((&workspace), Px_arr, Px_idx_arr, Px_n, Ax_arr, Ax_idx_arr, Ax_n);
 
     // Free data
     Py_DECREF(Px_cont);
@@ -687,14 +674,14 @@ static PyObject * moduleinit(void){
 
     // Initialize module (no methods. all inside OSQP object)
     #if PY_MAJOR_VERSION >= 3
-        m = PyModule_Create(&moduledef);
+    m = PyModule_Create(&moduledef);
     #else
-        m = Py_InitModule3("PYTHON_EXT_NAME", PYTHON_EXT_NAME_methods, "Embedded OSQP solver");
+    m = Py_InitModule3("PYTHON_EXT_NAME", PYTHON_EXT_NAME_methods, "Embedded OSQP solver");
     #endif
-        if (m == NULL)
-                return NULL;
+    if (m == NULL)
+    		return NULL;
 
-        return m;
+    return m;
 }
 
 
@@ -707,14 +694,13 @@ PyMODINIT_FUNC PyInit_PYTHON_EXT_NAME(void)
 PyMODINIT_FUNC initPYTHON_EXT_NAME(void)
 #endif
 {
+    import_array(); /* for numpy arrays */
 
-        import_array(); /* for numpy arrays */
-
-        // Module initialization is not a global variable in
-        // Python 3
-        #if PY_MAJOR_VERSION >= 3
-        return moduleinit();
-        #else
-        moduleinit();
-        #endif
+    // Module initialization is not a global variable in
+    // Python 3
+    #if PY_MAJOR_VERSION >= 3
+    return moduleinit();
+    #else
+    moduleinit();
+    #endif
 }

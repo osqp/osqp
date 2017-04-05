@@ -492,7 +492,6 @@ static PyObject * OSQP_update_P(OSQP *self, PyObject *args) {
 		c_float * Px_arr;
 		c_int * Px_idx_arr;
 		c_int Px_n;
-		c_int return_val;
 		int float_type = get_float_type();
 		int int_type = get_int_type();
 
@@ -507,10 +506,13 @@ static PyObject * OSQP_update_P(OSQP *self, PyObject *args) {
 						return NULL;
 		}
 
-		// Px_idx is passed
+		// Check if Px_idx is passed
 		if((PyObject *)Px_idx != Py_None){
-			Px_idx_cont = get_contiguous(Px_idx, int_type);
-			Px_idx_arr = (c_int *)PyArray_DATA(Px_idx_cont);
+				Px_idx_cont = get_contiguous(Px_idx, int_type);
+				Px_idx_arr = (c_int *)PyArray_DATA(Px_idx_cont);
+		} else {
+				Px_idx_cont = OSQP_NULL;
+				Px_idx_arr = OSQP_NULL;
 		}
 
 		// Get contiguous data structure
@@ -520,15 +522,10 @@ static PyObject * OSQP_update_P(OSQP *self, PyObject *args) {
 		Px_arr = (c_float *)PyArray_DATA(Px_cont);
 
 		// Update matrix P
-		if ((PyObject *)Px_idx == Py_None){
-			// Update all indices
-    		return_val = osqp_update_P(self->workspace, Px_arr, OSQP_NULL, 0);
-		} else {
-			return_val = osqp_update_P(self->workspace, Px_arr, Px_idx_arr, Px_n);
-		}
+		osqp_update_P(self->workspace, Px_arr, Px_idx_arr, Px_n);
 
-	    // Free data
-	    Py_DECREF(Px_cont);
+	  // Free data
+	  Py_DECREF(Px_cont);
 		if ((PyObject *)Px_idx != Py_None) Py_DECREF(Px_idx_cont);
 
 
@@ -543,7 +540,6 @@ static PyObject * OSQP_update_A(OSQP *self, PyObject *args) {
 		c_float * Ax_arr;
 		c_int * Ax_idx_arr;
 		c_int Ax_n;
-		c_int return_val;
 		int float_type = get_float_type();
 		int int_type = get_int_type();
 
@@ -558,10 +554,13 @@ static PyObject * OSQP_update_A(OSQP *self, PyObject *args) {
 						return NULL;
 		}
 
-		// Ax_idx is passed
+		// Check if Ax_idx is passed
 		if((PyObject *)Ax_idx != Py_None){
-			Ax_idx_cont = get_contiguous(Ax_idx, int_type);
-			Ax_idx_arr = (c_int *)PyArray_DATA(Ax_idx_cont);
+				Ax_idx_cont = get_contiguous(Ax_idx, int_type);
+				Ax_idx_arr = (c_int *)PyArray_DATA(Ax_idx_cont);
+		} else {
+				Ax_idx_cont = OSQP_NULL;
+				Ax_idx_arr = OSQP_NULL;
 		}
 
 		// Get contiguous data structure
@@ -571,12 +570,7 @@ static PyObject * OSQP_update_A(OSQP *self, PyObject *args) {
 		Ax_arr = (c_float *)PyArray_DATA(Ax_cont);
 
 		// Update matrix A
-		if ((PyObject *)Ax_idx == Py_None){
-			// Update all indices
-    		return_val = osqp_update_A(self->workspace, Ax_arr, OSQP_NULL, 0);
-		} else{
-			return_val = osqp_update_A(self->workspace, Ax_arr, Ax_idx_arr, Ax_n);
-		}
+		osqp_update_A(self->workspace, Ax_arr, Ax_idx_arr, Ax_n);
 
     // Free data
     Py_DECREF(Ax_cont);
@@ -594,7 +588,6 @@ static PyObject * OSQP_update_P_A(OSQP *self, PyObject *args) {
 		c_float * Px_arr, * Ax_arr;
 		c_int * Px_idx_arr, * Ax_idx_arr;
 		c_int Px_n, Ax_n;
-		c_int return_val;
 		int float_type = get_float_type();
 		int int_type = get_int_type();
 
@@ -610,16 +603,22 @@ static PyObject * OSQP_update_P_A(OSQP *self, PyObject *args) {
 						return NULL;
 		}
 
-		// Ax_idx is passed
+		// Check if Ax_idx is passed
 		if((PyObject *)Ax_idx != Py_None){
-			Ax_idx_cont = get_contiguous(Ax_idx, int_type);
-			Ax_idx_arr = (c_int *)PyArray_DATA(Ax_idx_cont);
+				Ax_idx_cont = get_contiguous(Ax_idx, int_type);
+				Ax_idx_arr = (c_int *)PyArray_DATA(Ax_idx_cont);
+		} else {
+				Ax_idx_cont = OSQP_NULL;
+				Ax_idx_arr = OSQP_NULL;
 		}
 
-		// Px_idx is passed
+		// Check if Px_idx is passed
 		if((PyObject *)Px_idx != Py_None){
-			Px_idx_cont = get_contiguous(Px_idx, int_type);
-			Px_idx_arr = (c_int *)PyArray_DATA(Px_idx_cont);
+				Px_idx_cont = get_contiguous(Px_idx, int_type);
+				Px_idx_arr = (c_int *)PyArray_DATA(Px_idx_cont);
+		} else {
+				Px_idx_cont = OSQP_NULL;
+				Px_idx_arr = OSQP_NULL;
 		}
 
 		// Get contiguous data structure
@@ -631,21 +630,13 @@ static PyObject * OSQP_update_P_A(OSQP *self, PyObject *args) {
 		Ax_arr = (c_float *)PyArray_DATA(Ax_cont);
 
 		// Update matrices P and A
-		if ((PyObject *)Px_idx == Py_None && (PyObject *)Ax_idx == Py_None){
-    		return_val = osqp_update_P_A(self->workspace, Px_arr, OSQP_NULL, 0, Ax_arr, OSQP_NULL, 0);
-		} else if ((PyObject *)Px_idx == Py_None){
-				return_val = osqp_update_P_A(self->workspace, Px_arr, OSQP_NULL, 0, Ax_arr, Ax_idx_arr, Ax_n);
-		} else if ((PyObject *)Ax_idx == Py_None){
-				return_val = osqp_update_P_A(self->workspace, Px_arr, Px_idx_arr, Px_n, Ax_arr, OSQP_NULL, 0);
-		} else {
-				return_val = osqp_update_P_A(self->workspace, Px_arr, Px_idx_arr, Px_n, Ax_arr, Ax_idx_arr, Ax_n);
-		}
+		osqp_update_P_A(self->workspace, Px_arr, Px_idx_arr, Px_n, Ax_arr, Ax_idx_arr, Ax_n);
 
     // Free data
     Py_DECREF(Px_cont);
-	if ((PyObject *)Px_idx != Py_None) Py_DECREF(Px_idx_cont);
-	Py_DECREF(Ax_cont);
-	if ((PyObject *)Ax_idx != Py_None) Py_DECREF(Ax_idx_cont);
+		if ((PyObject *)Px_idx != Py_None) Py_DECREF(Px_idx_cont);
+		Py_DECREF(Ax_cont);
+		if ((PyObject *)Ax_idx != Py_None) Py_DECREF(Ax_idx_cont);
 
     // Return None
     Py_INCREF(Py_None);
@@ -663,7 +654,7 @@ static PyObject *OSQP_warm_start(OSQP *self, PyObject *args){
     if( !PyArg_ParseTuple(args, argparse_string,
                           &PyArray_Type, &x,
                           &PyArray_Type, &y)) {
-            return NULL;
+        return NULL;
     }
 
     // Get contiguous data structure
@@ -697,7 +688,7 @@ static PyObject *OSQP_warm_start_x(OSQP *self, PyObject *args){
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string,
                           &PyArray_Type, &x)) {
-            return NULL;
+        return NULL;
     }
 
     // Get contiguous data structure
@@ -728,7 +719,7 @@ static PyObject *OSQP_warm_start_y(OSQP *self, PyObject *args){
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string,
                           &PyArray_Type, &y)) {
-            return NULL;
+        return NULL;
     }
 
     // Get contiguous data structure
@@ -760,13 +751,11 @@ static PyObject *OSQP_update_max_iter(OSQP *self, PyObject *args){
     #endif
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &max_iter_new)) {
-            return NULL;
+        return NULL;
     }
-
 
     // Perform Update
     osqp_update_max_iter(self->workspace, max_iter_new);
-
 
     // Return None
     Py_INCREF(Py_None);
@@ -786,7 +775,7 @@ static PyObject *OSQP_update_eps_abs(OSQP *self, PyObject *args){
 
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &eps_abs_new)) {
-            return NULL;
+        return NULL;
     }
 
     // Perform Update
@@ -809,7 +798,7 @@ static PyObject *OSQP_update_eps_rel(OSQP *self, PyObject *args){
 
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &eps_rel_new)) {
-            return NULL;
+        return NULL;
     }
 
     // Perform Update
@@ -833,7 +822,7 @@ static PyObject *OSQP_update_eps_prim_inf(OSQP *self, PyObject *args){
 
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &eps_prim_inf_new)) {
-            return NULL;
+        return NULL;
     }
 
     // Perform Update
@@ -856,7 +845,7 @@ static PyObject *OSQP_update_eps_dual_inf(OSQP *self, PyObject *args){
 
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &eps_dual_inf_new)) {
-            return NULL;
+        return NULL;
     }
 
     // Perform Update
@@ -883,7 +872,7 @@ static PyObject *OSQP_update_alpha(OSQP *self, PyObject *args){
 
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &alpha_new)) {
-            return NULL;
+        return NULL;
     }
 
     // Perform Update
@@ -907,7 +896,7 @@ static PyObject *OSQP_update_delta(OSQP *self, PyObject *args){
 
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &delta_new)) {
-            return NULL;
+        return NULL;
     }
 
     // Perform Update
@@ -931,7 +920,7 @@ static PyObject *OSQP_update_polish(OSQP *self, PyObject *args){
 
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &polish_new)) {
-            return NULL;
+        return NULL;
     }
 
     // Perform Update
@@ -954,7 +943,7 @@ static PyObject *OSQP_update_pol_refine_iter(OSQP *self, PyObject *args){
 
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &pol_refine_iter_new)) {
-            return NULL;
+        return NULL;
     }
 
     // Perform Update
@@ -978,7 +967,7 @@ static PyObject *OSQP_update_verbose(OSQP *self, PyObject *args){
 
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &verbose_new)) {
-            return NULL;
+        return NULL;
     }
 
     // Perform Update
@@ -1001,7 +990,7 @@ static PyObject *OSQP_update_early_terminate(OSQP *self, PyObject *args){
 
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &early_terminate_new)) {
-            return NULL;
+        return NULL;
     }
 
     // Perform Update
@@ -1025,7 +1014,7 @@ static PyObject *OSQP_update_early_terminate_interval(OSQP *self, PyObject *args
 
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &early_terminate_interval_new)) {
-            return NULL;
+        return NULL;
     }
 
     // Perform Update
@@ -1048,7 +1037,7 @@ static PyObject *OSQP_update_warm_start(OSQP *self, PyObject *args){
 
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string, &warm_start_new)) {
-            return NULL;
+        return NULL;
     }
 
     // Perform Update
