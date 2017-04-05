@@ -707,7 +707,7 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y){
  * Update elements of matrix P (upper-diagonal)
  * without changing sparsity structure.
  *
- * 
+ *
  *  If Px_new_idx is OSQP_NULL, Px_new is assumed to be as long as P->x
  *  and the whole P->x is replaced.
  *
@@ -854,8 +854,8 @@ c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, 
  *                                  2: A_new_n > nnzA
  *                                 <0: error in update_priv()
  */
-c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx,
-                      c_int P_new_n, c_float * Ax_new, c_int * Ax_new_idx, c_int A_new_n){
+c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, c_int P_new_n,
+                                            c_float * Ax_new, c_int * Ax_new_idx, c_int A_new_n){
     c_int i; // For indexing
     c_int exitflag; // Exit flag
     c_int nnzP, nnzA; // Number of nonzeros in P and A

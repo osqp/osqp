@@ -410,6 +410,7 @@ static PyObject *OSQP_update_bounds(PyObject *self, PyObject *args){
 
 }
 
+
 #if EMBEDDED != 1
 
 // Get integer type from OSQP setup
@@ -582,33 +583,37 @@ static PyObject * OSQP_update_P_A(PyObject *self, PyObject *args) {
 
 		// Get contiguous data structure
 		Px_cont = get_contiguous(Px, float_type);
-		Px_idx_cont = get_contiguous(Px_idx, int_type);
 		Ax_cont = get_contiguous(Ax, float_type);
+		Px_idx_cont = get_contiguous(Px_idx, int_type);
 		Ax_idx_cont = get_contiguous(Ax_idx, int_type);
 
 		// Copy array into c_float and c_int arrays
 		Px_arr = (c_float *)PyArray_DATA(Px_cont);
-		Px_idx_arr = (c_int *)PyArray_DATA(Px_idx_cont);
 		Ax_arr = (c_float *)PyArray_DATA(Ax_cont);
+		Px_idx_arr = (c_int *)PyArray_DATA(Px_idx_cont);
 		Ax_idx_arr = (c_int *)PyArray_DATA(Ax_idx_cont);
 
 		// Check dimension
-		if (Px_idx_arr[0] != -1 && PyArray_DIM(Px, 0) != PyArray_DIM(Px_idx, 0)){
+		if ( Px_idx_arr[0] != -1 && (PyArray_DIM(Px, 0) != PyArray_DIM(Px_idx, 0)) ){
 				PySys_WriteStdout("Error in Px and Px_idx sizes!\n");
 				return NULL;
 		}
-		if (Ax_idx_arr[0] != -1 && PyArray_DIM(Ax, 0) != PyArray_DIM(Ax_idx, 0)){
+		if ( Ax_idx_arr[0] != -1 && (PyArray_DIM(Ax, 0) != PyArray_DIM(Ax_idx, 0)) ){
 				PySys_WriteStdout("Error in Ax and Ax_idx sizes!\n");
 				return NULL;
 		}
 
+		// DEBUG
+		PySys_WriteStdout("Px_idx_arr[0] = %d\n", (int)Px_idx_arr[0]);
+		PySys_WriteStdout("Ax_idx_arr[0] = %d\n", (int)Ax_idx_arr[0]);
+
 		// Update matrices P and A
-		if (Px_idx_arr[0] == -1 && Ax_idx_arr[0] == -1)
-    		return_val = osqp_update_P_A((&workspace), Px_arr, NULL, 0, Ax_arr, NULL, 0);
+		if ( (Px_idx_arr[0] == -1) && (Ax_idx_arr[0] == -1) )
+    		return_val = osqp_update_P_A((&workspace), Px_arr, NULL, Px_n, Ax_arr, NULL, Ax_n);
 		else if (Px_idx_arr[0] == -1)
-				return_val = osqp_update_P_A((&workspace), Px_arr, NULL, 0, Ax_arr, Ax_idx_arr, Ax_n);
+				return_val = osqp_update_P_A((&workspace), Px_arr, NULL, Px_n, Ax_arr, Ax_idx_arr, Ax_n);
 		else if (Ax_idx_arr[0] == -1)
-				return_val = osqp_update_P_A((&workspace), Px_arr, Px_idx_arr, Px_n, Ax_arr, NULL, 0);
+				return_val = osqp_update_P_A((&workspace), Px_arr, Px_idx_arr, Px_n, Ax_arr, NULL, Ax_n);
 		else
 				return_val = osqp_update_P_A((&workspace), Px_arr, Px_idx_arr, Px_n, Ax_arr, Ax_idx_arr, Ax_n);
 
@@ -619,7 +624,7 @@ static PyObject * OSQP_update_P_A(PyObject *self, PyObject *args) {
     Py_DECREF(Ax_idx_cont);
 
 		if (return_val == 1) {
-				PySys_WriteStdout("Size of Px and Px_idx is too large! Px_n = %d", (int)Px_n);
+				PySys_WriteStdout("Size of Px and Px_idx is too large!");
 				return NULL;
 		} else if (return_val == 2) {
 				PySys_WriteStdout("Size of Ax and Ax_idx is too large!");

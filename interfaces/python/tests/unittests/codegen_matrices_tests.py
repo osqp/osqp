@@ -59,6 +59,8 @@ class codegen_matrices_tests(unittest.TestCase):
         Px = Pnew_triu.data
         Px_idx = np.arange(Pnew_triu.nnz)
         mat_emosqp.update_P(Px, Px_idx, len(Px))
+
+        # Solve problem
         x, y, _, _, _ = mat_emosqp.solve()
 
         # Assert close
@@ -79,6 +81,8 @@ class codegen_matrices_tests(unittest.TestCase):
         Pnew_triu = sparse.triu(self.P_new).tocsc()
         Px = Pnew_triu.data
         mat_emosqp.update_P(Px, np.array([-1]), 0)
+
+        # Solve problem
         x, y, _, _, _ = mat_emosqp.solve()
 
         # Assert close
@@ -99,6 +103,8 @@ class codegen_matrices_tests(unittest.TestCase):
         Ax = self.A_new.data
         Ax_idx = np.arange(self.A_new.nnz)
         mat_emosqp.update_A(Ax, Ax_idx, len(Ax))
+
+        # Solve problem
         x, y, _, _, _ = mat_emosqp.solve()
 
         # Assert close
@@ -117,7 +123,9 @@ class codegen_matrices_tests(unittest.TestCase):
 
         # Update matrix A
         Ax = self.A_new.data
-        mat_emosqp.update_A(Ax, np.array([-1]), 0)
+        mat_emosqp.update_A(Ax, np.array([-1]), len(Ax))
+
+        # Solve problem
         x, y, _, _, _ = mat_emosqp.solve()
 
         # Assert close
@@ -141,6 +149,8 @@ class codegen_matrices_tests(unittest.TestCase):
         Ax = self.A_new.data
         Ax_idx = np.arange(self.A_new.nnz)
         mat_emosqp.update_P_A(Px, Px_idx, len(Px), Ax, Ax_idx, len(Ax))
+
+        # Solve problem
         x, y, _, _, _ = mat_emosqp.solve()
 
         # Assert close
@@ -152,7 +162,7 @@ class codegen_matrices_tests(unittest.TestCase):
         P_triu = sparse.triu(self.P).tocsc()
         Px = P_triu.data
         Ax = self.A.data
-        mat_emosqp.update_P_A(Px, np.array([-1]), 0, Ax, np.array([-1]), 0)
+        mat_emosqp.update_P_A(Px, np.array([-1]), len(Px), Ax, np.array([-1]), len(Ax))
 
     # def test_update_P_A_indP(self):
     #     import mat_emosqp
@@ -162,7 +172,9 @@ class codegen_matrices_tests(unittest.TestCase):
     #     Px = Pnew_triu.data
     #     Px_idx = np.arange(Pnew_triu.nnz)
     #     Ax = self.A_new.data
-    #     mat_emosqp.update_P_A(Px, Px_idx, len(Px), Ax, np.array([-1]), 0)
+    #     mat_emosqp.update_P_A(Px, Px_idx, len(Px), Ax, np.array([-1]), len(Ax))
+    #
+    #     # Solve problem
     #     x, y, _, _, _ = mat_emosqp.solve()
     #
     #     # Assert close
@@ -185,6 +197,8 @@ class codegen_matrices_tests(unittest.TestCase):
     #     Ax = self.A_new.data
     #     Ax_idx = np.arange(self.A_new.nnz)
     #     mat_emosqp.update_P_A(Px, np.array([-1]), 0, Ax, Ax_idx, len(Ax))
+    #
+    #     # Solve problem
     #     x, y, _, _, _ = mat_emosqp.solve()
     #
     #     # Assert close
@@ -207,7 +221,9 @@ class codegen_matrices_tests(unittest.TestCase):
         Pnew_triu = sparse.triu(self.P_new).tocsc()
         Px = Pnew_triu.data
         Ax = self.A_new.data
-        mat_emosqp.update_P_A(Px, np.array([-1]), 0, Ax, np.array([-1]), 0)
+        mat_emosqp.update_P_A(Px, np.array([-1]), len(Px), Ax, np.array([-1]), len(Ax))
+
+        # Solve problem
         x, y, _, _, _ = mat_emosqp.solve()
 
         # Assert close

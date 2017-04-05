@@ -132,8 +132,21 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
 
     print("[done]")
 
+    # Create a project
+    if project_type != '':
+        sys.stdout.write("Creating project... \t\t\t\t\t")
+        sys.stdout.flush()
+        current_dir = os.getcwd()
+        os.chdir(target_dir)
+        if os.path.exists('build'):
+            sh.rmtree('build')
+        os.makedirs('build')
+        os.chdir('build')
+        call(['cmake', '-G', "%s" % project_type, '..'])
+        print("[done]")
+
     # Compile python interface
-    sys.stdout.write("Compiling Python wrapper... \t\t\t\t\t")
+    sys.stdout.write("Compiling Python wrapper...\n")
     sys.stdout.flush()
     current_dir = os.getcwd()
     os.chdir(target_src_dir)
@@ -141,7 +154,7 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
     print("[done]")
 
     # Copy compiled solver
-    sys.stdout.write("Copying code-generated Python solver to current" +
+    sys.stdout.write("Copying code-generated Python solver to current " +
                      "directory... \t")
     sys.stdout.flush()
     module_name = glob('%s*' % python_ext_name + module_ext)
@@ -152,19 +165,3 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
     sh.copy(module_name, current_dir)
     os.chdir(current_dir)
     print("[done]")
-
-
-
-    # python setup.py build_ext --inplace --quiet
-
-
-    # Generate project
-    # cwd = os.getcwd()
-    # os.chdir(target_dir)
-    # call(["cmake", "-DEMBEDDED=%i" % embedded, ".."])
-    # os.chdir(cwd)
-
-    #render(target_src_dir, template_vars, 'osqp_cg_data.c.jinja',
-    #       'osqp_cg_data.c')
-    #render(target_dir, template_vars, 'example_problem.c.jinja',
-    #       'example_problem.c')
