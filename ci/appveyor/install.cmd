@@ -13,7 +13,8 @@ set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%
 conda config --set always_yes yes --set changeps1 no
 conda update -q conda
 conda info -a
-conda create -q -n test-environment python=%PYTHON_VERSION% numpy scipy nose future conda-build
+conda install conda-build
+conda create -q -n test-environment python=%PYTHON_VERSION% numpy scipy nose future
 :: N.B. Need to run with call otherwise the script hangs
 call activate test-environment
 

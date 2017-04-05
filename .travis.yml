@@ -1,9 +1,5 @@
 language: C
-python:
-  - "2.7"
-  - "3.4"
-  - "3.5"
-  - "3.6"
+
 os:
   - linux
   - osx
@@ -13,6 +9,11 @@ env:
     - DEPS_DIR="${HOME}/deps"
     - COVERAGE="true"
     - ANACONDA_TOKEN="ox-a17c699f-1776-436c-af24-74620852ae91%"
+  matrix:
+    - PYTHON_VERSION="2.7"
+    - PYTHON_VERSION="3.4"
+    - PYTHON_VERSION="3.5"
+    - PYTHON_VERSION="3.6"
 install: bash ci/travis/install.sh
 script: bash ci/travis/script.sh
 after_success: bash ci/travis/coverage.sh
