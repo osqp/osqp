@@ -10,9 +10,9 @@ environment:
     - PYTHON_VERSION: 2.7
       MINICONDA: C:\Miniconda
       CMAKE_PROJECT: MinGW Makefiles
-    # - PYTHON_VERSION: 3.4
-    #   MINICONDA: C:\Miniconda3
-    #   CMAKE_PROJECT: MinGW Makefiles
+    - PYTHON_VERSION: 3.4
+      MINICONDA: C:\Miniconda3
+      CMAKE_PROJECT: MinGW Makefiles
 
 branches:
   only:
