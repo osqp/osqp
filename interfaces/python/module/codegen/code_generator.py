@@ -134,7 +134,7 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
 
     # Create a project
     if project_type != '':
-        sys.stdout.write("Creating project... \t\t\t\t\t")
+        sys.stdout.write("Creating project...\n")
         sys.stdout.flush()
         current_dir = os.getcwd()
         os.chdir(target_dir)
@@ -143,10 +143,11 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
         os.makedirs('build')
         os.chdir('build')
         call(['cmake', '-G', "%s" % project_type, '..'])
+        os.chdir(current_dir)
         print("[done]")
 
     # Compile python interface
-    sys.stdout.write("Compiling Python wrapper...\n")
+    sys.stdout.write("Compiling Python wrapper... \t\t\t\t\t")
     sys.stdout.flush()
     current_dir = os.getcwd()
     os.chdir(target_src_dir)

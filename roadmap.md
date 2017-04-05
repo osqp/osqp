@@ -3,7 +3,7 @@
 -   [x] Parameter Selection: `rho`, `sigma` and `alpha` from examples (data driven)
 -   [ ] Avoid square roots -> Use eps tests to the 2
 -   [x] Add functions to update matrices in Python and Matlab
--   [ ] Add functions to update matrices in codegen
+-   [x] Add functions to update matrices in codegen
 -   [ ] Replace PySys_WriteStdout by PyErr_SetString(PyExc_ValueError, <message>)
 -   [ ] Add functions to update rho and sigma (by updating the KKT matrix entries)
 -   [ ] Replace EMBEDDED flag in C with:  EMBEDDED, EMBEDDED_PARAMETERS_VECTORS, EMBEDDED_PARAMETERS_MATRICES (all true/false)

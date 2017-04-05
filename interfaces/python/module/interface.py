@@ -11,6 +11,7 @@ from platform import system
 import osqp.codegen as cg
 import sys
 
+
 class OSQP(object):
     def __init__(self):
         self._model = _osqp.OSQP()
@@ -351,5 +352,3 @@ class OSQP(object):
         # Generate code with codegen module
         cg.codegen(work, folder, python_ext_name, project_type,
                    embedded, force_rewrite, loop_unrolling)
-
-        # return work
