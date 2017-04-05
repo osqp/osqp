@@ -7,12 +7,12 @@ platform:
 
 environment:
   matrix:
-    # - PYTHON_VERSION: 2.7
+    - PYTHON_VERSION: 2.7
+      MINICONDA: C:\Miniconda
+      CMAKE_PROJECT: MinGW Makefiles
+    # - PYTHON_VERSION: 3.4
     #   MINICONDA: C:\Miniconda
     #   CMAKE_PROJECT: MinGW Makefiles
-    - PYTHON_VERSION: 3.4
-      MINICONDA: C:\Miniconda3
-      CMAKE_PROJECT: MinGW Makefiles
 
 branches:
   only:
@@ -30,6 +30,15 @@ install:
 test_script:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\script.cmd"
 
-# Uncomment for remote desktop debug
+deploy:
+  - provider: Script
+    name: production
+    on:
+      appveyor_repo_tag: false
+deploy_script:
+  - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\deploy_anaconda.cmd"
+
+
 on_finish:
+  # Uncomment for remote desktop debug
   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
