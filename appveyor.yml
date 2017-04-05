@@ -7,7 +7,8 @@ platform:
 
 environment:
   env:
-    - ANACONDA_TOKEN: ox-a17c699f-1776-436c-af24-74620852ae91%
+    ANACONDA_TOKEN:
+        secure: yom1od1sZI7nYAFSmHDtgmRrLCGdkSaow11rIdIA+k9m0XfNdviXDkWSRI3DwdQJ
   matrix:
     - PYTHON_VERSION: 2.7
       MINICONDA: C:\Miniconda

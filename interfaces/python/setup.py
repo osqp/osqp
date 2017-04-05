@@ -100,7 +100,7 @@ else:
 library_dirs = []
 libraries = []
 if system() == 'Linux':
-    libraries = ['-lrt']
+    libraries = ['rt']
 
 
 # Add OSQP compiled library

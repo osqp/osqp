@@ -34,7 +34,7 @@ else:
 
 # Add additional libraries
 if system() == 'Linux':
-    libraries = ['-lrt']
+    libraries = ['rt']
 
 '''
 Include directory
