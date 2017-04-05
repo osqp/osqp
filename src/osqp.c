@@ -866,8 +866,8 @@ c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, 
  *                                  2: A_new_n > nnzA
  *                                 <0: error in update_priv()
  */
-c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx,
-                      c_int P_new_n, c_float * Ax_new, c_int * Ax_new_idx, c_int A_new_n){
+c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, c_int P_new_n,
+                                            c_float * Ax_new, c_int * Ax_new_idx, c_int A_new_n){
     c_int i; // For indexing
     c_int exitflag; // Exit flag
     c_int nnzP, nnzA; // Number of nonzeros in P and A

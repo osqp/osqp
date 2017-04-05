@@ -11,6 +11,7 @@ from platform import system
 import osqp.codegen as cg
 import sys
 
+
 class OSQP(object):
     def __init__(self):
         self._model = _osqp.OSQP()
@@ -311,7 +312,7 @@ class OSQP(object):
         if x is None and y is None:
             raise ValueError("Unrecognized fields")
 
-    def codegen(self, folder, project_type="Makefile", parameters='vectors',
+    def codegen(self, folder, project_type='', parameters='vectors',
                 python_ext_name='emosqp', force_rewrite=False,
                 loop_unrolling=False):
         """
@@ -326,20 +327,24 @@ class OSQP(object):
         else:
             raise ValueError("Unknown value of 'parameters' argument.")
 
+        # Check project_type argument
+        expectedProject = ('', 'Makefile', 'MinGW Makefiles',
+                           'Unix Makefiles', 'CodeBlocks', 'Xcode')
+        if project_type not in expectedProject:
+            raise ValueError("Unknown value of 'project_type' argument.")
+
+        if project_type == 'Makefile':
+            if system() == 'Windows':
+                project_type = 'MinGW Makefiles'
+            elif system() == 'Linux' or system() == 'Darwin':
+                project_type = 'Unix Makefiles'
+
         # Convert workspace to Python
         sys.stdout.write("Getting workspace from OSQP object... \t\t\t\t")
         sys.stdout.flush()
         work = self._model._get_workspace()
         print("[done]")
 
-        if project_type == 'Makefile':
-            if system() == 'Windows':
-                project_type = "MinGW Makefiles"
-            elif system() == 'Linux' or system() == 'Darwin':
-                project_type = "Unix Makefiles"
-
         # Generate code with codegen module
         cg.codegen(work, folder, python_ext_name, project_type,
                    embedded, force_rewrite, loop_unrolling)
-
-        # return work

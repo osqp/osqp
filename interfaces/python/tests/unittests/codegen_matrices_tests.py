@@ -59,6 +59,8 @@ class codegen_matrices_tests(unittest.TestCase):
         Px = Pnew_triu.data
         Px_idx = np.arange(Pnew_triu.nnz)
         mat_emosqp.update_P(Px, Px_idx, len(Px))
+
+        # Solve problem
         x, y, _, _, _ = mat_emosqp.solve()
 
         # Assert close
@@ -99,6 +101,8 @@ class codegen_matrices_tests(unittest.TestCase):
         Ax = self.A_new.data
         Ax_idx = np.arange(self.A_new.nnz)
         mat_emosqp.update_A(Ax, Ax_idx, len(Ax))
+
+        # Solve problem
         x, y, _, _, _ = mat_emosqp.solve()
 
         # Assert close
@@ -141,6 +145,8 @@ class codegen_matrices_tests(unittest.TestCase):
         Ax = self.A_new.data
         Ax_idx = np.arange(self.A_new.nnz)
         mat_emosqp.update_P_A(Px, Px_idx, len(Px), Ax, Ax_idx, len(Ax))
+
+        # Solve problem
         x, y, _, _, _ = mat_emosqp.solve()
 
         # Assert close

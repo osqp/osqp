@@ -410,6 +410,7 @@ static PyObject *OSQP_update_bounds(PyObject *self, PyObject *args){
 
 }
 
+
 #if EMBEDDED != 1
 
 // Get integer type from OSQP setup
@@ -630,7 +631,7 @@ static PyObject * OSQP_update_P_A(PyObject *self, PyObject *args) {
 
 	// LEFT for DEBUG
 		if (return_val == 1) {
-				PySys_WriteStdout("Size of Px and Px_idx is too large! Px_n = %d", (int)Px_n);
+				PySys_WriteStdout("Size of Px and Px_idx is too large!");
 				return NULL;
 		} else if (return_val == 2) {
 				PySys_WriteStdout("Size of Ax and Ax_idx is too large!");
