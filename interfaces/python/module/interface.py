@@ -173,19 +173,15 @@ class OSQP(object):
 
         # Update matrix P
         if Px is not None:
-            if Px_idx is None:
-                Px_idx = np.array([-1])
-            elif len(Px) != len(Px_idx):
-                raise ValueError("Px and Px_idx must have same lengths")
+            if Px_idx is not None and len(Px) != len(Px_idx):
+                raise ValueError("Px and Px_idx must have same length")
             if Ax is None:
                 self._model.update_P(Px, Px_idx, len(Px))
 
         # Update matrix A
         if Ax is not None:
-            if Ax_idx is None:
-                Ax_idx = np.array([-1])
-            elif len(Ax) != len(Ax_idx):
-                    raise ValueError("Ax and Ax_idx must have same lengths")
+            if Ax_idx is not None and len(Ax) != len(Ax_idx):
+                    raise ValueError("Ax and Ax_idx must have same length")
             if Px is None:
                 self._model.update_A(Ax, Ax_idx, len(Ax))
 

@@ -707,7 +707,7 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y){
  * Update elements of matrix P (upper-diagonal)
  * without changing sparsity structure.
  *
- * 
+ *
  *  If Px_new_idx is OSQP_NULL, Px_new is assumed to be as long as P->x
  *  and the whole P->x is replaced.
  *
@@ -763,6 +763,12 @@ c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, 
 
    // Set solver status to OSQP_UNSOLVED
    update_status(work->info, OSQP_UNSOLVED);
+
+   #ifdef PRINTING
+   if (exitflag < 0) {
+           c_print("Error in P update: new KKT matrix is not quasidefinite!");
+   }
+   #endif
 
    return exitflag;
 }
@@ -825,6 +831,12 @@ c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, 
 
    // Set solver status to OSQP_UNSOLVED
    update_status(work->info, OSQP_UNSOLVED);
+
+   #ifdef PRINTING
+   if (exitflag < 0) {
+           c_print("Error in A update: new KKT matrix is not quasidefinite!");
+   }
+   #endif
 
     return exitflag;
 }
@@ -926,6 +938,12 @@ c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx
 
    // Set solver status to OSQP_UNSOLVED
    update_status(work->info, OSQP_UNSOLVED);
+
+   #ifdef PRINTING
+   if (exitflag < 0) {
+           c_print("Error in P and A update: new KKT matrix is not quasidefinite!");
+   }
+   #endif
 
    return exitflag;
 

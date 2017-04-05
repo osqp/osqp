@@ -497,45 +497,40 @@ static PyObject * OSQP_update_P(OSQP *self, PyObject *args) {
 		int int_type = get_int_type();
 
 		#ifdef DLONG
-		static char * argparse_string = "O!O!l";
+		static char * argparse_string = "OOl";
 		#else
-		static char * argparse_string = "O!O!i";
+		static char * argparse_string = "OOi";
 		#endif
 
 		// Parse arguments
-		if( !PyArg_ParseTuple(args, argparse_string,
-													&PyArray_Type, &Px,
-													&PyArray_Type, &Px_idx,
-													&Px_n)) {
+		if( !PyArg_ParseTuple(args, argparse_string, &Px, &Px_idx, &Px_n)) {
 						return NULL;
+		}
+
+		// Px_idx is passed
+		if((PyObject *)Px_idx != Py_None){
+			Px_idx_cont = get_contiguous(Px_idx, int_type);
+			Px_idx_arr = (c_int *)PyArray_DATA(Px_idx_cont);
 		}
 
 		// Get contiguous data structure
 		Px_cont = get_contiguous(Px, float_type);
-		Px_idx_cont = get_contiguous(Px_idx, int_type);
 
 		// Copy array into c_float and c_int arrays
 		Px_arr = (c_float *)PyArray_DATA(Px_cont);
-		Px_idx_arr = (c_int *)PyArray_DATA(Px_idx_cont);
 
 		// Update matrix P
-		if (Px_idx_arr[0] == -1)
-				// Update all indices
-    		return_val = osqp_update_P(self->workspace, Px_arr, NULL, 0);
-		else
-				return_val = osqp_update_P(self->workspace, Px_arr, Px_idx_arr, Px_n);
-
-    // Free data
-    Py_DECREF(Px_cont);
-    Py_DECREF(Px_idx_cont);
-
-		if (return_val == 1) {
-				PyErr_SetString(PyExc_ValueError, "Size of Px and Px_idx is too large!");
-				return (PyObject *) NULL;
-		} else if (return_val < 0) {
-				PyErr_SetString(PyExc_ValueError, "New KKT matrix is not quasidefinite!");
-				return (PyObject *) NULL;
+		if ((PyObject *)Px_idx == Py_None){
+			// Update all indices
+    		return_val = osqp_update_P(self->workspace, Px_arr, OSQP_NULL, 0);
+		} else {
+			return_val = osqp_update_P(self->workspace, Px_arr, Px_idx_arr, Px_n);
 		}
+
+	    // Free data
+	    Py_DECREF(Px_cont);
+		if ((PyObject *)Px_idx != Py_None) Py_DECREF(Px_idx_cont);
+
 
     // Return None
     Py_INCREF(Py_None);
@@ -553,45 +548,39 @@ static PyObject * OSQP_update_A(OSQP *self, PyObject *args) {
 		int int_type = get_int_type();
 
 		#ifdef DLONG
-		static char * argparse_string = "O!O!l";
+		static char * argparse_string = "OOl";
 		#else
-		static char * argparse_string = "O!O!i";
+		static char * argparse_string = "OOi";
 		#endif
 
 		// Parse arguments
-		if( !PyArg_ParseTuple(args, argparse_string,
-													&PyArray_Type, &Ax,
-													&PyArray_Type, &Ax_idx,
-													&Ax_n)) {
+		if( !PyArg_ParseTuple(args, argparse_string, &Ax, &Ax_idx, &Ax_n)) {
 						return NULL;
+		}
+
+		// Ax_idx is passed
+		if((PyObject *)Ax_idx != Py_None){
+			Ax_idx_cont = get_contiguous(Ax_idx, int_type);
+			Ax_idx_arr = (c_int *)PyArray_DATA(Ax_idx_cont);
 		}
 
 		// Get contiguous data structure
 		Ax_cont = get_contiguous(Ax, float_type);
-		Ax_idx_cont = get_contiguous(Ax_idx, int_type);
 
 		// Copy array into c_float and c_int arrays
 		Ax_arr = (c_float *)PyArray_DATA(Ax_cont);
-		Ax_idx_arr = (c_int *)PyArray_DATA(Ax_idx_cont);
 
 		// Update matrix A
-		if (Ax_idx_arr[0] == -1)
-				// Update all indices
-    		return_val = osqp_update_A(self->workspace, Ax_arr, NULL, 0);
-		else
-				return_val = osqp_update_A(self->workspace, Ax_arr, Ax_idx_arr, Ax_n);
+		if ((PyObject *)Ax_idx == Py_None){
+			// Update all indices
+    		return_val = osqp_update_A(self->workspace, Ax_arr, OSQP_NULL, 0);
+		} else{
+			return_val = osqp_update_A(self->workspace, Ax_arr, Ax_idx_arr, Ax_n);
+		}
 
     // Free data
     Py_DECREF(Ax_cont);
-    Py_DECREF(Ax_idx_cont);
-
-		if (return_val == 1) {
-				PyErr_SetString(PyExc_ValueError, "Size of Ax and Ax_idx is too large!");
-				return (PyObject *) NULL;
-		} else if (return_val < 0) {
-				PyErr_SetString(PyExc_ValueError, "New KKT matrix is not quasidefinite!");
-				return (PyObject *) NULL;
-		}
+	if ((PyObject *)Ax_idx != Py_None) Py_DECREF(Ax_idx_cont);
 
     // Return None
     Py_INCREF(Py_None);
@@ -610,60 +599,53 @@ static PyObject * OSQP_update_P_A(OSQP *self, PyObject *args) {
 		int int_type = get_int_type();
 
 		#ifdef DLONG
-		static char * argparse_string = "O!O!lO!O!l";
+		static char * argparse_string = "OOlOOl";
 		#else
-		static char * argparse_string = "O!O!iO!O!i";
+		static char * argparse_string = "OOiOOi";
 		#endif
 
 		// Parse arguments
-		if( !PyArg_ParseTuple(args, argparse_string,
-													&PyArray_Type, &Px,
-													&PyArray_Type, &Px_idx,
-													&Px_n,
-													&PyArray_Type, &Ax,
-													&PyArray_Type, &Ax_idx,
-													&Ax_n)) {
+		if( !PyArg_ParseTuple(args, argparse_string, &Px, &Px_idx, &Px_n,
+													&Ax, &Ax_idx, &Ax_n)) {
 						return NULL;
+		}
+
+		// Ax_idx is passed
+		if((PyObject *)Ax_idx != Py_None){
+			Ax_idx_cont = get_contiguous(Ax_idx, int_type);
+			Ax_idx_arr = (c_int *)PyArray_DATA(Ax_idx_cont);
+		}
+
+		// Px_idx is passed
+		if((PyObject *)Px_idx != Py_None){
+			Px_idx_cont = get_contiguous(Px_idx, int_type);
+			Px_idx_arr = (c_int *)PyArray_DATA(Px_idx_cont);
 		}
 
 		// Get contiguous data structure
 		Px_cont = get_contiguous(Px, float_type);
-		Px_idx_cont = get_contiguous(Px_idx, int_type);
 		Ax_cont = get_contiguous(Ax, float_type);
-		Ax_idx_cont = get_contiguous(Ax_idx, int_type);
 
 		// Copy array into c_float and c_int arrays
 		Px_arr = (c_float *)PyArray_DATA(Px_cont);
-		Px_idx_arr = (c_int *)PyArray_DATA(Px_idx_cont);
 		Ax_arr = (c_float *)PyArray_DATA(Ax_cont);
-		Ax_idx_arr = (c_int *)PyArray_DATA(Ax_idx_cont);
 
 		// Update matrices P and A
-		if (Px_idx_arr[0] == -1 && Ax_idx_arr[0] == -1)
-    		return_val = osqp_update_P_A(self->workspace, Px_arr, NULL, 0, Ax_arr, NULL, 0);
-		else if (Px_idx_arr[0] == -1)
-				return_val = osqp_update_P_A(self->workspace, Px_arr, NULL, 0, Ax_arr, Ax_idx_arr, Ax_n);
-		else if (Ax_idx_arr[0] == -1)
-				return_val = osqp_update_P_A(self->workspace, Px_arr, Px_idx_arr, Px_n, Ax_arr, NULL, 0);
-		else
+		if ((PyObject *)Px_idx == Py_None && (PyObject *)Ax_idx == Py_None){
+    		return_val = osqp_update_P_A(self->workspace, Px_arr, OSQP_NULL, 0, Ax_arr, OSQP_NULL, 0);
+		} else if ((PyObject *)Px_idx == Py_None){
+				return_val = osqp_update_P_A(self->workspace, Px_arr, OSQP_NULL, 0, Ax_arr, Ax_idx_arr, Ax_n);
+		} else if ((PyObject *)Ax_idx == Py_None){
+				return_val = osqp_update_P_A(self->workspace, Px_arr, Px_idx_arr, Px_n, Ax_arr, OSQP_NULL, 0);
+		} else {
 				return_val = osqp_update_P_A(self->workspace, Px_arr, Px_idx_arr, Px_n, Ax_arr, Ax_idx_arr, Ax_n);
+		}
 
     // Free data
     Py_DECREF(Px_cont);
-    Py_DECREF(Px_idx_cont);
-		Py_DECREF(Ax_cont);
-    Py_DECREF(Ax_idx_cont);
-
-		if (return_val == 1) {
-				PySys_WriteStdout("Size of Px and Px_idx is too large!");
-				return NULL;
-		} else if (return_val == 2) {
-				PySys_WriteStdout("Size of Ax and Ax_idx is too large!");
-				return NULL;
-		} else if (return_val < 0) {
-				PyErr_SetString(PyExc_ValueError, "New KKT matrix is not quasidefinite!");
-				return (PyObject *) NULL;
-		}
+	if ((PyObject *)Px_idx != Py_None) Py_DECREF(Px_idx_cont);
+	Py_DECREF(Ax_cont);
+	if ((PyObject *)Ax_idx != Py_None) Py_DECREF(Ax_idx_cont);
 
     // Return None
     Py_INCREF(Py_None);
