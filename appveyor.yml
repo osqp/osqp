@@ -6,7 +6,6 @@ platform:
   - x86
 
 environment:
-  env:
     ANACONDA_TOKEN:
         secure: yom1od1sZI7nYAFSmHDtgmRrLCGdkSaow11rIdIA+k9m0XfNdviXDkWSRI3DwdQJ
   matrix:
