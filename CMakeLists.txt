@@ -197,16 +197,10 @@ endif()
 # -----------------------------------------------------------------
 if (PYTHON)
 
-    if (IS_PY2)
-      # Look for Python libraries
-      find_package(PythonInterp 2.7)
-      find_package(PythonLibs 2.7)
-    else (IS_PY2)
-      # Look for Python libraries
-      find_package(PythonInterp 3.0)
-      find_package(PythonLibs 3.0)
-    endif (IS_PY2)
 
+    # Look for Python libraries
+    find_package(PythonInterp ${PYTHON_VER_NUM})
+    find_package(PythonLibs ${PYTHON_VER_NUM})
 
     if (NOT PYTHONLIBS_FOUND)
             message( FATAL_ERROR "You need Python libraries to build the Python interface" )
@@ -217,9 +211,6 @@ if (PYTHON)
 
     # Pass PYTHON flag to C compiler
     add_definitions(-DPYTHON)
-    if (IS_PY3K)
-      add_definitions(-DIS_PY3K)
-    endif (IS_PY3K)
 
     if (UNITTESTS)
         # Disable unittests

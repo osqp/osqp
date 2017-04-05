@@ -24,7 +24,7 @@ branches:
 deploy:
  # Deploy to Anaconda.org
   - provider: script
-    script: ci/travis/deploy_anaconda.sh
+    script: "sh $TRAVIS_BUILD_DIR/ci/travis/deploy_anaconda.sh"
     on:
         branch: continuous_integration
     #   tags: true

@@ -68,9 +68,10 @@ else:
 
 # Pass Python option to CMake and Python interface compilation
 cmake_args += ['-DPYTHON=ON']
-if sys.version_info[0] < 3:
-    cmake_args += ['-DIS_PY2=ON']
-define_macros += [('PYTHON', None)]
+
+# Pass python version to cmake
+py_version = "%i.%i" % sys.version_info[:2]
+cmake_args += ['-DPYTHON_VER_NUM=%s' % py_version]
 
 
 # Define osqp and suitesparse directories
