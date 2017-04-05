@@ -123,6 +123,11 @@ else:
                 '_static/css/osqp_theme.css'],
     }
 
+html_logo = '_static/img/logo.png'
+
+html_theme_options = {
+    'logo_only': True,
+}
 
 # -- Options for HTMLHelp output ------------------------------------------
 
