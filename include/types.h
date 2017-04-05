@@ -16,13 +16,13 @@ extern "C" {
  *  Matrix in compressed-column or triplet form
  */
 typedef struct {
-     c_int nzmax;     ////< maximum number of entries.
+     c_int nzmax;     ///< maximum number of entries.
      c_int m;         ///< number of rows
      c_int n;         ///< number of columns
      c_int *p;        ///< column pointers (size n+1) or col indices (size nzmax) start from 0
-     c_int *i;        ///< row indices, size nzmax starting from
+     c_int *i;        ///< row indices, size nzmax starting from 0
      c_float *x;      ///< numerical values, size nzmax
-     c_int nz;       ///< # of entries in triplet matrix, -1 for compressed-col
+     c_int nz;       ///< # of entries in triplet matrix, -1 for csc
 } csc;
 
 /**
@@ -49,8 +49,8 @@ typedef struct {
  * Solution structure
  */
 typedef struct {
-        c_float *x;       ////< Primal solution
-        c_float *y;       ////< Lagrange multiplier associated to \f$l <= Ax <= u\f$
+        c_float *x;       ///< Primal solution
+        c_float *y;       ///< Lagrange multiplier associated to \f$l <= Ax <= u\f$
 } OSQPSolution;
 
 
@@ -84,21 +84,21 @@ typedef struct {
  * Polish structure
  */
 typedef struct {
-    csc *Ared;            // Active rows of A
-                          //    Ared = vstack[Alow, Aupp]
-    c_int n_low;          // number of lower-active rows
-    c_int n_upp;          // number of upper-active rows
-    c_int *A_to_Alow;     // Maps indices in A to indices in Alow
-    c_int *A_to_Aupp;     // Maps indices in A to indices in Aupp
-    c_int *Alow_to_A;     // Maps indices in Alow to indices in A
-    c_int *Aupp_to_A;     // Maps indices in Aupp to indices in A
-    c_float *x;           // optimal x-solution obtained by polish
-    c_float *z;           // optimal z-solution obtained by polish
-    c_float *y_red;       // optimal dual variables associated to Ared obtained
-                          //    by polish
-    c_float obj_val;      // objective value at polished solution
-    c_float pri_res;      // primal residual at polished solution
-    c_float dua_res;      // dual residual at polished solution
+    csc *Ared;            ///< Active rows of A.
+                          ///<    Ared = vstack[Alow, Aupp]
+    c_int n_low;          ///< number of lower-active rows
+    c_int n_upp;          ///< number of upper-active rows
+    c_int *A_to_Alow;     ///< Maps indices in A to indices in Alow
+    c_int *A_to_Aupp;     ///< Maps indices in A to indices in Aupp
+    c_int *Alow_to_A;     ///< Maps indices in Alow to indices in A
+    c_int *Aupp_to_A;     ///< Maps indices in Aupp to indices in A
+    c_float *x;           ///< optimal x-solution obtained by polish
+    c_float *z;           ///< optimal z-solution obtained by polish
+    c_float *y_red;       ///< optimal dual variables associated to Ared obtained
+                          ///<    by polish
+    c_float obj_val;      ///< objective value at polished solution
+    c_float pri_res;      ///< primal residual at polished solution
+    c_float dua_res;      ///< dual residual at polished solution
 } OSQPPolish;
 #endif
 
@@ -135,7 +135,7 @@ typedef struct {
         c_int scaling;   ///< boolean, heuristic data rescalin
 
         #if EMBEDDED != 1
-        c_int scaling_norm; ///< scaling nor
+        c_int scaling_norm; ///< scaling norm
         c_int scaling_iter; ///< scaling iteration
         #endif
         /** @} */

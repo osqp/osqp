@@ -10,7 +10,7 @@ Once the sources are built as in :ref:`build_from_sources`, the generated static
 Main solver API
 ---------------
 
-The main C/C++ API is imported from the header :code:`osqp.h`.
+The main C/C++ API is imported from the header :code:`osqp.h` and provides the following functions
 
 
 .. doxygenfunction:: osqp_setup
@@ -20,14 +20,68 @@ The main C/C++ API is imported from the header :code:`osqp.h`.
 .. doxygenfunction:: osqp_cleanup
 
 
-OSQP Structures
----------------
+Data types
+----------
+
+The most basic used datatypes are
+
+.. doxygentypedef:: c_int
+.. doxygentypedef:: c_float
+
+:code:`c_int` can be long integer or normal integer if the compiler flag :code:`DLONG` is set or not. :code:`c_float` can be a float or a doule if the compiler flag :code:`DFLOAT` is set or not.
+
+
+
+The relevant structures used in the API are
+
+Data
+^^^^
+
+.. doxygenstruct:: OSQPData
+   :members:
+
+The matrices are defined in `Compressed Sparse Column (CSC) format <https://people.sc.fsu.edu/~jburkardt/data/cc/cc.html>`_.
+
+.. doxygenstruct:: csc
+   :members:
+
+Settings
+^^^^^^^^
+
+.. doxygenstruct:: OSQPSettings
+  :members:
+
+Solution
+^^^^^^^^
+
+.. doxygenstruct:: OSQPSolution
+   :members:
+
+Info
+^^^^^
+
+.. doxygenstruct:: OSQPInfo
+   :members:
+
+Workspace
+^^^^^^^^^
 
 .. doxygenstruct:: OSQPWorkspace
-   :project: osqp
    :members:
 
 
+Scaling
+^^^^^^^
 
-Sublevel API
-------------
+.. doxygenstruct:: OSQPScaling
+   :members:
+
+Polish
+^^^^^^
+.. doxygenstruct:: OSQPPolish
+  :members:
+
+
+
+.. TODO: Add sublevel API
+.. TODO: Add using your own linear system solver
