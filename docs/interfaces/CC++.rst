@@ -28,7 +28,7 @@ The most basic used datatypes are
 .. doxygentypedef:: c_int
 .. doxygentypedef:: c_float
 
-:code:`c_int` can be long integer or normal integer if the compiler flag :code:`DLONG` is set or not. :code:`c_float` can be a float or a doule if the compiler flag :code:`DFLOAT` is set or not.
+:code:`c_int` can be :code:`long` or :code:`int` if the compiler flag :code:`DLONG` is set or not. :code:`c_float` can be a :code:`float` or a :code:`double` if the compiler flag :code:`DFLOAT` is set or not.
 
 
 
