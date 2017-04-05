@@ -42,5 +42,5 @@ export PATH=${DEPS_DIR}/miniconda/bin:$PATH
 hash -r
 conda config --set always_yes yes --set changeps1 no
 conda update --yes -q conda
-conda create -n testenv --yes python=$PYTHON_VERSION pip nose numpy scipy future
+conda create -n testenv --yes python=$PYTHON_VERSION pip nose numpy scipy future conda-build
 source activate testenv

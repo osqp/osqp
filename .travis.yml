@@ -9,10 +9,6 @@ os:
   - osx
 sudo: required
 env:
-  - PYTHON_VERSION="2.7"
-  - PYTHON_VERSION="3.4"
-  - PYTHON_VERSION="3.5"
-  - PYTHON_VERSION="3.6"
   global:
     - DEPS_DIR="${HOME}/deps"
     - COVERAGE="true"
