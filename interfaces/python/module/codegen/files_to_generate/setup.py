@@ -33,6 +33,7 @@ else:
 
 
 # Add additional libraries
+libraries = []
 if system() == 'Linux':
     libraries = ['rt']
 

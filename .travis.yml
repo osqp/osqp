@@ -11,12 +11,10 @@ env:
     - ANACONDA_TOKEN="ox-a17c699f-1776-436c-af24-74620852ae91%"
   matrix:
     - PYTHON_VERSION="2.7"
-    - PYTHON_VERSION="3.4"
     - PYTHON_VERSION="3.5"
     - PYTHON_VERSION="3.6"
 install: bash ci/travis/install.sh
 script: bash ci/travis/script.sh
-after_success: bash ci/travis/coverage.sh
 branches:
   only:
   - master
@@ -27,6 +25,7 @@ deploy:
  # Deploy to Anaconda.org
   - provider: script
     script: ci/travis/deploy_anaconda.sh
-    # on:
+    on:
+        branch: continuous_integration
     #   tags: true
     skip_cleanup: true
