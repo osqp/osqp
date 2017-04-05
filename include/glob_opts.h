@@ -11,7 +11,6 @@ extern "C" {
 // We do not need alloc functions if EMBEDDED is enabled
 #ifndef EMBEDDED
 
-#include <stdlib.h>
 
 /* DATA CUSTOMIZATIONS (depending on memory manager)-----------------------   */
 /* define custom printfs and memory allocation (e.g. matlab or python) */
@@ -60,6 +59,9 @@ extern "C" {
     #define c_free free
     #define c_realloc realloc
 #endif
+
+#include <stdlib.h>
+
 
 #endif  //end EMBEDDED
 

@@ -6,6 +6,8 @@ platform:
   - x86
 
 environment:
+  env:
+    - ANACONDA_TOKEN: ox-a17c699f-1776-436c-af24-74620852ae91%
   matrix:
     - PYTHON_VERSION: 2.7
       MINICONDA: C:\Miniconda

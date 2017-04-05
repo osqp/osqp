@@ -32,6 +32,10 @@ else:
     compile_args = []
 
 
+# Add additional libraries
+if system() == 'Linux':
+    libraries = ['-lrt']
+
 '''
 Include directory
 '''
@@ -48,6 +52,7 @@ sources_files += glob(os.path.join('osqp', '*.c'))     # OSQP files
 
 PYTHON_EXT_NAME = Extension('PYTHON_EXT_NAME',
                           define_macros=define_macros,
+                          libraries=libraries,
                           include_dirs=include_dirs,
                           sources=sources_files,
                           extra_compile_args=compile_args)

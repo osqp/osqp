@@ -97,8 +97,11 @@ else:
     compile_args = []
 
 # External libraries
-libraries = []
 library_dirs = []
+libraries = []
+if system() == 'Linux':
+    libraries = ['-lrt']
+
 
 # Add OSQP compiled library
 lib_ext = '.a'
