@@ -73,6 +73,9 @@ cmake_args += ['-DPYTHON=ON']
 py_version = "%i.%i" % sys.version_info[:2]
 cmake_args += ['-DPYTHON_VER_NUM=%s' % py_version]
 
+# Pass python to compiler
+define_macros += [('PYTHON', None)]
+
 
 # Define osqp and suitesparse directories
 osqp_dir = os.path.join('..', '..')

@@ -155,6 +155,8 @@ static c_int free_data(OSQPData *data, PyOSQPData * py_d){
         return 1;
     }
 
+    return 0;
+
 }
 
 #endif

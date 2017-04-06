@@ -21,7 +21,7 @@ else:
 define_macros += [('DLONG', None)]
 define_macros += [('DFLOAT', None)]
 define_macros += [('EMBEDDED', EMBEDDED_FLAG)]
-
+define_macros += [('PYTHON', None)]
 
 '''
 Define compiler flags
