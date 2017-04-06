@@ -1,4 +1,5 @@
-set -e
+#!/bin/bash
+set -ev
 
 
 # Update variables from install
