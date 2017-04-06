@@ -195,6 +195,9 @@ out/
 # Other data files
 *.mat
 
+# matlab release files
+interfaces/matlab/package/osqp*
+
 # CMake Files
 # -------------------------------------------------------------------
 *.stamp
