@@ -42,6 +42,7 @@ static c_int OSQP_results_dealloc(OSQP_results *self){
     Py_DECREF(self->x);
     Py_DECREF(self->y);
 
+
     // Delete info object
     Py_DECREF(self->info);
 

@@ -51,6 +51,28 @@ static int get_float_type(void) {
     }
 }
 
+
+
+static PyArrayObject * PyArrayFromCArray(c_float *arrayin, npy_intp * nd,
+                                         int typenum){
+    int i;
+    PyArrayObject * arrayout;
+    double * data;
+
+    arrayout = (PyArrayObject *)PyArray_FromDims(1, (int *)nd, typenum);
+    data = PyArray_DATA(arrayout);
+
+    // Copy array into Python array
+    for (i=0; i< nd[0]; i++){
+        data[i] = (double)arrayin[i];
+    }
+
+    return arrayout;
+
+}
+
+
+
 /* gets the pointer to the block of contiguous C memory
  * the overhead should be small unless the numpy array has been
  * reordered in some way or the data type doesn't quite match

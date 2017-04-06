@@ -6,8 +6,8 @@ import numpy as np
 # import mathprogbasepy as mpbpy
 sp.random.seed(2)
 
-n = 1000
-m = 10000
+n = 100
+m = 500
 A = sparse.random(m, n, density=0.9, format='csc')
 lA = -sp.rand(m) * 2.
 uA = sp.rand(m) * 2.
@@ -21,6 +21,7 @@ q = sp.randn(n)
 
 
 osqp_opts = {'rho': 0.05,
+             'auto_rho': False,
             #  'sigma': 0.001,
             #  'eps_rel': 1e-08,
             #  'eps_abs': 1e-08,
@@ -34,7 +35,7 @@ osqp_opts = {'rho': 0.05,
 
 model = osqp.OSQP()
 model.setup(P=P, q=q, A=A, l=lA, u=uA, **osqp_opts)
-res_osqp = model.solve()
+# res_osqp = model.solve()
 #
 #
 # # Store optimal values

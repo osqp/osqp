@@ -5,8 +5,6 @@
  * OSQP Object definition and methods   *
  ****************************************/
 
-
-
 /* Create new OSQP Object */
 static c_int OSQP_init( OSQP * self, PyObject *args, PyObject *kwds)
 {
@@ -58,7 +56,6 @@ static PyObject * OSQP_solve(OSQP *self)
         PyObject *results;
 
         // Temporary solution
-        c_float *x_arr, *y_arr; // Primal dual solutions
         npy_intp nd[] = {(npy_intp)self->workspace->data->n};  // Dimensions in R^n
         npy_intp md[] = {(npy_intp)self->workspace->data->m};  // Dimensions in R^m
 
@@ -70,20 +67,13 @@ static PyObject * OSQP_solve(OSQP *self)
         // If problem is not primal or dual infeasible store it
         if ((self->workspace->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
             (self->workspace->info->status_val != OSQP_DUAL_INFEASIBLE)){
-            // Store solution into temporary arrays
-            // N.B. Needed to be able to store RESULTS even when OSQP structure is deleted
-            x_arr = vec_copy(self->workspace->solution->x, self->workspace->data->n);
-            y_arr = vec_copy(self->workspace->solution->y, self->workspace->data->m);
 
+			// Construct primal and dual solution arrays
+			x = (PyObject *)PyArrayFromCArray(self->workspace->solution->x,
+						          nd, float_type);
+			y = (PyObject *)PyArrayFromCArray(self->workspace->solution->y,
+								  md, float_type);
 
-            // Get primal dual solution PyArrayObjects
-            x = PyArray_SimpleNewFromData(1, nd, float_type, x_arr);
-            // Set x to own x_arr so that it is freed when x is freed
-            PyArray_ENABLEFLAGS((PyArrayObject *) x, NPY_ARRAY_OWNDATA);
-
-            y = PyArray_SimpleNewFromData(1, md, float_type, y_arr);
-            // Set y to own y_arr so that it is freed when y is freed
-            PyArray_ENABLEFLAGS((PyArrayObject *) y, NPY_ARRAY_OWNDATA);
         } else { // Problem primal or dual infeasible -> None values for x,y
             x = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
             y = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
@@ -125,11 +115,11 @@ static PyObject * OSQP_solve(OSQP *self)
         #endif
 
         info_list = Py_BuildValue(argparse_string,
-																	self->workspace->info->iter,
-																	status,
-																	self->workspace->info->status_val,
-																	self->workspace->info->status_polish,
-																	self->workspace->info->obj_val,
+								  self->workspace->info->iter,
+								  status,
+								  self->workspace->info->status_val,
+								  self->workspace->info->status_polish,
+								  self->workspace->info->obj_val,
                                   self->workspace->info->pri_res,
                                   self->workspace->info->dua_res,
                                   self->workspace->info->setup_time,
@@ -158,12 +148,12 @@ static PyObject * OSQP_solve(OSQP *self)
 
         info_list = Py_BuildValue(argparse_string,
                                   self->workspace->info->iter,
-																	status,
-																	self->workspace->info->status_val,
-																	self->workspace->info->status_polish,
-																	self->workspace->info->obj_val,
-																	self->workspace->info->pri_res,
-																	self->workspace->info->dua_res);
+								  status,
+								  self->workspace->info->status_val,
+								  self->workspace->info->status_polish,
+								  self->workspace->info->obj_val,
+								  self->workspace->info->pri_res,
+								  self->workspace->info->dua_res);
         #endif
 
         info = PyObject_CallObject((PyObject *) &OSQP_info_Type, info_list);

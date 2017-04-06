@@ -8,10 +8,10 @@ from scipy import sparse
 import unittest
 import numpy.testing as nptest
 
-
 class basic_tests(unittest.TestCase):
 
     def setUp(self):
+
         # Simple QP problem
         self.P = sparse.csc_matrix(np.array([[11., 0.], [0., 0.]]))
         self.q = np.array([3, 4])
@@ -60,57 +60,57 @@ class basic_tests(unittest.TestCase):
                                                           6.66666667, 0., 0.]))
         nptest.assert_array_almost_equal(res.info.obj_val, 100.)
 
-    def test_update_l(self):
-        # Update lower bound
-        l_new = -100 * np.ones(self.m)
-        self.model.update(l=l_new)
-        res = self.model.solve()
-
-        # Assert close
-        nptest.assert_array_almost_equal(res.x, np.array([0., 5.]))
-        nptest.assert_array_almost_equal(res.y, np.array([1.66666667, 0.,
-                                                          1.33333333, 0., 0.]))
-        nptest.assert_array_almost_equal(res.info.obj_val, 20.)
-
-    def test_update_u(self):
-        # Update lower bound
-        u_new = 1000 * np.ones(self.m)
-        self.model.update(u=u_new)
-        res = self.model.solve()
-
-        # Assert close
-        nptest.assert_array_almost_equal(res.x, np.array([-1.51515152e-01,
-                                                          -3.33282828e+02]))
-        nptest.assert_array_almost_equal(res.y, np.array([0., 0., 1.33333333,
-                                                          0., 0.]))
-        nptest.assert_array_almost_equal(res.info.obj_val, -1333.4595959614962)
-
-    def test_update_bounds(self):
-        # Update lower bound
-        l_new = -100 * np.ones(self.m)
-        # Update lower bound
-        u_new = 1000 * np.ones(self.m)
-        self.model.update(u=u_new, l=l_new)
-        res = self.model.solve()
-
-        # Assert close
-        nptest.assert_array_almost_equal(res.x, np.array([-0.12727273,
-                                                          -19.94909091]))
-        nptest.assert_array_almost_equal(res.y, np.array([0., 0., 0.,
-                                                          -0.8, 0.]))
-        nptest.assert_array_almost_equal(res.info.obj_val, -80.0890909023583)
-
-    def test_update_max_iter(self):
-        self.model.update_settings(max_iter=80)
-        res = self.model.solve()
-
-        # Assert max iter reached
-        self.assertEqual(res.info.status_val,
-                         self.model.constant('OSQP_MAX_ITER_REACHED'))
-
-    def test_update_early_termination(self):
-        self.model.update_settings(early_terminate=False)
-        res = self.model.solve()
-
-        # Assert max iter reached
-        self.assertEqual(res.info.iter, self.opts['max_iter'])
+    # def test_update_l(self):
+    #     # Update lower bound
+    #     l_new = -100 * np.ones(self.m)
+    #     self.model.update(l=l_new)
+    #     res = self.model.solve()
+    #
+    #     # Assert close
+    #     nptest.assert_array_almost_equal(res.x, np.array([0., 5.]))
+    #     nptest.assert_array_almost_equal(res.y, np.array([1.66666667, 0.,
+    #                                                       1.33333333, 0., 0.]))
+    #     nptest.assert_array_almost_equal(res.info.obj_val, 20.)
+    #
+    # def test_update_u(self):
+    #     # Update lower bound
+    #     u_new = 1000 * np.ones(self.m)
+    #     self.model.update(u=u_new)
+    #     res = self.model.solve()
+    #
+    #     # Assert close
+    #     nptest.assert_array_almost_equal(res.x, np.array([-1.51515152e-01,
+    #                                                       -3.33282828e+02]))
+    #     nptest.assert_array_almost_equal(res.y, np.array([0., 0., 1.33333333,
+    #                                                       0., 0.]))
+    #     nptest.assert_array_almost_equal(res.info.obj_val, -1333.4595959614962)
+    #
+    # def test_update_bounds(self):
+    #     # Update lower bound
+    #     l_new = -100 * np.ones(self.m)
+    #     # Update lower bound
+    #     u_new = 1000 * np.ones(self.m)
+    #     self.model.update(u=u_new, l=l_new)
+    #     res = self.model.solve()
+    #
+    #     # Assert close
+    #     nptest.assert_array_almost_equal(res.x, np.array([-0.12727273,
+    #                                                       -19.94909091]))
+    #     nptest.assert_array_almost_equal(res.y, np.array([0., 0., 0.,
+    #                                                       -0.8, 0.]))
+    #     nptest.assert_array_almost_equal(res.info.obj_val, -80.0890909023583)
+    #
+    # def test_update_max_iter(self):
+    #     self.model.update_settings(max_iter=80)
+    #     res = self.model.solve()
+    #
+    #     # Assert max iter reached
+    #     self.assertEqual(res.info.status_val,
+    #                      self.model.constant('OSQP_MAX_ITER_REACHED'))
+    #
+    # def test_update_early_termination(self):
+    #     self.model.update_settings(early_terminate=False)
+    #     res = self.model.solve()
+    #
+    #     # Assert max iter reached
+    #     self.assertEqual(res.info.iter, self.opts['max_iter'])

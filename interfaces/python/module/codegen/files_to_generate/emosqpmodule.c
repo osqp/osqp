@@ -147,6 +147,27 @@ static int get_float_type(void) {
     }
 }
 
+
+
+static PyArrayObject * PyArrayFromCArray(c_float *arrayin, npy_intp * nd,
+                                         int typenum){
+    int i;
+    PyArrayObject * arrayout;
+    double * data;
+
+    arrayout = (PyArrayObject *)PyArray_FromDims(1, (int *)nd, typenum);
+    data = PyArray_DATA(arrayout);
+
+    // Copy array into Python array
+    for (i=0; i< nd[0]; i++){
+        data[i] = (double)arrayin[i];
+    }
+
+    return arrayout;
+
+}
+
+
 /* gets the pointer to the block of contiguous C memory
  * the overhead should be small unless the numpy array has been
  * reordered in some way or the data type doesn't quite match
@@ -184,14 +205,9 @@ static PyObject * OSQP_solve(PyObject *self, PyObject *args)
     PyObject * x, *y;
 
     // Temporary solution
-    c_float *x_arr, *y_arr; // Primal dual solutions
     npy_intp nd[] = {(npy_intp)(&workspace)->data->n}; // Dimensions in R^n
     npy_intp md[] = {(npy_intp)(&workspace)->data->m}; // Dimensions in R^m
 
-
-    // Allocate solutions
-    x_arr = PyMem_Malloc((&workspace)->data->n * sizeof(c_float));
-    y_arr = PyMem_Malloc((&workspace)->data->m * sizeof(c_float));
 
     // Initialize timer
     timer = PyMem_Malloc(sizeof(PyTimer));
@@ -210,19 +226,26 @@ static PyObject * OSQP_solve(PyObject *self, PyObject *args)
     // If problem is not primal or dual infeasible store it
     if (((&workspace)->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
         ((&workspace)->info->status_val != OSQP_DUAL_INFEASIBLE)) {
-            // Store solution into temporary arrays
-            // N.B. Needed to be able to store RESULTS even when OSQP structure is deleted
-            prea_vec_copy((&workspace)->solution->x, x_arr, (&workspace)->data->n);
-            prea_vec_copy((&workspace)->solution->y, y_arr, (&workspace)->data->m);
 
-            // Get primal dual solution PyArrayObjects
-            x = PyArray_SimpleNewFromData(1, nd, float_type, x_arr);
-            // Set x to own x_arr so that it is freed when x is freed
-            PyArray_ENABLEFLAGS((PyArrayObject *) x, NPY_ARRAY_OWNDATA);
+			// Construct primal and dual solution arrays
+			x = (PyObject *)PyArrayFromCArray((&workspace)->solution->x,
+								  nd, float_type);
+			y = (PyObject *)PyArrayFromCArray((&workspace)->solution->y,
+								  md, float_type);
 
-            y = PyArray_SimpleNewFromData(1, md, float_type, y_arr);
-            // Set y to own y_arr so that it is freed when y is freed
-            PyArray_ENABLEFLAGS((PyArrayObject *) y, NPY_ARRAY_OWNDATA);
+            // // Store solution into temporary arrays
+            // // N.B. Needed to be able to store RESULTS even when OSQP structure is deleted
+            // prea_vec_copy((&workspace)->solution->x, x_arr, (&workspace)->data->n);
+            // prea_vec_copy((&workspace)->solution->y, y_arr, (&workspace)->data->m);
+			//
+            // // Get primal dual solution PyArrayObjects
+            // x = PyArray_SimpleNewFromData(1, nd, float_type, x_arr);
+            // // Set x to own x_arr so that it is freed when x is freed
+            // PyArray_ENABLEFLAGS((PyArrayObject *) x, NPY_ARRAY_OWNDATA);
+			//
+            // y = PyArray_SimpleNewFromData(1, md, float_type, y_arr);
+            // // Set y to own y_arr so that it is freed when y is freed
+            // PyArray_ENABLEFLAGS((PyArrayObject *) y, NPY_ARRAY_OWNDATA);
 
     } else { // Problem primal or dual infeasible -> None values for x,y
             x = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
