@@ -1,4 +1,4 @@
-function render_workspace( work, output )
+function render_workspace( work, output, embedded_flag )
 %RENDER_WORKSPACE Write workspace to header file.
 
 f = fopen(output, 'w');
@@ -17,13 +17,13 @@ fprintf(f, 'typedef struct c_priv Priv;\n\n');
 write_data(f, work.data);
 
 % Write settings structure
-write_settings(f, work.settings);
+write_settings(f, work.settings, embedded_flag);
 
 % Write scaling structure
 write_scaling(f, work.scaling);
 
 % Write private structure
-write_private(f, work.priv);
+write_private(f, work.priv, embedded_flag);
 
 % Define empty solution structure
 write_solution(f, work.data.n, work.data.m);
@@ -66,7 +66,7 @@ fprintf(f, '};\n\n');
 end
 
 
-function write_settings( f, settings )
+function write_settings( f, settings, embedded_flag )
 %WRITE_SETTINGS Write settings structure to file.
 
 fprintf(f, '// Define settings structure\n');
@@ -74,6 +74,11 @@ fprintf(f, 'OSQPSettings settings = {');
 fprintf(f, '(c_float)%.20f, ', settings.rho);
 fprintf(f, '(c_float)%.20f, ', settings.sigma);
 fprintf(f, '%d, ',             settings.scaling);
+
+if embedded_flag ~= 1
+    fprintf(f, '%d, ', settings.scaling_norm);
+    fprintf(f, '%d, ', settings.scaling_iter);
+end
 
 fprintf(f, '%d, ',             settings.max_iter);
 fprintf(f, '(c_float)%.20f, ', settings.eps_abs);
@@ -105,7 +110,7 @@ fprintf(f, '{Dscaling, Escaling, Dinvscaling, Einvscaling};\n\n');
 end
 
 
-function write_private( f, priv )
+function write_private( f, priv, embedded_flag )
 %WRITE_PRIVATE Write private structure to file.
 
 fprintf(f, '// Define private structure\n');
@@ -114,8 +119,26 @@ write_vec(f, priv.Dinv, 'priv_Dinv', 'c_float')
 write_vec(f, priv.P, 'priv_P', 'c_int')
 fprintf(f, 'c_float priv_bp[%d];\n', length(priv.Dinv));  % Empty rhs
 
+if embedded_flag ~= 1
+    write_vec(f, priv.Pdiag_idx, 'priv_Pdiag_idx', 'c_int');
+    write_mat(f, priv.KKT, 'priv_KKT');
+    write_vec(f, priv.PtoKKT, 'priv_PtoKKT', 'c_int');
+    write_vec(f, priv.AtoKKT, 'priv_AtoKKT', 'c_int');
+    write_vec(f, priv.Lnz, 'priv_Lnz', 'c_int');
+    write_vec(f, priv.Y, 'priv_Y', 'c_float');
+    write_vec(f, priv.Pattern, 'priv_Pattern', 'c_int');
+    write_vec(f, priv.Flag, 'priv_Flag', 'c_int');
+    write_vec(f, priv.Parent, 'priv_Parent', 'c_int');
+end
+
 fprintf(f, 'Priv priv = ');
-fprintf(f, '{&priv_L, priv_Dinv, priv_P, priv_bp};\n\n');
+if embedded_flag ~= 1
+    fprintf(f, ['{&priv_L, priv_Dinv, priv_P, priv_bp, priv_Pdiag_idx, ', ...
+        num2str(priv.Pdiag_n), ', &priv_KKT, priv_PtoKKT, priv_AtoKKT, ', ...
+        'priv_Lnz, priv_Y, priv_Pattern, priv_Flag, priv_Parent};\n\n']);
+else
+    fprintf(f, '{&priv_L, priv_Dinv, priv_P, priv_bp};\n\n');
+end
 
 end
 
@@ -135,7 +158,7 @@ function write_info( f )
 %WRITE_INFO Preallocate info structure
 
 fprintf(f, '// Define info\n');
-fprintf(f, 'OSQPInfo info = {OSQP_UNSOLVED};\n\n');
+fprintf(f, 'OSQPInfo info = {0, "Unsolved", OSQP_UNSOLVED, (c_float)0.0, (c_float)0.0, (c_float)0.0};\n\n');
 
 end
 

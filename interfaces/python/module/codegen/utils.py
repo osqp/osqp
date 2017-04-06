@@ -98,7 +98,7 @@ def write_data(f, data, name):
     f.write("};\n\n")
 
 
-def write_settings(f, settings, name):
+def write_settings(f, settings, name, embedded_flag):
     """
     Fille settings during code generation
     """
@@ -108,7 +108,10 @@ def write_settings(f, settings, name):
     f.write("(c_float)%.20f, " % settings['sigma'])
     f.write("%d, " % settings['scaling'])
 
-    # TODO: Add scaling_norm and scaling_iter for EMBEDDED = 2
+    # EMBEDDED == 2
+    if embedded_flag != 1:
+        f.write("%d, " % settings['scaling_norm'])
+        f.write("%d, " % settings['scaling_iter'])
 
     f.write("%d, " % settings['max_iter'])
     f.write("(c_float)%.20f, " % settings['eps_abs'])
@@ -138,7 +141,7 @@ def write_scaling(f, scaling, name):
     f.write("{Dscaling, Escaling, Dinvscaling, Einvscaling};\n\n")
 
 
-def write_private(f, priv, name):
+def write_private(f, priv, name, embedded_flag):
     """
     Write private structure during code generation
     """
@@ -149,8 +152,24 @@ def write_private(f, priv, name):
     write_vec(f, priv['P'], 'priv_P', 'c_int')
     f.write("c_float priv_bp[%d];\n" % (len(priv['Dinv'])))  # Empty rhs
 
+    if embedded_flag != 1:
+        write_vec(f, priv['Pdiag_idx'], 'priv_Pdiag_idx', 'c_int')
+        write_mat(f, priv['KKT'], 'priv_KKT')
+        write_vec(f, priv['PtoKKT'], 'priv_PtoKKT', 'c_int')
+        write_vec(f, priv['AtoKKT'], 'priv_AtoKKT', 'c_int')
+        write_vec(f, priv['Lnz'], 'priv_Lnz', 'c_int')
+        write_vec(f, priv['Y'], 'priv_Y', 'c_float')
+        write_vec(f, priv['Pattern'], 'priv_Pattern', 'c_int')
+        write_vec(f, priv['Flag'], 'priv_Flag', 'c_int')
+        write_vec(f, priv['Parent'], 'priv_Parent', 'c_int')
+
     f.write("Priv %s = " % name)
-    f.write("{&priv_L, priv_Dinv, priv_P, priv_bp};\n\n")
+    if embedded_flag != 1:
+        f.write("{&priv_L, priv_Dinv, priv_P, priv_bp, priv_Pdiag_idx, " +
+                "%d, &priv_KKT, priv_PtoKKT, priv_AtoKKT, " % priv['Pdiag_n'] +
+                "priv_Lnz, priv_Y, priv_Pattern, priv_Flag, priv_Parent};\n\n")
+    else:
+        f.write("{&priv_L, priv_Dinv, priv_P, priv_bp};\n\n")
 
 
 def write_solution(f, data, name):
@@ -168,7 +187,8 @@ def write_info(f, name):
     Preallocate info strcture
     """
     f.write("// Define info\n")
-    f.write("OSQPInfo %s = {OSQP_UNSOLVED};\n\n" % name)
+    f.write('OSQPInfo %s = {0, "Unsolved", OSQP_UNSOLVED, 0.0, 0.0, 0.0};\n\n'
+            % name)
 
 
 def write_workspace(f, data, name):
@@ -213,6 +233,7 @@ def render_workspace(variables, output):
     priv = variables['priv']
     scaling = variables['scaling']
     settings = variables['settings']
+    embedded_flag = variables['embedded_flag']
 
     # Open output file
     f = open(output, 'w')
@@ -235,7 +256,7 @@ def render_workspace(variables, output):
     '''
     Write settings structure
     '''
-    write_settings(f, settings, 'settings')
+    write_settings(f, settings, 'settings', embedded_flag)
 
     '''
     Write scaling structure
@@ -245,7 +266,7 @@ def render_workspace(variables, output):
     '''
     Write private structure
     '''
-    write_private(f, priv, 'priv')
+    write_private(f, priv, 'priv', embedded_flag)
 
     '''
     Define empty solution structure
@@ -370,9 +391,6 @@ def render_ldl(variables, output):
     Render LDL file so that loops can be unrolled
     """
 
-    data = variables['data']
-    priv = variables['priv']
-
     f = open(output, 'w')
 
     # Include header
@@ -395,6 +413,7 @@ def render_ldl(variables, output):
 
     f.close()
 
+
 def render_setuppy(variables, output):
     """
     Render setup.py file
@@ -409,6 +428,24 @@ def render_setuppy(variables, output):
 
     filedata = filedata.replace("EMBEDDED_FLAG", str(embedded_flag))
     filedata = filedata.replace("PYTHON_EXT_NAME", str(python_ext_name))
+
+    f = open(output, 'w')
+    f.write(filedata)
+    f.close()
+
+
+def render_cmakelists(variables, output):
+    """
+    Render setup.py file
+    """
+
+    embedded_flag = variables['embedded_flag']
+
+    f = open(os.path.join(files_to_generate_path, 'CMakeLists.txt'))
+    filedata = f.read()
+    f.close()
+
+    filedata = filedata.replace("EMBEDDED_FLAG", str(embedded_flag))
 
     f = open(output, 'w')
     f.write(filedata)

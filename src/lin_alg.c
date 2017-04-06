@@ -165,8 +165,7 @@ void mat_postmult_diag(csc *A, const c_float *d){
     }
 }
 
-#ifndef EMBEDDED
-
+#if EMBEDDED != 1
 void mat_ew_sq(csc * A){
     c_int i;
     for (i=0; i<A->p[A->n]; i++)
@@ -182,8 +181,10 @@ void mat_ew_abs(csc * A){
         A->x[i] = c_absval(A->x[i]);
     }
 }
+#endif // end embedded
 
 
+#ifndef EMBEDDED
 c_float mat_trace(csc * M){
     c_float trace = 0.;
     c_int j, i;

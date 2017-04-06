@@ -93,7 +93,7 @@ classdef osqp < handle
 
             %second input 'false' means that this is *not* a settings
             %initialization, so some parameter/values will be disallowed
-            allowedFields = {'q','l','u'};
+            allowedFields = {'q','l','u','Px','Px_idx','Ax','Ax_idx'};
 
             if(isempty(varargin))
                 return;
@@ -119,25 +119,33 @@ classdef osqp < handle
             try q = double(full(newData.q(:))); catch q = []; end
             try l = double(full(newData.l(:))); catch l = []; end
             try u = double(full(newData.u(:))); catch u = []; end
+            try Px = double(full(newData.Px(:))); catch Px = []; end
+            try Px_idx = double(full(newData.Px_idx(:))); catch Px_idx = []; end
+            try Ax = double(full(newData.Ax(:))); catch Ax = []; end
+            try Ax_idx = double(full(newData.Ax_idx(:))); catch Ax_idx = []; end
 
             [n,m]  = get_dimensions(this);
 
             assert(isempty(q) || length(q) == n, 'input ''q'' is the wrong size');
             assert(isempty(l) || length(l) == m, 'input ''u'' is the wrong size');
             assert(isempty(u) || length(u) == m, 'input ''l'' is the wrong size');
+            assert(isempty(Px) || isempty(Px_idx) || length(Px) == length(Px_idx), ...
+                'inputs ''Px'' and ''Px_idx'' must be the same size');
+            assert(isempty(Ax) || isempty(Ax_idx) || length(Ax) == length(Ax_idx), ...
+                'inputs ''Ax'' and ''Ax_idx'' must be the same size');
 
-            
-            % Convert infinity values to OSQP_INFINITY
-            if (~isempty(q))
+            % Convert infinity values to OSQP_INFTY
+            if (~isempty(u))
                 u = min(u, this.constant('OSQP_INFTY'));
             end
             if (~isempty(l))
                 l = max(l, -this.constant('OSQP_INFTY'));
             end
-            
+
             %write the new problem data.  C-mex does not protect
             %against unknown fields, but will handle empty values
-            osqp_mex('update', this.objectHandle,q,l,u);
+            osqp_mex('update', this.objectHandle, ...
+            q, l, u, Px, Px_idx, length(Px), Ax, Ax_idx, length(Ax));
 
         end
 
@@ -329,7 +337,7 @@ classdef osqp < handle
             % CODEGEN generate C code for the parametric problem
             %
             %   codegen(target_dir,options)
-            
+
             % Parse input arguments
             p = inputParser;
             defaultProject = '';
@@ -338,7 +346,7 @@ classdef osqp < handle
             expectedParams = {'vectors', 'matrices'};
             defaultMexname = 'emosqp';
             defaultFW = false;
-            
+
             addRequired(p, 'target_dir', @isstr);
             addParameter(p, 'project_type', defaultProject, ...
                          @(x) any(validatestring(x, expectedProject)));
@@ -346,9 +354,9 @@ classdef osqp < handle
                          @(x) any(validatestring(x, expectedParams)));
             addParameter(p, 'mexname', defaultMexname, @isstr);
             addParameter(p, 'force_rewrite', defaultFW, @islogical);
-            
+
             parse(p, target_dir, varargin{:});
-            
+
             % Set internal variables
             if strcmp(p.Results.parameters, 'vectors')
                 embedded = 1;
@@ -364,7 +372,7 @@ classdef osqp < handle
             else
                 project_type = p.Results.project_type;
             end
-            
+
             % Check whether the specified directory already exists
             if exist(target_dir, 'dir')
                 if p.Results.force_rewrite
@@ -373,7 +381,7 @@ classdef osqp < handle
                     while(1)
                         prompt = sprintf('Directory "%s" already exists. Do you want to replace it? y/n [y]: ', target_dir);
                         str = input(prompt, 's');
-                        
+
                         if any(strcmpi(str, {'','y'}))
                             rmdir(target_dir, 's');
                             break;
@@ -383,19 +391,25 @@ classdef osqp < handle
                     end
                 end
             end
-            
+
             % Import OSQP path
             [osqp_path,~,~] = fileparts(which('osqp.m'));
             
+            % Add codegen directory to path
+            addpath(fullfile(osqp_path, 'codegen'));
+
             % Path of osqp module
             cg_dir = fullfile(osqp_path, 'codegen');
             files_to_generate_path = fullfile(cg_dir, 'files_to_generate');
             
+            % Get workspace structure
+            work = osqp_mex('get_workspace', this.objectHandle);
+
             % Make target directory
             fprintf('Creating target directories...\t\t\t\t\t');
             target_include_dir = fullfile(target_dir, 'include');
             target_src_dir = fullfile(target_dir, 'src');
-            
+
             if ~exist(target_dir, 'dir')
                 mkdir(target_dir);
             end
@@ -406,7 +420,7 @@ classdef osqp < handle
                 mkdir(fullfile(target_src_dir, 'osqp'));
             end
             fprintf('[done]\n');
-            
+
             % Copy source files to target directory
             fprintf('Copying OSQP source files...\t\t\t\t\t');
             cfiles = dir(fullfile(cg_dir, 'sources', 'src', '*.c'));
@@ -420,21 +434,28 @@ classdef osqp < handle
                     fullfile(target_include_dir, hfiles(i).name));
             end
             fprintf('[done]\n');
-            
+
             % Copy example.c
             copyfile(fullfile(files_to_generate_path, 'example.c'), target_src_dir);
-            
-            % Copy CMakelists.txt
-            copyfile(fullfile(files_to_generate_path, 'CMakeLists.txt'), target_dir);
-            
-            % Write workspace in header file
-            fprintf('Generating workspace.h...\t\t\t\t\t\t');
-            work = osqp_mex('get_workspace', this.objectHandle);
+
+            % Render CMakeLists.txt
+            fidi = fopen(fullfile(files_to_generate_path, 'CMakeLists.txt'),'r');
+            fido = fopen(fullfile(target_dir, 'CMakeLists.txt'),'w');
+            while ~feof(fidi)
+                l = fgetl(fidi);   % read line
+                % Replace EMBEDDED_FLAG in CMakeLists.txt by a numerical value
+                newl = strrep(l, 'EMBEDDED_FLAG', num2str(embedded));
+                fprintf(fido, '%s\n', newl);
+            end
+            fclose(fidi);
+            fclose(fido);
+
+            % Render workspace.h
             work_hfile = fullfile(target_include_dir, 'workspace.h');
-            addpath(fullfile(osqp_path, 'codegen'));
-            render_workspace(work, work_hfile);
+            fprintf('Generating workspace.h...\t\t\t\t\t\t');
+            render_workspace(work, work_hfile, embedded);
             fprintf('[done]\n');
-            
+
             % Create project
             if ~isempty(project_type)
                 fprintf('Creating project...\t\t\t\t\t\t\t\t');
@@ -453,18 +474,18 @@ classdef osqp < handle
                 end
                 cd(orig_dir);
             end
-            
+
             % Make mex interface to the generated code
             mex_cfile  = fullfile(files_to_generate_path, 'emosqp_mex.c');
             make_emosqp(target_dir, mex_cfile, embedded);
-            
+
             % Rename the mex file
             old_mexfile = ['emosqp_mex.', mexext];
             new_mexfile = [p.Results.mexname, '.', mexext];
             movefile(old_mexfile, new_mexfile);
-            
+
         end
-        
+
     end
 end
 

@@ -10,7 +10,7 @@ import numpy.testing as nptest
 import shutil as sh
 
 
-class codegen_tests(unittest.TestCase):
+class codegen_vectors_tests(unittest.TestCase):
 
     def setUp(self):
         # Simple QP problem
@@ -34,82 +34,64 @@ class codegen_tests(unittest.TestCase):
 
     def test_solve(self):
         # Generate the code
-        self.model.codegen('code', python_ext_name='emosqp',
+        self.model.codegen('code', python_ext_name='vec_emosqp',
                            force_rewrite=True)
         sh.rmtree('code')
-        import emosqp
+        import vec_emosqp
 
         # Solve problem
-        x, y, _, _, _ = emosqp.solve()
+        x, y, _, _, _ = vec_emosqp.solve()
 
         # Assert close
-        nptest.assert_array_almost_equal(x, np.array([0., 5.]), decimal=3)
+        nptest.assert_array_almost_equal(x, np.array([0., 5.]), decimal=5)
         nptest.assert_array_almost_equal(
-            y, np.array([1.66666667, 0., 1.33333333, 0., 0.]), decimal=3)
+            y, np.array([1.66666667, 0., 1.33333333, 0., 0.]), decimal=5)
 
     def test_update_q(self):
-        import emosqp
+        import vec_emosqp
 
         # Update linear cost and solve the problem
         q_new = np.array([10., 20.])
-        emosqp.update_lin_cost(q_new)
-        x, y, _, _, _ = emosqp.solve()
+        vec_emosqp.update_lin_cost(q_new)
+        x, y, _, _, _ = vec_emosqp.solve()
 
         # Assert close
-        nptest.assert_array_almost_equal(x, np.array([0., 5.]), decimal=3)
+        nptest.assert_array_almost_equal(x, np.array([0., 5.]), decimal=5)
         nptest.assert_array_almost_equal(
-            y, np.array([3.33333334, 0., 6.66666667, 0., 0.]), decimal=3)
+            y, np.array([3.33333334, 0., 6.66666667, 0., 0.]), decimal=5)
 
         # Update linear cost to the original value
-        emosqp.update_lin_cost(self.q)
+        vec_emosqp.update_lin_cost(self.q)
 
     def test_update_l(self):
-        import emosqp
+        import vec_emosqp
 
         # Update lower bound
         l_new = -100. * np.ones(self.m)
-        emosqp.update_lower_bound(l_new)
-        x, y, _, _, _ = emosqp.solve()
+        vec_emosqp.update_lower_bound(l_new)
+        x, y, _, _, _ = vec_emosqp.solve()
 
         # Assert close
-        nptest.assert_array_almost_equal(x, np.array([0., 5.]), decimal=3)
+        nptest.assert_array_almost_equal(x, np.array([0., 5.]), decimal=5)
         nptest.assert_array_almost_equal(
-            y, np.array([1.66666667, 0., 1.33333333, 0., 0.]), decimal=3)
+            y, np.array([1.66666667, 0., 1.33333333, 0., 0.]), decimal=5)
 
         # Update lower bound to the original value
-        emosqp.update_lower_bound(self.l)
+        vec_emosqp.update_lower_bound(self.l)
 
     def test_update_u(self):
-        import emosqp
+        import vec_emosqp
 
         # Update upper bound
         u_new = 1000. * np.ones(self.m)
-        emosqp.update_upper_bound(u_new)
-        x, y, _, _, _ = emosqp.solve()
+        vec_emosqp.update_upper_bound(u_new)
+        x, y, _, _, _ = vec_emosqp.solve()
 
         # Assert close
         nptest.assert_array_almost_equal(
-           x, np.array([-1.51515152e-01, -3.33282828e+02]), decimal=3)
+           x, np.array([-1.51515152e-01, -3.33282828e+02]), decimal=4)
         nptest.assert_array_almost_equal(
-            y, np.array([0., 0., 1.33333333, 0., 0.]), decimal=3)
+            y, np.array([0., 0., 1.33333333, 0., 0.]), decimal=4)
 
         # Update upper bound to the original value
-        emosqp.update_upper_bound(self.u)
-
-    def test_update_bounds(self):
-        import emosqp
-
-        # Update bounds
-        l_new = -100 * np.ones(self.m)
-        u_new = 1000 * np.ones(self.m)
-        emosqp.update_bounds(l_new, u_new)
-        x, y, _, _, _ = emosqp.solve()
-
-        # Assert close
-        nptest.assert_array_almost_equal(
-            x, np.array([-0.12727273, -19.94909091]), decimal=3)
-        nptest.assert_array_almost_equal(
-            y, np.array([0., 0., 0., -0.8, 0.]), decimal=3)
-
-        # Update bounds to the original values
-        emosqp.update_bounds(self.l, self.u)
+        vec_emosqp.update_upper_bound(self.u)

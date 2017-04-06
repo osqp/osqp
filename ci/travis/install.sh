@@ -43,5 +43,5 @@ hash -r
 conda config --set always_yes yes --set changeps1 no
 conda update --yes -q conda
 conda install conda-build
-conda create -n testenv --yes python=$PYTHON_VERSION pip nose numpy scipy future
+conda create -n testenv --yes python=$PYTHON_VERSION pip pytest numpy scipy future
 source activate testenv

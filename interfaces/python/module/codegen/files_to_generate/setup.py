@@ -47,8 +47,8 @@ include_dirs = [get_include(),                  # Numpy includes
 '''
 Source files
 '''
-sources_files = ['PYTHON_EXT_NAMEmodule.c']                     # Python wrapper
-sources_files += glob(os.path.join('osqp', '*.c'))     # OSQP files
+sources_files = ['PYTHON_EXT_NAMEmodule.c']             # Python wrapper
+sources_files += glob(os.path.join('osqp', '*.c'))      # OSQP files
 
 
 PYTHON_EXT_NAME = Extension('PYTHON_EXT_NAME',

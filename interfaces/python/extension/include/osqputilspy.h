@@ -56,16 +56,16 @@ static int get_float_type(void) {
  * reordered in some way or the data type doesn't quite match
  */
 static PyArrayObject *get_contiguous(PyArrayObject *array, int typenum) {
-        /*
-        * the "tmp_arr" pointer has to have Py_DECREF called on it; new_owner
-        * owns the "new" array object created by PyArray_Cast
-        */
-        PyArrayObject *tmp_arr;
-        PyArrayObject *new_owner;
-        tmp_arr = PyArray_GETCONTIGUOUS(array);
-        new_owner = (PyArrayObject *) PyArray_Cast(tmp_arr, typenum);
-        Py_DECREF(tmp_arr);
-        return new_owner;
+    /*
+    * the "tmp_arr" pointer has to have Py_DECREF called on it; new_owner
+    * owns the "new" array object created by PyArray_Cast
+    */
+    PyArrayObject *tmp_arr;
+    PyArrayObject *new_owner;
+    tmp_arr = PyArray_GETCONTIGUOUS(array);
+    new_owner = (PyArrayObject *) PyArray_Cast(tmp_arr, typenum);
+    Py_DECREF(tmp_arr);
+    return new_owner;
 }
 
 
@@ -74,53 +74,53 @@ static PyOSQPData * create_pydata(c_int n, c_int m,
                      PyArrayObject *q, PyArrayObject *Ax, PyArrayObject *Ai,
                      PyArrayObject *Ap, PyArrayObject *l, PyArrayObject *u){
 
-        // Get int and float types
-        int int_type = get_int_type();
-        int float_type = get_float_type();
+    // Get int and float types
+    int int_type = get_int_type();
+    int float_type = get_float_type();
 
-        // Populate PyOSQPData structure
-        PyOSQPData * py_d = (PyOSQPData *)c_malloc(sizeof(PyOSQPData));
-        py_d->n = n;
-        py_d->m = m;
-        py_d->Px = get_contiguous(Px, float_type);
-        py_d->Pi = get_contiguous(Pi, int_type);
-        py_d->Pp = get_contiguous(Pp, int_type);
-        py_d->q  = get_contiguous(q, float_type);
-        py_d->Ax = get_contiguous(Ax, float_type);
-        py_d->Ai = get_contiguous(Ai, int_type);
-        py_d->Ap = get_contiguous(Ap, int_type);
-        py_d->l = get_contiguous(l, float_type);
-        py_d->u = get_contiguous(u, float_type);
+    // Populate PyOSQPData structure
+    PyOSQPData * py_d = (PyOSQPData *)c_malloc(sizeof(PyOSQPData));
+    py_d->n = n;
+    py_d->m = m;
+    py_d->Px = get_contiguous(Px, float_type);
+    py_d->Pi = get_contiguous(Pi, int_type);
+    py_d->Pp = get_contiguous(Pp, int_type);
+    py_d->q  = get_contiguous(q, float_type);
+    py_d->Ax = get_contiguous(Ax, float_type);
+    py_d->Ai = get_contiguous(Ai, int_type);
+    py_d->Ap = get_contiguous(Ap, int_type);
+    py_d->l = get_contiguous(l, float_type);
+    py_d->u = get_contiguous(u, float_type);
 
-        // Retrun
-        return py_d;
+    // Retrun
+    return py_d;
 
 }
 
 // Create data structure from arrays
 static OSQPData * create_data(PyOSQPData * py_d){
 
-        // Allocate OSQPData structure
-        OSQPData * data = (OSQPData *)c_malloc(sizeof(OSQPData));
+    // Allocate OSQPData structure
+    OSQPData * data = (OSQPData *)c_malloc(sizeof(OSQPData));
 
-        // Populate OSQPData structure
-        data->n = py_d->n;
-        data->m = py_d->m;
-        data->P = csc_matrix(data->n, data->n,
-                             PyArray_DIM(py_d->Px, 0),  // nnz
-                             (c_float *)PyArray_DATA(py_d->Px),
-                             (c_int *)PyArray_DATA(py_d->Pi),
-                             (c_int *)PyArray_DATA(py_d->Pp));
-        data->q = (c_float *)PyArray_DATA(py_d->q);
-        data->A = csc_matrix(data->m, data->n,
-                             PyArray_DIM(py_d->Ax, 0),  // nnz
-                             (c_float *)PyArray_DATA(py_d->Ax),
-                             (c_int *)PyArray_DATA(py_d->Ai),
-                             (c_int *)PyArray_DATA(py_d->Ap));
-        data->l = (c_float *)PyArray_DATA(py_d->l);
-        data->u = (c_float *)PyArray_DATA(py_d->u);
+    // Populate OSQPData structure
+    data->n = py_d->n;
+    data->m = py_d->m;
+    data->P = csc_matrix(data->n, data->n,
+                         PyArray_DIM(py_d->Px, 0),  // nnz
+                         (c_float *)PyArray_DATA(py_d->Px),
+                         (c_int *)PyArray_DATA(py_d->Pi),
+                         (c_int *)PyArray_DATA(py_d->Pp));
+    data->q = (c_float *)PyArray_DATA(py_d->q);
+    data->A = csc_matrix(data->m, data->n,
+                         PyArray_DIM(py_d->Ax, 0),  // nnz
+                         (c_float *)PyArray_DATA(py_d->Ax),
+                         (c_int *)PyArray_DATA(py_d->Ai),
+                         (c_int *)PyArray_DATA(py_d->Ap));
+    data->l = (c_float *)PyArray_DATA(py_d->l);
+    data->u = (c_float *)PyArray_DATA(py_d->u);
 
-        return data;
+    return data;
 }
 
 
