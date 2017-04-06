@@ -29,7 +29,7 @@ The last argument :code:`varargin` specifies the solver options. You can pass th
     m.setup(P, q, A, l, u, 'eps_abs', 1e-04, 'eps_rel', 1e-04);
 
 
-Alternatively, you can create a structure containing all the settings, change some of the fieldds and then pass it as the last argument
+Alternatively, you can create a structure containing all the settings, change some of the fields and then pass it as the last argument
 
 .. code:: matlab
 
