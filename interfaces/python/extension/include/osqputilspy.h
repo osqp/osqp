@@ -52,14 +52,14 @@ static int get_float_type(void) {
 }
 
 
-
+// Temporary substitute function to make it work on Python 3.6
 static PyArrayObject * PyArrayFromCArray(c_float *arrayin, npy_intp * nd,
                                          int typenum){
     int i;
     PyArrayObject * arrayout;
     double * data;
 
-    arrayout = (PyArrayObject *)PyArray_FromDims(1, (int *)nd, typenum);
+    arrayout = (PyArrayObject *)PyArray_SimpleNew(1, nd, typenum);
     data = PyArray_DATA(arrayout);
 
     // Copy array into Python array
@@ -71,6 +71,29 @@ static PyArrayObject * PyArrayFromCArray(c_float *arrayin, npy_intp * nd,
 
 }
 
+// Original function supposed to work (Not in Python 3.6)
+// static PyObject * PyArrayFromCArray(c_float *arrayin, npy_intp * nd,
+//                                          int typenum){
+// 	int i;
+// 	PyObject * arrayout;
+// 	c_float *x_arr;
+//
+// 	 // Allocate solutions
+//     x_arr = PyMem_Malloc(nd[0] * sizeof(c_float));
+//
+// 	// copy elements to x_arr
+// 	for (i=0; i< nd[0]; i++){
+// 		x_arr[i] = arrayin[i];
+//     }
+//
+// 	arrayout = PyArray_SimpleNewFromData(1, nd, typenum, x_arr);
+// 	// Set x to own x_arr so that it is freed when x is freed
+// 	PyArray_ENABLEFLAGS((PyArrayObject *) arrayout, NPY_ARRAY_OWNDATA);
+//
+//
+//     return arrayout;
+//
+// }
 
 
 /* gets the pointer to the block of contiguous C memory

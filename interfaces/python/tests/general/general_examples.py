@@ -38,7 +38,7 @@ def main():
     #                 'primal_infeasible', 'random_primal_infeasible',
     #                 'maros_meszaros', 'lp', 'dual_infeasible_lp',
     #                 'dual_infeasible_qp'}
-    example = 'small1'
+    example = 'maros_meszaros'
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples

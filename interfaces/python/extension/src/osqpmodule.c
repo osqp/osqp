@@ -2,9 +2,9 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
 #include "Python.h"                // Python API
-#include "structmember.h"          // Python members structure (to store results)
 #include "numpy/arrayobject.h"     // Numpy C API
 #include "numpy/npy_math.h"        // For infinity values
+#include "structmember.h"          // Python members structure (to store results)
 #include "osqp.h"                  // OSQP API
 
 /* The PyInt variable is a PyLong in Python3.x.

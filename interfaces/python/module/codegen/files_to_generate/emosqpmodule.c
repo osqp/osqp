@@ -2,7 +2,6 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
 #include "Python.h"                // Python API
-// #include "structmember.h"          // Python members structure (to store results)
 #include "numpy/arrayobject.h"     // Numpy C API
 #include "numpy/npy_math.h"        // For infinity values
 #include "osqp.h"                  // OSQP API
@@ -147,21 +146,44 @@ static int get_float_type(void) {
     }
 }
 
+// Old function. Not working.
+// static PyArrayObject * PyArrayFromCArray(c_float *arrayin, npy_intp * nd,
+//                                          int typenum){
+//     int i;
+//     PyArrayObject * arrayout;
+//     double * data;
+//
+//     arrayout = (PyArrayObject *)PyArray_SimpleNew(1, nd, typenum);
+//     data = PyArray_DATA(arrayout);
+//
+//     // Copy array into Python array
+//     for (i=0; i< nd[0]; i++){
+//         data[i] = (double)arrayin[i];
+//     }
+//
+//     return arrayout;
+//
+// }
 
 
-static PyArrayObject * PyArrayFromCArray(c_float *arrayin, npy_intp * nd,
+static PyObject * PyArrayFromCArray(c_float *arrayin, npy_intp * nd,
                                          int typenum){
-    int i;
-    PyArrayObject * arrayout;
-    double * data;
+	int i;
+	PyObject * arrayout;
+	c_float *x_arr;
 
-    arrayout = (PyArrayObject *)PyArray_FromDims(1, (int *)nd, typenum);
-    data = PyArray_DATA(arrayout);
+	 // Allocate solutions
+    x_arr = PyMem_Malloc(nd[0] * sizeof(c_float));
 
-    // Copy array into Python array
-    for (i=0; i< nd[0]; i++){
-        data[i] = (double)arrayin[i];
+	// copy elements to x_arr
+	for (i=0; i< nd[0]; i++){
+		x_arr[i] = arrayin[i];
     }
+
+	arrayout = PyArray_SimpleNewFromData(1, nd, typenum, x_arr);
+	// Set x to own x_arr so that it is freed when x is freed
+	PyArray_ENABLEFLAGS((PyArrayObject *) arrayout, NPY_ARRAY_OWNDATA);
+
 
     return arrayout;
 
@@ -232,20 +254,6 @@ static PyObject * OSQP_solve(PyObject *self, PyObject *args)
 								  nd, float_type);
 			y = (PyObject *)PyArrayFromCArray((&workspace)->solution->y,
 								  md, float_type);
-
-            // // Store solution into temporary arrays
-            // // N.B. Needed to be able to store RESULTS even when OSQP structure is deleted
-            // prea_vec_copy((&workspace)->solution->x, x_arr, (&workspace)->data->n);
-            // prea_vec_copy((&workspace)->solution->y, y_arr, (&workspace)->data->m);
-			//
-            // // Get primal dual solution PyArrayObjects
-            // x = PyArray_SimpleNewFromData(1, nd, float_type, x_arr);
-            // // Set x to own x_arr so that it is freed when x is freed
-            // PyArray_ENABLEFLAGS((PyArrayObject *) x, NPY_ARRAY_OWNDATA);
-			//
-            // y = PyArray_SimpleNewFromData(1, md, float_type, y_arr);
-            // // Set y to own y_arr so that it is freed when y is freed
-            // PyArray_ENABLEFLAGS((PyArrayObject *) y, NPY_ARRAY_OWNDATA);
 
     } else { // Problem primal or dual infeasible -> None values for x,y
             x = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
