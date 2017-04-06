@@ -10,10 +10,10 @@ environment:
     secure: yom1od1sZI7nYAFSmHDtgmRrLCGdkSaow11rIdIA+k9m0XfNdviXDkWSRI3DwdQJ
   matrix:
     - PYTHON_VERSION: 2.7
-      MINICONDA: C:\Miniconda
+      MINICONDA: C:\Miniconda3
       CMAKE_PROJECT: MinGW Makefiles
     - PYTHON_VERSION: 3.5
-      MINICONDA: C:\Miniconda
+      MINICONDA: C:\Miniconda3
       CMAKE_PROJECT: MinGW Makefiles
 
 branches:

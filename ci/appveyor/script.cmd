@@ -22,7 +22,7 @@ python setup.py install
 
 :: Test python interface
 cd %APPVEYOR_BUILD_FOLDER%\interfaces\python
-nosetests
+pytest
 if errorlevel 1 exit /b 1
 
 @echo off
