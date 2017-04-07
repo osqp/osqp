@@ -26,12 +26,12 @@ anaconda -t $ANACONDA_TOKEN upload conda-bld/**/osqp-*.tar.bz2 --user oxfordcont
 echo "Successfully deployed to Anaconda.org."
 
 
-# echo "Creating pip package..."
-# python setup.py bdist_wheel
-#
-# echo "Deploying to PyPi..."
-# twine upload -u $PYPI_USERNAME -p $PYPI_PASSWORD dist/*.whl
+echo "Creating pip package..."
+python setup.py bdist_wheel
 
+echo "Deploying to PyPi..."
+twine
+# twine upload -u $PYPI_USERNAME -p $PYPI_PASSWORD dist/*.whl
 echo "Successfully deployed to Pypi"
 
 
