@@ -52,19 +52,57 @@ Extension module API
 --------------------
 Once the code is generated the following functions are provided through its extension module
 
-+------------------------------------+-----------------------+-------------------------------------------+
-| Function                           | Input arguments       | Output structure                          |
-+====================================+=======================+===========================================+
-| :code:`solve`                      | None                  | :code:`(x, y, status_val, iter, runtime)` |
-+------------------------------------+-----------------------+-------------------------------------------+
-| :code:`update_lin_cost`            | :code:`q_new`         | None                                      |
-+------------------------------------+-----------------------+-------------------------------------------+
-| :code:`update_lower_bound`         | :code:`l_new`         | None                                      |
-+------------------------------------+-----------------------+-------------------------------------------+
-| :code:`update_upper_bound`         | :code:`u_new`         | None                                      |
-+------------------------------------+-----------------------+-------------------------------------------+
-| :code:`update_bounds`              | :code:`l_new, u_new`  | None                                      |
-+------------------------------------+-----------------------+-------------------------------------------+
+
+.. py:function:: solve()
+
+  Solve the problem.
+
+  :rtype: tuple
+  :return: Primal solution, dual solution, status value,
+            number of iteration, runtime
+
+
+.. py:function:: update_lin_cost(q_new)
+
+  Update linear cost.
+
+  :param ndarray q_new: New linear cost vector
+
+
+.. py:function:: update_lower_bound(l_new)
+
+  Update lower bound in the constraints.
+
+  :param ndarray l_new: New lower bound vector
+
+
+.. py:function:: update_upper_bound(u_new)
+
+  Update upper bound in the constraints.
+
+  :param ndarray u_new: New upper bound vector
+
+
+.. py:function:: update_bounds(l_new, u_new)
+
+  Update lower and upper bounds in the constraints.
+
+  :param ndarray l_new: New lower bound vector
+  :param ndarray u_new: New upper bound vector
+
+.. +------------------------------------+-----------------------+-------------------------------------------+
+.. | Function                           | Input arguments       | Output structure                          |
+.. +====================================+=======================+===========================================+
+.. | :code:`solve`                      | None                  | :code:`(x, y, status_val, iter, runtime)` |
+.. +------------------------------------+-----------------------+-------------------------------------------+
+.. | :code:`update_lin_cost`            | :code:`q_new`         | None                                      |
+.. +------------------------------------+-----------------------+-------------------------------------------+
+.. | :code:`update_lower_bound`         | :code:`l_new`         | None                                      |
+.. +------------------------------------+-----------------------+-------------------------------------------+
+.. | :code:`update_upper_bound`         | :code:`u_new`         | None                                      |
+.. +------------------------------------+-----------------------+-------------------------------------------+
+.. | :code:`update_bounds`              | :code:`l_new, u_new`  | None                                      |
+.. +------------------------------------+-----------------------+-------------------------------------------+
 
 You can update bounds :math:`l` and :math:`u` by running
 
@@ -75,15 +113,53 @@ You can update bounds :math:`l` and :math:`u` by running
 In addition, if the code is generated with the option :code:`parameters` set to
 :code:`'matrices'`, then the following functions are also provided
 
-+--------------------+--------------------------------------------+--------------------+
-| Function           | Input arguments                            | Output structure   |
-+====================+============================================+====================+
-| :code:`update_P`   | :code:`Px, Px_idx, Px_n`                   | None               |
-+--------------------+--------------------------------------------+--------------------+
-| :code:`update_A`   | :code:`Ax, Ax_idx, Ax_n`                   | None               |
-+--------------------+--------------------------------------------+--------------------+
-| :code:`update_P_A` | :code:`Px, Px_idx, Px_n, Ax, Ax_idx, Ax_n` | None               |
-+--------------------+--------------------------------------------+--------------------+
+
+.. py:function:: update_P(Px, Px_idx, Px_n)
+
+  Update nonzero entries of the quadratic cost matrix.
+
+  :param ndarray Px: Values of entries to be updated
+  :param ndarray Px_idx: Indices of entries to be updated. Pass :code:`None` if
+                         all the indices are to be updated
+  :param int Px_n: Number of entries to be updated. Used only if Px_idx is not
+                   :code:`None`.
+
+
+.. py:function:: update_A(Ax, Ax_idx, Ax_n)
+
+  Update nonzero entries of the constraint matrix.
+
+  :param ndarray Ax: Values of entries to be updated
+  :param ndarray Ax_idx: Indices of entries to be updated. Pass :code:`None` if
+                         all the indices are to be updated
+  :param int Ax_n: Number of entries to be updated. Used only if Ax_idx is not
+                   :code:`None`.
+
+
+.. py:function:: update_A(Ax, Ax_idx, Ax_n)
+
+  Update nonzero entries of the quadratic cost and constraint matrices.
+
+  :param ndarray Px: Values of entries to be updated
+  :param ndarray Px_idx: Indices of entries to be updated. Pass :code:`None` if
+                         all the indices are to be updated
+  :param int Px_n: Number of entries to be updated. Used only if Px_idx is not
+                   :code:`None`.
+  :param ndarray Ax: Values of entries to be updated
+  :param ndarray Ax_idx: Indices of entries to be updated. Pass :code:`None` if
+                         all the indices are to be updated
+  :param int Ax_n: Number of entries to be updated. Used only if Ax_idx is not
+                   :code:`None`.
+
+.. +--------------------+--------------------------------------------+--------------------+
+.. | Function           | Input arguments                            | Output structure   |
+.. +====================+============================================+====================+
+.. | :code:`update_P`   | :code:`Px, Px_idx, Px_n`                   | None               |
+.. +--------------------+--------------------------------------------+--------------------+
+.. | :code:`update_A`   | :code:`Ax, Ax_idx, Ax_n`                   | None               |
+.. +--------------------+--------------------------------------------+--------------------+
+.. | :code:`update_P_A` | :code:`Px, Px_idx, Px_n, Ax, Ax_idx, Ax_n` | None               |
+.. +--------------------+--------------------------------------------+--------------------+
 
 You can update all the nonzero entries in matrix :math:`A` by running
 

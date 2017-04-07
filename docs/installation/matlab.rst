@@ -6,6 +6,21 @@ OSQP Matlab interface required Matlab 2016b or newer.
 
     Find a proper way to distribute binaries
 
+
+Download the MATLAB binary package of OSQP from here, and extract the content
+into a directory of your choice.
+
+Then add the interface to the search path by executing from the same directory
+
+.. code:: matlab
+
+   addpath(pwd)
+   savepath
+
+
+You can also build OSQP from source as described below.
+
+
 Sources
 -------
 
@@ -46,5 +61,5 @@ Then you can add the interface to the search path by executing from the same dir
 
 .. code:: matlab
 
-   addpath(pwd())
+   addpath(pwd)
    savepath
