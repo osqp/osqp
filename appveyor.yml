@@ -17,7 +17,7 @@ environment:
       MINICONDA: C:\Miniconda
       CMAKE_PROJECT: MinGW Makefiles
     # - PYTHON_VERSION: 3.5
-    #   MINICONDA: C:\Miniconda3
+    #   MINICONDA: C:\Miniconda
     #   CMAKE_PROJECT: MinGW Makefiles
 
 branches:

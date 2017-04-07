@@ -1,3 +1,5 @@
+from __future__ import print_function
+from builtins import input
 import os
 import zipfile
 from platform import system
@@ -62,7 +64,7 @@ if __name__ == '__main__':
 
     # Upload on github
     print("We are ready to upload the package to GitHub")
-    gh_token = raw_input("GitHub token: ")
+    gh_token = input("GitHub token: ")
 
     call(['github-release', 'upload',
           '--user', 'oxfordcontrol',
