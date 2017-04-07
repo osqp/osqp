@@ -21,7 +21,7 @@ echo "Creating conda package..."
 conda build --python ${PYTHON_VERSION} osqp --output-folder conda-bld/
 
 echo "Deploying to Anaconda.org..."
-anaconda -t $ANACONDA_TOKEN upload conda-bld/**/osqp-*.tar.bz2
+anaconda -t $ANACONDA_TOKEN upload conda-bld/**/osqp-*.tar.bz2 --user oxfordcontrol
 
 echo "Successfully deployed to Anaconda.org."
 exit 0

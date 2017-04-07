@@ -29,14 +29,15 @@ make
 # Test OSQP C
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester_direct
 
-# Pefrorm code coverage
-if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+# Pefrorm code coverage (only in one case)
+if [[ "$TRAVIS_OS_NAME" == "linux"] && ["$PYTHON_VERSION" == "3.6"]]; then
     cd ${TRAVIS_BUILD_DIR}/build
     lcov --directory . --capture -o coverage.info # capture coverage info
     lcov --remove coverage.info "${TRAVIS_BUILD_DIR}/tests/*" \
         "${TRAVIS_BUILD_DIR}/lin_sys/direct/suitesparse/amd/*" \
         "${TRAVIS_BUILD_DIR}/lin_sys/direct/suitesparse/ldl/*" \
         "${TRAVIS_BUILD_DIR}/lin_sys/direct/suitesparse/SuiteSparse_config*" \
+        "/usr/include/x86_64-linux-gnu/**/*" \
         -o coverage.info # filter out tests and unnecessary files
     lcov --list coverage.info # debug before upload
     coveralls-lcov coverage.info # uploads to coveralls

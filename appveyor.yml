@@ -7,7 +7,7 @@ platform:
 
 environment:
   ANACONDA_TOKEN:
-    secure: yom1od1sZI7nYAFSmHDtgmRrLCGdkSaow11rIdIA+k9m0XfNdviXDkWSRI3DwdQJ
+    secure: yom1od1sZI7nYAFSmHDtgmRrLCGdkSaow11rIdIA+k8RI82Tk76rl0vOQNr3QXcX
   matrix:
     - PYTHON_VERSION: 2.7
       MINICONDA: C:\Miniconda3
