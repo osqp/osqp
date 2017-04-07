@@ -13,10 +13,9 @@ class basic_tests(unittest.TestCase):
 
     def setUp(self):
         # Simple QP problem
-        self.P = sparse.csc_matrix(np.array([[11., 0.], [0., 0.]]))
+        self.P = sparse.csc_matrix([[11., 0.], [0., 0.]])
         self.q = np.array([3, 4])
-        self.A = sparse.csc_matrix(np.array([[-1, 0], [0, -1], [-1, -3],
-                                             [2, 5], [3, 4]]))
+        self.A = sparse.csc_matrix([[-1, 0], [0, -1], [-1, -3], [2, 5], [3, 4]])
         self.u = np.array([0., 0., -15, 100, 80])
         self.l = -np.inf * np.ones(len(self.u))
         self.n = self.P.shape[0]

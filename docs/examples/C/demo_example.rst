@@ -1,7 +1,7 @@
 Demo example
 ------------
 
-We now show how a the following QP can be solved in C
+We now show how the following QP can be solved in C
 
 
 .. math::
