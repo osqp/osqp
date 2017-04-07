@@ -96,19 +96,22 @@ if (DLONG)
 endif (DLONG)
 
 
+
 # Set Compiler flags
 # ----------------------------------------------
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 
 
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g --coverage")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
-set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")      # Include math
-# Include real time library in linux
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lrt")
-endif()
 
+if (NOT MSVC)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g --coverage")
+    set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")      # Include math
+    # Include real time library in linux
+    if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+        set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lrt")
+    endif()
+endif (NOT MSVC)
 
 # Set things for debug
 # ----------------------------------------------
@@ -323,7 +326,7 @@ if (UNITTESTS)
                 ${PROJECT_SOURCE_DIR}/tests/osqp_tester_direct.c ${PROJECT_SOURCE_DIR}/tests/minunit.h
                 ${test_headers}
                 ${codegen_test_headers})
-    target_link_libraries (osqp_tester_direct osqpdir)
+    target_link_libraries (osqp_tester_direct osqpdirstatic)
     # add_dependencies(osqp_tester_direct generate_tests_data)
 
     # Add testing
