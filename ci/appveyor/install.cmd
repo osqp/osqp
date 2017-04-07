@@ -10,7 +10,9 @@ set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
 IF "%PLATFORM%"=="x86" (
     set MINGW_PATH=C:\MinGW\bin
 ) ELSE (
-    set MINGW_PATH=C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\mingw32\bin
+    :: Install 64bit MinGW from chocolatey
+    choco install -y mingw
+    set MINGW_PATH=C:\Tools\mingw64\bin
 )
 set PATH=%MINGW_PATH%;%PATH%
 
