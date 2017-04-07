@@ -26,6 +26,8 @@ anaconda -t $ANACONDA_TOKEN upload conda-bld/**/osqp-*.tar.bz2 --user oxfordcont
 echo "Successfully deployed to Anaconda.org."
 
 
+cd ${TRAVIS_BUILD_DIR}/interfaces/python
+
 echo "Creating pip package..."
 python setup.py bdist_wheel
 

@@ -11,8 +11,8 @@ if errorlevel 1 exit /b 1
 
 
 
+cd %APPVEYOR_BUILD_FOLDER%\interfaces\python
 python setup.py bdist_wheel
-
 twine
 REM twine upload -u %PYPI_USERNAME% -p %PYPI_PASSWORD% dist/*
 
