@@ -27,7 +27,7 @@ static char * test_primal_infeasible_qp_solve()
     settings->alpha = 1.6;
     settings->polish = 1;
     settings->scaling = 0;
-    settings->verbose = 0;
+    settings->verbose = 1;
     settings->warm_start = 0;
 
     // Setup workspace

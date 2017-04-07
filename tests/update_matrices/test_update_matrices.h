@@ -98,7 +98,7 @@ static char * test_update(){
     settings->max_iter = 1000;
     settings->alpha = 1.6;
     settings->rho = 0.1;
-    settings->verbose = 0;
+    settings->verbose = 1;
 
     // Setup workspace
     work = osqp_setup(problem, settings);

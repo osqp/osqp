@@ -30,7 +30,7 @@ static char * test_basic_qp2_solve()
     settings->alpha = 1.6;
     settings->warm_start = 1;
     settings->polish = 1;
-    settings->verbose = 0;
+    settings->verbose = 1;
 
     // Setup workspace
     work = osqp_setup(data, settings);
@@ -97,7 +97,7 @@ static char * test_basic_qp2_update()
     settings->alpha = 1.6;
     settings->warm_start = 1;
     settings->polish = 1;
-    settings->verbose = 0;
+    settings->verbose = 1;
 
     // Setup workspace
     work = osqp_setup(data, settings);

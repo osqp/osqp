@@ -27,7 +27,7 @@ static char * test_basic_qp_solve()
     settings->alpha = 1.6;
     settings->polish = 1;
     settings->scaling = 0;
-    settings->verbose = 0;
+    settings->verbose = 1;
     settings->warm_start = 0;
 
     // Setup workspace
@@ -93,7 +93,7 @@ static char * test_basic_qp_update()
     settings->alpha = 1.6;
     settings->polish = 1;
     settings->scaling = 0;
-    settings->verbose = 0;
+    settings->verbose = 1;
     settings->warm_start = 0;
 
     // Setup workspace
@@ -174,7 +174,7 @@ static char * test_basic_qp_early_terminate()
     settings->alpha = 1.6;
     settings->polish = 1;
     settings->scaling = 0;
-    settings->verbose = 0;
+    settings->verbose = 1;
     settings->early_terminate = 0;
     settings->warm_start = 0;
 
