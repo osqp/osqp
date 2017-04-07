@@ -69,7 +69,7 @@ if __name__ == '__main__':
     call(['github-release', 'upload',
           '--user', 'oxfordcontrol',
           '--security-token', gh_token,
-          '--repo', 'oxfordcontrol/osqp',
+          '--repo', 'osqp',
           '--tag', 'v%s' % version,
-          '--name', 'Matlab interface %s' % platform,
+          '--name', package_name + '.zip',
           '--file', package_name + '.zip'])
