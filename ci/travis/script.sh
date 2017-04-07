@@ -30,7 +30,7 @@ make
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester_direct
 
 # Pefrorm code coverage (only in Linux case for one version of python)
-if [ "$TRAVIS_OS_NAME" == "linux"] && ["$PYTHON_VERSION" == "3.6"]; then
+if [[ "$TRAVIS_OS_NAME" == "linux"]] && [["$PYTHON_VERSION" == "3.6"]]; then
     cd ${TRAVIS_BUILD_DIR}/build
     lcov --directory . --capture -o coverage.info # capture coverage info
     lcov --remove coverage.info "${TRAVIS_BUILD_DIR}/tests/*" \
