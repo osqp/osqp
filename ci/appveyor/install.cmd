@@ -9,11 +9,9 @@ set PATH=C:\MinGW\bin;%PATH%
 
 
 :: Activate test environment anaconda
-IF %PLATFORM%=="x86" (
-    set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%
-) ELSE (
-	set PATH=%MINICONDA%-%PLATFORM%;%MINICONDA%-%PLATFORM%\\Scripts;%PATH%
-)
+
+:: N.B. If you split it over multiple lines it does not work (why!??!!?)
+IF %PLATFORM%=="x86" (set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%) ELSE (set PATH=%MINICONDA%-%PLATFORM%;%MINICONDA%-%PLATFORM%\\Scripts;%PATH%)
 
 conda config --set always_yes yes --set changeps1 no
 conda update -q conda
