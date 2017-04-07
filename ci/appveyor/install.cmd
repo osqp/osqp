@@ -5,7 +5,14 @@
 :: (For MinGW make to work correctly sh.exe must NOT be in your path)
 :: http://stackoverflow.com/a/3870338/2288008
 set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
-set PATH=C:\MinGW\bin;%PATH%
+
+
+IF "%PLATFORM%"=="x86" (
+    set MINGW_PATH=C:\MinGW\bin
+) ELSE (
+    set MINGW_PATH=C:\mingw-w64\i686-5.3.0-posix-dwarf-rt_v4-rev0\mingw32\bin
+)
+set PATH=%MINGW_PATH%;%PATH%
 
 
 :: Activate test environment anaconda

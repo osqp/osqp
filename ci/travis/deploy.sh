@@ -11,7 +11,7 @@ fi
 # Anaconda
 export PATH=${DEPS_DIR}/miniconda/bin:$PATH
 hash -r
-# source activate testenv
+source activate testenv
 
 
 
