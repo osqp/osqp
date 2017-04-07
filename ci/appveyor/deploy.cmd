@@ -10,4 +10,10 @@ call anaconda -t %ANACONDA_TOKEN% upload conda-bld/**/osqp-*.tar.bz2 --user oxfo
 if errorlevel 1 exit /b 1
 
 
+
+python setup.py bdist_wheel
+
+REM twine upload -u %PYPI_USERNAME% -p %PYPI_PASSWORD% dist/*
+
+
 @echo off
