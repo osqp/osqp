@@ -31,6 +31,6 @@ deploy:
   - provider: script
     script: "bash $TRAVIS_BUILD_DIR/ci/travis/deploy.sh"
     on:
-        branch: continuous_integration
-    #   tags: true
+        # branch: continuous_integration
+      tags: true
     skip_cleanup: true

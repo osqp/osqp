@@ -9,9 +9,9 @@ set PATH=C:\MinGW\bin;%PATH%
 
 
 :: Activate test environment anaconda
-IF "%PLATFORM%"=="x86" (
+IF %PLATFORM% == "x86" (
     set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%
-) ELSE IF "%PLATFORM%"=="x64"(
+) ELSE IF %PLATFORM% == "x64"(
     set PATH=%MINICONDA%-%PLATFORM%;%MINICONDA%-%PLATFORM%\\Scripts;%PATH%
 )
 
