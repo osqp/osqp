@@ -64,7 +64,7 @@ void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
     print_line();
     c_print("        OSQP v%s  -  Operator Splitting QP Solver\n"
             "           (c) Bartolomeo Stellato,  Goran Banjac\n"
-            "     University of Oxford  -  Stanford University 2016\n",
+            "     University of Oxford  -  Stanford University 2017\n",
             OSQP_VERSION);
     print_line();
 
