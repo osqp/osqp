@@ -24,7 +24,7 @@ static char * test_constr_sparse_mat(){
 }
 
 static char * test_vec_operations(){
-    c_float norm2_diff, norm2, vecprod; // normInf;
+    c_float norm2, vecprod; // normInf;
     c_float * ew_reciprocal;
     c_float * add_scaled;
 

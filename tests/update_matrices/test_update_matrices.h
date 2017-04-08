@@ -14,7 +14,7 @@ static char * test_form_KKT(){
     update_matrices_sols_data *  data;
     c_float rho, sigma;
     c_int * PtoKKT, * AtoKKT, * Pdiag_idx, Pdiag_n;
-    csc * Ptriu, *Ptriu_new;
+    csc * Ptriu;
     csc * KKT;
 
     // Load problem data
@@ -67,15 +67,10 @@ static char * test_update(){
     OSQPSettings * settings;
 
     // Update matrix P
-    c_float *Px_new;
     c_int *Px_new_idx;
-    c_int P_new_n;
 
     // Update matrix A
-    c_float *Ax_new;
     c_int *Ax_new_idx;
-    c_int A_new_n;
-
 
     // Load problem data
     data = generate_problem_update_matrices_sols_data();
