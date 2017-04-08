@@ -105,7 +105,7 @@ library_dirs = []
 libraries = []
 if system() == 'Linux':
     libraries += ['rt']
-if system() == 'Windows':
+if system() == 'Windows' and sys.version_info[0] == 3:
     # They moved the stdio library to another place.
     # We need to include this to fix the dependency
     libraries += ['legacy_stdio_definitions']
