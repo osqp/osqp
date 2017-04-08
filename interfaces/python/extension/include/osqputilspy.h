@@ -52,7 +52,7 @@ static int get_float_type(void) {
 }
 
 
-// Temporary substitute function to make it work on Python 3.6
+// Function working on Python 3.6
 static PyArrayObject * PyArrayFromCArray(c_float *arrayin, npy_intp * nd,
                                          int typenum){
     int i;
