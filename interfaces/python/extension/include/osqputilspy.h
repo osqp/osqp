@@ -33,7 +33,7 @@ static int get_int_type(void) {
     case 8:
         return NPY_INT64;
     default:
-        return NPY_INT32; /* defaults to 4 byte int */
+        return NPY_INT64; /* defaults to 4 byte int */
     }
 }
 

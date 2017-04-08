@@ -9,8 +9,9 @@
 
 #include "types.h"
 
-#ifdef DLONG
 #define LDL_int c_int
+
+#ifdef DLONG
 
 #ifndef EMBEDDED
 #include "SuiteSparse_config.h"
@@ -33,12 +34,14 @@
 // #define LDL_valid_matrix ldl_l_valid_matrix
 
 #else  // DLONG
-#define LDL_int c_int
 
 #ifndef EMBEDDED
 #include "SuiteSparse_config.h"
 #define LDL_symbolic ldl_symbolic
+#else
+#define SuiteSparse_long c_int
 #endif
+
 
 #if EMBEDDED != 1
 #define LDL_numeric ldl_numeric
