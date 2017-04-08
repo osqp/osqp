@@ -70,7 +70,7 @@ extern "C" {
 /* Use customized number representation -----------------------------------   */
 #ifdef DLONG
 #ifdef _WIN64
-typedef long long c_int;
+typedef __int64 c_int;
 #else
 typedef long c_int;                   /* for indeces */
 #endif

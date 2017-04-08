@@ -99,28 +99,28 @@ endif (DLONG)
 option (COVERAGE "Perform code coverage" OFF)
 message(STATUS "Code coverage is ${DLONG}")
 
+
 # Set Compiler flags
 # ----------------------------------------------
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 
 
-
-if (COVERAGE)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
-endif()
-
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
-set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")      # Include math
-# Include real time library in linux
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lrt")
-endif()
 
+if (NOT MSVC)
 
-# Set things for debug
-# ----------------------------------------------
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g --coverage")
+    if (COVERAGE)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
+    endif()
+
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g")
+    set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")      # Include math
+    # Include real time library in linux
+    if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+        set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lrt")
+    endif()
+endif (NOT MSVC)
+
 
 # Include header directory
 # ----------------------------------------------
@@ -322,7 +322,7 @@ if (UNITTESTS)
                 ${PROJECT_SOURCE_DIR}/tests/osqp_tester_direct.c ${PROJECT_SOURCE_DIR}/tests/minunit.h
                 ${test_headers}
                 ${codegen_test_headers})
-    target_link_libraries (osqp_tester_direct osqpdir)
+    target_link_libraries (osqp_tester_direct osqpdirstatic)
     # add_dependencies(osqp_tester_direct generate_tests_data)
 
     # Add testing

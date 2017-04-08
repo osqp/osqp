@@ -45,9 +45,10 @@ Install CMake via Homebrew
 
 Windows
 ^^^^^^^
-#. Install `TDM 64bit GCC <http://tdm-gcc.tdragon.net/download>`_
+#. Install `TDM-GCC <http://tdm-gcc.tdragon.net/download>`_ 32bit or 64bit depending
+on your platform.
 
-#. Install the latest binaries of `CMake <https://cmake.org/download/#latest>`__ for Windows 64bit
+#. Install the latest binaries of `CMake <https://cmake.org/download/#latest>`__ for Windows 64bit.
 
 
 

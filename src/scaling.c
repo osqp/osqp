@@ -62,9 +62,9 @@ c_int scale_data(OSQPWorkspace * work){
 
         // d = (n + m) * d
         // e = (n + m) * e
-        vec_mult_scalar(work->scaling->D, work->data->n + work->data->m,
+        vec_mult_scalar(work->scaling->D, (c_float)(work->data->n + work->data->m),
                         work->data->n);
-        vec_mult_scalar(work->scaling->E, work->data->n + work->data->m,
+        vec_mult_scalar(work->scaling->E, (c_float)(work->data->n + work->data->m),
                         work->data->m);
 
         // Bound vectors between maximum and minimum allowed scaling
