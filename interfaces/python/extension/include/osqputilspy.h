@@ -53,13 +53,12 @@ static int get_float_type(void) {
 
 
 // Function working on Python 3.6
-static PyArrayObject * PyArrayFromCArray(c_float *arrayin, npy_intp * nd,
-                                         int typenum){
+static PyArrayObject * PyArrayFromCArray(c_float *arrayin, npy_intp * nd){
     int i;
     PyArrayObject * arrayout;
     double * data;
 
-    arrayout = (PyArrayObject *)PyArray_SimpleNew(1, nd, typenum);
+    arrayout = (PyArrayObject *)PyArray_SimpleNew(1, nd, NPY_DOUBLE);
     data = PyArray_DATA(arrayout);
 
     // Copy array into Python array

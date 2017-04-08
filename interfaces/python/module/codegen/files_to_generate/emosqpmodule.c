@@ -146,13 +146,12 @@ static int get_float_type(void) {
     }
 }
 
-static PyArrayObject * PyArrayFromCArray(c_float *arrayin, npy_intp * nd,
-                                         int typenum){
+static PyArrayObject * PyArrayFromCArray(c_float *arrayin, npy_intp * nd){
     int i;
     PyArrayObject * arrayout;
     double * data;
 
-    arrayout = (PyArrayObject *)PyArray_SimpleNew(1, nd, typenum);
+    arrayout = (PyArrayObject *)PyArray_SimpleNew(1, nd, NPY_DOUBLE);
     data = PyArray_DATA(arrayout);
 
     // Copy array into Python array
@@ -219,9 +218,6 @@ static PyObject * OSQP_solve(PyObject *self, PyObject *args)
     PyTimer * timer;
     c_float solve_time;
 
-    // Get float types
-    int float_type = get_float_type();
-
     // Create solution objects
     PyObject * x, *y;
 
@@ -250,9 +246,9 @@ static PyObject * OSQP_solve(PyObject *self, PyObject *args)
 
 			// Construct primal and dual solution arrays
 			x = (PyObject *)PyArrayFromCArray((&workspace)->solution->x,
-								  nd, float_type);
+								  nd);
 			y = (PyObject *)PyArrayFromCArray((&workspace)->solution->y,
-								  md, float_type);
+								  md);
 
     } else { // Problem primal or dual infeasible -> None values for x,y
             x = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);

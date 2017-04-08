@@ -18,8 +18,7 @@ else:
     elif system() == 'Darwin':
         define_macros += [('IS_MAC', None)]
 
-# define_macros += [('DLONG', None)]
-# define_macros += [('DFLOAT', None)]
+
 define_macros += [('EMBEDDED', EMBEDDED_FLAG)]
 define_macros += [('PYTHON', None)]
 

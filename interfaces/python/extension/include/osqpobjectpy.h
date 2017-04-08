@@ -36,9 +36,6 @@ static c_int OSQP_dealloc(OSQP* self)
 static PyObject * OSQP_solve(OSQP *self)
 {
     if (self->workspace){
-        // Get int and float types
-        // int int_type = get_int_type();
-        int float_type = get_float_type();
 
         // Create status object
         PyObject * status;
@@ -70,9 +67,9 @@ static PyObject * OSQP_solve(OSQP *self)
 
 			// Construct primal and dual solution arrays
 			x = (PyObject *)PyArrayFromCArray(self->workspace->solution->x,
-						          nd, float_type);
+						          nd);
 			y = (PyObject *)PyArrayFromCArray(self->workspace->solution->y,
-								  md, float_type);
+								  md);
 
         } else { // Problem primal or dual infeasible -> None values for x,y
             x = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
