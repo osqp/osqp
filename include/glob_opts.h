@@ -143,7 +143,8 @@ typedef float c_float;                /* for numerical values  */
 //   return out;
 // }
 #elif defined PYTHON
-#define c_print PySys_WriteStdout
+// #define c_print PySys_WriteStdout
+#define c_print printf
 #else
 #define c_print printf
 #endif

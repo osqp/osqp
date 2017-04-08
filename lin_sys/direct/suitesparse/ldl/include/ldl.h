@@ -32,10 +32,11 @@
 // #define LDL_valid_perm ldl_l_valid_perm
 // #define LDL_valid_matrix ldl_l_valid_matrix
 
-#else
+#else  // DLONG
 #define LDL_int c_int
 
 #ifndef EMBEDDED
+#include "SuiteSparse_config.h"
 #define LDL_symbolic ldl_symbolic
 #endif
 
@@ -45,13 +46,14 @@
 
 #define LDL_lsolve ldl_lsolve
 // #define LDL_dsolve ldl_dsolve
+#define LDL_dinvsolve ldl_dinvsolve
 #define LDL_ltsolve ldl_ltsolve
 #define LDL_perm ldl_perm
 #define LDL_permt ldl_permt
 // #define LDL_valid_perm ldl_valid_perm
 // #define LDL_valid_matrix ldl_valid_matrix
 
-#endif
+#endif  // DLONG
 
 /* ========================================================================== */
 /* === int version ========================================================== */
