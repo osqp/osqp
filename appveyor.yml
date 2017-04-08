@@ -20,10 +20,6 @@ environment:
       MINICONDA: C:\Miniconda
       CMAKE_PROJECT: MinGW Makefiles
 
-# branches:
-#   only:
-#     - master
-#     - continuous_integration
 
 init:
   # Uncomment for remote desktop debug
@@ -36,11 +32,6 @@ install:
 test_script:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\script.cmd"
 
-deploy:
-  - provider: Script
-    name: production
-    on:
-      appveyor_repo_tag: true
 deploy_script:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\deploy.cmd"
 

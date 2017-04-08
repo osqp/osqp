@@ -1,5 +1,6 @@
 @echo on
 
+IF "%APPVEYOR_REPO_TAG%" == "true" (
 
 cd %APPVEYOR_BUILD_FOLDER%\interfaces\python\conda_recipe
 
@@ -16,6 +17,8 @@ call activate test-environment
 python setup.py bdist_wheel
 twine
 REM twine upload -u %PYPI_USERNAME% -p %PYPI_PASSWORD% dist/*
+
+)
 
 
 @echo off
