@@ -104,8 +104,11 @@ else:
 library_dirs = []
 libraries = []
 if system() == 'Linux':
-    libraries = ['rt']
-
+    libraries += ['rt']
+if system() == 'Windows':
+    # They moved the stdio library to another place.
+    # We need to include this to fix the dependency
+    libraries += ['legacy_stdio_definitions']
 
 # Add OSQP compiled library
 lib_ext = '.a'
