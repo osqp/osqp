@@ -1,6 +1,6 @@
 Matlab
 ======
-OSQP Matlab interface required Matlab 2016b or newer.
+OSQP Matlab interface required Matlab 2015b or newer.
 
 .. todo::
 

@@ -15,7 +15,7 @@ The main compilation directives are specified using
 
 Linux
 ^^^^^
-Both :code:`gcc` :code:`cmake` commands are already installed by default.
+Both :code:`gcc` and :code:`cmake` commands are already installed by default.
 
 Mac OS
 ^^^^^^
@@ -45,10 +45,10 @@ Install CMake via Homebrew
 
 Windows
 ^^^^^^^
-#. Install `TDM-GCC <http://tdm-gcc.tdragon.net/download>`_ 32bit or 64bit depending
-on your platform.
 
-#. Install the latest binaries of `CMake <https://cmake.org/download/#latest>`__ for Windows 64bit.
+#. Install `TDM-GCC <http://tdm-gcc.tdragon.net/download>`_ 32bit or 64bit depending on your platform.
+
+#. Install the latest binaries of `CMake <https://cmake.org/download/#latest>`__.
 
 
 
@@ -96,6 +96,7 @@ Thanks to CMake, it is possible to create projects for a wide variety of IDEs; s
    cmake -G "Visual Studio 14 2015" ..
 
 
-The compilation will generate in the :code:`build/out/` directory the demo :code:`osqp_demo_direct` and the unittests :code:`osqp_tester_direct` executables. Run them to check that the compilation was correct.
+The compilation will generate the demo :code:`osqp_demo_direct` and the unittests :code:`osqp_tester_direct` executables. In the case of :code:`Unix` or :code:`MinGW` :code:`Makefiles` option they are located in the :code:`build/out/` directory.  Run them to check that the compilation was correct.
 
-The compilation also generates in the :code:`build/out/` folder a static library :code:`libosqpdirstatic.a` and a shared library :code:`libosqpdir.ext` where :code:`ext` is platform-dependent. See :ref:`c_cpp_interface` for details how to use them.
+
+Once the sources are built, the generated static :code:`build/out/libosqpdirstatic.a` and shared :code:`build/out/libosqpdir.ext` libraries can be used to interface any C/C++ software to OSQP. Simply compile with the linker option with :code:`-L(PATH_TO_OSQP)/build/out` and :code:`-losqpdir` or :code:`-losqpdirstatic`. Note that the :code:`osqp_demo_direct` example already performs the required linking using the CMake directives. See the file :code:`CMakeLists.txt` in the root folder for more details.
