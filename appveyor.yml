@@ -12,13 +12,12 @@ environment:
     secure: Exuqw/eu1vpjKcqg9TmxOQ==
   PYPI_PASSWORD:
     secure: raJmaYcAeHfVjblgXE7mrftbNOHRlPlKTk42vwC/+Xs=
+  MINICONDA: C:\Miniconda
+  CMAKE_PROJECT: MinGW Makefiles
   matrix:
     - PYTHON_VERSION: 2.7
-      MINICONDA: C:\Miniconda
-      CMAKE_PROJECT: MinGW Makefiles
     - PYTHON_VERSION: 3.5
-      MINICONDA: C:\Miniconda
-      CMAKE_PROJECT: MinGW Makefiles
+    - PYTHON_VERSION: 3.6
 
 
 init:
