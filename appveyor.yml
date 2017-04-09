@@ -11,11 +11,11 @@ environment:
   PYPI_USERNAME:
     secure: Exuqw/eu1vpjKcqg9TmxOQ==
   PYPI_PASSWORD:
-    secure: Xr3yKtbelrxmnH0sFDzvxA==
+    secure: raJmaYcAeHfVjblgXE7mrftbNOHRlPlKTk42vwC/+Xs=
   matrix:
-    # - PYTHON_VERSION: 2.7
-    #   MINICONDA: C:\Miniconda
-    #   CMAKE_PROJECT: MinGW Makefiles
+    - PYTHON_VERSION: 2.7
+      MINICONDA: C:\Miniconda
+      CMAKE_PROJECT: MinGW Makefiles
     - PYTHON_VERSION: 3.5
       MINICONDA: C:\Miniconda
       CMAKE_PROJECT: MinGW Makefiles
@@ -23,7 +23,7 @@ environment:
 
 init:
   # Uncomment for remote desktop debug
-  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
   - ECHO %PYTHON_VERSION% %MINICONDA%
 
 install:
@@ -38,4 +38,4 @@ deploy_script:
 
 on_finish:
   # Uncomment for remote desktop debug
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
