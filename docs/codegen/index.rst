@@ -5,6 +5,21 @@ OSQP can generate tailored C code that compiles into a fast and reliable solver
 for the given family of QP problems in which the problem data, but not its
 dimensions, change between problem instances.
 
+
+The generated code is:
+
+.. glossary::
+
+      Malloc-free
+          It does not perform any dynamic memory allocation.
+
+      Library-free
+          It is not linked to any external library.
+
+      Division-free
+          There are no division required in the ADMM algorithm
+
+
 We make a distinction between two cases depending on which of the data are to be
 treated as parameters.
 
@@ -18,27 +33,6 @@ treated as parameters.
         Both vectors :math:`q`, :math:`l`, :math:`u` and values in matrices
         :math:`P` and :math:`A` can change between problem instances.
         We assume that the sparsity patterns of :math:`P` and :math:`A` are fixed.
-
-
-
-
-Features
---------
-
-.. glossary::
-
-      Embeddable
-          It generates tailored embeddable C code.
-
-      Malloc-free
-          It does not perform any dynamic memory allocation.
-
-      Library-free
-          It is not linked to any external library.
-
-      Robust
-          The generated solver is reliable even in the presence of poor quality
-          data.
 
 
 

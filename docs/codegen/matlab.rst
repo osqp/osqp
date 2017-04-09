@@ -56,40 +56,45 @@ Once the code is generated the following functions are provided through its mex 
 
 
 .. function:: solve
+   :noindex:
 
-  Solve the problem.
+   Solve the problem.
 
-  :return: Primal solution, dual solution, status value,
+   :return: Primal solution, dual solution, status value,
             number of iteration, runtime
 
 
 .. function:: update_lin_cost(q_new)
+   :noindex:
 
-  Update linear cost.
+   Update linear cost.
 
-  :param ndarray q_new: New linear cost vector
+   :param ndarray q_new: New linear cost vector
 
 
 .. function:: update_lower_bound(l_new)
+   :noindex:
 
-  Update lower bound in the constraints.
+   Update lower bound in the constraints.
 
-  :param ndarray l_new: New lower bound vector
+   :param ndarray l_new: New lower bound vector
 
 
 .. function:: update_upper_bound(u_new)
+   :noindex:
 
-  Update upper bound in the constraints.
+   Update upper bound in the constraints.
 
-  :param ndarray u_new: New upper bound vector
+   :param ndarray u_new: New upper bound vector
 
 
 .. function:: update_bounds(l_new, u_new)
+   :noindex:
 
-  Update lower and upper bounds in the constraints.
+   Update lower and upper bounds in the constraints.
 
-  :param ndarray l_new: New lower bound vector
-  :param ndarray u_new: New upper bound vector
+   :param ndarray l_new: New lower bound vector
+   :param ndarray u_new: New upper bound vector
 
 .. +------------------------------+----------------------+-------------------------------------------+
 .. | Function                     | Input arguments      | Output structure                          |
@@ -118,40 +123,43 @@ In addition, if the code is generated with the option :code:`parameters` set to
 
 
 .. function:: update_P(Px, Px_idx, Px_n)
+   :noindex:
 
-  Update nonzero entries of the quadratic cost matrix.
+   Update nonzero entries of the quadratic cost matrix.
 
-  :param ndarray Px: Values of entries to be updated
-  :param ndarray Px_idx: Indices of entries to be updated. Pass :code:`[]` if
+   :param ndarray Px: Values of entries to be updated
+   :param ndarray Px_idx: Indices of entries to be updated. Pass :code:`[]` if
                          all the indices are to be updated
-  :param int Px_n: Number of entries to be updated. Used only if Px_idx is not
+   :param int Px_n: Number of entries to be updated. Used only if Px_idx is not
                    :code:`[]`.
 
 
 .. function:: update_A(Ax, Ax_idx, Ax_n)
+   :noindex:
 
-  Update nonzero entries of the constraint matrix.
+   Update nonzero entries of the constraint matrix.
 
-  :param ndarray Ax: Values of entries to be updated
-  :param ndarray Ax_idx: Indices of entries to be updated. Pass :code:`[]` if
+   :param ndarray Ax: Values of entries to be updated
+   :param ndarray Ax_idx: Indices of entries to be updated. Pass :code:`[]` if
                          all the indices are to be updated
-  :param int Ax_n: Number of entries to be updated. Used only if Ax_idx is not
+   :param int Ax_n: Number of entries to be updated. Used only if Ax_idx is not
                    :code:`[]`.
 
 
-.. function:: update_A(Ax, Ax_idx, Ax_n)
+.. function:: update_P_A(Px, Px_idx, Px_n, Ax, Ax_idx, Ax_n)
+   :noindex:
 
-  Update nonzero entries of the quadratic cost and constraint matrices.
+   Update nonzero entries of the quadratic cost and constraint matrices.
 
-  :param ndarray Px: Values of entries to be updated
-  :param ndarray Px_idx: Indices of entries to be updated. Pass :code:`[]` if
+   :param ndarray Px: Values of entries to be updated
+   :param ndarray Px_idx: Indices of entries to be updated. Pass :code:`[]` if
                          all the indices are to be updated
-  :param int Px_n: Number of entries to be updated. Used only if Px_idx is not
+   :param int Px_n: Number of entries to be updated. Used only if Px_idx is not
                    :code:`[]`.
-  :param ndarray Ax: Values of entries to be updated
-  :param ndarray Ax_idx: Indices of entries to be updated. Pass :code:`[]` if
+   :param ndarray Ax: Values of entries to be updated
+   :param ndarray Ax_idx: Indices of entries to be updated. Pass :code:`[]` if
                          all the indices are to be updated
-  :param int Ax_n: Number of entries to be updated. Used only if Ax_idx is not
+   :param int Ax_n: Number of entries to be updated. Used only if Ax_idx is not
                    :code:`[]`.
 
 
