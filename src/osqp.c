@@ -681,7 +681,7 @@ c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, 
         // nonzeros in P
         if (P_new_n > nnzP){
             #ifdef PRINTING
-            c_print("Error in P update: new number of elements (%i) greater than elements in P (%i)!\n", P_new_n, nnzP);
+            c_print("Error in P update: new number of elements (%i) greater than elements in P (%i)!\n", (int)P_new_n, (int)nnzP);
             #endif
             return 1;
         }
@@ -751,7 +751,7 @@ c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, 
         // nonzeros in A
         if (A_new_n > nnzA){
             #ifdef PRINTING
-            c_print("Error in A update: new number of elements (%i) greater than elements in A (%i)!\n", A_new_n, nnzA);
+            c_print("Error in A update: new number of elements (%i) greater than elements in A (%i)!\n", (int)A_new_n, (int)nnzA);
             #endif
             return 1;
         }
@@ -831,7 +831,7 @@ c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx
         // nonzeros in P
         if (P_new_n > nnzP){
             #ifdef PRINTING
-            c_print("Error in P update: new number of elements (%i) greater than elements in P (%i)!\n", P_new_n, nnzP);
+            c_print("Error in P update: new number of elements (%i) greater than elements in P (%i)!\n", (int)P_new_n, (int)nnzP);
             #endif
             return 1;
         }
@@ -843,7 +843,7 @@ c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx
         // nonzeros in A
         if (A_new_n > nnzA){
             #ifdef PRINTING
-            c_print("Error in A update: new number of elements (%i) greater than elements in A (%i)!\n", A_new_n, nnzA);
+            c_print("Error in A update: new number of elements (%i) greater than elements in A (%i)!\n", (int)A_new_n, (int)nnzA);
             #endif
             return 2;
         }
