@@ -20,10 +20,6 @@ env:
     - PYTHON_VERSION="3.6"
 install: bash ci/travis/install.sh
 script: bash ci/travis/script.sh
-# branches:
-#   only:
-#   - master
-#   - continuous_integration
 
 
 deploy:
@@ -31,6 +27,5 @@ deploy:
   - provider: script
     script: "bash $TRAVIS_BUILD_DIR/ci/travis/deploy.sh"
     on:
-        # branch: continuous_integration
       tags: true
     skip_cleanup: true
