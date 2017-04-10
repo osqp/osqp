@@ -1,9 +1,5 @@
 @echo on
 
-:: Set environment if 64bit
-IF "%PLATFORM%"=="x64" (
-"C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
-)
 
 :: Perform C Tests
 :: -----------------------------------------------------
