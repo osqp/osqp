@@ -88,9 +88,27 @@ class codegen_vectors_tests(unittest.TestCase):
 
         # Assert close
         nptest.assert_array_almost_equal(
-           x, np.array([-1.51515152e-01, -3.33282828e+02]), decimal=4)
+            x, np.array([-1.51515152e-01, -3.33282828e+02]), decimal=4)
         nptest.assert_array_almost_equal(
             y, np.array([0., 0., 1.33333333, 0., 0.]), decimal=4)
 
         # Update upper bound to the original value
         vec_emosqp.update_upper_bound(self.u)
+
+    def test_update_bounds(self):
+        import vec_emosqp
+
+        # Update upper bound
+        l_new = -100. * np.ones(self.m)
+        u_new = 1000. * np.ones(self.m)
+        vec_emosqp.update_bounds(l_new, u_new)
+        x, y, _, _, _ = vec_emosqp.solve()
+
+        # Assert close
+        nptest.assert_array_almost_equal(
+            x, np.array([-0.12727273, -19.94909091]), decimal=4)
+        nptest.assert_array_almost_equal(
+            y, np.array([0., 0., 0., -0.8, 0.]), decimal=4)
+
+        # Update upper bound to the original value
+        vec_emosqp.update_bounds(self.l, self.u)

@@ -38,20 +38,15 @@ void vec_add_scalar(c_float *a, c_float sc, c_int n);
 void vec_mult_scalar(c_float *a, c_float sc, c_int n);
 
 
-/* ||a - b||_2 */
-c_float vec_norm2_diff(const c_float *a, const c_float *b, c_int l);
+
+/* ||a - b||^2 */
+c_float vec_norm2_sq_diff(const c_float *a, const c_float *b, c_int l);
 
 /* a += sc*b */
 void vec_add_scaled(c_float *a, const c_float *b, c_int n, c_float sc);
 
 /* ||v||_2^2 */
 c_float vec_norm2_sq(const c_float *v, c_int l);
-
-/* ||v||_2 */
-c_float vec_norm2(const c_float *v, c_int l);
-
-// /* ||v||_inf */
-// c_float vec_normInf(const c_float *a, c_int l);
 
 
 /* Vector elementwise reciprocal b = 1./a (needed for scaling)*/
@@ -64,8 +59,10 @@ c_float vec_prod(const c_float *a, const c_float *b, c_int n);
 /* elementwse product a.*b stored in b*/
 void vec_ew_prod(const c_float *a, c_float *b, c_int n);
 
+#if EMBEDDED != 1
 /* elementwise sqrt of the vector elements */
 void vec_ew_sqrt(c_float *a, c_int n);
+#endif
 
 /* elementwise max between each vector component and max_val */
 void vec_ew_max(c_float *a, c_int n, c_float max_val);

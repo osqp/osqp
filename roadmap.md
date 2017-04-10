@@ -1,7 +1,7 @@
 ## TODO
 
 -   [x] Parameter Selection: `rho`, `sigma` and `alpha` from examples (data driven)
--   [ ] Avoid square roots -> Use eps tests to the 2
+-   [x] Avoid square roots when computing residuals
 -   [ ] Add option in CODEGEN to have floats
 -   [x] Add functions to update matrices in Python and Matlab
 -   [x] Add functions to update matrices in codegen

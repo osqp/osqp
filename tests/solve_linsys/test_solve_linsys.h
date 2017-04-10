@@ -34,7 +34,9 @@ static char * test_solveKKT(){
     // Solve  KKT x = b via LDL given factorization
     solve_lin_sys(settings, p, data->test_solve_KKT_rhs);
 
-    mu_assert("Linear systems solve tests: error in forming and solving KKT system!", vec_norm2_diff(data->test_solve_KKT_rhs, data->test_solve_KKT_x, data->test_solve_KKT_m + data->test_solve_KKT_n) < TESTS_TOL);
+    mu_assert("Linear systems solve tests: error in forming and solving KKT system!",
+              vec_norm2_sq_diff(data->test_solve_KKT_rhs, data->test_solve_KKT_x,
+                                data->test_solve_KKT_m + data->test_solve_KKT_n) < TESTS_TOL*TESTS_TOL);
 
 
     // Cleanup

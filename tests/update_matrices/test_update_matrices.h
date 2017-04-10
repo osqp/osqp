@@ -110,11 +110,11 @@ static char * test_update(){
 
     // Compare primal solutions
     mu_assert("Update matrices: original problem, error in primal solution!",
-              vec_norm2_diff(work->solution->x, data->test_solve_x, data->n) < TESTS_TOL);
+              vec_norm2_sq_diff(work->solution->x, data->test_solve_x, data->n) < TESTS_TOL*TESTS_TOL);
 
     // Compare dual solutions
     mu_assert("Update matrices: original problem, error in dual solution!",
-              vec_norm2_diff(work->solution->y, data->test_solve_y, data->m) < TESTS_TOL);
+              vec_norm2_sq_diff(work->solution->y, data->test_solve_y, data->m) < TESTS_TOL*TESTS_TOL);
 
 
 
@@ -136,11 +136,11 @@ static char * test_update(){
 
     // Compare primal solutions
     mu_assert("Update matrices: problem with P updated, error in primal solution!",
-              vec_norm2_diff(work->solution->x, data->test_solve_P_new_x, data->n) < TESTS_TOL);
+              vec_norm2_sq_diff(work->solution->x, data->test_solve_P_new_x, data->n) < TESTS_TOL*TESTS_TOL);
 
     // Compare dual solutions
     mu_assert("Update matrices: problem with P updated, error in dual solution!",
-              vec_norm2_diff(work->solution->y, data->test_solve_P_new_y, data->m) < TESTS_TOL);
+              vec_norm2_sq_diff(work->solution->y, data->test_solve_P_new_y, data->m) < TESTS_TOL*TESTS_TOL);
 
 
     // Update A
@@ -165,11 +165,11 @@ static char * test_update(){
 
     // Compare primal solutions
     mu_assert("Update matrices: problem with A updated, error in primal solution!",
-            vec_norm2_diff(work->solution->x, data->test_solve_A_new_x, data->n) < TESTS_TOL);
+            vec_norm2_sq_diff(work->solution->x, data->test_solve_A_new_x, data->n) < TESTS_TOL*TESTS_TOL);
 
     // Compare dual solutions
     mu_assert("Update matrices: problem with A updated, error in dual solution!",
-            vec_norm2_diff(work->solution->y, data->test_solve_A_new_y, data->m) < TESTS_TOL);
+            vec_norm2_sq_diff(work->solution->y, data->test_solve_A_new_y, data->m) < TESTS_TOL*TESTS_TOL);
 
 
     // Cleanup and setup workspace
@@ -188,11 +188,11 @@ static char * test_update(){
 
     // Compare primal solutions
     mu_assert("Update matrices: problem with P and A updated, error in primal solution!",
-          vec_norm2_diff(work->solution->x, data->test_solve_P_A_new_x, data->n) < TESTS_TOL);
+          vec_norm2_sq_diff(work->solution->x, data->test_solve_P_A_new_x, data->n) < TESTS_TOL*TESTS_TOL);
 
     // Compare dual solutions
     mu_assert("Update matrices: problem with P and A updated, error in dual solution!",
-          vec_norm2_diff(work->solution->y, data->test_solve_P_A_new_y, data->m) < TESTS_TOL);
+          vec_norm2_sq_diff(work->solution->y, data->test_solve_P_A_new_y, data->m) < TESTS_TOL*TESTS_TOL);
 
 
     // Cleanup problems

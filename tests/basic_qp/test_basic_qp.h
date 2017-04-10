@@ -45,11 +45,11 @@ static char * test_basic_qp_solve()
 
     // Compare primal solutions
     mu_assert("Basic QP test solve: Error in primal solution!",
-              vec_norm2_diff(work->solution->x, sols_data->x_test, data->n) < TESTS_TOL);
+              vec_norm2_sq_diff(work->solution->x, sols_data->x_test, data->n) < TESTS_TOL*TESTS_TOL);
 
     // Compare dual solutions
     mu_assert("Basic QP test solve: Error in dual solution!",
-              vec_norm2_diff(work->solution->y, sols_data->y_test, data->m) < TESTS_TOL);
+              vec_norm2_sq_diff(work->solution->y, sols_data->y_test, data->m) < TESTS_TOL*TESTS_TOL);
 
 
     // Compare objective values
@@ -110,31 +110,31 @@ static char * test_basic_qp_update()
     // Update linear cost
     osqp_update_lin_cost(work, sols_data->q_new);
     mu_assert("Basic QP test update: Error in updating linear cost!",
-              vec_norm2_diff(work->data->q, sols_data->q_new, data->n) < TESTS_TOL);
+              vec_norm2_sq_diff(work->data->q, sols_data->q_new, data->n) < TESTS_TOL*TESTS_TOL);
 
     // UPDATE BOUNDS
     mu_assert("Basic QP test update: Error in bounds update ordering!",
               osqp_update_bounds(work, sols_data->l_new, sols_data->u_new) == 0);
 
     mu_assert("Basic QP test update: Error in bounds update, lower bound!",
-              vec_norm2_diff(work->data->l, sols_data->l_new, data->m) < TESTS_TOL);
+              vec_norm2_sq_diff(work->data->l, sols_data->l_new, data->m) < TESTS_TOL*TESTS_TOL);
 
     mu_assert("Basic QP test update: Error in bounds update, upper bound!",
-              vec_norm2_diff(work->data->u, sols_data->u_new, data->m) < TESTS_TOL);
+              vec_norm2_sq_diff(work->data->u, sols_data->u_new, data->m) < TESTS_TOL*TESTS_TOL);
 
     // Update lower bound
     mu_assert("Basic QP test update: Error in lower bound update. ordering!",
               osqp_update_lower_bound(work, sols_data->l_new) == 0);
 
     mu_assert("Basic QP test update: Error in updating lower bound!",
-              vec_norm2_diff(work->data->l, sols_data->l_new, data->m) < TESTS_TOL);
+              vec_norm2_sq_diff(work->data->l, sols_data->l_new, data->m) < TESTS_TOL*TESTS_TOL);
 
     // Update upper bound
     mu_assert("Basic QP test update: Error in upper bound update: ordering!",
               osqp_update_upper_bound(work, sols_data->u_new) == 0);
 
     mu_assert("Basic QP test update: Error in updating upper bound!",
-            vec_norm2_diff(work->data->u, sols_data->u_new, data->m) < TESTS_TOL);
+            vec_norm2_sq_diff(work->data->u, sols_data->u_new, data->m) < TESTS_TOL*TESTS_TOL);
 
 
     // Clean workspace
@@ -197,11 +197,11 @@ static char * test_basic_qp_early_terminate()
 
     // Compare primal solutions
     mu_assert("Basic QP test solve: Error in primal solution!",
-              vec_norm2_diff(work->solution->x, sols_data->x_test, data->n) < TESTS_TOL);
+              vec_norm2_sq_diff(work->solution->x, sols_data->x_test, data->n) < TESTS_TOL*TESTS_TOL);
 
     // Compare dual solutions
     mu_assert("Basic QP test solve: Error in dual solution!",
-              vec_norm2_diff(work->solution->y, sols_data->y_test, data->m) < TESTS_TOL);
+              vec_norm2_sq_diff(work->solution->y, sols_data->y_test, data->m) < TESTS_TOL*TESTS_TOL);
 
     // Compare objective values
     mu_assert("Basic QP test solve: Error in objective value!",

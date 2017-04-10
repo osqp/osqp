@@ -4,15 +4,16 @@
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 
-c_float vec_norm2_diff(const c_float *a, const c_float *b, c_int l) {
+c_float vec_norm2_sq_diff(const c_float *a, const c_float *b, c_int l) {
     c_float nmDiff = 0.0, tmp;
     c_int i;
     for (i = 0; i < l; ++i) {
         tmp = (a[i] - b[i]);
         nmDiff += tmp * tmp;
     }
-    return c_sqrt(nmDiff);
+    return nmDiff;
 }
+
 
 void vec_add_scaled(c_float *a, const c_float *b, c_int n, c_float sc) {
     c_int i;
@@ -28,10 +29,6 @@ c_float vec_norm2_sq(const c_float *v, c_int l) {
         nmsq += v[i] * v[i];
     }
     return nmsq;
-}
-
-c_float vec_norm2(const c_float *v, c_int l) {
-    return c_sqrt(vec_norm2_sq(v, l));
 }
 
 
@@ -122,14 +119,14 @@ void vec_ew_prod(const c_float *a, c_float *b, c_int n){
     }
 }
 
-
+#if EMBEDDED != 1
 void vec_ew_sqrt(c_float *a, c_int n){
     c_int i;
     for(i = 0;  i < n; i++){
         a[i] = c_sqrt(a[i]);
     }
 }
-
+#endif
 
 void vec_ew_max(c_float *a, c_int n, c_float max_val){
     c_int i;

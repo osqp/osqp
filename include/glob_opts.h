@@ -64,8 +64,6 @@ extern "C" {
 
 #endif  //end EMBEDDED
 
-#include <math.h>
-
 
 /* Use customized number representation -----------------------------------   */
 #ifdef DLONG
@@ -74,15 +72,24 @@ typedef long c_int;                   /* for indeces */
 typedef int c_int;                   /* for indeces */
 #endif
 
+
 #ifndef DFLOAT // Doubles
 typedef double c_float;              /* for numerical values  */
-#define c_sqrt sqrt
 #else         // Floats
 typedef float c_float;                /* for numerical values  */
-#define c_sqrt sqrtf
 #endif
 
 
+#if EMBEDDED != 1
+
+#include <math.h>
+#ifndef DFLOAT // Doubles
+#define c_sqrt sqrt
+#else         // Floats
+#define c_sqrt sqrtf
+#endif
+
+#endif // end EMBEDDED
 
 
 /* Use customized constants -----------------------------------------------   */
