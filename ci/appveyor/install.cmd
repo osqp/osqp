@@ -39,6 +39,7 @@ call activate test-environment
 
 
 :: Set environment for build if 64bit
+:: N.B. Needed during conda build!
 IF "%PLATFORM%"=="x64" (
 call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
 )
