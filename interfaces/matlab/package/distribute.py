@@ -92,13 +92,17 @@ if __name__ == '__main__':
     print("Uploading to GitHub release v%s ..." % version)
     gh_token = input("GitHub token: ")
 
-    call(['github-release', 'upload',
-          '--user', 'oxfordcontrol',
-          '--security-token', gh_token,
-          '--repo', 'osqp',
-          '--tag', 'v%s' % version,
-          '--name', package_name + '.tar.gz',
-          '--file', package_name + '.tar.gz'])
+    interface_upload = input("Do you also want to upload the interface .tar.gz archive? [y/n]")
+    if interface_upload == 'y':
+        print("Uploading %s.tar.gz file" % package_name)
+
+        call(['github-release', 'upload',
+              '--user', 'oxfordcontrol',
+              '--security-token', gh_token,
+              '--repo', 'osqp',
+              '--tag', 'v%s' % version,
+              '--name', package_name + '.tar.gz',
+              '--file', package_name + '.tar.gz'])
 
     # Upload install_osqp.m
     install_osqp_upload = input("Do you also want to upload the install_osqp.m file? [y/n]")
