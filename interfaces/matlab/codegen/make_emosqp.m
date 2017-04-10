@@ -20,7 +20,7 @@ else
 end
 
 % Add parameters options to mex
-mexoptflags =  sprintf('%s %s %s', mexoptflags, '-DDLONG', '-DDFLOAT');
+mexoptflags =  sprintf('%s %s %s', mexoptflags, '-DDLONG');
 mexoptflags =  sprintf('%s -DEMBEDDED=%d', mexoptflags, EMBEDDED_FLAG);
 
 % Set optimizer flag

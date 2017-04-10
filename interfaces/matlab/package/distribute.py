@@ -44,6 +44,11 @@ if __name__ == '__main__':
     m = osqp.OSQP()
     version = m.version()
 
+    print("Creating the Matlab OSQP v%s package " % version)
+    mex_interface_compiled = 'n'
+    while mex_interface_compiled != 'y':
+        mex_interface_compiled = input("Did you compile the mex interface? (you need to do it to proceed!): [n]")
+
     # Get package name
     package_name = "osqp-%s-matlab-%s" % (version, platform)
 
@@ -70,7 +75,8 @@ if __name__ == '__main__':
     print("Copying files...")
     # Copy interface files
     files_to_copy = ['osqp_mex.%s' % matlab_ext,
-                     'osqp.m']
+                     'osqp.m',
+                     'run_osqp_tests.m']
 
     for file_name in files_to_copy:
         print("  Copying  %s/%s..." % (package_name, file_name))
@@ -83,7 +89,7 @@ if __name__ == '__main__':
     compress_dir(package_name)
 
     # Upload to github
-    print("Uploading to GitHub, release v%s ..." % version)
+    print("Uploading to GitHub release v%s ..." % version)
     gh_token = input("GitHub token: ")
 
     call(['github-release', 'upload',
@@ -93,3 +99,15 @@ if __name__ == '__main__':
           '--tag', 'v%s' % version,
           '--name', package_name + '.tar.gz',
           '--file', package_name + '.tar.gz'])
+
+    # Upload install_osqp.m
+    install_osqp_upload = input("Do you also want to upload the install_osqp.m file? [y/n]")
+    if install_osqp_upload == 'y':
+        print("Uploading install_osqp.m file")
+        call(['github-release', 'upload',
+              '--user', 'oxfordcontrol',
+              '--security-token', gh_token,
+              '--repo', 'osqp',
+              '--tag', 'v%s' % version,
+              '--name', 'install_osqp.m',
+              '--file', 'install_osqp.m'])
