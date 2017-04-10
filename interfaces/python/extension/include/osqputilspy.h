@@ -151,13 +151,13 @@ static OSQPData * create_data(PyOSQPData * py_d){
     data->n = py_d->n;
     data->m = py_d->m;
     data->P = csc_matrix(data->n, data->n,
-                         PyArray_DIM(py_d->Px, 0),  // nnz
+                         (c_int) PyArray_DIM(py_d->Px, 0),  // nnz
                          (c_float *)PyArray_DATA(py_d->Px),
                          (c_int *)PyArray_DATA(py_d->Pi),
                          (c_int *)PyArray_DATA(py_d->Pp));
     data->q = (c_float *)PyArray_DATA(py_d->q);
     data->A = csc_matrix(data->m, data->n,
-                         PyArray_DIM(py_d->Ax, 0),  // nnz
+                         (c_int) PyArray_DIM(py_d->Ax, 0),  // nnz
                          (c_float *)PyArray_DATA(py_d->Ax),
                          (c_int *)PyArray_DATA(py_d->Ai),
                          (c_int *)PyArray_DATA(py_d->Ap));
