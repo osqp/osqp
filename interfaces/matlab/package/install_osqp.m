@@ -3,7 +3,7 @@ function install_osqp
 
     % Get current operating system
     if ispc
-        platform = 'win';
+        platform = 'windows';
     elseif ismac
         platform = 'mac';
     elseif isunix
