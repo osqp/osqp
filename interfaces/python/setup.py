@@ -187,7 +187,7 @@ packages = ['osqp',
             'osqppurepy']
 
 setup(name='osqp',
-      version='0.0.0',
+      version='0.1.0',
       author='Bartolomeo Stellato, Goran Banjac',
       description='OSQP: The Operator Splitting QP Solver',
       package_dir={'osqp': 'module',

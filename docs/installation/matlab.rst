@@ -8,13 +8,13 @@ You can also build OSQP from source as described below.
 Binaries
 --------
 
-Precompiled platform-dependent Matlab binaries are available on `Github <https://github.com/oxfordcontrol/osqp/releases/tag/v0.0.0>`_.
+Precompiled platform-dependent Matlab binaries are available on `Github <https://github.com/oxfordcontrol/osqp/releases/tag/v0.1.0>`_.
 
 To install the interface, just run the following commands:
 
 .. code:: matlab
 
-    urlwrite('https://github.com/oxfordcontrol/osqp/releases/download/v0.0.0/install_osqp.m','install_osqp.m');
+    urlwrite('https://github.com/oxfordcontrol/osqp/releases/download/v0.1.0/install_osqp.m','install_osqp.m');
     install_osqp
 
 

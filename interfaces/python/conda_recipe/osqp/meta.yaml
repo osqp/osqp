@@ -1,10 +1,10 @@
 package:
   name: osqp
-  version: "0.0.0"
+  version: "0.1.0"
 
 source:
   git_url: https://github.com/oxfordcontrol/osqp.git
-  git_tag: v0.0.0
+  git_tag: v0.1.0
 
 
 # build:
