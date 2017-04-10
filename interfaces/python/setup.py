@@ -15,7 +15,7 @@ import sys
 PRINTING = True
 PROFILING = True
 DFLOAT = False
-DLONG = False
+DLONG = True
 CTRLC = True
 
 

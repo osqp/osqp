@@ -52,19 +52,10 @@ extern "C" {
 
 #ifndef SuiteSparse_long
 
-#ifdef _WIN64
-
-#define SuiteSparse_long __int64
-#define SuiteSparse_long_max _I64_MAX
-#define SuiteSparse_long_idd "I64d"
-
-#else
-
 #define SuiteSparse_long long
 #define SuiteSparse_long_max LONG_MAX
 #define SuiteSparse_long_idd "ld"
 
-#endif
 #define SuiteSparse_long_id "%" SuiteSparse_long_idd
 #endif
 
