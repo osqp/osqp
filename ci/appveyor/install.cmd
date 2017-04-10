@@ -1,5 +1,9 @@
 @echo on
 
+:: Set environment if 64bit
+IF "%PLATFORM%"=="x64" (
+"C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
+)
 
 :: Remove entry with sh.exe from PATH to fix error with MinGW toolchain
 :: (For MinGW make to work correctly sh.exe must NOT be in your path)
@@ -32,7 +36,7 @@ conda update -q conda
 conda info -a
 conda install conda-build anaconda-client
 conda create -q -n test-environment python=%PYTHON_VERSION% numpy scipy pytest future
-REM conda install -c conda-forge twine
+conda install -c conda-forge twine
 :: N.B. Need to run with call otherwise the script hangs
 call activate test-environment
 
