@@ -24,6 +24,10 @@ function make_osqp(varargin)
 
 if( nargin == 0 )
     what = {'all'};
+    verbose = false;
+elseif ( nargin == 1 && strcmp(varargin{1}, '-verbose'))
+    what = {'all'};
+    verbose = true;
 else
     what = varargin{nargin};
     if(isempty(strfind(what, 'all'))         && ...
@@ -31,7 +35,12 @@ else
         isempty(strfind(what, 'osqp_mex')) && ...
         isempty(strfind(what, 'clean'))       && ...
         isempty(strfind(what, 'purge')))
-    fprintf('No rule to make target "%s", exiting.\n', what);
+            fprintf('No rule to make target "%s", exiting.\n', what);
+    end
+    if ismember('-verbose', varargin)
+        verbose = true;
+    else
+        verbose = false;
     end
 end
 
@@ -164,6 +173,9 @@ if( any(strcmpi(what,'osqp')) || any(strcmpi(what,'all')) )
         fprintf('\n');
         disp(output);
         error('Error configuring CMake environment');
+    elseif(verbose)
+        fprintf('\n');
+        disp(output);
     end
 
     [status, output] = system(sprintf('%s %s', make_cmd, '--target osqpdirstatic'));
@@ -171,6 +183,9 @@ if( any(strcmpi(what,'osqp')) || any(strcmpi(what,'all')) )
         fprintf('\n');
         disp(output);
         error('Error compiling OSQP');
+    elseif(verbose)
+        fprintf('\n');
+        disp(output);
     end
 
 
@@ -252,8 +267,9 @@ if( any(strcmpi(what,'clean')) || any(strcmpi(what,'purge')) )
     end
 
     % Delete static library
-    if( exist(lib_name,'file') )
-        delete(lib_name);
+    lib_full_path = fullfile(makefile_path, lib_name);
+    if( exist(lib_full_path,'file') )
+        delete(lib_full_path);
     end
 
     fprintf('\t\t\t\t[done]\n');

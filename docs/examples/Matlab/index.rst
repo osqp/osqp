@@ -1,5 +1,5 @@
-Matlab examples
-===============
+Matlab
+======
 
 .. toctree::
    :maxdepth: 1

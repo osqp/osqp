@@ -1,5 +1,5 @@
-Python examples
-===============
+Python
+======
 
 .. toctree::
    :maxdepth: 1
