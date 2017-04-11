@@ -40,7 +40,7 @@ extern "C" {
 #define ALPHA (1.6)
 
 #ifndef EMBEDDED
-#define DELTA (1E-7)
+#define DELTA (1E-6)
 #define POLISH (1)
 #define POL_REFINE_ITER (3)
 #define VERBOSE (1)
