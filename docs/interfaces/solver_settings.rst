@@ -32,7 +32,7 @@ The settings marked with * can be changed without running the setup method again
 +------------------------------------+-------------------------------------+----------------+
 | :code:`alpha`    *                 | ADMM overrelaxation parameter       |   1.6          |
 +------------------------------------+-------------------------------------+----------------+
-| :code:`delta`    *                 | Polishing regularization parameter  |   1e-07        |
+| :code:`delta`    *                 | Polishing regularization parameter  |   1e-06        |
 +------------------------------------+-------------------------------------+----------------+
 | :code:`polish` *                   | Perform polishing                   |   True         |
 +------------------------------------+-------------------------------------+----------------+
