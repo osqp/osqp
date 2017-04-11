@@ -8,8 +8,8 @@ platform:
 environment:
   ANACONDA_TOKEN:
     secure: yom1od1sZI7nYAFSmHDtgmRrLCGdkSaow11rIdIA+k8RI82Tk76rl0vOQNr3QXcX
-  PYPI_USERNAME:
-    secure: Exuqw/eu1vpjKcqg9TmxOQ==
+  # PYPI_USERNAME:
+  #   secure: Exuqw/eu1vpjKcqg9TmxOQ==
   PYPI_PASSWORD:
     secure: raJmaYcAeHfVjblgXE7mrftbNOHRlPlKTk42vwC/+Xs=
   MINICONDA: C:\Miniconda

@@ -26,13 +26,24 @@ anaconda -t $ANACONDA_TOKEN upload conda-bld/**/osqp-*.tar.bz2 --user oxfordcont
 echo "Successfully deployed to Anaconda.org."
 
 
+
+# Setup pypi login
+echo [distutils]                                      > $HOME/.pypirc
+echo index-servers =                                 >> $HOME/.pypirc
+echo     testpypi                                    >> $HOME/.pypirc
+echo [testpypi]                                      >> $HOME/.pypirc
+echo repository=https://testpypi.python.org/pypi     >> $HOME/.pypirc
+echo username=bstellato                              >> $HOME/.pypirc
+echo password=$PYPI_PASSWORD                         >> $HOME/.pypirc
+
+
 cd ${TRAVIS_BUILD_DIR}/interfaces/python
 
-echo "Creating pip package..."
-python setup.py bdist_wheel
+echo "Creating and uploading pip package..."
+python setup.py bdist_wheel upload
 
-echo "Deploying to PyPi..."
-twine upload -u $PYPI_USERNAME -p $PYPI_PASSWORD dist/*.whl -r pypitest
+# echo "Deploying to PyPi..."
+# twine upload -u $PYPI_USERNAME -p $PYPI_PASSWORD dist/*.whl -r pypitest
 echo "Successfully deployed to Pypi"
 
 

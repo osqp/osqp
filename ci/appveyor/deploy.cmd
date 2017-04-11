@@ -9,10 +9,18 @@ call anaconda -t %ANACONDA_TOKEN% upload conda-bld/**/osqp-*.tar.bz2 --user oxfo
 if errorlevel 1 exit /b 1
 
 
+:: Specify account details for PyPI
+echo [distutils]                                  > %USERPROFILE%\\.pypirc
+echo index-servers =                             >> %USERPROFILE%\\.pypirc
+echo     testpypi                                    >> %USERPROFILE%\\.pypirc
+echo [testpypi]                                      >> %USERPROFILE%\\.pypirc
+echo repository=https://testpypi.python.org/pypi     >> %USERPROFILE%\\.pypirc
+echo username=bstellato                          >> %USERPROFILE%\\.pypirc
+echo password=%PYPI_PASSWORD%                    >> %USERPROFILE%\\.pypirc
+
 
 cd %APPVEYOR_BUILD_FOLDER%\interfaces\python
 call activate test-environment
-python setup.py bdist_wheel
-twine upload -u %PYPI_USERNAME% -p %PYPI_PASSWORD% dist/*.whl -r pypitest
+python setup.py bdist_wheel upload
 
 )
