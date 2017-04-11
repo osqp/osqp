@@ -144,7 +144,7 @@ void print_footer(OSQPInfo * info, c_int polish){
     if (polish && info->status_val == OSQP_SOLVED) {
         if (info->status_polish == 1){
             c_print("Solution polish: Successful\n");
-        } else if (info->status_polish == -1){
+        } else if (info->status_polish < 0){
             c_print("Solution polish: Unsuccessful\n");
         }
     }

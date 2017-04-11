@@ -125,7 +125,9 @@ lib_name = sprintf('libosqpdirstatic%s', lib_ext);
 
 
 % Set osqp directory and osqp_build directory
-osqp_dir = fullfile('..', '..');
+current_dir = pwd;
+[makefile_path,~,~] = fileparts(which('make_osqp.m'));
+osqp_dir = fullfile(makefile_path, '..', '..');
 osqp_build_dir = fullfile(osqp_dir, 'build');
 suitesparse_dir = fullfile(osqp_dir, 'lin_sys', 'direct', 'suitesparse');
 cg_sources_dir = fullfile('codegen', 'sources');
@@ -275,5 +277,8 @@ if( any(strcmpi(what,'purge')) )
     fprintf('\t[done]\n');
 end
 
+
+%% Go back to the original directory
+cd(current_dir);
 
 end

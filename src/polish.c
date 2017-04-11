@@ -1,5 +1,6 @@
 #include "polish.h"
 
+
 /**
  * Form reduced matrix A that contains only rows that are active at the solution.
  * Ared = vstack[Alow, Aupp]
@@ -201,6 +202,16 @@ c_int polish(OSQPWorkspace *work) {
 
     // Form and factorize reduced KKT
     plsh = init_priv(work->data->P, work->pol->Ared, work->settings, 1);
+    if (!plsh){
+        // Polishing failed
+        work->info->status_polish = -1;
+        // Memory clean-up
+        if (work->pol) {
+            if (work->pol->Ared)
+                csc_spfree(work->pol->Ared);
+        }
+        return 1;
+    }
 
     // Form reduced right-hand side rhs_red
     rhs_red = c_malloc(sizeof(c_float) * (work->data->n + mred));
