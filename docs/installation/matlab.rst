@@ -14,7 +14,7 @@ To install the interface, just run the following commands:
 
 .. code:: matlab
 
-    urlwrite('https://github.com/oxfordcontrol/osqp/releases/download/v0.1.0/install_osqp.m','install_osqp.m');
+    websave('install_osqp.m', 'https://github.com/oxfordcontrol/osqp/releases/download/v0.1.0/install_osqp.m');
     install_osqp
 
 
