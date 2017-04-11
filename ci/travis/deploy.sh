@@ -31,7 +31,7 @@ echo "Successfully deployed to Anaconda.org."
 cd ${TRAVIS_BUILD_DIR}/interfaces/python
 
 echo "Creating pip package..."
-python setup.py bdist_wheel upload
+python setup.py bdist_wheel
 echo "Deploying to Pypi..."
 twine upload --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*
 echo "Successfully deployed to Pypi"
