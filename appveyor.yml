@@ -8,7 +8,7 @@ platform:
 environment:
   ANACONDA_TOKEN:
     secure: yom1od1sZI7nYAFSmHDtgmRrLCGdkSaow11rIdIA+k8RI82Tk76rl0vOQNr3QXcX
-  PYPI_PASSWORD:
+  PYPIPASSWORD:
     secure: 3gQtEWf4jXJLJKP8oM22oCShTJ3VI+BtRYczfzO3RSQ=
   MINICONDA: C:\Miniconda
   CMAKE_PROJECT: MinGW Makefiles

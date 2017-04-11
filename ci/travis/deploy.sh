@@ -29,18 +29,18 @@ echo "Successfully deployed to Anaconda.org."
 
 # Setup pypi login
 echo "[distutils]"                                      > $HOME/.pypirc
-echo "index-servers ="                                 >> $HOME/.pypirc
-echo "   testpypi"                                   >> $HOME/.pypirc
+echo "index-servers = testpypi"                        >> $HOME/.pypirc
 echo "[testpypi]"                                      >> $HOME/.pypirc
 echo "repository=https://testpypi.python.org/pypi"     >> $HOME/.pypirc
 echo "username=bstellato"                              >> $HOME/.pypirc
-echo "password=$PYPI_PASSWORD"                         >> $HOME/.pypirc
+echo "password=$PYPIPASSWORD"                          >> $HOME/.pypirc
 
 
 cd ${TRAVIS_BUILD_DIR}/interfaces/python
 
 echo "Creating and uploading pip package..."
 python setup.py bdist_wheel upload
+twine upload dist/*
 
 echo "Successfully deployed to Pypi"
 
