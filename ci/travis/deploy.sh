@@ -26,16 +26,18 @@ anaconda -t $ANACONDA_TOKEN upload conda-bld/**/osqp-*.tar.bz2 --user oxfordcont
 echo "Successfully deployed to Anaconda.org."
 
 
+# Binary Linux packages not supported on Pypi
+if [[ "$TRAVIS_OS_NAME" != "linux" ]]; then
 
+    cd ${TRAVIS_BUILD_DIR}/interfaces/python
 
-cd ${TRAVIS_BUILD_DIR}/interfaces/python
+    echo "Creating pip package..."
+    python setup.py bdist_wheel
+    echo "Deploying to Pypi..."
+    twine upload --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*
+    echo "Successfully deployed to Pypi"
 
-echo "Creating pip package..."
-python setup.py bdist_wheel
-echo "Deploying to Pypi..."
-twine upload --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*
-echo "Successfully deployed to Pypi"
-
+fi
 
 
 
