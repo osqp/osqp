@@ -4,15 +4,15 @@ Python
 Python interface supports Python 2.7 and 3.5 or newer.
 
 Anaconda
-----------
+--------
 
 .. code:: bash
 
    conda install -c oxfordcontrol osqp
 
 
-Pip
-----
+Pip (only Mac and Windows)
+--------------------------
 
 .. code:: bash
 
