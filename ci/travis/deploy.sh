@@ -29,8 +29,8 @@ echo "Successfully deployed to Anaconda.org."
 
 # Setup pypi login
 echo "[distutils]"                                      > $HOME/.pypirc
-echo "index-servers = testpypi"                        >> $HOME/.pypirc
-echo "[testpypi]"                                      >> $HOME/.pypirc
+echo "index-servers = pypi"                            >> $HOME/.pypirc
+echo "[pypi]"                                          >> $HOME/.pypirc
 echo "repository=https://testpypi.python.org/pypi"     >> $HOME/.pypirc
 echo "username=bstellato"                              >> $HOME/.pypirc
 echo "password=$PYPIPASSWORD"                          >> $HOME/.pypirc
