@@ -63,6 +63,11 @@ The following people have been involved in the development of OSQP:
 * `Stephen Boyd <http://web.stanford.edu/~boyd/>`_ (Stanford University): methods and maths
 
 
+Bug reports and support
+------------------------
+
+Please report any issues via the `Github issue tracker <https://github.com/oxfordcontrol/osqp/issues>`_. All types of issues are welcome including bug reports, documentation typos, feature requests and so on.
+
 
 .. toctree::
    :hidden:

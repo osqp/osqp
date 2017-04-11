@@ -33,7 +33,7 @@ The primal and and dual residuals associated to :math:`(x^{k}, z^{k}, y^{k})` ar
 
    \begin{align}
    r_{\rm prim}^{k} &= Ax^{k} - z^{k}\\
-   r_{\rm dual}^{k} &= Px^{k} + q + A^T y^{k}
+   r_{\rm dual}^{k} &= Px^{k} + q + A^T y^{k}.
    \end{align}
 
 
@@ -57,4 +57,4 @@ When the problem is dual infeasible, OSQP generates a vector :math:`s\in\mathbf{
 
 .. math::
 
-   P s = 0, \quad q^T s < 0, \quad (As)_i = \begin{cases} 0 & l_i \in \mathbf{R}, u_i\in\mathbf{R} \\ \ge 0 & l_i\in\mathbf{R}, u_i=+\infty \\ \le 0 & u_i\in\mathbf{R}, l_i=-\infty \end{cases}
+   P s = 0, \quad q^T s < 0, \quad (As)_i = \begin{cases} 0 & l_i \in \mathbf{R}, u_i\in\mathbf{R} \\ \ge 0 & l_i\in\mathbf{R}, u_i=+\infty \\ \le 0 & u_i\in\mathbf{R}, l_i=-\infty. \end{cases}

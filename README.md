@@ -38,7 +38,6 @@ The latest version is `0.1.1`.
 
 
 
-
 ## Credits
 
 The following people have been involved in the development of OSQP:
@@ -47,3 +46,8 @@ The following people have been involved in the development of OSQP:
 -  [Paul Goulart](http://users.ox.ac.uk/~engs1373/) (University of Oxford): methods, maths and Matlab interface
 -  [Alberto Bemporad](http://cse.lab.imtlucca.it/~bemporad/) (IMT Lucca): methods and maths
 -  [Stephen Boyd](http://web.stanford.edu/~boyd/) (Stanford University): methods and maths
+
+
+## Bug reports and support
+
+Please report any issues via the [Github issue tracker](https://github.com/oxfordcontrol/osqp/issues). All types of issues are welcome including bug reports, documentation typos, feature requests and so on.
