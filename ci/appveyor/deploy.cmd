@@ -13,6 +13,6 @@ if errorlevel 1 exit /b 1
 cd %APPVEYOR_BUILD_FOLDER%\interfaces\python
 call activate test-environment
 python setup.py bdist_wheel
-twine upload -u %PYPI_USERNAME% -p %PYPI_PASSWORD% dist/*
+twine upload -u %PYPI_USERNAME% -p %PYPI_PASSWORD% dist/*.whl -r pypitest
 
 )

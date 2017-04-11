@@ -22,7 +22,7 @@ environment:
 
 init:
   # Uncomment for remote desktop debug
-  # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
   - ECHO %PYTHON_VERSION% %MINICONDA%
 
 install:
@@ -37,4 +37,4 @@ deploy_script:
 
 on_finish:
   # Uncomment for remote desktop debug
-  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
