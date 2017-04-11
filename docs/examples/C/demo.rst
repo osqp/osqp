@@ -1,5 +1,5 @@
-Demo example
-------------
+Demo
+-----
 
 We now show how the following QP can be solved in C
 

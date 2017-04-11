@@ -12,23 +12,23 @@ function install_osqp
 
     fprintf('Downloading binaries...');
     package_name = sprintf('https://github.com/oxfordcontrol/osqp/releases/download/v0.1.0/osqp-0.1.0-matlab-%s.tar.gz', platform);
-    urlwrite(package_name,'osqp.tar.gz');
+    websave('osqp.tar.gz', package_name);
     fprintf('\t\t\t\t[done]\n');
 
     fprintf('Unpacking...');
     untar('osqp.tar.gz','osqp')
-    fprintf('\t\t\t\t[done]\n');
+    fprintf('\t\t\t\t\t[done]\n');
 
     fprintf('Updating path...');
     cd osqp
-    addpath(pwd);
+    addpath(genpath(pwd));
     savepath
     cd ..
     fprintf('\t\t\t\t[done]\n');
 
     fprintf('Deleting temporary files...');
     delete('osqp.tar.gz');
-    fprintf('\t\t\t\t[done]\n');
+    fprintf('\t\t\t[done]\n');
 
     fprintf('OSQP is successfully installed!\n');
 

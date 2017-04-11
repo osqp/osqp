@@ -8,3 +8,4 @@ Examples
    C/index
    Python/index
    Matlab/index
+   YALMIP/index
