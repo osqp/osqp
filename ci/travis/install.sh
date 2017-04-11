@@ -44,5 +44,4 @@ conda config --set always_yes yes --set changeps1 no
 conda update --yes -q conda
 conda install conda-build anaconda-client
 conda create -n testenv --yes python=$PYTHON_VERSION pip pytest numpy scipy future
-# conda install -c conda-forge twine
 source activate testenv
