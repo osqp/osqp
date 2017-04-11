@@ -3,8 +3,6 @@ Matlab
 OSQP Matlab interface requires Matlab 2015b or newer.
 
 
-You can also build OSQP from source as described below.
-
 Binaries
 --------
 

@@ -1,12 +1,12 @@
-Version 0.1.1
--------------
+Version 0.1.1 (11 April 2017)
+-----------------------------
 * Fixed crashes during polishing when factorization fails
 * Added package to Pypi
 * Fixed relative paths Matlab
 
 
 
-Version 0.1.0 (first release)
+Version 0.1.0 (10 April 2017)
 -----------------------------
 * Linux, Mac and Windows
 * Interface to Python 2.7, 3.5+

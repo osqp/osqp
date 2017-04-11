@@ -12,12 +12,8 @@ optimization package for solving convex quadratic programs in the form
     \mbox{subject to} & l \leq A x \leq u
   \end{array}
 
-where :math:`x\in\mathbf{R}^{n}` is the optimization variable.
-The objective function is defined by a positive semidefinite matrix
-:math:`P \in \mathbf{S}^{n}_{+}` and vector :math:`q\in \mathbf{R}^{n}`.
-The linear constraints are defined by matrix :math:`A\in\mathbf{R}^{m \times n}`
-and vectors :math:`l \in \mathbf{R}^{m} \cup \{-\infty\}^{m}`,
-:math:`u \in \mathbf{R}^{m} \cup \{+\infty\}^{m}`.
+where :math:`x` is the optimization variable and
+:math:`P \in \mathbf{S}^{n}_{+}` a positive semidefinite matrix.
 
 
 Features
@@ -73,6 +69,7 @@ The following people have been involved in the development of OSQP:
    :maxdepth: 2
    :caption: User Documentation
 
+   solver/index
    installation/index
    interfaces/index
    parsers/index
