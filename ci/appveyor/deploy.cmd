@@ -15,7 +15,7 @@ echo index-servers = pypi                            >> %USERPROFILE%\\.pypirc
 echo [pypi]                                          >> %USERPROFILE%\\.pypirc
 echo repository=https://testpypi.python.org/pypi     >> %USERPROFILE%\\.pypirc
 echo username=bstellato                              >> %USERPROFILE%\\.pypirc
-echo password=%PYPIPASSWORD%                         >> %USERPROFILE%\\.pypirc
+echo password=%PYPI_PASSWORD%                        >> %USERPROFILE%\\.pypirc
 
 
 cd %APPVEYOR_BUILD_FOLDER%\interfaces\python
