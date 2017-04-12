@@ -3,6 +3,7 @@
 -   [x] Parameter Selection: `rho`, `sigma` and `alpha` from examples (data driven)
 -   [x] Avoid square roots when computing residuals
 -   [ ] Add option in CODEGEN to have floats
+-   [ ] Convert distribute.py script (for matlab mex files) to Matlab
 -   [x] Add functions to update matrices in Python and Matlab
 -   [x] Add functions to update matrices in codegen
 -   [x] Replace PySys_WriteStdout by PyErr_SetString(PyExc_ValueError, <message>)
