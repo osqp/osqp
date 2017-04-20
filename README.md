@@ -43,7 +43,8 @@ The latest version is `0.1.1`.
 The following people have been involved in the development of OSQP:
 -  [Bartolomeo Stellato](https://bstellato.github.io/) (University of Oxford): main development
 -  [Goran Banjac](http://users.ox.ac.uk/~sedm4978/) (University of Oxford): main development
--  [Paul Goulart](http://users.ox.ac.uk/~engs1373/) (University of Oxford): methods, maths and Matlab interface
+-  [Nicholas Moehle](http://web.stanford.edu/~moehle/) (Stanford University): methods, maths, and code generation
+-  [Paul Goulart](http://users.ox.ac.uk/~engs1373/) (University of Oxford): methods, maths, and Matlab interface
 -  [Alberto Bemporad](http://cse.lab.imtlucca.it/~bemporad/) (IMT Lucca): methods and maths
 -  [Stephen Boyd](http://web.stanford.edu/~boyd/) (Stanford University): methods and maths
 

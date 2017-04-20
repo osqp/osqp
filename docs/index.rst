@@ -58,7 +58,8 @@ The following people have been involved in the development of OSQP:
 
 * `Bartolomeo Stellato <https://bstellato.github.io/>`_ (University of Oxford): main development
 * `Goran Banjac <http://users.ox.ac.uk/~sedm4978/>`_ (University of Oxford): main development
-* `Paul Goulart <http://users.ox.ac.uk/~engs1373/>`_ (University of Oxford): methods, maths and Matlab interface
+* `Nicholas Moehle <http://web.stanford.edu/~moehle/>`_ (Stanford University): methods, maths, and code generation
+* `Paul Goulart <http://users.ox.ac.uk/~engs1373/>`_ (University of Oxford): methods, maths, and Matlab interface
 * `Alberto Bemporad <http://cse.lab.imtlucca.it/~bemporad/>`_ (IMT Lucca): methods and maths
 * `Stephen Boyd <http://web.stanford.edu/~boyd/>`_ (Stanford University): methods and maths
 
