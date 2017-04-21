@@ -250,7 +250,9 @@ if __name__ == '__main__':
 
     # Plot contour lines
     # levels = [0., 0.25, 0.5, 0.75, 0.9, 0.95, 1.]
-    levels = [0., 0.3, 0.6, 1., 5., 10., 20., 100.]
+    # levels = [0., 0.3, 0.6, 1., 5., 10., 20., 100.]
+    levels = [0., 0.5, 1., 2., 3., 5., 10., 100.]
+
 
     # use here 256 instead of len(levels)-1 becuase
     # as it's mentioned in the documentation for the
@@ -265,6 +267,7 @@ if __name__ == '__main__':
     ax.set_ylabel(r'$\rho$')
     ax.set_xlabel(r'$\frac{{\rm tr}(P)}{{\rm tr}(A^{T}A)}$')
     ax.set_title(r'Performance $p$')
+    ax.set_xlim(0., 2.)
     plt.colorbar()
     plt.tight_layout()
 
