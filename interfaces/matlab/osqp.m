@@ -394,14 +394,14 @@ classdef osqp < handle
 
             % Import OSQP path
             [osqp_path,~,~] = fileparts(which('osqp.m'));
-            
+
             % Add codegen directory to path
             addpath(fullfile(osqp_path, 'codegen'));
 
             % Path of osqp module
             cg_dir = fullfile(osqp_path, 'codegen');
             files_to_generate_path = fullfile(cg_dir, 'files_to_generate');
-            
+
             % Get workspace structure
             work = osqp_mex('get_workspace', this.objectHandle);
 
@@ -423,14 +423,16 @@ classdef osqp < handle
 
             % Copy source files to target directory
             fprintf('Copying OSQP source files...\t\t\t\t\t');
-            cfiles = dir(fullfile(cg_dir, 'sources', 'src', '*.c'));
+            cdir   = fullfile(cg_dir, 'sources', 'src');
+            cfiles = dir(fullfile(cdir, '*.c'));
             for i = 1 : length(cfiles)
-                copyfile(fullfile(cfiles(i).folder, cfiles(i).name), ...
+                copyfile(fullfile(cdir, cfiles(i).name), ...
                     fullfile(target_src_dir, 'osqp', cfiles(i).name));
             end
-            hfiles = dir(fullfile(cg_dir, 'sources', 'include', '*.h'));
+            hdir   = fullfile(cg_dir, 'sources', 'include');
+            hfiles = dir(fullfile(hdir, '*.h'));
             for i = 1 : length(hfiles)
-                copyfile(fullfile(hfiles(i).folder, hfiles(i).name), ...
+                copyfile(fullfile(hdir, hfiles(i).name), ...
                     fullfile(target_include_dir, hfiles(i).name));
             end
             fprintf('[done]\n');
