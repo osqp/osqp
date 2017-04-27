@@ -252,8 +252,8 @@ def run_portfolio_example():
     gammas = np.logspace(-2, 2, n_gamma)
 
     # Assets
-    # n_vec = np.array([100, 200, 300, 400, 500, 600, 700, 800, 900, 1000])
-    n_vec = np.array([100, 200, 300, 400, 500])
+    n_vec = np.array([100, 200, 300, 400, 500, 600, 700, 800, 900, 1000])
+    # n_vec = np.array([100, 200, 300, 400, 500])
 
     # Factors
     k_vec = (n_vec / 10).astype(int)
@@ -290,10 +290,9 @@ def run_portfolio_example():
                           ('qpOASES', qpoases_timing),
                           ('GUROBI', gurobi_timing)])
 
-    utils.generate_plot('median', n_vec, solvers)
-    utils.generate_plot('total', n_vec, solvers)
+    utils.generate_plot('portfolio', 'median', n_vec, solvers)
+    utils.generate_plot('portfolio', 'total', n_vec, solvers)
 
-    #
     # # Print total timings
     # print("Total timings")
     # df_dict = {'OSQP': [osqp_timing],
