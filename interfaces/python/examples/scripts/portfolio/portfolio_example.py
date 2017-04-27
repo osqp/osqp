@@ -290,23 +290,7 @@ def run_portfolio_example():
                           ('qpOASES', qpoases_timing),
                           ('GUROBI', gurobi_timing)])
 
-    utils.generate_plot('portfolio', 'median', n_vec, solvers)
-    utils.generate_plot('portfolio', 'total', n_vec, solvers)
-
-    # # Print total timings
-    # print("Total timings")
-    # df_dict = {'OSQP': [osqp_timing],
-    #
-    #
-    #
-    #
-    #             'm' : m_arr,
-    #             'p' : p_arr,
-    #             't_miosqp_avg' : timings_miosqp['t_avg'],
-    #             't_miosqp_std' : timings_miosqp['t_std'],
-    #             't_miosqp_max' : timings_miosqp['t_max'],
-    #             't_gurobi_avg' : timings_gurobi['t_avg'],
-    #             't_gurobi_std' : timings_gurobi['t_std'],
-    #             't_gurobi_max' : timings_gurobi['t_max']}
-    # stats = ['min', 'max', 'median', 'avg', 'total']
-    # comparison_table = pd.DataFrame(df_dict, index=solvers)
+    utils.generate_plot('portfolio', 'median', n_vec, solvers,
+                        fig_size=0.9)
+    utils.generate_plot('portfolio', 'total', n_vec, solvers,
+                        fig_size=0.9)
