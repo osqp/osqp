@@ -24,5 +24,7 @@ def gen_stats_array_vec(statistics_name, stats):
         out_vec = np.array([x.mean for x in stats])
     elif statistics_name == 'total':
         out_vec = np.array([x.total for x in stats])
+    elif statistics_name == 'max':
+        out_vec = np.array([x.max for x in stats])
 
     return out_vec

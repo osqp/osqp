@@ -43,7 +43,7 @@ mpl.rcParams.update(pgf_with_latex)
 import matplotlib.pylab as plt
 
 
-def generate_plot(example_name, statistics_name, n_vec, solvers,
+def generate_plot(example_name, unit, statistics_name, n_vec, solvers,
                   fig_size=None):
 
     if fig_size is not None:
@@ -61,7 +61,14 @@ def generate_plot(example_name, statistics_name, n_vec, solvers,
     plt.legend()
     plt.grid()
     ax.set_xlabel(r'$n$')
-    ax.set_ylabel(r'Time [s]')
+
+    if unit == 'time':
+        ax.set_ylabel(r'Time [s]')
+    elif unit == 'iter':
+        ax.set_ylabel(r'Iterations')
+    else:
+        raise ValueError('Unrecognized y unit')
+
     ax.set_title(statistics_name.title())
     plt.tight_layout()
     plt.show(block=False)

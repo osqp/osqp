@@ -123,12 +123,68 @@ def solve_loop(qp_matrices, solver='osqp'):
 
             # DEBUG
             # solve with gurobi
-            # import mathprogbasepy as mpbpy
-            prob = mpbpy.QuadprogProblem(qp.P, q, Aosqp, losqp, uosqp)
-            res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
-            print('Norm difference OSQP-GUROBI %.3e' %
-                  np.linalg.norm(x - res.x))
+            # prob = mpbpy.QuadprogProblem(qp.P, q, Aosqp, losqp, uosqp)
+            # res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
+            # print('Norm difference OSQP-GUROBI %.3e' %
+            #       np.linalg.norm(x - res.x))
             # import ipdb; ipdb.set_trace()
+
+    elif solver == 'osqp_coldstart':
+        # Construct qp matrices
+        Aosqp = spa.vstack((qp.A,
+                            spa.hstack((spa.eye(n), spa.csc_matrix((n, k)))
+                                       ))).tocsc()
+        losqp = np.append(qp.l, qp.lx)
+        uosqp = np.append(qp.u, qp.ux)
+
+        # Setup OSQP
+        m = osqp.OSQP()
+        m.setup(qp.P, qp.q[:, 0], Aosqp, losqp, uosqp,
+                warm_start=False,
+                auto_rho=False,
+                rho=0.1,
+                polish=False,
+                verbose=True)
+
+        for i in range(n_prob):
+            q = qp.q[:, i]
+
+            # Update linear cost
+            m.update(q=q)
+
+            # Solve
+            results = m.solve()
+            x = results.x
+            y = results.y
+            status = results.info.status_val
+            niter[i] = results.info.iter
+            time[i] = results.info.run_time
+
+            # Check if status correct
+            if status != m.constant('OSQP_SOLVED'):
+                import ipdb; ipdb.set_trace()
+                raise ValueError('OSQP did not solve the problem!')
+
+            # DEBUG
+            # solve with gurobi
+            # prob = mpbpy.QuadprogProblem(qp.P, q, Aosqp, losqp, uosqp)
+            # res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
+            # print('Norm difference OSQP-GUROBI %.3e' %
+            #       np.linalg.norm(x - res.x))
+            # import ipdb; ipdb.set_trace()
+
+        # DEBUG print iterations per value of gamma
+        # gamma_vals = np.logspace(-2, 2, 101)[::-1]
+        #
+        # import matplotlib.pylab as plt
+        # plt.figure()
+        # ax = plt.gca()
+        # plt.plot(gamma_vals, niter)
+        # ax.set_xlabel(r'$\gamma$')
+        # ax.set_ylabel(r'iter')
+        # plt.show(block=False)
+
+        # import ipdb; ipdb.set_trace()
 
     elif solver == 'qpoases':
 
@@ -248,12 +304,13 @@ def run_portfolio_example():
     np.random.seed(1)
 
     # Generate gamma parameters and cost vectors
-    n_gamma = 11
-    gammas = np.logspace(-2, 2, n_gamma)
+    n_gamma = 101
+    gammas = np.logspace(-2, 2, n_gamma)[::-1]
+    # gammas = np.logspace(-2, 2, n_gamma)
 
     # Assets
-    n_vec = np.array([100, 200, 300, 400, 500, 600, 700, 800, 900, 1000])
-    # n_vec = np.array([100, 200, 300, 400, 500])
+    # n_vec = np.array([100, 200, 300, 400, 500, 600, 700, 800, 900, 1000])
+    n_vec = np.array([100, 200, 300, 400, 500])
 
     # Factors
     k_vec = (n_vec / 10).astype(int)
@@ -262,6 +319,8 @@ def run_portfolio_example():
     # Define statistics for osqp and qpoases
     osqp_timing = []
     osqp_iter = []
+    osqp_coldstart_timing = []
+    osqp_coldstart_iter = []
     qpoases_timing = []
     qpoases_iter = []
     gurobi_iter = []
@@ -271,10 +330,15 @@ def run_portfolio_example():
         # Generate QP
         qp_matrices = gen_qp_matrices(k_vec[i], n_vec[i], gammas)
 
-        # Solve loop with emosqp
+        # Solve loop with osqp
         timing, niter = solve_loop(qp_matrices, 'osqp')
         osqp_timing.append(timing)
         osqp_iter.append(niter)
+
+        # Solve loop with osqp (coldstart)
+        timing, niter = solve_loop(qp_matrices, 'osqp_coldstart')
+        osqp_coldstart_timing.append(timing)
+        osqp_coldstart_iter.append(niter)
 
         # Solving loop with qpoases
         timing, niter = solve_loop(qp_matrices, 'qpoases')
@@ -286,11 +350,21 @@ def run_portfolio_example():
         gurobi_timing.append(timing)
         gurobi_iter.append(niter)
 
-    solvers = OrderedDict([('OSQP', osqp_timing),
-                          ('qpOASES', qpoases_timing),
-                          ('GUROBI', gurobi_timing)])
+    solver_timings = OrderedDict([('OSQP (warm start)', osqp_timing),
+                                  ('OSQP (cold start)',
+                                   osqp_coldstart_timing),
+                                  ('qpOASES', qpoases_timing),
+                                  ('GUROBI', gurobi_timing)])
 
-    utils.generate_plot('portfolio', 'median', n_vec, solvers,
-                        fig_size=0.9)
-    utils.generate_plot('portfolio', 'total', n_vec, solvers,
-                        fig_size=0.9)
+    # utils.generate_plot('portfolio', 'time', 'median', n_vec,
+    #                     solver_timings,
+    #                     fig_size=0.9)
+    # utils.generate_plot('portfolio', 'time', 'total', n_vec,
+    #                     solver_timings,
+    #                     fig_size=0.9)
+
+    solver_max_iter = OrderedDict([('OSQP (warm start)', osqp_iter),
+                                   ('OSQP (cold start)', osqp_coldstart_iter)])
+    # utils.generate_plot('portfolio', 'iter', 'max', n_vec,
+    #                     solver_max_iter,
+    #                     fig_size=0.9)
