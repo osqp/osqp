@@ -139,7 +139,7 @@ current_dir = pwd;
 osqp_dir = fullfile(makefile_path, '..', '..');
 osqp_build_dir = fullfile(osqp_dir, 'build');
 suitesparse_dir = fullfile(osqp_dir, 'lin_sys', 'direct', 'suitesparse');
-cg_sources_dir = fullfile('codegen', 'sources');
+cg_sources_dir = fullfile('.','codegen', 'sources');
 
 % Include directory
 inc_dir = [
@@ -226,13 +226,16 @@ if( any(strcmpi(what,'codegen')) || any(strcmpi(what,'all')) )
     if ~exist(cg_src_dir, 'dir')
         mkdir(cg_src_dir);
     end
-    cfiles = [dir(fullfile(osqp_dir, 'src', '*.c'));
-              dir(fullfile(suitesparse_dir, '*.c'));
-              dir(fullfile(suitesparse_dir, 'ldl', 'src', '*.c'))];
-    for i = 1 : length(cfiles)
-        if ~any(strcmp(cfiles(i).name, {'cs.c', 'ctrlc.c', 'polish.c', 'SuiteSparse_config.c'}))
-            copyfile(fullfile(cfiles(i).folder, cfiles(i).name), ...
-                fullfile(cg_src_dir, cfiles(i).name));
+    cdirs  = {fullfile(osqp_dir, 'src'),...
+              fullfile(suitesparse_dir),...
+              fullfile(suitesparse_dir, 'ldl', 'src')};
+    for j = 1:length(cdirs)
+        cfiles = dir(fullfile(cdirs{j},'*.c'));
+        for i = 1 : length(cfiles)
+            if ~any(strcmp(cfiles(i).name, {'cs.c', 'ctrlc.c', 'polish.c', 'SuiteSparse_config.c'}))
+                copyfile(fullfile(cdirs{j}, cfiles(i).name), ...
+                    fullfile(cg_src_dir, cfiles(i).name));
+            end
         end
     end
 
@@ -241,13 +244,16 @@ if( any(strcmpi(what,'codegen')) || any(strcmpi(what,'all')) )
     if ~exist(cg_include_dir, 'dir')
         mkdir(cg_include_dir);
     end
-    hfiles = [dir(fullfile(osqp_dir, 'include', '*.h'));
-              dir(fullfile(suitesparse_dir, '*.h'));
-              dir(fullfile(suitesparse_dir, 'ldl', 'include', '*.h'))];
-    for i = 1 : length(hfiles)
-        if ~any(strcmp(hfiles(i).name, {'cs.h', 'ctrlc.h', 'polish.h', 'SuiteSparse_config.h'}))
-            copyfile(fullfile(hfiles(i).folder, hfiles(i).name), ...
-                fullfile(cg_include_dir, hfiles(i).name));
+    hdirs  = {fullfile(osqp_dir, 'include'),...
+              fullfile(suitesparse_dir),...
+              fullfile(suitesparse_dir, 'ldl', 'include')};
+    for j = 1:length(hdirs)
+        hfiles = dir(fullfile(hdirs{j},'*.h'));
+        for i = 1 : length(hfiles)
+            if ~any(strcmp(hfiles(i).name, {'cs.h', 'ctrlc.h', 'polish.h', 'SuiteSparse_config.h'}))
+                copyfile(fullfile(hdirs{j}, hfiles(i).name), ...
+                    fullfile(cg_include_dir, hfiles(i).name));
+            end
         end
     end
 
