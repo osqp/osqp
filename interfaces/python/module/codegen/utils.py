@@ -243,11 +243,6 @@ def render_workspace(variables, output):
     f.write("#include \"constants.h\"\n")
     f.write("#include \"private.h\"\n\n")
 
-    # Redefine type of structure in private
-    f.write("// Redefine type of the structure in private\n")
-    f.write("// N.B. Making sure the right amount of memory is allocated\n")
-    f.write("typedef struct c_priv Priv;\n\n")
-
     '''
     Write data structure
     '''

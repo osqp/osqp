@@ -1,6 +1,7 @@
 
 Changes since the last release
 ------------------------------
+* Removed warnings in code-generation for standard <= C99
 * Fixed MATLAB 2015b compatibility [#6](https://github.com/oxfordcontrol/osqp/issues/6)
 
 Version 0.1.1 (11 April 2017)
