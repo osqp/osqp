@@ -95,13 +95,18 @@ function write_scaling( f, scaling )
 %WRITE_SCALING Write scaling structure to file.
 
 fprintf(f, '// Define scaling structure\n');
-write_vec(f, scaling.D,    'Dscaling',    'c_float');
-write_vec(f, scaling.Dinv, 'Dinvscaling', 'c_float');
-write_vec(f, scaling.E,    'Escaling',    'c_float');
-write_vec(f, scaling.Einv, 'Einvscaling', 'c_float');
-fprintf(f, 'OSQPScaling scaling = ');
-fprintf(f, '{Dscaling, Escaling, Dinvscaling, Einvscaling};\n\n');
 
+if ~isempty(scaling)
+    write_vec(f, scaling.D,    'Dscaling',    'c_float');
+    write_vec(f, scaling.Dinv, 'Dinvscaling', 'c_float');
+    write_vec(f, scaling.E,    'Escaling',    'c_float');
+    write_vec(f, scaling.Einv, 'Einvscaling', 'c_float');
+    fprintf(f, 'OSQPScaling scaling = ');
+    fprintf(f, '{Dscaling, Escaling, Dinvscaling, Einvscaling};\n\n');
+else
+    fprintf(f, 'OSQPScaling scaling;\n\n');
+end
+    
 end
 
 

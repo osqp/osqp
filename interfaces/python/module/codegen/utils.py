@@ -133,12 +133,15 @@ def write_scaling(f, scaling, name):
     Write scaling structure during code generation
     """
     f.write("// Define scaling structure\n")
-    write_vec(f, scaling['D'], 'Dscaling', 'c_float')
-    write_vec(f, scaling['Dinv'], 'Dinvscaling', 'c_float')
-    write_vec(f, scaling['E'], 'Escaling', 'c_float')
-    write_vec(f, scaling['Einv'], 'Einvscaling', 'c_float')
-    f.write("OSQPScaling %s = " % name)
-    f.write("{Dscaling, Escaling, Dinvscaling, Einvscaling};\n\n")
+    if scaling is not None:
+        write_vec(f, scaling['D'], 'Dscaling', 'c_float')
+        write_vec(f, scaling['Dinv'], 'Dinvscaling', 'c_float')
+        write_vec(f, scaling['E'], 'Escaling', 'c_float')
+        write_vec(f, scaling['Einv'], 'Einvscaling', 'c_float')
+        f.write("OSQPScaling %s = " % name)
+        f.write("{Dscaling, Escaling, Dinvscaling, Einvscaling};\n\n")
+    else:
+        f.write("OSQPScaling %s;\n\n" % name)
 
 
 def write_private(f, priv, name, embedded_flag):

@@ -113,13 +113,13 @@ void      castCintToDoubleArr(c_int *arr, double* arr_out, c_int len);
 c_int*    copyToCintVector(mwIndex * vecData, c_int numel);
 c_int*    copyDoubleToCintVector(double* vecData, c_int numel);
 c_float*  copyToCfloatVector(double * vecData, c_int numel);
-mxArray*  copyInfoToMxStruct(OSQPInfo*);
-mxArray*  copySettingsToMxStruct(OSQPSettings*);
-mxArray*  copyCscMatrixToMxStruct(csc*);
-mxArray*  copyDataToMxStruct(OSQPData*);
-mxArray*  copyPrivToMxStruct(Priv*, OSQPData*);
-mxArray*  copyScalingToMxStruct(OSQPScaling*, int n, int m);
-mxArray*  copyWorkToMxStruct(OSQPWorkspace*);
+mxArray*  copyInfoToMxStruct(OSQPInfo* info);
+mxArray*  copySettingsToMxStruct(OSQPSettings* settings);
+mxArray*  copyCscMatrixToMxStruct(csc* M);
+mxArray*  copyDataToMxStruct(OSQPWorkspace* work);
+mxArray*  copyPrivToMxStruct(OSQPWorkspace* work);
+mxArray*  copyScalingToMxStruct(OSQPWorkspace * work);
+mxArray*  copyWorkToMxStruct(OSQPWorkspace* work);
 
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
@@ -751,29 +751,29 @@ mxArray* copyCscMatrixToMxStruct(csc* M){
   return mxPtr;
 }
 
-mxArray* copyDataToMxStruct(OSQPData* data){
+mxArray* copyDataToMxStruct(OSQPWorkspace* work){
 
   int nfields  = sizeof(OSQP_DATA_FIELDS) / sizeof(OSQP_DATA_FIELDS[0]);
   mxArray* mxPtr = mxCreateStructMatrix(1,1,nfields,OSQP_DATA_FIELDS);
 
   // Create vectors
-  mxArray* q = mxCreateDoubleMatrix(data->n,1,mxREAL);
-  mxArray* l = mxCreateDoubleMatrix(data->m,1,mxREAL);
-  mxArray* u = mxCreateDoubleMatrix(data->m,1,mxREAL);
+  mxArray* q = mxCreateDoubleMatrix(work->data->n,1,mxREAL);
+  mxArray* l = mxCreateDoubleMatrix(work->data->m,1,mxREAL);
+  mxArray* u = mxCreateDoubleMatrix(work->data->m,1,mxREAL);
 
   // Populate vectors
-  castToDoubleArr(data->q, mxGetPr(q), data->n);
-  castToDoubleArr(data->l, mxGetPr(l), data->m);
-  castToDoubleArr(data->u, mxGetPr(u), data->m);
+  castToDoubleArr(work->data->q, mxGetPr(q), work->data->n);
+  castToDoubleArr(work->data->l, mxGetPr(l), work->data->m);
+  castToDoubleArr(work->data->u, mxGetPr(u), work->data->m);
 
   // Create matrices
-  mxArray* P = copyCscMatrixToMxStruct(data->P);
-  mxArray* A = copyCscMatrixToMxStruct(data->A);
+  mxArray* P = copyCscMatrixToMxStruct(work->data->P);
+  mxArray* A = copyCscMatrixToMxStruct(work->data->A);
 
   //map the OSQP_DATA fields one at a time into mxArrays
   //matlab handles everything as a double
-  mxSetField(mxPtr, 0, "n", mxCreateDoubleScalar(data->n));
-  mxSetField(mxPtr, 0, "m", mxCreateDoubleScalar(data->m));
+  mxSetField(mxPtr, 0, "n", mxCreateDoubleScalar(work->data->n));
+  mxSetField(mxPtr, 0, "m", mxCreateDoubleScalar(work->data->m));
   mxSetField(mxPtr, 0, "P", P);
   mxSetField(mxPtr, 0, "A", A);
   mxSetField(mxPtr, 0, "q", q);
@@ -783,11 +783,19 @@ mxArray* copyDataToMxStruct(OSQPData* data){
   return mxPtr;
 }
 
-mxArray* copyPrivToMxStruct(Priv* priv, OSQPData* data){
+mxArray* copyPrivToMxStruct(OSQPWorkspace * work){
 
-  int nfields  = sizeof(PRIV_FIELDS) / sizeof(PRIV_FIELDS[0]);
-  mxArray* mxPtr = mxCreateStructMatrix(1,1,nfields,PRIV_FIELDS);
-
+  int nfields;
+  mxArray* mxPtr;
+  OSQPData * data; 
+  Priv * priv;
+  
+  nfields = sizeof(PRIV_FIELDS) / sizeof(PRIV_FIELDS[0]);
+  mxPtr = mxCreateStructMatrix(1,1,nfields,PRIV_FIELDS);
+  
+  data = work->data;
+  priv = work->priv;
+  
   // Dimensions
   int n = priv->L->n;
   int Pdiag_n = priv->Pdiag_n;
@@ -844,30 +852,42 @@ mxArray* copyPrivToMxStruct(Priv* priv, OSQPData* data){
   return mxPtr;
 }
 
-mxArray* copyScalingToMxStruct(OSQPScaling* scaling, int n, int m){
+mxArray* copyScalingToMxStruct(OSQPWorkspace *work){
 
-  int nfields  = sizeof(OSQP_SCALING_FIELDS) / sizeof(OSQP_SCALING_FIELDS[0]);
-  mxArray* mxPtr = mxCreateStructMatrix(1,1,nfields,OSQP_SCALING_FIELDS);
+  int n, m, nfields;
+  mxArray* mxPtr;
+  
+  
+  if (work->settings->scaling){ // Scaling performed
+      n = work->data->n;
+      m = work->data->m;
 
-  // Create vectors
-  mxArray* D    = mxCreateDoubleMatrix(n,1,mxREAL);
-  mxArray* E    = mxCreateDoubleMatrix(m,1,mxREAL);
-  mxArray* Dinv = mxCreateDoubleMatrix(n,1,mxREAL);
-  mxArray* Einv = mxCreateDoubleMatrix(m,1,mxREAL);
+      nfields = sizeof(OSQP_SCALING_FIELDS) / sizeof(OSQP_SCALING_FIELDS[0]);
+      mxPtr = mxCreateStructMatrix(1,1,nfields,OSQP_SCALING_FIELDS); 
 
-  // Populate vectors
-  castToDoubleArr(scaling->D,    mxGetPr(D), n);
-  castToDoubleArr(scaling->E,    mxGetPr(E), m);
-  castToDoubleArr(scaling->Dinv, mxGetPr(Dinv), n);
-  castToDoubleArr(scaling->Einv, mxGetPr(Einv), m);
+      // Create vectors
+      mxArray* D    = mxCreateDoubleMatrix(n,1,mxREAL);
+      mxArray* E    = mxCreateDoubleMatrix(m,1,mxREAL);
+      mxArray* Dinv = mxCreateDoubleMatrix(n,1,mxREAL);
+      mxArray* Einv = mxCreateDoubleMatrix(m,1,mxREAL);
 
-  //map the SCALING fields one at a time into mxArrays
-  mxSetField(mxPtr, 0, "D",    D);
-  mxSetField(mxPtr, 0, "E",    E);
-  mxSetField(mxPtr, 0, "Dinv", Dinv);
-  mxSetField(mxPtr, 0, "Einv", Einv);
+      // Populate vectors
+      castToDoubleArr(work->scaling->D,    mxGetPr(D), n);
+      castToDoubleArr(work->scaling->E,    mxGetPr(E), m);
+      castToDoubleArr(work->scaling->Dinv, mxGetPr(Dinv), n);
+      castToDoubleArr(work->scaling->Einv, mxGetPr(Einv), m);
 
-  return mxPtr;
+      //map the SCALING fields one at a time into mxArrays
+      mxSetField(mxPtr, 0, "D",    D);
+      mxSetField(mxPtr, 0, "E",    E);
+      mxSetField(mxPtr, 0, "Dinv", Dinv);
+      mxSetField(mxPtr, 0, "Einv", Einv);
+
+  } else {
+    mxPtr = mxCreateDoubleMatrix(0, 0, mxREAL);
+  }
+  
+   return mxPtr;
 }
 
 mxArray*  copyWorkToMxStruct(OSQPWorkspace* work){
@@ -876,9 +896,9 @@ mxArray*  copyWorkToMxStruct(OSQPWorkspace* work){
   mxArray* mxPtr = mxCreateStructMatrix(1,1,nfields,OSQP_WORKSPACE_FIELDS);
 
   // Create workspace substructures
-  mxArray* data     = copyDataToMxStruct(work->data);
-  mxArray* priv     = copyPrivToMxStruct(work->priv, work->data);
-  mxArray* scaling  = copyScalingToMxStruct(work->scaling, work->data->n, work->data->m);
+  mxArray* data     = copyDataToMxStruct(work);
+  mxArray* priv     = copyPrivToMxStruct(work);
+  mxArray* scaling  = copyScalingToMxStruct(work);
   mxArray* settings = copySettingsToMxStruct(work->settings);
 
   //map the WORKSPACE fields one at a time into mxArrays

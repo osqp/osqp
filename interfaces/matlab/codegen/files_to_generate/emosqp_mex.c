@@ -147,19 +147,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
     // SOLVE
     if (!strcmp("solve", cmd)) {
-        
+
         // Allocate timer
         double solve_time;
         PyTimer * timer;
         timer = mxMalloc(sizeof(PyTimer));
-        
+
         if (nlhs != 5 || nrhs != 1){
             mexErrMsgTxt("Solve : wrong number of inputs / outputs");
         }
-        if(!(&workspace)){
-            mexErrMsgTxt("No problem data has been given.");
-        }
-        
+
         // solve the problem
         tic(timer);                 // start timer
         osqp_solve(&workspace);
@@ -201,7 +198,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         return;
     }
 
-    
+
     // update linear cost
     if (!strcmp("update_lin_cost", cmd)) {
 
@@ -223,8 +220,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
         return;
     }
-    
-    
+
+
     // update lower bound
     if (!strcmp("update_lower_bound", cmd)) {
 
@@ -306,7 +303,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         // Fill Px and Px_idx
         const mxArray *Px = prhs[1];
         const mxArray *Px_idx = prhs[2];
-        
+
         int Px_n = mxGetScalar(prhs[3]);
 
         // Copy vectors to ensure they are cast as c_float and c_int
@@ -329,14 +326,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
         return;
     }
-    
+
     // update matrix A
     if (!strcmp("update_A", cmd)) {
 
         // Fill Ax and Ax_idx
         const mxArray *Ax = prhs[1];
         const mxArray *Ax_idx = prhs[2];
-        
+
         int Ax_n = mxGetScalar(prhs[3]);
 
         // Copy vectors to ensure they are cast as c_float and c_int
@@ -359,7 +356,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
         return;
     }
-    
+
     // update matrices P and A
     if (!strcmp("update_P_A", cmd)) {
 
@@ -368,7 +365,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         const mxArray *Px_idx = prhs[2];
         const mxArray *Ax = prhs[4];
         const mxArray *Ax_idx = prhs[5];
-        
+
         int Px_n = mxGetScalar(prhs[3]);
         int Ax_n = mxGetScalar(prhs[6]);
 
@@ -403,7 +400,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         return;
     }
     #endif  // end EMBEDDED
-    
+
     // Got here, so command not recognized
     mexErrMsgTxt("Command not recognized.");
 }
@@ -441,10 +438,10 @@ void setToNaN(double* arr_out, c_int len){
 #if EMBEDDED != 1
 c_int* copyDoubleToCintVector(double* vecData, c_int numel){
   // This memory needs to be freed!
-  
+
   c_int* out;
   c_int i;
-  
+
   out = mxMalloc(numel * sizeof(c_int));
 
   //copy data
