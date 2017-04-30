@@ -35,9 +35,6 @@ treated as parameters.
         We assume that the sparsity patterns of :math:`P` and :math:`A` are fixed.
 
 
-
-Interfaces
-----------
 .. toctree::
    :maxdepth: 1
    :glob:

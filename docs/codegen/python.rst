@@ -41,7 +41,7 @@ The options are passed using named arguments, e.g.,
 
 .. code:: python
 
-    m.codegen('code', parameters='matrices', python_ext_name='emosqp');
+    m.codegen('code', parameters='matrices', python_ext_name='emosqp')
 
 If the :code:`project_type` argument is not passed or is set to :code:`''`,
 then no build files are generated.
@@ -50,17 +50,29 @@ then no build files are generated.
 
 Extension module API
 --------------------
-Once the code is generated the following functions are provided through its extension module
+Once the code is generated, you can import a light python wrapper with
 
+.. code:: python
+
+    import emosqp
+
+where :code:`emosqp` is the extension name given in the previous section. The module imports the following functions
 
 .. py:function:: solve()
    :noindex:
 
    Solve the problem.
 
-   :rtype: tuple
-   :return: Primal solution, dual solution, status value,
-            number of iteration, runtime
+   :returns: tuple (x, y, status_val, iter, run_time)
+
+             - **x** (*ndarray*) - Primal solution
+             - **y** (*ndarray*) - Dual solution
+             - **status_val** (*int*) - Status value as in :ref:`status_values`
+             - **iter** (*int*) - Number of iterations
+             - **run_time** (*double*) - Run time
+
+
+
 
 
 .. py:function:: update_lin_cost(q_new)
@@ -95,18 +107,13 @@ Once the code is generated the following functions are provided through its exte
    :param ndarray l_new: New lower bound vector
    :param ndarray u_new: New upper bound vector
 
-You can update bounds :math:`l` and :math:`u` by running
 
-.. code:: python
-
-    emosqp.update_bounds(l_new, u_new);
-
-In addition, if the code is generated with the option :code:`parameters` set to
-:code:`'matrices'`, then the following functions are also provided
+If the code is generated with the option :code:`parameters` set to
+:code:`'matrices'`, the following functions are also provided
 
 
 .. py:function:: update_P(Px, Px_idx, Px_n)
-    :noindex:
+  :noindex:
 
   Update nonzero entries of the quadratic cost matrix.
 
@@ -118,7 +125,8 @@ In addition, if the code is generated with the option :code:`parameters` set to
 
 
 .. py:function:: update_A(Ax, Ax_idx, Ax_n)
-    :noindex:
+  :noindex:
+  
   Update nonzero entries of the constraint matrix.
 
   :param ndarray Ax: Values of entries to be updated
@@ -129,7 +137,7 @@ In addition, if the code is generated with the option :code:`parameters` set to
 
 
 .. py:function:: update_P_A(Px, Px_idx, Px_n, Ax, Ax_idx, Ax_n)
-    :noindex:
+  :noindex:
 
   Update nonzero entries of the quadratic cost and constraint matrices.
 
