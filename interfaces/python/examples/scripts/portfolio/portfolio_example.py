@@ -356,15 +356,15 @@ def run_portfolio_example():
                                   ('qpOASES', qpoases_timing),
                                   ('GUROBI', gurobi_timing)])
 
-    # utils.generate_plot('portfolio', 'time', 'median', n_vec,
-    #                     solver_timings,
-    #                     fig_size=0.9)
-    # utils.generate_plot('portfolio', 'time', 'total', n_vec,
-    #                     solver_timings,
-    #                     fig_size=0.9)
-
-    solver_max_iter = OrderedDict([('OSQP (warm start)', osqp_iter),
-                                   ('OSQP (cold start)', osqp_coldstart_iter)])
+    utils.generate_plot('portfolio', 'time', 'median', n_vec,
+                        solver_timings,
+                        fig_size=0.9)
+    utils.generate_plot('portfolio', 'time', 'total', n_vec,
+                        solver_timings,
+                        fig_size=0.9)
+    #
+    # solver_max_iter = OrderedDict([('OSQP (warm start)', osqp_iter),
+    #                                ('OSQP (cold start)', osqp_coldstart_iter)])
     # utils.generate_plot('portfolio', 'iter', 'max', n_vec,
     #                     solver_max_iter,
     #                     fig_size=0.9)

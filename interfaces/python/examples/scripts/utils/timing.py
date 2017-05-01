@@ -10,7 +10,7 @@ class Statistics(object):
     """
     def __init__(self, x):
         self.x = x
-        self.avg = np.mean(x)
+        self.mean = np.mean(x)
         self.median = np.median(x)
         self.max = np.max(x)
         self.min = np.min(x)
