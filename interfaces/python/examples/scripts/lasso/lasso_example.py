@@ -1,5 +1,5 @@
 """
-Code for Portfolio example
+Code for lasso example
 
 This script compares:
     - OSQP
@@ -26,38 +26,43 @@ from collections import OrderedDict
 from .. import utils
 
 
-def gen_qp_matrices(k, n, gammas, dens_lvl=0.5):
+def gen_qp_matrices(n, m, lambdas, dens_lvl=0.5):
     """
-    Generate QP matrices for portfolio optimization problem
+    Generate QP matrices for lasso optimization problem
     """
 
     # Generate data
-    F = spa.random(n, k, density=dens_lvl, format='csc')
-    D = spa.diags(np.random.rand(n) * np.sqrt(k), format='csc')
-    mu = np.random.randn(n)
+    Ad = spa.random(m, n, density=dens_lvl)
+    x_true = np.multiply((np.random.rand(n) > 0.5).astype(float),
+                         np.random.randn(n)) / np.sqrt(n)
+    bd = Ad.dot(x_true) + np.random.randn(m)
 
-    # Construct the problem
-    #       minimize	x' D x + y' I y - (1/gamma) * mu' x
-    #       subject to  1' x = 1
-    #                   F' x = y
-    #                   0 <= x <= 1
-    P = spa.block_diag((2*D, 2*spa.eye(k)), format='csc')
-    A = spa.vstack([
-            spa.hstack([spa.csc_matrix(np.ones((1, n))),
-                       spa.csc_matrix((1, k))]),
-            spa.hstack([F.T, -spa.eye(k)])
-        ]).tocsc()
-    l = np.hstack([1., np.zeros(k)])   # Linear constraints
-    u = np.hstack([1., np.zeros(k)])
-    lx = np.zeros(n)   # Bounds
-    ux = np.ones(n)
+    #       minimize	y' * y + lambda * 1' * t
+    #       subject to  y = Ax - b
+    #                   -t <= x <= t
+    P = spa.block_diag((spa.csc_matrix((n, n)), 2*spa.eye(m),
+                          spa.csc_matrix((n, n))), format='csc')
+    In = spa.eye(n)
+    Onm = spa.csc_matrix((n, m))
+    A = spa.vstack([spa.hstack([Ad, -spa.eye(m),
+                                    spa.csc_matrix((m, n))]),
+                     spa.hstack([In, Onm, -In]),
+                     spa.hstack([In, Onm, In])]).tocsc()
+    l = np.hstack([bd, -np.inf * np.ones(n), np.zeros(n)])
+    u = np.hstack([bd, np.zeros(n), np.inf * np.ones(n)])
+
+    lx = -np.inf * np.ones(2 * n + m)
+    ux = np.inf * np.ones(2 * n + m)
 
     # Create linear cost vectors
-    q = np.empty((k + n, 0))
-    for gamma in gammas:
-        q = np.column_stack((q, np.append(-mu / gamma, np.zeros(k))))
+    q = np.empty((m + 2 * n, 0))
+    for lambda_i in lambdas:
+        q = np.column_stack((q, np.append(np.zeros(m + n), lambda_i*np.ones(n))
+                             ))
 
     qp_matrices = utils.QPmatrices(P, q, A, l, u, lx, ux)
+    qp_matrices.n = n
+    qp_matrices.m = m
 
     # Return QP matrices
     return qp_matrices
@@ -65,16 +70,15 @@ def gen_qp_matrices(k, n, gammas, dens_lvl=0.5):
 
 def solve_loop(qp_matrices, solver='osqp'):
     """
-    Solve portfolio optimization loop for all gammas
+    Solve lasso optimization loop for all lambdas
     """
     # Shorter name for qp_matrices
     qp = qp_matrices
 
-    # Get dimensions
-    n = len(qp.lx)
-    k = len(qp.l) - 1
+    # Extract features
+    n = qp.n
 
-    print('\nSolving portfolio problem loop for n = %d (assets) and solver %s' %
+    print('\nSolving lasso problem loop for n = %d (features) and solver %s' %
           (n, solver))
 
     # Get number of problems to solve
@@ -87,19 +91,11 @@ def solve_loop(qp_matrices, solver='osqp'):
     niter = np.zeros(n_prob)
 
     if solver == 'osqp':
-        # Construct qp matrices
-        Aosqp = spa.vstack((qp.A,
-                            spa.hstack((spa.eye(n), spa.csc_matrix((n, k)))
-                                       ))).tocsc()
-        losqp = np.append(qp.l, qp.lx)
-        uosqp = np.append(qp.u, qp.ux)
-
 
         # Setup OSQP
         m = osqp.OSQP()
-        m.setup(qp.P, qp.q[:, 0], Aosqp, losqp, uosqp,
-                auto_rho=False,
-                rho=0.1,
+        m.setup(qp.P, qp.q[:, 0], qp.A, qp.l, qp.u,
+                auto_rho=True,
                 polish=False,
                 verbose=False)
 
@@ -131,21 +127,15 @@ def solve_loop(qp_matrices, solver='osqp'):
             # import ipdb; ipdb.set_trace()
 
     elif solver == 'osqp_coldstart':
-        # Construct qp matrices
-        Aosqp = spa.vstack((qp.A,
-                            spa.hstack((spa.eye(n), spa.csc_matrix((n, k)))
-                                       ))).tocsc()
-        losqp = np.append(qp.l, qp.lx)
-        uosqp = np.append(qp.u, qp.ux)
 
         # Setup OSQP
         m = osqp.OSQP()
-        m.setup(qp.P, qp.q[:, 0], Aosqp, losqp, uosqp,
+        m.setup(qp.P, qp.q[:, 0], qp.A, qp.l, qp.u,
                 warm_start=False,
                 auto_rho=False,
                 rho=0.1,
                 polish=False,
-                verbose=True)
+                verbose=False)
 
         for i in range(n_prob):
             q = qp.q[:, i]
@@ -168,20 +158,20 @@ def solve_loop(qp_matrices, solver='osqp'):
 
             # DEBUG
             # solve with gurobi
-            # prob = mpbpy.QuadprogProblem(qp.P, q, Aosqp, losqp, uosqp)
+            # prob = mpbpy.QuadprogProblem(qp.P, q, qp.A, qp.l, qp.u)
             # res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
             # print('Norm difference OSQP-GUROBI %.3e' %
             #       np.linalg.norm(x - res.x))
             # import ipdb; ipdb.set_trace()
 
-        # DEBUG print iterations per value of gamma
-        # gamma_vals = np.logspace(-2, 2, 101)[::-1]
+        # DEBUG print iterations per value of lambda
+        # lambda_vals = np.logspace(-2, 2, 101)[::-1]
         #
         # import matplotlib.pylab as plt
         # plt.figure()
         # ax = plt.gca()
-        # plt.plot(gamma_vals, niter)
-        # ax.set_xlabel(r'$\gamma$')
+        # plt.plot(lambda_vals, niter)
+        # ax.set_xlabel(r'$\lambda$')
         # ax.set_ylabel(r'iter')
         # plt.show(block=False)
 
@@ -198,10 +188,6 @@ def solve_loop(qp_matrices, solver='osqp'):
         options.printLevel = qpoases.PyPrintLevel.NONE
         qpoases_m.setOptions(options)
 
-        # Construct bounds for qpoases
-        lx = np.append(qp.lx, -np.inf * np.ones(k))
-        ux = np.append(qp.ux, np.inf * np.ones(k))
-
         # Setup matrix P and A
         P = np.ascontiguousarray(qp.P.todense())
         A = np.ascontiguousarray(qp.A.todense())
@@ -212,7 +198,7 @@ def solve_loop(qp_matrices, solver='osqp'):
             q = np.ascontiguousarray(qp.q[:, i])
 
             # Reset cpu time
-            qpoases_cpu_time = np.array([20.])
+            qpoases_cpu_time = np.array([10.])
 
             # Reset number of of working set recalculations
             nWSR = np.array([1000])
@@ -220,16 +206,16 @@ def solve_loop(qp_matrices, solver='osqp'):
             if i == 0:
                 # First iteration
                 res_qpoases = qpoases_m.init(P, q, A,
-                                             np.ascontiguousarray(lx),
-                                             np.ascontiguousarray(ux),
+                                             np.ascontiguousarray(qp.lx),
+                                             np.ascontiguousarray(qp.ux),
                                              np.ascontiguousarray(qp.l),
                                              np.ascontiguousarray(qp.u),
                                              nWSR, qpoases_cpu_time)
             else:
                 # Solve new hot started problem
                 res_qpoases = qpoases_m.hotstart(q,
-                                                 np.ascontiguousarray(lx),
-                                                 np.ascontiguousarray(ux),
+                                                 np.ascontiguousarray(qp.lx),
+                                                 np.ascontiguousarray(qp.ux),
                                                  np.ascontiguousarray(qp.l),
                                                  np.ascontiguousarray(qp.u),
                                                  nWSR,
@@ -254,8 +240,8 @@ def solve_loop(qp_matrices, solver='osqp'):
             #       abs(qpoases_m.getObjVal() - res.obj_val))
             # import ipdb; ipdb.set_trace()
 
-            if res_qpoases != 0:
-                raise ValueError('qpoases did not solve the problem!')
+            # if res_qpoases != 0:
+            #     raise ValueError('qpoases did not solve the problem!')
 
             # Save time
             time[i] = qpoases_cpu_time[0]
@@ -265,20 +251,13 @@ def solve_loop(qp_matrices, solver='osqp'):
 
     elif solver == 'gurobi':
 
-        # Construct qp matrices
-        Agurobi = spa.vstack((qp.A,
-                              spa.hstack((spa.eye(n), spa.csc_matrix((n, k)))
-                                         ))).tocsc()
-        lgurobi = np.append(qp.l, qp.lx)
-        ugurobi = np.append(qp.u, qp.ux)
-
         for i in range(n_prob):
 
             # Get linera cost as contiguous array
             q = qp.q[:, i]
 
             # Solve with gurobi
-            prob = mpbpy.QuadprogProblem(qp.P, q, Agurobi, lgurobi, ugurobi)
+            prob = mpbpy.QuadprogProblem(qp.P, q, qp.A, qp.l, qp.u)
             res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
 
             # Save time
@@ -294,9 +273,7 @@ def solve_loop(qp_matrices, solver='osqp'):
     return utils.Statistics(time), utils.Statistics(niter)
 
 
-
-
-def run_portfolio_example():
+def run_lasso_example():
     '''
     Solve problems
     '''
@@ -304,20 +281,18 @@ def run_portfolio_example():
     # Reset random seed for repetibility
     np.random.seed(1)
 
-    # Generate gamma parameters and cost vectors
-    n_gamma = 101
-    gammas = np.logspace(-2, 2, n_gamma)[::-1]
-    # gammas = np.logspace(-2, 2, n_gamma)
+    # Generate lambda parameters and cost vectors
+    n_lambda = 11
+    lambdas = np.logspace(-1, 1, n_lambda)[::-1]
+    # lambdas = np.logspace(-2, 2, n_lambda)
 
-    # Assets
-    # n_vec = np.array([100, 200, 300, 400, 500, 600, 700, 800, 900, 1000])
-    n_vec = np.array([100, 200, 300, 400, 500])
+    # Parameters
+    n_vec = np.array([10, 20, 30, 40, 50])
 
-    # Factors
-    k_vec = (n_vec / 10).astype(int)
+    # Points
+    m_vec = (n_vec * 100).astype(int)
 
-
-    # Define statistics for osqp and qpoases
+    # Define statistics
     osqp_timing = []
     osqp_iter = []
     osqp_coldstart_timing = []
@@ -329,7 +304,7 @@ def run_portfolio_example():
 
     for i in range(len(n_vec)):
         # Generate QP
-        qp_matrices = gen_qp_matrices(k_vec[i], n_vec[i], gammas)
+        qp_matrices = gen_qp_matrices(n_vec[i], m_vec[i], lambdas)
 
         # Solve loop with osqp
         timing, niter = solve_loop(qp_matrices, 'osqp')
@@ -357,15 +332,15 @@ def run_portfolio_example():
                                   ('qpOASES', qpoases_timing),
                                   ('GUROBI', gurobi_timing)])
 
-    utils.generate_plot('portfolio', 'time', 'median', n_vec,
+    utils.generate_plot('lasso', 'time', 'median', n_vec,
                         solver_timings,
                         fig_size=0.9)
-    utils.generate_plot('portfolio', 'time', 'total', n_vec,
+    utils.generate_plot('lasso', 'time', 'total', n_vec,
                         solver_timings,
                         fig_size=0.9)
     #
     # solver_max_iter = OrderedDict([('OSQP (warm start)', osqp_iter),
     #                                ('OSQP (cold start)', osqp_coldstart_iter)])
-    # utils.generate_plot('portfolio', 'iter', 'max', n_vec,
+    # utils.generate_plot('lasso', 'iter', 'max', n_vec,
     #                     solver_max_iter,
     #                     fig_size=0.9)

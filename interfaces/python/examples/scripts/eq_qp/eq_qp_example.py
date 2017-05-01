@@ -35,19 +35,18 @@ def gen_qp_matrices(n, m, dens_lvl=0.5):
     P = P.dot(P.T).tocsc()
     q = np.random.randn(n)
 
-    scal_cost = np.linalg.norm(q)
-    P /= scal_cost
-    q /= scal_cost
+    # scal_cost = np.linalg.norm(q)
+    # P /= scal_cost
+    # q /= scal_cost
 
     A = spa.random(m, n, density=dens_lvl, format='csc')
     l = np.random.randn(m)
     u = np.copy(l)
 
-    scal_constraints = np.linalg.norm(l)
-    A /= scal_constraints
-    l /= scal_constraints
-    u /= scal_constraints
-
+    # scal_constraints = np.linalg.norm(l)
+    # A /= scal_constraints
+    # l /= scal_constraints
+    # u /= scal_constraints
 
     lx = -np.inf * np.ones(n)
     ux = np.inf * np.ones(n)
