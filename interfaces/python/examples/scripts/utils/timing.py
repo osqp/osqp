@@ -10,7 +10,7 @@ class Statistics(object):
     """
     def __init__(self, x):
         self.x = x
-        self.avg = np.mean(x)
+        self.mean = np.mean(x)
         self.median = np.median(x)
         self.max = np.max(x)
         self.min = np.min(x)
@@ -24,5 +24,7 @@ def gen_stats_array_vec(statistics_name, stats):
         out_vec = np.array([x.mean for x in stats])
     elif statistics_name == 'total':
         out_vec = np.array([x.total for x in stats])
+    elif statistics_name == 'max':
+        out_vec = np.array([x.max for x in stats])
 
     return out_vec

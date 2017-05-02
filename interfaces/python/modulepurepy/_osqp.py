@@ -360,7 +360,7 @@ class OSQP(object):
         print("      OSQP v%s  -  Operator Splitting QP Solver" % \
             self.version)
         print("              Pure Python Implementation")
-        print("     (c) .....,")
+        print("     (c) Bartolomeo Stellato, Goran Banjac")
         print("   University of Oxford  -  Stanford University 2016")
         print("-------------------------------------------------------")
 
