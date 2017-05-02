@@ -61,7 +61,7 @@ extern "C" {
 #endif
 
 /* Printing */
-#define PRINT_INTERVAL 1
+#define PRINT_INTERVAL 100
 
 
 
