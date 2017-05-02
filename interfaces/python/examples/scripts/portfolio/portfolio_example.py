@@ -11,7 +11,7 @@ from __future__ import print_function
 from __future__ import division
 
 import osqp  # Import osqp
-import qpoases as qpoases  # Import qpoases
+#import qpoases as qpoases  # Import qpoases
 import mathprogbasepy as mpbpy  # Mathprogbasepy to benchmark gurobi
 
 # Numerics
@@ -130,81 +130,81 @@ def solve_loop(qp_matrices, solver='osqp'):
                   np.linalg.norm(x - res.x))
             # import ipdb; ipdb.set_trace()
 
-    elif solver == 'qpoases':
-
-        n_dim = qp.P.shape[0]  # Number of variables
-        m_dim = qp.A.shape[0]  # Number of constraints without bounds
-
-        # Initialize qpoases and set options
-        qpoases_m = qpoases.PyQProblem(n_dim, m_dim)
-        options = qpoases.PyOptions()
-        options.printLevel = qpoases.PyPrintLevel.NONE
-        qpoases_m.setOptions(options)
-
-        # Construct bounds for qpoases
-        lx = np.append(qp.lx, -np.inf * np.ones(k))
-        ux = np.append(qp.ux, np.inf * np.ones(k))
-
-        # Setup matrix P and A
-        P = np.ascontiguousarray(qp.P.todense())
-        A = np.ascontiguousarray(qp.A.todense())
-
-        for i in range(n_prob):
-
-            # Get linera cost as contiguous array
-            q = np.ascontiguousarray(qp.q[:, i])
-
-            # Reset cpu time
-            qpoases_cpu_time = np.array([20.])
-
-            # Reset number of of working set recalculations
-            nWSR = np.array([1000])
-
-            if i == 0:
-                # First iteration
-                res_qpoases = qpoases_m.init(P, q, A,
-                                             np.ascontiguousarray(lx),
-                                             np.ascontiguousarray(ux),
-                                             np.ascontiguousarray(qp.l),
-                                             np.ascontiguousarray(qp.u),
-                                             nWSR, qpoases_cpu_time)
-            else:
-                # Solve new hot started problem
-                res_qpoases = qpoases_m.hotstart(q,
-                                                 np.ascontiguousarray(lx),
-                                                 np.ascontiguousarray(ux),
-                                                 np.ascontiguousarray(qp.l),
-                                                 np.ascontiguousarray(qp.u),
-                                                 nWSR,
-                                                 qpoases_cpu_time)
-
-            # # DEBUG Solve with gurobi
-            # qpoases solution
-            # sol_qpoases = np.zeros(n + k)
-            # qpoases_m.getPrimalSolution(sol_qpoases)
-            # import mathprogbasepy as mpbpy
-            # Agrb = spa.vstack((qp.A,
-            #                     spa.hstack((spa.eye(n), spa.csc_matrix((n, k)))
-            #                                ))).tocsc()
-            # lgrb = np.append(qp.l, qp.lx)
-            # ugrb = np.append(qp.u, qp.ux)
-            # prob = mpbpy.QuadprogProblem(spa.csc_matrix(qp.P), q,
-            #                              Agrb, lgrb, ugrb)
-            # res = prob.solve(solver=mpbpy.GUROBI, verbose=True)
-            # print("Norm difference x qpoases - GUROBI = %.4f" %
-            #       np.linalg.norm(sol_qpoases - res.x))
-            # print("Norm difference objval qpoases - GUROBI = %.4f" %
-            #       abs(qpoases_m.getObjVal() - res.obj_val))
-            # import ipdb; ipdb.set_trace()
-
-            if res_qpoases != 0:
-                raise ValueError('qpoases did not solve the problem!')
-
-            # Save time
-            time[i] = qpoases_cpu_time[0]
-
-            # Save number of iterations
-            niter[i] = nWSR[0]
+    # elif solver == 'qpoases':
+    #
+    #     n_dim = qp.P.shape[0]  # Number of variables
+    #     m_dim = qp.A.shape[0]  # Number of constraints without bounds
+    #
+    #     # Initialize qpoases and set options
+    #     qpoases_m = qpoases.PyQProblem(n_dim, m_dim)
+    #     options = qpoases.PyOptions()
+    #     options.printLevel = qpoases.PyPrintLevel.NONE
+    #     qpoases_m.setOptions(options)
+    #
+    #     # Construct bounds for qpoases
+    #     lx = np.append(qp.lx, -np.inf * np.ones(k))
+    #     ux = np.append(qp.ux, np.inf * np.ones(k))
+    #
+    #     # Setup matrix P and A
+    #     P = np.ascontiguousarray(qp.P.todense())
+    #     A = np.ascontiguousarray(qp.A.todense())
+    #
+    #     for i in range(n_prob):
+    #
+    #         # Get linera cost as contiguous array
+    #         q = np.ascontiguousarray(qp.q[:, i])
+    #
+    #         # Reset cpu time
+    #         qpoases_cpu_time = np.array([20.])
+    #
+    #         # Reset number of of working set recalculations
+    #         nWSR = np.array([1000])
+    #
+    #         if i == 0:
+    #             # First iteration
+    #             res_qpoases = qpoases_m.init(P, q, A,
+    #                                          np.ascontiguousarray(lx),
+    #                                          np.ascontiguousarray(ux),
+    #                                          np.ascontiguousarray(qp.l),
+    #                                          np.ascontiguousarray(qp.u),
+    #                                          nWSR, qpoases_cpu_time)
+    #         else:
+    #             # Solve new hot started problem
+    #             res_qpoases = qpoases_m.hotstart(q,
+    #                                              np.ascontiguousarray(lx),
+    #                                              np.ascontiguousarray(ux),
+    #                                              np.ascontiguousarray(qp.l),
+    #                                              np.ascontiguousarray(qp.u),
+    #                                              nWSR,
+    #                                              qpoases_cpu_time)
+    #
+    #         # # DEBUG Solve with gurobi
+    #         # qpoases solution
+    #         # sol_qpoases = np.zeros(n + k)
+    #         # qpoases_m.getPrimalSolution(sol_qpoases)
+    #         # import mathprogbasepy as mpbpy
+    #         # Agrb = spa.vstack((qp.A,
+    #         #                     spa.hstack((spa.eye(n), spa.csc_matrix((n, k)))
+    #         #                                ))).tocsc()
+    #         # lgrb = np.append(qp.l, qp.lx)
+    #         # ugrb = np.append(qp.u, qp.ux)
+    #         # prob = mpbpy.QuadprogProblem(spa.csc_matrix(qp.P), q,
+    #         #                              Agrb, lgrb, ugrb)
+    #         # res = prob.solve(solver=mpbpy.GUROBI, verbose=True)
+    #         # print("Norm difference x qpoases - GUROBI = %.4f" %
+    #         #       np.linalg.norm(sol_qpoases - res.x))
+    #         # print("Norm difference objval qpoases - GUROBI = %.4f" %
+    #         #       abs(qpoases_m.getObjVal() - res.obj_val))
+    #         # import ipdb; ipdb.set_trace()
+    #
+    #         if res_qpoases != 0:
+    #             raise ValueError('qpoases did not solve the problem!')
+    #
+    #         # Save time
+    #         time[i] = qpoases_cpu_time[0]
+    #
+    #         # Save number of iterations
+    #         niter[i] = nWSR[0]
 
     elif solver == 'gurobi':
 
@@ -244,7 +244,7 @@ def run_portfolio_example():
     Solve problems
     '''
 
-    # Reset random seed for repetibility
+    # Reset random seed for repeatibility
     np.random.seed(1)
 
     # Generate gamma parameters and cost vectors
@@ -259,11 +259,11 @@ def run_portfolio_example():
     k_vec = (n_vec / 10).astype(int)
 
 
-    # Define statistics for osqp and qpoases
+    # Define statistics for osqp, qpoases and gurobi
     osqp_timing = []
     osqp_iter = []
-    qpoases_timing = []
-    qpoases_iter = []
+    # qpoases_timing = []
+    # qpoases_iter = []
     gurobi_iter = []
     gurobi_timing = []
 
@@ -271,15 +271,15 @@ def run_portfolio_example():
         # Generate QP
         qp_matrices = gen_qp_matrices(k_vec[i], n_vec[i], gammas)
 
-        # Solve loop with emosqp
+        # Solve loop with osqp
         timing, niter = solve_loop(qp_matrices, 'osqp')
         osqp_timing.append(timing)
         osqp_iter.append(niter)
 
-        # Solving loop with qpoases
-        timing, niter = solve_loop(qp_matrices, 'qpoases')
-        qpoases_timing.append(timing)
-        qpoases_iter.append(niter)
+        # # Solving loop with qpoases
+        # timing, niter = solve_loop(qp_matrices, 'qpoases')
+        # qpoases_timing.append(timing)
+        # qpoases_iter.append(niter)
 
         # Solve loop with gurobi
         timing, niter = solve_loop(qp_matrices, 'gurobi')
@@ -287,7 +287,7 @@ def run_portfolio_example():
         gurobi_iter.append(niter)
 
     solvers = OrderedDict([('OSQP', osqp_timing),
-                          ('qpOASES', qpoases_timing),
+                          #('qpOASES', qpoases_timing),
                           ('GUROBI', gurobi_timing)])
 
     utils.generate_plot('portfolio', 'median', n_vec, solvers,
