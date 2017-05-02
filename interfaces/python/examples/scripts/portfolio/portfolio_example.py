@@ -130,7 +130,7 @@ def solve_loop(qp_matrices, solver='osqp'):
             #       np.linalg.norm(x - res.x))
             # import ipdb; ipdb.set_trace()
 
-<<<<<<< HEAD
+
     # elif solver == 'qpoases':
     #
     #     n_dim = qp.P.shape[0]  # Number of variables
@@ -206,7 +206,7 @@ def solve_loop(qp_matrices, solver='osqp'):
     #
     #         # Save number of iterations
     #         niter[i] = nWSR[0]
-=======
+
     elif solver == 'osqp_coldstart':
         # Construct qp matrices
         Aosqp = spa.vstack((qp.A,
@@ -339,7 +339,7 @@ def solve_loop(qp_matrices, solver='osqp'):
 
             # Save number of iterations
             niter[i] = nWSR[0]
->>>>>>> a7b2d9873349950d6bbd6984fbd86556511ac7c7
+
 
     elif solver == 'gurobi':
 
@@ -398,15 +398,14 @@ def run_portfolio_example():
     # Define statistics for osqp, qpoases and gurobi
     osqp_timing = []
     osqp_iter = []
-<<<<<<< HEAD
+
     # qpoases_timing = []
     # qpoases_iter = []
-=======
+
     osqp_coldstart_timing = []
     osqp_coldstart_iter = []
     qpoases_timing = []
     qpoases_iter = []
->>>>>>> a7b2d9873349950d6bbd6984fbd86556511ac7c7
     gurobi_iter = []
     gurobi_timing = []
 
@@ -419,12 +418,12 @@ def run_portfolio_example():
         osqp_timing.append(timing)
         osqp_iter.append(niter)
 
-<<<<<<< HEAD
+
         # # Solving loop with qpoases
         # timing, niter = solve_loop(qp_matrices, 'qpoases')
         # qpoases_timing.append(timing)
         # qpoases_iter.append(niter)
-=======
+
         # Solve loop with osqp (coldstart)
         timing, niter = solve_loop(qp_matrices, 'osqp_coldstart')
         osqp_coldstart_timing.append(timing)
@@ -434,24 +433,24 @@ def run_portfolio_example():
         timing, niter = solve_loop(qp_matrices, 'qpoases')
         qpoases_timing.append(timing)
         qpoases_iter.append(niter)
->>>>>>> a7b2d9873349950d6bbd6984fbd86556511ac7c7
+
 
         # Solve loop with gurobi
         timing, niter = solve_loop(qp_matrices, 'gurobi')
         gurobi_timing.append(timing)
         gurobi_iter.append(niter)
 
-<<<<<<< HEAD
+
     solvers = OrderedDict([('OSQP', osqp_timing),
                           #('qpOASES', qpoases_timing),
                           ('GUROBI', gurobi_timing)])
-=======
+
     solver_timings = OrderedDict([('OSQP (warm start)', osqp_timing),
                                   ('OSQP (cold start)',
                                    osqp_coldstart_timing),
                                   ('qpOASES', qpoases_timing),
                                   ('GUROBI', gurobi_timing)])
->>>>>>> a7b2d9873349950d6bbd6984fbd86556511ac7c7
+
 
     utils.generate_plot('portfolio', 'time', 'median', n_vec,
                         solver_timings,

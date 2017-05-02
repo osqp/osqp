@@ -1,5 +1,5 @@
 """
-Code for Huber example
+Code for SVM example
 
 This script compares:
     - OSQP
@@ -26,32 +26,31 @@ from .. import utils
 
 def gen_qp_matrices(m, n, dens_lvl=0.5):
     """
-    Generate QP matrices for Huber fitting problem
+    Generate QP matrices for SVM problem
     """
 
     # Generate data
-    A = spa.random(m, n, density=dens_lvl, format='csc')
-    x_true = np.random.randn(n) / np.sqrt(n)
-    ind95 = (np.random.rand(m) < 0.95).astype(float)
-    b = A.dot(x_true) + np.multiply(0.5*np.random.randn(m), ind95) \
-                      + np.multiply(10.*np.random.rand(m), 1. - ind95)
+    N = int(m / 2)
+    gamma = 1.0
+    b = np.append(np.ones(N), -np.ones(N))
+    A_upp = spa.random(N, n, density=dens_lvl)
+    A_low = spa.random(N, n, density=dens_lvl)
+    A = spa.vstack([
+            A_upp / np.sqrt(n) + (A_upp != 0.).astype(float) / n,
+            A_low / np.sqrt(n) - (A_low != 0.).astype(float) / n
+        ]).tocsc()
 
     # Construct the problem
-    #       minimize	1/2 u.T * u + np.ones(m).T * v
-    #       subject to  -u - v <= Ax - b <= u + v
-    #                   0 <= u <= 1
-    #                   v >= 0
-    Im = spa.eye(m)
-    P = spa.block_diag((spa.csc_matrix((n, n)), Im,
-                        spa.csc_matrix((m, m))), format='csc')
-    q = np.append(np.zeros(m + n), np.ones(m))
-    A = spa.vstack([
-            spa.hstack([A, Im, Im]),
-            spa.hstack([A, -Im, -Im])]).tocsc()
-    l = np.hstack([b, -np.inf*np.ones(m)])  # Linear constraints
-    u = np.hstack([np.inf*np.ones(m), b])
-    lx = np.zeros(2*m)                      # Bounds on (u,v)
-    ux = np.hstack([np.ones(m), np.inf*np.ones(m)])
+    #       minimize	 x.T * x + gamma 1.T * t
+    #       subject to  t >= diag(b) A x + 1
+    #                   t >= 0
+    P = spa.block_diag((spa.eye(n), spa.csc_matrix((m, m))), format='csc')
+    q = np.append(np.zeros(n), (gamma/2)*np.ones(m))
+    A = spa.hstack([spa.diags(b).dot(A), -spa.eye(m)]).tocsc()
+    l = -np.inf*np.ones(m)  # Linear constraints
+    u = -np.ones(m)
+    lx = np.zeros(m)        # Bounds on t
+    ux = np.inf*np.ones(m)
 
     qp_matrices = utils.QPmatrices(P, q, A, l, u, lx, ux)
 
@@ -61,23 +60,23 @@ def gen_qp_matrices(m, n, dens_lvl=0.5):
 
 def solve_problem(qp_matrices, solver='osqp'):
     """
-    Solve Huber fitting problem
+    Solve SVM problem
     """
     # Shorter name for qp_matrices
     qp = qp_matrices
 
     # Get dimensions
-    m = int(len(qp.lx) / 2)
-    n = len(qp.q) - 2*m
+    m = len(qp.lx)
+    n = len(qp.q) - m
 
-    print('\nSolving Huber fitting problem ' +
+    print('\nSolving SVM problem ' +
           'for n = %d (parameters) and solver %s' % (n, solver))
 
     if solver == 'osqp':
         # Construct qp matrices
         Aosqp = spa.vstack([
                     qp.A,
-                    spa.hstack([spa.csc_matrix((2*m, n)), spa.eye(2*m)])
+                    spa.hstack([spa.csc_matrix((m, n)), spa.eye(m)]),
                 ]).tocsc()
         losqp = np.hstack([qp.l, qp.lx])
         uosqp = np.hstack([qp.u, qp.ux])
@@ -155,8 +154,8 @@ def solve_problem(qp_matrices, solver='osqp'):
         # Construct qp matrices
         Agurobi = spa.vstack([
                     qp.A,
-                    spa.hstack([spa.csc_matrix((2*m, n)), spa.eye(2*m)])
-                ]).tocsc()
+                    spa.hstack([spa.csc_matrix((m, n)), spa.eye(m)]),
+                  ]).tocsc()
         lgurobi = np.hstack([qp.l, qp.lx])
         ugurobi = np.hstack([qp.u, qp.ux])
 
@@ -173,7 +172,7 @@ def solve_problem(qp_matrices, solver='osqp'):
     return utils.Statistics(time), utils.Statistics(niter)
 
 
-def run_huber_example():
+def run_svm_example():
     '''
     Solve problems
     '''
@@ -218,7 +217,7 @@ def run_huber_example():
                                   #('qpOASES', qpoases_timing),
                                   ('GUROBI', gurobi_timing)])
 
-    utils.generate_plot('huber', 'time', 'median', n_vec, solver_timings,
+    utils.generate_plot('svm', 'time', 'median', n_vec, solver_timings,
                         fig_size=0.9)
-    utils.generate_plot('huber', 'time', 'total', n_vec, solver_timings,
+    utils.generate_plot('svm', 'time', 'total', n_vec, solver_timings,
                         fig_size=0.9)
