@@ -194,10 +194,11 @@ def run_huber_example():
     np.random.seed(1)
 
     # Parameter dimension
-    n_vec = np.array([10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
+    n_vec = np.array([100, 200, 300, 400, 500, 600, 700, 800, 900, 1000])
+    # n_vec = np.array([100, 200, 300])
 
     # Data dimension
-    m_vec = n_vec * 100
+    m_vec = n_vec * 10
 
     # Number of problems for each dimension
     n_prob = 10

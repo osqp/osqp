@@ -198,7 +198,7 @@ def run_eq_qp_example():
     np.random.seed(1)
 
     # Dimensions
-    n_vec = np.array([100, 200, 300])
+    n_vec = np.array([100, 200, 300, 400, 500])
 
     # Constraints
     m_vec = (n_vec).astype(int)
