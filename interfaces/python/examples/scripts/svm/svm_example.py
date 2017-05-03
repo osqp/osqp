@@ -169,6 +169,23 @@ def solve_problem(qp_matrices, n_prob, solver='osqp'):
             niter[i] = res.total_iter
             time[i] = res.cputime
 
+    elif solver == 'mosek':
+
+        for i in range(n_prob):
+            # Construct qp matrices
+            Amosek = spa.vstack([
+                        qp.A,
+                        spa.hstack([spa.csc_matrix((m, n)), spa.eye(m)]),
+                      ]).tocsc()
+            lmosek = np.hstack([qp.l, qp.lx])
+            umosek = np.hstack([qp.u, qp.ux])
+
+            # Solve with mosek
+            prob = mpbpy.QuadprogProblem(qp.P, qp.q, Amosek, lmosek, umosek)
+            res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
+            niter[i] = res.total_iter
+            time[i] = res.cputime
+
     else:
         raise ValueError('Solver not understood')
 
@@ -185,8 +202,7 @@ def run_svm_example():
     np.random.seed(1)
 
     # Parameter dimension
-    n_vec = np.array([100, 200, 300, 400, 500, 600, 700, 800, 900, 1000])
-    # n_vec = np.array([100, 200, 300])
+    n_vec = np.array([200, 300, 400, 500, 600, 700, 800, 900, 1000])
 
     # Factors
     m_vec = n_vec * 10
@@ -201,7 +217,8 @@ def run_svm_example():
     qpoases_iter = []
     gurobi_iter = []
     gurobi_timing = []
-
+    mosek_iter = []
+    mosek_timing = []
 
     for i in range(len(n_vec)):
         # Generate QP
@@ -222,9 +239,15 @@ def run_svm_example():
         gurobi_timing.append(timing)
         gurobi_iter.append(niter)
 
+        # Solve loop with mosek
+        timing, niter = solve_problem(qp_matrices, n_prob, 'mosek')
+        mosek_timing.append(timing)
+        mosek_iter.append(niter)
+
     solver_timings = OrderedDict([('OSQP', osqp_timing),
                                   #('qpOASES', qpoases_timing),
-                                  ('GUROBI', gurobi_timing)])
+                                  ('GUROBI', gurobi_timing),
+                                  ('MOSEK', mosek_timing)])
 
     utils.generate_plot('svm', 'time', 'mean', n_vec, solver_timings,
                         fig_size=0.9)

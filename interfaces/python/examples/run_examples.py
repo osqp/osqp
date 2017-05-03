@@ -11,8 +11,8 @@ from scripts.svm.svm_example import run_svm_example
 
 
 # Run problems
-run_eq_qp_example()
+# run_eq_qp_example()
 # run_portfolio_example()
 # run_lasso_example()
 # run_huber_example()
-# run_svm_example()
+run_svm_example()
