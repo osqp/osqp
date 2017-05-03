@@ -418,7 +418,6 @@ def run_portfolio_example():
         osqp_timing.append(timing)
         osqp_iter.append(niter)
 
-
         # # Solving loop with qpoases
         # timing, niter = solve_loop(qp_matrices, 'qpoases')
         # qpoases_timing.append(timing)
@@ -434,16 +433,10 @@ def run_portfolio_example():
         qpoases_timing.append(timing)
         qpoases_iter.append(niter)
 
-
         # Solve loop with gurobi
         timing, niter = solve_loop(qp_matrices, 'gurobi')
         gurobi_timing.append(timing)
         gurobi_iter.append(niter)
-
-
-    solvers = OrderedDict([('OSQP', osqp_timing),
-                          #('qpOASES', qpoases_timing),
-                          ('GUROBI', gurobi_timing)])
 
     solver_timings = OrderedDict([('OSQP (warm start)', osqp_timing),
                                   ('OSQP (cold start)',

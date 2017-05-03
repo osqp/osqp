@@ -44,7 +44,7 @@ import matplotlib.pylab as plt
 
 
 def generate_plot(example_name, unit, statistics_name, n_vec, solvers,
-                  fig_size=None):
+                  fig_size=None, plot_name=''):
 
     if fig_size is not None:
         plt.figure(figsize=figsize(fig_size))
@@ -78,4 +78,4 @@ def generate_plot(example_name, unit, statistics_name, n_vec, solvers,
         os.makedirs(plots_dir)
 
     # Save figure
-    plt.savefig('%s/%s.pdf' % (plots_dir, statistics_name))
+    plt.savefig('%s/%s_%s.pdf' % (plots_dir, plot_name, statistics_name))
