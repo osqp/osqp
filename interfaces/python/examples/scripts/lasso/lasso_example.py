@@ -287,7 +287,7 @@ def run_lasso_example():
     # lambdas = np.logspace(-2, 2, n_lambda)
 
     # Parameters
-    n_vec = np.array([10, 20, 30, 40, 50])
+    n_vec = np.array([10, 20, 40, 50, 60, 80, 100])
 
     # Points
     m_vec = (n_vec * 100).astype(int)
@@ -316,10 +316,10 @@ def run_lasso_example():
         osqp_coldstart_timing.append(timing)
         osqp_coldstart_iter.append(niter)
 
-        # Solving loop with qpoases
-        timing, niter = solve_loop(qp_matrices, 'qpoases')
-        qpoases_timing.append(timing)
-        qpoases_iter.append(niter)
+        # # Solving loop with qpoases (qpOASES saturates after smallest problem)
+        # timing, niter = solve_loop(qp_matrices, 'qpoases')
+        # qpoases_timing.append(timing)
+        # qpoases_iter.append(niter)
 
         # Solve loop with gurobi
         timing, niter = solve_loop(qp_matrices, 'gurobi')
@@ -329,7 +329,7 @@ def run_lasso_example():
     solver_timings = OrderedDict([('OSQP (warm start)', osqp_timing),
                                   ('OSQP (cold start)',
                                    osqp_coldstart_timing),
-                                  ('qpOASES', qpoases_timing),
+                                #   ('qpOASES', qpoases_timing),
                                   ('GUROBI', gurobi_timing)])
 
     utils.generate_plot('lasso', 'time', 'median', n_vec,
