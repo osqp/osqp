@@ -35,10 +35,10 @@ n_unsolved = 0
 # Solve all Maroz Meszaros problems
 for f in lst_probs:
 
-    if f[:-4] == 'CVXQP1_M':
+    # if f[:-4] == 'CVXQP1_M':
     # if f[:-4] == 'AUG2DCQP':
     # if f[:-4] == 'BOYD1':
-    # if f[:-4] == 'AUG2D':
+    if f[:-4] == 'AUG2D':
     # if f[:-4] == 'AUG2DC':
     # if f[:-4] == 'CONT-101':
     # if f[:-4] == 'CONT-300':
@@ -129,9 +129,9 @@ for f in lst_probs:
 
         s = osqp.OSQP()
         s.setup(P, q, A, l, u,
-                rho=1e-05,
-                auto_rho=True,
-                verbose=True,
+                rho=0.0001,
+                auto_rho=False,
+                verbose=False,
                 max_iter=2500,
                 scaling=True)
         res = s.solve()
