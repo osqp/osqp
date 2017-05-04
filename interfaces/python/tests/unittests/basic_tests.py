@@ -26,7 +26,7 @@ class basic_tests(unittest.TestCase):
                      'scaling': True,
                      'scaling_norm': 2,
                      'scaling_iter': 3,
-                     'auto_rho': True,
+                     'auto_rho': False,
                      'alpha': 1.6,
                      'max_iter': 3000,
                      'polish': False,

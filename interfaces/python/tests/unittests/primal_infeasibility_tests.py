@@ -1,5 +1,6 @@
 # Test osqp python module
 import osqp
+# import osqppurepy as osqp
 import scipy.sparse as spspa
 import scipy as sp
 import numpy as np
@@ -16,17 +17,11 @@ class primal_infeeasibility_tests(unittest.TestCase):
         Setup primal infeasible problem
         """
 
-        self.opts = {'verbose': False,
+        self.opts = {'verbose': True,
                      'eps_abs': 1e-05,
                      'eps_rel': 1e-05,
-                     'scaling': True,
-                     'scaling_norm': 2,
-                     'scaling_iter': 3,
-                     'early_terminate': False,
-                     'eps_dual_inf': 1e-10,
-                     'rho': 1.6,
-                     'sigma': 0.1,
-                     'alpha': 1.6,
+                     'eps_dual_inf': 1e-20,
+                     'auto_rho': False,
                      'max_iter': 2500,
                      'polish': False}
 

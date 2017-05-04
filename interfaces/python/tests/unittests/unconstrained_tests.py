@@ -27,15 +27,10 @@ class unconstrained_tests(unittest.TestCase):
         self.A = sparse.csc_matrix((self.m, self.n))
         self.l = np.array([])
         self.u = np.array([])
-        self.opts = {'verbose': False,
-                     'eps_abs': 1e-06,
-                     'eps_rel': 1e-06,
-                     'scaling': True,
-                     'scaling_norm': 2,
-                     'scaling_iter': 3,
-                     'rho': 0.1,
-                     'alpha': 1.6,
-                     'max_iter': 5000,
+        self.opts = {'verbose': True,
+                     'eps_abs': 1e-08,
+                     'eps_rel': 1e-08,
+                     'auto_rho': False,
                      'polish': False}
         self.model = osqp.OSQP()
         self.model.setup(P=self.P, q=self.q, A=self.A, l=self.l, u=self.u,

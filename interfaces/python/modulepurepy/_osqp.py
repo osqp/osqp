@@ -122,7 +122,7 @@ class settings(object):
     delta [1.0]                         - Regularization parameter for polish
     verbose  [True]                     - Verbosity
     early_terminate  [True]             - Evalute termination criteria
-    early_terminate_interval  [True]    - Interval for evaluating termination criteria
+    early_terminate_interval  [25]    - Interval for evaluating termination criteria
     warm_start [False]                  - Reuse solution from previous solve
     polish  [True]                      - Solution polish
     pol_refine_iter  [3]                - Number of iterative refinement iterations
@@ -131,22 +131,22 @@ class settings(object):
 
     def __init__(self, **kwargs):
 
-        self.rho = kwargs.pop('rho', 1.6)
-        self.sigma = kwargs.pop('sigma', 1e-01)
+        self.rho = kwargs.pop('rho', 0.1)
+        self.sigma = kwargs.pop('sigma', 1e-03)
         self.scaling = kwargs.pop('scaling', True)
         self.scaling_iter = kwargs.pop('scaling_iter', 3)
         self.scaling_norm = kwargs.pop('scaling_norm', 2)
 
         self.max_iter = kwargs.pop('max_iter', 5000)
-        self.eps_abs = kwargs.pop('eps_abs', 1e-5)
-        self.eps_rel = kwargs.pop('eps_rel', 1e-5)
-        self.eps_prim_inf = kwargs.pop('eps_prim_inf', 1e-6)
-        self.eps_dual_inf = kwargs.pop('eps_dual_inf', 1e-6)
+        self.eps_abs = kwargs.pop('eps_abs', 1e-3)
+        self.eps_rel = kwargs.pop('eps_rel', 1e-3)
+        self.eps_prim_inf = kwargs.pop('eps_prim_inf', 1e-4)
+        self.eps_dual_inf = kwargs.pop('eps_dual_inf', 1e-4)
         self.alpha = kwargs.pop('alpha', 1.6)
-        self.delta = kwargs.pop('delta', 1e-7)
+        self.delta = kwargs.pop('delta', 1e-6)
         self.verbose = kwargs.pop('verbose', True)
         self.early_terminate = kwargs.pop('early_terminate', True)
-        self.early_terminate_interval = kwargs.pop('early_terminate_interval', True)
+        self.early_terminate_interval = kwargs.pop('early_terminate_interval', 25)
         self.warm_start = kwargs.pop('warm_start', False)
         self.polish = kwargs.pop('polish', True)
         self.pol_refine_iter = kwargs.pop('pol_refine_iter', 3)
@@ -360,7 +360,7 @@ class OSQP(object):
         print("      OSQP v%s  -  Operator Splitting QP Solver" % \
             self.version)
         print("              Pure Python Implementation")
-        print("     (c) .....,")
+        print("     (c) Bartolomeo Stellato, Goran Banjac")
         print("   University of Oxford  -  Stanford University 2016")
         print("-------------------------------------------------------")
 
@@ -480,9 +480,9 @@ class OSQP(object):
             return 0.
         if polish:
             return la.norm(np.maximum(self.work.data.l - self.work.pol.z, 0) +
-                           np.maximum(self.work.pol.z - self.work.data.u, 0))
+                           np.maximum(self.work.pol.z - self.work.data.u, 0), np.inf)
         else:
-            return la.norm(self.work.data.A.dot(self.work.x) - self.work.z)
+            return la.norm(self.work.data.A.dot(self.work.x) - self.work.z, np.inf)
 
     def compute_dua_res(self, polish):
         """
@@ -491,11 +491,11 @@ class OSQP(object):
         if polish:
             return la.norm(self.work.data.P.dot(self.work.pol.x) +
                            self.work.data.q +
-                           self.work.pol.Ared.T.dot(self.work.pol.y_red))
+                           self.work.pol.Ared.T.dot(self.work.pol.y_red), np.inf)
         else:
             return la.norm(self.work.data.P.dot(self.work.x) +
                            self.work.data.q +
-                           self.work.data.A.T.dot(self.work.y))
+                           self.work.data.A.T.dot(self.work.y), np.inf)
 
     def is_primal_infeasible(self):
         """
@@ -544,22 +544,32 @@ class OSQP(object):
             # print("||A'*v|| = %6.2e" % (la.norm(self.work.Atdelta_y)))
             # pdb.set_trace()
 
-        eps_prim_inf = self.work.settings.eps_prim_inf
         # Prevent 0 division
-        if la.norm(self.work.delta_y) > eps_prim_inf*eps_prim_inf:
-            self.work.delta_y /= la.norm(self.work.delta_y)
+        # if la.norm(self.work.delta_y) > eps_prim_inf*eps_prim_inf:
+        #     # self.work.delta_y /= la.norm(self.work.delta_y)
+        #     # lhs = self.work.data.u.dot(np.maximum(self.work.delta_y, 0)) + \
+        #     #     self.work.data.l.dot(np.minimum(self.work.delta_y, 0))
+        #     # if  lhs < -eps_prim_inf:
+        #     #     self.work.Atdelta_y = self.work.data.A.T.dot(self.work.delta_y)
+        #     #     return la.norm(self.work.Atdelta_y) < eps_prim_inf
+
+        eps_prim_inf = self.work.settings.eps_prim_inf
+        norm_delta_y = la.norm(self.work.delta_y, np.inf)
+        if norm_delta_y > eps_prim_inf:
+            self.work.delta_y /= norm_delta_y
             lhs = self.work.data.u.dot(np.maximum(self.work.delta_y, 0)) + \
-                self.work.data.l.dot(np.minimum(self.work.delta_y, 0))
-            if  lhs < -eps_prim_inf:
+                    self.work.data.l.dot(np.minimum(self.work.delta_y, 0))
+            if lhs < -eps_prim_inf:
                 self.work.Atdelta_y = self.work.data.A.T.dot(self.work.delta_y)
-                return la.norm(self.work.Atdelta_y) < eps_prim_inf
+                return la.norm(self.work.Atdelta_y, np.inf) < eps_prim_inf
+
         return False
 
     def is_dual_infeasible(self):
         """
         Check dual infeasibility
-            ||P*v||_2 = 0
-        with v = delta_x / ||delta_x||_2 given that the following
+            ||P*v||_inf = 0
+        with v = delta_x / ||delta_x||_inf given that the following
         conditions hold
             q'* v < 0 and
                         | 0     if l_i, u_i \in R
@@ -567,27 +577,28 @@ class OSQP(object):
                         | <= 0  if l_i = -inf
         """
         eps_dual_inf = self.work.settings.eps_dual_inf
+        norm_delta_x = la.norm(self.work.delta_x, np.inf)
         # Prevent 0 division
-        if la.norm(self.work.delta_x, np.inf) > eps_dual_inf*eps_dual_inf:
+        if norm_delta_x > eps_dual_inf:
             # Normalize delta_x
-            self.work.delta_x /= la.norm(self.work.delta_x)
+            self.work.delta_x /= norm_delta_x
 
-            # First check q'* v < 0
+            # First check q'* delta_x < 0
             if self.work.data.q.dot(self.work.delta_x) < -eps_dual_inf:
 
-                # Compute P * v
+                # Compute P * delta_x
                 self.work.Pdelta_x = self.work.data.P.dot(self.work.delta_x)
 
-                # Check if ||P*v||_2 = 0
-                if la.norm(self.work.Pdelta_x) < eps_dual_inf:
+                # Check if ||P * delta_x|| = 0
+                if la.norm(self.work.Pdelta_x, np.inf) < eps_dual_inf:
 
-                    # Compute A * v
+                    # Compute A * delta_x
                     self.work.Adelta_x = self.work.data.A.dot(
                         self.work.delta_x)
 
                     for i in range(self.work.data.m):
                         # De Morgan's Law applied to negate
-                        # conditions in sec 4.3
+                        # conditions on A * delta_x
                         if ((self.work.data.u[i] < OSQP_INFTY*1e-03) and
                             (self.work.Adelta_x[i] > eps_dual_inf)) or \
                             ((self.work.data.l[i] > -OSQP_INFTY*1e-03) and
@@ -648,30 +659,36 @@ class OSQP(object):
         prim_inf_check = 0
         dual_inf_check = 0
 
+        eps_abs = self.work.settings.eps_abs
+        eps_rel = self.work.settings.eps_rel
+
         if self.work.data.m == 0:  # No constraints -> always  primal feasible
             pri_check = 1
         else:
             # Compute primal tolerance
-            eps_pri = np.sqrt(self.work.data.m) * self.work.settings.eps_abs +\
-                self.work.settings.eps_rel * la.norm(self.work.z)
-            # print "eps_pri = %.4e, pri_res = %.4e" % \
-            # (eps_pri, self.work.info.pri_res)
-            # set_trace()
+            eps_pri = eps_abs + \
+                eps_rel * np.max([
+                    la.norm(self.work.data.A.dot(self.work.x), np.inf),
+                    la.norm(self.work.z, np.inf)])
+
             if self.work.info.pri_res < eps_pri:
                 pri_check = 1
-
-            # Check infeasibility
-            prim_inf_check = self.is_primal_infeasible()
+            else:
+                # Check infeasibility
+                prim_inf_check = self.is_primal_infeasible()
 
         # Compute dual tolerance
-        eps_dua = np.sqrt(self.work.data.n) * self.work.settings.eps_abs + \
-            self.work.settings.eps_rel * self.work.settings.rho * \
-            la.norm(self.work.data.A.T.dot(self.work.y))
+        eps_dua = eps_abs + \
+            eps_rel * np.max([
+                la.norm(self.work.data.A.T.dot(self.work.y), np.inf),
+                la.norm(self.work.data.P.dot(self.work.x), np.inf),
+                la.norm(self.work.data.q, np.inf)])
+
         if self.work.info.dua_res < eps_dua:
             dua_check = 1
-
-        # Check dual infeasibility
-        dual_inf_check = self.is_dual_infeasible()
+        else:
+            # Check dual infeasibility
+            dual_inf_check = self.is_dual_infeasible()
 
         # Compare residuals and determine solver status
         if pri_check & dua_check:
