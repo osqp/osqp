@@ -29,6 +29,7 @@ static char * test_basic_qp2_solve()
     settings->max_iter = 1000;
     settings->alpha = 1.6;
     settings->warm_start = 1;
+    settings->auto_rho = 0;
     settings->polish = 1;
     settings->verbose = 1;
 
@@ -96,6 +97,7 @@ static char * test_basic_qp2_update()
     settings->max_iter = 1000;
     settings->alpha = 1.6;
     settings->warm_start = 1;
+    settings->auto_rho = 0;
     settings->polish = 1;
     settings->verbose = 1;
 

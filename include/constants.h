@@ -58,6 +58,9 @@ extern "C" {
 #if EMBEDDED != 1
 #define SCALING_NORM (2)
 #define SCALING_ITER (3)
+#define MAX_SCALING (1e3)  /// Maximum scaling
+#define MIN_SCALING (1e-3)  /// Minimum scaling
+#define SCALING_REG (1e-08)  /// Regularization in scaling iterations
 #endif
 
 /* Printing */

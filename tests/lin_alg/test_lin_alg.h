@@ -25,25 +25,35 @@ static char * test_constr_sparse_mat(){
 }
 
 static char * test_vec_operations(){
-    c_float norm_sq, vecprod; // normInf;
+    c_float norm_sq;
+    c_float norm_inf, vecprod; // normInf;
     c_float * ew_reciprocal;
     c_float * add_scaled;
 
     lin_alg_sols_data *  data = generate_problem_lin_alg_sols_data();
 
-    // Norm of the difference
-    mu_assert("Linear algebra tests: error in vector operation, squared norm of difference",
-              c_absval(vec_norm2_sq_diff(data->test_vec_ops_v1, data->test_vec_ops_v2, data->test_vec_ops_n) - data->test_vec_ops_norm2_sq_diff) < TESTS_TOL*TESTS_TOL);
 
     // Add scaled
     add_scaled = vec_copy(data->test_vec_ops_v1, data->test_vec_ops_n);
     vec_add_scaled(add_scaled, data->test_vec_ops_v2, data->test_vec_ops_n, data->test_vec_ops_sc);
-    mu_assert("Linear algebra tests: error in vector operation, adding scaled vector",
-              vec_norm2_sq_diff(add_scaled, data->test_vec_ops_add_scaled, data->test_vec_ops_n) < TESTS_TOL*TESTS_TOL);
+    mu_assert("Linear algebra tests: error in vector operation, adding scaled vector", vec_norm2_sq_diff(add_scaled, data->test_vec_ops_add_scaled, data->test_vec_ops_n) < TESTS_TOL*TESTS_TOL);
 
-    // Squared norm
+    // Norm_inf of the difference
+    mu_assert("Linear algebra tests: error in vector operation, norm_inf of difference",
+      c_absval(vec_norm_inf_diff(data->test_vec_ops_v1, data->test_vec_ops_v2, data->test_vec_ops_n) - data->test_vec_ops_norm_inf_diff) < TESTS_TOL);
+
+    // norm_inf
+    norm_inf = vec_norm_inf(data->test_vec_ops_v1, data->test_vec_ops_n);
+    mu_assert("Linear algebra tests: error in vector operation, norm_inf",
+              c_absval(norm_inf - data->test_vec_ops_norm_inf) < TESTS_TOL);
+
+    // Norm_2 of the difference
+    mu_assert("Linear algebra tests: error in vector operation, squared norm_2 of difference",
+        c_absval(vec_norm2_sq_diff(data->test_vec_ops_v1, data->test_vec_ops_v2, data->test_vec_ops_n) - data->test_vec_ops_norm2_sq_diff) < TESTS_TOL*TESTS_TOL);
+
+    // Squared norm_2
     norm_sq = vec_norm2_sq(data->test_vec_ops_v1, data->test_vec_ops_n);
-    mu_assert("Linear algebra tests: error in vector operation, squared norm",
+    mu_assert("Linear algebra tests: error in vector operation, squared norm_2",
                 c_absval(norm_sq - data->test_vec_ops_norm2_sq) < TESTS_TOL*TESTS_TOL);
 
     // Elementwise reciprocal

@@ -92,7 +92,7 @@ static char * test_update(){
     set_default_settings(settings);
     settings->max_iter = 1000;
     settings->alpha = 1.6;
-    settings->rho = 0.1;
+    settings->auto_rho = 0;
     settings->verbose = 1;
 
     // Setup workspace

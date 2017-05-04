@@ -26,6 +26,7 @@ static char * test_basic_qp_solve()
     settings->max_iter = 2000;
     settings->alpha = 1.6;
     settings->polish = 1;
+    settings->auto_rho = 0;
     settings->scaling = 0;
     settings->verbose = 1;
     settings->warm_start = 0;
