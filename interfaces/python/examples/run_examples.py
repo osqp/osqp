@@ -8,7 +8,8 @@ Run all Examples in the OSQP paper
 # from scripts.eq_qp.eq_qp_example import run_eq_qp_example
 # from scripts.huber.huber_example import run_huber_example
 # from scripts.svm.svm_example import run_svm_example
-from scripts.mpc.mpc_example import run_mpc_pendulum_example
+# from scripts.mpc.mpc_example import run_mpc_pendulum_example
+from scripts.mpc.mpc_example import run_mpc_helicopter_example
 
 # Run problems
 # run_eq_qp_example()
@@ -16,4 +17,5 @@ from scripts.mpc.mpc_example import run_mpc_pendulum_example
 # run_lasso_example()
 # run_huber_example()
 # run_svm_example()
-run_mpc_pendulum_example()
+# run_mpc_pendulum_example()
+run_mpc_helicopter_example()

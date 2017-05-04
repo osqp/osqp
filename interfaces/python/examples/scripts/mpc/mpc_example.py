@@ -17,6 +17,7 @@ import mathprogbasepy as mpbpy  # Mathprogbasepy to benchmark gurobi
 # Numerics
 import numpy as np
 import scipy.sparse as spa
+import scipy.linalg as spla
 
 # Pandas
 from collections import OrderedDict, namedtuple
@@ -53,6 +54,15 @@ def gen_qp_matrices(problem):
     A = spa.hstack([Ax, Au])
     l = b(problem.x0, nx, N)
     u = b(problem.x0, nx, N)
+
+    # Terminal constraints
+    if len(problem.tmin) > 0:
+        nt = problem.T.shape[0]
+        A = spa.vstack([A, spa.hstack([spa.csc_matrix((nt, N*nx)),
+                                       problem.T,
+                                       spa.csc_matrix((nt, N*nu))])])
+        l = np.append(l, problem.tmin)
+        u = np.append(u, problem.tmax)
 
     # Bounds on u
     lx = np.tile(problem.umin, N)
@@ -110,9 +120,10 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
         # Setup OSQP
         m = osqp.OSQP()
         m.setup(qp.P, qp.q, Aosqp, losqp, uosqp,
-                auto_rho=False,
-                rho=0.1,
-                max_iter=5000,
+                auto_rho=True,
+                #auto_rho=False,
+                #rho=0.1,
+                max_iter=2500,
                 polish=False,
                 verbose=False)
 
@@ -134,9 +145,13 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
             u = res.x[-N*nu:-(N-1)*nu]
             x0 = problem.A.dot(x0) + problem.B.dot(u)
 
-            # Update QP problem
-            losqp = np.hstack([b(x0, nx, N), qp.lx])
-            uosqp = np.hstack([b(x0, nx, N), qp.ux])
+            # Update linear constraints
+            if len(problem.tmin) > 0:
+                losqp = np.hstack([b(x0, nx, N), problem.tmin, qp.lx])
+                uosqp = np.hstack([b(x0, nx, N), problem.tmax, qp.ux])
+            else:
+                losqp = np.hstack([b(x0, nx, N), qp.lx])
+                uosqp = np.hstack([b(x0, nx, N), qp.ux])
             m.update(l=losqp, u=uosqp)
 
     elif solver == 'osqp_coldstart':
@@ -164,9 +179,10 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
         m = osqp.OSQP()
         m.setup(qp.P, qp.q, Aosqp, losqp, uosqp,
                 warm_start=False,
-                auto_rho=False,
-                rho=0.1,
-                max_iter=5000,
+                auto_rho=True,
+                #auto_rho=False,
+                #rho=0.1,
+                max_iter=2500,
                 polish=False,
                 verbose=False)
 
@@ -188,9 +204,13 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
             u = res.x[-N*nu:-(N-1)*nu]
             x0 = problem.A.dot(x0) + problem.B.dot(u)
 
-            # Update QP problem
-            losqp = np.hstack([b(x0, nx, N), qp.lx])
-            uosqp = np.hstack([b(x0, nx, N), qp.ux])
+            # Update linear constraints
+            if len(problem.tmin) > 0:
+                losqp = np.hstack([b(x0, nx, N), problem.tmin, qp.lx])
+                uosqp = np.hstack([b(x0, nx, N), problem.tmax, qp.ux])
+            else:
+                losqp = np.hstack([b(x0, nx, N), qp.lx])
+                uosqp = np.hstack([b(x0, nx, N), qp.ux])
             m.update(l=losqp, u=uosqp)
 
     elif solver == 'qpoases':
@@ -259,11 +279,15 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
             u = sol_qpoases[-N*nu:-(N-1)*nu]
             x0 = problem.A.dot(x0) + problem.B.dot(u)
 
-            # Update linear equality constraint
-            lqpoases = b(x0, nx, N)
-            uqpoases = b(x0, nx, N)
+            # Update linear constraints
+            if len(problem.tmin) > 0:
+                lqpoases = np.hstack([b(x0, nx, N), problem.tmin])
+                uqpoases = np.hstack([b(x0, nx, N), problem.tmax])
+            else:
+                lqpoases = np.hstack([b(x0, nx, N)])
+                uqpoases = np.hstack([b(x0, nx, N)])
 
-    elif solver == 'gurobi':
+    elif solver == 'gurobi' or solver == 'mosek':
         # Construct qp matrices
         if len(problem.xmin) > 0:
             # If the problem has state constraints
@@ -287,7 +311,10 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
         for i in range(nsim):
             # Solve with gurobi
             prob = mpbpy.QuadprogProblem(qp.P, qp.q, Agurobi, lgurobi, ugurobi)
-            res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
+            if solver == 'gurobi':
+                res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
+            else:
+                res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
 
             # Save time and number of iterations
             time[i] = res.cputime
@@ -304,8 +331,12 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
             x0 = problem.A.dot(x0) + problem.B.dot(u)
 
             # Update QP problem
-            lgurobi = np.hstack([b(x0, nx, N), qp.lx])
-            ugurobi = np.hstack([b(x0, nx, N), qp.ux])
+            if len(problem.tmin) > 0:
+                lgurobi = np.hstack([b(x0, nx, N), problem.tmin, qp.lx])
+                ugurobi = np.hstack([b(x0, nx, N), problem.tmax, qp.ux])
+            else:
+                lgurobi = np.hstack([b(x0, nx, N), qp.lx])
+                ugurobi = np.hstack([b(x0, nx, N), qp.ux])
 
     else:
         raise ValueError('Solver not understood')
@@ -321,7 +352,8 @@ def run_mpc_pendulum_example():
     '''
 
     # Problem setup (sampling interval Ts = 0.05s)
-    problem = namedtuple("problem", "A B R Q QN umin umax xmin xmax N x0 name")
+    problem = namedtuple("problem", "A B R Q QN umin umax xmin xmax " +
+                                    "T tmin tmax N x0 name")
     problem.A = spa.csc_matrix([[1.001, -0.05, -0.001],
                                 [-0.05, 1.003, 0.05],
                                 [-0.001, 0.05, 1.001]])
@@ -335,6 +367,9 @@ def run_mpc_pendulum_example():
     problem.umax = np.array([1.25])
     problem.xmin = []
     problem.xmax = []
+    problem.T = []                  # terminal constraints
+    problem.tmin = []
+    problem.tmax = []
     problem.x0 = 0.6*np.ones(3)
     problem.name = 'pendulum'
 
@@ -353,6 +388,8 @@ def run_mpc_pendulum_example():
     # qpoases_iter = []
     gurobi_iter = []
     gurobi_timing = []
+    mosek_iter = []
+    mosek_timing = []
 
     for i in range(len(N_vec)):
         # Generate QP
@@ -379,17 +416,23 @@ def run_mpc_pendulum_example():
         gurobi_timing.append(timing)
         gurobi_iter.append(niter)
 
+        # Solve loop with mosek
+        timing, niter = solve_loop(qp_matrices, problem, nsim, 'mosek')
+        mosek_timing.append(timing)
+        mosek_iter.append(niter)
+
     solver_timings = OrderedDict([('OSQP (warm start)', osqp_timing),
                                   ('OSQP (cold start)', osqp_coldstart_timing),
                                   # ('qpOASES', qpoases_timing),
-                                  ('GUROBI', gurobi_timing)])
+                                  ('GUROBI', gurobi_timing),
+                                  ('MOSEK', mosek_timing)])
 
     utils.generate_plot('mpc', 'time', 'median', N_vec, solver_timings,
-                        fig_size=0.9, plot_name='pendulum')
+                        fig_size=0.9, plot_name=problem.name)
     utils.generate_plot('mpc', 'time', 'total', N_vec, solver_timings,
-                        fig_size=0.9, plot_name='pendulum')
+                        fig_size=0.9, plot_name=problem.name)
     utils.generate_plot('mpc', 'time', 'max', N_vec, solver_timings,
-                        fig_size=0.9, plot_name='pendulum')
+                        fig_size=0.9, plot_name=problem.name)
 
 
 def run_mpc_helicopter_example():
@@ -399,7 +442,8 @@ def run_mpc_helicopter_example():
     '''
 
     # Problem setup
-    problem = namedtuple("problem", "A B R Q QN umin umax xmin xmax N x0 name")
+    problem = namedtuple("problem", "A B R Q QN umin umax xmin xmax " +
+                                    "T tmin tmax N x0 name")
     problem.A = spa.csc_matrix([[0.99, 0., 0.01, 0., 0., 0.],
                                 [0., 0.99, 0., 0.01, 0., 0.],
                                 [0., 0., 0.99, 0., 0., 0.],
@@ -414,5 +458,77 @@ def run_mpc_helicopter_example():
                                 [0., 0.]])
     problem.R = 0.001*spa.eye(2)
     problem.Q = spa.diags([100, 100, 10, 10, 400, 200])
+    problem.QN = spla.solve_discrete_are(
+                                problem.A.todense(), problem.B.todense(),
+                                problem.Q.todense(), problem.R.todense())
+    problem.umin = -np.ones(2)
+    problem.umax = 3*np.ones(2)
+    problem.xmin = -np.array([np.inf, np.inf, 0.44, 0.6, np.inf, np.inf])
+    problem.xmax = np.array([np.inf, np.inf, 0.44, 0.6, np.inf, np.inf])
+    problem.T = spa.eye(6)
+    problem.tmin = -np.ones(6)
+    problem.tmax = np.ones(6)
+    problem.x0 = np.array([0.5, 0.5, 0., 0., 0., 0.])
+    problem.name = 'helicopter'
 
-    # TBC
+    # Simulation steps
+    nsim = 100
+
+    # Prediction horizon
+    N_vec = np.array([20])
+
+    # Define statistics for osqp, qpoases and gurobi
+    # osqp_timing = []
+    # osqp_iter = []
+    # osqp_coldstart_timing = []
+    # osqp_coldstart_iter = []
+    # qpoases_timing = []
+    # qpoases_iter = []
+    # gurobi_iter = []
+    # gurobi_timing = []
+    mosek_iter = []
+    mosek_timing = []
+
+    for i in range(len(N_vec)):
+        # Generate QP
+        problem.N = N_vec[i]
+        qp_matrices = gen_qp_matrices(problem)
+
+        # # Solve loop with osqp
+        # timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp')
+        # osqp_timing.append(timing)
+        # osqp_iter.append(niter)
+        #
+        # # Solve loop with osqp (coldstart)
+        # timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp_coldstart')
+        # osqp_coldstart_timing.append(timing)
+        # osqp_coldstart_iter.append(niter)
+
+        # # Solving loop with qpoases
+        # timing, niter = solve_loop(qp_matrices, 'qpoases')
+        # qpoases_timing.append(timing)
+        # qpoases_iter.append(niter)
+
+        # # Solve loop with gurobi
+        # timing, niter = solve_loop(qp_matrices, problem, nsim, 'gurobi')
+        # gurobi_timing.append(timing)
+        # gurobi_iter.append(niter)
+
+        # Solve loop with mosek
+        timing, niter = solve_loop(qp_matrices, problem, nsim, 'mosek')
+        mosek_timing.append(timing)
+        mosek_iter.append(niter)
+
+    solver_timings = OrderedDict([
+                            # ('OSQP (warm start)', osqp_timing),
+                            # ('OSQP (cold start)', osqp_coldstart_timing),
+                            # ('qpOASES', qpoases_timing),
+                            ('GUROBI', gurobi_timing),
+                            ('MOSEK', mosek_timing)])
+
+    utils.generate_plot('mpc', 'time', 'median', N_vec, solver_timings,
+                        fig_size=0.9, plot_name=problem.name)
+    utils.generate_plot('mpc', 'time', 'total', N_vec, solver_timings,
+                        fig_size=0.9, plot_name=problem.name)
+    utils.generate_plot('mpc', 'time', 'max', N_vec, solver_timings,
+                        fig_size=0.9, plot_name=problem.name)
