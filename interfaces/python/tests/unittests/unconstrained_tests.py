@@ -27,7 +27,7 @@ class unconstrained_tests(unittest.TestCase):
         self.A = sparse.csc_matrix((self.m, self.n))
         self.l = np.array([])
         self.u = np.array([])
-        self.opts = {'verbose': True,
+        self.opts = {'verbose': False,
                      'eps_abs': 1e-08,
                      'eps_rel': 1e-08,
                      'auto_rho': False,

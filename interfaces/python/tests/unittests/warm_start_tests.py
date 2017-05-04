@@ -15,7 +15,7 @@ class warm_start_tests(unittest.TestCase):
         """
         Setup default options
         """
-        self.opts = {'verbose': True,
+        self.opts = {'verbose': False,
                      'eps_abs': 1e-08,
                      'eps_rel': 1e-08,
                      'auto_rho': False,

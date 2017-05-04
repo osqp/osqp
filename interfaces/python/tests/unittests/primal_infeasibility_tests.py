@@ -17,7 +17,7 @@ class primal_infeeasibility_tests(unittest.TestCase):
         Setup primal infeasible problem
         """
 
-        self.opts = {'verbose': True,
+        self.opts = {'verbose': False,
                      'eps_abs': 1e-05,
                      'eps_rel': 1e-05,
                      'eps_dual_inf': 1e-20,

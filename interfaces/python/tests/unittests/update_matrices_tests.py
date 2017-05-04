@@ -34,7 +34,7 @@ class update_matrices_tests(unittest.TestCase):
         self.opts = {'auto_rho': False,
                      'eps_abs': 1e-08,
                      'eps_rel': 1e-08,
-                     'verbose': True}
+                     'verbose': False}
         self.model = osqp.OSQP()
         self.model.setup(P=self.P, q=self.q, A=self.A, l=self.l, u=self.u,
                          **self.opts)
