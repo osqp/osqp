@@ -106,8 +106,10 @@ void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
 void print_summary(OSQPInfo * info){
     c_print("%*i ", (int)strlen(HEADER[0]), (int)info->iter);
     c_print("%*.4e ", (int)HSPACE, info->obj_val);
-    c_print("%*.4e ", (int)HSPACE, info->pri_res);
-    c_print("%*.4e ", (int)HSPACE, info->dua_res);
+    // c_print("%*.4e ", (int)HSPACE, info->pri_res);
+    // c_print("%*.4e ", (int)HSPACE, info->dua_res);
+    c_print("%*.4e ", (int)HSPACE, sqrt(info->pri_res));
+    c_print("%*.4e ", (int)HSPACE, sqrt(info->dua_res));
     #ifdef PROFILING
     c_print("%*.2fs", 9, info->setup_time + info->solve_time);
     #endif

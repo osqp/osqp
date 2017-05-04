@@ -19,7 +19,7 @@ OSQP_DUAL_INFEASIBLE = -4
 OSQP_UNSOLVED = -10
 
 # Printing interval
-PRINT_INTERVAL = 100
+PRINT_INTERVAL = 1
 
 # OSQP Infinity
 OSQP_INFTY = 1e+20
@@ -118,7 +118,7 @@ class settings(object):
     eps_rel  [1e-05]                    - Relative tolerance
     eps_prim_inf  [1e-06]                    - Primal infeasibility tolerance
     eps_dual_inf  [1e-06]                    - Dual infeasibility tolerance
-    alpha [1.0]                         - Relaxation parameter
+    alpha [1.6]                         - Relaxation parameter
     delta [1.0]                         - Regularization parameter for polish
     verbose  [True]                     - Verbosity
     early_terminate  [True]             - Evalute termination criteria
@@ -136,8 +136,7 @@ class settings(object):
         self.scaling = kwargs.pop('scaling', True)
         self.scaling_iter = kwargs.pop('scaling_iter', 3)
         self.scaling_norm = kwargs.pop('scaling_norm', 2)
-
-        self.max_iter = kwargs.pop('max_iter', 5000)
+        self.max_iter = kwargs.pop('max_iter', 2500)
         self.eps_abs = kwargs.pop('eps_abs', 1e-3)
         self.eps_rel = kwargs.pop('eps_rel', 1e-3)
         self.eps_prim_inf = kwargs.pop('eps_prim_inf', 1e-4)
@@ -370,8 +369,9 @@ class OSQP(object):
             (settings.eps_abs, settings.eps_rel))
         print("          eps_prim_inf = %.2e, eps_dual_inf = %.2e," % \
             (settings.eps_prim_inf, settings.eps_dual_inf))
-        print("          rho = %.2f, sigma = %.2f, alpha = %.2f," % \
-            (settings.rho, settings.sigma, settings.alpha))
+        print("          rho = %.2e" % settings.rho)
+        print("          sigma = %.2e, alpha = %.2e," % \
+            (settings.sigma, settings.alpha))
         print("          max_iter = %d" % settings.max_iter)
         if settings.scaling:
             print("          scaling: active")
@@ -750,7 +750,7 @@ class OSQP(object):
     #   Main Solver API
     #
 
-    def setup(self, xxx_todo_changeme1, Pdata, Pindices, Pindptr, q,
+    def setup(self, dims, Pdata, Pindices, Pindptr, q,
               Adata, Aindices, Aindptr,
               l, u, **stgs):
         """
@@ -759,7 +759,7 @@ class OSQP(object):
             subject to	l <= A x <= u
 
         """
-        (n, m) = xxx_todo_changeme1
+        (n, m) = dims
         self.work = workspace()
 
         # Start timer

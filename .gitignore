@@ -193,7 +193,7 @@ out/
 *.asv
 
 # Other data files
-*.mat
+# *.mat
 
 # matlab release files
 interfaces/matlab/package/osqp*
