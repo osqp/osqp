@@ -48,13 +48,6 @@ c_float vec_norm_inf(const c_float *v, c_int l);
 c_float vec_norm_inf_diff(const c_float *a, const c_float *b, c_int l);
 
 
-/* ||a - b||^2 */
-c_float vec_norm2_sq_diff(const c_float *a, const c_float *b, c_int l);
-
-/* ||v||_2^2 */
-c_float vec_norm2_sq(const c_float *v, c_int l);
-
-
 /* Vector elementwise reciprocal b = 1./a (needed for scaling)*/
 void vec_ew_recipr(const c_float *a, c_float *b, c_int n);
 

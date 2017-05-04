@@ -36,26 +36,6 @@ c_float vec_norm_inf_diff(const c_float *a, const c_float *b, c_int l){
 }
 
 
-c_float vec_norm2_sq(const c_float *v, c_int l) {
-    c_int i;
-    c_float nmsq = 0.0;
-    for (i = 0; i < l; i++) {
-        nmsq += v[i] * v[i];
-    }
-    return nmsq;
-}
-
-c_float vec_norm2_sq_diff(const c_float *a, const c_float *b, c_int l) {
-    c_float nmDiff = 0.0, tmp;
-    c_int i;
-    for (i = 0; i < l; i++) {
-        tmp = (a[i] - b[i]);
-        nmDiff += tmp * tmp;
-    }
-    return nmDiff;
-}
-
-
 void int_vec_set_scalar(c_int *a, c_int sc, c_int n){
     c_int i;
     for (i=0; i<n; i++) {
