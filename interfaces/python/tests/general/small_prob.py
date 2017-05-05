@@ -6,9 +6,9 @@ import numpy as np
 import mathprogbasepy as mpbpy
 sp.random.seed(2)
 
-n = 2
-m = 3
-A = sparse.random(m, n, density=0.6, format='csc')
+n = 20
+m = 30
+A = sparse.random(m, n, density=0.9, format='csc')
 # A = sparse.eye(m)
 
 # l = -sp.rand(m) * 2.
@@ -29,10 +29,13 @@ u /= Escal
 
 
 
-P = sparse.random(n, n, density=0.6, format='csc')
+P = sparse.random(n, n, density=0.9)
+# P = sparse.random(n, n, density=0.9).tocsc()
 P = P.dot(P.T).tocsc()
 q = sp.randn(n)
 
+# Try to fix sparse matrix format
+# P = P.tocoo().tocsc()
 
 # Divide cost function
 norm_q = np.linalg.norm(q)
@@ -47,14 +50,14 @@ norm_q = np.linalg.norm(q)
 # print("new P ")
 # print(P.todense())
 
-osqp_opts = {'rho': 0.5,
+osqp_opts = {'rho': 0.1,
              'sigma': 0.001,
              'auto_rho': False,
-             'polish': False,
+             'polish': True,
              'eps_abs': 1e-03,
              'eps_rel': 1e-03,
              'early_terminate_interval': 1,
-             'max_iter': 174,
+             'max_iter': 200,
              'scaling': False}
 
 
@@ -73,9 +76,13 @@ res = model.solve()
 
 model = osqppurepy.OSQP()
 model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
-res = model.solve()
+res_purepy = model.solve()
 
 
+print("Norm difference x OSQP and OSQPPUREPY %.4e" %
+      np.linalg.norm(res.x - res_purepy.x))
+print("Norm difference y OSQP and OSQPPUREPY %.4e" %
+      np.linalg.norm(res.y - res_purepy.y))
 
 # x = res.x
 # y = res.y

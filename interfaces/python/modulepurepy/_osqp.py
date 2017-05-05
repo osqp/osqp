@@ -246,8 +246,6 @@ class priv(object):
                             spspa.eye(work.data.n), work.data.A.T]),
               spspa.hstack([work.data.A,
                            -1./work.settings.rho * spspa.eye(work.data.m)])])
-        # print("KKT")
-        # print(KKT.todense())
 
         # Initialize private structure
         self.kkt_factor = spla.splu(KKT.tocsc())
@@ -421,7 +419,7 @@ class OSQP(object):
         """
         # Compute rhs and store it in xz_tilde
         self.work.xz_tilde[:self.work.data.n] = \
-            self.work.settings.sigma * self.work.x - self.work.data.q
+            self.work.settings.sigma * self.work.x_prev - self.work.data.q
         self.work.xz_tilde[self.work.data.n:] = \
             self.work.z_prev - 1./self.work.settings.rho * self.work.y
 
@@ -844,6 +842,7 @@ class OSQP(object):
 
             # Third step: update y
             self.update_y()
+
 
             if self.work.settings.early_terminate:
                 # Update info

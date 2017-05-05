@@ -250,11 +250,13 @@ void LDLSolve(c_float *x, c_float *b, csc *L, c_float *Dinv, c_int *P,
               c_float *bp) {
     /* solves PLDL'P' x = b for x */
     c_int n = L->n;
+
     LDL_perm(n, bp, b, P);
     LDL_lsolve(n, bp, L->p, L->i, L->x);
     LDL_dinvsolve(n, bp, Dinv);
     LDL_ltsolve(n, bp, L->p, L->i, L->x);
     LDL_permt(n, x, bp, P);
+
 }
 
 
