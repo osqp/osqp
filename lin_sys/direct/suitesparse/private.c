@@ -262,6 +262,7 @@ c_int solve_lin_sys(const OSQPSettings *settings, Priv *p, c_float *b) {
     /* returns solution to linear system */
     /* Ax = b with solution stored in b */
     LDLSolve(b, b, p->L, p->Dinv, p->P, p->bp);
+
     return 0;
 }
 

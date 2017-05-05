@@ -243,6 +243,10 @@ typedef struct {
         /// flag indicating whether the solve function has been run before
         c_int first_run;
         #endif
+
+        #ifdef PRINTING
+        c_int summary_printed;  ///< Has last summary been printed? (true/false)
+        #endif
 } OSQPWorkspace;
 
 

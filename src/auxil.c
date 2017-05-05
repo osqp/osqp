@@ -157,6 +157,7 @@ c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
         return prim_resid;
     } else {
     #endif
+
         // Called from ADMM algorithm (store temporary vector in z_prev)
         mat_vec(work->data->A, work->x, work->z_prev, 0);
         return vec_norm_inf_diff(work->z_prev, work->z, work->data->m);
@@ -378,6 +379,11 @@ void update_info(OSQPWorkspace *work, c_int iter, c_int compute_objective, c_int
 
     #ifndef EMBEDDED
     }
+    #endif
+
+
+    #ifdef PRINTING
+    work->summary_printed = 0;  // The just updated info have not been printed
     #endif
 }
 

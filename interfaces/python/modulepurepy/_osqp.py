@@ -19,7 +19,7 @@ OSQP_DUAL_INFEASIBLE = -4
 OSQP_UNSOLVED = -10
 
 # Printing interval
-PRINT_INTERVAL = 1
+PRINT_INTERVAL = 100
 
 # OSQP Infinity
 OSQP_INFTY = 1e+20
@@ -246,6 +246,8 @@ class priv(object):
                             spspa.eye(work.data.n), work.data.A.T]),
               spspa.hstack([work.data.A,
                            -1./work.settings.rho * spspa.eye(work.data.m)])])
+        # print("KKT")
+        # print(KKT.todense())
 
         # Initialize private structure
         self.kkt_factor = spla.splu(KKT.tocsc())
@@ -360,7 +362,7 @@ class OSQP(object):
             self.version)
         print("              Pure Python Implementation")
         print("     (c) Bartolomeo Stellato, Goran Banjac")
-        print("   University of Oxford  -  Stanford University 2016")
+        print("   University of Oxford  -  Stanford University 2017")
         print("-------------------------------------------------------")
 
         print("Problem:  variables n = %d, constraints m = %d" % \
@@ -482,7 +484,9 @@ class OSQP(object):
             return la.norm(np.maximum(self.work.data.l - self.work.pol.z, 0) +
                            np.maximum(self.work.pol.z - self.work.data.u, 0), np.inf)
         else:
-            return la.norm(self.work.data.A.dot(self.work.x) - self.work.z, np.inf)
+
+            return la.norm(self.work.data.A.dot(self.work.x) - self.work.z,
+                           np.inf)
 
     def compute_dua_res(self, polish):
         """
@@ -835,6 +839,7 @@ class OSQP(object):
 
             # Second step: update x and z
             self.update_x()
+
             self.update_z()
 
             # Third step: update y
