@@ -38,7 +38,7 @@ for f in lst_probs:
     # if f[:-4] == 'CVXQP1_M':
     # if f[:-4] == 'AUG2DCQP':
     # if f[:-4] == 'BOYD1':
-    if f[:-4] == 'AUG2D':
+    # if f[:-4] == 'AUG2D':
     # if f[:-4] == 'AUG2DC':
     # if f[:-4] == 'CONT-101':
     # if f[:-4] == 'CONT-300':
@@ -48,7 +48,7 @@ for f in lst_probs:
         m = load_maros_meszaros_problem(prob_dir + "/" + f)  # Load problem
 
 
-        print("Problem %i (%s): " % (p, f[:-4]), end='')
+        print("%i) %s\t" % (p, f[:-4]), end='')
 
         # Solve problem
         # res = m.solve(solver=mpbpy.OSQP, verbose=True)  # No verbosity
@@ -74,14 +74,6 @@ for f in lst_probs:
         l = m.l
         u = m.u
 
-        P /= np.linalg.norm(m.P.todense())
-
-
-        # q = m.q
-        # P = m.P / (cost_scal)
-        # A = m.A / cost_scal
-        # l = m.l
-        # u = m.u
 
         # # Normalize constraints (TODO: remove)
         # m_constraints = len(m.l)
@@ -129,12 +121,24 @@ for f in lst_probs:
 
         s = osqp.OSQP()
         s.setup(P, q, A, l, u,
-                rho=0.0001,
+                rho=0.1,
                 auto_rho=False,
                 verbose=False,
                 max_iter=2500,
+                # early_terminate_interval=1,
                 scaling=True)
         res = s.solve()
+
+        # Check if pure python implementation gives same results
+        # import osqppurepy
+        # s = osqppurepy.OSQP()
+        # s.setup(P, q, A, l, u,
+        #         rho=0.1,
+        #         auto_rho=False,
+        #         verbose=True,
+        #         max_iter=2500,
+        #         scaling=True)
+        # res = s.solve()
 
         # for rho in np.logspace(-4, 2, 10):
         #     s = osqp.OSQP()
