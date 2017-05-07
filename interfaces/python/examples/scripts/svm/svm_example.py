@@ -97,7 +97,7 @@ def solve_problem(qp_matrices, n_prob, solver='osqp'):
                     rho=0.01,
                     auto_rho=False,
                     polish=False,
-                    verbose=True)
+                    verbose=False)
 
             # Solve
             results = m.solve()
