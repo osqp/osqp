@@ -1,10 +1,5 @@
 """
 Code for Huber example
-
-This script compares:
-    - OSQP
-    - qpOASES
-    - GUROBI
 """
 
 from __future__ import print_function
@@ -13,6 +8,7 @@ from __future__ import division
 import osqp  # Import osqp
 import qpoases as qpoases  # Import qpoases
 import mathprogbasepy as mpbpy  # Mathprogbasepy to benchmark gurobi
+import cvxpy
 
 # Numerics
 import numpy as np
@@ -30,11 +26,11 @@ def gen_qp_matrices(m, n, dens_lvl=0.5):
     """
 
     # Generate data
-    A = spa.random(m, n, density=dens_lvl, format='csc')
+    A_huber = spa.random(m, n, density=dens_lvl, format='csc')
     x_true = np.random.randn(n) / np.sqrt(n)
     ind95 = (np.random.rand(m) < 0.95).astype(float)
-    b = A.dot(x_true) + np.multiply(0.5*np.random.randn(m), ind95) \
-                      + np.multiply(10.*np.random.rand(m), 1. - ind95)
+    b_huber = A_huber.dot(x_true) + np.multiply(0.5*np.random.randn(m), ind95) \
+        + np.multiply(10.*np.random.rand(m), 1. - ind95)
 
     # Construct the problem
     #       minimize	1/2 u.T * u + np.ones(m).T * v
@@ -46,14 +42,18 @@ def gen_qp_matrices(m, n, dens_lvl=0.5):
                         spa.csc_matrix((m, m))), format='csc')
     q = np.append(np.zeros(m + n), np.ones(m))
     A = spa.vstack([
-            spa.hstack([A, Im, Im]),
-            spa.hstack([A, -Im, -Im])]).tocsc()
-    l = np.hstack([b, -np.inf*np.ones(m)])  # Linear constraints
-    u = np.hstack([np.inf*np.ones(m), b])
+            spa.hstack([A_huber, Im, Im]),
+            spa.hstack([A_huber, -Im, -Im])]).tocsc()
+    l = np.hstack([b_huber, -np.inf*np.ones(m)])  # Linear constraints
+    u = np.hstack([np.inf*np.ones(m), b_huber])
     lx = np.zeros(2*m)                      # Bounds on (u,v)
     ux = np.hstack([np.ones(m), np.inf*np.ones(m)])
 
     qp_matrices = utils.QPmatrices(P, q, A, l, u, lx, ux)
+
+    # Add further matrices for CVXPY modeling
+    qp_matrices.A_huber = A_huber
+    qp_matrices.b_huber = b_huber
 
     # Return QP matrices
     return qp_matrices
@@ -93,7 +93,8 @@ def solve_problem(qp_matrices, n_prob, solver='osqp'):
             # Setup OSQP
             m = osqp.OSQP()
             m.setup(qp.P, qp.q, Aosqp, losqp, uosqp,
-                    auto_rho=True,
+                    rho=0.01,
+                    auto_rho=False,
                     polish=False,
                     verbose=False)
 
@@ -178,6 +179,67 @@ def solve_problem(qp_matrices, n_prob, solver='osqp'):
             niter[i] = res.total_iter
             time[i] = res.cputime
 
+    elif solver == 'mosek':
+
+        for i in range(n_prob):
+
+            # Construct qp matrices
+            Amosek = spa.vstack([
+                        qp.A,
+                        spa.hstack([spa.csc_matrix((2*m, n)), spa.eye(2*m)])
+                    ]).tocsc()
+            lmosek = np.hstack([qp.l, qp.lx])
+            umosek = np.hstack([qp.u, qp.ux])
+
+            # Solve with mosek
+            prob = mpbpy.QuadprogProblem(qp.P, qp.q, Amosek, lmosek, umosek)
+            res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
+            niter[i] = res.total_iter
+            time[i] = res.cputime
+
+    elif solver == 'ecos':
+        for i in range(n_prob):
+
+            # Model with CVXPY
+            #       minimize	1/2 u.T * u + np.ones(m).T * v
+            #       subject to  -u - v <= Ax - b <= u + v
+            #                   0 <= u <= 1
+            #                   v >= 0
+            n_var = qp.A_huber.shape[1]
+            m_var = qp.b_huber.shape[0]
+            x = cvxpy.Variable(n_var)
+            u = cvxpy.Variable(m_var)
+            v = cvxpy.Variable(m_var)
+
+            objective = cvxpy.Minimize(.5 * cvxpy.quad_form(u, spa.eye(m_var))
+                                       + np.ones(m_var) * v)
+            constraints = [-u - v <= qp.A_huber * x - qp.b_huber,
+                           qp.A_huber * x - qp.b_huber <= u + v,
+                           0 <= u, u <= 1,
+                           v >= 0]
+            problem = cvxpy.Problem(objective, constraints)
+            problem.solve(solver=cvxpy.ECOS, verbose=False)
+
+
+            # DEBUG: solve with MOSEK
+            # Amosek = spa.vstack([
+            #             qp.A,
+            #             spa.hstack([spa.csc_matrix((2*m, n)), spa.eye(2*m)])
+            #         ]).tocsc()
+            # lmosek = np.hstack([qp.l, qp.lx])
+            # umosek = np.hstack([qp.u, qp.ux])
+            #
+            # # Solve with mosek
+            # prob = mpbpy.QuadprogProblem(qp.P, qp.q, Amosek, lmosek, umosek)
+            # res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
+            # x_mosek = res.x[:n_var]
+
+            # Obtain time and number of iterations
+            time[i] = problem.solver_stats.setup_time + \
+                problem.solver_stats.solve_time
+
+            niter[i] = problem.solver_stats.num_iters
+
     else:
         raise ValueError('Solver not understood')
 
@@ -196,6 +258,7 @@ def run_huber_example():
     # Parameter dimension
     n_vec = np.array([100, 200, 300, 400, 500, 600, 700, 800, 900, 1000])
     # n_vec = np.array([100, 200, 300])
+    # n_vec = np.array([10])
 
     # Data dimension
     m_vec = n_vec * 10
@@ -210,6 +273,10 @@ def run_huber_example():
     qpoases_iter = []
     gurobi_iter = []
     gurobi_timing = []
+    mosek_iter = []
+    mosek_timing = []
+    ecos_iter = []
+    ecos_timing = []
 
     for i in range(len(n_vec)):
         # Generate QP
@@ -230,9 +297,21 @@ def run_huber_example():
         gurobi_timing.append(timing)
         gurobi_iter.append(niter)
 
+        # Solve loop with mosek
+        timing, niter = solve_problem(qp_matrices, n_prob, 'mosek')
+        mosek_timing.append(timing)
+        mosek_iter.append(niter)
+
+        # Solve loop with ecos
+        timing, niter = solve_problem(qp_matrices, n_prob, 'ecos')
+        ecos_timing.append(timing)
+        ecos_iter.append(niter)
+
     solver_timings = OrderedDict([('OSQP', osqp_timing),
                                 #   ('qpOASES', qpoases_timing),
-                                  ('GUROBI', gurobi_timing)])
+                                  ('GUROBI', gurobi_timing),
+                                  ('MOSEK', mosek_timing),
+                                  ('ECOS', ecos_timing)])
 
     utils.generate_plot('huber', 'time', 'mean', n_vec, solver_timings,
                         fig_size=0.9)

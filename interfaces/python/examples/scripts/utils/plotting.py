@@ -55,8 +55,8 @@ def generate_plot(example_name, unit, statistics_name, n_vec, solvers,
     ax = plt.gca()
 
     for (solver_name, solver_stats) in solvers.items():
-        temp_vec = gen_stats_array_vec(statistics_name, solver_stats)
-        plt.semilogy(n_vec, temp_vec, label=solver_name)
+        temp_vec, idx_val = gen_stats_array_vec(statistics_name, solver_stats)
+        plt.semilogy(n_vec[idx_val], temp_vec, label=solver_name)
 
     plt.legend()
     plt.grid()

@@ -13,6 +13,7 @@ from __future__ import division
 import osqp  # Import osqp
 import qpoases as qpoases  # Import qpoases
 import mathprogbasepy as mpbpy  # Mathprogbasepy to benchmark gurobi
+import cvxpy
 
 # Numerics
 import numpy as np
@@ -61,6 +62,11 @@ def gen_qp_matrices(n, m, lambdas, dens_lvl=0.5):
                              ))
 
     qp_matrices = utils.QPmatrices(P, q, A, l, u, lx, ux)
+
+    # Add further matrices for CVXPY modeling
+    qp_matrices.lambdas = lambdas
+    qp_matrices.A_lasso = Ad
+    qp_matrices.b_lasso = bd
     qp_matrices.n = n
     qp_matrices.m = m
 
@@ -95,7 +101,8 @@ def solve_loop(qp_matrices, solver='osqp'):
         # Setup OSQP
         m = osqp.OSQP()
         m.setup(qp.P, qp.q[:, 0], qp.A, qp.l, qp.u,
-                auto_rho=True,
+                rho=0.1,
+                auto_rho=False,
                 polish=False,
                 verbose=False)
 
@@ -176,6 +183,39 @@ def solve_loop(qp_matrices, solver='osqp'):
         # plt.show(block=False)
 
         # import ipdb; ipdb.set_trace()
+
+    elif solver == 'osqp_no_caching':
+
+        for i in range(n_prob):
+
+            # Setup OSQP
+            m = osqp.OSQP()
+            m.setup(qp.P, qp.q[:, i], qp.A, qp.l, qp.u,
+                    rho=0.1,
+                    auto_rho=False,
+                    polish=False,
+                    verbose=False)
+
+            # Solve
+            results = m.solve()
+            x = results.x
+            y = results.y
+            status = results.info.status_val
+            niter[i] = results.info.iter
+            time[i] = results.info.run_time
+
+            # Check if status correct
+            if status != m.constant('OSQP_SOLVED'):
+                import ipdb; ipdb.set_trace()
+                raise ValueError('OSQP did not solve the problem!')
+
+            # DEBUG
+            # solve with gurobi
+            # prob = mpbpy.QuadprogProblem(qp.P, q, Aosqp, losqp, uosqp)
+            # res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
+            # print('Norm difference OSQP-GUROBI %.3e' %
+            #       np.linalg.norm(x - res.x))
+            # import ipdb; ipdb.set_trace()
 
     elif solver == 'qpoases':
 
@@ -266,6 +306,65 @@ def solve_loop(qp_matrices, solver='osqp'):
             # Save number of iterations
             niter[i] = res.total_iter
 
+    elif solver == 'mosek':
+
+        for i in range(n_prob):
+
+            # Get linera cost as contiguous array
+            q = qp.q[:, i]
+
+            # Solve with mosek
+            prob = mpbpy.QuadprogProblem(qp.P, q, qp.A, qp.l, qp.u)
+            res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
+
+            # Save time
+            time[i] = res.cputime
+
+            # Save number of iterations
+            niter[i] = res.total_iter
+
+    elif solver == 'ecos':
+
+        n_var = qp_matrices.A_lasso.shape[1]
+        m_var = qp_matrices.A_lasso.shape[0]
+
+        for i in range(n_prob):
+            if n_var <= 60:  # (problem becomes too big otherwise):
+
+                # Model with CVXPY
+                #       minimize	y' * y + lambda * 1' * t
+                #       subject to  y = Ax - b
+                #                   -t <= x <= t
+                lambda_i = qp_matrices.lambdas[i]
+                x = cvxpy.Variable(n_var)
+                y = cvxpy.Variable(m_var)
+                t = cvxpy.Variable(n_var)
+
+                objective = cvxpy.Minimize(cvxpy.quad_form(y, spa.eye(m_var))
+                                           + lambda_i * np.ones(n_var) * t)
+                constraints = [y == qp_matrices.A_lasso * x - qp_matrices.b_lasso,
+                               -t <= x, x <= t]
+                problem = cvxpy.Problem(objective, constraints)
+                problem.solve(solver=cvxpy.ECOS, verbose=False)
+
+                # DEBUG: Solve with MOSEK
+                q = qp.q[:, i]
+
+                # Solve with mosek
+                # prob = mpbpy.QuadprogProblem(qp.P, q, qp.A, qp.l, qp.u)
+                # res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
+                # x_mosek = res.x[:n_var]
+                # import ipdb; ipdb.set_trace()
+
+                # Obtain time and number of iterations
+                time[i] = problem.solver_stats.setup_time + \
+                    problem.solver_stats.solve_time
+
+                niter[i] = problem.solver_stats.num_iters
+            else:
+                time[i] = 0
+                niter[i] = 0
+
     else:
         raise ValueError('Solver not understood')
 
@@ -295,12 +394,18 @@ def run_lasso_example():
     # Define statistics
     osqp_timing = []
     osqp_iter = []
+    osqp_no_caching_timing = []
+    osqp_no_caching_iter = []
     osqp_coldstart_timing = []
     osqp_coldstart_iter = []
     qpoases_timing = []
     qpoases_iter = []
     gurobi_iter = []
     gurobi_timing = []
+    mosek_iter = []
+    mosek_timing = []
+    ecos_iter = []
+    ecos_timing = []
 
     for i in range(len(n_vec)):
         # Generate QP
@@ -316,6 +421,11 @@ def run_lasso_example():
         osqp_coldstart_timing.append(timing)
         osqp_coldstart_iter.append(niter)
 
+        # Solve loop with osqp (no caching)
+        timing, niter = solve_loop(qp_matrices, 'osqp_no_caching')
+        osqp_no_caching_timing.append(timing)
+        osqp_no_caching_iter.append(niter)
+
         # # Solving loop with qpoases (qpOASES saturates after smallest problem)
         # timing, niter = solve_loop(qp_matrices, 'qpoases')
         # qpoases_timing.append(timing)
@@ -326,16 +436,34 @@ def run_lasso_example():
         gurobi_timing.append(timing)
         gurobi_iter.append(niter)
 
+        # Solve loop with mosek
+        timing, niter = solve_loop(qp_matrices, 'mosek')
+        mosek_timing.append(timing)
+        mosek_iter.append(niter)
+
+        # Solve loop with ecos
+        timing, niter = solve_loop(qp_matrices, 'ecos')
+        ecos_timing.append(timing)
+        ecos_iter.append(niter)
+
+
     solver_timings = OrderedDict([('OSQP (warm start)', osqp_timing),
                                   ('OSQP (cold start)',
                                    osqp_coldstart_timing),
+                                  ('OSQP (no caching)',
+                                   osqp_no_caching_timing),
                                 #   ('qpOASES', qpoases_timing),
-                                  ('GUROBI', gurobi_timing)])
+                                  ('GUROBI', gurobi_timing),
+                                  ('MOSEK', mosek_timing),
+                                  ('ECOS', ecos_timing)])
 
     utils.generate_plot('lasso', 'time', 'median', n_vec,
                         solver_timings,
                         fig_size=0.9)
     utils.generate_plot('lasso', 'time', 'total', n_vec,
+                        solver_timings,
+                        fig_size=0.9)
+    utils.generate_plot('lasso', 'time', 'mean', n_vec,
                         solver_timings,
                         fig_size=0.9)
     #

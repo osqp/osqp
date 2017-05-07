@@ -19,12 +19,18 @@ class Statistics(object):
 
 def gen_stats_array_vec(statistics_name, stats):
     if statistics_name == 'median':
-        out_vec = np.array([x.median for x in stats])
+        out_vec = np.array([x.median for x in stats if x.median != 0])
+        stat_list = [x.median for x in stats]
     elif statistics_name == 'mean':
-        out_vec = np.array([x.mean for x in stats])
+        out_vec = np.array([x.mean for x in stats if x.mean != 0])
+        stat_list = [x.mean for x in stats]
     elif statistics_name == 'total':
-        out_vec = np.array([x.total for x in stats])
+        out_vec = np.array([x.total for x in stats if x.total != 0])
+        stat_list = [x.total for x in stats]
     elif statistics_name == 'max':
-        out_vec = np.array([x.max for x in stats])
+        out_vec = np.array([x.max for x in stats if x.max != 0])
+        stat_list = [x.max for x in stats]
 
-    return out_vec
+    idx_vec = np.array([stat_list.index(x) for x in out_vec if x in stat_list])
+    
+    return out_vec, idx_vec

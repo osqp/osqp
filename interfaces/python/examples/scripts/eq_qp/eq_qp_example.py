@@ -9,6 +9,7 @@ from __future__ import division
 import osqp  # Import osqp
 import qpoases as qpoases  # Import qpoases
 import mathprogbasepy as mpbpy  # Mathprogbasepy to benchmark gurobi
+import cvxpy
 
 # Numerics
 import numpy as np
@@ -83,7 +84,7 @@ def solve_problem(qp_matrices, n_prob, solver='osqp'):
             # Setup OSQP
             m = osqp.OSQP()
             m.setup(qp.P, qp.q, qp.A, qp.l, qp.u,
-                    rho=40,   # Set high rho to enforce feasibility
+                    rho=1000,   # Set high rho to enforce feasibility
                     auto_rho=False,
                     polish=False,
                     verbose=False)
@@ -180,6 +181,36 @@ def solve_problem(qp_matrices, n_prob, solver='osqp'):
             # Save number of iterations
             niter[i] = res.total_iter
 
+    elif solver == 'mosek':
+        for i in range(n_prob):
+
+            # Solve with mosek
+            prob = mpbpy.QuadprogProblem(qp.P, qp.q, qp.A, qp.l, qp.u)
+            res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
+
+            # Save time
+            time[i] = res.cputime
+
+            # Save number of iterations
+            niter[i] = res.total_iter
+
+    elif solver == 'ecos':
+        for i in range(n_prob):
+
+            # Solve with ECOS (via CVXPY)
+            n_var = qp.P.shape[0]
+            x_var = cvxpy.Variable(n_var)
+            objective = cvxpy.Minimize(.5 * cvxpy.quad_form(x_var, qp.P) + qp.q * x_var)
+            constraints = [qp.A * x_var <= qp.u, qp.A * x_var >= qp.l]
+            problem = cvxpy.Problem(objective, constraints)
+            problem.solve(solver=cvxpy.ECOS)
+
+            # Obtain time and number of iterations
+            time[i] = problem.solver_stats.setup_time + \
+                problem.solver_stats.solve_time
+
+            niter[i] = problem.solver_stats.num_iters
+
     else:
         raise ValueError('Solver not understood')
 
@@ -199,6 +230,7 @@ def run_eq_qp_example():
 
     # Dimensions
     n_vec = np.array([100, 200, 300, 400, 500])
+    # n_vec = np.array([400])
 
     # Constraints
     m_vec = (n_vec).astype(int)
@@ -215,6 +247,10 @@ def run_eq_qp_example():
     qpoases_iter = []
     gurobi_iter = []
     gurobi_timing = []
+    mosek_iter = []
+    mosek_timing = []
+    ecos_iter = []
+    ecos_timing = []
 
     for i in range(len(n_vec)):
         # Generate QP
@@ -235,9 +271,21 @@ def run_eq_qp_example():
         gurobi_timing.append(timing)
         gurobi_iter.append(niter)
 
+        # Solve loop with mosek
+        timing, niter = solve_problem(qp_matrices, n_prob, 'mosek')
+        mosek_timing.append(timing)
+        mosek_iter.append(niter)
+
+        # Solve loop with ecos
+        timing, niter = solve_problem(qp_matrices, n_prob, 'ecos')
+        ecos_timing.append(timing)
+        ecos_iter.append(niter)
+
     solver_timings = OrderedDict([('OSQP', osqp_timing),
                                   ('qpOASES', qpoases_timing),
-                                  ('GUROBI', gurobi_timing)])
+                                  ('GUROBI', gurobi_timing),
+                                  ('MOSEK', mosek_timing),
+                                  ('ECOS', ecos_timing)])
 
     utils.generate_plot('eq_qp', 'time', 'mean', n_vec,
                         solver_timings,
