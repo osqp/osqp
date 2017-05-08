@@ -94,7 +94,7 @@ def solve_problem(qp_matrices, n_prob, solver='osqp'):
             # Setup OSQP
             m = osqp.OSQP()
             m.setup(qp.P, qp.q, Aosqp, losqp, uosqp,
-                    rho=0.01,
+                    rho=0.001,
                     auto_rho=False,
                     polish=False,
                     verbose=False)
@@ -254,8 +254,9 @@ def run_svm_example():
     np.random.seed(1)
 
     # Parameter dimension
-    n_vec = np.array([100, 200, 300, 400, 500, 600, 700, 800, 900, 1000])
-    # n_vec = np.array([100, 200, 1000])
+    # n_vec = np.array([100, 200, 300, 400, 500, 600, 700, 800, 900, 1000])
+    # n_vec = np.array([100, 200, 300])
+    n_vec = np.array([800, 900, 1000])
 
     # Factors
     m_vec = n_vec * 10
