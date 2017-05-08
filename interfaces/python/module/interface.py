@@ -113,6 +113,12 @@ class OSQP(object):
                  "(compressed sparse column) matrix. (It may take a while...)")
             A = A.tocsc()
 
+        # Check if P an A have sorted indeces
+        if not P.has_sorted_indices:
+            P.sort_indices()
+        if not A.has_sorted_indices:
+            A.sort_indices()
+
         # Convert infinity values to OSQP Infinity
         u = np.minimum(u, self._model.constant('OSQP_INFTY'))
         l = np.maximum(l, -self._model.constant('OSQP_INFTY'))

@@ -38,15 +38,14 @@ void vec_add_scalar(c_float *a, c_float sc, c_int n);
 void vec_mult_scalar(c_float *a, c_float sc, c_int n);
 
 
-
-/* ||a - b||^2 */
-c_float vec_norm2_sq_diff(const c_float *a, const c_float *b, c_int l);
-
 /* a += sc*b */
 void vec_add_scaled(c_float *a, const c_float *b, c_int n, c_float sc);
 
-/* ||v||_2^2 */
-c_float vec_norm2_sq(const c_float *v, c_int l);
+/* ||v||_inf */
+c_float vec_norm_inf(const c_float *v, c_int l);
+
+/* ||a - b||_inf */
+c_float vec_norm_inf_diff(const c_float *a, const c_float *b, c_int l);
 
 
 /* Vector elementwise reciprocal b = 1./a (needed for scaling)*/

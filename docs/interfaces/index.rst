@@ -9,3 +9,4 @@ Interfaces
    python.rst
    matlab.rst
    solver_settings.rst
+   status_values.rst

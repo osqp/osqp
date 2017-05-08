@@ -156,6 +156,7 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     #ifdef PRINTING
     if (work->settings->verbose)
         print_setup_header(work->data, work->settings);
+        work->summary_printed = 0; // Initialize last summary  to not printed
     #endif
 
     return work;
@@ -256,7 +257,7 @@ c_int osqp_solve(OSQPWorkspace * work){
 
             if (can_print){
                 // Print summary
-                print_summary(work->info);
+                print_summary(work);
             }
 
             // Check algorithm termination
@@ -296,7 +297,7 @@ c_int osqp_solve(OSQPWorkspace * work){
         /* Print summary */
         #ifdef PRINTING
         if (work->settings->verbose)
-            print_summary(work->info);
+            print_summary(work);
         #endif
 
         /* Check whether a termination criterion is triggered */
@@ -311,10 +312,9 @@ c_int osqp_solve(OSQPWorkspace * work){
 
     /* Print summary for last iteration */
     #ifdef PRINTING
-    if (work->settings->verbose
-        && iter % PRINT_INTERVAL != 0 && iter != 1
-        && iter != work->settings->max_iter + 1)
-        print_summary(work->info);
+    if (work->settings->verbose && !work->summary_printed){
+        print_summary(work);
+    }
     #endif
 
     /* if max iterations reached, change status accordingly */

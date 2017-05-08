@@ -133,12 +133,15 @@ def write_scaling(f, scaling, name):
     Write scaling structure during code generation
     """
     f.write("// Define scaling structure\n")
-    write_vec(f, scaling['D'], 'Dscaling', 'c_float')
-    write_vec(f, scaling['Dinv'], 'Dinvscaling', 'c_float')
-    write_vec(f, scaling['E'], 'Escaling', 'c_float')
-    write_vec(f, scaling['Einv'], 'Einvscaling', 'c_float')
-    f.write("OSQPScaling %s = " % name)
-    f.write("{Dscaling, Escaling, Dinvscaling, Einvscaling};\n\n")
+    if scaling is not None:
+        write_vec(f, scaling['D'], 'Dscaling', 'c_float')
+        write_vec(f, scaling['Dinv'], 'Dinvscaling', 'c_float')
+        write_vec(f, scaling['E'], 'Escaling', 'c_float')
+        write_vec(f, scaling['Einv'], 'Einvscaling', 'c_float')
+        f.write("OSQPScaling %s = " % name)
+        f.write("{Dscaling, Escaling, Dinvscaling, Einvscaling};\n\n")
+    else:
+        f.write("OSQPScaling %s;\n\n" % name)
 
 
 def write_private(f, priv, name, embedded_flag):
@@ -242,11 +245,6 @@ def render_workspace(variables, output):
     f.write("#include \"types.h\"\n")
     f.write("#include \"constants.h\"\n")
     f.write("#include \"private.h\"\n\n")
-
-    # Redefine type of structure in private
-    f.write("// Redefine type of the structure in private\n")
-    f.write("// N.B. Making sure the right amount of memory is allocated\n")
-    f.write("typedef struct c_priv Priv;\n\n")
 
     '''
     Write data structure

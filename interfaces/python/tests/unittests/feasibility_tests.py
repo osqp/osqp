@@ -36,6 +36,7 @@ class feasibility_tests(unittest.TestCase):
                      'scaling_norm': 2,
                      'scaling_iter': 3,
                      'alpha': 1.6,
+                     'auto_rho': False,
                      'max_iter': 5000,
                      'polish': False,
                      'warm_start': True,

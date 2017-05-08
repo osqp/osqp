@@ -52,19 +52,30 @@ then no build files are generated.
 
 Mex interface
 -------------
-Once the code is generated the following functions are provided through its mex interface
+Once the code is generated the following functions are provided through its mex interface. Each function is called as
+
+.. code:: matlab
+
+    emosqp('function_name');
 
 
-.. function:: solve
+where :code:`emosqp` is the name of the mex interface specified in the previous section
+
+.. function:: emosqp('solve')
    :noindex:
 
    Solve the problem.
 
-   :return: Primal solution, dual solution, status value,
-            number of iteration, runtime
+   :returns: multiple variables [x, y, status_val, iter, run_time]
+
+             - **x** (*ndarray*) - Primal solution
+             - **y** (*ndarray*) - Dual solution
+             - **status_val** (*int*) - Status value as in :ref:`status_values`
+             - **iter** (*int*) - Number of iterations
+             - **run_time** (*double*) - Run time
 
 
-.. function:: update_lin_cost(q_new)
+.. function:: emosqp('update_lin_cost', q_new)
    :noindex:
 
    Update linear cost.
@@ -72,7 +83,7 @@ Once the code is generated the following functions are provided through its mex 
    :param ndarray q_new: New linear cost vector
 
 
-.. function:: update_lower_bound(l_new)
+.. function:: emosqp('update_lower_bound', l_new)
    :noindex:
 
    Update lower bound in the constraints.
@@ -80,7 +91,7 @@ Once the code is generated the following functions are provided through its mex 
    :param ndarray l_new: New lower bound vector
 
 
-.. function:: update_upper_bound(u_new)
+.. function:: emosqp('update_upper_bound', u_new)
    :noindex:
 
    Update upper bound in the constraints.
@@ -88,7 +99,7 @@ Once the code is generated the following functions are provided through its mex 
    :param ndarray u_new: New upper bound vector
 
 
-.. function:: update_bounds(l_new, u_new)
+.. function:: emosqp('update_bounds', l_new, u_new)
    :noindex:
 
    Update lower and upper bounds in the constraints.
@@ -96,33 +107,12 @@ Once the code is generated the following functions are provided through its mex 
    :param ndarray l_new: New lower bound vector
    :param ndarray u_new: New upper bound vector
 
-.. +------------------------------+----------------------+-------------------------------------------+
-.. | Function                     | Input arguments      | Output structure                          |
-.. +==============================+======================+===========================================+
-.. | :code:`solve`                | None                 | :code:`[x, y, status_val, iter, runtime]` |
-.. +------------------------------+----------------------+-------------------------------------------+
-.. | :code:`update_lin_cost`      | :code:`q_new`        | None                                      |
-.. +------------------------------+----------------------+-------------------------------------------+
-.. | :code:`update_lower_bound`   | :code:`l_new`        | None                                      |
-.. +------------------------------+----------------------+-------------------------------------------+
-.. | :code:`update_upper_bound`   | :code:`u_new`        | None                                      |
-.. +------------------------------+----------------------+-------------------------------------------+
-.. | :code:`update_bounds`        | :code:`l_new, u_new` | None                                      |
-.. +------------------------------+----------------------+-------------------------------------------+
 
-You can update bounds :math:`l` and :math:`u` and solve the updated problem by
-running
-
-.. code:: matlab
-
-    emosqp('update_bounds', l_new, u_new);
-    [x, y, status_val, numiter, runtime] = emosqp('solve');
-
-In addition, if the code is generated with the option :code:`parameters` set to
+If the code is generated with the option :code:`parameters` set to
 :code:`'matrices'`, then the following functions are also provided
 
 
-.. function:: update_P(Px, Px_idx, Px_n)
+.. function:: emosqp('update_P', Px, Px_idx, Px_n)
    :noindex:
 
    Update nonzero entries of the quadratic cost matrix.
@@ -134,7 +124,7 @@ In addition, if the code is generated with the option :code:`parameters` set to
                    :code:`[]`.
 
 
-.. function:: update_A(Ax, Ax_idx, Ax_n)
+.. function:: emosqp('update_A', Ax, Ax_idx, Ax_n)
    :noindex:
 
    Update nonzero entries of the constraint matrix.
@@ -146,7 +136,7 @@ In addition, if the code is generated with the option :code:`parameters` set to
                    :code:`[]`.
 
 
-.. function:: update_P_A(Px, Px_idx, Px_n, Ax, Ax_idx, Ax_n)
+.. function:: emosqp('update_P_A', Px, Px_idx, Px_n, Ax, Ax_idx, Ax_n)
    :noindex:
 
    Update nonzero entries of the quadratic cost and constraint matrices.
@@ -162,16 +152,6 @@ In addition, if the code is generated with the option :code:`parameters` set to
    :param int Ax_n: Number of entries to be updated. Used only if Ax_idx is not
                    :code:`[]`.
 
-
-.. +------------------------------------+--------------------------------------------+-------------------+
-.. | Function                           | Input arguments                            | Output structure  |
-.. +====================================+============================================+===================+
-.. | :code:`update_P`                   | :code:`Px, Px_idx, Px_n`                   | None              |
-.. +------------------------------------+--------------------------------------------+-------------------+
-.. | :code:`update_A`                   | :code:`Ax, Ax_idx, Ax_n`                   | None              |
-.. +------------------------------------+--------------------------------------------+-------------------+
-.. | :code:`update_P_A`                 | :code:`Px, Px_idx, Px_n, Ax, Ax_idx, Ax_n` | None              |
-.. +------------------------------------+--------------------------------------------+-------------------+
 
 You can update all the nonzero entries in matrix :math:`A` by running
 

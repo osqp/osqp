@@ -270,7 +270,7 @@ c_int polish(OSQPWorkspace *work) {
             // Print summary
             #ifdef PRINTING
             if (work->settings->verbose)
-                print_polish(work->info);
+                print_polish(work);
             #endif
 
     } else { // Polishing failed

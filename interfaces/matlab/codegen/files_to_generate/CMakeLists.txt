@@ -85,7 +85,7 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
 
 # Include math library if EMBEDDED != 1
-if(EMBEDDED NOT EQUAL 1)
+if(NOT(EMBEDDED EQUAL 1))
     set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")
 endif()
 # Include real time library in linux

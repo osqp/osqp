@@ -14,8 +14,8 @@ static char * test_constr_sparse_mat(){
 
     // Compute norm of the elementwise difference with
     mu_assert("Linear algebra tests: error in constructing sparse/dense matrix!",
-    vec_norm2_sq_diff(Adns, data->test_sp_matrix_Adns,
-                      data->test_sp_matrix_A->m*data->test_sp_matrix_A->n) < TESTS_TOL*TESTS_TOL);
+    vec_norm_inf_diff(Adns, data->test_sp_matrix_Adns,
+                      data->test_sp_matrix_A->m*data->test_sp_matrix_A->n) < TESTS_TOL);
 
     // Free memory
     c_free(Adns); // because of vars from file matrices.h
@@ -25,32 +25,33 @@ static char * test_constr_sparse_mat(){
 }
 
 static char * test_vec_operations(){
-    c_float norm_sq, vecprod; // normInf;
+    c_float norm_sq;
+    c_float norm_inf, vecprod; // normInf;
     c_float * ew_reciprocal;
     c_float * add_scaled;
 
     lin_alg_sols_data *  data = generate_problem_lin_alg_sols_data();
 
-    // Norm of the difference
-    mu_assert("Linear algebra tests: error in vector operation, squared norm of difference",
-              c_absval(vec_norm2_sq_diff(data->test_vec_ops_v1, data->test_vec_ops_v2, data->test_vec_ops_n) - data->test_vec_ops_norm2_sq_diff) < TESTS_TOL*TESTS_TOL);
 
     // Add scaled
     add_scaled = vec_copy(data->test_vec_ops_v1, data->test_vec_ops_n);
     vec_add_scaled(add_scaled, data->test_vec_ops_v2, data->test_vec_ops_n, data->test_vec_ops_sc);
-    mu_assert("Linear algebra tests: error in vector operation, adding scaled vector",
-              vec_norm2_sq_diff(add_scaled, data->test_vec_ops_add_scaled, data->test_vec_ops_n) < TESTS_TOL*TESTS_TOL);
+    mu_assert("Linear algebra tests: error in vector operation, adding scaled vector", vec_norm_inf_diff(add_scaled, data->test_vec_ops_add_scaled, data->test_vec_ops_n) < TESTS_TOL);
 
-    // Squared norm
-    norm_sq = vec_norm2_sq(data->test_vec_ops_v1, data->test_vec_ops_n);
-    mu_assert("Linear algebra tests: error in vector operation, squared norm",
-                c_absval(norm_sq - data->test_vec_ops_norm2_sq) < TESTS_TOL*TESTS_TOL);
+    // Norm_inf of the difference
+    mu_assert("Linear algebra tests: error in vector operation, norm_inf of difference",
+      c_absval(vec_norm_inf_diff(data->test_vec_ops_v1, data->test_vec_ops_v2, data->test_vec_ops_n) - data->test_vec_ops_norm_inf_diff) < TESTS_TOL);
+
+    // norm_inf
+    norm_inf = vec_norm_inf(data->test_vec_ops_v1, data->test_vec_ops_n);
+    mu_assert("Linear algebra tests: error in vector operation, norm_inf",
+              c_absval(norm_inf - data->test_vec_ops_norm_inf) < TESTS_TOL);
 
     // Elementwise reciprocal
     ew_reciprocal = (c_float *)c_malloc(data->test_vec_ops_n * sizeof(c_float));
     vec_ew_recipr(data->test_vec_ops_v1, ew_reciprocal, data->test_vec_ops_n);
     mu_assert("Linear algebra tests: error in vector operation, elementwise reciprocal",
-              vec_norm2_sq_diff(ew_reciprocal, data->test_vec_ops_ew_reciprocal, data->test_vec_ops_n) < TESTS_TOL*TESTS_TOL);
+              vec_norm_inf_diff(ew_reciprocal, data->test_vec_ops_ew_reciprocal, data->test_vec_ops_n) < TESTS_TOL);
 
 
     // Vector product
@@ -144,30 +145,30 @@ static char * test_mat_vec_multiplication(){
     // Matrix-vector multiplication:  y = Ax
     mat_vec(data->test_mat_vec_A, data->test_mat_vec_x, Ax, 0);
     mu_assert("Linear algebra tests: error in matrix-vector operation, matrix-vector multiplication",
-              vec_norm2_sq_diff(Ax, data->test_mat_vec_Ax, data->test_mat_vec_m) < TESTS_TOL*TESTS_TOL);
+              vec_norm_inf_diff(Ax, data->test_mat_vec_Ax, data->test_mat_vec_m) < TESTS_TOL);
 
     // Cumulative matrix-vector multiplication:  y += Ax
     Ax_cum = vec_copy(data->test_mat_vec_y, data->test_mat_vec_m);
     mat_vec(data->test_mat_vec_A, data->test_mat_vec_x, Ax_cum, 1);
     mu_assert("Linear algebra tests: error in matrix-vector operation, cumulative matrix-vector multiplication",
-              vec_norm2_sq_diff(Ax_cum, data->test_mat_vec_Ax_cum, data->test_mat_vec_m) < TESTS_TOL*TESTS_TOL);
+              vec_norm_inf_diff(Ax_cum, data->test_mat_vec_Ax_cum, data->test_mat_vec_m) < TESTS_TOL);
 
     // Matrix-transpose-vector multiplication:  x = A'*y
     mat_tpose_vec(data->test_mat_vec_A, data->test_mat_vec_y, ATy, 0, 0);
     mu_assert("Linear algebra tests: error in matrix-vector operation, matrix-transpose-vector multiplication",
-              vec_norm2_sq_diff(ATy, data->test_mat_vec_ATy, data->test_mat_vec_n) < TESTS_TOL*TESTS_TOL);
+              vec_norm_inf_diff(ATy, data->test_mat_vec_ATy, data->test_mat_vec_n) < TESTS_TOL);
 
     // Cumulative matrix-transpose-vector multiplication:  x += A'*y
     ATy_cum = vec_copy(data->test_mat_vec_x, data->test_mat_vec_n);
     mat_tpose_vec(data->test_mat_vec_A, data->test_mat_vec_y, ATy_cum, 1, 0);
     mu_assert("Linear algebra tests: error in matrix-vector operation, cumulative matrix-transpose-vector multiplication",
-              vec_norm2_sq_diff(ATy_cum, data->test_mat_vec_ATy_cum, data->test_mat_vec_n) < TESTS_TOL*TESTS_TOL);
+              vec_norm_inf_diff(ATy_cum, data->test_mat_vec_ATy_cum, data->test_mat_vec_n) < TESTS_TOL);
 
     // Symmetric-matrix-vector multiplication (only upper part is stored)
     mat_vec(data->test_mat_vec_Pu, data->test_mat_vec_x, Px, 0);           // upper traingular part
     mat_tpose_vec(data->test_mat_vec_Pu, data->test_mat_vec_x, Px, 1, 1);  // lower traingular part (without diagonal)
     mu_assert("Linear algebra tests: error in matrix-vector operation, symmetric matrix-vector multiplication",
-              vec_norm2_sq_diff(Px, data->test_mat_vec_Px, data->test_mat_vec_n) < TESTS_TOL*TESTS_TOL);
+              vec_norm_inf_diff(Px, data->test_mat_vec_Px, data->test_mat_vec_n) < TESTS_TOL);
 
 
     // Cumulative symmetric-matrix-vector multiplication
@@ -175,7 +176,7 @@ static char * test_mat_vec_multiplication(){
     mat_vec(data->test_mat_vec_Pu, data->test_mat_vec_x, Px_cum, 1);           // upper traingular part
     mat_tpose_vec(data->test_mat_vec_Pu, data->test_mat_vec_x, Px_cum, 1, 1);  // lower traingular part (without diagonal)
     mu_assert("Linear algebra tests: error in matrix-vector operation, cumulative symmetric matrix-vector multiplication",
-              vec_norm2_sq_diff(Px_cum, data->test_mat_vec_Px_cum, data->test_mat_vec_n) < TESTS_TOL*TESTS_TOL);
+              vec_norm_inf_diff(Px_cum, data->test_mat_vec_Px_cum, data->test_mat_vec_n) < TESTS_TOL);
 
 
     // cleanup

@@ -17,4 +17,4 @@ int main(int argc, char **argv) {
     printf("Dual residual:         %.4e\n", (&workspace)->info->dua_res);
 
     return 0;
-};
+}

@@ -99,7 +99,6 @@ csc * form_KKT(const csc * P, const  csc * A, c_float scalar1, c_float scalar2,
         zKKT++;
     }
 
-
     // Allocate number of nonzeros
     KKT_trip->nz = zKKT;
 

@@ -74,7 +74,7 @@ class lasso(QPExample):
             uA = np.append(np.zeros(n), np.inf * np.ones(n))
         elif version == 'sparse':
             #       minimize	y.T * y + gamma * np.ones(n).T * t
-            #       subject to  y = Ax
+            #       subject to  y = Ax - b
             #                   -t <= x <= t
             P = spspa.block_diag((spspa.csc_matrix((n, n)), 2*spspa.eye(m),
                                   spspa.csc_matrix((n, n))), format='csc')

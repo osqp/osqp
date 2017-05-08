@@ -15,31 +15,38 @@
 
 
  static PyObject *OSQP_get_scaling(OSQP *self){
-     npy_intp n = (npy_intp)self->workspace->data->n;  // Dimensions in R^n
-     npy_intp m = (npy_intp)self->workspace->data->m;  // Dimensions in R^m
 
-     int float_type = get_float_type();
 
-     PyObject *return_dict;
+     if(self->workspace->settings->scaling) { // if scaling enabled
+         npy_intp n = (npy_intp)self->workspace->data->n;  // Dimensions in R^n
+         npy_intp m = (npy_intp)self->workspace->data->m;  // Dimensions in R^m
 
-     /* Build Arrays. */
-     OSQPScaling *scaling = self->workspace->scaling;
-     PyObject *D    = PyArray_SimpleNewFromData(1, &n, float_type, scaling->D);
-     PyObject *E    = PyArray_SimpleNewFromData(1, &m, float_type, scaling->E);
-     PyObject *Dinv = PyArray_SimpleNewFromData(1, &n, float_type, scaling->Dinv);
-     PyObject *Einv = PyArray_SimpleNewFromData(1, &m, float_type, scaling->Einv);
+         int float_type = get_float_type();
 
-     /* Change data ownership. */
-     PyArray_ENABLEFLAGS((PyArrayObject *) D, NPY_ARRAY_OWNDATA);
-     PyArray_ENABLEFLAGS((PyArrayObject *) E, NPY_ARRAY_OWNDATA);
-     PyArray_ENABLEFLAGS((PyArrayObject *) Dinv, NPY_ARRAY_OWNDATA);
-     PyArray_ENABLEFLAGS((PyArrayObject *) Einv, NPY_ARRAY_OWNDATA);
+         PyObject *return_dict;
 
-     /* Build Python dictionary. */
-     return_dict = Py_BuildValue("{s:O,s:O,s:O,s:O}",
-                                 "D", D, "E", E, "Dinv", Dinv, "Einv", Einv);
+         /* Build Arrays. */
+         OSQPScaling *scaling = self->workspace->scaling;
+         PyObject *D    = PyArray_SimpleNewFromData(1, &n, float_type, scaling->D);
+         PyObject *E    = PyArray_SimpleNewFromData(1, &m, float_type, scaling->E);
+         PyObject *Dinv = PyArray_SimpleNewFromData(1, &n, float_type, scaling->Dinv);
+         PyObject *Einv = PyArray_SimpleNewFromData(1, &m, float_type, scaling->Einv);
 
-     return return_dict;
+         /* Change data ownership. */
+         PyArray_ENABLEFLAGS((PyArrayObject *) D, NPY_ARRAY_OWNDATA);
+         PyArray_ENABLEFLAGS((PyArrayObject *) E, NPY_ARRAY_OWNDATA);
+         PyArray_ENABLEFLAGS((PyArrayObject *) Dinv, NPY_ARRAY_OWNDATA);
+         PyArray_ENABLEFLAGS((PyArrayObject *) Einv, NPY_ARRAY_OWNDATA);
+
+         /* Build Python dictionary. */
+         return_dict = Py_BuildValue("{s:O,s:O,s:O,s:O}",
+                                     "D", D, "E", E, "Dinv", Dinv, "Einv", Einv);
+
+         return return_dict;
+    } else { // Scaling disabled. Return None
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
  }
 
 
@@ -206,7 +213,6 @@ static PyObject *OSQP_get_workspace(OSQP *self){
                                            "priv", priv_py,
                                            "scaling", scaling_py,
                                            "settings", settings_py);
-     // TODO do we have to decref things here?
      return return_dict;
 }
 

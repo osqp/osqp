@@ -8,11 +8,6 @@ fprintf(f, '#include \"types.h\"\n');
 fprintf(f, '#include \"constants.h\"\n');
 fprintf(f, '#include \"private.h\"\n\n');
 
-% Redefine type of structure in private
-fprintf(f, '// Redefine type of the structure in private\n');
-fprintf(f, '// N.B. Making sure the right amount of memory is allocated\n');
-fprintf(f, 'typedef struct c_priv Priv;\n\n');
-
 % Write data structure
 write_data(f, work.data);
 
@@ -33,7 +28,7 @@ write_info(f);
 
 % Define workspace structure
 write_workspace(f, work.data.n, work.data.m);
-    
+
 fclose(f);
 
 end
@@ -100,13 +95,18 @@ function write_scaling( f, scaling )
 %WRITE_SCALING Write scaling structure to file.
 
 fprintf(f, '// Define scaling structure\n');
-write_vec(f, scaling.D,    'Dscaling',    'c_float');
-write_vec(f, scaling.Dinv, 'Dinvscaling', 'c_float');
-write_vec(f, scaling.E,    'Escaling',    'c_float');
-write_vec(f, scaling.Einv, 'Einvscaling', 'c_float');
-fprintf(f, 'OSQPScaling scaling = ');
-fprintf(f, '{Dscaling, Escaling, Dinvscaling, Einvscaling};\n\n');
 
+if ~isempty(scaling)
+    write_vec(f, scaling.D,    'Dscaling',    'c_float');
+    write_vec(f, scaling.Dinv, 'Dinvscaling', 'c_float');
+    write_vec(f, scaling.E,    'Escaling',    'c_float');
+    write_vec(f, scaling.Einv, 'Einvscaling', 'c_float');
+    fprintf(f, 'OSQPScaling scaling = ');
+    fprintf(f, '{Dscaling, Escaling, Dinvscaling, Einvscaling};\n\n');
+else
+    fprintf(f, 'OSQPScaling scaling;\n\n');
+end
+    
 end
 
 
