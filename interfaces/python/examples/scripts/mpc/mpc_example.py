@@ -17,10 +17,9 @@ import mathprogbasepy as mpbpy  # Mathprogbasepy to benchmark gurobi
 # Numerics
 import numpy as np
 import scipy.sparse as spa
-import scipy.linalg as spla
 
 # Pandas
-from collections import OrderedDict, namedtuple
+from collections import OrderedDict
 
 # Import examples utilities
 from .. import utils
@@ -75,8 +74,8 @@ def gen_qp_matrices(problem):
 
     # Bounds on x
     if len(problem.xmin) > 0:
-        lx = np.append(lx, np.tile(problem.xmin, N+1))
-        ux = np.append(ux, np.tile(problem.xmax, N+1))
+        lx = np.append(np.tile(problem.xmin, N+1), lx)
+        ux = np.append(np.tile(problem.xmax, N+1), ux)
 
     # Return QP matrices
     qp_matrices = utils.QPmatrices(P, q, A, l, u, lx, ux)
@@ -125,9 +124,9 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
         # Setup OSQP
         m = osqp.OSQP()
         m.setup(qp.P, qp.q, Aosqp, losqp, uosqp,
-                #auto_rho=True,
+                # auto_rho=True,
                 auto_rho=False,
-                rho=0.1,
+                rho=1e-2,
                 max_iter=2500,
                 polish=False,
                 verbose=False)
@@ -371,7 +370,6 @@ def run_mpc_example(example_name):
     else:
         problem = load_ball_data()  # Default data
 
-
     # Simulation steps
     nsim = 100
 
@@ -379,10 +377,10 @@ def run_mpc_example(example_name):
     N_vec = np.array([10, 20])
 
     # Define statistics for osqp, qpoases and gurobi
-    osqp_timing = []
-    osqp_iter = []
-    osqp_coldstart_timing = []
-    osqp_coldstart_iter = []
+    # osqp_timing = []
+    # osqp_iter = []
+    # osqp_coldstart_timing = []
+    # osqp_coldstart_iter = []
     # qpoases_timing = []
     # qpoases_iter = []
     gurobi_iter = []
@@ -395,15 +393,15 @@ def run_mpc_example(example_name):
         problem.N = N_vec[i]
         qp_matrices = gen_qp_matrices(problem)
 
-        # Solve loop with osqp
-        timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp')
-        osqp_timing.append(timing)
-        osqp_iter.append(niter)
+        # # Solve loop with osqp
+        # timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp')
+        # osqp_timing.append(timing)
+        # osqp_iter.append(niter)
 
-        # Solve loop with osqp (coldstart)
-        timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp_coldstart')
-        osqp_coldstart_timing.append(timing)
-        osqp_coldstart_iter.append(niter)
+        # # Solve loop with osqp (coldstart)
+        # timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp_coldstart')
+        # osqp_coldstart_timing.append(timing)
+        # osqp_coldstart_iter.append(niter)
 
         # # Solving loop with qpoases
         # timing, niter = solve_loop(qp_matrices, 'qpoases')
@@ -420,11 +418,13 @@ def run_mpc_example(example_name):
         mosek_timing.append(timing)
         mosek_iter.append(niter)
 
-    solver_timings = OrderedDict([('OSQP (warm start)', osqp_timing),
-                                  ('OSQP (cold start)', osqp_coldstart_timing),
+    solver_timings = OrderedDict([
+                                  # ('OSQP (warm start)', osqp_timing),
+                                  # ('OSQP (cold start)', osqp_coldstart_timing),
                                   # ('qpOASES', qpoases_timing),
                                   ('GUROBI', gurobi_timing),
-                                  ('MOSEK', mosek_timing)])
+                                  ('MOSEK', mosek_timing)
+                                  ])
 
     utils.generate_plot('mpc', 'time', 'median', N_vec, solver_timings,
                         fig_size=0.9, plot_name=problem.name)
