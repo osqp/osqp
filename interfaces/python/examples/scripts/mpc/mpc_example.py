@@ -17,10 +17,9 @@ import mathprogbasepy as mpbpy  # Mathprogbasepy to benchmark gurobi
 # Numerics
 import numpy as np
 import scipy.sparse as spa
-import scipy.linalg as spla
 
 # Pandas
-from collections import OrderedDict, namedtuple
+from collections import OrderedDict
 
 # Import examples utilities
 from .. import utils
@@ -75,8 +74,8 @@ def gen_qp_matrices(problem):
 
     # Bounds on x
     if len(problem.xmin) > 0:
-        lx = np.append(lx, np.tile(problem.xmin, N+1))
-        ux = np.append(ux, np.tile(problem.xmax, N+1))
+        lx = np.append(np.tile(problem.xmin, N+1), lx)
+        ux = np.append(np.tile(problem.xmax, N+1), ux)
 
     # Return QP matrices
     qp_matrices = utils.QPmatrices(P, q, A, l, u, lx, ux)
@@ -125,9 +124,9 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
         # Setup OSQP
         m = osqp.OSQP()
         m.setup(qp.P, qp.q, Aosqp, losqp, uosqp,
-                #auto_rho=True,
+                # auto_rho=True,
                 auto_rho=False,
-                rho=0.1,
+                rho=1e-2,
                 max_iter=2500,
                 polish=False,
                 verbose=False)
@@ -317,9 +316,9 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
             # Solve with gurobi
             prob = mpbpy.QuadprogProblem(qp.P, qp.q, Agurobi, lgurobi, ugurobi)
             if solver == 'gurobi':
-                res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
+                res = prob.solve(solver=mpbpy.CPLEX, verbose=False)
             else:
-                res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
+                res = prob.solve(solver=mpbpy.MOSEK, verbose=True)
 
             # Save time and number of iterations
             time[i] = res.cputime
@@ -330,6 +329,32 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
             if status != 'optimal':
                 import ipdb; ipdb.set_trace()
                 raise ValueError('Gurobi did not solve the problem!')
+
+            # Plot the computed control action
+            if i == 0:
+                x_sim = np.zeros((N+1, nx))
+                u_sim = np.zeros((N, nu))
+                x_sim[0] = x0
+                u = res.x[-N*nu:]
+
+                for j in range(N):
+                    u_sim[j] = u[j*nu:(j+1)*nu]
+                    x_sim[j+1] = problem.A.dot(x_sim[j]) + problem.B.dot(u_sim[j])
+
+                import matplotlib.pylab as plt
+                plt.figure(1)
+                plt.step(np.arange(N), u_sim.T[0], label='input1')
+                plt.step(np.arange(N), u_sim.T[1], label='input2')
+                plt.show(block=False)
+
+                plt.figure(2)
+                plt.plot(np.arange(N+1), x_sim.T[0], label='x1')
+                plt.plot(np.arange(N+1), x_sim.T[1], label='x2')
+                plt.plot(np.arange(N+1), x_sim.T[2], label='x3')
+                plt.plot(np.arange(N+1), x_sim.T[3], label='x4')
+                plt.plot(np.arange(N+1), x_sim.T[4], label='x5')
+                plt.plot(np.arange(N+1), x_sim.T[5], label='x6')
+                plt.show(block=False)
 
             # Apply first control input to the plant
             u = res.x[-N*nu:-(N-1)*nu]
@@ -371,12 +396,11 @@ def run_mpc_example(example_name):
     else:
         problem = load_ball_data()  # Default data
 
-
     # Simulation steps
-    nsim = 100
+    nsim = 1
 
     # Prediction horizon
-    N_vec = np.array([10, 20])
+    N_vec = np.array([20])
 
     # Define statistics for osqp, qpoases and gurobi
     osqp_timing = []
@@ -395,15 +419,15 @@ def run_mpc_example(example_name):
         problem.N = N_vec[i]
         qp_matrices = gen_qp_matrices(problem)
 
-        # Solve loop with osqp
-        timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp')
-        osqp_timing.append(timing)
-        osqp_iter.append(niter)
+        # # Solve loop with osqp
+        # timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp')
+        # osqp_timing.append(timing)
+        # osqp_iter.append(niter)
 
-        # Solve loop with osqp (coldstart)
-        timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp_coldstart')
-        osqp_coldstart_timing.append(timing)
-        osqp_coldstart_iter.append(niter)
+        # # Solve loop with osqp (coldstart)
+        # timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp_coldstart')
+        # osqp_coldstart_timing.append(timing)
+        # osqp_coldstart_iter.append(niter)
 
         # # Solving loop with qpoases
         # timing, niter = solve_loop(qp_matrices, 'qpoases')
@@ -415,20 +439,22 @@ def run_mpc_example(example_name):
         gurobi_timing.append(timing)
         gurobi_iter.append(niter)
 
-        # Solve loop with mosek
-        timing, niter = solve_loop(qp_matrices, problem, nsim, 'mosek')
-        mosek_timing.append(timing)
-        mosek_iter.append(niter)
+        # # Solve loop with mosek
+        # timing, niter = solve_loop(qp_matrices, problem, nsim, 'mosek')
+        # mosek_timing.append(timing)
+        # mosek_iter.append(niter)
 
-    solver_timings = OrderedDict([('OSQP (warm start)', osqp_timing),
-                                  ('OSQP (cold start)', osqp_coldstart_timing),
+    solver_timings = OrderedDict([
+                                  # ('OSQP (warm start)', osqp_timing),
+                                  # ('OSQP (cold start)', osqp_coldstart_timing),
                                   # ('qpOASES', qpoases_timing),
                                   ('GUROBI', gurobi_timing),
-                                  ('MOSEK', mosek_timing)])
-
-    utils.generate_plot('mpc', 'time', 'median', N_vec, solver_timings,
-                        fig_size=0.9, plot_name=problem.name)
-    utils.generate_plot('mpc', 'time', 'total', N_vec, solver_timings,
-                        fig_size=0.9, plot_name=problem.name)
-    utils.generate_plot('mpc', 'time', 'max', N_vec, solver_timings,
-                        fig_size=0.9, plot_name=problem.name)
+                                  # ('MOSEK', mosek_timing)
+                                  ])
+    #
+    # utils.generate_plot('mpc', 'time', 'median', N_vec, solver_timings,
+    #                     fig_size=0.9, plot_name=problem.name)
+    # utils.generate_plot('mpc', 'time', 'total', N_vec, solver_timings,
+    #                     fig_size=0.9, plot_name=problem.name)
+    # utils.generate_plot('mpc', 'time', 'max', N_vec, solver_timings,
+    #                     fig_size=0.9, plot_name=problem.name)
