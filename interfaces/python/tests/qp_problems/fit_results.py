@@ -1,21 +1,12 @@
 from __future__ import print_function
 
 # For plotting
-import matplotlib as mpl
 import matplotlib.colors as mc
-# mpl.use('Agg')  # For plotting on remote server
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from scipy.interpolate import griddata
-plt.rc('axes', labelsize=18)    # fontsize of the x and y labels
-plt.rc('axes', titlesize=18)   # fontsize of the tick labels
-plt.rc('xtick', labelsize=15)   # fontsize of the tick labels
-plt.rc('ytick', labelsize=15)   # fontsize of the tick labels
-plt.rc('legend', fontsize=15)   # legend fontsize
-plt.rc('text', usetex=True)     # use latex
-plt.rc('font', family='serif')
+import utils.plotting as plotting
+import matplotlib.pyplot as plt
 
-# Numerics
+
 import numpy as np
 from scipy.spatial import ConvexHull  # Create convex hull of PWL approximations
 
@@ -205,7 +196,12 @@ if __name__ == '__main__':
 
     t = cvxpy.Variable(n_prob)
     rho = cvxpy.Variable(n_prob)
-    x = cvxpy.Variable(2)
+
+    # Line with offset
+    # x = cvxpy.Variable(2)
+
+    # Only line
+    x = cvxpy.Variable()
 
     # Add linear cost
     objective = cvxpy.Minimize(cvxpy.sum_entries(t))
@@ -229,7 +225,10 @@ if __name__ == '__main__':
     for _, problem in tqdm(problems_p):
         if i < n_prob:
             ratio = problem['trPovertrAtA'].iloc[0]
-            constraints += [x[0] + x[1] * ratio == rho[i]]
+            constraints += [x * ratio == rho[i]]
+
+            # Line with offset
+            # constraints += [x[0] + x[1] * ratio == rho[i]]
         i += 1
 
     # Add constraints on rho
@@ -260,10 +259,9 @@ if __name__ == '__main__':
     # definition: print(plt.cm.jet.N) for example
     norm = mc.BoundaryNorm(levels, 256)
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    plt.contour(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.jet_r)
-    plt.contourf(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.jet_r)
+    ax = plotting.create_figure(0.9)
+    plt.contour(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.viridis)
+    plt.contourf(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.viridis)
     ax.set_ylabel(r'$\rho$')
     ax.set_xlabel(r'$\frac{{\rm tr}(P)}{{\rm tr}(A^{T}A)}$')
     ax.set_title(r'Performance $p$')
@@ -277,7 +275,7 @@ if __name__ == '__main__':
     x_fit = np.asarray(x.value).flatten()
     ratio_vec = np.linspace(0, 2., 100)
     rho_fit_vec = x_fit[0] + x_fit[1] * ratio_vec
-    plt.plot(ratio_vec, rho_fit_vec, color='C2')
+    plt.plot(ratio_vec, rho_fit_vec, color='C3')
 
     plt.show(block=False)
     plt.savefig('behavior.pdf')
