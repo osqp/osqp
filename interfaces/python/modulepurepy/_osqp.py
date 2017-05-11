@@ -27,6 +27,14 @@ OSQP_INFTY = 1e+20
 # OSQP Nan
 OSQP_NAN = 1e+20  # Just as placeholder. Not real value
 
+# Auto rho
+# AUTO_RHO_OFFSET = 1.07838081E-03
+# AUTO_RHO_SLOPE = 2.31511262
+AUTO_RHO_OFFSET = 0.0
+AUTO_RHO_SLOPE = 3.8963024840949214
+AUTO_RHO_MAX = 1e03
+AUTO_RHO_MIN = 1e-06
+
 
 class workspace(object):
     """
@@ -352,6 +360,31 @@ class OSQP(object):
             self.work.scaling.Einv = \
                 spspa.diags(np.reciprocal(E.diagonal()))
 
+    def compute_rho(self):
+        """
+        Automatically compute rho value
+        """
+
+        if self.work.data.m == 0:
+            self.work.settings.rho = AUTO_RHO_MAX
+
+        # Compute tr(P)
+        trP = self.work.data.P.diagonal().sum()
+
+        #  Compute tr(AtA) = fro(A) ^ 2
+        trAtA = spspa.linalg.norm(self.work.data.A) ** 2
+
+        # Compute ratio
+        ratio = trP / trAtA
+
+        # Compute rho
+        self.work.settings.rho = AUTO_RHO_OFFSET + AUTO_RHO_SLOPE * ratio
+
+        # Constrain rho between max and min
+        self.work.settings.rho = np.minimum(np.maximum(self.work.settings.rho,
+                                                       AUTO_RHO_MIN),
+                                            AUTO_RHO_MAX)
+
     def print_setup_header(self, data, settings):
         """Print solver header
         """
@@ -369,7 +402,11 @@ class OSQP(object):
             (settings.eps_abs, settings.eps_rel))
         print("          eps_prim_inf = %.2e, eps_dual_inf = %.2e," % \
             (settings.eps_prim_inf, settings.eps_dual_inf))
-        print("          rho = %.2e" % settings.rho)
+        print("          rho = %.2e " % settings.rho, end='')
+        if settings.auto_rho:
+            print("(auto)")
+        else:
+            print("")
         print("          sigma = %.2e, alpha = %.2e," % \
             (settings.sigma, settings.alpha))
         print("          max_iter = %d" % settings.max_iter)
@@ -790,6 +827,10 @@ class OSQP(object):
         # Scale problem
         if self.work.settings.scaling:
             self.scale_data()
+
+        # Compute auto_rho in case
+        if self.work.settings.auto_rho:
+            self.compute_rho()
 
         # Factorize KKT
         self.work.priv = priv(self.work)

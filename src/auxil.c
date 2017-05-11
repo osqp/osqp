@@ -19,12 +19,6 @@
 
     // Compute tr(AtA) = fro(A) ^ 2
     trAtA = mat_fro_sq(work->data->A);
-    trAtA *= trAtA;
-
-    if (trAtA < 1e-05){ // tr(AtA) = 0
-        work->settings->rho = AUTO_RHO_MAX;
-        return;
-    }
 
     // Compute ratio
     ratio = trP / trAtA;
@@ -32,6 +26,7 @@
     // Compute rho
     work->settings->rho = AUTO_RHO_OFFSET + AUTO_RHO_SLOPE * ratio;
 
+    work->settings->rho = c_min(c_max(work->settings->rho, AUTO_RHO_MIN), AUTO_RHO_MAX);
  }
  #endif // ifndef EMBEDDED
 

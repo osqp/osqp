@@ -4,7 +4,7 @@ import scipy.sparse as sparse
 import scipy as sp
 import numpy as np
 import mathprogbasepy as mpbpy
-sp.random.seed(2)
+sp.random.seed(3)
 
 n = 20
 m = 30
@@ -52,7 +52,7 @@ norm_q = np.linalg.norm(q)
 
 osqp_opts = {'rho': 0.1,
              'sigma': 0.001,
-             'auto_rho': False,
+             'auto_rho': True,
              'polish': True,
              'eps_abs': 1e-03,
              'eps_rel': 1e-03,
