@@ -122,12 +122,14 @@ for f in lst_probs:
         s = osqp.OSQP()
         s.setup(P, q, A, l, u,
                 rho=0.1,
-                auto_rho=False,
+                auto_rho=True,
                 verbose=False,
                 max_iter=2500,
                 # early_terminate_interval=1,
                 scaling=True)
         res = s.solve()
+
+        # import ipdb; ipdb.set_trace()
 
         # Check if pure python implementation gives same results
         # import osqppurepy

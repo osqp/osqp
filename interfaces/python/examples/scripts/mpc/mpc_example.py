@@ -122,14 +122,16 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
         x0 = problem.x0
 
         # Setup OSQP
+        import osqppurepy as osqp
         m = osqp.OSQP()
         m.setup(qp.P, qp.q, Aosqp, losqp, uosqp,
-                # auto_rho=True,
-                auto_rho=False,
-                rho=1e-2,
+                # auto_rho=False,
+                auto_rho=True,
+                rho=0.001,
                 max_iter=2500,
+                scaling=True,
                 polish=False,
-                verbose=False)
+                verbose=True)
 
         for i in range(nsim):
             # Solve with osqp
@@ -138,6 +140,16 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
             # Save time and number of iterations
             time[i] = res.info.run_time
             niter[i] = res.info.iter
+
+            # Dump file to 'bad_convergence/data'folder
+            # import pickle
+            # problem = {'P': qp.P,
+            #            'q': qp.q,
+            #            'A': Aosqp,
+            #            'l': losqp,
+            #            'u': uosqp}
+            # with open('bad_convergence/data/%s.pickle' % 'helicopter_scaling', 'wb') as f:
+            #     pickle.dump(problem, f)
 
             # Check if status is correct
             status = res.info.status_val
@@ -183,12 +195,12 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
         m = osqp.OSQP()
         m.setup(qp.P, qp.q, Aosqp, losqp, uosqp,
                 warm_start=False,
-                #auto_rho=True,
-                auto_rho=False,
+                auto_rho=True,
+                # auto_rho=False,
                 rho=0.1,
                 max_iter=2500,
                 polish=False,
-                verbose=False)
+                verbose=True)
 
         for i in range(nsim):
             # Solve with osqp
@@ -377,10 +389,10 @@ def run_mpc_example(example_name):
     N_vec = np.array([10, 20])
 
     # Define statistics for osqp, qpoases and gurobi
-    # osqp_timing = []
-    # osqp_iter = []
-    # osqp_coldstart_timing = []
-    # osqp_coldstart_iter = []
+    osqp_timing = []
+    osqp_iter = []
+    osqp_coldstart_timing = []
+    osqp_coldstart_iter = []
     # qpoases_timing = []
     # qpoases_iter = []
     gurobi_iter = []
@@ -393,10 +405,10 @@ def run_mpc_example(example_name):
         problem.N = N_vec[i]
         qp_matrices = gen_qp_matrices(problem)
 
-        # # Solve loop with osqp
-        # timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp')
-        # osqp_timing.append(timing)
-        # osqp_iter.append(niter)
+        # Solve loop with osqp
+        timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp')
+        osqp_timing.append(timing)
+        osqp_iter.append(niter)
 
         # # Solve loop with osqp (coldstart)
         # timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp_coldstart')
@@ -408,10 +420,10 @@ def run_mpc_example(example_name):
         # qpoases_timing.append(timing)
         # qpoases_iter.append(niter)
 
-        # Solve loop with gurobi
-        timing, niter = solve_loop(qp_matrices, problem, nsim, 'gurobi')
-        gurobi_timing.append(timing)
-        gurobi_iter.append(niter)
+        # # Solve loop with gurobi
+        # timing, niter = solve_loop(qp_matrices, problem, nsim, 'gurobi')
+        # gurobi_timing.append(timing)
+        # gurobi_iter.append(niter)
 
         # Solve loop with mosek
         timing, niter = solve_loop(qp_matrices, problem, nsim, 'mosek')
@@ -419,10 +431,10 @@ def run_mpc_example(example_name):
         mosek_iter.append(niter)
 
     solver_timings = OrderedDict([
-                                  # ('OSQP (warm start)', osqp_timing),
+                                  ('OSQP (warm start)', osqp_timing),
                                   # ('OSQP (cold start)', osqp_coldstart_timing),
                                   # ('qpOASES', qpoases_timing),
-                                  ('GUROBI', gurobi_timing),
+                                #   ('GUROBI', gurobi_timing),
                                   ('MOSEK', mosek_timing)
                                   ])
 

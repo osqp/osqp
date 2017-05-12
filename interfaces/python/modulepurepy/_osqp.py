@@ -32,7 +32,7 @@ OSQP_NAN = 1e+20  # Just as placeholder. Not real value
 # AUTO_RHO_SLOPE = 2.31511262
 AUTO_RHO_OFFSET = 0.0
 AUTO_RHO_SLOPE = 3.8963024840949214
-AUTO_RHO_MAX = 1e03
+AUTO_RHO_MAX = 1e06
 AUTO_RHO_MIN = 1e-06
 
 
@@ -316,7 +316,8 @@ class OSQP(object):
         KKT2 = KKT.copy()
         if self.work.settings.scaling_norm == 2:
             KKT2.data = np.square(KKT2.data)  # Elementwise square
-        elif self.work.settings.scaling_norm == 1:
+        elif self.work.settings.scaling_norm == 1 or \
+            self.work.settings.scaling_norm == np.inf:
             KKT2.data = np.absolute(KKT2.data)  # Elementwise abs
 
         # Iterate Scaling
@@ -336,6 +337,9 @@ class OSQP(object):
             E = spspa.csc_matrix((0, 0))
         else:
             E = spspa.diags(d[self.work.data.n:])
+
+        import ipdb; ipdb.set_trace()
+
 
         # Scale problem Matrices
         P = D.dot(self.work.data.P.dot(D)).tocsc()

@@ -121,161 +121,163 @@ def compute_pwl_lower_approx(x, y):
     # Return convex hull in the form A_hull * x <= b_hull
     return A, b
 
+'''
+Main Script
+'''
 
-# Main function
-if __name__ == '__main__':
+# Read results (only the ones less then max_iter)
+# lasso = pd.read_csv('results/lasso_full.csv')
+# nonneg_l2 = pd.read_csv('results/nonneg_l2_full.csv')
+# portfolio = pd.read_csv('results/portfolio_full.csv')
+# svm = pd.read_csv('results/svm_full.csv')
+# res = pd.concat([lasso, portfolio, nonneg_l2, svm],
+#                 ignore_index=True)
 
-    # Read results (only the ones less then max_iter)
-    # lasso = pd.read_csv('results/lasso_full.csv')
-    # nonneg_l2 = pd.read_csv('results/nonneg_l2_full.csv')
-    # portfolio = pd.read_csv('results/portfolio_full.csv')
-    # svm = pd.read_csv('results/svm_full.csv')
-    # res = pd.concat([lasso, portfolio, nonneg_l2, svm],
-    #                 ignore_index=True)
+# Read full results
+res = pd.read_csv('results/results_full.csv')
 
-    # Read full results
-    res = pd.read_csv('results/results_full.csv')
+# Select problems not saturated at max number of iterations
+res = res.loc[(res['iter'] < 1000)]
 
-    # Select problems not saturated at max number of iterations
-    res = res.loc[(res['iter'] < 1000)]
+# Assign group headers
+group_headers = ['seed', 'name']
 
-    # Assign group headers
-    group_headers = ['seed', 'name']
+print("Compute performance index and ratio for all problems")
+tqdm.pandas()
+# Assign performance and ratio to samples
+problems = res.groupby(group_headers)
+res_p = problems.progress_apply(get_performance_and_ratio)
+problems_p = res_p.groupby(group_headers)
 
-    print("Compute performance index and ratio for all problems")
-    tqdm.pandas()
-    # Assign performance and ratio to samples
-    problems = res.groupby(group_headers)
-    res_p = problems.progress_apply(get_performance_and_ratio)
-    problems_p = res_p.groupby(group_headers)
+print("\nTotal number of problems: %i" % len(problems_p.groups))
 
-    print("\nTotal number of problems: %i" % len(problems_p.groups))
+'''
+Build piecewise-linear (PWL) functions f_i(rho)
+'''
+# Create list of arrays
+A = []
+b = []
 
-    '''
-    Build piecewise-linear (PWL) functions f_i(rho)
-    '''
-    # Create list of arrays
-    A = []
-    b = []
+print("\nComputing PWL lower approximations")
+for _, group in tqdm(problems_p):
+    f = group['p'].values
+    rho = group['rho'].values
 
-    print("\nComputing PWL lower approximations")
-    for _, group in tqdm(problems_p):
-        f = group['p'].values
-        rho = group['rho'].values
+    A_temp, b_temp = compute_pwl_lower_approx(rho, f)
 
-        A_temp, b_temp = compute_pwl_lower_approx(rho, f)
+    # Append arrays just found with list
+    A.append(A_temp)
+    b.append(b_temp)
 
-        # Append arrays just found with list
-        A.append(A_temp)
-        b.append(b_temp)
+# # DEBUG
+# i = i - 1
+#
+# DEBUG: Try to test PWL functions of last group
+# plt.figure()
+# ax = plt.gca()
+# rho_vec = np.linspace(0, 10, 100)
+# plt.plot(rho, f)
+# for j in range(len(b_temp)):
+#     f_temp = A_temp[j] * rho_vec + b_temp[j]
+#     plt.plot(rho_vec, f_temp)
+# ax.set_xlim(0, 0.1)
+# ax.set_ylim(0, 50)
+# plt.show(block=False)
 
-    # # DEBUG
-    # i = i - 1
-    #
-    # DEBUG: Try to test PWL functions of last group
-    # plt.figure()
-    # ax = plt.gca()
-    # rho_vec = np.linspace(0, 10, 100)
-    # plt.plot(rho, f)
-    # for j in range(len(b_temp)):
-    #     f_temp = A_temp[j] * rho_vec + b_temp[j]
-    #     plt.plot(rho_vec, f_temp)
-    # ax.set_xlim(0, 0.1)
-    # ax.set_ylim(0, 50)
-    # plt.show(block=False)
+# import ipdb; ipdb.set_trace()
 
-    # import ipdb; ipdb.set_trace()
+'''
+Solve LP with CVXPY
+'''
+print("\n\nSolving problem with CVXPY and GUROBI")
 
-    '''
-    Solve LP with CVXPY
-    '''
-    print("\n\nSolving problem with CVXPY and GUROBI")
+# Solve for only n_prob problems
+n_prob = len(problems_p.groups)
 
-    # Solve for only n_prob problems
-    n_prob = len(problems_p.groups)
+t = cvxpy.Variable(n_prob)
+rho = cvxpy.Variable(n_prob)
 
-    t = cvxpy.Variable(n_prob)
-    rho = cvxpy.Variable(n_prob)
+# Line with offset
+# x = cvxpy.Variable(2)
 
-    # Line with offset
-    # x = cvxpy.Variable(2)
+# Only line
+x = cvxpy.Variable()
 
-    # Only line
-    x = cvxpy.Variable()
+# Add linear cost
+objective = cvxpy.Minimize(cvxpy.sum_entries(t))
 
-    # Add linear cost
-    objective = cvxpy.Minimize(cvxpy.sum_entries(t))
+# Add constraints
+constraints = []
 
-    # Add constraints
-    constraints = []
+# Add inequality constraints
+i = 0
+print("Adding inequality constraints")
+for _, problem in tqdm(problems_p):
+    # Solve for only 10 problems
+    if i < n_prob:
+        for j in range(len(b[i])):
+            constraints += [A[i][j] * rho[i] + b[i][j] <= t[i]]
+    i += 1
 
-    # Add inequality constraints
-    i = 0
-    print("Adding inequality constraints")
-    for _, problem in tqdm(problems_p):
-        # Solve for only 10 problems
-        if i < n_prob:
-            for j in range(len(b[i])):
-                constraints += [A[i][j] * rho[i] + b[i][j] <= t[i]]
-        i += 1
+# Add equality constraints
+i = 0
+print("Adding equality constraints")
+for _, problem in tqdm(problems_p):
+    if i < n_prob:
+        ratio = problem['trPovertrAtA'].iloc[0]
+        constraints += [x * ratio == rho[i]]
 
-    # Add equality constraints
-    i = 0
-    print("Adding equality constraints")
-    for _, problem in tqdm(problems_p):
-        if i < n_prob:
-            ratio = problem['trPovertrAtA'].iloc[0]
-            constraints += [x * ratio == rho[i]]
+        # Line with offset
+        # constraints += [x[0] + x[1] * ratio == rho[i]]
+    i += 1
 
-            # Line with offset
-            # constraints += [x[0] + x[1] * ratio == rho[i]]
-        i += 1
+# Add constraints on rho
+constraints += [rho >= 0]
 
-    # Add constraints on rho
-    constraints += [rho >= 0]
+# Define problem
+prob = cvxpy.Problem(objective, constraints)
 
-    # Define problem
-    prob = cvxpy.Problem(objective, constraints)
+# Solve problem
+prob.solve(solver=cvxpy.MOSEK, verbose=True)
 
-    # Solve problem
-    prob.solve(solver=cvxpy.GUROBI, verbose=True)
+'''
+Create contour plot from 3D scatter plot with rho, ratio, efficiency
+'''
 
-    '''
-    Create contour plot from 3D scatter plot with rho, ratio, efficiency
-    '''
+# Get grid data
+xi, yi, zi = get_grid_data(res_p['trPovertrAtA'], res_p['rho'], res_p['p'])
 
-    # Get grid data
-    xi, yi, zi = get_grid_data(res_p['trPovertrAtA'], res_p['rho'], res_p['p'])
-
-    # Plot contour lines
-    # levels = [0., 0.25, 0.5, 0.75, 0.9, 0.95, 1.]
-    # levels = [0., 0.3, 0.6, 1., 5., 10., 20., 100.]
-    levels = [0., 0.5, 1., 2., 3., 5., 10., 100.]
+# Plot contour lines
+# levels = [0., 0.25, 0.5, 0.75, 0.9, 0.95, 1.]
+# levels = [0., 0.3, 0.6, 1., 5., 10., 20., 100.]
+# levels = [0., 0.5, 1., 2., 3., 5., 10., 100.]
+levels = [0., 3., 6., 10., 15., 20.,100.]
 
 
-    # use here 256 instead of len(levels)-1 becuase
-    # as it's mentioned in the documentation for the
-    # colormaps, the default colormaps use 256 colors in their
-    # definition: print(plt.cm.jet.N) for example
-    norm = mc.BoundaryNorm(levels, 256)
+# use here 256 instead of len(levels)-1 becuase
+# as it's mentioned in the documentation for the
+# colormaps, the default colormaps use 256 colors in their
+# definition: print(plt.cm.jet.N) for example
+norm = mc.BoundaryNorm(levels, 256)
 
-    ax = plotting.create_figure(0.9)
-    plt.contour(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.viridis)
-    plt.contourf(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.viridis)
-    ax.set_ylabel(r'$\rho$')
-    ax.set_xlabel(r'$\frac{{\rm tr}(P)}{{\rm tr}(A^{T}A)}$')
-    ax.set_title(r'Performance $p$')
-    ax.set_xlim(0., 2.)
-    plt.colorbar()
-    plt.tight_layout()
+ax = plotting.create_figure(0.9)
+plt.contour(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.viridis_r)
+plt.contourf(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.viridis_r)
+ax.set_ylabel(r'$\rho$')
+ax.set_xlabel(r'$\frac{\mathrm{tr}(P)}{\mathrm{tr}(A^{T}A)}$')
+ax.set_title(r'Performance $p$')
+ax.set_xlim(0., 2.)
+plt.colorbar()
+plt.tight_layout()
 
-    '''
-    Plot fit line on the graph
-    '''
-    x_fit = np.asarray(x.value).flatten()
-    ratio_vec = np.linspace(0, 2., 100)
-    rho_fit_vec = x_fit[0] + x_fit[1] * ratio_vec
-    plt.plot(ratio_vec, rho_fit_vec, color='C3')
+'''
+Plot fit line on the graph
+'''
+x_fit = np.asarray(x.value).flatten()
+ratio_vec = np.linspace(0, 2., 100)
+rho_fit_vec = x_fit * ratio_vec
+# rho_fit_vec = x_fit[0] + x_fit[1] * ratio_vec
+plt.plot(ratio_vec, rho_fit_vec, color='C3')
 
-    plt.show(block=False)
-    plt.savefig('behavior.pdf')
+plt.show(block=False)
+plt.savefig('behavior.pdf')
