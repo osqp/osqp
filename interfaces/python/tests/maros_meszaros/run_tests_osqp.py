@@ -124,7 +124,8 @@ for f in lst_probs:
                 rho=0.1,
                 auto_rho=True,
                 verbose=False,
-                max_iter=2500,
+                scaling_iter=100,
+                max_iter=10000,
                 # early_terminate_interval=1,
                 scaling=True)
         res = s.solve()

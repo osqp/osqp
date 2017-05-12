@@ -1,5 +1,5 @@
-# import osqp
-import osqppurepy as osqp
+import osqp
+# import osqppurepy as osqp
 import numpy as np
 import scipy.sparse as spa
 
@@ -11,8 +11,10 @@ with open('./data/%s.pickle' % 'helicopter_scaling', 'rb') as f:
 
 
 # OSQP settings
-osqp_settings = {'verbose': True,
+osqp_settings = {'verbose': False,
                  'scaling': True,
+                 'scaling_iter': 50,
+                 'early_terminate_interval': 1,
                  'auto_rho': True,
                  'rho': 0.1,
                  'polish': False}
@@ -21,4 +23,14 @@ osqp_settings = {'verbose': True,
 model = osqp.OSQP()
 model.setup(problem['P'], problem['q'], problem['A'],
             problem['l'], problem['u'], **osqp_settings)
-model.solve()
+res_osqp = model.solve()
+
+
+
+# Solve with GUROBI
+import mathprogbasepy as mpbpy
+qp = mpbpy.QuadprogProblem(problem['P'], problem['q'], problem['A'],
+                      problem['l'], problem['u'])
+res_gurobi = qp.solve(solver=mpbpy.GUROBI, verbose=False)
+print("GUROBI time = %.4e" % res_gurobi.cputime)
+print("OSQP time = %.4e" % res_osqp.info.run_time)

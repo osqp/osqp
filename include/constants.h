@@ -53,7 +53,7 @@ extern "C" {
 #define AUTO_RHO_SLOPE (3.8963024840949214)    // Not settable by the user
 
 
-#define AUTO_RHO_MAX (1e03)                   // Not settable by user
+#define AUTO_RHO_MAX (1e06)                   // Not settable by user
 #define AUTO_RHO_MIN (1e-06)                  // Not settable by user
 
 #endif
@@ -66,9 +66,9 @@ extern "C" {
 #if EMBEDDED != 1
 #define SCALING_NORM (2)
 #define SCALING_ITER (3)
-#define MAX_SCALING (1e3)  /// Maximum scaling
-#define MIN_SCALING (1e-3)  /// Minimum scaling
-#define SCALING_REG (1e-08)  /// Regularization in scaling iterations
+#define MAX_SCALING (1e6)  /// Maximum scaling
+#define MIN_SCALING (1e-6)  /// Minimum scaling
+#define SCALING_REG (1e-06)  /// Regularization in scaling iterations
 #endif
 
 /* Printing */

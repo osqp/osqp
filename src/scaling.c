@@ -50,10 +50,10 @@ c_int scale_data(OSQPWorkspace * work){
         mat_vec(work->data->A, work->D_temp, work->scaling->E, 0);
 
 
-        // d = d + SCALING_REG
-        // e = e + SCALING_REG
-        vec_add_scalar(work->scaling->D, SCALING_REG, work->data->n);
-        vec_add_scalar(work->scaling->E, SCALING_REG, work->data->m);
+        // d = d + (n + m) * SCALING_REG
+        // e = e + (n + m) * SCALING_REG
+        vec_add_scalar(work->scaling->D, (c_float)(work->data->n + work->data->m) * SCALING_REG, work->data->n);
+        vec_add_scalar(work->scaling->E, (c_float)(work->data->n + work->data->m) * SCALING_REG, work->data->m);
 
         // d = 1./d
         // e = 1./e

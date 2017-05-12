@@ -47,10 +47,12 @@ u = np.append(np.hstack([1., np.zeros(k)]),  np.ones(n))
 # q = q/np.linalg.norm(q)
 
 # Setup OSQP
+# import osqppurepy as osqp
 m = osqp.OSQP()
 m.setup(P, q, A, l, u,
         auto_rho=True,
         scaling=True,
+        scaling_iter=100,
         rho=0.1,
         sigma=0.001,
         polish=False,
