@@ -122,14 +122,14 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
         x0 = problem.x0
 
         # Setup OSQP
-        import osqppurepy as osqp
         m = osqp.OSQP()
         m.setup(qp.P, qp.q, Aosqp, losqp, uosqp,
                 # auto_rho=False,
                 auto_rho=True,
                 rho=0.001,
                 max_iter=2500,
-                scaling=True,
+                scaling=False,
+                scaling_iter=100,
                 polish=False,
                 verbose=True)
 
@@ -199,6 +199,7 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
                 # auto_rho=False,
                 rho=0.1,
                 max_iter=2500,
+                scaling_iter=100,
                 polish=False,
                 verbose=True)
 
@@ -410,10 +411,10 @@ def run_mpc_example(example_name):
         osqp_timing.append(timing)
         osqp_iter.append(niter)
 
-        # # Solve loop with osqp (coldstart)
-        # timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp_coldstart')
-        # osqp_coldstart_timing.append(timing)
-        # osqp_coldstart_iter.append(niter)
+        # Solve loop with osqp (coldstart)
+        timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp_coldstart')
+        osqp_coldstart_timing.append(timing)
+        osqp_coldstart_iter.append(niter)
 
         # # Solving loop with qpoases
         # timing, niter = solve_loop(qp_matrices, 'qpoases')
@@ -432,7 +433,7 @@ def run_mpc_example(example_name):
 
     solver_timings = OrderedDict([
                                   ('OSQP (warm start)', osqp_timing),
-                                  # ('OSQP (cold start)', osqp_coldstart_timing),
+                                  ('OSQP (cold start)', osqp_coldstart_timing),
                                   # ('qpOASES', qpoases_timing),
                                 #   ('GUROBI', gurobi_timing),
                                   ('MOSEK', mosek_timing)
