@@ -36,6 +36,12 @@ AUTO_RHO_MAX = 1e06
 AUTO_RHO_MIN = 1e-06
 
 
+# Scaling
+SCALING_REG = 2e-06
+MAX_SCALING = 1e06
+MIN_SCALING = 1e-06
+
+
 class workspace(object):
     """
     OSQP solver workspace
@@ -325,9 +331,9 @@ class OSQP(object):
             # Regularize components
             KKT2d = KKT2.dot(d)
             # Prevent division by 0
-            d = (n + m)*np.reciprocal(KKT2d + (n + m) * 1e-06)
+            d = (n + m)*np.reciprocal(KKT2d + SCALING_REG)
             # Limit scaling terms
-            # d = np.maximum(np.minimum(d, 1e+03), 1e-03)
+            d = np.maximum(np.minimum(d, MAX_SCALING), MIN_SCALING)
 
 
             # DEBUG: Check scaling

@@ -68,7 +68,7 @@ extern "C" {
 #define SCALING_ITER (3)
 #define MAX_SCALING (1e6)  /// Maximum scaling
 #define MIN_SCALING (1e-6)  /// Minimum scaling
-#define SCALING_REG (1e-06)  /// Regularization in scaling iterations
+#define SCALING_REG (2e-06)  /// Regularization in scaling iterations
 #endif
 
 /* Printing */
