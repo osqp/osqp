@@ -46,11 +46,9 @@ extern "C" {
 #define VERBOSE (1)
 #define AUTO_RHO (1)
 
-// TRY VALUES
-// #define AUTO_RHO_OFFSET (1.07838081E-03)    // Not settable by the user
-// #define AUTO_RHO_SLOPE (2.31511262)         // Not settable by the user
+
 #define AUTO_RHO_OFFSET (0.0)                  // Not settable by the user
-#define AUTO_RHO_SLOPE (3.8963024840949214)    // Not settable by the user
+#define AUTO_RHO_SLOPE (2.4474028467925546)    // Not settable by the user
 
 
 #define AUTO_RHO_MAX (1e06)                   // Not settable by user

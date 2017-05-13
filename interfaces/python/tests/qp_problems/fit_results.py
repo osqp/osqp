@@ -251,7 +251,7 @@ xi, yi, zi = get_grid_data(res_p['trPovertrAtA'], res_p['rho'], res_p['p'])
 # levels = [0., 0.25, 0.5, 0.75, 0.9, 0.95, 1.]
 # levels = [0., 0.3, 0.6, 1., 5., 10., 20., 100.]
 # levels = [0., 0.5, 1., 2., 3., 5., 10., 100.]
-levels = [0., 3., 6., 10., 15., 20.,100.]
+levels = [0., 3., 6., 10., 15., 20., 100.]
 
 
 # use here 256 instead of len(levels)-1 becuase
