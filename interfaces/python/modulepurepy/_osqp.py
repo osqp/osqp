@@ -35,6 +35,11 @@ OSQP_NAN = 1e+20  # Just as placeholder. Not real value
 AUTO_RHO_OFFSET = 0.0
 AUTO_RHO_SLOPE = 2.4474028467925546
 
+AUTO_RHO_BETA0 = 2.1877627217504649
+AUTO_RHO_BETA1 = 0.57211669508170027
+AUTO_RHO_BETA2 = -0.71622847416411806
+
+
 AUTO_RHO_MAX = 1e06
 AUTO_RHO_MIN = 1e-06
 
@@ -434,16 +439,22 @@ class OSQP(object):
         #  Compute tr(AtA) = fro(A) ^ 2
         trAtA = spspa.linalg.norm(self.work.data.A) ** 2
 
-        # Compute ratio
-        ratio = trP / trAtA
+        self.work.settings.rho = AUTO_RHO_BETA0 * \
+            np.power(trP, AUTO_RHO_BETA1) * \
+            np.power(trAtA, AUTO_RHO_BETA2)
 
-        # Compute rho
-        self.work.settings.rho = AUTO_RHO_OFFSET + AUTO_RHO_SLOPE * ratio
+        # Old linear ratio
+        # # Compute ratio
+        # ratio = trP / trAtA
+        #
+        # # Compute rho
+        # self.work.settings.rho = AUTO_RHO_OFFSET + AUTO_RHO_SLOPE * ratio
 
         # Constrain rho between max and min
-        self.work.settings.rho = np.minimum(np.maximum(self.work.settings.rho,
-                                                       AUTO_RHO_MIN),
-                                            AUTO_RHO_MAX)
+        self.work.settings.rho = \
+            np.minimum(np.maximum(self.work.settings.rho,
+                                  AUTO_RHO_MIN),
+                       AUTO_RHO_MAX)
 
     def print_setup_header(self, data, settings):
         """Print solver header

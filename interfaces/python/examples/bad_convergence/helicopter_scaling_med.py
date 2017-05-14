@@ -1,5 +1,5 @@
-# import osqp
-import osqppurepy as osqp
+import osqp
+# import osqppurepy as osqp
 import numpy as np
 import scipy.sparse as spa
 
@@ -13,10 +13,10 @@ with open('./data/%s.pickle' % 'helicopter_scaling_med', 'rb') as f:
 # OSQP settings
 osqp_settings = {'verbose': True,
                  'scaling': True,
-                 'scaling_iter': 100,
+                 'scaling_iter': 50,
                  'early_terminate_interval': 1,
                  'auto_rho': True,
-                 'rho': 0.0001,
+                 'rho': 0.01,
                  'polish': False}
 
 # Solve with OSQP

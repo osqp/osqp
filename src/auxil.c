@@ -20,11 +20,10 @@
     // Compute tr(AtA) = fro(A) ^ 2
     trAtA = mat_fro_sq(work->data->A);
 
-    // Compute ratio
-    ratio = trP / trAtA;
-
-    // Compute rho
-    work->settings->rho = AUTO_RHO_OFFSET + AUTO_RHO_SLOPE * ratio;
+    // Compute rho = beta0 * (trP)^(beta1) * (trAtA)^(beta2)
+    work->settings->rho = AUTO_RHO_BETA0 *
+                          pow(trP, AUTO_RHO_BETA1) *
+                          pow(trAtA, AUTO_RHO_BETA2);
 
     work->settings->rho = c_min(c_max(work->settings->rho, AUTO_RHO_MIN), AUTO_RHO_MAX);
  }

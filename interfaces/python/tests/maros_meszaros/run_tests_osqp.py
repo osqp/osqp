@@ -124,7 +124,7 @@ for f in lst_probs:
                 rho=0.1,
                 auto_rho=True,
                 verbose=False,
-                scaling_iter=100,
+                scaling_iter=50,
                 max_iter=10000,
                 # early_terminate_interval=1,
                 scaling=True)

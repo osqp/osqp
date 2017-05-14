@@ -47,9 +47,10 @@ extern "C" {
 #define AUTO_RHO (1)
 
 
-#define AUTO_RHO_OFFSET (0.0)                  // Not settable by the user
-#define AUTO_RHO_SLOPE (2.4474028467925546)    // Not settable by the user
 
+#define AUTO_RHO_BETA0 (2.1877627217504649)   // Not settable by the user
+#define AUTO_RHO_BETA1 (0.57211669508170027)  // Not settable by the user
+#define AUTO_RHO_BETA2 (-0.71622847416411806) // Not settable by the user
 
 #define AUTO_RHO_MAX (1e06)                   // Not settable by user
 #define AUTO_RHO_MIN (1e-06)                  // Not settable by user

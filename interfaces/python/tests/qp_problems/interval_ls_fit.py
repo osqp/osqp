@@ -19,21 +19,21 @@ import cvxpy
 def get_ratio_and_bounds(df):
     """
     Compute (relative to the current group)
-        1) scaled number of iterations in [0, 100]
+        1) scaled number of iterations in [1, 100]
         2) ratio tr(P)/tr(A'A)
         3) lower and upper bounds for rho (between 0 and 10)
     """
 
     # 1)
     df.loc[:, 'scaled_iter'] = (df['iter'] - df['iter'].min()) / \
-        (df['iter'].max() - df['iter'].min()) * 100
+        (df['iter'].max() - df['iter'].min()) * 99 + 1
 
     # 2)
     df.loc[:, 'trPovertrAtA'] = df['trP'] / (df['froA'] * df['froA'])
 
     # 3)
-    # Find rho values that give scaled number of iterations between 0 and 10
-    rho_values = df.loc[(df['scaled_iter'] <= .1)].rho.values
+    # Find rho values that give scaled number of iterations between 1 and 2
+    rho_values = df.loc[(df['scaled_iter'] <= 1.5)].rho.values
 
     # Compute maximum and minimum values
     df.loc[:, 'rho_min'] = rho_values.min()
@@ -48,6 +48,7 @@ def get_grid_data(x, y, z, resX=100, resY=100):
     yi = np.linspace(min(y), max(y), resY)
     zi = griddata((x, y), z, (xi[None, :], yi[:, None]), method='linear')
     # X, Y = np.meshgrid(xi, yi)
+
     return xi, yi, zi
 
 
@@ -59,7 +60,7 @@ Main script
 res = pd.read_csv('results/results_full.csv')
 
 # Select problems not saturated at max number of iterations
-res = res.loc[(res['iter'] < 1000)]
+res = res.loc[(res['iter'] < 2499)]
 
 # Assign group headers
 group_headers = ['seed', 'name']
@@ -80,52 +81,47 @@ print("\nTotal number of problems: %i" % n_problems)
 '''
 Construct problem
 '''
-n_params = 1  # Number of parameters in beta
+n_params = 3  # Number of parameters in alpha [alpha_0, alpha_1, alpha_2]
 
 # Data matrix A
 A = spa.csc_matrix((0, n_params))
 
 # rho bounds
-rho_l = np.empty((0))
-rho_u = np.empty((0))
+v_l = np.empty((0))
+v_u = np.empty((0))
 
-# Store ratios vector for later plotting
-ratio_vec = np.empty((0))
 
 
 print("Constructing data matrix A and bounds l, u")
 for _, problem in tqdm(problems_p):
-    ratio = problem['trPovertrAtA'].iloc[0]
 
-    ratio_vec = np.append(ratio_vec, ratio)
+    trP = problem['trP'].iloc[0]
+    trAtA = problem['froA'].iloc[0] ** 2
 
     # Create row of A matrix
-    A_temp = np.zeros(n_params)
-    for i in range(n_params):
-        A_temp[i] = ratio ** (i + 1)
+    A_temp = np.array([1., np.log(trP), np.log(trAtA)])
 
     # Add row to matrix A
     A = spa.vstack((A, spa.csc_matrix(A_temp)), 'csc')
 
-    # Add bounds on rho
-    l = problem['rho_min'].iloc[0]
-    u = problem['rho_max'].iloc[0]
-    rho_l = np.append(rho_l, l)
-    rho_u = np.append(rho_u, u)
+    # Add bounds on v
+    l = np.log(problem['rho_min'].iloc[0])
+    u = np.log(problem['rho_max'].iloc[0])
+    v_l = np.append(v_l, l)
+    v_u = np.append(v_u, u)
 
 
 # Define CVXPY problem
-x = cvxpy.Variable(n_params)
-rho = cvxpy.Variable(n_problems)
+alpha = cvxpy.Variable(n_params)
+v = cvxpy.Variable(n_problems)
 
-constraints = [rho_l <= rho, rho <= rho_u]
-objective = cvxpy.Minimize(cvxpy.norm(A * x - rho))
+constraints = [v_l <= v, v <= v_u]
+objective = cvxpy.Minimize(cvxpy.norm(A * alpha - v))
 
 problem = cvxpy.Problem(objective, constraints)
 
 # Solve problem
 problem.solve(solver=cvxpy.GUROBI, verbose=True)
-
 
 
 '''
@@ -138,12 +134,19 @@ xi, yi, zi = get_grid_data(res_p['trPovertrAtA'],
                            res_p['scaled_iter'])
 
 
-levels = [0., 3., 6., 10., 15., 20., 100.]
+# levels = [1., 3., 6., 10., 15., 20., 100.]
+levels = [1., 2., 4., 6., 8., 10., 20., 100.]
+
 # use here 256 instead of len(levels)-1 becuase
 # as it's mentioned in the documentation for the
 # colormaps, the default colormaps use 256 colors in their
 # definition: print(plt.cm.jet.N) for example
 norm = mc.BoundaryNorm(levels, 256)
+# norm = None
+
+# Try lognorm
+# norm = mc.LogNorm(vmin=res_p['scaled_iter'].min(),
+#                   vmax=res_p['scaled_iter'].max())
 
 
 ax = plotting.create_figure(0.9)
@@ -160,18 +163,46 @@ plt.tight_layout()
 Plot fit line on the graph
 '''
 n_fit_points = 100
-x_fit = np.asarray(x.value).flatten()
-ratio_vec = np.linspace(0, 2., n_fit_points)
-rho_fit = np.zeros(n_fit_points)
 
-for i in range(n_fit_points):
-    a = np.zeros(n_params)
-    for j in range(n_params):
-        a[j] = ratio_vec[i] ** (j + 1)
-    rho_fit[i] = a.dot(x_fit)
+# Get learned alpha
+alpha_fit = np.asarray(alpha.value).flatten()
+
+# Get beta after removing logarithm
+beta_fit = np.array([np.exp(alpha_fit[0]), alpha_fit[1], alpha_fit[2]])
+
+# Get fit for every point
+print("Fit rho through every point")
+rho_fit = np.zeros(n_problems)
+ratio_fit = np.zeros(n_problems)
+i = 0
+for _, problem in tqdm(problems_p):
+    trP = problem['trP'].iloc[0]
+    trAtA = problem['froA'].iloc[0] ** 2
+
+    ratio_fit[i] = problem['trPovertrAtA'].iloc[0]
+
+    rho_fit[i] = beta_fit[0] * (trP ** beta_fit[1]) * (trAtA ** beta_fit[2])
+
+    i += 1
+
+# Sort fit vectors
+sort_fit_idx = np.argsort(ratio_fit)
+ratio_fit = ratio_fit[sort_fit_idx]
+rho_fit = rho_fit[sort_fit_idx]
+
+# Pick only some elements of the picked vectors
+interval_slice = 20
+ratio_fit = ratio_fit[::interval_slice]
+rho_fit = rho_fit[::interval_slice]
+
+# Plot vectors
+plt.plot(ratio_fit, rho_fit)
 
 
-plt.plot(ratio_vec, rho_fit)
+# plt.xscale('linear')
+# plt.yscale('linear')
+# plt.xscale('log')
+# plt.yscale('log')
 
 plt.show(block=False)
 plt.savefig('behavior.pdf')
