@@ -20,10 +20,25 @@ osqp_settings = {'verbose': True,
                  'rho': 0.01,
                  'polish': False}
 
+
+# Assign problem data
+P = problem['P']
+q = problem['q']
+A = problem['A']
+l = problem['l']
+u = problem['u']
+
+
+# Scale data?
+# norm_scaling = np.linalg.norm(P.todense())
+norm_scaling = 1
+P /= norm_scaling
+q /= norm_scaling
+
 # Solve with OSQP
 model = osqp.OSQP()
-model.setup(problem['P'], problem['q'], problem['A'],
-            problem['l'], problem['u'], **osqp_settings)
+model.setup(P, q, A,
+            l, u, **osqp_settings)
 res_osqp = model.solve()
 
 
