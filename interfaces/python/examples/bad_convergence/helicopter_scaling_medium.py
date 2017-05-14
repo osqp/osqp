@@ -1,12 +1,12 @@
-import osqp
-# import osqppurepy as osqp
+# import osqp
+import osqppurepy as osqp
 import numpy as np
 import scipy.sparse as spa
 
 import pickle
 
 # Load one problem
-with open('./data/%s.pickle' % 'helicopter_scaling_med', 'rb') as f:
+with open('./data/%s.pickle' % 'helicopter_scaling_medium', 'rb') as f:
     problem = pickle.load(f)
 
 

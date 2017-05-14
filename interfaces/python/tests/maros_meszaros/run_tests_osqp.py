@@ -48,7 +48,7 @@ for f in lst_probs:
         m = load_maros_meszaros_problem(prob_dir + "/" + f)  # Load problem
 
 
-        print("%i) %s\t" % (p, f[:-4]), end='')
+        print("%3i) %s\t" % (p, f[:-4]), end='')
 
         # Solve problem
         # res = m.solve(solver=mpbpy.OSQP, verbose=True)  # No verbosity

@@ -35,9 +35,36 @@ OSQP_NAN = 1e+20  # Just as placeholder. Not real value
 AUTO_RHO_OFFSET = 0.0
 AUTO_RHO_SLOPE = 2.4474028467925546
 
-AUTO_RHO_BETA0 = 2.1877627217504649
-AUTO_RHO_BETA1 = 0.57211669508170027
-AUTO_RHO_BETA2 = -0.71622847416411806
+# Old
+# AUTO_RHO_BETA0 = 2.1877627217504649
+# AUTO_RHO_BETA1 = 0.57211669508170027
+# AUTO_RHO_BETA2 = -0.71622847416411806
+
+# New
+# AUTO_RHO_BETA0 = 2.9287845053694284
+# AUTO_RHO_BETA1 = 0.36309102743796728
+# AUTO_RHO_BETA2 = -0.59595092004777972
+
+# With regularization on v (1e-03)
+# AUTO_RHO_BETA0 = 4.7967320978661059
+# AUTO_RHO_BETA1 = -0.014575489596745135
+# AUTO_RHO_BETA2 = -0.38435004096785225
+
+# With regularization on v (1e-04)
+# AUTO_RHO_BETA0 = 3.1723875550135223
+# AUTO_RHO_BETA1 = 0.29811867735531827
+# AUTO_RHO_BETA2 = -0.55976668580992439
+
+# With iter less than 20
+# AUTO_RHO_BETA0 = 6.4047899119449241
+# AUTO_RHO_BETA1 = -0.67858183687448892
+# AUTO_RHO_BETA2 = -0.037034234262609413
+
+# No regularization. interval [1, 1.2]
+AUTO_RHO_BETA0 = 2.2377322735057317
+AUTO_RHO_BETA1 = 0.73909558577990619
+AUTO_RHO_BETA2 = -0.81428271821694909
+
 
 
 AUTO_RHO_MAX = 1e06
@@ -344,51 +371,51 @@ class OSQP(object):
             d = np.maximum(np.minimum(d, MAX_SCALING), MIN_SCALING)
 
 
-            # DEBUG: Check scaling
-            S_temp = spspa.diags(d)
-            D_temp = spspa.diags(d[:self.work.data.n])
-            E_temp = spspa.diags(d[self.work.data.n:])
-            KKT_temp = S_temp.dot(KKT.dot(S_temp)).todense()
-            P_temp = \
-                D_temp.dot(self.work.data.P.dot(D_temp)).todense()
-            A_temp = \
-                E_temp.dot(self.work.data.A.dot(D_temp)).todense()
-            cond_KKT = np.linalg.cond(KKT_temp)
-            cond_P = np.linalg.cond(P_temp)
-            cond_A = np.linalg.cond(A_temp)
-
-            # Get rato between columns and rows
-            n_plus_m = n + m
-            max_norm_rows = 0.0
-            min_norm_rows = np.inf
-            for j in range(n_plus_m):
-                norm_row_j = np.linalg.norm(KKT_temp[j, :])
-                max_norm_rows = np.maximum(norm_row_j,
-                                           max_norm_rows)
-                min_norm_rows = np.minimum(norm_row_j,
-                                           min_norm_rows)
-
-            max_norm_cols = 0.0
-            min_norm_cols = np.inf
-            for j in range(n_plus_m):
-                norm_col_j = np.linalg.norm(KKT_temp[:, j])
-                max_norm_cols = np.maximum(norm_col_j,
-                                           max_norm_cols)
-                min_norm_cols = np.minimum(norm_col_j,
-                                           min_norm_cols)
-
-            # Compute residuals
-            res_rows = max_norm_rows / min_norm_rows
-            res_cols = max_norm_cols / min_norm_cols
-
-            print("\niter %i" % i)
-            print("cond(KKT) = %.4e" % cond_KKT)
-            print("cond(P) = %.4e" % cond_P)
-            print("cond(A) = %.4e" % cond_A)
-            print("res_rows = %.4e / %.4e = %.4e" %
-                  (max_norm_rows, min_norm_rows, res_rows))
-            print("res_cols = %.4e / %.4e = %.4e" %
-                  (max_norm_cols, min_norm_cols, res_cols))
+            # # DEBUG: Check scaling
+            # S_temp = spspa.diags(d)
+            # D_temp = spspa.diags(d[:self.work.data.n])
+            # E_temp = spspa.diags(d[self.work.data.n:])
+            # KKT_temp = S_temp.dot(KKT.dot(S_temp)).todense()
+            # P_temp = \
+            #     D_temp.dot(self.work.data.P.dot(D_temp)).todense()
+            # A_temp = \
+            #     E_temp.dot(self.work.data.A.dot(D_temp)).todense()
+            # cond_KKT = np.linalg.cond(KKT_temp)
+            # cond_P = np.linalg.cond(P_temp)
+            # cond_A = np.linalg.cond(A_temp)
+            #
+            # # Get rato between columns and rows
+            # n_plus_m = n + m
+            # max_norm_rows = 0.0
+            # min_norm_rows = np.inf
+            # for j in range(n_plus_m):
+            #     norm_row_j = np.linalg.norm(KKT_temp[j, :])
+            #     max_norm_rows = np.maximum(norm_row_j,
+            #                                max_norm_rows)
+            #     min_norm_rows = np.minimum(norm_row_j,
+            #                                min_norm_rows)
+            #
+            # max_norm_cols = 0.0
+            # min_norm_cols = np.inf
+            # for j in range(n_plus_m):
+            #     norm_col_j = np.linalg.norm(KKT_temp[:, j])
+            #     max_norm_cols = np.maximum(norm_col_j,
+            #                                max_norm_cols)
+            #     min_norm_cols = np.minimum(norm_col_j,
+            #                                min_norm_cols)
+            #
+            # # Compute residuals
+            # res_rows = max_norm_rows / min_norm_rows
+            # res_cols = max_norm_cols / min_norm_cols
+            #
+            # print("\niter %i" % i)
+            # print("cond(KKT) = %.4e" % cond_KKT)
+            # print("cond(P) = %.4e" % cond_P)
+            # print("cond(A) = %.4e" % cond_A)
+            # print("res_rows = %.4e / %.4e = %.4e" %
+            #       (max_norm_rows, min_norm_rows, res_rows))
+            # print("res_cols = %.4e / %.4e = %.4e" %
+            #       (max_norm_cols, min_norm_cols, res_cols))
 
         # Obtain Scaler Matrices
         d = np.power(d, 1./self.work.settings.scaling_norm)
@@ -399,7 +426,7 @@ class OSQP(object):
         else:
             E = spspa.diags(d[self.work.data.n:])
 
-        import ipdb; ipdb.set_trace()
+        # import ipdb; ipdb.set_trace()
 
 
         # Scale problem Matrices
@@ -439,10 +466,17 @@ class OSQP(object):
         #  Compute tr(AtA) = fro(A) ^ 2
         trAtA = spspa.linalg.norm(self.work.data.A) ** 2
 
+        # import ipdb; ipdb.set_trace()
+
+        # DEBUG: saturate values of norms
+        # trP = np.maximum(trP, 1e-03)
+        # trAtA = np.maximum(trAtA, 1e-03)
+
         self.work.settings.rho = AUTO_RHO_BETA0 * \
             np.power(trP, AUTO_RHO_BETA1) * \
             np.power(trAtA, AUTO_RHO_BETA2)
 
+        # import ipdb; ipdb.set_trace()
         # Old linear ratio
         # # Compute ratio
         # ratio = trP / trAtA

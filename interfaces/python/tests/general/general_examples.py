@@ -131,8 +131,8 @@ def main():
         p = mpbpy.QuadprogProblem(P, q, A, l, u)
     elif example == 'lp':
         # Random Example
-        n = 100
-        m = 5000
+        n = 10
+        m = 500
         # Generate random Matrices
         P = spspa.csc_matrix(np.zeros((n, n)))
         q = sp.randn(n)
@@ -160,9 +160,11 @@ def main():
                           eps_rel=1e-3,
                           eps_abs=1e-3,
                           alpha=1.6,
-                          rho=1e-04,  # Works with LP
-                          auto_rho=False,
-                          sigma=1e-3,
+                          rho=0.00001,  # Works with LP
+                          auto_rho=True,
+                          scaling_iter=50,
+                          early_terminate_interval=1,
+                        #   sigma=1e-3,
                           polish=True,
                           scaling=True,
                           verbose=True)

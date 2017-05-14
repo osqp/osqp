@@ -128,8 +128,8 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
                 auto_rho=True,
                 rho=0.001,
                 max_iter=2500,
-                scaling=False,
-                scaling_iter=100,
+                scaling=True,
+                scaling_iter=50,
                 polish=False,
                 verbose=True)
 
@@ -141,19 +141,20 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
             time[i] = res.info.run_time
             niter[i] = res.info.iter
 
-            # Dump file to 'bad_convergence/data'folder
-            # import pickle
-            # problem = {'P': qp.P,
-            #            'q': qp.q,
-            #            'A': Aosqp,
-            #            'l': losqp,
-            #            'u': uosqp}
-            # with open('bad_convergence/data/%s.pickle' % 'helicopter_scaling', 'wb') as f:
-            #     pickle.dump(problem, f)
-
             # Check if status is correct
             status = res.info.status_val
             if status != m.constant('OSQP_SOLVED'):
+
+                # # Dump file to 'bad_convergence/data'folder
+                # import pickle
+                # problem = {'P': qp.P,
+                #            'q': qp.q,
+                #            'A': Aosqp,
+                #            'l': losqp,
+                #            'u': uosqp}
+                # with open('bad_convergence/data/%s.pickle' % 'helicopter_scaling_large', 'wb') as f:
+                #     pickle.dump(problem, f)
+
                 import ipdb; ipdb.set_trace()
                 raise ValueError('OSQP did not solve the problem!')
 
@@ -199,7 +200,7 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
                 # auto_rho=False,
                 rho=0.1,
                 max_iter=2500,
-                scaling_iter=100,
+                scaling_iter=50,
                 polish=False,
                 verbose=True)
 
@@ -210,6 +211,9 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
             # Save time and number of iterations
             time[i] = res.info.run_time
             niter[i] = res.info.iter
+
+            import ipdb; ipdb.set_trace()
+
 
             # Check if status is correct
             status = res.info.status_val
@@ -329,7 +333,7 @@ def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
             # Solve with gurobi
             prob = mpbpy.QuadprogProblem(qp.P, qp.q, Agurobi, lgurobi, ugurobi)
             if solver == 'gurobi':
-                res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
+                res = prob.solve(solver=mpbpy.GUROBI, verbose=True)
             else:
                 res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
 
@@ -387,7 +391,7 @@ def run_mpc_example(example_name):
     nsim = 100
 
     # Prediction horizon
-    N_vec = np.array([10, 20])
+    N_vec = np.array([100])
 
     # Define statistics for osqp, qpoases and gurobi
     osqp_timing = []
@@ -411,10 +415,10 @@ def run_mpc_example(example_name):
         osqp_timing.append(timing)
         osqp_iter.append(niter)
 
-        # Solve loop with osqp (coldstart)
-        timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp_coldstart')
-        osqp_coldstart_timing.append(timing)
-        osqp_coldstart_iter.append(niter)
+        # # Solve loop with osqp (coldstart)
+        # timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp_coldstart')
+        # osqp_coldstart_timing.append(timing)
+        # osqp_coldstart_iter.append(niter)
 
         # # Solving loop with qpoases
         # timing, niter = solve_loop(qp_matrices, 'qpoases')
@@ -426,10 +430,10 @@ def run_mpc_example(example_name):
         # gurobi_timing.append(timing)
         # gurobi_iter.append(niter)
 
-        # Solve loop with mosek
-        timing, niter = solve_loop(qp_matrices, problem, nsim, 'mosek')
-        mosek_timing.append(timing)
-        mosek_iter.append(niter)
+        # # Solve loop with mosek
+        # timing, niter = solve_loop(qp_matrices, problem, nsim, 'mosek')
+        # mosek_timing.append(timing)
+        # mosek_iter.append(niter)
 
     solver_timings = OrderedDict([
                                   ('OSQP (warm start)', osqp_timing),

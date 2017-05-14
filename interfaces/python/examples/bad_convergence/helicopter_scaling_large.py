@@ -6,17 +6,18 @@ import scipy.sparse as spa
 import pickle
 
 # Load one problem
-with open('./data/%s.pickle' % 'helicopter_scaling_small', 'rb') as f:
+with open('./data/%s.pickle' % 'helicopter_scaling_large', 'rb') as f:
     problem = pickle.load(f)
 
 
 # OSQP settings
 osqp_settings = {'verbose': True,
                  'scaling': True,
-                 'scaling_iter': 50,
+                 'scaling_iter': 100,
                  'early_terminate_interval': 1,
                  'auto_rho': True,
-                 'rho': 0.1,
+                 'alpha': 1.6,
+                 'rho': 0.01,
                  'polish': False}
 
 # Solve with OSQP

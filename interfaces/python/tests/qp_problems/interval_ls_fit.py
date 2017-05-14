@@ -33,11 +33,17 @@ def get_ratio_and_bounds(df):
 
     # 3)
     # Find rho values that give scaled number of iterations between 1 and 2
-    rho_values = df.loc[(df['scaled_iter'] <= 1.5)].rho.values
+    rho_values = df.loc[(df['scaled_iter'] <= 1.2)].rho.values
 
     # Compute maximum and minimum values
     df.loc[:, 'rho_min'] = rho_values.min()
     df.loc[:, 'rho_max'] = rho_values.max()
+
+    # if rho_values.min() == rho_values.max():
+    #     print("[r_min, r_max] = [%.4e, %.4e]" %
+    #           (rho_values.min(), rho_values.max()))
+    #     import ipdb; ipdb.set_trace()
+
 
     return df
 
@@ -116,7 +122,13 @@ alpha = cvxpy.Variable(n_params)
 v = cvxpy.Variable(n_problems)
 
 constraints = [v_l <= v, v <= v_u]
-objective = cvxpy.Minimize(cvxpy.norm(A * alpha - v))
+cost = cvxpy.norm(A * alpha - v)
+
+# DEBUG: try to add regularization on rho
+# lambda_reg = 1e-04
+# cost += -lambda_reg * cvxpy.sum_entries(v)
+
+objective = cvxpy.Minimize(cost)
 
 problem = cvxpy.Problem(objective, constraints)
 
@@ -191,7 +203,7 @@ ratio_fit = ratio_fit[sort_fit_idx]
 rho_fit = rho_fit[sort_fit_idx]
 
 # Pick only some elements of the picked vectors
-interval_slice = 20
+interval_slice = 5
 ratio_fit = ratio_fit[::interval_slice]
 rho_fit = rho_fit[::interval_slice]
 
