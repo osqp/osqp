@@ -15,7 +15,6 @@ from tqdm import tqdm
 import cvxpy
 
 
-
 def get_ratio_and_bounds(df):
     """
     Compute (relative to the current group)
@@ -33,7 +32,7 @@ def get_ratio_and_bounds(df):
 
     # 3)
     # Find rho values that give scaled number of iterations between 1 and 2
-    rho_values = df.loc[(df['scaled_iter'] <= 1.2)].rho.values
+    rho_values = df.loc[(df['scaled_iter'] <= 5.0)].rho.values
 
     # Compute maximum and minimum values
     df.loc[:, 'rho_min'] = rho_values.min()
@@ -43,7 +42,6 @@ def get_ratio_and_bounds(df):
     #     print("[r_min, r_max] = [%.4e, %.4e]" %
     #           (rho_values.min(), rho_values.max()))
     #     import ipdb; ipdb.set_trace()
-
 
     return df
 
@@ -87,7 +85,8 @@ print("\nTotal number of problems: %i" % n_problems)
 '''
 Construct problem
 '''
-n_params = 3  # Number of parameters in alpha [alpha_0, alpha_1, alpha_2]
+# Number of parameters in alpha [alpha_0, alpha_1, alpha_2]
+n_params = 5
 
 # Data matrix A
 A = spa.csc_matrix((0, n_params))
@@ -97,15 +96,16 @@ v_l = np.empty((0))
 v_u = np.empty((0))
 
 
-
 print("Constructing data matrix A and bounds l, u")
 for _, problem in tqdm(problems_p):
-
+    
+    n = problem['n'].iloc[0]
+    m = problem['m'].iloc[0]
     trP = problem['trP'].iloc[0]
     trAtA = problem['froA'].iloc[0] ** 2
 
     # Create row of A matrix
-    A_temp = np.array([1., np.log(trP), np.log(trAtA)])
+    A_temp = np.array([1., np.log(n), np.log(m), np.log(trP), np.log(trAtA)])
 
     # Add row to matrix A
     A = spa.vstack((A, spa.csc_matrix(A_temp)), 'csc')
@@ -180,7 +180,9 @@ n_fit_points = 100
 alpha_fit = np.asarray(alpha.value).flatten()
 
 # Get beta after removing logarithm
-beta_fit = np.array([np.exp(alpha_fit[0]), alpha_fit[1], alpha_fit[2]])
+beta_fit = np.array([np.exp(alpha_fit[0]),
+                     alpha_fit[1], alpha_fit[2],
+                     alpha_fit[3], alpha_fit[4]])
 
 # Get fit for every point
 print("Fit rho through every point")
@@ -188,12 +190,18 @@ rho_fit = np.zeros(n_problems)
 ratio_fit = np.zeros(n_problems)
 i = 0
 for _, problem in tqdm(problems_p):
+    n = problem['n'].iloc[0]
+    m = problem['m'].iloc[0]
     trP = problem['trP'].iloc[0]
     trAtA = problem['froA'].iloc[0] ** 2
 
     ratio_fit[i] = problem['trPovertrAtA'].iloc[0]
 
-    rho_fit[i] = beta_fit[0] * (trP ** beta_fit[1]) * (trAtA ** beta_fit[2])
+    rho_fit[i] = beta_fit[0] * \
+            (n ** beta_fit[1]) * \
+            (m ** beta_fit[2]) * \
+            (trP ** beta_fit[3]) * \
+            (trAtA ** beta_fit[4])
 
     i += 1
 
