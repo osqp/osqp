@@ -55,8 +55,8 @@ void vec_ew_recipr(const c_float *a, c_float *b, c_int n);
 /* Inner product a'b */
 c_float vec_prod(const c_float *a, const c_float *b, c_int n);
 
-/* elementwse product a.*b stored in b*/
-void vec_ew_prod(const c_float *a, c_float *b, c_int n);
+/* elementwse product a.*b stored in c*/
+void vec_ew_prod(const c_float *a, const c_float *b, c_float * c, c_int n);
 
 #if EMBEDDED != 1
 /* elementwise sqrt of the vector elements */

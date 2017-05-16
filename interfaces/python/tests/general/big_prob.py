@@ -1,5 +1,5 @@
-import osqp
-# import osqppurepy as osqp
+#  import osqp
+import osqppurepy as osqp
 import scipy.sparse as sparse
 import scipy as sp
 import numpy as np
@@ -35,7 +35,7 @@ osqp_opts = {'rho': 0.05,
 
 model = osqp.OSQP()
 model.setup(P=P, q=q, A=A, l=lA, u=uA, **osqp_opts)
-# res_osqp = model.solve()
+res_osqp = model.solve()
 #
 #
 # # Store optimal values

@@ -101,12 +101,12 @@ c_int scale_data(OSQPWorkspace * work){
     // Scale data
     mat_premult_diag(work->data->P, work->scaling->D);
     mat_postmult_diag(work->data->P, work->scaling->D);
-    vec_ew_prod(work->scaling->D, work->data->q, work->data->n);
+    vec_ew_prod(work->scaling->D, work->data->q, work->data->q, work->data->n);
 
     mat_premult_diag(work->data->A, work->scaling->E);
     mat_postmult_diag(work->data->A, work->scaling->D);
-    vec_ew_prod(work->scaling->E, work->data->l, work->data->m);
-    vec_ew_prod(work->scaling->E, work->data->u, work->data->m);
+    vec_ew_prod(work->scaling->E, work->data->l, work->data->l, work->data->m);
+    vec_ew_prod(work->scaling->E, work->data->u, work->data->u, work->data->m);
 
 
     return 0;
@@ -118,12 +118,12 @@ c_int unscale_data(OSQPWorkspace * work){
 
     mat_premult_diag(work->data->P, work->scaling->Dinv);
     mat_postmult_diag(work->data->P, work->scaling->Dinv);
-    vec_ew_prod(work->scaling->Dinv, work->data->q, work->data->n);
+    vec_ew_prod(work->scaling->Dinv, work->data->q, work->data->q, work->data->n);
 
     mat_premult_diag(work->data->A, work->scaling->Einv);
     mat_postmult_diag(work->data->A, work->scaling->Dinv);
-    vec_ew_prod(work->scaling->Einv, work->data->l, work->data->m);
-    vec_ew_prod(work->scaling->Einv, work->data->u, work->data->m);
+    vec_ew_prod(work->scaling->Einv, work->data->l, work->data->l, work->data->m);
+    vec_ew_prod(work->scaling->Einv, work->data->u, work->data->u, work->data->m);
 
     return 0;
 }
@@ -145,10 +145,10 @@ c_int unscale_data(OSQPWorkspace * work){
 
 c_int unscale_solution(OSQPWorkspace * work){
     // primal
-    vec_ew_prod(work->scaling->D, work->solution->x, work->data->n);
+    vec_ew_prod(work->scaling->D, work->solution->x, work->solution->x, work->data->n);
 
     // dual
-    vec_ew_prod(work->scaling->E, work->solution->y, work->data->m);
+    vec_ew_prod(work->scaling->E, work->solution->y, work->solution->y, work->data->m);
 
     return 0;
 }

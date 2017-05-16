@@ -142,23 +142,29 @@ c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
     c_float tmp, prim_resid = 0.0;
     if (polish) {
         // Called from polish() function
-        // residual = ||(z - u)_+ + (l - z)_-||_inf
+        // residual = ||(z - u)_+ + (z - l)_-||_inf    (stored in z_prev)
         for (j = 0; j < work->data->m; j++) {
-            tmp = c_absval(c_max(work->pol->z[j] - work->data->u[j], 0) +
-                c_min(work->pol->z[j] - work->data->l[j], 0));
-            if (tmp > prim_resid) prim_resid = tmp;
+            work->z_prev[i] = c_max(work->pol->z[j] - work->data->u[j], 0) +
+                c_min(work->pol->z[j] - work->data->l[j], 0);
         }
-        return prim_resid;
     } else {
     #endif
-
-        // Called from ADMM algorithm (store temporary vector in z_prev)
+        // Called from ADMM algorithm: Ax - z
+        // N.B. store temporary vector in z_prev
         mat_vec(work->data->A, work->x, work->z_prev, 0);
-        return vec_norm_inf_diff(work->z_prev, work->z, work->data->m);
+        vec_add_scaled(work->z_prev, work->z, work->data->m, -1); 
 
     #ifndef EMBEDDED
     }
     #endif
+
+    // If scaling active -> rescale residual
+    if (work->settings->scaling){
+        vec_ew_prod(work->scaling->Einv, work->z_prev, work->z_prev, work->data->m);
+    }
+
+    // Return norm of the residual
+    return vec_norm_inf(work->z_prev, work->data->m);
 }
 
 
@@ -170,6 +176,7 @@ c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
     #ifndef EMBEDDED
     if (!polish){ // Normal call
     #endif
+        // r = q + A'*y + P*x
         // dual_res = q
         prea_vec_copy(work->data->q, work->x_prev, work->data->n);
 
@@ -183,13 +190,10 @@ c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
         // += P' * x (lower triangular part with no diagonal)
         mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
 
-        // Return norm
-        return vec_norm_inf(work->x_prev, work->data->n);
-
     #ifndef EMBEDDED
     } else {  // Call after polish
         // Called from polish() function
-        // dr = q + Ared'*y_red + P*x
+        // r = q + Ared'*y_red + P*x
         // NB: Only upper triangular part of P is stored.
         prea_vec_copy(work->data->q, work->x_prev,
                       work->data->n);                    // dr = q
@@ -199,9 +203,15 @@ c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
                 work->x_prev, 1);               // += Px (upper triang part)
         mat_tpose_vec(work->data->P, work->pol->x,
                       work->x_prev, 1, 1);      // += Px (lower triang part)
-        return vec_norm_inf(work->x_prev, work->data->n);
     }
     #endif
+    
+    // If scaling active -> rescale residual
+    if (work->settings->scaling){
+        vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n);
+    }
+
+    return vec_norm_inf(work->x_prev, work->data->n);
 }
 
 
@@ -426,11 +436,30 @@ c_int check_termination(OSQPWorkspace *work){
     }
     else {
         // Compute primal tolerance
-        // max_rel_eps = max(||q||, ||A x||)
-        max_rel_eps = vec_norm_inf(work->z, work->data->m);
-        mat_vec(work->data->A, work->x, work->z_prev, 0);
-        temp_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
-        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+        eps_pri = eps_abs // Added Absolute part
+        max_rel_eps = 0.0; 
+        
+        // max_rel_eps = max(||z||, ||A x||)
+        if (work->settings->scaling){
+            // ||Einv * z||
+            vec_ew_prod(work->scaling->Einv, work->z, work->z_prev); 
+            max_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
+            // ||Einv * A * x||
+            mat_vec(work->data->A, work->x, work->z_prev, 0);
+            vec_ew_prod(work->scaling->Einv, work->z_prev, work->z_prev); 
+            temp_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
+            // Choose maximum
+            if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+        } else { // No unscaling required
+            // ||z||
+            max_rel_eps = vec_norm_inf(work->z, work->data->m);
+            // ||A * x||
+            mat_vec(work->data->A, work->x, work->z_prev, 0);
+            temp_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
+            // Choose maximum
+            if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+        }
+
 
         // eps_prim
         eps_prim = eps_abs + eps_rel * max_rel_eps;
@@ -441,11 +470,19 @@ c_int check_termination(OSQPWorkspace *work){
             // Primal infeasibility check
             prim_inf_check = is_primal_infeasible(work);
         }
-    }
+    }  // End check if m == 0 
 
     // Compute dual tolerance
     // max_rel_eps = max(||q||, ||A' y|, ||P x||)
-    //
+    if (work->settings->scaling){
+        // || Dinv q||
+        vec_ew_prod(work->scaling->Einv, work->data->q, work->x_prev, work->data->n);
+        max_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
+
+    } else { // No scaling required
+    
+    
+    }
     // ||q||
     max_rel_eps = vec_norm_inf(work->data->q, work->data->n);
     mat_tpose_vec(work->data->A, work->y, work->x_prev, 0, 0);

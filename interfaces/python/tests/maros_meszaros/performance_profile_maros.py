@@ -40,17 +40,17 @@ def is_optimal(x, y, qp, eps_abs=1e-03, eps_rel=1e-03):
 
     if la.norm(pri_res, np.inf) > eps_pri:
         print("Error in primal residual: %.4e > %.4e" %
-              (la.norm(pri_res, np.inf), eps_pri))
+              (la.norm(pri_res, np.inf), eps_pri), end='')
         return False
 
     # Check dual feasibility
     Px = P.dot(x)
     Aty = A.T.dot(y)
-    eps_dua = eps_abs + eps_rel * np.max([la.norm(Px, np.inf), 
-                                          la.norm(q, np.inf), 
+    eps_dua = eps_abs + eps_rel * np.max([la.norm(Px, np.inf),
+                                          la.norm(q, np.inf),
                                           la.norm(Aty, np.inf)])
     dua_res = Px + q + Aty
-    
+
     if la.norm(dua_res, np.inf) > eps_dua:
         print("Error in dual residual: %.4e > %.4e" %
               (la.norm(dua_res, np.inf), eps_dua), end='')
@@ -59,7 +59,7 @@ def is_optimal(x, y, qp, eps_abs=1e-03, eps_rel=1e-03):
     # Check complementary slackness
     y_plus = np.maximum(y, 0)
     y_minus = np.minimum(y, 0)
-    
+
     eps_comp = eps_abs + eps_rel * la.norm(Ax, np.inf)
 
     comp_res_u = np.minimum(np.abs(y_plus), np.abs(Ax - u))
@@ -67,12 +67,12 @@ def is_optimal(x, y, qp, eps_abs=1e-03, eps_rel=1e-03):
 
     if la.norm(comp_res_l, np.inf) > eps_comp:
         print("Error in complementary slackness residual l: %.4e > %.4e" %
-              (la.norm(comp_res_l, np.inf), eps_dua)), end='')
+              (la.norm(comp_res_l, np.inf), eps_dua), end='')
         return False
 
     if la.norm(comp_res_u, np.inf) > eps_comp:
         print("Error in complementary slackness residual u: %.4e > %.4e" %
-              (la.norm(comp_res_u, np.inf), eps_dua)), end='')
+              (la.norm(comp_res_u, np.inf), eps_dua), end='')
         return False
 
     # If we arrived until here, the solution is optimal
@@ -83,7 +83,8 @@ def is_optimal(x, y, qp, eps_abs=1e-03, eps_rel=1e-03):
 Run main script
 '''
 # Define all solvers
-solvers = [mpbpy.GUROBI, mpbpy.MOSEK, mpbpy.OSQP]
+#  solvers = [mpbpy.GUROBI, mpbpy.MOSEK, mpbpy.OSQP]
+solvers = [mpbpy.GUROBI, mpbpy.MOSEK, mpbpy.OSQP_PUREPY]
 # solvers = [mpbpy.MOSEK]
 # solvers = [mpbpy.GUROBI]
 nsolvers = len(solvers)  # Number of solvers
@@ -103,6 +104,7 @@ lst_probs = os.listdir(prob_dir)
 
 # DEBUG: insert only problem bad for GUROBI
 #  lst_probs = ['VALUES.mat']
+lst_probs = ['AUG2D.mat']
 
 # Count number of problems
 nprob = len([name for name in lst_probs
@@ -128,9 +130,9 @@ for f in lst_probs:
     for s in range(nsolvers):
         print("\t\t- %s: " % solvers[s], end='')
 
-        if solvers[s] == mpbpy.OSQP:
+        if solvers[s] == mpbpy.OSQP or solvers[s] == mpbpy.OSQP_PUREPY:
             res = m.solve(solver=solvers[s],
-                          verbose=False,
+                          verbose=True,
                           scaling_iter=50,
                           polish=False,
                           max_iter=10000)  # No verbosity

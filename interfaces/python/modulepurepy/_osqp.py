@@ -616,30 +616,37 @@ class OSQP(object):
     def compute_pri_res(self, polish):
         """
         Compute primal residual ||Ax - z||
-        TODO: Add polish case
         """
         if self.work.data.m == 0:  # No constraints
             return 0.
         if polish:
-            return la.norm(np.maximum(self.work.data.l - self.work.pol.z, 0) +
-                           np.maximum(self.work.pol.z - self.work.data.u, 0), np.inf)
+            pri_res = np.maximum(self.work.data.l - self.work.pol.z, 0) + \
+                np.maximum(self.work.pol.z - self.work.data.u, 0) 
         else:
+            pri_res = self.work.data.A.dot(self.work.x) - self.work.z
 
-            return la.norm(self.work.data.A.dot(self.work.x) - self.work.z,
-                           np.inf)
+        if self.work.settings.scaling:
+            pri_res = self.work.scaling.Einv.dot(pri_res)
+
+        return la.norm(pri_res, np.inf)
 
     def compute_dua_res(self, polish):
         """
         Compute dual residual ||Px + q + A'y||
         """
         if polish:
-            return la.norm(self.work.data.P.dot(self.work.pol.x) +
-                           self.work.data.q +
-                           self.work.pol.Ared.T.dot(self.work.pol.y_red), np.inf)
+            dua_res = self.work.data.P.dot(self.work.pol.x) + \
+                self.work.data.q +\
+                self.work.pol.Ared.T.dot(self.work.pol.y_red)
         else:
-            return la.norm(self.work.data.P.dot(self.work.x) +
-                           self.work.data.q +
-                           self.work.data.A.T.dot(self.work.y), np.inf)
+            dua_res = self.work.data.P.dot(self.work.x) +\
+                self.work.data.q +\
+                self.work.data.A.T.dot(self.work.y)
+
+        if self.work.settings.scaling:
+            dua_res = self.work.scaling.Dinv.dot(dua_res)
+
+        return la.norm(dua_res, np.inf)
 
     def is_primal_infeasible(self):
         """
@@ -810,10 +817,19 @@ class OSQP(object):
             pri_check = 1
         else:
             # Compute primal tolerance
-            eps_pri = eps_abs + \
-                eps_rel * np.max([
+            eps_pri = eps_abs
+            max_rel_eps = 0
+            if self.work.settings.scaling:
+                Einv = self.work.scaling.Einv
+                max_rel_eps = np.max([
+                    la.norm(Einv.dot(self.work.data.A.dot(self.work.x)), np.inf),
+                    la.norm(Einv.dot(self.work.z), np.inf)])
+            else:
+                max_rel_eps = np.max([
                     la.norm(self.work.data.A.dot(self.work.x), np.inf),
                     la.norm(self.work.z, np.inf)])
+
+            eps_pri += eps_abs * max_rel_eps
 
             if self.work.info.pri_res < eps_pri:
                 pri_check = 1
@@ -822,11 +838,22 @@ class OSQP(object):
                 prim_inf_check = self.is_primal_infeasible()
 
         # Compute dual tolerance
-        eps_dua = eps_abs + \
-            eps_rel * np.max([
+        eps_dua = eps_abs
+        max_rel_eps = 0
+
+        if self.work.settings.scaling:
+            Dinv = self.work.scaling.Dinv
+            max_rel_eps = np.max([
+                la.norm(Dinv.dot(self.work.data.A.T.dot(self.work.y)), np.inf),
+                la.norm(Dinv.dot(self.work.data.P.dot(self.work.x)), np.inf),
+                la.norm(Dinv.dot(self.work.data.q), np.inf)])
+        else:
+            max_rel_eps = np.max([
                 la.norm(self.work.data.A.T.dot(self.work.y), np.inf),
                 la.norm(self.work.data.P.dot(self.work.x), np.inf),
                 la.norm(self.work.data.q, np.inf)])
+
+        eps_dua += eps_abs * max_rel_eps
 
         if self.work.info.dua_res < eps_dua:
             dua_check = 1

@@ -6,8 +6,8 @@ import numpy as np
 import mathprogbasepy as mpbpy
 # sp.random.seed(3)
 
-n = 200
-m = 300
+n = 2000
+m = 3000
 random_scaling = np.power(10, np.random.randn())
 A = random_scaling * sparse.random(m, n, density=0.4, format='csc')
 # A = sparse.eye(m)
@@ -30,7 +30,7 @@ u /= Escal
 
 
 random_scaling = np.power(10, np.random.randn())
-P = random_scaling * sparse.random(n, n, density=0.9)
+P = random_scaling * sparse.random(n, n, density=0.4)
 # P = sparse.random(n, n, density=0.9).tocsc()
 P = P.dot(P.T).tocsc()
 q = sp.randn(n)
@@ -51,14 +51,14 @@ norm_q = np.linalg.norm(q)
 # print("new P ")
 # print(P.todense())
 
-osqp_opts = {'rho': 0.1,
-             'auto_rho': True,
+osqp_opts = {'rho': 1e-06,
+             'auto_rho': False,
              'scaling_iter': 100,
              'polish': True,
              'eps_abs': 1e-03,
              'eps_rel': 1e-03,
              'early_terminate_interval': 1,
-             'scaling': False}
+             'scaling': True}
 
 
 
