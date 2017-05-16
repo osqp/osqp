@@ -83,8 +83,8 @@ def is_optimal(x, y, qp, eps_abs=1e-03, eps_rel=1e-03):
 Run main script
 '''
 # Define all solvers
-#  solvers = [mpbpy.GUROBI, mpbpy.MOSEK, mpbpy.OSQP]
-solvers = [mpbpy.GUROBI, mpbpy.MOSEK, mpbpy.OSQP_PUREPY]
+solvers = [mpbpy.GUROBI, mpbpy.MOSEK, mpbpy.OSQP]
+#  solvers = [mpbpy.GUROBI, mpbpy.MOSEK, mpbpy.OSQP_PUREPY]
 # solvers = [mpbpy.MOSEK]
 # solvers = [mpbpy.GUROBI]
 nsolvers = len(solvers)  # Number of solvers
@@ -104,7 +104,7 @@ lst_probs = os.listdir(prob_dir)
 
 # DEBUG: insert only problem bad for GUROBI
 #  lst_probs = ['VALUES.mat']
-lst_probs = ['AUG2D.mat']
+#  lst_probs = ['AUG2D.mat']
 
 # Count number of problems
 nprob = len([name for name in lst_probs
@@ -132,8 +132,9 @@ for f in lst_probs:
 
         if solvers[s] == mpbpy.OSQP or solvers[s] == mpbpy.OSQP_PUREPY:
             res = m.solve(solver=solvers[s],
-                          verbose=True,
+                          verbose=False,
                           scaling_iter=50,
+                          sigma=1e-06,
                           polish=False,
                           max_iter=10000)  # No verbosity
         else:

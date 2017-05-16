@@ -1,5 +1,5 @@
-# import osqp
-import osqppurepy as osqp
+import osqp
+#  import osqppurepy as osqp
 import numpy as np
 import scipy.sparse as spa
 

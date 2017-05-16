@@ -712,6 +712,8 @@ class OSQP(object):
                     self.work.data.l.dot(np.minimum(self.work.delta_y, 0))
             if lhs < -eps_prim_inf:
                 self.work.Atdelta_y = self.work.data.A.T.dot(self.work.delta_y)
+                if self.work.settings.scaling:
+                    self.work.Atdelta_y = self.work.scaling.Dinv.dot(self.work.Atdelta_y)
                 return la.norm(self.work.Atdelta_y, np.inf) < eps_prim_inf
 
         return False
@@ -740,12 +742,20 @@ class OSQP(object):
                 # Compute P * delta_x
                 self.work.Pdelta_x = self.work.data.P.dot(self.work.delta_x)
 
+                # Scale if necessary
+                if self.work.settings.scaling:
+                    self.work.Pdelta_x = self.work.scaling.Dinv.dot(self.work.Pdelta_x)
+
                 # Check if ||P * delta_x|| = 0
                 if la.norm(self.work.Pdelta_x, np.inf) < eps_dual_inf:
 
                     # Compute A * delta_x
                     self.work.Adelta_x = self.work.data.A.dot(
                         self.work.delta_x)
+
+                    # Scale if necessary
+                    if self.work.settings.scaling:
+                        self.work.Adelta_x = self.work.scaling.Einv.dot(self.work.Adelta_x)
 
                     for i in range(self.work.data.m):
                         # De Morgan's Law applied to negate

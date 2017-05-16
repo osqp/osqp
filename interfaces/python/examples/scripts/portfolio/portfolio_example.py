@@ -84,7 +84,7 @@ def solve_loop(qp_matrices, solver='osqp'):
     n = len(qp.lx)
     k = len(qp.l) - 1
 
-    print('\nSolving portfolio problem loop for n = %d (assets) and solver %s' %
+    print('n = %d and solver %s' %
           (n, solver))
 
     # Get number of problems to solve
@@ -108,8 +108,7 @@ def solve_loop(qp_matrices, solver='osqp'):
         # Setup OSQP
         m = osqp.OSQP()
         m.setup(qp.P, qp.q[:, 0], Aosqp, losqp, uosqp,
-                auto_rho=False,
-                rho=0.1,
+                auto_rho=True,
                 polish=False,
                 verbose=False)
 
@@ -152,8 +151,7 @@ def solve_loop(qp_matrices, solver='osqp'):
         m = osqp.OSQP()
         m.setup(qp.P, qp.q[:, 0], Aosqp, losqp, uosqp,
                 warm_start=False,
-                auto_rho=False,
-                rho=0.1,
+                auto_rho=True,
                 polish=False,
                 verbose=False)
 
@@ -211,8 +209,7 @@ def solve_loop(qp_matrices, solver='osqp'):
             m = osqp.OSQP()
             m.setup(qp.P, qp.q[:, i], Aosqp, losqp, uosqp,
                     warm_start=False,
-                    auto_rho=False,
-                    rho=0.1,
+                    auto_rho=True,
                     polish=False,
                     verbose=False)
 
@@ -430,6 +427,9 @@ def run_portfolio_example():
     Solve problems
     '''
 
+    print("Portfolio  example")
+    print("--------------------")
+
     # Reset random seed for repeatibility
     np.random.seed(1)
 
@@ -440,7 +440,7 @@ def run_portfolio_example():
 
     # Assets
     n_vec = np.array([100, 200, 300, 400, 500, 600, 700, 800, 900, 1000])
-    # n_vec = np.array([100, 200, 300, 400, 500])
+    #  n_vec = np.array([100, 200, 300, 400, 500])
 
     # Factors
     k_vec = (n_vec / 10).astype(int)
@@ -518,6 +518,7 @@ def run_portfolio_example():
     utils.generate_plot('portfolio', 'time', 'total', n_vec,
                         solver_timings,
                         fig_size=0.9)
+
     #
     # solver_max_iter = OrderedDict([('OSQP (warm start)', osqp_iter),
     #                                ('OSQP (cold start)', osqp_coldstart_iter)])

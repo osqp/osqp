@@ -10,7 +10,7 @@ import numpy as np
 import ipdb
 
 import mathprogbasepy as mpbpy
-
+import mathprogbasepy.quadprog.problem as mpbpy_prob
 
 def load_maros_meszaros_problem(f):
     # Load file
@@ -38,7 +38,7 @@ def main():
     #                 'primal_infeasible', 'random_primal_infeasible',
     #                 'maros_meszaros', 'lp', 'dual_infeasible_lp',
     #                 'dual_infeasible_qp'}
-    example = 'lp'
+    example = 'dual_infeasible_lp'
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
@@ -156,11 +156,11 @@ def main():
     # Solve with OSQP. You can pass options to OSQP solver
     print("\nSolve with OSQP")
     print("-----------------")
-    resultsOSQP = p.solve(solver=mpbpy.OSQP, max_iter=2500,
-                          eps_rel=1e-3,
-                          eps_abs=1e-3,
-                          alpha=1.6,
-                          rho=0.00001,  # Works with LP
+    resultsOSQP = p.solve(solver=mpbpy.OSQP_PUREPY, max_iter=2500,
+                          #  eps_rel=1e-3,
+                          #  eps_abs=1e-3,
+                          #  alpha=1.6,
+                          #  rho=0.00001,  # Works with LP
                           auto_rho=True,
                           scaling_iter=50,
                           early_terminate_interval=1,
@@ -169,7 +169,7 @@ def main():
                           scaling=True,
                           verbose=True)
 
-    if resultsGUROBI.status != 'solver_error':
+    if resultsGUROBI.status in mpbpy_prob.SOLUTION_PRESENT:
         # print("\n")
         # print("Comparison CPLEX - GUROBI")
         # print("-------------------------")

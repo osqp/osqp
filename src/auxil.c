@@ -217,7 +217,7 @@ c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
 
 c_int is_primal_infeasible(OSQPWorkspace * work){
 
-    // This function checks for the scaled primal infeasibility termination criteria.
+    // This function checks for the primal infeasibility termination criteria.
     //
     // 1) A' * delta_y < eps
     //
@@ -250,6 +250,9 @@ c_int is_primal_infeasible(OSQPWorkspace * work){
         if (ineq_lhs < -eps_prim_inf){
             // Compute and return ||A'delta_y|| < eps_prim_inf
             mat_tpose_vec(work->data->A, work->delta_y, work->Atdelta_y, 0, 0);
+            if (work->settings->scaling){ // Unscale if necessary
+            vec_ew_prod(work->scaling->Dinv, work->Atdelta_y, work->Atdelta_y, work->data->n);
+            }
             return vec_norm_inf(work->Atdelta_y, work->data->n) < eps_prim_inf;
         }
 
@@ -296,11 +299,21 @@ c_int is_dual_infeasible(OSQPWorkspace * work){
             // Compute product P * delta_x
             mat_vec(work->data->P, work->delta_x, work->Pdelta_x, 0);
 
+            // Scale if necessary
+            if (work->settings->scaling){
+                vec_ew_prod(work->scaling->Dinv, work->Pdelta_x, work->Pdelta_x, work->data->n);
+            }
+
             // Check if || P * delta_x || = 0
             if (vec_norm_inf(work->Pdelta_x, work->data->n) < eps_dual_inf){
 
                 // Compute A * delta_x
                 mat_vec(work->data->A, work->delta_x, work->Adelta_x, 0);
+
+                // Scale if necessary
+                if (work->settings->scaling){
+                    vec_ew_prod(work->scaling->Einv, work->Adelta_x, work->Adelta_x, work->data->m);
+                }
 
                 // De Morgan Law Applied to dual fineasibility conditions for A * x
                 // N.B. Note that 1e-03 is used to adjust the infinity value

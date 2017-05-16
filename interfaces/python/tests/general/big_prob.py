@@ -20,9 +20,9 @@ q = sp.randn(n)
 qp = mpbpy.QuadprogProblem(P, q, A, lA, uA)
 
 
-osqp_opts = {'rho': 1e-6,
-             'auto_rho': False,
-            #  'sigma': 0.001,
+osqp_opts = {'rho': 1e-7,
+             'auto_rho': True,
+             'sigma': 1e-06,
             #  'eps_rel': 1e-08,
             #  'eps_abs': 1e-08,
              'early_terminate_interval': 1,

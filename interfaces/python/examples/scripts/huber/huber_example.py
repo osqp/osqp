@@ -70,8 +70,7 @@ def solve_problem(qp_matrices, n_prob, solver='osqp'):
     m = int(len(qp.lx) / 2)
     n = len(qp.q) - 2*m
 
-    print('\nSolving Huber fitting problem ' +
-          'for n = %d (parameters) and solver %s' % (n, solver))
+    print('n = %d and solver %s' % (n, solver))
 
     # Initialize time vector
     time = np.zeros(n_prob)
@@ -93,8 +92,7 @@ def solve_problem(qp_matrices, n_prob, solver='osqp'):
             # Setup OSQP
             m = osqp.OSQP()
             m.setup(qp.P, qp.q, Aosqp, losqp, uosqp,
-                    rho=0.01,
-                    auto_rho=False,
+                    auto_rho=True,
                     polish=False,
                     verbose=False)
 
@@ -252,6 +250,9 @@ def run_huber_example():
     Solve problems
     '''
 
+    print("Huber example")
+    print("--------------------")
+    
     # Reset random seed for repeatibility
     np.random.seed(1)
 

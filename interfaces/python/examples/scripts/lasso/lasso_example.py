@@ -1,10 +1,5 @@
 """
 Code for lasso example
-
-This script compares:
-    - OSQP
-    - qpOASES
-    - GUROBI
 """
 
 from __future__ import print_function
@@ -84,7 +79,7 @@ def solve_loop(qp_matrices, solver='osqp'):
     # Extract features
     n = qp.n
 
-    print('\nSolving lasso problem loop for n = %d (features) and solver %s' %
+    print('n = %d and solver %s' %
           (n, solver))
 
     # Get number of problems to solve
@@ -101,8 +96,7 @@ def solve_loop(qp_matrices, solver='osqp'):
         # Setup OSQP
         m = osqp.OSQP()
         m.setup(qp.P, qp.q[:, 0], qp.A, qp.l, qp.u,
-                rho=0.1,
-                auto_rho=False,
+                auto_rho=True,
                 polish=False,
                 verbose=False)
 
@@ -139,8 +133,7 @@ def solve_loop(qp_matrices, solver='osqp'):
         m = osqp.OSQP()
         m.setup(qp.P, qp.q[:, 0], qp.A, qp.l, qp.u,
                 warm_start=False,
-                auto_rho=False,
-                rho=0.1,
+                auto_rho=True,
                 polish=False,
                 verbose=False)
 
@@ -191,8 +184,7 @@ def solve_loop(qp_matrices, solver='osqp'):
             # Setup OSQP
             m = osqp.OSQP()
             m.setup(qp.P, qp.q[:, i], qp.A, qp.l, qp.u,
-                    rho=0.1,
-                    auto_rho=False,
+                    auto_rho=True,
                     polish=False,
                     verbose=False)
 
@@ -376,6 +368,9 @@ def run_lasso_example():
     '''
     Solve problems
     '''
+
+    print("Lasso  example")
+    print("--------------------")
 
     # Reset random seed for repetibility
     np.random.seed(1)

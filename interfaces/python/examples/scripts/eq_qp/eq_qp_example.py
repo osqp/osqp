@@ -69,8 +69,7 @@ def solve_problem(qp_matrices, n_prob, solver='osqp'):
     n = len(qp.q)
     m = len(qp.l)
 
-    print('\nSolving equality constrained QP problem for n = %d and solver %s' %
-          (n, solver))
+    print('n = %d and solver %s' % (n, solver))
 
     # Initialize time vector
     time = np.zeros(n_prob)
@@ -225,6 +224,9 @@ def run_eq_qp_example():
     Solve problems
     '''
 
+    print("Equality constrained QP example")
+    print("-------------------------------")
+    
     # Reset random seed for repetibility
     np.random.seed(1)
 
