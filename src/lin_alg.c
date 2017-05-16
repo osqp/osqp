@@ -119,7 +119,7 @@ c_float vec_prod(const c_float *a, const c_float *b, c_int n){
 void vec_ew_prod(const c_float *a, const c_float *b, c_float * c, c_int n){
     c_int i;
     for(i = 0;  i < n; i++){
-        c[i] *= b[i] * a[i];
+        c[i] = b[i] * a[i];
     }
 }
 

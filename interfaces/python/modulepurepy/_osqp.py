@@ -817,8 +817,6 @@ class OSQP(object):
             pri_check = 1
         else:
             # Compute primal tolerance
-            eps_pri = eps_abs
-            max_rel_eps = 0
             if self.work.settings.scaling:
                 Einv = self.work.scaling.Einv
                 max_rel_eps = np.max([
@@ -829,7 +827,7 @@ class OSQP(object):
                     la.norm(self.work.data.A.dot(self.work.x), np.inf),
                     la.norm(self.work.z, np.inf)])
 
-            eps_pri += eps_abs * max_rel_eps
+            eps_pri = eps_abs + eps_rel * max_rel_eps
 
             if self.work.info.pri_res < eps_pri:
                 pri_check = 1
@@ -838,8 +836,6 @@ class OSQP(object):
                 prim_inf_check = self.is_primal_infeasible()
 
         # Compute dual tolerance
-        eps_dua = eps_abs
-        max_rel_eps = 0
 
         if self.work.settings.scaling:
             Dinv = self.work.scaling.Dinv
@@ -853,7 +849,7 @@ class OSQP(object):
                 la.norm(self.work.data.P.dot(self.work.x), np.inf),
                 la.norm(self.work.data.q, np.inf)])
 
-        eps_dua += eps_abs * max_rel_eps
+        eps_dua = eps_abs + eps_rel * max_rel_eps
 
         if self.work.info.dua_res < eps_dua:
             dua_check = 1

@@ -6,8 +6,8 @@ import numpy as np
 import mathprogbasepy as mpbpy
 # sp.random.seed(3)
 
-n = 2000
-m = 3000
+n = 200
+m = 300
 random_scaling = np.power(10, np.random.randn())
 A = random_scaling * sparse.random(m, n, density=0.4, format='csc')
 # A = sparse.eye(m)

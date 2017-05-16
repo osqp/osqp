@@ -139,12 +139,12 @@ c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
     // If embedded we cannot access polish members
     #ifndef EMBEDDED
     c_int j;
-    c_float tmp, prim_resid = 0.0;
+    /* c_float tmp, prim_resid = 0.0; */
     if (polish) {
         // Called from polish() function
         // residual = ||(z - u)_+ + (z - l)_-||_inf    (stored in z_prev)
         for (j = 0; j < work->data->m; j++) {
-            work->z_prev[i] = c_max(work->pol->z[j] - work->data->u[j], 0) +
+            work->z_prev[j] = c_max(work->pol->z[j] - work->data->u[j], 0) +
                 c_min(work->pol->z[j] - work->data->l[j], 0);
         }
     } else {
@@ -436,17 +436,15 @@ c_int check_termination(OSQPWorkspace *work){
     }
     else {
         // Compute primal tolerance
-        eps_pri = eps_abs // Added Absolute part
-        max_rel_eps = 0.0; 
         
         // max_rel_eps = max(||z||, ||A x||)
         if (work->settings->scaling){
             // ||Einv * z||
-            vec_ew_prod(work->scaling->Einv, work->z, work->z_prev); 
+            vec_ew_prod(work->scaling->Einv, work->z, work->z_prev, work->data->m); 
             max_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
             // ||Einv * A * x||
             mat_vec(work->data->A, work->x, work->z_prev, 0);
-            vec_ew_prod(work->scaling->Einv, work->z_prev, work->z_prev); 
+            vec_ew_prod(work->scaling->Einv, work->z_prev, work->z_prev, work->data->m); 
             temp_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
             // Choose maximum
             if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
@@ -463,6 +461,7 @@ c_int check_termination(OSQPWorkspace *work){
 
         // eps_prim
         eps_prim = eps_abs + eps_rel * max_rel_eps;
+
         // Primal feasibility check
         if (work->info->pri_res < eps_prim) {
             prim_res_check = 1;
@@ -476,26 +475,38 @@ c_int check_termination(OSQPWorkspace *work){
     // max_rel_eps = max(||q||, ||A' y|, ||P x||)
     if (work->settings->scaling){
         // || Dinv q||
-        vec_ew_prod(work->scaling->Einv, work->data->q, work->x_prev, work->data->n);
+        vec_ew_prod(work->scaling->Dinv, work->data->q, work->x_prev, work->data->n);
         max_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
+        // || Dinv A' y ||
+        mat_tpose_vec(work->data->A, work->y, work->x_prev, 0, 0);
+        vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n); 
+        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
+        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+        // || Dinv P x||
+        // P * x (upper triangular part)
+        mat_vec(work->data->P, work->x, work->x_prev, 0);
+        // P' * x (lower triangular part with no diagonal)
+        mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
+        vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n); 
+        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
+        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
 
     } else { // No scaling required
-    
+        // ||q||
+        max_rel_eps = vec_norm_inf(work->data->q, work->data->n);
+        mat_tpose_vec(work->data->A, work->y, work->x_prev, 0, 0);
+        // ||A'*y||
+        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
+        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+        // ||P*x||
+        // P * x (upper triangular part)
+        mat_vec(work->data->P, work->x, work->x_prev, 0);
+        // P' * x (lower triangular part with no diagonal)
+        mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
+        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
+        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
     
     }
-    // ||q||
-    max_rel_eps = vec_norm_inf(work->data->q, work->data->n);
-    mat_tpose_vec(work->data->A, work->y, work->x_prev, 0, 0);
-    // ||A'*y||
-    temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
-    if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
-    // ||P*x||
-    // P * x (upper triangular part)
-    mat_vec(work->data->P, work->x, work->x_prev, 0);
-    // P' * x (lower triangular part with no diagonal)
-    mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
-    temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
-    if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
 
     // eps_dual
     eps_dual = eps_abs + eps_rel * max_rel_eps;

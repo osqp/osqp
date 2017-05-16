@@ -1,9 +1,9 @@
-#  import osqp
-import osqppurepy as osqp
+import osqp
+#  import osqppurepy as osqp
 import scipy.sparse as sparse
 import scipy as sp
 import numpy as np
-# import mathprogbasepy as mpbpy
+import mathprogbasepy as mpbpy
 sp.random.seed(2)
 
 n = 100
@@ -17,20 +17,24 @@ P = P.dot(P.T)
 q = sp.randn(n)
 
 
-# qp = mpbpy.QuadprogProblem(P, q, A, lA, uA)
+qp = mpbpy.QuadprogProblem(P, q, A, lA, uA)
 
 
-osqp_opts = {'rho': 0.05,
+osqp_opts = {'rho': 1e-6,
              'auto_rho': False,
             #  'sigma': 0.001,
             #  'eps_rel': 1e-08,
             #  'eps_abs': 1e-08,
+             'early_terminate_interval': 1,
              'polish': False,
              'scaling': True,
-             'max_iter': 2500}
+             'scaling_iter': 100,
+             'max_iter': 2500,
+             'verbose': True
+             }
 
 # qp.solve(solver=GUROBI)
-# res_purepy = qp.solve(solver=OSQP_PUREPY, **osqp_opts)
+res_purepy = qp.solve(solver=mpbpy.OSQP_PUREPY, **osqp_opts)
 # res_osqp = qp.solve(solver=mpbpy.OSQP, **osqp_opts)
 
 model = osqp.OSQP()
