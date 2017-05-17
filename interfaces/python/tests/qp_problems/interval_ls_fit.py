@@ -32,7 +32,7 @@ def get_ratio_and_bounds(df):
 
     # 3)
     # Find rho values that give scaled number of iterations between 1 and 2
-    rho_values = df.loc[(df['scaled_iter'] <= 5.0)].rho.values
+    rho_values = df.loc[(df['scaled_iter'] <= 2.0)].rho.values
 
     # Compute maximum and minimum values
     df.loc[:, 'rho_min'] = rho_values.min()
@@ -139,11 +139,14 @@ problem.solve(solver=cvxpy.GUROBI, verbose=True)
 '''
 Create contour plot from 3D scatter plot with rho, ratio, scaled iterations
 '''
-
-# Get grid data
-xi, yi, zi = get_grid_data(res_p['trPovertrAtA'],
-                           res_p['rho'],
+# Get grid data (take logarithm of rho and sigma to have better gridding)
+xi, yi, zi = get_grid_data(np.log10(res_p['trPovertrAtA']),
+                           np.log10(res_p['rho']),
                            res_p['scaled_iter'])
+
+# Revert logarithm
+xi = np.power(10, xi)
+yi = np.power(10, yi)
 
 
 # levels = [1., 3., 6., 10., 15., 20., 100.]
@@ -222,7 +225,7 @@ plt.plot(ratio_fit, rho_fit)
 # plt.xscale('linear')
 # plt.yscale('linear')
 # plt.xscale('log')
-# plt.yscale('log')
+plt.yscale('log')
 
 plt.show(block=False)
 plt.savefig('behavior.pdf')
