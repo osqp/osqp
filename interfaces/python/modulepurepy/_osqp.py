@@ -156,7 +156,7 @@ class settings(object):
     ----------
     -> These cannot be changed without running setup
     rho  [1.6]                 - Step in ADMM procedure
-    sigma    [1e-01]           - Regularization parameter for polish
+    sigma    [1e-06]           - Regularization parameter for polish
     scaling  [True]            - Prescaling/Equilibration
     scaling_iter [3]           - Number of Steps for Scaling Method
     scaling_norm [2]           - Scaling norm in SK algorithm
@@ -181,7 +181,7 @@ class settings(object):
     def __init__(self, **kwargs):
 
         self.rho = kwargs.pop('rho', 0.1)
-        self.sigma = kwargs.pop('sigma', 1e-03)
+        self.sigma = kwargs.pop('sigma', 1e-06)
         self.scaling = kwargs.pop('scaling', True)
         self.scaling_iter = kwargs.pop('scaling_iter', 3)
         self.scaling_norm = kwargs.pop('scaling_norm', 2)
@@ -426,7 +426,7 @@ class OSQP(object):
         else:
             E = spspa.diags(d[self.work.data.n:])
 
-        # import ipdb; ipdb.set_trace()
+        import ipdb; ipdb.set_trace()
 
 
         # Scale problem Matrices

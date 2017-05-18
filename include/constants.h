@@ -31,7 +31,7 @@ extern "C" {
  **********************************/
 
 #define RHO (0.1)
-#define SIGMA (0.001)
+#define SIGMA (1E-06)
 #define MAX_ITER (2500)
 #define EPS_ABS (1E-3)
 #define EPS_REL (1E-3)

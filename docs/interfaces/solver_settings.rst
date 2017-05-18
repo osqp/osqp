@@ -18,7 +18,7 @@ The settings marked with * can be changed without running the setup method again
 +------------------------------------+-------------------------------------+----------------+
 | :code:`auto_rho`                   | ADMM rho step automatic selection   |   True         |
 +------------------------------------+-------------------------------------+----------------+
-| :code:`sigma`                      | ADMM sigma step                     |   0.001        |
+| :code:`sigma`                      | ADMM sigma step                     |   1e-06        |
 +------------------------------------+-------------------------------------+----------------+
 | :code:`max_iter` *                 | Maximum number of iterations        |   2500         |
 +------------------------------------+-------------------------------------+----------------+

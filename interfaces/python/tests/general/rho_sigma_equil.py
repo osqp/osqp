@@ -153,9 +153,13 @@ q = random_scaling.dot(sp.randn(n))
 # Scale data as OSQP does
 scaling_norm = 2
 scaling_iter = 1000
-P_sc, q_sc, A_sc, l_sc, u_sc = scale_data(P, q, A, l, u, 
-                                          scaling_norm=scaling_norm, 
-                                          scaling_iter=scaling_iter)
+scaling = True
+if scaling is not True:
+    (P_sc, q_sc, A_sc, l_sc, u_sc) = (P, q, A, l, u)
+else:
+    P_sc, q_sc, A_sc, l_sc, u_sc = scale_data(P, q, A, l, u, 
+                                              scaling_norm=scaling_norm, 
+                                              scaling_iter=scaling_iter)
 
 
 # Iterate over rho and sigma values solving the problem
@@ -204,7 +208,7 @@ for i in tqdm(range(len(rho_vec))):
                 rho=rho_vec[i],
                 sigma=sigma_vec[j],
                 auto_rho=False,
-                scaling=True,
+                scaling=scaling,
                 scaling_iter=scaling_iter,
                 scaling_norm=scaling_norm,
                 polish=False,
@@ -215,8 +219,7 @@ for i in tqdm(range(len(rho_vec))):
         n_iter[i, j] = res.info.iter
 
         # Store ratio between residuals
-        r_res[i, j] = np.maximum(res.info.pri_res / res.info.dua_res,
-                                 res.info.dua_res / res.info.pri_res)
+        r_res[i, j] = res.info.pri_res / res.info.dua_res
 
         # Allocate values for plotting
         rho_plot[z_idx] = rho_vec[i]
@@ -310,6 +313,11 @@ zi = np.power(10, zi)
 
 norm = mc.LogNorm(vmin=zi.min(),
                   vmax=zi.max())
+#  max_res = 1e05
+#  min_res = 1e-05
+#  norm = mc.LogNorm(vmin=min_res,
+                  #  vmax=max_res)
+#  levels = np.logspace(np.log10(min_res), np.log10(max_res), 11)
 
 # Generate plot
 fig = plt.figure()
@@ -318,8 +326,9 @@ plt.contour(xi, yi, zi, norm=norm)
 plt.contourf(xi, yi, zi, norm=norm)
 ax.set_ylabel(r'$\sigma$')
 ax.set_xlabel(r'$\rho$')
-ax.set_title(r'Ratio between residual norms $\mathrm{max} \left(\frac{r_p}{r_d}, \frac{r_d}{r_p} \right)$')
+ax.set_title(r'Ratio between residual norms $\frac{r_p}{r_d}$')
 plt.colorbar()
+plt.contour(xi, yi, zi, levels=[.1, 10], colors=('k',),linestyles=('-',),linewidths=(2,))
 plt.tight_layout()
 ax.set_xscale('log')
 ax.set_yscale('log')
