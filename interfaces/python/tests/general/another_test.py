@@ -18,8 +18,8 @@ m = A.shape[0]
 # OSQP options
 osqp_opts = {'rho': 1.0,
              'auto_rho': False,
-             'scaling_iter': 100,
-             'scaling_norm': 1,
+             'scaling_iter': 30,
+             'scaling_norm': 2,
              'scaling': True,
              'early_terminate_interval': 1,
              'max_iter': 500}

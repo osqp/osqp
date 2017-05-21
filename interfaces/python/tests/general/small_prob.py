@@ -4,11 +4,12 @@ import scipy.sparse as sparse
 import scipy as sp
 import numpy as np
 import mathprogbasepy as mpbpy
-# sp.random.seed(3)
+
+sp.random.seed(5)
 
 n = 200
 m = 300
-random_scaling = np.power(10, np.random.randn())
+random_scaling = np.power(10, 5*np.random.randn())
 A = random_scaling * sparse.random(m, n, density=0.4, format='csc')
 # A = sparse.eye(m)
 
@@ -29,7 +30,7 @@ u /= Escal
 
 
 
-random_scaling = np.power(10, np.random.randn())
+random_scaling = np.power(10, 5*np.random.randn())
 P = random_scaling * sparse.random(n, n, density=0.4)
 # P = sparse.random(n, n, density=0.9).tocsc()
 P = P.dot(P.T).tocsc()
@@ -51,38 +52,35 @@ norm_q = np.linalg.norm(q)
 # print("new P ")
 # print(P.todense())
 
-osqp_opts = {'rho': 1e-06,
+osqp_opts = {'rho': 0.001,
              'auto_rho': False,
-             'scaling_iter': 100,
+             'scaling_iter': 30,
              'polish': True,
-             'eps_abs': 1e-03,
-             'eps_rel': 1e-03,
              'early_terminate_interval': 1,
              'scaling': True}
 
 
 
 
+# GUROBI
+qp = mpbpy.QuadprogProblem(P, q, A, l, u)
+res_gurobi = qp.solve(solver=mpbpy.GUROBI, verbose=True)
 
-# qp = mpbpy.QuadprogProblem(P, q, A, l, u)
-# res_gurobi = qp.solve(solver=mpbpy.GUROBI, verbose=True)
-# res_purepy = qp.solve(solver=OSQP_PUREPY, **osqp_opts)
-# res_osqp = qp.solve(solver=mpbpy.OSQP, **osqp_opts)
+# OSQP
+#  model = osqp.OSQP()
+#  model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
+#  res = model.solve()
 
-model = osqp.OSQP()
-model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
-res = model.solve()
-
-
+# OSQPPUREPY
 model = osqppurepy.OSQP()
 model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
 res_purepy = model.solve()
 
 
-print("Norm difference x OSQP and OSQPPUREPY %.4e" %
-      np.linalg.norm(res.x - res_purepy.x))
-print("Norm difference y OSQP and OSQPPUREPY %.4e" %
-      np.linalg.norm(res.y - res_purepy.y))
+#  print("Norm difference x OSQP and OSQPPUREPY %.4e" %
+#        np.linalg.norm(res.x - res_purepy.x))
+#  print("Norm difference y OSQP and OSQPPUREPY %.4e" %
+#        np.linalg.norm(res.y - res_purepy.y))
 
 # x = res.x
 # y = res.y

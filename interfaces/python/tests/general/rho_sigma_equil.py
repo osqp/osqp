@@ -2,8 +2,8 @@
 Try different values of rho and sigma to check relative norms
 between columns of KKT matrix
 '''
-import osqp
-#  import osqppurepy as osqp
+#  import osqp
+import osqppurepy as osqp
 import scipy.sparse as spa
 import scipy as sp
 import numpy as np
@@ -93,7 +93,7 @@ def get_KKT_info(P, A, sigma, rho):
 
     1) Condition number: cond(KKT)
 
-    3) Ratio: r = max_{i} || KKT_{i, :} || / min_{i} || KKT_{i, :} ||
+    2) Ratio: r = max_{i} || KKT_{i, :} || / min_{i} || KKT_{i, :} ||
 
     where || . || are the infinity norms and
 
