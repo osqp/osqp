@@ -146,6 +146,23 @@ void vec_ew_min(c_float *a, c_int n, c_float min_val){
     }
 }
 
+
+void vec_ew_max_vec(const c_float * a, const c_float * b, c_float * c, c_int n){
+    c_int i;
+    for(i = 0;  i < n; i++){
+        c[i] = c_max(a[i], b[i]);
+    }
+}
+
+
+void vec_ew_min_vec(const c_float * a, const c_float * b, c_float * c, c_int n){
+    c_int i;
+    for(i = 0;  i < n; i++){
+        c[i] = c_min(a[i], b[i]);
+    }
+}
+
+
 /* MATRIX FUNCTIONS ----------------------------------------------------------*/
 
 void mat_premult_diag(csc *A, const c_float *d){
@@ -292,6 +309,64 @@ void mat_tpose_vec(const csc *A, const c_float *x, c_float *y,
                     y[j] += A->x[k]*x[A->i[k]];
                 }
             }
+        }
+    }
+}
+
+
+void mat_inf_norm_rows(const csc * M, c_float * E){
+    c_int i, j, ptr;
+    
+    // Initialize zero max elements
+    for (j = 0; j < M->m; j++){
+        E[j] = 0.;
+    }
+
+    // Compute maximum across rows
+    for (j = 0; j < M->n; j++){
+        for (ptr = M->p[j]; ptr < M->p[j+1]; ptr++){
+            i = M->i[ptr];  
+            E[i] = c_max(c_absval(M->x[ptr]), E[i]);   
+        }
+    }
+}
+
+
+void mat_inf_norm_cols(const csc * M, c_float * E){
+    c_int i, j, ptr;
+    
+    // Initialize zero max elements
+    for (j = 0; j < M->n; j++){
+        E[j] = 0.;
+    }
+    
+    // Compute maximum across columns
+    for (j = 0; j < M->n; j++){
+        for (ptr = M->p[j]; ptr < M->p[j+1]; ptr++){
+            i = M->i[ptr];  
+            E[j] = c_max(c_absval(M->x[ptr]), E[j]);   
+        }
+    }
+}
+
+
+void mat_inf_norm_cols_sym_triu(const csc * M, c_float * E){
+    c_int i, j, ptr;
+    
+    // Initialize zero max elements
+    for (j = 0; j < M->n; j++){
+        E[j] = 0.;
+    }
+    
+    // Compute maximum across columns
+    // Note that element (i, j) contributes to
+    // -> Column j (as expected in any matrices)
+    // -> Column i (which is equal to row i for symmetric matrices)
+    for (j = 0; j < M->n; j++){
+        for (ptr = M->p[j]; ptr < M->p[j+1]; ptr++){
+            i = M->i[ptr];  
+            E[j] = c_max(c_absval(M->x[ptr]), E[j]);   
+            E[i] = c_max(c_absval(M->x[ptr]), E[i]);   
         }
     }
 }

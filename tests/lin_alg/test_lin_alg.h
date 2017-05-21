@@ -29,6 +29,7 @@ static char * test_vec_operations(){
     c_float norm_inf, vecprod; // normInf;
     c_float * ew_reciprocal;
     c_float * add_scaled;
+    c_float * vec_ew_max_vec_test, * vec_ew_min_vec_test;
 
     lin_alg_sols_data *  data = generate_problem_lin_alg_sols_data();
 
@@ -59,10 +60,25 @@ static char * test_vec_operations(){
     mu_assert("Linear algebra tests: error in vector operation, vector product",
             c_absval(vecprod - data->test_vec_ops_vec_prod) < TESTS_TOL);
 
+    // Elementwise maximum between two vectors
+    vec_ew_max_vec_test = (c_float *)c_malloc(data->test_vec_ops_n * sizeof(c_float));
+    vec_ew_max_vec(data->test_vec_ops_v1, data->test_vec_ops_v2, vec_ew_max_vec_test,
+                   data->test_vec_ops_n);
+    mu_assert("Linear algebra tests: error in vector operation, elementwise maximum between vectors", vec_norm_inf_diff(vec_ew_max_vec_test, data->test_vec_ops_ew_max_vec, 
+                  data->test_vec_ops_n) < TESTS_TOL);
 
+    // Elementwise minimum between two vectors
+    vec_ew_min_vec_test = (c_float *)c_malloc(data->test_vec_ops_n * sizeof(c_float));
+    vec_ew_min_vec(data->test_vec_ops_v1, data->test_vec_ops_v2, vec_ew_min_vec_test,
+                   data->test_vec_ops_n);
+    mu_assert("Linear algebra tests: error in vector operation, elementwise minimum between vectors", vec_norm_inf_diff(vec_ew_min_vec_test, data->test_vec_ops_ew_min_vec, 
+                  data->test_vec_ops_n) < TESTS_TOL);
+    
     // cleanup
     c_free(add_scaled);
     c_free(ew_reciprocal);
+    c_free(vec_ew_min_vec_test);
+    c_free(vec_ew_max_vec_test);
     clean_problem_lin_alg_sols_data(data);
 
     return 0;
@@ -74,7 +90,7 @@ static char * test_mat_operations(){
     csc *Ad, *dA, *A_ewsq, *A_ewabs;     // Matrices used for tests
     c_int exitflag=0;
     c_float trace, fro_sq;
-
+    c_float * inf_norm_cols_rows_test;
 
     lin_alg_sols_data *  data = generate_problem_lin_alg_sols_data();
 
@@ -108,7 +124,18 @@ static char * test_mat_operations(){
     mat_ew_abs(A_ewabs);
     mu_assert("Linear algebra tests: error in matrix operation, elementwise absolute value",
             is_eq_csc(A_ewabs, data->test_mat_ops_ew_abs, TESTS_TOL));
+    
+    // Maximum norm over columns
+    inf_norm_cols_rows_test = (c_float *)c_malloc(data->test_mat_ops_n * sizeof(c_float));
+    mat_inf_norm_cols(data->test_mat_ops_A, inf_norm_cols_rows_test);
+    mu_assert("Linear algebra tests: error in matrix operation, max norm over columns", vec_norm_inf_diff(inf_norm_cols_rows_test, data->test_mat_ops_inf_norm_cols, 
+                  data->test_mat_ops_n) < TESTS_TOL);
 
+    // Maximum norm over columns
+    mat_inf_norm_rows(data->test_mat_ops_A, inf_norm_cols_rows_test);
+    mu_assert("Linear algebra tests: error in matrix operation, max norm over rows", vec_norm_inf_diff(inf_norm_cols_rows_test, data->test_mat_ops_inf_norm_rows, 
+                  data->test_mat_ops_n) < TESTS_TOL);
+    
     // Trace
     trace = mat_trace(data->test_mat_trace_P);
     mu_assert("Linear algebra tests: error in matrix operation, trace",
@@ -120,6 +147,7 @@ static char * test_mat_operations(){
             c_absval(fro_sq - data->test_mat_trace_P_fro_sq) < TESTS_TOL);
 
     // cleanup
+    c_free(inf_norm_cols_rows_test);
     csc_spfree(Ad);
     csc_spfree(dA);
     csc_spfree(A_ewsq);
@@ -197,7 +225,7 @@ static char * test_mat_vec_multiplication(){
 
 static char * test_extract_upper_triangular(){
 
-
+    c_float * inf_norm_cols_test;
     lin_alg_sols_data *  data = generate_problem_lin_alg_sols_data();
 
     // Extract upper triangular part
@@ -206,7 +234,17 @@ static char * test_extract_upper_triangular(){
     mu_assert("Linear algebra tests: error in forming upper triangular matrix!",
               is_eq_csc(data->test_mat_extr_triu_Pu, Ptriu, TESTS_TOL));
 
+    // Compute infinity norm over columns of the original matrix by using the
+    // upper triangular part only
+    inf_norm_cols_test = (c_float *)c_malloc(data->test_mat_extr_triu_n
+            * sizeof(c_float));
+    mat_inf_norm_cols_sym_triu(Ptriu, inf_norm_cols_test); 
+    mu_assert("Linear algebra tests: error in forming upper triangular matrix, infinity norm over columns",
+              vec_norm_inf_diff(inf_norm_cols_test, data->test_mat_extr_triu_P_inf_norm_cols, data->test_mat_extr_triu_n) < TESTS_TOL);
+        
+
     // Cleanup
+    c_free(inf_norm_cols_test);
     csc_spfree(Ptriu);
     clean_problem_lin_alg_sols_data(data);
 

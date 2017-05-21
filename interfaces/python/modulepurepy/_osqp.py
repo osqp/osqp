@@ -72,7 +72,7 @@ AUTO_RHO_MIN = 1e-06
 
 
 # Scaling
-SCALING_REG = 2e-06
+SCALING_REG = 1e-06
 MAX_SCALING = 1e06
 MIN_SCALING = 1e-06
 
@@ -346,31 +346,21 @@ class OSQP(object):
 
         # Initialize scaling
         d = np.ones(n + m)
+        d_temp = np.ones(n + m)
 
         # Define reduced KKT matrix to scale
         KKT = spspa.vstack([
               spspa.hstack([self.work.data.P, self.work.data.A.T]),
               spspa.hstack([self.work.data.A,
-                            spspa.csc_matrix((m, m))])])
-
-        # Run Scaling
-        KKT2 = KKT.copy()
-        if self.work.settings.scaling_norm == 2:
-            KKT2.data = np.square(KKT2.data)  # Elementwise square
-        elif self.work.settings.scaling_norm == 1 or \
-            self.work.settings.scaling_norm == np.inf:
-            KKT2.data = np.absolute(KKT2.data)  # Elementwise abs
-
-        # Initialize temporary KKT
-        S_temp = spspa.diags(d)
-        KKT_temp = S_temp.dot(KKT.dot(S_temp)).todense()
+                            spspa.csc_matrix((m, m))])]).tocsc()
 
         # Iterate Scaling
         for i in range(self.work.settings.scaling_iter):
 
             # Ruiz equilibration
             for j in range(n + m):
-                norm_col_j = np.linalg.norm(KKT_temp[:, j].A1, np.inf)
+                norm_col_j = np.linalg.norm(np.asarray(KKT[:, j].todense()), 
+                                            np.inf)
                 #  print("norm col %i = %.4e" % (j, norm_col_j))
                 #  norm_row_j = np.linalg.norm(KKT_temp[j, :].A1, np.inf)
                 #  print("norm row %i = %.4e" % (j, norm_row_j))
@@ -378,37 +368,30 @@ class OSQP(object):
                 #  norm_col_j = np.linalg.norm(KKT_temp[j, :], 2)
                 #  norm_col_j = np.linalg.norm(KKT_temp[j, :], 1)
                 #  d[j] = 1./(np.sqrt(norm_col_j) + SCALING_REG)
-                d[j] = 1./(np.sqrt(norm_col_j)) * d[j]
+                if norm_col_j > SCALING_REG:
+                    d_temp[j] = 1./(np.sqrt(norm_col_j))
 
                 
-            #  # Sinkhorn Knopp equilibration
-            #  # Regularize components
-            #  KKT2d = KKT2.dot(d)
-            #  # Prevent division by 0
-            #  d = (n + m)*np.reciprocal(KKT2d + SCALING_REG)
-            #  # Limit scaling terms
-            #  d = np.maximum(np.minimum(d, MAX_SCALING), MIN_SCALING)
-
-
             # DEBUG: Check scaling
-            S_temp = spspa.diags(d)
-            D_temp = spspa.diags(d[:n])
-            E_temp = spspa.diags(d[n:])
-            KKT_temp = S_temp.dot(KKT.dot(S_temp)).todense()
-            P_temp = \
-               D_temp.dot(self.work.data.P.dot(D_temp)).todense()
-            A_temp = \
-               E_temp.dot(self.work.data.A.dot(D_temp)).todense()
-            cond_KKT = np.linalg.cond(KKT_temp)
-            cond_P = np.linalg.cond(P_temp)
-            cond_A = np.linalg.cond(A_temp)
+            S_temp = spspa.diags(d_temp)
+            d = np.multiply(d, d_temp)
+            KKT = S_temp.dot(KKT.dot(S_temp)) 
+            D = spspa.diags(d[:n])
+            E = spspa.diags(d[n:])
+            P = \
+               D.dot(self.work.data.P.dot(D)).todense()
+            A = \
+               E.dot(self.work.data.A.dot(D)).todense()
+            cond_KKT = np.linalg.cond(KKT.todense())
+            cond_P = np.linalg.cond(P)
+            cond_A = np.linalg.cond(A)
             
             # Get rato between columns and rows
             n_plus_m = n + m
             max_norm_rows = 0.0
             min_norm_rows = np.inf
             for j in range(n_plus_m):
-               norm_row_j = np.linalg.norm(KKT_temp[j, :])
+               norm_row_j = np.linalg.norm(np.asarray(KKT[j, :].todense()))
                max_norm_rows = np.maximum(norm_row_j,
                                           max_norm_rows)
                min_norm_rows = np.minimum(norm_row_j,
@@ -422,14 +405,11 @@ class OSQP(object):
             print("cond(KKT) = %.4e" % cond_KKT)
             print("cond(P) = %.4e" % cond_P)
             print("cond(A) = %.4e" % cond_A)
-            #  print("diag(S) = ", end='')
-            #  print(S_temp.diagonal())
             print("res_rows = %.4e / %.4e = %.4e" %
                  (max_norm_rows, min_norm_rows, res_rows))
 
 
         # Obtain Scaler Matrices
-        d = np.power(d, 1./self.work.settings.scaling_norm)
         D = spspa.diags(d[:self.work.data.n])
         if m == 0:
             # spspa.diags() will throw an error if fed with an empty array

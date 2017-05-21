@@ -22,6 +22,8 @@ test_vec_ops_norm_inf_diff = np.linalg.norm(test_vec_ops_v1 - test_vec_ops_v2,
 test_vec_ops_add_scaled = test_vec_ops_v1 + test_vec_ops_sc * test_vec_ops_v2
 test_vec_ops_ew_reciprocal = np.reciprocal(test_vec_ops_v1)
 test_vec_ops_vec_prod = test_vec_ops_v1.dot(test_vec_ops_v2)
+test_vec_ops_ew_max_vec = np.maximum(test_vec_ops_v1, test_vec_ops_v2)
+test_vec_ops_ew_min_vec = np.minimum(test_vec_ops_v1, test_vec_ops_v2)
 
 
 # Test matrix operations
@@ -35,7 +37,10 @@ test_mat_ops_ew_square = test_mat_ops_A.copy()
 test_mat_ops_ew_square.data = np.square(test_mat_ops_ew_square.data)
 test_mat_ops_ew_abs = test_mat_ops_A.copy()
 test_mat_ops_ew_abs.data = np.abs(test_mat_ops_ew_abs.data)
-
+test_mat_ops_inf_norm_cols = np.amax(np.abs(
+    np.asarray(test_mat_ops_A.todense())), axis=0)
+test_mat_ops_inf_norm_rows = np.amax(np.abs(
+    np.asarray(test_mat_ops_A.todense())), axis=1)
 
 # Test matrix vector operations
 m = 5
@@ -63,6 +68,8 @@ test_mat_extr_triu_n = 5
 test_mat_extr_triu_P = spa.random(test_mat_extr_triu_n, test_mat_extr_triu_n, density=0.8).tocsc()
 test_mat_extr_triu_P = test_mat_extr_triu_P + test_mat_extr_triu_P.T
 test_mat_extr_triu_Pu = spa.triu(test_mat_extr_triu_P).tocsc()
+test_mat_extr_triu_P_inf_norm_cols = np.amax(np.abs(
+    np.asarray(test_mat_extr_triu_P.todense())), axis=0)
 
 
 # Test trace and frobenius norms
@@ -91,6 +98,8 @@ data = {'test_sp_matrix_A': test_sp_matrix_A,
         'test_vec_ops_add_scaled': test_vec_ops_add_scaled,
         'test_vec_ops_ew_reciprocal': test_vec_ops_ew_reciprocal,
         'test_vec_ops_vec_prod': test_vec_ops_vec_prod,
+        'test_vec_ops_ew_max_vec': test_vec_ops_ew_max_vec,
+        'test_vec_ops_ew_min_vec': test_vec_ops_ew_min_vec,
         'test_mat_ops_n': test_mat_ops_n,
         'test_mat_ops_A': test_mat_ops_A,
         'test_mat_ops_d': test_mat_ops_d,
@@ -98,6 +107,8 @@ data = {'test_sp_matrix_A': test_sp_matrix_A,
         'test_mat_ops_postm_diag': test_mat_ops_postm_diag,
         'test_mat_ops_ew_square': test_mat_ops_ew_square,
         'test_mat_ops_ew_abs': test_mat_ops_ew_abs,
+        'test_mat_ops_inf_norm_cols': test_mat_ops_inf_norm_cols,
+        'test_mat_ops_inf_norm_rows': test_mat_ops_inf_norm_rows,
         'test_mat_vec_n': test_mat_vec_n,
         'test_mat_vec_m': test_mat_vec_m,
         'test_mat_vec_A': test_mat_vec_A,
@@ -113,6 +124,8 @@ data = {'test_sp_matrix_A': test_sp_matrix_A,
         'test_mat_extr_triu_n': test_mat_extr_triu_n,
         'test_mat_extr_triu_P': test_mat_extr_triu_P,
         'test_mat_extr_triu_Pu': test_mat_extr_triu_Pu,
+        'test_mat_extr_triu_P_inf_norm_cols':
+        test_mat_extr_triu_P_inf_norm_cols,
         'test_qpform_n': test_qpform_n,
         'test_qpform_Pu': test_qpform_Pu,
         'test_qpform_x': test_qpform_x,

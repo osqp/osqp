@@ -221,11 +221,10 @@ typedef struct {
          * @name Temporary vectors used in scaling
          * @{
          */
-        c_float *P_x;                     ///< backup values of P->x
-        c_float *A_x;                     ///< backup values of A->x
 
         c_float *D_temp;            ///< temporary primal variable scaling vectors
-        c_float *E_temp;            ///< temporary constraints scaling vectors
+        c_float *D_temp_A;            ///< temporary primal variable scaling vectors storing norms of A columns
+        c_float *E_temp;            ///< temporary constraints scaling vectors storing norms of A' columns 
 
         /** @} */
 
