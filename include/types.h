@@ -135,7 +135,6 @@ typedef struct {
         c_int scaling;   ///< boolean, heuristic data rescaling
 
         #if EMBEDDED != 1
-        c_int scaling_norm; ///< scaling norm
         c_int scaling_iter; ///< scaling iteration
         #endif
         /** @} */

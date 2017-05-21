@@ -84,49 +84,52 @@ class full_data_struct(object):
         self.norm_l_data = []
         self.norm_u_data = []
 
-
-
     def scale_qp(self, qp, settings):
 
+        (m, n) = A.shape
+
+        # Get QP variables
+        P = qp.P
+        q = qp.q
+        A = qp.A
+        l = qp.l
+        u = qp.u
+
         # Initialize scaling
-        d = np.ones(qp.n + qp.m)
+        d = np.ones(n + m)
+        d_temp = np.ones(n + m)
 
         # Define reduced KKT matrix to scale
         KKT = spa.vstack([
-              spa.hstack([qp.P, qp.A.T]),
-              spa.hstack([qp.A, spa.csc_matrix((qp.m, qp.m))])])
-
-        # Run Scaling
-        KKT2 = KKT.copy()
-        if settings['scaling_norm'] == 2:
-            KKT2.data = np.square(KKT2.data)  # Elementwise square
-        elif settings['scaling_norm'] == 1:
-            KKT2.data = np.absolute(KKT2.data)  # Elementwise abs
+              spa.hstack([P, A.T]),
+              spa.hstack([A, spa.csc_matrix((m, m))])]).tocsc()
 
         # Iterate Scaling
-        for i in range(settings['scaling_iter']):
-            # Regularize components
-            KKT2d = KKT2.dot(d)
-            # Prevent division by 0
-            d = (qp.n + qp.m) * np.reciprocal(KKT2d + 1e-08)
-            # Limit scaling terms
-            d = np.maximum(np.minimum(d, 1e+03), 1e-03)
+        for i in range(scaling_iter):
+            for j in range(n + m):
+                norm_col_j = np.linalg.norm(np.asarray(KKT[:, j].todense()), 
+                                            np.inf)
+                if norm_col_j > SCALING_REG:
+                    d_temp[j] = 1./(np.sqrt(norm_col_j))
+
+            S_temp = spa.diags(d_temp)
+            d = np.multiply(d, d_temp)
+            KKT = S_temp.dot(KKT.dot(S_temp)) 
 
         # Obtain Scaler Matrices
-        d = np.power(d, 1./settings['scaling_norm'])
-        D = spa.diags(d[:qp.n])
-        if qp.m == 0:
+        D = spa.diags(d[:n])
+        if m == 0:
+            # spa.diags() will throw an error if fed with an empty array
             E = spa.csc_matrix((0, 0))
         else:
-            E = spa.diags(d[qp.n:])
-
+            E = spa.diags(d[n:])
 
         # Scale problem Matrices
-        P = D.dot(qp.P.dot(D)).tocsc()
-        A = E.dot(qp.A.dot(D)).tocsc()
-        q = D.dot(qp.q)
-        l = E.dot(qp.l)
-        u = E.dot(qp.u)
+        P = D.dot(P.dot(D)).tocsc()
+        A = E.dot(A.dot(D)).tocsc()
+        q = D.dot(q)
+        l = E.dot(l)
+        u = E.dot(u)
 
         # Return scaled problem
         return QuadprogProblem(P, q, A, l, u)

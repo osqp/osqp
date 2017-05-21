@@ -61,7 +61,6 @@ nm_num_prob = 100
 options = {'solver': OSQP,
            'verbose': False,
            'polish': False,
-           'scaling_norm': 2,
            'scaling_iter': 3,
            'early_terminate_interval': 1,
            'max_iter': 2500}

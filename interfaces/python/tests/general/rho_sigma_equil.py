@@ -2,8 +2,8 @@
 Try different values of rho and sigma to check relative norms
 between columns of KKT matrix
 '''
-#  import osqp
-import osqppurepy as osqp
+import osqp
+#  import osqppurepy as osqp
 import scipy.sparse as spa
 import scipy as sp
 import numpy as np
@@ -29,12 +29,10 @@ def get_grid_data(x, y, z, resX=500, resY=500):
 
 
 # Scaling
-SCALING_REG = 2e-06
-MAX_SCALING = 1e06
-MIN_SCALING = 1e-06
+SCALING_REG = 1e-06
 
 
-def scale_data(P, q, A, l, u, scaling_norm=2, scaling_iter=100):
+def scale_data(P, q, A, l, u, scaling_iter=100):
     """
     Perform symmetric diagonal scaling via equilibration
     """
@@ -42,32 +40,26 @@ def scale_data(P, q, A, l, u, scaling_norm=2, scaling_iter=100):
 
     # Initialize scaling
     d = np.ones(n + m)
+    d_temp = np.ones(n + m)
 
     # Define reduced KKT matrix to scale
     KKT = spa.vstack([
           spa.hstack([P, A.T]),
-          spa.hstack([A, spa.csc_matrix((m, m))])])
-
-    # Run Scaling
-    KKT2 = KKT.copy()
-    if scaling_norm == 2:
-        KKT2.data = np.square(KKT2.data)  # Elementwise square
-    elif scaling_norm == 1:
-        KKT2.data = np.absolute(KKT2.data)  # Elementwise abs
-    else:
-        raise ValueError('norm not recognized!')
+          spa.hstack([A, spa.csc_matrix((m, m))])]).tocsc()
 
     # Iterate Scaling
     for i in range(scaling_iter):
-        # Regularize components
-        KKT2d = KKT2.dot(d)
-        # Prevent division by 0
-        d = (n + m)*np.reciprocal(KKT2d + SCALING_REG)
-        # Limit scaling terms
-        d = np.maximum(np.minimum(d, MAX_SCALING), MIN_SCALING)
+        for j in range(n + m):
+            norm_col_j = np.linalg.norm(np.asarray(KKT[:, j].todense()), 
+                                        np.inf)
+            if norm_col_j > SCALING_REG:
+                d_temp[j] = 1./(np.sqrt(norm_col_j))
+
+        S_temp = spa.diags(d_temp)
+        d = np.multiply(d, d_temp)
+        KKT = S_temp.dot(KKT.dot(S_temp)) 
 
     # Obtain Scaler Matrices
-    d = np.power(d, 1./scaling_norm)
     D = spa.diags(d[:n])
     if m == 0:
         # spa.diags() will throw an error if fed with an empty array
@@ -151,14 +143,12 @@ q = random_scaling.dot(sp.randn(n))
 
 
 # Scale data as OSQP does
-scaling_norm = 2
-scaling_iter = 1000
+scaling_iter = 15 
 scaling = True
 if scaling is not True:
     (P_sc, q_sc, A_sc, l_sc, u_sc) = (P, q, A, l, u)
 else:
     P_sc, q_sc, A_sc, l_sc, u_sc = scale_data(P, q, A, l, u, 
-                                              scaling_norm=scaling_norm, 
                                               scaling_iter=scaling_iter)
 
 
@@ -210,7 +200,6 @@ for i in tqdm(range(len(rho_vec))):
                 auto_rho=False,
                 scaling=scaling,
                 scaling_iter=scaling_iter,
-                scaling_norm=scaling_norm,
                 polish=False,
                 verbose=False)
         res = m.solve()

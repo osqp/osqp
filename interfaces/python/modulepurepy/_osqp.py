@@ -73,8 +73,8 @@ AUTO_RHO_MIN = 1e-06
 
 # Scaling
 SCALING_REG = 1e-06
-MAX_SCALING = 1e06
-MIN_SCALING = 1e-06
+#  MAX_SCALING = 1e06
+#  MIN_SCALING = 1e-06
 
 
 class workspace(object):
@@ -159,7 +159,6 @@ class settings(object):
     sigma    [1e-06]           - Regularization parameter for polish
     scaling  [True]            - Prescaling/Equilibration
     scaling_iter [3]           - Number of Steps for Scaling Method
-    scaling_norm [2]           - Scaling norm in SK algorithm
 
     -> These can be changed without running setup
     max_iter [5000]                     - Maximum number of iterations
@@ -183,8 +182,7 @@ class settings(object):
         self.rho = kwargs.pop('rho', 0.1)
         self.sigma = kwargs.pop('sigma', 1e-06)
         self.scaling = kwargs.pop('scaling', True)
-        self.scaling_iter = kwargs.pop('scaling_iter', 3)
-        self.scaling_norm = kwargs.pop('scaling_norm', 2)
+        self.scaling_iter = kwargs.pop('scaling_iter', 15) 
         self.max_iter = kwargs.pop('max_iter', 2500)
         self.eps_abs = kwargs.pop('eps_abs', 1e-3)
         self.eps_rel = kwargs.pop('eps_rel', 1e-3)
@@ -371,44 +369,52 @@ class OSQP(object):
                 if norm_col_j > SCALING_REG:
                     d_temp[j] = 1./(np.sqrt(norm_col_j))
 
-                
-            # DEBUG: Check scaling
             S_temp = spspa.diags(d_temp)
             d = np.multiply(d, d_temp)
-            KKT = S_temp.dot(KKT.dot(S_temp)) 
-            D = spspa.diags(d[:n])
-            E = spspa.diags(d[n:])
-            P = \
-               D.dot(self.work.data.P.dot(D)).todense()
-            A = \
-               E.dot(self.work.data.A.dot(D)).todense()
-            cond_KKT = np.linalg.cond(KKT.todense())
-            cond_P = np.linalg.cond(P)
-            cond_A = np.linalg.cond(A)
-            
-            # Get rato between columns and rows
-            n_plus_m = n + m
-            max_norm_rows = 0.0
-            min_norm_rows = np.inf
-            for j in range(n_plus_m):
-               norm_row_j = np.linalg.norm(np.asarray(KKT[j, :].todense()))
-               max_norm_rows = np.maximum(norm_row_j,
-                                          max_norm_rows)
-               min_norm_rows = np.minimum(norm_row_j,
-                                          min_norm_rows)
-            
-            # Compute residuals
-            res_rows = max_norm_rows / min_norm_rows
-            
-            np.set_printoptions(suppress=True, linewidth=500, precision=3)
-            print("\nIter %i" % i)
-            print("cond(KKT) = %.4e" % cond_KKT)
-            print("cond(P) = %.4e" % cond_P)
-            print("cond(A) = %.4e" % cond_A)
-            print("res_rows = %.4e / %.4e = %.4e" %
-                 (max_norm_rows, min_norm_rows, res_rows))
+            KKT = S_temp.dot(KKT.dot(S_temp))
 
-
+            #  # DEBUG: Check scaling
+            #  D = spspa.diags(d[:n])
+            #
+            #  if m == 0:
+            #      # spspa.diags() will throw an error if fed with an empty array
+            #      E = spspa.csc_matrix((0, 0))
+            #      A = \
+            #          E.dot(self.work.data.A.dot(D)).todense()
+            #      cond_A = 1.
+            #  else:
+            #      E = spspa.diags(d[n:])
+            #      A = \
+            #          E.dot(self.work.data.A.dot(D)).todense()
+            #      cond_A = np.linalg.cond(A)
+            #  cond_KKT = np.linalg.cond(KKT.todense())
+            #  P = \
+            #      D.dot(self.work.data.P.dot(D)).todense()
+            #  cond_P = np.linalg.cond(P)
+            #
+            #  # Get rato between columns and rows
+            #  n_plus_m = n + m
+            #  max_norm_rows = 0.0
+            #  min_norm_rows = np.inf
+            #  for j in range(n_plus_m):
+            #     norm_row_j = np.linalg.norm(np.asarray(KKT[j, :].todense()))
+            #     max_norm_rows = np.maximum(norm_row_j,
+            #                                max_norm_rows)
+            #     min_norm_rows = np.minimum(norm_row_j,
+            #                                min_norm_rows)
+            #
+            #  # Compute residuals
+            #  res_rows = max_norm_rows / min_norm_rows
+            #
+            #  np.set_printoptions(suppress=True, linewidth=500, precision=3)
+            #  print("\nIter %i" % i)
+            #  print("cond(KKT) = %.4e" % cond_KKT)
+            #  print("cond(P) = %.4e" % cond_P)
+            #  print("cond(A) = %.4e" % cond_A)
+            #  print("res_rows = %.4e / %.4e = %.4e" %
+            #       (max_norm_rows, min_norm_rows, res_rows))
+            #
+            #
         # Obtain Scaler Matrices
         D = spspa.diags(d[:self.work.data.n])
         if m == 0:

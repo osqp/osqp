@@ -15,11 +15,15 @@ u = np.array([0., 0., -15., 100., 80.])
 n = P.shape[0]
 m = A.shape[0]
 
+
+A = None
+l = None
+u = None
+
 # OSQP options
 osqp_opts = {'rho': 1.0,
              'auto_rho': False,
              'scaling_iter': 15,
-             'scaling_norm': 2,
              'scaling': True,
              'early_terminate_interval': 1,
              'max_iter': 500}

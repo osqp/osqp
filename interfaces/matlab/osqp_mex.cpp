@@ -35,7 +35,6 @@ const char* OSQP_SETTINGS_FIELDS[] =
                                {"rho",            //c_float
                                 "sigma",            //c_float
                                 "scaling",        //c_int
-                                "scaling_norm",   //c_int
                                 "scaling_iter",   //c_int
                                 //the following subset can be changed after initilization
                                 "max_iter",                     //c_int
@@ -701,7 +700,6 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
   mxSetField(mxPtr, 0, "rho",             mxCreateDoubleScalar(settings->rho));
   mxSetField(mxPtr, 0, "sigma",           mxCreateDoubleScalar(settings->sigma));
   mxSetField(mxPtr, 0, "scaling",         mxCreateDoubleScalar(settings->scaling));
-  mxSetField(mxPtr, 0, "scaling_norm",    mxCreateDoubleScalar(settings->scaling_norm));
   mxSetField(mxPtr, 0, "scaling_iter",    mxCreateDoubleScalar(settings->scaling_iter));
   mxSetField(mxPtr, 0, "max_iter",        mxCreateDoubleScalar(settings->max_iter));
   mxSetField(mxPtr, 0, "eps_abs",         mxCreateDoubleScalar(settings->eps_abs));
@@ -924,7 +922,6 @@ void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
   settings->rho             = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "rho"));
   settings->sigma           = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "sigma"));
   settings->scaling         = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaling"));
-  settings->scaling_norm    = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaling_norm"));
   settings->scaling_iter    = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaling_iter"));
   settings->max_iter        = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "max_iter"));
   settings->eps_abs         = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_abs"));

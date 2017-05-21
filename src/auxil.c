@@ -631,12 +631,6 @@ c_int validate_settings(const OSQPSettings * settings){
         #endif
         return 1;
     }
-    if (settings->scaling_norm != 1 &&  settings->scaling_norm != 2) {
-        #ifdef PRINTING
-        c_print("scaling_norm must be either 1 or 2\n");
-        #endif
-        return 1;
-    }
     if (settings->scaling_iter < 1) {
         #ifdef PRINTING
         c_print("scaling_iter must be greater than 0\n");

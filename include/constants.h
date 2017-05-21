@@ -80,10 +80,7 @@ extern "C" {
 #define SCALING (1)
 
 #if EMBEDDED != 1
-#define SCALING_NORM (2)
-#define SCALING_ITER (3)
-#define MAX_SCALING (1e6)  /// Maximum scaling
-#define MIN_SCALING (1e-6)  /// Minimum scaling
+#define SCALING_ITER (15)
 #define SCALING_REG (1e-06)  /// Regularization in scaling iterations
 #endif
 

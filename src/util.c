@@ -180,7 +180,6 @@ void set_default_settings(OSQPSettings * settings) {
         settings->scaling = SCALING; /* heuristic problem scaling */
 
         #if EMBEDDED != 1
-        settings->scaling_norm = SCALING_NORM;
         settings->scaling_iter = SCALING_ITER;
         #endif
 
@@ -215,7 +214,6 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
 
     // Copy settings
     new->scaling = settings->scaling;
-    new->scaling_norm = settings->scaling_norm;
     new->scaling_iter = settings->scaling_iter;
     new->rho = settings->rho;
     new->sigma = settings->sigma;
