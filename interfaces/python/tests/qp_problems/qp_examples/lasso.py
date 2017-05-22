@@ -4,14 +4,8 @@ from __future__ import absolute_import
 import scipy.sparse as spspa
 import scipy as sp
 import numpy as np
-from mathprogbasepy import QuadprogProblem
 from .qp_example import QPExample
-
-# from quadprog.solvers.solvers import GUROBI, CPLEX, OSQP
-# import quadprog.solvers.osqp.osqp as osqp
-
-# import matplotlib.pyplot as plt
-# import seaborn
+from utils.qp_problem import QPProblem
 
 
 class lasso(QPExample):
@@ -24,7 +18,7 @@ class lasso(QPExample):
         prob = lasso(n_vec, m_vec, rho_vec, sigma_vec,
                      alpha_vec, nm_num_prob, dens_lvl=0.4)
         prob.perform_tests(**options)
-        return prob.df, prob.full_df
+        return prob.df
 
     def create_dims(self, n_vec, m_vec):
         """Reduce n_vec and m_vec choosing the dimensions that make the related
@@ -50,7 +44,8 @@ class lasso(QPExample):
         version     - QP reformulation              ['dense', 'sparse']
         """
         # Generate data
-        Ad = spspa.random(m, n, density=dens_lvl)
+        random_scaling = spspa.diags(np.power(10, 2 * np.random.randn(m)))
+        Ad = random_scaling.dot(spspa.random(m, n, density=dens_lvl))
         x_true = np.multiply((np.random.rand(n) > 0.5).astype(float),
                              np.random.randn(n)) / np.sqrt(n)
         bd = Ad.dot(x_true) + .5*np.random.randn(m)
@@ -91,7 +86,7 @@ class lasso(QPExample):
             assert False, "Unhandled version"
 
         # Create a quadprog_problem and return in
-        return QuadprogProblem(P, q, A, lA, uA)
+        return QPProblem(P, q, A, lA, uA)
 
 
 

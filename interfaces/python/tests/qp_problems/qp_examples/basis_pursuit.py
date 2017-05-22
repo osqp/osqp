@@ -3,8 +3,8 @@
 from __future__ import absolute_import
 import scipy.sparse as spspa
 import numpy as np
-from mathprogbasepy import QuadprogProblem
 from .qp_example import QPExample
+from utils.qp_problem import QPProblem
 
 
 class basis_pursuit(QPExample):
@@ -17,7 +17,7 @@ class basis_pursuit(QPExample):
         prob = basis_pursuit(n_vec, m_vec, rho_vec, sigma_vec,
                              alpha_vec, nm_num_prob, dens_lvl=0.4)
         prob.perform_tests(**options)
-        return prob.df, prob.full_df
+        return prob.df
 
     def create_dims(self, n_vec, m_vec):
         """Reduce n_vec and m_vec choosing the dimensions that make the related
@@ -43,7 +43,8 @@ class basis_pursuit(QPExample):
         dens_lvl    - Density level of matrix A     <float>
         """
         # Generate data
-        Ad = spspa.random(m, n, density=dens_lvl)
+        random_scaling = spspa.diags(np.power(10, 2 * np.random.randn(m)))
+        Ad = random_scaling.dot(spspa.random(m, n, density=dens_lvl))
         x_true = np.multiply((np.random.rand(n) > 0.5).astype(float),
                              np.random.randn(n)) / np.sqrt(n)
         bd = Ad.dot(x_true)
@@ -62,7 +63,7 @@ class basis_pursuit(QPExample):
         uA = np.hstack([bd, np.zeros(n), np.inf * np.ones(n)])
 
         # Create a quadprog_problem and return it
-        return QuadprogProblem(P, q, A, lA, uA)
+        return QPProblem(P, q, A, lA, uA)
 
 
 # # Generate and solve a basis pursuit problem

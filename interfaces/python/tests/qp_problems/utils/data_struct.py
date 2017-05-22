@@ -4,58 +4,12 @@ import scipy.sparse as spa
 import numpy as np
 import numpy.linalg as npla
 import pandas as pd
-from mathprogbasepy import QuadprogProblem
+from .qp_problem import QPProblem
+
+SCALING_REG = 1e-8
+SCALING_ITER = 15
 
 class data_struct(object):
-    def __init__(self):
-        # Create dictionary of statistics
-        self.n_data = []
-        self.m_data = []
-        self.rho_data = []
-        self.sigma_data = []
-        self.alpha_data = []
-        self.seed_data = []
-        self.name_data = []
-        self.iter_data = []
-        self.time_data = []
-
-
-    def update_data(self, seed, name, qp, results, rho, sigma, alpha):
-        self.n_data.append(qp.n)
-        self.m_data.append(qp.m)
-        self.rho_data.append(rho)
-        self.sigma_data.append(sigma)
-        self.alpha_data.append(alpha)
-        self.seed_data.append(seed)
-        self.name_data.append(name)
-        self.iter_data.append(results.total_iter)
-        self.time_data.append(results.cputime)
-
-    def get_data_frame(self):
-        # Create dictionary
-        data = {'n': self.n_data,
-                'm': self.m_data,
-                'rho': self.rho_data,
-                'sigma': self.sigma_data,
-                'alpha': self.alpha_data,
-                'seed': self.seed_data,
-                'name': self.name_data,
-                'iter': self.iter_data,
-                'time': self.time_data}
-        cols = ['n', 'm', 'rho', 'sigma', 'alpha', 'iter',
-                 'name', 'time', 'seed']
-
-        # Create dataframe
-        df = pd.DataFrame(data)
-
-        # Order dataframe
-        df = df[cols]
-
-        return df
-
-
-
-class full_data_struct(object):
     """
     Structure for full data collection (with also problem types)
     """
@@ -70,6 +24,8 @@ class full_data_struct(object):
         self.alpha_data = []
         self.iter_data = []
         self.time_data = []
+        self.pri_res_data = []
+        self.dua_res_data = []
 
         # Additional data to be stored
         self.condKKT_data = []
@@ -86,14 +42,14 @@ class full_data_struct(object):
 
     def scale_qp(self, qp, settings):
 
-        (m, n) = A.shape
-
         # Get QP variables
         P = qp.P
         q = qp.q
         A = qp.A
         l = qp.l
         u = qp.u
+
+        (m, n) = qp.A.shape
 
         # Initialize scaling
         d = np.ones(n + m)
@@ -105,7 +61,7 @@ class full_data_struct(object):
               spa.hstack([A, spa.csc_matrix((m, m))])]).tocsc()
 
         # Iterate Scaling
-        for i in range(scaling_iter):
+        for i in range(SCALING_ITER):
             for j in range(n + m):
                 norm_col_j = np.linalg.norm(np.asarray(KKT[:, j].todense()), 
                                             np.inf)
@@ -132,7 +88,7 @@ class full_data_struct(object):
         u = E.dot(u)
 
         # Return scaled problem
-        return QuadprogProblem(P, q, A, l, u)
+        return QPProblem(P, q, A, l, u)
 
     def get_cond_bound(self, M):
         """
@@ -146,10 +102,6 @@ class full_data_struct(object):
 
         return np.max(norm_rows)/(np.min(norm_rows) + 1e-08)
 
-
-
-
-
     def update_data(self, seed, name, qp, results,
                     rho, sigma, alpha, settings):
         self.n_data.append(qp.n)
@@ -159,8 +111,10 @@ class full_data_struct(object):
         self.alpha_data.append(alpha)
         self.seed_data.append(seed)
         self.name_data.append(name)
-        self.iter_data.append(results.total_iter)
-        self.time_data.append(results.cputime)
+        self.iter_data.append(results.info.iter)
+        self.time_data.append(results.info.run_time)
+        self.pri_res_data.append(results.info.pri_res)
+        self.dua_res_data.append(results.info.dua_res)
 
         # Scale data as OSQP does and store those values
         qp_scaled = self.scale_qp(qp, settings)
@@ -197,6 +151,8 @@ class full_data_struct(object):
                 'name': self.name_data,
                 'iter': self.iter_data,
                 'time': self.time_data,
+                'pri_res': self.pri_res_data,
+                'dua_res': self.dua_res_data,
                 'condKKT': self.condKKT_data,
                 'condP': self.condP_data,
                 'froKKT': self.froKKT_data,
@@ -210,7 +166,7 @@ class full_data_struct(object):
                 'norm_u': self.norm_u_data}
 
         cols = ['n', 'm', 'rho', 'sigma', 'alpha', 'iter',
-                 'name', 'time', 'seed',
+                 'name', 'time', 'pri_res', 'dua_res', 'seed',
                  'condKKT', 'condP', 'froKKT', 'froP', 'trP', 'froA',
                  'condKKT_bound', 'condP_bound', 'norm_q', 'norm_l',
                  'norm_u']

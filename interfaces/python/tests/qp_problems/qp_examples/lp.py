@@ -3,8 +3,8 @@
 from __future__ import absolute_import
 import scipy.sparse as spspa
 import numpy as np
-from mathprogbasepy import QuadprogProblem
 from .qp_example import QPExample
+from utils.qp_problem import QPProblem
 
 
 class lp(QPExample):
@@ -17,7 +17,7 @@ class lp(QPExample):
         prob = lp(n_vec, m_vec, rho_vec, sigma_vec,
                   alpha_vec, nm_num_prob, dens_lvl=0.4)
         prob.perform_tests(**options)
-        return prob.df, prob.full_df
+        return prob.df
 
     def create_dims(self, n_vec, m_vec):
         """Reduce n_vec and m_vec choosing the dimensions that make the related
@@ -44,14 +44,16 @@ class lp(QPExample):
 
         # Generate data
         x_true = np.random.randn(n) / np.sqrt(n)
-        A = spspa.random(m, n, density=dens_lvl, format='csc')
+        random_scaling = spspa.diags(np.power(10, 2 * np.random.randn(m)))
+        A = random_scaling.dot(spspa.random(m, n, density=dens_lvl,
+                               format='csc'))
         uA = A.dot(x_true) + 0.1*np.random.rand(m)
         lA = -np.inf * np.ones(m)
         q = -A.T.dot(np.random.rand(m))
         P = spspa.csc_matrix((n, n))
 
         # Create a quadprog_problem and return it
-        return QuadprogProblem(P, q, A, lA, uA)
+        return QPProblem(P, q, A, lA, uA)
 #
 #
 # # Generate and solve a linear program

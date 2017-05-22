@@ -2,9 +2,8 @@
 from __future__ import absolute_import
 import scipy.sparse as spspa
 import numpy as np
-from mathprogbasepy import QuadprogProblem
 from .qp_example import QPExample
-# import ipdb
+from utils.qp_problem import QPProblem
 
 
 class svm(QPExample):
@@ -17,7 +16,7 @@ class svm(QPExample):
         prob = svm(n_vec, m_vec, rho_vec, sigma_vec,
                    alpha_vec, nm_num_prob, dens_lvl=0.4)
         prob.perform_tests(**options)
-        return prob.df, prob.full_df
+        return prob.df
 
     def create_dims(self, n_vec, m_vec):
         """Reduce n_vec and m_vec choosing the dimensions that make the related
@@ -48,8 +47,9 @@ class svm(QPExample):
         N = int(m / 2)
         gamma = 1.0
         b = np.append(np.ones(N), -np.ones(N))
-        A_upp = spspa.random(N, n, density=dens_lvl)
-        A_low = spspa.random(N, n, density=dens_lvl)
+        random_scaling = spspa.diags(np.power(10, 2 * np.random.randn(N)))
+        A_upp = random_scaling.dot(spspa.random(N, n, density=dens_lvl))
+        A_low = random_scaling.dot(spspa.random(N, n, density=dens_lvl))
         A = spspa.vstack([
                 A_upp / np.sqrt(n) + (A_upp != 0.).astype(float) / n,
                 A_low / np.sqrt(n) - (A_low != 0.).astype(float) / n]).tocsc()
@@ -70,7 +70,7 @@ class svm(QPExample):
         uA = np.append(-np.ones(m), np.inf * np.ones(m))
 
         # Create a quadprog_problem and store it in a private variable
-        return QuadprogProblem(P, q, A, lA, uA)
+        return QPProblem(P, q, A, lA, uA)
 
 # # Generate and solve an SVM problem
 # class svm(object):

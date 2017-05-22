@@ -1,5 +1,4 @@
 from __future__ import print_function
-from mathprogbasepy import OSQP
 import numpy as np
 
 # Run QP tests from different examples
@@ -14,7 +13,6 @@ from qp_examples.svm import svm
 # from multiprocessing import Process, Queue
 from multiprocessing import Pool, cpu_count
 from functools import partial
-# from joblib import Parallel, delayed, cpu_count
 
 
 import pandas as pd
@@ -27,14 +25,14 @@ from time import time
 # import ipdb
 
 # Define tests ranges
-rho_vec_len = 20  # Define rho vector
-rho_vec = np.logspace(-4., 3., rho_vec_len)
+rho_vec_len = 30  # Define rho vector
+rho_vec = np.logspace(-6., 6., rho_vec_len)
 # rho_vec = np.array([1000])
 
 
 # sigma_vec_len = 10  # Define sigma vector
 # sigma_vec = np.logspace(-4., 3., sigma_vec_len)
-sigma_vec = np.array([0.001])
+sigma_vec = np.array([1e-06])
 
 
 # alpha_vec_len = 10  # Define alpha vector
@@ -44,32 +42,30 @@ alpha_vec = np.array([1.6])
 
 
 
-dim_vecs_len = 20
+dim_vecs_len = 30
 # n_vec = np.array([20])
 # m_vec = np.array([30])
-n_max = 50
-m_max = 50
+n_max = 500
+m_max = 1000
 n_vec = np.arange(10, n_max, int(n_max/dim_vecs_len))
 m_vec = np.arange(10, m_max, int(m_max/dim_vecs_len))
 
 
-
 # Number of problems with the same dimensions
-nm_num_prob = 100
+nm_num_prob = 25
 
 # Test options
-options = {'solver': OSQP,
-           'verbose': False,
+options = {'verbose': False,
            'polish': False,
-           'scaling_iter': 3,
            'early_terminate_interval': 1,
            'max_iter': 2500}
 
 # Test types
-# test_types = ['basis_pursuit', 'huber_fit', 'lasso', 'nonneg_l2', 'lp',
-            #   'portfolio', 'svm']
+test_types = ['basis_pursuit', 'huber_fit', 'lasso',
+              'nonneg_l2', 'lp', 'portfolio', 'svm']
 
-test_types = ['lasso', 'svm']
+#  test_types = ['lasso', 'svm']
+
 
 def run_examples(test_type, n_vec, m_vec, rho_vec, sigma_vec,
                  alpha_vec, nm_num_prob, **kwargs):
@@ -103,31 +99,26 @@ partial_tests = partial(run_examples, n_vec=n_vec,
                         m_vec=m_vec, rho_vec=rho_vec, sigma_vec=sigma_vec,
                         alpha_vec=alpha_vec, nm_num_prob=nm_num_prob, **options)
 
+
 t = time()
 
 # Execute problems in parallel
 p = Pool(cpu_count())
-res = p.map(partial_tests, test_types)
-results = [x[0] for x in res]
-results_full = [x[1] for x in res]
+results = p.map(partial_tests, test_types)
 
 
 # Execute problems in series
 #  results = []
-#  results_full = []
 #  for i in range(len(test_types)):
-   #  res, res_full = partial_tests(test_types[i])
+   #  res = partial_tests(test_types[i])
    #  results.append(res)
-   #  results_full.append(res_full)
 
 cputime = time() - t
 print("total cputime = %.4f sec" % cputime)
 
 # Concatenate dataframes
 results = pd.concat(results)
-results_full = pd.concat(results_full)
 
 
 # Export results
 results.to_csv('results/results.csv', index=False)
-results_full.to_csv('results/results_full.csv', index=False)
