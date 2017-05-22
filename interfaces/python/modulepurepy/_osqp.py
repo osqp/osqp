@@ -51,9 +51,9 @@ OSQP_NAN = 1e+20  # Just as placeholder. Not real value
 # AUTO_RHO_BETA2 = -0.38435004096785225
 
 # With regularization on v (1e-04)
-# AUTO_RHO_BETA0 = 3.1723875550135223
-# AUTO_RHO_BETA1 = 0.29811867735531827
-# AUTO_RHO_BETA2 = -0.55976668580992439
+AUTO_RHO_BETA0 = 3.1723875550135223
+AUTO_RHO_BETA1 = 0.29811867735531827
+AUTO_RHO_BETA2 = -0.55976668580992439
 
 # With iter less than 20
 # AUTO_RHO_BETA0 = 6.4047899119449241
@@ -68,12 +68,12 @@ OSQP_NAN = 1e+20  # Just as placeholder. Not real value
 #  AUTO_RHO_BETA0 = 2.2377322735057317
 #  AUTO_RHO_BETA1 = 0.73909558577990619
 #  AUTO_RHO_BETA2 = -0.81428271821694909
-#
+
 
 # only n and m, interval 2.0
-AUTO_RHO_BETA0 = 132.31670550204416 
-AUTO_RHO_BETA1 = 3.6821990789623533
-AUTO_RHO_BETA2 = -5.3493318062852033
+#  AUTO_RHO_BETA0 = 132.31670550204416
+#  AUTO_RHO_BETA1 = 3.6821990789623533
+#  AUTO_RHO_BETA2 = -5.3493318062852033
 
 #  # only n and m, interval 2.0
 #  AUTO_RHO_BETA0 = 99.46657940983809
@@ -91,7 +91,7 @@ AUTO_RHO_MIN = 1e-06
 
 
 # Scaling
-SCALING_REG = 1e-06
+SCALING_REG = 1e-08
 #  MAX_SCALING = 1e06
 #  MIN_SCALING = 1e-06
 
@@ -479,28 +479,29 @@ class OSQP(object):
         n = self.work.data.n
         m = self.work.data.m
 
-        self.work.settings.rho = AUTO_RHO_BETA0 * \
-            np.power(n, AUTO_RHO_BETA1) * \
-            np.power(m, AUTO_RHO_BETA2)
+        #  self.work.settings.rho = AUTO_RHO_BETA0 * \
+        #      np.power(n, AUTO_RHO_BETA1) * \
+        #      np.power(m, AUTO_RHO_BETA2)
 
-        # Old stuff with traces
-        #  # Compute tr(P)
-        #  trP = self.work.data.P.diagonal().sum()
-        #
-        #  #  Compute tr(AtA) = fro(A) ^ 2
-        #  trAtA = spspa.linalg.norm(self.work.data.A) ** 2
 
-        # import ipdb; ipdb.set_trace()
+        #  Old stuff with traces
+        # Compute tr(P)
+        trP = self.work.data.P.diagonal().sum()
+
+        #  Compute tr(AtA) = fro(A) ^ 2
+        trAtA = spspa.linalg.norm(self.work.data.A) ** 2
+#
+        import ipdb; ipdb.set_trace()
 
         # DEBUG: saturate values of norms
         # trP = np.maximum(trP, 1e-03)
         # trAtA = np.maximum(trAtA, 1e-03)
 
-        #  self.work.settings.rho = AUTO_RHO_BETA0 * \
-        #      np.power(trP, AUTO_RHO_BETA1) * \
-        #      np.power(trAtA, AUTO_RHO_BETA2)
+        self.work.settings.rho = AUTO_RHO_BETA0 * \
+            np.power(trP, AUTO_RHO_BETA1) * \
+            np.power(trAtA, AUTO_RHO_BETA2)
 
-        # import ipdb; ipdb.set_trace()
+        import ipdb; ipdb.set_trace()
         # Old linear ratio
         # # Compute ratio
         # ratio = trP / trAtA

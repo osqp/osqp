@@ -9,6 +9,7 @@ import os
 from utils.utils import load_maros_meszaros_problem
 import mathprogbasepy as mpbpy
 
+#  import osqppurepy as osqp
 import osqp
 
 
@@ -121,16 +122,16 @@ for f in lst_probs:
 
         s = osqp.OSQP()
         s.setup(P, q, A, l, u,
-                rho=0.1,
+                rho=0.001,
                 auto_rho=True,
                 verbose=False,
-                scaling_iter=50,
+                scaling_iter=15,
                 max_iter=10000,
                 # early_terminate_interval=1,
                 scaling=True)
         res = s.solve()
 
-        # import ipdb; ipdb.set_trace()
+        #  import ipdb; ipdb.set_trace()
 
         # Check if pure python implementation gives same results
         # import osqppurepy
