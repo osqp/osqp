@@ -16,17 +16,17 @@ n = P.shape[0]
 m = A.shape[0]
 
 
-A = None
-l = None
-u = None
+#  A = None
+#  l = None
+#  u = None
 
 # OSQP options
 osqp_opts = {'rho': 1.0,
-             'auto_rho': False,
+             'auto_rho': True,
              'scaling_iter': 15,
              'scaling': True,
              'early_terminate_interval': 1,
-             'max_iter': 500}
+             'max_iter': 2500}
 
 # Solve problem with OSQP
 m = osqp.OSQP()

@@ -59,11 +59,14 @@ extern "C" {
 
 
 // No regularization. interval [1, 1.2]
-#define AUTO_RHO_BETA0 (2.2377322735057317)   // Not settable by the user
-#define AUTO_RHO_BETA1 (0.73909558577990619)  // Not settable by the user
-#define AUTO_RHO_BETA2 (-0.81428271821694909) // Not settable by the user
+// #define AUTO_RHO_BETA0 (2.2377322735057317)   // Not settable by the user
+// #define AUTO_RHO_BETA1 (0.73909558577990619)  // Not settable by the user
+// #define AUTO_RHO_BETA2 (-0.81428271821694909) // Not settable by the user
 
-
+// rho = beta0 * n ^ (beta1) * m ^(beta2)
+#define AUTO_RHO_BETA0 (132.31670550204416)   // Not settable by the user
+#define AUTO_RHO_BETA1 (3.6821990789623533)  // Not settable by the user
+#define AUTO_RHO_BETA2 (-5.3493318062852033) // Not settable by the user
 
 
 

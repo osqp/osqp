@@ -53,13 +53,11 @@ norm_q = np.linalg.norm(q)
 # print(P.todense())
 
 osqp_opts = {'rho': 0.001,
-             'auto_rho': False,
-             'scaling_iter': 30,
+             'auto_rho': True,
+             'scaling_iter': 15, 
              'polish': True,
              'early_terminate_interval': 1,
              'scaling': True}
-
-
 
 
 # GUROBI
@@ -67,9 +65,9 @@ qp = mpbpy.QuadprogProblem(P, q, A, l, u)
 res_gurobi = qp.solve(solver=mpbpy.GUROBI, verbose=True)
 
 # OSQP
-#  model = osqp.OSQP()
-#  model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
-#  res = model.solve()
+model = osqp.OSQP()
+model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
+res = model.solve()
 
 # OSQPPUREPY
 model = osqppurepy.OSQP()

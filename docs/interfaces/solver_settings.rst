@@ -44,9 +44,7 @@ The settings marked with * can be changed without running the setup method again
 +------------------------------------+-------------------------------------+----------------+
 | :code:`warm_start` *               | Perform warm starting               |   True         |
 +------------------------------------+-------------------------------------+----------------+
-| :code:`scaling_norm`               | Scaling norm                        |   2            |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`scaling_iter`               | Scaling iterations                  |   3            |
+| :code:`scaling_iter`               | Scaling iterations                  |   15            |
 +------------------------------------+-------------------------------------+----------------+
 | :code:`pol_refine_iter` *          | Refinement iterations in polish     |   5            |
 +------------------------------------+-------------------------------------+----------------+

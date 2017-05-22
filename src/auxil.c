@@ -7,24 +7,30 @@
 
 
  void compute_rho(OSQPWorkspace * work){
-    c_float trP, trAtA, ratio;
+    /* c_float trP, trAtA, ratio; */
 
     if (work->data->m == 0){ // No consraints. Use max rho
         work->settings->rho = AUTO_RHO_MAX;
         return;
     }
 
-    // Compute tr(P)
-    trP = mat_trace(work->data->P);
-
-    // Compute tr(AtA) = fro(A) ^ 2
-    trAtA = mat_fro_sq(work->data->A);
-
-    // Compute rho = beta0 * (trP)^(beta1) * (trAtA)^(beta2)
     work->settings->rho = AUTO_RHO_BETA0 *
-                          pow(trP, AUTO_RHO_BETA1) *
-                          pow(trAtA, AUTO_RHO_BETA2);
+                          pow(work->data->n, AUTO_RHO_BETA1) *
+                          pow(work->data->m, AUTO_RHO_BETA2);
 
+    // Old stuff with traces
+    /* // Compute tr(P) */
+    /* trP = mat_trace(work->data->P); */
+    /*  */
+    /* // Compute tr(AtA) = fro(A) ^ 2 */
+    /* trAtA = mat_fro_sq(work->data->A); */
+    /*  */
+    /* // Compute rho = beta0 * (trP)^(beta1) * (trAtA)^(beta2) */
+    /* work->settings->rho = AUTO_RHO_BETA0 * */
+    /*                       pow(trP, AUTO_RHO_BETA1) * */
+    /*                       pow(trAtA, AUTO_RHO_BETA2); */
+
+    
     work->settings->rho = c_min(c_max(work->settings->rho, AUTO_RHO_MIN), AUTO_RHO_MAX);
  }
  #endif // ifndef EMBEDDED

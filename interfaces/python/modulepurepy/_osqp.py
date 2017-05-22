@@ -27,15 +27,15 @@ OSQP_INFTY = 1e+20
 # OSQP Nan
 OSQP_NAN = 1e+20  # Just as placeholder. Not real value
 
-# Auto rho
+# Auto rho (only linear function)
 # (old values)
 # AUTO_RHO_OFFSET = 1.07838081E-03
 # AUTO_RHO_SLOPE = 2.31511262
 
-AUTO_RHO_OFFSET = 0.0
-AUTO_RHO_SLOPE = 2.4474028467925546
+#  AUTO_RHO_OFFSET = 0.0
+#  AUTO_RHO_SLOPE = 2.4474028467925546
 
-# Old
+# Old (More complicated fit)
 # AUTO_RHO_BETA0 = 2.1877627217504649
 # AUTO_RHO_BETA1 = 0.57211669508170027
 # AUTO_RHO_BETA2 = -0.71622847416411806
@@ -60,11 +60,30 @@ AUTO_RHO_SLOPE = 2.4474028467925546
 # AUTO_RHO_BETA1 = -0.67858183687448892
 # AUTO_RHO_BETA2 = -0.037034234262609413
 
-# No regularization. interval [1, 1.2]
-AUTO_RHO_BETA0 = 2.2377322735057317
-AUTO_RHO_BETA1 = 0.73909558577990619
-AUTO_RHO_BETA2 = -0.81428271821694909
 
+
+
+
+# No regularization. interval [1, 1.2] (depends on traces)
+#  AUTO_RHO_BETA0 = 2.2377322735057317
+#  AUTO_RHO_BETA1 = 0.73909558577990619
+#  AUTO_RHO_BETA2 = -0.81428271821694909
+#
+
+# only n and m, interval 2.0
+AUTO_RHO_BETA0 = 132.31670550204416 
+AUTO_RHO_BETA1 = 3.6821990789623533
+AUTO_RHO_BETA2 = -5.3493318062852033
+
+#  # only n and m, interval 2.0
+#  AUTO_RHO_BETA0 = 99.46657940983809
+#  AUTO_RHO_BETA1 = 3.7594273667640685
+#  AUTO_RHO_BETA2 = -5.3658885099270002
+
+# only n and m, interval 1.5 
+#  AUTO_RHO_BETA0 = 63.9204222926816
+#  AUTO_RHO_BETA1 = 4.2480325664123226
+#  AUTO_RHO_BETA2 = -5.7924560461638848
 
 
 AUTO_RHO_MAX = 1e06
@@ -457,11 +476,19 @@ class OSQP(object):
         if self.work.data.m == 0:
             self.work.settings.rho = AUTO_RHO_MAX
 
-        # Compute tr(P)
-        trP = self.work.data.P.diagonal().sum()
+        n = self.work.data.n
+        m = self.work.data.m
 
-        #  Compute tr(AtA) = fro(A) ^ 2
-        trAtA = spspa.linalg.norm(self.work.data.A) ** 2
+        self.work.settings.rho = AUTO_RHO_BETA0 * \
+            np.power(n, AUTO_RHO_BETA1) * \
+            np.power(m, AUTO_RHO_BETA2)
+
+        # Old stuff with traces
+        #  # Compute tr(P)
+        #  trP = self.work.data.P.diagonal().sum()
+        #
+        #  #  Compute tr(AtA) = fro(A) ^ 2
+        #  trAtA = spspa.linalg.norm(self.work.data.A) ** 2
 
         # import ipdb; ipdb.set_trace()
 
@@ -469,9 +496,9 @@ class OSQP(object):
         # trP = np.maximum(trP, 1e-03)
         # trAtA = np.maximum(trAtA, 1e-03)
 
-        self.work.settings.rho = AUTO_RHO_BETA0 * \
-            np.power(trP, AUTO_RHO_BETA1) * \
-            np.power(trAtA, AUTO_RHO_BETA2)
+        #  self.work.settings.rho = AUTO_RHO_BETA0 * \
+        #      np.power(trP, AUTO_RHO_BETA1) * \
+        #      np.power(trAtA, AUTO_RHO_BETA2)
 
         # import ipdb; ipdb.set_trace()
         # Old linear ratio
