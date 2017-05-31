@@ -26,9 +26,9 @@
     // Compute tr(AtA) = fro(A) ^ 2
     trAtA = mat_fro_sq(work->data->A);
 
-    // Compute rho = beta0 * (trP)^(beta1) * (trAtA)^(beta2)
+    // Compute rho = beta0 * (trP + sigma * n)^(beta1) * (trAtA)^(beta2)
     work->settings->rho = AUTO_RHO_BETA0 *
-                          pow(trP, AUTO_RHO_BETA1) *
+                          pow(trP + work->settings->sigma * work->data->n, AUTO_RHO_BETA1) *
                           pow(trAtA, AUTO_RHO_BETA2);
 
     

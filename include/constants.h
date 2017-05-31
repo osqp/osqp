@@ -53,9 +53,9 @@ extern "C" {
 // #define AUTO_RHO_BETA2 (-0.83725587170072002) // Not settable by the user
 
 // Working on MPC examples
-#define AUTO_RHO_BETA0 (3.1723875550135223)   // Not settable by the user
-#define AUTO_RHO_BETA1 (0.29811867735531827)  // Not settable by the user
-#define AUTO_RHO_BETA2 (-0.55976668580992439) // Not settable by the user
+// #define AUTO_RHO_BETA0 (3.1723875550135223)   // Not settable by the user
+// #define AUTO_RHO_BETA1 (0.29811867735531827)  // Not settable by the user
+// #define AUTO_RHO_BETA2 (-0.55976668580992439) // Not settable by the user
 
 
 // No regularization. interval [1, 1.2]
@@ -69,6 +69,10 @@ extern "C" {
 // #define AUTO_RHO_BETA2 (-5.3493318062852033) // Not settable by the user
 
 
+// (trP + sigma * n)  (trAtA)
+#define AUTO_RHO_BETA0 (34.230612247771937)   // Not settable by the user
+#define AUTO_RHO_BETA1 (0.034396470475530572)  // Not settable by the user
+#define AUTO_RHO_BETA2 (-0.78084717518697355) // Not settable by the user
 
 
 

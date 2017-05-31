@@ -51,9 +51,9 @@ OSQP_NAN = 1e+20  # Just as placeholder. Not real value
 # AUTO_RHO_BETA2 = -0.38435004096785225
 
 # With regularization on v (1e-04)
-AUTO_RHO_BETA0 = 3.1723875550135223
-AUTO_RHO_BETA1 = 0.29811867735531827
-AUTO_RHO_BETA2 = -0.55976668580992439
+#  AUTO_RHO_BETA0 = 3.1723875550135223
+#  AUTO_RHO_BETA1 = 0.29811867735531827
+#  AUTO_RHO_BETA2 = -0.55976668580992439
 
 # With iter less than 20
 # AUTO_RHO_BETA0 = 6.4047899119449241
@@ -84,6 +84,12 @@ AUTO_RHO_BETA2 = -0.55976668580992439
 #  AUTO_RHO_BETA0 = 63.9204222926816
 #  AUTO_RHO_BETA1 = 4.2480325664123226
 #  AUTO_RHO_BETA2 = -5.7924560461638848
+
+
+AUTO_RHO_BETA0 = 34.230612247771937
+AUTO_RHO_BETA1 = 0.034396470475530572
+AUTO_RHO_BETA2 = -0.78084717518697355 
+
 
 
 AUTO_RHO_MAX = 1e06
@@ -478,7 +484,7 @@ class OSQP(object):
 
         n = self.work.data.n
         m = self.work.data.m
-
+        sigma = self.work.settings.sigma
         #  self.work.settings.rho = AUTO_RHO_BETA0 * \
         #      np.power(n, AUTO_RHO_BETA1) * \
         #      np.power(m, AUTO_RHO_BETA2)
@@ -491,17 +497,21 @@ class OSQP(object):
         #  Compute tr(AtA) = fro(A) ^ 2
         trAtA = spspa.linalg.norm(self.work.data.A) ** 2
 #
-        import ipdb; ipdb.set_trace()
 
         # DEBUG: saturate values of norms
         # trP = np.maximum(trP, 1e-03)
         # trAtA = np.maximum(trAtA, 1e-03)
 
-        self.work.settings.rho = AUTO_RHO_BETA0 * \
-            np.power(trP, AUTO_RHO_BETA1) * \
-            np.power(trAtA, AUTO_RHO_BETA2)
+        #  self.work.settings.rho = AUTO_RHO_BETA0 * \
+        #      np.power(trP, AUTO_RHO_BETA1) * \
+        #      np.power(trAtA, AUTO_RHO_BETA2)
 
-        import ipdb; ipdb.set_trace()
+    
+        self.work.settings.rho = AUTO_RHO_BETA0 * \
+                np.power(trP + sigma * n, AUTO_RHO_BETA1) * \
+                np.power(trAtA, AUTO_RHO_BETA2)
+
+        #  import ipdb; ipdb.set_trace()
         # Old linear ratio
         # # Compute ratio
         # ratio = trP / trAtA
