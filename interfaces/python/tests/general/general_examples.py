@@ -38,7 +38,7 @@ def main():
     #                 'primal_infeasible', 'random_primal_infeasible',
     #                 'maros_meszaros', 'lp', 'dual_infeasible_lp',
     #                 'dual_infeasible_qp'}
-    example = 'dual_infeasible_lp'
+    example = 'random_primal_infeasible'
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
@@ -168,6 +168,8 @@ def main():
                           polish=True,
                           scaling=True,
                           verbose=True)
+
+    import ipdb; ipdb.set_trace()
 
     if resultsGUROBI.status in mpbpy_prob.SOLUTION_PRESENT:
         # print("\n")
