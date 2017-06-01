@@ -33,12 +33,12 @@ def load_maros_meszaros_problem(f):
 
 
 def main():
-    sp.random.seed(6)
+    sp.random.seed(1)
     # Possible ops:  {'small1', 'small2', 'random',
     #                 'primal_infeasible', 'random_primal_infeasible',
     #                 'maros_meszaros', 'lp', 'dual_infeasible_lp',
     #                 'dual_infeasible_qp'}
-    example = 'lp'
+    example = 'dual_infeasible_lp'
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
@@ -156,7 +156,7 @@ def main():
     # Solve with OSQP. You can pass options to OSQP solver
     print("\nSolve with OSQP")
     print("-----------------")
-    resultsOSQP = p.solve(solver=mpbpy.OSQP_PUREPY, max_iter=5000,
+    resultsOSQP = p.solve(solver=mpbpy.OSQP, max_iter=5000,
                           #  eps_rel=1e-3,
                           #  eps_abs=1e-3,
                           #  alpha=1.6,

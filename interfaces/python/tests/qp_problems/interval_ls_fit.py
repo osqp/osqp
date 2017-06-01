@@ -47,7 +47,7 @@ def get_ratio_and_bounds(df):
     # 4)
     # Find rho values that give scaled number of iterations between certain
     # values 
-    rho_values = df.loc[(df['scaled_iter'] <= 3.0)].rho.values
+    rho_values = df.loc[(df['scaled_iter'] <= 1.5)].rho.values
 
     if len(rho_values) == 0:
         print('Problem with 0 rho_values')
@@ -140,14 +140,14 @@ print("Constructing data matrix A and bounds l, u")
 for _, problem in tqdm(problems_p):
 
     n = problem['n'].iloc[0]
-    #  m = problem['m'].iloc[0]
+    m = problem['m'].iloc[0]
     sigma = problem['sigma'].iloc[0]
     trP = problem['trP'].iloc[0]
 
-    trP_plus_sigma_n = trP + sigma * n
+    trP_plus_sigma_n_over_n = (trP + sigma * n)/n
 
 
-    trAtA = problem['froA'].iloc[0] ** 2
+    trAtA_over_m = (problem['froA'].iloc[0] ** 2)/m
 
     #  if trP < 1e-06:
     #      print("trP = 0")
@@ -159,7 +159,9 @@ for _, problem in tqdm(problems_p):
 
     # Create row of A matrix
     #  A_temp = np.array([1., np.log(n), np.log(m), np.log(trAtA)])
-    A_temp = np.array([1., np.log(trP_plus_sigma_n), np.log(trAtA)])
+    A_temp = np.array([1.,
+                       np.log(trP_plus_sigma_n_over_n), 
+                       np.log(trAtA_over_m)])
 
     # Add row to matrix A
     A = spa.vstack((A, spa.csc_matrix(A_temp)), 'csc')
@@ -216,8 +218,7 @@ scaled_iter = np.zeros(len(res_p))
 i = 0
 for _, problem in tqdm(res_p.iterrows()):
     n = problem['n']
-    #  m = problem['m']
-
+    m = problem['m']
     trP = problem['trP']
     sigma = problem['sigma']
 
@@ -229,7 +230,7 @@ for _, problem in tqdm(res_p.iterrows()):
     #      (m ** beta_fit[2]) * \
     #      (trAtA ** beta_fit[3])
 
-    x_axis[i] = (trP + sigma * n) / trAtA
+    x_axis[i] = ((trP + sigma * n) / n) / (trAtA / m)
 
     #  x_axis_fit[i] = beta_fit[0] * \
     #      (n ** beta_fit[1]) * \
@@ -269,7 +270,7 @@ ax = plotting.create_figure(0.9)
 plt.contour(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.viridis_r)
 plt.contourf(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.viridis_r)
 ax.set_ylabel(r'$\rho$')
-ax.set_xlabel(r'$\frac{\mathrm{tr} (P) + \sigma n}{\mathrm{tr}(A^{T}A)}$')
+#  ax.set_xlabel(r'$\frac{\mathrm{tr} (P) + \sigma n}{\mathrm{tr}(A^{T}A)}$')
 #  ax.set_xlabel(r'$i$')
 ax.set_title(r'Scaled number of iterations')
 #  ax.set_xlim(0., 2.)
@@ -293,7 +294,7 @@ for _, problem in tqdm(problems_p):
     trAtA = problem['froA'].iloc[0] ** 2
     sigma = problem['sigma'].iloc[0]
 
-    ratio_fit[i] = (trP + sigma * n) / trAtA 
+    ratio_fit[i] = ((trP + sigma * n)/n) / (trAtA/m)
 
     #  rho_fit[i] = beta_fit[0] * \
     #          (n ** beta_fit[1]) * \
@@ -301,8 +302,8 @@ for _, problem in tqdm(problems_p):
     #          (trAtA ** beta_fit[4])
 
     rho_fit[i] = beta_fit[0] * \
-        ((trP + sigma * n) ** beta_fit[1]) * \
-        (trAtA ** beta_fit[2])
+        (((trP + sigma * n)/n) ** beta_fit[1]) * \
+        ((trAtA/m) ** beta_fit[2])
     i += 1
 
 # Sort fit vectors
@@ -321,7 +322,7 @@ plt.plot(ratio_fit, rho_fit)
 #
 #  plt.xscale('linear')
 # plt.yscale('linear')
-#  plt.xscale('log')
+plt.xscale('log')
 plt.yscale('log')
 
 plt.show(block=False)
@@ -329,9 +330,113 @@ plt.savefig('behavior.pdf')
 
 
 
-
-
+#  '''
+#  Create contour plot from 3D scatter plot with rho,
+#  ((trP + sigma * n) / n) / (trAtA / m),
+#  scaled iterations
+#  '''
+#  x_axis = np.zeros(len(res_p))
+#  rho_values = np.zeros(len(res_p))
+#  scaled_iter = np.zeros(len(res_p))
 #
+#  i = 0
+#  for _, problem in tqdm(res_p.iterrows()):
+#      n = problem['n']
+#      m = problem['m']
+#      sigma = problem['sigma']
+#      trP = problem['trP']
+#      trAtA = problem['froA'] ** 2
+#
+#      x_axis[i] = ((trP + sigma * n) / n) / (trAtA / m)
+#
+#      rho_values[i] = problem['rho']
+#      scaled_iter[i] = problem['scaled_iter']
+#      i += 1
+#
+#
+#  xi, yi, zi = get_grid_data(np.log10(x_axis),
+#                             np.log10(rho_values),
+#                             scaled_iter)
+#
+#  # Revert logarithm
+#  xi = np.power(10, xi)
+#  yi = np.power(10, yi)
+#
+#
+#  #  levels = [1., 3., 6., 10., 15., 20., 100.]
+#  levels = [1., 1.5, 2., 2.5, 3., 6., 10., 15., 20., 100.]
+#  norm = mc.BoundaryNorm(levels, 256)
+#
+#  ax = plotting.create_figure(0.9)
+#  plt.contour(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.viridis_r)
+#  plt.contourf(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.viridis_r)
+#  ax.set_ylabel(r'$\rho$')
+#  #  ax.set_xlabel(r'$\frac{\mathrm{tr} (P) + \sigma n}{\mathrm{tr}(A^{T}A)}$')
+#  ax.set_title(r'Scaled number of iterations')
+#  #  ax.set_xlim(0., 2.)
+#  plt.colorbar()
+#  plt.tight_layout()
+#
+#
+#  #  plt.xscale('log')
+#  plt.yscale('log')
+#
+#  plt.show(block=False)
+#  plt.savefig('behavior_complex_ratio.pdf')
+#
+
+
+#  '''
+#  Create contour plot from 3D scatter plot with rho, n/m, scaled iterations
+#  '''
+#  x_axis = np.zeros(len(res_p))
+#  rho_values = np.zeros(len(res_p))
+#  scaled_iter = np.zeros(len(res_p))
+#
+#  i = 0
+#  for _, problem in tqdm(res_p.iterrows()):
+#      n = problem['n']
+#      m = problem['m']
+#      x_axis[i] = n / m
+#
+#      rho_values[i] = problem['rho']
+#      scaled_iter[i] = problem['scaled_iter']
+#      i += 1
+#
+#
+#  xi, yi, zi = get_grid_data(np.log10(x_axis),
+#                             np.log10(rho_values),
+#                             scaled_iter)
+#
+#  # Revert logarithm
+#  xi = np.power(10, xi)
+#  yi = np.power(10, yi)
+#
+#
+#  #  levels = [1., 3., 6., 10., 15., 20., 100.]
+#  levels = [1., 1.5, 2., 2.5, 3., 6., 10., 15., 20., 100.]
+#  norm = mc.BoundaryNorm(levels, 256)
+#
+#  ax = plotting.create_figure(0.9)
+#  plt.contour(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.viridis_r)
+#  plt.contourf(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.viridis_r)
+#  ax.set_ylabel(r'$\rho$')
+#  ax.set_xlabel(r'$\frac{n}{m}$')
+#  ax.set_title(r'Scaled number of iterations')
+#  #  ax.set_xlim(0., 2.)
+#  plt.colorbar()
+#  plt.tight_layout()
+#
+#
+#  plt.xscale('log')
+#  plt.yscale('log')
+#
+#  plt.show(block=False)
+#  plt.savefig('behavior_n_over_m_ratio.pdf')
+#
+
+
+
 #  '''
 #  Create contour plot from 3D scatter plot with rho, residual ratio, scaled iterations
 #  '''

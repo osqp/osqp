@@ -69,11 +69,15 @@ extern "C" {
 // #define AUTO_RHO_BETA2 (-5.3493318062852033) // Not settable by the user
 
 
-// (trP + sigma * n)  (trAtA)
-#define AUTO_RHO_BETA0 (34.230612247771937)   // Not settable by the user
-#define AUTO_RHO_BETA1 (0.034396470475530572)  // Not settable by the user
-#define AUTO_RHO_BETA2 (-0.78084717518697355) // Not settable by the user
+// // (trP + sigma * n)  (trAtA)
+// #define AUTO_RHO_BETA0 (34.230612247771937)   // Not settable by the user
+// #define AUTO_RHO_BETA1 (0.034396470475530572)  // Not settable by the user
+// #define AUTO_RHO_BETA2 (-0.78084717518697355) // Not settable by the user
 
+// (trP + sigma * n)/n    /    (trAtA)/m
+#define AUTO_RHO_BETA0 (0.43764484761141698)   // Not settable by the user
+#define AUTO_RHO_BETA1 (0.26202391082629206)  // Not settable by the user
+#define AUTO_RHO_BETA2 (-0.46598879917320213) // Not settable by the user
 
 
 #define AUTO_RHO_MAX (1e06)                   // Not settable by user

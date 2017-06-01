@@ -86,9 +86,13 @@ OSQP_NAN = 1e+20  # Just as placeholder. Not real value
 #  AUTO_RHO_BETA2 = -5.7924560461638848
 
 
-AUTO_RHO_BETA0 = 34.230612247771937
-AUTO_RHO_BETA1 = 0.034396470475530572
-AUTO_RHO_BETA2 = -0.78084717518697355 
+#  AUTO_RHO_BETA0 = 1.0865058613182395
+#  AUTO_RHO_BETA1 = 0.12750326228757933
+#  AUTO_RHO_BETA2 = -0.65234442259175496
+
+AUTO_RHO_BETA0 = 0.43764484761141698
+AUTO_RHO_BETA1 = 0.26202391082629206
+AUTO_RHO_BETA2 = -0.46598879917320213
 
 
 
@@ -456,7 +460,7 @@ class OSQP(object):
         l = E.dot(self.work.data.l)
         u = E.dot(self.work.data.u)
 
-        import ipdb; ipdb.set_trace()
+        #  import ipdb; ipdb.set_trace()
 
         # Assign scaled problem
         self.work.data = problem((n, m), P.data, P.indices, P.indptr, q,
@@ -508,8 +512,8 @@ class OSQP(object):
 
     
         self.work.settings.rho = AUTO_RHO_BETA0 * \
-                np.power(trP + sigma * n, AUTO_RHO_BETA1) * \
-                np.power(trAtA, AUTO_RHO_BETA2)
+                np.power((trP + sigma * n)/n, AUTO_RHO_BETA1) * \
+                np.power((trAtA)/m, AUTO_RHO_BETA2)
 
         #  import ipdb; ipdb.set_trace()
         # Old linear ratio
@@ -795,9 +799,9 @@ class OSQP(object):
                     for i in range(self.work.data.m):
                         # De Morgan's Law applied to negate
                         # conditions on A * delta_x
-                        if ((self.work.data.u[i] < OSQP_INFTY*1e-03) and
+                        if ((self.work.data.u[i] < OSQP_INFTY*1e-06) and
                             (self.work.Adelta_x[i] > eps_dual_inf)) or \
-                            ((self.work.data.l[i] > -OSQP_INFTY*1e-03) and
+                            ((self.work.data.l[i] > -OSQP_INFTY*1e-06) and
                              (self.work.Adelta_x[i] < -eps_dual_inf)):
 
                             # At least one condition not satisfied
