@@ -1,7 +1,10 @@
 import matplotlib as mpl
-mpl.use('pgf')  # Export pgf figures
+#  mpl.use('pgf')  # Export pgf figures
 import matplotlib.pylab as plt
 
+
+# Paper stylesheet from: https://gist.github.com/bstellato/e24405efcc532eeda445ea3ab43922f1
+#  plt.style.use(['paper'])
 
 # Text width in pt
 # -> Get this from LaTeX using \the\textwidth
@@ -20,8 +23,6 @@ def figsize(scale):
     return fig_size
 
 
-# Paper stylesheet from: https://gist.github.com/bstellato/e24405efcc532eeda445ea3ab43922f1
-plt.style.use(['paper'])
 
 
 def create_figure(fig_size):
