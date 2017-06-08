@@ -2,7 +2,8 @@
 Timing statistics utils
 """
 import numpy as np
-
+import os
+import pandas as pd
 
 class Statistics(object):
     """
@@ -34,3 +35,24 @@ def gen_stats_array_vec(statistics_name, stats):
     idx_vec = np.array([stat_list.index(x) for x in out_vec if x in stat_list])
     
     return out_vec, idx_vec
+
+
+
+def store_timings(example_name, timings_dict, cols):
+    comparison_table = pd.DataFrame(timings_dict)
+    comparison_table = comparison_table[cols]  # Sort table columns
+
+    
+    data_dir = 'scripts/%s/data' % example_name
+    if not os.path.isdir(data_dir):
+        os.makedirs(data_dir)
+  
+    comparison_table.to_csv('%s/timings.csv' % data_dir, index=False)
+
+     # Converting results to latex table and storing them to a file
+    formatter = lambda x: '%1.2f' % x
+    latex_table = comparison_table.to_latex(header=False, index=False,
+                                            float_format=formatter)
+    f = open('%s/timings.tex' % data_dir, 'w')
+    f.write(latex_table)
+    f.close()

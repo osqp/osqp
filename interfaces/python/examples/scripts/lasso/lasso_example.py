@@ -64,12 +64,15 @@ def gen_qp_matrices(n, m, lambdas, dens_lvl=0.5):
     qp_matrices.b_lasso = bd
     qp_matrices.n = n
     qp_matrices.m = m
+    qp_matrices.nnzA = A.nnz
+    qp_matrices.nnzP = P.nnz
+
 
     # Return QP matrices
     return qp_matrices
 
 
-def solve_loop(qp_matrices, solver='osqp'):
+def solve_loop(qp_matrices, solver='osqp', osqp_settings=None):
     """
     Solve lasso optimization loop for all lambdas
     """
@@ -95,10 +98,7 @@ def solve_loop(qp_matrices, solver='osqp'):
 
         # Setup OSQP
         m = osqp.OSQP()
-        m.setup(qp.P, qp.q[:, 0], qp.A, qp.l, qp.u,
-                auto_rho=True,
-                polish=False,
-                verbose=False)
+        m.setup(qp.P, qp.q[:, 0], qp.A, qp.l, qp.u, **osqp_settings)
 
         for i in range(n_prob):
             q = qp.q[:, i]
@@ -131,11 +131,7 @@ def solve_loop(qp_matrices, solver='osqp'):
 
         # Setup OSQP
         m = osqp.OSQP()
-        m.setup(qp.P, qp.q[:, 0], qp.A, qp.l, qp.u,
-                warm_start=False,
-                auto_rho=True,
-                polish=False,
-                verbose=False)
+        m.setup(qp.P, qp.q[:, 0], qp.A, qp.l, qp.u, **osqp_settings)
 
         for i in range(n_prob):
             q = qp.q[:, i]
@@ -183,10 +179,7 @@ def solve_loop(qp_matrices, solver='osqp'):
 
             # Setup OSQP
             m = osqp.OSQP()
-            m.setup(qp.P, qp.q[:, i], qp.A, qp.l, qp.u,
-                    auto_rho=True,
-                    polish=False,
-                    verbose=False)
+            m.setup(qp.P, qp.q[:, i], qp.A, qp.l, qp.u, **osqp_settings)
 
             # Solve
             results = m.solve()
@@ -369,6 +362,12 @@ def run_lasso_example():
     Solve problems
     '''
 
+    osqp_settings ={'auto_rho': False,
+                    'rho': 1.0,
+                    'polish': False,
+                    'verbose': True}
+
+
     print("Lasso  example")
     print("--------------------")
 
@@ -381,10 +380,15 @@ def run_lasso_example():
     # lambdas = np.logspace(-2, 2, n_lambda)
 
     # Parameters
-    n_vec = np.array([10, 20, 40, 50, 60, 80, 100])
+    #  n_vec = np.array([10, 20, 40, 50, 60, 80, 100])
+    #  n_vec = np.array([10, 100, 1000])
+    n_vec = np.array([10, 20])
 
     # Points
     m_vec = (n_vec * 100).astype(int)
+
+    # Matrix of dimensions
+    dims_mat = np.zeros((4, len(n_vec)))
 
     # Define statistics
     osqp_timing = []
@@ -406,18 +410,26 @@ def run_lasso_example():
         # Generate QP
         qp_matrices = gen_qp_matrices(n_vec[i], m_vec[i], lambdas)
 
+        # Get dimensions
+        dims_mat[:, i] = np.array([qp_matrices.n,
+            qp_matrices.m,
+            qp_matrices.nnzA,
+            qp_matrices.nnzP])
+
+
         # Solve loop with osqp
-        timing, niter = solve_loop(qp_matrices, 'osqp')
+        timing, niter = solve_loop(qp_matrices, 'osqp', osqp_settings)
         osqp_timing.append(timing)
         osqp_iter.append(niter)
 
         # Solve loop with osqp (coldstart)
-        timing, niter = solve_loop(qp_matrices, 'osqp_coldstart')
+        timing, niter = solve_loop(qp_matrices, 'osqp_coldstart', osqp_settings)
         osqp_coldstart_timing.append(timing)
         osqp_coldstart_iter.append(niter)
 
         # Solve loop with osqp (no caching)
-        timing, niter = solve_loop(qp_matrices, 'osqp_no_caching')
+        timing, niter = solve_loop(qp_matrices, 'osqp_no_caching',
+                osqp_settings)
         osqp_no_caching_timing.append(timing)
         osqp_no_caching_iter.append(niter)
 
@@ -430,40 +442,61 @@ def run_lasso_example():
         timing, niter = solve_loop(qp_matrices, 'gurobi')
         gurobi_timing.append(timing)
         gurobi_iter.append(niter)
-
+#
         # Solve loop with mosek
         timing, niter = solve_loop(qp_matrices, 'mosek')
         mosek_timing.append(timing)
         mosek_iter.append(niter)
 
-        # Solve loop with ecos
-        timing, niter = solve_loop(qp_matrices, 'ecos')
-        ecos_timing.append(timing)
-        ecos_iter.append(niter)
+        #  Solve loop with ecos
+        #  timing, niter = solve_loop(qp_matrices, 'ecos')
+        #  ecos_timing.append(timing)
+        #  ecos_iter.append(niter)
 
 
+
+    '''
+    Define timings and dimensions dictionaries
+    '''
     solver_timings = OrderedDict([('OSQP (warm start)', osqp_timing),
-                                  ('OSQP (cold start)',
-                                   osqp_coldstart_timing),
-                                  ('OSQP (no caching)',
-                                   osqp_no_caching_timing),
-                                #   ('qpOASES', qpoases_timing),
-                                  ('GUROBI', gurobi_timing),
-                                  ('MOSEK', mosek_timing),
-                                  ('ECOS', ecos_timing)])
+        ('OSQP (cold start)',
+            osqp_coldstart_timing),
+        ('OSQP (no caching)',
+            osqp_no_caching_timing),
+        #   ('qpOASES', qpoases_timing),
+        ('GUROBI', gurobi_timing),
+        ('MOSEK', mosek_timing),
+        #  ('ECOS', ecos_timing)
+        ])
+    cols_timings = ['OSQP (warm start)', 'OSQP (cold start)', 'OSQP (no caching)',
+            'GUROBI', 'MOSEK']
+
+    dims_dict = {'n': dims_mat[0,:],
+                 'm': dims_mat[1,:],
+                 'nnzA': dims_mat[2,:],
+                 'nnzP': dims_mat[3,:]}
+    cols_dims = ['n', 'm', 'nnzA', 'nnzP']
+
+
+    '''
+    Store timings and dimensions
+    '''
+    utils.store_timings("lasso", solver_timings, cols_timings) 
+    utils.store_dimensions("lasso", dims_dict, cols_dims)
+
+
+    '''
+    Store plots
+    '''
+    
+    fig_size = None  # Adapt for talk plots
 
     utils.generate_plot('lasso', 'time', 'median', n_vec,
-                        solver_timings,
-                        fig_size=0.9)
+            solver_timings,
+            fig_size=fig_size)
     utils.generate_plot('lasso', 'time', 'total', n_vec,
-                        solver_timings,
-                        fig_size=0.9)
+            solver_timings,
+            fig_size=fig_size)
     utils.generate_plot('lasso', 'time', 'mean', n_vec,
-                        solver_timings,
-                        fig_size=0.9)
-    #
-    # solver_max_iter = OrderedDict([('OSQP (warm start)', osqp_iter),
-    #                                ('OSQP (cold start)', osqp_coldstart_iter)])
-    # utils.generate_plot('lasso', 'iter', 'max', n_vec,
-    #                     solver_max_iter,
-    #                     fig_size=0.9)
+            solver_timings,
+            fig_size=fig_size)

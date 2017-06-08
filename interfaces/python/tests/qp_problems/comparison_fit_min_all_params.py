@@ -68,7 +68,7 @@ def get_ratio_and_bounds(df):
 
 
     # 6) Compute best value of rho
-    df.loc[:, 'best_rho'] = df.loc[(df['scaled_iter'] == 2)].rho.values.mean()
+    df.loc[:, 'best_rho'] = df.loc[(df['scaled_iter'] == 1)].rho.values.mean()
 
     # 7) Rho ratio
     df.loc[:, 'rho_ratio'] = df['best_rho']/df['rho']

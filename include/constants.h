@@ -44,7 +44,7 @@ extern "C" {
 #define POLISH (1)
 #define POL_REFINE_ITER (3)
 #define VERBOSE (1)
-#define AUTO_RHO (1)
+#define AUTO_RHO (0)
 
 
 //Old

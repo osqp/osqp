@@ -1,0 +1,3 @@
+OSQP (warm start),OSQP (cold start),OSQP (no caching),GUROBI,MOSEK
+<scripts.utils.timing.Statistics object at 0x11468dc88>,<scripts.utils.timing.Statistics object at 0x11468dcc0>,<scripts.utils.timing.Statistics object at 0x10a99a828>,<scripts.utils.timing.Statistics object at 0x1094b2630>,<scripts.utils.timing.Statistics object at 0x116d6b390>
+<scripts.utils.timing.Statistics object at 0x11468dd68>,<scripts.utils.timing.Statistics object at 0x116d615f8>,<scripts.utils.timing.Statistics object at 0x1147140b8>,<scripts.utils.timing.Statistics object at 0x10a99a978>,<scripts.utils.timing.Statistics object at 0x1159ba7b8>

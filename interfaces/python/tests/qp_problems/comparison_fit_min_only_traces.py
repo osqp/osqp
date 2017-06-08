@@ -69,7 +69,7 @@ def get_ratio_and_bounds(df):
 
 
     # 6) Compute best value of rho
-    df.loc[:, 'best_rho'] = df.loc[(df['scaled_iter'] == 2)].rho.values.mean()
+    df.loc[:, 'best_rho'] = df.loc[(df['scaled_iter'] == 1)].rho.values.mean()
 
     # 7) Rho ratio
     df.loc[:, 'rho_ratio'] = df['best_rho']/df['rho']
@@ -285,6 +285,11 @@ for _, problem in tqdm(problems_p):
     i += 1
 
 
+
+# DEBUG: Make fit_iter always doable (not a number)
+fit_iter = np.ones(n_problems)
+
+
 # Extra (Remove NaN values)
 not_nan_idx = np.logical_not(np.isnan(fit_iter))
 min_iter_new = min_iter[not_nan_idx]
@@ -293,14 +298,14 @@ fit_rhos_new = fit_rhos[not_nan_idx]
 best_rhos_new = best_rhos[not_nan_idx]
 
 # Order vector of iters 
-idx_sort = np.argsort(min_iter_new)
-min_iter_new = min_iter_new[idx_sort]
-fit_iter_new = fit_iter_new[idx_sort]
+idx_sort_iter = np.argsort(min_iter_new)
+min_iter_new = min_iter_new[idx_sort_iter]
+fit_iter_new = fit_iter_new[idx_sort_iter]
 
 # Order vector of rhos 
-idx_sort = np.argsort(best_rhos_new)
-best_rhos_new = best_rhos_new[idx_sort]
-fit_rhos_new = fit_rhos_new[idx_sort]
+idx_sort_rho = np.argsort(best_rhos_new)
+best_rhos_new = best_rhos_new[idx_sort_rho]
+fit_rhos_new = fit_rhos_new[idx_sort_rho]
 
 
 
@@ -309,18 +314,41 @@ fit_rhos_new = fit_rhos_new[idx_sort]
 '''
 Create actual plots
 '''
-# Fit rho 
+# RHO 
 fig, ax = plt.subplots()
 ax.plot(best_rhos_new, label='Best rho')
 ax.plot(fit_rhos_new, label='Fit rho')
 plt.yscale('log')
 plt.legend()
+
+
+#  # Order trP and plot it
+#  trP_vec = np.zeros(n_problems)
+#  i = 0
+#  for _, problem in tqdm(problems_p):
+#      trP_vec[i] = problem['trP'].iloc[0]
+#      i += 1
+#  trP_vec = trP_vec[idx_sort_rho]
+#  ax2 = ax.twinx()  # Add second axis
+#  ax2.plot(trP_vec, label="trP")
+
+# Order trAtA and plot it
+trAtA_vec = np.zeros(n_problems)
+i = 0
+for _, problem in tqdm(problems_p):
+    trAtA_vec[i] = problem['froA'].iloc[0] ** 2
+    i += 1
+trP_vec = trAtA_vec[idx_sort_rho]
+ax2 = ax.twinx()  # Add second axis
+ax2.plot(trAtA_vec, label="trAtA")
+
+
 plt.grid()
 plt.show(block=False)
 plt.savefig('comparison_rho_fit.pdf')
 
 
-# Fit iters 
+# ITERS 
 fig, ax = plt.subplots()
 ax.plot(min_iter_new, label='Min iter')
 ax.plot(fit_iter_new, label='Fit iter')

@@ -16,7 +16,7 @@ The settings marked with * can be changed without running the setup method again
 +------------------------------------+-------------------------------------+----------------+
 | :code:`rho`                        | ADMM rho step                       | Auto computed  |
 +------------------------------------+-------------------------------------+----------------+
-| :code:`auto_rho`                   | ADMM rho step automatic selection   |   True         |
+| :code:`auto_rho`                   | ADMM rho step automatic selection   |   False        |
 +------------------------------------+-------------------------------------+----------------+
 | :code:`sigma`                      | ADMM sigma step                     |   1e-06        |
 +------------------------------------+-------------------------------------+----------------+
