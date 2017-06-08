@@ -33,12 +33,12 @@ def load_maros_meszaros_problem(f):
 
 
 def main():
-    sp.random.seed(6)
+    sp.random.seed(1)
     # Possible ops:  {'small1', 'small2', 'random',
     #                 'primal_infeasible', 'random_primal_infeasible',
     #                 'maros_meszaros', 'lp', 'dual_infeasible_lp',
     #                 'dual_infeasible_qp'}
-    example = 'dual_infeasible_lp'
+    example = 'random_primal_infeasible'
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
@@ -132,7 +132,7 @@ def main():
     elif example == 'lp':
         # Random Example
         n = 10
-        m = 500
+        m = 1000
         # Generate random Matrices
         P = spspa.csc_matrix(np.zeros((n, n)))
         q = sp.randn(n)
@@ -156,18 +156,20 @@ def main():
     # Solve with OSQP. You can pass options to OSQP solver
     print("\nSolve with OSQP")
     print("-----------------")
-    resultsOSQP = p.solve(solver=mpbpy.OSQP_PUREPY, max_iter=2500,
+    resultsOSQP = p.solve(solver=mpbpy.OSQP, max_iter=5000,
                           #  eps_rel=1e-3,
                           #  eps_abs=1e-3,
                           #  alpha=1.6,
                           #  rho=0.00001,  # Works with LP
                           auto_rho=True,
-                          scaling_iter=50,
+                          scaling_iter=15,
                           early_terminate_interval=1,
                         #   sigma=1e-3,
                           polish=True,
                           scaling=True,
                           verbose=True)
+
+    import ipdb; ipdb.set_trace()
 
     if resultsGUROBI.status in mpbpy_prob.SOLUTION_PRESENT:
         # print("\n")

@@ -8,11 +8,15 @@
 
  void compute_rho(OSQPWorkspace * work){
     c_float trP, trAtA, ratio;
+    c_int n, m;
 
     if (work->data->m == 0){ // No consraints. Use max rho
         work->settings->rho = AUTO_RHO_MAX;
         return;
     }
+
+    n = work->data->n;
+    m = work->data->m;
 
     // Depends only on n and m
     /* work->settings->rho = AUTO_RHO_BETA0 * */
@@ -26,10 +30,10 @@
     // Compute tr(AtA) = fro(A) ^ 2
     trAtA = mat_fro_sq(work->data->A);
 
-    // Compute rho = beta0 * (trP)^(beta1) * (trAtA)^(beta2)
+    // Compute rho = beta0 * (trP + sigma * n)^(beta1) * (trAtA)^(beta2)
     work->settings->rho = AUTO_RHO_BETA0 *
-                          pow(trP, AUTO_RHO_BETA1) *
-                          pow(trAtA, AUTO_RHO_BETA2);
+                          pow((trP + work->settings->sigma * n)/n , AUTO_RHO_BETA1) *
+                          pow((trAtA) / m, AUTO_RHO_BETA2);
 
     
     work->settings->rho = c_min(c_max(work->settings->rho, AUTO_RHO_MIN), AUTO_RHO_MAX);
@@ -226,9 +230,9 @@ c_int is_primal_infeasible(OSQPWorkspace * work){
 
     // This function checks for the primal infeasibility termination criteria.
     //
-    // 1) A' * delta_y < eps
+    // 1) A' * delta_y < eps * ||delta_y||
     //
-    // 2) u'*max(delta_y, 0) + l'*min(delta_y, 0) < -eps
+    // 2) u'*max(delta_y, 0) + l'*min(delta_y, 0) < -eps * ||delta_y||
     //
 
     c_int i; // Index for loops
@@ -244,7 +248,7 @@ c_int is_primal_infeasible(OSQPWorkspace * work){
     if (norm_delta_y > eps_prim_inf){ // ||delta_y|| > 0
 
         // scale delta_y by its norm
-        vec_mult_scalar(work->delta_y, 1./norm_delta_y, work->data->m);
+        /* vec_mult_scalar(work->delta_y, 1./norm_delta_y, work->data->m); */
 
         // ineq_lhs = u'*max(delta_y, 0) + l'*min(delta_y, 0)
         ineq_lhs = 0;
@@ -254,13 +258,13 @@ c_int is_primal_infeasible(OSQPWorkspace * work){
         }
 
         // Check if the condition is satisfied: ineq_lhs < -eps
-        if (ineq_lhs < -eps_prim_inf){
+        if (ineq_lhs < -eps_prim_inf * norm_delta_y ){
             // Compute and return ||A'delta_y|| < eps_prim_inf
             mat_tpose_vec(work->data->A, work->delta_y, work->Atdelta_y, 0, 0);
             if (work->settings->scaling){ // Unscale if necessary
             vec_ew_prod(work->scaling->Dinv, work->Atdelta_y, work->Atdelta_y, work->data->n);
             }
-            return vec_norm_inf(work->Atdelta_y, work->data->n) < eps_prim_inf;
+            return vec_norm_inf(work->Atdelta_y, work->data->n) < eps_prim_inf * norm_delta_y;
         }
 
     }
@@ -274,12 +278,12 @@ c_int is_primal_infeasible(OSQPWorkspace * work){
 c_int is_dual_infeasible(OSQPWorkspace * work){
     // This function checks for the scaled dual infeasibility termination criteria.
     //
-    // 1) q * delta_x < - eps
+    // 1) q * delta_x < - eps * || delta_x ||
     //
-    // 2) ||P * delta_x || < eps
+    // 2) ||P * delta_x || < eps * || delta_x ||
     //
-    // 3) -> (A * delta_x)_i > -eps,    l_i != -inf
-    //    -> (A * delta_x)_i <  eps,    u_i != inf
+    // 3) -> (A * delta_x)_i > -eps * || delta_x ||,    l_i != -inf
+    //    -> (A * delta_x)_i <  eps * || delta_x ||,    u_i != inf
     //
 
 
@@ -297,11 +301,10 @@ c_int is_dual_infeasible(OSQPWorkspace * work){
     if (norm_delta_x > eps_dual_inf){
 
         // Normalize delta_x by its norm
-        vec_mult_scalar(work->delta_x, 1./norm_delta_x, work->data->n);
+        /* vec_mult_scalar(work->delta_x, 1./norm_delta_x, work->data->n); */
 
         // Check first if q'*delta_x < 0
-        if (vec_prod(work->data->q, work->delta_x, work->data->n) <
-            -eps_dual_inf){
+        if (vec_prod(work->data->q, work->delta_x, work->data->n) < -eps_dual_inf * norm_delta_x){
 
             // Compute product P * delta_x
             mat_vec(work->data->P, work->delta_x, work->Pdelta_x, 0);
@@ -312,7 +315,7 @@ c_int is_dual_infeasible(OSQPWorkspace * work){
             }
 
             // Check if || P * delta_x || = 0
-            if (vec_norm_inf(work->Pdelta_x, work->data->n) < eps_dual_inf){
+            if (vec_norm_inf(work->Pdelta_x, work->data->n) < eps_dual_inf * norm_delta_x){
 
                 // Compute A * delta_x
                 mat_vec(work->data->A, work->delta_x, work->Adelta_x, 0);
@@ -322,12 +325,12 @@ c_int is_dual_infeasible(OSQPWorkspace * work){
                     vec_ew_prod(work->scaling->Einv, work->Adelta_x, work->Adelta_x, work->data->m);
                 }
 
-                // De Morgan Law Applied to dual fineasibility conditions for A * x
-                // N.B. Note that 1e-03 is used to adjust the infinity value
+                // De Morgan Law Applied to dual infeasibility conditions for A * x
+                // N.B. Note that 1e-06 is used to adjust the infinity value
                 //      in case the problem is scaled.
                 for (i = 0; i < work->data->m; i++){
-                    if (((work->data->u[i] < OSQP_INFTY*1e-03) && (work->Adelta_x[i] >  eps_dual_inf)) ||
-                    ((work->data->l[i] > -OSQP_INFTY*1e-03) && (work->Adelta_x[i] < -eps_dual_inf))){
+                    if (((work->data->u[i] < OSQP_INFTY*1e-06) && (work->Adelta_x[i] >  eps_dual_inf * norm_delta_x)) ||
+                    ((work->data->l[i] > -OSQP_INFTY*1e-06) && (work->Adelta_x[i] < -eps_dual_inf * norm_delta_x))){
                         // At least one condition not satisfied -> not dual infeasible
                         return 0;
                     }

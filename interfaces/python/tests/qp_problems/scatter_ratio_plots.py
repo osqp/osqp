@@ -25,6 +25,8 @@ def get_ratio_and_bounds(df):
         3) ratio pri_res/dua_res 
         4) lower and upper bounds for rho (between 0 and 3)
         5) Compute maximum and minimum values of rho
+        6) Compute best value of rho
+        7) Compute all the relative values of rho: best_rho / rho
     """
 
     # 1)
@@ -61,10 +63,11 @@ def get_ratio_and_bounds(df):
     df.loc[:, 'rho_max'] = rho_values.max()
 
 
-    # if rho_values.min() == rho_values.max():
-    #     print("[r_min, r_max] = [%.4e, %.4e]" %
-    #           (rho_values.min(), rho_values.max()))
-    #     import ipdb; ipdb.set_trace()
+    # 6) Compute best value of rho
+    df.loc[:, 'best_rho'] = df.loc[(df['scaled_iter'] == 1)].rho.values.mean()
+
+    # 7) Rho ratio
+    df.loc[:, 'rho_ratio'] = df['best_rho']/df['rho']
 
     return df
 
@@ -141,27 +144,12 @@ for _, problem in tqdm(problems_p):
 
     n = problem['n'].iloc[0]
     m = problem['m'].iloc[0]
-    sigma = problem['sigma'].iloc[0]
-    trP = problem['trP'].iloc[0]
 
-    trP_plus_sigma_n_over_n = (trP + sigma * n)/n
+    min_n_m = np.minimum(n, m)
 
-
-    trAtA_over_m = (problem['froA'].iloc[0] ** 2)/m
-
-    #  if trP < 1e-06:
-    #      print("trP = 0")
-    #      import ipdb; ipdb.set_trace()
-    #  logtrP = np.maximum(-1e06, np.log(trP))
-
-    #  logtrAtA = np.maximum(-1e06, np.log(trAtA))
-    #  logtrAtA = np.log(trAtA)
-
-    # Create row of A matrix
-    #  A_temp = np.array([1., np.log(n), np.log(m), np.log(trAtA)])
     A_temp = np.array([1.,
-                       np.log(trP_plus_sigma_n_over_n), 
-                       np.log(trAtA_over_m)])
+                       np.log(min_n_m), 
+                       np.log(m)])
 
     # Add row to matrix A
     A = spa.vstack((A, spa.csc_matrix(A_temp)), 'csc')
@@ -180,10 +168,6 @@ v = cvxpy.Variable(n_problems)
 constraints = [v_l <= v, v <= v_u]
 cost = cvxpy.norm(A * alpha - v)
 
-# DEBUG: try to add regularization on rho
-# lambda_reg = 1e-04
-# cost += -lambda_reg * cvxpy.sum_entries(v)
-
 objective = cvxpy.Minimize(cost)
 
 problem = cvxpy.Problem(objective, constraints)
@@ -194,19 +178,10 @@ problem.solve(solver=cvxpy.GUROBI, verbose=True)
 # Get learned alpha
 alpha_fit = np.asarray(alpha.value).flatten()
 
-# Get beta after removing logarithm
-#  beta_fit = np.array([np.exp(alpha_fit[0]),
-#                       alpha_fit[1], alpha_fit[2], alpha_fit[3]])
 beta_fit = np.array([np.exp(alpha_fit[0]),
                      alpha_fit[1], alpha_fit[2]])
 
 
-
-#  '''
-#  Compute ratio residuals
-#  '''
-# stats for 1.5 <= rho <= 2
-#  res_p.loc[((res_p['rho'] <= 2.) & (res_p['rho'] >= 1.5))][['res_ratio', 'iter']]
 
 '''
 Create contour plot from 3D scatter plot with rho, ratio, scaled iterations
@@ -219,22 +194,10 @@ i = 0
 for _, problem in tqdm(res_p.iterrows()):
     n = problem['n']
     m = problem['m']
-    trP = problem['trP']
-    sigma = problem['sigma']
 
+    min_n_m = np.minimum(n, m)
 
-    trAtA = problem['froA'] ** 2
-
-    #  x_axis_fit[i] = beta_fit[0] * \
-    #      (n ** beta_fit[1]) * \
-    #      (m ** beta_fit[2]) * \
-    #      (trAtA ** beta_fit[3])
-
-    x_axis[i] = ((trP + sigma * n) / n) / (trAtA / m)
-
-    #  x_axis_fit[i] = beta_fit[0] * \
-    #      (n ** beta_fit[1]) * \
-    #      (trAtA ** beta_fit[2])
+    x_axis[i] = min_n_m / m 
 
     rho_values[i] = problem['rho']
     scaled_iter[i] = problem['scaled_iter']
@@ -251,8 +214,6 @@ yi = np.power(10, yi)
 
 
 levels = [1., 3., 6., 10., 15., 20., 100.]
-#  levels = [1., 2., 4., 6., 8., 10., 20., 100.]
-#  levels = [1., 10., 20., 30., 40., 50., 60., 80., 90., 100.]
 
 # use here 256 instead of len(levels)-1 becuase
 # as it's mentioned in the documentation for the
@@ -261,19 +222,14 @@ levels = [1., 3., 6., 10., 15., 20., 100.]
 norm = mc.BoundaryNorm(levels, 256)
 # norm = None
 
-# Try lognorm
-# norm = mc.LogNorm(vmin=res_p['scaled_iter'].min(),
-#                   vmax=res_p['scaled_iter'].max())
-
 
 ax = plotting.create_figure(0.9)
 plt.contour(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.viridis_r)
 plt.contourf(xi, yi, zi, levels=levels, norm=norm, cmap=plt.cm.viridis_r)
 ax.set_ylabel(r'$\rho$')
 #  ax.set_xlabel(r'$\frac{\mathrm{tr} (P) + \sigma n}{\mathrm{tr}(A^{T}A)}$')
-#  ax.set_xlabel(r'$i$')
+ax.set_xlabel(r'$\frac{\min (n, m)}{m}$')
 ax.set_title(r'Scaled number of iterations')
-#  ax.set_xlim(0., 2.)
 plt.colorbar()
 plt.tight_layout()
 
@@ -290,20 +246,16 @@ ratio_fit = np.zeros(n_problems)
 i = 0
 for _, problem in tqdm(problems_p):
     n = problem['n'].iloc[0]
-    trP = problem['trP'].iloc[0]
-    trAtA = problem['froA'].iloc[0] ** 2
-    sigma = problem['sigma'].iloc[0]
+    m = problem['m'].iloc[0]
+    
+    min_n_m = np.minimum(n, m)
 
-    ratio_fit[i] = ((trP + sigma * n)/n) / (trAtA/m)
+    ratio_fit[i] = min_n_m / m  
 
-    #  rho_fit[i] = beta_fit[0] * \
-    #          (n ** beta_fit[1]) * \
-    #          (trP ** beta_fit[3]) * \
-    #          (trAtA ** beta_fit[4])
 
     rho_fit[i] = beta_fit[0] * \
-        (((trP + sigma * n)/n) ** beta_fit[1]) * \
-        ((trAtA/m) ** beta_fit[2])
+        (min_n_m ** beta_fit[1]) * \
+        (m ** beta_fit[2])
     i += 1
 
 # Sort fit vectors
@@ -329,6 +281,23 @@ plt.show(block=False)
 plt.savefig('behavior.pdf')
 
 
+
+'''
+Plot scatter plot of rho ratio
+'''
+#  TODO: Continue from here! Make scatter plot visible!
+
+ax = plotting.create_figure(0.9)
+plt.scatter(res_p['res_ratio'], res_p['rho_ratio'])
+
+ax.set_ylabel(r'$\frac{\rho^{\star}}{\rho}$')
+ax.set_xlabel(r'$\frac{\|r_{\mathrm{pri}}\|_{\infty}}{\|r_{\mathrm{dua}}\|_{\infty}}$')
+plt.xscale('log')
+plt.yscale('log')
+plt.tight_layout()
+ax.set_xlim(1e-09, 1e09)
+ax.set_ylim(1e-09, 1e09)
+plt.savefig('behavior_scatter_rho_ratio.pdf')
 
 #  '''
 #  Create contour plot from 3D scatter plot with rho,

@@ -24,7 +24,8 @@ def figsize(scale):
 
 # Paper stylesheet from:
 # https://gist.github.com/bstellato/e24405efcc532eeda445ea3ab43922f1
-plt.style.use(['paper'])
+#  plt.style.use(['paper'])
+plt.style.use(['talk'])
 
 
 def generate_plot(example_name, unit, statistics_name, n_vec, solvers,
@@ -43,20 +44,20 @@ def generate_plot(example_name, unit, statistics_name, n_vec, solvers,
 
     for (solver_name, solver_stats) in solvers.items():
         temp_vec, idx_val = gen_stats_array_vec(statistics_name, solver_stats)
-        plt.semilogy(n_vec[idx_val], temp_vec, label=solver_name)
+        plt.semilogy(n_vec[idx_val], temp_vec, label=r"$\mbox{%s}$" % solver_name)
 
     plt.legend()
     plt.grid()
     ax.set_xlabel(r'$n$')
 
     if unit == 'time':
-        ax.set_ylabel(r'Time [s]')
+        ax.set_ylabel(r'$\mbox{Time }[s]$')
     elif unit == 'iter':
-        ax.set_ylabel(r'Iterations')
+        ax.set_ylabel(r'$\mathrm{Iterations}$')
     else:
         raise ValueError('Unrecognized y unit')
 
-    ax.set_title(statistics_name.title())
+    #  ax.set_title(statistics_name.title())
     plt.tight_layout()
     plt.show(block=False)
 

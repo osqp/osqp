@@ -1,6 +1,9 @@
 """
 Structure to define QP problems
 """
+import os
+import pandas as pd
+
 
 class QPmatrices(object):
     """
@@ -16,3 +19,26 @@ class QPmatrices(object):
         self.u = u
         self.lx = lx
         self.ux = ux
+
+
+
+def store_dimensions(example_name, dims_dict, cols):
+    dims_table = pd.DataFrame(dims_dict)
+    dims_table = dims_table[cols]
+
+    data_dir = 'scripts/%s/data' % example_name
+
+    if not os.path.isdir(data_dir):
+        os.makedirs(data_dir)
+
+    dims_table.to_csv('%s/dimensions.csv' % data_dir, 
+                            index=False)
+
+     # Converting results to latex table and storing them to a file
+    formatter = lambda x: '%1.2f' % x
+    latex_table = dims_table.to_latex(header=False, index=False,
+                                            float_format=formatter)
+    f = open('%s/dimensions.tex' % data_dir, 'w')
+    f.write(latex_table)
+    f.close()
+

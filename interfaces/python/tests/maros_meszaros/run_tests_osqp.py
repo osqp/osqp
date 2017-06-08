@@ -57,11 +57,11 @@ for f in lst_probs:
 
 
         # Normalize cost (TODO: remove)
-        norm_q = np.linalg.norm(m.q)
-        # cost_scal = 1.
-        cost_scal = constrain_scaling(norm_q, 1e-03, 1e03)
-        if norm_q < 1e-06:   #  q is null!
-            cost_scal = 1.
+        #  norm_q = np.linalg.norm(m.q)
+        #  # cost_scal = 1.
+        #  cost_scal = constrain_scaling(norm_q, 1e-03, 1e03)
+        #  if norm_q < 1e-06:   #  q is null!
+        #      cost_scal = 1.
 
         # P = m.P / cost_scal
         # q = m.q / cost_scal
