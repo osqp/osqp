@@ -57,6 +57,7 @@ nm_num_prob = 25
 # Test options
 options = {'verbose': False,
            'polish': False,
+           'auto_rho': False,
            'early_terminate_interval': 1,
            'max_iter': 2500}
 

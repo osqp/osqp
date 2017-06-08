@@ -45,7 +45,7 @@ class portfolio(QPExample):
         version     - QP reformulation              ['dense', 'sparse']
         """
         # Generate data
-        random_scaling = spspa.diags(np.power(10, 2 * np.random.randn(m)))
+        random_scaling = spspa.diags(np.power(10, 2 * np.random.randn(n)))
         F = random_scaling.dot(spspa.random(n, k, density=dens_lvl,
                                format='csc'))
         D = spspa.diags(np.random.rand(n) * np.sqrt(k), format='csc')
