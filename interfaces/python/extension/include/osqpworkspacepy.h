@@ -183,11 +183,10 @@
      OSQPSettings *settings = self->workspace->settings;
 
      PyObject *return_dict = Py_BuildValue(
-         "{s:d,s:d,s:i,s:i,s:i,s:i,s:d,s:d,s:d, s:d, s:d, s:i, s:i, s:i}",
+         "{s:d,s:d,s:i,s:i,s:i,s:d,s:d,s:d, s:d, s:d, s:i, s:i, s:i}",
          "rho", (double)settings->rho,
          "sigma", (double)settings->sigma,
          "scaling", settings->scaling,
-         "scaling_norm", settings->scaling_norm,
          "scaling_iter", settings->scaling_iter,
          "max_iter", settings->max_iter,
          "eps_abs", (double)settings->eps_abs,

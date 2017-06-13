@@ -16,13 +16,11 @@ class warm_start_tests(unittest.TestCase):
         Setup default options
         """
         self.opts = {'verbose': False,
-                     'eps_abs': 1e-05,
-                     'eps_rel': 1e-05,
-                     'rho': 0.05,
-                     'sigma': 0.01,
+                     'eps_abs': 1e-08,
+                     'eps_rel': 1e-08,
+                     'auto_rho': False,
                      'polish': False,
-                     'early_terminate_interval': 1,
-                     'pol_refine_iter': 4}
+                     'early_terminate_interval': 1}
 
     def test_warm_start(self):
 

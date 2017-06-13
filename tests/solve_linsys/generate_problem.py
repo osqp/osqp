@@ -7,10 +7,14 @@ import utils.codegen_utils as cu
 np.random.seed(2)
 
 # Simple case
-test_solve_KKT_n = 2
-test_solve_KKT_m = 2
-test_solve_KKT_A = spa.csc_matrix(np.array([[-3., 4.], [2., -3.]]))
-test_solve_KKT_P = spa.csc_matrix(np.array([[0.2, 0.0], [0.0, 0.6]]))
+test_solve_KKT_n = 10
+test_solve_KKT_m = 20
+
+test_solve_KKT_P = spa.random(test_solve_KKT_n, test_solve_KKT_n,
+                                 density=0.4, format='csc')
+test_solve_KKT_P = test_solve_KKT_P.dot(test_solve_KKT_P.T).tocsc()
+test_solve_KKT_A = spa.random(test_solve_KKT_m, test_solve_KKT_n,
+                                 density=0.4, format='csc')
 test_solve_KKT_Pu = spa.triu(test_solve_KKT_P).tocsc()
 
 test_solve_KKT_rho = 4.0

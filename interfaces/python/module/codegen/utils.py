@@ -20,7 +20,7 @@ def fill_settings(f, settings, name):
     Fill settings
     """
     for key, value in settings.items():
-        if key != 'scaling_norm' and key != 'scaling_iter':
+        if  key != 'scaling_iter':
             if type(value) == int:
                 is_int = True
             elif value.is_integer():
@@ -110,7 +110,6 @@ def write_settings(f, settings, name, embedded_flag):
 
     # EMBEDDED == 2
     if embedded_flag != 1:
-        f.write("%d, " % settings['scaling_norm'])
         f.write("%d, " % settings['scaling_iter'])
 
     f.write("%d, " % settings['max_iter'])
@@ -211,9 +210,8 @@ def write_workspace(f, data, name):
     f.write("c_float work_delta_x[%d];\n" % data['n'])
     f.write("c_float work_Pdelta_x[%d];\n" % data['n'])
     f.write("c_float work_Adelta_x[%d];\n" % data['m'])
-    f.write("c_float work_P_x[%d];\n" % data['n'])
-    f.write("c_float work_A_x[%d];\n" % data['m'])
     f.write("c_float work_D_temp[%d];\n" % data['n'])
+    f.write("c_float work_D_temp_A[%d];\n" % data['n'])
     f.write("c_float work_E_temp[%d];\n\n" % data['m'])
 
     f.write("OSQPWorkspace %s = {\n" % name)
@@ -222,8 +220,7 @@ def write_workspace(f, data, name):
     f.write("work_x_prev, work_z_prev,\n")
     f.write("work_delta_y, work_Atdelta_y,\n")
     f.write("work_delta_x, work_Pdelta_x, work_Adelta_x,\n")
-    f.write("work_P_x, work_A_x,\n")
-    f.write("work_D_temp, work_E_temp,\n")
+    f.write("work_D_temp, work_D_temp_A, work_E_temp,\n")
     f.write("&settings, &scaling, &solution, &info};\n\n")
 
 

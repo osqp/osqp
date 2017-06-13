@@ -71,7 +71,6 @@ fprintf(f, '(c_float)%.20f, ', settings.sigma);
 fprintf(f, '%d, ',             settings.scaling);
 
 if embedded_flag ~= 1
-    fprintf(f, '%d, ', settings.scaling_norm);
     fprintf(f, '%d, ', settings.scaling_iter);
 end
 
@@ -178,9 +177,8 @@ fprintf(f, 'c_float work_Atdelta_y[%d];\n', n);
 fprintf(f, 'c_float work_delta_x[%d];\n', n);
 fprintf(f, 'c_float work_Pdelta_x[%d];\n', n);
 fprintf(f, 'c_float work_Adelta_x[%d];\n', m);
-fprintf(f, 'c_float work_P_x[%d];\n', n);
-fprintf(f, 'c_float work_A_x[%d];\n', m);
 fprintf(f, 'c_float work_D_temp[%d];\n', n);
+fprintf(f, 'c_float work_D_temp_A[%d];\n', n);
 fprintf(f, 'c_float work_E_temp[%d];\n\n', m);
 
 fprintf(f, 'OSQPWorkspace workspace = {\n');
@@ -189,8 +187,7 @@ fprintf(f, 'work_x, work_y, work_z, work_xz_tilde,\n');
 fprintf(f, 'work_x_prev, work_z_prev,\n');
 fprintf(f, 'work_delta_y, work_Atdelta_y,\n');
 fprintf(f, 'work_delta_x, work_Pdelta_x, work_Adelta_x,\n');
-fprintf(f, 'work_P_x, work_A_x,\n');
-fprintf(f, 'work_D_temp, work_E_temp,\n');
+fprintf(f, 'work_D_temp, work_D_temp_A, work_E_temp,\n');
 fprintf(f, '&settings, &scaling, &solution, &info};\n\n');
 
 end

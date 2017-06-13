@@ -10,7 +10,7 @@ import numpy as np
 import ipdb
 
 import mathprogbasepy as mpbpy
-
+import mathprogbasepy.quadprog.problem as mpbpy_prob
 
 def load_maros_meszaros_problem(f):
     # Load file
@@ -33,12 +33,12 @@ def load_maros_meszaros_problem(f):
 
 
 def main():
-    sp.random.seed(6)
+    sp.random.seed(1)
     # Possible ops:  {'small1', 'small2', 'random',
     #                 'primal_infeasible', 'random_primal_infeasible',
     #                 'maros_meszaros', 'lp', 'dual_infeasible_lp',
     #                 'dual_infeasible_qp'}
-    example = 'maros_meszaros'
+    example = 'random_primal_infeasible'
 
     if example == 'maros_meszaros':
         # Maros Meszaros Examples
@@ -131,8 +131,8 @@ def main():
         p = mpbpy.QuadprogProblem(P, q, A, l, u)
     elif example == 'lp':
         # Random Example
-        n = 100
-        m = 50
+        n = 10
+        m = 1000
         # Generate random Matrices
         P = spspa.csc_matrix(np.zeros((n, n)))
         q = sp.randn(n)
@@ -156,15 +156,22 @@ def main():
     # Solve with OSQP. You can pass options to OSQP solver
     print("\nSolve with OSQP")
     print("-----------------")
-    resultsOSQP = p.solve(solver=mpbpy.OSQP, max_iter=2500,
-                          eps_rel=1e-3,
-                          eps_abs=1e-3,
-                          alpha=1.6,
-                          rho=1e-01,
-                          sigma=0.001,
-                          polish=True)
+    resultsOSQP = p.solve(solver=mpbpy.OSQP, max_iter=5000,
+                          #  eps_rel=1e-3,
+                          #  eps_abs=1e-3,
+                          #  alpha=1.6,
+                          #  rho=0.00001,  # Works with LP
+                          auto_rho=True,
+                          scaling_iter=15,
+                          early_terminate_interval=1,
+                        #   sigma=1e-3,
+                          polish=True,
+                          scaling=True,
+                          verbose=True)
 
-    if resultsGUROBI.status != 'solver_error':
+    import ipdb; ipdb.set_trace()
+
+    if resultsGUROBI.status in mpbpy_prob.SOLUTION_PRESENT:
         # print("\n")
         # print("Comparison CPLEX - GUROBI")
         # print("-------------------------")

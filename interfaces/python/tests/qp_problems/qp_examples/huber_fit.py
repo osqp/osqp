@@ -2,15 +2,8 @@
 from __future__ import absolute_import
 import scipy.sparse as spspa
 import numpy as np
-from mathprogbasepy import QuadprogProblem
 from .qp_example import QPExample
-
-# import utils.data_struct as ds
-# from quadprog.solvers.solvers import GUROBI, CPLEX, OSQP
-# import quadprog.solvers.osqp.osqp as osqp
-#
-# import matplotlib.pyplot as plt
-# import seaborn
+from utils.qp_problem import QPProblem
 
 
 class huber_fit(QPExample):
@@ -23,7 +16,7 @@ class huber_fit(QPExample):
         prob = huber_fit(n_vec, m_vec, rho_vec, sigma_vec,
                          alpha_vec, nm_num_prob, dens_lvl=0.4)
         prob.perform_tests(**options)
-        return prob.df, prob.full_df
+        return prob.df
 
     def create_dims(self, n_vec, m_vec):
         """Reduce n_vec and m_vec choosing the dimensions that make the related
@@ -53,7 +46,9 @@ class huber_fit(QPExample):
         dens_lvl    - Density level of matrix A     <float>
         """
         # Generate data
-        A = spspa.random(m, n, density=dens_lvl, format='csc')
+        random_scaling = spspa.diags(np.power(10, 2 * np.random.randn(m)))
+        A = random_scaling.dot(spspa.random(m, n, density=dens_lvl,
+                               format='csc'))
         x_true = np.random.randn(n) / np.sqrt(n)
         ind95 = (np.random.rand(m) < 0.95).astype(float)
         b = A.dot(x_true) + np.multiply(0.5*np.random.randn(m), ind95) \
@@ -79,7 +74,7 @@ class huber_fit(QPExample):
                        np.ones(m), np.inf*np.ones(m)])
 
         # Create a quadprog_problem and store it in a private variable
-        return QuadprogProblem(P, q, A, lA, uA)
+        return QPProblem(P, q, A, lA, uA)
 
 
 #

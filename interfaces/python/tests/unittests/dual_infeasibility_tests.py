@@ -20,10 +20,8 @@ class dual_infeasibility_tests(unittest.TestCase):
                      'eps_prim_inf': 1e-15,  # Focus only on dual infeasibility
                      'eps_dual_inf': 1e-6,
                      'scaling': True,
-                     'scaling_norm': 2,
                      'scaling_iter': 3,
-                     'rho': 1.6,
-                     'alpha': 1.6,
+                     'auto_rho': False,
                      'max_iter': 2500,
                      'polish': False,
                      'early_terminate_interval': 1,

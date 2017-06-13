@@ -26,9 +26,9 @@ static char * test_basic_qp2_solve()
 
     // Define Solver settings as default
     set_default_settings(settings);
-    settings->max_iter = 1000;
     settings->alpha = 1.6;
-    settings->warm_start = 1;
+    settings->auto_rho = 0;
+    settings->rho = 0.1;
     settings->polish = 1;
     settings->verbose = 1;
 
@@ -47,12 +47,12 @@ static char * test_basic_qp2_solve()
 
     // Compare primal solutions
     mu_assert("Basic QP 2 test solve: Error in primal solution!",
-              vec_norm2_sq_diff(work->solution->x, sols_data->x_test, data->n)/vec_norm2_sq(sols_data->x_test_new, data->n) < TESTS_TOL*TESTS_TOL);
+              vec_norm_inf_diff(work->solution->x, sols_data->x_test, data->n)/vec_norm_inf(sols_data->x_test_new, data->n) < TESTS_TOL);
 
 
     // Compare dual solutions
     mu_assert("Basic QP 2 test solve: Error in dual solution!",
-              vec_norm2_sq_diff(work->solution->y, sols_data->y_test, data->m)/vec_norm2_sq(sols_data->y_test_new, data->m) < TESTS_TOL*TESTS_TOL);
+              vec_norm_inf_diff(work->solution->y, sols_data->y_test, data->m)/vec_norm_inf(sols_data->y_test_new, data->m) < TESTS_TOL);
 
 
     // Compare objective values
@@ -93,9 +93,9 @@ static char * test_basic_qp2_update()
 
     // Define Solver settings as default
     set_default_settings(settings);
-    settings->max_iter = 1000;
     settings->alpha = 1.6;
     settings->warm_start = 1;
+    settings->auto_rho = 0;
     settings->polish = 1;
     settings->verbose = 1;
 
@@ -119,11 +119,11 @@ static char * test_basic_qp2_update()
 
     // Compare primal solutions
     mu_assert("Basic QP 2 test update: Error in primal solution!",
-              vec_norm2_sq_diff(work->solution->x, sols_data->x_test_new, data->n)/vec_norm2_sq(sols_data->x_test_new, data->n) < TESTS_TOL*TESTS_TOL);
+              vec_norm_inf_diff(work->solution->x, sols_data->x_test_new, data->n)/vec_norm_inf(sols_data->x_test_new, data->n) < TESTS_TOL);
 
     // Compare dual solutions
     mu_assert("Basic QP 2 test update: Error in dual solution!",
-              vec_norm2_sq_diff(work->solution->y, sols_data->y_test_new, data->m)/vec_norm2_sq(sols_data->y_test_new, data->m) < TESTS_TOL*TESTS_TOL);
+              vec_norm_inf_diff(work->solution->y, sols_data->y_test_new, data->m)/vec_norm_inf(sols_data->y_test_new, data->m) < TESTS_TOL);
 
 
     // Compare objective values

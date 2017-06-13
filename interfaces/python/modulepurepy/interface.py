@@ -25,7 +25,10 @@ class OSQP(object):
         solver settings can be specified as additional keyword arguments
         """
 
+        #
         # Get problem dimensions
+        #
+
         if P is None:
             if q is not None:
                 n = len(q)
@@ -40,11 +43,10 @@ class OSQP(object):
         else:
             m = A.shape[0]
 
-        # Check if second dimension of A is correct
-        if A.shape[1] != n:
-            raise ValueError("Dimension n in A and P does not match")
+        #
+        # Create parameters if they are None
+        #
 
-        # Check if parameters are None
         if (A is None and (l is not None or u is not None)) or \
                 (A is not None and (l is None and u is None)):
             raise ValueError("A must be supplied together " +
@@ -73,7 +75,23 @@ class OSQP(object):
             l = np.zeros(A.shape[0])
             u = np.zeros(A.shape[0])
 
-        # Check if matrices are sparse
+        #
+        # Check vector dimensions (not checked from C solver)
+        #
+
+        # Check if second dimension of A is correct
+        # if A.shape[1] != n:
+        #     raise ValueError("Dimension n in A and P does not match")
+        if len(q) != n:
+            raise ValueError("Incorrect dimension of q")
+        if len(l) != m:
+            raise ValueError("Incorrect dimension of l")
+        if len(u) != m:
+            raise ValueError("Incorrect dimension of u")
+
+        #
+        # Check or Sparsify Matrices
+        #
         if not sparse.issparse(P) and isinstance(P, np.ndarray) and \
                 len(P.shape) == 2:
             raise TypeError("P is required to be a sparse matrix")
@@ -90,6 +108,12 @@ class OSQP(object):
             warn("Converting sparse A to a CSC " +
                  "(compressed sparse column) matrix. (It may take a while...)")
             A = A.tocsc()
+
+        # Check if P an A have sorted indeces
+        if not P.has_sorted_indices:
+            P.sort_indices()
+        if not A.has_sorted_indices:
+            A.sort_indices()
 
         # Convert infinity values to OSQP Infinity
         u = np.minimum(u, self._model.constant('OSQP_INFTY'))

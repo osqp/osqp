@@ -3,8 +3,8 @@
 from __future__ import absolute_import
 import scipy.sparse as spspa
 import numpy as np
-from mathprogbasepy import QuadprogProblem
 from .qp_example import QPExample
+from utils.qp_problem import QPProblem
 
 
 class portfolio(QPExample):
@@ -17,7 +17,7 @@ class portfolio(QPExample):
         prob = portfolio(n_vec, m_vec, rho_vec, sigma_vec,
                          alpha_vec, nm_num_prob, dens_lvl=0.4)
         prob.perform_tests(**options)
-        return prob.df, prob.full_df
+        return prob.df
 
     def create_dims(self, n_vec, m_vec):
         """Reduce n_vec and m_vec choosing the dimensions that make the related
@@ -45,7 +45,9 @@ class portfolio(QPExample):
         version     - QP reformulation              ['dense', 'sparse']
         """
         # Generate data
-        F = spspa.random(n, k, density=dens_lvl, format='csc')
+        random_scaling = spspa.diags(np.power(10, 2 * np.random.randn(m)))
+        F = random_scaling.dot(spspa.random(n, k, density=dens_lvl,
+                               format='csc'))
         D = spspa.diags(np.random.rand(n) * np.sqrt(k), format='csc')
         mu = np.random.randn(n)
         gamma = 1
@@ -80,7 +82,7 @@ class portfolio(QPExample):
         else:
             assert False, "Unhandled version"
         # Create a quadprog_problem and return it
-        return QuadprogProblem(P, q, A, lA, uA)
+        return QPProblem(P, q, A, lA, uA)
 
 # # Generate and solve a Portfolio optimization problem
 # class portfolio(object):

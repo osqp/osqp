@@ -8,30 +8,35 @@
 
  void compute_rho(OSQPWorkspace * work){
     c_float trP, trAtA, ratio;
+    c_int n, m;
 
     if (work->data->m == 0){ // No consraints. Use max rho
         work->settings->rho = AUTO_RHO_MAX;
         return;
     }
 
+    n = work->data->n;
+    m = work->data->m;
+
+    // Depends only on n and m
+    /* work->settings->rho = AUTO_RHO_BETA0 * */
+    /*                       pow(work->data->n, AUTO_RHO_BETA1) * */
+    /*                       pow(work->data->m, AUTO_RHO_BETA2); */
+
+    // Old stuff with traces
     // Compute tr(P)
     trP = mat_trace(work->data->P);
 
     // Compute tr(AtA) = fro(A) ^ 2
     trAtA = mat_fro_sq(work->data->A);
-    trAtA *= trAtA;
 
-    if (trAtA < 1e-05){ // tr(AtA) = 0
-        work->settings->rho = AUTO_RHO_MAX;
-        return;
-    }
+    // Compute rho = beta0 * (trP + sigma * n)^(beta1) * (trAtA)^(beta2)
+    work->settings->rho = AUTO_RHO_BETA0 *
+                          pow((trP + work->settings->sigma * n)/n , AUTO_RHO_BETA1) *
+                          pow((trAtA) / m, AUTO_RHO_BETA2);
 
-    // Compute ratio
-    ratio = trP / trAtA;
-
-    // Compute rho
-    work->settings->rho = AUTO_RHO_OFFSET + AUTO_RHO_SLOPE * ratio;
-
+    
+    work->settings->rho = c_min(c_max(work->settings->rho, AUTO_RHO_MIN), AUTO_RHO_MAX);
  }
  #endif // ifndef EMBEDDED
 
@@ -145,28 +150,32 @@ c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
     // If embedded we cannot access polish members
     #ifndef EMBEDDED
     c_int j;
-    c_float tmp, prim_resid_sq = 0.0;
+    /* c_float tmp, prim_resid = 0.0; */
     if (polish) {
         // Called from polish() function
+        // residual = ||(z - u)_+ + (z - l)_-||_inf    (stored in z_prev)
         for (j = 0; j < work->data->m; j++) {
-            if (work->pol->z[j] < work->data->l[j]) {
-                tmp = work->data->l[j] - work->pol->z[j];
-                prim_resid_sq += tmp*tmp;
-            } else if (work->pol->z[j] > work->data->u[j]) {
-                tmp = work->pol->z[j] - work->data->u[j];
-                prim_resid_sq += tmp*tmp;
-            }
+            work->z_prev[j] = c_max(work->pol->z[j] - work->data->u[j], 0) +
+                c_min(work->pol->z[j] - work->data->l[j], 0);
         }
-        return prim_resid_sq;
     } else {
     #endif
-        // Called from ADMM algorithm (store temporary vector in z_prev)
+        // Called from ADMM algorithm: Ax - z
+        // N.B. store temporary vector in z_prev
         mat_vec(work->data->A, work->x, work->z_prev, 0);
-        return vec_norm2_sq_diff(work->z_prev, work->z, work->data->m);
+        vec_add_scaled(work->z_prev, work->z, work->data->m, -1); 
 
     #ifndef EMBEDDED
     }
     #endif
+
+    // If scaling active -> rescale residual
+    if (work->settings->scaling){
+        vec_ew_prod(work->scaling->Einv, work->z_prev, work->z_prev, work->data->m);
+    }
+
+    // Return norm of the residual
+    return vec_norm_inf(work->z_prev, work->data->m);
 }
 
 
@@ -178,6 +187,7 @@ c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
     #ifndef EMBEDDED
     if (!polish){ // Normal call
     #endif
+        // r = q + A'*y + P*x
         // dual_res = q
         prea_vec_copy(work->data->q, work->x_prev, work->data->n);
 
@@ -191,13 +201,10 @@ c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
         // += P' * x (lower triangular part with no diagonal)
         mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
 
-        // Return norm
-        return vec_norm2_sq(work->x_prev, work->data->n);
-
     #ifndef EMBEDDED
     } else {  // Call after polish
         // Called from polish() function
-        // dr = q + Ared'*y_red + P*x
+        // r = q + Ared'*y_red + P*x
         // NB: Only upper triangular part of P is stored.
         prea_vec_copy(work->data->q, work->x_prev,
                       work->data->n);                    // dr = q
@@ -207,48 +214,59 @@ c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
                 work->x_prev, 1);               // += Px (upper triang part)
         mat_tpose_vec(work->data->P, work->pol->x,
                       work->x_prev, 1, 1);      // += Px (lower triang part)
-        return vec_norm2_sq(work->x_prev, work->data->n);
     }
     #endif
+    
+    // If scaling active -> rescale residual
+    if (work->settings->scaling){
+        vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n);
+    }
+
+    return vec_norm_inf(work->x_prev, work->data->n);
 }
 
 
 c_int is_primal_infeasible(OSQPWorkspace * work){
 
-    // This function checks for the scaled primal infeasibility termination criteria.
-    // N.B. These are the same as the paper but with the scaling ||delta_y|| added.
+    // This function checks for the primal infeasibility termination criteria.
     //
-    // 1) A' * delta_y < eps || delta_y ||
+    // 1) A' * delta_y < eps * ||delta_y||
     //
-    // 2) u'*max(delta_y, 0) + l'*min(delta_y, 0) < -eps * delta_y
+    // 2) u'*max(delta_y, 0) + l'*min(delta_y, 0) < -eps * ||delta_y||
     //
 
     c_int i; // Index for loops
-    c_float norm_sq_delta_y, ineq_lhs = 0;
-    c_float eps_prim_inf_sq = work->settings->eps_prim_inf * work->settings->eps_prim_inf;
+    c_float norm_delta_y;
+    c_float ineq_lhs;
+    c_float eps_prim_inf;
 
-    // Compute squared norm of delta_y
-    norm_sq_delta_y = vec_norm2_sq(work->delta_y, work->data->m);
+    eps_prim_inf = work->settings->eps_prim_inf;
 
-    if (norm_sq_delta_y > eps_prim_inf_sq){ // ||delta_y|| > 0
+    // Compute infinity norm of delta_y
+    norm_delta_y = vec_norm_inf(work->delta_y, work->data->m);
+
+    if (norm_delta_y > eps_prim_inf){ // ||delta_y|| > 0
+
+        // scale delta_y by its norm
+        /* vec_mult_scalar(work->delta_y, 1./norm_delta_y, work->data->m); */
 
         // ineq_lhs = u'*max(delta_y, 0) + l'*min(delta_y, 0)
+        ineq_lhs = 0;
         for (i = 0; i < work->data->m; i++){
             ineq_lhs += work->data->u[i] * c_max(work->delta_y[i], 0) + \
                         work->data->l[i] * c_min(work->delta_y[i], 0);
         }
 
-        // Check if the condition is satisfied: ineq_lhs < -eps*norm(dy)
-        //
-        // NB: We avoid computing norms because we do not want to use sqrt function.
-        //     Instead of checking ineq_lhs < -eps*norm(dy), we check the equivalent condition
-        //     ineq_lhs < 0 && (ineq_lhs)^2 > eps^2 * ||dy||^2
-        //
-        if (ineq_lhs < 0 && ineq_lhs*ineq_lhs > eps_prim_inf_sq*norm_sq_delta_y){
-            // Compute and return ||A'delta_y|| < eps_prim_inf ||delta_y||
+        // Check if the condition is satisfied: ineq_lhs < -eps
+        if (ineq_lhs < -eps_prim_inf * norm_delta_y ){
+            // Compute and return ||A'delta_y|| < eps_prim_inf
             mat_tpose_vec(work->data->A, work->delta_y, work->Atdelta_y, 0, 0);
-            return vec_norm2_sq(work->Atdelta_y, work->data->n) < eps_prim_inf_sq * norm_sq_delta_y;
+            if (work->settings->scaling){ // Unscale if necessary
+            vec_ew_prod(work->scaling->Dinv, work->Atdelta_y, work->Atdelta_y, work->data->n);
+            }
+            return vec_norm_inf(work->Atdelta_y, work->data->n) < eps_prim_inf * norm_delta_y;
         }
+
     }
 
     // Conditions not satisfied -> not primal infeasible
@@ -259,67 +277,61 @@ c_int is_primal_infeasible(OSQPWorkspace * work){
 
 c_int is_dual_infeasible(OSQPWorkspace * work){
     // This function checks for the scaled dual infeasibility termination criteria.
-    // N.B. These are the same as the paper but with the scaling ||delta_x|| added.
     //
-    // 1) q * delta_x < - eps || delta_x ||
+    // 1) q * delta_x < - eps * || delta_x ||
     //
-    // 2) ||P * delta_x || < eps ||delta_x||
+    // 2) ||P * delta_x || < eps * || delta_x ||
     //
-    // 3) -> (A * delta_x)_i > -eps ||delta_x||    l_i != -inf
-    //    -> (A * delta_x)_i <  eps ||delta_x||    u_i != inf
+    // 3) -> (A * delta_x)_i > -eps * || delta_x ||,    l_i != -inf
+    //    -> (A * delta_x)_i <  eps * || delta_x ||,    u_i != inf
     //
+
 
     c_int i; // Index for loops
-    c_float norm_sq_delta_x, q_dot_deltax = 0;
-    c_float * u, * l; // Bounds u and l
-    c_float eps_dual_inf = work->settings->eps_dual_inf;
-    c_float eps_dual_inf_sq = eps_dual_inf*eps_dual_inf;
+    c_float norm_delta_x;
+    c_float eps_dual_inf;
 
-    // Assign pointers for u and l
-    u = work->data->u;
-    l = work->data->l;
 
-    // Compute squared norm of delta_x
-    norm_sq_delta_x = vec_norm2_sq(work->delta_x, work->data->n);
+    eps_dual_inf = work->settings->eps_dual_inf;
 
-    // Prevent 0 division || delta_x || > eps
-    if (norm_sq_delta_x > eps_dual_inf_sq){
+    // Compute norm of delta_x
+    norm_delta_x = vec_norm_inf(work->delta_x, work->data->n);
 
-        // Check first if q * delta_x < -eps
-        q_dot_deltax = vec_prod(work->data->q, work->delta_x, work->data->n); // q * delta_x
-        // NB: We avoid computing norms because we do not want to use sqrt function.
-        //     Instead of checking q * delta_x < -eps*norm(delta_x), we check the equivalent condition
-        //     q * delta_x < 0 && (q * delta_x)^2 > eps^2 * ||delta_x||^2
-        //
-        if (q_dot_deltax < 0 && q_dot_deltax*q_dot_deltax > eps_dual_inf_sq * norm_sq_delta_x){
+    // Prevent 0 division || delta_x || > 0
+    if (norm_delta_x > eps_dual_inf){
+
+        // Normalize delta_x by its norm
+        /* vec_mult_scalar(work->delta_x, 1./norm_delta_x, work->data->n); */
+
+        // Check first if q'*delta_x < 0
+        if (vec_prod(work->data->q, work->delta_x, work->data->n) < -eps_dual_inf * norm_delta_x){
 
             // Compute product P * delta_x
             mat_vec(work->data->P, work->delta_x, work->Pdelta_x, 0);
 
-            // Check if || P * delta_x || < eps * || delta_x ||
-            if (vec_norm2_sq(work->Pdelta_x, work->data->n) < eps_dual_inf_sq * norm_sq_delta_x){
+            // Scale if necessary
+            if (work->settings->scaling){
+                vec_ew_prod(work->scaling->Dinv, work->Pdelta_x, work->Pdelta_x, work->data->n);
+            }
+
+            // Check if || P * delta_x || = 0
+            if (vec_norm_inf(work->Pdelta_x, work->data->n) < eps_dual_inf * norm_delta_x){
 
                 // Compute A * delta_x
                 mat_vec(work->data->A, work->delta_x, work->Adelta_x, 0);
 
-                // De Morgan Law Applied to dual infeasibility conditions for A * delta_x
-                // N.B. Note that 1e-03 is used to adjust the infinity value
+                // Scale if necessary
+                if (work->settings->scaling){
+                    vec_ew_prod(work->scaling->Einv, work->Adelta_x, work->Adelta_x, work->data->m);
+                }
+
+                // De Morgan Law Applied to dual infeasibility conditions for A * x
+                // N.B. Note that 1e-06 is used to adjust the infinity value
                 //      in case the problem is scaled.
-                //
-                // N.B. We avoid computing norms because we do not want to use sqrt function.
-                //     1) Instead of checking A * delta_x < -eps*norm(delta_x), we check the equivalent condition
-                //        A * delta_x < 0 && (A * delta_x)^2 > eps^2 * ||delta_x||^2
-                //     2) Instead of checking A * delta_x > eps*norm(delta_x), we check the equivalent condition
-                //        A * delta_x > 0 && (A * delta_x)^2 > eps^2 * ||delta_x||^2
-                //
-
                 for (i = 0; i < work->data->m; i++){
-                    if (((u[i] < OSQP_INFTY*1e-03) &&
-                        ((work->Adelta_x[i] >  0) && (work->Adelta_x[i] * work->Adelta_x[i]) > eps_dual_inf_sq * norm_sq_delta_x)) ||
-                        ((l[i] > -OSQP_INFTY*1e-03) &&
-                        ((work->Adelta_x[i] <  0) && (work->Adelta_x[i] * work->Adelta_x[i]) > eps_dual_inf_sq * norm_sq_delta_x))){
-
-                        // At least one condition not satisfied -> Not dual infeasible
+                    if (((work->data->u[i] < OSQP_INFTY*1e-06) && (work->Adelta_x[i] >  eps_dual_inf * norm_delta_x)) ||
+                    ((work->data->l[i] > -OSQP_INFTY*1e-06) && (work->Adelta_x[i] < -eps_dual_inf * norm_delta_x))){
+                        // At least one condition not satisfied -> not dual infeasible
                         return 0;
                     }
                 }
@@ -330,10 +342,10 @@ c_int is_dual_infeasible(OSQPWorkspace * work){
         }
     }
 
-    // Conditions not satisfied -> not dual infeasible
-    return 0;
-
+       // Conditions not satisfied -> not dual infeasible
+       return 0;
 }
+
 
 
 void store_solution(OSQPWorkspace *work) {
@@ -395,6 +407,11 @@ void update_info(OSQPWorkspace *work, c_int iter, c_int compute_objective, c_int
     #ifndef EMBEDDED
     }
     #endif
+
+
+    #ifdef PRINTING
+    work->summary_printed = 0;  // The just updated info have not been printed
+    #endif
 }
 
 
@@ -420,41 +437,113 @@ void update_status(OSQPInfo *info, c_int status_val) {
 
 
 c_int check_termination(OSQPWorkspace *work){
-    c_float eps_pri, eps_dua;
-    c_int exitflag = 0;
-    c_int pri_res_check = 0, dua_res_check = 0, prim_inf_check = 0, dual_inf_check = 0;
-    c_float eps_abs = work->settings->eps_abs;
-    c_float eps_rel = work->settings->eps_rel;
+    c_float eps_prim, eps_dual;
+    c_int exitflag;
+    c_int prim_res_check, dual_res_check, prim_inf_check, dual_inf_check;
+    c_float eps_abs, eps_rel;
+    c_float max_rel_eps, temp_rel_eps; // Temporary variables to compute maximums
+
+
+    // Initialize variables to 0
+    exitflag = 0;
+    prim_res_check = 0; dual_res_check = 0;
+    prim_inf_check = 0; dual_inf_check = 0;
+
+    // Initialize tolerances
+    eps_abs = work->settings->eps_abs;
+    eps_rel = work->settings->eps_rel;
 
     // Check residuals
     if (work->data->m == 0){
-        pri_res_check = 1;  // No contraints -> Primal feasibility always satisfied
+        prim_res_check = 1;  // No contraints -> Primal feasibility always satisfied
     }
     else {
         // Compute primal tolerance
-        eps_pri = (c_float) work->data->m * eps_abs*eps_abs +
-                  eps_rel*eps_rel * vec_norm2_sq(work->z, work->data->m);
-        // Primal feasibility check
-        if (work->info->pri_res < eps_pri) pri_res_check = 1;
+        
+        // max_rel_eps = max(||z||, ||A x||)
+        if (work->settings->scaling){
+            // ||Einv * z||
+            vec_ew_prod(work->scaling->Einv, work->z, work->z_prev, work->data->m); 
+            max_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
+            // ||Einv * A * x||
+            mat_vec(work->data->A, work->x, work->z_prev, 0);
+            vec_ew_prod(work->scaling->Einv, work->z_prev, work->z_prev, work->data->m); 
+            temp_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
+            // Choose maximum
+            if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+        } else { // No unscaling required
+            // ||z||
+            max_rel_eps = vec_norm_inf(work->z, work->data->m);
+            // ||A * x||
+            mat_vec(work->data->A, work->x, work->z_prev, 0);
+            temp_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
+            // Choose maximum
+            if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+        }
 
-        // Primal infeasibility check
-        prim_inf_check = is_primal_infeasible(work);
-    }
+
+        // eps_prim
+        eps_prim = eps_abs + eps_rel * max_rel_eps;
+
+        // Primal feasibility check
+        if (work->info->pri_res < eps_prim) {
+            prim_res_check = 1;
+        } else {
+            // Primal infeasibility check
+            prim_inf_check = is_primal_infeasible(work);
+        }
+    }  // End check if m == 0 
 
     // Compute dual tolerance
-    mat_tpose_vec(work->data->A, work->y, work->x_prev, 0, 0); // ws = A'*u
-    eps_dua = (c_float) work->data->n * eps_abs*eps_abs +
-              eps_rel*eps_rel * work->settings->rho *
-              vec_norm2_sq(work->x_prev, work->data->n);
+    // max_rel_eps = max(||q||, ||A' y|, ||P x||)
+    if (work->settings->scaling){
+        // || Dinv q||
+        vec_ew_prod(work->scaling->Dinv, work->data->q, work->x_prev, work->data->n);
+        max_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
+        // || Dinv A' y ||
+        mat_tpose_vec(work->data->A, work->y, work->x_prev, 0, 0);
+        vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n); 
+        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
+        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+        // || Dinv P x||
+        // P * x (upper triangular part)
+        mat_vec(work->data->P, work->x, work->x_prev, 0);
+        // P' * x (lower triangular part with no diagonal)
+        mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
+        vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n); 
+        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
+        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+
+    } else { // No scaling required
+        // ||q||
+        max_rel_eps = vec_norm_inf(work->data->q, work->data->n);
+        mat_tpose_vec(work->data->A, work->y, work->x_prev, 0, 0);
+        // ||A'*y||
+        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
+        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+        // ||P*x||
+        // P * x (upper triangular part)
+        mat_vec(work->data->P, work->x, work->x_prev, 0);
+        // P' * x (lower triangular part with no diagonal)
+        mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
+        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
+        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+    
+    }
+
+    // eps_dual
+    eps_dual = eps_abs + eps_rel * max_rel_eps;
+
     // Dual feasibility check
-    if (work->info->dua_res < eps_dua) dua_res_check = 1;
-
-
-    // Check dual infeasibility
-    dual_inf_check = is_dual_infeasible(work);
+    if (work->info->dua_res < eps_dual) {
+        dual_res_check = 1;
+    } else {
+        // Check dual infeasibility
+        dual_inf_check = is_dual_infeasible(work);
+    }
 
     // Compare checks to determine solver status
-    if (pri_res_check && dua_res_check){
+    if (prim_res_check && dual_res_check){
         // Update final information
         update_status(work->info, OSQP_SOLVED);
         exitflag = 1;
@@ -549,12 +638,6 @@ c_int validate_settings(const OSQPSettings * settings){
     if (settings->scaling != 0 &&  settings->scaling != 1) {
         #ifdef PRINTING
         c_print("scaling must be either 0 or 1\n");
-        #endif
-        return 1;
-    }
-    if (settings->scaling_norm != 1 &&  settings->scaling_norm != 2) {
-        #ifdef PRINTING
-        c_print("scaling_norm must be either 1 or 2\n");
         #endif
         return 1;
     }

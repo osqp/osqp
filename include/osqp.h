@@ -60,6 +60,12 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings);
  *
  * The solution is stored in the  \a work->solution  structure
  *
+ * If the problem is primal infeasible, the certificate is stored
+ * in \a work->delta_y
+ *
+ * If the problem is dual infeasible, the certificate is stored in \a
+ * work->delta_x
+ *
  * @param  work Workspace allocated
  * @return      Exitflag for errors
  */

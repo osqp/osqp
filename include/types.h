@@ -114,8 +114,8 @@ typedef struct {
 typedef struct {
         c_int n;             ///< number of variables n,
         c_int m;             ///< number of constraints m
-        csc *P;              ///< P:  in csc format
-        csc *A;              ///< A: in csc format
+        csc *P;              ///< P: in csc format (size n x n)
+        csc *A;              ///< A: in csc format (size m x n)
         c_float *q;          ///< dense array for linear part of cost function (size n)
         c_float *l;          ///< dense array for lower bound (size m)
         c_float *u;          ///< dense array for upper bound (size m)
@@ -130,12 +130,11 @@ typedef struct {
          * @name These *cannot* change for multiple runs with the same call to osqp_setup
          * @{
          */
-        c_float rho;     ///< ADMM step rh
-        c_float sigma;   ///< ADMM step sigm
-        c_int scaling;   ///< boolean, heuristic data rescalin
+        c_float rho;     ///< ADMM step rho
+        c_float sigma;   ///< ADMM step sigma
+        c_int scaling;   ///< boolean, heuristic data rescaling
 
         #if EMBEDDED != 1
-        c_int scaling_norm; ///< scaling norm
         c_int scaling_iter; ///< scaling iteration
         #endif
         /** @} */
@@ -221,11 +220,10 @@ typedef struct {
          * @name Temporary vectors used in scaling
          * @{
          */
-        c_float *P_x;                     ///< backup values of P->x
-        c_float *A_x;                     ///< backup values of A->x
 
         c_float *D_temp;            ///< temporary primal variable scaling vectors
-        c_float *E_temp;            ///< temporary constraints scaling vectors
+        c_float *D_temp_A;            ///< temporary primal variable scaling vectors storing norms of A columns
+        c_float *E_temp;            ///< temporary constraints scaling vectors storing norms of A' columns 
 
         /** @} */
 
@@ -242,6 +240,10 @@ typedef struct {
 
         /// flag indicating whether the solve function has been run before
         c_int first_run;
+        #endif
+
+        #ifdef PRINTING
+        c_int summary_printed;  ///< Has last summary been printed? (true/false)
         #endif
 } OSQPWorkspace;
 

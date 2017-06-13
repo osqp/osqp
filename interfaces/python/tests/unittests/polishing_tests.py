@@ -20,8 +20,6 @@ class polish_tests(unittest.TestCase):
                      'eps_abs': 1e-03,
                      'eps_rel': 1e-03,
                      'scaling': True,
-                     'scaling_norm': 2,
-                     'scaling_iter': 3,
                      'rho': 0.1,
                      'alpha': 1.6,
                      'max_iter': 2500,

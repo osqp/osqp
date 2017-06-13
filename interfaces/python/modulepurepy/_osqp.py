@@ -27,6 +27,84 @@ OSQP_INFTY = 1e+20
 # OSQP Nan
 OSQP_NAN = 1e+20  # Just as placeholder. Not real value
 
+# Auto rho (only linear function)
+# (old values)
+# AUTO_RHO_OFFSET = 1.07838081E-03
+# AUTO_RHO_SLOPE = 2.31511262
+
+#  AUTO_RHO_OFFSET = 0.0
+#  AUTO_RHO_SLOPE = 2.4474028467925546
+
+# Old (More complicated fit)
+# AUTO_RHO_BETA0 = 2.1877627217504649
+# AUTO_RHO_BETA1 = 0.57211669508170027
+# AUTO_RHO_BETA2 = -0.71622847416411806
+
+# New
+# AUTO_RHO_BETA0 = 2.9287845053694284
+# AUTO_RHO_BETA1 = 0.36309102743796728
+# AUTO_RHO_BETA2 = -0.59595092004777972
+
+# With regularization on v (1e-03)
+# AUTO_RHO_BETA0 = 4.7967320978661059
+# AUTO_RHO_BETA1 = -0.014575489596745135
+# AUTO_RHO_BETA2 = -0.38435004096785225
+
+# With regularization on v (1e-04)
+#  AUTO_RHO_BETA0 = 3.1723875550135223
+#  AUTO_RHO_BETA1 = 0.29811867735531827
+#  AUTO_RHO_BETA2 = -0.55976668580992439
+
+# With iter less than 20
+# AUTO_RHO_BETA0 = 6.4047899119449241
+# AUTO_RHO_BETA1 = -0.67858183687448892
+# AUTO_RHO_BETA2 = -0.037034234262609413
+
+
+
+
+
+# No regularization. interval [1, 1.2] (depends on traces)
+#  AUTO_RHO_BETA0 = 2.2377322735057317
+#  AUTO_RHO_BETA1 = 0.73909558577990619
+#  AUTO_RHO_BETA2 = -0.81428271821694909
+
+
+# only n and m, interval 2.0
+#  AUTO_RHO_BETA0 = 132.31670550204416
+#  AUTO_RHO_BETA1 = 3.6821990789623533
+#  AUTO_RHO_BETA2 = -5.3493318062852033
+
+#  # only n and m, interval 2.0
+#  AUTO_RHO_BETA0 = 99.46657940983809
+#  AUTO_RHO_BETA1 = 3.7594273667640685
+#  AUTO_RHO_BETA2 = -5.3658885099270002
+
+# only n and m, interval 1.5 
+#  AUTO_RHO_BETA0 = 63.9204222926816
+#  AUTO_RHO_BETA1 = 4.2480325664123226
+#  AUTO_RHO_BETA2 = -5.7924560461638848
+
+
+#  AUTO_RHO_BETA0 = 1.0865058613182395
+#  AUTO_RHO_BETA1 = 0.12750326228757933
+#  AUTO_RHO_BETA2 = -0.65234442259175496
+
+AUTO_RHO_BETA0 = 0.43764484761141698
+AUTO_RHO_BETA1 = 0.26202391082629206
+AUTO_RHO_BETA2 = -0.46598879917320213
+
+
+
+AUTO_RHO_MAX = 1e06
+AUTO_RHO_MIN = 1e-06
+
+
+# Scaling
+SCALING_REG = 1e-08
+#  MAX_SCALING = 1e06
+#  MIN_SCALING = 1e-06
+
 
 class workspace(object):
     """
@@ -107,10 +185,9 @@ class settings(object):
     ----------
     -> These cannot be changed without running setup
     rho  [1.6]                 - Step in ADMM procedure
-    sigma    [1e-01]           - Regularization parameter for polish
+    sigma    [1e-06]           - Regularization parameter for polish
     scaling  [True]            - Prescaling/Equilibration
     scaling_iter [3]           - Number of Steps for Scaling Method
-    scaling_norm [2]           - Scaling norm in SK algorithm
 
     -> These can be changed without running setup
     max_iter [5000]                     - Maximum number of iterations
@@ -118,11 +195,11 @@ class settings(object):
     eps_rel  [1e-05]                    - Relative tolerance
     eps_prim_inf  [1e-06]                    - Primal infeasibility tolerance
     eps_dual_inf  [1e-06]                    - Dual infeasibility tolerance
-    alpha [1.0]                         - Relaxation parameter
+    alpha [1.6]                         - Relaxation parameter
     delta [1.0]                         - Regularization parameter for polish
     verbose  [True]                     - Verbosity
     early_terminate  [True]             - Evalute termination criteria
-    early_terminate_interval  [True]    - Interval for evaluating termination criteria
+    early_terminate_interval  [25]    - Interval for evaluating termination criteria
     warm_start [False]                  - Reuse solution from previous solve
     polish  [True]                      - Solution polish
     pol_refine_iter  [3]                - Number of iterative refinement iterations
@@ -131,22 +208,20 @@ class settings(object):
 
     def __init__(self, **kwargs):
 
-        self.rho = kwargs.pop('rho', 1.6)
-        self.sigma = kwargs.pop('sigma', 1e-01)
+        self.rho = kwargs.pop('rho', 0.1)
+        self.sigma = kwargs.pop('sigma', 1e-06)
         self.scaling = kwargs.pop('scaling', True)
-        self.scaling_iter = kwargs.pop('scaling_iter', 3)
-        self.scaling_norm = kwargs.pop('scaling_norm', 2)
-
-        self.max_iter = kwargs.pop('max_iter', 5000)
-        self.eps_abs = kwargs.pop('eps_abs', 1e-5)
-        self.eps_rel = kwargs.pop('eps_rel', 1e-5)
-        self.eps_prim_inf = kwargs.pop('eps_prim_inf', 1e-6)
-        self.eps_dual_inf = kwargs.pop('eps_dual_inf', 1e-6)
+        self.scaling_iter = kwargs.pop('scaling_iter', 15) 
+        self.max_iter = kwargs.pop('max_iter', 2500)
+        self.eps_abs = kwargs.pop('eps_abs', 1e-3)
+        self.eps_rel = kwargs.pop('eps_rel', 1e-3)
+        self.eps_prim_inf = kwargs.pop('eps_prim_inf', 1e-4)
+        self.eps_dual_inf = kwargs.pop('eps_dual_inf', 1e-4)
         self.alpha = kwargs.pop('alpha', 1.6)
-        self.delta = kwargs.pop('delta', 1e-7)
+        self.delta = kwargs.pop('delta', 1e-6)
         self.verbose = kwargs.pop('verbose', True)
         self.early_terminate = kwargs.pop('early_terminate', True)
-        self.early_terminate_interval = kwargs.pop('early_terminate_interval', True)
+        self.early_terminate_interval = kwargs.pop('early_terminate_interval', 25)
         self.warm_start = kwargs.pop('warm_start', False)
         self.polish = kwargs.pop('polish', True)
         self.pol_refine_iter = kwargs.pop('pol_refine_iter', 3)
@@ -298,31 +373,78 @@ class OSQP(object):
 
         # Initialize scaling
         d = np.ones(n + m)
+        d_temp = np.ones(n + m)
 
         # Define reduced KKT matrix to scale
         KKT = spspa.vstack([
               spspa.hstack([self.work.data.P, self.work.data.A.T]),
               spspa.hstack([self.work.data.A,
-                            spspa.csc_matrix((m, m))])])
-
-        # Run Scaling
-        KKT2 = KKT.copy()
-        if self.work.settings.scaling_norm == 2:
-            KKT2.data = np.square(KKT2.data)  # Elementwise square
-        elif self.work.settings.scaling_norm == 1:
-            KKT2.data = np.absolute(KKT2.data)  # Elementwise abs
+                            spspa.csc_matrix((m, m))])]).tocsc()
 
         # Iterate Scaling
         for i in range(self.work.settings.scaling_iter):
-            # Regularize components
-            KKT2d = KKT2.dot(d)
-            # Prevent division by 0
-            d = (n + m)*np.reciprocal(KKT2d + 1e-08)
-            # Limit scaling terms
-            d = np.maximum(np.minimum(d, 1e+03), 1e-03)
 
+            # Ruiz equilibration
+            for j in range(n + m):
+                norm_col_j = np.linalg.norm(np.asarray(KKT[:, j].todense()), 
+                                            np.inf)
+                #  print("norm col %i = %.4e" % (j, norm_col_j))
+                #  norm_row_j = np.linalg.norm(KKT_temp[j, :].A1, np.inf)
+                #  print("norm row %i = %.4e" % (j, norm_row_j))
+                #  norm_col_j = np.linalg.norm(KKT_temp[j, :], np.inf)
+                #  norm_col_j = np.linalg.norm(KKT_temp[j, :], 2)
+                #  norm_col_j = np.linalg.norm(KKT_temp[j, :], 1)
+                #  d[j] = 1./(np.sqrt(norm_col_j) + SCALING_REG)
+                if norm_col_j > SCALING_REG:
+                    d_temp[j] = 1./(np.sqrt(norm_col_j))
+
+            S_temp = spspa.diags(d_temp)
+            d = np.multiply(d, d_temp)
+            KKT = S_temp.dot(KKT.dot(S_temp))
+
+            #  # DEBUG: Check scaling
+            #  D = spspa.diags(d[:n])
+            #
+            #  if m == 0:
+            #      # spspa.diags() will throw an error if fed with an empty array
+            #      E = spspa.csc_matrix((0, 0))
+            #      A = \
+            #          E.dot(self.work.data.A.dot(D)).todense()
+            #      cond_A = 1.
+            #  else:
+            #      E = spspa.diags(d[n:])
+            #      A = \
+            #          E.dot(self.work.data.A.dot(D)).todense()
+            #      cond_A = np.linalg.cond(A)
+            #  cond_KKT = np.linalg.cond(KKT.todense())
+            #  P = \
+            #      D.dot(self.work.data.P.dot(D)).todense()
+            #  cond_P = np.linalg.cond(P)
+            #
+            #  # Get rato between columns and rows
+            #  n_plus_m = n + m
+            #  max_norm_rows = 0.0
+            #  min_norm_rows = np.inf
+            #  for j in range(n_plus_m):
+            #     norm_row_j = np.linalg.norm(np.asarray(KKT[j, :].todense()))
+            #     max_norm_rows = np.maximum(norm_row_j,
+            #                                max_norm_rows)
+            #     min_norm_rows = np.minimum(norm_row_j,
+            #                                min_norm_rows)
+            #
+            #  # Compute residuals
+            #  res_rows = max_norm_rows / min_norm_rows
+            #
+            #  np.set_printoptions(suppress=True, linewidth=500, precision=3)
+            #  print("\nIter %i" % i)
+            #  print("cond(KKT) = %.4e" % cond_KKT)
+            #  print("cond(P) = %.4e" % cond_P)
+            #  print("cond(A) = %.4e" % cond_A)
+            #  print("res_rows = %.4e / %.4e = %.4e" %
+            #       (max_norm_rows, min_norm_rows, res_rows))
+            #
+            #
         # Obtain Scaler Matrices
-        d = np.power(d, 1./self.work.settings.scaling_norm)
         D = spspa.diags(d[:self.work.data.n])
         if m == 0:
             # spspa.diags() will throw an error if fed with an empty array
@@ -330,12 +452,15 @@ class OSQP(object):
         else:
             E = spspa.diags(d[self.work.data.n:])
 
+
         # Scale problem Matrices
         P = D.dot(self.work.data.P.dot(D)).tocsc()
         A = E.dot(self.work.data.A.dot(D)).tocsc()
         q = D.dot(self.work.data.q)
         l = E.dot(self.work.data.l)
         u = E.dot(self.work.data.u)
+
+        #  import ipdb; ipdb.set_trace()
 
         # Assign scaled problem
         self.work.data = problem((n, m), P.data, P.indices, P.indptr, q,
@@ -353,6 +478,57 @@ class OSQP(object):
             self.work.scaling.Einv = \
                 spspa.diags(np.reciprocal(E.diagonal()))
 
+    def compute_rho(self):
+        """
+        Automatically compute rho value
+        """
+
+        if self.work.data.m == 0:
+            self.work.settings.rho = AUTO_RHO_MAX
+
+        n = self.work.data.n
+        m = self.work.data.m
+        sigma = self.work.settings.sigma
+        #  self.work.settings.rho = AUTO_RHO_BETA0 * \
+        #      np.power(n, AUTO_RHO_BETA1) * \
+        #      np.power(m, AUTO_RHO_BETA2)
+
+
+        #  Old stuff with traces
+        # Compute tr(P)
+        trP = self.work.data.P.diagonal().sum()
+
+        #  Compute tr(AtA) = fro(A) ^ 2
+        trAtA = spspa.linalg.norm(self.work.data.A) ** 2
+#
+
+        # DEBUG: saturate values of norms
+        # trP = np.maximum(trP, 1e-03)
+        # trAtA = np.maximum(trAtA, 1e-03)
+
+        #  self.work.settings.rho = AUTO_RHO_BETA0 * \
+        #      np.power(trP, AUTO_RHO_BETA1) * \
+        #      np.power(trAtA, AUTO_RHO_BETA2)
+
+    
+        self.work.settings.rho = AUTO_RHO_BETA0 * \
+                np.power((trP + sigma * n)/n, AUTO_RHO_BETA1) * \
+                np.power((trAtA)/m, AUTO_RHO_BETA2)
+
+        #  import ipdb; ipdb.set_trace()
+        # Old linear ratio
+        # # Compute ratio
+        # ratio = trP / trAtA
+        #
+        # # Compute rho
+        # self.work.settings.rho = AUTO_RHO_OFFSET + AUTO_RHO_SLOPE * ratio
+
+        # Constrain rho between max and min
+        self.work.settings.rho = \
+            np.minimum(np.maximum(self.work.settings.rho,
+                                  AUTO_RHO_MIN),
+                       AUTO_RHO_MAX)
+
     def print_setup_header(self, data, settings):
         """Print solver header
         """
@@ -360,8 +536,8 @@ class OSQP(object):
         print("      OSQP v%s  -  Operator Splitting QP Solver" % \
             self.version)
         print("              Pure Python Implementation")
-        print("     (c) .....,")
-        print("   University of Oxford  -  Stanford University 2016")
+        print("     (c) Bartolomeo Stellato, Goran Banjac")
+        print("   University of Oxford  -  Stanford University 2017")
         print("-------------------------------------------------------")
 
         print("Problem:  variables n = %d, constraints m = %d" % \
@@ -370,8 +546,13 @@ class OSQP(object):
             (settings.eps_abs, settings.eps_rel))
         print("          eps_prim_inf = %.2e, eps_dual_inf = %.2e," % \
             (settings.eps_prim_inf, settings.eps_dual_inf))
-        print("          rho = %.2f, sigma = %.2f, alpha = %.2f," % \
-            (settings.rho, settings.sigma, settings.alpha))
+        print("          rho = %.2e " % settings.rho, end='')
+        if settings.auto_rho:
+            print("(auto)")
+        else:
+            print("")
+        print("          sigma = %.2e, alpha = %.2e," % \
+            (settings.sigma, settings.alpha))
         print("          max_iter = %d" % settings.max_iter)
         if settings.scaling:
             print("          scaling: active")
@@ -419,7 +600,7 @@ class OSQP(object):
         """
         # Compute rhs and store it in xz_tilde
         self.work.xz_tilde[:self.work.data.n] = \
-            self.work.settings.sigma * self.work.x - self.work.data.q
+            self.work.settings.sigma * self.work.x_prev - self.work.data.q
         self.work.xz_tilde[self.work.data.n:] = \
             self.work.z_prev - 1./self.work.settings.rho * self.work.y
 
@@ -474,28 +655,37 @@ class OSQP(object):
     def compute_pri_res(self, polish):
         """
         Compute primal residual ||Ax - z||
-        TODO: Add polish case
         """
         if self.work.data.m == 0:  # No constraints
             return 0.
         if polish:
-            return la.norm(np.maximum(self.work.data.l - self.work.pol.z, 0) +
-                           np.maximum(self.work.pol.z - self.work.data.u, 0))
+            pri_res = np.maximum(self.work.data.l - self.work.pol.z, 0) + \
+                np.maximum(self.work.pol.z - self.work.data.u, 0) 
         else:
-            return la.norm(self.work.data.A.dot(self.work.x) - self.work.z)
+            pri_res = self.work.data.A.dot(self.work.x) - self.work.z
+
+        if self.work.settings.scaling:
+            pri_res = self.work.scaling.Einv.dot(pri_res)
+
+        return la.norm(pri_res, np.inf)
 
     def compute_dua_res(self, polish):
         """
         Compute dual residual ||Px + q + A'y||
         """
         if polish:
-            return la.norm(self.work.data.P.dot(self.work.pol.x) +
-                           self.work.data.q +
-                           self.work.pol.Ared.T.dot(self.work.pol.y_red))
+            dua_res = self.work.data.P.dot(self.work.pol.x) + \
+                self.work.data.q +\
+                self.work.pol.Ared.T.dot(self.work.pol.y_red)
         else:
-            return la.norm(self.work.data.P.dot(self.work.x) +
-                           self.work.data.q +
-                           self.work.data.A.T.dot(self.work.y))
+            dua_res = self.work.data.P.dot(self.work.x) +\
+                self.work.data.q +\
+                self.work.data.A.T.dot(self.work.y)
+
+        if self.work.settings.scaling:
+            dua_res = self.work.scaling.Dinv.dot(dua_res)
+
+        return la.norm(dua_res, np.inf)
 
     def is_primal_infeasible(self):
         """
@@ -544,22 +734,34 @@ class OSQP(object):
             # print("||A'*v|| = %6.2e" % (la.norm(self.work.Atdelta_y)))
             # pdb.set_trace()
 
-        eps_prim_inf = self.work.settings.eps_prim_inf
         # Prevent 0 division
-        if la.norm(self.work.delta_y) > eps_prim_inf*eps_prim_inf:
-            self.work.delta_y /= la.norm(self.work.delta_y)
+        # if la.norm(self.work.delta_y) > eps_prim_inf*eps_prim_inf:
+        #     # self.work.delta_y /= la.norm(self.work.delta_y)
+        #     # lhs = self.work.data.u.dot(np.maximum(self.work.delta_y, 0)) + \
+        #     #     self.work.data.l.dot(np.minimum(self.work.delta_y, 0))
+        #     # if  lhs < -eps_prim_inf:
+        #     #     self.work.Atdelta_y = self.work.data.A.T.dot(self.work.delta_y)
+        #     #     return la.norm(self.work.Atdelta_y) < eps_prim_inf
+
+        eps_prim_inf = self.work.settings.eps_prim_inf
+        norm_delta_y = la.norm(self.work.delta_y, np.inf)
+        if norm_delta_y > eps_prim_inf:
+            self.work.delta_y /= norm_delta_y
             lhs = self.work.data.u.dot(np.maximum(self.work.delta_y, 0)) + \
-                self.work.data.l.dot(np.minimum(self.work.delta_y, 0))
-            if  lhs < -eps_prim_inf:
+                    self.work.data.l.dot(np.minimum(self.work.delta_y, 0))
+            if lhs < -eps_prim_inf:
                 self.work.Atdelta_y = self.work.data.A.T.dot(self.work.delta_y)
-                return la.norm(self.work.Atdelta_y) < eps_prim_inf
+                if self.work.settings.scaling:
+                    self.work.Atdelta_y = self.work.scaling.Dinv.dot(self.work.Atdelta_y)
+                return la.norm(self.work.Atdelta_y, np.inf) < eps_prim_inf
+
         return False
 
     def is_dual_infeasible(self):
         """
         Check dual infeasibility
-            ||P*v||_2 = 0
-        with v = delta_x / ||delta_x||_2 given that the following
+            ||P*v||_inf = 0
+        with v = delta_x / ||delta_x||_inf given that the following
         conditions hold
             q'* v < 0 and
                         | 0     if l_i, u_i \in R
@@ -567,30 +769,39 @@ class OSQP(object):
                         | <= 0  if l_i = -inf
         """
         eps_dual_inf = self.work.settings.eps_dual_inf
+        norm_delta_x = la.norm(self.work.delta_x, np.inf)
         # Prevent 0 division
-        if la.norm(self.work.delta_x, np.inf) > eps_dual_inf*eps_dual_inf:
+        if norm_delta_x > eps_dual_inf:
             # Normalize delta_x
-            self.work.delta_x /= la.norm(self.work.delta_x)
+            self.work.delta_x /= norm_delta_x
 
-            # First check q'* v < 0
+            # First check q'* delta_x < 0
             if self.work.data.q.dot(self.work.delta_x) < -eps_dual_inf:
 
-                # Compute P * v
+                # Compute P * delta_x
                 self.work.Pdelta_x = self.work.data.P.dot(self.work.delta_x)
 
-                # Check if ||P*v||_2 = 0
-                if la.norm(self.work.Pdelta_x) < eps_dual_inf:
+                # Scale if necessary
+                if self.work.settings.scaling:
+                    self.work.Pdelta_x = self.work.scaling.Dinv.dot(self.work.Pdelta_x)
 
-                    # Compute A * v
+                # Check if ||P * delta_x|| = 0
+                if la.norm(self.work.Pdelta_x, np.inf) < eps_dual_inf:
+
+                    # Compute A * delta_x
                     self.work.Adelta_x = self.work.data.A.dot(
                         self.work.delta_x)
 
+                    # Scale if necessary
+                    if self.work.settings.scaling:
+                        self.work.Adelta_x = self.work.scaling.Einv.dot(self.work.Adelta_x)
+
                     for i in range(self.work.data.m):
                         # De Morgan's Law applied to negate
-                        # conditions in sec 4.3
-                        if ((self.work.data.u[i] < OSQP_INFTY*1e-03) and
+                        # conditions on A * delta_x
+                        if ((self.work.data.u[i] < OSQP_INFTY*1e-06) and
                             (self.work.Adelta_x[i] > eps_dual_inf)) or \
-                            ((self.work.data.l[i] > -OSQP_INFTY*1e-03) and
+                            ((self.work.data.l[i] > -OSQP_INFTY*1e-06) and
                              (self.work.Adelta_x[i] < -eps_dual_inf)):
 
                             # At least one condition not satisfied
@@ -648,30 +859,52 @@ class OSQP(object):
         prim_inf_check = 0
         dual_inf_check = 0
 
+        eps_abs = self.work.settings.eps_abs
+        eps_rel = self.work.settings.eps_rel
+
         if self.work.data.m == 0:  # No constraints -> always  primal feasible
             pri_check = 1
         else:
             # Compute primal tolerance
-            eps_pri = np.sqrt(self.work.data.m) * self.work.settings.eps_abs +\
-                self.work.settings.eps_rel * la.norm(self.work.z)
-            # print "eps_pri = %.4e, pri_res = %.4e" % \
-            # (eps_pri, self.work.info.pri_res)
-            # set_trace()
+            if self.work.settings.scaling:
+                Einv = self.work.scaling.Einv
+                max_rel_eps = np.max([
+                    la.norm(Einv.dot(self.work.data.A.dot(self.work.x)), np.inf),
+                    la.norm(Einv.dot(self.work.z), np.inf)])
+            else:
+                max_rel_eps = np.max([
+                    la.norm(self.work.data.A.dot(self.work.x), np.inf),
+                    la.norm(self.work.z, np.inf)])
+
+            eps_pri = eps_abs + eps_rel * max_rel_eps
+
             if self.work.info.pri_res < eps_pri:
                 pri_check = 1
-
-            # Check infeasibility
-            prim_inf_check = self.is_primal_infeasible()
+            else:
+                # Check infeasibility
+                prim_inf_check = self.is_primal_infeasible()
 
         # Compute dual tolerance
-        eps_dua = np.sqrt(self.work.data.n) * self.work.settings.eps_abs + \
-            self.work.settings.eps_rel * self.work.settings.rho * \
-            la.norm(self.work.data.A.T.dot(self.work.y))
+
+        if self.work.settings.scaling:
+            Dinv = self.work.scaling.Dinv
+            max_rel_eps = np.max([
+                la.norm(Dinv.dot(self.work.data.A.T.dot(self.work.y)), np.inf),
+                la.norm(Dinv.dot(self.work.data.P.dot(self.work.x)), np.inf),
+                la.norm(Dinv.dot(self.work.data.q), np.inf)])
+        else:
+            max_rel_eps = np.max([
+                la.norm(self.work.data.A.T.dot(self.work.y), np.inf),
+                la.norm(self.work.data.P.dot(self.work.x), np.inf),
+                la.norm(self.work.data.q, np.inf)])
+
+        eps_dua = eps_abs + eps_rel * max_rel_eps
+
         if self.work.info.dua_res < eps_dua:
             dua_check = 1
-
-        # Check dual infeasibility
-        dual_inf_check = self.is_dual_infeasible()
+        else:
+            # Check dual infeasibility
+            dual_inf_check = self.is_dual_infeasible()
 
         # Compare residuals and determine solver status
         if pri_check & dua_check:
@@ -733,7 +966,7 @@ class OSQP(object):
     #   Main Solver API
     #
 
-    def setup(self, xxx_todo_changeme1, Pdata, Pindices, Pindptr, q,
+    def setup(self, dims, Pdata, Pindices, Pindptr, q,
               Adata, Aindices, Aindptr,
               l, u, **stgs):
         """
@@ -742,7 +975,7 @@ class OSQP(object):
             subject to	l <= A x <= u
 
         """
-        (n, m) = xxx_todo_changeme1
+        (n, m) = dims
         self.work = workspace()
 
         # Start timer
@@ -771,6 +1004,10 @@ class OSQP(object):
         # Scale problem
         if self.work.settings.scaling:
             self.scale_data()
+
+        # Compute auto_rho in case
+        if self.work.settings.auto_rho:
+            self.compute_rho()
 
         # Factorize KKT
         self.work.priv = priv(self.work)
@@ -818,10 +1055,12 @@ class OSQP(object):
 
             # Second step: update x and z
             self.update_x()
+
             self.update_z()
 
             # Third step: update y
             self.update_y()
+
 
             if self.work.settings.early_terminate:
                 # Update info

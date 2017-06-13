@@ -103,7 +103,10 @@ void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
 }
 
 
-void print_summary(OSQPInfo * info){
+void print_summary(OSQPWorkspace * work){
+    OSQPInfo * info;
+    info = work->info;
+
     c_print("%*i ", (int)strlen(HEADER[0]), (int)info->iter);
     c_print("%*.4e ", (int)HSPACE, info->obj_val);
     c_print("%*.4e ", (int)HSPACE, info->pri_res);
@@ -112,10 +115,15 @@ void print_summary(OSQPInfo * info){
     c_print("%*.2fs", 9, info->setup_time + info->solve_time);
     #endif
     c_print("\n");
+
+    work->summary_printed = 1; // Summary has been printed
 }
 
 
-void print_polish(OSQPInfo * info) {
+void print_polish(OSQPWorkspace * work) {
+    OSQPInfo * info;
+    info = work->info;
+    
     c_print("%*s ", (int)strlen(HEADER[0]), "PLSH");
     c_print("%*.4e ", (int)HSPACE, info->obj_val);
     c_print("%*.4e ", (int)HSPACE, info->pri_res);
@@ -172,7 +180,6 @@ void set_default_settings(OSQPSettings * settings) {
         settings->scaling = SCALING; /* heuristic problem scaling */
 
         #if EMBEDDED != 1
-        settings->scaling_norm = SCALING_NORM;
         settings->scaling_iter = SCALING_ITER;
         #endif
 
@@ -207,7 +214,6 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
 
     // Copy settings
     new->scaling = settings->scaling;
-    new->scaling_norm = settings->scaling_norm;
     new->scaling_iter = settings->scaling_iter;
     new->rho = settings->rho;
     new->sigma = settings->sigma;
@@ -417,11 +423,11 @@ void print_dns_matrix(c_float * M, c_int m, c_int n, const char *name)
                 for(j=0; j<n; j++) { // Cycle over columns
                         if (j < n - 1)
                                 // c_print("% 14.12e,  ", M[j*m+i]);
-                                c_print("% .5f,  ", M[j*m+i]);
+                                c_print("% .8f,  ", M[j*m+i]);
 
                         else
                                 // c_print("% 14.12e;  ", M[j*m+i]);
-                                c_print("% .5f;  ", M[j*m+i]);
+                                c_print("% .8f;  ", M[j*m+i]);
                 }
                 if (i < m - 1) {
                         c_print("\n\t");

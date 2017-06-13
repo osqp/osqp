@@ -16,9 +16,9 @@ The settings marked with * can be changed without running the setup method again
 +------------------------------------+-------------------------------------+----------------+
 | :code:`rho`                        | ADMM rho step                       | Auto computed  |
 +------------------------------------+-------------------------------------+----------------+
-| :code:`auto_rho`                   | ADMM rho step automatic selection   |   True         |
+| :code:`auto_rho`                   | ADMM rho step automatic selection   |   False        |
 +------------------------------------+-------------------------------------+----------------+
-| :code:`sigma`                      | ADMM sigma step                     |   0.001        |
+| :code:`sigma`                      | ADMM sigma step                     |   1e-06        |
 +------------------------------------+-------------------------------------+----------------+
 | :code:`max_iter` *                 | Maximum number of iterations        |   2500         |
 +------------------------------------+-------------------------------------+----------------+
@@ -44,9 +44,7 @@ The settings marked with * can be changed without running the setup method again
 +------------------------------------+-------------------------------------+----------------+
 | :code:`warm_start` *               | Perform warm starting               |   True         |
 +------------------------------------+-------------------------------------+----------------+
-| :code:`scaling_norm`               | Scaling norm                        |   2            |
-+------------------------------------+-------------------------------------+----------------+
-| :code:`scaling_iter`               | Scaling iterations                  |   3            |
+| :code:`scaling_iter`               | Scaling iterations                  |   15            |
 +------------------------------------+-------------------------------------+----------------+
 | :code:`pol_refine_iter` *          | Refinement iterations in polish     |   5            |
 +------------------------------------+-------------------------------------+----------------+

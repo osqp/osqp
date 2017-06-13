@@ -65,15 +65,15 @@ void print_header(void);
 
 /**
  * Print iteration summary
- * @param info current information
+ * @param work current workspace
  */
-void print_summary(OSQPInfo * info);
+void print_summary(OSQPWorkspace * work);
 
 /**
  * Print information after polish
- * @param info information structure
+ * @param work current workspace
  */
-void print_polish(OSQPInfo * info);
+void print_polish(OSQPWorkspace * work);
 
 /**
  * Print footer when algorithm terminates

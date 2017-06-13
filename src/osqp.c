@@ -87,16 +87,9 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
         work->scaling->Einv = c_malloc(work->data->m * sizeof(c_float));
 
         // Allocate workspace variables used in scaling
-        work->P_x = c_malloc(work->data->P->p[work->data->n] * sizeof(c_float));
-        work->A_x = c_malloc(work->data->A->p[work->data->n] * sizeof(c_float));
         work->D_temp = c_malloc(work->data->n * sizeof(c_float));
+        work->D_temp_A = c_malloc(work->data->n * sizeof(c_float));
         work->E_temp = c_malloc(work->data->m * sizeof(c_float));
-
-        // Initialize scaling vectors to 1
-        vec_set_scalar(work->scaling->D, 1., work->data->n);
-        vec_set_scalar(work->scaling->Dinv, 1., work->data->n);
-        vec_set_scalar(work->scaling->E, 1., work->data->m);
-        vec_set_scalar(work->scaling->Einv, 1., work->data->m);
 
         // Scale data
         scale_data(work);
@@ -156,6 +149,7 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     #ifdef PRINTING
     if (work->settings->verbose)
         print_setup_header(work->data, work->settings);
+        work->summary_printed = 0; // Initialize last summary  to not printed
     #endif
 
     return work;
@@ -256,7 +250,7 @@ c_int osqp_solve(OSQPWorkspace * work){
 
             if (can_print){
                 // Print summary
-                print_summary(work->info);
+                print_summary(work);
             }
 
             // Check algorithm termination
@@ -296,7 +290,7 @@ c_int osqp_solve(OSQPWorkspace * work){
         /* Print summary */
         #ifdef PRINTING
         if (work->settings->verbose)
-            print_summary(work->info);
+            print_summary(work);
         #endif
 
         /* Check whether a termination criterion is triggered */
@@ -311,10 +305,9 @@ c_int osqp_solve(OSQPWorkspace * work){
 
     /* Print summary for last iteration */
     #ifdef PRINTING
-    if (work->settings->verbose
-        && iter % PRINT_INTERVAL != 0 && iter != 1
-        && iter != work->settings->max_iter + 1)
-        print_summary(work->info);
+    if (work->settings->verbose && !work->summary_printed){
+        print_summary(work);
+    }
     #endif
 
     /* if max iterations reached, change status accordingly */
@@ -397,9 +390,8 @@ c_int osqp_cleanup(OSQPWorkspace * work){
             c_free(work->scaling);
 
             // Free workspace variables
-            if (work->P_x) c_free(work->P_x);
-            if (work->A_x) c_free(work->A_x);
             if (work->D_temp) c_free(work->D_temp);
+            if (work->D_temp_A) c_free(work->D_temp_A);
             if (work->E_temp) c_free(work->E_temp);
         }
 
@@ -494,7 +486,7 @@ c_int osqp_update_lin_cost(OSQPWorkspace * work, c_float * q_new) {
 
     // Scaling
     if (work->settings->scaling) {
-        vec_ew_prod(work->scaling->D, work->data->q, work->data->n);
+        vec_ew_prod(work->scaling->D, work->data->q, work->data->q, work->data->n);
     }
 
     // Set solver status to OSQP_UNSOLVED
@@ -523,8 +515,8 @@ c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new)
 
     // Scaling
     if (work->settings->scaling) {
-        vec_ew_prod(work->scaling->E, work->data->l, work->data->m);
-        vec_ew_prod(work->scaling->E, work->data->u, work->data->m);
+        vec_ew_prod(work->scaling->E, work->data->l, work->data->l, work->data->m);
+        vec_ew_prod(work->scaling->E, work->data->u, work->data->u, work->data->m);
     }
 
     // Set solver status to OSQP_UNSOLVED
@@ -542,7 +534,7 @@ c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
 
     // Scaling
     if (work->settings->scaling) {
-        vec_ew_prod(work->scaling->E, work->data->l, work->data->m);
+        vec_ew_prod(work->scaling->E, work->data->l, work->data->l, work->data->m);
     }
 
     // Check if lower bound is smaller than upper bound
@@ -571,7 +563,7 @@ c_int osqp_update_upper_bound(OSQPWorkspace * work, c_float * u_new) {
 
     // Scaling
     if (work->settings->scaling) {
-        vec_ew_prod(work->scaling->E, work->data->u, work->data->m);
+        vec_ew_prod(work->scaling->E, work->data->u, work->data->u, work->data->m);
     }
 
     // Check if upper bound is greater than lower bound
@@ -602,8 +594,8 @@ c_int osqp_warm_start(OSQPWorkspace * work, c_float * x, c_float * y){
     prea_vec_copy(y, work->y, work->data->m);
 
     // Scale iterates
-    vec_ew_prod(work->scaling->Dinv, work->x, work->data->n);
-    vec_ew_prod(work->scaling->Einv, work->y, work->data->m);
+    vec_ew_prod(work->scaling->Dinv, work->x, work->x, work->data->n);
+    vec_ew_prod(work->scaling->Einv, work->y, work->y, work->data->m);
 
     // Compute Ax = z and store it in z
     mat_vec(work->data->A, work->x, work->z, 0);
@@ -621,7 +613,7 @@ c_int osqp_warm_start_x(OSQPWorkspace * work, c_float * x){
     prea_vec_copy(x, work->x, work->data->n);
 
     // Scale iterate
-    vec_ew_prod(work->scaling->Dinv, work->x, work->data->n);
+    vec_ew_prod(work->scaling->Dinv, work->x, work->x, work->data->n);
 
     // Compute Ax = z and store it in z
     mat_vec(work->data->A, work->x, work->z, 0);
@@ -643,7 +635,7 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y){
     prea_vec_copy(y, work->y, work->data->m);
 
     // Scale iterate
-    vec_ew_prod(work->scaling->Einv, work->y, work->data->m);
+    vec_ew_prod(work->scaling->Einv, work->y, work->y, work->data->m);
 
     // Cold start x and z
     vec_set_scalar(work->x, 0., work->data->n);
