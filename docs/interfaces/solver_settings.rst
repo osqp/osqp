@@ -14,7 +14,7 @@ The settings marked with * can be changed without running the setup method again
 +====================================+=====================================+================+
 | :code:`scaling`                    | Perform data scaling                |   True         |
 +------------------------------------+-------------------------------------+----------------+
-| :code:`rho`                        | ADMM rho step                       | Auto computed  |
+| :code:`rho`                        | ADMM rho step                       |   0.1          |
 +------------------------------------+-------------------------------------+----------------+
 | :code:`auto_rho`                   | ADMM rho step automatic selection   |   False        |
 +------------------------------------+-------------------------------------+----------------+
@@ -44,7 +44,7 @@ The settings marked with * can be changed without running the setup method again
 +------------------------------------+-------------------------------------+----------------+
 | :code:`warm_start` *               | Perform warm starting               |   True         |
 +------------------------------------+-------------------------------------+----------------+
-| :code:`scaling_iter`               | Scaling iterations                  |   15            |
+| :code:`scaling_iter`               | Scaling iterations                  |   15           |
 +------------------------------------+-------------------------------------+----------------+
 | :code:`pol_refine_iter` *          | Refinement iterations in polish     |   5            |
 +------------------------------------+-------------------------------------+----------------+
