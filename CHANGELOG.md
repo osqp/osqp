@@ -1,6 +1,7 @@
 
 Changes since the last release
 ------------------------------
+* Now Matlab interface does support logical entries for the settings
 * Fixed bug in index ordering of sparse matrices of Python interface
 * Changed 2-norms to inf-norms
 * Fixed code generation bug when scaling is disabled [#7](https://github.com/oxfordcontrol/osqp/issues/7)
