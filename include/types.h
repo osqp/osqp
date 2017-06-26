@@ -159,7 +159,8 @@ typedef struct {
         c_int auto_rho; ///< boolean, true if rho is chosen automatically
         #endif
 
-        c_int early_terminate;  ///< boolean, terminate if stopping criterion is met
+        c_int scaled_termination;  ///< boolean, use scaled termination criteria 
+        c_int early_terminate;  ///< boolean, terminate if stopping criteria is met
         c_int early_terminate_interval; ///< boolean, interval for checking termination, if early_terminate == 1
         c_int warm_start; ///< boolean, warm start
 

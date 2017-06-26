@@ -172,7 +172,8 @@ class OSQP(object):
 
         It is possible to change: 'max_iter', 'eps_abs', 'eps_rel', 'alpha',
                                   'delta', 'polish', 'pol_refine_iter',
-                                  'verbose', 'early_terminate', 'early_terminate_interval'
+                                  'verbose', 'scaled_termination', 
+                                  'early_terminate', 'early_terminate_interval'
         """
 
         # get arguments
@@ -184,6 +185,7 @@ class OSQP(object):
         polish = kwargs.pop('polish', None)
         pol_refine_iter = kwargs.pop('pol_refine_iter', None)
         verbose = kwargs.pop('verbose', None)
+        scaled_termination = kwargs.pop('scaled_termination', None)
         early_terminate = kwargs.pop('early_terminate', None)
         early_terminate_interval = kwargs.pop('early_terminate_interval', None)
         warm_start = kwargs.pop('warm_start', None)
@@ -213,6 +215,9 @@ class OSQP(object):
         if verbose is not None:
             self._model.update_verbose(verbose)
 
+        if scaled_termination is not None:
+            self._model.update_scaled_termination(scaled_termination)
+        
         if early_terminate is not None:
             self._model.update_early_terminate(early_terminate)
 
@@ -230,6 +235,7 @@ class OSQP(object):
            polish is None and \
            pol_refine_iter is None and \
            verbose is None and \
+           scaled_termination is None and \
            early_terminate is None and \
            early_terminate_interval is None and \
            warm_start is None:

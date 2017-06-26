@@ -183,7 +183,7 @@
      OSQPSettings *settings = self->workspace->settings;
 
      PyObject *return_dict = Py_BuildValue(
-         "{s:d,s:d,s:i,s:i,s:i,s:d,s:d,s:d, s:d, s:d, s:i, s:i, s:i}",
+         "{s:d,s:d,s:i,s:i,s:i,s:d,s:d,s:d, s:d, s:d, s:i, s:i, s:i, s:i}",
          "rho", (double)settings->rho,
          "sigma", (double)settings->sigma,
          "scaling", settings->scaling,
@@ -195,6 +195,7 @@
          "eps_dual_inf", (double)settings->eps_dual_inf,
          "alpha", (double)settings->alpha,
          "warm_start", settings->warm_start,
+         "scaled_termination", settings->scaled_termination,
          "early_terminate", settings->early_terminate,
          "early_terminate_interval", settings->early_terminate_interval);
      return return_dict;

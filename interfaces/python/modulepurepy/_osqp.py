@@ -198,6 +198,7 @@ class settings(object):
     alpha [1.6]                         - Relaxation parameter
     delta [1.0]                         - Regularization parameter for polish
     verbose  [True]                     - Verbosity
+    scaled_termination [True]             - Evalute scaled termination criteria
     early_terminate  [True]             - Evalute termination criteria
     early_terminate_interval  [25]    - Interval for evaluating termination criteria
     warm_start [False]                  - Reuse solution from previous solve
@@ -220,6 +221,7 @@ class settings(object):
         self.alpha = kwargs.pop('alpha', 1.6)
         self.delta = kwargs.pop('delta', 1e-6)
         self.verbose = kwargs.pop('verbose', True)
+        self.scaled_termination = kwargs.pop('scaled_termination', True)
         self.early_terminate = kwargs.pop('early_terminate', True)
         self.early_terminate_interval = kwargs.pop('early_terminate_interval', 25)
         self.warm_start = kwargs.pop('warm_start', False)
@@ -555,17 +557,21 @@ class OSQP(object):
             (settings.sigma, settings.alpha))
         print("          max_iter = %d" % settings.max_iter)
         if settings.scaling:
-            print("          scaling: active")
+            print("          scaling: on, ", end='')
         else:
-            print("          scaling: inactive")
+            print("          scaling: off, ", end='')
+        if settings.scaled_termination:
+            print("scaled_termination: on")
+        else:
+            print("scaled_termination: off")
         if settings.warm_start:
-            print("          warm_start: active")
+            print("          warm_start: on, ", end='')
         else:
-            print("          warm_start: inactive")
+            print("          warm_start: off, ", end='')
         if settings.polish:
-            print("          polish: active")
+            print("polish: on")
         else:
-            print("          polish: inactive")
+            print("polish: off")
         print("")
 
     def print_header(self):
@@ -664,7 +670,7 @@ class OSQP(object):
         else:
             pri_res = self.work.data.A.dot(self.work.x) - self.work.z
 
-        if self.work.settings.scaling:
+        if self.work.settings.scaling and self.work.settings.scaled_termination:
             pri_res = self.work.scaling.Einv.dot(pri_res)
 
         return la.norm(pri_res, np.inf)
@@ -682,7 +688,7 @@ class OSQP(object):
                 self.work.data.q +\
                 self.work.data.A.T.dot(self.work.y)
 
-        if self.work.settings.scaling:
+        if self.work.settings.scaling and self.work.settings.scaled_termination:
             dua_res = self.work.scaling.Dinv.dot(dua_res)
 
         return la.norm(dua_res, np.inf)
@@ -751,8 +757,8 @@ class OSQP(object):
                     self.work.data.l.dot(np.minimum(self.work.delta_y, 0))
             if lhs < -eps_prim_inf:
                 self.work.Atdelta_y = self.work.data.A.T.dot(self.work.delta_y)
-                if self.work.settings.scaling:
-                    self.work.Atdelta_y = self.work.scaling.Dinv.dot(self.work.Atdelta_y)
+                if self.work.settings.scaling and self.work.settings.scaled_termination:
+                        self.work.Atdelta_y = self.work.scaling.Dinv.dot(self.work.Atdelta_y)
                 return la.norm(self.work.Atdelta_y, np.inf) < eps_prim_inf
 
         return False
@@ -782,7 +788,7 @@ class OSQP(object):
                 self.work.Pdelta_x = self.work.data.P.dot(self.work.delta_x)
 
                 # Scale if necessary
-                if self.work.settings.scaling:
+                if self.work.settings.scaling and self.work.settings.scaled_termination:
                     self.work.Pdelta_x = self.work.scaling.Dinv.dot(self.work.Pdelta_x)
 
                 # Check if ||P * delta_x|| = 0
@@ -793,7 +799,7 @@ class OSQP(object):
                         self.work.delta_x)
 
                     # Scale if necessary
-                    if self.work.settings.scaling:
+                    if self.work.settings.scaling and self.work.settings.scaled_termination:
                         self.work.Adelta_x = self.work.scaling.Einv.dot(self.work.Adelta_x)
 
                     for i in range(self.work.data.m):
@@ -866,7 +872,7 @@ class OSQP(object):
             pri_check = 1
         else:
             # Compute primal tolerance
-            if self.work.settings.scaling:
+            if self.work.settings.scaling and self.work.settings.scaled_termination:
                 Einv = self.work.scaling.Einv
                 max_rel_eps = np.max([
                     la.norm(Einv.dot(self.work.data.A.dot(self.work.x)), np.inf),
@@ -886,7 +892,7 @@ class OSQP(object):
 
         # Compute dual tolerance
 
-        if self.work.settings.scaling:
+        if self.work.settings.scaling and self.work.settings.scaled_termination:
             Dinv = self.work.scaling.Dinv
             max_rel_eps = np.max([
                 la.norm(Dinv.dot(self.work.data.A.T.dot(self.work.y)), np.inf),
@@ -1327,6 +1333,15 @@ class OSQP(object):
             raise ValueError("verbose should be either True or False")
 
         self.work.settings.verbose = verbose_new
+
+    def update_scaled_termination(self, scaled_termination_new):
+        """
+        Update scaled_termination parameter
+        """
+        if (scaled_termination_new is not True) & (scaled_termination_new is not False):
+            raise ValueError("scaled_termination should be either True or False")
+
+        self.work.settings.scaled_termination = scaled_termination_new
 
     def update_early_terminate(self, early_terminate_new):
         """

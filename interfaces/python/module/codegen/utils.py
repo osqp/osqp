@@ -119,6 +119,7 @@ def write_settings(f, settings, name, embedded_flag):
     f.write("(c_float)%.20f, " % settings['eps_dual_inf'])
     f.write("(c_float)%.20f, " % settings['alpha'])
 
+    f.write("%d, " % settings['scaled_termination'])
     f.write("%d, " % settings['early_terminate'])
     f.write("%d, " %
             settings['early_terminate_interval'])

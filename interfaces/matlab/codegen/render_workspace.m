@@ -81,6 +81,7 @@ fprintf(f, '(c_float)%.20f, ', settings.eps_prim_inf);
 fprintf(f, '(c_float)%.20f, ', settings.eps_dual_inf);
 fprintf(f, '(c_float)%.20f, ', settings.alpha);
 
+fprintf(f, '%d, ', settings.scaled_termination);
 fprintf(f, '%d, ', settings.early_terminate);
 fprintf(f, '%d, ', settings.early_terminate_interval);
 fprintf(f, '%d',   settings.warm_start);

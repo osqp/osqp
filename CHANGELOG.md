@@ -1,6 +1,7 @@
 
 Changes since the last release
 ------------------------------
+* Added option to terminate with scaled or unscaled residual
 * Now Matlab interface does support logical entries for the settings
 * Fixed bug in index ordering of sparse matrices of Python interface
 * Changed 2-norms to inf-norms

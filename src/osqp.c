@@ -1005,6 +1005,20 @@ c_int osqp_update_warm_start(OSQPWorkspace * work, c_int warm_start_new) {
 }
 
 
+c_int osqp_update_scaled_termination(OSQPWorkspace * work, c_int scaled_termination_new) {
+    // Check that scaled_termination is either 0 or 1
+    if (scaled_termination_new != 0 && scaled_termination_new != 1) {
+      #ifdef PRINTING
+      c_print("scaled_termination should be either 0 or 1\n");
+      #endif
+      return 1;
+    }
+    // Update early_terminate
+    work->settings->scaled_termination = scaled_termination_new;
+
+    return 0;
+}
+
 c_int osqp_update_early_terminate(OSQPWorkspace * work, c_int early_terminate_new) {
     // Check that early_terminate is either 0 or 1
     if (early_terminate_new != 0 && early_terminate_new != 1) {
