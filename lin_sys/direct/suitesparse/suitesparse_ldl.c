@@ -242,6 +242,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
     p->solve = &solve_linsys_suitesparse_ldl;
     p->free = &free_linsys_solver_suitesparse_ldl;
     p->update_matrices = &update_linsys_solver_matrices_suitesparse_ldl;
+    
 
     // Assign type
     p->type = SUITESPARSE_LDL;

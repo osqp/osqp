@@ -124,8 +124,9 @@ endif (NOT MSVC)
 
 # Include header directory
 # ----------------------------------------------
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-	            ${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
+            ${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/suitesparse               
+    )
 
 
 # Set sources

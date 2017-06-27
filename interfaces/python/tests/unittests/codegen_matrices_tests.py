@@ -26,8 +26,8 @@ class codegen_matrices_tests(unittest.TestCase):
         self.n = self.P.shape[0]
         self.m = self.A.shape[0]
         self.opts = {'verbose': False,
-                     'eps_abs': 1e-06,
-                     'eps_rel': 1e-06,
+                     'eps_abs': 1e-08,
+                     'eps_rel': 1e-08,
                      'alpha': 1.6,
                      'max_iter': 3000,
                      'warm_start': True}
