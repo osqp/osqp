@@ -25,6 +25,10 @@ extern "C" {
 #define OSQP_UNSOLVED (-10)  /* Unsolved. Only setup function has been called */
 
 
+/*************************
+ * Linear System Solvers *
+ *************************/
+enum linsys_solver_type {SUITESPARSE_LDL};
 
 /**********************************
  * Solver Parameters and Settings *
@@ -38,6 +42,7 @@ extern "C" {
 #define EPS_PRIM_INF (1E-4)
 #define EPS_DUAL_INF (1E-4)
 #define ALPHA (1.6)
+#define LINSYS_SOLVER (SUITESPARSE_LDL)
 
 #ifndef EMBEDDED
 #define DELTA (1E-6)

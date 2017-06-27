@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include "glob_opts.h"
+#include "constants.h"
 
 
 /******************
@@ -26,9 +27,10 @@ typedef struct {
 } csc;
 
 /**
- * Linear system solver private structure (internal functions deal with it)
+ * Linear system solver structure (sublevel objects initialize it differently) 
  */
-typedef struct c_priv Priv;
+
+typedef struct linsys_solver LinSysSolver;
 
 /**
  * OSQP Timer for statistics
@@ -148,7 +150,8 @@ typedef struct {
         c_float eps_rel;  ///< relative convergence tolerance
         c_float eps_prim_inf;  ///< primal infeasibility tolerance
         c_float eps_dual_inf;  ///< dual infeasibility tolerance
-        c_float alpha; ///< relaxation paramete
+        c_float alpha; ///< relaxation parameter
+	enum linsys_solver_type linsys_solver;  ///< linear system solver to use
 
         #ifndef EMBEDDED
         c_float delta; ///< regularization parameter for polis
@@ -177,7 +180,7 @@ typedef struct {
         OSQPData * data;
 
         /// Linear System solver structure
-        Priv * priv;
+        LinSysSolver * linsys_solver;
 
         #ifndef EMBEDDED
         /// Polish structure
@@ -248,6 +251,17 @@ typedef struct {
         #endif
 } OSQPWorkspace;
 
+
+// Define linsys_solve rstructure
+struct linsys_solver {
+	enum linsys_solver_type type;
+	// Functions
+	c_int (*solve)(LinSysSolver * self, c_float * b, const OSQPSettings * settings);
+	void (*free)(LinSysSolver * self);
+#if EMBEDDED != 1
+	c_int (*update_matrices)(LinSysSolver * self, const csc *P, const csc *A, const OSQPWorkspace * work, const OSQPSettings *settings);
+#endif
+};
 
 
 

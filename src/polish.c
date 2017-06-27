@@ -116,7 +116,7 @@ static void form_rhs_red(OSQPWorkspace * work, c_float * rhs){
  * @param  b    RHS of the linear system
  * @return      More accurate solution
  */
-static void iterative_refinement(OSQPWorkspace *work, Priv *p, c_float *z, c_float *b) {
+static void iterative_refinement(OSQPWorkspace *work, LinSysSolver *p, c_float *z, c_float *b) {
     if (work->settings->pol_refine_iter > 0) {
         c_int i, j, n;
         c_float *dz;
@@ -148,7 +148,7 @@ static void iterative_refinement(OSQPWorkspace *work, Priv *p, c_float *z, c_flo
             mat_vec(work->pol->Ared, z, rhs + work->data->n, -1);
 
             // Solve linear system. Store solution in rhs
-            solve_lin_sys(work->settings, p, rhs);
+            p->solve(p, rhs, work->settings);
 
             // Update solution
             for (j=0; j<n; j++) {
@@ -190,7 +190,7 @@ static void compute_y_from_y_red(OSQPWorkspace * work){
 c_int polish(OSQPWorkspace *work) {
     c_int mred, polish_successful;
     c_float * rhs_red;
-    Priv *plsh;
+    LinSysSolver *plsh;
     c_float *pol_sol; // Polished solution
 
     #ifdef PROFILING
@@ -201,7 +201,7 @@ c_int polish(OSQPWorkspace *work) {
     mred = form_Ared(work);
 
     // Form and factorize reduced KKT
-    plsh = init_priv(work->data->P, work->pol->Ared, work->settings, 1);
+    plsh = init_linsys_solver(work->data->P, work->pol->Ared, work->settings, 1);
     if (!plsh){
         // Polishing failed
         work->info->status_polish = -1;
@@ -219,7 +219,7 @@ c_int polish(OSQPWorkspace *work) {
 
     // Solve the reduced KKT system
     pol_sol = vec_copy(rhs_red, work->data->n + mred);
-    solve_lin_sys(work->settings, plsh, pol_sol);
+    plsh->solve(plsh, pol_sol, work->settings);
 
     // Perform iterative refinement to compensate for the regularization error
     iterative_refinement(work, plsh, pol_sol, rhs_red);
@@ -280,7 +280,7 @@ c_int polish(OSQPWorkspace *work) {
     }
 
     // Memory clean-up
-    free_priv(plsh);
+    plsh->free(plsh);
     if (work->pol) {
         if (work->pol->Ared)
             csc_spfree(work->pol->Ared);

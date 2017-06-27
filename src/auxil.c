@@ -86,7 +86,7 @@ void update_xz_tilde(OSQPWorkspace * work){
     compute_rhs(work);
 
     // Solve linear system
-    solve_lin_sys(work->settings, work->priv, work->xz_tilde);
+    work->linsys_solver->solve(work->linsys_solver, work->xz_tilde, work->settings);
 
     // Update z_tilde variable after solving linear system
     update_z_tilde(work);

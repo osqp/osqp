@@ -1,40 +1,40 @@
-#include "private.h"
+#include "suitesparse_ldl.h"
 
 #ifndef EMBEDDED
 
 // Free LDL Factorization structure
-void free_priv(Priv *p) {
-    if (p) {
-        if (p->L)
-            csc_spfree(p->L);
-        if (p->P)
-            c_free(p->P);
-        if (p->Dinv)
-            c_free(p->Dinv);
-        if (p->bp)
-            c_free(p->bp);
+void free_linsys_solver_suitesparse_ldl(suitesparse_ldl_solver *s) {
+    if (s) {
+        if (s->L)
+            csc_spfree(s->L);
+        if (s->P)
+            c_free(s->P);
+        if (s->Dinv)
+            c_free(s->Dinv);
+        if (s->bp)
+            c_free(s->bp);
 
         // These are required for matrix updates
-        if (p->Pdiag_idx)
-            c_free(p->Pdiag_idx);
-        if (p->KKT)
-            csc_spfree(p->KKT);
-        if (p->PtoKKT)
-            c_free(p->PtoKKT);
-        if (p->AtoKKT)
-            c_free(p->AtoKKT);
-        if (p->Parent)
-            c_free(p->Parent);
-        if (p->Lnz)
-            c_free(p->Lnz);
-        if (p->Flag)
-            c_free(p->Flag);
-        if (p->Pattern)
-            c_free(p->Pattern);
-        if (p->Y)
-            c_free(p->Y);
+        if (s->Pdiag_idx)
+            c_free(s->Pdiag_idx);
+        if (s->KKT)
+            csc_spfree(s->KKT);
+        if (s->PtoKKT)
+            c_free(s->PtoKKT);
+        if (s->AtoKKT)
+            c_free(s->AtoKKT);
+        if (s->Parent)
+            c_free(s->Parent);
+        if (s->Lnz)
+            c_free(s->Lnz);
+        if (s->Flag)
+            c_free(s->Flag);
+        if (s->Pattern)
+            c_free(s->Pattern);
+        if (s->Y)
+            c_free(s->Y);
 
-        c_free(p);
+        c_free(s);
 
     }
 }
@@ -46,7 +46,7 @@ void free_priv(Priv *p) {
  * @param  p Private workspace
  * @return   [description]
  */
-c_int LDL_factor(csc *A,  Priv * p){
+c_int LDL_factor(csc *A,  suitesparse_ldl_solver * p){
     // c_int P[], c_int Pinv[], csc **L, c_float **D) {
     c_int kk, n = A->n;
     c_int check_Li_Lx;
@@ -96,7 +96,7 @@ c_int LDL_factor(csc *A,  Priv * p){
 }
 
 
-c_int permute_KKT(csc ** KKT, Priv * p, c_int Pnz, c_int Anz, c_int * PtoKKT, c_int * AtoKKT){
+c_int permute_KKT(csc ** KKT, suitesparse_ldl_solver * p, c_int Pnz, c_int Anz, c_int * PtoKKT, c_int * AtoKKT){
     c_float *info;
     c_int amd_status;
     info = (c_float *)c_malloc(AMD_INFO * sizeof(c_float));
@@ -160,14 +160,14 @@ c_int permute_KKT(csc ** KKT, Priv * p, c_int Pnz, c_int Anz, c_int * PtoKKT, c_
  * @param  polish   Flag whether we are initializing for polish or not
  * @return          Initialized private structure
  */
-Priv *init_priv(const csc * P, const csc * A, const OSQPSettings *settings, c_int polish){
+suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const csc * A, const OSQPSettings *settings, c_int polish){
     // Define Variables
-    Priv * p;                    // KKT factorization structure
+    suitesparse_ldl_solver * p;  // Initialize LDL solver 
     c_int n_plus_m;              // Define n_plus_m dimension
     csc * KKT_temp;              // Temporary KKT pointer
 
     // Allocate private structure to store KKT factorization
-    p = c_calloc(1, sizeof(Priv));
+    p = c_calloc(1, sizeof(suitesparse_ldl_solver));
 
     // Size of KKT
     n_plus_m = P->m + A->m;
@@ -223,7 +223,7 @@ Priv *init_priv(const csc * P, const csc * A, const OSQPSettings *settings, c_in
 
     // Factorize the KKT matrix
     if (LDL_factor(KKT_temp, p) < 0) {
-        free_priv(p);
+        free_linsys_solver_suitesparse_ldl(p);
         return OSQP_NULL;
     }
 
@@ -238,6 +238,13 @@ Priv *init_priv(const csc * P, const csc * A, const OSQPSettings *settings, c_in
         p->KKT = KKT_temp;
     }
 
+    // Link Functions
+    p->solve = &solve_linsys_suitesparse_ldl;
+    p->free = &free_linsys_solver_suitesparse_ldl;
+    p->update_matrices = &update_linsys_solver_matrices_suitesparse_ldl;
+
+    // Assign type
+    p->type = SUITESPARSE_LDL;
 
     return p;
 }
@@ -260,10 +267,10 @@ void LDLSolve(c_float *x, c_float *b, csc *L, c_float *Dinv, c_int *P,
 }
 
 
-c_int solve_lin_sys(const OSQPSettings *settings, Priv *p, c_float *b) {
+c_int solve_linsys_suitesparse_ldl(suitesparse_ldl_solver * s, c_float * b, const OSQPSettings *settings) {
     /* returns solution to linear system */
     /* Ax = b with solution stored in b */
-    LDLSolve(b, b, p->L, p->Dinv, p->P, p->bp);
+    LDLSolve(b, b, s->L, s->Dinv, s->P, s->bp);
 
     return 0;
 }
@@ -271,27 +278,27 @@ c_int solve_lin_sys(const OSQPSettings *settings, Priv *p, c_float *b) {
 
 #if EMBEDDED != 1
 // Update private structure with new P and A
-c_int update_priv(Priv * p, const csc *P, const csc *A,
-                 const OSQPWorkspace * work, const OSQPSettings *settings){
+c_int update_linsys_solver_matrices_suitesparse_ldl(suitesparse_ldl_solver * s, 
+		const csc *P, const csc *A, const OSQPWorkspace * work, const OSQPSettings *settings){
     c_int kk;
 
     // Update KKT matrix with new P
-    update_KKT_P(p->KKT, P, p->PtoKKT, settings->sigma, p->Pdiag_idx, p->Pdiag_n);
+    update_KKT_P(s->KKT, P, s->PtoKKT, settings->sigma, s->Pdiag_idx, s->Pdiag_n);
 
     // Update KKT matrix with new A
-    update_KKT_A(p->KKT, A, p->AtoKKT);
+    update_KKT_A(s->KKT, A, s->AtoKKT);
 
     // Perform numeric factorization
-    kk = LDL_numeric(p->KKT->n, p->KKT->p, p->KKT->i, p->KKT->x,
-                     p->L->p, p->Parent, p->Lnz, p->L->i,
-                     p->L->x, p->Dinv, p->Y, p->Pattern, p->Flag,
+    kk = LDL_numeric(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
+                     s->L->p, s->Parent, s->Lnz, s->L->i,
+                     s->L->x, s->Dinv, s->Y, s->Pattern, s->Flag,
                      OSQP_NULL, OSQP_NULL);
 
-     // Invert elements of D that are stored in p->Dinv
-     vec_ew_recipr(p->Dinv, p->Dinv, p->KKT->n);
+     // Invert elements of D that are stored in s->Dinv
+     vec_ew_recipr(s->Dinv, s->Dinv, s->KKT->n);
 
     // return exit flag
-    return (kk - p->KKT->n);
+    return (kk - s->KKT->n);
 
 }
 

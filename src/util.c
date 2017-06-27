@@ -195,6 +195,7 @@ void set_default_settings(OSQPSettings * settings) {
         settings->eps_prim_inf = (c_float) EPS_PRIM_INF;         /* primal infeasibility tolerance */
         settings->eps_dual_inf = (c_float) EPS_DUAL_INF;         /* dual infeasibility tolerance */
         settings->alpha = (c_float) ALPHA;     /* relaxation parameter */
+        settings->linsys_solver = LINSYS_SOLVER;     /* relaxation parameter */
 
         #ifndef EMBEDDED
         settings->delta = DELTA;    /* regularization parameter for polish */
@@ -228,6 +229,7 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
     new->eps_prim_inf = settings->eps_prim_inf;
     new->eps_dual_inf = settings->eps_dual_inf;
     new->alpha = settings->alpha;
+    new->linsys_solver = settings->linsys_solver;
     new->delta = settings->delta;
     new->polish = settings->polish;
     new->pol_refine_iter = settings->pol_refine_iter;

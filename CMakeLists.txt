@@ -124,7 +124,8 @@ endif (NOT MSVC)
 
 # Include header directory
 # ----------------------------------------------
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}
+	            ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 
 # Set sources
@@ -137,6 +138,7 @@ if(NOT DEFINED EMBEDDED)
         src/ctrlc.c
         src/kkt.c
         src/lin_alg.c
+        src/lin_sys.c
         src/osqp.c
         src/polish.c
         src/proj.c
@@ -167,6 +169,7 @@ else()
         osqp_src
         src/auxil.c
         src/lin_alg.c
+        src/lin_sys.c
         src/osqp.c
         src/kkt.c
         src/proj.c
@@ -254,14 +257,14 @@ endif (MATLAB)
 # Add linear systems solver
 add_subdirectory(lin_sys)
 
-add_library (osqpdirstatic STATIC ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_direct>)
+add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_suitesparse_ldl>)
 
 if (MATLAB)
-target_link_libraries (osqpdirstatic ${Matlab_LIBRARIES})
+target_link_libraries (osqpstatic ${Matlab_LIBRARIES})
 endif (MATLAB)
 
 if (PYTHON)
-target_link_libraries (osqpdirstatic ${PYTHON_LIBRARIES})
+target_link_libraries (osqpstatic ${PYTHON_LIBRARIES})
 endif (PYTHON)
 
 # If we are building Python or Matlab interface:
@@ -269,11 +272,11 @@ endif (PYTHON)
 #   - do not build demo
 if (NOT PYTHON AND NOT MATLAB)
     # Create osqp shared library
-    add_library (osqpdir SHARED ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_direct>)
+    add_library (osqp SHARED ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_suitesparse_ldl>)
 
     # Create demo executable (linked to static library)
-    add_executable (osqp_demo_direct ${PROJECT_SOURCE_DIR}/examples/osqp_demo_direct.c)
-    target_link_libraries (osqp_demo_direct osqpdirstatic)
+    add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
+    target_link_libraries (osqp_demo osqpstatic)
 endif (NOT PYTHON AND NOT MATLAB)
 
 
@@ -318,15 +321,15 @@ if (UNITTESTS)
 
     # Direct linear solver testing
     include_directories(tests)
-    add_executable(osqp_tester_direct
-                ${PROJECT_SOURCE_DIR}/tests/osqp_tester_direct.c ${PROJECT_SOURCE_DIR}/tests/minunit.h
+    add_executable(osqp_tester
+                ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c ${PROJECT_SOURCE_DIR}/tests/minunit.h
                 ${test_headers}
                 ${codegen_test_headers})
-    target_link_libraries (osqp_tester_direct osqpdirstatic)
-    # add_dependencies(osqp_tester_direct generate_tests_data)
+    target_link_libraries (osqp_tester osqpstatic)
+    # add_dependencies(osqp_tester generate_tests_data)
 
     # Add testing
     include(CTest)
     enable_testing()
-    add_test(NAME direct COMMAND $<TARGET_FILE:osqp_tester_direct>)
+    add_test(NAME direct COMMAND $<TARGET_FILE:osqp_tester>)
 endif()
