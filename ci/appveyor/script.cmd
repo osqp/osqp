@@ -11,7 +11,7 @@ cmake -G "%CMAKE_PROJECT%" ..
 cmake --build .
 
 :: Test C
-%APPVEYOR_BUILD_FOLDER%\build\out\osqp_tester_direct.exe
+%APPVEYOR_BUILD_FOLDER%\build\out\osqp_tester.exe
 if errorlevel 1 exit /b 1
 
 :: Perform Python tests
