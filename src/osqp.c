@@ -105,7 +105,7 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     }
 
     // Initialize linear system solver structure
-    work->linsys_solver = init_linsys_solver(work->data->P, work->data->A, work->settings, 0); 
+    work->linsys_solver = init_linsys_solver(work->data->P, work->data->A, work->settings, 0);
     if (!work->linsys_solver){
         #ifdef PRINTING
         c_print("ERROR: Linear systems solver initialization failure!\n");
@@ -699,8 +699,7 @@ c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, 
     scale_data(work);
 
     // Update linear system structure with new data
-    exitflag = work->linsys_solver->update_matrices(work->linsys_solver, work->data->P, work->data->A,
-                           work, work->settings);
+    exitflag = work->linsys_solver->update_matrices(work->linsys_solver, work->data->P, work->data->A, work->settings);
 
    // Set solver status to OSQP_UNSOLVED
    update_status(work->info, OSQP_UNSOLVED);
@@ -767,8 +766,7 @@ c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, 
     scale_data(work);
 
     // Update linear system structure with new data
-    exitflag = work->linsys_solver->update_matrices(work->linsys_solver, work->data->P, work->data->A,
-                           work, work->settings);
+    exitflag = work->linsys_solver->update_matrices(work->linsys_solver, work->data->P, work->data->A, work->settings);
 
    // Set solver status to OSQP_UNSOLVED
    update_status(work->info, OSQP_UNSOLVED);
@@ -874,8 +872,7 @@ c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx
     scale_data(work);
 
     // Update linear system structure with new data
-    exitflag = work->linsys_solver->update_matrices(work->linsys_solver, work->data->P, work->data->A,
-                           work, work->settings);
+    exitflag = work->linsys_solver->update_matrices(work->linsys_solver, work->data->P, work->data->A, work->settings);
 
    // Set solver status to OSQP_UNSOLVED
    update_status(work->info, OSQP_UNSOLVED);

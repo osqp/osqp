@@ -196,7 +196,7 @@ if( any(strcmpi(what,'osqp')) || any(strcmpi(what,'all')) )
     lib_origin = fullfile(osqp_build_dir, 'out', lib_name);
     copyfile(lib_origin, lib_name);
 
-    fprintf('\t\t\t\t\t\t[done]\n');
+    fprintf('\t\t\t\t\t[done]\n');
 
 end
 
@@ -278,7 +278,7 @@ if( any(strcmpi(what,'clean')) || any(strcmpi(what,'purge')) )
         delete(lib_full_path);
     end
 
-    fprintf('\t\t\t\t[done]\n');
+    fprintf('\t\t\t[done]\n');
 end
 
 
@@ -296,7 +296,7 @@ if( any(strcmpi(what,'purge')) )
         rmdir(cg_sources_dir, 's');
     end
 
-    fprintf('\t[done]\n');
+    fprintf('\t\t[done]\n');
 end
 
 

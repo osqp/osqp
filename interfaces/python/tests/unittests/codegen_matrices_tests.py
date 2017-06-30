@@ -40,7 +40,7 @@ class codegen_matrices_tests(unittest.TestCase):
         self.model.codegen('code2', python_ext_name='mat_emosqp',
                            force_rewrite=True, parameters='matrices')
 
-        # sh.rmtree('code2')
+        sh.rmtree('code2')
         import mat_emosqp
 
         # Solve problem
@@ -52,10 +52,6 @@ class codegen_matrices_tests(unittest.TestCase):
             y, np.array([1.5, 0., 1.5, 0., 0.]), decimal=5)
 
     def test_update_P(self):
-        # Generate the code (TODO: REMOVE)
-        self.model.codegen('code2', python_ext_name='mat_emosqp',
-                           force_rewrite=True, parameters='matrices')
-
         import mat_emosqp
 
         # Update matrix P

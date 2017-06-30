@@ -162,7 +162,7 @@ c_int permute_KKT(csc ** KKT, suitesparse_ldl_solver * p, c_int Pnz, c_int Anz, 
  */
 suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const csc * A, const OSQPSettings *settings, c_int polish){
     // Define Variables
-    suitesparse_ldl_solver * p;  // Initialize LDL solver 
+    suitesparse_ldl_solver * p;  // Initialize LDL solver
     c_int n_plus_m;              // Define n_plus_m dimension
     csc * KKT_temp;              // Temporary KKT pointer
 
@@ -242,7 +242,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
     p->solve = &solve_linsys_suitesparse_ldl;
     p->free = &free_linsys_solver_suitesparse_ldl;
     p->update_matrices = &update_linsys_solver_matrices_suitesparse_ldl;
-    
+
 
     // Assign type
     p->type = SUITESPARSE_LDL;
@@ -279,8 +279,8 @@ c_int solve_linsys_suitesparse_ldl(suitesparse_ldl_solver * s, c_float * b, cons
 
 #if EMBEDDED != 1
 // Update private structure with new P and A
-c_int update_linsys_solver_matrices_suitesparse_ldl(suitesparse_ldl_solver * s, 
-		const csc *P, const csc *A, const OSQPWorkspace * work, const OSQPSettings *settings){
+c_int update_linsys_solver_matrices_suitesparse_ldl(suitesparse_ldl_solver * s,
+		const csc *P, const csc *A, const OSQPSettings *settings){
     c_int kk;
 
     // Update KKT matrix with new P

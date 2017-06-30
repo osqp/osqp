@@ -257,10 +257,14 @@ struct linsys_solver {
 	enum linsys_solver_type type;
 	// Functions
 	c_int (*solve)(LinSysSolver * self, c_float * b, const OSQPSettings * settings);
+
+    #ifndef EMBEDDED
 	void (*free)(LinSysSolver * self);
-#if EMBEDDED != 1
-	c_int (*update_matrices)(LinSysSolver * self, const csc *P, const csc *A, const OSQPWorkspace * work, const OSQPSettings *settings);
-#endif
+    #endif
+
+    #if EMBEDDED != 1
+    	c_int (*update_matrices)(LinSysSolver * self, const csc *P, const csc *A, const OSQPSettings *settings);
+    #endif
 };
 
 

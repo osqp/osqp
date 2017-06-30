@@ -26,7 +26,7 @@ struct suitesparse_ldl {
 
     // This used only in non embedded or matrix-updates version
     #if EMBEDDED != 1
-    c_int (*update_matrices)(struct suitesparse_ldl * self, const csc *P, const csc *A, const OSQPWorkspace * work, const OSQPSettings *settings);
+    c_int (*update_matrices)(struct suitesparse_ldl * self, const csc *P, const csc *A, const OSQPSettings *settings);
     #endif
 
     // Attributes
@@ -71,7 +71,7 @@ c_int solve_linsys_suitesparse_ldl(suitesparse_ldl_solver * s, c_float * b, cons
 #if EMBEDDED != 1
 // Update system matrices
 c_int update_linsys_solver_matrices_suitesparse_ldl(suitesparse_ldl_solver * s,
-		const csc *P, const csc *A, const OSQPWorkspace * work, const OSQPSettings *settings);
+		const csc *P, const csc *A, const OSQPSettings *settings);
 #endif
 
 #ifndef EMBEDDED
