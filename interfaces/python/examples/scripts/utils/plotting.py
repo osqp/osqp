@@ -24,8 +24,8 @@ def figsize(scale):
 
 # Paper stylesheet from:
 # https://gist.github.com/bstellato/e24405efcc532eeda445ea3ab43922f1
-#  plt.style.use(['paper'])
-plt.style.use(['talk'])
+plt.style.use(['paper'])
+#  plt.style.use(['talk'])
 
 
 def generate_plot(example_name, unit, statistics_name, n_vec, solvers,
@@ -44,7 +44,7 @@ def generate_plot(example_name, unit, statistics_name, n_vec, solvers,
 
     for (solver_name, solver_stats) in solvers.items():
         temp_vec, idx_val = gen_stats_array_vec(statistics_name, solver_stats)
-        plt.semilogy(n_vec[idx_val], temp_vec, label=r"$\mbox{%s}$" % solver_name)
+        plt.loglog(n_vec[idx_val], temp_vec, label=r"$\mbox{%s}$" % solver_name)
 
     plt.legend()
     plt.grid()

@@ -131,7 +131,7 @@ def solve_loop(qp_matrices, solver='osqp', osqp_settings=None):
 
         # Setup OSQP
         m = osqp.OSQP()
-        m.setup(qp.P, qp.q[:, 0], qp.A, qp.l, qp.u, **osqp_settings)
+        m.setup(qp.P, qp.q[:, 0], qp.A, qp.l, qp.u, warm_start=False, **osqp_settings)
 
         for i in range(n_prob):
             q = qp.q[:, i]
@@ -365,7 +365,7 @@ def run_lasso_example():
     osqp_settings ={'auto_rho': False,
                     'rho': 1.0,
                     'polish': False,
-                    'verbose': True}
+                    'verbose': False}
 
 
     print("Lasso  example")
@@ -381,8 +381,8 @@ def run_lasso_example():
 
     # Parameters
     #  n_vec = np.array([10, 20, 40, 50, 60, 80, 100])
-    #  n_vec = np.array([10, 100, 1000])
-    n_vec = np.array([10, 20])
+    n_vec = np.array([10, 50, 100, 500, 1000])
+    #  n_vec = np.array([10, 20])
 
     # Points
     m_vec = (n_vec * 100).astype(int)
@@ -468,8 +468,8 @@ def run_lasso_example():
         ('MOSEK', mosek_timing),
         #  ('ECOS', ecos_timing)
         ])
-    cols_timings = ['OSQP (warm start)', 'OSQP (cold start)', 'OSQP (no caching)',
-            'GUROBI', 'MOSEK']
+    #  cols_timings = ['OSQP (warm start)', 'OSQP (cold start)', 'OSQP (no caching)',
+    #          'GUROBI', 'MOSEK']
 
     dims_dict = {'n': dims_mat[0,:],
                  'm': dims_mat[1,:],
@@ -481,7 +481,8 @@ def run_lasso_example():
     '''
     Store timings and dimensions
     '''
-    utils.store_timings("lasso", solver_timings, cols_timings) 
+    utils.store_timings("lasso", solver_timings, n_vec, 'mean')
+    utils.store_timings("lasso", solver_timings, n_vec, 'max')
     utils.store_dimensions("lasso", dims_dict, cols_dims)
 
 

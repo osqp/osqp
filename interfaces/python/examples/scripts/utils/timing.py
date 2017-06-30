@@ -37,22 +37,40 @@ def gen_stats_array_vec(statistics_name, stats):
     return out_vec, idx_vec
 
 
+def compute_statistics_dataframe(statistics_name, timings_dict, n_vec):
+    '''
+    Compute statistics dataframe from timings dictionary
+    '''
 
-def store_timings(example_name, timings_dict, cols):
-    comparison_table = pd.DataFrame(timings_dict)
-    comparison_table = comparison_table[cols]  # Sort table columns
+    df = pd.DataFrame({'n': n_vec}) 
 
+    for (solver_name, solver_timings) in timings_dict.items():
+        stats_array, idx_val = gen_stats_array_vec(statistics_name,
+                                                  solver_timings)
+        df['%s %s' % (solver_name, statistics_name)] = stats_array
+
+    return df
+
+
+def store_timings(example_name, timings_dict, n_vec, stats_name):
+    #  comparison_table = pd.DataFrame(timings_dict)
+    #  comparison_table = comparison_table[cols]  # Sort table columns
+
+    comparison_table = compute_statistics_dataframe(stats_name, 
+                                                    timings_dict,
+                                                    n_vec)
     
     data_dir = 'scripts/%s/data' % example_name
     if not os.path.isdir(data_dir):
         os.makedirs(data_dir)
   
-    comparison_table.to_csv('%s/timings.csv' % data_dir, index=False)
+    comparison_table.to_csv('%s/timings_%s.csv' % (data_dir, stats_name),
+                            index=False)
 
      # Converting results to latex table and storing them to a file
     formatter = lambda x: '%1.2f' % x
-    latex_table = comparison_table.to_latex(header=False, index=False,
+    latex_table = comparison_table.to_latex(header=True, index=False,
                                             float_format=formatter)
-    f = open('%s/timings.tex' % data_dir, 'w')
+    f = open('%s/timings_%s.tex' % (data_dir, stats_name), 'w')
     f.write(latex_table)
     f.close()
