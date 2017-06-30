@@ -252,18 +252,23 @@ typedef struct {
 } OSQPWorkspace;
 
 
-// Define linsys_solve rstructure
+/**
+ * Define linsys_solver prototype structure
+ *
+ * N.B. The details are defined when the linear solver is initialized depending
+ *      on the choice
+ */
 struct linsys_solver {
-	enum linsys_solver_type type;
+	enum linsys_solver_type type;  ///< Linear system solver type (see type.h)
 	// Functions
-	c_int (*solve)(LinSysSolver * self, c_float * b, const OSQPSettings * settings);
+	c_int (*solve)(LinSysSolver * self, c_float * b, const OSQPSettings * settings); ///< Solve linear system
 
     #ifndef EMBEDDED
-	void (*free)(LinSysSolver * self);
+	void (*free)(LinSysSolver * self); ///< Free linear system solver (only in desktop version)
     #endif
 
     #if EMBEDDED != 1
-    	c_int (*update_matrices)(LinSysSolver * self, const csc *P, const csc *A, const OSQPSettings *settings);
+    c_int (*update_matrices)(LinSysSolver * self, const csc *P, const csc *A, const OSQPSettings *settings); ///< Update matrices P and A in the solver
     #endif
 };
 

@@ -10,26 +10,36 @@
 #include "amd.h"
 #endif
 
-
+/**
+ * Suitesparse LDL solver structure
+ */
 typedef struct suitesparse_ldl suitesparse_ldl_solver;
 
 struct suitesparse_ldl {
     enum linsys_solver_type type;
 
-    // Functions
+    /**
+     * @name Functions
+     * @{
+     */
     c_int (*solve)(struct suitesparse_ldl * self, c_float * b, const OSQPSettings * settings);
 
     #ifndef EMBEDDED
-    // Free workspace (only if desktop)
-    void (*free)(struct suitesparse_ldl * self);
+    void (*free)(struct suitesparse_ldl * self); ///< Free workspace (only if desktop)
     #endif
 
     // This used only in non embedded or matrix-updates version
     #if EMBEDDED != 1
-    c_int (*update_matrices)(struct suitesparse_ldl * self, const csc *P, const csc *A, const OSQPSettings *settings);
+    c_int (*update_matrices)(struct suitesparse_ldl * self, const csc *P, const csc *A, const OSQPSettings *settings); ///< Update solver matrices
     #endif
 
-    // Attributes
+    /** @} */
+
+
+    /**
+     * @name Attributes
+     * @{
+     */
     csc *L;         ///< lower triangular matrix in LDL factorization
     c_float *Dinv;  ///< inverse of diag matrix in LDL (as a vector)
     c_int *P;       ///< permutation of KKT matrix for factorization
@@ -48,6 +58,7 @@ struct suitesparse_ldl {
     c_int *Parent;               ///< LDL numeric workspace
     #endif
 
+    /** @} */
 };
 
 
@@ -63,19 +74,34 @@ struct suitesparse_ldl {
  */
 suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const csc * A, const OSQPSettings *settings, c_int polish);
 
-
-// Solve linear system
+/**
+ * Solve linear system and store result in b
+ * @param  s        Linear system solver structure
+ * @param  b        Right-hand side
+ * @param  settings OSQP solver settings
+ * @return          Exitflag
+ */
 c_int solve_linsys_suitesparse_ldl(suitesparse_ldl_solver * s, c_float * b, const OSQPSettings * settings);
 
 
 #if EMBEDDED != 1
-// Update system matrices
+/**
+ * Update linear system solver matrices
+ * @param  s        Linear system solver structure
+ * @param  P        Matrix P
+ * @param  A        Matrix A
+ * @param  settings Solver settings
+ * @return          Exitflag
+ */
 c_int update_linsys_solver_matrices_suitesparse_ldl(suitesparse_ldl_solver * s,
 		const csc *P, const csc *A, const OSQPSettings *settings);
 #endif
 
 #ifndef EMBEDDED
-// Free linear system solver
+/**
+ * Free linear system solver
+ * @param s linear system solver object
+ */
 void free_linsys_solver_suitesparse_ldl(suitesparse_ldl_solver * s);
 #endif
 
