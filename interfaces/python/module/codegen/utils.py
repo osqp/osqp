@@ -168,7 +168,7 @@ def write_linsys_solver(f, linsys_solver, name, embedded_flag):
         write_vec(f, linsys_solver['Parent'], 'linsys_solver_Parent', 'c_int')
 
     f.write("suitesparse_ldl_solver %s = " % name)
-    f.write("{SUITESPARSE_LDL, &solve_linsys_suitesparse_ldl, &free_linsys_solver_suitesparse_ldl, ")
+    f.write("{SUITESPARSE_LDL, &solve_linsys_suitesparse_ldl, ")
     if embedded_flag != 1:
         f.write("&update_linsys_solver_matrices_suitesparse_ldl, &linsys_solver_L, linsys_solver_Dinv, linsys_solver_P, linsys_solver_bp, linsys_solver_Pdiag_idx, " +
                 "%d, &linsys_solver_KKT, linsys_solver_PtoKKT, linsys_solver_AtoKKT, " % linsys_solver['Pdiag_n'] +
@@ -434,7 +434,7 @@ def render_setuppy(variables, output):
 
 def render_cmakelists(variables, output):
     """
-    Render setup.py file
+    Render CMakeLists file
     """
 
     embedded_flag = variables['embedded_flag']

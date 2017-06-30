@@ -2,7 +2,6 @@
 #include "matrix.h"
 #include "osqp_mex.hpp"
 #include "osqp.h"
-#include "private.h"
 
 // Interrupt handler
 extern "C" bool utIsInterruptPending(void);
@@ -43,6 +42,7 @@ const char* OSQP_SETTINGS_FIELDS[] =
                                 "eps_prim_inf",                 //c_float
                                 "eps_dual_inf",                 //c_float
                                 "alpha",                        //c_float
+                                "linsys_solver",                //c_int
                                 "delta",                        //c_float
                                 "polish",                       //c_int
                                 "pol_refine_iter",              //c_int
@@ -69,20 +69,20 @@ const char* OSQP_DATA_FIELDS[] = {"n",  //c_int
                                  "l",   //c_float*
                                  "u"};  //c_float*
 
-const char* PRIV_FIELDS[] = {"L",           //csc
-                             "Dinv",        //c_float*
-                             "P",           //c_int*
-                             "bp",          //c_float*
-                             "Pdiag_idx",   //c_int*
-                             "Pdiag_n",     //c_int
-                             "KKT",         //csc
-                             "PtoKKT",      //c_int*
-                             "AtoKKT",      //c_int*
-                             "Lnz",         //c_int*
-                             "Y",           //c_float*
-                             "Pattern",     //c_int*
-                             "Flag",        //c_int*
-                             "Parent"};     //c_int*
+const char* LINSYS_SOLVER_FIELDS[] = {"L",           //csc
+                                      "Dinv",        //c_float*
+                                      "P",           //c_int*
+                                      "bp",          //c_float*
+                                      "Pdiag_idx",   //c_int*
+                                      "Pdiag_n",     //c_int
+                                      "KKT",         //csc
+                                      "PtoKKT",      //c_int*
+                                      "AtoKKT",      //c_int*
+                                      "Lnz",         //c_int*
+                                      "Y",           //c_float*
+                                      "Pattern",     //c_int*
+                                      "Flag",        //c_int*
+                                      "Parent"};     //c_int*
 
 const char* OSQP_SCALING_FIELDS[] = {"D",       //c_float*
                                      "E",       //c_float*
@@ -90,7 +90,7 @@ const char* OSQP_SCALING_FIELDS[] = {"D",       //c_float*
                                      "Einv"};   //c_float*
 
 const char* OSQP_WORKSPACE_FIELDS[] = {"data",
-                                       "priv",
+                                       "linsys_solver",
                                        "scaling",
                                        "settings"};
 
@@ -117,7 +117,7 @@ mxArray*  copyInfoToMxStruct(OSQPInfo* info);
 mxArray*  copySettingsToMxStruct(OSQPSettings* settings);
 mxArray*  copyCscMatrixToMxStruct(csc* M);
 mxArray*  copyDataToMxStruct(OSQPWorkspace* work);
-mxArray*  copyPrivToMxStruct(OSQPWorkspace* work);
+mxArray*  copyLinsysSolverToMxStruct(OSQPWorkspace* work);
 mxArray*  copyScalingToMxStruct(OSQPWorkspace * work);
 mxArray*  copyWorkToMxStruct(OSQPWorkspace* work);
 
@@ -708,6 +708,7 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
   mxSetField(mxPtr, 0, "eps_prim_inf",    mxCreateDoubleScalar(settings->eps_prim_inf));
   mxSetField(mxPtr, 0, "eps_dual_inf",    mxCreateDoubleScalar(settings->eps_dual_inf));
   mxSetField(mxPtr, 0, "alpha",           mxCreateDoubleScalar(settings->alpha));
+  mxSetField(mxPtr, 0, "linsys_solver",   mxCreateDoubleScalar(settings->linsys_solver));
   mxSetField(mxPtr, 0, "delta",           mxCreateDoubleScalar(settings->delta));
   mxSetField(mxPtr, 0, "polish",          mxCreateDoubleScalar(settings->polish));
   mxSetField(mxPtr, 0, "pol_refine_iter", mxCreateDoubleScalar(settings->pol_refine_iter));
@@ -783,22 +784,22 @@ mxArray* copyDataToMxStruct(OSQPWorkspace* work){
   return mxPtr;
 }
 
-mxArray* copyPrivToMxStruct(OSQPWorkspace * work){
+mxArray* copyLinsysSolverToMxStruct(OSQPWorkspace * work){
 
   int nfields;
   mxArray* mxPtr;
-  OSQPData * data; 
-  Priv * priv;
-  
-  nfields = sizeof(PRIV_FIELDS) / sizeof(PRIV_FIELDS[0]);
-  mxPtr = mxCreateStructMatrix(1,1,nfields,PRIV_FIELDS);
-  
+  OSQPData * data;
+  suitesparse_ldl_solver * linsys_solver;
+
+  nfields = sizeof(LINSYS_SOLVER_FIELDS) / sizeof(LINSYS_SOLVER_FIELDS[0]);
+  mxPtr = mxCreateStructMatrix(1,1,nfields,LINSYS_SOLVER_FIELDS);
+
   data = work->data;
-  priv = work->priv;
-  
+  linsys_solver = (suitesparse_ldl_solver *) work->linsys_solver;
+
   // Dimensions
-  int n = priv->L->n;
-  int Pdiag_n = priv->Pdiag_n;
+  int n = linsys_solver->L->n;
+  int Pdiag_n = linsys_solver->Pdiag_n;
   int Pnzmax = data->P->p[data->P->n];
   int Anzmax = data->A->p[data->A->n];
   int m_plus_n = data->m + data->n;
@@ -817,21 +818,21 @@ mxArray* copyPrivToMxStruct(OSQPWorkspace * work){
   mxArray* Parent    = mxCreateDoubleMatrix(m_plus_n,1,mxREAL);
 
   // Populate vectors
-  castToDoubleArr(priv->Dinv, mxGetPr(Dinv), n);
-  castCintToDoubleArr(priv->P, mxGetPr(P), n);
-  castToDoubleArr(priv->bp, mxGetPr(bp), n);
-  castCintToDoubleArr(priv->Pdiag_idx, mxGetPr(Pdiag_idx), Pdiag_n);
-  castCintToDoubleArr(priv->PtoKKT, mxGetPr(PtoKKT), Pnzmax);
-  castCintToDoubleArr(priv->AtoKKT, mxGetPr(AtoKKT), Anzmax);
-  castCintToDoubleArr(priv->Lnz, mxGetPr(Lnz), m_plus_n);
-  castToDoubleArr(priv->Y, mxGetPr(Y), m_plus_n);
-  castCintToDoubleArr(priv->Pattern, mxGetPr(Pattern), m_plus_n);
-  castCintToDoubleArr(priv->Flag, mxGetPr(Flag), m_plus_n);
-  castCintToDoubleArr(priv->Parent, mxGetPr(Parent), m_plus_n);
+  castToDoubleArr(linsys_solver->Dinv, mxGetPr(Dinv), n);
+  castCintToDoubleArr(linsys_solver->P, mxGetPr(P), n);
+  castToDoubleArr(linsys_solver->bp, mxGetPr(bp), n);
+  castCintToDoubleArr(linsys_solver->Pdiag_idx, mxGetPr(Pdiag_idx), Pdiag_n);
+  castCintToDoubleArr(linsys_solver->PtoKKT, mxGetPr(PtoKKT), Pnzmax);
+  castCintToDoubleArr(linsys_solver->AtoKKT, mxGetPr(AtoKKT), Anzmax);
+  castCintToDoubleArr(linsys_solver->Lnz, mxGetPr(Lnz), m_plus_n);
+  castToDoubleArr(linsys_solver->Y, mxGetPr(Y), m_plus_n);
+  castCintToDoubleArr(linsys_solver->Pattern, mxGetPr(Pattern), m_plus_n);
+  castCintToDoubleArr(linsys_solver->Flag, mxGetPr(Flag), m_plus_n);
+  castCintToDoubleArr(linsys_solver->Parent, mxGetPr(Parent), m_plus_n);
 
   // Create matrices
-  mxArray* L   = copyCscMatrixToMxStruct(priv->L);
-  mxArray* KKT = copyCscMatrixToMxStruct(priv->KKT);
+  mxArray* L   = copyCscMatrixToMxStruct(linsys_solver->L);
+  mxArray* KKT = copyCscMatrixToMxStruct(linsys_solver->KKT);
 
   //map the PRIV fields one at a time into mxArrays
   mxSetField(mxPtr, 0, "L",         L);
@@ -839,7 +840,7 @@ mxArray* copyPrivToMxStruct(OSQPWorkspace * work){
   mxSetField(mxPtr, 0, "P",         P);
   mxSetField(mxPtr, 0, "bp",        bp);
   mxSetField(mxPtr, 0, "Pdiag_idx", Pdiag_idx);
-  mxSetField(mxPtr, 0, "Pdiag_n",   mxCreateDoubleScalar(priv->Pdiag_n));
+  mxSetField(mxPtr, 0, "Pdiag_n",   mxCreateDoubleScalar(linsys_solver->Pdiag_n));
   mxSetField(mxPtr, 0, "KKT",       KKT);
   mxSetField(mxPtr, 0, "PtoKKT",    PtoKKT);
   mxSetField(mxPtr, 0, "AtoKKT",    AtoKKT);
@@ -856,14 +857,14 @@ mxArray* copyScalingToMxStruct(OSQPWorkspace *work){
 
   int n, m, nfields;
   mxArray* mxPtr;
-  
-  
+
+
   if (work->settings->scaling){ // Scaling performed
       n = work->data->n;
       m = work->data->m;
 
       nfields = sizeof(OSQP_SCALING_FIELDS) / sizeof(OSQP_SCALING_FIELDS[0]);
-      mxPtr = mxCreateStructMatrix(1,1,nfields,OSQP_SCALING_FIELDS); 
+      mxPtr = mxCreateStructMatrix(1,1,nfields,OSQP_SCALING_FIELDS);
 
       // Create vectors
       mxArray* D    = mxCreateDoubleMatrix(n,1,mxREAL);
@@ -886,7 +887,7 @@ mxArray* copyScalingToMxStruct(OSQPWorkspace *work){
   } else {
     mxPtr = mxCreateDoubleMatrix(0, 0, mxREAL);
   }
-  
+
    return mxPtr;
 }
 
@@ -896,14 +897,14 @@ mxArray*  copyWorkToMxStruct(OSQPWorkspace* work){
   mxArray* mxPtr = mxCreateStructMatrix(1,1,nfields,OSQP_WORKSPACE_FIELDS);
 
   // Create workspace substructures
-  mxArray* data     = copyDataToMxStruct(work);
-  mxArray* priv     = copyPrivToMxStruct(work);
+  mxArray* data = copyDataToMxStruct(work);
+  mxArray* linsys_solver = copyLinsysSolverToMxStruct(work);
   mxArray* scaling  = copyScalingToMxStruct(work);
   mxArray* settings = copySettingsToMxStruct(work->settings);
 
   //map the WORKSPACE fields one at a time into mxArrays
   mxSetField(mxPtr, 0, "data",     data);
-  mxSetField(mxPtr, 0, "priv",     priv);
+  mxSetField(mxPtr, 0, "linsys_solver",     linsys_solver);
   mxSetField(mxPtr, 0, "scaling",  scaling);
   mxSetField(mxPtr, 0, "settings", settings);
 
@@ -931,6 +932,7 @@ void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
   settings->eps_prim_inf    = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_dual_inf"));
   settings->eps_dual_inf    = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_dual_inf"));
   settings->alpha           = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "alpha"));
+  settings->linsys_solver   = (enum linsys_solver_type) mxGetScalar(mxGetField(mxPtr, 0, "linsys_solver"));
   settings->delta           = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "delta"));
   settings->polish          = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polish"));
   settings->pol_refine_iter = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "pol_refine_iter"));

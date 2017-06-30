@@ -189,7 +189,7 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                  "scaling", "scaling_iter",
                                  "rho", "sigma", "max_iter",
                                  "eps_abs", "eps_rel", "eps_prim_inf", "eps_dual_inf", "alpha",
-                                 "delta", "polish", "pol_refine_iter", "auto_rho", "verbose",
+								 "linsys_solver", "delta", "polish", "pol_refine_iter", "auto_rho", "verbose",
                                  "scaled_termination", "early_terminate", "early_terminate_interval",
 								 "warm_start", NULL};  // Settings
 
@@ -197,17 +197,17 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
         #ifdef DLONG
 
         #ifdef DFLOAT
-        static char * argparse_string = "(ll)O!O!O!O!O!O!O!O!O!|llfflffffffllllllll";
+        static char * argparse_string = "(ll)O!O!O!O!O!O!O!O!O!|llfflfffffflllllllll";
         #else
-        static char * argparse_string = "(ll)O!O!O!O!O!O!O!O!O!|llddlddddddllllllll";
+        static char * argparse_string = "(ll)O!O!O!O!O!O!O!O!O!|llddlddddddlllllllll";
         #endif
 
         #else
 
         #ifdef DFLOAT
-        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiffiffffffiiiiiiii";
+        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiffiffffffiiiiiiiii";
         #else
-        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiddiddddddiiiiiiii";
+        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiddiddddddiiiiiiiii";
         #endif
 
         #endif
@@ -239,14 +239,15 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                          &settings->eps_prim_inf,
                                          &settings->eps_dual_inf,
                                          &settings->alpha,
+										 &settings->linsys_solver,
                                          &settings->delta,
                                          &settings->polish,
-					 &settings->pol_refine_iter,
-					 &settings->auto_rho,
+					  			 	     &settings->pol_refine_iter,
+										 &settings->auto_rho,
                                          &settings->verbose,
                                          &settings->scaled_termination,
                                          &settings->early_terminate,
-					 &settings->early_terminate_interval,
+					 				 	 &settings->early_terminate_interval,
                                          &settings->warm_start)) {
                 return NULL;
         }

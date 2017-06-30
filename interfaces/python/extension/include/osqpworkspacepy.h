@@ -6,14 +6,6 @@
  **********************************************/
 
 
-// TODO: Extract long integers and doubles (make sure of that!)
-//
-
-
-// Include private header to access to private structure
-// #include "suitesparse_ldl.h"
-
-
  static PyObject *OSQP_get_scaling(OSQP *self){
 
 

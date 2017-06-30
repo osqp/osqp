@@ -27,6 +27,10 @@ OSQP_INFTY = 1e+20
 # OSQP Nan
 OSQP_NAN = 1e+20  # Just as placeholder. Not real value
 
+# Linear system solver options
+SUITESPARSE_LDL = 0
+
+
 # Auto rho (only linear function)
 # (old values)
 # AUTO_RHO_OFFSET = 1.07838081E-03
@@ -80,7 +84,7 @@ OSQP_NAN = 1e+20  # Just as placeholder. Not real value
 #  AUTO_RHO_BETA1 = 3.7594273667640685
 #  AUTO_RHO_BETA2 = -5.3658885099270002
 
-# only n and m, interval 1.5 
+# only n and m, interval 1.5
 #  AUTO_RHO_BETA0 = 63.9204222926816
 #  AUTO_RHO_BETA1 = 4.2480325664123226
 #  AUTO_RHO_BETA2 = -5.7924560461638848
@@ -114,7 +118,7 @@ class workspace(object):
     ----------
     data                   - scaled QP problem
     info                   - solver information
-    priv                   - private structure for linear system solution
+    linsys_solver          - structure for linear system solution
     scaling                - scaling matrices
     settings               - settings structure
     solution               - solution structure
@@ -212,13 +216,14 @@ class settings(object):
         self.rho = kwargs.pop('rho', 0.1)
         self.sigma = kwargs.pop('sigma', 1e-06)
         self.scaling = kwargs.pop('scaling', True)
-        self.scaling_iter = kwargs.pop('scaling_iter', 15) 
+        self.scaling_iter = kwargs.pop('scaling_iter', 15)
         self.max_iter = kwargs.pop('max_iter', 2500)
         self.eps_abs = kwargs.pop('eps_abs', 1e-3)
         self.eps_rel = kwargs.pop('eps_rel', 1e-3)
         self.eps_prim_inf = kwargs.pop('eps_prim_inf', 1e-4)
         self.eps_dual_inf = kwargs.pop('eps_dual_inf', 1e-4)
         self.alpha = kwargs.pop('alpha', 1.6)
+        self.linsys_solver = kwargs.pop('linsys_solver', SUITESPARSE_LDL)
         self.delta = kwargs.pop('delta', 1e-6)
         self.verbose = kwargs.pop('verbose', True)
         self.scaled_termination = kwargs.pop('scaled_termination', True)
@@ -309,14 +314,14 @@ class pol(object):
         self.y_red = None
 
 
-class priv(object):
+class linsys_solver(object):
     """
     Linear systems solver
     """
 
     def __init__(self, work):
         """
-        Initialize private structure for KKT system solution
+        Initialize structure for KKT system solution
         """
         # Construct reduced KKT matrix
         KKT = spspa.vstack([
@@ -325,7 +330,7 @@ class priv(object):
               spspa.hstack([work.data.A,
                            -1./work.settings.rho * spspa.eye(work.data.m)])])
 
-        # Initialize private structure
+        # Initialize structure
         self.kkt_factor = spla.splu(KKT.tocsc())
 
     def solve(self, rhs):
@@ -388,7 +393,7 @@ class OSQP(object):
 
             # Ruiz equilibration
             for j in range(n + m):
-                norm_col_j = np.linalg.norm(np.asarray(KKT[:, j].todense()), 
+                norm_col_j = np.linalg.norm(np.asarray(KKT[:, j].todense()),
                                             np.inf)
                 #  print("norm col %i = %.4e" % (j, norm_col_j))
                 #  norm_row_j = np.linalg.norm(KKT_temp[j, :].A1, np.inf)
@@ -512,7 +517,7 @@ class OSQP(object):
         #      np.power(trP, AUTO_RHO_BETA1) * \
         #      np.power(trAtA, AUTO_RHO_BETA2)
 
-    
+
         self.work.settings.rho = AUTO_RHO_BETA0 * \
                 np.power((trP + sigma * n)/n, AUTO_RHO_BETA1) * \
                 np.power((trAtA)/m, AUTO_RHO_BETA2)
@@ -544,7 +549,10 @@ class OSQP(object):
 
         print("Problem:  variables n = %d, constraints m = %d" % \
             (data.n, data.m))
-        print("Settings: eps_abs = %.2e, eps_rel = %.2e," % \
+        print("Settings: ", end='')
+        if settings.linsys_solver == SUITESPARSE_LDL:
+            print("linear system solver = SuiteSparse LDL")
+        print("          eps_abs = %.2e, eps_rel = %.2e," % \
             (settings.eps_abs, settings.eps_rel))
         print("          eps_prim_inf = %.2e, eps_dual_inf = %.2e," % \
             (settings.eps_prim_inf, settings.eps_dual_inf))
@@ -611,7 +619,7 @@ class OSQP(object):
             self.work.z_prev - 1./self.work.settings.rho * self.work.y
 
         # Solve linear system
-        self.work.xz_tilde = self.work.priv.solve(self.work.xz_tilde)
+        self.work.xz_tilde = self.work.linsys_solver.solve(self.work.xz_tilde)
 
         # Update z_tilde
         self.work.xz_tilde[self.work.data.n:] = \
@@ -666,7 +674,7 @@ class OSQP(object):
             return 0.
         if polish:
             pri_res = np.maximum(self.work.data.l - self.work.pol.z, 0) + \
-                np.maximum(self.work.pol.z - self.work.data.u, 0) 
+                np.maximum(self.work.pol.z - self.work.data.u, 0)
         else:
             pri_res = self.work.data.A.dot(self.work.x) - self.work.z
 
@@ -1016,7 +1024,7 @@ class OSQP(object):
             self.compute_rho()
 
         # Factorize KKT
-        self.work.priv = priv(self.work)
+        self.work.linsys_solver = linsys_solver(self.work)
 
         # Solution
         self.work.solution = solution()

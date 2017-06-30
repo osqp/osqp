@@ -28,3 +28,6 @@ u = [bd; zeros(n,1); Inf*ones(n,1)];
 solver = osqp;
 solver.setup(P, q, A, l, u, 'verbose', false);
 res = solver.solve();
+
+
+solver.codegen('test')

@@ -130,7 +130,7 @@ end
 
 % Set library extension
 lib_ext = '.a';
-lib_name = sprintf('libosqpdirstatic%s', lib_ext);
+lib_name = sprintf('libosqpstatic%s', lib_ext);
 
 
 % Set osqp directory and osqp_build directory
@@ -178,7 +178,7 @@ if( any(strcmpi(what,'osqp')) || any(strcmpi(what,'all')) )
         disp(output);
     end
 
-    [status, output] = system(sprintf('%s %s', make_cmd, '--target osqpdirstatic'));
+    [status, output] = system(sprintf('%s %s', make_cmd, '--target osqpstatic'));
     if (status)
         fprintf('\n');
         disp(output);

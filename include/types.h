@@ -27,7 +27,7 @@ typedef struct {
 } csc;
 
 /**
- * Linear system solver structure (sublevel objects initialize it differently) 
+ * Linear system solver structure (sublevel objects initialize it differently)
  */
 
 typedef struct linsys_solver LinSysSolver;
@@ -151,7 +151,7 @@ typedef struct {
         c_float eps_prim_inf;  ///< primal infeasibility tolerance
         c_float eps_dual_inf;  ///< dual infeasibility tolerance
         c_float alpha; ///< relaxation parameter
-	enum linsys_solver_type linsys_solver;  ///< linear system solver to use
+	    enum linsys_solver_type linsys_solver;  ///< linear system solver to use
 
         #ifndef EMBEDDED
         c_float delta; ///< regularization parameter for polis
@@ -162,7 +162,7 @@ typedef struct {
         c_int auto_rho; ///< boolean, true if rho is chosen automatically
         #endif
 
-        c_int scaled_termination;  ///< boolean, use scaled termination criteria 
+        c_int scaled_termination;  ///< boolean, use scaled termination criteria
         c_int early_terminate;  ///< boolean, terminate if stopping criteria is met
         c_int early_terminate_interval; ///< boolean, interval for checking termination, if early_terminate == 1
         c_int warm_start; ///< boolean, warm start
@@ -227,7 +227,7 @@ typedef struct {
 
         c_float *D_temp;            ///< temporary primal variable scaling vectors
         c_float *D_temp_A;            ///< temporary primal variable scaling vectors storing norms of A columns
-        c_float *E_temp;            ///< temporary constraints scaling vectors storing norms of A' columns 
+        c_float *E_temp;            ///< temporary constraints scaling vectors storing norms of A' columns
 
         /** @} */
 

@@ -105,6 +105,7 @@ set(
     osqp_src
     src/osqp/auxil.c
     src/osqp/lin_alg.c
+    src/osqp/lin_sys.c
     src/osqp/osqp.c
     src/osqp/kkt.c
     src/osqp/proj.c

@@ -35,7 +35,7 @@
                           pow((trP + work->settings->sigma * n)/n , AUTO_RHO_BETA1) *
                           pow((trAtA) / m, AUTO_RHO_BETA2);
 
-    
+
     work->settings->rho = c_min(c_max(work->settings->rho, AUTO_RHO_MIN), AUTO_RHO_MAX);
  }
  #endif // ifndef EMBEDDED
@@ -163,7 +163,7 @@ c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
         // Called from ADMM algorithm: Ax - z
         // N.B. store temporary vector in z_prev
         mat_vec(work->data->A, work->x, work->z_prev, 0);
-        vec_add_scaled(work->z_prev, work->z, work->data->m, -1); 
+        vec_add_scaled(work->z_prev, work->z, work->data->m, -1);
 
     #ifndef EMBEDDED
     }
@@ -216,7 +216,7 @@ c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
                       work->x_prev, 1, 1);      // += Px (lower triang part)
     }
     #endif
-    
+
     // If scaling active -> rescale residual
     if (work->settings->scaling && work->settings->scaled_termination){
         vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n);
@@ -459,15 +459,15 @@ c_int check_termination(OSQPWorkspace *work){
     }
     else {
         // Compute primal tolerance
-        
+
         // max_rel_eps = max(||z||, ||A x||)
         if (work->settings->scaling && work->settings->scaled_termination){
             // ||Einv * z||
-            vec_ew_prod(work->scaling->Einv, work->z, work->z_prev, work->data->m); 
+            vec_ew_prod(work->scaling->Einv, work->z, work->z_prev, work->data->m);
             max_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
             // ||Einv * A * x||
             mat_vec(work->data->A, work->x, work->z_prev, 0);
-            vec_ew_prod(work->scaling->Einv, work->z_prev, work->z_prev, work->data->m); 
+            vec_ew_prod(work->scaling->Einv, work->z_prev, work->z_prev, work->data->m);
             temp_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
             // Choose maximum
             if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
@@ -492,7 +492,7 @@ c_int check_termination(OSQPWorkspace *work){
             // Primal infeasibility check
             prim_inf_check = is_primal_infeasible(work);
         }
-    }  // End check if m == 0 
+    }  // End check if m == 0
 
     // Compute dual tolerance
     // max_rel_eps = max(||q||, ||A' y|, ||P x||)
@@ -502,7 +502,7 @@ c_int check_termination(OSQPWorkspace *work){
         max_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
         // || Dinv A' y ||
         mat_tpose_vec(work->data->A, work->y, work->x_prev, 0, 0);
-        vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n); 
+        vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n);
         temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
         if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
         // || Dinv P x||
@@ -510,7 +510,7 @@ c_int check_termination(OSQPWorkspace *work){
         mat_vec(work->data->P, work->x, work->x_prev, 0);
         // P' * x (lower triangular part with no diagonal)
         mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
-        vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n); 
+        vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n);
         temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
         if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
 
@@ -528,7 +528,7 @@ c_int check_termination(OSQPWorkspace *work){
         mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
         temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
         if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
-    
+
     }
 
     // eps_dual
@@ -705,6 +705,12 @@ c_int validate_settings(const OSQPSettings * settings){
     if (settings->alpha <= 0 || settings->alpha >= 2) {
         #ifdef PRINTING
         c_print("alpha must be between 0 and 2\n");
+        #endif
+        return 1;
+    }
+    if (settings->linsys_solver != SUITESPARSE_LDL){
+        #ifdef PRINTING
+        c_print("linsys_solver must be SUITESPARSE_LDL\n");
         #endif
         return 1;
     }
