@@ -1,3 +1,11 @@
+#include "ldl.h"
+
+#ifndef EMBEDDED
+#include "amd.h"
+#endif
+
+#include "lin_alg.h"
+#include "kkt.h"
 #include "suitesparse_ldl.h"
 
 #ifndef EMBEDDED

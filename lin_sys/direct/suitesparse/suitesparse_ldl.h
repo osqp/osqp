@@ -2,13 +2,6 @@
 #define SUITESPARSE_LDL_H
 
 #include "types.h"
-#include "lin_alg.h"
-#include "kkt.h"
-#include "ldl.h"
-
-#ifndef EMBEDDED
-#include "amd.h"
-#endif
 
 /**
  * Suitesparse LDL solver structure
