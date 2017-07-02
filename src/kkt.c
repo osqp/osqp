@@ -186,9 +186,6 @@ void update_KKT_scalar2(csc * KKT, const c_float scalar2,
                         c_int m){
     c_int i; // Iterations
 
-    // DEBUG
-    c_print("scalar2 = %.4f\n", scalar2);
-
     // Update elements of KKT using scalar2
     for (i = 0; i < m; i++){
         KKT->x[scalar2toKKT[i]] = - scalar2;

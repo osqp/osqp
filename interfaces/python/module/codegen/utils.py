@@ -161,6 +161,7 @@ def write_linsys_solver(f, linsys_solver, name, embedded_flag):
         write_mat(f, linsys_solver['KKT'], 'linsys_solver_KKT')
         write_vec(f, linsys_solver['PtoKKT'], 'linsys_solver_PtoKKT', 'c_int')
         write_vec(f, linsys_solver['AtoKKT'], 'linsys_solver_AtoKKT', 'c_int')
+        write_vec(f, linsys_solver['rhotoKKT'], 'linsys_solver_rhotoKKT', 'c_int')
         write_vec(f, linsys_solver['Lnz'], 'linsys_solver_Lnz', 'c_int')
         write_vec(f, linsys_solver['Y'], 'linsys_solver_Y', 'c_float')
         write_vec(f, linsys_solver['Pattern'], 'linsys_solver_Pattern', 'c_int')
@@ -170,8 +171,10 @@ def write_linsys_solver(f, linsys_solver, name, embedded_flag):
     f.write("suitesparse_ldl_solver %s = " % name)
     f.write("{SUITESPARSE_LDL, &solve_linsys_suitesparse_ldl, ")
     if embedded_flag != 1:
-        f.write("&update_linsys_solver_matrices_suitesparse_ldl, &linsys_solver_L, linsys_solver_Dinv, linsys_solver_P, linsys_solver_bp, linsys_solver_Pdiag_idx, " +
-                "%d, &linsys_solver_KKT, linsys_solver_PtoKKT, linsys_solver_AtoKKT, " % linsys_solver['Pdiag_n'] +
+        f.write("&update_linsys_solver_matrices_suitesparse_ldl, &update_linsys_solver_rho_suitesparse_ldl, " +
+                "&linsys_solver_L, linsys_solver_Dinv, linsys_solver_P, linsys_solver_bp, linsys_solver_Pdiag_idx, " +
+                "%d, " % linsys_solver['Pdiag_n'] +
+                "&linsys_solver_KKT, linsys_solver_PtoKKT, linsys_solver_AtoKKT, linsys_solver_rhotoKKT, " +
                 "linsys_solver_Lnz, linsys_solver_Y, linsys_solver_Pattern, linsys_solver_Flag, linsys_solver_Parent};\n\n")
     else:
         f.write("&linsys_solver_L, linsys_solver_Dinv, linsys_solver_P, linsys_solver_bp};\n\n")

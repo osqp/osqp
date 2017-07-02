@@ -128,6 +128,7 @@
      PyObject *KKTx      = PyArray_SimpleNewFromData(1, &KKTnzmax,    float_type, solver->KKT->x);
      PyObject *PtoKKT    = PyArray_SimpleNewFromData(1, &Pnzmax,      int_type,   solver->PtoKKT);
      PyObject *AtoKKT    = PyArray_SimpleNewFromData(1, &Anzmax,      int_type,   solver->AtoKKT);
+     PyObject *rhotoKKT  = PyArray_SimpleNewFromData(1, &data->m,     int_type,   solver->rhotoKKT);
      PyObject *Lnz_vec   = PyArray_SimpleNewFromData(1, &m_plus_n,    int_type,   solver->Lnz);
      PyObject *Y         = PyArray_SimpleNewFromData(1, &m_plus_n,    float_type, solver->Y);
      PyObject *Pattern   = PyArray_SimpleNewFromData(1, &m_plus_n,    int_type,   solver->Pattern);
@@ -147,6 +148,7 @@
      PyArray_ENABLEFLAGS((PyArrayObject *) KKTx,      NPY_ARRAY_OWNDATA);
      PyArray_ENABLEFLAGS((PyArrayObject *) PtoKKT,    NPY_ARRAY_OWNDATA);
      PyArray_ENABLEFLAGS((PyArrayObject *) AtoKKT,    NPY_ARRAY_OWNDATA);
+     PyArray_ENABLEFLAGS((PyArrayObject *) rhotoKKT,  NPY_ARRAY_OWNDATA);
      PyArray_ENABLEFLAGS((PyArrayObject *) Lnz_vec,   NPY_ARRAY_OWNDATA);
      PyArray_ENABLEFLAGS((PyArrayObject *) Y,         NPY_ARRAY_OWNDATA);
      PyArray_ENABLEFLAGS((PyArrayObject *) Pattern,   NPY_ARRAY_OWNDATA);
@@ -158,13 +160,13 @@
          "s:O,s:O,s:O,"                       // Dinv, P, bp
          "s:O,s:i,"                           // Pdiag_idx, Pdiag_n
          "s:{s:i,s:i,s:i,s:O,s:O,s:O,s:i},"   // KKT
-         "s:O,s:O,s:O,s:O,"                   // PtoKKT, AtoKKT, Lnz, Y
+         "s:O,s:O,s:O,s:O,s:O,"               // PtoKKT, AtoKKT, Lnz, Y
          "s:O,s:O,s:O}",                      // Pattern, Flag, Parent
          "L", "nzmax", Lnzmax, "m", Ln, "n", Ln, "p", Lp, "i", Li, "x", Lx, "nz", Lnz,
          "Dinv", Dinv, "P", P, "bp", bp,
          "Pdiag_idx", Pdiag_idx, "Pdiag_n", Pdiag_n,
          "KKT", "nzmax", KKTnzmax, "m", KKTn, "n", KKTn, "p", KKTp, "i", KKTi, "x", KKTx, "nz", KKTnz,
-         "PtoKKT", PtoKKT, "AtoKKT", AtoKKT, "Lnz", Lnz_vec, "Y", Y,
+         "PtoKKT", PtoKKT, "AtoKKT", AtoKKT, "rhotoKKT", rhotoKKT, "Lnz", Lnz_vec, "Y", Y,
          "Pattern", Pattern, "Flag", Flag, "Parent", Parent);
 
      return return_dict;

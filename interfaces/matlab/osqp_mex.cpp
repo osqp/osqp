@@ -78,6 +78,7 @@ const char* LINSYS_SOLVER_FIELDS[] = {"L",           //csc
                                       "KKT",         //csc
                                       "PtoKKT",      //c_int*
                                       "AtoKKT",      //c_int*
+                                      "rhotoKKT",    //c_int*
                                       "Lnz",         //c_int*
                                       "Y",           //c_float*
                                       "Pattern",     //c_int*
@@ -94,6 +95,9 @@ const char* OSQP_WORKSPACE_FIELDS[] = {"data",
                                        "scaling",
                                        "settings"};
 
+                                       
+#define NEW_SETTINGS_TOL (1e-10)                            
+                                       
 // wrapper class for all osqp data and settings
 class OsqpData
 {
@@ -198,6 +202,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       if(!osqpData->work){
         mexErrMsgTxt("Solver is uninitialized.  No settings have been configured.");
       }
+            
       copyUpdatedSettingsToWork(prhs[2],osqpData);
       return;
     }
@@ -811,6 +816,7 @@ mxArray* copyLinsysSolverToMxStruct(OSQPWorkspace * work){
   mxArray* Pdiag_idx = mxCreateDoubleMatrix(Pdiag_n,1,mxREAL);
   mxArray* PtoKKT    = mxCreateDoubleMatrix(Pnzmax,1,mxREAL);
   mxArray* AtoKKT    = mxCreateDoubleMatrix(Anzmax,1,mxREAL);
+  mxArray* rhotoKKT  = mxCreateDoubleMatrix(data->m,1,mxREAL);
   mxArray* Lnz       = mxCreateDoubleMatrix(m_plus_n,1,mxREAL);
   mxArray* Y         = mxCreateDoubleMatrix(m_plus_n,1,mxREAL);
   mxArray* Pattern	 = mxCreateDoubleMatrix(m_plus_n,1,mxREAL);
@@ -824,6 +830,7 @@ mxArray* copyLinsysSolverToMxStruct(OSQPWorkspace * work){
   castCintToDoubleArr(linsys_solver->Pdiag_idx, mxGetPr(Pdiag_idx), Pdiag_n);
   castCintToDoubleArr(linsys_solver->PtoKKT, mxGetPr(PtoKKT), Pnzmax);
   castCintToDoubleArr(linsys_solver->AtoKKT, mxGetPr(AtoKKT), Anzmax);
+  castCintToDoubleArr(linsys_solver->rhotoKKT, mxGetPr(rhotoKKT), data->m);
   castCintToDoubleArr(linsys_solver->Lnz, mxGetPr(Lnz), m_plus_n);
   castToDoubleArr(linsys_solver->Y, mxGetPr(Y), m_plus_n);
   castCintToDoubleArr(linsys_solver->Pattern, mxGetPr(Pattern), m_plus_n);
@@ -844,6 +851,7 @@ mxArray* copyLinsysSolverToMxStruct(OSQPWorkspace * work){
   mxSetField(mxPtr, 0, "KKT",       KKT);
   mxSetField(mxPtr, 0, "PtoKKT",    PtoKKT);
   mxSetField(mxPtr, 0, "AtoKKT",    AtoKKT);
+  mxSetField(mxPtr, 0, "rhotoKKT",  rhotoKKT);
   mxSetField(mxPtr, 0, "Lnz",       Lnz);
   mxSetField(mxPtr, 0, "Y",         Y);
   mxSetField(mxPtr, 0, "Pattern",   Pattern);
@@ -977,7 +985,18 @@ void copyUpdatedSettingsToWork(const mxArray* mxPtr ,OsqpData* osqpData){
   osqp_update_early_terminate(osqpData->work,
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "early_terminate")));
   osqp_update_early_terminate_interval(osqpData->work,
-      (c_int)mxGetScalar(mxGetField(mxPtr, 0, "early_terminate_interval")));
+    (c_int)mxGetScalar(mxGetField(mxPtr, 0, "early_terminate_interval")));
   osqp_update_warm_start(osqpData->work,
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "warm_start")));
+  
+  
+  // Check for settings that need special update
+  // Update them only if they ae different than already set values
+  c_float rho_new = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "rho"));
+  // Check if it has changed
+  if (c_absval(rho_new - osqpData->work->settings->rho) > NEW_SETTINGS_TOL){ 
+      osqp_update_rho(osqpData->work, rho_new);
+  }
+
+  
 }
