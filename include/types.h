@@ -269,6 +269,7 @@ struct linsys_solver {
 
     #if EMBEDDED != 1
     c_int (*update_matrices)(LinSysSolver * self, const csc *P, const csc *A, const OSQPSettings *settings); ///< Update matrices P and A in the solver
+    c_int (*update_rho)(LinSysSolver * s, const c_float rho, const c_int m);  ///< Update rho
     #endif
 };
 

@@ -1,6 +1,10 @@
 #ifndef SUITESPARSE_LDL_H
 #define SUITESPARSE_LDL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "types.h"
 
 /**
@@ -21,9 +25,10 @@ struct suitesparse_ldl {
     void (*free)(struct suitesparse_ldl * self); ///< Free workspace (only if desktop)
     #endif
 
-    // This used only in non embedded or matrix-updates version
+    // This used only in non embedded or embedded 2 version
     #if EMBEDDED != 1
     c_int (*update_matrices)(struct suitesparse_ldl * self, const csc *P, const csc *A, const OSQPSettings *settings); ///< Update solver matrices
+    c_int (*update_rho)(struct suitesparse_ldl * self, const c_float rho, const c_int m); ///< Update solver matrices
     #endif
 
     /** @} */
@@ -44,6 +49,7 @@ struct suitesparse_ldl {
     c_int * Pdiag_idx, Pdiag_n;  ///< index and number of diagonal elements in P
     csc * KKT;                   ///< Permuted KKT matrix in sparse form (used to update P and A matrices)
     c_int * PtoKKT, * AtoKKT;    ///< Index of elements from P and A to KKT matrix
+    c_int * rhotoKKT;            ///< Index of rho places in KKT matrix
     // LDL Numeric workspace
     c_int *Lnz;                  ///< Number of nonzeros in each column of L
     c_float *Y;                  ///< LDL Numeric workspace
@@ -88,6 +94,19 @@ c_int solve_linsys_suitesparse_ldl(suitesparse_ldl_solver * s, c_float * b, cons
  */
 c_int update_linsys_solver_matrices_suitesparse_ldl(suitesparse_ldl_solver * s,
 		const csc *P, const csc *A, const OSQPSettings *settings);
+
+
+
+
+/**
+ * Update rho parameter in linear system solver structure
+ * @param  s   Linear system solver structure
+ * @param  rho new rho value
+ * @param  m   number of constraints
+ * @return     exitflag
+ */
+c_int update_linsys_solver_rho_suitesparse_ldl(suitesparse_ldl_solver * s, const c_float rho, const c_int m);
+
 #endif
 
 #ifndef EMBEDDED
@@ -96,6 +115,10 @@ c_int update_linsys_solver_matrices_suitesparse_ldl(suitesparse_ldl_solver * s,
  * @param s linear system solver object
  */
 void free_linsys_solver_suitesparse_ldl(suitesparse_ldl_solver * s);
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

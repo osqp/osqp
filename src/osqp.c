@@ -888,6 +888,28 @@ c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx
 }
 
 
+c_int osqp_update_rho(OSQPWorkspace * work, c_float rho_new){
+    c_int exitflag;
+
+    // Check value of rho
+    if (rho_new <= 0) {
+        #ifdef PRINTING
+        c_print("rho must be positive\n");
+        #endif
+        return 1;
+    }
+
+    // Update rho in settings
+    work->settings->rho = rho_new;
+
+    // Update rho in KKT matrix
+    exitflag = work->linsys_solver->update_rho(work->linsys_solver,
+                                               rho_new,
+                                               work->data->m);
+
+    return exitflag;
+}
+
 #endif // EMBEDDED != 1
 
 /****************************

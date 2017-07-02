@@ -31,6 +31,8 @@ void free_linsys_solver_suitesparse_ldl(suitesparse_ldl_solver *s) {
             c_free(s->PtoKKT);
         if (s->AtoKKT)
             c_free(s->AtoKKT);
+        if (s->rhotoKKT)
+            c_free(s->rhotoKKT);
         if (s->Parent)
             c_free(s->Parent);
         if (s->Lnz)
@@ -104,7 +106,7 @@ c_int LDL_factor(csc *A,  suitesparse_ldl_solver * p){
 }
 
 
-c_int permute_KKT(csc ** KKT, suitesparse_ldl_solver * p, c_int Pnz, c_int Anz, c_int * PtoKKT, c_int * AtoKKT){
+c_int permute_KKT(csc ** KKT, suitesparse_ldl_solver * p, c_int Pnz, c_int Anz, c_int m, c_int * PtoKKT, c_int * AtoKKT, c_int * rhotoKKT){
     c_float *info;
     c_int amd_status;
     info = (c_float *)c_malloc(AMD_INFO * sizeof(c_float));
@@ -122,11 +124,11 @@ c_int permute_KKT(csc ** KKT, suitesparse_ldl_solver * p, c_int Pnz, c_int Anz, 
     if (amd_status < 0) return (amd_status);
 
 
-    // Converse of the permutation vector
+    // Inverse of the permutation vector
     Pinv = csc_pinv(p->P, (*KKT)->n);
 
     // Permute KKT matrix
-    if (!PtoKKT && !AtoKKT){  // No vectors to be stored
+    if (!PtoKKT && !AtoKKT && !rhotoKKT){  // No vectors to be stored
         // Assign values of mapping
         KKT_temp = csc_symperm((*KKT), Pinv, OSQP_NULL, 1);
     }
@@ -135,12 +137,21 @@ c_int permute_KKT(csc ** KKT, suitesparse_ldl_solver * p, c_int Pnz, c_int Anz, 
         KtoPKPt = c_malloc((*KKT)->p[(*KKT)->n] * sizeof(c_int));
         KKT_temp = csc_symperm((*KKT), Pinv, KtoPKPt, 1);
 
-        // Update vectors PtoKKT and AtoKKT
-        for (i = 0; i < Pnz; i++){
-            PtoKKT[i] = KtoPKPt[PtoKKT[i]];
+        // Update vectors PtoKKT, AtoKKT and rhotoKKT
+        if (PtoKKT){
+            for (i = 0; i < Pnz; i++){
+                PtoKKT[i] = KtoPKPt[PtoKKT[i]];
+            }
         }
-        for (i = 0; i < Anz; i++){
-            AtoKKT[i] = KtoPKPt[AtoKKT[i]];
+        if (AtoKKT){
+            for (i = 0; i < Anz; i++){
+                AtoKKT[i] = KtoPKPt[AtoKKT[i]];
+            }
+        }
+        if (rhotoKKT){
+            for (i = 0; i < m; i++){
+                rhotoKKT[i] = KtoPKPt[rhotoKKT[i]];
+            }
         }
 
         // Cleanup vector of mapping
@@ -201,23 +212,24 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
 
     // Form and permute KKT matrix
     if (polish){ // Called from polish()
-        KKT_temp = form_KKT(P, A, settings->delta, settings->delta, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
+        KKT_temp = form_KKT(P, A, settings->delta, settings->delta, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
 
         // Permute matrix
-        permute_KKT(&KKT_temp, p, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
+        permute_KKT(&KKT_temp, p, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
     }
     else { // Called from ADMM algorithm
 
         // Allocate vectors of indeces
         p->PtoKKT = c_malloc((P->p[P->n]) * sizeof(c_int));
         p->AtoKKT = c_malloc((A->p[A->n]) * sizeof(c_int));
+        p->rhotoKKT = c_malloc((A->m) * sizeof(c_int));
 
         KKT_temp = form_KKT(P, A, settings->sigma, 1./settings->rho,
                             p->PtoKKT, p->AtoKKT,
-                            &(p->Pdiag_idx), &(p->Pdiag_n));
+                            &(p->Pdiag_idx), &(p->Pdiag_n), p->rhotoKKT);
 
         // Permute matrix
-        permute_KKT(&KKT_temp, p, P->p[P->n], A->p[A->n], p->PtoKKT, p->AtoKKT);
+        permute_KKT(&KKT_temp, p, P->p[P->n], A->p[A->n], A->m, p->PtoKKT, p->AtoKKT, p->rhotoKKT);
     }
 
     // Check if matrix has been created
@@ -250,7 +262,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
     p->solve = &solve_linsys_suitesparse_ldl;
     p->free = &free_linsys_solver_suitesparse_ldl;
     p->update_matrices = &update_linsys_solver_matrices_suitesparse_ldl;
-
+    p->update_rho = &update_linsys_solver_rho_suitesparse_ldl;
 
     // Assign type
     p->type = SUITESPARSE_LDL;
@@ -310,5 +322,28 @@ c_int update_linsys_solver_matrices_suitesparse_ldl(suitesparse_ldl_solver * s,
     return (kk - s->KKT->n);
 
 }
+
+
+
+c_int update_linsys_solver_rho_suitesparse_ldl(suitesparse_ldl_solver * s, const c_float rho, const c_int m){
+    c_int kk;
+    // Update KKT matrix with new rho
+    update_KKT_scalar2(s->KKT, 1./rho, s->rhotoKKT, m);
+
+    // Perform numeric factorization
+    kk = LDL_numeric(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
+                     s->L->p, s->Parent, s->Lnz, s->L->i,
+                     s->L->x, s->Dinv, s->Y, s->Pattern, s->Flag,
+                     OSQP_NULL, OSQP_NULL);
+
+     // Invert elements of D that are stored in s->Dinv
+     vec_ew_recipr(s->Dinv, s->Dinv, s->KKT->n);
+
+    // return exit flag
+    return (kk - s->KKT->n);
+}
+
+
+
 
 #endif
