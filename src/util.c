@@ -75,6 +75,15 @@ void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
     // Print Settings
     // Print variables and constraints
     c_print("Settings: ");
+    c_print("linear system solver = ");
+    switch (settings->linsys_solver){
+        case SUITESPARSE_LDL:
+            c_print("SuiteSparse LDL,\n          ");
+            break;
+        default:
+            c_print("SuiteSparse LDL,\n          ");
+    }
+
     c_print("eps_abs = %.1e, eps_rel = %.1e,\n          ", settings->eps_abs, settings->eps_rel);
     c_print("eps_prim_inf = %.1e, eps_dual_inf = %.1e,\n          ", settings->eps_prim_inf, settings->eps_dual_inf);
     c_print("rho = %.2e ", settings->rho);
@@ -84,21 +93,25 @@ void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
     c_print("max_iter = %i\n", (int)settings->max_iter);
 
     if (settings->early_terminate)
-        c_print("          early_terminate: active (interval %i)\n", (int)settings->early_terminate_interval);
+        c_print("          early_terminate: on (interval %i)\n", (int)settings->early_terminate_interval);
     else
-        c_print("          early_terminate: inactive\n");
+        c_print("          early_terminate: off \n");
     if (settings->scaling)
-        c_print("          scaling: active\n");
+        c_print("          scaling: on, ");
     else
-        c_print("          scaling: inactive\n");
+        c_print("          scaling: off, ");
+    if (settings->scaled_termination)
+        c_print("scaled_termination: on\n");
+    else
+        c_print("scaled_termination: off\n");
     if (settings->warm_start)
-        c_print("          warm start: active\n");
+        c_print("          warm start: on, ");
     else
-        c_print("          warm start: inactive\n");
+        c_print("          warm start: off, ");
     if (settings->polish)
-        c_print("          polish: active\n");
+        c_print("polish: on\n");
     else
-        c_print("          polish: inactive\n");
+        c_print("polish: off\n");
     c_print("\n");
 }
 
@@ -123,7 +136,7 @@ void print_summary(OSQPWorkspace * work){
 void print_polish(OSQPWorkspace * work) {
     OSQPInfo * info;
     info = work->info;
-    
+
     c_print("%*s ", (int)strlen(HEADER[0]), "PLSH");
     c_print("%*.4e ", (int)HSPACE, info->obj_val);
     c_print("%*.4e ", (int)HSPACE, info->pri_res);
@@ -191,6 +204,7 @@ void set_default_settings(OSQPSettings * settings) {
         settings->eps_prim_inf = (c_float) EPS_PRIM_INF;         /* primal infeasibility tolerance */
         settings->eps_dual_inf = (c_float) EPS_DUAL_INF;         /* dual infeasibility tolerance */
         settings->alpha = (c_float) ALPHA;     /* relaxation parameter */
+        settings->linsys_solver = LINSYS_SOLVER;     /* relaxation parameter */
 
         #ifndef EMBEDDED
         settings->delta = DELTA;    /* regularization parameter for polish */
@@ -201,6 +215,7 @@ void set_default_settings(OSQPSettings * settings) {
         settings->verbose = VERBOSE;     /* print output */
         #endif
 
+        settings->scaled_termination = SCALED_TERMINATION;     /* Evaluate scaled termination criteria*/
         settings->early_terminate = EARLY_TERMINATE;     /* Evaluate termination criteria */
         settings->early_terminate_interval = EARLY_TERMINATE_INTERVAL;     /* Evaluate termination at certain interval */
         settings->warm_start = WARM_START;     /* x equality constraint scaling: 1e-3 */
@@ -223,11 +238,13 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
     new->eps_prim_inf = settings->eps_prim_inf;
     new->eps_dual_inf = settings->eps_dual_inf;
     new->alpha = settings->alpha;
+    new->linsys_solver = settings->linsys_solver;
     new->delta = settings->delta;
     new->polish = settings->polish;
     new->pol_refine_iter = settings->pol_refine_iter;
     new->auto_rho = settings->auto_rho;
     new->verbose = settings->verbose;
+    new->scaled_termination = settings->scaled_termination;
     new->early_terminate = settings->early_terminate;
     new->early_terminate_interval = settings->early_terminate_interval;
     new->warm_start = settings->warm_start;

@@ -228,6 +228,14 @@ c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, 
  */
 c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, c_int P_new_n, c_float * Ax_new, c_int * Ax_new_idx, c_int A_new_n);
 
+/**
+* Update rho
+* @param  work         Workspace
+* @param  rho_new      New rho setting
+* @return              Exitflag
+*/
+c_int osqp_update_rho(OSQPWorkspace * work, c_float rho_new);
+
 #endif
 
 /** @} */
@@ -305,6 +313,22 @@ c_int osqp_update_warm_start(OSQPWorkspace * work, c_int warm_start_new);
 
 
 /**
+ * Update scaled_termination setting
+ * @param  work                 Workspace
+ * @param  scaled_termination_new  New scaled_termination setting
+ * @return                      Exitflag
+ */
+c_int osqp_update_scaled_termination(OSQPWorkspace * work, c_int scaled_termination_new);
+
+/**
+ * Update early_terminate setting
+ * @param  work                 Workspace
+ * @param  early_terminate_new  New early_terminate setting
+ * @return                      Exitflag
+ */
+c_int osqp_update_early_terminate(OSQPWorkspace * work, c_int early_terminate_new);
+
+/**
  * Update early_terminate setting
  * @param  work                 Workspace
  * @param  early_terminate_new  New early_terminate setting
@@ -315,9 +339,9 @@ c_int osqp_update_early_terminate(OSQPWorkspace * work, c_int early_terminate_ne
 
 
 /**
- * Update early_terminate setting
+ * Update early_terminate_interval setting
  * @param  work                          Workspace
- * @param  early_terminate_interval_new  New early_terminate setting
+ * @param  early_terminate_interval_new  New early_terminate_interval setting
  * @return                               Exitflag
  */
 c_int osqp_update_early_terminate_interval(OSQPWorkspace * work, c_int early_terminate_interval_new);

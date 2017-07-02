@@ -100,7 +100,7 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
     sys.stdout.flush()
     template_vars = {'data':            work['data'],
                      'settings':        work['settings'],
-                     'priv':            work['priv'],
+                     'linsys_solver':   work['linsys_solver'],
                      'scaling':         work['scaling'],
                      'embedded_flag':   embedded,
                      'python_ext_name': python_ext_name}

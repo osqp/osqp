@@ -118,7 +118,9 @@ def write_settings(f, settings, name, embedded_flag):
     f.write("(c_float)%.20f, " % settings['eps_prim_inf'])
     f.write("(c_float)%.20f, " % settings['eps_dual_inf'])
     f.write("(c_float)%.20f, " % settings['alpha'])
+    f.write("%d, " % settings['linsys_solver'])
 
+    f.write("%d, " % settings['scaled_termination'])
     f.write("%d, " % settings['early_terminate'])
     f.write("%d, " %
             settings['early_terminate_interval'])
@@ -143,35 +145,39 @@ def write_scaling(f, scaling, name):
         f.write("OSQPScaling %s;\n\n" % name)
 
 
-def write_private(f, priv, name, embedded_flag):
+def write_linsys_solver(f, linsys_solver, name, embedded_flag):
     """
-    Write private structure during code generation
+    Write linsys_solver structure during code generation
     """
 
-    f.write("// Define private structure\n")
-    write_mat(f, priv['L'], 'priv_L')
-    write_vec(f, priv['Dinv'], 'priv_Dinv', 'c_float')
-    write_vec(f, priv['P'], 'priv_P', 'c_int')
-    f.write("c_float priv_bp[%d];\n" % (len(priv['Dinv'])))  # Empty rhs
+    f.write("// Define linsys_solver structure\n")
+    write_mat(f, linsys_solver['L'], 'linsys_solver_L')
+    write_vec(f, linsys_solver['Dinv'], 'linsys_solver_Dinv', 'c_float')
+    write_vec(f, linsys_solver['P'], 'linsys_solver_P', 'c_int')
+    f.write("c_float linsys_solver_bp[%d];\n" % (len(linsys_solver['Dinv'])))  # Empty rhs
 
     if embedded_flag != 1:
-        write_vec(f, priv['Pdiag_idx'], 'priv_Pdiag_idx', 'c_int')
-        write_mat(f, priv['KKT'], 'priv_KKT')
-        write_vec(f, priv['PtoKKT'], 'priv_PtoKKT', 'c_int')
-        write_vec(f, priv['AtoKKT'], 'priv_AtoKKT', 'c_int')
-        write_vec(f, priv['Lnz'], 'priv_Lnz', 'c_int')
-        write_vec(f, priv['Y'], 'priv_Y', 'c_float')
-        write_vec(f, priv['Pattern'], 'priv_Pattern', 'c_int')
-        write_vec(f, priv['Flag'], 'priv_Flag', 'c_int')
-        write_vec(f, priv['Parent'], 'priv_Parent', 'c_int')
+        write_vec(f, linsys_solver['Pdiag_idx'], 'linsys_solver_Pdiag_idx', 'c_int')
+        write_mat(f, linsys_solver['KKT'], 'linsys_solver_KKT')
+        write_vec(f, linsys_solver['PtoKKT'], 'linsys_solver_PtoKKT', 'c_int')
+        write_vec(f, linsys_solver['AtoKKT'], 'linsys_solver_AtoKKT', 'c_int')
+        write_vec(f, linsys_solver['rhotoKKT'], 'linsys_solver_rhotoKKT', 'c_int')
+        write_vec(f, linsys_solver['Lnz'], 'linsys_solver_Lnz', 'c_int')
+        write_vec(f, linsys_solver['Y'], 'linsys_solver_Y', 'c_float')
+        write_vec(f, linsys_solver['Pattern'], 'linsys_solver_Pattern', 'c_int')
+        write_vec(f, linsys_solver['Flag'], 'linsys_solver_Flag', 'c_int')
+        write_vec(f, linsys_solver['Parent'], 'linsys_solver_Parent', 'c_int')
 
-    f.write("Priv %s = " % name)
+    f.write("suitesparse_ldl_solver %s = " % name)
+    f.write("{SUITESPARSE_LDL, &solve_linsys_suitesparse_ldl, ")
     if embedded_flag != 1:
-        f.write("{&priv_L, priv_Dinv, priv_P, priv_bp, priv_Pdiag_idx, " +
-                "%d, &priv_KKT, priv_PtoKKT, priv_AtoKKT, " % priv['Pdiag_n'] +
-                "priv_Lnz, priv_Y, priv_Pattern, priv_Flag, priv_Parent};\n\n")
+        f.write("&update_linsys_solver_matrices_suitesparse_ldl, &update_linsys_solver_rho_suitesparse_ldl, " +
+                "&linsys_solver_L, linsys_solver_Dinv, linsys_solver_P, linsys_solver_bp, linsys_solver_Pdiag_idx, " +
+                "%d, " % linsys_solver['Pdiag_n'] +
+                "&linsys_solver_KKT, linsys_solver_PtoKKT, linsys_solver_AtoKKT, linsys_solver_rhotoKKT, " +
+                "linsys_solver_Lnz, linsys_solver_Y, linsys_solver_Pattern, linsys_solver_Flag, linsys_solver_Parent};\n\n")
     else:
-        f.write("{&priv_L, priv_Dinv, priv_P, priv_bp};\n\n")
+        f.write("&linsys_solver_L, linsys_solver_Dinv, linsys_solver_P, linsys_solver_bp};\n\n")
 
 
 def write_solution(f, data, name):
@@ -215,7 +221,7 @@ def write_workspace(f, data, name):
     f.write("c_float work_E_temp[%d];\n\n" % data['m'])
 
     f.write("OSQPWorkspace %s = {\n" % name)
-    f.write("&data, &priv,\n")
+    f.write("&data, (LinSysSolver *)&linsys_solver,\n")
     f.write("work_x, work_y, work_z, work_xz_tilde,\n")
     f.write("work_x_prev, work_z_prev,\n")
     f.write("work_delta_y, work_Atdelta_y,\n")
@@ -230,7 +236,7 @@ def render_workspace(variables, output):
     """
 
     data = variables['data']
-    priv = variables['priv']
+    linsys_solver = variables['linsys_solver']
     scaling = variables['scaling']
     settings = variables['settings']
     embedded_flag = variables['embedded_flag']
@@ -238,10 +244,10 @@ def render_workspace(variables, output):
     # Open output file
     f = open(output, 'w')
 
-    # Include types, constants and private header
+    # Include types, constants and linsys_solver header
     f.write("#include \"types.h\"\n")
     f.write("#include \"constants.h\"\n")
-    f.write("#include \"private.h\"\n\n")
+    f.write("#include \"suitesparse_ldl.h\"\n\n")
 
     '''
     Write data structure
@@ -259,9 +265,9 @@ def render_workspace(variables, output):
     write_scaling(f, scaling, 'scaling')
 
     '''
-    Write private structure
+    Write linsys_solver structure
     '''
-    write_private(f, priv, 'priv', embedded_flag)
+    write_linsys_solver(f, linsys_solver, 'linsys_solver', embedded_flag)
 
     '''
     Define empty solution structure
@@ -287,8 +293,8 @@ def write_ldl_lsolve(f, variables):
     """
 
     data = variables['data']
-    priv = variables['priv']
-    Lp = priv['L']['p']
+    linsys_solver = variables['linsys_solver']
+    Lp = linsys_solver['L']['p']
 
     f.write("void LDL_lsolve(LDL_int n, c_float X [ ], LDL_int Lp [ ]")
     f.write(", LDL_int Li [ ], c_float Lx [ ]){\n")
@@ -310,8 +316,8 @@ def write_ldl_ltsolve(f, variables):
     Write LDL_ltsolve to file
     """
     data = variables['data']
-    priv = variables['priv']
-    Lp = priv['L']['p']
+    linsys_solver = variables['linsys_solver']
+    Lp = linsys_solver['L']['p']
 
     f.write("void LDL_ltsolve(LDL_int n, c_float X [ ], LDL_int Lp [ ]")
     f.write(", LDL_int Li [ ], c_float Lx [ ]){\n")
@@ -431,7 +437,7 @@ def render_setuppy(variables, output):
 
 def render_cmakelists(variables, output):
     """
-    Render setup.py file
+    Render CMakeLists file
     """
 
     embedded_flag = variables['embedded_flag']

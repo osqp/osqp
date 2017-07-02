@@ -85,8 +85,9 @@ suitesparse_dir = os.path.join(osqp_dir, 'lin_sys', 'direct', 'suitesparse')
 # Interface files
 include_dirs = [
     get_include(),                                      # Numpy directories
+    osqp_dir,                                           # Main source folder 
     os.path.join(osqp_dir, 'include'),                  # osqp.h
-    os.path.join(suitesparse_dir),                      # private.h
+    os.path.join(suitesparse_dir),                      # suitesparse_ldl.h
     os.path.join(suitesparse_dir, 'ldl', 'include'),    # ldl.h
     os.path.join(suitesparse_dir, 'amd', 'include'),    # amd.h
     os.path.join('extension', 'include')]               # auxiliary .h files
@@ -113,7 +114,7 @@ if system() == 'Windows' and sys.version_info[0] == 3:
 # Add OSQP compiled library
 lib_ext = '.a'
 extra_objects = [os.path.join('extension', 'src',
-                 'libosqpdirstatic%s' % lib_ext)]
+                 'libosqpstatic%s' % lib_ext)]
 
 
 '''
@@ -159,13 +160,13 @@ class build_ext_osqp(build_ext):
 
         # Compile static library with CMake
         call(['cmake'] + cmake_args + ['..'])
-        call(['cmake', '--build', '.', '--target', 'osqpdirstatic'])
+        call(['cmake', '--build', '.', '--target', 'osqpstatic'])
 
         # Change directory back to the python interface
         os.chdir(os.path.join('..', 'interfaces', 'python'))
 
         # Copy static library to src folder
-        lib_name = 'libosqpdirstatic%s' % lib_ext
+        lib_name = 'libosqpstatic%s' % lib_ext
         lib_origin = os.path.join(osqp_build_dir, 'out', lib_name)
         copyfile(lib_origin, os.path.join('extension', 'src', lib_name))
 

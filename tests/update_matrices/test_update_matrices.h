@@ -35,7 +35,7 @@ static char * test_form_KKT(){
     Ptriu = csc_to_triu(data->test_form_KKT_P);
 
     // Form KKT matrix storing the index vectors
-    KKT = form_KKT(Ptriu, data->test_form_KKT_A, sigma, 1./rho, PtoKKT, AtoKKT, &Pdiag_idx, &Pdiag_n);
+    KKT = form_KKT(Ptriu, data->test_form_KKT_A, sigma, 1./rho, PtoKKT, AtoKKT, &Pdiag_idx, &Pdiag_n, OSQP_NULL);
 
     // Assert if KKT matrix is the same as predicted one
     mu_assert("Update matrices: error in forming KKT matrix!", is_eq_csc(KKT, data->test_form_KKT_KKTu, TESTS_TOL));

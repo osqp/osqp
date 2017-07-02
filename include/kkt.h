@@ -23,6 +23,9 @@ extern "C" {
  *  If Pdiag_idx is not OSQP_NULL, it saves the index of the diagonal
  * elements of P there and the number of diagonal elements in Pdiag_n.
  *
+ * Similarly, if rhotoKKT is not null,
+ * it saves where the values of scalar2 go in the final KKT matrix
+ *
  * N.B. Pdiag_idx needs to be freed!
  *
  * @param  P          cost matrix (already just upper triangular part)
@@ -33,10 +36,11 @@ extern "C" {
  * @param  AtoKKT     (modified) index mapping from elements of A to KKT matrix
  * @param  Pdiag_idx  (modified) Address of the index of diagonal elements in P
  * @param  Pdiag_n    (modified) Address to the number of diagonal elements in P
+ * @param  scalar2toKKT    (modified) index mapping from scalar2 to elements of KKT
  * @return            return status flag
  */
 csc * form_KKT(const csc * P, const  csc * A, c_float scalar1, c_float scalar2,
-               c_int * PtoKKT, c_int * AtoKKT, c_int **Pdiag_idx, c_int *Pdiag_n);
+               c_int * PtoKKT, c_int * AtoKKT, c_int **Pdiag_idx, c_int *Pdiag_n, c_int * scalar2toKKT);
 #endif // ifndef EMBEDDED
 
 
@@ -63,7 +67,23 @@ void update_KKT_P(csc * KKT, const csc * P, const c_int * PtoKKT, const c_float 
  * @param AtoKKT    Vector of pointers from A->x to KKT->x
  */
 void update_KKT_A(csc * KKT, const csc * A, const c_int * AtoKKT);
+
+
+
+/**
+ * Update KKT matrix with new scalar2
+ *
+ * @param KKT           KKT matrix
+ * @param scalar2       scalar2
+ * @param scalar2toKKT  index where scalar2 enters in the KKT matrix
+ * @param m             number of constraints
+ */
+void update_KKT_scalar2(csc * KKT, const c_float scalar2, const c_int * scalar2toKKT, const c_int m);
+
 #endif // EMBEDDED != 1
+
+
+
 
 
 #ifdef __cplusplus

@@ -27,7 +27,7 @@ make
 
 
 # Test OSQP C
-${TRAVIS_BUILD_DIR}/build/out/osqp_tester_direct
+${TRAVIS_BUILD_DIR}/build/out/osqp_tester
 
 # Pefrorm code coverage (only in Linux case for one version of python)
 if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHON_VERSION == "3.6" ]]; then

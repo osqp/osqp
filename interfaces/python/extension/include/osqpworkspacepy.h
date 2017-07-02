@@ -6,14 +6,6 @@
  **********************************************/
 
 
-// TODO: Extract long integers and doubles (make sure of that!)
-//
-
-
-// Include private header to access to private structure
-#include "private.h"
-
-
  static PyObject *OSQP_get_scaling(OSQP *self){
 
 
@@ -101,19 +93,19 @@
  }
 
 
- static PyObject *OSQP_get_priv(OSQP *self){
-     Priv *priv= self->workspace->priv;
+ static PyObject *OSQP_get_linsys_solver(OSQP *self){
+     suitesparse_ldl_solver * solver = (suitesparse_ldl_solver *) self->workspace->linsys_solver;
      OSQPData *data = self->workspace->data;
 
-     npy_intp Ln          = (npy_intp)priv->L->n;
+     npy_intp Ln          = (npy_intp)solver->L->n;
      npy_intp Ln_plus_1   = Ln+1;
-     npy_intp Lnzmax      = (npy_intp)priv->L->p[Ln];
-     npy_intp Lnz         = (npy_intp)priv->L->nz;
-     npy_intp Pdiag_n     = (npy_intp)priv->Pdiag_n;
-     npy_intp KKTn        = (npy_intp)priv->KKT->n;
+     npy_intp Lnzmax      = (npy_intp)solver->L->p[Ln];
+     npy_intp Lnz         = (npy_intp)solver->L->nz;
+     npy_intp Pdiag_n     = (npy_intp)solver->Pdiag_n;
+     npy_intp KKTn        = (npy_intp)solver->KKT->n;
      npy_intp KKTn_plus_1 = KKTn+1;
-     npy_intp KKTnzmax    = (npy_intp)priv->KKT->p[KKTn];
-     npy_intp KKTnz       = (npy_intp)priv->KKT->nz;
+     npy_intp KKTnzmax    = (npy_intp)solver->KKT->p[KKTn];
+     npy_intp KKTnz       = (npy_intp)solver->KKT->nz;
      npy_intp Pnzmax      = (npy_intp)data->P->p[data->P->n];
      npy_intp Anzmax      = (npy_intp)data->A->p[data->A->n];
      npy_intp m_plus_n    = (npy_intp)(data->m + data->n);
@@ -124,23 +116,24 @@
      PyObject *return_dict;
 
      /* Build Arrays. */
-     PyObject *Lp        = PyArray_SimpleNewFromData(1, &Ln_plus_1,   int_type,   priv->L->p);
-     PyObject *Li        = PyArray_SimpleNewFromData(1, &Lnzmax,      int_type,   priv->L->i);
-     PyObject *Lx        = PyArray_SimpleNewFromData(1, &Lnzmax,      float_type, priv->L->x);
-     PyObject *Dinv      = PyArray_SimpleNewFromData(1, &Ln,          float_type, priv->Dinv);
-     PyObject *P         = PyArray_SimpleNewFromData(1, &Ln,          int_type,   priv->P);
-     PyObject *bp        = PyArray_SimpleNewFromData(1, &Ln,          float_type, priv->bp);
-     PyObject *Pdiag_idx = PyArray_SimpleNewFromData(1, &Pdiag_n,     int_type,   priv->Pdiag_idx);
-     PyObject *KKTp      = PyArray_SimpleNewFromData(1, &KKTn_plus_1, int_type,   priv->KKT->p);
-     PyObject *KKTi      = PyArray_SimpleNewFromData(1, &KKTnzmax,    int_type,   priv->KKT->i);
-     PyObject *KKTx      = PyArray_SimpleNewFromData(1, &KKTnzmax,    float_type, priv->KKT->x);
-     PyObject *PtoKKT    = PyArray_SimpleNewFromData(1, &Pnzmax,      int_type,   priv->PtoKKT);
-     PyObject *AtoKKT    = PyArray_SimpleNewFromData(1, &Anzmax,      int_type,   priv->AtoKKT);
-     PyObject *Lnz_vec   = PyArray_SimpleNewFromData(1, &m_plus_n,    int_type,   priv->Lnz);
-     PyObject *Y         = PyArray_SimpleNewFromData(1, &m_plus_n,    float_type, priv->Y);
-     PyObject *Pattern   = PyArray_SimpleNewFromData(1, &m_plus_n,    int_type,   priv->Pattern);
-     PyObject *Flag      = PyArray_SimpleNewFromData(1, &m_plus_n,    int_type,   priv->Flag);
-     PyObject *Parent    = PyArray_SimpleNewFromData(1, &m_plus_n,    int_type,   priv->Parent);
+     PyObject *Lp        = PyArray_SimpleNewFromData(1, &Ln_plus_1,   int_type,   solver->L->p);
+     PyObject *Li        = PyArray_SimpleNewFromData(1, &Lnzmax,      int_type,   solver->L->i);
+     PyObject *Lx        = PyArray_SimpleNewFromData(1, &Lnzmax,      float_type, solver->L->x);
+     PyObject *Dinv      = PyArray_SimpleNewFromData(1, &Ln,          float_type, solver->Dinv);
+     PyObject *P         = PyArray_SimpleNewFromData(1, &Ln,          int_type,   solver->P);
+     PyObject *bp        = PyArray_SimpleNewFromData(1, &Ln,          float_type, solver->bp);
+     PyObject *Pdiag_idx = PyArray_SimpleNewFromData(1, &Pdiag_n,     int_type,   solver->Pdiag_idx);
+     PyObject *KKTp      = PyArray_SimpleNewFromData(1, &KKTn_plus_1, int_type,   solver->KKT->p);
+     PyObject *KKTi      = PyArray_SimpleNewFromData(1, &KKTnzmax,    int_type,   solver->KKT->i);
+     PyObject *KKTx      = PyArray_SimpleNewFromData(1, &KKTnzmax,    float_type, solver->KKT->x);
+     PyObject *PtoKKT    = PyArray_SimpleNewFromData(1, &Pnzmax,      int_type,   solver->PtoKKT);
+     PyObject *AtoKKT    = PyArray_SimpleNewFromData(1, &Anzmax,      int_type,   solver->AtoKKT);
+     PyObject *rhotoKKT  = PyArray_SimpleNewFromData(1, &data->m,     int_type,   solver->rhotoKKT);
+     PyObject *Lnz_vec   = PyArray_SimpleNewFromData(1, &m_plus_n,    int_type,   solver->Lnz);
+     PyObject *Y         = PyArray_SimpleNewFromData(1, &m_plus_n,    float_type, solver->Y);
+     PyObject *Pattern   = PyArray_SimpleNewFromData(1, &m_plus_n,    int_type,   solver->Pattern);
+     PyObject *Flag      = PyArray_SimpleNewFromData(1, &m_plus_n,    int_type,   solver->Flag);
+     PyObject *Parent    = PyArray_SimpleNewFromData(1, &m_plus_n,    int_type,   solver->Parent);
 
      /* Change data ownership. */
      PyArray_ENABLEFLAGS((PyArrayObject *) Lp,        NPY_ARRAY_OWNDATA);
@@ -155,6 +148,7 @@
      PyArray_ENABLEFLAGS((PyArrayObject *) KKTx,      NPY_ARRAY_OWNDATA);
      PyArray_ENABLEFLAGS((PyArrayObject *) PtoKKT,    NPY_ARRAY_OWNDATA);
      PyArray_ENABLEFLAGS((PyArrayObject *) AtoKKT,    NPY_ARRAY_OWNDATA);
+     PyArray_ENABLEFLAGS((PyArrayObject *) rhotoKKT,  NPY_ARRAY_OWNDATA);
      PyArray_ENABLEFLAGS((PyArrayObject *) Lnz_vec,   NPY_ARRAY_OWNDATA);
      PyArray_ENABLEFLAGS((PyArrayObject *) Y,         NPY_ARRAY_OWNDATA);
      PyArray_ENABLEFLAGS((PyArrayObject *) Pattern,   NPY_ARRAY_OWNDATA);
@@ -166,13 +160,13 @@
          "s:O,s:O,s:O,"                       // Dinv, P, bp
          "s:O,s:i,"                           // Pdiag_idx, Pdiag_n
          "s:{s:i,s:i,s:i,s:O,s:O,s:O,s:i},"   // KKT
-         "s:O,s:O,s:O,s:O,"                   // PtoKKT, AtoKKT, Lnz, Y
+         "s:O,s:O,s:O,s:O,s:O,"               // PtoKKT, AtoKKT, Lnz, Y
          "s:O,s:O,s:O}",                      // Pattern, Flag, Parent
          "L", "nzmax", Lnzmax, "m", Ln, "n", Ln, "p", Lp, "i", Li, "x", Lx, "nz", Lnz,
          "Dinv", Dinv, "P", P, "bp", bp,
          "Pdiag_idx", Pdiag_idx, "Pdiag_n", Pdiag_n,
          "KKT", "nzmax", KKTnzmax, "m", KKTn, "n", KKTn, "p", KKTp, "i", KKTi, "x", KKTx, "nz", KKTnz,
-         "PtoKKT", PtoKKT, "AtoKKT", AtoKKT, "Lnz", Lnz_vec, "Y", Y,
+         "PtoKKT", PtoKKT, "AtoKKT", AtoKKT, "rhotoKKT", rhotoKKT, "Lnz", Lnz_vec, "Y", Y,
          "Pattern", Pattern, "Flag", Flag, "Parent", Parent);
 
      return return_dict;
@@ -183,7 +177,7 @@
      OSQPSettings *settings = self->workspace->settings;
 
      PyObject *return_dict = Py_BuildValue(
-         "{s:d,s:d,s:i,s:i,s:i,s:d,s:d,s:d, s:d, s:d, s:i, s:i, s:i}",
+         "{s:d,s:d,s:i,s:i,s:i,s:d,s:d,s:d, s:d, s:d, s:i, s:i, s:i, s:i, s:i}",
          "rho", (double)settings->rho,
          "sigma", (double)settings->sigma,
          "scaling", settings->scaling,
@@ -194,7 +188,9 @@
          "eps_prim_inf", (double)settings->eps_prim_inf,
          "eps_dual_inf", (double)settings->eps_dual_inf,
          "alpha", (double)settings->alpha,
+         "linsys_solver", settings->linsys_solver,
          "warm_start", settings->warm_start,
+         "scaled_termination", settings->scaled_termination,
          "early_terminate", settings->early_terminate,
          "early_terminate_interval", settings->early_terminate_interval);
      return return_dict;
@@ -203,13 +199,13 @@
 
 static PyObject *OSQP_get_workspace(OSQP *self){
      PyObject *data_py = OSQP_get_data(self);
-     PyObject *priv_py = OSQP_get_priv(self);
+     PyObject *linsys_solver_py = OSQP_get_linsys_solver(self);
      PyObject *scaling_py = OSQP_get_scaling(self);
      PyObject *settings_py = OSQP_get_settings(self);
 
      PyObject *return_dict = Py_BuildValue("{s:O,s:O,s:O,s:O}",
                                            "data", data_py,
-                                           "priv", priv_py,
+                                           "linsys_solver", linsys_solver_py,
                                            "scaling", scaling_py,
                                            "settings", settings_py);
      return return_dict;

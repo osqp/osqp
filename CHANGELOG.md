@@ -1,6 +1,9 @@
 
 Changes since the last release
 ------------------------------
+* Created new object-oriented structure for linear system solvers
+* Added option to terminate with scaled or unscaled residual
+* Now Matlab interface does support logical entries for the settings
 * Fixed bug in index ordering of sparse matrices of Python interface
 * Changed 2-norms to inf-norms
 * Fixed code generation bug when scaling is disabled [#7](https://github.com/oxfordcontrol/osqp/issues/7)

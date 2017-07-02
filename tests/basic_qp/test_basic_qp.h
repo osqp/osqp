@@ -224,12 +224,130 @@ static char * test_basic_qp_early_terminate()
 
 
 
+static char * test_basic_qp_update_rho()
+{
+    // Problem settings
+    OSQPSettings * settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
+
+    // Structures
+    OSQPWorkspace * work;  // Workspace
+    OSQPData * data;  // Data
+    basic_qp_sols_data *  sols_data;
+
+    // Exitflag
+    c_int exitflag;
+
+    // rho to use
+    c_float rho;
+
+    // Define number of iterations to compare
+    c_int n_iter_new_solver, n_iter_update_rho;
+
+    // Populate data
+    data = generate_problem_basic_qp();
+    sols_data = generate_problem_basic_qp_sols_data();
+
+
+    // Define Solver settings as default
+    rho = 0.7;
+    set_default_settings(settings);
+    settings->rho = rho;
+    settings->early_terminate_interval = 1;
+
+    // Setup workspace
+    work = osqp_setup(data, settings);
+
+    // Setup correct
+    mu_assert("Update rho test solve: Setup error!", work != OSQP_NULL);
+
+    // Solve Problem
+    osqp_solve(work);
+
+    // Store number of iterations
+    n_iter_new_solver = work->info->iter;
+
+    // Compare solver statuses
+    mu_assert("Update rho test solve: Error in solver status!",
+              work->info->status_val == sols_data->status_test );
+
+    // Compare primal solutions
+    mu_assert("Update rho test solve: Error in primal solution!",
+              vec_norm_inf_diff(work->solution->x, sols_data->x_test, data->n) < TESTS_TOL);
+
+    // Compare dual solutions
+    mu_assert("Update rho test solve: Error in dual solution!",
+              vec_norm_inf_diff(work->solution->y, sols_data->y_test, data->m) < TESTS_TOL);
+
+    // Compare objective values
+    mu_assert("Update rho test solve: Error in objective value!",
+              c_absval(work->info->obj_val - sols_data->obj_value_test) < TESTS_TOL);
+
+    // Clean workspace
+    osqp_cleanup(work);
+
+
+
+    // Create new problem with different rho and update it
+    set_default_settings(settings);
+    settings->rho = 0.1;
+    settings->early_terminate_interval = 1;
+
+    // Setup workspace
+    work = osqp_setup(data, settings);
+
+    // Setup correct
+    mu_assert("Update rho test update: Setup error!", work != OSQP_NULL);
+
+    // Update rho
+    exitflag = osqp_update_rho(work, rho);
+    mu_assert("Update rho test update: Error update rho!", exitflag == 0);
+
+    // Solve Problem
+    osqp_solve(work);
+
+    // Compare solver statuses
+    mu_assert("Update rho test update: Error in solver status!",
+              work->info->status_val == sols_data->status_test );
+
+    // Compare primal solutions
+    mu_assert("Update rho test update: Error in primal solution!",
+              vec_norm_inf_diff(work->solution->x, sols_data->x_test, data->n) < TESTS_TOL);
+
+    // Compare dual solutions
+    mu_assert("Update rho test update: Error in dual solution!",
+              vec_norm_inf_diff(work->solution->y, sols_data->y_test, data->m) < TESTS_TOL);
+
+    // Compare objective values
+    mu_assert("Update rho test update: Error in objective value!",
+              c_absval(work->info->obj_val - sols_data->obj_value_test) < TESTS_TOL);
+
+    // Get number of iterations
+    n_iter_update_rho = work->info->iter;
+
+    // Assert same number of iterations
+    mu_assert("Update rho test update: Error in number of iterations!",
+              n_iter_new_solver == n_iter_update_rho);
+
+    // Cleanup solver
+    osqp_cleanup(work);
+
+    // Cleanup data
+    clean_problem_basic_qp(data);
+    clean_problem_basic_qp_sols_data(sols_data);
+
+    // Cleanup
+    c_free(settings);
+
+    return 0;
+}
+
 static char * test_basic_qp()
 {
 
     mu_run_test(test_basic_qp_solve);
     mu_run_test(test_basic_qp_update);
     mu_run_test(test_basic_qp_early_terminate);
+    mu_run_test(test_basic_qp_update_rho);
 
     return 0;
 }

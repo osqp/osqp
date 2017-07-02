@@ -496,7 +496,7 @@ end
 function currentSettings = validateSettings(this,isInitialization,varargin)
 
 %don't allow these fields to be changed
-unmodifiableFields = {'rho','scaling','scaling_iter'};
+unmodifiableFields = {'scaling','scaling_iter'};
 
 %get the current settings
 if(isInitialization)
@@ -542,7 +542,7 @@ end
 
 %check that everything is a nonnegative scalar
 for i = 1:length(newFields)
-    val = newSettings.(newFields{i});
+    val = double(newSettings.(newFields{i}));
     assert(isscalar(val) & isnumeric(val) & val >= 0, ...
         'Solver setting ''%s'' not specified as nonnegative scalar', newFields{i});
 end

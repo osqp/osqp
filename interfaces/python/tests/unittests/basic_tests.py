@@ -25,11 +25,11 @@ class basic_tests(unittest.TestCase):
                      'eps_rel': 1e-09,
                      'scaling': True,
                      'auto_rho': False,
-                     'alpha': 1.6,
-                     'max_iter': 3000,
+                     'max_iter': 2500,
+                     'rho': 0.1,
                      'polish': False,
-                     'warm_start': True,
-                     'pol_refine_iter': 4}
+                     'early_terminate_interval': 1,
+                     'warm_start': True}
         self.model = osqp.OSQP()
         self.model.setup(P=self.P, q=self.q, A=self.A, l=self.l, u=self.u,
                          **self.opts)
@@ -110,3 +110,18 @@ class basic_tests(unittest.TestCase):
 
         # Assert max iter reached
         self.assertEqual(res.info.iter, self.opts['max_iter'])
+
+    def test_update_rho(self):
+        res_default = self.model.solve()
+
+        # Setup with different rho and update
+        default_opts = self.opts.copy()
+        default_opts['rho'] = 0.7
+        self.model = osqp.OSQP()
+        self.model.setup(P=self.P, q=self.q, A=self.A, l=self.l, u=self.u,
+                         **default_opts)
+        self.model.update_settings(rho=self.opts['rho'])
+        res_updated_rho = self.model.solve()
+
+        # Assert same number of iterations
+        self.assertEqual(res_default.info.iter, res_updated_rho.info.iter)

@@ -104,10 +104,9 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
         compute_rho(work);
     }
 
-    // Initialize linear system solver private structure
-    // Initialize private structure
-    work->priv = init_priv(work->data->P, work->data->A, work->settings, 0);
-    if (!work->priv){
+    // Initialize linear system solver structure
+    work->linsys_solver = init_linsys_solver(work->data->P, work->data->A, work->settings, 0);
+    if (!work->linsys_solver){
         #ifdef PRINTING
         c_print("ERROR: Linear systems solver initialization failure!\n");
         #endif
@@ -395,8 +394,8 @@ c_int osqp_cleanup(OSQPWorkspace * work){
             if (work->E_temp) c_free(work->E_temp);
         }
 
-        // Free private structure for linear system solver_solution
-        free_priv(work->priv);
+        // Free linear system solver structure
+        work->linsys_solver->free(work->linsys_solver);
 
         // Free active constraints structure
         if (work->pol) {
@@ -659,7 +658,7 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y){
  * @param  P_new_n    Number of new elements to be changed
  * @return            output flag:  0: OK
  *                                  1: P_new_n > nnzP
- *                                 <0: error in update_priv()
+ *                                 <0: error in update_matrices()
  */
 c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, c_int P_new_n){
     c_int i; // For indexing
@@ -699,9 +698,8 @@ c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, 
     // Scale data
     scale_data(work);
 
-    // Update linear system private structure with new data
-    exitflag = update_priv(work->priv, work->data->P, work->data->A,
-                           work, work->settings);
+    // Update linear system structure with new data
+    exitflag = work->linsys_solver->update_matrices(work->linsys_solver, work->data->P, work->data->A, work->settings);
 
    // Set solver status to OSQP_UNSOLVED
    update_status(work->info, OSQP_UNSOLVED);
@@ -729,7 +727,7 @@ c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, 
  * @param  A_new_n    Number of new elements to be changed
  * @return            output flag:  0: OK
  *                                  1: A_new_n > nnzA
- *                                 <0: error in update_priv()
+ *                                 <0: error in update_matrices()
  */
 c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, c_int A_new_n){
     c_int i; // For indexing
@@ -767,9 +765,8 @@ c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, 
     // Scale data
     scale_data(work);
 
-    // Update linear system private structure with new data
-    exitflag = update_priv(work->priv, work->data->P, work->data->A,
-                           work, work->settings);
+    // Update linear system structure with new data
+    exitflag = work->linsys_solver->update_matrices(work->linsys_solver, work->data->P, work->data->A, work->settings);
 
    // Set solver status to OSQP_UNSOLVED
    update_status(work->info, OSQP_UNSOLVED);
@@ -806,7 +803,7 @@ c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, 
  * @return            output flag:  0: OK
  *                                  1: P_new_n > nnzP
  *                                  2: A_new_n > nnzA
- *                                 <0: error in update_priv()
+ *                                 <0: error in update_matrices()
  */
 c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, c_int P_new_n,
                                             c_float * Ax_new, c_int * Ax_new_idx, c_int A_new_n){
@@ -874,9 +871,8 @@ c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx
     // Scale data
     scale_data(work);
 
-    // Update linear system private structure with new data
-    exitflag = update_priv(work->priv, work->data->P, work->data->A,
-                           work, work->settings);
+    // Update linear system structure with new data
+    exitflag = work->linsys_solver->update_matrices(work->linsys_solver, work->data->P, work->data->A, work->settings);
 
    // Set solver status to OSQP_UNSOLVED
    update_status(work->info, OSQP_UNSOLVED);
@@ -891,6 +887,28 @@ c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx
 
 }
 
+
+c_int osqp_update_rho(OSQPWorkspace * work, c_float rho_new){
+    c_int exitflag;
+
+    // Check value of rho
+    if (rho_new <= 0) {
+        #ifdef PRINTING
+        c_print("rho must be positive\n");
+        #endif
+        return 1;
+    }
+
+    // Update rho in settings
+    work->settings->rho = rho_new;
+
+    // Update rho in KKT matrix
+    exitflag = work->linsys_solver->update_rho(work->linsys_solver,
+                                               rho_new,
+                                               work->data->m);
+
+    return exitflag;
+}
 
 #endif // EMBEDDED != 1
 
@@ -1004,6 +1022,20 @@ c_int osqp_update_warm_start(OSQPWorkspace * work, c_int warm_start_new) {
     return 0;
 }
 
+
+c_int osqp_update_scaled_termination(OSQPWorkspace * work, c_int scaled_termination_new) {
+    // Check that scaled_termination is either 0 or 1
+    if (scaled_termination_new != 0 && scaled_termination_new != 1) {
+      #ifdef PRINTING
+      c_print("scaled_termination should be either 0 or 1\n");
+      #endif
+      return 1;
+    }
+    // Update early_terminate
+    work->settings->scaled_termination = scaled_termination_new;
+
+    return 0;
+}
 
 c_int osqp_update_early_terminate(OSQPWorkspace * work, c_int early_terminate_new) {
     // Check that early_terminate is either 0 or 1

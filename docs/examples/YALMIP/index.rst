@@ -8,7 +8,7 @@ You can easily define and solve the following least-squares program  in YALMIP
 
 .. math::
   \begin{array}{ll}
-    \mbox{minimize} & \|Ax - b\|_2 \\
+    \mbox{minimize} & \|Ax - b\|_2^2 \\
     \mbox{subject to} & 0 \leq x \leq 1
   \end{array}
 

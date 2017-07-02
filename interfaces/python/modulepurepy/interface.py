@@ -170,20 +170,23 @@ class OSQP(object):
         """
         Update OSQP solver settings
 
-        It is possible to change: 'max_iter', 'eps_abs', 'eps_rel', 'alpha',
+        It is possible to change: 'max_iter', 'eps_abs', 'eps_rel', 'rho, ''alpha',
                                   'delta', 'polish', 'pol_refine_iter',
-                                  'verbose', 'early_terminate', 'early_terminate_interval'
+                                  'verbose', 'scaled_termination',
+                                  'early_terminate', 'early_terminate_interval'
         """
 
         # get arguments
         max_iter = kwargs.pop('max_iter', None)
         eps_abs = kwargs.pop('eps_abs', None)
         eps_rel = kwargs.pop('eps_rel', None)
+        rho = kwargs.pop('rho', None)
         alpha = kwargs.pop('alpha', None)
         delta = kwargs.pop('delta', None)
         polish = kwargs.pop('polish', None)
         pol_refine_iter = kwargs.pop('pol_refine_iter', None)
         verbose = kwargs.pop('verbose', None)
+        scaled_termination = kwargs.pop('scaled_termination', None)
         early_terminate = kwargs.pop('early_terminate', None)
         early_terminate_interval = kwargs.pop('early_terminate_interval', None)
         warm_start = kwargs.pop('warm_start', None)
@@ -197,6 +200,9 @@ class OSQP(object):
 
         if eps_rel is not None:
             self._model.update_eps_rel(eps_rel)
+
+        if rho is not None:
+            self._model.update_rho(rho)
 
         if alpha is not None:
             self._model.update_alpha(alpha)
@@ -213,6 +219,9 @@ class OSQP(object):
         if verbose is not None:
             self._model.update_verbose(verbose)
 
+        if scaled_termination is not None:
+            self._model.update_scaled_termination(scaled_termination)
+
         if early_terminate is not None:
             self._model.update_early_terminate(early_terminate)
 
@@ -225,11 +234,13 @@ class OSQP(object):
         if max_iter is None and \
            eps_abs is None and \
            eps_rel is None and \
+           rho is None and \
            alpha is None and \
            delta is None and \
            polish is None and \
            pol_refine_iter is None and \
            verbose is None and \
+           scaled_termination is None and \
            early_terminate is None and \
            early_terminate_interval is None and \
            warm_start is None:

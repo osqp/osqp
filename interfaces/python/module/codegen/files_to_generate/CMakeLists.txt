@@ -105,12 +105,13 @@ set(
     osqp_src
     src/osqp/auxil.c
     src/osqp/lin_alg.c
+    src/osqp/lin_sys.c
     src/osqp/osqp.c
     src/osqp/kkt.c
     src/osqp/proj.c
     src/osqp/scaling.c
     src/osqp/util.c
-    src/osqp/private.c
+    src/osqp/suitesparse_ldl.c
     src/osqp/ldl.c
 )
 
@@ -128,7 +129,7 @@ set(
     include/scaling.h
     include/util.h
     include/workspace.h
-    include/private.h
+    include/suitesparse_ldl.h
     include/ldl.h
 )
 

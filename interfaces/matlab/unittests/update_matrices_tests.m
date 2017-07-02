@@ -41,7 +41,7 @@ classdef update_matrices_tests < matlab.unittest.TestCase
             % Setup solver
             testCase.solver = osqp;
             testCase.solver.setup(testCase.P, testCase.q, testCase.A, ...
-                testCase.l, testCase.u, 'verbose', 0, 'rho', 1.6, 'sigma', 0.1);
+                testCase.l, testCase.u, 'verbose', false);
 
             % Setup tolerance
             testCase.tol = 1e-04;

@@ -4,7 +4,7 @@
 
 
 csc * form_KKT(const csc * P, const  csc * A, c_float scalar1, c_float scalar2,
-               c_int * PtoKKT, c_int * AtoKKT, c_int **Pdiag_idx, c_int *Pdiag_n){
+               c_int * PtoKKT, c_int * AtoKKT, c_int **Pdiag_idx, c_int *Pdiag_n, c_int * scalar2toKKT){
     c_int nKKT, nnzKKTmax; // Size, number of nonzeros and max number of nonzeros in KKT matrix
     csc * KKT_trip, * KKT;   // KKT matrix in triplet format and CSC format
     c_int ptr, i, j;       // Counters for elements (i,j) and index pointer
@@ -96,6 +96,7 @@ csc * form_KKT(const csc * P, const  csc * A, c_float scalar1, c_float scalar2,
         KKT_trip->i[zKKT] = j + P->n;
         KKT_trip->p[zKKT] = j + P->n;
         KKT_trip->x[zKKT] = - scalar2;
+        if (scalar2toKKT != OSQP_NULL) scalar2toKKT[j] = zKKT;  // Update index from scalar2 to KKTtrip
         zKKT++;
     }
 
@@ -103,7 +104,7 @@ csc * form_KKT(const csc * P, const  csc * A, c_float scalar1, c_float scalar2,
     KKT_trip->nz = zKKT;
 
     // Convert triplet matrix to csc format
-    if ((PtoKKT == OSQP_NULL) && (AtoKKT == OSQP_NULL)){
+    if (!PtoKKT && !AtoKKT && !scalar2toKKT){
         // If no index vectors passed, do not store KKT mapping from Trip to CSC
         KKT = triplet_to_csc(KKT_trip, OSQP_NULL);
     }
@@ -116,12 +117,23 @@ csc * form_KKT(const csc * P, const  csc * A, c_float scalar1, c_float scalar2,
         // Store KKT mapping from Trip to CSC
         KKT = triplet_to_csc(KKT_trip, KKT_TtoC);
 
-        // Update vectors of indeces from P and A to KKT (now in CSC format)
-        for (i = 0; i < P->p[P->n]; i++){
-            PtoKKT[i] = KKT_TtoC[PtoKKT[i]];
+        // Update vectors of indeces from P, A, scalar2 to KKT (now in CSC format)
+        if (PtoKKT != OSQP_NULL){
+            for (i = 0; i < P->p[P->n]; i++){
+                PtoKKT[i] = KKT_TtoC[PtoKKT[i]];
+            }
         }
+
+        if (AtoKKT != OSQP_NULL){
         for (i = 0; i < A->p[A->n]; i++){
-            AtoKKT[i] = KKT_TtoC[AtoKKT[i]];
+                AtoKKT[i] = KKT_TtoC[AtoKKT[i]];
+            }
+        }
+
+        if (scalar2toKKT != OSQP_NULL){
+            for (i = 0; i < A->m; i++){
+                scalar2toKKT[i] = KKT_TtoC[scalar2toKKT[i]];
+            }
         }
 
         // Free mapping
@@ -164,6 +176,19 @@ void update_KKT_A(csc * KKT, const csc * A, const c_int * AtoKKT){
     // Update elements of KKT using A
     for (i = 0; i < A->p[A->n]; i++ ){
         KKT->x[AtoKKT[i]] = A->x[i];
+    }
+
+}
+
+
+void update_KKT_scalar2(csc * KKT, const c_float scalar2,
+                        const c_int * scalar2toKKT,
+                        c_int m){
+    c_int i; // Iterations
+
+    // Update elements of KKT using scalar2
+    for (i = 0; i < m; i++){
+        KKT->x[scalar2toKKT[i]] = - scalar2;
     }
 
 }

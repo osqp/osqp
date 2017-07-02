@@ -1,5 +1,5 @@
 # Add suitesparse directory
-set(suitesparse_includes
+set(suitesparse_ldl_includes
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/amd/include
     ${CMAKE_CURRENT_SOURCE_DIR}/ldl/include
@@ -38,22 +38,22 @@ set(
 # Suitesparse sources
 if(NOT DEFINED EMBEDDED)
     set(
-        suitesparse_sources
+        suitesparse_ldl_sources
         ${CMAKE_CURRENT_SOURCE_DIR}/SuiteSparse_config.h
         ${CMAKE_CURRENT_SOURCE_DIR}/SuiteSparse_config.c
         ${amd_sources}
         ${ldl_sources}
-        ${CMAKE_CURRENT_SOURCE_DIR}/private.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/private.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/suitesparse_ldl.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/suitesparse_ldl.c
         PARENT_SCOPE
     )
 else()
   # If embedded is enabled, do not use SuiteSparse_config
   set(
-      suitesparse_sources
+      suitesparse_ldl_sources
       ${ldl_sources}
-      ${CMAKE_CURRENT_SOURCE_DIR}/private.h
-      ${CMAKE_CURRENT_SOURCE_DIR}/private.c
+      ${CMAKE_CURRENT_SOURCE_DIR}/suitesparse_ldl.h
+      ${CMAKE_CURRENT_SOURCE_DIR}/suitesparse_ldl.c
       PARENT_SCOPE
   )
 endif()

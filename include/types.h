@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include "glob_opts.h"
+#include "constants.h"
 
 
 /******************
@@ -26,9 +27,10 @@ typedef struct {
 } csc;
 
 /**
- * Linear system solver private structure (internal functions deal with it)
+ * Linear system solver structure (sublevel objects initialize it differently)
  */
-typedef struct c_priv Priv;
+
+typedef struct linsys_solver LinSysSolver;
 
 /**
  * OSQP Timer for statistics
@@ -148,7 +150,8 @@ typedef struct {
         c_float eps_rel;  ///< relative convergence tolerance
         c_float eps_prim_inf;  ///< primal infeasibility tolerance
         c_float eps_dual_inf;  ///< dual infeasibility tolerance
-        c_float alpha; ///< relaxation paramete
+        c_float alpha; ///< relaxation parameter
+	    enum linsys_solver_type linsys_solver;  ///< linear system solver to use
 
         #ifndef EMBEDDED
         c_float delta; ///< regularization parameter for polis
@@ -159,7 +162,8 @@ typedef struct {
         c_int auto_rho; ///< boolean, true if rho is chosen automatically
         #endif
 
-        c_int early_terminate;  ///< boolean, terminate if stopping criterion is met
+        c_int scaled_termination;  ///< boolean, use scaled termination criteria
+        c_int early_terminate;  ///< boolean, terminate if stopping criteria is met
         c_int early_terminate_interval; ///< boolean, interval for checking termination, if early_terminate == 1
         c_int warm_start; ///< boolean, warm start
 
@@ -176,7 +180,7 @@ typedef struct {
         OSQPData * data;
 
         /// Linear System solver structure
-        Priv * priv;
+        LinSysSolver * linsys_solver;
 
         #ifndef EMBEDDED
         /// Polish structure
@@ -223,7 +227,7 @@ typedef struct {
 
         c_float *D_temp;            ///< temporary primal variable scaling vectors
         c_float *D_temp_A;            ///< temporary primal variable scaling vectors storing norms of A columns
-        c_float *E_temp;            ///< temporary constraints scaling vectors storing norms of A' columns 
+        c_float *E_temp;            ///< temporary constraints scaling vectors storing norms of A' columns
 
         /** @} */
 
@@ -247,6 +251,27 @@ typedef struct {
         #endif
 } OSQPWorkspace;
 
+
+/**
+ * Define linsys_solver prototype structure
+ *
+ * N.B. The details are defined when the linear solver is initialized depending
+ *      on the choice
+ */
+struct linsys_solver {
+	enum linsys_solver_type type;  ///< Linear system solver type (see type.h)
+	// Functions
+	c_int (*solve)(LinSysSolver * self, c_float * b, const OSQPSettings * settings); ///< Solve linear system
+
+    #ifndef EMBEDDED
+	void (*free)(LinSysSolver * self); ///< Free linear system solver (only in desktop version)
+    #endif
+
+    #if EMBEDDED != 1
+    c_int (*update_matrices)(LinSysSolver * self, const csc *P, const csc *A, const OSQPSettings *settings); ///< Update matrices P and A in the solver
+    c_int (*update_rho)(LinSysSolver * s, const c_float rho, const c_int m);  ///< Update rho
+    #endif
+};
 
 
 
