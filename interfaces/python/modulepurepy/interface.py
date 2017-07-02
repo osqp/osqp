@@ -170,9 +170,9 @@ class OSQP(object):
         """
         Update OSQP solver settings
 
-        It is possible to change: 'max_iter', 'eps_abs', 'eps_rel', 'alpha',
+        It is possible to change: 'max_iter', 'eps_abs', 'eps_rel', 'rho, ''alpha',
                                   'delta', 'polish', 'pol_refine_iter',
-                                  'verbose', 'scaled_termination', 
+                                  'verbose', 'scaled_termination',
                                   'early_terminate', 'early_terminate_interval'
         """
 
@@ -180,6 +180,7 @@ class OSQP(object):
         max_iter = kwargs.pop('max_iter', None)
         eps_abs = kwargs.pop('eps_abs', None)
         eps_rel = kwargs.pop('eps_rel', None)
+        rho = kwargs.pop('rho', None)
         alpha = kwargs.pop('alpha', None)
         delta = kwargs.pop('delta', None)
         polish = kwargs.pop('polish', None)
@@ -200,6 +201,9 @@ class OSQP(object):
         if eps_rel is not None:
             self._model.update_eps_rel(eps_rel)
 
+        if rho is not None:
+            self._model.update_rho(rho)
+
         if alpha is not None:
             self._model.update_alpha(alpha)
 
@@ -217,7 +221,7 @@ class OSQP(object):
 
         if scaled_termination is not None:
             self._model.update_scaled_termination(scaled_termination)
-        
+
         if early_terminate is not None:
             self._model.update_early_terminate(early_terminate)
 
@@ -230,6 +234,7 @@ class OSQP(object):
         if max_iter is None and \
            eps_abs is None and \
            eps_rel is None and \
+           rho is None and \
            alpha is None and \
            delta is None and \
            polish is None and \

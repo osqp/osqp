@@ -1296,6 +1296,19 @@ class OSQP(object):
 
         self.work.settings.eps_rel = eps_rel_new
 
+    def update_rho(self, rho_new):
+        """
+        Update set-size parameter rho
+        """
+        if rho_new <= 0:
+            raise ValueError("rho must be positive")
+
+        # Update rho
+        self.work.settings.rho = rho_new
+
+        # Factorize KKT
+        self.work.linsys_solver = linsys_solver(self.work)
+
     def update_alpha(self, alpha_new):
         """
         Update relaxation parameter alpga
