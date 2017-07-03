@@ -23,7 +23,7 @@ from utils.utils import load_maros_meszaros_problem
 def is_optimal(x, y, qp, eps_abs=1e-03, eps_rel=1e-03):
     '''
     Check optimality condition of the QP in qp given the
-    primal-dual solution (x, y) and the tolerance eps 
+    primal-dual solution (x, y) and the tolerance eps
     '''
 
     # Get problem matrices
@@ -133,8 +133,6 @@ for f in lst_probs:
         if solvers[s] == mpbpy.OSQP or solvers[s] == mpbpy.OSQP_PUREPY:
             res = m.solve(solver=solvers[s],
                           verbose=False,
-                          scaling_iter=50,
-                          sigma=1e-06,
                           polish=False,
                           max_iter=10000)  # No verbosity
         else:

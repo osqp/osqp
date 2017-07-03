@@ -5,6 +5,7 @@ import numpy as np
 import os
 import pandas as pd
 
+
 class Statistics(object):
     """
     Solver statistics
@@ -33,7 +34,7 @@ def gen_stats_array_vec(statistics_name, stats):
         stat_list = [x.max for x in stats]
 
     idx_vec = np.array([stat_list.index(x) for x in out_vec if x in stat_list])
-    
+
     return out_vec, idx_vec
 
 
@@ -42,11 +43,11 @@ def compute_statistics_dataframe(statistics_name, timings_dict, n_vec):
     Compute statistics dataframe from timings dictionary
     '''
 
-    df = pd.DataFrame({'n': n_vec}) 
+    df = pd.DataFrame({'n': n_vec})
 
     for (solver_name, solver_timings) in timings_dict.items():
         stats_array, idx_val = gen_stats_array_vec(statistics_name,
-                                                  solver_timings)
+                                                   solver_timings)
         df['%s %s' % (solver_name, statistics_name)] = stats_array
 
     return df
@@ -56,18 +57,18 @@ def store_timings(example_name, timings_dict, n_vec, stats_name):
     #  comparison_table = pd.DataFrame(timings_dict)
     #  comparison_table = comparison_table[cols]  # Sort table columns
 
-    comparison_table = compute_statistics_dataframe(stats_name, 
+    comparison_table = compute_statistics_dataframe(stats_name,
                                                     timings_dict,
                                                     n_vec)
-    
+
     data_dir = 'scripts/%s/data' % example_name
     if not os.path.isdir(data_dir):
         os.makedirs(data_dir)
-  
+
     comparison_table.to_csv('%s/timings_%s.csv' % (data_dir, stats_name),
                             index=False)
 
-     # Converting results to latex table and storing them to a file
+    # Converting results to latex table and storing them to a file
     formatter = lambda x: '%1.2f' % x
     latex_table = comparison_table.to_latex(header=True, index=False,
                                             float_format=formatter)
