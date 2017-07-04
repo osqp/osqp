@@ -64,8 +64,8 @@ def gen_qp_matrices(n, m, lambdas, dens_lvl=0.5):
     qp_matrices.b_lasso = bd
     qp_matrices.n = n
     qp_matrices.m = m
-    qp_matrices.nnzA = A.nnz
-    qp_matrices.nnzP = P.nnz
+    # qp_matrices.nnzA = A.nnz
+    # qp_matrices.nnzP = P.nnz
 
 
     # Return QP matrices
@@ -313,6 +313,17 @@ def solve_loop(qp_matrices, solver='osqp', osqp_settings=None):
         n_var = qp_matrices.A_lasso.shape[1]
         m_var = qp_matrices.A_lasso.shape[0]
 
+        lambda_i = cvxpy.Parameter(sign="positive")
+        x = cvxpy.Variable(n_var)
+        y = cvxpy.Variable(m_var)
+        t = cvxpy.Variable(n_var)
+
+        objective = cvxpy.Minimize(cvxpy.quad_form(y, spa.eye(m_var))
+                                   + lambda_i * np.ones(n_var) * t)
+        constraints = [y == qp_matrices.A_lasso * x - qp_matrices.b_lasso,
+                       -t <= x, x <= t]
+        problem = cvxpy.Problem(objective, constraints)
+
         for i in range(n_prob):
             if n_var <= 60:  # (problem becomes too big otherwise):
 
@@ -320,20 +331,11 @@ def solve_loop(qp_matrices, solver='osqp', osqp_settings=None):
                 #       minimize	y' * y + lambda * 1' * t
                 #       subject to  y = Ax - b
                 #                   -t <= x <= t
-                lambda_i = qp_matrices.lambdas[i]
-                x = cvxpy.Variable(n_var)
-                y = cvxpy.Variable(m_var)
-                t = cvxpy.Variable(n_var)
-
-                objective = cvxpy.Minimize(cvxpy.quad_form(y, spa.eye(m_var))
-                                           + lambda_i * np.ones(n_var) * t)
-                constraints = [y == qp_matrices.A_lasso * x - qp_matrices.b_lasso,
-                               -t <= x, x <= t]
-                problem = cvxpy.Problem(objective, constraints)
+                lambda_i.value = qp_matrices.lambdas[i]
                 problem.solve(solver=cvxpy.ECOS, verbose=False)
 
                 # DEBUG: Solve with MOSEK
-                q = qp.q[:, i]
+                # q = qp.q[:, i]
 
                 # Solve with mosek
                 # prob = mpbpy.QuadprogProblem(qp.P, q, qp.A, qp.l, qp.u)
@@ -489,7 +491,7 @@ def run_lasso_example():
     '''
     Store plots
     '''
-    
+
     fig_size = None  # Adapt for talk plots
 
     utils.generate_plot('lasso', 'time', 'median', n_vec,

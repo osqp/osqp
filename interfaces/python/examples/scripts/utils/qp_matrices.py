@@ -19,6 +19,8 @@ class QPmatrices(object):
         self.u = u
         self.lx = lx
         self.ux = ux
+        self.nnzA = A.nnz
+        self.nnzP = P.nnz
 
 
 
@@ -31,7 +33,7 @@ def store_dimensions(example_name, dims_dict, cols):
     if not os.path.isdir(data_dir):
         os.makedirs(data_dir)
 
-    dims_table.to_csv('%s/dimensions.csv' % data_dir, 
+    dims_table.to_csv('%s/dimensions.csv' % data_dir,
                             index=False)
 
      # Converting results to latex table and storing them to a file
@@ -41,4 +43,3 @@ def store_dimensions(example_name, dims_dict, cols):
     f = open('%s/dimensions.tex' % data_dir, 'w')
     f.write(latex_table)
     f.close()
-

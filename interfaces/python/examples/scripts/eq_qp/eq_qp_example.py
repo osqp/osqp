@@ -54,6 +54,10 @@ def gen_qp_matrices(n, m, dens_lvl=0.5):
 
     qp_matrices = utils.QPmatrices(P, q, A, l, u, lx, ux)
 
+    # Add further details related to the problem
+    qp_matrices.m = m
+    qp_matrices.n = n
+
     # Return QP matrices
     return qp_matrices
 
@@ -226,7 +230,7 @@ def run_eq_qp_example():
 
     print("Equality constrained QP example")
     print("-------------------------------")
-    
+
     # Reset random seed for repetibility
     np.random.seed(1)
 
