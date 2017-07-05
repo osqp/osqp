@@ -38,7 +38,7 @@ The settings marked with * can be changed without running the setup method again
 +------------------------------------+-------------------------------------+----------------+
 | :code:`verbose`  *                 | Print output                        |   True         |
 +------------------------------------+-------------------------------------+----------------+
-| :code:`scaled_termination` *       | Scaled termination conditions       |   True         |
+| :code:`scaled_termination` *       | Scaled termination conditions       |   False        |
 +------------------------------------+-------------------------------------+----------------+
 | :code:`early_terminate` *          | Evaluate termination criteria       |   True         |
 +------------------------------------+-------------------------------------+----------------+

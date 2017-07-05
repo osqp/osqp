@@ -80,7 +80,7 @@ OSQP_NAN = 1e+20  # Just as placeholder. Not real value
 #  AUTO_RHO_BETA1 = 3.7594273667640685
 #  AUTO_RHO_BETA2 = -5.3658885099270002
 
-# only n and m, interval 1.5 
+# only n and m, interval 1.5
 #  AUTO_RHO_BETA0 = 63.9204222926816
 #  AUTO_RHO_BETA1 = 4.2480325664123226
 #  AUTO_RHO_BETA2 = -5.7924560461638848
@@ -198,7 +198,7 @@ class settings(object):
     alpha [1.6]                         - Relaxation parameter
     delta [1.0]                         - Regularization parameter for polish
     verbose  [True]                     - Verbosity
-    scaled_termination [True]             - Evalute scaled termination criteria
+    scaled_termination [False]             - Evalute scaled termination criteria
     early_terminate  [True]             - Evalute termination criteria
     early_terminate_interval  [25]    - Interval for evaluating termination criteria
     warm_start [False]                  - Reuse solution from previous solve
@@ -212,7 +212,7 @@ class settings(object):
         self.rho = kwargs.pop('rho', 0.1)
         self.sigma = kwargs.pop('sigma', 1e-06)
         self.scaling = kwargs.pop('scaling', True)
-        self.scaling_iter = kwargs.pop('scaling_iter', 15) 
+        self.scaling_iter = kwargs.pop('scaling_iter', 15)
         self.max_iter = kwargs.pop('max_iter', 2500)
         self.eps_abs = kwargs.pop('eps_abs', 1e-3)
         self.eps_rel = kwargs.pop('eps_rel', 1e-3)
@@ -221,7 +221,7 @@ class settings(object):
         self.alpha = kwargs.pop('alpha', 1.6)
         self.delta = kwargs.pop('delta', 1e-6)
         self.verbose = kwargs.pop('verbose', True)
-        self.scaled_termination = kwargs.pop('scaled_termination', True)
+        self.scaled_termination = kwargs.pop('scaled_termination', False)
         self.early_terminate = kwargs.pop('early_terminate', True)
         self.early_terminate_interval = kwargs.pop('early_terminate_interval', 25)
         self.warm_start = kwargs.pop('warm_start', False)
@@ -388,7 +388,7 @@ class OSQP(object):
 
             # Ruiz equilibration
             for j in range(n + m):
-                norm_col_j = np.linalg.norm(np.asarray(KKT[:, j].todense()), 
+                norm_col_j = np.linalg.norm(np.asarray(KKT[:, j].todense()),
                                             np.inf)
                 #  print("norm col %i = %.4e" % (j, norm_col_j))
                 #  norm_row_j = np.linalg.norm(KKT_temp[j, :].A1, np.inf)
@@ -512,7 +512,7 @@ class OSQP(object):
         #      np.power(trP, AUTO_RHO_BETA1) * \
         #      np.power(trAtA, AUTO_RHO_BETA2)
 
-    
+
         self.work.settings.rho = AUTO_RHO_BETA0 * \
                 np.power((trP + sigma * n)/n, AUTO_RHO_BETA1) * \
                 np.power((trAtA)/m, AUTO_RHO_BETA2)
@@ -666,11 +666,11 @@ class OSQP(object):
             return 0.
         if polish:
             pri_res = np.maximum(self.work.data.l - self.work.pol.z, 0) + \
-                np.maximum(self.work.pol.z - self.work.data.u, 0) 
+                np.maximum(self.work.pol.z - self.work.data.u, 0)
         else:
             pri_res = self.work.data.A.dot(self.work.x) - self.work.z
 
-        if self.work.settings.scaling and self.work.settings.scaled_termination:
+        if self.work.settings.scaling and not self.work.settings.scaled_termination:
             pri_res = self.work.scaling.Einv.dot(pri_res)
 
         return la.norm(pri_res, np.inf)
@@ -688,7 +688,7 @@ class OSQP(object):
                 self.work.data.q +\
                 self.work.data.A.T.dot(self.work.y)
 
-        if self.work.settings.scaling and self.work.settings.scaled_termination:
+        if self.work.settings.scaling and not self.work.settings.scaled_termination:
             dua_res = self.work.scaling.Dinv.dot(dua_res)
 
         return la.norm(dua_res, np.inf)
@@ -757,7 +757,7 @@ class OSQP(object):
                     self.work.data.l.dot(np.minimum(self.work.delta_y, 0))
             if lhs < -eps_prim_inf:
                 self.work.Atdelta_y = self.work.data.A.T.dot(self.work.delta_y)
-                if self.work.settings.scaling and self.work.settings.scaled_termination:
+                if self.work.settings.scaling and not self.work.settings.scaled_termination:
                         self.work.Atdelta_y = self.work.scaling.Dinv.dot(self.work.Atdelta_y)
                 return la.norm(self.work.Atdelta_y, np.inf) < eps_prim_inf
 
@@ -788,7 +788,7 @@ class OSQP(object):
                 self.work.Pdelta_x = self.work.data.P.dot(self.work.delta_x)
 
                 # Scale if necessary
-                if self.work.settings.scaling and self.work.settings.scaled_termination:
+                if self.work.settings.scaling and not self.work.settings.scaled_termination:
                     self.work.Pdelta_x = self.work.scaling.Dinv.dot(self.work.Pdelta_x)
 
                 # Check if ||P * delta_x|| = 0
@@ -799,7 +799,7 @@ class OSQP(object):
                         self.work.delta_x)
 
                     # Scale if necessary
-                    if self.work.settings.scaling and self.work.settings.scaled_termination:
+                    if self.work.settings.scaling and not self.work.settings.scaled_termination:
                         self.work.Adelta_x = self.work.scaling.Einv.dot(self.work.Adelta_x)
 
                     for i in range(self.work.data.m):
@@ -872,7 +872,7 @@ class OSQP(object):
             pri_check = 1
         else:
             # Compute primal tolerance
-            if self.work.settings.scaling and self.work.settings.scaled_termination:
+            if self.work.settings.scaling and not self.work.settings.scaled_termination:
                 Einv = self.work.scaling.Einv
                 max_rel_eps = np.max([
                     la.norm(Einv.dot(self.work.data.A.dot(self.work.x)), np.inf),
@@ -892,7 +892,7 @@ class OSQP(object):
 
         # Compute dual tolerance
 
-        if self.work.settings.scaling and self.work.settings.scaled_termination:
+        if self.work.settings.scaling and not self.work.settings.scaled_termination:
             Dinv = self.work.scaling.Dinv
             max_rel_eps = np.max([
                 la.norm(Dinv.dot(self.work.data.A.T.dot(self.work.y)), np.inf),
