@@ -170,7 +170,7 @@ c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
     #endif
 
     // If scaling active -> rescale residual
-    if (work->settings->scaling && work->settings->scaled_termination){
+    if (work->settings->scaling && !work->settings->scaled_termination){
         vec_ew_prod(work->scaling->Einv, work->z_prev, work->z_prev, work->data->m);
     }
 
@@ -218,7 +218,7 @@ c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
     #endif
 
     // If scaling active -> rescale residual
-    if (work->settings->scaling && work->settings->scaled_termination){
+    if (work->settings->scaling && !work->settings->scaled_termination){
         vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n);
     }
 
@@ -261,7 +261,7 @@ c_int is_primal_infeasible(OSQPWorkspace * work){
         if (ineq_lhs < -eps_prim_inf * norm_delta_y ){
             // Compute and return ||A'delta_y|| < eps_prim_inf
             mat_tpose_vec(work->data->A, work->delta_y, work->Atdelta_y, 0, 0);
-            if (work->settings->scaling && work->settings->scaled_termination){ // Unscale if necessary
+            if (work->settings->scaling && !work->settings->scaled_termination){ // Unscale if necessary
             vec_ew_prod(work->scaling->Dinv, work->Atdelta_y, work->Atdelta_y, work->data->n);
             }
             return vec_norm_inf(work->Atdelta_y, work->data->n) < eps_prim_inf * norm_delta_y;
@@ -310,7 +310,7 @@ c_int is_dual_infeasible(OSQPWorkspace * work){
             mat_vec(work->data->P, work->delta_x, work->Pdelta_x, 0);
 
             // Scale if necessary
-            if (work->settings->scaling && work->settings->scaled_termination){
+            if (work->settings->scaling && !work->settings->scaled_termination){
                 vec_ew_prod(work->scaling->Dinv, work->Pdelta_x, work->Pdelta_x, work->data->n);
             }
 
@@ -321,7 +321,7 @@ c_int is_dual_infeasible(OSQPWorkspace * work){
                 mat_vec(work->data->A, work->delta_x, work->Adelta_x, 0);
 
                 // Scale if necessary
-                if (work->settings->scaling && work->settings->scaled_termination){
+                if (work->settings->scaling && !work->settings->scaled_termination){
                     vec_ew_prod(work->scaling->Einv, work->Adelta_x, work->Adelta_x, work->data->m);
                 }
 
@@ -461,7 +461,7 @@ c_int check_termination(OSQPWorkspace *work){
         // Compute primal tolerance
 
         // max_rel_eps = max(||z||, ||A x||)
-        if (work->settings->scaling && work->settings->scaled_termination){
+        if (work->settings->scaling && !work->settings->scaled_termination){
             // ||Einv * z||
             vec_ew_prod(work->scaling->Einv, work->z, work->z_prev, work->data->m);
             max_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
@@ -496,7 +496,7 @@ c_int check_termination(OSQPWorkspace *work){
 
     // Compute dual tolerance
     // max_rel_eps = max(||q||, ||A' y|, ||P x||)
-    if (work->settings->scaling && work->settings->scaled_termination){
+    if (work->settings->scaling && !work->settings->scaled_termination){
         // || Dinv q||
         vec_ew_prod(work->scaling->Dinv, work->data->q, work->x_prev, work->data->n);
         max_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
