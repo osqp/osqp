@@ -108,6 +108,7 @@
      npy_intp KKTnz       = (npy_intp)solver->KKT->nz;
      npy_intp Pnzmax      = (npy_intp)data->P->p[data->P->n];
      npy_intp Anzmax      = (npy_intp)data->A->p[data->A->n];
+     npy_intp m           = (npy_intp)(data->m);
      npy_intp m_plus_n    = (npy_intp)(data->m + data->n);
 
      int float_type = get_float_type();
@@ -128,7 +129,7 @@
      PyObject *KKTx      = PyArray_SimpleNewFromData(1, &KKTnzmax,    float_type, solver->KKT->x);
      PyObject *PtoKKT    = PyArray_SimpleNewFromData(1, &Pnzmax,      int_type,   solver->PtoKKT);
      PyObject *AtoKKT    = PyArray_SimpleNewFromData(1, &Anzmax,      int_type,   solver->AtoKKT);
-     PyObject *rhotoKKT  = PyArray_SimpleNewFromData(1, &data->m,     int_type,   solver->rhotoKKT);
+     PyObject *rhotoKKT  = PyArray_SimpleNewFromData(1, &m,           int_type,   solver->rhotoKKT);
      PyObject *Lnz_vec   = PyArray_SimpleNewFromData(1, &m_plus_n,    int_type,   solver->Lnz);
      PyObject *Y         = PyArray_SimpleNewFromData(1, &m_plus_n,    float_type, solver->Y);
      PyObject *Pattern   = PyArray_SimpleNewFromData(1, &m_plus_n,    int_type,   solver->Pattern);
