@@ -53,9 +53,9 @@ class nonneg_l2(QPExample):
         if version == 'dense':
             #       minimize	1/2 x.T (A.T * A) x - (A.T * b).T * x
             #       subject to  x >= 0
-            P = Ad.T.dot(Ad)
+            P = Ad.T.dot(Ad).tocsc()
             q = -Ad.T.dot(bd)
-            A = spspa.eye(n)
+            A = spspa.eye(n).tocsc()
             lA = np.zeros(n)
             uA = np.inf * np.ones(n)
         elif version == 'sparse':

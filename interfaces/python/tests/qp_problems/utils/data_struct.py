@@ -28,19 +28,23 @@ class data_struct(object):
         self.dua_res_data = []
 
         # Additional data to be stored
-        self.condKKT_data = []
-        self.condP_data = []
-        self.froKKT_data = []
+        # self.condKKT_data = []
+        # self.condP_data = []
+        # self.froKKT_data = []
         self.trP_data = []
         self.froP_data = []
         self.froA_data = []
-        self.condKKT_bound_data = []
-        self.condP_bound_data = []
+        # self.condKKT_bound_data = []
+        # self.condP_bound_data = []
         self.norm_q_data = []
-        self.norm_l_data = []
-        self.norm_u_data = []
+        # self.norm_l_data = []
+        # self.norm_u_data = []
+        self.avg_u_minus_l_data = []
 
     def scale_qp(self, qp, settings):
+        """
+        Perform Ruiz equilibration
+        """
 
         # Get QP variables
         P = qp.P
@@ -63,14 +67,13 @@ class data_struct(object):
         # Iterate Scaling
         for i in range(SCALING_ITER):
             for j in range(n + m):
-                norm_col_j = np.linalg.norm(np.asarray(KKT[:, j].todense()), 
-                                            np.inf)
+                norm_col_j = spa.linalg.norm(KKT[:, j], np.inf)
                 if norm_col_j > SCALING_REG:
                     d_temp[j] = 1./(np.sqrt(norm_col_j))
 
             S_temp = spa.diags(d_temp)
             d = np.multiply(d, d_temp)
-            KKT = S_temp.dot(KKT.dot(S_temp)) 
+            KKT = S_temp.dot(KKT.dot(S_temp))
 
         # Obtain Scaler Matrices
         D = spa.diags(d[:n])
@@ -98,9 +101,30 @@ class data_struct(object):
         norm_rows = np.zeros(Mb.shape[0])
 
         for i in range(len(norm_rows)):
-            norm_rows[i] = npla.norm(Mb[i, :])
+            norm_rows[i] = spa.linalg.norm(Mb[i, :])
 
         return np.max(norm_rows)/(np.min(norm_rows) + 1e-08)
+
+    def get_avg_distance_lu(self, l, u):
+        """
+        Get average distance of the noninfinity l and u elements
+        """
+
+        # Get index of non infinity elements in l
+        l_idx = np.where(l != -np.inf)[0]
+
+        # Get index of non infinity elements in u
+        u_idx = np.where(u != np.inf)[0]
+
+        # Get intersection of indeces
+        idx = np.intersect1d(l_idx, u_idx)
+
+        # Get reduced vectors
+        l_red = l[idx]
+        u_red = u[idx]
+
+        # Get average distance
+        avg_dist = np.mean(u_red - l_red) if any(u_red - l_red) else np.inf
 
     def update_data(self, seed, name, qp, results,
                     rho, sigma, alpha, settings):
@@ -119,26 +143,27 @@ class data_struct(object):
         # Scale data as OSQP does and store those values
         qp_scaled = self.scale_qp(qp, settings)
 
-
         # Compute data statistics
-        KKT = spa.vstack([spa.hstack([qp_scaled.P, qp_scaled.A.T]),
-                          spa.hstack([qp_scaled.A,
-                                      spa.csc_matrix((qp_scaled.m,
-                                                      qp_scaled.m))])])
+        # KKT = spa.vstack([spa.hstack([qp_scaled.P, qp_scaled.A.T]),
+        #                   spa.hstack([qp_scaled.A,
+        #                               spa.csc_matrix((qp_scaled.m,
+        #                                               qp_scaled.m))])])
+
+        # self.condKKT_data.append(npla.cond(KKT.todense()))
+        # self.condP_data.append(npla.cond(qp_scaled.P.todense()))
+        # self.froKKT_data.append(spala.norm(KKT))
 
 
-        self.condKKT_data.append(npla.cond(KKT.todense()))
-        self.condP_data.append(npla.cond(qp_scaled.P.todense()))
-        self.froKKT_data.append(spala.norm(KKT))
         self.froP_data.append(spala.norm(qp_scaled.P))
         self.trP_data.append(np.sum(qp_scaled.P.diagonal()))
         self.froA_data.append(spala.norm(qp_scaled.A))
-        self.condKKT_bound_data.append(self.get_cond_bound(KKT.todense()))
-        self.condP_bound_data.append(self.get_cond_bound(qp_scaled.P.todense()))
+        # self.condKKT_bound_data.append(self.get_cond_bound(KKT.todense()))
+        # self.condP_bound_data.append(self.get_cond_bound(qp_scaled.P.todense()))
         self.norm_q_data.append(npla.norm(qp_scaled.q))
-        self.norm_l_data.append(npla.norm(qp_scaled.l))
-        self.norm_u_data.append(npla.norm(qp_scaled.u))
-
+        # self.norm_l_data.append(npla.norm(qp_scaled.l))
+        # self.norm_u_data.append(npla.norm(qp_scaled.u))
+        self.avg_u_minus_l_data.append(self.get_avg_distance_lu(qp_scaled.l,
+                                                                qp_scaled.u))
 
     def get_data_frame(self):
         # Create dictionary
@@ -153,23 +178,31 @@ class data_struct(object):
                 'time': self.time_data,
                 'pri_res': self.pri_res_data,
                 'dua_res': self.dua_res_data,
-                'condKKT': self.condKKT_data,
-                'condP': self.condP_data,
-                'froKKT': self.froKKT_data,
+                # 'condKKT': self.condKKT_data,
+                # 'condP': self.condP_data,
+                # 'froKKT': self.froKKT_data,
                 'froP': self.froP_data,
                 'trP': self.trP_data,
                 'froA': self.froA_data,
-                'condKKT_bound': self.condKKT_bound_data,
-                'condP_bound': self.condP_bound_data,
+                # 'condKKT_bound': self.condKKT_bound_data,
+                # 'condP_bound': self.condP_bound_data,
                 'norm_q': self.norm_q_data,
-                'norm_l': self.norm_l_data,
-                'norm_u': self.norm_u_data}
+                # 'norm_l': self.norm_l_data,
+                # 'norm_u': self.norm_u_data,
+                'avg_u_minus_l': self.avg_u_minus_l_data
+                }
 
         cols = ['n', 'm', 'rho', 'sigma', 'alpha', 'iter',
-                 'name', 'time', 'pri_res', 'dua_res', 'seed',
-                 'condKKT', 'condP', 'froKKT', 'froP', 'trP', 'froA',
-                 'condKKT_bound', 'condP_bound', 'norm_q', 'norm_l',
-                 'norm_u']
+                'name', 'time', 'pri_res', 'dua_res', 'seed',
+                #  'condKKT',
+                # 'condP',
+                #  'froKKT',
+                'froP', 'trP', 'froA',
+                #  'condKKT_bound',
+                # 'condP_bound',
+                'norm_q',
+                # 'norm_l', 'norm_u',
+                'avg_u_minus_l']
 
         # Create dataframe
         df = pd.DataFrame(data)

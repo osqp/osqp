@@ -42,17 +42,17 @@ alpha_vec = np.array([1.6])
 
 
 
-dim_vecs_len = 30
+dim_vecs_len = 20
 # n_vec = np.array([20])
 # m_vec = np.array([30])
-n_max = 500
-m_max = 1000
+n_max = 100
+m_max = 100
 n_vec = np.arange(10, n_max, int(n_max/dim_vecs_len))
 m_vec = np.arange(10, m_max, int(m_max/dim_vecs_len))
 
 
 # Number of problems with the same dimensions
-nm_num_prob = 25
+nm_num_prob = 1
 
 # Test options
 options = {'verbose': False,
@@ -62,8 +62,15 @@ options = {'verbose': False,
            'max_iter': 2500}
 
 # Test types
-test_types = ['basis_pursuit', 'huber_fit', 'lasso',
-              'nonneg_l2', 'lp', 'portfolio', 'svm']
+test_types = [
+            #   'basis_pursuit',
+            #   'huber_fit',
+            #   'lasso',
+            #   'nonneg_l2',
+            #   'lp',
+            #   'portfolio',
+              'svm'
+              ]
 
 #  test_types = ['lasso', 'svm']
 

@@ -393,8 +393,7 @@ class OSQP(object):
 
             # Ruiz equilibration
             for j in range(n + m):
-                norm_col_j = np.linalg.norm(np.asarray(KKT[:, j].todense()),
-                                            np.inf)
+                norm_col_j = spspa.linalg.norm(KKT[:, j], np.inf)
                 #  print("norm col %i = %.4e" % (j, norm_col_j))
                 #  norm_row_j = np.linalg.norm(KKT_temp[j, :].A1, np.inf)
                 #  print("norm row %i = %.4e" % (j, norm_row_j))

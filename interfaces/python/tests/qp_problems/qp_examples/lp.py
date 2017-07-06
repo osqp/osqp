@@ -46,7 +46,7 @@ class lp(QPExample):
         x_true = np.random.randn(n) / np.sqrt(n)
         random_scaling = spspa.diags(np.power(10, 2 * np.random.randn(m)))
         A = random_scaling.dot(spspa.random(m, n, density=dens_lvl,
-                               format='csc'))
+                               format='csc')).tocsc()
         uA = A.dot(x_true) + 0.1*np.random.rand(m)
         lA = -np.inf * np.ones(m)
         q = -A.T.dot(np.random.rand(m))

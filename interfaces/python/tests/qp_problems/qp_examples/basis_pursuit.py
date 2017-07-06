@@ -58,7 +58,7 @@ class basis_pursuit(QPExample):
         q = np.append(np.zeros(n), np.ones(n))
         A = spspa.vstack([spspa.hstack([Ad, spspa.csc_matrix((m, n))]),
                           spspa.hstack([In, -In]),
-                          spspa.hstack([In, In])])
+                          spspa.hstack([In, In])]).tocsc()
         lA = np.hstack([bd, -np.inf * np.ones(n), np.zeros(n)])
         uA = np.hstack([bd, np.zeros(n), np.inf * np.ones(n)])
 
