@@ -63,16 +63,14 @@ options = {'verbose': False,
 
 # Test types
 test_types = [
-            #   'basis_pursuit',
-            #   'huber_fit',
-            #   'lasso',
-            #   'nonneg_l2',
-            #   'lp',
-            #   'portfolio',
-              'svm'
+             'basis_pursuit',
+             'huber_fit',
+             'lasso',
+             'nonneg_l2',
+             'lp',
+             'portfolio',
+             'svm'
               ]
-
-#  test_types = ['lasso', 'svm']
 
 
 def run_examples(test_type, n_vec, m_vec, rho_vec, sigma_vec,
@@ -105,7 +103,8 @@ def run_examples(test_type, n_vec, m_vec, rho_vec, sigma_vec,
 
 partial_tests = partial(run_examples, n_vec=n_vec,
                         m_vec=m_vec, rho_vec=rho_vec, sigma_vec=sigma_vec,
-                        alpha_vec=alpha_vec, nm_num_prob=nm_num_prob, **options)
+                        alpha_vec=alpha_vec, nm_num_prob=nm_num_prob, 
+                        **options)
 
 
 t = time()
