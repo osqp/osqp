@@ -125,6 +125,8 @@ class data_struct(object):
 
         # Get average distance
         avg_dist = np.mean(u_red - l_red) if any(u_red - l_red) else np.inf
+        
+        return avg_dist
 
     def update_data(self, seed, name, qp, results,
                     rho, sigma, alpha, settings):
