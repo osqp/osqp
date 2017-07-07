@@ -85,7 +85,7 @@ extern "C" {
 
 #endif
 
-#define SCALED_TERMINATION (1)
+#define SCALED_TERMINATION (0)
 #define EARLY_TERMINATE (1)
 #define EARLY_TERMINATE_INTERVAL (25)
 #define WARM_START (1)
