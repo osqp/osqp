@@ -74,6 +74,12 @@ def get_ratio_and_bounds(df):
     # 7) Rho ratio
     df.loc[:, 'rho_ratio'] = df['best_rho']/df['rho']
 
+    # Cap avg_u_minus_l with 10^6
+    df.loc[:, 'avg_u_minus_l'] = np.minimum(df['avg_u_minus_l'], 1e6)
+
+    if np.isnan(df['avg_u_minus_l'].iloc[0]):
+        df.loc[:, 'avg_u_minus_l'] = 1e6
+
     return df
 
 
@@ -98,12 +104,14 @@ for prob_name in prob_names:
     res_list.append(res_temp)
 res = pd.concat(res_list, ignore_index=True)
 
-import ipdb; ipdb.set_trace()
+# import ipdb; ipdb.set_trace()
 # Read full results
 #  res = pd.read_csv('results/results_full.csv')
 
 # Select problems not saturated at max number of iterations
 res = res.loc[(res['iter'] < 2000)]
+
+import ipdb; ipdb.set_trace()
 
 # Assign group headers
 group_headers = ['seed', 'name']
@@ -136,6 +144,8 @@ v_u = np.empty((0))
 
 
 print("Constructing data matrix A and bounds l, u")
+
+
 
 for _, problem in tqdm(problems_p):
 
@@ -312,6 +322,17 @@ plt.show(block=False)
 fig, ax = plt.subplots()
 ax.plot(best_rhos_new, label='Best rho')
 ax.plot(norm_q, label='||q||')
+plt.yscale('log')
+plt.legend()
+plt.grid()
+plt.show(block=False)
+
+
+# Norm_q and best_rho
+fig, ax = plt.subplots()
+ax.plot(best_rhos_new, label='Best rho')
+ax.plot(avg_u_minus_l, label='avg(u - l)')
+plt.yscale('log')
 plt.legend()
 plt.grid()
 plt.show(block=False)

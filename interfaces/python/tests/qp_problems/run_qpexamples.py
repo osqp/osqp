@@ -110,16 +110,16 @@ partial_tests = partial(run_examples, n_vec=n_vec,
 
 t = time()
 
-# Execute problems in parallel
-p = Pool(cpu_count())
-results = p.map(partial_tests, test_types)
+# # Execute problems in parallel
+# p = Pool(cpu_count())
+# results = p.map(partial_tests, test_types)
 
 
 # Execute problems in series
-#  results = []
-#  for i in range(len(test_types)):
-   #  res = partial_tests(test_types[i])
-   #  results.append(res)
+results = []
+for i in range(len(test_types)):
+    res = partial_tests(test_types[i])
+    results.append(res)
 
 cputime = time() - t
 print("total cputime = %.4f sec" % cputime)

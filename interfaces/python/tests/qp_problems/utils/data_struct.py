@@ -39,7 +39,7 @@ class data_struct(object):
         self.norm_q_data = []
         # self.norm_l_data = []
         # self.norm_u_data = []
-        self.avg_u_minus_l_data = []
+        self.u_minus_l_data = []
 
     def scale_qp(self, qp, settings):
         """
@@ -105,16 +105,16 @@ class data_struct(object):
 
         return np.max(norm_rows)/(np.min(norm_rows) + 1e-08)
 
-    def get_avg_distance_lu(self, l, u):
+    def get_distance_lu(self, l, u):
         """
         Get average distance of the noninfinity l and u elements
         """
 
         # Get index of non infinity elements in l
-        l_idx = np.where(l != -np.inf)[0]
+        l_idx = np.where(!np.isinf(np.abs(l)))[0]
 
         # Get index of non infinity elements in u
-        u_idx = np.where(u != np.inf)[0]
+        u_idx = np.where(!np.isinf(np.abs(u)))[0]
 
         # Get intersection of indeces
         idx = np.intersect1d(l_idx, u_idx)
@@ -124,8 +124,11 @@ class data_struct(object):
         u_red = u[idx]
 
         # Get average distance
-        avg_dist = np.mean(u_red - l_red) if any(u_red - l_red) else np.inf
-        
+        avg_dist = np.max(u_red - l_red) if any(u_red - l_red) else np.inf
+
+        if np.isnan(avg_dist):
+            print("ERROR: avg_dist is NaN")
+
         return avg_dist
 
     def update_data(self, seed, name, qp, results,
@@ -164,8 +167,8 @@ class data_struct(object):
         self.norm_q_data.append(npla.norm(qp_scaled.q))
         # self.norm_l_data.append(npla.norm(qp_scaled.l))
         # self.norm_u_data.append(npla.norm(qp_scaled.u))
-        self.avg_u_minus_l_data.append(self.get_avg_distance_lu(qp_scaled.l,
-                                                                qp_scaled.u))
+        self.u_minus_l_data.append(self.get_distance_lu(qp_scaled.l,
+                                                        qp_scaled.u))
 
     def get_data_frame(self):
         # Create dictionary
@@ -191,7 +194,7 @@ class data_struct(object):
                 'norm_q': self.norm_q_data,
                 # 'norm_l': self.norm_l_data,
                 # 'norm_u': self.norm_u_data,
-                'avg_u_minus_l': self.avg_u_minus_l_data
+                'u_minus_l': self.u_minus_l_data
                 }
 
         cols = ['n', 'm', 'rho', 'sigma', 'alpha', 'iter',
@@ -204,7 +207,7 @@ class data_struct(object):
                 # 'condP_bound',
                 'norm_q',
                 # 'norm_l', 'norm_u',
-                'avg_u_minus_l']
+                'u_minus_l']
 
         # Create dataframe
         df = pd.DataFrame(data)
