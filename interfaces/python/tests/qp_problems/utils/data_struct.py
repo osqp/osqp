@@ -111,10 +111,10 @@ class data_struct(object):
         """
 
         # Get index of non infinity elements in l
-        l_idx = np.where(!np.isinf(np.abs(l)))[0]
+        l_idx = np.where(np.invert(np.isinf(np.abs(l))))[0]
 
         # Get index of non infinity elements in u
-        u_idx = np.where(!np.isinf(np.abs(u)))[0]
+        u_idx = np.where(np.invert(np.isinf(np.abs(u))))[0]
 
         # Get intersection of indeces
         idx = np.intersect1d(l_idx, u_idx)
