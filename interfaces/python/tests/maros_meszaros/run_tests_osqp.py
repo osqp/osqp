@@ -9,7 +9,7 @@ import os
 from utils.utils import load_maros_meszaros_problem
 import mathprogbasepy as mpbpy
 
-#  import osqppurepy as osqp
+# import osqppurepy as osqp
 import osqp
 
 
@@ -37,6 +37,7 @@ n_unsolved = 0
 for f in lst_probs:
 
     # if f[:-4] == 'CVXQP1_M':
+    if f[:-4] == 'CVXQP1_S':
     # if f[:-4] == 'AUG2DCQP':
     # if f[:-4] == 'BOYD1':
     # if f[:-4] == 'AUG2D':
@@ -44,7 +45,6 @@ for f in lst_probs:
     # if f[:-4] == 'CONT-101':
     # if f[:-4] == 'CONT-300':
     # if True:
-
 
         m = load_maros_meszaros_problem(prob_dir + "/" + f)  # Load problem
 
@@ -122,9 +122,11 @@ for f in lst_probs:
 
         s = osqp.OSQP()
         s.setup(P, q, A, l, u,
-                verbose=False,
-                max_iter=10000)
-                # early_terminate_interval=1)
+                rho=50.,
+                auto_rho=False,
+                verbose=True,
+                max_iter=2500,
+                early_terminate_interval=1)
         res = s.solve()
 
         #  import ipdb; ipdb.set_trace()
