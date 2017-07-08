@@ -1,7 +1,7 @@
 function make_osqp(varargin)
 % Matlab MEX makefile for OSQP.
 %
-%    MAKEMEX(VARARGIN) is a make file for OSQP solver. It
+%    MAKE_OSQP(VARARGIN) is a make file for OSQP solver. It
 %    builds OSQP and its components from source.
 %
 %    WHAT is the last element of VARARGIN and cell array of strings,
@@ -18,8 +18,8 @@ function make_osqp(varargin)
 %
 %    Additional commands:
 %
-%    makemex clean - delete all object files (.o and .obj)
-%    makemex purge - same as above, and also delete the mex files.
+%    'clean': delete all object files (.o and .obj)
+%    'purge' : same as above, and also delete the mex files.
 
 
 if( nargin == 0 )
@@ -209,7 +209,7 @@ if( any(strcmpi(what,'osqp_mex')) || any(strcmpi(what,'all')) )
     %cmd = sprintf('%s %s %s %s osqp_mex.cpp', mex_cmd, mexoptflags, inc_dir, lib_name);
     cmd = sprintf('%s %s %s %s osqp_mex.cpp %s', ...
         mex_cmd, mexoptflags, inc_dir, lib_name, mex_libs);
-    
+
     % Compile
     eval(cmd);
     fprintf('\t\t\t\t[done]\n');
