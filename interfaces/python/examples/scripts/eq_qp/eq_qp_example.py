@@ -36,18 +36,9 @@ def gen_qp_matrices(n, m, dens_lvl=0.5):
     P = P.dot(P.T).tocsc()
     q = np.random.randn(n)
 
-    # scal_cost = np.linalg.norm(q)
-    # P /= scal_cost
-    # q /= scal_cost
-
     A = spa.random(m, n, density=dens_lvl, format='csc')
     l = np.random.randn(m)
     u = np.copy(l)
-
-    # scal_constraints = np.linalg.norm(l)
-    # A /= scal_constraints
-    # l /= scal_constraints
-    # u /= scal_constraints
 
     lx = -np.inf * np.ones(n)
     ux = np.inf * np.ones(n)
@@ -62,7 +53,7 @@ def gen_qp_matrices(n, m, dens_lvl=0.5):
     return qp_matrices
 
 
-def solve_problem(qp_matrices, n_prob, solver='osqp'):
+def solve_problem(qp_matrices, n_prob, solver='osqp', osqp_settings=None):
     """
     Solve equality constrained optimization
     """
@@ -86,11 +77,7 @@ def solve_problem(qp_matrices, n_prob, solver='osqp'):
         for i in range(n_prob):
             # Setup OSQP
             m = osqp.OSQP()
-            m.setup(qp.P, qp.q, qp.A, qp.l, qp.u,
-                    rho=1000,   # Set high rho to enforce feasibility
-                    auto_rho=False,
-                    polish=False,
-                    verbose=False)
+            m.setup(qp.P, qp.q, qp.A, qp.l, qp.u, **osqp_settings)
 
             # Solve
             results = m.solve()

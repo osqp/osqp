@@ -42,7 +42,6 @@ def compute_statistics_dataframe(statistics_name, timings_dict, n_vec):
     '''
     Compute statistics dataframe from timings dictionary
     '''
-
     df = pd.DataFrame({'n': n_vec})
 
     for (solver_name, solver_timings) in timings_dict.items():
