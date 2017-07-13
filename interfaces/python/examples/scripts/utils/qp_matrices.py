@@ -88,9 +88,9 @@ class QPmatrices(object):
         return True
 
 
-def store_dimensions(example_name, dims_dict, cols):
+def store_dimensions(example_name, dims_dict):
     dims_table = pd.DataFrame(dims_dict)
-    dims_table = dims_table[cols]
+    # dims_table = dims_table[cols]
 
     data_dir = 'scripts/%s/data' % example_name
 

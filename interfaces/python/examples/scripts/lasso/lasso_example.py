@@ -14,11 +14,10 @@ import cvxpy
 import numpy as np
 import scipy.sparse as spa
 
-# Pandas
-import pandas as pd
 
 # Utilities
 import scripts.utils as utils
+
 
 class LassoExample(utils.Example):
     """
@@ -38,14 +37,16 @@ class LassoExample(utils.Example):
         """
         self.name = "lasso"
         self.n_vec = n_vec
-        self.m_vec = (n_vec * 100).astype(int)
         self.solvers = solvers
         self.parameter = parameter
 
-    def gen_qp_matrices(self, n, m, dens_lvl=0.5):
+    def gen_qp_matrices(self, n, dens_lvl=0.5):
         """
         Generate QP matrices for lasso optimization problem
         """
+
+        # 100 more datapoints than features
+        m = n * 100
 
         # Generate data
         Ad = spa.random(m, n, density=dens_lvl)
@@ -82,7 +83,6 @@ class LassoExample(utils.Example):
         qp_matrices.A_lasso = Ad
         qp_matrices.b_lasso = bd
         qp_matrices.n = n
-        qp_matrices.m = m
 
         # Return QP matrices
         return qp_matrices
@@ -99,8 +99,7 @@ class LassoExample(utils.Example):
         constraints = [y == qp_matrices.A_lasso * x - qp_matrices.b_lasso,
                        -t <= x, x <= t]
         problem = cvxpy.Problem(objective, constraints)
-        variables = (x, y, t)
-        return problem, lambda_i, variables
+        return problem, lambda_i, (x, y, t)
 
     def solve_problem(self, qp_matrices, solver='osqp', osqp_settings=None):
 
@@ -222,10 +221,10 @@ class LassoExample(utils.Example):
                 qp.q = np.ascontiguousarray(qp.q_vec[:, i])
 
                 # Reset cpu time
-                qpoases_cpu_time = np.array([10.])
+                qpoases_cpu_time = np.array([20.])
 
                 # Reset number of of working set recalculations
-                nWSR = np.array([1000])
+                nWSR = np.array([10000])
 
                 if i == 0:
                     # First iteration
@@ -251,9 +250,12 @@ class LassoExample(utils.Example):
                 y = np.zeros(n_dim + m_dim)
                 qpoases_m.getPrimalSolution(x)
                 qpoases_m.getDualSolution(y)
-                y = y[n_dim:]
+                y = -y[n_dim:]
 
-                if not qp.is_optimal(res.x, res.y):
+                if res_qpoases != 0:
+                    raise ValueError('qpoases did not solve the problem!')
+
+                if not qp.is_optimal(x, y):
                     raise ValueError('Returned solution not optimal!')
 
                 # Save time
@@ -349,49 +351,3 @@ class LassoExample(utils.Example):
 
         # Return statistics
         return utils.Statistics(time), utils.Statistics(niter)
-
-    def run(self, osqp_settings=None):
-
-        print("Lasso  example")
-        print("--------------------")
-
-        # Reset random seed for repetibility
-        np.random.seed(1)
-
-        # Define statistics
-        statistics = {}
-        for solver in self.solvers:
-            statistics[solver] = {}
-            statistics[solver]['timing'] = []
-            statistics[solver]['iter'] = []
-
-        # Problem dimensions
-        dimensions = {'n': [],
-                      'm': [],
-                      'nnzA': [],
-                      'nnzP': []}
-
-        for i in range(len(self.n_vec)):
-            # Generate QP
-            qp_matrices = self.gen_qp_matrices(self.n_vec[i],
-                                               self.m_vec[i])
-
-            # Get dimensions
-            dimensions['n'].append(qp_matrices.n)
-            dimensions['m'].append(qp_matrices.m)
-            dimensions['nnzA'].append(qp_matrices.nnzA)
-            dimensions['nnzP'].append(qp_matrices.nnzP)
-
-            # Solve for all the solvers
-            for solver in self.solvers:
-                timing, niter = self.solve_problem(qp_matrices,
-                                                   solver,
-                                                   osqp_settings)
-                statistics[solver]['timing'].append(timing)
-                statistics[solver]['iter'].append(niter)
-
-        # Create ordered timings dictionary
-        solver_timings = self.create_timings_dict(statistics)
-
-        # Store data and plots
-        self.store_data_and_plots(solver_timings, dimensions)

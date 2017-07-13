@@ -25,503 +25,343 @@ import pandas as pd
 from collections import OrderedDict
 
 # Import examples utilities
-from .. import utils
+import scripts.utils as utils
 
 
-def gen_qp_matrices(k, n, gammas, dens_lvl=0.5):
+class PortfolioExample(utils.Example):
     """
-    Generate QP matrices for portfolio optimization problem
+    Portfolio example class
     """
 
-    # Generate data
-    F = spa.random(n, k, density=dens_lvl, format='csc')
-    D = spa.diags(np.random.rand(n) * np.sqrt(k), format='csc')
-    mu = np.random.randn(n)
+    def __init__(self, n_vec, solvers, parameter):
+        """
+        Initialize example class
 
-    # Construct the problem
-    #       minimize	x' D x + y' I y - (1/gamma) * mu' x
-    #       subject to  1' x = 1
-    #                   F' x = y
-    #                   0 <= x <= 1
-    P = spa.block_diag((2*D, 2*spa.eye(k)), format='csc')
-    A = spa.vstack([
-            spa.hstack([spa.csc_matrix(np.ones((1, n))),
-                       spa.csc_matrix((1, k))]),
-            spa.hstack([F.T, -spa.eye(k)])
-        ]).tocsc()
-    l = np.hstack([1., np.zeros(k)])   # Linear constraints
-    u = np.hstack([1., np.zeros(k)])
-    lx = np.zeros(n)   # Bounds
-    ux = np.ones(n)
+        Arguments:
+            name (str): Name of the example
+            n_vec (ndarray): Vector of dimension n (different sizes of problem)
+            solvers (list): List of solvers
+            parameter (ndarray): Parameter to iterate over
+                                 during loops
+        """
+        self.name = "portfolio"
+        self.n_vec = n_vec
+        self.solvers = solvers
+        self.parameter = parameter
 
-    # Create linear cost vectors
-    q = np.empty((k + n, 0))
-    for gamma in gammas:
-        q = np.column_stack((q, np.append(-mu / gamma, np.zeros(k))))
+    def gen_qp_matrices(self, n, dens_lvl=0.5):
+        """
+        Generate QP matrices for portfolio optimization problem
+        """
 
-    qp_matrices = utils.QPmatrices(P, q, A, l, u, lx, ux)
+        # Factors
+        k = (n / 100).astype(int)
 
+        # Generate data
+        F = spa.random(n, k, density=dens_lvl, format='csc')
+        D = spa.diags(np.random.rand(n) * np.sqrt(k), format='csc')
+        mu = np.random.randn(n)
 
-    # Add further matrices for CVXPY modeling
-    qp_matrices.F = F
-    qp_matrices.D = D
-    qp_matrices.mu = mu
-    qp_matrices.gammas = gammas
-
-
-    # Return QP matrices
-    return qp_matrices
-
-
-def solve_loop(qp_matrices, solver='osqp'):
-    """
-    Solve portfolio optimization loop for all gammas
-    """
-    # Shorter name for qp_matrices
-    qp = qp_matrices
-
-    # Get dimensions
-    n = len(qp.lx)
-    k = len(qp.l) - 1
-
-    print('n = %d and solver %s' %
-          (n, solver))
-
-    # Get number of problems to solve
-    n_prob = qp.q.shape[1]
-
-    # Initialize time vector
-    time = np.zeros(n_prob)
-
-    # Initialize number of iterations vector
-    niter = np.zeros(n_prob)
-
-    if solver == 'osqp':
-        # Construct qp matrices
-        Aosqp = spa.vstack((qp.A,
-                            spa.hstack((spa.eye(n), spa.csc_matrix((n, k)))
-                                       ))).tocsc()
-        losqp = np.append(qp.l, qp.lx)
-        uosqp = np.append(qp.u, qp.ux)
+        # Construct the problem
+        #       minimize	x' D x + y' I y - (1/gamma) * mu' x
+        #       subject to  1' x = 1
+        #                   F' x = y
+        #                   0 <= x <= 1
+        P = spa.block_diag((2*D, 2*spa.eye(k)), format='csc')
+        A = spa.vstack([
+                spa.hstack([spa.csc_matrix(np.ones((1, n))),
+                           spa.csc_matrix((1, k))]),
+                spa.hstack([F.T, -spa.eye(k)]),
+                spa.hstack((spa.eye(n), spa.csc_matrix((n, k))))
+            ]).tocsc()
+        l = np.hstack([1., np.zeros(k), np.zeros(n)])   # Linear constraints
+        u = np.hstack([1., np.zeros(k), np.ones(n)])
 
 
-        # Setup OSQP
-        m = osqp.OSQP()
-        m.setup(qp.P, qp.q[:, 0], Aosqp, losqp, uosqp,
-                auto_rho=True,
-                polish=False,
-                verbose=False)
+        lx = np.hstack([np.zeros(n), -np.inf * np.ones(k)])   # Bounds
+        ux = np.hstack([np.ones(n), np.inf * np.ones(k)])
 
-        for i in range(n_prob):
-            q = qp.q[:, i]
+        # Create linear cost vectors
+        q = np.empty((k + n, 0))
+        for gamma in self.parameter:
+            q = np.column_stack((q, np.append(-mu / gamma, np.zeros(k))))
 
-            # Update linear cost
-            m.update(q=q)
+        qp_matrices = utils.QPmatrices(P, q, A, l, u, lx, ux)
 
-            # Solve
-            results = m.solve()
-            x = results.x
-            y = results.y
-            status = results.info.status_val
-            niter[i] = results.info.iter
-            time[i] = results.info.run_time
+        # Add further matrices for CVXPY modeling
+        qp_matrices.n = n
+        qp_matrices.k = k
+        qp_matrices.F = F
+        qp_matrices.D = D
+        qp_matrices.mu = mu
 
-            # Check if status correct
-            if status != m.constant('OSQP_SOLVED'):
-                import ipdb; ipdb.set_trace()
-                raise ValueError('OSQP did not solve the problem!')
+        # Other stuff for
+        qp_matrices.A_nobounds = spa.vstack([
+                spa.hstack([spa.csc_matrix(np.ones((1, n))),
+                            spa.csc_matrix((1, k))]),
+                spa.hstack([F.T, -spa.eye(k)]),
+                ]).tocsc()
+        qp_matrices.l_nobounds = np.hstack([1., np.zeros(k)])
+        qp_matrices.u_nobounds = np.hstack([1., np.zeros(k)])
 
-            # DEBUG
-            # solve with gurobi
-            # prob = mpbpy.QuadprogProblem(qp.P, q, Aosqp, losqp, uosqp)
-            # res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
-            # print('Norm difference OSQP-GUROBI %.3e' %
-            #       np.linalg.norm(x - res.x))
-            # import ipdb; ipdb.set_trace()
+        # Return QP matrices
+        return qp_matrices
 
-    elif solver == 'osqp_coldstart':
-        # Construct qp matrices
-        Aosqp = spa.vstack((qp.A,
-                            spa.hstack((spa.eye(n), spa.csc_matrix((n, k)))
-                                       ))).tocsc()
-        losqp = np.append(qp.l, qp.lx)
-        uosqp = np.append(qp.u, qp.ux)
+    def gen_cvxpy_problem(self, qp):
+        # Construct the problem
+        #       minimize	x' D x + y' I y - (1/gamma) * mu' x
+        #       subject to  1' x = 1
+        #                   F' x = y
+        #                   0 <= x <= 1
 
-        # Setup OSQP
-        m = osqp.OSQP()
-        m.setup(qp.P, qp.q[:, 0], Aosqp, losqp, uosqp,
-                warm_start=False,
-                auto_rho=True,
-                polish=False,
-                verbose=False)
+        # gamma parameter
+        gamma = cvxpy.Parameter(sign="positive")
 
-        for i in range(n_prob):
-            q = qp.q[:, i]
+        n_var = qp.F.shape[0]
+        m_var = qp.F.shape[1]
+        x = cvxpy.Variable(n_var)
+        y = cvxpy.Variable(m_var)
 
-            # Update linear cost
-            m.update(q=q)
+        objective = cvxpy.Minimize(cvxpy.quad_form(x, qp.D) +
+                                   cvxpy.quad_form(y, spa.eye(m_var)) +
+                                   - 1 / gamma * (qp.mu * x))
+        constraints = [np.ones(n_var) * x == 1,
+                       qp.F.T * x == y,
+                       0 <= x, x <= 1]
+        problem = cvxpy.Problem(objective, constraints)
 
-            # Solve
-            results = m.solve()
-            x = results.x
-            y = results.y
-            status = results.info.status_val
-            niter[i] = results.info.iter
-            time[i] = results.info.run_time
+        return problem, gamma, (x, y)
 
-            # Check if status correct
-            if status != m.constant('OSQP_SOLVED'):
-                import ipdb; ipdb.set_trace()
-                raise ValueError('OSQP did not solve the problem!')
+    def solve_problem(self, qp_matrices, solver='osqp', osqp_settings=None):
+        """
+        Solve portfolio optimization loop for all gammas
+        """
+        # Shorter name for qp_matrices
+        qp = qp_matrices
 
-            # DEBUG
-            # solve with gurobi
-            # prob = mpbpy.QuadprogProblem(qp.P, q, Aosqp, losqp, uosqp)
-            # res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
-            # print('Norm difference OSQP-GUROBI %.3e' %
-            #       np.linalg.norm(x - res.x))
-            # import ipdb; ipdb.set_trace()
+        print('n = %d and solver %s' %
+              (qp.n, solver))
 
-        # DEBUG print iterations per value of gamma
-        # gamma_vals = np.logspace(-2, 2, 101)[::-1]
-        #
-        # import matplotlib.pylab as plt
-        # plt.figure()
-        # ax = plt.gca()
-        # plt.plot(gamma_vals, niter)
-        # ax.set_xlabel(r'$\gamma$')
-        # ax.set_ylabel(r'iter')
-        # plt.show(block=False)
+        # Get number of problems to solve
+        n_prob = qp.q_vec.shape[1]
 
-        # import ipdb; ipdb.set_trace()
+        # Initialize time vector
+        time = np.zeros(n_prob)
 
-    elif solver == 'osqp_no_caching':
-        # Construct qp matrices
-        Aosqp = spa.vstack((qp.A,
-                            spa.hstack((spa.eye(n), spa.csc_matrix((n, k)))
-                                       ))).tocsc()
-        losqp = np.append(qp.l, qp.lx)
-        uosqp = np.append(qp.u, qp.ux)
+        # Initialize number of iterations vector
+        niter = np.zeros(n_prob)
 
-        for i in range(n_prob):
-
+        if solver == 'osqp':
             # Setup OSQP
             m = osqp.OSQP()
-            m.setup(qp.P, qp.q[:, i], Aosqp, losqp, uosqp,
-                    warm_start=False,
-                    auto_rho=True,
-                    polish=False,
-                    verbose=False)
-
-            # Solve
-            results = m.solve()
-            x = results.x
-            y = results.y
-            status = results.info.status_val
-            niter[i] = results.info.iter
-            time[i] = results.info.run_time
-
-            # Check if status correct
-            if status != m.constant('OSQP_SOLVED'):
-                import ipdb; ipdb.set_trace()
-                raise ValueError('OSQP did not solve the problem!')
-
-            # DEBUG
-            # solve with gurobi
-            # prob = mpbpy.QuadprogProblem(qp.P, q, Aosqp, losqp, uosqp)
-            # res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
-            # print('Norm difference OSQP-GUROBI %.3e' %
-            #       np.linalg.norm(x - res.x))
-            # import ipdb; ipdb.set_trace()
-
-        # DEBUG print iterations per value of gamma
-        # gamma_vals = np.logspace(-2, 2, 101)[::-1]
-        #
-        # import matplotlib.pylab as plt
-        # plt.figure()
-        # ax = plt.gca()
-        # plt.plot(gamma_vals, niter)
-        # ax.set_xlabel(r'$\gamma$')
-        # ax.set_ylabel(r'iter')
-        # plt.show(block=False)
-
-        # import ipdb; ipdb.set_trace()
-
-    elif solver == 'qpoases':
-
-        n_dim = qp.P.shape[0]  # Number of variables
-        m_dim = qp.A.shape[0]  # Number of constraints without bounds
-
-        # Initialize qpoases and set options
-        qpoases_m = qpoases.PyQProblem(n_dim, m_dim)
-        options = qpoases.PyOptions()
-        options.printLevel = qpoases.PyPrintLevel.NONE
-        qpoases_m.setOptions(options)
-
-        # Construct bounds for qpoases
-        lx = np.append(qp.lx, -np.inf * np.ones(k))
-        ux = np.append(qp.ux, np.inf * np.ones(k))
-
-        # Setup matrix P and A
-        P = np.ascontiguousarray(qp.P.todense())
-        A = np.ascontiguousarray(qp.A.todense())
-
-        for i in range(n_prob):
-
-            # Get linera cost as contiguous array
-            q = np.ascontiguousarray(qp.q[:, i])
-
-            # Reset cpu time
-            qpoases_cpu_time = np.array([20.])
-
-            # Reset number of of working set recalculations
-            nWSR = np.array([1000])
-
-            if i == 0:
-                # First iteration
-                res_qpoases = qpoases_m.init(P, q, A,
-                                             np.ascontiguousarray(lx),
-                                             np.ascontiguousarray(ux),
-                                             np.ascontiguousarray(qp.l),
-                                             np.ascontiguousarray(qp.u),
-                                             nWSR, qpoases_cpu_time)
-            else:
-                # Solve new hot started problem
-                res_qpoases = qpoases_m.hotstart(q,
-                                                 np.ascontiguousarray(lx),
-                                                 np.ascontiguousarray(ux),
-                                                 np.ascontiguousarray(qp.l),
-                                                 np.ascontiguousarray(qp.u),
-                                                 nWSR,
-                                                 qpoases_cpu_time)
-
-            # # DEBUG Solve with gurobi
-            # qpoases solution
-            # sol_qpoases = np.zeros(n + k)
-            # qpoases_m.getPrimalSolution(sol_qpoases)
-            # import mathprogbasepy as mpbpy
-            # Agrb = spa.vstack((qp.A,
-            #                     spa.hstack((spa.eye(n), spa.csc_matrix((n, k)))
-            #                                ))).tocsc()
-            # lgrb = np.append(qp.l, qp.lx)
-            # ugrb = np.append(qp.u, qp.ux)
-            # prob = mpbpy.QuadprogProblem(spa.csc_matrix(qp.P), q,
-            #                              Agrb, lgrb, ugrb)
-            # res = prob.solve(solver=mpbpy.GUROBI, verbose=True)
-            # print("Norm difference x qpoases - GUROBI = %.4f" %
-            #       np.linalg.norm(sol_qpoases - res.x))
-            # print("Norm difference objval qpoases - GUROBI = %.4f" %
-            #       abs(qpoases_m.getObjVal() - res.obj_val))
-            # import ipdb; ipdb.set_trace()
-
-            if res_qpoases != 0:
-                raise ValueError('qpoases did not solve the problem!')
-
-            # Save time
-            time[i] = qpoases_cpu_time[0]
+            m.setup(qp.P, qp.q_vec[:, 0], qp.A, qp.l, qp.u, **osqp_settings)
 
-            # Save number of iterations
-            niter[i] = nWSR[0]
+            for i in range(n_prob):
+                qp.q = qp.q_vec[:, i]
 
+                # Update linear cost
+                m.update(q=qp.q)
+
+                # Solve
+                results = m.solve()
+                x = results.x
+                y = results.y
+                status = results.info.status_val
+                niter[i] = results.info.iter
+                time[i] = results.info.run_time
+
+                # Check if status correct
+                if status != m.constant('OSQP_SOLVED'):
+                    raise ValueError('OSQP did not solve the problem!')
+
+                if not qp.is_optimal(x, y):
+                    raise ValueError('Returned solution not optimal!')
+
+        elif solver == 'osqp_coldstart':
+            # Setup OSQP
+            m = osqp.OSQP()
+            m.setup(qp.P, qp.q_vec[:, 0], qp.A, qp.l, qp.u,
+                    warm_start=False, **osqp_settings)
+
+            for i in range(n_prob):
+                qp.q = qp.q_vec[:, i]
+
+                # Update linear cost
+                m.update(q=qp.q)
+
+                # Solve
+                results = m.solve()
+                x = results.x
+                y = results.y
+                status = results.info.status_val
+                niter[i] = results.info.iter
+                time[i] = results.info.run_time
+
+                # Check if status correct
+                if status != m.constant('OSQP_SOLVED'):
+                    raise ValueError('OSQP did not solve the problem!')
+                if not qp.is_optimal(x, y):
+                    raise ValueError('Returned solution not optimal!')
+
+        elif solver == 'osqp_no_caching':
+
+            for i in range(n_prob):
+
+                qp.q = qp.q_vec[:, i]
+
+                # Setup OSQP
+                m = osqp.OSQP()
+                m.setup(qp.P, qp.q_vec[:, i], qp.A, qp.l, qp.u,
+                        **osqp_settings)
+
+                # Solve
+                results = m.solve()
+                x = results.x
+                y = results.y
+                status = results.info.status_val
+                niter[i] = results.info.iter
+                time[i] = results.info.run_time
 
-    elif solver == 'gurobi':
+                # Check if status correct
+                if status != m.constant('OSQP_SOLVED'):
+                    raise ValueError('OSQP did not solve the problem!')
 
-        # Construct qp matrices
-        Agurobi = spa.vstack((qp.A,
-                              spa.hstack((spa.eye(n), spa.csc_matrix((n, k)))
-                                         ))).tocsc()
-        lgurobi = np.append(qp.l, qp.lx)
-        ugurobi = np.append(qp.u, qp.ux)
+                if not qp.is_optimal(x, y):
+                    raise ValueError('Returned solution not optimal!')
 
-        for i in range(n_prob):
+        elif solver == 'qpoases':
 
-            # Get linera cost as contiguous array
-            q = qp.q[:, i]
+            n_dim = qp.P.shape[0]  # Number of variables
+            m_dim = qp.A_nobounds.shape[0]  # Number of constraints without bounds
 
-            # Solve with gurobi
-            prob = mpbpy.QuadprogProblem(qp.P, q, Agurobi, lgurobi, ugurobi)
-            res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
+            # Initialize qpoases and set options
+            qpoases_m = qpoases.PyQProblem(n_dim, m_dim)
+            options = qpoases.PyOptions()
+            options.printLevel = qpoases.PyPrintLevel.NONE
+            qpoases_m.setOptions(options)
 
-            # Save time
-            time[i] = res.cputime
+            # Setup matrix P and A
+            P = np.ascontiguousarray(qp.P.todense())
+            A = np.ascontiguousarray(qp.A_nobounds.todense())
 
-            # Save number of iterations
-            niter[i] = res.total_iter
+            for i in range(n_prob):
 
-    elif solver == 'mosek':
+                # Get linera cost as contiguous array
+                qp.q = np.ascontiguousarray(qp.q_vec[:, i])
+
+                # Reset cpu time
+                qpoases_cpu_time = np.array([20.])
+
+                # Reset number of of working set recalculations
+                nWSR = np.array([10000])
 
-        # Construct qp matrices
-        Amosek = spa.vstack((qp.A,
-                             spa.hstack((spa.eye(n), spa.csc_matrix((n, k)))
-                                        ))).tocsc()
-        lmosek = np.append(qp.l, qp.lx)
-        umosek = np.append(qp.u, qp.ux)
+                if i == 0:
+                    # First iteration
+                    res_qpoases = qpoases_m.init(P, qp.q, A,
+                                                 np.ascontiguousarray(qp.lx),
+                                                 np.ascontiguousarray(qp.ux),
+                                                 np.ascontiguousarray(qp.l_nobounds),
+                                                 np.ascontiguousarray(qp.u_nobounds),
+                                                 nWSR, qpoases_cpu_time)
+                else:
+                    # Solve new hot started problem
+                    res_qpoases = qpoases_m.hotstart(qp.q,
+                                                     np.ascontiguousarray(qp.lx),
+                                                     np.ascontiguousarray(qp.ux),
+                                                     np.ascontiguousarray(qp.l_nobounds),
+                                                     np.ascontiguousarray(qp.u_nobounds),
+                                                     nWSR,
+                                                     qpoases_cpu_time)
 
-        for i in range(n_prob):
+                # qpoases solution
+                x = np.zeros(n_dim)
+                y = np.zeros(n_dim + m_dim)
+                qpoases_m.getPrimalSolution(x)
+                qpoases_m.getDualSolution(y)
+                y = np.append(-y[n_dim:], -y[:qp.n])
 
-            # Get linera cost as contiguous array
-            q = qp.q[:, i]
-
-            # Solve with mosek
-            prob = mpbpy.QuadprogProblem(qp.P, q, Amosek, lmosek, umosek)
-            res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
-
-            # Save time
-            time[i] = res.cputime
-
-            # Save number of iterations
-            niter[i] = res.total_iter
+                # import ipdb; ipdb.set_trace()
 
-    elif solver == 'ecos':
-
-        for i in range(n_prob):
-            # Construct the problem
-            #       minimize	x' D x + y' I y - (1/gamma) * mu' x
-            #       subject to  1' x = 1
-            #                   F' x = y
-            #                   0 <= x <= 1
-            n_var = qp.F.shape[0]
-            m_var = qp.F.shape[1]
-            x = cvxpy.Variable(n_var)
-            y = cvxpy.Variable(m_var)
-
-            objective = cvxpy.Minimize(cvxpy.quad_form(x, qp.D) +
-                                       cvxpy.quad_form(y, spa.eye(m_var)) +
-                                       - 1 / qp.gammas[i] * qp.mu * x)
-            constraints = [np.ones(n_var) * x == 1,
-                           qp.F.T * x == y,
-                           0 <= x, x <= 1]
-            problem = cvxpy.Problem(objective, constraints)
-            problem.solve(solver=cvxpy.ECOS, verbose=False)
-
-
-            # Obtain time and number of iterations
-            time[i] = problem.solver_stats.setup_time + \
-                problem.solver_stats.solve_time
-
-            niter[i] = problem.solver_stats.num_iters
-
-            # # DEBUG: Solve with MOSEK
-            # Amosek = spa.vstack((qp.A,
-            #                      spa.hstack((spa.eye(n), spa.csc_matrix((n, k)))
-            #                                 ))).tocsc()
-            # lmosek = np.append(qp.l, qp.lx)
-            # umosek = np.append(qp.u, qp.ux)
-            # prob = mpbpy.QuadprogProblem(qp.P, qp.q[:, i],
-            #                              Amosek, lmosek, umosek)
-            # res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
-            # x_mosek = res.x[:n_var]
-            # import ipdb; ipdb.set_trace()
-
-
-    else:
-        raise ValueError('Solver not understood')
-
-    # Return statistics
-    return utils.Statistics(time), utils.Statistics(niter)
-
-
-
-def run_portfolio_example():
-    '''
-    Solve problems
-    '''
-
-    print("Portfolio  example")
-    print("--------------------")
-
-    # Reset random seed for repeatibility
-    np.random.seed(1)
-
-    # Generate gamma parameters and cost vectors
-    n_gamma = 51
-    gammas = np.logspace(-1, 1, n_gamma)[::-1]
-    # gammas = np.logspace(-2, 2, n_gamma)
-
-    # Assets
-    n_vec = np.array([100, 200, 300, 400, 500, 600, 700, 800, 900, 1000])
-    #  n_vec = np.array([100, 200, 300, 400, 500])
-
-    # Factors
-    k_vec = (n_vec / 10).astype(int)
-
-
-    # Define statistics for osqp, qpoases and gurobi
-    osqp_timing = []
-    osqp_iter = []
-    qpoases_timing = []
-    qpoases_iter = []
-    osqp_coldstart_timing = []
-    osqp_coldstart_iter = []
-    osqp_no_caching_timing = []
-    osqp_no_caching_iter = []
-    gurobi_iter = []
-    gurobi_timing = []
-    mosek_iter = []
-    mosek_timing = []
-    ecos_iter = []
-    ecos_timing = []
-
-    for i in range(len(n_vec)):
-        # Generate QP
-        qp_matrices = gen_qp_matrices(k_vec[i], n_vec[i], gammas)
-
-        # Solve loop with osqp
-        timing, niter = solve_loop(qp_matrices, 'osqp')
-        osqp_timing.append(timing)
-        osqp_iter.append(niter)
-
-        # Solving loop with qpoases
-        timing, niter = solve_loop(qp_matrices, 'qpoases')
-        qpoases_timing.append(timing)
-        qpoases_iter.append(niter)
-
-        # Solve loop with osqp (coldstart)
-        timing, niter = solve_loop(qp_matrices, 'osqp_coldstart')
-        osqp_coldstart_timing.append(timing)
-        osqp_coldstart_iter.append(niter)
-
-        # Solve loop with osqp (no caching)
-        timing, niter = solve_loop(qp_matrices, 'osqp_no_caching')
-        osqp_no_caching_timing.append(timing)
-        osqp_no_caching_iter.append(niter)
-
-        # Solve loop with gurobi
-        timing, niter = solve_loop(qp_matrices, 'gurobi')
-        gurobi_timing.append(timing)
-        gurobi_iter.append(niter)
-
-        # Solve loop with mosek
-        timing, niter = solve_loop(qp_matrices, 'mosek')
-        mosek_timing.append(timing)
-        mosek_iter.append(niter)
-
-        # Solve loop with ecos
-        timing, niter = solve_loop(qp_matrices, 'ecos')
-        ecos_timing.append(timing)
-        ecos_iter.append(niter)
-
-    solver_timings = OrderedDict([('OSQP (warm start)', osqp_timing),
-                                  ('OSQP (cold start)',
-                                   osqp_coldstart_timing),
-                                  ('OSQP (no caching)',
-                                   osqp_no_caching_timing),
-                                  ('qpOASES', qpoases_timing),
-                                  ('GUROBI', gurobi_timing),
-                                  ('MOSEK', mosek_timing),
-                                  ('ECOS', ecos_timing)])
-
-
-    utils.generate_plot('portfolio', 'time', 'median', n_vec,
-                        solver_timings,
-                        fig_size=0.9)
-    utils.generate_plot('portfolio', 'time', 'total', n_vec,
-                        solver_timings,
-                        fig_size=0.9)
-
-    #
-    # solver_max_iter = OrderedDict([('OSQP (warm start)', osqp_iter),
-    #                                ('OSQP (cold start)', osqp_coldstart_iter)])
-    # utils.generate_plot('portfolio', 'iter', 'max', n_vec,
-    #                     solver_max_iter,
-    #                     fig_size=0.9)
+                if res_qpoases != 0:
+                    raise ValueError('qpoases did not solve the problem!')
+
+                if not qp.is_optimal(x, y):
+                    raise ValueError('Returned solution not optimal!')
+                # Save time
+                time[i] = qpoases_cpu_time[0]
+
+                # Save number of iterations
+                niter[i] = nWSR[0]
+
+        elif solver == 'gurobi':
+
+            for i in range(n_prob):
+
+                # Get linera cost as contiguous array
+                qp.q = qp.q_vec[:, i]
+
+                # Solve with gurobi
+                prob = mpbpy.QuadprogProblem(qp.P, qp.q, qp.A, qp.l, qp.u)
+                res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
+
+                if not qp.is_optimal(res.x, res.y):
+                    raise ValueError('Returned solution not optimal!')
+
+                # Save time
+                time[i] = res.cputime
+
+                # Save number of iterations
+                niter[i] = res.total_iter
+
+        elif solver == 'mosek':
+
+            for i in range(n_prob):
+
+                # Get linera cost as contiguous array
+                qp.q = qp.q_vec[:, i]
+
+                # Solve with mosek
+                prob = mpbpy.QuadprogProblem(qp.P, qp.q, qp.A, qp.l, qp.u)
+                res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
+
+                if not qp.is_optimal(res.x, res.y):
+                    raise ValueError('Returned solution not optimal!')
+
+                # Save time
+                time[i] = res.cputime
+
+                # Save number of iterations
+                niter[i] = res.total_iter
+
+        elif solver == 'ecos':
+
+            problem, gamma, variables = self.gen_cvxpy_problem(qp)
+            for i in range(n_prob):
+                gamma.value = self.parameter[i]
+                problem.solve(solver=cvxpy.ECOS, verbose=False)
+
+                # Check if solved
+                (x, y) = variables
+                cons = problem.constraints
+                x_ecos = np.concatenate((x.value.A1,
+                                         y.value.A1))
+                y_ecos = np.concatenate(([cons[0].dual_value],
+                                         cons[1].dual_value.A1,
+                                         cons[3].dual_value.A1 -
+                                         cons[2].dual_value.A1))
+
+                qp.q = qp.q_vec[:, i]
+                if not qp.is_optimal(x_ecos, y_ecos):
+                    raise ValueError('Returned solution not optimal')
+
+                # Obtain time and number of iterations
+                time[i] = problem.solver_stats.setup_time + \
+                    problem.solver_stats.solve_time
+
+                niter[i] = problem.solver_stats.num_iters
+
+        else:
+            raise ValueError('Solver not understood')
+
+        # Return statistics
+        return utils.Statistics(time), utils.Statistics(niter)

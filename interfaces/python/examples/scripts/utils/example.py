@@ -2,10 +2,12 @@ from future.utils import with_metaclass
 import abc
 from collections import OrderedDict
 from scripts import utils
+import numpy as np
+
 
 class Example(with_metaclass(abc.ABCMeta, object)):
     """
-    Example class
+    Example meta-class
     """
     @abc.abstractmethod
     def gen_qp_matrices(self, *args):
@@ -19,9 +21,55 @@ class Example(with_metaclass(abc.ABCMeta, object)):
     def solve_problem(self, solver='osqp', osqp_settings=None):
         pass
 
-    @abc.abstractmethod
     def run(self, osqp_settings=None):
-        pass
+        print("%s  example" % self.name.title())
+        print("--------------------")
+
+        # Reset random seed for repetibility
+        np.random.seed(1)
+
+        # Define statistics
+        statistics = {}
+        for solver in self.solvers:
+            statistics[solver] = {}
+            statistics[solver]['timing'] = []
+            statistics[solver]['iter'] = []
+
+        # Problem dimensions
+        dimensions = {'n': [],
+                      'n_var': [],
+                      'm_constraints': [],
+                      'nnzA': [],
+                      'nnzP': []}
+
+        for i in range(len(self.n_vec)):
+            # Generate QP
+            qp_matrices = self.gen_qp_matrices(self.n_vec[i])
+
+            # Get dimensions
+            if hasattr(qp_matrices, 'k'):
+                if "k" not in dimensions:
+                    dimensions["k"] = []
+                dimensions['k'].append(qp_matrices.k)
+            dimensions['n'].append(qp_matrices.n)
+            dimensions['n_var'].append(qp_matrices.P.shape[0])
+            dimensions['m_constraints'].append(qp_matrices.A.shape[0])
+            dimensions['nnzA'].append(qp_matrices.A.nnz)
+            dimensions['nnzP'].append(qp_matrices.P.nnz)
+
+            # Solve for all the solvers
+            for solver in self.solvers:
+                timing, niter = self.solve_problem(qp_matrices,
+                                                   solver,
+                                                   osqp_settings)
+                statistics[solver]['timing'].append(timing)
+                statistics[solver]['iter'].append(niter)
+
+        # Create ordered timings dictionary
+        solver_timings = self.create_timings_dict(statistics)
+
+        # Store data and plots
+        self.store_data_and_plots(solver_timings, dimensions)
 
     def create_timings_dict(self, statistics):
         timings_dict = OrderedDict()
@@ -53,10 +101,9 @@ class Example(with_metaclass(abc.ABCMeta, object)):
         '''
         Store dimensions and timings
         '''
-        cols_dims = ['n', 'm', 'nnzA', 'nnzP']
         utils.store_timings(self.name, solver_timings, self.n_vec, 'mean')
         utils.store_timings(self.name, solver_timings, self.n_vec, 'max')
-        utils.store_dimensions(self.name, dimensions, cols_dims)
+        utils.store_dimensions(self.name, dimensions)
 
         '''
         Store plots
