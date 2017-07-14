@@ -8,16 +8,14 @@ from __future__ import division
 import osqp  # Import osqp
 import qpoases as qpoases  # Import qpoases
 import mathprogbasepy as mpbpy  # Mathprogbasepy to benchmark gurobi
+import cvxpy
 
 # Numerics
 import numpy as np
 import scipy.sparse as spa
 
-# Pandas
-from collections import OrderedDict
-
 # Import examples utilities
-from .. import utils
+import scripts.utils as utils
 
 # Load MPC examples data
 from .examples.ball import load_ball_data
@@ -25,490 +23,488 @@ from .examples.helicopter import load_helicopter_data
 from .examples.pendulum import load_pendulum_data
 
 
-# RHS of linear equality constraint in sparse MPC variant
-def b(x, nx, N):
-    b = np.zeros((N+1)*nx)
-    b[:nx] = -x
-    return b
+class MPCExample(utils.Example):
 
+    def __init__(self, n_vec, solvers, problem_name):
+        """
+        Initialize example class
 
-def gen_qp_matrices(problem):
-    """
-    Generate QP matrices for MPC problem
-    """
-    # Get dimensions
-    (nx, nu) = problem.B.shape
-    N = problem.N
+        Arguments:
+            name (str): Name of the example
+            n_vec (ndarray): Vector of dimension n (different sizes of problem)
+            solvers (list): List of solvers
+            parameter (ndarray): Parameter to iterate over
+                                 during loops
+        """
+        self.name = "mpc"
+        self.n_vec = n_vec
+        self.solvers = solvers
+        self.problem_name = problem_name
 
-    # Objective
-    Px = spa.kron(spa.eye(N), problem.Q)
-    Pu = spa.kron(spa.eye(N), problem.R)
-    P = spa.block_diag([Px, problem.QN, Pu]).tocsc()
-    q = np.zeros((N+1)*nx + N*nu)
-
-    # Dynamics
-    Ax = spa.kron(spa.eye(N+1), -spa.eye(nx)) + \
-         spa.kron(spa.eye(N+1, k=-1), problem.A)
-    Au = spa.kron(spa.vstack([spa.csc_matrix((1, N)), spa.eye(N)]), problem.B)
-    A = spa.hstack([Ax, Au])
-    l = b(problem.x0, nx, N)
-    u = b(problem.x0, nx, N)
-
-    # Terminal constraints
-    if len(problem.tmin) > 0:
-        nt = problem.T.shape[0]
-        A = spa.vstack([A, spa.hstack([spa.csc_matrix((nt, N*nx)),
-                                       problem.T,
-                                       spa.csc_matrix((nt, N*nu))])])
-        l = np.append(l, problem.tmin)
-        u = np.append(u, problem.tmax)
-
-    # Bounds on u
-    lx = np.tile(problem.umin, N)
-    ux = np.tile(problem.umax, N)
-
-    # Bounds on x
-    if len(problem.xmin) > 0:
-        lx = np.append(np.tile(problem.xmin, N+1), lx)
-        ux = np.append(np.tile(problem.xmax, N+1), ux)
-
-    # Return QP matrices
-    qp_matrices = utils.QPmatrices(P, q, A, l, u, lx, ux)
-    return qp_matrices
-
-
-def solve_loop(qp_matrices, problem, nsim, solver='osqp'):
-    """
-    Solve MPC loop
-    """
-    # Shorter name for qp_matrices
-    qp = qp_matrices
-
-    # Get dimensions
-    (nx, nu) = problem.B.shape
-    N = problem.N
-
-    print('N = %d and solver %s' % (N, solver))
-
-    # Initialize time and number of iterations vectors
-    time = np.zeros(nsim)
-    niter = np.zeros(nsim)
-
-    if solver == 'osqp':
-        # Construct qp matrices
-        if len(problem.xmin) > 0:
-            # If the problem has state constraints
-            Aosqp = spa.vstack([
-                        qp.A,
-                        spa.eye((N+1)*nx + N*nu),
-                      ]).tocsc()
+        # Load the example
+        if problem_name == 'pendulum':
+            self.problem = load_pendulum_data()
+        elif problem_name == 'helicopter':
+            self.problem = load_helicopter_data()
+        elif problem_name == 'ball':
+            self.problem = load_ball_data()
         else:
-            Aosqp = spa.vstack([
-                        qp.A,
-                        spa.hstack([
-                            spa.csc_matrix((N*nu, (N+1)*nx)),
-                            spa.eye(N*nu)]),
-                      ]).tocsc()
-        losqp = np.hstack([qp.l, qp.lx])
-        uosqp = np.hstack([qp.u, qp.ux])
+            self.problem = load_ball_data()  # Default data
+
+    # RHS of linear equality constraint in sparse MPC variant
+    def b(self, x, nx, N):
+        b = np.zeros((N+1)*nx)
+        b[:nx] = -x
+        return b
+
+    def gen_qp_matrices(self, N):
+        """
+        Generate QP matrices for MPC problem
+        """
+        # Problem
+        problem = self.problem
+
+        # Get dimensions
+        (nx, nu) = problem.B.shape
+
+        # Objective
+        Px = spa.kron(spa.eye(N), problem.Q)
+        Pu = spa.kron(spa.eye(N), problem.R)
+        P = spa.block_diag([Px, problem.QN, Pu]).tocsc()
+        q = np.zeros((N+1)*nx + N*nu)
+
+        # Dynamics
+        Ax = spa.kron(spa.eye(N+1), -spa.eye(nx)) + \
+            spa.kron(spa.eye(N+1, k=-1), problem.A)
+        Au = spa.kron(spa.vstack([spa.csc_matrix((1, N)), spa.eye(N)]),
+                      problem.B)
+        A = spa.hstack([Ax, Au])
+        l = self.b(problem.x0, nx, N)
+        u = self.b(problem.x0, nx, N)
+
+        # Terminal constraints
+        if len(problem.tmin) > 0:
+            nt = problem.T.shape[0]
+            A = spa.vstack([A, spa.hstack([spa.csc_matrix((nt, N*nx)),
+                                           problem.T,
+                                           spa.csc_matrix((nt, N*nu))])])
+            l = np.append(l, problem.tmin)
+            u = np.append(u, problem.tmax)
+
+        # Store values of problem without variable bound (for qpOASES)
+        A_nobounds = A.copy()
+        l_nobounds = np.copy(l)
+        u_nobounds = np.copy(u)
+
+        # Add bounds on x and u (for qpOASES)
+        lx = np.array([])
+        ux = np.array([])
+
+        # Bounds on x
+        if len(problem.xmin) > 0:
+            l = np.append(l, np.tile(problem.xmin, N+1))
+            u = np.append(u, np.tile(problem.xmax, N+1))
+            A = spa.vstack([A,
+                            spa.hstack([spa.eye((N+1)*nx),
+                                        spa.csc_matrix(((N+1)*nx, N*nu))])
+                            ]).tocsc()
+            lx = np.append(lx, np.tile(problem.xmin, N+1))
+            ux = np.append(ux, np.tile(problem.xmax, N+1))
+        else:
+            lx = np.append(lx, -np.inf * np.ones(nx * (N+1)))
+            ux = np.append(ux, np.inf * np.ones(nx * (N+1)))
+
+        # Bounds on u
+        if len(problem.umin) > 0:
+            l = np.append(l, np.tile(problem.umin, N))
+            u = np.append(u, np.tile(problem.umax, N))
+            A = spa.vstack([A,
+                            spa.hstack([spa.csc_matrix((N*nu, (N+1)*nx)),
+                                        spa.eye(N*nu)])
+                            ]).tocsc()
+            lx = np.append(lx, np.tile(problem.umin, N))
+            ux = np.append(ux, np.tile(problem.umax, N))
+        else:
+            lx = np.append(lx, -np.inf * np.ones(nu * N))
+            ux = np.append(ux, np.inf * np.ones(nu * N))
+
+        # Return QP matrices
+        qp_matrices = utils.QPmatrices(P, q, A, l, u, lx, ux)
+
+        # Add additional elements to qp_matrices
+        qp_matrices.n = N
+        qp_matrices.nsim = 200  # Assume 200 steps of simulation
+        qp_matrices.A_nobounds = A_nobounds
+        qp_matrices.l_nobounds = l_nobounds
+        qp_matrices.u_nobounds = u_nobounds
+
+        return qp_matrices
+
+    def update_initial_state(self, qp, x0):
+        """
+        Update initial state in qp solver formulation
+        """
+        nx = self.problem.B.shape[0]
+        N = qp.n
+        qp.l[:(N+1)*nx] = self.b(x0, nx, N)
+        qp.u[:(N+1)*nx] = qp.l[:(N+1)*nx]
+        qp.l_nobounds[:(N+1)*nx] = self.b(x0, nx, N)
+        qp.u_nobounds[:(N+1)*nx] = qp.l_nobounds[:(N+1)*nx]
+
+    def gen_cvxpy_problem(self, qp):
+        (nx, nu) = self.problem.B.shape
+        N = qp.n
 
         # Initial state
-        x0 = problem.x0
+        x0 = cvxpy.Parameter(nx)
 
-        # Setup OSQP
-        m = osqp.OSQP()
-        m.setup(qp.P, qp.q, Aosqp, losqp, uosqp,
-                # auto_rho=False,
-                auto_rho=True,
-                max_iter=2500,
-                scaling=True,
-                scaling_iter=50,
-                polish=False,
-                verbose=False)
+        # Problem
+        p = self.problem
 
-        for i in range(nsim):
-            # Solve with osqp
-            res = m.solve()
+        # variables
+        x = cvxpy.Variable(nx, N + 1)
+        u = cvxpy.Variable(nu, N)
 
-            # Save time and number of iterations
-            time[i] = res.info.run_time
-            niter[i] = res.info.iter
+        # Objective
+        cost = .5 * cvxpy.quad_form(x[:, N], p.QN)  # Final stage cost
+        for i in range(N):
+            cost += .5 * cvxpy.quad_form(x[:, i], p.Q)  # State cost
+            cost += .5 * cvxpy.quad_form(u[:, i], p.R)  # Inpout cost
+        objective = cvxpy.Minimize(cost)
 
-            # Check if status is correct
-            status = res.info.status_val
-            if status != m.constant('OSQP_SOLVED'):
+        # Constraints
+        constr = []
+        # Linear Dynamics
+        constr += [x[:, 0] == x0]
+        for i in range(0, N):
+            constr += [x[:, i+1] == p.A * x[:, i] + p.B * u[:, i]]
 
-                # # Dump file to 'bad_convergence/data'folder
-                # import pickle
-                # problem = {'P': qp.P,
-                #            'q': qp.q,
-                #            'A': Aosqp,
-                #            'l': losqp,
-                #            'u': uosqp}
-                # with open('bad_convergence/data/%s.pickle' % 'helicopter_scaling_large', 'wb') as f:
-                #     pickle.dump(problem, f)
+        # Terminal constraints
+        if len(p.tmin) > 0:
+            constr += [p.tmin <= p.T * x[:, N], p.T * x[:, N] <= p.tmax]
 
-                import ipdb; ipdb.set_trace()
-                raise ValueError('OSQP did not solve the problem!')
+        # State constraints
+        if len(p.xmin) > 0:
+            for i in range(N + 1):
+                constr += [p.xmin <= x[:, i], x[:, i] <= p.xmax]
 
-            # Apply first control input to the plant
-            u = res.x[-N*nu:-(N-1)*nu]
-            x0 = problem.A.dot(x0) + problem.B.dot(u)
+        # Input constraints
+        if len(p.umin) > 0:
+            for i in range(N):
+                constr += [p.umin <= u[:, i], u[:, i] <= p.umax]
 
-            # Update linear constraints
-            if len(problem.tmin) > 0:
-                losqp = np.hstack([b(x0, nx, N), problem.tmin, qp.lx])
-                uosqp = np.hstack([b(x0, nx, N), problem.tmax, qp.ux])
-            else:
-                losqp = np.hstack([b(x0, nx, N), qp.lx])
-                uosqp = np.hstack([b(x0, nx, N), qp.ux])
-            m.update(l=losqp, u=uosqp)
+        problem = cvxpy.Problem(objective, constr)
 
-    elif solver == 'osqp_coldstart':
-        # Construct qp matrices
-        if len(problem.xmin) > 0:
-            # If the problem has state constraints
-            Aosqp = spa.vstack([
-                        qp.A,
-                        spa.eye((N+1)*nx + N*nu),
-                      ]).tocsc()
-        else:
-            Aosqp = spa.vstack([
-                        qp.A,
-                        spa.hstack([
-                            spa.csc_matrix((N*nu, (N+1)*nx)),
-                            spa.eye(N*nu)]),
-                      ]).tocsc()
-        losqp = np.hstack([qp.l, qp.lx])
-        uosqp = np.hstack([qp.u, qp.ux])
+        return problem, x0, (x, u)
 
-        # Initial state
-        x0 = problem.x0
+    def solve_problem(self, qp_matrices, solver='osqp', osqp_settings=None):
+        problem = self.problem
+        nsim = qp_matrices.nsim
 
-        # Setup OSQP
-        m = osqp.OSQP()
-        m.setup(qp.P, qp.q, Aosqp, losqp, uosqp,
-                warm_start=False,
-                auto_rho=True,
-                # auto_rho=False,
-                rho=0.1,
-                max_iter=2500,
-                scaling_iter=50,
-                polish=False,
-                verbose=False)
+        """
+        Solve MPC loop
+        """
+        # Shorter name for qp_matrices
+        qp = qp_matrices
 
-        for i in range(nsim):
-            # Solve with osqp
-            res = m.solve()
+        # Get dimensions
+        (nx, nu) = problem.B.shape
+        N = qp_matrices.n
 
-            # Save time and number of iterations
-            time[i] = res.info.run_time
-            niter[i] = res.info.iter
+        print('N = %d and solver %s' % (N, solver))
 
-            # Check if status is correct
-            status = res.info.status_val
-            if status != m.constant('OSQP_SOLVED'):
-                import ipdb; ipdb.set_trace()
-                raise ValueError('OSQP did not solve the problem!')
+        # Initialize time and number of iterations vectors
+        time = np.zeros(nsim)
+        niter = np.zeros(nsim)
 
-            # Apply first control input to the plant
-            u = res.x[-N*nu:-(N-1)*nu]
-            x0 = problem.A.dot(x0) + problem.B.dot(u)
+        # Initialize bounds with initial state
+        self.update_initial_state(qp, problem.x0)
+        x_sys = np.zeros((nx, nsim+1))
+        x_sys[:, 0] = problem.x0
+        u_sys = np.zeros((nu, nsim))
 
-            # Update linear constraints
-            if len(problem.tmin) > 0:
-                losqp = np.hstack([b(x0, nx, N), problem.tmin, qp.lx])
-                uosqp = np.hstack([b(x0, nx, N), problem.tmax, qp.ux])
-            else:
-                losqp = np.hstack([b(x0, nx, N), qp.lx])
-                uosqp = np.hstack([b(x0, nx, N), qp.ux])
-            m.update(l=losqp, u=uosqp)
-    
-    elif solver == 'osqp_no_caching':
+        if solver == 'osqp':
 
-        # Construct qp matrices
-        if len(problem.xmin) > 0:
-            # If the problem has state constraints
-            Aosqp = spa.vstack([
-                        qp.A,
-                        spa.eye((N+1)*nx + N*nu),
-                      ]).tocsc()
-        else:
-            Aosqp = spa.vstack([
-                        qp.A,
-                        spa.hstack([
-                            spa.csc_matrix((N*nu, (N+1)*nx)),
-                            spa.eye(N*nu)]),
-                      ]).tocsc()
-        losqp = np.hstack([qp.l, qp.lx])
-        uosqp = np.hstack([qp.u, qp.ux])
-
-        # Initial state
-        x0 = problem.x0
-
-
-        for i in range(nsim):
             # Setup OSQP
             m = osqp.OSQP()
-            m.setup(qp.P, qp.q, Aosqp, losqp, uosqp,
-                    warm_start=False,
-                    auto_rho=True,
-                    # auto_rho=False,
-                    rho=0.1,
-                    max_iter=2500,
-                    scaling_iter=50,
-                    polish=False,
-                    verbose=False)
-            # Solve
-            res = m.solve()
+            m.setup(qp.P, qp.q, qp.A, qp.l, qp.u, **osqp_settings)
 
-            # Save time and number of iterations
-            time[i] = res.info.run_time
-            niter[i] = res.info.iter
+            for i in range(nsim):
+                # Solve with osqp
+                res = m.solve()
 
-            # Check if status is correct
-            status = res.info.status_val
-            if status != m.constant('OSQP_SOLVED'):
-                import ipdb; ipdb.set_trace()
-                raise ValueError('OSQP did not solve the problem!')
+                # Save time and number of iterations
+                time[i] = res.info.run_time
+                niter[i] = res.info.iter
 
-            # Apply first control input to the plant
-            u = res.x[-N*nu:-(N-1)*nu]
-            x0 = problem.A.dot(x0) + problem.B.dot(u)
+                # Check if status is correct
+                status = res.info.status_val
+                if status != m.constant('OSQP_SOLVED'):
 
-            # Update linear constraints
-            if len(problem.tmin) > 0:
-                losqp = np.hstack([b(x0, nx, N), problem.tmin, qp.lx])
-                uosqp = np.hstack([b(x0, nx, N), problem.tmax, qp.ux])
-            else:
-                losqp = np.hstack([b(x0, nx, N), qp.lx])
-                uosqp = np.hstack([b(x0, nx, N), qp.ux])
-            m.update(l=losqp, u=uosqp)
+                    # # Dump file to 'bad_convergence/data'folder
+                    # import pickle
+                    # problem = {'P': qp.P,
+                    #            'q': qp.q,
+                    #            'A': qp.A,
+                    #            'l': qp.l,
+                    #            'u': qp.u}
+                    # with open('bad_convergence/data/%s.pickle' % 'helicopter_balanced_residuals', 'wb') as f:
+                    #     pickle.dump(problem, f)
+                    raise ValueError('OSQP did not solve the problem!')
 
+                if not qp.is_optimal(res.x, res.y):
+                    raise ValueError('Returned solution not optimal!')
 
-    elif solver == 'qpoases':
+                # Apply first control input to the plant
+                u_sys[:, i] = res.x[-N*nu:-(N-1)*nu]
 
-        n_dim = qp.P.shape[0]  # Number of variables
-        m_dim = qp.A.shape[0]  # Number of constraints without bounds
+                # x_{k+1} = Ax_{t} + Bu_{t}
+                x_sys[:, i+1] = problem.A.dot(x_sys[:, i]) + \
+                    problem.B.dot(u_sys[:, i])
 
-        # Initialize qpoases and set options
-        qpoases_m = qpoases.PyQProblem(n_dim, m_dim)
-        options = qpoases.PyOptions()
-        options.printLevel = qpoases.PyPrintLevel.NONE
-        qpoases_m.setOptions(options)
+                # Update linear constraints
+                self.update_initial_state(qp, x_sys[:, i+1])
 
-        # Construct bounds for qpoases
-        lx = np.append(-np.inf * np.ones((N+1)*nx), qp.lx)
-        ux = np.append(np.inf * np.ones((N+1)*nx), qp.ux)
+                # Change l and u
+                m.update(l=qp.l, u=qp.u)
 
-        # Setup matrix P and A
-        P = np.ascontiguousarray(qp.P.todense())
-        A = np.ascontiguousarray(qp.A.todense())
+        elif solver == 'osqp_coldstart':
+            # Setup OSQP
+            m = osqp.OSQP()
+            m.setup(qp.P, qp.q, qp.A, qp.l, qp.u,
+                    warm_start=False, **osqp_settings)
 
-        # Initial state
-        x0 = problem.x0
+            for i in range(nsim):
+                # Solve with osqp
+                res = m.solve()
 
-        # RHS of the linear equality constraints
-        lqpoases = qp.l
-        uqpoases = qp.u
+                # Save time and number of iterations
+                time[i] = res.info.run_time
+                niter[i] = res.info.iter
 
-        for i in range(nsim):
-            # Reset cpu time
-            qpoases_cpu_time = np.array([60.])
+                # Check if status is correct
+                status = res.info.status_val
+                if status != m.constant('OSQP_SOLVED'):
+                    raise ValueError('OSQP did not solve the problem!')
+                if not qp.is_optimal(res.x, res.y):
+                    raise ValueError('Returned solution not optimal!')
 
-            # Reset number of of working set recalculations
-            nWSR = np.array([1e6])
+                # Apply first control input to the plant
+                u_sys[:, i] = res.x[-N*nu:-(N-1)*nu]
 
-            if i == 0:
-                # First iteration
-                res_qpoases = qpoases_m.init(P, np.ascontiguousarray(qp.q), A,
-                                             np.ascontiguousarray(lx),
-                                             np.ascontiguousarray(ux),
-                                             np.ascontiguousarray(lqpoases),
-                                             np.ascontiguousarray(uqpoases),
-                                             nWSR, qpoases_cpu_time)
-            else:
-                # Solve new hot started problem
-                res_qpoases = qpoases_m.hotstart(np.ascontiguousarray(qp.q),
-                                                 np.ascontiguousarray(lx),
-                                                 np.ascontiguousarray(ux),
-                                                 np.ascontiguousarray(lqpoases),
-                                                 np.ascontiguousarray(uqpoases),
-                                                 nWSR,
-                                                 qpoases_cpu_time)
+                # x_{k+1} = Ax_{t} + Bu_{t}
+                x_sys[:, i+1] = problem.A.dot(x_sys[:, i]) + \
+                    problem.B.dot(u_sys[:, i])
 
-            if res_qpoases != 0:
-                raise ValueError('qpoases did not solve the problem!')
+                # Update linear constraints
+                self.update_initial_state(qp, x_sys[:, i+1])
 
-            # Save time and number of iterations
-            time[i] = qpoases_cpu_time[0]
-            niter[i] = nWSR[0]
+                # Change l and u
+                m.update(l=qp.l, u=qp.u)
 
-            # Get qpoases solution
-            sol_qpoases = np.zeros((N+1)*nx + N*nu)
-            qpoases_m.getPrimalSolution(sol_qpoases)
+        elif solver == 'osqp_no_caching':
 
-            # Apply first control input to the plant
-            u = sol_qpoases[-N*nu:-(N-1)*nu]
-            x0 = problem.A.dot(x0) + problem.B.dot(u)
+            for i in range(nsim):
+                # Setup OSQP
+                m = osqp.OSQP()
+                m.setup(qp.P, qp.q, qp.A, qp.l, qp.u, **osqp_settings)
+                # Solve
+                res = m.solve()
 
-            # Update linear constraints
-            if len(problem.tmin) > 0:
-                lqpoases = np.hstack([b(x0, nx, N), problem.tmin])
-                uqpoases = np.hstack([b(x0, nx, N), problem.tmax])
-            else:
-                lqpoases = np.hstack([b(x0, nx, N)])
-                uqpoases = np.hstack([b(x0, nx, N)])
+                # Save time and number of iterations
+                time[i] = res.info.run_time
+                niter[i] = res.info.iter
 
-    elif solver == 'gurobi' or solver == 'mosek':
-        # Construct qp matrices
-        if len(problem.xmin) > 0:
-            # If the problem has state constraints
-            Agurobi = spa.vstack([
-                        qp.A,
-                        spa.eye((N+1)*nx + N*nu),
-                      ]).tocsc()
-        else:
-            Agurobi = spa.vstack([
-                        qp.A,
-                        spa.hstack([
-                            spa.csc_matrix((N*nu, (N+1)*nx)),
-                            spa.eye(N*nu)]),
-                      ]).tocsc()
-        lgurobi = np.hstack([qp.l, qp.lx])
-        ugurobi = np.hstack([qp.u, qp.ux])
+                # Check if status is correct
+                status = res.info.status_val
+                if status != m.constant('OSQP_SOLVED'):
+                    raise ValueError('OSQP did not solve the problem!')
 
-        # Initial state
-        x0 = problem.x0
+                if not qp.is_optimal(res.x, res.y):
+                    raise ValueError('Returned solution not optimal!')
 
-        for i in range(nsim):
-            # Solve with gurobi
-            prob = mpbpy.QuadprogProblem(qp.P, qp.q, Agurobi, lgurobi, ugurobi)
-            if solver == 'gurobi':
+                # Apply first control input to the plant
+                u_sys[:, i] = res.x[-N*nu:-(N-1)*nu]
+
+                # x_{k+1} = Ax_{t} + Bu_{t}
+                x_sys[:, i+1] = problem.A.dot(x_sys[:, i]) + \
+                    problem.B.dot(u_sys[:, i])
+
+                # Update linear constraints
+                self.update_initial_state(qp, x_sys[:, i+1])
+
+                # Change l and u
+                m.update(l=qp.l, u=qp.u)
+
+        elif solver == 'qpoases':
+
+            n_dim = qp.P.shape[0]  # Number of variables
+            m_dim = qp.A_nobounds.shape[0]  # Number of constraints without bounds
+
+            # Initialize qpoases and set options
+            qpoases_m = qpoases.PyQProblem(n_dim, m_dim)
+            options = qpoases.PyOptions()
+            options.printLevel = qpoases.PyPrintLevel.NONE
+            qpoases_m.setOptions(options)
+
+            # Setup matrix P and A
+            P = np.ascontiguousarray(qp.P.todense())
+            A = np.ascontiguousarray(qp.A_nobounds.todense())
+
+            for i in range(nsim):
+                # Reset cpu time
+                qpoases_cpu_time = np.array([20.])
+
+                # Reset number of of working set recalculations
+                nWSR = np.array([10000])
+
+                if i == 0:
+                    # First iteration
+                    res_qpoases = qpoases_m.init(P, np.ascontiguousarray(qp.q),
+                                                 A,
+                                                 np.ascontiguousarray(qp.lx),
+                                                 np.ascontiguousarray(qp.ux),
+                                                 np.ascontiguousarray(qp.l_nobounds),
+                                                 np.ascontiguousarray(qp.u_nobounds),
+                                                 nWSR, qpoases_cpu_time)
+                else:
+                    # Solve new hot started problem
+                    res_qpoases = qpoases_m.hotstart(np.ascontiguousarray(qp.q),
+                                                     np.ascontiguousarray(qp.lx),
+                                                     np.ascontiguousarray(qp.ux),
+                                                     np.ascontiguousarray(qp.l_nobounds),
+                                                     np.ascontiguousarray(qp.u_nobounds),
+                                                     nWSR,
+                                                     qpoases_cpu_time)
+
+                if res_qpoases != 0:
+                    raise ValueError('qpoases did not solve the problem!')
+
+                # Check qpoases solution
+                x_qpoases = np.zeros(n_dim)
+                y_qpoases = np.zeros(n_dim + m_dim)
+                qpoases_m.getPrimalSolution(x_qpoases)
+                qpoases_m.getDualSolution(y_qpoases)
+                x = x_qpoases
+                y = -y_qpoases[n_dim:]
+
+                if len(problem.xmin) > 0 and len(problem.umin) > 0:
+                    y = np.append(y, -y_qpoases[:n_dim])
+                elif len(problem.xmin) == 0 and len(problem.umin) > 0:
+                    y = np.append(y, -y_qpoases[nx * (N+1):n_dim])
+                elif len(problem.xmin) > 0 and len(problem.umin) == 0:
+                    y = np.append(y, -y_qpoases[: nx * (N+1)])
+
+                if not qp.is_optimal(x, y):
+                    raise ValueError('Returned solution not optimal!')
+
+                # Save time and number of iterations
+                time[i] = qpoases_cpu_time[0]
+                niter[i] = nWSR[0]
+
+                # Apply first control input to the plant
+                u_sys[:, i] = x[-N*nu:-(N-1)*nu]
+
+                # x_{k+1} = Ax_{t} + Bu_{t}
+                x_sys[:, i+1] = problem.A.dot(x_sys[:, i]) + \
+                    problem.B.dot(u_sys[:, i])
+
+                # Update linear constraints
+                self.update_initial_state(qp, x_sys[:, i+1])
+
+        elif solver == 'gurobi':
+            for i in range(nsim):
+                # Solve with gurobi
+                prob = mpbpy.QuadprogProblem(qp.P, qp.q, qp.A,
+                                             qp.l, qp.u)
                 res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
-            else:
+
+                # Save time and number of iterations
+                time[i] = res.cputime
+                niter[i] = res.total_iter
+
+                # Check if status is correct
+                status = res.status
+                if status != 'optimal':
+                    raise ValueError('Gurobi did not solve the problem!')
+
+                if not qp.is_optimal(res.x, res.y):
+                    raise ValueError('Returned solution not optimal!')
+
+                # Apply first control input to the plant
+                u_sys[:, i] = res.x[-N*nu:-(N-1)*nu]
+
+                # x_{k+1} = Ax_{t} + Bu_{t}
+                x_sys[:, i+1] = problem.A.dot(x_sys[:, i]) + \
+                    problem.B.dot(u_sys[:, i])
+
+                # Update linear constraints
+                self.update_initial_state(qp, x_sys[:, i+1])
+
+        elif solver == 'mosek':
+            for i in range(nsim):
+                # Solve with mosek
+                prob = mpbpy.QuadprogProblem(qp.P, qp.q, qp.A,
+                                             qp.l, qp.u)
                 res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
 
-            # Save time and number of iterations
-            time[i] = res.cputime
-            niter[i] = res.total_iter
+                # Save time and number of iterations
+                time[i] = res.cputime
+                niter[i] = res.total_iter
 
-            # Check if status is correct
-            status = res.status
-            if status != 'optimal':
-                import ipdb; ipdb.set_trace()
-                raise ValueError('Gurobi did not solve the problem!')
+                if not qp.is_optimal(res.x, res.y):
+                    raise ValueError('Returned solution not optimal!')
 
-            # Apply first control input to the plant
-            u = res.x[-N*nu:-(N-1)*nu]
-            x0 = problem.A.dot(x0) + problem.B.dot(u)
+                # Apply first control input to the plant
+                u_sys[:, i] = res.x[-N*nu:-(N-1)*nu]
 
-            # Update QP problem
-            if len(problem.tmin) > 0:
-                lgurobi = np.hstack([b(x0, nx, N), problem.tmin, qp.lx])
-                ugurobi = np.hstack([b(x0, nx, N), problem.tmax, qp.ux])
-            else:
-                lgurobi = np.hstack([b(x0, nx, N), qp.lx])
-                ugurobi = np.hstack([b(x0, nx, N), qp.ux])
+                # x_{k+1} = Ax_{t} + Bu_{t}
+                x_sys[:, i+1] = problem.A.dot(x_sys[:, i]) + \
+                    problem.B.dot(u_sys[:, i])
 
-    else:
-        raise ValueError('Solver not understood')
+                # Update linear constraints
+                self.update_initial_state(qp, x_sys[:, i+1])
 
-    # Return statistics
-    return utils.Statistics(time), utils.Statistics(niter)
+        elif solver == 'ecos':
+            cvxpy_prob, x_init, variables = self.gen_cvxpy_problem(qp)
+            (x, u) = variables
+            for i in range(nsim):
+
+                x_init.value = x_sys[:, i]
+
+                cvxpy_prob.solve(solver=cvxpy.ECOS, verbose=False)
+
+                # Obtain time and number of iterations
+                time[i] = cvxpy_prob.solver_stats.setup_time + \
+                    cvxpy_prob.solver_stats.solve_time
+                # time[i] = cvxpy_prob.solver_stats.solve_time
+
+                niter[i] = cvxpy_prob.solver_stats.num_iters
+
+                # Check if solved! (TODO)
+                if cvxpy_prob.status != cvxpy.OPTIMAL:
+                    raise ValueError('ECOS did not solve the problem!')
+
+                # Apply first control input to the plant
+                # u_ecos = np.asarray(u.value)
+                u_sys[:, i] = u.value[:, 0].A1
+
+                # x_{k+1} = Ax_{t} + Bu_{t}
+                x_sys[:, i+1] = problem.A.dot(x_sys[:, i]) + \
+                    problem.B.dot(u_sys[:, i])
+
+                # Update linear constraints
+                self.update_initial_state(qp, x_sys[:, i+1])
+
+        else:
+            raise ValueError('Solver not understood')
 
 
-def run_mpc_example(example_name):
-    """
-    Solve MPC example
-    """
+        # DEBUG: print state behavior
+        # import matplotlib.pylab as plt
+        # plt.figure()
+        # plt.plot(x_sys.T)
+        # plt.show(block=False)
 
-    # Load the example
-    if example_name == 'pendulum':
-        print("MPC pendulum example")
-        print("--------------------")
-        problem = load_pendulum_data()
-    elif example_name == 'helicopter':
-        print("MPC helicopter example")
-        print("----------------------")
-        problem = load_helicopter_data()
-    elif example_name == 'ball':
-        print("MPC ball example")
-        print("----------------")
-        problem = load_ball_data()
-    else:
-        problem = load_ball_data()  # Default data
-
-    # Simulation steps
-    nsim = 100
-
-    # Prediction horizon
-    N_vec = np.array([10, 20, 30, 40, 50, 60, 80, 90, 100])
-    #  N_vec = np.array([10, 20, 30])
-
-    # Define statistics for osqp, qpoases and gurobi
-    osqp_timing = []
-    osqp_iter = []
-    osqp_coldstart_timing = []
-    osqp_coldstart_iter = []
-    osqp_no_caching_timing = []
-    osqp_no_caching_iter = []
-    qpoases_timing = []
-    qpoases_iter = []
-    gurobi_iter = []
-    gurobi_timing = []
-    mosek_iter = []
-    mosek_timing = []
-
-    for i in range(len(N_vec)):
-        # Generate QP
-        problem.N = N_vec[i]
-        qp_matrices = gen_qp_matrices(problem)
-
-        # Solve loop with osqp
-        timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp')
-        osqp_timing.append(timing)
-        osqp_iter.append(niter)
-
-        # Solve loop with osqp (coldstart)
-        timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp_coldstart')
-        osqp_coldstart_timing.append(timing)
-        osqp_coldstart_iter.append(niter)
-
-        # Solve loop with osqp (no caching)
-        timing, niter = solve_loop(qp_matrices, problem, nsim, 'osqp_no_caching')
-        osqp_no_caching_timing.append(timing)
-        osqp_no_caching_iter.append(niter)
-
-        # Solving loop with qpoases
-        timing, niter = solve_loop(qp_matrices, problem, nsim, 'qpoases')
-        qpoases_timing.append(timing)
-        qpoases_iter.append(niter)
-
-        # Solve loop with gurobi
-        timing, niter = solve_loop(qp_matrices, problem, nsim, 'gurobi')
-        gurobi_timing.append(timing)
-        gurobi_iter.append(niter)
-
-        # Solve loop with mosek
-        timing, niter = solve_loop(qp_matrices, problem, nsim, 'mosek')
-        mosek_timing.append(timing)
-        mosek_iter.append(niter)
-
-    solver_timings = OrderedDict([
-                                  ('OSQP (warm start)', osqp_timing),
-                                  ('OSQP (cold start)', osqp_coldstart_timing),
-                                  ('OSQP (no caching)', osqp_no_caching_timing),
-                                  ('qpOASES', qpoases_timing),
-                                  ('GUROBI', gurobi_timing),
-                                  ('MOSEK', mosek_timing)
-                                  ])
-
-    utils.generate_plot('mpc', 'time', 'median', N_vec, solver_timings,
-                        fig_size=0.9, plot_name=problem.name)
-    utils.generate_plot('mpc', 'time', 'total', N_vec, solver_timings,
-                        fig_size=0.9, plot_name=problem.name)
-    utils.generate_plot('mpc', 'time', 'mean', N_vec, solver_timings,
-                        fig_size=0.9, plot_name=problem.name)
-    utils.generate_plot('mpc', 'time', 'max', N_vec, solver_timings,
-                        fig_size=0.9, plot_name=problem.name)
+        # Return statistics
+        return utils.Statistics(time), utils.Statistics(niter)

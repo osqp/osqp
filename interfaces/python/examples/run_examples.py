@@ -25,11 +25,12 @@ from scripts.lasso.lasso_example import LassoExample
 from scripts.huber.huber_example import HuberExample
 from scripts.svm.svm_example import SVMExample
 from scripts.portfolio.portfolio_example import PortfolioExample
+from scripts.mpc.mpc_example import MPCExample
 
 
 # OSQP settings
 osqp_settings = {'auto_rho': False,
-                 'rho': 1.,
+                 'rho': 100.0,
                  'polish': False,
                  'verbose': False}
 
@@ -74,7 +75,8 @@ solvers_svm = ['osqp',
 
 # Portfolio
 n_portfolio = np.array([500, 600])
-solvers_portfolio = ['osqp',
+solvers_portfolio = [
+                     'osqp',
                      'osqp_coldstart',
                      'osqp_no_caching',
                      'gurobi',
@@ -84,7 +86,17 @@ solvers_portfolio = ['osqp',
                      ]
 gammas_portfolio = np.logspace(-1, 1, 51)   # TODO: Change it?
 
-
+# MPC
+n_mpc = np.array([5, 10, 15, 20])
+solvers_mpc = [
+               'osqp',
+               'osqp_coldstart',
+               'osqp_no_caching',
+               'gurobi',
+               'mosek',
+               'qpoases',
+               'ecos'
+               ]
 '''
 Solve problems
 '''
@@ -105,11 +117,10 @@ Solve problems
 # svm.run(osqp_settings)
 
 # Portfolio
-portfolio = PortfolioExample(n_portfolio, solvers_portfolio, gammas_portfolio)
-portfolio.run(osqp_settings)
+# portfolio = PortfolioExample(n_portfolio, solvers_portfolio, gammas_portfolio)
+# portfolio.run(osqp_settings)
 
-
-
-#  run_portfolio_example()
-#  run_mpc_example('helicopter')
-#  run_mpc_example('pendulum')
+# MPC
+# Examples: ball, helicopter, pendulum
+mpc = MPCExample(n_mpc, solvers_mpc, "ball")
+mpc.run(osqp_settings)

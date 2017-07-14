@@ -29,11 +29,13 @@ def load_helicopter_data():
     problem.Q = spa.diags([100, 100, 10, 10, 400, 200])
     QN = spla.solve_discrete_are(problem.A.todense(), problem.B.todense(),
                                  problem.Q.todense(), problem.R.todense())
-    problem.QN = (QN + QN.T) / 2
+    problem.QN = spa.csc_matrix((QN + QN.T) / 2)
     problem.umin = -np.ones(2)
     problem.umax = 3*np.ones(2)
     problem.xmin = -np.array([np.inf, np.inf, 0.44, 0.6, np.inf, np.inf])
     problem.xmax = np.array([np.inf, np.inf, 0.44, 0.6, np.inf, np.inf])
+    # problem.xmin = []
+    # problem.xmax = []
     problem.T = spa.eye(6)
     problem.tmin = -np.ones(6)
     problem.tmax = np.ones(6)

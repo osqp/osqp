@@ -22,8 +22,12 @@ class Example(with_metaclass(abc.ABCMeta, object)):
         pass
 
     def run(self, osqp_settings=None):
-        print("%s  example" % self.name.title())
-        print("--------------------")
+        print("%s  example" % self.name.title(), end='')
+        if hasattr(self, 'problem_name'):
+            print("  %s" % self.problem_name)
+        else:
+            print("")
+        print("---------------------------")
 
         # Reset random seed for repetibility
         np.random.seed(1)
@@ -109,13 +113,19 @@ class Example(with_metaclass(abc.ABCMeta, object)):
         Store plots
         '''
         fig_size = None  # Adapt for talk plots
-
+        if hasattr(self, 'problem_name'):
+            plot_name = self.problem_name
+        else:
+            plot_name = None
         utils.generate_plot(self.name, 'time', 'median', self.n_vec,
                             solver_timings,
-                            fig_size=fig_size)
+                            fig_size=fig_size,
+                            plot_name=plot_name)
         utils.generate_plot(self.name, 'time', 'total', self.n_vec,
                             solver_timings,
-                            fig_size=fig_size)
+                            fig_size=fig_size,
+                            plot_name=plot_name)
         utils.generate_plot(self.name, 'time', 'mean', self.n_vec,
                             solver_timings,
-                            fig_size=fig_size)
+                            fig_size=fig_size,
+                            plot_name=plot_name)

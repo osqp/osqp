@@ -1,5 +1,5 @@
 import matplotlib as mpl
-mpl.use('pgf')  # Export pgf figures
+# mpl.use('pgf')  # Export pgf figures
 import matplotlib.pylab as plt
 
 import os
@@ -59,7 +59,7 @@ def generate_plot(example_name, unit, statistics_name, n_vec, solvers,
 
     #  ax.set_title(statistics_name.title())
     plt.tight_layout()
-    plt.show(block=False)
+    # plt.show(block=False)
 
     plots_dir = 'scripts/%s/plots' % example_name
     if not os.path.isdir(plots_dir):
