@@ -29,7 +29,7 @@ class QPmatrices(object):
         self.nnzA = A.nnz
         self.nnzP = P.nnz
 
-    def is_optimal(self, x, y, eps_abs=1e-03, eps_rel=1e-03):
+    def is_optimal(self, x, y, eps_abs=1e-02, eps_rel=1e-02):
         '''
         Check optimality condition of the QP given the
         primal-dual solution (x, y) and the tolerance eps

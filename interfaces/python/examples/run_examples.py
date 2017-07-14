@@ -30,20 +30,23 @@ from scripts.mpc.mpc_example import MPCExample
 
 # OSQP settings
 osqp_settings = {'auto_rho': False,
-                 'rho': 100.0,
+                 'rho': 1.0,
                  'polish': False,
                  'verbose': False}
 
 # Lasso problem
-n_lasso = np.array([1, 2])
-lambdas_lasso = np.logspace(-1, 1, 11)
-solvers_lasso = ['osqp',
+n_lasso = np.array([10, 20, 50, 70, 100])
+# n_lasso = np.array([70])
+lambdas_lasso = np.logspace(-2, 0, 10)
+solvers_lasso = [
+                 'osqp',
                  'osqp_coldstart',
                  'osqp_no_caching',
                  'gurobi',
                  'mosek',
                  #  'qpoases',   # It fails for big problems!
-                 'ecos']
+                 #  'ecos'
+                 ]
 
 # Eq qp problem
 n_eqqp = np.array([10, 20])
@@ -101,8 +104,8 @@ solvers_mpc = [
 Solve problems
 '''
 # Lasso
-# lasso = LassoExample(n_lasso, solvers_lasso, lambdas_lasso)
-# lasso.run(osqp_settings)
+lasso = LassoExample(n_lasso, solvers_lasso, lambdas_lasso)
+lasso.run(osqp_settings)
 
 # Eq qp
 # eqqp = EqqpExample(n_eqqp, solvers_eqqp)
@@ -122,5 +125,5 @@ Solve problems
 
 # MPC
 # Examples: ball, helicopter, pendulum
-mpc = MPCExample(n_mpc, solvers_mpc, "ball")
-mpc.run(osqp_settings)
+# mpc = MPCExample(n_mpc, solvers_mpc, "ball")
+# mpc.run(osqp_settings)

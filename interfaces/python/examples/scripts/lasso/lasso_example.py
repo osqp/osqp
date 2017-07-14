@@ -334,6 +334,8 @@ class LassoExample(utils.Example):
                                              -constraints[1].dual_value.A1))
 
                     qp.q = qp.q_vec[:, i]
+                    if problem.status != cvxpy.OPTIMAL:
+                        raise ValueError("ECOS did not solve the problem")
                     if not qp.is_optimal(x_ecos, y_ecos):
                         raise ValueError('Returned solution not optimal')
 
