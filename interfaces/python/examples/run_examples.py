@@ -35,7 +35,7 @@ osqp_settings = {'auto_rho': False,
                  'verbose': False}
 
 # Lasso problem
-n_lasso = np.array([10, 20, 50, 70, 100])
+n_lasso = np.array([10, 100, 1000, 10000])
 # n_lasso = np.array([70])
 lambdas_lasso = np.logspace(-2, 0, 10)
 solvers_lasso = [
