@@ -304,7 +304,8 @@ class PortfolioExample(utils.Example):
                 prob = mpbpy.QuadprogProblem(qp.P, qp.q, qp.A, qp.l, qp.u)
                 res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
 
-                if res.status != 'optimal':
+                if res.status != 'optimal' and \
+                        res.status != 'optimal inaccurate':
                     print('GUROBI did not solve the problem!')
                 else:
 
@@ -325,7 +326,8 @@ class PortfolioExample(utils.Example):
                 prob = mpbpy.QuadprogProblem(qp.P, qp.q, qp.A, qp.l, qp.u)
                 res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
 
-                if res.status != 'optimal':
+                if res.status != 'optimal' and \
+                        res.status != 'optimal inaccurate':
                     print('MOSEK did not solve the problem!')
                 else:
                     niter[i] = res.total_iter
@@ -352,7 +354,8 @@ class PortfolioExample(utils.Example):
                                          cons[2].dual_value.A1))
 
                 qp.q = qp.q_vec[:, i]
-                if problem.status != 'optimal':
+                if problem.status != 'optimal' and \
+                        problem.status != 'optimal inaccurate':
                     print('ECOS did not solve the problem!')
                 else:
                     # Obtain time and number of iterations

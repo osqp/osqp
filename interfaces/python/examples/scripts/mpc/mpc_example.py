@@ -432,7 +432,8 @@ class MPCExample(utils.Example):
                                              qp.l, qp.u)
                 res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
 
-                if res.status != 'optimal':
+                if res.status != 'optimal' and \
+                        res.status != 'optimal inaccurate':
                     print('GUROBI did not solve the problem!')
                 else:
 
@@ -459,7 +460,8 @@ class MPCExample(utils.Example):
                                              qp.l, qp.u)
                 res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
 
-                if res.status != 'optimal':
+                if res.status != 'optimal' and \
+                        res.status != 'optimal inaccurate':
                     print('MOSEK did not solve the problem!')
                 else:
                     niter[i] = res.total_iter
@@ -494,7 +496,8 @@ class MPCExample(utils.Example):
 
                 niter[i] = cvxpy_prob.solver_stats.num_iters
 
-                if cvxpy_prob.status != 'optimal':
+                if problem.status != 'optimal' and \
+                        problem.status != 'optimal inaccurate':
                     print('ECOS did not solve the problem!')
                 else:
                     # Obtain time and number of iterations

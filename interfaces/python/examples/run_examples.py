@@ -44,7 +44,7 @@ solvers_lasso = [
                  'gurobi',
                  'mosek',
                  #  'qpoases',   # It fails for big problems!
-                 #  'ecos'
+                  'ecos'
                  ]
 
 # Eq qp problem

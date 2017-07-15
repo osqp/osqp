@@ -174,7 +174,8 @@ class EqqpExample(utils.Example):
                 prob = mpbpy.QuadprogProblem(qp.P, qp.q, qp.A, qp.l, qp.u)
                 res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
 
-                if res.status != 'optimal':
+                if res.status != 'optimal' and \
+                        res.status != 'optimal inaccurate':
                     print('GUROBI did not solve the problem!')
                 else:
                     # Save time
@@ -193,7 +194,8 @@ class EqqpExample(utils.Example):
                 prob = mpbpy.QuadprogProblem(qp.P, qp.q, qp.A, qp.l, qp.u)
                 res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
 
-                if res.status != 'optimal':
+                if res.status != 'optimal' and \
+                        res.status != 'optimal inaccurate':
                     print('MOSEK did not solve the problem!')
                 else:
                     # Save time
@@ -220,7 +222,8 @@ class EqqpExample(utils.Example):
                 y_ecos = constraints[0].dual_value.A1 - \
                     constraints[1].dual_value.A1
 
-                if problem.status != 'optimal':
+                if problem.status != 'optimal' and \
+                        problem.status != 'optimal inaccurate':
                     print('ECOS did not solve the problem!')
                 else:
                     # Obtain time and number of iterations
