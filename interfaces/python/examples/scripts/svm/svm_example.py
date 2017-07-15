@@ -141,14 +141,15 @@ class SVMExample(utils.Example):
                 x = results.x
                 y = results.y
                 status = results.info.status_val
-                niter[i] = results.info.iter
-                time[i] = results.info.run_time
-
                 # Check if status correct
                 if status != m.constant('OSQP_SOLVED'):
-                    raise ValueError('OSQP did not solve the problem!')
+                    print('OSQP did not solve the problem!')
+                else:
+                    niter[i] = results.info.iter
+                    time[i] = results.info.run_time
+
                 if not qp.is_optimal(x, y):
-                    raise ValueError('Returned solution not optimal!')
+                    print('Returned solution not optimal!')
 
         elif solver == 'qpoases':
 
@@ -170,7 +171,7 @@ class SVMExample(utils.Example):
                 qpoases_cpu_time = np.array([20.])
 
                 # Reset number of working set recalculations
-                nWSR = np.array([1000])
+                nWSR = np.array([10000])
 
                 # Solve
                 res_qpoases = qpoases_m.init(P, np.ascontiguousarray(qp.q), A,
@@ -189,14 +190,14 @@ class SVMExample(utils.Example):
                 y = np.append(-y[n_dim:], -y[qp.n:n_dim])
 
                 if res_qpoases != 0:
-                    raise ValueError('qpoases did not solve the problem!')
+                    print('qpoases did not solve the problem!')
+                else:
+                    # Save time and number of iterations
+                    time[i] = qpoases_cpu_time[0]
+                    niter[i] = nWSR[0]
 
-                if not qp.is_optimal(x, y):
-                    raise ValueError('Returned solution not optimal!')
-
-                # Save time and number of iterations
-                time[i] = qpoases_cpu_time[0]
-                niter[i] = nWSR[0]
+                    if not qp.is_optimal(x, y):
+                        print('Returned solution not optimal!')
 
         elif solver == 'gurobi':
 
@@ -205,11 +206,15 @@ class SVMExample(utils.Example):
                 # Solve with gurobi
                 prob = mpbpy.QuadprogProblem(qp.P, qp.q, qp.A, qp.l, qp.u)
                 res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
-                niter[i] = res.total_iter
-                time[i] = res.cputime
+                if res.status != 'optimal':
+                    print('GUROBI did not solve the problem!')
+                else:
 
-                if not qp.is_optimal(res.x, res.y):
-                    raise ValueError('Returned solution not optimal!')
+                    niter[i] = res.total_iter
+                    time[i] = res.cputime
+
+                    if not qp.is_optimal(res.x, res.y):
+                        print('Returned solution not optimal!')
 
         elif solver == 'mosek':
 
@@ -218,11 +223,14 @@ class SVMExample(utils.Example):
                 # Solve with mosek
                 prob = mpbpy.QuadprogProblem(qp.P, qp.q, qp.A, qp.l, qp.u)
                 res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
-                niter[i] = res.total_iter
-                time[i] = res.cputime
+                if res.status != 'optimal':
+                    print('MOSEK did not solve the problem!')
+                else:
+                    niter[i] = res.total_iter
+                    time[i] = res.cputime
 
-                if not qp.is_optimal(res.x, res.y):
-                    raise ValueError('Returned solution not optimal!')
+                    if not qp.is_optimal(res.x, res.y):
+                        print('Returned solution not optimal!')
 
         elif solver == 'ecos':
 
@@ -243,14 +251,17 @@ class SVMExample(utils.Example):
                 prob = mpbpy.QuadprogProblem(qp.P, qp.q, qp.A, qp.l, qp.u)
                 res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
 
-                if not qp.is_optimal(x_ecos, y_ecos):
-                    raise ValueError('Returned solution not optimal')
+                if problem.status != 'optimal':
+                    print('ECOS did not solve the problem!')
+                else:
+                    # Obtain time and number of iterations
+                    time[i] = problem.solver_stats.setup_time + \
+                        problem.solver_stats.solve_time
 
-                # Obtain time and number of iterations
-                time[i] = problem.solver_stats.setup_time + \
-                    problem.solver_stats.solve_time
+                    niter[i] = problem.solver_stats.num_iters
 
-                niter[i] = problem.solver_stats.num_iters
+                    if not qp.is_optimal(x_ecos, y_ecos):
+                        print('Returned solution not optimal')
 
         else:
             raise ValueError('Solver not understood')

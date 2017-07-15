@@ -239,8 +239,10 @@ class MPCExample(utils.Example):
 
                 # Check if status is correct
                 status = res.info.status_val
-                if status != m.constant('OSQP_SOLVED'):
 
+                # Check if status correct
+                if status != m.constant('OSQP_SOLVED'):
+                    print('OSQP did not solve the problem!')
                     # # Dump file to 'bad_convergence/data'folder
                     # import pickle
                     # problem = {'P': qp.P,
@@ -250,10 +252,12 @@ class MPCExample(utils.Example):
                     #            'u': qp.u}
                     # with open('bad_convergence/data/%s.pickle' % 'helicopter_balanced_residuals', 'wb') as f:
                     #     pickle.dump(problem, f)
-                    raise ValueError('OSQP did not solve the problem!')
+                else:
+                    niter[i] = res.info.iter
+                    time[i] = res.info.run_time
 
-                if not qp.is_optimal(res.x, res.y):
-                    raise ValueError('Returned solution not optimal!')
+                    if not qp.is_optimal(res.x, res.y):
+                        print('Returned solution not optimal!')
 
                 # Apply first control input to the plant
                 u_sys[:, i] = res.x[-N*nu:-(N-1)*nu]
@@ -284,10 +288,15 @@ class MPCExample(utils.Example):
 
                 # Check if status is correct
                 status = res.info.status_val
+                # Check if status correct
                 if status != m.constant('OSQP_SOLVED'):
-                    raise ValueError('OSQP did not solve the problem!')
+                    print('OSQP did not solve the problem!')
+                else:
+                    niter[i] = res.info.iter
+                    time[i] = res.info.run_time
+
                 if not qp.is_optimal(res.x, res.y):
-                    raise ValueError('Returned solution not optimal!')
+                    print('Returned solution not optimal!')
 
                 # Apply first control input to the plant
                 u_sys[:, i] = res.x[-N*nu:-(N-1)*nu]
@@ -317,11 +326,15 @@ class MPCExample(utils.Example):
 
                 # Check if status is correct
                 status = res.info.status_val
+                # Check if status correct
                 if status != m.constant('OSQP_SOLVED'):
-                    raise ValueError('OSQP did not solve the problem!')
+                    print('OSQP did not solve the problem!')
+                else:
+                    niter[i] = res.info.iter
+                    time[i] = res.info.run_time
 
                 if not qp.is_optimal(res.x, res.y):
-                    raise ValueError('Returned solution not optimal!')
+                    print('Returned solution not optimal!')
 
                 # Apply first control input to the plant
                 u_sys[:, i] = res.x[-N*nu:-(N-1)*nu]
@@ -377,9 +390,6 @@ class MPCExample(utils.Example):
                                                      nWSR,
                                                      qpoases_cpu_time)
 
-                if res_qpoases != 0:
-                    raise ValueError('qpoases did not solve the problem!')
-
                 # Check qpoases solution
                 x_qpoases = np.zeros(n_dim)
                 y_qpoases = np.zeros(n_dim + m_dim)
@@ -395,12 +405,15 @@ class MPCExample(utils.Example):
                 elif len(problem.xmin) > 0 and len(problem.umin) == 0:
                     y = np.append(y, -y_qpoases[: nx * (N+1)])
 
-                if not qp.is_optimal(x, y):
-                    raise ValueError('Returned solution not optimal!')
+                if res_qpoases != 0:
+                    print('qpoases did not solve the problem!')
+                else:
+                    # Save time and number of iterations
+                    time[i] = qpoases_cpu_time[0]
+                    niter[i] = nWSR[0]
 
-                # Save time and number of iterations
-                time[i] = qpoases_cpu_time[0]
-                niter[i] = nWSR[0]
+                    if not qp.is_optimal(x, y):
+                        print('Returned solution not optimal!')
 
                 # Apply first control input to the plant
                 u_sys[:, i] = x[-N*nu:-(N-1)*nu]
@@ -419,17 +432,15 @@ class MPCExample(utils.Example):
                                              qp.l, qp.u)
                 res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
 
-                # Save time and number of iterations
-                time[i] = res.cputime
-                niter[i] = res.total_iter
+                if res.status != 'optimal':
+                    print('GUROBI did not solve the problem!')
+                else:
 
-                # Check if status is correct
-                status = res.status
-                if status != 'optimal':
-                    raise ValueError('Gurobi did not solve the problem!')
+                    niter[i] = res.total_iter
+                    time[i] = res.cputime
 
-                if not qp.is_optimal(res.x, res.y):
-                    raise ValueError('Returned solution not optimal!')
+                    if not qp.is_optimal(res.x, res.y):
+                        print('Returned solution not optimal!')
 
                 # Apply first control input to the plant
                 u_sys[:, i] = res.x[-N*nu:-(N-1)*nu]
@@ -448,12 +459,14 @@ class MPCExample(utils.Example):
                                              qp.l, qp.u)
                 res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
 
-                # Save time and number of iterations
-                time[i] = res.cputime
-                niter[i] = res.total_iter
+                if res.status != 'optimal':
+                    print('MOSEK did not solve the problem!')
+                else:
+                    niter[i] = res.total_iter
+                    time[i] = res.cputime
 
-                if not qp.is_optimal(res.x, res.y):
-                    raise ValueError('Returned solution not optimal!')
+                    if not qp.is_optimal(res.x, res.y):
+                        print('Returned solution not optimal!')
 
                 # Apply first control input to the plant
                 u_sys[:, i] = res.x[-N*nu:-(N-1)*nu]
@@ -481,9 +494,14 @@ class MPCExample(utils.Example):
 
                 niter[i] = cvxpy_prob.solver_stats.num_iters
 
-                # Check if solved! (TODO)
-                if cvxpy_prob.status != cvxpy.OPTIMAL:
-                    raise ValueError('ECOS did not solve the problem!')
+                if cvxpy_prob.status != 'optimal':
+                    print('ECOS did not solve the problem!')
+                else:
+                    # Obtain time and number of iterations
+                    time[i] = cvxpy_prob.solver_stats.setup_time + \
+                        cvxpy_prob.solver_stats.solve_time
+
+                    niter[i] = cvxpy_prob.solver_stats.num_iters
 
                 # Apply first control input to the plant
                 # u_ecos = np.asarray(u.value)

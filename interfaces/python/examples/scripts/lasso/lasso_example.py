@@ -138,15 +138,16 @@ class LassoExample(utils.Example):
                 x = results.x
                 y = results.y
                 status = results.info.status_val
-                niter[i] = results.info.iter
-                time[i] = results.info.run_time
 
                 # Check if status correct
                 if status != m.constant('OSQP_SOLVED'):
-                    raise ValueError('OSQP did not solve the problem!')
+                    print('OSQP did not solve the problem!')
+                else:
+                    niter[i] = results.info.iter
+                    time[i] = results.info.run_time
 
-                if not qp.is_optimal(x, y):
-                    raise ValueError('Returned solution not optimal!')
+                    if not qp.is_optimal(x, y):
+                        print('Returned solution not optimal!')
 
         elif solver == 'osqp_coldstart':
 
@@ -166,15 +167,15 @@ class LassoExample(utils.Example):
                 x = results.x
                 y = results.y
                 status = results.info.status_val
-                niter[i] = results.info.iter
-                time[i] = results.info.run_time
-
                 # Check if status correct
                 if status != m.constant('OSQP_SOLVED'):
-                    raise ValueError('OSQP did not solve the problem!')
+                    print('OSQP did not solve the problem!')
+                else:
+                    niter[i] = results.info.iter
+                    time[i] = results.info.run_time
 
-                if not qp.is_optimal(x, y):
-                    raise ValueError('Returned solution not optimal!')
+                    if not qp.is_optimal(x, y):
+                        print('Returned solution not optimal!')
 
         elif solver == 'osqp_no_caching':
 
@@ -190,15 +191,15 @@ class LassoExample(utils.Example):
                 x = results.x
                 y = results.y
                 status = results.info.status_val
-                niter[i] = results.info.iter
-                time[i] = results.info.run_time
-
                 # Check if status correct
                 if status != m.constant('OSQP_SOLVED'):
-                    raise ValueError('OSQP did not solve the problem!')
+                    print('OSQP did not solve the problem!')
+                else:
+                    niter[i] = results.info.iter
+                    time[i] = results.info.run_time
 
-                if not qp.is_optimal(x, y):
-                    raise ValueError('Returned solution not optimal!')
+                    if not qp.is_optimal(x, y):
+                        print('Returned solution not optimal!')
 
         elif solver == 'qpoases':
 
@@ -253,16 +254,16 @@ class LassoExample(utils.Example):
                 y = -y[n_dim:]
 
                 if res_qpoases != 0:
-                    raise ValueError('qpoases did not solve the problem!')
+                    print('qpoases did not solve the problem!')
+                else:
+                    # Save time
+                    time[i] = qpoases_cpu_time[0]
 
-                if not qp.is_optimal(x, y):
-                    raise ValueError('Returned solution not optimal!')
+                    # Save number of iterations
+                    niter[i] = nWSR[0]
 
-                # Save time
-                time[i] = qpoases_cpu_time[0]
-
-                # Save number of iterations
-                niter[i] = nWSR[0]
+                    if not qp.is_optimal(x, y):
+                        print('Returned solution not optimal!')
 
         elif solver == 'gurobi':
 
@@ -275,14 +276,17 @@ class LassoExample(utils.Example):
                 prob = mpbpy.QuadprogProblem(qp.P, qp.q, qp.A, qp.l, qp.u)
                 res = prob.solve(solver=mpbpy.GUROBI, verbose=False)
 
-                if not qp.is_optimal(res.x, res.y):
-                    raise ValueError('Returned solution not optimal!')
+                if res.status != 'optimal':
+                    print('GUROBI did not solve the problem!')
+                else:
+                    # Save time
+                    time[i] = res.cputime
 
-                # Save time
-                time[i] = res.cputime
+                    # Save number of iterations
+                    niter[i] = res.total_iter
 
-                # Save number of iterations
-                niter[i] = res.total_iter
+                    if not qp.is_optimal(res.x, res.y):
+                        print('Returned solution not optimal!')
 
         elif solver == 'mosek':
 
@@ -295,14 +299,17 @@ class LassoExample(utils.Example):
                 prob = mpbpy.QuadprogProblem(qp.P, qp.q, qp.A, qp.l, qp.u)
                 res = prob.solve(solver=mpbpy.MOSEK, verbose=False)
 
-                if not qp.is_optimal(res.x, res.y):
-                    raise ValueError('Returned solution not optimal!')
+                if res.status != 'optimal':
+                    print('MOSEK did not solve the problem!')
+                else:
+                    # Save time
+                    time[i] = res.cputime
 
-                # Save time
-                time[i] = res.cputime
+                    # Save number of iterations
+                    niter[i] = res.total_iter
 
-                # Save number of iterations
-                niter[i] = res.total_iter
+                    if not qp.is_optimal(res.x, res.y):
+                        print('Returned solution not optimal!')
 
         elif solver == 'ecos':
 
@@ -334,19 +341,18 @@ class LassoExample(utils.Example):
                                              -constraints[1].dual_value.A1))
 
                     qp.q = qp.q_vec[:, i]
-                    if problem.status != cvxpy.OPTIMAL:
-                        raise ValueError("ECOS did not solve the problem")
-                    if not qp.is_optimal(x_ecos, y_ecos):
-                        raise ValueError('Returned solution not optimal')
+                    
+                    if problem.status != 'optimal':
+                        print('ECOS did not solve the problem!')
+                    else:
+                        # Obtain time and number of iterations
+                        time[i] = problem.solver_stats.setup_time + \
+                            problem.solver_stats.solve_time
 
-                    # Obtain time and number of iterations
-                    time[i] = problem.solver_stats.setup_time + \
-                        problem.solver_stats.solve_time
+                        niter[i] = problem.solver_stats.num_iters
 
-                    niter[i] = problem.solver_stats.num_iters
-                # else:
-                    # time[i] = 0
-                    # niter[i] = 0
+                        if not qp.is_optimal(x_ecos, y_ecos):
+                            print('Returned solution not optimal')
 
         else:
             raise ValueError('Solver not understood')

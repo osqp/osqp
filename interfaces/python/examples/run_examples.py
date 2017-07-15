@@ -36,7 +36,6 @@ osqp_settings = {'auto_rho': False,
 
 # Lasso problem
 n_lasso = np.array([10, 100, 1000, 10000])
-# n_lasso = np.array([70])
 lambdas_lasso = np.logspace(-2, 0, 10)
 solvers_lasso = [
                  'osqp',
@@ -77,7 +76,7 @@ solvers_svm = ['osqp',
                ]
 
 # Portfolio
-n_portfolio = np.array([500, 600])
+n_portfolio = np.array([200, 210])
 solvers_portfolio = [
                      'osqp',
                      'osqp_coldstart',

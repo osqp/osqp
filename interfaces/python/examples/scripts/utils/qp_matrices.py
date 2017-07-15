@@ -29,7 +29,7 @@ class QPmatrices(object):
         self.nnzA = A.nnz
         self.nnzP = P.nnz
 
-    def is_optimal(self, x, y, eps_abs=1e-02, eps_rel=1e-02):
+    def is_optimal(self, x, y, eps_abs=1e-03, eps_rel=1e-03):
         '''
         Check optimality condition of the QP given the
         primal-dual solution (x, y) and the tolerance eps
@@ -76,12 +76,12 @@ class QPmatrices(object):
 
         if la.norm(comp_res_l, np.inf) > eps_comp:
             print("Error in complementary slackness residual l: %.4e > %.4e" %
-                  (la.norm(comp_res_l, np.inf), eps_dua), end='')
+                  (la.norm(comp_res_l, np.inf), eps_comp), end='')
             return False
 
         if la.norm(comp_res_u, np.inf) > eps_comp:
             print("Error in complementary slackness residual u: %.4e > %.4e" %
-                  (la.norm(comp_res_u, np.inf), eps_dua), end='')
+                  (la.norm(comp_res_u, np.inf), eps_comp), end='')
             return False
 
         # If we arrived until here, the solution is optimal

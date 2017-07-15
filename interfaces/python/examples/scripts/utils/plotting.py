@@ -43,8 +43,13 @@ def generate_plot(example_name, unit, statistics_name, n_vec, solvers,
     ax = plt.gca()
 
     for (solver_name, solver_stats) in solvers.items():
-        temp_vec, idx_val = gen_stats_array_vec(statistics_name, solver_stats)
-        plt.loglog(n_vec[idx_val], temp_vec, label=r"$\mbox{%s}$" % solver_name)
+        # If plotting iterations, consider only OSQP
+        if (unit == 'iterations' and solver_name[:4] == 'OSQP') or \
+                (unit != 'iterations'):
+            temp_vec, idx_val = gen_stats_array_vec(statistics_name,
+                                                    solver_stats)
+            plt.loglog(n_vec[idx_val], temp_vec, label=r"$\mbox{%s}$" %
+                       solver_name)
 
     plt.legend()
     plt.grid()
