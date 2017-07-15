@@ -38,13 +38,13 @@ def gen_stats_array_vec(statistics_name, stats):
     return out_vec, idx_vec
 
 
-def compute_statistics_dataframe(statistics_name, timings_dict, n_vec):
+def compute_statistics_dataframe(statistics_name, data_dict, n_vec):
     '''
-    Compute statistics dataframe from timings dictionary
+    Compute statistics dataframe from data dictionary
     '''
     df = pd.DataFrame({'n': n_vec})
 
-    for (solver_name, solver_timings) in timings_dict.items():
+    for (solver_name, solver_timings) in data_dict.items():
         stats_array, idx_val = gen_stats_array_vec(statistics_name,
                                                    solver_timings)
         df['%s %s' % (solver_name, statistics_name)] = stats_array
@@ -52,25 +52,22 @@ def compute_statistics_dataframe(statistics_name, timings_dict, n_vec):
     return df
 
 
-def store_timings(example_name, timings_dict, n_vec, stats_name):
-    #  comparison_table = pd.DataFrame(timings_dict)
-    #  comparison_table = comparison_table[cols]  # Sort table columns
-
+def store_statistics(example_name, data_name, stats_dict, n_vec, stats_name):
     comparison_table = compute_statistics_dataframe(stats_name,
-                                                    timings_dict,
+                                                    stats_dict,
                                                     n_vec)
 
     data_dir = 'scripts/%s/data' % example_name
     if not os.path.isdir(data_dir):
         os.makedirs(data_dir)
 
-    comparison_table.to_csv('%s/timings_%s.csv' % (data_dir, stats_name),
+    comparison_table.to_csv('%s/%s_%s.csv' % (data_dir, data_name, stats_name),
                             index=False)
 
     # Converting results to latex table and storing them to a file
     formatter = lambda x: '%1.2f' % x
     latex_table = comparison_table.to_latex(header=True, index=False,
                                             float_format=formatter)
-    f = open('%s/timings_%s.tex' % (data_dir, stats_name), 'w')
+    f = open('%s/%s_%s.tex' % (data_dir, data_name, stats_name), 'w')
     f.write(latex_table)
     f.close()

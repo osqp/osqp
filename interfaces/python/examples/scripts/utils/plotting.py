@@ -3,7 +3,7 @@ import matplotlib as mpl
 import matplotlib.pylab as plt
 
 import os
-from .timing import gen_stats_array_vec
+from .statistics import gen_stats_array_vec
 
 # Text width in pt
 # -> Get this from LaTeX using \the\textwidth
@@ -50,9 +50,9 @@ def generate_plot(example_name, unit, statistics_name, n_vec, solvers,
     plt.grid()
     ax.set_xlabel(r'$n$')
 
-    if unit == 'time':
+    if unit == 'timings':
         ax.set_ylabel(r'$\mbox{Time }[s]$')
-    elif unit == 'iter':
+    elif unit == 'iterations':
         ax.set_ylabel(r'$\mathrm{Iterations}$')
     else:
         raise ValueError('Unrecognized y unit')
@@ -66,4 +66,5 @@ def generate_plot(example_name, unit, statistics_name, n_vec, solvers,
         os.makedirs(plots_dir)
 
     # Save figure
-    plt.savefig('%s/%s_%s.pdf' % (plots_dir, plot_name, statistics_name))
+    plt.savefig('%s/%s_%s_%s.pdf' % (plots_dir, plot_name, unit,
+                                     statistics_name))

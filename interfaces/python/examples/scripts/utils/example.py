@@ -70,13 +70,14 @@ class Example(with_metaclass(abc.ABCMeta, object)):
                 statistics[solver]['iter'].append(niter)
 
         # Create ordered timings dictionary
-        solver_timings = self.create_timings_dict(statistics)
+        solver_timings, solver_iters = self.create_ordered_dict(statistics)
 
         # Store data and plots
-        self.store_data_and_plots(solver_timings, dimensions)
+        self.store_data_and_plots(solver_timings, solver_iters, dimensions)
 
-    def create_timings_dict(self, statistics):
+    def create_ordered_dict(self, statistics):
         timings_dict = OrderedDict()
+        iter_dict = OrderedDict()
 
         for solver in self.solvers:
 
@@ -98,15 +99,23 @@ class Example(with_metaclass(abc.ABCMeta, object)):
 
             # Store statistics
             timings_dict[solver_name] = statistics[solver]['timing']
+            iter_dict[solver_name] = statistics[solver]['iter']
 
-        return timings_dict
+        return timings_dict, iter_dict
 
-    def store_data_and_plots(self, solver_timings, dimensions):
+    def store_data_and_plots(self, timings, iterations, dimensions):
         '''
-        Store dimensions and timings
+        Store timings, iterations, dimensions
         '''
-        utils.store_timings(self.name, solver_timings, self.n_vec, 'mean')
-        utils.store_timings(self.name, solver_timings, self.n_vec, 'max')
+
+        utils.store_statistics(self.name, "timings",
+                               timings, self.n_vec, 'mean')
+        utils.store_statistics(self.name, "timings",
+                               timings, self.n_vec, 'max')
+        utils.store_statistics(self.name, "iterations",
+                               iterations, self.n_vec, 'mean')
+        utils.store_statistics(self.name, "iterations",
+                               iterations, self.n_vec, 'max')
         utils.store_dimensions(self.name, dimensions)
 
         '''
@@ -117,15 +126,27 @@ class Example(with_metaclass(abc.ABCMeta, object)):
             plot_name = self.problem_name
         else:
             plot_name = None
-        utils.generate_plot(self.name, 'time', 'median', self.n_vec,
-                            solver_timings,
+        utils.generate_plot(self.name, 'timings', 'median', self.n_vec,
+                            timings,
                             fig_size=fig_size,
                             plot_name=plot_name)
-        utils.generate_plot(self.name, 'time', 'total', self.n_vec,
-                            solver_timings,
+        utils.generate_plot(self.name, 'timings', 'total', self.n_vec,
+                            timings,
                             fig_size=fig_size,
                             plot_name=plot_name)
-        utils.generate_plot(self.name, 'time', 'mean', self.n_vec,
-                            solver_timings,
+        utils.generate_plot(self.name, 'timings', 'mean', self.n_vec,
+                            timings,
+                            fig_size=fig_size,
+                            plot_name=plot_name)
+        utils.generate_plot(self.name, 'iterations', 'median', self.n_vec,
+                            iterations,
+                            fig_size=fig_size,
+                            plot_name=plot_name)
+        utils.generate_plot(self.name, 'iterations', 'total', self.n_vec,
+                            iterations,
+                            fig_size=fig_size,
+                            plot_name=plot_name)
+        utils.generate_plot(self.name, 'iterations', 'mean', self.n_vec,
+                            iterations,
                             fig_size=fig_size,
                             plot_name=plot_name)
