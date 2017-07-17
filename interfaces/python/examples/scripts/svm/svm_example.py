@@ -43,7 +43,7 @@ class SVMExample(utils.Example):
         Generate QP matrices for SVM problem
         """
         # Same dimension n and m
-        m = 10 * n
+        m = 100 * n
 
         # Generate data
         N = int(m / 2)

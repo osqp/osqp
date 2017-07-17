@@ -34,8 +34,8 @@ osqp_settings = {'auto_rho': False,
                  'polish': False,
                  'verbose': False}
 
-# Lasso problem
-n_lasso = np.array([10, 100, 1000, 10000])
+# Lasso problem (best rho = 1)
+n_lasso = np.array([10, 50, 100, 500, 1000])
 lambdas_lasso = np.logspace(-2, 0, 10)
 solvers_lasso = [
                  'osqp',
@@ -44,35 +44,35 @@ solvers_lasso = [
                  'gurobi',
                  'mosek',
                  #  'qpoases',   # It fails for big problems!
-                  'ecos'
+                  #  'ecos'
                  ]
 
 # Eq qp problem
-n_eqqp = np.array([10, 20])
+n_eqqp = np.array([10, 100, 1000, 10000])
 solvers_eqqp = ['osqp',
                 'gurobi',
                 'mosek',
-                'ecos',
-                'qpoases'
+                #  'ecos',
+                #  'qpoases'
                 ]
 
-# Huber problem
-n_huber = np.array([2, 3])
+# Huber problem (best rho = 1)
+n_huber = np.array([10, 50, 100, 500, 1000])
 solvers_huber = ['osqp',
                  'gurobi',
                  'mosek',
-                 'ecos',
-                 'qpoases'
+                 #  'ecos',
+                 #  'qpoases'
                  ]
 
 
 # SVM problem
-n_svm = np.array([2, 3, 4])
+n_svm = np.array([10, 50, 100, 500, 1000])
 solvers_svm = ['osqp',
                'gurobi',
                'mosek',
-               'ecos',
-               'qpoases'
+               #  'ecos',
+               #  'qpoases'
                ]
 
 # Portfolio
@@ -103,20 +103,20 @@ solvers_mpc = [
 Solve problems
 '''
 # Lasso
-lasso = LassoExample(n_lasso, solvers_lasso, lambdas_lasso)
-lasso.run(osqp_settings)
+#  lasso = LassoExample(n_lasso, solvers_lasso, lambdas_lasso)
+#  lasso.run(osqp_settings)
 
 # Eq qp
-# eqqp = EqqpExample(n_eqqp, solvers_eqqp)
-# eqqp.run(osqp_settings)
+#  eqqp = EqqpExample(n_eqqp, solvers_eqqp)
+#  eqqp.run(osqp_settings)
 
 # Huber
-# huber = HuberExample(n_huber, solvers_huber)
-# huber.run(osqp_settings)
+#  huber = HuberExample(n_huber, solvers_huber)
+#  huber.run(osqp_settings)
 
 # SVM
-# svm = SVMExample(n_svm, solvers_svm)
-# svm.run(osqp_settings)
+svm = SVMExample(n_svm, solvers_svm)
+svm.run(osqp_settings)
 
 # Portfolio
 # portfolio = PortfolioExample(n_portfolio, solvers_portfolio, gammas_portfolio)

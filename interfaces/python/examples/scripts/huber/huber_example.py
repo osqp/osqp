@@ -43,7 +43,7 @@ class HuberExample(utils.Example):
         """
 
         # 10 more datapoints than features
-        m = int(n * 10)
+        m = int(n * 100)
 
         # Generate data
         A_huber = spa.random(m, n, density=dens_lvl, format='csc')
