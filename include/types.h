@@ -19,7 +19,7 @@ typedef struct {
      c_int nzmax;     ///< maximum number of entries.
      c_int m;         ///< number of rows
      c_int n;         ///< number of columns
-     c_int *p;        ///< column pointers (size n+1) or col indices (size nzmax) start from 0
+     c_int *p;        ///< column pointers (size n+1) (col indices (size nzmax) start from 0 when using triplet format (direct KKT matrix formation))
      c_int *i;        ///< row indices, size nzmax starting from 0
      c_float *x;      ///< numerical values, size nzmax
      c_int nz;       ///< # of entries in triplet matrix, -1 for csc
@@ -159,7 +159,7 @@ typedef struct {
         c_int auto_rho; ///< boolean, true if rho is chosen automatically
         #endif
 
-        c_int scaled_termination;  ///< boolean, use scaled termination criteria 
+        c_int scaled_termination;  ///< boolean, use scaled termination criteria
         c_int early_terminate;  ///< boolean, terminate if stopping criteria is met
         c_int early_terminate_interval; ///< boolean, interval for checking termination, if early_terminate == 1
         c_int warm_start; ///< boolean, warm start
@@ -224,7 +224,7 @@ typedef struct {
 
         c_float *D_temp;            ///< temporary primal variable scaling vectors
         c_float *D_temp_A;            ///< temporary primal variable scaling vectors storing norms of A columns
-        c_float *E_temp;            ///< temporary constraints scaling vectors storing norms of A' columns 
+        c_float *E_temp;            ///< temporary constraints scaling vectors storing norms of A' columns
 
         /** @} */
 
