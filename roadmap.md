@@ -2,6 +2,7 @@
 -   [ ] Add indirect solver
 -   [ ] Check interfaces values for linsys solver
 -   [ ] Make sure codegen checks that the solver is SUITESPARSE_LDL
+-   [ ] Return a certificate of infeasibility when problem is infeasible
 -   [ ] Add functions to update rho and sigma (by updating the KKT matrix entries)
 -   [ ] Replace EMBEDDED flag in C with:  EMBEDDED, EMBEDDED_PARAMETERS_VECTORS, EMBEDDED_PARAMETERS_MATRICES (all true/false)
 -   [ ] Implement cheaper dual residual computation: (only one matrix-vector computation)
