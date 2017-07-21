@@ -110,11 +110,11 @@ where :code:`kwargs` are the settings that can be updated which are marked with 
 Warm start
 ----------
 
-Primal and dual variables can be warm-started with
+OSQP automatically warm starts primal and dual variables from the previous QP solution. If you would like to warm start their values manually, you can use
 
 .. code:: python
 
     m.warm_start(x=x0, y=y0)
 
 
-where :code:`x0` and :code:`y0` are the new primal and dual variables.
+where :code:`x0` and :code:`y0` are the new primal and dual variables. Please make sure :code`warm_start` solver option is active.

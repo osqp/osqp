@@ -3,7 +3,7 @@
 Solver settings
 ---------------
 
-The solver settings are displayed in the following table. Not that the boolean values :code:`True/False` are defined as :code:`1/0` in the C/C++ interfaces.
+The solver settings are displayed in the following table. Note that the boolean values :code:`True/False` are defined as :code:`1/0` in the C/C++ interfaces.
 
 
 The settings marked with * can be changed without running the setup method again.

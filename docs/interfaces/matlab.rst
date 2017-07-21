@@ -114,11 +114,10 @@ where :code:`varargin` argument is described in :ref:`matlab_setup`. The allowed
 
 Warm start
 ----------
-
-Primal and dual variables can be warm-started with
+OSQP automatically warm starts primal and dual variables from the previous QP solution. If you would like to warm start their values manually, you can use
 
 .. code:: matlab
 
     m.warm_start('x', x0, 'y', y0)
 
-where :code:`x0` and :code:`y0` are the new primal and dual variables.
+where :code:`x0` and :code:`y0` are the new primal and dual variables. Please make sure :code`warm_start` solver option is active.
