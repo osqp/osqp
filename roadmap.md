@@ -1,21 +1,13 @@
 ## TODO
-
--   [x] Parameter Selection: `rho`, `sigma` and `alpha` from examples (data driven)
--   [x] Avoid square roots when computing residuals
--   [ ] Add option in CODEGEN to have floats
--   [ ] Convert distribute.py script (for matlab mex files) to Matlab
--   [x] Add functions to update matrices in Python and Matlab
--   [x] Add functions to update matrices in codegen
--   [x] Replace PySys_WriteStdout by PyErr_SetString(PyExc_ValueError, <message>)
+-   [ ] Add indirect solver
+-   [ ] Check interfaces values for linsys solver
+-   [ ] Make sure codegen checks that the solver is SUITESPARSE_LDL
+-   [ ] Return a certificate of infeasibility when problem is infeasible
 -   [ ] Add functions to update rho and sigma (by updating the KKT matrix entries)
 -   [ ] Replace EMBEDDED flag in C with:  EMBEDDED, EMBEDDED_PARAMETERS_VECTORS, EMBEDDED_PARAMETERS_MATRICES (all true/false)
--   [x] Add unittests Python for code generation
--   [x] Add CTRL-C interrupt close function
--   [x] Implement code generation in Matlab
--   [ ] Fix relative criterion for termination condition
 -   [ ] Implement cheaper dual residual computation: (only one matrix-vector computation)
 -   [ ] Stress tests Maros Meszaros
--   [ ] Link to CVXPY
+-   [x] Link to CVXPY
 
 ### Test Problems
 

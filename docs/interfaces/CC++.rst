@@ -27,6 +27,20 @@ Sublevel API
 ------------
 Sublevel C/C++ API is also imported from the header :code:`osqp.h` and provides the following functions
 
+Warm start
+^^^^^^^^^^
+OSQP automatically warm starts primal and dual variables from the previous QP solution. If you would like to warm start their values manually, you can use
+
+.. doxygenfunction:: osqp_warm_start
+
+.. doxygenfunction:: osqp_warm_start_x
+
+.. doxygenfunction:: osqp_warm_start_y
+
+Update problem data
+^^^^^^^^^^^^^^^^^^^
+Problem data can be updated without executing the setup again using the following functions.
+
 .. doxygenfunction:: osqp_update_lin_cost
 
 .. doxygenfunction:: osqp_update_lower_bound
@@ -40,6 +54,8 @@ Sublevel C/C++ API is also imported from the header :code:`osqp.h` and provides 
 .. doxygenfunction:: osqp_update_A
 
 .. doxygenfunction:: osqp_update_P_A
+
+
 
 
 Data types

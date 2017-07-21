@@ -20,7 +20,7 @@ typedef struct {
      c_int nzmax;     ///< maximum number of entries.
      c_int m;         ///< number of rows
      c_int n;         ///< number of columns
-     c_int *p;        ///< column pointers (size n+1) or col indices (size nzmax) start from 0
+     c_int *p;        ///< column pointers (size n+1) (col indices (size nzmax) start from 0 when using triplet format (direct KKT matrix formation))
      c_int *i;        ///< row indices, size nzmax starting from 0
      c_float *x;      ///< numerical values, size nzmax
      c_int nz;       ///< # of entries in triplet matrix, -1 for csc
