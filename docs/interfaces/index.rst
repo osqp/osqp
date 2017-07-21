@@ -9,4 +9,5 @@ Interfaces
    python.rst
    matlab.rst
    solver_settings.rst
+   linear_systems_solvers.rst
    status_values.rst

@@ -180,7 +180,7 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y);
  * @param  P_new_n    Number of new elements to be changed
  * @return            output flag:  0: OK
  *                                  1: P_new_n > nnzP
- *                                 <0: error in update_priv()
+ *                                 <0: error in the update
  */
 c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, c_int P_new_n);
 
@@ -198,7 +198,7 @@ c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, 
  * @param  A_new_n    Number of new elements to be changed
  * @return            output flag:  0: OK
  *                                  1: A_new_n > nnzA
- *                                 <0: error in update_priv()
+ *                                 <0: error in the update
  */
 c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, c_int A_new_n);
 
@@ -224,7 +224,7 @@ c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, 
  * @return            output flag:  0: OK
  *                                  1: P_new_n > nnzP
  *                                  2: A_new_n > nnzA
- *                                 <0: error in update_priv()
+ *                                 <0: error in the update
  */
 c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, c_int P_new_n, c_float * Ax_new, c_int * Ax_new_idx, c_int A_new_n);
 

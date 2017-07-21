@@ -628,6 +628,17 @@ c_int validate_data(const OSQPData * data){
 }
 
 
+c_int validate_linsys_solver(c_int linsys_solver){
+    if (linsys_solver != SUITESPARSE_LDL){
+        return 1;
+    }
+    // TODO: Add more solvers in case
+
+    // Valid solver
+    return 0;
+}
+
+
 c_int validate_settings(const OSQPSettings * settings){
     if (!settings){
         #ifdef PRINTING
@@ -708,9 +719,9 @@ c_int validate_settings(const OSQPSettings * settings){
         #endif
         return 1;
     }
-    if (settings->linsys_solver != SUITESPARSE_LDL){
+    if (validate_linsys_solver(settings->linsys_solver)){
         #ifdef PRINTING
-        c_print("linsys_solver must be SUITESPARSE_LDL\n");
+        c_print("linsys_solver not recognized\n");
         #endif
         return 1;
     }

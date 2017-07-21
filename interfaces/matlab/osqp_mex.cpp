@@ -187,6 +187,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       if(!osqpData->work){
         mexErrMsgTxt("Solver is uninitialized.  No data have been configured.");
       }
+      
+      //throw an error if linear systems solver is different than suitesparse
+      if(osqpData->work->linsys_solver->type != SUITESPARSE_LDL){
+        mexErrMsgTxt("Solver setup was not performed using SuiteSparse LDL! Please perform setup with linsys_solver as SuiteSparse LDL.");
+      }
+      
       //return data
       plhs[0] = copyWorkToMxStruct(osqpData->work);
       return;

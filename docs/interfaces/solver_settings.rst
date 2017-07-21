@@ -32,7 +32,7 @@ The settings marked with * can be changed without running the setup method again
 +------------------------------------+-------------------------------------+----------------------------------+
 | :code:`alpha`    *                 | ADMM overrelaxation parameter       |   1.6                            |
 +------------------------------------+-------------------------------------+----------------------------------+
-| :code:`linsys_solver`    *         | Linear systems solver type          | Suitesparse LDL (only for now!)  |
+| :code:`linsys_solver`              | Linear systems solver type          | See :ref:`linear_systems_solvers`|
 +------------------------------------+-------------------------------------+----------------------------------+
 | :code:`delta`    *                 | Polishing regularization parameter  |   1e-06                          |
 +------------------------------------+-------------------------------------+----------------------------------+

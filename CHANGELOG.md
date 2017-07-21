@@ -1,6 +1,9 @@
+Changes since last commit
+-------------------------
+* Created new object-oriented structure for linear system solvers
+
 Version 0.1.2 (20 July 2017)
 ------------------------------
-* Created new object-oriented structure for linear system solvers
 * Added option to terminate with scaled or unscaled residual
 * Now Matlab interface does support logical entries for the settings
 * Fixed bug in index ordering of sparse matrices of Python interface
