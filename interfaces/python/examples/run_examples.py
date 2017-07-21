@@ -30,7 +30,7 @@ from scripts.mpc.mpc_example import MPCExample
 
 # OSQP settings
 osqp_settings = {'auto_rho': False,
-                 'rho': 1.0,
+                 'rho': 1000000.0,
                  'polish': False,
                  'verbose': False}
 
@@ -47,8 +47,8 @@ solvers_lasso = [
                   #  'ecos'
                  ]
 
-# Eq qp problem
-n_eqqp = np.array([10, 100, 1000, 10000])
+# Eq qp problem (best rho = 1000)
+n_eqqp = np.array([10, 50, 100, 500, 1000])
 solvers_eqqp = ['osqp',
                 'gurobi',
                 'mosek',
@@ -66,7 +66,7 @@ solvers_huber = ['osqp',
                  ]
 
 
-# SVM problem
+# SVM problem (best rho = 1)
 n_svm = np.array([10, 50, 100, 500, 1000])
 solvers_svm = ['osqp',
                'gurobi',
@@ -107,16 +107,16 @@ Solve problems
 #  lasso.run(osqp_settings)
 
 # Eq qp
-#  eqqp = EqqpExample(n_eqqp, solvers_eqqp)
-#  eqqp.run(osqp_settings)
+eqqp = EqqpExample(n_eqqp, solvers_eqqp)
+eqqp.run(osqp_settings)
 
 # Huber
 #  huber = HuberExample(n_huber, solvers_huber)
 #  huber.run(osqp_settings)
 
 # SVM
-svm = SVMExample(n_svm, solvers_svm)
-svm.run(osqp_settings)
+#  svm = SVMExample(n_svm, solvers_svm)
+#  svm.run(osqp_settings)
 
 # Portfolio
 # portfolio = PortfolioExample(n_portfolio, solvers_portfolio, gammas_portfolio)

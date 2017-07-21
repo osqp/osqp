@@ -138,15 +138,15 @@ class Example(with_metaclass(abc.ABCMeta, object)):
                             timings,
                             fig_size=fig_size,
                             plot_name=plot_name)
-        utils.generate_plot(self.name, 'iterations', 'median', self.n_vec,
-                            iterations,
-                            fig_size=fig_size,
-                            plot_name=plot_name)
-        utils.generate_plot(self.name, 'iterations', 'total', self.n_vec,
-                            iterations,
-                            fig_size=fig_size,
-                            plot_name=plot_name)
-        utils.generate_plot(self.name, 'iterations', 'mean', self.n_vec,
-                            iterations,
-                            fig_size=fig_size,
-                            plot_name=plot_name)
+        #  utils.generate_plot(self.name, 'iterations', 'median', self.n_vec,
+        #                      iterations,
+        #                      fig_size=fig_size,
+        #                      plot_name=plot_name)
+        #  utils.generate_plot(self.name, 'iterations', 'total', self.n_vec,
+        #                      iterations,
+        #                      fig_size=fig_size,
+        #                      plot_name=plot_name)
+        #  utils.generate_plot(self.name, 'iterations', 'mean', self.n_vec,
+        #                      iterations,
+        #                      fig_size=fig_size,
+        #                      plot_name=plot_name)
