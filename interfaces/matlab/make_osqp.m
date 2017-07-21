@@ -99,7 +99,13 @@ end
 if CTRLC
    cmake_args = sprintf('%s %s', cmake_args, '-DCTRLC:BOOL=ON');
    mexoptflags =  sprintf('%s %s', mexoptflags, '-DCTRLC');
-   mex_libs = sprintf('%s %s', mex_libs, '-lut');
+   if (ispc)
+       ut = fullfile(matlabroot, 'extern', 'lib', computer('arch'), ...
+                     'mingw64', 'libut.lib');
+       mex_libs = sprintf('%s "%s"', mex_libs, ut);
+   else
+       mex_libs = sprintf('%s %s', mex_libs, '-lut');
+   end
 end
 
 if DLONG
