@@ -17,8 +17,9 @@ where :math:`x` is the optimization variable and
 
 **The code is available on** `GitHub <https://github.com/oxfordcontrol/osqp>`_.
 
-Features
---------
+
+.. rubric:: Features
+
 
 .. glossary::
 
@@ -45,14 +46,13 @@ Features
 
 
 
-License
--------
+.. rubric:: License
+
 OSQP is distributed under the `Apache 2.0 License <https://www.apache.org/licenses/LICENSE-2.0>`_
 
 
 
-Credits
--------
+.. rubric:: Credits
 
 The following people have been involved in the development of OSQP:
 
@@ -65,8 +65,7 @@ The following people have been involved in the development of OSQP:
 * `Stephen Boyd <http://web.stanford.edu/~boyd/>`_ (Stanford University): methods and maths
 
 
-Bug reports and support
-------------------------
+.. rubric:: Bug reports and support
 
 Please report any issues via the `Github issue tracker <https://github.com/oxfordcontrol/osqp/issues>`_. All types of issues are welcome including bug reports, documentation typos, feature requests and so on.
 

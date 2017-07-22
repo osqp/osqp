@@ -93,6 +93,15 @@ a:hover, a:active {
 	color: rgb(46, 118, 176);  /* Light blue*/
 }
 
+
+/* Rubric bigger (initial page) */
+.rst-content p.rubric {
+    font-family:  "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-weight: 700;
+    font-size: 150%;
+    margin-bottom: 20px;
+}
+
 /* Force breathe display inline parameters */
 /*.wy-plain-list-disc li p:last-child, .rst-content .section ul li p:last-child, .rst-content .toctree-wrapper ul li p:last-child, article ul li p:last-child{
     display: inline;

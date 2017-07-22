@@ -70,21 +70,21 @@ void vec_ew_max(c_float *a, c_int n, c_float max_val);
 void vec_ew_min(c_float *a, c_int n, c_float min_val);
 
 /**
-* Elementwise maximum between vectors c = max(a, b)
-* @param: const c_float * a    First vector
-*       : const c_float * b    Second vector
-*       : c_float * c          Vector of maxima
-*       : c_int n	       Vectors length
-*/
+ * Elementwise maximum between vectors c = max(a, b)
+ * @param a First vector
+ * @param b Second vector
+ * @param c Vector of maxima
+ * @param n Vectors length
+ */
 void vec_ew_max_vec(const c_float * a, const c_float * b, c_float * c, c_int n);
 
 
 /**
 * Elementwise minimum between vectors c = min(a, b)
-* @param: const c_float * a 	First vector
-*       : const c_float * b	Second vector
-*       : c_float * c		Vector of maxima
-*       : c_int n		Vectors length
+* @param a 	First vector
+* @param b	Second vector
+* @param c  Vector of maxima
+* @param n	Vectors length
 */
 void vec_ew_min_vec(const c_float * a, const c_float * b, c_float * c, c_int n);
 
@@ -150,8 +150,8 @@ void mat_tpose_vec(const csc *A, const c_float *x, c_float *y,
 
 /**
 * Infinity norm of each matrix column
-* @param: M	Input matrix
-* @param: E 	Vector of infinity norms	
+* @param M	Input matrix
+* @param E 	Vector of infinity norms
 *
 */
 void mat_inf_norm_cols(const csc * M, c_float * E);
@@ -159,8 +159,8 @@ void mat_inf_norm_cols(const csc * M, c_float * E);
 
 /**
 * Infinity norm of each matrix row
-* @param: M	Input matrix
-* @param: E 	Vector of infinity norms	
+* @param M	Input matrix
+* @param E 	Vector of infinity norms
 *
 */
 void mat_inf_norm_rows(const csc * M, c_float * E);
@@ -169,9 +169,9 @@ void mat_inf_norm_rows(const csc * M, c_float * E);
 /**
 * Infinity norm of each matrix column
 * Matrix M is symmetric upper-triangular
-* 
-* @param: M	Input matrix (symmetric, upper-triangular)
-* @param: E 	Vector of infinity norms	
+*
+* @param M	Input matrix (symmetric, upper-triangular)
+* @param E 	Vector of infinity norms
 *
 */
 void mat_inf_norm_cols_sym_triu(const csc * M, c_float * E);
