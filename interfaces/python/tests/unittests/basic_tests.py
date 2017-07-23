@@ -24,11 +24,11 @@ class basic_tests(unittest.TestCase):
                      'eps_abs': 1e-09,
                      'eps_rel': 1e-09,
                      'scaling': True,
-                     'auto_rho': False,
                      'max_iter': 2500,
                      'rho': 0.1,
                      'polish': False,
                      'early_terminate_interval': 1,
+                     'scaling_norm': -1,
                      'warm_start': True}
         self.model = osqp.OSQP()
         self.model.setup(P=self.P, q=self.q, A=self.A, l=self.l, u=self.u,

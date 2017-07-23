@@ -138,6 +138,7 @@ typedef struct {
 
         #if EMBEDDED != 1
         c_int scaling_iter; ///< scaling iteration
+        c_int scaling_norm;  ///< scaling norm
         #endif
         /** @} */
 

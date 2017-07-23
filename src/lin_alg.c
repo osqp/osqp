@@ -25,6 +25,7 @@ c_float vec_norm_inf(const c_float *v, c_int l) {
     return max;
 }
 
+
 c_float vec_norm_inf_diff(const c_float *a, const c_float *b, c_int l){
     c_float nmDiff = 0.0, tmp;
     c_int i;
@@ -51,12 +52,14 @@ void vec_set_scalar(c_float *a, c_float sc, c_int n){
     }
 }
 
+
 void vec_add_scalar(c_float *a, c_float sc, c_int n){
     c_int i;
     for (i=0; i<n; i++) {
         a[i] += sc;
     }
 }
+
 
 void vec_mult_scalar(c_float *a, c_float sc, c_int n){
     c_int i;
@@ -67,7 +70,6 @@ void vec_mult_scalar(c_float *a, c_float sc, c_int n){
 
 
 #ifndef EMBEDDED
-
 c_float * vec_copy(c_float *a, c_int n) {
     c_float * b;
     c_int i;
@@ -79,8 +81,8 @@ c_float * vec_copy(c_float *a, c_int n) {
 
     return b;
 }
-
 #endif  //end EMBEDDED
+
 
 void prea_int_vec_copy(c_int *a, c_int * b, c_int n){
     c_int i;
@@ -88,6 +90,7 @@ void prea_int_vec_copy(c_int *a, c_int * b, c_int n){
         b[i] = a[i];
     }
 }
+
 
 void prea_vec_copy(c_float *a, c_float * b, c_int n) {
     c_int i;
@@ -116,12 +119,14 @@ c_float vec_prod(const c_float *a, const c_float *b, c_int n){
     return prod;
 }
 
+
 void vec_ew_prod(const c_float *a, const c_float *b, c_float * c, c_int n){
     c_int i;
     for(i = 0;  i < n; i++){
         c[i] = b[i] * a[i];
     }
 }
+
 
 #if EMBEDDED != 1
 void vec_ew_sqrt(c_float *a, c_int n){
@@ -130,7 +135,7 @@ void vec_ew_sqrt(c_float *a, c_int n){
         a[i] = c_sqrt(a[i]);
     }
 }
-#endif
+
 
 void vec_ew_max(c_float *a, c_int n, c_float max_val){
     c_int i;
@@ -138,6 +143,7 @@ void vec_ew_max(c_float *a, c_int n, c_float max_val){
         a[i] = c_max(a[i], max_val);
     }
 }
+
 
 void vec_ew_min(c_float *a, c_int n, c_float min_val){
     c_int i;
@@ -162,6 +168,28 @@ void vec_ew_min_vec(const c_float * a, const c_float * b, c_float * c, c_int n){
     }
 }
 
+void vec_ew_sqrt_sos_vec(const c_float * a, const c_float * b,
+                         c_float * c, c_int n){
+
+    c_int i;
+    for(i = 0;  i < n; i++){
+        c[i] = c_sqrt(a[i]*a[i] + b[i]*b[i]);
+    }
+
+}
+
+
+void vec_ew_sum_vec(const c_float * a, const c_float * b,
+                         c_float * c, c_int n){
+
+    c_int i;
+    for(i = 0;  i < n; i++){
+        c[i] = a[i] + b[i];
+    }
+
+}
+#endif  // EMBEDDED != 1
+
 
 /* MATRIX FUNCTIONS ----------------------------------------------------------*/
 
@@ -183,53 +211,50 @@ void mat_postmult_diag(csc *A, const c_float *d){
     }
 }
 
-#if EMBEDDED != 1
-void mat_ew_sq(csc * A){
-    c_int i;
-    for (i=0; i<A->p[A->n]; i++)
-    {
-        A->x[i] = A->x[i]*A->x[i];
-    }
-}
+// #if EMBEDDED != 1
+// void mat_ew_sq(csc * A){
+//     c_int i;
+//     for (i=0; i<A->p[A->n]; i++)
+//     {
+//         A->x[i] = A->x[i]*A->x[i];
+//     }
+// }
+//
+//
+// void mat_ew_abs(csc * A){
+//     c_int i;
+//     for (i=0; i<A->p[A->n]; i++) {
+//         A->x[i] = c_absval(A->x[i]);
+//     }
+// }
+// #endif // end embedded
 
 
-void mat_ew_abs(csc * A){
-    c_int i;
-    for (i=0; i<A->p[A->n]; i++) {
-        A->x[i] = c_absval(A->x[i]);
-    }
-}
-#endif // end embedded
-
-
-#ifndef EMBEDDED
-c_float mat_trace(csc * M){
-    c_float trace = 0.;
-    c_int j, i;
-    for (j = 0; j < M->n; j++){  // Cycle over columns
-        for (i = M->p[j]; i < M->p[j+1]; i++){   // Cycle every row in the column
-            if (M->i[i] == j){
-                trace += M->x[i];
-            }
-        }
-    }
-    return trace;
-}
-
-c_float mat_fro_sq(csc * M){
-    c_float fro_sq = 0.;
-    c_int j, i;
-    for (j = 0; j < M->n; j++){  // Cycle over columns
-        for (i = M->p[j]; i < M->p[j+1]; i++){   // Cycle every row in the column
-            fro_sq += M->x[i] * M->x[i];
-        }
-    }
-    return fro_sq;
-}
-
-
-
-#endif // ifndef embedded
+// #ifndef EMBEDDED
+// c_float mat_trace(csc * M){
+//     c_float trace = 0.;
+//     c_int j, i;
+//     for (j = 0; j < M->n; j++){  // Cycle over columns
+//         for (i = M->p[j]; i < M->p[j+1]; i++){   // Cycle every row in the column
+//             if (M->i[i] == j){
+//                 trace += M->x[i];
+//             }
+//         }
+//     }
+//     return trace;
+// }
+//
+// c_float mat_fro_sq(csc * M){
+//     c_float fro_sq = 0.;
+//     c_int j, i;
+//     for (j = 0; j < M->n; j++){  // Cycle over columns
+//         for (i = M->p[j]; i < M->p[j+1]; i++){   // Cycle every row in the column
+//             fro_sq += M->x[i] * M->x[i];
+//         }
+//     }
+//     return fro_sq;
+// }
+// #endif // ifndef embedded
 
 
 void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq) {
@@ -313,10 +338,27 @@ void mat_tpose_vec(const csc *A, const c_float *x, c_float *y,
     }
 }
 
+#if EMBEDDED != 1
+void mat_inf_norm_cols(const csc * M, c_float * E){
+    c_int j, ptr;
+
+    // Initialize zero max elements
+    for (j = 0; j < M->n; j++){
+        E[j] = 0.;
+    }
+
+    // Compute maximum across columns
+    for (j = 0; j < M->n; j++){
+        for (ptr = M->p[j]; ptr < M->p[j+1]; ptr++){
+            E[j] = c_max(c_absval(M->x[ptr]), E[j]);
+        }
+    }
+}
+
 
 void mat_inf_norm_rows(const csc * M, c_float * E){
     c_int i, j, ptr;
-    
+
     // Initialize zero max elements
     for (j = 0; j < M->m; j++){
         E[j] = 0.;
@@ -325,26 +367,8 @@ void mat_inf_norm_rows(const csc * M, c_float * E){
     // Compute maximum across rows
     for (j = 0; j < M->n; j++){
         for (ptr = M->p[j]; ptr < M->p[j+1]; ptr++){
-            i = M->i[ptr];  
-            E[i] = c_max(c_absval(M->x[ptr]), E[i]);   
-        }
-    }
-}
-
-
-void mat_inf_norm_cols(const csc * M, c_float * E){
-    c_int i, j, ptr;
-    
-    // Initialize zero max elements
-    for (j = 0; j < M->n; j++){
-        E[j] = 0.;
-    }
-    
-    // Compute maximum across columns
-    for (j = 0; j < M->n; j++){
-        for (ptr = M->p[j]; ptr < M->p[j+1]; ptr++){
-            i = M->i[ptr];  
-            E[j] = c_max(c_absval(M->x[ptr]), E[j]);   
+            i = M->i[ptr];
+            E[i] = c_max(c_absval(M->x[ptr]), E[i]);
         }
     }
 }
@@ -352,24 +376,162 @@ void mat_inf_norm_cols(const csc * M, c_float * E){
 
 void mat_inf_norm_cols_sym_triu(const csc * M, c_float * E){
     c_int i, j, ptr;
-    
+    c_float abs_x;
+
     // Initialize zero max elements
     for (j = 0; j < M->n; j++){
         E[j] = 0.;
     }
-    
+
     // Compute maximum across columns
     // Note that element (i, j) contributes to
     // -> Column j (as expected in any matrices)
     // -> Column i (which is equal to row i for symmetric matrices)
     for (j = 0; j < M->n; j++){
         for (ptr = M->p[j]; ptr < M->p[j+1]; ptr++){
-            i = M->i[ptr];  
-            E[j] = c_max(c_absval(M->x[ptr]), E[j]);   
-            E[i] = c_max(c_absval(M->x[ptr]), E[i]);   
+            i = M->i[ptr];
+            abs_x = c_absval(M->x[ptr]);
+            E[j] = c_max(abs_x, E[j]);
+            if(i != j){
+                E[i] = c_max(abs_x, E[i]);
+            }
         }
     }
 }
+
+
+void mat_1_norm_cols(const csc * M, c_float * E){
+    c_int j, ptr;
+
+    // Initialize zero max elements
+    for (j = 0; j < M->n; j++){
+        E[j] = 0.;
+    }
+
+    // Compute 1-norm across columns
+    for (j = 0; j < M->n; j++){
+        for (ptr = M->p[j]; ptr < M->p[j+1]; ptr++){
+            E[j] += c_absval(M->x[ptr]);
+        }
+    }
+}
+
+
+void mat_1_norm_rows(const csc * M, c_float * E){
+    c_int i, j, ptr;
+
+    // Initialize zero max elements
+    for (j = 0; j < M->m; j++){
+        E[j] = 0.;
+    }
+
+    // Compute 1-norm across rows
+    for (j = 0; j < M->n; j++){
+        for (ptr = M->p[j]; ptr < M->p[j+1]; ptr++){
+            i = M->i[ptr];
+            E[i] += c_absval(M->x[ptr]);
+        }
+    }
+}
+
+
+void mat_1_norm_cols_sym_triu(const csc * M, c_float * E){
+    c_int i, j, ptr;
+    c_float abs_x;
+    // Initialize zero max elements
+    for (j = 0; j < M->n; j++){
+        E[j] = 0.;
+    }
+
+    // Compute 1-norm across columns
+    // Note that element (i, j) contributes to
+    // -> Column j (as expected in any matrices)
+    // -> Column i (which is equal to row i for symmetric matrices)
+    for (j = 0; j < M->n; j++){
+        for (ptr = M->p[j]; ptr < M->p[j+1]; ptr++){
+            i = M->i[ptr];
+            abs_x = c_absval(M->x[ptr]);
+            E[j] += abs_x;
+            if(i != j){
+                E[i] += abs_x;
+            }
+        }
+    }
+}
+
+
+void mat_2_norm_cols(const csc * M, c_float * E){
+    c_int j, ptr;
+    c_float x;
+
+    // Initialize zero max elements
+    for (j = 0; j < M->n; j++){
+        E[j] = 0.;
+    }
+
+    // Compute 2-norm across columns
+    for (j = 0; j < M->n; j++){
+        for (ptr = M->p[j]; ptr < M->p[j+1]; ptr++){
+            x = M->x[ptr];
+            E[j] += x * x;
+        }
+        E[j] = c_sqrt(E[j]);  // Take square root for 2-norm
+    }
+}
+
+
+void mat_2_norm_rows(const csc * M, c_float * E){
+    c_int i, j, ptr;
+    c_float x;
+
+    // Initialize zero max elements
+    for (j = 0; j < M->m; j++){
+        E[j] = 0.;
+    }
+
+    // Compute 1-norm across rows
+    for (j = 0; j < M->n; j++){
+        for (ptr = M->p[j]; ptr < M->p[j+1]; ptr++){
+            i = M->i[ptr];
+            x = M->x[ptr];
+            E[i] += x * x;
+        }
+    }
+    for (j = 0; j < M->m; j++){
+        E[j] = c_sqrt(E[j]);  // Take square root for the 2-norm
+    }
+}
+
+
+void mat_2_norm_cols_sym_triu(const csc * M, c_float * E){
+    c_int i, j, ptr;
+    c_float x, x2;
+
+    // Initialize zero max elements
+    for (j = 0; j < M->n; j++){
+        E[j] = 0.;
+    }
+
+    // Compute 1-norm across columns
+    // Note that element (i, j) contributes to
+    // -> Column j (as expected in any matrices)
+    // -> Column i (which is equal to row i for symmetric matrices)
+    for (j = 0; j < M->n; j++){
+        for (ptr = M->p[j]; ptr < M->p[j+1]; ptr++){
+            i = M->i[ptr];
+            x = M->x[ptr];
+            x2 = x * x;
+            E[j] += x2;
+            if(i != j){
+                E[i] += x2;
+            }
+        }
+    }
+    for (j = 0; j < M->m; j++){
+        E[j] = c_sqrt(E[j]);  // Take square root for the 2-norm
+    }
+}
+#endif
 
 
 c_float quad_form(const csc * P, const c_float * x){

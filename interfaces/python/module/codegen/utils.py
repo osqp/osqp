@@ -15,27 +15,6 @@ files_to_generate_path = os.path.join(osqp.__path__[0],
                                       'codegen', 'files_to_generate')
 
 
-def fill_settings(f, settings, name):
-    """
-    Fill settings
-    """
-    for key, value in settings.items():
-        if  key != 'scaling_iter':
-            if type(value) == int:
-                is_int = True
-            elif value.is_integer():
-                is_int = True
-            else:
-                is_int = False
-            f.write('%s->%s = ' % (name, key))
-            if is_int:
-                f.write(str(value))
-            else:
-                f.write("(c_float)")
-                f.write(str(value))
-            f.write(";\n")
-
-
 def write_vec(f, vec, name, vec_type):
     """
     Write vector to file
@@ -111,6 +90,8 @@ def write_settings(f, settings, name, embedded_flag):
     # EMBEDDED == 2
     if embedded_flag != 1:
         f.write("%d, " % settings['scaling_iter'])
+        f.write("%d, " % settings['scaling_norm'])
+
 
     f.write("%d, " % settings['max_iter'])
     f.write("(c_float)%.20f, " % settings['eps_abs'])

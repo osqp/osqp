@@ -5,6 +5,11 @@
 #ifndef CTRLC_H
 #define CTRLC_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #if defined MATLAB
 
 /* No header file available here; define the prototypes ourselves */
@@ -40,6 +45,11 @@ void endInterruptListener(void);
  * @return  Boolean indicating if the solver has been interrupted
  */
 int isInterrupted(void);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif /* END IFDEF CTRLC */

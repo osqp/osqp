@@ -69,7 +69,8 @@ enum linsys_solver_type {SUITESPARSE_LDL};
 
 #if EMBEDDED != 1
 #define SCALING_ITER (15)
-#define SCALING_REG (1e-08)  /// Regularization in scaling iterations
+#define SCALING_REG (1e-08)  ///< Regularization in scaling iterations
+#define SCALING_NORM (2)     ///< Scaling norm
 #endif
 
 /* Printing */

@@ -96,8 +96,13 @@ void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
         c_print("          early_terminate: on (interval %i)\n", (int)settings->early_terminate_interval);
     else
         c_print("          early_terminate: off \n");
-    if (settings->scaling)
-        c_print("          scaling: on, ");
+    if (settings->scaling){
+        c_print("          scaling: on ");
+        if (settings->scaling_norm != -1)
+            c_print("(%d-norm), ", (int)settings->scaling_norm);
+        else
+            c_print("(inf-norm), ");
+    }
     else
         c_print("          scaling: off, ");
     if (settings->scaled_termination)
@@ -194,6 +199,7 @@ void set_default_settings(OSQPSettings * settings) {
 
         #if EMBEDDED != 1
         settings->scaling_iter = SCALING_ITER;
+        settings->scaling_norm = SCALING_NORM;
         #endif
 
         settings->rho = (c_float) RHO; /* ADMM step */
@@ -230,6 +236,7 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
     // Copy settings
     new->scaling = settings->scaling;
     new->scaling_iter = settings->scaling_iter;
+    new->scaling_norm = settings->scaling_norm;
     new->rho = settings->rho;
     new->sigma = settings->sigma;
     new->max_iter = settings->max_iter;

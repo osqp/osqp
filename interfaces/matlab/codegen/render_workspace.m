@@ -72,6 +72,7 @@ fprintf(f, '%d, ',             settings.scaling);
 
 if embedded_flag ~= 1
     fprintf(f, '%d, ', settings.scaling_iter);
+    fprintf(f, '%d, ', settings.scaling_norm);
 end
 
 fprintf(f, '%d, ',             settings.max_iter);

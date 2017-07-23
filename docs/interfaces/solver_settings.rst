@@ -3,10 +3,7 @@
 Solver settings
 ---------------
 
-The solver settings are displayed in the following table. Note that the boolean values :code:`True/False` are defined as :code:`1/0` in the C/C++ interfaces.
-
-
-The settings marked with * can be changed without running the setup method again.
+The solver settings are displayed in the following table. The settings marked with * can be changed without running the setup method again.
 
 
 +------------------------------------+-------------------------------------+----------------------------------+
@@ -50,5 +47,25 @@ The settings marked with * can be changed without running the setup method again
 +------------------------------------+-------------------------------------+----------------------------------+
 | :code:`scaling_iter`               | Scaling iterations                  |   15                             |
 +------------------------------------+-------------------------------------+----------------------------------+
+| :code:`scaling_norm`               | Scaling norm                        |   1/2/-1(for infinity)           |
++------------------------------------+-------------------------------------+----------------------------------+
 | :code:`pol_refine_iter` *          | Refinement iterations in polish     |   5                              |
 +------------------------------------+-------------------------------------+----------------------------------+
+
+
+The boolean values :code:`True/False` are defined as :code:`1/0` in the C/C++ interfaces.
+
+
+.. The infinity values correspond to:
+..
+.. +------------------------------------+-------------------------------------+
+.. | Language                           | Value                               |
+.. +====================================+=====================================+
+.. | C                                  | :code:`OSQP_INFTY`                  |
+.. +------------------------------------+-------------------------------------+
+.. | Python                             | :code:`numpy.inf`                   |
+.. +------------------------------------+-------------------------------------+
+.. | Matlab                             | :code:`Inf`                         |
+.. +------------------------------------+-------------------------------------+
+.. | Julia                              | :code:`Inf`                         |
+.. +------------------------------------+-------------------------------------+

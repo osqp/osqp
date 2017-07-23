@@ -30,11 +30,12 @@ const char* OSQP_INFO_FIELDS[] = {"iter",         //c_int
                                 "run_time"};      //c_float, only used if PROFILING
 
 const char* OSQP_SETTINGS_FIELDS[] =
-                                //the following subset can't be changed after initilization
                                {"rho",            //c_float
+                               //the following subset can't be changed after initilization
                                 "sigma",            //c_float
                                 "scaling",        //c_int
                                 "scaling_iter",   //c_int
+                                "scaling_norm",   //c_int
                                 //the following subset can be changed after initilization
                                 "max_iter",                     //c_int
                                 "eps_abs",                      //c_float
@@ -95,9 +96,9 @@ const char* OSQP_WORKSPACE_FIELDS[] = {"data",
                                        "scaling",
                                        "settings"};
 
-                                       
-#define NEW_SETTINGS_TOL (1e-10)                            
-                                       
+
+#define NEW_SETTINGS_TOL (1e-10)
+
 // wrapper class for all osqp data and settings
 class OsqpData
 {
@@ -187,12 +188,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       if(!osqpData->work){
         mexErrMsgTxt("Solver is uninitialized.  No data have been configured.");
       }
-      
+
       //throw an error if linear systems solver is different than suitesparse
       if(osqpData->work->linsys_solver->type != SUITESPARSE_LDL){
         mexErrMsgTxt("Solver setup was not performed using SuiteSparse LDL! Please perform setup with linsys_solver as SuiteSparse LDL.");
       }
-      
+
       //return data
       plhs[0] = copyWorkToMxStruct(osqpData->work);
       return;
@@ -208,7 +209,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       if(!osqpData->work){
         mexErrMsgTxt("Solver is uninitialized.  No settings have been configured.");
       }
-            
+
       copyUpdatedSettingsToWork(prhs[2],osqpData);
       return;
     }
@@ -713,6 +714,7 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
   mxSetField(mxPtr, 0, "sigma",           mxCreateDoubleScalar(settings->sigma));
   mxSetField(mxPtr, 0, "scaling",         mxCreateDoubleScalar(settings->scaling));
   mxSetField(mxPtr, 0, "scaling_iter",    mxCreateDoubleScalar(settings->scaling_iter));
+  mxSetField(mxPtr, 0, "scaling_norm",    mxCreateDoubleScalar(settings->scaling_norm));
   mxSetField(mxPtr, 0, "max_iter",        mxCreateDoubleScalar(settings->max_iter));
   mxSetField(mxPtr, 0, "eps_abs",         mxCreateDoubleScalar(settings->eps_abs));
   mxSetField(mxPtr, 0, "eps_rel",         mxCreateDoubleScalar(settings->eps_rel));
@@ -940,6 +942,7 @@ void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
   settings->sigma           = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "sigma"));
   settings->scaling         = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaling"));
   settings->scaling_iter    = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaling_iter"));
+  settings->scaling_norm    = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaling_norm"));
   settings->max_iter        = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "max_iter"));
   settings->eps_abs         = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_abs"));
   settings->eps_rel         = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_rel"));
@@ -994,15 +997,15 @@ void copyUpdatedSettingsToWork(const mxArray* mxPtr ,OsqpData* osqpData){
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "early_terminate_interval")));
   osqp_update_warm_start(osqpData->work,
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "warm_start")));
-  
-  
+
+
   // Check for settings that need special update
   // Update them only if they ae different than already set values
   c_float rho_new = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "rho"));
   // Check if it has changed
-  if (c_absval(rho_new - osqpData->work->settings->rho) > NEW_SETTINGS_TOL){ 
+  if (c_absval(rho_new - osqpData->work->settings->rho) > NEW_SETTINGS_TOL){
       osqp_update_rho(osqpData->work, rho_new);
   }
 
-  
+
 }

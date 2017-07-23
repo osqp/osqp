@@ -188,12 +188,13 @@ class settings(object):
     Attributes
     ----------
     -> These cannot be changed without running setup
-    rho  [1.6]                 - Step in ADMM procedure
     sigma    [1e-06]           - Regularization parameter for polish
     scaling  [True]            - Prescaling/Equilibration
-    scaling_iter [3]           - Number of Steps for Scaling Method
+    scaling_iter [15]          - Number of Steps for Scaling Method
+    scaling_norm [2]           - Equilibration scaling norm
 
     -> These can be changed without running setup
+    rho  [1.6]                 - Step in ADMM procedure
     max_iter [5000]                     - Maximum number of iterations
     eps_abs  [1e-05]                    - Absolute tolerance
     eps_rel  [1e-05]                    - Relative tolerance
@@ -217,6 +218,7 @@ class settings(object):
         self.sigma = kwargs.pop('sigma', 1e-06)
         self.scaling = kwargs.pop('scaling', True)
         self.scaling_iter = kwargs.pop('scaling_iter', 15)
+        self.scaling_norm = kwargs.pop('scaling_norm', 2)
         self.max_iter = kwargs.pop('max_iter', 2500)
         self.eps_abs = kwargs.pop('eps_abs', 1e-3)
         self.eps_rel = kwargs.pop('eps_rel', 1e-3)
@@ -232,7 +234,7 @@ class settings(object):
         self.warm_start = kwargs.pop('warm_start', False)
         self.polish = kwargs.pop('polish', True)
         self.pol_refine_iter = kwargs.pop('pol_refine_iter', 3)
-        self.auto_rho = kwargs.pop('auto_rho', True)
+        self.auto_rho = kwargs.pop('auto_rho', False)
 
 
 
@@ -377,6 +379,9 @@ class OSQP(object):
         """
         n = self.work.data.n
         m = self.work.data.m
+        scaling_norm = self.work.settings.scaling_norm
+        scaling_norm = scaling_norm if scaling_norm == 1 or scaling_norm == 2 \
+            else np.inf
 
         # Initialize scaling
         d = np.ones(n + m)
@@ -393,14 +398,14 @@ class OSQP(object):
 
             # Ruiz equilibration
             for j in range(n + m):
-                norm_col_j = spspa.linalg.norm(KKT[:, j], np.inf)
-                #  print("norm col %i = %.4e" % (j, norm_col_j))
-                #  norm_row_j = np.linalg.norm(KKT_temp[j, :].A1, np.inf)
-                #  print("norm row %i = %.4e" % (j, norm_row_j))
-                #  norm_col_j = np.linalg.norm(KKT_temp[j, :], np.inf)
-                #  norm_col_j = np.linalg.norm(KKT_temp[j, :], 2)
-                #  norm_col_j = np.linalg.norm(KKT_temp[j, :], 1)
-                #  d[j] = 1./(np.sqrt(norm_col_j) + SCALING_REG)
+                if scaling_norm != 2:
+                    norm_col_j = spspa.linalg.norm(KKT[:, j],
+                                                   scaling_norm)
+                else:
+                    # Scipy hasn't implemented that function yet!
+                    norm_col_j = np.linalg.norm(KKT[:, j].todense(),
+                                                scaling_norm)
+
                 if norm_col_j > SCALING_REG:
                     d_temp[j] = 1./(np.sqrt(norm_col_j))
 
@@ -564,7 +569,11 @@ class OSQP(object):
             (settings.sigma, settings.alpha))
         print("          max_iter = %d" % settings.max_iter)
         if settings.scaling:
-            print("          scaling: on, ", end='')
+            print("          scaling: on ", end='')
+            if settings.scaling_norm != -1:
+                print("(%d-norm), " % settings.scaling_norm, end='')
+            else:
+                print("(inf-norm), ", end='')
         else:
             print("          scaling: off, ", end='')
         if settings.scaled_termination:

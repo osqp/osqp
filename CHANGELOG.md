@@ -1,6 +1,7 @@
 Changes since last commit
 -------------------------
 * Created new object-oriented structure for linear system solvers
+* Added different norms for equilibration (1/2/inf)
 
 Version 0.1.2 (20 July 2017)
 ------------------------------

@@ -496,7 +496,7 @@ end
 function currentSettings = validateSettings(this,isInitialization,varargin)
 
 %don't allow these fields to be changed
-unmodifiableFields = {'scaling','scaling_iter'};
+unmodifiableFields = {'scaling','scaling_iter', 'scaling_norm'};
 
 %get the current settings
 if(isInitialization)

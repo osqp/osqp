@@ -186,7 +186,7 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
         static char *kwlist[] = {"dims",                          // nvars and ncons
                                  "Px", "Pi", "Pp", "q",           // Cost function
                                  "Ax", "Ai", "Ap", "l", "u",      // Constraints
-                                 "scaling", "scaling_iter",
+                                 "scaling", "scaling_iter", "scaling_norm",
                                  "rho", "sigma", "max_iter",
                                  "eps_abs", "eps_rel", "eps_prim_inf", "eps_dual_inf", "alpha",
 								 "linsys_solver", "delta", "polish", "pol_refine_iter", "auto_rho", "verbose",
@@ -197,17 +197,17 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
         #ifdef DLONG
 
         #ifdef DFLOAT
-        static char * argparse_string = "(ll)O!O!O!O!O!O!O!O!O!|llfflfffffflllllllll";
+        static char * argparse_string = "(ll)O!O!O!O!O!O!O!O!O!|lllfflfffffflllllllll";
         #else
-        static char * argparse_string = "(ll)O!O!O!O!O!O!O!O!O!|llddlddddddlllllllll";
+        static char * argparse_string = "(ll)O!O!O!O!O!O!O!O!O!|lllddlddddddlllllllll";
         #endif
 
         #else
 
         #ifdef DFLOAT
-        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiffiffffffiiiiiiiii";
+        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiffiffffffiiiiiiiii";
         #else
-        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiddiddddddiiiiiiiii";
+        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiddiddddddiiiiiiiii";
         #endif
 
         #endif
@@ -231,6 +231,7 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                          &PyArray_Type, &u,
                                          &settings->scaling,
                                          &settings->scaling_iter,
+                                         &settings->scaling_norm,
                                          &settings->rho,
                                          &settings->sigma,
                                          &settings->max_iter,

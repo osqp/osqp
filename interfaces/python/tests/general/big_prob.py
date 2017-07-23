@@ -6,8 +6,10 @@ import numpy as np
 import mathprogbasepy as mpbpy
 sp.random.seed(2)
 
-n = 100
-m = 500
+# n = 100
+# m = 500
+n = 2
+m = 3
 A = sparse.random(m, n, density=0.9, format='csc')
 lA = -sp.rand(m) * 2.
 uA = sp.rand(m) * 2.
@@ -20,8 +22,8 @@ q = sp.randn(n)
 qp = mpbpy.QuadprogProblem(P, q, A, lA, uA)
 
 
-osqp_opts = {'rho': 1e-7,
-             'auto_rho': True,
+osqp_opts = {'rho': 0.1,
+            #  'auto_rho': True,
              'sigma': 1e-06,
             #  'eps_rel': 1e-08,
             #  'eps_abs': 1e-08,
@@ -29,7 +31,7 @@ osqp_opts = {'rho': 1e-7,
              'early_terminate_interval': 1,
              'polish': False,
              'scaling': True,
-             'scaling_iter': 15,
+             'scaling_norm': -1,
              'max_iter': 2500,
              'verbose': True
              }

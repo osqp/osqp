@@ -21,7 +21,7 @@ extern "C" {
 
 #ifndef EMBEDDED
 /**
- * Automatically compute rho
+ * Automatically compute rho (not used at the moment)
  * @param work Workspace
  */
 void compute_rho(OSQPWorkspace * work);
