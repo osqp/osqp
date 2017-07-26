@@ -19,14 +19,20 @@ extern "C" {
  * Auxiliary functions needed to compute ADMM iterations * *
  ***********************************************************/
 
-#ifndef EMBEDDED
+#if EMBEDDED != 1
 /**
- * Automatically compute rho (not used at the moment)
+ * Set values of rho vector based on constraint types
  * @param work Workspace
  */
-void compute_rho(OSQPWorkspace * work);
+void set_rho_vec(OSQPWorkspace * work);
 
-#endif // ifndef EMBEDDED
+/**
+ * Update values of rho vector based on updated constraints
+ * @param work Workspace
+ */
+c_int update_rho_vec(OSQPWorkspace * work);
+
+#endif // EMBEDDED
 
 /**
  * Swap c_float vector pointers

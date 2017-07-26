@@ -20,14 +20,15 @@ extern "C" {
 // NB: Only the upper triangular part of P is stuffed!
 /**
  * Initialize linear system solver structure
- * @param 	P		Cost function matrix
- * @param	A		Constraints matrix
- * @param	settings 	Settings structure
- * @param	polish		0/1 depending whether we are allocating for polishing or not
+ * @param P		    Cost function matrix
+ * @param	A		    Constraints matrix
+ * @param	sigma   Algorithm parameter
+ * @param	rho_vec Algorithm parameter
+ * @param	polish  0/1 depending whether we are allocating for polishing or not
  *
  */
 LinSysSolver * init_linsys_solver(const csc * P, const csc * A,
-                const OSQPSettings *settings, c_int polish);
+                                  c_float sigma, c_float * rho_vec, c_int polish);
 
 
 #endif

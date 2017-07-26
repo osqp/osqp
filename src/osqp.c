@@ -53,6 +53,12 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     work->data->l = vec_copy(data->l, data->m);  // Lower bounds on constraints
     work->data->u = vec_copy(data->u, data->m);  // Upper bounds on constraints
 
+    // Vectorized rho parameter
+    work->rho_vec     = c_malloc(work->data->m * sizeof(c_float));
+    work->rho_inv_vec = c_malloc(work->data->m * sizeof(c_float));
+
+    // Type of constraints
+    work->constr_type = c_calloc(work->data->m, sizeof(c_float));
 
     /*
      *  Allocate internal solver variables (ADMM steps)
@@ -98,14 +104,12 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
         work->scaling = OSQP_NULL;
     }
 
-
-    // Compute rho automatically if specified
-    if (work->settings->auto_rho){
-        compute_rho(work);
-    }
+    // Set type of constraints
+    set_rho_vec(work);
 
     // Initialize linear system solver structure
-    work->linsys_solver = init_linsys_solver(work->data->P, work->data->A, work->settings, 0);
+    work->linsys_solver = init_linsys_solver(work->data->P, work->data->A,
+                                             work->settings->sigma, work->rho_vec, 0);
     if (!work->linsys_solver){
         #ifdef PRINTING
         c_print("ERROR: Linear systems solver initialization failure!\n");
@@ -496,7 +500,7 @@ c_int osqp_update_lin_cost(OSQPWorkspace * work, c_float * q_new) {
 
 
 c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new) {
-    c_int i;
+    c_int i, constr_type_changed, exitflag = 0;
 
     // Check if lower bound is smaller than upper bound
     for (i=0; i<work->data->m; i++) {
@@ -521,7 +525,19 @@ c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new)
     // Set solver status to OSQP_UNSOLVED
     update_status(work->info, OSQP_UNSOLVED);
 
-    return 0;
+    #if EMBEDDED != 1
+    // If the type of any constraint changed, update rho_vec
+    constr_type_changed = update_rho_vec(work);
+
+    if (constr_type_changed == 1) {
+        // Update rho_vec in KKT matrix
+        exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
+                                                       work->rho_vec,
+                                                       work->data->m);
+    }
+    #endif // EMBEDDED
+
+    return exitflag;
 }
 
 
@@ -548,6 +564,18 @@ c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
 
     // Set solver status to OSQP_UNSOLVED
     update_status(work->info, OSQP_UNSOLVED);
+
+    #if EMBEDDED != 1
+    // If the type of any constraint changed, update rho_vec
+    constr_type_changed = update_rho_vec(work);
+
+    if (constr_type_changed == 1) {
+        // Update rho_vec in KKT matrix
+        exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
+                                                       work->rho_vec,
+                                                       work->data->m);
+    }
+    #endif // EMBEDDED
 
     return 0;
 }
@@ -577,6 +605,18 @@ c_int osqp_update_upper_bound(OSQPWorkspace * work, c_float * u_new) {
 
     // Set solver status to OSQP_UNSOLVED
     update_status(work->info, OSQP_UNSOLVED);
+
+    #if EMBEDDED != 1
+    // If the type of any constraint changed, update rho_vec
+    constr_type_changed = update_rho_vec(work);
+
+    if (constr_type_changed == 1) {
+        // Update rho_vec in KKT matrix
+        exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
+                                                       work->rho_vec,
+                                                       work->data->m);
+    }
+    #endif // EMBEDDED
 
     return 0;
 }
@@ -889,7 +929,7 @@ c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx
 
 
 c_int osqp_update_rho(OSQPWorkspace * work, c_float rho_new){
-    c_int exitflag;
+    c_int exitflag, i;
 
     // Check value of rho
     if (rho_new <= 0) {
@@ -900,12 +940,21 @@ c_int osqp_update_rho(OSQPWorkspace * work, c_float rho_new){
     }
 
     // Update rho in settings
-    work->settings->rho = rho_new;
+    work->settings->rho = c_min(c_max(rho_new, RHO_MIN), RHO_MAX);
 
-    // Update rho in KKT matrix
-    exitflag = work->linsys_solver->update_rho(work->linsys_solver,
-                                               rho_new,
-                                               work->data->m);
+    // Update rho_vec and rho_inv_vec
+    for (i = 0; i < work->data->m; i++){
+        if (work->constr_type[i] == 0) {
+            // Constraints for which rho is not set to RHO_MIN or RHO_MAX
+            work->rho_vec[i] = work->settings->rho;
+            work->rho_inv_vec[i] = 1. / work->settings->rho;
+        }
+    }
+
+    // Update rho_vec in KKT matrix
+    exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
+                                                   work->rho_vec,
+                                                   work->data->m);
 
     return exitflag;
 }
