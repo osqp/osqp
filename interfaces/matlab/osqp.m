@@ -540,12 +540,13 @@ if(~isInitialization)
     end
 end
 
-%check that everything is a nonnegative scalar
-for i = 1:length(newFields)
-    val = double(newSettings.(newFields{i}));
-    assert(isscalar(val) & isnumeric(val) & val >= 0, ...
-        'Solver setting ''%s'' not specified as nonnegative scalar', newFields{i});
-end
+%check that everything is a nonnegative scalar (this check is already
+%performed in C)
+% for i = 1:length(newFields)
+%     val = double(newSettings.(newFields{i}));
+%     assert(isscalar(val) & isnumeric(val) & val >= 0, ...
+%         'Solver setting ''%s'' not specified as nonnegative scalar', newFields{i});
+% end
 
 %everything checks out - merge the newSettings into the current ones
 for i = 1:length(newFields)
