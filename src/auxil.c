@@ -5,9 +5,10 @@
  ***********************************************************/
 #if EMBEDDED != 1
 void set_rho_vec(OSQPWorkspace * work){
+    c_int i;
     work->settings->rho = c_min(c_max(work->settings->rho, RHO_MIN), RHO_MAX);
 
-    for(int i=0; i < work->data->m; i++){
+    for(i=0; i < work->data->m; i++){
         if ( (work->data->l[i] < -OSQP_INFTY*MIN_SCALING) && (work->data->u[i] > OSQP_INFTY*MIN_SCALING) ) {
             // Loose bounds
             work->constr_type[i] = -1;
@@ -26,9 +27,9 @@ void set_rho_vec(OSQPWorkspace * work){
 }
 
 c_int update_rho_vec(OSQPWorkspace * work){
-    c_int constr_type_changed = 0;
+    c_int i, constr_type_changed = 0;
 
-    for(int i=0; i < work->data->m; i++){
+    for(i=0; i < work->data->m; i++){
         if ( (work->data->l[i] < -OSQP_INFTY*MIN_SCALING) && (work->data->u[i] > OSQP_INFTY*MIN_SCALING) ) {
             // Loose bounds
             if (work->constr_type[i] != -1){

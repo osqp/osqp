@@ -229,6 +229,12 @@
 
 
 static PyObject *OSQP_get_workspace(OSQP *self){
+    PyObject *rho_vectors_py;
+    PyObject *data_py;
+    PyObject *linsys_solver_py;
+    PyObject *scaling_py;
+    PyObject *settings_py;
+    PyObject *return_dict;
 
     // Check if linear systems solver is SUITESPARSE_LDL
     if(!self->workspace){
@@ -241,13 +247,13 @@ static PyObject *OSQP_get_workspace(OSQP *self){
         return (PyObject *) NULL;
     }
 
-     PyObject *rho_vectors_py   = OSQP_get_rho_vectors(self);
-     PyObject *data_py          = OSQP_get_data(self);
-     PyObject *linsys_solver_py = OSQP_get_linsys_solver(self);
-     PyObject *scaling_py       = OSQP_get_scaling(self);
-     PyObject *settings_py      = OSQP_get_settings(self);
+     rho_vectors_py   = OSQP_get_rho_vectors(self);
+     data_py          = OSQP_get_data(self);
+     linsys_solver_py = OSQP_get_linsys_solver(self);
+     scaling_py       = OSQP_get_scaling(self);
+     settings_py      = OSQP_get_settings(self);
 
-     PyObject *return_dict = Py_BuildValue("{s:O,s:O,s:O,s:O,s:O}",
+     return_dict = Py_BuildValue("{s:O,s:O,s:O,s:O,s:O}",
                                            "rho_vectors",   rho_vectors_py,
                                            "data",          data_py,
                                            "linsys_solver", linsys_solver_py,
