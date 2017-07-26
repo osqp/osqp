@@ -152,7 +152,7 @@ typedef struct {
         c_float eps_prim_inf;  ///< primal infeasibility tolerance
         c_float eps_dual_inf;  ///< dual infeasibility tolerance
         c_float alpha; ///< relaxation parameter
-	    enum linsys_solver_type linsys_solver;  ///< linear system solver to use
+	      enum linsys_solver_type linsys_solver;  ///< linear system solver to use
 
         #ifndef EMBEDDED
         c_float delta; ///< regularization parameter for polis
@@ -186,6 +186,19 @@ typedef struct {
         #ifndef EMBEDDED
         /// Polish structure
         OSQPPolish * pol;
+        #endif
+
+        /**
+         * @name Vector used to store a vectorized rho parameter
+         * @{
+         */
+        c_float *rho_vec;           ///< vector of rho values
+        c_float *rho_inv_vec;       ///< vector of inv rho values
+
+        /** @} */
+
+        #if EMBEDDED != 1
+        c_int *constr_type;   ///< Type of constraints: loose (-1), equality (1), inequality (0)
         #endif
 
         /**
@@ -230,8 +243,6 @@ typedef struct {
         c_float *D_temp_A;            ///< temporary primal variable scaling vectors storing norms of A columns
         c_float *E_temp;            ///< temporary constraints scaling vectors storing norms of A' columns
 
-        /** @} */
-
 
         /** @} */
 
@@ -270,7 +281,7 @@ struct linsys_solver {
 
     #if EMBEDDED != 1
     c_int (*update_matrices)(LinSysSolver * self, const csc *P, const csc *A, const OSQPSettings *settings); ///< Update matrices P and A in the solver
-    c_int (*update_rho)(LinSysSolver * s, const c_float rho, const c_int m);  ///< Update rho
+    c_int (*update_rho_vec)(LinSysSolver * s, const c_float * rho_vec, const c_int m);  ///< Update rho
     #endif
 };
 

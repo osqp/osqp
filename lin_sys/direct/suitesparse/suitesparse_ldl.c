@@ -170,16 +170,10 @@ c_int permute_KKT(csc ** KKT, suitesparse_ldl_solver * p, c_int Pnz, c_int Anz, 
     return 0;
 }
 
-/**
- * Initialize LDL Factorization structure
- *
- * @param  P        Cost function matrix (upper triangular form)
- * @param  A        Constraints matrix
- * @param  settings Solver settings
- * @param  polish   Flag whether we are initializing for polish or not
- * @return          Initialized private structure
- */
-suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const csc * A, const OSQPSettings *settings, c_int polish){
+
+// Initialize LDL Factorization structure
+suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const csc * A, c_float sigma, c_float * rho_vec, c_int polish){
+    c_int i;                     // loop counter
     // Define Variables
     suitesparse_ldl_solver * p;  // Initialize LDL solver
     c_int n_plus_m;              // Define n_plus_m dimension
@@ -212,19 +206,29 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
 
     // Form and permute KKT matrix
     if (polish){ // Called from polish()
-        KKT_temp = form_KKT(P, A, settings->delta, settings->delta, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
+        // Use p->bp for storing param2 = vec(delta)
+        for (i = 0; i < A->m; i++){
+            p->bp[i] = sigma;
+        }
+
+        KKT_temp = form_KKT(P, A, sigma, p->bp, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
 
         // Permute matrix
         permute_KKT(&KKT_temp, p, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
     }
     else { // Called from ADMM algorithm
 
-        // Allocate vectors of indeces
+        // Allocate vectors of indices
         p->PtoKKT = c_malloc((P->p[P->n]) * sizeof(c_int));
         p->AtoKKT = c_malloc((A->p[A->n]) * sizeof(c_int));
         p->rhotoKKT = c_malloc((A->m) * sizeof(c_int));
 
-        KKT_temp = form_KKT(P, A, settings->sigma, 1./settings->rho,
+        // Use p->bp for storing param2 = rho_inv_vec
+        for (i = 0; i < A->m; i++){
+            p->bp[i] = 1. / rho_vec[i];
+        }
+
+        KKT_temp = form_KKT(P, A, sigma, p->bp,
                             p->PtoKKT, p->AtoKKT,
                             &(p->Pdiag_idx), &(p->Pdiag_n), p->rhotoKKT);
 
@@ -260,9 +264,15 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
 
     // Link Functions
     p->solve = &solve_linsys_suitesparse_ldl;
+
+    #ifndef EMBEDDED
     p->free = &free_linsys_solver_suitesparse_ldl;
+    #endif
+
+    #if EMBEDDED != 1
     p->update_matrices = &update_linsys_solver_matrices_suitesparse_ldl;
-    p->update_rho = &update_linsys_solver_rho_suitesparse_ldl;
+    p->update_rho_vec = &update_linsys_solver_rho_vec_suitesparse_ldl;
+    #endif
 
     // Assign type
     p->type = SUITESPARSE_LDL;
@@ -325,10 +335,16 @@ c_int update_linsys_solver_matrices_suitesparse_ldl(suitesparse_ldl_solver * s,
 
 
 
-c_int update_linsys_solver_rho_suitesparse_ldl(suitesparse_ldl_solver * s, const c_float rho, const c_int m){
-    c_int kk;
+c_int update_linsys_solver_rho_vec_suitesparse_ldl(suitesparse_ldl_solver * s, const c_float * rho_vec, const c_int m){
+    c_int kk, i;
+
+    // Use s->bp for storing param2 = rho_inv_vec
+    for (i = 0; i < m; i++){
+        s->bp[i] = 1. / rho_vec[i];
+    }
+
     // Update KKT matrix with new rho
-    update_KKT_scalar2(s->KKT, 1./rho, s->rhotoKKT, m);
+    update_KKT_param2(s->KKT, s->bp, s->rhotoKKT, m);
 
     // Perform numeric factorization
     kk = LDL_numeric(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,

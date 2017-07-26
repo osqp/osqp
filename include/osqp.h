@@ -229,7 +229,7 @@ c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, 
 c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, c_int P_new_n, c_float * Ax_new, c_int * Ax_new_idx, c_int A_new_n);
 
 /**
-* Update rho
+* Update rho. Limit it between RHO_MIN and RHO_MAX.
 * @param  work         Workspace
 * @param  rho_new      New rho setting
 * @return              Exitflag

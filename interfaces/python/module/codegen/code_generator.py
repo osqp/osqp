@@ -98,7 +98,8 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
     # Variables created from the workspace
     sys.stdout.write("Generating customized code... \t\t\t\t\t")
     sys.stdout.flush()
-    template_vars = {'data':            work['data'],
+    template_vars = {'rho_vectors':     work['rho_vectors'],
+                     'data':            work['data'],
                      'settings':        work['settings'],
                      'linsys_solver':   work['linsys_solver'],
                      'scaling':         work['scaling'],

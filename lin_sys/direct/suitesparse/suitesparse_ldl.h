@@ -28,7 +28,7 @@ struct suitesparse_ldl {
     // This used only in non embedded or embedded 2 version
     #if EMBEDDED != 1
     c_int (*update_matrices)(struct suitesparse_ldl * self, const csc *P, const csc *A, const OSQPSettings *settings); ///< Update solver matrices
-    c_int (*update_rho)(struct suitesparse_ldl * self, const c_float rho, const c_int m); ///< Update solver matrices
+    c_int (*update_rho_vec)(struct suitesparse_ldl * self, const c_float * rho_vec, const c_int m); ///< Update solver matrices
     #endif
 
     /** @} */
@@ -65,13 +65,14 @@ struct suitesparse_ldl {
 /**
  * Initialize Suitesparse LDL Solver
  *
- * @param  P        Cost function matrix (upper triangular form)
- * @param  A        Constraints matrix
- * @param  settings Solver settings
- * @param  polish   Flag whether we are initializing for polish or not
- * @return          Initialized private structure
+ * @param  P      Cost function matrix (upper triangular form)
+ * @param  A      Constraints matrix
+ * @param	sigma   Algorithm parameter. If polish, then sigma = delta.
+ * @param	rho_vec Algorithm parameter. If polish, then rho_vec = OSQP_NULL.
+ * @param  polish Flag whether we are initializing for polish or not
+ * @return        Initialized private structure
  */
-suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const csc * A, const OSQPSettings *settings, c_int polish);
+suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const csc * A, c_float sigma, c_float * rho_vec, c_int polish);
 
 /**
  * Solve linear system and store result in b
@@ -105,7 +106,7 @@ c_int update_linsys_solver_matrices_suitesparse_ldl(suitesparse_ldl_solver * s,
  * @param  m   number of constraints
  * @return     exitflag
  */
-c_int update_linsys_solver_rho_suitesparse_ldl(suitesparse_ldl_solver * s, const c_float rho, const c_int m);
+c_int update_linsys_solver_rho_vec_suitesparse_ldl(suitesparse_ldl_solver * s, const c_float * rho_vec, const c_int m);
 
 #endif
 

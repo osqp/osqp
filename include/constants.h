@@ -44,6 +44,11 @@ enum linsys_solver_type {SUITESPARSE_LDL};
 #define ALPHA (1.6)
 #define LINSYS_SOLVER (SUITESPARSE_LDL)
 
+#define RHO_MIN (1e-06)
+#define RHO_MAX (1e06)
+#define RHO_TOL (1e-04)
+
+
 #ifndef EMBEDDED
 #define DELTA (1E-6)
 #define POLISH (1)
@@ -51,13 +56,6 @@ enum linsys_solver_type {SUITESPARSE_LDL};
 #define VERBOSE (1)
 #define AUTO_RHO (0)
 
-
-// (trP + sigma * n)/n    /    (trAtA)/m
-#define AUTO_RHO_BETA0 (0.43764484761141698)   // Not settable by the user
-#define AUTO_RHO_BETA1 (0.26202391082629206)  // Not settable by the user
-#define AUTO_RHO_BETA2 (-0.46598879917320213) // Not settable by the user
-#define AUTO_RHO_MAX (1e06)                   // Not settable by user
-#define AUTO_RHO_MIN (1e-06)                  // Not settable by user
 
 #endif
 
@@ -69,7 +67,8 @@ enum linsys_solver_type {SUITESPARSE_LDL};
 
 #if EMBEDDED != 1
 #define SCALING_ITER (15)
-#define SCALING_REG (1e-08)  ///< Regularization in scaling iterations
+#define MIN_SCALING (1e-08)  ///< Minimum scaling value
+#define MAX_SCALING (1e+08)  ///< Maximum scaling value
 #define SCALING_NORM (2)     ///< Scaling norm
 #endif
 

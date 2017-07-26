@@ -4,10 +4,11 @@
 
 
 // Set values lower than threshold SCALING_REG to 1
-void set_to_one_zero_values(c_float * D, c_int n){
+void limit_scaling(c_float * D, c_int n){
 	c_int i;
 	for (i = 0; i < n; i++){
-		D[i] = D[i] < SCALING_REG ? 1.0 : D[i];
+		D[i] = D[i] < MIN_SCALING ? 1.0 : D[i];
+		D[i] = D[i] > MAX_SCALING ? MAX_SCALING : D[i];
 	}
 }
 
@@ -147,8 +148,8 @@ c_int scale_data(OSQPWorkspace * work){
 							  work->E_temp, n);
 
 		// Set to 1 values with 0 norms (avoid crazy scaling)
-		set_to_one_zero_values(work->D_temp, n);
-		set_to_one_zero_values(work->E_temp, m);
+		limit_scaling(work->D_temp, n);
+		limit_scaling(work->E_temp, m);
 
 		// Take square root of norms
 		vec_ew_sqrt(work->D_temp, n);

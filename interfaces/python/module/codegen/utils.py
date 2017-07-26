@@ -87,11 +87,9 @@ def write_settings(f, settings, name, embedded_flag):
     f.write("(c_float)%.20f, " % settings['sigma'])
     f.write("%d, " % settings['scaling'])
 
-    # EMBEDDED == 2
     if embedded_flag != 1:
         f.write("%d, " % settings['scaling_iter'])
         f.write("%d, " % settings['scaling_norm'])
-
 
     f.write("%d, " % settings['max_iter'])
     f.write("(c_float)%.20f, " % settings['eps_abs'])
@@ -152,7 +150,7 @@ def write_linsys_solver(f, linsys_solver, name, embedded_flag):
     f.write("suitesparse_ldl_solver %s = " % name)
     f.write("{SUITESPARSE_LDL, &solve_linsys_suitesparse_ldl, ")
     if embedded_flag != 1:
-        f.write("&update_linsys_solver_matrices_suitesparse_ldl, &update_linsys_solver_rho_suitesparse_ldl, " +
+        f.write("&update_linsys_solver_matrices_suitesparse_ldl, &update_linsys_solver_rho_vec_suitesparse_ldl, " +
                 "&linsys_solver_L, linsys_solver_Dinv, linsys_solver_P, linsys_solver_bp, linsys_solver_Pdiag_idx, " +
                 "%d, " % linsys_solver['Pdiag_n'] +
                 "&linsys_solver_KKT, linsys_solver_PtoKKT, linsys_solver_AtoKKT, linsys_solver_rhotoKKT, " +
@@ -180,29 +178,39 @@ def write_info(f, name):
             % name)
 
 
-def write_workspace(f, data, name):
+def write_workspace(f, n, m, rho_vectors, embedded_flag, name):
     """
     Write workspace structure
     """
 
     f.write("// Define workspace\n")
-    f.write("c_float work_x[%d];\n" % data['n'])
-    f.write("c_float work_y[%d];\n" % data['m'])
-    f.write("c_float work_z[%d];\n" % data['m'])
-    f.write("c_float work_xz_tilde[%d];\n" % (data['m'] + data['n']))
-    f.write("c_float work_x_prev[%d];\n" % data['n'])
-    f.write("c_float work_z_prev[%d];\n" % data['m'])
-    f.write("c_float work_delta_y[%d];\n" % data['m'])
-    f.write("c_float work_Atdelta_y[%d];\n" % data['n'])
-    f.write("c_float work_delta_x[%d];\n" % data['n'])
-    f.write("c_float work_Pdelta_x[%d];\n" % data['n'])
-    f.write("c_float work_Adelta_x[%d];\n" % data['m'])
-    f.write("c_float work_D_temp[%d];\n" % data['n'])
-    f.write("c_float work_D_temp_A[%d];\n" % data['n'])
-    f.write("c_float work_E_temp[%d];\n\n" % data['m'])
+
+    write_vec(f, rho_vectors['rho_vec'], 'work_rho_vec', 'c_float')
+    write_vec(f, rho_vectors['rho_inv_vec'], 'work_rho_inv_vec', 'c_float')
+    if embedded_flag != 1:
+        write_vec(f, rho_vectors['constr_type'], 'work_constr_type', 'c_int')
+
+    f.write("c_float work_x[%d];\n" % n)
+    f.write("c_float work_y[%d];\n" % m)
+    f.write("c_float work_z[%d];\n" % m)
+    f.write("c_float work_xz_tilde[%d];\n" % (m + n))
+    f.write("c_float work_x_prev[%d];\n" % n)
+    f.write("c_float work_z_prev[%d];\n" % m)
+    f.write("c_float work_delta_y[%d];\n" % m)
+    f.write("c_float work_Atdelta_y[%d];\n" % n)
+    f.write("c_float work_delta_x[%d];\n" % n)
+    f.write("c_float work_Pdelta_x[%d];\n" % n)
+    f.write("c_float work_Adelta_x[%d];\n" % m)
+    f.write("c_float work_D_temp[%d];\n" % n)
+    f.write("c_float work_D_temp_A[%d];\n" % n)
+    f.write("c_float work_E_temp[%d];\n\n" % m)
 
     f.write("OSQPWorkspace %s = {\n" % name)
     f.write("&data, (LinSysSolver *)&linsys_solver,\n")
+    f.write("work_rho_vec, work_rho_inv_vec,\n")
+    if embedded_flag != 1:
+        f.write("work_constr_type,\n")
+
     f.write("work_x, work_y, work_z, work_xz_tilde,\n")
     f.write("work_x_prev, work_z_prev,\n")
     f.write("work_delta_y, work_Atdelta_y,\n")
@@ -216,11 +224,14 @@ def render_workspace(variables, output):
     Print workspace dimensions
     """
 
+    rho_vectors = variables['rho_vectors']
     data = variables['data']
     linsys_solver = variables['linsys_solver']
     scaling = variables['scaling']
     settings = variables['settings']
     embedded_flag = variables['embedded_flag']
+    n = data['n']
+    m = data['m']
 
     # Open output file
     f = open(output, 'w')
@@ -263,7 +274,7 @@ def render_workspace(variables, output):
     '''
     Define workspace structure
     '''
-    write_workspace(f, data, 'workspace')
+    write_workspace(f, n, m, rho_vectors, embedded_flag, 'workspace')
 
     f.close()
 

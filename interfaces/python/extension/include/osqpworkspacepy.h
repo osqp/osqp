@@ -5,6 +5,35 @@
  * OSQP Workspace creation in Python objects  *
  **********************************************/
 
+ static PyObject *OSQP_get_rho_vectors(OSQP *self){
+
+     npy_intp m = (npy_intp)self->workspace->data->m;
+
+     int float_type = get_float_type();
+     int int_type   = get_int_type();
+
+     PyObject *return_dict;
+
+     /* Build Arrays. */
+     PyObject *rho_vec     = PyArray_SimpleNewFromData(1, &m, float_type, self->workspace->rho_vec);
+     PyObject *rho_inv_vec = PyArray_SimpleNewFromData(1, &m, float_type, self->workspace->rho_inv_vec);
+     PyObject *constr_type = PyArray_SimpleNewFromData(1, &m, int_type,   self->workspace->constr_type);
+
+     /* Change data ownership. */
+     PyArray_ENABLEFLAGS((PyArrayObject *) rho_vec,     NPY_ARRAY_OWNDATA);
+     PyArray_ENABLEFLAGS((PyArrayObject *) rho_inv_vec, NPY_ARRAY_OWNDATA);
+     PyArray_ENABLEFLAGS((PyArrayObject *) constr_type, NPY_ARRAY_OWNDATA);
+
+     /* Build Python dictionary. */
+     return_dict = Py_BuildValue("{s:O,s:O,s:O}", "rho_vec", rho_vec,
+                                 "rho_inv_vec", rho_inv_vec, "constr_type", constr_type);
+
+     return return_dict;
+ }
+
+
+
+
 
  static PyObject *OSQP_get_scaling(OSQP *self){
 
@@ -200,6 +229,12 @@
 
 
 static PyObject *OSQP_get_workspace(OSQP *self){
+    PyObject *rho_vectors_py;
+    PyObject *data_py;
+    PyObject *linsys_solver_py;
+    PyObject *scaling_py;
+    PyObject *settings_py;
+    PyObject *return_dict;
 
     // Check if linear systems solver is SUITESPARSE_LDL
     if(!self->workspace){
@@ -212,16 +247,18 @@ static PyObject *OSQP_get_workspace(OSQP *self){
         return (PyObject *) NULL;
     }
 
-     PyObject *data_py = OSQP_get_data(self);
-     PyObject *linsys_solver_py = OSQP_get_linsys_solver(self);
-     PyObject *scaling_py = OSQP_get_scaling(self);
-     PyObject *settings_py = OSQP_get_settings(self);
+     rho_vectors_py   = OSQP_get_rho_vectors(self);
+     data_py          = OSQP_get_data(self);
+     linsys_solver_py = OSQP_get_linsys_solver(self);
+     scaling_py       = OSQP_get_scaling(self);
+     settings_py      = OSQP_get_settings(self);
 
-     PyObject *return_dict = Py_BuildValue("{s:O,s:O,s:O,s:O}",
-                                           "data", data_py,
+     return_dict = Py_BuildValue("{s:O,s:O,s:O,s:O,s:O}",
+                                           "rho_vectors",   rho_vectors_py,
+                                           "data",          data_py,
                                            "linsys_solver", linsys_solver_py,
-                                           "scaling", scaling_py,
-                                           "settings", settings_py);
+                                           "scaling",       scaling_py,
+                                           "settings",      settings_py);
      return return_dict;
 }
 
