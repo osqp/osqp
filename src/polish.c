@@ -202,7 +202,8 @@ c_int polish(OSQPWorkspace *work) {
 
     // Form and factorize reduced KKT
     plsh = init_linsys_solver(work->data->P, work->pol->Ared,
-                              work->settings->delta, OSQP_NULL, 1);
+                              work->settings->delta, OSQP_NULL,
+                              work->settings->linsys_solver, 1);
     if (!plsh){
         // Polishing failed
         work->info->status_polish = -1;

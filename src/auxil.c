@@ -25,7 +25,7 @@ void set_rho_vec(OSQPWorkspace * work){
     }
 }
 
-c_int set_rho_vec(OSQPWorkspace * work){
+c_int update_rho_vec(OSQPWorkspace * work){
     c_int constr_type_changed = 0;
 
     for(int i=0; i < work->data->m; i++){
@@ -87,7 +87,7 @@ static void compute_rhs(OSQPWorkspace *work){
     }
     for (i = 0; i < work->data->m; i++){
         // Cycle over dual variable in the first step (nu)
-        work->xz_tilde[i + work->data->n] = work->z_prev[i] - (c_float) 1./work->settings->rho * work->y[i];
+        work->xz_tilde[i + work->data->n] = work->z_prev[i] - work->rho_inv_vec[i] * work->y[i];
     }
 
 }
@@ -96,7 +96,7 @@ static void compute_rhs(OSQPWorkspace *work){
 static void update_z_tilde(OSQPWorkspace *work){
     c_int i; // Index
     for (i = 0; i < work->data->m; i++){
-        work->xz_tilde[i + work->data->n] = work->z_prev[i] + (c_float) 1./work->settings->rho * (work->xz_tilde[i + work->data->n] - work->y[i]);
+        work->xz_tilde[i + work->data->n] = work->z_prev[i] + work->rho_inv_vec[i] * (work->xz_tilde[i + work->data->n] - work->y[i]);
     }
 }
 
@@ -136,7 +136,7 @@ void update_z(OSQPWorkspace *work){
     for (i = 0; i < work->data->m; i++){
         work->z[i] = work->settings->alpha * work->xz_tilde[i + work->data->n] +
                      ((c_float) 1.0 - work->settings->alpha) * work->z_prev[i] +
-                     (c_float) 1./work->settings->rho * work->y[i];
+                     work->rho_inv_vec[i] * work->y[i];
     }
 
     // project z
@@ -150,7 +150,7 @@ void update_y(OSQPWorkspace *work){
     c_int i; // Index
     for (i = 0; i < work->data->m; i++){
 
-        work->delta_y[i] = work->settings->rho *
+        work->delta_y[i] = work->rho_vec[i] *
             (work->settings->alpha * work->xz_tilde[i + work->data->n] +
             ((c_float) 1.0 - work->settings->alpha) * work->z_prev[i] - work->z[i]);
         work->y[i] += work->delta_y[i];

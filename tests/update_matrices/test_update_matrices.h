@@ -12,18 +12,21 @@
 
 static char * test_form_KKT(){
     update_matrices_sols_data *  data;
-    c_float rho, sigma;
-    c_int * PtoKKT, * AtoKKT, * Pdiag_idx, Pdiag_n;
+    c_float sigma, *rho_vec, * rho_inv_vec;
+    c_int m, * PtoKKT, * AtoKKT, * Pdiag_idx, Pdiag_n;
     csc * Ptriu;
     csc * KKT;
 
     // Load problem data
     data = generate_problem_update_matrices_sols_data();
 
-    // Define rho and sigma to form KKT
-    rho = data->test_form_KKT_rho;
+    // Define rho_vec and sigma to form KKT
     sigma = data->test_form_KKT_sigma;
-
+    m = data->test_form_KKT_A->m;
+    rho_vec = c_calloc(m, sizeof(c_float));
+    rho_inv_vec = c_calloc(m, sizeof(c_float));
+    vec_add_scalar(rho_vec, data->test_form_KKT_rho, m);
+    vec_ew_recipr(rho_vec, rho_inv_vec, m);
 
     // Allocate vectors of indeces
     PtoKKT = c_malloc((data->test_form_KKT_Pu->p[data->test_form_KKT_Pu->n]) *
@@ -35,7 +38,7 @@ static char * test_form_KKT(){
     Ptriu = csc_to_triu(data->test_form_KKT_P);
 
     // Form KKT matrix storing the index vectors
-    KKT = form_KKT(Ptriu, data->test_form_KKT_A, sigma, 1./rho, PtoKKT, AtoKKT, &Pdiag_idx, &Pdiag_n, OSQP_NULL);
+    KKT = form_KKT(Ptriu, data->test_form_KKT_A, sigma, rho_inv_vec, PtoKKT, AtoKKT, &Pdiag_idx, &Pdiag_n, OSQP_NULL);
 
     // Assert if KKT matrix is the same as predicted one
     mu_assert("Update matrices: error in forming KKT matrix!", is_eq_csc(KKT, data->test_form_KKT_KKTu, TESTS_TOL));

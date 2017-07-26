@@ -264,9 +264,15 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
 
     // Link Functions
     p->solve = &solve_linsys_suitesparse_ldl;
+
+    #ifndef EMBEDDED
     p->free = &free_linsys_solver_suitesparse_ldl;
+    #endif
+
+    #if EMBEDDED != 1
     p->update_matrices = &update_linsys_solver_matrices_suitesparse_ldl;
     p->update_rho_vec = &update_linsys_solver_rho_vec_suitesparse_ldl;
+    #endif
 
     // Assign type
     p->type = SUITESPARSE_LDL;

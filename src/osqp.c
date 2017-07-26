@@ -109,7 +109,8 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
 
     // Initialize linear system solver structure
     work->linsys_solver = init_linsys_solver(work->data->P, work->data->A,
-                                             work->settings->sigma, work->rho_vec, 0);
+                                             work->settings->sigma, work->rho_vec,
+                                             work->settings->linsys_solver, 0);
     if (!work->linsys_solver){
         #ifdef PRINTING
         c_print("ERROR: Linear systems solver initialization failure!\n");
@@ -542,7 +543,7 @@ c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new)
 
 
 c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
-    c_int i;
+    c_int i, constr_type_changed, exitflag = 0;
 
     // Replace l by the new vector
     prea_vec_copy(l_new, work->data->l, work->data->m);
@@ -583,7 +584,7 @@ c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
 
 
 c_int osqp_update_upper_bound(OSQPWorkspace * work, c_float * u_new) {
-    c_int i;
+    c_int i, constr_type_changed, exitflag = 0;
 
     // Replace u by the new vector
     prea_vec_copy(u_new, work->data->u, work->data->m);

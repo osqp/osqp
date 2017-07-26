@@ -78,7 +78,7 @@ void update_KKT_A(csc * KKT, const csc * A, const c_int * AtoKKT);
  * @param param2toKKT   index where param2 enters in the KKT matrix
  * @param m             number of constraints
  */
-void update_KKT_param2(csc * KKT, const c_float param2, const c_int * param2toKKT, const c_int m);
+void update_KKT_param2(csc * KKT, const c_float * param2, const c_int * param2toKKT, const c_int m);
 
 #endif // EMBEDDED != 1
 

@@ -27,8 +27,7 @@ extern "C" {
  * @param	polish  0/1 depending whether we are allocating for polishing or not
  *
  */
-LinSysSolver * init_linsys_solver(const csc * P, const csc * A,
-                                  c_float sigma, c_float * rho_vec, c_int polish);
+LinSysSolver * init_linsys_solver(const csc * P, const csc * A, c_float sigma, c_float * rho_vec, enum linsys_solver_type linsys_solver, c_int polish);
 
 
 #endif

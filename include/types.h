@@ -152,7 +152,7 @@ typedef struct {
         c_float eps_prim_inf;  ///< primal infeasibility tolerance
         c_float eps_dual_inf;  ///< dual infeasibility tolerance
         c_float alpha; ///< relaxation parameter
-	    enum linsys_solver_type linsys_solver;  ///< linear system solver to use
+	      enum linsys_solver_type linsys_solver;  ///< linear system solver to use
 
         #ifndef EMBEDDED
         c_float delta; ///< regularization parameter for polis

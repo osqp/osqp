@@ -11,16 +11,25 @@
 
 
 static char * test_solveKKT(){
-    c_int exitflag=0;
+    c_int m, exitflag=0;
+    c_float * rho_vec;
     LinSysSolver * p; // Private structure to form KKT factorization
     OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings)); // Settings
 
     solve_linsys_sols_data *  data = generate_problem_solve_linsys_sols_data();
 
-    // Form and factorize KKT matrix
+    // Settings
     settings->rho = data->test_solve_KKT_rho;
     settings->sigma = data->test_solve_KKT_sigma;
-    p = init_linsys_solver(data->test_solve_KKT_Pu, data->test_solve_KKT_A, settings, 0);
+
+    // Set rho_vec
+    m = data->test_solve_KKT_A->m;
+    rho_vec = c_calloc(m, sizeof(c_float));
+    vec_add_scalar(rho_vec, settings->rho, m);
+
+    // Form and factorize KKT matrix
+    p = init_linsys_solver(data->test_solve_KKT_Pu, data->test_solve_KKT_A,
+                           settings->sigma, rho_vec, LINSYS_SOLVER, 0);
 
     // Debug print KKT and LDL
     // print_csc_mat(data->test_solve_KKT_KKT, "KKTpy");

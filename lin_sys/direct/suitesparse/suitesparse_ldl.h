@@ -106,7 +106,7 @@ c_int update_linsys_solver_matrices_suitesparse_ldl(suitesparse_ldl_solver * s,
  * @param  m   number of constraints
  * @return     exitflag
  */
-c_int update_linsys_solver_rho_suitesparse_ldl(suitesparse_ldl_solver * s, const c_float rho, const c_int m);
+c_int update_linsys_solver_rho_vec_suitesparse_ldl(suitesparse_ldl_solver * s, const c_float * rho_vec, const c_int m);
 
 #endif
 
