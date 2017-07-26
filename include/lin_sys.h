@@ -11,9 +11,12 @@ extern "C" {
 // #include "cs.h"
 #include "types.h"
 
-// Include solvers
+#ifdef EMBEDDED
+#include "suitesparse_ldl.h"   // Include only this solver in the same directory
+#else
+// Include all linear system solvers
 #include "../lin_sys/direct/suitesparse/suitesparse_ldl.h"
-
+#endif
 
 #ifndef EMBEDDED
 // Initialize linear system solver structure
