@@ -197,13 +197,9 @@ typedef struct {
 
         /** @} */
 
-        /**
-         * @name Type of constraints: loose (-1), equality (1), inequality (0)
-         * @{
-         */
-        c_float *constr_type;
-
-        /** @} */
+        #if EMBEDDED != 1
+        c_int *constr_type;   ///< Type of constraints: loose (-1), equality (1), inequality (0)
+        #endif
 
         /**
          * @name Iterates

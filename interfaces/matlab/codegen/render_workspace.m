@@ -27,7 +27,7 @@ write_solution(f, work.data.n, work.data.m);
 write_info(f);
 
 % Define workspace structure
-write_workspace(f, work.data.n, work.data.m);
+write_workspace(f, work.data.n, work.data.m, work.rho_vectors, embedded_flag);
 
 fclose(f);
 
@@ -138,7 +138,7 @@ end
 fprintf(f, 'suitesparse_ldl_solver linsys_solver = ');
 fprintf(f, '{SUITESPARSE_LDL, &solve_linsys_suitesparse_ldl, ');
 if embedded_flag ~= 1
-    fprintf(f, ['&update_linsys_solver_matrices_suitesparse_ldl, &update_linsys_solver_rho_suitesparse_ldl, ', ...
+    fprintf(f, ['&update_linsys_solver_matrices_suitesparse_ldl, &update_linsys_solver_rho_vec_suitesparse_ldl, ', ...
             '&linsys_solver_L, linsys_solver_Dinv, linsys_solver_P, linsys_solver_bp, linsys_solver_Pdiag_idx, ', ...
             num2str(linsys_solver.Pdiag_n), ', &linsys_solver_KKT, linsys_solver_PtoKKT, linsys_solver_AtoKKT, linsys_solver_rhotoKKT, ', ...
             'linsys_solver_Lnz, linsys_solver_Y, linsys_solver_Pattern, linsys_solver_Flag, linsys_solver_Parent};\n\n']);
@@ -169,10 +169,15 @@ fprintf(f, 'OSQPInfo info = {0, "Unsolved", OSQP_UNSOLVED, (c_float)0.0, (c_floa
 end
 
 
-function write_workspace( f, n, m )
-%WRITE_WORKSPACE Preallocate workspace structure
+function write_workspace( f, n, m, rho_vectors, embedded_flag )
+%WRITE_WORKSPACE Preallocate workspace structure and populate rho_vectors
 
 fprintf(f, '// Define workspace\n');
+write_vec(f, rho_vectors.rho_vec,     'work_rho_vec',     'c_float');
+write_vec(f, rho_vectors.rho_inv_vec, 'work_rho_inv_vec', 'c_float');
+if embedded_flag ~= 1
+    write_vec(f, rho_vectors.constr_type, 'work_constr_type', 'c_int');
+end
 fprintf(f, 'c_float work_x[%d];\n', n);
 fprintf(f, 'c_float work_y[%d];\n', m);
 fprintf(f, 'c_float work_z[%d];\n', m);
@@ -190,6 +195,10 @@ fprintf(f, 'c_float work_E_temp[%d];\n\n', m);
 
 fprintf(f, 'OSQPWorkspace workspace = {\n');
 fprintf(f, '&data, (LinSysSolver *)&linsys_solver,\n');
+fprintf(f, 'work_rho_vec, work_rho_inv_vec,\n');
+if embedded_flag ~= 1
+    fprintf(f, 'work_constr_type,\n');
+end
 fprintf(f, 'work_x, work_y, work_z, work_xz_tilde,\n');
 fprintf(f, 'work_x_prev, work_z_prev,\n');
 fprintf(f, 'work_delta_y, work_Atdelta_y,\n');

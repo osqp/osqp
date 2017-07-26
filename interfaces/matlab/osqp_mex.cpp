@@ -18,41 +18,40 @@ int SetInterruptEnabled(int x){
 
 // all of the OSQP_INFO fieldnames as strings
 const char* OSQP_INFO_FIELDS[] = {"iter",         //c_int
-                                "status" ,        //char*
-                                "status_val" ,    //c_int
-                                "status_polish",  //c_int
-                                "obj_val",        //c_float
-                                "pri_res",        //c_float
-                                "dua_res",        //c_float
-                                "setup_time",     //c_float, only used if PROFILING
-                                "solve_time",     //c_float, only used if PROFILING
-                                "polish_time",    //c_float, only used if PROFILING
-                                "run_time"};      //c_float, only used if PROFILING
+                                  "status" ,        //char*
+                                  "status_val" ,    //c_int
+                                  "status_polish",  //c_int
+                                  "obj_val",        //c_float
+                                  "pri_res",        //c_float
+                                  "dua_res",        //c_float
+                                  "setup_time",     //c_float, only used if PROFILING
+                                  "solve_time",     //c_float, only used if PROFILING
+                                  "polish_time",    //c_float, only used if PROFILING
+                                  "run_time"};      //c_float, only used if PROFILING
 
-const char* OSQP_SETTINGS_FIELDS[] =
-                               {"rho",            //c_float
-                               //the following subset can't be changed after initilization
-                                "sigma",            //c_float
-                                "scaling",        //c_int
-                                "scaling_iter",   //c_int
-                                "scaling_norm",   //c_int
-                                //the following subset can be changed after initilization
-                                "max_iter",                     //c_int
-                                "eps_abs",                      //c_float
-                                "eps_rel",                      //c_float
-                                "eps_prim_inf",                 //c_float
-                                "eps_dual_inf",                 //c_float
-                                "alpha",                        //c_float
-                                "linsys_solver",                //c_int
-                                "delta",                        //c_float
-                                "polish",                       //c_int
-                                "pol_refine_iter",              //c_int
-                                "auto_rho",                     //c_int
-                                "verbose",                      //c_int
-                                "scaled_termination",           //c_int
-                                "early_terminate",              //c_int
-                                "early_terminate_interval",     //c_int
-                                "warm_start"};                  //c_int
+const char* OSQP_SETTINGS_FIELDS[] = {"rho",                        //c_float
+                                      //the following subset can't be changed after initilization
+                                      "sigma",                      //c_float
+                                      "scaling",                    //c_int
+                                      "scaling_iter",               //c_int
+                                      "scaling_norm",               //c_int
+                                      //the following subset can be changed after initilization
+                                      "max_iter",                   //c_int
+                                      "eps_abs",                    //c_float
+                                      "eps_rel",                    //c_float
+                                      "eps_prim_inf",               //c_float
+                                      "eps_dual_inf",               //c_float
+                                      "alpha",                      //c_float
+                                      "linsys_solver",              //c_int
+                                      "delta",                      //c_float
+                                      "polish",                     //c_int
+                                      "pol_refine_iter",            //c_int
+                                      "auto_rho",                   //c_int
+                                      "verbose",                    //c_int
+                                      "scaled_termination",         //c_int
+                                      "early_terminate",            //c_int
+                                      "early_terminate_interval",   //c_int
+                                      "warm_start"};                //c_int
 
 const char* CSC_FIELDS[] = {"nzmax",    //c_int
                             "m",        //c_int
@@ -90,8 +89,13 @@ const char* OSQP_SCALING_FIELDS[] = {"D",       //c_float*
                                      "E",       //c_float*
                                      "Dinv",    //c_float*
                                      "Einv"};   //c_float*
+                                     
+const char* OSQP_RHO_VECTORS_FIELDS[] = {"rho_vec",         //c_float*
+                                         "rho_inv_vec",     //c_float*
+                                         "constr_type"};    //c_int*
 
-const char* OSQP_WORKSPACE_FIELDS[] = {"data",
+const char* OSQP_WORKSPACE_FIELDS[] = {"rho_vectors",
+                                       "data",
                                        "linsys_solver",
                                        "scaling",
                                        "settings"};
@@ -907,22 +911,53 @@ mxArray* copyScalingToMxStruct(OSQPWorkspace *work){
    return mxPtr;
 }
 
-mxArray*  copyWorkToMxStruct(OSQPWorkspace* work){
+mxArray* copyRhoVectorsToMxStruct(OSQPWorkspace *work){
+
+    int m, nfields;
+    mxArray* mxPtr;
+
+    m = work->data->m;
+
+    nfields = sizeof(OSQP_RHO_VECTORS_FIELDS) / sizeof(OSQP_RHO_VECTORS_FIELDS[0]);
+    mxPtr = mxCreateStructMatrix(1,1,nfields,OSQP_RHO_VECTORS_FIELDS);
+
+    // Create vectors
+    mxArray* rho_vec     = mxCreateDoubleMatrix(m,1,mxREAL);
+    mxArray* rho_inv_vec = mxCreateDoubleMatrix(m,1,mxREAL);
+    mxArray* constr_type = mxCreateDoubleMatrix(m,1,mxREAL);
+
+    // Populate vectors
+    castToDoubleArr(work->rho_vec,     mxGetPr(rho_vec),     m);
+    castToDoubleArr(work->rho_inv_vec, mxGetPr(rho_inv_vec), m);
+    castCintToDoubleArr(work->constr_type, mxGetPr(constr_type), m);
+
+    //map the RHO_VECTORS fields one at a time into mxArrays
+    mxSetField(mxPtr, 0, "rho_vec",     rho_vec);
+    mxSetField(mxPtr, 0, "rho_inv_vec", rho_inv_vec);
+    mxSetField(mxPtr, 0, "constr_type", constr_type);
+
+    return mxPtr;
+}
+
+
+mxArray* copyWorkToMxStruct(OSQPWorkspace* work){
 
   int nfields  = sizeof(OSQP_WORKSPACE_FIELDS) / sizeof(OSQP_WORKSPACE_FIELDS[0]);
   mxArray* mxPtr = mxCreateStructMatrix(1,1,nfields,OSQP_WORKSPACE_FIELDS);
 
   // Create workspace substructures
-  mxArray* data = copyDataToMxStruct(work);
+  mxArray* rho_vectors   = copyRhoVectorsToMxStruct(work);
+  mxArray* data          = copyDataToMxStruct(work);
   mxArray* linsys_solver = copyLinsysSolverToMxStruct(work);
-  mxArray* scaling  = copyScalingToMxStruct(work);
-  mxArray* settings = copySettingsToMxStruct(work->settings);
+  mxArray* scaling       = copyScalingToMxStruct(work);
+  mxArray* settings      = copySettingsToMxStruct(work->settings);
 
   //map the WORKSPACE fields one at a time into mxArrays
-  mxSetField(mxPtr, 0, "data",     data);
-  mxSetField(mxPtr, 0, "linsys_solver",     linsys_solver);
-  mxSetField(mxPtr, 0, "scaling",  scaling);
-  mxSetField(mxPtr, 0, "settings", settings);
+  mxSetField(mxPtr, 0, "rho_vectors",   rho_vectors);
+  mxSetField(mxPtr, 0, "data",          data);
+  mxSetField(mxPtr, 0, "linsys_solver", linsys_solver);
+  mxSetField(mxPtr, 0, "scaling",       scaling);
+  mxSetField(mxPtr, 0, "settings",      settings);
 
   return mxPtr;
 }

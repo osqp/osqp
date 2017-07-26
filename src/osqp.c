@@ -58,7 +58,7 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     work->rho_inv_vec = c_malloc(work->data->m * sizeof(c_float));
 
     // Type of constraints
-    work->constr_type = c_calloc(work->data->m, sizeof(c_float));
+    work->constr_type = c_calloc(work->data->m, sizeof(c_int));
 
     /*
      *  Allocate internal solver variables (ADMM steps)
