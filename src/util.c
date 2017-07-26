@@ -424,6 +424,30 @@ void print_csc_matrix(csc* M, const char * name)
         }
 }
 
+void dump_csc_matrix(csc * M, const char * file_name){
+	c_int j, i, row_strt, row_stop;
+    c_int k = 0;
+	FILE *f = fopen(file_name,"w");
+	if( f != NULL ){
+		for(j=0; j<M->n; j++){
+			row_strt = M->p[j];
+			row_stop = M->p[j+1];
+			if (row_strt == row_stop)
+				continue;
+			else {
+				for(i = row_strt; i < row_stop; i++ ){
+					fprintf(f,"%d\t%d\t%20.18e\n",
+                        (int)M->i[i]+1, (int)j+1, M->x[k++]);
+				}
+			}
+		}
+        fprintf(f,"%d\t%d\t%20.18e\n", (int)M->m, (int)M->n, 0.0);
+		fclose(f);
+		c_print("File %s successfully written.\n", file_name);
+	} else {
+		c_print("Error during writing file %s.\n", file_name);
+	}
+}
 
 void print_trip_matrix(csc* M, const char * name)
 {
@@ -465,7 +489,19 @@ void print_vec(c_float * v, c_int n, const char *name){
         print_dns_matrix(v, 1, n, name);
 }
 
-
+void dump_vec(c_float * v, c_int len, const char * file_name){
+    c_int i;
+    FILE *f = fopen(file_name,"w");
+    if( f != NULL ){
+        for (i = 0; i < len; i++){
+            fprintf(f,"%20.18e\n", v[i]);
+        }
+        fclose(f);
+        c_print("File %s successfully written.\n", file_name);
+    } else {
+		c_print("Error during writing file %s.\n", file_name);
+	}
+}
 
 void print_vec_int(c_int * x, c_int n, const char *name) {
     c_int i;

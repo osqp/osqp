@@ -177,6 +177,9 @@ c_float * csc_to_dns(csc * M);
 /* Print a csc sparse matrix */
 void print_csc_matrix(csc* M, const char * name);
 
+/* Dump csc sparse matrix to file */
+void dump_csc_matrix(csc * M, const char * file_name);
+
 /* Print a triplet format sparse matrix */
 void print_trip_matrix(csc* M, const char * name);
 
@@ -185,6 +188,9 @@ void print_dns_matrix(c_float * M, c_int m, c_int n, const char *name);
 
 /* Print vector  */
 void print_vec(c_float * v, c_int n, const char *name);
+
+/* Dump vector to file */
+void dump_vec(c_float * v, c_int len, const char * file_name);
 
 // Print int array
 void print_vec_int(c_int * x, c_int n, const char *name);
