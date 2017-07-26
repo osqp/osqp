@@ -124,9 +124,7 @@ endif (NOT MSVC)
 
 # Include header directory
 # ----------------------------------------------
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
-            ${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/suitesparse               
-    )
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 
 # Set sources
@@ -258,6 +256,8 @@ endif (MATLAB)
 # Add linear systems solver
 add_subdirectory(lin_sys)
 
+# Add library
+# N.B. Add all the linear system solvers here
 add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_suitesparse_ldl>)
 
 if (MATLAB)
@@ -273,6 +273,7 @@ endif (PYTHON)
 #   - do not build demo
 if (NOT PYTHON AND NOT MATLAB)
     # Create osqp shared library
+    # N.B. Add all the linear system solvers here
     add_library (osqp SHARED ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_suitesparse_ldl>)
 
     # Create demo executable (linked to static library)
