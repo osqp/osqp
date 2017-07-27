@@ -246,10 +246,10 @@ typedef struct {
 
         /** @} */
 
-        OSQPSettings *settings;          ///< Problem settings
-        OSQPScaling *scaling;                ///< Scaling Vectors
-        OSQPSolution *solution;              ///< Problem Solution
-        OSQPInfo *info;                      ///< Solver information
+        OSQPSettings *settings;         ///< Problem settings
+        OSQPScaling *scaling;           ///< Scaling vectors
+        OSQPSolution *solution;         ///< Problem solution
+        OSQPInfo *info;                 ///< Solver information
 
         #ifdef PROFILING
         OSQPTimer * timer;  ///< Timer object

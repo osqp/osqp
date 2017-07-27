@@ -7,14 +7,18 @@
 
  typedef struct {
     PyObject_HEAD
-    PyArrayObject * x;     // Primal solution
-    PyArrayObject * y;     // Dual solution
-    OSQP_info * info;      // Solver information
+    PyArrayObject * x;                  // Primal solution
+    PyArrayObject * y;                  // Dual solution
+    PyArrayObject * prim_inf_cert;      // Primal infeasibility certificate
+    PyArrayObject * dual_inf_cert;      // Dual infeasibility certificate
+    OSQP_info * info;                   // Solver information
 } OSQP_results;
 
 static PyMemberDef OSQP_results_members[] = {
     {"x", T_OBJECT, offsetof(OSQP_results, x), READONLY, "Primal solution"},
     {"y", T_OBJECT, offsetof(OSQP_results, y), READONLY, "Dual solution"},
+    {"prim_inf_cert", T_OBJECT, offsetof(OSQP_results, prim_inf_cert), READONLY, "Primal infeasibility certificate"},
+    {"dual_inf_cert", T_OBJECT, offsetof(OSQP_results, dual_inf_cert), READONLY, "Dual infeasibility certificate"},
     {"info", T_OBJECT, offsetof(OSQP_results, info), READONLY, "Solver Information"},
     {NULL}
 };
@@ -22,12 +26,14 @@ static PyMemberDef OSQP_results_members[] = {
 // Initialize results structure assigning arguments
 static c_int OSQP_results_init( OSQP_results * self, PyObject *args)
 {
-    static char * argparse_string = "O!O!O!";
+    static char * argparse_string = "O!O!O!O!O!";
 
     // Parse arguments
     if( !PyArg_ParseTuple(args, argparse_string,
-                          &PyArray_Type, &(self->x),
-                          &PyArray_Type, &(self->y),
+                          &PyArray_Type,   &(self->x),
+                          &PyArray_Type,   &(self->y),
+                          &PyArray_Type,   &(self->prim_inf_cert),
+                          &PyArray_Type,   &(self->dual_inf_cert),
                           &OSQP_info_Type, &(self->info))) {
             return -1;
     }
@@ -41,7 +47,8 @@ static c_int OSQP_results_dealloc(OSQP_results *self){
     // Delete Python arrays
     Py_DECREF(self->x);
     Py_DECREF(self->y);
-
+    Py_DECREF(self->prim_inf_cert);
+    Py_DECREF(self->dual_inf_cert);
 
     // Delete info object
     Py_DECREF(self->info);
