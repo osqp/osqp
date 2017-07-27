@@ -50,7 +50,7 @@ The problem can be solved by
 
    results = m.solve();
 
-The :code:`results` structure contains the primal solution :code:`x`, the dual solution :code:`y` and the :code:`info` structure containing the solver statistics defined in the following table
+The :code:`results` structure contains the primal solution :code:`x`, the dual solution :code:`y`, certificate of primal infeasibility :code:`prim_inf_cert`, certificate of dual infeasibility :code:`dual_inf_cert` and the :code:`info` structure containing the solver statistics defined in the following table
 
 
 +-----------------------+-------------------------------------------------+
