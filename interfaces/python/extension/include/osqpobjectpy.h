@@ -65,7 +65,7 @@ static PyObject * OSQP_solve(OSQP *self)
         if ((self->workspace->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
             (self->workspace->info->status_val != OSQP_DUAL_INFEASIBLE)){
 
-						// Primal and dual solution arrays
+						// Primal and dual solutions
 						x = (PyObject *)PyArrayFromCArray(self->workspace->solution->x, nd);
 						y = (PyObject *)PyArrayFromCArray(self->workspace->solution->y, md);
 
@@ -85,6 +85,9 @@ static PyObject * OSQP_solve(OSQP *self)
 						// Dual infeasibility certificate -> None values
 						dual_inf_cert = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
 
+						// Set objective value to infinity
+		        self->workspace->info->obj_val = NPY_INFINITY;
+
         } else {	// dual infeasible
 
 						// Primal and dual solution arrays -> None values
@@ -96,18 +99,10 @@ static PyObject * OSQP_solve(OSQP *self)
 
 						// Dual infeasibility certificate
 						dual_inf_cert = (PyObject *)PyArrayFromCArray(self->workspace->delta_x, nd);
-        }
 
-        // If problem primal infeasible, set objective value to numpy infinity
-        if (self->workspace->info->status_val == OSQP_PRIMAL_INFEASIBLE){
-            self->workspace->info->obj_val = NPY_INFINITY;
+						// Set objective value to -infinity
+						self->workspace->info->obj_val = -NPY_INFINITY;
         }
-
-        // If problem dual infeasible, set objective value to numpy -infinity
-        if (self->workspace->info->status_val == OSQP_DUAL_INFEASIBLE){
-            self->workspace->info->obj_val = -NPY_INFINITY;
-        }
-
 
         /*  CREATE INFO OBJECT */
         // Store status string
