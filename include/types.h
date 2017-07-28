@@ -219,7 +219,7 @@ typedef struct {
         * @name Primal infeasibility variables
         * @{
         */
-        c_float *delta_y;     ///< Scaled difference of dual iterates -> diag(rho_vec) * (y - y_prev)
+        c_float *delta_y;     ///< Difference of consecutive dual iterates
         c_float *Atdelta_y;   ///< A' * delta_y
 
         /** @} */

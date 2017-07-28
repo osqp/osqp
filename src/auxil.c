@@ -151,9 +151,10 @@ void update_y(OSQPWorkspace *work){
     c_int i; // Index
     for (i = 0; i < work->data->m; i++){
 
-        work->delta_y[i] = work->settings->alpha * work->xz_tilde[i + work->data->n] +
-              ((c_float) 1.0 - work->settings->alpha) * work->z_prev[i] - work->z[i];
-        work->y[i] += work->rho_vec[i] * work->delta_y[i];
+        work->delta_y[i] = work->rho_vec[i] *
+              (work->settings->alpha * work->xz_tilde[i + work->data->n] +
+               ((c_float) 1.0 - work->settings->alpha) * work->z_prev[i] - work->z[i]);
+        work->y[i] += work->delta_y[i];
 
     }
 }
