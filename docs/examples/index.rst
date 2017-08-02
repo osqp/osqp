@@ -3,9 +3,8 @@ Examples
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   C/index
-   Python/index
-   Matlab/index
-   YALMIP/index
+   demo.rst
+   portfolio.rst
+   least-squares.rst

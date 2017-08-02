@@ -1,5 +1,5 @@
 Portfolio optimization
-----------------------
+======================
 
 
 Portfolio optimization seeks to allocate assets in a way that maximizes the risk adjusted return,
@@ -33,14 +33,28 @@ The resulting problem has the following equivalent form,
   \end{array}
 
 
+
+Python
+------
+
 .. code:: python
 
     import osqp
-    import scipy.sparse as sparse
     import numpy as np
+    import scipy as sp
+    import scipy.sparse as sparse
 
-    # Define problem data
-    P = sparse.block_diag((D, spa.eye(k)), format='csc')
+    # Generate problem data
+    sp.random.seed(1)
+    n = 100
+    k = 10
+    F = sparse.random(n, k, density=0.7, format='csc')
+    D = sparse.diags(np.random.rand(n) * np.sqrt(k), format='csc')
+    mu = np.random.randn(n)
+    gamma = 1
+
+    # OSQP data
+    P = sparse.block_diag((D, sparse.eye(k)), format='csc')
     q = np.hstack([-mu / (2*gamma), np.zeros(k)])
     A = sparse.vstack([
             sparse.hstack([F.T, -sparse.eye(k)]),
@@ -58,3 +72,67 @@ The resulting problem has the following equivalent form,
 
     # Solve problem
     res = prob.solve()
+
+
+
+Matlab
+------
+
+.. code:: matlab
+
+    % Generate problem data
+    rng(1)
+    n = 100;
+    k = 10;
+    F = sprandn(n, k, 0.7);
+    D = sparse(diag( sqrt(k)*rand(n,1) ));
+    mu = randn(n, 1);
+    gamma = 1;
+
+    % OSQP data
+    P = blkdiag(D, speye(k));
+    q = [-mu/(2*gamma); zeros(k, 1)];
+    A = [F', -speye(k);
+         ones(1, n), zeros(1, k);
+         speye(n), sparse(n, k)];
+    l = [zeros(k, 1); 1; zeros(n, 1)];
+    u = [zeros(k, 1); 1; ones(n, 1)];
+
+    % Create an OSQP object
+    prob = osqp;
+
+    % Setup workspace
+    prob.setup(P, q, A, l, u);
+
+    % Solve problem
+    res = prob.solve();
+
+
+
+YALMIP
+------
+
+.. code:: matlab
+
+    % Generate problem data
+    rng(1)
+    n = 100;
+    k = 10;
+    F = sprandn(n, k, 0.7);
+    D = sparse(diag( sqrt(k)*rand(n,1) ));
+    mu = randn(n, 1);
+    gamma = 1;
+    Sigma = F*F' + D;
+
+    % Define problem
+    x = sdpvar(n, 1);
+    objective = gamma * (x'*Sigma*x) - mu'*x;
+    constraints = [sum(x) == 1, x >= 0];
+
+    % Solve with OSQP
+    options = sdpsettings('solver','osqp');
+    optimize(constraints, objective, options);
+
+    % Get optimal primal and dual solution
+    x_opt = value(x);
+    y_opt = dual(constraints(1));
