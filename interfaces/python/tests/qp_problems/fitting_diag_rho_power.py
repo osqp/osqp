@@ -286,6 +286,7 @@ fit_rhos = fit_rhos[idx_sort]
 n = n[idx_sort]
 m = m[idx_sort]
 norm_q = norm_q[idx_sort]
+sigma = sigma[idx_sort]
 trP = trP[idx_sort]
 froP = froP[idx_sort]
 trAtA = trAtA[idx_sort]
@@ -307,9 +308,11 @@ plt.fill_between(problems_idx, rho_max, rho_min,
 ax.plot(fit_rhos, label='Fit rho')
 # ax.plot(n, label='n')
 # ax.plot(norm_q, label='norm_q')
-ax.plot(trP, label='trP')
-ax.plot(trP + norm_q, label='trP + norm_q')
-ax.plot(trAtA, label='trAtA')
+# ax.plot(trP, label='trP')
+# ax.plot(trP + norm_q, label='trP + norm_q')
+# ax.plot((trP + norm_q)/trAtA, label='(trP + norm_q)/trAtA')
+# ax.plot((trP + sigma * n + norm_q)/trAtA, label='(trP + sigma * n + norm_q)/trAtA')
+# ax.plot(trAtA, label='trAtA')
 plt.yscale('log')
 plt.legend()
 plt.grid()
