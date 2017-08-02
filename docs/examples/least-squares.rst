@@ -34,14 +34,14 @@ Python
     sp.random.seed(1)
     m = 30
     n = 20
-    A = sparse.random(m, n, density=0.7, format='csc')
+    Ad = sparse.random(m, n, density=0.7, format='csc')
     b = np.random.randn(m)
 
     # OSQP data
     P = sparse.block_diag((sparse.csc_matrix((n, n)), sparse.eye(m)), format='csc')
     q = np.zeros(n+m);
     A = sparse.vstack([
-            sparse.hstack([A, -sparse.eye(m)]),
+            sparse.hstack([Ad, -sparse.eye(m)]),
             sparse.hstack((sparse.eye(n), sparse.csc_matrix((n, m))))
         ]).tocsc()
     l = np.hstack([b, np.zeros(n)])
@@ -67,13 +67,13 @@ Matlab
    rng(1)
    m = 30;
    n = 20;
-   A = sprandn(m, n, 0.7);
+   Ad = sprandn(m, n, 0.7);
    b = randn(m, 1);
 
    % OSQP data
    P = blkdiag(sparse(n, n), speye(m));
    q = zeros(n+m, 1);
-   A = [A, -speye(m);
+   A = [Ad, -speye(m);
         speye(n), sparse(n, m)];
    l = [b; zeros(n, 1)];
    u = [b; ones(n, 1)];
