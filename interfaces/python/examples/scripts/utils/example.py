@@ -121,7 +121,7 @@ class Example(with_metaclass(abc.ABCMeta, object)):
         '''
         Store plots
         '''
-        fig_size = None  # Adapt for talk plots
+        fig_size = None  # TODO: Adapt for talk plots
         if hasattr(self, 'problem_name'):
             plot_name = self.problem_name
         else:
@@ -138,15 +138,3 @@ class Example(with_metaclass(abc.ABCMeta, object)):
                             timings,
                             fig_size=fig_size,
                             plot_name=plot_name)
-        #  utils.generate_plot(self.name, 'iterations', 'median', self.n_vec,
-        #                      iterations,
-        #                      fig_size=fig_size,
-        #                      plot_name=plot_name)
-        #  utils.generate_plot(self.name, 'iterations', 'total', self.n_vec,
-        #                      iterations,
-        #                      fig_size=fig_size,
-        #                      plot_name=plot_name)
-        #  utils.generate_plot(self.name, 'iterations', 'mean', self.n_vec,
-        #                      iterations,
-        #                      fig_size=fig_size,
-        #                      plot_name=plot_name)

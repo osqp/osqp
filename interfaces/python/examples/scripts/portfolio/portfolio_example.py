@@ -58,7 +58,8 @@ class PortfolioExample(utils.Example):
         k = (n / 100).astype(int)
 
         # Generate data
-        F = spa.random(n, k, density=dens_lvl, format='csc')
+        F = spa.random(n, k, density=dens_lvl,
+                       data_rvs=np.random.randn, format='csc')
         D = spa.diags(np.random.rand(n) * np.sqrt(k), format='csc')
         mu = np.random.randn(n)
 
@@ -167,12 +168,16 @@ class PortfolioExample(utils.Example):
                 x = results.x
                 y = results.y
                 status = results.info.status_val
+
                 # Check if status correct
                 if status != m.constant('OSQP_SOLVED'):
                     print('OSQP did not solve the problem!')
                 else:
                     niter[i] = results.info.iter
                     time[i] = results.info.run_time
+
+                    if results.info.status_polish == -1:
+                            print('Polish failed!')
 
                 if not qp.is_optimal(x, y):
                     print('Returned solution not optimal!')
@@ -201,8 +206,11 @@ class PortfolioExample(utils.Example):
                     niter[i] = results.info.iter
                     time[i] = results.info.run_time
 
-                if not qp.is_optimal(x, y):
-                    print('Returned solution not optimal!')
+                    if results.info.status_polish == -1:
+                            print('Polish failed!')
+
+                    if not qp.is_optimal(x, y):
+                        print('Returned solution not optimal!')
 
         elif solver == 'osqp_no_caching':
 
@@ -227,8 +235,11 @@ class PortfolioExample(utils.Example):
                     niter[i] = results.info.iter
                     time[i] = results.info.run_time
 
-                if not qp.is_optimal(x, y):
-                    print('Returned solution not optimal!')
+                    if results.info.status_polish == -1:
+                            print('Polish failed!')
+
+                    if not qp.is_optimal(x, y):
+                        print('Returned solution not optimal!')
 
         elif solver == 'qpoases':
 

@@ -2,6 +2,8 @@ Changes since last commit
 -------------------------
 * Created new object-oriented structure for linear system solvers
 * Added different norms for equilibration (1/2/inf)
+* Added diagonal rho vector with different values for equality/inequality constraints (interface still have scalar rho)
+* Return certificates of infeasibility in results structure
 
 Version 0.1.2 (20 July 2017)
 ------------------------------

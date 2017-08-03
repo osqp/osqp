@@ -46,7 +46,8 @@ class HuberExample(utils.Example):
         m = int(n * 100)
 
         # Generate data
-        A_huber = spa.random(m, n, density=dens_lvl, format='csc')
+        A_huber = spa.random(m, n, density=dens_lvl,
+                             data_rvs=np.random.randn, format='csc')
         x_true = np.random.randn(n) / np.sqrt(n)
         ind95 = (np.random.rand(m) < 0.95).astype(float)
         b_huber = A_huber.dot(x_true) + np.multiply(0.5*np.random.randn(m), ind95) \
@@ -157,8 +158,11 @@ class HuberExample(utils.Example):
                     niter[i] = results.info.iter
                     time[i] = results.info.run_time
 
-                if not qp.is_optimal(x, y):
-                    print('Returned solution not optimal!')
+                    if results.info.status_polish == -1:
+                            print('Polish failed!')
+
+                    if not qp.is_optimal(x, y):
+                        print('Returned solution not optimal!')
 
         elif solver == 'qpoases':
 

@@ -18,9 +18,10 @@ import scipy.sparse as spa
 # Import examples utilities
 import scripts.utils as utils
 
-class EqqpExample(utils.Example):
+
+class RandomqpExample(utils.Example):
     """
-    Equality constrained QP class
+    Random QP class
     """
 
     def __init__(self, n_vec, solvers):
@@ -32,7 +33,7 @@ class EqqpExample(utils.Example):
             n_vec (ndarray): Vector of dimension n (different sizes of problem)
             solvers (list): List of solvers
         """
-        self.name = "eq_qp"
+        self.name = "random_qp"
         self.n_vec = n_vec
         self.solvers = solvers
 
@@ -41,11 +42,11 @@ class EqqpExample(utils.Example):
         Generate QP matrices for the quality constrained QP problem
         """
         # Same dimension n and m
-        m = int(n/2)
+        m = int(n * 10)
 
         # Construct problem
         #       minimize	1/2 x' P x + q'*x
-        #       subject to  A * x = b
+        #       subject to  l <= A x <= u
         #
         P = spa.random(n, n, density=dens_lvl,
                        data_rvs=np.random.randn, format='csc')
@@ -54,8 +55,8 @@ class EqqpExample(utils.Example):
 
         A = spa.random(m, n, density=dens_lvl,
                        data_rvs=np.random.randn, format='csc')
-        l = np.random.randn(m)
-        u = np.copy(l)
+        l = - np.random.rand(m)
+        u = np.random.rand(m)
 
         lx = -np.inf * np.ones(n)
         ux = np.inf * np.ones(n)
@@ -109,9 +110,6 @@ class EqqpExample(utils.Example):
                 x = results.x
                 y = results.y
                 status = results.info.status_val
-
-                if results.info.status_polish == -1:
-                        print('Polish failed!')
 
                 # Check if status correct
                 if status != m.constant('OSQP_SOLVED'):

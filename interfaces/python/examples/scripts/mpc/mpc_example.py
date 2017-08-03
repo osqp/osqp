@@ -256,6 +256,9 @@ class MPCExample(utils.Example):
                     niter[i] = res.info.iter
                     time[i] = res.info.run_time
 
+                    if res.info.status_polish == -1:
+                            print('Polish failed!')
+
                     if not qp.is_optimal(res.x, res.y):
                         print('Returned solution not optimal!')
 
@@ -295,8 +298,11 @@ class MPCExample(utils.Example):
                     niter[i] = res.info.iter
                     time[i] = res.info.run_time
 
-                if not qp.is_optimal(res.x, res.y):
-                    print('Returned solution not optimal!')
+                    if res.info.status_polish == -1:
+                            print('Polish failed!')
+
+                    if not qp.is_optimal(res.x, res.y):
+                        print('Returned solution not optimal!')
 
                 # Apply first control input to the plant
                 u_sys[:, i] = res.x[-N*nu:-(N-1)*nu]
@@ -333,8 +339,11 @@ class MPCExample(utils.Example):
                     niter[i] = res.info.iter
                     time[i] = res.info.run_time
 
-                if not qp.is_optimal(res.x, res.y):
-                    print('Returned solution not optimal!')
+                    if res.info.status_polish == -1:
+                            print('Polish failed!')
+
+                    if not qp.is_optimal(res.x, res.y):
+                        print('Returned solution not optimal!')
 
                 # Apply first control input to the plant
                 u_sys[:, i] = res.x[-N*nu:-(N-1)*nu]

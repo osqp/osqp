@@ -49,8 +49,10 @@ class SVMExample(utils.Example):
         N = int(m / 2)
         gamma = 1.0
         b_svm = np.append(np.ones(N), -np.ones(N))
-        A_upp = spa.random(N, n, density=dens_lvl)
-        A_low = spa.random(N, n, density=dens_lvl)
+        A_upp = spa.random(N, n, density=dens_lvl,
+                           data_rvs=np.random.randn)
+        A_low = spa.random(N, n, density=dens_lvl,
+                           data_rvs=np.random.randn)
         A_svm = spa.vstack([
                 A_upp / np.sqrt(n) + (A_upp != 0.).astype(float) / n,
                 A_low / np.sqrt(n) - (A_low != 0.).astype(float) / n
@@ -60,7 +62,8 @@ class SVMExample(utils.Example):
         #       minimize	 x.T * x + gamma 1.T * t
         #       subject to  t >= diag(b) A x + 1
         #                   t >= 0
-        P = spa.block_diag((spa.eye(n), spa.csc_matrix((m, m))), format='csc')
+        P = spa.block_diag((spa.eye(n),
+                            spa.csc_matrix((m, m))), format='csc')
         q = np.append(np.zeros(n), (gamma/2)*np.ones(m))
         A = spa.vstack([spa.hstack([spa.diags(b_svm).dot(A_svm),
                                     -spa.eye(m)]),
@@ -148,8 +151,11 @@ class SVMExample(utils.Example):
                     niter[i] = results.info.iter
                     time[i] = results.info.run_time
 
-                if not qp.is_optimal(x, y):
-                    print('Returned solution not optimal!')
+                    if results.info.status_polish == -1:
+                            print('Polish failed!')
+
+                    if not qp.is_optimal(x, y):
+                        print('Returned solution not optimal!')
 
         elif solver == 'qpoases':
 

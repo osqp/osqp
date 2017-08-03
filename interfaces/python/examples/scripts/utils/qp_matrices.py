@@ -69,21 +69,20 @@ class QPmatrices(object):
         y_plus = np.maximum(y, 0)
         y_minus = np.minimum(y, 0)
 
-        eps_comp = eps_abs + eps_rel * la.norm(Ax, np.inf)
+        eps_comp = eps_abs + eps_rel * np.max([la.norm(Ax, np.inf)])
 
         comp_res_u = np.minimum(np.abs(y_plus), np.abs(Ax - u))
         comp_res_l = np.minimum(np.abs(y_minus), np.abs(Ax - l))
 
         if la.norm(comp_res_l, np.inf) > eps_comp:
             print("Error in complementary slackness residual l: %.4e > %.4e" %
-                  (la.norm(comp_res_l, np.inf), eps_comp), end='')
+                  (la.norm(comp_res_l, np.inf), eps_comp))
             return False
 
         if la.norm(comp_res_u, np.inf) > eps_comp:
             print("Error in complementary slackness residual u: %.4e > %.4e" %
-                  (la.norm(comp_res_u, np.inf), eps_comp), end='')
+                  (la.norm(comp_res_u, np.inf), eps_comp))
             return False
-
         # If we arrived until here, the solution is optimal
         return True
 

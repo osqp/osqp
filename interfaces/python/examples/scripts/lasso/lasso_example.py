@@ -49,15 +49,18 @@ class LassoExample(utils.Example):
         m = n * 100
 
         # Generate data
-        Ad = spa.random(m, n, density=dens_lvl)
-        x_true = np.multiply((np.random.rand(n) > 0.5).astype(float),
+        Ad = spa.random(m, n, density=dens_lvl,
+                        data_rvs=np.random.randn)
+        x_true = np.multiply((np.random.rand(n) >
+                              0.5).astype(float),
                              np.random.randn(n)) / np.sqrt(n)
         bd = Ad.dot(x_true) + np.random.randn(m)
 
         #       minimize	y' * y + lambda * 1' * t
         #       subject to  y = Ax - b
         #                   -t <= x <= t
-        P = spa.block_diag((spa.csc_matrix((n, n)), 2*spa.eye(m),
+        P = spa.block_diag((spa.csc_matrix((n, n)),
+                            2*spa.eye(m),
                             spa.csc_matrix((n, n))), format='csc')
         In = spa.eye(n)
         Onm = spa.csc_matrix((n, m))
@@ -146,6 +149,9 @@ class LassoExample(utils.Example):
                     niter[i] = results.info.iter
                     time[i] = results.info.run_time
 
+                    if results.info.status_polish == -1:
+                            print('Polish failed!')
+
                     if not qp.is_optimal(x, y):
                         print('Returned solution not optimal!')
 
@@ -174,6 +180,9 @@ class LassoExample(utils.Example):
                     niter[i] = results.info.iter
                     time[i] = results.info.run_time
 
+                    if results.info.status_polish == -1:
+                            print('Polish failed!')
+
                     if not qp.is_optimal(x, y):
                         print('Returned solution not optimal!')
 
@@ -197,6 +206,9 @@ class LassoExample(utils.Example):
                 else:
                     niter[i] = results.info.iter
                     time[i] = results.info.run_time
+
+                    if results.info.status_polish == -1:
+                            print('Polish failed!')
 
                     if not qp.is_optimal(x, y):
                         print('Returned solution not optimal!')
