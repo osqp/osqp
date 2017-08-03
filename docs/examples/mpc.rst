@@ -17,6 +17,9 @@ The states :math:`x_k \in \mathbf{R}^{n_x}` and the inputs :math:`u_k \in \mathb
 The problem is solved repeatedly for varying initial state :math:`\bar{x} \in \mathbf{R}^{n_x}`.
 
 
+Python
+------
+
 .. code:: python
 
     import osqp
@@ -282,7 +285,7 @@ YAMLIP
     objective = 0;
     for k = 1 : N
         objective = objective + (x{k}-xr)'*Q*(x{k}-xr) + u{k}'*R*u{k};
-        constraints = [constraints, x{k+1} == A*x{k} + B*u{k}];
+        constraints = [constraints, x{k+1} == Ad*x{k} + Bd*u{k}];
         constraints = [constraints, umin <= u{k}<= umax, xmin <= x{k+1} <= xmax];
     end
     objective = objective + (x{N+1}-xr)'*Q*(x{N+1}-xr);
@@ -290,7 +293,7 @@ YAMLIP
     controller = optimizer(constraints, objective,options,x{1},[u{:}]);
 
     nsim = 15;
-    for i = 1:15
+    for i = 1 : 15
         U = controller{x0};
-        x0 = A*x0 + B*U(1);
+        x0 = Ad*x0 + Bd*U(:,1);
     end

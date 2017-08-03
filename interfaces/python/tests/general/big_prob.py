@@ -4,12 +4,12 @@ import scipy.sparse as sparse
 import scipy as sp
 import numpy as np
 import mathprogbasepy as mpbpy
-sp.random.seed(2)
+sp.random.seed(1)
 
 # n = 100
 # m = 500
-n = 2
-m = 3
+n = 20
+m = 30
 A = sparse.random(m, n, density=0.9, format='csc')
 lA = -sp.rand(m) * 2.
 uA = sp.rand(m) * 2.
@@ -27,9 +27,9 @@ osqp_opts = {'rho': 0.1,
              'sigma': 1e-06,
             #  'eps_rel': 1e-08,
             #  'eps_abs': 1e-08,
-             'scaled_termination': True,
+             'scaled_termination': False,
              'early_terminate_interval': 1,
-             'polish': False,
+             'polish': True,
              'scaling': True,
              'scaling_norm': -1,
              'max_iter': 2500,
