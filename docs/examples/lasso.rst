@@ -16,7 +16,7 @@ The problem has the following equivalent form,
 
 .. math::
   \begin{array}{ll}
-    \mbox{minimize} & \frac{1}{2} y^T y + \gamma \boldsymbol{1}^T t \\
+    \mbox{minimize}   & \frac{1}{2} y^T y + \gamma \boldsymbol{1}^T t \\
     \mbox{subject to} & y = Ax - b \\
                       & -t \le x \le t
   \end{array}
