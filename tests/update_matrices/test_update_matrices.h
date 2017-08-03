@@ -202,6 +202,7 @@ static char * test_update(){
     osqp_cleanup(work);
     clean_problem_update_matrices_sols_data(data);
     c_free(problem);
+    c_free(settings);
     c_free(Ax_new_idx);
     c_free(Px_new_idx);
 

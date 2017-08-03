@@ -12,6 +12,7 @@
 #include "basic_qp/test_basic_qp.h"
 #include "basic_qp2/test_basic_qp2.h"
 #include "primal_infeasibility/test_primal_infeasibility.h"
+#include "primal_dual_infeasibility/test_primal_dual_infeasibility.h"
 #include "update_matrices/test_update_matrices.h"
 
 
@@ -24,6 +25,7 @@ static char * all_tests() {
     mu_run_test(test_basic_qp);
     mu_run_test(test_basic_qp2);
     mu_run_test(test_primal_infeasibility);
+    mu_run_test(test_primal_dual_infeasibility);
     mu_run_test(test_update_matrices);
     return 0;
 }

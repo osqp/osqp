@@ -2,6 +2,7 @@
 add_subdirectory(basic_qp)
 add_subdirectory(basic_qp2)
 add_subdirectory(primal_infeasibility)
+add_subdirectory(primal_dual_infeasibility)
 add_subdirectory(lin_alg)
 add_subdirectory(solve_linsys)
 add_subdirectory(update_matrices)

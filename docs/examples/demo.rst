@@ -1,7 +1,8 @@
 Demo
------
+====
 
-We now show how the following QP can be solved in C
+
+Consider the following QP
 
 
 .. math::
@@ -10,6 +11,65 @@ We now show how the following QP can be solved in C
     \mbox{subject to} & \begin{bmatrix}1 \\ 0 \\ 0\end{bmatrix} \leq \begin{bmatrix} 1 & 1\\ 1 & 0\\ 0 & 1\end{bmatrix} x \leq  \begin{bmatrix}1 \\ 0.7 \\ 0.7\end{bmatrix}
   \end{array}
 
+
+
+We show below how to solve the problem in Python, Matlab and C.
+
+
+Python
+------
+
+.. code:: python
+
+
+    import osqp
+    import scipy.sparse as sparse
+    import numpy as np
+
+    # Define problem data
+    P = sparse.csc_matrix([[4, 1], [1, 2]])
+    q = np.array([1, 1])
+    A = sparse.csc_matrix([[1, 1], [1, 0], [0, 1]])
+    l = np.array([1, 0, 0])
+    u = np.array([1, 0.7, 0.7])
+
+    # Create an OSQP object
+    prob = osqp.OSQP()
+
+    # Setup workspace and change alpha parameter
+    prob.setup(P, q, A, l, u, alpha=1.0)
+
+    # Solve problem
+    res = prob.solve()
+
+
+
+Matlab
+------
+
+.. code:: matlab
+
+
+    % Define problem data
+    P = sparse([4, 1; 1, 2]);
+    q = [1; 1];
+    A = sparse([1, 1; 1, 0; 0, 1]);
+    l = [1; 0; 0];
+    u = [1; 0.7; 0.7];
+
+    % Create an OSQP object
+    prob = osqp;
+
+    % Setup workspace and change alpha parameter
+    prob.setup(P, q, A, l, u, 'alpha', 1);
+
+    % Solve problem
+    res = prob.solve();
+
+
+
+C
+-
 
 
 .. code:: c

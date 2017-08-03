@@ -41,7 +41,7 @@ static PyObject * OSQP_solve(OSQP *self)
         PyObject * status;
 
         // Create solution objects
-        PyObject * x, *y;
+        PyObject * x, *y, *prim_inf_cert, *dual_inf_cert;
 
         // Define info related variables
         static char *argparse_string;
@@ -65,27 +65,44 @@ static PyObject * OSQP_solve(OSQP *self)
         if ((self->workspace->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
             (self->workspace->info->status_val != OSQP_DUAL_INFEASIBLE)){
 
-			// Construct primal and dual solution arrays
-			x = (PyObject *)PyArrayFromCArray(self->workspace->solution->x,
-						          nd);
-			y = (PyObject *)PyArrayFromCArray(self->workspace->solution->y,
-								  md);
+						// Primal and dual solutions
+						x = (PyObject *)PyArrayFromCArray(self->workspace->solution->x, nd);
+						y = (PyObject *)PyArrayFromCArray(self->workspace->solution->y, md);
 
-        } else { // Problem primal or dual infeasible -> None values for x,y
+						// Infeasibility certificates -> None values
+						prim_inf_cert = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
+            dual_inf_cert = PyArray_EMPTY(1, md, NPY_OBJECT, 0);
+
+        } else if (self->workspace->info->status_val == OSQP_PRIMAL_INFEASIBLE) {	// primal infeasible
+
+						// Primal and dual solution arrays -> None values
             x = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
-            y = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
-        }
+            y = PyArray_EMPTY(1, md, NPY_OBJECT, 0);
 
-        // If problem primal infeasible, set objective value to numpy infinity
-        if (self->workspace->info->status_val == OSQP_PRIMAL_INFEASIBLE){
-            self->workspace->info->obj_val = NPY_INFINITY;
-        }
+						// Primal infeasibility certificate
+						prim_inf_cert = (PyObject *)PyArrayFromCArray(self->workspace->delta_y, md);
 
-        // If problem dual infeasible, set objective value to numpy -infinity
-        if (self->workspace->info->status_val == OSQP_DUAL_INFEASIBLE){
-            self->workspace->info->obj_val = -NPY_INFINITY;
-        }
+						// Dual infeasibility certificate -> None values
+						dual_inf_cert = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
 
+						// Set objective value to infinity
+		        self->workspace->info->obj_val = NPY_INFINITY;
+
+        } else {	// dual infeasible
+
+						// Primal and dual solution arrays -> None values
+            x = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
+            y = PyArray_EMPTY(1, md, NPY_OBJECT, 0);
+
+						// Primal infeasibility certificate -> None values
+						prim_inf_cert = PyArray_EMPTY(1, md, NPY_OBJECT, 0);
+
+						// Dual infeasibility certificate
+						dual_inf_cert = (PyObject *)PyArrayFromCArray(self->workspace->delta_x, nd);
+
+						// Set objective value to -infinity
+						self->workspace->info->obj_val = -NPY_INFINITY;
+        }
 
         /*  CREATE INFO OBJECT */
         // Store status string
@@ -112,17 +129,17 @@ static PyObject * OSQP_solve(OSQP *self)
         #endif
 
         info_list = Py_BuildValue(argparse_string,
-								  self->workspace->info->iter,
-								  status,
-								  self->workspace->info->status_val,
-								  self->workspace->info->status_polish,
-								  self->workspace->info->obj_val,
-                                  self->workspace->info->pri_res,
-                                  self->workspace->info->dua_res,
-                                  self->workspace->info->setup_time,
-                                  self->workspace->info->solve_time,
-                                  self->workspace->info->polish_time,
-                                  self->workspace->info->run_time);
+																  self->workspace->info->iter,
+																  status,
+																  self->workspace->info->status_val,
+																  self->workspace->info->status_polish,
+																  self->workspace->info->obj_val,
+																	self->workspace->info->pri_res,
+																	self->workspace->info->dua_res,
+																	self->workspace->info->setup_time,
+																	self->workspace->info->solve_time,
+																	self->workspace->info->polish_time,
+																	self->workspace->info->run_time);
         #else
 
         #ifdef DLONG
@@ -145,12 +162,12 @@ static PyObject * OSQP_solve(OSQP *self)
 
         info_list = Py_BuildValue(argparse_string,
                                   self->workspace->info->iter,
-								  status,
-								  self->workspace->info->status_val,
-								  self->workspace->info->status_polish,
-								  self->workspace->info->obj_val,
-								  self->workspace->info->pri_res,
-								  self->workspace->info->dua_res);
+								  								status,
+								  								self->workspace->info->status_val,
+								  								self->workspace->info->status_polish,
+								  								self->workspace->info->obj_val,
+								  								self->workspace->info->pri_res,
+								  								self->workspace->info->dua_res);
         #endif
 
         info = PyObject_CallObject((PyObject *) &OSQP_info_Type, info_list);
@@ -159,7 +176,7 @@ static PyObject * OSQP_solve(OSQP *self)
         Py_DECREF(info_list);
 
         /*  CREATE RESULTS OBJECT */
-        results_list = Py_BuildValue("OOO", x, y, info);
+        results_list = Py_BuildValue("OOOOO", x, y, prim_inf_cert, dual_inf_cert, info);
 
         // /* Call the class object. */
         results = PyObject_CallObject((PyObject *) &OSQP_results_Type, results_list);
@@ -267,7 +284,7 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
         if (self->workspace){ // Workspace allocation correct
             // Return workspace
             Py_INCREF(Py_None);
-        	return Py_None;
+        		return Py_None;
         }
         else{
             PyErr_SetString(PyExc_ValueError, "Workspace allocation error!");

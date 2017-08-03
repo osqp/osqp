@@ -51,6 +51,7 @@ static char * test_solveKKT(){
     // Cleanup
     p->free(p);
     c_free(settings);
+    c_free(rho_vec);
     clean_problem_solve_linsys_sols_data(data);
 
     return 0;

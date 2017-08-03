@@ -219,8 +219,8 @@ typedef struct {
         * @name Primal infeasibility variables
         * @{
         */
-        c_float *delta_y;           ///< Difference of dual iterates
-        c_float *Atdelta_y;         ///< A' * delta_y
+        c_float *delta_y;     ///< Difference of consecutive dual iterates
+        c_float *Atdelta_y;   ///< A' * delta_y
 
         /** @} */
 
@@ -246,10 +246,10 @@ typedef struct {
 
         /** @} */
 
-        OSQPSettings *settings;          ///< Problem settings
-        OSQPScaling *scaling;                ///< Scaling Vectors
-        OSQPSolution *solution;              ///< Problem Solution
-        OSQPInfo *info;                      ///< Solver information
+        OSQPSettings *settings;         ///< Problem settings
+        OSQPScaling *scaling;           ///< Scaling vectors
+        OSQPSolution *solution;         ///< Problem solution
+        OSQPInfo *info;                 ///< Solver information
 
         #ifdef PROFILING
         OSQPTimer * timer;  ///< Timer object

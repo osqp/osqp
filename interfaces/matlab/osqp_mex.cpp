@@ -521,7 +521,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
     // SOLVE
     if (!strcmp("solve", cmd)) {
-        if (nlhs != 3 || nrhs != 2){
+        if (nlhs != 5 || nrhs != 2){
           mexErrMsgTxt("Solve : wrong number of inputs / outputs");
         }
         if(!osqpData->work){
@@ -536,37 +536,57 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         plhs[0] = mxCreateDoubleMatrix(osqpData->work->data->n,1,mxREAL);
         // dual variables
         plhs[1] = mxCreateDoubleMatrix(osqpData->work->data->m,1,mxREAL);
+        // primal infeasibility certificate
+        plhs[2] = mxCreateDoubleMatrix(osqpData->work->data->m,1,mxREAL);
+        // dual infeasibility certificate
+        plhs[3] = mxCreateDoubleMatrix(osqpData->work->data->n,1,mxREAL);
 
         //copy results to mxArray outputs
-        //assume that three outputs will always
+        //assume that five outputs will always
         //be returned to matlab-side class wrapper
         if ((osqpData->work->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
             (osqpData->work->info->status_val != OSQP_DUAL_INFEASIBLE)){
 
-            //primal variables
+            //primal and dual solutions
             castToDoubleArr(osqpData->work->solution->x, mxGetPr(plhs[0]), osqpData->work->data->n);
-
-            //dual variables
             castToDoubleArr(osqpData->work->solution->y, mxGetPr(plhs[1]), osqpData->work->data->m);
+            
+            //infeasibility certificates -> NaN values
+            setToNaN(mxGetPr(plhs[2]), osqpData->work->data->m);
+            setToNaN(mxGetPr(plhs[3]), osqpData->work->data->n);
 
-        } else { // Problem is primal or dual infeasible -> NaN values
+        } else if (osqpData->work->info->status_val == OSQP_PRIMAL_INFEASIBLE){ //primal infeasible
 
-            // Set primal and dual variables to NaN
+            //primal and dual solutions -> NaN values
             setToNaN(mxGetPr(plhs[0]), osqpData->work->data->n);
             setToNaN(mxGetPr(plhs[1]), osqpData->work->data->m);
-        }
-
-        // If problem is primal infeasible, set objective value to infinity
-        if (osqpData->work->info->status_val == OSQP_PRIMAL_INFEASIBLE){
+            
+            //primal infeasibility certificates
+            castToDoubleArr(osqpData->work->delta_y, mxGetPr(plhs[2]), osqpData->work->data->m);
+            
+            //dual infeasibility certificates -> NaN values
+            setToNaN(mxGetPr(plhs[3]), osqpData->work->data->n);
+            
+            // Set objective value to infinity
             osqpData->work->info->obj_val = mxGetInf();
-        }
 
-        // If problem is dual infeasible, set objective value to -infinity
-        if (osqpData->work->info->status_val == OSQP_DUAL_INFEASIBLE){
+        } else { //dual infeasible
+
+            //primal and dual solutions -> NaN values
+            setToNaN(mxGetPr(plhs[0]), osqpData->work->data->n);
+            setToNaN(mxGetPr(plhs[1]), osqpData->work->data->m);
+            
+            //primal infeasibility certificates -> NaN values
+            setToNaN(mxGetPr(plhs[2]), osqpData->work->data->m);
+            
+            //dual infeasibility certificates
+            castToDoubleArr(osqpData->work->delta_x, mxGetPr(plhs[3]), osqpData->work->data->n);
+            
+            // Set objective value to -infinity
             osqpData->work->info->obj_val = -mxGetInf();
         }
 
-        plhs[2] = copyInfoToMxStruct(osqpData->work->info); // Info structure
+        plhs[4] = copyInfoToMxStruct(osqpData->work->info); // Info structure
 
         return;
     }

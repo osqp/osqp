@@ -52,10 +52,52 @@ static char * test_basic_qp_solve()
     mu_assert("Basic QP test solve: Error in dual solution!",
               vec_norm_inf_diff(work->solution->y, sols_data->y_test, data->m) < TESTS_TOL);
 
-
     // Compare objective values
     mu_assert("Basic QP test solve: Error in objective value!",
               c_absval(work->info->obj_val - sols_data->obj_value_test) < TESTS_TOL);
+
+    // Try to set wrong settings
+    mu_assert("Basic QP test solve: Wrong value of rho not caught!",
+              osqp_update_rho(work, -0.1) == 1);
+
+    mu_assert("Basic QP test solve: Wrong value of max_iter not caught!",
+              osqp_update_max_iter(work, -1) == 1);
+
+    mu_assert("Basic QP test solve: Wrong value of eps_abs not caught!",
+              osqp_update_eps_abs(work, 0.) == 1);
+
+    mu_assert("Basic QP test solve: Wrong value of eps_rel not caught!",
+              osqp_update_eps_rel(work, 0.) == 1);
+
+    mu_assert("Basic QP test solve: Wrong value of eps_prim_inf not caught!",
+              osqp_update_eps_prim_inf(work, -0.1) == 1);
+
+    mu_assert("Basic QP test solve: Wrong value of eps_dual_inf not caught!",
+              osqp_update_eps_dual_inf(work, -0.1)== 1);
+
+    mu_assert("Basic QP test solve: Wrong value of alpha not caught!",
+              osqp_update_alpha(work, 2.0) == 1);
+
+    mu_assert("Basic QP test solve: Wrong value of warm_start not caught!",
+              osqp_update_warm_start(work, -1) == 1);
+
+    mu_assert("Basic QP test solve: Wrong value of scaled_termination not caught!",
+              osqp_update_scaled_termination(work, 2) == 1);
+
+    mu_assert("Basic QP test solve: Wrong value of early_terminate not caught!",
+              osqp_update_early_terminate(work, 5) == 1);
+
+    mu_assert("Basic QP test solve: Wrong value of delta not caught!",
+              osqp_update_delta(work, 0.) == 1);
+
+    mu_assert("Basic QP test solve: Wrong value of polish not caught!",
+              osqp_update_polish(work, 2) == 1);
+
+    mu_assert("Basic QP test solve: Wrong value of pol_refine_iter not caught!",
+              osqp_update_pol_refine_iter(work, -1) == 1);
+
+    mu_assert("Basic QP test solve: Wrong value of verbose not caught!",
+              osqp_update_verbose(work, 2) == 1);
 
 
     // Clean workspace
@@ -113,7 +155,12 @@ static char * test_basic_qp_update()
     mu_assert("Basic QP test update: Error in updating linear cost!",
               vec_norm_inf_diff(work->data->q, sols_data->q_new, data->n) < TESTS_TOL);
 
-    // UPDATE BOUNDS
+    // UPDATE BOUND
+    // Try to update with non-consistent values
+    mu_assert("Basic QP test update: Error in bounds update ordering not caught!",
+              osqp_update_bounds(work, sols_data->u_new, sols_data->l_new) == 1);
+
+    // Now update with correct values
     mu_assert("Basic QP test update: Error in bounds update ordering!",
               osqp_update_bounds(work, sols_data->l_new, sols_data->u_new) == 0);
 
@@ -123,14 +170,34 @@ static char * test_basic_qp_update()
     mu_assert("Basic QP test update: Error in bounds update, upper bound!",
               vec_norm_inf_diff(work->data->u, sols_data->u_new, data->m) < TESTS_TOL);
 
-    // Update lower bound
-    mu_assert("Basic QP test update: Error in lower bound update. ordering!",
+    // Return original values
+    osqp_update_bounds(work, data->l, data->u);
+
+
+
+    // UPDATE LOWER BOUND
+    // Try to update with non-consistent values
+    mu_assert("Basic QP test update: Error in lower bound update ordering not caught!",
+              osqp_update_lower_bound(work, sols_data->u_new) == 1);
+
+    // Now update with correct values
+    mu_assert("Basic QP test update: Error in lower bound update ordering!",
               osqp_update_lower_bound(work, sols_data->l_new) == 0);
 
     mu_assert("Basic QP test update: Error in updating lower bound!",
               vec_norm_inf_diff(work->data->l, sols_data->l_new, data->m) < TESTS_TOL);
 
-    // Update upper bound
+    // Return original values
+    osqp_update_lower_bound(work, data->l);
+
+
+
+    // UPDATE UPPER BOUND
+    // Try to update with non-consistent values
+    mu_assert("Basic QP test update: Error in upper bound update: ordering not caught!",
+              osqp_update_upper_bound(work, sols_data->l_new) == 1);
+
+    // Now update with correct values
     mu_assert("Basic QP test update: Error in upper bound update: ordering!",
               osqp_update_upper_bound(work, sols_data->u_new) == 0);
 
