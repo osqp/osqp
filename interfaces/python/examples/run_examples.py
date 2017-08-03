@@ -47,19 +47,19 @@ solvers_eqqp = ['osqp',
                 #  'qpoases'
                 ]
 # MPC
-# n_mpc = np.array([5, 10, 15, 20])
-n_mpc = np.array([5, 10])
+n_mpc = np.array([5, 10, 25, 50, 75, 100])
 solvers_mpc = [
                'osqp',
                'osqp_coldstart',
                'osqp_no_caching',
                'gurobi',
                'mosek',
-            #    'qpoases',
-            #    'ecos'
+               #    'qpoases',
+                #   'ecos'
                ]
 
-# Portfolio (works for rho = 100. Works also for rho = 10. Other values do not even converge)
+# Portfolio (works for rho = 100. Works also for rho = 10.
+# Other values do not even converge)
 n_portfolio = np.array([500, 1000, 5000, 10000, 15000])
 solvers_portfolio = [
                      'osqp',
@@ -83,7 +83,7 @@ solvers_lasso = [
                  'gurobi',
                  'mosek',
                  #  'qpoases',   # It fails for big problems!
-                  #  'ecos'
+                 #  'ecos'
                  ]
 
 # Huber problem
@@ -94,7 +94,6 @@ solvers_huber = ['osqp',
                  #  'ecos',
                  #  'qpoases'
                  ]
-
 
 # SVM problem (works around 300 iterations for rho=0.1. It works a bit better for rho=1.0)
 n_svm = np.array([10, 50, 100, 500, 1000])
@@ -110,34 +109,34 @@ Solve problems
 '''
 
 # Random qp
-# randomqp = RandomqpExample(n_randomqp, solvers_randomqp)
-# randomqp.run(osqp_settings)
+randomqp = RandomqpExample(n_randomqp, solvers_randomqp)
+randomqp.run(osqp_settings)
 
 
 # Eq qp
-# eqqp = EqqpExample(n_eqqp, solvers_eqqp)
-# eqqp.run(osqp_settings)
+eqqp = EqqpExample(n_eqqp, solvers_eqqp)
+eqqp.run(osqp_settings)
 
 
 # MPC
 # Examples: ball, helicopter, pendulum
-mpc = MPCExample(n_mpc, solvers_mpc, "helicopter")
+mpc = MPCExample(n_mpc, solvers_mpc, "quadcopter")
 mpc.run(osqp_settings)
 
 
 # Portfolio
 # portfolio = PortfolioExample(n_portfolio, solvers_portfolio,
-#                              gammas_portfolio)
+                            #  gammas_portfolio)
 # portfolio.run(osqp_settings)
 
 # Lasso
-# lasso = LassoExample(n_lasso, solvers_lasso, lambdas_lasso)
-# lasso.run(osqp_settings)
+lasso = LassoExample(n_lasso, solvers_lasso, lambdas_lasso)
+lasso.run(osqp_settings)
 
 # Huber
-# huber = HuberExample(n_huber, solvers_huber)
-# huber.run(osqp_settings)
+huber = HuberExample(n_huber, solvers_huber)
+huber.run(osqp_settings)
 
 # SVM
-# svm = SVMExample(n_svm, solvers_svm)
-# svm.run(osqp_settings)
+svm = SVMExample(n_svm, solvers_svm)
+svm.run(osqp_settings)

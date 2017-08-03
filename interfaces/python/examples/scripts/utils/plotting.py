@@ -1,5 +1,5 @@
 import matplotlib as mpl
-mpl.use('pgf')  # Export pgf figures
+# mpl.use('pgf')  # Export pgf figures
 import matplotlib.pylab as plt
 
 import os

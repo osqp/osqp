@@ -2,6 +2,7 @@ import scipy.sparse as spa
 import scipy.linalg as spla
 import numpy as np
 from collections import namedtuple
+from .mpc_problem import MPCProblem
 
 
 def load_helicopter_data():
@@ -11,38 +12,37 @@ def load_helicopter_data():
     '''
 
     # Problem setup
-    problem = namedtuple("problem", "A B R Q QN umin umax xmin xmax " +
-                                    "T tmin tmax N x0 name")
-    problem.A = spa.csc_matrix([[0.99, 0., 0.01, 0., 0., 0.],
-                                [0., 0.99, 0., 0.01, 0., 0.],
-                                [0., 0., 0.99, 0., 0., 0.],
-                                [0., 0., 0., 0.99, 0., 0.],
-                                [0.01, 0., 0., 0., 0.99, 0.],
-                                [0., 0.01, 0., 0., 0., 0.99]])
-    problem.B = spa.csc_matrix([[0., 0.],
-                                [0.0001, -0.0001],
-                                [0.0019, -0.0019],
-                                [0.0132, -0.0132],
-                                [0., 0.],
-                                [0., 0.]])
-    problem.R = 0.001*spa.eye(2)
-    problem.Q = spa.diags([100, 100, 10, 10, 400, 200])
-    QN = spla.solve_discrete_are(problem.A.todense(), problem.B.todense(),
-                                 problem.Q.todense(), problem.R.todense())
-    problem.QN = spa.csc_matrix((QN + QN.T) / 2)
-    problem.umin = -np.ones(2)
-    problem.umax = 3*np.ones(2)
-    problem.xmin = -np.array([np.inf, np.inf, 0.44, 0.6, np.inf, np.inf])
-    problem.xmax = np.array([np.inf, np.inf, 0.44, 0.6, np.inf, np.inf])
-    # problem.xmin = []
-    # problem.xmax = []
-    problem.T = spa.eye(6)
-    problem.tmin = -np.ones(6)
-    problem.tmax = np.ones(6)
-    # problem.T = []
-    # problem.tmin = []
-    # problem.tmax = []
-    problem.x0 = np.array([0.5, 0.5, 0., 0., 0., 0.])
-    problem.name = 'helicopter'
+    A = spa.csc_matrix([[0.99, 0., 0.01, 0., 0., 0.],
+                        [0., 0.99, 0., 0.01, 0., 0.],
+                        [0., 0., 0.99, 0., 0., 0.],
+                        [0., 0., 0., 0.99, 0., 0.],
+                        [0.01, 0., 0., 0., 0.99, 0.],
+                        [0., 0.01, 0., 0., 0., 0.99]])
+    B = spa.csc_matrix([[0., 0.],
+                        [0.0001, -0.0001],
+                        [0.0019, -0.0019],
+                        [0.0132, -0.0132],
+                        [0., 0.],
+                        [0., 0.]])
+    R = 0.001*spa.eye(2)
+    Q = spa.diags([100, 100, 10, 10, 400, 200])
+    QN = spla.solve_discrete_are(A.todense(), B.todense(),
+                                 Q.todense(), R.todense())
+    QN = spa.csc_matrix((QN + QN.T) / 2)
+    umin = -np.ones(2)
+    umax = 3*np.ones(2)
+    xmin = -np.array([np.inf, np.inf, 0.44, 0.6, np.inf, np.inf])
+    xmax = np.array([np.inf, np.inf, 0.44, 0.6, np.inf, np.inf])
+    T = spa.eye(6)
+    tmin = -np.ones(6)
+    tmax = np.ones(6)
+    x0 = np.array([0.5, 0.5, 0., 0., 0., 0.])
+    name = 'helicopter'
 
-    return problem
+    return MPCProblem(name,
+                      A=A, B=B,
+                      R=R, Q=Q, QN=QN,
+                      umin=umin, umax=umax,
+                      xmin=xmin, xmax=xmax,
+                      T=T, tmin=tmin, tmax=tmax,
+                      x0=x0)

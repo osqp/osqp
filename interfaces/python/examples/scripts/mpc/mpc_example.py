@@ -21,6 +21,7 @@ import scripts.utils as utils
 from .examples.ball import load_ball_data
 from .examples.helicopter import load_helicopter_data
 from .examples.pendulum import load_pendulum_data
+from .examples.quadcopter import load_quadcopter_data
 
 
 class MPCExample(utils.Example):
@@ -46,6 +47,8 @@ class MPCExample(utils.Example):
             self.problem = load_pendulum_data()
         elif problem_name == 'helicopter':
             self.problem = load_helicopter_data()
+        elif problem_name == 'quadcopter':
+            self.problem = load_quadcopter_data()
         elif problem_name == 'ball':
             self.problem = load_ball_data()
         else:
@@ -71,7 +74,13 @@ class MPCExample(utils.Example):
         Px = spa.kron(spa.eye(N), problem.Q)
         Pu = spa.kron(spa.eye(N), problem.R)
         P = spa.block_diag([Px, problem.QN, Pu]).tocsc()
-        q = np.zeros((N+1)*nx + N*nu)
+
+        if problem.xr is not None:
+            q = np.hstack([np.kron(np.ones(N), -problem.Q.dot(problem.xr)),
+                           -problem.QN.dot(problem.xr),
+                           np.zeros(N*nu)])
+        else:
+            q = np.zeros((N+1)*nx + N*nu)
 
         # Dynamics
         Ax = spa.kron(spa.eye(N+1), -spa.eye(nx)) + \
@@ -83,7 +92,7 @@ class MPCExample(utils.Example):
         u = self.b(problem.x0, nx, N)
 
         # Terminal constraints
-        if len(problem.tmin) > 0:
+        if problem.tmin is not None:
             nt = problem.T.shape[0]
             A = spa.vstack([A, spa.hstack([spa.csc_matrix((nt, N*nx)),
                                            problem.T,
@@ -101,7 +110,7 @@ class MPCExample(utils.Example):
         ux = np.array([])
 
         # Bounds on x
-        if len(problem.xmin) > 0:
+        if problem.xmin is not None:
             l = np.append(l, np.tile(problem.xmin, N+1))
             u = np.append(u, np.tile(problem.xmax, N+1))
             A = spa.vstack([A,
@@ -115,7 +124,7 @@ class MPCExample(utils.Example):
             ux = np.append(ux, np.inf * np.ones(nx * (N+1)))
 
         # Bounds on u
-        if len(problem.umin) > 0:
+        if problem.umin is not None:
             l = np.append(l, np.tile(problem.umin, N))
             u = np.append(u, np.tile(problem.umax, N))
             A = spa.vstack([A,
@@ -166,9 +175,9 @@ class MPCExample(utils.Example):
         u = cvxpy.Variable(nu, N)
 
         # Objective
-        cost = .5 * cvxpy.quad_form(x[:, N], p.QN)  # Final stage cost
+        cost = .5 * cvxpy.quad_form((x[:, N] - p.xr), p.QN)  # Final stage cost
         for i in range(N):
-            cost += .5 * cvxpy.quad_form(x[:, i], p.Q)  # State cost
+            cost += .5 * cvxpy.quad_form((x[:, i] - p.xr), p.Q)  # State cost
             cost += .5 * cvxpy.quad_form(u[:, i], p.R)  # Inpout cost
         objective = cvxpy.Minimize(cost)
 
@@ -180,16 +189,16 @@ class MPCExample(utils.Example):
             constr += [x[:, i+1] == p.A * x[:, i] + p.B * u[:, i]]
 
         # Terminal constraints
-        if len(p.tmin) > 0:
+        if p.tmin is not None:
             constr += [p.tmin <= p.T * x[:, N], p.T * x[:, N] <= p.tmax]
 
         # State constraints
-        if len(p.xmin) > 0:
+        if p.xmin is not None:
             for i in range(N + 1):
                 constr += [p.xmin <= x[:, i], x[:, i] <= p.xmax]
 
         # Input constraints
-        if len(p.umin) > 0:
+        if p.umin is not None:
             for i in range(N):
                 constr += [p.umin <= u[:, i], u[:, i] <= p.umax]
 
@@ -407,11 +416,11 @@ class MPCExample(utils.Example):
                 x = x_qpoases
                 y = -y_qpoases[n_dim:]
 
-                if len(problem.xmin) > 0 and len(problem.umin) > 0:
+                if problem.xmin is not None and problem.umin is not None:
                     y = np.append(y, -y_qpoases[:n_dim])
-                elif len(problem.xmin) == 0 and len(problem.umin) > 0:
+                elif problem.xmin is None and problem.umin is not None:
                     y = np.append(y, -y_qpoases[nx * (N+1):n_dim])
-                elif len(problem.xmin) > 0 and len(problem.umin) == 0:
+                elif problem.xmin is not None and problem.umin is not None:
                     y = np.append(y, -y_qpoases[: nx * (N+1)])
 
                 if res_qpoases != 0:
@@ -498,15 +507,8 @@ class MPCExample(utils.Example):
 
                 cvxpy_prob.solve(solver=cvxpy.ECOS, verbose=False)
 
-                # Obtain time and number of iterations
-                time[i] = cvxpy_prob.solver_stats.setup_time + \
-                    cvxpy_prob.solver_stats.solve_time
-                # time[i] = cvxpy_prob.solver_stats.solve_time
-
-                niter[i] = cvxpy_prob.solver_stats.num_iters
-
-                if problem.status != 'optimal' and \
-                        problem.status != 'optimal inaccurate':
+                if cvxpy_prob.status != 'optimal' and \
+                        cvxpy_prob.status != 'optimal inaccurate':
                     print('ECOS did not solve the problem!')
                 else:
                     # Obtain time and number of iterations
@@ -529,12 +531,12 @@ class MPCExample(utils.Example):
         else:
             raise ValueError('Solver not understood')
 
-
         # DEBUG: print state behavior
         # import matplotlib.pylab as plt
         # plt.figure()
         # plt.plot(x_sys.T)
         # plt.show(block=False)
+        # import ipdb; ipdb.set_trace()
 
         # Return statistics
         return utils.Statistics(time), utils.Statistics(niter)
