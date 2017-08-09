@@ -162,6 +162,33 @@ static void iterative_refinement(OSQPWorkspace *work, LinSysSolver *p, c_float *
 
 
 /**
+ * Compute maximum violation of complementary slackness condition
+ * @param work  Workspace
+ * @return      Maximum violation of CS condition
+ */
+static c_float compute_cs_violation(OSQPWorkspace * work){
+    c_int j;
+    c_float violation, max_violation = 0.0;
+
+    // Cycle over elements of z = Ax
+    for (j = 0; j < work->data->m; j++) {
+        if (work->pol->A_to_Alow[j] != -1) {          // lower-active
+            violation = c_absval(work->pol->z[j] - work->data->l[j]);
+            if (violation > max_violation) {
+                max_violation = violation;
+            }
+        } else if (work->pol->A_to_Aupp[j] != -1) {   // upper-active
+            violation = c_absval(work->pol->z[j] - work->data->u[j]);
+            if (violation > max_violation) {
+                max_violation = violation;
+            }
+        }
+    }
+    return max_violation;
+}
+
+
+/**
  * Compute dual variable y from reduced on y_red
  * @param work Workspace
  */
@@ -189,6 +216,7 @@ static void compute_y_from_y_red(OSQPWorkspace * work){
 
 c_int polish(OSQPWorkspace *work) {
     c_int mred, polish_successful;
+    c_float cs_violation; // complementary slackness violation
     c_float * rhs_red;
     LinSysSolver *plsh;
     c_float *pol_sol; // Polished solution
@@ -237,6 +265,9 @@ c_int polish(OSQPWorkspace *work) {
     // Compute primal and dual residuals at the polished solution
     update_info(work, 0, 1, 1);
 
+    // Compute maximum violation of complementary slackness condition
+    cs_violation = compute_cs_violation(work);
+
     // Update timing
     #ifdef PROFILING
     work->info->polish_time = toc(work->timer);
@@ -249,6 +280,7 @@ c_int polish(OSQPWorkspace *work) {
          work->info->dua_res < 1e-10) ||             // Dual residual already tiny
         (work->pol->dua_res < work->info->dua_res &&
          work->info->pri_res < 1e-10);               // Primal residual already tiny
+    polish_successful = polish_successful && (cs_violation < MAX_CS_VIOLATION);
 
     if (polish_successful) {
 
