@@ -1,7 +1,6 @@
 import scipy.sparse as spa
 import scipy.linalg as spla
 import numpy as np
-from collections import namedtuple
 from .mpc_problem import MPCProblem
 
 

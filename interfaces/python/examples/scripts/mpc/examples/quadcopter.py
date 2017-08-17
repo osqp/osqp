@@ -1,7 +1,5 @@
 import scipy.sparse as spa
-import scipy.linalg as spla
 import numpy as np
-from collections import namedtuple
 from .mpc_problem import MPCProblem
 
 
@@ -55,7 +53,7 @@ def load_quadcopter_data():
     [nx, nu] = B.shape
 
     # Constraints
-    u0 = 10.5916
+    u0 = np.array([10.59, 0, 0, 0])
     umin = np.array([9.6, 9.6, 9.6, 9.6]) - u0
     umax = np.array([13., 13., 13., 13.]) - u0
     xmin = np.array([-np.pi / 6, -np.pi / 6, -np.inf, -np.inf, -np.inf, -1.,
