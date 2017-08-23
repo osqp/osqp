@@ -130,7 +130,13 @@ void print_summary(OSQPWorkspace * work){
     c_print("%*.4e ", (int)HSPACE, info->pri_res);
     c_print("%*.4e ", (int)HSPACE, info->dua_res);
     #ifdef PROFILING
-    c_print("%*.2fs", 9, info->setup_time + info->solve_time);
+    if (work->first_run) {
+        // total time: setup + solve
+        c_print("%*.2fs", 9, info->setup_time + info->solve_time);
+    } else {
+        // total time: solve
+        c_print("%*.2fs", 9, info->solve_time);
+    }
     #endif
     c_print("\n");
 

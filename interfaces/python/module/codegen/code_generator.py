@@ -8,10 +8,6 @@ from glob import glob
 from platform import system
 import sys
 
-# Import time
-import time
-
-
 # import utilities
 from . import utils
 
