@@ -128,6 +128,7 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     work->pol->A_to_Aupp = c_malloc(work->data->m * sizeof(c_int));
     work->pol->x = c_malloc(work->data->n * sizeof(c_float));
     work->pol->z = c_malloc(work->data->m * sizeof(c_float));
+    work->pol->y = c_malloc(work->data->m * sizeof(c_float));
 
 
     // Allocate solution
@@ -416,6 +417,8 @@ c_int osqp_cleanup(OSQPWorkspace * work){
                 c_free(work->pol->x);
             if (work->pol->z)
                 c_free(work->pol->z);
+            if (work->pol->y)
+                c_free(work->pol->y);
             c_free(work->pol);
         }
 
