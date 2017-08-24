@@ -272,7 +272,6 @@ c_int polish(OSQPWorkspace *work) {
          work->info->dua_res < 1e-10) ||             // Dual residual already tiny
         (work->pol->dua_res < work->info->dua_res &&
          work->info->pri_res < 1e-10);               // Primal residual already tiny
-    // polish_successful = polish_successful && (cs_violation < MAX_CS_VIOLATION);
 
     if (polish_successful) {
 
