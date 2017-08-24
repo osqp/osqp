@@ -52,6 +52,7 @@ static char * test_basic_qp_solve()
     mu_assert("Basic QP test solve: Error in dual solution!",
               vec_norm_inf_diff(work->solution->y, sols_data->y_test, data->m) < TESTS_TOL);
 
+
     // Compare objective values
     mu_assert("Basic QP test solve: Error in objective value!",
               c_absval(work->info->obj_val - sols_data->obj_value_test) < TESTS_TOL);
@@ -240,7 +241,7 @@ static char * test_basic_qp_early_terminate()
     set_default_settings(settings);
     settings->max_iter = 200;
     settings->alpha = 1.6;
-    settings->polish = 1;
+    settings->polish = 0;
     settings->scaling = 0;
     settings->verbose = 1;
     settings->early_terminate = 0;
@@ -256,23 +257,25 @@ static char * test_basic_qp_early_terminate()
     osqp_solve(work);
 
     // Check if iter == max_iter
-    mu_assert("Basic QP test solve: Error in number of iterations taken!",
+    mu_assert("Basic QP test early terminate: Error in number of iterations taken!",
               work->info->iter == work->settings->max_iter );
 
     // Compare solver statuses
-    mu_assert("Basic QP test solve: Error in solver status!",
+    mu_assert("Basic QP test early terminate: Error in solver status!",
               work->info->status_val == sols_data->status_test );
 
     // Compare primal solutions
-    mu_assert("Basic QP test solve: Error in primal solution!",
+    mu_assert("Basic QP test early terminate: Error in primal solution!",
               vec_norm_inf_diff(work->solution->x, sols_data->x_test, data->n) < TESTS_TOL);
 
     // Compare dual solutions
-    mu_assert("Basic QP test solve: Error in dual solution!",
+    print_vec(work->solution->y, data->m, "y_sol");
+    print_vec(sols_data->y_test, data->m, "y_test");
+    mu_assert("Basic QP test early terminate: Error in dual solution!",
               vec_norm_inf_diff(work->solution->y, sols_data->y_test, data->m) < TESTS_TOL);
 
     // Compare objective values
-    mu_assert("Basic QP test solve: Error in objective value!",
+    mu_assert("Basic QP test early terminate: Error in objective value!",
               c_absval(work->info->obj_val - sols_data->obj_value_test) < TESTS_TOL);
 
     // Clean workspace
@@ -319,6 +322,8 @@ static char * test_basic_qp_update_rho()
     rho = 0.7;
     set_default_settings(settings);
     settings->rho = rho;
+    settings->eps_abs = 1e-05;
+    settings->eps_rel = 1e-05;
     settings->early_terminate_interval = 1;
 
     // Setup workspace
@@ -358,6 +363,8 @@ static char * test_basic_qp_update_rho()
     set_default_settings(settings);
     settings->rho = 0.1;
     settings->early_terminate_interval = 1;
+    settings->eps_abs = 1e-05;
+    settings->eps_rel = 1e-05;
 
     // Setup workspace
     work = osqp_setup(data, settings);

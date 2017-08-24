@@ -19,7 +19,7 @@ u_new = np.array([1.6, 1.0, np.inf, 0.5])
 
 # Generate problem solutions
 sols_data = {'x_test': np.array([0.30000002, 0.69999998]),
-             'y_test': np.array([-2.90000005, -0., 0.20000007]),
+             'y_test': np.array([-2.90000005, -0., 0.20000007, 0.0]),
              'obj_value_test': 1.8800000032888342,
              'status_test': 'optimal',
              'q_new': q_new,
