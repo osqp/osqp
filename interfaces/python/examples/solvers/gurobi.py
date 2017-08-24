@@ -2,6 +2,7 @@ import gurobipy as grb
 import numpy as np
 from . import statuses as s
 from .results import Results
+from benchmark_problems.utils import is_qp_solution_optimal
 
 
 class GUROBISolver(object):
@@ -42,21 +43,21 @@ class GUROBISolver(object):
         '''
         p = example.qp_problem
 
-        if p.A is not None:
+        if p['A'] is not None:
             # Convert Matrices in CSR format
-            p.A = p.A.tocsr()
+            p['A'] = p['A'].tocsr()
 
-        if p.P is not None:
+        if p['P'] is not None:
             # Convert P matrix to COO format
-            p.P = p.P.tocoo()
+            p['P'] = p['P'].tocoo()
 
         # Get problem dimensions
-        n = p.n
-        m = p.m
+        n = p['n']
+        m = p['m']
 
         # Adjust infinity values in bounds
-        u = np.copy(p.u)
-        l = np.copy(p.l)
+        u = np.copy(p['u'])
+        l = np.copy(p['l'])
 
         for i in range(m):
             if u[i] >= 1e20:
@@ -75,12 +76,12 @@ class GUROBISolver(object):
 
         # Add inequality constraints: iterate over the rows of A
         # adding each row into the model
-        if p.A is not None:
+        if p['A'] is not None:
             for i in range(m):
-                start = p.A.indptr[i]
-                end = p.A.indptr[i+1]
-                variables = [x[j] for j in p.A.indices[start:end]]  # Get nnz
-                coeff = p.A.data[start:end]
+                start = p['A'].indptr[i]
+                end = p['A'].indptr[i+1]
+                variables = [x[j] for j in p['A'].indices[start:end]]  # nnz
+                coeff = p['A'].data[start:end]
                 expr = grb.LinExpr(coeff, variables)
                 if (np.abs(l[i] - u[i]) < 1e-08):
                     model.addConstr(expr, grb.GRB.EQUAL, u[i])
@@ -93,12 +94,13 @@ class GUROBISolver(object):
                     model.addRange(expr, lower=l[i], upper=u[i])
 
         # Define objective
-        if p.P is not None:
+        if p['P'] is not None:
             obj = grb.QuadExpr()  # Set quadratic part
-            if p.P.count_nonzero():  # If there are any nonzero elms in P
-                for i in range(p.P.nnz):
-                    obj.add(.5*p.P.data[i]*x[p.P.row[i]]*x[p.P.col[i]])
-            obj.add(grb.LinExpr(p.q, x))  # Add linear part
+            if p['P'].count_nonzero():  # If there are any nonzero elms in P
+                for i in range(p['P'].nnz):
+                    obj.add(.5*p['P'].data[i] *
+                            x[p['P'].row[i]]*x[p['P'].col[i]])
+            obj.add(grb.LinExpr(p['q'], x))  # Add linear part
             model.setObjective(obj)  # Set objective
 
         # Set parameters
@@ -141,7 +143,7 @@ class GUROBISolver(object):
             constrs = model.getConstrs()
             y = -np.array([constrs[i].Pi for i in range(m)])
 
-            if not example.is_qp_solution_optimal(p, x, y):
+            if not is_qp_solution_optimal(p, x, y):
                 status = s.SOLVER_ERROR
 
             return Results(status, objval, x, y,

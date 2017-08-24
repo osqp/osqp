@@ -33,7 +33,8 @@ class RandomQPExample(object):
         self.qp_problem = self._generate_qp_problem()
         self.cvxpy_problem = self._generate_cvxpy_problem()
 
-    def name(self):
+    @staticmethod
+    def name():
         return 'Random QP'
 
     def _generate_qp_problem(self):
@@ -46,6 +47,8 @@ class RandomQPExample(object):
         problem['A'] = self.A
         problem['l'] = self.l
         problem['u'] = self.u
+        problem['m'] = self.A.shape[0]
+        problem['n'] = self.A.shape[1]
 
         return problem
 
@@ -65,8 +68,8 @@ class RandomQPExample(object):
         Get QP primal and duar variables from cvxpy solution
         '''
 
-        variables = self.problem.variables()
-        constraints = self.problem.constraints
+        variables = self.cvxpy_problem.variables()
+        constraints = self.cvxpy_problem.constraints
 
         # primal solution
         x = variables[0].value.A1

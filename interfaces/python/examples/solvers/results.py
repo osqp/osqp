@@ -2,10 +2,10 @@ class Results(object):
     '''
     Results class from QP solution
     '''
-    def __init__(self, status, obj_val, x, y, run_time, iter):
+    def __init__(self, status, obj_val, x, y, run_time, niter):
         self.status = status
         self.obj_val = obj_val
         self.x = x
         self.y = y
         self.run_time = run_time
-        self.iter = iter
+        self.niter = niter

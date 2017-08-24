@@ -51,7 +51,7 @@ enum linsys_solver_type {SUITESPARSE_LDL};
 
 #ifndef EMBEDDED
 #define DELTA (1E-6)
-#define POLISH (1)
+#define POLISH (0)
 #define POL_REFINE_ITER (3)
 #define VERBOSE (1)
 #define AUTO_RHO (0)
@@ -69,7 +69,7 @@ enum linsys_solver_type {SUITESPARSE_LDL};
 #define SCALING_ITER (15)
 #define MIN_SCALING (1e-08)  ///< Minimum scaling value
 #define MAX_SCALING (1e+08)  ///< Maximum scaling value
-#define SCALING_NORM (2)     ///< Scaling norm
+#define SCALING_NORM (-1)     ///< Scaling norm
 #endif
 
 /* Printing */

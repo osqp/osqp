@@ -2,6 +2,7 @@ import cvxpy.settings as stgs
 import cvxpy
 from . import statuses as s
 from .results import Results
+from benchmark_problems.utils import is_qp_solution_optimal
 
 
 class ECOSSolver(object):
@@ -44,8 +45,9 @@ class ECOSSolver(object):
         try:
             problem.solve(solver=cvxpy.ECOS, verbose=verbose)
         except:
-            if self._settings['verbose']:
-                print("Error in ECOS solution\n")
+            if 'verbose' in self._settings:  # if verbose is null, suppress it
+                if self._settings['verbose']:
+                    print("Error in ECOS solution\n")
             return Results(s.SOLVER_ERROR, None, None, None,
                            None, None)
 
@@ -63,7 +65,7 @@ class ECOSSolver(object):
         x, y = example.revert_cvxpy_solution()
 
         # Validate status
-        if not example.is_qp_solution_optimal(x, y):
+        if not is_qp_solution_optimal(example.qp_problem, x, y):
             status = s.SOLVER_ERROR
 
         return Results(status,

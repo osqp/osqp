@@ -2,6 +2,7 @@ import qpoases
 import numpy as np
 from . import statuses as s
 from .results import Results
+from benchmark_problems.utils import is_qp_solution_optimal, stdout_redirected
 
 
 class qpOASESSolver(object):
@@ -37,30 +38,33 @@ class qpOASESSolver(object):
         Returns:
             Results structure
         '''
-        p = example.problem
-        n, m = p.P.shape[0], p.A.shape[0]
+        p = example.qp_problem
+        n, m = p['n'], p['m']
 
-        if p.P is not None:
-            P = np.ascontiguousarray(p.P.todense())
+        if p['P'] is not None:
+            P = np.ascontiguousarray(p['P'].todense())
 
-        if p.A is not None:
-            A = np.ascontiguousarray(p.A.todense())
+        if p['A'] is not None:
+            A = np.ascontiguousarray(p['A'].todense())
 
         # Define contiguous array vectors
-        q = np.ascontiguousarray(p.q)
-        l = np.ascontiguousarray(p.l)
-        u = np.ascontiguousarray(p.u)
+        q = np.ascontiguousarray(p['q'])
+        l = np.ascontiguousarray(p['l'])
+        u = np.ascontiguousarray(p['u'])
 
         # Create infinite arrays of bounds
-        lx = np.ascontiguousarray(-np.inf * np.ones(p.n))
-        ux = np.ascontiguousarray(np.inf * np.ones(p.n))
+        lx = np.ascontiguousarray(-np.inf * np.ones(n))
+        ux = np.ascontiguousarray(np.inf * np.ones(n))
 
-        # Solve with qpOASES
-        qpoases_m = qpoases.PyQProblem(n, m)
+        # Redirect output if verbose is False
+        if 'verbose' in self._settings:
+            if self._settings['verbose'] is False:
+                with stdout_redirected():
+                    qpoases_m = qpoases.PyQProblem(n, m)
+        else:
+            qpoases_m = qpoases.PyQProblem(n, m)
+
         options = qpoases.PyOptions()
-
-        if not self._settings['verbose']:
-            options.printLevel = qpoases.PyPrintLevel.NONE
 
         for param, value in self._settings.items():
             if param == 'verbose':
@@ -83,7 +87,7 @@ class qpOASESSolver(object):
             # Set default to max 1000 working set recalculations
             qpoases_nWSR = np.array([1000])
 
-        # Set number of working set recalculations
+        # Solve problem
         status = qpoases_m.init(P, q, A, lx, ux, l, u,
                                 qpoases_nWSR, qpoases_cpu_time)
 
@@ -97,17 +101,17 @@ class qpOASESSolver(object):
         niter = qpoases_nWSR[0]
 
         if status in s.SOLUTION_PRESENT:
-            x = np.zeros(p.n)
-            y_temp = np.zeros(p.n + p.m)
+            x = np.zeros(n)
+            y_temp = np.zeros(n + m)
             obj_val = qpoases_m.getObjVal()
             qpoases_m.getPrimalSolution(x)
             qpoases_m.getDualSolution(y_temp)
 
             # Change sign and take only last part of y
             # N.B. No bounds on x in our formulation
-            y = -y_temp[p.n:]
+            y = -y_temp[n:]
 
-            if not example.is_qp_solution_optimal(p, x, y):
+            if not is_qp_solution_optimal(p, x, y):
                 status = s.SOLVER_ERROR
 
             return Results(status, obj_val,

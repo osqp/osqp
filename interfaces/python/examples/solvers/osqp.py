@@ -1,6 +1,7 @@
 import osqp
 from . import statuses as s
 from .results import Results
+from benchmark_problems.utils import is_qp_solution_optimal
 
 
 class OSQPSolver(object):
@@ -36,7 +37,8 @@ class OSQPSolver(object):
 
         # Setup OSQP
         m = osqp.OSQP()
-        m.setup(problem.P, problem.q, problem.A, problem.l, problem.u,
+        m.setup(problem['P'], problem['q'], problem['A'], problem['l'],
+                problem['u'],
                 **self._settings)
 
         # Solve
@@ -44,14 +46,18 @@ class OSQPSolver(object):
         status = self.STATUS_MAP.get(results.info.status_val, s.SOLVER_ERROR)
 
         if status in s.SOLUTION_PRESENT:
-            if not example.is_qp_solution_optimal(problem,
-                                                  results.x,
-                                                  results.y):
+            if not is_qp_solution_optimal(problem,
+                                          results.x,
+                                          results.y):
                 status = s.SOLVER_ERROR
 
-        return Results(status,
-                       results.info.obj_val,
-                       results.x,
-                       results.y,
-                       results.info.run_time,
-                       results.info.iter)
+        return_results = Results(status,
+                                 results.info.obj_val,
+                                 results.x,
+                                 results.y,
+                                 results.info.run_time,
+                                 results.info.iter)
+
+        return_results.status_polish = results.info.status_polish
+
+        return return_results
