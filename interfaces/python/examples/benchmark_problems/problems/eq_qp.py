@@ -3,9 +3,9 @@ import scipy.sparse as spa
 import cvxpy
 
 
-class RandomQPExample(object):
+class EqQPExample(object):
     '''
-    Random QP example
+    Equality constrained QP example
     '''
     def __init__(self, n, seed=1):
         '''
@@ -35,7 +35,7 @@ class RandomQPExample(object):
 
     @staticmethod
     def name():
-        return 'Random QP'
+        return 'Eq QP'
 
     def _generate_qp_problem(self):
         '''
@@ -58,7 +58,7 @@ class RandomQPExample(object):
         '''
         x_var = cvxpy.Variable(self.n)
         objective = .5 * cvxpy.quad_form(x_var, self.P) + self.q * x_var
-        constraints = [self.A * x_var <= self.u, self.A * x_var >= self.l]
+        constraints = [self.A * x_var == self.u]
         problem = cvxpy.Problem(cvxpy.Minimize(objective), constraints)
 
         return problem
@@ -75,6 +75,6 @@ class RandomQPExample(object):
         x = variables[0].value.A1
 
         # dual solution
-        y = constraints[0].dual_value.A1 - constraints[1].dual_value.A1
+        y = constraints[0].dual_value.A1
 
         return x, y

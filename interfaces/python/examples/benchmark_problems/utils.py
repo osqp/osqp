@@ -69,7 +69,7 @@ def is_qp_solution_optimal(qp_problem, x, y,
 
     if la.norm(pri_res, np.inf) > eps_pri:
         print("Error in primal residual: %.4e > %.4e" %
-              (la.norm(pri_res, np.inf), eps_pri), end='')
+              (la.norm(pri_res, np.inf), eps_pri))
         return False
 
     # Check dual feasibility
@@ -82,7 +82,7 @@ def is_qp_solution_optimal(qp_problem, x, y,
 
     if la.norm(dua_res, np.inf) > eps_dua:
         print("Error in dual residual: %.4e > %.4e" %
-              (la.norm(dua_res, np.inf), eps_dua), end='')
+              (la.norm(dua_res, np.inf), eps_dua))
         return False
 
     # Check complementary slackness

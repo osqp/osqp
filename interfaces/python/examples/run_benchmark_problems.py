@@ -32,9 +32,24 @@ for key in settings:
     settings[key]['verbose'] = False
 
 # Run benchmark problems
+
+# Random QP
 random_qp = Example('Random QP',
                     [10, 20, 30],
                     solvers,
-                    settings,
-                    )
-random_qp.solve()
+                    settings)
+# random_qp.solve()
+
+# Equality constrained QP
+eq_qp = Example('Eq QP',
+                [10, 20, 30],
+                solvers,
+                settings)
+# eq_qp.solve()
+
+# Portfolio
+portfolio = Example('Portfolio',
+                    [200, 200, 400],
+                    solvers,
+                    settings)
+portfolio.solve()

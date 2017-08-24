@@ -4,10 +4,12 @@ from itertools import repeat
 import pandas as pd
 
 from solvers.solvers import SOLVER_MAP
-from benchmark_problems.random_qp import RandomQPExample
+from benchmark_problems.problems.random_qp import RandomQPExample
+from benchmark_problems.problems.eq_qp import EqQPExample
+from benchmark_problems.problems.portfolio import PortfolioExample
 from benchmark_problems.utils import make_sure_path_exists
 
-examples = [RandomQPExample]
+examples = [RandomQPExample, EqQPExample, PortfolioExample]
 
 EXAMPLES_MAP = {example.name(): example for example in examples}
 
@@ -44,13 +46,15 @@ class Example(object):
                 example_instance = EXAMPLES_MAP[self.name](n, i)
 
                 if parallel:
+                    settings_list = \
+                        [self.settings[solver] for solver in self.solvers]
                     pool = Pool(processes=cpu_count())
                     pool.starmap(self.solve_single_example,
                                  zip(repeat(example_instance),
                                      repeat(n),
                                      repeat(i),
                                      self.solvers,
-                                     self.settings))
+                                     settings_list))
                 else:
                     for solver in self.solvers:
                         self.solve_single_example(example_instance,
@@ -68,7 +72,7 @@ class Example(object):
 
         The results are stored as
 
-            ./results/n{dimension}/{solver}/i{instance_number}.csv
+            ./results/benchmark_problems/{class}/n{dimension}/{solver}/i{instance_number}.csv
 
         using a pandas table with fields
             - 'class': example class
@@ -88,7 +92,8 @@ class Example(object):
 
         '''
         # Solution directory
-        path = os.path.join('.', 'results',
+        path = os.path.join('.', 'results', 'benchmark_problems',
+                            self.name,
                             'n%i' % dimension,
                             solver)
 

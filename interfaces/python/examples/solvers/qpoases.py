@@ -44,17 +44,33 @@ class qpOASESSolver(object):
         if p['P'] is not None:
             P = np.ascontiguousarray(p['P'].todense())
 
-        if p['A'] is not None:
+        if 'A_nobounds' in p:
+            A = np.ascontiguousarray(p['A'].todense())
+        elif p['A'] is not None:
             A = np.ascontiguousarray(p['A'].todense())
 
         # Define contiguous array vectors
         q = np.ascontiguousarray(p['q'])
-        l = np.ascontiguousarray(p['l'])
-        u = np.ascontiguousarray(p['u'])
 
-        # Create infinite arrays of bounds
-        lx = np.ascontiguousarray(-np.inf * np.ones(n))
-        ux = np.ascontiguousarray(np.inf * np.ones(n))
+        if 'l_nobounds' in p:
+            l = np.ascontiguousarray(p['l_nobounds'])
+        else:
+            l = np.ascontiguousarray(p['l'])
+
+        if 'u_nobounds' in p:
+            u = np.ascontiguousarray(p['u_nobounds'])
+        else:
+            u = np.ascontiguousarray(p['u'])
+
+        if 'lx' in p:
+            lx = np.ascontiguousarray(p['lx'])
+        else:
+            lx = np.ascontiguousarray(-np.inf * np.ones(n))
+
+        if 'ux' in p:
+            ux = np.ascontiguousarray(p['ux'])
+        else:
+            ux = np.ascontiguousarray(np.inf * np.ones(n))
 
         # Redirect output if verbose is False
         if 'verbose' in self._settings:
