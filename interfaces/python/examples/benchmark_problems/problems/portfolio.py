@@ -61,6 +61,7 @@ class PortfolioExample(object):
                 ]).tocsc()
         l_nobounds = np.hstack([1., np.zeros(self.k)])
         u_nobounds = np.hstack([1., np.zeros(self.k)])
+        bounds_idx = np.arange(self.n)
 
         # Separate bounds
         lx = np.hstack([np.zeros(self.n), -np.inf * np.ones(self.k)])
@@ -78,6 +79,7 @@ class PortfolioExample(object):
         problem['A_nobounds'] = A_nobounds
         problem['l_nobounds'] = l_nobounds
         problem['u_nobounds'] = u_nobounds
+        problem['bounds_idx'] = bounds_idx
         problem['lx'] = lx
         problem['ux'] = ux
 

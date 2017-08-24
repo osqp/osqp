@@ -15,7 +15,7 @@ import solvers.solvers as s
 # Define solvers
 solvers = [
            s.OSQP,
-           s.OSQP_polish,
+           #  s.OSQP_polish,
            s.GUROBI,
            s.MOSEK,
            s.ECOS,
@@ -24,13 +24,16 @@ solvers = [
 
 settings = {
             s.OSQP: {'polish': False},
-            s.OSQP_polish: {'polish': True},
+            #  s.OSQP_polish: {'polish': True},
             s.GUROBI: {},
             s.MOSEK: {},
             s.ECOS: {},
-            s.qpOASES: {}
+            s.qpOASES: {'nWSR': 1e6,    # Number of working set recalculations
+                        'cputime': 120  # Seconds
+                        }
             }
 
+# Number of instances per different dimension
 n_instances = 10
 
 # Shut up solvers
@@ -61,16 +64,25 @@ portfolio = Example('Portfolio',
                     solvers,
                     settings,
                     n_instances)
-# portfolio.solve()
+portfolio.solve()
 
 
 # Lasso
 lasso = Example('Lasso',
-                [2, 3, 4],
+                [2],
                 solvers,
                 settings,
                 n_instances)
-lasso.solve()
+# lasso.solve()
+
+
 # SVM
+svm = Example('SVM',
+              [2, 3, 4],
+              solvers,
+              settings,
+              n_instances)
+svm.solve()
+
 # Huber
 # Control

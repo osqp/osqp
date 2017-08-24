@@ -45,7 +45,8 @@ class qpOASESSolver(object):
             P = np.ascontiguousarray(p['P'].todense())
 
         if 'A_nobounds' in p:
-            A = np.ascontiguousarray(p['A'].todense())
+            A = np.ascontiguousarray(p['A_nobounds'].todense())
+            m = A.shape[0]
         elif p['A'] is not None:
             A = np.ascontiguousarray(p['A'].todense())
 
@@ -77,6 +78,8 @@ class qpOASESSolver(object):
             if self._settings['verbose'] is False:
                 with stdout_redirected():
                     qpoases_m = qpoases.PyQProblem(n, m)
+            else:
+                qpoases_m = qpoases.PyQProblem(n, m)
         else:
             qpoases_m = qpoases.PyQProblem(n, m)
 
@@ -123,9 +126,17 @@ class qpOASESSolver(object):
             qpoases_m.getPrimalSolution(x)
             qpoases_m.getDualSolution(y_temp)
 
-            # Change sign and take only last part of y
-            # N.B. No bounds on x in our formulation
+            # Change sign
             y = -y_temp[n:]
+
+            if 'A_nobounds' in p:
+                # If explicit bounds provided, reconstruct dual variable
+                # Bounds on all the variables
+                y_bounds = -y_temp[:n]
+                # Limit to only the actual bounds
+                y_bounds = y_bounds[p['bounds_idx']]
+
+                y = np.concatenate((y, y_bounds))
 
             if not is_qp_solution_optimal(p, x, y):
                 status = s.SOLVER_ERROR

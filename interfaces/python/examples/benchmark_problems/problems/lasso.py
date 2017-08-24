@@ -83,9 +83,6 @@ class LassoExample(object):
                        -t <= x, x <= t]
         problem = cvxpy.Problem(objective, constraints)
 
-        # Store cvxpy variables
-        self.cvxpy_variables = (x, y, t)
-
         return problem, (x, y, t)
 
     def revert_cvxpy_solution(self):
