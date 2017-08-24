@@ -13,19 +13,25 @@ from benchmark_problems.example import Example
 import solvers.solvers as s
 
 # Define solvers
-solvers = [s.OSQP,
+solvers = [
+           s.OSQP,
            s.OSQP_polish,
            s.GUROBI,
            s.MOSEK,
            s.ECOS,
-           s.qpOASES]
+           s.qpOASES
+           ]
 
-settings = {s.OSQP: {'polish': False},
+settings = {
+            s.OSQP: {'polish': False},
             s.OSQP_polish: {'polish': True},
             s.GUROBI: {},
             s.MOSEK: {},
             s.ECOS: {},
-            s.qpOASES: {}}
+            s.qpOASES: {}
+            }
+
+n_instances = 10
 
 # Shut up solvers
 for key in settings:
@@ -37,19 +43,34 @@ for key in settings:
 random_qp = Example('Random QP',
                     [10, 20, 30],
                     solvers,
-                    settings)
+                    settings,
+                    n_instances)
 # random_qp.solve()
 
 # Equality constrained QP
 eq_qp = Example('Eq QP',
                 [10, 20, 30],
                 solvers,
-                settings)
+                settings,
+                n_instances)
 # eq_qp.solve()
 
 # Portfolio
 portfolio = Example('Portfolio',
-                    [200, 200, 400],
+                    [2, 3, 4],
                     solvers,
-                    settings)
-portfolio.solve()
+                    settings,
+                    n_instances)
+# portfolio.solve()
+
+
+# Lasso
+lasso = Example('Lasso',
+                [2, 3, 4],
+                solvers,
+                settings,
+                n_instances)
+lasso.solve()
+# SVM
+# Huber
+# Control

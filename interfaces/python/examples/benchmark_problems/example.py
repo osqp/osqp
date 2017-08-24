@@ -7,9 +7,10 @@ from solvers.solvers import SOLVER_MAP
 from benchmark_problems.problems.random_qp import RandomQPExample
 from benchmark_problems.problems.eq_qp import EqQPExample
 from benchmark_problems.problems.portfolio import PortfolioExample
+from benchmark_problems.problems.lasso import LassoExample
 from benchmark_problems.utils import make_sure_path_exists
 
-examples = [RandomQPExample, EqQPExample, PortfolioExample]
+examples = [RandomQPExample, EqQPExample, PortfolioExample, LassoExample]
 
 EXAMPLES_MAP = {example.name(): example for example in examples}
 
@@ -72,7 +73,7 @@ class Example(object):
 
         The results are stored as
 
-            ./results/benchmark_problems/{class}/n{dimension}/{solver}/i{instance_number}.csv
+            ./results/benchmark_problems/{solver}/{class}/n{dimension}/i{instance_number}.csv
 
         using a pandas table with fields
             - 'class': example class
@@ -80,6 +81,7 @@ class Example(object):
             - 'status': solver status
             - 'run_time': execution time
             - 'iter': number of iterations
+            - 'obj_val': objective value
             - 'n': leading dimension
             - 'N': nnz dimension (nnz(P) + nnz(A))
 
@@ -93,9 +95,10 @@ class Example(object):
         '''
         # Solution directory
         path = os.path.join('.', 'results', 'benchmark_problems',
+                            solver,
                             self.name,
-                            'n%i' % dimension,
-                            solver)
+                            'n%i' % dimension
+                            )
 
         # Create directory for the results
         make_sure_path_exists(path)
@@ -121,6 +124,7 @@ class Example(object):
                              'status': [results.status],
                              'run_time': [results.run_time],
                              'iter': [results.niter],
+                             'obj_val': [results.obj_val],
                              'n': [dimension],
                              'N': [N]}
 

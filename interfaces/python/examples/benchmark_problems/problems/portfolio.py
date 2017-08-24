@@ -7,22 +7,22 @@ class PortfolioExample(object):
     '''
     Portfolio QP example
     '''
-    def __init__(self, n, seed=1):
+    def __init__(self, k, seed=1):
         '''
         Generate problem in QP format and CVXPY format
         '''
         # Set random seed
         np.random.seed(seed)
 
-        self.n = n         # Number of assets
-        self.k = int(n / 100)  # Number of factors
+        self.k = k               # Number of factors
+        self.n = k * 100         # Number of assets
 
         # Generate data
         self.F = spa.random(self.n, self.k, density=0.5,
                             data_rvs=np.random.randn, format='csc')
         self.D = spa.diags(np.random.rand(self.n) *
                            np.sqrt(self.k), format='csc')
-        self.mu = np.random.randn(n)
+        self.mu = np.random.randn(self.n)
         self.gamma = 1.0
 
         self.qp_problem = self._generate_qp_problem()
