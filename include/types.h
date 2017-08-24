@@ -42,7 +42,7 @@ typedef struct OSQP_TIMER OSQPTimer;
  */
 typedef struct {
         c_float *D;       ///< primal variable scaling
-        c_float  *E;      ///< dual variable scaling
+        c_float *E;       ///< dual variable scaling
         c_float *Dinv;    ///< primal variable rescaling
         c_float *Einv;    ///< dual variable rescaling
 } OSQPScaling;

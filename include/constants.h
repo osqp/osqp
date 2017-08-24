@@ -52,7 +52,6 @@ enum linsys_solver_type {SUITESPARSE_LDL};
 #ifndef EMBEDDED
 #define DELTA (1E-6)
 #define POLISH (1)
-#define MAX_CS_VIOLATION (1e-06)
 #define POL_REFINE_ITER (3)
 #define VERBOSE (1)
 #define AUTO_RHO (0)
