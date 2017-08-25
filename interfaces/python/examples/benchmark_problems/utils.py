@@ -66,7 +66,7 @@ def gen_int_log_space(min_val, limit, n):
             ratio = (float(limit)/result[-1]) ** (1.0/(n-len(result)))
     # round, re-adjust to 0 indexing (i.e. minus 1) and return np.uint64 array
     return np.array(list(map(lambda x: round(x)-1 + min_val, result)),
-                    dtype=np.uint64)
+                    dtype=np.int64)
 
 
 def is_qp_solution_optimal(qp_problem, x, y,

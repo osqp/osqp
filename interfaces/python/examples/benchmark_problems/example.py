@@ -39,7 +39,7 @@ class Example(object):
         self.solvers = solvers
         self.settings = settings
 
-    def solve(self, parallel=False):
+    def solve(self, parallel=True):
         '''
         Solve problems
         '''
