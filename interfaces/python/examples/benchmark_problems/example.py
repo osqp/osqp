@@ -61,45 +61,66 @@ class Example(object):
         print("Solving %s" % self.name)
         print("-----------------")
 
-        for n in self.dims:
+        # Iterate over all solvers
+        for solver in self.solvers:
+            settings = self.settings[solver]
 
-            # Iterate over all solvers
-            for solver in self.solvers:
-                settings = self.settings[solver]
+            # Initialize solver results
+            results_solver = []
 
-                # Solution directory
-                path = os.path.join('.', 'results', 'benchmark_problems',
-                                    solver,
-                                    self.name
-                                    )
+            # Solution directory
+            path = os.path.join('.', 'results', 'benchmark_problems',
+                                solver,
+                                self.name
+                                )
 
-                # Create directory for the results
-                make_sure_path_exists(path)
+            # Create directory for the results
+            make_sure_path_exists(path)
+
+            # Get solver file name
+            solver_file_name = os.path.join(path, 'full.csv')
+
+            for n in self.dims:
 
                 # Check if solution already exists
-                file_name = os.path.join(path, 'n%i.csv' % n)
+                n_file_name = os.path.join(path, 'n%i.csv' % n)
 
-                if not os.path.isfile(file_name):
+                if not os.path.isfile(n_file_name):
 
                     if parallel:
                         instances_list = list(range(self.n_instances))
                         pool = Pool(processes=cpu_count())
-                        results = pool.starmap(self.solve_single_example,
-                                               zip(repeat(n),
-                                                   instances_list,
-                                                   repeat(solver),
-                                                   repeat(settings)))
+                        n_results = pool.starmap(self.solve_single_example,
+                                                 zip(repeat(n),
+                                                     instances_list,
+                                                     repeat(solver),
+                                                     repeat(settings)))
                     else:
-                        results = []
+                        n_results = []
                         for instance in range(self.n_instances):
-                            results.append(self.solve_single_example(n,
-                                                                     instance,
-                                                                     solver,
-                                                                     settings))
+                            n_results.append(
+                                self.solve_single_example(n,
+                                                          instance,
+                                                          solver,
+                                                          settings)
+                                )
 
-                    # Combine results
-                    df = pd.concat(results)
-                    df.to_csv(file_name, index=False)
+                    # Combine n_results
+                    df = pd.concat(n_results)
+
+                    # Store n_results
+                    df.to_csv(n_file_name, index=False)
+
+                else:
+                    # Load from file
+                    df = pd.read_csv(n_file_name)
+
+                # Combine dataframe for all dimensions for current solver
+                results_solver.append(df)
+                df_solver = pd.concat(results_solver)
+
+                # Store dataframe
+                df_solver.to_csv(solver_file_name, index=False)
 
     def solve_single_example(self,
                              dimension, instance_number,
