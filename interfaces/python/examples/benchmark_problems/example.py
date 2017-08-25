@@ -61,6 +61,9 @@ class Example(object):
         print("Solving %s" % self.name)
         print("-----------------")
 
+        if parallel:
+            pool = Pool(processes=cpu_count())
+
         # Iterate over all solvers
         for solver in self.solvers:
             settings = self.settings[solver]
@@ -89,7 +92,6 @@ class Example(object):
 
                     if parallel:
                         instances_list = list(range(self.n_instances))
-                        pool = Pool(processes=cpu_count())
                         n_results = pool.starmap(self.solve_single_example,
                                                  zip(repeat(n),
                                                      instances_list,
@@ -115,12 +117,18 @@ class Example(object):
                     # Load from file
                     df = pd.read_csv(n_file_name)
 
-                # Combine dataframe for all dimensions for current solver
+                # Combine list of dataframes
                 results_solver.append(df)
-                df_solver = pd.concat(results_solver)
 
-                # Store dataframe
-                df_solver.to_csv(solver_file_name, index=False)
+            # Create total dataframe for the solver from list
+            df_solver = pd.concat(results_solver)
+
+            # Store dataframe
+            df_solver.to_csv(solver_file_name, index=False)
+
+        if parallel:
+            pool.close()  # Not accepting any more jobs on this pool
+            pool.join()   # Wait for all processes to finish
 
     def solve_single_example(self,
                              dimension, instance_number,
