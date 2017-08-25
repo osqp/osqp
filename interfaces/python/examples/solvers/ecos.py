@@ -54,8 +54,8 @@ class ECOSSolver(object):
         status = self.STATUS_MAP.get(problem.status, s.SOLVER_ERROR)
 
         # Obtain time and number of iterations
-        run_time = problem.solver_stats.setup_time + \
-            problem.solver_stats.solve_time
+        run_time = problem.solver_stats.solve_time \
+            + problem.solver_stats.setup_time
 
         niter = problem.solver_stats.num_iters
 

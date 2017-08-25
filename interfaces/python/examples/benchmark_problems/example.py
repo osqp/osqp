@@ -9,13 +9,17 @@ from benchmark_problems.problems.eq_qp import EqQPExample
 from benchmark_problems.problems.portfolio import PortfolioExample
 from benchmark_problems.problems.lasso import LassoExample
 from benchmark_problems.problems.svm import SVMExample
+from benchmark_problems.problems.huber import HuberExample
+from benchmark_problems.problems.control import ControlExample
 from benchmark_problems.utils import make_sure_path_exists
 
 examples = [RandomQPExample,
             EqQPExample,
             PortfolioExample,
             LassoExample,
-            SVMExample]
+            SVMExample,
+            HuberExample,
+            ControlExample]
 
 EXAMPLES_MAP = {example.name(): example for example in examples}
 
