@@ -45,8 +45,7 @@ for key in settings:
 
 # Random QP
 random_qp = Example('Random QP',
-                    [5, 6],
-                    # gen_int_log_space(10, 10000, 20),
+                    gen_int_log_space(10, 10000, 20),
                     solvers,
                     settings,
                     n_instances)
@@ -54,8 +53,7 @@ random_qp.solve()
 
 # Equality constrained QP
 eq_qp = Example('Eq QP',
-                [5, 6],
-                # gen_int_log_space(10, 10000, 20),
+                gen_int_log_space(10, 10000, 20),
                 solvers,
                 settings,
                 n_instances)
@@ -63,8 +61,7 @@ eq_qp.solve()
 
 # Portfolio
 portfolio = Example('Portfolio',
-                    [5, 6],
-                    # gen_int_log_space(5, 150, 20),
+                    gen_int_log_space(5, 150, 20),
                     solvers,
                     settings,
                     n_instances)
@@ -73,8 +70,7 @@ portfolio.solve()
 
 # Lasso
 lasso = Example('Lasso',
-                [5, 6],
-                # gen_int_log_space(10, 1000, 20),
+                gen_int_log_space(10, 1000, 20),
                 solvers,
                 settings,
                 n_instances)
@@ -83,8 +79,7 @@ lasso.solve()
 
 # SVM
 svm = Example('SVM',
-              [5, 6],
-            #   gen_int_log_space(10, 1000, 20),
+              gen_int_log_space(10, 1000, 20),
               solvers,
               settings,
               n_instances)
@@ -93,18 +88,16 @@ svm.solve()
 
 # Huber
 huber = Example('Huber',
-                [5, 6],
-                # gen_int_log_space(10, 1000, 20),
+                gen_int_log_space(10, 1000, 20),
                 solvers,
                 settings,
                 n_instances)
-# huber.solve()
+huber.solve()
 
 
 # Control
 control = Example('Control',
-                  [5, 6],
-                #   gen_int_log_space(4, 100, 20),
+                  gen_int_log_space(4, 100, 20),
                   solvers,
                   settings,
                   n_instances)
