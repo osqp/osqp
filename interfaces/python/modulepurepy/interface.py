@@ -2,7 +2,7 @@
 OSQP solver pure python implementation
 """
 from builtins import object
-import osqppurepy._osqp  as _osqp # Internal low level module
+import osqppurepy._osqp as _osqp # Internal low level module
 from warnings import warn
 import numpy as np
 from scipy import sparse

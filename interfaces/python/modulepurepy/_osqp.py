@@ -205,10 +205,10 @@ class settings(object):
     verbose  [True]                     - Verbosity
     scaled_termination [False]             - Evalute scaled termination criteria
     early_terminate  [True]             - Evalute termination criteria
-    early_terminate_interval  [25]    - Interval for evaluating termination criteria
+    early_terminate_interval  [25]      - Interval for evaluating termination criteria
     warm_start [False]                  - Reuse solution from previous solve
     polish  [True]                      - Solution polish
-    pol_refine_iter  [3]                - Number of iterative refinement iterations
+    pol_refine_iter  [3]                - Iterative refinement iterations
     auto_rho  [True]                    - Automatic rho computation
     """
 
@@ -230,12 +230,12 @@ class settings(object):
         self.verbose = kwargs.pop('verbose', True)
         self.scaled_termination = kwargs.pop('scaled_termination', False)
         self.early_terminate = kwargs.pop('early_terminate', True)
-        self.early_terminate_interval = kwargs.pop('early_terminate_interval', 25)
+        self.early_terminate_interval = \
+            kwargs.pop('early_terminate_interval', 25)
         self.warm_start = kwargs.pop('warm_start', False)
         self.polish = kwargs.pop('polish', True)
         self.pol_refine_iter = kwargs.pop('pol_refine_iter', 3)
         self.auto_rho = kwargs.pop('auto_rho', False)
-
 
 
 class scaling(object):
@@ -463,7 +463,6 @@ class OSQP(object):
         else:
             E = spspa.diags(d[self.work.data.n:])
 
-
         # Scale problem Matrices
         P = D.dot(self.work.data.P.dot(D)).tocsc()
         A = E.dot(self.work.data.A.dot(D)).tocsc()
@@ -504,7 +503,6 @@ class OSQP(object):
         #      np.power(n, AUTO_RHO_BETA1) * \
         #      np.power(m, AUTO_RHO_BETA2)
 
-
         #  Old stuff with traces
         # Compute tr(P)
         trP = self.work.data.P.diagonal().sum()
@@ -521,10 +519,9 @@ class OSQP(object):
         #      np.power(trP, AUTO_RHO_BETA1) * \
         #      np.power(trAtA, AUTO_RHO_BETA2)
 
-
         self.work.settings.rho = AUTO_RHO_BETA0 * \
-                np.power((trP + sigma * n)/n, AUTO_RHO_BETA1) * \
-                np.power((trAtA)/m, AUTO_RHO_BETA2)
+            np.power((trP + sigma * n)/n, AUTO_RHO_BETA1) * \
+            np.power((trAtA)/m, AUTO_RHO_BETA2)
 
         #  import ipdb; ipdb.set_trace()
         # Old linear ratio
@@ -544,29 +541,29 @@ class OSQP(object):
         """Print solver header
         """
         print("-------------------------------------------------------")
-        print("      OSQP v%s  -  Operator Splitting QP Solver" % \
-            self.version)
+        print("      OSQP v%s  -  Operator Splitting QP Solver" %
+              self.version)
         print("              Pure Python Implementation")
         print("     (c) Bartolomeo Stellato, Goran Banjac")
         print("   University of Oxford  -  Stanford University 2017")
         print("-------------------------------------------------------")
 
-        print("Problem:  variables n = %d, constraints m = %d" % \
-            (data.n, data.m))
+        print("Problem:  variables n = %d, constraints m = %d" %
+              (data.n, data.m))
         print("Settings: ", end='')
         if settings.linsys_solver == SUITESPARSE_LDL:
             print("linear system solver = SuiteSparse LDL")
-        print("          eps_abs = %.2e, eps_rel = %.2e," % \
-            (settings.eps_abs, settings.eps_rel))
-        print("          eps_prim_inf = %.2e, eps_dual_inf = %.2e," % \
-            (settings.eps_prim_inf, settings.eps_dual_inf))
+        print("          eps_abs = %.2e, eps_rel = %.2e," %
+              (settings.eps_abs, settings.eps_rel))
+        print("          eps_prim_inf = %.2e, eps_dual_inf = %.2e," %
+              (settings.eps_prim_inf, settings.eps_dual_inf))
         print("          rho = %.2e " % settings.rho, end='')
         if settings.auto_rho:
             print("(auto)")
         else:
             print("")
-        print("          sigma = %.2e, alpha = %.2e," % \
-            (settings.sigma, settings.alpha))
+        print("          sigma = %.2e, alpha = %.2e," %
+              (settings.sigma, settings.alpha))
         print("          max_iter = %d" % settings.max_iter)
         if settings.scaling:
             print("          scaling: on ", end='')
@@ -643,15 +640,17 @@ class OSQP(object):
             (1. - self.work.settings.alpha) * self.work.x_prev
         self.work.delta_x = self.work.x - self.work.x_prev
 
-    def project_z(self):
+    def project(self, z):
         """
         Project z variable in set C (for now C = [l, u])
         """
-        # proj_z = np.minimum(np.maximum(self.work.z,
-        #                     self.work.data.l), self.work.data.u)
-        # set_trace()
-        self.work.z = np.minimum(np.maximum(self.work.z,
-                                 self.work.data.l), self.work.data.u)
+        return np.minimum(np.maximum(z, self.work.data.l), self.work.data.u)
+
+    def project_normalcone(self, z, y):
+        tmp = z + y
+        z = np.minimum(np.maximum(tmp, self.work.data.l), self.work.data.u)
+        y = tmp - z
+        return z, y
 
     def update_z(self):
         """
@@ -662,7 +661,7 @@ class OSQP(object):
             (1. - self.work.settings.alpha) * self.work.z_prev +\
             1./self.work.settings.rho * self.work.y
 
-        self.project_z()
+        self.work.z = self.project(self.work.z)
 
     def update_y(self):
         """
@@ -674,36 +673,31 @@ class OSQP(object):
                 self.work.z)
         self.work.y += self.work.delta_y
 
-    def compute_pri_res(self, polish):
+    def compute_pri_res(self, x, z):
         """
         Compute primal residual ||Ax - z||
         """
-        if self.work.data.m == 0:  # No constraints
-            return 0.
-        if polish:
-            pri_res = self.work.data.A.dot(self.work.pol.x) - self.work.pol.z
-        else:
-            pri_res = self.work.data.A.dot(self.work.x) - self.work.z
 
-        if self.work.settings.scaling and not self.work.settings.scaled_termination:
+        # Primal residual
+        pri_res = self.work.data.A.dot(x) - z
+
+        if self.work.settings.scaling and not \
+                self.work.settings.scaled_termination:
             pri_res = self.work.scaling.Einv.dot(pri_res)
 
         return la.norm(pri_res, np.inf)
 
-    def compute_dua_res(self, polish):
+    def compute_dua_res(self, x, y):
         """
         Compute dual residual ||Px + q + A'y||
         """
-        if polish:
-            dua_res = self.work.data.P.dot(self.work.pol.x) + \
-                self.work.data.q +\
-                self.work.pol.A.T.dot(self.work.pol.y)
-        else:
-            dua_res = self.work.data.P.dot(self.work.x) +\
-                self.work.data.q +\
-                self.work.data.A.T.dot(self.work.y)
+        # Dual residual
+        dua_res = self.work.data.P.dot(x) +\
+            self.work.data.q +\
+            self.work.data.A.T.dot(y)
 
-        if self.work.settings.scaling and not self.work.settings.scaled_termination:
+        if self.work.settings.scaling and not \
+                self.work.settings.scaled_termination:
             dua_res = self.work.scaling.Dinv.dot(dua_res)
 
         return la.norm(dua_res, np.inf)
@@ -716,64 +710,18 @@ class OSQP(object):
             u'*(v)_{+} + l'*(v)_{-} < 0
         """
 
-        # # DEBUG
-        # if (self.work.info.iter % PRINT_INTERVAL == 0):
-        #     print "\n\nValues with r_pri"
-        #     r_pri = self.work.z - self.work.data.A.dot(self.work.x)
-        #
-        #     lhs = 0.
-        #     for i in range(self.work.data.m):
-        #         if self.work.data.u[i] < self.constant('OSQP_INFTY')*1e-03:
-        #             lhs += self.work.data.u[i] * max(r_pri[i], 0)
-        #
-        #         if self.work.data.l[i] > -self.constant('OSQP_INFTY')*1e-03:
-        #             lhs += self.work.data.l[i] * min(r_pri[i], 0)
-        #     # lhs = self.work.data.u.dot(np.maximum(r_pri, 0)) + \
-        #     #     self.work.data.l.dot(np.minimum(r_pri, 0))
-        #     print("u' * (v)_{+} + l' * v_{-} = %6.2e" % (lhs))
-        #     Atr_pri = self.work.data.A.T.dot(r_pri)
-        #     print("||A'*v|| = %6.2e" % (la.norm(Atr_pri)))
-        #
-
-            # lhsp = self.work.data.u.dot(np.maximum(self.work.delta_y, 0))
-            # lhsm = self.work.data.l.dot(np.minimum(self.work.delta_y, 0))
-            # print("Values with delta_y")
-            # lhs = 0.
-            # lhsp = 0.
-            # lhsm = 0.
-            # for i in range(self.work.data.m):
-            #     if self.work.data.u[i] < self.constant('OSQP_INFTY')*1e-05:
-            #         lhsp += self.work.data.u[i] * max(self.work.delta_y[i], 0)
-            #
-            #     if self.work.data.l[i] > -self.constant('OSQP_INFTY')*1e-03:
-            #         lhsm += self.work.data.l[i] * min(self.work.delta_y[i], 0)
-            # lhs = lhsp + lhsm
-            # print("u' * (v_{+}) = %6.2e" % lhsp)
-            # print("l' * (v_{-}) = %6.2e" % lhsm)
-            # print("u' * (v_{+}) + l' * (v_{-}) = %6.2e" % (lhs))
-            # self.work.Atdelta_y = self.work.data.A.T.dot(self.work.delta_y)
-            # print("||A'*v|| = %6.2e" % (la.norm(self.work.Atdelta_y)))
-            # pdb.set_trace()
-
-        # Prevent 0 division
-        # if la.norm(self.work.delta_y) > eps_prim_inf*eps_prim_inf:
-        #     # self.work.delta_y /= la.norm(self.work.delta_y)
-        #     # lhs = self.work.data.u.dot(np.maximum(self.work.delta_y, 0)) + \
-        #     #     self.work.data.l.dot(np.minimum(self.work.delta_y, 0))
-        #     # if  lhs < -eps_prim_inf:
-        #     #     self.work.Atdelta_y = self.work.data.A.T.dot(self.work.delta_y)
-        #     #     return la.norm(self.work.Atdelta_y) < eps_prim_inf
-
         eps_prim_inf = self.work.settings.eps_prim_inf
         norm_delta_y = la.norm(self.work.delta_y, np.inf)
         if norm_delta_y > eps_prim_inf:
             self.work.delta_y /= norm_delta_y
             lhs = self.work.data.u.dot(np.maximum(self.work.delta_y, 0)) + \
-                    self.work.data.l.dot(np.minimum(self.work.delta_y, 0))
+                self.work.data.l.dot(np.minimum(self.work.delta_y, 0))
             if lhs < -eps_prim_inf:
                 self.work.Atdelta_y = self.work.data.A.T.dot(self.work.delta_y)
-                if self.work.settings.scaling and not self.work.settings.scaled_termination:
-                        self.work.Atdelta_y = self.work.scaling.Dinv.dot(self.work.Atdelta_y)
+                if self.work.settings.scaling and not \
+                        self.work.settings.scaled_termination:
+                    self.work.Atdelta_y = \
+                        self.work.scaling.Dinv.dot(self.work.Atdelta_y)
                 return la.norm(self.work.Atdelta_y, np.inf) < eps_prim_inf
 
         return False
@@ -803,8 +751,10 @@ class OSQP(object):
                 self.work.Pdelta_x = self.work.data.P.dot(self.work.delta_x)
 
                 # Scale if necessary
-                if self.work.settings.scaling and not self.work.settings.scaled_termination:
-                    self.work.Pdelta_x = self.work.scaling.Dinv.dot(self.work.Pdelta_x)
+                if self.work.settings.scaling and not \
+                        self.work.settings.scaled_termination:
+                    self.work.Pdelta_x = \
+                        self.work.scaling.Dinv.dot(self.work.Pdelta_x)
 
                 # Check if ||P * delta_x|| = 0
                 if la.norm(self.work.Pdelta_x, np.inf) < eps_dual_inf:
@@ -814,8 +764,10 @@ class OSQP(object):
                         self.work.delta_x)
 
                     # Scale if necessary
-                    if self.work.settings.scaling and not self.work.settings.scaled_termination:
-                        self.work.Adelta_x = self.work.scaling.Einv.dot(self.work.Adelta_x)
+                    if self.work.settings.scaling and not \
+                            self.work.settings.scaled_termination:
+                        self.work.Adelta_x = \
+                            self.work.scaling.Einv.dot(self.work.Adelta_x)
 
                     for i in range(self.work.data.m):
                         # De Morgan's Law applied to negate
@@ -838,15 +790,21 @@ class OSQP(object):
         """
         Update information at iterations
         """
+
         if polish == 1:
             self.work.pol.obj_val = self.work.data.objval(self.work.pol.x)
-            self.work.pol.pri_res = self.compute_pri_res(1)
-            self.work.pol.dua_res = self.compute_dua_res(1)
+            self.work.pol.pri_res = self.compute_pri_res(self.work.pol.x,
+                                                         self.work.pol.z)
+            self.work.pol.dua_res = self.compute_dua_res(self.work.pol.x,
+                                                         self.work.pol.y)
+            self.work.info.polish_time = time.time() - self.work.timer
         else:
             self.work.info.iter = iter
             self.work.info.obj_val = self.work.data.objval(self.work.x)
-            self.work.info.pri_res = self.compute_pri_res(0)
-            self.work.info.dua_res = self.compute_dua_res(0)
+            self.work.info.pri_res = self.compute_pri_res(self.work.x,
+                                                          self.work.z)
+            self.work.info.dua_res = self.compute_dua_res(self.work.x,
+                                                          self.work.y)
             self.work.info.solve_time = time.time() - self.work.timer
 
     def print_summary(self):
@@ -887,10 +845,12 @@ class OSQP(object):
             pri_check = 1
         else:
             # Compute primal tolerance
-            if self.work.settings.scaling and not self.work.settings.scaled_termination:
+            if self.work.settings.scaling and not \
+                    self.work.settings.scaled_termination:
                 Einv = self.work.scaling.Einv
                 max_rel_eps = np.max([
-                    la.norm(Einv.dot(self.work.data.A.dot(self.work.x)), np.inf),
+                    la.norm(Einv.dot(self.work.data.A.dot(self.work.x)),
+                            np.inf),
                     la.norm(Einv.dot(self.work.z), np.inf)])
             else:
                 max_rel_eps = np.max([
@@ -907,7 +867,8 @@ class OSQP(object):
 
         # Compute dual tolerance
 
-        if self.work.settings.scaling and not self.work.settings.scaled_termination:
+        if self.work.settings.scaling and not \
+                self.work.settings.scaled_termination:
             Dinv = self.work.scaling.Dinv
             max_rel_eps = np.max([
                 la.norm(Dinv.dot(self.work.data.A.T.dot(self.work.y)), np.inf),
@@ -959,7 +920,6 @@ class OSQP(object):
             print("Run time: %.3fs" % (self.work.info.run_time))
         else:
             print("Run time: %.3fms" % (1e03*self.work.info.run_time))
-
 
         print("")  # Print last space
 
@@ -1014,7 +974,7 @@ class OSQP(object):
         self.work.x_prev = np.zeros(n)
         self.work.z_prev = np.zeros(m)
         self.work.y = np.zeros(m)
-        self.work.delta_y = np.zeros(m)       # Delta_y for primal infeasibility
+        self.work.delta_y = np.zeros(m)    # Delta_y for primal infeasibility
 
         # Flag indicating first run
         self.work.first_run = 1
@@ -1081,7 +1041,6 @@ class OSQP(object):
 
             # Third step: update y
             self.update_y()
-
 
             if self.work.settings.early_terminate:
                 # Update info
@@ -1419,7 +1378,6 @@ class OSQP(object):
 
         raise ValueError('Constant not recognized!')
 
-
     def iter_refin(self, KKT_factor, z, b):
         """
         Iterative refinement of the solution of a linear system
@@ -1484,21 +1442,17 @@ class OSQP(object):
         # Store the polished solution (x,z,y)
         self.work.pol.x = pol_sol[:self.work.data.n]
         self.work.pol.z = self.work.data.A.dot(self.work.pol.x)
+        self.work.pol.y = np.zeros(self.work.data.m)
         y_red = pol_sol[self.work.data.n:]
         self.work.pol.y[self.work.pol.ind_low] = y_red[:self.work.pol.n_low]
         self.work.pol.y[self.work.pol.ind_upp] = y_red[self.work.pol.n_low:]
 
         # Ensure (z,y) satisfies normal cone constraint
-        tmp = self.work.pol.z + self.work.pol.y
-        self.work.pol.z = np.minimum(np.maximum(tmp, self.work.data.l),
-                                     self.work.data.u)
-        self.work.pol.y = tmp - self.work.pol.z
+        self.work.pol.z, self.work.pol.y = \
+            self.project_normalcone(self.work.pol.z, self.work.pol.y)
 
         # Compute primal and dual residuals of the polished solution
         self.update_info(0, 1)
-
-        # Update polish time
-        self.work.info.polish_time = time.time() - self.work.timer
 
         # Check if polish was successful
         pol_success = (self.work.pol.pri_res < self.work.info.pri_res) and \

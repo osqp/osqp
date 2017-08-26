@@ -17,7 +17,7 @@ P = sparse.random(n, n, density=0.9,
                   data_rvs=np.random.randn,
                   format='csc')
 P = P.dot(P.T)
-q = 1000 * sp.randn(n)
+q = sp.randn(n)
 
 osqp_opts = {'rho': 1.,
              #  'auto_rho': True,
