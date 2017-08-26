@@ -1,8 +1,0 @@
-# Ignore latex generated plots
-*.tex
-
-# Ignore pdf generated plots
-**/*.pdf
-
-# Ignore CSV generated timings
-**/*.csv
