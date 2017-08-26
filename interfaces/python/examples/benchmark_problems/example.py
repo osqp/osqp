@@ -62,7 +62,7 @@ class Example(object):
         print("-----------------")
 
         if parallel:
-            pool = Pool(processes=cpu_count())
+            pool = Pool(processes=min(self.n_instances, cpu_count()))
 
         # Iterate over all solvers
         for solver in self.solvers:
