@@ -3,7 +3,6 @@ import osqppurepy
 import scipy.sparse as sparse
 import scipy as sp
 import numpy as np
-import mathprogbasepy as mpbpy
 sp.random.seed(1)
 
 n = 100
@@ -23,8 +22,8 @@ q = 1000 * sp.randn(n)
 osqp_opts = {'rho': 1.,
              #  'auto_rho': True,
              'sigma': 1e-06,
-            #  'eps_rel': 1e-08,
-            #  'eps_abs': 1e-08,
+             #  'eps_rel': 1e-08,
+             #  'eps_abs': 1e-08,
              'scaled_termination': False,
              'early_terminate_interval': 1,
              'polish': True,

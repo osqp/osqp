@@ -190,26 +190,6 @@ static void get_ypol_from_yred(OSQPWorkspace * work, c_float *yred){
 }
 
 
-/**
- * Ensure z satisfies box constraints and y is is normal cone of z
- * @param work Workspace
- * @param z    Primal variable z
- * @param y    Dual variable y
- */
-static void project_onto_normalcone(OSQPWorkspace *work, c_float *z, c_float *y){
-    c_int j;
-
-    // NB: Use z_prev as temporary vector
-
-    for (j = 0; j < work->data->m; j++) {
-        work->z_prev[j] = z[j] + y[j];
-        z[j] = c_min(c_max(work->z_prev[j], work->data->l[j]), work->data->u[j]);
-        y[j] = work->z_prev[j] - z[j];
-    }
-
-}
-
-
 c_int polish(OSQPWorkspace *work) {
     c_int mred, polish_successful;
     c_float * rhs_red;
@@ -255,15 +235,10 @@ c_int polish(OSQPWorkspace *work) {
     get_ypol_from_yred(work, pol_sol + work->data->n);      // pol->y
 
     // Ensure (z,y) satisfies normal cone constraint
-    project_onto_normalcone(work, work->pol->z, work->pol->y);
+    project_normalcone(work, work->pol->z, work->pol->y);
 
     // Compute primal and dual residuals at the polished solution
     update_info(work, 0, 1, 1);
-
-    // Update timing
-    #ifdef PROFILING
-    work->info->polish_time = toc(work->timer);
-    #endif
 
     // Check if polish was successful
     polish_successful = (work->pol->pri_res < work->info->pri_res &&

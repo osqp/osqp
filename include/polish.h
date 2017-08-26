@@ -11,6 +11,7 @@ extern "C" {
 #include "util.h"
 #include "auxil.h"
 #include "kkt.h"
+#include "proj.h"
 
 /**
  * Solution polish: Solve equality constrained QP with assumed active constraints

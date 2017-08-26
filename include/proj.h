@@ -12,9 +12,20 @@ extern "C" {
 
 /**
  * Project z onto \f$C = [l, u]\f$
+ * @param z    Vector to project
  * @param work Workspace
  */
-void project_z(OSQPWorkspace *work);
+void project(OSQPWorkspace *work, c_float *z);
+
+
+/**
+ * Ensure z satisfies box constraints and y is is normal cone of z
+ * @param work Workspace
+ * @param z    Primal variable z
+ * @param y    Dual variable y
+ */
+void project_normalcone(OSQPWorkspace *work, c_float *z, c_float *y);
+
 
 
 #ifdef __cplusplus

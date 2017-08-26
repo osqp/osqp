@@ -141,7 +141,7 @@ void update_z(OSQPWorkspace *work){
     }
 
     // project z
-    project_z(work);
+    project(work, work->z);
 
 }
 
@@ -166,27 +166,13 @@ c_float compute_obj_val(OSQPData *data, c_float * x) {
 }
 
 
-c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
+c_float compute_pri_res(OSQPWorkspace * work, c_float * x, c_float * z){
 
     // NB: Use z_prev as temporary vector
     // pr = Ax - z
 
-    #ifndef EMBEDDED
-    c_int j;
-
-    if (polish) {
-        // Called from polish() function
-        mat_vec(work->data->A, work->pol->x, work->z_prev, 0);
-        vec_add_scaled(work->z_prev, work->pol->z, work->data->m, -1);
-    } else {
-    #endif
-        // Called from ADMM algorithm: Ax - z
-        mat_vec(work->data->A, work->x, work->z_prev, 0);
-        vec_add_scaled(work->z_prev, work->z, work->data->m, -1);
-
-    #ifndef EMBEDDED
-    }
-    #endif
+    mat_vec(work->data->A, x, work->z_prev, 0);
+    vec_add_scaled(work->z_prev, z, work->data->m, -1);
 
     // If scaling active -> rescale residual
     if (work->settings->scaling && !work->settings->scaled_termination){
@@ -199,45 +185,24 @@ c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
 
 
 
-c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
+c_float compute_dua_res(OSQPWorkspace * work, c_float * x, c_float * y){
 
     // NB: Use x_prev as temporary vector
     // NB: Only upper triangular part of P is stored.
     // dr = q + A'*y + P*x
 
-    #ifndef EMBEDDED
-    if (!polish){ // Normal call
-    #endif
-        // dr = q
-        prea_vec_copy(work->data->q, work->x_prev, work->data->n);
+    // dr = q
+    prea_vec_copy(work->data->q, work->x_prev, work->data->n);
 
-        // dr += P * x (upper triangular part)
-        mat_vec(work->data->P, work->x, work->x_prev, 1);
+    // dr += P * x (upper triangular part)
+    mat_vec(work->data->P, x, work->x_prev, 1);
 
-        // dr += P' * x (lower triangular part with no diagonal)
-        mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
+    // dr += P' * x (lower triangular part with no diagonal)
+    mat_tpose_vec(work->data->P, x, work->x_prev, 1, 1);
 
-        // dr += A' * y
-        if (work->data->m > 0)
-            mat_tpose_vec(work->data->A, work->y, work->x_prev, 1, 0);
-
-    #ifndef EMBEDDED
-    } else {  // Call after polish
-        // dr = q
-        prea_vec_copy(work->data->q, work->x_prev, work->data->n);
-
-        // dr += P * x (upper triangular part)
-        mat_vec(work->data->P, work->pol->x, work->x_prev, 1);
-
-        // dr += P' * x (lower triangular part with no diagonal)
-        mat_tpose_vec(work->data->P, work->pol->x, work->x_prev, 1, 1);
-
-        // dr += A' * y
-        if (work->data->m > 0)
-            mat_tpose_vec(work->data->A, work->pol->y, work->x_prev, 1, 0);
-
-    }
-    #endif
+    // dr += A' * y
+    if (work->data->m > 0)
+        mat_tpose_vec(work->data->A, y, work->x_prev, 1, 0);
 
     // If scaling active -> rescale residual
     if (work->settings->scaling && !work->settings->scaled_termination){
@@ -389,47 +354,61 @@ void store_solution(OSQPWorkspace *work) {
 
 
 void update_info(OSQPWorkspace *work, c_int iter, c_int compute_objective, c_int polish){
+    c_float * x, * z, * y;  // Allocate pointers to variables
+    c_float * obj_val, * pri_res, *dua_res;  // objective value, residuals
 
-    #ifndef EMBEDDED
-    if (polish) { // polish
-
-        // Always compute objective value when called from polish
-        work->pol->obj_val = compute_obj_val(work->data, work->pol->x);
-
-        if (work->data->m == 0) {
-            // No constraints -> Always primal feasible
-            work->pol->pri_res = 0.;
-        } else {
-            work->pol->pri_res = compute_pri_res(work, 1);
-        }
-        work->pol->dua_res = compute_dua_res(work, 1);
-
-    } else { // normal update
+    #ifdef PROFILING
+    c_float *run_time;  // Execution time
     #endif
 
-        work->info->iter = iter; // Update iteration number
-
-        // Check if we need to compute the objective
-        if (compute_objective){
-            work->info->obj_val = compute_obj_val(work->data, work->x);
-        }
-
-        if (work->data->m == 0) {
-            // No constraints -> Always primal feasible
-              work->info->pri_res = 0.;
-        } else {
-              work->info->pri_res = compute_pri_res(work, 0);
-        }
-        work->info->dua_res = compute_dua_res(work, 0);
-
+    #ifndef EMBEDDED
+    if (polish){
+        x = work->pol->x;
+        y = work->pol->y;
+        z = work->pol->z;
+        obj_val = &work->pol->obj_val;
+        pri_res = &work->pol->pri_res;
+        dua_res = &work->pol->dua_res;
         #ifdef PROFILING
-            work->info->solve_time = toc(work->timer);
+        run_time = &work->info->polish_time;
         #endif
-
+    } else {
+    #endif // EMBEDDED
+        x = work->x;
+        y = work->y;
+        z = work->z;
+        obj_val = &work->info->obj_val;
+        pri_res = &work->info->pri_res;
+        dua_res = &work->info->dua_res;
+        work->info->iter = iter; // Update iteration number
+        #ifdef PROFILING
+        run_time = &work->info->solve_time;
+        #endif
     #ifndef EMBEDDED
     }
     #endif
 
+
+    // Compute the objective if needed
+    if (compute_objective){
+        *obj_val = compute_obj_val(work->data, x);
+    }
+
+    // Compute primal residual
+    if (work->data->m == 0) {
+        // No constraints -> Always primal feasible
+        *pri_res = 0.;
+    } else {
+        *pri_res = compute_pri_res(work, x, z);
+    }
+
+    // Compute dual residual
+    *dua_res = compute_dua_res(work, x, y);
+
+    // Update timing
+    #ifdef PROFILING
+    *run_time = toc(work->timer);
+    #endif
 
     #ifdef PRINTING
     work->summary_printed = 0;  // The just updated info have not been printed
