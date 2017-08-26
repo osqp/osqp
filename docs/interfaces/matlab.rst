@@ -120,4 +120,4 @@ OSQP automatically warm starts primal and dual variables from the previous QP so
 
     m.warm_start('x', x0, 'y', y0)
 
-where :code:`x0` and :code:`y0` are the new primal and dual variables. Please make sure :code`warm_start` solver option is active.
+where :code:`x0` and :code:`y0` are the new primal and dual variables. Please make sure :code:`warm_start` solver option is active.

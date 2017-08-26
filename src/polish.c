@@ -162,28 +162,51 @@ static void iterative_refinement(OSQPWorkspace *work, LinSysSolver *p, c_float *
 
 
 /**
- * Compute dual variable y from reduced on y_red
+ * Compute dual variable y from yred
  * @param work Workspace
+ * @param yred Dual variables associated to active constraints
  */
-static void compute_y_from_y_red(OSQPWorkspace * work){
+static void get_ypol_from_yred(OSQPWorkspace * work, c_float *yred){
     c_int j;
 
     // If there are no active constraints
     if (work->pol->n_low + work->pol->n_upp == 0) {
-        vec_set_scalar(work->y, 0., work->data->m);
+        vec_set_scalar(work->pol->y, 0., work->data->m);
         return;
     }
-    // yred = vstack[ylow, yupp]
+    // NB: yred = vstack[ylow, yupp]
     for (j = 0; j < work->data->m; j++) {
         if (work->pol->A_to_Alow[j] != -1) {
-            work->y[j] = work->pol->y_red[work->pol->A_to_Alow[j]];     // ylow
+            // lower-active
+            work->pol->y[j] = yred[work->pol->A_to_Alow[j]];
         } else if (work->pol->A_to_Aupp[j] != -1) {
-            work->y[j] = work->pol->y_red[work->pol->A_to_Aupp[j] +
-                                          work->pol->n_low];            // yupp
+            // upper-active
+            work->pol->y[j] = yred[work->pol->A_to_Aupp[j] + work->pol->n_low];
         } else {
-            work->y[j] = 0.0;
+            // inactive
+            work->pol->y[j] = 0.0;
         }
     }
+}
+
+
+/**
+ * Ensure z satisfies box constraints and y is is normal cone of z
+ * @param work Workspace
+ * @param z    Primal variable z
+ * @param y    Dual variable y
+ */
+static void project_onto_normalcone(OSQPWorkspace *work, c_float *z, c_float *y){
+    c_int j;
+
+    // NB: Use z_prev as temporary vector
+
+    for (j = 0; j < work->data->m; j++) {
+        work->z_prev[j] = z[j] + y[j];
+        z[j] = c_min(c_max(work->z_prev[j], work->data->l[j]), work->data->u[j]);
+        y[j] = work->z_prev[j] - z[j];
+    }
+
 }
 
 
@@ -226,13 +249,13 @@ c_int polish(OSQPWorkspace *work) {
     // Perform iterative refinement to compensate for the regularization error
     iterative_refinement(work, plsh, pol_sol, rhs_red);
 
-    // Store the polished solution
-    work->pol->y_red = c_malloc(mred * sizeof(c_float));
-    prea_vec_copy(pol_sol, work->pol->x, work->data->n);
-    prea_vec_copy(pol_sol + work->data->n, work->pol->y_red, mred);
+    // Store the polished solution (x,z,y)
+    prea_vec_copy(pol_sol, work->pol->x, work->data->n);    // pol->x
+    mat_vec(work->data->A, work->pol->x, work->pol->z, 0);  // pol->z
+    get_ypol_from_yred(work, pol_sol + work->data->n);      // pol->y
 
-    // Compute z = A*x needed for computing the primal residual
-    mat_vec(work->data->A, work->pol->x, work->pol->z, 0);
+    // Ensure (z,y) satisfies normal cone constraint
+    project_onto_normalcone(work, work->pol->z, work->pol->y);
 
     // Compute primal and dual residuals at the polished solution
     update_info(work, 0, 1, 1);
@@ -259,15 +282,10 @@ c_int polish(OSQPWorkspace *work) {
             work->info->status_polish = 1;
 
             // Update (x, z, y) in ADMM iterations
-
-            // Update x
+            // NB: z needed for warm starting
             prea_vec_copy(work->pol->x, work->x, work->data->n);
-
-            // Update z (needed for warm starting)
             prea_vec_copy(work->pol->z, work->z, work->data->m);
-
-            // Reconstruct y from y_red and active constraints
-            compute_y_from_y_red(work);
+            prea_vec_copy(work->pol->y, work->y, work->data->m);
 
             // Print summary
             #ifdef PRINTING
@@ -286,8 +304,6 @@ c_int polish(OSQPWorkspace *work) {
     if (work->pol) {
         if (work->pol->Ared)
             csc_spfree(work->pol->Ared);
-        if (work->pol->y_red)
-            c_free(work->pol->y_red);
     }
     c_free(rhs_red);
     c_free(pol_sol);

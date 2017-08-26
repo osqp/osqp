@@ -168,21 +168,19 @@ c_float compute_obj_val(OSQPData *data, c_float * x) {
 
 c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
 
-    // If embedded we cannot access polish members
+    // NB: Use z_prev as temporary vector
+    // pr = Ax - z
+
     #ifndef EMBEDDED
     c_int j;
-    /* c_float tmp, prim_resid = 0.0; */
+
     if (polish) {
         // Called from polish() function
-        // residual = ||(z - u)_+ + (z - l)_-||_inf    (stored in z_prev)
-        for (j = 0; j < work->data->m; j++) {
-            work->z_prev[j] = c_max(work->pol->z[j] - work->data->u[j], 0) +
-                c_min(work->pol->z[j] - work->data->l[j], 0);
-        }
+        mat_vec(work->data->A, work->pol->x, work->z_prev, 0);
+        vec_add_scaled(work->z_prev, work->pol->z, work->data->m, -1);
     } else {
     #endif
         // Called from ADMM algorithm: Ax - z
-        // N.B. store temporary vector in z_prev
         mat_vec(work->data->A, work->x, work->z_prev, 0);
         vec_add_scaled(work->z_prev, work->z, work->data->m, -1);
 
@@ -203,38 +201,41 @@ c_float compute_pri_res(OSQPWorkspace * work, c_int polish){
 
 c_float compute_dua_res(OSQPWorkspace * work, c_int polish){
 
-    // N.B. Use x_prev as temporary vector
+    // NB: Use x_prev as temporary vector
+    // NB: Only upper triangular part of P is stored.
+    // dr = q + A'*y + P*x
 
     #ifndef EMBEDDED
     if (!polish){ // Normal call
     #endif
-        // r = q + A'*y + P*x
-        // dual_res = q
+        // dr = q
         prea_vec_copy(work->data->q, work->x_prev, work->data->n);
 
-        // += A' * y
+        // dr += P * x (upper triangular part)
+        mat_vec(work->data->P, work->x, work->x_prev, 1);
+
+        // dr += P' * x (lower triangular part with no diagonal)
+        mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
+
+        // dr += A' * y
         if (work->data->m > 0)
             mat_tpose_vec(work->data->A, work->y, work->x_prev, 1, 0);
 
-        // += P * x (upper triangular part)
-        mat_vec(work->data->P, work->x, work->x_prev, 1);
-
-        // += P' * x (lower triangular part with no diagonal)
-        mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
-
     #ifndef EMBEDDED
     } else {  // Call after polish
-        // Called from polish() function
-        // r = q + Ared'*y_red + P*x
-        // NB: Only upper triangular part of P is stored.
-        prea_vec_copy(work->data->q, work->x_prev,
-                      work->data->n);                    // dr = q
-        mat_tpose_vec(work->pol->Ared, work->pol->y_red,
-                      work->x_prev, 1, 0);  // += Ared'*y_red
-        mat_vec(work->data->P, work->pol->x,
-                work->x_prev, 1);               // += Px (upper triang part)
-        mat_tpose_vec(work->data->P, work->pol->x,
-                      work->x_prev, 1, 1);      // += Px (lower triang part)
+        // dr = q
+        prea_vec_copy(work->data->q, work->x_prev, work->data->n);
+
+        // dr += P * x (upper triangular part)
+        mat_vec(work->data->P, work->pol->x, work->x_prev, 1);
+
+        // dr += P' * x (lower triangular part with no diagonal)
+        mat_tpose_vec(work->data->P, work->pol->x, work->x_prev, 1, 1);
+
+        // dr += A' * y
+        if (work->data->m > 0)
+            mat_tpose_vec(work->data->A, work->pol->y, work->x_prev, 1, 0);
+
     }
     #endif
 

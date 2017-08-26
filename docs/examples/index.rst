@@ -6,5 +6,9 @@ Examples
    :maxdepth: 1
 
    demo.rst
-   portfolio.rst
+   huber.rst
+   lasso.rst
    least-squares.rst
+   mpc.rst
+   portfolio.rst
+   svm.rst

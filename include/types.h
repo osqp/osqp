@@ -42,7 +42,7 @@ typedef struct OSQP_TIMER OSQPTimer;
  */
 typedef struct {
         c_float *D;       ///< primal variable scaling
-        c_float  *E;      ///< dual variable scaling
+        c_float *E;       ///< dual variable scaling
         c_float *Dinv;    ///< primal variable rescaling
         c_float *Einv;    ///< dual variable rescaling
 } OSQPScaling;
@@ -96,8 +96,7 @@ typedef struct {
     c_int *Aupp_to_A;     ///< Maps indices in Aupp to indices in A
     c_float *x;           ///< optimal x-solution obtained by polish
     c_float *z;           ///< optimal z-solution obtained by polish
-    c_float *y_red;       ///< optimal dual variables associated to Ared obtained
-                          ///<    by polish
+    c_float *y;           ///< optimal y-solution obtained by polish
     c_float obj_val;      ///< objective value at polished solution
     c_float pri_res;      ///< primal residual at polished solution
     c_float dua_res;      ///< dual residual at polished solution

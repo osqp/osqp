@@ -303,7 +303,7 @@ class pol(object):
     Ared            - Part of A containing only active rows
     x               - polished x
     z               - polished z
-    y_red           - polished y (part corresponding to active constraints)
+    y               - polished y
     """
     def __init__(self):
         self.ind_low = None
@@ -313,7 +313,7 @@ class pol(object):
         self.Ared = None
         self.x = None
         self.z = None
-        self.y_red = None
+        self.y = None
 
 
 class linsys_solver(object):
@@ -681,8 +681,7 @@ class OSQP(object):
         if self.work.data.m == 0:  # No constraints
             return 0.
         if polish:
-            pri_res = np.maximum(self.work.data.l - self.work.pol.z, 0) + \
-                np.maximum(self.work.pol.z - self.work.data.u, 0)
+            pri_res = self.work.data.A.dot(self.work.pol.x) - self.work.pol.z
         else:
             pri_res = self.work.data.A.dot(self.work.x) - self.work.z
 
@@ -698,7 +697,7 @@ class OSQP(object):
         if polish:
             dua_res = self.work.data.P.dot(self.work.pol.x) + \
                 self.work.data.q +\
-                self.work.pol.Ared.T.dot(self.work.pol.y_red)
+                self.work.pol.A.T.dot(self.work.pol.y)
         else:
             dua_res = self.work.data.P.dot(self.work.x) +\
                 self.work.data.q +\
@@ -1482,10 +1481,18 @@ class OSQP(object):
         if self.work.settings.pol_refine_iter > 0:
             pol_sol = self.iter_refin(KKTred_factor, pol_sol, rhs_red)
 
-        # Store the polished solution
+        # Store the polished solution (x,z,y)
         self.work.pol.x = pol_sol[:self.work.data.n]
         self.work.pol.z = self.work.data.A.dot(self.work.pol.x)
-        self.work.pol.y_red = pol_sol[self.work.data.n:]
+        y_red = pol_sol[self.work.data.n:]
+        self.work.pol.y[self.work.pol.ind_low] = y_red[:self.work.pol.n_low]
+        self.work.pol.y[self.work.pol.ind_upp] = y_red[self.work.pol.n_low:]
+
+        # Ensure (z,y) satisfies normal cone constraint
+        tmp = self.work.pol.z + self.work.pol.y
+        self.work.pol.z = np.minimum(np.maximum(tmp, self.work.data.l),
+                                     self.work.data.u)
+        self.work.pol.y = tmp - self.work.pol.z
 
         # Compute primal and dual residuals of the polished solution
         self.update_info(0, 1)
@@ -1511,12 +1518,7 @@ class OSQP(object):
             # Update ADMM iterations
             self.work.x = self.work.pol.x
             self.work.z = self.work.pol.z
-            self.work.y = np.zeros(self.work.data.m)
-            if self.work.pol.Ared.shape[0] > 0:
-                self.work.y[self.work.pol.ind_low] = \
-                    self.work.pol.y_red[:self.work.pol.n_low]
-                self.work.y[self.work.pol.ind_upp] = \
-                    self.work.pol.y_red[self.work.pol.n_low:]
+            self.work.y = self.work.pol.y
 
             # Print summary
             if self.work.settings.verbose:
