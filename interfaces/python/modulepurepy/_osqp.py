@@ -192,6 +192,24 @@ class scaling(object):
         self.Einv = None
 
 
+class linesearch(object):
+    """
+    Vectors obtained from line search between the ADMM and the polished solution
+
+    Attributes
+    ----------
+    X     - matrix in R^{N \\times n}
+    Z     - matrix in R^{N \\times m}
+    Y     - matrix in R^{N \\times m}
+    t     - vector in R^N
+    """
+    def __init__(self):
+        self.X = None
+        self.Z = None
+        self.Y = None
+        self.t = None
+
+
 class solution(object):
     """
     Solver solution vectors z, u
@@ -288,10 +306,11 @@ class results(object):
     y           - dual solution
     info        - info structure
     """
-    def __init__(self, solution, info):
+    def __init__(self, solution, info, linesearch):
         self.x = solution.x
         self.y = solution.y
         self.info = info
+        self.linesearch = linesearch
 
 
 class OSQP(object):
@@ -1043,7 +1062,7 @@ class OSQP(object):
         # Solution polish
         if self.work.settings.polish and \
                 self.work.info.status_val == OSQP_SOLVED:
-                    self.polish()
+                    ls = self.polish()
 
         # Update total times
         if self.work.first_run:
@@ -1065,7 +1084,7 @@ class OSQP(object):
             self.work.first_run = 0
 
         # Store results structure
-        return results(self.work.solution, self.work.info)
+        return results(self.work.solution, self.work.info, ls)
 
     #
     #   Auxiliary API Functions
@@ -1485,6 +1504,8 @@ class OSQP(object):
                       (self.work.pol.dua_res < self.work.info.dua_res) and \
                       (self.work.info.pri_res < 1e-10)
 
+        ls = linesearch()
+
         if pol_success:
             # Update solver information
             self.work.info.obj_val = self.work.pol.obj_val
@@ -1500,5 +1521,42 @@ class OSQP(object):
             # Print summary
             if self.work.settings.verbose:
                 self.print_polish()
+
         else:
             self.work.info.status_polish = -1
+
+            # Line search on the line connecting the ADMM and the polished sol.
+            ls.t = np.linspace(-0.01, 0.01, 1001)
+            ls.X, ls.Z, ls.Y = self.line_search(
+                            self.work.x, self.work.z, self.work.y,
+                            self.work.pol.x, self.work.pol.z, self.work.pol.y,
+                            ls.t)
+
+        return ls
+
+    def line_search(self, x1, z1, y1, x2, z2, y2, t):
+        """
+        Perform line search on the line between (x1,z1,y1) and (x2,z2,y2).
+        """
+        N = len(t)
+        X = np.zeros((N, self.work.data.n))
+        Z = np.zeros((N, self.work.data.m))
+        Y = np.zeros((N, self.work.data.m))
+
+        dx = x2 - x1
+        dz = z2 - z1
+        dy = y2 - y1
+
+        for i in range(N):
+            X[i, :] = x1 + t[i] * dx
+            Z[i, :] = z1 + t[i] * dz
+            Y[i, :] = y1 + t[i] * dy
+            Z[i, :], Y[i, :] = self.project_normalcone(Z[i, :], Y[i, :])
+
+            # Unscale optimization variables (x,z,y)
+            if self.work.settings.scaling:
+                X[i, :] = self.work.scaling.D.dot(X[i, :])
+                Z[i, :] = self.work.scaling.Einv.dot(Z[i, :])
+                Y[i, :] = self.work.scaling.E.dot(Y[i, :])
+
+        return (X, Z, Y)
