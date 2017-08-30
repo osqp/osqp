@@ -1160,6 +1160,38 @@ class OSQP(object):
         if constr_type_changed:
             self.work.linsys_solver = linsys_solver(self.work)
 
+    def update_P(self, P_new):
+        """
+        Update quadratic cost matrix
+        """
+        if self.work.settings.scaling:
+            self.work.data.P = self.work.scaling.D.dot(P_new.dot(self.work.scaling.D))
+        else:
+            self.work.data.P = P_new
+        self.work.linsys_solver = linsys_solver(self.work)
+
+    def update_A(self, A_new):
+        """
+        Update constraint matrix
+        """
+        if self.work.settings.scaling:
+            self.work.data.A = self.work.scaling.E.dot(A_new.dot(self.work.scaling.D))
+        else:
+            self.work.data.A = A_new
+        self.work.linsys_solver = linsys_solver(self.work)
+
+    def update_P_A(self, P_new, A_new):
+        """
+        Update quadratic cost and constraint matrices
+        """
+        if self.work.settings.scaling:
+            self.work.data.P = self.work.scaling.D.dot(P_new.dot(self.work.scaling.D))
+            self.work.data.A = self.work.scaling.E.dot(A_new.dot(self.work.scaling.D))
+        else:
+            self.work.data.P = P_new
+            self.work.data.A = A_new
+        self.work.linsys_solver = linsys_solver(self.work)
+
     def warm_start(self, x, y):
         """
         Warm start primal and dual variables

@@ -131,12 +131,29 @@ class OSQP(object):
         """
 
         # get arguments
+        P = kwargs.pop('P', None)
+        A = kwargs.pop('A', None)
         q = kwargs.pop('q', None)
         l = kwargs.pop('l', None)
         u = kwargs.pop('u', None)
 
         # Get problem dimensions
         (n, m) = (self._model.work.data.n, self._model.work.data.m)
+
+        if P is not None:
+            if P.shape != (n, n):
+                raise ValueError("P must have shape (n x n)")
+            if A is None:
+                self._model.update_P(P)
+
+        if A is not None:
+            if A.shape != (m, n):
+                raise ValueError("A must have shape (m x n)")
+            if P is None:
+                self._model.update_A(A)
+
+        if P is not None and A is not None:
+            self._model.update_P_A(P, A)
 
         if q is not None:
             if len(q) != n:
