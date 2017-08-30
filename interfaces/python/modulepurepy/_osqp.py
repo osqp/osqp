@@ -18,6 +18,11 @@ OSQP_PRIMAL_INFEASIBLE = -3
 OSQP_DUAL_INFEASIBLE = -4
 OSQP_UNSOLVED = -10
 
+# Parameter bounds
+RHO_MIN = 1e-06
+RHO_MAX = 1e+06
+RHO_TOL = 1e-04
+
 # Printing interval
 PRINT_INTERVAL = 100
 
@@ -30,84 +35,9 @@ OSQP_NAN = 1e+20  # Just as placeholder. Not real value
 # Linear system solver options
 SUITESPARSE_LDL = 0
 
-
-# Auto rho (only linear function)
-# (old values)
-# AUTO_RHO_OFFSET = 1.07838081E-03
-# AUTO_RHO_SLOPE = 2.31511262
-
-#  AUTO_RHO_OFFSET = 0.0
-#  AUTO_RHO_SLOPE = 2.4474028467925546
-
-# Old (More complicated fit)
-# AUTO_RHO_BETA0 = 2.1877627217504649
-# AUTO_RHO_BETA1 = 0.57211669508170027
-# AUTO_RHO_BETA2 = -0.71622847416411806
-
-# New
-# AUTO_RHO_BETA0 = 2.9287845053694284
-# AUTO_RHO_BETA1 = 0.36309102743796728
-# AUTO_RHO_BETA2 = -0.59595092004777972
-
-# With regularization on v (1e-03)
-# AUTO_RHO_BETA0 = 4.7967320978661059
-# AUTO_RHO_BETA1 = -0.014575489596745135
-# AUTO_RHO_BETA2 = -0.38435004096785225
-
-# With regularization on v (1e-04)
-#  AUTO_RHO_BETA0 = 3.1723875550135223
-#  AUTO_RHO_BETA1 = 0.29811867735531827
-#  AUTO_RHO_BETA2 = -0.55976668580992439
-
-# With iter less than 20
-# AUTO_RHO_BETA0 = 6.4047899119449241
-# AUTO_RHO_BETA1 = -0.67858183687448892
-# AUTO_RHO_BETA2 = -0.037034234262609413
-
-
-
-
-
-# No regularization. interval [1, 1.2] (depends on traces)
-#  AUTO_RHO_BETA0 = 2.2377322735057317
-#  AUTO_RHO_BETA1 = 0.73909558577990619
-#  AUTO_RHO_BETA2 = -0.81428271821694909
-
-
-# only n and m, interval 2.0
-#  AUTO_RHO_BETA0 = 132.31670550204416
-#  AUTO_RHO_BETA1 = 3.6821990789623533
-#  AUTO_RHO_BETA2 = -5.3493318062852033
-
-#  # only n and m, interval 2.0
-#  AUTO_RHO_BETA0 = 99.46657940983809
-#  AUTO_RHO_BETA1 = 3.7594273667640685
-#  AUTO_RHO_BETA2 = -5.3658885099270002
-
-# only n and m, interval 1.5
-#  AUTO_RHO_BETA0 = 63.9204222926816
-#  AUTO_RHO_BETA1 = 4.2480325664123226
-#  AUTO_RHO_BETA2 = -5.7924560461638848
-
-
-#  AUTO_RHO_BETA0 = 1.0865058613182395
-#  AUTO_RHO_BETA1 = 0.12750326228757933
-#  AUTO_RHO_BETA2 = -0.65234442259175496
-
-AUTO_RHO_BETA0 = 0.43764484761141698
-AUTO_RHO_BETA1 = 0.26202391082629206
-AUTO_RHO_BETA2 = -0.46598879917320213
-
-
-
-AUTO_RHO_MAX = 1e06
-AUTO_RHO_MIN = 1e-06
-
-
 # Scaling
-SCALING_REG = 1e-08
-#  MAX_SCALING = 1e06
-#  MIN_SCALING = 1e-06
+MIN_SCALING = 1e-06
+MAX_SCALING = 1e+06
 
 
 class workspace(object):
@@ -125,7 +55,7 @@ class workspace(object):
 
 
     Additional workspace variables
-    -------------------------------
+    ------------------------------
     first_run              - flag to indicate if it is the first run
     timer                  - saved time instant for timing purposes
     x                      - primal iterate
@@ -135,13 +65,19 @@ class workspace(object):
     z                      - z iterate
     z_prev                 - previous z iterate
 
+    Vectorized rho parameter
+    ------------------------
+    rho_vec                - vector of rho values for each constraint
+    rho_inv_vec            - vector of reciprocal rho values
+    constr_type            - type of constraints: loose (-1), eq (1), ineq (0)
+
     Primal infeasibility related workspace variables
-    -----------------------------------------
+    ------------------------------------------------
     delta_y                - difference of consecutive y
     Atdelta_y              - A' * delta_y
 
     Dual infeasibility related workspace variables
-    -----------------------------------------
+    ----------------------------------------------
     delta_x                - difference of consecutive x
     Pdelta_x               - P * delta_x
     Adelta_x               - A * delta_x
@@ -207,7 +143,7 @@ class settings(object):
     early_terminate  [True]             - Evalute termination criteria
     early_terminate_interval  [25]      - Interval for evaluating termination criteria
     warm_start [False]                  - Reuse solution from previous solve
-    polish  [True]                      - Solution polish
+    polish  [False]                     - Solution polish
     pol_refine_iter  [3]                - Iterative refinement iterations
     auto_rho  [True]                    - Automatic rho computation
     """
@@ -218,7 +154,7 @@ class settings(object):
         self.sigma = kwargs.pop('sigma', 1e-06)
         self.scaling = kwargs.pop('scaling', True)
         self.scaling_iter = kwargs.pop('scaling_iter', 15)
-        self.scaling_norm = kwargs.pop('scaling_norm', 2)
+        self.scaling_norm = kwargs.pop('scaling_norm', -1)
         self.max_iter = kwargs.pop('max_iter', 2500)
         self.eps_abs = kwargs.pop('eps_abs', 1e-3)
         self.eps_rel = kwargs.pop('eps_rel', 1e-3)
@@ -232,8 +168,8 @@ class settings(object):
         self.early_terminate = kwargs.pop('early_terminate', True)
         self.early_terminate_interval = \
             kwargs.pop('early_terminate_interval', 25)
-        self.warm_start = kwargs.pop('warm_start', False)
-        self.polish = kwargs.pop('polish', True)
+        self.warm_start = kwargs.pop('warm_start', True)
+        self.polish = kwargs.pop('polish', False)
         self.pol_refine_iter = kwargs.pop('pol_refine_iter', 3)
         self.auto_rho = kwargs.pop('auto_rho', False)
 
@@ -286,6 +222,7 @@ class info(object):
     def __init__(self):
         self.iter = 0
         self.status_val = OSQP_UNSOLVED
+        self.status = "Unsolved"
         self.status_polish = 0
         self.polish_time = 0.0
 
@@ -329,8 +266,7 @@ class linsys_solver(object):
         KKT = spspa.vstack([
               spspa.hstack([work.data.P + work.settings.sigma *
                             spspa.eye(work.data.n), work.data.A.T]),
-              spspa.hstack([work.data.A,
-                           -1./work.settings.rho * spspa.eye(work.data.m)])])
+              spspa.hstack([work.data.A, -spspa.diags(work.rho_inv_vec)])])
 
         # Initialize structure
         self.kkt_factor = spla.splu(KKT.tocsc())
@@ -405,9 +341,13 @@ class OSQP(object):
                     # Scipy hasn't implemented that function yet!
                     norm_col_j = np.linalg.norm(KKT[:, j].todense(),
                                                 scaling_norm)
+                # Limit scaling
+                if norm_col_j < MIN_SCALING:
+                    norm_col_j = 1.
+                elif norm_col_j > MAX_SCALING:
+                    norm_col_j = MAX_SCALING
 
-                if norm_col_j > SCALING_REG:
-                    d_temp[j] = 1./(np.sqrt(norm_col_j))
+                d_temp[j] = 1./(np.sqrt(norm_col_j))
 
             S_temp = spspa.diags(d_temp)
             d = np.multiply(d, d_temp)
@@ -488,54 +428,67 @@ class OSQP(object):
             self.work.scaling.Einv = \
                 spspa.diags(np.reciprocal(E.diagonal()))
 
-    def compute_rho(self):
+    def set_rho_vec(self):
         """
-        Automatically compute rho value
+        Set values of rho vector based on constraint types
         """
+        self.work.settings.rho = np.minimum(np.maximum(self.work.settings.rho,
+                                            RHO_MIN), RHO_MAX)
 
-        if self.work.data.m == 0:
-            self.work.settings.rho = AUTO_RHO_MAX
+        # Find indices of loose bounds, equality constr and one-sided constr
+        loose_ind = np.where(np.logical_and(
+                            self.work.data.l < -OSQP_INFTY*MIN_SCALING,
+                            self.work.data.u > OSQP_INFTY*MAX_SCALING))[0]
+        eq_ind = np.where(self.work.data.u - self.work.data.l < RHO_TOL)[0]
+        ineq_ind = np.setdiff1d(np.setdiff1d(np.arange(self.work.data.m),
+                                loose_ind), eq_ind)
 
-        n = self.work.data.n
-        m = self.work.data.m
-        sigma = self.work.settings.sigma
-        #  self.work.settings.rho = AUTO_RHO_BETA0 * \
-        #      np.power(n, AUTO_RHO_BETA1) * \
-        #      np.power(m, AUTO_RHO_BETA2)
+        # Type of constraints
+        self.work.constr_type[loose_ind] = -1
+        self.work.constr_type[eq_ind] = 1
+        self.work.constr_type[ineq_ind] = 0
 
-        #  Old stuff with traces
-        # Compute tr(P)
-        trP = self.work.data.P.diagonal().sum()
+        self.work.rho_vec[loose_ind] = RHO_MIN
+        self.work.rho_vec[eq_ind] = RHO_MAX
+        self.work.rho_vec[ineq_ind] = self.work.settings.rho
 
-        #  Compute tr(AtA) = fro(A) ^ 2
-        trAtA = spspa.linalg.norm(self.work.data.A) ** 2
-#
+        self.work.rho_inv_vec = np.reciprocal(self.work.rho_vec)
 
-        # DEBUG: saturate values of norms
-        # trP = np.maximum(trP, 1e-03)
-        # trAtA = np.maximum(trAtA, 1e-03)
+    def update_rho_vec(self):
+        """
+        Update values of rho_vec and return 1 if type of some constraints
+        changed.
+        """
+        # Find indices of loose bounds, equality constr and one-sided constr
+        loose_ind = np.where(np.logical_and(
+                            self.work.data.l < -OSQP_INFTY*MIN_SCALING,
+                            self.work.data.u > OSQP_INFTY*MAX_SCALING))[0]
+        eq_ind = np.where(self.work.data.u - self.work.data.l < RHO_TOL)[0]
+        ineq_ind = np.setdiff1d(np.setdiff1d(np.arange(self.work.data.m),
+                                loose_ind), eq_ind)
 
-        #  self.work.settings.rho = AUTO_RHO_BETA0 * \
-        #      np.power(trP, AUTO_RHO_BETA1) * \
-        #      np.power(trAtA, AUTO_RHO_BETA2)
+        # Find indices of current constraint types
+        old_loose_ind = np.where(self.work.constr_type == -1)
+        old_eq_ind = np.where(self.work.constr_type == 1)
+        old_ineq_ind = np.where(self.work.constr_type == 0)
 
-        self.work.settings.rho = AUTO_RHO_BETA0 * \
-            np.power((trP + sigma * n)/n, AUTO_RHO_BETA1) * \
-            np.power((trAtA)/m, AUTO_RHO_BETA2)
+        # Check if type of any constraint changed
+        constr_type_changed = (loose_ind != old_loose_ind).any() or \
+                              (eq_ind != old_eq_ind).any() or \
+                              (ineq_ind != old_ineq_ind).any()
 
-        #  import ipdb; ipdb.set_trace()
-        # Old linear ratio
-        # # Compute ratio
-        # ratio = trP / trAtA
-        #
-        # # Compute rho
-        # self.work.settings.rho = AUTO_RHO_OFFSET + AUTO_RHO_SLOPE * ratio
+        # Update type of constraints
+        self.work.constr_type[loose_ind] = -1
+        self.work.constr_type[eq_ind] = 1
+        self.work.constr_type[ineq_ind] = 0
 
-        # Constrain rho between max and min
-        self.work.settings.rho = \
-            np.minimum(np.maximum(self.work.settings.rho,
-                                  AUTO_RHO_MIN),
-                       AUTO_RHO_MAX)
+        self.work.rho_vec[loose_ind] = RHO_MIN
+        self.work.rho_vec[eq_ind] = RHO_MAX
+        self.work.rho_vec[ineq_ind] = self.work.settings.rho
+
+        self.work.rho_inv_vec = np.reciprocal(self.work.rho_vec)
+
+        return constr_type_changed
 
     def print_setup_header(self, data, settings):
         """Print solver header
@@ -593,17 +546,18 @@ class OSQP(object):
         """
         print("Iter    Obj  Val     Pri  Res     Dua  Res       Time")
 
-    def update_status_string(self, status):
+    def update_status(self, status):
+        self.work.info.status_val = status
         if status == OSQP_SOLVED:
-            return "Solved"
+            self.work.info.status = "Solved"
         elif status == OSQP_PRIMAL_INFEASIBLE:
-            return "Primal infeasible"
+            self.work.info.status = "Primal infeasible"
         elif status == OSQP_UNSOLVED:
-            return "Unsolved"
+            self.work.info.status = "Unsolved"
         elif status == OSQP_DUAL_INFEASIBLE:
-            return "Dual infeasible"
+            self.work.info.status = "Dual infeasible"
         elif status == OSQP_MAX_ITER_REACHED:
-            return "Maximum iterations reached"
+            self.work.info.status = "Maximum iterations reached"
 
     def cold_start(self):
         """
@@ -621,14 +575,14 @@ class OSQP(object):
         self.work.xz_tilde[:self.work.data.n] = \
             self.work.settings.sigma * self.work.x_prev - self.work.data.q
         self.work.xz_tilde[self.work.data.n:] = \
-            self.work.z_prev - 1./self.work.settings.rho * self.work.y
+            self.work.z_prev - self.work.rho_inv_vec * self.work.y
 
         # Solve linear system
         self.work.xz_tilde = self.work.linsys_solver.solve(self.work.xz_tilde)
 
         # Update z_tilde
         self.work.xz_tilde[self.work.data.n:] = \
-            self.work.z_prev + 1./self.work.settings.rho * \
+            self.work.z_prev + self.work.rho_inv_vec * \
             (self.work.xz_tilde[self.work.data.n:] - self.work.y)
 
     def update_x(self):
@@ -659,7 +613,7 @@ class OSQP(object):
         self.work.z = \
             self.work.settings.alpha * self.work.xz_tilde[self.work.data.n:] +\
             (1. - self.work.settings.alpha) * self.work.z_prev +\
-            1./self.work.settings.rho * self.work.y
+            self.work.rho_inv_vec * self.work.y
 
         self.work.z = self.project(self.work.z)
 
@@ -667,7 +621,7 @@ class OSQP(object):
         """
         Third ADMM step: update dual variable y
         """
-        self.work.delta_y = self.work.settings.rho * \
+        self.work.delta_y = self.work.rho_vec * \
             (self.work.settings.alpha * self.work.xz_tilde[self.work.data.n:] +
                 (1. - self.work.settings.alpha) * self.work.z_prev -
                 self.work.z)
@@ -967,6 +921,13 @@ class OSQP(object):
                                  Adata, Aindices, Aindptr,
                                  l, u)
 
+        # Vectorized rho parameter
+        self.work.rho_vec = np.zeros(m)
+        self.work.rho_inv_vec = np.zeros(m)
+
+        # Type of constraints
+        self.work.constr_type = np.zeros(m)
+
         # Initialize workspace variables
         self.work.x = np.zeros(n)
         self.work.z = np.zeros(m)
@@ -986,9 +947,8 @@ class OSQP(object):
         if self.work.settings.scaling:
             self.scale_data()
 
-        # Compute auto_rho in case
-        if self.work.settings.auto_rho:
-            self.compute_rho()
+        # Set type of constraints
+        self.set_rho_vec()
 
         # Factorize KKT
         self.work.linsys_solver = linsys_solver(self.work)
@@ -1075,8 +1035,7 @@ class OSQP(object):
             self.work.info.status_val = OSQP_MAX_ITER_REACHED
 
         # Update status string
-        self.work.info.status = \
-            self.update_status_string(self.work.info.status_val)
+        self.update_status(self.work.info.status_val)
 
         # Update solve time
         self.work.info.solve_time = time.time() - self.work.timer
@@ -1123,6 +1082,9 @@ class OSQP(object):
         if self.work.settings.scaling:
             self.work.data.q = self.work.scaling.D.dot(self.work.data.q)
 
+        # Set solver status to OSQP_UNSOLVED
+        self.update_status(OSQP_UNSOLVED)
+
     def update_bounds(self, l_new, u_new):
         """
         Update counstraint bounds without requiring factorization
@@ -1142,6 +1104,14 @@ class OSQP(object):
             self.work.data.l = self.work.scaling.E.dot(self.work.data.l)
             self.work.data.u = self.work.scaling.E.dot(self.work.data.u)
 
+        # Set solver status to OSQP_UNSOLVED
+        self.update_status(OSQP_UNSOLVED)
+
+        # If type of any constraint changed, update rho_vec and KKT matrix
+        constr_type_changed = self.update_rho_vec()
+        if constr_type_changed:
+            self.work.linsys_solver = linsys_solver(self.work)
+
     def update_lower_bound(self, l_new):
         """
         Update lower bound without requiring factorization
@@ -1154,9 +1124,17 @@ class OSQP(object):
             self.work.data.l = self.work.scaling.E.dot(self.work.data.l)
 
         # Check values
-        if not np.greater(self.work.data.u, self.work.data.l).all():
+        if not np.greater_equal(self.work.data.u, self.work.data.l).all():
             raise ValueError("Lower bound must be lower than" +
                              " or equal to upper bound!")
+
+        # Set solver status to OSQP_UNSOLVED
+        self.update_status(OSQP_UNSOLVED)
+
+        # If type of any constraint changed, update rho_vec and KKT matrix
+        constr_type_changed = self.update_rho_vec()
+        if constr_type_changed:
+            self.work.linsys_solver = linsys_solver(self.work)
 
     def update_upper_bound(self, u_new):
         """
@@ -1170,9 +1148,17 @@ class OSQP(object):
             self.work.data.u = self.work.scaling.E.dot(self.work.data.u)
 
         # Check values
-        if not np.greater(self.work.data.u, self.work.data.l).all():
+        if not np.greater_equal(self.work.data.u, self.work.data.l).all():
             raise ValueError("Lower bound must be lower than" +
                              " or equal to upper bound!")
+
+        # Set solver status to OSQP_UNSOLVED
+        self.update_status(OSQP_UNSOLVED)
+
+        # If type of any constraint changed, update rho_vec and KKT matrix
+        constr_type_changed = self.update_rho_vec()
+        if constr_type_changed:
+            self.work.linsys_solver = linsys_solver(self.work)
 
     def warm_start(self, x, y):
         """
@@ -1191,7 +1177,6 @@ class OSQP(object):
 
         # Update z iterate as well
         self.work.z = self.work.data.A.dot(self.work.x)
-
 
     def warm_start_x(self, x):
         """
@@ -1270,7 +1255,13 @@ class OSQP(object):
             raise ValueError("rho must be positive")
 
         # Update rho
-        self.work.settings.rho = rho_new
+        self.work.settings.rho = np.minimum(np.maximum(rho_new,
+                                            RHO_MIN), RHO_MAX)
+
+        # Update rho_vec and rho_inv_vec
+        ineq_ind = np.where(self.work.constr_type == 0)
+        self.work.rho_vec[ineq_ind] = self.work.settings.rho
+        self.work.rho_inv_vec = np.reciprocal(self.work.rho_vec)
 
         # Factorize KKT
         self.work.linsys_solver = linsys_solver(self.work)

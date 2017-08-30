@@ -516,7 +516,7 @@ c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new)
         }
     }
 
-    // Replace lA and uA by the new vectors
+    // Replace l and u by the new vectors
     prea_vec_copy(l_new, work->data->l, work->data->m);
     prea_vec_copy(u_new, work->data->u, work->data->m);
 
