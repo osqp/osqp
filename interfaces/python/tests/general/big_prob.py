@@ -3,7 +3,7 @@ import osqppurepy
 import scipy.sparse as sparse
 import scipy as sp
 import numpy as np
-sp.random.seed(1)
+sp.random.seed(2)
 
 n = 100
 m = 500
@@ -12,6 +12,7 @@ A = sparse.random(m, n, density=0.9,
                   format='csc')
 l = -np.random.rand(m) * 2.
 u = np.random.rand(m) * 2.
+l[4:5] = u[4:5]
 
 P = sparse.random(n, n, density=0.9,
                   data_rvs=np.random.randn,
@@ -19,14 +20,14 @@ P = sparse.random(n, n, density=0.9,
 P = P.dot(P.T)
 q = sp.randn(n)
 
-osqp_opts = {'rho': 1.,
+osqp_opts = {'rho': 0.1,
              #  'auto_rho': True,
              'sigma': 1e-06,
              #  'eps_rel': 1e-08,
              #  'eps_abs': 1e-08,
              'scaled_termination': False,
              'early_terminate_interval': 1,
-             'polish': True,
+             'polish': False,
              'scaling': True,
              'scaling_norm': -1,
              'max_iter': 2500,

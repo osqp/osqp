@@ -9,7 +9,6 @@ import scipy.sparse as spspa
 import scipy.sparse.linalg as spla
 import numpy.linalg as la
 import time   # Time execution
-import pdb   # Debugger
 
 # Solver Constants
 OSQP_SOLVED = 1
@@ -194,7 +193,8 @@ class scaling(object):
 
 class linesearch(object):
     """
-    Vectors obtained from line search between the ADMM and the polished solution
+    Vectors obtained from line search between the ADMM and the polished
+    solution
 
     Attributes
     ----------
@@ -1063,6 +1063,8 @@ class OSQP(object):
         if self.work.settings.polish and \
                 self.work.info.status_val == OSQP_SOLVED:
                     ls = self.polish()
+        else:
+            ls = None
 
         # Update total times
         if self.work.first_run:
@@ -1526,7 +1528,7 @@ class OSQP(object):
             self.work.info.status_polish = -1
 
             # Line search on the line connecting the ADMM and the polished sol.
-            ls.t = np.linspace(-0.01, 0.01, 1001)
+            ls.t = np.linspace(0., 0.002, 1000)
             ls.X, ls.Z, ls.Y = self.line_search(
                             self.work.x, self.work.z, self.work.y,
                             self.work.pol.x, self.work.pol.z, self.work.pol.y,
