@@ -179,16 +179,20 @@ class scaling(object):
 
     Attributes
     ----------
-    D     - matrix in R^{n \\times n}
-    E     - matrix in R^{m \\times n}
-    Dinv  - inverse of D
-    Einv  - inverse of E
+    D        - matrix in R^{n \\times n}
+    E        - matrix in R^{m \\times n}
+    Dinv     - inverse of D
+    Einv     - inverse of E
+    cs       - cost scaling
+    inv_cs   - inverse cost scaling
     """
     def __init__(self):
         self.D = None
         self.E = None
         self.Dinv = None
         self.Einv = None
+        self.cs = None
+        self.inv_cs = None
 
 
 class linesearch(object):
@@ -328,6 +332,49 @@ class OSQP(object):
         """
         return self._version
 
+    def _norm_KKT_cols(self, P, A, scaling_norm):
+        """
+        Compute the norm of the KKT matrix from P and A
+        """
+
+        if scaling_norm == 2:   # Scipy does not support sparse 2-norms
+            P = P.todense()
+            A = A.todense()
+            norm_function = np.linalg.norm
+        else:
+            norm_function = spspa.linalg.norm
+
+        if scaling_norm == -1:
+            scaling_norm = np.inf
+
+        # First half
+        norm_P_cols = norm_function(P, scaling_norm, axis=0)
+        norm_A_cols = norm_function(A, scaling_norm, axis=0)
+        if scaling_norm == 2:
+            norm_first_half = np.sqrt(np.square(norm_P_cols) +
+                                      np.square(norm_A_cols))
+        elif scaling_norm == 1:
+            norm_first_half = norm_P_cols + norm_A_cols
+        elif scaling_norm == np.inf:  # Infinity norm
+            norm_first_half = np.maximum(norm_P_cols, norm_A_cols)
+
+        # Second half (norm cols of A')
+        norm_second_half = norm_function(A, scaling_norm, axis=1)
+
+        return np.hstack((norm_first_half, norm_second_half))
+
+    def _limit_scaling(self, norm_vec):
+        """
+        Norm vector for scaling
+        """
+        n = len(norm_vec)
+
+        for i in range(n):
+            if norm_vec[i] < MIN_SCALING:
+                norm_vec[i] = 1.
+            elif norm_vec[i] > MAX_SCALING:
+                norm_vec[i] = MAX_SCALING
+
     def scale_data(self):
         """
         Perform symmetric diagonal scaling via equilibration
@@ -335,99 +382,81 @@ class OSQP(object):
         n = self.work.data.n
         m = self.work.data.m
         scaling_norm = self.work.settings.scaling_norm
-        scaling_norm = scaling_norm if scaling_norm == 1 or scaling_norm == 2 \
-            else np.inf
 
         # Initialize scaling
-        d = np.ones(n + m)
-        d_temp = np.ones(n + m)
+        s_temp = np.ones(n + m)
+        cs = 1.0  # Cost scaling
 
         # Define reduced KKT matrix to scale
-        KKT = spspa.vstack([
-              spspa.hstack([self.work.data.P, self.work.data.A.T]),
-              spspa.hstack([self.work.data.A,
-                            spspa.csc_matrix((m, m))])]).tocsc()
+        # KKT = spspa.vstack([
+        #       spspa.hstack([self.work.data.P, self.work.data.A.T]),
+        #       spspa.hstack([self.work.data.A,
+        #                     spspa.csc_matrix((m, m))])]).tocsc()
+        # Define data
+        P = self.work.data.P
+        q = self.work.data.q
+        A = self.work.data.A
+        l = self.work.data.l
+        u = self.work.data.u
 
-        # Iterate Scaling
-        for i in range(self.work.settings.scaling_iter):
-
-            # Ruiz equilibration
-            for j in range(n + m):
-                if scaling_norm != 2:
-                    norm_col_j = spspa.linalg.norm(KKT[:, j],
-                                                   scaling_norm)
-                else:
-                    # Scipy hasn't implemented that function yet!
-                    norm_col_j = np.linalg.norm(KKT[:, j].todense(),
-                                                scaling_norm)
-                # Limit scaling
-                if norm_col_j < MIN_SCALING:
-                    norm_col_j = 1.
-                elif norm_col_j > MAX_SCALING:
-                    norm_col_j = MAX_SCALING
-
-                d_temp[j] = 1./(np.sqrt(norm_col_j))
-
-            S_temp = spspa.diags(d_temp)
-            d = np.multiply(d, d_temp)
-            KKT = S_temp.dot(KKT.dot(S_temp))
-
-            #  # DEBUG: Check scaling
-            #  D = spspa.diags(d[:n])
-            #
-            #  if m == 0:
-            #      # spspa.diags() will throw an error if fed with an empty array
-            #      E = spspa.csc_matrix((0, 0))
-            #      A = \
-            #          E.dot(self.work.data.A.dot(D)).todense()
-            #      cond_A = 1.
-            #  else:
-            #      E = spspa.diags(d[n:])
-            #      A = \
-            #          E.dot(self.work.data.A.dot(D)).todense()
-            #      cond_A = np.linalg.cond(A)
-            #  cond_KKT = np.linalg.cond(KKT.todense())
-            #  P = \
-            #      D.dot(self.work.data.P.dot(D)).todense()
-            #  cond_P = np.linalg.cond(P)
-            #
-            #  # Get rato between columns and rows
-            #  n_plus_m = n + m
-            #  max_norm_rows = 0.0
-            #  min_norm_rows = np.inf
-            #  for j in range(n_plus_m):
-            #     norm_row_j = np.linalg.norm(np.asarray(KKT[j, :].todense()))
-            #     max_norm_rows = np.maximum(norm_row_j,
-            #                                max_norm_rows)
-            #     min_norm_rows = np.minimum(norm_row_j,
-            #                                min_norm_rows)
-            #
-            #  # Compute residuals
-            #  res_rows = max_norm_rows / min_norm_rows
-            #
-            #  np.set_printoptions(suppress=True, linewidth=500, precision=3)
-            #  print("\nIter %i" % i)
-            #  print("cond(KKT) = %.4e" % cond_KKT)
-            #  print("cond(P) = %.4e" % cond_P)
-            #  print("cond(A) = %.4e" % cond_A)
-            #  print("res_rows = %.4e / %.4e = %.4e" %
-            #       (max_norm_rows, min_norm_rows, res_rows))
-            #
-            #
-        # Obtain Scaler Matrices
-        D = spspa.diags(d[:self.work.data.n])
+        # Initialize scaler matrices
+        D = spspa.eye(n)
         if m == 0:
             # spspa.diags() will throw an error if fed with an empty array
             E = spspa.csc_matrix((0, 0))
         else:
-            E = spspa.diags(d[self.work.data.n:])
+            E = spspa.eye(m)
+
+        # Iterate Scaling
+        for i in range(self.work.settings.scaling_iter):
+
+            # First Step Ruiz
+            norm_cols = self._norm_KKT_cols(P, A, scaling_norm)
+            self._limit_scaling(norm_cols)              # Limit scaling
+            sqrt_norm_cols = np.sqrt(norm_cols)         # Compute sqrt
+            s_temp = np.reciprocal(sqrt_norm_cols)      # Elementwise recipr
+
+            # Obtain Scaler Matrices
+            D_temp = spspa.diags(s_temp[:self.work.data.n])
+            if m == 0:
+                # spspa.diags() will throw an error if fed with an empty array
+                E_temp = spspa.csc_matrix((0, 0))
+            else:
+                E_temp = spspa.diags(s_temp[self.work.data.n:])
+
+            # Scale data in place
+            P = D_temp.dot(P.dot(D_temp)).tocsc()
+            A = E_temp.dot(A.dot(D_temp)).tocsc()
+            q = D_temp.dot(q)
+            l = E_temp.dot(l)
+            u = E_temp.dot(u)
+
+            # Old way
+            # S_temp = spspa.diags(d_temp)
+            # d = np.multiply(d, d_temp)
+            # KKT = S_temp.dot(KKT.dot(S_temp))
+
+            # Update equilibration matrices D and E
+            D = D_temp.dot(D)
+            E = E_temp.dot(E)
+
+            # Second Step cost normalization
+            # TODO!
+
+        # Obtain Scaler Matrices
+        # D = spspa.diags(d[:self.work.data.n])
+        # if m == 0:
+        #     # spspa.diags() will throw an error if fed with an empty array
+        #     E = spspa.csc_matrix((0, 0))
+        # else:
+        #     E = spspa.diags(d[self.work.data.n:])
 
         # Scale problem Matrices
-        P = D.dot(self.work.data.P.dot(D)).tocsc()
-        A = E.dot(self.work.data.A.dot(D)).tocsc()
-        q = D.dot(self.work.data.q)
-        l = E.dot(self.work.data.l)
-        u = E.dot(self.work.data.u)
+        # P = D.dot(self.work.data.P.dot(D)).tocsc()
+        # A = E.dot(self.work.data.A.dot(D)).tocsc()
+        # q = D.dot(self.work.data.q)
+        # l = E.dot(self.work.data.l)
+        # u = E.dot(self.work.data.u)
 
         #  import ipdb; ipdb.set_trace()
 
