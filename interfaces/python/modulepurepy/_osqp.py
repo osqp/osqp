@@ -729,7 +729,8 @@ class OSQP(object):
         # Rescale delta_y
         if self.work.settings.scaling and not \
                 self.work.settings.scaled_termination:
-            norm_delta_y = la.norm(self.work.scaling.E.dot(self.work.delta_y))
+            norm_delta_y = la.norm(self.work.scaling.E.dot(self.work.delta_y),
+                                   np.inf)
         else:
             norm_delta_y = la.norm(self.work.delta_y, np.inf)
 
@@ -763,7 +764,8 @@ class OSQP(object):
         # Rescale delta_x
         if self.work.settings.scaling and not \
                 self.work.settings.scaled_termination:
-            norm_delta_x = la.norm(self.work.scaling.D.dot(self.work.delta_x))
+            norm_delta_x = la.norm(self.work.scaling.D.dot(self.work.delta_x),
+                                   np.inf)
         else:
             norm_delta_x = la.norm(self.work.delta_x, np.inf)
 
@@ -931,7 +933,7 @@ class OSQP(object):
             # Store original certificate
             if self.work.settings.scaling and not \
                     self.work.settings.scaled_termination:
-                self.work.delta_x = self.work.scaling.D.dot(self.work.delta_x)
+                self.work.delta_y = self.work.scaling.E.dot(self.work.delta_y)
             return 1
         elif dual_inf_check:
             self.work.info.status_val = OSQP_DUAL_INFEASIBLE

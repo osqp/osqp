@@ -230,14 +230,16 @@ c_int is_primal_infeasible(OSQPWorkspace * work){
     eps_prim_inf = work->settings->eps_prim_inf;
 
     // Compute infinity norm of delta_y
-    norm_delta_y = vec_norm_inf(work->delta_y, work->data->m);
+    if (work->settings->scaling && !work->settings->scaled_termination){ // Unscale if necessary
+        // Use work->Adelta_x as temporary vector
+        vec_ew_prod(work->scaling->E, work->delta_y, work->Adelta_x, work->data->m);
+        norm_delta_y = vec_norm_inf(work->Adelta_x, work->data->m);
+    } else{
+        norm_delta_y = vec_norm_inf(work->delta_y, work->data->m);
+    }
 
     if (norm_delta_y > eps_prim_inf){ // ||delta_y|| > 0
 
-        // scale delta_y by its norm
-        /* vec_mult_scalar(work->delta_y, 1./norm_delta_y, work->data->m); */
-
-        // ineq_lhs = u'*max(delta_y, 0) + l'*min(delta_y, 0)
         ineq_lhs = 0;
         for (i = 0; i < work->data->m; i++){
             ineq_lhs += work->data->u[i] * c_max(work->delta_y[i], 0) + \
@@ -249,7 +251,7 @@ c_int is_primal_infeasible(OSQPWorkspace * work){
             // Compute and return ||A'delta_y|| < eps_prim_inf
             mat_tpose_vec(work->data->A, work->delta_y, work->Atdelta_y, 0, 0);
             if (work->settings->scaling && !work->settings->scaled_termination){ // Unscale if necessary
-            vec_ew_prod(work->scaling->Dinv, work->Atdelta_y, work->Atdelta_y, work->data->n);
+                vec_ew_prod(work->scaling->Dinv, work->Atdelta_y, work->Atdelta_y, work->data->n);
             }
             return vec_norm_inf(work->Atdelta_y, work->data->n) < eps_prim_inf * norm_delta_y;
         }
@@ -282,7 +284,13 @@ c_int is_dual_infeasible(OSQPWorkspace * work){
     eps_dual_inf = work->settings->eps_dual_inf;
 
     // Compute norm of delta_x
-    norm_delta_x = vec_norm_inf(work->delta_x, work->data->n);
+    if (work->settings->scaling && !work->settings->scaled_termination){ // Unscale if necessary
+        // Use work->Atdelta_y as temporary vector
+        vec_ew_prod(work->scaling->D, work->delta_x, work->Atdelta_y, work->data->n);
+        norm_delta_x = vec_norm_inf(work->Atdelta_y, work->data->n);
+    } else{
+        norm_delta_x = vec_norm_inf(work->delta_x, work->data->n);
+    }
 
     // Prevent 0 division || delta_x || > 0
     if (norm_delta_x > eps_dual_inf){
@@ -552,12 +560,20 @@ c_int check_termination(OSQPWorkspace *work){
     else if (prim_inf_check){
         // Update final information
         update_status(work->info, OSQP_PRIMAL_INFEASIBLE);
+        if (work->settings->scaling && !work->settings->scaled_termination){
+            // Update infeasibility certificate
+            vec_ew_prod(work->scaling->E, work->delta_y, work->delta_y, work->data->m);
+        }
         work->info->obj_val = OSQP_INFTY;
         exitflag = 1;
     }
     else if (dual_inf_check){
         // Update final information
         update_status(work->info, OSQP_DUAL_INFEASIBLE);
+        if (work->settings->scaling && !work->settings->scaled_termination){
+            // Update infeasibility certificate
+            vec_ew_prod(work->scaling->D, work->delta_x, work->delta_x, work->data->n);
+        }
         work->info->obj_val = -OSQP_INFTY;
         exitflag = 1;
     }

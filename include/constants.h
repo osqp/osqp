@@ -67,8 +67,8 @@ enum linsys_solver_type {SUITESPARSE_LDL};
 
 #if EMBEDDED != 1
 #define SCALING_ITER (15)
-#define MIN_SCALING (1e-08)  ///< Minimum scaling value
-#define MAX_SCALING (1e+08)  ///< Maximum scaling value
+#define MIN_SCALING (1e-06)  ///< Minimum scaling value
+#define MAX_SCALING (1e+06)  ///< Maximum scaling value
 #define SCALING_NORM (-1)     ///< Scaling norm
 #endif
 
