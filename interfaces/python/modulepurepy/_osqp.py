@@ -183,16 +183,16 @@ class scaling(object):
     E        - matrix in R^{m \\times n}
     Dinv     - inverse of D
     Einv     - inverse of E
-    cs       - cost scaling
-    inv_cs   - inverse cost scaling
+    c        - cost scaling
+    inv_c    - inverse cost scaling
     """
     def __init__(self):
         self.D = None
         self.E = None
         self.Dinv = None
         self.Einv = None
-        self.cs = None
-        self.inv_cs = None
+        self.c = None
+        self.inv_c = None
 
 
 class linesearch(object):
@@ -367,13 +367,28 @@ class OSQP(object):
         """
         Norm vector for scaling
         """
-        n = len(norm_vec)
 
-        for i in range(n):
-            if norm_vec[i] < MIN_SCALING:
-                norm_vec[i] = 1.
-            elif norm_vec[i] > MAX_SCALING:
-                norm_vec[i] = MAX_SCALING
+        if isinstance(norm_vec, (list, tuple, np.ndarray)):   # Array
+
+            n = len(norm_vec)
+            new_norm_vec = np.zeros(n)
+
+            for i in range(n):
+                if norm_vec[i] < MIN_SCALING:
+                    new_norm_vec[i] = 1.
+                elif norm_vec[i] > MAX_SCALING:
+                    new_norm_vec[i] = MAX_SCALING
+                else:
+                    new_norm_vec[i] = norm_vec[i]
+        else:   # Scalar
+            if norm_vec < MIN_SCALING:
+                new_norm_vec = 1.
+            elif norm_vec > MAX_SCALING:
+                new_norm_vec = MAX_SCALING
+            else:
+                new_norm_vec = norm_vec
+
+        return new_norm_vec
 
     def scale_data(self):
         """
@@ -385,7 +400,7 @@ class OSQP(object):
 
         # Initialize scaling
         s_temp = np.ones(n + m)
-        cs = 1.0  # Cost scaling
+        c = 1.0  # Cost scaling
 
         # Define reduced KKT matrix to scale
         # KKT = spspa.vstack([
@@ -412,7 +427,7 @@ class OSQP(object):
 
             # First Step Ruiz
             norm_cols = self._norm_KKT_cols(P, A, scaling_norm)
-            self._limit_scaling(norm_cols)              # Limit scaling
+            norm_cols = self._limit_scaling(norm_cols)  # Limit scaling
             sqrt_norm_cols = np.sqrt(norm_cols)         # Compute sqrt
             s_temp = np.reciprocal(sqrt_norm_cols)      # Elementwise recipr
 
@@ -441,7 +456,30 @@ class OSQP(object):
             E = E_temp.dot(E)
 
             # Second Step cost normalization
-            # TODO!
+            # avg_norm_P_cols = spla.norm(P, np.inf, axis=0).mean()
+            inf_norm_q = np.linalg.norm(q, np.inf)
+            scale_cost = inf_norm_q
+            scale_cost = 1. / np.maximum(np.minimum(
+                scale_cost, MAX_SCALING), MIN_SCALING)
+
+            print("Scale cost = %.2e" % scale_cost)
+
+            # norm_cost = self._limit_scaling(norm_cost)
+            c_temp = 1. * scale_cost
+
+            # c_temp = 1.0
+
+            # Normalize cost
+            P = c_temp * P
+            q = c_temp * q
+
+            # Update scaling
+            c = c_temp * c
+
+        if self.work.settings.verbose:
+            print("Final cost scaling = ", c)
+
+        # import ipdb; ipdb.set_trace()
 
         # Obtain Scaler Matrices
         # D = spspa.diags(d[:self.work.data.n])
@@ -475,6 +513,8 @@ class OSQP(object):
         else:
             self.work.scaling.Einv = \
                 spspa.diags(np.reciprocal(E.diagonal()))
+        self.work.scaling.c = c
+        self.work.scaling.inv_c = 1. / c
 
     def set_rho_vec(self):
         """
@@ -693,14 +733,15 @@ class OSQP(object):
         """
         Compute dual residual ||Px + q + A'y||
         """
-        # Dual residual
+
         dua_res = self.work.data.P.dot(x) +\
-            self.work.data.q +\
-            self.work.data.A.T.dot(y)
+            self.work.data.q + self.work.data.A.T.dot(y)
 
         if self.work.settings.scaling and not \
                 self.work.settings.scaled_termination:
-            dua_res = self.work.scaling.Dinv.dot(dua_res)
+            # Use unscaled residual
+            dua_res = self.work.scaling.inv_c * \
+                self.work.scaling.Dinv.dot(dua_res)
 
         return la.norm(dua_res, np.inf)
 
@@ -713,7 +754,15 @@ class OSQP(object):
         """
 
         eps_prim_inf = self.work.settings.eps_prim_inf
+
+        # Rescale delta_y
+        if self.work.settings.scaling and not \
+                self.work.settings.scaled_termination:
+            self.work.delta_y = self.work.scaling.E.dot(self.work.delta_y)
+
+        # Norm of delta_y
         norm_delta_y = la.norm(self.work.delta_y, np.inf)
+
         if norm_delta_y > eps_prim_inf:
             self.work.delta_y /= norm_delta_y
             lhs = self.work.data.u.dot(np.maximum(self.work.delta_y, 0)) + \
@@ -740,15 +789,26 @@ class OSQP(object):
                         | <= 0  if l_i = -inf
         """
         eps_dual_inf = self.work.settings.eps_dual_inf
+
+        scale_eps = 1.0  # Scale eps for P delta_x and q' delta_x
+
+        # Rescale delta_x
+        if self.work.settings.scaling and not \
+                self.work.settings.scaled_termination:
+            self.work.delta_x = self.work.scaling.D.dot(self.work.delta_x)
+            scale_eps = self.work.scaling.c
+
+        # Norm of delta_x
         norm_delta_x = la.norm(self.work.delta_x, np.inf)
+
         # Prevent 0 division
         if norm_delta_x > eps_dual_inf:
             # Normalize delta_x
             self.work.delta_x /= norm_delta_x
 
             # First check q'* delta_x < 0
-            if self.work.data.q.dot(self.work.delta_x) < -eps_dual_inf:
-
+            if self.work.data.q.dot(self.work.delta_x) < \
+                    -scale_eps * eps_dual_inf:
                 # Compute P * delta_x
                 self.work.Pdelta_x = self.work.data.P.dot(self.work.delta_x)
 
@@ -759,7 +819,8 @@ class OSQP(object):
                         self.work.scaling.Dinv.dot(self.work.Pdelta_x)
 
                 # Check if ||P * delta_x|| = 0
-                if la.norm(self.work.Pdelta_x, np.inf) < eps_dual_inf:
+                if la.norm(self.work.Pdelta_x, np.inf) < \
+                        scale_eps * eps_dual_inf:
 
                     # Compute A * delta_x
                     self.work.Adelta_x = self.work.data.A.dot(
@@ -795,6 +856,11 @@ class OSQP(object):
 
         if polish == 1:
             self.work.pol.obj_val = self.work.data.objval(self.work.pol.x)
+
+            if self.work.settings.scaling and \
+                    not self.work.settings.scaled_termination:
+                self.work.pol.obj_val *= self.work.scaling.inv_c
+
             self.work.pol.pri_res = self.compute_pri_res(self.work.pol.x,
                                                          self.work.pol.z)
             self.work.pol.dua_res = self.compute_dua_res(self.work.pol.x,
@@ -803,6 +869,10 @@ class OSQP(object):
         else:
             self.work.info.iter = iter
             self.work.info.obj_val = self.work.data.objval(self.work.x)
+            if self.work.settings.scaling and \
+                    not self.work.settings.scaled_termination:
+                self.work.info.obj_val *= self.work.scaling.inv_c
+
             self.work.info.pri_res = self.compute_pri_res(self.work.x,
                                                           self.work.z)
             self.work.info.dua_res = self.compute_dua_res(self.work.x,
@@ -813,12 +883,12 @@ class OSQP(object):
         """
         Print status summary at each ADMM iteration
         """
-        print("%4i %12.4e %12.4e %12.4e %9.2fs" % \
-            (self.work.info.iter,
-             self.work.info.obj_val,
-             self.work.info.pri_res,
-             self.work.info.dua_res,
-             self.work.info.setup_time + self.work.info.solve_time))
+        print("%4i %12.4e %12.4e %12.4e %9.2fs" %
+              (self.work.info.iter,
+              self.work.info.obj_val,
+              self.work.info.pri_res,
+              self.work.info.dua_res,
+              self.work.info.setup_time + self.work.info.solve_time))
 
     def print_polish(self):
         """
@@ -843,6 +913,12 @@ class OSQP(object):
         eps_abs = self.work.settings.eps_abs
         eps_rel = self.work.settings.eps_rel
 
+        P = self.work.data.P
+        q = self.work.data.q
+        A = self.work.data.A
+        l = self.work.data.l
+        u = self.work.data.u
+
         if self.work.data.m == 0:  # No constraints -> always  primal feasible
             pri_check = 1
         else:
@@ -851,12 +927,11 @@ class OSQP(object):
                     self.work.settings.scaled_termination:
                 Einv = self.work.scaling.Einv
                 max_rel_eps = np.max([
-                    la.norm(Einv.dot(self.work.data.A.dot(self.work.x)),
-                            np.inf),
+                    la.norm(Einv.dot(A.dot(self.work.x)), np.inf),
                     la.norm(Einv.dot(self.work.z), np.inf)])
             else:
                 max_rel_eps = np.max([
-                    la.norm(self.work.data.A.dot(self.work.x), np.inf),
+                    la.norm(A.dot(self.work.x), np.inf),
                     la.norm(self.work.z, np.inf)])
 
             eps_pri = eps_abs + eps_rel * max_rel_eps
@@ -868,19 +943,19 @@ class OSQP(object):
                 prim_inf_check = self.is_primal_infeasible()
 
         # Compute dual tolerance
-
         if self.work.settings.scaling and not \
                 self.work.settings.scaled_termination:
             Dinv = self.work.scaling.Dinv
-            max_rel_eps = np.max([
-                la.norm(Dinv.dot(self.work.data.A.T.dot(self.work.y)), np.inf),
-                la.norm(Dinv.dot(self.work.data.P.dot(self.work.x)), np.inf),
-                la.norm(Dinv.dot(self.work.data.q), np.inf)])
+            inv_c = self.work.scaling.inv_c
+            max_rel_eps = inv_c * np.max([
+                la.norm(Dinv.dot(A.T.dot(self.work.y)), np.inf),
+                la.norm(Dinv.dot(P.dot(self.work.x)), np.inf),
+                la.norm(Dinv.dot(q), np.inf)])
         else:
             max_rel_eps = np.max([
-                la.norm(self.work.data.A.T.dot(self.work.y), np.inf),
-                la.norm(self.work.data.P.dot(self.work.x), np.inf),
-                la.norm(self.work.data.q, np.inf)])
+                la.norm(A.T.dot(self.work.y), np.inf),
+                la.norm(P.dot(self.work.x), np.inf),
+                la.norm(q, np.inf)])
 
         eps_dua = eps_abs + eps_rel * max_rel_eps
 
@@ -939,7 +1014,7 @@ class OSQP(object):
             if self.work.settings.scaling:
                 self.work.solution.x = \
                     self.work.scaling.D.dot(self.work.solution.x)
-                self.work.solution.y = \
+                self.work.solution.y = self.work.scaling.inv_c * \
                     self.work.scaling.E.dot(self.work.solution.y)
         else:
             self.work.solution.x = np.array([None] * self.work.data.n)
