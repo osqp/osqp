@@ -13,7 +13,7 @@ A = sparse.random(m, n, density=0.9,
                   format='csc')
 l = -np.random.rand(m) * 2.
 u = np.random.rand(m) * 2.
-# l[4:5] = u[4:5]
+l[1:10] = u[1:10]
 
 P = sparse.random(n, n, density=0.9,
                   data_rvs=np.random.randn,
@@ -31,7 +31,7 @@ rho = 0.1
 # rho=10.0
 # q /= 100
 # P *= 100
-q *= 1000
+# q *= 1000
 
 
 osqp_opts = {'rho': rho,
@@ -41,7 +41,7 @@ osqp_opts = {'rho': rho,
              #  'eps_abs': 1e-08,
              'scaled_termination': False,
              'early_terminate_interval': 1,
-             'polish': False,
+             'polish': True,
              'scaling': True,
              'scaling_norm': -1,
              'max_iter': 2500,
@@ -59,13 +59,13 @@ res_osqppurepy = model.solve()
 
 
 # Check difference with gurobi
-print("Difference Purepy vs Gurobi")
-print("  - primal = %.4f" %
-      (np.linalg.norm(res_gurobi.x - res_osqppurepy.x) /
-       np.linalg.norm(res_gurobi.x)))
-print("  - dual = %.4f" %
-      (np.linalg.norm(res_gurobi.y - res_osqppurepy.y) /
-       np.linalg.norm(res_gurobi.y)))
+# print("Difference Purepy vs Gurobi")
+# print("  - primal = %.4f" %
+#       (np.linalg.norm(res_gurobi.x - res_osqppurepy.x) /
+#        np.linalg.norm(res_gurobi.x)))
+# print("  - dual = %.4f" %
+#       (np.linalg.norm(res_gurobi.y - res_osqppurepy.y) /
+#        np.linalg.norm(res_gurobi.y)))
 
 
 # Solve with SCS
