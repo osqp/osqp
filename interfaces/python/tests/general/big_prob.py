@@ -15,10 +15,10 @@ l = -np.random.rand(m) * 2.
 u = np.random.rand(m) * 2.
 
 # Make problem infeasible
-A_temp = A[5, :]
-A[6, :] = A_temp
-l[6] = l[5] + 2.
-u[6] = l[6] + 3.
+# A_temp = A[5, :]
+# A[6, :] = A_temp
+# l[6] = l[5] + 2.
+# u[6] = l[6] + 3.
 
 P = sparse.random(n, n, density=0.9,
                   data_rvs=np.random.randn,
@@ -36,14 +36,14 @@ rho = 0.1
 # rho=10.0
 # q /= 100
 # P *= 100
-# q *= 1000
+q *= 200
 
 
 osqp_opts = {'rho': rho,
              #  'auto_rho': True,
              'sigma': 1e-06,
-             #  'eps_rel': 1e-08,
-             #  'eps_abs': 1e-08,
+            #  'eps_rel': 1e-05,
+            #  'eps_abs': 1e-05,
              'scaled_termination': False,
              'early_terminate_interval': 1,
              'polish': True,

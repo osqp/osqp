@@ -260,7 +260,7 @@ c_int osqp_solve(OSQPWorkspace * work){
 
             // Check algorithm termination
             if (can_check_termination){
-                if (check_termination(work)){
+                if (check_termination(work, 0)){
                     // Terminate algorithm
                     break;
                 }
@@ -273,7 +273,7 @@ c_int osqp_solve(OSQPWorkspace * work){
             update_info(work, iter, compute_cost_function, 0);
 
             // Check algorithm termination
-            if (check_termination(work)){
+            if (check_termination(work, 0)){
                 // Terminate algorithm
                 break;
             }
@@ -299,7 +299,7 @@ c_int osqp_solve(OSQPWorkspace * work){
         #endif
 
         /* Check whether a termination criterion is triggered */
-        check_termination(work);
+        check_termination(work, 0);
     }
 
     // Compute objective value in case it was not
@@ -317,7 +317,9 @@ c_int osqp_solve(OSQPWorkspace * work){
 
     /* if max iterations reached, change status accordingly */
     if (work->info->status_val == OSQP_UNSOLVED) {
-        update_status(work->info, OSQP_MAX_ITER_REACHED);
+        if (!check_termination(work, 1)){ // Try to check for approximate termination
+            update_status(work->info, OSQP_MAX_ITER_REACHED);
+        }
     }
 
     /* Update solve time */

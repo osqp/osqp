@@ -242,7 +242,9 @@ static PyObject * OSQP_solve(PyObject *self, PyObject *args)
 
     // If problem is not primal or dual infeasible store it
     if (((&workspace)->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
-        ((&workspace)->info->status_val != OSQP_DUAL_INFEASIBLE)) {
+		((&workspace)->info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE) &&
+        ((&workspace)->info->status_val != OSQP_DUAL_INFEASIBLE) &&
+		((&workspace)->info->status_val != OSQP_DUAL_INFEASIBLE_INACCURATE)) {
 
 			// Construct primal and dual solution arrays
 			x = (PyObject *)PyArrayFromCArray((&workspace)->solution->x,

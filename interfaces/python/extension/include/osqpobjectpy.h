@@ -63,7 +63,9 @@ static PyObject * OSQP_solve(OSQP *self)
 
         // If problem is not primal or dual infeasible store it
         if ((self->workspace->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
-            (self->workspace->info->status_val != OSQP_DUAL_INFEASIBLE)){
+			(self->workspace->info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE) &&
+            (self->workspace->info->status_val != OSQP_DUAL_INFEASIBLE) &&
+			(self->workspace->info->status_val != OSQP_DUAL_INFEASIBLE_INACCURATE)){
 
 						// Primal and dual solutions
 						x = (PyObject *)PyArrayFromCArray(self->workspace->solution->x, nd);
@@ -73,7 +75,8 @@ static PyObject * OSQP_solve(OSQP *self)
 						prim_inf_cert = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
             dual_inf_cert = PyArray_EMPTY(1, md, NPY_OBJECT, 0);
 
-        } else if (self->workspace->info->status_val == OSQP_PRIMAL_INFEASIBLE) {	// primal infeasible
+        } else if (self->workspace->info->status_val == OSQP_PRIMAL_INFEASIBLE ||
+		self->workspace->info->status_val == OSQP_PRIMAL_INFEASIBLE_INACCURATE) {	// primal infeasible
 
 						// Primal and dual solution arrays -> None values
             x = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
@@ -337,6 +340,10 @@ static PyObject *OSQP_constant(OSQP *self, PyObject *args) {
         return Py_BuildValue("i", OSQP_SOLVED);
     }
 
+	if(!strcmp(constant_name, "OSQP_SOLVED_INACCURATE")){
+        return Py_BuildValue("i", OSQP_SOLVED_INACCURATE);
+    }
+
     if(!strcmp(constant_name, "OSQP_UNSOLVED")){
         return Py_BuildValue("i", OSQP_UNSOLVED);
     }
@@ -345,9 +352,17 @@ static PyObject *OSQP_constant(OSQP *self, PyObject *args) {
         return Py_BuildValue("i", OSQP_PRIMAL_INFEASIBLE);
     }
 
+	if(!strcmp(constant_name, "OSQP_PRIMAL_INFEASIBLE_INACCURATE")){
+		return Py_BuildValue("i", OSQP_PRIMAL_INFEASIBLE_INACCURATE);
+	}
+
     if(!strcmp(constant_name, "OSQP_DUAL_INFEASIBLE")){
         return Py_BuildValue("i", OSQP_DUAL_INFEASIBLE);
     }
+
+	if(!strcmp(constant_name, "OSQP_DUAL_INFEASIBLE_INACCURATE")){
+		return Py_BuildValue("i", OSQP_DUAL_INFEASIBLE_INACCURATE);
+	}
 
     if(!strcmp(constant_name, "OSQP_MAX_ITER_REACHED")){
         return Py_BuildValue("i", OSQP_MAX_ITER_REACHED);

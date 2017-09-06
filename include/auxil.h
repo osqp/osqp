@@ -117,10 +117,14 @@ void update_status(OSQPInfo *info, c_int status_val);
 
 /**
 * Check if termination conditions are satisfied
-* @param  work Workspace
+* If the boolean flag is ON, it checks for approximate conditions (10 x larger
+* tolerances than the ones set)
+* 
+* @param  work        Workspace
+* @param  approximate Boolean
 * @return      Redisuals check
 */
-c_int check_termination(OSQPWorkspace *work);
+c_int check_termination(OSQPWorkspace *work, c_int approximate);
 
 
 

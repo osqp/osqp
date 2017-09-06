@@ -16,9 +16,11 @@ extern "C" {
  * Solver Status  *
  ******************/
  // TODO: Add other statuses
+#define OSQP_DUAL_INFEASIBLE_INACCURATE (4)
+#define OSQP_PRIMAL_INFEASIBLE_INACCURATE (3)
+#define OSQP_SOLVED_INACCURATE (2)
 #define OSQP_SOLVED (1)
 #define OSQP_MAX_ITER_REACHED (-2)
-// #define OSQP_SOLVED_INACCURATE (2)
 #define OSQP_PRIMAL_INFEASIBLE (-3) /* primal infeasible  */
 #define OSQP_DUAL_INFEASIBLE (-4) /* dual infeasible */
 #define OSQP_SIGINT (-5) /* interrupted by user */

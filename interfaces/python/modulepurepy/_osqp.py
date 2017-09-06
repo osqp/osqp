@@ -11,6 +11,9 @@ import numpy.linalg as la
 import time   # Time execution
 
 # Solver Constants
+OSQP_DUAL_INFEASIBLE_INACCURATE = 4
+OSQP_PRIMAL_INFEASIBLE_INACCURATE = 3
+OSQP_SOLVED_INACCURATE = 2
 OSQP_SOLVED = 1
 OSQP_MAX_ITER_REACHED = -2
 OSQP_PRIMAL_INFEASIBLE = -3
@@ -610,12 +613,18 @@ class OSQP(object):
         self.work.info.status_val = status
         if status == OSQP_SOLVED:
             self.work.info.status = "Solved"
+        if status == OSQP_SOLVED_INACCURATE:
+            self.work.info.status = "Solved inaccurate"
         elif status == OSQP_PRIMAL_INFEASIBLE:
             self.work.info.status = "Primal infeasible"
+        elif status == OSQP_PRIMAL_INFEASIBLE_INACCURATE:
+            self.work.info.status = "Primal infeasible inaccurate"
         elif status == OSQP_UNSOLVED:
             self.work.info.status = "Unsolved"
         elif status == OSQP_DUAL_INFEASIBLE:
             self.work.info.status = "Dual infeasible"
+        elif status == OSQP_DUAL_INFEASIBLE_INACCURATE:
+            self.work.info.status = "Dual infeasible inaccurate"
         elif status == OSQP_MAX_ITER_REACHED:
             self.work.info.status = "Maximum iterations reached"
 
@@ -701,6 +710,26 @@ class OSQP(object):
 
         return la.norm(pri_res, np.inf)
 
+    def compute_pri_tol(self, eps_abs, eps_rel):
+        """
+        Compute primal tolerance using problem data
+        """
+        A = self.work.data.A
+        if self.work.settings.scaling and not \
+                self.work.settings.scaled_termination:
+            Einv = self.work.scaling.Einv
+            max_rel_eps = np.max([
+                la.norm(Einv.dot(A.dot(self.work.x)), np.inf),
+                la.norm(Einv.dot(self.work.z), np.inf)])
+        else:
+            max_rel_eps = np.max([
+                la.norm(A.dot(self.work.x), np.inf),
+                la.norm(self.work.z, np.inf)])
+
+        eps_pri = eps_abs + eps_rel * max_rel_eps
+
+        return eps_pri
+
     def compute_dua_res(self, x, y):
         """
         Compute dual residual ||Px + q + A'y||
@@ -716,15 +745,37 @@ class OSQP(object):
 
         return la.norm(dua_res, np.inf)
 
-    def is_primal_infeasible(self):
+    def compute_dua_tol(self, eps_abs, eps_rel):
+        """
+        Compute dual tolerance
+        """
+        P = self.work.data.P
+        q = self.work.data.q
+        A = self.work.data.A
+        if self.work.settings.scaling and not \
+                self.work.settings.scaled_termination:
+            Dinv = self.work.scaling.Dinv
+            max_rel_eps = np.max([
+                la.norm(Dinv.dot(A.T.dot(self.work.y)), np.inf),
+                la.norm(Dinv.dot(P.dot(self.work.x)), np.inf),
+                la.norm(Dinv.dot(q), np.inf)])
+        else:
+            max_rel_eps = np.max([
+                la.norm(A.T.dot(self.work.y), np.inf),
+                la.norm(P.dot(self.work.x), np.inf),
+                la.norm(q, np.inf)])
+
+        eps_dua = eps_abs + eps_rel * max_rel_eps
+
+        return eps_dua
+
+    def is_primal_infeasible(self, eps_prim_inf):
         """
         Check primal infeasibility
                 ||A'*v||_2 = 0
         with v = delta_y/||delta_y||_2 given that following condition holds
             u'*(v)_{+} + l'*(v)_{-} < 0
         """
-
-        eps_prim_inf = self.work.settings.eps_prim_inf
 
         # Rescale delta_y
         if self.work.settings.scaling and not \
@@ -748,7 +799,7 @@ class OSQP(object):
 
         return False
 
-    def is_dual_infeasible(self):
+    def is_dual_infeasible(self, eps_dual_inf):
         """
         Check dual infeasibility
             ||P*v||_inf = 0
@@ -759,8 +810,6 @@ class OSQP(object):
             (A * v)_i = { >= 0  if u_i = +inf
                         | <= 0  if l_i = -inf
         """
-        eps_dual_inf = self.work.settings.eps_dual_inf
-
         # Rescale delta_x
         if self.work.settings.scaling and not \
                 self.work.settings.scaled_termination:
@@ -853,16 +902,22 @@ class OSQP(object):
         """
         Print polish information
         """
-        print("PLSH %12.4e %12.4e %12.4e %9.2fs" % \
+        print("PLSH %12.4e %12.4e %12.4e %9.2fs" %
               (self.work.info.obj_val,
                self.work.info.pri_res,
                self.work.info.dua_res,
                self.work.info.setup_time + self.work.info.solve_time +
                self.work.info.polish_time))
 
-    def check_termination(self):
+    def check_termination(self, approximate=False):
         """
         Check residuals for algorithm convergence and update solver status
+
+        Args
+        ----
+            approximate: bool to determine if termination criteria are
+                         approximate or accurate
+
         """
         pri_check = 0
         dua_check = 0
@@ -871,64 +926,48 @@ class OSQP(object):
 
         eps_abs = self.work.settings.eps_abs
         eps_rel = self.work.settings.eps_rel
+        eps_prim_inf = self.work.settings.eps_prim_inf
+        eps_dual_inf = self.work.settings.eps_dual_inf
 
-        P = self.work.data.P
-        q = self.work.data.q
-        A = self.work.data.A
-        l = self.work.data.l
-        u = self.work.data.u
+        if approximate:
+            eps_abs *= 10
+            eps_rel *= 10
+            eps_prim_inf *= 10
+            eps_dual_inf *= 10
 
         if self.work.data.m == 0:  # No constraints -> always  primal feasible
             pri_check = 1
         else:
             # Compute primal tolerance
-            if self.work.settings.scaling and not \
-                    self.work.settings.scaled_termination:
-                Einv = self.work.scaling.Einv
-                max_rel_eps = np.max([
-                    la.norm(Einv.dot(A.dot(self.work.x)), np.inf),
-                    la.norm(Einv.dot(self.work.z), np.inf)])
-            else:
-                max_rel_eps = np.max([
-                    la.norm(A.dot(self.work.x), np.inf),
-                    la.norm(self.work.z, np.inf)])
-
-            eps_pri = eps_abs + eps_rel * max_rel_eps
+            eps_pri = self.compute_pri_tol(eps_abs, eps_rel)
 
             if self.work.info.pri_res < eps_pri:
                 pri_check = 1
             else:
                 # Check infeasibility
-                prim_inf_check = self.is_primal_infeasible()
+                prim_inf_check = self.is_primal_infeasible(eps_prim_inf)
 
         # Compute dual tolerance
-        if self.work.settings.scaling and not \
-                self.work.settings.scaled_termination:
-            Dinv = self.work.scaling.Dinv
-            max_rel_eps = np.max([
-                la.norm(Dinv.dot(A.T.dot(self.work.y)), np.inf),
-                la.norm(Dinv.dot(P.dot(self.work.x)), np.inf),
-                la.norm(Dinv.dot(q), np.inf)])
-        else:
-            max_rel_eps = np.max([
-                la.norm(A.T.dot(self.work.y), np.inf),
-                la.norm(P.dot(self.work.x), np.inf),
-                la.norm(q, np.inf)])
-
-        eps_dua = eps_abs + eps_rel * max_rel_eps
+        eps_dua = self.compute_dua_tol(eps_abs, eps_rel)
 
         if self.work.info.dua_res < eps_dua:
             dua_check = 1
         else:
             # Check dual infeasibility
-            dual_inf_check = self.is_dual_infeasible()
+            dual_inf_check = self.is_dual_infeasible(eps_dual_inf)
 
         # Compare residuals and determine solver status
         if pri_check & dua_check:
-            self.work.info.status_val = OSQP_SOLVED
+            if approximate:
+                self.work.info.status_val = OSQP_SOLVED_INACCURATE
+            else:
+                self.work.info.status_val = OSQP_SOLVED
             return 1
         elif prim_inf_check:
-            self.work.info.status_val = OSQP_PRIMAL_INFEASIBLE
+            if approximate:
+                self.work.info.status_val = OSQP_PRIMAL_INFEASIBLE_INACCURATE
+            else:
+                self.work.info.status_val = OSQP_PRIMAL_INFEASIBLE
             self.work.info.obj_val = OSQP_INFTY
             # Store original certificate
             if self.work.settings.scaling and not \
@@ -936,7 +975,10 @@ class OSQP(object):
                 self.work.delta_y = self.work.scaling.E.dot(self.work.delta_y)
             return 1
         elif dual_inf_check:
-            self.work.info.status_val = OSQP_DUAL_INFEASIBLE
+            if approximate:
+                self.work.info.status_val = OSQP_DUAL_INFEASIBLE_INACCURATE
+            else:
+                self.work.info.status_val = OSQP_DUAL_INFEASIBLE
             # Store original certificate
             if self.work.settings.scaling and not \
                     self.work.settings.scaled_termination:
@@ -1121,7 +1163,8 @@ class OSQP(object):
 
         # If max iterations reached, update status accordingly
         if iter == self.work.settings.max_iter:
-            self.work.info.status_val = OSQP_MAX_ITER_REACHED
+            if not self.check_termination(approximate=True):
+                self.work.info.status_val = OSQP_MAX_ITER_REACHED
 
         # Update status string
         self.update_status(self.work.info.status_val)

@@ -89,7 +89,7 @@ const char* OSQP_SCALING_FIELDS[] = {"D",       //c_float*
                                      "E",       //c_float*
                                      "Dinv",    //c_float*
                                      "Einv"};   //c_float*
-                                     
+
 const char* OSQP_RHO_VECTORS_FIELDS[] = {"rho_vec",         //c_float*
                                          "rho_inv_vec",     //c_float*
                                          "constr_type"};    //c_int*
@@ -550,23 +550,24 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             //primal and dual solutions
             castToDoubleArr(osqpData->work->solution->x, mxGetPr(plhs[0]), osqpData->work->data->n);
             castToDoubleArr(osqpData->work->solution->y, mxGetPr(plhs[1]), osqpData->work->data->m);
-            
+
             //infeasibility certificates -> NaN values
             setToNaN(mxGetPr(plhs[2]), osqpData->work->data->m);
             setToNaN(mxGetPr(plhs[3]), osqpData->work->data->n);
 
-        } else if (osqpData->work->info->status_val == OSQP_PRIMAL_INFEASIBLE){ //primal infeasible
+        } else if (osqpData->work->info->status_val == OSQP_PRIMAL_INFEASIBLE ||
+        osqpData->work->info->status_val == OSQP_PRIMAL_INFEASIBLE_INACCURATE){ //primal infeasible
 
             //primal and dual solutions -> NaN values
             setToNaN(mxGetPr(plhs[0]), osqpData->work->data->n);
             setToNaN(mxGetPr(plhs[1]), osqpData->work->data->m);
-            
+
             //primal infeasibility certificates
             castToDoubleArr(osqpData->work->delta_y, mxGetPr(plhs[2]), osqpData->work->data->m);
-            
+
             //dual infeasibility certificates -> NaN values
             setToNaN(mxGetPr(plhs[3]), osqpData->work->data->n);
-            
+
             // Set objective value to infinity
             osqpData->work->info->obj_val = mxGetInf();
 
@@ -575,13 +576,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             //primal and dual solutions -> NaN values
             setToNaN(mxGetPr(plhs[0]), osqpData->work->data->n);
             setToNaN(mxGetPr(plhs[1]), osqpData->work->data->m);
-            
+
             //primal infeasibility certificates -> NaN values
             setToNaN(mxGetPr(plhs[2]), osqpData->work->data->m);
-            
+
             //dual infeasibility certificates
             castToDoubleArr(osqpData->work->delta_x, mxGetPr(plhs[3]), osqpData->work->data->n);
-            
+
             // Set objective value to -infinity
             osqpData->work->info->obj_val = -mxGetInf();
         }
@@ -610,6 +611,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             return;
         }
 
+        if (!strcmp("OSQP_SOLVED_INACCURATE", constant)){
+            plhs[0] = mxCreateDoubleScalar(OSQP_SOLVED_INACCURATE);
+            return;
+        }
+
         if (!strcmp("OSQP_UNSOLVED", constant)){
             plhs[0] = mxCreateDoubleScalar(OSQP_UNSOLVED);
             return;
@@ -620,8 +626,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             return;
         }
 
+        if (!strcmp("OSQP_PRIMAL_INFEASIBLE_INACCURATE", constant)){
+            plhs[0] = mxCreateDoubleScalar(OSQP_PRIMAL_INFEASIBLE_INACCURATE);
+            return;
+        }
+
         if (!strcmp("OSQP_DUAL_INFEASIBLE", constant)){
             plhs[0] = mxCreateDoubleScalar(OSQP_DUAL_INFEASIBLE);
+            return;
+        }
+
+        if (!strcmp("OSQP_DUAL_INFEASIBLE_INACCURATE", constant)){
+            plhs[0] = mxCreateDoubleScalar(OSQP_DUAL_INFEASIBLE_INACCURATE);
             return;
         }
 

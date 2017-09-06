@@ -184,6 +184,35 @@ c_float compute_pri_res(OSQPWorkspace * work, c_float * x, c_float * z){
 }
 
 
+c_float compute_pri_tol(OSQPWorkspace * work, c_float eps_abs, c_float eps_rel){
+    c_float max_rel_eps, temp_rel_eps;
+
+    // max_rel_eps = max(||z||, ||A x||)
+    if (work->settings->scaling && !work->settings->scaled_termination){
+        // ||Einv * z||
+        vec_ew_prod(work->scaling->Einv, work->z, work->z_prev, work->data->m);
+        max_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
+        // ||Einv * A * x||
+        mat_vec(work->data->A, work->x, work->z_prev, 0);
+        vec_ew_prod(work->scaling->Einv, work->z_prev, work->z_prev, work->data->m);
+        temp_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
+        // Choose maximum
+        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+    } else { // No unscaling required
+        // ||z||
+        max_rel_eps = vec_norm_inf(work->z, work->data->m);
+        // ||A * x||
+        mat_vec(work->data->A, work->x, work->z_prev, 0);
+        temp_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
+        // Choose maximum
+        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+    }
+
+    // eps_prim
+    return eps_abs + eps_rel * max_rel_eps;
+}
+
+
 
 c_float compute_dua_res(OSQPWorkspace * work, c_float * x, c_float * y){
 
@@ -212,8 +241,51 @@ c_float compute_dua_res(OSQPWorkspace * work, c_float * x, c_float * y){
     return vec_norm_inf(work->x_prev, work->data->n);
 }
 
+c_float compute_dua_tol(OSQPWorkspace * work, c_float eps_abs, c_float eps_rel){
+    c_float max_rel_eps, temp_rel_eps;
 
-c_int is_primal_infeasible(OSQPWorkspace * work){
+    // max_rel_eps = max(||q||, ||A' y|, ||P x||)
+    if (work->settings->scaling && !work->settings->scaled_termination){
+        // || Dinv q||
+        vec_ew_prod(work->scaling->Dinv, work->data->q, work->x_prev, work->data->n);
+        max_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
+        // || Dinv A' y ||
+        mat_tpose_vec(work->data->A, work->y, work->x_prev, 0, 0);
+        vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n);
+        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
+        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+        // || Dinv P x||
+        // P * x (upper triangular part)
+        mat_vec(work->data->P, work->x, work->x_prev, 0);
+        // P' * x (lower triangular part with no diagonal)
+        mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
+        vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n);
+        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
+        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+
+    } else { // No scaling required
+        // ||q||
+        max_rel_eps = vec_norm_inf(work->data->q, work->data->n);
+        mat_tpose_vec(work->data->A, work->y, work->x_prev, 0, 0);
+        // ||A'*y||
+        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
+        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+        // ||P*x||
+        // P * x (upper triangular part)
+        mat_vec(work->data->P, work->x, work->x_prev, 0);
+        // P' * x (lower triangular part with no diagonal)
+        mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
+        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
+        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+
+    }
+
+    // eps_dual
+    return eps_abs + eps_rel * max_rel_eps;
+}
+
+
+c_int is_primal_infeasible(OSQPWorkspace * work, c_float eps_prim_inf){
 
     // This function checks for the primal infeasibility termination criteria.
     //
@@ -225,9 +297,6 @@ c_int is_primal_infeasible(OSQPWorkspace * work){
     c_int i; // Index for loops
     c_float norm_delta_y;
     c_float ineq_lhs;
-    c_float eps_prim_inf;
-
-    eps_prim_inf = work->settings->eps_prim_inf;
 
     // Compute infinity norm of delta_y
     if (work->settings->scaling && !work->settings->scaled_termination){ // Unscale if necessary
@@ -264,7 +333,7 @@ c_int is_primal_infeasible(OSQPWorkspace * work){
 }
 
 
-c_int is_dual_infeasible(OSQPWorkspace * work){
+c_int is_dual_infeasible(OSQPWorkspace * work, c_float eps_dual_inf){
     // This function checks for the scaled dual infeasibility termination criteria.
     //
     // 1) q * delta_x < - eps * || delta_x ||
@@ -278,10 +347,6 @@ c_int is_dual_infeasible(OSQPWorkspace * work){
 
     c_int i; // Index for loops
     c_float norm_delta_x;
-    c_float eps_dual_inf;
-
-
-    eps_dual_inf = work->settings->eps_dual_inf;
 
     // Compute norm of delta_x
     if (work->settings->scaling && !work->settings->scaled_termination){ // Unscale if necessary
@@ -345,7 +410,9 @@ c_int is_dual_infeasible(OSQPWorkspace * work){
 
 void store_solution(OSQPWorkspace *work) {
     if ((work->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
-        (work->info->status_val != OSQP_DUAL_INFEASIBLE)){
+        (work->info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE) &&
+        (work->info->status_val != OSQP_DUAL_INFEASIBLE) &&
+        (work->info->status_val != OSQP_DUAL_INFEASIBLE_INACCURATE)){
         prea_vec_copy(work->x, work->solution->x, work->data->n);   // primal
         prea_vec_copy(work->y, work->solution->y, work->data->m);  // dual
 
@@ -431,12 +498,18 @@ void update_status(OSQPInfo *info, c_int status_val) {
     // Update status string depending on status val
     if(status_val == OSQP_SOLVED)
         c_strcpy(info->status, "Solved");
+    if(status_val == OSQP_SOLVED_INACCURATE)
+        c_strcpy(info->status, "Solved inaccurate");
     else if (status_val == OSQP_PRIMAL_INFEASIBLE)
         c_strcpy(info->status, "Primal infeasible");
+    else if (status_val == OSQP_PRIMAL_INFEASIBLE_INACCURATE)
+        c_strcpy(info->status, "Primal infeasible inaccurate");
     else if (status_val == OSQP_UNSOLVED)
         c_strcpy(info->status, "Unsolved");
     else if (status_val == OSQP_DUAL_INFEASIBLE)
         c_strcpy(info->status, "Dual infeasible");
+    else if (status_val == OSQP_DUAL_INFEASIBLE_INACCURATE)
+        c_strcpy(info->status, "Dual infeasible inaccurate");
     else if (status_val == OSQP_MAX_ITER_REACHED)
         c_strcpy(info->status, "Maximum iterations reached");
     else if (status_val == OSQP_SIGINT)
@@ -445,13 +518,11 @@ void update_status(OSQPInfo *info, c_int status_val) {
 
 
 
-c_int check_termination(OSQPWorkspace *work){
-    c_float eps_prim, eps_dual;
+c_int check_termination(OSQPWorkspace *work, c_int approximate){
+    c_float eps_prim, eps_dual, eps_prim_inf, eps_dual_inf;
     c_int exitflag;
     c_int prim_res_check, dual_res_check, prim_inf_check, dual_inf_check;
     c_float eps_abs, eps_rel;
-    c_float max_rel_eps, temp_rel_eps; // Temporary variables to compute maximums
-
 
     // Initialize variables to 0
     exitflag = 0;
@@ -461,6 +532,16 @@ c_int check_termination(OSQPWorkspace *work){
     // Initialize tolerances
     eps_abs = work->settings->eps_abs;
     eps_rel = work->settings->eps_rel;
+    eps_prim_inf = work->settings->eps_prim_inf;
+    eps_dual_inf = work->settings->eps_dual_inf;
+
+    // If approximate solution required, increase tolerances by 10
+    if (approximate){
+        eps_abs *= 10;
+        eps_rel *= 10;
+        eps_prim_inf *= 10;
+        eps_dual_inf *= 10;
+    }
 
     // Check residuals
     if (work->data->m == 0){
@@ -468,98 +549,45 @@ c_int check_termination(OSQPWorkspace *work){
     }
     else {
         // Compute primal tolerance
-
-        // max_rel_eps = max(||z||, ||A x||)
-        if (work->settings->scaling && !work->settings->scaled_termination){
-            // ||Einv * z||
-            vec_ew_prod(work->scaling->Einv, work->z, work->z_prev, work->data->m);
-            max_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
-            // ||Einv * A * x||
-            mat_vec(work->data->A, work->x, work->z_prev, 0);
-            vec_ew_prod(work->scaling->Einv, work->z_prev, work->z_prev, work->data->m);
-            temp_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
-            // Choose maximum
-            if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
-        } else { // No unscaling required
-            // ||z||
-            max_rel_eps = vec_norm_inf(work->z, work->data->m);
-            // ||A * x||
-            mat_vec(work->data->A, work->x, work->z_prev, 0);
-            temp_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
-            // Choose maximum
-            if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
-        }
-
-
-        // eps_prim
-        eps_prim = eps_abs + eps_rel * max_rel_eps;
+        eps_prim = compute_pri_tol(work, eps_abs, eps_rel);
 
         // Primal feasibility check
         if (work->info->pri_res < eps_prim) {
             prim_res_check = 1;
         } else {
             // Primal infeasibility check
-            prim_inf_check = is_primal_infeasible(work);
+            prim_inf_check = is_primal_infeasible(work, eps_prim_inf);
         }
     }  // End check if m == 0
 
     // Compute dual tolerance
-    // max_rel_eps = max(||q||, ||A' y|, ||P x||)
-    if (work->settings->scaling && !work->settings->scaled_termination){
-        // || Dinv q||
-        vec_ew_prod(work->scaling->Dinv, work->data->q, work->x_prev, work->data->n);
-        max_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
-        // || Dinv A' y ||
-        mat_tpose_vec(work->data->A, work->y, work->x_prev, 0, 0);
-        vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n);
-        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
-        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
-        // || Dinv P x||
-        // P * x (upper triangular part)
-        mat_vec(work->data->P, work->x, work->x_prev, 0);
-        // P' * x (lower triangular part with no diagonal)
-        mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
-        vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n);
-        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
-        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
-
-    } else { // No scaling required
-        // ||q||
-        max_rel_eps = vec_norm_inf(work->data->q, work->data->n);
-        mat_tpose_vec(work->data->A, work->y, work->x_prev, 0, 0);
-        // ||A'*y||
-        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
-        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
-        // ||P*x||
-        // P * x (upper triangular part)
-        mat_vec(work->data->P, work->x, work->x_prev, 0);
-        // P' * x (lower triangular part with no diagonal)
-        mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
-        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
-        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
-
-    }
-
-    // eps_dual
-    eps_dual = eps_abs + eps_rel * max_rel_eps;
+    eps_dual = compute_dua_tol(work, eps_abs, eps_rel);
 
     // Dual feasibility check
     if (work->info->dua_res < eps_dual) {
         dual_res_check = 1;
     } else {
         // Check dual infeasibility
-        dual_inf_check = is_dual_infeasible(work);
+        dual_inf_check = is_dual_infeasible(work, eps_dual_inf);
     }
 
     // Compare checks to determine solver status
     if (prim_res_check && dual_res_check){
         // Update final information
-        update_status(work->info, OSQP_SOLVED);
+        if (approximate){
+            update_status(work->info, OSQP_SOLVED_INACCURATE);
+        } else {
+            update_status(work->info, OSQP_SOLVED);
+        }
         exitflag = 1;
     }
     else if (prim_inf_check){
         // Update final information
-        update_status(work->info, OSQP_PRIMAL_INFEASIBLE);
+        if (approximate){
+            update_status(work->info, OSQP_PRIMAL_INFEASIBLE_INACCURATE);
+        } else {
+            update_status(work->info, OSQP_PRIMAL_INFEASIBLE);
+        }
         if (work->settings->scaling && !work->settings->scaled_termination){
             // Update infeasibility certificate
             vec_ew_prod(work->scaling->E, work->delta_y, work->delta_y, work->data->m);
@@ -569,7 +597,11 @@ c_int check_termination(OSQPWorkspace *work){
     }
     else if (dual_inf_check){
         // Update final information
-        update_status(work->info, OSQP_DUAL_INFEASIBLE);
+        if (approximate){
+            update_status(work->info, OSQP_DUAL_INFEASIBLE_INACCURATE);
+        } else {
+            update_status(work->info, OSQP_DUAL_INFEASIBLE);
+        }
         if (work->settings->scaling && !work->settings->scaled_termination){
             // Update infeasibility certificate
             vec_ew_prod(work->scaling->D, work->delta_x, work->delta_x, work->data->n);

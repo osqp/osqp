@@ -180,7 +180,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         //assume that three outputs will always
         //be returned to matlab-side class wrapper
         if (((&workspace)->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
-            ((&workspace)->info->status_val != OSQP_DUAL_INFEASIBLE)){
+            ((&workspace)->info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE) &&
+            ((&workspace)->info->status_val != OSQP_DUAL_INFEASIBLE) &&
+            ((&workspace)->info->status_val != OSQP_DUAL_INFEASIBLE_INACCURATE)){
 
             //primal variables
             castToDoubleArr((&workspace)->solution->x, mxGetPr(plhs[0]), (&workspace)->data->n);
