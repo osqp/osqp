@@ -182,7 +182,8 @@ void print_footer(OSQPInfo * info, c_int polish){
     }
 
     c_print("Number of iterations: %i\n", (int)info->iter);
-    if (info->status_val == OSQP_SOLVED) {
+    if (info->status_val == OSQP_SOLVED ||
+        info->status_val == OSQP_SOLVED_INACCURATE) {
         c_print("Optimal objective: %.4f\n", info->obj_val);
     }
 

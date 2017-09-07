@@ -999,7 +999,8 @@ class OSQP(object):
                     elif self.work.info.status_polish == -1:
                         print("Solution polish: Unsuccessful")
         print("Number of iterations: %d" % self.work.info.iter)
-        if self.work.info.status_val == OSQP_SOLVED:
+        if self.work.info.status_val == OSQP_SOLVED or \
+                self.work.info.status_val == OSQP_SOLVED_INACCURATE:
             print("Optimal objective: %.4f" % self.work.info.obj_val)
         if self.work.info.run_time > 1e-03:
             print("Run time: %.3fs" % (self.work.info.run_time))
