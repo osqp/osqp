@@ -6,8 +6,8 @@ import numpy as np
 import mathprogbasepy as mpbpy
 sp.random.seed(2)
 
-n = 20
-m = 30
+n = 100
+m = 1000
 A = sparse.random(m, n, density=0.9,
                   data_rvs=np.random.randn,
                   format='csc')
@@ -15,10 +15,10 @@ l = -np.random.rand(m) * 2.
 u = np.random.rand(m) * 2.
 
 # Make problem infeasible
-A_temp = A[5, :]
-A[6, :] = A_temp
-l[6] = l[5] + 2.
-u[6] = l[6] + 3.
+# A_temp = A[5, :]
+# A[6, :] = A_temp
+# l[6] = l[5] + 2.
+# u[6] = l[6] + 3.
 
 P = sparse.random(n, n, density=0.9,
                   data_rvs=np.random.randn,
@@ -35,8 +35,8 @@ q = sp.randn(n)
 rho = 0.1
 # rho=10.0
 # q /= 100
-P *= 100
-q *= 2000
+# P *= 100
+# q *= 2000
 
 
 osqp_opts = {'rho': rho,
@@ -62,15 +62,20 @@ model = osqppurepy.OSQP()
 model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
 res_osqppurepy = model.solve()
 
+model = osqp.OSQP()
+model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
+res_osqp = model.solve()
+
 
 # Check difference with gurobi
-# print("Difference Purepy vs Gurobi")
-# print("  - primal = %.4f" %
-#       (np.linalg.norm(res_gurobi.x - res_osqppurepy.x) /
-#        np.linalg.norm(res_gurobi.x)))
-# print("  - dual = %.4f" %
-#       (np.linalg.norm(res_gurobi.y - res_osqppurepy.y) /
-#        np.linalg.norm(res_gurobi.y)))
+if res_gurobi.status == 'optimal':
+    print("Difference Purepy vs Gurobi")
+    print("  - primal = %.4f" %
+          (np.linalg.norm(res_gurobi.x - res_osqppurepy.x) /
+           np.linalg.norm(res_gurobi.x)))
+    print("  - dual = %.4f" %
+          (np.linalg.norm(res_gurobi.y - res_osqppurepy.y) /
+           np.linalg.norm(res_gurobi.y)))
 
 
 # Solve with SCS
@@ -80,10 +85,6 @@ res_osqppurepy = model.solve()
 # constraints = [l <= A * x, A * x <= u]
 # problem = cvxpy.Problem(objective, constraints)
 # problem.solve(solver=cvxpy.SCS, verbose=True)
-
-model = osqp.OSQP()
-model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
-res_osqp = model.solve()
 
 
 # # Store optimal values
