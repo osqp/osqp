@@ -548,7 +548,10 @@ c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new)
 
 
 c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
-    c_int i, constr_type_changed, exitflag = 0;
+    c_int i, exitflag = 0;
+    #if EMBEDDED != 1
+    c_int constr_type_changed;
+    #endif
 
     // Replace l by the new vector
     prea_vec_copy(l_new, work->data->l, work->data->m);
@@ -583,13 +586,18 @@ c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
     }
     #endif // EMBEDDED
 
-    return 0;
+    return exitflag;
 }
 
 
 
 c_int osqp_update_upper_bound(OSQPWorkspace * work, c_float * u_new) {
-    c_int i, constr_type_changed, exitflag = 0;
+    c_int i, exitflag = 0;
+
+    #if EMBEDDED != 1
+    c_int constr_type_changed;
+    #endif
+
 
     // Replace u by the new vector
     prea_vec_copy(u_new, work->data->u, work->data->m);
@@ -624,7 +632,7 @@ c_int osqp_update_upper_bound(OSQPWorkspace * work, c_float * u_new) {
     }
     #endif // EMBEDDED
 
-    return 0;
+    return exitflag;
 }
 
 
