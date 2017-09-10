@@ -5,9 +5,6 @@ Utilities to generate embedded C code from OSQP sources
 from __future__ import print_function
 from builtins import range
 
-# Import numpy
-import numpy as np
-
 # Path of osqp module
 import os.path
 import osqp
@@ -118,8 +115,11 @@ def write_scaling(f, scaling, name):
         write_vec(f, scaling['Dinv'], 'Dinvscaling', 'c_float')
         write_vec(f, scaling['E'], 'Escaling', 'c_float')
         write_vec(f, scaling['Einv'], 'Einvscaling', 'c_float')
-        f.write("OSQPScaling %s = " % name)
-        f.write("{Dscaling, Escaling, Dinvscaling, Einvscaling};\n\n")
+        f.write("OSQPScaling %s = {" % name)
+        f.write("(c_float)%.20f, " % scaling['c'])
+        f.write("Dscaling, Escaling, ")
+        f.write("(c_float)%.20f, " % scaling['cinv'])
+        f.write("Dinvscaling, Einvscaling};\n\n")
     else:
         f.write("OSQPScaling %s;\n\n" % name)
 
@@ -133,17 +133,21 @@ def write_linsys_solver(f, linsys_solver, name, embedded_flag):
     write_mat(f, linsys_solver['L'], 'linsys_solver_L')
     write_vec(f, linsys_solver['Dinv'], 'linsys_solver_Dinv', 'c_float')
     write_vec(f, linsys_solver['P'], 'linsys_solver_P', 'c_int')
-    f.write("c_float linsys_solver_bp[%d];\n" % (len(linsys_solver['Dinv'])))  # Empty rhs
+    # Empty rhs
+    f.write("c_float linsys_solver_bp[%d];\n" % (len(linsys_solver['Dinv'])))
 
     if embedded_flag != 1:
-        write_vec(f, linsys_solver['Pdiag_idx'], 'linsys_solver_Pdiag_idx', 'c_int')
+        write_vec(f, linsys_solver['Pdiag_idx'],
+                  'linsys_solver_Pdiag_idx', 'c_int')
         write_mat(f, linsys_solver['KKT'], 'linsys_solver_KKT')
         write_vec(f, linsys_solver['PtoKKT'], 'linsys_solver_PtoKKT', 'c_int')
         write_vec(f, linsys_solver['AtoKKT'], 'linsys_solver_AtoKKT', 'c_int')
-        write_vec(f, linsys_solver['rhotoKKT'], 'linsys_solver_rhotoKKT', 'c_int')
+        write_vec(f, linsys_solver['rhotoKKT'],
+                  'linsys_solver_rhotoKKT', 'c_int')
         write_vec(f, linsys_solver['Lnz'], 'linsys_solver_Lnz', 'c_int')
         write_vec(f, linsys_solver['Y'], 'linsys_solver_Y', 'c_float')
-        write_vec(f, linsys_solver['Pattern'], 'linsys_solver_Pattern', 'c_int')
+        write_vec(f, linsys_solver['Pattern'],
+                  'linsys_solver_Pattern', 'c_int')
         write_vec(f, linsys_solver['Flag'], 'linsys_solver_Flag', 'c_int')
         write_vec(f, linsys_solver['Parent'], 'linsys_solver_Parent', 'c_int')
 

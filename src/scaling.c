@@ -234,14 +234,14 @@ c_int scale_data(OSQPWorkspace * work){
 
 
 	// DEBUG
-	#ifdef PRINTING
-	c_print("Final cost scaling = %.10f\n", work->scaling->c);
+	// #ifdef PRINTING
+	// c_print("Final cost scaling = %.10f\n", work->scaling->c);
 	// c_print("n = %i\n", n);
 	// print_vec(work->scaling->D, n, "D");
 	// print_vec(work->scaling->Dinv, n, "Dinv");
 	// print_vec(work->scaling->E, m, "E");
 	// print_vec(work->scaling->Einv, m, "Einv");
-	#endif
+	// #endif
 
     return 0;
 }

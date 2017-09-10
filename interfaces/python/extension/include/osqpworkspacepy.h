@@ -41,6 +41,7 @@
      if(self->workspace->settings->scaling) { // if scaling enabled
          npy_intp n = (npy_intp)self->workspace->data->n;  // Dimensions in R^n
          npy_intp m = (npy_intp)self->workspace->data->m;  // Dimensions in R^m
+         c_float c, cinv;  // Cost scaling
 
          int float_type = get_float_type();
 
@@ -48,6 +49,8 @@
 
          /* Build Arrays. */
          OSQPScaling *scaling = self->workspace->scaling;
+         c = scaling->c;
+         cinv = scaling->cinv;
          PyObject *D    = PyArray_SimpleNewFromData(1, &n, float_type, scaling->D);
          PyObject *E    = PyArray_SimpleNewFromData(1, &m, float_type, scaling->E);
          PyObject *Dinv = PyArray_SimpleNewFromData(1, &n, float_type, scaling->Dinv);
@@ -60,7 +63,8 @@
          PyArray_ENABLEFLAGS((PyArrayObject *) Einv, NPY_ARRAY_OWNDATA);
 
          /* Build Python dictionary. */
-         return_dict = Py_BuildValue("{s:O,s:O,s:O,s:O}",
+         return_dict = Py_BuildValue("{s:d, s:d, s:O,s:O,s:O,s:O}",
+                                     "c", c, "cinv", cinv,
                                      "D", D, "E", E, "Dinv", Dinv, "Einv", Einv);
 
          return return_dict;
