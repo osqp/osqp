@@ -187,7 +187,7 @@ class scaling(object):
     Dinv     - inverse of D
     Einv     - inverse of E
     c        - cost scaling
-    inv_c    - inverse of cost scaling
+    cinv    - inverse of cost scaling
     """
     def __init__(self):
         self.D = None
@@ -195,7 +195,7 @@ class scaling(object):
         self.Dinv = None
         self.Einv = None
         self.c = None
-        self.inv_c = None
+        self.cinv = None
 
 
 class linesearch(object):
@@ -460,9 +460,9 @@ class OSQP(object):
             scale_cost = 1. / np.maximum(np.minimum(
                 scale_cost, MAX_SCALING), MIN_SCALING)
 
-            print("avg_norm_P_cols", avg_norm_P_cols)
-            print("inf_norm_q", inf_norm_q)
-            print("Scale cost = %.2e" % scale_cost)
+            # print("avg_norm_P_cols", avg_norm_P_cols)
+            # print("inf_norm_q", inf_norm_q)
+            # print("Scale cost = %.2e" % scale_cost)
 
             # norm_cost = self._limit_scaling(norm_cost)
             c_temp = scale_cost
@@ -477,7 +477,7 @@ class OSQP(object):
             c = c_temp * c
 
         if self.work.settings.verbose:
-            print("Final cost scaling = ", c)
+            print("Final cost scaling = %.10f" % c)
 
         # import ipdb; ipdb.set_trace()
 
@@ -497,7 +497,7 @@ class OSQP(object):
             self.work.scaling.Einv = \
                 spspa.diags(np.reciprocal(E.diagonal()))
         self.work.scaling.c = c
-        self.work.scaling.inv_c = 1. / c
+        self.work.scaling.cinv = 1. / c
 
     def set_rho_vec(self):
         """
@@ -749,7 +749,7 @@ class OSQP(object):
         if self.work.settings.scaling and not \
                 self.work.settings.scaled_termination:
             # Use unscaled residual
-            dua_res = self.work.scaling.inv_c * \
+            dua_res = self.work.scaling.cinv * \
                 self.work.scaling.Dinv.dot(dua_res)
 
         return la.norm(dua_res, np.inf)
@@ -763,9 +763,9 @@ class OSQP(object):
         A = self.work.data.A
         if self.work.settings.scaling and not \
                 self.work.settings.scaled_termination:
-            inv_c = self.work.scaling.inv_c
+            cinv = self.work.scaling.cinv
             Dinv = self.work.scaling.Dinv
-            max_rel_eps = inv_c * np.max([
+            max_rel_eps = cinv * np.max([
                 la.norm(Dinv.dot(A.T.dot(self.work.y)), np.inf),
                 la.norm(Dinv.dot(P.dot(self.work.x)), np.inf),
                 la.norm(Dinv.dot(q), np.inf)])
@@ -1036,7 +1036,7 @@ class OSQP(object):
                 self.work.solution.x = \
                     self.work.scaling.D.dot(self.work.solution.x)
                 self.work.solution.y = \
-                    self.work.scaling.inv_c * \
+                    self.work.scaling.cinv * \
                     self.work.scaling.E.dot(self.work.solution.y)
         else:
             self.work.solution.x = np.array([None] * self.work.data.n)

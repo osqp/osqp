@@ -15,10 +15,10 @@ l = -np.random.rand(m) * 2.
 u = np.random.rand(m) * 2.
 
 # Make problem infeasible
-# A_temp = A[5, :]
-# A[6, :] = A_temp
-# l[6] = l[5] + 2.
-# u[6] = l[6] + 3.
+A_temp = A[5, :]
+A[6, :] = A_temp
+l[6] = l[5] + 2.
+u[6] = l[6] + 3.
 
 P = sparse.random(n, n, density=0.9,
                   data_rvs=np.random.randn,
@@ -35,7 +35,7 @@ q = sp.randn(n)
 rho = 0.1
 # rho=10.0
 # q /= 100
-# P *= 100
+P *= 100
 q *= 2000
 
 

@@ -44,6 +44,9 @@ c_float vec_norm_inf(const c_float *v, c_int l);
 /* ||a - b||_inf */
 c_float vec_norm_inf_diff(const c_float *a, const c_float *b, c_int l);
 
+/* mean of vector elements */
+c_float vec_mean(const c_float *a, c_int n);
+
 #if EMBEDDED != 1
 /* Vector elementwise reciprocal b = 1./a (needed for scaling)*/
 void vec_ew_recipr(const c_float *a, c_float *b, c_int n);
@@ -82,6 +85,10 @@ void vec_ew_sum_vec(const c_float * a, const c_float * b,
 
 
 /* MATRIX FUNCTIONS ----------------------------------------------------------*/
+
+/* multiply scalar to vmatrixector */
+void mat_mult_scalar(csc *A, c_float sc);
+
 /* Premultiply matrix A by diagonal matrix with diagonal d,
 i.e. scale the rows of A by d
 */

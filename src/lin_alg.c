@@ -36,6 +36,17 @@ c_float vec_norm_inf_diff(const c_float *a, const c_float *b, c_int l){
     return nmDiff;
 }
 
+c_float vec_mean(const c_float *a, c_int n){
+    c_float mean = 0.0;
+    c_int i;
+    for (i = 0; i < n; i++){
+        mean += a[i];
+    }
+    mean /= (c_float)n;
+
+    return mean;
+}
+
 
 void int_vec_set_scalar(c_int *a, c_int sc, c_int n){
     c_int i;
@@ -192,6 +203,16 @@ void vec_ew_sum_vec(const c_float * a, const c_float * b,
 
 
 /* MATRIX FUNCTIONS ----------------------------------------------------------*/
+
+/* multiply scalar to matrix */
+void mat_mult_scalar(csc *A, c_float sc){
+    c_int i, nnzA;
+    nnzA = A->p[A->n];
+    for ( i = 0; i < nnzA; i++){
+        A->x[i] *= sc;
+    }
+}
+
 
 void mat_premult_diag(csc *A, const c_float *d){
     c_int j, i;

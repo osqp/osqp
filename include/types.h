@@ -41,8 +41,10 @@ typedef struct OSQP_TIMER OSQPTimer;
  * Problem scaling matrices stored as vectors
  */
 typedef struct {
+        c_float c;        ///< cost function scaling
         c_float *D;       ///< primal variable scaling
         c_float *E;       ///< dual variable scaling
+        c_float cinv;     ///< cost function rescaling
         c_float *Dinv;    ///< primal variable rescaling
         c_float *Einv;    ///< dual variable rescaling
 } OSQPScaling;
