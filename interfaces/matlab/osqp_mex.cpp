@@ -85,8 +85,10 @@ const char* LINSYS_SOLVER_FIELDS[] = {"L",           //csc
                                       "Flag",        //c_int*
                                       "Parent"};     //c_int*
 
-const char* OSQP_SCALING_FIELDS[] = {"D",       //c_float*
+const char* OSQP_SCALING_FIELDS[] = {"c",       //c_float
+                                     "D",       //c_float*
                                      "E",       //c_float*
+                                     "cinv",    //c_float
                                      "Dinv",    //c_float*
                                      "Einv"};   //c_float*
 
@@ -934,9 +936,11 @@ mxArray* copyScalingToMxStruct(OSQPWorkspace *work){
       castToDoubleArr(work->scaling->Dinv, mxGetPr(Dinv), n);
       castToDoubleArr(work->scaling->Einv, mxGetPr(Einv), m);
 
-      //map the SCALING fields one at a time into mxArrays
+      //map the SCALING fields one at a time
+      mxSetField(mxPtr, 0, "c", mxCreateDoubleScalar(work->scaling->c));
       mxSetField(mxPtr, 0, "D",    D);
       mxSetField(mxPtr, 0, "E",    E);
+      mxSetField(mxPtr, 0, "cinv", mxCreateDoubleScalar(work->scaling->cinv));
       mxSetField(mxPtr, 0, "Dinv", Dinv);
       mxSetField(mxPtr, 0, "Einv", Einv);
 
