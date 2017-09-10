@@ -200,6 +200,10 @@ c_int scale_data(OSQPWorkspace * work){
 
 		// Compute max between avg norm of cols of P and inf norm of q
 		c_temp = c_max(c_temp, inf_norm_q);
+
+		// DEBUG: Force one scaling (TODO REMOVE ME)
+		// c_temp = 1.0;
+
 		// Limit scaling (use same function as with vectors)
 		limit_scaling(&c_temp, 1);
 		// Invert scaling c = 1 / cost_measure
@@ -247,10 +251,14 @@ c_int scale_data(OSQPWorkspace * work){
 
 c_int unscale_data(OSQPWorkspace * work){
 
+	// Unscale cost
+	mat_mult_scalar(work->data->P, work->scaling->cinv);
     mat_premult_diag(work->data->P, work->scaling->Dinv);
     mat_postmult_diag(work->data->P, work->scaling->Dinv);
+	vec_mult_scalar(work->data->q, work->scaling->cinv, work->data->n);
     vec_ew_prod(work->scaling->Dinv, work->data->q, work->data->q, work->data->n);
 
+	// Unscale constraints
     mat_premult_diag(work->data->A, work->scaling->Einv);
     mat_postmult_diag(work->data->A, work->scaling->Dinv);
     vec_ew_prod(work->scaling->Einv, work->data->l, work->data->l, work->data->m);

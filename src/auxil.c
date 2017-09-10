@@ -160,9 +160,17 @@ void update_y(OSQPWorkspace *work){
 }
 
 
-c_float compute_obj_val(OSQPData *data, c_float * x) {
-        return quad_form(data->P, x) +
-               vec_prod(data->q, x, data->n);
+c_float compute_obj_val(OSQPWorkspace *work, c_float * x) {
+        c_float obj_val;
+
+        obj_val = quad_form(work->data->P, x) +
+            vec_prod(work->data->q, x, work->data->n);
+
+        if (work->settings->scaling){
+            obj_val *= work->scaling->cinv;
+        }
+
+        return obj_val;
 }
 
 
@@ -473,7 +481,7 @@ void update_info(OSQPWorkspace *work, c_int iter, c_int compute_objective, c_int
 
     // Compute the objective if needed
     if (compute_objective){
-        *obj_val = compute_obj_val(work->data, x);
+        *obj_val = compute_obj_val(work, x);
     }
 
     // Compute primal residual

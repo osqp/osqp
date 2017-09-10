@@ -114,10 +114,6 @@ class problem(object):
         self.l = l if l is not None else -np.inf*np.ones(self.m)
         self.u = u if u is not None else np.inf*np.ones(self.m)
 
-    def objval(self, x):
-        # Compute quadratic objective value for the given x
-        return .5 * np.dot(x, self.P.dot(x)) + np.dot(self.q, x)
-
 
 class settings(object):
     """
@@ -704,6 +700,16 @@ class OSQP(object):
                 self.work.z)
         self.work.y += self.work.delta_y
 
+    def compute_obj_val(self, x):
+        # Compute quadratic objective value for the given x
+        obj_val = .5 * np.dot(x, self.work.data.P.dot(x)) + \
+            np.dot(self.work.data.q, x)
+
+        if self.work.settings.scaling:
+            obj_val *= self.work.scaling.cinv
+
+        return obj_val
+
     def compute_pri_res(self, x, z):
         """
         Compute primal residual ||Ax - z||
@@ -884,7 +890,7 @@ class OSQP(object):
         """
 
         if polish == 1:
-            self.work.pol.obj_val = self.work.data.objval(self.work.pol.x)
+            self.work.pol.obj_val = self.compute_obj_val(self.work.pol.x)
             self.work.pol.pri_res = self.compute_pri_res(self.work.pol.x,
                                                          self.work.pol.z)
             self.work.pol.dua_res = self.compute_dua_res(self.work.pol.x,
@@ -892,7 +898,7 @@ class OSQP(object):
             self.work.info.polish_time = time.time() - self.work.timer
         else:
             self.work.info.iter = iter
-            self.work.info.obj_val = self.work.data.objval(self.work.x)
+            self.work.info.obj_val = self.compute_obj_val(self.work.x)
             self.work.info.pri_res = self.compute_pri_res(self.work.x,
                                                           self.work.z)
             self.work.info.dua_res = self.compute_dua_res(self.work.x,
@@ -1228,7 +1234,8 @@ class OSQP(object):
 
         # Scaling
         if self.work.settings.scaling:
-            self.work.data.q = self.work.scaling.D.dot(self.work.data.q)
+            self.work.data.q = self.work.scaling.c * \
+                self.work.scaling.D.dot(self.work.data.q)
 
         # Set solver status to OSQP_UNSOLVED
         self.update_status(OSQP_UNSOLVED)
@@ -1313,7 +1320,9 @@ class OSQP(object):
         Update quadratic cost matrix
         """
         if self.work.settings.scaling:
-            self.work.data.P = self.work.scaling.D.dot(P_new.dot(self.work.scaling.D))
+            self.work.data.P = \
+                self.work.scaling.c * \
+                self.work.scaling.D.dot(P_new.dot(self.work.scaling.D))
         else:
             self.work.data.P = P_new
         self.work.linsys_solver = linsys_solver(self.work)
