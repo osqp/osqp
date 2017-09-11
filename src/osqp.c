@@ -506,7 +506,10 @@ c_int osqp_update_lin_cost(OSQPWorkspace * work, c_float * q_new) {
 
 
 c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new) {
-    c_int i, constr_type_changed, exitflag = 0;
+    c_int i, exitflag = 0;
+    #if EMBEDDED != 1
+    c_int constr_type_changed;
+    #endif
 
     // Check if lower bound is smaller than upper bound
     for (i=0; i<work->data->m; i++) {
@@ -593,7 +596,6 @@ c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
 
 c_int osqp_update_upper_bound(OSQPWorkspace * work, c_float * u_new) {
     c_int i, exitflag = 0;
-
     #if EMBEDDED != 1
     c_int constr_type_changed;
     #endif
