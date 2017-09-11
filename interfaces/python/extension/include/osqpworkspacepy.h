@@ -49,8 +49,6 @@
 
          /* Build Arrays. */
          OSQPScaling *scaling = self->workspace->scaling;
-         c = scaling->c;
-         cinv = scaling->cinv;
          PyObject *D    = PyArray_SimpleNewFromData(1, &n, float_type, scaling->D);
          PyObject *E    = PyArray_SimpleNewFromData(1, &m, float_type, scaling->E);
          PyObject *Dinv = PyArray_SimpleNewFromData(1, &n, float_type, scaling->Dinv);
@@ -61,6 +59,9 @@
          PyArray_ENABLEFLAGS((PyArrayObject *) E, NPY_ARRAY_OWNDATA);
          PyArray_ENABLEFLAGS((PyArrayObject *) Dinv, NPY_ARRAY_OWNDATA);
          PyArray_ENABLEFLAGS((PyArrayObject *) Einv, NPY_ARRAY_OWNDATA);
+
+         c = scaling->c;
+         cinv = scaling->cinv;
 
          /* Build Python dictionary. */
          return_dict = Py_BuildValue("{s:d, s:d, s:O,s:O,s:O,s:O}",
