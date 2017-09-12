@@ -1,11 +1,9 @@
 # Compatibility with Python 2
 from __future__ import print_function
-from builtins import dict
-from builtins import range
 
 import scipy.sparse as spa
 import numpy as np
-import os.path
+
 
 def write_int(f, x, name, *args):
     if any(args):
@@ -213,7 +211,6 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
     f.write("} %s_sols_data;\n\n" % problem_name)
 
 
-
     #
     # Generate QP problem data
     #
@@ -325,11 +322,10 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
 
     f.write("}\n\n")
 
-
     f.write("#endif\n")
 
-
     f.close()
+
 
 def generate_data(problem_name, sols_data):
     """
@@ -377,7 +373,6 @@ def generate_data(problem_name, sols_data):
                 f.write("c_float %s;\n" % key)
     f.write("} %s_sols_data;\n\n" % problem_name)
 
-
     #
     # Generate additional problem data for solutions
     #
@@ -386,7 +381,6 @@ def generate_data(problem_name, sols_data):
 
     # Initialize structure data
     f.write("%s_sols_data * data = (%s_sols_data *)c_malloc(sizeof(%s_sols_data));\n\n" % (problem_name, problem_name, problem_name))
-
 
     # Generate further data and solutions
     for key, value in sols_data.items():
@@ -418,7 +412,6 @@ def generate_data(problem_name, sols_data):
     f.write("}\n\n")
 
 
-
     #
     # Clean  data
     #
@@ -436,9 +429,6 @@ def generate_data(problem_name, sols_data):
 
     f.write("}\n\n")
 
-
-
     f.write("#endif\n")
-
 
     f.close()
