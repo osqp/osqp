@@ -1,6 +1,10 @@
 # Minimum version required
 cmake_minimum_required (VERSION 3.2)
 
+
+
+
+
 # Project name
 project (osqp)
 
@@ -15,6 +19,8 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 
 # Some non-standard CMake modules
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+INCLUDE(FindPythonModule)
+INCLUDE(Utils)
 
 # Detect operating system
 # ----------------------------------------------
@@ -292,20 +298,21 @@ if (UNITTESTS)
     endif()
 
     INCLUDE(FindPythonModule)
-    find_python_module(numpy REQUIRED)
-    IF(NOT PY_NUMPY)
+    find_python_module(numpy)
+    IF(NOT NUMPY_FOUND)
         message( FATAL_ERROR "You need numpy python module installed to generate unittests. If you do not want to compile the unittests pass -DUNITTESTS=OFF to cmake." )
-    ENDIF(NOT PY_NUMPY)
+    ENDIF()
 
-    find_python_module(scipy REQUIRED)
-    IF(NOT PY_SCIPY)
+    find_python_module(scipy)
+    # Check scipy version for sparse.random functionalities
+    IF((NOT SCIPY_FOUND) OR (SCIPY_VERSION VERSION_LESS 0.17.0))
         message( FATAL_ERROR "You need scipy python module installed to generate unittests. If you do not want to compile the unittests pass -DUNITTESTS=OFF to cmake." )
-    ENDIF(NOT PY_SCIPY)
+    ENDIF()
 
-    find_python_module(__future__ REQUIRED)
-    IF(NOT PY___FUTURE__)
+    find_python_module(__future__)
+    IF(NOT __FUTURE___FOUND)
         message( FATAL_ERROR "You need future python module installed to generate unittests. If you do not want to compile the unittests pass -DUNITTESTS=OFF to cmake." )
-    ENDIF(NOT PY___FUTURE__)
+    ENDIF()
 
     # Add test_headers and codegen_test_headers
     add_subdirectory(tests)
