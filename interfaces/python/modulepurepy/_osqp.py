@@ -450,13 +450,18 @@ class OSQP(object):
             E = E_temp.dot(E)
 
             # Second Step cost normalization
-            avg_norm_P_cols = spla.norm(P, np.inf, axis=0).mean()
+            norm_P_cols = spla.norm(P, np.inf, axis=0).mean()
             inf_norm_q = np.linalg.norm(q, np.inf)
-            scale_cost = np.maximum(inf_norm_q, avg_norm_P_cols)
-            scale_cost = 1. / np.maximum(np.minimum(
-                scale_cost, MAX_SCALING), MIN_SCALING)
+            inf_norm_q = self._limit_scaling(inf_norm_q)
+            scale_cost = np.maximum(inf_norm_q, norm_P_cols)
+            scale_cost = self._limit_scaling(scale_cost)
+            scale_cost = 1. / scale_cost
 
-            # print("avg_norm_P_cols", avg_norm_P_cols)
+            # scale_cost = 1. / np.maximum(np.minimum(
+            #     scale_cost, MAX_SCALING), MIN_SCALING)
+            # print("trace P", P.todense().trace()[0, 0])
+            # print("sum_norm_P_cols", spla.norm(P, np.inf, axis=0).sum())
+            # print("norm_P_cols", norm_P_cols)
             # print("inf_norm_q", inf_norm_q)
             # print("Scale cost = %.2e" % scale_cost)
 

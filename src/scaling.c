@@ -198,6 +198,10 @@ c_int scale_data(OSQPWorkspace * work){
 		// DEBUG
 		// c_print("inf_norm_q = %.2e\n", inf_norm_q);
 
+		// If norm_q == 0, set it to 1 (ignore it in the scaling)
+		// N.B. Using the same function as with vectors here
+		limit_scaling(&inf_norm_q, 1);
+
 		// Compute max between avg norm of cols of P and inf norm of q
 		c_temp = c_max(c_temp, inf_norm_q);
 
