@@ -649,8 +649,10 @@ c_int osqp_warm_start(OSQPWorkspace * work, c_float * x, c_float * y){
     prea_vec_copy(y, work->y, work->data->m);
 
     // Scale iterates
-    vec_ew_prod(work->scaling->Dinv, work->x, work->x, work->data->n);
-    vec_ew_prod(work->scaling->Einv, work->y, work->y, work->data->m);
+    if (work->settings->scaling){
+	    vec_ew_prod(work->scaling->Dinv, work->x, work->x, work->data->n);
+	    vec_ew_prod(work->scaling->Einv, work->y, work->y, work->data->m);
+    }
 
     // Compute Ax = z and store it in z
     mat_vec(work->data->A, work->x, work->z, 0);
@@ -668,7 +670,9 @@ c_int osqp_warm_start_x(OSQPWorkspace * work, c_float * x){
     prea_vec_copy(x, work->x, work->data->n);
 
     // Scale iterate
-    vec_ew_prod(work->scaling->Dinv, work->x, work->x, work->data->n);
+    if (work->settings->scaling){
+	    vec_ew_prod(work->scaling->Dinv, work->x, work->x, work->data->n);
+    }
 
     // Compute Ax = z and store it in z
     mat_vec(work->data->A, work->x, work->z, 0);
@@ -690,7 +694,9 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y){
     prea_vec_copy(y, work->y, work->data->m);
 
     // Scale iterate
-    vec_ew_prod(work->scaling->Einv, work->y, work->y, work->data->m);
+    if (work->settings->scaling){
+	    vec_ew_prod(work->scaling->Einv, work->y, work->y, work->data->m);
+    }
 
     // Cold start x and z
     vec_set_scalar(work->x, 0., work->data->n);
