@@ -30,7 +30,7 @@ extern "C" {
 /*************************
  * Linear System Solvers *
  *************************/
-enum linsys_solver_type {SUITESPARSE_LDL};
+enum linsys_solver_type {SUITESPARSE_LDL, PARDISO};
 
 /**********************************
  * Solver Parameters and Settings *
