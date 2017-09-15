@@ -63,12 +63,16 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
     sys.stdout.flush()
     target_dir = os.path.abspath(target_dir)
     target_include_dir = os.path.join(target_dir, 'include')
+    target_configure_dir = os.path.join(target_dir, 'configure')
+    target_include_dir = os.path.join(target_dir, 'include')
     target_src_dir = os.path.join(target_dir, 'src')
 
     if not os.path.exists(target_dir):
         os.mkdir(target_dir)
     if not os.path.exists(target_include_dir):
             os.mkdir(target_include_dir)
+    if not os.path.exists(target_configure_dir):
+            os.mkdir(target_configure_dir)
     if not os.path.exists(target_src_dir):
         os.makedirs(os.path.join(target_src_dir, 'osqp'))
     print("[done]")
@@ -85,10 +89,18 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
         else:
             sh.copy(source, os.path.join(target_src_dir, 'osqp'))
 
+    # Copy header files
     c_headers = glob(os.path.join(osqp_path, 'codegen', 'sources',
                                   'include', '*.h'))
     for header in c_headers:
         sh.copy(header, target_include_dir)
+
+    # Copy config files
+    c_configs = glob(os.path.join(osqp_path, 'codegen', 'sources',
+                                  'configure', '*.h.in'))
+    for config in c_configs:
+        sh.copy(config, target_configure_dir)
+
     print("[done]")
 
     # Variables created from the workspace

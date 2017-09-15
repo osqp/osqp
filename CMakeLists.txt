@@ -1,17 +1,8 @@
 # Minimum version required
 cmake_minimum_required (VERSION 3.2)
 
-
-
-
-
 # Project name
 project (osqp)
-
-# project version --> Does it make sense to have it here?
-# set(VERSION_MAJOR 0)
-# set(VERSION_MINOR 0)
-# set(VERSION_PATCH 0)
 
 # Set the output folder where your program will be created
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
@@ -22,20 +13,18 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/configure/cmake/
 INCLUDE(FindPythonModule)
 INCLUDE(Utils)
 
+
 # Detect operating system
 # ----------------------------------------------
 message(STATUS "We are on a ${CMAKE_SYSTEM_NAME} system")
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    set(IS_LINUX "Linux operative system" ON)
-    # add_definitions(-DIS_LINUX)
+    set(IS_LINUX ON)
 endif()
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-    set(IS_MAC "Mac operative system" ON)
-    # add_definitions(-DIS_MAC)
+    set(IS_MAC ON)
 endif()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    set(IS_WINDOWS "Windows operative system" ON)
-    # add_definitions(-DIS_WINDOWS)
+    set(IS_WINDOWS ON)
 endif()
 
 
@@ -53,9 +42,6 @@ if (NOT DEFINED EMBEDDED)
     message(STATUS "Embedded is OFF")
 else()
     message(STATUS "Embedded is ${EMBEDDED}")
-    # message(STATUS "Passing EMBEDDED flag to compiler")
-    # set(EMBEDDED "Embedded mode" )
-    # add_definitions(-DEMBEDDED=${EMBEDDED})
 endif()
 
 # Is printing enabled?
@@ -65,9 +51,7 @@ if (DEFINED EMBEDDED)
     set(PRINTING OFF)
 endif()
 message(STATUS "Printing is ${PRINTING}")
-# if (PRINTING)
-#     add_definitions(-DPRINTING)
-# endif (PRINTING)
+
 
 # Is profiling enabled?
 option (PROFILING "Enable solver profiling (timing)" ON)
@@ -76,9 +60,6 @@ if (DEFINED EMBEDDED)
     set(PROFILING OFF)
 endif()
 message(STATUS "Profiling is ${PROFILING}")
-# if (PROFILING)
-#     add_definitions(-DPROFILING)
-# endif (PROFILING)
 
 # Is user interrupt enabled?
 option (CTRLC "Enable user interrupt (Ctrl-C)" ON)
@@ -87,23 +68,14 @@ if (DEFINED EMBEDDED)
     set(CTRLC OFF)
 endif()
 message(STATUS "User interrupt is ${CTRLC}")
-# if (CTRLC)
-#     add_definitions(-DCTRLC)
-# endif (CTRLC)
 
 # Use floats instead of integers
 option (DFLOAT "Use float numbers instead of doubles" OFF)
 message(STATUS "Floats are ${DFLOAT}")
-# if (DFLOAT)
-#     add_definitions(-DDFLOAT)
-# endif (DFLOAT)
 
 # Use long integers for indexing
 option (DLONG "Use long integers for indexing" ON)
 message(STATUS "Long integers are ${DLONG}")
-# if (DLONG)
-#     add_definitions(-DDLONG)
-# endif (DLONG)
 
 # Add code coverage
 option (COVERAGE "Perform code coverage" OFF)
@@ -344,5 +316,5 @@ if (UNITTESTS)
     # Add testing
     include(CTest)
     enable_testing()
-    add_test(NAME direct COMMAND $<TARGET_FILE:osqp_tester>)
+    add_test(NAME tester COMMAND $<TARGET_FILE:osqp_tester>)
 endif()

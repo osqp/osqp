@@ -11,60 +11,14 @@ import os
 import sys
 
 
-# PARAMETERS
-PRINTING = True
-PROFILING = True
-DFLOAT = False
-DLONG = True
-CTRLC = True
-
-
 # Add parameters to cmake_args and define_macros
 cmake_args = []
-define_macros = []
 
 # Check if windows linux or mac to pass flag
 if system() == 'Windows':
-    define_macros += [('IS_WINDOWS', None)]
     cmake_args += ['-G', 'MinGW Makefiles']
-else:
+else:  # Linux or Mac
     cmake_args += ['-G', 'Unix Makefiles']
-    if system() == 'Linux':
-        define_macros += [('IS_LINUX', None)]
-    elif system() == 'Darwin':
-        define_macros += [('IS_MAC', None)]
-
-
-if PROFILING:
-    cmake_args += ['-DPROFILING:BOOL=ON']
-    define_macros += [('PROFILING', None)]
-else:
-    cmake_args += ['-DPROFILING:BOOL=OFF']
-
-if PRINTING:
-    cmake_args += ['-DPRINTING:BOOL=ON']
-    define_macros += [('PRINTING', None)]
-else:
-    cmake_args += ['-DPRINTING:BOOL=OFF']
-
-if CTRLC:
-    cmake_args += ['-DCTRLC:BOOL=ON']
-    define_macros += [('CTRLC', None)]
-else:
-    cmake_args += ['-DCTRLC:BOOL=OFF']
-
-if DLONG:
-    cmake_args += ['-DDLONG:BOOL=ON']
-    define_macros += [('DLONG', None)]
-else:
-    cmake_args += ['-DDLONG:BOOL=OFF']
-
-if DFLOAT:
-    cmake_args += ['-DDFLOAT:BOOL=ON']
-    define_macros += [('DFLOAT', None)]
-else:
-    cmake_args += ['-DDFLOAT:BOOL=OFF']
-
 
 # Pass Python option to CMake and Python interface compilation
 cmake_args += ['-DPYTHON=ON']
@@ -72,9 +26,6 @@ cmake_args += ['-DPYTHON=ON']
 # Pass python version to cmake
 py_version = "%i.%i" % sys.version_info[:2]
 cmake_args += ['-DPYTHON_VER_NUM=%s' % py_version]
-
-# Pass python to compiler
-define_macros += [('PYTHON', None)]
 
 
 # Define osqp and suitesparse directories
@@ -85,7 +36,7 @@ suitesparse_dir = os.path.join(osqp_dir, 'lin_sys', 'direct', 'suitesparse')
 # Interface files
 include_dirs = [
     get_include(),                                      # Numpy directories
-    osqp_dir,                                           # Main source folder 
+    osqp_dir,                                           # Main source folder
     os.path.join(osqp_dir, 'include'),                  # osqp.h
     os.path.join(suitesparse_dir),                      # suitesparse_ldl.h
     os.path.join(suitesparse_dir, 'ldl', 'include'),    # ldl.h
@@ -135,13 +86,17 @@ cfiles += [os.path.join(suitesparse_dir, 'ldl', 'src', f)
 # List with OSQP H files
 hfiles = [os.path.join(osqp_dir, 'include', f)
           for f in os.listdir(os.path.join(osqp_dir, 'include'))
-          if f.endswith('.h') and f not in ('cs.h', 'ctrlc.h', 'polish.h')]
+          if f.endswith('.h') and f not in ('glob_opts.h', 'cs.h',
+                                            'ctrlc.h', 'polish.h')]
 hfiles += [os.path.join(suitesparse_dir, f)
            for f in os.listdir(suitesparse_dir)
            if f.endswith('.h') and f != 'SuiteSparse_config.h']
 hfiles += [os.path.join(suitesparse_dir, 'ldl', 'include', f)
            for f in os.listdir(os.path.join(suitesparse_dir, 'ldl', 'include'))
            if f.endswith('.h')]
+
+# List with OSQP configure files
+configure_files = [os.path.join(osqp_dir, 'configure', 'glob_opts.h.in')]
 
 # List of files to generate
 files_to_generate = glob(os.path.join('module', 'codegen',
@@ -175,7 +130,6 @@ class build_ext_osqp(build_ext):
 
 
 _osqp = Extension('osqp._osqp',
-                  define_macros=define_macros,
                   libraries=libraries,
                   library_dirs=library_dirs,
                   include_dirs=include_dirs,
@@ -195,6 +149,7 @@ setup(name='osqp',
                    'osqppurepy': 'modulepurepy'},
       data_files=[('osqp/codegen/sources/src', cfiles),
                   ('osqp/codegen/sources/include', hfiles),
+                  ('osqp/codegen/sources/configure', configure_files),
                   ('osqp/codegen/files_to_generate', files_to_generate)],
       install_requires=["numpy >= 1.7", "scipy >= 0.13.2", "future"],
       license='Apache 2.0',

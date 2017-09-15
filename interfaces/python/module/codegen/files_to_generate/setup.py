@@ -3,25 +3,31 @@ from platform import system
 from numpy import get_include
 from glob import glob
 import os
+import shutil as sh
+from subprocess import call
 
 
 '''
 Define macros
 '''
+# Pass EMBEDDED flag to cmake to generate glob_opts.h file
+cmake_args = []
+embedded_flag = EMBEDDED_FLAG
+cmake_args += ['-DEMBEDDED:INT=%i' % embedded_flag]
+
+# Pass Python flag to compile interface
 define_macros = []
-
-if system() == 'Windows':
-    define_macros += [('IS_WINDOWS', None)]
-else:
-    if system() == 'Linux':
-        define_macros += [('IS_LINUX', None)]
-    elif system() == 'Darwin':
-        define_macros += [('IS_MAC', None)]
-
-
-define_macros += [('DLONG', None)]
-define_macros += [('EMBEDDED', EMBEDDED_FLAG)]
 define_macros += [('PYTHON', None)]
+
+# Generate glob_opts.h file by running cmake
+current_dir = os.getcwd()
+os.chdir('..')
+if os.path.exists('build'):
+    sh.rmtree('build')
+os.makedirs('build')
+os.chdir('build')
+call(['cmake'] + cmake_args + ['..'])
+os.chdir(current_dir)
 
 '''
 Define compiler flags
@@ -30,7 +36,6 @@ if system() != 'Windows':
     compile_args = ["-O3"]
 else:
     compile_args = []
-
 
 # Add additional libraries
 libraries = []
@@ -43,7 +48,6 @@ Include directory
 include_dirs = [get_include(),                  # Numpy includes
                 os.path.join('..', 'include')]  # OSQP includes
 
-
 '''
 Source files
 '''
@@ -52,11 +56,11 @@ sources_files += glob(os.path.join('osqp', '*.c'))      # OSQP files
 
 
 PYTHON_EXT_NAME = Extension('PYTHON_EXT_NAME',
-                          define_macros=define_macros,
-                          libraries=libraries,
-                          include_dirs=include_dirs,
-                          sources=sources_files,
-                          extra_compile_args=compile_args)
+                            define_macros=define_macros,
+                            libraries=libraries,
+                            include_dirs=include_dirs,
+                            sources=sources_files,
+                            extra_compile_args=compile_args)
 
 
 setup(name='PYTHON_EXT_NAME',
