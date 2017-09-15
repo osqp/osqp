@@ -77,7 +77,7 @@ message(STATUS "Long integers are ${DLONG}")
 
 # Add code coverage
 option (COVERAGE "Perform code coverage" OFF)
-message(STATUS "Code coverage is ${DLONG}")
+message(STATUS "Code coverage is ${COVERAGE}")
 
 
 # Generate header file with the global options

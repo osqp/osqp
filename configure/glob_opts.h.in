@@ -90,9 +90,9 @@ extern "C" {
 
 /* Use customized number representation -----------------------------------   */
 #ifdef DLONG
-typedef long c_int;                   /* for indeces */
+typedef long c_int;                   /* for indices */
 #else
-typedef int c_int;                   /* for indeces */
+typedef int c_int;                   /* for indices */
 #endif
 
 
