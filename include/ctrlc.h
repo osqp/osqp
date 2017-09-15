@@ -9,6 +9,7 @@
 extern "C" {
 #endif
 
+#include "glob_opts.h"
 
 #if defined MATLAB
 
