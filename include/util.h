@@ -104,7 +104,7 @@ struct OSQP_TIMER {
 };
 
 // Mac
-#elif IS_MAC
+#elif defined IS_MAC
 
 #include <mach/mach_time.h>
 

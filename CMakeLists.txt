@@ -18,7 +18,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 
 # Some non-standard CMake modules
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/configure/cmake/")
 INCLUDE(FindPythonModule)
 INCLUDE(Utils)
 
@@ -26,13 +26,16 @@ INCLUDE(Utils)
 # ----------------------------------------------
 message(STATUS "We are on a ${CMAKE_SYSTEM_NAME} system")
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    add_definitions(-DIS_LINUX)
+    set(IS_LINUX "Linux operative system" ON)
+    # add_definitions(-DIS_LINUX)
 endif()
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-    add_definitions(-DIS_MAC)
+    set(IS_MAC "Mac operative system" ON)
+    # add_definitions(-DIS_MAC)
 endif()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    add_definitions(-DIS_WINDOWS)
+    set(IS_WINDOWS "Windows operative system" ON)
+    # add_definitions(-DIS_WINDOWS)
 endif()
 
 
@@ -50,8 +53,9 @@ if (NOT DEFINED EMBEDDED)
     message(STATUS "Embedded is OFF")
 else()
     message(STATUS "Embedded is ${EMBEDDED}")
-    message(STATUS "Passing EMBEDDED flag to compiler")
-    add_definitions(-DEMBEDDED=${EMBEDDED})
+    # message(STATUS "Passing EMBEDDED flag to compiler")
+    # set(EMBEDDED "Embedded mode" )
+    # add_definitions(-DEMBEDDED=${EMBEDDED})
 endif()
 
 # Is printing enabled?
@@ -61,9 +65,9 @@ if (DEFINED EMBEDDED)
     set(PRINTING OFF)
 endif()
 message(STATUS "Printing is ${PRINTING}")
-if (PRINTING)
-    add_definitions(-DPRINTING)
-endif (PRINTING)
+# if (PRINTING)
+#     add_definitions(-DPRINTING)
+# endif (PRINTING)
 
 # Is profiling enabled?
 option (PROFILING "Enable solver profiling (timing)" ON)
@@ -72,9 +76,9 @@ if (DEFINED EMBEDDED)
     set(PROFILING OFF)
 endif()
 message(STATUS "Profiling is ${PROFILING}")
-if (PROFILING)
-    add_definitions(-DPROFILING)
-endif (PROFILING)
+# if (PROFILING)
+#     add_definitions(-DPROFILING)
+# endif (PROFILING)
 
 # Is user interrupt enabled?
 option (CTRLC "Enable user interrupt (Ctrl-C)" ON)
@@ -83,33 +87,37 @@ if (DEFINED EMBEDDED)
     set(CTRLC OFF)
 endif()
 message(STATUS "User interrupt is ${CTRLC}")
-if (CTRLC)
-    add_definitions(-DCTRLC)
-endif (CTRLC)
+# if (CTRLC)
+#     add_definitions(-DCTRLC)
+# endif (CTRLC)
 
 # Use floats instead of integers
 option (DFLOAT "Use float numbers instead of doubles" OFF)
 message(STATUS "Floats are ${DFLOAT}")
-if (DFLOAT)
-    add_definitions(-DDFLOAT)
-endif (DFLOAT)
+# if (DFLOAT)
+#     add_definitions(-DDFLOAT)
+# endif (DFLOAT)
 
 # Use long integers for indexing
 option (DLONG "Use long integers for indexing" ON)
 message(STATUS "Long integers are ${DLONG}")
-if (DLONG)
-    add_definitions(-DDLONG)
-endif (DLONG)
+# if (DLONG)
+#     add_definitions(-DDLONG)
+# endif (DLONG)
 
 # Add code coverage
 option (COVERAGE "Perform code coverage" OFF)
 message(STATUS "Code coverage is ${DLONG}")
 
 
+# Generate header file with the global options
+# ---------------------------------------------
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/glob_opts.h.in
+               ${CMAKE_CURRENT_SOURCE_DIR}/include/glob_opts.h)
+
+
 # Set Compiler flags
 # ----------------------------------------------
-
-
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
 
 if (NOT MSVC)
@@ -205,7 +213,6 @@ endif()
 # -----------------------------------------------------------------
 if (PYTHON)
 
-
     # Look for Python libraries
     find_package(PythonInterp ${PYTHON_VER_NUM})
     find_package(PythonLibs ${PYTHON_VER_NUM})
@@ -251,8 +258,6 @@ if (MATLAB)
     endif (UNITTESTS)
 
 endif (MATLAB)
-
-
 
 
 
@@ -335,7 +340,6 @@ if (UNITTESTS)
                 ${test_headers}
                 ${codegen_test_headers})
     target_link_libraries (osqp_tester osqpstatic)
-    # add_dependencies(osqp_tester generate_tests_data)
 
     # Add testing
     include(CTest)

@@ -27,7 +27,7 @@ typedef struct {
 } PyTimer;
 
 // Mac
-#elif IS_MAC
+#elif defined IS_MAC
 
 #include <mach/mach_time.h>
 
@@ -57,7 +57,7 @@ typedef struct {
  */
 
 // Windows
-#if IS_WINDOWS
+#ifdef IS_WINDOWS
 
 void tic(PyTimer* t) {
     QueryPerformanceFrequency(&t->freq);
@@ -70,7 +70,7 @@ c_float toc(PyTimer* t) {
 }
 
 // Mac
-#elif IS_MAC
+#elif defined IS_MAC
 
 void tic(PyTimer* t) {
     /* read current clock cycles */

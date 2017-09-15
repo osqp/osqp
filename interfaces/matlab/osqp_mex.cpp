@@ -730,7 +730,7 @@ mxArray* copyInfoToMxStruct(OSQPInfo* info){
   mxSetField(mxPtr, 0, "pri_res",       mxCreateDoubleScalar(info->pri_res));
   mxSetField(mxPtr, 0, "dua_res",       mxCreateDoubleScalar(info->dua_res));
 
-  #if PROFILING > 0
+  #ifdef PROFILING
   //if not profiling, these fields will be empty
   mxSetField(mxPtr, 0, "setup_time",  mxCreateDoubleScalar(info->setup_time));
   mxSetField(mxPtr, 0, "solve_time",  mxCreateDoubleScalar(info->solve_time));

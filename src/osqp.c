@@ -172,7 +172,7 @@ c_int osqp_solve(OSQPWorkspace * work){
                                   // in the loop
     c_int can_check_termination = 0;  // Boolean whether to check termination
 
-    #if PRINTING
+    #ifdef PRINTING
     c_int can_print; // Boolean whether you can print
     compute_cost_function = work->settings->verbose; // Compute cost function only if verbose is on
     #else

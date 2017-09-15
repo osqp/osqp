@@ -5,13 +5,36 @@
 extern "C" {
 #endif
 
+/*
+ Define OSQP compiler flags
+ */
+// Operative system
+#cmakedefine IS_LINUX
+#cmakedefine IS_MAC
+#cmakedefine IS_WINDOWS
 
+// EMBEDDED
+#cmakedefine EMBEDDED (@EMBEDDED@)
 
-// We do not need alloc functions if EMBEDDED is enabled
-#ifndef EMBEDDED
+// PRINTING
+#cmakedefine PRINTING
+
+// PROFILING
+#cmakedefine PROFILING
+
+// CTRLC
+#cmakedefine CTRLC
+
+// DFLOAT
+#cmakedefine DFLOAT
+
+// DLONG
+#cmakedefine DLONG
 
 
 /* DATA CUSTOMIZATIONS (depending on memory manager)-----------------------   */
+// We do not need memory allocation functions if EMBEDDED is enabled
+#ifndef EMBEDDED
 /* define custom printfs and memory allocation (e.g. matlab or python) */
 #ifdef MATLAB
     #include "mex.h"

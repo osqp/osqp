@@ -277,7 +277,7 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
 #ifdef PROFILING
 
 // Windows
-#if IS_WINDOWS
+#ifdef IS_WINDOWS
 
 void tic(OSQPTimer* t)
 {
@@ -292,7 +292,7 @@ c_float toc(OSQPTimer* t)
 }
 
 // Mac
-#elif IS_MAC
+#elif defined IS_MAC
 
 void tic(OSQPTimer* t)
 {
