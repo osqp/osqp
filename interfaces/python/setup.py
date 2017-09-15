@@ -13,6 +13,7 @@ import sys
 
 # Add parameters to cmake_args and define_macros
 cmake_args = []
+define_macros = []
 
 # Check if windows linux or mac to pass flag
 if system() == 'Windows':
@@ -22,6 +23,9 @@ else:  # Linux or Mac
 
 # Pass Python option to CMake and Python interface compilation
 cmake_args += ['-DPYTHON=ON']
+
+# Pass python to compiler launched from setup.py
+define_macros += [('PYTHON', None)]
 
 # Pass python version to cmake
 py_version = "%i.%i" % sys.version_info[:2]
@@ -130,6 +134,7 @@ class build_ext_osqp(build_ext):
 
 
 _osqp = Extension('osqp._osqp',
+                  define_macros=define_macros,
                   libraries=libraries,
                   library_dirs=library_dirs,
                   include_dirs=include_dirs,

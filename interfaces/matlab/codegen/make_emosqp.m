@@ -8,20 +8,26 @@ mex_cmd = sprintf('mex -O -silent');
 % Add arguments to mex compiler
 mexoptflags = '-DMATLAB';
 
-% Add specific generators for windows linux or mac
-if (ispc)
-    mexoptflags = sprintf('%s %s', mexoptflags, '-DIS_WINDOWS');
-else
-    if (ismac)
-        mexoptflags = sprintf('%s %s', mexoptflags, '-DIS_MAC');
-    elseif (isunix)
-        mexoptflags = sprintf('%s %s', mexoptflags, '-DIS_LINUX');
-    end
-end
+% Add embedded flag
+cmake_args = sprintf('-DEMBEDDED:INT=%i', EMBEDDED_FLAG);
 
-% Add parameters options to mex
-mexoptflags =  sprintf('%s %s %s', mexoptflags, '-DDLONG');
-mexoptflags =  sprintf('%s -DEMBEDDED=%d', mexoptflags, EMBEDDED_FLAG);
+
+% Generate glop_opts.h file by running cmake
+current_dir = pwd;
+build_dir = fullfile(target_dir, 'build');
+cd(target_dir);
+if exist(build_dir, 'dir')
+    rmdir('build', 's');
+end
+mkdir('build');
+cd('build');
+[status, output] = system(sprintf('%s %s ..', 'cmake', cmake_args));
+if(status)
+    fprintf('\n');
+    disp(output);
+    error('Error generating glob_opts.h');
+end
+cd(current_dir);
 
 % Set optimizer flag
 if (~ispc)

@@ -407,11 +407,15 @@ classdef osqp < handle
 
             % Make target directory
             fprintf('Creating target directories...\t\t\t\t\t');
+            target_configure_dir = fullfile(target_dir, 'configure');
             target_include_dir = fullfile(target_dir, 'include');
             target_src_dir = fullfile(target_dir, 'src');
 
             if ~exist(target_dir, 'dir')
                 mkdir(target_dir);
+            end
+            if ~exist(target_configure_dir, 'dir')
+                mkdir(target_configure_dir);
             end
             if ~exist(target_include_dir, 'dir')
                 mkdir(target_include_dir);
@@ -428,6 +432,12 @@ classdef osqp < handle
             for i = 1 : length(cfiles)
                 copyfile(fullfile(cdir, cfiles(i).name), ...
                     fullfile(target_src_dir, 'osqp', cfiles(i).name));
+            end
+            configure_dir = fullfile(cg_dir, 'sources', 'configure');
+            configure_files = dir(fullfile(configure_dir, '*.h.in'));
+            for i = 1 : length(configure_files)
+                copyfile(fullfile(configure_dir, configure_files(i).name), ...
+                    fullfile(target_configure_dir, configure_files(i).name));
             end
             hdir   = fullfile(cg_dir, 'sources', 'include');
             hfiles = dir(fullfile(hdir, '*.h'));

@@ -45,13 +45,6 @@ else
 end
 
 
-% Default parameters
-PRINTING = true;
-PROFILING = true;
-CTRLC = true;
-DFLOAT = false;
-DLONG = true;
-
 
 %% Basic compile commands
 
@@ -62,22 +55,14 @@ mex_libs = '';
 
 
 % Add arguments to cmake and mex compiler
-cmake_args = '-DUNITTESTS=OFF -DMATLAB=ON';
-mexoptflags = '';
+cmake_args = '-DMATLAB=ON';
+mexoptflags = '-DMATLAB';
 
 % Add specific generators for windows linux or mac
 if (ispc)
     cmake_args = sprintf('%s %s', cmake_args, '-G "MinGW Makefiles"');
-    mexoptflags = sprintf('%s %s', mexoptflags, '-DIS_WINDOWS');
 else
     cmake_args = sprintf('%s %s', cmake_args, '-G "Unix Makefiles"');
-    if (ismac)
-      mexoptflags = sprintf('%s %s', mexoptflags, '-DIS_MAC');
-    else
-        if (isunix)
-          mexoptflags = sprintf('%s %s', mexoptflags, '-DIS_LINUX');
-        end
-    end
 end
 
 % Pass Matlab root to cmake
@@ -86,48 +71,20 @@ cmake_args = sprintf('%s %s%s%s', cmake_args, ...
     '-DMatlab_ROOT_DIR="', Matlab_ROOT, '"');
 
 % Add parameters options to mex and cmake
-if PROFILING
-   cmake_args = sprintf('%s %s', cmake_args, '-DPROFILING:BOOL=ON');
-   mexoptflags =  sprintf('%s %s', mexoptflags, '-DPROFILING');
+% CTRLC
+if (ispc)
+   ut = fullfile(matlabroot, 'extern', 'lib', computer('arch'), ...
+                 'mingw64', 'libut.lib');
+   mex_libs = sprintf('%s "%s"', mex_libs, ut);
+else
+   mex_libs = sprintf('%s %s', mex_libs, '-lut');
 end
-
-if PRINTING
-   cmake_args = sprintf('%s %s', cmake_args, '-DPRINTING:BOOL=ON');
-   mexoptflags =  sprintf('%s %s', mexoptflags, '-DPRINTING');
-end
-
-if CTRLC
-   cmake_args = sprintf('%s %s', cmake_args, '-DCTRLC:BOOL=ON');
-   mexoptflags =  sprintf('%s %s', mexoptflags, '-DCTRLC');
-   if (ispc)
-       ut = fullfile(matlabroot, 'extern', 'lib', computer('arch'), ...
-                     'mingw64', 'libut.lib');
-       mex_libs = sprintf('%s "%s"', mex_libs, ut);
-   else
-       mex_libs = sprintf('%s %s', mex_libs, '-lut');
-   end
-end
-
-if DLONG
-   cmake_args = sprintf('%s %s', cmake_args, '-DDLONG:BOOL=ON');
-   mexoptflags =  sprintf('%s %s', mexoptflags, '-DDLONG');
-   mexoptflags =  sprintf('%s %s', mexoptflags, '-DDLONG');
-end
-
-if DFLOAT
-   cmake_args = sprintf('%s %s', cmake_args, '-DDFLOAT:BOOL=ON');
-   mexoptflags =  sprintf('%s %s', mexoptflags, '-DDFLOAT');
-end
-
 
 % Add large arrays support if computer 64 bit
 if (~isempty (strfind (computer, '64')))
     mexoptflags = sprintf('%s %s', mexoptflags, '-largeArrayDims');
 end
 
-
-% Pass MATLAB flag to mex compiler
-mexoptflags = sprintf('%s %s', mexoptflags, '-DMATLAB');
 
 % Set optimizer flag
 if (~ispc)
@@ -256,13 +213,28 @@ if( any(strcmpi(what,'codegen')) || any(strcmpi(what,'all')) )
     for j = 1:length(hdirs)
         hfiles = dir(fullfile(hdirs{j},'*.h'));
         for i = 1 : length(hfiles)
-            if ~any(strcmp(hfiles(i).name, {'cs.h', 'ctrlc.h', 'polish.h', 'SuiteSparse_config.h'}))
+            if ~any(strcmp(hfiles(i).name, {'glob_opts.h','cs.h', 'ctrlc.h', 'polish.h', 'SuiteSparse_config.h'}))
                 copyfile(fullfile(hdirs{j}, hfiles(i).name), ...
                     fullfile(cg_include_dir, hfiles(i).name));
             end
         end
     end
-
+    
+    % Copy configure files
+    cg_configure_dir = fullfile(cg_sources_dir, 'configure');
+    if ~exist(cg_configure_dir, 'dir')
+        mkdir(cg_configure_dir);
+    end
+    configure_dirs  = {fullfile(osqp_dir, 'configure')};
+    for j = 1:length(configure_dirs)
+        configure_files = dir(fullfile(configure_dirs{j},'*.h.in'));
+        for i = 1 : length(configure_files)
+            copyfile(fullfile(configure_dirs{j}, configure_files(i).name), ...
+                fullfile(cg_configure_dir, configure_files(i).name));
+        end
+    end
+    
+   
     fprintf('\t\t\t\t\t[done]\n');
 
 end

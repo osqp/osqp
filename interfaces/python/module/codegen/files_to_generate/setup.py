@@ -26,7 +26,7 @@ if os.path.exists('build'):
     sh.rmtree('build')
 os.makedirs('build')
 os.chdir('build')
-call(['cmake'] + cmake_args + ['..'])
+call(['cmake'] + cmake_args + ['..'], stdout=open(os.devnull, 'wb'))
 os.chdir(current_dir)
 
 '''
