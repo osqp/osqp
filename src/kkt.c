@@ -118,7 +118,7 @@ csc * form_KKT(const csc * P, const  csc * A, c_float param1, c_float * param2,
         // Store KKT mapping from Trip to CSC
         KKT = triplet_to_csc(KKT_trip, KKT_TtoC);
 
-        // Update vectors of indeces from P, A, param2 to KKT (now in CSC format)
+        // Update vectors of indices from P, A, param2 to KKT (now in CSC format)
         if (PtoKKT != OSQP_NULL){
             for (i = 0; i < P->p[P->n]; i++){
                 PtoKKT[i] = KKT_TtoC[PtoKKT[i]];

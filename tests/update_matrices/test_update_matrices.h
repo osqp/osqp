@@ -28,7 +28,7 @@ static char * test_form_KKT(){
     vec_add_scalar(rho_vec, data->test_form_KKT_rho, m);
     vec_ew_recipr(rho_vec, rho_inv_vec, m);
 
-    // Allocate vectors of indeces
+    // Allocate vectors of indices
     PtoKKT = c_malloc((data->test_form_KKT_Pu->p[data->test_form_KKT_Pu->n]) *
                     sizeof(c_int));
     AtoKKT = c_malloc((data->test_form_KKT_A->p[data->test_form_KKT_A->n]) *
@@ -148,7 +148,7 @@ static char * test_update(){
 
     // Update A
     nnzA = data->test_solve_A->p[data->test_solve_A->n];
-    Ax_new_idx = c_malloc(nnzA * sizeof(c_int)); // Generate indeces going from beginning to end of P
+    Ax_new_idx = c_malloc(nnzA * sizeof(c_int)); // Generate indices going from beginning to end of P
     for (i = 0; i < nnzA; i++){
       Ax_new_idx[i] = i;
     }

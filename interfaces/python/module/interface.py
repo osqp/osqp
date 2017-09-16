@@ -113,7 +113,7 @@ class OSQP(object):
                  "(compressed sparse column) matrix. (It may take a while...)")
             A = A.tocsc()
 
-        # Check if P an A have sorted indeces
+        # Check if P an A have sorted indices
         if not P.has_sorted_indices:
             P.sort_indices()
         if not A.has_sorted_indices:

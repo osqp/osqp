@@ -79,7 +79,36 @@ csc *triplet_to_csc(const csc *T, c_int * TtoC) {
                 Ci[p = w[Tj[k]]++] = Ti[k]; /* A(i,j) is the pth entry in C */
                 if (Cx) {
                     Cx[p] = Tx[k];
-                    if (TtoC != OSQP_NULL) TtoC[k] = p; // Assign vector of indeces
+                    if (TtoC != OSQP_NULL) TtoC[k] = p; // Assign vector of indices
+                }
+        }
+        return (csc_done(C, w, OSQP_NULL, 1)); /* success; free w and return C */
+}
+
+csc *triplet_to_csr(const csc *T, c_int * TtoC) {
+        c_int m, n, nz, p, k, *Cp, *Cj, *w, *Ti, *Tj;
+        c_float *Cx, *Tx;
+        csc *C;
+        m = T->m;
+        n = T->n;
+        Ti = T->i;
+        Tj = T->p;
+        Tx = T->x;
+        nz = T->nz;
+        C = csc_spalloc(m, n, nz, Tx != OSQP_NULL, 0); /* allocate result */
+        w = csc_calloc(m, sizeof(c_int));       /* get workspace */
+        if (!C || !w) return (csc_done(C, w, OSQP_NULL, 0)); /* out of memory */
+        Cp = C->p;
+        Cj = C->i;
+        Cx = C->x;
+        for (k = 0; k < nz; k++)
+                w[Ti[k]]++; /* row counts */
+        csc_cumsum(Cp, w, n); /* row pointers */
+        for (k = 0; k < nz; k++) {
+                Cj[p = w[Ti[k]]++] = Tj[k]; /* A(i,j) is the pth entry in C */
+                if (Cx) {
+                    Cx[p] = Tx[k];
+                    if (TtoC != OSQP_NULL) TtoC[k] = p; // Assign vector of indices
                 }
         }
         return (csc_done(C, w, OSQP_NULL, 1)); /* success; free w and return C */
