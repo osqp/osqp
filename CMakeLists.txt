@@ -10,8 +10,9 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 
 # Some non-standard CMake modules
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/configure/cmake/")
-INCLUDE(FindPythonModule)
-INCLUDE(Utils)
+include(FindPythonModule)
+include(Utils)
+include(FindMKL)  # Find MKL module
 
 
 # Detect operating system
@@ -233,6 +234,9 @@ endif (MATLAB)
 
 # Create  Library
 # ----------------------------------------------
+
+# Find linear system solvers
+# TODO: Find MKL library
 
 # Add linear systems solver
 add_subdirectory(lin_sys)
