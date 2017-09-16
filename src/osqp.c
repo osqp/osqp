@@ -305,7 +305,7 @@ c_int osqp_solve(OSQPWorkspace * work){
     // Compute objective value in case it was not
     // computed during the iterations
     if (!compute_cost_function){
-        work->info->obj_val = compute_obj_val(work->data, work->x);
+        work->info->obj_val = compute_obj_val(work, work->x);
     }
 
     /* Print summary for last iteration */
@@ -496,6 +496,7 @@ c_int osqp_update_lin_cost(OSQPWorkspace * work, c_float * q_new) {
     // Scaling
     if (work->settings->scaling) {
         vec_ew_prod(work->scaling->D, work->data->q, work->data->q, work->data->n);
+        vec_mult_scalar(work->data->q, work->scaling->c, work->data->n);
     }
 
     // Set solver status to OSQP_UNSOLVED

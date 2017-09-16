@@ -82,11 +82,11 @@ void update_y(OSQPWorkspace *work);
 
 /**
 * Compute objective function from data at value x
-* @param  data OSQPData structure
+* @param  work OSQPWorkspace structure
 * @param  x    Value x
 * @return      Objective function value
 */
-c_float compute_obj_val(OSQPData *data, c_float * x);
+c_float compute_obj_val(OSQPWorkspace *work, c_float * x);
 
 
 
@@ -119,7 +119,7 @@ void update_status(OSQPInfo *info, c_int status_val);
 * Check if termination conditions are satisfied
 * If the boolean flag is ON, it checks for approximate conditions (10 x larger
 * tolerances than the ones set)
-* 
+*
 * @param  work        Workspace
 * @param  approximate Boolean
 * @return      Redisuals check

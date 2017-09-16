@@ -160,9 +160,17 @@ void update_y(OSQPWorkspace *work){
 }
 
 
-c_float compute_obj_val(OSQPData *data, c_float * x) {
-        return quad_form(data->P, x) +
-               vec_prod(data->q, x, data->n);
+c_float compute_obj_val(OSQPWorkspace *work, c_float * x) {
+        c_float obj_val;
+
+        obj_val = quad_form(work->data->P, x) +
+            vec_prod(work->data->q, x, work->data->n);
+
+        if (work->settings->scaling){
+            obj_val *= work->scaling->cinv;
+        }
+
+        return obj_val;
 }
 
 
@@ -236,6 +244,7 @@ c_float compute_dua_res(OSQPWorkspace * work, c_float * x, c_float * y){
     // If scaling active -> rescale residual
     if (work->settings->scaling && !work->settings->scaled_termination){
         vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n);
+        vec_mult_scalar(work->x_prev, work->scaling->cinv, work->data->n);
     }
 
     return vec_norm_inf(work->x_prev, work->data->n);
@@ -262,6 +271,7 @@ c_float compute_dua_tol(OSQPWorkspace * work, c_float eps_abs, c_float eps_rel){
         vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n);
         temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
         if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+        max_rel_eps *= work->scaling->cinv;
 
     } else { // No scaling required
         // ||q||
@@ -347,14 +357,17 @@ c_int is_dual_infeasible(OSQPWorkspace * work, c_float eps_dual_inf){
 
     c_int i; // Index for loops
     c_float norm_delta_x;
+    c_float cost_scaling;
 
     // Compute norm of delta_x
     if (work->settings->scaling && !work->settings->scaled_termination){ // Unscale if necessary
         // Use work->Atdelta_y as temporary vector
         vec_ew_prod(work->scaling->D, work->delta_x, work->Atdelta_y, work->data->n);
         norm_delta_x = vec_norm_inf(work->Atdelta_y, work->data->n);
+        cost_scaling = work->scaling->c;
     } else{
         norm_delta_x = vec_norm_inf(work->delta_x, work->data->n);
+        cost_scaling = 1.0;
     }
 
     // Prevent 0 division || delta_x || > 0
@@ -364,7 +377,8 @@ c_int is_dual_infeasible(OSQPWorkspace * work, c_float eps_dual_inf){
         /* vec_mult_scalar(work->delta_x, 1./norm_delta_x, work->data->n); */
 
         // Check first if q'*delta_x < 0
-        if (vec_prod(work->data->q, work->delta_x, work->data->n) < -eps_dual_inf * norm_delta_x){
+        if (vec_prod(work->data->q, work->delta_x, work->data->n) <
+            - cost_scaling * eps_dual_inf * norm_delta_x){
 
             // Compute product P * delta_x
             mat_vec(work->data->P, work->delta_x, work->Pdelta_x, 0);
@@ -375,7 +389,8 @@ c_int is_dual_infeasible(OSQPWorkspace * work, c_float eps_dual_inf){
             }
 
             // Check if || P * delta_x || = 0
-            if (vec_norm_inf(work->Pdelta_x, work->data->n) < eps_dual_inf * norm_delta_x){
+            if (vec_norm_inf(work->Pdelta_x, work->data->n) <
+                cost_scaling * eps_dual_inf * norm_delta_x){
 
                 // Compute A * delta_x
                 mat_vec(work->data->A, work->delta_x, work->Adelta_x, 0);
@@ -414,7 +429,7 @@ void store_solution(OSQPWorkspace *work) {
         (work->info->status_val != OSQP_DUAL_INFEASIBLE) &&
         (work->info->status_val != OSQP_DUAL_INFEASIBLE_INACCURATE)){
         prea_vec_copy(work->x, work->solution->x, work->data->n);   // primal
-        prea_vec_copy(work->y, work->solution->y, work->data->m);  // dual
+        prea_vec_copy(work->y, work->solution->y, work->data->m);   // dual
 
         if(work->settings->scaling) // Unscale solution if scaling has been performed
             unscale_solution(work);
@@ -466,7 +481,7 @@ void update_info(OSQPWorkspace *work, c_int iter, c_int compute_objective, c_int
 
     // Compute the objective if needed
     if (compute_objective){
-        *obj_val = compute_obj_val(work->data, x);
+        *obj_val = compute_obj_val(work, x);
     }
 
     // Compute primal residual
