@@ -9,9 +9,8 @@ import time
 from multiprocessing import Pool, cpu_count
 from itertools import repeat
 from utils.utils import load_maros_meszaros_problem
-import mathprogbasepy as mpbpy
 
-import osqppurepy as osqpurepy
+# import osqppurepy as osqp
 import osqp
 
 
@@ -118,19 +117,19 @@ def solve_problem(name, settings):
     # scale_constraints(problem)
 
     # Solve with OSQP
-    # s = osqp.OSQP()
-    # s.setup(problem.P, problem.q, problem.A, problem.l, problem.u,
-    #         **settings)
-    # res = s.solve()
-
-    # Solve with purepy
-    s = osqpurepy.OSQP()
+    s = osqp.OSQP()
     s.setup(problem.P, problem.q, problem.A, problem.l, problem.u,
             **settings)
     res = s.solve()
 
-    if res.info.status_val == \
-            s.constant('OSQP_MAX_ITER_REACHED'):
+    # Solve with purepy
+    # s = osqpurepy.OSQP()
+    # s.setup(problem.P, problem.q, problem.A, problem.l, problem.u,
+    #         **settings)
+    # res = s.solve()
+
+    if res.info.status_val != \
+            s.constant('OSQP_OPTIMAL'):
             solved = False
     else:
         solved = True
@@ -175,7 +174,7 @@ problems = [f[:-4] for f in lst_probs]
 n_prob = len(problems)
 
 # Select small problems
-problems, n_prob = select_small_problems(problems)
+# problems, n_prob = select_small_problems(problems)
 
 # List of interesting probs
 # 'QAFIRO' or name == 'CVXQP1_S':
@@ -218,7 +217,7 @@ settings = {'rho': 0.1,
             'scaling': True,
             'early_terminate_interval': 1}
 
-parallel = False  # Execute script in parallel
+parallel = True  # Execute script in parallel
 
 # Results
 results = []

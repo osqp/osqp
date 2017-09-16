@@ -104,8 +104,11 @@ if ~isempty(scaling)
     write_vec(f, scaling.Dinv, 'Dinvscaling', 'c_float');
     write_vec(f, scaling.E,    'Escaling',    'c_float');
     write_vec(f, scaling.Einv, 'Einvscaling', 'c_float');
-    fprintf(f, 'OSQPScaling scaling = ');
-    fprintf(f, '{Dscaling, Escaling, Dinvscaling, Einvscaling};\n\n');
+    fprintf(f, 'OSQPScaling scaling = {');
+    fprintf(f, '(c_float)%.20f, ', scaling.c);
+    fprintf(f, 'Dscaling, Escaling, ');
+    fprintf(f, '(c_float)%.20f, ', scaling.cinv);
+    fprintf(f, 'Dinvscaling, Einvscaling};\n\n');
 else
     fprintf(f, 'OSQPScaling scaling;\n\n');
 end
