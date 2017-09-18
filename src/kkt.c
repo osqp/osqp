@@ -3,7 +3,7 @@
 #ifndef EMBEDDED
 
 
-csc * form_KKT(const csc * P, const  csc * A, c_float param1, c_float * param2,
+csc * form_KKT(const csc * P, const  csc * A, c_int format, c_float param1, c_float * param2,
                c_int * PtoKKT, c_int * AtoKKT, c_int **Pdiag_idx, c_int *Pdiag_n, c_int * param2toKKT){
     c_int nKKT, nnzKKTmax;  // Size, number of nonzeros and max number of nonzeros in KKT matrix
     csc * KKT_trip, * KKT;  // KKT matrix in triplet format and CSC format
@@ -106,8 +106,11 @@ csc * form_KKT(const csc * P, const  csc * A, c_float param1, c_float * param2,
 
     // Convert triplet matrix to csc format
     if (!PtoKKT && !AtoKKT && !param2toKKT){
-        // If no index vectors passed, do not store KKT mapping from Trip to CSC
-        KKT = triplet_to_csc(KKT_trip, OSQP_NULL);
+        // If no index vectors passed, do not store KKT mapping from Trip to CSC/CSR
+        if (format == 0)
+            KKT = triplet_to_csc(KKT_trip, OSQP_NULL);
+        else
+            KKT = triplet_to_csr(KKT_trip, OSQP_NULL);
     }
     else{
 
@@ -115,8 +118,11 @@ csc * form_KKT(const csc * P, const  csc * A, c_float param1, c_float * param2,
         KKT_TtoC = c_malloc((zKKT) * sizeof(c_int));
         if(!KKT_TtoC) return OSQP_NULL; // Error in allocating KKT_TtoC vector
 
-        // Store KKT mapping from Trip to CSC
-        KKT = triplet_to_csc(KKT_trip, KKT_TtoC);
+        // Store KKT mapping from Trip to CSC/CSR
+        if (format == 0)
+            KKT = triplet_to_csc(KKT_trip, KKT_TtoC);
+        else
+            KKT = triplet_to_csr(KKT_trip, KKT_TtoC);
 
         // Update vectors of indices from P, A, param2 to KKT (now in CSC format)
         if (PtoKKT != OSQP_NULL){

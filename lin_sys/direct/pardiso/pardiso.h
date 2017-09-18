@@ -5,8 +5,17 @@
 extern "C" {
 #endif
 
+#define MKL_INT c_int
+#include "mkl_pardiso.h"
+#include "mkl_types.h"
 #include "types.h"
-// TODO: Add mkl includes
+
+
+// Solver Phases
+#define PARDISO_SYMBOLIC (11)
+#define PARDISO_NUMERIC (22)
+#define PARDISO_SOLVE (33)
+#define PARDISO_CLEANUP (-1)
 
 /**
  * Pardiso solver structure
@@ -36,19 +45,31 @@ struct pardiso {
      * @name Attributes
      * @{
      */
-     // These are used in pardiso solver
-     // TODO: Fill with data used in pardiso solver
-    c_float *bp;    ///< workspace memory for solves (rhs)
+    // Attributes
+    csc *KKT;         ///< KKT matrix in CSR format!
+    c_float *bp;      ///< workspace memory for solves (rhs)
+
+    // Pardiso variables
+    c_int pt[64];     ///< internal solver memory pointer pt
+    c_int iparm[64];  ///< Pardiso control parameters
+    c_int n;          ///< dimension of the linear system
+    c_int mtype;      ///< matrix type (-2 for real and symmetric indefinite)
+    c_int nrhs;       ///< number of right-hand sides (1 for our needs)
+    c_int maxfct;     ///< maximum number of factors (1 for our needs)
+    c_int mnum;       ///< indicates matrix for the solution phase (1 for our needs)
+    c_int phase;      ///< control the execution phases of the solver
+    c_int error;      ///< the error indicator (0 for no error)
+    c_int msglvl;     ///< Message level information (0 for no output)
+    c_int idum;       ///< dummy integer
+    c_float fdum;     ///< dummy float
 
     // These are required for matrix updates
     c_int * Pdiag_idx, Pdiag_n;  ///< index and number of diagonal elements in P
-    csc * KKT;                   ///< Permuted KKT matrix in sparse form (used to update P and A matrices)
     c_int * PtoKKT, * AtoKKT;    ///< Index of elements from P and A to KKT matrix
     c_int * rhotoKKT;            ///< Index of rho places in KKT matrix
 
     /** @} */
 };
-
 
 
 /**
@@ -62,6 +83,7 @@ struct pardiso {
  * @return        Initialized private structure
  */
 pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float sigma, c_float * rho_vec, c_int polish);
+
 
 /**
  * Solve linear system and store result in b
@@ -83,8 +105,6 @@ c_int solve_linsys_pardiso(pardiso_solver * s, c_float * b, const OSQPSettings *
  */
 c_int update_linsys_solver_matrices_pardiso(pardiso_solver * s,
 		const csc *P, const csc *A, const OSQPSettings *settings);
-
-
 
 
 /**

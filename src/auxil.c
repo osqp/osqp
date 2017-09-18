@@ -693,8 +693,8 @@ c_int validate_data(const OSQPData * data){
 
 
 c_int validate_linsys_solver(c_int linsys_solver){
-    if (linsys_solver != SUITESPARSE_LDL &&
-        linsys_solver != PARDISO){
+    if (linsys_solver != SUITESPARSE_LDL_SOLVER &&
+        linsys_solver != PARDISO_SOLVER){
         return 1;
     }
     // TODO: Add more solvers in case

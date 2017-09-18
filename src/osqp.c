@@ -79,7 +79,6 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     work->Pdelta_x = c_calloc(work->data->n, sizeof(c_float));
     work->Adelta_x = c_calloc(work->data->m, sizeof(c_float));
 
-
     // Copy settings
     work->settings = copy_settings(settings);
 

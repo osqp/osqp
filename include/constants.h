@@ -30,8 +30,10 @@ extern "C" {
 /*************************
  * Linear System Solvers *
  *************************/
-enum linsys_solver_type {SUITESPARSE_LDL, PARDISO};
-
+enum linsys_solver_type {SUITESPARSE_LDL_SOLVER, PARDISO_SOLVER};
+static const char *SOLVER_NAME[] = {
+  "Suitesparse LDL", "Pardiso"
+};
 /**********************************
  * Solver Parameters and Settings *
  **********************************/
@@ -44,7 +46,7 @@ enum linsys_solver_type {SUITESPARSE_LDL, PARDISO};
 #define EPS_PRIM_INF (1E-4)
 #define EPS_DUAL_INF (1E-4)
 #define ALPHA (1.6)
-#define LINSYS_SOLVER (SUITESPARSE_LDL)
+#define LINSYS_SOLVER (SUITESPARSE_LDL_SOLVER)
 
 #define RHO_MIN (1e-06)
 #define RHO_MAX (1e06)

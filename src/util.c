@@ -75,14 +75,18 @@ void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
     // Print Settings
     // Print variables and constraints
     c_print("Settings: ");
-    c_print("linear system solver = ");
-    switch (settings->linsys_solver){
-        case SUITESPARSE_LDL:
-            c_print("SuiteSparse LDL,\n          ");
-            break;
-        default:
-            c_print("SuiteSparse LDL,\n          ");
-    }
+    c_print("linear system solver = %s,\n          ",
+            SOLVER_NAME[settings->linsys_solver]);
+    // switch (settings->linsys_solver){
+    //     case SUITESPARSE_LDL_SOLVER:
+    //         c_print("SuiteSparse LDL,\n          ");
+    //         break;
+    //     case PARDISO_SOLVER:
+    //         c_print("Pardiso,\n          ");
+    //         break;
+    //     default:
+    //         c_print("SuiteSparse LDL,\n          ");
+    // }
 
     c_print("eps_abs = %.1e, eps_rel = %.1e,\n          ", settings->eps_abs, settings->eps_rel);
     c_print("eps_prim_inf = %.1e, eps_dual_inf = %.1e,\n          ", settings->eps_prim_inf, settings->eps_dual_inf);

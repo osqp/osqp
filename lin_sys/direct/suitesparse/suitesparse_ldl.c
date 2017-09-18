@@ -211,7 +211,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
             p->bp[i] = sigma;
         }
 
-        KKT_temp = form_KKT(P, A, sigma, p->bp, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
+        KKT_temp = form_KKT(P, A, 0, sigma, p->bp, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
 
         // Permute matrix
         permute_KKT(&KKT_temp, p, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
@@ -228,7 +228,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
             p->bp[i] = 1. / rho_vec[i];
         }
 
-        KKT_temp = form_KKT(P, A, sigma, p->bp,
+        KKT_temp = form_KKT(P, A, 0, sigma, p->bp,
                             p->PtoKKT, p->AtoKKT,
                             &(p->Pdiag_idx), &(p->Pdiag_n), p->rhotoKKT);
 
@@ -275,7 +275,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
     #endif
 
     // Assign type
-    p->type = SUITESPARSE_LDL;
+    p->type = SUITESPARSE_LDL_SOLVER;
 
     return p;
 }
@@ -358,8 +358,6 @@ c_int update_linsys_solver_rho_vec_suitesparse_ldl(suitesparse_ldl_solver * s, c
     // return exit flag
     return (kk - s->KKT->n);
 }
-
-
 
 
 #endif
