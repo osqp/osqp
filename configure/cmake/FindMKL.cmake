@@ -3,7 +3,7 @@
 # Options:
 #
 #   MKL_USE_SINGLE_DYNAMIC_LIBRARY  : use single dynamic library interface
-#   MKL_USE_STATIC_LIBS             : use static libraries
+#   MKL_USE_STATIC_LIBRARIES        : use static libraries
 #   MKL_MULTI_THREADED              : use multi-threading
 #
 # This module defines the following variables:
@@ -13,10 +13,6 @@
 #   MKL_LIBRARIES        : the libraries to link against.
 
 
-# ---[ Options
-caffe_option(MKL_USE_SINGLE_DYNAMIC_LIBRARY "Use single dynamic library interface" ON)
-caffe_option(MKL_USE_STATIC_LIBS "Use static libraries" OFF IF NOT MKL_USE_SINGLE_DYNAMIC_LIBRARY)
-caffe_option(MKL_MULTI_THREADED  "Use multi-threading"   ON IF NOT MKL_USE_SINGLE_DYNAMIC_LIBRARY)
 
 # ---[ Root folders
 set(INTEL_ROOT "/opt/intel" CACHE PATH "Folder contains intel libs")
@@ -62,7 +58,7 @@ foreach (__lib ${__mkl_libs})
   set(__mkl_lib "mkl_${__lib}")
   string(TOUPPER ${__mkl_lib} __mkl_lib_upper)
 
-  if(MKL_USE_STATIC_LIBS)
+  if(MKL_USE_STATIC_LIBRARIES)
     set(__mkl_lib "lib${__mkl_lib}.a")
   endif()
 
@@ -79,7 +75,7 @@ endforeach()
 
 
 if(NOT MKL_USE_SINGLE_DYNAMIC_LIBRARY)
-  if (MKL_USE_STATIC_LIBS)
+	if (MKL_USE_STATIC_LIBRARIES)
     set(__iomp5_libs iomp5 libiomp5mt.lib)
   else()
     set(__iomp5_libs iomp5 libiomp5md.lib)
@@ -107,4 +103,4 @@ if(MKL_FOUND)
   message(STATUS "Found MKL (include: ${MKL_INCLUDE_DIR}, lib: ${MKL_LIBRARIES}")
 endif()
 
-caffe_clear_vars(__looked_for __mkl_libs __path_suffixes __lib_suffix __iomp5_libs)
+osqp_clear_vars(__looked_for __mkl_libs __path_suffixes __lib_suffix __iomp5_libs)

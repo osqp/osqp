@@ -12,8 +12,10 @@ LinSysSolver * init_linsys_solver(const csc * P, const csc * A,
 	switch(linsys_solver){
 		case SUITESPARSE_LDL_SOLVER:
 			return (LinSysSolver *) init_linsys_solver_suitesparse_ldl(P, A, sigma, rho_vec, polish);
-    case PARDISO_SOLVER:
+		#ifdef MKL_FOUND
+		case PARDISO_SOLVER:
 			return (LinSysSolver *) init_linsys_solver_pardiso(P, A, sigma, rho_vec, polish);
+		#endif
 	 	default:
 			return (LinSysSolver *) init_linsys_solver_suitesparse_ldl(P, A, sigma, rho_vec, polish);
         }
