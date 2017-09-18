@@ -12,7 +12,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/configure/cmake/")
 include(FindPythonModule)
 include(Utils)
-include(FindMKL)  # Find MKL module
+# include(FindMKL)  # Find MKL module
 
 
 # Detect operating system
@@ -79,6 +79,12 @@ message(STATUS "Long integers are ${DLONG}")
 # Add code coverage
 option (COVERAGE "Perform code coverage" OFF)
 message(STATUS "Code coverage is ${COVERAGE}")
+
+
+# Linear solvers dependencies
+# ---------------------------------------------
+option (USE_MKL_PARDISO "Enable MKL Pardiso solver" ON)
+message(STATUS "MKL Pardiso: ${USE_MKL_PARDISO}")
 
 
 # Generate header file with the global options
@@ -236,14 +242,25 @@ endif (MATLAB)
 # ----------------------------------------------
 
 # Find linear system solvers
-# TODO: Find MKL library
+if (USE_MKL_PARDISO)
+	option(MKL_USE_SINGLE_DYNAMIC_LIBRARY "Use MKL single dynamic library interface" ON)
+	message(STATUS "MKL single dynamic library (SDL) ${MKL_USE_SINGLE_DYNAMIC_LIBRARY}")
+	if (NOT MKL_USE_SINGLE_DYNAMIC_LIBRARY)
+		option(MKL_USE_STATIC_LIBRARIES "Use MKL in static library interface" ON)
+		message(STATUS "MKL static library interface ${MKL_USE_STATIC_LIBRARIES}")
+		option(MKL_MULTI_THREADED "Use MKL multi threading in static library interface" ON)
+		message(STATUS "MKL multi threading ${MKL_MULTI_THREADED}")
+	endif()
 
-# Add linear systems solver
+	# Find MKL Pardiso
+	find_package(MKL REQUIRED)
+endif()
+
+# Add linear systems solver cumulative library
 add_subdirectory(lin_sys)
 
-# Add library
-# NB: Add all the linear system solvers here
-add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_suitesparse_ldl>)
+add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
+target_link_libraries(osqpstatic ${linsys_solvers_libraries})
 
 if (MATLAB)
 target_link_libraries (osqpstatic ${Matlab_LIBRARIES})
@@ -259,7 +276,8 @@ endif (PYTHON)
 if (NOT PYTHON AND NOT MATLAB)
     # Create osqp shared library
     # NB: Add all the linear system solvers here
-    add_library (osqp SHARED ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_suitesparse_ldl>)
+    add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
+    target_link_libraries(osqp ${linsys_solvers_libraries})
 
     # Create demo executable (linked to static library)
     add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
