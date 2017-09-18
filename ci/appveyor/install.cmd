@@ -34,12 +34,12 @@ conda info -a
 conda install conda-build anaconda-client
 conda create -q -n test-environment python=%PYTHON_VERSION% numpy scipy pytest future
 conda install -c conda-forge twine
-:: N.B. Need to run with call otherwise the script hangs
+:: NB: Need to run with call otherwise the script hangs
 call activate test-environment
 
 
 :: Set environment for build if 64bit
-:: N.B. Needed during conda build!
+:: NB: Needed during conda build!
 IF "%PLATFORM%"=="x64" (
 call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
 )

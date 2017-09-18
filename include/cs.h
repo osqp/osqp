@@ -133,7 +133,7 @@ c_int *csc_pinv(c_int const *p, c_int n);
 
 /**
  * C = A(p,p)= PAP' where A and C are symmetric the upper part stored;
- *  N.B. pinv not p!
+ *  NB: pinv not p!
  * @param  A      Original matrix (upper-triangular)
  * @param  pinv   Inverse of permutation vector
  * @param  AtoC   Mapping from indices of A-x to C->x

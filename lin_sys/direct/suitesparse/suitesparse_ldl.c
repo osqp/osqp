@@ -186,7 +186,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
     n_plus_m = P->m + A->m;
 
     // Sparse matrix L (lower triangular)
-    // N.B. Do not allocate L completely (CSC elements)
+    // NB: Do not allocate L completely (CSC elements)
     //      L will be allocated during the factorization depending on the
     //      resulting number of elements.
     p->L = c_malloc(sizeof(csc));

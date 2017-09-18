@@ -20,7 +20,7 @@ extern "C" {
 /**
  * Pardiso solver structure
  *
- * N.B. If we use Pardiso, we suppose that EMBEDDED is not enabled
+ * NB: If we use Pardiso, we suppose that EMBEDDED is not enabled
  */
 typedef struct pardiso pardiso_solver;
 

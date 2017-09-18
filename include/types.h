@@ -212,9 +212,9 @@ typedef struct {
         c_float *xz_tilde; ///< Iterate xz_tilde
 
         c_float *x_prev;               ///< Previous x
-                                       /**< N.B. Used also as workspace vector for dual residual */
+                                       /**< NB: Used also as workspace vector for dual residual */
         c_float *z_prev;               ///< Previous z
-                                       /**< N.B. Used also as workspace vector for primal residual */
+                                       /**< NB: Used also as workspace vector for primal residual */
 
        /**
         * @name Primal infeasibility variables
@@ -268,7 +268,7 @@ typedef struct {
 /**
  * Define linsys_solver prototype structure
  *
- * N.B. The details are defined when the linear solver is initialized depending
+ * NB: The details are defined when the linear solver is initialized depending
  *      on the choice
  */
 struct linsys_solver {

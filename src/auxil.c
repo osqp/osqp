@@ -401,7 +401,7 @@ c_int is_dual_infeasible(OSQPWorkspace * work, c_float eps_dual_inf){
                 }
 
                 // De Morgan Law Applied to dual infeasibility conditions for A * x
-                // N.B. Note that 1e-06 is used to adjust the infinity value
+                // NB: Note that 1e-06 is used to adjust the infinity value
                 //      in case the problem is scaled.
                 for (i = 0; i < work->data->m; i++){
                     if (((work->data->u[i] < OSQP_INFTY*1e-06) && (work->Adelta_x[i] >  eps_dual_inf * norm_delta_x)) ||

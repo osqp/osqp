@@ -17,7 +17,7 @@ extern "C" {
  * [P + param1 I,            A';
  *  A             -diag(param2)]
  *
- * N.B. Only the upper triangular part is stuffed!
+ * NB: Only the upper triangular part is stuffed!
  *
  *
  *  If Pdiag_idx is not OSQP_NULL, it saves the index of the diagonal
@@ -26,7 +26,7 @@ extern "C" {
  * Similarly, if rhotoKKT is not null,
  * it saves where the values of param2 go in the final KKT matrix
  *
- * N.B. Pdiag_idx needs to be freed!
+ * NB: Pdiag_idx needs to be freed!
  *
  * @param  P          cost matrix (already just upper triangular part)
  * @param  A          linear constraint matrix
