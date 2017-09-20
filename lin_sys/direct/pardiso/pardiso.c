@@ -91,11 +91,18 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
 
     // Check if matrix has been created
     if (!(s->KKT)) {
-        #ifdef PRINTING
-            c_print("Error in forming KKT matrix!\n");
-        #endif
-        return OSQP_NULL;
+    #ifdef PRINTING
+	    c_print("Error in forming KKT matrix!\n");
+    #endif
+	    return OSQP_NULL;
     }
+
+    // Set MKL interface layer (Long integers if activated)
+    #ifdef DLONG
+    mkl_set_interface_layer(MKL_INTERFACE_ILP64);
+    #else
+    mkl_set_interface_layer(MKL_INTERFACE_LP64);
+    #endif
 
     // Set Pardiso variables
     s->mtype = -2;        // Real symmetric matrix

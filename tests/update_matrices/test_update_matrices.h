@@ -365,7 +365,7 @@ static char * test_update_matrices()
 {
     mu_run_test(test_form_KKT);
     mu_run_test(test_update);
-    mu_run_test(test_update_pardiso);
+    // mu_run_test(test_update_pardiso);
 
     return 0;
 }

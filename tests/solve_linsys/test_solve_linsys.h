@@ -85,8 +85,6 @@ static char * test_solveKKT_pardiso(){
               vec_norm_inf_diff(data->test_solve_KKT_rhs, data->test_solve_KKT_x,
                                 data->test_solve_KKT_m + data->test_solve_KKT_n) < TESTS_TOL);
 
-    c_print("YO MADAFAKA\n");
-
 
     // Cleanup
     p->free(p);
