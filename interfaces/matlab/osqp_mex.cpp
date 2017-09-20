@@ -2,6 +2,7 @@
 #include "matrix.h"
 #include "osqp_mex.hpp"
 #include "osqp.h"
+#include "ctrlc.h"             // Needed for interrupt
 #include "suitesparse_ldl.h"   // To extract workspace for codegen
 
 

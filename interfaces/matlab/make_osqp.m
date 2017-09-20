@@ -107,10 +107,7 @@ cg_sources_dir = fullfile('.','codegen', 'sources');
 % Include directory
 inc_dir = [
     fullfile(sprintf(' -I%s', osqp_dir), 'include'), ...
-    sprintf(' -I%s', suitesparse_dir), ...
-%     fullfile(sprintf(' -I%s', suitesparse_dir), 'ldl', 'include'), ...
-%     fullfile(sprintf(' -I%s', suitesparse_dir), 'amd', 'include')
-    ];
+    sprintf(' -I%s', suitesparse_dir)];
 
 
 %% OSQP Solver
@@ -142,7 +139,6 @@ if( any(strcmpi(what,'osqp')) || any(strcmpi(what,'all')) )
     end
 
     [status, output] = system(sprintf('%s %s', make_cmd, '--target osqpstatic'));
-    disp(output);
     if (status)
         fprintf('\n');
         disp(output);

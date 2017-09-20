@@ -5,12 +5,13 @@
 #include "scaling.h"
 #include "glob_opts.h"
 
-#ifdef CTRLC
-#include "ctrlc.h"
-#endif
 
 #ifndef EMBEDDED
 #include "polish.h"
+#endif
+
+#ifdef CTRLC
+#include "ctrlc.h"
 #endif
 
 /**********************
