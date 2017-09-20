@@ -13,3 +13,6 @@ set(linsys_solvers ${direct_linsys_solvers} PARENT_SCOPE)
 
 # Combine solvers external libraries
 set(linsys_solvers_libraries ${direct_linsys_solvers_libraries} PARENT_SCOPE)
+
+# Combine solvers external libraries
+set(linsys_solvers_includes ${direct_linsys_solvers_includes} PARENT_SCOPE)

@@ -189,7 +189,7 @@ void update_KKT_A(csc * KKT, const csc * A, const c_int * AtoKKT){
 
 
 void update_KKT_param2(csc * KKT, const c_float * param2,
-                       const c_int * param2toKKT, c_int m){
+                       const c_int * param2toKKT, const c_int m){
     c_int i; // Iterations
 
     // Update elements of KKT using param2

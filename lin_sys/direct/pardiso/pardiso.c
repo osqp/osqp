@@ -1,14 +1,28 @@
-#include "lin_alg.h"
-#include "kkt.h"
+
 #include "pardiso.h"
+
+#define MKL_INT c_int
+// #define MKL_INTERFACE_LAYER ILP64
+// #include "mkl_pardiso.h"
+// #include "mkl_types.h"
+#include "mkl.h"
+#include "types.h"
+
+
+// Solver Phases
+#define PARDISO_SYMBOLIC (11)
+#define PARDISO_NUMERIC (22)
+#define PARDISO_SOLVE (33)
+#define PARDISO_CLEANUP (-1)
 
 
 // Free LDL Factorization structure
 void free_linsys_solver_pardiso(pardiso_solver *s) {
     if (s) {
+
         // Free pardiso solver using internal function
         s->phase = PARDISO_CLEANUP;
-        PARDISO (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
+        pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
                  &(s->n), &(s->fdum), s->KKT->p, s->KKT->i, &(s->idum), &(s->nrhs),
                  s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
 
@@ -103,7 +117,7 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
 
     // Reordering and symbolic factorization
     s->phase = PARDISO_SYMBOLIC;
-    PARDISO (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
+    pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
              &(s->n), s->KKT->x, s->KKT->p, s->KKT->i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
     if ( s->error != 0 ){
@@ -116,7 +130,7 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
 
     // Numerical factorization
     s->phase = PARDISO_NUMERIC;
-    PARDISO (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
+    pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
              &(s->n), s->KKT->x, s->KKT->p, s->KKT->i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
     if ( s->error != 0 ){
@@ -143,7 +157,7 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
 c_int solve_linsys_pardiso(pardiso_solver * s, c_float * b, const OSQPSettings *settings) {
     // Back substitution and iterative refinement
     s->phase = PARDISO_SOLVE;
-    PARDISO (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
+    pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
              &(s->n), s->KKT->x, s->KKT->p, s->KKT->i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), b, s->bp, &(s->error));
     if ( s->error != 0 ){
@@ -168,7 +182,7 @@ c_int update_linsys_solver_matrices_pardiso(pardiso_solver * s,
 
     // Perform numerical factorization
     s->phase = PARDISO_NUMERIC;
-    PARDISO (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
+    pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
              &(s->n), s->KKT->x, s->KKT->p, s->KKT->i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
 
@@ -190,7 +204,7 @@ c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver * s, const c_float * r
 
     // Perform numerical factorization
     s->phase = PARDISO_NUMERIC;
-    PARDISO (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
+    pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
              &(s->n), s->KKT->x, s->KKT->p, s->KKT->i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
 

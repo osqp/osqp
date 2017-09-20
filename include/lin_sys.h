@@ -11,11 +11,17 @@ extern "C" {
 // #include "cs.h"
 #include "types.h"
 
-#ifdef EMBEDDED
+// #ifdef EMBEDDED
 #include "suitesparse_ldl.h"   // Include only this solver in the same directory
-#else
+// #else
 // Include all linear system solvers
-#include "../lin_sys/direct/suitesparse/suitesparse_ldl.h"
+// #include "../lin_sys/direct/suitesparse/suitesparse_ldl.h"
+
+#ifdef MKL_FOUND
+// #include "../lin_sys/direct/pardiso/pardiso.h"
+#include "pardiso.h"
+#endif
+
 #endif
 
 #ifndef EMBEDDED
@@ -40,4 +46,4 @@ LinSysSolver * init_linsys_solver(const csc * P, const csc * A, c_float sigma, c
 }
 #endif
 
-#endif
+// #endif

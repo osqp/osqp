@@ -5,17 +5,8 @@
 extern "C" {
 #endif
 
-#define MKL_INT c_int
-#include "mkl_pardiso.h"
-#include "mkl_types.h"
-#include "types.h"
-
-
-// Solver Phases
-#define PARDISO_SYMBOLIC (11)
-#define PARDISO_NUMERIC (22)
-#define PARDISO_SOLVE (33)
-#define PARDISO_CLEANUP (-1)
+#include "lin_alg.h"
+#include "kkt.h"
 
 /**
  * Pardiso solver structure
@@ -50,7 +41,7 @@ struct pardiso {
     c_float *bp;      ///< workspace memory for solves (rhs)
 
     // Pardiso variables
-    c_int pt[64];     ///< internal solver memory pointer pt
+    void *pt[64];     ///< internal solver memory pointer pt
     c_int iparm[64];  ///< Pardiso control parameters
     c_int n;          ///< dimension of the linear system
     c_int mtype;      ///< matrix type (-2 for real and symmetric indefinite)

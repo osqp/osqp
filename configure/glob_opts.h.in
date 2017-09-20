@@ -31,6 +31,9 @@ extern "C" {
 // DLONG
 #cmakedefine DLONG
 
+// MKL_FOUND
+#cmakedefine MKL_FOUND
+
 
 /* DATA CUSTOMIZATIONS (depending on memory manager)-----------------------   */
 // We do not need memory allocation functions if EMBEDDED is enabled

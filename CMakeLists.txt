@@ -83,9 +83,25 @@ message(STATUS "Code coverage is ${COVERAGE}")
 
 # Linear solvers dependencies
 # ---------------------------------------------
-option (USE_MKL_PARDISO "Enable MKL Pardiso solver" ON)
-message(STATUS "MKL Pardiso: ${USE_MKL_PARDISO}")
+option (ENABLE_MKL_PARDISO "Enable MKL Pardiso solver" ON)
+message(STATUS "MKL Pardiso: ${ENABLE_MKL_PARDISO}")
 
+
+# Find linear system solvers
+# ---------------------------------------------
+if (ENABLE_MKL_PARDISO)
+	option(MKL_USE_SINGLE_DYNAMIC_LIBRARY "Use MKL single dynamic library interface" ON)
+	message(STATUS "MKL single dynamic library (SDL) ${MKL_USE_SINGLE_DYNAMIC_LIBRARY}")
+	if (NOT MKL_USE_SINGLE_DYNAMIC_LIBRARY)
+		option(MKL_USE_STATIC_LIBRARIES "Use MKL in static library interface" ON)
+		message(STATUS "MKL static library interface ${MKL_USE_STATIC_LIBRARIES}")
+		option(MKL_MULTI_THREADED "Use MKL multi threading in static library interface" ON)
+		message(STATUS "MKL multi threading ${MKL_MULTI_THREADED}")
+	endif()
+
+	# Find MKL Pardiso
+	find_package(MKL REQUIRED)
+endif()
 
 # Generate header file with the global options
 # ---------------------------------------------
@@ -241,26 +257,16 @@ endif (MATLAB)
 # Create  Library
 # ----------------------------------------------
 
-# Find linear system solvers
-if (USE_MKL_PARDISO)
-	option(MKL_USE_SINGLE_DYNAMIC_LIBRARY "Use MKL single dynamic library interface" ON)
-	message(STATUS "MKL single dynamic library (SDL) ${MKL_USE_SINGLE_DYNAMIC_LIBRARY}")
-	if (NOT MKL_USE_SINGLE_DYNAMIC_LIBRARY)
-		option(MKL_USE_STATIC_LIBRARIES "Use MKL in static library interface" ON)
-		message(STATUS "MKL static library interface ${MKL_USE_STATIC_LIBRARIES}")
-		option(MKL_MULTI_THREADED "Use MKL multi threading in static library interface" ON)
-		message(STATUS "MKL multi threading ${MKL_MULTI_THREADED}")
-	endif()
-
-	# Find MKL Pardiso
-	find_package(MKL REQUIRED)
-endif()
-
-# Add linear systems solver cumulative library
+# Add linear system solvers cumulative library
 add_subdirectory(lin_sys)
+
+# Add linear system solvers interfaces includes
+include_directories(${linsys_solvers_includes})
+
 
 add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
 target_link_libraries(osqpstatic ${linsys_solvers_libraries})
+
 
 if (MATLAB)
 target_link_libraries (osqpstatic ${Matlab_LIBRARIES})
@@ -282,6 +288,7 @@ if (NOT PYTHON AND NOT MATLAB)
     # Create demo executable (linked to static library)
     add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
     target_link_libraries (osqp_demo osqpstatic)
+
 endif (NOT PYTHON AND NOT MATLAB)
 
 
@@ -323,7 +330,6 @@ if (UNITTESTS)
         OUTPUT ${codegen_test_headers}
         COMMENT "Generating unittests data files using Python"
     )
-
 
     # Direct linear solver testing
     include_directories(tests)
