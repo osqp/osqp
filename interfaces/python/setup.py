@@ -40,11 +40,8 @@ suitesparse_dir = os.path.join(osqp_dir, 'lin_sys', 'direct', 'suitesparse')
 # Interface files
 include_dirs = [
     get_include(),                                      # Numpy directories
-    osqp_dir,                                           # Main source folder
     os.path.join(osqp_dir, 'include'),                  # osqp.h
-    os.path.join(suitesparse_dir),                      # suitesparse_ldl.h
-    os.path.join(suitesparse_dir, 'ldl', 'include'),    # ldl.h
-    os.path.join(suitesparse_dir, 'amd', 'include'),    # amd.h
+    os.path.join(suitesparse_dir),                      # suitesparse_ldl headers to extract workspace for codegen
     os.path.join('extension', 'include')]               # auxiliary .h files
 
 sources_files = glob(os.path.join('extension', 'src', '*.c'))

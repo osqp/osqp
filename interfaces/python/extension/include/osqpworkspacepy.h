@@ -1,6 +1,8 @@
 #ifndef OSQPWORKSPACEPY_H
 #define OSQPWORKSPACEPY_H
 
+#include "suitesparse_ldl.h"
+
 /**********************************************
  * OSQP Workspace creation in Python objects  *
  **********************************************/

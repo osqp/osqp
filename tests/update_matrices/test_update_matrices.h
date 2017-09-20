@@ -3,6 +3,7 @@
 #include "cs.h"
 #include "util.h"
 #include "minunit.h"
+#include "kkt.h"
 #include "lin_sys.h"
 
 

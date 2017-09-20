@@ -1,28 +1,13 @@
-/* KKT linear system definition and solution */
-
 #ifndef LIN_SYS_H
 #define LIN_SYS_H
 
+/* KKT linear system definition and solution */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// #include "cs.h"
 #include "types.h"
-
-// #ifdef EMBEDDED
-#include "suitesparse_ldl.h"   // Include only this solver in the same directory
-// #else
-// Include all linear system solvers
-// #include "../lin_sys/direct/suitesparse/suitesparse_ldl.h"
-
-#ifdef MKL_FOUND
-// #include "../lin_sys/direct/pardiso/pardiso.h"
-#include "pardiso.h"
-#endif
-
-#endif
 
 #ifndef EMBEDDED
 // Initialize linear system solver structure
@@ -46,4 +31,4 @@ LinSysSolver * init_linsys_solver(const csc * P, const csc * A, c_float sigma, c
 }
 #endif
 
-// #endif
+#endif

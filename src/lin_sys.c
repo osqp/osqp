@@ -1,6 +1,12 @@
 #include "lin_sys.h"
 
 
+#include "suitesparse_ldl.h"   // Include only this solver in the same directory
+
+#ifdef MKL_FOUND
+#include "pardiso.h"
+#endif
+
 
 #ifndef EMBEDDED
 // Initialize linear system solver structure

@@ -2,6 +2,8 @@
 #include "matrix.h"
 #include "osqp_mex.hpp"
 #include "osqp.h"
+#include "suitesparse_ldl.h"   // To extract workspace for codegen
+
 
 // Interrupt handler
 extern "C" bool utIsInterruptPending(void);

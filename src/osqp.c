@@ -1,5 +1,18 @@
 #include "osqp.h"
 
+#include "auxil.h"
+#include "util.h"
+#include "scaling.h"
+#include "glob_opts.h"
+
+#ifdef CTRLC
+#include "ctrlc.h"
+#endif
+
+#ifndef EMBEDDED
+#include "polish.h"
+#endif
+
 /**********************
  * Main API Functions *
  **********************/

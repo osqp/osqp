@@ -1,6 +1,13 @@
 #include "lin_alg.h"
 
 
+#include "suitesparse_ldl.h"   // Include only this solver in the same directory
+
+#ifdef MKL_FOUND
+#include "pardiso.h"
+#endif
+
+
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 
