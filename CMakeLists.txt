@@ -83,7 +83,7 @@ message(STATUS "Code coverage is ${COVERAGE}")
 
 # Linear solvers dependencies
 # ---------------------------------------------
-option (ENABLE_MKL_PARDISO "Enable MKL Pardiso solver" OFF)
+option (ENABLE_MKL_PARDISO "Enable MKL Pardiso solver" ON)
 message(STATUS "MKL Pardiso: ${ENABLE_MKL_PARDISO}")
 
 

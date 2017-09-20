@@ -7,9 +7,13 @@ extern "C" {
 
 /* Includes */
 #include "types.h"
-#include "cs.h"
 #include "util.h"
 
+
+// Library to deal with sparse matrices enabled only if embedded not defined
+#ifndef EMBEDDED
+#include "cs.h"
+#endif
 
 /********************
  * Main Solver API  *

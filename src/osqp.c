@@ -1,5 +1,4 @@
 #include "osqp.h"
-
 #include "auxil.h"
 #include "util.h"
 #include "scaling.h"
