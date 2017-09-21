@@ -6,6 +6,11 @@ Changes since last commit
 *   Added diagonal rho vector with different values for equality/inequality constraints (interface still have scalar rho)
 *   Return certificates of infeasibility in results structure
 
+Version 0.1.3 (21 September 2017)
+---------------------------------
+* Fixed sources distribution on Python
+
+
 Version 0.1.2 (20 July 2017)
 ------------------------------
 *   Added option to terminate with scaled or unscaled residual

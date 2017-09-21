@@ -11,8 +11,8 @@ Anaconda
    conda install -c oxfordcontrol osqp
 
 
-Pip (only Mac and Windows)
---------------------------
+Pip
+----
 
 .. code:: bash
 

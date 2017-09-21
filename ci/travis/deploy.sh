@@ -26,20 +26,32 @@ anaconda -t $ANACONDA_TOKEN upload conda-bld/**/osqp-*.tar.bz2 --user oxfordcont
 echo "Successfully deployed to Anaconda.org."
 
 
-# Binary Linux packages not supported on Pypi
-if [[ "$TRAVIS_OS_NAME" != "linux" ]]; then
+# NB: Binary Linux packages not supported on Pypi
+cd ${TRAVIS_BUILD_DIR}/interfaces/python
 
-    cd ${TRAVIS_BUILD_DIR}/interfaces/python
+if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
 
-    echo "Creating pip package..."
-    python setup.py bdist_wheel
-    echo "Deploying to Pypi..."
-    twine upload --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*
-    echo "Successfully deployed to Pypi"
+	echo "Creating pip binary package..."
+	python setup.py bdist_wheel
+
+
+	echo "Deploying to Pypi..."
+	twine upload --repository pypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*         # Main pypi repo
+	# twine upload --repository testpypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*     # Test pypi repo
+	echo "Successfully deployed to Pypi"
+
+else if [[ "$TRAVIS_OS_NAME" == "linux" && "$PYTHON_VERSION" == "3.6" ]]; then
+	# Choose one python version to upload source distribution (3.6)
+	echo "Creating pip source package..."
+	python setup.py sdist
+
+
+	echo "Deploying to Pypi..."
+	twine upload --repository pypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*         # Main pypi repo
+	# twine upload --repository testpypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*     # Test pypi repo
+	echo "Successfully deployed to Pypi"
 
 fi
-
-
-
+fi
 
 exit 0

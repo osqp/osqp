@@ -12,7 +12,7 @@ import sys
 
 
 # Add parameters to cmake_args and define_macros
-cmake_args = []
+cmake_args = ["-DUNITTESTS=OFF"]
 define_macros = []
 
 # Check if windows linux or mac to pass flag
@@ -33,7 +33,8 @@ cmake_args += ['-DPYTHON_VER_NUM=%s' % py_version]
 
 
 # Define osqp and suitesparse directories
-osqp_dir = os.path.join('..', '..')
+current_dir = os.getcwd()
+osqp_dir = os.path.join('osqp')
 osqp_build_dir = os.path.join(osqp_dir, 'build')
 suitesparse_dir = os.path.join(osqp_dir, 'lin_sys', 'direct', 'suitesparse')
 
@@ -45,7 +46,7 @@ include_dirs = [
     os.path.join(suitesparse_dir),                      # suitesparse_ldl.h
     os.path.join(suitesparse_dir, 'ldl', 'include'),    # ldl.h
     os.path.join(suitesparse_dir, 'amd', 'include'),    # amd.h
-    os.path.join('extension', 'include')]               # auxiliary .h files
+    os.path.join(current_dir, 'extension', 'include')]  # auxiliary .h files
 
 sources_files = glob(os.path.join('extension', 'src', '*.c'))
 
@@ -117,12 +118,17 @@ class build_ext_osqp(build_ext):
         os.makedirs(osqp_build_dir)
         os.chdir(osqp_build_dir)
 
+        try:
+            call(['cmake', '--version'])
+        except OSError:
+            raise RuntimeError("CMake must be installed to build OSQP")
+
         # Compile static library with CMake
         call(['cmake'] + cmake_args + ['..'])
         call(['cmake', '--build', '.', '--target', 'osqpstatic'])
 
         # Change directory back to the python interface
-        os.chdir(os.path.join('..', 'interfaces', 'python'))
+        os.chdir(current_dir)
 
         # Copy static library to src folder
         lib_name = 'libosqpstatic%s' % lib_ext
@@ -147,7 +153,7 @@ packages = ['osqp',
             'osqppurepy']
 
 setup(name='osqp',
-      version='0.1.2',
+      version='0.1.3',
       author='Bartolomeo Stellato, Goran Banjac',
       description='OSQP: The Operator Splitting QP Solver',
       package_dir={'osqp': 'module',

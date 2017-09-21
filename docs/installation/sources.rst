@@ -50,6 +50,7 @@ Windows
 
 #. Install the latest binaries of `CMake <https://cmake.org/download/#latest>`__.
 
+#. Make sure you have the privileges to create symbolic links. See the `git wiki <https://github.com/git-for-windows/git/wiki/Symbolic-Links#creating-symbolic-links>`_ for more details.
 
 
 Build the binaries
@@ -58,13 +59,24 @@ Build the binaries
 Run the following commands from the terminal
 
 #. Clone the repository, create :code:`build` directory and change directory
+    
+    - On Linux and Mac OS run
+    
+        .. code:: bash
 
-    .. code:: bash
+            git clone https://github.com/oxfordcontrol/osqp
+            cd osqp
+            mkdir build
+            cd build
+       
+    -  On Windows run
+    
+        .. code:: bash
 
-       git clone https://github.com/oxfordcontrol/osqp
-       cd osqp
-       mkdir build
-       cd build
+            git clone -c core.symlinks=true https://github.com/oxfordcontrol/osqp
+            cd osqp
+            mkdir build
+            cd build
 
 
 #. Create Makefiles

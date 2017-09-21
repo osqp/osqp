@@ -1,0 +1,9 @@
+include README.md LICENSE
+include osqp/CMakeLists.txt
+recursive-include osqp/cmake *
+recursive-include osqp/src *
+recursive-include osqp/lin_sys *
+recursive-include osqp/include *
+recursive-include extension *
+
+
