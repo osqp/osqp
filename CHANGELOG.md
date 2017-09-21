@@ -1,3 +1,9 @@
+Version 0.1.3 (21 September 2017)
+---------------------------------
+* Fixed sources distribution on Python
+
+
+
 Version 0.1.2 (20 July 2017)
 ------------------------------
 * Added option to terminate with scaled or unscaled residual
