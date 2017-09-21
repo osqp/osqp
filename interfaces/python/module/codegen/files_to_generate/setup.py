@@ -60,7 +60,7 @@ PYTHON_EXT_NAME = Extension('PYTHON_EXT_NAME',
 
 
 setup(name='PYTHON_EXT_NAME',
-      version='0.1.201',
+      version='0.1.202',
       author='Bartolomeo Stellato, Goran Banjac',
       description='This is the Python module for embedded OSQP: ' +
                   'Operator Splitting solver for Quadratic Programs.',
