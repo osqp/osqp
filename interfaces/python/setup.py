@@ -78,6 +78,7 @@ define_macros += [('PYTHON', None)]
 
 
 # Define osqp and suitesparse directories
+current_dir = os.getcwd()
 osqp_dir = os.path.join('osqp')
 osqp_build_dir = os.path.join(osqp_dir, 'build')
 suitesparse_dir = os.path.join(osqp_dir, 'lin_sys', 'direct', 'suitesparse')
@@ -89,7 +90,7 @@ include_dirs = [
     os.path.join(suitesparse_dir),                      # private.h
     os.path.join(suitesparse_dir, 'ldl', 'include'),    # ldl.h
     os.path.join(suitesparse_dir, 'amd', 'include'),    # amd.h
-    os.path.join('extension', 'include')]               # auxiliary .h files
+    os.path.join(current_dir, 'extension', 'include')]  # auxiliary .h files
 
 sources_files = glob(os.path.join('extension', 'src', '*.c'))
 
@@ -162,7 +163,9 @@ class build_ext_osqp(build_ext):
         call(['cmake', '--build', '.', '--target', 'osqpdirstatic'])
 
         # Change directory back to the python interface
-        os.chdir(os.path.join('..', 'interfaces', 'python'))
+        #  import ipdb; ipdb.set_trace()
+        os.chdir(current_dir)
+        #  os.chdir(os.path.join('..', 'interfaces', 'python'))
 
         # Copy static library to src folder
         lib_name = 'libosqpdirstatic%s' % lib_ext
