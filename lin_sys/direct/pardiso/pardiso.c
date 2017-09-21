@@ -2,9 +2,6 @@
 #include "pardiso.h"
 
 #define MKL_INT c_int
-// #define MKL_INTERFACE_LAYER ILP64
-// #include "mkl_pardiso.h"
-// #include "mkl_types.h"
 #include "mkl.h"
 #include "types.h"
 

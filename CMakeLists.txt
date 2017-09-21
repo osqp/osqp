@@ -73,7 +73,7 @@ option (DFLOAT "Use float numbers instead of doubles" OFF)
 message(STATUS "Floats are ${DFLOAT}")
 
 # Use long integers for indexing
-option (DLONG "Use long integers for indexing" ON)
+option (DLONG "Use long integers for indexing" OFF)
 message(STATUS "Long integers are ${DLONG}")
 
 # Add code coverage
