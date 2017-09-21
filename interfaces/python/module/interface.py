@@ -1,5 +1,5 @@
 """
-Python interface module for OSQP solver v0.1.202
+Python interface module for OSQP solver v0.1.203
 """
 from __future__ import print_function
 from builtins import object

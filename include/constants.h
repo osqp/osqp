@@ -9,7 +9,7 @@ extern "C" {
 /*******************
  * OSQP Versioning *
  *******************/
-#define OSQP_VERSION ("0.1.202") /* string literals automatically null-terminated */
+#define OSQP_VERSION ("0.1.203") /* string literals automatically null-terminated */
 
 
 /******************
