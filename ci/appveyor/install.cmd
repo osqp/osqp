@@ -1,7 +1,7 @@
 @echo on
 
 :: Force symlinks on linux to work on windows (needed for python interface)
-git config core.symlinks true
+git config core.symlinks true --global
 git reset --hard
 
 
