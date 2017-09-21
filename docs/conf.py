@@ -23,7 +23,7 @@ import os, subprocess
 # sys.path.insert(0, os.path.abspath('.'))
 
 # Set version for bumpversion
-__version__ = "0.1.204"
+__version__ = "0.1.3"
 
 # -- General configuration ------------------------------------------------
 
