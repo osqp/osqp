@@ -20,7 +20,7 @@ CTRLC = True
 
 
 # Add parameters to cmake_args and define_macros
-cmake_args = []
+cmake_args = ["-DUNITTESTS=OFF"]
 define_macros = []
 
 # Check if windows linux or mac to pass flag
@@ -78,7 +78,7 @@ define_macros += [('PYTHON', None)]
 
 
 # Define osqp and suitesparse directories
-osqp_dir = os.path.join('..', '..')
+osqp_dir = os.path.join('osqp')
 osqp_build_dir = os.path.join(osqp_dir, 'build')
 suitesparse_dir = os.path.join(osqp_dir, 'lin_sys', 'direct', 'suitesparse')
 
