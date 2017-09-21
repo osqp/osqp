@@ -22,6 +22,8 @@ init:
   # Uncomment for remote desktop debug
   # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
   - ECHO %PYTHON_VERSION% %MINICONDA%
+  # Force symlinks on linux to work on windows (needed for python interface)
+  - git config core.symlinks true
 
 install:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\install.cmd"
