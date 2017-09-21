@@ -1,4 +1,12 @@
 [distutils]
-index-servers = pypi
+index-servers = 
+    pypi
+    testpypi
+
 [pypi]
 username=bstellato
+
+[testpypi]
+username=bstellato
+repository: https://test.pypi.org/legacy/
+
