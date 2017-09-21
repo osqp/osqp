@@ -1,9 +1,11 @@
 @echo on
 
 :: Force symlinks on linux to work on windows (needed for python interface)
-git config --global core.symlinks true
+git config core.symlinks true
 git reset --hard
 
+:: Set config also for future repos
+git config --global core.symlinks true
 
 :: Remove entry with sh.exe from PATH to fix error with MinGW toolchain
 :: (For MinGW make to work correctly sh.exe must NOT be in your path)
