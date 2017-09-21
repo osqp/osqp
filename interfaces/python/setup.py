@@ -158,6 +158,11 @@ class build_ext_osqp(build_ext):
         os.makedirs(osqp_build_dir)
         os.chdir(osqp_build_dir)
 
+        try:
+            call(['cmake', '--version'])
+        except OSError:
+            raise RuntimeError("CMake must be installed to build OSQP")
+
         # Compile static library with CMake
         call(['cmake'] + cmake_args + ['..'])
         call(['cmake', '--build', '.', '--target', 'osqpdirstatic'])
