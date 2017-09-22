@@ -129,7 +129,7 @@ def solve_problem(name, settings):
     # res = s.solve()
 
     if res.info.status_val != \
-            s.constant('OSQP_OPTIMAL'):
+            s.constant('OSQP_SOLVED'):
             solved = False
     else:
         solved = True
