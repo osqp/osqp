@@ -106,17 +106,6 @@ typedef float c_float;                /* for numerical values  */
 #endif
 
 
-#if EMBEDDED != 1
-
-#include <math.h>
-#ifndef DFLOAT // Doubles
-#define c_sqrt sqrt
-#else         // Floats
-#define c_sqrt sqrtf
-#endif
-
-#endif // end EMBEDDED
-
 
 /* Use customized constants -----------------------------------------------   */
 #ifndef OSQP_NULL
@@ -146,6 +135,18 @@ typedef float c_float;                /* for numerical values  */
 #endif
 
 /* Use customized functions -----------------------------------------------   */
+
+#if EMBEDDED != 1
+
+#include <math.h>
+#ifndef DFLOAT // Doubles
+#define c_sqrt sqrt
+#else         // Floats
+#define c_sqrt sqrtf
+#endif
+
+#endif // end EMBEDDED
+
 
 #ifdef PRINTING
 #include <stdio.h>

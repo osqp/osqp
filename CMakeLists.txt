@@ -87,22 +87,6 @@ option (ENABLE_MKL_PARDISO "Enable MKL Pardiso solver" ON)
 message(STATUS "MKL Pardiso: ${ENABLE_MKL_PARDISO}")
 
 
-# Find linear system solvers
-# ---------------------------------------------
-if (ENABLE_MKL_PARDISO)
-	option(MKL_USE_SINGLE_DYNAMIC_LIBRARY "Use MKL single dynamic library interface" ON)
-	message(STATUS "MKL single dynamic library (SDL) ${MKL_USE_SINGLE_DYNAMIC_LIBRARY}")
-	if (NOT MKL_USE_SINGLE_DYNAMIC_LIBRARY)
-		option(MKL_USE_STATIC_LIBRARIES "Use MKL in static library interface" ON)
-		message(STATUS "MKL static library interface ${MKL_USE_STATIC_LIBRARIES}")
-		option(MKL_MULTI_THREADED "Use MKL multi threading in static library interface" ON)
-		message(STATUS "MKL multi threading ${MKL_MULTI_THREADED}")
-	endif()
-
-	# Find MKL Pardiso
-	find_package(MKL REQUIRED)
-endif()
-
 # Generate header file with the global options
 # ---------------------------------------------
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/glob_opts.h.in
@@ -265,7 +249,6 @@ include_directories(${linsys_solvers_includes})
 
 
 add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
-target_link_libraries(osqpstatic ${linsys_solvers_libraries})
 
 
 if (MATLAB)
@@ -283,7 +266,6 @@ if (NOT PYTHON AND NOT MATLAB)
     # Create osqp shared library
     # NB: Add all the linear system solvers here
     add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
-    target_link_libraries(osqp ${linsys_solvers_libraries})
 
     # Create demo executable (linked to static library)
     add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)

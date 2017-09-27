@@ -19,8 +19,8 @@ A = sparse.eye(n).tocsc()
 l = -1 * np.ones(n)
 u = 1 * np.ones(n)
 
-l += 10
-u += 10
+# l += 10
+# u += 10
 
 # l *= 1000
 # u *= 1000
@@ -44,9 +44,9 @@ q = sp.randn(n)
 # q = q
 
 # Test
-rho = 10.
+rho = 0.1
 # rho=10.0
-q /= 100
+# q /= 100
 # P *= 100
 # q *= 2000
 
@@ -62,17 +62,18 @@ osqp_opts = {'rho': rho,
              'scaling': True,
              'scaling_norm': -1,
              'max_iter': 2500,
-             'verbose': True
+             'verbose': True,
+             'linsys_solver': 2
              }
 
 qp = mpbpy.QuadprogProblem(P, q, A, l, u)
-res_gurobi = qp.solve(solver=mpbpy.GUROBI, verbose=True)
+res_gurobi = qp.solve(solver=mpbpy.GUROBI, verbose=False)
 # res_purepy = qp.solve(solver=mpbpy.OSQP_PUREPY, **osqp_opts)
 # res_osqp = qp.solve(solver=mpbpy.OSQP, **osqp_opts)
-
-model = osqppurepy.OSQP()
-model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
-res_osqppurepy = model.solve()
+#
+# model = osqppurepy.OSQP()
+# model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
+# res_osqppurepy = model.solve()
 
 model = osqp.OSQP()
 model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
@@ -83,20 +84,20 @@ res_osqp = model.solve()
 if res_gurobi.status == 'optimal':
     print("Difference Purepy vs Gurobi")
     print("  - primal = %.4f" %
-          (np.linalg.norm(res_gurobi.x - res_osqppurepy.x) /
+          (np.linalg.norm(res_gurobi.x - res_osqp.x) /
            np.linalg.norm(res_gurobi.x)))
     print("  - dual = %.4f" %
-          (np.linalg.norm(res_gurobi.y - res_osqppurepy.y) /
+          (np.linalg.norm(res_gurobi.y - res_osqp.y) /
            np.linalg.norm(res_gurobi.y)))
 
 
 # Solve with SCS
-import cvxpy
-x = cvxpy.Variable(n)
-objective = cvxpy.Minimize(cvxpy.quad_form(x, P) + q * x)
-constraints = [l <= A * x, A * x <= u]
-problem = cvxpy.Problem(objective, constraints)
-problem.solve(solver=cvxpy.SCS, verbose=True)
+# import cvxpy
+# x = cvxpy.Variable(n)
+# objective = cvxpy.Minimize(cvxpy.quad_form(x, P) + q * x)
+# constraints = [l <= A * x, A * x <= u]
+# problem = cvxpy.Problem(objective, constraints)
+# problem.solve(solver=cvxpy.SCS, verbose=True)
 
 
 # # Store optimal values

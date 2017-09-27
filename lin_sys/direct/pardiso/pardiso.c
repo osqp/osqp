@@ -1,16 +1,26 @@
-
 #include "pardiso.h"
+#include "PardisoLoader.h"
 
 #define MKL_INT c_int
-#include "mkl.h"
-#include "types.h"
+#define PARDISOLIBNAME "mkl_rt." SHAREDLIBEXT
 
+// Single Dynamic library interface
+#define MKL_INTERFACE_LP64  0x0
+#define MKL_INTERFACE_ILP64 0x1
 
 // Solver Phases
-#define PARDISO_SYMBOLIC (11)
-#define PARDISO_NUMERIC (22)
-#define PARDISO_SOLVE (33)
-#define PARDISO_CLEANUP (-1)
+#define PARDISO_SYMBOLIC  (11)
+#define PARDISO_NUMERIC   (22)
+#define PARDISO_SOLVE     (33)
+#define PARDISO_CLEANUP   (-1)
+
+
+// Prototypes for Pardiso functions
+void pardiso(void**, const c_int*, const c_int*, const c_int*, const c_int*,
+             const c_int*, const c_float*, const c_int*, const c_int*,
+             const c_int*, const c_int*, c_int*, const c_int*, c_float*,
+             c_float*, const c_int*);
+c_int mkl_set_interface_layer(c_int);
 
 
 // Free LDL Factorization structure
@@ -22,6 +32,13 @@ void free_linsys_solver_pardiso(pardiso_solver *s) {
         pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
                  &(s->n), &(s->fdum), s->KKT->p, s->KKT->i, &(s->idum), &(s->nrhs),
                  s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
+
+        // Unload Pardiso library
+         if ( LSL_unloadPardisoLib() ) {
+             #ifdef PRINTING
+                 c_print("Unsuccessful unloading of Pardiso MKL shared library.\n");
+             #endif
+         }
 
         // Check each attribute of s and free it if it exists
         if (s->KKT)
@@ -49,6 +66,12 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
     // Define Variables
     pardiso_solver * s;          // Pardiso solver structure
     c_int n_plus_m;              // n_plus_m dimension
+
+    // Load Pardiso library
+    if ( LSL_loadPardisoLib(OSQP_NULL) ) {
+        c_print("Selected linear solver Pardiso not available.\nTried to obtain Pardiso from shared library.");
+        return OSQP_NULL;
+    }
 
     // Size of KKT
     n_plus_m = P->m + A->m;
@@ -102,7 +125,7 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
     #endif
 
     // Set Pardiso variables
-    s->mtype = -2;        // Real symmetric matrix
+    s->mtype = -2;        // Real symmetric indefinite matrix
     s->nrhs = 1;          // Number of right hand sides
     s->maxfct = 1;        // Maximum number of numerical factorizations
     s->mnum = 1;          // Which factorization to use
@@ -117,7 +140,7 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
     s->iparm[5] = 1;      // Write solution into b
     s->iparm[7] = 2;      // Max number of iterative refinement steps
     s->iparm[9] = 13;     // Perturb the pivot elements with 1E-13
-    s->iparm[34] = 1;     // PARDISO use C-style indexing for indices
+    s->iparm[34] = 1;     // Use C-style indexing for indices
 
     // Reordering and symbolic factorization
     s->phase = PARDISO_SYMBOLIC;
@@ -126,7 +149,7 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
              s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
     if ( s->error != 0 ){
         #ifdef PRINTING
-            c_print("\nERROR during symbolic factorization: %d", (int)s->error);
+            c_print("\nERROR during symbolic factorization: %d", s->error);
         #endif
         free_linsys_solver_pardiso(s);
         return OSQP_NULL;
@@ -139,7 +162,7 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
              s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
     if ( s->error != 0 ){
         #ifdef PRINTING
-            c_print("\nERROR during numerical factorization: %d", (int)s->error);
+            c_print("\nERROR during numerical factorization: %d", s->error);
         #endif
         free_linsys_solver_pardiso(s);
         return OSQP_NULL;
@@ -166,7 +189,7 @@ c_int solve_linsys_pardiso(pardiso_solver * s, c_float * b, const OSQPSettings *
              s->iparm, &(s->msglvl), b, s->bp, &(s->error));
     if ( s->error != 0 ){
         #ifdef PRINTING
-        c_print("\nERROR during solution: %d", (int)s->error);
+        c_print("\nERROR during solution: %d", s->error);
         #endif
         return 1;
     }
