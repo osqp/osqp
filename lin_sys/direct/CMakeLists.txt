@@ -15,6 +15,9 @@ set(direct_linsys_solvers $<TARGET_OBJECTS:linsys_suitesparse_ldl>)
 set(direct_linsys_solvers_includes ${suitesparse_ldl_includes})
 
 
+# Add other solvers if embedded option is false
+if(NOT DEFINED EMBEDDED)
+
 # MKL Pardiso MKL
 # -----------
 # If MKL Pardiso is enabled, include pardiso directory
@@ -32,6 +35,8 @@ if (ENABLE_MKL_PARDISO)
 	set(direct_linsys_solvers_includes ${direct_linsys_solvers_includes} ${pardiso_includes})
 endif()
 
+
+endif()
 
 # Make direct_linsys_solvers list visible from parent directory
 set(direct_linsys_solvers ${direct_linsys_solvers} PARENT_SCOPE)

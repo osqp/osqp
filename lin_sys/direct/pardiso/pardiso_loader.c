@@ -1,7 +1,12 @@
 #include "lib_handler.h"
 #include "pardiso_loader.h"
 
+#ifdef IS_WINDOWS
 #define PARDISOLIBNAME "mkl_rt." SHAREDLIBEXT
+#else 
+#define PARDISOLIBNAME "libmkl_rt." SHAREDLIBEXT
+#endif
+
 typedef void (*voidfun)(void);
 
 voidfun lh_load_sym (soHandle_t h, const char *symName);
@@ -38,7 +43,7 @@ c_int mkl_set_interface_layer(c_int code) {
 
 
 
-int lh_load_pardiso(const char* libname) {
+c_int lh_load_pardiso(const char* libname) {
     // Load Pardiso library
     if (libname) {
         Pardiso_handle = lh_load_lib(libname);
@@ -58,7 +63,7 @@ int lh_load_pardiso(const char* libname) {
     return 0;
 }
 
-int lh_unload_pardiso() {
+c_int lh_unload_pardiso() {
     int rc;
 
     if (Pardiso_handle == OSQP_NULL)

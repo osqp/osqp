@@ -1,5 +1,5 @@
 #include "lib_handler.h"
-
+#include <ctype.h> // Needed for tolower functions
 
 soHandle_t lh_load_lib(const char *libName) {
     soHandle_t h = OSQP_NULL;
@@ -20,10 +20,11 @@ soHandle_t lh_load_lib(const char *libName) {
         #endif
     }
 #else
-    h = dlopen (libName, RTLD_NOW);
+    h = dlopen (libName, RTLD_LAZY);
     if (!h) {
         #ifdef PRINTING
         c_print("Error while loading dynamic library %s.\n", libName);
+	c_print("%s\n", dlerror());
         #endif
     }
 #endif
