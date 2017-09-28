@@ -8,7 +8,7 @@ set(
     pardiso_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/pardiso.h
     ${CMAKE_CURRENT_SOURCE_DIR}/pardiso.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/PardisoLoader.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/PardisoLoader.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/pardiso_loader.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/pardiso_loader.c
     PARENT_SCOPE
 )

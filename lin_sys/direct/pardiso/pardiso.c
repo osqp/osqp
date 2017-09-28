@@ -1,5 +1,4 @@
 #include "pardiso.h"
-#include "PardisoLoader.h"
 
 #define MKL_INT c_int
 #define PARDISOLIBNAME "mkl_rt." SHAREDLIBEXT
@@ -33,26 +32,13 @@ void free_linsys_solver_pardiso(pardiso_solver *s) {
                  &(s->n), &(s->fdum), s->KKT->p, s->KKT->i, &(s->idum), &(s->nrhs),
                  s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
 
-        // Unload Pardiso library
-         if ( LSL_unloadPardisoLib() ) {
-             #ifdef PRINTING
-                 c_print("Unsuccessful unloading of Pardiso MKL shared library.\n");
-             #endif
-         }
-
-        // Check each attribute of s and free it if it exists
-        if (s->KKT)
-            csc_spfree(s->KKT);
-        if (s->bp)
-            c_free(s->bp);
-        if (s->Pdiag_idx)
-            c_free(s->Pdiag_idx);
-        if (s->PtoKKT)
-            c_free(s->PtoKKT);
-        if (s->AtoKKT)
-            c_free(s->AtoKKT);
-        if (s->rhotoKKT)
-            c_free(s->rhotoKKT);
+        // Check each attribute of the structure and free it if it exists
+        if (s->KKT)       csc_spfree(s->KKT);
+        if (s->bp)        c_free(s->bp);
+        if (s->Pdiag_idx) c_free(s->Pdiag_idx);
+        if (s->PtoKKT)    c_free(s->PtoKKT);
+        if (s->AtoKKT)    c_free(s->AtoKKT);
+        if (s->rhotoKKT)  c_free(s->rhotoKKT);
 
         c_free(s);
 
@@ -66,12 +52,6 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
     // Define Variables
     pardiso_solver * s;          // Pardiso solver structure
     c_int n_plus_m;              // n_plus_m dimension
-
-    // Load Pardiso library
-    if ( LSL_loadPardisoLib(OSQP_NULL) ) {
-        c_print("Selected linear solver Pardiso not available.\nTried to obtain Pardiso from shared library.");
-        return OSQP_NULL;
-    }
 
     // Size of KKT
     n_plus_m = P->m + A->m;

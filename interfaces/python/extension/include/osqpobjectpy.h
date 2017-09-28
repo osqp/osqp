@@ -207,11 +207,9 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                  "Px", "Pi", "Pp", "q",           // Cost function
                                  "Ax", "Ai", "Ap", "l", "u",      // Constraints
                                  "scaling", "scaling_iter", "scaling_norm",
-                                 "rho", "sigma", "max_iter",
-                                 "eps_abs", "eps_rel", "eps_prim_inf", "eps_dual_inf", "alpha",
-								 "linsys_solver", "delta", "polish", "pol_refine_iter", "auto_rho", "verbose",
-                                 "scaled_termination", "early_terminate", "early_terminate_interval",
-								 "warm_start", NULL};  // Settings
+                                 "rho", "sigma", "max_iter", "eps_abs", "eps_rel", "eps_prim_inf", "eps_dual_inf", "alpha", "delta", "linsys_solver", "polish",
+																 "pol_refine_iter", "auto_rho", "verbose", "scaled_termination",
+																 "early_terminate", "early_terminate_interval", "warm_start", NULL};  // Settings
 
 
         #ifdef DLONG
@@ -260,15 +258,15 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                          &settings->eps_prim_inf,
                                          &settings->eps_dual_inf,
                                          &settings->alpha,
-										 &settings->linsys_solver,
                                          &settings->delta,
+																				 &settings->linsys_solver,
                                          &settings->polish,
-					  			 	     &settings->pol_refine_iter,
-										 &settings->auto_rho,
+																				 &settings->pol_refine_iter,
+																				 &settings->auto_rho,
                                          &settings->verbose,
                                          &settings->scaled_termination,
                                          &settings->early_terminate,
-					 				 	 &settings->early_terminate_interval,
+																				 &settings->early_terminate_interval,
                                          &settings->warm_start)) {
                 return NULL;
         }

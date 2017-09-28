@@ -13,36 +13,22 @@
 // Free LDL Factorization structure
 void free_linsys_solver_suitesparse_ldl(suitesparse_ldl_solver *s) {
     if (s) {
-        if (s->L)
-            csc_spfree(s->L);
-        if (s->P)
-            c_free(s->P);
-        if (s->Dinv)
-            c_free(s->Dinv);
-        if (s->bp)
-            c_free(s->bp);
+        if (s->L)         csc_spfree(s->L);
+        if (s->P)         c_free(s->P);
+        if (s->Dinv)      c_free(s->Dinv);
+        if (s->bp)        c_free(s->bp);
 
         // These are required for matrix updates
-        if (s->Pdiag_idx)
-            c_free(s->Pdiag_idx);
-        if (s->KKT)
-            csc_spfree(s->KKT);
-        if (s->PtoKKT)
-            c_free(s->PtoKKT);
-        if (s->AtoKKT)
-            c_free(s->AtoKKT);
-        if (s->rhotoKKT)
-            c_free(s->rhotoKKT);
-        if (s->Parent)
-            c_free(s->Parent);
-        if (s->Lnz)
-            c_free(s->Lnz);
-        if (s->Flag)
-            c_free(s->Flag);
-        if (s->Pattern)
-            c_free(s->Pattern);
-        if (s->Y)
-            c_free(s->Y);
+        if (s->Pdiag_idx) c_free(s->Pdiag_idx);
+        if (s->KKT)       csc_spfree(s->KKT);
+        if (s->PtoKKT)    c_free(s->PtoKKT);
+        if (s->AtoKKT)    c_free(s->AtoKKT);
+        if (s->rhotoKKT)  c_free(s->rhotoKKT);
+        if (s->Parent)    c_free(s->Parent);
+        if (s->Lnz)       c_free(s->Lnz);
+        if (s->Flag)      c_free(s->Flag);
+        if (s->Pattern)   c_free(s->Pattern);
+        if (s->Y)         c_free(s->Y);
 
         c_free(s);
 

@@ -73,31 +73,23 @@ void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
     c_print("variables n = %i, constraints m = %i\n", (int)data->n, (int)data->m);
 
     // Print Settings
-    // Print variables and constraints
     c_print("Settings: ");
     c_print("linear system solver = %s,\n          ",
             SOLVER_NAME[settings->linsys_solver]);
-    // switch (settings->linsys_solver){
-    //     case SUITESPARSE_LDL_SOLVER:
-    //         c_print("SuiteSparse LDL,\n          ");
-    //         break;
-    //     case PARDISO_SOLVER:
-    //         c_print("Pardiso,\n          ");
-    //         break;
-    //     default:
-    //         c_print("SuiteSparse LDL,\n          ");
-    // }
-
-    c_print("eps_abs = %.1e, eps_rel = %.1e,\n          ", settings->eps_abs, settings->eps_rel);
-    c_print("eps_prim_inf = %.1e, eps_dual_inf = %.1e,\n          ", settings->eps_prim_inf, settings->eps_dual_inf);
+    c_print("eps_abs = %.1e, eps_rel = %.1e,\n          ",
+            settings->eps_abs, settings->eps_rel);
+    c_print("eps_prim_inf = %.1e, eps_dual_inf = %.1e,\n          ",
+            settings->eps_prim_inf, settings->eps_dual_inf);
     c_print("rho = %.2e ", settings->rho);
     if (settings->auto_rho) c_print("(auto)");
     c_print("\n          ");
-    c_print("sigma = %.1e, alpha = %.1e, \n          ", settings->sigma, settings->alpha);
+    c_print("sigma = %.1e, alpha = %.1e, \n          ",
+            settings->sigma, settings->alpha);
     c_print("max_iter = %i\n", (int)settings->max_iter);
 
     if (settings->early_terminate)
-        c_print("          early_terminate: on (interval %i)\n", (int)settings->early_terminate_interval);
+        c_print("          early_terminate: on (interval %i)\n",
+                (int)settings->early_terminate_interval);
     else
         c_print("          early_terminate: off \n");
     if (settings->scaling){

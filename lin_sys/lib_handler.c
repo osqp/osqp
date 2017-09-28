@@ -1,7 +1,7 @@
-#include "LibraryHandler.h"
+#include "lib_handler.h"
 
 
-soHandle_t LSL_loadLib(const char *libName) {
+soHandle_t lh_load_lib(const char *libName) {
     soHandle_t h = OSQP_NULL;
 
     if (!libName) {
@@ -29,10 +29,10 @@ soHandle_t LSL_loadLib(const char *libName) {
 #endif
 
     return h;
-} /* LSL_loadLib */
+} /* lh_load_lib */
 
 
-c_int LSL_unloadLib (soHandle_t h) {
+c_int lh_unload_lib (soHandle_t h) {
     c_int rc = 1;
 
 #ifdef IS_WINDOWS
@@ -58,9 +58,9 @@ typedef void* symtype;
  * The method does six attempts to load the symbol. Next to its given name, it also tries variations of lower case and upper case form and with an extra underscore.
  * @param h Handle of dynamically linked library.
  * @param symName Name of the symbol to load.
- * @return A pointer to the symbol, or NULL if not found.
+ * @return A pointer to the symbol, or OSQP_NULL if not found.
  */
-symtype LSL_loadSym (soHandle_t h, const char *symName) {
+symtype lh_load_sym (soHandle_t h, const char *symName) {
     symtype s;
     const char *from;
     char *to;
@@ -72,8 +72,8 @@ symtype LSL_loadSym (soHandle_t h, const char *symName) {
     size_t symLen;
     int trip;
 
-    s = NULL;
-    err = NULL;
+    s = OSQP_NULL;
+    err = OSQP_NULL;
 
     /* search in this order:
      *  1. original
@@ -136,7 +136,7 @@ symtype LSL_loadSym (soHandle_t h, const char *symName) {
         }
 #else
         s = dlsym (h, tripSym);
-        err = dlerror();  /* we have only one chance; a successive call to dlerror() returns NULL */
+        err = dlerror();  /* we have only one chance; a successive call to dlerror() returns OSQP_NULL */
         if (err) {
             #ifdef PRINTING
             c_print("Cannot find symbol %s in dynamic library, error = %s.",
@@ -149,4 +149,4 @@ symtype LSL_loadSym (soHandle_t h, const char *symName) {
     } /* end loop over symbol name variations */
 
     return OSQP_NULL;
-} /* LSL_loadSym */
+} /* lh_load_sym */

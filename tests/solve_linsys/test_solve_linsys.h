@@ -74,6 +74,11 @@ static char * test_solveKKT_pardiso(){
     rho_vec = c_calloc(m, sizeof(c_float));
     vec_add_scalar(rho_vec, settings->rho, m);
 
+    // Load Pardiso shared library
+    exitflag = load_linsys_solver(PARDISO_SOLVER);
+    mu_assert("Linear system solve test: error in loading Pardiso shared library",
+              exitflag == 0);
+
     // Form and factorize KKT matrix
     p = init_linsys_solver(data->test_solve_KKT_Pu, data->test_solve_KKT_A,
                            settings->sigma, rho_vec, PARDISO_SOLVER, 0);
@@ -91,6 +96,9 @@ static char * test_solveKKT_pardiso(){
     c_free(settings);
     c_free(rho_vec);
     clean_problem_solve_linsys_sols_data(data);
+
+    // Unload Pardiso shared library
+    exitflag = unload_linsys_solver(PARDISO_SOLVER);
 
     return 0;
 }

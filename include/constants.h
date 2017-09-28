@@ -32,7 +32,7 @@ extern "C" {
  *************************/
 enum linsys_solver_type {SUITESPARSE_LDL_SOLVER, PARDISO_SOLVER};
 static const char *SOLVER_NAME[] = {
-  "Suitesparse LDL", "Pardiso"
+  "Suitesparse LDL", "MKL Pardiso"
 };
 /**********************************
  * Solver Parameters and Settings *

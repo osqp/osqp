@@ -6,18 +6,18 @@ import numpy as np
 import mathprogbasepy as mpbpy
 sp.random.seed(2)
 
-n = 200
-m = 500
-# A = sparse.random(m, n, density=0.1,
-#                   data_rvs=np.random.randn,
-#                   format='csc')
-# l = -1. - np.random.rand(m)
-# u = 1 + np.random.rand(m)
+n = 500
+m = 2500
+A = sparse.random(m, n, density=0.5,
+                  data_rvs=np.random.randn,
+                  format='csc')
+l = -1. - np.random.rand(m)
+u = 1 + np.random.rand(m)
 
 
-A = sparse.eye(n).tocsc()
-l = -1 * np.ones(n)
-u = 1 * np.ones(n)
+# A = sparse.eye(n).tocsc()
+# l = -1 * np.ones(n)
+# u = 1 * np.ones(n)
 
 # l += 10
 # u += 10
@@ -32,7 +32,7 @@ u = 1 * np.ones(n)
 # l[6] = l[5] + 2.
 # u[6] = l[6] + 3.
 
-P = sparse.random(n, n, density=0.9,
+P = sparse.random(n, n, density=0.5,
                   data_rvs=np.random.randn,
                   format='csc')
 P = P.dot(P.T)
@@ -63,7 +63,7 @@ osqp_opts = {'rho': rho,
              'scaling_norm': -1,
              'max_iter': 2500,
              'verbose': True,
-             'linsys_solver': 2
+             'linsys_solver': 0
              }
 
 qp = mpbpy.QuadprogProblem(P, q, A, l, u)
@@ -75,14 +75,24 @@ res_gurobi = qp.solve(solver=mpbpy.GUROBI, verbose=False)
 # model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
 # res_osqppurepy = model.solve()
 
+# Solve with SuiteSparse LDL
 model = osqp.OSQP()
 model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
 res_osqp = model.solve()
 
+# Solve with Pardiso
+model2 = osqp.OSQP()
+osqp_opts['linsys_solver'] = 1
+model2.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
+res_osqp2 = model2.solve()
+
+print("Difference SuiteSparse LDL vs Pardiso")
+print("SuiteSparse LDL runtime = %.4f" % res_osqp.info.run_time)
+print("Pardiso runtime         = %.4f" % res_osqp2.info.run_time)
 
 # Check difference with gurobi
 if res_gurobi.status == 'optimal':
-    print("Difference Purepy vs Gurobi")
+    print("Difference OSQP vs Gurobi")
     print("  - primal = %.4f" %
           (np.linalg.norm(res_gurobi.x - res_osqp.x) /
            np.linalg.norm(res_gurobi.x)))

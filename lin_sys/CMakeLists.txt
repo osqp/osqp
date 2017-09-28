@@ -14,8 +14,8 @@ add_subdirectory(direct)
 # Combine solvers
 # TODO: Add indirect ones
 set(linsys_solvers
-    ${CMAKE_CURRENT_SOURCE_DIR}/LibraryHandler.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/LibraryHandler.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib_handler.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib_handler.h
     ${direct_linsys_solvers}
     PARENT_SCOPE)
 

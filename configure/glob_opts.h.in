@@ -31,8 +31,8 @@ extern "C" {
 // DLONG
 #cmakedefine DLONG
 
-// MKL_FOUND
-#cmakedefine MKL_FOUND
+// ENABLE_MKL_PARDISO
+#cmakedefine ENABLE_MKL_PARDISO
 
 
 /* DATA CUSTOMIZATIONS (depending on memory manager)-----------------------   */

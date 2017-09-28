@@ -119,15 +119,25 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     // Set type of constraints
     set_rho_vec(work);
 
+    // Load linear system solver
+    if ( load_linsys_solver(work->settings->linsys_solver) ) {
+        #ifdef PRINTING
+        c_print("%s linear system solver not available.\nTried to obtain it from shared library.\n",
+                SOLVER_NAME[work->settings->linsys_solver]);
+        #endif
+        osqp_cleanup(work);
+        return OSQP_NULL;
+    }
+
     // Initialize linear system solver structure
     work->linsys_solver = init_linsys_solver(work->data->P, work->data->A,
                                              work->settings->sigma, work->rho_vec,
                                              work->settings->linsys_solver, 0);
-    if (!work->linsys_solver){
+    if (!work->linsys_solver) {
         #ifdef PRINTING
         c_print("ERROR: Linear systems solver initialization failure!\n");
         #endif
-
+        osqp_cleanup(work);
         return OSQP_NULL;
     }
 
@@ -383,106 +393,76 @@ c_int osqp_cleanup(OSQPWorkspace * work){
     if (work) { // If workspace has been allocated
         // Free Data
         if (work->data) {
-            if (work->data->P)
-                csc_spfree(work->data->P);
-            if (work->data->A)
-                csc_spfree(work->data->A);
-            if (work->data->q)
-                c_free(work->data->q);
-            if (work->data->l)
-                c_free(work->data->l);
-            if (work->data->u)
-                c_free(work->data->u);
+            if (work->data->P)        csc_spfree(work->data->P);
+            if (work->data->A)        csc_spfree(work->data->A);
+            if (work->data->q)        c_free(work->data->q);
+            if (work->data->l)        c_free(work->data->l);
+            if (work->data->u)        c_free(work->data->u);
             c_free(work->data);
         }
 
         // Free scaling
         if (work->settings->scaling) {
-            if (work->scaling->D)
-                c_free(work->scaling->D);
-            if (work->scaling->Dinv)
-                c_free(work->scaling->Dinv);
-            if (work->scaling->E)
-                c_free(work->scaling->E);
-            if (work->scaling->Einv)
-                c_free(work->scaling->Einv);
+            if (work->scaling->D)     c_free(work->scaling->D);
+            if (work->scaling->Dinv)  c_free(work->scaling->Dinv);
+            if (work->scaling->E)     c_free(work->scaling->E);
+            if (work->scaling->Einv)  c_free(work->scaling->Einv);
             c_free(work->scaling);
 
             // Free workspace variables
-            if (work->D_temp) c_free(work->D_temp);
-            if (work->D_temp_A) c_free(work->D_temp_A);
-            if (work->E_temp) c_free(work->E_temp);
+            if (work->D_temp)         c_free(work->D_temp);
+            if (work->D_temp_A)       c_free(work->D_temp_A);
+            if (work->E_temp)         c_free(work->E_temp);
         }
 
         // Free linear system solver structure
         work->linsys_solver->free(work->linsys_solver);
 
+        // Unload linear system solver
+        exitflag = unload_linsys_solver(work->settings->linsys_solver);
+
         // Free active constraints structure
         if (work->pol) {
-            if (work->pol->Alow_to_A)
-                c_free(work->pol->Alow_to_A);
-            if (work->pol->Aupp_to_A)
-                c_free(work->pol->Aupp_to_A);
-            if (work->pol->A_to_Alow)
-                c_free(work->pol->A_to_Alow);
-            if (work->pol->A_to_Aupp)
-                c_free(work->pol->A_to_Aupp);
-            if (work->pol->x)
-                c_free(work->pol->x);
-            if (work->pol->z)
-                c_free(work->pol->z);
-            if (work->pol->y)
-                c_free(work->pol->y);
+            if (work->pol->Alow_to_A) c_free(work->pol->Alow_to_A);
+            if (work->pol->Aupp_to_A) c_free(work->pol->Aupp_to_A);
+            if (work->pol->A_to_Alow) c_free(work->pol->A_to_Alow);
+            if (work->pol->A_to_Aupp) c_free(work->pol->A_to_Aupp);
+            if (work->pol->x)         c_free(work->pol->x);
+            if (work->pol->z)         c_free(work->pol->z);
+            if (work->pol->y)         c_free(work->pol->y);
             c_free(work->pol);
         }
 
         // Free other Variables
-        if (work->x)
-            c_free(work->x);
-        if (work->z)
-            c_free(work->z);
-        if (work->xz_tilde)
-            c_free(work->xz_tilde);
-        if (work->x_prev)
-            c_free(work->x_prev);
-        if (work->z_prev)
-            c_free(work->z_prev);
-        if (work->y)
-            c_free(work->y);
+        if (work->x)                  c_free(work->x);
+        if (work->z)                  c_free(work->z);
+        if (work->xz_tilde)           c_free(work->xz_tilde);
+        if (work->x_prev)             c_free(work->x_prev);
+        if (work->z_prev)             c_free(work->z_prev);
+        if (work->y)                  c_free(work->y);
 
-        if (work->delta_y)
-            c_free(work->delta_y);
-        if (work->Atdelta_y)
-            c_free(work->Atdelta_y);
-
-        if (work->delta_x)
-            c_free(work->delta_x);
-        if (work->Pdelta_x)
-            c_free(work->Pdelta_x);
-        if (work->Adelta_x)
-            c_free(work->Adelta_x);
+        if (work->delta_y)            c_free(work->delta_y);
+        if (work->Atdelta_y)          c_free(work->Atdelta_y);
+        if (work->delta_x)            c_free(work->delta_x);
+        if (work->Pdelta_x)           c_free(work->Pdelta_x);
+        if (work->Adelta_x)           c_free(work->Adelta_x);
 
         // Free Settings
-        if (work->settings)
-            c_free(work->settings);
+        if (work->settings)           c_free(work->settings);
 
         // Free solution
         if (work->solution) {
-            if (work->solution->x)
-                c_free(work->solution->x);
-            if (work->solution->y)
-                c_free(work->solution->y);
+            if (work->solution->x)    c_free(work->solution->x);
+            if (work->solution->y)    c_free(work->solution->y);
             c_free(work->solution);
         }
 
         // Free information
-        if (work->info)
-            c_free(work->info);
+        if (work->info)               c_free(work->info);
 
         // Free timer
         #ifdef PROFILING
-        if (work->timer)
-            c_free(work->timer);
+        if (work->timer)              c_free(work->timer);
         #endif
 
         // Free work
