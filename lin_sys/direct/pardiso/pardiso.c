@@ -134,7 +134,8 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
     s->iparm[0] = 1;      // No solver default
     s->iparm[1] = 3;      // Fill-in reordering from OpenMP
     s->iparm[5] = 1;      // Write solution into b
-    s->iparm[7] = 2;      // Max number of iterative refinement steps
+    /* s->iparm[7] = 2;      // Max number of iterative refinement steps */
+    s->iparm[7] = 0;      // Number of iterative refinement steps (auto, performs them only if perturbed pivots are obtained)
     s->iparm[9] = 13;     // Perturb the pivot elements with 1E-13
     s->iparm[34] = 0;     // Use Fortran-style indexing for indices
     /* s->iparm[34] = 1;     // Use C-style indexing for indices */
