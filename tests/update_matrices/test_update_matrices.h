@@ -58,6 +58,8 @@ static char * test_form_KKT(){
     c_free(Pdiag_idx);
     csc_spfree(Ptriu);
     csc_spfree(KKT);
+    c_free(rho_vec);
+    c_free(rho_inv_vec);
     c_free(AtoKKT);
     c_free(PtoKKT);
     return 0;

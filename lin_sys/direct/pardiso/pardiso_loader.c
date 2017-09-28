@@ -19,13 +19,14 @@ typedef void (*pardiso_t)(void**, const c_int*, const c_int*, const c_int*,
                           const c_int*, c_int*, const c_int*, c_float*,
                           c_float*, const c_int*);
 typedef int (*mkl_set_ifl_t)(int);
+typedef int (*mkl_get_mt_t)();
 
 
 // Handlers are static variables
 static soHandle_t Pardiso_handle = OSQP_NULL;
 static pardiso_t func_pardiso = OSQP_NULL;
 static mkl_set_ifl_t func_mkl_set_interface_layer = OSQP_NULL;
-
+static mkl_get_mt_t func_mkl_get_max_threads = OSQP_NULL;
 
 // Wrappers for loaded Pardiso function handlers
 void pardiso(void** pt, const c_int* maxfct, const c_int* mnum,
@@ -37,10 +38,14 @@ void pardiso(void** pt, const c_int* maxfct, const c_int* mnum,
     func_pardiso(pt, maxfct, mnum, mtype, phase, n, a, ia, ja,
                  perm, nrhs, iparm, msglvl, b, x, error);
 }
+
 c_int mkl_set_interface_layer(c_int code) {
     return (c_int)func_mkl_set_interface_layer((int)code);
 }
 
+c_int mkl_get_max_threads() {
+    return (c_int)func_mkl_get_max_threads();
+}
 
 
 c_int lh_load_pardiso(const char* libname) {
@@ -59,6 +64,10 @@ c_int lh_load_pardiso(const char* libname) {
     func_mkl_set_interface_layer = (mkl_set_ifl_t)lh_load_sym(Pardiso_handle,
                                                     "MKL_Set_Interface_Layer");
     if (!func_mkl_set_interface_layer) return 1;
+
+    func_mkl_get_max_threads = (mkl_get_mt_t)lh_load_sym(Pardiso_handle,
+                                                    "MKL_Get_Max_Threads");
+    if (!func_mkl_get_max_threads) return 1;
 
     return 0;
 }

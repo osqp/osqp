@@ -30,7 +30,10 @@ struct suitesparse_ldl {
     c_int (*update_matrices)(struct suitesparse_ldl * self, const csc *P, const csc *A, const OSQPSettings *settings); ///< Update solver matrices
     c_int (*update_rho_vec)(struct suitesparse_ldl * self, const c_float * rho_vec, const c_int m); ///< Update solver matrices
     #endif
-
+    
+    #ifndef EMBEDDED
+    c_int nthreads;
+    #endif
     /** @} */
 
 

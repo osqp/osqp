@@ -175,7 +175,7 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     // Print header
     #ifdef PRINTING
     if (work->settings->verbose)
-        print_setup_header(work->data, work->settings);
+        print_setup_header(work);
         work->summary_printed = 0; // Initialize last summary  to not printed
     #endif
 
@@ -434,6 +434,9 @@ c_int osqp_cleanup(OSQPWorkspace * work){
         }
 
         // Free other Variables
+        if (work->constr_type)        c_free(work->constr_type);
+        if (work->rho_vec)            c_free(work->rho_vec);
+        if (work->rho_inv_vec)        c_free(work->rho_inv_vec);
         if (work->x)                  c_free(work->x);
         if (work->z)                  c_free(work->z);
         if (work->xz_tilde)           c_free(work->xz_tilde);

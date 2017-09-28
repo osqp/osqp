@@ -53,10 +53,9 @@ void c_strcpy(char dest[], const char source[]);
 #ifdef PRINTING
 /**
  * Print Header before running the algorithm
- * @param data     problem data
- * @param settings osqp settings
+ * @param work     osqp workspace 
  */
-void print_setup_header(const OSQPData *data, const OSQPSettings *settings);
+void print_setup_header(const OSQPWorkspace * work);
 
 /**
  * Print header with data to be displayed per iteration

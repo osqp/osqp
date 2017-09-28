@@ -29,6 +29,7 @@ struct pardiso {
     c_int (*update_matrices)(struct pardiso * self, const csc *P, const csc *A, const OSQPSettings *settings); ///< Update solver matrices
     c_int (*update_rho_vec)(struct pardiso * self, const c_float * rho_vec, const c_int m); ///< Update solver matrices
 
+    c_int nthreads;
     /** @} */
 
 
@@ -37,7 +38,9 @@ struct pardiso {
      * @{
      */
     // Attributes
-    csc *KKT;         ///< KKT matrix in CSR format!
+    csc *KKT;         ///< KKT matrix (in CSR format!)
+    c_int *KKT_i;     ///< KKT column ondeces in 1-indexing for Pardiso
+    c_int *KKT_p;     ///< KKT row pointers in 1-indexing for Pardiso
     c_float *bp;      ///< workspace memory for solves (rhs)
 
     // Pardiso variables

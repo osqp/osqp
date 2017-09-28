@@ -60,7 +60,12 @@ void print_header(void){
     c_print("%s\n", HEADER[HEADER_LEN - 1]);
 }
 
-void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
+void print_setup_header(const OSQPWorkspace * work) {
+    OSQPData *data;
+    OSQPSettings * settings;
+    data = work->data;
+    settings = work->settings;
+
     print_line();
     c_print("        OSQP v%s  -  Operator Splitting QP Solver\n"
             "           (c) Bartolomeo Stellato,  Goran Banjac\n"
@@ -74,8 +79,13 @@ void print_setup_header(const OSQPData *data, const OSQPSettings *settings) {
 
     // Print Settings
     c_print("Settings: ");
-    c_print("linear system solver = %s,\n          ",
+    c_print("linear system solver = %s",
             SOLVER_NAME[settings->linsys_solver]);
+    if (work->linsys_solver->nthreads != 1){
+        c_print(" (%d threads)", work->linsys_solver->nthreads);
+    }
+    c_print(",\n          ");
+
     c_print("eps_abs = %.1e, eps_rel = %.1e,\n          ",
             settings->eps_abs, settings->eps_rel);
     c_print("eps_prim_inf = %.1e, eps_dual_inf = %.1e,\n          ",

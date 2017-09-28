@@ -284,6 +284,10 @@ struct linsys_solver {
     c_int (*update_matrices)(LinSysSolver * self, const csc *P, const csc *A, const OSQPSettings *settings); ///< Update matrices P and A in the solver
     c_int (*update_rho_vec)(LinSysSolver * s, const c_float * rho_vec, const c_int m);  ///< Update rho
     #endif
+
+#ifndef EMBEDDED
+    c_int nthreads; ///< Number of threads active
+#endif 
 };
 
 

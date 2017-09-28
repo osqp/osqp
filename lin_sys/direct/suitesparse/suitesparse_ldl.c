@@ -53,6 +53,9 @@ c_int LDL_factor(csc *A,  suitesparse_ldl_solver * p){
     c_float * Y = c_malloc(n * sizeof(c_float));
     p->L->p = (c_int *)c_malloc((1 + n) * sizeof(c_int));
 
+    // Set number of threads to 1 (single threaded)
+    p->nthreads = 1;
+
     // Symbolic factorization
     LDL_symbolic(n, A->p, A->i, p->L->p, Parent, Lnz, Flag,
          OSQP_NULL, OSQP_NULL);
