@@ -116,9 +116,9 @@ static PyObject * OSQP_solve(OSQP *self)
         #ifdef DLONG
 
         #ifdef DFLOAT
-        argparse_string = "lOllfffffff";
+        argparse_string = "LOLLfffffff";
         #else
-        argparse_string = "lOllddddddd";
+        argparse_string = "LOLLddddddd";
         #endif
 
         #else
@@ -148,9 +148,9 @@ static PyObject * OSQP_solve(OSQP *self)
         #ifdef DLONG
 
         #ifdef DFLOAT
-        argparse_string = "lOllfff";
+        argparse_string = "LOLLfff";
         #else
-        argparse_string = "lOllddd";
+        argparse_string = "LOLLddd";
         #endif
 
         #else
@@ -215,9 +215,9 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
         #ifdef DLONG
 
         #ifdef DFLOAT
-        static char * argparse_string = "(ll)O!O!O!O!O!O!O!O!O!|lllfflfffffflllllllll";
+        static char * argparse_string = "(LL)O!O!O!O!O!O!O!O!O!|LLLffLffffffLLLLLLLLL";
         #else
-        static char * argparse_string = "(ll)O!O!O!O!O!O!O!O!O!|lllddlddddddlllllllll";
+        static char * argparse_string = "(LL)O!O!O!O!O!O!O!O!O!|LLLddLddddddLLLLLLLLL";
         #endif
 
         #else
@@ -515,7 +515,7 @@ static PyObject * OSQP_update_P(OSQP *self, PyObject *args) {
 		int int_type = get_int_type();
 
 		#ifdef DLONG
-		static char * argparse_string = "OOl";
+		static char * argparse_string = "OOL";
 		#else
 		static char * argparse_string = "OOi";
 		#endif
@@ -563,7 +563,7 @@ static PyObject * OSQP_update_A(OSQP *self, PyObject *args) {
 		int int_type = get_int_type();
 
 		#ifdef DLONG
-		static char * argparse_string = "OOl";
+		static char * argparse_string = "OOL";
 		#else
 		static char * argparse_string = "OOi";
 		#endif
@@ -611,7 +611,7 @@ static PyObject * OSQP_update_P_A(OSQP *self, PyObject *args) {
 		int int_type = get_int_type();
 
 		#ifdef DLONG
-		static char * argparse_string = "OOlOOl";
+		static char * argparse_string = "OOLOOL";
 		#else
 		static char * argparse_string = "OOiOOi";
 		#endif
@@ -764,7 +764,7 @@ static PyObject *OSQP_update_max_iter(OSQP *self, PyObject *args){
     c_int max_iter_new;
 
     #ifdef DLONG
-    static char * argparse_string = "l";
+    static char * argparse_string = "L";
     #else
     static char * argparse_string = "i";
     #endif
@@ -955,7 +955,7 @@ static PyObject *OSQP_update_polish(OSQP *self, PyObject *args){
     c_int polish_new;
 
     #ifdef DLONG
-    static char * argparse_string = "l";
+    static char * argparse_string = "L";
     #else
     static char * argparse_string = "i";
     #endif
@@ -978,7 +978,7 @@ static PyObject *OSQP_update_pol_refine_iter(OSQP *self, PyObject *args){
     c_int pol_refine_iter_new;
 
     #ifdef DLONG
-    static char * argparse_string = "l";
+    static char * argparse_string = "L";
     #else
     static char * argparse_string = "i";
     #endif
@@ -1002,7 +1002,7 @@ static PyObject *OSQP_update_verbose(OSQP *self, PyObject *args){
     c_int verbose_new;
 
     #ifdef DLONG
-    static char * argparse_string = "l";
+    static char * argparse_string = "L";
     #else
     static char * argparse_string = "i";
     #endif
@@ -1025,7 +1025,7 @@ static PyObject *OSQP_update_scaled_termination(OSQP *self, PyObject *args){
     c_int scaled_termination_new;
 
     #ifdef DLONG
-    static char * argparse_string = "l";
+    static char * argparse_string = "L";
     #else
     static char * argparse_string = "i";
     #endif
@@ -1047,7 +1047,7 @@ static PyObject *OSQP_update_early_terminate(OSQP *self, PyObject *args){
     c_int early_terminate_new;
 
     #ifdef DLONG
-    static char * argparse_string = "l";
+    static char * argparse_string = "L";
     #else
     static char * argparse_string = "i";
     #endif
@@ -1071,7 +1071,7 @@ static PyObject *OSQP_update_early_terminate_interval(OSQP *self, PyObject *args
     c_int early_terminate_interval_new;
 
     #ifdef DLONG
-    static char * argparse_string = "l";
+    static char * argparse_string = "L";
     #else
     static char * argparse_string = "i";
     #endif
@@ -1094,7 +1094,7 @@ static PyObject *OSQP_update_warm_start(OSQP *self, PyObject *args){
     c_int warm_start_new;
 
     #ifdef DLONG
-    static char * argparse_string = "l";
+    static char * argparse_string = "L";
     #else
     static char * argparse_string = "i";
     #endif
