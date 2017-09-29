@@ -126,7 +126,7 @@ class data_struct(object):
         # Get index of non infinity elements in u
         u_idx = np.where(np.invert(np.isinf(np.abs(u))))[0]
 
-        # Get intersection of indeces
+        # Get intersection of indices
         idx = np.intersect1d(l_idx, u_idx)
 
         # Get reduced vectors

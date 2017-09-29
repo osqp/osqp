@@ -2,6 +2,9 @@
 #include "matrix.h"
 #include "osqp_mex.hpp"
 #include "osqp.h"
+#include "ctrlc.h"             // Needed for interrupt
+#include "suitesparse_ldl.h"   // To extract workspace for codegen
+
 
 // Interrupt handler
 extern "C" bool utIsInterruptPending(void);
@@ -196,7 +199,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       }
 
       //throw an error if linear systems solver is different than suitesparse
-      if(osqpData->work->linsys_solver->type != SUITESPARSE_LDL){
+      if(osqpData->work->linsys_solver->type != SUITESPARSE_LDL_SOLVER){
         mexErrMsgTxt("Solver setup was not performed using SuiteSparse LDL! Please perform setup with linsys_solver as SuiteSparse LDL.");
       }
 
@@ -645,6 +648,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
         if (!strcmp("OSQP_MAX_ITER_REACHED", constant)){
             plhs[0] = mxCreateDoubleScalar(OSQP_MAX_ITER_REACHED);
+            return;
+        }
+        
+        // Linear system solvers
+        if (!strcmp("SUITESPARSE_LDL_SOLVER", constant)){
+            plhs[0] = mxCreateDoubleScalar(SUITESPARSE_LDL_SOLVER);
+            return;
+        }
+        
+        if (!strcmp("PARDISO_SOLVER", constant)){
+            plhs[0] = mxCreateDoubleScalar(PARDISO_SOLVER);
             return;
         }
 

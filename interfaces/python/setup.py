@@ -5,7 +5,7 @@ from shutil import copyfile
 from numpy import get_include
 from glob import glob
 import shutil as sh
-from subprocess import call
+from subprocess import call, check_output
 from platform import system
 import os
 import sys
@@ -41,12 +41,9 @@ suitesparse_dir = os.path.join(osqp_dir, 'lin_sys', 'direct', 'suitesparse')
 # Interface files
 include_dirs = [
     get_include(),                                      # Numpy directories
-    osqp_dir,                                           # Main source folder
     os.path.join(osqp_dir, 'include'),                  # osqp.h
-    os.path.join(suitesparse_dir),                      # suitesparse_ldl.h
-    os.path.join(suitesparse_dir, 'ldl', 'include'),    # ldl.h
-    os.path.join(suitesparse_dir, 'amd', 'include'),    # amd.h
-    os.path.join(current_dir, 'extension', 'include')]  # auxiliary .h files
+    os.path.join(suitesparse_dir),                      # suitesparse_ldl headers to extract workspace for codegen
+    os.path.join('extension', 'include')]               # auxiliary .h files
 
 sources_files = glob(os.path.join('extension', 'src', '*.c'))
 
@@ -119,7 +116,7 @@ class build_ext_osqp(build_ext):
         os.chdir(osqp_build_dir)
 
         try:
-            call(['cmake', '--version'])
+            check_output(['cmake', '--version'])
         except OSError:
             raise RuntimeError("CMake must be installed to build OSQP")
 

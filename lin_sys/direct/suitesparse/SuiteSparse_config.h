@@ -52,7 +52,7 @@ extern "C" {
 
 #ifndef SuiteSparse_long
 
-#define SuiteSparse_long long
+#define SuiteSparse_long long long
 #define SuiteSparse_long_max LONG_MAX
 #define SuiteSparse_long_idd "ld"
 

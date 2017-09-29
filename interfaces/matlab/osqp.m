@@ -57,12 +57,28 @@ classdef osqp < handle
         function out = default_settings(this)
             % DEFAULT_SETTINGS get the default solver settings structure
            out = osqp_mex('default_settings', this.objectHandle);
+           switch out.linsys_solver
+               case this.constant('SUITESPARSE_LDL_SOLVER')
+                   out.linsys_solver = 'suitesparse ldl';
+               case this.constant('PARDISO_SOLVER')
+                   out.linsys_solver = 'mkl pardiso';
+               otherwise
+                   error('Unrecognized linear system solver.');
+           end
         end
 
         %%
         function out = current_settings(this)
             % CURRENT_SETTINGS
             out = osqp_mex('current_settings', this.objectHandle);
+            switch out.linsys_solver
+               case this.constant('SUITESPARSE_LDL_SOLVER')
+                   out.linsys_solver = 'suitesparse ldl';
+               case this.constant('PARDISO_SOLVER')
+                   out.linsys_solver = 'mkl pardiso';
+               otherwise
+                   error('Unrecognized linear system solver.');
+           end
         end
 
         %%
@@ -506,7 +522,7 @@ end
 function currentSettings = validateSettings(this,isInitialization,varargin)
 
 %don't allow these fields to be changed
-unmodifiableFields = {'scaling','scaling_iter', 'scaling_norm'};
+unmodifiableFields = {'scaling','scaling_iter', 'scaling_norm', 'linsys_solver'};
 
 %get the current settings
 if(isInitialization)
@@ -540,6 +556,27 @@ if(~isempty(badFieldsIdx))
     error('Unrecognized solver setting ''%s'' detected',newFields{badFieldsIdx(1)});
 end
 
+%convert linsys_solver string to integer
+if ismember('linsys_solver',newFields)
+   if ~ischar(newSettings.linsys_solver)
+       error('Setting linsys_solver is required to be a string.');
+   end
+   linsys_solver_str = lower(newSettings.linsys_solver);
+   switch linsys_solver_str
+       case 'suitesparse ldl'
+           newSettings.linsys_solver = this.constant('SUITESPARSE_LDL_SOLVER');
+       case 'mkl pardiso'
+           newSettings.linsys_solver = this.constant('PARDISO_SOLVER');
+       % Default solver: Suitesparse LDL
+       case ''
+           newSettings.linsys_solver = this.constant('SUITESPARSE_LDL_SOLVER');
+       otherwise
+           warning('Linear system solver not recognized. Using default solver Suitesparse LDL.')
+           newSettings.linsys_solver = this.constant('SUITESPARSE_LDL_SOLVER');
+   end
+end
+
+
 %check for disallowed fields if this in not an initialization call
 if(~isInitialization)
     badFieldsIdx = find(ismember(newFields,unmodifiableFields));
@@ -549,6 +586,7 @@ if(~isInitialization)
         end
     end
 end
+
 
 %check that everything is a nonnegative scalar (this check is already
 %performed in C)

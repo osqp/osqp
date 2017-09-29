@@ -92,7 +92,7 @@ def get_KKT_info(P, A, sigma, rho):
           KKT = [P + sigma I   A'
                  A             - 1/rho I]
     
-    N.B. It computes the ratio for rows but it is equal to the columns
+    NB: It computes the ratio for rows but it is equal to the columns
          one since KKT is symmetric
     '''
     # Get problem dimensions

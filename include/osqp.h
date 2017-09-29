@@ -5,20 +5,14 @@
 extern "C" {
 #endif
 
-
 /* Includes */
 #include "types.h"
-#include "auxil.h"
 #include "util.h"
-#include "scaling.h"
-#include "glob_opts.h"
 
-#ifdef CTRLC
-#include "ctrlc.h"
-#endif
 
+// Library to deal with sparse matrices enabled only if embedded not defined
 #ifndef EMBEDDED
-#include "polish.h"
+#include "cs.h"
 #endif
 
 /********************
@@ -43,7 +37,7 @@ extern "C" {
  * - setup linear system solver:
  *      - direct solver: KKT matrix factorization is performed here
  *
- * N.B. This is the only function that allocates dynamic memory and is not used during code generation
+ * NB: This is the only function that allocates dynamic memory and is not used during code generation
  *
  * @param  data         Problem data
  * @param  settings     Solver settings

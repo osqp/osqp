@@ -17,7 +17,7 @@ extern "C" {
  * [P + param1 I,            A';
  *  A             -diag(param2)]
  *
- * N.B. Only the upper triangular part is stuffed!
+ * NB: Only the upper triangular part is stuffed!
  *
  *
  *  If Pdiag_idx is not OSQP_NULL, it saves the index of the diagonal
@@ -26,10 +26,11 @@ extern "C" {
  * Similarly, if rhotoKKT is not null,
  * it saves where the values of param2 go in the final KKT matrix
  *
- * N.B. Pdiag_idx needs to be freed!
+ * NB: Pdiag_idx needs to be freed!
  *
  * @param  P          cost matrix (already just upper triangular part)
  * @param  A          linear constraint matrix
+ * @param  format     CSC (0) or CSR (1)
  * @param  param1     regularization parameter
  * @param  param2     regularization parameter (vector)
  * @param  PtoKKT     (modified) index mapping from elements of P to KKT matrix
@@ -39,7 +40,7 @@ extern "C" {
  * @param  param2toKKT    (modified) index mapping from param2 to elements of KKT
  * @return            return status flag
  */
-csc * form_KKT(const csc * P, const  csc * A, c_float param1, c_float * param2,
+csc * form_KKT(const csc * P, const  csc * A, c_int format, c_float param1, c_float * param2,
                c_int * PtoKKT, c_int * AtoKKT, c_int **Pdiag_idx, c_int *Pdiag_n, c_int * param2toKKT);
 #endif // ifndef EMBEDDED
 

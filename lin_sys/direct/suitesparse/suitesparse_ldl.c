@@ -13,36 +13,22 @@
 // Free LDL Factorization structure
 void free_linsys_solver_suitesparse_ldl(suitesparse_ldl_solver *s) {
     if (s) {
-        if (s->L)
-            csc_spfree(s->L);
-        if (s->P)
-            c_free(s->P);
-        if (s->Dinv)
-            c_free(s->Dinv);
-        if (s->bp)
-            c_free(s->bp);
+        if (s->L)         csc_spfree(s->L);
+        if (s->P)         c_free(s->P);
+        if (s->Dinv)      c_free(s->Dinv);
+        if (s->bp)        c_free(s->bp);
 
         // These are required for matrix updates
-        if (s->Pdiag_idx)
-            c_free(s->Pdiag_idx);
-        if (s->KKT)
-            csc_spfree(s->KKT);
-        if (s->PtoKKT)
-            c_free(s->PtoKKT);
-        if (s->AtoKKT)
-            c_free(s->AtoKKT);
-        if (s->rhotoKKT)
-            c_free(s->rhotoKKT);
-        if (s->Parent)
-            c_free(s->Parent);
-        if (s->Lnz)
-            c_free(s->Lnz);
-        if (s->Flag)
-            c_free(s->Flag);
-        if (s->Pattern)
-            c_free(s->Pattern);
-        if (s->Y)
-            c_free(s->Y);
+        if (s->Pdiag_idx) c_free(s->Pdiag_idx);
+        if (s->KKT)       csc_spfree(s->KKT);
+        if (s->PtoKKT)    c_free(s->PtoKKT);
+        if (s->AtoKKT)    c_free(s->AtoKKT);
+        if (s->rhotoKKT)  c_free(s->rhotoKKT);
+        if (s->Parent)    c_free(s->Parent);
+        if (s->Lnz)       c_free(s->Lnz);
+        if (s->Flag)      c_free(s->Flag);
+        if (s->Pattern)   c_free(s->Pattern);
+        if (s->Y)         c_free(s->Y);
 
         c_free(s);
 
@@ -66,6 +52,9 @@ c_int LDL_factor(csc *A,  suitesparse_ldl_solver * p){
     c_int * Pattern = c_malloc(n * sizeof(c_int));
     c_float * Y = c_malloc(n * sizeof(c_float));
     p->L->p = (c_int *)c_malloc((1 + n) * sizeof(c_int));
+
+    // Set number of threads to 1 (single threaded)
+    p->nthreads = 1;
 
     // Symbolic factorization
     LDL_symbolic(n, A->p, A->i, p->L->p, Parent, Lnz, Flag,
@@ -186,7 +175,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
     n_plus_m = P->m + A->m;
 
     // Sparse matrix L (lower triangular)
-    // N.B. Do not allocate L completely (CSC elements)
+    // NB: Do not allocate L completely (CSC elements)
     //      L will be allocated during the factorization depending on the
     //      resulting number of elements.
     p->L = c_malloc(sizeof(csc));
@@ -211,7 +200,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
             p->bp[i] = sigma;
         }
 
-        KKT_temp = form_KKT(P, A, sigma, p->bp, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
+        KKT_temp = form_KKT(P, A, 0, sigma, p->bp, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
 
         // Permute matrix
         permute_KKT(&KKT_temp, p, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
@@ -228,7 +217,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
             p->bp[i] = 1. / rho_vec[i];
         }
 
-        KKT_temp = form_KKT(P, A, sigma, p->bp,
+        KKT_temp = form_KKT(P, A, 0, sigma, p->bp,
                             p->PtoKKT, p->AtoKKT,
                             &(p->Pdiag_idx), &(p->Pdiag_n), p->rhotoKKT);
 
@@ -275,7 +264,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
     #endif
 
     // Assign type
-    p->type = SUITESPARSE_LDL;
+    p->type = SUITESPARSE_LDL_SOLVER;
 
     return p;
 }
@@ -358,8 +347,6 @@ c_int update_linsys_solver_rho_vec_suitesparse_ldl(suitesparse_ldl_solver * s, c
     // return exit flag
     return (kk - s->KKT->n);
 }
-
-
 
 
 #endif

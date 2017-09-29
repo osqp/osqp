@@ -139,7 +139,7 @@ if embedded_flag ~= 1
 end
 
 fprintf(f, 'suitesparse_ldl_solver linsys_solver = ');
-fprintf(f, '{SUITESPARSE_LDL, &solve_linsys_suitesparse_ldl, ');
+fprintf(f, '{SUITESPARSE_LDL_SOLVER, &solve_linsys_suitesparse_ldl, ');
 if embedded_flag ~= 1
     fprintf(f, ['&update_linsys_solver_matrices_suitesparse_ldl, &update_linsys_solver_rho_vec_suitesparse_ldl, ', ...
             '&linsys_solver_L, linsys_solver_Dinv, linsys_solver_P, linsys_solver_bp, linsys_solver_Pdiag_idx, ', ...

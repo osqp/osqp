@@ -35,7 +35,7 @@ OSQP_INFTY = 1e+20
 OSQP_NAN = 1e+20  # Just as placeholder. Not real value
 
 # Linear system solver options
-SUITESPARSE_LDL = 0
+SUITESPARSE_LDL_SOLVER = 0
 
 # Scaling
 MIN_SCALING = 1e-06
@@ -159,7 +159,7 @@ class settings(object):
         self.eps_prim_inf = kwargs.pop('eps_prim_inf', 1e-4)
         self.eps_dual_inf = kwargs.pop('eps_dual_inf', 1e-4)
         self.alpha = kwargs.pop('alpha', 1.6)
-        self.linsys_solver = kwargs.pop('linsys_solver', SUITESPARSE_LDL)
+        self.linsys_solver = kwargs.pop('linsys_solver', SUITESPARSE_LDL_SOLVER)
         self.delta = kwargs.pop('delta', 1e-6)
         self.verbose = kwargs.pop('verbose', True)
         self.scaled_termination = kwargs.pop('scaled_termination', False)
@@ -576,7 +576,7 @@ class OSQP(object):
         print("Problem:  variables n = %d, constraints m = %d" %
               (data.n, data.m))
         print("Settings: ", end='')
-        if settings.linsys_solver == SUITESPARSE_LDL:
+        if settings.linsys_solver == SUITESPARSE_LDL_SOLVER:
             print("linear system solver = SuiteSparse LDL")
         print("          eps_abs = %.2e, eps_rel = %.2e," %
               (settings.eps_abs, settings.eps_rel))

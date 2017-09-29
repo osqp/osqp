@@ -152,7 +152,7 @@ def write_linsys_solver(f, linsys_solver, name, embedded_flag):
         write_vec(f, linsys_solver['Parent'], 'linsys_solver_Parent', 'c_int')
 
     f.write("suitesparse_ldl_solver %s = " % name)
-    f.write("{SUITESPARSE_LDL, &solve_linsys_suitesparse_ldl, ")
+    f.write("{SUITESPARSE_LDL_SOLVER, &solve_linsys_suitesparse_ldl, ")
     if embedded_flag != 1:
         f.write("&update_linsys_solver_matrices_suitesparse_ldl, &update_linsys_solver_rho_vec_suitesparse_ldl, " +
                 "&linsys_solver_L, linsys_solver_Dinv, linsys_solver_P, linsys_solver_bp, linsys_solver_Pdiag_idx, " +

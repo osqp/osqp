@@ -277,8 +277,7 @@ c_int polish(OSQPWorkspace *work) {
     // Memory clean-up
     plsh->free(plsh);
     if (work->pol) {
-        if (work->pol->Ared)
-            csc_spfree(work->pol->Ared);
+        if (work->pol->Ared) csc_spfree(work->pol->Ared);
     }
     c_free(rhs_red);
     c_free(pol_sol);

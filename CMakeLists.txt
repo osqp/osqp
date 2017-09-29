@@ -14,8 +14,9 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 
 # Some non-standard CMake modules
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/configure/cmake/")
-INCLUDE(FindPythonModule)
-INCLUDE(Utils)
+include(FindPythonModule)
+include(Utils)
+# include(FindMKL)  # Find MKL module
 
 
 # Detect operating system
@@ -76,12 +77,18 @@ option (DFLOAT "Use float numbers instead of doubles" OFF)
 message(STATUS "Floats are ${DFLOAT}")
 
 # Use long integers for indexing
-option (DLONG "Use long integers for indexing" ON)
+option (DLONG "Use long integers for indexing" OFF)
 message(STATUS "Long integers are ${DLONG}")
 
 # Add code coverage
 option (COVERAGE "Perform code coverage" OFF)
-message(STATUS "Code coverage is ${DLONG}")
+message(STATUS "Code coverage is ${COVERAGE}")
+
+
+# Linear solvers dependencies
+# ---------------------------------------------
+option (ENABLE_MKL_PARDISO "Enable MKL Pardiso solver" ON)
+message(STATUS "MKL Pardiso: ${ENABLE_MKL_PARDISO}")
 
 
 # Generate header file with the global options
@@ -105,7 +112,7 @@ if (NOT MSVC)
     set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")      # Include math
     # Include real time library in linux
     if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-        set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lrt")
+        set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lrt -ldl")
     endif()
 endif (NOT MSVC)
 
@@ -238,12 +245,15 @@ endif (MATLAB)
 # Create  Library
 # ----------------------------------------------
 
-# Add linear systems solver
+# Add linear system solvers cumulative library
 add_subdirectory(lin_sys)
 
-# Add library
-# N.B. Add all the linear system solvers here
-add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_suitesparse_ldl>)
+# Add linear system solvers interfaces includes
+include_directories(${linsys_solvers_includes})
+
+
+add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
+
 
 if (MATLAB)
 target_link_libraries (osqpstatic ${Matlab_LIBRARIES})
@@ -258,12 +268,13 @@ endif (PYTHON)
 #   - do not build demo
 if (NOT PYTHON AND NOT MATLAB)
     # Create osqp shared library
-    # N.B. Add all the linear system solvers here
-    add_library (osqp SHARED ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_suitesparse_ldl>)
+    # NB: Add all the linear system solvers here
+    add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
 
     # Create demo executable (linked to static library)
     add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
     target_link_libraries (osqp_demo osqpstatic)
+
 endif (NOT PYTHON AND NOT MATLAB)
 
 
@@ -305,7 +316,6 @@ if (UNITTESTS)
         OUTPUT ${codegen_test_headers}
         COMMENT "Generating unittests data files using Python"
     )
-
 
     # Direct linear solver testing
     include_directories(tests)

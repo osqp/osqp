@@ -1,7 +1,8 @@
-Changes since last commit
+Changes since last release
 -------------------------
 *   Added inaccurate return statuses
 *   Created new object-oriented structure for linear system solvers
+*   Added MKL Pardiso interface using shared dynamic library loader
 *   Added different norms for equilibration (1/2/inf)
 *   Added diagonal rho vector with different values for equality/inequality constraints (interface still have scalar rho)
 *   Return certificates of infeasibility in results structure

@@ -1,6 +1,8 @@
 #ifndef OSQPWORKSPACEPY_H
 #define OSQPWORKSPACEPY_H
 
+#include "suitesparse_ldl.h"
+
 /**********************************************
  * OSQP Workspace creation in Python objects  *
  **********************************************/
@@ -241,13 +243,13 @@ static PyObject *OSQP_get_workspace(OSQP *self){
     PyObject *settings_py;
     PyObject *return_dict;
 
-    // Check if linear systems solver is SUITESPARSE_LDL
+    // Check if linear systems solver is SUITESPARSE_LDL_SOLVER
     if(!self->workspace){
         PyErr_SetString(PyExc_ValueError, "Solver is uninitialized.  No data have been configured.");
         return (PyObject *) NULL;
     }
 
-    if(self->workspace->linsys_solver->type != SUITESPARSE_LDL){
+    if(self->workspace->linsys_solver->type != SUITESPARSE_LDL_SOLVER){
         PyErr_SetString(PyExc_ValueError, "OSQP setup was not performed using SuiteSparse LDL! Run setup with linsys_solver as SuiteSparse LDL");
         return (PyObject *) NULL;
     }

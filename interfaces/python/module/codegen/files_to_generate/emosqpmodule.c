@@ -462,7 +462,7 @@ static PyObject * OSQP_update_P(PyObject *self, PyObject *args) {
 		int int_type = get_int_type();
 
 		#ifdef DLONG
-		static char * argparse_string = "OOl";
+		static char * argparse_string = "OOL";
 		#else
 		static char * argparse_string = "OOi";
 		#endif
@@ -525,7 +525,7 @@ static PyObject * OSQP_update_A(PyObject *self, PyObject *args) {
 		int int_type = get_int_type();
 
 		#ifdef DLONG
-		static char * argparse_string = "OOl";
+		static char * argparse_string = "OOL";
 		#else
 		static char * argparse_string = "OOi";
 		#endif
@@ -588,7 +588,7 @@ static PyObject * OSQP_update_P_A(PyObject *self, PyObject *args) {
 		int int_type = get_int_type();
 
 		#ifdef DLONG
-		static char * argparse_string = "OOlOOl";
+		static char * argparse_string = "OOLOOL";
 		#else
 		static char * argparse_string = "OOiOOi";
 		#endif

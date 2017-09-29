@@ -23,7 +23,7 @@ extern "C" {
  * @param  n     Second dimension
  * @param  nzmax Maximum number of nonzero elements
  * @param  x     Vector of data
- * @param  i     Vector of row indeces
+ * @param  i     Vector of row indices
  * @param  p     Vector of column pointers
  * @return       New matrix pointer
  */
@@ -86,15 +86,29 @@ csc * csc_done(csc *C, void *w, void *x, c_int ok);
  /**
   * C = compressed-column CSC from matrix T in triplet form
   *
-  * TtoC stores the vector of indeces from T to C
+  * TtoC stores the vector of indices from T to C
   *  -> C[TtoC[i]] = T[i]
   *
   * @param  T    matrix in triplet format
-  * @param  TtoC vector of indeces from triplet to CSC format
+  * @param  TtoC vector of indices from triplet to CSC format
   * @return      matrix in CSC format
   */
  csc *triplet_to_csc(const csc *T, c_int * TtoC);
+ 
 
+ /**
+  * C = compressed-row CSR from matrix T in triplet form
+  *
+  * TtoC stores the vector of indices from T to C
+  *  -> C[TtoC[i]] = T[i]
+  *
+  * @param  T    matrix in triplet format
+  * @param  TtoC vector of indices from triplet to CSR format
+  * @return      matrix in CSR format
+  */
+csc *triplet_to_csr(const csc *T, c_int * TtoC);
+
+	
 /**
  * Convert sparse to dense
  */
@@ -133,10 +147,10 @@ c_int *csc_pinv(c_int const *p, c_int n);
 
 /**
  * C = A(p,p)= PAP' where A and C are symmetric the upper part stored;
- *  N.B. pinv not p!
+ *  NB: pinv not p!
  * @param  A      Original matrix (upper-triangular)
  * @param  pinv   Inverse of permutation vector
- * @param  AtoC   Mapping from indeces of A-x to C->x
+ * @param  AtoC   Mapping from indices of A-x to C->x
  * @param  values Are values of A allocated?
  * @return        New matrix (allocated)
  */
