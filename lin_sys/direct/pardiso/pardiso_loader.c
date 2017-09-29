@@ -3,7 +3,7 @@
 
 #ifdef IS_WINDOWS
 #define PARDISOLIBNAME "mkl_rt." SHAREDLIBEXT
-#else 
+#else
 #define PARDISOLIBNAME "libmkl_rt." SHAREDLIBEXT
 #endif
 
@@ -49,6 +49,9 @@ c_int mkl_get_max_threads() {
 
 
 c_int lh_load_pardiso(const char* libname) {
+    // DEBUG
+    // if (Pardiso_handle) return 0;
+
     // Load Pardiso library
     if (libname) {
         Pardiso_handle = lh_load_lib(libname);
@@ -73,14 +76,15 @@ c_int lh_load_pardiso(const char* libname) {
 }
 
 c_int lh_unload_pardiso() {
-    int rc;
 
-    if (Pardiso_handle == OSQP_NULL)
-      return 0;
+    if (Pardiso_handle == OSQP_NULL) return 0;
 
-    rc = lh_unload_lib(Pardiso_handle);
-    Pardiso_handle = OSQP_NULL;
-    func_pardiso = OSQP_NULL;
+    return lh_unload_lib(Pardiso_handle);
 
-    return rc;
+    /* If multiple OSQP objects are laoded, the lines below cause a crash */
+    // Pardiso_handle = OSQP_NULL;
+    // func_pardiso = OSQP_NULL;
+    // func_mkl_set_interface_layer = OSQP_NULL;
+    // func_mkl_get_max_threads = OSQP_NULL;
+
 }

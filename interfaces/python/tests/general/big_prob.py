@@ -85,6 +85,12 @@ model2 = osqp.OSQP()
 osqp_opts['linsys_solver'] = 'mkl pardiso'
 model2.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
 res_osqp2 = model2.solve()
+model2 = 1
+
+# Solve with Pardiso
+model3 = osqp.OSQP()
+model3.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
+res_osqp3 = model3.solve()
 
 print("Difference SuiteSparse LDL vs Pardiso")
 print("SuiteSparse LDL runtime = %.4f" % res_osqp.info.run_time)

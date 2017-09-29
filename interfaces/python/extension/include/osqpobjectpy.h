@@ -23,8 +23,12 @@ static c_int OSQP_init( OSQP * self, PyObject *args, PyObject *kwds)
 static c_int OSQP_dealloc(OSQP* self)
 {
     // Cleanup workspace if not null
-    if (self->workspace)
-        osqp_cleanup(self->workspace);
+    if (self->workspace) {
+        if (osqp_cleanup(self->workspace)) {
+					PyErr_SetString(PyExc_ValueError, "Workspace deallocation error!");
+					return 1;
+				}
+		}
 
     // Cleanup python object
     PyObject_Del(self);

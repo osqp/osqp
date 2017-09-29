@@ -34,14 +34,14 @@ void free_linsys_solver_pardiso(pardiso_solver *s) {
 
         // Check each attribute of the structure and free it if it exists
         if (s->KKT)       csc_spfree(s->KKT);
-	if (s->KKT_i)     c_free(s->KKT_i);
-	if (s->KKT_p)     c_free(s->KKT_p);
+        if (s->KKT_i)     c_free(s->KKT_i);
+        if (s->KKT_p)     c_free(s->KKT_p);
         if (s->bp)        c_free(s->bp);
         if (s->Pdiag_idx) c_free(s->Pdiag_idx);
         if (s->PtoKKT)    c_free(s->PtoKKT);
         if (s->AtoKKT)    c_free(s->AtoKKT);
         if (s->rhotoKKT)  c_free(s->rhotoKKT);
-	
+
         c_free(s);
 
     }
@@ -103,13 +103,13 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
 	    nnzKKT = s->KKT->p[s->KKT->m];
 	    s->KKT_i = c_malloc((nnzKKT) * sizeof(c_int));
 	    s->KKT_p = c_malloc((s->KKT->m + 1) * sizeof(c_int));
-		
+
 	    for(i = 0; i < nnzKKT; i++){
 	    	s->KKT_i[i] = s->KKT->i[i] + 1;
-	    } 
+	    }
 	    for(i = 0; i < n_plus_m+1; i++){
 	    	s->KKT_p[i] = s->KKT->p[i] + 1;
-	    } 
+	    }
 
     }
 
