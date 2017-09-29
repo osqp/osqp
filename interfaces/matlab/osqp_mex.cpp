@@ -650,6 +650,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             plhs[0] = mxCreateDoubleScalar(OSQP_MAX_ITER_REACHED);
             return;
         }
+        
+        // Linear system solvers
+        if (!strcmp("SUITESPARSE_LDL_SOLVER", constant)){
+            plhs[0] = mxCreateDoubleScalar(SUITESPARSE_LDL_SOLVER);
+            return;
+        }
+        
+        if (!strcmp("PARDISO_SOLVER", constant)){
+            plhs[0] = mxCreateDoubleScalar(PARDISO_SOLVER);
+            return;
+        }
 
 
         mexErrMsgTxt("Constant not recognized.");

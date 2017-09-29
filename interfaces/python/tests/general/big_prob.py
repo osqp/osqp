@@ -6,8 +6,8 @@ import numpy as np
 import mathprogbasepy as mpbpy
 sp.random.seed(2)
 
-n = 1000
-m = 10000
+n = 100
+m = 1000
 A = sparse.random(m, n, density=0.5,
                   data_rvs=np.random.randn,
                   format='csc')
@@ -63,7 +63,7 @@ osqp_opts = {'rho': rho,
              'scaling_norm': -1,
              'max_iter': 2500,
              'verbose': True,
-             'linsys_solver': 0
+             'linsys_solver': 'suitesparse ldl'
              }
 
 qp = mpbpy.QuadprogProblem(P, q, A, l, u)
@@ -82,7 +82,7 @@ res_osqp = model.solve()
 
 # Solve with Pardiso
 model2 = osqp.OSQP()
-osqp_opts['linsys_solver'] = 1
+osqp_opts['linsys_solver'] = 'mkl pardiso'
 model2.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
 res_osqp2 = model2.solve()
 

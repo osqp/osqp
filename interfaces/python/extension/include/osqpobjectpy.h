@@ -338,7 +338,7 @@ static PyObject *OSQP_constant(OSQP *self, PyObject *args) {
         return Py_BuildValue("i", OSQP_SOLVED);
     }
 
-	if(!strcmp(constant_name, "OSQP_SOLVED_INACCURATE")){
+		if(!strcmp(constant_name, "OSQP_SOLVED_INACCURATE")){
         return Py_BuildValue("i", OSQP_SOLVED_INACCURATE);
     }
 
@@ -350,21 +350,30 @@ static PyObject *OSQP_constant(OSQP *self, PyObject *args) {
         return Py_BuildValue("i", OSQP_PRIMAL_INFEASIBLE);
     }
 
-	if(!strcmp(constant_name, "OSQP_PRIMAL_INFEASIBLE_INACCURATE")){
-		return Py_BuildValue("i", OSQP_PRIMAL_INFEASIBLE_INACCURATE);
-	}
+		if(!strcmp(constant_name, "OSQP_PRIMAL_INFEASIBLE_INACCURATE")){
+				return Py_BuildValue("i", OSQP_PRIMAL_INFEASIBLE_INACCURATE);
+		}
 
     if(!strcmp(constant_name, "OSQP_DUAL_INFEASIBLE")){
         return Py_BuildValue("i", OSQP_DUAL_INFEASIBLE);
     }
 
-	if(!strcmp(constant_name, "OSQP_DUAL_INFEASIBLE_INACCURATE")){
-		return Py_BuildValue("i", OSQP_DUAL_INFEASIBLE_INACCURATE);
-	}
+		if(!strcmp(constant_name, "OSQP_DUAL_INFEASIBLE_INACCURATE")){
+				return Py_BuildValue("i", OSQP_DUAL_INFEASIBLE_INACCURATE);
+		}
 
     if(!strcmp(constant_name, "OSQP_MAX_ITER_REACHED")){
         return Py_BuildValue("i", OSQP_MAX_ITER_REACHED);
     }
+
+		// Linear system solvers
+		if(!strcmp(constant_name, "SUITESPARSE_LDL_SOLVER")){
+				return Py_BuildValue("i", SUITESPARSE_LDL_SOLVER);
+		}
+
+		if(!strcmp(constant_name, "PARDISO_SOLVER")){
+				return Py_BuildValue("i", PARDISO_SOLVER);
+		}
 
 
     // If reached here error
