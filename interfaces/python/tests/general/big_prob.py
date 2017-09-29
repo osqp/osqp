@@ -6,8 +6,8 @@ import numpy as np
 import mathprogbasepy as mpbpy
 sp.random.seed(2)
 
-n = 100
-m = 1000
+n = 1000
+m = 10000
 A = sparse.random(m, n, density=0.5,
                   data_rvs=np.random.randn,
                   format='csc')
