@@ -65,6 +65,10 @@ void print_setup_header(const OSQPWorkspace * work) {
     OSQPSettings * settings;
     data = work->data;
     settings = work->settings;
+    c_int nnz;  // Number of nonzeros in the problem
+
+    // Number of nonzeros
+    nnz = data->P->p[data->P->n] + data->A->p[data->A->n];
 
     print_line();
     c_print("        OSQP v%s  -  Operator Splitting QP Solver\n"
@@ -75,8 +79,9 @@ void print_setup_header(const OSQPWorkspace * work) {
 
     // Print variables and constraints
     c_print("Problem:  ");
-    c_print("variables n = %i, constraints m = %i\n", (int)data->n, (int)data->m);
-
+    c_print("variables n = %i, constraints m = %i\n          ", (int)data->n, (int)data->m);
+    c_print("nnz(P) + nnz(A) = %i\n", (int)nnz);
+    
     // Print Settings
     c_print("Settings: ");
     c_print("linear system solver = %s",

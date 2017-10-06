@@ -71,9 +71,9 @@ res_gurobi = qp.solve(solver=mpbpy.GUROBI, verbose=False)
 # res_purepy = qp.solve(solver=mpbpy.OSQP_PUREPY, **osqp_opts)
 # res_osqp = qp.solve(solver=mpbpy.OSQP, **osqp_opts)
 #
-# model = osqppurepy.OSQP()
-# model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
-# res_osqppurepy = model.solve()
+model = osqppurepy.OSQP()
+model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
+res_osqppurepy = model.solve()
 
 # Solve with SuiteSparse LDL
 model = osqp.OSQP()

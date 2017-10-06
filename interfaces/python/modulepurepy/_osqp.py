@@ -575,10 +575,12 @@ class OSQP(object):
 
         print("Problem:  variables n = %d, constraints m = %d" %
               (data.n, data.m))
+        nnz = self.work.data.P.nnz + self.work.data.A.nnz
+        print("          nnz(P) + nnz(A) = %i" % nnz)
         print("Settings: ", end='')
         if settings.linsys_solver == SUITESPARSE_LDL_SOLVER:
-            print("linear system solver = SuiteSparse LDL")
-        print("          eps_abs = %.2e, eps_rel = %.2e," %
+            print("linear system solver = SuiteSparse LDL\n          ")
+        print("eps_abs = %.2e, eps_rel = %.2e," %
               (settings.eps_abs, settings.eps_rel))
         print("          eps_prim_inf = %.2e, eps_dual_inf = %.2e," %
               (settings.eps_prim_inf, settings.eps_dual_inf))
