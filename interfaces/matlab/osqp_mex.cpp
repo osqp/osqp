@@ -657,8 +657,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             return;
         }
         
-        if (!strcmp("PARDISO_SOLVER", constant)){
-            plhs[0] = mxCreateDoubleScalar(PARDISO_SOLVER);
+        if (!strcmp("MKL_PARDISO_SOLVER", constant)){
+            plhs[0] = mxCreateDoubleScalar(MKL_PARDISO_SOLVER);
             return;
         }
 

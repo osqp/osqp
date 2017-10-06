@@ -60,7 +60,7 @@ classdef osqp < handle
            switch out.linsys_solver
                case this.constant('SUITESPARSE_LDL_SOLVER')
                    out.linsys_solver = 'suitesparse ldl';
-               case this.constant('PARDISO_SOLVER')
+               case this.constant('MKL_PARDISO_SOLVER')
                    out.linsys_solver = 'mkl pardiso';
                otherwise
                    error('Unrecognized linear system solver.');
@@ -74,7 +74,7 @@ classdef osqp < handle
             switch out.linsys_solver
                case this.constant('SUITESPARSE_LDL_SOLVER')
                    out.linsys_solver = 'suitesparse ldl';
-               case this.constant('PARDISO_SOLVER')
+               case this.constant('MKL_PARDISO_SOLVER')
                    out.linsys_solver = 'mkl pardiso';
                otherwise
                    error('Unrecognized linear system solver.');
@@ -566,7 +566,7 @@ if ismember('linsys_solver',newFields)
        case 'suitesparse ldl'
            newSettings.linsys_solver = this.constant('SUITESPARSE_LDL_SOLVER');
        case 'mkl pardiso'
-           newSettings.linsys_solver = this.constant('PARDISO_SOLVER');
+           newSettings.linsys_solver = this.constant('MKL_PARDISO_SOLVER');
        % Default solver: Suitesparse LDL
        case ''
            newSettings.linsys_solver = this.constant('SUITESPARSE_LDL_SOLVER');

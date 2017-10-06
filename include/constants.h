@@ -30,7 +30,7 @@ extern "C" {
 /*************************
  * Linear System Solvers *
  *************************/
-enum linsys_solver_type {SUITESPARSE_LDL_SOLVER, PARDISO_SOLVER};
+enum linsys_solver_type {SUITESPARSE_LDL_SOLVER, MKL_PARDISO_SOLVER};
 static const char *SOLVER_NAME[] = {
   "Suitesparse LDL", "MKL Pardiso"
 };

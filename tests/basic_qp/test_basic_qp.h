@@ -140,7 +140,7 @@ static char * test_basic_qp_solve_pardiso()
     settings->scaling = 0;
     settings->verbose = 1;
     settings->warm_start = 0;
-    settings->linsys_solver = PARDISO_SOLVER;
+    settings->linsys_solver = MKL_PARDISO_SOLVER;
 
     // Setup workspace
     work = osqp_setup(data, settings);

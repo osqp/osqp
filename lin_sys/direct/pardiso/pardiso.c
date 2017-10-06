@@ -176,7 +176,7 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
     s->update_rho_vec = &update_linsys_solver_rho_vec_pardiso;
 
     // Assign type
-    s->type = PARDISO_SOLVER;
+    s->type = MKL_PARDISO_SOLVER;
 
     return s;
 }

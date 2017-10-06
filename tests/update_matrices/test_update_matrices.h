@@ -249,7 +249,7 @@ static char * test_update_pardiso(){
     settings->alpha = 1.6;
     settings->auto_rho = 0;
     settings->verbose = 1;
-    settings->linsys_solver = PARDISO_SOLVER;
+    settings->linsys_solver = MKL_PARDISO_SOLVER;
 
     // Setup workspace
     work = osqp_setup(problem, settings);

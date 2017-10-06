@@ -126,18 +126,23 @@ class OSQP(object):
         # Convert linsys_solver string to integer
         linsys_solver_str = settings.pop('linsys_solver', '')
         if not isinstance(linsys_solver_str, str):
-            raise TypeError("Setting linsys_solver is required to be a string.")
+            raise TypeError("Setting linsys_solver " +
+                            "is required to be a string.")
         linsys_solver_str = linsys_solver_str.lower()
         if linsys_solver_str == 'suitesparse ldl':
-            settings['linsys_solver'] = self._model.constant('SUITESPARSE_LDL_SOLVER')
+            settings['linsys_solver'] = \
+                    self._model.constant('SUITESPARSE_LDL_SOLVER')
         elif linsys_solver_str == 'mkl pardiso':
-            settings['linsys_solver'] = self._model.constant('PARDISO_SOLVER')
+            settings['linsys_solver'] = self._model.constant('MKL_PARDISO_SOLVER')
         # Default solver: Suitesparse LDL
         elif linsys_solver_str == '':
-            settings['linsys_solver'] = self._model.constant('SUITESPARSE_LDL_SOLVER')
+            settings['linsys_solver'] = \
+                    self._model.constant('SUITESPARSE_LDL_SOLVER')
         else:   # default solver: Suitesparse LDL
-            warn("Linear system solver not recognized. Using default solver Suitesparse LDL.")
-            settings['linsys_solver'] = self._model.constant('SUITESPARSE_LDL_SOLVER')
+            warn("Linear system solver not recognized. " + 
+                 "Using default solver Suitesparse LDL.")
+            settings['linsys_solver'] = \
+                self._model.constant('SUITESPARSE_LDL_SOLVER')
 
         self._model.setup((n, m), P.data, P.indices, P.indptr, q,
                           A.data, A.indices, A.indptr,
