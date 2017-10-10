@@ -648,6 +648,7 @@ c_int osqp_warm_start(OSQPWorkspace * work, c_float * x, c_float * y){
     if (work->settings->scaling){
 	    vec_ew_prod(work->scaling->Dinv, work->x, work->x, work->data->n);
 	    vec_ew_prod(work->scaling->Einv, work->y, work->y, work->data->m);
+            vec_mult_scalar(work->y, work->scaling->c, work->data->m);
     }
 
     // Compute Ax = z and store it in z
@@ -692,6 +693,7 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y){
     // Scale iterate
     if (work->settings->scaling){
 	    vec_ew_prod(work->scaling->Einv, work->y, work->y, work->data->m);
+            vec_mult_scalar(work->y, work->scaling->c, work->data->m);
     }
 
     // Cold start x and z
