@@ -68,7 +68,7 @@ osqp_opts = {'rho': rho,
 
 qp = mpbpy.QuadprogProblem(P, q, A, l, u)
 res_gurobi = qp.solve(solver=mpbpy.GUROBI, verbose=False)
-# res_purepy = qp.solve(solver=mpbpy.OSQP_PUREPY, **osqp_opts)
+#  res_purepy = qp.solve(solver=mpbpy.OSQP_PUREPY, **osqp_opts)
 # res_osqp = qp.solve(solver=mpbpy.OSQP, **osqp_opts)
 #
 model = osqppurepy.OSQP()
