@@ -11,6 +11,7 @@ if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
     mkdir cmake && wget --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
     export PATH=${DEPS_DIR}/cmake/bin:${PATH}
 else
+brew update
 brew upgrade cmake || brew install cmake
 fi
 cmake --version
