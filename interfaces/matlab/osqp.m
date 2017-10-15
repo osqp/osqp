@@ -446,8 +446,16 @@ classdef osqp < handle
             cdir   = fullfile(cg_dir, 'sources', 'src');
             cfiles = dir(fullfile(cdir, '*.c'));
             for i = 1 : length(cfiles)
-                copyfile(fullfile(cdir, cfiles(i).name), ...
-                    fullfile(target_src_dir, 'osqp', cfiles(i).name));
+                if embedded == 1
+                    % Do not copy kkt.c if embedded is 1
+                    if ~strcmp(cfiles(i).name, fullfile(cdir, 'kkt.c'))
+                        copyfile(fullfile(cdir, cfiles(i).name), ...
+                            fullfile(target_src_dir, 'osqp', cfiles(i).name));    
+                    end
+                else
+                    copyfile(fullfile(cdir, cfiles(i).name), ...
+                        fullfile(target_src_dir, 'osqp', cfiles(i).name));
+                end
             end
             configure_dir = fullfile(cg_dir, 'sources', 'configure');
             configure_files = dir(fullfile(configure_dir, '*.h.in'));

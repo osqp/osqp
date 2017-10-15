@@ -22,7 +22,6 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 endif()
 
 
-
 # Set options
 # ----------------------------------------------
 
@@ -45,6 +44,7 @@ if (DEFINED EMBEDDED)
     set(PRINTING OFF)
 endif()
 message(STATUS "Printing is ${PRINTING}")
+
 
 # Is profiling enabled?
 option (PROFILING "Enable solver profiling (timing)" ON)
@@ -70,7 +70,7 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
 
 # Include math library if EMBEDDED != 1
-if(NOT(EMBEDDED EQUAL 1))
+if(NOT (EMBEDDED EQUAL 1))
     set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")
 endif()
 # Include real time library in linux
@@ -94,9 +94,7 @@ set(
     osqp_src
     src/osqp/auxil.c
     src/osqp/lin_alg.c
-    src/osqp/lin_sys.c
     src/osqp/osqp.c
-    src/osqp/kkt.c
     src/osqp/proj.c
     src/osqp/scaling.c
     src/osqp/util.c
@@ -110,8 +108,6 @@ set(
     include/constants.h
     include/glob_opts.h
     include/lin_alg.h
-    include/lin_sys.h
-    include/kkt.h
     include/osqp.h
     include/types.h
     include/proj.h
@@ -122,6 +118,14 @@ set(
     include/ldl.h
 )
 
+if (NOT(EMBEDDED EQUAL 1))
+	set (osqp_src ${osqp_src} src/osqp/kkt.c)
+	set (osqp_headers ${osqp_headers} include/kkt.h)
+endif()
+
+# Create static library for embedded solver
+add_library (emosqpstatic STATIC ${osqp_src} ${osqp_headers})
 
 # Create example executable
-add_executable (example ${PROJECT_SOURCE_DIR}/src/example.c  ${osqp_src} ${osqp_headers})
+add_executable (example ${PROJECT_SOURCE_DIR}/src/example.c)
+target_link_libraries (example emosqpstatic)

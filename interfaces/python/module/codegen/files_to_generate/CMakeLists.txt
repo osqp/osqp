@@ -94,9 +94,7 @@ set(
     osqp_src
     src/osqp/auxil.c
     src/osqp/lin_alg.c
-    src/osqp/lin_sys.c
     src/osqp/osqp.c
-    src/osqp/kkt.c
     src/osqp/proj.c
     src/osqp/scaling.c
     src/osqp/util.c
@@ -110,8 +108,6 @@ set(
     include/constants.h
     include/glob_opts.h
     include/lin_alg.h
-    include/lin_sys.h
-    include/kkt.h
     include/osqp.h
     include/types.h
     include/proj.h
@@ -122,6 +118,14 @@ set(
     include/ldl.h
 )
 
+if (NOT(EMBEDDED EQUAL 1))
+	set (osqp_src ${osqp_src} src/osqp/kkt.c)
+	set (osqp_headers ${osqp_headers} include/kkt.h)
+endif()
+
+# Create static library for embedded solver
+add_library (emosqpstatic STATIC ${osqp_src} ${osqp_headers})
 
 # Create example executable
-add_executable (example ${PROJECT_SOURCE_DIR}/src/example.c  ${osqp_src} ${osqp_headers})
+add_executable (example ${PROJECT_SOURCE_DIR}/src/example.c)
+target_link_libraries (example emosqpstatic)

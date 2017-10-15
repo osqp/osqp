@@ -77,7 +77,8 @@ Copy C sources for code generation
 # List with OSQP C files
 cfiles = [os.path.join(osqp_dir, 'src', f)
           for f in os.listdir(os.path.join(osqp_dir, 'src'))
-          if f.endswith('.c') and f not in ('cs.c', 'ctrlc.c', 'polish.c')]
+          if f.endswith('.c') and f not in ('cs.c', 'ctrlc.c', 'polish.c',
+          'lin_sys.c')]
 cfiles += [os.path.join(suitesparse_dir, f)
            for f in os.listdir(suitesparse_dir)
            if f.endswith('.c') and f != 'SuiteSparse_config.c']
@@ -89,7 +90,8 @@ cfiles += [os.path.join(suitesparse_dir, 'ldl', 'src', f)
 hfiles = [os.path.join(osqp_dir, 'include', f)
           for f in os.listdir(os.path.join(osqp_dir, 'include'))
           if f.endswith('.h') and f not in ('glob_opts.h', 'cs.h',
-                                            'ctrlc.h', 'polish.h')]
+                                            'ctrlc.h', 'polish.h', 
+                                            'lin_sys.h')]
 hfiles += [os.path.join(suitesparse_dir, f)
            for f in os.listdir(suitesparse_dir)
            if f.endswith('.h') and f != 'SuiteSparse_config.h']

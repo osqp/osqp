@@ -11,4 +11,4 @@ problem.q = randn(n,1);
 m = osqp;
 m.setup(problem.P, problem.q, problem.A, problem.l, problem.u);
 
-m.codegen('code');
+m.codegen('code', 'parameters', 'matrices');

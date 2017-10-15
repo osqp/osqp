@@ -1,5 +1,6 @@
 Changes since last release
 -------------------------
+*   Now code generation produces a static library
 *   Added inaccurate return statuses
 *   Created new object-oriented structure for linear system solvers
 *   Added MKL Pardiso interface using shared dynamic library loader

@@ -13,6 +13,10 @@
 #include "ctrlc.h"
 #endif
 
+#ifndef EMBEDDED
+#include "lin_sys.h"
+#endif
+
 /**********************
  * Main API Functions *
  **********************/

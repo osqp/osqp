@@ -82,6 +82,11 @@ def codegen(work, target_dir, python_ext_name, project_type, embedded,
     sys.stdout.flush()
     c_sources = glob(os.path.join(osqp_path, 'codegen', 'sources',
                                   'src', '*.c'))
+    if embedded == 1:
+        # Remobe kkt.c from embedded sources
+        c_sources.remove(os.path.join(osqp_path, 'codegen', 'sources',
+                                      'src', 'kkt.c'))
+
     for source in c_sources:
         if loop_unrolling:
             if source != 'ldl.c':  # Do not copy ldl. We will generate it

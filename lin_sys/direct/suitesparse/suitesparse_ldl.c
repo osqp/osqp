@@ -5,8 +5,11 @@
 #endif
 
 #include "lin_alg.h"
-#include "kkt.h"
 #include "suitesparse_ldl.h"
+
+#if EMBEDDED != 1
+#include "kkt.h"
+#endif
 
 #ifndef EMBEDDED
 

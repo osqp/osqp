@@ -192,7 +192,7 @@ if( any(strcmpi(what,'codegen')) || any(strcmpi(what,'all')) )
     for j = 1:length(cdirs)
         cfiles = dir(fullfile(cdirs{j},'*.c'));
         for i = 1 : length(cfiles)
-            if ~any(strcmp(cfiles(i).name, {'cs.c', 'ctrlc.c', 'polish.c', 'SuiteSparse_config.c'}))
+            if ~any(strcmp(cfiles(i).name, {'cs.c', 'ctrlc.c', 'lin_sys.c', 'polish.c', 'SuiteSparse_config.c'}))
                 copyfile(fullfile(cdirs{j}, cfiles(i).name), ...
                     fullfile(cg_src_dir, cfiles(i).name));
             end
@@ -210,7 +210,7 @@ if( any(strcmpi(what,'codegen')) || any(strcmpi(what,'all')) )
     for j = 1:length(hdirs)
         hfiles = dir(fullfile(hdirs{j},'*.h'));
         for i = 1 : length(hfiles)
-            if ~any(strcmp(hfiles(i).name, {'glob_opts.h','cs.h', 'ctrlc.h', 'polish.h', 'SuiteSparse_config.h'}))
+            if ~any(strcmp(hfiles(i).name, {'glob_opts.h','cs.h', 'ctrlc.h', 'lin_sys.h', 'polish.h', 'SuiteSparse_config.h'}))
                 copyfile(fullfile(hdirs{j}, hfiles(i).name), ...
                     fullfile(cg_include_dir, hfiles(i).name));
             end

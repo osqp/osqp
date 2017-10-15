@@ -11,7 +11,6 @@ extern "C" {
 #include "constants.h"
 #include "scaling.h"
 #include "util.h"
-#include "lin_sys.h"
 
 
 

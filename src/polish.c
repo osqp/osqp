@@ -1,5 +1,10 @@
 #include "polish.h"
-
+#include "lin_alg.h"
+#include "util.h"
+#include "auxil.h"
+#include "lin_sys.h"
+#include "kkt.h"
+#include "proj.h"
 
 /**
  * Form reduced matrix A that contains only rows that are active at the solution.
