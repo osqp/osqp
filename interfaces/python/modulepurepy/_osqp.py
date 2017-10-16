@@ -454,6 +454,7 @@ class OSQP(object):
             inf_norm_q = np.linalg.norm(q, np.inf)
             inf_norm_q = self._limit_scaling(inf_norm_q)
             scale_cost = np.maximum(inf_norm_q, norm_P_cols)
+            #  import ipdb; ipdb.set_trace()
             scale_cost = self._limit_scaling(scale_cost)
             scale_cost = 1. / scale_cost
 
@@ -579,7 +580,7 @@ class OSQP(object):
         print("          nnz(P) + nnz(A) = %i" % nnz)
         print("Settings: ", end='')
         if settings.linsys_solver == SUITESPARSE_LDL_SOLVER:
-            print("linear system solver = SuiteSparse LDL\n          ")
+            print("linear system solver = SuiteSparse LDL\n          ", end='')
         print("eps_abs = %.2e, eps_rel = %.2e," %
               (settings.eps_abs, settings.eps_rel))
         print("          eps_prim_inf = %.2e, eps_dual_inf = %.2e," %
