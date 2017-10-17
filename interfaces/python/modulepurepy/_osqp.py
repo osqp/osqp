@@ -23,6 +23,7 @@ OSQP_UNSOLVED = -10
 # Parameter bounds
 RHO_MIN = 1e-06
 RHO_MAX = 1e+06
+RHO_EQ_OVER_RHO_INEQ = 1e+03
 RHO_TOL = 1e-04
 
 # Printing interval
@@ -522,7 +523,8 @@ class OSQP(object):
         self.work.constr_type[ineq_ind] = 0
 
         self.work.rho_vec[loose_ind] = RHO_MIN
-        self.work.rho_vec[eq_ind] = RHO_MAX
+        self.work.rho_vec[eq_ind] = RHO_EQ_OVER_RHO_INEQ * \
+            self.work.settings.rho
         self.work.rho_vec[ineq_ind] = self.work.settings.rho
 
         self.work.rho_inv_vec = np.reciprocal(self.work.rho_vec)
@@ -555,7 +557,8 @@ class OSQP(object):
         self.work.constr_type[ineq_ind] = 0
 
         self.work.rho_vec[loose_ind] = RHO_MIN
-        self.work.rho_vec[eq_ind] = RHO_MAX
+        self.work.rho_vec[eq_ind] = RHO_EQ_OVER_RHO_INEQ * \
+            self.work.settings.rho
         self.work.rho_vec[ineq_ind] = self.work.settings.rho
 
         self.work.rho_inv_vec = np.reciprocal(self.work.rho_vec)
@@ -1451,7 +1454,9 @@ class OSQP(object):
 
         # Update rho_vec and rho_inv_vec
         ineq_ind = np.where(self.work.constr_type == 0)
+        eq_ind = np.where(self.work.constr_type == 1)
         self.work.rho_vec[ineq_ind] = self.work.settings.rho
+        self.work.rho_vec[eq_ind] = RHO_EQ_OVER_RHO_INEQ * self.work.settings.rho
         self.work.rho_inv_vec = np.reciprocal(self.work.rho_vec)
 
         # Factorize KKT

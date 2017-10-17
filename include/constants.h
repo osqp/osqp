@@ -50,6 +50,7 @@ static const char *SOLVER_NAME[] = {
 
 #define RHO_MIN (1e-06)
 #define RHO_MAX (1e06)
+#define RHO_EQ_OVER_RHO_INEQ (1e03)
 #define RHO_TOL (1e-04)
 
 

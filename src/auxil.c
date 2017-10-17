@@ -16,7 +16,7 @@ void set_rho_vec(OSQPWorkspace * work){
         } else if (work->data->u[i] - work->data->l[i] < RHO_TOL) {
             // Equality constraints
             work->constr_type[i] = 1;
-            work->rho_vec[i] = RHO_MAX;
+            work->rho_vec[i] = RHO_EQ_OVER_RHO_INEQ * work->settings->rho;
         } else {
             // Inequality constraints
             work->constr_type[i] = 0;
@@ -44,8 +44,8 @@ c_int update_rho_vec(OSQPWorkspace * work){
             // Equality constraints
             if (work->constr_type[i] != 1){
                 work->constr_type[i] = 1;
-                work->rho_vec[i] = RHO_MAX;
-                work->rho_inv_vec[i] = 1. / RHO_MAX;
+                work->rho_vec[i] = RHO_EQ_OVER_RHO_INEQ * work->settings->rho;
+                work->rho_inv_vec[i] = 1. / work->rho_vec[i];
                 constr_type_changed = 1;
             }
         } else {

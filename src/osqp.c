@@ -943,9 +943,14 @@ c_int osqp_update_rho(OSQPWorkspace * work, c_float rho_new){
     // Update rho_vec and rho_inv_vec
     for (i = 0; i < work->data->m; i++){
         if (work->constr_type[i] == 0) {
-            // Constraints for which rho is not set to RHO_MIN or RHO_MAX
+            // Inequalities
             work->rho_vec[i] = work->settings->rho;
             work->rho_inv_vec[i] = 1. / work->settings->rho;
+        }
+        else if (work->constr_type[i] == 1){
+            // Equalities
+            work->rho_vec[i] = RHO_EQ_OVER_RHO_INEQ * work->settings->rho;
+            work->rho_inv_vec[i] = 1. / work->rho_vec[i];
         }
     }
 
