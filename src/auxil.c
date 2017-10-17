@@ -433,6 +433,9 @@ c_int is_dual_infeasible(OSQPWorkspace * work, c_float eps_dual_inf){
 
 
 void store_solution(OSQPWorkspace *work) {
+#ifndef EMBEDDED
+    c_float norm_vec;
+#endif
     if ((work->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
             (work->info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE) &&
             (work->info->status_val != OSQP_DUAL_INFEASIBLE) &&
@@ -446,6 +449,22 @@ void store_solution(OSQPWorkspace *work) {
         vec_set_scalar(work->solution->x, OSQP_NAN, work->data->n);
         vec_set_scalar(work->solution->y, OSQP_NAN, work->data->m);
 
+#ifndef EMBEDDED
+        // Normalize infeasibility certificates if embedded is off 
+        // NB: It requires a division
+        if ((work->info->status_val != OSQP_PRIMAL_INFEASIBLE) ||
+                ((work->info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE))){
+            norm_vec = vec_norm_inf(work->delta_y, work->data->m);
+            vec_mult_scalar(work->delta_y, 1./norm_vec, work->data->m);
+        }
+        if ((work->info->status_val != OSQP_DUAL_INFEASIBLE) ||
+                ((work->info->status_val != OSQP_DUAL_INFEASIBLE_INACCURATE))){
+            norm_vec = vec_norm_inf(work->delta_x, work->data->n);
+            vec_mult_scalar(work->delta_x, 1./norm_vec, work->data->n);
+        }
+        
+#endif
+        
         // Cold start iterates to 0 for next runs
         cold_start(work);
     }
