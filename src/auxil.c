@@ -27,7 +27,9 @@ void set_rho_vec(OSQPWorkspace * work){
 }
 
 c_int update_rho_vec(OSQPWorkspace * work){
-    c_int i, constr_type_changed = 0;
+    c_int i, exitflag, constr_type_changed;
+    exitflag = 0;
+    constr_type_changed = 0;
 
     for(i=0; i < work->data->m; i++){
         if ( (work->data->l[i] < -OSQP_INFTY*MIN_SCALING) && (work->data->u[i] > OSQP_INFTY*MIN_SCALING) ) {
@@ -57,7 +59,14 @@ c_int update_rho_vec(OSQPWorkspace * work){
         }
     }
 
-    return constr_type_changed;
+    // Update rho_vec in KKT matrix if constraints type has changed
+    if (constr_type_changed == 1) {
+        exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
+                work->rho_vec,
+                work->data->m);
+    }
+
+    return exitflag;
 }
 #endif // EMBEDDED
 

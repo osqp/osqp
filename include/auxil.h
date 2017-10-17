@@ -28,6 +28,7 @@ void set_rho_vec(OSQPWorkspace * work);
 /**
  * Update values of rho vector based on updated constraints
  * @param work Workspace
+ * @return     Exitflag
  */
 c_int update_rho_vec(OSQPWorkspace * work);
 

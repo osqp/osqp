@@ -512,9 +512,6 @@ c_int osqp_update_lin_cost(OSQPWorkspace * work, c_float * q_new) {
 
 c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new) {
     c_int i, exitflag = 0;
-#if EMBEDDED != 1
-    c_int constr_type_changed;
-#endif
 
     // Check if lower bound is smaller than upper bound
     for (i=0; i<work->data->m; i++) {
@@ -540,15 +537,8 @@ c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new)
     update_status(work->info, OSQP_UNSOLVED);
 
 #if EMBEDDED != 1
-    // If the type of any constraint changed, update rho_vec
-    constr_type_changed = update_rho_vec(work);
-
-    if (constr_type_changed == 1) {
-        // Update rho_vec in KKT matrix
-        exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
-                work->rho_vec,
-                work->data->m);
-    }
+    // Update rho_vec and refactor if constraints type changes
+    exitflag = update_rho_vec(work);
 #endif // EMBEDDED
 
     return exitflag;
@@ -557,9 +547,6 @@ c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new)
 
 c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
     c_int i, exitflag = 0;
-#if EMBEDDED != 1
-    c_int constr_type_changed;
-#endif
 
     // Replace l by the new vector
     prea_vec_copy(l_new, work->data->l, work->data->m);
@@ -583,15 +570,8 @@ c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
     update_status(work->info, OSQP_UNSOLVED);
 
 #if EMBEDDED != 1
-    // If the type of any constraint changed, update rho_vec
-    constr_type_changed = update_rho_vec(work);
-
-    if (constr_type_changed == 1) {
-        // Update rho_vec in KKT matrix
-        exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
-                work->rho_vec,
-                work->data->m);
-    }
+    // Update rho_vec and refactor if constraints type changes
+    exitflag = update_rho_vec(work);
 #endif // EMBEDDED
 
     return exitflag;
@@ -601,10 +581,6 @@ c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
 
 c_int osqp_update_upper_bound(OSQPWorkspace * work, c_float * u_new) {
     c_int i, exitflag = 0;
-#if EMBEDDED != 1
-    c_int constr_type_changed;
-#endif
-
 
     // Replace u by the new vector
     prea_vec_copy(u_new, work->data->u, work->data->m);
@@ -628,15 +604,8 @@ c_int osqp_update_upper_bound(OSQPWorkspace * work, c_float * u_new) {
     update_status(work->info, OSQP_UNSOLVED);
 
 #if EMBEDDED != 1
-    // If the type of any constraint changed, update rho_vec
-    constr_type_changed = update_rho_vec(work);
-
-    if (constr_type_changed == 1) {
-        // Update rho_vec in KKT matrix
-        exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
-                work->rho_vec,
-                work->data->m);
-    }
+    // Update rho_vec and refactor if constraints type changes
+    exitflag = update_rho_vec(work);
 #endif // EMBEDDED
 
     return exitflag;

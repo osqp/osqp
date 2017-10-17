@@ -529,8 +529,7 @@ class OSQP(object):
 
     def update_rho_vec(self):
         """
-        Update values of rho_vec and return 1 if type of some constraints
-        changed.
+        Update values of rho_vec and refactor if constraints change.
         """
         # Find indices of loose bounds, equality constr and one-sided constr
         loose_ind = np.where(np.logical_and(
@@ -561,7 +560,8 @@ class OSQP(object):
 
         self.work.rho_inv_vec = np.reciprocal(self.work.rho_vec)
 
-        return constr_type_changed
+        if constr_type_changed:
+            self.work.linsys_solver = linsys_solver(self.work)
 
     def print_setup_header(self, data, settings):
         """Print solver header
@@ -1271,9 +1271,7 @@ class OSQP(object):
         self.update_status(OSQP_UNSOLVED)
 
         # If type of any constraint changed, update rho_vec and KKT matrix
-        constr_type_changed = self.update_rho_vec()
-        if constr_type_changed:
-            self.work.linsys_solver = linsys_solver(self.work)
+        self.update_rho_vec()
 
     def update_lower_bound(self, l_new):
         """
@@ -1295,9 +1293,7 @@ class OSQP(object):
         self.update_status(OSQP_UNSOLVED)
 
         # If type of any constraint changed, update rho_vec and KKT matrix
-        constr_type_changed = self.update_rho_vec()
-        if constr_type_changed:
-            self.work.linsys_solver = linsys_solver(self.work)
+        self.update_rho_vec()
 
     def update_upper_bound(self, u_new):
         """
@@ -1319,9 +1315,7 @@ class OSQP(object):
         self.update_status(OSQP_UNSOLVED)
 
         # If type of any constraint changed, update rho_vec and KKT matrix
-        constr_type_changed = self.update_rho_vec()
-        if constr_type_changed:
-            self.work.linsys_solver = linsys_solver(self.work)
+        self.update_rho_vec()
 
     def update_P(self, P_new):
         """
