@@ -336,8 +336,8 @@ static char * test_basic_qp_early_terminate()
               vec_norm_inf_diff(work->solution->x, sols_data->x_test, data->n) < TESTS_TOL);
 
     // Compare dual solutions
-    print_vec(work->solution->y, data->m, "y_sol");
-    print_vec(sols_data->y_test, data->m, "y_test");
+    // print_vec(work->solution->y, data->m, "y_sol");
+    // print_vec(sols_data->y_test, data->m, "y_test");
     mu_assert("Basic QP test early terminate: Error in dual solution!",
               vec_norm_inf_diff(work->solution->y, sols_data->y_test, data->m) < TESTS_TOL);
 
@@ -347,7 +347,6 @@ static char * test_basic_qp_early_terminate()
 
     // Clean workspace
     osqp_cleanup(work);
-
 
     // Cleanup data
     clean_problem_basic_qp(data);

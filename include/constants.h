@@ -59,8 +59,6 @@ static const char *SOLVER_NAME[] = {
 #define POL_REFINE_ITER (3)
 #define VERBOSE (1)
 #define AUTO_RHO (0)
-
-
 #endif
 
 #define SCALED_TERMINATION (0)
@@ -70,14 +68,14 @@ static const char *SOLVER_NAME[] = {
 #define SCALING (1)
 
 #if EMBEDDED != 1
-#define SCALING_ITER (15)
-#define MIN_SCALING (1e-06)  ///< Minimum scaling value
-#define MAX_SCALING (1e+06)  ///< Maximum scaling value
+#define SCALING_ITER (10)
+#define MIN_SCALING (1e-03)  ///< Minimum scaling value
+#define MAX_SCALING (1e+03)  ///< Maximum scaling value
 #define SCALING_NORM (-1)     ///< Scaling norm
 #endif
 
 /* Printing */
-#define PRINT_INTERVAL 100
+#define PRINT_INTERVAL 200
 
 
 

@@ -68,7 +68,7 @@ void swap_vectors(c_float ** a, c_float ** b){
     temp = *b;
     *b = *a;
     *a = temp;
- }
+}
 
 
 void cold_start(OSQPWorkspace *work) {
@@ -120,7 +120,7 @@ void update_x(OSQPWorkspace * work){
     // update x
     for (i = 0; i < work->data->n; i++){
         work->x[i] = work->settings->alpha * work->xz_tilde[i] +
-                     ((c_float) 1.0 - work->settings->alpha) * work->x_prev[i];
+            ((c_float) 1.0 - work->settings->alpha) * work->x_prev[i];
     }
 
     // update delta_x
@@ -136,8 +136,8 @@ void update_z(OSQPWorkspace *work){
     // update z
     for (i = 0; i < work->data->m; i++){
         work->z[i] = work->settings->alpha * work->xz_tilde[i + work->data->n] +
-                     ((c_float) 1.0 - work->settings->alpha) * work->z_prev[i] +
-                     work->rho_inv_vec[i] * work->y[i];
+            ((c_float) 1.0 - work->settings->alpha) * work->z_prev[i] +
+            work->rho_inv_vec[i] * work->y[i];
     }
 
     // project z
@@ -152,8 +152,8 @@ void update_y(OSQPWorkspace *work){
     for (i = 0; i < work->data->m; i++){
 
         work->delta_y[i] = work->rho_vec[i] *
-              (work->settings->alpha * work->xz_tilde[i + work->data->n] +
-               ((c_float) 1.0 - work->settings->alpha) * work->z_prev[i] - work->z[i]);
+            (work->settings->alpha * work->xz_tilde[i + work->data->n] +
+             ((c_float) 1.0 - work->settings->alpha) * work->z_prev[i] - work->z[i]);
         work->y[i] += work->delta_y[i];
 
     }
@@ -161,16 +161,16 @@ void update_y(OSQPWorkspace *work){
 
 
 c_float compute_obj_val(OSQPWorkspace *work, c_float * x) {
-        c_float obj_val;
+    c_float obj_val;
 
-        obj_val = quad_form(work->data->P, x) +
-            vec_prod(work->data->q, x, work->data->n);
+    obj_val = quad_form(work->data->P, x) +
+        vec_prod(work->data->q, x, work->data->n);
 
-        if (work->settings->scaling){
-            obj_val *= work->scaling->cinv;
-        }
+    if (work->settings->scaling){
+        obj_val *= work->scaling->cinv;
+    }
 
-        return obj_val;
+    return obj_val;
 }
 
 
@@ -378,7 +378,7 @@ c_int is_dual_infeasible(OSQPWorkspace * work, c_float eps_dual_inf){
 
         // Check first if q'*delta_x < 0
         if (vec_prod(work->data->q, work->delta_x, work->data->n) <
-            - cost_scaling * eps_dual_inf * norm_delta_x){
+                - cost_scaling * eps_dual_inf * norm_delta_x){
 
             // Compute product P * delta_x
             mat_vec(work->data->P, work->delta_x, work->Pdelta_x, 0);
@@ -390,7 +390,7 @@ c_int is_dual_infeasible(OSQPWorkspace * work, c_float eps_dual_inf){
 
             // Check if || P * delta_x || = 0
             if (vec_norm_inf(work->Pdelta_x, work->data->n) <
-                cost_scaling * eps_dual_inf * norm_delta_x){
+                    cost_scaling * eps_dual_inf * norm_delta_x){
 
                 // Compute A * delta_x
                 mat_vec(work->data->A, work->delta_x, work->Adelta_x, 0);
@@ -405,7 +405,7 @@ c_int is_dual_infeasible(OSQPWorkspace * work, c_float eps_dual_inf){
                 //      in case the problem is scaled.
                 for (i = 0; i < work->data->m; i++){
                     if (((work->data->u[i] < OSQP_INFTY*1e-06) && (work->Adelta_x[i] >  eps_dual_inf * norm_delta_x)) ||
-                    ((work->data->l[i] > -OSQP_INFTY*1e-06) && (work->Adelta_x[i] < -eps_dual_inf * norm_delta_x))){
+                            ((work->data->l[i] > -OSQP_INFTY*1e-06) && (work->Adelta_x[i] < -eps_dual_inf * norm_delta_x))){
                         // At least one condition not satisfied -> not dual infeasible
                         return 0;
                     }
@@ -417,17 +417,17 @@ c_int is_dual_infeasible(OSQPWorkspace * work, c_float eps_dual_inf){
         }
     }
 
-       // Conditions not satisfied -> not dual infeasible
-       return 0;
+    // Conditions not satisfied -> not dual infeasible
+    return 0;
 }
 
 
 
 void store_solution(OSQPWorkspace *work) {
     if ((work->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
-        (work->info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE) &&
-        (work->info->status_val != OSQP_DUAL_INFEASIBLE) &&
-        (work->info->status_val != OSQP_DUAL_INFEASIBLE_INACCURATE)){
+            (work->info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE) &&
+            (work->info->status_val != OSQP_DUAL_INFEASIBLE) &&
+            (work->info->status_val != OSQP_DUAL_INFEASIBLE_INACCURATE)){
         prea_vec_copy(work->x, work->solution->x, work->data->n);   // primal
         prea_vec_copy(work->y, work->solution->y, work->data->m);   // dual
 
@@ -447,11 +447,11 @@ void update_info(OSQPWorkspace *work, c_int iter, c_int compute_objective, c_int
     c_float * x, * z, * y;  // Allocate pointers to variables
     c_float * obj_val, * pri_res, *dua_res;  // objective value, residuals
 
-    #ifdef PROFILING
+#ifdef PROFILING
     c_float *run_time;  // Execution time
-    #endif
+#endif
 
-    #ifndef EMBEDDED
+#ifndef EMBEDDED
     if (polish){
         x = work->pol->x;
         y = work->pol->y;
@@ -459,11 +459,11 @@ void update_info(OSQPWorkspace *work, c_int iter, c_int compute_objective, c_int
         obj_val = &work->pol->obj_val;
         pri_res = &work->pol->pri_res;
         dua_res = &work->pol->dua_res;
-        #ifdef PROFILING
+#ifdef PROFILING
         run_time = &work->info->polish_time;
-        #endif
+#endif
     } else {
-    #endif // EMBEDDED
+#endif // EMBEDDED
         x = work->x;
         y = work->y;
         z = work->z;
@@ -471,12 +471,12 @@ void update_info(OSQPWorkspace *work, c_int iter, c_int compute_objective, c_int
         pri_res = &work->info->pri_res;
         dua_res = &work->info->dua_res;
         work->info->iter = iter; // Update iteration number
-        #ifdef PROFILING
+#ifdef PROFILING
         run_time = &work->info->solve_time;
-        #endif
-    #ifndef EMBEDDED
+#endif
+#ifndef EMBEDDED
     }
-    #endif
+#endif
 
 
     // Compute the objective if needed
@@ -496,13 +496,13 @@ void update_info(OSQPWorkspace *work, c_int iter, c_int compute_objective, c_int
     *dua_res = compute_dua_res(work, x, y);
 
     // Update timing
-    #ifdef PROFILING
+#ifdef PROFILING
     *run_time = toc(work->timer);
-    #endif
+#endif
 
-    #ifdef PRINTING
+#ifdef PRINTING
     work->summary_printed = 0;  // The just updated info have not been printed
-    #endif
+#endif
 }
 
 
@@ -637,52 +637,52 @@ c_int validate_data(const OSQPData * data){
     c_int j;
 
     if(!data){
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("Missing data!\n");
-        #endif
+#endif
         return 1;
     }
 
     // General dimensions Tests
     if (data->n <= 0 || data->m < 0){
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("n must be positive and m nonnegative; n = %i, m = %i\n",
-                 (int)data->n, (int)data->m);
-        #endif
+                (int)data->n, (int)data->m);
+#endif
         return 1;
     }
 
     // Matrix P
     if (data->P->m != data->n ){
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("P does not have dimension n x n with n = %i\n", (int)data->n);
-        #endif
+#endif
         return 1;
     }
     if (data->P->m != data->P->n ){
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("P is not square\n");
-        #endif
+#endif
         return 1;
     }
 
     // Matrix A
     if (data->A->m != data->m || data->A->n != data->n){
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("A does not have dimension m x n with m = %i and n = %i\n",
                 (int)data->m, (int)data->n);
-        #endif
+#endif
         return 1;
     }
 
     // Lower and upper bounds
     for (j = 0; j < data->m; j++) {
         if (data->l[j] > data->u[j]) {
-            #ifdef PRINTING
+#ifdef PRINTING
             c_print("Lower bound at index %d is greater than upper bound: %.4e > %.4e\n",
-                  (int)j, data->l[j], data->u[j]);
-            #endif
-          return 1;
+                    (int)j, data->l[j], data->u[j]);
+#endif
+            return 1;
         }
     }
 
@@ -694,7 +694,7 @@ c_int validate_data(const OSQPData * data){
 
 c_int validate_linsys_solver(c_int linsys_solver){
     if (linsys_solver != SUITESPARSE_LDL_SOLVER &&
-        linsys_solver != MKL_PARDISO_SOLVER){
+            linsys_solver != MKL_PARDISO_SOLVER){
         return 1;
     }
     // TODO: Add more solvers in case
@@ -706,125 +706,125 @@ c_int validate_linsys_solver(c_int linsys_solver){
 
 c_int validate_settings(const OSQPSettings * settings){
     if (!settings){
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("Missing settings!\n");
-        #endif
+#endif
         return 1;
     }
     if (settings->scaling != 0 &&  settings->scaling != 1) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("scaling must be either 0 or 1\n");
-        #endif
+#endif
         return 1;
     }
     if (settings->scaling_iter < 1) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("scaling_iter must be greater than 0\n");
-        #endif
+#endif
         return 1;
     }
     if (settings->scaling_norm != 1 && settings->scaling_norm != 2 &&
-        settings->scaling_norm != -1) {
-        #ifdef PRINTING
+            settings->scaling_norm != -1) {
+#ifdef PRINTING
         c_print("scaling_norm must be wither 1, 2 or -1 (for infinity norm)\n");
-        #endif
+#endif
         return 1;
     }
     if (settings->pol_refine_iter < 0) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("pol_refine_iter must be nonnegative\n");
-        #endif
+#endif
         return 1;
     }
     if (settings->auto_rho != 0 &&  settings->auto_rho != 1) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("auto_rho must be either 0 or 1\n");
-        #endif
+#endif
         return 1;
     }
 
     if (settings->rho <= 0) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("rho must be positive\n");
-        #endif
+#endif
         return 1;
     }
     if (settings->delta <= 0) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("delta must be positive\n");
-        #endif
+#endif
         return 1;
     }
     if (settings->max_iter <= 0) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("max_iter must be positive\n");
-        #endif
+#endif
         return 1;
     }
     if (settings->eps_abs <= 0) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("eps_abs must be positive\n");
-        #endif
+#endif
         return 1;
     }
     if (settings->eps_rel <= 0) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("eps_rel must be positive\n");
-        #endif
+#endif
         return 1;
     }
     if (settings->eps_prim_inf <= 0) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("eps_prim_inf must be positive\n");
-        #endif
+#endif
         return 1;
     }
     if (settings->eps_dual_inf <= 0) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("eps_dual_inf must be positive\n");
-        #endif
+#endif
         return 1;
     }
     if (settings->alpha <= 0 || settings->alpha >= 2) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("alpha must be between 0 and 2\n");
-        #endif
+#endif
         return 1;
     }
     if (validate_linsys_solver(settings->linsys_solver)){
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("linsys_solver not recognized\n");
-        #endif
+#endif
         return 1;
     }
     if (settings->verbose != 0 && settings->verbose != 1) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("verbose must be either 0 or 1\n");
-        #endif
+#endif
         return 1;
     }
     if (settings->scaled_termination != 0 && settings->scaled_termination != 1) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("scaled_termination must be either 0 or 1\n");
-        #endif
+#endif
         return 1;
     }
     if (settings->early_terminate != 0 && settings->early_terminate != 1) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("early_terminate must be either 0 or 1\n");
-        #endif
+#endif
         return 1;
     }
     if (settings->early_terminate_interval <= 0) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("early_terminate_interval must be positive\n");
-        #endif
+#endif
         return 1;
     }
     if (settings->warm_start != 0 && settings->warm_start != 1) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("warm_start must be either 0 or 1\n");
-        #endif
+#endif
         return 1;
     }
 

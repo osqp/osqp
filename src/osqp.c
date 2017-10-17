@@ -30,34 +30,34 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
 
     // Validate data
     if (validate_data(data)){
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("ERROR: Data validation returned failure!\n");
-        #endif
+#endif
         return OSQP_NULL;
     }
 
     // Validate settings
     if (validate_settings(settings)){
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("ERROR: Settings validation returned failure!\n");
-        #endif
+#endif
         return OSQP_NULL;
     }
 
     // Allocate empty workspace
     work = c_calloc(1, sizeof(OSQPWorkspace));
     if (!work){
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("ERROR: allocating work failure!\n");
-        #endif
+#endif
         return OSQP_NULL;
     }
 
     // Start and allocate directly timer
-    #ifdef PROFILING
+#ifdef PROFILING
     work->timer = c_malloc(sizeof(OSQPTimer));
     tic(work->timer);
-    #endif
+#endif
 
 
     // Copy problem data into workspace
@@ -125,22 +125,22 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
 
     // Load linear system solver
     if ( load_linsys_solver(work->settings->linsys_solver) ) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("%s linear system solver not available.\nTried to obtain it from shared library.\n",
                 SOLVER_NAME[work->settings->linsys_solver]);
-        #endif
+#endif
         osqp_cleanup(work);
         return OSQP_NULL;
     }
 
     // Initialize linear system solver structure
     work->linsys_solver = init_linsys_solver(work->data->P, work->data->A,
-                                             work->settings->sigma, work->rho_vec,
-                                             work->settings->linsys_solver, 0);
+            work->settings->sigma, work->rho_vec,
+            work->settings->linsys_solver, 0);
     if (!work->linsys_solver) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("ERROR: Linear systems solver initialization failure!\n");
-        #endif
+#endif
         osqp_cleanup(work);
         return OSQP_NULL;
     }
@@ -168,20 +168,20 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     update_status(work->info, OSQP_UNSOLVED);
 
     // Allocate timing information
-    #ifdef PROFILING
+#ifdef PROFILING
     work->info->solve_time = 0.0;  // Solve time to zero
     work->info->polish_time = 0.0; // Polish time to zero
     work->info->run_time = 0.0;    // Total run time to zero
     work->info->setup_time = toc(work->timer); // Updater timer information
     work->first_run = 1;
-    #endif
+#endif
 
     // Print header
-    #ifdef PRINTING
+#ifdef PRINTING
     if (work->settings->verbose)
         print_setup_header(work);
-        work->summary_printed = 0; // Initialize last summary  to not printed
-    #endif
+    work->summary_printed = 0; // Initialize last summary  to not printed
+#endif
 
     return work;
 }
@@ -195,41 +195,41 @@ c_int osqp_solve(OSQPWorkspace * work){
     c_int exitflag = 0;
     c_int iter;
     c_int compute_cost_function;  // Boolean whether to compute the cost function
-                                  // in the loop
+    // in the loop
     c_int can_check_termination = 0;  // Boolean whether to check termination
 
-    #ifdef PRINTING
+#ifdef PRINTING
     c_int can_print; // Boolean whether you can print
     compute_cost_function = work->settings->verbose; // Compute cost function only if verbose is on
-    #else
+#else
     compute_cost_function = 0; // Never compute cost function during the iterations if no printing enabled
-    #endif
+#endif
 
 
 
     // Check if workspace has been initialized
     if (!work){
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("ERROR: Workspace not initialized!\n");
-        #endif
+#endif
         return -1;
     }
 
-    #ifdef PROFILING
+#ifdef PROFILING
     tic(work->timer); // Start timer
-    #endif
+#endif
 
-    #ifdef PRINTING
+#ifdef PRINTING
     if (work->settings->verbose){
         // Print Header for every column
         print_header();
     }
-    #endif
+#endif
 
-    #ifdef CTRLC
+#ifdef CTRLC
     // initialize Ctrl-C support
     startInterruptListener();
-    #endif
+#endif
 
     // Initialize variables (cold start or warm start depending on settings)
     if (!work->settings->warm_start)
@@ -256,7 +256,7 @@ c_int osqp_solve(OSQPWorkspace * work){
 
         /* End of ADMM Steps */
 
-        #ifdef CTRLC
+#ifdef CTRLC
         // Check the interrupt signal
         if (isInterrupted()) {
             update_status(work->info, OSQP_SIGINT);
@@ -264,16 +264,16 @@ c_int osqp_solve(OSQPWorkspace * work){
             endInterruptListener();
             return 1;   // exitflag
         }
-        #endif
+#endif
 
         // Can we check for termination ?
         can_check_termination = work->settings->early_terminate &&
-                                (iter % work->settings->early_terminate_interval == 0);
+            (iter % work->settings->early_terminate_interval == 0);
 
-        #ifdef PRINTING
+#ifdef PRINTING
         // Can we print ?
         can_print = work->settings->verbose &&
-                    ((iter % PRINT_INTERVAL == 0) || (iter == 1));
+            ((iter % PRINT_INTERVAL == 0) || (iter == 1));
 
         if (can_check_termination || can_print){ // Update status in either of these cases
             // Update information
@@ -293,7 +293,7 @@ c_int osqp_solve(OSQPWorkspace * work){
             }
 
         }
-        #else
+#else
         if (can_check_termination){
             // Update information and compute also objective value
             update_info(work, iter, compute_cost_function, 0);
@@ -304,25 +304,30 @@ c_int osqp_solve(OSQPWorkspace * work){
                 break;
             }
         }
-        #endif
-
-
-
-
+#endif
     }
 
     // Update information and check termination condition if it hasn't been done
-    // during last iteration
+    // during last iteration (max_iter reached or early_terminate disabled)
     if (!can_check_termination){
 
         /* Update information */
+#ifdef PRINTING
+        if(!can_print){
+            // Update info only if it hasn't been updated before for printing
+            // reasons
+            update_info(work, iter-1, compute_cost_function, 0);
+        }
+#else
+        // If no printing is enabled, update info directly
         update_info(work, iter-1, compute_cost_function, 0);
+#endif
 
+#ifdef PRINTING
         /* Print summary */
-        #ifdef PRINTING
-        if (work->settings->verbose)
+        if (work->settings->verbose && !work->summary_printed)
             print_summary(work);
-        #endif
+#endif
 
         /* Check whether a termination criterion is triggered */
         check_termination(work, 0);
@@ -335,11 +340,11 @@ c_int osqp_solve(OSQPWorkspace * work){
     }
 
     /* Print summary for last iteration */
-    #ifdef PRINTING
+#ifdef PRINTING
     if (work->settings->verbose && !work->summary_printed){
         print_summary(work);
     }
-    #endif
+#endif
 
     /* if max iterations reached, change status accordingly */
     if (work->info->status_val == OSQP_UNSOLVED) {
@@ -349,38 +354,38 @@ c_int osqp_solve(OSQPWorkspace * work){
     }
 
     /* Update solve time */
-    #ifdef PROFILING
+#ifdef PROFILING
     work->info->solve_time = toc(work->timer);
-    #endif
+#endif
 
     // Polish the obtained solution
-    #ifndef EMBEDDED
+#ifndef EMBEDDED
     if (work->settings->polish && work->info->status_val == OSQP_SOLVED)
         polish(work);
-    #endif
+#endif
 
     /* Update total time */
-    #ifdef PROFILING
+#ifdef PROFILING
     if (work->first_run) {
         // total time: setup + solve + polish
         work->info->run_time = work->info->setup_time +
-                               work->info->solve_time +
-                               work->info->polish_time;
+            work->info->solve_time +
+            work->info->polish_time;
     } else {
         // total time: solve + polish
         work->info->run_time = work->info->solve_time +
-                               work->info->polish_time;
+            work->info->polish_time;
     }
     // Indicate that the solve function has already been executed
     if (work->first_run) work->first_run = 0;
-    #endif
+#endif
 
 
     /* Print final footer */
-    #ifdef PRINTING
+#ifdef PRINTING
     if(work->settings->verbose)
         print_footer(work->info, work->settings->polish);
-    #endif
+#endif
 
     // Store solution
     store_solution(work);
@@ -468,9 +473,9 @@ c_int osqp_cleanup(OSQPWorkspace * work){
         if (work->info)               c_free(work->info);
 
         // Free timer
-        #ifdef PROFILING
+#ifdef PROFILING
         if (work->timer)              c_free(work->timer);
-        #endif
+#endif
 
         // Free work
         c_free(work);
@@ -507,16 +512,16 @@ c_int osqp_update_lin_cost(OSQPWorkspace * work, c_float * q_new) {
 
 c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new) {
     c_int i, exitflag = 0;
-    #if EMBEDDED != 1
+#if EMBEDDED != 1
     c_int constr_type_changed;
-    #endif
+#endif
 
     // Check if lower bound is smaller than upper bound
     for (i=0; i<work->data->m; i++) {
         if (l_new[i] > u_new[i]) {
-            #ifdef PRINTING
+#ifdef PRINTING
             c_print("lower bound must be lower than or equal to upper bound\n");
-            #endif
+#endif
             return 1;
         }
     }
@@ -534,17 +539,17 @@ c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new)
     // Set solver status to OSQP_UNSOLVED
     update_status(work->info, OSQP_UNSOLVED);
 
-    #if EMBEDDED != 1
+#if EMBEDDED != 1
     // If the type of any constraint changed, update rho_vec
     constr_type_changed = update_rho_vec(work);
 
     if (constr_type_changed == 1) {
         // Update rho_vec in KKT matrix
         exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
-                                                       work->rho_vec,
-                                                       work->data->m);
+                work->rho_vec,
+                work->data->m);
     }
-    #endif // EMBEDDED
+#endif // EMBEDDED
 
     return exitflag;
 }
@@ -552,9 +557,9 @@ c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new)
 
 c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
     c_int i, exitflag = 0;
-    #if EMBEDDED != 1
+#if EMBEDDED != 1
     c_int constr_type_changed;
-    #endif
+#endif
 
     // Replace l by the new vector
     prea_vec_copy(l_new, work->data->l, work->data->m);
@@ -567,9 +572,9 @@ c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
     // Check if lower bound is smaller than upper bound
     for (i=0; i<work->data->m; i++) {
         if (work->data->l[i] > work->data->u[i]) {
-            #ifdef PRINTING
+#ifdef PRINTING
             c_print("upper bound must be greater than or equal to lower bound\n");
-            #endif
+#endif
             return 1;
         }
     }
@@ -577,17 +582,17 @@ c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
     // Set solver status to OSQP_UNSOLVED
     update_status(work->info, OSQP_UNSOLVED);
 
-    #if EMBEDDED != 1
+#if EMBEDDED != 1
     // If the type of any constraint changed, update rho_vec
     constr_type_changed = update_rho_vec(work);
 
     if (constr_type_changed == 1) {
         // Update rho_vec in KKT matrix
         exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
-                                                       work->rho_vec,
-                                                       work->data->m);
+                work->rho_vec,
+                work->data->m);
     }
-    #endif // EMBEDDED
+#endif // EMBEDDED
 
     return exitflag;
 }
@@ -596,9 +601,9 @@ c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
 
 c_int osqp_update_upper_bound(OSQPWorkspace * work, c_float * u_new) {
     c_int i, exitflag = 0;
-    #if EMBEDDED != 1
+#if EMBEDDED != 1
     c_int constr_type_changed;
-    #endif
+#endif
 
 
     // Replace u by the new vector
@@ -612,9 +617,9 @@ c_int osqp_update_upper_bound(OSQPWorkspace * work, c_float * u_new) {
     // Check if upper bound is greater than lower bound
     for (i=0; i<work->data->m; i++) {
         if (work->data->u[i] < work->data->l[i]) {
-            #ifdef PRINTING
+#ifdef PRINTING
             c_print("lower bound must be lower than or equal to upper bound\n");
-            #endif
+#endif
             return 1;
         }
     }
@@ -622,17 +627,17 @@ c_int osqp_update_upper_bound(OSQPWorkspace * work, c_float * u_new) {
     // Set solver status to OSQP_UNSOLVED
     update_status(work->info, OSQP_UNSOLVED);
 
-    #if EMBEDDED != 1
+#if EMBEDDED != 1
     // If the type of any constraint changed, update rho_vec
     constr_type_changed = update_rho_vec(work);
 
     if (constr_type_changed == 1) {
         // Update rho_vec in KKT matrix
         exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
-                                                       work->rho_vec,
-                                                       work->data->m);
+                work->rho_vec,
+                work->data->m);
     }
-    #endif // EMBEDDED
+#endif // EMBEDDED
 
     return exitflag;
 }
@@ -650,9 +655,9 @@ c_int osqp_warm_start(OSQPWorkspace * work, c_float * x, c_float * y){
 
     // Scale iterates
     if (work->settings->scaling){
-	    vec_ew_prod(work->scaling->Dinv, work->x, work->x, work->data->n);
-	    vec_ew_prod(work->scaling->Einv, work->y, work->y, work->data->m);
-            vec_mult_scalar(work->y, work->scaling->c, work->data->m);
+        vec_ew_prod(work->scaling->Dinv, work->x, work->x, work->data->n);
+        vec_ew_prod(work->scaling->Einv, work->y, work->y, work->data->m);
+        vec_mult_scalar(work->y, work->scaling->c, work->data->m);
     }
 
     // Compute Ax = z and store it in z
@@ -672,7 +677,7 @@ c_int osqp_warm_start_x(OSQPWorkspace * work, c_float * x){
 
     // Scale iterate
     if (work->settings->scaling){
-	    vec_ew_prod(work->scaling->Dinv, work->x, work->x, work->data->n);
+        vec_ew_prod(work->scaling->Dinv, work->x, work->x, work->data->n);
     }
 
     // Compute Ax = z and store it in z
@@ -696,8 +701,8 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y){
 
     // Scale iterate
     if (work->settings->scaling){
-	    vec_ew_prod(work->scaling->Einv, work->y, work->y, work->data->m);
-            vec_mult_scalar(work->y, work->scaling->c, work->data->m);
+        vec_ew_prod(work->scaling->Einv, work->y, work->y, work->data->m);
+        vec_mult_scalar(work->y, work->scaling->c, work->data->m);
     }
 
     // Cold start x and z
@@ -735,9 +740,9 @@ c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, 
         // Check if number of elements is less or equal than the total number of
         // nonzeros in P
         if (P_new_n > nnzP){
-            #ifdef PRINTING
+#ifdef PRINTING
             c_print("Error in P update: new number of elements (%i) greater than elements in P (%i)!\n", (int)P_new_n, (int)nnzP);
-            #endif
+#endif
             return 1;
         }
     }
@@ -765,16 +770,16 @@ c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, 
     // Update linear system structure with new data
     exitflag = work->linsys_solver->update_matrices(work->linsys_solver, work->data->P, work->data->A, work->settings);
 
-   // Set solver status to OSQP_UNSOLVED
-   update_status(work->info, OSQP_UNSOLVED);
+    // Set solver status to OSQP_UNSOLVED
+    update_status(work->info, OSQP_UNSOLVED);
 
-   #ifdef PRINTING
-   if (exitflag < 0) {
-           c_print("Error in P update: new KKT matrix is not quasidefinite!");
-   }
-   #endif
+#ifdef PRINTING
+    if (exitflag < 0) {
+        c_print("Error in P update: new KKT matrix is not quasidefinite!");
+    }
+#endif
 
-   return exitflag;
+    return exitflag;
 }
 
 
@@ -804,9 +809,9 @@ c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, 
         // Check if number of elements is less or equal than the total number of
         // nonzeros in A
         if (A_new_n > nnzA){
-            #ifdef PRINTING
+#ifdef PRINTING
             c_print("Error in A update: new number of elements (%i) greater than elements in A (%i)!\n", (int)A_new_n, (int)nnzA);
-            #endif
+#endif
             return 1;
         }
     }
@@ -832,14 +837,14 @@ c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, 
     // Update linear system structure with new data
     exitflag = work->linsys_solver->update_matrices(work->linsys_solver, work->data->P, work->data->A, work->settings);
 
-   // Set solver status to OSQP_UNSOLVED
-   update_status(work->info, OSQP_UNSOLVED);
+    // Set solver status to OSQP_UNSOLVED
+    update_status(work->info, OSQP_UNSOLVED);
 
-   #ifdef PRINTING
-   if (exitflag < 0) {
-           c_print("Error in A update: new KKT matrix is not quasidefinite!");
-   }
-   #endif
+#ifdef PRINTING
+    if (exitflag < 0) {
+        c_print("Error in A update: new KKT matrix is not quasidefinite!");
+    }
+#endif
 
     return exitflag;
 }
@@ -870,7 +875,7 @@ c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, 
  *                                 <0: error in update_matrices()
  */
 c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, c_int P_new_n,
-                                            c_float * Ax_new, c_int * Ax_new_idx, c_int A_new_n){
+        c_float * Ax_new, c_int * Ax_new_idx, c_int A_new_n){
     c_int i; // For indexing
     c_int exitflag; // Exit flag
     c_int nnzP, nnzA; // Number of nonzeros in P and A
@@ -883,9 +888,9 @@ c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx
         // Check if number of elements is less or equal than the total number of
         // nonzeros in P
         if (P_new_n > nnzP){
-            #ifdef PRINTING
+#ifdef PRINTING
             c_print("Error in P update: new number of elements (%i) greater than elements in P (%i)!\n", (int)P_new_n, (int)nnzP);
-            #endif
+#endif
             return 1;
         }
     }
@@ -895,9 +900,9 @@ c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx
         // Check if number of elements is less or equal than the total number of
         // nonzeros in A
         if (A_new_n > nnzA){
-            #ifdef PRINTING
+#ifdef PRINTING
             c_print("Error in A update: new number of elements (%i) greater than elements in A (%i)!\n", (int)A_new_n, (int)nnzA);
-            #endif
+#endif
             return 2;
         }
     }
@@ -938,16 +943,16 @@ c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx
     // Update linear system structure with new data
     exitflag = work->linsys_solver->update_matrices(work->linsys_solver, work->data->P, work->data->A, work->settings);
 
-   // Set solver status to OSQP_UNSOLVED
-   update_status(work->info, OSQP_UNSOLVED);
+    // Set solver status to OSQP_UNSOLVED
+    update_status(work->info, OSQP_UNSOLVED);
 
-   #ifdef PRINTING
-   if (exitflag < 0) {
-           c_print("Error in P and A update: new KKT matrix is not quasidefinite!");
-   }
-   #endif
+#ifdef PRINTING
+    if (exitflag < 0) {
+        c_print("Error in P and A update: new KKT matrix is not quasidefinite!");
+    }
+#endif
 
-   return exitflag;
+    return exitflag;
 
 }
 
@@ -957,9 +962,9 @@ c_int osqp_update_rho(OSQPWorkspace * work, c_float rho_new){
 
     // Check value of rho
     if (rho_new <= 0) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("rho must be positive\n");
-        #endif
+#endif
         return 1;
     }
 
@@ -977,8 +982,8 @@ c_int osqp_update_rho(OSQPWorkspace * work, c_float rho_new){
 
     // Update rho_vec in KKT matrix
     exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
-                                                   work->rho_vec,
-                                                   work->data->m);
+            work->rho_vec,
+            work->data->m);
 
     return exitflag;
 }
@@ -992,9 +997,9 @@ c_int osqp_update_rho(OSQPWorkspace * work, c_float rho_new){
 c_int osqp_update_max_iter(OSQPWorkspace * work, c_int max_iter_new) {
     // Check that max_iter is positive
     if (max_iter_new <= 0) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("max_iter must be positive\n");
-        #endif
+#endif
         return 1;
     }
     // Update max_iter
@@ -1007,9 +1012,9 @@ c_int osqp_update_max_iter(OSQPWorkspace * work, c_int max_iter_new) {
 c_int osqp_update_eps_abs(OSQPWorkspace * work, c_float eps_abs_new) {
     // Check that eps_abs is positive
     if (eps_abs_new <= 0.) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("eps_abs must be positive\n");
-        #endif
+#endif
         return 1;
     }
     // Update eps_abs
@@ -1021,9 +1026,9 @@ c_int osqp_update_eps_abs(OSQPWorkspace * work, c_float eps_abs_new) {
 c_int osqp_update_eps_rel(OSQPWorkspace * work, c_float eps_rel_new) {
     // Check that eps_rel is positive
     if (eps_rel_new <= 0.) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("eps_rel must be positive\n");
-        #endif
+#endif
         return 1;
     }
     // Update eps_rel
@@ -1036,9 +1041,9 @@ c_int osqp_update_eps_prim_inf(OSQPWorkspace * work, c_float eps_prim_inf_new){
 
     // Check that eps_prim_inf is positive
     if (eps_prim_inf_new <= 0.) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("eps_prim_inf must be positive\n");
-        #endif
+#endif
         return 1;
     }
     // Update eps_prim_inf
@@ -1053,9 +1058,9 @@ c_int osqp_update_eps_dual_inf(OSQPWorkspace * work, c_float eps_dual_inf_new){
 
     // Check that eps_dual_inf is positive
     if (eps_dual_inf_new <= 0.) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("eps_dual_inf must be positive\n");
-        #endif
+#endif
         return 1;
     }
     // Update eps_dual_inf
@@ -1069,9 +1074,9 @@ c_int osqp_update_eps_dual_inf(OSQPWorkspace * work, c_float eps_dual_inf_new){
 c_int osqp_update_alpha(OSQPWorkspace * work, c_float alpha_new) {
     // Check that alpha is between 0 and 2
     if (alpha_new <= 0. || alpha_new >= 2.) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("alpha must be between 0 and 2\n");
-        #endif
+#endif
         return 1;
     }
     // Update alpha
@@ -1084,10 +1089,10 @@ c_int osqp_update_alpha(OSQPWorkspace * work, c_float alpha_new) {
 c_int osqp_update_warm_start(OSQPWorkspace * work, c_int warm_start_new) {
     // Check that warm_start is either 0 or 1
     if (warm_start_new != 0 && warm_start_new != 1) {
-      #ifdef PRINTING
-      c_print("warm_start should be either 0 or 1\n");
-      #endif
-      return 1;
+#ifdef PRINTING
+        c_print("warm_start should be either 0 or 1\n");
+#endif
+        return 1;
     }
     // Update warm_start
     work->settings->warm_start = warm_start_new;
@@ -1099,10 +1104,10 @@ c_int osqp_update_warm_start(OSQPWorkspace * work, c_int warm_start_new) {
 c_int osqp_update_scaled_termination(OSQPWorkspace * work, c_int scaled_termination_new) {
     // Check that scaled_termination is either 0 or 1
     if (scaled_termination_new != 0 && scaled_termination_new != 1) {
-      #ifdef PRINTING
-      c_print("scaled_termination should be either 0 or 1\n");
-      #endif
-      return 1;
+#ifdef PRINTING
+        c_print("scaled_termination should be either 0 or 1\n");
+#endif
+        return 1;
     }
     // Update early_terminate
     work->settings->scaled_termination = scaled_termination_new;
@@ -1113,10 +1118,10 @@ c_int osqp_update_scaled_termination(OSQPWorkspace * work, c_int scaled_terminat
 c_int osqp_update_early_terminate(OSQPWorkspace * work, c_int early_terminate_new) {
     // Check that early_terminate is either 0 or 1
     if (early_terminate_new != 0 && early_terminate_new != 1) {
-      #ifdef PRINTING
-      c_print("early_terminate should be either 0 or 1\n");
-      #endif
-      return 1;
+#ifdef PRINTING
+        c_print("early_terminate should be either 0 or 1\n");
+#endif
+        return 1;
     }
     // Update early_terminate
     work->settings->early_terminate = early_terminate_new;
@@ -1128,10 +1133,10 @@ c_int osqp_update_early_terminate(OSQPWorkspace * work, c_int early_terminate_ne
 c_int osqp_update_early_terminate_interval(OSQPWorkspace * work, c_int early_terminate_interval_new) {
     // Check that early_terminate_interval is either 0 or 1
     if (early_terminate_interval_new <= 0) {
-      #ifdef PRINTING
-      c_print("early_terminate_interval should be positive\n");
-      #endif
-      return 1;
+#ifdef PRINTING
+        c_print("early_terminate_interval should be positive\n");
+#endif
+        return 1;
     }
     // Update early_terminate_interval
     work->settings->early_terminate_interval = early_terminate_interval_new;
@@ -1146,9 +1151,9 @@ c_int osqp_update_early_terminate_interval(OSQPWorkspace * work, c_int early_ter
 c_int osqp_update_delta(OSQPWorkspace * work, c_float delta_new) {
     // Check that delta is positive
     if (delta_new <= 0.) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("delta must be positive\n");
-        #endif
+#endif
         return 1;
     }
     // Update delta
@@ -1160,18 +1165,18 @@ c_int osqp_update_delta(OSQPWorkspace * work, c_float delta_new) {
 c_int osqp_update_polish(OSQPWorkspace * work, c_int polish_new) {
     // Check that polish is either 0 or 1
     if (polish_new != 0 && polish_new != 1) {
-      #ifdef PRINTING
-      c_print("polish should be either 0 or 1\n");
-      #endif
-      return 1;
+#ifdef PRINTING
+        c_print("polish should be either 0 or 1\n");
+#endif
+        return 1;
     }
     // Update polish
     work->settings->polish = polish_new;
 
-    #ifdef PROFILING
+#ifdef PROFILING
     // Reset polish time to zero
     work->info->polish_time = 0.0;
-    #endif
+#endif
 
     return 0;
 }
@@ -1180,9 +1185,9 @@ c_int osqp_update_polish(OSQPWorkspace * work, c_int polish_new) {
 c_int osqp_update_pol_refine_iter(OSQPWorkspace * work, c_int pol_refine_iter_new) {
     // Check that pol_refine_iter is nonnegative
     if (pol_refine_iter_new < 0) {
-        #ifdef PRINTING
+#ifdef PRINTING
         c_print("pol_refine_iter must be nonnegative\n");
-        #endif
+#endif
         return 1;
     }
     // Update pol_refine_iter
@@ -1195,10 +1200,10 @@ c_int osqp_update_pol_refine_iter(OSQPWorkspace * work, c_int pol_refine_iter_ne
 c_int osqp_update_verbose(OSQPWorkspace * work, c_int verbose_new) {
     // Check that verbose is either 0 or 1
     if (verbose_new != 0 && verbose_new != 1) {
-      #ifdef PRINTING
-      c_print("verbose should be either 0 or 1\n");
-      #endif
-      return 1;
+#ifdef PRINTING
+        c_print("verbose should be either 0 or 1\n");
+#endif
+        return 1;
     }
     // Update verbose
     work->settings->verbose = verbose_new;

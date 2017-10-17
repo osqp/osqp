@@ -26,7 +26,7 @@ RHO_MAX = 1e+06
 RHO_TOL = 1e-04
 
 # Printing interval
-PRINT_INTERVAL = 100
+PRINT_INTERVAL = 200
 
 # OSQP Infinity
 OSQP_INFTY = 1e+20
@@ -38,8 +38,8 @@ OSQP_NAN = 1e+20  # Just as placeholder. Not real value
 SUITESPARSE_LDL_SOLVER = 0
 
 # Scaling
-MIN_SCALING = 1e-06
-MAX_SCALING = 1e+06
+MIN_SCALING = 1e-03
+MAX_SCALING = 1e+03
 
 
 class workspace(object):
@@ -151,9 +151,9 @@ class settings(object):
         self.rho = kwargs.pop('rho', 0.1)
         self.sigma = kwargs.pop('sigma', 1e-06)
         self.scaling = kwargs.pop('scaling', True)
-        self.scaling_iter = kwargs.pop('scaling_iter', 15)
+        self.scaling_iter = kwargs.pop('scaling_iter', 10)
         self.scaling_norm = kwargs.pop('scaling_norm', -1)
-        self.max_iter = kwargs.pop('max_iter', 2500)
+        self.max_iter = kwargs.pop('max_iter', 5000)
         self.eps_abs = kwargs.pop('eps_abs', 1e-3)
         self.eps_rel = kwargs.pop('eps_rel', 1e-3)
         self.eps_prim_inf = kwargs.pop('eps_prim_inf', 1e-4)
