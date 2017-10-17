@@ -4,7 +4,7 @@
 
 
 csc * form_KKT(const csc * P, const  csc * A, c_int format, c_float param1, c_float * param2,
-               c_int * PtoKKT, c_int * AtoKKT, c_int **Pdiag_idx, c_int *Pdiag_n, c_int * param2toKKT){
+        c_int * PtoKKT, c_int * AtoKKT, c_int **Pdiag_idx, c_int *Pdiag_n, c_int * param2toKKT){
     c_int nKKT, nnzKKTmax;  // Size, number of nonzeros and max number of nonzeros in KKT matrix
     csc * KKT_trip, * KKT;  // KKT matrix in triplet format and CSC format
     c_int ptr, i, j;        // Counters for elements (i,j) and index pointer
@@ -16,9 +16,9 @@ csc * form_KKT(const csc * P, const  csc * A, c_int format, c_float param1, c_fl
 
     // Get maximum number of nonzero elements (only upper triangular part)
     nnzKKTmax = P->p[P->n] +         // Number of elements in P
-                P->m +               // Number of elements in param1 * I
-                A->p[A->n] +         // Number of nonzeros in A
-                A->m;                // Number of elements in - diag(param2)
+        P->m +               // Number of elements in param1 * I
+        A->p[A->n] +         // Number of nonzeros in A
+        A->m;                // Number of elements in - diag(param2)
 
     // Preallocate KKT matrix in triplet format
     KKT_trip = csc_spalloc(nKKT, nKKT, nnzKKTmax, 1, 1);
@@ -55,15 +55,15 @@ csc * form_KKT(const csc * P, const  csc * A, c_int format, c_float param1, c_fl
 
                 // If index vector pointer supplied -> Store the index
                 if (Pdiag_idx != OSQP_NULL) {
-                        (*Pdiag_idx)[*Pdiag_n] = ptr;
-                        (*Pdiag_n)++;
+                    (*Pdiag_idx)[*Pdiag_n] = ptr;
+                    (*Pdiag_n)++;
                 }
             }
             zKKT++;
 
             // Add diagonal param1 in case
             if ((i < j) && // Diagonal element not reached
-                (ptr + 1 == P->p[j+1])){ // last element of column j
+                    (ptr + 1 == P->p[j+1])){ // last element of column j
 
                 // Add diagonal element param1
                 KKT_trip->i[zKKT] = j;
@@ -132,7 +132,7 @@ csc * form_KKT(const csc * P, const  csc * A, c_int format, c_float param1, c_fl
         }
 
         if (AtoKKT != OSQP_NULL){
-        for (i = 0; i < A->p[A->n]; i++){
+            for (i = 0; i < A->p[A->n]; i++){
                 AtoKKT[i] = KKT_TtoC[AtoKKT[i]];
             }
         }
@@ -189,7 +189,7 @@ void update_KKT_A(csc * KKT, const csc * A, const c_int * AtoKKT){
 
 
 void update_KKT_param2(csc * KKT, const c_float * param2,
-                       const c_int * param2toKKT, const c_int m){
+        const c_int * param2toKKT, const c_int m){
     c_int i; // Iterations
 
     // Update elements of KKT using param2

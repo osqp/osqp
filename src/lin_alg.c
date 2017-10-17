@@ -179,7 +179,7 @@ void vec_ew_min_vec(const c_float * a, const c_float * b, c_float * c, c_int n){
 }
 
 void vec_ew_sqrt_sos_vec(const c_float * a, const c_float * b,
-                         c_float * c, c_int n){
+        c_float * c, c_int n){
 
     c_int i;
     for(i = 0;  i < n; i++){
@@ -190,7 +190,7 @@ void vec_ew_sqrt_sos_vec(const c_float * a, const c_float * b,
 
 
 void vec_ew_sum_vec(const c_float * a, const c_float * b,
-                         c_float * c, c_int n){
+        c_float * c, c_int n){
 
     c_int i;
     for(i = 0;  i < n; i++){
@@ -309,7 +309,7 @@ void mat_vec(const csc *A, const c_float *x, c_float *y, c_int plus_eq) {
 }
 
 void mat_tpose_vec(const csc *A, const c_float *x, c_float *y,
-                   c_int plus_eq, c_int skip_diag) {
+        c_int plus_eq, c_int skip_diag) {
     c_int i, j, k;
     if (!plus_eq){
         // y = 0
@@ -342,13 +342,13 @@ void mat_tpose_vec(const csc *A, const c_float *x, c_float *y,
     } else {
         // y +=  A*x
         if (skip_diag) {
-      		  for (j=0; j<A->n; j++) {
+            for (j=0; j<A->n; j++) {
                 for (k=A->p[j]; k < A->p[j+1]; k++) {
                     i = A->i[k];
                     y[j] += i==j ? 0 : A->x[k]*x[i];
                 }
             }
-      	} else {
+        } else {
             for (j=0; j<A->n; j++) {
                 for (k=A->p[j]; k < A->p[j+1]; k++) {
                     y[j] += A->x[k]*x[A->i[k]];
@@ -569,9 +569,9 @@ c_float quad_form(const csc * P, const c_float * x){
                 quad_form += P->x[ptr]*x[i]*x[j];
             }
             else { // Element in lower diagonal part
-                #ifdef PRINTING
+#ifdef PRINTING
                 c_print("ERROR: quad_form matrix is not upper triangular\n");
-                #endif
+#endif
                 return OSQP_NULL;
             }
         }

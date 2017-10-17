@@ -15,12 +15,12 @@ const char *osqp_version(void) {
 #ifdef PRINTING
 #ifdef PROFILING
 static const char *HEADER[] = {
- "Iter",   " Obj  Val ",  "  Pri  Res ", "  Dua  Res ", "      Time "
+    "Iter",   " Obj  Val ",  "  Pri  Res ", "  Dua  Res ", "      Time "
 };
 static const c_int HEADER_LEN = 5;
 #else
 static const char *HEADER[] = {
- "Iter",   " Obj  Val ",  "  Pri  Res ", "    Dua  Res "
+    "Iter",   " Obj  Val ",  "  Pri  Res ", "    Dua  Res "
 };
 static const c_int HEADER_LEN = 4;
 #endif
@@ -34,12 +34,12 @@ static const c_int HSPACE = 12;
 
 
 void c_strcpy(char dest[], const char source[]){
-int i = 0;
+    int i = 0;
     while (1) {
-       dest[i] = source[i];
-       if (dest[i] == '\0') break;
-       i++;
- } }
+        dest[i] = source[i];
+        if (dest[i] == '\0') break;
+        i++;
+    } }
 
 
 #ifdef PRINTING
@@ -81,7 +81,7 @@ void print_setup_header(const OSQPWorkspace * work) {
     c_print("Problem:  ");
     c_print("variables n = %i, constraints m = %i\n          ", (int)data->n, (int)data->m);
     c_print("nnz(P) + nnz(A) = %i\n", (int)nnz);
-    
+
     // Print Settings
     c_print("Settings: ");
     c_print("linear system solver = %s",
@@ -140,7 +140,7 @@ void print_summary(OSQPWorkspace * work){
     c_print("%*.4e ", (int)HSPACE, info->obj_val);
     c_print("%*.4e ", (int)HSPACE, info->pri_res);
     c_print("%*.4e ", (int)HSPACE, info->dua_res);
-    #ifdef PROFILING
+#ifdef PROFILING
     if (work->first_run) {
         // total time: setup + solve
         c_print("%*.2fs", 9, info->setup_time + info->solve_time);
@@ -148,7 +148,7 @@ void print_summary(OSQPWorkspace * work){
         // total time: solve
         c_print("%*.2fs", 9, info->solve_time);
     }
-    #endif
+#endif
     c_print("\n");
 
     work->summary_printed = 1; // Summary has been printed
@@ -163,10 +163,10 @@ void print_polish(OSQPWorkspace * work) {
     c_print("%*.4e ", (int)HSPACE, info->obj_val);
     c_print("%*.4e ", (int)HSPACE, info->pri_res);
     c_print("%*.4e ", (int)HSPACE, info->dua_res);
-    #ifdef PROFILING
+#ifdef PROFILING
     c_print("%*.2fs", 9, info->setup_time + info->solve_time +
-                         info->polish_time);
-    #endif
+            info->polish_time);
+#endif
     c_print("\n");
 }
 
@@ -178,9 +178,9 @@ void print_polish(OSQPWorkspace * work) {
 
 void print_footer(OSQPInfo * info, c_int polish){
 
-    #ifdef PRINTING
+#ifdef PRINTING
     c_print("\n"); // Add space after iterations
-    #endif
+#endif
 
     c_print("Status: %s\n", info->status);
 
@@ -194,17 +194,17 @@ void print_footer(OSQPInfo * info, c_int polish){
 
     c_print("Number of iterations: %i\n", (int)info->iter);
     if (info->status_val == OSQP_SOLVED ||
-        info->status_val == OSQP_SOLVED_INACCURATE) {
+            info->status_val == OSQP_SOLVED_INACCURATE) {
         c_print("Optimal objective: %.4f\n", info->obj_val);
     }
 
-    #ifdef PROFILING
+#ifdef PROFILING
     if (info->run_time > 1e-03) { // Time more than 1ms
         c_print("Run time: %.3fs\n", info->run_time);
     } else {
         c_print("Run time: %.3fms\n", 1e03*info->run_time);
     }
-    #endif
+#endif
     c_print("\n");
 
 }
@@ -213,36 +213,36 @@ void print_footer(OSQPInfo * info, c_int polish){
 
 
 void set_default_settings(OSQPSettings * settings) {
-        settings->scaling = SCALING; /* heuristic problem scaling */
+    settings->scaling = SCALING; /* heuristic problem scaling */
 
-        #if EMBEDDED != 1
-        settings->scaling_iter = SCALING_ITER;
-        settings->scaling_norm = SCALING_NORM;
-        #endif
+#if EMBEDDED != 1
+    settings->scaling_iter = SCALING_ITER;
+    settings->scaling_norm = SCALING_NORM;
+#endif
 
-        settings->rho = (c_float) RHO; /* ADMM step */
-        settings->sigma = (c_float) SIGMA; /* ADMM step */
-        settings->max_iter = MAX_ITER; /* maximum iterations to take */
-        settings->eps_abs = (c_float) EPS_ABS;         /* absolute convergence tolerance */
-        settings->eps_rel = (c_float) EPS_REL;         /* relative convergence tolerance */
-        settings->eps_prim_inf = (c_float) EPS_PRIM_INF;         /* primal infeasibility tolerance */
-        settings->eps_dual_inf = (c_float) EPS_DUAL_INF;         /* dual infeasibility tolerance */
-        settings->alpha = (c_float) ALPHA;     /* relaxation parameter */
-        settings->linsys_solver = LINSYS_SOLVER;     /* relaxation parameter */
+    settings->rho = (c_float) RHO; /* ADMM step */
+    settings->sigma = (c_float) SIGMA; /* ADMM step */
+    settings->max_iter = MAX_ITER; /* maximum iterations to take */
+    settings->eps_abs = (c_float) EPS_ABS;         /* absolute convergence tolerance */
+    settings->eps_rel = (c_float) EPS_REL;         /* relative convergence tolerance */
+    settings->eps_prim_inf = (c_float) EPS_PRIM_INF;         /* primal infeasibility tolerance */
+    settings->eps_dual_inf = (c_float) EPS_DUAL_INF;         /* dual infeasibility tolerance */
+    settings->alpha = (c_float) ALPHA;     /* relaxation parameter */
+    settings->linsys_solver = LINSYS_SOLVER;     /* relaxation parameter */
 
-        #ifndef EMBEDDED
-        settings->delta = DELTA;    /* regularization parameter for polish */
-        settings->polish = POLISH;     /* ADMM solution polish: 1 */
-        settings->pol_refine_iter = POL_REFINE_ITER; /* iterative refinement
-                                                        steps in polish */
-        settings->auto_rho = AUTO_RHO; /* automatic rho computation */
-        settings->verbose = VERBOSE;     /* print output */
-        #endif
+#ifndef EMBEDDED
+    settings->delta = DELTA;    /* regularization parameter for polish */
+    settings->polish = POLISH;     /* ADMM solution polish: 1 */
+    settings->pol_refine_iter = POL_REFINE_ITER; /* iterative refinement
+                                                    steps in polish */
+    settings->auto_rho = AUTO_RHO; /* automatic rho computation */
+    settings->verbose = VERBOSE;     /* print output */
+#endif
 
-        settings->scaled_termination = SCALED_TERMINATION;     /* Evaluate scaled termination criteria*/
-        settings->early_terminate = EARLY_TERMINATE;     /* Evaluate termination criteria */
-        settings->early_terminate_interval = EARLY_TERMINATE_INTERVAL;     /* Evaluate termination at certain interval */
-        settings->warm_start = WARM_START;     /* x equality constraint scaling: 1e-3 */
+    settings->scaled_termination = SCALED_TERMINATION;     /* Evaluate scaled termination criteria*/
+    settings->early_terminate = EARLY_TERMINATE;     /* Evaluate termination criteria */
+    settings->early_terminate_interval = EARLY_TERMINATE_INTERVAL;     /* Evaluate termination at certain interval */
+    settings->warm_start = WARM_START;     /* x equality constraint scaling: 1e-3 */
 
 }
 
@@ -282,8 +282,8 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
 
 
 /*******************
-* Timer Functions *
-*******************/
+ * Timer Functions *
+ *******************/
 
 #ifdef PROFILING
 
@@ -292,14 +292,14 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
 
 void tic(OSQPTimer* t)
 {
-        QueryPerformanceFrequency(&t->freq);
-        QueryPerformanceCounter(&t->tic);
+    QueryPerformanceFrequency(&t->freq);
+    QueryPerformanceCounter(&t->tic);
 }
 
 c_float toc(OSQPTimer* t)
 {
-        QueryPerformanceCounter(&t->toc);
-        return ((t->toc.QuadPart - t->tic.QuadPart) / (c_float)t->freq.QuadPart);
+    QueryPerformanceCounter(&t->toc);
+    return ((t->toc.QuadPart - t->tic.QuadPart) / (c_float)t->freq.QuadPart);
 }
 
 // Mac
@@ -307,24 +307,24 @@ c_float toc(OSQPTimer* t)
 
 void tic(OSQPTimer* t)
 {
-        /* read current clock cycles */
-        t->tic = mach_absolute_time();
+    /* read current clock cycles */
+    t->tic = mach_absolute_time();
 }
 
 c_float toc(OSQPTimer* t)
 {
 
-        uint64_t duration; /* elapsed time in clock cycles*/
+    uint64_t duration; /* elapsed time in clock cycles*/
 
-        t->toc = mach_absolute_time();
-        duration = t->toc - t->tic;
+    t->toc = mach_absolute_time();
+    duration = t->toc - t->tic;
 
-        /*conversion from clock cycles to nanoseconds*/
-        mach_timebase_info(&(t->tinfo));
-        duration *= t->tinfo.numer;
-        duration /= t->tinfo.denom;
+    /*conversion from clock cycles to nanoseconds*/
+    mach_timebase_info(&(t->tinfo));
+    duration *= t->tinfo.numer;
+    duration /= t->tinfo.denom;
 
-        return (c_float)duration / 1e9;
+    return (c_float)duration / 1e9;
 }
 
 
@@ -334,25 +334,25 @@ c_float toc(OSQPTimer* t)
 /* read current time */
 void tic(OSQPTimer* t)
 {
-        clock_gettime(CLOCK_MONOTONIC, &t->tic);
+    clock_gettime(CLOCK_MONOTONIC, &t->tic);
 }
 
 
 /* return time passed since last call to tic on this timer */
 c_float toc(OSQPTimer* t)
 {
-        struct timespec temp;
+    struct timespec temp;
 
-        clock_gettime(CLOCK_MONOTONIC, &t->toc);
+    clock_gettime(CLOCK_MONOTONIC, &t->toc);
 
-        if ((t->toc.tv_nsec - t->tic.tv_nsec)<0) {
-                temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec-1;
-                temp.tv_nsec = 1e9+t->toc.tv_nsec - t->tic.tv_nsec;
-        } else {
-                temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec;
-                temp.tv_nsec = t->toc.tv_nsec - t->tic.tv_nsec;
-        }
-        return (c_float)temp.tv_sec + (c_float)temp.tv_nsec / 1e9;
+    if ((t->toc.tv_nsec - t->tic.tv_nsec)<0) {
+        temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec-1;
+        temp.tv_nsec = 1e9+t->toc.tv_nsec - t->tic.tv_nsec;
+    } else {
+        temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec;
+        temp.tv_nsec = t->toc.tv_nsec - t->tic.tv_nsec;
+    }
+    return (c_float)temp.tv_sec + (c_float)temp.tv_nsec / 1e9;
 }
 
 #endif
@@ -371,49 +371,49 @@ c_float toc(OSQPTimer* t)
 
 c_float * csc_to_dns(csc * M)
 {
-        c_int i, j=0; // Predefine row index and column index
-        c_int idx;
+    c_int i, j=0; // Predefine row index and column index
+    c_int idx;
 
-        // Initialize matrix of zeros
-        c_float * A = (c_float *)c_calloc(M->m * M->n, sizeof(c_float));
+    // Initialize matrix of zeros
+    c_float * A = (c_float *)c_calloc(M->m * M->n, sizeof(c_float));
 
-        // Allocate elements
-        for (idx = 0; idx < M->p[M->n]; idx++)
-        {
-                // Get row index i (starting from 1)
-                i = M->i[idx];
+    // Allocate elements
+    for (idx = 0; idx < M->p[M->n]; idx++)
+    {
+        // Get row index i (starting from 1)
+        i = M->i[idx];
 
-                // Get column index j (increase if necessary) (starting from 1)
-                while (M->p[j+1] <= idx) {
-                        j++;
-                }
-
-                // Assign values to A
-                A[j*(M->m)+i] = M->x[idx];
-
+        // Get column index j (increase if necessary) (starting from 1)
+        while (M->p[j+1] <= idx) {
+            j++;
         }
-        return A;
+
+        // Assign values to A
+        A[j*(M->m)+i] = M->x[idx];
+
+    }
+    return A;
 }
 
 
 c_int is_eq_csc(csc *A, csc *B, c_float tol){
-        c_int j, i;
-        // If number of columns does not coincide, they are not equal.
-        if (A->n != B->n) return 0;
+    c_int j, i;
+    // If number of columns does not coincide, they are not equal.
+    if (A->n != B->n) return 0;
 
-        for (j=0; j<A->n; j++) { // Cycle over columns j
+    for (j=0; j<A->n; j++) { // Cycle over columns j
 
-                // if column pointer does not coincide, they are not equal
-                if (A->p[j] != B->p[j]) return 0;
+        // if column pointer does not coincide, they are not equal
+        if (A->p[j] != B->p[j]) return 0;
 
-                for (i=A->p[j]; i<A->p[j+1]; i++) { // Cycle rows i in column j
-                        if (A->i[i] != B->i[i] || // Different row indices
-                            c_absval(A->x[i] - B->x[i]) > tol) {
-                                return 0;
-                        }
-                }
+        for (i=A->p[j]; i<A->p[j+1]; i++) { // Cycle rows i in column j
+            if (A->i[i] != B->i[i] || // Different row indices
+                    c_absval(A->x[i] - B->x[i]) > tol) {
+                return 0;
+            }
         }
-        return(1);
+    }
+    return(1);
 }
 
 #endif  // #ifndef EMBEDDED
@@ -423,88 +423,88 @@ c_int is_eq_csc(csc *A, csc *B, c_float tol){
 
 void print_csc_matrix(csc* M, const char * name)
 {
-        c_int j, i, row_start, row_stop;
-        c_int k=0;
+    c_int j, i, row_start, row_stop;
+    c_int k=0;
 
-        // Print name
-        c_print("%s :\n", name);
+    // Print name
+    c_print("%s :\n", name);
 
-        for(j=0; j<M->n; j++) {
-                row_start = M->p[j];
-                row_stop = M->p[j+1];
-                if (row_start == row_stop)
-                        continue;
-                else {
-                        for(i=row_start; i<row_stop; i++ ) {
-                                c_print("\t[%3u,%3u] = %g\n", (int)M->i[i], (int)j, M->x[k++]);
-                        }
-                }
+    for(j=0; j<M->n; j++) {
+        row_start = M->p[j];
+        row_stop = M->p[j+1];
+        if (row_start == row_stop)
+            continue;
+        else {
+            for(i=row_start; i<row_stop; i++ ) {
+                c_print("\t[%3u,%3u] = %g\n", (int)M->i[i], (int)j, M->x[k++]);
+            }
         }
+    }
 }
 
 void dump_csc_matrix(csc * M, const char * file_name){
-	c_int j, i, row_strt, row_stop;
+    c_int j, i, row_strt, row_stop;
     c_int k = 0;
-	FILE *f = fopen(file_name,"w");
-	if( f != NULL ){
-		for(j=0; j<M->n; j++){
-			row_strt = M->p[j];
-			row_stop = M->p[j+1];
-			if (row_strt == row_stop)
-				continue;
-			else {
-				for(i = row_strt; i < row_stop; i++ ){
-					fprintf(f,"%d\t%d\t%20.18e\n",
-                        (int)M->i[i]+1, (int)j+1, M->x[k++]);
-				}
-			}
-		}
+    FILE *f = fopen(file_name,"w");
+    if( f != NULL ){
+        for(j=0; j<M->n; j++){
+            row_strt = M->p[j];
+            row_stop = M->p[j+1];
+            if (row_strt == row_stop)
+                continue;
+            else {
+                for(i = row_strt; i < row_stop; i++ ){
+                    fprintf(f,"%d\t%d\t%20.18e\n",
+                            (int)M->i[i]+1, (int)j+1, M->x[k++]);
+                }
+            }
+        }
         fprintf(f,"%d\t%d\t%20.18e\n", (int)M->m, (int)M->n, 0.0);
-		fclose(f);
-		c_print("File %s successfully written.\n", file_name);
-	} else {
-		c_print("Error during writing file %s.\n", file_name);
-	}
+        fclose(f);
+        c_print("File %s successfully written.\n", file_name);
+    } else {
+        c_print("Error during writing file %s.\n", file_name);
+    }
 }
 
 void print_trip_matrix(csc* M, const char * name)
 {
-        c_int k = 0;
+    c_int k = 0;
 
-        // Print name
-        c_print("%s :\n", name);
+    // Print name
+    c_print("%s :\n", name);
 
-        for (k=0; k<M->nz; k++){
-            c_print("\t[%3u, %3u] = %g\n", (int)M->i[k], (int)M->p[k], M->x[k]);
-        }
+    for (k=0; k<M->nz; k++){
+        c_print("\t[%3u, %3u] = %g\n", (int)M->i[k], (int)M->p[k], M->x[k]);
+    }
 }
 
 
 
 void print_dns_matrix(c_float * M, c_int m, c_int n, const char *name)
 {
-        c_int i, j;
-        c_print("%s : \n\t", name);
-        for(i=0; i<m; i++) { // Cycle over rows
-                for(j=0; j<n; j++) { // Cycle over columns
-                        if (j < n - 1)
-                                // c_print("% 14.12e,  ", M[j*m+i]);
-                                c_print("% .8f,  ", M[j*m+i]);
+    c_int i, j;
+    c_print("%s : \n\t", name);
+    for(i=0; i<m; i++) { // Cycle over rows
+        for(j=0; j<n; j++) { // Cycle over columns
+            if (j < n - 1)
+                // c_print("% 14.12e,  ", M[j*m+i]);
+                c_print("% .8f,  ", M[j*m+i]);
 
-                        else
-                                // c_print("% 14.12e;  ", M[j*m+i]);
-                                c_print("% .8f;  ", M[j*m+i]);
-                }
-                if (i < m - 1) {
-                        c_print("\n\t");
-                }
+            else
+                // c_print("% 14.12e;  ", M[j*m+i]);
+                c_print("% .8f;  ", M[j*m+i]);
         }
-        c_print("\n");
+        if (i < m - 1) {
+            c_print("\n\t");
+        }
+    }
+    c_print("\n");
 }
 
 
 void print_vec(c_float * v, c_int n, const char *name){
-        print_dns_matrix(v, 1, n, name);
+    print_dns_matrix(v, 1, n, name);
 }
 
 void dump_vec(c_float * v, c_int len, const char * file_name){
@@ -517,8 +517,8 @@ void dump_vec(c_float * v, c_int len, const char * file_name){
         fclose(f);
         c_print("File %s successfully written.\n", file_name);
     } else {
-		c_print("Error during writing file %s.\n", file_name);
-	}
+        c_print("Error during writing file %s.\n", file_name);
+    }
 }
 
 void print_vec_int(c_int * x, c_int n, const char *name) {

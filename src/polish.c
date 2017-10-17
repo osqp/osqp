@@ -56,14 +56,14 @@ static c_int form_Ared(OSQPWorkspace *work) {
     // Count number of elements in Ared
     for (j = 0; j < work->data->A->p[work->data->A->n]; j++) {
         if (work->pol->A_to_Alow[work->data->A->i[j]] != -1 ||
-            work->pol->A_to_Aupp[work->data->A->i[j]] != -1)
+                work->pol->A_to_Aupp[work->data->A->i[j]] != -1)
             Ared_nnz++;
     }
 
     // Form Ared
     // Ared = vstack[Alow, Aupp]
     work->pol->Ared = csc_spalloc(work->pol->n_low + work->pol->n_upp,
-                                  work->data->n, Ared_nnz, 1, 0);
+            work->data->n, Ared_nnz, 1, 0);
     Ared_nnz = 0;  // counter
     for (j = 0; j < work->data->n; j++) {  // Cycle over columns of A
         work->pol->Ared->p[j] = Ared_nnz;
@@ -201,17 +201,17 @@ c_int polish(OSQPWorkspace *work) {
     LinSysSolver *plsh;
     c_float *pol_sol; // Polished solution
 
-    #ifdef PROFILING
+#ifdef PROFILING
     tic(work->timer); // Start timer
-    #endif
+#endif
 
     // Form Ared by assuming the active constraints and store in work->pol->Ared
     mred = form_Ared(work);
 
     // Form and factorize reduced KKT
     plsh = init_linsys_solver(work->data->P, work->pol->Ared,
-                              work->settings->delta, OSQP_NULL,
-                              work->settings->linsys_solver, 1);
+            work->settings->delta, OSQP_NULL,
+            work->settings->linsys_solver, 1);
     if (!plsh){
         // Polishing failed
         work->info->status_polish = -1;
@@ -247,7 +247,7 @@ c_int polish(OSQPWorkspace *work) {
 
     // Check if polish was successful
     polish_successful = (work->pol->pri_res < work->info->pri_res &&
-        work->pol->dua_res < work->info->dua_res) || // Residuals are reduced
+            work->pol->dua_res < work->info->dua_res) || // Residuals are reduced
         (work->pol->pri_res < work->info->pri_res &&
          work->info->dua_res < 1e-10) ||             // Dual residual already tiny
         (work->pol->dua_res < work->info->dua_res &&
@@ -255,23 +255,23 @@ c_int polish(OSQPWorkspace *work) {
 
     if (polish_successful) {
 
-            // Update solver information
-            work->info->obj_val = work->pol->obj_val;
-            work->info->pri_res = work->pol->pri_res;
-            work->info->dua_res = work->pol->dua_res;
-            work->info->status_polish = 1;
+        // Update solver information
+        work->info->obj_val = work->pol->obj_val;
+        work->info->pri_res = work->pol->pri_res;
+        work->info->dua_res = work->pol->dua_res;
+        work->info->status_polish = 1;
 
-            // Update (x, z, y) in ADMM iterations
-            // NB: z needed for warm starting
-            prea_vec_copy(work->pol->x, work->x, work->data->n);
-            prea_vec_copy(work->pol->z, work->z, work->data->m);
-            prea_vec_copy(work->pol->y, work->y, work->data->m);
+        // Update (x, z, y) in ADMM iterations
+        // NB: z needed for warm starting
+        prea_vec_copy(work->pol->x, work->x, work->data->n);
+        prea_vec_copy(work->pol->z, work->z, work->data->m);
+        prea_vec_copy(work->pol->y, work->y, work->data->m);
 
-            // Print summary
-            #ifdef PRINTING
-            if (work->settings->verbose)
-                print_polish(work);
-            #endif
+        // Print summary
+#ifdef PRINTING
+        if (work->settings->verbose)
+            print_polish(work);
+#endif
 
     } else { // Polishing failed
         work->info->status_polish = -1;

@@ -8,8 +8,8 @@ void project(OSQPWorkspace *work, c_float * z){
     m = work->data->m;
     for (i = 0 ; i < m; i++){
         z[i] = c_min(c_max(z[i],
-                     work->data->l[i]), // Between lower
-                     work->data->u[i]); // and upper bounds
+                    work->data->l[i]), // Between lower
+                work->data->u[i]); // and upper bounds
     }
 
 }
