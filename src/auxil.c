@@ -68,7 +68,7 @@ c_int update_rho_vec(OSQPWorkspace * work){
 
     return exitflag;
 }
-#endif // EMBEDDED
+#endif // EMBEDDED != 1
 
 
 

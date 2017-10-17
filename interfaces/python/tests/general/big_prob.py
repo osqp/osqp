@@ -67,7 +67,7 @@ osqp_opts = {'rho': rho,
              }
 
 qp = mpbpy.QuadprogProblem(P, q, A, l, u)
-res_gurobi = qp.solve(solver=mpbpy.GUROBI, verbose=False)
+res_gurobi = qp.solve(solver=mpbpy.GUROBI, verbose=True)
 #  res_purepy = qp.solve(solver=mpbpy.OSQP_PUREPY, **osqp_opts)
 # res_osqp = qp.solve(solver=mpbpy.OSQP, **osqp_opts)
 #
@@ -95,6 +95,7 @@ res_osqp3 = model3.solve()
 print("Difference SuiteSparse LDL vs Pardiso")
 print("SuiteSparse LDL runtime = %.4f" % res_osqp.info.run_time)
 print("Pardiso runtime         = %.4f" % res_osqp2.info.run_time)
+print("GUROBI runtime          = %.4f" % res_gurobi.cputime)
 
 # Check difference with gurobi
 if res_gurobi.status == 'optimal':

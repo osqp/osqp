@@ -160,7 +160,8 @@ class settings(object):
         self.eps_prim_inf = kwargs.pop('eps_prim_inf', 1e-4)
         self.eps_dual_inf = kwargs.pop('eps_dual_inf', 1e-4)
         self.alpha = kwargs.pop('alpha', 1.6)
-        self.linsys_solver = kwargs.pop('linsys_solver', SUITESPARSE_LDL_SOLVER)
+        self.linsys_solver = kwargs.pop('linsys_solver',
+                                        SUITESPARSE_LDL_SOLVER)
         self.delta = kwargs.pop('delta', 1e-6)
         self.verbose = kwargs.pop('verbose', True)
         self.scaled_termination = kwargs.pop('scaled_termination', False)
@@ -171,6 +172,8 @@ class settings(object):
         self.polish = kwargs.pop('polish', False)
         self.pol_refine_iter = kwargs.pop('pol_refine_iter', 3)
         self.auto_rho = kwargs.pop('auto_rho', False)
+        self.adaptive_rho = kwargs.pop('adaptive_rho', False)
+        self.adaptive_rho_interval = kwargs.pop('adaptive_rho_interval', False)
 
 
 class scaling(object):
@@ -895,6 +898,39 @@ class OSQP(object):
         # No all checks managed to pass. Problem not dual infeasible
         return False
 
+    def adapt_rho(self):
+        """
+        Adapt rho value based on current primal and dual residuals
+        """
+        # Iterates
+        x = self.work.x
+        y = self.work.y
+        z = self.work.z
+
+        # Problem data
+        P = self.work.data.P
+        q = self.work.data.q
+        A = self.work.data.A
+
+        # Compute normalized residuals
+        pri_res = la.norm(A.dot(x) - z)
+        pri_res /= np.max([la.norm(A.dot(x), np.inf),
+                           la.norm(z, np.inf)])
+        dua_res = la.norm(P.dot(x) + q + A.T.dot(y))
+        dua_res /= np.max([la.norm(A.T.dot(y), np.inf),
+                           la.norm(P.dot(x), np.inf),
+                           la.norm(q, np.inf)])
+
+        # Compute new rho
+        rho_new = self.work.settings.rho * np.sqrt(pri_res/dua_res)
+
+        # Update rho
+        self.update_rho(rho_new)
+
+        # Print
+        if self.work.settings.verbose:
+            print("rho = %.2e" % rho_new)
+
     def update_info(self, iter, polish):
         """
         Update information at iterations
@@ -1176,6 +1212,12 @@ class OSQP(object):
                 # Break if converged
                 if self.check_termination():
                     break
+
+            # If not terminated, update rho in case
+            adapt_rho_condition = \
+                (iter % self.work.settings.adaptive_rho_interval == 0)
+            if adapt_rho_condition and self.work.settings.adaptive_rho:
+                self.adapt_rho()
 
         if not self.work.settings.early_terminate:
             # Update info
