@@ -187,6 +187,9 @@ fprintf(f, 'c_float work_z[%d];\n', m);
 fprintf(f, 'c_float work_xz_tilde[%d];\n', n+m);
 fprintf(f, 'c_float work_x_prev[%d];\n', n);
 fprintf(f, 'c_float work_z_prev[%d];\n', m);
+fprintf(f, 'c_float work_Ax[%d];\n', m);
+fprintf(f, 'c_float work_Px[%d];\n', n);
+fprintf(f, 'c_float work_Aty[%d];\n', n);
 fprintf(f, 'c_float work_delta_y[%d];\n', m);
 fprintf(f, 'c_float work_Atdelta_y[%d];\n', n);
 fprintf(f, 'c_float work_delta_x[%d];\n', n);
@@ -204,6 +207,7 @@ if embedded_flag ~= 1
 end
 fprintf(f, 'work_x, work_y, work_z, work_xz_tilde,\n');
 fprintf(f, 'work_x_prev, work_z_prev,\n');
+fprintf(f, 'work_Ax, work_Px, work_Aty,\n');
 fprintf(f, 'work_delta_y, work_Atdelta_y,\n');
 fprintf(f, 'work_delta_x, work_Pdelta_x, work_Adelta_x,\n');
 fprintf(f, 'work_D_temp, work_D_temp_A, work_E_temp,\n');

@@ -200,6 +200,9 @@ def write_workspace(f, n, m, rho_vectors, embedded_flag, name):
     f.write("c_float work_xz_tilde[%d];\n" % (m + n))
     f.write("c_float work_x_prev[%d];\n" % n)
     f.write("c_float work_z_prev[%d];\n" % m)
+    f.write("c_float work_Ax[%d];\n" % m)
+    f.write("c_float work_Px[%d];\n" % n)
+    f.write("c_float work_Aty[%d];\n" % n)
     f.write("c_float work_delta_y[%d];\n" % m)
     f.write("c_float work_Atdelta_y[%d];\n" % n)
     f.write("c_float work_delta_x[%d];\n" % n)
@@ -217,6 +220,7 @@ def write_workspace(f, n, m, rho_vectors, embedded_flag, name):
 
     f.write("work_x, work_y, work_z, work_xz_tilde,\n")
     f.write("work_x_prev, work_z_prev,\n")
+    f.write("work_Ax, work_Px, work_Aty,\n")
     f.write("work_delta_y, work_Atdelta_y,\n")
     f.write("work_delta_x, work_Pdelta_x, work_Adelta_x,\n")
     f.write("work_D_temp, work_D_temp_A, work_E_temp,\n")

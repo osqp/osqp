@@ -156,9 +156,9 @@ typedef struct {
 	      enum linsys_solver_type linsys_solver;  ///< linear system solver to use
 
         #ifndef EMBEDDED
-        c_float delta; ///< regularization parameter for polis
-        c_int polish; ///< boolean, polish ADMM solutio
-        c_int pol_refine_iter; ///< iterative refinement steps in polis
+        c_float delta; ///< regularization parameter for polish
+        c_int polish; ///< boolean, polish ADMM solution
+        c_int pol_refine_iter; ///< iterative refinement steps in polish
 
         c_int verbose; ///< boolean, write out progres
         c_int auto_rho; ///< boolean, true if rho is chosen automatically
@@ -215,6 +215,19 @@ typedef struct {
                                        /**< NB: Used also as workspace vector for dual residual */
         c_float *z_prev;               ///< Previous z
                                        /**< NB: Used also as workspace vector for primal residual */
+
+       /**
+        * @name Primal and dual residuals workspace variables
+        *
+        * Needed for residuals computation, tolerances computation,
+        * approximate tolerances computation and adapting rho
+        * @{
+        */
+        c_float *Ax;              ///< Scaled A * x
+        c_float *Px;              ///< Scaled P * x
+        c_float *Aty;             ///< Scaled A * x
+
+        /** @} */
 
        /**
         * @name Primal infeasibility variables

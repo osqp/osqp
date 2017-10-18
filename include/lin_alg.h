@@ -35,11 +35,14 @@ void vec_add_scalar(c_float *a, c_float sc, c_int n);
 /* multiply scalar to vector */
 void vec_mult_scalar(c_float *a, c_float sc, c_int n);
 
-/* a += sc*b */
-void vec_add_scaled(c_float *a, const c_float *b, c_int n, c_float sc);
+/* c = a + sc*b */
+void vec_add_scaled(c_float *c, const c_float *a, const c_float *b, c_int n, c_float sc);
 
 /* ||v||_inf */
 c_float vec_norm_inf(const c_float *v, c_int l);
+
+/* ||Sv||_inf */
+c_float vec_scaled_norm_inf(const c_float *S, const c_float *v, c_int l);
 
 /* ||a - b||_inf */
 c_float vec_norm_inf_diff(const c_float *a, const c_float *b, c_int l);

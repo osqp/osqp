@@ -87,6 +87,11 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     work->z_prev = c_calloc(work->data->m, sizeof(c_float));
     work->y = c_calloc(work->data->m, sizeof(c_float));
 
+    // Primal and dual residuals variables
+    work->Ax = c_calloc(work->data->m, sizeof(c_float));
+    work->Px = c_calloc(work->data->n, sizeof(c_float));
+    work->Aty = c_calloc(work->data->n, sizeof(c_float));
+    
     // Primal infeasibility variables
     work->delta_y = c_calloc(work->data->m, sizeof(c_float));
     work->Atdelta_y = c_calloc(work->data->n, sizeof(c_float));
@@ -453,6 +458,9 @@ c_int osqp_cleanup(OSQPWorkspace * work){
         if (work->z_prev)             c_free(work->z_prev);
         if (work->y)                  c_free(work->y);
 
+        if (work->Ax)                 c_free(work->Ax);
+        if (work->Px)                 c_free(work->Px);
+        if (work->Aty)                c_free(work->Aty);
         if (work->delta_y)            c_free(work->delta_y);
         if (work->Atdelta_y)          c_free(work->Atdelta_y);
         if (work->delta_x)            c_free(work->delta_x);

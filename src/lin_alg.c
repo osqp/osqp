@@ -5,13 +5,24 @@
 
 
 
-void vec_add_scaled(c_float *a, const c_float *b, c_int n, c_float sc) {
+void vec_add_scaled(c_float *c, const c_float *a, const c_float *b, c_int n, c_float sc) {
     c_int i;
     for (i = 0; i < n; i++) {
-        a[i] += sc * b[i];
+       c[i] =  a[i] + sc * b[i];
     }
 }
 
+
+c_float vec_scaled_norm_inf(const c_float *S, const c_float * v, c_int l){
+    c_int i;
+    c_float abs_Sv_i;
+    c_float max = 0.0;
+    for (i = 0; i < l; i++) {
+        abs_Sv_i = c_absval(S[i] * v[i]);
+        if ( abs_Sv_i > max ) max = abs_Sv_i;
+    }
+    return max;
+}
 
 c_float vec_norm_inf(const c_float *v, c_int l) {
     c_int i;

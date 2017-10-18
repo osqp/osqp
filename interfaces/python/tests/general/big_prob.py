@@ -57,7 +57,7 @@ osqp_opts = {'rho': rho,
             #  'eps_rel': 1e-05,
             #  'eps_abs': 1e-05,
              'scaled_termination': False,
-             'early_terminate_interval': 25,
+             'early_terminate_interval': 1,
              'polish': True,
              'scaling': True,
              'scaling_norm': -1,
@@ -87,10 +87,10 @@ model2.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
 res_osqp2 = model2.solve()
 model2 = 1
 
-# Solve with Pardiso
-model3 = osqp.OSQP()
-model3.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
-res_osqp3 = model3.solve()
+#  # Solve with Pardiso
+#  model3 = osqp.OSQP()
+#  model3.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
+#  res_osqp3 = model3.solve()
 
 print("Difference SuiteSparse LDL vs Pardiso")
 print("SuiteSparse LDL runtime = %.4f" % res_osqp.info.run_time)

@@ -185,15 +185,15 @@ c_float compute_obj_val(OSQPWorkspace *work, c_float * x) {
 
 c_float compute_pri_res(OSQPWorkspace * work, c_float * x, c_float * z){
 
-    // NB: Use z_prev as temporary vector
+    // NB: Use z_prev as working vector
     // pr = Ax - z
 
-    mat_vec(work->data->A, x, work->z_prev, 0);
-    vec_add_scaled(work->z_prev, z, work->data->m, -1);
+    mat_vec(work->data->A, x, work->Ax, 0);  // Ax
+    vec_add_scaled(work->z_prev, work->Ax, z, work->data->m, -1);
 
     // If scaling active -> rescale residual
     if (work->settings->scaling && !work->settings->scaled_termination){
-        vec_ew_prod(work->scaling->Einv, work->z_prev, work->z_prev, work->data->m);
+        return vec_scaled_norm_inf(work->scaling->Einv, work->z_prev, work->data->m);
     }
 
     // Return norm of the residual
@@ -207,22 +207,18 @@ c_float compute_pri_tol(OSQPWorkspace * work, c_float eps_abs, c_float eps_rel){
     // max_rel_eps = max(||z||, ||A x||)
     if (work->settings->scaling && !work->settings->scaled_termination){
         // ||Einv * z||
-        vec_ew_prod(work->scaling->Einv, work->z, work->z_prev, work->data->m);
-        max_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
+        max_rel_eps = vec_scaled_norm_inf(work->scaling->Einv, work->z, work->data->m);
         // ||Einv * A * x||
-        mat_vec(work->data->A, work->x, work->z_prev, 0);
-        vec_ew_prod(work->scaling->Einv, work->z_prev, work->z_prev, work->data->m);
-        temp_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
+        temp_rel_eps = vec_scaled_norm_inf(work->scaling->Einv, work->Ax, work->data->m);
         // Choose maximum
-        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+        max_rel_eps = c_max(max_rel_eps, temp_rel_eps);
     } else { // No unscaling required
         // ||z||
         max_rel_eps = vec_norm_inf(work->z, work->data->m);
         // ||A * x||
-        mat_vec(work->data->A, work->x, work->z_prev, 0);
-        temp_rel_eps = vec_norm_inf(work->z_prev, work->data->m);
+        temp_rel_eps = vec_norm_inf(work->Ax, work->data->m);
         // Choose maximum
-        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+        max_rel_eps = c_max(max_rel_eps, temp_rel_eps);
     }
 
     // eps_prim
@@ -240,20 +236,24 @@ c_float compute_dua_res(OSQPWorkspace * work, c_float * x, c_float * y){
     // dr = q
     prea_vec_copy(work->data->q, work->x_prev, work->data->n);
 
-    // dr += P * x (upper triangular part)
-    mat_vec(work->data->P, x, work->x_prev, 1);
+    // P * x (upper triangular part)
+    mat_vec(work->data->P, x, work->Px, 0); 
 
-    // dr += P' * x (lower triangular part with no diagonal)
-    mat_tpose_vec(work->data->P, x, work->x_prev, 1, 1);
+    // P' * x (lower triangular part with no diagonal)
+    mat_tpose_vec(work->data->P, x, work->Px, 1, 1);
 
+    // dr += P * x (full P matrix)
+    vec_add_scaled(work->x_prev, work->x_prev, work->Px, work->data->n, 1);
+    
     // dr += A' * y
-    if (work->data->m > 0)
-        mat_tpose_vec(work->data->A, y, work->x_prev, 1, 0);
+    if (work->data->m > 0){
+        mat_tpose_vec(work->data->A, y, work->Aty, 0, 0);
+        vec_add_scaled(work->x_prev, work->x_prev, work->Aty, work->data->n, 1);
+    }
 
     // If scaling active -> rescale residual
     if (work->settings->scaling && !work->settings->scaled_termination){
-        vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n);
-        vec_mult_scalar(work->x_prev, work->scaling->cinv, work->data->n);
+        return work->scaling->cinv * vec_scaled_norm_inf(work->scaling->Dinv, work->x_prev, work->data->n); 
     }
 
     return vec_norm_inf(work->x_prev, work->data->n);
@@ -264,38 +264,33 @@ c_float compute_dua_tol(OSQPWorkspace * work, c_float eps_abs, c_float eps_rel){
 
     // max_rel_eps = max(||q||, ||A' y|, ||P x||)
     if (work->settings->scaling && !work->settings->scaled_termination){
+        
         // || Dinv q||
-        vec_ew_prod(work->scaling->Dinv, work->data->q, work->x_prev, work->data->n);
-        max_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
+        max_rel_eps = vec_scaled_norm_inf(work->scaling->Dinv, work->data->q, work->data->n);
+        
         // || Dinv A' y ||
-        mat_tpose_vec(work->data->A, work->y, work->x_prev, 0, 0);
-        vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n);
-        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
-        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+        temp_rel_eps = vec_scaled_norm_inf(work->scaling->Dinv, work->Aty, work->data->n);
+        max_rel_eps = c_max(max_rel_eps, temp_rel_eps);
+
         // || Dinv P x||
-        // P * x (upper triangular part)
-        mat_vec(work->data->P, work->x, work->x_prev, 0);
-        // P' * x (lower triangular part with no diagonal)
-        mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
-        vec_ew_prod(work->scaling->Dinv, work->x_prev, work->x_prev, work->data->n);
-        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
-        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+        temp_rel_eps = vec_scaled_norm_inf(work->scaling->Dinv, work->Px, work->data->n);
+        max_rel_eps = c_max(max_rel_eps, temp_rel_eps);
+
+        // Multiply by cinv
         max_rel_eps *= work->scaling->cinv;
 
     } else { // No scaling required
+        
         // ||q||
         max_rel_eps = vec_norm_inf(work->data->q, work->data->n);
-        mat_tpose_vec(work->data->A, work->y, work->x_prev, 0, 0);
+
         // ||A'*y||
-        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
-        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+        temp_rel_eps = vec_norm_inf(work->Aty, work->data->n);
+        max_rel_eps = c_max(max_rel_eps, temp_rel_eps);
+
         // ||P*x||
-        // P * x (upper triangular part)
-        mat_vec(work->data->P, work->x, work->x_prev, 0);
-        // P' * x (lower triangular part with no diagonal)
-        mat_tpose_vec(work->data->P, work->x, work->x_prev, 1, 1);
-        temp_rel_eps = vec_norm_inf(work->x_prev, work->data->n);
-        if (temp_rel_eps > max_rel_eps) max_rel_eps = temp_rel_eps;
+        temp_rel_eps = vec_norm_inf(work->Px, work->data->n);
+        max_rel_eps = c_max(max_rel_eps, temp_rel_eps);
 
     }
 

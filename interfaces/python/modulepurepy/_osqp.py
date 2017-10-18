@@ -173,7 +173,7 @@ class settings(object):
         self.pol_refine_iter = kwargs.pop('pol_refine_iter', 3)
         self.auto_rho = kwargs.pop('auto_rho', False)
         self.adaptive_rho = kwargs.pop('adaptive_rho', False)
-        self.adaptive_rho_interval = kwargs.pop('adaptive_rho_interval', False)
+        self.adaptive_rho_interval = kwargs.pop('adaptive_rho_interval', 200)
 
 
 class scaling(object):
@@ -730,7 +730,8 @@ class OSQP(object):
         """
 
         # Primal residual
-        pri_res = self.work.data.A.dot(x) - z
+        Ax = self.work.data.A.dot(x)
+        pri_res = Ax - z
 
         if self.work.settings.scaling and not \
                 self.work.settings.scaled_termination:

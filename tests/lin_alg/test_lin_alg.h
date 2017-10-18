@@ -37,7 +37,7 @@ static char * test_vec_operations(){
 
     // Add scaled
     add_scaled = vec_copy(data->test_vec_ops_v1, data->test_vec_ops_n);
-    vec_add_scaled(add_scaled, data->test_vec_ops_v2, data->test_vec_ops_n, data->test_vec_ops_sc);
+    vec_add_scaled(add_scaled, add_scaled, data->test_vec_ops_v2, data->test_vec_ops_n, data->test_vec_ops_sc);
     mu_assert("Linear algebra tests: error in vector operation, adding scaled vector", vec_norm_inf_diff(add_scaled, data->test_vec_ops_add_scaled, data->test_vec_ops_n) < TESTS_TOL);
 
     // Norm_inf of the difference
