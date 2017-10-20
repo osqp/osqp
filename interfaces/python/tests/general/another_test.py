@@ -22,7 +22,6 @@ m = A.shape[0]
 
 # OSQP options
 osqp_opts = {'rho': 1.0,
-             'auto_rho': True,
              'check_termination': 1,
              'max_iter': 2500}
 

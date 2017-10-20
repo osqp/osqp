@@ -161,7 +161,6 @@ def main():
                           #  eps_abs=1e-3,
                           #  alpha=1.6,
                           #  rho=0.00001,  # Works with LP
-                          auto_rho=True,
                           check_termination=1,
                         #   sigma=1e-3,
                           polish=True,

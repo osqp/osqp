@@ -34,7 +34,7 @@ A = spa.vstack([spa.hstack([Ad, -spa.eye(m),
 l = np.hstack([bd, -np.inf * np.ones(n), np.zeros(n)])
 u = np.hstack([bd, np.zeros(n), np.inf * np.ones(n)])
 
-osqp_opts = {'early_terminate': False,
+osqp_opts = {'check_termination': 0,
              'polish': False,
              'scaling': True,
              'max_iter': 50000}

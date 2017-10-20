@@ -21,7 +21,6 @@ class primal_infeeasibility_tests(unittest.TestCase):
                      'eps_abs': 1e-05,
                      'eps_rel': 1e-05,
                      'eps_dual_inf': 1e-20,
-                     'auto_rho': False,
                      'max_iter': 2500,
                      'polish': False}
 

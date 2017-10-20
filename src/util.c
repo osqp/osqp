@@ -96,15 +96,10 @@ void print_setup_header(const OSQPWorkspace * work) {
     c_print("eps_prim_inf = %.1e, eps_dual_inf = %.1e,\n          ",
             settings->eps_prim_inf, settings->eps_dual_inf);
     c_print("rho = %.2e ", settings->rho);
-    if (settings->auto_rho) c_print("(auto) ");
-    if (settings->adaptive_rho) c_print("adaptive - interval ");
-    if (settings->adaptive_rho_interval > 0){
-        c_print("%d", settings->adaptive_rho_interval);
-    }else{
-        c_print("auto");
-    }
+    if (settings->adaptive_rho) c_print("(adaptive)");
     c_print("\n          ");
-    c_print("sigma = %.1e, alpha = %.1e, \n          ",
+    // c_print("sigma = %.1f, alpha = %.2f, \n          ",
+    c_print("sigma = %.2e, alpha = %.2f, ",
             settings->sigma, settings->alpha);
     c_print("max_iter = %i\n", (int)settings->max_iter);
 
@@ -242,7 +237,6 @@ void set_default_settings(OSQPSettings * settings) {
     settings->polish = POLISH;     /* ADMM solution polish: 1 */
     settings->polish_refine_iter = POLISH_REFINE_ITER; /* iterative refinement
                                                     steps in polish */
-    settings->auto_rho = AUTO_RHO; /* automatic rho computation */
     settings->verbose = VERBOSE;     /* print output */
 #endif
 
@@ -274,7 +268,6 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
     new->delta = settings->delta;
     new->polish = settings->polish;
     new->polish_refine_iter = settings->polish_refine_iter;
-    new->auto_rho = settings->auto_rho;
     new->verbose = settings->verbose;
     new->scaled_termination = settings->scaled_termination;
     new->check_termination = settings->check_termination;

@@ -16,7 +16,7 @@ u = np.array([.5])
 rho = 1.0
 
 m = osqp.OSQP()
-m.setup(P, q, A, l, u, rho=rho, auto_rho=False, scaling=0,
+m.setup(P, q, A, l, u, rho=rho, scaling=0,
         check_termination=1)
 res = m.solve()
 

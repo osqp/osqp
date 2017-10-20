@@ -98,7 +98,6 @@ static char * test_update(){
     set_default_settings(settings);
     settings->max_iter = 1000;
     settings->alpha = 1.6;
-    settings->auto_rho = 0;
     settings->verbose = 1;
 
     // Setup workspace
@@ -247,7 +246,6 @@ static char * test_update_pardiso(){
     set_default_settings(settings);
     settings->max_iter = 1000;
     settings->alpha = 1.6;
-    settings->auto_rho = 0;
     settings->verbose = 1;
     settings->linsys_solver = MKL_PARDISO_SOLVER;
 

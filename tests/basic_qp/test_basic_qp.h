@@ -26,7 +26,6 @@ static char * test_basic_qp_solve()
     settings->max_iter = 2000;
     settings->alpha = 1.6;
     settings->polish = 1;
-    settings->auto_rho = 0;
     settings->scaling = 0;
     settings->verbose = 1;
     settings->warm_start = 0;
@@ -85,8 +84,8 @@ static char * test_basic_qp_solve()
     mu_assert("Basic QP test solve: Wrong value of scaled_termination not caught!",
               osqp_update_scaled_termination(work, 2) == 1);
 
-    mu_assert("Basic QP test solve: Wrong value of early_terminate not caught!",
-              osqp_update_early_terminate(work, 5) == 1);
+    mu_assert("Basic QP test solve: Wrong value of check_termination not caught!",
+              osqp_update_check_termination(work, -1) == 1);
 
     mu_assert("Basic QP test solve: Wrong value of delta not caught!",
               osqp_update_delta(work, 0.) == 1);
@@ -136,7 +135,6 @@ static char * test_basic_qp_solve_pardiso()
     settings->max_iter = 2000;
     settings->alpha = 1.6;
     settings->polish = 1;
-    settings->auto_rho = 0;
     settings->scaling = 0;
     settings->verbose = 1;
     settings->warm_start = 0;
@@ -289,7 +287,7 @@ static char * test_basic_qp_update()
 
 
 
-static char * test_basic_qp_early_terminate()
+static char * test_basic_qp_check_termination()
 {
     // Problem settings
     OSQPSettings * settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
@@ -311,7 +309,7 @@ static char * test_basic_qp_early_terminate()
     settings->polish = 0;
     settings->scaling = 0;
     settings->verbose = 1;
-    settings->early_terminate = 0;
+    settings->check_termination = 0;
     settings->warm_start = 0;
 
     // Setup workspace
@@ -324,25 +322,25 @@ static char * test_basic_qp_early_terminate()
     osqp_solve(work);
 
     // Check if iter == max_iter
-    mu_assert("Basic QP test early terminate: Error in number of iterations taken!",
+    mu_assert("Basic QP test check termination: Error in number of iterations taken!",
               work->info->iter == work->settings->max_iter );
 
     // Compare solver statuses
-    mu_assert("Basic QP test early terminate: Error in solver status!",
+    mu_assert("Basic QP test check termination: Error in solver status!",
               work->info->status_val == sols_data->status_test );
 
     // Compare primal solutions
-    mu_assert("Basic QP test early terminate: Error in primal solution!",
+    mu_assert("Basic QP test check termination: Error in primal solution!",
               vec_norm_inf_diff(work->solution->x, sols_data->x_test, data->n) < TESTS_TOL);
 
     // Compare dual solutions
     // print_vec(work->solution->y, data->m, "y_sol");
     // print_vec(sols_data->y_test, data->m, "y_test");
-    mu_assert("Basic QP test early terminate: Error in dual solution!",
+    mu_assert("Basic QP test check termination: Error in dual solution!",
               vec_norm_inf_diff(work->solution->y, sols_data->y_test, data->m) < TESTS_TOL);
 
     // Compare objective values
-    mu_assert("Basic QP test early terminate: Error in objective value!",
+    mu_assert("Basic QP test check termination: Error in objective value!",
               c_absval(work->info->obj_val - sols_data->obj_value_test) < TESTS_TOL);
 
     // Clean workspace
@@ -487,7 +485,7 @@ static char * test_basic_qp()
     mu_run_test(test_basic_qp_solve);
     mu_run_test(test_basic_qp_solve_pardiso);
     mu_run_test(test_basic_qp_update);
-    mu_run_test(test_basic_qp_early_terminate);
+    mu_run_test(test_basic_qp_check_termination);
     mu_run_test(test_basic_qp_update_rho);
 
     return 0;

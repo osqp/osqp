@@ -315,7 +315,7 @@ c_int osqp_solve(OSQPWorkspace * work){
     }
 
     // Update information and check termination condition if it hasn't been done
-    // during last iteration (max_iter reached or early_terminate disabled)
+    // during last iteration (max_iter reached or check_termination disabled)
     if (!can_check_termination){
 
         /* Update information */

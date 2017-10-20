@@ -34,7 +34,6 @@ static char * test_optimal()
     settings->max_iter = 2000;
     settings->alpha = 1.6;
     settings->polish = 1;
-    settings->auto_rho = 0;
     settings->scaling = 0;
     settings->verbose = 1;
 
@@ -103,7 +102,6 @@ static char * test_prim_infeas()
     settings->max_iter = 2000;
     settings->alpha = 1.6;
     settings->polish = 0;
-    settings->auto_rho = 0;
     settings->scaling = 0;
     settings->verbose = 1;
 
@@ -157,7 +155,6 @@ static char * test_dual_infeas()
     settings->max_iter = 2000;
     settings->alpha = 1.6;
     settings->polish = 0;
-    settings->auto_rho = 0;
     settings->scaling = 0;
     settings->verbose = 1;
 
@@ -213,7 +210,6 @@ static char * test_primal_dual_infeas()
     settings->max_iter = 2000;
     settings->alpha = 1.6;
     settings->polish = 0;
-    settings->auto_rho = 0;
     settings->scaling = 0;
     settings->verbose = 1;
 

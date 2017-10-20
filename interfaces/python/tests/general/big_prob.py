@@ -52,7 +52,6 @@ rho = 0.1
 
 
 osqp_opts = {'rho': rho,
-             #  'auto_rho': True,
              'sigma': 1e-06,
             #  'eps_rel': 1e-05,
             #  'eps_abs': 1e-05,

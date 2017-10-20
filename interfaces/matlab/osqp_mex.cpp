@@ -48,7 +48,6 @@ const char* OSQP_SETTINGS_FIELDS[] = {"rho",                        //c_float
                                       "delta",                      //c_float
                                       "polish",                     //c_int
                                       "polish_refine_iter",            //c_int
-                                      "auto_rho",                   //c_int
                                       "verbose",                    //c_int
                                       "scaled_termination",         //c_int
                                       "check_termination",          //c_int
@@ -780,7 +779,6 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
   mxSetField(mxPtr, 0, "delta",           mxCreateDoubleScalar(settings->delta));
   mxSetField(mxPtr, 0, "polish",          mxCreateDoubleScalar(settings->polish));
   mxSetField(mxPtr, 0, "polish_refine_iter", mxCreateDoubleScalar(settings->polish_refine_iter));
-  mxSetField(mxPtr, 0, "auto_rho",        mxCreateDoubleScalar(settings->auto_rho));
   mxSetField(mxPtr, 0, "verbose",         mxCreateDoubleScalar(settings->verbose));
   mxSetField(mxPtr, 0, "scaled_termination", mxCreateDoubleScalar(settings->scaled_termination));
   mxSetField(mxPtr, 0, "check_termination", mxCreateDoubleScalar(settings->check_termination));
@@ -1041,7 +1039,6 @@ void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
   settings->delta           = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "delta"));
   settings->polish          = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polish"));
   settings->polish_refine_iter = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polish_refine_iter"));
-  settings->auto_rho = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "auto_rho"));
   settings->verbose         = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "verbose"));
   settings->scaled_termination = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaled_termination"));
   settings->check_termination = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "check_termination"));

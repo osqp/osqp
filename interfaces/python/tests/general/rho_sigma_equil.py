@@ -196,7 +196,6 @@ for i in tqdm(range(len(rho_vec))):
         m.setup(P, q, A, l, u,
                 rho=rho_vec[i],
                 sigma=sigma_vec[j],
-                auto_rho=False,
                 scaling=scaling,
                 polish=False,
                 verbose=False)

@@ -136,7 +136,7 @@ classdef basic_tests < matlab.unittest.TestCase
         function test_update_early_termination(testCase)
             % Update max_iter
             opts = testCase.solver.current_settings();
-            opts.early_terminate = 0;
+            opts.check_termination = 0;
             testCase.solver.update_settings(opts);
 
             % Solve again

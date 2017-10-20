@@ -142,7 +142,6 @@ class settings(object):
     warm_start [False]                  - Reuse solution from previous solve
     polish  [False]                     - Solution polish
     polish_refine_iter  [3]                - Iterative refinement iterations
-    auto_rho  [True]                    - Automatic rho computation
     """
 
     def __init__(self, **kwargs):
@@ -166,7 +165,6 @@ class settings(object):
         self.warm_start = kwargs.pop('warm_start', True)
         self.polish = kwargs.pop('polish', False)
         self.polish_refine_iter = kwargs.pop('polish_refine_iter', 3)
-        self.auto_rho = kwargs.pop('auto_rho', False)
         self.adaptive_rho = kwargs.pop('adaptive_rho', False)
         self.adaptive_rho_interval = kwargs.pop('adaptive_rho_interval', 200)
 
@@ -587,8 +585,8 @@ class OSQP(object):
         print("          eps_prim_inf = %.2e, eps_dual_inf = %.2e," %
               (settings.eps_prim_inf, settings.eps_dual_inf))
         print("          rho = %.2e " % settings.rho, end='')
-        if settings.auto_rho:
-            print("(auto)")
+        if settings.adaptive_rho:
+            print("(adaptive)")
         else:
             print("")
         print("          sigma = %.2e, alpha = %.2e," %
@@ -1192,7 +1190,7 @@ class OSQP(object):
             # Third step: update y
             self.update_y()
 
-            if self.work.settings.early_terminate:
+            if self.work.settings.check_termination:
                 # Update info
                 self.update_info(iter, 0)
 
@@ -1214,7 +1212,7 @@ class OSQP(object):
                 if self.work.settings.verbose:
                     print("rho = %.2e" % self.work.settings.rho)
 
-        if not self.work.settings.early_terminate:
+        if not self.work.settings.check_termination:
             # Update info
             self.update_info(self.work.settings.max_iter, 0)
 

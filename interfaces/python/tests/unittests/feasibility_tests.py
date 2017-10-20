@@ -34,7 +34,6 @@ class feasibility_tests(unittest.TestCase):
                      'eps_rel': 1e-06,
                      'scaling': True,
                      'alpha': 1.6,
-                     'auto_rho': False,
                      'max_iter': 5000,
                      'polish': False,
                      'warm_start': True,

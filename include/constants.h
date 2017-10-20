@@ -59,7 +59,6 @@ static const char *LINSYS_SOLVER_NAME[] = {
 #define POLISH (0)
 #define POLISH_REFINE_ITER (3)
 #define VERBOSE (1)
-#define AUTO_RHO (0)
 #endif
 
 #define SCALED_TERMINATION (0)

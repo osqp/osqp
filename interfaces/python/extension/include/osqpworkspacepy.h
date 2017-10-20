@@ -230,7 +230,7 @@
          "linsys_solver", settings->linsys_solver,
          "warm_start", settings->warm_start,
          "scaled_termination", settings->scaled_termination,
-         "check_termination", settings->check_termination,
+         "check_termination", settings->check_termination);
      return return_dict;
  }
 

@@ -213,24 +213,24 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                  "scaling", "scaling_norm",
                                  "adaptive_rho", "adaptive_rho_interval",
                                  "rho", "sigma", "max_iter", "eps_abs", "eps_rel", "eps_prim_inf", "eps_dual_inf", "alpha", "delta", "linsys_solver", "polish",
-                                 "polish_refine_iter", "auto_rho", "verbose", "scaled_termination",
+                                 "polish_refine_iter", "verbose", "scaled_termination",
                                  "check_termination", "warm_start", NULL};  // Settings
 
 
         #ifdef DLONG
 
         #ifdef DFLOAT
-        static char * argparse_string = "(LL)O!O!O!O!O!O!O!O!O!|LLLLffLffffffLLLLLLLL";
+        static char * argparse_string = "(LL)O!O!O!O!O!O!O!O!O!|LLLLffLffffffLLLLLLL";
         #else
-        static char * argparse_string = "(LL)O!O!O!O!O!O!O!O!O!|LLLLddLddddddLLLLLLLL";
+        static char * argparse_string = "(LL)O!O!O!O!O!O!O!O!O!|LLLLddLddddddLLLLLLL";
         #endif
 
         #else
 
         #ifdef DFLOAT
-        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiiffiffffffiiiiiiii";
+        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiiffiffffffiiiiiii";
         #else
-        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiiddiddddddiiiiiiii";
+        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiiddiddddddiiiiiii";
         #endif
 
         #endif
@@ -268,7 +268,6 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                          &settings->linsys_solver,
                                          &settings->polish,
                                          &settings->polish_refine_iter,
-                                         &settings->auto_rho,
                                          &settings->verbose,
                                          &settings->scaled_termination,
                                          &settings->check_termination,
