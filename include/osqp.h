@@ -7,7 +7,7 @@ extern "C" {
 
 /* Includes */
 #include "types.h"
-#include "util.h"
+#include "util.h"  // Needed for set_default_settings functions
 
 
 // Library to deal with sparse matrices enabled only if embedded not defined

@@ -6,11 +6,6 @@ extern "C" {
 #endif
 
 #include "types.h"
-#include "proj.h"
-#include "lin_alg.h"
-#include "constants.h"
-#include "scaling.h"
-#include "util.h"
 
 
 
@@ -20,13 +15,22 @@ extern "C" {
 
 #if EMBEDDED != 1
 /**
+ * Adapt rho value based on current unscaled primal/dual residuals
+ * @param work Workspace
+ * @return     Exitflag
+ */
+c_int adapt_rho(OSQPWorkspace * work);
+
+/**
  * Set values of rho vector based on constraint types
  * @param work Workspace
  */
 void set_rho_vec(OSQPWorkspace * work);
 
 /**
- * Update values of rho vector based on updated constraints
+ * Update values of rho vector based on updated constraints.
+ * If the constraints change, update the linear systems solver.
+ * 
  * @param work Workspace
  * @return     Exitflag
  */

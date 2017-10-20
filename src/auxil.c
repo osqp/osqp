@@ -1,9 +1,53 @@
+#include "osqp.h"   // For OSQP rho update
 #include "auxil.h"
+#include "proj.h"
+#include "lin_alg.h"
+#include "constants.h"
+#include "scaling.h"
+#include "util.h"
 
 /***********************************************************
  * Auxiliary functions needed to compute ADMM iterations * *
  ***********************************************************/
 #if EMBEDDED != 1
+c_int adapt_rho(OSQPWorkspace * work){
+    c_int n, m;  // Dimensions
+    c_int exitflag; // Exitflag
+    c_float pri_res, dua_res; // Primal and dual residuals
+    c_float pri_res_norm, dua_res_norm;  // Normalization for the residuals
+    c_float temp_res_norm;   // Temporary residual norm
+    c_float rho_new;  // New rho value
+
+    // Get problem dimensions
+    n = work->data->n;
+    m = work->data->m;
+
+    // Get primal and dual residuals
+    pri_res = vec_norm_inf(work->z_prev, m); 
+    dua_res = vec_norm_inf(work->x_prev, n);
+     
+    // Normalize primal residual
+    pri_res_norm = vec_norm_inf(work->z, m);     // ||z||
+    temp_res_norm = vec_norm_inf(work->Ax, m);   // ||Ax||
+    pri_res_norm = c_max(pri_res_norm, temp_res_norm);       // max (||z||,||Ax||)
+    pri_res /= pri_res_norm;  // Normalize primal residual
+
+    // Normalize dual residual
+    dua_res_norm = vec_norm_inf(work->data->q, n);  // ||q||
+    temp_res_norm = vec_norm_inf(work->Aty, n);     // ||A' y||
+    dua_res_norm = c_max(dua_res_norm, temp_res_norm);          
+    temp_res_norm = vec_norm_inf(work->Px, n);      //  ||P x||
+    dua_res_norm = c_max(dua_res_norm, temp_res_norm);          // max(||q||,||A' y||,||P x||)
+    dua_res /= dua_res_norm;  // Normalize dual residual
+
+    // Compute new rho
+    rho_new = work->settings->rho * c_sqrt(pri_res / dua_res);  
+    exitflag = osqp_update_rho(work, rho_new);
+	
+    return exitflag;
+}
+
+
 void set_rho_vec(OSQPWorkspace * work){
     c_int i;
     work->settings->rho = c_min(c_max(work->settings->rho, RHO_MIN), RHO_MAX);

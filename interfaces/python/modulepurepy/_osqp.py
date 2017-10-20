@@ -914,10 +914,10 @@ class OSQP(object):
         A = self.work.data.A
 
         # Compute normalized residuals
-        pri_res = la.norm(A.dot(x) - z)
+        pri_res = la.norm(A.dot(x) - z, np.inf)
         pri_res /= np.max([la.norm(A.dot(x), np.inf),
                            la.norm(z, np.inf)])
-        dua_res = la.norm(P.dot(x) + q + A.T.dot(y))
+        dua_res = la.norm(P.dot(x) + q + A.T.dot(y), np.inf)
         dua_res /= np.max([la.norm(A.T.dot(y), np.inf),
                            la.norm(P.dot(x), np.inf),
                            la.norm(q, np.inf)])
@@ -928,9 +928,6 @@ class OSQP(object):
         # Update rho
         self.update_rho(rho_new)
 
-        # Print
-        if self.work.settings.verbose:
-            print("rho = %.2e" % rho_new)
 
     def update_info(self, iter, polish):
         """
@@ -1219,6 +1216,9 @@ class OSQP(object):
                 (iter % self.work.settings.adaptive_rho_interval == 0)
             if adapt_rho_condition and self.work.settings.adaptive_rho:
                 self.adapt_rho()
+                # Print
+                if self.work.settings.verbose:
+                    print("rho = %.2e" % self.work.settings.rho)
 
         if not self.work.settings.early_terminate:
             # Update info
