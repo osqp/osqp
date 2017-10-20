@@ -31,7 +31,7 @@ extern "C" {
  * Linear System Solvers *
  *************************/
 enum linsys_solver_type {SUITESPARSE_LDL_SOLVER, MKL_PARDISO_SOLVER};
-static const char *SOLVER_NAME[] = {
+static const char *LINSYS_SOLVER_NAME[] = {
   "Suitesparse LDL", "MKL Pardiso"
 };
 /**********************************
@@ -63,16 +63,17 @@ static const char *SOLVER_NAME[] = {
 #endif
 
 #define SCALED_TERMINATION (0)
-#define EARLY_TERMINATE (1)
-#define EARLY_TERMINATE_INTERVAL (25)
+#define CHECK_TERMINATION (25)
 #define WARM_START (1)
-#define SCALING (1)
+#define SCALING (10)
 
 #if EMBEDDED != 1
-#define SCALING_ITER (10)
 #define MIN_SCALING (1e-03)  ///< Minimum scaling value
 #define MAX_SCALING (1e+03)  ///< Maximum scaling value
 #define SCALING_NORM (-1)     ///< Scaling norm
+
+#define ADAPTIVE_RHO (1)
+#define ADAPTIVE_RHO_INTERVAL (0)
 #endif
 
 /* Printing */

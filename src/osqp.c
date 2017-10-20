@@ -132,7 +132,7 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
     if ( load_linsys_solver(work->settings->linsys_solver) ) {
 #ifdef PRINTING
         c_print("%s linear system solver not available.\nTried to obtain it from shared library.\n",
-                SOLVER_NAME[work->settings->linsys_solver]);
+                LINSYS_SOLVER_NAME[work->settings->linsys_solver]);
 #endif
         osqp_cleanup(work);
         return OSQP_NULL;
@@ -210,8 +210,6 @@ c_int osqp_solve(OSQPWorkspace * work){
     compute_cost_function = 0; // Never compute cost function during the iterations if no printing enabled
 #endif
 
-
-
     // Check if workspace has been initialized
     if (!work){
 #ifdef PRINTING
@@ -272,8 +270,8 @@ c_int osqp_solve(OSQPWorkspace * work){
 #endif
 
         // Can we check for termination ?
-        can_check_termination = work->settings->early_terminate &&
-            (iter % work->settings->early_terminate_interval == 0);
+        can_check_termination = work->settings->check_termination &&
+            (iter % work->settings->check_termination == 0);
 
 #ifdef PRINTING
         // Can we print ?
@@ -310,6 +308,10 @@ c_int osqp_solve(OSQPWorkspace * work){
             }
         }
 #endif
+
+    // TODO: Continue from here! add rho adaptation
+    // First add options "adapt_rho" and "adapt_rho_interval"
+    
     }
 
     // Update information and check termination condition if it hasn't been done
@@ -1091,41 +1093,25 @@ c_int osqp_update_scaled_termination(OSQPWorkspace * work, c_int scaled_terminat
 #endif
         return 1;
     }
-    // Update early_terminate
+    // Update scaled_termination 
     work->settings->scaled_termination = scaled_termination_new;
 
     return 0;
 }
 
-c_int osqp_update_early_terminate(OSQPWorkspace * work, c_int early_terminate_new) {
-    // Check that early_terminate is either 0 or 1
-    if (early_terminate_new != 0 && early_terminate_new != 1) {
+c_int osqp_update_check_termination(OSQPWorkspace * work, c_int check_termination_new) {
+    // Check that check_termination is nonnegative
+    if (check_termination_new < 0) {
 #ifdef PRINTING
-        c_print("early_terminate should be either 0 or 1\n");
+        c_print("check_termination should be nonnegative\n");
 #endif
         return 1;
     }
-    // Update early_terminate
-    work->settings->early_terminate = early_terminate_new;
+    // Update check_termination
+    work->settings->check_termination = check_termination_new;
 
     return 0;
 }
-
-
-c_int osqp_update_early_terminate_interval(OSQPWorkspace * work, c_int early_terminate_interval_new) {
-    // Check that early_terminate_interval is either 0 or 1
-    if (early_terminate_interval_new <= 0) {
-#ifdef PRINTING
-        c_print("early_terminate_interval should be positive\n");
-#endif
-        return 1;
-    }
-    // Update early_terminate_interval
-    work->settings->early_terminate_interval = early_terminate_interval_new;
-
-    return 0;
-}
-
 
 
 #ifndef EMBEDDED

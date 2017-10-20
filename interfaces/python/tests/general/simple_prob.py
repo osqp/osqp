@@ -50,9 +50,8 @@ osqp_opts = {'rho': rho,
              'adaptive_rho_interval': 100,
              'sigma': 1e-06,
              'scaled_termination': False,
-             'early_terminate_interval': 25,
+             'check_termination': 25,
              'polish': True,
-             'scaling': True,
              'verbose': True,
              'linsys_solver': 'suitesparse ldl'
              }

@@ -33,12 +33,11 @@ const char* OSQP_INFO_FIELDS[] = {"iter",         //c_int
                                   "run_time"};      //c_float, only used if PROFILING
 
 const char* OSQP_SETTINGS_FIELDS[] = {"rho",                        //c_float
-                                      //the following subset can't be changed after initilization
                                       "sigma",                      //c_float
                                       "scaling",                    //c_int
-                                      "scaling_iter",               //c_int
                                       "scaling_norm",               //c_int
-                                      //the following subset can be changed after initilization
+                                      "adaptive_rho",               //c_int
+                                      "adaptive_rho_interval",      //c_int
                                       "max_iter",                   //c_int
                                       "eps_abs",                    //c_float
                                       "eps_rel",                    //c_float
@@ -52,8 +51,7 @@ const char* OSQP_SETTINGS_FIELDS[] = {"rho",                        //c_float
                                       "auto_rho",                   //c_int
                                       "verbose",                    //c_int
                                       "scaled_termination",         //c_int
-                                      "early_terminate",            //c_int
-                                      "early_terminate_interval",   //c_int
+                                      "check_termination",          //c_int
                                       "warm_start"};                //c_int
 
 const char* CSC_FIELDS[] = {"nzmax",    //c_int
@@ -769,8 +767,9 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
   mxSetField(mxPtr, 0, "rho",             mxCreateDoubleScalar(settings->rho));
   mxSetField(mxPtr, 0, "sigma",           mxCreateDoubleScalar(settings->sigma));
   mxSetField(mxPtr, 0, "scaling",         mxCreateDoubleScalar(settings->scaling));
-  mxSetField(mxPtr, 0, "scaling_iter",    mxCreateDoubleScalar(settings->scaling_iter));
   mxSetField(mxPtr, 0, "scaling_norm",    mxCreateDoubleScalar(settings->scaling_norm));
+  mxSetField(mxPtr, 0, "adaptive_rho",    mxCreateDoubleScalar(settings->adaptive_rho));
+  mxSetField(mxPtr, 0, "adaptive_rho_interval",    mxCreateDoubleScalar(settings->adaptive_rho_interval));
   mxSetField(mxPtr, 0, "max_iter",        mxCreateDoubleScalar(settings->max_iter));
   mxSetField(mxPtr, 0, "eps_abs",         mxCreateDoubleScalar(settings->eps_abs));
   mxSetField(mxPtr, 0, "eps_rel",         mxCreateDoubleScalar(settings->eps_rel));
@@ -784,8 +783,7 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
   mxSetField(mxPtr, 0, "auto_rho",        mxCreateDoubleScalar(settings->auto_rho));
   mxSetField(mxPtr, 0, "verbose",         mxCreateDoubleScalar(settings->verbose));
   mxSetField(mxPtr, 0, "scaled_termination", mxCreateDoubleScalar(settings->scaled_termination));
-  mxSetField(mxPtr, 0, "early_terminate", mxCreateDoubleScalar(settings->early_terminate));
-  mxSetField(mxPtr, 0, "early_terminate_interval", mxCreateDoubleScalar(settings->early_terminate_interval));
+  mxSetField(mxPtr, 0, "check_termination", mxCreateDoubleScalar(settings->check_termination));
   mxSetField(mxPtr, 0, "warm_start",      mxCreateDoubleScalar(settings->warm_start));
 
   return mxPtr;
@@ -1030,8 +1028,9 @@ void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
   settings->rho             = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "rho"));
   settings->sigma           = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "sigma"));
   settings->scaling         = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaling"));
-  settings->scaling_iter    = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaling_iter"));
   settings->scaling_norm    = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaling_norm"));
+  settings->adaptive_rho    = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "adaptive_rho"));
+  settings->adaptive_rho_interval    = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "adaptive_rho_interval"));
   settings->max_iter        = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "max_iter"));
   settings->eps_abs         = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_abs"));
   settings->eps_rel         = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_rel"));
@@ -1045,8 +1044,7 @@ void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
   settings->auto_rho = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "auto_rho"));
   settings->verbose         = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "verbose"));
   settings->scaled_termination = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaled_termination"));
-  settings->early_terminate = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "early_terminate"));
-  settings->early_terminate_interval = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "early_terminate_interval"));
+  settings->check_termination = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "check_termination"));
   settings->warm_start      = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "warm_start"));
 
 }
@@ -1080,10 +1078,8 @@ void copyUpdatedSettingsToWork(const mxArray* mxPtr ,OsqpData* osqpData){
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "verbose")));
   osqp_update_scaled_termination(osqpData->work,
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaled_termination")));
-  osqp_update_early_terminate(osqpData->work,
-    (c_int)mxGetScalar(mxGetField(mxPtr, 0, "early_terminate")));
-  osqp_update_early_terminate_interval(osqpData->work,
-    (c_int)mxGetScalar(mxGetField(mxPtr, 0, "early_terminate_interval")));
+  osqp_update_check_termination(osqpData->work,
+    (c_int)mxGetScalar(mxGetField(mxPtr, 0, "check_termination")));
   osqp_update_warm_start(osqpData->work,
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "warm_start")));
 

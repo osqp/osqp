@@ -85,7 +85,7 @@ void print_setup_header(const OSQPWorkspace * work) {
     // Print Settings
     c_print("Settings: ");
     c_print("linear system solver = %s",
-            SOLVER_NAME[settings->linsys_solver]);
+            LINSYS_SOLVER_NAME[settings->linsys_solver]);
     if (work->linsys_solver->nthreads != 1){
         c_print(" (%d threads)", work->linsys_solver->nthreads);
     }
@@ -96,17 +96,23 @@ void print_setup_header(const OSQPWorkspace * work) {
     c_print("eps_prim_inf = %.1e, eps_dual_inf = %.1e,\n          ",
             settings->eps_prim_inf, settings->eps_dual_inf);
     c_print("rho = %.2e ", settings->rho);
-    if (settings->auto_rho) c_print("(auto)");
+    if (settings->auto_rho) c_print("(auto) ");
+    if (settings->adaptive_rho) c_print("adaptive - interval ");
+    if (settings->adaptive_rho_interval > 0){
+        c_print("%d", settings->adaptive_rho_interval);
+    }else{
+        c_print("auto");
+    }
     c_print("\n          ");
     c_print("sigma = %.1e, alpha = %.1e, \n          ",
             settings->sigma, settings->alpha);
     c_print("max_iter = %i\n", (int)settings->max_iter);
 
-    if (settings->early_terminate)
-        c_print("          early_terminate: on (interval %i)\n",
-                (int)settings->early_terminate_interval);
+    if (settings->check_termination)
+        c_print("          check_termination: on (interval %i)\n",
+                (int)settings->check_termination);
     else
-        c_print("          early_terminate: off \n");
+        c_print("          check_termination: off \n");
     if (settings->scaling){
         c_print("          scaling: on ");
         if (settings->scaling_norm != -1)
@@ -216,8 +222,9 @@ void set_default_settings(OSQPSettings * settings) {
     settings->scaling = SCALING; /* heuristic problem scaling */
 
 #if EMBEDDED != 1
-    settings->scaling_iter = SCALING_ITER;
     settings->scaling_norm = SCALING_NORM;
+    settings->adaptive_rho = ADAPTIVE_RHO;
+    settings->adaptive_rho_interval = ADAPTIVE_RHO_INTERVAL;
 #endif
 
     settings->rho = (c_float) RHO; /* ADMM step */
@@ -240,9 +247,8 @@ void set_default_settings(OSQPSettings * settings) {
 #endif
 
     settings->scaled_termination = SCALED_TERMINATION;     /* Evaluate scaled termination criteria*/
-    settings->early_terminate = EARLY_TERMINATE;     /* Evaluate termination criteria */
-    settings->early_terminate_interval = EARLY_TERMINATE_INTERVAL;     /* Evaluate termination at certain interval */
-    settings->warm_start = WARM_START;     /* x equality constraint scaling: 1e-3 */
+    settings->check_termination = CHECK_TERMINATION;     /* Interval for evaluating termination criteria */
+    settings->warm_start = WARM_START;     /* warm starting */
 
 }
 
@@ -253,8 +259,9 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
 
     // Copy settings
     new->scaling = settings->scaling;
-    new->scaling_iter = settings->scaling_iter;
     new->scaling_norm = settings->scaling_norm;
+    new->adaptive_rho = settings->adaptive_rho;
+    new->adaptive_rho_interval = settings->adaptive_rho_interval;
     new->rho = settings->rho;
     new->sigma = settings->sigma;
     new->max_iter = settings->max_iter;
@@ -270,8 +277,7 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
     new->auto_rho = settings->auto_rho;
     new->verbose = settings->verbose;
     new->scaled_termination = settings->scaled_termination;
-    new->early_terminate = settings->early_terminate;
-    new->early_terminate_interval = settings->early_terminate_interval;
+    new->check_termination = settings->check_termination;
     new->warm_start = settings->warm_start;
 
     return new;

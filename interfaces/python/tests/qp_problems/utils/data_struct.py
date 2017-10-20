@@ -7,7 +7,7 @@ import pandas as pd
 from .qp_problem import QPProblem
 
 SCALING_REG = 1e-8
-SCALING_ITER = 15
+SCALING = 15
 
 class data_struct(object):
     """
@@ -68,7 +68,7 @@ class data_struct(object):
               spa.hstack([A, spa.csc_matrix((m, m))])]).tocsc()
 
         # Iterate Scaling
-        for i in range(settings.scaling_iter):
+        for i in range(settings.scaling):
             for j in range(n + m):
                 if scaling_norm != 2:
                     norm_col_j = spspa.linalg.norm(KKT[:, j],

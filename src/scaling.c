@@ -145,7 +145,7 @@ c_int scale_data(OSQPWorkspace * work){
     }
 
 
-    for (i = 0; i < work->settings->scaling_iter; i++){
+    for (i = 0; i < work->settings->scaling; i++){
         //
         // First Ruiz step
         //

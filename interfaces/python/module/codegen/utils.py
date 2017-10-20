@@ -85,8 +85,9 @@ def write_settings(f, settings, name, embedded_flag):
     f.write("%d, " % settings['scaling'])
 
     if embedded_flag != 1:
-        f.write("%d, " % settings['scaling_iter'])
         f.write("%d, " % settings['scaling_norm'])
+        f.write("%d, " % settings['adaptive_rho'])
+        f.write("%d, " % settings['adaptive_rho_interval'])
 
     f.write("%d, " % settings['max_iter'])
     f.write("(c_float)%.20f, " % settings['eps_abs'])
@@ -97,9 +98,7 @@ def write_settings(f, settings, name, embedded_flag):
     f.write("%d, " % settings['linsys_solver'])
 
     f.write("%d, " % settings['scaled_termination'])
-    f.write("%d, " % settings['early_terminate'])
-    f.write("%d, " %
-            settings['early_terminate_interval'])
+    f.write("%d, " % settings['check_termination'])
     f.write("%d" % settings['warm_start'])
 
     f.write("};\n\n")

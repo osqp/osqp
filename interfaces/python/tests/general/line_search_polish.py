@@ -16,7 +16,7 @@ u = m['u'].T.flatten()
 
 # Solve problem
 osqp_opts = {'polish': True,
-             'early_terminate_interval': 1}
+             'check_termination': 1}
 prob = osqppurepy.OSQP()
 prob.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
 res = prob.solve()

@@ -23,11 +23,10 @@ class basic_tests(unittest.TestCase):
         self.opts = {'verbose': False,
                      'eps_abs': 1e-09,
                      'eps_rel': 1e-09,
-                     'scaling': True,
                      'max_iter': 2500,
                      'rho': 0.1,
                      'polish': False,
-                     'early_terminate_interval': 1,
+                     'check_termination': 1,
                      'scaling_norm': -1,
                      'warm_start': True}
         self.model = osqp.OSQP()

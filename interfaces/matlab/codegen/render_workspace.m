@@ -71,8 +71,9 @@ fprintf(f, '(c_float)%.20f, ', settings.sigma);
 fprintf(f, '%d, ',             settings.scaling);
 
 if embedded_flag ~= 1
-    fprintf(f, '%d, ', settings.scaling_iter);
     fprintf(f, '%d, ', settings.scaling_norm);
+    fprintf(f, '%d, ', settings.adaptive_rho);
+    fprintf(f, '%d, ', settings.adaptive_rho_interval);
 end
 
 fprintf(f, '%d, ',             settings.max_iter);
@@ -85,8 +86,7 @@ fprintf(f, '%.20f, ', settings.linsys_solver);
 
 
 fprintf(f, '%d, ', settings.scaled_termination);
-fprintf(f, '%d, ', settings.early_terminate);
-fprintf(f, '%d, ', settings.early_terminate_interval);
+fprintf(f, '%d, ', settings.check_termination);
 fprintf(f, '%d',   settings.warm_start);
 
 fprintf(f, '};\n\n');

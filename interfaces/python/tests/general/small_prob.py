@@ -54,10 +54,9 @@ norm_q = np.linalg.norm(q)
 
 osqp_opts = {'rho': 0.001,
              'auto_rho': True,
-             'scaling_iter': 15, 
              'polish': True,
-             'early_terminate_interval': 1,
-             'scaling': True}
+             'check_termination': 1,
+             'scaling': 15}
 
 
 # GUROBI

@@ -778,15 +778,9 @@ c_int validate_settings(const OSQPSettings * settings){
 #endif
         return 1;
     }
-    if (settings->scaling != 0 &&  settings->scaling != 1) {
+    if (settings->scaling < 0) {
 #ifdef PRINTING
-        c_print("scaling must be either 0 or 1\n");
-#endif
-        return 1;
-    }
-    if (settings->scaling_iter < 1) {
-#ifdef PRINTING
-        c_print("scaling_iter must be greater than 0\n");
+        c_print("scaling must be nonnegative\n");
 #endif
         return 1;
     }
@@ -794,6 +788,18 @@ c_int validate_settings(const OSQPSettings * settings){
             settings->scaling_norm != -1) {
 #ifdef PRINTING
         c_print("scaling_norm must be wither 1, 2 or -1 (for infinity norm)\n");
+#endif
+        return 1;
+    }
+    if (settings->adaptive_rho != 0 && settings->adaptive_rho != 1) {
+#ifdef PRINTING
+        c_print("adaptive_rho must be either 0 or 1\n");
+#endif
+        return 1;
+    }
+    if (settings->adaptive_rho_interval < 0) {
+#ifdef PRINTING
+        c_print("adaptive_rho_interval must be either nonnegative\n");
 #endif
         return 1;
     }
@@ -876,15 +882,9 @@ c_int validate_settings(const OSQPSettings * settings){
 #endif
         return 1;
     }
-    if (settings->early_terminate != 0 && settings->early_terminate != 1) {
+    if (settings->check_termination < 0) {
 #ifdef PRINTING
-        c_print("early_terminate must be either 0 or 1\n");
-#endif
-        return 1;
-    }
-    if (settings->early_terminate_interval <= 0) {
-#ifdef PRINTING
-        c_print("early_terminate_interval must be positive\n");
+        c_print("check_termination must be nonnegative\n");
 #endif
         return 1;
     }

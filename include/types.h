@@ -129,31 +129,23 @@ typedef struct {
  * Settings struct
  */
 typedef struct {
-        /**
-         * @name These *cannot* change for multiple runs with the same call to osqp_setup
-         * @{
-         */
         c_float rho;     ///< ADMM step rho
         c_float sigma;   ///< ADMM step sigma
-        c_int scaling;   ///< boolean, heuristic data rescaling
+        c_int scaling;   ///< heuristic data scaling iterations. If 0, scaling disabled
 
         #if EMBEDDED != 1
-        c_int scaling_iter; ///< scaling iteration
         c_int scaling_norm;  ///< scaling norm
+        c_int adaptive_rho;  ///< boolean, is rho step size adaptive?
+        c_int adaptive_rho_interval;  ///< Number of iterations between rho adaptations rho. If 0, it is automatic
         #endif
-        /** @} */
 
-        /**
-         * @name These these can change for multiple runs with the same call to osqp_setup
-         * @{
-         */
         c_int max_iter; ///< maximum iterations to tak
         c_float eps_abs;  ///< absolute convergence tolerance
         c_float eps_rel;  ///< relative convergence tolerance
         c_float eps_prim_inf;  ///< primal infeasibility tolerance
         c_float eps_dual_inf;  ///< dual infeasibility tolerance
         c_float alpha; ///< relaxation parameter
-	      enum linsys_solver_type linsys_solver;  ///< linear system solver to use
+	    enum linsys_solver_type linsys_solver;  ///< linear system solver to use
 
         #ifndef EMBEDDED
         c_float delta; ///< regularization parameter for polish
@@ -165,11 +157,8 @@ typedef struct {
         #endif
 
         c_int scaled_termination;  ///< boolean, use scaled termination criteria
-        c_int early_terminate;  ///< boolean, terminate if stopping criteria is met
-        c_int early_terminate_interval; ///< boolean, interval for checking termination, if early_terminate == 1
+        c_int check_termination;  ///< integer, check termination interval. If 0, termination checking is disabled
         c_int warm_start; ///< boolean, warm start
-
-        /** @} */
 
 } OSQPSettings;
 

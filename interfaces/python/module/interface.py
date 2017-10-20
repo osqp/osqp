@@ -226,8 +226,7 @@ class OSQP(object):
                                   'alpha', 'delta', 'polish',
                                   'pol_refine_iter',
                                   'verbose', 'scaled_termination',
-                                  'early_terminate',
-                                  'early_terminate_interval'
+                                  'check_termination',
         """
 
         # get arguments
@@ -243,8 +242,7 @@ class OSQP(object):
         pol_refine_iter = kwargs.pop('pol_refine_iter', None)
         verbose = kwargs.pop('verbose', None)
         scaled_termination = kwargs.pop('scaled_termination', None)
-        early_terminate = kwargs.pop('early_terminate', None)
-        early_terminate_interval = kwargs.pop('early_terminate_interval', None)
+        check_termination = kwargs.pop('check_termination', None)
         warm_start = kwargs.pop('warm_start', None)
 
         # update them
@@ -284,11 +282,8 @@ class OSQP(object):
         if scaled_termination is not None:
             self._model.update_scaled_termination(scaled_termination)
 
-        if early_terminate is not None:
-            self._model.update_early_terminate(early_terminate)
-
-        if early_terminate_interval is not None:
-            self._model.update_early_terminate_interval(early_terminate_interval)
+        if check_termination is not None:
+            self._model.update_check_termination(check_termination)
 
         if warm_start is not None:
             self._model.update_warm_start(warm_start)
@@ -305,8 +300,7 @@ class OSQP(object):
            pol_refine_iter is None and \
            verbose is None and \
            scaled_termination is None and \
-           early_terminate is None and \
-           early_terminate_interval is None and \
+           check_termination is None and \
            warm_start is None:
             ValueError("No updatable settings has been specified!")
 

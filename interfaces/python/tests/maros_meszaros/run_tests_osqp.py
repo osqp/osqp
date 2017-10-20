@@ -214,8 +214,7 @@ settings = {'rho': 0.1,
             'max_iter': 2500,
             'scaling_norm': -1,
             'polish': False,
-            'scaling': True,
-            'early_terminate_interval': 1}
+            'check_termination': 1}
 
 parallel = True  # Execute script in parallel
 

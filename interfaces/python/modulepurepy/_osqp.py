@@ -124,9 +124,8 @@ class settings(object):
     ----------
     -> These cannot be changed without running setup
     sigma    [1e-06]           - Regularization parameter for polish
-    scaling  [True]            - Prescaling/Equilibration
-    scaling_iter [15]          - Number of Steps for Scaling Method
-    scaling_norm [2]           - Equilibration scaling norm
+    scaling  [10]            - Scaling/Equilibration iterations (0 disabled)
+    scaling_norm [-1]           - Equilibration scaling norm
 
     -> These can be changed without running setup
     rho  [1.6]                 - Step in ADMM procedure
@@ -139,8 +138,7 @@ class settings(object):
     delta [1.0]                         - Regularization parameter for polish
     verbose  [True]                     - Verbosity
     scaled_termination [False]             - Evalute scaled termination criteria
-    early_terminate  [True]             - Evalute termination criteria
-    early_terminate_interval  [25]      - Interval for evaluating termination criteria
+    check_termination  [True]             - Interval for termination checking
     warm_start [False]                  - Reuse solution from previous solve
     polish  [False]                     - Solution polish
     pol_refine_iter  [3]                - Iterative refinement iterations
@@ -151,8 +149,7 @@ class settings(object):
 
         self.rho = kwargs.pop('rho', 0.1)
         self.sigma = kwargs.pop('sigma', 1e-06)
-        self.scaling = kwargs.pop('scaling', True)
-        self.scaling_iter = kwargs.pop('scaling_iter', 10)
+        self.scaling = kwargs.pop('scaling', 10)
         self.scaling_norm = kwargs.pop('scaling_norm', -1)
         self.max_iter = kwargs.pop('max_iter', 5000)
         self.eps_abs = kwargs.pop('eps_abs', 1e-3)
@@ -165,9 +162,7 @@ class settings(object):
         self.delta = kwargs.pop('delta', 1e-6)
         self.verbose = kwargs.pop('verbose', True)
         self.scaled_termination = kwargs.pop('scaled_termination', False)
-        self.early_terminate = kwargs.pop('early_terminate', True)
-        self.early_terminate_interval = \
-            kwargs.pop('early_terminate_interval', 25)
+        self.check_termination = kwargs.pop('check_termination', True)
         self.warm_start = kwargs.pop('warm_start', True)
         self.polish = kwargs.pop('polish', False)
         self.pol_refine_iter = kwargs.pop('pol_refine_iter', 3)
@@ -426,7 +421,7 @@ class OSQP(object):
             E = spspa.eye(m)
 
         # Iterate Scaling
-        for i in range(self.work.settings.scaling_iter):
+        for i in range(self.work.settings.scaling):
 
             # First Step Ruiz
             norm_cols = self._norm_KKT_cols(P, A, scaling_norm)
@@ -927,7 +922,6 @@ class OSQP(object):
 
         # Update rho
         self.update_rho(rho_new)
-
 
     def update_info(self, iter, polish):
         """
@@ -1560,23 +1554,14 @@ class OSQP(object):
 
         self.work.settings.scaled_termination = scaled_termination_new
 
-    def update_early_terminate(self, early_terminate_new):
+    def update_check_termination(self, check_termination_new):
         """
-        Update early_terminate parameter
+        Update check_termination parameter
         """
-        if (early_terminate_new is not True) & (early_terminate_new is not False):
-            raise ValueError("early_terminate should be either True or False")
+        if check_termination_new <= 0:
+            raise ValueError("check_termination should be greater than 0")
 
-        self.work.settings.early_terminate = early_terminate_new
-
-    def update_early_terminate_interval(self, early_terminate_interval_new):
-        """
-        Update early_terminate_interval parameter
-        """
-        if (early_terminate_interval_new is not True) & (early_terminate_interval_new is not False):
-            raise ValueError("early_terminate_interval should be either True or False")
-
-        self.work.settings.early_terminate_interval = early_terminate_interval_new
+        self.work.settings.check_termination = check_termination_new
 
     def update_warm_start(self, warm_start_new):
         """

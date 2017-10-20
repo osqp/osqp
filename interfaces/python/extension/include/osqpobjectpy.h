@@ -210,26 +210,27 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
         static char *kwlist[] = {"dims",                          // nvars and ncons
                                  "Px", "Pi", "Pp", "q",           // Cost function
                                  "Ax", "Ai", "Ap", "l", "u",      // Constraints
-                                 "scaling", "scaling_iter", "scaling_norm",
+                                 "scaling", "scaling_norm",
+                                 "adaptive_rho", "adaptive_rho_interval",
                                  "rho", "sigma", "max_iter", "eps_abs", "eps_rel", "eps_prim_inf", "eps_dual_inf", "alpha", "delta", "linsys_solver", "polish",
-																 "pol_refine_iter", "auto_rho", "verbose", "scaled_termination",
-																 "early_terminate", "early_terminate_interval", "warm_start", NULL};  // Settings
+                                 "pol_refine_iter", "auto_rho", "verbose", "scaled_termination",
+                                 "check_termination", "warm_start", NULL};  // Settings
 
 
         #ifdef DLONG
 
         #ifdef DFLOAT
-        static char * argparse_string = "(LL)O!O!O!O!O!O!O!O!O!|LLLffLffffffLLLLLLLLL";
+        static char * argparse_string = "(LL)O!O!O!O!O!O!O!O!O!|LLLLffLffffffLLLLLLLL";
         #else
-        static char * argparse_string = "(LL)O!O!O!O!O!O!O!O!O!|LLLddLddddddLLLLLLLLL";
+        static char * argparse_string = "(LL)O!O!O!O!O!O!O!O!O!|LLLLddLddddddLLLLLLLL";
         #endif
 
         #else
 
         #ifdef DFLOAT
-        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiffiffffffiiiiiiiii";
+        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiiffiffffffiiiiiiii";
         #else
-        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiddiddddddiiiiiiiii";
+        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiiddiddddddiiiiiiii";
         #endif
 
         #endif
@@ -252,8 +253,9 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                          &PyArray_Type, &l,
                                          &PyArray_Type, &u,
                                          &settings->scaling,
-                                         &settings->scaling_iter,
                                          &settings->scaling_norm,
+                                         &settings->adaptive_rho,
+                                         &settings->adaptive_rho_interval,
                                          &settings->rho,
                                          &settings->sigma,
                                          &settings->max_iter,
@@ -263,14 +265,13 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                          &settings->eps_dual_inf,
                                          &settings->alpha,
                                          &settings->delta,
-																				 &settings->linsys_solver,
+                                         &settings->linsys_solver,
                                          &settings->polish,
-																				 &settings->pol_refine_iter,
-																				 &settings->auto_rho,
+                                         &settings->pol_refine_iter,
+                                         &settings->auto_rho,
                                          &settings->verbose,
                                          &settings->scaled_termination,
-                                         &settings->early_terminate,
-																				 &settings->early_terminate_interval,
+                                         &settings->check_termination,
                                          &settings->warm_start)) {
                 return NULL;
         }
@@ -1056,8 +1057,8 @@ static PyObject *OSQP_update_scaled_termination(OSQP *self, PyObject *args){
     return Py_None;
 
 }
-static PyObject *OSQP_update_early_terminate(OSQP *self, PyObject *args){
-    c_int early_terminate_new;
+static PyObject *OSQP_update_check_termination(OSQP *self, PyObject *args){
+    c_int check_termination_new;
 
     #ifdef DLONG
     static char * argparse_string = "L";
@@ -1066,12 +1067,12 @@ static PyObject *OSQP_update_early_terminate(OSQP *self, PyObject *args){
     #endif
 
     // Parse arguments
-    if( !PyArg_ParseTuple(args, argparse_string, &early_terminate_new)) {
+    if( !PyArg_ParseTuple(args, argparse_string, &check_termination_new)) {
         return NULL;
     }
 
     // Perform Update
-    osqp_update_early_terminate(self->workspace, early_terminate_new);
+    osqp_update_check_termination(self->workspace, check_termination_new);
 
     // Return None
     Py_INCREF(Py_None);
@@ -1079,29 +1080,6 @@ static PyObject *OSQP_update_early_terminate(OSQP *self, PyObject *args){
 
 }
 
-
-static PyObject *OSQP_update_early_terminate_interval(OSQP *self, PyObject *args){
-    c_int early_terminate_interval_new;
-
-    #ifdef DLONG
-    static char * argparse_string = "L";
-    #else
-    static char * argparse_string = "i";
-    #endif
-
-    // Parse arguments
-    if( !PyArg_ParseTuple(args, argparse_string, &early_terminate_interval_new)) {
-        return NULL;
-    }
-
-    // Perform Update
-    osqp_update_early_terminate_interval(self->workspace, early_terminate_interval_new);
-
-    // Return None
-    Py_INCREF(Py_None);
-    return Py_None;
-
-}
 
 static PyObject *OSQP_update_warm_start(OSQP *self, PyObject *args){
     c_int warm_start_new;
@@ -1155,8 +1133,7 @@ static PyMethodDef OSQP_methods[] = {
     {"update_pol_refine_iter",	(PyCFunction)OSQP_update_pol_refine_iter, METH_VARARGS, PyDoc_STR("Update OSQP solver setting pol_refine_iter")},
     {"update_verbose",	(PyCFunction)OSQP_update_verbose, METH_VARARGS, PyDoc_STR("Update OSQP solver setting verbose")},
     {"update_scaled_termination",	(PyCFunction)OSQP_update_scaled_termination, METH_VARARGS, PyDoc_STR("Update OSQP solver setting scaled_termination")},
-    {"update_early_terminate",	(PyCFunction)OSQP_update_early_terminate, METH_VARARGS, PyDoc_STR("Update OSQP solver setting early_terminate")},
-    {"update_early_terminate_interval",	(PyCFunction)OSQP_update_early_terminate_interval, METH_VARARGS, PyDoc_STR("Update OSQP solver setting early_terminate_interval")},
+    {"update_check_termination",	(PyCFunction)OSQP_update_check_termination, METH_VARARGS, PyDoc_STR("Update OSQP solver setting check_termination")},
     {"update_warm_start",	(PyCFunction)OSQP_update_warm_start, METH_VARARGS, PyDoc_STR("Update OSQP solver setting warm_start")},
     {"_get_workspace", (PyCFunction)OSQP_get_workspace, METH_VARARGS, PyDoc_STR("Returns the OSQP workspace struct as a Python dictionary.")},
     {NULL,		NULL}		/* sentinel */
