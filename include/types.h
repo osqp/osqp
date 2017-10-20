@@ -150,7 +150,7 @@ typedef struct {
         #ifndef EMBEDDED
         c_float delta; ///< regularization parameter for polish
         c_int polish; ///< boolean, polish ADMM solution
-        c_int pol_refine_iter; ///< iterative refinement steps in polish
+        c_int polish_refine_iter; ///< iterative refinement steps in polish
 
         c_int verbose; ///< boolean, write out progres
         c_int auto_rho; ///< boolean, true if rho is chosen automatically

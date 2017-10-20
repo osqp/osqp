@@ -224,7 +224,7 @@ class OSQP(object):
         It is possible to change: 'max_iter', 'eps_abs', 'eps_rel',
                                   'eps_prim_inf', 'eps_dual_inf', 'rho'
                                   'alpha', 'delta', 'polish',
-                                  'pol_refine_iter',
+                                  'polish_refine_iter',
                                   'verbose', 'scaled_termination',
                                   'check_termination',
         """
@@ -239,7 +239,7 @@ class OSQP(object):
         alpha = kwargs.pop('alpha', None)
         delta = kwargs.pop('delta', None)
         polish = kwargs.pop('polish', None)
-        pol_refine_iter = kwargs.pop('pol_refine_iter', None)
+        polish_refine_iter = kwargs.pop('polish_refine_iter', None)
         verbose = kwargs.pop('verbose', None)
         scaled_termination = kwargs.pop('scaled_termination', None)
         check_termination = kwargs.pop('check_termination', None)
@@ -273,8 +273,8 @@ class OSQP(object):
         if polish is not None:
             self._model.update_polish(polish)
 
-        if pol_refine_iter is not None:
-            self._model.update_pol_refine_iter(pol_refine_iter)
+        if polish_refine_iter is not None:
+            self._model.update_polish_refine_iter(polish_refine_iter)
 
         if verbose is not None:
             self._model.update_verbose(verbose)
@@ -297,7 +297,7 @@ class OSQP(object):
            alpha is None and \
            delta is None and \
            polish is None and \
-           pol_refine_iter is None and \
+           polish_refine_iter is None and \
            verbose is None and \
            scaled_termination is None and \
            check_termination is None and \

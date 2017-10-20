@@ -141,7 +141,7 @@ class settings(object):
     check_termination  [True]             - Interval for termination checking
     warm_start [False]                  - Reuse solution from previous solve
     polish  [False]                     - Solution polish
-    pol_refine_iter  [3]                - Iterative refinement iterations
+    polish_refine_iter  [3]                - Iterative refinement iterations
     auto_rho  [True]                    - Automatic rho computation
     """
 
@@ -165,7 +165,7 @@ class settings(object):
         self.check_termination = kwargs.pop('check_termination', True)
         self.warm_start = kwargs.pop('warm_start', True)
         self.polish = kwargs.pop('polish', False)
-        self.pol_refine_iter = kwargs.pop('pol_refine_iter', 3)
+        self.polish_refine_iter = kwargs.pop('polish_refine_iter', 3)
         self.auto_rho = kwargs.pop('auto_rho', False)
         self.adaptive_rho = kwargs.pop('adaptive_rho', False)
         self.adaptive_rho_interval = kwargs.pop('adaptive_rho_interval', 200)
@@ -1527,14 +1527,14 @@ class OSQP(object):
         self.work.settings.polish = polish_new
         self.work.info.polish_time = 0.0
 
-    def update_pol_refine_iter(self, pol_refine_iter_new):
+    def update_polish_refine_iter(self, polish_refine_iter_new):
         """
         Update number iterative refinement iterations in polish
         """
-        if pol_refine_iter_new < 0:
-            raise ValueError("pol_refine_iter must be nonnegative")
+        if polish_refine_iter_new < 0:
+            raise ValueError("polish_refine_iter must be nonnegative")
 
-        self.work.settings.pol_refine_iter = pol_refine_iter_new
+        self.work.settings.polish_refine_iter = polish_refine_iter_new
 
     def update_verbose(self, verbose_new):
         """
@@ -1599,7 +1599,7 @@ class OSQP(object):
             1. (K + dK) * dz = b - K*z
             2. z <- z + dz
         """
-        for i in range(self.work.settings.pol_refine_iter):
+        for i in range(self.work.settings.polish_refine_iter):
             rhs = b - np.hstack([
                             self.work.data.P.dot(z[:self.work.data.n]) +
                             self.work.pol.Ared.T.dot(z[self.work.data.n:]),
@@ -1651,7 +1651,7 @@ class OSQP(object):
         pol_sol = KKTred_factor.solve(rhs_red)
 
         # Perform iterative refinement to compensate for the reg. error
-        if self.work.settings.pol_refine_iter > 0:
+        if self.work.settings.polish_refine_iter > 0:
             pol_sol = self.iter_refin(KKTred_factor, pol_sol, rhs_red)
 
         # Store the polished solution (x,z,y)

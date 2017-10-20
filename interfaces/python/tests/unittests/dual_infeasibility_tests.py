@@ -24,7 +24,7 @@ class dual_infeasibility_tests(unittest.TestCase):
                      'max_iter': 2500,
                      'polish': False,
                      'check_termination': 1,
-                     'pol_refine_iter': 4}
+                     'polish_refine_iter': 4}
 
     def test_dual_infeasible_lp(self):
 

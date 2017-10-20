@@ -213,7 +213,7 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                  "scaling", "scaling_norm",
                                  "adaptive_rho", "adaptive_rho_interval",
                                  "rho", "sigma", "max_iter", "eps_abs", "eps_rel", "eps_prim_inf", "eps_dual_inf", "alpha", "delta", "linsys_solver", "polish",
-                                 "pol_refine_iter", "auto_rho", "verbose", "scaled_termination",
+                                 "polish_refine_iter", "auto_rho", "verbose", "scaled_termination",
                                  "check_termination", "warm_start", NULL};  // Settings
 
 
@@ -267,7 +267,7 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                          &settings->delta,
                                          &settings->linsys_solver,
                                          &settings->polish,
-                                         &settings->pol_refine_iter,
+                                         &settings->polish_refine_iter,
                                          &settings->auto_rho,
                                          &settings->verbose,
                                          &settings->scaled_termination,
@@ -988,8 +988,8 @@ static PyObject *OSQP_update_polish(OSQP *self, PyObject *args){
 
 }
 
-static PyObject *OSQP_update_pol_refine_iter(OSQP *self, PyObject *args){
-    c_int pol_refine_iter_new;
+static PyObject *OSQP_update_polish_refine_iter(OSQP *self, PyObject *args){
+    c_int polish_refine_iter_new;
 
     #ifdef DLONG
     static char * argparse_string = "L";
@@ -998,12 +998,12 @@ static PyObject *OSQP_update_pol_refine_iter(OSQP *self, PyObject *args){
     #endif
 
     // Parse arguments
-    if( !PyArg_ParseTuple(args, argparse_string, &pol_refine_iter_new)) {
+    if( !PyArg_ParseTuple(args, argparse_string, &polish_refine_iter_new)) {
         return NULL;
     }
 
     // Perform Update
-    osqp_update_pol_refine_iter(self->workspace, pol_refine_iter_new);
+    osqp_update_polish_refine_iter(self->workspace, polish_refine_iter_new);
 
     // Return None
     Py_INCREF(Py_None);
@@ -1130,7 +1130,7 @@ static PyMethodDef OSQP_methods[] = {
     {"update_rho",	(PyCFunction)OSQP_update_rho, METH_VARARGS, PyDoc_STR("Update OSQP solver setting rho")},
     {"update_delta",	(PyCFunction)OSQP_update_delta, METH_VARARGS, PyDoc_STR("Update OSQP solver setting delta")},
     {"update_polish",	(PyCFunction)OSQP_update_polish, METH_VARARGS, PyDoc_STR("Update OSQP solver setting polish")},
-    {"update_pol_refine_iter",	(PyCFunction)OSQP_update_pol_refine_iter, METH_VARARGS, PyDoc_STR("Update OSQP solver setting pol_refine_iter")},
+    {"update_polish_refine_iter",	(PyCFunction)OSQP_update_polish_refine_iter, METH_VARARGS, PyDoc_STR("Update OSQP solver setting polish_refine_iter")},
     {"update_verbose",	(PyCFunction)OSQP_update_verbose, METH_VARARGS, PyDoc_STR("Update OSQP solver setting verbose")},
     {"update_scaled_termination",	(PyCFunction)OSQP_update_scaled_termination, METH_VARARGS, PyDoc_STR("Update OSQP solver setting scaled_termination")},
     {"update_check_termination",	(PyCFunction)OSQP_update_check_termination, METH_VARARGS, PyDoc_STR("Update OSQP solver setting check_termination")},

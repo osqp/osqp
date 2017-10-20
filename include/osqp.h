@@ -346,10 +346,10 @@ c_int osqp_update_polish(OSQPWorkspace * work, c_int polish_new);
 /**
  * Update number of iterative refinement steps in polish
  * @param  work                Workspace
- * @param  pol_refine_iter_new New iterative reginement steps
+ * @param  polish_refine_iter_new New iterative reginement steps
  * @return                     Exitflag
  */
-c_int osqp_update_pol_refine_iter(OSQPWorkspace * work, c_int pol_refine_iter_new);
+c_int osqp_update_polish_refine_iter(OSQPWorkspace * work, c_int polish_refine_iter_new);
 
 
 /**

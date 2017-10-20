@@ -94,8 +94,8 @@ static char * test_basic_qp_solve()
     mu_assert("Basic QP test solve: Wrong value of polish not caught!",
               osqp_update_polish(work, 2) == 1);
 
-    mu_assert("Basic QP test solve: Wrong value of pol_refine_iter not caught!",
-              osqp_update_pol_refine_iter(work, -1) == 1);
+    mu_assert("Basic QP test solve: Wrong value of polish_refine_iter not caught!",
+              osqp_update_polish_refine_iter(work, -1) == 1);
 
     mu_assert("Basic QP test solve: Wrong value of verbose not caught!",
               osqp_update_verbose(work, 2) == 1);

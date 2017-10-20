@@ -122,7 +122,7 @@ static void form_rhs_red(OSQPWorkspace * work, c_float * rhs){
  * @return      More accurate solution
  */
 static void iterative_refinement(OSQPWorkspace *work, LinSysSolver *p, c_float *z, c_float *b) {
-    if (work->settings->pol_refine_iter > 0) {
+    if (work->settings->polish_refine_iter > 0) {
         c_int i, j, n;
         c_float *dz;
         c_float *rhs;
@@ -134,7 +134,7 @@ static void iterative_refinement(OSQPWorkspace *work, LinSysSolver *p, c_float *
         dz = (c_float *)c_malloc(sizeof(c_float) * n);
         rhs = (c_float *)c_malloc(sizeof(c_float) * n);
 
-        for (i=0; i<work->settings->pol_refine_iter; i++) {
+        for (i=0; i<work->settings->polish_refine_iter; i++) {
 
             // Form the RHS for the iterative refinement:  b - K*z
             prea_vec_copy(b, rhs, n);

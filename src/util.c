@@ -240,7 +240,7 @@ void set_default_settings(OSQPSettings * settings) {
 #ifndef EMBEDDED
     settings->delta = DELTA;    /* regularization parameter for polish */
     settings->polish = POLISH;     /* ADMM solution polish: 1 */
-    settings->pol_refine_iter = POL_REFINE_ITER; /* iterative refinement
+    settings->polish_refine_iter = POLISH_REFINE_ITER; /* iterative refinement
                                                     steps in polish */
     settings->auto_rho = AUTO_RHO; /* automatic rho computation */
     settings->verbose = VERBOSE;     /* print output */
@@ -273,7 +273,7 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
     new->linsys_solver = settings->linsys_solver;
     new->delta = settings->delta;
     new->polish = settings->polish;
-    new->pol_refine_iter = settings->pol_refine_iter;
+    new->polish_refine_iter = settings->polish_refine_iter;
     new->auto_rho = settings->auto_rho;
     new->verbose = settings->verbose;
     new->scaled_termination = settings->scaled_termination;

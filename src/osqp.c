@@ -1150,16 +1150,16 @@ c_int osqp_update_polish(OSQPWorkspace * work, c_int polish_new) {
 }
 
 
-c_int osqp_update_pol_refine_iter(OSQPWorkspace * work, c_int pol_refine_iter_new) {
-    // Check that pol_refine_iter is nonnegative
-    if (pol_refine_iter_new < 0) {
+c_int osqp_update_polish_refine_iter(OSQPWorkspace * work, c_int polish_refine_iter_new) {
+    // Check that polish_refine_iter is nonnegative
+    if (polish_refine_iter_new < 0) {
 #ifdef PRINTING
-        c_print("pol_refine_iter must be nonnegative\n");
+        c_print("polish_refine_iter must be nonnegative\n");
 #endif
         return 1;
     }
-    // Update pol_refine_iter
-    work->settings->pol_refine_iter = pol_refine_iter_new;
+    // Update polish_refine_iter
+    work->settings->polish_refine_iter = polish_refine_iter_new;
 
     return 0;
 }

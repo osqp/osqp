@@ -47,7 +47,7 @@ const char* OSQP_SETTINGS_FIELDS[] = {"rho",                        //c_float
                                       "linsys_solver",              //c_int
                                       "delta",                      //c_float
                                       "polish",                     //c_int
-                                      "pol_refine_iter",            //c_int
+                                      "polish_refine_iter",            //c_int
                                       "auto_rho",                   //c_int
                                       "verbose",                    //c_int
                                       "scaled_termination",         //c_int
@@ -779,7 +779,7 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
   mxSetField(mxPtr, 0, "linsys_solver",   mxCreateDoubleScalar(settings->linsys_solver));
   mxSetField(mxPtr, 0, "delta",           mxCreateDoubleScalar(settings->delta));
   mxSetField(mxPtr, 0, "polish",          mxCreateDoubleScalar(settings->polish));
-  mxSetField(mxPtr, 0, "pol_refine_iter", mxCreateDoubleScalar(settings->pol_refine_iter));
+  mxSetField(mxPtr, 0, "polish_refine_iter", mxCreateDoubleScalar(settings->polish_refine_iter));
   mxSetField(mxPtr, 0, "auto_rho",        mxCreateDoubleScalar(settings->auto_rho));
   mxSetField(mxPtr, 0, "verbose",         mxCreateDoubleScalar(settings->verbose));
   mxSetField(mxPtr, 0, "scaled_termination", mxCreateDoubleScalar(settings->scaled_termination));
@@ -1040,7 +1040,7 @@ void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
   settings->linsys_solver   = (enum linsys_solver_type) mxGetScalar(mxGetField(mxPtr, 0, "linsys_solver"));
   settings->delta           = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "delta"));
   settings->polish          = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polish"));
-  settings->pol_refine_iter = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "pol_refine_iter"));
+  settings->polish_refine_iter = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polish_refine_iter"));
   settings->auto_rho = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "auto_rho"));
   settings->verbose         = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "verbose"));
   settings->scaled_termination = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaled_termination"));
@@ -1072,8 +1072,8 @@ void copyUpdatedSettingsToWork(const mxArray* mxPtr ,OsqpData* osqpData){
     (c_float)mxGetScalar(mxGetField(mxPtr, 0, "delta")));
   osqp_update_polish(osqpData->work,
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polish")));
-  osqp_update_pol_refine_iter(osqpData->work,
-    (c_int)mxGetScalar(mxGetField(mxPtr, 0, "pol_refine_iter")));
+  osqp_update_polish_refine_iter(osqpData->work,
+    (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polish_refine_iter")));
   osqp_update_verbose(osqpData->work,
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "verbose")));
   osqp_update_scaled_termination(osqpData->work,

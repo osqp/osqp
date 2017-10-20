@@ -803,9 +803,9 @@ c_int validate_settings(const OSQPSettings * settings){
 #endif
         return 1;
     }
-    if (settings->pol_refine_iter < 0) {
+    if (settings->polish_refine_iter < 0) {
 #ifdef PRINTING
-        c_print("pol_refine_iter must be nonnegative\n");
+        c_print("polish_refine_iter must be nonnegative\n");
 #endif
         return 1;
     }

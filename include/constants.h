@@ -57,7 +57,7 @@ static const char *LINSYS_SOLVER_NAME[] = {
 #ifndef EMBEDDED
 #define DELTA (1E-6)
 #define POLISH (0)
-#define POL_REFINE_ITER (3)
+#define POLISH_REFINE_ITER (3)
 #define VERBOSE (1)
 #define AUTO_RHO (0)
 #endif
