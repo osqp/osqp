@@ -1,5 +1,9 @@
 Changes since last release
 -------------------------
+*   Added rho adaptation during the algorithm
+*   Simplified several settings 
+    *  "early_terminate" and "early_terminate_interval" -> "check_termination"
+    *  "scaling_iter" removed and put inside "scaling" parameter
 *   Now code generation produces a static library
 *   Added inaccurate return statuses
 *   Created new object-oriented structure for linear system solvers
