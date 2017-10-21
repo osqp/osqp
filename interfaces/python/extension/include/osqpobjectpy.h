@@ -235,11 +235,12 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
 
         #endif
 
-        // OSQPData and settings
-        PyOSQPData *pydata;
-        OSQPData * data;
-        OSQPSettings * settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
-        set_default_settings(settings);
+
+	// OSQPData and settings
+	PyOSQPData *pydata;
+	OSQPData * data;
+	OSQPSettings * settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
+	set_default_settings(settings);
 
         if( !PyArg_ParseTupleAndKeywords(args, kwargs, argparse_string, kwlist,
                                          &n, &m,

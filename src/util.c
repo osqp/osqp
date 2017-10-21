@@ -68,7 +68,8 @@ void print_setup_header(const OSQPWorkspace * work) {
     c_int nnz;  // Number of nonzeros in the problem
 
     // Number of nonzeros
-    nnz = data->P->p[data->P->n] + data->A->p[data->A->n];
+    nnz = data->P->nzmax + data->A->p[data->A->n];
+    // nnz = data->P->p[data->P->n] + data->A->p[data->A->n];
 
     print_line();
     c_print("        OSQP v%s  -  Operator Splitting QP Solver\n"

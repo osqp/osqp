@@ -297,21 +297,37 @@ c_int osqp_solve(OSQPWorkspace * work){
 
         }
 #else
-        if (can_check_termination){
-            // Update information and compute also objective value
-            update_info(work, iter, compute_cost_function, 0);
+	if (can_check_termination){
+		// Update information and compute also objective value
+		update_info(work, iter, compute_cost_function, 0);
 
-            // Check algorithm termination
-            if (check_termination(work, 0)){
-                // Terminate algorithm
-                break;
-            }
-        }
+		// Check algorithm termination
+		if (check_termination(work, 0)){
+			// Terminate algorithm
+			break;
+		}
+	}
 #endif
 
-    // TODO: Continue from here! add rho adaptation
-    // First add options "adapt_rho" and "adapt_rho_interval"
-    
+
+#if EMBEDDED != 1
+	// Adapt rho
+	if (work->settings->adaptive_rho &&
+		        work->settings->adaptive_rho_interval &&	
+			(iter % work->settings->adaptive_rho_interval == 0)){
+		if(adapt_rho(work)){
+#ifdef PRINTING
+			c_print("ERROR: Failed rho update!\n");
+#endif  // PRINTING
+			return 1;
+		}
+#ifdef PRINTING
+		if (work->settings->verbose)
+			c_print("rho = %.2e\n", work->settings->rho);
+#endif  // PRINTING
+	}
+#endif  // EMBEDDED != 1
+
     }
 
     // Update information and check termination condition if it hasn't been done

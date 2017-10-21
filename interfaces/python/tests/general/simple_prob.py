@@ -1,4 +1,4 @@
-#  import osqp
+import osqp
 import osqppurepy
 import scipy.sparse as sparse
 import scipy as sp
@@ -42,14 +42,14 @@ q = sp.randn(n)
 #  q *= 1000
 
 # Test
-rho = 10.
+rho = 0.1
 
 osqp_opts = {'rho': rho,
-             'adaptive_rho': True,
+             'adaptive_rho': False,
              'adaptive_rho_interval': 100,
              'sigma': 1e-06,
              'scaled_termination': False,
-             'check_termination': 25,
+             'check_termination': 1,
              'polish': True,
              'verbose': True,
              'linsys_solver': 'suitesparse ldl'
@@ -62,18 +62,11 @@ model = osqppurepy.OSQP()
 model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
 res_osqppurepy = model.solve()
 
-# DEBUG: Make OSQP and purepy the same thing
-res_osqp = res_osqppurepy
-
 # Solve with SuiteSparse LDL
-#  model = osqp.OSQP()
-#  model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
-#  res_osqp = model.solve()
+model = osqp.OSQP()
+model.setup(P=P, q=q, A=A, l=l, u=u, **osqp_opts)
+res_osqp = model.solve()
 
-#  print("Difference SuiteSparse LDL vs Pardiso")
-#  print("SuiteSparse LDL runtime = %.4f" % res_osqp.info.run_time)
-#  print("Pardiso runtime         = %.4f" % res_osqp2.info.run_time)
-#  print("GUROBI runtime          = %.4f" % res_gurobi.cputime)
 
 # Check difference with gurobi
 if res_gurobi.status == 'optimal':

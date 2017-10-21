@@ -41,7 +41,7 @@ c_int adapt_rho(OSQPWorkspace * work){
     dua_res /= dua_res_norm;  // Normalize dual residual
 
     // Compute new rho
-    rho_new = work->settings->rho * c_sqrt(pri_res / dua_res);  
+    rho_new = work->settings->rho * c_sqrt(pri_res / (dua_res + 1e-10));   // 1e-10 to prevent 0 division
     exitflag = osqp_update_rho(work, rho_new);
 	
     return exitflag;

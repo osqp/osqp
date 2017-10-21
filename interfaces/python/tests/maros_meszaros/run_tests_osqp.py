@@ -10,7 +10,7 @@ from multiprocessing import Pool, cpu_count
 from itertools import repeat
 from utils.utils import load_maros_meszaros_problem
 
-# import osqppurepy as osqp
+#  import osqppurepy as osqp
 import osqp
 
 
@@ -174,7 +174,7 @@ problems = [f[:-4] for f in lst_probs]
 n_prob = len(problems)
 
 # Select small problems
-# problems, n_prob = select_small_problems(problems)
+#  problems, n_prob = select_small_problems(problems)
 
 # List of interesting probs
 # 'QAFIRO' or name == 'CVXQP1_S':
@@ -196,6 +196,7 @@ n_prob = len(problems)
 # Solve only few problems
 # problems = ['QAFIRO', 'CVXQP1_S', 'QSHIP04S', 'PRIMAL4']
 # problems = ['CVXQP1_S']
+#  problems = ['CONT-200']
 
 # Problems index
 p = 0
@@ -207,10 +208,11 @@ n_unsolved = 0
 settings = {'rho': 0.1,
             'verbose': False,
             'scaled_termination': False,
+            'adaptive_rho_interval': 100,
             'max_iter': 2500,
             'scaling_norm': -1,
             'polish': False,
-            'check_termination': 1}
+            'check_termination': 25}
 
 parallel = True  # Execute script in parallel
 

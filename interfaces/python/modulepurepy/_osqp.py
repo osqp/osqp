@@ -589,9 +589,9 @@ class OSQP(object):
             print("(adaptive)")
         else:
             print("")
-        print("          sigma = %.2e, alpha = %.2e," %
-              (settings.sigma, settings.alpha))
-        print("          max_iter = %d" % settings.max_iter)
+        print("          sigma = %.2e, alpha = %.2f, " %
+              (settings.sigma, settings.alpha), end='')
+        print("max_iter = %d" % settings.max_iter)
         if settings.scaling:
             print("          scaling: on ", end='')
             if settings.scaling_norm != -1:
@@ -916,7 +916,7 @@ class OSQP(object):
                            la.norm(q, np.inf)])
 
         # Compute new rho
-        rho_new = self.work.settings.rho * np.sqrt(pri_res/dua_res)
+        rho_new = self.work.settings.rho * np.sqrt(pri_res/(dua_res + 1e-10))
 
         # Update rho
         self.update_rho(rho_new)
@@ -1204,9 +1204,9 @@ class OSQP(object):
                     break
 
             # If not terminated, update rho in case
-            adapt_rho_condition = \
-                (iter % self.work.settings.adaptive_rho_interval == 0)
-            if adapt_rho_condition and self.work.settings.adaptive_rho:
+            if self.work.settings.adaptive_rho_interval and \
+                    (iter % self.work.settings.adaptive_rho_interval == 0) and \
+                    self.work.settings.adaptive_rho:
                 self.adapt_rho()
                 # Print
                 if self.work.settings.verbose:
