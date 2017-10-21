@@ -321,10 +321,13 @@ c_int osqp_solve(OSQPWorkspace * work){
 #endif  // PRINTING
 			return 1;
 		}
-#ifdef PRINTING
-		if (work->settings->verbose)
-			c_print("rho = %.2e\n", work->settings->rho);
-#endif  // PRINTING
+		
+// This was for debug purposes 
+// #ifdef PRINTING
+//                 if (work->settings->verbose)
+//                         c_print("rho = %.2e\n", work->settings->rho);
+// #endif  // PRINTING
+
 	}
 #endif  // EMBEDDED != 1
 

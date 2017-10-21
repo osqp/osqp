@@ -11,5 +11,5 @@ In C/C++ it corresponds to an integer :c:type:`c_int` (see :ref:`c_cpp_data_type
 +===================================+==================================+=====================================+
 | SuiteSparse LDL                   | "suitesparse ldl"                | :code:`SUITESPARSE_LDL_SOLVER`      |
 +-----------------------------------+----------------------------------+-------------------------------------+
-| MKL Pardiso                       | "mkl pardiso"                    | :code:`MKL_PARDISO_SOLVER`              |
+| MKL Pardiso                       | "mkl pardiso"                    | :code:`MKL_PARDISO_SOLVER`          |
 +-----------------------------------+----------------------------------+-------------------------------------+

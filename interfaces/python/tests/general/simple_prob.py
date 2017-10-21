@@ -45,7 +45,7 @@ q = sp.randn(n)
 rho = 0.1
 
 osqp_opts = {'rho': rho,
-             'adaptive_rho': False,
+             'adaptive_rho': True,
              'adaptive_rho_interval': 100,
              'sigma': 1e-06,
              'scaled_termination': False,

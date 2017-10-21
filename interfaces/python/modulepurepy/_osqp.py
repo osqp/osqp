@@ -565,19 +565,19 @@ class OSQP(object):
     def print_setup_header(self, data, settings):
         """Print solver header
         """
-        print("-------------------------------------------------------")
-        print("      OSQP v%s  -  Operator Splitting QP Solver" %
+        print("--------------------------------------------------------------")
+        print("         OSQP v%s  -  Operator Splitting QP Solver" %
               self.version)
-        print("              Pure Python Implementation")
-        print("     (c) Bartolomeo Stellato, Goran Banjac")
-        print("   University of Oxford  -  Stanford University 2017")
-        print("-------------------------------------------------------")
+        print("                 Pure Python Implementation")
+        print("        (c) Bartolomeo Stellato, Goran Banjac")
+        print("      University of Oxford  -  Stanford University 2017")
+        print("--------------------------------------------------------------")
 
-        print("Problem:  variables n = %d, constraints m = %d" %
+        print("problem:  variables n = %d, constraints m = %d" %
               (data.n, data.m))
         nnz = self.work.data.P.nnz + self.work.data.A.nnz
         print("          nnz(P) + nnz(A) = %i" % nnz)
-        print("Settings: ", end='')
+        print("settings: ", end='')
         if settings.linsys_solver == SUITESPARSE_LDL_SOLVER:
             print("linear system solver = SuiteSparse LDL\n          ", end='')
         print("eps_abs = %.2e, eps_rel = %.2e," %
@@ -618,26 +618,26 @@ class OSQP(object):
         """
         Print header before the iterations
         """
-        print("Iter    Obj  Val     Pri  Res     Dua  Res       Time")
+        print("iter   objective    pri res    dua res    rho        time")
 
     def update_status(self, status):
         self.work.info.status_val = status
         if status == OSQP_SOLVED:
-            self.work.info.status = "Solved"
+            self.work.info.status = "solved"
         if status == OSQP_SOLVED_INACCURATE:
-            self.work.info.status = "Solved inaccurate"
+            self.work.info.status = "solved inaccurate"
         elif status == OSQP_PRIMAL_INFEASIBLE:
-            self.work.info.status = "Primal infeasible"
+            self.work.info.status = "primal infeasible"
         elif status == OSQP_PRIMAL_INFEASIBLE_INACCURATE:
-            self.work.info.status = "Primal infeasible inaccurate"
+            self.work.info.status = "primal infeasible inaccurate"
         elif status == OSQP_UNSOLVED:
-            self.work.info.status = "Unsolved"
+            self.work.info.status = "unsolved"
         elif status == OSQP_DUAL_INFEASIBLE:
-            self.work.info.status = "Dual infeasible"
+            self.work.info.status = "dual infeasible"
         elif status == OSQP_DUAL_INFEASIBLE_INACCURATE:
-            self.work.info.status = "Dual infeasible inaccurate"
+            self.work.info.status = "dual infeasible inaccurate"
         elif status == OSQP_MAX_ITER_REACHED:
-            self.work.info.status = "Maximum iterations reached"
+            self.work.info.status = "maximum iterations reached"
 
     def cold_start(self):
         """
@@ -946,18 +946,19 @@ class OSQP(object):
         """
         Print status summary at each ADMM iteration
         """
-        print("%4i %12.4e %12.4e %12.4e %9.2fs" %
+        print("%4i  %11.4e   %8.2e   %8.2e   %8.2e  %8.2es" %
               (self.work.info.iter,
                self.work.info.obj_val,
                self.work.info.pri_res,
                self.work.info.dua_res,
+               self.work.settings.rho,
                self.work.info.setup_time + self.work.info.solve_time))
 
     def print_polish(self):
         """
         Print polish information
         """
-        print("PLSH %12.4e %12.4e %12.4e %9.2fs" %
+        print("plsh  %11.4e   %8.2e   %8.2e   ---       %8.2es" %
               (self.work.info.obj_val,
                self.work.info.pri_res,
                self.work.info.dua_res,
@@ -1046,21 +1047,18 @@ class OSQP(object):
         Print footer at the end of the optimization
         """
         print("")  # Add space after iterations
-        print("Status: %s" % self.work.info.status)
+        print("status:               %s" % self.work.info.status)
         if self.work.settings.polish and \
                 self.work.info.status_val == OSQP_SOLVED:
                     if self.work.info.status_polish == 1:
-                        print("Solution polish: Successful")
+                        print("solution polish:      successful")
                     elif self.work.info.status_polish == -1:
-                        print("Solution polish: Unsuccessful")
-        print("Number of iterations: %d" % self.work.info.iter)
+                        print("solution polish:      unsuccessful")
+        print("number of iterations: %d" % self.work.info.iter)
         if self.work.info.status_val == OSQP_SOLVED or \
                 self.work.info.status_val == OSQP_SOLVED_INACCURATE:
-            print("Optimal objective: %.4f" % self.work.info.obj_val)
-        if self.work.info.run_time > 1e-03:
-            print("Run time: %.3fs" % (self.work.info.run_time))
-        else:
-            print("Run time: %.3fms" % (1e03*self.work.info.run_time))
+            print("optimal objective:    %.4f" % self.work.info.obj_val)
+            print("run time:             %.2es" % (self.work.info.run_time))
 
         print("")  # Print last space
 
@@ -1208,9 +1206,9 @@ class OSQP(object):
                     (iter % self.work.settings.adaptive_rho_interval == 0) and \
                     self.work.settings.adaptive_rho:
                 self.adapt_rho()
-                # Print
-                if self.work.settings.verbose:
-                    print("rho = %.2e" % self.work.settings.rho)
+                # DEBUG: Print
+                #  if self.work.settings.verbose:
+                #      print("rho = %.2e" % self.work.settings.rho)
 
         if not self.work.settings.check_termination:
             # Update info

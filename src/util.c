@@ -7,25 +7,11 @@ const char *osqp_version(void) {
     return OSQP_VERSION;
 }
 
-
-
 /************************************
  * Printing Constants to set Layout *
  ************************************/
 #ifdef PRINTING
-#ifdef PROFILING
-static const char *HEADER[] = {
-    "Iter",   " Obj  Val ",  "  Pri  Res ", "  Dua  Res ", "      Time "
-};
-static const c_int HEADER_LEN = 5;
-#else
-static const char *HEADER[] = {
-    "Iter",   " Obj  Val ",  "  Pri  Res ", "    Dua  Res "
-};
-static const c_int HEADER_LEN = 4;
-#endif
-static const c_int HSPACE = 12;
-#define HEADER_LINE_LEN 60
+#define HEADER_LINE_LEN 65
 #endif
 
 /**********************
@@ -45,19 +31,20 @@ void c_strcpy(char dest[], const char source[]){
 #ifdef PRINTING
 
 static void print_line(void){
-    char theLine[HEADER_LINE_LEN+1];
+    char the_line[HEADER_LINE_LEN+1];
     c_int i;
     for (i = 0; i < HEADER_LINE_LEN; ++i)
-        theLine[i] = '-';
-    theLine[HEADER_LINE_LEN] = '\0';
-    c_print("%s\n",theLine);
+        the_line[i] = '-';
+    the_line[HEADER_LINE_LEN] = '\0';
+    c_print("%s\n", the_line);
 }
 
 void print_header(void){
-    c_int i;
-    c_print("%s ", HEADER[0]);
-    for (i=1; i < HEADER_LEN - 1; i++) c_print("  %s", HEADER[i]);
-    c_print("%s\n", HEADER[HEADER_LEN - 1]);
+    c_print("iter   objective    pri res    dua res    rho");
+#ifdef PROFILING
+    c_print("        time");
+#endif
+    c_print("\n");
 }
 
 void print_setup_header(const OSQPWorkspace * work) {
@@ -69,22 +56,21 @@ void print_setup_header(const OSQPWorkspace * work) {
 
     // Number of nonzeros
     nnz = data->P->nzmax + data->A->p[data->A->n];
-    // nnz = data->P->p[data->P->n] + data->A->p[data->A->n];
 
     print_line();
-    c_print("        OSQP v%s  -  Operator Splitting QP Solver\n"
-            "           (c) Bartolomeo Stellato,  Goran Banjac\n"
-            "     University of Oxford  -  Stanford University 2017\n",
+    c_print("           OSQP v%s  -  Operator Splitting QP Solver\n"
+            "              (c) Bartolomeo Stellato,  Goran Banjac\n"
+            "        University of Oxford  -  Stanford University 2017\n",
             OSQP_VERSION);
     print_line();
 
     // Print variables and constraints
-    c_print("Problem:  ");
+    c_print("problem:  ");
     c_print("variables n = %i, constraints m = %i\n          ", (int)data->n, (int)data->m);
     c_print("nnz(P) + nnz(A) = %i\n", (int)nnz);
 
     // Print Settings
-    c_print("Settings: ");
+    c_print("settings: ");
     c_print("linear system solver = %s",
             LINSYS_SOLVER_NAME[settings->linsys_solver]);
     if (work->linsys_solver->nthreads != 1){
@@ -138,17 +124,18 @@ void print_summary(OSQPWorkspace * work){
     OSQPInfo * info;
     info = work->info;
 
-    c_print("%*i ", (int)strlen(HEADER[0]), (int)info->iter);
-    c_print("%*.4e ", (int)HSPACE, info->obj_val);
-    c_print("%*.4e ", (int)HSPACE, info->pri_res);
-    c_print("%*.4e ", (int)HSPACE, info->dua_res);
+    c_print("%4i", (int)info->iter);
+    c_print("  %11.4e", info->obj_val);
+    c_print("   %8.2e", info->pri_res);
+    c_print("   %8.2e", info->dua_res);
+    c_print("   %8.2e", work->settings->rho);
 #ifdef PROFILING
     if (work->first_run) {
         // total time: setup + solve
-        c_print("%*.2fs", 9, info->setup_time + info->solve_time);
+        c_print("   %8.2es", info->setup_time + info->solve_time);
     } else {
         // total time: solve
-        c_print("%*.2fs", 9, info->solve_time);
+        c_print("   %8.2es", info->solve_time);
     }
 #endif
     c_print("\n");
@@ -161,12 +148,13 @@ void print_polish(OSQPWorkspace * work) {
     OSQPInfo * info;
     info = work->info;
 
-    c_print("%*s ", (int)strlen(HEADER[0]), "PLSH");
-    c_print("%*.4e ", (int)HSPACE, info->obj_val);
-    c_print("%*.4e ", (int)HSPACE, info->pri_res);
-    c_print("%*.4e ", (int)HSPACE, info->dua_res);
+    c_print("%4s", "plsh");
+    c_print("  %11.4e", info->obj_val);
+    c_print("   %8.2e", info->pri_res);
+    c_print("   %8.2e", info->dua_res);
+    c_print("   ---     ");
 #ifdef PROFILING
-    c_print("%*.2fs", 9, info->setup_time + info->solve_time +
+    c_print("   %8.2es", info->setup_time + info->solve_time +
             info->polish_time);
 #endif
     c_print("\n");
@@ -184,28 +172,24 @@ void print_footer(OSQPInfo * info, c_int polish){
     c_print("\n"); // Add space after iterations
 #endif
 
-    c_print("Status: %s\n", info->status);
+    c_print("status:               %s\n", info->status);
 
     if (polish && info->status_val == OSQP_SOLVED) {
         if (info->status_polish == 1){
-            c_print("Solution polish: Successful\n");
+            c_print("solution polish:      successful\n");
         } else if (info->status_polish < 0){
-            c_print("Solution polish: Unsuccessful\n");
+            c_print("solution polish:      unsuccessful\n");
         }
     }
 
-    c_print("Number of iterations: %i\n", (int)info->iter);
+    c_print("number of iterations: %i\n", (int)info->iter);
     if (info->status_val == OSQP_SOLVED ||
             info->status_val == OSQP_SOLVED_INACCURATE) {
-        c_print("Optimal objective: %.4f\n", info->obj_val);
+        c_print("optimal objective:    %.4f\n", info->obj_val);
     }
 
 #ifdef PROFILING
-    if (info->run_time > 1e-03) { // Time more than 1ms
-        c_print("Run time: %.3fs\n", info->run_time);
-    } else {
-        c_print("Run time: %.3fms\n", 1e03*info->run_time);
-    }
+    c_print("run time:             %.2es\n", info->run_time);
 #endif
     c_print("\n");
 

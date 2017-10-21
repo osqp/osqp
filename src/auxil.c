@@ -579,23 +579,23 @@ void update_status(OSQPInfo *info, c_int status_val) {
 
     // Update status string depending on status val
     if(status_val == OSQP_SOLVED)
-        c_strcpy(info->status, "Solved");
+        c_strcpy(info->status, "solved");
     if(status_val == OSQP_SOLVED_INACCURATE)
-        c_strcpy(info->status, "Solved inaccurate");
+        c_strcpy(info->status, "solved inaccurate");
     else if (status_val == OSQP_PRIMAL_INFEASIBLE)
-        c_strcpy(info->status, "Primal infeasible");
+        c_strcpy(info->status, "primal infeasible");
     else if (status_val == OSQP_PRIMAL_INFEASIBLE_INACCURATE)
-        c_strcpy(info->status, "Primal infeasible inaccurate");
+        c_strcpy(info->status, "primal infeasible inaccurate");
     else if (status_val == OSQP_UNSOLVED)
-        c_strcpy(info->status, "Unsolved");
+        c_strcpy(info->status, "unsolved");
     else if (status_val == OSQP_DUAL_INFEASIBLE)
-        c_strcpy(info->status, "Dual infeasible");
+        c_strcpy(info->status, "dual infeasible");
     else if (status_val == OSQP_DUAL_INFEASIBLE_INACCURATE)
-        c_strcpy(info->status, "Dual infeasible inaccurate");
+        c_strcpy(info->status, "dual infeasible inaccurate");
     else if (status_val == OSQP_MAX_ITER_REACHED)
-        c_strcpy(info->status, "Maximum iterations reached");
+        c_strcpy(info->status, "maximum iterations reached");
     else if (status_val == OSQP_SIGINT)
-        c_strcpy(info->status, "Interrupted");
+        c_strcpy(info->status, "interrupted");
 }
 
 
