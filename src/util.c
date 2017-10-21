@@ -152,7 +152,7 @@ void print_polish(OSQPWorkspace * work) {
     c_print("  %11.4e", info->obj_val);
     c_print("   %8.2e", info->pri_res);
     c_print("   %8.2e", info->dua_res);
-    c_print("   ---     ");
+    c_print("   --------");
 #ifdef PROFILING
     c_print("   %8.2es", info->setup_time + info->solve_time +
             info->polish_time);

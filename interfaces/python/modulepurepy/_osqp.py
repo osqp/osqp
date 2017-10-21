@@ -958,7 +958,7 @@ class OSQP(object):
         """
         Print polish information
         """
-        print("plsh  %11.4e   %8.2e   %8.2e   ---       %8.2es" %
+        print("plsh  %11.4e   %8.2e   %8.2e   --------  %8.2es" %
               (self.work.info.obj_val,
                self.work.info.pri_res,
                self.work.info.dua_res,

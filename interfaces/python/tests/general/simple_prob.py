@@ -6,8 +6,8 @@ import numpy as np
 import mathprogbasepy as mpbpy
 sp.random.seed(2)
 
-n = 100
-m = 500
+n = 500
+m = 1000
 A = sparse.random(m, n, density=0.5,
                   data_rvs=np.random.randn,
                   format='csc')
@@ -46,11 +46,11 @@ rho = 0.1
 
 osqp_opts = {'rho': rho,
              'adaptive_rho': True,
-             'adaptive_rho_interval': 100,
+             'adaptive_rho_interval': 0,
              'sigma': 1e-06,
              'scaled_termination': False,
-             'check_termination': 1,
-             'polish': True,
+             'check_termination': 25,
+             'polish': False,
              'verbose': True,
              'linsys_solver': 'suitesparse ldl'
              }

@@ -73,6 +73,7 @@ static const char *LINSYS_SOLVER_NAME[] = {
 
 #define ADAPTIVE_RHO (1)
 #define ADAPTIVE_RHO_INTERVAL (0)
+#define ADAPTIVE_RHO_AUTO_INTERVAL_PERCENTAGE (0.7)  ///< Percentage of setup time after which we update rho
 #endif
 
 /* Printing */

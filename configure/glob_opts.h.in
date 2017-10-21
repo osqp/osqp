@@ -134,6 +134,12 @@ typedef float c_float;                /* for numerical values  */
 #define c_min(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
+// Round x to the nearest multiple of N
+#ifndef c_roundmultiple
+#define c_roundmultiple(x, N) ((x) + .5 * (N) - c_fmod((x) + .5 * (N), (N)))
+#endif
+
+
 /* Use customized functions -----------------------------------------------   */
 
 #if EMBEDDED != 1
@@ -141,8 +147,10 @@ typedef float c_float;                /* for numerical values  */
 #include <math.h>
 #ifndef DFLOAT // Doubles
 #define c_sqrt sqrt
+#define c_fmod fmod
 #else         // Floats
 #define c_sqrt sqrtf
+#define c_fmod fmodf
 #endif
 
 #endif // end EMBEDDED

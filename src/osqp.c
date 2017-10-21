@@ -311,6 +311,32 @@ c_int osqp_solve(OSQPWorkspace * work){
 
 
 #if EMBEDDED != 1
+		// If adaptive rho with automatic interval, check if the solve time is a certain percentage 
+		// of the setup time.
+		if (work->settings->adaptive_rho && !work->settings->adaptive_rho_interval){
+			// Check time 
+			if (toc(work->timer) > ADAPTIVE_RHO_AUTO_INTERVAL_PERCENTAGE * work->info->setup_time){
+					// Enough time has passed. We round the number of iterations to the
+					// closest multiple of check_termination
+					//
+					work->settings->adaptive_rho_interval = (c_int)c_roundmultiple(iter, work->settings->check_termination);
+					// Make sure the interval is not 0 and at least check_termination times
+					work->settings->adaptive_rho_interval = c_max(work->settings->adaptive_rho_interval, work->settings->check_termination);
+					
+// #ifdef PRINTING
+//                                         // DEBUG: print stuff
+//                                         c_print("time %.2e, iter %i, check_termination %i, new_interval %i\n",
+//                                                         toc(work->timer), iter,
+//                                                         work->settings->check_termination,
+//                                                         work->settings->adaptive_rho_interval);
+// #endif
+						
+			}
+
+		}
+
+
+
 		// Adapt rho
 		if (work->settings->adaptive_rho &&
 				work->settings->adaptive_rho_interval &&	
