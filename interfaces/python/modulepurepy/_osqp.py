@@ -26,6 +26,9 @@ RHO_MAX = 1e+06
 RHO_EQ_OVER_RHO_INEQ = 1e+03
 RHO_TOL = 1e-04
 
+# Adaptive rho
+ADAPTIVE_RHO_TOLERANCE = 5
+
 # Printing interval
 PRINT_INTERVAL = 200
 
@@ -618,7 +621,7 @@ class OSQP(object):
         """
         Print header before the iterations
         """
-        print("iter   objective    pri res    dua res    rho        time")
+        print("iter   objective    pri res    dua res    rho       time")
 
     def update_status(self, status):
         self.work.info.status_val = status
@@ -917,9 +920,15 @@ class OSQP(object):
 
         # Compute new rho
         rho_new = self.work.settings.rho * np.sqrt(pri_res/(dua_res + 1e-10))
+        
+        # DEBUG
+        #  print("rho = %.2e, rho_new = %.2e" % (self.work.settings.rho, rho_new))
 
-        # Update rho
-        self.update_rho(rho_new)
+        if rho_new > ADAPTIVE_RHO_TOLERANCE * self.work.settings.rho or \
+            rho_new < 0.1 * ADAPTIVE_RHO_TOLERANCE * \
+                self.work.settings.rho:
+            # Update rho
+            self.update_rho(rho_new)
 
     def update_info(self, iter, polish):
         """

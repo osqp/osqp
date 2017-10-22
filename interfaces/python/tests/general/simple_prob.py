@@ -46,10 +46,10 @@ rho = 0.1
 
 osqp_opts = {'rho': rho,
              'adaptive_rho': True,
-             'adaptive_rho_interval': 0,
+             'adaptive_rho_interval': 25,
              'sigma': 1e-06,
              'scaled_termination': False,
-             'check_termination': 25,
+             'check_termination': 1,
              'polish': False,
              'verbose': True,
              'linsys_solver': 'suitesparse ldl'
