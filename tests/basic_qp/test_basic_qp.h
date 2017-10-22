@@ -426,6 +426,7 @@ static char * test_basic_qp_update_rho()
     // Create new problem with different rho and update it
     set_default_settings(settings);
     settings->rho = 0.1;
+    settings->adaptive_rho = 0;
     settings->check_termination = 1;
     settings->eps_abs = 1e-05;
     settings->eps_rel = 1e-05;
