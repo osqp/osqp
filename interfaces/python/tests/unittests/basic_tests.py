@@ -25,6 +25,7 @@ class basic_tests(unittest.TestCase):
                      'eps_rel': 1e-09,
                      'max_iter': 2500,
                      'rho': 0.1,
+                     'adaptive_rho': False,
                      'polish': False,
                      'check_termination': 1,
                      'scaling_norm': -1,

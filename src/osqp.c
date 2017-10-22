@@ -188,6 +188,25 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
 	work->summary_printed = 0; // Initialize last summary  to not printed
 #endif
 
+
+#if EMBEDDED != 1
+        // If adaptive rho and automatic interval, but profiling disabled, we need to
+	// set the interval to a default value
+#ifndef PROFILING
+	if (work->settings->adaptive_rho && !work->settings->adaptive_rho_interval){
+		if (work->settings->check_termination){
+			// If check_termination is enabled, we set it to a multiple of the check termination interval
+			work->settings->adaptive_rho_interval = ADAPTIVE_RHO_AUTO_INTERVAL_MULTIPLE_TERMINATION * work->settings->check_termination;
+		} else {
+			// If check_termination is disabled we set it to a predefined fix number
+			work->settings->adaptive_rho_interval = ADAPTIVE_RHO_AUTO_INTERVAL_FIXED;
+		}
+
+	}
+#endif
+#endif
+
+	// Return workspace structure
 	return work;
 }
 
@@ -311,6 +330,7 @@ c_int osqp_solve(OSQPWorkspace * work){
 
 
 #if EMBEDDED != 1
+#ifdef PROFILING
 		// If adaptive rho with automatic interval, check if the solve time is a certain percentage 
 		// of the setup time.
 		if (work->settings->adaptive_rho && !work->settings->adaptive_rho_interval){
@@ -318,7 +338,6 @@ c_int osqp_solve(OSQPWorkspace * work){
 			if (toc(work->timer) > ADAPTIVE_RHO_AUTO_INTERVAL_PERCENTAGE * work->info->setup_time){
 					// Enough time has passed. We round the number of iterations to the
 					// closest multiple of check_termination
-					//
 					work->settings->adaptive_rho_interval = (c_int)c_roundmultiple(iter, work->settings->check_termination);
 					// Make sure the interval is not 0 and at least check_termination times
 					work->settings->adaptive_rho_interval = c_max(work->settings->adaptive_rho_interval, work->settings->check_termination);
@@ -330,17 +349,28 @@ c_int osqp_solve(OSQPWorkspace * work){
 //                                                         work->settings->check_termination,
 //                                                         work->settings->adaptive_rho_interval);
 // #endif
-						
-			}
-
-		}
-
-
-
+			} // If time condition is met
+		}  // If adaptive rho enabled and interval set to auto
+#endif // PROFILING
+		
 		// Adapt rho
 		if (work->settings->adaptive_rho &&
 				work->settings->adaptive_rho_interval &&	
 				(iter % work->settings->adaptive_rho_interval == 0)){
+			// Update info with the residuals if it hasn't been done before
+#ifdef PRINTING	
+			if (!can_check_termination && !can_print){
+				// Information has not been computed neither for termination or printing reasons
+				update_info(work, iter, compute_cost_function, 0);
+			}
+#else
+			if(!can_check_termination){
+				// Information has not been computed before for termination check
+				update_info(work, iter, compute_cost_function, 0);
+			}
+#endif
+			
+			// Actually update rho
 			if(adapt_rho(work)){
 #ifdef PRINTING
 				c_print("ERROR: Failed rho update!\n");
@@ -357,7 +387,7 @@ c_int osqp_solve(OSQPWorkspace * work){
 		}
 #endif  // EMBEDDED != 1
 
-	}
+	}  // End of ADMM for loop
 
 	// Update information and check termination condition if it hasn't been done
 	// during last iteration (max_iter reached or check_termination disabled)

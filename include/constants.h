@@ -74,6 +74,8 @@ static const char *LINSYS_SOLVER_NAME[] = {
 #define ADAPTIVE_RHO (1)
 #define ADAPTIVE_RHO_INTERVAL (0)
 #define ADAPTIVE_RHO_AUTO_INTERVAL_PERCENTAGE (0.7)  ///< Percentage of setup time after which we update rho
+#define ADAPTIVE_RHO_AUTO_INTERVAL_MULTIPLE_TERMINATION (4)  ///< Multiple of termination check time we update rho if profiling disabled
+#define ADAPTIVE_RHO_AUTO_INTERVAL_FIXED (100)   ///< Number of iterations after which we update rho if termination check if disabled and profiling disabled
 #endif
 
 /* Printing */

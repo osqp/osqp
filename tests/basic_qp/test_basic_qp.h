@@ -386,6 +386,7 @@ static char * test_basic_qp_update_rho()
     rho = 0.7;
     set_default_settings(settings);
     settings->rho = rho;
+    settings->adaptive_rho = 0;  // Disable adaptive rho for this test
     settings->eps_abs = 1e-05;
     settings->eps_rel = 1e-05;
     settings->check_termination = 1;

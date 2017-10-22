@@ -125,17 +125,17 @@ void print_summary(OSQPWorkspace * work){
     info = work->info;
 
     c_print("%4i", (int)info->iter);
-    c_print("  %11.4e", info->obj_val);
-    c_print("   %8.2e", info->pri_res);
-    c_print("   %8.2e", info->dua_res);
-    c_print("   %8.2e", work->settings->rho);
+    c_print(" %12.4e", info->obj_val);
+    c_print("  %9.2e", info->pri_res);
+    c_print("  %9.2e", info->dua_res);
+    c_print("  %9.2e", work->settings->rho);
 #ifdef PROFILING
     if (work->first_run) {
         // total time: setup + solve
-        c_print("   %8.2es", info->setup_time + info->solve_time);
+        c_print("  %9.2es", info->setup_time + info->solve_time);
     } else {
         // total time: solve
-        c_print("   %8.2es", info->solve_time);
+        c_print("  %9.2es", info->solve_time);
     }
 #endif
     c_print("\n");
@@ -149,12 +149,12 @@ void print_polish(OSQPWorkspace * work) {
     info = work->info;
 
     c_print("%4s", "plsh");
-    c_print("  %11.4e", info->obj_val);
-    c_print("   %8.2e", info->pri_res);
-    c_print("   %8.2e", info->dua_res);
+    c_print(" %12.4e", info->obj_val);
+    c_print("  %9.2e", info->pri_res);
+    c_print("  %9.2e", info->dua_res);
     c_print("   --------");
 #ifdef PROFILING
-    c_print("   %8.2es", info->setup_time + info->solve_time +
+    c_print("  %9.2es", info->setup_time + info->solve_time +
             info->polish_time);
 #endif
     c_print("\n");
