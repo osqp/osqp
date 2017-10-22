@@ -40,7 +40,14 @@ static void print_line(void){
 }
 
 void print_header(void){
-    c_print("iter   objective    pri res    dua res    rho");
+	// Different indentation required for windows
+#if IS_WINDOWS
+    c_print("iter  ");
+#else
+    c_print("iter   ");
+#endif
+    // Main information
+    c_print("objective    pri res    dua res    rho");
 #ifdef PROFILING
     c_print("        time");
 #endif
@@ -152,7 +159,12 @@ void print_polish(OSQPWorkspace * work) {
     c_print(" %12.4e", info->obj_val);
     c_print("  %9.2e", info->pri_res);
     c_print("  %9.2e", info->dua_res);
+    // Different characters for windows/unix
+#ifdef IS_WINDOWS
+    c_print("  ---------");
+#else
     c_print("   --------");
+#endif
 #ifdef PROFILING
     c_print("  %9.2es", info->setup_time + info->solve_time +
             info->polish_time);
