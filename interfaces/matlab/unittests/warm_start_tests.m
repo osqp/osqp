@@ -23,6 +23,7 @@ classdef warm_start_tests < matlab.unittest.TestCase
             testCase.options.rho = 0.01;
             testCase.options.eps_abs = 1e-04;
             testCase.options.eps_rel = 1e-04;
+            testCase.options.adaptive_rho = 0;
             testCase.options.check_termination = 1;
 
             % Setup tolerance
