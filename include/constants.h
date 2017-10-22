@@ -51,7 +51,7 @@ static const char *LINSYS_SOLVER_NAME[] = {
 #define RHO_MIN (1e-06)
 #define RHO_MAX (1e06)
 #define RHO_EQ_OVER_RHO_INEQ (1e03)
-#define RHO_TOL (1e-04)
+#define RHO_TOL (1e-04)   ///< Tolerance for detecting if an inequality is set to equality
 
 
 #ifndef EMBEDDED
@@ -76,6 +76,7 @@ static const char *LINSYS_SOLVER_NAME[] = {
 #define ADAPTIVE_RHO_AUTO_INTERVAL_PERCENTAGE (0.7)  ///< Percentage of setup time after which we update rho
 #define ADAPTIVE_RHO_AUTO_INTERVAL_MULTIPLE_TERMINATION (4)  ///< Multiple of termination check time we update rho if profiling disabled
 #define ADAPTIVE_RHO_AUTO_INTERVAL_FIXED (100)   ///< Number of iterations after which we update rho if termination check if disabled and profiling disabled
+#define ADAPTIVE_RHO_TOLERANCE (5)  ///< Tolerance for adopting new rho. Number of times the new rho is larger or smaller than the current one
 #endif
 
 /* Printing */

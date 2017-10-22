@@ -18,6 +18,8 @@ c_int adapt_rho(OSQPWorkspace * work){
     c_float temp_res_norm;   // Temporary residual norm
     c_float rho_new;  // New rho value
 
+    exitflag = 0;   // Initialize exitflag to 0
+    
     // Get problem dimensions
     n = work->data->n;
     m = work->data->m;
@@ -42,7 +44,12 @@ c_int adapt_rho(OSQPWorkspace * work){
 
     // Compute new rho
     rho_new = work->settings->rho * c_sqrt(pri_res / (dua_res + 1e-10));   // 1e-10 to prevent 0 division
-    exitflag = osqp_update_rho(work, rho_new);
+
+    // Check if the new rho is large or small enough and update it in case
+    if (rho_new > work->settings->rho * ADAPTIVE_RHO_TOLERANCE ||
+            rho_new < work->settings->rho * 0.1 * ADAPTIVE_RHO_TOLERANCE){
+                exitflag = osqp_update_rho(work, rho_new);
+    }
 	
     return exitflag;
 }
