@@ -41,7 +41,7 @@ static void print_line(void){
 
 void print_header(void){
 	// Different indentation required for windows
-#if IS_WINDOWS
+#ifdef IS_WINDOWS
     c_print("iter  ");
 #else
     c_print("iter   ");
