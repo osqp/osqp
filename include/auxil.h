@@ -12,8 +12,14 @@ extern "C" {
 /***********************************************************
  * Auxiliary functions needed to compute ADMM iterations * *
  ***********************************************************/
-
 #if EMBEDDED != 1
+/**
+ * Compute rho estimate from residuals
+ * @param work Workspace
+ * @return     rho estimate
+ */
+c_float compute_rho_estimate(OSQPWorkspace * work);
+
 /**
  * Adapt rho value based on current unscaled primal/dual residuals
  * @param work Workspace
@@ -109,6 +115,13 @@ void store_solution(OSQPWorkspace *work);
 * @param polish             Boolean (if called from polish)
 */
 void update_info(OSQPWorkspace *work, c_int iter, c_int compute_objective, c_int polish);
+
+
+/**
+* Reset solver information (after problem updates)
+* @param info               Information structure
+*/
+void reset_info(OSQPInfo *info);
 
 
 /**

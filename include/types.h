@@ -62,24 +62,29 @@ typedef struct {
  * Solver return nformation
  */
 typedef struct {
-        c_int iter;          ///< number of iterations taken
-        char status[32];     ///< status string, e.g. 'Solved'
-        c_int status_val;    ///< status as c_int, defined in constants.h
+	c_int iter;          ///< number of iterations taken
+	char status[32];     ///< status string, e.g. 'solved'
+	c_int status_val;    ///< status as c_int, defined in constants.h
 
-        #ifndef EMBEDDED
-        c_int status_polish; ///< polish status: successful (1), unperformed (0), (-1) unsuccessful
-        #endif
+#ifndef EMBEDDED
+	c_int status_polish; ///< polish status: successful (1), unperformed (0), (-1) unsuccessful
+#endif
 
-        c_float obj_val;     ///< primal objective
-        c_float pri_res;     ///< norm of primal residual
-        c_float dua_res;     ///< norm of dual residual
+	c_float obj_val;     ///< primal objective
+	c_float pri_res;     ///< norm of primal residual
+	c_float dua_res;     ///< norm of dual residual
 
-        #ifdef PROFILING
-        c_float setup_time;  ///< time taken for setup phase (milliseconds)
-        c_float solve_time;  ///< time taken for solve phase (milliseconds)
-        c_float polish_time; ///< time taken for polish phase (milliseconds)
-        c_float run_time;    ///< total time  (milliseconds)
-        #endif
+#ifdef PROFILING
+	c_float setup_time;  ///< time taken for setup phase (seconds)
+	c_float solve_time;  ///< time taken for solve phase (seconds)
+	c_float polish_time; ///< time taken for polish phase (seconds)
+	c_float run_time;    ///< total time  (seconds)
+#endif
+
+#if EMBEDDED != 1
+	c_int rho_updates;  ///< number of rho updates
+	c_float rho_estimate;   ///< best rho estimate so far from residuals
+#endif
 } OSQPInfo;
 
 

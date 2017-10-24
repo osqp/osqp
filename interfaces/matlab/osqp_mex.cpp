@@ -30,7 +30,9 @@ const char* OSQP_INFO_FIELDS[] = {"iter",         //c_int
                                   "setup_time",     //c_float, only used if PROFILING
                                   "solve_time",     //c_float, only used if PROFILING
                                   "polish_time",    //c_float, only used if PROFILING
-                                  "run_time"};      //c_float, only used if PROFILING
+                                  "run_time",       //c_float, only used if PROFILING
+                                  "rho_updates",    //c_int
+                                  "rho_estimate"};  //c_float
 
 const char* OSQP_SETTINGS_FIELDS[] = {"rho",                        //c_float
                                       "sigma",                      //c_float
@@ -750,6 +752,10 @@ mxArray* copyInfoToMxStruct(OSQPInfo* info){
   mxSetField(mxPtr, 0, "polish_time", mxCreateDoubleScalar(info->polish_time));
   mxSetField(mxPtr, 0, "run_time",    mxCreateDoubleScalar(info->run_time));
   #endif
+
+  mxSetField(mxPtr, 0, "rho_updates",    mxCreateDoubleScalar(info->rho_updates));
+  mxSetField(mxPtr, 0, "rho_estimate",    mxCreateDoubleScalar(info->rho_estimate));
+
 
   return mxPtr;
 

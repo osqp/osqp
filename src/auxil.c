@@ -10,15 +10,11 @@
  * Auxiliary functions needed to compute ADMM iterations * *
  ***********************************************************/
 #if EMBEDDED != 1
-c_int adapt_rho(OSQPWorkspace * work){
+c_float compute_rho_estimate(OSQPWorkspace * work){
     c_int n, m;  // Dimensions
-    c_int exitflag; // Exitflag
     c_float pri_res, dua_res; // Primal and dual residuals
     c_float pri_res_norm, dua_res_norm;  // Normalization for the residuals
     c_float temp_res_norm;   // Temporary residual norm
-    c_float rho_new;  // New rho value
-
-    exitflag = 0;   // Initialize exitflag to 0
     
     // Get problem dimensions
     n = work->data->n;
@@ -42,13 +38,28 @@ c_int adapt_rho(OSQPWorkspace * work){
     dua_res_norm = c_max(dua_res_norm, temp_res_norm);          // max(||q||,||A' y||,||P x||)
     dua_res /= dua_res_norm;  // Normalize dual residual
 
-    // Compute new rho
-    rho_new = work->settings->rho * c_sqrt(pri_res / (dua_res + 1e-10));   // 1e-10 to prevent 0 division
+    // Return rho estimate
+    return work->settings->rho * c_sqrt(pri_res / (dua_res + 1e-10));   // 1e-10 to prevent 0 division
 
+}
+
+c_int adapt_rho(OSQPWorkspace * work){
+    c_int exitflag; // Exitflag
+    c_float rho_new;  // New rho value
+
+    exitflag = 0;   // Initialize exitflag to 0
+    
+    // Compute new rho
+    rho_new = compute_rho_estimate(work);
+
+    // Set rho estimate in info
+    work->info->rho_estimate = rho_new;
+	   
     // Check if the new rho is large or small enough and update it in case
     if (rho_new > work->settings->rho * ADAPTIVE_RHO_TOLERANCE ||
             rho_new < work->settings->rho * 0.1 * ADAPTIVE_RHO_TOLERANCE){
                 exitflag = osqp_update_rho(work, rho_new);
+		work->info->rho_updates += 1;
     }
 	
     return exitflag;
@@ -577,6 +588,25 @@ void update_info(OSQPWorkspace *work, c_int iter, c_int compute_objective, c_int
 #ifdef PRINTING
     work->summary_printed = 0;  // The just updated info have not been printed
 #endif
+}
+
+
+void reset_info(OSQPInfo *info){ 
+#ifdef PROFILING
+    // Initialize info values.
+    info->solve_time = 0.0;  // Solve time to zero
+#ifndef EMBEDDED
+    info->polish_time = 0.0;  // Polish time to zero
+#endif
+    // NB: We do not reset the setup_time because it is performed only once
+#endif
+    
+    update_status(info, OSQP_UNSOLVED);  // Problem is unsolved
+
+#if EMBEDDED != 1
+    info->rho_updates = 0;   // Rho updates are now 0
+#endif     
+
 }
 
 

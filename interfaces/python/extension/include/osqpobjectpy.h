@@ -39,167 +39,173 @@ static c_int OSQP_dealloc(OSQP* self)
 // Solve Optimization Problem
 static PyObject * OSQP_solve(OSQP *self)
 {
-    if (self->workspace){
+	if (self->workspace){
 
-        // Create status object
-        PyObject * status;
+		// Create status object
+		PyObject * status;
 
-        // Create solution objects
-        PyObject * x, *y, *prim_inf_cert, *dual_inf_cert;
+		// Create solution objects
+		PyObject * x, *y, *prim_inf_cert, *dual_inf_cert;
 
-        // Define info related variables
-        static char *argparse_string;
-        PyObject *info_list;
-        PyObject *info;
+		// Define info related variables
+		static char *argparse_string;
+		PyObject *info_list;
+		PyObject *info;
 
-        // Results
-        PyObject *results_list;
-        PyObject *results;
+		// Results
+		PyObject *results_list;
+		PyObject *results;
 
-        // Temporary solution
-        npy_intp nd[] = {(npy_intp)self->workspace->data->n};  // Dimensions in R^n
-        npy_intp md[] = {(npy_intp)self->workspace->data->m};  // Dimensions in R^m
+		// Temporary solution
+		npy_intp nd[] = {(npy_intp)self->workspace->data->n};  // Dimensions in R^n
+		npy_intp md[] = {(npy_intp)self->workspace->data->m};  // Dimensions in R^m
 
-        /**
-         *  Solve QP Problem
-         */
-        osqp_solve(self->workspace);
+		/**
+		 *  Solve QP Problem
+		 */
+		osqp_solve(self->workspace);
 
-        // If problem is not primal or dual infeasible store it
-        if ((self->workspace->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
-			(self->workspace->info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE) &&
-            (self->workspace->info->status_val != OSQP_DUAL_INFEASIBLE) &&
-			(self->workspace->info->status_val != OSQP_DUAL_INFEASIBLE_INACCURATE)){
+		// If problem is not primal or dual infeasible store it
+		if ((self->workspace->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
+				(self->workspace->info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE) &&
+				(self->workspace->info->status_val != OSQP_DUAL_INFEASIBLE) &&
+				(self->workspace->info->status_val != OSQP_DUAL_INFEASIBLE_INACCURATE)){
 
-						// Primal and dual solutions
-						x = (PyObject *)PyArrayFromCArray(self->workspace->solution->x, nd);
-						y = (PyObject *)PyArrayFromCArray(self->workspace->solution->y, md);
+			// Primal and dual solutions
+			x = (PyObject *)PyArrayFromCArray(self->workspace->solution->x, nd);
+			y = (PyObject *)PyArrayFromCArray(self->workspace->solution->y, md);
 
-						// Infeasibility certificates -> None values
-						prim_inf_cert = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
-            dual_inf_cert = PyArray_EMPTY(1, md, NPY_OBJECT, 0);
+			// Infeasibility certificates -> None values
+			prim_inf_cert = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
+			dual_inf_cert = PyArray_EMPTY(1, md, NPY_OBJECT, 0);
 
-        } else if (self->workspace->info->status_val == OSQP_PRIMAL_INFEASIBLE ||
-		self->workspace->info->status_val == OSQP_PRIMAL_INFEASIBLE_INACCURATE) {	// primal infeasible
+		} else if (self->workspace->info->status_val == OSQP_PRIMAL_INFEASIBLE ||
+				self->workspace->info->status_val == OSQP_PRIMAL_INFEASIBLE_INACCURATE) {	// primal infeasible
 
-						// Primal and dual solution arrays -> None values
-            x = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
-            y = PyArray_EMPTY(1, md, NPY_OBJECT, 0);
+			// Primal and dual solution arrays -> None values
+			x = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
+			y = PyArray_EMPTY(1, md, NPY_OBJECT, 0);
 
-						// Primal infeasibility certificate
-						prim_inf_cert = (PyObject *)PyArrayFromCArray(self->workspace->delta_y, md);
+			// Primal infeasibility certificate
+			prim_inf_cert = (PyObject *)PyArrayFromCArray(self->workspace->delta_y, md);
 
-						// Dual infeasibility certificate -> None values
-						dual_inf_cert = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
+			// Dual infeasibility certificate -> None values
+			dual_inf_cert = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
 
-						// Set objective value to infinity
-		        self->workspace->info->obj_val = NPY_INFINITY;
+			// Set objective value to infinity
+			self->workspace->info->obj_val = NPY_INFINITY;
 
-        } else {	// dual infeasible
+		} else {	// dual infeasible
 
-						// Primal and dual solution arrays -> None values
-            x = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
-            y = PyArray_EMPTY(1, md, NPY_OBJECT, 0);
+			// Primal and dual solution arrays -> None values
+			x = PyArray_EMPTY(1, nd, NPY_OBJECT, 0);
+			y = PyArray_EMPTY(1, md, NPY_OBJECT, 0);
 
-						// Primal infeasibility certificate -> None values
-						prim_inf_cert = PyArray_EMPTY(1, md, NPY_OBJECT, 0);
+			// Primal infeasibility certificate -> None values
+			prim_inf_cert = PyArray_EMPTY(1, md, NPY_OBJECT, 0);
 
-						// Dual infeasibility certificate
-						dual_inf_cert = (PyObject *)PyArrayFromCArray(self->workspace->delta_x, nd);
+			// Dual infeasibility certificate
+			dual_inf_cert = (PyObject *)PyArrayFromCArray(self->workspace->delta_x, nd);
 
-						// Set objective value to -infinity
-						self->workspace->info->obj_val = -NPY_INFINITY;
-        }
+			// Set objective value to -infinity
+			self->workspace->info->obj_val = -NPY_INFINITY;
+		}
 
-        /*  CREATE INFO OBJECT */
-        // Store status string
-        status = PyUnicode_FromString(self->workspace->info->status);
+		/*  CREATE INFO OBJECT */
+		// Store status string
+		status = PyUnicode_FromString(self->workspace->info->status);
 
-        // Create info_list
-        #ifdef PROFILING
-        #ifdef DLONG
+		// Create info_list
+#ifdef PROFILING
+#ifdef DLONG
 
-        #ifdef DFLOAT
-        argparse_string = "LOLLfffffff";
-        #else
-        argparse_string = "LOLLddddddd";
-        #endif
+#ifdef DFLOAT
+		argparse_string = "LOLLfffffffLf";
+#else
+		argparse_string = "LOLLdddddddLd";
+#endif
 
-        #else
+#else
 
-        #ifdef DFLOAT
-        argparse_string = "iOiifffffff";
-        #else
-        argparse_string = "iOiiddddddd";
-        #endif
+#ifdef DFLOAT
+		argparse_string = "iOiifffffffif";
+#else
+		argparse_string = "iOiidddddddid";
+#endif
 
-        #endif
+#endif
 
-        info_list = Py_BuildValue(argparse_string,
-																  self->workspace->info->iter,
-																  status,
-																  self->workspace->info->status_val,
-																  self->workspace->info->status_polish,
-																  self->workspace->info->obj_val,
-																	self->workspace->info->pri_res,
-																	self->workspace->info->dua_res,
-																	self->workspace->info->setup_time,
-																	self->workspace->info->solve_time,
-																	self->workspace->info->polish_time,
-																	self->workspace->info->run_time);
-        #else
+		info_list = Py_BuildValue(argparse_string,
+				self->workspace->info->iter,
+				status,
+				self->workspace->info->status_val,
+				self->workspace->info->status_polish,
+				self->workspace->info->obj_val,
+				self->workspace->info->pri_res,
+				self->workspace->info->dua_res,
+				self->workspace->info->setup_time,
+				self->workspace->info->solve_time,
+				self->workspace->info->polish_time,
+				self->workspace->info->run_time,
+				self->workspace->info->rho_updates,
+				self->workspace->info->rho_estimate
+				);
+#else
 
-        #ifdef DLONG
+#ifdef DLONG
 
-        #ifdef DFLOAT
-        argparse_string = "LOLLfff";
-        #else
-        argparse_string = "LOLLddd";
-        #endif
+#ifdef DFLOAT
+		argparse_string = "LOLLfffLf";
+#else
+		argparse_string = "LOLLdddLd";
+#endif
 
-        #else
+#else
 
-        #ifdef DFLOAT
-        argparse_string = "iOiifff";
-        #else
-        argparse_string = "iOiiddd";
-        #endif
+#ifdef DFLOAT
+		argparse_string = "iOiifffif";
+#else
+		argparse_string = "iOiidddid";
+#endif
 
-        #endif
+#endif
 
-        info_list = Py_BuildValue(argparse_string,
-                                  self->workspace->info->iter,
-								  								status,
-								  								self->workspace->info->status_val,
-								  								self->workspace->info->status_polish,
-								  								self->workspace->info->obj_val,
-								  								self->workspace->info->pri_res,
-								  								self->workspace->info->dua_res);
-        #endif
+		info_list = Py_BuildValue(argparse_string,
+				self->workspace->info->iter,
+				status,
+				self->workspace->info->status_val,
+				self->workspace->info->status_polish,
+				self->workspace->info->obj_val,
+				self->workspace->info->pri_res,
+				self->workspace->info->dua_res,
+				self->workspace->info->rho_updates,
+				self->workspace->info->rho_estimate,
+				);
+#endif
 
-        info = PyObject_CallObject((PyObject *) &OSQP_info_Type, info_list);
+		info = PyObject_CallObject((PyObject *) &OSQP_info_Type, info_list);
 
-        /* Release the info argument list. */
-        Py_DECREF(info_list);
+		/* Release the info argument list. */
+		Py_DECREF(info_list);
 
-        /*  CREATE RESULTS OBJECT */
-        results_list = Py_BuildValue("OOOOO", x, y, prim_inf_cert, dual_inf_cert, info);
+		/*  CREATE RESULTS OBJECT */
+		results_list = Py_BuildValue("OOOOO", x, y, prim_inf_cert, dual_inf_cert, info);
 
-        // /* Call the class object. */
-        results = PyObject_CallObject((PyObject *) &OSQP_results_Type, results_list);
+		// /* Call the class object. */
+		results = PyObject_CallObject((PyObject *) &OSQP_results_Type, results_list);
 
-        /* Release the argument list. */
-        Py_DECREF(results_list);
+		/* Release the argument list. */
+		Py_DECREF(results_list);
 
-    	// Py_INCREF(Py_None);
-    	// return Py_None;
-        return results;
-        // return x;
-    }
-    else {
-        PyErr_SetString(PyExc_ValueError, "Workspace not initialized!");
-        return (PyObject *) NULL;
-    }
+		// Py_INCREF(Py_None);
+		// return Py_None;
+		return results;
+		// return x;
+	}
+	else {
+		PyErr_SetString(PyExc_ValueError, "Workspace not initialized!");
+		return (PyObject *) NULL;
+	}
 }
 
 

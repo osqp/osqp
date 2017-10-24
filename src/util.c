@@ -203,6 +203,10 @@ void print_footer(OSQPInfo * info, c_int polish){
 #ifdef PROFILING
     c_print("run time:             %.2es\n", info->run_time);
 #endif
+
+#if EMBEDDED != 1
+    c_print("optimal rho estimate: %.2e\n", info->rho_estimate);
+#endif
     c_print("\n");
 
 }

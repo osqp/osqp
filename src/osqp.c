@@ -167,18 +167,20 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
 	work->solution->x = c_calloc(1, work->data->n * sizeof(c_float));
 	work->solution->y = c_calloc(1, work->data->m * sizeof(c_float));
 
-	// Allocate information
+	// Allocate and initialize information
 	work->info = c_calloc(1, sizeof(OSQPInfo));
 	work->info->status_polish = 0;  // Polishing not performed
 	update_status(work->info, OSQP_UNSOLVED);
-
-	// Allocate timing information
 #ifdef PROFILING
 	work->info->solve_time = 0.0;  // Solve time to zero
 	work->info->polish_time = 0.0; // Polish time to zero
 	work->info->run_time = 0.0;    // Total run time to zero
 	work->info->setup_time = toc(work->timer); // Updater timer information
 	work->first_run = 1;
+#endif
+#if EMBEDDED != 1
+	work->info->rho_updates = 0;  // Rho updates set to 0
+	work->info->rho_estimate = work->settings->rho;   // Best rho estimate
 #endif
 
 	// Print header
@@ -435,11 +437,17 @@ c_int osqp_solve(OSQPWorkspace * work){
 		}
 	}
 
+#if EMBEDDED != 1
+        /* Update rho estimate */
+        work->info->rho_estimate = compute_rho_estimate(work);
+#endif
+
 	/* Update solve time */
 #ifdef PROFILING
 	work->info->solve_time = toc(work->timer);
 #endif
 
+	
 	// Polish the obtained solution
 #ifndef EMBEDDED
 	if (work->settings->polish && work->info->status_val == OSQP_SOLVED)
@@ -588,8 +596,8 @@ c_int osqp_update_lin_cost(OSQPWorkspace * work, c_float * q_new) {
 		vec_mult_scalar(work->data->q, work->scaling->c, work->data->n);
 	}
 
-	// Set solver status to OSQP_UNSOLVED
-	update_status(work->info, OSQP_UNSOLVED);
+	// Reset solver information
+	reset_info(work->info);
 
 	return 0;
 }
@@ -618,8 +626,8 @@ c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new)
 		vec_ew_prod(work->scaling->E, work->data->u, work->data->u, work->data->m);
 	}
 
-	// Set solver status to OSQP_UNSOLVED
-	update_status(work->info, OSQP_UNSOLVED);
+	// Reset solver information
+	reset_info(work->info);
 
 #if EMBEDDED != 1
 	// Update rho_vec and refactor if constraints type changes
@@ -651,8 +659,8 @@ c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
 		}
 	}
 
-	// Set solver status to OSQP_UNSOLVED
-	update_status(work->info, OSQP_UNSOLVED);
+	// Reset solver information
+	reset_info(work->info);
 
 #if EMBEDDED != 1
 	// Update rho_vec and refactor if constraints type changes
@@ -685,8 +693,8 @@ c_int osqp_update_upper_bound(OSQPWorkspace * work, c_float * u_new) {
 		}
 	}
 
-	// Set solver status to OSQP_UNSOLVED
-	update_status(work->info, OSQP_UNSOLVED);
+	// Reset solver information
+	reset_info(work->info);
 
 #if EMBEDDED != 1
 	// Update rho_vec and refactor if constraints type changes
@@ -824,8 +832,8 @@ c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, 
 	// Update linear system structure with new data
 	exitflag = work->linsys_solver->update_matrices(work->linsys_solver, work->data->P, work->data->A, work->settings);
 
-	// Set solver status to OSQP_UNSOLVED
-	update_status(work->info, OSQP_UNSOLVED);
+	// Reset solver information
+	reset_info(work->info);
 
 #ifdef PRINTING
 	if (exitflag < 0) {
@@ -891,8 +899,8 @@ c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, 
 	// Update linear system structure with new data
 	exitflag = work->linsys_solver->update_matrices(work->linsys_solver, work->data->P, work->data->A, work->settings);
 
-	// Set solver status to OSQP_UNSOLVED
-	update_status(work->info, OSQP_UNSOLVED);
+	// Reset solver information
+	reset_info(work->info);
 
 #ifdef PRINTING
 	if (exitflag < 0) {
@@ -997,8 +1005,8 @@ c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx
 	// Update linear system structure with new data
 	exitflag = work->linsys_solver->update_matrices(work->linsys_solver, work->data->P, work->data->A, work->settings);
 
-	// Set solver status to OSQP_UNSOLVED
-	update_status(work->info, OSQP_UNSOLVED);
+	// Reset solver information
+	reset_info(work->info);
 
 #ifdef PRINTING
 	if (exitflag < 0) {

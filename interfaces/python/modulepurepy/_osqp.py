@@ -235,10 +235,12 @@ class info(object):
     obj_val         - primal objective
     pri_res         - norm of primal residual
     dua_res         - norm of dual residual
-    setup_time      - time taken for setup phase (milliseconds)
-    solve_time      - time taken for solve phase (milliseconds)
-    polish_time     - time taken for polish phase (milliseconds)
-    run_time        - total time  (milliseconds)
+    setup_time      - time taken for setup phase (seconds)
+    solve_time      - time taken for solve phase (seconds)
+    polish_time     - time taken for polish phase (seconds)
+    run_time        - total time  (seconds)
+    rho_updates     - number of rho updates
+    rho_estimate    - optimal rho estimate 
     """
     def __init__(self):
         self.iter = 0
@@ -246,6 +248,7 @@ class info(object):
         self.status = "Unsolved"
         self.status_polish = 0
         self.polish_time = 0.0
+        self.rho_updates = 0.0
 
 
 class pol(object):
@@ -894,11 +897,8 @@ class OSQP(object):
 
         # No all checks managed to pass. Problem not dual infeasible
         return False
-
-    def adapt_rho(self):
-        """
-        Adapt rho value based on current primal and dual residuals
-        """
+    
+    def compute_rho_estimate(self):
         # Iterates
         x = self.work.x
         y = self.work.y
@@ -919,16 +919,37 @@ class OSQP(object):
                            la.norm(q, np.inf)])
 
         # Compute new rho
-        rho_new = self.work.settings.rho * np.sqrt(pri_res/(dua_res + 1e-10))
-        
-        # DEBUG
-        #  print("rho = %.2e, rho_new = %.2e" % (self.work.settings.rho, rho_new))
+        return self.work.settings.rho * np.sqrt(pri_res/(dua_res + 1e-10))
+    
+    def adapt_rho(self):
+        """
+        Adapt rho value based on current primal and dual residuals
+        """
+        # Compute new rho 
+        rho_new = self.compute_rho_estimate()
+
+        # Update rho estimate
+        self.work.info.rho_estimate = rho_new
 
         if rho_new > ADAPTIVE_RHO_TOLERANCE * self.work.settings.rho or \
             rho_new < 0.1 * ADAPTIVE_RHO_TOLERANCE * \
                 self.work.settings.rho:
             # Update rho
             self.update_rho(rho_new)
+            # Update rho updates count
+            self.work.info.rho_updates += 1
+    
+    def reset_info(self, info):
+        """
+        Reset information after problem updates
+        """
+        info.solve_time = 0.0
+        info.polish_time = 0.0
+
+        self.update_status(OSQP_UNSOLVED)
+
+        info.rho_updates = 0
+
 
     def update_info(self, iter, polish):
         """
@@ -1068,6 +1089,8 @@ class OSQP(object):
                 self.work.info.status_val == OSQP_SOLVED_INACCURATE:
             print("optimal objective:    %.4f" % self.work.info.obj_val)
             print("run time:             %.2es" % (self.work.info.run_time))
+        print("optimal rho estimate: %.2es" %
+                (self.work.info.rho_estimate))
 
         print("")  # Print last space
 
@@ -1212,8 +1235,8 @@ class OSQP(object):
 
             # If not terminated, update rho in case
             if self.work.settings.adaptive_rho_interval and \
-                    (iter % self.work.settings.adaptive_rho_interval == 0) and \
-                    self.work.settings.adaptive_rho:
+                    (iter % self.work.settings.adaptive_rho_interval == 0) \
+                    and self.work.settings.adaptive_rho:
                 self.adapt_rho()
                 # DEBUG: Print
                 #  if self.work.settings.verbose:
@@ -1244,6 +1267,9 @@ class OSQP(object):
 
         # Update solve time
         self.work.info.solve_time = time.time() - self.work.timer
+
+        # Update rho estimate
+        self.work.info.rho_estimate = self.compute_rho_estimate()
 
         # Solution polish
         if self.work.settings.polish and \
@@ -1290,8 +1316,8 @@ class OSQP(object):
             self.work.data.q = self.work.scaling.c * \
                 self.work.scaling.D.dot(self.work.data.q)
 
-        # Set solver status to OSQP_UNSOLVED
-        self.update_status(OSQP_UNSOLVED)
+        # Reset solver info
+        self.reset_info(self.work.info)
 
     def update_bounds(self, l_new, u_new):
         """
@@ -1312,8 +1338,8 @@ class OSQP(object):
             self.work.data.l = self.work.scaling.E.dot(self.work.data.l)
             self.work.data.u = self.work.scaling.E.dot(self.work.data.u)
 
-        # Set solver status to OSQP_UNSOLVED
-        self.update_status(OSQP_UNSOLVED)
+        # Reset solver info
+        self.reset_info(self.work.info)
 
         # If type of any constraint changed, update rho_vec and KKT matrix
         self.update_rho_vec()
@@ -1334,8 +1360,8 @@ class OSQP(object):
             raise ValueError("Lower bound must be lower than" +
                              " or equal to upper bound!")
 
-        # Set solver status to OSQP_UNSOLVED
-        self.update_status(OSQP_UNSOLVED)
+        # Reset solver info
+        self.reset_info(self.work.info)
 
         # If type of any constraint changed, update rho_vec and KKT matrix
         self.update_rho_vec()
@@ -1356,8 +1382,8 @@ class OSQP(object):
             raise ValueError("Lower bound must be lower than" +
                              " or equal to upper bound!")
 
-        # Set solver status to OSQP_UNSOLVED
-        self.update_status(OSQP_UNSOLVED)
+        # Reset solver info
+        self.reset_info(self.work.info)
 
         # If type of any constraint changed, update rho_vec and KKT matrix
         self.update_rho_vec()
