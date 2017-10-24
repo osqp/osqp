@@ -624,7 +624,7 @@ c_int osqp_update_bounds(OSQPWorkspace * work, c_float * l_new, c_float * u_new)
 #if EMBEDDED != 1
 	// Update rho_vec and refactor if constraints type changes
 	exitflag = update_rho_vec(work);
-#endif // EMBEDDED
+#endif // EMBEDDED != 1
 
 	return exitflag;
 }
@@ -657,7 +657,7 @@ c_int osqp_update_lower_bound(OSQPWorkspace * work, c_float * l_new) {
 #if EMBEDDED != 1
 	// Update rho_vec and refactor if constraints type changes
 	exitflag = update_rho_vec(work);
-#endif // EMBEDDED
+#endif // EMBEDDED ! =1
 
 	return exitflag;
 }
@@ -691,7 +691,7 @@ c_int osqp_update_upper_bound(OSQPWorkspace * work, c_float * u_new) {
 #if EMBEDDED != 1
 	// Update rho_vec and refactor if constraints type changes
 	exitflag = update_rho_vec(work);
-#endif // EMBEDDED
+#endif // EMBEDDED != 1
 
 	return exitflag;
 }

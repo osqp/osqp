@@ -205,14 +205,16 @@ p = 0
 n_unsolved = 0
 
 # OSQP Settings
-settings = {'rho': 0.1,
+settings = {
+            #  'rho': 0.1,
             'verbose': False,
-            'scaled_termination': False,
-            'adaptive_rho_interval': 100,
-            'max_iter': 2500,
-            'scaling_norm': -1,
+            #  'scaled_termination': False,
+            #  'adaptive_rho_interval': 100,
+            #  'max_iter': 5000,
+            #  'scaling_norm': -1,
             'polish': False,
-            'check_termination': 25}
+            #  'check_termination': 25
+            }
 
 parallel = True  # Execute script in parallel
 
@@ -244,7 +246,7 @@ solved = list(zipped_results[0])
 n_iter = list(zipped_results[1])
 unsolved = np.invert(solved)
 
-avg_niter = np.mean([x for x in n_iter if x < 2500])
+avg_niter = np.mean([x for x in n_iter if x < 5000])
 
 print('Number of solved problems %i/%i' % (n_prob - sum(unsolved),
                                            n_prob))

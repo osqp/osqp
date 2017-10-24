@@ -132,7 +132,7 @@ class settings(object):
 
     -> These can be changed without running setup
     rho  [1.6]                 - Step in ADMM procedure
-    max_iter [5000]                     - Maximum number of iterations
+    max_iter [4000]                     - Maximum number of iterations
     eps_abs  [1e-05]                    - Absolute tolerance
     eps_rel  [1e-05]                    - Relative tolerance
     eps_prim_inf  [1e-06]                    - Primal infeasibility tolerance
@@ -153,7 +153,7 @@ class settings(object):
         self.sigma = kwargs.pop('sigma', 1e-06)
         self.scaling = kwargs.pop('scaling', 10)
         self.scaling_norm = kwargs.pop('scaling_norm', -1)
-        self.max_iter = kwargs.pop('max_iter', 5000)
+        self.max_iter = kwargs.pop('max_iter', 4000)
         self.eps_abs = kwargs.pop('eps_abs', 1e-3)
         self.eps_rel = kwargs.pop('eps_rel', 1e-3)
         self.eps_prim_inf = kwargs.pop('eps_prim_inf', 1e-4)
