@@ -88,6 +88,10 @@ def write_settings(f, settings, name, embedded_flag):
         f.write("%d, " % settings['scaling_norm'])
         f.write("%d, " % settings['adaptive_rho'])
         f.write("%d, " % settings['adaptive_rho_interval'])
+        f.write("(c_float)%.20f, " % settings['adaptive_rho_tolerance'])
+        f.write("\n#ifdef PROFILING\n")
+        f.write("(c_float)%.20f, " % settings['adaptive_rho_percentage'])
+        f.write("\n#endif  // PROFILING\n")
 
     f.write("%d, " % settings['max_iter'])
     f.write("(c_float)%.20f, " % settings['eps_abs'])

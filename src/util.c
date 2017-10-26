@@ -221,6 +221,10 @@ void set_default_settings(OSQPSettings * settings) {
     settings->scaling_norm = SCALING_NORM;
     settings->adaptive_rho = ADAPTIVE_RHO;
     settings->adaptive_rho_interval = ADAPTIVE_RHO_INTERVAL;
+    settings->adaptive_rho_tolerance = (c_float) ADAPTIVE_RHO_TOLERANCE;
+#ifdef PROFILING
+    settings->adaptive_rho_percentage = (c_float) ADAPTIVE_RHO_PERCENTAGE;
+#endif
 #endif
 
     settings->rho = (c_float) RHO; /* ADMM step */
@@ -257,6 +261,8 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
     new->scaling_norm = settings->scaling_norm;
     new->adaptive_rho = settings->adaptive_rho;
     new->adaptive_rho_interval = settings->adaptive_rho_interval;
+    new->adaptive_rho_tolerance = settings->adaptive_rho_tolerance;
+    new->adaptive_rho_percentage = settings->adaptive_rho_percentage;
     new->rho = settings->rho;
     new->sigma = settings->sigma;
     new->max_iter = settings->max_iter;

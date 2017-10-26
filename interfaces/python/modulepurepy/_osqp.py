@@ -26,8 +26,6 @@ RHO_MAX = 1e+06
 RHO_EQ_OVER_RHO_INEQ = 1e+03
 RHO_TOL = 1e-04
 
-# Adaptive rho
-ADAPTIVE_RHO_TOLERANCE = 5
 
 # Printing interval
 PRINT_INTERVAL = 200
@@ -170,6 +168,9 @@ class settings(object):
         self.polish_refine_iter = kwargs.pop('polish_refine_iter', 3)
         self.adaptive_rho = kwargs.pop('adaptive_rho', False)
         self.adaptive_rho_interval = kwargs.pop('adaptive_rho_interval', 200)
+        self.adaptive_rho_tolerance = kwargs.pop('adaptive_rho_tolerance', 5)
+        self.adaptive_rho_percentage = kwargs.pop('adaptive_rho_percentage',
+                                                  0.7)
 
 
 class scaling(object):
@@ -930,9 +931,12 @@ class OSQP(object):
 
         # Update rho estimate
         self.work.info.rho_estimate = rho_new
+        
+        # Settings
+        adaptive_rho_tolerance = self.work.settings.adaptive_rho_tolerance
 
-        if rho_new > ADAPTIVE_RHO_TOLERANCE * self.work.settings.rho or \
-            rho_new < 0.1 * ADAPTIVE_RHO_TOLERANCE * \
+        if rho_new > adaptive_rho_tolerance * self.work.settings.rho or \
+            rho_new < 0.1 * adaptive_rho_tolerance * \
                 self.work.settings.rho:
             # Update rho
             self.update_rho(rho_new)

@@ -1,6 +1,6 @@
 Changes since last release
 -------------------------
-*   Added rho adaptation during the algorithm
+*   Added adaptive rho during the algorithm -> Much more reliable convergence!
 *   Simplified several settings 
     *  "early_terminate" and "early_terminate_interval" -> "check_termination"
     *  "scaling_iter" removed and put inside "scaling" parameter

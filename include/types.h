@@ -134,35 +134,39 @@ typedef struct {
  * Settings struct
  */
 typedef struct {
-        c_float rho;     ///< ADMM step rho
-        c_float sigma;   ///< ADMM step sigma
-        c_int scaling;   ///< heuristic data scaling iterations. If 0, scaling disabled
+    c_float rho;     ///< ADMM step rho
+    c_float sigma;   ///< ADMM step sigma
+    c_int scaling;   ///< heuristic data scaling iterations. If 0, scaling disabled
 
-        #if EMBEDDED != 1
-        c_int scaling_norm;  ///< scaling norm
-        c_int adaptive_rho;  ///< boolean, is rho step size adaptive?
-        c_int adaptive_rho_interval;  ///< Number of iterations between rho adaptations rho. If 0, it is automatic
-        #endif
+#if EMBEDDED != 1
+    c_int scaling_norm;  ///< scaling norm
+    c_int adaptive_rho;  ///< boolean, is rho step size adaptive?
+    c_int adaptive_rho_interval;  ///< Number of iterations between rho adaptations rho. If 0, it is automatic
+    c_float adaptive_rho_tolerance;  ///< Tolerance X for adapting rho. The new rho has to be X times larger or 1/X times smaller than the current one to trigger a new factorization.
+#ifdef PROFILING
+    c_float adaptive_rho_percentage; ///< Interval for adapting rho (percentage of the setup time)
+#endif // Profiling
+#endif // EMBEDDED != 1
 
-        c_int max_iter; ///< maximum iterations to tak
-        c_float eps_abs;  ///< absolute convergence tolerance
-        c_float eps_rel;  ///< relative convergence tolerance
-        c_float eps_prim_inf;  ///< primal infeasibility tolerance
-        c_float eps_dual_inf;  ///< dual infeasibility tolerance
-        c_float alpha; ///< relaxation parameter
-	    enum linsys_solver_type linsys_solver;  ///< linear system solver to use
+    c_int max_iter; ///< maximum iterations
+    c_float eps_abs;  ///< absolute convergence tolerance
+    c_float eps_rel;  ///< relative convergence tolerance
+    c_float eps_prim_inf;  ///< primal infeasibility tolerance
+    c_float eps_dual_inf;  ///< dual infeasibility tolerance
+    c_float alpha; ///< relaxation parameter
+    enum linsys_solver_type linsys_solver;  ///< linear system solver to use
 
-        #ifndef EMBEDDED
-        c_float delta; ///< regularization parameter for polish
-        c_int polish; ///< boolean, polish ADMM solution
-        c_int polish_refine_iter; ///< iterative refinement steps in polish
+#ifndef EMBEDDED
+    c_float delta; ///< regularization parameter for polish
+    c_int polish; ///< boolean, polish ADMM solution
+    c_int polish_refine_iter; ///< iterative refinement steps in polish
 
-        c_int verbose; ///< boolean, write out progres
-        #endif
+    c_int verbose; ///< boolean, write out progres
+#endif
 
-        c_int scaled_termination;  ///< boolean, use scaled termination criteria
-        c_int check_termination;  ///< integer, check termination interval. If 0, termination checking is disabled
-        c_int warm_start; ///< boolean, warm start
+    c_int scaled_termination;  ///< boolean, use scaled termination criteria
+    c_int check_termination;  ///< integer, check termination interval. If 0, termination checking is disabled
+    c_int warm_start; ///< boolean, warm start
 
 } OSQPSettings;
 

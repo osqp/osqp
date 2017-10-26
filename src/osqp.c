@@ -198,10 +198,10 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
 	if (work->settings->adaptive_rho && !work->settings->adaptive_rho_interval){
 		if (work->settings->check_termination){
 			// If check_termination is enabled, we set it to a multiple of the check termination interval
-			work->settings->adaptive_rho_interval = ADAPTIVE_RHO_AUTO_INTERVAL_MULTIPLE_TERMINATION * work->settings->check_termination;
+			work->settings->adaptive_rho_interval = ADAPTIVE_RHO_MULTIPLE_TERMINATION * work->settings->check_termination;
 		} else {
 			// If check_termination is disabled we set it to a predefined fix number
-			work->settings->adaptive_rho_interval = ADAPTIVE_RHO_AUTO_INTERVAL_FIXED;
+			work->settings->adaptive_rho_interval = ADAPTIVE_RHO_FIXED;
 		}
 
 	}
@@ -337,7 +337,7 @@ c_int osqp_solve(OSQPWorkspace * work){
 		// of the setup time.
 		if (work->settings->adaptive_rho && !work->settings->adaptive_rho_interval){
 			// Check time 
-			if (toc(work->timer) > ADAPTIVE_RHO_AUTO_INTERVAL_PERCENTAGE * work->info->setup_time){
+			if (toc(work->timer) > work->settings->adaptive_rho_percentage * work->info->setup_time){
 					// Enough time has passed. We round the number of iterations to the
 					// closest multiple of check_termination
 					work->settings->adaptive_rho_interval = (c_int)c_roundmultiple(iter, work->settings->check_termination);

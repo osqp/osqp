@@ -40,6 +40,8 @@ const char* OSQP_SETTINGS_FIELDS[] = {"rho",                        //c_float
                                       "scaling_norm",               //c_int
                                       "adaptive_rho",               //c_int
                                       "adaptive_rho_interval",      //c_int
+                                      "adaptive_rho_tolerance",      //c_float
+                                      "adaptive_rho_percentage",     //c_float
                                       "max_iter",                   //c_int
                                       "eps_abs",                    //c_float
                                       "eps_rel",                    //c_float
@@ -775,6 +777,8 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
   mxSetField(mxPtr, 0, "scaling_norm",    mxCreateDoubleScalar(settings->scaling_norm));
   mxSetField(mxPtr, 0, "adaptive_rho",    mxCreateDoubleScalar(settings->adaptive_rho));
   mxSetField(mxPtr, 0, "adaptive_rho_interval",    mxCreateDoubleScalar(settings->adaptive_rho_interval));
+  mxSetField(mxPtr, 0, "adaptive_rho_tolerance",    mxCreateDoubleScalar(settings->adaptive_rho_tolerance));
+  mxSetField(mxPtr, 0, "adaptive_rho_percentage",    mxCreateDoubleScalar(settings->adaptive_rho_percentage));
   mxSetField(mxPtr, 0, "max_iter",        mxCreateDoubleScalar(settings->max_iter));
   mxSetField(mxPtr, 0, "eps_abs",         mxCreateDoubleScalar(settings->eps_abs));
   mxSetField(mxPtr, 0, "eps_rel",         mxCreateDoubleScalar(settings->eps_rel));
@@ -1029,26 +1033,28 @@ void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
 
   //map the OSQP_SETTINGS fields one at a time into mxArrays
   //matlab handles everything as a double
-  settings->rho             = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "rho"));
-  settings->sigma           = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "sigma"));
-  settings->scaling         = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaling"));
-  settings->scaling_norm    = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaling_norm"));
-  settings->adaptive_rho    = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "adaptive_rho"));
-  settings->adaptive_rho_interval    = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "adaptive_rho_interval"));
-  settings->max_iter        = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "max_iter"));
-  settings->eps_abs         = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_abs"));
-  settings->eps_rel         = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_rel"));
-  settings->eps_prim_inf    = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_dual_inf"));
-  settings->eps_dual_inf    = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_dual_inf"));
-  settings->alpha           = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "alpha"));
-  settings->linsys_solver   = (enum linsys_solver_type) mxGetScalar(mxGetField(mxPtr, 0, "linsys_solver"));
-  settings->delta           = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "delta"));
-  settings->polish          = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polish"));
-  settings->polish_refine_iter = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polish_refine_iter"));
-  settings->verbose         = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "verbose"));
-  settings->scaled_termination = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaled_termination"));
-  settings->check_termination = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "check_termination"));
-  settings->warm_start      = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "warm_start"));
+  settings->rho                       = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "rho"));
+  settings->sigma                     = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "sigma"));
+  settings->scaling                   = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaling"));
+  settings->scaling_norm              = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaling_norm"));
+  settings->adaptive_rho              = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "adaptive_rho"));
+  settings->adaptive_rho_interval     = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "adaptive_rho_interval"));
+  settings->adaptive_rho_tolerance    = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "adaptive_rho_tolerance"));
+  settings->adaptive_rho_percentage   = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "adaptive_rho_percentage"));
+  settings->max_iter                  = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "max_iter"));
+  settings->eps_abs                   = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_abs"));
+  settings->eps_rel                   = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_rel"));
+  settings->eps_prim_inf              = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_dual_inf"));
+  settings->eps_dual_inf              = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_dual_inf"));
+  settings->alpha                     = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "alpha"));
+  settings->linsys_solver             = (enum linsys_solver_type) mxGetScalar(mxGetField(mxPtr, 0, "linsys_solver"));
+  settings->delta                     = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "delta"));
+  settings->polish                    = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polish"));
+  settings->polish_refine_iter           = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "polish_refine_iter"));
+  settings->verbose                   = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "verbose"));
+  settings->scaled_termination           = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaled_termination"));
+  settings->check_termination           = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "check_termination"));
+  settings->warm_start                = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "warm_start"));
 
 }
 

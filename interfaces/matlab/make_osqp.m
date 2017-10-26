@@ -253,7 +253,7 @@ if( any(strcmpi(what,'clean')) || any(strcmpi(what,'purge')) )
         delete(lib_full_path);
     end
 
-    fprintf('\t\t\t\t\t[done]\n');
+    fprintf('\t\t\t[done]\n');
 end
 
 

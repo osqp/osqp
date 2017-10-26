@@ -836,7 +836,19 @@ c_int validate_settings(const OSQPSettings * settings){
     }
     if (settings->adaptive_rho_interval < 0) {
 #ifdef PRINTING
-        c_print("adaptive_rho_interval must be either nonnegative\n");
+        c_print("adaptive_rho_interval must be nonnegative\n");
+#endif
+        return 1;
+    }
+    if (settings->adaptive_rho_percentage <= 0) {
+#ifdef PRINTING
+        c_print("adaptive_rho_percentage must be positive\n");
+#endif
+        return 1;
+    }
+    if (settings->adaptive_rho_tolerance <= 0) {
+#ifdef PRINTING
+        c_print("adaptive_rho_tolerance must be positive\n");
 #endif
         return 1;
     }
