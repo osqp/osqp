@@ -67,8 +67,8 @@ static const char *LINSYS_SOLVER_NAME[] = {
 #define SCALING (10)
 
 #if EMBEDDED != 1
-#define MIN_SCALING (1e-03)  ///< Minimum scaling value
-#define MAX_SCALING (1e+03)  ///< Maximum scaling value
+#define MIN_SCALING (1e-04)  ///< Minimum scaling value
+#define MAX_SCALING (1e+04)  ///< Maximum scaling value
 #define SCALING_NORM (-1)     ///< Scaling norm
 
 #define ADAPTIVE_RHO (1)

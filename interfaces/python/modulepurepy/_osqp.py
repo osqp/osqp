@@ -936,7 +936,7 @@ class OSQP(object):
         adaptive_rho_tolerance = self.work.settings.adaptive_rho_tolerance
 
         if rho_new > adaptive_rho_tolerance * self.work.settings.rho or \
-            rho_new < 0.1 * adaptive_rho_tolerance * \
+            rho_new < 1. / adaptive_rho_tolerance * \
                 self.work.settings.rho:
             # Update rho
             self.update_rho(rho_new)

@@ -57,7 +57,7 @@ c_int adapt_rho(OSQPWorkspace * work){
 	   
     // Check if the new rho is large or small enough and update it in case
     if (rho_new > work->settings->rho * ADAPTIVE_RHO_TOLERANCE ||
-            rho_new < work->settings->rho * 0.1 * ADAPTIVE_RHO_TOLERANCE){
+            rho_new < work->settings->rho /  ADAPTIVE_RHO_TOLERANCE){
                 exitflag = osqp_update_rho(work, rho_new);
 		work->info->rho_updates += 1;
     }
@@ -846,9 +846,9 @@ c_int validate_settings(const OSQPSettings * settings){
 #endif
         return 1;
     }
-    if (settings->adaptive_rho_tolerance <= 0) {
+    if (settings->adaptive_rho_tolerance < 1) {
 #ifdef PRINTING
-        c_print("adaptive_rho_tolerance must be positive\n");
+        c_print("adaptive_rho_tolerance must be >= 1\n");
 #endif
         return 1;
     }
