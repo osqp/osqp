@@ -138,12 +138,16 @@ mxArray*  copyWorkToMxStruct(OSQPWorkspace* work);
 
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
-{
+{   OsqpData* osqpData;  // OSQP data identifier
+    
+    // Static string for static methods
+    char stat_string[64];
+    
     // Get the command string
     char cmd[64];
 	  if (nrhs < 1 || mxGetString(prhs[0], cmd, sizeof(cmd)))
 		mexErrMsgTxt("First input should be a command string less than 64 characters long.");
-
+  
     // new object
     if (!strcmp("new", cmd)) {
         // Check parameters
@@ -155,13 +159,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         return;
     }
 
-    // Check for a second input, which should be the class instance handle
-    if (nrhs < 2)
-		mexErrMsgTxt("Second input should be a class instance handle.");
-
-    // Get the class instance pointer from the second input
-    OsqpData* osqpData = convertMat2Ptr<OsqpData>(prhs[1]);
-
+    // Check for a second input, which should be the class instance handle or string 'static'
+        if (nrhs < 2)
+    		mexErrMsgTxt("Second input should be a class instance handle or the string 'static'.");
+     
+    if(mxGetString(prhs[1], stat_string, sizeof(stat_string))){
+        // If we are dealing with non-static methods, get the class instance pointer from the second input
+        osqpData = convertMat2Ptr<OsqpData>(prhs[1]);
+    }
+    
     // delete the object and its data
     if (!strcmp("delete", cmd)) {
 
@@ -227,6 +233,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     // report the default settings
     if (!strcmp("default_settings", cmd)) {
 
+        // Warn if other commands were ignored
+        if (nrhs > 2)
+            mexWarnMsgTxt("Default settings: unexpected number of arguments.");
+        
+        
       //Create a Settings structure in default form and report the results
       //Useful for external solver packages (e.g. Yalmip) that want to
       //know which solver settings are supported

@@ -40,8 +40,8 @@ OSQP_NAN = 1e+20  # Just as placeholder. Not real value
 SUITESPARSE_LDL_SOLVER = 0
 
 # Scaling
-MIN_SCALING = 1e-03
-MAX_SCALING = 1e+03
+MIN_SCALING = 1e-04
+MAX_SCALING = 1e+04
 
 
 class workspace(object):

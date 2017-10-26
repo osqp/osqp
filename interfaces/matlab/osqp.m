@@ -27,6 +27,24 @@ classdef osqp < handle
     properties (SetAccess = private, Hidden = true)
         objectHandle % Handle to underlying C instance
     end
+   methods(Static) 
+        %%
+        function out = default_settings()
+            % DEFAULT_SETTINGS get the default solver settings structure
+            out = osqp_mex('default_settings', 'static');
+
+	        % Convert linsys solver to string
+	        out.linsys_solver = linsys_solver_to_string(out.linsys_solver);
+
+        end
+        
+        %%
+        function out = constant(constant_name)
+            % CONSTANT Return solver constant
+            %   C = CONSTANT(CONSTANT_NAME) return constant called CONSTANT_NAME
+            out = osqp_mex('constant', 'static', constant_name);
+        end
+    end
     methods
         %% Constructor - Create a new solver instance
         function this = osqp(varargin)
@@ -47,38 +65,13 @@ classdef osqp < handle
         end
 
         %%
-        function out = constant(this, constant_name)
-            % CONSTANT Return solver constant
-            %   C = CONSTANT(CONSTANT_NAME) return constant called CONSTANT_NAME
-            out = osqp_mex('constant', this.objectHandle, constant_name);
-        end
-
-        %%
-        function out = default_settings(this)
-            % DEFAULT_SETTINGS get the default solver settings structure
-           out = osqp_mex('default_settings', this.objectHandle);
-           switch out.linsys_solver
-               case this.constant('SUITESPARSE_LDL_SOLVER')
-                   out.linsys_solver = 'suitesparse ldl';
-               case this.constant('MKL_PARDISO_SOLVER')
-                   out.linsys_solver = 'mkl pardiso';
-               otherwise
-                   error('Unrecognized linear system solver.');
-           end
-        end
-
-        %%
         function out = current_settings(this)
-            % CURRENT_SETTINGS
+            % CURRENT_SETTINGS get the current solver settings structure
             out = osqp_mex('current_settings', this.objectHandle);
-            switch out.linsys_solver
-               case this.constant('SUITESPARSE_LDL_SOLVER')
-                   out.linsys_solver = 'suitesparse ldl';
-               case this.constant('MKL_PARDISO_SOLVER')
-                   out.linsys_solver = 'mkl pardiso';
-               otherwise
-                   error('Unrecognized linear system solver.');
-           end
+
+	   % Convert linsys solver to string
+	   out.linsys_solver = linsys_solver_to_string(out.linsys_solver);
+
         end
 
         %%
@@ -152,10 +145,10 @@ classdef osqp < handle
 
             % Convert infinity values to OSQP_INFTY
             if (~isempty(u))
-                u = min(u, this.constant('OSQP_INFTY'));
+                u = min(u, osqp.constant('OSQP_INFTY'));
             end
             if (~isempty(l))
-                l = max(l, -this.constant('OSQP_INFTY'));
+                l = max(l, -osqp.constant('OSQP_INFTY'));
             end
 
             %write the new problem data.  C-mex does not protect
@@ -255,8 +248,8 @@ classdef osqp < handle
             %
             % Convert infinity values to OSQP_INFINITY
             %
-            u = min(u, this.constant('OSQP_INFTY'));
-            l = max(l, -this.constant('OSQP_INFTY'));
+            u = min(u, osqp.constant('OSQP_INFTY'));
+            l = max(l, -osqp.constant('OSQP_INFTY'));
 
 
             %make a settings structure from the remainder of the arguments.
@@ -569,19 +562,8 @@ if ismember('linsys_solver',newFields)
    if ~ischar(newSettings.linsys_solver)
        error('Setting linsys_solver is required to be a string.');
    end
-   linsys_solver_str = lower(newSettings.linsys_solver);
-   switch linsys_solver_str
-       case 'suitesparse ldl'
-           newSettings.linsys_solver = this.constant('SUITESPARSE_LDL_SOLVER');
-       case 'mkl pardiso'
-           newSettings.linsys_solver = this.constant('MKL_PARDISO_SOLVER');
-       % Default solver: Suitesparse LDL
-       case ''
-           newSettings.linsys_solver = this.constant('SUITESPARSE_LDL_SOLVER');
-       otherwise
-           warning('Linear system solver not recognized. Using default solver Suitesparse LDL.')
-           newSettings.linsys_solver = this.constant('SUITESPARSE_LDL_SOLVER');
-   end
+   % Convert linsys_solver to number
+    newSettings.linsys_solver = string_to_linsys_solver(newSettings.linsys_solver);
 end
 
 
@@ -611,3 +593,35 @@ end
 
 
 end
+
+function [linsys_solver_string] = linsys_solver_to_string(linsys_solver)
+% Convert linear systme solver integer to stringh
+switch linsys_solver
+    case osqp.constant('SUITESPARSE_LDL_SOLVER')
+        linsys_solver_string = 'suitesparse ldl';
+    case osqp.constant('MKL_PARDISO_SOLVER')
+        linsys_solver_string = 'mkl pardiso';
+    otherwise
+        error('Unrecognized linear system solver.');
+end
+end
+
+
+
+function [linsys_solver] = string_to_linsys_solver(linsys_solver_string)
+   linsys_solver_string = lower(linsys_solver_string);
+   switch linsys_solver_string
+       case 'suitesparse ldl'
+           linsys_solver = osqp.constant('SUITESPARSE_LDL_SOLVER');
+       case 'mkl pardiso'
+           linsys_solver = osqp.constant('MKL_PARDISO_SOLVER');
+       % Default solver: Suitesparse LDL
+       case ''
+           linsys_solver = osqp.constant('SUITESPARSE_LDL_SOLVER');
+       otherwise
+           warning('Linear system solver not recognized. Using default solver Suitesparse LDL.')
+           linsys_solver = osqp.constant('SUITESPARSE_LDL_SOLVER');
+   end
+end
+
+
