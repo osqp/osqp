@@ -79,6 +79,10 @@ if (ispc)
 else
    mex_libs = sprintf('%s %s', mex_libs, '-lut');
 end
+% Shared library loading
+if (isunix && ~ismac)
+   mex_libs = sprintf('%s %s', mex_libs, '-ldl');
+end
 
 % Add large arrays support if computer 64 bit
 if (~isempty (strfind (computer, '64')))
@@ -156,7 +160,7 @@ if( any(strcmpi(what,'osqp')) || any(strcmpi(what,'all')) )
     lib_origin = fullfile(osqp_build_dir, 'out', lib_name);
     copyfile(lib_origin, lib_name);
 
-    fprintf('\t\t\t\t\t\t\t[done]\n');
+    fprintf('\t\t\t\t\t\t[done]\n');
 
 end
 
