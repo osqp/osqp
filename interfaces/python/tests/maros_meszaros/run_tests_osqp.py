@@ -197,6 +197,7 @@ n_prob = len(problems)
 # problems = ['QAFIRO', 'CVXQP1_S', 'QSHIP04S', 'PRIMAL4']
 # problems = ['CVXQP1_S']
 #  problems = ['CONT-200']
+problems = ['STADAT1']
 
 # Problems index
 p = 0
@@ -206,8 +207,9 @@ n_unsolved = 0
 
 # OSQP Settings
 settings = {
-            #  'rho': 0.1,
-            'verbose': False,
+            'rho': 0.1,
+            'verbose': True,
+            'adaptive_rho': True,
             #  'scaled_termination': False,
             #  'adaptive_rho_interval': 100,
             #  'max_iter': 5000,
@@ -216,7 +218,7 @@ settings = {
             #  'check_termination': 25
             }
 
-parallel = True  # Execute script in parallel
+parallel = False  # Execute script in parallel
 
 # Results
 results = []
