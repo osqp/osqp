@@ -542,7 +542,7 @@ class OSQP(object):
         # Find indices of loose bounds, equality constr and one-sided constr
         loose_ind = np.where(np.logical_and(
                             self.work.data.l < -OSQP_INFTY*MIN_SCALING,
-                            self.work.data.u > OSQP_INFTY*MAX_SCALING))[0]
+                            self.work.data.u > OSQP_INFTY*MIN_SCALING))[0]
         eq_ind = np.where(self.work.data.u - self.work.data.l < RHO_TOL)[0]
         ineq_ind = np.setdiff1d(np.setdiff1d(np.arange(self.work.data.m),
                                 loose_ind), eq_ind)

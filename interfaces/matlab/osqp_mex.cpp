@@ -166,6 +166,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     if(mxGetString(prhs[1], stat_string, sizeof(stat_string))){
         // If we are dealing with non-static methods, get the class instance pointer from the second input
         osqpData = convertMat2Ptr<OsqpData>(prhs[1]);
+    } else {
+        if (strcmp("static", stat_string)){
+            mexErrMsgTxt("Second argument for static functions is string 'static'");
+        }
     }
     
     // delete the object and its data
