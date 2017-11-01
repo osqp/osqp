@@ -15,7 +15,8 @@ c_float compute_rho_estimate(OSQPWorkspace * work){
     c_float pri_res, dua_res; // Primal and dual residuals
     c_float pri_res_norm, dua_res_norm;  // Normalization for the residuals
     c_float temp_res_norm;   // Temporary residual norm
-    
+    c_float rho_estimate;  // Rho estimate value
+
     // Get problem dimensions
     n = work->data->n;
     m = work->data->m;
@@ -38,9 +39,17 @@ c_float compute_rho_estimate(OSQPWorkspace * work){
     dua_res_norm = c_max(dua_res_norm, temp_res_norm);          // max(||q||,||A' y||,||P x||)
     dua_res /= dua_res_norm;  // Normalize dual residual
 
-    // Return rho estimate
-    return work->settings->rho * c_sqrt(pri_res / (dua_res + 1e-10));   // 1e-10 to prevent 0 division
 
+    // Return rho estimate
+    rho_estimate = work->settings->rho * c_sqrt(pri_res / (dua_res + 1e-10));   // 1e-10 to prevent 0 division
+    rho_estimate = c_min(c_max(rho_estimate, RHO_MIN), RHO_MAX);  // Constrain rho values
+    
+    // DEBUG: Print stuff
+    // c_print("current rho = %.2e\n", work->settings->rho);
+    // c_print("pri_res = %.2e, dua_res = %.2e\n", pri_res, dua_res);
+    // c_print("new rho = %.2e\n", rho_estimate);
+
+    return rho_estimate;
 }
 
 c_int adapt_rho(OSQPWorkspace * work){
@@ -182,6 +191,7 @@ void update_xz_tilde(OSQPWorkspace * work){
 
     // Update z_tilde variable after solving linear system
     update_z_tilde(work);
+
 }
 
 
@@ -427,9 +437,7 @@ c_int is_dual_infeasible(OSQPWorkspace * work, c_float eps_dual_inf){
 
     // Compute norm of delta_x
     if (work->settings->scaling && !work->settings->scaled_termination){ // Unscale if necessary
-        // Use work->Atdelta_y as temporary vector
-        vec_ew_prod(work->scaling->D, work->delta_x, work->Atdelta_y, work->data->n);
-        norm_delta_x = vec_norm_inf(work->Atdelta_y, work->data->n);
+        norm_delta_x = vec_scaled_norm_inf(work->scaling->D, work->delta_x, work->data->n);
         cost_scaling = work->scaling->c;
     } else{
         norm_delta_x = vec_norm_inf(work->delta_x, work->data->n);
@@ -446,14 +454,15 @@ c_int is_dual_infeasible(OSQPWorkspace * work, c_float eps_dual_inf){
         if (vec_prod(work->data->q, work->delta_x, work->data->n) <
                 - cost_scaling * eps_dual_inf * norm_delta_x){
 
-            // Compute product P * delta_x
+            // Compute product P * delta_x (NB: P is store in upper triangular form)
             mat_vec(work->data->P, work->delta_x, work->Pdelta_x, 0);
+	    mat_tpose_vec(work->data->P, work->delta_x, work->Pdelta_x, 1, 1);
 
             // Scale if necessary
             if (work->settings->scaling && !work->settings->scaled_termination){
                 vec_ew_prod(work->scaling->Dinv, work->Pdelta_x, work->Pdelta_x, work->data->n);
             }
-
+	    
             // Check if || P * delta_x || = 0
             if (vec_norm_inf(work->Pdelta_x, work->data->n) <
                     cost_scaling * eps_dual_inf * norm_delta_x){
@@ -465,13 +474,13 @@ c_int is_dual_infeasible(OSQPWorkspace * work, c_float eps_dual_inf){
                 if (work->settings->scaling && !work->settings->scaled_termination){
                     vec_ew_prod(work->scaling->Einv, work->Adelta_x, work->Adelta_x, work->data->m);
                 }
-
+		
                 // De Morgan Law Applied to dual infeasibility conditions for A * x
                 // NB: Note that 1e-06 is used to adjust the infinity value
                 //      in case the problem is scaled.
                 for (i = 0; i < work->data->m; i++){
-                    if (((work->data->u[i] < OSQP_INFTY*1e-06) && (work->Adelta_x[i] >  eps_dual_inf * norm_delta_x)) ||
-                            ((work->data->l[i] > -OSQP_INFTY*1e-06) && (work->Adelta_x[i] < -eps_dual_inf * norm_delta_x))){
+                    if (((work->data->u[i] < OSQP_INFTY*MIN_SCALING) && (work->Adelta_x[i] >  eps_dual_inf * norm_delta_x)) ||
+                            ((work->data->l[i] > -OSQP_INFTY*MIN_SCALING) && (work->Adelta_x[i] < -eps_dual_inf * norm_delta_x))){
                         // At least one condition not satisfied -> not dual infeasible
                         return 0;
                     }

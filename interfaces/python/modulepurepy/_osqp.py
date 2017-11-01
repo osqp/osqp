@@ -5,6 +5,7 @@ from __future__ import print_function
 from builtins import range
 from builtins import object
 import numpy as np
+import scipy as sp
 import scipy.sparse as spspa
 import scipy.sparse.linalg as spla
 import numpy.linalg as la
@@ -295,12 +296,14 @@ class linsys_solver(object):
 
         # Initialize structure
         self.kkt_factor = spla.splu(KKT.tocsc())
+        #  self.lu, self.piv = sp.linalg.lu_factor(KKT.todense())
 
     def solve(self, rhs):
         """
         Solve linear system with given factorization
         """
         return self.kkt_factor.solve(rhs)
+        #  return sp.linalg.lu_solve((self.lu, self.piv), rhs)
 
 
 class results(object):
@@ -515,7 +518,7 @@ class OSQP(object):
         # Find indices of loose bounds, equality constr and one-sided constr
         loose_ind = np.where(np.logical_and(
                             self.work.data.l < -OSQP_INFTY*MIN_SCALING,
-                            self.work.data.u > OSQP_INFTY*MAX_SCALING))[0]
+                            self.work.data.u > OSQP_INFTY*MIN_SCALING))[0]
         eq_ind = np.where(self.work.data.u - self.work.data.l < RHO_TOL)[0]
         ineq_ind = np.setdiff1d(np.setdiff1d(np.arange(self.work.data.m),
                                 loose_ind), eq_ind)
@@ -586,7 +589,7 @@ class OSQP(object):
         print("          nnz(P) + nnz(A) = %i" % nnz)
         print("settings: ", end='')
         if settings.linsys_solver == SUITESPARSE_LDL_SOLVER:
-            print("linear system solver = SuiteSparse LDL\n          ", end='')
+            print("linear system solver = suitesparse ldl\n          ", end='')
         print("eps_abs = %.2e, eps_rel = %.2e," %
               (settings.eps_abs, settings.eps_rel))
         print("          eps_prim_inf = %.2e, eps_dual_inf = %.2e," %
@@ -920,7 +923,8 @@ class OSQP(object):
                            la.norm(q, np.inf)])
 
         # Compute new rho
-        return self.work.settings.rho * np.sqrt(pri_res/(dua_res + 1e-10))
+        new_rho = self.work.settings.rho * np.sqrt(pri_res/(dua_res + 1e-10))
+        return min(max(new_rho, RHO_MIN), RHO_MAX)
     
     def adapt_rho(self):
         """
