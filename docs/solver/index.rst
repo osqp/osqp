@@ -36,8 +36,7 @@ The primal and and dual residuals associated to :math:`(x^{k}, z^{k}, y^{k})` ar
    r_{\rm dual}^{k} &= Px^{k} + q + A^{T} y^{k}.
    \end{aligned}
 
-
-If the problem is feasible, the residuals converge to zero as :math:`k\to\infty`. The algorithm stops when the norms of :math:`r_{\rm prim}^{k}` and :math:`r_{\rm dual}^{k}` are within the specified tolerances.
+Complementary slackness is satisfied by construction at machine precision. If the problem is feasible, the residuals converge to zero as :math:`k\to\infty`. The algorithm stops when the norms of :math:`r_{\rm prim}^{k}` and :math:`r_{\rm dual}^{k}` are within the specified tolerances.
 
 
 Primal/dual infeasible problems
