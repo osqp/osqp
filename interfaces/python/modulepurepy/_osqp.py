@@ -170,8 +170,7 @@ class settings(object):
         self.adaptive_rho = kwargs.pop('adaptive_rho', False)
         self.adaptive_rho_interval = kwargs.pop('adaptive_rho_interval', 200)
         self.adaptive_rho_tolerance = kwargs.pop('adaptive_rho_tolerance', 5)
-        self.adaptive_rho_percentage = kwargs.pop('adaptive_rho_percentage',
-                                                  0.7)
+        self.adaptive_rho_fraction = kwargs.pop('adaptive_rho_fraction', 0.7)
 
 
 class scaling(object):
@@ -915,12 +914,12 @@ class OSQP(object):
 
         # Compute normalized residuals
         pri_res = la.norm(A.dot(x) - z, np.inf)
-        pri_res /= np.max([la.norm(A.dot(x), np.inf),
-                           la.norm(z, np.inf)])
+        pri_res /= (np.max([la.norm(A.dot(x), np.inf),
+                            la.norm(z, np.inf)]) + 1e-10)
         dua_res = la.norm(P.dot(x) + q + A.T.dot(y), np.inf)
-        dua_res /= np.max([la.norm(A.T.dot(y), np.inf),
+        dua_res /= (np.max([la.norm(A.T.dot(y), np.inf),
                            la.norm(P.dot(x), np.inf),
-                           la.norm(q, np.inf)])
+                           la.norm(q, np.inf)]) + 1e-10)
 
         # Compute new rho
         new_rho = self.work.settings.rho * np.sqrt(pri_res/(dua_res + 1e-10))

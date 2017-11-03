@@ -218,7 +218,7 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                  "Ax", "Ai", "Ap", "l", "u",      // Constraints
                                  "scaling", "scaling_norm",
                                  "adaptive_rho", "adaptive_rho_interval",
-				 "adaptive_rho_tolerance", "adaptive_rho_percentage",
+				 "adaptive_rho_tolerance", "adaptive_rho_fraction",
                                  "rho", "sigma", "max_iter", "eps_abs", "eps_rel", "eps_prim_inf", "eps_dual_inf", "alpha", "delta", "linsys_solver", "polish",
                                  "polish_refine_iter", "verbose", "scaled_termination",
                                  "check_termination", "warm_start", NULL};  // Settings
@@ -265,7 +265,7 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                          &settings->adaptive_rho,
                                          &settings->adaptive_rho_interval,
                                          &settings->adaptive_rho_tolerance,
-                                         &settings->adaptive_rho_percentage,
+                                         &settings->adaptive_rho_fraction,
                                          &settings->rho,
                                          &settings->sigma,
                                          &settings->max_iter,

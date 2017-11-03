@@ -144,7 +144,7 @@ typedef struct {
     c_int adaptive_rho_interval;  ///< Number of iterations between rho adaptations rho. If 0, it is automatic
     c_float adaptive_rho_tolerance;  ///< Tolerance X for adapting rho. The new rho has to be X times larger or 1/X times smaller than the current one to trigger a new factorization.
 #ifdef PROFILING
-    c_float adaptive_rho_percentage; ///< Interval for adapting rho (percentage of the setup time)
+    c_float adaptive_rho_fraction; ///< Interval for adapting rho (fraction of the setup time)
 #endif // Profiling
 #endif // EMBEDDED != 1
 

@@ -223,7 +223,7 @@ void set_default_settings(OSQPSettings * settings) {
     settings->adaptive_rho_interval = ADAPTIVE_RHO_INTERVAL;
     settings->adaptive_rho_tolerance = (c_float) ADAPTIVE_RHO_TOLERANCE;
 #ifdef PROFILING
-    settings->adaptive_rho_percentage = (c_float) ADAPTIVE_RHO_PERCENTAGE;
+    settings->adaptive_rho_fraction = (c_float) ADAPTIVE_RHO_FRACTION;
 #endif
 #endif
 
@@ -262,7 +262,7 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
     new->adaptive_rho = settings->adaptive_rho;
     new->adaptive_rho_interval = settings->adaptive_rho_interval;
     new->adaptive_rho_tolerance = settings->adaptive_rho_tolerance;
-    new->adaptive_rho_percentage = settings->adaptive_rho_percentage;
+    new->adaptive_rho_fraction = settings->adaptive_rho_fraction;
     new->rho = settings->rho;
     new->sigma = settings->sigma;
     new->max_iter = settings->max_iter;

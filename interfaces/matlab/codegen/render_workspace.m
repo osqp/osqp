@@ -76,7 +76,7 @@ if embedded_flag ~= 1
     fprintf(f, '%d, ', settings.adaptive_rho_interval);
     fprintf(f, '(c_float)%.20f,', settings.adaptive_rho_tolerance);
     fprintf(f, '\n#ifdef PROFILING\n');
-    fprintf(f, '(c_float)%.20f, ', settings.adaptive_rho_percentage);
+    fprintf(f, '(c_float)%.20f, ', settings.adaptive_rho_fraction);
     fprintf(f, '\n#endif  // PROFILING\n');
 end
 

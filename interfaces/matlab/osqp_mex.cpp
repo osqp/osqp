@@ -40,8 +40,8 @@ const char* OSQP_SETTINGS_FIELDS[] = {"rho",                        //c_float
                                       "scaling_norm",               //c_int
                                       "adaptive_rho",               //c_int
                                       "adaptive_rho_interval",      //c_int
-                                      "adaptive_rho_tolerance",      //c_float
-                                      "adaptive_rho_percentage",     //c_float
+                                      "adaptive_rho_tolerance",     //c_float
+                                      "adaptive_rho_fraction",      //c_float
                                       "max_iter",                   //c_int
                                       "eps_abs",                    //c_float
                                       "eps_rel",                    //c_float
@@ -793,7 +793,7 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
   mxSetField(mxPtr, 0, "adaptive_rho",    mxCreateDoubleScalar(settings->adaptive_rho));
   mxSetField(mxPtr, 0, "adaptive_rho_interval",    mxCreateDoubleScalar(settings->adaptive_rho_interval));
   mxSetField(mxPtr, 0, "adaptive_rho_tolerance",    mxCreateDoubleScalar(settings->adaptive_rho_tolerance));
-  mxSetField(mxPtr, 0, "adaptive_rho_percentage",    mxCreateDoubleScalar(settings->adaptive_rho_percentage));
+  mxSetField(mxPtr, 0, "adaptive_rho_fraction",    mxCreateDoubleScalar(settings->adaptive_rho_fraction));
   mxSetField(mxPtr, 0, "max_iter",        mxCreateDoubleScalar(settings->max_iter));
   mxSetField(mxPtr, 0, "eps_abs",         mxCreateDoubleScalar(settings->eps_abs));
   mxSetField(mxPtr, 0, "eps_rel",         mxCreateDoubleScalar(settings->eps_rel));
@@ -1055,7 +1055,7 @@ void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
   settings->adaptive_rho              = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "adaptive_rho"));
   settings->adaptive_rho_interval     = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "adaptive_rho_interval"));
   settings->adaptive_rho_tolerance    = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "adaptive_rho_tolerance"));
-  settings->adaptive_rho_percentage   = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "adaptive_rho_percentage"));
+  settings->adaptive_rho_fraction   = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "adaptive_rho_fraction"));
   settings->max_iter                  = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "max_iter"));
   settings->eps_abs                   = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_abs"));
   settings->eps_rel                   = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "eps_rel"));

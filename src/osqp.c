@@ -333,11 +333,11 @@ c_int osqp_solve(OSQPWorkspace * work){
 
 #if EMBEDDED != 1
 #ifdef PROFILING
-		// If adaptive rho with automatic interval, check if the solve time is a certain percentage 
+		// If adaptive rho with automatic interval, check if the solve time is a certain fraction 
 		// of the setup time.
 		if (work->settings->adaptive_rho && !work->settings->adaptive_rho_interval){
 			// Check time 
-			if (toc(work->timer) > work->settings->adaptive_rho_percentage * work->info->setup_time){
+			if (toc(work->timer) > work->settings->adaptive_rho_fraction * work->info->setup_time){
 					// Enough time has passed. We round the number of iterations to the
 					// closest multiple of check_termination
 					work->settings->adaptive_rho_interval = (c_int)c_roundmultiple(iter, work->settings->check_termination);

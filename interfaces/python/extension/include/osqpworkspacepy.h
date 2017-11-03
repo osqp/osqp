@@ -222,7 +222,7 @@
          "adaptive_rho", settings->adaptive_rho,
          "adaptive_rho_interval", settings->adaptive_rho_interval,
          "adaptive_rho_tolerance", settings->adaptive_rho_tolerance,
-         "adaptive_rho_percentage", settings->adaptive_rho_percentage,
+         "adaptive_rho_fraction", settings->adaptive_rho_fraction,
          "max_iter", settings->max_iter,
          "eps_abs", (double)settings->eps_abs,
          "eps_rel", (double)settings->eps_rel,

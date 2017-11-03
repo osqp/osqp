@@ -29,7 +29,7 @@ c_float compute_rho_estimate(OSQPWorkspace * work){
     pri_res_norm = vec_norm_inf(work->z, m);     // ||z||
     temp_res_norm = vec_norm_inf(work->Ax, m);   // ||Ax||
     pri_res_norm = c_max(pri_res_norm, temp_res_norm);       // max (||z||,||Ax||)
-    pri_res /= pri_res_norm;  // Normalize primal residual
+    pri_res /= (pri_res_norm + 1e-10);  // Normalize primal residual (prevent 0 division)
 
     // Normalize dual residual
     dua_res_norm = vec_norm_inf(work->data->q, n);  // ||q||
@@ -37,11 +37,11 @@ c_float compute_rho_estimate(OSQPWorkspace * work){
     dua_res_norm = c_max(dua_res_norm, temp_res_norm);          
     temp_res_norm = vec_norm_inf(work->Px, n);      //  ||P x||
     dua_res_norm = c_max(dua_res_norm, temp_res_norm);          // max(||q||,||A' y||,||P x||)
-    dua_res /= dua_res_norm;  // Normalize dual residual
+    dua_res /= (dua_res_norm + 1e-10);  // Normalize dual residual (prevent 0 division)
 
 
     // Return rho estimate
-    rho_estimate = work->settings->rho * c_sqrt(pri_res / (dua_res + 1e-10));   // 1e-10 to prevent 0 division
+    rho_estimate = work->settings->rho * c_sqrt(pri_res / (dua_res + 1e-10));   // (prevent 0 division)
     rho_estimate = c_min(c_max(rho_estimate, RHO_MIN), RHO_MAX);  // Constrain rho values
     
     // DEBUG: Print stuff
@@ -849,9 +849,9 @@ c_int validate_settings(const OSQPSettings * settings){
 #endif
         return 1;
     }
-    if (settings->adaptive_rho_percentage <= 0) {
+    if (settings->adaptive_rho_fraction <= 0) {
 #ifdef PRINTING
-        c_print("adaptive_rho_percentage must be positive\n");
+        c_print("adaptive_rho_fraction must be positive\n");
 #endif
         return 1;
     }

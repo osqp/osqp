@@ -51,7 +51,7 @@ The solver settings are displayed in the following table. The settings marked wi
 +---------------------------------+---------------------------------------------------------------+--------------------------------------------------------------+-----------------------------------+
 | :code:`adaptive_rho_tolerance`  | Tolerance for adapting rho                                    | 1 <= :code:`adaptive_rho_tolerance`                          | 5                                 |
 +---------------------------------+---------------------------------------------------------------+--------------------------------------------------------------+-----------------------------------+
-| :code:`adaptive_rho_percentage` | Adaptive rho interval as percentage of setup time (auto mode) | 0 < :code:`adaptive_rho_percentage`                          | 0.7                               |
+| :code:`adaptive_rho_fraction`   | Adaptive rho interval as fraction of setup time (auto mode)   | 0 < :code:`adaptive_rho_fraction`                            | 0.7                               |
 +---------------------------------+---------------------------------------------------------------+--------------------------------------------------------------+-----------------------------------+
 
 
