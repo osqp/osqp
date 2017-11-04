@@ -815,19 +815,22 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
 
 // ======================================================================
 mxArray* copyCscMatrixToMxStruct(csc* M){
-
+  int nnzM;
   int nfields  = sizeof(CSC_FIELDS) / sizeof(CSC_FIELDS[0]);
   mxArray* mxPtr = mxCreateStructMatrix(1,1,nfields,CSC_FIELDS);
 
+  // Get number of nonzeros
+  nnzM = M->p[M->n];
+
   // Create vectors
   mxArray* p = mxCreateDoubleMatrix((M->n)+1,1,mxREAL);
-  mxArray* i = mxCreateDoubleMatrix(M->nzmax,1,mxREAL);
-  mxArray* x = mxCreateDoubleMatrix(M->nzmax,1,mxREAL);
+  mxArray* i = mxCreateDoubleMatrix(nnzM,1,mxREAL);
+  mxArray* x = mxCreateDoubleMatrix(nnzM,1,mxREAL);
 
   // Populate vectors
   castCintToDoubleArr(M->p, mxGetPr(p), (M->n)+1);
-  castCintToDoubleArr(M->i, mxGetPr(i), M->nzmax);
-  castToDoubleArr(M->x,     mxGetPr(x), M->nzmax);
+  castCintToDoubleArr(M->i, mxGetPr(i), nnzM);
+  castToDoubleArr(M->x,     mxGetPr(x), nnzM);
 
   //map the CSC fields one at a time into mxArrays
   //matlab handles everything as a double
@@ -890,8 +893,8 @@ mxArray* copyLinsysSolverToMxStruct(OSQPWorkspace * work){
   // Dimensions
   int n = linsys_solver->L->n;
   int Pdiag_n = linsys_solver->Pdiag_n;
-  int Pnzmax = data->P->p[data->P->n];
-  int Anzmax = data->A->p[data->A->n];
+  int nnzP = data->P->p[data->P->n];
+  int nnzA = data->A->p[data->A->n];
   int m_plus_n = data->m + data->n;
 
   // Create vectors
@@ -899,12 +902,12 @@ mxArray* copyLinsysSolverToMxStruct(OSQPWorkspace * work){
   mxArray* P         = mxCreateDoubleMatrix(n,1,mxREAL);
   mxArray* bp        = mxCreateDoubleMatrix(n,1,mxREAL);
   mxArray* Pdiag_idx = mxCreateDoubleMatrix(Pdiag_n,1,mxREAL);
-  mxArray* PtoKKT    = mxCreateDoubleMatrix(Pnzmax,1,mxREAL);
-  mxArray* AtoKKT    = mxCreateDoubleMatrix(Anzmax,1,mxREAL);
+  mxArray* PtoKKT    = mxCreateDoubleMatrix(nnzP,1,mxREAL);
+  mxArray* AtoKKT    = mxCreateDoubleMatrix(nnzA,1,mxREAL);
   mxArray* rhotoKKT  = mxCreateDoubleMatrix(data->m,1,mxREAL);
   mxArray* Lnz       = mxCreateDoubleMatrix(m_plus_n,1,mxREAL);
   mxArray* Y         = mxCreateDoubleMatrix(m_plus_n,1,mxREAL);
-  mxArray* Pattern	 = mxCreateDoubleMatrix(m_plus_n,1,mxREAL);
+  mxArray* Pattern   = mxCreateDoubleMatrix(m_plus_n,1,mxREAL);
   mxArray* Flag      = mxCreateDoubleMatrix(m_plus_n,1,mxREAL);
   mxArray* Parent    = mxCreateDoubleMatrix(m_plus_n,1,mxREAL);
 
@@ -913,8 +916,8 @@ mxArray* copyLinsysSolverToMxStruct(OSQPWorkspace * work){
   castCintToDoubleArr(linsys_solver->P, mxGetPr(P), n);
   castToDoubleArr(linsys_solver->bp, mxGetPr(bp), n);
   castCintToDoubleArr(linsys_solver->Pdiag_idx, mxGetPr(Pdiag_idx), Pdiag_n);
-  castCintToDoubleArr(linsys_solver->PtoKKT, mxGetPr(PtoKKT), Pnzmax);
-  castCintToDoubleArr(linsys_solver->AtoKKT, mxGetPr(AtoKKT), Anzmax);
+  castCintToDoubleArr(linsys_solver->PtoKKT, mxGetPr(PtoKKT), nnzP);
+  castCintToDoubleArr(linsys_solver->AtoKKT, mxGetPr(AtoKKT), nnzA);
   castCintToDoubleArr(linsys_solver->rhotoKKT, mxGetPr(rhotoKKT), data->m);
   castCintToDoubleArr(linsys_solver->Lnz, mxGetPr(Lnz), m_plus_n);
   castToDoubleArr(linsys_solver->Y, mxGetPr(Y), m_plus_n);

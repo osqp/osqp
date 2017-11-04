@@ -234,7 +234,7 @@ csc * csc_to_triu(csc * M){
 
         return OSQP_NULL;
     }
-    n = M->m;
+    n = M->n;
     
     // Get number of nonzeros full M
     nnzfullM = M->p[n];
