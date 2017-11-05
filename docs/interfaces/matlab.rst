@@ -70,16 +70,21 @@ The :code:`results` structure contains the primal solution :code:`x`, the dual s
 +-----------------------+------------------------------------------------+
 | :code:`dua_res`       | Dual residual                                  |
 +-----------------------+------------------------------------------------+
-| :code:`run_time`      | Total run time                                 |
-+-----------------------+------------------------------------------------+
 | :code:`setup_time`    | Setup time                                     |
 +-----------------------+------------------------------------------------+
+| :code:`solve_time`    | Solve time                                     |
++-----------------------+------------------------------------------------+
 | :code:`polish_time`   | Polish time                                    |
++-----------------------+------------------------------------------------+
+| :code:`run_time`      | Total run time: setup + solve + polish         |
 +-----------------------+------------------------------------------------+
 | :code:`rho_estimate`  | Optimal rho estimate                           |
 +-----------------------+------------------------------------------------+
 | :code:`rho_updates`   | Number of rho updates                          |
 +-----------------------+------------------------------------------------+
+
+Note that if multiple solves are executed from single setup, then after the
+first one :code:`run_time` includes only :code:`solve_time` + :code:`polish_time`.
 
 Update
 ------
