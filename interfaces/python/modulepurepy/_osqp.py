@@ -127,7 +127,6 @@ class settings(object):
     -> These cannot be changed without running setup
     sigma    [1e-06]           - Regularization parameter for polish
     scaling  [10]            - Scaling/Equilibration iterations (0 disabled)
-    scaling_norm [-1]           - Equilibration scaling norm
 
     -> These can be changed without running setup
     rho  [1.6]                 - Step in ADMM procedure
@@ -151,7 +150,6 @@ class settings(object):
         self.rho = kwargs.pop('rho', 0.1)
         self.sigma = kwargs.pop('sigma', 1e-06)
         self.scaling = kwargs.pop('scaling', 10)
-        self.scaling_norm = kwargs.pop('scaling_norm', -1)
         self.max_iter = kwargs.pop('max_iter', 4000)
         self.eps_abs = kwargs.pop('eps_abs', 1e-3)
         self.eps_rel = kwargs.pop('eps_rel', 1e-3)
@@ -337,34 +335,18 @@ class OSQP(object):
         """
         return self._version
 
-    def _norm_KKT_cols(self, P, A, scaling_norm):
+    def _norm_KKT_cols(self, P, A):
         """
         Compute the norm of the KKT matrix from P and A
         """
 
-        if scaling_norm == 2:   # Scipy does not support sparse 2-norms
-            P = P.todense()
-            A = A.todense()
-            norm_function = np.linalg.norm
-        else:
-            norm_function = spspa.linalg.norm
-
-        if scaling_norm == -1:
-            scaling_norm = np.inf
-
         # First half
-        norm_P_cols = norm_function(P, scaling_norm, axis=0)
-        norm_A_cols = norm_function(A, scaling_norm, axis=0)
-        if scaling_norm == 2:
-            norm_first_half = np.sqrt(np.square(norm_P_cols) +
-                                      np.square(norm_A_cols))
-        elif scaling_norm == 1:
-            norm_first_half = norm_P_cols + norm_A_cols
-        elif scaling_norm == np.inf:  # Infinity norm
-            norm_first_half = np.maximum(norm_P_cols, norm_A_cols)
+        norm_P_cols = spspa.linalg.norm(P, np.inf, axis=0)
+        norm_A_cols = spspa.linalg.norm(A, np.inf, axis=0)
+        norm_first_half = np.maximum(norm_P_cols, norm_A_cols)
 
         # Second half (norm cols of A')
-        norm_second_half = norm_function(A, scaling_norm, axis=1)
+        norm_second_half = spspa.linalg.norm(A, np.inf, axis=1)
 
         return np.hstack((norm_first_half, norm_second_half))
 
@@ -401,17 +383,11 @@ class OSQP(object):
         """
         n = self.work.data.n
         m = self.work.data.m
-        scaling_norm = self.work.settings.scaling_norm
 
         # Initialize scaling
         s_temp = np.ones(n + m)
         c = 1.0  # Cost scaling
 
-        # Define reduced KKT matrix to scale
-        # KKT = spspa.vstack([
-        #       spspa.hstack([self.work.data.P, self.work.data.A.T]),
-        #       spspa.hstack([self.work.data.A,
-        #                     spspa.csc_matrix((m, m))])]).tocsc()
         # Define data
         P = self.work.data.P
         q = self.work.data.q
@@ -431,7 +407,7 @@ class OSQP(object):
         for i in range(self.work.settings.scaling):
 
             # First Step Ruiz
-            norm_cols = self._norm_KKT_cols(P, A, scaling_norm)
+            norm_cols = self._norm_KKT_cols(P, A)
             norm_cols = self._limit_scaling(norm_cols)  # Limit scaling
             sqrt_norm_cols = np.sqrt(norm_cols)         # Compute sqrt
             s_temp = np.reciprocal(sqrt_norm_cols)      # Elementwise recipr
@@ -602,11 +578,7 @@ class OSQP(object):
               (settings.sigma, settings.alpha), end='')
         print("max_iter = %d" % settings.max_iter)
         if settings.scaling:
-            print("          scaling: on ", end='')
-            if settings.scaling_norm != -1:
-                print("(%d-norm), " % settings.scaling_norm, end='')
-            else:
-                print("(inf-norm), ", end='')
+            print("          scaling: on, ", end='')
         else:
             print("          scaling: off, ", end='')
         if settings.scaled_termination:

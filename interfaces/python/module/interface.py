@@ -124,25 +124,7 @@ class OSQP(object):
         l = np.maximum(l, -self._model.constant('OSQP_INFTY'))
 
         # Convert linsys_solver string to integer
-        linsys_solver_str = settings.pop('linsys_solver', '')
-        if not isinstance(linsys_solver_str, str):
-            raise TypeError("Setting linsys_solver " +
-                            "is required to be a string.")
-        linsys_solver_str = linsys_solver_str.lower()
-        if linsys_solver_str == 'suitesparse ldl':
-            settings['linsys_solver'] = \
-                    self._model.constant('SUITESPARSE_LDL_SOLVER')
-        elif linsys_solver_str == 'mkl pardiso':
-            settings['linsys_solver'] = self._model.constant('MKL_PARDISO_SOLVER')
-        # Default solver: Suitesparse LDL
-        elif linsys_solver_str == '':
-            settings['linsys_solver'] = \
-                    self._model.constant('SUITESPARSE_LDL_SOLVER')
-        else:   # default solver: Suitesparse LDL
-            warn("Linear system solver not recognized. " + 
-                 "Using default solver Suitesparse LDL.")
-            settings['linsys_solver'] = \
-                self._model.constant('SUITESPARSE_LDL_SOLVER')
+        self._linsys_solver_str_to_int(settings)
 
         self._model.setup((n, m), P.data, P.indices, P.indptr, q,
                           A.data, A.indices, A.indptr,
@@ -380,3 +362,25 @@ class OSQP(object):
         # Generate code with codegen module
         cg.codegen(work, folder, python_ext_name, project_type,
                    embedded, force_rewrite, loop_unrolling)
+
+    def _linsys_solver_str_to_int(self, settings):
+        linsys_solver_str = settings.pop('linsys_solver', '')
+        if not isinstance(linsys_solver_str, str):
+            raise TypeError("Setting linsys_solver " +
+                            "is required to be a string.")
+        linsys_solver_str = linsys_solver_str.lower()
+        if linsys_solver_str == 'suitesparse ldl':
+            settings['linsys_solver'] = \
+                    self._model.constant('SUITESPARSE_LDL_SOLVER')
+        elif linsys_solver_str == 'mkl pardiso':
+            settings['linsys_solver'] = self._model.constant('MKL_PARDISO_SOLVER')
+        # Default solver: Suitesparse LDL
+        elif linsys_solver_str == '':
+            settings['linsys_solver'] = \
+                    self._model.constant('SUITESPARSE_LDL_SOLVER')
+        else:   # default solver: Suitesparse LDL
+            warn("Linear system solver not recognized. " + 
+                 "Using default solver Suitesparse LDL.")
+            settings['linsys_solver'] = \
+                self._model.constant('SUITESPARSE_LDL_SOLVER')
+

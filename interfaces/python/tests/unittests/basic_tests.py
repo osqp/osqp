@@ -28,7 +28,6 @@ class basic_tests(unittest.TestCase):
                      'adaptive_rho': False,
                      'polish': False,
                      'check_termination': 1,
-                     'scaling_norm': -1,
                      'warm_start': True}
         self.model = osqp.OSQP()
         self.model.setup(P=self.P, q=self.q, A=self.A, l=self.l, u=self.u,

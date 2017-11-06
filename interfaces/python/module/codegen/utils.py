@@ -85,7 +85,6 @@ def write_settings(f, settings, name, embedded_flag):
     f.write("%d, " % settings['scaling'])
 
     if embedded_flag != 1:
-        f.write("%d, " % settings['scaling_norm'])
         f.write("%d, " % settings['adaptive_rho'])
         f.write("%d, " % settings['adaptive_rho_interval'])
         f.write("(c_float)%.20f, " % settings['adaptive_rho_tolerance'])

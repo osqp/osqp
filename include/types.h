@@ -139,7 +139,6 @@ typedef struct {
     c_int scaling;   ///< heuristic data scaling iterations. If 0, scaling disabled
 
 #if EMBEDDED != 1
-    c_int scaling_norm;  ///< scaling norm
     c_int adaptive_rho;  ///< boolean, is rho step size adaptive?
     c_int adaptive_rho_interval;  ///< Number of iterations between rho adaptations rho. If 0, it is automatic
     c_float adaptive_rho_tolerance;  ///< Tolerance X for adapting rho. The new rho has to be X times larger or 1/X times smaller than the current one to trigger a new factorization.

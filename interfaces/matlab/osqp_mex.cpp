@@ -37,7 +37,6 @@ const char* OSQP_INFO_FIELDS[] = {"iter",         //c_int
 const char* OSQP_SETTINGS_FIELDS[] = {"rho",                        //c_float
                                       "sigma",                      //c_float
                                       "scaling",                    //c_int
-                                      "scaling_norm",               //c_int
                                       "adaptive_rho",               //c_int
                                       "adaptive_rho_interval",      //c_int
                                       "adaptive_rho_tolerance",     //c_float
@@ -789,7 +788,6 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
   mxSetField(mxPtr, 0, "rho",             mxCreateDoubleScalar(settings->rho));
   mxSetField(mxPtr, 0, "sigma",           mxCreateDoubleScalar(settings->sigma));
   mxSetField(mxPtr, 0, "scaling",         mxCreateDoubleScalar(settings->scaling));
-  mxSetField(mxPtr, 0, "scaling_norm",    mxCreateDoubleScalar(settings->scaling_norm));
   mxSetField(mxPtr, 0, "adaptive_rho",    mxCreateDoubleScalar(settings->adaptive_rho));
   mxSetField(mxPtr, 0, "adaptive_rho_interval",    mxCreateDoubleScalar(settings->adaptive_rho_interval));
   mxSetField(mxPtr, 0, "adaptive_rho_tolerance",    mxCreateDoubleScalar(settings->adaptive_rho_tolerance));
@@ -1054,7 +1052,6 @@ void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
   settings->rho                       = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "rho"));
   settings->sigma                     = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "sigma"));
   settings->scaling                   = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaling"));
-  settings->scaling_norm              = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaling_norm"));
   settings->adaptive_rho              = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "adaptive_rho"));
   settings->adaptive_rho_interval     = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "adaptive_rho_interval"));
   settings->adaptive_rho_tolerance    = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "adaptive_rho_tolerance"));

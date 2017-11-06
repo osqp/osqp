@@ -71,7 +71,6 @@ fprintf(f, '(c_float)%.20f, ', settings.sigma);
 fprintf(f, '%d, ',             settings.scaling);
 
 if embedded_flag ~= 1
-    fprintf(f, '%d, ', settings.scaling_norm);
     fprintf(f, '%d, ', settings.adaptive_rho);
     fprintf(f, '%d, ', settings.adaptive_rho_interval);
     fprintf(f, '(c_float)%.20f,', settings.adaptive_rho_tolerance);

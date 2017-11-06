@@ -42,64 +42,6 @@ void compute_inf_norm_cols_KKT(const csc * P, const csc * A,
 }
 
 
-/**
- * Compute 1-norm of the colums of the KKT matrix without forming it
- *
- * The norm is stored in the vector v = (D, E)
- *
- * @param P        Cost matrix
- * @param A        Contraints matrix
- * @param D        Norm of columns related to variables
- * @param D_temp_A Temporary vector for norm of columns of A
- * @param E        Norm of columns related to constraints
- * @param n        Dimension of KKT matrix
- */
-void compute_1_norm_cols_KKT(const csc * P, const csc * A,
-        c_float * D, c_float * D_temp_A,
-        c_float * E, c_int n){
-    // First half
-    //  [ P ]
-    //  [ A ]
-    mat_1_norm_cols_sym_triu(P, D);
-    mat_1_norm_cols(A, D_temp_A);
-    vec_ew_sum_vec(D, D_temp_A, D, n);
-    // Second half
-    //  [ A']
-    //  [ 0 ]
-    mat_1_norm_rows(A, E);
-
-}
-
-
-/**
- * Compute 2-norm of the colums of the KKT matrix without forming it
- *
- * The norm is stored in the vector v = (D, E)
- *
- * @param P        Cost matrix
- * @param A        Contraints matrix
- * @param D        Norm of columns related to variables
- * @param D_temp_A Temporary vector for norm of columns of A
- * @param E        Norm of columns related to constraints
- * @param n        Dimension of KKT matrix
- */
-void compute_2_norm_cols_KKT(const csc * P, const csc * A,
-        c_float * D, c_float * D_temp_A,
-        c_float * E, c_int n){
-    // First half
-    //  [ P ]
-    //  [ A ]
-    mat_2_norm_cols_sym_triu(P, D);
-    mat_2_norm_cols(A, D_temp_A);
-    vec_ew_sqrt_sos_vec(D, D_temp_A, D, n);
-    // Second half
-    //  [ A']
-    //  [ 0 ]
-    mat_2_norm_rows(A, E);
-
-}
-
-
 c_int scale_data(OSQPWorkspace * work){
     // Scale KKT matrix
     //
@@ -118,9 +60,6 @@ c_int scale_data(OSQPWorkspace * work){
     c_float c_temp;      // Cost function scaling
     c_float inf_norm_q;  // Infinity norm of q
 
-    void (*compute_norm_cols_KKT)(const csc *, const csc *, c_float *, c_float *,
-            c_float *, c_int); // Function pointer to compute the norm of columns of KKT matrix
-
     n = work->data->n;
     m = work->data->m;
 
@@ -131,19 +70,6 @@ c_int scale_data(OSQPWorkspace * work){
     vec_set_scalar(work->scaling->E, 1., work->data->m);
     vec_set_scalar(work->scaling->Einv, 1., work->data->m);
 
-    // Initialize function pointer for selected norm
-    switch (work->settings->scaling_norm){
-        case 1:
-            compute_norm_cols_KKT = &compute_1_norm_cols_KKT;
-            break;
-        case 2:
-            compute_norm_cols_KKT = &compute_2_norm_cols_KKT;
-            break;
-        case -1: // Infinity norm
-            compute_norm_cols_KKT = &compute_inf_norm_cols_KKT;
-            break;
-    }
-
 
     for (i = 0; i < work->settings->scaling; i++){
         //
@@ -151,7 +77,7 @@ c_int scale_data(OSQPWorkspace * work){
         //
 
         // Compute norm of KKT columns
-        compute_norm_cols_KKT(work->data->P, work->data->A,
+        compute_inf_norm_cols_KKT(work->data->P, work->data->A,
                 work->D_temp, work->D_temp_A,
                 work->E_temp, n);
 
@@ -189,14 +115,8 @@ c_int scale_data(OSQPWorkspace * work){
         mat_inf_norm_cols_sym_triu(work->data->P, work->D_temp);
         c_temp = vec_mean(work->D_temp, n);
 
-        // DEBUG
-        // c_print("avg_norm_P_cols = %.2e\n", c_temp);
-
         // Compute inf norm of q
         inf_norm_q = vec_norm_inf(work->data->q, n);
-
-        // DEBUG
-        // c_print("inf_norm_q = %.2e\n", inf_norm_q);
 
         // If norm_q == 0, set it to 1 (ignore it in the scaling)
         // NB: Using the same function as with vectors here
@@ -204,9 +124,6 @@ c_int scale_data(OSQPWorkspace * work){
 
         // Compute max between avg norm of cols of P and inf norm of q
         c_temp = c_max(c_temp, inf_norm_q);
-
-        // DEBUG: Force one scaling (TODO REMOVE ME)
-        // c_temp = 1.0;
 
         // Limit scaling (use same function as with vectors)
         limit_scaling(&c_temp, 1);
@@ -218,9 +135,6 @@ c_int scale_data(OSQPWorkspace * work){
         vec_mult_scalar(work->data->q, c_temp, n);
         // Update cost scaling
         work->scaling->c *= c_temp;
-
-        // DEBUG
-        // c_print("Scale cost = %.2e\n", c_temp);
 
 
     }

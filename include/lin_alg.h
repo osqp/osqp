@@ -77,13 +77,6 @@ void vec_ew_max_vec(const c_float * a, const c_float * b, c_float * c, c_int n);
 /* Elementwise minimum between vectors c = min(a, b) */
 void vec_ew_min_vec(const c_float * a, const c_float * b, c_float * c, c_int n);
 
-/* Elementwise sqrt of sum of squares of vectors  */
-void vec_ew_sqrt_sos_vec(const c_float * a, const c_float * b,
-                         c_float * c, c_int n);
-
-/* Elementwise sum of vectors */
-void vec_ew_sum_vec(const c_float * a, const c_float * b,
-                    c_float * c, c_int n);
 #endif
 
 
@@ -101,30 +94,6 @@ void mat_premult_diag(csc *A, const c_float *d);
 i.e. scale the columns of A by d
 */
 void mat_postmult_diag(csc *A, const c_float *d);
-
-// #ifndef EMBEDDEED
-// TODO: Remove!
-/* Elementwise square matrix M */
-// void mat_ew_sq(csc * A);
-
-// TODO: Remove!
-/* Elementwise absolute value of matrix M */
-// void mat_ew_abs(csc * A);
-
-/**
- * Trace of matrix M in cdc format
- * @param  M Input matrix
- * @return   Trace
- */
-// c_float mat_trace(csc * M);
-
-/**
- * Frobenius norm squared of matrix M
- * @param  M Input matrix
- * @return   Frobenius norm squared
- */
-// c_float mat_fro_sq(csc * M);
-// #endif // ifndef embedded
 
 
 /* Matrix-vector multiplication
@@ -173,57 +142,6 @@ void mat_inf_norm_rows(const csc * M, c_float * E);
 */
 void mat_inf_norm_cols_sym_triu(const csc * M, c_float * E);
 
-/**
-* 1 norm of each matrix column
-* @param M	Input matrix
-* @param E 	Vector of infinity norms
-*
-*/
-void mat_1_norm_cols(const csc * M, c_float * E);
-
-/**
-* 1 norm of each matrix row
-* @param M	Input matrix
-* @param E 	Vector of infinity norms
-*
-*/
-void mat_1_norm_rows(const csc * M, c_float * E);
-
-/**
-* 1 norm of each matrix column
-* Matrix M is symmetric upper-triangular
-*
-* @param M	Input matrix (symmetric, upper-triangular)
-* @param E 	Vector of infinity norms
-*
-*/
-void mat_1_norm_cols_sym_triu(const csc * M, c_float * E);
-
-/**
-* 2 norm of each matrix column
-* @param M	Input matrix
-* @param E 	Vector of infinity norms
-*
-*/
-void mat_2_norm_cols(const csc * M, c_float * E);
-
-/**
-* 2 norm of each matrix row
-* @param M	Input matrix
-* @param E 	Vector of infinity norms
-*
-*/
-void mat_2_norm_rows(const csc * M, c_float * E);
-
-/**
-* 2 norm of each matrix column
-* Matrix M is symmetric upper-triangular
-*
-* @param M	Input matrix (symmetric, upper-triangular)
-* @param E 	Vector of infinity norms
-*
-*/
-void mat_2_norm_cols_sym_triu(const csc * M, c_float * E);
 #endif  // EMBEDDED != 1
 
 /**

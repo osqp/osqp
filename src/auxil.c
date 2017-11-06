@@ -830,13 +830,6 @@ c_int validate_settings(const OSQPSettings * settings){
 #endif
         return 1;
     }
-    if (settings->scaling_norm != 1 && settings->scaling_norm != 2 &&
-            settings->scaling_norm != -1) {
-#ifdef PRINTING
-        c_print("scaling_norm must be wither 1, 2 or -1 (for infinity norm)\n");
-#endif
-        return 1;
-    }
     if (settings->adaptive_rho != 0 && settings->adaptive_rho != 1) {
 #ifdef PRINTING
         c_print("adaptive_rho must be either 0 or 1\n");

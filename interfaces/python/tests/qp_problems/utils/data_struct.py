@@ -45,9 +45,6 @@ class data_struct(object):
         """
         Perform Ruiz equilibration
         """
-        scaling_norm = self.work.settings.scaling_norm
-        scaling_norm = scaling_norm if scaling_norm == 1 or scaling_norm == 2 \
-            else np.inf
 
         # Get QP variables
         P = qp.P
@@ -70,18 +67,12 @@ class data_struct(object):
         # Iterate Scaling
         for i in range(settings.scaling):
             for j in range(n + m):
-                if scaling_norm != 2:
-                    norm_col_j = spspa.linalg.norm(KKT[:, j],
-                                                   scaling_norm)
-                else:
-                    # Scipy hasn't implemented that function yet!
-                    norm_col_j = np.linalg.norm(KKT[:, j].todense(),
-                                                scaling_norm)
-
+                norm_col_j = spa.linalg.norm(KKT[:, j],
+                                             np.inf)
                 if norm_col_j > SCALING_REG:
                     d_temp[j] = 1./(np.sqrt(norm_col_j))
 
-            S_temp = spspa.diags(d_temp)
+            S_temp = spa.diags(d_temp)
             d = np.multiply(d, d_temp)
             KKT = S_temp.dot(KKT.dot(S_temp))
 

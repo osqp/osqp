@@ -25,14 +25,6 @@ test_vec_ops_vec_prod = test_vec_ops_v1.dot(test_vec_ops_v2)
 test_vec_ops_ew_max_vec = np.maximum(test_vec_ops_v1, test_vec_ops_v2)
 test_vec_ops_ew_min_vec = np.minimum(test_vec_ops_v1, test_vec_ops_v2)
 
-# v_i = sqrt(v1_i ^2 + v2_i ^ 2)
-test_vec_ops_ew_sqrt_sos_vec = np.zeros(len(test_vec_ops_v1))
-for i in range(len(test_vec_ops_v1)):
-    test_vec_ops_ew_sqrt_sos_vec[i] = np.sqrt(test_vec_ops_v1[i] ** 2 +
-                                              test_vec_ops_v2[i] ** 2)
-
-test_vec_ops_ew_sum_vec = test_vec_ops_v1 + test_vec_ops_v2
-
 
 # Test matrix operations
 test_mat_ops_n = 2
@@ -41,22 +33,10 @@ test_mat_ops_d = np.random.randn(test_mat_ops_n)
 D = spa.diags(test_mat_ops_d).tocsc()
 test_mat_ops_prem_diag = D.dot(test_mat_ops_A).tocoo().tocsc()  # Force matrix reordering
 test_mat_ops_postm_diag = test_mat_ops_A.dot(D).tocoo().tocsc()  # Force matrix reordering
-# test_mat_ops_ew_square = test_mat_ops_A.copy()
-# test_mat_ops_ew_square.data = np.square(test_mat_ops_ew_square.data)
-# test_mat_ops_ew_abs = test_mat_ops_A.copy()
-# test_mat_ops_ew_abs.data = np.abs(test_mat_ops_ew_abs.data)
 test_mat_ops_inf_norm_cols = np.amax(np.abs(
     np.asarray(test_mat_ops_A.todense())), axis=0)
 test_mat_ops_inf_norm_rows = np.amax(np.abs(
     np.asarray(test_mat_ops_A.todense())), axis=1)
-test_mat_ops_2_norm_cols = spa.linalg.norm(test_mat_ops_A, ord=2,
-                                           axis=0)
-test_mat_ops_2_norm_rows = spa.linalg.norm(test_mat_ops_A, ord=2,
-                                           axis=1)
-test_mat_ops_1_norm_cols = spa.linalg.norm(test_mat_ops_A, ord=1,
-                                           axis=0)
-test_mat_ops_1_norm_rows = spa.linalg.norm(test_mat_ops_A, ord=1,
-                                           axis=1)
 
 # Test matrix vector operations
 m = 5
@@ -86,18 +66,7 @@ test_mat_extr_triu_P = test_mat_extr_triu_P + test_mat_extr_triu_P.T
 test_mat_extr_triu_Pu = spa.triu(test_mat_extr_triu_P).tocsc()
 test_mat_extr_triu_P_inf_norm_cols = np.amax(np.abs(
     np.asarray(test_mat_extr_triu_P.todense())), axis=0)
-test_mat_extr_triu_P_2_norm_cols = spa.linalg.norm(test_mat_extr_triu_P,
-                                                   ord=2,
-                                                   axis=0)
-test_mat_extr_triu_P_1_norm_cols = spa.linalg.norm(test_mat_extr_triu_P,
-                                                   ord=1,
-                                                   axis=0)
 
-
-# Test trace and frobenius norms
-# test_mat_trace_P = spa.random(4, 4, density=0.6, format='csc')
-# test_mat_trace_P_trace = test_mat_trace_P.diagonal().sum()
-# test_mat_trace_P_fro_sq = sla.norm(test_mat_trace_P, ord='fro') ** 2
 
 # Test compute quad form
 test_qpform_n = 4
@@ -122,21 +91,13 @@ data = {'test_sp_matrix_A': test_sp_matrix_A,
         'test_vec_ops_vec_prod': test_vec_ops_vec_prod,
         'test_vec_ops_ew_max_vec': test_vec_ops_ew_max_vec,
         'test_vec_ops_ew_min_vec': test_vec_ops_ew_min_vec,
-        'test_vec_ops_ew_sqrt_sos_vec': test_vec_ops_ew_sqrt_sos_vec,
-        'test_vec_ops_ew_sum_vec': test_vec_ops_ew_sum_vec,
         'test_mat_ops_n': test_mat_ops_n,
         'test_mat_ops_A': test_mat_ops_A,
         'test_mat_ops_d': test_mat_ops_d,
         'test_mat_ops_prem_diag': test_mat_ops_prem_diag,
         'test_mat_ops_postm_diag': test_mat_ops_postm_diag,
-        # 'test_mat_ops_ew_square': test_mat_ops_ew_square,
-        # 'test_mat_ops_ew_abs': test_mat_ops_ew_abs,
         'test_mat_ops_inf_norm_cols': test_mat_ops_inf_norm_cols,
         'test_mat_ops_inf_norm_rows': test_mat_ops_inf_norm_rows,
-        'test_mat_ops_2_norm_cols': test_mat_ops_2_norm_cols,
-        'test_mat_ops_2_norm_rows': test_mat_ops_2_norm_rows,
-        'test_mat_ops_1_norm_cols': test_mat_ops_1_norm_cols,
-        'test_mat_ops_1_norm_rows': test_mat_ops_1_norm_rows,
         'test_mat_vec_n': test_mat_vec_n,
         'test_mat_vec_m': test_mat_vec_m,
         'test_mat_vec_A': test_mat_vec_A,
@@ -154,15 +115,10 @@ data = {'test_sp_matrix_A': test_sp_matrix_A,
         'test_mat_extr_triu_Pu': test_mat_extr_triu_Pu,
         'test_mat_extr_triu_P_inf_norm_cols':
         test_mat_extr_triu_P_inf_norm_cols,
-        'test_mat_extr_triu_P_2_norm_cols': test_mat_extr_triu_P_2_norm_cols,
-        'test_mat_extr_triu_P_1_norm_cols': test_mat_extr_triu_P_1_norm_cols,
         'test_qpform_n': test_qpform_n,
         'test_qpform_Pu': test_qpform_Pu,
         'test_qpform_x': test_qpform_x,
         'test_qpform_value': test_qpform_value,
-        # 'test_mat_trace_P': test_mat_trace_P,
-        # 'test_mat_trace_P_trace': test_mat_trace_P_trace,
-        # 'test_mat_trace_P_fro_sq': test_mat_trace_P_fro_sq
         }
 
 # Generate test data

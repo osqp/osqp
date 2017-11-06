@@ -213,7 +213,6 @@ settings = {
             #  'scaled_termination': False,
             #  'adaptive_rho_interval': 100,
             #  'max_iter': 5000,
-            #  'scaling_norm': -1,
             'polish': False,
             #  'check_termination': 25
             }

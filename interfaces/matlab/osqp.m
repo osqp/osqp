@@ -523,7 +523,7 @@ end
 function currentSettings = validateSettings(this,isInitialization,varargin)
 
 %don't allow these fields to be changed
-unmodifiableFields = {'scaling', 'scaling_norm', 'linsys_solver'};
+unmodifiableFields = {'scaling', 'linsys_solver'};
 
 %get the current settings
 if(isInitialization)

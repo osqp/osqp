@@ -102,13 +102,8 @@ void print_setup_header(const OSQPWorkspace * work) {
                 (int)settings->check_termination);
     else
         c_print("          check_termination: off \n");
-    if (settings->scaling){
-        c_print("          scaling: on ");
-        if (settings->scaling_norm != -1)
-            c_print("(%d-norm), ", (int)settings->scaling_norm);
-        else
-            c_print("(inf-norm), ");
-    }
+    if (settings->scaling)
+        c_print("          scaling: on, ");
     else
         c_print("          scaling: off, ");
     if (settings->scaled_termination)
@@ -218,7 +213,6 @@ void set_default_settings(OSQPSettings * settings) {
     settings->scaling = SCALING; /* heuristic problem scaling */
 
 #if EMBEDDED != 1
-    settings->scaling_norm = SCALING_NORM;
     settings->adaptive_rho = ADAPTIVE_RHO;
     settings->adaptive_rho_interval = ADAPTIVE_RHO_INTERVAL;
     settings->adaptive_rho_tolerance = (c_float) ADAPTIVE_RHO_TOLERANCE;
@@ -258,7 +252,6 @@ OSQPSettings * copy_settings(OSQPSettings * settings){
 
     // Copy settings
     new->scaling = settings->scaling;
-    new->scaling_norm = settings->scaling_norm;
     new->adaptive_rho = settings->adaptive_rho;
     new->adaptive_rho_interval = settings->adaptive_rho_interval;
     new->adaptive_rho_tolerance = settings->adaptive_rho_tolerance;

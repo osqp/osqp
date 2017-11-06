@@ -216,7 +216,7 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
         static char *kwlist[] = {"dims",                          // nvars and ncons
                                  "Px", "Pi", "Pp", "q",           // Cost function
                                  "Ax", "Ai", "Ap", "l", "u",      // Constraints
-                                 "scaling", "scaling_norm",
+                                 "scaling", 
                                  "adaptive_rho", "adaptive_rho_interval",
 				 "adaptive_rho_tolerance", "adaptive_rho_fraction",
                                  "rho", "sigma", "max_iter", "eps_abs", "eps_rel", "eps_prim_inf", "eps_dual_inf", "alpha", "delta", "linsys_solver", "polish",
@@ -227,17 +227,17 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
         #ifdef DLONG
 
         #ifdef DFLOAT
-        static char * argparse_string = "(LL)O!O!O!O!O!O!O!O!O!|LLLLffffLffffffLLLLLLL";
+        static char * argparse_string = "(LL)O!O!O!O!O!O!O!O!O!|LLLffffLffffffLLLLLLL";
         #else
-        static char * argparse_string = "(LL)O!O!O!O!O!O!O!O!O!|LLLLddddLddddddLLLLLLL";
+        static char * argparse_string = "(LL)O!O!O!O!O!O!O!O!O!|LLLddddLddddddLLLLLLL";
         #endif
 
         #else
 
         #ifdef DFLOAT
-        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiiffffiffffffiiiiiii";
+        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiffffiffffffiiiiiii";
         #else
-        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiiddddiddddddiiiiiii";
+        static char * argparse_string = "(ii)O!O!O!O!O!O!O!O!O!|iiiddddiddddddiiiiiii";
         #endif
 
         #endif
@@ -261,7 +261,6 @@ static PyObject * OSQP_setup(OSQP *self, PyObject *args, PyObject *kwargs) {
                                          &PyArray_Type, &l,
                                          &PyArray_Type, &u,
                                          &settings->scaling,
-                                         &settings->scaling_norm,
                                          &settings->adaptive_rho,
                                          &settings->adaptive_rho_interval,
                                          &settings->adaptive_rho_tolerance,

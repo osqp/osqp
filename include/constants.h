@@ -70,8 +70,6 @@ static const char *LINSYS_SOLVER_NAME[] = {
 #define MAX_SCALING (1e+04)  ///< Maximum scaling value
 
 #if EMBEDDED != 1
-#define SCALING_NORM (-1)     ///< Scaling norm
-
 #define ADAPTIVE_RHO (1)
 #define ADAPTIVE_RHO_INTERVAL (0)
 #define ADAPTIVE_RHO_FRACTION (0.7)  ///< Fraction of setup time after which we update rho
