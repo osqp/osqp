@@ -47,7 +47,7 @@ tar -czvf $OSQP_DEPLOY_DIR.tar.gz  $OSQP_DEPLOY_DIR
 
 
 # Deploy package
-curl -T $OSQP_DEPLOY_DIR.tar.gz\
+curl -T $OSQP_DEPLOY_DIR.tar.gz \
     -ubstellato:$BINTRAY_API_KEY \
     -H "X-Bintray-Package:OSQP" \ 
     -H "X-Bintray-Version:0.1.3" \
