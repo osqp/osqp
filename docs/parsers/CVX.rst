@@ -1,4 +1,0 @@
-CVX
-===
-
-Coming soon!
