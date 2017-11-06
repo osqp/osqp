@@ -14,6 +14,14 @@ fi
 if [[ "$PYTHON_VERSION" == "3.6" ]]; then
 echo "Creating Bintray package..."
 
+# Compile OSQP 
+cd ${TRAVIS_BUILD_DIR}
+rm -rf build
+mkdir build
+cd build
+cmake -G "Unix Makefiles"
+make osqp
+
 cd ${TRAVIS_BUILD_DIR}/build/out
 if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     OS_NAME="mac"

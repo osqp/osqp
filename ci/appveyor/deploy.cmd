@@ -3,6 +3,7 @@ IF "%APPVEYOR_REPO_TAG%" == "true" (
 REM Create shared library archive for Bintray only ig Python 3.6
 if "%PYTHON_VERSION% == "3.6" (
     cd %APPVEYOR_BUILD_FOLDER%\build\out
+
     if "%PLATFORM%"=="x86" (
         set OSQP_DEPLOY_DIR=osqp-0.1.3-windows32
     ) ELSE (

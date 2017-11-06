@@ -56,7 +56,6 @@ if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHON_VERSION == "3.6" ]]; then
 fi
 
 
-
 # Test Python interface
 # ---------------------------------------------------
 
