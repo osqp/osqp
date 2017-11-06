@@ -42,7 +42,8 @@ suitesparse_dir = os.path.join(osqp_dir, 'lin_sys', 'direct', 'suitesparse')
 include_dirs = [
     get_include(),                                      # Numpy directories
     os.path.join(osqp_dir, 'include'),                  # osqp.h
-    os.path.join(suitesparse_dir),                      # suitesparse_ldl headers to extract workspace for codegen
+    # suitesparse_ldl headers to extract workspace for codegen
+    os.path.join(suitesparse_dir),
     os.path.join('extension', 'include')]               # auxiliary .h files
 
 sources_files = glob(os.path.join('extension', 'src', '*.c'))
@@ -90,7 +91,7 @@ cfiles += [os.path.join(suitesparse_dir, 'ldl', 'src', f)
 hfiles = [os.path.join(osqp_dir, 'include', f)
           for f in os.listdir(os.path.join(osqp_dir, 'include'))
           if f.endswith('.h') and f not in ('glob_opts.h', 'cs.h',
-                                            'ctrlc.h', 'polish.h', 
+                                            'ctrlc.h', 'polish.h',
                                             'lin_sys.h')]
 hfiles += [os.path.join(suitesparse_dir, f)
            for f in os.listdir(suitesparse_dir)

@@ -31,7 +31,7 @@ fprintf('Creating Matlab OSQP v%s package\n', version);
 fprintf('--------------------------------\n');
 
 % Get package name
-package_name = sprintf('osqp-%s-matlab-%s', version, platform);
+package_name = sprintf('osqp-%s-matlab-%s64', version, platform);
 
 % Create package directory
 fprintf('Creating package directory %s/...\n', package_name);

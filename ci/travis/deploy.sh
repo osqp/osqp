@@ -8,6 +8,46 @@ if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
     export PATH=${DEPS_DIR}/cmake/bin:${PATH}
 fi
 
+
+# Create shared library archive for Bintray only if Python 3.6 
+# NB: need to do it only once
+if [[ "$PYTHON_VERSION" == "3.6" ]]; then
+echo "Creating Bintray package..."
+
+cd ${TRAVIS_BUILD_DIR}/build/out
+if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    OS_NAME="mac"
+    OS_SHARED_LIB_EXT="dylib"
+else
+    OS_NAME="linux"
+    OS_SHARED_LIB_EXT="so"
+fi
+OSQP_DEPLOY_DIR=osqp-0.1.3-${OS_NAME}64
+mkdir $OSQP_DEPLOY_DIR/
+mkdir $OSQP_DEPLOY_DIR/lib
+mkdir $OSQP_DEPLOY_DIR/include
+# Copy includes
+cp ../../include/*  $OSQP_DEPLOY_DIR/include
+# Copy shared library
+cp libosqp.$OS_SHARED_LIB_EXT $OSQP_DEPLOY_DIR/lib 
+# Compress package
+tar -czvf $OSQP_DEPLOY_DIR.tar.gz  $OSQP_DEPLOY_DIR
+
+
+# Deploy package
+curl -T $OSQP_DEPLOY_DIR.tar.gz\
+    -ubstellato:$BINTRAY_API_KEY \
+    -H "X-Bintray-Package:OSQP" \ 
+    -H "X-Bintray-Version:0.1.3" \
+    https://api.bintray.com/content/bstellato/generic/OSQP/0.1.3/
+
+fi
+
+
+
+
+
+
 # Anaconda
 export PATH=${DEPS_DIR}/miniconda/bin:$PATH
 hash -r
@@ -36,8 +76,8 @@ if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
 
 
 	echo "Deploying to Pypi..."
-	twine upload --repository pypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*         # Main pypi repo
-	# twine upload --repository testpypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*     # Test pypi repo
+	# twine upload --repository pypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*         # Main pypi repo
+    twine upload --repository testpypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*     # Test pypi repo
 	echo "Successfully deployed to Pypi"
 
 else if [[ "$TRAVIS_OS_NAME" == "linux" && "$PYTHON_VERSION" == "3.6" ]]; then
@@ -47,8 +87,8 @@ else if [[ "$TRAVIS_OS_NAME" == "linux" && "$PYTHON_VERSION" == "3.6" ]]; then
 
 
 	echo "Deploying to Pypi..."
-	twine upload --repository pypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*         # Main pypi repo
-	# twine upload --repository testpypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*     # Test pypi repo
+	# twine upload --repository pypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*         # Main pypi repo
+    twine upload --repository testpypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*     # Test pypi repo
 	echo "Successfully deployed to Pypi"
 
 fi
