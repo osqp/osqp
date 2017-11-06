@@ -12,7 +12,7 @@ To install the interface, just run the following commands:
 
 .. code:: matlab
 
-    websave('install_osqp.m', 'https://dl.bintray.com/bstellato/generic/OSQP/0.1.3/install_osqp.m');
+    websave('install_osqp.m', 'https://dl.bintray.com/bstellato/generic/OSQP/0.2.0/install_osqp.m');
     install_osqp
 
 
