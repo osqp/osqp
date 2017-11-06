@@ -36,12 +36,6 @@ test_script:
 
 deploy:
         
-  # Deploy on branch release
-  - provider: script
-    script: "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\deploy.cmd"
-    on:
-      branch: release
-
   # Deploy on tags
   - provider: script
     script: "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\deploy.cmd"

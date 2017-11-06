@@ -22,13 +22,6 @@ install: bash ci/travis/install.sh
 script: bash ci/travis/script.sh
 
 deploy:
-  # Deploy on branch release
-  - provider: script
-    script: "bash $TRAVIS_BUILD_DIR/ci/travis/deploy.sh"
-    on:
-      branch: release
-    skip_cleanup: true
-
   # Deploy on tags
   - provider: script
     script: "bash $TRAVIS_BUILD_DIR/ci/travis/deploy.sh"
