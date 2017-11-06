@@ -3,9 +3,9 @@ if "%PYTHON_VERSION% == "3.6" (
     cd %APPVEYOR_BUILD_FOLDER%\build\out
 
     if "%PLATFORM%"=="x86" (
-        set OSQP_DEPLOY_DIR=osqp-0.2.0-windows32
+        set OSQP_DEPLOY_DIR=osqp-0.1.99-windows32
     ) ELSE (
-        set OSQP_DEPLOY_DIR=osqp-0.2.0-windows64
+        set OSQP_DEPLOY_DIR=osqp-0.1.99-windows64
     )
     REM Create directories
     mkdir %OSQP_DEPLOY_DIR%
@@ -23,7 +23,7 @@ if "%PYTHON_VERSION% == "3.6" (
     7z a -tgzip %OSQP_DEPLOY_DIR%.tar.gz %OSQP_DEPLOY_DIR%.tar
 
     REM Deploy to Bintray
-    curl -T %OSQP_DEPLOY_DIR%.tar.gz -ubstellato:%BINTRAY_API_KEY% -H "X-Bintray-Package:OSQP" -H "X-Bintray-Version:0.2.0" https://api.bintray.com/content/bstellato/generic/OSQP/0.2.0/
+    curl -T %OSQP_DEPLOY_DIR%.tar.gz -ubstellato:%BINTRAY_API_KEY% -H "X-Bintray-Package:OSQP" -H "X-Bintray-Version:0.1.99" https://api.bintray.com/content/bstellato/generic/OSQP/0.1.99/
 
 )
 
