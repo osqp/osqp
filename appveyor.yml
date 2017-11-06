@@ -31,9 +31,22 @@ install:
 test_script:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\script.cmd"
 
-deploy_script:
-  - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\deploy.cmd"
+# deploy_script:
+#   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\deploy.cmd"
 
+# Deploy on branch release
+deploy:
+  provider: script
+  script: "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\deploy.cmd"
+  on:
+    branch: release
+
+# Deploy on tags
+deploy:
+  provider: script
+  script: "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\deploy.cmd"
+  on:
+    appveyor_repo_tag: true
 
 # on_finish:
   # Uncomment for remote desktop debug

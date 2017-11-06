@@ -1,5 +1,3 @@
-IF "%APPVEYOR_REPO_TAG%" == "true" (
-
 REM Create shared library archive for Bintray only ig Python 3.6
 if "%PYTHON_VERSION% == "3.6" (
     cd %APPVEYOR_BUILD_FOLDER%\build\out
@@ -45,4 +43,3 @@ python setup.py bdist_wheel
 REM  twine upload --repository pypi --config-file ..\..\ci\pypirc -p %PYPI_PASSWORD% dist/*
 twine upload --repository testpypi --config-file ..\..\ci\pypirc -p %PYPI_PASSWORD% dist/*
 
-)

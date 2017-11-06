@@ -21,11 +21,19 @@ env:
 install: bash ci/travis/install.sh
 script: bash ci/travis/script.sh
 
-
+# Deploy on branch release
 deploy:
- # Deploy to Anaconda.org
+  - provider: script
+    script: "bash $TRAVIS_BUILD_DIR/ci/travis/deploy.sh"
+    on:
+      branch: release
+    skip_cleanup: true
+
+# Deploy on tags
+deploy:
   - provider: script
     script: "bash $TRAVIS_BUILD_DIR/ci/travis/deploy.sh"
     on:
       tags: true
     skip_cleanup: true
+
