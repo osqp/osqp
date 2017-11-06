@@ -7,6 +7,10 @@ set -ev
 if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
     export PATH=${DEPS_DIR}/cmake/bin:${PATH}
 fi
+# Anaconda
+export PATH=${DEPS_DIR}/miniconda/bin:$PATH
+hash -r
+source activate testenv
 
 
 # Create shared library archive for Bintray only if Python 3.6 
@@ -52,17 +56,7 @@ curl -T $OSQP_DEPLOY_DIR.tar.gz\
 fi
 
 
-
-
-
-
 # Anaconda
-export PATH=${DEPS_DIR}/miniconda/bin:$PATH
-hash -r
-source activate testenv
-
-
-
 cd ${TRAVIS_BUILD_DIR}/interfaces/python/conda_recipe
 
 echo "Creating conda package..."
