@@ -25,10 +25,10 @@ if "%PYTHON_VERSION% == "3.6" (
 
 
     REM Deploy to Bintray
-    curl -T %OSQP_DEPLOY_DIR%.tar.gz\
-        -ubstellato:%BINTRAY_API_KEY% \
-        -H "X-Bintray-Package:OSQP" \ 
-        -H "X-Bintray-Version:0.1.3" \
+    curl -T %OSQP_DEPLOY_DIR%.tar.gz ^
+        -ubstellato:%BINTRAY_API_KEY% ^
+        -H "X-Bintray-Package:OSQP" ^
+        -H "X-Bintray-Version:0.1.3" ^
         https://api.bintray.com/content/bstellato/generic/OSQP/0.1.3/
 
 )
