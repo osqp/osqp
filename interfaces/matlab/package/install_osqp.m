@@ -11,7 +11,7 @@ function install_osqp
     end
 
     fprintf('Downloading binaries...');
-    package_name = sprintf('https://github.com/oxfordcontrol/osqp/releases/download/v0.1.3/osqp-0.1.3-matlab-%s.tar.gz', platform);
+    package_name = sprintf('https://dl.bintray.com/bstellato/generic/OSQP/0.1.3/osqp-0.1.3-matlab-%s.tar.gz', platform);
     websave('osqp.tar.gz', package_name);
     fprintf('\t\t\t\t[done]\n');
 
