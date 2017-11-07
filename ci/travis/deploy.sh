@@ -34,7 +34,7 @@ else
     OS_NAME="linux"
     OS_SHARED_LIB_EXT="so"
 fi
-OSQP_DEPLOY_DIR=osqp-0.2.0.dev1-${OS_NAME}64
+OSQP_DEPLOY_DIR=osqp-0.2.0.dev2-${OS_NAME}64
 mkdir $OSQP_DEPLOY_DIR/
 mkdir $OSQP_DEPLOY_DIR/lib
 mkdir $OSQP_DEPLOY_DIR/include
@@ -49,10 +49,10 @@ tar -czvf $OSQP_DEPLOY_DIR.tar.gz  $OSQP_DEPLOY_DIR
 
 
 # Deploy package
-curl -T $OSQP_DEPLOY_DIR.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:OSQP" -H "X-Bintray-Version:0.2.0.dev1" https://api.bintray.com/content/bstellato/generic/OSQP/0.2.0.dev1/
+curl -T $OSQP_DEPLOY_DIR.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:OSQP" -H "X-Bintray-Version:0.2.0.dev2" https://api.bintray.com/content/bstellato/generic/OSQP/0.2.0.dev2/
 
 # Publish
-curl -X POST -ubstellato:$BINTRAY_API_KEY https://api.bintray.com/content/bstellato/generic/OSQP/0.2.0.dev1/publish
+curl -X POST -ubstellato:$BINTRAY_API_KEY https://api.bintray.com/content/bstellato/generic/OSQP/0.2.0.dev2/publish
 
 fi
 
