@@ -2,7 +2,7 @@
 IF "%APPVEYOR_REPO_TAG%" == "true" (
 
 :: Create shared library archive for Bintray only ig Python 3.6
-if "%PYTHON_VERSION% == "3.6" (
+if "%PYTHON_VERSION%" == "3.6" (
     cd %APPVEYOR_BUILD_FOLDER%\build\out
 
     if "%PLATFORM%" == "x86" (
