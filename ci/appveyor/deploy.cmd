@@ -12,6 +12,9 @@ if "%PYTHON_VERSION% == "3.6" (
     mkdir %OSQP_DEPLOY_DIR%\lib
     mkdir %OSQP_DEPLOY_DIR%\include
 
+    REM Copy License
+    xcopy ..\..\LICENSE %OSQP_DEPLOY_DIR%\
+
     REM Copy includes
     xcopy ..\..\include\* %OSQP_DEPLOY_DIR%\include
 

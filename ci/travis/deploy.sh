@@ -38,6 +38,8 @@ OSQP_DEPLOY_DIR=osqp-0.2.0-dev0-${OS_NAME}64
 mkdir $OSQP_DEPLOY_DIR/
 mkdir $OSQP_DEPLOY_DIR/lib
 mkdir $OSQP_DEPLOY_DIR/include
+# Copy license 
+cp ../../LICENSE $OSQP_DEPLOY_DIR/
 # Copy includes
 cp ../../include/*  $OSQP_DEPLOY_DIR/include
 # Copy shared library

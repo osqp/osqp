@@ -41,6 +41,12 @@ end
 mkdir(package_name);
 fprintf('[done]\n');
 
+% Copying license
+fprintf('Copying license...\n');
+copyfile(fullfile(osqp_dir_matlab, '..', '..','LICENSE'), ...
+	 fullfile(package_name));
+fprintf('[done]\n');
+
 % Copying folders
 fprintf('Copying folders...\n');
 folders_to_copy = {'codegen', 'unittests'};
