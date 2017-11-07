@@ -1,36 +1,37 @@
+@echo on
 IF "%APPVEYOR_REPO_TAG%" == "true" (
 
-REM Create shared library archive for Bintray only ig Python 3.6
+:: Create shared library archive for Bintray only ig Python 3.6
 if "%PYTHON_VERSION% == "3.6" (
     cd %APPVEYOR_BUILD_FOLDER%\build\out
 
-    if "%PLATFORM%"=="x86" (
+    if "%PLATFORM%" == "x86" (
         set OSQP_DEPLOY_DIR=osqp-0.2.0.dev0-windows32
     ) ELSE (
         set OSQP_DEPLOY_DIR=osqp-0.2.0.dev0-windows64
     )
-    REM Create directories
+    :: Create directories
     mkdir %OSQP_DEPLOY_DIR%
     mkdir %OSQP_DEPLOY_DIR%\lib
     mkdir %OSQP_DEPLOY_DIR%\include
 
-    REM Copy License
-    xcopy ..\..\LICENSE %OSQP_DEPLOY_DIR%\
+    :: Copy License
+    xcopy ..\..\LICENSE %OSQP_DEPLOY_DIR%
 
-    REM Copy includes
+    :: Copy includes
     xcopy ..\..\include\* %OSQP_DEPLOY_DIR%\include
 
-    REM Copy shared library
-    xcopy libosqp.dll %OSQP_DEPLOY_DIR%\lib\
+    :: Copy shared library
+    xcopy libosqp.dll %OSQP_DEPLOY_DIR%\lib
 
-    REM Compress package
+    :: Compress package
     7z a -ttar %OSQP_DEPLOY_DIR%.tar %OSQP_DEPLOY_DIR%\
     7z a -tgzip %OSQP_DEPLOY_DIR%.tar.gz %OSQP_DEPLOY_DIR%.tar
 
-    REM Deploy to Bintray
+    :: Deploy to Bintray
     curl -T %OSQP_DEPLOY_DIR%.tar.gz -ubstellato:%BINTRAY_API_KEY% -H "X-Bintray-Package:OSQP" -H "X-Bintray-Version:0.2.0.dev0" https://api.bintray.com/content/bstellato/generic/OSQP/0.2.0.dev0/
 
-    REM Publish
+    :: Publish
     curl -X POST -ubstellato:%BINTRAY_API_KEY% https://api.bintray.com/content/bstellato/generic/OSQP/0.2.0.dev0/publish
 )
 
@@ -53,5 +54,6 @@ IF "%TEST_PYPI%" == "true" (
     twine upload --repository pypi --config-file ..\..\ci\pypirc -p %PYPI_PASSWORD% dist/*
 )
 
-REM Close parenthesis for deploying only if it is a tagged commit
+:: Close parenthesis for deploying only if it is a tagged commit
 )
+@echo off
