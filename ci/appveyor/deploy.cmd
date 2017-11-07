@@ -2,13 +2,13 @@
 IF "%APPVEYOR_REPO_TAG%" == "true" (
 
 :: Create shared library archive for Bintray only ig Python 3.6
-if "%PYTHON_VERSION%" == "3.6" (
+IF "%PYTHON_VERSION%" == "3.6" (
     cd %APPVEYOR_BUILD_FOLDER%\build\out
 
-    if "%PLATFORM%" == "x86" (
-        set OSQP_DEPLOY_DIR=osqp-0.2.0.dev0-windows32
+    IF "%PLATFORM%" == "x86" (
+        set OSQP_DEPLOY_DIR="osqp-0.2.0.dev0-windows32"
     ) ELSE (
-        set OSQP_DEPLOY_DIR=osqp-0.2.0.dev0-windows64
+        set OSQP_DEPLOY_DIR="osqp-0.2.0.dev0-windows64"
     )
     :: Create directories
     mkdir %OSQP_DEPLOY_DIR%
