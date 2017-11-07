@@ -1,3 +1,5 @@
+IF "%APPVEYOR_REPO_TAG%" == "true" (
+
 REM Create shared library archive for Bintray only ig Python 3.6
 if "%PYTHON_VERSION% == "3.6" (
     cd %APPVEYOR_BUILD_FOLDER%\build\out
@@ -51,3 +53,5 @@ IF "%TEST_PYPI%" == "true" (
     twine upload --repository pypi --config-file ..\..\ci\pypirc -p %PYPI_PASSWORD% dist/*
 )
 
+REM Close parenthesis for deploying only if it is a tagged commit
+)
