@@ -12,6 +12,7 @@ environment:
     secure: 3gQtEWf4jXJLJKP8oM22oCShTJ3VI+BtRYczfzO3RSQ=
   BINTRAY_API_KEY:
     secure: ng7NUNQat2LczU5XjKKyDLITkZbZsJeAdPGDjuTdQDHDiaL03JJF6Usab+miNVsO
+  TEST_PYPI: true
   MINICONDA: C:\Miniconda
   CMAKE_PROJECT: MinGW Makefiles
   matrix:

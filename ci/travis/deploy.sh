@@ -79,8 +79,11 @@ if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
 
 
 	echo "Deploying to Pypi..."
-	# twine upload --repository pypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*         # Main pypi repo
-    twine upload --repository testpypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*     # Test pypi repo
+	if [[ $TEST_PYPI ]]; then
+	    twine upload --repository testpypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*     # Test pypi repo
+	else
+	    twine upload --repository pypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*         # Main pypi repo
+	fi
 	echo "Successfully deployed to Pypi"
 
 else if [[ "$TRAVIS_OS_NAME" == "linux" && "$PYTHON_VERSION" == "3.6" ]]; then
@@ -90,8 +93,11 @@ else if [[ "$TRAVIS_OS_NAME" == "linux" && "$PYTHON_VERSION" == "3.6" ]]; then
 
 
 	echo "Deploying to Pypi..."
-	# twine upload --repository pypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*         # Main pypi repo
-    twine upload --repository testpypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*     # Test pypi repo
+	if [[ $TEST_PYPI ]]; then
+		twine upload --repository testpypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*     # Test pypi repo
+	else
+		twine upload --repository pypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*         # Main pypi repo
+	fi
 	echo "Successfully deployed to Pypi"
 
 fi

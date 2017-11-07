@@ -45,6 +45,9 @@ if errorlevel 1 exit /b 1
 cd %APPVEYOR_BUILD_FOLDER%\interfaces\python
 call activate test-environment
 python setup.py bdist_wheel
-REM  twine upload --repository pypi --config-file ..\..\ci\pypirc -p %PYPI_PASSWORD% dist/*
-twine upload --repository testpypi --config-file ..\..\ci\pypirc -p %PYPI_PASSWORD% dist/*
+IF "%TEST_PYPI%" == "true" (
+    twine upload --repository testpypi --config-file ..\..\ci\pypirc -p %PYPI_PASSWORD% dist/*
+) ELSE (
+    twine upload --repository pypi --config-file ..\..\ci\pypirc -p %PYPI_PASSWORD% dist/*
+)
 
