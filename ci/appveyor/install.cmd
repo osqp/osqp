@@ -34,11 +34,12 @@ set PATH=%MINICONDA_PATH%;%MINICONDA_PATH%\\Scripts;%PATH%
 
 
 conda config --set always_yes yes --set changeps1 no
-conda update -q conda
+REM conda update -q conda
 conda info -a
 conda install conda-build anaconda-client
 conda create -q -n test-environment python=%PYTHON_VERSION% numpy scipy pytest future
 conda install -c conda-forge twine
+if errorlevel 1 exit /b 1
 :: NB: Need to run with call otherwise the script hangs
 call activate test-environment
 
