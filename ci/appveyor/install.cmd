@@ -34,6 +34,8 @@ set PATH=%MINICONDA_PATH%;%MINICONDA_PATH%\\Scripts;%PATH%
 
 
 conda config --set always_yes yes --set changeps1 no
+REM This, together with next line, disables conda auto update (fixes problem with tqdm)
+conda config --set auto_update_conda false
 REM conda update -q conda
 conda info -a
 conda install conda-build anaconda-client
