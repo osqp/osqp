@@ -1,5 +1,5 @@
 classdef osqp < handle
-    % osqp interface class for OSQP solver v0.1.99
+    % osqp interface class for OSQP solver v0.2.0-dev0
     % This class provides a complete interface to the C implementation
     % of the OSQP solver.
     %
