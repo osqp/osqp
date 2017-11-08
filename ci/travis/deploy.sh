@@ -41,7 +41,7 @@ mkdir $OSQP_DEPLOY_DIR/include
 # Copy license 
 cp ../../LICENSE $OSQP_DEPLOY_DIR/
 # Copy includes
-cp ../../include/*  $OSQP_DEPLOY_DIR/include
+cp ../../include/*.h  $OSQP_DEPLOY_DIR/include
 # Copy static library
 cp libosqpstatic.a $OSQP_DEPLOY_DIR/lib 
 # Copy shared library
