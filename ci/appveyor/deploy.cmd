@@ -6,9 +6,9 @@ IF "%PYTHON_VERSION%" == "3.6" (
     cd %APPVEYOR_BUILD_FOLDER%\build\out
 
     IF "%PLATFORM%" == "x86" (
-        set OSQP_DEPLOY_DIR=osqp-0.2.0.dev2-windows32
+        set "OSQP_DEPLOY_DIR=osqp-0.2.0.dev2-windows32"
     ) ELSE (
-        set OSQP_DEPLOY_DIR=osqp-0.2.0.dev2-windows64
+        set "OSQP_DEPLOY_DIR=osqp-0.2.0.dev2-windows64"
     )
     REM Create directories
     mkdir %OSQP_DEPLOY_DIR%
