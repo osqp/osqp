@@ -24,7 +24,7 @@ rm -rf build
 mkdir build
 cd build
 cmake -G "Unix Makefiles" ..
-make osqp
+make
 
 cd ${TRAVIS_BUILD_DIR}/build/out
 if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
@@ -42,6 +42,8 @@ mkdir $OSQP_DEPLOY_DIR/include
 cp ../../LICENSE $OSQP_DEPLOY_DIR/
 # Copy includes
 cp ../../include/*  $OSQP_DEPLOY_DIR/include
+# Copy static library
+cp libosqpstatic.a $OSQP_DEPLOY_DIR/lib 
 # Copy shared library
 cp libosqp.$OS_SHARED_LIB_EXT $OSQP_DEPLOY_DIR/lib 
 # Compress package

@@ -3,6 +3,14 @@ IF "%APPVEYOR_REPO_TAG%" == "true" (
 
 REM Create shared library archive for Bintray only ig Python 3.6
 IF "%PYTHON_VERSION%" == "3.6" (
+    REM Build C libraries
+    cd %APPVEYOR_BUILD_FOLDER%
+    mkdir build
+    cd build
+    cmake -G "%CMAKE_PROJECT%" ..
+    cmake --build .
+    
+    REM Go to output folder
     cd %APPVEYOR_BUILD_FOLDER%\build\out
 
     IF "%PLATFORM%" == "x86" (
@@ -20,6 +28,9 @@ IF "%PYTHON_VERSION%" == "3.6" (
 
     REM Copy includes
     xcopy ..\..\include\* %OSQP_DEPLOY_DIR%\include
+
+    REM Copy static library
+    xcopy libosqpstatic.a %OSQP_DEPLOY_DIR%\lib
 
     REM Copy shared library
     xcopy libosqp.dll %OSQP_DEPLOY_DIR%\lib
