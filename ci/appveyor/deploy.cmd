@@ -1,10 +1,14 @@
 @echo on
-IF "%APPVEYOR_REPO_TAG%" == "true" (
 
+REM Needed to enable to define OSQP_DEPLOY_DIR within the file
+@setlocal enabledelayedexpansion
+
+IF "%APPVEYOR_REPO_TAG%" == "true" (
 REM Create shared library archive for Bintray only ig Python 3.6
 IF "%PYTHON_VERSION%" == "3.6" (
     REM Build C libraries
     cd %APPVEYOR_BUILD_FOLDER%
+    del /F /Q build
     mkdir build
     cd build
     cmake -G "%CMAKE_PROJECT%" ..
