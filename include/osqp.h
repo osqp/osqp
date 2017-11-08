@@ -36,6 +36,7 @@ extern "C" {
  * - automatic parameters tuning (if enabled)
  * - setup linear system solver:
  *      - direct solver: KKT matrix factorization is performed here
+ *      - indirect solver: KKT matrix preconditioning is performed here
  *
  * NB: This is the only function that allocates dynamic memory and is not used during code generation
  *
