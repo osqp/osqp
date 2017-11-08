@@ -9,3 +9,4 @@ Installation
    CC++.rst
    python.rst
    matlab.rst
+   linear_system_solvers.rst

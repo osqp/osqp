@@ -1,4 +1,4 @@
-.. _linear_systems_solvers :
+.. _linear_system_solvers_setting :
 
 Linear Systems Solvers
 -----------------------
