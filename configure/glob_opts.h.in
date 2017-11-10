@@ -92,9 +92,13 @@ extern "C" {
 
 
 /* Use customized number representation -----------------------------------   */
-#ifdef DLONG
-typedef long long c_int;             /* for indices */
+#ifdef DLONG  // long integers
+#ifdef _WIN32
+typedef long c_int;     
 #else
+typedef long long c_int;             /* for indices */
+#endif
+#else  // standard integers
 typedef int c_int;                   /* for indices */
 #endif
 
