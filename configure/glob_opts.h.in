@@ -93,11 +93,7 @@ extern "C" {
 
 /* Use customized number representation -----------------------------------   */
 #ifdef DLONG  // long integers
-#ifdef defined(_WIN32) && !defined(_WIN64)  // Windows 32bit
-typedef long c_int;     
-#else
 typedef long long c_int;             /* for indices */
-#endif
 #else  // standard integers
 typedef int c_int;                   /* for indices */
 #endif
