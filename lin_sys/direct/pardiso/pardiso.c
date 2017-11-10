@@ -190,7 +190,7 @@ c_int solve_linsys_pardiso(pardiso_solver * s, c_float * b, const OSQPSettings *
              s->iparm, &(s->msglvl), b, s->bp, &(s->error));
     if ( s->error != 0 ){
         #ifdef PRINTING
-        c_print("\nERROR during solution: %d", s->error);
+        c_print("\nERROR during solution: %d", (int)s->error);
         #endif
         return 1;
     }
