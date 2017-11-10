@@ -6,7 +6,7 @@ from numpy import get_include
 from glob import glob
 import shutil as sh
 from subprocess import call, check_output
-from platform import system
+from platform import system, architecture
 import os
 import sys
 
@@ -18,6 +18,12 @@ define_macros = []
 # Check if windows linux or mac to pass flag
 if system() == 'Windows':
     cmake_args += ['-G', 'MinGW Makefiles']
+
+    # If Windows 32bit, disable long integers
+    # => problem in interfacing Python libraries
+    if architecture()[0] == '32bit':
+        cmake_args += ['-DDLONG=OFF']
+
 else:  # Linux or Mac
     cmake_args += ['-G', 'Unix Makefiles']
 
