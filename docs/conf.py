@@ -18,7 +18,8 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
 import sphinx_rtd_theme
-import os, subprocess
+import os
+import subprocess
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
@@ -58,7 +59,7 @@ author = 'Bartolomeo Stellato, Goran Banjac'
 # built documents.
 #
 
-version = '.'.join(__version__.split('.')[:3])
+version = '.'.join(__version__.split('.')[:4])
 
 # The full version, including alpha/beta/rc tags.
 release = __version__
