@@ -64,7 +64,7 @@ PYTHON_EXT_NAME = Extension('PYTHON_EXT_NAME',
 
 
 setup(name='PYTHON_EXT_NAME',
-      version='0.2.0.dev6',
+      version='0.2.0.dev7',
       author='Bartolomeo Stellato, Goran Banjac',
       author_email='bartolomeo.stellato@gmail.com',
       description='This is the Python module for embedded OSQP: ' +

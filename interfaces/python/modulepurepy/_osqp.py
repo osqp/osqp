@@ -327,7 +327,7 @@ class OSQP(object):
     work    - workspace
     """
     def __init__(self):
-        self._version = "0.2.0.dev6"
+        self._version = "0.2.0.dev7"
 
     @property
     def version(self):
