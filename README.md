@@ -13,7 +13,7 @@ subject to      l <= A x <= u
 where `x in R^n` is the optimization variable. The objective function is defined by a positive semidefinite matrix `P in S^n_+` and vector `q in R^n`. The linear constraints are defined by matrix `A in R^{m x n}` and vectors `l in R^m U {-inf}^m`, `u in R^m U {+inf}^m`.
 
 
-The latest version is `0.2.0.dev7`.
+The latest version is `0.2.0.dev8`.
 
 <br>
 
