@@ -24,7 +24,7 @@ import subprocess
 # sys.path.insert(0, os.path.abspath('.'))
 
 # Set version for bumpversion
-__version__ = "0.2.0.dev8"
+__version__ = "0.2.0.dev9"
 
 # -- General configuration ------------------------------------------------
 
