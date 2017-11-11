@@ -19,10 +19,10 @@ define_macros = []
 if system() == 'Windows':
     cmake_args += ['-G', 'MinGW Makefiles']
 
-    # If Windows 32bit, disable long integers
-    # => problem in interfacing Python libraries
-    if architecture()[0] == '32bit':
-        cmake_args += ['-DDLONG=OFF']
+    #  # If Windows 32bit, disable long integers
+    #  # => problem in interfacing Python libraries
+    #  if architecture()[0] == '32bit':
+    #      cmake_args += ['-DDLONG=OFF']
 
 else:  # Linux or Mac
     cmake_args += ['-G', 'Unix Makefiles']

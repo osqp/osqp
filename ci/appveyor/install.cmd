@@ -13,13 +13,13 @@ git config --global core.symlinks true
 set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
 
 
-IF "%PLATFORM%"=="x86" (
-    set MINGW_PATH=C:\MinGW\bin
-) ELSE (
+REM  IF "%PLATFORM%"=="x86" (
+REM      set MINGW_PATH=C:\MinGW\bin
+REM  ) ELSE (
     :: Install 64bit MinGW from chocolatey
     choco install -y mingw
     set MINGW_PATH=C:\Tools\mingw64\bin
-)
+REM  )
 set PATH=%MINGW_PATH%;%PATH%
 
 
