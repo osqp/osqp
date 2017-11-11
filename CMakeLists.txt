@@ -77,8 +77,12 @@ option (DFLOAT "Use float numbers instead of doubles" OFF)
 message(STATUS "Floats are ${DFLOAT}")
 
 # Use long integers for indexing
-option (DLONG "Use long integers for indexing" ON)
-message(STATUS "Long integers are ${DLONG}")
+option (DLONG "Use long integers (64bit) for indexing" ON)
+if (NOT (CMAKE_SIZEOF_VOID_P EQUAL 8))
+	message(STATUS "Disabling long integers (64bit) on 32bit machine")
+	set(DLONG OFF)
+endif()
+message(STATUS "Long integers (64bit) are ${DLONG}")
 
 # Add code coverage
 option (COVERAGE "Perform code coverage" OFF)
