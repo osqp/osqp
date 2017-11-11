@@ -16,10 +16,15 @@ set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
 REM  IF "%PLATFORM%"=="x86" (
 REM      set MINGW_PATH=C:\MinGW\bin
 REM  ) ELSE (
-    :: Install 64bit MinGW from chocolatey
-    choco install -y mingw
-    set MINGW_PATH=C:\Tools\mingw64\bin
+REM      :: Install 64bit MinGW from chocolatey
+REM      choco install -y mingw
+REM      set MINGW_PATH=C:\Tools\mingw64\bin
 REM  )
+IF "%PLATFORM%"=="x86" (
+    set MINGW_PATH=C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\bin
+) ELSE (
+    set MINGW_PATH=C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\bin
+)
 set PATH=%MINGW_PATH%;%PATH%
 
 
