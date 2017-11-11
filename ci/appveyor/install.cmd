@@ -21,9 +21,9 @@ REM      choco install -y mingw
 REM      set MINGW_PATH=C:\Tools\mingw64\bin
 REM  )
 IF "%PLATFORM%"=="x86" (
-    set MINGW_PATH=C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\bin
+    set MINGW_PATH=C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\mingw32\bin
 ) ELSE (
-    set MINGW_PATH=C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\bin
+    set MINGW_PATH=C:\mingw-w64\x86_64-6.3.0-posix-seh-rt_v5-rev1\mingw64\bin
 )
 set PATH=%MINGW_PATH%;%PATH%
 
