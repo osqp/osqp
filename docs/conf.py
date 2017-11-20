@@ -150,6 +150,7 @@ latex_elements = {
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
+    'sphinxsetup': 'hmargin={1.5cm,1.5cm}',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples

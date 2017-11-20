@@ -17,7 +17,7 @@ body {
 
 /* Remove rounded navigation bar */
 .wy-side-nav-search input[type=text] {
-    border-radius: 0px;
+    border-radius: 2px;
 }
 
 div[class^='highlight'] pre {
@@ -164,6 +164,13 @@ tr td code span{
     margin-bottom: 20px;
 }
 
+
+/* Remove box shadow from buttons */
+.btn {
+    font-weight: normal;
+    font-family:  "Open Sans", "Helvetica Neue",Helvetica,Arial,sans-serif;
+    box-shadow: none;
+}
 /* Force breathe display inline parameters */
 /*.wy-plain-list-disc li p:last-child, .rst-content .section ul li p:last-child, .rst-content .toctree-wrapper ul li p:last-child, article ul li p:last-child{
     display: inline;

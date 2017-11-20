@@ -15,8 +15,13 @@ optimization package for solving convex quadratic programs in the form
 where :math:`x` is the optimization variable and
 :math:`P \in \mathbf{S}^{n}_{+}` a positive semidefinite matrix.
 
-**The code is available on** `GitHub <https://github.com/oxfordcontrol/osqp>`_.
+**Code available on** `GitHub <https://github.com/oxfordcontrol/osqp>`_.
 
+**Numerical benchmarks available** `here <https://github.com/oxfordcontrol/osqp_benchmarks>`_.
+
+.. rubric:: Citing
+
+If OSQP is useful for your work, we encourage you to **cite the related papers** (see :ref:`citing`) and to **put a star** on `GitHub <https://github.com/oxfordcontrol/osqp>`_.
 
 .. rubric:: Features
 

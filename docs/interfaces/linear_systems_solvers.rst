@@ -13,3 +13,11 @@ In C/C++ it corresponds to an integer :c:type:`c_int` (see :ref:`c_cpp_data_type
 +-----------------------------------+----------------------------------+-------------------------------------+
 | MKL Pardiso                       | "mkl pardiso"                    | :code:`MKL_PARDISO_SOLVER`          |
 +-----------------------------------+----------------------------------+-------------------------------------+
+
+
+
+
+Interfacing new linear system solvers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSQP is designed to be easily interfaced to new linear system solvers.
+Each linear system solver....

@@ -5,6 +5,7 @@ Solver settings
 
 The solver settings are displayed in the following table. The settings marked with * can be changed without running the setup method again.
 
+.. tabularcolumns:: |p{4.5cm}|p{3.5cm}|p{6.5cm}|L|
 
 +---------------------------------+---------------------------------------------------------------+--------------------------------------------------------------+-----------------------------------+
 | Argument                        | Description                                                   | Allowed values                                               | Default value                     |
