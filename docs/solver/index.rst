@@ -102,7 +102,7 @@ The update happens as follows
 
 .. math::
 
-    \rho^{k+1} \gets \rho^{k} \sqrt{\frac{\|r_{\rm prim}\|_{\infty}}{\|r_{\rm dual}\|_{\infty}}}
+    \rho^{k+1} \gets \rho^{k} \sqrt{\frac{\|r_{\rm prim}\|_{\infty}}{\|r_{\rm dual}\|_{\infty}}}.
 
 
 Note that :math:`\rho` is updated only if it is sufficiently different than the current one.
@@ -131,7 +131,7 @@ The primal infeasibility check is then
 
 .. math::
 
-	\left\|A^T v \right\|_{\infty} \le \epsilon_{\rm prim\_inf}, \quad u^T (v)_{+} + l^T (v)_{-} \le - \epsilon_{\rm prim\_inf},
+	\left\|A^T v \right\|_{\infty} \le \epsilon_{\rm prim\_inf}, \quad u^T (v)_{+} + l^T (v)_{-} \le - \epsilon_{\rm prim\_inf}.
 
 
 
@@ -153,7 +153,7 @@ The dual infeasibility check is then
         q^T s \le -\epsilon_{\rm dual\_inf}, \\
         (A s)_i \begin{cases} \in \left[-\epsilon_{\rm dual\_inf}, \epsilon_{\rm dual\_inf}\right] & u_i, l_i \in \mathbf{R}\\
         \ge \epsilon_{\rm dual\_inf} &u_i = +\infty\\
-        \le  -\epsilon_{\rm dual\_inf} &l_i = -\infty,\end{cases}
+        \le  -\epsilon_{\rm dual\_inf} &l_i = -\infty.\end{cases}
 
 
 

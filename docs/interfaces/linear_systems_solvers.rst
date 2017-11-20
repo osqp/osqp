@@ -16,8 +16,7 @@ In C/C++ it corresponds to an integer :c:type:`c_int` (see :ref:`c_cpp_data_type
 
 
 
+To add new linear system solvers see :ref:`interfacing_new_linear_system_solvers`.
 
-Interfacing new linear system solvers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-OSQP is designed to be easily interfaced to new linear system solvers.
-Each linear system solver....
+
+

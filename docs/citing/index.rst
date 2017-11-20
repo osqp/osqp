@@ -3,7 +3,7 @@
 Citing OSQP
 ===========
 
-If you use OSQP for published work, we encourage you to cite the accompanying papers:
+If you use OSQP for published work, we encourage you to put a star on `GitHub <https://github.com/oxfordcontrol/osqp>`_ and cite the accompanying papers:
 
 
 .. glossary::
@@ -18,7 +18,7 @@ If you use OSQP for published work, we encourage you to cite the accompanying pa
 
           @article{osqp-infeasibility,
             title   = {Infeasibility detection in the alternating direction method of multipliers for convex optimization},
-            author  = {Goran Banjac and Paul Goulart and Bartolomeo Stellato and Stephen Boyd},
+            author  = {Banjac, G. and Goulart, P. and Stellato, B. and Boyd, S.},
             journal = {optimization-online.org},
             year    = {2017},
             url     = {http://www.optimization-online.org/DB_HTML/2017/06/6058.html},

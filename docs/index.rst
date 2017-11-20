@@ -17,11 +17,14 @@ where :math:`x` is the optimization variable and
 
 **Code available on** `GitHub <https://github.com/oxfordcontrol/osqp>`_.
 
-**Numerical benchmarks available** `here <https://github.com/oxfordcontrol/osqp_benchmarks>`_.
+.. rubric:: Citing OSQP
 
-.. rubric:: Citing
+If you are using OSQP for your work, we encourage you to 
 
-If OSQP is useful for your work, we encourage you to **cite the related papers** (see :ref:`citing`) and to **put a star** on `GitHub <https://github.com/oxfordcontrol/osqp>`_.
+* :ref:`Cite the related papers <citing>`
+* Put a star on `GitHub <https://github.com/oxfordcontrol/osqp>`_
+
+**We are looking forward to hearing your success stories with OSQP!** Please `share them with us <mailto:bartolomeo.stellato@gmail.com>`_. 
 
 .. rubric:: Features
 
@@ -75,6 +78,11 @@ The following people have been involved in the development of OSQP:
 Please report any issues via the `Github issue tracker <https://github.com/oxfordcontrol/osqp/issues>`_. All types of issues are welcome including bug reports, documentation typos, feature requests and so on.
 
 
+.. rubric:: Numerical benchmarks
+
+Numerical benchmarks against other solvers are available `here <https://github.com/oxfordcontrol/osqp_benchmarks>`_.
+
+
 .. toctree::
    :hidden:
    :maxdepth: 2
@@ -86,4 +94,5 @@ Please report any issues via the `Github issue tracker <https://github.com/oxfor
    parsers/index
    codegen/index
    examples/index
+   contributing/index
    citing/index
