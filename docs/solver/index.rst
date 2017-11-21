@@ -158,4 +158,21 @@ The dual infeasibility check is then
 
 
 
+Polishing
+^^^^^^^^^^^
+
+Polishing is an additional algorithm step where OSQP tries to compute a high-accuracy solution. 
+We can enable it by turning the setting :code:`polish` to 1.
+
+Polishing works by guessing the active constraints at the optimum and solving an additional linear system.
+If the guess is correct, OSQP returns a high accuracy solution.
+Otherwise OSQP returns the ADMM solution.
+The status of the polishing phase appears in the information :code:`status_polish`.
+
+Note that polishing requires the solution of an additional linear system and thereby, an additional factorization if the linear system solver is direct.
+However, the linear system is usually much smaller than the one solved during the ADMM iterations.
+
+The chances to have a successful polishing increase if the tolerances :code:`eps_abs` and :code:`eps_rel` are small. 
+However, low tolerances might require a very large number of iterations.
+
 
