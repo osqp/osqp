@@ -1,15 +1,17 @@
 Changes since last release
 -------------------------
-*   Added adaptive rho during the algorithm -> Much more reliable convergence!
+*   Added adaptive rho -> Much more reliable convergence!
 *   Simplified several settings 
     *  "early_terminate" and "early_terminate_interval" -> "check_termination"
     *  "scaling_iter" removed and put inside "scaling" parameter
-*   Now code generation produces a static library
+*   Julia interface [OSQP.jl](https://github.com/oxfordcontrol/OSQP.jl)
+*   Shared libraries available on bintray.com
 *   Added inaccurate return statuses
-*   Created new object-oriented structure for linear system solvers
+*   Added new object-oriented structure for linear system solvers
 *   Added MKL Pardiso interface using shared dynamic library loader
 *   Added diagonal rho vector with different values for equality/inequality constraints (interface still have scalar rho)
 *   Return certificates of infeasibility in results structure
+*   Now code generation produces a static library
 
 Version 0.1.3 (21 September 2017)
 ---------------------------------
