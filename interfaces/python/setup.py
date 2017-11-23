@@ -159,7 +159,7 @@ packages = ['osqp',
             'osqppurepy']
 
 setup(name='osqp',
-      version='0.2.0.dev9',
+      version='0.2.0.dev10',
       author='Bartolomeo Stellato, Goran Banjac',
       author_email='bartolomeo.stellato@gmail.com',
       description='OSQP: The Operator Splitting QP Solver',
