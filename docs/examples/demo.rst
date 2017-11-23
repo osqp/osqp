@@ -66,6 +66,28 @@ Matlab
     % Solve problem
     res = prob.solve();
 
+Julia
+------
+
+.. code:: julia
+
+    import OSQP
+
+    # Define problem data
+    P = sparse([4. 1.; 1. 2.])
+    q = [1.; 1.]
+    A = sparse([1. 1.; 1. 0.; 0. 1.])
+    u = [1.; 0.7; 0.7]
+    l = [1.; 0.; 0.]
+
+    # Crate OSQP object
+    prob = OSQP.Model()
+
+    # Setup workspace and change alpha parameter
+    OSQP.setup!(prob; P=P, q=q, A=A, l=l, u=u, alpha=1)
+
+    # Solve problem
+    results = OSQP.solve!(prob)
 
 
 C
@@ -89,7 +111,7 @@ C
         c_int A_i[4] = {0, 1, 0, 2, };
         c_int A_p[3] = {0, 2, 4, };
         c_float l[3] = {1.00, 0.00, 0.00, };
-        c_float u[3] = {1.00, 0.69, 0.69, };
+        c_float u[3] = {1.00, 0.70, 0.70, };
         c_int n = 2;
         c_int m = 3;
 
