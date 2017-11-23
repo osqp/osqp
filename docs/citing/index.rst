@@ -9,10 +9,26 @@ If you use OSQP for published work, we encourage you to put a star on `GitHub <h
 .. glossary::
 
     Main paper
-        Main algorithm description, derivation and benchmarks. (Coming soon!).
+        Main algorithm description, derivation and benchmark available in this `preprint <https://arxiv.org/pdf/1711.08013.pdf>`__.
+
+        .. code:: latex
+
+          @article{osqp,
+            author = {Stellato, B. and Banjac, G. and Goulart, P. and Bemporad, A. and Boyd, S.},
+            title = {{OSQP}: An Operator Splitting Solver for Quadratic Programs},
+            journal = {ArXiv e-prints},
+            year = {2017},
+            month = nov,
+            adsnote = {Provided by the SAO/NASA Astrophysics Data System},
+            adsurl = {http://adsabs.harvard.edu/abs/2017arXiv171108013S},
+            archiveprefix = {arXiv},
+            eprint = {1711.08013},
+            keywords = {Mathematics - Optimization and Control},
+            primaryclass = {math.OC},
+          }
 
     Infeasibility detection
-        Infeasibility detection proofs using ADMM (also for general conic programs) in this `paper <http://www.optimization-online.org/DB_FILE/2017/06/6058.pdf>`_.
+        Infeasibility detection proofs using ADMM (also for general conic programs) in this `preprint <http://www.optimization-online.org/DB_FILE/2017/06/6058.pdf>`__.
 
         .. code:: latex
 
