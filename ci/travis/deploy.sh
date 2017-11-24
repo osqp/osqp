@@ -81,7 +81,7 @@ if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
 
 
 	echo "Deploying to Pypi..."
-	if [[ $TEST_PYPI ]]; then
+	if [[ "$TEST_PYPI" == "true" ]]; then
 	    twine upload --repository testpypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*     # Test pypi repo
 	else
 	    twine upload --repository pypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*         # Main pypi repo
@@ -95,7 +95,7 @@ else if [[ "$TRAVIS_OS_NAME" == "linux" && "$PYTHON_VERSION" == "3.6" ]]; then
 
 
 	echo "Deploying to Pypi..."
-	if [[ $TEST_PYPI ]]; then
+	if [[ "$TEST_PYPI" == "true" ]]; then
 		twine upload --repository testpypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*     # Test pypi repo
 	else
 		twine upload --repository pypi --config-file ../../ci/pypirc -p $PYPI_PASSWORD dist/*         # Main pypi repo
