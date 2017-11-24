@@ -41,7 +41,7 @@ If you use OSQP for published work, we encourage you to put a star on `GitHub <h
           }
 
     Code generation
-        Code generation functionality.
+        Code generation functionality and example in this `paper <http://stanford.edu/~boyd/papers/pdf/osqp_embedded.pdf>`__.
 
         .. code:: latex
 
