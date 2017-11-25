@@ -1,6 +1,10 @@
 Changes since last release
 --------------------------
-* Fixed problem with code generation and pypi `data_files`
+
+
+Version 0.2.1. (25 November 2017)
+---------------------------------
+* Fixed problem with code generation and pypi `data_files` (everything now in MANIFEST.in)
 
 
 Version 0.2.0 (23 November 2017)
