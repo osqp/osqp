@@ -1,9 +1,10 @@
 include README LICENSE
-include osqp/CMakeLists.txt
-recursive-include osqp/configure *
-recursive-include osqp/src *
-recursive-include osqp/lin_sys *
-recursive-include osqp/include *
+include osqp_sources/CMakeLists.txt
+recursive-include osqp_sources/configure *
+recursive-include osqp_sources/src *
+recursive-include osqp_sources/lin_sys *
+recursive-include osqp_sources/include *
 recursive-include extension *
-
+recursive-include module/codegen/sources *
+recursive-include module/codegen/files_to_generate * 
 

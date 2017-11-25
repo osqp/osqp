@@ -1,7 +1,7 @@
 from __future__ import print_function
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
-from shutil import copyfile
+from shutil import copyfile, copy
 from numpy import get_include
 from glob import glob
 import shutil as sh
@@ -19,11 +19,6 @@ define_macros = []
 if system() == 'Windows':
     cmake_args += ['-G', 'MinGW Makefiles']
 
-    #  # If Windows 32bit, disable long integers
-    #  # => problem in interfacing Python libraries
-    #  if architecture()[0] == '32bit':
-    #      cmake_args += ['-DDLONG=OFF']
-
 else:  # Linux or Mac
     cmake_args += ['-G', 'Unix Makefiles']
 
@@ -40,7 +35,7 @@ cmake_args += ['-DPYTHON_VER_NUM=%s' % py_version]
 
 # Define osqp and suitesparse directories
 current_dir = os.getcwd()
-osqp_dir = os.path.join('osqp')
+osqp_dir = os.path.join('osqp_sources')
 osqp_build_dir = os.path.join(osqp_dir, 'build')
 suitesparse_dir = os.path.join(osqp_dir, 'lin_sys', 'direct', 'suitesparse')
 
@@ -81,7 +76,13 @@ extra_objects = [os.path.join('extension', 'src',
 Copy C sources for code generation
 '''
 
-# List with OSQP C files
+# Create codegen directory
+osqp_codegen_sources_dir = os.path.join('module', 'codegen', 'sources')
+if os.path.exists(osqp_codegen_sources_dir):
+    sh.rmtree(osqp_codegen_sources_dir)
+os.makedirs(osqp_codegen_sources_dir)
+
+# OSQP C files
 cfiles = [os.path.join(osqp_dir, 'src', f)
           for f in os.listdir(os.path.join(osqp_dir, 'src'))
           if f.endswith('.c') and f not in ('cs.c', 'ctrlc.c', 'polish.c',
@@ -92,6 +93,12 @@ cfiles += [os.path.join(suitesparse_dir, f)
 cfiles += [os.path.join(suitesparse_dir, 'ldl', 'src', f)
            for f in os.listdir(os.path.join(suitesparse_dir, 'ldl', 'src'))
            if f.endswith('.c')]
+osqp_codegen_sources_c_dir = os.path.join(osqp_codegen_sources_dir, 'src')
+if os.path.exists(osqp_codegen_sources_c_dir):  # Create destination directory
+    sh.rmtree(osqp_codegen_sources_c_dir)
+os.makedirs(osqp_codegen_sources_c_dir)
+for f in cfiles:  # Copy C files
+    copy(f, osqp_codegen_sources_c_dir)
 
 # List with OSQP H files
 hfiles = [os.path.join(osqp_dir, 'include', f)
@@ -105,13 +112,26 @@ hfiles += [os.path.join(suitesparse_dir, f)
 hfiles += [os.path.join(suitesparse_dir, 'ldl', 'include', f)
            for f in os.listdir(os.path.join(suitesparse_dir, 'ldl', 'include'))
            if f.endswith('.h')]
+osqp_codegen_sources_h_dir = os.path.join(osqp_codegen_sources_dir, 'include')
+if os.path.exists(osqp_codegen_sources_h_dir):  # Create destination directory
+    sh.rmtree(osqp_codegen_sources_h_dir)
+os.makedirs(osqp_codegen_sources_h_dir)
+for f in hfiles:  # Copy header files
+    copy(f, osqp_codegen_sources_h_dir)
 
 # List with OSQP configure files
 configure_files = [os.path.join(osqp_dir, 'configure', 'glob_opts.h.in')]
+osqp_codegen_sources_configure_dir = os.path.join(osqp_codegen_sources_dir, 'configure')
+if os.path.exists(osqp_codegen_sources_configure_dir):  # Create destination directory
+    sh.rmtree(osqp_codegen_sources_configure_dir)
+os.makedirs(osqp_codegen_sources_configure_dir)
+for f in configure_files:  # Copy configure files
+    copy(f, osqp_codegen_sources_configure_dir)
 
-# List of files to generate
-files_to_generate = glob(os.path.join('module', 'codegen',
-                                      'files_to_generate', '*.*'))
+# List of files to generate  (No longer needed. It is in MANIFEST.in)
+#  files_to_generate = glob(os.path.join('module', 'codegen',
+                                      #  'files_to_generate', '*.*'))
+
 
 
 class build_ext_osqp(build_ext):
@@ -165,10 +185,7 @@ setup(name='osqp',
       description='OSQP: The Operator Splitting QP Solver',
       package_dir={'osqp': 'module',
                    'osqppurepy': 'modulepurepy'},
-      data_files=[('osqp/codegen/sources/src', cfiles),
-                  ('osqp/codegen/sources/include', hfiles),
-                  ('osqp/codegen/sources/configure', configure_files),
-                  ('osqp/codegen/files_to_generate', files_to_generate)],
+      include_package_data=True,  # Include package data from MANIFEST.in
       install_requires=["numpy >= 1.7", "scipy >= 0.13.2", "future"],
       license='Apache 2.0',
       url="http://osqp.readthedocs.io/",

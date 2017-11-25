@@ -1,5 +1,10 @@
 Changes since last release
--------------------------
+--------------------------
+* Fixed problem with code generation and pypi `data_files`
+
+
+Version 0.2.0 (23 November 2017)
+---------------------------------
 *   Added adaptive rho -> Much more reliable convergence!
 *   Simplified several settings 
     *  "early_terminate" and "early_terminate_interval" -> "check_termination"
