@@ -164,6 +164,13 @@ tr td code span{
     margin-bottom: 20px;
 }
 
+/* Smaller rubric in C/C++ description */
+p.breathe-sectiondef-title.rubric {
+	font-size: 100%;
+}
+
+
+
 
 /* Remove box shadow from buttons */
 .btn {
