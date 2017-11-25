@@ -50,7 +50,7 @@ If you are using OSQP for your work, we encourage you to
         It can be easily warm-started and the matrix factorization can be cached to solve parametrized problems extremely efficiently.
 
     Interfaces
-        It can be interfaced to C, C++, Python and Matlab.
+        It can be interfaced to C, C++, Python, Julia and Matlab.
 
 
 
