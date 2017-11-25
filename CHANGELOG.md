@@ -2,9 +2,9 @@ Changes since last release
 --------------------------
 
 
-Version 0.2.1. (25 November 2017)
+Version 0.2.1 (25 November 2017)
 ---------------------------------
-* Fixed problem with code generation and pypi `data_files` (everything now in MANIFEST.in)
+* Fixed problem with code generation and pypi `data_files` (everything now in [MANIFEST.in](https://github.com/pypa/sampleproject/issues/30))
 
 
 Version 0.2.0 (23 November 2017)
