@@ -22,7 +22,7 @@ classdef primal_infeasibility_tests < matlab.unittest.TestCase
             testCase.options.rho = 0.01;
             testCase.options.eps_prim_inf = 1e-05;
             testCase.options.max_iter = 2500;
-            testCase.options.early_terminate_interval = 1;
+            testCase.options.check_termination = 1;
 
             % Setup tolerance
             testCase.tol = 1e-04;

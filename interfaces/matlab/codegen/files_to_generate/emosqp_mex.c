@@ -21,7 +21,7 @@ typedef struct {
 } PyTimer;
 
 // Mac
-#elif IS_MAC
+#elif defined IS_MAC
 
 #include <mach/mach_time.h>
 
@@ -52,7 +52,7 @@ typedef struct {
  */
 
 // Windows
-#if IS_WINDOWS
+#ifdef IS_WINDOWS
 
 void tic(PyTimer* t)
 {
@@ -67,7 +67,7 @@ c_float toc(PyTimer* t)
 }
 
 // Mac
-#elif IS_MAC
+#elif defined IS_MAC
 
 void tic(PyTimer* t)
 {
@@ -180,7 +180,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         //assume that three outputs will always
         //be returned to matlab-side class wrapper
         if (((&workspace)->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
-            ((&workspace)->info->status_val != OSQP_DUAL_INFEASIBLE)){
+            ((&workspace)->info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE) &&
+            ((&workspace)->info->status_val != OSQP_DUAL_INFEASIBLE) &&
+            ((&workspace)->info->status_val != OSQP_DUAL_INFEASIBLE_INACCURATE)){
 
             //primal variables
             castToDoubleArr((&workspace)->solution->x, mxGetPr(plhs[0]), (&workspace)->data->n);

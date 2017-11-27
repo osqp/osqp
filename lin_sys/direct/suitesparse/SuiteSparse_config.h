@@ -52,7 +52,7 @@ extern "C" {
 
 #ifndef SuiteSparse_long
 
-#define SuiteSparse_long long
+#define SuiteSparse_long long long
 #define SuiteSparse_long_max LONG_MAX
 #define SuiteSparse_long_idd "ld"
 
@@ -79,7 +79,11 @@ struct SuiteSparse_config_struct
     void *(*malloc_func) (size_t) ;             /* pointer to malloc */
     void *(*realloc_func) (void *, size_t) ;    /* pointer to realloc */
     void (*free_func) (void *) ;                /* pointer to free */
+#ifdef PYTHON
+    void (*printf_func) (const char *, ...) ;    /* pointer to printf (in Python it returns void)*/
+#else
     int (*printf_func) (const char *, ...) ;    /* pointer to printf */
+#endif
     c_float (*hypot_func) (c_float, c_float) ;     /* pointer to hypot */
     int (*divcomplex_func) (c_float, c_float, c_float, c_float, c_float *, c_float *);
 } ;

@@ -50,6 +50,7 @@ Windows
 
 #. Install the latest binaries of `CMake <https://cmake.org/download/#latest>`__.
 
+#. Make sure you have the privileges to create symbolic links. See the `git wiki <https://github.com/git-for-windows/git/wiki/Symbolic-Links#creating-symbolic-links>`_ for more details.
 
 
 Build the binaries
@@ -58,13 +59,24 @@ Build the binaries
 Run the following commands from the terminal
 
 #. Clone the repository, create :code:`build` directory and change directory
+    
+    - On Linux and Mac OS run
+    
+        .. code:: bash
 
-    .. code:: bash
+            git clone https://github.com/oxfordcontrol/osqp
+            cd osqp
+            mkdir build
+            cd build
+       
+    -  On Windows run
+    
+        .. code:: bash
 
-       git clone https://github.com/oxfordcontrol/osqp
-       cd osqp
-       mkdir build
-       cd build
+            git clone -c core.symlinks=true https://github.com/oxfordcontrol/osqp
+            cd osqp
+            mkdir build
+            cd build
 
 
 #. Create Makefiles
@@ -96,7 +108,7 @@ Thanks to CMake, it is possible to create projects for a wide variety of IDEs; s
    cmake -G "Visual Studio 14 2015" ..
 
 
-The compilation will generate the demo :code:`osqp_demo_direct` and the unittests :code:`osqp_tester_direct` executables. In the case of :code:`Unix` or :code:`MinGW` :code:`Makefiles` option they are located in the :code:`build/out/` directory.  Run them to check that the compilation was correct.
+The compilation will generate the demo :code:`osqp_demo` and the unittests :code:`osqp_tester` executables. In the case of :code:`Unix` or :code:`MinGW` :code:`Makefiles` option they are located in the :code:`build/out/` directory.  Run them to check that the compilation was correct.
 
 
-Once the sources are built, the generated static :code:`build/out/libosqpdirstatic.a` and shared :code:`build/out/libosqpdir.ext` libraries can be used to interface any C/C++ software to OSQP. Simply compile with the linker option with :code:`-L(PATH_TO_OSQP)/build/out` and :code:`-losqpdir` or :code:`-losqpdirstatic`. Note that the :code:`osqp_demo_direct` example already performs the required linking using the CMake directives. See the file :code:`CMakeLists.txt` in the root folder for more details.
+Once the sources are built, the generated static :code:`build/out/libosqpstatic.a` and shared :code:`build/out/libosqp.ext` libraries can be used to interface any C/C++ software to OSQP (see :ref:`install_osqp_libs` installation).

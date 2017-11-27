@@ -29,9 +29,9 @@ function [x, y, cost, status, iter] = osqpmatlab(problem, warm_start, settings) 
 %     + max_iter: maximum number of iterations
 %     + verbose: verbosity of the solver
 %       TODO: Add these!
+%     + linsys_solver: linear system solver 
 %     + scaled_termination: evaluate termination criteria
-%     + early_terminate: evaluate termination criteria
-%     + early_terminate_interval: interval for evaluating termination criteria
+%     + check_termination: evaluate termination criteria
 %
 % OUTPUTS
 %   - x: primal solution

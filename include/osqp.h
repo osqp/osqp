@@ -5,20 +5,14 @@
 extern "C" {
 #endif
 
-
 /* Includes */
 #include "types.h"
-#include "auxil.h"
-#include "util.h"
-#include "scaling.h"
-#include "glob_opts.h"
+#include "util.h"  // Needed for set_default_settings functions
 
-#ifdef CTRLC
-#include "ctrlc.h"
-#endif
 
+// Library to deal with sparse matrices enabled only if embedded not defined
 #ifndef EMBEDDED
-#include "polish.h"
+#include "cs.h"
 #endif
 
 /********************
@@ -42,8 +36,9 @@ extern "C" {
  * - automatic parameters tuning (if enabled)
  * - setup linear system solver:
  *      - direct solver: KKT matrix factorization is performed here
+ *      - indirect solver: KKT matrix preconditioning is performed here
  *
- * N.B. This is the only function that allocates dynamic memory and is not used during code generation
+ * NB: This is the only function that allocates dynamic memory and is not used during code generation
  *
  * @param  data         Problem data
  * @param  settings     Solver settings
@@ -180,7 +175,7 @@ c_int osqp_warm_start_y(OSQPWorkspace * work, c_float * y);
  * @param  P_new_n    Number of new elements to be changed
  * @return            output flag:  0: OK
  *                                  1: P_new_n > nnzP
- *                                 <0: error in update_priv()
+ *                                 <0: error in the update
  */
 c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, c_int P_new_n);
 
@@ -198,7 +193,7 @@ c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, 
  * @param  A_new_n    Number of new elements to be changed
  * @return            output flag:  0: OK
  *                                  1: A_new_n > nnzA
- *                                 <0: error in update_priv()
+ *                                 <0: error in the update
  */
 c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, c_int A_new_n);
 
@@ -224,9 +219,17 @@ c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, 
  * @return            output flag:  0: OK
  *                                  1: P_new_n > nnzP
  *                                  2: A_new_n > nnzA
- *                                 <0: error in update_priv()
+ *                                 <0: error in the update
  */
 c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, c_int P_new_n, c_float * Ax_new, c_int * Ax_new_idx, c_int A_new_n);
+
+/**
+* Update rho. Limit it between RHO_MIN and RHO_MAX.
+* @param  work         Workspace
+* @param  rho_new      New rho setting
+* @return              Exitflag
+*/
+c_int osqp_update_rho(OSQPWorkspace * work, c_float rho_new);
 
 #endif
 
@@ -313,30 +316,12 @@ c_int osqp_update_warm_start(OSQPWorkspace * work, c_int warm_start_new);
 c_int osqp_update_scaled_termination(OSQPWorkspace * work, c_int scaled_termination_new);
 
 /**
- * Update early_terminate setting
- * @param  work                 Workspace
- * @param  early_terminate_new  New early_terminate setting
- * @return                      Exitflag
+ * Update check_termination setting
+ * @param  work                   Workspace
+ * @param  check_termination_new  New check_termination setting
+ * @return                        Exitflag
  */
-c_int osqp_update_early_terminate(OSQPWorkspace * work, c_int early_terminate_new);
-
-/**
- * Update early_terminate setting
- * @param  work                 Workspace
- * @param  early_terminate_new  New early_terminate setting
- * @return                      Exitflag
- */
-c_int osqp_update_early_terminate(OSQPWorkspace * work, c_int early_terminate_new);
-
-
-
-/**
- * Update early_terminate_interval setting
- * @param  work                          Workspace
- * @param  early_terminate_interval_new  New early_terminate_interval setting
- * @return                               Exitflag
- */
-c_int osqp_update_early_terminate_interval(OSQPWorkspace * work, c_int early_terminate_interval_new);
+c_int osqp_update_check_termination(OSQPWorkspace * work, c_int check_termination_new);
 
 
 #ifndef EMBEDDED
@@ -362,10 +347,10 @@ c_int osqp_update_polish(OSQPWorkspace * work, c_int polish_new);
 /**
  * Update number of iterative refinement steps in polish
  * @param  work                Workspace
- * @param  pol_refine_iter_new New iterative reginement steps
+ * @param  polish_refine_iter_new New iterative reginement steps
  * @return                     Exitflag
  */
-c_int osqp_update_pol_refine_iter(OSQPWorkspace * work, c_int pol_refine_iter_new);
+c_int osqp_update_polish_refine_iter(OSQPWorkspace * work, c_int polish_refine_iter_new);
 
 
 /**

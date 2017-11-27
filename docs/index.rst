@@ -15,10 +15,19 @@ optimization package for solving convex quadratic programs in the form
 where :math:`x` is the optimization variable and
 :math:`P \in \mathbf{S}^{n}_{+}` a positive semidefinite matrix.
 
-**The code is available on** `GitHub <https://github.com/oxfordcontrol/osqp>`_.
+**Code available on** `GitHub <https://github.com/oxfordcontrol/osqp>`_.
 
-Features
---------
+.. rubric:: Citing OSQP
+
+If you are using OSQP for your work, we encourage you to 
+
+* :ref:`Cite the related papers <citing>`
+* Put a star on `GitHub <https://github.com/oxfordcontrol/osqp>`_
+
+**We are looking forward to hearing your success stories with OSQP!** Please `share them with us <mailto:bartolomeo.stellato@gmail.com>`_. 
+
+.. rubric:: Features
+
 
 .. glossary::
 
@@ -41,18 +50,17 @@ Features
         It can be easily warm-started and the matrix factorization can be cached to solve parametrized problems extremely efficiently.
 
     Interfaces
-        It can be interfaced to C, C++, Python and Matlab.
+        It can be interfaced to C, C++, Python, Julia and Matlab.
 
 
 
-License
--------
+.. rubric:: License
+
 OSQP is distributed under the `Apache 2.0 License <https://www.apache.org/licenses/LICENSE-2.0>`_
 
 
 
-Credits
--------
+.. rubric:: Credits
 
 The following people have been involved in the development of OSQP:
 
@@ -65,10 +73,14 @@ The following people have been involved in the development of OSQP:
 * `Stephen Boyd <http://web.stanford.edu/~boyd/>`_ (Stanford University): methods and maths
 
 
-Bug reports and support
-------------------------
+.. rubric:: Bug reports and support
 
 Please report any issues via the `Github issue tracker <https://github.com/oxfordcontrol/osqp/issues>`_. All types of issues are welcome including bug reports, documentation typos, feature requests and so on.
+
+
+.. rubric:: Numerical benchmarks
+
+Numerical benchmarks against other solvers are available `here <https://github.com/oxfordcontrol/osqp_benchmarks>`_.
 
 
 .. toctree::
@@ -82,4 +94,5 @@ Please report any issues via the `Github issue tracker <https://github.com/oxfor
    parsers/index
    codegen/index
    examples/index
+   contributing/index
    citing/index

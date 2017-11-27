@@ -50,33 +50,41 @@ The problem can be solved by
 
    results = m.solve();
 
-The :code:`results` structure contains the primal solution :code:`x`, the dual solution :code:`y` and the :code:`info` structure containing the solver statistics defined in the following table
+The :code:`results` structure contains the primal solution :code:`x`, the dual solution :code:`y`, certificate of primal infeasibility :code:`prim_inf_cert`, certificate of dual infeasibility :code:`dual_inf_cert` and the :code:`info` structure containing the solver statistics defined in the following table
 
 
-+-----------------------+-------------------------------------------------+
-| Member                | Description                                     |
-+=======================+=================================================+
-| :code:`iter`          | Number of iterations                            |
-+-----------------------+-------------------------------------------------+
-| :code:`status`        | Solver status                                   |
-+-----------------------+-------------------------------------------------+
-| :code:`status_val`    | Solver status value as in :ref:`status_values`  |
-+-----------------------+-------------------------------------------------+
-| :code:`status_polish` | Polishing status                                |
-+-----------------------+-------------------------------------------------+
-| :code:`obj_val`       | Objective value                                 |
-+-----------------------+-------------------------------------------------+
-| :code:`pri_res`       | Primal residual                                 |
-+-----------------------+-------------------------------------------------+
-| :code:`dua_res`       | Dual residual                                   |
-+-----------------------+-------------------------------------------------+
-| :code:`run_time`      | Total run time                                  |
-+-----------------------+-------------------------------------------------+
-| :code:`setup_time`    | Setup time                                      |
-+-----------------------+-------------------------------------------------+
-| :code:`polish_time`   | Polish time                                     |
-+-----------------------+-------------------------------------------------+
++-----------------------+------------------------------------------------+
+| Member                | Description                                    |
++=======================+================================================+
+| :code:`iter`          | Number of iterations                           |
++-----------------------+------------------------------------------------+
+| :code:`status`        | Solver status                                  |
++-----------------------+------------------------------------------------+
+| :code:`status_val`    | Solver status value as in :ref:`status_values` |
++-----------------------+------------------------------------------------+
+| :code:`status_polish` | Polishing status                               |
++-----------------------+------------------------------------------------+
+| :code:`obj_val`       | Objective value                                |
++-----------------------+------------------------------------------------+
+| :code:`pri_res`       | Primal residual                                |
++-----------------------+------------------------------------------------+
+| :code:`dua_res`       | Dual residual                                  |
++-----------------------+------------------------------------------------+
+| :code:`setup_time`    | Setup time                                     |
++-----------------------+------------------------------------------------+
+| :code:`solve_time`    | Solve time                                     |
++-----------------------+------------------------------------------------+
+| :code:`polish_time`   | Polish time                                    |
++-----------------------+------------------------------------------------+
+| :code:`run_time`      | Total run time: setup + solve + polish         |
++-----------------------+------------------------------------------------+
+| :code:`rho_estimate`  | Optimal rho estimate                           |
++-----------------------+------------------------------------------------+
+| :code:`rho_updates`   | Number of rho updates                          |
++-----------------------+------------------------------------------------+
 
+Note that if multiple solves are executed from single setup, then after the
+first one :code:`run_time` includes only :code:`solve_time` + :code:`polish_time`.
 
 Update
 ------
@@ -120,4 +128,4 @@ OSQP automatically warm starts primal and dual variables from the previous QP so
 
     m.warm_start('x', x0, 'y', y0)
 
-where :code:`x0` and :code:`y0` are the new primal and dual variables. Please make sure :code`warm_start` solver option is active.
+where :code:`x0` and :code:`y0` are the new primal and dual variables. 

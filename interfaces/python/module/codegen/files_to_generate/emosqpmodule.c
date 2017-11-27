@@ -27,7 +27,7 @@ typedef struct {
 } PyTimer;
 
 // Mac
-#elif IS_MAC
+#elif defined IS_MAC
 
 #include <mach/mach_time.h>
 
@@ -57,7 +57,7 @@ typedef struct {
  */
 
 // Windows
-#if IS_WINDOWS
+#ifdef IS_WINDOWS
 
 void tic(PyTimer* t) {
     QueryPerformanceFrequency(&t->freq);
@@ -70,7 +70,7 @@ c_float toc(PyTimer* t) {
 }
 
 // Mac
-#elif IS_MAC
+#elif defined IS_MAC
 
 void tic(PyTimer* t) {
     /* read current clock cycles */
@@ -242,7 +242,9 @@ static PyObject * OSQP_solve(PyObject *self, PyObject *args)
 
     // If problem is not primal or dual infeasible store it
     if (((&workspace)->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
-        ((&workspace)->info->status_val != OSQP_DUAL_INFEASIBLE)) {
+		((&workspace)->info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE) &&
+        ((&workspace)->info->status_val != OSQP_DUAL_INFEASIBLE) &&
+		((&workspace)->info->status_val != OSQP_DUAL_INFEASIBLE_INACCURATE)) {
 
 			// Construct primal and dual solution arrays
 			x = (PyObject *)PyArrayFromCArray((&workspace)->solution->x,
@@ -460,7 +462,7 @@ static PyObject * OSQP_update_P(PyObject *self, PyObject *args) {
 		int int_type = get_int_type();
 
 		#ifdef DLONG
-		static char * argparse_string = "OOl";
+		static char * argparse_string = "OOL";
 		#else
 		static char * argparse_string = "OOi";
 		#endif
@@ -523,7 +525,7 @@ static PyObject * OSQP_update_A(PyObject *self, PyObject *args) {
 		int int_type = get_int_type();
 
 		#ifdef DLONG
-		static char * argparse_string = "OOl";
+		static char * argparse_string = "OOL";
 		#else
 		static char * argparse_string = "OOi";
 		#endif
@@ -586,7 +588,7 @@ static PyObject * OSQP_update_P_A(PyObject *self, PyObject *args) {
 		int int_type = get_int_type();
 
 		#ifdef DLONG
-		static char * argparse_string = "OOlOOl";
+		static char * argparse_string = "OOLOOL";
 		#else
 		static char * argparse_string = "OOiOOi";
 		#endif

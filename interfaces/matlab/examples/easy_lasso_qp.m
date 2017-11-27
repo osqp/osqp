@@ -26,5 +26,8 @@ l = [bd; -Inf*ones(n,1); zeros(n,1)];
 u = [bd; zeros(n,1); Inf*ones(n,1)];
 
 solver = osqp;
-solver.setup(P, q, A, l, u, 'verbose', false);
+solver.setup(P, q, A, l, u, 'verbose', true, 'linsys_solver', 'mkl pardiso');
 res = solver.solve();
+
+
+%solver.codegen('test')

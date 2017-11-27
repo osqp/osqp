@@ -6,27 +6,43 @@ extern "C" {
 #endif
 
 #include "types.h"
-#include "proj.h"
-#include "lin_alg.h"
-#include "constants.h"
-#include "scaling.h"
-#include "util.h"
-#include "lin_sys.h"
 
 
 
 /***********************************************************
  * Auxiliary functions needed to compute ADMM iterations * *
  ***********************************************************/
-
-#ifndef EMBEDDED
+#if EMBEDDED != 1
 /**
- * Automatically compute rho
+ * Compute rho estimate from residuals
+ * @param work Workspace
+ * @return     rho estimate
+ */
+c_float compute_rho_estimate(OSQPWorkspace * work);
+
+/**
+ * Adapt rho value based on current unscaled primal/dual residuals
+ * @param work Workspace
+ * @return     Exitflag
+ */
+c_int adapt_rho(OSQPWorkspace * work);
+
+/**
+ * Set values of rho vector based on constraint types
  * @param work Workspace
  */
-void compute_rho(OSQPWorkspace * work);
+void set_rho_vec(OSQPWorkspace * work);
 
-#endif // ifndef EMBEDDED
+/**
+ * Update values of rho vector based on updated constraints.
+ * If the constraints change, update the linear systems solver.
+ * 
+ * @param work Workspace
+ * @return     Exitflag
+ */
+c_int update_rho_vec(OSQPWorkspace * work);
+
+#endif // EMBEDDED
 
 /**
  * Swap c_float vector pointers
@@ -76,11 +92,11 @@ void update_y(OSQPWorkspace *work);
 
 /**
 * Compute objective function from data at value x
-* @param  data OSQPData structure
+* @param  work OSQPWorkspace structure
 * @param  x    Value x
 * @return      Objective function value
 */
-c_float compute_obj_val(OSQPData *data, c_float * x);
+c_float compute_obj_val(OSQPWorkspace *work, c_float * x);
 
 
 
@@ -102,6 +118,13 @@ void update_info(OSQPWorkspace *work, c_int iter, c_int compute_objective, c_int
 
 
 /**
+* Reset solver information (after problem updates)
+* @param info               Information structure
+*/
+void reset_info(OSQPInfo *info);
+
+
+/**
 * Update solver status (value and string)
 * @param info OSQPInfo
 * @param status_val new status value
@@ -111,10 +134,14 @@ void update_status(OSQPInfo *info, c_int status_val);
 
 /**
 * Check if termination conditions are satisfied
-* @param  work Workspace
+* If the boolean flag is ON, it checks for approximate conditions (10 x larger
+* tolerances than the ones set)
+*
+* @param  work        Workspace
+* @param  approximate Boolean
 * @return      Redisuals check
 */
-c_int check_termination(OSQPWorkspace *work);
+c_int check_termination(OSQPWorkspace *work, c_int approximate);
 
 
 

@@ -5,35 +5,11 @@ Utilities to generate embedded C code from OSQP sources
 from __future__ import print_function
 from builtins import range
 
-# Import numpy
-import numpy as np
-
 # Path of osqp module
 import os.path
 import osqp
 files_to_generate_path = os.path.join(osqp.__path__[0],
                                       'codegen', 'files_to_generate')
-
-
-def fill_settings(f, settings, name):
-    """
-    Fill settings
-    """
-    for key, value in settings.items():
-        if  key != 'scaling_iter':
-            if type(value) == int:
-                is_int = True
-            elif value.is_integer():
-                is_int = True
-            else:
-                is_int = False
-            f.write('%s->%s = ' % (name, key))
-            if is_int:
-                f.write(str(value))
-            else:
-                f.write("(c_float)")
-                f.write(str(value))
-            f.write(";\n")
 
 
 def write_vec(f, vec, name, vec_type):
@@ -108,9 +84,13 @@ def write_settings(f, settings, name, embedded_flag):
     f.write("(c_float)%.20f, " % settings['sigma'])
     f.write("%d, " % settings['scaling'])
 
-    # EMBEDDED == 2
     if embedded_flag != 1:
-        f.write("%d, " % settings['scaling_iter'])
+        f.write("%d, " % settings['adaptive_rho'])
+        f.write("%d, " % settings['adaptive_rho_interval'])
+        f.write("(c_float)%.20f, " % settings['adaptive_rho_tolerance'])
+        f.write("\n#ifdef PROFILING\n")
+        f.write("(c_float)%.20f, " % settings['adaptive_rho_fraction'])
+        f.write("\n#endif  // PROFILING\n")
 
     f.write("%d, " % settings['max_iter'])
     f.write("(c_float)%.20f, " % settings['eps_abs'])
@@ -118,11 +98,10 @@ def write_settings(f, settings, name, embedded_flag):
     f.write("(c_float)%.20f, " % settings['eps_prim_inf'])
     f.write("(c_float)%.20f, " % settings['eps_dual_inf'])
     f.write("(c_float)%.20f, " % settings['alpha'])
+    f.write("%d, " % settings['linsys_solver'])
 
     f.write("%d, " % settings['scaled_termination'])
-    f.write("%d, " % settings['early_terminate'])
-    f.write("%d, " %
-            settings['early_terminate_interval'])
+    f.write("%d, " % settings['check_termination'])
     f.write("%d" % settings['warm_start'])
 
     f.write("};\n\n")
@@ -138,41 +117,52 @@ def write_scaling(f, scaling, name):
         write_vec(f, scaling['Dinv'], 'Dinvscaling', 'c_float')
         write_vec(f, scaling['E'], 'Escaling', 'c_float')
         write_vec(f, scaling['Einv'], 'Einvscaling', 'c_float')
-        f.write("OSQPScaling %s = " % name)
-        f.write("{Dscaling, Escaling, Dinvscaling, Einvscaling};\n\n")
+        f.write("OSQPScaling %s = {" % name)
+        f.write("(c_float)%.20f, " % scaling['c'])
+        f.write("Dscaling, Escaling, ")
+        f.write("(c_float)%.20f, " % scaling['cinv'])
+        f.write("Dinvscaling, Einvscaling};\n\n")
     else:
         f.write("OSQPScaling %s;\n\n" % name)
 
 
-def write_private(f, priv, name, embedded_flag):
+def write_linsys_solver(f, linsys_solver, name, embedded_flag):
     """
-    Write private structure during code generation
+    Write linsys_solver structure during code generation
     """
 
-    f.write("// Define private structure\n")
-    write_mat(f, priv['L'], 'priv_L')
-    write_vec(f, priv['Dinv'], 'priv_Dinv', 'c_float')
-    write_vec(f, priv['P'], 'priv_P', 'c_int')
-    f.write("c_float priv_bp[%d];\n" % (len(priv['Dinv'])))  # Empty rhs
+    f.write("// Define linsys_solver structure\n")
+    write_mat(f, linsys_solver['L'], 'linsys_solver_L')
+    write_vec(f, linsys_solver['Dinv'], 'linsys_solver_Dinv', 'c_float')
+    write_vec(f, linsys_solver['P'], 'linsys_solver_P', 'c_int')
+    # Empty rhs
+    f.write("c_float linsys_solver_bp[%d];\n" % (len(linsys_solver['Dinv'])))
 
     if embedded_flag != 1:
-        write_vec(f, priv['Pdiag_idx'], 'priv_Pdiag_idx', 'c_int')
-        write_mat(f, priv['KKT'], 'priv_KKT')
-        write_vec(f, priv['PtoKKT'], 'priv_PtoKKT', 'c_int')
-        write_vec(f, priv['AtoKKT'], 'priv_AtoKKT', 'c_int')
-        write_vec(f, priv['Lnz'], 'priv_Lnz', 'c_int')
-        write_vec(f, priv['Y'], 'priv_Y', 'c_float')
-        write_vec(f, priv['Pattern'], 'priv_Pattern', 'c_int')
-        write_vec(f, priv['Flag'], 'priv_Flag', 'c_int')
-        write_vec(f, priv['Parent'], 'priv_Parent', 'c_int')
+        write_vec(f, linsys_solver['Pdiag_idx'],
+                  'linsys_solver_Pdiag_idx', 'c_int')
+        write_mat(f, linsys_solver['KKT'], 'linsys_solver_KKT')
+        write_vec(f, linsys_solver['PtoKKT'], 'linsys_solver_PtoKKT', 'c_int')
+        write_vec(f, linsys_solver['AtoKKT'], 'linsys_solver_AtoKKT', 'c_int')
+        write_vec(f, linsys_solver['rhotoKKT'],
+                  'linsys_solver_rhotoKKT', 'c_int')
+        write_vec(f, linsys_solver['Lnz'], 'linsys_solver_Lnz', 'c_int')
+        write_vec(f, linsys_solver['Y'], 'linsys_solver_Y', 'c_float')
+        write_vec(f, linsys_solver['Pattern'],
+                  'linsys_solver_Pattern', 'c_int')
+        write_vec(f, linsys_solver['Flag'], 'linsys_solver_Flag', 'c_int')
+        write_vec(f, linsys_solver['Parent'], 'linsys_solver_Parent', 'c_int')
 
-    f.write("Priv %s = " % name)
+    f.write("suitesparse_ldl_solver %s = " % name)
+    f.write("{SUITESPARSE_LDL_SOLVER, &solve_linsys_suitesparse_ldl, ")
     if embedded_flag != 1:
-        f.write("{&priv_L, priv_Dinv, priv_P, priv_bp, priv_Pdiag_idx, " +
-                "%d, &priv_KKT, priv_PtoKKT, priv_AtoKKT, " % priv['Pdiag_n'] +
-                "priv_Lnz, priv_Y, priv_Pattern, priv_Flag, priv_Parent};\n\n")
+        f.write("&update_linsys_solver_matrices_suitesparse_ldl, &update_linsys_solver_rho_vec_suitesparse_ldl, " +
+                "&linsys_solver_L, linsys_solver_Dinv, linsys_solver_P, linsys_solver_bp, linsys_solver_Pdiag_idx, " +
+                "%d, " % linsys_solver['Pdiag_n'] +
+                "&linsys_solver_KKT, linsys_solver_PtoKKT, linsys_solver_AtoKKT, linsys_solver_rhotoKKT, " +
+                "linsys_solver_Lnz, linsys_solver_Y, linsys_solver_Pattern, linsys_solver_Flag, linsys_solver_Parent};\n\n")
     else:
-        f.write("{&priv_L, priv_Dinv, priv_P, priv_bp};\n\n")
+        f.write("&linsys_solver_L, linsys_solver_Dinv, linsys_solver_P, linsys_solver_bp};\n\n")
 
 
 def write_solution(f, data, name):
@@ -194,31 +184,45 @@ def write_info(f, name):
             % name)
 
 
-def write_workspace(f, data, name):
+def write_workspace(f, n, m, rho_vectors, embedded_flag, name):
     """
     Write workspace structure
     """
 
     f.write("// Define workspace\n")
-    f.write("c_float work_x[%d];\n" % data['n'])
-    f.write("c_float work_y[%d];\n" % data['m'])
-    f.write("c_float work_z[%d];\n" % data['m'])
-    f.write("c_float work_xz_tilde[%d];\n" % (data['m'] + data['n']))
-    f.write("c_float work_x_prev[%d];\n" % data['n'])
-    f.write("c_float work_z_prev[%d];\n" % data['m'])
-    f.write("c_float work_delta_y[%d];\n" % data['m'])
-    f.write("c_float work_Atdelta_y[%d];\n" % data['n'])
-    f.write("c_float work_delta_x[%d];\n" % data['n'])
-    f.write("c_float work_Pdelta_x[%d];\n" % data['n'])
-    f.write("c_float work_Adelta_x[%d];\n" % data['m'])
-    f.write("c_float work_D_temp[%d];\n" % data['n'])
-    f.write("c_float work_D_temp_A[%d];\n" % data['n'])
-    f.write("c_float work_E_temp[%d];\n\n" % data['m'])
+
+    write_vec(f, rho_vectors['rho_vec'], 'work_rho_vec', 'c_float')
+    write_vec(f, rho_vectors['rho_inv_vec'], 'work_rho_inv_vec', 'c_float')
+    if embedded_flag != 1:
+        write_vec(f, rho_vectors['constr_type'], 'work_constr_type', 'c_int')
+
+    f.write("c_float work_x[%d];\n" % n)
+    f.write("c_float work_y[%d];\n" % m)
+    f.write("c_float work_z[%d];\n" % m)
+    f.write("c_float work_xz_tilde[%d];\n" % (m + n))
+    f.write("c_float work_x_prev[%d];\n" % n)
+    f.write("c_float work_z_prev[%d];\n" % m)
+    f.write("c_float work_Ax[%d];\n" % m)
+    f.write("c_float work_Px[%d];\n" % n)
+    f.write("c_float work_Aty[%d];\n" % n)
+    f.write("c_float work_delta_y[%d];\n" % m)
+    f.write("c_float work_Atdelta_y[%d];\n" % n)
+    f.write("c_float work_delta_x[%d];\n" % n)
+    f.write("c_float work_Pdelta_x[%d];\n" % n)
+    f.write("c_float work_Adelta_x[%d];\n" % m)
+    f.write("c_float work_D_temp[%d];\n" % n)
+    f.write("c_float work_D_temp_A[%d];\n" % n)
+    f.write("c_float work_E_temp[%d];\n\n" % m)
 
     f.write("OSQPWorkspace %s = {\n" % name)
-    f.write("&data, &priv,\n")
+    f.write("&data, (LinSysSolver *)&linsys_solver,\n")
+    f.write("work_rho_vec, work_rho_inv_vec,\n")
+    if embedded_flag != 1:
+        f.write("work_constr_type,\n")
+
     f.write("work_x, work_y, work_z, work_xz_tilde,\n")
     f.write("work_x_prev, work_z_prev,\n")
+    f.write("work_Ax, work_Px, work_Aty,\n")
     f.write("work_delta_y, work_Atdelta_y,\n")
     f.write("work_delta_x, work_Pdelta_x, work_Adelta_x,\n")
     f.write("work_D_temp, work_D_temp_A, work_E_temp,\n")
@@ -230,19 +234,22 @@ def render_workspace(variables, output):
     Print workspace dimensions
     """
 
+    rho_vectors = variables['rho_vectors']
     data = variables['data']
-    priv = variables['priv']
+    linsys_solver = variables['linsys_solver']
     scaling = variables['scaling']
     settings = variables['settings']
     embedded_flag = variables['embedded_flag']
+    n = data['n']
+    m = data['m']
 
     # Open output file
     f = open(output, 'w')
 
-    # Include types, constants and private header
+    # Include types, constants and linsys_solver header
     f.write("#include \"types.h\"\n")
     f.write("#include \"constants.h\"\n")
-    f.write("#include \"private.h\"\n\n")
+    f.write("#include \"suitesparse_ldl.h\"\n\n")
 
     '''
     Write data structure
@@ -260,9 +267,9 @@ def render_workspace(variables, output):
     write_scaling(f, scaling, 'scaling')
 
     '''
-    Write private structure
+    Write linsys_solver structure
     '''
-    write_private(f, priv, 'priv', embedded_flag)
+    write_linsys_solver(f, linsys_solver, 'linsys_solver', embedded_flag)
 
     '''
     Define empty solution structure
@@ -277,7 +284,7 @@ def render_workspace(variables, output):
     '''
     Define workspace structure
     '''
-    write_workspace(f, data, 'workspace')
+    write_workspace(f, n, m, rho_vectors, embedded_flag, 'workspace')
 
     f.close()
 
@@ -288,8 +295,8 @@ def write_ldl_lsolve(f, variables):
     """
 
     data = variables['data']
-    priv = variables['priv']
-    Lp = priv['L']['p']
+    linsys_solver = variables['linsys_solver']
+    Lp = linsys_solver['L']['p']
 
     f.write("void LDL_lsolve(LDL_int n, c_float X [ ], LDL_int Lp [ ]")
     f.write(", LDL_int Li [ ], c_float Lx [ ]){\n")
@@ -311,8 +318,8 @@ def write_ldl_ltsolve(f, variables):
     Write LDL_ltsolve to file
     """
     data = variables['data']
-    priv = variables['priv']
-    Lp = priv['L']['p']
+    linsys_solver = variables['linsys_solver']
+    Lp = linsys_solver['L']['p']
 
     f.write("void LDL_ltsolve(LDL_int n, c_float X [ ], LDL_int Lp [ ]")
     f.write(", LDL_int Li [ ], c_float Lx [ ]){\n")
@@ -432,7 +439,7 @@ def render_setuppy(variables, output):
 
 def render_cmakelists(variables, output):
     """
-    Render setup.py file
+    Render CMakeLists file
     """
 
     embedded_flag = variables['embedded_flag']

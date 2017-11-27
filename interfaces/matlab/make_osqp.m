@@ -1,7 +1,7 @@
 function make_osqp(varargin)
 % Matlab MEX makefile for OSQP.
 %
-%    MAKEMEX(VARARGIN) is a make file for OSQP solver. It
+%    MAKE_OSQP(VARARGIN) is a make file for OSQP solver. It
 %    builds OSQP and its components from source.
 %
 %    WHAT is the last element of VARARGIN and cell array of strings,
@@ -18,8 +18,8 @@ function make_osqp(varargin)
 %
 %    Additional commands:
 %
-%    makemex clean - delete all object files (.o and .obj)
-%    makemex purge - same as above, and also delete the mex files.
+%    'clean': delete all object files (.o and .obj)
+%    'purge' : same as above, and also delete the mex files.
 
 
 if( nargin == 0 )
@@ -45,13 +45,6 @@ else
 end
 
 
-% Default parameters
-PRINTING = true;
-PROFILING = true;
-CTRLC = true;
-DFLOAT = false;
-DLONG = true;
-
 
 %% Basic compile commands
 
@@ -62,22 +55,14 @@ mex_libs = '';
 
 
 % Add arguments to cmake and mex compiler
-cmake_args = '-DUNITTESTS=OFF -DMATLAB=ON';
-mexoptflags = '';
+cmake_args = '-DMATLAB=ON';
+mexoptflags = '-DMATLAB';
 
 % Add specific generators for windows linux or mac
 if (ispc)
     cmake_args = sprintf('%s %s', cmake_args, '-G "MinGW Makefiles"');
-    mexoptflags = sprintf('%s %s', mexoptflags, '-DIS_WINDOWS');
 else
     cmake_args = sprintf('%s %s', cmake_args, '-G "Unix Makefiles"');
-    if (ismac)
-      mexoptflags = sprintf('%s %s', mexoptflags, '-DIS_MAC');
-    else
-        if (isunix)
-          mexoptflags = sprintf('%s %s', mexoptflags, '-DIS_LINUX');
-        end
-    end
 end
 
 % Pass Matlab root to cmake
@@ -86,48 +71,24 @@ cmake_args = sprintf('%s %s%s%s', cmake_args, ...
     '-DMatlab_ROOT_DIR="', Matlab_ROOT, '"');
 
 % Add parameters options to mex and cmake
-if PROFILING
-   cmake_args = sprintf('%s %s', cmake_args, '-DPROFILING:BOOL=ON');
-   mexoptflags =  sprintf('%s %s', mexoptflags, '-DPROFILING');
+% CTRLC
+if (ispc)
+   ut = fullfile(matlabroot, 'extern', 'lib', computer('arch'), ...
+                 'mingw64', 'libut.lib');
+   mex_libs = sprintf('%s "%s"', mex_libs, ut);
+else
+   mex_libs = sprintf('%s %s', mex_libs, '-lut');
 end
-
-if PRINTING
-   cmake_args = sprintf('%s %s', cmake_args, '-DPRINTING:BOOL=ON');
-   mexoptflags =  sprintf('%s %s', mexoptflags, '-DPRINTING');
+% Shared library loading
+if (isunix && ~ismac)
+   mex_libs = sprintf('%s %s', mex_libs, '-ldl');
 end
-
-if CTRLC
-   cmake_args = sprintf('%s %s', cmake_args, '-DCTRLC:BOOL=ON');
-   mexoptflags =  sprintf('%s %s', mexoptflags, '-DCTRLC');
-   if (ispc)
-       ut = fullfile(matlabroot, 'extern', 'lib', computer('arch'), ...
-                     'mingw64', 'libut.lib');
-       mex_libs = sprintf('%s "%s"', mex_libs, ut);
-   else
-       mex_libs = sprintf('%s %s', mex_libs, '-lut');
-   end
-end
-
-if DLONG
-   cmake_args = sprintf('%s %s', cmake_args, '-DDLONG:BOOL=ON');
-   mexoptflags =  sprintf('%s %s', mexoptflags, '-DDLONG');
-   mexoptflags =  sprintf('%s %s', mexoptflags, '-DDLONG');
-end
-
-if DFLOAT
-   cmake_args = sprintf('%s %s', cmake_args, '-DDFLOAT:BOOL=ON');
-   mexoptflags =  sprintf('%s %s', mexoptflags, '-DDFLOAT');
-end
-
 
 % Add large arrays support if computer 64 bit
 if (~isempty (strfind (computer, '64')))
     mexoptflags = sprintf('%s %s', mexoptflags, '-largeArrayDims');
 end
 
-
-% Pass MATLAB flag to mex compiler
-mexoptflags = sprintf('%s %s', mexoptflags, '-DMATLAB');
 
 % Set optimizer flag
 if (~ispc)
@@ -136,7 +97,7 @@ end
 
 % Set library extension
 lib_ext = '.a';
-lib_name = sprintf('libosqpdirstatic%s', lib_ext);
+lib_name = sprintf('libosqpstatic%s', lib_ext);
 
 
 % Set osqp directory and osqp_build directory
@@ -150,10 +111,7 @@ cg_sources_dir = fullfile('.','codegen', 'sources');
 % Include directory
 inc_dir = [
     fullfile(sprintf(' -I%s', osqp_dir), 'include'), ...
-    sprintf(' -I%s', suitesparse_dir), ...
-    fullfile(sprintf(' -I%s', suitesparse_dir), 'ldl', 'include'), ...
-    fullfile(sprintf(' -I%s', suitesparse_dir), 'amd', 'include')
-    ];
+    sprintf(' -I%s', suitesparse_dir)];
 
 
 %% OSQP Solver
@@ -184,7 +142,7 @@ if( any(strcmpi(what,'osqp')) || any(strcmpi(what,'all')) )
         disp(output);
     end
 
-    [status, output] = system(sprintf('%s %s', make_cmd, '--target osqpdirstatic'));
+    [status, output] = system(sprintf('%s %s', make_cmd, '--target osqpstatic'));
     if (status)
         fprintf('\n');
         disp(output);
@@ -215,10 +173,10 @@ if( any(strcmpi(what,'osqp_mex')) || any(strcmpi(what,'all')) )
     %cmd = sprintf('%s %s %s %s osqp_mex.cpp', mex_cmd, mexoptflags, inc_dir, lib_name);
     cmd = sprintf('%s %s %s %s osqp_mex.cpp %s', ...
         mex_cmd, mexoptflags, inc_dir, lib_name, mex_libs);
-    
+
     % Compile
     eval(cmd);
-    fprintf('\t\t\t\t[done]\n');
+    fprintf('\t\t\t\t\t[done]\n');
 
 end
 
@@ -238,7 +196,7 @@ if( any(strcmpi(what,'codegen')) || any(strcmpi(what,'all')) )
     for j = 1:length(cdirs)
         cfiles = dir(fullfile(cdirs{j},'*.c'));
         for i = 1 : length(cfiles)
-            if ~any(strcmp(cfiles(i).name, {'cs.c', 'ctrlc.c', 'polish.c', 'SuiteSparse_config.c'}))
+            if ~any(strcmp(cfiles(i).name, {'cs.c', 'ctrlc.c', 'lin_sys.c', 'polish.c', 'SuiteSparse_config.c'}))
                 copyfile(fullfile(cdirs{j}, cfiles(i).name), ...
                     fullfile(cg_src_dir, cfiles(i).name));
             end
@@ -256,14 +214,29 @@ if( any(strcmpi(what,'codegen')) || any(strcmpi(what,'all')) )
     for j = 1:length(hdirs)
         hfiles = dir(fullfile(hdirs{j},'*.h'));
         for i = 1 : length(hfiles)
-            if ~any(strcmp(hfiles(i).name, {'cs.h', 'ctrlc.h', 'polish.h', 'SuiteSparse_config.h'}))
+            if ~any(strcmp(hfiles(i).name, {'glob_opts.h','cs.h', 'ctrlc.h', 'lin_sys.h', 'polish.h', 'SuiteSparse_config.h'}))
                 copyfile(fullfile(hdirs{j}, hfiles(i).name), ...
                     fullfile(cg_include_dir, hfiles(i).name));
             end
         end
     end
-
-    fprintf('\t\t\t\t[done]\n');
+    
+    % Copy configure files
+    cg_configure_dir = fullfile(cg_sources_dir, 'configure');
+    if ~exist(cg_configure_dir, 'dir')
+        mkdir(cg_configure_dir);
+    end
+    configure_dirs  = {fullfile(osqp_dir, 'configure')};
+    for j = 1:length(configure_dirs)
+        configure_files = dir(fullfile(configure_dirs{j},'*.h.in'));
+        for i = 1 : length(configure_files)
+            copyfile(fullfile(configure_dirs{j}, configure_files(i).name), ...
+                fullfile(cg_configure_dir, configure_files(i).name));
+        end
+    end
+    
+   
+    fprintf('\t\t\t\t\t[done]\n');
 
 end
 
@@ -284,7 +257,7 @@ if( any(strcmpi(what,'clean')) || any(strcmpi(what,'purge')) )
         delete(lib_full_path);
     end
 
-    fprintf('\t\t\t\t[done]\n');
+    fprintf('\t\t\t[done]\n');
 end
 
 
@@ -302,7 +275,7 @@ if( any(strcmpi(what,'purge')) )
         rmdir(cg_sources_dir, 's');
     end
 
-    fprintf('\t[done]\n');
+    fprintf('\t\t[done]\n');
 end
 
 

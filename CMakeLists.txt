@@ -8,31 +8,26 @@ cmake_minimum_required (VERSION 3.2)
 # Project name
 project (osqp)
 
-# project version --> Does it make sense to have it here?
-# set(VERSION_MAJOR 0)
-# set(VERSION_MINOR 0)
-# set(VERSION_PATCH 0)
-
 # Set the output folder where your program will be created
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 
 # Some non-standard CMake modules
-LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/configure/cmake)
 INCLUDE(FindPythonModule)
 INCLUDE(Utils)
+# include(FindMKL)  # Find MKL module
+
 
 # Detect operating system
 # ----------------------------------------------
 message(STATUS "We are on a ${CMAKE_SYSTEM_NAME} system")
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    add_definitions(-DIS_LINUX)
-endif()
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-    add_definitions(-DIS_MAC)
-endif()
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    add_definitions(-DIS_WINDOWS)
+    set(IS_LINUX ON)
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+    set(IS_MAC ON)
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    set(IS_WINDOWS ON)
 endif()
 
 
@@ -50,8 +45,6 @@ if (NOT DEFINED EMBEDDED)
     message(STATUS "Embedded is OFF")
 else()
     message(STATUS "Embedded is ${EMBEDDED}")
-    message(STATUS "Passing EMBEDDED flag to compiler")
-    add_definitions(-DEMBEDDED=${EMBEDDED})
 endif()
 
 # Is printing enabled?
@@ -61,9 +54,7 @@ if (DEFINED EMBEDDED)
     set(PRINTING OFF)
 endif()
 message(STATUS "Printing is ${PRINTING}")
-if (PRINTING)
-    add_definitions(-DPRINTING)
-endif (PRINTING)
+
 
 # Is profiling enabled?
 option (PROFILING "Enable solver profiling (timing)" ON)
@@ -72,9 +63,6 @@ if (DEFINED EMBEDDED)
     set(PROFILING OFF)
 endif()
 message(STATUS "Profiling is ${PROFILING}")
-if (PROFILING)
-    add_definitions(-DPROFILING)
-endif (PROFILING)
 
 # Is user interrupt enabled?
 option (CTRLC "Enable user interrupt (Ctrl-C)" ON)
@@ -83,33 +71,38 @@ if (DEFINED EMBEDDED)
     set(CTRLC OFF)
 endif()
 message(STATUS "User interrupt is ${CTRLC}")
-if (CTRLC)
-    add_definitions(-DCTRLC)
-endif (CTRLC)
 
 # Use floats instead of integers
 option (DFLOAT "Use float numbers instead of doubles" OFF)
 message(STATUS "Floats are ${DFLOAT}")
-if (DFLOAT)
-    add_definitions(-DDFLOAT)
-endif (DFLOAT)
 
 # Use long integers for indexing
-option (DLONG "Use long integers for indexing" ON)
-message(STATUS "Long integers are ${DLONG}")
-if (DLONG)
-    add_definitions(-DDLONG)
-endif (DLONG)
+option (DLONG "Use long integers (64bit) for indexing" ON)
+if (NOT (CMAKE_SIZEOF_VOID_P EQUAL 8))
+	message(STATUS "Disabling long integers (64bit) on 32bit machine")
+	set(DLONG OFF)
+endif()
+message(STATUS "Long integers (64bit) are ${DLONG}")
 
 # Add code coverage
 option (COVERAGE "Perform code coverage" OFF)
-message(STATUS "Code coverage is ${DLONG}")
+message(STATUS "Code coverage is ${COVERAGE}")
+
+
+# Linear solvers dependencies
+# ---------------------------------------------
+option (ENABLE_MKL_PARDISO "Enable MKL Pardiso solver" ON)
+message(STATUS "MKL Pardiso: ${ENABLE_MKL_PARDISO}")
+
+
+# Generate header file with the global options
+# ---------------------------------------------
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/glob_opts.h.in
+               ${CMAKE_CURRENT_SOURCE_DIR}/include/glob_opts.h)
 
 
 # Set Compiler flags
 # ----------------------------------------------
-
-
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
 
 if (NOT MSVC)
@@ -123,7 +116,7 @@ if (NOT MSVC)
     set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")      # Include math
     # Include real time library in linux
     if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-        set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lrt")
+        set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lrt -ldl")
     endif()
 endif (NOT MSVC)
 
@@ -143,6 +136,7 @@ if(NOT DEFINED EMBEDDED)
         src/ctrlc.c
         src/kkt.c
         src/lin_alg.c
+        src/lin_sys.c
         src/osqp.c
         src/polish.c
         src/proj.c
@@ -173,6 +167,7 @@ else()
         osqp_src
         src/auxil.c
         src/lin_alg.c
+        src/lin_sys.c
         src/osqp.c
         src/kkt.c
         src/proj.c
@@ -202,7 +197,6 @@ endif()
 # and set some options
 # -----------------------------------------------------------------
 if (PYTHON)
-
 
     # Look for Python libraries
     find_package(PythonInterp ${PYTHON_VER_NUM})
@@ -252,22 +246,25 @@ endif (MATLAB)
 
 
 
-
-
 # Create  Library
 # ----------------------------------------------
 
-# Add linear systems solver
+# Add linear system solvers cumulative library
 add_subdirectory(lin_sys)
 
-add_library (osqpdirstatic STATIC ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_direct>)
+# Add linear system solvers interfaces includes
+include_directories(${linsys_solvers_includes})
+
+
+add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
+
 
 if (MATLAB)
-target_link_libraries (osqpdirstatic ${Matlab_LIBRARIES})
+target_link_libraries (osqpstatic ${Matlab_LIBRARIES})
 endif (MATLAB)
 
 if (PYTHON)
-target_link_libraries (osqpdirstatic ${PYTHON_LIBRARIES})
+target_link_libraries (osqpstatic ${PYTHON_LIBRARIES})
 endif (PYTHON)
 
 # If we are building Python or Matlab interface:
@@ -275,11 +272,13 @@ endif (PYTHON)
 #   - do not build demo
 if (NOT PYTHON AND NOT MATLAB)
     # Create osqp shared library
-    add_library (osqpdir SHARED ${osqp_src} ${osqp_headers} $<TARGET_OBJECTS:linsys_direct>)
+    # NB: Add all the linear system solvers here
+    add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
 
     # Create demo executable (linked to static library)
-    add_executable (osqp_demo_direct ${PROJECT_SOURCE_DIR}/examples/osqp_demo_direct.c)
-    target_link_libraries (osqp_demo_direct osqpdirstatic)
+    add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
+    target_link_libraries (osqp_demo osqpstatic)
+
 endif (NOT PYTHON AND NOT MATLAB)
 
 
@@ -322,18 +321,16 @@ if (UNITTESTS)
         COMMENT "Generating unittests data files using Python"
     )
 
-
     # Direct linear solver testing
     include_directories(tests)
-    add_executable(osqp_tester_direct
-                ${PROJECT_SOURCE_DIR}/tests/osqp_tester_direct.c ${PROJECT_SOURCE_DIR}/tests/minunit.h
+    add_executable(osqp_tester
+                ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c ${PROJECT_SOURCE_DIR}/tests/minunit.h
                 ${test_headers}
                 ${codegen_test_headers})
-    target_link_libraries (osqp_tester_direct osqpdirstatic)
-    # add_dependencies(osqp_tester_direct generate_tests_data)
+    target_link_libraries (osqp_tester osqpstatic)
 
     # Add testing
     include(CTest)
     enable_testing()
-    add_test(NAME direct COMMAND $<TARGET_FILE:osqp_tester_direct>)
+    add_test(NAME tester COMMAND $<TARGET_FILE:osqp_tester>)
 endif()

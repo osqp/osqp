@@ -7,5 +7,3 @@ Parsers
 
    yalmip.rst
    cvxpy.rst
-   CVX.rst
-   convexjl.rst

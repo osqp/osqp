@@ -1,5 +1,5 @@
 """
-Python interface module for OSQP solver v0.1.2
+Python interface module for OSQP solver v0.2.1
 """
 from __future__ import print_function
 from builtins import object
@@ -113,7 +113,7 @@ class OSQP(object):
                  "(compressed sparse column) matrix. (It may take a while...)")
             A = A.tocsc()
 
-        # Check if P an A have sorted indeces
+        # Check if P an A have sorted indices
         if not P.has_sorted_indices:
             P.sort_indices()
         if not A.has_sorted_indices:
@@ -122,6 +122,9 @@ class OSQP(object):
         # Convert infinity values to OSQP Infinity
         u = np.minimum(u, self._model.constant('OSQP_INFTY'))
         l = np.maximum(l, -self._model.constant('OSQP_INFTY'))
+
+        # Convert linsys_solver string to integer
+        self._linsys_solver_str_to_int(settings)
 
         self._model.setup((n, m), P.data, P.indices, P.indptr, q,
                           A.data, A.indices, A.indptr,
@@ -201,12 +204,11 @@ class OSQP(object):
         Update OSQP solver settings
 
         It is possible to change: 'max_iter', 'eps_abs', 'eps_rel',
-                                  'eps_prim_inf', 'eps_dual_inf',
+                                  'eps_prim_inf', 'eps_dual_inf', 'rho'
                                   'alpha', 'delta', 'polish',
-                                  'pol_refine_iter',
+                                  'polish_refine_iter',
                                   'verbose', 'scaled_termination',
-                                  'early_terminate',
-                                  'early_terminate_interval'
+                                  'check_termination',
         """
 
         # get arguments
@@ -215,14 +217,14 @@ class OSQP(object):
         eps_rel = kwargs.pop('eps_rel', None)
         eps_prim_inf = kwargs.pop('eps_prim_inf', None)
         eps_dual_inf = kwargs.pop('eps_dual_inf', None)
+        rho = kwargs.pop('rho', None)
         alpha = kwargs.pop('alpha', None)
         delta = kwargs.pop('delta', None)
         polish = kwargs.pop('polish', None)
-        pol_refine_iter = kwargs.pop('pol_refine_iter', None)
+        polish_refine_iter = kwargs.pop('polish_refine_iter', None)
         verbose = kwargs.pop('verbose', None)
         scaled_termination = kwargs.pop('scaled_termination', None)
-        early_terminate = kwargs.pop('early_terminate', None)
-        early_terminate_interval = kwargs.pop('early_terminate_interval', None)
+        check_termination = kwargs.pop('check_termination', None)
         warm_start = kwargs.pop('warm_start', None)
 
         # update them
@@ -241,6 +243,9 @@ class OSQP(object):
         if eps_dual_inf is not None:
             self._model.update_eps_dual_inf(eps_dual_inf)
 
+        if rho is not None:
+            self._model.update_rho(rho)
+
         if alpha is not None:
             self._model.update_alpha(alpha)
 
@@ -250,20 +255,17 @@ class OSQP(object):
         if polish is not None:
             self._model.update_polish(polish)
 
-        if pol_refine_iter is not None:
-            self._model.update_pol_refine_iter(pol_refine_iter)
+        if polish_refine_iter is not None:
+            self._model.update_polish_refine_iter(polish_refine_iter)
 
         if verbose is not None:
             self._model.update_verbose(verbose)
 
         if scaled_termination is not None:
             self._model.update_scaled_termination(scaled_termination)
-        
-        if early_terminate is not None:
-            self._model.update_early_terminate(early_terminate)
 
-        if early_terminate_interval is not None:
-            self._model.update_early_terminate_interval(early_terminate_interval)
+        if check_termination is not None:
+            self._model.update_check_termination(check_termination)
 
         if warm_start is not None:
             self._model.update_warm_start(warm_start)
@@ -273,14 +275,14 @@ class OSQP(object):
            eps_rel is None and \
            eps_prim_inf is None and \
            eps_dual_inf is None and \
+           rho is None and \
            alpha is None and \
            delta is None and \
            polish is None and \
-           pol_refine_iter is None and \
+           polish_refine_iter is None and \
            verbose is None and \
            scaled_termination is None and \
-           early_terminate is None and \
-           early_terminate_interval is None and \
+           check_termination is None and \
            warm_start is None:
             ValueError("No updatable settings has been specified!")
 
@@ -360,3 +362,25 @@ class OSQP(object):
         # Generate code with codegen module
         cg.codegen(work, folder, python_ext_name, project_type,
                    embedded, force_rewrite, loop_unrolling)
+
+    def _linsys_solver_str_to_int(self, settings):
+        linsys_solver_str = settings.pop('linsys_solver', '')
+        if not isinstance(linsys_solver_str, str):
+            raise TypeError("Setting linsys_solver " +
+                            "is required to be a string.")
+        linsys_solver_str = linsys_solver_str.lower()
+        if linsys_solver_str == 'suitesparse ldl':
+            settings['linsys_solver'] = \
+                    self._model.constant('SUITESPARSE_LDL_SOLVER')
+        elif linsys_solver_str == 'mkl pardiso':
+            settings['linsys_solver'] = self._model.constant('MKL_PARDISO_SOLVER')
+        # Default solver: Suitesparse LDL
+        elif linsys_solver_str == '':
+            settings['linsys_solver'] = \
+                    self._model.constant('SUITESPARSE_LDL_SOLVER')
+        else:   # default solver: Suitesparse LDL
+            warn("Linear system solver not recognized. " + 
+                 "Using default solver Suitesparse LDL.")
+            settings['linsys_solver'] = \
+                self._model.constant('SUITESPARSE_LDL_SOLVER')
+

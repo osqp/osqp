@@ -1,5 +1,10 @@
 #include "polish.h"
-
+#include "lin_alg.h"
+#include "util.h"
+#include "auxil.h"
+#include "lin_sys.h"
+#include "kkt.h"
+#include "proj.h"
 
 /**
  * Form reduced matrix A that contains only rows that are active at the solution.
@@ -51,14 +56,14 @@ static c_int form_Ared(OSQPWorkspace *work) {
     // Count number of elements in Ared
     for (j = 0; j < work->data->A->p[work->data->A->n]; j++) {
         if (work->pol->A_to_Alow[work->data->A->i[j]] != -1 ||
-            work->pol->A_to_Aupp[work->data->A->i[j]] != -1)
+                work->pol->A_to_Aupp[work->data->A->i[j]] != -1)
             Ared_nnz++;
     }
 
     // Form Ared
     // Ared = vstack[Alow, Aupp]
     work->pol->Ared = csc_spalloc(work->pol->n_low + work->pol->n_upp,
-                                  work->data->n, Ared_nnz, 1, 0);
+            work->data->n, Ared_nnz, 1, 0);
     Ared_nnz = 0;  // counter
     for (j = 0; j < work->data->n; j++) {  // Cycle over columns of A
         work->pol->Ared->p[j] = Ared_nnz;
@@ -116,8 +121,8 @@ static void form_rhs_red(OSQPWorkspace * work, c_float * rhs){
  * @param  b    RHS of the linear system
  * @return      More accurate solution
  */
-static void iterative_refinement(OSQPWorkspace *work, Priv *p, c_float *z, c_float *b) {
-    if (work->settings->pol_refine_iter > 0) {
+static void iterative_refinement(OSQPWorkspace *work, LinSysSolver *p, c_float *z, c_float *b) {
+    if (work->settings->polish_refine_iter > 0) {
         c_int i, j, n;
         c_float *dz;
         c_float *rhs;
@@ -129,7 +134,7 @@ static void iterative_refinement(OSQPWorkspace *work, Priv *p, c_float *z, c_flo
         dz = (c_float *)c_malloc(sizeof(c_float) * n);
         rhs = (c_float *)c_malloc(sizeof(c_float) * n);
 
-        for (i=0; i<work->settings->pol_refine_iter; i++) {
+        for (i=0; i<work->settings->polish_refine_iter; i++) {
 
             // Form the RHS for the iterative refinement:  b - K*z
             prea_vec_copy(b, rhs, n);
@@ -148,7 +153,7 @@ static void iterative_refinement(OSQPWorkspace *work, Priv *p, c_float *z, c_flo
             mat_vec(work->pol->Ared, z, rhs + work->data->n, -1);
 
             // Solve linear system. Store solution in rhs
-            solve_lin_sys(work->settings, p, rhs);
+            p->solve(p, rhs, work->settings);
 
             // Update solution
             for (j=0; j<n; j++) {
@@ -162,26 +167,29 @@ static void iterative_refinement(OSQPWorkspace *work, Priv *p, c_float *z, c_flo
 
 
 /**
- * Compute dual variable y from reduced on y_red
+ * Compute dual variable y from yred
  * @param work Workspace
+ * @param yred Dual variables associated to active constraints
  */
-static void compute_y_from_y_red(OSQPWorkspace * work){
+static void get_ypol_from_yred(OSQPWorkspace * work, c_float *yred){
     c_int j;
 
     // If there are no active constraints
     if (work->pol->n_low + work->pol->n_upp == 0) {
-        vec_set_scalar(work->y, 0., work->data->m);
+        vec_set_scalar(work->pol->y, 0., work->data->m);
         return;
     }
-    // yred = vstack[ylow, yupp]
+    // NB: yred = vstack[ylow, yupp]
     for (j = 0; j < work->data->m; j++) {
         if (work->pol->A_to_Alow[j] != -1) {
-            work->y[j] = work->pol->y_red[work->pol->A_to_Alow[j]];     // ylow
+            // lower-active
+            work->pol->y[j] = yred[work->pol->A_to_Alow[j]];
         } else if (work->pol->A_to_Aupp[j] != -1) {
-            work->y[j] = work->pol->y_red[work->pol->A_to_Aupp[j] +
-                                          work->pol->n_low];            // yupp
+            // upper-active
+            work->pol->y[j] = yred[work->pol->A_to_Aupp[j] + work->pol->n_low];
         } else {
-            work->y[j] = 0.0;
+            // inactive
+            work->pol->y[j] = 0.0;
         }
     }
 }
@@ -190,18 +198,20 @@ static void compute_y_from_y_red(OSQPWorkspace * work){
 c_int polish(OSQPWorkspace *work) {
     c_int mred, polish_successful;
     c_float * rhs_red;
-    Priv *plsh;
+    LinSysSolver *plsh;
     c_float *pol_sol; // Polished solution
 
-    #ifdef PROFILING
+#ifdef PROFILING
     tic(work->timer); // Start timer
-    #endif
+#endif
 
     // Form Ared by assuming the active constraints and store in work->pol->Ared
     mred = form_Ared(work);
 
     // Form and factorize reduced KKT
-    plsh = init_priv(work->data->P, work->pol->Ared, work->settings, 1);
+    plsh = init_linsys_solver(work->data->P, work->pol->Ared,
+            work->settings->delta, OSQP_NULL,
+            work->settings->linsys_solver, 1);
     if (!plsh){
         // Polishing failed
         work->info->status_polish = -1;
@@ -219,30 +229,25 @@ c_int polish(OSQPWorkspace *work) {
 
     // Solve the reduced KKT system
     pol_sol = vec_copy(rhs_red, work->data->n + mred);
-    solve_lin_sys(work->settings, plsh, pol_sol);
+    plsh->solve(plsh, pol_sol, work->settings);
 
     // Perform iterative refinement to compensate for the regularization error
     iterative_refinement(work, plsh, pol_sol, rhs_red);
 
-    // Store the polished solution
-    work->pol->y_red = c_malloc(mred * sizeof(c_float));
-    prea_vec_copy(pol_sol, work->pol->x, work->data->n);
-    prea_vec_copy(pol_sol + work->data->n, work->pol->y_red, mred);
+    // Store the polished solution (x,z,y)
+    prea_vec_copy(pol_sol, work->pol->x, work->data->n);    // pol->x
+    mat_vec(work->data->A, work->pol->x, work->pol->z, 0);  // pol->z
+    get_ypol_from_yred(work, pol_sol + work->data->n);      // pol->y
 
-    // Compute z = A*x needed for computing the primal residual
-    mat_vec(work->data->A, work->pol->x, work->pol->z, 0);
+    // Ensure (z,y) satisfies normal cone constraint
+    project_normalcone(work, work->pol->z, work->pol->y);
 
     // Compute primal and dual residuals at the polished solution
     update_info(work, 0, 1, 1);
 
-    // Update timing
-    #ifdef PROFILING
-    work->info->polish_time = toc(work->timer);
-    #endif
-
     // Check if polish was successful
     polish_successful = (work->pol->pri_res < work->info->pri_res &&
-        work->pol->dua_res < work->info->dua_res) || // Residuals are reduced
+            work->pol->dua_res < work->info->dua_res) || // Residuals are reduced
         (work->pol->pri_res < work->info->pri_res &&
          work->info->dua_res < 1e-10) ||             // Dual residual already tiny
         (work->pol->dua_res < work->info->dua_res &&
@@ -250,28 +255,23 @@ c_int polish(OSQPWorkspace *work) {
 
     if (polish_successful) {
 
-            // Update solver information
-            work->info->obj_val = work->pol->obj_val;
-            work->info->pri_res = work->pol->pri_res;
-            work->info->dua_res = work->pol->dua_res;
-            work->info->status_polish = 1;
+        // Update solver information
+        work->info->obj_val = work->pol->obj_val;
+        work->info->pri_res = work->pol->pri_res;
+        work->info->dua_res = work->pol->dua_res;
+        work->info->status_polish = 1;
 
-            // Update (x, z, y) in ADMM iterations
+        // Update (x, z, y) in ADMM iterations
+        // NB: z needed for warm starting
+        prea_vec_copy(work->pol->x, work->x, work->data->n);
+        prea_vec_copy(work->pol->z, work->z, work->data->m);
+        prea_vec_copy(work->pol->y, work->y, work->data->m);
 
-            // Update x
-            prea_vec_copy(work->pol->x, work->x, work->data->n);
-
-            // Update z (needed for warm starting)
-            prea_vec_copy(work->pol->z, work->z, work->data->m);
-
-            // Reconstruct y from y_red and active constraints
-            compute_y_from_y_red(work);
-
-            // Print summary
-            #ifdef PRINTING
-            if (work->settings->verbose)
-                print_polish(work);
-            #endif
+        // Print summary
+#ifdef PRINTING
+        if (work->settings->verbose)
+            print_polish(work);
+#endif
 
     } else { // Polishing failed
         work->info->status_polish = -1;
@@ -280,12 +280,9 @@ c_int polish(OSQPWorkspace *work) {
     }
 
     // Memory clean-up
-    free_priv(plsh);
+    plsh->free(plsh);
     if (work->pol) {
-        if (work->pol->Ared)
-            csc_spfree(work->pol->Ared);
-        if (work->pol->y_red)
-            c_free(work->pol->y_red);
+        if (work->pol->Ared) csc_spfree(work->pol->Ared);
     }
     c_free(rhs_red);
     c_free(pol_sol);

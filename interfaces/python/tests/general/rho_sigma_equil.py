@@ -32,7 +32,7 @@ def get_grid_data(x, y, z, resX=500, resY=500):
 SCALING_REG = 1e-06
 
 
-def scale_data(P, q, A, l, u, scaling_iter=100):
+def scale_data(P, q, A, l, u, scaling=100):
     """
     Perform symmetric diagonal scaling via equilibration
     """
@@ -48,7 +48,7 @@ def scale_data(P, q, A, l, u, scaling_iter=100):
           spa.hstack([A, spa.csc_matrix((m, m))])]).tocsc()
 
     # Iterate Scaling
-    for i in range(scaling_iter):
+    for i in range(scaling):
         for j in range(n + m):
             norm_col_j = np.linalg.norm(np.asarray(KKT[:, j].todense()), 
                                         np.inf)
@@ -92,7 +92,7 @@ def get_KKT_info(P, A, sigma, rho):
           KKT = [P + sigma I   A'
                  A             - 1/rho I]
     
-    N.B. It computes the ratio for rows but it is equal to the columns
+    NB: It computes the ratio for rows but it is equal to the columns
          one since KKT is symmetric
     '''
     # Get problem dimensions
@@ -143,13 +143,12 @@ q = random_scaling.dot(sp.randn(n))
 
 
 # Scale data as OSQP does
-scaling_iter = 15 
-scaling = True
-if scaling is not True:
+scaling = 15 
+if scaling != 0:
     (P_sc, q_sc, A_sc, l_sc, u_sc) = (P, q, A, l, u)
 else:
     P_sc, q_sc, A_sc, l_sc, u_sc = scale_data(P, q, A, l, u, 
-                                              scaling_iter=scaling_iter)
+                                              scaling=scaling)
 
 
 # Iterate over rho and sigma values solving the problem
@@ -197,9 +196,7 @@ for i in tqdm(range(len(rho_vec))):
         m.setup(P, q, A, l, u,
                 rho=rho_vec[i],
                 sigma=sigma_vec[j],
-                auto_rho=False,
                 scaling=scaling,
-                scaling_iter=scaling_iter,
                 polish=False,
                 verbose=False)
         res = m.solve()

@@ -13,7 +13,7 @@ subject to      l <= A x <= u
 where `x in R^n` is the optimization variable. The objective function is defined by a positive semidefinite matrix `P in S^n_+` and vector `q in R^n`. The linear constraints are defined by matrix `A in R^{m x n}` and vectors `l in R^m U {-inf}^m`, `u in R^m U {+inf}^m`.
 
 
-The latest version is `0.1.2`.
+The latest version is `0.2.1`.
 
 <br>
 
@@ -36,6 +36,15 @@ The latest version is `0.1.2`.
 
 <br>
 
+## Citing OSQP
+
+If you are using OSQP for your work, we encourage you to 
+
+* [Cite the related papers](http://osqp.readthedocs.io/en/latest/citing/index.html),
+* Put a star on this repository.
+
+**We are looking forward to hearing your success stories with OSQP!** Please [share them with us](mailto:bartolomeo.stellato@gmail.com).
+
 
 
 ## Credits
@@ -52,3 +61,8 @@ The following people have been involved in the development of OSQP:
 ## Bug reports and support
 
 Please report any issues via the [Github issue tracker](https://github.com/oxfordcontrol/osqp/issues). All types of issues are welcome including bug reports, documentation typos, feature requests and so on.
+
+
+## Numerical benchmarks
+Numerical benchmarks against other solvers are available [here](https://github.com/oxfordcontrol/osqp_benchmarks).
+

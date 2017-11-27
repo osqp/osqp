@@ -13,10 +13,8 @@ extern "C" {
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 
 #ifndef EMBEDDED
-
 /* copy vector a into output (Uses MALLOC)*/
 c_float * vec_copy(c_float *a, c_int n);
-
 #endif
 
 /* copy vector a into preallocated vector b */
@@ -34,23 +32,28 @@ void int_vec_set_scalar(c_int *a, c_int sc, c_int n);
 /* add scalar to vector*/
 void vec_add_scalar(c_float *a, c_float sc, c_int n);
 
-/* multiply scalar to vector*/
+/* multiply scalar to vector */
 void vec_mult_scalar(c_float *a, c_float sc, c_int n);
 
-
-/* a += sc*b */
-void vec_add_scaled(c_float *a, const c_float *b, c_int n, c_float sc);
+/* c = a + sc*b */
+void vec_add_scaled(c_float *c, const c_float *a, const c_float *b, c_int n, c_float sc);
 
 /* ||v||_inf */
 c_float vec_norm_inf(const c_float *v, c_int l);
 
+/* ||Sv||_inf */
+c_float vec_scaled_norm_inf(const c_float *S, const c_float *v, c_int l);
+
 /* ||a - b||_inf */
 c_float vec_norm_inf_diff(const c_float *a, const c_float *b, c_int l);
 
+/* mean of vector elements */
+c_float vec_mean(const c_float *a, c_int n);
 
+#if EMBEDDED != 1
 /* Vector elementwise reciprocal b = 1./a (needed for scaling)*/
 void vec_ew_recipr(const c_float *a, c_float *b, c_int n);
-
+#endif
 
 /* Inner product a'b */
 c_float vec_prod(const c_float *a, const c_float *b, c_int n);
@@ -61,7 +64,6 @@ void vec_ew_prod(const c_float *a, const c_float *b, c_float * c, c_int n);
 #if EMBEDDED != 1
 /* elementwise sqrt of the vector elements */
 void vec_ew_sqrt(c_float *a, c_int n);
-#endif
 
 /* elementwise max between each vector component and max_val */
 void vec_ew_max(c_float *a, c_int n, c_float max_val);
@@ -69,32 +71,19 @@ void vec_ew_max(c_float *a, c_int n, c_float max_val);
 /* elementwise min between each vector component and max_val */
 void vec_ew_min(c_float *a, c_int n, c_float min_val);
 
-/**
-* Elementwise maximum between vectors c = max(a, b)
-* @param: const c_float * a    First vector
-*       : const c_float * b    Second vector
-*       : c_float * c          Vector of maxima
-*       : c_int n	       Vectors length
-*/
+/* Elementwise maximum between vectors c = max(a, b) */
 void vec_ew_max_vec(const c_float * a, const c_float * b, c_float * c, c_int n);
 
-
-/**
-* Elementwise minimum between vectors c = min(a, b)
-* @param: const c_float * a 	First vector
-*       : const c_float * b	Second vector
-*       : c_float * c		Vector of maxima
-*       : c_int n		Vectors length
-*/
+/* Elementwise minimum between vectors c = min(a, b) */
 void vec_ew_min_vec(const c_float * a, const c_float * b, c_float * c, c_int n);
+
+#endif
 
 
 /* MATRIX FUNCTIONS ----------------------------------------------------------*/
-/* Vertically concatenate arrays and return Z = [A' B']'
-(uses MALLOC to create inner arrays x, i, p within Z)
-*/
-// csc * vstack(csc *A, csc *B);
 
+/* multiply scalar to vmatrixector */
+void mat_mult_scalar(csc *A, c_float sc);
 
 /* Premultiply matrix A by diagonal matrix with diagonal d,
 i.e. scale the rows of A by d
@@ -105,28 +94,6 @@ void mat_premult_diag(csc *A, const c_float *d);
 i.e. scale the columns of A by d
 */
 void mat_postmult_diag(csc *A, const c_float *d);
-
-#ifndef EMBEDDEED
-/* Elementwise square matrix M */
-void mat_ew_sq(csc * A);
-
-/* Elementwise absolute value of matrix M */
-void mat_ew_abs(csc * A);
-
-/**
- * Trace of matrix M in cdc format
- * @param  M Input matrix
- * @return   Trace
- */
-c_float mat_trace(csc * M);
-
-/**
- * Frobenius norm squared of matrix M
- * @param  M Input matrix
- * @return   Frobenius norm squared
- */
-c_float mat_fro_sq(csc * M);
-#endif // ifndef embedded
 
 
 /* Matrix-vector multiplication
@@ -148,34 +115,34 @@ void mat_tpose_vec(const csc *A, const c_float *x, c_float *y,
 
 
 
+#if EMBEDDED != 1
 /**
 * Infinity norm of each matrix column
-* @param: M	Input matrix
-* @param: E 	Vector of infinity norms	
+* @param M	Input matrix
+* @param E 	Vector of infinity norms
 *
 */
 void mat_inf_norm_cols(const csc * M, c_float * E);
 
-
 /**
 * Infinity norm of each matrix row
-* @param: M	Input matrix
-* @param: E 	Vector of infinity norms	
+* @param M	Input matrix
+* @param E 	Vector of infinity norms
 *
 */
 void mat_inf_norm_rows(const csc * M, c_float * E);
 
-
 /**
 * Infinity norm of each matrix column
 * Matrix M is symmetric upper-triangular
-* 
-* @param: M	Input matrix (symmetric, upper-triangular)
-* @param: E 	Vector of infinity norms	
+*
+* @param M	Input matrix (symmetric, upper-triangular)
+* @param E 	Vector of infinity norms
 *
 */
 void mat_inf_norm_cols_sym_triu(const csc * M, c_float * E);
 
+#endif  // EMBEDDED != 1
 
 /**
  * Compute quadratic form f(x) = 1/2 x' P x

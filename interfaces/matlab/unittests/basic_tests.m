@@ -28,7 +28,13 @@ classdef basic_tests < matlab.unittest.TestCase
             % Setup solver
             testCase.solver = osqp;
             testCase.solver.setup(testCase.P, testCase.q, ...
-                testCase.A, testCase.l, testCase.u, 'verbose', 0);
+                testCase.A, testCase.l, testCase.u, ...
+                'eps_rel',1e-06, ...
+                'eps_abs', 1e-06, ...
+                'polish', true, ...
+                'verbose', false, ...
+                'adaptive_rho', false, ...
+                'check_termination', 1);
 
             % Get options
             testCase.options = testCase.solver.current_settings();
@@ -122,16 +128,16 @@ classdef basic_tests < matlab.unittest.TestCase
             % Solve again
             results = testCase.solver.solve();
 
-            % Check if they are close
+            % Check if they are the same
             testCase.verifyEqual(results.info.status_val, ...
-                testCase.solver.constant('OSQP_MAX_ITER_REACHED'), 'AbsTol',testCase.tol)
+                testCase.solver.constant('OSQP_MAX_ITER_REACHED'))
 
         end
         
         function test_update_early_termination(testCase)
             % Update max_iter
             opts = testCase.solver.current_settings();
-            opts.early_terminate = 0;
+            opts.check_termination = 0;
             testCase.solver.update_settings(opts);
 
             % Solve again
@@ -140,6 +146,31 @@ classdef basic_tests < matlab.unittest.TestCase
             % Check if they are close
             testCase.verifyEqual(results.info.iter, testCase.options.max_iter, 'AbsTol',testCase.tol)
 
+        end
+        
+        
+        function test_update_rho(testCase)
+        
+            % Solve with default rho
+            res_default = testCase.solver.solve();
+            
+            % Setup with different rho and update
+            default_opts = testCase.options;
+            default_opts.rho = 0.7;
+            
+            testCase.solver = osqp;
+            testCase.solver.setup(testCase.P, testCase.q, ...
+                testCase.A, testCase.l, testCase.u, default_opts);
+            testCase.solver.update_settings('rho', testCase.options.rho);
+            res_updated_rho = testCase.solver.solve();
+       
+            % Verify same number of iterations
+            testCase.verifyEqual(res_default.info.iter, ...
+                                 res_updated_rho.info.iter)
+            
+            
+            
+            
         end
 
     end

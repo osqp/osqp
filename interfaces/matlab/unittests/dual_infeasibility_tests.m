@@ -23,7 +23,7 @@ classdef dual_infeasibility_tests < matlab.unittest.TestCase
             testCase.options.eps_abs = 1e-04;
             testCase.options.eps_rel = 1e-04;
             testCase.options.eps_prim_inf = 1e-15;  % Focus only on dual infeasibility
-            testCase.options.early_terminate_interval = 1;
+            testCase.options.check_termination = 1;
 
             % Setup tolerance
             testCase.tol = 1e-04;

@@ -2,7 +2,7 @@
 OSQP solver pure python implementation
 """
 from builtins import object
-import osqppurepy._osqp  as _osqp # Internal low level module
+import osqppurepy._osqp as _osqp # Internal low level module
 from warnings import warn
 import numpy as np
 from scipy import sparse
@@ -109,7 +109,7 @@ class OSQP(object):
                  "(compressed sparse column) matrix. (It may take a while...)")
             A = A.tocsc()
 
-        # Check if P an A have sorted indeces
+        # Check if P an A have sorted indices
         if not P.has_sorted_indices:
             P.sort_indices()
         if not A.has_sorted_indices:
@@ -131,12 +131,29 @@ class OSQP(object):
         """
 
         # get arguments
+        P = kwargs.pop('P', None)
+        A = kwargs.pop('A', None)
         q = kwargs.pop('q', None)
         l = kwargs.pop('l', None)
         u = kwargs.pop('u', None)
 
         # Get problem dimensions
         (n, m) = (self._model.work.data.n, self._model.work.data.m)
+
+        if P is not None:
+            if P.shape != (n, n):
+                raise ValueError("P must have shape (n x n)")
+            if A is None:
+                self._model.update_P(P)
+
+        if A is not None:
+            if A.shape != (m, n):
+                raise ValueError("A must have shape (m x n)")
+            if P is None:
+                self._model.update_A(A)
+
+        if P is not None and A is not None:
+            self._model.update_P_A(P, A)
 
         if q is not None:
             if len(q) != n:
@@ -170,24 +187,24 @@ class OSQP(object):
         """
         Update OSQP solver settings
 
-        It is possible to change: 'max_iter', 'eps_abs', 'eps_rel', 'alpha',
-                                  'delta', 'polish', 'pol_refine_iter',
-                                  'verbose', 'scaled_termination', 
-                                  'early_terminate', 'early_terminate_interval'
+        It is possible to change: 'max_iter', 'eps_abs', 'eps_rel', 'rho, 'alpha',
+                                  'delta', 'polish', 'polish_refine_iter',
+                                  'verbose', 'scaled_termination',
+                                  'check_termination'
         """
 
         # get arguments
         max_iter = kwargs.pop('max_iter', None)
         eps_abs = kwargs.pop('eps_abs', None)
         eps_rel = kwargs.pop('eps_rel', None)
+        rho = kwargs.pop('rho', None)
         alpha = kwargs.pop('alpha', None)
         delta = kwargs.pop('delta', None)
         polish = kwargs.pop('polish', None)
-        pol_refine_iter = kwargs.pop('pol_refine_iter', None)
+        polish_refine_iter = kwargs.pop('polish_refine_iter', None)
         verbose = kwargs.pop('verbose', None)
         scaled_termination = kwargs.pop('scaled_termination', None)
-        early_terminate = kwargs.pop('early_terminate', None)
-        early_terminate_interval = kwargs.pop('early_terminate_interval', None)
+        check_termination = kwargs.pop('check_termination', None)
         warm_start = kwargs.pop('warm_start', None)
 
         # update them
@@ -200,6 +217,9 @@ class OSQP(object):
         if eps_rel is not None:
             self._model.update_eps_rel(eps_rel)
 
+        if rho is not None:
+            self._model.update_rho(rho)
+
         if alpha is not None:
             self._model.update_alpha(alpha)
 
@@ -209,20 +229,17 @@ class OSQP(object):
         if polish is not None:
             self._model.update_polish(polish)
 
-        if pol_refine_iter is not None:
-            self._model.update_pol_refine_iter(pol_refine_iter)
+        if polish_refine_iter is not None:
+            self._model.update_polish_refine_iter(polish_refine_iter)
 
         if verbose is not None:
             self._model.update_verbose(verbose)
 
         if scaled_termination is not None:
             self._model.update_scaled_termination(scaled_termination)
-        
-        if early_terminate is not None:
-            self._model.update_early_terminate(early_terminate)
 
-        if early_terminate_interval is not None:
-            self._model.update_early_terminate_interval(early_terminate_interval)
+        if check_termination is not None:
+            self._model.update_check_termination(check_termination)
 
         if warm_start is not None:
             self._model.update_warm_start(warm_start)
@@ -230,14 +247,14 @@ class OSQP(object):
         if max_iter is None and \
            eps_abs is None and \
            eps_rel is None and \
+           rho is None and \
            alpha is None and \
            delta is None and \
            polish is None and \
-           pol_refine_iter is None and \
+           polish_refine_iter is None and \
            verbose is None and \
            scaled_termination is None and \
-           early_terminate is None and \
-           early_terminate_interval is None and \
+           check_termination is None and \
            warm_start is None:
             ValueError("No updatable settings has been specified!")
 

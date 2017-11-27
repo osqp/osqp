@@ -57,16 +57,15 @@ Problem data can be updated without executing the setup again using the followin
 
 
 
+.. _c_cpp_data_types :
 
 Data types
 ----------
 
 The most basic used datatypes are
 
-.. doxygentypedef:: c_int
-.. doxygentypedef:: c_float
-
-:code:`c_int` can be :code:`long` or :code:`int` if the compiler flag :code:`DLONG` is set or not. :code:`c_float` can be a :code:`float` or a :code:`double` if the compiler flag :code:`DFLOAT` is set or not.
+* :code:`c_int`: can be :code:`long` or :code:`int` if the compiler flag :code:`DLONG` is set or not
+* :code:`c_float`: can be a :code:`float` or a :code:`double` if the compiler flag :code:`DFLOAT` is set or not.
 
 
 

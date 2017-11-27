@@ -16,11 +16,14 @@
     c_float dua_res;           /* norm of dual residual */
 
     #ifdef PROFILING
-    c_float setup_time;        /* time taken for setup phase (milliseconds) */
-    c_float solve_time;        /* time taken for solve phase (milliseconds) */
-    c_float polish_time;       /* time taken for polish phase (milliseconds) */
-    c_float run_time;          /* total time taken (milliseconds) */
+    c_float setup_time;        /* time taken for setup phase (seconds) */
+    c_float solve_time;        /* time taken for solve phase (seconds) */
+    c_float polish_time;       /* time taken for polish phase (seconds) */
+    c_float run_time;          /* total time taken (seconds) */
     #endif
+
+    c_int rho_updates;         /* number of rho updates */
+    c_float rho_estimate;       /* optimal rho estimate */
 
 } OSQP_info;
 
@@ -39,6 +42,8 @@ static PyMemberDef OSQP_info_members[] = {
     {"polish_time", T_DOUBLE, offsetof(OSQP_info, polish_time), READONLY, "Polish time"},
     {"run_time", T_DOUBLE, offsetof(OSQP_info, run_time), READONLY, "Total run time"},
     #endif
+    {"rho_updates", T_INT, offsetof(OSQP_info, rho_updates), READONLY, "Number of rho updates"},
+    {"rho_estimate", T_DOUBLE, offsetof(OSQP_info, rho_estimate), READONLY, "Optimal rho estimate"},
     {NULL}
 };
 
@@ -51,17 +56,17 @@ static c_int OSQP_info_init( OSQP_info * self, PyObject *args)
     #ifdef DLONG
 
     #ifdef DFLOAT
-    static char * argparse_string = "lUllfffffff";
+    static char * argparse_string = "LULLfffffffLf";
     #else
-    static char * argparse_string = "lUllddddddd";
+    static char * argparse_string = "LULLdddddddLf";
     #endif
 
-    #else
+    #else // DLONG
 
     #ifdef DFLOAT
-    static char * argparse_string = "iUiifffffff";
+    static char * argparse_string = "iUiifffffffif";
     #else
-    static char * argparse_string = "iUiiddddddd";
+    static char * argparse_string = "iUiidddddddid";
     #endif
 
     #endif
@@ -77,25 +82,28 @@ static c_int OSQP_info_init( OSQP_info * self, PyObject *args)
                           &(self->setup_time),
                           &(self->solve_time),
                           &(self->polish_time),
-                          &(self->run_time))) {
+                          &(self->run_time),
+                          &(self->rho_updates),
+                          &(self->rho_estimate)
+			  )) {
             return -1;
     }
-    #else
+    #else  // PROFILING
 
     #ifdef DLONG
 
     #ifdef DFLOAT
-    static char * argparse_string = "lUllfff";
+    static char * argparse_string = "LULLfffLf";
     #else
-    static char * argparse_string = "lUllddd";
+    static char * argparse_string = "LULLdddLd";
     #endif
 
     #else
 
     #ifdef DFLOAT
-    static char * argparse_string = "iUiifff";
+    static char * argparse_string = "iUiifffif";
     #else
-    static char * argparse_string = "iUiiddd";
+    static char * argparse_string = "iUiidddid";
     #endif
 
     #endif
@@ -108,7 +116,10 @@ static c_int OSQP_info_init( OSQP_info * self, PyObject *args)
                           &(self->status_polish),
                           &(self->obj_val),
                           &(self->pri_res),
-                          &(self->dua_res))) {
+                          &(self->dua_res),
+                          &(self->rho_updates),
+                          &(self->rho_estimate),
+			  )) {
             return -1;
     }
 

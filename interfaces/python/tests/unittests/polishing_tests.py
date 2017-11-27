@@ -24,7 +24,7 @@ class polish_tests(unittest.TestCase):
                      'alpha': 1.6,
                      'max_iter': 2500,
                      'polish': True,
-                     'pol_refine_iter': 4}
+                     'polish_refine_iter': 4}
 
     def test_polish_simple(self):
 

@@ -53,10 +53,9 @@ void c_strcpy(char dest[], const char source[]);
 #ifdef PRINTING
 /**
  * Print Header before running the algorithm
- * @param data     problem data
- * @param settings osqp settings
+ * @param work     osqp workspace 
  */
-void print_setup_header(const OSQPData *data, const OSQPSettings *settings);
+void print_setup_header(const OSQPWorkspace * work);
 
 /**
  * Print header with data to be displayed per iteration
@@ -104,7 +103,7 @@ struct OSQP_TIMER {
 };
 
 // Mac
-#elif IS_MAC
+#elif defined IS_MAC
 
 #include <mach/mach_time.h>
 
@@ -177,6 +176,9 @@ c_float * csc_to_dns(csc * M);
 /* Print a csc sparse matrix */
 void print_csc_matrix(csc* M, const char * name);
 
+/* Dump csc sparse matrix to file */
+void dump_csc_matrix(csc * M, const char * file_name);
+
 /* Print a triplet format sparse matrix */
 void print_trip_matrix(csc* M, const char * name);
 
@@ -185,6 +187,9 @@ void print_dns_matrix(c_float * M, c_int m, c_int n, const char *name);
 
 /* Print vector  */
 void print_vec(c_float * v, c_int n, const char *name);
+
+/* Dump vector to file */
+void dump_vec(c_float * v, c_int len, const char * file_name);
 
 // Print int array
 void print_vec_int(c_int * x, c_int n, const char *name);

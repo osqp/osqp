@@ -161,12 +161,9 @@ def main():
                           #  eps_abs=1e-3,
                           #  alpha=1.6,
                           #  rho=0.00001,  # Works with LP
-                          auto_rho=True,
-                          scaling_iter=15,
-                          early_terminate_interval=1,
+                          check_termination=1,
                         #   sigma=1e-3,
                           polish=True,
-                          scaling=True,
                           verbose=True)
 
     import ipdb; ipdb.set_trace()

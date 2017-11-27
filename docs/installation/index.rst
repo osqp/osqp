@@ -5,6 +5,9 @@ Installation
    :maxdepth: 1
    :glob:
 
-   python.rst
-   matlab.rst
    sources.rst
+   CC++.rst
+   python.rst
+   julia.rst
+   matlab.rst
+   linear_system_solvers.rst

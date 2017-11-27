@@ -7,7 +7,10 @@ sudo: required
 env:
   global:
     - DEPS_DIR="${HOME}/deps"
-    - COVERAGE="true"
+    # Testpypi for deployment
+    - TEST_PYPI=false
+    # Bintray API key
+    - secure: "RgZWa1zTkbXzbF+TW89CDa0OD+hjVrZCSnsG9X3OQRyMRcR8yp61SudC0sopJyAhrXA++6zRENI/T1rTmTr1WYcitF22x3fzVvPL+IQEUCxXPV6GOb3cBB/f3rxkpxeBYXO+tgsH1ad+A9T2oihO0/94fKVpZ5uN5mjJbP4yatF+DyEk5+IlHkp0yrgNxyLYEo7QCaDQJhffBJCa4R3C2sb2oL5S3JV6C1svWeSRVey5lrkNwk+rL1Af0kIEfWCXYBq5dchDLFGgfJlzFTw3i/UmKSqtdkq/Eq3vKpvvqMCHcm9ibcWeJX1iNSXVmblycLitI/K1LjONWvrAioHsv9qRaf+YXtLtyb1WXLmaPdi0P138TIDMHLslFYBq1Sf+1WZJ5U3KItzNXjFw/c2yUIDXMePrXNbHodYwND+3QS+yAoIHXT0buxUjjEbD6g54YfqjsTX8w510l+dy7WZQUM6GJn7byiEDfEEu9RbhLuDRHMG8h2viya9aLgIEAMq92/XbS6v01aX24dPmrlSZEocqwrp8yJxGU4tYk+gj4rnWXYF7XfaOVvINc5RRwejZ1mIkMg1fCEqaBmKQiOwDuypoG0L9kDaX85fGwo7/LIdApsJWZvXewlW8ZQERSqFwXDJpQXjS8iHcCzJUR+WUWkrVMYzzr74Fr+XeKmQeQC4="
     # Anaconda password
     - secure: "co+NmbYLEZWq3AgsvgYY1P6WSzsp4/5X1o1R/oXKsaSP7UIkYoI2rwkPgugAPBAt27K/wZUEXlzYGtb9EiW27NhRnnI1H4g3Qe9RRUl6x8Zs/g+KI/s5E68Srb8wdfTXCD2ANguBUniYgMGT4ti3ZzXyVaCrIlMApbrVjBwZ+f3qf7Dv41yj+yzk8AjbjL5cYnczdjmL0dtGVFknoOu50dMN5ZigTdD6Fn+sY7Xt3HBMCSJuRAKP4s7rEOMa1qWhchFX1sAiM/+tWr4vewNpaKkQE4VefnZ2TvZZPGhfd+gZ7VR/eDDKIw3G0MEzGNO/wjsgjr86S44QyUGY4ZNuP3bmFAlFumk0j45eFWznks75EIkQGEXZudZFaDIgderhU2NYc5weQI/4eaouDeH8vZavbwiazLfoj4G6RbrKKx8gr4TNp5AehCrau6YzgLtZ3reoaftLfvYapc3Y5o5eXuPFqBuOnaFwkhV4S5tazxb7U9h9KzK5Jg0X5CBadJfzJEraayutv+GZtnbFBEZ9e25GiB9CFvF3TMRIYm4lfs1UlJXFiNpRmKgOTsmk4JcIK565JvEz44x4VxR9moBVIsycyfD2C36DCtmnUGdDhSkg/ziWIhxmfjWYU2GtloDw3Q7D9Yj484abyyaBTzKk/tw/RQn6JdfxKdwNEBAV5xs="
     # Pypi password
@@ -19,11 +22,11 @@ env:
 install: bash ci/travis/install.sh
 script: bash ci/travis/script.sh
 
-
 deploy:
- # Deploy to Anaconda.org
+  # Deploy on tags
   - provider: script
     script: "bash $TRAVIS_BUILD_DIR/ci/travis/deploy.sh"
     on:
       tags: true
     skip_cleanup: true
+

@@ -1,5 +1,5 @@
 classdef osqp < handle
-    % osqp interface class for OSQP solver v0.1.2
+    % osqp interface class for OSQP solver v0.2.1
     % This class provides a complete interface to the C implementation
     % of the OSQP solver.
     %
@@ -27,6 +27,24 @@ classdef osqp < handle
     properties (SetAccess = private, Hidden = true)
         objectHandle % Handle to underlying C instance
     end
+   methods(Static) 
+        %%
+        function out = default_settings()
+            % DEFAULT_SETTINGS get the default solver settings structure
+            out = osqp_mex('default_settings', 'static');
+
+	        % Convert linsys solver to string
+	        out.linsys_solver = linsys_solver_to_string(out.linsys_solver);
+
+        end
+        
+        %%
+        function out = constant(constant_name)
+            % CONSTANT Return solver constant
+            %   C = CONSTANT(CONSTANT_NAME) return constant called CONSTANT_NAME
+            out = osqp_mex('constant', 'static', constant_name);
+        end
+    end
     methods
         %% Constructor - Create a new solver instance
         function this = osqp(varargin)
@@ -47,22 +65,13 @@ classdef osqp < handle
         end
 
         %%
-        function out = constant(this, constant_name)
-            % CONSTANT Return solver constant
-            %   C = CONSTANT(CONSTANT_NAME) return constant called CONSTANT_NAME
-            out = osqp_mex('constant', this.objectHandle, constant_name);
-        end
-
-        %%
-        function out = default_settings(this)
-            % DEFAULT_SETTINGS get the default solver settings structure
-           out = osqp_mex('default_settings', this.objectHandle);
-        end
-
-        %%
         function out = current_settings(this)
-            % CURRENT_SETTINGS
+            % CURRENT_SETTINGS get the current solver settings structure
             out = osqp_mex('current_settings', this.objectHandle);
+
+	   % Convert linsys solver to string
+	   out.linsys_solver = linsys_solver_to_string(out.linsys_solver);
+
         end
 
         %%
@@ -136,10 +145,10 @@ classdef osqp < handle
 
             % Convert infinity values to OSQP_INFTY
             if (~isempty(u))
-                u = min(u, this.constant('OSQP_INFTY'));
+                u = min(u, osqp.constant('OSQP_INFTY'));
             end
             if (~isempty(l))
-                l = max(l, -this.constant('OSQP_INFTY'));
+                l = max(l, -osqp.constant('OSQP_INFTY'));
             end
 
             %write the new problem data.  C-mex does not protect
@@ -239,8 +248,8 @@ classdef osqp < handle
             %
             % Convert infinity values to OSQP_INFINITY
             %
-            u = min(u, this.constant('OSQP_INFTY'));
-            l = max(l, -this.constant('OSQP_INFTY'));
+            u = min(u, osqp.constant('OSQP_INFTY'));
+            l = max(l, -osqp.constant('OSQP_INFTY'));
 
 
             %make a settings structure from the remainder of the arguments.
@@ -325,7 +334,7 @@ classdef osqp < handle
             % SOLVE solve the QP
 
             nargoutchk(0,1);  %either return nothing (but still solve), or a single output structure
-            [out.x,out.y,out.info] = osqp_mex('solve', this.objectHandle);
+            [out.x, out.y, out.prim_inf_cert, out.dual_inf_cert, out.info] = osqp_mex('solve', this.objectHandle);
             if(nargout)
                 varargout{1} = out;
             end
@@ -407,11 +416,15 @@ classdef osqp < handle
 
             % Make target directory
             fprintf('Creating target directories...\t\t\t\t\t');
+            target_configure_dir = fullfile(target_dir, 'configure');
             target_include_dir = fullfile(target_dir, 'include');
             target_src_dir = fullfile(target_dir, 'src');
 
             if ~exist(target_dir, 'dir')
                 mkdir(target_dir);
+            end
+            if ~exist(target_configure_dir, 'dir')
+                mkdir(target_configure_dir);
             end
             if ~exist(target_include_dir, 'dir')
                 mkdir(target_include_dir);
@@ -426,8 +439,22 @@ classdef osqp < handle
             cdir   = fullfile(cg_dir, 'sources', 'src');
             cfiles = dir(fullfile(cdir, '*.c'));
             for i = 1 : length(cfiles)
-                copyfile(fullfile(cdir, cfiles(i).name), ...
-                    fullfile(target_src_dir, 'osqp', cfiles(i).name));
+                if embedded == 1
+                    % Do not copy kkt.c if embedded is 1
+                    if ~strcmp(cfiles(i).name, fullfile(cdir, 'kkt.c'))
+                        copyfile(fullfile(cdir, cfiles(i).name), ...
+                            fullfile(target_src_dir, 'osqp', cfiles(i).name));    
+                    end
+                else
+                    copyfile(fullfile(cdir, cfiles(i).name), ...
+                        fullfile(target_src_dir, 'osqp', cfiles(i).name));
+                end
+            end
+            configure_dir = fullfile(cg_dir, 'sources', 'configure');
+            configure_files = dir(fullfile(configure_dir, '*.h.in'));
+            for i = 1 : length(configure_files)
+                copyfile(fullfile(configure_dir, configure_files(i).name), ...
+                    fullfile(target_configure_dir, configure_files(i).name));
             end
             hdir   = fullfile(cg_dir, 'sources', 'include');
             hfiles = dir(fullfile(hdir, '*.h'));
@@ -496,7 +523,7 @@ end
 function currentSettings = validateSettings(this,isInitialization,varargin)
 
 %don't allow these fields to be changed
-unmodifiableFields = {'rho','scaling','scaling_iter'};
+unmodifiableFields = {'scaling', 'linsys_solver'};
 
 %get the current settings
 if(isInitialization)
@@ -530,6 +557,16 @@ if(~isempty(badFieldsIdx))
     error('Unrecognized solver setting ''%s'' detected',newFields{badFieldsIdx(1)});
 end
 
+%convert linsys_solver string to integer
+if ismember('linsys_solver',newFields)
+   if ~ischar(newSettings.linsys_solver)
+       error('Setting linsys_solver is required to be a string.');
+   end
+   % Convert linsys_solver to number
+    newSettings.linsys_solver = string_to_linsys_solver(newSettings.linsys_solver);
+end
+
+
 %check for disallowed fields if this in not an initialization call
 if(~isInitialization)
     badFieldsIdx = find(ismember(newFields,unmodifiableFields));
@@ -540,12 +577,14 @@ if(~isInitialization)
     end
 end
 
-%check that everything is a nonnegative scalar
-for i = 1:length(newFields)
-    val = double(newSettings.(newFields{i}));
-    assert(isscalar(val) & isnumeric(val) & val >= 0, ...
-        'Solver setting ''%s'' not specified as nonnegative scalar', newFields{i});
-end
+
+%check that everything is a nonnegative scalar (this check is already
+%performed in C)
+% for i = 1:length(newFields)
+%     val = double(newSettings.(newFields{i}));
+%     assert(isscalar(val) & isnumeric(val) & val >= 0, ...
+%         'Solver setting ''%s'' not specified as nonnegative scalar', newFields{i});
+% end
 
 %everything checks out - merge the newSettings into the current ones
 for i = 1:length(newFields)
@@ -554,3 +593,35 @@ end
 
 
 end
+
+function [linsys_solver_string] = linsys_solver_to_string(linsys_solver)
+% Convert linear systme solver integer to stringh
+switch linsys_solver
+    case osqp.constant('SUITESPARSE_LDL_SOLVER')
+        linsys_solver_string = 'suitesparse ldl';
+    case osqp.constant('MKL_PARDISO_SOLVER')
+        linsys_solver_string = 'mkl pardiso';
+    otherwise
+        error('Unrecognized linear system solver.');
+end
+end
+
+
+
+function [linsys_solver] = string_to_linsys_solver(linsys_solver_string)
+   linsys_solver_string = lower(linsys_solver_string);
+   switch linsys_solver_string
+       case 'suitesparse ldl'
+           linsys_solver = osqp.constant('SUITESPARSE_LDL_SOLVER');
+       case 'mkl pardiso'
+           linsys_solver = osqp.constant('MKL_PARDISO_SOLVER');
+       % Default solver: Suitesparse LDL
+       case ''
+           linsys_solver = osqp.constant('SUITESPARSE_LDL_SOLVER');
+       otherwise
+           warning('Linear system solver not recognized. Using default solver Suitesparse LDL.')
+           linsys_solver = osqp.constant('SUITESPARSE_LDL_SOLVER');
+   end
+end
+
+

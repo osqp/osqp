@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include "glob_opts.h"
+#include "constants.h"
 
 
 /******************
@@ -26,9 +27,10 @@ typedef struct {
 } csc;
 
 /**
- * Linear system solver private structure (internal functions deal with it)
+ * Linear system solver structure (sublevel objects initialize it differently)
  */
-typedef struct c_priv Priv;
+
+typedef struct linsys_solver LinSysSolver;
 
 /**
  * OSQP Timer for statistics
@@ -39,8 +41,10 @@ typedef struct OSQP_TIMER OSQPTimer;
  * Problem scaling matrices stored as vectors
  */
 typedef struct {
+        c_float c;        ///< cost function scaling
         c_float *D;       ///< primal variable scaling
-        c_float  *E;      ///< dual variable scaling
+        c_float *E;       ///< dual variable scaling
+        c_float cinv;     ///< cost function rescaling
         c_float *Dinv;    ///< primal variable rescaling
         c_float *Einv;    ///< dual variable rescaling
 } OSQPScaling;
@@ -58,24 +62,29 @@ typedef struct {
  * Solver return nformation
  */
 typedef struct {
-        c_int iter;          ///< number of iterations taken
-        char status[32];     ///< status string, e.g. 'Solved'
-        c_int status_val;    ///< status as c_int, defined in constants.h
+	c_int iter;          ///< number of iterations taken
+	char status[32];     ///< status string, e.g. 'solved'
+	c_int status_val;    ///< status as c_int, defined in constants.h
 
-        #ifndef EMBEDDED
-        c_int status_polish; ///< polish status: successful (1), unperformed (0), (-1) unsuccessful
-        #endif
+#ifndef EMBEDDED
+	c_int status_polish; ///< polish status: successful (1), unperformed (0), (-1) unsuccessful
+#endif
 
-        c_float obj_val;     ///< primal objective
-        c_float pri_res;     ///< norm of primal residual
-        c_float dua_res;     ///< norm of dual residual
+	c_float obj_val;     ///< primal objective
+	c_float pri_res;     ///< norm of primal residual
+	c_float dua_res;     ///< norm of dual residual
 
-        #ifdef PROFILING
-        c_float setup_time;  ///< time taken for setup phase (milliseconds)
-        c_float solve_time;  ///< time taken for solve phase (milliseconds)
-        c_float polish_time; ///< time taken for polish phase (milliseconds)
-        c_float run_time;    ///< total time  (milliseconds)
-        #endif
+#ifdef PROFILING
+	c_float setup_time;  ///< time taken for setup phase (seconds)
+	c_float solve_time;  ///< time taken for solve phase (seconds)
+	c_float polish_time; ///< time taken for polish phase (seconds)
+	c_float run_time;    ///< total time  (seconds)
+#endif
+
+#if EMBEDDED != 1
+	c_int rho_updates;  ///< number of rho updates
+	c_float rho_estimate;   ///< best rho estimate so far from residuals
+#endif
 } OSQPInfo;
 
 
@@ -94,8 +103,7 @@ typedef struct {
     c_int *Aupp_to_A;     ///< Maps indices in Aupp to indices in A
     c_float *x;           ///< optimal x-solution obtained by polish
     c_float *z;           ///< optimal z-solution obtained by polish
-    c_float *y_red;       ///< optimal dual variables associated to Ared obtained
-                          ///<    by polish
+    c_float *y;           ///< optimal y-solution obtained by polish
     c_float obj_val;      ///< objective value at polished solution
     c_float pri_res;      ///< primal residual at polished solution
     c_float dua_res;      ///< dual residual at polished solution
@@ -114,7 +122,7 @@ typedef struct {
 typedef struct {
         c_int n;             ///< number of variables n,
         c_int m;             ///< number of constraints m
-        csc *P;              ///< P: in csc format (size n x n)
+        csc *P;              ///< P: in csc format (size n x n). The workspace version stores only the upper triangular part. P->nzmax is the number of nonzero elements of the full P.
         csc *A;              ///< A: in csc format (size m x n)
         c_float *q;          ///< dense array for linear part of cost function (size n)
         c_float *l;          ///< dense array for lower bound (size m)
@@ -126,45 +134,38 @@ typedef struct {
  * Settings struct
  */
 typedef struct {
-        /**
-         * @name These *cannot* change for multiple runs with the same call to osqp_setup
-         * @{
-         */
-        c_float rho;     ///< ADMM step rho
-        c_float sigma;   ///< ADMM step sigma
-        c_int scaling;   ///< boolean, heuristic data rescaling
+    c_float rho;     ///< ADMM step rho
+    c_float sigma;   ///< ADMM step sigma
+    c_int scaling;   ///< heuristic data scaling iterations. If 0, scaling disabled
 
-        #if EMBEDDED != 1
-        c_int scaling_iter; ///< scaling iteration
-        #endif
-        /** @} */
+#if EMBEDDED != 1
+    c_int adaptive_rho;  ///< boolean, is rho step size adaptive?
+    c_int adaptive_rho_interval;  ///< Number of iterations between rho adaptations rho. If 0, it is automatic
+    c_float adaptive_rho_tolerance;  ///< Tolerance X for adapting rho. The new rho has to be X times larger or 1/X times smaller than the current one to trigger a new factorization.
+#ifdef PROFILING
+    c_float adaptive_rho_fraction; ///< Interval for adapting rho (fraction of the setup time)
+#endif // Profiling
+#endif // EMBEDDED != 1
 
-        /**
-         * @name These these can change for multiple runs with the same call to osqp_setup
-         * @{
-         */
-        c_int max_iter; ///< maximum iterations to tak
-        c_float eps_abs;  ///< absolute convergence tolerance
-        c_float eps_rel;  ///< relative convergence tolerance
-        c_float eps_prim_inf;  ///< primal infeasibility tolerance
-        c_float eps_dual_inf;  ///< dual infeasibility tolerance
-        c_float alpha; ///< relaxation paramete
+    c_int max_iter; ///< maximum iterations
+    c_float eps_abs;  ///< absolute convergence tolerance
+    c_float eps_rel;  ///< relative convergence tolerance
+    c_float eps_prim_inf;  ///< primal infeasibility tolerance
+    c_float eps_dual_inf;  ///< dual infeasibility tolerance
+    c_float alpha; ///< relaxation parameter
+    enum linsys_solver_type linsys_solver;  ///< linear system solver to use
 
-        #ifndef EMBEDDED
-        c_float delta; ///< regularization parameter for polis
-        c_int polish; ///< boolean, polish ADMM solutio
-        c_int pol_refine_iter; ///< iterative refinement steps in polis
+#ifndef EMBEDDED
+    c_float delta; ///< regularization parameter for polish
+    c_int polish; ///< boolean, polish ADMM solution
+    c_int polish_refine_iter; ///< iterative refinement steps in polish
 
-        c_int verbose; ///< boolean, write out progres
-        c_int auto_rho; ///< boolean, true if rho is chosen automatically
-        #endif
+    c_int verbose; ///< boolean, write out progres
+#endif
 
-        c_int scaled_termination;  ///< boolean, use scaled termination criteria
-        c_int early_terminate;  ///< boolean, terminate if stopping criteria is met
-        c_int early_terminate_interval; ///< boolean, interval for checking termination, if early_terminate == 1
-        c_int warm_start; ///< boolean, warm start
-
-        /** @} */
+    c_int scaled_termination;  ///< boolean, use scaled termination criteria
+    c_int check_termination;  ///< integer, check termination interval. If 0, termination checking is disabled
+    c_int warm_start; ///< boolean, warm start
 
 } OSQPSettings;
 
@@ -177,11 +178,24 @@ typedef struct {
         OSQPData * data;
 
         /// Linear System solver structure
-        Priv * priv;
+        LinSysSolver * linsys_solver;
 
         #ifndef EMBEDDED
         /// Polish structure
         OSQPPolish * pol;
+        #endif
+
+        /**
+         * @name Vector used to store a vectorized rho parameter
+         * @{
+         */
+        c_float *rho_vec;           ///< vector of rho values
+        c_float *rho_inv_vec;       ///< vector of inv rho values
+
+        /** @} */
+
+        #if EMBEDDED != 1
+        c_int *constr_type;   ///< Type of constraints: loose (-1), equality (1), inequality (0)
         #endif
 
         /**
@@ -194,16 +208,29 @@ typedef struct {
         c_float *xz_tilde; ///< Iterate xz_tilde
 
         c_float *x_prev;               ///< Previous x
-                                       /**< N.B. Used also as workspace vector for dual residual */
+                                       /**< NB: Used also as workspace vector for dual residual */
         c_float *z_prev;               ///< Previous z
-                                       /**< N.B. Used also as workspace vector for primal residual */
+                                       /**< NB: Used also as workspace vector for primal residual */
+
+       /**
+        * @name Primal and dual residuals workspace variables
+        *
+        * Needed for residuals computation, tolerances computation,
+        * approximate tolerances computation and adapting rho
+        * @{
+        */
+        c_float *Ax;              ///< Scaled A * x
+        c_float *Px;              ///< Scaled P * x
+        c_float *Aty;             ///< Scaled A * x
+
+        /** @} */
 
        /**
         * @name Primal infeasibility variables
         * @{
         */
-        c_float *delta_y;           ///< Difference of dual iterates
-        c_float *Atdelta_y;         ///< A' * delta_y
+        c_float *delta_y;     ///< Difference of consecutive dual iterates
+        c_float *Atdelta_y;   ///< A' * delta_y
 
         /** @} */
 
@@ -226,15 +253,13 @@ typedef struct {
         c_float *D_temp_A;            ///< temporary primal variable scaling vectors storing norms of A columns
         c_float *E_temp;            ///< temporary constraints scaling vectors storing norms of A' columns
 
-        /** @} */
-
 
         /** @} */
 
-        OSQPSettings *settings;          ///< Problem settings
-        OSQPScaling *scaling;                ///< Scaling Vectors
-        OSQPSolution *solution;              ///< Problem Solution
-        OSQPInfo *info;                      ///< Solver information
+        OSQPSettings *settings;         ///< Problem settings
+        OSQPScaling *scaling;           ///< Scaling vectors
+        OSQPSolution *solution;         ///< Problem solution
+        OSQPInfo *info;                 ///< Solver information
 
         #ifdef PROFILING
         OSQPTimer * timer;  ///< Timer object
@@ -248,6 +273,31 @@ typedef struct {
         #endif
 } OSQPWorkspace;
 
+
+/**
+ * Define linsys_solver prototype structure
+ *
+ * NB: The details are defined when the linear solver is initialized depending
+ *      on the choice
+ */
+struct linsys_solver {
+	enum linsys_solver_type type;  ///< Linear system solver type (see type.h)
+	// Functions
+	c_int (*solve)(LinSysSolver * self, c_float * b, const OSQPSettings * settings); ///< Solve linear system
+
+    #ifndef EMBEDDED
+	void (*free)(LinSysSolver * self); ///< Free linear system solver (only in desktop version)
+    #endif
+
+    #if EMBEDDED != 1
+    c_int (*update_matrices)(LinSysSolver * self, const csc *P, const csc *A, const OSQPSettings *settings); ///< Update matrices P and A in the solver
+    c_int (*update_rho_vec)(LinSysSolver * s, const c_float * rho_vec, const c_int m);  ///< Update rho
+    #endif
+
+#ifndef EMBEDDED
+    c_int nthreads; ///< Number of threads active
+#endif 
+};
 
 
 

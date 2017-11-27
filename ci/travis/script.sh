@@ -13,6 +13,18 @@ export PATH=${DEPS_DIR}/miniconda/bin:$PATH
 hash -r
 source activate testenv
 
+# Add MKL shared libraries to the path
+MKL_SHARED_LIB_DIR=`ls -d ${DEPS_DIR}/miniconda/pkgs/*/lib | grep mkl-2 | tail -1`
+OPENMP_SHARED_LIB_DIR=`ls -d ${DEPS_DIR}/miniconda/pkgs/*/lib | grep openmp | tail -1`
+if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+    export LD_LIBRARY_PATH=${MKL_SHARED_LIB_DIR}:${OPENMP_SHARED_LIB_DIR}:${LD_LIBRARY_PATH}
+else if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    export DYLD_LIBRARY_PATH=${MKL_SHARED_LIB_DIR}:${OPENMP_SHARED_LIB_DIR}:${DYLD_LIBRARY_PATH}
+fi
+fi
+
+
+
 
 # Test C interface
 # ---------------------------------------------------
@@ -27,7 +39,7 @@ make
 
 
 # Test OSQP C
-${TRAVIS_BUILD_DIR}/build/out/osqp_tester_direct
+${TRAVIS_BUILD_DIR}/build/out/osqp_tester
 
 # Pefrorm code coverage (only in Linux case for one version of python)
 if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHON_VERSION == "3.6" ]]; then
@@ -42,7 +54,6 @@ if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHON_VERSION == "3.6" ]]; then
     lcov --list coverage.info # debug before upload
     coveralls-lcov coverage.info # uploads to coveralls
 fi
-
 
 
 # Test Python interface

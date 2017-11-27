@@ -25,7 +25,6 @@ static char * test_primal_infeasible_qp_solve()
     set_default_settings(settings);
     settings->max_iter = 10000;
     settings->alpha = 1.6;
-    settings->auto_rho = 0;
     settings->polish = 1;
     settings->scaling = 0;
     settings->verbose = 1;

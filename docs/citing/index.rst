@@ -1,16 +1,56 @@
+.. _citing :
+
 Citing OSQP
 ===========
 
-If you use OSQP for published work, we encourage you to cite the accompanying `paper <http://www.optimization-online.org/DB_FILE/2017/06/6058.pdf>`_ on infeasibility detection with ADMM.
+If you use OSQP for published work, we encourage you to put a star on `GitHub <https://github.com/oxfordcontrol/osqp>`_ and cite the accompanying papers:
 
-Use the following BibTeX citation:
 
-.. code:: latex
+.. glossary::
 
-  @article{osqp-infeasibility,
-    title   = {Infeasibility detection in the alternating direction method of multipliers for convex optimization},
-    author  = {Goran Banjac and Paul Goulart and Bartolomeo Stellato and Stephen Boyd},
-    journal = {optimization-online.org},
-    year    = {2017},
-    url     = {http://www.optimization-online.org/DB_HTML/2017/06/6058.html},
-  }
+    Main paper
+        Main algorithm description, derivation and benchmark available in this `preprint <https://arxiv.org/pdf/1711.08013.pdf>`__.
+
+        .. code:: latex
+
+          @article{osqp,
+            author = {Stellato, B. and Banjac, G. and Goulart, P. and Bemporad, A. and Boyd, S.},
+            title = {{OSQP}: An Operator Splitting Solver for Quadratic Programs},
+            journal = {ArXiv e-prints},
+            year = {2017},
+            month = nov,
+            adsnote = {Provided by the SAO/NASA Astrophysics Data System},
+            adsurl = {http://adsabs.harvard.edu/abs/2017arXiv171108013S},
+            archiveprefix = {arXiv},
+            eprint = {1711.08013},
+            keywords = {Mathematics - Optimization and Control},
+            primaryclass = {math.OC},
+          }
+
+    Infeasibility detection
+        Infeasibility detection proofs using ADMM (also for general conic programs) in this `preprint <http://www.optimization-online.org/DB_FILE/2017/06/6058.pdf>`__.
+
+        .. code:: latex
+
+          @article{osqp-infeasibility,
+            title   = {Infeasibility detection in the alternating direction method of multipliers for convex optimization},
+            author  = {Banjac, G. and Goulart, P. and Stellato, B. and Boyd, S.},
+            journal = {optimization-online.org},
+            year    = {2017},
+            url     = {http://www.optimization-online.org/DB_HTML/2017/06/6058.html},
+          }
+
+    Code generation
+        Code generation functionality and example in this `paper <http://stanford.edu/~boyd/papers/pdf/osqp_embedded.pdf>`__.
+
+        .. code:: latex
+
+          @inproceedings{osqp-codegen,
+            author = {Banjac, G. and Stellato, B. and Moehle, N. and Goulart, P. and Bemporad, A. and Boyd, S.},
+            title = {Embedded code generation using the {OSQP} solver},
+            booktitle = {{IEEE} Conference on Decision and Control ({CDC})},
+            year = {2017},
+            month = dec,
+          }
+
+

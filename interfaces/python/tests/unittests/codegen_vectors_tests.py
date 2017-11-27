@@ -22,10 +22,11 @@ class codegen_vectors_tests(unittest.TestCase):
         self.n = self.P.shape[0]
         self.m = self.A.shape[0]
         self.opts = {'verbose': False,
-                     'eps_abs': 1e-06,
-                     'eps_rel': 1e-06,
+                     'eps_abs': 1e-08,
+                     'eps_rel': 1e-08,
+                     'rho': 0.01,
                      'alpha': 1.6,
-                     'max_iter': 3000,
+                     'max_iter': 10000,
                      'warm_start': True}
         self.model = osqp.OSQP()
         self.model.setup(P=self.P, q=self.q, A=self.A, l=self.l, u=self.u,

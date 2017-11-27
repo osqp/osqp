@@ -19,13 +19,11 @@ class dual_infeasibility_tests(unittest.TestCase):
                      'eps_rel': 1e-05,
                      'eps_prim_inf': 1e-15,  # Focus only on dual infeasibility
                      'eps_dual_inf': 1e-6,
-                     'scaling': True,
-                     'scaling_iter': 3,
-                     'auto_rho': False,
+                     'scaling': 3,
                      'max_iter': 2500,
                      'polish': False,
-                     'early_terminate_interval': 1,
-                     'pol_refine_iter': 4}
+                     'check_termination': 1,
+                     'polish_refine_iter': 4}
 
     def test_dual_infeasible_lp(self):
 

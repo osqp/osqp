@@ -33,10 +33,6 @@ test_mat_ops_d = np.random.randn(test_mat_ops_n)
 D = spa.diags(test_mat_ops_d).tocsc()
 test_mat_ops_prem_diag = D.dot(test_mat_ops_A).tocoo().tocsc()  # Force matrix reordering
 test_mat_ops_postm_diag = test_mat_ops_A.dot(D).tocoo().tocsc()  # Force matrix reordering
-test_mat_ops_ew_square = test_mat_ops_A.copy()
-test_mat_ops_ew_square.data = np.square(test_mat_ops_ew_square.data)
-test_mat_ops_ew_abs = test_mat_ops_A.copy()
-test_mat_ops_ew_abs.data = np.abs(test_mat_ops_ew_abs.data)
 test_mat_ops_inf_norm_cols = np.amax(np.abs(
     np.asarray(test_mat_ops_A.todense())), axis=0)
 test_mat_ops_inf_norm_rows = np.amax(np.abs(
@@ -72,11 +68,6 @@ test_mat_extr_triu_P_inf_norm_cols = np.amax(np.abs(
     np.asarray(test_mat_extr_triu_P.todense())), axis=0)
 
 
-# Test trace and frobenius norms
-test_mat_trace_P = spa.random(4, 4, density=0.6, format='csc')
-test_mat_trace_P_trace = test_mat_trace_P.diagonal().sum()
-test_mat_trace_P_fro_sq = sla.norm(test_mat_trace_P, ord='fro') ** 2
-
 # Test compute quad form
 test_qpform_n = 4
 test_qpform_P = spa.random(test_qpform_n, test_qpform_n, density=0.8).tocsc()
@@ -105,8 +96,6 @@ data = {'test_sp_matrix_A': test_sp_matrix_A,
         'test_mat_ops_d': test_mat_ops_d,
         'test_mat_ops_prem_diag': test_mat_ops_prem_diag,
         'test_mat_ops_postm_diag': test_mat_ops_postm_diag,
-        'test_mat_ops_ew_square': test_mat_ops_ew_square,
-        'test_mat_ops_ew_abs': test_mat_ops_ew_abs,
         'test_mat_ops_inf_norm_cols': test_mat_ops_inf_norm_cols,
         'test_mat_ops_inf_norm_rows': test_mat_ops_inf_norm_rows,
         'test_mat_vec_n': test_mat_vec_n,
@@ -130,9 +119,6 @@ data = {'test_sp_matrix_A': test_sp_matrix_A,
         'test_qpform_Pu': test_qpform_Pu,
         'test_qpform_x': test_qpform_x,
         'test_qpform_value': test_qpform_value,
-        'test_mat_trace_P': test_mat_trace_P,
-        'test_mat_trace_P_trace': test_mat_trace_P_trace,
-        'test_mat_trace_P_fro_sq': test_mat_trace_P_fro_sq
         }
 
 # Generate test data

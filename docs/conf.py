@@ -18,12 +18,13 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
 import sphinx_rtd_theme
-import os, subprocess
+import os
+import subprocess
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
 # Set version for bumpversion
-__version__ = "0.1.2"
+__version__ = "0.2.1"
 
 # -- General configuration ------------------------------------------------
 
@@ -58,7 +59,7 @@ author = 'Bartolomeo Stellato, Goran Banjac'
 # built documents.
 #
 
-version = '.'.join(__version__.split('.')[:3])
+version = '.'.join(__version__.split('.')[:4])
 
 # The full version, including alpha/beta/rc tags.
 release = __version__
@@ -149,6 +150,7 @@ latex_elements = {
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
+    'sphinxsetup': 'hmargin={1.5cm,1.5cm}',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples

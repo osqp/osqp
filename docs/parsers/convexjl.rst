@@ -1,3 +1,0 @@
-Convex.jl
-=========
-Coming soon!

@@ -54,9 +54,6 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# Add clang_complete files
-.clang_complete
-
 # Code coverage
 *.gcda
 *.gcno
@@ -71,6 +68,7 @@ docs/doxygen_out
 *.swp
 .ycm_extra_conf.py
 *.swo
+
 # Gurobi
 # -------------------------------------------------------------------
 gurobi.log
@@ -204,12 +202,4 @@ interfaces/matlab/package/osqp*
 
 # Data Files
 # -------------------------------------------------------------------
-interfaces/python/tests/qp_problems/results/
-interfaces/python/tests/qp_problems/results_bak
-interfaces/python/tests/qp_problems/figures/
 tests/**/*data.h
-interfaces/python/*.so
-interfaces/python/*.pyd
-interfaces/python/files.txt
-
-interfaces/matlab/codegen/sources

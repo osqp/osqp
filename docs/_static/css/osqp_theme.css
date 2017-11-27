@@ -1,8 +1,60 @@
 /* Default header fonts are ugly */
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,400i,600,600i,700,700i);
+@import url(http://fonts.googleapis.com/css?family=Inconsolata);
+
 h1, h2, h3, h4, h5, h6 {
-    font-family:  "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-family:  "Open Sans", "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-weight: 600;
+}
+body {
+  font-family: 'Open Sans', sans-serif;
 }
 
+.wy-nav-top a {
+    font-size: 175%;
+    font-weight: 600;
+}
+
+/* Remove rounded navigation bar */
+.wy-side-nav-search input[type=text] {
+    border-radius: 2px;
+}
+
+div[class^='highlight'] pre {
+    font-family: 'Inconsolata', monospace;
+    font-size: 16px;
+}
+
+/* Make glossary entries bolder to stand out */
+dl.glossary>dt{
+    font-weight: 700; 
+}
+
+/* Make bold things less bold */
+b, strong {
+    font-weight: 600;
+}
+
+/* Less bold table head */
+.wy-table thead th, .rst-content table.docutils thead th, .rst-content table.field-list thead th {
+    font-weight: 600;
+}
+
+/* Less bold current active element */
+.wy-menu-vertical li.on a, .wy-menu-vertical li.current>a {
+    font-weight: 600;
+}
+
+
+/* Types link refs less bold */
+.rst-content tt.xref, a .rst-content tt, .rst-content tt.xref, .rst-content code.xref, a .rst-content tt, a .rst-content code {
+    font-weight: normal;
+}
+
+/* Make types in C/C++ docs less bold */
+.rst-content dl dt {
+    font-weight: 600;
+}
 
 
 /* Link Styling */
@@ -14,6 +66,8 @@ a:hover, a:active {
 	color: rgb(0, 32, 72);  /*  blue*/
 	text-decoration: none;
 }
+
+
 
 /* Make bar oxford blue*/
 .wy-side-nav-search {
@@ -27,6 +81,7 @@ a:hover, a:active {
 
 .wy-nav-content-wrap, .wy-menu li.current > a  {
     background-color: #fff;
+    /* font-weight: 600; */
 }
 
 @media screen and (min-width: 1400px) {
@@ -68,6 +123,7 @@ a:hover, a:active {
 /* Navigation bar text */
 .wy-menu-vertical header, .wy-menu-vertical p.caption {
     color: rgb(255, 255, 255); /* White text*/
+    font-weight: 600;
 }
 
 .wy-menu-vertical a{
@@ -87,12 +143,41 @@ a:hover, a:active {
 /* Change text color for tt literal */
 .rst-content tt.literal, .rst-content tt.literal, .rst-content code.literal{
     color: rgb(46, 118, 176);  /* Light blue*/
+    font-size: 14px;
+}
+
+tr td code span{
+   font-size: 13px;
 }
 
 .s1, .s2{
 	color: rgb(46, 118, 176);  /* Light blue*/
+    font-size: 16px;
 }
 
+
+/* Rubric bigger (initial page) */
+.rst-content p.rubric {
+    font-family:  "Open Sans", "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-weight: 600;
+    font-size: 150%;
+    margin-bottom: 20px;
+}
+
+/* Smaller rubric in C/C++ description */
+p.breathe-sectiondef-title.rubric {
+	font-size: 100%;
+}
+
+
+
+
+/* Remove box shadow from buttons */
+.btn {
+    font-weight: normal;
+    font-family:  "Open Sans", "Helvetica Neue",Helvetica,Arial,sans-serif;
+    box-shadow: none;
+}
 /* Force breathe display inline parameters */
 /*.wy-plain-list-disc li p:last-child, .rst-content .section ul li p:last-child, .rst-content .toctree-wrapper ul li p:last-child, article ul li p:last-child{
     display: inline;

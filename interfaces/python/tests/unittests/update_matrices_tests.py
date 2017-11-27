@@ -31,8 +31,7 @@ class update_matrices_tests(unittest.TestCase):
         self.A_new.data += np.random.randn(self.A_new.nnz)
         self.l = np.zeros(self.m)
         self.u = 30 + np.random.randn(self.m)
-        self.opts = {'auto_rho': False,
-                     'eps_abs': 1e-08,
+        self.opts = {'eps_abs': 1e-08,
                      'eps_rel': 1e-08,
                      'verbose': False}
         self.model = osqp.OSQP()
