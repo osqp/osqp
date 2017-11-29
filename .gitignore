@@ -196,6 +196,10 @@ out/
 # matlab release files
 interfaces/matlab/package/osqp*
 
+
+# Clang completer
+.clang_complete
+
 # CMake Files
 # -------------------------------------------------------------------
 *.stamp
