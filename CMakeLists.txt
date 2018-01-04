@@ -13,9 +13,9 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 
 # Some non-standard CMake modules
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/configure/cmake/")
-include(FindPythonModule)
-include(Utils)
+LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/configure/cmake)
+INCLUDE(FindPythonModule)
+INCLUDE(Utils)
 # include(FindMKL)  # Find MKL module
 
 

@@ -113,7 +113,7 @@ Python
         res = prob.solve()
 
         # Check solver status
-        if res.info.status != 'Solved':
+        if res.info.status != 'solved':
             raise ValueError('OSQP did not solve the problem!')
 
         # Apply first control input to the plant
@@ -211,7 +211,7 @@ Matlab
         res = prob.solve();
 
         % Check solver status
-        if ~strcmp(res.info.status, 'Solved')
+        if ~strcmp(res.info.status, 'solved')
             error('OSQP did not solve the problem!')
         end
 
