@@ -176,11 +176,11 @@ c_int osqp_f2c_solve( c_int m, c_int n,
     // Record solution and dual variables
 
     for (i = 0 ; i < n ; i++) {
-      x[i] = star_work->x[i];
+      x[i] = star_work->solution->x[i];
     }
 
     for (i = 0 ; i < m ; i++) {
-      y[i] = star_work->y[i];
+      y[i] = star_work->solution->y[i];
     }
 
     // Record remaining output information
