@@ -1,5 +1,7 @@
 Changes since last release
 --------------------------
+* Added CUTEst interface
+* Fixed bug in upper triangular `P` extraction. Now the solver can accept both complete `P` matrix or just the upper triangular part.
 
 
 Version 0.2.1 (25 November 2017)
@@ -21,6 +23,7 @@ Version 0.2.0 (23 November 2017)
 *   Added diagonal rho vector with different values for equality/inequality constraints (interface still have scalar rho)
 *   Return certificates of infeasibility in results structure
 *   Now code generation produces a static library
+
 
 Version 0.1.3 (21 September 2017)
 ---------------------------------

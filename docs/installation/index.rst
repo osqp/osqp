@@ -10,4 +10,5 @@ Installation
    python.rst
    julia.rst
    matlab.rst
+   cutest.rst
    linear_system_solvers.rst

@@ -133,12 +133,13 @@ void     castToDoubleArr(c_float *arr, double* arr_out, c_int len);
 void     setToNaN(double* arr_out, c_int len);
 #if EMBEDDED != 1
 c_int*   copyDoubleToCintVector(double* vecData, c_int numel);
+void     change1To0Indexing(c_int *vecData, c_int numel);
 #endif
 
 
 // Function handler
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
-{
+{    
     // Get the command string
     char cmd[64];
 	  if (nrhs < 1 || mxGetString(prhs[0], cmd, sizeof(cmd)))
@@ -316,6 +317,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         }
         if(!mxIsEmpty(Px_idx)){
             Px_idx_vec = copyDoubleToCintVector(mxGetPr(Px_idx), Px_n);
+            
+            // Change indexing to match C 0-based one
+            change1To0Indexing(Px_idx_vec, Px_n);
+            
         }
 
         if(!mxIsEmpty(Px)){
@@ -346,6 +351,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         }
         if(!mxIsEmpty(Ax_idx)){
             Ax_idx_vec = copyDoubleToCintVector(mxGetPr(Ax_idx), Ax_n);
+            
+            // Change indexing to match C 0-based one
+            change1To0Indexing(Ax_idx_vec, Ax_n);
         }
 
         if(!mxIsEmpty(Ax)){
@@ -380,12 +388,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         }
         if(!mxIsEmpty(Px_idx)){
             Px_idx_vec = copyDoubleToCintVector(mxGetPr(Px_idx), Px_n);
+            
+            // Change indexing to match C 0-based one
+            change1To0Indexing(Px_idx_vec, Px_n);
         }
         if(!mxIsEmpty(Ax)){
             Ax_vec = copyToCfloatVector(mxGetPr(Ax), Ax_n);
         }
         if(!mxIsEmpty(Ax_idx)){
             Ax_idx_vec = copyDoubleToCintVector(mxGetPr(Ax_idx), Ax_n);
+            
+            // Change indexing to match C 0-based one
+            change1To0Indexing(Ax_idx_vec, Ax_n);
         }
 
         if(!mxIsEmpty(Ax) && !mxIsEmpty(Px)){
@@ -453,4 +467,13 @@ c_int* copyDoubleToCintVector(double* vecData, c_int numel){
   return out;
 
 }
+
+void change1To0Indexing(c_int *vecData, c_int numel){
+c_int i; // Indexing
+for(i=0; i < numel; i++){
+vecData[i] -= 1;  // Decrease index by 1
+}
+}
+
+
 #endif  // end EMBEDDED

@@ -68,7 +68,7 @@ classdef update_matrices_tests < matlab.unittest.TestCase
             % Update matrix P
             Pnew_triu = triu(testCase.P_new);
             Px = nonzeros(Pnew_triu);
-            Px_idx = (1:nnz(Pnew_triu))'-1;
+            Px_idx = (1:nnz(Pnew_triu))';
             testCase.solver.update('Px', Px, 'Px_idx', Px_idx);
 
             % Solve again
@@ -106,7 +106,7 @@ classdef update_matrices_tests < matlab.unittest.TestCase
         function test_update_A(testCase)
             % Update matrix A
             Ax = nonzeros(testCase.A_new);
-            Ax_idx = (1:nnz(testCase.A_new))'-1;
+            Ax_idx = (1:nnz(testCase.A_new))';
             testCase.solver.update('Ax', Ax, 'Ax_idx', Ax_idx);
 
             % Solve again
@@ -144,9 +144,9 @@ classdef update_matrices_tests < matlab.unittest.TestCase
             % Update matrices P and A
             Pnew_triu = triu(testCase.P_new);
             Px = nonzeros(Pnew_triu);
-            Px_idx = (1:nnz(Pnew_triu))'-1;
+            Px_idx = (1:nnz(Pnew_triu))';
             Ax = nonzeros(testCase.A_new);
-            Ax_idx = (1:nnz(testCase.A_new))'-1;
+            Ax_idx = (1:nnz(testCase.A_new))';
             testCase.solver.update('Px', Px, 'Px_idx', Px_idx, 'Ax', Ax, 'Ax_idx', Ax_idx);
 
             % Solve again
@@ -166,7 +166,7 @@ classdef update_matrices_tests < matlab.unittest.TestCase
             % Update matrices P and A
             Pnew_triu = triu(testCase.P_new);
             Px = nonzeros(Pnew_triu);
-            Px_idx = (1:nnz(Pnew_triu))'-1;
+            Px_idx = (1:nnz(Pnew_triu))';
             Ax = nonzeros(testCase.A_new);
             testCase.solver.update('Px', Px, 'Px_idx', Px_idx, 'Ax', Ax);
 
@@ -188,7 +188,7 @@ classdef update_matrices_tests < matlab.unittest.TestCase
             Pnew_triu = triu(testCase.P_new);
             Px = nonzeros(Pnew_triu);
             Ax = nonzeros(testCase.A_new);
-            Ax_idx = (1:nnz(testCase.A_new))'-1;
+            Ax_idx = (1:nnz(testCase.A_new))';
             testCase.solver.update('Px', Px, 'Ax', Ax, 'Ax_idx', Ax_idx);
 
             % Solve again
