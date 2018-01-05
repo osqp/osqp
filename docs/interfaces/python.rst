@@ -3,7 +3,7 @@ Python
 
 Import
 ------
-The OSQP module is can be imported with
+The OSQP module can be imported with
 
 .. code:: python
 

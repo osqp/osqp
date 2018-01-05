@@ -3,7 +3,7 @@ Julia
 
 Load the module
 ---------------
-The OSQP module is can be load with
+The OSQP module can be load with
 
 .. code:: julia
 
