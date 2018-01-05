@@ -1,4 +1,4 @@
-#include "fosqp.h"
+#include "glob_optsf.h"
 
 PROGRAM TEST_OSQP
 

@@ -1,4 +1,4 @@
-#include "fosqp.h"
+#include "glob_optsf.h"
 
 MODULE OSQP_TYPES
 
