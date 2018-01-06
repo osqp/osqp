@@ -285,8 +285,8 @@ c_int osqp_solve(OSQPWorkspace * work){
 		if (isInterrupted()) {
 			update_status(work->info, OSQP_SIGINT);
 			c_print("Solver interrupted\n");
-			endInterruptListener();
-			return 1;   // exitflag
+			exitflag = 1;
+			goto exit;
 		}
 #endif
 
@@ -377,7 +377,8 @@ c_int osqp_solve(OSQPWorkspace * work){
 #ifdef PRINTING
 				c_print("ERROR: Failed rho update!\n");
 #endif  // PRINTING
-				return 1;
+				exitflag = 1;
+				goto exit;
 			}
 
 			// This was for debug purposes 
@@ -480,6 +481,11 @@ c_int osqp_solve(OSQPWorkspace * work){
 	// Store solution
 	store_solution(work);
 
+exit:
+#ifdef CTRLC
+	// Restore previous signal handler
+	endInterruptListener();
+#endif
 	return exitflag;
 }
 
