@@ -168,9 +168,24 @@ classdef basic_tests < matlab.unittest.TestCase
             testCase.verifyEqual(res_default.info.iter, ...
                                  res_updated_rho.info.iter)
             
-            
-            
-            
+        end
+
+        function test_update_time_limit(testCase)
+            testCase.verifyEqual(testCase.options.time_limit, Inf)
+
+            results = testCase.solver.solve();
+            testCase.verifyEqual(results.info.status_val, ...
+                testCase.solver.constant('OSQP_SOLVED'))
+
+            % Ensure the solver will time out
+            testCase.solver.update_settings(...
+                'time_limit', 1e-6, ...
+                'max_iter', 2e9, ...
+                check_termination, 0);
+
+            results = testCase.solver.solve();
+            testCase.verifyEqual(results.info.status_val, ...
+                testCase.solver.constant('OSQP_TIME_LIMIT_REACHED'))
         end
 
     end

@@ -243,36 +243,17 @@ void set_default_settings(OSQPSettings * settings) {
     settings->check_termination = CHECK_TERMINATION;     /* Interval for evaluating termination criteria */
     settings->warm_start = WARM_START;     /* warm starting */
 
+#ifdef PROFILING
+    settings->time_limit = TIME_LIMIT;
+#endif
 }
 
 #ifndef EMBEDDED
 
 OSQPSettings * copy_settings(OSQPSettings * settings){
     OSQPSettings * new = c_malloc(sizeof(OSQPSettings));
-
     // Copy settings
-    new->scaling = settings->scaling;
-    new->adaptive_rho = settings->adaptive_rho;
-    new->adaptive_rho_interval = settings->adaptive_rho_interval;
-    new->adaptive_rho_tolerance = settings->adaptive_rho_tolerance;
-    new->adaptive_rho_fraction = settings->adaptive_rho_fraction;
-    new->rho = settings->rho;
-    new->sigma = settings->sigma;
-    new->max_iter = settings->max_iter;
-    new->eps_abs = settings->eps_abs;
-    new->eps_rel = settings->eps_rel;
-    new->eps_prim_inf = settings->eps_prim_inf;
-    new->eps_dual_inf = settings->eps_dual_inf;
-    new->alpha = settings->alpha;
-    new->linsys_solver = settings->linsys_solver;
-    new->delta = settings->delta;
-    new->polish = settings->polish;
-    new->polish_refine_iter = settings->polish_refine_iter;
-    new->verbose = settings->verbose;
-    new->scaled_termination = settings->scaled_termination;
-    new->check_termination = settings->check_termination;
-    new->warm_start = settings->warm_start;
-
+    memcpy(new, settings, sizeof(OSQPSettings));
     return new;
 }
 

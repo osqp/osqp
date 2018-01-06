@@ -24,6 +24,9 @@ extern "C" {
 #define OSQP_PRIMAL_INFEASIBLE (-3) /* primal infeasible  */
 #define OSQP_DUAL_INFEASIBLE (-4) /* dual infeasible */
 #define OSQP_SIGINT (-5) /* interrupted by user */
+#ifdef PROFILING
+#define OSQP_TIME_LIMIT_REACHED (-6)
+#endif
 #define OSQP_UNSOLVED (-10)  /* Unsolved. Only setup function has been called */
 
 
@@ -77,6 +80,10 @@ static const char *LINSYS_SOLVER_NAME[] = {
 #define ADAPTIVE_RHO_MULTIPLE_TERMINATION (4)  ///< Multiple of termination check time we update rho if profiling disabled
 #define ADAPTIVE_RHO_FIXED (100)   ///< Number of iterations after which we update rho if termination check if disabled and profiling disabled
 #define ADAPTIVE_RHO_TOLERANCE (5)  ///< Tolerance for adopting new rho. Number of times the new rho is larger or smaller than the current one
+#endif
+
+#ifdef PROFILING
+#define TIME_LIMIT (INFINITY)
 #endif
 
 /* Printing */

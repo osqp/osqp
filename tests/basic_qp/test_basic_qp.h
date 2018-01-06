@@ -481,6 +481,67 @@ static char * test_basic_qp_update_rho()
     return 0;
 }
 
+static char * test_basic_qp_time_limit()
+{
+    // Problem settings
+    OSQPSettings * settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
+
+    // Structures
+    OSQPWorkspace * work;  // Workspace
+    OSQPData * data;  // Data
+    basic_qp_sols_data *  sols_data;
+
+    // Exitflag
+    c_int exitflag;
+
+    // Populate data
+    data = generate_problem_basic_qp();
+    sols_data = generate_problem_basic_qp_sols_data();
+
+    // Define Solver settings as default
+    set_default_settings(settings);
+
+    // Check dfault time limit
+    mu_assert("Time limit test: Default not correct", settings->time_limit == INFINITY);
+
+    // Setup workspace
+    work = osqp_setup(data, settings);
+
+    // Setup correct
+    mu_assert("Time limit test: Setup error!", work != OSQP_NULL);
+
+    // Solve Problem
+    osqp_solve(work);
+
+    // Compare solver statuses
+    mu_assert("Time limit test: Error in no time limit solver status!",
+              work->info->status_val == sols_data->status_test);
+
+    // Update time limit
+    osqp_update_time_limit(work, 1e-5);
+    osqp_update_max_iter(work, 2000000000);
+    osqp_update_check_termination(work, 0);
+
+    // Solve Problem
+    osqp_solve(work);
+
+    // Compare solver statuses
+    mu_assert("Time limit test: Error in timed out solver status!",
+              work->info->status_val == OSQP_TIME_LIMIT_REACHED );
+
+    // Cleanup solver
+    osqp_cleanup(work);
+
+    // Cleanup data
+    clean_problem_basic_qp(data);
+    clean_problem_basic_qp_sols_data(sols_data);
+
+    // Cleanup
+    c_free(settings);
+
+    return 0;
+}
+
 static char * test_basic_qp()
 {
 
@@ -489,6 +550,7 @@ static char * test_basic_qp()
     mu_run_test(test_basic_qp_update);
     mu_run_test(test_basic_qp_check_termination);
     mu_run_test(test_basic_qp_update_rho);
+    mu_run_test(test_basic_qp_time_limit);
 
     return 0;
 }

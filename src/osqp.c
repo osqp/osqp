@@ -292,6 +292,17 @@ c_int osqp_solve(OSQPWorkspace * work){
 		}
 #endif
 
+#ifdef PROFILING
+		if (work->settings->time_limit < INFINITY && toc(work->timer) >= work->settings->time_limit) {
+			update_status(work->info, OSQP_TIME_LIMIT_REACHED);
+#ifdef PRINTING
+			c_print("Solver time limit reached\n");
+#endif
+			exitflag = 1;
+			goto exit;
+		}
+#endif
+
 		// Can we check for termination ?
 		can_check_termination = work->settings->check_termination &&
 			(iter % work->settings->check_termination == 0);
@@ -1272,3 +1283,19 @@ c_int osqp_update_verbose(OSQPWorkspace * work, c_int verbose_new) {
 
 
 #endif // EMBEDDED
+
+#ifdef PROFILING
+c_int osqp_update_time_limit(OSQPWorkspace * work, c_float time_limit_new) {
+	// Check that time_limit is nonnegative
+	if (time_limit_new < 0.) {
+#ifdef PRINTING
+		c_print("time_limit must be nonnegative\n");
+#endif
+		return 1;
+	}
+	// Update time_limit
+	work->settings->time_limit = time_limit_new;
+
+	return 0;
+}
+#endif
