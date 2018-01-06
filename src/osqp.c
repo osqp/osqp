@@ -284,7 +284,9 @@ c_int osqp_solve(OSQPWorkspace * work){
 		// Check the interrupt signal
 		if (isInterrupted()) {
 			update_status(work->info, OSQP_SIGINT);
+#ifdef PRINTING
 			c_print("Solver interrupted\n");
+#endif
 			exitflag = 1;
 			goto exit;
 		}
