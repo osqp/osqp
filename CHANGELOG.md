@@ -2,6 +2,7 @@ Changes since last release
 --------------------------
 * Added CUTEst interface
 * Fixed bug in upper triangular `P` extraction. Now the solver can accept both complete `P` matrix or just the upper triangular part.
+* Fixed [#34](https://github.com/oxfordcontrol/osqp/issues/34)
 
 
 Version 0.2.1 (25 November 2017)
