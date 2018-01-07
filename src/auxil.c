@@ -842,12 +842,14 @@ c_int validate_settings(const OSQPSettings * settings){
 #endif
         return 1;
     }
+#ifdef PROFILING
     if (settings->adaptive_rho_fraction <= 0) {
 #ifdef PRINTING
         c_print("adaptive_rho_fraction must be positive\n");
 #endif
         return 1;
     }
+#endif
     if (settings->adaptive_rho_tolerance < 1) {
 #ifdef PRINTING
         c_print("adaptive_rho_tolerance must be >= 1\n");
