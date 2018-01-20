@@ -223,7 +223,9 @@ c_int osqp_solve(OSQPWorkspace * work){
 	c_int compute_cost_function;  // Boolean whether to compute the cost function
 	// in the loop
 	c_int can_check_termination = 0;  // Boolean whether to check termination
+#ifdef PROFILING
 	c_float temp_run_time;  // Temporary variable to store current run time
+#endif
 
 #ifdef PRINTING
 	c_int can_print; // Boolean whether you can print
@@ -305,6 +307,7 @@ c_int osqp_solve(OSQPWorkspace * work){
 		if (work->settings->time_limit && temp_run_time >= work->settings->time_limit) {
 			update_status(work->info, OSQP_TIME_LIMIT_REACHED);
 #ifdef PRINTING
+		if (work->settings->verbose)
 			c_print("Run time limit reached\n");
 #endif
 			exitflag = 1;
@@ -503,7 +506,12 @@ c_int osqp_solve(OSQPWorkspace * work){
 	// Store solution
 	store_solution(work);
 
+
+// Define exit flag for quitting function
+#if defined (PROFILING) || defined (CTRLC) || EMBEDDED != 1
 exit:
+#endif
+	
 #ifdef CTRLC
 	// Restore previous signal handler
 	endInterruptListener();

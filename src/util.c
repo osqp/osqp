@@ -91,17 +91,18 @@ void print_setup_header(const OSQPWorkspace * work) {
             settings->eps_prim_inf, settings->eps_dual_inf);
     c_print("rho = %.2e ", settings->rho);
     if (settings->adaptive_rho) c_print("(adaptive)");
-    c_print("\n          ");
-    // c_print("sigma = %.1f, alpha = %.2f, \n          ",
+    c_print(",\n          ");
     c_print("sigma = %.2e, alpha = %.2f, ",
             settings->sigma, settings->alpha);
     c_print("max_iter = %i\n", (int)settings->max_iter);
 
     if (settings->check_termination)
-        c_print("          check_termination: on (interval %i)\n",
+        c_print("          check_termination: on (interval %i),\n",
                 (int)settings->check_termination);
     else
-        c_print("          check_termination: off \n");
+        c_print("          check_termination: off,\n");
+    if (settings->time_limit)
+	c_print("          time_limit: %.2e sec,\n", settings->time_limit);
     if (settings->scaling)
         c_print("          scaling: on, ");
     else

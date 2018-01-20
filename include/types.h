@@ -168,7 +168,7 @@ typedef struct {
     c_int warm_start; ///< boolean, warm start
 
 #ifdef PROFILING
-    c_float time_limit; ///< maximum seconds allowed for the solver
+    c_float time_limit; ///< maximum seconds allowed to solve the problem
 #endif
 
 } OSQPSettings;

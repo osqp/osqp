@@ -666,6 +666,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             plhs[0] = mxCreateDoubleScalar(OSQP_MAX_ITER_REACHED);
             return;
         }
+
+        if (!strcmp("OSQP_TIME_LIMIT_REACHED", constant)){
+            plhs[0] = mxCreateDoubleScalar(OSQP_TIME_LIMIT_REACHED);
+            return;
+        }
         
         // Linear system solvers
         if (!strcmp("SUITESPARSE_LDL_SOLVER", constant)){

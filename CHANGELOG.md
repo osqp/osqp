@@ -1,5 +1,6 @@
 Changes since last release
 --------------------------
+* Added `time_limit` option
 
 
 Version 0.2.1 (25 November 2017)

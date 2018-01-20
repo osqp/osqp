@@ -90,7 +90,11 @@ fprintf(f, '%.20f, ', settings.linsys_solver);
 
 fprintf(f, '%d, ', settings.scaled_termination);
 fprintf(f, '%d, ', settings.check_termination);
-fprintf(f, '%d',   settings.warm_start);
+fprintf(f, '%d,',   settings.warm_start);
+
+fprintf(f, '\n#ifdef PROFILING\n');
+fprintf(f, '(c_float)%.20f, ', settings.time_limit);
+fprintf(f, '\n#endif  // PROFILING\n');
 
 fprintf(f, '};\n\n');
 
