@@ -15,7 +15,6 @@ extern "C" {
 /******************
  * Solver Status  *
  ******************/
- // TODO: Add other statuses
 #define OSQP_DUAL_INFEASIBLE_INACCURATE (4)
 #define OSQP_PRIMAL_INFEASIBLE_INACCURATE (3)
 #define OSQP_SOLVED_INACCURATE (2)
@@ -83,7 +82,7 @@ static const char *LINSYS_SOLVER_NAME[] = {
 #endif
 
 #ifdef PROFILING
-#define TIME_LIMIT (INFINITY)
+#define TIME_LIMIT (0)  ///< Disable time limit as default
 #endif
 
 /* Printing */

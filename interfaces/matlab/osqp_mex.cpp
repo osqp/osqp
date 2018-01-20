@@ -55,7 +55,7 @@ const char* OSQP_SETTINGS_FIELDS[] = {"rho",                        //c_float
                                       "scaled_termination",         //c_int
                                       "check_termination",          //c_int
                                       "warm_start",                 //c_int
-                                      "time_limit",};               //c_float
+                                      "time_limit"};               //c_float
 
 const char* CSC_FIELDS[] = {"nzmax",    //c_int
                             "m",        //c_int

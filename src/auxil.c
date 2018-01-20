@@ -642,7 +642,7 @@ void update_status(OSQPInfo *info, c_int status_val) {
         c_strcpy(info->status, "maximum iterations reached");
 #ifdef PROFILING
     else if (status_val == OSQP_TIME_LIMIT_REACHED)
-        c_strcpy(info->status, "solve time limit reached");
+        c_strcpy(info->status, "Run time limit reached");
 #endif
     else if (status_val == OSQP_SIGINT)
         c_strcpy(info->status, "interrupted");

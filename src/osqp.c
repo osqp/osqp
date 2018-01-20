@@ -223,6 +223,7 @@ c_int osqp_solve(OSQPWorkspace * work){
 	c_int compute_cost_function;  // Boolean whether to compute the cost function
 	// in the loop
 	c_int can_check_termination = 0;  // Boolean whether to check termination
+	c_float temp_run_time;  // Temporary variable to store current run time
 
 #ifdef PRINTING
 	c_int can_print; // Boolean whether you can print
@@ -293,10 +294,18 @@ c_int osqp_solve(OSQPWorkspace * work){
 #endif
 
 #ifdef PROFILING
-		if (work->settings->time_limit < INFINITY && toc(work->timer) >= work->settings->time_limit) {
+		// Check if solver time_limit is enabled. In case, check if the current run time 
+		// is more than the time_limit option.
+		if (work->first_run){
+			temp_run_time = work->info->setup_time + toc(work->timer);
+		}
+		else {
+			temp_run_time = toc(work->timer);
+		}
+		if (work->settings->time_limit && temp_run_time >= work->settings->time_limit) {
 			update_status(work->info, OSQP_TIME_LIMIT_REACHED);
 #ifdef PRINTING
-			c_print("Solver time limit reached\n");
+			c_print("Run time limit reached\n");
 #endif
 			exitflag = 1;
 			goto exit;

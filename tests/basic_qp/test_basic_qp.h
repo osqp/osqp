@@ -502,7 +502,7 @@ static char * test_basic_qp_time_limit()
     set_default_settings(settings);
 
     // Check dfault time limit
-    mu_assert("Time limit test: Default not correct", settings->time_limit == INFINITY);
+    mu_assert("Time limit test: Default not correct", settings->time_limit == 0);
 
     // Setup workspace
     work = osqp_setup(data, settings);
