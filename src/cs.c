@@ -229,7 +229,7 @@ csc * csc_to_triu(csc * M){
     // Check if matrix is square
     if (M->m != M->n){
 #ifdef PRINTING
-        c_print("ERROR: Matrix M not square!\n");
+        c_eprint("Matrix M not square");
 #endif
 
         return OSQP_NULL;
@@ -247,7 +247,7 @@ csc * csc_to_triu(csc * M){
     M_trip = csc_spalloc(n, n, nnzmaxM, 1, 1); // Triplet format
     if (!M_trip){
 #ifdef PRINTING
-	    c_print("ERROR: Upper triangular matrix extraction failed (out of memory)!\n");
+	    c_eprint("Upper triangular matrix extraction failed (out of memory)");
 #endif		    
 	    return OSQP_NULL;
     }

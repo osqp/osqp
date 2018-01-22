@@ -81,6 +81,7 @@ void print_polish(OSQPWorkspace * work);
  */
 void print_footer(OSQPInfo * info, c_int polish);
 
+
 #endif
 
 

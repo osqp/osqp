@@ -6,7 +6,7 @@ soHandle_t lh_load_lib(const char *libName) {
 
     if (!libName) {
         #ifdef PRINTING
-        c_print("loadLib error: no library name given");
+        c_eprint("no library name given");
         #endif
         return OSQP_NULL;
     }
@@ -15,7 +15,7 @@ soHandle_t lh_load_lib(const char *libName) {
     h = LoadLibrary (libName);
     if (!h) {
         #ifdef PRINTING
-        c_print("Windows error while loading dynamic library %s, error = %d.\n",
+        c_eprint("Windows error while loading dynamic library %s, error = %d",
                 libName, (int)GetLastError());
         #endif
     }
@@ -23,8 +23,7 @@ soHandle_t lh_load_lib(const char *libName) {
     h = dlopen (libName, RTLD_LAZY);
     if (!h) {
         #ifdef PRINTING
-        c_print("Error while loading dynamic library %s.\n", libName);
-	c_print("%s\n", dlerror());
+        c_eprint("Error while loading dynamic library %s: %s", libName, dlerror());
         #endif
     }
 #endif
@@ -131,7 +130,7 @@ symtype lh_load_sym (soHandle_t h, const char *symName) {
             return s;
         } else {
             #ifdef PRINTING
-            c_print("Cannot find symbol %s in dynamic library, error = %d.",
+            c_eprint("Cannot find symbol %s in dynamic library, error = %d",
                     symName, (int)GetLastError());
             #endif
         }
@@ -140,7 +139,7 @@ symtype lh_load_sym (soHandle_t h, const char *symName) {
         err = dlerror();  /* we have only one chance; a successive call to dlerror() returns OSQP_NULL */
         if (err) {
             #ifdef PRINTING
-            c_print("Cannot find symbol %s in dynamic library, error = %s.",
+            c_eprint("Cannot find symbol %s in dynamic library, error = %s",
                     symName, err);
             #endif
         } else {

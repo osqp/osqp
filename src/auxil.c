@@ -751,7 +751,7 @@ c_int validate_data(const OSQPData * data){
 
     if(!data){
 #ifdef PRINTING
-        c_print("Missing data!\n");
+        c_eprint("Missing data");
 #endif
         return 1;
     }
@@ -759,7 +759,7 @@ c_int validate_data(const OSQPData * data){
     // General dimensions Tests
     if (data->n <= 0 || data->m < 0){
 #ifdef PRINTING
-        c_print("n must be positive and m nonnegative; n = %i, m = %i\n",
+        c_eprint("n must be positive and m nonnegative; n = %i, m = %i",
                 (int)data->n, (int)data->m);
 #endif
         return 1;
@@ -768,13 +768,13 @@ c_int validate_data(const OSQPData * data){
     // Matrix P
     if (data->P->m != data->n ){
 #ifdef PRINTING
-        c_print("P does not have dimension n x n with n = %i\n", (int)data->n);
+        c_eprint("P does not have dimension n x n with n = %i", (int)data->n);
 #endif
         return 1;
     }
     if (data->P->m != data->P->n ){
 #ifdef PRINTING
-        c_print("P is not square\n");
+        c_eprint("P is not square");
 #endif
         return 1;
     }
@@ -782,7 +782,7 @@ c_int validate_data(const OSQPData * data){
     // Matrix A
     if (data->A->m != data->m || data->A->n != data->n){
 #ifdef PRINTING
-        c_print("A does not have dimension m x n with m = %i and n = %i\n",
+        c_eprint("A does not have dimension m x n with m = %i and n = %i",
                 (int)data->m, (int)data->n);
 #endif
         return 1;
@@ -792,7 +792,7 @@ c_int validate_data(const OSQPData * data){
     for (j = 0; j < data->m; j++) {
         if (data->l[j] > data->u[j]) {
 #ifdef PRINTING
-            c_print("Lower bound at index %d is greater than upper bound: %.4e > %.4e\n",
+            c_eprint("Lower bound at index %d is greater than upper bound: %.4e > %.4e",
                     (int)j, data->l[j], data->u[j]);
 #endif
             return 1;
@@ -820,121 +820,121 @@ c_int validate_linsys_solver(c_int linsys_solver){
 c_int validate_settings(const OSQPSettings * settings){
     if (!settings){
 #ifdef PRINTING
-        c_print("Missing settings!\n");
+        c_eprint("Missing settings!");
 #endif
         return 1;
     }
     if (settings->scaling < 0) {
 #ifdef PRINTING
-        c_print("scaling must be nonnegative\n");
+        c_eprint("scaling must be nonnegative");
 #endif
         return 1;
     }
     if (settings->adaptive_rho != 0 && settings->adaptive_rho != 1) {
 #ifdef PRINTING
-        c_print("adaptive_rho must be either 0 or 1\n");
+        c_eprint("adaptive_rho must be either 0 or 1");
 #endif
         return 1;
     }
     if (settings->adaptive_rho_interval < 0) {
 #ifdef PRINTING
-        c_print("adaptive_rho_interval must be nonnegative\n");
+        c_eprint("adaptive_rho_interval must be nonnegative");
 #endif
         return 1;
     }
     if (settings->adaptive_rho_fraction <= 0) {
 #ifdef PRINTING
-        c_print("adaptive_rho_fraction must be positive\n");
+        c_eprint("adaptive_rho_fraction must be positive");
 #endif
         return 1;
     }
     if (settings->adaptive_rho_tolerance < 1) {
 #ifdef PRINTING
-        c_print("adaptive_rho_tolerance must be >= 1\n");
+        c_eprint("adaptive_rho_tolerance must be >= 1");
 #endif
         return 1;
     }
     if (settings->polish_refine_iter < 0) {
 #ifdef PRINTING
-        c_print("polish_refine_iter must be nonnegative\n");
+        c_eprint("polish_refine_iter must be nonnegative");
 #endif
         return 1;
     }
     if (settings->rho <= 0) {
 #ifdef PRINTING
-        c_print("rho must be positive\n");
+        c_eprint("rho must be positive");
 #endif
         return 1;
     }
     if (settings->delta <= 0) {
 #ifdef PRINTING
-        c_print("delta must be positive\n");
+        c_eprint("delta must be positive");
 #endif
         return 1;
     }
     if (settings->max_iter <= 0) {
 #ifdef PRINTING
-        c_print("max_iter must be positive\n");
+        c_eprint("max_iter must be positive");
 #endif
         return 1;
     }
     if (settings->eps_abs <= 0) {
 #ifdef PRINTING
-        c_print("eps_abs must be positive\n");
+        c_eprint("eps_abs must be positive");
 #endif
         return 1;
     }
     if (settings->eps_rel <= 0) {
 #ifdef PRINTING
-        c_print("eps_rel must be positive\n");
+        c_eprint("eps_rel must be positive");
 #endif
         return 1;
     }
     if (settings->eps_prim_inf <= 0) {
 #ifdef PRINTING
-        c_print("eps_prim_inf must be positive\n");
+        c_eprint("eps_prim_inf must be positive");
 #endif
         return 1;
     }
     if (settings->eps_dual_inf <= 0) {
 #ifdef PRINTING
-        c_print("eps_dual_inf must be positive\n");
+        c_eprint("eps_dual_inf must be positive");
 #endif
         return 1;
     }
     if (settings->alpha <= 0 || settings->alpha >= 2) {
 #ifdef PRINTING
-        c_print("alpha must be between 0 and 2\n");
+        c_eprint("alpha must be between 0 and 2");
 #endif
         return 1;
     }
     if (validate_linsys_solver(settings->linsys_solver)){
 #ifdef PRINTING
-        c_print("linsys_solver not recognized\n");
+        c_eprint("linsys_solver not recognized");
 #endif
         return 1;
     }
     if (settings->verbose != 0 && settings->verbose != 1) {
 #ifdef PRINTING
-        c_print("verbose must be either 0 or 1\n");
+        c_eprint("verbose must be either 0 or 1");
 #endif
         return 1;
     }
     if (settings->scaled_termination != 0 && settings->scaled_termination != 1) {
 #ifdef PRINTING
-        c_print("scaled_termination must be either 0 or 1\n");
+        c_eprint("scaled_termination must be either 0 or 1");
 #endif
         return 1;
     }
     if (settings->check_termination < 0) {
 #ifdef PRINTING
-        c_print("check_termination must be nonnegative\n");
+        c_eprint("check_termination must be nonnegative");
 #endif
         return 1;
     }
     if (settings->warm_start != 0 && settings->warm_start != 1) {
 #ifdef PRINTING
-        c_print("warm_start must be either 0 or 1\n");
+        c_eprint("warm_start must be either 0 or 1");
 #endif
         return 1;
     }

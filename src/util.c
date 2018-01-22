@@ -168,16 +168,9 @@ void print_polish(OSQPWorkspace * work) {
 }
 
 
-#endif /* End #ifdef PRINTING */
-
-
-#ifdef PRINTING
-
 void print_footer(OSQPInfo * info, c_int polish){
 
-#ifdef PRINTING
     c_print("\n"); // Add space after iterations
-#endif
 
     c_print("status:               %s\n", info->status);
 
@@ -206,7 +199,7 @@ void print_footer(OSQPInfo * info, c_int polish){
 
 }
 
-#endif
+#endif /* End #ifdef PRINTING */
 
 
 void set_default_settings(OSQPSettings * settings) {
@@ -462,7 +455,7 @@ void dump_csc_matrix(csc * M, const char * file_name){
         fclose(f);
         c_print("File %s successfully written.\n", file_name);
     } else {
-        c_print("Error during writing file %s.\n", file_name);
+        c_eprint("Error during writing file %s.\n", file_name);
     }
 }
 
