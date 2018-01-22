@@ -231,7 +231,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
     // Check if matrix has been created
     if (!KKT_temp){
         #ifdef PRINTING
-            c_print("Error forming and permuting KKT matrix!\n");
+            c_eprint("Error forming and permuting KKT matrix");
         #endif
         return OSQP_NULL;
     }

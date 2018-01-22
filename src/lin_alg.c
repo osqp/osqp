@@ -383,7 +383,7 @@ c_float quad_form(const csc * P, const c_float * x){
             }
             else { // Element in lower diagonal part
 #ifdef PRINTING
-                c_print("ERROR: quad_form matrix is not upper triangular\n");
+                c_eprint("quad_form matrix is not upper triangular");
 #endif
                 return OSQP_NULL;
             }

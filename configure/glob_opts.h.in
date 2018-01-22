@@ -187,6 +187,10 @@ typedef float c_float;                /* for numerical values  */
 #define c_print printf
 #endif
 
+// Print error function
+// #define c_eprint(desc...) (c_print("ERROR in %s: ", __FUNCTION__); c_print (stderr, desc); c_print("\n");)
+#define c_eprint(desc...) c_print("ERROR in %s: ", __FUNCTION__); c_print(desc); c_print("\n");
+
 #endif
 
 
