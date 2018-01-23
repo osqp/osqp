@@ -892,6 +892,12 @@ c_int validate_settings(const OSQPSettings * settings){
 #endif
         return 1;
     }
+    if (settings->eps_rel == 0 && settings->eps_abs == 0){
+#ifdef PRINTING
+        c_eprint("at least one of eps_abs and eps_rel must be positive");
+#endif
+	return 1;
+    }
     if (settings->eps_prim_inf <= 0) {
 #ifdef PRINTING
         c_eprint("eps_prim_inf must be positive");
