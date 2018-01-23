@@ -67,7 +67,7 @@ static char * test_basic_qp_solve()
               osqp_update_eps_abs(work, 0.) == 1);
 
     mu_assert("Basic QP test solve: Wrong value of eps_rel not caught!",
-              osqp_update_eps_rel(work, 0.) == 1);
+              osqp_update_eps_rel(work, -1.) == 1);
 
     mu_assert("Basic QP test solve: Wrong value of eps_prim_inf not caught!",
               osqp_update_eps_prim_inf(work, -0.1) == 1);

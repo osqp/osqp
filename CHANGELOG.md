@@ -4,6 +4,7 @@ Changes since last release
 * Fixed bug in upper triangular `P` extraction. Now the solver can accept both complete `P` matrix or just the upper triangular part.
 * Fixed [#33](https://github.com/oxfordcontrol/osqp/issues/33)
 * Fixed [#34](https://github.com/oxfordcontrol/osqp/issues/34)
+* Allow `eps_rel=0` [#40](https://github.com/oxfordcontrol/osqp/issues/40)
 
 
 Version 0.2.1 (25 November 2017)

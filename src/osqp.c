@@ -1099,9 +1099,9 @@ c_int osqp_update_eps_abs(OSQPWorkspace * work, c_float eps_abs_new) {
 
 c_int osqp_update_eps_rel(OSQPWorkspace * work, c_float eps_rel_new) {
 	// Check that eps_rel is positive
-	if (eps_rel_new <= 0.) {
+	if (eps_rel_new < 0.) {
 #ifdef PRINTING
-		c_eprint("eps_rel must be positive");
+		c_eprint("eps_rel must be nonnegative");
 #endif
 		return 1;
 	}
