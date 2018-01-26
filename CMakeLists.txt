@@ -1,10 +1,6 @@
 # Minimum version required
 cmake_minimum_required (VERSION 3.2)
 
-
-
-
-
 # Project name
 project (osqp)
 
@@ -88,6 +84,9 @@ message(STATUS "Long integers (64bit) are ${DLONG}")
 option (COVERAGE "Perform code coverage" OFF)
 message(STATUS "Code coverage is ${COVERAGE}")
 
+# Compile Fortran interface
+option (FORTRAN "Build Fortran interface" ON)
+message(STATUS "Fortran interface build: ${FORTRAN}")
 
 # Linear solvers dependencies
 # ---------------------------------------------
@@ -109,6 +108,9 @@ if (NOT MSVC)
 
     if (COVERAGE)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
+	if(FORTRAN)
+		set(CMAKE_FORTRAN_FLAGS "${CMAKE_FORRAN_FLAGS} --coverage")
+	endif(FORTRAN)
     endif()
 
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
@@ -218,6 +220,11 @@ if (PYTHON)
         set(UNITTESTS OFF)
     endif (UNITTESTS)
 
+	if (FORTRAN)
+		# Disable unittests
+		message(STATUS "Disabling FORTRAN because we are building Python interface")
+		set(FORTRAN OFF)
+	endif()
 endif (PYTHON)
 
 
@@ -242,6 +249,11 @@ if (MATLAB)
         set(UNITTESTS OFF)
     endif (UNITTESTS)
 
+	if (FORTRAN)
+		# Disable unittests
+		message(STATUS "Disabling FORTRAN because we are building Matlab interface")
+		set(FORTRAN OFF)
+	endif()
 endif (MATLAB)
 
 
@@ -276,10 +288,18 @@ if (NOT PYTHON AND NOT MATLAB)
     add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
 
     # Create demo executable (linked to static library)
-    add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
+    add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/demo/osqp_demo.c)
     target_link_libraries (osqp_demo osqpstatic)
 
 endif (NOT PYTHON AND NOT MATLAB)
+
+
+# Compile Fortran interface
+# ------------------------------------------
+if (FORTRAN)
+	add_subdirectory(interfaces/fortran)
+endif()
+
 
 
 # Add testing
