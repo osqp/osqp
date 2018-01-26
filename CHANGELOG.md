@@ -5,6 +5,7 @@ Changes since last release
 * Fixed [#33](https://github.com/oxfordcontrol/osqp/issues/33)
 * Fixed [#34](https://github.com/oxfordcontrol/osqp/issues/34)
 * Allow `eps_rel=0` [#40](https://github.com/oxfordcontrol/osqp/issues/40)
+* Fixed bug when calling `osqp_solve` or `osqp_cleanup` after failed linear system initialization
 
 
 Version 0.2.1 (25 November 2017)

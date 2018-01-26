@@ -226,9 +226,6 @@ c_int osqp_solve(OSQPWorkspace * work){
 
 #ifdef PRINTING
 	c_int can_print; // Boolean whether you can print
-	compute_cost_function = work->settings->verbose; // Compute cost function only if verbose is on
-#else
-	compute_cost_function = 0; // Never compute cost function during the iterations if no printing enabled
 #endif
 
 	// Check if workspace has been initialized
@@ -241,6 +238,12 @@ c_int osqp_solve(OSQPWorkspace * work){
 
 #ifdef PROFILING
 	tic(work->timer); // Start timer
+#endif
+
+#ifdef PRINTING
+	compute_cost_function = work->settings->verbose; // Compute cost function only if verbose is on
+#else
+	compute_cost_function = 0; // Never compute cost function during the iterations if no printing enabled
 #endif
 
 #ifdef PRINTING
@@ -522,7 +525,11 @@ c_int osqp_cleanup(OSQPWorkspace * work){
 		}
 
 		// Free linear system solver structure
-		work->linsys_solver->free(work->linsys_solver);
+		if (work->linsys_solver){
+			if(work->linsys_solver->free){
+				work->linsys_solver->free(work->linsys_solver);
+			}
+		}
 
 		// Unload linear system solver
 		exitflag = unload_linsys_solver(work->settings->linsys_solver);

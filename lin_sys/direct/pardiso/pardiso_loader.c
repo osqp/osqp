@@ -35,8 +35,17 @@ void pardiso(void** pt, const c_int* maxfct, const c_int* mnum,
                   const c_int* perm, const c_int* nrhs, c_int* iparm,
                   const c_int* msglvl, c_float* b, c_float* x,
                   const c_int* error) {
-    func_pardiso(pt, maxfct, mnum, mtype, phase, n, a, ia, ja,
-                 perm, nrhs, iparm, msglvl, b, x, error);
+	if(func_pardiso){
+            // Call function pardiso only if it has been initialized
+	    func_pardiso(pt, maxfct, mnum, mtype, phase, n, a, ia, ja,
+			 perm, nrhs, iparm, msglvl, b, x, error);
+	} 
+	else
+	{
+#ifdef PRINTING
+		c_eprint("Pardiso not loaded correctly");
+#endif
+	}
 }
 
 c_int mkl_set_interface_layer(c_int code) {
