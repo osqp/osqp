@@ -62,7 +62,7 @@ classdef codegen_mat_tests < matlab.unittest.TestCase
             Pnew = speye(2);
             Pnew_triu = triu(Pnew);
             [~,~,Px] = find(Pnew_triu(:));
-            Px_idx = (1:length(Px))'-1;
+            Px_idx = (1:length(Px))';
             emosqp('update_P', Px, Px_idx, length(Px));
             
             % Solve with OSQP
@@ -104,7 +104,7 @@ classdef codegen_mat_tests < matlab.unittest.TestCase
             % Update matrix A
             Anew = sparse([-1. 0; 0 -1; -2 -2; 2  5; 3  4]);
             [~,~,Ax] = find(Anew(:));
-            Ax_idx = (1:length(Ax))'-1;
+            Ax_idx = (1:length(Ax))';
             emosqp('update_A', Ax, Ax_idx, length(Ax));
             
             % Solve with OSQP
@@ -144,10 +144,10 @@ classdef codegen_mat_tests < matlab.unittest.TestCase
             Pnew = speye(2);
             Pnew_triu = triu(Pnew);
             [~,~,Px] = find(Pnew_triu(:));
-            Px_idx = (1:length(Px))'-1;
+            Px_idx = (1:length(Px))';
             Anew = sparse([-1. 0; 0 -1; -2 -2; 2  5; 3  4]);
             [~,~,Ax] = find(Anew(:));
-            Ax_idx = (1:length(Ax))'-1;
+            Ax_idx = (1:length(Ax))';
             emosqp('update_P_A', Px, Px_idx, length(Px), Ax, Ax_idx, length(Ax));
             
             % Solve with OSQP
@@ -170,7 +170,7 @@ classdef codegen_mat_tests < matlab.unittest.TestCase
             Pnew = speye(2);
             Pnew_triu = triu(Pnew);
             [~,~,Px] = find(Pnew_triu(:));
-            Px_idx = (1:length(Px))'-1;
+            Px_idx = (1:length(Px))';
             Anew = sparse([-1. 0; 0 -1; -2 -2; 2  5; 3  4]);
             [~,~,Ax] = find(Anew(:));
             emosqp('update_P_A', Px, Px_idx, length(Px), Ax, [], length(Ax));
@@ -197,7 +197,7 @@ classdef codegen_mat_tests < matlab.unittest.TestCase
             [~,~,Px] = find(Pnew_triu(:));
             Anew = sparse([-1. 0; 0 -1; -2 -2; 2  5; 3  4]);
             [~,~,Ax] = find(Anew(:));
-            Ax_idx = (1:length(Ax))'-1;
+            Ax_idx = (1:length(Ax))';
             emosqp('update_P_A', Px, [], length(Px), Ax, Ax_idx, length(Ax));
             
             % Solve with OSQP

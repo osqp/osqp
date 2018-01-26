@@ -55,6 +55,7 @@ The following people have been involved in the development of OSQP:
 -  [Nicholas Moehle](http://web.stanford.edu/~moehle/) (Stanford University): methods, maths, and code generation
 -  [Paul Goulart](http://users.ox.ac.uk/~engs1373/) (University of Oxford): methods, maths, and Matlab interface
 -  [Alberto Bemporad](http://cse.lab.imtlucca.it/~bemporad/) (IMT Lucca): methods and maths
+-  [Nick Gould](http://www.numerical.rl.ac.uk/people/nimg/nimg.html) (Rutherford Appleton Laboratory): Fortran and CUTEst interfaces
 -  [Stephen Boyd](http://web.stanford.edu/~boyd/) (Stanford University): methods and maths
 
 

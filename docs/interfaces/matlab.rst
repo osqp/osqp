@@ -19,6 +19,8 @@ The problem is specified in the setup phase by running
 
 
 The arguments :code:`q`, :code:`l` and :code:`u` are arrays. The elements of :code:`l` and :code:`u` can be :math:`\pm \infty` ( using :code:`Inf`). The arguments :code:`P` and :code:`A` are sparse matrices.
+Matrix :code:`P` can be either complete or just the upper triangular
+part. OSQP will make use of only the upper triangular part.
 
 There is no need to specify all the problem data. They can be omitted by writing :code:`[]`.
 
@@ -92,8 +94,8 @@ Part of problem data and settings can be updated without requiring a new problem
 
 
 
-Update problem data
-^^^^^^^^^^^^^^^^^^^
+Update problem vectors
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 Vectors :code:`q`, :code:`l` and :code:`u` can be updated with new values :code:`q_new`, :code:`l_new` and :code:`u_new` by just running
 
@@ -103,6 +105,35 @@ Vectors :code:`q`, :code:`l` and :code:`u` can be updated with new values :code:
 
 
 The user does not have to specify all the arguments.
+
+
+Update problem matrices
+^^^^^^^^^^^^^^^^^^^^^^^^
+Matrices :code:`A` and :code:`P` can be updated by changing the value of their elements but not their sparsity pattern. 
+The interface is designed to mimic the :ref:`C/C++ counterpart <c_cpp_update_data>` with the Matlab 1-based indexing. 
+Note that the new values of :code:`P` represent only the upper triangular part while :code:`A` is always represented as a full matrix.
+
+You can update the values of all the elements of :code:`P` by executing
+
+.. code:: matlab
+
+    m.update('Px', Px_new)
+
+
+If you want to update only some elements, you can pass
+
+.. code:: matlab
+
+    m.update('Px', Px_new, 'Px_idx', Px_new_idx)
+
+where :code:`Px_new_idx` is the vector of indices of mapping the elements of :code:`Px_new` to the original vector :code:`Px` representing the data of the sparse matrix :code:`P`.
+
+Matrix :code:`A` can be changed in the same way. You can also change both matrices at the same time by running, for example
+
+
+.. code:: matlab
+
+    m.update('Px', Px_new, 'Px_idx', Px_new_idx, 'Ax' Ax_new, 'Ax', Ax_new_idx)
 
 
 Update settings

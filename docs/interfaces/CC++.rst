@@ -37,6 +37,9 @@ OSQP automatically warm starts primal and dual variables from the previous QP so
 
 .. doxygenfunction:: osqp_warm_start_y
 
+
+.. _c_cpp_update_data :
+
 Update problem data
 ^^^^^^^^^^^^^^^^^^^
 Problem data can be updated without executing the setup again using the following functions.

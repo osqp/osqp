@@ -338,9 +338,16 @@ c_int osqp_solve(OSQPWorkspace * work){
 		if (work->settings->adaptive_rho && !work->settings->adaptive_rho_interval){
 			// Check time 
 			if (toc(work->timer) > work->settings->adaptive_rho_fraction * work->info->setup_time){
-					// Enough time has passed. We round the number of iterations to the
-					// closest multiple of check_termination
-					work->settings->adaptive_rho_interval = (c_int)c_roundmultiple(iter, work->settings->check_termination);
+					// Enough time has passed. We now get the number of iterations between the updates.
+					if(work->settings->check_termination){	
+						// If check_termination is enabled, we round the number of iterations between 
+						// rho updates to the closest multiple of check_termination
+						work->settings->adaptive_rho_interval = (c_int)c_roundmultiple(iter, work->settings->check_termination);
+					} else {
+						// If check_termintion is disabled, we round the number of iterations between
+						// updates to the closest multiple of the default check_termination interval.
+						work->settings->adaptive_rho_interval = (c_int)c_roundmultiple(iter, CHECK_TERMINATION);
+					}
 					// Make sure the interval is not 0 and at least check_termination times
 					work->settings->adaptive_rho_interval = c_max(work->settings->adaptive_rho_interval, work->settings->check_termination);
 					
@@ -1078,9 +1085,9 @@ c_int osqp_update_max_iter(OSQPWorkspace * work, c_int max_iter_new) {
 
 c_int osqp_update_eps_abs(OSQPWorkspace * work, c_float eps_abs_new) {
 	// Check that eps_abs is positive
-	if (eps_abs_new <= 0.) {
+	if (eps_abs_new < 0.) {
 #ifdef PRINTING
-		c_eprint("eps_abs must be positive");
+		c_eprint("eps_abs must be nonnegative");
 #endif
 		return 1;
 	}
@@ -1092,9 +1099,9 @@ c_int osqp_update_eps_abs(OSQPWorkspace * work, c_float eps_abs_new) {
 
 c_int osqp_update_eps_rel(OSQPWorkspace * work, c_float eps_rel_new) {
 	// Check that eps_rel is positive
-	if (eps_rel_new <= 0.) {
+	if (eps_rel_new < 0.) {
 #ifdef PRINTING
-		c_eprint("eps_rel must be positive");
+		c_eprint("eps_rel must be nonnegative");
 #endif
 		return 1;
 	}
@@ -1107,9 +1114,9 @@ c_int osqp_update_eps_rel(OSQPWorkspace * work, c_float eps_rel_new) {
 c_int osqp_update_eps_prim_inf(OSQPWorkspace * work, c_float eps_prim_inf_new){
 
 	// Check that eps_prim_inf is positive
-	if (eps_prim_inf_new <= 0.) {
+	if (eps_prim_inf_new < 0.) {
 #ifdef PRINTING
-		c_eprint("eps_prim_inf must be positive");
+		c_eprint("eps_prim_inf must be nonnegative");
 #endif
 		return 1;
 	}
@@ -1124,9 +1131,9 @@ c_int osqp_update_eps_prim_inf(OSQPWorkspace * work, c_float eps_prim_inf_new){
 c_int osqp_update_eps_dual_inf(OSQPWorkspace * work, c_float eps_dual_inf_new){
 
 	// Check that eps_dual_inf is positive
-	if (eps_dual_inf_new <= 0.) {
+	if (eps_dual_inf_new < 0.) {
 #ifdef PRINTING
-		c_eprint("eps_dual_inf must be positive");
+		c_eprint("eps_dual_inf must be nonnegative");
 #endif
 		return 1;
 	}
