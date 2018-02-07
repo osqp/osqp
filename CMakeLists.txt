@@ -260,7 +260,9 @@ include(GNUInstallDirs)
 
 install(TARGETS osqpstatic
         EXPORT  ${PROJECT_NAME}
-        ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+        ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
         
 # Install Headers
@@ -297,7 +299,9 @@ if (NOT PYTHON AND NOT MATLAB)
     # Install osqp shared library 
     install(TARGETS osqp
             EXPORT  ${PROJECT_NAME}
-            LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+            LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+            ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+            RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
     # Create demo executable (linked to static library)
     add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)

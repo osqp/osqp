@@ -112,3 +112,26 @@ The compilation will generate the demo :code:`osqp_demo` and the unittests :code
 
 
 Once the sources are built, the generated static :code:`build/out/libosqpstatic.a` and shared :code:`build/out/libosqp.ext` libraries can be used to interface any C/C++ software to OSQP (see :ref:`install_osqp_libs` installation).
+
+.. _install_the_binaries:
+
+Install the binaries
+--------------------
+
+To install the generated libraries and headers to a system-wide location compatible with `GNU standards <http://www.gnu.org/prep/standards/html_node/Directory-Variables.html>`_ it is just necessary to run
+
+.. code:: bash
+   
+   cmake --build . --target install
+
+This code installs the libraries in :code:`libdir` and the headers into :code:`includedir/osqp`. For mode details see the defaults folders on the `GNU standards <http://www.gnu.org/prep/standards/html_node/Directory-Variables.html>`_ website.
+To change the installation prefix, in the "Create Makefiles" step above, you need to specify the destination folder as :code:`cmake -DCMAKE_INSTALL_PREFIX:PATH=myfolder ..`.
+
+
+We provided also an uninstall routine to remove the copied files by running 
+
+.. code:: bash
+   
+   cmake --build . --target uninstall
+
+Note that this corresponds to running :code:`make install` and :code:`make uninstall` on unix machines.
