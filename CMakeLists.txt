@@ -258,6 +258,27 @@ include_directories(${linsys_solvers_includes})
 
 add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
 
+# Declare include directories for the cmake exported target
+target_include_directories(osqpstatic 
+                           INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+                                     "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+
+# Install  Library
+# ----------------------------------------------
+
+include(GNUInstallDirs)
+
+install(TARGETS osqpstatic
+        EXPORT  ${PROJECT_NAME}
+        LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
+
+        
+# Install  Headers
+# ----------------------------------------------
+
+install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
 if (MATLAB)
 target_link_libraries (osqpstatic ${Matlab_LIBRARIES})
@@ -274,6 +295,18 @@ if (NOT PYTHON AND NOT MATLAB)
     # Create osqp shared library
     # NB: Add all the linear system solvers here
     add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
+    
+    # Declare include directories for the cmake exported target
+    target_include_directories(osqp 
+                               INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+                                         "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+
+    # Install osqp shared library 
+    install(TARGETS osqp
+            EXPORT  ${PROJECT_NAME}
+            LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+            ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+            RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
     # Create demo executable (linked to static library)
     add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
@@ -281,6 +314,31 @@ if (NOT PYTHON AND NOT MATLAB)
 
 endif (NOT PYTHON AND NOT MATLAB)
 
+# Create CMake packages for the build directory 
+# ----------------------------------------------
+include(CMakePackageConfigHelpers)
+
+export(EXPORT ${PROJECT_NAME}
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/osqp-targets.cmake"
+  NAMESPACE osqp::)
+
+if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake)
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake "include(\"\${CMAKE_CURRENT_LIST_DIR}/osqp-targets.cmake\")\n")
+endif()
+
+
+# Create CMake packages for the install directory 
+# ----------------------------------------------
+
+set(ConfigPackageLocation lib/cmake/osqp)
+
+install(EXPORT ${PROJECT_NAME} 
+        FILE osqp-targets.cmake
+        NAMESPACE osqp::
+        DESTINATION ${ConfigPackageLocation})
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake
+        DESTINATION ${ConfigPackageLocation})
 
 # Add testing
 # ----------------------------------------------
