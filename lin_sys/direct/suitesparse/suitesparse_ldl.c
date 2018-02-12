@@ -239,6 +239,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
 
     // Factorize the KKT matrix
     if (LDL_factor(KKT_temp, p) < 0) {
+        csc_spfree(KKT_temp);
         free_linsys_solver_suitesparse_ldl(p);
         return OSQP_NULL;
     }
