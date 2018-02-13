@@ -7,3 +7,4 @@ Parsers
 
    yalmip.rst
    cvxpy.rst
+   jump.rst
