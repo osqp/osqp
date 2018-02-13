@@ -45,7 +45,7 @@ void free_linsys_solver_suitesparse_ldl(suitesparse_ldl_solver *s) {
  * @param  p Private workspace
  * @return   [description]
  */
-c_int LDL_factor(csc *A,  suitesparse_ldl_solver * p){
+static c_int LDL_factor(csc *A,  suitesparse_ldl_solver * p){
     // c_int P[], c_int Pinv[], csc **L, c_float **D) {
     c_int kk, n = A->n;
     c_int check_Li_Lx;
@@ -98,7 +98,7 @@ c_int LDL_factor(csc *A,  suitesparse_ldl_solver * p){
 }
 
 
-c_int permute_KKT(csc ** KKT, suitesparse_ldl_solver * p, c_int Pnz, c_int Anz, c_int m, c_int * PtoKKT, c_int * AtoKKT, c_int * rhotoKKT){
+static c_int permute_KKT(csc ** KKT, suitesparse_ldl_solver * p, c_int Pnz, c_int Anz, c_int m, c_int * PtoKKT, c_int * AtoKKT, c_int * rhotoKKT){
     c_float *info;
     c_int amd_status;
     info = (c_float *)c_malloc(AMD_INFO * sizeof(c_float));
