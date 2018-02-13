@@ -63,11 +63,14 @@ coverage_html/
 # Doxygen output
 docs/doxygen_out
 
-# Vim files
+# Editor files
 # -------------------------------------------------------------------
 *.swp
 .ycm_extra_conf.py
 *.swo
+*.vscode/
+
+
 
 # Gurobi
 # -------------------------------------------------------------------

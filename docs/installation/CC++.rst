@@ -23,3 +23,21 @@ Sources
 The OSQP libraries can also be compiled from sources. For more details see :ref:`build_from_sources`.
 
 
+Including OSQP in CMake projects
+--------------------------------
+If you compiled OSQP from sources and followed the CMake installation instructions in :ref:`install_the_binaries` section, you can include the package in another CMake project with the following lines depending on whether you need a shared or a static library
+
+.. code::
+
+   # Find OSQP library and headers
+   find_package(osqp REQUIRED)
+
+   # Link the OSQP shared library
+   target_link_libraries(yourTarget PRIVATE osqp::osqp)
+
+   # or...
+
+   # Link the OSQP static library
+   target_link_libraries(yourTarget PRIVATE osqp::osqpstatic)
+
+
