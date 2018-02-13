@@ -276,7 +276,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
 
 
 
-void LDLSolve(c_float *x, c_float *b, csc *L, c_float *Dinv, c_int *P,
+static void LDLSolve(c_float *x, c_float *b, csc *L, c_float *Dinv, c_int *P,
               c_float *bp) {
     /* solves PLDL'P' x = b for x */
     c_int n = L->n;
