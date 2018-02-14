@@ -44,6 +44,13 @@ classdef osqp < handle
             %   C = CONSTANT(CONSTANT_NAME) return constant called CONSTANT_NAME
             out = osqp_mex('constant', 'static', constant_name);
         end
+        
+        %%
+        function out = version(this)
+            % Return OSQP version
+            out = osqp_mex('version', this.objectHandle);
+        end
+        
     end
     methods
         %% Constructor - Create a new solver instance
@@ -56,12 +63,6 @@ classdef osqp < handle
         function delete(this)
             % Destroy OSQP solver class
             osqp_mex('delete', this.objectHandle);
-        end
-
-        %%
-        function out = version(this)
-            % Return OSQP version
-            out = osqp_mex('version', this.objectHandle);
         end
 
         %%
