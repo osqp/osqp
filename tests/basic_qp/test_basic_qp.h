@@ -22,7 +22,7 @@ static char * test_basic_qp_solve()
 
 
     // Define Solver settings as default
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->max_iter = 2000;
     settings->alpha = 1.6;
     settings->polish = 1;
@@ -131,7 +131,7 @@ static char * test_basic_qp_solve_pardiso()
 
 
     // Define Solver settings as default
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->max_iter = 2000;
     settings->alpha = 1.6;
     settings->polish = 1;
@@ -197,7 +197,7 @@ static char * test_basic_qp_update()
 
 
     // Define Solver settings as default
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->max_iter = 200;
     settings->alpha = 1.6;
     settings->polish = 1;
@@ -303,7 +303,7 @@ static char * test_basic_qp_check_termination()
 
 
     // Define Solver settings as default
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->max_iter = 200;
     settings->alpha = 1.6;
     settings->polish = 0;
@@ -384,7 +384,7 @@ static char * test_basic_qp_update_rho()
 
     // Define Solver settings as default
     rho = 0.7;
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->rho = rho;
     settings->adaptive_rho = 0;  // Disable adaptive rho for this test
     settings->eps_abs = 1e-05;
@@ -425,7 +425,7 @@ static char * test_basic_qp_update_rho()
 
 
     // Create new problem with different rho and update it
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->rho = 0.1;
     settings->adaptive_rho = 0;
     settings->check_termination = 1;

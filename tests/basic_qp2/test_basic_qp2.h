@@ -25,7 +25,7 @@ static char * test_basic_qp2_solve()
 
 
     // Define Solver settings as default
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->alpha = 1.6;
     settings->rho = 0.1;
     settings->polish = 1;
@@ -92,7 +92,7 @@ static char * test_basic_qp2_solve_pardiso()
 
 
     // Define Solver settings as default
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->alpha = 1.6;
     settings->rho = 0.1;
     settings->polish = 1;
@@ -161,7 +161,7 @@ static char * test_basic_qp2_update()
 
 
     // Define Solver settings as default
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->alpha = 1.6;
     // settings->eps_abs = 1e-08;
     // settings->eps_rel = 1e-08;

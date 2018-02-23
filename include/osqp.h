@@ -7,7 +7,7 @@ extern "C" {
 
 /* Includes */
 #include "types.h"
-#include "util.h"  // Needed for set_default_settings functions
+#include "util.h"  // Needed for osqp_set_default_settings functions
 
 
 // Library to deal with sparse matrices enabled only if embedded not defined
@@ -23,6 +23,14 @@ extern "C" {
   * @{
   */
 
+/**
+ * Set default settings from constants.h file
+ * assumes settings already allocated in memory
+ * @param settings settings structure
+ */
+void osqp_set_default_settings(OSQPSettings * settings);
+
+  
 #ifndef EMBEDDED
 
 /**

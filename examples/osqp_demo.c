@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 
 
     // Define Solver settings as default
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
 
     // Setup workspace
     work = osqp_setup(data, settings);

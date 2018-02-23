@@ -21,6 +21,43 @@
  * Main API Functions *
  **********************/
 
+void osqp_set_default_settings(OSQPSettings * settings) {
+    settings->scaling = SCALING; /* heuristic problem scaling */
+
+#if EMBEDDED != 1
+    settings->adaptive_rho = ADAPTIVE_RHO;
+    settings->adaptive_rho_interval = ADAPTIVE_RHO_INTERVAL;
+    settings->adaptive_rho_tolerance = (c_float) ADAPTIVE_RHO_TOLERANCE;
+#ifdef PROFILING
+    settings->adaptive_rho_fraction = (c_float) ADAPTIVE_RHO_FRACTION;
+#endif
+#endif
+
+    settings->rho = (c_float) RHO; /* ADMM step */
+    settings->sigma = (c_float) SIGMA; /* ADMM step */
+    settings->max_iter = MAX_ITER; /* maximum iterations to take */
+    settings->eps_abs = (c_float) EPS_ABS;         /* absolute convergence tolerance */
+    settings->eps_rel = (c_float) EPS_REL;         /* relative convergence tolerance */
+    settings->eps_prim_inf = (c_float) EPS_PRIM_INF;         /* primal infeasibility tolerance */
+    settings->eps_dual_inf = (c_float) EPS_DUAL_INF;         /* dual infeasibility tolerance */
+    settings->alpha = (c_float) ALPHA;     /* relaxation parameter */
+    settings->linsys_solver = LINSYS_SOLVER;     /* relaxation parameter */
+
+#ifndef EMBEDDED
+    settings->delta = DELTA;    /* regularization parameter for polish */
+    settings->polish = POLISH;     /* ADMM solution polish: 1 */
+    settings->polish_refine_iter = POLISH_REFINE_ITER; /* iterative refinement
+                                                    steps in polish */
+    settings->verbose = VERBOSE;     /* print output */
+#endif
+
+    settings->scaled_termination = SCALED_TERMINATION;     /* Evaluate scaled termination criteria*/
+    settings->check_termination = CHECK_TERMINATION;     /* Interval for evaluating termination criteria */
+    settings->warm_start = WARM_START;     /* warm starting */
+
+}
+
+
 
 #ifndef EMBEDDED
 

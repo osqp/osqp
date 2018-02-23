@@ -95,7 +95,7 @@ static char * test_update(){
     // Define Solver settings as default
     // Problem settings
     settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->max_iter = 1000;
     settings->alpha = 1.6;
     settings->verbose = 1;
@@ -243,7 +243,7 @@ static char * test_update_pardiso(){
     // Define Solver settings as default
     // Problem settings
     settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->max_iter = 1000;
     settings->alpha = 1.6;
     settings->verbose = 1;

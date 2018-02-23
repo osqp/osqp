@@ -82,6 +82,7 @@ gurobi.log
 tags
 .tags
 .tags1
+TAGS
 
 # Python Language
 # -------------------------------------------------------------------
@@ -176,11 +177,13 @@ ENV/
 # Rope project settings
 .ropeproject
 
-# Mac OSX Files
-.DS_Store
-
 # Python 3 porting backup files
 *.bak
+
+# Mac OSX Files
+# -------------------------------------------------------------------
+.DS_Store
+
 
 # Matlab
 # -------------------------------------------------------------------
@@ -196,17 +199,16 @@ out/
 # Other data files
 # *.mat
 
-# matlab release files
-interfaces/matlab/package/osqp*
-
+# Emacs
+\#*\#
+.\#*
+*~
 
 # Clang completer
+# -------------------------------------------------------------------
 .clang_complete
 
 # CMake Files
 # -------------------------------------------------------------------
 *.stamp
 
-# Data Files
-# -------------------------------------------------------------------
-tests/**/*data.h

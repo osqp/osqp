@@ -23,14 +23,6 @@ const char *osqp_version(void);
  * Utility Functions  *
  **********************/
 
-/**
- * Set default settings from constants.h file
- * assumes settings already allocated in memory
- * @param settings settings structure
- */
-void set_default_settings(OSQPSettings * settings);
-
-
 #ifndef EMBEDDED
 
 /**
