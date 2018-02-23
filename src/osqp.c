@@ -860,9 +860,10 @@ c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, 
 		}
 	}
 
-	// Unscale data
-	unscale_data(work);
-
+	if (work->settings->scaling) {
+            // Unscale data
+	    unscale_data(work);
+	}
 
 	// Update P elements
 	if (Px_new_idx){ // Change only Px_new_idx
@@ -876,9 +877,11 @@ c_int osqp_update_P(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx, 
 			work->data->P->x[i] = Px_new[i];
 		}
 	}
-
-	// Scale data
-	scale_data(work);
+	
+	if (work->settings->scaling) {
+            // Scale data
+	    scale_data(work);
+	}
 
 	// Update linear system structure with new data
 	exitflag = work->linsys_solver->update_matrices(work->linsys_solver, work->data->P, work->data->A, work->settings);
@@ -929,8 +932,10 @@ c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, 
 		}
 	}
 
-	// Unscale data
-	unscale_data(work);
+	if (work->settings->scaling) {
+  	    // Unscale data
+	    unscale_data(work);
+	}
 
 	// Update A elements
 	if (Ax_new_idx){ // Change only Ax_new_idx
@@ -944,8 +949,10 @@ c_int osqp_update_A(OSQPWorkspace * work, c_float * Ax_new, c_int * Ax_new_idx, 
 		}
 	}
 
-	// Scale data
-	scale_data(work);
+	if (work->settings->scaling) {
+	    // Scale data
+	    scale_data(work);
+	}
 
 	// Update linear system structure with new data
 	exitflag = work->linsys_solver->update_matrices(work->linsys_solver, work->data->P, work->data->A, work->settings);
@@ -1020,9 +1027,10 @@ c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx
 		}
 	}
 
-
-	// Unscale data
-	unscale_data(work);
+	if (work->settings->scaling) {
+            // Unscale data
+	    unscale_data(work);
+	}
 
 	// Update P elements
 	if (Px_new_idx){ // Change only Px_new_idx
@@ -1049,9 +1057,10 @@ c_int osqp_update_P_A(OSQPWorkspace * work, c_float * Px_new, c_int * Px_new_idx
 		}
 	}
 
-
-	// Scale data
-	scale_data(work);
+	if (work->settings->scaling) {
+            // Scale data
+	    scale_data(work);
+	}
 
 	// Update linear system structure with new data
 	exitflag = work->linsys_solver->update_matrices(work->linsys_solver, work->data->P, work->data->A, work->settings);

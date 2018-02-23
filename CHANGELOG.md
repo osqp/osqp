@@ -9,6 +9,7 @@ Changes since last release
 * Add "install" CMake target and installation of CMake configuration files
 * Fixed potential name conflict with SCS [47](https://github.com/oxfordcontrol/osqp/issues/47)
 * Changed `set_default_settings` to `osqp_set_default_settings` and brought function to main API header `osqp.h`
+* Fixed [#49](https://github.com/oxfordcontrol/osqp/issues/49)
 
 Version 0.2.1 (25 November 2017)
 ---------------------------------
