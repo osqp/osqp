@@ -262,7 +262,7 @@ c_int osqp_solve(OSQPWorkspace * work){
 	c_int can_check_termination = 0;  // Boolean whether to check termination
 
 #ifdef PRINTING
-	c_int can_print; // Boolean whether you can print
+	c_int can_print = work->settings->verbose; // Boolean whether you can print
 #endif
 
 	// Check if workspace has been initialized
