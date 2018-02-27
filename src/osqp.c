@@ -255,16 +255,28 @@ OSQPWorkspace * osqp_setup(const OSQPData * data, OSQPSettings *settings){
 
 
 c_int osqp_solve(OSQPWorkspace * work){
-	c_int exitflag = 0;
+	c_int exitflag;
 	c_int iter;
 	c_int compute_cost_function;  // Boolean whether to compute the cost function
 	// in the loop
-	c_int can_check_termination = 0;  // Boolean whether to check termination
-
+	c_int can_check_termination;  // Boolean whether to check termination
 #ifdef PRINTING
 	c_int can_print; // Boolean whether you can print
 #endif
 
+	// Initialize variables
+	exitflag = 0;
+	can_check_termination = 0;
+#ifdef PRINTING
+	can_print = work->settings->verbose;
+#endif
+#ifdef PRINTING
+	compute_cost_function = work->settings->verbose; // Compute cost function only if verbose is on
+#else
+	compute_cost_function = 0; // Never compute cost function during the iterations if no printing enabled
+#endif
+
+	
 	// Check if workspace has been initialized
 	if (!work){
 #ifdef PRINTING
@@ -277,11 +289,6 @@ c_int osqp_solve(OSQPWorkspace * work){
 	tic(work->timer); // Start timer
 #endif
 
-#ifdef PRINTING
-	compute_cost_function = work->settings->verbose; // Compute cost function only if verbose is on
-#else
-	compute_cost_function = 0; // Never compute cost function during the iterations if no printing enabled
-#endif
 
 #ifdef PRINTING
 	if (work->settings->verbose){
