@@ -6,13 +6,13 @@ The settings parameter :code:`linsys_solver` defines the solver for the linear s
 In C/C++ it corresponds to an integer :code:`c_int` (see :ref:`c_cpp_data_types`) and in the other high level languages to a string.
 
 
-+-----------------------------------+----------------------------------+-------------------------------------+
-| Solver                            | String option                    | C/C++ Constant                      |
-+===================================+==================================+=====================================+
-| SuiteSparse LDL                   | "suitesparse ldl"                | :code:`SUITESPARSE_LDL_SOLVER`      |
-+-----------------------------------+----------------------------------+-------------------------------------+
-| MKL Pardiso                       | "mkl pardiso"                    | :code:`MKL_PARDISO_SOLVER`          |
-+-----------------------------------+----------------------------------+-------------------------------------+
++-----------------+-------------------+--------------------------------+---------------+
+| Solver          | String option     | C/C++ Constant                 | Integer value |
++=================+===================+================================+===============+
+| SuiteSparse LDL | "suitesparse ldl" | :code:`SUITESPARSE_LDL_SOLVER` | :code:`0`     |
++-----------------+-------------------+--------------------------------+---------------+
+| MKL Pardiso     | "mkl pardiso"     | :code:`MKL_PARDISO_SOLVER`     | :code:`1`     |
++-----------------+-------------------+--------------------------------+---------------+
 
 
 

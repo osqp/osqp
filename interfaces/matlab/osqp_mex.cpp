@@ -246,7 +246,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       //Useful for external solver packages (e.g. Yalmip) that want to
       //know which solver settings are supported
       OSQPSettings* defaults = (OSQPSettings *)mxCalloc(1,sizeof(OSQPSettings));
-      set_default_settings(defaults);
+      osqp_set_default_settings(defaults);
       plhs[0] = copySettingsToMxStruct(defaults);
       mxFree(defaults);
       return;
@@ -300,7 +300,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         const mxArray* mxSettings = prhs[9];
         if(mxIsEmpty(mxSettings)){
           // use defaults
-          set_default_settings(settings);
+          osqp_set_default_settings(settings);
         } else {
           //populate settings structure from mxArray input
           copyMxStructToSettings(mxSettings, settings);

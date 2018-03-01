@@ -51,6 +51,6 @@ If you use OSQP for published work, we encourage you to put a star on `GitHub <h
             booktitle = {{IEEE} Conference on Decision and Control ({CDC})},
             year = {2017},
             month = dec,
+            doi = {10.1109/CDC.2017.8263928},
+            url = {https://doi.org/10.1109/CDC.2017.8263928},
           }
-
-

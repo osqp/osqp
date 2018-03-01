@@ -137,3 +137,21 @@ class basic_tests(unittest.TestCase):
         res = self.model.solve()
         self.assertEqual(res.info.status_val,
                          self.model.constant('OSQP_TIME_LIMIT_REACHED'))
+
+    def test_upper_triangular_P(self):
+        res_default = self.model.solve()
+
+        # Get upper triangular P
+        P_triu = sparse.triu(self.P, format='csc')
+
+        # Setup and solve with upper triangular part only
+        m = osqp.OSQP()
+        m.setup(P=P_triu, q=self.q, A=self.A, l=self.l, u=self.u,
+                **self.opts)
+        res_triu = m.solve()
+
+        # Assert equal
+        nptest.assert_array_almost_equal(res_default.x, res_triu.x)
+        nptest.assert_array_almost_equal(res_default.y, res_triu.y)
+        nptest.assert_array_almost_equal(res_default.info.obj_val, 
+                                         res_triu.info.obj_val)

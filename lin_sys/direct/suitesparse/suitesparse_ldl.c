@@ -45,7 +45,7 @@ void free_linsys_solver_suitesparse_ldl(suitesparse_ldl_solver *s) {
  * @param  p Private workspace
  * @return   [description]
  */
-c_int LDL_factor(csc *A,  suitesparse_ldl_solver * p){
+static c_int LDL_factor(csc *A,  suitesparse_ldl_solver * p){
     // c_int P[], c_int Pinv[], csc **L, c_float **D) {
     c_int kk, n = A->n;
     c_int check_Li_Lx;
@@ -98,7 +98,7 @@ c_int LDL_factor(csc *A,  suitesparse_ldl_solver * p){
 }
 
 
-c_int permute_KKT(csc ** KKT, suitesparse_ldl_solver * p, c_int Pnz, c_int Anz, c_int m, c_int * PtoKKT, c_int * AtoKKT, c_int * rhotoKKT){
+static c_int permute_KKT(csc ** KKT, suitesparse_ldl_solver * p, c_int Pnz, c_int Anz, c_int m, c_int * PtoKKT, c_int * AtoKKT, c_int * rhotoKKT){
     c_float *info;
     c_int amd_status;
     info = (c_float *)c_malloc(AMD_INFO * sizeof(c_float));
@@ -231,7 +231,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
     // Check if matrix has been created
     if (!KKT_temp){
         #ifdef PRINTING
-            c_print("Error forming and permuting KKT matrix!\n");
+            c_eprint("Error forming and permuting KKT matrix");
         #endif
         return OSQP_NULL;
     }
@@ -239,6 +239,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
 
     // Factorize the KKT matrix
     if (LDL_factor(KKT_temp, p) < 0) {
+        csc_spfree(KKT_temp);
         free_linsys_solver_suitesparse_ldl(p);
         return OSQP_NULL;
     }
@@ -276,7 +277,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
 
 
 
-void LDLSolve(c_float *x, c_float *b, csc *L, c_float *Dinv, c_int *P,
+static void LDLSolve(c_float *x, c_float *b, csc *L, c_float *Dinv, c_int *P,
               c_float *bp) {
     /* solves PLDL'P' x = b for x */
     c_int n = L->n;

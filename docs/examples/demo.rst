@@ -134,7 +134,7 @@ C
 
 
         // Define Solver settings as default
-        set_default_settings(settings);
+        osqp_set_default_settings(settings);
         settings->alpha = 1.0; // Change alpha parameter
 
         // Setup workspace

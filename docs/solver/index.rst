@@ -96,7 +96,7 @@ We set the tolerance levels as
 :math:`\rho` step-size 
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 To ensure quick convergence of the algorithm we adapt :math:`\rho` by balancing the residuals. 
-In default mode, the inteval (*i.e.*, number of iterations) at which we update rho is defined by a time measurement.
+In default mode, the inteval (*i.e.*, number of iterations) at which we update :math:`\rho` is defined by a time measurement.
 When the iterations time becomes greater than a certain fraction of the setup time, *i.e.* :code:`adaptive_rho_fraction`, we set the current number of iterations as the interval to update :math:`\rho`.
 The update happens as follows 
 

@@ -120,10 +120,10 @@ typedef struct {
  * Data structure
  */
 typedef struct {
-        c_int n;             ///< number of variables n,
+        c_int n;             ///< number of variables n
         c_int m;             ///< number of constraints m
-        csc *P;              ///< P: in csc format (size n x n). The workspace version stores only the upper triangular part. P->nzmax is the number of nonzero elements of the full P.
-        csc *A;              ///< A: in csc format (size m x n)
+        csc *P;              ///< quadratic part of the cost P in csc format (size n x n). It can be either the full P or only the upper triangular part. The workspace stores only the upper triangular part
+        csc *A;              ///< linear constraints matrix A in csc format (size m x n)
         c_float *q;          ///< dense array for linear part of cost function (size n)
         c_float *l;          ///< dense array for lower bound (size m)
         c_float *u;          ///< dense array for upper bound (size m)

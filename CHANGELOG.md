@@ -1,7 +1,16 @@
 Changes since last release
 --------------------------
 * Added `time_limit` option
-
+* Added CUTEst interface
+* Fixed bug in upper triangular `P` extraction. Now the solver can accept both complete `P` matrix or just the upper triangular part.
+* Fixed [#33](https://github.com/oxfordcontrol/osqp/issues/33)
+* Fixed [#34](https://github.com/oxfordcontrol/osqp/issues/34)
+* Allow `eps_rel=0` [#40](https://github.com/oxfordcontrol/osqp/issues/40)
+* Fixed bug when calling `osqp_solve` or `osqp_cleanup` after failed linear system initialization
+* Add "install" CMake target and installation of CMake configuration files
+* Fixed potential name conflict with SCS [47](https://github.com/oxfordcontrol/osqp/issues/47)
+* Changed `set_default_settings` to `osqp_set_default_settings` and brought function to main API header `osqp.h`
+* Fixed [#49](https://github.com/oxfordcontrol/osqp/issues/49)
 
 Version 0.2.1 (25 November 2017)
 ---------------------------------
@@ -11,7 +20,7 @@ Version 0.2.1 (25 November 2017)
 Version 0.2.0 (23 November 2017)
 ---------------------------------
 *   Added adaptive rho -> Much more reliable convergence!
-*   Simplified several settings 
+*   Simplified several settings
     *  "early_terminate" and "early_terminate_interval" -> "check_termination"
     *  "scaling_iter" removed and put inside "scaling" parameter
 *   Julia interface [OSQP.jl](https://github.com/oxfordcontrol/OSQP.jl)
@@ -22,6 +31,7 @@ Version 0.2.0 (23 November 2017)
 *   Added diagonal rho vector with different values for equality/inequality constraints (interface still have scalar rho)
 *   Return certificates of infeasibility in results structure
 *   Now code generation produces a static library
+
 
 Version 0.1.3 (21 September 2017)
 ---------------------------------

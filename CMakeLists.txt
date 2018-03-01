@@ -1,10 +1,6 @@
 # Minimum version required
 cmake_minimum_required (VERSION 3.2)
 
-
-
-
-
 # Project name
 project (osqp)
 
@@ -119,12 +115,6 @@ if (NOT MSVC)
         set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lrt -ldl")
     endif()
 endif (NOT MSVC)
-
-
-# Include header directory
-# ----------------------------------------------
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
 
 # Set sources
 # ----------------------------------------------
@@ -246,17 +236,40 @@ endif (MATLAB)
 
 
 
-# Create  Library
+# Create Static Library
 # ----------------------------------------------
 
 # Add linear system solvers cumulative library
 add_subdirectory(lin_sys)
 
-# Add linear system solvers interfaces includes
-include_directories(${linsys_solvers_includes})
-
-
+# Static library
 add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
+
+# Include directories for linear system solvers
+target_include_directories(osqpstatic PRIVATE ${linsys_solvers_includes})
+
+# Declare include directories for the cmake exported target
+target_include_directories(osqpstatic 
+                           PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+                                  "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
+
+# Install Static Library
+# ----------------------------------------------
+
+include(GNUInstallDirs)
+
+install(TARGETS osqpstatic
+        EXPORT  ${PROJECT_NAME}
+        ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
+
+        
+# Install Headers
+# ----------------------------------------------
+
+install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
+
 
 
 if (MATLAB)
@@ -274,12 +287,68 @@ if (NOT PYTHON AND NOT MATLAB)
     # Create osqp shared library
     # NB: Add all the linear system solvers here
     add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
+    
+    # Include directories for linear system solvers
+    target_include_directories(osqp PRIVATE ${linsys_solvers_includes})
+
+    # Declare include directories for the cmake exported target
+    target_include_directories(osqp 
+                               PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+                                      "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
+
+    # Install osqp shared library 
+    install(TARGETS osqp
+            EXPORT  ${PROJECT_NAME}
+            LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+            ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+            RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
     # Create demo executable (linked to static library)
     add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
     target_link_libraries (osqp_demo osqpstatic)
 
 endif (NOT PYTHON AND NOT MATLAB)
+
+# Create CMake packages for the build directory 
+# ----------------------------------------------
+include(CMakePackageConfigHelpers)
+
+export(EXPORT ${PROJECT_NAME}
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/osqp-targets.cmake"
+  NAMESPACE osqp::)
+
+if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake)
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake "include(\"\${CMAKE_CURRENT_LIST_DIR}/osqp-targets.cmake\")\n")
+endif()
+
+
+# Create CMake packages for the install directory 
+# ----------------------------------------------
+
+set(ConfigPackageLocation lib/cmake/osqp)
+
+install(EXPORT ${PROJECT_NAME} 
+        FILE osqp-targets.cmake
+        NAMESPACE osqp::
+        DESTINATION ${ConfigPackageLocation})
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake
+        DESTINATION ${ConfigPackageLocation})
+
+
+
+# Add uninstall command
+# ----------------------------------------------
+if(NOT TARGET uninstall)
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/configure/cmake/cmake_uninstall.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+        IMMEDIATE @ONLY)
+
+    add_custom_target(uninstall
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()
+
 
 
 # Add testing

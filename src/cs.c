@@ -219,8 +219,8 @@ csc * csc_done(csc *C, void *w, void *x, c_int ok){
 csc * csc_to_triu(csc * M){
     csc * M_trip;  // Matrix in triplet format
     csc * M_triu;  // Resulting upper triangular matrix
-    c_int nnzfullM;  // Number of nonzeros from full matrix M
-    c_int nnzmaxM; // Estimated maximum number of elements of M
+    c_int nnzorigM;  // Number of nonzeros from original matrix M
+    c_int nnzmaxM; // Estimated maximum number of elements of upper triangular M
     c_int n;  // Dimension of M
     c_int ptr, i, j;  // Counters for (i,j) and index in M
     c_int z_M = 0; // Counter for elements in M_trip
@@ -229,7 +229,7 @@ csc * csc_to_triu(csc * M){
     // Check if matrix is square
     if (M->m != M->n){
 #ifdef PRINTING
-        c_print("ERROR: Matrix M not square!\n");
+        c_eprint("Matrix M not square");
 #endif
 
         return OSQP_NULL;
@@ -237,17 +237,24 @@ csc * csc_to_triu(csc * M){
     n = M->n;
     
     // Get number of nonzeros full M
-    nnzfullM = M->p[n];
+    nnzorigM = M->p[n];
 
     // Estimate nnzmaxM
+    // Number of nonzero elements in original M + diagonal part.
+    // -> Full matrix M as input: estimate is half the number of total elements + diagonal = .5 * (nnzorigM + n)
+    // -> Upper triangular matrix M as input: estimate is the number of total elements + diagonal = nnzorigM + n
+    // The maximum between the two is nnzorigM + n
+    nnzmaxM = nnzorigM + n;  
+
+    // OLD
     // nnzmaxM = n*(n+1)/2;  // Full upper triangular matrix (This version allocates too much memory!)
-    nnzmaxM = .5 * (nnzfullM + n);  // half of the total elements + diagonal
+    // nnzmaxM = .5 * (nnzorigM + n);  // half of the total elements + diagonal
 
     // Allocate M_trip
     M_trip = csc_spalloc(n, n, nnzmaxM, 1, 1); // Triplet format
     if (!M_trip){
 #ifdef PRINTING
-	    c_print("ERROR: Upper triangular matrix extraction failed (out of memory)!\n");
+	    c_eprint("Upper triangular matrix extraction failed (out of memory)");
 #endif		    
 	    return OSQP_NULL;
     }
@@ -279,7 +286,7 @@ csc * csc_to_triu(csc * M){
     M_triu = triplet_to_csc(M_trip, OSQP_NULL);
 
     // Assign number of nonzeros of full matrix to triu M
-    M_triu->nzmax = nnzfullM;
+    M_triu->nzmax = nnzmaxM;
 
     // Cleanup and return result
     csc_spfree(M_trip);

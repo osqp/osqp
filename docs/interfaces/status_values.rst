@@ -25,7 +25,7 @@ The *inaccurate* statuses define when the optimality, primal infeasibility or du
 +------------------------------+-----------------------------------+-------+
 | interrupted by user          | OSQP_SIGINT                       | -5    |
 +------------------------------+-----------------------------------+-------+
-| Run time limit reached       | OSQP_TIME_LIMIT_REACHED           | -6    |
+| run time limit reached       | OSQP_TIME_LIMIT_REACHED           | -6    |
 +------------------------------+-----------------------------------+-------+
 | unsolved                     | OSQP_UNSOLVED                     | -10   |
 +------------------------------+-----------------------------------+-------+

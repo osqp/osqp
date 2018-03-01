@@ -22,7 +22,7 @@ static char * test_basic_qp_solve()
 
 
     // Define Solver settings as default
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->max_iter = 2000;
     settings->alpha = 1.6;
     settings->polish = 1;
@@ -64,10 +64,10 @@ static char * test_basic_qp_solve()
               osqp_update_max_iter(work, -1) == 1);
 
     mu_assert("Basic QP test solve: Wrong value of eps_abs not caught!",
-              osqp_update_eps_abs(work, 0.) == 1);
+              osqp_update_eps_abs(work, -1.) == 1);
 
     mu_assert("Basic QP test solve: Wrong value of eps_rel not caught!",
-              osqp_update_eps_rel(work, 0.) == 1);
+              osqp_update_eps_rel(work, -1.) == 1);
 
     mu_assert("Basic QP test solve: Wrong value of eps_prim_inf not caught!",
               osqp_update_eps_prim_inf(work, -0.1) == 1);
@@ -131,7 +131,7 @@ static char * test_basic_qp_solve_pardiso()
 
 
     // Define Solver settings as default
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->max_iter = 2000;
     settings->alpha = 1.6;
     settings->polish = 1;
@@ -197,7 +197,7 @@ static char * test_basic_qp_update()
 
 
     // Define Solver settings as default
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->max_iter = 200;
     settings->alpha = 1.6;
     settings->polish = 1;
@@ -303,7 +303,7 @@ static char * test_basic_qp_check_termination()
 
 
     // Define Solver settings as default
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->max_iter = 200;
     settings->alpha = 1.6;
     settings->polish = 0;
@@ -384,7 +384,7 @@ static char * test_basic_qp_update_rho()
 
     // Define Solver settings as default
     rho = 0.7;
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->rho = rho;
     settings->adaptive_rho = 0;  // Disable adaptive rho for this test
     settings->eps_abs = 1e-05;
@@ -425,7 +425,7 @@ static char * test_basic_qp_update_rho()
 
 
     // Create new problem with different rho and update it
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->rho = 0.1;
     settings->adaptive_rho = 0;
     settings->check_termination = 1;
@@ -499,7 +499,7 @@ static char * test_basic_qp_time_limit()
     sols_data = generate_problem_basic_qp_sols_data();
 
     // Define Solver settings as default
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
 
     // Check dfault time limit
     mu_assert("Time limit test: Default not correct", settings->time_limit == 0);

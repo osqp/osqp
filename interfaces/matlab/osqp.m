@@ -44,6 +44,13 @@ classdef osqp < handle
             %   C = CONSTANT(CONSTANT_NAME) return constant called CONSTANT_NAME
             out = osqp_mex('constant', 'static', constant_name);
         end
+        
+        %%
+        function out = version(this)
+            % Return OSQP version
+            out = osqp_mex('version', this.objectHandle);
+        end
+        
     end
     methods
         %% Constructor - Create a new solver instance
@@ -56,12 +63,6 @@ classdef osqp < handle
         function delete(this)
             % Destroy OSQP solver class
             osqp_mex('delete', this.objectHandle);
-        end
-
-        %%
-        function out = version(this)
-            % Return OSQP version
-            out = osqp_mex('version', this.objectHandle);
         end
 
         %%
@@ -143,6 +144,15 @@ classdef osqp < handle
             assert(isempty(Ax) || isempty(Ax_idx) || length(Ax) == length(Ax_idx), ...
                 'inputs ''Ax'' and ''Ax_idx'' must be the same size');
 
+            % Adjust index of Px_idx and Ax_idx to match 0-based indexing
+            % in C
+            if (~isempty(Px_idx))
+                Px_idx = Px_idx - 1;
+            end
+            if (~isempty(Ax_idx))
+                Ax_idx = Ax_idx - 1;
+            end
+            
             % Convert infinity values to OSQP_INFTY
             if (~isempty(u))
                 u = min(u, osqp.constant('OSQP_INFTY'));

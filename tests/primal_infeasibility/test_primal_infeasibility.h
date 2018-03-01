@@ -22,7 +22,7 @@ static char * test_primal_infeasible_qp_solve()
 
 
     // Define Solver settings as default
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->max_iter = 10000;
     settings->alpha = 1.6;
     settings->polish = 1;

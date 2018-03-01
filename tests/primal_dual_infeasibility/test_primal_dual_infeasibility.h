@@ -30,7 +30,7 @@ static char * test_optimal()
 
     // Define Solver settings as default
     settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->max_iter = 2000;
     settings->alpha = 1.6;
     settings->polish = 1;
@@ -98,7 +98,7 @@ static char * test_prim_infeas()
 
     // Define Solver settings as default
     settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->max_iter = 2000;
     settings->alpha = 1.6;
     settings->polish = 0;
@@ -151,7 +151,7 @@ static char * test_dual_infeas()
 
     // Define Solver settings as default
     settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->max_iter = 2000;
     settings->alpha = 1.6;
     settings->polish = 0;
@@ -206,7 +206,7 @@ static char * test_primal_dual_infeas()
 
     // Define Solver settings as default
     settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
-    set_default_settings(settings);
+    osqp_set_default_settings(settings);
     settings->max_iter = 2000;
     settings->alpha = 1.6;
     settings->polish = 0;
