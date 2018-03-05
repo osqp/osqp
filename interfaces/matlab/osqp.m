@@ -46,9 +46,9 @@ classdef osqp < handle
         end
         
         %%
-        function out = version(this)
+        function out = version()
             % Return OSQP version
-            out = osqp_mex('version', this.objectHandle);
+            out = osqp_mex('version', 'static');
         end
         
     end
