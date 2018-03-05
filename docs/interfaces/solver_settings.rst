@@ -52,7 +52,8 @@ The solver settings are displayed in the following table. The settings marked wi
 +--------------------------------+-------------------------------------------------------------+--------------------------------------------------------------+-----------------+
 | :code:`adaptive_rho_fraction`  | Adaptive rho interval as fraction of setup time (auto mode) | 0 < :code:`adaptive_rho_fraction`                            | 0.4             |
 +--------------------------------+-------------------------------------------------------------+--------------------------------------------------------------+-----------------+
-
+| :code:`time_limit` *           | Run time limit in seconds                                   | 0 (disabled) or 0 <= :code:`time_limit`                      | 0               |
++--------------------------------+-------------------------------------------------------------+--------------------------------------------------------------+-----------------+
 
 The boolean values :code:`True/False` are defined as :code:`1/0` in the C/C++ interfaces.
 

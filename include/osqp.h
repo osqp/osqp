@@ -372,6 +372,16 @@ c_int osqp_update_verbose(OSQPWorkspace * work, c_int verbose_new);
 
 #endif  // #ifndef EMBEDDED
 
+#ifdef PROFILING
+/**
+ * Update time_limit setting
+ * @param  work            Workspace
+ * @param  time_limit_new  New time_limit setting
+ * @return                 Exitflag
+ */
+c_int osqp_update_time_limit(OSQPWorkspace * work, c_float time_limit_new);
+#endif
+
 /** @} */
 
 

@@ -640,6 +640,10 @@ void update_status(OSQPInfo *info, c_int status_val) {
         c_strcpy(info->status, "dual infeasible inaccurate");
     else if (status_val == OSQP_MAX_ITER_REACHED)
         c_strcpy(info->status, "maximum iterations reached");
+#ifdef PROFILING
+    else if (status_val == OSQP_TIME_LIMIT_REACHED)
+        c_strcpy(info->status, "Run time limit reached");
+#endif
     else if (status_val == OSQP_SIGINT)
         c_strcpy(info->status, "interrupted");
 }
@@ -946,6 +950,14 @@ c_int validate_settings(const OSQPSettings * settings){
 #endif
         return 1;
     }
+#ifdef PROFILING
+    if (settings->time_limit < 0) {
+#ifdef PRINTING
+        c_print("time_limit must be nonnegative\n");
+#endif
+        return 1;
+    }
+#endif
 
     return 0;
 

@@ -125,6 +125,19 @@ class basic_tests(unittest.TestCase):
         # Assert same number of iterations
         self.assertEqual(res_default.info.iter, res_updated_rho.info.iter)
 
+    def test_update_time_limit(self):
+        res = self.model.solve()
+        self.assertEqual(res.info.status_val,
+                         self.model.constant('OSQP_SOLVED'))
+
+        # Ensure the solver will time out
+        self.model.update_settings(time_limit=1e-6, max_iter=2000000000,
+                                   check_termination=0)
+
+        res = self.model.solve()
+        self.assertEqual(res.info.status_val,
+                         self.model.constant('OSQP_TIME_LIMIT_REACHED'))
+
     def test_upper_triangular_P(self):
         res_default = self.model.solve()
 

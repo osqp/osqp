@@ -167,6 +167,10 @@ typedef struct {
     c_int check_termination;  ///< integer, check termination interval. If 0, termination checking is disabled
     c_int warm_start; ///< boolean, warm start
 
+#ifdef PROFILING
+    c_float time_limit; ///< maximum seconds allowed to solve the problem
+#endif
+
 } OSQPSettings;
 
 

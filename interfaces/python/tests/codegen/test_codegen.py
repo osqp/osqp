@@ -14,6 +14,6 @@ l = -np.random.rand(m)
 
 
 m = osqp.OSQP()
-m.setup(P, q, A, l, u)
+m.setup(P, q, A, l, u, time_limit=2)
 
 m.codegen('code')

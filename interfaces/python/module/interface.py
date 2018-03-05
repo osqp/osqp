@@ -208,7 +208,7 @@ class OSQP(object):
                                   'alpha', 'delta', 'polish',
                                   'polish_refine_iter',
                                   'verbose', 'scaled_termination',
-                                  'check_termination',
+                                  'check_termination', 'time_limit',
         """
 
         # get arguments
@@ -226,6 +226,7 @@ class OSQP(object):
         scaled_termination = kwargs.pop('scaled_termination', None)
         check_termination = kwargs.pop('check_termination', None)
         warm_start = kwargs.pop('warm_start', None)
+        time_limit = kwargs.pop('time_limit', None)
 
         # update them
         if max_iter is not None:
@@ -269,6 +270,9 @@ class OSQP(object):
 
         if warm_start is not None:
             self._model.update_warm_start(warm_start)
+
+        if time_limit is not None:
+            self._model.update_time_limit(time_limit)
 
         if max_iter is None and \
            eps_abs is None and \
