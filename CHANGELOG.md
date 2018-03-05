@@ -1,3 +1,6 @@
+Changes since last release
+--------------------------
+
 Version 0.3.0 (5 March 2018)
 ----------------------------
 * Added `time_limit` option
