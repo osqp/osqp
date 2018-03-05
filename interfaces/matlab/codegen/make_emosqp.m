@@ -21,7 +21,14 @@ if exist(build_dir, 'dir')
 end
 mkdir('build');
 cd('build');
-[status, output] = system(sprintf('%s %s ..', 'cmake', cmake_args));
+
+
+% Add specific generators for windows linux or mac
+if (ispc)
+    [status, output] = system(sprintf('%s %s -G "MinGW Makefiles" ..', 'cmake', cmake_args));
+else
+    [status, output] = system(sprintf('%s %s -G "Unix Makefiles" ..', 'cmake', cmake_args));
+end
 if(status)
     fprintf('\n');
     disp(output);
