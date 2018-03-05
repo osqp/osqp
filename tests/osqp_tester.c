@@ -1,5 +1,7 @@
 /* OSQP TESTER MODULE */
-/* THE CODE FOR MINIMAL UNIT TESTING HAS BEEN TAKEN FROM http://www.jera.com/techinfo/jtns/jtn002.html */
+
+/* THE CODE FOR MINIMAL UNIT TESTING HAS BEEN TAKEN FROM
+   http://www.jera.com/techinfo/jtns/jtn002.html */
 
 #include <stdio.h>
 
@@ -19,27 +21,27 @@
 int tests_run = 0;
 
 
-static char * all_tests() {
-    mu_run_test(test_lin_alg);
-    mu_run_test(test_solve_linsys);
-    mu_run_test(test_basic_qp);
-    mu_run_test(test_basic_qp2);
-    mu_run_test(test_primal_infeasibility);
-    mu_run_test(test_primal_dual_infeasibility);
-    mu_run_test(test_update_matrices);
-    return 0;
+static char* all_tests() {
+  mu_run_test(test_lin_alg);
+  mu_run_test(test_solve_linsys);
+  mu_run_test(test_basic_qp);
+  mu_run_test(test_basic_qp2);
+  mu_run_test(test_primal_infeasibility);
+  mu_run_test(test_primal_dual_infeasibility);
+  mu_run_test(test_update_matrices);
+  return 0;
 }
 
-
 int main(void) {
-    char *result = all_tests();
-    if (result != 0) {
-        printf("%s\n", result);
-    }
-    else {
-        printf("ALL TESTS PASSED\n");
-    }
-    printf("Tests run: %d\n", tests_run);
+  char *result = all_tests();
 
-    return result != 0;
+  if (result != 0) {
+    printf("%s\n", result);
+  }
+  else {
+    printf("ALL TESTS PASSED\n");
+  }
+  printf("Tests run: %d\n", tests_run);
+
+  return result != 0;
 }

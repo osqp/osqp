@@ -1,11 +1,11 @@
 #ifndef PROJ_H
-#define PROJ_H
+# define PROJ_H
 
-#ifdef __cplusplus
+# ifdef __cplusplus
 extern "C" {
-#endif
+# endif // ifdef __cplusplus
 
-#include "types.h"
+# include "types.h"
 
 
 /* Define Projections onto set C involved in the ADMM algorithm */
@@ -15,7 +15,8 @@ extern "C" {
  * @param z    Vector to project
  * @param work Workspace
  */
-void project(OSQPWorkspace *work, c_float *z);
+void project(OSQPWorkspace *work,
+             c_float       *z);
 
 
 /**
@@ -24,12 +25,13 @@ void project(OSQPWorkspace *work, c_float *z);
  * @param z    Primal variable z
  * @param y    Dual variable y
  */
-void project_normalcone(OSQPWorkspace *work, c_float *z, c_float *y);
+void project_normalcone(OSQPWorkspace *work,
+                        c_float       *z,
+                        c_float       *y);
 
 
-
-#ifdef __cplusplus
+# ifdef __cplusplus
 }
-#endif
+# endif // ifdef __cplusplus
 
-#endif
+#endif // ifndef PROJ_H

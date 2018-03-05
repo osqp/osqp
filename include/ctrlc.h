@@ -3,31 +3,31 @@
  */
 
 #ifndef CTRLC_H
-#define CTRLC_H
+# define CTRLC_H
 
-#ifdef __cplusplus
+# ifdef __cplusplus
 extern "C" {
-#endif
+# endif // ifdef __cplusplus
 
-#include "glob_opts.h"
+# include "glob_opts.h"
 
-#if defined MATLAB
+# if defined MATLAB
 
 /* No header file available here; define the prototypes ourselves */
 int IsInterruptPending(void);
 int SetInterruptEnabled(int x);
 
-#elif defined IS_WINDOWS
+# elif defined IS_WINDOWS
 
 /* Use Windows SetConsoleCtrlHandler for signal handling */
-#include <windows.h>
+#  include <windows.h>
 
-#else
+# else // if defined MATLAB
 
 /* Use sigaction for signal handling on non-Windows machines */
-#include <signal.h>
+#  include <signal.h>
 
-#endif
+# endif // if defined MATLAB
 
 /* METHODS are the same for both */
 
@@ -45,12 +45,12 @@ void endInterruptListener(void);
  * Check if the solver has been interrupted
  * @return  Boolean indicating if the solver has been interrupted
  */
-int isInterrupted(void);
+int  isInterrupted(void);
 
 
-#ifdef __cplusplus
+# ifdef __cplusplus
 }
-#endif
+# endif // ifdef __cplusplus
 
 
 #endif /* END IFDEF CTRLC */
