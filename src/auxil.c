@@ -51,12 +51,6 @@ c_float compute_rho_estimate(OSQPWorkspace *work) {
   rho_estimate = c_min(c_max(rho_estimate, RHO_MIN), RHO_MAX);              // Constrain
                                                                             // rho
                                                                             // values
-
-  // DEBUG: Print stuff
-  // c_print("current rho = %.2e\n", work->settings->rho);
-  // c_print("pri_res = %.2e, dua_res = %.2e\n", pri_res, dua_res);
-  // c_print("new rho = %.2e\n", rho_estimate);
-
   return rho_estimate;
 }
 

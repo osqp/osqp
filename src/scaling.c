@@ -153,17 +153,6 @@ c_int scale_data(OSQPWorkspace *work) {
   vec_ew_prod(work->scaling->E, work->data->l, work->data->l, work->data->m);
   vec_ew_prod(work->scaling->E, work->data->u, work->data->u, work->data->m);
 
-
-  // DEBUG
-  // #ifdef PRINTING
-  // c_print("Final cost scaling = %.10f\n", work->scaling->c);
-  // c_print("n = %i\n", n);
-  // print_vec(work->scaling->D, n, "D");
-  // print_vec(work->scaling->Dinv, n, "Dinv");
-  // print_vec(work->scaling->E, m, "E");
-  // print_vec(work->scaling->Einv, m, "Einv");
-  // #endif
-
   return 0;
 }
 
