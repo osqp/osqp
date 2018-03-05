@@ -214,7 +214,7 @@
      OSQPSettings *settings = self->workspace->settings;
 
      PyObject *return_dict = Py_BuildValue(
-         "{s:d,s:d,s:i,s:i,s:i,s:d,s:d,s:i,s:d,s:d,s:d, s:d, s:d, s:i, s:i, s:i, s:i}",
+         "{s:d,s:d,s:i,s:i,s:i,s:d,s:d,s:i,s:d,s:d,s:d, s:d, s:d, s:i, s:i, s:i, s:i, s:d}",
          "rho", (double)settings->rho,
          "sigma", (double)settings->sigma,
          "scaling", settings->scaling,
@@ -231,7 +231,8 @@
          "linsys_solver", settings->linsys_solver,
          "warm_start", settings->warm_start,
          "scaled_termination", settings->scaled_termination,
-         "check_termination", settings->check_termination);
+         "check_termination", settings->check_termination,
+         "time_limit", (double)settings->time_limit);
      return return_dict;
  }
 

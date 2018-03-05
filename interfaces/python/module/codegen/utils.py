@@ -102,7 +102,12 @@ def write_settings(f, settings, name, embedded_flag):
 
     f.write("%d, " % settings['scaled_termination'])
     f.write("%d, " % settings['check_termination'])
-    f.write("%d" % settings['warm_start'])
+    f.write("%d," % settings['warm_start'])
+
+
+    f.write("\n#ifdef PROFILING\n")
+    f.write("(c_float)%.20f " % settings['time_limit'])
+    f.write("\n#endif  // PROFILING\n")
 
     f.write("};\n\n")
 

@@ -54,7 +54,8 @@ const char* OSQP_SETTINGS_FIELDS[] = {"rho",                        //c_float
                                       "verbose",                    //c_int
                                       "scaled_termination",         //c_int
                                       "check_termination",          //c_int
-                                      "warm_start"};                //c_int
+                                      "warm_start",                 //c_int
+                                      "time_limit"};               //c_float
 
 const char* CSC_FIELDS[] = {"nzmax",    //c_int
                             "m",        //c_int
@@ -665,6 +666,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             plhs[0] = mxCreateDoubleScalar(OSQP_MAX_ITER_REACHED);
             return;
         }
+
+        if (!strcmp("OSQP_TIME_LIMIT_REACHED", constant)){
+            plhs[0] = mxCreateDoubleScalar(OSQP_TIME_LIMIT_REACHED);
+            return;
+        }
         
         // Linear system solvers
         if (!strcmp("SUITESPARSE_LDL_SOLVER", constant)){
@@ -806,6 +812,7 @@ mxArray* copySettingsToMxStruct(OSQPSettings* settings){
   mxSetField(mxPtr, 0, "scaled_termination", mxCreateDoubleScalar(settings->scaled_termination));
   mxSetField(mxPtr, 0, "check_termination", mxCreateDoubleScalar(settings->check_termination));
   mxSetField(mxPtr, 0, "warm_start",      mxCreateDoubleScalar(settings->warm_start));
+  mxSetField(mxPtr, 0, "time_limit",      mxCreateDoubleScalar(settings->time_limit));
 
   return mxPtr;
 }
@@ -1070,6 +1077,7 @@ void copyMxStructToSettings(const mxArray* mxPtr, OSQPSettings* settings){
   settings->scaled_termination           = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "scaled_termination"));
   settings->check_termination           = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "check_termination"));
   settings->warm_start                = (c_int)mxGetScalar(mxGetField(mxPtr, 0, "warm_start"));
+  settings->time_limit                = (c_float)mxGetScalar(mxGetField(mxPtr, 0, "time_limit"));
 
 }
 
@@ -1106,6 +1114,8 @@ void copyUpdatedSettingsToWork(const mxArray* mxPtr ,OsqpData* osqpData){
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "check_termination")));
   osqp_update_warm_start(osqpData->work,
     (c_int)mxGetScalar(mxGetField(mxPtr, 0, "warm_start")));
+  osqp_update_time_limit(osqpData->work,
+    (c_float)mxGetScalar(mxGetField(mxPtr, 0, "time_limit")));
 
 
   // Check for settings that need special update

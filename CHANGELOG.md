@@ -1,5 +1,6 @@
 Changes since last release
 --------------------------
+* Added `time_limit` option
 * Added CUTEst interface
 * Fixed bug in upper triangular `P` extraction. Now the solver can accept both complete `P` matrix or just the upper triangular part.
 * Fixed [#33](https://github.com/oxfordcontrol/osqp/issues/33)

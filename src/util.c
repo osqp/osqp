@@ -91,17 +91,18 @@ void print_setup_header(const OSQPWorkspace * work) {
             settings->eps_prim_inf, settings->eps_dual_inf);
     c_print("rho = %.2e ", settings->rho);
     if (settings->adaptive_rho) c_print("(adaptive)");
-    c_print("\n          ");
-    // c_print("sigma = %.1f, alpha = %.2f, \n          ",
+    c_print(",\n          ");
     c_print("sigma = %.2e, alpha = %.2f, ",
             settings->sigma, settings->alpha);
     c_print("max_iter = %i\n", (int)settings->max_iter);
 
     if (settings->check_termination)
-        c_print("          check_termination: on (interval %i)\n",
+        c_print("          check_termination: on (interval %i),\n",
                 (int)settings->check_termination);
     else
-        c_print("          check_termination: off \n");
+        c_print("          check_termination: off,\n");
+    if (settings->time_limit)
+	c_print("          time_limit: %.2e sec,\n", settings->time_limit);
     if (settings->scaling)
         c_print("          scaling: on, ");
     else
@@ -206,32 +207,8 @@ void print_footer(OSQPInfo * info, c_int polish){
 
 OSQPSettings * copy_settings(OSQPSettings * settings){
     OSQPSettings * new = c_malloc(sizeof(OSQPSettings));
-
     // Copy settings
-    new->scaling = settings->scaling;
-    new->adaptive_rho = settings->adaptive_rho;
-    new->adaptive_rho_interval = settings->adaptive_rho_interval;
-    new->adaptive_rho_tolerance = settings->adaptive_rho_tolerance;
-#ifdef PROFILING
-    new->adaptive_rho_fraction = settings->adaptive_rho_fraction;
-#endif
-    new->rho = settings->rho;
-    new->sigma = settings->sigma;
-    new->max_iter = settings->max_iter;
-    new->eps_abs = settings->eps_abs;
-    new->eps_rel = settings->eps_rel;
-    new->eps_prim_inf = settings->eps_prim_inf;
-    new->eps_dual_inf = settings->eps_dual_inf;
-    new->alpha = settings->alpha;
-    new->linsys_solver = settings->linsys_solver;
-    new->delta = settings->delta;
-    new->polish = settings->polish;
-    new->polish_refine_iter = settings->polish_refine_iter;
-    new->verbose = settings->verbose;
-    new->scaled_termination = settings->scaled_termination;
-    new->check_termination = settings->check_termination;
-    new->warm_start = settings->warm_start;
-
+    memcpy(new, settings, sizeof(OSQPSettings));
     return new;
 }
 

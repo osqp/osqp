@@ -55,8 +55,10 @@ void osqp_set_default_settings(OSQPSettings * settings) {
     settings->check_termination = CHECK_TERMINATION;     /* Interval for evaluating termination criteria */
     settings->warm_start = WARM_START;     /* warm starting */
 
+#ifdef PROFILING
+    settings->time_limit = TIME_LIMIT;
+#endif
 }
-
 
 
 #ifndef EMBEDDED
@@ -260,6 +262,9 @@ c_int osqp_solve(OSQPWorkspace * work){
 	c_int compute_cost_function;  // Boolean whether to compute the cost function
 	// in the loop
 	c_int can_check_termination;  // Boolean whether to check termination
+#ifdef PROFILING
+	c_float temp_run_time;  // Temporary variable to store current run time
+#endif
 #ifdef PRINTING
 	c_int can_print; // Boolean whether you can print
 #endif
@@ -331,9 +336,31 @@ c_int osqp_solve(OSQPWorkspace * work){
 		// Check the interrupt signal
 		if (isInterrupted()) {
 			update_status(work->info, OSQP_SIGINT);
+#ifdef PRINTING
 			c_print("Solver interrupted\n");
-			endInterruptListener();
-			return 1;   // exitflag
+#endif
+			exitflag = 1;
+			goto exit;
+		}
+#endif
+
+#ifdef PROFILING
+		// Check if solver time_limit is enabled. In case, check if the current run time 
+		// is more than the time_limit option.
+		if (work->first_run){
+			temp_run_time = work->info->setup_time + toc(work->timer);
+		}
+		else {
+			temp_run_time = toc(work->timer);
+		}
+		if (work->settings->time_limit && temp_run_time >= work->settings->time_limit) {
+			update_status(work->info, OSQP_TIME_LIMIT_REACHED);
+#ifdef PRINTING
+		if (work->settings->verbose)
+			c_print("Run time limit reached\n");
+#endif
+			exitflag = 1;
+			goto exit;
 		}
 #endif
 
@@ -431,7 +458,8 @@ c_int osqp_solve(OSQPWorkspace * work){
 #ifdef PRINTING
 				c_eprint("Failed rho update");
 #endif  // PRINTING
-				return 1;
+				exitflag = 1;
+				goto exit;
 			}
 
 			// This was for debug purposes 
@@ -534,6 +562,16 @@ c_int osqp_solve(OSQPWorkspace * work){
 	// Store solution
 	store_solution(work);
 
+
+// Define exit flag for quitting function
+#if defined (PROFILING) || defined (CTRLC) || EMBEDDED != 1
+exit:
+#endif
+	
+#ifdef CTRLC
+	// Restore previous signal handler
+	endInterruptListener();
+#endif
 	return exitflag;
 }
 
@@ -1331,3 +1369,19 @@ c_int osqp_update_verbose(OSQPWorkspace * work, c_int verbose_new) {
 
 
 #endif // EMBEDDED
+
+#ifdef PROFILING
+c_int osqp_update_time_limit(OSQPWorkspace * work, c_float time_limit_new) {
+	// Check that time_limit is nonnegative
+	if (time_limit_new < 0.) {
+#ifdef PRINTING
+		c_print("time_limit must be nonnegative\n");
+#endif
+		return 1;
+	}
+	// Update time_limit
+	work->settings->time_limit = time_limit_new;
+
+	return 0;
+}
+#endif
