@@ -34,7 +34,7 @@ The elements of :code:`l` and :code:`u` can be :math:`\pm \infty` ( using :code:
 The arguments :code:`P` and :code:`A` are sparse matrices of type :code:`SparseMatrixCSC`. 
 Matrix :code:`P` can be either complete or just the upper triangular
 part. OSQP will make use of only the upper triangular part.
-If they are sparse matrices are in another format, the interface will attemp to convert them. 
+If they are sparse matrices are in another format, the interface will attempt to convert them. 
 There is no need to specify all the arguments. 
 
 The argument :code:`settings` specifies the solver settings. 

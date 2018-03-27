@@ -33,7 +33,7 @@ The arguments :code:`q`, :code:`l` and :code:`u` are numpy arrays. The elements 
 The arguments :code:`P` and :code:`A` are scipy sparse matrices in CSC format. 
 Matrix :code:`P` can be either complete or just the upper triangular
 part. OSQP will make use of only the upper triangular part.
-If they are sparse matrices are in another format, the interface will attemp to convert them. There is no need to specify all the arguments.
+If they are sparse matrices are in another format, the interface will attempt to convert them. There is no need to specify all the arguments.
 
 
 The keyword arguments :code:`**settings` specify the solver settings. The allowed parameters are defined in :ref:`solver_settings`.

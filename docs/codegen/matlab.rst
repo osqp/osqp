@@ -115,7 +115,7 @@ If the code is generated with the option :code:`parameters` set to
 .. function:: emosqp('update_P', Px, Px_idx, Px_n)
    :noindex:
 
-   Update nonzero entries of the quadratic cost matrix.
+  Update nonzero entries of the quadratic cost matrix (only upper-diagonal) without changing sparsity structure.
 
    :param ndarray Px: Values of entries to be updated
    :param ndarray Px_idx: Indices of entries to be updated. Pass :code:`[]` if
@@ -139,7 +139,7 @@ If the code is generated with the option :code:`parameters` set to
 .. function:: emosqp('update_P_A', Px, Px_idx, Px_n, Ax, Ax_idx, Ax_n)
    :noindex:
 
-   Update nonzero entries of the quadratic cost and constraint matrices.
+  Update nonzero entries of the quadratic cost and constraint matrices. It considers only the upper-triangular part of P.
 
    :param ndarray Px: Values of entries to be updated
    :param ndarray Px_idx: Indices of entries to be updated. Pass :code:`[]` if
