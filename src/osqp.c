@@ -281,6 +281,14 @@ c_int osqp_solve(OSQPWorkspace *work) {
   c_int can_print;             // Boolean whether you can print
 #endif /* ifdef PRINTING */
 
+  // Check if workspace has been initialized
+  if (!work) {
+#ifdef PRINTING
+    c_eprint("Workspace not initialized");
+#endif /* ifdef PRINTING */
+    return -1;
+  }
+
   // Initialize variables
   exitflag              = 0;
   can_check_termination = 0;
@@ -298,13 +306,6 @@ c_int osqp_solve(OSQPWorkspace *work) {
 #endif /* ifdef PRINTING */
 
 
-  // Check if workspace has been initialized
-  if (!work) {
-#ifdef PRINTING
-    c_eprint("Workspace not initialized");
-#endif /* ifdef PRINTING */
-    return -1;
-  }
 
 #ifdef PROFILING
   tic(work->timer); // Start timer

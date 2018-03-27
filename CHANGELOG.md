@@ -1,5 +1,7 @@
 Changes since last release
 --------------------------
+* Fixed [#54](https://github.com/oxfordcontrol/osqp/issues/54).
+
 
 Version 0.3.0 (5 March 2018)
 ----------------------------
