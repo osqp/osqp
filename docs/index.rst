@@ -72,6 +72,7 @@ The following people have been involved in the development of OSQP:
 * `Alberto Bemporad <http://cse.lab.imtlucca.it/~bemporad/>`_ (IMT Lucca): methods and maths
 * `Nick Gould <http://www.numerical.rl.ac.uk/people/nimg/nimg.html>`_ (Rutherford Appleton Laboratory): Fortran and CUTEst interfaces
 * `Stephen Boyd <http://web.stanford.edu/~boyd/>`_ (Stanford University): methods and maths
+* `Ed Barnard <eabarnard@gmail.com>`_ (University of Oxford): Rust interface
 
 
 .. rubric:: Bug reports and support
