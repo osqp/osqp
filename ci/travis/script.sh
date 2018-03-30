@@ -25,7 +25,6 @@ fi
 
 
 
-
 # Test C interface
 # ---------------------------------------------------
 
@@ -42,7 +41,7 @@ make
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
 
 # Pefrorm code coverage (only in Linux case for one version of python)
-if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHON_VERSION == "3.6" ]]; then
+if [[ $TRAVIS_OS_NAME == "linux" ]]; then
     cd ${TRAVIS_BUILD_DIR}/build
     lcov --directory . --capture -o coverage.info # capture coverage info
     lcov --remove coverage.info "${TRAVIS_BUILD_DIR}/tests/*" \
@@ -54,15 +53,3 @@ if [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $PYTHON_VERSION == "3.6" ]]; then
     lcov --list coverage.info # debug before upload
     coveralls-lcov coverage.info # uploads to coveralls
 fi
-
-
-# Test Python interface
-# ---------------------------------------------------
-
-# Install Python interface
-cd ${TRAVIS_BUILD_DIR}/interfaces/python
-python setup.py install
-
-# Test OSQP Python
-cd ${TRAVIS_BUILD_DIR}/interfaces/python
-pytest

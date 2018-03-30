@@ -50,8 +50,6 @@ Windows
 
 #. Install the latest binaries of `CMake <https://cmake.org/download/#latest>`__.
 
-#. Make sure you have the privileges to create symbolic links. See the `git wiki <https://github.com/git-for-windows/git/wiki/Symbolic-Links#creating-symbolic-links>`_ for more details.
-
 
 Build the binaries
 ------------------

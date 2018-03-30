@@ -1,5 +1,6 @@
 Changes since last release
 --------------------------
+* Moved interfaces to separate repositories
 * Fixed [#54](https://github.com/oxfordcontrol/osqp/issues/54).
 
 

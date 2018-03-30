@@ -14,15 +14,5 @@ cmake --build .
 %APPVEYOR_BUILD_FOLDER%\build\out\osqp_tester.exe
 if errorlevel 1 exit /b 1
 
-:: Perform Python tests
-:: -------------------------------------------------------
-:: Install python interface
-cd %APPVEYOR_BUILD_FOLDER%\interfaces\python
-python setup.py install
-
-:: Test python interface
-cd %APPVEYOR_BUILD_FOLDER%\interfaces\python
-pytest
-if errorlevel 1 exit /b 1
 
 @echo off

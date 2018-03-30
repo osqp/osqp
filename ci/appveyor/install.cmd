@@ -1,25 +1,11 @@
 @echo on
 
-:: Force symlinks on linux to work on windows (needed for python interface)
-git config core.symlinks true
-git reset --hard
-
-:: Set config also for future repos
-git config --global core.symlinks true
-
 :: Remove entry with sh.exe from PATH to fix error with MinGW toolchain
 :: (For MinGW make to work correctly sh.exe must NOT be in your path)
 :: http://stackoverflow.com/a/3870338/2288008
 set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
 
 
-REM  IF "%PLATFORM%"=="x86" (
-REM      set MINGW_PATH=C:\MinGW\bin
-REM  ) ELSE (
-REM      :: Install 64bit MinGW from chocolatey
-REM      choco install -y mingw
-REM      set MINGW_PATH=C:\Tools\mingw64\bin
-REM  )
 IF "%PLATFORM%"=="x86" (
     set MINGW_PATH=C:\mingw-w64\i686-6.3.0-posix-dwarf-rt_v5-rev1\mingw32\bin
 ) ELSE (
@@ -29,7 +15,6 @@ set PATH=%MINGW_PATH%;%PATH%
 
 
 :: Activate test environment anaconda
-
 IF "%PLATFORM%"=="x86" (
 	set MINICONDA_PATH=%MINICONDA%
 ) ELSE (
@@ -43,9 +28,7 @@ REM This, together with next line, disables conda auto update (fixes problem wit
 conda config --set auto_update_conda false
 REM conda update -q conda
 conda info -a
-conda install conda-build anaconda-client
-conda create -q -n test-environment python=%PYTHON_VERSION% numpy scipy pytest future
-conda install -c conda-forge twine
+conda create -q -n test-environment python=%PYTHON_VERSION% numpy scipy future
 if errorlevel 1 exit /b 1
 :: NB: Need to run with call otherwise the script hangs
 call activate test-environment

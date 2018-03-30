@@ -7,18 +7,10 @@ sudo: required
 env:
   global:
     - DEPS_DIR="${HOME}/deps"
-    # Testpypi for deployment
-    - TEST_PYPI=false
     # Bintray API key
     - secure: "RgZWa1zTkbXzbF+TW89CDa0OD+hjVrZCSnsG9X3OQRyMRcR8yp61SudC0sopJyAhrXA++6zRENI/T1rTmTr1WYcitF22x3fzVvPL+IQEUCxXPV6GOb3cBB/f3rxkpxeBYXO+tgsH1ad+A9T2oihO0/94fKVpZ5uN5mjJbP4yatF+DyEk5+IlHkp0yrgNxyLYEo7QCaDQJhffBJCa4R3C2sb2oL5S3JV6C1svWeSRVey5lrkNwk+rL1Af0kIEfWCXYBq5dchDLFGgfJlzFTw3i/UmKSqtdkq/Eq3vKpvvqMCHcm9ibcWeJX1iNSXVmblycLitI/K1LjONWvrAioHsv9qRaf+YXtLtyb1WXLmaPdi0P138TIDMHLslFYBq1Sf+1WZJ5U3KItzNXjFw/c2yUIDXMePrXNbHodYwND+3QS+yAoIHXT0buxUjjEbD6g54YfqjsTX8w510l+dy7WZQUM6GJn7byiEDfEEu9RbhLuDRHMG8h2viya9aLgIEAMq92/XbS6v01aX24dPmrlSZEocqwrp8yJxGU4tYk+gj4rnWXYF7XfaOVvINc5RRwejZ1mIkMg1fCEqaBmKQiOwDuypoG0L9kDaX85fGwo7/LIdApsJWZvXewlW8ZQERSqFwXDJpQXjS8iHcCzJUR+WUWkrVMYzzr74Fr+XeKmQeQC4="
-    # Anaconda password
-    - secure: "co+NmbYLEZWq3AgsvgYY1P6WSzsp4/5X1o1R/oXKsaSP7UIkYoI2rwkPgugAPBAt27K/wZUEXlzYGtb9EiW27NhRnnI1H4g3Qe9RRUl6x8Zs/g+KI/s5E68Srb8wdfTXCD2ANguBUniYgMGT4ti3ZzXyVaCrIlMApbrVjBwZ+f3qf7Dv41yj+yzk8AjbjL5cYnczdjmL0dtGVFknoOu50dMN5ZigTdD6Fn+sY7Xt3HBMCSJuRAKP4s7rEOMa1qWhchFX1sAiM/+tWr4vewNpaKkQE4VefnZ2TvZZPGhfd+gZ7VR/eDDKIw3G0MEzGNO/wjsgjr86S44QyUGY4ZNuP3bmFAlFumk0j45eFWznks75EIkQGEXZudZFaDIgderhU2NYc5weQI/4eaouDeH8vZavbwiazLfoj4G6RbrKKx8gr4TNp5AehCrau6YzgLtZ3reoaftLfvYapc3Y5o5eXuPFqBuOnaFwkhV4S5tazxb7U9h9KzK5Jg0X5CBadJfzJEraayutv+GZtnbFBEZ9e25GiB9CFvF3TMRIYm4lfs1UlJXFiNpRmKgOTsmk4JcIK565JvEz44x4VxR9moBVIsycyfD2C36DCtmnUGdDhSkg/ziWIhxmfjWYU2GtloDw3Q7D9Yj484abyyaBTzKk/tw/RQn6JdfxKdwNEBAV5xs="
-    # Pypi password
-    - secure: "LaVpegJkYZzkEohmx0gsA/RlVxb9Wa78EwAPJ7c58bo6eZgD1IV5tbERTyM9Lmdotp6MZuJZ/IQc4wQnCE6qx0jJKP+HVgNbxU9WgtTuMjGvDS8YodM2s+ub2BtZHGwq+I67Veer4dW0NrSVwZRReD0zcI/q6u2q+rGTYvO2VPbE8T15QJFLpaqe12it+GW5EvAhnANHdaRfE4OIdJ+rLFxCSK9j35cAL9opoljJs+g+hHQ9hE6uTvX34Gz3mhNsFu1ofdInN1Ubqa8bkBZ9XjeZKUWG+Azs0d9jAolzLlan2//FVa+ny6WlTHkqiBjSEy2bvLWMBvf+XYVUWFW4O/QcLeRT4359v27e+Wa89qhQ/hxt3pRieB2xaaYHmwpAM539xyDUMLUV+0DZX4rBfvuU1CYCt9YsDWRqBP6lgs++3ZmC/U4tnR0MkzpfiJwO0/8U1jL1InR8zZN+peObxY6EXE01SZSYc9Kw0DV8YnpZL9EUEyU6Aavq6eVtvqUDXyRrI8awAr1sc/OgsNwRzKkBLNh3arBhE2rUGkD5fQVyx2mecLI5fNmRvfavSHmRBfc4d+xIpSXDLre33glZuxHCT+NA0U/8uC2xaXG0WTo1L0pch0QQzVv10zD+8ZFeE55b1qhXHMktXU/BsdZAR0piEyUReJ+HlG9c0QKupYQ="
-  matrix:
-    - PYTHON_VERSION="2.7"
-    - PYTHON_VERSION="3.5"
     - PYTHON_VERSION="3.6"
+    
 install: bash ci/travis/install.sh
 script: bash ci/travis/script.sh
 
