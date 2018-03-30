@@ -47,8 +47,8 @@ You can now build the interface by running inside Matlab
 
 .. code:: matlab
 
-   !git clone https://github.com/oxfordcontrol/osqp
-   cd osqp/interfaces/matlab
+   !git clone --recurse-submodules https://github.com/oxfordcontrol/osqp-matlab
+   cd osqp-matlab
    make_osqp
 
 

@@ -58,24 +58,13 @@ Run the following commands from the terminal
 
 #. Clone the repository, create :code:`build` directory and change directory
     
-    - On Linux and Mac OS run
-    
-        .. code:: bash
+    .. code:: bash
 
-            git clone https://github.com/oxfordcontrol/osqp
-            cd osqp
-            mkdir build
-            cd build
+	git clone https://github.com/oxfordcontrol/osqp
+	cd osqp
+	mkdir build
+	cd build
        
-    -  On Windows run
-    
-        .. code:: bash
-
-            git clone -c core.symlinks=true https://github.com/oxfordcontrol/osqp
-            cd osqp
-            mkdir build
-            cd build
-
 
 #. Create Makefiles
 

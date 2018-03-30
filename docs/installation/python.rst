@@ -39,6 +39,6 @@ Now you are ready to build OSQP python interface from sources. Run the following
 
 .. code:: bash
 
-   git clone https://github.com/oxfordcontrol/osqp
-   cd osqp/interfaces/python
+   git clone --recurse-submodules https://github.com/oxfordcontrol/osqp-python
+   cd osqp-python
    python setup.py install
