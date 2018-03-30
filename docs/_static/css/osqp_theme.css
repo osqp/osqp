@@ -186,5 +186,6 @@ p.breathe-sectiondef-title.rubric {
 
 /* Remove line block indentation */
 .rst-content .line-block {
-    margin-left: inherit;
+    margin-bottom: 0px;
+    margin-left: 0px;
 }
