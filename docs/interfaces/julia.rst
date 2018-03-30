@@ -1,3 +1,5 @@
+.. _julia_interface:
+
 Julia
 ======
 

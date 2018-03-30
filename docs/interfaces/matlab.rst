@@ -1,3 +1,5 @@
+.. _matlab_interface:
+
 Matlab
 ======
 
