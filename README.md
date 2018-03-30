@@ -46,19 +46,6 @@ If you are using OSQP for your work, we encourage you to
 **We are looking forward to hearing your success stories with OSQP!** Please [share them with us](mailto:bartolomeo.stellato@gmail.com).
 
 
-
-## Credits
-
-The following people have been involved in the development of OSQP:
--  [Bartolomeo Stellato](https://bstellato.github.io/) (University of Oxford): main development
--  [Goran Banjac](http://users.ox.ac.uk/~sedm4978/) (University of Oxford): main development
--  [Nicholas Moehle](http://web.stanford.edu/~moehle/) (Stanford University): methods, maths, and code generation
--  [Paul Goulart](http://users.ox.ac.uk/~engs1373/) (University of Oxford): methods, maths, and Matlab interface
--  [Alberto Bemporad](http://cse.lab.imtlucca.it/~bemporad/) (IMT Lucca): methods and maths
--  [Nick Gould](http://www.numerical.rl.ac.uk/people/nimg/nimg.html) (Rutherford Appleton Laboratory): Fortran and CUTEst interfaces
--  [Stephen Boyd](http://web.stanford.edu/~boyd/) (Stanford University): methods and maths
-
-
 ## Bug reports and support
 
 Please report any issues via the [Github issue tracker](https://github.com/oxfordcontrol/osqp/issues). All types of issues are welcome including bug reports, documentation typos, feature requests and so on.
