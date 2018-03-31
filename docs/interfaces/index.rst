@@ -20,8 +20,8 @@ Interfaces
 +------------------------------------+-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------+
 | `Rust <https://docs.rs/osqp/>`_    | | `Ed Barnard <eabarnard@gmail.com>`_                             | `github.com/oxfordcontrol/osqp.rs <https://github.com/oxfordcontrol/osqp.rs>`_                             |
 +------------------------------------+-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------+
-| :ref:`Fortran <fortran_interface>` | | `Nick Gould <nick.gould@stfc.ac.uk>`_                           | `github.com/oxfordcontrol/osqp <https://github.com/oxfordcontrol/osqp>`_                                   |
-| (experimental)                     | | `Bartolomeo Stellato <bartolomeo.stellato@gmail.com>`_          |                                                                                                            |
+| :ref:`Fortran <fortran_interface>` | | `Nick Gould <nick.gould@stfc.ac.uk>`_                           | `github.com/oxfordcontrol/osqp-fortran <https://github.com/oxfordcontrol/osqp-fortran>`_                   |
+|                                    | | `Bartolomeo Stellato <bartolomeo.stellato@gmail.com>`_          |                                                                                                            |
 |                                    | | `Paul Goulart <paul.goulart@eng.ox.ac.uk>`_                     |                                                                                                            |
 +------------------------------------+-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------+
 | :ref:`Cutest <cutest_interface>`   | | `Nick Gould <nick.gould@stfc.ac.uk>`_                           | `github.com/ralna/CUTEst <https://github.com/ralna/CUTEst/tree/master/src/osqp>`_                          |
