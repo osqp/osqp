@@ -227,10 +227,7 @@ if (MATLAB)
     include_directories(${Matlab_INCLUDE_DIRS})
 
     # Pass MATLAB flag to C compiler
-    # This seems not to be necessary since -DMATLAB is only required when applying
-    # mex <args> to the main matlab mex file, which is not built via cmake anyway.   
-    # Commented out because it causes problems with pre/post R2018a array handling
-    # add_definitions(-DMATLAB)
+    add_definitions(-DMATLAB)
 
     if (UNITTESTS)
         # Disable unittests
