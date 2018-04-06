@@ -237,7 +237,7 @@ if (MATLAB)
     # so that mxGetPr will work correctly
     add_definitions(-DMATLAB_MEXSRC_RELEASE=R2017b)
 
-    message(STATUS "Using Matlab pre-2018a API for mexGetPr friendliness")
+    message(STATUS "Using Matlab pre-2018a API for mxGetPr compatibility")
 
     if (UNITTESTS)
         # Disable unittests
