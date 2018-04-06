@@ -22,7 +22,7 @@ void endInterruptListener(void) {
 }
 
 int isInterrupted(void) {
-  return false;//utIsInterruptPending();
+  return utIsInterruptPending();
 }
 
 #elif defined IS_WINDOWS
