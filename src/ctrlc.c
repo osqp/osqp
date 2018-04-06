@@ -12,16 +12,17 @@
 #if defined MATLAB
 
 static int istate;
+
 void startInterruptListener(void) {
-  istate = SetInterruptEnabled(1);
+  istate = utSetInterruptEnabled(1);
 }
 
 void endInterruptListener(void) {
-  SetInterruptEnabled(istate);
+  utSetInterruptEnabled(istate);
 }
 
 int isInterrupted(void) {
-  return utIsInterruptPending();
+  return false;//utIsInterruptPending();
 }
 
 #elif defined IS_WINDOWS
