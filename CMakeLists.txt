@@ -218,7 +218,9 @@ endif (PYTHON)
 # and set some options
 # -----------------------------------------------------------------
 if (MATLAB)
+
     find_package(Matlab)
+
     if (NOT Matlab_FOUND)
         message( FATAL_ERROR "You need Matlab libraries to build the Matlab interface" )
     endif (NOT Matlab_FOUND)
@@ -226,8 +228,16 @@ if (MATLAB)
     # Include directories for Python headers
     include_directories(${Matlab_INCLUDE_DIRS})
 
+    message(STATUS "Matlab root is " ${Matlab_ROOT_DIR})
+
     # Pass MATLAB flag to C compiler
     add_definitions(-DMATLAB)
+
+    # Insist on the pre 2018 complex data API
+    # so that mxGetPr will work correctly
+    add_definitions(-DMATLAB_MEXSRC_RELEASE=R2017b)
+
+    message(STATUS "Using Matlab pre-2018a API for mexGetPr friendliness")
 
     if (UNITTESTS)
         # Disable unittests
@@ -252,7 +262,7 @@ add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
 target_include_directories(osqpstatic PRIVATE ${linsys_solvers_includes})
 
 # Declare include directories for the cmake exported target
-target_include_directories(osqpstatic 
+target_include_directories(osqpstatic
                            PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
                                   "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
@@ -267,7 +277,7 @@ install(TARGETS osqpstatic
         LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
         RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
-        
+
 # Install Headers
 # ----------------------------------------------
 
@@ -290,16 +300,16 @@ if (NOT PYTHON AND NOT MATLAB)
     # Create osqp shared library
     # NB: Add all the linear system solvers here
     add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
-    
+
     # Include directories for linear system solvers
     target_include_directories(osqp PRIVATE ${linsys_solvers_includes})
 
     # Declare include directories for the cmake exported target
-    target_include_directories(osqp 
+    target_include_directories(osqp
                                PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
                                       "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
-    # Install osqp shared library 
+    # Install osqp shared library
     install(TARGETS osqp
             EXPORT  ${PROJECT_NAME}
             LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
@@ -312,7 +322,7 @@ if (NOT PYTHON AND NOT MATLAB)
 
 endif (NOT PYTHON AND NOT MATLAB)
 
-# Create CMake packages for the build directory 
+# Create CMake packages for the build directory
 # ----------------------------------------------
 include(CMakePackageConfigHelpers)
 
@@ -325,12 +335,12 @@ if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake)
 endif()
 
 
-# Create CMake packages for the install directory 
+# Create CMake packages for the install directory
 # ----------------------------------------------
 
 set(ConfigPackageLocation lib/cmake/osqp)
 
-install(EXPORT ${PROJECT_NAME} 
+install(EXPORT ${PROJECT_NAME}
         FILE osqp-targets.cmake
         NAMESPACE osqp::
         DESTINATION ${ConfigPackageLocation})
