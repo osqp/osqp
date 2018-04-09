@@ -79,8 +79,10 @@ struct SuiteSparse_config_struct
     void *(*malloc_func) (size_t) ;             /* pointer to malloc */
     void *(*realloc_func) (void *, size_t) ;    /* pointer to realloc */
     void (*free_func) (void *) ;                /* pointer to free */
-#ifdef PYTHON
+#if defined PYTHON
     void (*printf_func) (const char *, ...) ;    /* pointer to printf (in Python it returns void)*/
+#elif defined R_LANG
+    void (*printf_func) (const char *, ...) ;    /* pointer to printf (in R it returns void)*/
 #else
     int (*printf_func) (const char *, ...) ;    /* pointer to printf */
 #endif

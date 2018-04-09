@@ -223,7 +223,7 @@ if (MATLAB)
         message( FATAL_ERROR "You need Matlab libraries to build the Matlab interface" )
     endif (NOT Matlab_FOUND)
 
-    # Include directories for Python headers
+    # Include directories for Matlab headers
     include_directories(${Matlab_INCLUDE_DIRS})
 
     # Pass MATLAB flag to C compiler
@@ -237,6 +237,35 @@ if (MATLAB)
 
 endif (MATLAB)
 
+# if we are building the R interface, let's look for R
+# and set some options
+# -----------------------------------------------------------------
+if (R_LANG)
+
+    message(STATUS "We are building the R interface")
+
+    # Look for R libraries
+    find_package(R)
+
+    if (NOT R_FOUND)
+            message( FATAL_ERROR "You need R libraries to build the R interface" )
+    endif (NOT R_FOUND)
+
+    message(STATUS "Found R includes at: " ${R_INCLUDE_DIRS})
+
+    # Include directories for R headers
+    include_directories(${R_INCLUDE_DIRS})
+
+    # Pass R_LANG flag to C compiler
+    add_definitions(-DR_LANG)
+
+    if (UNITTESTS)
+        # Disable unittests
+        message(STATUS "Disabling UNITTESTS because we are building the R interface")
+        set(UNITTESTS OFF)
+    endif (UNITTESTS)
+
+endif (R_LANG)
 
 
 # Create Static Library
@@ -252,7 +281,7 @@ add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
 target_include_directories(osqpstatic PRIVATE ${linsys_solvers_includes})
 
 # Declare include directories for the cmake exported target
-target_include_directories(osqpstatic 
+target_include_directories(osqpstatic
                            PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
                                   "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
@@ -267,7 +296,7 @@ install(TARGETS osqpstatic
         LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
         RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
-        
+
 # Install Headers
 # ----------------------------------------------
 
@@ -283,23 +312,23 @@ if (PYTHON)
 target_link_libraries (osqpstatic ${PYTHON_LIBRARIES})
 endif (PYTHON)
 
-# If we are building Python or Matlab interface:
+# If we are building Python/Matlab/R interface:
 #   - do not build shared library
 #   - do not build demo
-if (NOT PYTHON AND NOT MATLAB)
+if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG)
     # Create osqp shared library
     # NB: Add all the linear system solvers here
     add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
-    
+
     # Include directories for linear system solvers
     target_include_directories(osqp PRIVATE ${linsys_solvers_includes})
 
     # Declare include directories for the cmake exported target
-    target_include_directories(osqp 
+    target_include_directories(osqp
                                PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
                                       "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
-    # Install osqp shared library 
+    # Install osqp shared library
     install(TARGETS osqp
             EXPORT  ${PROJECT_NAME}
             LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
@@ -310,9 +339,9 @@ if (NOT PYTHON AND NOT MATLAB)
     add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
     target_link_libraries (osqp_demo osqpstatic)
 
-endif (NOT PYTHON AND NOT MATLAB)
+endif (NOT PYTHON AND NOT MATLAB AND NOT R_LANG)
 
-# Create CMake packages for the build directory 
+# Create CMake packages for the build directory
 # ----------------------------------------------
 include(CMakePackageConfigHelpers)
 
@@ -325,12 +354,12 @@ if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake)
 endif()
 
 
-# Create CMake packages for the install directory 
+# Create CMake packages for the install directory
 # ----------------------------------------------
 
 set(ConfigPackageLocation lib/cmake/osqp)
 
-install(EXPORT ${PROJECT_NAME} 
+install(EXPORT ${PROJECT_NAME}
         FILE osqp-targets.cmake
         NAMESPACE osqp::
         DESTINATION ${ConfigPackageLocation})
