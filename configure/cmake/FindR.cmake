@@ -17,10 +17,10 @@ if(R_EXEC)
 
   set(R_FOUND TRUE)
 
-  execute_process(WORKING_DIRECTORY .
-                  COMMAND ${R_EXEC} RHOME
-                  OUTPUT_VARIABLE R_ROOT_DIR
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+  EXECUTE_PROCESS(
+  COMMAND ${R_EXEC} "--slave" "--no-save" "-e" "cat(R.home())"
+  OUTPUT_VARIABLE R_ROOT_DIR)
+
 
   find_path(R_INCLUDE_DIRS R.h
             HINTS ${R_ROOT_DIR}

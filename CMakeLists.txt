@@ -251,6 +251,7 @@ if (R_LANG)
             message( FATAL_ERROR "You need R libraries to build the R interface" )
     endif (NOT R_FOUND)
 
+    message(STATUS "R exec is: " ${R_EXEC})
     message(STATUS "R root dir is: " ${R_ROOT_DIR})
     message(STATUS "R includes are in: " ${R_INCLUDE_DIRS})
 
