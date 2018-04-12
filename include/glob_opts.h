@@ -9,32 +9,8 @@ extern "C" {
    Define OSQP compiler flags
  */
 
-// Operative system
-#cmakedefine IS_LINUX
-#cmakedefine IS_MAC
-#cmakedefine IS_WINDOWS
-
-// EMBEDDED
-#cmakedefine EMBEDDED (@EMBEDDED@)
-
-// PRINTING
-#cmakedefine PRINTING
-
-// PROFILING
-#cmakedefine PROFILING
-
-// CTRLC
-#cmakedefine CTRLC
-
-// DFLOAT
-#cmakedefine DFLOAT
-
-// DLONG
-#cmakedefine DLONG
-
-// ENABLE_MKL_PARDISO
-#cmakedefine ENABLE_MKL_PARDISO
-
+// cmake generated compiler flags
+#include osqp_configure.h
 
 /* DATA CUSTOMIZATIONS (depending on memory manager)-----------------------   */
 
