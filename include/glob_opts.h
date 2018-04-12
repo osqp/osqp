@@ -10,7 +10,7 @@ extern "C" {
  */
 
 // cmake generated compiler flags
-#include osqp_configure.h
+#include "osqp_configure.h"
 
 /* DATA CUSTOMIZATIONS (depending on memory manager)-----------------------   */
 
