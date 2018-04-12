@@ -18,7 +18,7 @@ if(R_EXEC)
   set(R_FOUND TRUE)
 
   EXECUTE_PROCESS(
-  COMMAND ${R_EXEC} "--slave" "--no-save" "-e" "cat(R.home())"
+  COMMAND "${R_EXEC}" "--slave" "--no-save" "-e" "cat(R.home())"
   OUTPUT_VARIABLE R_ROOT_DIR)
 
 
