@@ -17,7 +17,8 @@ if(R_EXEC)
 
   set(R_FOUND TRUE)
 
-  execute_process(COMMAND ${R_EXEC} RHOME
+  execute_process(WORKING_DIRECTORY .
+                  COMMAND ${R_EXEC} RHOME
                   OUTPUT_VARIABLE R_ROOT_DIR
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
 

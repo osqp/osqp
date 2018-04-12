@@ -251,7 +251,8 @@ if (R_LANG)
             message( FATAL_ERROR "You need R libraries to build the R interface" )
     endif (NOT R_FOUND)
 
-    message(STATUS "Found R includes at: " ${R_INCLUDE_DIRS})
+    message(STATUS "R root dir is: " ${R_ROOT_DIR})
+    message(STATUS "R includes are in: " ${R_INCLUDE_DIRS})
 
     # Include directories for R headers
     include_directories(${R_INCLUDE_DIRS})
