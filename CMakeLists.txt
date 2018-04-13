@@ -148,6 +148,7 @@ if(NOT DEFINED EMBEDDED)
         include/lin_alg.h
         include/lin_sys.h
         include/osqp.h
+        include/osqp_configure.h
         include/types.h
         include/polish.h
         include/proj.h
@@ -177,6 +178,7 @@ else()
         include/lin_sys.h
         include/kkt.h
         include/osqp.h
+        include/osqp_configure.h
         include/types.h
         include/proj.h
         include/scaling.h
