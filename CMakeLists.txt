@@ -94,7 +94,8 @@ message(STATUS "MKL Pardiso: ${ENABLE_MKL_PARDISO}")
 # Generate header file with the global options
 # ---------------------------------------------
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/include/osqp_configure.h)
+               ${CMAKE_CURRENT_SOURCE_DIR}/include/osqp_configure.h
+               NEWLINE_STYLE LF)
 
 
 # Set Compiler flags
