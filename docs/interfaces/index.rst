@@ -18,6 +18,9 @@ Interfaces
 +------------------------------------+-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------+
 | :ref:`Julia <julia_interface>`     | | `Bartolomeo Stellato <bartolomeo.stellato@gmail.com>`_          | `github.com/oxfordcontrol/OSQP.jl <https://github.com/oxfordcontrol/OSQP.jl>`_                             |
 +------------------------------------+-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------+
+| :ref:`R <R_interface>`             | | `Paul Goulart <paul.goulart@eng.ox.ac.uk>`_                     | `github.com/oxfordcontrol/osqp-r <https://github.com/oxfordcontrol/osqp-r>`_                               |
+|                                    | | `Eric Anderson <anderic1@gmx.com>`_                             |                                                                                                            |
++------------------------------------+-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------+
 | `Rust <https://docs.rs/osqp/>`_    | | `Ed Barnard <eabarnard@gmail.com>`_                             | `github.com/oxfordcontrol/osqp.rs <https://github.com/oxfordcontrol/osqp.rs>`_                             |
 +------------------------------------+-------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------+
 | :ref:`Fortran <fortran_interface>` | | `Nick Gould <nick.gould@stfc.ac.uk>`_                           | `github.com/oxfordcontrol/osqp-fortran <https://github.com/oxfordcontrol/osqp-fortran>`_                   |
@@ -38,6 +41,7 @@ Interfaces
    python.rst
    julia.rst
    matlab.rst
+   r.rst
    fortran.rst
    cutest.rst
    solver_settings.rst
