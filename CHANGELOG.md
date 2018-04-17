@@ -2,7 +2,8 @@ Changes since last release
 --------------------------
 * Moved interfaces to separate repositories
 * Fixed [#54](https://github.com/oxfordcontrol/osqp/issues/54).
-
+* Changes to support Matlab 2018a
+* Added support for new interface in R
 
 Version 0.3.0 (5 March 2018)
 ----------------------------
