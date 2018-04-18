@@ -14,8 +14,8 @@ extern "C" {
 # if defined MATLAB
 
 /* No header file available here; define the prototypes ourselves */
-int IsInterruptPending(void);
-int SetInterruptEnabled(int x);
+bool utIsInterruptPending(void);
+bool utSetInterruptEnabled(bool);
 
 # elif defined IS_WINDOWS
 
