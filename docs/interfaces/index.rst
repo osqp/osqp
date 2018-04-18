@@ -39,6 +39,7 @@ Interfaces
    julia.rst
    matlab.rst
    fortran.rst
+   rust.rst
    cutest.rst
    solver_settings.rst
    linear_systems_solvers.rst
