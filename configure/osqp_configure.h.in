@@ -5,30 +5,30 @@
 extern "C" {
 # endif /* ifdef __cplusplus */
 
-// Operative system
+/* Operative system */
 #cmakedefine IS_LINUX
 #cmakedefine IS_MAC
 #cmakedefine IS_WINDOWS
 
-// EMBEDDED
+/* EMBEDDED */
 #cmakedefine EMBEDDED (@EMBEDDED@)
 
-// PRINTING
+/* PRINTING */
 #cmakedefine PRINTING
 
-// PROFILING
+/* PROFILING */
 #cmakedefine PROFILING
 
-// CTRLC
+/* CTRLC */
 #cmakedefine CTRLC
 
-// DFLOAT
+/* DFLOAT */
 #cmakedefine DFLOAT
 
-// DLONG
+/* DLONG */
 #cmakedefine DLONG
 
-// ENABLE_MKL_PARDISO
+/* ENABLE_MKL_PARDISO */
 #cmakedefine ENABLE_MKL_PARDISO
 
 
