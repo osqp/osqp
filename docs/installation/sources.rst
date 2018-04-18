@@ -105,6 +105,8 @@ Once the sources are built, the generated static :code:`build/out/libosqpstatic.
 Install the binaries
 --------------------
 
+
+
 To install the generated libraries and headers to a system-wide location compatible with `GNU standards <http://www.gnu.org/prep/standards/html_node/Directory-Variables.html>`_ it is just necessary to run
 
 .. code:: bash
@@ -114,6 +116,9 @@ To install the generated libraries and headers to a system-wide location compati
 This code installs the libraries in :code:`libdir` and the headers into :code:`includedir/osqp`. For mode details see the defaults folders on the `GNU standards <http://www.gnu.org/prep/standards/html_node/Directory-Variables.html>`_ website.
 To change the installation prefix, in the "Create Makefiles" step above, you need to specify the destination folder as :code:`cmake -DCMAKE_INSTALL_PREFIX:PATH=myfolder ..`.
 
+.. note:: This step requires write permissions in the destination
+	  folders. You might be able to gain access using the
+	  :code:`sudo` command.
 
 We provided also an uninstall routine to remove the copied files by running 
 
