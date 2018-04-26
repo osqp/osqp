@@ -91,6 +91,13 @@ void print_footer(OSQPInfo *info,
 // Windows
 #  ifdef IS_WINDOWS
 
+  // Some R packages clash with elements
+  // of the windows.h header, so use a
+  // slimmer version for conflict avoidance
+  # ifdef R_LANG
+    #define NOGDI
+  # endif
+
 #   include <windows.h>
 
 struct OSQP_TIMER {
