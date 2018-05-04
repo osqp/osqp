@@ -743,8 +743,7 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
 /************************
 * Update problem data  *
 ************************/
-c_int osqp_update_lin_cost(OSQPWorkspace *work,
-                           const c_float *q_new) {
+c_int osqp_update_lin_cost(OSQPWorkspace *work, const c_float *q_new) {
   // Replace q by the new vector
   prea_vec_copy(q_new, work->data->q, work->data->n);
 
