@@ -743,7 +743,7 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
 /************************
 * Update problem data  *
 ************************/
-c_int osqp_update_lin_cost(OSQPWorkspace *work, c_float *q_new) {
+c_int osqp_update_lin_cost(OSQPWorkspace *work, const c_float *q_new) {
   // Replace q by the new vector
   prea_vec_copy(q_new, work->data->q, work->data->n);
 
@@ -759,7 +759,9 @@ c_int osqp_update_lin_cost(OSQPWorkspace *work, c_float *q_new) {
   return 0;
 }
 
-c_int osqp_update_bounds(OSQPWorkspace *work, c_float *l_new, c_float *u_new) {
+c_int osqp_update_bounds(OSQPWorkspace *work,
+                         const c_float *l_new,
+                         const c_float *u_new) {
   c_int i, exitflag = 0;
 
   // Check if lower bound is smaller than upper bound
@@ -794,7 +796,7 @@ c_int osqp_update_bounds(OSQPWorkspace *work, c_float *l_new, c_float *u_new) {
   return exitflag;
 }
 
-c_int osqp_update_lower_bound(OSQPWorkspace *work, c_float *l_new) {
+c_int osqp_update_lower_bound(OSQPWorkspace *work, const c_float *l_new) {
   c_int i, exitflag = 0;
 
   // Replace l by the new vector
@@ -827,7 +829,7 @@ c_int osqp_update_lower_bound(OSQPWorkspace *work, c_float *l_new) {
   return exitflag;
 }
 
-c_int osqp_update_upper_bound(OSQPWorkspace *work, c_float *u_new) {
+c_int osqp_update_upper_bound(OSQPWorkspace *work, const c_float *u_new) {
   c_int i, exitflag = 0;
 
   // Replace u by the new vector
@@ -860,7 +862,7 @@ c_int osqp_update_upper_bound(OSQPWorkspace *work, c_float *u_new) {
   return exitflag;
 }
 
-c_int osqp_warm_start(OSQPWorkspace *work, c_float *x, c_float *y) {
+c_int osqp_warm_start(OSQPWorkspace *work, const c_float *x, const c_float *y) {
   // Update warm_start setting to true
   if (!work->settings->warm_start) work->settings->warm_start = 1;
 
@@ -881,7 +883,7 @@ c_int osqp_warm_start(OSQPWorkspace *work, c_float *x, c_float *y) {
   return 0;
 }
 
-c_int osqp_warm_start_x(OSQPWorkspace *work, c_float *x) {
+c_int osqp_warm_start_x(OSQPWorkspace *work, const c_float *x) {
   // Update warm_start setting to true
   if (!work->settings->warm_start) work->settings->warm_start = 1;
 
@@ -902,7 +904,7 @@ c_int osqp_warm_start_x(OSQPWorkspace *work, c_float *x) {
   return 0;
 }
 
-c_int osqp_warm_start_y(OSQPWorkspace *work, c_float *y) {
+c_int osqp_warm_start_y(OSQPWorkspace *work, const c_float *y) {
   // Update warm_start setting to true
   if (!work->settings->warm_start) work->settings->warm_start = 1;
 
@@ -941,8 +943,8 @@ c_int osqp_warm_start_y(OSQPWorkspace *work, c_float *y) {
  *                                 <0: error in update_matrices()
  */
 c_int osqp_update_P(OSQPWorkspace *work,
-                    c_float       *Px_new,
-                    c_int         *Px_new_idx,
+                    const c_float *Px_new,
+                    const c_int   *Px_new_idx,
                     c_int          P_new_n) {
   c_int i;        // For indexing
   c_int exitflag; // Exit flag
@@ -1021,8 +1023,8 @@ c_int osqp_update_P(OSQPWorkspace *work,
  *                                 <0: error in update_matrices()
  */
 c_int osqp_update_A(OSQPWorkspace *work,
-                    c_float       *Ax_new,
-                    c_int         *Ax_new_idx,
+                    const c_float *Ax_new,
+                    const c_int   *Ax_new_idx,
                     c_int          A_new_n) {
   c_int i;        // For indexing
   c_int exitflag; // Exit flag
@@ -1108,11 +1110,11 @@ c_int osqp_update_A(OSQPWorkspace *work,
  *                                 <0: error in update_matrices()
  */
 c_int osqp_update_P_A(OSQPWorkspace *work,
-                      c_float       *Px_new,
-                      c_int         *Px_new_idx,
+                      const c_float *Px_new,
+                      const c_int   *Px_new_idx,
                       c_int          P_new_n,
-                      c_float       *Ax_new,
-                      c_int         *Ax_new_idx,
+                      const c_float *Ax_new,
+                      const c_int   *Ax_new_idx,
                       c_int          A_new_n) {
   c_int i;          // For indexing
   c_int exitflag;   // Exit flag
