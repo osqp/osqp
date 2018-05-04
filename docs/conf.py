@@ -35,8 +35,7 @@ __version__ = "0.3.0"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.todo', 'sphinx.ext.mathjax', 'breathe',
-              'sphinxcontrib.email']
+extensions = ['sphinx.ext.todo', 'sphinx.ext.mathjax', 'breathe']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

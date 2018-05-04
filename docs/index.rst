@@ -24,7 +24,7 @@ If you are using OSQP for your work, we encourage you to
 * :ref:`Cite the related papers <citing>`
 * Put a star on `GitHub <https://github.com/oxfordcontrol/osqp>`_
 
-**We are looking forward to hearing your success stories with OSQP!** Please :email:`share them with us <bartolomeo.stellato@gmail.com>`.
+**We are looking forward to hearing your success stories with OSQP!** Please `share them with us <bartolomeo.stellato@gmail.com>`_.
 
 .. rubric:: Features
 
@@ -74,7 +74,7 @@ The following people have been involved in the development of OSQP:
 Interfaces development
 
 * `Nick Gould <http://www.numerical.rl.ac.uk/people/nimg/nimg.html>`_ (Rutherford Appleton Laboratory): Fortran and CUTEst interfaces
-* :email:`Ed Barnard <eabarnard@gmail.com>` (University of Oxford): Rust interface
+* `Ed Barnard <eabarnard@gmail.com>`_ (University of Oxford): Rust interface
 
 
 .. rubric:: Bug reports and support
