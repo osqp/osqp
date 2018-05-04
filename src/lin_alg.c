@@ -115,7 +115,7 @@ c_float* vec_copy(c_float *a, c_int n) {
 #endif // end EMBEDDED
 
 
-void prea_int_vec_copy(c_int *a, c_int *b, c_int n) {
+void prea_int_vec_copy(const c_int *a, c_int *b, c_int n) {
   c_int i;
 
   for (i = 0; i < n; i++) {
@@ -123,7 +123,7 @@ void prea_int_vec_copy(c_int *a, c_int *b, c_int n) {
   }
 }
 
-void prea_vec_copy(c_float *a, c_float *b, c_int n) {
+void prea_vec_copy(const c_float *a, c_float *b, c_int n) {
   c_int i;
 
   for (i = 0; i < n; i++) {

@@ -112,7 +112,7 @@ c_int osqp_cleanup(OSQPWorkspace *work);
  * @return       Exitflag for errors and warnings
  */
 c_int osqp_update_lin_cost(OSQPWorkspace *work,
-                           c_float       *q_new);
+                           const c_float *q_new);
 
 
 /**
@@ -123,8 +123,8 @@ c_int osqp_update_lin_cost(OSQPWorkspace *work,
  * @return        Exitflag: 1 if new lower bound is not <= than new upper bound
  */
 c_int osqp_update_bounds(OSQPWorkspace *work,
-                         c_float       *l_new,
-                         c_float       *u_new);
+                         const c_float *l_new,
+                         const c_float *u_new);
 
 
 /**
@@ -134,7 +134,7 @@ c_int osqp_update_bounds(OSQPWorkspace *work,
  * @return        Exitflag: 1 if new lower bound is not <= than upper bound
  */
 c_int osqp_update_lower_bound(OSQPWorkspace *work,
-                              c_float       *l_new);
+                              const c_float *l_new);
 
 
 /**
@@ -144,7 +144,7 @@ c_int osqp_update_lower_bound(OSQPWorkspace *work,
  * @return        Exitflag: 1 if new upper bound is not >= than lower bound
  */
 c_int osqp_update_upper_bound(OSQPWorkspace *work,
-                              c_float       *u_new);
+                              const c_float *u_new);
 
 
 /**
@@ -155,8 +155,8 @@ c_int osqp_update_upper_bound(OSQPWorkspace *work,
  * @return      Exitflag
  */
 c_int osqp_warm_start(OSQPWorkspace *work,
-                      c_float       *x,
-                      c_float       *y);
+                      const c_float *x,
+                      const c_float *y);
 
 
 /**
@@ -166,7 +166,7 @@ c_int osqp_warm_start(OSQPWorkspace *work,
  * @return      Exitflag
  */
 c_int osqp_warm_start_x(OSQPWorkspace *work,
-                        c_float       *x);
+                        const c_float *x);
 
 
 /**
@@ -176,7 +176,7 @@ c_int osqp_warm_start_x(OSQPWorkspace *work,
  * @return      Exitflag
  */
 c_int osqp_warm_start_y(OSQPWorkspace *work,
-                        c_float       *y);
+                        const c_float *y);
 
 
 # if EMBEDDED != 1
@@ -198,8 +198,8 @@ c_int osqp_warm_start_y(OSQPWorkspace *work,
  *                                 <0: error in the update
  */
 c_int osqp_update_P(OSQPWorkspace *work,
-                    c_float       *Px_new,
-                    c_int         *Px_new_idx,
+                    const c_float *Px_new,
+                    const c_int   *Px_new_idx,
                     c_int          P_new_n);
 
 
@@ -219,8 +219,8 @@ c_int osqp_update_P(OSQPWorkspace *work,
  *                                 <0: error in the update
  */
 c_int osqp_update_A(OSQPWorkspace *work,
-                    c_float       *Ax_new,
-                    c_int         *Ax_new_idx,
+                    const c_float *Ax_new,
+                    const c_int   *Ax_new_idx,
                     c_int          A_new_n);
 
 
@@ -248,11 +248,11 @@ c_int osqp_update_A(OSQPWorkspace *work,
  *                                 <0: error in the update
  */
 c_int osqp_update_P_A(OSQPWorkspace *work,
-                      c_float       *Px_new,
-                      c_int         *Px_new_idx,
+                      const c_float *Px_new,
+                      const c_int   *Px_new_idx,
                       c_int          P_new_n,
-                      c_float       *Ax_new,
-                      c_int         *Ax_new_idx,
+                      const c_float *Ax_new,
+                      const c_int   *Ax_new_idx,
                       c_int          A_new_n);
 
 /**

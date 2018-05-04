@@ -19,14 +19,14 @@ c_float* vec_copy(c_float *a,
 # endif // ifndef EMBEDDED
 
 /* copy vector a into preallocated vector b */
-void prea_vec_copy(c_float *a,
-                   c_float *b,
-                   c_int    n);
+void prea_vec_copy(const c_float *a,
+                   c_float       *b,
+                   c_int          n);
 
 /* copy integer vector a into preallocated vector b */
-void prea_int_vec_copy(c_int *a,
-                       c_int *b,
-                       c_int  n);
+void prea_int_vec_copy(const c_int *a,
+                       c_int       *b,
+                       c_int        n);
 
 /* set float vector to scalar */
 void vec_set_scalar(c_float *a,
