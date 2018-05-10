@@ -227,7 +227,7 @@ Matlab
 
 
 
-YAMLIP
+YALMIP
 ------
 
 .. code:: matlab
