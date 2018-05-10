@@ -15,9 +15,26 @@ extern "C" {
 #  include "cs.h"
 # endif // ifndef EMBEDDED
 
+
 /********************
 * Main Solver API  *
 ********************/
+
+
+/**
+ * @name Main solver types
+ * @{
+ */
+
+
+/**
+ * OSQP Matrix in different representation formats
+ */
+typedef struct {
+	csc * csc;  ///< matrix in CSC format
+} OSQPMatrix;
+
+/** @} */
 
 /**
  * @name Main solver API
