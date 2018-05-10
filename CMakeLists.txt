@@ -93,8 +93,9 @@ message(STATUS "MKL Pardiso: ${ENABLE_MKL_PARDISO}")
 
 # Generate header file with the global options
 # ---------------------------------------------
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/glob_opts.h.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/include/glob_opts.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
+               ${CMAKE_CURRENT_SOURCE_DIR}/include/osqp_configure.h
+               NEWLINE_STYLE LF)
 
 
 # Set Compiler flags
@@ -148,6 +149,7 @@ if(NOT DEFINED EMBEDDED)
         include/lin_alg.h
         include/lin_sys.h
         include/osqp.h
+        include/osqp_configure.h
         include/types.h
         include/polish.h
         include/proj.h
@@ -177,6 +179,7 @@ else()
         include/lin_sys.h
         include/kkt.h
         include/osqp.h
+        include/osqp_configure.h
         include/types.h
         include/proj.h
         include/scaling.h
@@ -225,7 +228,7 @@ if (MATLAB)
         message( FATAL_ERROR "You need Matlab libraries to build the Matlab interface" )
     endif (NOT Matlab_FOUND)
 
-    # Include directories for Python headers
+    # Include directories for Matlab headers
     include_directories(${Matlab_INCLUDE_DIRS})
 
     message(STATUS "Matlab root is " ${Matlab_ROOT_DIR})
@@ -247,6 +250,37 @@ if (MATLAB)
 
 endif (MATLAB)
 
+# if we are building the R interface, let's look for R
+# and set some options
+# -----------------------------------------------------------------
+if (R_LANG)
+
+    message(STATUS "We are building the R interface")
+
+    # Look for R libraries
+    find_package(R)
+
+    if (NOT R_FOUND)
+            message( FATAL_ERROR "You need R libraries to build the R interface" )
+    endif (NOT R_FOUND)
+
+    message(STATUS "R exec is: " ${R_EXEC})
+    message(STATUS "R root dir is: " ${R_ROOT_DIR})
+    message(STATUS "R includes are in: " ${R_INCLUDE_DIRS})
+
+    # Include directories for R headers
+    include_directories(${R_INCLUDE_DIRS})
+
+    # Pass R_LANG flag to C compiler
+    add_definitions(-DR_LANG)
+
+    if (UNITTESTS)
+        # Disable unittests
+        message(STATUS "Disabling UNITTESTS because we are building the R interface")
+        set(UNITTESTS OFF)
+    endif (UNITTESTS)
+
+endif (R_LANG)
 
 
 # Create Static Library
@@ -293,10 +327,10 @@ if (PYTHON)
 target_link_libraries (osqpstatic ${PYTHON_LIBRARIES})
 endif (PYTHON)
 
-# If we are building Python or Matlab interface:
+# If we are building Python/Matlab/R interface:
 #   - do not build shared library
 #   - do not build demo
-if (NOT PYTHON AND NOT MATLAB)
+if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG)
     # Create osqp shared library
     # NB: Add all the linear system solvers here
     add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
@@ -320,7 +354,7 @@ if (NOT PYTHON AND NOT MATLAB)
     add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
     target_link_libraries (osqp_demo osqpstatic)
 
-endif (NOT PYTHON AND NOT MATLAB)
+endif (NOT PYTHON AND NOT MATLAB AND NOT R_LANG)
 
 # Create CMake packages for the build directory
 # ----------------------------------------------

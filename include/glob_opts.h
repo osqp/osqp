@@ -9,39 +9,15 @@ extern "C" {
    Define OSQP compiler flags
  */
 
-// Operative system
-#cmakedefine IS_LINUX
-#cmakedefine IS_MAC
-#cmakedefine IS_WINDOWS
-
-// EMBEDDED
-#cmakedefine EMBEDDED (@EMBEDDED@)
-
-// PRINTING
-#cmakedefine PRINTING
-
-// PROFILING
-#cmakedefine PROFILING
-
-// CTRLC
-#cmakedefine CTRLC
-
-// DFLOAT
-#cmakedefine DFLOAT
-
-// DLONG
-#cmakedefine DLONG
-
-// ENABLE_MKL_PARDISO
-#cmakedefine ENABLE_MKL_PARDISO
-
+// cmake generated compiler flags
+#include "osqp_configure.h"
 
 /* DATA CUSTOMIZATIONS (depending on memory manager)-----------------------   */
 
 // We do not need memory allocation functions if EMBEDDED is enabled
 # ifndef EMBEDDED
 
-/* define custom printfs and memory allocation (e.g. matlab or python) */
+/* define custom printfs and memory allocation (e.g. matlab/python) */
 #  ifdef MATLAB
     #   include "mex.h"
 static void* c_calloc(size_t num, size_t size) {
@@ -96,6 +72,7 @@ static void* c_calloc(size_t num, size_t size) {
     #   define c_calloc calloc
     #   define c_free free
     #   define c_realloc realloc
+
 #  endif /* ifdef MATLAB */
 
 #  include <stdlib.h>
@@ -197,6 +174,9 @@ typedef float c_float;  /* for numerical values  */
 #  elif defined PYTHON
 #   include <Python.h>
 #   define c_print PySys_WriteStdout
+#  elif defined R_LANG
+#   include <R_ext/Print.h>
+#   define c_print Rprintf
 #  else  /* ifdef MATLAB */
 #   define c_print printf
 #  endif /* ifdef MATLAB */
