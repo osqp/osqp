@@ -35,7 +35,7 @@ typedef struct SparseMatrix TripletMatrix; // Sparse Triplet format matrix
 
 typedef struct OSQPMatrix_ {
   CscMatrix* csc; //sparse column representation
-  CscMatrix* csr; //sparse row representation (NULL if unused)
+  CsrMatrix* csr; //sparse row representation (NULL if unused)
 } OSQPMatrix;
 
 
