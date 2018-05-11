@@ -28,11 +28,10 @@ extern "C" {
 
 
 /**
- * OSQP Matrix in different representation formats
+ * OSQPMatrix type.   Internal implementation of the
+ * OSQPMatrix type is hidden from the user
  */
-typedef struct {
-	csc * csc;  ///< matrix in CSC format
-} OSQPMatrix;
+typedef struct OSQPMatrix_ OSQPMatrix;
 
 /** @} */
 
