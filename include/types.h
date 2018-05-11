@@ -14,9 +14,10 @@ extern "C" {
 ******************/
 
 /**
- *  Matrix in compressed-column or triplet form
+ *  Matrix in compressed-column or triplet form.  The same structure
+ *  is used for csc, csr and sparse triplet form
  */
-typedef struct {
+struct SparseMatrix {
   c_int    nzmax; ///< maximum number of entries.
   c_int    m;     ///< number of rows
   c_int    n;     ///< number of columns
@@ -25,8 +26,18 @@ typedef struct {
                   // formation))
   c_int   *i;     ///< row indices, size nzmax starting from 0
   c_float *x;     ///< numerical values, size nzmax
-  c_int    nz;    ///< # of entries in triplet matrix, -1 for csc
-} csc;
+  c_int   nnz;    ///< # of entries in triplet matrix, -1 for csc
+};
+
+typedef struct SparseMatrix CscMatrix; // Compressed sparse column matrix
+typedef struct SparseMatrix CsrMatrix; // Compressed sparse row matrix
+typedef struct SparseMatrix TripletMatrix; // Sparse Triplet format matrix
+
+typedef struct OSQPMatrix_ {
+  CscMatrix* csc; //sparse column representation
+  CscMatrix* csr; //sparse row representation (NULL if unused)
+} OSQPMatrix;
+
 
 /**
  * Linear system solver structure (sublevel objects initialize it differently)
