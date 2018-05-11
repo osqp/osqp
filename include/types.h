@@ -14,10 +14,16 @@ extern "C" {
 ******************/
 
 /**
+ *  An enum used to indicate whether a matrix stores
+ *  real values or only the locations of non-zeros
+ */
+typedef enum matrix_value_type {REAL,LOGICAL} matrix_value_type;
+
+/**
  *  Matrix in compressed-column or triplet form.  The same structure
  *  is used for csc, csr and sparse triplet form
  */
-struct SparseMatrix {
+struct SparseMatrix_ {
   c_int    nzmax; ///< maximum number of entries.
   c_int    m;     ///< number of rows
   c_int    n;     ///< number of columns
@@ -27,11 +33,12 @@ struct SparseMatrix {
   c_int   *i;     ///< row indices, size nzmax starting from 0
   c_float *x;     ///< numerical values, size nzmax
   c_int   nnz;    ///< # of entries in triplet matrix, -1 for csc
+  sp_value_type datatype; /// REAL or LOGICAL.  If Logical, then x = NULL
 };
 
-typedef struct SparseMatrix CscMatrix; // Compressed sparse column matrix
-typedef struct SparseMatrix CsrMatrix; // Compressed sparse row matrix
-typedef struct SparseMatrix TripletMatrix; // Sparse Triplet format matrix
+typedef struct SparseMatrix_ CscMatrix; // Compressed sparse column matrix
+typedef struct SparseMatrix_ CsrMatrix; // Compressed sparse row matrix
+typedef struct SparseMatrix_ TripletMatrix; // Sparse Triplet format matrix
 
 typedef struct OSQPMatrix_ {
   CscMatrix* csc; //sparse column representation
