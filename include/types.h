@@ -46,6 +46,18 @@ typedef struct OSQPMatrix_ {
 } OSQPMatrix;
 
 
+typedef struct OSQPVectorf_ {
+  c_int* values;
+  c_int length;
+} OSQPVectori;
+
+typedef struct OSQPVectorf_ {
+  c_float* values;
+  c_int length;
+} OSQPVectorf;
+
+
+
 /**
  * Linear system solver structure (sublevel objects initialize it differently)
  */
