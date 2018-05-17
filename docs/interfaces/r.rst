@@ -8,6 +8,7 @@ Example
 -------
 
 .. code:: r
+
   library(rosqp)
   ## example, adapted from ?quadprog::solve.QP
   Dmat       <- diag(3)
