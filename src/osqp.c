@@ -134,6 +134,9 @@ OSQPWorkspace* osqp_setup(const OSQPData *data, OSQPSettings *settings) {
   work->z_prev   = c_calloc(work->data->m, sizeof(c_float));
   work->y        = c_calloc(work->data->m, sizeof(c_float));
 
+  // Initialize variables x, y, z to 0
+  cold_start(work);
+
   // Primal and dual residuals variables
   work->Ax  = c_calloc(work->data->m, sizeof(c_float));
   work->Px  = c_calloc(work->data->n, sizeof(c_float));
@@ -898,9 +901,6 @@ c_int osqp_warm_start_x(OSQPWorkspace *work, const c_float *x) {
   // Compute Ax = z and store it in z
   mat_vec(work->data->A, work->x, work->z, 0);
 
-  // Cold start y
-  vec_set_scalar(work->y, 0., work->data->m);
-
   return 0;
 }
 
@@ -916,10 +916,6 @@ c_int osqp_warm_start_y(OSQPWorkspace *work, const c_float *y) {
     vec_ew_prod(work->scaling->Einv, work->y, work->y, work->data->m);
     vec_mult_scalar(work->y, work->scaling->c, work->data->m);
   }
-
-  // Cold start x and z
-  vec_set_scalar(work->x, 0., work->data->n);
-  vec_set_scalar(work->z, 0., work->data->m);
 
   return 0;
 }
