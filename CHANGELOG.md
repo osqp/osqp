@@ -1,5 +1,6 @@
 Changes since last release
 --------------------------
+* Fixed [#62](https://github.com/oxfordcontrol/osqp/issues/62).
 * Moved interfaces to separate repositories
 * Fixed [#54](https://github.com/oxfordcontrol/osqp/issues/54).
 * Changes to support Matlab 2018a
