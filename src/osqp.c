@@ -176,7 +176,7 @@ OSQPWorkspace* osqp_setup(const OSQPData *data, OSQPSettings *settings) {
   }
 
   // Set type of constraints
-  set_rho_vec(work);
+  osqp_set_rho_vec_(work);
 
   // Load linear system solver
   if (load_linsys_solver(work->settings->linsys_solver)) {
@@ -490,7 +490,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
 # endif /* ifdef PRINTING */
 
       // Actually update rho
-      if (adapt_rho(work)) {
+      if (osqp_adapt_rho_(work)) {
 # ifdef PRINTING
         c_eprint("Failed rho update");
 # endif // PRINTING
@@ -553,7 +553,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
 #if EMBEDDED != 1
 
   /* Update rho estimate */
-  work->info->rho_estimate = compute_rho_estimate(work);
+  work->info->rho_estimate = osqp_compute_rho_estimate_(work);
 #endif /* if EMBEDDED != 1 */
 
   /* Update solve time */
@@ -793,7 +793,7 @@ c_int osqp_update_bounds(OSQPWorkspace *work,
 #if EMBEDDED != 1
 
   // Update rho_vec and refactor if constraints type changes
-  exitflag = update_rho_vec(work);
+  exitflag = osqp_update_rho_vec_(work);
 #endif // EMBEDDED != 1
 
   return exitflag;
@@ -826,7 +826,7 @@ c_int osqp_update_lower_bound(OSQPWorkspace *work, const c_float *l_new) {
 #if EMBEDDED != 1
 
   // Update rho_vec and refactor if constraints type changes
-  exitflag = update_rho_vec(work);
+  exitflag = osqp_update_rho_vec_(work);
 #endif // EMBEDDED ! =1
 
   return exitflag;
@@ -859,7 +859,7 @@ c_int osqp_update_upper_bound(OSQPWorkspace *work, const c_float *u_new) {
 #if EMBEDDED != 1
 
   // Update rho_vec and refactor if constraints type changes
-  exitflag = update_rho_vec(work);
+  exitflag = osqp_update_rho_vec_(work);
 #endif // EMBEDDED != 1
 
   return exitflag;

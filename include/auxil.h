@@ -18,20 +18,20 @@ extern "C" {
  * @param work Workspace
  * @return     rho estimate
  */
-c_float compute_rho_estimate(OSQPWorkspace *work);
+c_float osqp_compute_rho_estimate_(OSQPWorkspace *work);
 
 /**
  * Adapt rho value based on current unscaled primal/dual residuals
  * @param work Workspace
  * @return     Exitflag
  */
-c_int   adapt_rho(OSQPWorkspace *work);
+c_int   osqp_adapt_rho_(OSQPWorkspace *work);
 
 /**
  * Set values of rho vector based on constraint types
  * @param work Workspace
  */
-void    set_rho_vec(OSQPWorkspace *work);
+void    osqp_set_rho_vec_(OSQPWorkspace *work);
 
 /**
  * Update values of rho vector based on updated constraints.
@@ -40,7 +40,7 @@ void    set_rho_vec(OSQPWorkspace *work);
  * @param work Workspace
  * @return     Exitflag
  */
-c_int   update_rho_vec(OSQPWorkspace *work);
+c_int   osqp_update_rho_vec_(OSQPWorkspace *work);
 
 # endif // EMBEDDED
 

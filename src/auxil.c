@@ -10,7 +10,7 @@
 * Auxiliary functions needed to compute ADMM iterations * *
 ***********************************************************/
 #if EMBEDDED != 1
-c_float compute_rho_estimate(OSQPWorkspace *work) {
+c_float osqp_compute_rho_estimate_(OSQPWorkspace *work) {
   c_int   n, m;                       // Dimensions
   c_float pri_res, dua_res;           // Primal and dual residuals
   c_float pri_res_norm, dua_res_norm; // Normalization for the residuals
@@ -54,14 +54,14 @@ c_float compute_rho_estimate(OSQPWorkspace *work) {
   return rho_estimate;
 }
 
-c_int adapt_rho(OSQPWorkspace *work) {
+c_int osqp_adapt_rho_(OSQPWorkspace *work) {
   c_int   exitflag; // Exitflag
   c_float rho_new;  // New rho value
 
   exitflag = 0;     // Initialize exitflag to 0
 
   // Compute new rho
-  rho_new = compute_rho_estimate(work);
+  rho_new = osqp_compute_rho_estimate_(work);
 
   // Set rho estimate in info
   work->info->rho_estimate = rho_new;
@@ -76,7 +76,7 @@ c_int adapt_rho(OSQPWorkspace *work) {
   return exitflag;
 }
 
-void set_rho_vec(OSQPWorkspace *work) {
+void osqp_set_rho_vec_(OSQPWorkspace *work) {
   c_int i;
 
   work->settings->rho = c_min(c_max(work->settings->rho, RHO_MIN), RHO_MAX);
@@ -100,7 +100,7 @@ void set_rho_vec(OSQPWorkspace *work) {
   }
 }
 
-c_int update_rho_vec(OSQPWorkspace *work) {
+c_int osqp_update_rho_vec_(OSQPWorkspace *work) {
   c_int i, exitflag, constr_type_changed;
 
   exitflag            = 0;
