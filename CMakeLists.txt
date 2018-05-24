@@ -14,6 +14,8 @@ INCLUDE(FindPythonModule)
 INCLUDE(Utils)
 # include(FindMKL)  # Find MKL module
 
+# Export compile commands for project
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Detect operating system
 # ----------------------------------------------

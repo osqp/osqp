@@ -69,6 +69,7 @@ docs/doxygen_out
 .ycm_extra_conf.py
 *.swo
 *.vscode/
+compile_commands.json
 
 
 
