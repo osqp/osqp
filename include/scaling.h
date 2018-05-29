@@ -18,7 +18,7 @@ extern "C" {
  * @param  work Workspace
  * @return      exitflag
  */
-c_int scale_data(OSQPWorkspace *work);
+c_int osqp_scale_data_(OSQPWorkspace *work);
 # endif // if EMBEDDED != 1
 
 
@@ -27,7 +27,7 @@ c_int scale_data(OSQPWorkspace *work);
  * @param  work Workspace
  * @return      exitflag
  */
-c_int unscale_data(OSQPWorkspace *work);
+c_int osqp_unscale_data_(OSQPWorkspace *work);
 
 
 // Scale solution
@@ -38,7 +38,7 @@ c_int unscale_data(OSQPWorkspace *work);
  * @param  work Workspace
  * @return      exitflag
  */
-c_int unscale_solution(OSQPWorkspace *work);
+c_int osqp_unscale_solution_(OSQPWorkspace *work);
 
 # ifdef __cplusplus
 }

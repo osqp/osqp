@@ -73,7 +73,7 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
             s->bp[i] = sigma;
         }
 
-        s->KKT = form_KKT(P, A, 1, sigma, s->bp, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
+        s->KKT = osqp_form_KKT_(P, A, 1, sigma, s->bp, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
     }
     else { // Called from ADMM algorithm
 
@@ -87,7 +87,7 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
             s->bp[i] = 1. / rho_vec[i];
         }
 
-        s->KKT = form_KKT(P, A, 1, sigma, s->bp,
+        s->KKT = osqp_form_KKT_(P, A, 1, sigma, s->bp,
                           s->PtoKKT, s->AtoKKT,
                           &(s->Pdiag_idx), &(s->Pdiag_n), s->rhotoKKT);
     }
@@ -203,10 +203,10 @@ c_int update_linsys_solver_matrices_pardiso(pardiso_solver * s,
 		const csc *P, const csc *A, const OSQPSettings *settings){
 
     // Update KKT matrix with new P
-    update_KKT_P(s->KKT, P, s->PtoKKT, settings->sigma, s->Pdiag_idx, s->Pdiag_n);
+    osqp_update_KKT_P_(s->KKT, P, s->PtoKKT, settings->sigma, s->Pdiag_idx, s->Pdiag_n);
 
     // Update KKT matrix with new A
-    update_KKT_A(s->KKT, A, s->AtoKKT);
+    osqp_update_KKT_A_(s->KKT, A, s->AtoKKT);
 
     // Perform numerical factorization
     s->phase = PARDISO_NUMERIC;
@@ -228,7 +228,7 @@ c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver * s, const c_float * r
     }
 
     // Update KKT matrix with new rho
-    update_KKT_param2(s->KKT, s->bp, s->rhotoKKT, m);
+    osqp_update_KKT_param2_(s->KKT, s->bp, s->rhotoKKT, m);
 
     // Perform numerical factorization
     s->phase = PARDISO_NUMERIC;

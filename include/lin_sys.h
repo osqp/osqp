@@ -17,7 +17,7 @@ extern "C" {
  * @param	linsys_solver  Linear system solver
  * @return Zero on success, nonzero on failure.
  */
-c_int load_linsys_solver(enum linsys_solver_type linsys_solver);
+c_int osqp_load_linsys_solver_(enum linsys_solver_type linsys_solver);
 
 
 /**
@@ -25,7 +25,7 @@ c_int load_linsys_solver(enum linsys_solver_type linsys_solver);
  * @param	linsys_solver  Linear system solver
  * @return Zero on success, nonzero on failure.
  */
-c_int unload_linsys_solver(enum linsys_solver_type linsys_solver);
+c_int osqp_unload_linsys_solver_(enum linsys_solver_type linsys_solver);
 
 
 // NB: Only the upper triangular part of P is stuffed!
@@ -42,7 +42,7 @@ c_int unload_linsys_solver(enum linsys_solver_type linsys_solver);
  * @return Pointer to linear system solver structure on success, OSQP_NULL on
  *failure.
  */
-LinSysSolver* init_linsys_solver(const csc              *P,
+LinSysSolver* osqp_init_linsys_solver_(const csc              *P,
                                  const csc              *A,
                                  c_float                 sigma,
                                  c_float                *rho_vec,

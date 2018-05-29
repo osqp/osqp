@@ -38,7 +38,7 @@ static char* test_form_KKT() {
   Ptriu = csc_to_triu(data->test_form_KKT_P);
 
   // Form KKT matrix storing the index vectors
-  KKT = form_KKT(Ptriu,
+  KKT = osqp_form_KKT_(Ptriu,
                  data->test_form_KKT_A,
                  0,
                  sigma,
@@ -54,9 +54,9 @@ static char* test_form_KKT() {
             is_eq_csc(KKT, data->test_form_KKT_KKTu, TESTS_TOL));
 
   // Update KKT matrix with new P and new A
-  update_KKT_P(KKT, data->test_form_KKT_Pu_new, PtoKKT, sigma, Pdiag_idx,
+  osqp_update_KKT_P_(KKT, data->test_form_KKT_Pu_new, PtoKKT, sigma, Pdiag_idx,
                Pdiag_n);
-  update_KKT_A(KKT, data->test_form_KKT_A_new, AtoKKT);
+  osqp_update_KKT_A_(KKT, data->test_form_KKT_A_new, AtoKKT);
 
 
   // Assert if KKT matrix is the same as predicted one

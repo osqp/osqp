@@ -15,7 +15,7 @@ extern "C" {
  * @param z    Vector to project
  * @param work Workspace
  */
-void project(OSQPWorkspace *work,
+void osqp_project_(OSQPWorkspace *work,
              c_float       *z);
 
 
@@ -25,7 +25,7 @@ void project(OSQPWorkspace *work,
  * @param z    Primal variable z
  * @param y    Dual variable y
  */
-void project_normalcone(OSQPWorkspace *work,
+void osqp_project_normalcone_(OSQPWorkspace *work,
                         c_float       *z,
                         c_float       *y);
 

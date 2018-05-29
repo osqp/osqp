@@ -41,7 +41,7 @@ extern "C" {
  *KKT
  * @return            return status flag
  */
-csc* form_KKT(const csc  *P,
+csc* osqp_form_KKT_(const csc  *P,
               const  csc *A,
               c_int       format,
               c_float     param1,
@@ -66,7 +66,7 @@ csc* form_KKT(const csc  *P,
  * @param Pdiag_idx Index of diagonal elements in P->x
  * @param Pdiag_n   Number of diagonal elements of P
  */
-void update_KKT_P(csc          *KKT,
+void osqp_update_KKT_P_(csc          *KKT,
                   const csc    *P,
                   const c_int  *PtoKKT,
                   const c_float param1,
@@ -81,7 +81,7 @@ void update_KKT_P(csc          *KKT,
  * @param A         A matrix in CSC form (upper-triangular)
  * @param AtoKKT    Vector of pointers from A->x to KKT->x
  */
-void update_KKT_A(csc         *KKT,
+void osqp_update_KKT_A_(csc         *KKT,
                   const csc   *A,
                   const c_int *AtoKKT);
 
@@ -94,7 +94,7 @@ void update_KKT_A(csc         *KKT,
  * @param param2toKKT   index where param2 enters in the KKT matrix
  * @param m             number of constraints
  */
-void update_KKT_param2(csc           *KKT,
+void osqp_update_KKT_param2_(csc           *KKT,
                        const c_float *param2,
                        const c_int   *param2toKKT,
                        const c_int    m);

@@ -32,7 +32,7 @@ static char* test_solveKKT() {
   vec_add_scalar(rho_vec, settings->rho, m);
 
   // Form and factorize KKT matrix
-  p = init_linsys_solver(data->test_solve_KKT_Pu, data->test_solve_KKT_A,
+  p = osqp_init_linsys_solver_(data->test_solve_KKT_Pu, data->test_solve_KKT_A,
                          settings->sigma, rho_vec, LINSYS_SOLVER, 0);
 
   // Debug print KKT and LDL
@@ -87,12 +87,12 @@ static char* test_solveKKT_pardiso() {
   vec_add_scalar(rho_vec, settings->rho, m);
 
   // Load Pardiso shared library
-  exitflag = load_linsys_solver(MKL_PARDISO_SOLVER);
+  exitflag = osqp_load_linsys_solver_(MKL_PARDISO_SOLVER);
   mu_assert("Linear system solve test: error in loading Pardiso shared library",
             exitflag == 0);
 
   // Form and factorize KKT matrix
-  p = init_linsys_solver(data->test_solve_KKT_Pu, data->test_solve_KKT_A,
+  p = osqp_init_linsys_solver_(data->test_solve_KKT_Pu, data->test_solve_KKT_A,
                          settings->sigma, rho_vec, MKL_PARDISO_SOLVER, 0);
 
   // Solve  KKT x = b via LDL given factorization
@@ -112,7 +112,7 @@ static char* test_solveKKT_pardiso() {
   clean_problem_solve_linsys_sols_data(data);
 
   // Unload Pardiso shared library
-  exitflag = unload_linsys_solver(MKL_PARDISO_SOLVER);
+  exitflag = osqp_unload_linsys_solver_(MKL_PARDISO_SOLVER);
 
   return 0;
 }

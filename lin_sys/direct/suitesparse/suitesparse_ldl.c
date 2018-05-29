@@ -203,7 +203,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
             p->bp[i] = sigma;
         }
 
-        KKT_temp = form_KKT(P, A, 0, sigma, p->bp, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
+        KKT_temp = osqp_form_KKT_(P, A, 0, sigma, p->bp, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
 
         // Permute matrix
         permute_KKT(&KKT_temp, p, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
@@ -220,7 +220,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
             p->bp[i] = 1. / rho_vec[i];
         }
 
-        KKT_temp = form_KKT(P, A, 0, sigma, p->bp,
+        KKT_temp = osqp_form_KKT_(P, A, 0, sigma, p->bp,
                             p->PtoKKT, p->AtoKKT,
                             &(p->Pdiag_idx), &(p->Pdiag_n), p->rhotoKKT);
 
@@ -307,10 +307,10 @@ c_int update_linsys_solver_matrices_suitesparse_ldl(suitesparse_ldl_solver * s,
     c_int kk;
 
     // Update KKT matrix with new P
-    update_KKT_P(s->KKT, P, s->PtoKKT, settings->sigma, s->Pdiag_idx, s->Pdiag_n);
+    osqp_update_KKT_P_(s->KKT, P, s->PtoKKT, settings->sigma, s->Pdiag_idx, s->Pdiag_n);
 
     // Update KKT matrix with new A
-    update_KKT_A(s->KKT, A, s->AtoKKT);
+    osqp_update_KKT_A_(s->KKT, A, s->AtoKKT);
 
     // Perform numeric factorization
     kk = LDL_numeric(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
@@ -337,7 +337,7 @@ c_int update_linsys_solver_rho_vec_suitesparse_ldl(suitesparse_ldl_solver * s, c
     }
 
     // Update KKT matrix with new rho
-    update_KKT_param2(s->KKT, s->bp, s->rhotoKKT, m);
+    osqp_update_KKT_param2_(s->KKT, s->bp, s->rhotoKKT, m);
 
     // Perform numeric factorization
     kk = LDL_numeric(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,

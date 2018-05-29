@@ -49,7 +49,7 @@ c_int   osqp_update_rho_vec_(OSQPWorkspace *work);
  * @param a first vector
  * @param b second vector
  */
-void swap_vectors(c_float **a,
+void osqp_swap_vectors_(c_float **a,
                   c_float **b);
 
 
@@ -57,14 +57,14 @@ void swap_vectors(c_float **a,
  * Cold start workspace variables xz and y
  * @param work Workspace
  */
-void cold_start(OSQPWorkspace *work);
+void osqp_cold_start_(OSQPWorkspace *work);
 
 
 /**
  * Update x_tilde and z_tilde variable (first ADMM step)
  * @param work [description]
  */
-void update_xz_tilde(OSQPWorkspace *work);
+void osqp_update_x_z_tilde_(OSQPWorkspace *work);
 
 
 /**
@@ -72,14 +72,14 @@ void update_xz_tilde(OSQPWorkspace *work);
  * Update also delta_x (For for dual infeasibility)
  * @param work Workspace
  */
-void update_x(OSQPWorkspace *work);
+void osqp_update_x_(OSQPWorkspace *work);
 
 
 /**
  * Update z (third ADMM step)
  * @param work Workspace
  */
-void update_z(OSQPWorkspace *work);
+void osqp_update_z_(OSQPWorkspace *work);
 
 
 /**
@@ -87,7 +87,7 @@ void update_z(OSQPWorkspace *work);
  * Update also delta_y to check for primal infeasibility
  * @param work Workspace
  */
-void update_y(OSQPWorkspace *work);
+void osqp_update_y_(OSQPWorkspace *work);
 
 
 /**
@@ -96,7 +96,7 @@ void update_y(OSQPWorkspace *work);
  * @param  x    Value x
  * @return      Objective function value
  */
-c_float compute_obj_val(OSQPWorkspace *work,
+c_float osqp_compute_obj_val_(OSQPWorkspace *work,
                         c_float       *x);
 
 
@@ -104,7 +104,7 @@ c_float compute_obj_val(OSQPWorkspace *work,
  * Store the QP solution
  * @param work Workspace
  */
-void store_solution(OSQPWorkspace *work);
+void osqp_store_solution_(OSQPWorkspace *work);
 
 
 /**
@@ -114,7 +114,7 @@ void store_solution(OSQPWorkspace *work);
  * @param compute_objective  Boolean (if compute the objective or not)
  * @param polish             Boolean (if called from polish)
  */
-void update_info(OSQPWorkspace *work,
+void osqp_update_info_(OSQPWorkspace *work,
                  c_int          iter,
                  c_int          compute_objective,
                  c_int          polish);
@@ -124,7 +124,7 @@ void update_info(OSQPWorkspace *work,
  * Reset solver information (after problem updates)
  * @param info               Information structure
  */
-void reset_info(OSQPInfo *info);
+void osqp_reset_info_(OSQPInfo *info);
 
 
 /**
@@ -132,7 +132,7 @@ void reset_info(OSQPInfo *info);
  * @param info OSQPInfo
  * @param status_val new status value
  */
-void update_status(OSQPInfo *info,
+void osqp_update_status_(OSQPInfo *info,
                    c_int     status_val);
 
 
@@ -145,7 +145,7 @@ void update_status(OSQPInfo *info,
  * @param  approximate Boolean
  * @return      Redisuals check
  */
-c_int check_termination(OSQPWorkspace *work,
+c_int osqp_check_termination_(OSQPWorkspace *work,
                         c_int          approximate);
 
 
@@ -156,7 +156,7 @@ c_int check_termination(OSQPWorkspace *work,
  * @param  data OSQPData to be validated
  * @return      Exitflag to check
  */
-c_int validate_data(const OSQPData *data);
+c_int osqp_validate_data_(const OSQPData *data);
 
 
 /**
@@ -164,7 +164,7 @@ c_int validate_data(const OSQPData *data);
  * @param  settings OSQPSettings to be validated
  * @return      Exitflag to check
  */
-c_int validate_settings(const OSQPSettings *settings);
+c_int osqp_validate_settings_(const OSQPSettings *settings);
 
 # endif // #ifndef EMBEDDED
 

@@ -203,7 +203,7 @@ static void get_ypol_from_yred(OSQPWorkspace *work, c_float *yred) {
   }
 }
 
-c_int polish(OSQPWorkspace *work) {
+c_int osqp_polish_(OSQPWorkspace *work) {
   c_int mred, polish_successful;
   c_float *rhs_red;
   LinSysSolver *plsh;
@@ -217,7 +217,7 @@ c_int polish(OSQPWorkspace *work) {
   mred = form_Ared(work);
 
   // Form and factorize reduced KKT
-  plsh = init_linsys_solver(work->data->P, work->pol->Ared,
+  plsh = osqp_init_linsys_solver_(work->data->P, work->pol->Ared,
                             work->settings->delta, OSQP_NULL,
                             work->settings->linsys_solver, 1);
 
@@ -249,10 +249,10 @@ c_int polish(OSQPWorkspace *work) {
   get_ypol_from_yred(work, pol_sol + work->data->n);     // pol->y
 
   // Ensure (z,y) satisfies normal cone constraint
-  project_normalcone(work, work->pol->z, work->pol->y);
+  osqp_project_normalcone_(work, work->pol->z, work->pol->y);
 
   // Compute primal and dual residuals at the polished solution
-  update_info(work, 0, 1, 1);
+  osqp_update_info_(work, 0, 1, 1);
 
   // Check if polish was successful
   polish_successful = (work->pol->pri_res < work->info->pri_res &&
@@ -286,7 +286,7 @@ c_int polish(OSQPWorkspace *work) {
     // Print summary
 #ifdef PRINTING
 
-    if (work->settings->verbose) print_polish(work);
+    if (work->settings->verbose) osqp_print_polish_(work);
 #endif /* ifdef PRINTING */
   } else { // Polishing failed
     work->info->status_polish = -1;

@@ -148,7 +148,7 @@ c_int osqp_update_rho_vec_(OSQPWorkspace *work) {
 #endif // EMBEDDED != 1
 
 
-void swap_vectors(c_float **a, c_float **b) {
+void osqp_swap_vectors_(c_float **a, c_float **b) {
   c_float *temp;
 
   temp = *b;
@@ -156,7 +156,7 @@ void swap_vectors(c_float **a, c_float **b) {
   *a   = temp;
 }
 
-void cold_start(OSQPWorkspace *work) {
+void osqp_cold_start_(OSQPWorkspace *work) {
   vec_set_scalar(work->x, 0., work->data->n);
   vec_set_scalar(work->z, 0., work->data->m);
   vec_set_scalar(work->y, 0., work->data->m);
@@ -178,7 +178,7 @@ static void compute_rhs(OSQPWorkspace *work) {
   }
 }
 
-static void update_z_tilde(OSQPWorkspace *work) {
+static void osqp_update_z__tilde(OSQPWorkspace *work) {
   c_int i; // Index
 
   for (i = 0; i < work->data->m; i++) {
@@ -188,7 +188,7 @@ static void update_z_tilde(OSQPWorkspace *work) {
   }
 }
 
-void update_xz_tilde(OSQPWorkspace *work) {
+void osqp_update_x_z_tilde_(OSQPWorkspace *work) {
   // Compute right-hand side
   compute_rhs(work);
 
@@ -196,10 +196,10 @@ void update_xz_tilde(OSQPWorkspace *work) {
   work->linsys_solver->solve(work->linsys_solver, work->xz_tilde, work->settings);
 
   // Update z_tilde variable after solving linear system
-  update_z_tilde(work);
+  osqp_update_z__tilde(work);
 }
 
-void update_x(OSQPWorkspace *work) {
+void osqp_update_x_(OSQPWorkspace *work) {
   c_int i;
 
   // update x
@@ -214,7 +214,7 @@ void update_x(OSQPWorkspace *work) {
   }
 }
 
-void update_z(OSQPWorkspace *work) {
+void osqp_update_z_(OSQPWorkspace *work) {
   c_int i;
 
   // update z
@@ -225,10 +225,10 @@ void update_z(OSQPWorkspace *work) {
   }
 
   // project z
-  project(work, work->z);
+  osqp_project_(work, work->z);
 }
 
-void update_y(OSQPWorkspace *work) {
+void osqp_update_y_(OSQPWorkspace *work) {
   c_int i; // Index
 
   for (i = 0; i < work->data->m; i++) {
@@ -241,7 +241,7 @@ void update_y(OSQPWorkspace *work) {
   }
 }
 
-c_float compute_obj_val(OSQPWorkspace *work, c_float *x) {
+c_float osqp_compute_obj_val_(OSQPWorkspace *work, c_float *x) {
   c_float obj_val;
 
   obj_val = quad_form(work->data->P, x) +
@@ -516,7 +516,7 @@ c_int is_dual_infeasible(OSQPWorkspace *work, c_float eps_dual_inf) {
   return 0;
 }
 
-void store_solution(OSQPWorkspace *work) {
+void osqp_store_solution_(OSQPWorkspace *work) {
 #ifndef EMBEDDED
   c_float norm_vec;
 #endif /* ifndef EMBEDDED */
@@ -532,7 +532,7 @@ void store_solution(OSQPWorkspace *work) {
                                                               // solution if
                                                               // scaling has
                                                               // been performed
-      unscale_solution(work);
+      osqp_unscale_solution_(work);
   } else {                                                    // Problem primal
                                                               // or dual
                                                               // infeasible.
@@ -559,11 +559,11 @@ void store_solution(OSQPWorkspace *work) {
 #endif /* ifndef EMBEDDED */
 
     // Cold start iterates to 0 for next runs
-    cold_start(work);
+    osqp_cold_start_(work);
   }
 }
 
-void update_info(OSQPWorkspace *work,
+void osqp_update_info_(OSQPWorkspace *work,
                  c_int          iter,
                  c_int          compute_objective,
                  c_int          polish) {
@@ -606,7 +606,7 @@ void update_info(OSQPWorkspace *work,
 
   // Compute the objective if needed
   if (compute_objective) {
-    *obj_val = compute_obj_val(work, x);
+    *obj_val = osqp_compute_obj_val_(work, x);
   }
 
   // Compute primal residual
@@ -631,7 +631,7 @@ void update_info(OSQPWorkspace *work,
 }
 
 
-void reset_info(OSQPInfo *info) {
+void osqp_reset_info_(OSQPInfo *info) {
 #ifdef PROFILING
 
   // Initialize info values.
@@ -643,14 +643,14 @@ void reset_info(OSQPInfo *info) {
   // NB: We do not reset the setup_time because it is performed only once
 #endif /* ifdef PROFILING */
 
-  update_status(info, OSQP_UNSOLVED); // Problem is unsolved
+  osqp_update_status_(info, OSQP_UNSOLVED); // Problem is unsolved
 
 #if EMBEDDED != 1
   info->rho_updates = 0;              // Rho updates are now 0
 #endif /* if EMBEDDED != 1 */
 }
 
-void update_status(OSQPInfo *info, c_int status_val) {
+void osqp_update_status_(OSQPInfo *info, c_int status_val) {
   // Update status value
   info->status_val = status_val;
 
@@ -677,7 +677,7 @@ void update_status(OSQPInfo *info, c_int status_val) {
   else if (status_val == OSQP_SIGINT) c_strcpy(info->status, "interrupted");
 }
 
-c_int check_termination(OSQPWorkspace *work, c_int approximate) {
+c_int osqp_check_termination_(OSQPWorkspace *work, c_int approximate) {
   c_float eps_prim, eps_dual, eps_prim_inf, eps_dual_inf;
   c_int   exitflag;
   c_int   prim_res_check, dual_res_check, prim_inf_check, dual_inf_check;
@@ -734,18 +734,18 @@ c_int check_termination(OSQPWorkspace *work, c_int approximate) {
   if (prim_res_check && dual_res_check) {
     // Update final information
     if (approximate) {
-      update_status(work->info, OSQP_SOLVED_INACCURATE);
+      osqp_update_status_(work->info, OSQP_SOLVED_INACCURATE);
     } else {
-      update_status(work->info, OSQP_SOLVED);
+      osqp_update_status_(work->info, OSQP_SOLVED);
     }
     exitflag = 1;
   }
   else if (prim_inf_check) {
     // Update final information
     if (approximate) {
-      update_status(work->info, OSQP_PRIMAL_INFEASIBLE_INACCURATE);
+      osqp_update_status_(work->info, OSQP_PRIMAL_INFEASIBLE_INACCURATE);
     } else {
-      update_status(work->info, OSQP_PRIMAL_INFEASIBLE);
+      osqp_update_status_(work->info, OSQP_PRIMAL_INFEASIBLE);
     }
 
     if (work->settings->scaling && !work->settings->scaled_termination) {
@@ -758,9 +758,9 @@ c_int check_termination(OSQPWorkspace *work, c_int approximate) {
   else if (dual_inf_check) {
     // Update final information
     if (approximate) {
-      update_status(work->info, OSQP_DUAL_INFEASIBLE_INACCURATE);
+      osqp_update_status_(work->info, OSQP_DUAL_INFEASIBLE_INACCURATE);
     } else {
-      update_status(work->info, OSQP_DUAL_INFEASIBLE);
+      osqp_update_status_(work->info, OSQP_DUAL_INFEASIBLE);
     }
 
     if (work->settings->scaling && !work->settings->scaled_termination) {
@@ -777,7 +777,7 @@ c_int check_termination(OSQPWorkspace *work, c_int approximate) {
 #ifndef EMBEDDED
 
 
-c_int validate_data(const OSQPData *data) {
+c_int osqp_validate_data_(const OSQPData *data) {
   c_int j;
 
   if (!data) {
@@ -848,7 +848,7 @@ c_int validate_linsys_solver(c_int linsys_solver) {
   return 0;
 }
 
-c_int validate_settings(const OSQPSettings *settings) {
+c_int osqp_validate_settings_(const OSQPSettings *settings) {
   if (!settings) {
 # ifdef PRINTING
     c_eprint("Missing settings!");

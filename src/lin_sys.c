@@ -11,7 +11,7 @@
 #ifndef EMBEDDED
 
 // Load linear system solver shared library
-c_int load_linsys_solver(enum linsys_solver_type linsys_solver) {
+c_int osqp_load_linsys_solver_(enum linsys_solver_type linsys_solver) {
   switch (linsys_solver) {
   case SUITESPARSE_LDL_SOLVER:
 
@@ -31,7 +31,7 @@ c_int load_linsys_solver(enum linsys_solver_type linsys_solver) {
 }
 
 // Unload linear system solver shared library
-c_int unload_linsys_solver(enum linsys_solver_type linsys_solver) {
+c_int osqp_unload_linsys_solver_(enum linsys_solver_type linsys_solver) {
   switch (linsys_solver) {
   case SUITESPARSE_LDL_SOLVER:
 
@@ -52,7 +52,7 @@ c_int unload_linsys_solver(enum linsys_solver_type linsys_solver) {
 
 // Initialize linear system solver structure
 // NB: Only the upper triangular part of P is stuffed!
-LinSysSolver* init_linsys_solver(const csc              *P,
+LinSysSolver* osqp_init_linsys_solver_(const csc              *P,
                                  const csc              *A,
                                  c_float                 sigma,
                                  c_float                *rho_vec,

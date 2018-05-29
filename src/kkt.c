@@ -3,7 +3,7 @@
 #ifndef EMBEDDED
 
 
-csc* form_KKT(const csc  *P,
+csc* osqp_form_KKT_(const csc  *P,
               const  csc *A,
               c_int       format,
               c_float     param1,
@@ -174,7 +174,7 @@ csc* form_KKT(const csc  *P,
 
 #if EMBEDDED != 1
 
-void update_KKT_P(csc          *KKT,
+void osqp_update_KKT_P_(csc          *KKT,
                   const csc    *P,
                   const c_int  *PtoKKT,
                   const c_float param1,
@@ -195,7 +195,7 @@ void update_KKT_P(csc          *KKT,
   }
 }
 
-void update_KKT_A(csc *KKT, const csc *A, const c_int *AtoKKT) {
+void osqp_update_KKT_A_(csc *KKT, const csc *A, const c_int *AtoKKT) {
   c_int i; // Iterations
 
   // Update elements of KKT using A
@@ -204,7 +204,7 @@ void update_KKT_A(csc *KKT, const csc *A, const c_int *AtoKKT) {
   }
 }
 
-void update_KKT_param2(csc *KKT, const c_float *param2,
+void osqp_update_KKT_param2_(csc *KKT, const c_float *param2,
                        const c_int *param2toKKT, const c_int m) {
   c_int i; // Iterations
 

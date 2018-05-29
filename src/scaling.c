@@ -41,7 +41,7 @@ void compute_inf_norm_cols_KKT(const csc *P, const csc *A,
   mat_inf_norm_rows(A, E);
 }
 
-c_int scale_data(OSQPWorkspace *work) {
+c_int osqp_scale_data_(OSQPWorkspace *work) {
   // Scale KKT matrix
   //
   //    [ P   A']
@@ -158,7 +158,7 @@ c_int scale_data(OSQPWorkspace *work) {
 
 #endif // EMBEDDED
 
-c_int unscale_data(OSQPWorkspace *work) {
+c_int osqp_unscale_data_(OSQPWorkspace *work) {
   // Unscale cost
   mat_mult_scalar(work->data->P, work->scaling->cinv);
   mat_premult_diag(work->data->P, work->scaling->Dinv);
@@ -189,7 +189,7 @@ c_int unscale_data(OSQPWorkspace *work) {
 // }
 
 
-c_int unscale_solution(OSQPWorkspace *work) {
+c_int osqp_unscale_solution_(OSQPWorkspace *work) {
   // primal
   vec_ew_prod(work->scaling->D,
               work->solution->x,

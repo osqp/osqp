@@ -16,7 +16,7 @@ extern "C" {
  * @return      Exitflag:  0: Factorization successfull
  *                         1: Factorization unsuccessfull
  */
-c_int polish(OSQPWorkspace *work);
+c_int osqp_polish_(OSQPWorkspace *work);
 
 
 # ifdef __cplusplus

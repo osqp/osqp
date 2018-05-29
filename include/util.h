@@ -30,7 +30,7 @@ const char* osqp_version(void);
  * @param  settings Settings to be copied
  * @return          New settings structure
  */
-OSQPSettings* copy_settings(OSQPSettings *settings);
+OSQPSettings* osqp_copy_settings_(OSQPSettings *settings);
 
 # endif // #ifndef EMBEDDED
 
@@ -49,31 +49,31 @@ void c_strcpy(char       dest[],
  * Print Header before running the algorithm
  * @param work     osqp workspace
  */
-void print_setup_header(const OSQPWorkspace *work);
+void osqp_print_setup_header_(const OSQPWorkspace *work);
 
 /**
  * Print header with data to be displayed per iteration
  */
-void print_header(void);
+void osqp_print_header_(void);
 
 /**
  * Print iteration summary
  * @param work current workspace
  */
-void print_summary(OSQPWorkspace *work);
+void osqp_print_summary_(OSQPWorkspace *work);
 
 /**
  * Print information after polish
  * @param work current workspace
  */
-void print_polish(OSQPWorkspace *work);
+void osqp_print_polish_(OSQPWorkspace *work);
 
 /**
  * Print footer when algorithm terminates
  * @param info   info structure
  * @param polish is polish enabled?
  */
-void print_footer(OSQPInfo *info,
+void osqp_print_footer_(OSQPInfo *info,
                   c_int     polish);
 
 

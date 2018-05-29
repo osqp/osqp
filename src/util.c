@@ -39,7 +39,7 @@ static void print_line(void) {
   c_print("%s\n", the_line);
 }
 
-void print_header(void) {
+void osqp_print_header_(void) {
   // Different indentation required for windows
 # ifdef IS_WINDOWS
   c_print("iter  ");
@@ -55,7 +55,7 @@ void print_header(void) {
   c_print("\n");
 }
 
-void print_setup_header(const OSQPWorkspace *work) {
+void osqp_print_setup_header_(const OSQPWorkspace *work) {
   OSQPData *data;
   OSQPSettings *settings;
 
@@ -124,7 +124,7 @@ void print_setup_header(const OSQPWorkspace *work) {
   c_print("\n");
 }
 
-void print_summary(OSQPWorkspace *work) {
+void osqp_print_summary_(OSQPWorkspace *work) {
   OSQPInfo *info;
 
   info = work->info;
@@ -149,7 +149,7 @@ void print_summary(OSQPWorkspace *work) {
   work->summary_printed = 1; // Summary has been printed
 }
 
-void print_polish(OSQPWorkspace *work) {
+void osqp_print_polish_(OSQPWorkspace *work) {
   OSQPInfo *info;
 
   info = work->info;
@@ -172,7 +172,7 @@ void print_polish(OSQPWorkspace *work) {
   c_print("\n");
 }
 
-void print_footer(OSQPInfo *info, c_int polish) {
+void osqp_print_footer_(OSQPInfo *info, c_int polish) {
   c_print("\n"); // Add space after iterations
 
   c_print("status:               %s\n", info->status);
@@ -207,7 +207,7 @@ void print_footer(OSQPInfo *info, c_int polish) {
 
 #ifndef EMBEDDED
 
-OSQPSettings* copy_settings(OSQPSettings *settings) {
+OSQPSettings* osqp_copy_settings_(OSQPSettings *settings) {
   OSQPSettings *new = c_malloc(sizeof(OSQPSettings));
 
   // Copy settings
