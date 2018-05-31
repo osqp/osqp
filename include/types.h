@@ -17,7 +17,16 @@ extern "C" {
  *  An enum used to indicate whether a matrix stores
  *  real values or only the locations of non-zeros
  */
-typedef enum matrix_value_type {REAL,LOGICAL} matrix_value_type;
+typedef enum OSQPMatrix_value_type {REAL,LOGICAL} SparseMatrix_value_type;
+
+/**
+ *  An enum used to indicate whether a matrix is symmetric.   Options
+ *  NONE : matrix is not symmetric
+ *  SYMMETRIC : matrix is symmetric and holds all of its values
+ *  TRUI : matrix is symmetric and only upper triangle is stored
+ *  TRIL : matrix is symmetric and only lower triangle is stored
+ */
+typedef enum OSQPMatrix_symmetry_type {NONE,SYMMETRIC,TRIU,TRIL} SparseMatrix_symmetry_type;
 
 /**
  *  Matrix in compressed-column or triplet form.  The same structure
@@ -33,7 +42,6 @@ struct SparseMatrix_ {
   c_int   *i;     ///< row indices, size nzmax starting from 0
   c_float *x;     ///< numerical values, size nzmax
   c_int   nnz;    ///< # of entries in triplet matrix, -1 for csc
-  sp_value_type datatype; /// REAL or LOGICAL.  If Logical, then x = NULL
 };
 
 typedef struct SparseMatrix_ CscMatrix; // Compressed sparse column matrix
@@ -41,12 +49,14 @@ typedef struct SparseMatrix_ CsrMatrix; // Compressed sparse row matrix
 typedef struct SparseMatrix_ TripletMatrix; // Sparse Triplet format matrix
 
 typedef struct OSQPMatrix_ {
-  CscMatrix* csc; //sparse column representation
+  CscMatrix* csc; //sparse column representation (NULL if unused)
   CsrMatrix* csr; //sparse row representation (NULL if unused)
+  SparseMatrix_value_type    datatype; /// REAL or LOGICAL.  If Logical, then x = NULL
+  SparseMatrix_symmetry_type symmetry; /// NONE, SYMMETRIC (full), TRIL or TRIU
 } OSQPMatrix;
 
 
-typedef struct OSQPVectorf_ {
+typedef struct OSQPVectori_ {
   c_int* values;
   c_int length;
 } OSQPVectori;
