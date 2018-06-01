@@ -42,6 +42,9 @@ void OsqpVectori_add_scalar(OsqpVectori *a, c_int sc);
 /* multiply float vector by float */
 void OsqpVectorf_mult_scalar(OsqpVectorf *a, c_float sc);
 
+/* change sign */
+void OsqpVectorf_negate(OsqpVectorf *a);
+
 
 /* c = a + sc*b */
 void OsqpVectorf_add_scaled(OsqpVectorf       *c,
@@ -79,7 +82,7 @@ c_float OsqpVectorf_mean(const OsqpVectorf *a);
 c_float OsqpVectorf_dot_prod(const OsqpVectorf *a,
                              const OsqpVectorf *b);
 
-/* elementwse product a.*b stored in c*/
+/* elementwise product a.*b stored in c*/
 void OsqpVectorf_ew_prod(const OsqpVectorf *a,
                          const OsqpVectorf *b,
                          OsqpVectorf       *c);
@@ -120,12 +123,12 @@ void OSQPMatrix_mult_scalar(OSQPMatrix *A, c_float sc);
 /* Premultiply (i.e. left) matrix A by diagonal matrix with diagonal d,
    i.e. scale the rows of A by d
  */
-void OSQPMatrix_premult_diag(OSQPMatrix *A, const c_float *d);
+void OSQPMatrix_premult_diag(OSQPMatrix *A, const OsqpVectorf *d);
 
 /* Postmultiply (i.e. right) matrix A by diagonal matrix with diagonal d,
    i.e. scale the columns of A by d
  */
-void OSQPMatrix_postmult_diag(OSQPMatrix *A, const c_float *d);
+void OSQPMatrix_postmult_diag(OSQPMatrix *A, const OsqpVectorf *d);
 
 
 /* Matrix-vector multiplication
@@ -187,7 +190,7 @@ void OSQPMatrix_inf_norm_cols_sym_triu(const OSQPMatrix *M,
 
 /**
  * Compute quadratic form f(x) = 1/2 x' P x
- * @param  P quadratic matrix in CSC form (only upper triangular)
+ * @param  P symmetrix matrix (symmetry == TRIU or TRIL)
  * @param  x argument float vector
  * @return   quadratic form value
  */
