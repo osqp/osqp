@@ -28,10 +28,10 @@ extern "C" {
 
 
 /**
- * OSQPMatrix type.   Internal implementation of the
- * OSQPMatrix type is hidden from the user
+ * OsqpMatrix type.   Internal implementation of the
+ * OsqpMatrix type is hidden from the user
  */
-typedef struct OSQPMatrix_ OSQPMatrix;
+typedef struct OsqpMatrix_ OsqpMatrix;
 
 /** @} */
 

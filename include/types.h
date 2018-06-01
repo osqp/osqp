@@ -17,7 +17,7 @@ extern "C" {
  *  An enum used to indicate whether a matrix stores
  *  real values or only the locations of non-zeros
  */
-typedef enum OSQPMatrix_value_type {REAL,LOGICAL} SparseMatrix_value_type;
+typedef enum OsqpMatrix_value_type {REAL,LOGICAL} SparseMatrix_value_type;
 
 /**
  *  An enum used to indicate whether a matrix is symmetric.   Options
@@ -25,7 +25,7 @@ typedef enum OSQPMatrix_value_type {REAL,LOGICAL} SparseMatrix_value_type;
  *  TRUI : matrix is symmetric and only upper triangle is stored
  *  TRIL : matrix is symmetric and only lower triangle is stored
  */
-typedef enum OSQPMatrix_symmetry_type {NONE,TRIU,TRIL} OSQPMatrix_symmetry_type;
+typedef enum OsqpMatrix_symmetry_type {NONE,TRIU,TRIL} OsqpMatrix_symmetry_type;
 
 /**
  *  Matrix in compressed-column or triplet form.  The same structure
@@ -48,22 +48,24 @@ typedef struct SparseMatrix_ CscMatrix; // Compressed sparse column matrix
 typedef struct SparseMatrix_ CsrMatrix; // Compressed sparse row matrix
 typedef struct SparseMatrix_ TripletMatrix; // Sparse Triplet format matrix
 
-typedef struct OSQPMatrix_ {
+typedef struct OsqpMatrix_ {
   CscMatrix* csc; //sparse column representation (NULL if unused)
   CsrMatrix* csr; //sparse row representation (NULL if unused)
-  OSQPMatrix_symmetry_type symmetry; /// NONE, TRIL or TRIU
-} OSQPMatrix;
+  OsqpMatrix_symmetry_type symmetry; // NONE (if full)
+                                     // TRIL or TRIU if symmetric and only
+                                     // upper/lower triangle is stored
+} OsqpMatrix;
 
 
-typedef struct OSQPVectori_ {
+typedef struct OsqpVectori_ {
   c_int* values;
   c_int length;
-} OSQPVectori;
+} OsqpVectori;
 
-typedef struct OSQPVectorf_ {
+typedef struct OsqpVectorf_ {
   c_float* values;
   c_int length;
-} OSQPVectorf;
+} OsqpVectorf;
 
 
 
@@ -136,7 +138,7 @@ typedef struct {
  * Polish structure
  */
 typedef struct {
-  csc *Ared;          ///< Active rows of A.
+  OsqpMatrix *Ared;          ///< Active rows of A.
   ///<    Ared = vstack[Alow, Aupp]
   c_int    n_low;     ///< number of lower-active rows
   c_int    n_upp;     ///< number of upper-active rows
@@ -144,9 +146,9 @@ typedef struct {
   c_int   *A_to_Aupp; ///< Maps indices in A to indices in Aupp
   c_int   *Alow_to_A; ///< Maps indices in Alow to indices in A
   c_int   *Aupp_to_A; ///< Maps indices in Aupp to indices in A
-  c_float *x;         ///< optimal x-solution obtained by polish
-  c_float *z;         ///< optimal z-solution obtained by polish
-  c_float *y;         ///< optimal y-solution obtained by polish
+  OsqpVectorf *x;         ///< optimal x-solution obtained by polish
+  OsqpVectorf *z;         ///< optimal z-solution obtained by polish
+  OsqpVectorf *y;         ///< optimal y-solution obtained by polish
   c_float  obj_val;   ///< objective value at polished solution
   c_float  pri_res;   ///< primal residual at polished solution
   c_float  dua_res;   ///< dual residual at polished solution
@@ -164,13 +166,13 @@ typedef struct {
 typedef struct {
   c_int    n; ///< number of variables n
   c_int    m; ///< number of constraints m
-  csc     *P; ///< quadratic part of the cost P in csc format (size n x n). It
-              ///  can be either the full P or only the upper triangular part. The
+  OsqpMatrix  *P; ///< quadratic part of the cost P.  It
+              ///  can be either the full P or the triangular part. The
               ///  workspace stores only the upper triangular part
-  csc     *A; ///< linear constraints matrix A in csc format (size m x n)
-  c_float *q; ///< dense array for linear part of cost function (size n)
-  c_float *l; ///< dense array for lower bound (size m)
-  c_float *u; ///< dense array for upper bound (size m)
+  OsqpMatrix  *A; ///< linear constraints matrix A in csc format (size m x n)
+  OsqpVectorf *q; ///< dense array for linear part of cost function (size n)
+  OsqpVectorf *l; ///< dense array for lower bound (size m)
+  OsqpVectorf *u; ///< dense array for upper bound (size m)
 } OSQPData;
 
 
@@ -249,8 +251,8 @@ typedef struct {
    * @name Vector used to store a vectorized rho parameter
    * @{
    */
-  c_float *rho_vec;     ///< vector of rho values
-  c_float *rho_inv_vec; ///< vector of inv rho values
+  OsqpVectorf *rho_vec;     ///< vector of rho values
+  OsqpVectorf *rho_inv_vec; ///< vector of inv rho values
 
   /** @} */
 
@@ -263,15 +265,15 @@ typedef struct {
    * @name Iterates
    * @{
    */
-  c_float *x;        ///< Iterate x
-  c_float *y;        ///< Iterate y
-  c_float *z;        ///< Iterate z
-  c_float *xz_tilde; ///< Iterate xz_tilde
+  OsqpVectorf *x;        ///< Iterate x
+  OsqpVectorf *y;        ///< Iterate y
+  OsqpVectorf *z;        ///< Iterate z
+  OsqpVectorf *xz_tilde; ///< Iterate xz_tilde
 
-  c_float *x_prev;   ///< Previous x
+  OsqpVectorf *x_prev;   ///< Previous x
 
   /**< NB: Used also as workspace vector for dual residual */
-  c_float *z_prev;   ///< Previous z
+  OsqpVectorf *z_prev;   ///< Previous z
 
   /**< NB: Used also as workspace vector for primal residual */
 
@@ -282,9 +284,9 @@ typedef struct {
    * approximate tolerances computation and adapting rho
    * @{
    */
-  c_float *Ax;  ///< Scaled A * x
-  c_float *Px;  ///< Scaled P * x
-  c_float *Aty; ///< Scaled A * x
+  OsqpVectorf *Ax;  ///< Scaled A * x
+  OsqpVectorf *Px;  ///< Scaled P * x
+  OsqpVectorf *Aty; ///< Scaled A * x
 
   /** @} */
 
@@ -292,8 +294,8 @@ typedef struct {
    * @name Primal infeasibility variables
    * @{
    */
-  c_float *delta_y;   ///< Difference of consecutive dual iterates
-  c_float *Atdelta_y; ///< A' * delta_y
+  OsqpVectorf *delta_y;   ///< Difference of consecutive dual iterates
+  OsqpVectorf *Atdelta_y; ///< A' * delta_y
 
   /** @} */
 
@@ -301,9 +303,9 @@ typedef struct {
    * @name Dual infeasibility variables
    * @{
    */
-  c_float *delta_x;  ///< Difference of consecutive primal iterates
-  c_float *Pdelta_x; ///< P * delta_x
-  c_float *Adelta_x; ///< A * delta_x
+  OsqpVectorf *delta_x;  ///< Difference of consecutive primal iterates
+  OsqpVectorf *Pdelta_x; ///< P * delta_x
+  OsqpVectorf *Adelta_x; ///< A * delta_x
 
   /** @} */
 
@@ -312,10 +314,10 @@ typedef struct {
    * @{
    */
 
-  c_float *D_temp;   ///< temporary primal variable scaling vectors
-  c_float *D_temp_A; ///< temporary primal variable scaling vectors storing
+  OsqpVectorf *D_temp;   ///< temporary primal variable scaling vectors
+  OsqpVectorf *D_temp_A; ///< temporary primal variable scaling vectors storing
                      // norms of A columns
-  c_float *E_temp;   ///< temporary constraints scaling vectors storing norms of
+  OsqpVectorf *E_temp;   ///< temporary constraints scaling vectors storing norms of
                      // A' columns
 
 
@@ -349,7 +351,7 @@ struct linsys_solver {
   enum linsys_solver_type type; ///< Linear system solver type (see type.h)
   // Functions
   c_int (*solve)(LinSysSolver       *self,
-                 c_float            *b,
+                 OsqpVectorf        *b,
                  const OSQPSettings *settings); ///< Solve linear system
 
     # ifndef EMBEDDED
@@ -358,11 +360,11 @@ struct linsys_solver {
     # endif // ifndef EMBEDDED
 
     # if EMBEDDED != 1
-  c_int (*update_matrices)(LinSysSolver *self, const csc *P, const csc *A,
+  c_int (*update_matrices)(LinSysSolver *self, const OsqpMatrix *P, const OsqpMatrix *A,
                            const OSQPSettings *settings); ///< Update matrices P
                                                           // and A in the solver
   c_int (*update_rho_vec)(LinSysSolver  *s,
-                          const c_float *rho_vec,
+                          const OsqpVectorf *rho_vec,
                           const c_int    m);              ///< Update rho
     # endif // if EMBEDDED != 1
 
