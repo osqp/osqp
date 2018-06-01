@@ -118,17 +118,23 @@ void OsqpVectorf_ew_min_vec(const OsqpVectorf *a,
 /* MATRIX FUNCTIONS ----------------------------------------------------------*/
 
 /* multiply matrix by scalar */
-void OSQPMatrix_mult_scalar(OSQPMatrix *A, c_float sc);
+void OsqpMatrix_mult_scalar(OsqpMatrix *A, c_float sc);
+void CscMatrix_mult_scalar(CscMatrix *A, c_float sc);
+void CsrMatrix_mult_scalar(CsrMatrix *A, c_float sc);
 
 /* Premultiply (i.e. left) matrix A by diagonal matrix with diagonal d,
    i.e. scale the rows of A by d
  */
-void OSQPMatrix_premult_diag(OSQPMatrix *A, const OsqpVectorf *d);
+void OsqpMatrix_premult_diag(OsqpMatrix *A, const OsqpVectorf *d);
+void CscMatrix_premult_diag(CscMatrix *A, const OsqpVectorf *d);
+void CsrMatrix_premult_diag(CsrMatrix *A, const OsqpVectorf *d);
 
 /* Postmultiply (i.e. right) matrix A by diagonal matrix with diagonal d,
    i.e. scale the columns of A by d
  */
-void OSQPMatrix_postmult_diag(OSQPMatrix *A, const OsqpVectorf *d);
+void OsqpMatrix_postmult_diag(OsqpMatrix *A, const OsqpVectorf *d);
+void CscMatrix_postmult_diag(CscMatrix *A, const OsqpVectorf *d);
+void CsrMatrix_postmult_diag(CsrMatrix *A, const OsqpVectorf *d);
 
 
 /* Matrix-vector multiplication
@@ -136,23 +142,41 @@ void OSQPMatrix_postmult_diag(OSQPMatrix *A, const OsqpVectorf *d);
  *    y +=  A*x  (if plus_eq == 1)
  *    y -=  A*x  (if plus_eq == -1)
  */
-void OSQPMatrix_Ax(const OSQPMatrix  *A,
-                   const OSQPVectorf *x,
-                   OSQPVectorf       *y,
+void OsqpMatrix_Ax(const OsqpMatrix  *A,
+                   const OsqpVectorf *x,
+                   OsqpVectorf       *y,
                    c_int             sign);
+void CscMatrix_Ax(const CscMatrix  *A,
+                  const OsqpVectorf *x,
+                  OsqpVectorf       *y,
+                  c_int             sign,
+                  c_int             skip_diag);
+void CsrMatrix_Ax(const CsrMatrix  *A,
+                  const OsqpVectorf *x,
+                  OsqpVectorf       *y,
+                  c_int             sign,
+                  c_int             skip_diag);
 
 
 /* Matrix-transpose-vector multiplication
  *    y  =  A'*x  (if plus_eq == 0)
  *    y +=  A'*x  (if plus_eq == 1)
  *    y -=  A'*x  (if plus_eq == -1)
- * If skip_diag == 1, then diagonal elements of A are assumed to be zero.
  */
- void OSQPMatrix_Atx(const OSQPMatrix  *A,
-                     const OSQPVectorf *x,
-                     OSQPVectorf       *y,
-                     c_int             sign
-                     c_int             skip_diag);
+ void OsqpMatrix_Atx(const OsqpMatrix  *A,
+                     const OsqpVectorf *x,
+                     OsqpVectorf       *y,
+                     c_int             sign);
+ void CscMatrix_Atx(const CscMatrix  *A,
+                    const OsqpVectorf *x,
+                    OsqpVectorf       *y,
+                    c_int             sign,
+                    c_int             skip_diag);
+ void CsrMatrix_Atx(const CsrMatrix  *A,
+                    const OsqpVectorf *x,
+                    OsqpVectorf       *y,
+                    c_int             sign,
+                    c_int             skip_diag);
 
 
 # if EMBEDDED != 1
@@ -163,8 +187,9 @@ void OSQPMatrix_Ax(const OSQPMatrix  *A,
  * @param E     Vector of infinity norms
  *
  */
-void OSQPMatrix_inf_norm_cols(const OSQPMatrix *M,
-                              OSQPVectorf      *E);
+void OsqpMatrix_inf_norm_cols(const OsqpMatrix *M,OsqpVectorf *E);
+void CscMatrix_inf_norm_cols(const CscMatrix *M,OsqpVectorf *E);
+void CsrMatrix_inf_norm_cols(const CsrMatrix *M,OsqpVectorf *E);
 
 /**
  * Infinity norm of each matrix row
@@ -172,30 +197,21 @@ void OSQPMatrix_inf_norm_cols(const OSQPMatrix *M,
  * @param E     Vector of infinity norms
  *
  */
-void OSQPMatrix_inf_norm_rows(const OSQPMatrix *M,
-                              OSQPVectorf      *E);
-
-/**
- * Infinity norm of each matrix column
- * Matrix M is symmetric upper-triangular
- *
- * @param M	Input matrix (symmetric, upper-triangular)
- * @param E     Vector of infinity norms
- *
- */
-void OSQPMatrix_inf_norm_cols_sym_triu(const OSQPMatrix *M,
-                                       OSQPVectorf      *E);
+void OsqpMatrix_inf_norm_rows(const OsqpMatrix *M,OsqpVectorf *E);
+void CscMatrix_inf_norm_rows(const CscMatrix *M,OsqpVectorf *E);
+void CsrMatrix_inf_norm_rows(const CsrMatrix *M,OsqpVectorf *E);
 
 # endif // EMBEDDED != 1
 
 /**
  * Compute quadratic form f(x) = 1/2 x' P x
- * @param  P symmetrix matrix (symmetry == TRIU or TRIL)
+ * @param  P symmetrix matrix (symmetry is TRIU or TRIL)
  * @param  x argument float vector
  * @return   quadratic form value
  */
-c_float OSQPMatrix_quad_form(const OSQPMatrix  *P,
-                             const OSQPVectorf *x);
+c_float OsqpMatrix_quad_form(const OsqpMatrix  *P, const OsqpVectorf *x);
+c_float CscMatrix_quad_form(const CscMatrix  *P, const OsqpVectorf *x);
+c_float CsrMatrix_quad_form(const CsrMatrix  *P, const OsqpVectorf *x);
 
 
 # ifdef __cplusplus
