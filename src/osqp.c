@@ -331,7 +331,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
 
   // Initialize variables (cold start or warm start depending on settings)
   if (!work->settings->warm_start) cold_start(work);  // If not warm start ->
-                                                      // set z, u to zero
+                                                      // set x, z, y to zero
 
   // Main ADMM algorithm
   for (iter = 1; iter <= work->settings->max_iter; iter++) {

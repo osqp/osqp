@@ -19,12 +19,12 @@ where :math:`x` is the optimization variable and
 
 .. rubric:: Citing OSQP
 
-If you are using OSQP for your work, we encourage you to 
+If you are using OSQP for your work, we encourage you to
 
 * :ref:`Cite the related papers <citing>`
 * Put a star on `GitHub <https://github.com/oxfordcontrol/osqp>`_
 
-**We are looking forward to hearing your success stories with OSQP!** Please `share them with us <mailto:bartolomeo.stellato@gmail.com>`_. 
+**We are looking forward to hearing your success stories with OSQP!** Please `share them with us <bartolomeo.stellato@gmail.com>`_.
 
 .. rubric:: Features
 
@@ -64,8 +64,8 @@ OSQP is distributed under the `Apache 2.0 License <https://www.apache.org/licens
 
 The following people have been involved in the development of OSQP:
 
-* `Bartolomeo Stellato <https://bstellato.github.io/>`_ (University of Oxford): main development
-* `Goran Banjac <http://users.ox.ac.uk/~sedm4978/>`_ (University of Oxford): main development
+* `Bartolomeo Stellato <https://stellato.io/>`_ (MIT): main development
+* `Goran Banjac <http://control.ee.ethz.ch/~gbanjac/>`_ (ETH Zürich): main development
 * `Nicholas Moehle <http://web.stanford.edu/~moehle/>`_ (Stanford University): methods, maths, and code generation
 * `Paul Goulart <http://users.ox.ac.uk/~engs1373/>`_ (University of Oxford): methods, maths, and Matlab interface
 * `Alberto Bemporad <http://cse.lab.imtlucca.it/~bemporad/>`_ (IMT Lucca): methods and maths
