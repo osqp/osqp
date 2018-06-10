@@ -106,9 +106,11 @@ void print_setup_header(const OSQPWorkspace *work) {
       "          check_termination: on (interval %i),\n",
       (int)settings->check_termination);
   else c_print("          check_termination: off,\n");
-
+  
+# ifdef PROFILING
   if (settings->time_limit) c_print("          time_limit: %.2e sec,\n",
                                     settings->time_limit);
+# endif /* ifdef PROFILING */
 
   if (settings->scaling) c_print("          scaling: on, ");
   else c_print("          scaling: off, ");
