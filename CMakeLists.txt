@@ -194,13 +194,10 @@ endif()
 # -----------------------------------------------------------------
 if (PYTHON)
 
-    # Look for Python libraries
-    find_package(PythonInterp ${PYTHON_VER_NUM})
-    find_package(PythonLibs ${PYTHON_VER_NUM})
-
-    if (NOT PYTHONLIBS_FOUND)
-            message( FATAL_ERROR "You need Python libraries to build the Python interface" )
-    endif (NOT PYTHONLIBS_FOUND)
+    # Python include directories need to be passed by the python compilation process
+    if (NOT PYTHON_INCLUDE_DIRS)
+            message( FATAL_ERROR "You need Python include directories to build the Python interface" )
+    endif (NOT PYTHON_INCLUDE_DIRS)
 
     # Include directories for Python headers
     include_directories(${PYTHON_INCLUDE_DIRS})
@@ -322,10 +319,6 @@ install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
 if (MATLAB)
 target_link_libraries (osqpstatic ${Matlab_LIBRARIES})
 endif (MATLAB)
-
-if (PYTHON)
-target_link_libraries (osqpstatic ${PYTHON_LIBRARIES})
-endif (PYTHON)
 
 # If we are building Python/Matlab/R interface:
 #   - do not build shared library

@@ -6,14 +6,14 @@ Interfaces
 | Language                           | Maintainers                                              | Repository                                                                               |
 +====================================+==========================================================+==========================================================================================+
 | :ref:`C/C++ <c_cpp_interface>`     | | `Bartolomeo Stellato <bartolomeo.stellato@gmail.com>`_ | `github.com/oxfordcontrol/osqp <https://github.com/oxfordcontrol/osqp>`_                 |
-|                                    | | `Goran Banjac <goran.banjac@eng.ox.ac.uk>`_            |                                                                                          |
+|                                    | | `Goran Banjac <gbanjac@control.ee.ethz.ch>`_           |                                                                                          |
 |                                    | | `Paul Goulart <paul.goulart@eng.ox.ac.uk>`_            |                                                                                          |
 +------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
 | :ref:`Python <python_interface>`   | | `Bartolomeo Stellato <bartolomeo.stellato@gmail.com>`_ | `github.com/oxfordcontrol/osqp-python <https://github.com/oxfordcontrol/osqp-python>`_   |
-|                                    | | `Goran Banjac <goran.banjac@eng.ox.ac.uk>`_            |                                                                                          |
+|                                    | | `Goran Banjac <gbanjac@control.ee.ethz.ch>`_           |                                                                                          |
 +------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
 | :ref:`Matlab <matlab_interface>`   | | `Bartolomeo Stellato <bartolomeo.stellato@gmail.com>`_ | `github.com/oxfordcontrol/osqp-matlab <https://github.com/oxfordcontrol/osqp-matlab>`_   |
-|                                    | | `Goran Banjac <goran.banjac@eng.ox.ac.uk>`_            |                                                                                          |
+|                                    | | `Goran Banjac <gbanjac@control.ee.ethz.ch>`_           |                                                                                          |
 |                                    | | `Paul Goulart <paul.goulart@eng.ox.ac.uk>`_            |                                                                                          |
 +------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
 | :ref:`Julia <julia_interface>`     | | `Twan Koolen <tkoolen@mit.edu>`_                       | `github.com/oxfordcontrol/OSQP.jl <https://github.com/oxfordcontrol/OSQP.jl>`_           |
@@ -31,8 +31,6 @@ Interfaces
 | :ref:`Cutest <cutest_interface>`   | | `Nick Gould <nick.gould@stfc.ac.uk>`_                  | `github.com/ralna/CUTEst <https://github.com/ralna/CUTEst/tree/master/src/osqp>`_        |
 +------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
 
-
-
 .. toctree::
    :maxdepth: 1
    :glob:
@@ -44,6 +42,7 @@ Interfaces
    matlab.rst
    r.rst
    fortran.rst
+   rust.rst
    cutest.rst
    solver_settings.rst
    linear_systems_solvers.rst
