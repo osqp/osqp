@@ -27,7 +27,7 @@ div[class^='highlight'] pre {
 
 /* Make glossary entries bolder to stand out */
 dl.glossary>dt{
-    font-weight: 700; 
+    font-weight: 700;
 }
 
 /* Make bold things less bold */
@@ -152,7 +152,6 @@ tr td code span{
 
 .s1, .s2{
 	color: rgb(46, 118, 176);  /* Light blue*/
-    font-size: 16px;
 }
 
 
