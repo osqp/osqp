@@ -4,6 +4,8 @@
 R
 ========
 
+R interface is still experimental. Here is an example of how it works:
+
 Example
 -------
 

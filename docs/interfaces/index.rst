@@ -30,6 +30,8 @@ Interfaces
 +------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
 | :ref:`Cutest <cutest_interface>`   | | `Nick Gould <nick.gould@stfc.ac.uk>`_                  | `github.com/ralna/CUTEst <https://github.com/ralna/CUTEst/tree/master/src/osqp>`_        |
 +------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
+| `Eigen`_                           | | `Giulio Romualdi <giulio.romualdi@gmail.com>`_         | `github.com/robotology/osqp-eigen <https://github.com/robotology/osqp-eigen>`_           |
++------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
 
 .. toctree::
    :maxdepth: 1
@@ -47,3 +49,7 @@ Interfaces
    solver_settings.rst
    linear_systems_solvers.rst
    status_values.rst
+
+
+
+.. _Eigen: https://robotology.github.io/osqp-eigen/doxygen/doc/html/index.html
