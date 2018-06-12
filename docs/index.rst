@@ -22,7 +22,12 @@ where :math:`x` is the optimization variable and
 If you are using OSQP for your work, we encourage you to
 
 * :ref:`Cite the related papers <citing>`
-* Put a star on `GitHub <https://github.com/oxfordcontrol/osqp>`_
+* Put a star on GitHub |github-star|
+
+
+.. |github-star| image:: https://img.shields.io/github/stars/oxfordcontrol/osqp.svg?style=social&label=Star
+  :target: https://github.com/oxfordcontrol/osqp
+
 
 **We are looking forward to hearing your success stories with OSQP!** Please `share them with us <bartolomeo.stellato@gmail.com>`_.
 
