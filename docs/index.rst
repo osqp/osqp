@@ -98,7 +98,7 @@ Numerical benchmarks against other solvers are available `here <https://github.c
    :caption: User Documentation
 
    solver/index
-   installation/index
+   get_started/index
    interfaces/index
    parsers/index
    codegen/index
