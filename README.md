@@ -1,7 +1,7 @@
 # The Operator Splitting QP Solver
 [**Join our forum**](https://groups.google.com/forum/#!forum/osqp) for any questions related to the solver!
 
-**The documentation** is available at [**osqp.readthedocs.io**](http://osqp.readthedocs.io/)
+**The documentation** is available at [**osqp.org**](https://osqp.org/)
 
 The OSQP (Operator Splitting Quadratic Program) solver is a numerical optimization package for solving problems in the form
 ```
@@ -38,7 +38,7 @@ The latest version is `0.3.1`.
 
 ## Citing OSQP
 
-If you are using OSQP for your work, we encourage you to 
+If you are using OSQP for your work, we encourage you to
 
 * [Cite the related papers](http://osqp.readthedocs.io/en/latest/citing/index.html),
 * Put a star on this repository.
