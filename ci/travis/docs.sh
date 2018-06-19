@@ -42,7 +42,7 @@ if [[ $TRAVIS_OS_NAME == "linux" ]]; then
 
 	# Add and commit changes.
 	git add -A .
-	git commit -m "Generated docs for commit $COMMIT."
+	git commit -m "Generated docs for commit $TRAVIS_COMMIT"
 	# -q is very important, otherwise you leak your GH_TOKEN
 	git push -q origin master
 

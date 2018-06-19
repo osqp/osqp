@@ -18,7 +18,6 @@ env:
 install: bash ci/travis/install.sh
 script:
  - bash ci/travis/script.sh
- - bash ci/travis/docs.sh
 
 deploy:
   # Deploy on tags
