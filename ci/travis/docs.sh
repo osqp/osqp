@@ -15,6 +15,9 @@ source activate testenv
 if [[ $TRAVIS_OS_NAME == "linux" ]]; then
 
 	# Install dependencies
+	# Add PPA to make doxygen installation work
+	sudo add-apt-repository ppa:libreoffice/ppa -y
+	sudo apt-get update -q -y
 	sudo apt-get install -y doxygen
 	conda install -y sphinx
 	conda install -y -c conda-forge sphinx_rtd_theme breathe
