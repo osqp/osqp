@@ -1,7 +1,7 @@
 Get started
 ===============
 
-To get started simply choose your language interface and follow the easy installation instructions at the corresponding link:
+To get started simply choose your language interface and follow the easy installation instructions below:
 
 .. toctree::
    :maxdepth: 1
