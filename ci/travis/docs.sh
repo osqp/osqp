@@ -23,7 +23,7 @@ if [[ $TRAVIS_OS_NAME == "linux" ]]; then
 	conda install -y -c conda-forge sphinx_rtd_theme breathe
 
 	# Enter in docs folder
-	${TRAVIS_BUILD_DIR}/docs/
+	cd ${TRAVIS_BUILD_DIR}/docs/
 
 	# Create docs
 	make html
