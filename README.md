@@ -40,7 +40,7 @@ The latest version is `0.3.1`.
 
 If you are using OSQP for your work, we encourage you to
 
-* [Cite the related papers](http://osqp.readthedocs.io/en/latest/citing/index.html),
+* [Cite the related papers](https://osqp.org/citing/),
 * Put a star on this repository.
 
 **We are looking forward to hearing your success stories with OSQP!** Please [share them with us](mailto:bartolomeo.stellato@gmail.com).
