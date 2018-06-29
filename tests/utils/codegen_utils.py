@@ -163,7 +163,7 @@ def clean_mat(f, name, *args):
     f.write("%s);\n" % name)
 
 
-def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
+def generate_problem_data(P, q, A, l, u, problem_name, sols_data={}):
     """
     Generate test problem data.
 
@@ -284,7 +284,7 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
             # Status test get from C code
             if value == 'optimal':
                 f.write("data->%s = %s;\n" % (key, 'OSQP_SOLVED'))
-            if value == 'optimal_inaccurate':
+            elif value == 'optimal_inaccurate':
                 f.write("data->%s = %s;\n" % (key, 'OSQP_SOLVED_INACCURATE'))
             elif value == 'primal_infeasible':
                 f.write("data->%s = %s;\n" % (key, 'OSQP_PRIMAL_INFEASIBLE'))
@@ -295,6 +295,7 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data):
                 f.write("data->%s = %s;\n" % (key, 'OSQP_DUAL_INFEASIBLE'))
             elif value == 'dual_infeasible_inaccurate':
                 f.write("data->%s = %s;\n" % (key, 'OSQP_DUAL_INFEASIBLE_INACCURATE'))
+
         # Check if it is an array or a scalar
         if type(value) is np.ndarray:
             if isinstance(value.flatten(order='F')[0], int):

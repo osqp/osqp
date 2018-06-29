@@ -17,8 +17,5 @@ m = A.shape[0]
 q_new = np.array([1., 1.])
 u_new = np.array([-2., 0., -20., 100., 80.])
 
-# Generate problem solutions
-sols_data = {'status_test': 'problem non convex'}
-
 # Generate problem data
-cu.generate_problem_data(P, q, A, l, u, 'non_cvx', sols_data)
+cu.generate_problem_data(P, q, A, l, u, 'non_cvx')

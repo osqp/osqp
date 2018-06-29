@@ -39,7 +39,7 @@ static char* test_non_cvx_solve()
 
   // Compare solver statuses
   mu_assert("Non Convex test solve: Error in solver status!",
-            work->info->status_val == sols_data->status_test);
+            work->info->status_val == OSQP_NON_CVX);
 
   // Compare objective values
   mu_assert("Non Convex test solve: Error in objective value!",
