@@ -58,10 +58,10 @@ void print_header(void) {
 void print_setup_header(const OSQPWorkspace *work) {
   OSQPData *data;
   OSQPSettings *settings;
+  c_int nnz; // Number of nonzeros in the problem
 
   data     = work->data;
   settings = work->settings;
-  c_int nnz; // Number of nonzeros in the problem
 
   // Number of nonzeros
   nnz = data->P->nzmax + data->A->p[data->A->n];

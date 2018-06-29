@@ -101,11 +101,12 @@ static c_int LDL_factor(csc *A,  suitesparse_ldl_solver * p){
 static c_int permute_KKT(csc ** KKT, suitesparse_ldl_solver * p, c_int Pnz, c_int Anz, c_int m, c_int * PtoKKT, c_int * AtoKKT, c_int * rhotoKKT){
     c_float *info;
     c_int amd_status;
-    info = (c_float *)c_malloc(AMD_INFO * sizeof(c_float));
     c_int * Pinv;
     csc *KKT_temp;
     c_int * KtoPKPt;
     c_int i; // Indexing
+
+    info = (c_float *)c_malloc(AMD_INFO * sizeof(c_float));
 
     // Compute permutation metrix P using AMD
     #ifdef DLONG
