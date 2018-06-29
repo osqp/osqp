@@ -526,22 +526,6 @@ static c_int has_solution(OSQPInfo * info){
 
 }
 
-static c_int has_primal_solution(OSQPInfo * info){
-
-  return ((info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
-      (info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE) &&
-      (info->status_val != OSQP_NON_CVX));
-
-}
-
-static c_int has_dual_solution(OSQPInfo * info){
-
-  return ((info->status_val != OSQP_DUAL_INFEASIBLE) &&
-      (info->status_val != OSQP_DUAL_INFEASIBLE_INACCURATE) &&
-      (info->status_val != OSQP_NON_CVX));
-
-}
-
 void store_solution(OSQPWorkspace *work) {
 #ifndef EMBEDDED
   c_float norm_vec;
