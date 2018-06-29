@@ -516,27 +516,46 @@ c_int is_dual_infeasible(OSQPWorkspace *work, c_float eps_dual_inf) {
   return 0;
 }
 
+static c_int has_solution(OSQPInfo * info){
+
+  return ((info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
+      (info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE) &&
+      (info->status_val != OSQP_DUAL_INFEASIBLE) &&
+      (info->status_val != OSQP_DUAL_INFEASIBLE_INACCURATE) &&
+      (info->status_val != OSQP_NON_CVX));
+
+}
+
+static c_int has_primal_solution(OSQPInfo * info){
+
+  return ((info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
+      (info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE) &&
+      (info->status_val != OSQP_NON_CVX));
+
+}
+
+static c_int has_dual_solution(OSQPInfo * info){
+
+  return ((info->status_val != OSQP_DUAL_INFEASIBLE) &&
+      (info->status_val != OSQP_DUAL_INFEASIBLE_INACCURATE) &&
+      (info->status_val != OSQP_NON_CVX));
+
+}
+
 void store_solution(OSQPWorkspace *work) {
 #ifndef EMBEDDED
   c_float norm_vec;
 #endif /* ifndef EMBEDDED */
 
-  if ((work->info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
-      (work->info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE) &&
-      (work->info->status_val != OSQP_DUAL_INFEASIBLE) &&
-      (work->info->status_val != OSQP_DUAL_INFEASIBLE_INACCURATE)) {
+  if (has_solution(work->info)) {
     prea_vec_copy(work->x, work->solution->x, work->data->n); // primal
     prea_vec_copy(work->y, work->solution->y, work->data->m); // dual
 
-    if (work->settings->scaling)                              // Unscale
-                                                              // solution if
-                                                              // scaling has
-                                                              // been performed
+    // Unscale solution if scaling has been performed
+    if (work->settings->scaling)
       unscale_solution(work);
-  } else {                                                    // Problem primal
-                                                              // or dual
-                                                              // infeasible.
-                                                              // Solution is NaN
+  } else {
+    // No solution present. Solution is NaN
     vec_set_scalar(work->solution->x, OSQP_NAN, work->data->n);
     vec_set_scalar(work->solution->y, OSQP_NAN, work->data->m);
 
@@ -544,21 +563,21 @@ void store_solution(OSQPWorkspace *work) {
 
     // Normalize infeasibility certificates if embedded is off
     // NB: It requires a division
-    if ((work->info->status_val != OSQP_PRIMAL_INFEASIBLE) ||
-        ((work->info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE))) {
+    if ((work->info->status_val == OSQP_PRIMAL_INFEASIBLE) ||
+        ((work->info->status_val == OSQP_PRIMAL_INFEASIBLE_INACCURATE))) {
       norm_vec = vec_norm_inf(work->delta_y, work->data->m);
       vec_mult_scalar(work->delta_y, 1. / norm_vec, work->data->m);
     }
 
-    if ((work->info->status_val != OSQP_DUAL_INFEASIBLE) ||
-        ((work->info->status_val != OSQP_DUAL_INFEASIBLE_INACCURATE))) {
+    if ((work->info->status_val == OSQP_DUAL_INFEASIBLE) ||
+        ((work->info->status_val == OSQP_DUAL_INFEASIBLE_INACCURATE))) {
       norm_vec = vec_norm_inf(work->delta_x, work->data->n);
       vec_mult_scalar(work->delta_x, 1. / norm_vec, work->data->n);
     }
 
 #endif /* ifndef EMBEDDED */
 
-    // Cold start iterates to 0 for next runs
+    // Cold start iterates to 0 for next runs (they cannot start from NaN)
     cold_start(work);
   }
 }
@@ -672,9 +691,12 @@ void update_status(OSQPInfo *info, c_int status_val) {
                                                          "maximum iterations reached");
 #ifdef PROFILING
   else if (status_val == OSQP_TIME_LIMIT_REACHED) c_strcpy(info->status,
-                                                           "Run time limit reached");
+                                                           "run time limit reached");
 #endif /* ifdef PROFILING */
   else if (status_val == OSQP_SIGINT) c_strcpy(info->status, "interrupted");
+
+  else if (status_val == OSQP_NON_CVX) c_strcpy(info->status, "problem non convex");
+
 }
 
 c_int check_termination(OSQPWorkspace *work, c_int approximate) {
@@ -693,6 +715,16 @@ c_int check_termination(OSQPWorkspace *work, c_int approximate) {
   eps_rel      = work->settings->eps_rel;
   eps_prim_inf = work->settings->eps_prim_inf;
   eps_dual_inf = work->settings->eps_dual_inf;
+
+  // If residuals are too large, the problem is probably non convex
+  if ((work->info->pri_res > 2 * OSQP_INFTY) ||
+      (work->info->dua_res > 2 * OSQP_INFTY)){
+    // Looks like residuals are diverging. Probably the problem is non convex!
+    // Terminate and report it
+    update_status(work->info, OSQP_NON_CVX);
+    work->info->obj_val = OSQP_NAN;
+    return 1;
+  }
 
   // If approximate solution required, increase tolerances by 10
   if (approximate) {
