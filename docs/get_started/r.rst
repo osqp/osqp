@@ -13,7 +13,7 @@ A pre-compiled version of the OSQP R interface can be installed directly from wi
 
 
 The pre-compiled binaries can also be downloaded `directly from the CRAN server
-<https://cran.r-project.org/web/packages/rosqp/>`_.
+<https://cran.r-project.org/web/packages/osqp/>`_.
 
 From Sources
 ------------

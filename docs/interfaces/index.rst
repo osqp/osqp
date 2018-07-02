@@ -19,8 +19,8 @@ Interfaces
 | :ref:`Julia <julia_interface>`     | | `Twan Koolen <tkoolen@mit.edu>`_                       | `github.com/oxfordcontrol/OSQP.jl <https://github.com/oxfordcontrol/OSQP.jl>`_           |
 |                                    | | `Bartolomeo Stellato <bartolomeo.stellato@gmail.com>`_ |                                                                                          |
 +------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
-| :ref:`R <R_interface>`             | | `Paul Goulart <paul.goulart@eng.ox.ac.uk>`_            | `github.com/oxfordcontrol/osqp-r <https://github.com/oxfordcontrol/osqp-r>`_             |
-|                                    | | `Eric Anderson <anderic1@gmx.com>`_                    |                                                                                          |
+| `R`_                               | | `Bartolomeo Stellato <bartolomeo.stellato@gmail.com>`_ | `github.com/oxfordcontrol/osqp-r <https://github.com/oxfordcontrol/osqp-r>`_             |
+|                                    | | `Paul Goulart <paul.goulart@eng.ox.ac.uk>`_            |                                                                                          |
 +------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
 | `Rust <https://docs.rs/osqp/>`_    | | `Ed Barnard <eabarnard@gmail.com>`_                    | `github.com/oxfordcontrol/osqp.rs <https://github.com/oxfordcontrol/osqp.rs>`_           |
 +------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
@@ -53,3 +53,5 @@ Interfaces
 
 
 .. _Eigen: https://robotology.github.io/osqp-eigen/doxygen/doc/html/index.html
+
+.. _R: https://cran.r-project.org/web/packages/osqp/
