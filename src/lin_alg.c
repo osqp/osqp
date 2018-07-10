@@ -31,7 +31,6 @@ OsqpVectori* OsqpVectori_copy_new(OsqpVectori *a){
   return b;
 }
 
-
 #endif // end EMBEDDED
 
 void OsqpVectorf_copy(OsqpVectorf *a,OsqpVectorf *b){
@@ -58,9 +57,10 @@ void OsqpVectori_copy(OsqpVectori *a,OsqpVectori *b){
 
 void OsqpVectorf_set_scalar(OsqpVectorf *a, c_float sc){
   c_int i;
-  for (i = 0; i < a->length; i++) {
+  for (i = 0; i < (int)a->length; i++) {
     a->values[i] = sc;
   }
+  return;
 }
 
 void OsqpVectori_set_scalar(OsqpVectori *a, c_int sc){
@@ -83,7 +83,6 @@ void OsqpVectori_add_scalar(OsqpVectori *a, c_int sc){
     a->values[i] += sc;
   }
 }
-
 
 void OsqpVectorf_mult_scalar(OsqpVectorf *a, c_float sc){
   c_int i;
@@ -129,7 +128,6 @@ c_float OsqpVectorf_norm_inf(const OsqpVectorf *v){
 c_float OsqpVectorf_norm_1(const OsqpVectorf *v){
 
   c_int   i;
-  c_float absval;
   c_float normval = 0.0;
 
   for (i = 0; i < v->length; i++) {
@@ -166,7 +164,6 @@ c_float OsqpVectorf_scaled_norm_1(const OsqpVectorf *S, const OsqpVectorf *v){
   return normval;
 }
 
-
 c_float OsqpVectorf_norm_inf_diff(const OsqpVectorf *a,
                                   const OsqpVectorf *b){
   c_int   i;
@@ -196,7 +193,6 @@ c_float OsqpVectorf_norm_1_diff(const OsqpVectorf *a,
   return normDiff;
 }
 
-
 c_float OsqpVectorf_sum(const OsqpVectorf *a){
 
   c_int   i;
@@ -207,16 +203,6 @@ c_float OsqpVectorf_sum(const OsqpVectorf *a){
   }
 
   return val;
-}
-
-c_float OsqpVectorf_mean(const OsqpVectorf *a){
-
-  if(a->length){
-    return OsqpVectorf_sum(a)/(a->length);
-  }
-  else{
-    return 0;
-  }
 }
 
 c_float OsqpVectorf_dot_prod(const OsqpVectorf *a, const OsqpVectorf *b){
@@ -247,9 +233,17 @@ void OsqpVectorf_ew_prod(const OsqpVectorf *a,
     }
 }
 
-
-
 #if EMBEDDED != 1
+
+c_float OsqpVectorf_mean(const OsqpVectorf *a){
+
+  if(a->length){
+    return OsqpVectorf_sum(a)/(a->length);
+  }
+  else{
+    return 0;
+  }
+}
 
 void OsqpVectorf_ew_reciprocal(const OsqpVectorf *a, OsqpVectorf *b){
 
@@ -261,7 +255,6 @@ void OsqpVectorf_ew_reciprocal(const OsqpVectorf *a, OsqpVectorf *b){
     b->values[i] = (c_float)1.0 / a->values[i];
   }
 }
-
 
 void OsqpVectorf_ew_sqrt(OsqpVectorf *a){
 
@@ -538,8 +531,8 @@ void CsrMatrix_Ax(const CsrMatrix   *A,
   }
 
 /*
-Matrix vector A^T*x multiplication, with file scope CSR/CSC implementations
-For this operation, always prefer the CSR format if it is available
+  Matrix vector A^T*x multiplication, with file scope CSR/CSC implementations
+  For this operation, always prefer the CSR format if it is available
 */
 
 void OsqpMatrix_Atx(const OsqpMatrix  *A,
