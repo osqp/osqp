@@ -40,7 +40,7 @@ struct SparseMatrix_ {
                   // formation))
   c_int   *i;     ///< row indices, size nzmax starting from 0
   c_float *x;     ///< numerical values, size nzmax
-  c_int   nnz;    ///< # of entries in triplet matrix, -1 for csc
+  c_int   nnz;    ///< # of entries in triplet matrix, -1 for csc/csr
   SparseMatrix_value_type    datatype; /// REAL or LOGICAL.  If Logical, then x = NULL
 };
 
