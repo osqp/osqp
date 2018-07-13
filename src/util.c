@@ -64,7 +64,7 @@ void print_setup_header(const OSQPWorkspace *work) {
   settings = work->settings;
 
   // Number of nonzeros
-  nnz = data->P->nzmax + data->A->p[data->A->n];
+  nnz = data->P->p[data->P->n] + data->A->p[data->A->n];
 
   print_line();
   c_print("           OSQP v%s  -  Operator Splitting QP Solver\n"
@@ -106,7 +106,7 @@ void print_setup_header(const OSQPWorkspace *work) {
       "          check_termination: on (interval %i),\n",
       (int)settings->check_termination);
   else c_print("          check_termination: off,\n");
-  
+
 # ifdef PROFILING
   if (settings->time_limit) c_print("          time_limit: %.2e sec,\n",
                                     settings->time_limit);
