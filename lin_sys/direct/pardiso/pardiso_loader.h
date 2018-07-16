@@ -5,7 +5,6 @@
 extern "C" {
 #endif
 
-#include "glob_opts.h"
 
 
 /**

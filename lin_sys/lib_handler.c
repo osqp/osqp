@@ -1,6 +1,8 @@
 #include "lib_handler.h"
 #include <ctype.h> // Needed for tolower functions
 
+#include "constants.h"
+
 soHandle_t lh_load_lib(const char *libName) {
     soHandle_t h = OSQP_NULL;
 

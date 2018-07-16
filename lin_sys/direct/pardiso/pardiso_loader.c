@@ -1,6 +1,9 @@
 #include "lib_handler.h"
 #include "pardiso_loader.h"
 
+#include "glob_opts.h"
+#include "constants.h"
+
 #ifdef IS_WINDOWS
 #define PARDISOLIBNAME "mkl_rt." SHAREDLIBEXT
 #else
@@ -39,7 +42,7 @@ void pardiso(void** pt, const c_int* maxfct, const c_int* mnum,
             // Call function pardiso only if it has been initialized
 	    func_pardiso(pt, maxfct, mnum, mtype, phase, n, a, ia, ja,
 			 perm, nrhs, iparm, msglvl, b, x, error);
-	} 
+	}
 	else
 	{
 #ifdef PRINTING

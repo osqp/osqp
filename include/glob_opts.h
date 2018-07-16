@@ -96,19 +96,6 @@ typedef float c_float;  /* for numerical values  */
 # endif /* ifndef DFLOAT */
 
 
-/* Use customized constants -----------------------------------------------   */
-# ifndef OSQP_NULL
-#  define OSQP_NULL 0
-# endif /* ifndef OSQP_NULL */
-
-# ifndef OSQP_NAN
-#  define OSQP_NAN ((c_float)0x7ff8000000000000) // Not a Number
-# endif /* ifndef OSQP_NAN */
-
-# ifndef OSQP_INFTY
-#  define OSQP_INFTY ((c_float)1e20) // Infinity
-# endif /* ifndef OSQP_INFTY */
-
 /* Use customized operations */
 
 # ifndef c_absval

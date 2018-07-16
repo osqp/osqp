@@ -384,7 +384,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
       update_status(work->info, OSQP_TIME_LIMIT_REACHED);
 # ifdef PRINTING
 
-      if (work->settings->verbose) c_print("Run time limit reached\n");
+      if (work->settings->verbose) c_print("run time limit reached\n");
 # endif /* ifdef PRINTING */
       exitflag = 1;
       goto exit;
@@ -499,7 +499,9 @@ c_int osqp_solve(OSQPWorkspace *work) {
       }
     }
 #endif // EMBEDDED != 1
+
   }        // End of ADMM for loop
+
 
   // Update information and check termination condition if it hasn't been done
   // during last iteration (max_iter reached or check_termination disabled)

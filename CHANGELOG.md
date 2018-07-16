@@ -1,3 +1,8 @@
+Unreleased
+----------
+* Added check for nonconvex cost function (negative semidefinite `P`).
+
+
 Version 0.3.1 (10 June 2018)
 ----------------------------
 * Fixed [#62](https://github.com/oxfordcontrol/osqp/issues/62).
