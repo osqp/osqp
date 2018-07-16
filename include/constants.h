@@ -81,7 +81,7 @@ static const char *LINSYS_SOLVER_NAME[] = {
 # endif /* ifndef OSQP_NULL */
 
 # ifndef OSQP_NAN
-#  define OSQP_NAN ((c_float)0.0/0.0) // Not a Number
+#  define OSQP_NAN ((c_float)0x7fc00000UL) // Not a Number
 # endif /* ifndef OSQP_NAN */
 
 # ifndef OSQP_INFTY
