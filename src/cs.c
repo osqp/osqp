@@ -112,7 +112,7 @@ csc* triplet_to_csr(const csc *T, c_int *TtoC) {
   Cx = C->x;
 
   for (k = 0; k < nz; k++) w[Ti[k]]++;  /* row counts */
-  csc_cumsum(Cp, w, n);                 /* row pointers */
+  csc_cumsum(Cp, w, m);                 /* row pointers */
 
   for (k = 0; k < nz; k++) {
     Cj[p = w[Ti[k]]++] = Tj[k];         /* A(i,j) is the pth entry in C */
