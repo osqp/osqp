@@ -291,6 +291,9 @@ add_subdirectory(lin_sys)
 
 # Static library
 add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
+
+# Link against linear system solver libraries
+# QDLDL
 target_link_libraries(osqpstatic qdldlstatic)
 
 # Include directories for linear system solvers
@@ -333,6 +336,7 @@ if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG)
     add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
 
     # Link against linear system solver libraries
+    # QDLDL
     target_link_libraries(osqp qdldlstatic)
 
     # Include directories for linear system solvers

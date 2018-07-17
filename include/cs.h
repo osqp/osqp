@@ -52,9 +52,8 @@ csc* csc_spalloc(c_int m,
  * Free sparse matrix
     (uses FREE to free inner arrays x, i, p)
  * @param  A Matrix in CSC format
- * @return   return NULL pointer if everything works
  */
-csc* csc_spfree(csc *A);
+void csc_spfree(csc *A);
 
 
 /**

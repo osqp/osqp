@@ -52,29 +52,23 @@ void free_linsys_solver_qdldl(qdldl_solver *s) {
  * Compute LDL factorization of matrix A
  * @param  A Matrix to be factorized
  * @param  p Private workspace
- * @return   [description]
+ * @return   exitstatus (0 is good)
  */
 static c_int LDL_factor(csc *A,  qdldl_solver * p){
 
-    c_int Ln = A->n;
     c_int sum_Lnz;
     c_int factor_status;
 
-    // Elimination tree workspace
-    p->etree = (c_int *)c_malloc(Ln * sizeof(c_int));
-    p->Lnz = (c_int *)c_malloc(Ln * sizeof(c_int));
-
-    // Preallocate L matrix (Lx and Li are sparsity dependent)
-    p->L->p = (c_int *)c_malloc(Ln + 1 * sizeof(c_int));
-
-    // Preallocate workspace
-    p->iwork = (c_int *)malloc(sizeof(c_int)*(3*Ln));
-    p->bwork = (c_int *)malloc(sizeof(c_int)*Ln);
-    p->fwork = (c_float *)malloc(sizeof(c_float)*Ln);
-
     // Compute elimination tree
-    sum_Lnz = QDLDL_etree(Ln, A->p, A->i, p->iwork, p->Lnz, p->etree);
+    sum_Lnz = QDLDL_etree(A->n, A->p, A->i, p->iwork, p->Lnz, p->etree);
     if (sum_Lnz < 0){
+
+      // DEBUG
+      c_print("sum_Lnz = %d\n", sum_Lnz);
+      print_csc_matrix(A, "A");
+      c_float * Adns = csc_to_dns(A);
+      print_dns_matrix(Adns, A->m, A->n, "A");
+
       // Error
       c_eprint("Error in KKT matrix LDL factorization when computing the elimination tree. A is not perfectly upper triangular");
       return sum_Lnz;
@@ -185,7 +179,7 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
     // NB: Do not allocate L completely (CSC elements)
     //      L will be allocated during the factorization depending on the
     //      resulting number of elements.
-    p->L = c_malloc(sizeof(csc));
+    p->L = c_calloc(1, sizeof(csc));  // Calloc to avoid memory bad acess in case of failure
     p->L->m = n_plus_m;
     p->L->n = n_plus_m;
     p->L->nz = -1;
@@ -200,6 +194,17 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
     // Working vector
     p->bp = c_malloc(sizeof(c_float) * n_plus_m);
 
+    // Elimination tree workspace
+    p->etree = (c_int *)c_malloc(n_plus_m * sizeof(c_int));
+    p->Lnz = (c_int *)c_malloc(n_plus_m * sizeof(c_int));
+
+    // Preallocate L matrix (Lx and Li are sparsity dependent)
+    p->L->p = (c_int *)c_malloc(n_plus_m + 1 * sizeof(c_int));
+
+    // Preallocate workspace
+    p->iwork = (c_int *)c_malloc(sizeof(c_int)*(3*n_plus_m));
+    p->bwork = (c_int *)c_malloc(sizeof(c_int)*n_plus_m);
+    p->fwork = (c_float *)c_malloc(sizeof(c_float)*n_plus_m);
 
     // Form and permute KKT matrix
     if (polish){ // Called from polish()

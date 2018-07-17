@@ -9,11 +9,6 @@ static void* csc_calloc(c_int n, c_int size) {
   return c_calloc(n, size);
 }
 
-static void* csc_free(void *p) {
-  if (p) c_free(p);  /* free p if it is not already SCS_NULL */
-  return OSQP_NULL;  /* return OSQP_NULL to simplify the use of csc_free */
-}
-
 csc* csc_matrix(c_int m, c_int n, c_int nzmax, c_float *x, c_int *i, c_int *p)
 {
   csc *M = (csc *)c_malloc(sizeof(csc));
@@ -40,16 +35,19 @@ csc* csc_spalloc(c_int m, c_int n, c_int nzmax, c_int values, c_int triplet) {
   A->p     = csc_malloc(triplet ? nzmax : n + 1, sizeof(c_int));
   A->i     = csc_malloc(nzmax,  sizeof(c_int));
   A->x     = values ? csc_malloc(nzmax,  sizeof(c_float)) : OSQP_NULL;
-  return (!A->p || !A->i || (values && !A->x)) ? csc_spfree(A) : A;
+  if (!A->p || !A->i || (values && !A->x)){
+    csc_spfree(A);
+    return OSQP_NULL;
+  } else return A;
 }
 
-csc* csc_spfree(csc *A) {
-  if (!A) return OSQP_NULL;  /* do nothing if A already SCS_NULL */
-
-  csc_free(A->p);
-  csc_free(A->i);
-  csc_free(A->x);
-  return (csc *)csc_free(A); /* free the cs struct and return OSQP_NULL */
+void csc_spfree(csc *A) {
+  if (A){
+    if (A->p) c_free(A->p);
+    if (A->i) c_free(A->i);
+    if (A->x) c_free(A->x);
+    c_free(A);
+  }
 }
 
 csc* triplet_to_csc(const csc *T, c_int *TtoC) {
@@ -224,9 +222,13 @@ void prea_copy_csc_mat(const csc *A, csc *B) {
 }
 
 csc* csc_done(csc *C, void *w, void *x, c_int ok) {
-  csc_free(w);                   /* free workspace */
-  csc_free(x);
-  return ok ? C : csc_spfree(C); /* return result if OK, else free it */
+  c_free(w);                   /* free workspace */
+  c_free(x);
+  if (ok) return C;
+  else {
+    csc_spfree(C);
+    return OSQP_NULL;
+  }
 }
 
 csc* csc_to_triu(csc *M) {
