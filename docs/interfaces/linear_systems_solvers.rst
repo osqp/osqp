@@ -9,7 +9,7 @@ In C/C++ it corresponds to an integer :code:`c_int` (see :ref:`c_cpp_data_types`
 +-----------------+-------------------+--------------------------------+---------------+
 | Solver          | String option     | C/C++ Constant                 | Integer value |
 +=================+===================+================================+===============+
-| SuiteSparse LDL | "suitesparse ldl" | :code:`SUITESPARSE_LDL_SOLVER` | :code:`0`     |
+| QDLDL           | "qdldl"           | :code:`QDLDL_SOLVER`           | :code:`0`     |
 +-----------------+-------------------+--------------------------------+---------------+
 | MKL Pardiso     | "mkl pardiso"     | :code:`MKL_PARDISO_SOLVER`     | :code:`1`     |
 +-----------------+-------------------+--------------------------------+---------------+

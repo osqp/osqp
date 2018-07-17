@@ -1,18 +1,12 @@
 # Add direct linear systems solvers
 
-# Suitesparse LDL (Default)
+# QDLDL (Default)
 # -------------------------
-# suitesparse
-add_subdirectory(suitesparse)
+add_subdirectory(qdldl)
 
-# create suitesparse ldl object library
-add_library(linsys_suitesparse_ldl OBJECT ${suitesparse_ldl_sources})
+set(direct_linsys_solvers $<TARGET_OBJECTS:linsys_qdldl>)
 
-target_include_directories(linsys_suitesparse_ldl PRIVATE ${suitesparse_ldl_includes}  ${PROJECT_SOURCE_DIR}/include)
-
-set(direct_linsys_solvers $<TARGET_OBJECTS:linsys_suitesparse_ldl>)
-
-set(direct_linsys_solvers_includes "${CMAKE_CURRENT_SOURCE_DIR}/suitesparse/")
+set(direct_linsys_solvers_includes "${CMAKE_CURRENT_SOURCE_DIR}/qdldl/")
 
 
 # Add other solvers if embedded option is false
@@ -27,7 +21,7 @@ if (ENABLE_MKL_PARDISO)
 
 	add_library(linsys_pardiso OBJECT ${pardiso_sources})
 
-  # Add parent directory for library handler
+	# Add parent directory for library handler
 	target_include_directories(linsys_pardiso PRIVATE  ${pardiso_includes} ${PROJECT_SOURCE_DIR}/include)
 
 	set(direct_linsys_solvers ${direct_linsys_solvers} $<TARGET_OBJECTS:linsys_pardiso>)

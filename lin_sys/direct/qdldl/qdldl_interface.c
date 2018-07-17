@@ -1,11 +1,20 @@
-#include "ldl.h"
+#include "glob_opts.h"
+
+typedef c_int QDLDL_bool;
+typedef c_int QDLDL_int;
+typedef c_float QDLDL_float;
+
+/* Then define this symbol to prevent type redefinitions */
+#define QDLDL_TYPES_DEFINED
+
+#include "qdldl.h"
+#include "qdldl_interface.h"
 
 #ifndef EMBEDDED
 #include "amd.h"
 #endif
 
 #include "lin_alg.h"
-#include "suitesparse_ldl.h"
 
 #if EMBEDDED != 1
 #include "kkt.h"
@@ -14,7 +23,7 @@
 #ifndef EMBEDDED
 
 // Free LDL Factorization structure
-void free_linsys_solver_suitesparse_ldl(suitesparse_ldl_solver *s) {
+void free_linsys_solver_qdldl(qdldl_solver *s) {
     if (s) {
         if (s->L)         csc_spfree(s->L);
         if (s->P)         c_free(s->P);
@@ -27,12 +36,12 @@ void free_linsys_solver_suitesparse_ldl(suitesparse_ldl_solver *s) {
         if (s->PtoKKT)    c_free(s->PtoKKT);
         if (s->AtoKKT)    c_free(s->AtoKKT);
         if (s->rhotoKKT)  c_free(s->rhotoKKT);
-        if (s->Parent)    c_free(s->Parent);
+        if (s->D)         c_free(s->D);
+        if (s->etree)     c_free(s->etree);
         if (s->Lnz)       c_free(s->Lnz);
-        if (s->Flag)      c_free(s->Flag);
-        if (s->Pattern)   c_free(s->Pattern);
-        if (s->Y)         c_free(s->Y);
-
+        if (s->iwork)     c_free(s->iwork);
+        if (s->bwork)     c_free(s->bwork);
+        if (s->fwork)     c_free(s->fwork);
         c_free(s);
 
     }
@@ -45,60 +54,54 @@ void free_linsys_solver_suitesparse_ldl(suitesparse_ldl_solver *s) {
  * @param  p Private workspace
  * @return   [description]
  */
-static c_int LDL_factor(csc *A,  suitesparse_ldl_solver * p){
-    // c_int P[], c_int Pinv[], csc **L, c_float **D) {
-    c_int kk, n = A->n;
-    c_int check_Li_Lx;
-    c_int * Parent = c_malloc(n * sizeof(c_int));
-    c_int * Lnz = c_malloc(n * sizeof(c_int));
-    c_int * Flag = c_malloc(n * sizeof(c_int));
-    c_int * Pattern = c_malloc(n * sizeof(c_int));
-    c_float * Y = c_malloc(n * sizeof(c_float));
-    p->L->p = (c_int *)c_malloc((1 + n) * sizeof(c_int));
+static c_int LDL_factor(csc *A,  qdldl_solver * p){
 
-    // Set number of threads to 1 (single threaded)
-    p->nthreads = 1;
+    c_int Ln = A->n;
+    c_int sum_Lnz;
+    c_int factor_status;
 
-    // Symbolic factorization
-    LDL_symbolic(n, A->p, A->i, p->L->p, Parent, Lnz, Flag,
-         OSQP_NULL, OSQP_NULL);
+    // Elimination tree workspace
+    p->etree = (c_int *)c_malloc(Ln * sizeof(c_int));
+    p->Lnz = (c_int *)c_malloc(Ln * sizeof(c_int));
 
-    p->L->nzmax = p->L->p[n];
-    p->L->x = (c_float *)c_malloc(p->L->nzmax * sizeof(c_float));
-    p->L->i = (c_int *)c_malloc(p->L->nzmax * sizeof(c_int));
+    // Preallocate L matrix (Lx and Li are sparsity dependent)
+    p->L->p = (c_int *)c_malloc(Ln + 1 * sizeof(c_int));
 
-    // If there are no elements in L, i.e. if the matrix A is already diagona, do not check if L->x or L->i are different than zero.
-    if (p->L->nzmax == 0) {
-        check_Li_Lx = 0;
-    }
-    else{
-        check_Li_Lx = !p->L->i || !p->L->x;
+    // Preallocate workspace
+    p->iwork = (c_int *)malloc(sizeof(c_int)*(3*Ln));
+    p->bwork = (c_int *)malloc(sizeof(c_int)*Ln);
+    p->fwork = (c_float *)malloc(sizeof(c_float)*Ln);
+
+    // Compute elimination tree
+    sum_Lnz = QDLDL_etree(Ln, A->p, A->i, p->iwork, p->Lnz, p->etree);
+    if (sum_Lnz < 0){
+      // Error
+      c_eprint("Error in KKT matrix LDL factorization when computing the elimination tree. A is not perfectly upper triangular");
+      return sum_Lnz;
     }
 
-    // Check if symbolic factorization worked our correctly
-    if (!(p->Dinv) || check_Li_Lx || !Y || !Pattern || !Flag || !Lnz ||
-        !Parent)
-        return -1;
+    // Allocate memory for Li and Lx
+    p->L->i = (c_int *)malloc(sizeof(c_int)*sum_Lnz);
+    p->L->x = (c_float *)malloc(sizeof(c_float)*sum_Lnz);
 
-    // Numeric factorization
-    //                  p->L->x, p->Dinv, Y, Pattern, Flag, p->P, Pinv);
-    kk = LDL_numeric(A->n, A->p, A->i, A->x, p->L->p, Parent, Lnz, p->L->i,
-                     p->L->x, p->Dinv, Y, Pattern, Flag, OSQP_NULL, OSQP_NULL);
+    // Factor matrix
+    factor_status = QDLDL_factor(A->n, A->p, A->i, A->x,
+                                 p->L->p, p->L->i, p->L->x,
+                                 p->D, p->Dinv, p->Lnz,
+                                 p->etree, p->bwork, p->iwork, p->fwork);
 
+    if (factor_status < 0){
+      // Error
+      c_eprint("Error in KKT matrix LDL factorization when in computing the nonzero elements. There are zeros in the diagonal matrix");
+      return factor_status;
+    }
 
-    // If not embedded option 1 store values into private structure
-    p->Parent = Parent;
-    p->Lnz = Lnz;
-    p->Flag = Flag;
-    p->Pattern = Pattern;
-    p->Y = Y;
+    return 0;
 
-    // return exit flag
-    return (kk - n);
 }
 
 
-static c_int permute_KKT(csc ** KKT, suitesparse_ldl_solver * p, c_int Pnz, c_int Anz, c_int m, c_int * PtoKKT, c_int * AtoKKT, c_int * rhotoKKT){
+static c_int permute_KKT(csc ** KKT, qdldl_solver * p, c_int Pnz, c_int Anz, c_int m, c_int * PtoKKT, c_int * AtoKKT, c_int * rhotoKKT){
     c_float *info;
     c_int amd_status;
     c_int * Pinv;
@@ -165,15 +168,15 @@ static c_int permute_KKT(csc ** KKT, suitesparse_ldl_solver * p, c_int Pnz, c_in
 
 
 // Initialize LDL Factorization structure
-suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const csc * A, c_float sigma, c_float * rho_vec, c_int polish){
+qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sigma, c_float * rho_vec, c_int polish){
     c_int i;                     // loop counter
     // Define Variables
-    suitesparse_ldl_solver * p;  // Initialize LDL solver
+    qdldl_solver * p;  // Initialize LDL solver
     c_int n_plus_m;              // Define n_plus_m dimension
     csc * KKT_temp;              // Temporary KKT pointer
 
     // Allocate private structure to store KKT factorization
-    p = c_calloc(1, sizeof(suitesparse_ldl_solver));
+    p = c_calloc(1, sizeof(qdldl_solver));
 
     // Size of KKT
     n_plus_m = P->m + A->m;
@@ -189,6 +192,7 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
 
     // Diagonal matrix stored as a vector D
     p->Dinv = c_malloc(sizeof(c_float) * n_plus_m);
+    p->D = c_malloc(sizeof(c_float) * n_plus_m);
 
     // Permutation vector P
     p->P = c_malloc(sizeof(c_int) * n_plus_m);
@@ -241,12 +245,9 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
     // Factorize the KKT matrix
     if (LDL_factor(KKT_temp, p) < 0) {
         csc_spfree(KKT_temp);
-        free_linsys_solver_suitesparse_ldl(p);
+        free_linsys_solver_qdldl(p);
         return OSQP_NULL;
     }
-
-    // Invert elements of D that are stored in p->Dinv
-    vec_ew_recipr(p->Dinv, p->Dinv, KKT_temp->n);
 
     if (polish){ // If KKT passed, assign it to KKT_temp
         // Polish, no need for KKT_temp
@@ -257,19 +258,23 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
     }
 
     // Link Functions
-    p->solve = &solve_linsys_suitesparse_ldl;
+    p->solve = &solve_linsys_qdldl;
 
     #ifndef EMBEDDED
-    p->free = &free_linsys_solver_suitesparse_ldl;
+    p->free = &free_linsys_solver_qdldl;
     #endif
 
     #if EMBEDDED != 1
-    p->update_matrices = &update_linsys_solver_matrices_suitesparse_ldl;
-    p->update_rho_vec = &update_linsys_solver_rho_vec_suitesparse_ldl;
+    p->update_matrices = &update_linsys_solver_matrices_qdldl;
+    p->update_rho_vec = &update_linsys_solver_rho_vec_qdldl;
     #endif
 
     // Assign type
-    p->type = SUITESPARSE_LDL_SOLVER;
+    p->type = QDLDL_SOLVER;
+    //
+    // Set number of threads to 1 (single threaded)
+    p->nthreads = 1;
+
 
     return p;
 }
@@ -277,22 +282,32 @@ suitesparse_ldl_solver *init_linsys_solver_suitesparse_ldl(const csc * P, const 
 #endif  // EMBEDDED
 
 
+// Permute x = P*b using P and store it in b
+void permute_x( c_int n, c_float * x,	c_float * b, c_int * P) {
+    c_int j;
+    for (j = 0 ; j < n ; j++) x[j] = b[P[j]];
+}
+
+// Permute x = P'*b using P and store it in b
+void permutet_x( c_int n, c_float * x,	c_float * b, c_int * P) {
+    c_int j;
+    for (j = 0 ; j < n ; j++) x[P[j]] = b[j];
+}
+
 
 static void LDLSolve(c_float *x, c_float *b, csc *L, c_float *Dinv, c_int *P,
               c_float *bp) {
     /* solves PLDL'P' x = b for x */
     c_int n = L->n;
 
-    LDL_perm(n, bp, b, P);
-    LDL_lsolve(n, bp, L->p, L->i, L->x);
-    LDL_dinvsolve(n, bp, Dinv);
-    LDL_ltsolve(n, bp, L->p, L->i, L->x);
-    LDL_permt(n, x, bp, P);
+    permute_x(n, bp, b, P);
+    QDLDL_solve(n, L->p, L->i, L->x, Dinv, b);
+    permutet_x(n, x, bp, P);
 
 }
 
 
-c_int solve_linsys_suitesparse_ldl(suitesparse_ldl_solver * s, c_float * b, const OSQPSettings *settings) {
+c_int solve_linsys_qdldl(qdldl_solver * s, c_float * b, const OSQPSettings *settings) {
     /* returns solution to linear system */
     /* Ax = b with solution stored in b */
     LDLSolve(b, b, s->L, s->Dinv, s->P, s->bp);
@@ -303,7 +318,7 @@ c_int solve_linsys_suitesparse_ldl(suitesparse_ldl_solver * s, c_float * b, cons
 
 #if EMBEDDED != 1
 // Update private structure with new P and A
-c_int update_linsys_solver_matrices_suitesparse_ldl(suitesparse_ldl_solver * s,
+c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s,
 		const csc *P, const csc *A, const OSQPSettings *settings){
     c_int kk;
 
@@ -313,23 +328,15 @@ c_int update_linsys_solver_matrices_suitesparse_ldl(suitesparse_ldl_solver * s,
     // Update KKT matrix with new A
     update_KKT_A(s->KKT, A, s->AtoKKT);
 
-    // Perform numeric factorization
-    kk = LDL_numeric(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
-                     s->L->p, s->Parent, s->Lnz, s->L->i,
-                     s->L->x, s->Dinv, s->Y, s->Pattern, s->Flag,
-                     OSQP_NULL, OSQP_NULL);
-
-     // Invert elements of D that are stored in s->Dinv
-     vec_ew_recipr(s->Dinv, s->Dinv, s->KKT->n);
-
-    // return exit flag
-    return (kk - s->KKT->n);
+    return QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
+        s->L->p,s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
+        s->etree, s->bwork, s->iwork, s->fwork);
 
 }
 
 
 
-c_int update_linsys_solver_rho_vec_suitesparse_ldl(suitesparse_ldl_solver * s, const c_float * rho_vec, const c_int m){
+c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver * s, const c_float * rho_vec, const c_int m){
     c_int kk, i;
 
     // Use s->bp for storing param2 = rho_inv_vec
@@ -340,17 +347,9 @@ c_int update_linsys_solver_rho_vec_suitesparse_ldl(suitesparse_ldl_solver * s, c
     // Update KKT matrix with new rho
     update_KKT_param2(s->KKT, s->bp, s->rhotoKKT, m);
 
-    // Perform numeric factorization
-    kk = LDL_numeric(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
-                     s->L->p, s->Parent, s->Lnz, s->L->i,
-                     s->L->x, s->Dinv, s->Y, s->Pattern, s->Flag,
-                     OSQP_NULL, OSQP_NULL);
-
-     // Invert elements of D that are stored in s->Dinv
-     vec_ew_recipr(s->Dinv, s->Dinv, s->KKT->n);
-
-    // return exit flag
-    return (kk - s->KKT->n);
+    return QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
+        s->L->p,s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
+        s->etree, s->bwork, s->iwork, s->fwork);
 }
 
 

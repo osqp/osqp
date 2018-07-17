@@ -26,11 +26,11 @@ The only requirement is that the shared library related to the solver is in the 
 
 
 
-SuiteSparse LDL
+QDLDL
 ---------------
-OSQP comes with `SuiteSparse LDL <http://faculty.cse.tamu.edu/davis/suitesparse.html>`_ internally installed.
+OSQP comes with `QDLDL <https://github.com/oxfordcontrol/qdldl>`_ internally installed.
 It does not require any external shared library.
-SuiteSparse LDL is a sparse direct solver that works well for most small to medium sized problems.
+QDLDL is a sparse direct solver that works well for most small to medium sized problems.
 However, its becomes not really efficient for large scale problems since it is not multi-threaded.
 
 
@@ -42,7 +42,7 @@ Intel offers `free lincenses <https://software.intel.com/en-us/articles/free-mkl
 Install with MKL
 ^^^^^^^^^^^^^^^^
 We can install MKL Pardiso by using the standard `MKL installer <https://software.intel.com/en-us/mkl>`_.
-The main library to be loaded is called :code:`libmkl_rt`. 
+The main library to be loaded is called :code:`libmkl_rt`.
 To add it, together with its dependencies, to your path, just execute the automatic MKL script.
 
 +------------------+------------------------------------------------+
