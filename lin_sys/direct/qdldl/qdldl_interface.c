@@ -59,24 +59,32 @@ static c_int LDL_factor(csc *A,  qdldl_solver * p){
     c_int sum_Lnz;
     c_int factor_status;
 
+    // DEBUG
+    c_print("Arguments for etree\n");
+    printf("An = %lli\n", A->n);
+    print_vec_int(A->p, A->n + 1, "A->p");
+    print_vec_int(A->i, A->p[A->n], "A->i");
+
     // Compute elimination tree
     sum_Lnz = QDLDL_etree(A->n, A->p, A->i, p->iwork, p->Lnz, p->etree);
     if (sum_Lnz < 0){
-
-      // DEBUG
-      c_print("sum_Lnz = %d\n", sum_Lnz);
-      print_csc_matrix(A, "A");
-      c_float * Adns = csc_to_dns(A);
-      print_dns_matrix(Adns, A->m, A->n, "A");
-
       // Error
       c_eprint("Error in KKT matrix LDL factorization when computing the elimination tree. A is not perfectly upper triangular");
       return sum_Lnz;
     }
 
+
     // Allocate memory for Li and Lx
     p->L->i = (c_int *)malloc(sizeof(c_int)*sum_Lnz);
     p->L->x = (c_float *)malloc(sizeof(c_float)*sum_Lnz);
+
+    // DEBUG arguments
+    c_print("Arguments for factor\n");
+    print_vec_int(A->p, A->n + 1, "A->p");
+    print_vec_int(A->i, A->p[A->n], "A->i");
+    print_vec(A->x, A->p[A->n], "A->x");
+    print_vec_int(p->Lnz, A->n, "Lnz");
+    print_vec_int(p->etree, A->n, "etree");
 
     // Factor matrix
     factor_status = QDLDL_factor(A->n, A->p, A->i, A->x,
@@ -246,7 +254,6 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
         return OSQP_NULL;
     }
 
-
     // Factorize the KKT matrix
     if (LDL_factor(KKT_temp, p) < 0) {
         csc_spfree(KKT_temp);
@@ -280,6 +287,11 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
     // Set number of threads to 1 (single threaded)
     p->nthreads = 1;
 
+    // DEBUG
+    c_print("Final L matrix\n");
+    print_vec_int(p->L->p, p->L->n + 1, "L->p");
+    print_vec_int(p->L->i, p->L->p[p->L->n], "L->i");
+    print_vec(p->L->x, p->L->p[p->L->n], "L->x");
 
     return p;
 }
@@ -287,13 +299,13 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
 #endif  // EMBEDDED
 
 
-// Permute x = P*b using P and store it in b
+// Permute x = P*b using P
 void permute_x( c_int n, c_float * x,	c_float * b, c_int * P) {
     c_int j;
     for (j = 0 ; j < n ; j++) x[j] = b[P[j]];
 }
 
-// Permute x = P'*b using P and store it in b
+// Permute x = P'*b using P
 void permutet_x( c_int n, c_float * x,	c_float * b, c_int * P) {
     c_int j;
     for (j = 0 ; j < n ; j++) x[P[j]] = b[j];
@@ -303,11 +315,9 @@ void permutet_x( c_int n, c_float * x,	c_float * b, c_int * P) {
 static void LDLSolve(c_float *x, c_float *b, csc *L, c_float *Dinv, c_int *P,
               c_float *bp) {
     /* solves PLDL'P' x = b for x */
-    c_int n = L->n;
-
-    permute_x(n, bp, b, P);
-    QDLDL_solve(n, L->p, L->i, L->x, Dinv, b);
-    permutet_x(n, x, bp, P);
+    permute_x(L->n, bp, b, P);
+    QDLDL_solve(L->n, L->p, L->i, L->x, Dinv, bp);
+    permutet_x(L->n, x, bp, P);
 
 }
 

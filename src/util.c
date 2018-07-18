@@ -366,7 +366,7 @@ void print_csc_matrix(csc *M, const char *name)
     if (row_start == row_stop) continue;
     else {
       for (i = row_start; i < row_stop; i++) {
-        c_print("\t[%3u,%3u] = %g\n", (int)M->i[i], (int)j, M->x[k++]);
+        c_print("\t[%3u,%3u] = %.3g\n", (int)M->i[i], (int)j, M->x[k++]);
       }
     }
   }
@@ -406,7 +406,7 @@ void print_trip_matrix(csc *M, const char *name)
   c_print("%s :\n", name);
 
   for (k = 0; k < M->nz; k++) {
-    c_print("\t[%3u, %3u] = %g\n", (int)M->i[k], (int)M->p[k], M->x[k]);
+    c_print("\t[%3u, %3u] = %.3g\n", (int)M->i[k], (int)M->p[k], M->x[k]);
   }
 }
 
@@ -420,11 +420,11 @@ void print_dns_matrix(c_float *M, c_int m, c_int n, const char *name)
     for (j = 0; j < n; j++) { // Cycle over columns
       if (j < n - 1)
         // c_print("% 14.12e,  ", M[j*m+i]);
-        c_print("% .8f,  ", M[j * m + i]);
+        c_print("% .3g,  ", M[j * m + i]);
 
       else
         // c_print("% 14.12e;  ", M[j*m+i]);
-        c_print("% .8f;  ", M[j * m + i]);
+        c_print("% .3g;  ", M[j * m + i]);
     }
 
     if (i < m - 1) {
@@ -459,7 +459,7 @@ void print_vec_int(c_int *x, c_int n, const char *name) {
   c_print("%s = [", name);
 
   for (i = 0; i < n; i++) {
-    c_print(" %d ", (int)x[i]);
+    c_print(" %lli ", x[i]);
   }
   c_print("]\n");
 }
