@@ -207,7 +207,7 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
     p->Lnz = (c_int *)c_malloc(n_plus_m * sizeof(c_int));
 
     // Preallocate L matrix (Lx and Li are sparsity dependent)
-    p->L->p = (c_int *)c_malloc(n_plus_m + 1 * sizeof(c_int));
+    p->L->p = (c_int *)c_malloc((n_plus_m+1) * sizeof(c_int));
 
     // Preallocate workspace
     p->iwork = (c_int *)c_malloc(sizeof(c_int)*(3*n_plus_m));
