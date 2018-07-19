@@ -57,6 +57,7 @@ static char* test_solveKKT() {
   return 0;
 }
 
+#ifdef ENABLE_MKL_PARDISO
 static char* test_solveKKT_pardiso() {
   c_int m, exitflag = 0;
   c_float *rho_vec;
@@ -109,11 +110,14 @@ static char* test_solveKKT_pardiso() {
 
   return 0;
 }
+#endif
 
 static char* test_solve_linsys()
 {
   mu_run_test(test_solveKKT);
+#ifdef ENABLE_MKL_PARDISO
   mu_run_test(test_solveKKT_pardiso);
+#endif
 
   return 0;
 }

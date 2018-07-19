@@ -57,12 +57,9 @@ static char* test_basic_qp2_solve()
                               data->m) /
             vec_norm_inf(sols_data->y_test_new, data->m) < TESTS_TOL);
 
-
   // Compare objective values
   mu_assert("Basic QP 2 test solve: Error in objective value!",
-            c_absval(work->info->obj_val - sols_data->obj_value_test) <
-            TESTS_TOL);
-
+            c_absval(work->info->obj_val - sols_data->obj_value_test)/(c_absval(sols_data->obj_value_test)) < TESTS_TOL);
 
   // Clean workspace
   osqp_cleanup(work);
@@ -75,6 +72,7 @@ static char* test_basic_qp2_solve()
   return 0;
 }
 
+#ifdef ENABLE_MKL_PARDISO
 static char* test_basic_qp2_solve_pardiso()
 {
   /* local variables */
@@ -145,6 +143,7 @@ static char* test_basic_qp2_solve_pardiso()
 
   return 0;
 }
+#endif
 
 static char* test_basic_qp2_update()
 {
@@ -209,7 +208,7 @@ static char* test_basic_qp2_update()
   // Compare objective values
   mu_assert("Basic QP 2 test update: Error in objective value!",
             c_absval(
-              work->info->obj_val - sols_data->obj_value_test_new) < TESTS_TOL);
+              work->info->obj_val - sols_data->obj_value_test_new)/(c_absval(sols_data->obj_value_test_new)) < TESTS_TOL);
 
   // Clean workspace
   osqp_cleanup(work);
@@ -225,7 +224,9 @@ static char* test_basic_qp2_update()
 static char* test_basic_qp2()
 {
   mu_run_test(test_basic_qp2_solve);
+#ifdef ENABLE_MKL_PARDISO
   mu_run_test(test_basic_qp2_solve_pardiso);
+#endif
   mu_run_test(test_basic_qp2_update);
 
   return 0;

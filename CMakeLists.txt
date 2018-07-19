@@ -91,6 +91,10 @@ message(STATUS "Code coverage is ${COVERAGE}")
 # Linear solvers dependencies
 # ---------------------------------------------
 option (ENABLE_MKL_PARDISO "Enable MKL Pardiso solver" ON)
+if (DFLOAT)
+	message(STATUS "Disabling MKL Pardiso Solver with floats")
+	set(ENABLE_MKL_PARDISO OFF)
+endif()
 message(STATUS "MKL Pardiso: ${ENABLE_MKL_PARDISO}")
 
 
@@ -99,7 +103,6 @@ message(STATUS "MKL Pardiso: ${ENABLE_MKL_PARDISO}")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
                ${CMAKE_CURRENT_SOURCE_DIR}/include/osqp_configure.h
                NEWLINE_STYLE LF)
-
 
 # Set Compiler flags
 # ----------------------------------------------

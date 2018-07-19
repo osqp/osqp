@@ -459,7 +459,7 @@ void print_vec_int(c_int *x, c_int n, const char *name) {
   c_print("%s = [", name);
 
   for (i = 0; i < n; i++) {
-    c_print(" %lli ", x[i]);
+    c_print(" %i ", (int)x[i]);
   }
   c_print("]\n");
 }
