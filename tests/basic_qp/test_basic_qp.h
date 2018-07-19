@@ -421,12 +421,12 @@ static char* test_basic_qp_update_rho()
   // Compare primal solutions
   mu_assert("Update rho test solve: Error in primal solution!",
             vec_norm_inf_diff(work->solution->x, sols_data->x_test,
-                              data->n) < TESTS_TOL);
+                              data->n)/vec_norm_inf(sols_data->x_test, data->n) < TESTS_TOL);
 
   // Compare dual solutions
   mu_assert("Update rho test solve: Error in dual solution!",
             vec_norm_inf_diff(work->solution->y, sols_data->y_test,
-                              data->m) < TESTS_TOL);
+                              data->m)/vec_norm_inf(sols_data->y_test, data->m) < TESTS_TOL);
 
   // Compare objective values
   mu_assert("Update rho test solve: Error in objective value!",
@@ -442,8 +442,8 @@ static char* test_basic_qp_update_rho()
   settings->rho               = 0.1;
   settings->adaptive_rho      = 0;
   settings->check_termination = 1;
-  settings->eps_abs           = 1e-05;
-  settings->eps_rel           = 1e-05;
+  settings->eps_abs           = 1e-04;
+  settings->eps_rel           = 1e-04;
 
   // Setup workspace
   work = osqp_setup(data, settings);
@@ -465,12 +465,12 @@ static char* test_basic_qp_update_rho()
   // Compare primal solutions
   mu_assert("Update rho test update: Error in primal solution!",
             vec_norm_inf_diff(work->solution->x, sols_data->x_test,
-                              data->n) < TESTS_TOL);
+                              data->n)/vec_norm_inf(sols_data->x_test, data->n) < TESTS_TOL);
 
   // Compare dual solutions
   mu_assert("Update rho test update: Error in dual solution!",
             vec_norm_inf_diff(work->solution->y, sols_data->y_test,
-                              data->m) < TESTS_TOL);
+                              data->m)/vec_norm_inf(sols_data->y_test, data->m)< TESTS_TOL);
 
   // Compare objective values
   mu_assert("Update rho test update: Error in objective value!",
