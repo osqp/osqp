@@ -57,7 +57,6 @@ struct qdldl {
     c_float *D;
     c_int *etree;
     c_int *Lnz;
-    c_int sumLnz;
     c_int *iwork, *bwork;
     c_float *fwork;
     #endif
