@@ -339,10 +339,6 @@ if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG)
     # NB: Add all the linear system solvers here
     add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
 
-    # Link against linear system solver libraries
-    # QDLDL
-    target_link_libraries(osqp qdldlstatic)
-
     # Include directories for linear system solvers
     target_include_directories(osqp PRIVATE ${linsys_solvers_includes})
 
