@@ -4,11 +4,11 @@
 # -------------------------
 add_subdirectory(qdldl)
 
-set(direct_linsys_solvers $<TARGET_OBJECTS:linsys_qdldl>)
+# Need to add qdldlobject only here because it cannot be
+# included in another object library such as linsys_qdldl
+set(direct_linsys_solvers $<TARGET_OBJECTS:linsys_qdldl> $<TARGET_OBJECTS:qdldlobject>)
 
 set(direct_linsys_solvers_includes "${CMAKE_CURRENT_SOURCE_DIR}/qdldl/")
-
-set(direct_linsys_solvers_libraries qdldlstatic)
 
 
 # Add other solvers if embedded option is false
@@ -39,6 +39,3 @@ set(direct_linsys_solvers ${direct_linsys_solvers} PARENT_SCOPE)
 
 # Make external linsys solvers includes visible from parent directory
 set(direct_linsys_solvers_includes ${direct_linsys_solvers_includes} PARENT_SCOPE)
-
-# Make external linsys solvers libraries visible from parent directory
-set(direct_linsys_solvers_libraries ${direct_linsys_solvers_libraries} PARENT_SCOPE)

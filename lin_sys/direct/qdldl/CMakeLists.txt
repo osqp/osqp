@@ -24,18 +24,18 @@ set(
 endif()
 
 
-set(qdldl_includes
+set(qdldl_interface_includes
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/amd/include
     ${CMAKE_CURRENT_SOURCE_DIR}/qdldl_sources/include
 )
 
-set(qdldl_src
+set(qdldl_interface_src
     ${amd_sources}
     ${CMAKE_CURRENT_SOURCE_DIR}/qdldl_interface.h
     ${CMAKE_CURRENT_SOURCE_DIR}/qdldl_interface.c
 )
 
 # Create object library for linear system solver interface
-add_library(linsys_qdldl OBJECT ${qdldl_src})
-target_include_directories(linsys_qdldl PRIVATE ${qdldl_includes} ${PROJECT_SOURCE_DIR}/include)
+add_library(linsys_qdldl OBJECT ${qdldl_interface_src})
+target_include_directories(linsys_qdldl PRIVATE ${qdldl_interface_includes} ${PROJECT_SOURCE_DIR}/include)

@@ -300,9 +300,6 @@ add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
 # Give same name to static library output
 set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
 
-# Link against linear system solver libraries
-target_link_libraries(osqpstatic ${linsys_solvers_libraries})
-
 # Include directories for linear system solvers
 target_include_directories(osqpstatic PRIVATE ${linsys_solvers_includes})
 
@@ -344,9 +341,6 @@ if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG)
 
     # Include directories for linear system solvers
     target_include_directories(osqp PRIVATE ${linsys_solvers_includes})
-
-    # Link against linear system solver libraries
-    target_link_libraries(osqp ${linsys_solvers_libraries})
 
     # Declare include directories for the cmake exported target
     target_include_directories(osqp
