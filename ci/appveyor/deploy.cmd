@@ -12,7 +12,7 @@ IF "%APPVEYOR_REPO_TAG%" == "true" (
     cd build
     cmake -G "%CMAKE_PROJECT%" ..
     cmake --build .
-    
+
     REM Go to output folder
     cd %APPVEYOR_BUILD_FOLDER%\build\out
 
@@ -34,7 +34,7 @@ IF "%APPVEYOR_REPO_TAG%" == "true" (
     xcopy ..\..\include\*.h !OSQP_DEPLOY_DIR!\include
 
     REM Copy static library
-    xcopy libosqpstatic.a !OSQP_DEPLOY_DIR!\lib
+    xcopy libosqp.a !OSQP_DEPLOY_DIR!\lib
 
     REM Copy shared library
     xcopy libosqp.dll !OSQP_DEPLOY_DIR!\lib

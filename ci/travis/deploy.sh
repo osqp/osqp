@@ -15,7 +15,7 @@ source activate testenv
 
 echo "Creating Bintray package..."
 
-# Compile OSQP 
+# Compile OSQP
 cd ${TRAVIS_BUILD_DIR}
 rm -rf build
 mkdir build
@@ -35,14 +35,14 @@ OSQP_DEPLOY_DIR=osqp-0.3.1-${OS_NAME}64
 mkdir $OSQP_DEPLOY_DIR/
 mkdir $OSQP_DEPLOY_DIR/lib
 mkdir $OSQP_DEPLOY_DIR/include
-# Copy license 
+# Copy license
 cp ../../LICENSE $OSQP_DEPLOY_DIR/
 # Copy includes
 cp ../../include/*.h  $OSQP_DEPLOY_DIR/include
 # Copy static library
-cp libosqpstatic.a $OSQP_DEPLOY_DIR/lib 
+cp libosqp.a $OSQP_DEPLOY_DIR/lib
 # Copy shared library
-cp libosqp.$OS_SHARED_LIB_EXT $OSQP_DEPLOY_DIR/lib 
+cp libosqp.$OS_SHARED_LIB_EXT $OSQP_DEPLOY_DIR/lib
 # Compress package
 tar -czvf $OSQP_DEPLOY_DIR.tar.gz  $OSQP_DEPLOY_DIR
 
