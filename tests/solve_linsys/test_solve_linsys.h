@@ -41,10 +41,6 @@ static char* test_solveKKT() {
   // Solve  KKT x = b via LDL given factorization
   p->solve(p, data->test_solve_KKT_rhs, settings);
 
-  // DEBUG
-  print_vec(data->test_solve_KKT_rhs, data->test_solve_KKT_m + data->test_solve_KKT_n, "test_rhs");
-  print_vec(data->test_solve_KKT_x, data->test_solve_KKT_m + data->test_solve_KKT_n, "test_x");
-
   mu_assert(
     "Linear systems solve tests: error in forming and solving KKT system!",
     vec_norm_inf_diff(data->test_solve_KKT_rhs, data->test_solve_KKT_x,

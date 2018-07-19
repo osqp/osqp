@@ -1,12 +1,5 @@
 #include "glob_opts.h"
 
-typedef c_int QDLDL_bool;
-typedef c_int QDLDL_int;
-typedef c_float QDLDL_float;
-
-/* Then define this symbol to prevent type redefinitions */
-#define QDLDL_TYPES_DEFINED
-
 #include "qdldl.h"
 #include "qdldl_interface.h"
 
@@ -59,14 +52,9 @@ static c_int LDL_factor(csc *A,  qdldl_solver * p){
     c_int sum_Lnz;
     c_int factor_status;
 
-    // DEBUG
-    c_print("Arguments for etree\n");
-    printf("An = %lli\n", A->n);
-    print_vec_int(A->p, A->n + 1, "A->p");
-    print_vec_int(A->i, A->p[A->n], "A->i");
-
     // Compute elimination tree
     sum_Lnz = QDLDL_etree(A->n, A->p, A->i, p->iwork, p->Lnz, p->etree);
+
     if (sum_Lnz < 0){
       // Error
       c_eprint("Error in KKT matrix LDL factorization when computing the elimination tree. A is not perfectly upper triangular");
@@ -78,19 +66,12 @@ static c_int LDL_factor(csc *A,  qdldl_solver * p){
     p->L->i = (c_int *)malloc(sizeof(c_int)*sum_Lnz);
     p->L->x = (c_float *)malloc(sizeof(c_float)*sum_Lnz);
 
-    // DEBUG arguments
-    c_print("Arguments for factor\n");
-    print_vec_int(A->p, A->n + 1, "A->p");
-    print_vec_int(A->i, A->p[A->n], "A->i");
-    print_vec(A->x, A->p[A->n], "A->x");
-    print_vec_int(p->Lnz, A->n, "Lnz");
-    print_vec_int(p->etree, A->n, "etree");
-
     // Factor matrix
     factor_status = QDLDL_factor(A->n, A->p, A->i, A->x,
                                  p->L->p, p->L->i, p->L->x,
                                  p->D, p->Dinv, p->Lnz,
-                                 p->etree, p->bwork, p->iwork, p->fwork);
+                                 p->etree, (QDLDL_bool *)p->bwork, p->iwork, p->fwork);
+
 
     if (factor_status < 0){
       // Error
@@ -287,12 +268,6 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
     // Set number of threads to 1 (single threaded)
     p->nthreads = 1;
 
-    // DEBUG
-    c_print("Final L matrix\n");
-    print_vec_int(p->L->p, p->L->n + 1, "L->p");
-    print_vec_int(p->L->i, p->L->p[p->L->n], "L->i");
-    print_vec(p->L->x, p->L->p[p->L->n], "L->x");
-
     return p;
 }
 
@@ -343,9 +318,9 @@ c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s,
     // Update KKT matrix with new A
     update_KKT_A(s->KKT, A, s->AtoKKT);
 
-    return QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
-        s->L->p,s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
-        s->etree, s->bwork, s->iwork, s->fwork);
+    return (QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
+        s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
+        s->etree, (QDLDL_bool *)s->bwork, s->iwork, s->fwork) < 0);
 
 }
 
@@ -362,9 +337,9 @@ c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver * s, const c_float * rho_v
     // Update KKT matrix with new rho
     update_KKT_param2(s->KKT, s->bp, s->rhotoKKT, m);
 
-    return QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
-        s->L->p,s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
-        s->etree, s->bwork, s->iwork, s->fwork);
+    return (QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
+        s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
+        s->etree, (QDLDL_bool *)s->bwork, s->iwork, s->fwork) < 0);
 }
 
 
