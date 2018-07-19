@@ -236,6 +236,7 @@ static char* test_update() {
   return 0;
 }
 
+#ifdef ENABLE_MKL_PARDISO
 static char* test_update_pardiso() {
   c_int i, nnzP, nnzA;
   update_matrices_sols_data *data;
@@ -396,13 +397,16 @@ static char* test_update_pardiso() {
 
   return 0;
 }
+#endif
 
 static char* test_update_matrices()
 {
   mu_run_test(test_form_KKT);
   mu_run_test(test_update);
 
-  // mu_run_test(test_update_pardiso);
+#ifdef ENABLE_MKL_PARDISO
+  mu_run_test(test_update_pardiso);
+#endif
 
   return 0;
 }

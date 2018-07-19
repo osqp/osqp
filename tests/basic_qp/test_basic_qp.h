@@ -117,6 +117,7 @@ static char* test_basic_qp_solve()
   return 0;
 }
 
+#ifdef ENABLE_MKL_PARDISO
 static char* test_basic_qp_solve_pardiso()
 {
   // Problem settings
@@ -184,6 +185,7 @@ static char* test_basic_qp_solve_pardiso()
 
   return 0;
 }
+#endif
 
 static char* test_basic_qp_update()
 {
@@ -559,7 +561,9 @@ static char* test_basic_qp_time_limit()
 static char* test_basic_qp()
 {
   mu_run_test(test_basic_qp_solve);
+#ifdef ENABLE_MKL_PARDISO
   mu_run_test(test_basic_qp_solve_pardiso);
+#endif
   mu_run_test(test_basic_qp_update);
   mu_run_test(test_basic_qp_check_termination);
   mu_run_test(test_basic_qp_update_rho);
