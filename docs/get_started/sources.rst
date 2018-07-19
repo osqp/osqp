@@ -98,7 +98,7 @@ Thanks to CMake, it is possible to create projects for a wide variety of IDEs; s
 The compilation will generate the demo :code:`osqp_demo` and the unittests :code:`osqp_tester` executables. In the case of :code:`Unix` or :code:`MinGW` :code:`Makefiles` option they are located in the :code:`build/out/` directory.  Run them to check that the compilation was correct.
 
 
-Once the sources are built, the generated static :code:`build/out/libosqpstatic.a` and shared :code:`build/out/libosqp.ext` libraries can be used to interface any C/C++ software to OSQP (see :ref:`install_osqp_libs` installation).
+Once the sources are built, the generated static :code:`build/out/libosqp.a` and shared :code:`build/out/libosqp.ext` libraries can be used to interface any C/C++ software to OSQP (see :ref:`install_osqp_libs` installation).
 
 .. _install_the_binaries:
 
