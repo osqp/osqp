@@ -28,16 +28,14 @@ fi
 # Test C interface
 # ---------------------------------------------------
 
-# Compile OSQP
+# Compile and test OSQP
 echo "Change directory to Travis build ${TRAVIS_BUILD_DIR}"
+echo "Testing OSQP with standard configuration"
 cd ${TRAVIS_BUILD_DIR}
 mkdir build
 cd build
 cmake -G "Unix Makefiles" -DCOVERAGE=ON ..
 make
-
-
-# Test OSQP C
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
 
 # Pefrorm code coverage (only in Linux case for one version of python)
@@ -52,3 +50,22 @@ if [[ $TRAVIS_OS_NAME == "linux" ]]; then
     lcov --list coverage.info # debug before upload
     coveralls-lcov coverage.info # uploads to coveralls
 fi
+
+
+echo "Testing OSQP with floats"
+cd ${TRAVIS_BUILD_DIR}
+rm -rf build
+mkdir build
+cd build
+cmake -G "Unix Makefiles" -DDFLOAT=ON ..
+make
+${TRAVIS_BUILD_DIR}/build/out/osqp_tester
+
+echo "Testing OSQP without long integers"
+cd ${TRAVIS_BUILD_DIR}
+rm -rf build
+mkdir build
+cd build
+cmake -G "Unix Makefiles" -DDLONG=OFF ..
+make
+${TRAVIS_BUILD_DIR}/build/out/osqp_tester
