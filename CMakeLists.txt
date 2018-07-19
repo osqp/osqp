@@ -35,7 +35,7 @@ endif()
 # ----------------------------------------------
 
 # Are unittests generated?
-option (UNITTESTS "Enable unittests generation" ON)
+option (UNITTESTS "Enable unittests generation" OFF)
 
 # Is the code generated for embedded platforms?
 #   1 :   Yes. Matrix update not allowed.
@@ -107,6 +107,9 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
 # Set Compiler flags
 # ----------------------------------------------
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
+
+# Add specific flag for debug
+set(CMAKE_C_FLAGS_DEBUG "-DDDEBUG")
 
 if (NOT MSVC)
 
@@ -447,7 +450,9 @@ if (UNITTESTS)
     # Direct linear solver testing
     include_directories(tests)
     add_executable(osqp_tester
-                ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c ${PROJECT_SOURCE_DIR}/tests/minunit.h
+                ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c
+                ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
+		${PROJECT_SOURCE_DIR}/tests/minunit.h
                 ${test_headers}
                 ${codegen_test_headers})
     target_link_libraries (osqp_tester osqpstatic)

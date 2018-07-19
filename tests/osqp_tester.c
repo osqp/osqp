@@ -7,6 +7,7 @@
 
 #include "minunit.h"
 #include "osqp.h"
+#include "osqp_tester.h"
 
 // Include tests
 #include "lin_alg/test_lin_alg.h"

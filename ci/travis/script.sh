@@ -34,7 +34,7 @@ echo "Testing OSQP with standard configuration"
 cd ${TRAVIS_BUILD_DIR}
 mkdir build
 cd build
-cmake -G "Unix Makefiles" -DCOVERAGE=ON ..
+cmake -G "Unix Makefiles" -DCOVERAGE=ON -DUNITTESTS=ON ..
 make
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
 
@@ -57,7 +57,7 @@ cd ${TRAVIS_BUILD_DIR}
 rm -rf build
 mkdir build
 cd build
-cmake -G "Unix Makefiles" -DDFLOAT=ON ..
+cmake -G "Unix Makefiles" -DDFLOAT=ON -DUNITTESTS=ON ..
 make
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
 
@@ -66,6 +66,6 @@ cd ${TRAVIS_BUILD_DIR}
 rm -rf build
 mkdir build
 cd build
-cmake -G "Unix Makefiles" -DDLONG=OFF ..
+cmake -G "Unix Makefiles" -DDLONG=OFF -DUNITTESTS=ON ..
 make
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
