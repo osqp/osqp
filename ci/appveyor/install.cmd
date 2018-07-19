@@ -1,4 +1,7 @@
 @echo on
+:: Make sure all the submodules are updated correctly
+cd %APPVEYOR_BUILD_FOLDER%
+git submodule update --init --recursive
 
 :: Remove entry with sh.exe from PATH to fix error with MinGW toolchain
 :: (For MinGW make to work correctly sh.exe must NOT be in your path)
