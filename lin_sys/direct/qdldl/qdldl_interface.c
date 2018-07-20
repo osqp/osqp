@@ -169,7 +169,7 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
     // NB: We don not allocate L completely (CSC elements)
     //      L will be allocated during the factorization depending on the
     //      resulting number of elements.
-    p->L = c_malloc(1, sizeof(csc));  
+    p->L = c_malloc(sizeof(csc));  
     p->L->m = n_plus_m;
     p->L->n = n_plus_m;
     p->L->nz = -1;
