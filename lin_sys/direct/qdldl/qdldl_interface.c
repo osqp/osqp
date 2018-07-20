@@ -61,10 +61,9 @@ static c_int LDL_factor(csc *A,  qdldl_solver * p){
       return sum_Lnz;
     }
 
-
     // Allocate memory for Li and Lx
-    p->L->i = (c_int *)malloc(sizeof(c_int)*sum_Lnz);
-    p->L->x = (c_float *)malloc(sizeof(c_float)*sum_Lnz);
+    p->L->i = (c_int *)c_malloc(sizeof(c_int)*sum_Lnz);
+    p->L->x = (c_float *)c_malloc(sizeof(c_float)*sum_Lnz);
 
     // Factor matrix
     factor_status = QDLDL_factor(A->n, A->p, A->i, A->x,
@@ -152,7 +151,9 @@ static c_int permute_KKT(csc ** KKT, qdldl_solver * p, c_int Pnz, c_int Anz, c_i
 
 // Initialize LDL Factorization structure
 qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sigma, c_float * rho_vec, c_int polish){
+
     c_int i;                     // loop counter
+
     // Define Variables
     qdldl_solver * p;  // Initialize LDL solver
     c_int n_plus_m;              // Define n_plus_m dimension
@@ -189,6 +190,12 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
 
     // Preallocate L matrix (Lx and Li are sparsity dependent)
     p->L->p = (c_int *)c_malloc((n_plus_m+1) * sizeof(c_int));
+
+    //Lx and Li are sparsity dependent, so set them to
+    //null initially so we don't try to free them prematurely
+    p->L->i = OSQP_NULL;  
+    p->L->x = OSQP_NULL; 
+
 
     // Preallocate workspace
     p->iwork = (c_int *)c_malloc(sizeof(c_int)*(3*n_plus_m));
