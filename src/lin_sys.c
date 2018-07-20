@@ -15,7 +15,7 @@ c_int load_linsys_solver(enum linsys_solver_type linsys_solver) {
   switch (linsys_solver) {
   case QDLDL_SOLVER:
 
-    // We do not laod SuiteSparse LDL solver. We have the source.
+    // We do not load  QDLDL solver. We have the source.
     return 0;
 
 # ifdef ENABLE_MKL_PARDISO
@@ -35,7 +35,7 @@ c_int unload_linsys_solver(enum linsys_solver_type linsys_solver) {
   switch (linsys_solver) {
   case QDLDL_SOLVER:
 
-    // We do not laod SuiteSparse LDL solver. We have the source.
+    // We do not load QDLDL solver. We have the source.
     return 0;
 
 # ifdef ENABLE_MKL_PARDISO
@@ -45,7 +45,7 @@ c_int unload_linsys_solver(enum linsys_solver_type linsys_solver) {
     return lh_unload_pardiso();
 
 # endif /* ifdef ENABLE_MKL_PARDISO */
-  default: // SuiteSparse LDL
+  default: //  QDLDL
     return 0;
   }
 }
@@ -72,7 +72,7 @@ LinSysSolver* init_linsys_solver(const csc              *P,
                                                       polish);
 
 # endif /* ifdef ENABLE_MKL_PARDISO */
-  default: // SuiteSparse LDL
+  default: // QDLDL
     return (LinSysSolver *)init_linsys_solver_qdldl(P,
                                                     A,
                                                     sigma,
