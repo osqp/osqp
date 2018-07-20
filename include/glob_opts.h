@@ -20,6 +20,7 @@ extern "C" {
 /* define custom printfs and memory allocation (e.g. matlab/python) */
 #  ifdef MATLAB
     #   include "mex.h"
+    #   include <string.h> //for memset
 static void* c_calloc(size_t num, size_t size) {
   void *m = mxCalloc(num, size);
   if(m != NULL){memset(m,'\0',size);}
