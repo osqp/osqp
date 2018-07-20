@@ -166,10 +166,10 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
     n_plus_m = P->m + A->m;
 
     // Sparse matrix L (lower triangular)
-    // NB: Do not allocate L completely (CSC elements)
+    // NB: We don not allocate L completely (CSC elements)
     //      L will be allocated during the factorization depending on the
     //      resulting number of elements.
-    p->L = c_calloc(1, sizeof(csc));  // Calloc to avoid memory bad acess in case of failure
+    p->L = c_malloc(1, sizeof(csc));  
     p->L->m = n_plus_m;
     p->L->n = n_plus_m;
     p->L->nz = -1;
@@ -193,8 +193,8 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
 
     //Lx and Li are sparsity dependent, so set them to
     //null initially so we don't try to free them prematurely
-    p->L->i = OSQP_NULL;  
-    p->L->x = OSQP_NULL; 
+    p->L->i = OSQP_NULL;
+    p->L->x = OSQP_NULL;
 
 
     // Preallocate workspace
