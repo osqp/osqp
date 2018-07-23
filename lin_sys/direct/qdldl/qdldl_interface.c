@@ -43,9 +43,10 @@ void free_linsys_solver_qdldl(qdldl_solver *s) {
 
 /**
  * Compute LDL factorization of matrix A
- * @param  A Matrix to be factorized
- * @param  p Private workspace
- * @return   exitstatus (0 is good)
+ * @param  A    Matrix to be factorized
+ * @param  p    Private workspace
+ * @param  nvar Number of QP variables
+ * @return      exitstatus (0 is good)
  */
 static c_int LDL_factor(csc *A,  qdldl_solver * p, c_int nvar){
 
