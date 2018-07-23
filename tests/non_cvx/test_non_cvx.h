@@ -27,11 +27,21 @@ static char* test_non_cvx_solve()
   // Define Solver settings as default
   osqp_set_default_settings(settings);
   settings->verbose = 1;
+  settings->sigma = 1e-6;
 
   // Setup workspace
   work = osqp_setup(data, settings);
 
-  // Setup correct
+  // Setup should fail due to (P + sigma I) having a negative eigenvalue
+  mu_assert("Non Convex test solve: Setup should have failed!", work == OSQP_NULL);
+
+  // Update Solver settings
+  settings->sigma = sols_data->sigma_new;
+
+  // Setup workspace again
+  work = osqp_setup(data, settings);
+
+  // Setup should work this time because (P + sigma I) is positive definite
   mu_assert("Non Convex test solve: Setup error!", work != OSQP_NULL);
 
   // Solve Problem first time

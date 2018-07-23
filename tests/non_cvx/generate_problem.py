@@ -10,5 +10,7 @@ A = spa.csc_matrix(np.array([[-1.0, 0.], [0., -1.], [-1., 3.],
 l = -np.inf * np.ones(A.shape[0])
 u = np.array([0., 0., -15., 100., 80.])
 
+sols_data = {'sigma_new': 5}
+
 # Generate problem data
-cu.generate_problem_data(P, q, A, l, u, 'non_cvx')
+cu.generate_problem_data(P, q, A, l, u, 'non_cvx', sols_data)

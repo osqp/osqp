@@ -47,7 +47,7 @@ void free_linsys_solver_qdldl(qdldl_solver *s) {
  * @param  p Private workspace
  * @return   exitstatus (0 is good)
  */
-static c_int LDL_factor(csc *A,  qdldl_solver * p){
+static c_int LDL_factor(csc *A,  qdldl_solver * p, c_int nvar){
 
     c_int sum_Lnz;
     c_int factor_status;
@@ -74,8 +74,12 @@ static c_int LDL_factor(csc *A,  qdldl_solver * p){
 
     if (factor_status < 0){
       // Error
-      c_eprint("Error in KKT matrix LDL factorization when in computing the nonzero elements. There are zeros in the diagonal matrix");
+      c_eprint("Error in KKT matrix LDL factorization when computing the nonzero elements. There are zeros in the diagonal matrix");
       return factor_status;
+    } else if (factor_status < nvar) {
+      // Error: Number of positive elements of D should be equal to nvar
+      c_eprint("Error in KKT matrix LDL factorization when computing the nonzero elements. The problem seems to be non-convex");
+      return -2;
     }
 
     return 0;
@@ -243,7 +247,7 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
     }
 
     // Factorize the KKT matrix
-    if (LDL_factor(KKT_temp, p) < 0) {
+    if (LDL_factor(KKT_temp, p, P->n) < 0) {
         csc_spfree(KKT_temp);
         free_linsys_solver_qdldl(p);
         return OSQP_NULL;
