@@ -49,7 +49,7 @@ If you are using OSQP for your work, we encourage you to
         It has an easy interface to generate customized embeddable C code with no memory manager required.
 
     Library-free
-        It requires no external library to run. Only the setup phase requires the AMD and SparseLDL from Timothy A. Davis that are already included in the sources.
+        It requires no external library to run.
 
     Efficiently warm started
         It can be easily warm-started and the matrix factorization can be cached to solve parametrized problems extremely efficiently.
