@@ -100,23 +100,29 @@ def write_mat_sparse(f, A, name, *args):
 
     for arg in args:
         f.write("%s->" % arg)
-    f.write("%s->" % name)
-    f.write("x = c_malloc(%i * sizeof(c_float));\n" % A.nnz)
-    for i in range(A.nnz):
-        for arg in args:
-            f.write("%s->" % arg)
+    if min(m,n) == 0:
+        f.write("%s->x = OSQP_NULL;\n" % name)
+    else:
         f.write("%s->" % name)
-        f.write("x[%i] = %.20f;\n" % (i, A.data[i]))
+        f.write("x = c_malloc(%i * sizeof(c_float));\n" % A.nnz)
+        for i in range(A.nnz):
+            for arg in args:
+                f.write("%s->" % arg)
+            f.write("%s->" % name)
+            f.write("x[%i] = %.20f;\n" % (i, A.data[i]))
 
     for arg in args:
         f.write("%s->" % arg)
-    f.write("%s->" % name)
-    f.write("i = c_malloc(%i * sizeof(c_int));\n" % A.nnz)
-    for i in range(A.nnz):
-        for arg in args:
-            f.write("%s->" % arg)
+    if min(m,n) == 0:
+        f.write("%s->i = OSQP_NULL;\n" % name)
+    else:
         f.write("%s->" % name)
-        f.write("i[%i] = %i;\n" % (i, A.indices[i]))
+        f.write("i = c_malloc(%i * sizeof(c_int));\n" % A.nnz)
+        for i in range(A.nnz):
+            for arg in args:
+                f.write("%s->" % arg)
+            f.write("%s->" % name)
+            f.write("i[%i] = %i;\n" % (i, A.indices[i]))
 
     for arg in args:
         f.write("%s->" % arg)
