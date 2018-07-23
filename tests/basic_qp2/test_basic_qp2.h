@@ -57,12 +57,9 @@ static char* test_basic_qp2_solve()
                               data->m) /
             vec_norm_inf(sols_data->y_test_new, data->m) < TESTS_TOL);
 
-
   // Compare objective values
   mu_assert("Basic QP 2 test solve: Error in objective value!",
-            c_absval(work->info->obj_val - sols_data->obj_value_test) <
-            TESTS_TOL);
-
+            c_absval(work->info->obj_val - sols_data->obj_value_test)/(c_absval(sols_data->obj_value_test)) < TESTS_TOL);
 
   // Clean workspace
   osqp_cleanup(work);
@@ -75,6 +72,7 @@ static char* test_basic_qp2_solve()
   return 0;
 }
 
+#ifdef ENABLE_MKL_PARDISO
 static char* test_basic_qp2_solve_pardiso()
 {
   /* local variables */
@@ -145,6 +143,7 @@ static char* test_basic_qp2_solve_pardiso()
 
   return 0;
 }
+#endif
 
 static char* test_basic_qp2_update()
 {
@@ -200,15 +199,6 @@ static char* test_basic_qp2_update()
             vec_norm_inf(sols_data->x_test_new, data->n) < TESTS_TOL);
 
   // Compare dual solutions
-  print_vec(sols_data->y_test_new, data->m, "y_test");
-  print_vec(work->solution->y,     data->m, "y_osqp");
-  c_print("Vec norm diff = %.5e\n",
-          vec_norm_inf_diff(work->solution->y, sols_data->y_test_new, data->m));
-  c_print("Vec norm diff normalized = %.5e\n",
-          vec_norm_inf_diff(work->solution->y, sols_data->y_test_new,
-                            data->m) / vec_norm_inf(sols_data->y_test_new,
-                                                    data->m));
-
   mu_assert("Basic QP 2 test update: Error in dual solution!",
             vec_norm_inf_diff(work->solution->y, sols_data->y_test_new,
                               data->m) /
@@ -218,7 +208,7 @@ static char* test_basic_qp2_update()
   // Compare objective values
   mu_assert("Basic QP 2 test update: Error in objective value!",
             c_absval(
-              work->info->obj_val - sols_data->obj_value_test_new) < TESTS_TOL);
+              work->info->obj_val - sols_data->obj_value_test_new)/(c_absval(sols_data->obj_value_test_new)) < TESTS_TOL);
 
   // Clean workspace
   osqp_cleanup(work);
@@ -234,7 +224,9 @@ static char* test_basic_qp2_update()
 static char* test_basic_qp2()
 {
   mu_run_test(test_basic_qp2_solve);
+#ifdef ENABLE_MKL_PARDISO
   mu_run_test(test_basic_qp2_solve_pardiso);
+#endif
   mu_run_test(test_basic_qp2_update);
 
   return 0;

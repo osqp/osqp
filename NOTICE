@@ -4,11 +4,11 @@ Copyright (c) 2017 Bartolomeo Stellato, Goran Banjac, Paul Goulart, Stephen Boyd
 This product includes software developed at Stanford University and at the University of Oxford.
 
 
-The following external modules are included from SuiteSparse: http://www.suitesparse.com
+The following external modules are included in this software library
+
+QDLDL
+Copyright (c) 2018, Paul Goulart, Bartolomeo Stellato, Goran Banjac.
 
 AMD
-Copyright (c) 1996-2015, Timothy A. Davis, Patrick R. Amestoy, and Iain S. Duff.  
-
-LDL
-Copyright (c) 2005-2013, Timothy A. Davis.
+Copyright (c) 1996-2015, Timothy A. Davis, Patrick R. Amestoy, and Iain S. Duff.
 

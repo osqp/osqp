@@ -7,8 +7,8 @@ import utils.codegen_utils as cu
 np.random.seed(2)
 
 # Simple case
-test_solve_KKT_n = 10
-test_solve_KKT_m = 20
+test_solve_KKT_n = 3
+test_solve_KKT_m = 4
 
 test_solve_KKT_P = spa.random(test_solve_KKT_n, test_solve_KKT_n,
                                  density=0.4, format='csc')

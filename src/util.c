@@ -299,55 +299,9 @@ c_float toc(OSQPTimer *t)
 /* ==================== DEBUG FUNCTIONS ======================= */
 
 
-#ifndef EMBEDDED
 
-c_float* csc_to_dns(csc *M)
-{
-  c_int i, j = 0; // Predefine row index and column index
-  c_int idx;
-
-  // Initialize matrix of zeros
-  c_float *A = (c_float *)c_calloc(M->m * M->n, sizeof(c_float));
-
-  // Allocate elements
-  for (idx = 0; idx < M->p[M->n]; idx++)
-  {
-    // Get row index i (starting from 1)
-    i = M->i[idx];
-
-    // Get column index j (increase if necessary) (starting from 1)
-    while (M->p[j + 1] <= idx) {
-      j++;
-    }
-
-    // Assign values to A
-    A[j * (M->m) + i] = M->x[idx];
-  }
-  return A;
-}
-
-c_int is_eq_csc(csc *A, csc *B, c_float tol) {
-  c_int j, i;
-
-  // If number of columns does not coincide, they are not equal.
-  if (A->n != B->n) return 0;
-
-  for (j = 0; j < A->n; j++) { // Cycle over columns j
-    // if column pointer does not coincide, they are not equal
-    if (A->p[j] != B->p[j]) return 0;
-
-    for (i = A->p[j]; i < A->p[j + 1]; i++) { // Cycle rows i in column j
-      if ((A->i[i] != B->i[i]) ||             // Different row indices
-          (c_absval(A->x[i] - B->x[i]) > tol)) {
-        return 0;
-      }
-    }
-  }
-  return 1;
-}
-
-#endif // #ifndef EMBEDDED
-
+// If debug mode enabled
+#ifdef DDEBUG
 
 #ifdef PRINTING
 
@@ -366,7 +320,7 @@ void print_csc_matrix(csc *M, const char *name)
     if (row_start == row_stop) continue;
     else {
       for (i = row_start; i < row_stop; i++) {
-        c_print("\t[%3u,%3u] = %g\n", (int)M->i[i], (int)j, M->x[k++]);
+        c_print("\t[%3u,%3u] = %.3g\n", (int)M->i[i], (int)j, M->x[k++]);
       }
     }
   }
@@ -406,7 +360,7 @@ void print_trip_matrix(csc *M, const char *name)
   c_print("%s :\n", name);
 
   for (k = 0; k < M->nz; k++) {
-    c_print("\t[%3u, %3u] = %g\n", (int)M->i[k], (int)M->p[k], M->x[k]);
+    c_print("\t[%3u, %3u] = %.3g\n", (int)M->i[k], (int)M->p[k], M->x[k]);
   }
 }
 
@@ -420,11 +374,11 @@ void print_dns_matrix(c_float *M, c_int m, c_int n, const char *name)
     for (j = 0; j < n; j++) { // Cycle over columns
       if (j < n - 1)
         // c_print("% 14.12e,  ", M[j*m+i]);
-        c_print("% .8f,  ", M[j * m + i]);
+        c_print("% .3g,  ", M[j * m + i]);
 
       else
         // c_print("% 14.12e;  ", M[j*m+i]);
-        c_print("% .8f;  ", M[j * m + i]);
+        c_print("% .3g;  ", M[j * m + i]);
     }
 
     if (i < m - 1) {
@@ -459,9 +413,11 @@ void print_vec_int(c_int *x, c_int n, const char *name) {
   c_print("%s = [", name);
 
   for (i = 0; i < n; i++) {
-    c_print(" %d ", (int)x[i]);
+    c_print(" %i ", (int)x[i]);
   }
   c_print("]\n");
 }
 
 #endif // PRINTING
+
+#endif // DEBUG MODE

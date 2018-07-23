@@ -1,4 +1,4 @@
-#include "pardiso.h"
+#include "pardiso_interface.h"
 
 #define MKL_INT c_int
 #define PARDISOLIBNAME "mkl_rt." SHAREDLIBEXT

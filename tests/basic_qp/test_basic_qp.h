@@ -117,6 +117,7 @@ static char* test_basic_qp_solve()
   return 0;
 }
 
+#ifdef ENABLE_MKL_PARDISO
 static char* test_basic_qp_solve_pardiso()
 {
   // Problem settings
@@ -184,6 +185,7 @@ static char* test_basic_qp_solve_pardiso()
 
   return 0;
 }
+#endif
 
 static char* test_basic_qp_update()
 {
@@ -396,8 +398,8 @@ static char* test_basic_qp_update_rho()
   osqp_set_default_settings(settings);
   settings->rho               = rho;
   settings->adaptive_rho      = 0; // Disable adaptive rho for this test
-  settings->eps_abs           = 1e-05;
-  settings->eps_rel           = 1e-05;
+  settings->eps_abs           = 1e-04;
+  settings->eps_rel           = 1e-04;
   settings->check_termination = 1;
 
   // Setup workspace
@@ -419,12 +421,12 @@ static char* test_basic_qp_update_rho()
   // Compare primal solutions
   mu_assert("Update rho test solve: Error in primal solution!",
             vec_norm_inf_diff(work->solution->x, sols_data->x_test,
-                              data->n) < TESTS_TOL);
+                              data->n)/vec_norm_inf(sols_data->x_test, data->n) < TESTS_TOL);
 
   // Compare dual solutions
   mu_assert("Update rho test solve: Error in dual solution!",
             vec_norm_inf_diff(work->solution->y, sols_data->y_test,
-                              data->m) < TESTS_TOL);
+                              data->m)/vec_norm_inf(sols_data->y_test, data->m) < TESTS_TOL);
 
   // Compare objective values
   mu_assert("Update rho test solve: Error in objective value!",
@@ -440,8 +442,8 @@ static char* test_basic_qp_update_rho()
   settings->rho               = 0.1;
   settings->adaptive_rho      = 0;
   settings->check_termination = 1;
-  settings->eps_abs           = 1e-05;
-  settings->eps_rel           = 1e-05;
+  settings->eps_abs           = 1e-04;
+  settings->eps_rel           = 1e-04;
 
   // Setup workspace
   work = osqp_setup(data, settings);
@@ -463,12 +465,12 @@ static char* test_basic_qp_update_rho()
   // Compare primal solutions
   mu_assert("Update rho test update: Error in primal solution!",
             vec_norm_inf_diff(work->solution->x, sols_data->x_test,
-                              data->n) < TESTS_TOL);
+                              data->n)/vec_norm_inf(sols_data->x_test, data->n) < TESTS_TOL);
 
   // Compare dual solutions
   mu_assert("Update rho test update: Error in dual solution!",
             vec_norm_inf_diff(work->solution->y, sols_data->y_test,
-                              data->m) < TESTS_TOL);
+                              data->m)/vec_norm_inf(sols_data->y_test, data->m)< TESTS_TOL);
 
   // Compare objective values
   mu_assert("Update rho test update: Error in objective value!",
@@ -559,7 +561,9 @@ static char* test_basic_qp_time_limit()
 static char* test_basic_qp()
 {
   mu_run_test(test_basic_qp_solve);
+#ifdef ENABLE_MKL_PARDISO
   mu_run_test(test_basic_qp_solve_pardiso);
+#endif
   mu_run_test(test_basic_qp_update);
   mu_run_test(test_basic_qp_check_termination);
   mu_run_test(test_basic_qp_update_rho);

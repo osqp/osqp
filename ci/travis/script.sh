@@ -28,16 +28,14 @@ fi
 # Test C interface
 # ---------------------------------------------------
 
-# Compile OSQP
+# Compile and test OSQP
 echo "Change directory to Travis build ${TRAVIS_BUILD_DIR}"
+echo "Testing OSQP with standard configuration"
 cd ${TRAVIS_BUILD_DIR}
 mkdir build
 cd build
-cmake -G "Unix Makefiles" -DCOVERAGE=ON ..
+cmake -G "Unix Makefiles" -DCOVERAGE=ON -DUNITTESTS=ON ..
 make
-
-
-# Test OSQP C
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
 
 # Pefrorm code coverage (only in Linux case for one version of python)
@@ -45,11 +43,29 @@ if [[ $TRAVIS_OS_NAME == "linux" ]]; then
     cd ${TRAVIS_BUILD_DIR}/build
     lcov --directory . --capture -o coverage.info # capture coverage info
     lcov --remove coverage.info "${TRAVIS_BUILD_DIR}/tests/*" \
-        "${TRAVIS_BUILD_DIR}/lin_sys/direct/suitesparse/amd/*" \
-        "${TRAVIS_BUILD_DIR}/lin_sys/direct/suitesparse/ldl/*" \
-        "${TRAVIS_BUILD_DIR}/lin_sys/direct/suitesparse/SuiteSparse_config*" \
+        "${TRAVIS_BUILD_DIR}/lin_sys/direct/qdldl/amd/*" \
+        "${TRAVIS_BUILD_DIR}/lin_sys/direct/qdldl/qdldl_sources/*" \
         "/usr/include/x86_64-linux-gnu/**/*" \
         -o coverage.info # filter out tests and unnecessary files
     lcov --list coverage.info # debug before upload
     coveralls-lcov coverage.info # uploads to coveralls
 fi
+
+
+echo "Testing OSQP with floats"
+cd ${TRAVIS_BUILD_DIR}
+rm -rf build
+mkdir build
+cd build
+cmake -G "Unix Makefiles" -DDFLOAT=ON -DUNITTESTS=ON ..
+make
+${TRAVIS_BUILD_DIR}/build/out/osqp_tester
+
+echo "Testing OSQP without long integers"
+cd ${TRAVIS_BUILD_DIR}
+rm -rf build
+mkdir build
+cd build
+cmake -G "Unix Makefiles" -DDLONG=OFF -DUNITTESTS=ON ..
+make
+${TRAVIS_BUILD_DIR}/build/out/osqp_tester

@@ -35,7 +35,7 @@ endif()
 # ----------------------------------------------
 
 # Are unittests generated?
-option (UNITTESTS "Enable unittests generation" ON)
+option (UNITTESTS "Enable unittests generation" OFF)
 
 # Is the code generated for embedded platforms?
 #   1 :   Yes. Matrix update not allowed.
@@ -91,6 +91,10 @@ message(STATUS "Code coverage is ${COVERAGE}")
 # Linear solvers dependencies
 # ---------------------------------------------
 option (ENABLE_MKL_PARDISO "Enable MKL Pardiso solver" ON)
+if (DFLOAT)
+	message(STATUS "Disabling MKL Pardiso Solver with floats")
+	set(ENABLE_MKL_PARDISO OFF)
+endif()
 message(STATUS "MKL Pardiso: ${ENABLE_MKL_PARDISO}")
 
 
@@ -100,17 +104,19 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
                ${CMAKE_CURRENT_SOURCE_DIR}/include/osqp_configure.h
                NEWLINE_STYLE LF)
 
-
 # Set Compiler flags
 # ----------------------------------------------
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
+
+# Add specific flag for debug
+set(CMAKE_C_FLAGS_DEBUG "-DDDEBUG")
 
 if (NOT MSVC)
 
     if (COVERAGE)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
 	if(FORTRAN)
-		set(CMAKE_FORTRAN_FLAGS "${CMAKE_FORRAN_FLAGS} --coverage")
+		set(CMAKE_FORTRAN_FLAGS "${CMAKE_FORTRAN_FLAGS} --coverage")
 	endif(FORTRAN)
     endif()
 
@@ -291,6 +297,8 @@ add_subdirectory(lin_sys)
 
 # Static library
 add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
+# Give same name to static library output
+set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
 
 # Include directories for linear system solvers
 target_include_directories(osqpstatic PRIVATE ${linsys_solvers_includes})
@@ -436,7 +444,9 @@ if (UNITTESTS)
     # Direct linear solver testing
     include_directories(tests)
     add_executable(osqp_tester
-                ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c ${PROJECT_SOURCE_DIR}/tests/minunit.h
+                ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c
+                ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
+		${PROJECT_SOURCE_DIR}/tests/minunit.h
                 ${test_headers}
                 ${codegen_test_headers})
     target_link_libraries (osqp_tester osqpstatic)

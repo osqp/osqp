@@ -853,7 +853,7 @@ c_int validate_data(const OSQPData *data) {
 }
 
 c_int validate_linsys_solver(c_int linsys_solver) {
-  if ((linsys_solver != SUITESPARSE_LDL_SOLVER) &&
+  if ((linsys_solver != QDLDL_SOLVER) &&
       (linsys_solver != MKL_PARDISO_SOLVER)) {
     return 1;
   }

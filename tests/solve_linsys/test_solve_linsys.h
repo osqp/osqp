@@ -12,14 +12,8 @@
 static char* test_solveKKT() {
   c_int m, exitflag = 0;
   c_float *rho_vec;
-  LinSysSolver *p;                                                         // Private
-                                                                           // structure
-                                                                           // to
-                                                                           // form
-                                                                           // KKT
-                                                                           // factorization
+  LinSysSolver *p;  // Private structure to form KKT factorization
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings)); // Settings
-
   solve_linsys_sols_data *data = generate_problem_solve_linsys_sols_data();
 
   // Settings
@@ -35,14 +29,13 @@ static char* test_solveKKT() {
   p = init_linsys_solver(data->test_solve_KKT_Pu, data->test_solve_KKT_A,
                          settings->sigma, rho_vec, LINSYS_SOLVER, 0);
 
-  // Debug print KKT and LDL
+  // // Debug print KKT and LDL
   // print_csc_mat(data->test_solve_KKT_KKT, "KKTpy");
-  // print_csc_mat(p->KKT, "KKT");
+  // // print_csc_mat(p->KKT, "KKT");
   // c_float * KKTdnspy = csc_to_dns(data->test_solve_KKT_KKT);
-  // c_float * KKTdns = csc_to_dns(p->KKT);
-  // print_dns_matrix(KKTdnspy, data->test_solve_KKT_KKT->m,
-  // data->test_solve_KKT_KKT->n, "KKTdnspy");
-  // print_dns_matrix(KKTdns, p->KKT->m, p->KKT->n, "KKTdns");
+  // // c_float * KKTdns = csc_to_dns(p->KKT);
+  // print_dns_matrix(KKTdnspy, data->test_solve_KKT_KKT->m, data->test_solve_KKT_KKT->n, "KKTdnspy");
+  // // print_dns_matrix(KKTdns, p->KKT->m, p->KKT->n, "KKTdns");
 
 
   // Solve  KKT x = b via LDL given factorization
@@ -64,6 +57,7 @@ static char* test_solveKKT() {
   return 0;
 }
 
+#ifdef ENABLE_MKL_PARDISO
 static char* test_solveKKT_pardiso() {
   c_int m, exitflag = 0;
   c_float *rho_vec;
@@ -116,11 +110,14 @@ static char* test_solveKKT_pardiso() {
 
   return 0;
 }
+#endif
 
 static char* test_solve_linsys()
 {
   mu_run_test(test_solveKKT);
+#ifdef ENABLE_MKL_PARDISO
   mu_run_test(test_solveKKT_pardiso);
+#endif
 
   return 0;
 }

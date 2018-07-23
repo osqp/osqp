@@ -22,7 +22,6 @@ extern "C" {
     #   include "mex.h"
 static void* c_calloc(size_t num, size_t size) {
   void *m = mxCalloc(num, size);
-
   mexMakeMemoryPersistent(m);
   return m;
 }
