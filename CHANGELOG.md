@@ -1,6 +1,11 @@
+Unreleased
+----------
+* Added check for nonconvex cost function (non-positive semidefinite `P`) after factorization is performed.
+
+
 Version 0.4.0 (23 July 2018)
 ----------------------------
-* Added check for nonconvex cost function (negative semidefinite `P`).
+* Added check for nonconvex cost function (non-positive semidefinite `P`).
 * Removed SuiteSparse LDL in favor of [QDLDL](https://github.com/oxfordcontrol/qdldl)
 * Static library `libosqpstatic` now renamed as `libosqp`.
 
