@@ -116,7 +116,7 @@ if (NOT MSVC)
     if (COVERAGE)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
 	if(FORTRAN)
-		set(CMAKE_FORTRAN_FLAGS "${CMAKE_FORRAN_FLAGS} --coverage")
+		set(CMAKE_FORTRAN_FLAGS "${CMAKE_FORTRAN_FLAGS} --coverage")
 	endif(FORTRAN)
     endif()
 
