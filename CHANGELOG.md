@@ -1,5 +1,5 @@
-Unreleased
-----------
+Version 0.4.0 (23 July 2018)
+----------------------------
 * Added check for nonconvex cost function (negative semidefinite `P`).
 * Removed SuiteSparse LDL in favor of [QDLDL](https://github.com/oxfordcontrol/qdldl)
 * Static library `libosqpstatic` now renamed as `libosqp`.
