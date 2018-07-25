@@ -4,6 +4,25 @@ cmake_minimum_required (VERSION 3.2)
 # Project name
 project (osqp)
 
+### Leggedrobotics #######################################################
+##############
+### CATKIN ###
+##############
+# Find Catkin
+find_package(catkin REQUIRED COMPONENTS
+)
+
+# Declare this project as a catkin package
+catkin_package(
+ INCLUDE_DIRS include
+ LIBRARIES osqp
+ CATKIN_DEPENDS
+     qdldl
+# DEPENDS system_lib
+)
+
+##########################################################################
+
 # Export compile commands
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
