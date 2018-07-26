@@ -1,3 +1,7 @@
+/* NB: this is a subset of the routines in the CSPARSE package by
+   Tim Davis et. al., for the full package please visit
+   http://www.cise.ufl.edu/research/sparse/CSparse/ */
+
 #ifndef CS_H
 # define CS_H
 
@@ -52,8 +56,14 @@ csc* csc_spalloc(c_int m,
  * Free sparse matrix
     (uses FREE to free inner arrays x, i, p)
  * @param  A Matrix in CSC format
+<<<<<<< HEAD
  */
 void csc_spfree(csc *A);
+=======
+ * @return   return NULL pointer if everything works
+ */
+csc* csc_spfree(csc *A);
+>>>>>>> 15d4703a3a45f7dd1ebf22b823eb0a48bdcac621
 
 
 /**

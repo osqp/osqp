@@ -125,7 +125,11 @@ void vec_ew_min_vec(const c_float *a,
 
 /* MATRIX FUNCTIONS ----------------------------------------------------------*/
 
+<<<<<<< HEAD
 /* multiply scalar to matrix */
+=======
+/* multiply scalar to vmatrixector */
+>>>>>>> 15d4703a3a45f7dd1ebf22b823eb0a48bdcac621
 void mat_mult_scalar(csc    *A,
                      c_float sc);
 

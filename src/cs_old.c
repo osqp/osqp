@@ -1,3 +1,10 @@
+<<<<<<< HEAD
+=======
+/* NB: this is a subset of the routines in the CSPARSE package by
+   Tim Davis et. al., for the full package please visit
+   http://www.cise.ufl.edu/research/sparse/CSparse/ */
+
+>>>>>>> 15d4703a3a45f7dd1ebf22b823eb0a48bdcac621
 #include "cs.h"
 
 
@@ -9,6 +16,14 @@ static void* csc_calloc(c_int n, c_int size) {
   return c_calloc(n, size);
 }
 
+<<<<<<< HEAD
+=======
+static void* csc_free(void *p) {
+  if (p) c_free(p);  /* free p if it is not already SCS_NULL */
+  return OSQP_NULL;  /* return OSQP_NULL to simplify the use of csc_free */
+}
+
+>>>>>>> 15d4703a3a45f7dd1ebf22b823eb0a48bdcac621
 csc* csc_matrix(c_int m, c_int n, c_int nzmax, c_float *x, c_int *i, c_int *p)
 {
   csc *M = (csc *)c_malloc(sizeof(csc));
@@ -35,6 +50,7 @@ csc* csc_spalloc(c_int m, c_int n, c_int nzmax, c_int values, c_int triplet) {
   A->p     = csc_malloc(triplet ? nzmax : n + 1, sizeof(c_int));
   A->i     = csc_malloc(nzmax,  sizeof(c_int));
   A->x     = values ? csc_malloc(nzmax,  sizeof(c_float)) : OSQP_NULL;
+<<<<<<< HEAD
   if (!A->p || !A->i || (values && !A->x)){
     csc_spfree(A);
     return OSQP_NULL;
@@ -48,6 +64,18 @@ void csc_spfree(csc *A) {
     if (A->x) c_free(A->x);
     c_free(A);
   }
+=======
+  return (!A->p || !A->i || (values && !A->x)) ? csc_spfree(A) : A;
+}
+
+csc* csc_spfree(csc *A) {
+  if (!A) return OSQP_NULL;  /* do nothing if A already SCS_NULL */
+
+  csc_free(A->p);
+  csc_free(A->i);
+  csc_free(A->x);
+  return (csc *)csc_free(A); /* free the cs struct and return OSQP_NULL */
+>>>>>>> 15d4703a3a45f7dd1ebf22b823eb0a48bdcac621
 }
 
 csc* triplet_to_csc(const csc *T, c_int *TtoC) {
@@ -106,7 +134,11 @@ csc* triplet_to_csr(const csc *T, c_int *TtoC) {
   Cx = C->x;
 
   for (k = 0; k < nz; k++) w[Ti[k]]++;  /* row counts */
+<<<<<<< HEAD
   csc_cumsum(Cp, w, m);                 /* row pointers */
+=======
+  csc_cumsum(Cp, w, n);                 /* row pointers */
+>>>>>>> 15d4703a3a45f7dd1ebf22b823eb0a48bdcac621
 
   for (k = 0; k < nz; k++) {
     Cj[p = w[Ti[k]]++] = Tj[k];         /* A(i,j) is the pth entry in C */
@@ -222,6 +254,7 @@ void prea_copy_csc_mat(const csc *A, csc *B) {
 }
 
 csc* csc_done(csc *C, void *w, void *x, c_int ok) {
+<<<<<<< HEAD
   c_free(w);                   /* free workspace */
   c_free(x);
   if (ok) return C;
@@ -229,6 +262,11 @@ csc* csc_done(csc *C, void *w, void *x, c_int ok) {
     csc_spfree(C);
     return OSQP_NULL;
   }
+=======
+  csc_free(w);                   /* free workspace */
+  csc_free(x);
+  return ok ? C : csc_spfree(C); /* return result if OK, else free it */
+>>>>>>> 15d4703a3a45f7dd1ebf22b823eb0a48bdcac621
 }
 
 csc* csc_to_triu(csc *M) {
