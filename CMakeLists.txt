@@ -17,9 +17,13 @@ catkin_package(
  INCLUDE_DIRS include
  LIBRARIES osqp
  CATKIN_DEPENDS
-     qdldl
 # DEPENDS system_lib
 )
+
+# Set variables
+set(MATLAB OFF)
+set(PYTHON OFF)
+set(R_LANG OFF)
 
 ##########################################################################
 

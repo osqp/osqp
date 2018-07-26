@@ -1,4 +1,4 @@
-<package>
+<package format="2">
   <name>osqp</name>
   <version>0.0.0</version>
   <description>osqp</description>
@@ -6,6 +6,4 @@
   <license>TODO</license>
   <author email="yvaind@ethz.ch">Yvain de Viragh</author>
   <buildtool_depend>catkin</buildtool_depend>
-  <depend>qdldl</depend>
 </package>
-
