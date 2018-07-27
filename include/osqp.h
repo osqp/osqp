@@ -22,20 +22,6 @@ extern "C" {
 
 
 /**
- * @name Main solver types
- * @{
- */
-
-
-/**
- * OsqpMatrix type.   Internal implementation of the
- * OsqpMatrix type is hidden from the user
- */
-typedef struct OsqpMatrix_ OsqpMatrix;
-
-/** @} */
-
-/**
  * @name Main solver API
  * @{
  */

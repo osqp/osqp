@@ -1,4 +1,4 @@
-#include "lin_alg.h"
+#include "lin_alg_impl.h"
 #include <assert.h>
 
 /* a macro for swapping variable pairs */
@@ -9,31 +9,31 @@
 
 #ifndef EMBEDDED
 
-OsqpVectorf* OsqpVectorf_copy_new(OsqpVectorf *a){
+OSQPVectorf* OSQPVectorf_copy_new(OSQPVectorf *a){
 
-  OsqpVectorf *b;
-  b         = c_malloc(sizeof(OsqpVectorf));
+  OSQPVectorf *b;
+  b         = c_malloc(sizeof(OSQPVectorf));
   b->length = a->length;
   b->values = c_malloc(b->length * sizeof(c_float));
 
-  OsqpVectorf_copy(a,b);
+  OSQPVectorf_copy(a,b);
   return b;
 }
 
-OsqpVectori* OsqpVectori_copy_new(OsqpVectori *a){
+OSQPVectori* OSQPVectori_copy_new(OSQPVectori *a){
 
-  OsqpVectori *b;
-  b         = c_malloc(sizeof(OsqpVectori));
+  OSQPVectori *b;
+  b         = c_malloc(sizeof(OSQPVectori));
   b->length = a->length;
   b->values = c_malloc(b->length * sizeof(c_int));
 
-  OsqpVectori_copy(a,b);
+  OSQPVectori_copy(a,b);
   return b;
 }
 
 #endif // end EMBEDDED
 
-void OsqpVectorf_copy(OsqpVectorf *a,OsqpVectorf *b){
+void OSQPVectorf_copy(OSQPVectorf *a,OSQPVectorf *b){
 
   c_int i;
 
@@ -44,7 +44,7 @@ void OsqpVectorf_copy(OsqpVectorf *a,OsqpVectorf *b){
   }
 }
 
-void OsqpVectori_copy(OsqpVectori *a,OsqpVectori *b){
+void OSQPVectori_copy(OSQPVectori *a,OSQPVectori *b){
 
   c_int i;
 
@@ -55,7 +55,7 @@ void OsqpVectori_copy(OsqpVectori *a,OsqpVectori *b){
   }
 }
 
-void OsqpVectorf_set_scalar(OsqpVectorf *a, c_float sc){
+void OSQPVectorf_set_scalar(OSQPVectorf *a, c_float sc){
   c_int i;
   for (i = 0; i < (int)a->length; i++) {
     a->values[i] = sc;
@@ -63,44 +63,44 @@ void OsqpVectorf_set_scalar(OsqpVectorf *a, c_float sc){
   return;
 }
 
-void OsqpVectori_set_scalar(OsqpVectori *a, c_int sc){
+void OSQPVectori_set_scalar(OSQPVectori *a, c_int sc){
   c_int i;
   for (i = 0; i < a->length; i++) {
     a->values[i] = sc;
   }
 }
 
-void OsqpVectorf_add_scalar(OsqpVectorf *a, c_float sc){
+void OSQPVectorf_add_scalar(OSQPVectorf *a, c_float sc){
   c_int i;
   for (i = 0; i < a->length; i++) {
     a->values[i] += sc;
   }
 }
 
-void OsqpVectori_add_scalar(OsqpVectori *a, c_int sc){
+void OSQPVectori_add_scalar(OSQPVectori *a, c_int sc){
   c_int i;
   for (i = 0; i < a->length; i++) {
     a->values[i] += sc;
   }
 }
 
-void OsqpVectorf_mult_scalar(OsqpVectorf *a, c_float sc){
+void OSQPVectorf_mult_scalar(OSQPVectorf *a, c_float sc){
   c_int i;
   for (i = 0; i < a->length; i++) {
     a->values[i] *= sc;
   }
 }
 
-void OsqpVectorf_negate(OsqpVectorf *a){
+void OSQPVectorf_negate(OSQPVectorf *a){
   c_int i;
   for (i = 0; i < a->length; i++) {
     a->values[i] = -a->values[i];
   }
 }
 
-void OsqpVectorf_add_scaled(OsqpVectorf       *c,
-                             const OsqpVectorf *a,
-                             const OsqpVectorf *b,
+void OSQPVectorf_add_scaled(OSQPVectorf       *c,
+                             const OSQPVectorf *a,
+                             const OSQPVectorf *b,
                              c_float           sc){
   c_int i;
 
@@ -112,7 +112,7 @@ void OsqpVectorf_add_scaled(OsqpVectorf       *c,
   }
 }
 
-c_float OsqpVectorf_norm_inf(const OsqpVectorf *v){
+c_float OSQPVectorf_norm_inf(const OSQPVectorf *v){
 
   c_int   i;
   c_float normval = 0.0;
@@ -125,7 +125,7 @@ c_float OsqpVectorf_norm_inf(const OsqpVectorf *v){
   return normval;
 }
 
-c_float OsqpVectorf_norm_1(const OsqpVectorf *v){
+c_float OSQPVectorf_norm_1(const OSQPVectorf *v){
 
   c_int   i;
   c_float normval = 0.0;
@@ -136,7 +136,7 @@ c_float OsqpVectorf_norm_1(const OsqpVectorf *v){
   return normval;
 }
 
-c_float OsqpVectorf_scaled_norm_inf(const OsqpVectorf *S, const OsqpVectorf *v){
+c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S, const OSQPVectorf *v){
 
   c_int   i;
   c_float absval;
@@ -151,7 +151,7 @@ c_float OsqpVectorf_scaled_norm_inf(const OsqpVectorf *S, const OsqpVectorf *v){
   return normval;
 }
 
-c_float OsqpVectorf_scaled_norm_1(const OsqpVectorf *S, const OsqpVectorf *v){
+c_float OSQPVectorf_scaled_norm_1(const OSQPVectorf *S, const OSQPVectorf *v){
 
   c_int   i;
   c_float normval = 0.0;
@@ -164,8 +164,8 @@ c_float OsqpVectorf_scaled_norm_1(const OsqpVectorf *S, const OsqpVectorf *v){
   return normval;
 }
 
-c_float OsqpVectorf_norm_inf_diff(const OsqpVectorf *a,
-                                  const OsqpVectorf *b){
+c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
+                                  const OSQPVectorf *b){
   c_int   i;
   c_float absval;
   c_float normDiff = 0.0;
@@ -179,8 +179,8 @@ c_float OsqpVectorf_norm_inf_diff(const OsqpVectorf *a,
   return normDiff;
 }
 
-c_float OsqpVectorf_norm_1_diff(const OsqpVectorf *a,
-                                const OsqpVectorf *b){
+c_float OSQPVectorf_norm_1_diff(const OSQPVectorf *a,
+                                const OSQPVectorf *b){
 
   c_int   i;
   c_float normDiff = 0.0;
@@ -193,7 +193,7 @@ c_float OsqpVectorf_norm_1_diff(const OsqpVectorf *a,
   return normDiff;
 }
 
-c_float OsqpVectorf_sum(const OsqpVectorf *a){
+c_float OSQPVectorf_sum(const OSQPVectorf *a){
 
   c_int   i;
   c_float val = 0.0;
@@ -205,7 +205,7 @@ c_float OsqpVectorf_sum(const OsqpVectorf *a){
   return val;
 }
 
-c_float OsqpVectorf_dot_prod(const OsqpVectorf *a, const OsqpVectorf *b){
+c_float OSQPVectorf_dot_prod(const OSQPVectorf *a, const OSQPVectorf *b){
 
   c_int   i; // Index
   c_float dotprod = 0.0;
@@ -219,9 +219,9 @@ c_float OsqpVectorf_dot_prod(const OsqpVectorf *a, const OsqpVectorf *b){
   return dotprod;
 }
 
-void OsqpVectorf_ew_prod(const OsqpVectorf *a,
-                         const OsqpVectorf *b,
-                               OsqpVectorf *c){
+void OSQPVectorf_ew_prod(const OSQPVectorf *a,
+                         const OSQPVectorf *b,
+                               OSQPVectorf *c){
 
     c_int i;
 
@@ -235,17 +235,17 @@ void OsqpVectorf_ew_prod(const OsqpVectorf *a,
 
 #if EMBEDDED != 1
 
-c_float OsqpVectorf_mean(const OsqpVectorf *a){
+c_float OSQPVectorf_mean(const OSQPVectorf *a){
 
   if(a->length){
-    return OsqpVectorf_sum(a)/(a->length);
+    return OSQPVectorf_sum(a)/(a->length);
   }
   else{
     return 0;
   }
 }
 
-void OsqpVectorf_ew_reciprocal(const OsqpVectorf *a, OsqpVectorf *b){
+void OSQPVectorf_ew_reciprocal(const OSQPVectorf *a, OSQPVectorf *b){
 
   c_int i;
 
@@ -256,7 +256,7 @@ void OsqpVectorf_ew_reciprocal(const OsqpVectorf *a, OsqpVectorf *b){
   }
 }
 
-void OsqpVectorf_ew_sqrt(OsqpVectorf *a){
+void OSQPVectorf_ew_sqrt(OSQPVectorf *a){
 
   c_int i;
 
@@ -265,7 +265,7 @@ void OsqpVectorf_ew_sqrt(OsqpVectorf *a){
   }
 }
 
-void OsqpVectorf_ew_max(OsqpVectorf *a, c_float max_val){
+void OSQPVectorf_ew_max(OSQPVectorf *a, c_float max_val){
 
   c_int i;
 
@@ -274,7 +274,7 @@ void OsqpVectorf_ew_max(OsqpVectorf *a, c_float max_val){
   }
 }
 
-void OsqpVectorf_ew_min(OsqpVectorf *a, c_float min_val){
+void OSQPVectorf_ew_min(OSQPVectorf *a, c_float min_val){
 
   c_int i;
 
@@ -283,9 +283,9 @@ void OsqpVectorf_ew_min(OsqpVectorf *a, c_float min_val){
   }
 }
 
-void OsqpVectorf_ew_max_vec(const OsqpVectorf *a,
-                            const OsqpVectorf *b,
-                            OsqpVectorf       *c){
+void OSQPVectorf_ew_max_vec(const OSQPVectorf *a,
+                            const OSQPVectorf *b,
+                            OSQPVectorf       *c){
   c_int i;
 
   assert(a->length == b->length);
@@ -296,9 +296,9 @@ void OsqpVectorf_ew_max_vec(const OsqpVectorf *a,
   }
 }
 
-void OsqpVectorf_ew_min_vec(const OsqpVectorf *a,
-                            const OsqpVectorf *b,
-                            OsqpVectorf       *c){
+void OSQPVectorf_ew_min_vec(const OSQPVectorf *a,
+                            const OSQPVectorf *b,
+                            OSQPVectorf       *c){
   c_int i;
 
   assert(a->length == b->length);
@@ -316,7 +316,7 @@ void OsqpVectorf_ew_min_vec(const OsqpVectorf *a,
 
 /* Scalar multiplication, with file scope CSR/CSC implementations */
 
-void OsqpMatrix_mult_scalar(OsqpMatrix *A, c_float sc){
+void OSQPMatrix_mult_scalar(OSQPMatrix *A, c_float sc){
   if(A->csc != OSQP_NULL) CscMatrix_mult_scalar(A->csc,sc);
   if(A->csr != OSQP_NULL) CsrMatrix_mult_scalar(A->csr,sc);
 }
@@ -337,12 +337,12 @@ void CsrMatrix_mult_scalar(CsrMatrix *A, c_float sc) {
 
 /* Left diagonal matrix multiplication, with file scope CSR/CSC implementations */
 
-void OsqpMatrix_premult_diag(OsqpMatrix *A, const OsqpVectorf *d){
+void OSQPMatrix_premult_diag(OSQPMatrix *A, const OSQPVectorf *d){
   if(A->csc != OSQP_NULL) CscMatrix_premult_diag(A->csc,d);
   if(A->csr != OSQP_NULL) CsrMatrix_premult_diag(A->csr,d);
 }
 
-void CscMatrix_premult_diag(CscMatrix *A, const OsqpVectorf *d){
+void CscMatrix_premult_diag(CscMatrix *A, const OSQPVectorf *d){
   c_int j, i;
   assert(A->m == d->length);
   for (j = 0; j < A->n; j++) {                // Cycle over columns
@@ -353,7 +353,7 @@ void CscMatrix_premult_diag(CscMatrix *A, const OsqpVectorf *d){
   }
 }
 
-void CsrMatrix_premult_diag(CsrMatrix *A, const OsqpVectorf *d){
+void CsrMatrix_premult_diag(CsrMatrix *A, const OSQPVectorf *d){
   /* postmult the transpose */
   SWAP(A->m,A->n,c_int);
   CscMatrix_postmult_diag((CscMatrix *)A,d);
@@ -362,12 +362,12 @@ void CsrMatrix_premult_diag(CsrMatrix *A, const OsqpVectorf *d){
 
 /* Right diagonal matrix multiplication, with file scope CSR/CSC implementations */
 
-void OsqpMatrix_postmult_diag(OsqpMatrix *A, const OsqpVectorf *d){
+void OSQPMatrix_postmult_diag(OSQPMatrix *A, const OSQPVectorf *d){
   if(A->csc != OSQP_NULL) CscMatrix_postmult_diag(A->csc,d);
   if(A->csr != OSQP_NULL) CsrMatrix_postmult_diag(A->csr,d);
 }
 
-void CscMatrix_postmult_diag(CscMatrix *A, const OsqpVectorf* d){
+void CscMatrix_postmult_diag(CscMatrix *A, const OSQPVectorf* d){
   c_int j, i;
   assert(A->n == d->length);
   for (j = 0; j < A->n; j++) {                // Cycle over columns j
@@ -378,7 +378,7 @@ void CscMatrix_postmult_diag(CscMatrix *A, const OsqpVectorf* d){
   }
 }
 
-void CsrMatrix_postmult_diag(CsrMatrix *A, const OsqpVectorf *d){
+void CsrMatrix_postmult_diag(CsrMatrix *A, const OSQPVectorf *d){
   /* premult the transpose */
   SWAP(A->m,A->n,c_int);
   CscMatrix_premult_diag((CscMatrix *)A,d);
@@ -390,9 +390,9 @@ void CsrMatrix_postmult_diag(CsrMatrix *A, const OsqpVectorf *d){
   For this operations, always prefer the CSR format if it is available
 */
 
-void OsqpMatrix_Ax(const OsqpMatrix  *A,
-                   const OsqpVectorf *x,
-                   OsqpVectorf       *y,
+void OSQPMatrix_Ax(const OSQPMatrix  *A,
+                   const OSQPVectorf *x,
+                   OSQPVectorf       *y,
                    c_int             sign){
 
   /* at least one format must exist */
@@ -441,15 +441,15 @@ void OsqpMatrix_Ax(const OsqpMatrix  *A,
 }
 
 void CscMatrix_Ax(const CscMatrix   *A,
-                  const OsqpVectorf *x,
-                  OsqpVectorf       *y,
+                  const OSQPVectorf *x,
+                  OSQPVectorf       *y,
                   c_int             sign,
                   c_int             skip_diag){
 
   c_int i, j, k;
 
   /* if sign == 0, y = 0 */
-  if (sign == 0) OsqpVectorf_set_scalar(y, (c_float)0.0);
+  if (sign == 0) OSQPVectorf_set_scalar(y, (c_float)0.0);
 
   // if A is empty, no output
   if (A->p[A->n] == 0) return;
@@ -487,15 +487,15 @@ void CscMatrix_Ax(const CscMatrix   *A,
 }
 
 void CsrMatrix_Ax(const CsrMatrix   *A,
-                  const OsqpVectorf *x,
-                  OsqpVectorf       *y,
+                  const OSQPVectorf *x,
+                  OSQPVectorf       *y,
                   c_int             sign,
                   c_int             skip_diag){
 
     c_int i, j, k;
 
     /* if sign == 0, y = 0 */
-    if (sign == 0) OsqpVectorf_set_scalar(y, (c_float)0.0);
+    if (sign == 0) OSQPVectorf_set_scalar(y, (c_float)0.0);
 
     // if A is empty, no output
     if (A->p[A->m] == 0) return;
@@ -535,9 +535,9 @@ void CsrMatrix_Ax(const CsrMatrix   *A,
   For this operation, always prefer the CSR format if it is available
 */
 
-void OsqpMatrix_Atx(const OsqpMatrix  *A,
-                   const OsqpVectorf *x,
-                   OsqpVectorf       *y,
+void OSQPMatrix_Atx(const OSQPMatrix  *A,
+                   const OSQPVectorf *x,
+                   OSQPVectorf       *y,
                    c_int             sign){
 
   /* at least one format must exist */
@@ -554,13 +554,13 @@ void OsqpMatrix_Atx(const OsqpMatrix  *A,
     }
   }
   else{
-    OsqpMatrix_Ax(A,x,y,sign);
+    OSQPMatrix_Ax(A,x,y,sign);
   }
 }
 
 void CscMatrix_Atx(const CscMatrix  *A,
-                   const OsqpVectorf *x,
-                   OsqpVectorf       *y,
+                   const OSQPVectorf *x,
+                   OSQPVectorf       *y,
                    c_int             sign,
                    c_int             skip_diag){
   // Cast to CSR to multiply by the transpose
@@ -570,8 +570,8 @@ void CscMatrix_Atx(const CscMatrix  *A,
 }
 
 void CsrMatrix_Atx(const CsrMatrix  *A,
-                   const OsqpVectorf *x,
-                   OsqpVectorf       *y,
+                   const OSQPVectorf *x,
+                   OSQPVectorf       *y,
                    c_int             sign,
                    c_int             skip_diag){
   // Cast to CSR to multiply by the transpose
@@ -585,14 +585,14 @@ void CsrMatrix_Atx(const CsrMatrix  *A,
 
 /* Column-wise infinity norms */
 
-void OsqpMatrix_inf_norm_cols(const OsqpMatrix *M,
-                              OsqpVectorf      *E){
+void OSQPMatrix_inf_norm_cols(const OSQPMatrix *M,
+                              OSQPVectorf      *E){
 
   /* at least one format must exist */
   assert(M->csr != OSQP_NULL || M->csc != OSQP_NULL);
 
   // Initialize zero max elements
-  OsqpVectorf_set_scalar(E,0.0);
+  OSQPVectorf_set_scalar(E,0.0);
 
   if(M->symmetry == NONE){
     /*Assume that CSC is faster, so use that
@@ -626,7 +626,7 @@ void OsqpMatrix_inf_norm_cols(const OsqpMatrix *M,
 }
 
 void CscMatrix_inf_norm_cols(const CscMatrix *M,
-                             OsqpVectorf     *E){
+                             OSQPVectorf     *E){
 
    // Warning! E is *not* set to zero to start, so that
    // we can use this function as part of a two-step procedure
@@ -646,7 +646,7 @@ void CscMatrix_inf_norm_cols(const CscMatrix *M,
 }
 
 void CsrMatrix_inf_norm_cols(const CsrMatrix *M,
-                             OsqpVectorf     *E){
+                             OSQPVectorf     *E){
    SWAP(M->m,M->n,c_int);
    CscMatrix_inf_norm_rows((const CscMatrix*)M,E);
    SWAP(M->m,M->n,c_int);
@@ -654,8 +654,8 @@ void CsrMatrix_inf_norm_cols(const CsrMatrix *M,
 
 /* row wise infinity norms */
 
-void OsqpMatrix_inf_norm_rows(const OsqpMatrix *M,
-                              OsqpVectorf      *E){
+void OSQPMatrix_inf_norm_rows(const OSQPMatrix *M,
+                              OSQPVectorf      *E){
 
   /* at least one format must exist */
   assert(M->csr != OSQP_NULL || M->csc != OSQP_NULL);
@@ -667,7 +667,7 @@ void OsqpMatrix_inf_norm_rows(const OsqpMatrix *M,
      done here so that symmetric norm
      case doesn't doubly initialise E
     */
-    OsqpVectorf_set_scalar(E,0.0);
+    OSQPVectorf_set_scalar(E,0.0);
 
     /*Assume that CSR is faster, so use that
     form if it exists.  Otherwise CSC */
@@ -680,13 +680,13 @@ void OsqpMatrix_inf_norm_rows(const OsqpMatrix *M,
   }
   else if(M->symmetry == TRIL || M->symmetry == TRIU){
       /* just use col norms instead*/
-      OsqpMatrix_inf_norm_cols(M,E);
+      OSQPMatrix_inf_norm_cols(M,E);
   }
   else assert(0);
 }
 
 void CscMatrix_inf_norm_rows(const CscMatrix *M,
-                             OsqpVectorf     *E){
+                             OSQPVectorf     *E){
 
   // Warning! E is *not* set to zero to start, so that
   // we can use this function as part of a two-step procedure
@@ -707,7 +707,7 @@ void CscMatrix_inf_norm_rows(const CscMatrix *M,
 }
 
 void CsrMatrix_inf_norm_rows(const CsrMatrix *M,
-                            OsqpVectorf      *E){
+                            OSQPVectorf      *E){
   SWAP(M->m,M->n,c_int);
   CscMatrix_inf_norm_cols((const CscMatrix*)M,E);
   SWAP(M->m,M->n,c_int);
@@ -715,8 +715,8 @@ void CsrMatrix_inf_norm_rows(const CsrMatrix *M,
 
 #endif /* if EMBEDDED != 1 */
 
-c_float OsqpMatrix_quad_form(const OsqpMatrix  *P,
-                             const OsqpVectorf *x){
+c_float OSQPMatrix_quad_form(const OSQPMatrix  *P,
+                             const OSQPVectorf *x){
 
   c_float val;
 
@@ -734,7 +734,7 @@ c_float OsqpMatrix_quad_form(const OsqpMatrix  *P,
 }
 
 c_float CscMatrix_quad_form(const CscMatrix  *P,
-                            const OsqpVectorf *x){
+                            const OSQPVectorf *x){
 
   c_float quad_form = 0.;
   c_int   i, j, ptr;                                // Pointers to iterate over
@@ -761,6 +761,6 @@ c_float CscMatrix_quad_form(const CscMatrix  *P,
 }
 
 c_float CsrMatrix_quad_form(const CsrMatrix  *P,
-                            const OsqpVectorf *x){
+                            const OSQPVectorf *x){
   return CscMatrix_quad_form((const CscMatrix *)P,x);
 }
