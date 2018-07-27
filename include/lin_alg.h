@@ -8,7 +8,6 @@ extern "C" {
 
 # include "types.h"
 
-
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 
 # ifndef EMBEDDED
@@ -20,6 +19,18 @@ OSQPVectorf* OSQPVectorf_copy_new(OSQPVectorf *a);
 OSQPVectori* OSQPVectori_copy_new(OSQPVectori *a);
 
 # endif // ifndef EMBEDDED
+
+/* Length of the vector (floats) */
+c_int OSQPVectorf_length(OSQPVectorf *a);
+
+/* Length of the vector (ints)*/
+c_int OSQPVectori_length(OSQPVectori *a);
+
+/* Pointer to vector data (floats) */
+c_float* OSQPVectorf_data(OSQPVectorf *a);
+
+/* Pointer to vector data (ints) */
+c_float* OSQPVectori_data(OSQPVectori *a);
 
 /* copy a float vector a into another vector b (pre-allocated) */
 void OSQPVectorf_copy(OSQPVectorf *a,OSQPVectorf *b);
@@ -116,6 +127,55 @@ void OSQPVectorf_ew_min_vec(const OSQPVectorf *a,
 
 
 /* MATRIX FUNCTIONS ----------------------------------------------------------*/
+
+# ifndef EMBEDDED
+
+/**
+ * Create OSQPMatrix from existing data arrays of a matrix in
+   compressed sparse column format
+ * @param  m     First dimension
+ * @param  n     Second dimension
+ * @param  nzmax Maximum number of nonzero elements
+ * @param  x     Vector of data
+ * @param  i     Vector of row indices
+ * @param  p     Vector of column pointers
+ * @return       New matrix pointer
+ */
+OSQPMatrix* OSQPMatrix_new_from_csc(c_int    m,
+                                    c_int    n,
+                                    c_int    nzmax,
+                                    c_float *x,
+                                    c_int   *i,
+                                    c_int   *p);
+
+/**
+ * Create a deep copy of an OSQPMatrix from an existing one
+ * @param  A     Matrix to be copied
+ * @return       New matrix pointer
+ */
+ OSQPMatrix* OSQPMatrix_copy(OSQPMatrix *A);
+
+/** Create a new OSQPMatrix of a given dimension and with capacity
+    for a minimum number of nonzero elements
+    * @param  m     First dimension
+    * @param  n     Second dimension
+    * @param  nzmax Maximum number of nonzero elements
+**/
+OSQPMatrix* OSQPMatrix_new(c_int m,c_int n, c_int nzmax);
+
+/** Free an OSQPMatrix and any internal data structures
+*   used to store it.
+*
+* @param    A Matrix in OSQPMatrix format
+* @return   return NULL pointer if everything works
+**/
+OSQPMatrix* OSQPMatrix_free(OSQPMatrix *A);
+
+
+
+
+# endif // if EMBEDDED != 1
+
 
 /* multiply matrix by scalar */
 void OSQPMatrix_mult_scalar(OSQPMatrix *A, c_float sc);

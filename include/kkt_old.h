@@ -6,9 +6,10 @@ extern "C" {
 # endif // ifdef __cplusplus
 
 # include "types.h"
-# include "lin_alg.h"
 
 # ifndef EMBEDDED
+
+#  include "cs.h"
 
 /**
  * Form square symmetric KKT matrix of the form
@@ -27,7 +28,7 @@ extern "C" {
  *
  * NB: Pdiag_idx needs to be freed!
  *
- * @param  P          cost matrix
+ * @param  P          cost matrix (already just upper triangular part)
  * @param  A          linear constraint matrix
  * @param  format     CSC (0) or CSR (1)
  * @param  param1     regularization parameter
@@ -40,16 +41,16 @@ extern "C" {
  *KKT
  * @return            return status flag
  */
-csc* form_KKT(const  OSQPMatrix *P,
-              const  OSQPMatrix *A,
+csc* form_KKT(const csc  *P,
+              const  csc *A,
               c_int       format,
               c_float     param1,
-              OSQPVectorf    *param2,
-              OSQPVectori    *PtoKKT,
-              OSQPVectori    *AtoKKT,
-              OSQPVectori    **Pdiag_idx,
-              c_int          *Pdiag_n,
-              OSQPVectori    *param2toKKT);
+              c_float    *param2,
+              c_int      *PtoKKT,
+              c_int      *AtoKKT,
+              c_int     **Pdiag_idx,
+              c_int      *Pdiag_n,
+              c_int      *param2toKKT);
 # endif // ifndef EMBEDDED
 
 
@@ -65,11 +66,12 @@ csc* form_KKT(const  OSQPMatrix *P,
  * @param Pdiag_idx Index of diagonal elements in P->x
  * @param Pdiag_n   Number of diagonal elements of P
  */
-void update_KKT_P(OSQPMatrix          *KKT,
-                  const OSQPMatrix    *P,
+void update_KKT_P(csc          *KKT,
+                  const csc    *P,
                   const c_int  *PtoKKT,
                   const c_float param1,
-                  const OSQPVectori  *Pdiag);
+                  const c_int  *Pdiag_idx,
+                  const c_int   Pdiag_n);
 
 
 /**

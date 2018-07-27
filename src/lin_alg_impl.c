@@ -33,6 +33,13 @@ OSQPVectori* OSQPVectori_copy_new(OSQPVectori *a){
 
 #endif // end EMBEDDED
 
+c_int OSQPVectorf_length(OSQPVectorf *a){return a->length;}
+c_int OSQPVectori_length(OSQPVectori *a){return a->length;}
+
+/* Pointer to vector data (floats) */
+c_float* OSQPVectorf_data(OSQPVectorf *a){return a->values;}
+c_float* OSQPVectori_data(OSQPVectori *a){return a->values;}
+
 void OSQPVectorf_copy(OSQPVectorf *a,OSQPVectorf *b){
 
   c_int i;

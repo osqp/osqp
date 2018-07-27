@@ -5,7 +5,6 @@
 extern "C" {
 # endif // ifdef __cplusplus
 
-
 /***********************************
 * Concrete Matrix and Vector Types *
 ***********************************/
@@ -63,6 +62,11 @@ typedef struct OSQPVectorf_ {
   c_float* values;
   c_int length;
 } OSQPVectorf;
+
+
+/* MATRIX /VECTOR FUNCTIONS that allocate memory------------------------------*/
+
+# ifndef EMBEDDED
 
 
 
