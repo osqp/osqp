@@ -40,7 +40,7 @@ extern "C" {
  *KKT
  * @return            return status flag
  */
-csc* form_KKT(const  OSQPMatrix *P,
+OSQPMatrix* form_KKT(const  OSQPMatrix *P,
               const  OSQPMatrix *A,
               c_int       format,
               c_float     param1,
@@ -75,12 +75,12 @@ void update_KKT_P(OSQPMatrix          *KKT,
 /**
  * Update KKT matrix using the elements of A
  *
- * @param KKT       KKT matrix in CSC form (upper-triangular)
- * @param A         A matrix in CSC form (upper-triangular)
+ * @param KKT       KKT matrix
+ * @param A         A matrix
  * @param AtoKKT    Vector of pointers from A->x to KKT->x
  */
-void update_KKT_A(csc         *KKT,
-                  const csc   *A,
+void update_KKT_A(OSQPMatrix         *KKT,
+                  const OSQPMatrix   *A,
                   const c_int *AtoKKT);
 
 
@@ -90,12 +90,10 @@ void update_KKT_A(csc         *KKT,
  * @param KKT           KKT matrix
  * @param param2        Parameter of the KKT matrix (vector)
  * @param param2toKKT   index where param2 enters in the KKT matrix
- * @param m             number of constraints
  */
-void update_KKT_param2(csc           *KKT,
-                       const c_float *param2,
-                       const c_int   *param2toKKT,
-                       const c_int    m);
+void update_KKT_param2(OSQPMatrix           *KKT,
+                       const OSQPVectorf    *param2,
+                       const OSQPVectori    *param2toKKT);
 
 # endif // EMBEDDED != 1
 

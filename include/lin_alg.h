@@ -18,6 +18,12 @@ OSQPVectorf* OSQPVectorf_copy_new(OSQPVectorf *a);
 /* Return a copy of an int vector a as output (Uses MALLOC)*/
 OSQPVectori* OSQPVectori_copy_new(OSQPVectori *a);
 
+/* Free a float vector*/
+OSQPVectorf* OSQPVectorf_free(OSQPVectorf *a);
+
+/* Free an int vector*/
+OSQPVectori* OSQPVectori_free(OSQPVectori *a);
+
 # endif // ifndef EMBEDDED
 
 /* Length of the vector (floats) */

@@ -5,15 +5,11 @@
 extern "C" {
 # endif // ifdef __cplusplus
 
+#include "lin_alg.h"
+
 /***********************************
 * Concrete Matrix and Vector Types *
 ***********************************/
-
-/**
- *  An enum used to indicate whether a matrix stores
- *  real values or only the locations of non-zeros
- */
-typedef enum OSQPMatrix_value_type {REAL,LOGICAL} SparseMatrix_value_type;
 
 /**
  *  An enum used to indicate whether a matrix is symmetric.   Options
@@ -37,7 +33,6 @@ struct SparseMatrix_ {
   c_int   *i;     ///< row indices, size nzmax starting from 0
   c_float *x;     ///< numerical values, size nzmax
   c_int   nnz;    ///< # of entries in triplet matrix, -1 for csc/csr
-  SparseMatrix_value_type    datatype; /// REAL or LOGICAL.  If Logical, then x = NULL
 };
 
 typedef struct SparseMatrix_ CscMatrix; // Compressed sparse column matrix
@@ -62,12 +57,6 @@ typedef struct OSQPVectorf_ {
   c_float* values;
   c_int length;
 } OSQPVectorf;
-
-
-/* MATRIX /VECTOR FUNCTIONS that allocate memory------------------------------*/
-
-# ifndef EMBEDDED
-
 
 
 /* MATRIX FUNCTIONS ----------------------------------------------------------*/

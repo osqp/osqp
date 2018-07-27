@@ -31,6 +31,22 @@ OSQPVectori* OSQPVectori_copy_new(OSQPVectori *a){
   return b;
 }
 
+/* Free a float vector*/
+OSQPVectorf* OSQPVectorf_free(OSQPVectorf *a){
+  if(a){
+    c_free(a->values);
+    c_free(a);
+    return OSQP_NULL;
+}
+
+/* Free an int vector*/
+OSQPVectori* OSQPVectori_free(OSQPVectori *a){
+  if(a){
+    c_free(a->values);
+    c_free(a);
+    return OSQP_NULL;
+}
+
 #endif // end EMBEDDED
 
 c_int OSQPVectorf_length(OSQPVectorf *a){return a->length;}
@@ -318,10 +334,72 @@ void OSQPVectorf_ew_min_vec(const OSQPVectorf *a,
 
 #endif // EMBEDDED != 1
 
-
 /* MATRIX FUNCTIONS ----------------------------------------------------------*/
 
-/* Scalar multiplication, with file scope CSR/CSC implementations */
+
+# ifndef EMBEDDED
+
+OSQPMatrix* OSQPMatrix_new_from_csc(c_int    m,
+                                    c_int    n,
+                                    c_int    nzmax,
+                                    c_float *x,
+                                    c_int   *i,
+                                    c_int   *p);
+
+OSQPMatrix* OSQPMatrix_copy(OSQPMatrix *A);
+
+
+OSQPMatrix* OSQPMatrix_new(c_int m, c_int n, c_int nzmax){
+  OSQPMatrix *A = (OSQPMatrix *)c_malloc(sizeof(OSQPMatrix));
+  A->csc = CscMatrix_new(m,n,nzmax);
+  A->csr = OSQP_NULL;    //for future use
+  return A;
+}
+
+CscMatrix* CscMatrix_new(c_int m, c_int n, c_int nzmax){
+  CscMatrix *A = (CscMatrix *)c_malloc(sizeof(CscMatrix));
+  A->m = m;
+  A->n = n;
+  A->nzmax = nzmax;
+  A->p = (c_int *)c_malloc(sizeof(c_int)*(n+1));
+  A->i = (c_int *)c_malloc(sizeof(c_int)*nzmax);
+  A->x = (c_float *)c_malloc(sizeof(c_float)*nzmax);
+  A->nnz = -1;  //not used for CscMatrix
+  return A;
+}
+
+CsrMatrix* CsrMatrix_new(c_int m, c_int n, c_int nzmax){
+  return (CsrMatrix*)(CscMatrix_new(n,m,nzmax);
+}
+
+OSQPMatrix* OSQPMatrix_free(OSQPMatrix *A){
+  if(A){
+    if(A->csc) CscMatrix_free(A->csc);
+    if(A->csr) CsrMatrix_free(A->csr);
+    c_free(A);
+  }
+  return OSQP_NULL;
+}
+
+CscMatrix* CscMatrix_free(CscMatrix *A){
+  if(A){
+    c_free(A->p);
+    c_free(A->i);
+    c_free(A->x);
+    c_free(A);
+  }
+  return OSQP_NULL;
+}
+
+CsrMatrix* CsrMatrix_free(CsrMatrix *A){
+  return (CsrMatrix*)CscMatrix_free((CscMatrix*)A);
+}
+
+
+#endif
+
+
+/* Scalar multiplication, with CSR/CSC implementations */
 
 void OSQPMatrix_mult_scalar(OSQPMatrix *A, c_float sc){
   if(A->csc != OSQP_NULL) CscMatrix_mult_scalar(A->csc,sc);
@@ -342,7 +420,7 @@ void CsrMatrix_mult_scalar(CsrMatrix *A, c_float sc) {
   SWAP(A->m,A->n,c_int);
 }
 
-/* Left diagonal matrix multiplication, with file scope CSR/CSC implementations */
+/* Left diagonal matrix multiplication, with CSR/CSC implementations */
 
 void OSQPMatrix_premult_diag(OSQPMatrix *A, const OSQPVectorf *d){
   if(A->csc != OSQP_NULL) CscMatrix_premult_diag(A->csc,d);
@@ -367,7 +445,7 @@ void CsrMatrix_premult_diag(CsrMatrix *A, const OSQPVectorf *d){
   SWAP(A->m,A->n,c_int);
 }
 
-/* Right diagonal matrix multiplication, with file scope CSR/CSC implementations */
+/* Right diagonal matrix multiplication, with CSR/CSC implementations */
 
 void OSQPMatrix_postmult_diag(OSQPMatrix *A, const OSQPVectorf *d){
   if(A->csc != OSQP_NULL) CscMatrix_postmult_diag(A->csc,d);
@@ -393,7 +471,7 @@ void CsrMatrix_postmult_diag(CsrMatrix *A, const OSQPVectorf *d){
 }
 
 /*
-  Matrix vector multiplication A*x, with file scope CSR/CSC implementations
+  Matrix vector multiplication A*x, with CSR/CSC implementations
   For this operations, always prefer the CSR format if it is available
 */
 
@@ -538,7 +616,7 @@ void CsrMatrix_Ax(const CsrMatrix   *A,
   }
 
 /*
-  Matrix vector A^T*x multiplication, with file scope CSR/CSC implementations
+  Matrix vector A^T*x multiplication, with CSR/CSC implementations
   For this operation, always prefer the CSR format if it is available
 */
 

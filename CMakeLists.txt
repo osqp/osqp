@@ -138,7 +138,7 @@ if(NOT DEFINED EMBEDDED)
         src/cs.c
         src/ctrlc.c
         src/kkt.c
-        src/lin_alg.c
+        src/lin_alg_impl.c
         src/lin_sys.c
         src/osqp.c
         src/polish.c
@@ -156,6 +156,7 @@ if(NOT DEFINED EMBEDDED)
         include/glob_opts.h
         include/kkt.h
         include/lin_alg.h
+        include/lin_alg_impl.h
         include/lin_sys.h
         include/osqp.h
         include/osqp_configure.h

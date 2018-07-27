@@ -8,6 +8,9 @@
 #endif
 
 #include "lin_alg.h"
+//Need to expose internal matrix implementation of OSQPMatrix
+//in order to use the CSC specific QDLDL solver
+#include "lin_alg_impl.h"
 
 #if EMBEDDED != 1
 #include "kkt.h"
@@ -18,17 +21,17 @@
 // Free LDL Factorization structure
 void free_linsys_solver_qdldl(qdldl_solver *s) {
     if (s) {
-        if (s->L)         csc_spfree(s->L);
-        if (s->P)         c_free(s->P);
-        if (s->Dinv)      c_free(s->Dinv);
-        if (s->bp)        c_free(s->bp);
+        if (s->L)         OSQPMatrix_free(s->L);
+        if (s->P)         OSQPVectori_free(s->P);
+        if (s->Dinv)      OSQPVectorf_free(s->Dinv);
+        if (s->bp)        OSQPVectori_free(s->bp);
 
         // These are required for matrix updates
-        if (s->Pdiag_idx) c_free(s->Pdiag_idx);
-        if (s->KKT)       csc_spfree(s->KKT);
-        if (s->PtoKKT)    c_free(s->PtoKKT);
-        if (s->AtoKKT)    c_free(s->AtoKKT);
-        if (s->rhotoKKT)  c_free(s->rhotoKKT);
+        if (s->Pdiag_idx) OSQPVectori_free(s->Pdiag_idx);
+        if (s->KKT)       OSQPMatrix_free(s->KKT);
+        if (s->PtoKKT)    OSQPVectori_free(s->PtoKKT);
+        if (s->AtoKKT)    OSQPVectori_free(s->AtoKKT);
+        if (s->rhotoKKT)  OSQPVectori_free(s->rhotoKKT);
         if (s->D)         c_free(s->D);
         if (s->etree)     c_free(s->etree);
         if (s->Lnz)       c_free(s->Lnz);
@@ -47,13 +50,17 @@ void free_linsys_solver_qdldl(qdldl_solver *s) {
  * @param  p Private workspace
  * @return   exitstatus (0 is good)
  */
-static c_int LDL_factor(csc *A,  qdldl_solver * p){
+static c_int LDL_factor(OSQPMatrix *A,  qdldl_solver * p){
 
     c_int sum_Lnz;
     c_int factor_status;
 
+    //pointer to inner CSC structure for A and L
+    CscMatrix* Acsc = A->csc;
+    CscMatrix* Lcsc;
+
     // Compute elimination tree
-    sum_Lnz = QDLDL_etree(A->n, A->p, A->i, p->iwork, p->Lnz, p->etree);
+    sum_Lnz = QDLDL_etree(Acsc->n, Acsc->p, Acsc->i, p->iwork, p->Lnz, p->etree);
 
     if (sum_Lnz < 0){
       // Error
@@ -61,15 +68,20 @@ static c_int LDL_factor(csc *A,  qdldl_solver * p){
       return sum_Lnz;
     }
 
-    // Allocate memory for Li and Lx
-    p->L->i = (c_int *)c_malloc(sizeof(c_int)*sum_Lnz);
-    p->L->x = (c_float *)c_malloc(sizeof(c_float)*sum_Lnz);
+    // Allocate memory for L
+    p->L = OSQPMatrix_new(Acsc->n, Acsc->n, sum_Lnz);
+    Lcsc = p->L->csc;
 
     // Factor matrix
-    factor_status = QDLDL_factor(A->n, A->p, A->i, A->x,
-                                 p->L->p, p->L->i, p->L->x,
-                                 p->D, p->Dinv, p->Lnz,
-                                 p->etree, (QDLDL_bool *)p->bwork, p->iwork, p->fwork);
+    factor_status = QDLDL_factor(Acsc->n, Acsc->p, Acsc->i, Acsc->x,
+                                 Lcsc->p, Lcsc->i, Lcsc->x,
+                                 OsqpVectorf_values(p->D),
+                                 OsqpVectorf_values(p->Dinv),
+                                 p->Lnz,
+                                 p->etree,
+                                 (QDLDL_bool *)p->bwork,
+                                 p->iwork,
+                                 p->fwork);
 
 
     if (factor_status < 0){
@@ -169,7 +181,7 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
     // NB: We don not allocate L completely (CSC elements)
     //      L will be allocated during the factorization depending on the
     //      resulting number of elements.
-    p->L = c_malloc(sizeof(csc));  
+    p->L = c_malloc(sizeof(csc));
     p->L->m = n_plus_m;
     p->L->n = n_plus_m;
     p->L->nz = -1;

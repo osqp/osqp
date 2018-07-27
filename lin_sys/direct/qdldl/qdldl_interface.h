@@ -19,7 +19,7 @@ struct qdldl {
      * @name Functions
      * @{
      */
-    c_int (*solve)(struct qdldl * self, c_float * b, const OSQPSettings * settings);
+    c_int (*solve)(struct qdldl * self, OSQPVectorf *b, const OSQPSettings * settings);
 
     #ifndef EMBEDDED
     void (*free)(struct qdldl * self); ///< Free workspace (only if desktop)
@@ -27,8 +27,13 @@ struct qdldl {
 
     // This used only in non embedded or embedded 2 version
     #if EMBEDDED != 1
-    c_int (*update_matrices)(struct qdldl * self, const csc *P, const csc *A, const OSQPSettings *settings); ///< Update solver matrices
-    c_int (*update_rho_vec)(struct qdldl * self, const c_float * rho_vec, const c_int m); ///< Update solver matrices
+    c_int (*update_matrices)(struct qdldl * self,
+                             const OSQPMatrix *P,
+                             const OSQPMatrix *A,
+                             const OSQPSettings *settings); ///< Update solver matrices
+
+    c_int (*update_rho_vec)(struct qdldl * self,
+                            const OSQPVectorf* rho_vec); ///< Update solver matrices
     #endif
 
     #ifndef EMBEDDED
@@ -41,18 +46,20 @@ struct qdldl {
      * @name Attributes
      * @{
      */
-    csc *L;         ///< lower triangular matrix in LDL factorization
-    c_float *Dinv;  ///< inverse of diag matrix in LDL (as a vector)
-    c_int *P;       ///< permutation of KKT matrix for factorization
-    c_float *bp;    ///< workspace memory for solves
+    OSQPMatrix *L;         ///< lower triangular matrix in LDL factorization
+    OSQPVectorf *Dinv;     ///< inverse of diag matrix in LDL (as a vector)
+    OSQPVectori *P;        ///< permutation of KKT matrix for factorization
+    OSQPVectori *bp;       ///< workspace memory for solves
 
 
     #if EMBEDDED != 1
     // These are required for matrix updates
-    c_int * Pdiag_idx, Pdiag_n;  ///< index and number of diagonal elements in P
-    csc * KKT;                   ///< Permuted KKT matrix in sparse form (used to update P and A matrices)
-    c_int * PtoKKT, * AtoKKT;    ///< Index of elements from P and A to KKT matrix
-    c_int * rhotoKKT;            ///< Index of rho places in KKT matrix
+    OSQPVectori* Pdiag_idx;      ///< index of diagonal elements in P
+    OSQPMatrix * KKT;            ///< Permuted KKT matrix
+
+    OSQPVectori *PtoKKT, *AtoKKT;    ///< Index of elements from P and A to KKT matrix
+    OSQPVectori *rhotoKKT;           ///< Index of rho places in KKT matrix
+
     // QDLDL Numeric workspace
     c_float *D;
     c_int *etree;
@@ -69,14 +76,14 @@ struct qdldl {
 /**
  * Initialize QDLDL Solver
  *
- * @param  P      Cost function matrix (upper triangular form)
+ * @param  P      Cost function matrix
  * @param  A      Constraints matrix
  * @param	sigma   Algorithm parameter. If polish, then sigma = delta.
  * @param	rho_vec Algorithm parameter. If polish, then rho_vec = OSQP_NULL.
  * @param  polish Flag whether we are initializing for polish or not
  * @return        Initialized private structure
  */
-qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sigma, c_float * rho_vec, c_int polish);
+qdldl_solver *init_linsys_solver_qdldl(const OSQPMatrix * P, const OSQPMatrix * A, c_float sigma, OSQPVectorf * rho_vec, c_int polish);
 
 /**
  * Solve linear system and store result in b
@@ -85,7 +92,7 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
  * @param  settings OSQP solver settings
  * @return          Exitflag
  */
-c_int solve_linsys_qdldl(qdldl_solver * s, c_float * b, const OSQPSettings * settings);
+c_int solve_linsys_qdldl(qdldl_solver * s, OSQPVectorf * b, const OSQPSettings * settings);
 
 
 #if EMBEDDED != 1
@@ -98,7 +105,7 @@ c_int solve_linsys_qdldl(qdldl_solver * s, c_float * b, const OSQPSettings * set
  * @return          Exitflag
  */
 c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s,
-		const csc *P, const csc *A, const OSQPSettings *settings);
+		const OSQPMatrix *P, const OSQPMatrix *A, const OSQPSettings *settings);
 
 
 
@@ -107,10 +114,9 @@ c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s,
  * Update rho parameter in linear system solver structure
  * @param  s   Linear system solver structure
  * @param  rho new rho value
- * @param  m   number of constraints
  * @return     exitflag
  */
-c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver * s, const c_float * rho_vec, const c_int m);
+c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver * s, const OSQPVectorf * rho_vec);
 
 #endif
 
