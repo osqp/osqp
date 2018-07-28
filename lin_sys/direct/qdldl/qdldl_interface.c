@@ -8,6 +8,7 @@
 #endif
 
 #include "lin_alg.h"
+
 //Need to expose internal matrix implementation of OSQPMatrix
 //in order to use the CSC specific QDLDL solver
 #include "lin_alg_impl.h"
@@ -21,10 +22,14 @@
 // Free LDL Factorization structure
 void free_linsys_solver_qdldl(qdldl_solver *s) {
     if (s) {
+
+        //The matrix factorisation goes here
         if (s->L)         OSQPMatrix_free(s->L);
         if (s->P)         OSQPVectori_free(s->P);
         if (s->Dinv)      OSQPVectorf_free(s->Dinv);
-        if (s->bp)        OSQPVectori_free(s->bp);
+
+        //working memory for solves
+        if (s->bp)        OSQPVectorf_free(s->bp);
 
         // These are required for matrix updates
         if (s->Pdiag_idx) OSQPVectori_free(s->Pdiag_idx);
@@ -32,6 +37,8 @@ void free_linsys_solver_qdldl(qdldl_solver *s) {
         if (s->PtoKKT)    OSQPVectori_free(s->PtoKKT);
         if (s->AtoKKT)    OSQPVectori_free(s->AtoKKT);
         if (s->rhotoKKT)  OSQPVectori_free(s->rhotoKKT);
+
+        //These are working memory for the LDL solver
         if (s->D)         c_free(s->D);
         if (s->etree)     c_free(s->etree);
         if (s->Lnz)       c_free(s->Lnz);
@@ -75,8 +82,8 @@ static c_int LDL_factor(OSQPMatrix *A,  qdldl_solver * p){
     // Factor matrix
     factor_status = QDLDL_factor(Acsc->n, Acsc->p, Acsc->i, Acsc->x,
                                  Lcsc->p, Lcsc->i, Lcsc->x,
-                                 OsqpVectorf_values(p->D),
-                                 OsqpVectorf_values(p->Dinv),
+                                 p->D,
+                                 OSQPVectorf_data(p->Dinv),
                                  p->Lnz,
                                  p->etree,
                                  (QDLDL_bool *)p->bwork,
@@ -167,7 +174,7 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
     c_int i;                     // loop counter
 
     // Define Variables
-    qdldl_solver * p;  // Initialize LDL solver
+    qdldl_solver * p;            // Initialize LDL solver
     c_int n_plus_m;              // Define n_plus_m dimension
     csc * KKT_temp;              // Temporary KKT pointer
 
@@ -293,28 +300,14 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
 #endif  // EMBEDDED
 
 
-// Permute x = P*b using P
-void permute_x( c_int n, c_float * x,	c_float * b, c_int * P) {
-    c_int j;
-    for (j = 0 ; j < n ; j++) x[j] = b[P[j]];
-}
-
-// Permute x = P'*b using P
-void permutet_x( c_int n, c_float * x,	c_float * b, c_int * P) {
-    c_int j;
-    for (j = 0 ; j < n ; j++) x[P[j]] = b[j];
-}
-
-
 static void LDLSolve(c_float *x, c_float *b, csc *L, c_float *Dinv, c_int *P,
               c_float *bp) {
     /* solves PLDL'P' x = b for x */
-    permute_x(L->n, bp, b, P);
+    OSQPVectorf_perm(bp,b,P);
     QDLDL_solve(L->n, L->p, L->i, L->x, Dinv, bp);
-    permutet_x(L->n, x, bp, P);
+    OSQPVectorf_iperm(x,bp,P);
 
 }
-
 
 c_int solve_linsys_qdldl(qdldl_solver * s, c_float * b, const OSQPSettings *settings) {
     /* returns solution to linear system */
@@ -345,16 +338,14 @@ c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s,
 
 
 
-c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver * s, const c_float * rho_vec, const c_int m){
+c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver * s, const OSQPVectorf* rho_vec){
     c_int kk, i;
 
     // Use s->bp for storing param2 = rho_inv_vec
-    for (i = 0; i < m; i++){
-        s->bp[i] = 1. / rho_vec[i];
-    }
+    OSQPVectorf_ew_reciprocal(rho_vec,s->bp);
 
     // Update KKT matrix with new rho
-    update_KKT_param2(s->KKT, s->bp, s->rhotoKKT, m);
+    update_KKT_param2(s->KKT, s->bp, s->rhotoKKT);
 
     return (QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
         s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,

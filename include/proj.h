@@ -16,7 +16,7 @@ extern "C" {
  * @param work Workspace
  */
 void project(OSQPWorkspace *work,
-             c_float       *z);
+             OSQPVectorf   *z);
 
 
 /**
@@ -26,8 +26,8 @@ void project(OSQPWorkspace *work,
  * @param y    Dual variable y
  */
 void project_normalcone(OSQPWorkspace *work,
-                        c_float       *z,
-                        c_float       *y);
+                        OSQPVectorf   *z,
+                        OSQPVectorf   *y);
 
 
 # ifdef __cplusplus

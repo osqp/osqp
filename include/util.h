@@ -162,11 +162,6 @@ c_float toc(OSQPTimer *t);
 
 # ifndef EMBEDDED
 
-/* Compare CSC matrices */
-c_int is_eq_csc(csc    *A,
-                csc    *B,
-                c_float tol);
-
 /* Convert sparse CSC to dense */
 c_float* csc_to_dns(csc *M);
 

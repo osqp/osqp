@@ -143,6 +143,17 @@ void CsrMatrix_inf_norm_rows(const CsrMatrix *M,OSQPVectorf *E);
 c_float CscMatrix_quad_form(const CscMatrix  *P, const OSQPVectorf *x);
 c_float CsrMatrix_quad_form(const CsrMatrix  *P, const OSQPVectorf *x);
 
+
+/**
+ * Check for matrix equality to within given tolerance
+ * @param  A matrix input
+ * @param  B matrix input
+ * @param  e check tolerance
+ * @return   1 if true, 0 therwise
+ */
+int CscMatrix_eq(const CscMatrix  *A, const CscMatrix  *B, c_float tol);
+int CsrMatrix_eq(const CsrMatrix  *A, const CsrMatrix  *B, c_float tol);
+
 # ifdef __cplusplus
 }
 # endif // ifdef __cplusplus

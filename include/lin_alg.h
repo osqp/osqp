@@ -104,6 +104,14 @@ void OSQPVectorf_ew_prod(const OSQPVectorf *a,
                          const OSQPVectorf *b,
                          OSQPVectorf       *c);
 
+/* vector permutation x[:] = b(p[:]) */
+void OSQPVectorf_permute(OSQPVectorf *x, OSQPVectorf *b, OSQPVectori *p);
+void OSQPVectori_permute(OSQPVectori *x, OSQPVectori *b, OSQPVectori *p);
+
+/* vector inverse permutation x(p[:]) = b */
+void OSQPVectorf_ipermute(OSQPVectorf *x, OSQPVectorf *b, OSQPVectori *p);
+void OSQPVectori_ipermute(OSQPVectori *x, OSQPVectori *b, OSQPVectori *p);
+
 
 # if EMBEDDED != 1
 
@@ -128,6 +136,15 @@ void OSQPVectorf_ew_max_vec(const OSQPVectorf *a,
 void OSQPVectorf_ew_min_vec(const OSQPVectorf *a,
                             const OSQPVectorf *b,
                             OSQPVectorf       *c);
+
+/* Elementwise bounding vectors x = min(max(z,l),u)
+ * It is acceptable to assign x = z in this call, so
+ * that x = min(max(x,l),u) is allowed
+ */
+void OSQPVectorf_ew_bound_vec(const OSQPVectorf *l,
+                              const OSQPVectorf *u,
+                                    OSQPVectorf *z,
+                                    OSQPVectorf *x);
 
 # endif // if EMBEDDED != 1
 
@@ -246,6 +263,16 @@ void OSQPMatrix_inf_norm_rows(const OSQPMatrix *M,OSQPVectorf *E);
  * @return   quadratic form value
  */
 c_float OSQPMatrix_quad_form(const OSQPMatrix  *P, const OSQPVectorf *x);
+
+
+/**
+ * Check for matrix equality to within given tolerance
+ * @param  A matrix input
+ * @param  B matrix input
+ * @param  e check tolerance
+ * @return   1 if true, 0 therwise
+ */
+int OSQPMatrix_eq(const OSQPMatrix  *A, const OSQPMatrix  *B, c_float tol);
 
 # ifdef __cplusplus
 }

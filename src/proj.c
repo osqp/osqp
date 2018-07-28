@@ -1,29 +1,22 @@
 #include "proj.h"
+#include "lin_alg.h"
 
 
-void project(OSQPWorkspace *work, c_float *z) {
-  c_int i, m;
-
-  m = work->data->m;
-
-  for (i = 0; i < m; i++) {
-    z[i] = c_min(c_max(z[i],
-                       work->data->l[i]), // Between lower
-                 work->data->u[i]);       // and upper bounds
-  }
+void project(OSQPWorkspace *work, OSQPVectorf *z) {
+  OSQPVectorf_ew_bound_vec(work->data->l, work->data->u,z,z);
 }
 
-void project_normalcone(OSQPWorkspace *work, c_float *z, c_float *y) {
-  c_int i, m;
+
+void project_normalcone(OSQPWorkspace *work, OSQPVectorf *z, OSQPVectorf *y) {
 
   // NB: Use z_prev as temporary vector
 
-  m = work->data->m;
+  //z_prev = z + y;
+  OSQPVectorf_add_scaled(work->z_prev,z,y,1);
 
-  for (i = 0; i < m; i++) {
-    work->z_prev[i] = z[i] + y[i];
-    z[i]            = c_min(c_max(work->z_prev[i], work->data->l[i]),
-                            work->data->u[i]);
-    y[i] = work->z_prev[i] - z[i];
-  }
+  // z = min(max(z_prev,l),u)
+  OSQPVectorf_ew_bound_vec(work->data->l, work->data->u, work->z_prev,z);
+
+  //y = z_prev - z;
+  OSQPVectorf_add_scaled(y,work->z_prev,z,-1);
 }

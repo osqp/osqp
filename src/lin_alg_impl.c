@@ -256,6 +256,24 @@ void OSQPVectorf_ew_prod(const OSQPVectorf *a,
     }
 }
 
+void OSQPVectorf_permute(OSQPVectorf *x, OSQPVectorf *b, OSQPVectori *p){
+  for (c_int j = 0; j < x->length ; j++) x->values[j] = b->values[P->values[j]];
+}
+
+void OSQPVectori_permute(OSQPVectori *x, OSQPVectori *b, OSQPVectori *p){
+  for (c_int j = 0; j < x->length ; j++) x->values[j] = b->values[P->values[j]];
+}
+
+void OSQPVectorf_ipermute(OSQPVectorf *x, OSQPVectorf *b, OSQPVectori *p){
+  for (c_int j = 0; j < x->length ; j++) x->values[P->values[j]] = b->values[j];
+}
+
+void OSQPVectori_permute(OSQPVectori *x, OSQPVectori *b, OSQPVectori *p){
+  for (c_int j = 0; j < x->length ; j++) x->values[P->values[j]] = b->values[j];
+}
+
+
+
 #if EMBEDDED != 1
 
 c_float OSQPVectorf_mean(const OSQPVectorf *a){
@@ -330,6 +348,26 @@ void OSQPVectorf_ew_min_vec(const OSQPVectorf *a,
   for (i = 0; i < a->length; i++) {
     c->values[i] = c_min(a->values[i], b->values[i]);
   }
+}
+
+void OSQPVectorf_ew_bound_vec(const OSQPVectorf *l,
+                              const OSQPVectorf *u,
+                                    OSQPVectorf *z,
+                                    OSQPVectorf *x){
+  assert(l->length = u->length);
+  assert(u->length = z->length);
+  assert(z->length = x->length);
+
+  c_int m = x->length;
+  c_float* xval = x->values;
+  c_float* zval = z->values;
+
+  for(i=0; i < m; i++){
+      xval[i] = c_min(c_max(zval[i],l->values[i]),u->values[i]);
+  }
+
+
+
 }
 
 #endif // EMBEDDED != 1
@@ -848,4 +886,49 @@ c_float CscMatrix_quad_form(const CscMatrix  *P,
 c_float CsrMatrix_quad_form(const CsrMatrix  *P,
                             const OSQPVectorf *x){
   return CscMatrix_quad_form((const CscMatrix *)P,x);
+}
+
+
+/* Matrix equality check, with CSR/CSC implementations */
+int OSQPMatrix_eq(const OSQPMatrix  *A, const OSQPMatrix  *B, c_float tol){
+
+  //both internal representations should be equal
+  return CscMatrix_eq(A->csc,B->csc,tol) && CsrMatrix_eq(A->csr,B->csr,tol);
+}
+
+int CscMatrix_eq(const CscMatrix  *A, const CscMatrix  *B, c_float tol){
+
+    c_int j, i;
+
+    if(A == B) return 1; //works for OSQP_NULL in particular
+
+    // If number of columns does not coincide, they are not equal.
+    if (A->n != B->n) return 0;
+
+    for (j = 0; j < A->n; j++) { // Cycle over columns j
+      // if column pointer does not coincide, they are not equal
+      if (A->p[j] != B->p[j]) return 0;
+
+      for (i = A->p[j]; i < A->p[j + 1]; i++) { // Cycle rows i in column j
+        if ((A->i[i] != B->i[i]) ||             // Different row indices
+            (c_absval(A->x[i] - B->x[i]) > tol)) {
+          return 0;
+        }
+      }
+    }
+    return 1;
+  }
+}
+
+int CsrMatrix_eq(const CsrMatrix  *A, const CsrMatrix  *B, c_float tol){
+
+  c_int out;
+
+  if(A == B) return 1; //works for OSQP_NULL in particular
+
+  SWAP(A->m,A->n,c_int);
+  SWAP(B->m,B->n,c_int);
+  out = CscMatrix_eq(A,B,tol);
+  SWAP(A->m,A->n,c_int);
+  SWAP(B->m,B->n,c_int);
 }

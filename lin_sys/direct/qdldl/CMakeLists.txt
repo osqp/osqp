@@ -30,6 +30,10 @@ set(qdldl_interface_includes
     ${CMAKE_CURRENT_SOURCE_DIR}/qdldl_sources/include
 )
 
+set(qdldl_type_includes
+    ${CMAKE_CURRENT_SOURCE_DIR}/qdldl_sources/include/
+)
+
 set(qdldl_interface_src
     ${amd_sources}
     ${CMAKE_CURRENT_SOURCE_DIR}/qdldl_interface.h
@@ -38,4 +42,5 @@ set(qdldl_interface_src
 
 # Create object library for linear system solver interface
 add_library(linsys_qdldl OBJECT ${qdldl_interface_src})
-target_include_directories(linsys_qdldl PRIVATE ${qdldl_interface_includes} ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(linsys_qdldl  PRIVATE ${qdldl_interface_includes} ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(linsys_qdldl PUBLIC ${qdldl_type_includes})

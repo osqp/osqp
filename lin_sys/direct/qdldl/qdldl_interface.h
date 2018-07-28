@@ -49,7 +49,7 @@ struct qdldl {
     OSQPMatrix *L;         ///< lower triangular matrix in LDL factorization
     OSQPVectorf *Dinv;     ///< inverse of diag matrix in LDL (as a vector)
     OSQPVectori *P;        ///< permutation of KKT matrix for factorization
-    OSQPVectori *bp;       ///< workspace memory for solves
+    OSQPVectorf *bp;       ///< workspace memory for solves
 
 
     #if EMBEDDED != 1
