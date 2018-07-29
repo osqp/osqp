@@ -60,16 +60,11 @@ Run the following commands from the terminal
     
     .. code:: bash
 
-	git clone https://github.com/oxfordcontrol/osqp
+	git clone --recursive https://github.com/oxfordcontrol/osqp
 	cd osqp
 	mkdir build
 	cd build
-
-#. Update submodules
-
-    .. code:: bash
-
-	git submodule update --init --recursive
+       
 
 #. Create Makefiles
 
