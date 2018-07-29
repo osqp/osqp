@@ -64,7 +64,12 @@ Run the following commands from the terminal
 	cd osqp
 	mkdir build
 	cd build
-       
+
+#. Update submodules
+
+    .. code:: bash
+
+	git submodule update --init --recursive
 
 #. Create Makefiles
 
