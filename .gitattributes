@@ -1,4 +1,6 @@
-* text=auto
+*-text
 *.c text
 *.h text
 *.cpp text
+# Ignore all differences in line endings
+*-crlf
