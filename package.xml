@@ -1,0 +1,9 @@
+<package format="2">
+  <name>osqp</name>
+  <version>0.0.0</version>
+  <description>osqp</description>
+  <maintainer email="yvaind@ethz.ch">Yvain de Viragh</maintainer>
+  <license>Apache 2.0</license>
+  <author email="yvaind@ethz.ch">Yvain de Viragh</author>
+  <buildtool_depend>catkin</buildtool_depend>
+</package>
