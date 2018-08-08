@@ -132,7 +132,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
 
 # Add specific flag for debug
-set(CMAKE_C_FLAGS_DEBUG "-DDDEBUG")
+set(CMAKE_C_FLAGS_DEBUG "-DNDEBUG")
 
 if (NOT MSVC)
 
