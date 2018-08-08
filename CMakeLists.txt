@@ -413,13 +413,11 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake
 target_link_libraries(${PROJECT_NAME}
    ${catkin_LIBRARIES}
 )
-##############
-### Install ###
-##############
-install(DIRECTORY include/
-        DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}/osqp
-        PATTERN ".svn" EXCLUDE
+
+install(DIRECTORY include/${PROJECT_NAME}/
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
+
 install(TARGETS ${PROJECT_NAME}
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
