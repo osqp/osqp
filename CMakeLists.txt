@@ -409,6 +409,16 @@ install(EXPORT ${PROJECT_NAME}
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake
         DESTINATION ${ConfigPackageLocation})
 
+### Leggedrobotics #######################################################
+##############
+### Install ###
+##############
+install(DIRECTORY include/
+        DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}/osqp
+        PATTERN ".svn" EXCLUDE
+)
+##########################################################################
+
 
 
 # Add uninstall command
