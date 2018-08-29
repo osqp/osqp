@@ -5,6 +5,9 @@ cmake_minimum_required (VERSION 3.2)
 project (osqp)
 
 ### Leggedrobotics #######################################################
+option(BUILD_CATKIN_PACKAGE "Build catkin package" ON)
+
+if(BUILD_CATKIN_PACKAGE)
 ##############
 ### CATKIN ###
 ##############
@@ -15,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
 # Declare this project as a catkin package
 catkin_package(
  INCLUDE_DIRS include
- LIBRARIES osqp
+ LIBRARIES ${PROJECT_NAME}
  CATKIN_DEPENDS
 # DEPENDS system_lib
 )
@@ -24,7 +27,7 @@ catkin_package(
 set(MATLAB OFF)
 set(PYTHON OFF)
 set(R_LANG OFF)
-
+endif()
 ##########################################################################
 
 # Export compile commands
@@ -132,7 +135,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
 
 # Add specific flag for debug
-set(CMAKE_C_FLAGS_DEBUG "-DDDEBUG")
+set(CMAKE_C_FLAGS_DEBUG "-DNDEBUG")
 
 if (NOT MSVC)
 
@@ -354,6 +357,7 @@ if (MATLAB)
 target_link_libraries (osqpstatic ${Matlab_LIBRARIES})
 endif (MATLAB)
 
+if(NOT BUILD_CATKIN_PACKAGE) # Leggedrobotics
 # If we are building Python/Matlab/R interface:
 #   - do not build shared library
 #   - do not build demo
@@ -410,7 +414,6 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake
         DESTINATION ${ConfigPackageLocation})
 
 
-
 # Add uninstall command
 # ----------------------------------------------
 if(NOT TARGET uninstall)
@@ -423,6 +426,37 @@ if(NOT TARGET uninstall)
         COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
 
+else()
+### Leggedrobotics #######################################################
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+)
+
+add_library(${PROJECT_NAME}
+   ${osqp_src} ${linsys_solvers}
+)
+
+target_include_directories(${PROJECT_NAME}
+   PRIVATE ${linsys_solvers_includes}
+)
+
+target_link_libraries(${PROJECT_NAME}
+   ${catkin_LIBRARIES}
+)
+
+install(DIRECTORY include/
+        DESTINATION include
+        PATTERN ".svn" EXCLUDE
+)
+
+install(TARGETS ${PROJECT_NAME}
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+##########################################################################
+endif(NOT BUILD_CATKIN_PACKAGE)
 
 
 # Add testing
