@@ -1,6 +1,7 @@
 #!/bin/bash
 set -ev
 
+OSQP_VERSION="0.4.1"
 
 # Update variables from install
 # CMake
@@ -31,7 +32,7 @@ else
     OS_NAME="linux"
     OS_SHARED_LIB_EXT="so"
 fi
-OSQP_DEPLOY_DIR=osqp-0.4.1-${OS_NAME}64
+OSQP_DEPLOY_DIR=osqp-${OSQP_VERSION}-${OS_NAME}64
 mkdir $OSQP_DEPLOY_DIR/
 mkdir $OSQP_DEPLOY_DIR/lib
 mkdir $OSQP_DEPLOY_DIR/include
@@ -48,7 +49,45 @@ tar -czvf $OSQP_DEPLOY_DIR.tar.gz  $OSQP_DEPLOY_DIR
 
 
 # Deploy package
-curl -T $OSQP_DEPLOY_DIR.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:OSQP" -H "X-Bintray-Version:0.4.1" https://api.bintray.com/content/bstellato/generic/OSQP/0.4.1/
+curl -T $OSQP_DEPLOY_DIR.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:OSQP" -H "X-Bintray-Version:${OSQP_VERSION}" https://api.bintray.com/content/bstellato/generic/OSQP/${OSQP_VERSION}/
+
+
+echo "Creating Bintray sources package..."
+
+OSQP_SOURCES = osqp-${OSQP_VERSION}
+
+# Clone OSQP repository
+cd ${TRAVIS_BUILD_DIR}
+mkdir sources/
+cd sources/
+git clone https://github.com/$TRAVIS_REPO_SLUG.git ${OSQP_SOURCES} --recursive
+cd ${OSQP_SOURCES}
+git checkout -qf $TRAVIS_COMMIT
+git submodule update
+cd ..
+
+# Create archive ignoring hidden files
+tar --exclude=".*" -czvf ${OSQP_SOURCES}.tar.gz ${OSQP_SOURCES}
+
+# Deploy sources
+curl -T ${OSQP_SOURCES}.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:OSQP" -H "X-Bintray-Version:${OSQP_VERSION}" https://api.bintray.com/content/bstellato/generic/OSQP/${OSQP_VERSION}/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Publish
 curl -X POST -ubstellato:$BINTRAY_API_KEY https://api.bintray.com/content/bstellato/generic/OSQP/0.4.1/publish
