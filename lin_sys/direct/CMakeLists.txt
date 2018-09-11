@@ -8,7 +8,10 @@ add_subdirectory(qdldl)
 # included in another object library such as linsys_qdldl
 set(direct_linsys_solvers $<TARGET_OBJECTS:linsys_qdldl> $<TARGET_OBJECTS:qdldlobject>)
 
-set(direct_linsys_solvers_includes "${CMAKE_CURRENT_SOURCE_DIR}/qdldl/")
+# NB. The second directory is added because we need to include the "qdldl_types.h" file in "qdldl_interface.h"
+set(direct_linsys_solvers_includes
+	"${CMAKE_CURRENT_SOURCE_DIR}/qdldl/"
+	"${CMAKE_CURRENT_SOURCE_DIR}/qdldl/qdldl_sources/include")
 
 
 # Add other solvers if embedded option is false

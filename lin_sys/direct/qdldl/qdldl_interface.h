@@ -37,7 +37,6 @@ struct qdldl {
     #endif
     /** @} */
 
-
     /**
      * @name Attributes
      * @{
