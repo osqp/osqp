@@ -1,8 +1,11 @@
 language: C
 
-os:
-  - linux
-  - osx
+matrix:
+  include:
+    - os: linux
+    - os: osx
+      # Specify version to avoid bug (https://github.com/travis-ci/travis-ci/issues/6522)
+      osx_image: xcode9.3
 sudo: required
 env:
   global:
@@ -26,9 +29,7 @@ deploy:
     on:
       tags: true
     skip_cleanup: true
-
-# Deploy docs
-deploy:
+  # Deploy docs
   - provider: script
     script: "bash $TRAVIS_BUILD_DIR/ci/travis/docs.sh"
     on:
