@@ -224,15 +224,15 @@ OSQPWorkspace* osqp_setup(const OSQPData *data, OSQPSettings *settings) {
   work->info->status_polish = 0;              // Polishing not performed
   update_status(work->info, OSQP_UNSOLVED);
 # ifdef PROFILING
-  work->info->solve_time  = 0.0;              // Solve time to zero
-  work->info->polish_time = 0.0;              // Polish time to zero
-  work->info->run_time    = 0.0;              // Total run time to zero
+  work->info->solve_time  = 0.0;                   // Solve time to zero
+  work->info->polish_time = 0.0;                   // Polish time to zero
+  work->info->run_time    = 0.0;                   // Total run time to zero
   work->info->setup_time  = osqp_toc(work->timer); // Updater timer information
   work->first_run         = 1;
 # endif /* ifdef PROFILING */
 # if EMBEDDED != 1
-  work->info->rho_updates  = 0;                   // Rho updates set to 0
-  work->info->rho_estimate = work->settings->rho; // Best rho estimate
+  work->info->rho_updates  = 0;                    // Rho updates set to 0
+  work->info->rho_estimate = work->settings->rho;  // Best rho estimate
 # endif /* if EMBEDDED != 1 */
 
   // Print header
