@@ -143,14 +143,14 @@ struct OSQP_TIMER {
  * Start timer
  * @param t Timer object
  */
-void    tic(OSQPTimer *t);
+void    osqp_tic(OSQPTimer *t);
 
 /**
  * Report time
  * @param  t Timer object
  * @return   Reported time
  */
-c_float toc(OSQPTimer *t);
+c_float osqp_toc(OSQPTimer *t);
 
 # endif /* END #ifdef PROFILING */
 
