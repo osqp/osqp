@@ -28,7 +28,7 @@ int osqp_is_interrupted(void) {
 #elif defined IS_WINDOWS
 
 static int int_detected;
-BOOL WINAPI handle_ctrlc(DWORD dwCtrlType) {
+static BOOL WINAPI handle_ctrlc(DWORD dwCtrlType) {
   if (dwCtrlType != CTRL_C_EVENT) return FALSE;
 
   int_detected = 1;
