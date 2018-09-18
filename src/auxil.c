@@ -625,7 +625,7 @@ void update_info(OSQPWorkspace *work,
 
   // Update timing
 #ifdef PROFILING
-  *run_time = toc(work->timer);
+  *run_time = osqp_toc(work->timer);
 #endif /* ifdef PROFILING */
 
 #ifdef PRINTING

@@ -103,7 +103,7 @@ OSQPWorkspace* osqp_setup(const OSQPData *data, OSQPSettings *settings) {
   // Start and allocate directly timer
 # ifdef PROFILING
   work->timer = c_malloc(sizeof(OSQPTimer));
-  tic(work->timer);
+  osqp_tic(work->timer);
 # endif /* ifdef PROFILING */
 
 
@@ -224,15 +224,15 @@ OSQPWorkspace* osqp_setup(const OSQPData *data, OSQPSettings *settings) {
   work->info->status_polish = 0;              // Polishing not performed
   update_status(work->info, OSQP_UNSOLVED);
 # ifdef PROFILING
-  work->info->solve_time  = 0.0;              // Solve time to zero
-  work->info->polish_time = 0.0;              // Polish time to zero
-  work->info->run_time    = 0.0;              // Total run time to zero
-  work->info->setup_time  = toc(work->timer); // Updater timer information
+  work->info->solve_time  = 0.0;                   // Solve time to zero
+  work->info->polish_time = 0.0;                   // Polish time to zero
+  work->info->run_time    = 0.0;                   // Total run time to zero
+  work->info->setup_time  = osqp_toc(work->timer); // Updater timer information
   work->first_run         = 1;
 # endif /* ifdef PROFILING */
 # if EMBEDDED != 1
-  work->info->rho_updates  = 0;                   // Rho updates set to 0
-  work->info->rho_estimate = work->settings->rho; // Best rho estimate
+  work->info->rho_updates  = 0;                    // Rho updates set to 0
+  work->info->rho_estimate = work->settings->rho;  // Best rho estimate
 # endif /* if EMBEDDED != 1 */
 
   // Print header
@@ -311,7 +311,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
 
 
 #ifdef PROFILING
-  tic(work->timer); // Start timer
+  osqp_tic(work->timer); // Start timer
 #endif /* ifdef PROFILING */
 
 
@@ -326,7 +326,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
 #ifdef CTRLC
 
   // initialize Ctrl-C support
-  startInterruptListener();
+  osqp_start_interrupt_listener();
 #endif /* ifdef CTRLC */
 
   // Initialize variables (cold start or warm start depending on settings)
@@ -357,7 +357,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
 #ifdef CTRLC
 
     // Check the interrupt signal
-    if (isInterrupted()) {
+    if (osqp_is_interrupted()) {
       update_status(work->info, OSQP_SIGINT);
 # ifdef PRINTING
       c_print("Solver interrupted\n");
@@ -373,10 +373,10 @@ c_int osqp_solve(OSQPWorkspace *work) {
     // time
     // is more than the time_limit option.
     if (work->first_run) {
-      temp_run_time = work->info->setup_time + toc(work->timer);
+      temp_run_time = work->info->setup_time + osqp_toc(work->timer);
     }
     else {
-      temp_run_time = toc(work->timer);
+      temp_run_time = osqp_toc(work->timer);
     }
 
     if (work->settings->time_limit &&
@@ -442,7 +442,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
     // of the setup time.
     if (work->settings->adaptive_rho && !work->settings->adaptive_rho_interval) {
       // Check time
-      if (toc(work->timer) >
+      if (osqp_toc(work->timer) >
           work->settings->adaptive_rho_fraction * work->info->setup_time) {
         // Enough time has passed. We now get the number of iterations between
         // the updates.
@@ -560,7 +560,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
 
   /* Update solve time */
 #ifdef PROFILING
-  work->info->solve_time = toc(work->timer);
+  work->info->solve_time = osqp_toc(work->timer);
 #endif /* ifdef PROFILING */
 
 
@@ -608,7 +608,7 @@ exit:
 #ifdef CTRLC
 
   // Restore previous signal handler
-  endInterruptListener();
+  osqp_end_interrupt_listener();
 #endif /* ifdef CTRLC */
   return exitflag;
 }
