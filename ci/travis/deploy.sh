@@ -73,23 +73,7 @@ tar --exclude=".*" -czvf ${OSQP_SOURCES}.tar.gz ${OSQP_SOURCES}
 curl -T ${OSQP_SOURCES}.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:OSQP" -H "X-Bintray-Version:${OSQP_VERSION}" https://api.bintray.com/content/bstellato/generic/OSQP/${OSQP_VERSION}/
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Publish
+# Publish deployed files
 curl -X POST -ubstellato:$BINTRAY_API_KEY https://api.bintray.com/content/bstellato/generic/OSQP/0.4.1/publish
 
 
