@@ -1,5 +1,5 @@
-Unreleased
-----------
+Version 0.4.1 (25 September 2018)
+---------------------------------
 * Updated QDLDL to version 0.1.3.
 * Added check for nonconvex cost function (non-positive semidefinite `P`) after factorization is performed.
 * Added complete sources distribution on bintray.com (including QDLDL).
