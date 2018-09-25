@@ -54,7 +54,7 @@ curl -T $OSQP_DEPLOY_DIR.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Packa
 
 echo "Creating Bintray sources package..."
 
-OSQP_SOURCES = osqp-${OSQP_VERSION}
+OSQP_SOURCES=osqp-${OSQP_VERSION}
 
 # Clone OSQP repository
 cd ${TRAVIS_BUILD_DIR}
