@@ -1,5 +1,8 @@
 # C language
 # -------------------------------------------------------------------
+# Compile commands for cquery
+compile_commands.json
+
 # Out folder
 out/
 
