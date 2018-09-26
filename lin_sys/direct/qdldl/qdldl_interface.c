@@ -58,7 +58,9 @@ static c_int LDL_factor(csc *A,  qdldl_solver * p, c_int nvar){
 
     if (sum_Lnz < 0){
       // Error
+#ifdef PRINTING
       c_eprint("Error in KKT matrix LDL factorization when computing the elimination tree. A is not perfectly upper triangular");
+#endif
       return sum_Lnz;
     }
 
@@ -75,11 +77,15 @@ static c_int LDL_factor(csc *A,  qdldl_solver * p, c_int nvar){
 
     if (factor_status < 0){
       // Error
+#ifdef PRINTING
       c_eprint("Error in KKT matrix LDL factorization when computing the nonzero elements. There are zeros in the diagonal matrix");
+#endif
       return factor_status;
     } else if (factor_status < nvar) {
       // Error: Number of positive elements of D should be equal to nvar
+#ifdef PRINTING
       c_eprint("Error in KKT matrix LDL factorization when computing the nonzero elements. The problem seems to be non-convex");
+#endif
       return -2;
     }
 
