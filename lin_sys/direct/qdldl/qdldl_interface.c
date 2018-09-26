@@ -43,11 +43,12 @@ void free_linsys_solver_qdldl(qdldl_solver *s) {
 
 /**
  * Compute LDL factorization of matrix A
- * @param  A Matrix to be factorized
- * @param  p Private workspace
- * @return   exitstatus (0 is good)
+ * @param  A    Matrix to be factorized
+ * @param  p    Private workspace
+ * @param  nvar Number of QP variables
+ * @return      exitstatus (0 is good)
  */
-static c_int LDL_factor(csc *A,  qdldl_solver * p){
+static c_int LDL_factor(csc *A,  qdldl_solver * p, c_int nvar){
 
     c_int sum_Lnz;
     c_int factor_status;
@@ -69,13 +70,17 @@ static c_int LDL_factor(csc *A,  qdldl_solver * p){
     factor_status = QDLDL_factor(A->n, A->p, A->i, A->x,
                                  p->L->p, p->L->i, p->L->x,
                                  p->D, p->Dinv, p->Lnz,
-                                 p->etree, (QDLDL_bool *)p->bwork, p->iwork, p->fwork);
+                                 p->etree, p->bwork, p->iwork, p->fwork);
 
 
     if (factor_status < 0){
       // Error
-      c_eprint("Error in KKT matrix LDL factorization when in computing the nonzero elements. There are zeros in the diagonal matrix");
+      c_eprint("Error in KKT matrix LDL factorization when computing the nonzero elements. There are zeros in the diagonal matrix");
       return factor_status;
+    } else if (factor_status < nvar) {
+      // Error: Number of positive elements of D should be equal to nvar
+      c_eprint("Error in KKT matrix LDL factorization when computing the nonzero elements. The problem seems to be non-convex");
+      return -2;
     }
 
     return 0;
@@ -169,27 +174,27 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
     // NB: We don not allocate L completely (CSC elements)
     //      L will be allocated during the factorization depending on the
     //      resulting number of elements.
-    p->L = c_malloc(sizeof(csc));  
+    p->L = c_malloc(sizeof(csc));
     p->L->m = n_plus_m;
     p->L->n = n_plus_m;
     p->L->nz = -1;
 
     // Diagonal matrix stored as a vector D
-    p->Dinv = c_malloc(sizeof(c_float) * n_plus_m);
-    p->D = c_malloc(sizeof(c_float) * n_plus_m);
+    p->Dinv = (QDLDL_float *)c_malloc(sizeof(QDLDL_float) * n_plus_m);
+    p->D    = (QDLDL_float *)c_malloc(sizeof(QDLDL_float) * n_plus_m);
 
     // Permutation vector P
-    p->P = c_malloc(sizeof(c_int) * n_plus_m);
+    p->P    = (QDLDL_int *)c_malloc(sizeof(QDLDL_int) * n_plus_m);
 
     // Working vector
-    p->bp = c_malloc(sizeof(c_float) * n_plus_m);
+    p->bp   = c_malloc(sizeof(QDLDL_float) * n_plus_m);
 
     // Elimination tree workspace
-    p->etree = (c_int *)c_malloc(n_plus_m * sizeof(c_int));
-    p->Lnz = (c_int *)c_malloc(n_plus_m * sizeof(c_int));
+    p->etree = (QDLDL_int *)c_malloc(n_plus_m * sizeof(QDLDL_int));
+    p->Lnz   = (QDLDL_int *)c_malloc(n_plus_m * sizeof(QDLDL_int));
 
     // Preallocate L matrix (Lx and Li are sparsity dependent)
-    p->L->p = (c_int *)c_malloc((n_plus_m+1) * sizeof(c_int));
+    p->L->p = (c_int *)c_malloc((n_plus_m+1) * sizeof(QDLDL_int));
 
     //Lx and Li are sparsity dependent, so set them to
     //null initially so we don't try to free them prematurely
@@ -198,9 +203,9 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
 
 
     // Preallocate workspace
-    p->iwork = (c_int *)c_malloc(sizeof(c_int)*(3*n_plus_m));
-    p->bwork = (c_int *)c_malloc(sizeof(c_int)*n_plus_m);
-    p->fwork = (c_float *)c_malloc(sizeof(c_float)*n_plus_m);
+    p->iwork = (QDLDL_int *)c_malloc(sizeof(QDLDL_int)*(3*n_plus_m));
+    p->bwork = (QDLDL_bool *)c_malloc(sizeof(QDLDL_bool)*n_plus_m);
+    p->fwork = (QDLDL_float *)c_malloc(sizeof(QDLDL_float)*n_plus_m);
 
     // Form and permute KKT matrix
     if (polish){ // Called from polish()
@@ -243,7 +248,7 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
     }
 
     // Factorize the KKT matrix
-    if (LDL_factor(KKT_temp, p) < 0) {
+    if (LDL_factor(KKT_temp, p, P->n) < 0) {
         csc_spfree(KKT_temp);
         free_linsys_solver_qdldl(p);
         return OSQP_NULL;
@@ -327,7 +332,7 @@ c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s,
 
     return (QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
         s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
-        s->etree, (QDLDL_bool *)s->bwork, s->iwork, s->fwork) < 0);
+        s->etree, s->bwork, s->iwork, s->fwork) < 0);
 
 }
 
@@ -346,7 +351,7 @@ c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver * s, const c_float * rho_v
 
     return (QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
         s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
-        s->etree, (QDLDL_bool *)s->bwork, s->iwork, s->fwork) < 0);
+        s->etree, s->bwork, s->iwork, s->fwork) < 0);
 }
 
 

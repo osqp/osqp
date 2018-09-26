@@ -1,6 +1,13 @@
+Version 0.4.1 (25 September 2018)
+---------------------------------
+* Updated QDLDL to version 0.1.3.
+* Added check for nonconvex cost function (non-positive semidefinite `P`) after factorization is performed.
+* Added complete sources distribution on bintray.com (including QDLDL).
+
+
 Version 0.4.0 (23 July 2018)
 ----------------------------
-* Added check for nonconvex cost function (negative semidefinite `P`).
+* Added check for nonconvex cost function (non-positive semidefinite `P`).
 * Removed SuiteSparse LDL in favor of [QDLDL](https://github.com/oxfordcontrol/qdldl)
 * Static library `libosqpstatic` now renamed as `libosqp`.
 

@@ -29,3 +29,21 @@ The *inaccurate* statuses define when the optimality, primal infeasibility or du
 +------------------------------+-----------------------------------+-------+
 | unsolved                     | OSQP_UNSOLVED                     | -10   |
 +------------------------------+-----------------------------------+-------+
+| problem non convex           | OSQP_NON_CVX                      | -7    |
++------------------------------+-----------------------------------+-------+
+
+.. note::
+
+   We recommend the user to **check the convexity of their problem before
+   passing it to OSQP**! If the user passes a non-convex problem we do not
+   assure the solver will be able to detect it.
+
+   OSQP will try to detect **non-convex** problems by checking if the residuals
+   diverge or if there are any issues in the initial factorization (if a direct
+   method is used). It will detect non-convex problems when one or more of the
+   eigenvalues of :code:`P` are "clearly" negative, i.e., when :code:`P + sigma
+   * I` is not positive semidefinite. However, it might fail to detect
+   non-convexity when :code:`P` has slightly negative eigenvalues, i.e., when
+   :code:`P + sigma * I` is positive semidefinite and :code:`P` is not.
+
+

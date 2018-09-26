@@ -210,7 +210,7 @@ c_int polish(OSQPWorkspace *work) {
   c_float *pol_sol; // Polished solution
 
 #ifdef PROFILING
-  tic(work->timer); // Start timer
+  osqp_tic(work->timer); // Start timer
 #endif /* ifdef PROFILING */
 
   // Form Ared by assuming the active constraints and store in work->pol->Ared

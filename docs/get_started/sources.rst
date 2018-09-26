@@ -56,15 +56,23 @@ Build the binaries
 
 Run the following commands from the terminal
 
-#. Clone the repository, create :code:`build` directory and change directory
-    
-    .. code:: bash
+#. You first need to get the sources from one of these two options:
 
-	git clone --recursive https://github.com/oxfordcontrol/osqp
-	cd osqp
-	mkdir build
-	cd build
-       
+    * Download the compressed file `from bintray.com <https://dl.bintray.com/bstellato/generic/OSQP/0.4.1/osqp-0.4.1.tar.gz>`_.
+
+    * Clone the repository
+
+        .. code:: bash
+
+            git clone --recursive https://github.com/oxfordcontrol/osqp
+
+#. Create :code:`build` directory and change directory
+
+        .. code:: bash
+
+            cd osqp
+            mkdir build
+            cd build
 
 #. Create Makefiles
 
@@ -110,7 +118,7 @@ Install the binaries
 To install the generated libraries and headers to a system-wide location compatible with `GNU standards <http://www.gnu.org/prep/standards/html_node/Directory-Variables.html>`_ it is just necessary to run
 
 .. code:: bash
-   
+
    cmake --build . --target install
 
 This code installs the libraries in :code:`libdir` and the headers into :code:`includedir/osqp`. For mode details see the defaults folders on the `GNU standards <http://www.gnu.org/prep/standards/html_node/Directory-Variables.html>`_ website.
@@ -120,10 +128,10 @@ To change the installation prefix, in the "Create Makefiles" step above, you nee
 	  folders. You might be able to gain access using the
 	  :code:`sudo` command.
 
-We provided also an uninstall routine to remove the copied files by running 
+We provided also an uninstall routine to remove the copied files by running
 
 .. code:: bash
-   
+
    cmake --build . --target uninstall
 
 Note that this corresponds to running :code:`make install` and :code:`make uninstall` on unix machines.

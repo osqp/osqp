@@ -13,38 +13,38 @@
 
 static int istate;
 
-void startInterruptListener(void) {
+void osqp_start_interrupt_listener(void) {
   istate = utSetInterruptEnabled(1);
 }
 
-void endInterruptListener(void) {
+void osqp_end_interrupt_listener(void) {
   utSetInterruptEnabled(istate);
 }
 
-int isInterrupted(void) {
+int osqp_is_interrupted(void) {
   return utIsInterruptPending();
 }
 
 #elif defined IS_WINDOWS
 
 static int int_detected;
-BOOL WINAPI handle_ctrlc(DWORD dwCtrlType) {
+static BOOL WINAPI handle_ctrlc(DWORD dwCtrlType) {
   if (dwCtrlType != CTRL_C_EVENT) return FALSE;
 
   int_detected = 1;
   return TRUE;
 }
 
-void startInterruptListener(void) {
+void osqp_start_interrupt_listener(void) {
   int_detected = 0;
   SetConsoleCtrlHandler(handle_ctrlc, TRUE);
 }
 
-void endInterruptListener(void) {
+void osqp_end_interrupt_listener(void) {
   SetConsoleCtrlHandler(handle_ctrlc, FALSE);
 }
 
-int isInterrupted(void) {
+int osqp_is_interrupted(void) {
   return int_detected;
 }
 
@@ -53,11 +53,11 @@ int isInterrupted(void) {
 # include <signal.h>
 static int int_detected;
 struct sigaction oact;
-void handle_ctrlc(int dummy) {
+static void handle_ctrlc(int dummy) {
   int_detected = dummy ? dummy : -1;
 }
 
-void startInterruptListener(void) {
+void osqp_start_interrupt_listener(void) {
   struct sigaction act;
 
   int_detected = 0;
@@ -67,13 +67,13 @@ void startInterruptListener(void) {
   sigaction(SIGINT, &act, &oact);
 }
 
-void endInterruptListener(void) {
+void osqp_end_interrupt_listener(void) {
   struct sigaction act;
 
   sigaction(SIGINT, &oact, &act);
 }
 
-int isInterrupted(void) {
+int osqp_is_interrupted(void) {
   return int_detected;
 }
 

@@ -229,13 +229,13 @@ OSQPSettings* copy_settings(OSQPSettings *settings) {
 // Windows
 # ifdef IS_WINDOWS
 
-void tic(OSQPTimer *t)
+void osqp_tic(OSQPTimer *t)
 {
   QueryPerformanceFrequency(&t->freq);
   QueryPerformanceCounter(&t->tic);
 }
 
-c_float toc(OSQPTimer *t)
+c_float osqp_toc(OSQPTimer *t)
 {
   QueryPerformanceCounter(&t->toc);
   return (t->toc.QuadPart - t->tic.QuadPart) / (c_float)t->freq.QuadPart;
@@ -244,13 +244,13 @@ c_float toc(OSQPTimer *t)
 // Mac
 # elif defined IS_MAC
 
-void tic(OSQPTimer *t)
+void osqp_tic(OSQPTimer *t)
 {
   /* read current clock cycles */
   t->tic = mach_absolute_time();
 }
 
-c_float toc(OSQPTimer *t)
+c_float osqp_toc(OSQPTimer *t)
 {
   uint64_t duration; /* elapsed time in clock cycles*/
 
@@ -269,13 +269,13 @@ c_float toc(OSQPTimer *t)
 # else  /* ifdef IS_WINDOWS */
 
 /* read current time */
-void tic(OSQPTimer *t)
+void osqp_tic(OSQPTimer *t)
 {
   clock_gettime(CLOCK_MONOTONIC, &t->tic);
 }
 
 /* return time passed since last call to tic on this timer */
-c_float toc(OSQPTimer *t)
+c_float osqp_toc(OSQPTimer *t)
 {
   struct timespec temp;
 
