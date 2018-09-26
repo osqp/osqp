@@ -44,7 +44,7 @@ IF "%APPVEYOR_REPO_TAG%" == "true" (
     7z a -tgzip !OSQP_DEPLOY_DIR!.tar.gz !OSQP_DEPLOY_DIR!.tar
 
     REM Deploy to Bintray
-    curl -T !OSQP_DEPLOY_DIR!.tar.gz -ubstellato:%BINTRAY_API_KEY% -H "X-Bintray-Package:OSQP" -H "X-Bintray-Version:0.4.1" https://api.bintray.com/content/bstellato/generic/OSQP/0.4.1/
+    curl -T !OSQP_DEPLOY_DIR!.tar.gz -ubstellato:%BINTRAY_API_KEY% -H "X-Bintray-Package:OSQP" -H "X-Bintray-Version:0.4.1" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/OSQP/0.4.1/
     if errorlevel 1 exit /b 1
 
     REM Publish
