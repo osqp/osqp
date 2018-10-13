@@ -27,7 +27,6 @@ Since :math:`\gamma` enters only in the linear part of the objective function, w
 
 
 
-
 Python
 ------
 
@@ -121,6 +120,38 @@ Matlab
 
 
 
+CVXPY
+-----
+
+.. code:: python
+
+    from cvxpy import *
+    import numpy as np
+    import scipy as sp
+    import scipy.sparse as sparse
+
+    # Generate problem data
+    sp.random.seed(1)
+    n = 10
+    m = 1000
+    A = sparse.random(m, n, density=0.5)
+    x_true = np.multiply((np.random.rand(n) > 0.8).astype(float),
+                         np.random.randn(n)) / np.sqrt(n)
+    b = A.dot(x_true) + 0.5*np.random.randn(m)
+    gammas = np.linspace(1, 10, 11)
+
+    # Define problem
+    x = Variable(n)
+    gamma = Parameter(nonneg=True)
+    objective = 0.5*sum_squares(A*x - b) + gamma*norm1(x)
+    prob = Problem(Minimize(objective))
+
+    # Solve problem for different values of gamma parameter
+    for gamma_val in gammas:
+        gamma.value = gamma_val
+        prob.solve(solver=OSQP, warm_start=True)
+
+
 YALMIP
 ------
 
@@ -141,7 +172,7 @@ YALMIP
     objective = 0.5*norm(A*x - b)^2 + gamma*norm(x,1);
 
     % Solve with OSQP
-    options = sdpsettings('solver','osqp');
+    options = sdpsettings('solver', 'osqp');
     x_opt = optimizer([], objective, options, gamma, x);
 
     % Solve problem for different values of gamma parameter
