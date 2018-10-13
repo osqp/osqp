@@ -119,7 +119,6 @@ Python
         # Apply first control input to the plant
         ctrl = res.x[-N*nu:-(N-1)*nu]
         x0 = Ad.dot(x0) + Bd.dot(ctrl)
-        print(ctrl)
 
         # Update initial state
         l[:nx] = -x0
