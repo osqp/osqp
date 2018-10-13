@@ -109,6 +109,36 @@ Matlab
 
 
 
+CVXPY
+-----
+
+.. code:: python
+
+    from cvxpy import *
+    import numpy as np
+    import scipy as sp
+    import scipy.sparse as sparse
+
+    # Generate problem data
+    sp.random.seed(1)
+    n = 100
+    k = 10
+    F = sparse.random(n, k, density=0.7, format='csc')
+    D = sparse.diags(np.random.rand(n) * np.sqrt(k), format='csc')
+    mu = np.random.randn(n)
+    gamma = 1
+    Sigma = F*F.T + D
+
+    # Define problem
+    x = Variable(n)
+    objective = mu.T*x - gamma*quad_form(x, Sigma)
+    constraints = [sum(x) == 1, x >= 0]
+
+    # Solve with OSQP
+    Problem(Maximize(objective), constraints).solve(solver=OSQP)
+
+
+
 YALMIP
 ------
 
@@ -130,9 +160,6 @@ YALMIP
     constraints = [sum(x) == 1, x >= 0];
 
     % Solve with OSQP
-    options = sdpsettings('solver','osqp');
+    options = sdpsettings('solver', 'osqp');
     optimize(constraints, objective, options);
 
-    % Get optimal primal and dual solution
-    x_opt = value(x);
-    y_opt = dual(constraints(1));

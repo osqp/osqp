@@ -81,7 +81,7 @@ Python
     # Cast MPC problem to a QP: x = (x(0),x(1),...,x(N),u(0),...,u(N-1))
     # - quadratic objective
     P = sparse.block_diag([sparse.kron(sparse.eye(N), Q), QN,
-                           sparse.kron(sparse.eye(N), R)])
+                           sparse.kron(sparse.eye(N), R)]).tocsc()
     # - linear objective
     q = np.hstack([np.kron(np.ones(N), -Q.dot(xr)), -QN.dot(xr),
                    np.zeros(N*nu)])
@@ -96,7 +96,7 @@ Python
     lineq = np.hstack([np.kron(np.ones(N+1), xmin), np.kron(np.ones(N), umin)])
     uineq = np.hstack([np.kron(np.ones(N+1), xmax), np.kron(np.ones(N), umax)])
     # - OSQP constraints
-    A = sparse.vstack([Aeq, Aineq])
+    A = sparse.vstack([Aeq, Aineq]).tocsc()
     l = np.hstack([leq, lineq])
     u = np.hstack([ueq, uineq])
 
@@ -180,14 +180,14 @@ Matlab
 
     % Cast MPC problem to a QP: x = (x(0),x(1),...,x(N),u(0),...,u(N-1))
     % - quadratic objective
-    P = blkdiag( kron(speye(N),Q), QN, kron(speye(N),R) );
+    P = blkdiag( kron(speye(N), Q), QN, kron(speye(N), R) );
     % - linear objective
-    q = [repmat(-Q*xr, N, 1); -QN*xr; zeros(N*nu,1)];
+    q = [repmat(-Q*xr, N, 1); -QN*xr; zeros(N*nu, 1)];
     % - linear dynamics
-    Ax = kron(speye(N+1), -speye(nx)) + kron(sparse(diag(ones(N,1), -1)), Ad);
+    Ax = kron(speye(N+1), -speye(nx)) + kron(sparse(diag(ones(N, 1), -1)), Ad);
     Bu = kron([sparse(1, N); speye(N)], Bd);
     Aeq = [Ax, Bu];
-    leq = [-x0; zeros(N*nx,1)];
+    leq = [-x0; zeros(N*nx, 1)];
     ueq = leq;
     % - input and state constraints
     Aineq = speye((N+1)*nx + N*nu);
@@ -224,6 +224,90 @@ Matlab
         u(1:nx) = -x0;
         prob.update('l', l, 'u', u);
     end
+
+
+
+CVXPY
+-----
+
+.. code:: python
+
+    from cvxpy import *
+    import numpy as np
+    import scipy as sp
+    import scipy.sparse as sparse
+
+    # Discrete time model of a quadcopter
+    Ad = sparse.csc_matrix([
+      [1.,      0.,     0., 0., 0., 0., 0.1,     0.,     0.,  0.,     0.,     0.    ],
+      [0.,      1.,     0., 0., 0., 0., 0.,      0.1,    0.,  0.,     0.,     0.    ],
+      [0.,      0.,     1., 0., 0., 0., 0.,      0.,     0.1, 0.,     0.,     0.    ],
+      [0.0488,  0.,     0., 1., 0., 0., 0.0016,  0.,     0.,  0.0992, 0.,     0.    ],
+      [0.,     -0.0488, 0., 0., 1., 0., 0.,     -0.0016, 0.,  0.,     0.0992, 0.    ],
+      [0.,      0.,     0., 0., 0., 1., 0.,      0.,     0.,  0.,     0.,     0.0992],
+      [0.,      0.,     0., 0., 0., 0., 1.,      0.,     0.,  0.,     0.,     0.    ],
+      [0.,      0.,     0., 0., 0., 0., 0.,      1.,     0.,  0.,     0.,     0.    ],
+      [0.,      0.,     0., 0., 0., 0., 0.,      0.,     1.,  0.,     0.,     0.    ],
+      [0.9734,  0.,     0., 0., 0., 0., 0.0488,  0.,     0.,  0.9846, 0.,     0.    ],
+      [0.,     -0.9734, 0., 0., 0., 0., 0.,     -0.0488, 0.,  0.,     0.9846, 0.    ],
+      [0.,      0.,     0., 0., 0., 0., 0.,      0.,     0.,  0.,     0.,     0.9846]
+    ])
+    Bd = sparse.csc_matrix([
+      [0.,      -0.0726,  0.,     0.0726],
+      [-0.0726,  0.,      0.0726, 0.    ],
+      [-0.0152,  0.0152, -0.0152, 0.0152],
+      [-0.,     -0.0006, -0.,     0.0006],
+      [0.0006,   0.,     -0.0006, 0.0000],
+      [0.0106,   0.0106,  0.0106, 0.0106],
+      [0,       -1.4512,  0.,     1.4512],
+      [-1.4512,  0.,      1.4512, 0.    ],
+      [-0.3049,  0.3049, -0.3049, 0.3049],
+      [-0.,     -0.0236,  0.,     0.0236],
+      [0.0236,   0.,     -0.0236, 0.    ],
+      [0.2107,   0.2107,  0.2107, 0.2107]])
+    [nx, nu] = Bd.shape
+
+    # Constraints
+    u0 = 10.5916
+    umin = np.array([9.6, 9.6, 9.6, 9.6]) - u0
+    umax = np.array([13., 13., 13., 13.]) - u0
+    xmin = np.array([-np.pi/6,-np.pi/6,-np.inf,-np.inf,-np.inf,-1.,
+                     -np.inf,-np.inf,-np.inf,-np.inf,-np.inf,-np.inf])
+    xmax = np.array([ np.pi/6, np.pi/6, np.inf, np.inf, np.inf, np.inf,
+                      np.inf, np.inf, np.inf, np.inf, np.inf, np.inf])
+
+    # Objective function
+    Q = sparse.diags([0., 0., 10., 10., 10., 10., 0., 0., 0., 5., 5., 5.])
+    QN = Q
+    R = 0.1*sparse.eye(4)
+
+    # Initial and reference states
+    x0 = np.zeros(12)
+    xr = np.array([0.,0.,1.,0.,0.,0.,0.,0.,0.,0.,0.,0.])
+
+    # Prediction horizon
+    N = 10
+
+    # Define problem
+    u = Variable((nu, N))
+    x = Variable((nx, N+1))
+    x_init = Parameter(nx)
+    objective = 0
+    constraints = [x[:,0] == x_init]
+    for k in range(N):
+        objective += quad_form(x[:,k] - xr, Q) + quad_form(u[:,k], R)
+        constraints += [x[:,k+1] == Ad*x[:,k] + Bd*u[:,k]]
+        constraints += [xmin <= x[:,k], x[:,k] <= xmax]
+        constraints += [umin <= u[:,k], u[:,k] <= umax]
+    objective += quad_form(x[:,N] - xr, QN)
+    prob = Problem(Minimize(objective), constraints)
+
+    # Simulate in closed loop
+    nsim = 15
+    for i in range(nsim):
+        x_init.value = x0
+        prob.solve(solver=OSQP, warm_start=True)
+        x0 = Ad.dot(x0) + Bd.dot(u[:,0].value)
 
 
 
@@ -279,7 +363,7 @@ YALMIP
     N = 10;
 
     % Define problem
-    u = sdpvar(repmat(nu,1,N),   repmat(1,1,N));
+    u = sdpvar(repmat(nu,1,N), repmat(1,1,N));
     x = sdpvar(repmat(nx,1,N+1), repmat(1,1,N+1));
     constraints = [xmin <= x{1} <= xmax];
     objective = 0;
@@ -288,12 +372,13 @@ YALMIP
         constraints = [constraints, x{k+1} == Ad*x{k} + Bd*u{k}];
         constraints = [constraints, umin <= u{k}<= umax, xmin <= x{k+1} <= xmax];
     end
-    objective = objective + (x{N+1}-xr)'*Q*(x{N+1}-xr);
-    options = sdpsettings('solver','osqp');
-    controller = optimizer(constraints, objective,options,x{1},[u{:}]);
+    objective = objective + (x{N+1}-xr)'*QN*(x{N+1}-xr);
+    options = sdpsettings('solver', 'osqp');
+    controller = optimizer(constraints, objective, options, x{1}, [u{:}]);
 
+    % Simulate in closed loop
     nsim = 15;
-    for i = 1 : 15
+    for i = 1 : nsim
         U = controller{x0};
         x0 = Ad*x0 + Bd*U(:,1);
     end

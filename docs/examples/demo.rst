@@ -13,14 +13,14 @@ Consider the following QP
 
 
 
-We show below how to solve the problem in Python, Matlab and C.
+We show below how to solve the problem in Python, Matlab, Julia and C.
+
 
 
 Python
 ------
 
 .. code:: python
-
 
     import osqp
     import scipy.sparse as sparse
@@ -49,7 +49,6 @@ Matlab
 
 .. code:: matlab
 
-
     % Define problem data
     P = sparse([4, 1; 1, 2]);
     q = [1; 1];
@@ -65,6 +64,8 @@ Matlab
 
     % Solve problem
     res = prob.solve();
+
+
 
 Julia
 ------
@@ -90,12 +91,11 @@ Julia
     results = OSQP.solve!(prob)
 
 
+
 C
 -
 
-
 .. code:: c
-
 
     #include "osqp.h"
 
