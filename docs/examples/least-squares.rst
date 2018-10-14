@@ -108,7 +108,7 @@ CVXPY
 
     # Define problem
     x = Variable(n)
-    objective = 0.5*sum_squares(A*x-b)
+    objective = 0.5*sum_squares(A*x - b)
     constraints = [x >= 0, x <= 1]
 
     # Solve with OSQP
