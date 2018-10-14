@@ -106,3 +106,32 @@ Matlab
 
     % Solve problem
     res = prob.solve();
+
+
+
+CVXPY
+-----
+
+.. code:: python
+
+    from cvxpy import *
+    import numpy as np
+    import scipy as sp
+    import scipy.sparse as sparse
+
+    # Generate problem data
+    sp.random.seed(1)
+    n = 10
+    m = 100
+    A = sparse.random(m, n, density=0.5, format='csc')
+    x_true = np.random.randn(n) / np.sqrt(n)
+    ind95 = (np.random.rand(m) < 0.95).astype(float)
+    b = A.dot(x_true) + np.multiply(0.5*np.random.randn(m), ind95) \
+        + np.multiply(10.*np.random.rand(m), 1. - ind95)
+
+    # Define problem
+    x = Variable(n)
+    objective = sum(huber(A*x-b))
+
+    # Solve with OSQP
+    Problem(Minimize(objective)).solve(solver=OSQP)
