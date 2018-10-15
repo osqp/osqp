@@ -17,6 +17,7 @@ Interfaces
 |                                    | | `Paul Goulart <paul.goulart@eng.ox.ac.uk>`_            |                                                                                          |
 +------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
 | :ref:`Julia <julia_interface>`     | | `Twan Koolen <tkoolen@mit.edu>`_                       | `github.com/oxfordcontrol/OSQP.jl <https://github.com/oxfordcontrol/OSQP.jl>`_           |
+|                                    | | `Benoît Legat <benoit.legat@uclouvain.be>`_            |                                                                                          |
 |                                    | | `Bartolomeo Stellato <bartolomeo.stellato@gmail.com>`_ |                                                                                          |
 +------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
 | `R`_                               | | `Bartolomeo Stellato <bartolomeo.stellato@gmail.com>`_ | `github.com/oxfordcontrol/osqp-r <https://github.com/oxfordcontrol/osqp-r>`_             |
