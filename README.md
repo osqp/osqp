@@ -3,7 +3,7 @@
 [![Build status of the master branch on Linux/OSX](https://img.shields.io/travis/oxfordcontrol/osqp/master.svg?label=Linux%20%2F%20OSX%20build)](https://travis-ci.org/oxfordcontrol/osqp)
 [![Build status of the master branch on Windows](https://img.shields.io/appveyor/ci/bstellato/osqp/master.svg?label=Windows%20build)](https://ci.appveyor.com/project/bstellato/osqp/branch/master)
 [![Code coverage](https://coveralls.io/repos/github/oxfordcontrol/osqp/badge.svg?branch=master)](https://coveralls.io/github/oxfordcontrol/osqp?branch=master)
-![License](https://img.shields.io/badge/License-MIT-brightgreen.svg)
+![License](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)
 
 
 ![PyPI - downloads](https://img.shields.io/pypi/dm/osqp.svg?label=Pypi%20downloads)
