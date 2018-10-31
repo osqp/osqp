@@ -1,6 +1,6 @@
 /* Default header fonts are ugly */
-@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,400i,600,600i,700,700i);
-@import url(http://fonts.googleapis.com/css?family=Inconsolata);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,400i,600,600i,700,700i);
+@import url(https://fonts.googleapis.com/css?family=Inconsolata);
 
 h1, h2, h3, h4, h5, h6 {
     font-family:  "Open Sans", "Helvetica Neue",Helvetica,Arial,sans-serif;
@@ -23,6 +23,7 @@ body {
 div[class^='highlight'] pre {
     font-family: 'Inconsolata', monospace;
     font-size: 16px;
+    background: #f3f6f6;
 }
 
 /* Make glossary entries bolder to stand out */
