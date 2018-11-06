@@ -1,4 +1,14 @@
 # The Operator Splitting QP Solver
+
+[![Build status of the master branch on Linux/OSX](https://img.shields.io/travis/oxfordcontrol/osqp/master.svg?label=Linux%20%2F%20OSX%20build)](https://travis-ci.org/oxfordcontrol/osqp)
+[![Build status of the master branch on Windows](https://img.shields.io/appveyor/ci/bstellato/osqp/master.svg?label=Windows%20build)](https://ci.appveyor.com/project/bstellato/osqp/branch/master)
+[![Code coverage](https://coveralls.io/repos/github/oxfordcontrol/osqp/badge.svg?branch=master)](https://coveralls.io/github/oxfordcontrol/osqp?branch=master)
+![License](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)
+
+
+![PyPI - downloads](https://img.shields.io/pypi/dm/osqp.svg?label=Pypi%20downloads)
+![Conda - downloads](https://img.shields.io/conda/dn/conda-forge/osqp.svg?label=Conda%20downloads)
+
 [**Join our forum**](https://groups.google.com/forum/#!forum/osqp) for any questions related to the solver!
 
 **The documentation** is available at [**osqp.org**](https://osqp.org/)
@@ -14,27 +24,6 @@ where `x in R^n` is the optimization variable. The objective function is defined
 
 
 The latest version is `0.4.1`.
-
-<br>
-
-<table>
-  <tr>
-    <th>System</th>
-    <th>Status</th>
-    <th>Coverage</th>
-  </tr>
-  <tr>
-    <td>Linux / OSX</td>
-    <td><a href="https://travis-ci.org/oxfordcontrol/osqp"><img src="https://travis-ci.org/oxfordcontrol/osqp.svg?branch=master"></a></td>
-    <td rowspan="2"><a href="https://coveralls.io/github/oxfordcontrol/osqp?branch=master"><img src="https://coveralls.io/repos/github/oxfordcontrol/osqp/badge.svg?branch=master"></a></td>
-  </tr>
-  <tr>
-    <td>Windows</td>
-    <td><a href="https://ci.appveyor.com/project/bstellato/osqp/"><img src="https://ci.appveyor.com/api/projects/status/ik6ct0203pq5esxh/branch/master?svg=true"></a></td>
-  </tr>
-</table>
-
-<br>
 
 ## Citing OSQP
 
