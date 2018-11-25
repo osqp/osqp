@@ -42,7 +42,9 @@ static void print_line(void) {
 void print_header(void) {
   // Different indentation required for windows
 # ifdef IS_WINDOWS
+# ifndef PYTHON
   c_print("iter  ");
+# endif /* ifdef PYTHON */
 # else  /* ifdef IS_WINDOWS */
   c_print("iter   ");
 # endif /* ifdef IS_WINDOWS */
@@ -142,8 +144,8 @@ void print_summary(OSQPWorkspace *work) {
     // total time: setup + solve
     c_print("  %9.2es", info->setup_time + info->solve_time);
   } else {
-    // total time: solve
-    c_print("  %9.2es", info->solve_time);
+    // total time: update + solve
+    c_print("  %9.2es", info->update_time + info->solve_time);
   }
 # endif /* ifdef PROFILING */
   c_print("\n");
@@ -163,13 +165,22 @@ void print_polish(OSQPWorkspace *work) {
 
   // Different characters for windows/unix
 # ifdef IS_WINDOWS
+# ifndef PYTHON
   c_print("  ---------");
+# endif /* ifdef PYTHON */
 # else  /* ifdef IS_WINDOWS */
   c_print("   --------");
 # endif /* ifdef IS_WINDOWS */
 # ifdef PROFILING
-  c_print("  %9.2es", info->setup_time + info->solve_time +
-          info->polish_time);
+  if (work->first_run) {
+    // total time: setup + solve
+    c_print("  %9.2es", info->setup_time + info->solve_time +
+            info->polish_time);
+  } else {
+    // total time: update + solve
+    c_print("  %9.2es", info->update_time + info->solve_time +
+            info->polish_time);
+  }
 # endif /* ifdef PROFILING */
   c_print("\n");
 }
