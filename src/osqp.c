@@ -593,7 +593,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
   if (work->first_run) work->first_run = 0;
 
   // Indicate that the update_time should be set to zero
-  if (work->clear_update_time) work->clear_update_time = 0;
+  work->clear_update_time = 1;
 #endif /* ifdef PROFILING */
 
 #ifdef PRINTING
