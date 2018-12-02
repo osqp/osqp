@@ -182,7 +182,7 @@ c_int osqp_warm_start_y(OSQPWorkspace *work,
 # if EMBEDDED != 1
 
 /**
- * Update elements of matrix P (upper-diagonal)
+ * Update elements of matrix P (upper triangular)
  * without changing sparsity structure.
  *
  *
@@ -225,7 +225,7 @@ c_int osqp_update_A(OSQPWorkspace *work,
 
 
 /**
- * Update elements of matrix P (upper-diagonal) and elements of matrix A
+ * Update elements of matrix P (upper triangular) and elements of matrix A
  * without changing sparsity structure.
  *
  *

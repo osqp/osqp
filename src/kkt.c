@@ -189,7 +189,7 @@ void update_KKT_P(csc          *KKT,
 
   // Update diagonal elements of KKT by adding sigma
   for (i = 0; i < Pdiag_n; i++) {
-    j                  = Pdiag_idx[i]; // Extract ondex of the element on the
+    j                  = Pdiag_idx[i]; // Extract index of the element on the
                                        // diagonal
     KKT->x[PtoKKT[j]] += param1;
   }

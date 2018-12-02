@@ -115,7 +115,7 @@ If the code is generated with the option :code:`parameters` set to
 .. py:function:: update_P(Px, Px_idx, Px_n)
   :noindex:
 
-  Update nonzero entries of the quadratic cost matrix (only upper-diagonal) without changing sparsity structure.
+  Update nonzero entries of the quadratic cost matrix (only upper triangular) without changing sparsity structure.
 
   :param ndarray Px: Values of entries to be updated
   :param ndarray Px_idx: Indices of entries to be updated. Pass :code:`None` if

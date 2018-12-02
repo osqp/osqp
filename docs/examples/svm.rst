@@ -86,7 +86,7 @@ Matlab
     b = [ones(N, 1); -ones(N,1)];
 
     % OSQP data
-    P = blkdiag(2*speye(n), sparse(m, m));
+    P = blkdiag(speye(n), sparse(m, m));
     q = [zeros(n,1); gamma*ones(m,1)];
     A = [diag(b)*Ad, -speye(m);
          sparse(m, n), speye(m)];
@@ -101,3 +101,65 @@ Matlab
 
     % Solve problem
     res = prob.solve();
+
+
+
+CVXPY
+-----
+
+.. code:: python
+
+    from cvxpy import *
+    import numpy as np
+    import scipy as sp
+    import scipy.sparse as sparse
+
+    # Generate problem data
+    sp.random.seed(1)
+    n = 10
+    m = 1000
+    N = int(m / 2)
+    gamma = 1.0
+    b = np.hstack([np.ones(N), -np.ones(N)])
+    A_upp = sparse.random(N, n, density=0.5)
+    A_low = sparse.random(N, n, density=0.5)
+    A = sparse.vstack([
+            A_upp / np.sqrt(n) + (A_upp != 0.).astype(float) / n,
+            A_low / np.sqrt(n) - (A_low != 0.).astype(float) / n
+        ]).tocsc()
+
+    # Define problem
+    x = Variable(n)
+    objective = 0.5*sum_squares(x) + gamma*sum(pos(diag(b)*A*x + 1))
+
+    # Solve with OSQP
+    Problem(Minimize(objective)).solve(solver=OSQP)
+    
+
+
+
+YALMIP
+------
+
+.. code:: matlab
+
+    % Generate problem data
+    rng(1)
+    n = 10;
+    m = 1000;
+    N = ceil(m/2);
+    gamma = 1;
+    A_upp = sprandn(N, n, 0.5);
+    A_low = sprandn(N, n, 0.5);
+    A = [A_upp / sqrt(n) + (A_upp ~= 0) / n;
+         A_low / sqrt(n) - (A_low ~= 0) / n];
+    b = [ones(N, 1); -ones(N,1)];
+
+    % Define problem
+    x = sdpvar(n, 1);
+    objective = 0.5*norm(x)^2 + gamma*sum(max(diag(b)*A*x + 1, 0));
+
+    % Solve with OSQP
+    options = sdpsettings('solver','osqp');
+    optimize([],objective,options);
+

@@ -74,18 +74,21 @@ The :code:`results` object contains the primal solution :code:`x`, the dual solu
 +-----------------------+------------------------------------------------+
 | :code:`solve_time`    | Solve time                                     |
 +-----------------------+------------------------------------------------+
+| :code:`update_time`   | Update time                                    |
++-----------------------+------------------------------------------------+
 | :code:`polish_time`   | Polish time                                    |
 +-----------------------+------------------------------------------------+
-| :code:`run_time`      | Total run time: setup + solve + polish         |
+| :code:`run_time`      | Total run time: setup/update + solve + polish  |
 +-----------------------+------------------------------------------------+
 | :code:`rho_estimate`  | Optimal rho estimate                           |
 +-----------------------+------------------------------------------------+
 | :code:`rho_updates`   | Number of rho updates                          |
 +-----------------------+------------------------------------------------+
 
-
 Note that if multiple solves are executed from single setup, then after the
-first one :code:`run_time` includes only :code:`solve_time` + :code:`polish_time`.
+first one :code:`run_time` includes :code:`update_time` + :code:`solve_time`
++ :code:`polish_time`.
+
 
 Update
 ------

@@ -32,7 +32,7 @@ You need to install the following (see :ref:`build_from_sources` for more detail
 
    * Python 2: `Visual C++ 9.0 for Python (VC 9.0) <https://www.microsoft.com/en-us/download/details.aspx?id=44266>`_
 
-   * Python 3: `Visual C++ 2015 Build Tools (VC 14.0) <http://landinghub.visualstudio.com/visual-cpp-build-tools>`_
+   * Python 3: `Build Tools for Visual Studio 2017 <https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2017>`_
 
 
 Now you are ready to build OSQP python interface from sources. Run the following in your terminal

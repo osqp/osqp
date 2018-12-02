@@ -39,7 +39,7 @@ Python
 
     # OSQP data
     P = sparse.block_diag((sparse.csc_matrix((n, n)), sparse.eye(m)), format='csc')
-    q = np.zeros(n+m);
+    q = np.zeros(n+m)
     A = sparse.vstack([
             sparse.hstack([Ad, -sparse.eye(m)]),
             sparse.hstack((sparse.eye(n), sparse.csc_matrix((n, m))))
@@ -89,6 +89,33 @@ Matlab
 
 
 
+CVXPY
+-----
+
+.. code:: python
+
+    from cvxpy import *
+    import numpy as np
+    import scipy as sp
+    import scipy.sparse as sparse
+
+    # Generate problem data
+    sp.random.seed(1)
+    m = 30
+    n = 20
+    A = sparse.random(m, n, density=0.7, format='csc')
+    b = np.random.randn(m)
+
+    # Define problem
+    x = Variable(n)
+    objective = 0.5*sum_squares(A*x - b)
+    constraints = [x >= 0, x <= 1]
+
+    # Solve with OSQP
+    Problem(Minimize(objective), constraints).solve(solver=OSQP)
+
+
+
 YALMIP
 ------
 
@@ -110,6 +137,3 @@ YALMIP
    options = sdpsettings('solver','osqp');
    optimize(constraints, objective, options);
 
-   % Get optimal primal and dual solution
-   x_opt = value(x);
-   y_opt = dual(constraints(1));
