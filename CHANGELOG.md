@@ -1,3 +1,9 @@
+Version 0.4.2 ()
+----------------
+* Added `update_time` to the info structure.
+* Fixed [#101](https://github.com/oxfordcontrol/osqp/issues/101).
+
+
 Version 0.4.1 (25 September 2018)
 ---------------------------------
 * Updated QDLDL to version 0.1.3.
