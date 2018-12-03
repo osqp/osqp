@@ -225,10 +225,12 @@ OSQPWorkspace* osqp_setup(const OSQPData *data, OSQPSettings *settings) {
   update_status(work->info, OSQP_UNSOLVED);
 # ifdef PROFILING
   work->info->solve_time  = 0.0;                   // Solve time to zero
+  work->info->update_time = 0.0;                   // Update time to zero
   work->info->polish_time = 0.0;                   // Polish time to zero
   work->info->run_time    = 0.0;                   // Total run time to zero
-  work->info->setup_time  = osqp_toc(work->timer); // Updater timer information
+  work->info->setup_time  = osqp_toc(work->timer); // Update timer information
   work->first_run         = 1;
+  work->clear_update_time = 0;
 # endif /* ifdef PROFILING */
 # if EMBEDDED != 1
   work->info->rho_updates  = 0;                    // Rho updates set to 0
@@ -291,6 +293,11 @@ c_int osqp_solve(OSQPWorkspace *work) {
 #endif /* ifdef PRINTING */
     return -1;
   }
+
+#ifdef PROFILING
+  if (work->clear_update_time == 1)
+    work->info->update_time = 0.0;
+#endif /* ifdef PROFILING */
 
   // Initialize variables
   exitflag              = 0;
@@ -369,9 +376,8 @@ c_int osqp_solve(OSQPWorkspace *work) {
 
 #ifdef PROFILING
 
-    // Check if solver time_limit is enabled. In case, check if the current run
-    // time
-    // is more than the time_limit option.
+    // Check if solver time_limit is enabled. In case, check if the current
+    // run time is more than the time_limit option.
     if (work->first_run) {
       temp_run_time = work->info->setup_time + osqp_toc(work->timer);
     }
@@ -536,9 +542,8 @@ c_int osqp_solve(OSQPWorkspace *work) {
     work->info->obj_val = compute_obj_val(work, work->x);
   }
 
-  /* Print summary for last iteration */
 #ifdef PRINTING
-
+  /* Print summary for last iteration */
   if (work->settings->verbose && !work->summary_printed) {
     print_summary(work);
   }
@@ -553,7 +558,6 @@ c_int osqp_solve(OSQPWorkspace *work) {
   }
 
 #if EMBEDDED != 1
-
   /* Update rho estimate */
   work->info->rho_estimate = compute_rho_estimate(work);
 #endif /* if EMBEDDED != 1 */
@@ -566,9 +570,8 @@ c_int osqp_solve(OSQPWorkspace *work) {
 
   // Polish the obtained solution
 #ifndef EMBEDDED
-
-  if (work->settings->polish && (work->info->status_val == OSQP_SOLVED)) polish(
-      work);
+  if (work->settings->polish && (work->info->status_val == OSQP_SOLVED))
+    polish(work);
 #endif /* ifndef EMBEDDED */
 
   /* Update total time */
@@ -580,19 +583,21 @@ c_int osqp_solve(OSQPWorkspace *work) {
                            work->info->solve_time +
                            work->info->polish_time;
   } else {
-    // total time: solve + polish
-    work->info->run_time = work->info->solve_time +
+    // total time: update + solve + polish
+    work->info->run_time = work->info->update_time +
+                           work->info->solve_time +
                            work->info->polish_time;
   }
 
   // Indicate that the solve function has already been executed
   if (work->first_run) work->first_run = 0;
+
+  // Indicate that the update_time should be set to zero
+  work->clear_update_time = 1;
 #endif /* ifdef PROFILING */
 
-
-  /* Print final footer */
 #ifdef PRINTING
-
+  /* Print final footer */
   if (work->settings->verbose) print_footer(work->info, work->settings->polish);
 #endif /* ifdef PRINTING */
 
@@ -600,7 +605,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
   store_solution(work);
 
 
-  // Define exit flag for quitting function
+// Define exit flag for quitting function
 #if defined(PROFILING) || defined(CTRLC) || EMBEDDED != 1
 exit:
 #endif /* if defined(PROFILING) || defined(CTRLC) || EMBEDDED != 1 */
@@ -749,6 +754,15 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
 * Update problem data  *
 ************************/
 c_int osqp_update_lin_cost(OSQPWorkspace *work, const c_float *q_new) {
+
+#ifdef PROFILING
+  if (work->clear_update_time == 1) {
+    work->clear_update_time = 0;
+    work->info->update_time = 0.0;
+  }
+  osqp_tic(work->timer); // Start timer
+#endif /* ifdef PROFILING */
+
   // Replace q by the new vector
   prea_vec_copy(q_new, work->data->q, work->data->n);
 
@@ -761,6 +775,10 @@ c_int osqp_update_lin_cost(OSQPWorkspace *work, const c_float *q_new) {
   // Reset solver information
   reset_info(work->info);
 
+#ifdef PROFILING
+  work->info->update_time += osqp_toc(work->timer);
+#endif /* ifdef PROFILING */
+
   return 0;
 }
 
@@ -768,6 +786,14 @@ c_int osqp_update_bounds(OSQPWorkspace *work,
                          const c_float *l_new,
                          const c_float *u_new) {
   c_int i, exitflag = 0;
+
+#ifdef PROFILING
+  if (work->clear_update_time == 1) {
+    work->clear_update_time = 0;
+    work->info->update_time = 0.0;
+  }
+  osqp_tic(work->timer); // Start timer
+#endif /* ifdef PROFILING */
 
   // Check if lower bound is smaller than upper bound
   for (i = 0; i < work->data->m; i++) {
@@ -793,16 +819,27 @@ c_int osqp_update_bounds(OSQPWorkspace *work,
   reset_info(work->info);
 
 #if EMBEDDED != 1
-
   // Update rho_vec and refactor if constraints type changes
   exitflag = update_rho_vec(work);
 #endif // EMBEDDED != 1
+
+#ifdef PROFILING
+  work->info->update_time += osqp_toc(work->timer);
+#endif /* ifdef PROFILING */
 
   return exitflag;
 }
 
 c_int osqp_update_lower_bound(OSQPWorkspace *work, const c_float *l_new) {
   c_int i, exitflag = 0;
+
+#ifdef PROFILING
+  if (work->clear_update_time == 1) {
+    work->clear_update_time = 0;
+    work->info->update_time = 0.0;
+  }
+  osqp_tic(work->timer); // Start timer
+#endif /* ifdef PROFILING */
 
   // Replace l by the new vector
   prea_vec_copy(l_new, work->data->l, work->data->m);
@@ -826,16 +863,27 @@ c_int osqp_update_lower_bound(OSQPWorkspace *work, const c_float *l_new) {
   reset_info(work->info);
 
 #if EMBEDDED != 1
-
   // Update rho_vec and refactor if constraints type changes
   exitflag = update_rho_vec(work);
 #endif // EMBEDDED ! =1
+
+#ifdef PROFILING
+  work->info->update_time += osqp_toc(work->timer);
+#endif /* ifdef PROFILING */
 
   return exitflag;
 }
 
 c_int osqp_update_upper_bound(OSQPWorkspace *work, const c_float *u_new) {
   c_int i, exitflag = 0;
+
+#ifdef PROFILING
+  if (work->clear_update_time == 1) {
+    work->clear_update_time = 0;
+    work->info->update_time = 0.0;
+  }
+  osqp_tic(work->timer); // Start timer
+#endif /* ifdef PROFILING */
 
   // Replace u by the new vector
   prea_vec_copy(u_new, work->data->u, work->data->m);
@@ -859,10 +907,13 @@ c_int osqp_update_upper_bound(OSQPWorkspace *work, const c_float *u_new) {
   reset_info(work->info);
 
 #if EMBEDDED != 1
-
   // Update rho_vec and refactor if constraints type changes
   exitflag = update_rho_vec(work);
 #endif // EMBEDDED != 1
+
+#ifdef PROFILING
+  work->info->update_time += osqp_toc(work->timer);
+#endif /* ifdef PROFILING */
 
   return exitflag;
 }
@@ -947,6 +998,14 @@ c_int osqp_update_P(OSQPWorkspace *work,
   c_int i;        // For indexing
   c_int exitflag; // Exit flag
   c_int nnzP;     // Number of nonzeros in P
+  
+#ifdef PROFILING
+  if (work->clear_update_time == 1) {
+    work->clear_update_time = 0;
+    work->info->update_time = 0.0;
+  }
+  osqp_tic(work->timer); // Start timer
+#endif /* ifdef PROFILING */
 
   nnzP = work->data->P->p[work->data->P->n];
 
@@ -1002,6 +1061,10 @@ c_int osqp_update_P(OSQPWorkspace *work,
   }
 # endif /* ifdef PRINTING */
 
+#ifdef PROFILING
+  work->info->update_time += osqp_toc(work->timer);
+#endif /* ifdef PROFILING */
+
   return exitflag;
 }
 
@@ -1027,6 +1090,14 @@ c_int osqp_update_A(OSQPWorkspace *work,
   c_int i;        // For indexing
   c_int exitflag; // Exit flag
   c_int nnzA;     // Number of nonzeros in A
+
+#ifdef PROFILING
+  if (work->clear_update_time == 1) {
+    work->clear_update_time = 0;
+    work->info->update_time = 0.0;
+  }
+  osqp_tic(work->timer); // Start timer
+#endif /* ifdef PROFILING */
 
   nnzA = work->data->A->p[work->data->A->n];
 
@@ -1081,6 +1152,10 @@ c_int osqp_update_A(OSQPWorkspace *work,
   }
 # endif /* ifdef PRINTING */
 
+#ifdef PROFILING
+  work->info->update_time += osqp_toc(work->timer);
+#endif /* ifdef PROFILING */
+
   return exitflag;
 }
 
@@ -1117,6 +1192,14 @@ c_int osqp_update_P_A(OSQPWorkspace *work,
   c_int i;          // For indexing
   c_int exitflag;   // Exit flag
   c_int nnzP, nnzA; // Number of nonzeros in P and A
+
+#ifdef PROFILING
+  if (work->clear_update_time == 1) {
+    work->clear_update_time = 0;
+    work->info->update_time = 0.0;
+  }
+  osqp_tic(work->timer); // Start timer
+#endif /* ifdef PROFILING */
 
   nnzP = work->data->P->p[work->data->P->n];
   nnzA = work->data->A->p[work->data->A->n];
@@ -1200,6 +1283,10 @@ c_int osqp_update_P_A(OSQPWorkspace *work,
   }
 # endif /* ifdef PRINTING */
 
+#ifdef PROFILING
+  work->info->update_time += osqp_toc(work->timer);
+#endif /* ifdef PROFILING */
+
   return exitflag;
 }
 
@@ -1213,6 +1300,14 @@ c_int osqp_update_rho(OSQPWorkspace *work, c_float rho_new) {
 # endif /* ifdef PRINTING */
     return 1;
   }
+
+#ifdef PROFILING
+  if (work->clear_update_time == 1) {
+    work->clear_update_time = 0;
+    work->info->update_time = 0.0;
+  }
+  osqp_tic(work->timer); // Start timer
+#endif /* ifdef PROFILING */
 
   // Update rho in settings
   work->settings->rho = c_min(c_max(rho_new, RHO_MIN), RHO_MAX);
@@ -1235,6 +1330,10 @@ c_int osqp_update_rho(OSQPWorkspace *work, c_float rho_new) {
   exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
                                                  work->rho_vec,
                                                  work->data->m);
+
+#ifdef PROFILING
+  work->info->update_time += osqp_toc(work->timer);
+#endif /* ifdef PROFILING */
 
   return exitflag;
 }

@@ -61,7 +61,7 @@ typedef struct {
 
 
 /**
- * Solver return nformation
+ * Solver return information
  */
 typedef struct {
   c_int iter;          ///< number of iterations taken
@@ -80,6 +80,7 @@ typedef struct {
 # ifdef PROFILING
   c_float setup_time;  ///< time taken for setup phase (seconds)
   c_float solve_time;  ///< time taken for solve phase (seconds)
+  c_float update_time; ///< time taken for update phase (seconds)
   c_float polish_time; ///< time taken for polish phase (seconds)
   c_float run_time;    ///< total time  (seconds)
 # endif // ifdef PROFILING
@@ -287,16 +288,20 @@ typedef struct {
   OSQPSolution *solution; ///< Problem solution
   OSQPInfo     *info;     ///< Solver information
 
-        # ifdef PROFILING
+# ifdef PROFILING
   OSQPTimer *timer;       ///< Timer object
 
   /// flag indicating whether the solve function has been run before
   c_int first_run;
-        # endif // ifdef PROFILING
 
-        # ifdef PRINTING
+  /// flag indicating whether the update_time should be cleared
+  c_int clear_update_time;
+# endif // ifdef PROFILING
+
+# ifdef PRINTING
   c_int summary_printed; ///< Has last summary been printed? (true/false)
-        # endif // ifdef PRINTING
+# endif // ifdef PRINTING
+
 } OSQPWorkspace;
 
 
