@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ev
 
-OSQP_VERSION="0.4.1"
+OSQP_VERSION="0.5.0"
 
 # Update variables from install
 # CMake
@@ -74,7 +74,7 @@ curl -T ${OSQP_SOURCES}.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Packag
 
 
 # Publish deployed files
-curl -X POST -ubstellato:$BINTRAY_API_KEY https://api.bintray.com/content/bstellato/generic/OSQP/0.4.1/publish
+curl -X POST -ubstellato:$BINTRAY_API_KEY https://api.bintray.com/content/bstellato/generic/OSQP/0.5.0/publish
 
 
 exit 0
