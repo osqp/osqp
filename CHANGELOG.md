@@ -1,4 +1,4 @@
-Version 0.5.0 ()
+Version 0.5.0 (10 December 2018)
 ----------------
 * Added `update_time` to the info structure.
 * Fixed [#101](https://github.com/oxfordcontrol/osqp/issues/101).
