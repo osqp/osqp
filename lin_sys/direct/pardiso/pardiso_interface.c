@@ -1,7 +1,6 @@
 #include "pardiso_interface.h"
 
 #define MKL_INT c_int
-#define PARDISOLIBNAME "mkl_rt." SHAREDLIBEXT
 
 // Single Dynamic library interface
 #define MKL_INTERFACE_LP64  0x0

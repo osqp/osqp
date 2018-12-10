@@ -1,3 +1,9 @@
+Version 0.5.0 (10 December 2018)
+----------------
+* Added `update_time` to the info structure.
+* Fixed [#101](https://github.com/oxfordcontrol/osqp/issues/101).
+
+
 Version 0.4.1 (25 September 2018)
 ---------------------------------
 * Updated QDLDL to version 0.1.3.
@@ -8,7 +14,7 @@ Version 0.4.1 (25 September 2018)
 Version 0.4.0 (23 July 2018)
 ----------------------------
 * Added check for nonconvex cost function (non-positive semidefinite `P`).
-* Removed SuiteSparse LDL in favor of [QDLDL](https://github.com/oxfordcontrol/qdldl)
+* Removed SuiteSparse LDL in favor of [QDLDL](https://github.com/oxfordcontrol/qdldl).
 * Static library `libosqpstatic` now renamed as `libosqp`.
 
 
