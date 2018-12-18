@@ -94,6 +94,9 @@ option (ENABLE_MKL_PARDISO "Enable MKL Pardiso solver" ON)
 if (DFLOAT)
 	message(STATUS "Disabling MKL Pardiso Solver with floats")
 	set(ENABLE_MKL_PARDISO OFF)
+elseif(DEFINED EMBEDDED)
+	message(STATUS "Disabling MKL Pardiso Solver for embedded")
+	set(ENABLE_MKL_PARDISO OFF)
 endif()
 message(STATUS "MKL Pardiso: ${ENABLE_MKL_PARDISO}")
 
@@ -334,7 +337,7 @@ endif (MATLAB)
 # If we are building Python/Matlab/R interface:
 #   - do not build shared library
 #   - do not build demo
-if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG)
+if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
     # Create osqp shared library
     # NB: Add all the linear system solvers here
     add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
@@ -358,7 +361,7 @@ if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG)
     add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
     target_link_libraries (osqp_demo osqpstatic)
 
-endif (NOT PYTHON AND NOT MATLAB AND NOT R_LANG)
+endif (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
 
 # Create CMake packages for the build directory
 # ----------------------------------------------
