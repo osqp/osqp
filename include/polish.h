@@ -13,8 +13,8 @@ extern "C" {
  * Solution polish: Solve equality constrained QP with assumed active
  *constraints
  * @param  work Workspace
- * @return      Exitflag:  0: Factorization successfull
- *                         1: Factorization unsuccessfull
+ * @return      Exitflag:  0: Factorization successful
+ *                         1: Factorization unsuccessful
  */
 c_int polish(OSQPWorkspace *work);
 

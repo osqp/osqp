@@ -121,7 +121,7 @@ struct OSQP_TIMER {
 // Linux
 #  else // ifdef IS_WINDOWS
 
-/* Use POSIX clocl_gettime() for timing on non-Windows machines */
+/* Use POSIX clock_gettime() for timing on non-Windows machines */
 #   include <time.h>
 #   include <sys/time.h>
 

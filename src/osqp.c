@@ -459,7 +459,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
           work->settings->adaptive_rho_interval = (c_int)c_roundmultiple(iter,
                                                                          work->settings->check_termination);
         } else {
-          // If check_termintion is disabled, we round the number of iterations
+          // If check_termination is disabled, we round the number of iterations
           // between
           // updates to the closest multiple of the default check_termination
           // interval.

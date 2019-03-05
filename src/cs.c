@@ -195,7 +195,7 @@ csc* csc_symperm(const csc *A, const c_int *pinv, c_int *AtoC, c_int values) {
 
       if (Cx) Cx[q] = Ax[p];
 
-      if (AtoC) { // If vector AtoC passed, store values of the mapppings
+      if (AtoC) { // If vector AtoC passed, store values of the mappings
         AtoC[p] = q;
       }
     }

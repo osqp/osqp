@@ -32,12 +32,12 @@ bool utSetInterruptEnabled(bool);
 /* METHODS are the same for both */
 
 /**
- * Start listner for ctrl-c interrupts
+ * Start listener for ctrl-c interrupts
  */
 void osqp_start_interrupt_listener(void);
 
 /**
- * End listner for ctrl-c interrupts
+ * End listener for ctrl-c interrupts
  */
 void osqp_end_interrupt_listener(void);
 
