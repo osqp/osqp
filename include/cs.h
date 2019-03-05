@@ -152,7 +152,7 @@ c_int csc_cumsum(c_int *p,
                  c_int  n);
 
 /**
- * Compute inverse of permuation matrix stored in the vector p.
+ * Compute inverse of permutation matrix stored in the vector p.
  * The computed inverse is also stored in a vector.
  */
 c_int* csc_pinv(c_int const *p,

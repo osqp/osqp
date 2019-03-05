@@ -14,12 +14,12 @@ void limit_scaling(c_float *D, c_int n) {
 }
 
 /**
- * Compute infinite norm of the colums of the KKT matrix without forming it
+ * Compute infinite norm of the columns of the KKT matrix without forming it
  *
  * The norm is stored in the vector v = (D, E)
  *
  * @param P        Cost matrix
- * @param A        Contraints matrix
+ * @param A        Constraints matrix
  * @param D        Norm of columns related to variables
  * @param D_temp_A Temporary vector for norm of columns of A
  * @param E        Norm of columns related to constraints

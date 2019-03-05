@@ -174,7 +174,7 @@ typedef struct {
   c_int   polish_refine_iter;            ///< iterative refinement steps in
                                          // polish
 
-  c_int verbose;                         ///< boolean, write out progres
+  c_int verbose;                         ///< boolean, write out progress
 # endif // ifndef EMBEDDED
 
   c_int scaled_termination;              ///< boolean, use scaled termination

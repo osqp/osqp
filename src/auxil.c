@@ -720,7 +720,7 @@ c_int check_termination(OSQPWorkspace *work, c_int approximate) {
 
   // Check residuals
   if (work->data->m == 0) {
-    prim_res_check = 1; // No contraints -> Primal feasibility always satisfied
+    prim_res_check = 1; // No constraints -> Primal feasibility always satisfied
   }
   else {
     // Compute primal tolerance
