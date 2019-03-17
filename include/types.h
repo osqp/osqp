@@ -201,11 +201,10 @@ typedef struct {
   /// Linear System solver structure
   LinSysSolver *linsys_solver;
 
-        # ifndef EMBEDDED
-
+# ifndef EMBEDDED
   /// Polish structure
   OSQPPolish *pol;
-        # endif // ifndef EMBEDDED
+# endif // ifndef EMBEDDED
 
   /**
    * @name Vector used to store a vectorized rho parameter
@@ -216,10 +215,10 @@ typedef struct {
 
   /** @} */
 
-        # if EMBEDDED != 1
+# if EMBEDDED != 1
   c_int *constr_type; ///< Type of constraints: loose (-1), equality (1),
                       // inequality (0)
-        # endif // if EMBEDDED != 1
+# endif // if EMBEDDED != 1
 
   /**
    * @name Iterates
@@ -296,6 +295,9 @@ typedef struct {
 
   /// flag indicating whether the update_time should be cleared
   c_int clear_update_time;
+
+  /// flag indicating that osqp_update_rho is called from osqp_solve function
+  c_int rho_update_from_solve;
 # endif // ifdef PROFILING
 
 # ifdef PRINTING

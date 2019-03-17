@@ -231,6 +231,7 @@ OSQPWorkspace* osqp_setup(const OSQPData *data, OSQPSettings *settings) {
   work->info->setup_time  = osqp_toc(work->timer); // Update timer information
   work->first_run         = 1;
   work->clear_update_time = 0;
+  work->rho_update_from_solve = 0;
 # endif /* ifdef PROFILING */
 # if EMBEDDED != 1
   work->info->rho_updates  = 0;                    // Rho updates set to 0
@@ -297,6 +298,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
 #ifdef PROFILING
   if (work->clear_update_time == 1)
     work->info->update_time = 0.0;
+  work->rho_update_from_solve = 1;
 #endif /* ifdef PROFILING */
 
   // Initialize variables
@@ -568,15 +570,14 @@ c_int osqp_solve(OSQPWorkspace *work) {
 #endif /* ifdef PROFILING */
 
 
-  // Polish the obtained solution
 #ifndef EMBEDDED
+  // Polish the obtained solution
   if (work->settings->polish && (work->info->status_val == OSQP_SOLVED))
     polish(work);
 #endif /* ifndef EMBEDDED */
 
-  /* Update total time */
 #ifdef PROFILING
-
+  /* Update total time */
   if (work->first_run) {
     // total time: setup + solve + polish
     work->info->run_time = work->info->setup_time +
@@ -594,6 +595,9 @@ c_int osqp_solve(OSQPWorkspace *work) {
 
   // Indicate that the update_time should be set to zero
   work->clear_update_time = 1;
+
+  // Indicate that osqp_update_rho is not called from osqp_solve
+  work->rho_update_from_solve = 0;
 #endif /* ifdef PROFILING */
 
 #ifdef PRINTING
@@ -611,12 +615,13 @@ exit:
 #endif /* if defined(PROFILING) || defined(CTRLC) || EMBEDDED != 1 */
 
 #ifdef CTRLC
-
   // Restore previous signal handler
   osqp_end_interrupt_listener();
 #endif /* ifdef CTRLC */
+
   return exitflag;
 }
+
 
 #ifndef EMBEDDED
 
@@ -1302,11 +1307,13 @@ c_int osqp_update_rho(OSQPWorkspace *work, c_float rho_new) {
   }
 
 #ifdef PROFILING
-  if (work->clear_update_time == 1) {
-    work->clear_update_time = 0;
-    work->info->update_time = 0.0;
+  if (work->rho_update_from_solve == 0) {
+    if (work->clear_update_time == 1) {
+      work->clear_update_time = 0;
+      work->info->update_time = 0.0;
+    }
+    osqp_tic(work->timer); // Start timer
   }
-  osqp_tic(work->timer); // Start timer
 #endif /* ifdef PROFILING */
 
   // Update rho in settings
@@ -1332,7 +1339,8 @@ c_int osqp_update_rho(OSQPWorkspace *work, c_float rho_new) {
                                                  work->data->m);
 
 #ifdef PROFILING
-  work->info->update_time += osqp_toc(work->timer);
+  if (work->rho_update_from_solve == 0)
+    work->info->update_time += osqp_toc(work->timer);
 #endif /* ifdef PROFILING */
 
   return exitflag;
