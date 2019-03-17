@@ -143,7 +143,7 @@ void update_status(OSQPInfo *info,
  *
  * @param  work        Workspace
  * @param  approximate Boolean
- * @return      Redisuals check
+ * @return      Residuals check
  */
 c_int check_termination(OSQPWorkspace *work,
                         c_int          approximate);

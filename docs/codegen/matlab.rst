@@ -19,25 +19,31 @@ The second argument :code:`varargin` specifies additional codegen options
 shown in the following table
 
 
-+-----------------------+-------------------------------------+--------------------------------+
-| Option                | Description                         | Allowed values                 |
-+=======================+=====================================+================================+
-| :code:`project_type`  | Build environment                   | | :code:`''` (default)         |
-|                       |                                     | | :code:`'Makefile'`           |
-|                       |                                     | | :code:`'MinGW Makefiles'`    |
-|                       |                                     | | :code:`'Unix Makefiles'`     |
-|                       |                                     | | :code:`'CodeBlocks'`         |
-|                       |                                     | | :code:`'Xcode'`              |
-+-----------------------+-------------------------------------+--------------------------------+
-| :code:`parameters`    | Problem parameters                  | | :code:`'vectors'` (default)  |
-|                       |                                     | | :code:`'matrices'`           |
-+-----------------------+-------------------------------------+--------------------------------+
-| :code:`mexname`       | Name of the compiled mex interface  | | :code:`'emosqp'` (default)   |
-|                       |                                     | | Nonempty string              |
-+-----------------------+-------------------------------------+--------------------------------+
-| :code:`force_rewrite` | Rewrite existing directory          | | :code:`false` (default)      |
-|                       |                                     | | :code:`true`                 |
-+-----------------------+-------------------------------------+--------------------------------+
++-----------------------+---------------------------------------------------+--------------------------------+
+| Option                | Description                                       | Allowed values                 |
++=======================+===================================================+================================+
+| :code:`project_type`  | Build environment                                 | | :code:`''` (default)         |
+|                       |                                                   | | :code:`'Makefile'`           |
+|                       |                                                   | | :code:`'MinGW Makefiles'`    |
+|                       |                                                   | | :code:`'Unix Makefiles'`     |
+|                       |                                                   | | :code:`'CodeBlocks'`         |
+|                       |                                                   | | :code:`'Xcode'`              |
++-----------------------+---------------------------------------------------+--------------------------------+
+| :code:`parameters`    | Problem parameters                                | | :code:`'vectors'` (default)  |
+|                       |                                                   | | :code:`'matrices'`           |
++-----------------------+---------------------------------------------------+--------------------------------+
+| :code:`mexname`       | Name of the compiled mex interface                | | :code:`'emosqp'` (default)   |
+|                       |                                                   | | Nonempty string              |
++-----------------------+---------------------------------------------------+--------------------------------+
+| :code:`force_rewrite` | Rewrite existing directory                        | | :code:`false` (default)      |
+|                       |                                                   | | :code:`true`                 |
++-----------------------+---------------------------------------------------+--------------------------------+
+| :code:`FLOAT`         | Use :code:`float` type instead of :code:`double`  | | :code:`false` (default)      |
+|                       |                                                   | | :code:`true`                 |
++-----------------------+---------------------------------------------------+--------------------------------+
+| :code:`LONG`          | Use :code:`long long` type instead of :code:`int` | | :code:`true` (default)       |
+|                       |                                                   | | :code:`false`                |
++-----------------------+---------------------------------------------------+--------------------------------+
 
 You can pass the options as field-value pairs, e.g.,
 

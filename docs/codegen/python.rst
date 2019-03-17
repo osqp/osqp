@@ -17,25 +17,31 @@ The argument :code:`dir_name` is the name of a directory where the generated
 code is stored.
 Additional codegen options are shown in the following table
 
-+-------------------------+-------------------------------------+--------------------------------+
-| Option                  | Description                         | Allowed values                 |
-+=========================+=====================================+================================+
-| :code:`project_type`    | Build environment                   | | :code:`''` (default)         |
-|                         |                                     | | :code:`'Makefile'`           |
-|                         |                                     | | :code:`'MinGW Makefiles'`    |
-|                         |                                     | | :code:`'Unix Makefiles'`     |
-|                         |                                     | | :code:`'CodeBlocks'`         |
-|                         |                                     | | :code:`'Xcode'`              |
-+-------------------------+-------------------------------------+--------------------------------+
-| :code:`parameters`      | Problem parameters                  | | :code:`'vectors'` (default)  |
-|                         |                                     | | :code:`'matrices'`           |
-+-------------------------+-------------------------------------+--------------------------------+
-| :code:`python_ext_name` | Name of the generated Python module | | :code:`'emosqp'` (default)   |
-|                         |                                     | | Nonempty string              |
-+-------------------------+-------------------------------------+--------------------------------+
-| :code:`force_rewrite`   | Rewrite existing directory          | | :code:`False` (default)      |
-|                         |                                     | | :code:`True`                 |
-+-------------------------+-------------------------------------+--------------------------------+
++-------------------------+---------------------------------------------------+--------------------------------+
+| Option                  | Description                                       | Allowed values                 |
++=========================+===================================================+================================+
+| :code:`project_type`    | Build environment                                 | | :code:`''` (default)         |
+|                         |                                                   | | :code:`'Makefile'`           |
+|                         |                                                   | | :code:`'MinGW Makefiles'`    |
+|                         |                                                   | | :code:`'Unix Makefiles'`     |
+|                         |                                                   | | :code:`'CodeBlocks'`         |
+|                         |                                                   | | :code:`'Xcode'`              |
++-------------------------+---------------------------------------------------+--------------------------------+
+| :code:`parameters`      | Problem parameters                                | | :code:`'vectors'` (default)  |
+|                         |                                                   | | :code:`'matrices'`           |
++-------------------------+---------------------------------------------------+--------------------------------+
+| :code:`python_ext_name` | Name of the generated Python module               | | :code:`'emosqp'` (default)   |
+|                         |                                                   | | Nonempty string              |
++-------------------------+---------------------------------------------------+--------------------------------+
+| :code:`force_rewrite`   | Rewrite existing directory                        | | :code:`False` (default)      |
+|                         |                                                   | | :code:`True`                 |
++-------------------------+---------------------------------------------------+--------------------------------+
+| :code:`FLOAT`           | Use :code:`float` type instead of :code:`double`  | | :code:`False` (default)      |
+|                         |                                                   | | :code:`True`                 |
++-------------------------+---------------------------------------------------+--------------------------------+
+| :code:`LONG`            | Use :code:`long long` type instead of :code:`int` | | :code:`True` (default)       |
+|                         |                                                   | | :code:`False`                |
++-------------------------+---------------------------------------------------+--------------------------------+
 
 The options are passed using named arguments, e.g.,
 
