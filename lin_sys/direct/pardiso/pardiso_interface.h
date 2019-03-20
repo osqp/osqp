@@ -39,7 +39,7 @@ struct pardiso {
      */
     // Attributes
     csc *KKT;         ///< KKT matrix (in CSR format!)
-    c_int *KKT_i;     ///< KKT column ondeces in 1-indexing for Pardiso
+    c_int *KKT_i;     ///< KKT column indices in 1-indexing for Pardiso
     c_int *KKT_p;     ///< KKT row pointers in 1-indexing for Pardiso
     c_float *bp;      ///< workspace memory for solves (rhs)
 

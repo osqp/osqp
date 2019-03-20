@@ -8,6 +8,8 @@
 
 static char* test_primal_infeasible_qp_solve()
 {
+  c_int exitflag;
+
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
@@ -31,10 +33,10 @@ static char* test_primal_infeasible_qp_solve()
   settings->warm_start = 0;
 
   // Setup workspace
-  work = osqp_setup(data, settings);
+  exitflag = osqp_setup(&work, data, settings);
 
   // Setup correct
-  mu_assert("Primal infeasible QP test solve: Setup error!", work != OSQP_NULL);
+  mu_assert("Primal infeasible QP test solve: Setup error!", exitflag == 0);
 
   // Solve Problem
   osqp_solve(work);

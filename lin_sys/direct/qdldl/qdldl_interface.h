@@ -22,19 +22,19 @@ struct qdldl {
      */
     c_int (*solve)(struct qdldl * self, c_float * b, const OSQPSettings * settings);
 
-    #ifndef EMBEDDED
+#ifndef EMBEDDED
     void (*free)(struct qdldl * self); ///< Free workspace (only if desktop)
-    #endif
+#endif
 
     // This used only in non embedded or embedded 2 version
-    #if EMBEDDED != 1
+#if EMBEDDED != 1
     c_int (*update_matrices)(struct qdldl * self, const csc *P, const csc *A, const OSQPSettings *settings); ///< Update solver matrices
     c_int (*update_rho_vec)(struct qdldl * self, const c_float * rho_vec, const c_int m); ///< Update solver matrices
-    #endif
+#endif
 
-    #ifndef EMBEDDED
+#ifndef EMBEDDED
     c_int nthreads;
-    #endif
+#endif
     /** @} */
 
     /**
@@ -47,7 +47,7 @@ struct qdldl {
     c_float *bp;    ///< workspace memory for solves
 
 
-    #if EMBEDDED != 1
+#if EMBEDDED != 1
     // These are required for matrix updates
     c_int * Pdiag_idx, Pdiag_n;  ///< index and number of diagonal elements in P
     csc   * KKT;                 ///< Permuted KKT matrix in sparse form (used to update P and A matrices)
@@ -60,7 +60,7 @@ struct qdldl {
     QDLDL_int   *iwork;
     QDLDL_bool  *bwork;
     QDLDL_float *fwork;
-    #endif
+#endif
 
     /** @} */
 };

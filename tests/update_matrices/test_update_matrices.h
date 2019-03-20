@@ -21,9 +21,9 @@ static char* test_form_KKT() {
   data = generate_problem_update_matrices_sols_data();
 
   // Define rho_vec and sigma to form KKT
-  sigma       = data->test_form_KKT_sigma;
-  m           = data->test_form_KKT_A->m;
-  rho_vec     = c_calloc(m, sizeof(c_float));
+  sigma = data->test_form_KKT_sigma;
+  m = data->test_form_KKT_A->m;
+  rho_vec = c_calloc(m, sizeof(c_float));
   rho_inv_vec = c_calloc(m, sizeof(c_float));
   vec_add_scalar(rho_vec, data->test_form_KKT_rho, m);
   vec_ew_recipr(rho_vec, rho_inv_vec, m);
@@ -77,7 +77,7 @@ static char* test_form_KKT() {
 }
 
 static char* test_update() {
-  c_int i, nnzP, nnzA;
+  c_int i, nnzP, nnzA, exitflag;
   update_matrices_sols_data *data;
   OSQPData *problem;
   OSQPWorkspace *work;
@@ -112,10 +112,10 @@ static char* test_update() {
   settings->verbose  = 1;
 
   // Setup workspace
-  work = osqp_setup(problem, settings);
+  exitflag = osqp_setup(&work, problem, settings);
 
   // Setup correct
-  mu_assert("Update matrices: original problem, setup error!", work != OSQP_NULL);
+  mu_assert("Update matrices: original problem, setup error!", exitflag == 0);
 
   // Solve Problem
   osqp_solve(work);
@@ -165,7 +165,7 @@ static char* test_update() {
 
 
   // Update A
-  nnzA       = data->test_solve_A->p[data->test_solve_A->n];
+  nnzA = data->test_solve_A->p[data->test_solve_A->n];
   Ax_new_idx = c_malloc(nnzA * sizeof(c_int)); // Generate indices going from
                                                // beginning to end of P
 
@@ -175,7 +175,7 @@ static char* test_update() {
 
   // Cleanup and setup workspace
   osqp_cleanup(work);
-  work = osqp_setup(problem, settings);
+  exitflag = osqp_setup(&work, problem, settings);
 
   osqp_update_A(work, data->test_solve_A_new->x, Ax_new_idx, nnzA);
 
@@ -199,7 +199,7 @@ static char* test_update() {
 
   // Cleanup and setup workspace
   osqp_cleanup(work);
-  work = osqp_setup(problem, settings);
+  exitflag = osqp_setup(&work, problem, settings);
 
   osqp_update_P_A(work, data->test_solve_Pu_new->x, Px_new_idx, nnzP,
                   data->test_solve_A_new->x, Ax_new_idx, nnzA);
@@ -238,7 +238,7 @@ static char* test_update() {
 
 #ifdef ENABLE_MKL_PARDISO
 static char* test_update_pardiso() {
-  c_int i, nnzP, nnzA;
+  c_int i, nnzP, nnzA, exitflag;
   update_matrices_sols_data *data;
   OSQPData *problem;
   OSQPWorkspace *work;
@@ -274,10 +274,10 @@ static char* test_update_pardiso() {
   settings->linsys_solver = MKL_PARDISO_SOLVER;
 
   // Setup workspace
-  work = osqp_setup(problem, settings);
+  exitflag = osqp_setup(&work, problem, settings);
 
   // Setup correct
-  mu_assert("Update matrices: original problem, setup error!", work != OSQP_NULL);
+  mu_assert("Update matrices: original problem, setup error!", exitflag == 0);
 
   // Solve Problem
   osqp_solve(work);
@@ -337,7 +337,7 @@ static char* test_update_pardiso() {
 
   // Cleanup and setup workspace
   osqp_cleanup(work);
-  work = osqp_setup(problem, settings);
+  exitflag = osqp_setup(&work, problem, settings);
 
   osqp_update_A(work, data->test_solve_A_new->x, Ax_new_idx, nnzA);
 
@@ -361,7 +361,7 @@ static char* test_update_pardiso() {
 
   // Cleanup and setup workspace
   osqp_cleanup(work);
-  work = osqp_setup(problem, settings);
+  exitflag = osqp_setup(&work, problem, settings);
 
   osqp_update_P_A(work, data->test_solve_Pu_new->x, Px_new_idx, nnzP,
                   data->test_solve_A_new->x, Ax_new_idx, nnzA);

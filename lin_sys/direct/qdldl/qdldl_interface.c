@@ -104,12 +104,12 @@ static c_int permute_KKT(csc ** KKT, qdldl_solver * p, c_int Pnz, c_int Anz, c_i
 
     info = (c_float *)c_malloc(AMD_INFO * sizeof(c_float));
 
-    // Compute permutation metrix P using AMD
-    #ifdef DLONG
+    // Compute permutation matrix P using AMD
+#ifdef DLONG
     amd_status = amd_l_order((*KKT)->n, (*KKT)->p, (*KKT)->i, p->P, (c_float *)OSQP_NULL, info);
-    #else
+#else
     amd_status = amd_order((*KKT)->n, (*KKT)->p, (*KKT)->i, p->P, (c_float *)OSQP_NULL, info);
-    #endif
+#endif
     if (amd_status < 0) return (amd_status);
 
 
@@ -247,9 +247,9 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
 
     // Check if matrix has been created
     if (!KKT_temp){
-        #ifdef PRINTING
-            c_eprint("Error forming and permuting KKT matrix");
-        #endif
+#ifdef PRINTING
+        c_eprint("Error forming and permuting KKT matrix");
+#endif
         return OSQP_NULL;
     }
 
@@ -271,14 +271,14 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
     // Link Functions
     p->solve = &solve_linsys_qdldl;
 
-    #ifndef EMBEDDED
+#ifndef EMBEDDED
     p->free = &free_linsys_solver_qdldl;
-    #endif
+#endif
 
-    #if EMBEDDED != 1
+#if EMBEDDED != 1
     p->update_matrices = &update_linsys_solver_matrices_qdldl;
     p->update_rho_vec = &update_linsys_solver_rho_vec_qdldl;
-    #endif
+#endif
 
     // Assign type
     p->type = QDLDL_SOLVER;

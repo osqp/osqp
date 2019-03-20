@@ -8,6 +8,8 @@
 
 static char* test_optimal()
 {
+  c_int exitflag;
+
   // Structures
   OSQPWorkspace *work;    // Workspace
   OSQPData *problem;      // Problem data
@@ -37,10 +39,10 @@ static char* test_optimal()
   settings->verbose  = 1;
 
   // Setup workspace
-  work = osqp_setup(problem, settings);
+  exitflag = osqp_setup(&work, problem, settings);
 
   // Setup correct
-  mu_assert("Primal dual infeasibility test 1: Setup error!", work != OSQP_NULL);
+  mu_assert("Primal dual infeasibility test 1: Setup error!", exitflag == 0);
 
   // Solve Problem
   osqp_solve(work);
@@ -74,8 +76,11 @@ static char* test_optimal()
   return 0;
 }
 
+
 static char* test_prim_infeas()
 {
+  c_int exitflag;
+
   // Structures
   OSQPWorkspace *work;    // Workspace
   OSQPData *problem;      // Problem data
@@ -105,10 +110,10 @@ static char* test_prim_infeas()
   settings->verbose  = 1;
 
   // Setup workspace
-  work = osqp_setup(problem, settings);
+  exitflag = osqp_setup(&work, problem, settings);
 
   // Setup correct
-  mu_assert("Primal dual infeasibility test 2: Setup error!", work != OSQP_NULL);
+  mu_assert("Primal dual infeasibility test 2: Setup error!", exitflag == 0);
 
   // Solve Problem
   osqp_solve(work);
@@ -128,6 +133,8 @@ static char* test_prim_infeas()
 
 static char* test_dual_infeas()
 {
+  c_int exitflag;
+
   // Structures
   OSQPWorkspace *work;    // Workspace
   OSQPData *problem;      // Problem data
@@ -157,10 +164,10 @@ static char* test_dual_infeas()
   settings->verbose  = 1;
 
   // Setup workspace
-  work = osqp_setup(problem, settings);
+  exitflag = osqp_setup(&work, problem, settings);
 
   // Setup correct
-  mu_assert("Primal dual infeasibility test 3: Setup error!", work != OSQP_NULL);
+  mu_assert("Primal dual infeasibility test 3: Setup error!", exitflag == 0);
 
   // Solve Problem
   osqp_solve(work);
@@ -180,6 +187,8 @@ static char* test_dual_infeas()
 
 static char* test_primal_dual_infeas()
 {
+  c_int exitflag;
+  
   // Structures
   OSQPWorkspace *work;    // Workspace
   OSQPData *problem;      // Problem data
@@ -209,10 +218,10 @@ static char* test_primal_dual_infeas()
   settings->verbose  = 1;
 
   // Setup workspace
-  work = osqp_setup(problem, settings);
+  exitflag = osqp_setup(&work, problem, settings);
 
   // Setup correct
-  mu_assert("Primal dual infeasibility test 4: Setup error!", work != OSQP_NULL);
+  mu_assert("Primal dual infeasibility test 4: Setup error!", exitflag == 0);
 
   // Solve Problem
   osqp_solve(work);

@@ -21,7 +21,7 @@ static char* test_solveKKT() {
   settings->sigma = data->test_solve_KKT_sigma;
 
   // Set rho_vec
-  m       = data->test_solve_KKT_A->m;
+  m = data->test_solve_KKT_A->m;
   rho_vec = c_calloc(m, sizeof(c_float));
   vec_add_scalar(rho_vec, settings->rho, m);
 
@@ -44,8 +44,7 @@ static char* test_solveKKT() {
   mu_assert(
     "Linear systems solve tests: error in forming and solving KKT system!",
     vec_norm_inf_diff(data->test_solve_KKT_rhs, data->test_solve_KKT_x,
-                      data->test_solve_KKT_m + data->test_solve_KKT_n) <
-    TESTS_TOL);
+                      data->test_solve_KKT_m + data->test_solve_KKT_n) < TESTS_TOL);
 
 
   // Cleanup
@@ -61,12 +60,7 @@ static char* test_solveKKT() {
 static char* test_solveKKT_pardiso() {
   c_int m, exitflag = 0;
   c_float *rho_vec;
-  LinSysSolver *p;                                                         // Private
-                                                                           // structure
-                                                                           // to
-                                                                           // form
-                                                                           // KKT
-                                                                           // factorization
+  LinSysSolver *p;  // Private  structure  to  form  KKT  factorization
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings)); // Settings
 
   solve_linsys_sols_data *data = generate_problem_solve_linsys_sols_data();
@@ -76,7 +70,7 @@ static char* test_solveKKT_pardiso() {
   settings->sigma = data->test_solve_KKT_sigma;
 
   // Set rho_vec
-  m       = data->test_solve_KKT_A->m;
+  m = data->test_solve_KKT_A->m;
   rho_vec = c_calloc(m, sizeof(c_float));
   vec_add_scalar(rho_vec, settings->rho, m);
 
@@ -95,8 +89,7 @@ static char* test_solveKKT_pardiso() {
   mu_assert(
     "Linear systems solve tests: error in forming and solving KKT system with PARDISO!",
     vec_norm_inf_diff(data->test_solve_KKT_rhs, data->test_solve_KKT_x,
-                      data->test_solve_KKT_m + data->test_solve_KKT_n) <
-    TESTS_TOL);
+                      data->test_solve_KKT_m + data->test_solve_KKT_n) < TESTS_TOL);
 
 
   // Cleanup
