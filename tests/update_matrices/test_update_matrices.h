@@ -34,11 +34,8 @@ static char* test_form_KKT() {
   AtoKKT = c_malloc((data->test_form_KKT_A->p[data->test_form_KKT_A->n]) *
                     sizeof(c_int));
 
-  // Form upper triangular part in P
-  Ptriu = csc_to_triu(data->test_form_KKT_P);
-
   // Form KKT matrix storing the index vectors
-  KKT = form_KKT(Ptriu,
+  KKT = form_KKT(data->test_form_KKT_Pu,
                  data->test_form_KKT_A,
                  0,
                  sigma,
@@ -94,12 +91,12 @@ static char* test_update() {
 
   // Generate first problem data
   problem    = c_malloc(sizeof(OSQPData));
-  problem->P = data->test_solve_P;
+  problem->P = data->test_solve_Pu;
   problem->q = data->test_solve_q;
   problem->A = data->test_solve_A;
   problem->l = data->test_solve_l;
   problem->u = data->test_solve_u;
-  problem->n = data->test_solve_P->n;
+  problem->n = data->test_solve_Pu->n;
   problem->m = data->test_solve_A->m;
 
 
@@ -255,12 +252,12 @@ static char* test_update_pardiso() {
 
   // Generate first problem data
   problem    = c_malloc(sizeof(OSQPData));
-  problem->P = data->test_solve_P;
+  problem->P = data->test_solve_Pu;
   problem->q = data->test_solve_q;
   problem->A = data->test_solve_A;
   problem->l = data->test_solve_l;
   problem->u = data->test_solve_u;
-  problem->n = data->test_solve_P->n;
+  problem->n = data->test_solve_Pu->n;
   problem->m = data->test_solve_A->m;
 
 
