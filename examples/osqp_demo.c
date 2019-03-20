@@ -4,10 +4,10 @@
 
 int main(int argc, char **argv) {
   // Load problem data
-  c_float P_x[4] = { 4.0, 1.0, 1.0, 2.0, };
-  c_int P_nnz  = 4;
-  c_int P_i[4] = { 0, 1, 0, 1, };
-  c_int P_p[3] = { 0, 2, 4, };
+  c_float P_x[3] = { 4.0, 1.0, 2.0, };
+  c_int P_nnz  = 3;
+  c_int P_i[3] = { 0, 0, 1, };
+  c_int P_p[3] = { 0, 1, 3, };
   c_float q[2]   = { 1.0, 1.0, };
   c_float A_x[4] = { 1.0, 1.0, 1.0, 1.0, };
   c_int A_nnz  = 4;

@@ -111,7 +111,7 @@ c_int osqp_setup(OSQPWorkspace** work, const OSQPData *data, const OSQPSettings 
   (*work)->data    = c_malloc(sizeof(OSQPData));
   (*work)->data->n = data->n;                    // Number of variables
   (*work)->data->m = data->m;                    // Number of linear constraints
-  (*work)->data->P = csc_to_triu(data->P);       // Cost function matrix
+  (*work)->data->P = copy_csc_mat(data->P);      // Cost function matrix
   (*work)->data->q = vec_copy(data->q, data->n); // Linear part of cost function
   (*work)->data->A = copy_csc_mat(data->A);      // Linear constraints matrix
   (*work)->data->l = vec_copy(data->l, data->m); // Lower bounds on constraints

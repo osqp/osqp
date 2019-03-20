@@ -101,17 +101,17 @@ C
 
     int main(int argc, char **argv) {
         // Load problem data
-        c_float P_x[4] = {4.00, 1.00, 1.00, 2.00, };
-        c_int P_nnz = 4;
-        c_int P_i[4] = {0, 1, 0, 1, };
-        c_int P_p[3] = {0, 2, 4, };
-        c_float q[2] = {1.00, 1.00, };
-        c_float A_x[4] = {1.00, 1.00, 1.00, 1.00, };
+        c_float P_x[3] = {4.0, 1.0, 2.0, };
+        c_int P_nnz = 3;
+        c_int P_i[3] = {0, 0, 1, };
+        c_int P_p[3] = {0, 1, 3, };
+        c_float q[2] = {1.0, 1.0, };
+        c_float A_x[4] = {1.0, 1.0, 1.0, 1.0, };
         c_int A_nnz = 4;
         c_int A_i[4] = {0, 1, 0, 2, };
         c_int A_p[3] = {0, 2, 4, };
-        c_float l[3] = {1.00, 0.00, 0.00, };
-        c_float u[3] = {1.00, 0.70, 0.70, };
+        c_float l[3] = {1.0, 0.0, 0.0, };
+        c_float u[3] = {1.0, 0.7, 0.7, };
         c_int n = 2;
         c_int m = 3;
 

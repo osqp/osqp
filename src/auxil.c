@@ -794,7 +794,7 @@ c_int check_termination(OSQPWorkspace *work, c_int approximate) {
 
 
 c_int validate_data(const OSQPData *data) {
-  c_int j;
+  c_int j, ptr;
 
   if (!data) {
 # ifdef PRINTING
@@ -827,11 +827,21 @@ c_int validate_data(const OSQPData *data) {
     return 1;
   }
 
+  for (j = 0; j < data->n; j++) { // COLUMN
+    for (ptr = data->P->p[j]; ptr < data->P->p[j + 1]; ptr++) {
+      if (data->P->i[ptr] > j) {  // if ROW > COLUMN
+# ifdef PRINTING
+        c_eprint("P is not upper triangular");
+# endif /* ifdef PRINTING */
+        return 1;
+      }
+    }
+  }
+
   // Matrix A
   if ((data->A->m != data->m) || (data->A->n != data->n)) {
 # ifdef PRINTING
-    c_eprint("A does not have dimension m x n with m = %i and n = %i",
-             (int)data->m, (int)data->n);
+    c_eprint("A does not have dimension %i x %i", (int)data->m, (int)data->n);
 # endif /* ifdef PRINTING */
     return 1;
   }
