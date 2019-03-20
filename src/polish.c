@@ -204,7 +204,7 @@ static void get_ypol_from_yred(OSQPWorkspace *work, c_float *yred) {
 }
 
 c_int polish(OSQPWorkspace *work) {
-  c_int mred, polish_successful;
+  c_int mred, polish_successful, exitflag;
   c_float *rhs_red;
   LinSysSolver *plsh;
   c_float *pol_sol; // Polished solution
@@ -219,7 +219,8 @@ c_int polish(OSQPWorkspace *work) {
   // Form and factorize reduced KKT
   plsh = init_linsys_solver(work->data->P, work->pol->Ared,
                             work->settings->delta, OSQP_NULL,
-                            work->settings->linsys_solver, 1);
+                            work->settings->linsys_solver,
+                            1, &exitflag);
 
   if (!plsh) {
     // Polishing failed

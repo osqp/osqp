@@ -32,22 +32,24 @@ c_int unload_linsys_solver(enum linsys_solver_type linsys_solver);
 
 /**
  * Initialize linear system solver structure
- * @param P             Cost function matrix
+ * @param   P             Cost function matrix
  * @param	A             Constraint matrix
  * @param	sigma         Algorithm parameter
  * @param	rho_vec       Algorithm parameter
+ * @param	linsys_solver Linear system solver
  * @param	polish        0/1 depending whether we are allocating for
  *polishing or not
- * @param	linsys_solver Linear system solver
+ * @param	exitflag      Exitflag for error (0 if no errors)
  * @return Pointer to linear system solver structure on success, OSQP_NULL on
  *failure.
  */
 LinSysSolver* init_linsys_solver(const csc              *P,
                                  const csc              *A,
                                  c_float                 sigma,
-                                 c_float                *rho_vec,
+                                 const c_float          *rho_vec,
                                  enum linsys_solver_type linsys_solver,
-                                 c_int                   polish);
+                                 c_int                   polish,
+                                 c_int                  *exitflag);
 
 
 # endif // EMBEDDED

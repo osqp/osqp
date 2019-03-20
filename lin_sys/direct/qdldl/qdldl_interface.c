@@ -7,8 +7,6 @@
 #include "amd.h"
 #endif
 
-#include "lin_alg.h"
-
 #if EMBEDDED != 1
 #include "kkt.h"
 #endif
@@ -161,14 +159,13 @@ static c_int permute_KKT(csc ** KKT, qdldl_solver * p, c_int Pnz, c_int Anz, c_i
 
 
 // Initialize LDL Factorization structure
-qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sigma, c_float * rho_vec, c_int polish){
-
-    c_int i;                     // loop counter
+qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sigma, const c_float * rho_vec, c_int polish, c_int * exitflag){
 
     // Define Variables
-    qdldl_solver * p;  // Initialize LDL solver
-    c_int n_plus_m;              // Define n_plus_m dimension
-    csc * KKT_temp;              // Temporary KKT pointer
+    qdldl_solver * p;   // Initialize LDL solver
+    csc * KKT_temp;     // Temporary KKT pointer
+    c_int i;            // Loop counter
+    c_int n_plus_m;     // Define n_plus_m dimension
 
     // Allocate private structure to store KKT factorization
     p = c_calloc(1, sizeof(qdldl_solver));
@@ -202,11 +199,10 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
     // Preallocate L matrix (Lx and Li are sparsity dependent)
     p->L->p = (c_int *)c_malloc((n_plus_m+1) * sizeof(QDLDL_int));
 
-    //Lx and Li are sparsity dependent, so set them to
-    //null initially so we don't try to free them prematurely
+    // Lx and Li are sparsity dependent, so set them to
+    // null initially so we don't try to free them prematurely
     p->L->i = OSQP_NULL;
     p->L->x = OSQP_NULL;
-
 
     // Preallocate workspace
     p->iwork = (QDLDL_int *)c_malloc(sizeof(QDLDL_int)*(3*n_plus_m));
@@ -223,7 +219,8 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
         KKT_temp = form_KKT(P, A, 0, sigma, p->bp, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
 
         // Permute matrix
-        permute_KKT(&KKT_temp, p, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
+        if (KKT_temp)
+            permute_KKT(&KKT_temp, p, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
     }
     else { // Called from ADMM algorithm
 
@@ -242,7 +239,8 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
                             &(p->Pdiag_idx), &(p->Pdiag_n), p->rhotoKKT);
 
         // Permute matrix
-        permute_KKT(&KKT_temp, p, P->p[P->n], A->p[A->n], A->m, p->PtoKKT, p->AtoKKT, p->rhotoKKT);
+        if (KKT_temp)
+            permute_KKT(&KKT_temp, p, P->p[P->n], A->p[A->n], A->m, p->PtoKKT, p->AtoKKT, p->rhotoKKT);
     }
 
     // Check if matrix has been created
@@ -250,6 +248,7 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
 #ifdef PRINTING
         c_eprint("Error forming and permuting KKT matrix");
 #endif
+        *exitflag = OSQP_INIT_LINSYS_SOLVER_ERROR;
         return OSQP_NULL;
     }
 
@@ -257,6 +256,7 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
     if (LDL_factor(KKT_temp, p, P->n) < 0) {
         csc_spfree(KKT_temp);
         free_linsys_solver_qdldl(p);
+        *exitflag = OSQP_INIT_LINSYS_SOLVER_NONCVX;
         return OSQP_NULL;
     }
 
@@ -282,10 +282,12 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
 
     // Assign type
     p->type = QDLDL_SOLVER;
-    //
+    
     // Set number of threads to 1 (single threaded)
     p->nthreads = 1;
 
+    // No error
+    *exitflag = 0;
     return p;
 }
 

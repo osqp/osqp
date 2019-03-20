@@ -55,29 +55,24 @@ c_int unload_linsys_solver(enum linsys_solver_type linsys_solver) {
 LinSysSolver* init_linsys_solver(const csc              *P,
                                  const csc              *A,
                                  c_float                 sigma,
-                                 c_float                *rho_vec,
+                                 const c_float                *rho_vec,
                                  enum linsys_solver_type linsys_solver,
-                                 c_int                   polish) {
+                                 c_int                   polish,
+                                 c_int                  *exitflag) {
   switch (linsys_solver) {
   case QDLDL_SOLVER:
-    return (LinSysSolver *)init_linsys_solver_qdldl(P,
-                                                    A,
-                                                    sigma,
-                                                    rho_vec,
-                                                    polish);
+    return (LinSysSolver *)init_linsys_solver_qdldl(P, A, sigma, rho_vec,
+                                                    polish, exitflag);
 
 # ifdef ENABLE_MKL_PARDISO
   case MKL_PARDISO_SOLVER:
     return (LinSysSolver *)init_linsys_solver_pardiso(P, A, sigma, rho_vec,
-                                                      polish);
+                                                      polish, exitflag);
 
 # endif /* ifdef ENABLE_MKL_PARDISO */
   default: // QDLDL
-    return (LinSysSolver *)init_linsys_solver_qdldl(P,
-                                                    A,
-                                                    sigma,
-                                                    rho_vec,
-                                                    polish);
+    return (LinSysSolver *)init_linsys_solver_qdldl(P, A, sigma, rho_vec,
+                                                    polish, exitflag);
   }
 }
 

@@ -72,6 +72,7 @@ void osqp_set_default_settings(OSQPSettings *settings) {
 
 
 c_int osqp_setup(OSQPWorkspace** work, const OSQPData *data, const OSQPSettings *settings) {
+  c_int exitflag;
 
   // Validate data
   if (validate_data(data)) {
@@ -96,7 +97,7 @@ c_int osqp_setup(OSQPWorkspace** work, const OSQPData *data, const OSQPSettings 
 # ifdef PRINTING
     c_eprint("Workspace allocation failure");
 # endif /* ifdef PRINTING */
-    return OSQP_WORKSPACE_ALLOCATION_ERROR;
+    return OSQP_MEMORY_ALLOCATION_ERROR;
   }
 
   // Start and allocate directly timer
@@ -190,15 +191,16 @@ c_int osqp_setup(OSQPWorkspace** work, const OSQPData *data, const OSQPSettings 
 
   // Initialize linear system solver structure
   (*work)->linsys_solver = init_linsys_solver((*work)->data->P, (*work)->data->A,
-                                           (*work)->settings->sigma, (*work)->rho_vec,
-                                           (*work)->settings->linsys_solver, 0);
+                                              (*work)->settings->sigma, (*work)->rho_vec,
+                                              (*work)->settings->linsys_solver,
+                                              0, &exitflag);
 
-  if (!(*work)->linsys_solver) {
+  if (exitflag) {
 # ifdef PRINTING
     c_eprint("Linear systems solver initialization failure");
 # endif /* ifdef PRINTING */
     osqp_cleanup(*work);
-    return OSQP_INIT_LINSYS_SOLVER_ERROR;
+    return exitflag;
   }
 
 

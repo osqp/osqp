@@ -48,7 +48,7 @@ void free_linsys_solver_pardiso(pardiso_solver *s) {
 
 
 // Initialize factorization structure
-pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float sigma, c_float * rho_vec, c_int polish){
+pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float sigma, const c_float * rho_vec, c_int polish, c_int * exitflag){
     c_int i;                     // loop counter
     c_int nnzKKT;                // Number of nonzeros in KKT
     // Define Variables
@@ -93,9 +93,10 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
 
     // Check if matrix has been created
     if (!(s->KKT)) {
-    #ifdef PRINTING
+#ifdef PRINTING
 	    c_eprint("Error in forming KKT matrix");
-    #endif
+#endif
+        *exitflag = OSQP_INIT_LINSYS_SOLVER_ERROR;
 	    return OSQP_NULL;
     } else {
 	    // Adjust indexing for Pardiso
@@ -113,11 +114,11 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
     }
 
     // Set MKL interface layer (Long integers if activated)
-    #ifdef DLONG
+#ifdef DLONG
     mkl_set_interface_layer(MKL_INTERFACE_ILP64);
-    #else
+#else
     mkl_set_interface_layer(MKL_INTERFACE_LP64);
-    #endif
+#endif
 
     // Set Pardiso variables
     s->mtype = -2;        // Real symmetric indefinite matrix
@@ -148,10 +149,11 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
              &(s->n), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
     if ( s->error != 0 ){
-        #ifdef PRINTING
-            c_eprint("Error during symbolic factorization: %d", (int)s->error);
-        #endif
+#ifdef PRINTING
+        c_eprint("Error during symbolic factorization: %d", (int)s->error);
+#endif
         free_linsys_solver_pardiso(s);
+        *exitflag = OSQP_INIT_LINSYS_SOLVER_ERROR;
         return OSQP_NULL;
     }
 
@@ -161,10 +163,11 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
              &(s->n), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
     if ( s->error != 0 ){
-        #ifdef PRINTING
-            c_eprint("Error during numerical factorization: %d", (int)s->error);
-        #endif
+#ifdef PRINTING
+        c_eprint("Error during numerical factorization: %d", (int)s->error);
+#endif
         free_linsys_solver_pardiso(s);
+        *exitflag = OSQP_INIT_LINSYS_SOLVER_ERROR;
         return OSQP_NULL;
     }
 
@@ -177,6 +180,8 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
     // Assign type
     s->type = MKL_PARDISO_SOLVER;
 
+    // No error
+    *exitflag = 0;
     return s;
 }
 
@@ -188,9 +193,9 @@ c_int solve_linsys_pardiso(pardiso_solver * s, c_float * b, const OSQPSettings *
              &(s->n), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), b, s->bp, &(s->error));
     if ( s->error != 0 ){
-        #ifdef PRINTING
+#ifdef PRINTING
         c_eprint("Error during solution: %d", (int)s->error);
-        #endif
+#endif
         return 1;
     }
 
