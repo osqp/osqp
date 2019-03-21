@@ -27,7 +27,7 @@ Python
     import numpy as np
 
     # Define problem data
-    P = sparse.triu([[4, 1], [1, 2]]).tocsc()
+    P = sparse.csc_matrix([[4, 1], [1, 2]])
     q = np.array([1, 1])
     A = sparse.csc_matrix([[1, 1], [1, 0], [0, 1]])
     l = np.array([1, 0, 0])
