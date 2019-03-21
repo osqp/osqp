@@ -134,11 +134,18 @@ csc* form_KKT(const csc  *P,
     // Allocate vector of indices from triplet to csc
     KKT_TtoC = c_malloc((zKKT) * sizeof(c_int));
 
-    if (!KKT_TtoC) return OSQP_NULL;  // Error in allocating KKT_TtoC vector
+    if (!KKT_TtoC) {
+      // Error in allocating KKT_TtoC vector
+      csc_spfree(KKT_trip);
+      c_free(*Pdiag_idx);
+      return OSQP_NULL;
+    }
 
     // Store KKT mapping from Trip to CSC/CSR
-    if (format == 0) KKT = triplet_to_csc(KKT_trip, KKT_TtoC);
-    else KKT = triplet_to_csr(KKT_trip, KKT_TtoC);
+    if (format == 0)
+      KKT = triplet_to_csc(KKT_trip, KKT_TtoC);
+    else
+      KKT = triplet_to_csr(KKT_trip, KKT_TtoC);
 
     // Update vectors of indices from P, A, param2 to KKT (now in CSC format)
     if (PtoKKT != OSQP_NULL) {
