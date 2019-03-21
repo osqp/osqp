@@ -55,7 +55,7 @@ c_int unload_linsys_solver(enum linsys_solver_type linsys_solver) {
 LinSysSolver* init_linsys_solver(const csc              *P,
                                  const csc              *A,
                                  c_float                 sigma,
-                                 const c_float                *rho_vec,
+                                 const c_float          *rho_vec,
                                  enum linsys_solver_type linsys_solver,
                                  c_int                   polish,
                                  c_int                  *exitflag) {

@@ -732,7 +732,6 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
     // Free solution
     if (work->solution) {
       if (work->solution->x) c_free(work->solution->x);
-
       if (work->solution->y) c_free(work->solution->y);
       c_free(work->solution);
     }
@@ -740,9 +739,8 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
     // Free information
     if (work->info) c_free(work->info);
 
-    // Free timer
 # ifdef PROFILING
-
+    // Free timer
     if (work->timer) c_free(work->timer);
 # endif /* ifdef PROFILING */
 
