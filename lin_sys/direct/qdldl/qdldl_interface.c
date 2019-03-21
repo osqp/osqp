@@ -248,7 +248,6 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
 #ifdef PRINTING
         c_eprint("Error forming and permuting KKT matrix");
 #endif
-        csc_spfree(KKT_temp);
         free_linsys_solver_qdldl(p);
         *exitflag = OSQP_INIT_LINSYS_SOLVER_ERROR;
         return OSQP_NULL;
