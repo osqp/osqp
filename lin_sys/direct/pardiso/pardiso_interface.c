@@ -96,6 +96,7 @@ pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float
 #ifdef PRINTING
 	    c_eprint("Error in forming KKT matrix");
 #endif
+        free_linsys_solver_pardiso(s);
         *exitflag = OSQP_INIT_LINSYS_SOLVER_ERROR;
 	    return OSQP_NULL;
     } else {
