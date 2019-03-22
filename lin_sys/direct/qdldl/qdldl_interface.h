@@ -70,15 +70,15 @@ struct qdldl {
 /**
  * Initialize QDLDL Solver
  *
+ * @param  s         Pointer to a private structure
  * @param  P         Cost function matrix (upper triangular form)
  * @param  A         Constraints matrix
  * @param  sigma     Algorithm parameter. If polish, then sigma = delta.
  * @param  rho_vec   Algorithm parameter. If polish, then rho_vec = OSQP_NULL.
  * @param  polish    Flag whether we are initializing for polish or not
- * @param  exitflag  Exitflag for error (0 if no errors)
- * @return           Initialized private structure
+ * @return           Exitflag for error (0 if no errors)
  */
-qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sigma, const c_float * rho_vec, c_int polish, c_int * exitflag);
+c_int init_linsys_solver_qdldl(qdldl_solver ** s, const csc * P, const csc * A, c_float sigma, const c_float * rho_vec, c_int polish);
 
 /**
  * Solve linear system and store result in b

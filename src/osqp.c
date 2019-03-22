@@ -190,10 +190,9 @@ c_int osqp_setup(OSQPWorkspace** work, const OSQPData *data, const OSQPSettings 
   }
 
   // Initialize linear system solver structure
-  (*work)->linsys_solver = init_linsys_solver((*work)->data->P, (*work)->data->A,
-                                              (*work)->settings->sigma, (*work)->rho_vec,
-                                              (*work)->settings->linsys_solver,
-                                              0, &exitflag);
+  exitflag = init_linsys_solver(&((*work)->linsys_solver), (*work)->data->P, (*work)->data->A,
+                                (*work)->settings->sigma, (*work)->rho_vec,
+                                (*work)->settings->linsys_solver, 0);
 
   if (exitflag) {
 # ifdef PRINTING

@@ -159,16 +159,15 @@ static c_int permute_KKT(csc ** KKT, qdldl_solver * p, c_int Pnz, c_int Anz, c_i
 
 
 // Initialize LDL Factorization structure
-qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sigma, const c_float * rho_vec, c_int polish, c_int * exitflag){
+c_int init_linsys_solver_qdldl(qdldl_solver ** s, const csc * P, const csc * A, c_float sigma, const c_float * rho_vec, c_int polish){
 
     // Define Variables
-    qdldl_solver * p;   // Initialize LDL solver
     csc * KKT_temp;     // Temporary KKT pointer
     c_int i;            // Loop counter
     c_int n_plus_m;     // Define n_plus_m dimension
 
     // Allocate private structure to store KKT factorization
-    p = c_calloc(1, sizeof(qdldl_solver));
+    *s = c_calloc(1, sizeof(qdldl_solver));
 
     // Size of KKT
     n_plus_m = P->m + A->m;
@@ -177,70 +176,70 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
     // NB: We don not allocate L completely (CSC elements)
     //      L will be allocated during the factorization depending on the
     //      resulting number of elements.
-    p->L = c_malloc(sizeof(csc));
-    p->L->m = n_plus_m;
-    p->L->n = n_plus_m;
-    p->L->nz = -1;
+    (*s)->L = c_malloc(sizeof(csc));
+    (*s)->L->m = n_plus_m;
+    (*s)->L->n = n_plus_m;
+    (*s)->L->nz = -1;
 
     // Diagonal matrix stored as a vector D
-    p->Dinv = (QDLDL_float *)c_malloc(sizeof(QDLDL_float) * n_plus_m);
-    p->D    = (QDLDL_float *)c_malloc(sizeof(QDLDL_float) * n_plus_m);
+    (*s)->Dinv = (QDLDL_float *)c_malloc(sizeof(QDLDL_float) * n_plus_m);
+    (*s)->D    = (QDLDL_float *)c_malloc(sizeof(QDLDL_float) * n_plus_m);
 
     // Permutation vector P
-    p->P    = (QDLDL_int *)c_malloc(sizeof(QDLDL_int) * n_plus_m);
+    (*s)->P    = (QDLDL_int *)c_malloc(sizeof(QDLDL_int) * n_plus_m);
 
     // Working vector
-    p->bp   = c_malloc(sizeof(QDLDL_float) * n_plus_m);
+    (*s)->bp   = c_malloc(sizeof(QDLDL_float) * n_plus_m);
 
     // Elimination tree workspace
-    p->etree = (QDLDL_int *)c_malloc(n_plus_m * sizeof(QDLDL_int));
-    p->Lnz   = (QDLDL_int *)c_malloc(n_plus_m * sizeof(QDLDL_int));
+    (*s)->etree = (QDLDL_int *)c_malloc(n_plus_m * sizeof(QDLDL_int));
+    (*s)->Lnz   = (QDLDL_int *)c_malloc(n_plus_m * sizeof(QDLDL_int));
 
     // Preallocate L matrix (Lx and Li are sparsity dependent)
-    p->L->p = (c_int *)c_malloc((n_plus_m+1) * sizeof(QDLDL_int));
+    (*s)->L->p = (c_int *)c_malloc((n_plus_m+1) * sizeof(QDLDL_int));
 
     // Lx and Li are sparsity dependent, so set them to
     // null initially so we don't try to free them prematurely
-    p->L->i = OSQP_NULL;
-    p->L->x = OSQP_NULL;
+    (*s)->L->i = OSQP_NULL;
+    (*s)->L->x = OSQP_NULL;
 
     // Preallocate workspace
-    p->iwork = (QDLDL_int *)c_malloc(sizeof(QDLDL_int)*(3*n_plus_m));
-    p->bwork = (QDLDL_bool *)c_malloc(sizeof(QDLDL_bool)*n_plus_m);
-    p->fwork = (QDLDL_float *)c_malloc(sizeof(QDLDL_float)*n_plus_m);
+    (*s)->iwork = (QDLDL_int *)c_malloc(sizeof(QDLDL_int)*(3*n_plus_m));
+    (*s)->bwork = (QDLDL_bool *)c_malloc(sizeof(QDLDL_bool)*n_plus_m);
+    (*s)->fwork = (QDLDL_float *)c_malloc(sizeof(QDLDL_float)*n_plus_m);
 
     // Form and permute KKT matrix
     if (polish){ // Called from polish()
-        // Use p->bp for storing param2 = vec(delta)
+        // Use (*s)->bp for storing param2 = vec(delta)
         for (i = 0; i < A->m; i++){
-            p->bp[i] = sigma;
+            (*s)->bp[i] = sigma;
         }
 
-        KKT_temp = form_KKT(P, A, 0, sigma, p->bp, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
+        KKT_temp = form_KKT(P, A, 0, sigma, (*s)->bp, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
 
         // Permute matrix
         if (KKT_temp)
-            permute_KKT(&KKT_temp, p, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
+            permute_KKT(&KKT_temp, *s, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
     }
     else { // Called from ADMM algorithm
 
         // Allocate vectors of indices
-        p->PtoKKT = c_malloc((P->p[P->n]) * sizeof(c_int));
-        p->AtoKKT = c_malloc((A->p[A->n]) * sizeof(c_int));
-        p->rhotoKKT = c_malloc((A->m) * sizeof(c_int));
+        (*s)->PtoKKT = c_malloc((P->p[P->n]) * sizeof(c_int));
+        (*s)->AtoKKT = c_malloc((A->p[A->n]) * sizeof(c_int));
+        (*s)->rhotoKKT = c_malloc((A->m) * sizeof(c_int));
 
         // Use p->bp for storing param2 = rho_inv_vec
         for (i = 0; i < A->m; i++){
-            p->bp[i] = 1. / rho_vec[i];
+            (*s)->bp[i] = 1. / rho_vec[i];
         }
 
-        KKT_temp = form_KKT(P, A, 0, sigma, p->bp,
-                            p->PtoKKT, p->AtoKKT,
-                            &(p->Pdiag_idx), &(p->Pdiag_n), p->rhotoKKT);
+        KKT_temp = form_KKT(P, A, 0, sigma, (*s)->bp,
+                            (*s)->PtoKKT, (*s)->AtoKKT,
+                            &((*s)->Pdiag_idx), &((*s)->Pdiag_n), (*s)->rhotoKKT);
 
         // Permute matrix
         if (KKT_temp)
-            permute_KKT(&KKT_temp, p, P->p[P->n], A->p[A->n], A->m, p->PtoKKT, p->AtoKKT, p->rhotoKKT);
+            permute_KKT(&KKT_temp, (*s), P->p[P->n], A->p[A->n], A->m, (*s)->PtoKKT, (*s)->AtoKKT, (*s)->rhotoKKT);
     }
 
     // Check if matrix has been created
@@ -248,17 +247,16 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
 #ifdef PRINTING
         c_eprint("Error forming and permuting KKT matrix");
 #endif
-        free_linsys_solver_qdldl(p);
-        *exitflag = OSQP_INIT_LINSYS_SOLVER_ERROR;
+        free_linsys_solver_qdldl(*s);
+        return OSQP_INIT_LINSYS_SOLVER_ERROR;
         return OSQP_NULL;
     }
 
     // Factorize the KKT matrix
-    if (LDL_factor(KKT_temp, p, P->n) < 0) {
+    if (LDL_factor(KKT_temp, *s, P->n) < 0) {
         csc_spfree(KKT_temp);
-        free_linsys_solver_qdldl(p);
-        *exitflag = OSQP_INIT_LINSYS_SOLVER_NONCVX;
-        return OSQP_NULL;
+        free_linsys_solver_qdldl(*s);
+        return OSQP_INIT_LINSYS_SOLVER_NONCVX_ERROR;
     }
 
     if (polish){ // If KKT passed, assign it to KKT_temp
@@ -266,30 +264,29 @@ qdldl_solver *init_linsys_solver_qdldl(const csc * P, const csc * A, c_float sig
         csc_spfree(KKT_temp);
     }
     else { // If not embedded option 1 copy pointer to KKT_temp. Do not free it.
-        p->KKT = KKT_temp;
+        (*s)->KKT = KKT_temp;
     }
 
     // Link Functions
-    p->solve = &solve_linsys_qdldl;
+    (*s)->solve = &solve_linsys_qdldl;
 
 #ifndef EMBEDDED
-    p->free = &free_linsys_solver_qdldl;
+    (*s)->free = &free_linsys_solver_qdldl;
 #endif
 
 #if EMBEDDED != 1
-    p->update_matrices = &update_linsys_solver_matrices_qdldl;
-    p->update_rho_vec = &update_linsys_solver_rho_vec_qdldl;
+    (*s)->update_matrices = &update_linsys_solver_matrices_qdldl;
+    (*s)->update_rho_vec = &update_linsys_solver_rho_vec_qdldl;
 #endif
 
     // Assign type
-    p->type = QDLDL_SOLVER;
+    (*s)->type = QDLDL_SOLVER;
     
     // Set number of threads to 1 (single threaded)
-    p->nthreads = 1;
+    (*s)->nthreads = 1;
 
     // No error
-    *exitflag = 0;
-    return p;
+    return 0;
 }
 
 #endif  // EMBEDDED

@@ -12,7 +12,7 @@
 static char* test_solveKKT() {
   c_int m, exitflag = 0;
   c_float *rho_vec;
-  LinSysSolver *p;  // Private structure to form KKT factorization
+  LinSysSolver *s;  // Private structure to form KKT factorization
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings)); // Settings
   solve_linsys_sols_data *data = generate_problem_solve_linsys_sols_data();
 
@@ -26,11 +26,11 @@ static char* test_solveKKT() {
   vec_add_scalar(rho_vec, settings->rho, m);
 
   // Form and factorize KKT matrix
-  p = init_linsys_solver(data->test_solve_KKT_Pu, data->test_solve_KKT_A,
-                         settings->sigma, rho_vec, LINSYS_SOLVER, 0, &exitflag);
+  exitflag = init_linsys_solver(&s, data->test_solve_KKT_Pu, data->test_solve_KKT_A,
+                                settings->sigma, rho_vec, LINSYS_SOLVER, 0);
 
   // Solve  KKT x = b via LDL given factorization
-  p->solve(p, data->test_solve_KKT_rhs, settings);
+  s->solve(s, data->test_solve_KKT_rhs, settings);
 
   mu_assert(
     "Linear systems solve tests: error in forming and solving KKT system!",
@@ -39,7 +39,7 @@ static char* test_solveKKT() {
 
 
   // Cleanup
-  p->free(p);
+  s->free(s);
   c_free(settings);
   c_free(rho_vec);
   clean_problem_solve_linsys_sols_data(data);
@@ -51,7 +51,7 @@ static char* test_solveKKT() {
 static char* test_solveKKT_pardiso() {
   c_int m, exitflag = 0;
   c_float *rho_vec;
-  LinSysSolver *p;  // Private  structure  to  form  KKT  factorization
+  LinSysSolver *s;  // Private  structure  to  form  KKT  factorization
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings)); // Settings
 
   solve_linsys_sols_data *data = generate_problem_solve_linsys_sols_data();
@@ -71,11 +71,11 @@ static char* test_solveKKT_pardiso() {
             exitflag == 0);
 
   // Form and factorize KKT matrix
-  p = init_linsys_solver(data->test_solve_KKT_Pu, data->test_solve_KKT_A,
-                         settings->sigma, rho_vec, MKL_PARDISO_SOLVER, 0, &exitflag);
+  exitflag = init_linsys_solver(&s, data->test_solve_KKT_Pu, data->test_solve_KKT_A,
+                                settings->sigma, rho_vec, MKL_PARDISO_SOLVER, 0);
 
   // Solve  KKT x = b via LDL given factorization
-  p->solve(p, data->test_solve_KKT_rhs, settings);
+  s->solve(s, data->test_solve_KKT_rhs, settings);
 
   mu_assert(
     "Linear systems solve tests: error in forming and solving KKT system with PARDISO!",
@@ -84,7 +84,7 @@ static char* test_solveKKT_pardiso() {
 
 
   // Cleanup
-  p->free(p);
+  s->free(s);
   c_free(settings);
   c_free(rho_vec);
   clean_problem_solve_linsys_sols_data(data);
