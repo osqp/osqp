@@ -249,7 +249,6 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** s, const csc * P, const csc * A, 
 #endif
         free_linsys_solver_qdldl(*s);
         return OSQP_INIT_LINSYS_SOLVER_ERROR;
-        return OSQP_NULL;
     }
 
     // Factorize the KKT matrix
