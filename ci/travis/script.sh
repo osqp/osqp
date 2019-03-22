@@ -37,7 +37,7 @@ cd build
 cmake -G "Unix Makefiles" -DCOVERAGE=ON -DUNITTESTS=ON ..
 make
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
-valgrind --suppress=${TRAVIS_BUILD_DIR}/.valgrind-suppress.supp --error-exitcode=1 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
+valgrind --suppress=${TRAVIS_BUILD_DIR}/.valgrind-suppress.supp --leak-check=full --error-exitcode=1 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
 
 # Pefrorm code coverage (only in Linux case for one version of python)
 if [[ $TRAVIS_OS_NAME == "linux" ]]; then
