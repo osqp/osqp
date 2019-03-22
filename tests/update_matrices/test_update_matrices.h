@@ -14,7 +14,6 @@ static char* test_form_KKT() {
   update_matrices_sols_data *data;
   c_float sigma, *rho_vec, *rho_inv_vec;
   c_int   m, *PtoKKT, *AtoKKT, *Pdiag_idx, Pdiag_n;
-  csc    *Ptriu;
   csc    *KKT;
 
   // Load problem data
@@ -64,7 +63,6 @@ static char* test_form_KKT() {
   // Cleanup
   clean_problem_update_matrices_sols_data(data);
   c_free(Pdiag_idx);
-  csc_spfree(Ptriu);
   csc_spfree(KKT);
   c_free(rho_vec);
   c_free(rho_inv_vec);
