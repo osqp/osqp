@@ -42,7 +42,9 @@ static void print_line(void) {
 void print_header(void) {
   // Different indentation required for windows
 # ifdef IS_WINDOWS
-# ifndef PYTHON
+# ifdef PYTHON
+  c_print("iter   ");
+# else  /* ifdef PYTHON */
   c_print("iter  ");
 # endif /* ifdef PYTHON */
 # else  /* ifdef IS_WINDOWS */
