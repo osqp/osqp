@@ -1073,7 +1073,7 @@ c_int osqp_update_P(OSQPWorkspace *work,
  *
  *
  *  If Ax_new_idx is OSQP_NULL, Ax_new is assumed to be as long as A->x
- *  and the whole P->x is replaced.
+ *  and the whole A->x is replaced.
  *
  * @param  work       Workspace structure
  * @param  Ax_new     Vector of new elements in A->x
@@ -1168,7 +1168,7 @@ c_int osqp_update_A(OSQPWorkspace *work,
  *  and the whole P->x is replaced.
  *
  *  If Ax_new_idx is OSQP_NULL, Ax_new is assumed to be as long as A->x
- *  and the whole P->x is replaced.
+ *  and the whole A->x is replaced.
  *
  * @param  work       Workspace structure
  * @param  Px_new     Vector of new elements in P->x (upper triangular)
