@@ -224,7 +224,38 @@ OSQPSettings* copy_settings(OSQPSettings *settings) {
   OSQPSettings *new = c_malloc(sizeof(OSQPSettings));
 
   // Copy settings
-  memcpy(new, settings, sizeof(OSQPSettings));
+  // NB. Copying them explicitly because memcpy is not
+  // defined when PRINTING is disabled (appears in string.h)
+  new->rho = settings->rho;
+  new->sigma = settings->sigma;
+  new->scaling = settings->scaling;
+
+# if EMBEDDED != 1
+  new->adaptive_rho = settings->adaptive_rho;
+  new->adaptive_rho_interval = settings->adaptive_rho_interval;
+  new->adaptive_rho_tolerance = settings->adaptive_rho_tolerance;
+# ifndef PROFILING
+  new->adaptive_rho_fraction = settings->adaptive_rho_fraction;
+# endif
+# endif // EMBEDDED != 1
+  new->max_iter = settings->max_iter;
+  new->eps_abs = settings->eps_abs;
+  new->eps_rel = settings->eps_rel;
+  new->eps_prim_inf = settings->eps_prim_inf;
+  new->eps_dual_inf = settings->eps_dual_inf;
+  new->alpha = settings->alpha;
+  new->linsys_solver = settings->linsys_solver;
+  new->delta = settings->delta;
+  new->polish = settings->polish;
+  new->polish_refine_iter = settings->polish_refine_iter;
+  new->verbose = settings->verbose;
+  new->scaled_termination = settings->scaled_termination;
+  new->check_termination = settings->check_termination;
+  new->warm_start = settings->warm_start;
+# ifdef PROFILING
+  new->time_limit = settings->time_limit;
+# endif
+
   return new;
 }
 

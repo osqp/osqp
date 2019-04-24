@@ -99,6 +99,11 @@ void update_y(OSQPWorkspace *work);
 c_float compute_obj_val(OSQPWorkspace *work,
                         c_float       *x);
 
+/**
+ * Check whether QP has solution
+ * @param work Workspace
+ */
+c_int has_solution(OSQPInfo *info);
 
 /**
  * Store the QP solution
