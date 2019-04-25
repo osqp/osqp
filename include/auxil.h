@@ -101,7 +101,7 @@ c_float compute_obj_val(OSQPWorkspace *work,
 
 /**
  * Check whether QP has solution
- * @param work Workspace
+ * @param info OSQPInfo
  */
 c_int has_solution(OSQPInfo *info);
 
