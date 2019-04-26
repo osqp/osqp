@@ -39,7 +39,7 @@ struct pardiso {
      */
     // Attributes
     csc *KKT;         ///< KKT matrix (in CSR format!)
-    c_int *KKT_i;     ///< KKT column ondeces in 1-indexing for Pardiso
+    c_int *KKT_i;     ///< KKT column indices in 1-indexing for Pardiso
     c_int *KKT_p;     ///< KKT row pointers in 1-indexing for Pardiso
     c_float *bp;      ///< workspace memory for solves (rhs)
 
@@ -69,14 +69,15 @@ struct pardiso {
 /**
  * Initialize Pardiso Solver
  *
- * @param  P      Cost function matrix (upper triangular form)
- * @param  A      Constraints matrix
- * @param  sigma   Algorithm parameter. If polish, then sigma = delta.
- * @param  rho_vec Algorithm parameter. If polish, then rho_vec = OSQP_NULL.
- * @param  polish Flag whether we are initializing for polish or not
- * @return        Initialized private structure
+ * @param  s         Pointer to a private structure
+ * @param  P         Cost function matrix (upper triangular form)
+ * @param  A         Constraints matrix
+ * @param  sigma     Algorithm parameter. If polish, then sigma = delta.
+ * @param  rho_vec   Algorithm parameter. If polish, then rho_vec = OSQP_NULL.
+ * @param  polish    Flag whether we are initializing for polish or not
+ * @return           Exitflag for error (0 if no errors)
  */
-pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float sigma, c_float * rho_vec, c_int polish);
+c_int init_linsys_solver_pardiso(pardiso_solver ** s, const csc * P, const csc * A, c_float sigma, const c_float * rho_vec, c_int polish);
 
 
 /**

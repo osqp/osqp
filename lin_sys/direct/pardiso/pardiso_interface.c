@@ -48,136 +48,137 @@ void free_linsys_solver_pardiso(pardiso_solver *s) {
 
 
 // Initialize factorization structure
-pardiso_solver *init_linsys_solver_pardiso(const csc * P, const csc * A, c_float sigma, c_float * rho_vec, c_int polish){
+c_int init_linsys_solver_pardiso(pardiso_solver ** s, const csc * P, const csc * A, c_float sigma, const c_float * rho_vec, c_int polish){
     c_int i;                     // loop counter
     c_int nnzKKT;                // Number of nonzeros in KKT
     // Define Variables
-    pardiso_solver * s;          // Pardiso solver structure
     c_int n_plus_m;              // n_plus_m dimension
 
     // Size of KKT
     n_plus_m = P->m + A->m;
 
     // Allocate private structure to store KKT factorization
-    s = c_calloc(1, sizeof(pardiso_solver));
-    s->n = n_plus_m;
+    *s = c_calloc(1, sizeof(pardiso_solver));
+    (*s)->n = n_plus_m;
 
     // Working vector
-    s->bp = c_malloc(sizeof(c_float) * n_plus_m);
+    (*s)->bp = c_malloc(sizeof(c_float) * n_plus_m);
 
     // Form KKT matrix
     if (polish){ // Called from polish()
-        // Use s->bp for storing param2 = vec(delta)
+        // Use (*s)->bp for storing param2 = vec(delta)
         for (i = 0; i < A->m; i++){
-            s->bp[i] = sigma;
+            (*s)->bp[i] = sigma;
         }
 
-        s->KKT = form_KKT(P, A, 1, sigma, s->bp, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
+        (*s)->KKT = form_KKT(P, A, 1, sigma, (*s)->bp, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
     }
     else { // Called from ADMM algorithm
 
         // Allocate vectors of indices
-        s->PtoKKT = c_malloc((P->p[P->n]) * sizeof(c_int));
-        s->AtoKKT = c_malloc((A->p[A->n]) * sizeof(c_int));
-        s->rhotoKKT = c_malloc((A->m) * sizeof(c_int));
+        (*s)->PtoKKT = c_malloc((P->p[P->n]) * sizeof(c_int));
+        (*s)->AtoKKT = c_malloc((A->p[A->n]) * sizeof(c_int));
+        (*s)->rhotoKKT = c_malloc((A->m) * sizeof(c_int));
 
-        // Use s->bp for storing param2 = rho_inv_vec
+        // Use (*s)->bp for storing param2 = rho_inv_vec
         for (i = 0; i < A->m; i++){
-            s->bp[i] = 1. / rho_vec[i];
+            (*s)->bp[i] = 1. / rho_vec[i];
         }
 
-        s->KKT = form_KKT(P, A, 1, sigma, s->bp,
-                          s->PtoKKT, s->AtoKKT,
-                          &(s->Pdiag_idx), &(s->Pdiag_n), s->rhotoKKT);
+        (*s)->KKT = form_KKT(P, A, 1, sigma, (*s)->bp,
+                             (*s)->PtoKKT, (*s)->AtoKKT,
+                             &((*s)->Pdiag_idx), &((*s)->Pdiag_n), (*s)->rhotoKKT);
     }
 
     // Check if matrix has been created
-    if (!(s->KKT)) {
-    #ifdef PRINTING
+    if (!((*s)->KKT)) {
+#ifdef PRINTING
 	    c_eprint("Error in forming KKT matrix");
-    #endif
-	    return OSQP_NULL;
+#endif
+        free_linsys_solver_pardiso(*s);
+        return OSQP_INIT_LINSYS_SOLVER_ERROR;
     } else {
 	    // Adjust indexing for Pardiso
-	    nnzKKT = s->KKT->p[s->KKT->m];
-	    s->KKT_i = c_malloc((nnzKKT) * sizeof(c_int));
-	    s->KKT_p = c_malloc((s->KKT->m + 1) * sizeof(c_int));
+	    nnzKKT = (*s)->KKT->p[(*s)->KKT->m];
+	    (*s)->KKT_i = c_malloc((nnzKKT) * sizeof(c_int));
+	    (*s)->KKT_p = c_malloc(((*s)->KKT->m + 1) * sizeof(c_int));
 
 	    for(i = 0; i < nnzKKT; i++){
-	    	s->KKT_i[i] = s->KKT->i[i] + 1;
+	    	(*s)->KKT_i[i] = (*s)->KKT->i[i] + 1;
 	    }
 	    for(i = 0; i < n_plus_m+1; i++){
-	    	s->KKT_p[i] = s->KKT->p[i] + 1;
+	    	(*s)->KKT_p[i] = (*s)->KKT->p[i] + 1;
 	    }
 
     }
 
     // Set MKL interface layer (Long integers if activated)
-    #ifdef DLONG
+#ifdef DLONG
     mkl_set_interface_layer(MKL_INTERFACE_ILP64);
-    #else
+#else
     mkl_set_interface_layer(MKL_INTERFACE_LP64);
-    #endif
+#endif
 
     // Set Pardiso variables
-    s->mtype = -2;        // Real symmetric indefinite matrix
-    s->nrhs = 1;          // Number of right hand sides
-    s->maxfct = 1;        // Maximum number of numerical factorizations
-    s->mnum = 1;          // Which factorization to use
-    s->msglvl = 0;        // Do not print statistical information
-    s->error = 0;         // Initialize error flag
+    (*s)->mtype = -2;        // Real symmetric indefinite matrix
+    (*s)->nrhs = 1;          // Number of right hand sides
+    (*s)->maxfct = 1;        // Maximum number of numerical factorizations
+    (*s)->mnum = 1;          // Which factorization to use
+    (*s)->msglvl = 0;        // Do not print statistical information
+    (*s)->error = 0;         // Initialize error flag
     for ( i = 0; i < 64; i++ ){
-        s->iparm[i] = 0;  // Setup Pardiso control parameters
-        s->pt[i] = 0;     // Initialize the internal solver memory pointer
+        (*s)->iparm[i] = 0;  // Setup Pardiso control parameters
+        (*s)->pt[i] = 0;     // Initialize the internal solver memory pointer
     }
-    s->iparm[0] = 1;      // No solver default
-    s->iparm[1] = 3;      // Fill-in reordering from OpenMP
-    s->iparm[5] = 1;      // Write solution into b
-    /* s->iparm[7] = 2;      // Max number of iterative refinement steps */
-    s->iparm[7] = 0;      // Number of iterative refinement steps (auto, performs them only if perturbed pivots are obtained)
-    s->iparm[9] = 13;     // Perturb the pivot elements with 1E-13
-    s->iparm[34] = 0;     // Use Fortran-style indexing for indices
-    /* s->iparm[34] = 1;     // Use C-style indexing for indices */
+    (*s)->iparm[0] = 1;      // No solver default
+    (*s)->iparm[1] = 3;      // Fill-in reordering from OpenMP
+    (*s)->iparm[5] = 1;      // Write solution into b
+    /* (*s)->iparm[7] = 2;      // Max number of iterative refinement steps */
+    (*s)->iparm[7] = 0;      // Number of iterative refinement steps (auto, performs them only if perturbed pivots are obtained)
+    (*s)->iparm[9] = 13;     // Perturb the pivot elements with 1E-13
+    (*s)->iparm[34] = 0;     // Use Fortran-style indexing for indices
+    /* (*s)->iparm[34] = 1;     // Use C-style indexing for indices */
 
     // Print number of threads
-    s->nthreads = mkl_get_max_threads();
+    (*s)->nthreads = mkl_get_max_threads();
 
     // Reordering and symbolic factorization
-    s->phase = PARDISO_SYMBOLIC;
-    pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
-             &(s->n), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
-             s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
-    if ( s->error != 0 ){
-        #ifdef PRINTING
-            c_eprint("Error during symbolic factorization: %d", (int)s->error);
-        #endif
-        free_linsys_solver_pardiso(s);
-        return OSQP_NULL;
+    (*s)->phase = PARDISO_SYMBOLIC;
+    pardiso ((*s)->pt, &((*s)->maxfct), &((*s)->mnum), &((*s)->mtype), &((*s)->phase),
+             &((*s)->n), (*s)->KKT->x, (*s)->KKT_p, (*s)->KKT_i, &((*s)->idum), &((*s)->nrhs),
+             (*s)->iparm, &((*s)->msglvl), &((*s)->fdum), &((*s)->fdum), &((*s)->error));
+    if ( (*s)->error != 0 ){
+#ifdef PRINTING
+        c_eprint("Error during symbolic factorization: %d", (int)(*s)->error);
+#endif
+        free_linsys_solver_pardiso(*s);
+        return OSQP_INIT_LINSYS_SOLVER_ERROR;
     }
 
     // Numerical factorization
-    s->phase = PARDISO_NUMERIC;
-    pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
-             &(s->n), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
-             s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
-    if ( s->error != 0 ){
-        #ifdef PRINTING
-            c_eprint("Error during numerical factorization: %d", (int)s->error);
-        #endif
-        free_linsys_solver_pardiso(s);
-        return OSQP_NULL;
+    (*s)->phase = PARDISO_NUMERIC;
+    pardiso ((*s)->pt, &((*s)->maxfct), &((*s)->mnum), &((*s)->mtype), &((*s)->phase),
+             &((*s)->n), (*s)->KKT->x, (*s)->KKT_p, (*s)->KKT_i, &((*s)->idum), &((*s)->nrhs),
+             (*s)->iparm, &((*s)->msglvl), &((*s)->fdum), &((*s)->fdum), &((*s)->error));
+    if ( (*s)->error ){
+#ifdef PRINTING
+        c_eprint("Error during numerical factorization: %d", (int)(*s)->error);
+#endif
+        free_linsys_solver_pardiso(*s);
+        return OSQP_INIT_LINSYS_SOLVER_ERROR;
     }
 
     // Link Functions
-    s->solve = &solve_linsys_pardiso;
-    s->free = &free_linsys_solver_pardiso;
-    s->update_matrices = &update_linsys_solver_matrices_pardiso;
-    s->update_rho_vec = &update_linsys_solver_rho_vec_pardiso;
+    (*s)->solve = &solve_linsys_pardiso;
+    (*s)->free = &free_linsys_solver_pardiso;
+    (*s)->update_matrices = &update_linsys_solver_matrices_pardiso;
+    (*s)->update_rho_vec = &update_linsys_solver_rho_vec_pardiso;
 
     // Assign type
-    s->type = MKL_PARDISO_SOLVER;
+    (*s)->type = MKL_PARDISO_SOLVER;
 
-    return s;
+    // No error
+    return 0;
 }
 
 // Returns solution to linear system  Ax = b with solution stored in b
@@ -188,9 +189,9 @@ c_int solve_linsys_pardiso(pardiso_solver * s, c_float * b, const OSQPSettings *
              &(s->n), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), b, s->bp, &(s->error));
     if ( s->error != 0 ){
-        #ifdef PRINTING
+#ifdef PRINTING
         c_eprint("Error during solution: %d", (int)s->error);
-        #endif
+#endif
         return 1;
     }
 

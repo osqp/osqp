@@ -2,7 +2,7 @@ import numpy as np
 import scipy.sparse as spa
 import utils.codegen_utils as cu
 
-P = spa.csc_matrix(np.array([[11., 0.], [0., 0.]]))
+P = spa.triu([[11., 0.], [0., 0.]]).tocsc()
 q = np.array([3., 4.])
 
 A = spa.csc_matrix(np.array([[-1.0, 0.], [0., -1.], [-1., 3.],

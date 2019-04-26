@@ -12,6 +12,16 @@ extern "C" {
 # define OSQP_VERSION ("0.5.0") /* string literals automatically null-terminated
                                    */
 
+/******************
+* Setup Status  *
+******************/
+# define OSQP_DATA_VALIDATION_ERROR (1)
+# define OSQP_SETTINGS_VALIDATION_ERROR (2)
+# define OSQP_MEMORY_ALLOCATION_ERROR (3)
+# define OSQP_LOAD_LINSYS_SOLVER_ERROR (4)
+# define OSQP_INIT_LINSYS_SOLVER_ERROR (5)
+# define OSQP_INIT_LINSYS_SOLVER_NONCVX_ERROR (6)
+
 
 /******************
 * Solver Status  *

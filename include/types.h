@@ -126,9 +126,8 @@ typedef struct {
 typedef struct {
   c_int    n; ///< number of variables n
   c_int    m; ///< number of constraints m
-  csc     *P; ///< quadratic part of the cost P in csc format (size n x n). It
-              ///  can be either the full P or only the upper triangular part. The
-              ///  workspace stores only the upper triangular part
+  csc     *P; ///< the upper triangular part of the quadratic cost matrix
+              ///  P in csc format (size n x n).
   csc     *A; ///< linear constraints matrix A in csc format (size m x n)
   c_float *q; ///< dense array for linear part of cost function (size n)
   c_float *l; ///< dense array for lower bound (size m)
@@ -314,25 +313,25 @@ typedef struct {
  *      on the choice
  */
 struct linsys_solver {
-  enum linsys_solver_type type; ///< Linear system solver type (see type.h)
+  enum linsys_solver_type type; ///< Linear system solver type
   // Functions
   c_int (*solve)(LinSysSolver       *self,
                  c_float            *b,
                  const OSQPSettings *settings); ///< Solve linear system
 
-    # ifndef EMBEDDED
+# ifndef EMBEDDED
   void (*free)(LinSysSolver *self);             ///< Free linear system solver
                                                 // (only in desktop version)
-    # endif // ifndef EMBEDDED
+# endif // ifndef EMBEDDED
 
-    # if EMBEDDED != 1
+# if EMBEDDED != 1
   c_int (*update_matrices)(LinSysSolver *self, const csc *P, const csc *A,
                            const OSQPSettings *settings); ///< Update matrices P
                                                           // and A in the solver
   c_int (*update_rho_vec)(LinSysSolver  *s,
                           const c_float *rho_vec,
                           const c_int    m);              ///< Update rho
-    # endif // if EMBEDDED != 1
+# endif // if EMBEDDED != 1
 
 # ifndef EMBEDDED
   c_int nthreads; ///< Number of threads active

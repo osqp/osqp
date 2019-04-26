@@ -222,7 +222,7 @@ void print_footer(OSQPInfo *info, c_int polish) {
 
 #ifndef EMBEDDED
 
-OSQPSettings* copy_settings(OSQPSettings *settings) {
+OSQPSettings* copy_settings(const OSQPSettings *settings) {
   OSQPSettings *new = c_malloc(sizeof(OSQPSettings));
 
   // Copy settings

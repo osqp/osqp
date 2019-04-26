@@ -75,7 +75,7 @@ The linear system solver object is defined in :code:`mysolver.h` as follows
         };
 
         // Initialize mysolver solver
-        mysolver_solver *init_linsys_solver_mysolver(const csc * P, const csc * A, c_float sigma, c_float * rho_vec, c_int polish);
+        c_int init_linsys_solver_mysolver(mysolver_solver ** s, const csc * P, const csc * A, c_float sigma, c_float * rho_vec, c_int polish);
 
         // Solve linear system and store result in b
         c_int solve_linsys_mysolver(mysolver_solver * s, c_float * b, const OSQPSettings * settings);

@@ -11,7 +11,8 @@ m = 150
 
 # Generate random Matrices
 Pt = spa.random(n, n)
-P = Pt.T.dot(Pt).tocsc() + spa.eye(n)
+P = Pt.T.dot(Pt) + spa.eye(n)
+P = spa.triu(P).tocsc()
 q = sp.randn(n)
 A = spa.random(m, n).tolil()  # Lil for efficiency
 u = 3 + sp.randn(m)

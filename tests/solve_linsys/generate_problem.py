@@ -33,7 +33,6 @@ test_solve_KKT_x = spla.splu(test_solve_KKT_KKT.tocsc()).solve(test_solve_KKT_rh
 data = {'test_solve_KKT_n': test_solve_KKT_n,
         'test_solve_KKT_m': test_solve_KKT_m,
         'test_solve_KKT_A': test_solve_KKT_A,
-        'test_solve_KKT_P': test_solve_KKT_P,
         'test_solve_KKT_Pu': test_solve_KKT_Pu,
         'test_solve_KKT_rho': test_solve_KKT_rho,
         'test_solve_KKT_sigma': test_solve_KKT_sigma,

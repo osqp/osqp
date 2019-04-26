@@ -8,6 +8,8 @@
 
 static char* test_basic_qp_solve()
 {
+  c_int exitflag;
+
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
@@ -17,9 +19,8 @@ static char* test_basic_qp_solve()
   basic_qp_sols_data *sols_data;
 
   // Populate data
-  data      = generate_problem_basic_qp();
+  data = generate_problem_basic_qp();
   sols_data = generate_problem_basic_qp_sols_data();
-
 
   // Define Solver settings as default
   osqp_set_default_settings(settings);
@@ -31,10 +32,10 @@ static char* test_basic_qp_solve()
   settings->warm_start = 0;
 
   // Setup workspace
-  work = osqp_setup(data, settings);
+  exitflag = osqp_setup(&work, data, settings);
 
   // Setup correct
-  mu_assert("Basic QP test solve: Setup error!", work != OSQP_NULL);
+  mu_assert("Basic QP test solve: Setup error!", exitflag == 0);
 
   // Solve Problem
   osqp_solve(work);
@@ -120,6 +121,8 @@ static char* test_basic_qp_solve()
 #ifdef ENABLE_MKL_PARDISO
 static char* test_basic_qp_solve_pardiso()
 {
+  c_int exitflag;
+
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
@@ -129,7 +132,7 @@ static char* test_basic_qp_solve_pardiso()
   basic_qp_sols_data *sols_data;
 
   // Populate data
-  data      = generate_problem_basic_qp();
+  data = generate_problem_basic_qp();
   sols_data = generate_problem_basic_qp_sols_data();
 
 
@@ -144,10 +147,10 @@ static char* test_basic_qp_solve_pardiso()
   settings->linsys_solver = MKL_PARDISO_SOLVER;
 
   // Setup workspace
-  work = osqp_setup(data, settings);
+  exitflag = osqp_setup(&work, data, settings);
 
   // Setup correct
-  mu_assert("Basic QP test solve: Setup error!", work != OSQP_NULL);
+  mu_assert("Basic QP test solve Pardiso: Setup error!", exitflag == 0);
 
   // Solve Problem
   osqp_solve(work);
@@ -189,6 +192,8 @@ static char* test_basic_qp_solve_pardiso()
 
 static char* test_basic_qp_update()
 {
+  c_int exitflag;
+
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
@@ -198,7 +203,7 @@ static char* test_basic_qp_update()
   basic_qp_sols_data *sols_data;
 
   // Populate data
-  data      = generate_problem_basic_qp();
+  data = generate_problem_basic_qp();
   sols_data = generate_problem_basic_qp_sols_data();
 
 
@@ -212,10 +217,10 @@ static char* test_basic_qp_update()
   settings->warm_start = 0;
 
   // Setup workspace
-  work = osqp_setup(data, settings);
+  exitflag = osqp_setup(&work, data, settings);
 
   // Setup correct
-  mu_assert("Basic QP test update: Setup error!", work != OSQP_NULL);
+  mu_assert("Basic QP test update: Setup error!", exitflag == 0);
 
 
   // ====================================================================
@@ -298,6 +303,8 @@ static char* test_basic_qp_update()
 
 static char* test_basic_qp_check_termination()
 {
+  c_int exitflag;
+
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
@@ -307,7 +314,7 @@ static char* test_basic_qp_check_termination()
   basic_qp_sols_data *sols_data;
 
   // Populate data
-  data      = generate_problem_basic_qp();
+  data = generate_problem_basic_qp();
   sols_data = generate_problem_basic_qp_sols_data();
 
 
@@ -322,10 +329,10 @@ static char* test_basic_qp_check_termination()
   settings->warm_start        = 0;
 
   // Setup workspace
-  work = osqp_setup(data, settings);
+  exitflag = osqp_setup(&work, data, settings);
 
   // Setup correct
-  mu_assert("Basic QP test solve: Setup error!", work != OSQP_NULL);
+  mu_assert("Basic QP test solve: Setup error!", exitflag == 0);
 
   // Solve Problem
   osqp_solve(work);
@@ -371,6 +378,8 @@ static char* test_basic_qp_check_termination()
 
 static char* test_basic_qp_update_rho()
 {
+  c_int extiflag;
+
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
@@ -389,7 +398,7 @@ static char* test_basic_qp_update_rho()
   c_int n_iter_new_solver, n_iter_update_rho;
 
   // Populate data
-  data      = generate_problem_basic_qp();
+  data = generate_problem_basic_qp();
   sols_data = generate_problem_basic_qp_sols_data();
 
 
@@ -403,10 +412,10 @@ static char* test_basic_qp_update_rho()
   settings->check_termination = 1;
 
   // Setup workspace
-  work = osqp_setup(data, settings);
+  exitflag = osqp_setup(&work, data, settings);
 
   // Setup correct
-  mu_assert("Update rho test solve: Setup error!", work != OSQP_NULL);
+  mu_assert("Basic QP test update rho: Setup error!", exitflag == 0);
 
   // Solve Problem
   osqp_solve(work);
@@ -446,14 +455,14 @@ static char* test_basic_qp_update_rho()
   settings->eps_rel           = 1e-04;
 
   // Setup workspace
-  work = osqp_setup(data, settings);
+  exitflag = osqp_setup(&work, data, settings);
 
   // Setup correct
-  mu_assert("Update rho test update: Setup error!", work != OSQP_NULL);
+  mu_assert("Basic QP test update rho: Setup error!", exitflag == 0);
 
   // Update rho
   exitflag = osqp_update_rho(work, rho);
-  mu_assert("Update rho test update: Error update rho!", exitflag == 0);
+  mu_assert("Basic QP test update rho: Error update rho!", exitflag == 0);
 
   // Solve Problem
   osqp_solve(work);
@@ -499,6 +508,8 @@ static char* test_basic_qp_update_rho()
 
 static char* test_basic_qp_time_limit()
 {
+  c_int exitflag;
+
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
@@ -507,11 +518,8 @@ static char* test_basic_qp_time_limit()
   OSQPData *data;      // Data
   basic_qp_sols_data *sols_data;
 
-  // Exitflag
-  c_int exitflag;
-
   // Populate data
-  data      = generate_problem_basic_qp();
+  data = generate_problem_basic_qp();
   sols_data = generate_problem_basic_qp_sols_data();
 
   // Define Solver settings as default
@@ -521,21 +529,21 @@ static char* test_basic_qp_time_limit()
   mu_assert("Time limit test: Default not correct", settings->time_limit == 0);
 
   // Setup workspace
-  work = osqp_setup(data, settings);
+  exitflag = osqp_setup(&work, data, settings);
 
   // Setup correct
-  mu_assert("Time limit test: Setup error!", work != OSQP_NULL);
+  mu_assert("Time limit test: Setup error!", exitflag == 0);
 
   // Solve Problem
   osqp_solve(work);
 
   // Compare solver statuses
-  mu_assert("Time limit test: Error in no time limit solver status!",
+  mu_assert("Basic QP test time limit: Error in no time limit solver status!",
             work->info->status_val == sols_data->status_test);
 
   // Update time limit
   osqp_update_time_limit(work, 1e-5);
-  osqp_update_max_iter(work, 2000000000);
+  osqp_update_max_iter(work, (c_int)2e9);
   osqp_update_check_termination(work, 0);
 
   // Solve Problem
