@@ -172,6 +172,24 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** s, const csc * P, const csc * A, 
     // Size of KKT
     n_plus_m = P->m + A->m;
 
+    // Link Functions
+    (*s)->solve = &solve_linsys_qdldl;
+
+#ifndef EMBEDDED
+    (*s)->free = &free_linsys_solver_qdldl;
+#endif
+
+#if EMBEDDED != 1
+    (*s)->update_matrices = &update_linsys_solver_matrices_qdldl;
+    (*s)->update_rho_vec = &update_linsys_solver_rho_vec_qdldl;
+#endif
+
+    // Assign type
+    (*s)->type = QDLDL_SOLVER;
+
+    // Set number of threads to 1 (single threaded)
+    (*s)->nthreads = 1;
+
     // Sparse matrix L (lower triangular)
     // NB: We don not allocate L completely (CSC elements)
     //      L will be allocated during the factorization depending on the
@@ -266,23 +284,6 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** s, const csc * P, const csc * A, 
         (*s)->KKT = KKT_temp;
     }
 
-    // Link Functions
-    (*s)->solve = &solve_linsys_qdldl;
-
-#ifndef EMBEDDED
-    (*s)->free = &free_linsys_solver_qdldl;
-#endif
-
-#if EMBEDDED != 1
-    (*s)->update_matrices = &update_linsys_solver_matrices_qdldl;
-    (*s)->update_rho_vec = &update_linsys_solver_rho_vec_qdldl;
-#endif
-
-    // Assign type
-    (*s)->type = QDLDL_SOLVER;
-    
-    // Set number of threads to 1 (single threaded)
-    (*s)->nthreads = 1;
 
     // No error
     return 0;

@@ -50,12 +50,12 @@ void osqp_set_default_settings(OSQPSettings *settings);
  * NB: This is the only function that allocates dynamic memory and is not used
  *during code generation
  *
- * @param  work         Solver workspace
+ * @param  workp        Solver workspace pointer
  * @param  data         Problem data
  * @param  settings     Solver settings
  * @return              Exitflag for errors (0 if no errors)
  */
-c_int osqp_setup(OSQPWorkspace** work, const OSQPData* data, const OSQPSettings* settings);
+c_int osqp_setup(OSQPWorkspace** workp, const OSQPData* data, const OSQPSettings* settings);
 
 # endif // #ifndef EMBEDDED
 

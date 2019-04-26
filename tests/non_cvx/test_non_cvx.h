@@ -35,6 +35,9 @@ static char* test_non_cvx_solve()
   mu_assert("Non Convex test solve: Setup should have failed!",
             exitflag == OSQP_INIT_LINSYS_SOLVER_NONCVX_ERROR);
 
+  // Clean workspace
+  osqp_cleanup(work);
+
   // Update Solver settings
   settings->sigma = sols_data->sigma_new;
 

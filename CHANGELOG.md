@@ -1,3 +1,9 @@
+Unreleased
+----------------
+* Added meaningful return values to internal functions. Changed syntax of `osqp_setup` function. It now returns an exitflag!
+
+
+
 Version 0.5.0 (10 December 2018)
 ----------------
 * Added `update_time` to the info structure.
