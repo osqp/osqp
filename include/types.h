@@ -311,7 +311,7 @@ typedef void* (*OSQPReallocFxn) (void* ptr, size_t size);       // realloc
 
 typedef struct
 {
-
+    // ALL or NONE of these functions must be set.
     OSQPMallocFxn   malloc_fxn;
     OSQPCallocFxn   calloc_fxn;
     OSQPFreeFxn     free_fxn;
