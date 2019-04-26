@@ -516,7 +516,7 @@ c_int is_dual_infeasible(OSQPWorkspace *work, c_float eps_dual_inf) {
   return 0;
 }
 
-static c_int has_solution(OSQPInfo * info){
+c_int has_solution(OSQPInfo * info){
 
   return ((info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
       (info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE) &&

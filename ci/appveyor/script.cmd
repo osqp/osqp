@@ -33,4 +33,17 @@ cmake --build .
 %APPVEYOR_BUILD_FOLDER%\build\out\osqp_tester.exe
 if errorlevel 1 exit /b 1
 
+
+
+:: Perform C Tests without printing
+:: -----------------------------------------------------
+cd %APPVEYOR_BUILD_FOLDER%
+rmdir /s /q build
+mkdir build
+cd build
+cmake -G "%CMAKE_PROJECT%" -DPRINTING=OFF -DUNITTESTS=ON ..
+cmake --build .
+%APPVEYOR_BUILD_FOLDER%\build\out\osqp_tester.exe
+if errorlevel 1 exit /b 1
+
 @echo off

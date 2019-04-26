@@ -53,7 +53,7 @@ static char* test_non_cvx_solve()
 
   // Compare objective values
   mu_assert("Non Convex test solve: Error in objective value!",
-            work->info->obj_val == OSQP_NAN);
+	    work->info->obj_val == OSQP_NAN);
 
   // Clean workspace
   osqp_cleanup(work);

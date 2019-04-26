@@ -508,7 +508,6 @@ c_int osqp_solve(OSQPWorkspace *work) {
 
   }        // End of ADMM for loop
 
-
   // Update information and check termination condition if it hasn't been done
   // during last iteration (max_iter reached or check_termination disabled)
   if (!can_check_termination) {
@@ -534,13 +533,15 @@ c_int osqp_solve(OSQPWorkspace *work) {
 
     /* Check whether a termination criterion is triggered */
     check_termination(work, 0);
+
   }
 
   // Compute objective value in case it was not
   // computed during the iterations
-  if (!compute_cost_function) {
+  if (!compute_cost_function && has_solution(work->info)){
     work->info->obj_val = compute_obj_val(work, work->x);
   }
+
 
 #ifdef PRINTING
   /* Print summary for last iteration */
@@ -552,7 +553,6 @@ c_int osqp_solve(OSQPWorkspace *work) {
   /* if max iterations reached, change status accordingly */
   if (work->info->status_val == OSQP_UNSOLVED) {
     if (!check_termination(work, 1)) { // Try to check for approximate
-                                       // termination
       update_status(work->info, OSQP_MAX_ITER_REACHED);
     }
   }
@@ -983,7 +983,7 @@ c_int osqp_update_P(OSQPWorkspace *work,
   c_int i;        // For indexing
   c_int exitflag; // Exit flag
   c_int nnzP;     // Number of nonzeros in P
-  
+
 #ifdef PROFILING
   if (work->clear_update_time == 1) {
     work->clear_update_time = 0;
