@@ -188,7 +188,7 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
       "%s linear system solver not available.\nTried to obtain it from shared library",
       LINSYS_SOLVER_NAME[work->settings->linsys_solver]);
 # endif /* ifdef PRINTING */
-    // osqp_cleanup(work);
+    osqp_cleanup(work);
     return OSQP_LOAD_LINSYS_SOLVER_ERROR;
   }
 
@@ -201,7 +201,7 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
 # ifdef PRINTING
     c_eprint("Linear systems solver initialization failure");
 # endif /* ifdef PRINTING */
-    // osqp_cleanup(work);
+    osqp_cleanup(work);
     return exitflag;
   }
 
