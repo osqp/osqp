@@ -24,7 +24,7 @@
 int tests_run = 0;
 
 
-static char* all_tests() {
+static const char* all_tests() {
   mu_run_test(test_lin_alg);
   mu_run_test(test_solve_linsys);
   mu_run_test(test_basic_qp);
@@ -38,7 +38,7 @@ static char* all_tests() {
 }
 
 int main(void) {
-  char *result = all_tests();
+  const char *result = all_tests();
 
   if (result != 0) {
     printf("%s\n", result);
