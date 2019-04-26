@@ -4,7 +4,7 @@
 
 #include "lin_alg/data.h"
 
-static char* test_constr_sparse_mat() {
+static const char* test_constr_sparse_mat() {
   c_float *Adns; // Conversion to dense matrix
 
   lin_alg_sols_data *data = generate_problem_lin_alg_sols_data();
@@ -25,7 +25,7 @@ static char* test_constr_sparse_mat() {
   return 0;
 }
 
-static char* test_vec_operations() {
+static const char* test_vec_operations() {
   c_float  norm_inf, vecprod; // normInf;
   c_float *ew_reciprocal;
   c_float *add_scaled;
@@ -112,7 +112,7 @@ static char* test_vec_operations() {
   return 0;
 }
 
-static char* test_mat_operations() {
+static const char* test_mat_operations() {
   csc *Ad, *dA; // Matrices used for tests
   // csc *A_ewsq, *A_ewabs;     // Matrices used for tests
   c_int exitflag = 0;
@@ -170,7 +170,7 @@ static char* test_mat_operations() {
   return 0;
 }
 
-static char* test_mat_vec_multiplication() {
+static const char* test_mat_vec_multiplication() {
   c_float *Ax, *ATy, *Px, *Ax_cum, *ATy_cum, *Px_cum;
 
   lin_alg_sols_data *data = generate_problem_lin_alg_sols_data();
@@ -255,7 +255,7 @@ static char* test_mat_vec_multiplication() {
   return 0;
 }
 
-static char* test_extract_upper_triangular() {
+static const char* test_extract_upper_triangular() {
   c_float *inf_norm_cols_test;
   lin_alg_sols_data *data = generate_problem_lin_alg_sols_data();
 
@@ -285,7 +285,7 @@ static char* test_extract_upper_triangular() {
   return 0;
 }
 
-static char* test_quad_form_upper_triang() {
+static const char* test_quad_form_upper_triang() {
   c_float quad_form_t;
 
   lin_alg_sols_data *data = generate_problem_lin_alg_sols_data();
@@ -303,7 +303,7 @@ static char* test_quad_form_upper_triang() {
   return 0;
 }
 
-static char* test_lin_alg()
+static const char* test_lin_alg()
 {
   mu_run_test(test_constr_sparse_mat);
   mu_run_test(test_vec_operations);

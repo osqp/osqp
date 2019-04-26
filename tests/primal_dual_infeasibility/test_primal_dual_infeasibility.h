@@ -6,7 +6,7 @@
 #include "primal_dual_infeasibility/data.h"
 
 
-static char* test_optimal()
+static const char* test_optimal()
 {
   // Structures
   OSQPWorkspace *work;    // Workspace
@@ -18,7 +18,7 @@ static char* test_optimal()
   data = generate_problem_primal_dual_infeasibility_sols_data();
 
   // Populate problem data
-  problem    = c_malloc(sizeof(OSQPData));
+  problem    = (OSQPData*) c_malloc(sizeof(OSQPData));
   problem->P = data->P;
   problem->q = data->q;
   problem->A = data->A12;
@@ -74,7 +74,7 @@ static char* test_optimal()
   return 0;
 }
 
-static char* test_prim_infeas()
+static const char* test_prim_infeas()
 {
   // Structures
   OSQPWorkspace *work;    // Workspace
@@ -86,7 +86,7 @@ static char* test_prim_infeas()
   data = generate_problem_primal_dual_infeasibility_sols_data();
 
   // Populate problem data
-  problem    = c_malloc(sizeof(OSQPData));
+  problem    = (OSQPData*) c_malloc(sizeof(OSQPData));
   problem->P = data->P;
   problem->q = data->q;
   problem->A = data->A12;
@@ -126,7 +126,7 @@ static char* test_prim_infeas()
   return 0;
 }
 
-static char* test_dual_infeas()
+static const char* test_dual_infeas()
 {
   // Structures
   OSQPWorkspace *work;    // Workspace
@@ -138,7 +138,7 @@ static char* test_dual_infeas()
   data = generate_problem_primal_dual_infeasibility_sols_data();
 
   // Populate problem data
-  problem    = c_malloc(sizeof(OSQPData));
+  problem    = (OSQPData*) c_malloc(sizeof(OSQPData));
   problem->P = data->P;
   problem->q = data->q;
   problem->A = data->A34;
@@ -178,7 +178,7 @@ static char* test_dual_infeas()
   return 0;
 }
 
-static char* test_primal_dual_infeas()
+static const char* test_primal_dual_infeas()
 {
   // Structures
   OSQPWorkspace *work;    // Workspace
@@ -190,7 +190,7 @@ static char* test_primal_dual_infeas()
   data = generate_problem_primal_dual_infeasibility_sols_data();
 
   // Populate problem data
-  problem    = c_malloc(sizeof(OSQPData));
+  problem    = (OSQPData*) c_malloc(sizeof(OSQPData));
   problem->P = data->P;
   problem->q = data->q;
   problem->A = data->A34;
@@ -231,7 +231,7 @@ static char* test_primal_dual_infeas()
   return 0;
 }
 
-static char* test_primal_dual_infeasibility()
+static const char* test_primal_dual_infeasibility()
 {
   mu_run_test(test_optimal);
   mu_run_test(test_prim_infeas);
