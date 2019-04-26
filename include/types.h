@@ -304,6 +304,21 @@ typedef struct {
 
 } OSQPWorkspace;
 
+typedef void* (*OSQPMallocFxn)  (size_t size);                  // malloc
+typedef void* (*OSQPCallocFxn)  (size_t count, size_t size);    // calloc
+typedef void  (*OSQPFreeFxn)    (void* ptr);                    // free
+typedef void* (*OSQPReallocFxn) (void* ptr, size_t size);       // realloc
+
+typedef struct
+{
+
+    OSQPMallocFxn   malloc_fxn;
+    OSQPCallocFxn   calloc_fxn;
+    OSQPFreeFxn     free_fxn;
+    OSQPReallocFxn  realloc_fxn;
+
+} OSQPGlobalOptions;
+
 
 /**
  * Define linsys_solver prototype structure

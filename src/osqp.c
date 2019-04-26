@@ -18,6 +18,50 @@
 #endif /* ifndef EMBEDDED */
 
 /**********************
+* Global setup Functions *
+**********************/
+static OSQPGlobalOptions osqp_global_opts;
+
+void osqp_set_global_options(OSQPGlobalOptions *settings)
+{
+  memcpy(
+    (void*) &osqp_global_opts, 
+    (void*) settings, 
+    sizeof(OSQPGlobalOptions));
+}
+
+/**********************
+* Memory allocation functions *
+**********************/
+void* OSQPMalloc(size_t size)
+{
+  return osqp_global_opts.malloc_fxn
+    ? osqp_global_opts.malloc_fxn(size)
+    : malloc(size);
+}
+
+void* OSQPCalloc(size_t count, size_t size)
+{
+  return osqp_global_opts.calloc_fxn
+    ? osqp_global_opts.calloc_fxn(count, size)
+    : calloc(count, size);
+}
+
+void OSQPFree(void* ptr)
+{
+  return osqp_global_opts.free_fxn
+    ? osqp_global_opts.free_fxn(ptr)
+    : free(ptr);
+}
+
+void* OSQPRealloc(void* ptr, size_t size)
+{
+  return osqp_global_opts.realloc_fxn
+    ? osqp_global_opts.realloc_fxn(ptr, size)
+    : realloc(ptr, size);
+}
+
+/**********************
 * Main API Functions *
 **********************/
 void osqp_set_default_settings(OSQPSettings *settings) {

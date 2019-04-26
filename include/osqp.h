@@ -16,6 +16,27 @@ extern "C" {
 # endif // ifndef EMBEDDED
 
 /********************
+ * Global setup
+********************/
+
+/**
+ * @name Global OSQP setup
+ * @{
+ */
+
+/**
+ * Optional method that sets global OSQP options.
+ * The method is not threadsafe and is assumed to
+ * be called only once prior to any other OSQP
+ * methods being called.
+ * assumes settings already allocated in memory
+ * @param settings settings structure
+ */
+void osqp_set_global_options(OSQPGlobalOptions *settings);
+
+/** @} */
+
+/********************
 * Main Solver API  *
 ********************/
 

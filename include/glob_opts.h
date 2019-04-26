@@ -12,6 +12,8 @@ extern "C" {
 // cmake generated compiler flags
 #include "osqp_configure.h"
 
+#include <stddef.h>
+
 /* DATA CUSTOMIZATIONS (depending on memory manager)-----------------------   */
 
 // We do not need memory allocation functions if EMBEDDED is enabled
@@ -67,10 +69,14 @@ static void* c_calloc(size_t num, size_t size) {
     #   define c_free PyMem_Free
     #   define c_realloc PyMem_Realloc
 #  else  /* ifdef MATLAB */
-    #   define c_malloc malloc
-    #   define c_calloc calloc
-    #   define c_free free
-    #   define c_realloc realloc
+    void* OSQPMalloc(size_t);
+    void* OSQPCalloc(size_t, size_t);
+    void  OSQPFree(void*);
+    void* OSQPRealloc(void*, size_t);
+    #   define c_malloc OSQPMalloc
+    #   define c_calloc OSQPCalloc
+    #   define c_free OSQPFree
+    #   define c_realloc OSQPRealloc
 
 #  endif /* ifdef MATLAB */
 
