@@ -26,9 +26,8 @@ extern "C" {
 
 /**
  * Optional method that sets global OSQP options.
- * The method is not threadsafe and is assumed to
- * be called only once prior to any other OSQP
- * methods being called.
+ * This function should not be called if memory
+ * allocations have already taken place.
  * assumes settings already allocated in memory
  * @param settings settings structure
  */
