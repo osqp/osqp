@@ -32,9 +32,9 @@ void reset_custom_allocator_counts();
 
 int osqp_tests_run = 0;
 
-int custom_malloc_called = 0;
-int custom_free_called = 0;
-int custom_realloc_called = 0;
+static int custom_malloc_called = 0;
+static int custom_free_called = 0;
+static int custom_realloc_called = 0;
 
 void* custom_malloc(size_t size)
 {
