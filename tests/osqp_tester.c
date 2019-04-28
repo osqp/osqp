@@ -52,7 +52,7 @@ void* custom_calloc(size_t count, size_t size)
 void custom_free(void* ptr)
 {
   custom_free_called++;
-  return free(ptr);
+  free(ptr);
 }
 
 void* custom_realloc(void* ptr, size_t size)

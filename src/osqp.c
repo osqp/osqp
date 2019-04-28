@@ -49,7 +49,7 @@ void* OSQPCalloc(size_t count, size_t size)
 
 void OSQPFree(void* ptr)
 {
-  return osqp_global_opts.free_fxn
+  osqp_global_opts.free_fxn
     ? osqp_global_opts.free_fxn(ptr)
     : free(ptr);
 }
