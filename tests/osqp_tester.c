@@ -30,7 +30,7 @@ int check_custom_allocator_count_zero();
 
 void reset_custom_allocator_counts();
 
-int tests_run = 0;
+int osqp_tests_run = 0;
 
 int custom_malloc_called = 0;
 int custom_free_called = 0;
@@ -135,7 +135,7 @@ int main(void) {
   else {
     printf("ALL TESTS PASSED\n");
   }
-  printf("Tests run: %d\n", tests_run);
+  printf("Tests run: %d\n", osqp_tests_run);
 
   return result != 0;
 }
