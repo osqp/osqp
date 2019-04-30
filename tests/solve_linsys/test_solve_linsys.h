@@ -9,7 +9,7 @@
 #include "solve_linsys/data.h"
 
 
-static char* test_solveKKT() {
+static const char* test_solveKKT() {
   c_int m, exitflag = 0;
   c_float *rho_vec;
   LinSysSolver *p;  // Private structure to form KKT factorization
@@ -22,7 +22,7 @@ static char* test_solveKKT() {
 
   // Set rho_vec
   m       = data->test_solve_KKT_A->m;
-  rho_vec = c_calloc(m, sizeof(c_float));
+  rho_vec = (c_float*) c_calloc(m, sizeof(c_float));
   vec_add_scalar(rho_vec, settings->rho, m);
 
   // Form and factorize KKT matrix
@@ -112,7 +112,7 @@ static char* test_solveKKT_pardiso() {
 }
 #endif
 
-static char* test_solve_linsys()
+static const char* test_solve_linsys()
 {
   mu_run_test(test_solveKKT);
 #ifdef ENABLE_MKL_PARDISO

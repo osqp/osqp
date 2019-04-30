@@ -5,7 +5,7 @@
 #include "basic_qp2/data.h"
 
 
-static char* test_basic_qp2_solve()
+static const char* test_basic_qp2_solve()
 {
   /* local variables */
   c_int exitflag = 0; // No errors
@@ -145,7 +145,7 @@ static char* test_basic_qp2_solve_pardiso()
 }
 #endif
 
-static char* test_basic_qp2_update()
+static const char* test_basic_qp2_update()
 {
   /* local variables */
   c_int exitflag = 0; // No errors
@@ -221,7 +221,7 @@ static char* test_basic_qp2_update()
   return 0;
 }
 
-static char* test_basic_qp2()
+static const char* test_basic_qp2()
 {
   mu_run_test(test_basic_qp2_solve);
 #ifdef ENABLE_MKL_PARDISO

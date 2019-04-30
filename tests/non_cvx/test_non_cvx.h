@@ -5,7 +5,7 @@
 #include "non_cvx/data.h"
 
 
-static char* test_non_cvx_solve()
+static const char* test_non_cvx_solve()
 {
   /* local variables */
   c_int exitflag = 0; // No errors
@@ -53,7 +53,7 @@ static char* test_non_cvx_solve()
 
   // Compare objective values
   mu_assert("Non Convex test solve: Error in objective value!",
-	    work->info->obj_val == OSQP_NAN);
+            work->info->obj_val == OSQP_NAN);
 
   // Clean workspace
   osqp_cleanup(work);
@@ -66,7 +66,7 @@ static char* test_non_cvx_solve()
   return 0;
 }
 
-static char* test_non_cvx()
+static const char* test_non_cvx()
 {
   mu_run_test(test_non_cvx_solve);
 
