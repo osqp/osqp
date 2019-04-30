@@ -80,7 +80,7 @@ void reset_custom_allocator_counts()
   custom_malloc_called = custom_realloc_called = custom_free_called = 0;
 }
 
-static char* all_tests() {
+static const char* all_tests() {
   // ensure that memory allocation works if
   // osqp_set_global_options() has not been
   // called yet.
@@ -127,7 +127,7 @@ static char* all_tests() {
 }
 
 int main(void) {
-  char *result = all_tests();
+  const char *result = all_tests();
 
   if (result != 0) {
     printf("%s\n", result);
