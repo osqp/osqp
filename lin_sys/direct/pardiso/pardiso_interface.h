@@ -77,7 +77,7 @@ struct pardiso {
  * @param  polish    Flag whether we are initializing for polish or not
  * @return           Exitflag for error (0 if no errors)
  */
-c_int init_linsys_solver_pardiso(pardiso_solver ** s, const csc * P, const csc * A, c_float sigma, const c_float * rho_vec, c_int polish);
+c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc * A, c_float sigma, const c_float * rho_vec, c_int polish);
 
 
 /**
