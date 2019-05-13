@@ -14,10 +14,23 @@
 
 
 // Prototypes for Pardiso functions
-void pardiso(void**, const c_int*, const c_int*, const c_int*, const c_int*,
-             const c_int*, const c_float*, const c_int*, const c_int*,
-             const c_int*, const c_int*, c_int*, const c_int*, c_float*,
-             c_float*, const c_int*);
+void pardiso(void**,         // pt
+             const c_int*,   // maxfct
+             const c_int*,   // mnum
+             const c_int*,   // mtype
+             const c_int*,   // phase
+             const c_int*,   // n
+             const c_float*, // a
+             const c_int*,   // ia
+             const c_int*,   // ja
+             c_int*,         // perm
+             const c_int*,   //nrhs
+             c_int*,         // iparam
+             const c_int*,   //msglvl
+             c_float*,       // b
+             c_float*,       // x
+             c_int*          // error
+             );
 c_int mkl_set_interface_layer(c_int);
 c_int mkl_get_max_threads();
 
@@ -27,10 +40,20 @@ void free_linsys_solver_pardiso(pardiso_solver *s) {
 
         // Free pardiso solver using internal function
         s->phase = PARDISO_CLEANUP;
+        // c_print("s->mnum: %f", s->mnum);
+        // c_print("s->mtype: %f", s->mtype);
+        // c_print("s->phase: %f", s->phase);
+        // c_print("s->n: %f", s->n);
+        // c_print("s->fdum: %f", s->fdum);
         pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
                  &(s->n), &(s->fdum), s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
                  s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
 
+      if ( s->error != 0 ){
+#ifdef PRINTING
+          c_eprint("Error during MKL Pardiso cleanup: %d", (int)s->error);
+#endif
+      }
         // Check each attribute of the structure and free it if it exists
         if (s->KKT)       csc_spfree(s->KKT);
         if (s->KKT_i)     c_free(s->KKT_i);
@@ -195,7 +218,7 @@ c_int solve_linsys_pardiso(pardiso_solver * s, c_float * b, const OSQPSettings *
              s->iparm, &(s->msglvl), b, s->bp, &(s->error));
     if ( s->error != 0 ){
 #ifdef PRINTING
-        c_eprint("Error during solution: %d", (int)s->error);
+        c_eprint("Error during linear system solution: %d", (int)s->error);
 #endif
         return 1;
     }
