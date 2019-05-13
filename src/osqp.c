@@ -665,15 +665,16 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
       if (work->E_temp) c_free(work->E_temp);
     }
 
-    // Unload linear system solver
-    exitflag = unload_linsys_solver(work->settings->linsys_solver);
-
     // Free linear system solver structure
     if (work->linsys_solver) {
       if (work->linsys_solver->free) {
         work->linsys_solver->free(work->linsys_solver);
       }
     }
+
+    // Unload linear system solver after free
+    exitflag = unload_linsys_solver(work->settings->linsys_solver);
+
 
     // Free active constraints structure
     if (work->pol) {
