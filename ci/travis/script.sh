@@ -40,7 +40,7 @@ ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
 
 if [[ $TRAVIS_OS_NAME == "linux" ]]; then
     # Check memory with valgrind
-    valgrind --suppressions=${TRAVIS_BUILD_DIR}/.valgrind-suppress.supp --leak-check=full --error-exitcode=42 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
+    valgrind --suppressions=${TRAVIS_BUILD_DIR}/.valgrind-suppress.supp --leak-check=full --gen-suppressions=all --error-exitcode=42 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
     # Perform code coverage
     cd ${TRAVIS_BUILD_DIR}/build
     lcov --directory . --capture -o coverage.info # capture coverage info
