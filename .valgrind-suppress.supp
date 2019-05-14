@@ -39,3 +39,12 @@
    fun:call_init.part.0
 }
 
+{
+   another_intel
+   Memcheck:Addr16
+   fun:__intel_sse2_strrchr
+   fun:_ZN67_INTERNAL_45_______src_thirdparty_tbb_omp_dynamic_link_cpp_d77f5ef55__kmp12init_dl_dataEv
+   fun:__sti__$E
+   obj:*libiomp5.so
+   obj:*libiomp5.so
+}
