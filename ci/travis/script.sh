@@ -37,10 +37,11 @@ cd build
 cmake -G "Unix Makefiles" -DCOVERAGE=ON -DUNITTESTS=ON ..
 make
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
-valgrind --suppress=${TRAVIS_BUILD_DIR}/.valgrind-suppress.supp --leak-check=full --error-exitcode=1 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
 
-# Pefrorm code coverage (only in Linux case for one version of python)
 if [[ $TRAVIS_OS_NAME == "linux" ]]; then
+    # Check memory with valgrind
+    valgrind --suppressions=${TRAVIS_BUILD_DIR}/.valgrind-suppress.supp --leak-check=full --error-exitcode=1 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
+    # Perform code coverage
     cd ${TRAVIS_BUILD_DIR}/build
     lcov --directory . --capture -o coverage.info # capture coverage info
     lcov --remove coverage.info "${TRAVIS_BUILD_DIR}/tests/*" \
