@@ -18,9 +18,9 @@ voidfun lh_load_sym (soHandle_t h, const char *symName);
 // Interfaces for Pardiso functions
 typedef void (*pardiso_t)(void**, const c_int*, const c_int*, const c_int*,
                           const c_int*, const c_int*, const c_float*,
-                          const c_int*, const c_int*, const c_int*,
+                          const c_int*, const c_int*, c_int*,
                           const c_int*, c_int*, const c_int*, c_float*,
-                          c_float*, const c_int*);
+                          c_float*, c_int*);
 typedef int (*mkl_set_ifl_t)(int);
 typedef int (*mkl_get_mt_t)();
 
@@ -35,9 +35,9 @@ static mkl_get_mt_t func_mkl_get_max_threads = OSQP_NULL;
 void pardiso(void** pt, const c_int* maxfct, const c_int* mnum,
                   const c_int* mtype, const c_int* phase, const c_int* n,
                   const c_float* a, const c_int* ia, const c_int* ja,
-                  const c_int* perm, const c_int* nrhs, c_int* iparm,
+                  c_int* perm, const c_int* nrhs, c_int* iparm,
                   const c_int* msglvl, c_float* b, c_float* x,
-                  const c_int* error) {
+                  c_int* error) {
 	if(func_pardiso){
             // Call function pardiso only if it has been initialized
 	    func_pardiso(pt, maxfct, mnum, mtype, phase, n, a, ia, ja,
