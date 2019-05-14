@@ -15,7 +15,7 @@
    ignore_libiomp_intel
    Memcheck:Cond
    fun:__intel_sse2_strrchr
-   fun:_ZN67_INTERNAL_45_______src_thirdparty_tbb_omp_dynamic_link_cpp_*
+   fun:*_INTERNAL_45_______src_thirdparty_tbb_omp_dynamic_link_cpp_*
    fun:__sti__$E
    obj:*libiomp*.so
 }
