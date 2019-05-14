@@ -188,7 +188,6 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
       "%s linear system solver not available.\nTried to obtain it from shared library",
       LINSYS_SOLVER_NAME[work->settings->linsys_solver]);
 # endif /* ifdef PRINTING */
-    osqp_cleanup(work);
     return OSQP_LOAD_LINSYS_SOLVER_ERROR;
   }
 
@@ -201,7 +200,6 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
 # ifdef PRINTING
     c_eprint("Linear systems solver initialization failure");
 # endif /* ifdef PRINTING */
-    osqp_cleanup(work);
     return exitflag;
   }
 
@@ -648,13 +646,15 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
 
     // Free scaling
     if (work->settings->scaling) {
-      if (work->scaling->D) c_free(work->scaling->D);
+      if (work->scaling){
+        if (work->scaling->D) c_free(work->scaling->D);
 
-      if (work->scaling->Dinv) c_free(work->scaling->Dinv);
+        if (work->scaling->Dinv) c_free(work->scaling->Dinv);
 
-      if (work->scaling->E) c_free(work->scaling->E);
+        if (work->scaling->E) c_free(work->scaling->E);
 
-      if (work->scaling->Einv) c_free(work->scaling->Einv);
+        if (work->scaling->Einv) c_free(work->scaling->Einv);
+      }
       c_free(work->scaling);
 
       // Free workspace variables
