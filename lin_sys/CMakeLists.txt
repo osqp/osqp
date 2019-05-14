@@ -15,9 +15,11 @@ add_subdirectory(direct)
 
 # Add linsys handler if not embedded
 if (NOT DEFINED EMBEDDED)
-set(linsys_lib_handler
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib_handler.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib_handler.h)
+
+add_library(linsys_lib_handler
+            ${CMAKE_CURRENT_SOURCE_DIR}/lib_handler.c)
+target_include_directories(linsys_lib_handler PRIVATE ${PROJECT_SOURCE_DIR}/include)
+
 endif()
 
 

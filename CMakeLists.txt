@@ -12,14 +12,14 @@ if(BUILD_CATKIN_PACKAGE)
 ### CATKIN ###
 ##############
 # Find Catkin
-find_package(catkin REQUIRED COMPONENTS
+find_package(catkin REQUIRED COMPONENTS qdldl
 )
 
 # Declare this project as a catkin package
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES ${PROJECT_NAME}
- CATKIN_DEPENDS
+ CATKIN_DEPENDS qdldl
 # DEPENDS system_lib
 )
 
@@ -322,7 +322,9 @@ endif (R_LANG)
 add_subdirectory(lin_sys)
 
 # Static library
-add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
+add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers})
+target_link_libraries(osqpstatic  ${linsys_solvers})
+
 # Give same name to static library output
 set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
 
@@ -426,7 +428,8 @@ if(NOT TARGET uninstall)
         COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
 
-else()
+else(NOT BUILD_CATKIN_PACKAGE)
+
 ### Leggedrobotics #######################################################
 include_directories(
   include
@@ -434,7 +437,7 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME}
-   ${osqp_src} ${linsys_solvers}
+   ${osqp_src}
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -443,6 +446,7 @@ target_include_directories(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
    ${catkin_LIBRARIES}
+   ${linsys_solvers}
 )
 
 install(DIRECTORY include/
