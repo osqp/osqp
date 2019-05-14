@@ -37,9 +37,6 @@ static char* test_non_cvx_solve()
 
   osqp_cleanup(work);
 
-  // Setup workspace again
-  exitflag = osqp_setup(&work, data, settings);
-
   // Update Solver settings
   settings->sigma = sols_data->sigma_new;
 
