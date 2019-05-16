@@ -31,7 +31,13 @@ extern "C" {
 /* ENABLE_MKL_PARDISO */
 #cmakedefine ENABLE_MKL_PARDISO
 
-/* MEMORY MANAGEMENT FUNCTIONS */
+/* MEMORY MANAGEMENT */
+
+#cmakedefine OSQP_USER_CONFIG_H
+#ifdef OSQP_USER_CONFIG_H
+  #include "@OSQP_USER_CONFIG_H@"
+#endif
+
 #cmakedefine OSQP_CALLOC    @OSQP_CALLOC@
 #cmakedefine OSQP_MALLOC    @OSQP_MALLOC@
 #cmakedefine OSQP_REALLOC   @OSQP_REALLOC@

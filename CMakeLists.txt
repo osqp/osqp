@@ -106,6 +106,14 @@ if (NOT DEFINED OSQP_FREE)
     set(OSQP_FREE free)
 endif()
 
+#Report on custom user header options.  This is intended to allow
+#users to provide definitions of their own memory functions
+if(OSQP_USER_CONFIG_H)
+  message(STATUS "User custom configuration header: ${OSQP_USER_CONFIG_H}")
+else()
+  message(STATUS "User custom configuration header: none provided")
+endif()
+
 #Report the memory management configuration.   If matlab
 #or python are used, then report those as special cases
 #since we implement custom internal wrappers.
