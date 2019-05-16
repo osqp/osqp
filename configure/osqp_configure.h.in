@@ -5,7 +5,7 @@
 extern "C" {
 # endif /* ifdef __cplusplus */
 
-/* Operative system */
+/* Operating system */
 #cmakedefine IS_LINUX
 #cmakedefine IS_MAC
 #cmakedefine IS_WINDOWS
@@ -30,6 +30,12 @@ extern "C" {
 
 /* ENABLE_MKL_PARDISO */
 #cmakedefine ENABLE_MKL_PARDISO
+
+/* MEMORY MANAGEMENT FUNCTIONS */
+#cmakedefine OSQP_CALLOC    @OSQP_CALLOC@
+#cmakedefine OSQP_MALLOC    @OSQP_MALLOC@
+#cmakedefine OSQP_REALLOC   @OSQP_REALLOC@
+#cmakedefine OSQP_FREE      @OSQP_FREE@
 
 
 # ifdef __cplusplus
