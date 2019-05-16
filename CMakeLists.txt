@@ -88,6 +88,52 @@ option (COVERAGE "Perform code coverage" OFF)
 message(STATUS "Code coverage is ${COVERAGE}")
 
 
+# Memory allocators
+# ----------------------------------------------
+
+# If user defined functions are not provided for
+# malloc/calloc/realloc/free, then provide defaults
+if (NOT DEFINED OSQP_MALLOC)
+    set(OSQP_MALLOC malloc)
+endif()
+if (NOT DEFINED OSQP_CALLOC)
+    set(OSQP_CALLOC calloc)
+endif()
+if (NOT DEFINED OSQP_REALLOC)
+    set(OSQP_REALLOC realloc)
+endif()
+if (NOT DEFINED OSQP_FREE)
+    set(OSQP_FREE free)
+endif()
+
+#Report the memory management configuration.   If matlab
+#or python are used, then report those as special cases
+#since we implement custom internal wrappers.
+#if EMBEDDED is on, then report instead that no allocators
+#are required, even though function names will have been
+#assigned above as placeholders
+
+if(EMBEDDED)
+  message(STATUS "OSQP allocators: None required since we are building EMBEDDED")
+
+elseif(MATLAB)
+  message(STATUS "OSQP allocators: OSQP/Mathworks wrappers assigned")
+
+elseif(PYTHON)
+  message(STATUS "OSQP allocators: OSQP/Python wrappers assigned")
+
+else()
+  message(STATUS "OSQP allocators: OSQP_MALLOC is ${OSQP_MALLOC}")
+  message(STATUS "OSQP allocators: OSQP_CALLOC is ${OSQP_CALLOC}")
+  message(STATUS "OSQP allocators: OSQP_REALLOC is ${OSQP_REALLOC}")
+  message(STATUS "OSQP allocators: OSQP_FREE is ${OSQP_FREE}")
+
+endif()
+
+
+
+
+
 # Linear solvers dependencies
 # ---------------------------------------------
 option (ENABLE_MKL_PARDISO "Enable MKL Pardiso solver" ON)

@@ -67,10 +67,11 @@ static void* c_calloc(size_t num, size_t size) {
     #   define c_free PyMem_Free
     #   define c_realloc PyMem_Realloc
 #  else  /* ifdef MATLAB */
-    #   define c_malloc malloc
-    #   define c_calloc calloc
-    #   define c_free free
-    #   define c_realloc realloc
+
+    #   define c_malloc  OSQP_MALLOC
+    #   define c_calloc  OSQP_CALLOC
+    #   define c_free    OSQP_FREE
+    #   define c_realloc OSQP_REALLOC
 
 #  endif /* ifdef MATLAB */
 
