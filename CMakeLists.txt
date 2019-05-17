@@ -115,37 +115,21 @@ endif()
 
 #Report on custom user header options.  This is intended to allow
 #users to provide definitions of their own memory functions
-if(OSQP_USER_CONFIG_H)
-  message(STATUS "User custom configuration header: ${OSQP_USER_CONFIG_H}")
-else()
-  message(STATUS "User custom configuration header: none provided")
+if(OSQP_CUSTOM_MEMORY_H)
+	message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY_H}")
+	if (NOT ((DEFINED OSQP_MALLOC) AND
+		     (DEFINED OSQP_CALLOC) AND
+			 (DEFINED OSQP_REALLOC) AND
+			 (DEFINED OSQP_FREE)))
+		message(FATAL_ERROR "If you pass a custom memory management header you must
+		        specify the names of all the new memory management functions:
+				OSQP_MALLOC, OSQP_CALLOC, OSQP_REALLOC and OSQP_FREE")
+	endif()
+    message(STATUS "OSQP memory management: c_malloc is ${OSQP_MALLOC}")
+    message(STATUS "OSQP memory management: c_calloc is ${OSQP_CALLOC}")
+    message(STATUS "OSQP memory management: c_realloc is ${OSQP_REALLOC}")
+    message(STATUS "OSQP memory management: c_free is ${OSQP_FREE}")
 endif()
-
-#Report the memory management configuration.   If matlab
-#or python are used, then report those as special cases
-#since we implement custom internal wrappers.
-#if EMBEDDED is on, then report instead that no allocators
-#are required, even though function names will have been
-#assigned above as placeholders
-
-if(EMBEDDED)
-  message(STATUS "OSQP allocators: None required since we are building EMBEDDED")
-
-elseif(MATLAB)
-  message(STATUS "OSQP allocators: OSQP/Mathworks wrappers assigned")
-
-elseif(PYTHON)
-  message(STATUS "OSQP allocators: OSQP/Python wrappers assigned")
-
-else()
-  message(STATUS "OSQP allocators: OSQP_MALLOC is ${OSQP_MALLOC}")
-  message(STATUS "OSQP allocators: OSQP_CALLOC is ${OSQP_CALLOC}")
-  message(STATUS "OSQP allocators: OSQP_REALLOC is ${OSQP_REALLOC}")
-  message(STATUS "OSQP allocators: OSQP_FREE is ${OSQP_FREE}")
-
-endif()
-
-
 
 
 

@@ -28,14 +28,12 @@ static void* c_calloc(size_t num, size_t size) {
 
 static void* c_malloc(size_t size) {
   void *m = mxMalloc(size);
-
   mexMakeMemoryPersistent(m);
   return m;
 }
 
 static void* c_realloc(void *ptr, size_t size) {
   void *m = mxRealloc(ptr, size);
-
   mexMakeMemoryPersistent(m);
   return m;
 }
@@ -57,13 +55,15 @@ static void* c_calloc(size_t num, size_t size) {
     #   endif /* if PY_MAJOR_VERSION >= 3 */
     #   define c_free PyMem_Free
     #   define c_realloc PyMem_Realloc
-#  else  /* otherwise use standard linux functions */
 
-    #   define c_malloc  OSQP_MALLOC
-    #   define c_calloc  OSQP_CALLOC
-    #   define c_free    OSQP_FREE
-    #   define c_realloc OSQP_REALLOC
-
+# elif !defined OSQP_CUSTOM_MEMORY_H
+/* If no custom memory allocator defined, use
+ * standard linux functions. Custom memory allocator definitions
+ * appear in the osqp_configure.h generated file. */
+    #   define c_malloc  malloc
+    #   define c_calloc  calloc
+    #   define c_free    free
+    #   define c_realloc realloc
 #  endif /* ifdef MATLAB */
 
 #  include <stdlib.h>
