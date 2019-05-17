@@ -136,11 +136,11 @@ C
     #include "osqp.h"
 
     int main(int argc, char **argv) {
-        // Define problem data
-        c_float P_x[4] = {4.0, 1.0, 1.0, 2.0, };
-        c_int P_nnz = 4;
-        c_int P_i[4] = {0, 1, 0, 1, };
-        c_int P_p[3] = {0, 2, 4, };
+        // Load problem data
+        c_float P_x[3] = {4.0, 1.0, 2.0, };
+        c_int P_nnz = 3;
+        c_int P_i[3] = {0, 0, 1, };
+        c_int P_p[3] = {0, 1, 3, };
         c_float q[2] = {1.0, 1.0, };
         c_float q_new[2] = {2.0, 3.0, };
         c_float A_x[4] = {1.0, 1.0, 1.0, 1.0, };
@@ -175,7 +175,7 @@ C
         osqp_set_default_settings(settings);
 
         // Setup workspace
-        work = osqp_setup(data, settings);
+        osqp_setup(&work, data, settings);
 
         // Solve problem
         osqp_solve(work);
