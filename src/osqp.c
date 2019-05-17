@@ -21,8 +21,10 @@
 * Main API Functions *
 **********************/
 void osqp_set_default_settings(OSQPSettings *settings) {
-  settings->scaling = SCALING; /* heuristic problem scaling */
 
+  settings->rho           = (c_float)RHO;            /* ADMM step */
+  settings->sigma         = (c_float)SIGMA;          /* ADMM step */
+  settings->scaling = SCALING;                       /* heuristic problem scaling */
 #if EMBEDDED != 1
   settings->adaptive_rho           = ADAPTIVE_RHO;
   settings->adaptive_rho_interval  = ADAPTIVE_RHO_INTERVAL;
@@ -32,8 +34,6 @@ void osqp_set_default_settings(OSQPSettings *settings) {
 # endif /* ifdef PROFILING */
 #endif  /* if EMBEDDED != 1 */
 
-  settings->rho           = (c_float)RHO;            /* ADMM step */
-  settings->sigma         = (c_float)SIGMA;          /* ADMM step */
   settings->max_iter      = MAX_ITER;                /* maximum iterations to
                                                         take */
   settings->eps_abs       = (c_float)EPS_ABS;        /* absolute convergence
@@ -284,6 +284,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
 #ifdef PROFILING
   c_float temp_run_time;       // Temporary variable to store current run time
 #endif /* ifdef PROFILING */
+
 #ifdef PRINTING
   c_int can_print;             // Boolean whether you can print
 #endif /* ifdef PRINTING */
@@ -400,11 +401,16 @@ c_int osqp_solve(OSQPWorkspace *work) {
     }
 #endif /* ifdef PROFILING */
 
+
+    c_print("DEBUG: before check termination\n");
+
     // Can we check for termination ?
     can_check_termination = work->settings->check_termination &&
                             (iter % work->settings->check_termination == 0);
 
 #ifdef PRINTING
+
+    c_print("DEBUG: before can print\n");
 
     // Can we print ?
     can_print = work->settings->verbose &&
@@ -442,6 +448,8 @@ c_int osqp_solve(OSQPWorkspace *work) {
     }
 #endif /* ifdef PRINTING */
 
+    c_print("DEBUG: after can print and check termination\n");
+    c_print("DEBUG: before adaptive rho interval \n");
 
 #if EMBEDDED != 1
 # ifdef PROFILING
@@ -510,6 +518,8 @@ c_int osqp_solve(OSQPWorkspace *work) {
 #endif // EMBEDDED != 1
 
   }        // End of ADMM for loop
+
+  c_print("DEBUG: after main admm loop\n");
 
   // Update information and check termination condition if it hasn't been done
   // during last iteration (max_iter reached or check_termination disabled)

@@ -5,6 +5,9 @@
 extern "C" {
 # endif /* ifdef __cplusplus */
 
+/* DEBUG */
+#cmakedefine DEBUG
+
 /* Operating system */
 #cmakedefine IS_LINUX
 #cmakedefine IS_MAC

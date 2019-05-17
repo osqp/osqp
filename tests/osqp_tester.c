@@ -25,15 +25,15 @@ int tests_run = 0;
 
 
 static const char* all_tests() {
-  mu_run_test(test_lin_alg);
-  mu_run_test(test_solve_linsys);
+  // mu_run_test(test_lin_alg);
+  // mu_run_test(test_solve_linsys);
   mu_run_test(test_basic_qp);
-  mu_run_test(test_basic_qp2);
-  mu_run_test(test_non_cvx);
-  mu_run_test(test_primal_infeasibility);
-  mu_run_test(test_primal_dual_infeasibility);
-  mu_run_test(test_unconstrained);
-  mu_run_test(test_update_matrices);
+  // mu_run_test(test_basic_qp2);
+  // mu_run_test(test_non_cvx);
+  // mu_run_test(test_primal_infeasibility);
+  // mu_run_test(test_primal_dual_infeasibility);
+  // mu_run_test(test_unconstrained);
+  // mu_run_test(test_update_matrices);
   return 0;
 }
 
