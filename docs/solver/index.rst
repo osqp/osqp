@@ -1,5 +1,5 @@
 The solver
-===========
+==========
 
 Problem statement
 -----------------
@@ -21,7 +21,7 @@ and vectors :math:`l \in \mathbf{R}^{m} \cup \{-\infty\}^{m}`,
 
 
 Algorithm
--------------------------
+---------
 
 The solver runs the following `ADMM algorithm <http://web.stanford.edu/~boyd/papers/admm_distr_stats.html>`_ (for more details see the related papers at the :ref:`citing` section):
 
@@ -38,7 +38,7 @@ where :math:`\Pi` is the projection onto the hyperbox :math:`[l,u]`.
 
 
 Linear system solution
-^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
 The linear system solution is the core part of the algorithm.
 It can be done using a **direct** or **indirect** method.
 
@@ -94,7 +94,7 @@ We set the tolerance levels as
 .. _rho_step_size :
 
 :math:`\rho` step-size 
-^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
 To ensure quick convergence of the algorithm we adapt :math:`\rho` by balancing the residuals. 
 In default mode, the inteval (*i.e.*, number of iterations) at which we update :math:`\rho` is defined by a time measurement.
 When the iterations time becomes greater than a certain fraction of the setup time, *i.e.* :code:`adaptive_rho_fraction`, we set the current number of iterations as the interval to update :math:`\rho`.

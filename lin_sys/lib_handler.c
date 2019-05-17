@@ -2,6 +2,7 @@
 #include <ctype.h> // Needed for tolower functions
 
 #include "constants.h"
+#include "util.h"
 
 soHandle_t lh_load_lib(const char *libName) {
     soHandle_t h = OSQP_NULL;
@@ -110,7 +111,7 @@ symtype lh_load_sym (soHandle_t h, const char *symName) {
             tripSym = ucbuf;
             break;
         case 4:                             /* original_ */
-            memcpy (ocbuf, symName, symLen);
+            c_strcpy(ocbuf, symName);
             ocbuf[symLen] = '_';
             ocbuf[symLen+1] = '\0';
             tripSym = ocbuf;

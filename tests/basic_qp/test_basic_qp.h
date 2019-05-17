@@ -6,7 +6,7 @@
 #include "basic_qp/data.h"
 
 
-static char* test_basic_qp_solve()
+static const char* test_basic_qp_solve()
 {
   c_int exitflag;
 
@@ -190,7 +190,7 @@ static char* test_basic_qp_solve_pardiso()
 }
 #endif
 
-static char* test_basic_qp_update()
+static const char* test_basic_qp_update()
 {
   c_int exitflag;
 
@@ -301,7 +301,7 @@ static char* test_basic_qp_update()
   return 0;
 }
 
-static char* test_basic_qp_check_termination()
+static const char* test_basic_qp_check_termination()
 {
   c_int exitflag;
 
@@ -376,7 +376,7 @@ static char* test_basic_qp_check_termination()
   return 0;
 }
 
-static char* test_basic_qp_update_rho()
+static const char* test_basic_qp_update_rho()
 {
   c_int extiflag;
 
@@ -506,7 +506,7 @@ static char* test_basic_qp_update_rho()
   return 0;
 }
 
-static char* test_basic_qp_time_limit()
+static const char* test_basic_qp_time_limit()
 {
   c_int exitflag;
 
@@ -566,7 +566,7 @@ static char* test_basic_qp_time_limit()
   return 0;
 }
 
-static char* test_basic_qp()
+static const char* test_basic_qp()
 {
   mu_run_test(test_basic_qp_solve);
 #ifdef ENABLE_MKL_PARDISO

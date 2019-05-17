@@ -5,7 +5,7 @@
 #include "unconstrained/data.h"
 
 
-static char* test_unconstrained_solve()
+static const char* test_unconstrained_solve()
 {
   c_int exitflag;
 
@@ -61,7 +61,7 @@ static char* test_unconstrained_solve()
   return 0;
 }
 
-static char* test_unconstrained()
+static const char* test_unconstrained()
 {
   mu_run_test(test_unconstrained_solve);
 

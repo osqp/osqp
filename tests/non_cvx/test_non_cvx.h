@@ -5,7 +5,7 @@
 #include "non_cvx/data.h"
 
 
-static char* test_non_cvx_solve()
+static const char* test_non_cvx_solve()
 {
   c_int exitflag;
 
@@ -68,7 +68,7 @@ static char* test_non_cvx_solve()
   return 0;
 }
 
-static char* test_non_cvx()
+static const char* test_non_cvx()
 {
   mu_run_test(test_non_cvx_solve);
 

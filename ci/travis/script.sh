@@ -71,3 +71,14 @@ cd build
 cmake -G "Unix Makefiles" -DDLONG=OFF -DUNITTESTS=ON ..
 make
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
+
+
+
+echo "Testing OSQP without printing"
+cd ${TRAVIS_BUILD_DIR}
+rm -rf build
+mkdir build
+cd build
+cmake -G "Unix Makefiles" -DPRINTING=OFF -DUNITTESTS=ON ..
+make
+${TRAVIS_BUILD_DIR}/build/out/osqp_tester

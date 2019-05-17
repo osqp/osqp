@@ -511,7 +511,6 @@ c_int osqp_solve(OSQPWorkspace *work) {
 
   }        // End of ADMM for loop
 
-
   // Update information and check termination condition if it hasn't been done
   // during last iteration (max_iter reached or check_termination disabled)
   if (!can_check_termination) {
@@ -537,13 +536,15 @@ c_int osqp_solve(OSQPWorkspace *work) {
 
     /* Check whether a termination criterion is triggered */
     check_termination(work, 0);
+
   }
 
   // Compute objective value in case it was not
   // computed during the iterations
-  if (!compute_cost_function) {
+  if (!compute_cost_function && has_solution(work->info)){
     work->info->obj_val = compute_obj_val(work, work->x);
   }
+
 
 #ifdef PRINTING
   /* Print summary for last iteration */
@@ -555,7 +556,6 @@ c_int osqp_solve(OSQPWorkspace *work) {
   /* if max iterations reached, change status accordingly */
   if (work->info->status_val == OSQP_UNSOLVED) {
     if (!check_termination(work, 1)) { // Try to check for approximate
-                                       // termination
       update_status(work->info, OSQP_MAX_ITER_REACHED);
     }
   }
@@ -982,22 +982,7 @@ c_int osqp_warm_start_y(OSQPWorkspace *work, const c_float *y) {
 
 #if EMBEDDED != 1
 
-/**
- * Update elements of matrix P (upper triangular)
- * without changing sparsity structure.
- *
- *
- *  If Px_new_idx is OSQP_NULL, Px_new is assumed to be as long as P->x
- *  and the whole P->x is replaced.
- *
- * @param  work       Workspace structure
- * @param  Px_new     Vector of new elements in P->x (upper triangular)
- * @param  Px_new_idx Index mapping new elements to positions in P->x
- * @param  P_new_n    Number of new elements to be changed
- * @return            output flag:  0: OK
- *                                  1: P_new_n > nnzP
- *                                 <0: error in update_matrices()
- */
+
 c_int osqp_update_P(OSQPWorkspace *work,
                     const c_float *Px_new,
                     const c_int   *Px_new_idx,
@@ -1075,21 +1060,7 @@ c_int osqp_update_P(OSQPWorkspace *work,
   return exitflag;
 }
 
-/**
- * Update elements of matrix A without changing sparsity structure.
- *
- *
- *  If Ax_new_idx is OSQP_NULL, Ax_new is assumed to be as long as A->x
- *  and the whole P->x is replaced.
- *
- * @param  work       Workspace structure
- * @param  Ax_new     Vector of new elements in A->x
- * @param  Ax_new_idx Index mapping new elements to positions in A->x
- * @param  A_new_n    Number of new elements to be changed
- * @return            output flag:  0: OK
- *                                  1: A_new_n > nnzA
- *                                 <0: error in update_matrices()
- */
+
 c_int osqp_update_A(OSQPWorkspace *work,
                     const c_float *Ax_new,
                     const c_int   *Ax_new_idx,
@@ -1166,29 +1137,7 @@ c_int osqp_update_A(OSQPWorkspace *work,
   return exitflag;
 }
 
-/**
- * Update elements of matrix P (upper triangular) and elements of matrix A
- * without changing sparsity structure.
- *
- *
- *  If Px_new_idx is OSQP_NULL, Px_new is assumed to be as long as P->x
- *  and the whole P->x is replaced.
- *
- *  If Ax_new_idx is OSQP_NULL, Ax_new is assumed to be as long as A->x
- *  and the whole P->x is replaced.
- *
- * @param  work       Workspace structure
- * @param  Px_new     Vector of new elements in P->x (upper triangular)
- * @param  Px_new_idx Index mapping new elements to positions in P->x
- * @param  P_new_n    Number of new elements to be changed
- * @param  Ax_new     Vector of new elements in A->x
- * @param  Ax_new_idx Index mapping new elements to positions in A->x
- * @param  A_new_n    Number of new elements to be changed
- * @return            output flag:  0: OK
- *                                  1: P_new_n > nnzP
- *                                  2: A_new_n > nnzA
- *                                 <0: error in update_matrices()
- */
+
 c_int osqp_update_P_A(OSQPWorkspace *work,
                       const c_float *Px_new,
                       const c_int   *Px_new_idx,
