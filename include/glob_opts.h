@@ -60,14 +60,12 @@ static void* c_calloc(size_t num, size_t size) {
 /* If no custom memory allocator defined, use
  * standard linux functions. Custom memory allocator definitions
  * appear in the osqp_configure.h generated file. */
-    #   define c_malloc  malloc
-    #   define c_calloc  calloc
-    #   define c_free    free
-    #   define c_realloc realloc
+    #  include <stdlib.h>
+    #  define c_malloc  malloc
+    #  define c_calloc  calloc
+    #  define c_free    free
+    #  define c_realloc realloc
 #  endif /* ifdef MATLAB */
-
-#  include <stdlib.h>
-
 
 # endif // end ifndef EMBEDDED
 

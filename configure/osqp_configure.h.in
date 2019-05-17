@@ -38,10 +38,6 @@ extern "C" {
 #cmakedefine OSQP_CUSTOM_MEMORY_H
 #ifdef OSQP_CUSTOM_MEMORY_H
 #include "@OSQP_CUSTOM_MEMORY_H@"
-#define c_malloc    @OSQP_MALLOC@
-#define c_calloc    @OSQP_CALLOC@
-#define c_realloc   @OSQP_REALLOC@
-#define c_free      @OSQP_FREE@
 #endif
 
 

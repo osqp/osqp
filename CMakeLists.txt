@@ -98,37 +98,17 @@ message(STATUS "Code coverage is ${COVERAGE}")
 # Memory allocators
 # ----------------------------------------------
 
-# If user defined functions are not provided for
-# malloc/calloc/realloc/free, then provide defaults
-if (NOT DEFINED OSQP_MALLOC)
-    set(OSQP_MALLOC "malloc")
-endif()
-if (NOT DEFINED OSQP_CALLOC)
-    set(OSQP_CALLOC "calloc")
-endif()
-if (NOT DEFINED OSQP_REALLOC)
-    set(OSQP_REALLOC "realloc")
-endif()
-if (NOT DEFINED OSQP_FREE)
-    set(OSQP_FREE "free")
-endif()
-
 #Report on custom user header options.  This is intended to allow
 #users to provide definitions of their own memory functions
+# The header should define the functions as follows
+#
+# define c_malloc mymalloc
+# define c_calloc mycalloc
+# define c_realloc myrealloc
+# define c_free myfree
+
 if(OSQP_CUSTOM_MEMORY_H)
 	message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY_H}")
-	if (NOT ((DEFINED OSQP_MALLOC) AND
-		     (DEFINED OSQP_CALLOC) AND
-			 (DEFINED OSQP_REALLOC) AND
-			 (DEFINED OSQP_FREE)))
-		message(FATAL_ERROR "If you pass a custom memory management header you must
-		        specify the names of all the new memory management functions:
-				OSQP_MALLOC, OSQP_CALLOC, OSQP_REALLOC and OSQP_FREE")
-	endif()
-    message(STATUS "OSQP memory management: c_malloc is ${OSQP_MALLOC}")
-    message(STATUS "OSQP memory management: c_calloc is ${OSQP_CALLOC}")
-    message(STATUS "OSQP memory management: c_realloc is ${OSQP_REALLOC}")
-    message(STATUS "OSQP memory management: c_free is ${OSQP_FREE}")
 endif()
 
 

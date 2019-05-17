@@ -82,3 +82,16 @@ cd build
 cmake -G "Unix Makefiles" -DPRINTING=OFF -DUNITTESTS=ON ..
 make
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
+
+
+echo "Test OSQP custom allocators"
+cd ${TRAVIS_BUILD_DIR}
+rm -rf build
+mkdir build
+cd build
+cmake -DUNITTESTS=ON \
+    -DOSQP_CUSTOM_MEMORY_H=../tests/custom_memory/memory.h \
+    ..
+make
+${TRAVIS_BUILD_DIR}/build/out/osqp_tester
+
