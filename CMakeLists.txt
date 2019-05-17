@@ -107,8 +107,8 @@ message(STATUS "Code coverage is ${COVERAGE}")
 # define c_realloc myrealloc
 # define c_free myfree
 
-if(OSQP_CUSTOM_MEMORY_H)
-	message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY_H}")
+if(OSQP_CUSTOM_MEMORY)
+	message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY}")
 endif()
 
 

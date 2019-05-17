@@ -56,7 +56,7 @@ static void* c_calloc(size_t num, size_t size) {
     #   define c_free PyMem_Free
     #   define c_realloc PyMem_Realloc
 
-# elif !defined OSQP_CUSTOM_MEMORY_H
+# elif !defined OSQP_CUSTOM_MEMORY
 /* If no custom memory allocator defined, use
  * standard linux functions. Custom memory allocator definitions
  * appear in the osqp_configure.h generated file. */

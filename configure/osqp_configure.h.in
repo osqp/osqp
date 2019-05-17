@@ -35,9 +35,9 @@ extern "C" {
 #cmakedefine ENABLE_MKL_PARDISO
 
 /* MEMORY MANAGEMENT */
-#cmakedefine OSQP_CUSTOM_MEMORY_H
-#ifdef OSQP_CUSTOM_MEMORY_H
-#include "@OSQP_CUSTOM_MEMORY_H@"
+#cmakedefine OSQP_CUSTOM_MEMORY
+#ifdef OSQP_CUSTOM_MEMORY
+#include "@OSQP_CUSTOM_MEMORY@"
 #endif
 
 

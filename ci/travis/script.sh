@@ -90,8 +90,7 @@ rm -rf build
 mkdir build
 cd build
 cmake -DUNITTESTS=ON \
-    -DOSQP_CUSTOM_MEMORY_H=../tests/custom_memory/custom_memory.h \
+    -DOSQP_CUSTOM_MEMORY=../tests/custom_memory/custom_memory.h \
     ..
 make
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
-
