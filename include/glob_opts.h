@@ -42,7 +42,6 @@ static void* c_realloc(void *ptr, size_t size) {
 
     #   define c_free mxFree
 #  elif defined PYTHON
-
 // Define memory allocation for python. Note that in Python 2 memory manager
 // Calloc is not implemented
     #   include <Python.h>
@@ -52,21 +51,13 @@ static void* c_realloc(void *ptr, size_t size) {
     #   else  /* if PY_MAJOR_VERSION >= 3 */
 static void* c_calloc(size_t num, size_t size) {
   void *m = PyMem_Malloc(num * size);
-
   memset(m, 0, num * size);
   return m;
 }
-
     #   endif /* if PY_MAJOR_VERSION >= 3 */
-
-// #define c_calloc(n,s) ({
-//         void * p_calloc = c_malloc((n)*(s));
-//         memset(p_calloc, 0, (n)*(s));
-//         p_calloc;
-//     })
     #   define c_free PyMem_Free
     #   define c_realloc PyMem_Realloc
-#  else  /* ifdef MATLAB */
+#  else  /* otherwise use standard linux functions */
 
     #   define c_malloc  OSQP_MALLOC
     #   define c_calloc  OSQP_CALLOC
@@ -78,7 +69,7 @@ static void* c_calloc(size_t num, size_t size) {
 #  include <stdlib.h>
 
 
-# endif // end EMBEDDED
+# endif // end ifndef EMBEDDED
 
 
 /* Use customized number representation -----------------------------------   */

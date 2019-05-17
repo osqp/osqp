@@ -1,6 +1,7 @@
 Unreleased
 ----------------
-* Added meaningful return values to internal functions. Changed syntax of `osqp_setup` function. It now returns an exitflag!
+* Added meaningful return values to internal functions. Changed syntax of `osqp_setup` function. It now returns an exitflag.
+* Custom memory allocators via cmake and the configure file
 
 
 

@@ -94,16 +94,16 @@ message(STATUS "Code coverage is ${COVERAGE}")
 # If user defined functions are not provided for
 # malloc/calloc/realloc/free, then provide defaults
 if (NOT DEFINED OSQP_MALLOC)
-    set(OSQP_MALLOC malloc)
+    set(OSQP_MALLOC "malloc")
 endif()
 if (NOT DEFINED OSQP_CALLOC)
-    set(OSQP_CALLOC calloc)
+    set(OSQP_CALLOC "calloc")
 endif()
 if (NOT DEFINED OSQP_REALLOC)
-    set(OSQP_REALLOC realloc)
+    set(OSQP_REALLOC "realloc")
 endif()
 if (NOT DEFINED OSQP_FREE)
-    set(OSQP_FREE free)
+    set(OSQP_FREE "free")
 endif()
 
 #Report on custom user header options.  This is intended to allow
