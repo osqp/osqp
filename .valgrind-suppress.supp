@@ -12,6 +12,13 @@
 }
 
 {
+   ignore mkl_get_max_threads
+   Memcheck:Cond
+   fun:mkl_serv_domain_get_max_threads
+   obj:*
+}
+
+{
    ignore_libiomp_intel
    Memcheck:Cond
    fun:__intel_sse2_strrchr

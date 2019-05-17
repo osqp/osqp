@@ -236,7 +236,7 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->adaptive_rho = settings->adaptive_rho;
   new->adaptive_rho_interval = settings->adaptive_rho_interval;
   new->adaptive_rho_tolerance = settings->adaptive_rho_tolerance;
-# ifndef PROFILING
+# ifdef PROFILING
   new->adaptive_rho_fraction = settings->adaptive_rho_fraction;
 # endif
 # endif // EMBEDDED != 1

@@ -247,6 +247,7 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
 # endif /* ifdef PRINTING */
 
 
+
 # if EMBEDDED != 1
 
   // If adaptive rho and automatic interval, but profiling disabled, we need to
@@ -275,6 +276,7 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
 
 
 c_int osqp_solve(OSQPWorkspace *work) {
+
   c_int exitflag;
   c_int iter;
   c_int compute_cost_function; // Boolean whether to compute the cost function
@@ -402,15 +404,11 @@ c_int osqp_solve(OSQPWorkspace *work) {
 #endif /* ifdef PROFILING */
 
 
-    c_print("DEBUG: before check termination\n");
-
     // Can we check for termination ?
     can_check_termination = work->settings->check_termination &&
                             (iter % work->settings->check_termination == 0);
 
 #ifdef PRINTING
-
-    c_print("DEBUG: before can print\n");
 
     // Can we print ?
     can_print = work->settings->verbose &&
@@ -448,8 +446,6 @@ c_int osqp_solve(OSQPWorkspace *work) {
     }
 #endif /* ifdef PRINTING */
 
-    c_print("DEBUG: after can print and check termination\n");
-    c_print("DEBUG: before adaptive rho interval \n");
 
 #if EMBEDDED != 1
 # ifdef PROFILING
@@ -519,7 +515,6 @@ c_int osqp_solve(OSQPWorkspace *work) {
 
   }        // End of ADMM for loop
 
-  c_print("DEBUG: after main admm loop\n");
 
   // Update information and check termination condition if it hasn't been done
   // during last iteration (max_iter reached or check_termination disabled)
