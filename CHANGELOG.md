@@ -3,6 +3,7 @@ Unreleased
 * Added meaningful return values to internal functions. Changed syntax of `osqp_setup` function. It now returns an exitflag.
 * `osqp_setup` function requires `P` to be upper triangular. It returns a nonzero exitflag otherwise.
 * Custom memory allocators via cmake and the configure file.
+* Changed interfaces to linsys solver functions. The solve function now stores `(x_tilde,z_tilde)` instead of `(x_tilde,nu)`.
 
 
 Version 0.5.0 (10 December 2018)
