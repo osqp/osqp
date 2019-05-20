@@ -93,21 +93,21 @@ rm -rf build
 mkdir build
 cd build
 cmake -DUNITTESTS=OFF \
-    -DOSQP_CUSTOM_MEMORY=${TRAVIS_BUILD_DIR}/tests/custom_memory/custom_memory.c \
+    -DOSQP_CUSTOM_MEMORY=${TRAVIS_BUILD_DIR}/tests/custom_memory/custom_memory.h \
     ..
 #make the static library first: it will be missing symbols
 #for the custom memory functions
 make osqpstatic
 #compile the custom memory management functions
-g++ -c ${TRAVIS_BUILD_DIR}/tests/custom_memory/custom_memory.c -o \
-       ${TRAVIS_BUILD_DIR}/tests/custom_memory/custom_memory.o
+g++ -c ${TRAVIS_BUILD_DIR}/tests/custom_memory/custom_memory.c \
+    -o ${TRAVIS_BUILD_DIR}/build/custom_memory.o
 #for testing purposes, just add this to osqp
 #static library.   For real applications, users
 #may prefer to keep it separate and link both
 #to their application
 ar -rcs ${TRAVIS_BUILD_DIR}/build/out/libosqp.a \
-        ${TRAVIS_BUILD_DIR}/tests/custom_memory/custom_memory.o\
-        ${TRAVIS_BUILD_DIR}/build/out/libosqp.a
+        ${TRAVIS_BUILD_DIR}/build/custom_memory.o
+
 #now make the rest of the demos and test
 make osqp_demo
 ${TRAVIS_BUILD_DIR}/build/out/osqp_demo
