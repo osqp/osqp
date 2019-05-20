@@ -41,13 +41,16 @@ struct qdldl {
      * @name Attributes
      * @{
      */
-    csc *L;         ///< lower triangular matrix in LDL factorization
-    c_float *Dinv;  ///< inverse of diag matrix in LDL (as a vector)
-    c_int   *P;     ///< permutation of KKT matrix for factorization
-    c_float *bp;    ///< workspace memory for solves
-    c_float sigma;  ///< scalar parameter
-    c_float n;      ///< number of QP variables
-    c_float m;      ///< number of QP constraints
+    csc *L;                 ///< lower triangular matrix in LDL factorization
+    c_float *Dinv;          ///< inverse of diag matrix in LDL (as a vector)
+    c_int   *P;             ///< permutation of KKT matrix for factorization
+    c_float *bp;            ///< workspace memory for solves
+    c_float *sol;           ///< solution to the KKT system
+    c_float *rho_inv_vec;   ///< parameter vector
+    c_float polish;         ///< polishing flag
+    c_float sigma;          ///< scalar parameter
+    c_int n;                ///< number of QP variables
+    c_int m;                ///< number of QP constraints
 
 
 #if EMBEDDED != 1

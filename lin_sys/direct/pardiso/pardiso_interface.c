@@ -50,10 +50,14 @@ void free_linsys_solver_pardiso(pardiso_solver *s) {
 #endif
       }
         // Check each attribute of the structure and free it if it exists
-        if (s->KKT)       csc_spfree(s->KKT);
-        if (s->KKT_i)     c_free(s->KKT_i);
-        if (s->KKT_p)     c_free(s->KKT_p);
-        if (s->bp)        c_free(s->bp);
+        if (s->KKT)         csc_spfree(s->KKT);
+        if (s->KKT_i)       c_free(s->KKT_i);
+        if (s->KKT_p)       c_free(s->KKT_p);
+        if (s->bp)          c_free(s->bp);
+        if (s->sol)         c_free(s->sol);
+        if (s->rho_inv_vec) c_free(s->rho_inv_vec);
+
+        // These are required for matrix updates
         if (s->Pdiag_idx) c_free(s->Pdiag_idx);
         if (s->PtoKKT)    c_free(s->PtoKKT);
         if (s->AtoKKT)    c_free(s->AtoKKT);
@@ -87,6 +91,9 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
     // Sigma parameter
     s->sigma = sigma;
 
+    // Polishing flag
+    s->polish = polish;
+
     // Link Functions
     s->solve = &solve_linsys_pardiso;
     s->free = &free_linsys_solver_pardiso;
@@ -97,16 +104,22 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
     s->type = MKL_PARDISO_SOLVER;
 
     // Working vector
-    s->bp = c_malloc(sizeof(c_float) * n_plus_m);
+    s->bp = (c_float *)c_malloc(sizeof(c_float) * n_plus_m);
+
+    // Solution vector
+    s->sol  = (c_float *)c_malloc(sizeof(c_float) * n_plus_m);
+
+    // Parameter vector
+    s->rho_inv_vec = (c_float *)c_malloc(sizeof(c_float) * n_plus_m);
 
     // Form KKT matrix
     if (polish){ // Called from polish()
-        // Use s->bp for storing param2 = vec(delta)
+        // Use s->rho_inv_vec for storing param2 = vec(delta)
         for (i = 0; i < A->m; i++){
-            s->bp[i] = sigma;
+            s->rho_inv_vec[i] = sigma;
         }
 
-        s->KKT = form_KKT(P, A, 1, sigma, s->bp, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
+        s->KKT = form_KKT(P, A, 1, sigma, s->rho_inv_vec, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
     }
     else { // Called from ADMM algorithm
 
@@ -115,12 +128,12 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
         s->AtoKKT = c_malloc((A->p[A->n]) * sizeof(c_int));
         s->rhotoKKT = c_malloc((A->m) * sizeof(c_int));
 
-        // Use s->bp for storing param2 = rho_inv_vec
+        // Use s->rho_inv_vec for storing param2 = rho_inv_vec
         for (i = 0; i < A->m; i++){
-            s->bp[i] = 1. / rho_vec[i];
+            s->rho_inv_vec[i] = 1. / rho_vec[i];
         }
 
-        s->KKT = form_KKT(P, A, 1, sigma, s->bp,
+        s->KKT = form_KKT(P, A, 1, sigma, s->rho_inv_vec,
                              s->PtoKKT, s->AtoKKT,
                              &(s->Pdiag_idx), &(s->Pdiag_n), s->rhotoKKT);
     }
@@ -161,13 +174,17 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
     s->mnum = 1;          // Which factorization to use
     s->msglvl = 0;        // Do not print statistical information
     s->error = 0;         // Initialize error flag
-    for ( i = 0; i < 64; i++ ){
+    for ( i = 0; i < 64; i++ ) {
         s->iparm[i] = 0;  // Setup Pardiso control parameters
         s->pt[i] = 0;     // Initialize the internal solver memory pointer
     }
     s->iparm[0] = 1;      // No solver default
     s->iparm[1] = 3;      // Fill-in reordering from OpenMP
-    s->iparm[5] = 1;      // Write solution into b
+    if (polish) {
+        s->iparm[5] = 1;  // Write solution into b
+    } else {
+        s->iparm[5] = 0;  // Do NOT write solution into b
+    }
     /* s->iparm[7] = 2;      // Max number of iterative refinement steps */
     s->iparm[7] = 0;      // Number of iterative refinement steps (auto, performs them only if perturbed pivots are obtained)
     s->iparm[9] = 13;     // Perturb the pivot elements with 1E-13
@@ -212,16 +229,30 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
 
 // Returns solution to linear system  Ax = b with solution stored in b
 c_int solve_linsys_pardiso(pardiso_solver * s, c_float * b) {
+    c_int j;
+
     // Back substitution and iterative refinement
     s->phase = PARDISO_SOLVE;
     pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
              &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
-             s->iparm, &(s->msglvl), b, s->bp, &(s->error));
+             s->iparm, &(s->msglvl), b, s->sol, &(s->error));
     if ( s->error != 0 ){
 #ifdef PRINTING
         c_eprint("Error during linear system solution: %d", (int)s->error);
 #endif
         return 1;
+    }
+
+    if (!(s->polish)) {
+        /* copy x_tilde from s->sol */
+        for (j = 0 ; j < s->n ; j++) {
+            b[j] = s->sol[j];
+        }
+
+        /* compute z_tilde from b and s->sol */
+        for (j = 0 ; j < s->m ; j++) {
+            b[j + s->n] += s->rho_inv_vec[j] * s->sol[j + s->n];
+        }
     }
 
     return 0;
@@ -250,13 +281,13 @@ c_int update_linsys_solver_matrices_pardiso(pardiso_solver * s, const csc *P, co
 c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver * s, const c_float * rho_vec) {
     c_int i;
 
-    // Use s->bp for storing param2 = rho_inv_vec
+    // Update internal rho_inv_vec
     for (i = 0; i < s->m; i++){
-        s->bp[i] = 1. / rho_vec[i];
+        s->rho_inv_vec[i] = 1. / rho_vec[i];
     }
 
     // Update KKT matrix with new rho_vec
-    update_KKT_param2(s->KKT, s->bp, s->rhotoKKT, s->m);
+    update_KKT_param2(s->KKT, s->rho_inv_vec, s->rhotoKKT, s->m);
 
     // Perform numerical factorization
     s->phase = PARDISO_NUMERIC;

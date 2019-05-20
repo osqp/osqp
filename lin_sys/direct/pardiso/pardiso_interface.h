@@ -22,7 +22,7 @@ struct pardiso {
      * @name Functions
      * @{
      */
-    c_int (*solve)(struct pardiso * self, c_float * b, const OSQPSettings * settings);
+    c_int (*solve)(struct pardiso * self, c_float * b);
 
     void (*free)(struct pardiso * self); ///< Free workspace (only if desktop)
 
@@ -38,18 +38,21 @@ struct pardiso {
      * @{
      */
     // Attributes
-    csc *KKT;         ///< KKT matrix (in CSR format!)
-    c_int *KKT_i;     ///< KKT column indices in 1-indexing for Pardiso
-    c_int *KKT_p;     ///< KKT row pointers in 1-indexing for Pardiso
-    c_float *bp;      ///< workspace memory for solves (rhs)
-    c_float sigma;    ///< scalar parameter
-    c_float n;        ///< number of QP variables
-    c_float m;        ///< number of QP constraints
+    csc *KKT;               ///< KKT matrix (in CSR format!)
+    c_int *KKT_i;           ///< KKT column indices in 1-indexing for Pardiso
+    c_int *KKT_p;           ///< KKT row pointers in 1-indexing for Pardiso
+    c_float *bp;            ///< workspace memory for solves (rhs)
+    c_float *sol;           ///< solution to the KKT system
+    c_float *rho_inv_vec;   ///< parameter vector
+    c_float polish;         ///< polishing flag
+    c_float sigma;          ///< scalar parameter
+    c_int n;                ///< number of QP variables
+    c_int m;                ///< number of QP constraints
 
     // Pardiso variables
     void *pt[64];     ///< internal solver memory pointer pt
     c_int iparm[64];  ///< Pardiso control parameters
-    c_int nKKT;          ///< dimension of the linear system
+    c_int nKKT;       ///< dimension of the linear system
     c_int mtype;      ///< matrix type (-2 for real and symmetric indefinite)
     c_int nrhs;       ///< number of right-hand sides (1 for our needs)
     c_int maxfct;     ///< maximum number of factors (1 for our needs)

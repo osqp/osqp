@@ -326,10 +326,10 @@ struct linsys_solver {
 # if EMBEDDED != 1
   c_int (*update_matrices)(LinSysSolver *s,
                            const csc *P,            ///< Update matrices P
-                           const csc *A);           // and A in the solver
+                           const csc *A);           //   and A in the solver
 
   c_int (*update_rho_vec)(LinSysSolver  *s,
-                          const c_float *rho_vec);  ///< Update rho
+                          const c_float *rho_vec);  ///< Update rho_vec
 # endif // if EMBEDDED != 1
 
 # ifndef EMBEDDED

@@ -157,22 +157,22 @@ static char* test_basic_qp_solve_pardiso()
   osqp_solve(work);
 
   // Compare solver statuses
-  mu_assert("Basic QP test solve: Error in solver status!",
+  mu_assert("Basic QP test solve Pardiso: Error in solver status!",
             work->info->status_val == sols_data->status_test);
 
   // Compare primal solutions
-  mu_assert("Basic QP test solve: Error in primal solution!",
+  mu_assert("Basic QP test solve Pardiso: Error in primal solution!",
             vec_norm_inf_diff(work->solution->x, sols_data->x_test,
                               data->n) < TESTS_TOL);
 
   // Compare dual solutions
-  mu_assert("Basic QP test solve: Error in dual solution!",
+  mu_assert("Basic QP test solve Pardiso: Error in dual solution!",
             vec_norm_inf_diff(work->solution->y, sols_data->y_test,
                               data->m) < TESTS_TOL);
 
 
   // Compare objective values
-  mu_assert("Basic QP test solve: Error in objective value!",
+  mu_assert("Basic QP test solve Pardiso: Error in objective value!",
             c_absval(work->info->obj_val - sols_data->obj_value_test) <
             TESTS_TOL);
 

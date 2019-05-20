@@ -177,25 +177,12 @@ static void compute_rhs(OSQPWorkspace *work) {
   }
 }
 
-static void update_z_tilde(OSQPWorkspace *work) {
-  c_int i; // Index
-
-  for (i = 0; i < work->data->m; i++) {
-    work->xz_tilde[i + work->data->n] = work->z_prev[i] + work->rho_inv_vec[i] *
-                                        (work->xz_tilde[i + work->data->n] -
-                                         work->y[i]);
-  }
-}
-
 void update_xz_tilde(OSQPWorkspace *work) {
   // Compute right-hand side
   compute_rhs(work);
 
   // Solve linear system
   work->linsys_solver->solve(work->linsys_solver, work->xz_tilde);
-
-  // Update z_tilde variable after solving linear system
-  update_z_tilde(work);
 }
 
 void update_x(OSQPWorkspace *work) {
