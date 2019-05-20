@@ -27,7 +27,9 @@ void* my_realloc(void *ptr, size_t size) {
 }
 
 void my_free(void *ptr) {
-  free(ptr);
-  alloc_counter--;
-  printf("OSQP allocator   (free) : %ld allocations \n", alloc_counter);
+  if(ptr != NULL){
+    free(ptr);
+    alloc_counter--;
+    printf("OSQP allocator   (free) : %ld allocations \n", alloc_counter);
+  }
 }
