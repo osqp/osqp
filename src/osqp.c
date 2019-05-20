@@ -21,8 +21,10 @@
 * Main API Functions *
 **********************/
 void osqp_set_default_settings(OSQPSettings *settings) {
-  settings->scaling = SCALING; /* heuristic problem scaling */
 
+  settings->rho           = (c_float)RHO;            /* ADMM step */
+  settings->sigma         = (c_float)SIGMA;          /* ADMM step */
+  settings->scaling = SCALING;                       /* heuristic problem scaling */
 #if EMBEDDED != 1
   settings->adaptive_rho           = ADAPTIVE_RHO;
   settings->adaptive_rho_interval  = ADAPTIVE_RHO_INTERVAL;
@@ -32,8 +34,6 @@ void osqp_set_default_settings(OSQPSettings *settings) {
 # endif /* ifdef PROFILING */
 #endif  /* if EMBEDDED != 1 */
 
-  settings->rho           = (c_float)RHO;            /* ADMM step */
-  settings->sigma         = (c_float)SIGMA;          /* ADMM step */
   settings->max_iter      = MAX_ITER;                /* maximum iterations to
                                                         take */
   settings->eps_abs       = (c_float)EPS_ABS;        /* absolute convergence
@@ -247,6 +247,7 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
 # endif /* ifdef PRINTING */
 
 
+
 # if EMBEDDED != 1
 
   // If adaptive rho and automatic interval, but profiling disabled, we need to
@@ -275,6 +276,7 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
 
 
 c_int osqp_solve(OSQPWorkspace *work) {
+
   c_int exitflag;
   c_int iter;
   c_int compute_cost_function; // Boolean whether to compute the cost function
@@ -284,6 +286,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
 #ifdef PROFILING
   c_float temp_run_time;       // Temporary variable to store current run time
 #endif /* ifdef PROFILING */
+
 #ifdef PRINTING
   c_int can_print;             // Boolean whether you can print
 #endif /* ifdef PRINTING */
@@ -400,6 +403,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
     }
 #endif /* ifdef PROFILING */
 
+
     // Can we check for termination ?
     can_check_termination = work->settings->check_termination &&
                             (iter % work->settings->check_termination == 0);
@@ -510,6 +514,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
 #endif // EMBEDDED != 1
 
   }        // End of ADMM for loop
+
 
   // Update information and check termination condition if it hasn't been done
   // during last iteration (max_iter reached or check_termination disabled)

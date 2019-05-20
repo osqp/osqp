@@ -83,9 +83,34 @@ if (NOT (CMAKE_SIZEOF_VOID_P EQUAL 8))
 endif()
 message(STATUS "Long integers (64bit) are ${DLONG}")
 
+
+option (DEBUG "Debug mode" OFF)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	set (DEBUG ON)
+	message(STATUS "Debug mode is ${DEBUG}")
+endif()
+
 # Add code coverage
 option (COVERAGE "Perform code coverage" OFF)
 message(STATUS "Code coverage is ${COVERAGE}")
+
+
+# Memory allocators
+# ----------------------------------------------
+
+#Report on custom user header options.  This is intended to allow
+#users to provide definitions of their own memory functions
+# The header should define the functions as follows
+#
+# define c_malloc mymalloc
+# define c_calloc mycalloc
+# define c_realloc myrealloc
+# define c_free myfree
+
+if(OSQP_CUSTOM_MEMORY)
+	message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY}")
+endif()
+
 
 
 # Linear solvers dependencies
@@ -111,8 +136,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
 # ----------------------------------------------
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
 
-# Add specific flag for debug
-set(CMAKE_C_FLAGS_DEBUG "-DDDEBUG")
 
 if (NOT MSVC)
 
@@ -123,8 +146,12 @@ if (NOT MSVC)
 	endif(FORTRAN)
     endif()
 
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g")
+    if (DEBUG)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g")
+    else()
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+    endif()
+
     set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")      # Include math
     # Include real time library in linux
     if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
