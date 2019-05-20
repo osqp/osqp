@@ -359,7 +359,7 @@ c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver * s, const c_float * rho_v
         s->bp[i] = 1. / rho_vec[i];
     }
 
-    // Update KKT matrix with new rho
+    // Update KKT matrix with new rho_vec
     update_KKT_param2(s->KKT, s->bp, s->rhotoKKT, s->m);
 
     return (QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,

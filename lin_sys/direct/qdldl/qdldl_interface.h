@@ -106,7 +106,7 @@ c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s, const csc *P, const 
 
 
 /**
- * Update rho parameter in linear system solver structure
+ * Update rho_vec parameter in linear system solver structure
  * @param  s        Linear system solver structure
  * @param  rho_vec  new rho_vec value
  * @return          exitflag
