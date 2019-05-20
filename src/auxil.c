@@ -67,8 +67,8 @@ c_int adapt_rho(OSQPWorkspace *work) {
   work->info->rho_estimate = rho_new;
 
   // Check if the new rho is large or small enough and update it in case
-  if ((rho_new > work->settings->rho * ADAPTIVE_RHO_TOLERANCE) ||
-      (rho_new < work->settings->rho /  ADAPTIVE_RHO_TOLERANCE)) {
+  if ((rho_new > work->settings->rho * work->settings->adaptive_rho_tolerance) ||
+      (rho_new < work->settings->rho /  work->settings->adaptive_rho_tolerance)) {
     exitflag                 = osqp_update_rho(work, rho_new);
     work->info->rho_updates += 1;
   }
