@@ -162,7 +162,7 @@ static void iterative_refinement(OSQPWorkspace *work,
       mat_vec(work->pol->Ared, z, rhs + work->data->n, -1);
 
       // Solve linear system. Store solution in rhs
-      p->solve(p, rhs, work->settings);
+      p->solve(p, rhs);
 
       // Update solution
       for (j = 0; j < n; j++) {
@@ -238,7 +238,7 @@ c_int polish(OSQPWorkspace *work) {
 
   // Solve the reduced KKT system
   pol_sol = vec_copy(rhs_red, work->data->n + mred);
-  plsh->solve(plsh, pol_sol, work->settings);
+  plsh->solve(plsh, pol_sol);
 
   // Perform iterative refinement to compensate for the regularization error
   iterative_refinement(work, plsh, pol_sol, rhs_red);

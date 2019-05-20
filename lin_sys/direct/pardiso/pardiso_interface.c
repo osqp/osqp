@@ -40,13 +40,8 @@ void free_linsys_solver_pardiso(pardiso_solver *s) {
 
         // Free pardiso solver using internal function
         s->phase = PARDISO_CLEANUP;
-        // c_print("s->mnum: %f", s->mnum);
-        // c_print("s->mtype: %f", s->mtype);
-        // c_print("s->phase: %f", s->phase);
-        // c_print("s->n: %f", s->n);
-        // c_print("s->fdum: %f", s->fdum);
         pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
-                 &(s->n), &(s->fdum), s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
+                 &(s->nKKT), &(s->fdum), s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
                  s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
 
       if ( s->error != 0 ){
@@ -77,14 +72,20 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
     // Define Variables
     c_int n_plus_m;              // n_plus_m dimension
 
-    // Size of KKT
-    n_plus_m = P->m + A->m;
 
     // Allocate private structure to store KKT factorization
     pardiso_solver *s;
     s = c_calloc(1, sizeof(pardiso_solver));
     *sp = s;
-    s->n = n_plus_m;
+
+    // Size of KKT
+    s->n = P->n;
+    s->m = A->m;
+    n_plus_m = s->n + s->m;
+    s->nKKT = n_plus_m;
+
+    // Sigma parameter
+    s->sigma = sigma;
 
     // Link Functions
     s->solve = &solve_linsys_pardiso;
@@ -179,7 +180,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
     // Reordering and symbolic factorization
     s->phase = PARDISO_SYMBOLIC;
     pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
-             &(s->n), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
+             &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
     if ( s->error != 0 ){
 #ifdef PRINTING
@@ -193,7 +194,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
     // Numerical factorization
     s->phase = PARDISO_NUMERIC;
     pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
-             &(s->n), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
+             &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
     if ( s->error ){
 #ifdef PRINTING
@@ -210,11 +211,11 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
 }
 
 // Returns solution to linear system  Ax = b with solution stored in b
-c_int solve_linsys_pardiso(pardiso_solver * s, c_float * b, const OSQPSettings *settings) {
+c_int solve_linsys_pardiso(pardiso_solver * s, c_float * b) {
     // Back substitution and iterative refinement
     s->phase = PARDISO_SOLVE;
     pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
-             &(s->n), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
+             &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), b, s->bp, &(s->error));
     if ( s->error != 0 ){
 #ifdef PRINTING
@@ -227,11 +228,10 @@ c_int solve_linsys_pardiso(pardiso_solver * s, c_float * b, const OSQPSettings *
 }
 
 // Update solver structure with new P and A
-c_int update_linsys_solver_matrices_pardiso(pardiso_solver * s,
-		const csc *P, const csc *A, const OSQPSettings *settings){
+c_int update_linsys_solver_matrices_pardiso(pardiso_solver * s, const csc *P, const csc *A) {
 
     // Update KKT matrix with new P
-    update_KKT_P(s->KKT, P, s->PtoKKT, settings->sigma, s->Pdiag_idx, s->Pdiag_n);
+    update_KKT_P(s->KKT, P, s->PtoKKT, s->sigma, s->Pdiag_idx, s->Pdiag_n);
 
     // Update KKT matrix with new A
     update_KKT_A(s->KKT, A, s->AtoKKT);
@@ -239,7 +239,7 @@ c_int update_linsys_solver_matrices_pardiso(pardiso_solver * s,
     // Perform numerical factorization
     s->phase = PARDISO_NUMERIC;
     pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
-             &(s->n), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
+             &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
 
     // Return exit flag
@@ -247,21 +247,21 @@ c_int update_linsys_solver_matrices_pardiso(pardiso_solver * s,
 }
 
 
-c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver * s, const c_float * rho_vec, const c_int m){
+c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver * s, const c_float * rho_vec) {
     c_int i;
 
     // Use s->bp for storing param2 = rho_inv_vec
-    for (i = 0; i < m; i++){
+    for (i = 0; i < s->m; i++){
         s->bp[i] = 1. / rho_vec[i];
     }
 
     // Update KKT matrix with new rho
-    update_KKT_param2(s->KKT, s->bp, s->rhotoKKT, m);
+    update_KKT_param2(s->KKT, s->bp, s->rhotoKKT, s->m);
 
     // Perform numerical factorization
     s->phase = PARDISO_NUMERIC;
     pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
-             &(s->n), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
+             &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
 
     // Return exit flag

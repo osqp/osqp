@@ -20,7 +20,7 @@ struct qdldl {
      * @name Functions
      * @{
      */
-    c_int (*solve)(struct qdldl * self, c_float * b, const OSQPSettings * settings);
+    c_int (*solve)(struct qdldl * self, c_float * b);
 
 #ifndef EMBEDDED
     void (*free)(struct qdldl * self); ///< Free workspace (only if desktop)
@@ -28,8 +28,8 @@ struct qdldl {
 
     // This used only in non embedded or embedded 2 version
 #if EMBEDDED != 1
-    c_int (*update_matrices)(struct qdldl * self, const csc *P, const csc *A, const OSQPSettings *settings); ///< Update solver matrices
-    c_int (*update_rho_vec)(struct qdldl * self, const c_float * rho_vec, const c_int m); ///< Update solver matrices
+    c_int (*update_matrices)(struct qdldl * self, const csc *P, const csc *A);  ///< Update solver matrices
+    c_int (*update_rho_vec)(struct qdldl * self, const c_float * rho_vec);      ///< Update rho_vec parameter
 #endif
 
 #ifndef EMBEDDED
@@ -45,6 +45,9 @@ struct qdldl {
     c_float *Dinv;  ///< inverse of diag matrix in LDL (as a vector)
     c_int   *P;     ///< permutation of KKT matrix for factorization
     c_float *bp;    ///< workspace memory for solves
+    c_float sigma;  ///< scalar parameter
+    c_float n;      ///< number of QP variables
+    c_float m;      ///< number of QP constraints
 
 
 #if EMBEDDED != 1
@@ -84,10 +87,9 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const csc * P, const csc * A,
  * Solve linear system and store result in b
  * @param  s        Linear system solver structure
  * @param  b        Right-hand side
- * @param  settings OSQP solver settings
  * @return          Exitflag
  */
-c_int solve_linsys_qdldl(qdldl_solver * s, c_float * b, const OSQPSettings * settings);
+c_int solve_linsys_qdldl(qdldl_solver * s, c_float * b);
 
 
 #if EMBEDDED != 1
@@ -96,23 +98,20 @@ c_int solve_linsys_qdldl(qdldl_solver * s, c_float * b, const OSQPSettings * set
  * @param  s        Linear system solver structure
  * @param  P        Matrix P
  * @param  A        Matrix A
- * @param  settings Solver settings
  * @return          Exitflag
  */
-c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s,
-		const csc *P, const csc *A, const OSQPSettings *settings);
+c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s, const csc *P, const csc *A);
 
 
 
 
 /**
  * Update rho parameter in linear system solver structure
- * @param  s   Linear system solver structure
- * @param  rho new rho value
- * @param  m   number of constraints
- * @return     exitflag
+ * @param  s        Linear system solver structure
+ * @param  rho_vec  new rho_vec value
+ * @return          exitflag
  */
-c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver * s, const c_float * rho_vec, const c_int m);
+c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver * s, const c_float * rho_vec);
 
 #endif
 

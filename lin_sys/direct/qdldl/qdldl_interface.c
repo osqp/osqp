@@ -172,7 +172,12 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const csc * P, const csc * A,
     *sp = s;
 
     // Size of KKT
-    n_plus_m = P->m + A->m;
+    s->n = P->n;
+    s->m = A->m;
+    n_plus_m = s->n + s->m;
+
+    // Sigma parameter
+    s->sigma = sigma;
 
     // Link Functions
     s->solve = &solve_linsys_qdldl;
@@ -319,7 +324,7 @@ static void LDLSolve(c_float *x, c_float *b, csc *L, c_float *Dinv, c_int *P,
 }
 
 
-c_int solve_linsys_qdldl(qdldl_solver * s, c_float * b, const OSQPSettings *settings) {
+c_int solve_linsys_qdldl(qdldl_solver * s, c_float * b) {
     /* returns solution to linear system */
     /* Ax = b with solution stored in b */
     LDLSolve(b, b, s->L, s->Dinv, s->P, s->bp);
@@ -330,12 +335,10 @@ c_int solve_linsys_qdldl(qdldl_solver * s, c_float * b, const OSQPSettings *sett
 
 #if EMBEDDED != 1
 // Update private structure with new P and A
-c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s,
-		const csc *P, const csc *A, const OSQPSettings *settings){
-    c_int kk;
+c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s, const csc *P, const csc *A) {
 
     // Update KKT matrix with new P
-    update_KKT_P(s->KKT, P, s->PtoKKT, settings->sigma, s->Pdiag_idx, s->Pdiag_n);
+    update_KKT_P(s->KKT, P, s->PtoKKT, s->sigma, s->Pdiag_idx, s->Pdiag_n);
 
     // Update KKT matrix with new A
     update_KKT_A(s->KKT, A, s->AtoKKT);
@@ -348,16 +351,16 @@ c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s,
 
 
 
-c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver * s, const c_float * rho_vec, const c_int m){
-    c_int kk, i;
+c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver * s, const c_float * rho_vec){
+    c_int i;
 
     // Use s->bp for storing param2 = rho_inv_vec
-    for (i = 0; i < m; i++){
+    for (i = 0; i < s->m; i++){
         s->bp[i] = 1. / rho_vec[i];
     }
 
     // Update KKT matrix with new rho
-    update_KKT_param2(s->KKT, s->bp, s->rhotoKKT, m);
+    update_KKT_param2(s->KKT, s->bp, s->rhotoKKT, s->m);
 
     return (QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
         s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
