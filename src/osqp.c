@@ -1045,8 +1045,7 @@ c_int osqp_update_P(OSQPWorkspace *work,
   // Update linear system structure with new data
   exitflag = work->linsys_solver->update_matrices(work->linsys_solver,
                                                   work->data->P,
-                                                  work->data->A,
-                                                  work->settings);
+                                                  work->data->A);
 
   // Reset solver information
   reset_info(work->info);
@@ -1122,8 +1121,7 @@ c_int osqp_update_A(OSQPWorkspace *work,
   // Update linear system structure with new data
   exitflag = work->linsys_solver->update_matrices(work->linsys_solver,
                                                   work->data->P,
-                                                  work->data->A,
-                                                  work->settings);
+                                                  work->data->A);
 
   // Reset solver information
   reset_info(work->info);
@@ -1231,8 +1229,7 @@ c_int osqp_update_P_A(OSQPWorkspace *work,
   // Update linear system structure with new data
   exitflag = work->linsys_solver->update_matrices(work->linsys_solver,
                                                   work->data->P,
-                                                  work->data->A,
-                                                  work->settings);
+                                                  work->data->A);
 
   // Reset solver information
   reset_info(work->info);
@@ -1291,8 +1288,7 @@ c_int osqp_update_rho(OSQPWorkspace *work, c_float rho_new) {
 
   // Update rho_vec in KKT matrix
   exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
-                                                 work->rho_vec,
-                                                 work->data->m);
+                                                 work->rho_vec);
 
 #ifdef PROFILING
   if (work->rho_update_from_solve == 0)

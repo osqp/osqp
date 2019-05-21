@@ -22,12 +22,12 @@ struct pardiso {
      * @name Functions
      * @{
      */
-    c_int (*solve)(struct pardiso * self, c_float * b, const OSQPSettings * settings);
+    c_int (*solve)(struct pardiso * self, c_float * b);
 
     void (*free)(struct pardiso * self); ///< Free workspace (only if desktop)
 
-    c_int (*update_matrices)(struct pardiso * self, const csc *P, const csc *A, const OSQPSettings *settings); ///< Update solver matrices
-    c_int (*update_rho_vec)(struct pardiso * self, const c_float * rho_vec, const c_int m); ///< Update solver matrices
+    c_int (*update_matrices)(struct pardiso * self, const csc *P, const csc *A);    ///< Update solver matrices
+    c_int (*update_rho_vec)(struct pardiso * self, const c_float * rho_vec);        ///< Update rho_vec parameter
 
     c_int nthreads;
     /** @} */
@@ -38,15 +38,21 @@ struct pardiso {
      * @{
      */
     // Attributes
-    csc *KKT;         ///< KKT matrix (in CSR format!)
-    c_int *KKT_i;     ///< KKT column indices in 1-indexing for Pardiso
-    c_int *KKT_p;     ///< KKT row pointers in 1-indexing for Pardiso
-    c_float *bp;      ///< workspace memory for solves (rhs)
+    csc *KKT;               ///< KKT matrix (in CSR format!)
+    c_int *KKT_i;           ///< KKT column indices in 1-indexing for Pardiso
+    c_int *KKT_p;           ///< KKT row pointers in 1-indexing for Pardiso
+    c_float *bp;            ///< workspace memory for solves (rhs)
+    c_float *sol;           ///< solution to the KKT system
+    c_float *rho_inv_vec;   ///< parameter vector
+    c_float sigma;          ///< scalar parameter
+    c_int polish;           ///< polishing flag
+    c_int n;                ///< number of QP variables
+    c_int m;                ///< number of QP constraints
 
     // Pardiso variables
     void *pt[64];     ///< internal solver memory pointer pt
     c_int iparm[64];  ///< Pardiso control parameters
-    c_int n;          ///< dimension of the linear system
+    c_int nKKT;       ///< dimension of the linear system
     c_int mtype;      ///< matrix type (-2 for real and symmetric indefinite)
     c_int nrhs;       ///< number of right-hand sides (1 for our needs)
     c_int maxfct;     ///< maximum number of factors (1 for our needs)
@@ -84,10 +90,9 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
  * Solve linear system and store result in b
  * @param  s        Linear system solver structure
  * @param  b        Right-hand side
- * @param  settings OSQP solver settings
  * @return          Exitflag
  */
-c_int solve_linsys_pardiso(pardiso_solver * s, c_float * b, const OSQPSettings * settings);
+c_int solve_linsys_pardiso(pardiso_solver * s, c_float * b);
 
 
 /**
@@ -95,21 +100,18 @@ c_int solve_linsys_pardiso(pardiso_solver * s, c_float * b, const OSQPSettings *
  * @param  s        Linear system solver structure
  * @param  P        Matrix P
  * @param  A        Matrix A
- * @param  settings Solver settings
  * @return          Exitflag
  */
-c_int update_linsys_solver_matrices_pardiso(pardiso_solver * s,
-		const csc *P, const csc *A, const OSQPSettings *settings);
+c_int update_linsys_solver_matrices_pardiso(pardiso_solver * s, const csc *P, const csc *A);
 
 
 /**
  * Update rho parameter in linear system solver structure
- * @param  s   Linear system solver structure
- * @param  rho new rho value
- * @param  m   number of constraints
- * @return     exitflag
+ * @param  s        Linear system solver structure
+ * @param  rho_vec  new rho_vec value
+ * @return          exitflag
  */
-c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver * s, const c_float * rho_vec, const c_int m);
+c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver * s, const c_float * rho_vec);
 
 
 /**

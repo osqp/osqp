@@ -313,11 +313,10 @@ typedef struct {
  *      on the choice
  */
 struct linsys_solver {
-  enum linsys_solver_type type; ///< Linear system solver type
+  enum linsys_solver_type type;                 ///< Linear system solver type
   // Functions
-  c_int (*solve)(LinSysSolver       *self,
-                 c_float            *b,
-                 const OSQPSettings *settings); ///< Solve linear system
+  c_int (*solve)(LinSysSolver *self,
+                 c_float      *b);              ///< Solve linear system
 
 # ifndef EMBEDDED
   void (*free)(LinSysSolver *self);             ///< Free linear system solver
@@ -325,12 +324,12 @@ struct linsys_solver {
 # endif // ifndef EMBEDDED
 
 # if EMBEDDED != 1
-  c_int (*update_matrices)(LinSysSolver *self, const csc *P, const csc *A,
-                           const OSQPSettings *settings); ///< Update matrices P
-                                                          // and A in the solver
+  c_int (*update_matrices)(LinSysSolver *s,
+                           const csc *P,            ///< Update matrices P
+                           const csc *A);           //   and A in the solver
+
   c_int (*update_rho_vec)(LinSysSolver  *s,
-                          const c_float *rho_vec,
-                          const c_int    m);              ///< Update rho
+                          const c_float *rho_vec);  ///< Update rho_vec
 # endif // if EMBEDDED != 1
 
 # ifndef EMBEDDED

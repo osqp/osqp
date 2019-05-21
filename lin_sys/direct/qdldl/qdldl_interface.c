@@ -16,10 +16,12 @@
 // Free LDL Factorization structure
 void free_linsys_solver_qdldl(qdldl_solver *s) {
     if (s) {
-        if (s->L)         csc_spfree(s->L);
-        if (s->P)         c_free(s->P);
-        if (s->Dinv)      c_free(s->Dinv);
-        if (s->bp)        c_free(s->bp);
+        if (s->L)           csc_spfree(s->L);
+        if (s->P)           c_free(s->P);
+        if (s->Dinv)        c_free(s->Dinv);
+        if (s->bp)          c_free(s->bp);
+        if (s->sol)         c_free(s->sol);
+        if (s->rho_inv_vec) c_free(s->rho_inv_vec);
 
         // These are required for matrix updates
         if (s->Pdiag_idx) c_free(s->Pdiag_idx);
@@ -27,6 +29,8 @@ void free_linsys_solver_qdldl(qdldl_solver *s) {
         if (s->PtoKKT)    c_free(s->PtoKKT);
         if (s->AtoKKT)    c_free(s->AtoKKT);
         if (s->rhotoKKT)  c_free(s->rhotoKKT);
+
+        // QDLDL workspace
         if (s->D)         c_free(s->D);
         if (s->etree)     c_free(s->etree);
         if (s->Lnz)       c_free(s->Lnz);
@@ -172,7 +176,15 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const csc * P, const csc * A,
     *sp = s;
 
     // Size of KKT
-    n_plus_m = P->m + A->m;
+    s->n = P->n;
+    s->m = A->m;
+    n_plus_m = s->n + s->m;
+
+    // Sigma parameter
+    s->sigma = sigma;
+
+    // Polishing flag
+    s->polish = polish;
 
     // Link Functions
     s->solve = &solve_linsys_qdldl;
@@ -209,7 +221,13 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const csc * P, const csc * A,
     s->P    = (QDLDL_int *)c_malloc(sizeof(QDLDL_int) * n_plus_m);
 
     // Working vector
-    s->bp   = c_malloc(sizeof(QDLDL_float) * n_plus_m);
+    s->bp   = (QDLDL_float *)c_malloc(sizeof(QDLDL_float) * n_plus_m);
+
+    // Solution vector
+    s->sol  = (QDLDL_float *)c_malloc(sizeof(QDLDL_float) * n_plus_m);
+
+    // Parameter vector
+    s->rho_inv_vec = (c_float *)c_malloc(sizeof(c_float) * s->m);
 
     // Elimination tree workspace
     s->etree = (QDLDL_int *)c_malloc(n_plus_m * sizeof(QDLDL_int));
@@ -230,12 +248,12 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const csc * P, const csc * A,
 
     // Form and permute KKT matrix
     if (polish){ // Called from polish()
-        // Use s->bp for storing param2 = vec(delta)
+        // Use s->rho_inv_vec for storing param2 = vec(delta)
         for (i = 0; i < A->m; i++){
-            s->bp[i] = sigma;
+            s->rho_inv_vec[i] = sigma;
         }
 
-        KKT_temp = form_KKT(P, A, 0, sigma, s->bp, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
+        KKT_temp = form_KKT(P, A, 0, sigma, s->rho_inv_vec, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
 
         // Permute matrix
         if (KKT_temp)
@@ -248,12 +266,12 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const csc * P, const csc * A,
         s->AtoKKT = c_malloc((A->p[A->n]) * sizeof(c_int));
         s->rhotoKKT = c_malloc((A->m) * sizeof(c_int));
 
-        // Use p->bp for storing param2 = rho_inv_vec
+        // Use p->rho_inv_vec for storing param2 = rho_inv_vec
         for (i = 0; i < A->m; i++){
-            s->bp[i] = 1. / rho_vec[i];
+            s->rho_inv_vec[i] = 1. / rho_vec[i];
         }
 
-        KKT_temp = form_KKT(P, A, 0, sigma, s->bp,
+        KKT_temp = form_KKT(P, A, 0, sigma, s->rho_inv_vec,
                             s->PtoKKT, s->AtoKKT,
                             &(s->Pdiag_idx), &(s->Pdiag_n), s->rhotoKKT);
 
@@ -297,21 +315,20 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const csc * P, const csc * A,
 
 
 // Permute x = P*b using P
-void permute_x( c_int n, c_float * x,	c_float * b, c_int * P) {
+void permute_x(c_int n, c_float * x, const c_float * b, const c_int * P) {
     c_int j;
     for (j = 0 ; j < n ; j++) x[j] = b[P[j]];
 }
 
 // Permute x = P'*b using P
-void permutet_x( c_int n, c_float * x,	c_float * b, c_int * P) {
+void permutet_x(c_int n, c_float * x, const c_float * b, const c_int * P) {
     c_int j;
     for (j = 0 ; j < n ; j++) x[P[j]] = b[j];
 }
 
 
-static void LDLSolve(c_float *x, c_float *b, csc *L, c_float *Dinv, c_int *P,
-              c_float *bp) {
-    /* solves PLDL'P' x = b for x */
+static void LDLSolve(c_float *x, c_float *b, const csc *L, const c_float *Dinv, const c_int *P, c_float *bp) {
+    /* solves P'LDL'P x = b for x */
     permute_x(L->n, bp, b, P);
     QDLDL_solve(L->n, L->p, L->i, L->x, Dinv, bp);
     permutet_x(L->n, x, bp, P);
@@ -319,10 +336,30 @@ static void LDLSolve(c_float *x, c_float *b, csc *L, c_float *Dinv, c_int *P,
 }
 
 
-c_int solve_linsys_qdldl(qdldl_solver * s, c_float * b, const OSQPSettings *settings) {
-    /* returns solution to linear system */
-    /* Ax = b with solution stored in b */
-    LDLSolve(b, b, s->L, s->Dinv, s->P, s->bp);
+c_int solve_linsys_qdldl(qdldl_solver * s, c_float * b) {
+    c_int j;
+
+#ifndef EMBEDDED
+    if (s->polish) {
+        /* stores solution to the KKT system in b */
+        LDLSolve(b, b, s->L, s->Dinv, s->P, s->bp);
+    } else {
+#endif
+        /* stores solution to the KKT system in s->sol */
+        LDLSolve(s->sol, b, s->L, s->Dinv, s->P, s->bp);
+
+        /* copy x_tilde from s->sol */
+        for (j = 0 ; j < s->n ; j++) {
+            b[j] = s->sol[j];
+        }
+
+        /* compute z_tilde from b and s->sol */
+        for (j = 0 ; j < s->m ; j++) {
+            b[j + s->n] += s->rho_inv_vec[j] * s->sol[j + s->n];
+        }
+#ifndef EMBEDDED
+    }
+#endif
 
     return 0;
 }
@@ -330,12 +367,10 @@ c_int solve_linsys_qdldl(qdldl_solver * s, c_float * b, const OSQPSettings *sett
 
 #if EMBEDDED != 1
 // Update private structure with new P and A
-c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s,
-		const csc *P, const csc *A, const OSQPSettings *settings){
-    c_int kk;
+c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s, const csc *P, const csc *A) {
 
     // Update KKT matrix with new P
-    update_KKT_P(s->KKT, P, s->PtoKKT, settings->sigma, s->Pdiag_idx, s->Pdiag_n);
+    update_KKT_P(s->KKT, P, s->PtoKKT, s->sigma, s->Pdiag_idx, s->Pdiag_n);
 
     // Update KKT matrix with new A
     update_KKT_A(s->KKT, A, s->AtoKKT);
@@ -347,17 +382,16 @@ c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s,
 }
 
 
+c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver * s, const c_float * rho_vec){
+    c_int i;
 
-c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver * s, const c_float * rho_vec, const c_int m){
-    c_int kk, i;
-
-    // Use s->bp for storing param2 = rho_inv_vec
-    for (i = 0; i < m; i++){
-        s->bp[i] = 1. / rho_vec[i];
+    // Update internal rho_inv_vec
+    for (i = 0; i < s->m; i++){
+        s->rho_inv_vec[i] = 1. / rho_vec[i];
     }
 
-    // Update KKT matrix with new rho
-    update_KKT_param2(s->KKT, s->bp, s->rhotoKKT, m);
+    // Update KKT matrix with new rho_vec
+    update_KKT_param2(s->KKT, s->rho_inv_vec, s->rhotoKKT, s->m);
 
     return (QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
         s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,

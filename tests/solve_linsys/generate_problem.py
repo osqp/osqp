@@ -27,7 +27,8 @@ test_solve_KKT_KKT = spa.vstack([
 test_solve_KKT_rhs = np.random.randn(test_solve_KKT_m + test_solve_KKT_n)
 test_solve_KKT_x = spla.splu(test_solve_KKT_KKT.tocsc()).solve(test_solve_KKT_rhs)
 
-# import ipdb; ipdb.set_trace()
+test_solve_KKT_x[test_solve_KKT_n:] = test_solve_KKT_rhs[test_solve_KKT_n:] + \
+                                      test_solve_KKT_x[test_solve_KKT_n:] / test_solve_KKT_rho
 
 # Generate test data and solutions
 data = {'test_solve_KKT_n': test_solve_KKT_n,
