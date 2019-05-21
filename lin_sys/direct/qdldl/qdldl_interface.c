@@ -227,7 +227,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const csc * P, const csc * A,
     s->sol  = (QDLDL_float *)c_malloc(sizeof(QDLDL_float) * n_plus_m);
 
     // Parameter vector
-    s->rho_inv_vec = (c_float *)c_malloc(sizeof(c_float) * n_plus_m);
+    s->rho_inv_vec = (c_float *)c_malloc(sizeof(c_float) * s->m);
 
     // Elimination tree workspace
     s->etree = (QDLDL_int *)c_malloc(n_plus_m * sizeof(QDLDL_int));
