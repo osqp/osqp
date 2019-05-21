@@ -44,8 +44,8 @@ struct pardiso {
     c_float *bp;            ///< workspace memory for solves (rhs)
     c_float *sol;           ///< solution to the KKT system
     c_float *rho_inv_vec;   ///< parameter vector
-    c_float polish;         ///< polishing flag
     c_float sigma;          ///< scalar parameter
+    c_int polish;           ///< polishing flag
     c_int n;                ///< number of QP variables
     c_int m;                ///< number of QP constraints
 
