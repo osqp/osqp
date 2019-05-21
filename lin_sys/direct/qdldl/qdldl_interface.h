@@ -48,7 +48,9 @@ struct qdldl {
     c_float *sol;           ///< solution to the KKT system
     c_float *rho_inv_vec;   ///< parameter vector
     c_float sigma;          ///< scalar parameter
+#ifndef EMBEDDED
     c_int polish;           ///< polishing flag
+#endif
     c_int n;                ///< number of QP variables
     c_int m;                ///< number of QP constraints
 
