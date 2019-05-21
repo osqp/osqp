@@ -30,7 +30,7 @@ static const char* test_solveKKT() {
                                 settings->sigma, rho_vec, LINSYS_SOLVER, 0);
 
   // Solve  KKT x = b via LDL given factorization
-  s->solve(s, data->test_solve_KKT_rhs, settings);
+  s->solve(s, data->test_solve_KKT_rhs);
 
   mu_assert(
     "Linear systems solve tests: error in forming and solving KKT system!",
@@ -75,7 +75,7 @@ static char* test_solveKKT_pardiso() {
                                 settings->sigma, rho_vec, MKL_PARDISO_SOLVER, 0);
 
   // Solve  KKT x = b via LDL given factorization
-  s->solve(s, data->test_solve_KKT_rhs, settings);
+  s->solve(s, data->test_solve_KKT_rhs);
 
   mu_assert(
     "Linear systems solve tests: error in forming and solving KKT system with PARDISO!",

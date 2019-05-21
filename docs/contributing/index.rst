@@ -55,10 +55,10 @@ The linear system solver object is defined in :code:`mysolver.h` as follows
             // Methods
             enum linsys_solver_type type; // Linear system solver defined in constants.h
 
-            c_int (*solve)(struct mysolver * self, c_float * b, const OSQPSettings * settings);
+            c_int (*solve)(struct mysolver * self, c_float * b);
             void (*free)(struct mysolver * self);
-            c_int (*update_matrices)(struct mysolver * self, const csc *P, const csc *A, const OSQPSettings *settings);
-            c_int (*update_rho_vec)(struct mysolver * self, const c_float * rho_vec, const c_int m);
+            c_int (*update_matrices)(struct mysolver * self, const csc *P, const csc *A);
+            c_int (*update_rho_vec)(struct mysolver * self, const c_float * rho_vec);
 
             // Attributes
             c_int nthreads; // Number of threads used (required!)
@@ -78,14 +78,13 @@ The linear system solver object is defined in :code:`mysolver.h` as follows
         c_int init_linsys_solver_mysolver(mysolver_solver ** s, const csc * P, const csc * A, c_float sigma, c_float * rho_vec, c_int polish);
 
         // Solve linear system and store result in b
-        c_int solve_linsys_mysolver(mysolver_solver * s, c_float * b, const OSQPSettings * settings);
+        c_int solve_linsys_mysolver(mysolver_solver * s, c_float * b);
 
          // Update linear system solver matrices
-        c_int update_linsys_solver_matrices_mysolver(mysolver_solver * s,
-                        const csc *P, const csc *A, const OSQPSettings *settings);
+        c_int update_linsys_solver_matrices_mysolver(mysolver_solver * s, const csc *P, const csc *A);
 
-        // Update rho parameter in linear system solver structure
-        c_int update_linsys_solver_rho_vec_mysolver(mysolver_solver * s, const c_float * rho_vec, const c_int m);
+        // Update rho_vec parameter in linear system solver structure
+        c_int update_linsys_solver_rho_vec_mysolver(mysolver_solver * s, const c_float * rho_vec);
 
         // Free linear system solver
         void free_linsys_solver_mysolver(mysolver_solver * s);
