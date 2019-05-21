@@ -339,10 +339,12 @@ static void LDLSolve(c_float *x, c_float *b, const csc *L, const c_float *Dinv, 
 c_int solve_linsys_qdldl(qdldl_solver * s, c_float * b) {
     c_int j;
 
+#ifndef EMBEDDED
     if (s->polish) {
         /* stores solution to the KKT system in b */
         LDLSolve(b, b, s->L, s->Dinv, s->P, s->bp);
     } else {
+#endif
         /* stores solution to the KKT system in s->sol */
         LDLSolve(s->sol, b, s->L, s->Dinv, s->P, s->bp);
 
@@ -355,7 +357,9 @@ c_int solve_linsys_qdldl(qdldl_solver * s, c_float * b) {
         for (j = 0 ; j < s->m ; j++) {
             b[j + s->n] += s->rho_inv_vec[j] * s->sol[j + s->n];
         }
+#ifndef EMBEDDED
     }
+#endif
 
     return 0;
 }
