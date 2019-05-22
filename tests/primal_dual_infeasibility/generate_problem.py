@@ -1,12 +1,12 @@
 import numpy as np
-import scipy.sparse as spa
+from scipy import sparse
 import utils.codegen_utils as cu
 
-P = spa.diags([1., 0.]).tocsc()
+P = sparse.diags([1., 0.]).tocsc()
 q = np.array([1., -1.])
 
-A12 = spa.csc_matrix([[1., 1.], [1., 0.], [0., 1.]])
-A34 = spa.csc_matrix([[1., 0.], [1., 0.], [0., 1.]])
+A12 = sparse.csc_matrix([[1., 1.], [1., 0.], [0., 1.]])
+A34 = sparse.csc_matrix([[1., 0.], [1., 0.], [0., 1.]])
 l = np.array([0., 1., 1.])
 u1 = np.array([5., 3., 3.])
 u2 = np.array([0., 3., 3.])

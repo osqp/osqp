@@ -1,5 +1,5 @@
 import numpy as np
-import scipy.sparse as spa
+from scipy import sparse
 import scipy as sp
 import utils.codegen_utils as cu
 
@@ -10,11 +10,11 @@ n = 50
 m = 150
 
 # Generate random Matrices
-Pt = spa.random(n, n)
-P = Pt.T.dot(Pt) + spa.eye(n)
-P = spa.triu(P).tocsc()
+Pt = sparse.random(n, n)
+P = Pt.T.dot(Pt) + sparse.eye(n)
+P = sparse.triu(P).tocsc()
 q = sp.randn(n)
-A = spa.random(m, n).tolil()  # Lil for efficiency
+A = sparse.random(m, n).tolil()  # Lil for efficiency
 u = 3 + sp.randn(m)
 l = -3 + sp.randn(m)
 

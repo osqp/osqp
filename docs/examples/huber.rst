@@ -36,7 +36,7 @@ Python
     import osqp
     import numpy as np
     import scipy as sp
-    import scipy.sparse as sparse
+    from scipy import sparse
 
     # Generate problem data
     sp.random.seed(1)
@@ -113,7 +113,7 @@ CVXPY
     from cvxpy import *
     import numpy as np
     import scipy as sp
-    import scipy.sparse as sparse
+    from scipy import sparse
 
     # Generate problem data
     sp.random.seed(1)
