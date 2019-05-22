@@ -1,13 +1,13 @@
 import numpy as np
-import scipy.sparse as spa
+from scipy import sparse
 import utils.codegen_utils as cu
 
-P = spa.triu([[4., 1.], [1., 2.]]).tocsc()
+P = sparse.triu([[4., 1.], [1., 2.]]).tocsc()
 q = np.ones(2)
 
-A = spa.csc_matrix(np.array([[1.0, 1.0], [1.0, 0.0], [0.0, 1.0], [0.0, 1.0]]))
-l = np.array([1.0, 0.0, 0.0, -np.inf])
-u = np.array([1.0, 0.7, 0.7, np.inf])
+A = sparse.csc_matrix(np.array([[1., 1.], [1., 0.], [0., 1.], [0., 1.]]))
+l = np.array([1., 0., 0., -np.inf])
+u = np.array([1., 0.7, 0.7, np.inf])
 
 n = P.shape[0]
 m = A.shape[0]

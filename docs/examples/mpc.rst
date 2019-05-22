@@ -25,7 +25,7 @@ Python
     import osqp
     import numpy as np
     import scipy as sp
-    import scipy.sparse as sparse
+    from scipy import sparse
 
     # Discrete time model of a quadcopter
     Ad = sparse.csc_matrix([
@@ -235,7 +235,7 @@ CVXPY
     from cvxpy import *
     import numpy as np
     import scipy as sp
-    import scipy.sparse as sparse
+    from scipy import sparse
 
     # Discrete time model of a quadcopter
     Ad = sparse.csc_matrix([
