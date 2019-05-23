@@ -375,14 +375,17 @@ c_int is_primal_infeasible(OSQPWorkspace *work, c_float eps_prim_inf) {
 
   // Project delta_y onto the polar of the recession cone of [l,u]
   for (i = 0; i < work->data->m; i++) {
-    if (work->constr_type[i] == 0) {   // inequality constraint
-      if (work->data->u[i] > OSQP_INFTY * MIN_SCALING) {
-        work->delta_y[i] = c_min(work->delta_y[i], 0.0);    // infinite upper bound
-      } else if (work->data->l[i] < -OSQP_INFTY * MIN_SCALING) {
-        work->delta_y[i] = c_max(work->delta_y[i], 0.0);    // infinite lower bound
+    if (work->data->u[i] > OSQP_INFTY * MIN_SCALING) {          // Infinite upper bound
+      if (work->data->l[i] < -OSQP_INFTY * MIN_SCALING) {       // Infinite lower bound
+        // Both bounds infinite
+        work->delta_y[i] = 0.0;
+      } else {
+        // Only upper bound infinite
+        work->delta_y[i] = c_min(work->delta_y[i], 0.0);
       }
-    } else if (work->constr_type[i] == -1) {
-      work->delta_y[i] = 0.0;                               // loose bounds
+    } else if (work->data->l[i] < -OSQP_INFTY * MIN_SCALING) {  // Infinite lower bound
+      // Only lower bound infinite
+      work->delta_y[i] = c_max(work->delta_y[i], 0.0);
     }
   }
 
