@@ -36,26 +36,25 @@ else
     OS_NAME="linux"
     OS_SHARED_LIB_EXT="so"
 fi
-OSQP_DEPLOY_DIR=osqp-${OSQP_VERSION}-${OS_NAME}64
-mkdir $OSQP_DEPLOY_DIR/
-mkdir $OSQP_DEPLOY_DIR/lib
-mkdir $OSQP_DEPLOY_DIR/include
+OSQP_BIN=osqp-${OSQP_VERSION}-${OS_NAME}64
+mkdir $OSQP_BIN/
+mkdir $OSQP_BIN/lib
+mkdir $OSQP_BIN/include
 # Copy license
-cp ../../LICENSE $OSQP_DEPLOY_DIR/
+cp ../../LICENSE $OSQP_BIN/
 # Copy includes
-cp ../../include/*.h  $OSQP_DEPLOY_DIR/include
+cp ../../include/*.h  $OSQP_BIN/include
 # Copy static library
-cp libosqp.a $OSQP_DEPLOY_DIR/lib
+cp libosqp.a $OSQP_BIN/lib
 # Copy shared library
-cp libosqp.$OS_SHARED_LIB_EXT $OSQP_DEPLOY_DIR/lib
+cp libosqp.$OS_SHARED_LIB_EXT $OSQP_BIN/lib
 # Compress package
-tar -czvf $OSQP_DEPLOY_DIR.tar.gz  $OSQP_DEPLOY_DIR
+tar -czvf ${TRAVIS_BUILD_DIR}/$OSQP_BIN.tar.gz  $OSQP_BIN
 
 
 echo "Creating Bintray sources package..."
 
 OSQP_SOURCES=osqp-${OSQP_VERSION}
-
 # Clone OSQP repository
 cd ${TRAVIS_BUILD_DIR}
 mkdir sources/
@@ -65,16 +64,15 @@ cd ${OSQP_SOURCES}
 git checkout -qf $TRAVIS_COMMIT
 git submodule update
 cd ..
-
 # Create archive ignoring hidden files
-tar --exclude=".*" -czvf ${OSQP_SOURCES}.tar.gz ${OSQP_SOURCES}
+tar --exclude=".*" -czvf ${TRAVIS_BUILD_DIR}/${OSQP_SOURCES}.tar.gz ${OSQP_SOURCES}
 
 # Deploy package
-curl -T $OSQP_DEPLOY_DIR.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:${OSQP_PACKAGE_NAME}" -H "X-Bintray-Version:${OSQP_VERSION}" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/
+curl -T ${TRAVIS_BUILD_DIR}/${OSQP_BIN}.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:${OSQP_PACKAGE_NAME}" -H "X-Bintray-Version:${OSQP_VERSION}" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/
 
 
 # Deploy sources
-curl -T ${OSQP_SOURCES}.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:${OSQP_PACKAGE_NAME}" -H "X-Bintray-Version:${OSQP_VERSION}" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/
+curl -T ${TRAVIS_BUILD_DIR}/${OSQP_SOURCES}.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:${OSQP_PACKAGE_NAME}" -H "X-Bintray-Version:${OSQP_VERSION}" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/
 
 
 # Publish deployed files
