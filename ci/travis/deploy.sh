@@ -2,6 +2,10 @@
 set -ev
 
 OSQP_VERSION="0.5.0"
+OSQP_PACKAGE_NAME="OSQP"
+if [[ ${OSQP_VERSION} == *"dev"* ]]; then
+    OSQP_PACKAGE_NAME="${OSQP_PACKAGE_NAME}-dev"
+fi
 
 # Update variables from install
 # CMake
@@ -48,10 +52,6 @@ cp libosqp.$OS_SHARED_LIB_EXT $OSQP_DEPLOY_DIR/lib
 tar -czvf $OSQP_DEPLOY_DIR.tar.gz  $OSQP_DEPLOY_DIR
 
 
-# Deploy package
-curl -T $OSQP_DEPLOY_DIR.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:OSQP" -H "X-Bintray-Version:${OSQP_VERSION}" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/OSQP/${OSQP_VERSION}/
-
-
 echo "Creating Bintray sources package..."
 
 OSQP_SOURCES=osqp-${OSQP_VERSION}
@@ -69,12 +69,16 @@ cd ..
 # Create archive ignoring hidden files
 tar --exclude=".*" -czvf ${OSQP_SOURCES}.tar.gz ${OSQP_SOURCES}
 
+# Deploy package
+curl -T $OSQP_DEPLOY_DIR.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:${OSQP_PACKAGE_NAME}" -H "X-Bintray-Version:${OSQP_VERSION}" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/
+
+
 # Deploy sources
-curl -T ${OSQP_SOURCES}.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:OSQP" -H "X-Bintray-Version:${OSQP_VERSION}" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/OSQP/${OSQP_VERSION}/
+curl -T ${OSQP_SOURCES}.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:${OSQP_PACKAGE_NAME}" -H "X-Bintray-Version:${OSQP_VERSION}" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/
 
 
 # Publish deployed files
-curl -X POST -ubstellato:$BINTRAY_API_KEY https://api.bintray.com/content/bstellato/generic/OSQP/0.5.0/publish
+curl -X POST -ubstellato:$BINTRAY_API_KEY https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/publish
 
 
 exit 0
