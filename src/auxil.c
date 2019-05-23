@@ -369,14 +369,25 @@ c_int is_primal_infeasible(OSQPWorkspace *work, c_float eps_prim_inf) {
   // 2) u'*max(delta_y, 0) + l'*min(delta_y, 0) < -eps * ||delta_y||
   //
 
-  c_int   i; // Index for loops
+  c_int i; // Index for loops
   c_float norm_delta_y;
-  c_float ineq_lhs;
+  c_float ineq_lhs = 0.0;
 
-  // Compute infinity norm of delta_y
-  if (work->settings->scaling && !work->settings->scaled_termination) { // Unscale
-                                                                        // if
-                                                                        // necessary
+  // Project delta_y onto the polar of the recession cone of [l,u]
+  for (i = 0; i < work->data->m; i++) {
+    if (work->constr_type[i] == 0) {   // inequality constraint
+      if (work->data->u[i] > OSQP_INFTY * MIN_SCALING) {
+        work->delta_y[i] = c_min(work->delta_y[i], 0.0);    // infinite upper bound
+      } else if (work->data->l[i] < -OSQP_INFTY * MIN_SCALING) {
+        work->delta_y[i] = c_max(work->delta_y[i], 0.0);    // infinite lower bound
+      }
+    } else if (work->constr_type[i] == -1) {
+      work->delta_y[i] = 0.0;                               // loose bounds
+    }
+  }
+
+  // Compute infinity norm of delta_y (unscale if necessary)
+  if (work->settings->scaling && !work->settings->scaled_termination) {
     // Use work->Adelta_x as temporary vector
     vec_ew_prod(work->scaling->E, work->delta_y, work->Adelta_x, work->data->m);
     norm_delta_y = vec_norm_inf(work->Adelta_x, work->data->m);
@@ -385,7 +396,6 @@ c_int is_primal_infeasible(OSQPWorkspace *work, c_float eps_prim_inf) {
   }
 
   if (norm_delta_y > eps_prim_inf) { // ||delta_y|| > 0
-    ineq_lhs = 0;
 
     for (i = 0; i < work->data->m; i++) {
       ineq_lhs += work->data->u[i] * c_max(work->delta_y[i], 0) + \
@@ -397,16 +407,15 @@ c_int is_primal_infeasible(OSQPWorkspace *work, c_float eps_prim_inf) {
       // Compute and return ||A'delta_y|| < eps_prim_inf
       mat_tpose_vec(work->data->A, work->delta_y, work->Atdelta_y, 0, 0);
 
-      if (work->settings->scaling && !work->settings->scaled_termination) { // Unscale
-                                                                            // if
-                                                                            // necessary
+      // Unscale if necessary
+      if (work->settings->scaling && !work->settings->scaled_termination) {
         vec_ew_prod(work->scaling->Dinv,
                     work->Atdelta_y,
                     work->Atdelta_y,
                     work->data->n);
       }
-      return vec_norm_inf(work->Atdelta_y,
-                          work->data->n) < eps_prim_inf * norm_delta_y;
+
+      return vec_norm_inf(work->Atdelta_y, work->data->n) < eps_prim_inf * norm_delta_y;
     }
   }
 
@@ -480,8 +489,8 @@ c_int is_dual_infeasible(OSQPWorkspace *work, c_float eps_dual_inf) {
         }
 
         // De Morgan Law Applied to dual infeasibility conditions for A * x
-        // NB: Note that 1e-06 is used to adjust the infinity value
-        //      in case the problem is scaled.
+        // NB: Note that MIN_SCALING is used to adjust the infinity value
+        //     in case the problem is scaled.
         for (i = 0; i < work->data->m; i++) {
           if (((work->data->u[i] < OSQP_INFTY * MIN_SCALING) &&
                (work->Adelta_x[i] >  eps_dual_inf * norm_delta_x)) ||
