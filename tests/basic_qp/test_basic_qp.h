@@ -8,7 +8,8 @@
 
 static const char* test_basic_qp_solve()
 {
-  c_int exitflag;
+  c_int exitflag, tmp;
+  csc *mat_tmp, *P_tmp;
 
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
@@ -103,10 +104,85 @@ static const char* test_basic_qp_solve()
 
   mu_assert("Basic QP test solve: Wrong value of verbose not caught!",
 	    osqp_update_verbose(work, 2) == 1);
-//
 
   // Clean workspace
   osqp_cleanup(work);
+
+  // Setup workspace with empty data
+  exitflag = osqp_setup(&work, OSQP_NULL, settings);
+  mu_assert("Basic QP test solve: Setup should result in error due to empty data",
+            exitflag == OSQP_DATA_VALIDATION_ERROR);
+
+  // Setup workspace with empty settings
+  exitflag = osqp_setup(&work, data, OSQP_NULL);
+  mu_assert("Basic QP test solve: Setup should result in error due to empty settings",
+            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+
+  // Setup workspace with wrong data->m
+  tmp = data->m;
+  data->m = data->m - 1;
+  exitflag = osqp_setup(&work, data, settings);
+  mu_assert("Basic QP test solve: Setup should result in error due to wrong data->m",
+            exitflag == OSQP_DATA_VALIDATION_ERROR);
+  data->m = tmp;
+
+  // Setup workspace with wrong data->n
+  tmp = data->n;
+  data->n = data->n + 1;
+  exitflag = osqp_setup(&work, data, settings);
+  mu_assert("Basic QP test solve: Setup should result in error due to wrong data->n",
+            exitflag == OSQP_DATA_VALIDATION_ERROR);
+
+  // Setup workspace with zero data->n
+  data->n = 0;
+  exitflag = osqp_setup(&work, data, settings);
+  mu_assert("Basic QP test solve: Setup should result in error due to zero data->n",
+            exitflag == OSQP_DATA_VALIDATION_ERROR);
+  data->n = tmp;
+
+  // Setup workspace with wrong P->m
+  tmp = data->P->m;
+  data->P->m = data->n + 1;
+  exitflag = osqp_setup(&work, data, settings);
+  mu_assert("Basic QP test solve: Setup should result in error due to wrong P->n",
+            exitflag == OSQP_DATA_VALIDATION_ERROR);
+  data->P->m = tmp;
+
+  // Setup workspace with non-upper-triangular P
+  mat_tmp = data->P;
+
+  // Construct non-upper-triangular P
+  P_tmp = (csc*) c_malloc(sizeof(csc));
+  P_tmp->m = 2;
+  P_tmp->n = 2;
+  P_tmp->nz = -1;
+  P_tmp->nzmax = 4;
+  P_tmp->x = (c_float*) c_malloc(4 * sizeof(c_float));
+  P_tmp->x[0] = 4.0;
+  P_tmp->x[1] = 1.0;
+  P_tmp->x[2] = 1.0;
+  P_tmp->x[3] = 2.0;
+  P_tmp->i = (c_int*) c_malloc(4 * sizeof(c_int));
+  P_tmp->i[0] = 0;
+  P_tmp->i[1] = 1;
+  P_tmp->i[2] = 0;
+  P_tmp->i[3] = 1;
+  P_tmp->p = (c_int*) c_malloc((2 + 1) * sizeof(c_int));
+  P_tmp->p[0] = 0;
+  P_tmp->p[1] = 2;
+  P_tmp->p[2] = 4;
+
+  data->P = P_tmp;
+  exitflag = osqp_setup(&work, data, settings);
+  mu_assert("Basic QP test solve: Setup should result in error due to non-triu structure of P",
+            exitflag == OSQP_DATA_VALIDATION_ERROR);
+  data->P = mat_tmp;
+
+  // Setup workspace with non-consistent bounds
+  data->l[0] = data->u[0] + 1.0;
+  exitflag = osqp_setup(&work, data, settings);
+  mu_assert("Basic QP test solve: Setup should result in error due to non-consistent bounds",
+            exitflag == OSQP_DATA_VALIDATION_ERROR);
 
 
   // Cleanup data
@@ -115,6 +191,10 @@ static const char* test_basic_qp_solve()
 
   // Cleanup
   c_free(settings);
+  c_free(P_tmp->x);
+  c_free(P_tmp->i);
+  c_free(P_tmp->p);
+  c_free(P_tmp);
 
   return 0;
 }
