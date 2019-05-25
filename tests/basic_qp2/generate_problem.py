@@ -2,7 +2,7 @@ import numpy as np
 from scipy import sparse
 import utils.codegen_utils as cu
 
-P = sparse.triu([[11., 0.], [0., 0.]]).tocsc()
+P = sparse.triu([[11., 0.], [0., 0.]], format='csc')
 q = np.array([3., 4.])
 
 A = sparse.csc_matrix(np.array([[-1., 0.], [0., -1.], [-1., 3.],

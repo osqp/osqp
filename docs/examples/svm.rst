@@ -45,7 +45,7 @@ Python
     Ad = sparse.vstack([
             A_upp / np.sqrt(n) + (A_upp != 0.).astype(float) / n,
             A_low / np.sqrt(n) - (A_low != 0.).astype(float) / n
-         ]).tocsc()
+         ], format='csc')
 
     # OSQP data
     Im = sparse.eye(m)
@@ -54,7 +54,7 @@ Python
     A = sparse.vstack([
             sparse.hstack([sparse.diags(b).dot(Ad), -Im]),
             sparse.hstack([sparse.csc_matrix((m, n)), Im])
-        ]).tocsc()
+        ], format='csc')
     l = np.hstack([-np.inf*np.ones(m), np.zeros(m)])
     u = np.hstack([-np.ones(m), np.inf*np.ones(m)])
 
@@ -126,7 +126,7 @@ CVXPY
     A = sparse.vstack([
             A_upp / np.sqrt(n) + (A_upp != 0.).astype(float) / n,
             A_low / np.sqrt(n) - (A_low != 0.).astype(float) / n
-        ]).tocsc()
+        ], format='csc')
 
     # Define problem
     x = Variable(n)

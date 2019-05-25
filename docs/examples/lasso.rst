@@ -58,7 +58,7 @@ Python
     q = np.zeros(2*n + m)
     A = sparse.vstack([sparse.hstack([Ad, -Im, Onm.T]),
                        sparse.hstack([In, Onm, -In]),
-                       sparse.hstack([In, Onm, In])]).tocsc()
+                       sparse.hstack([In, Onm, In])], format='csc')
     l = np.hstack([b, -np.inf * np.ones(n), np.zeros(n)])
     u = np.hstack([b, np.zeros(n), np.inf * np.ones(n)])
 

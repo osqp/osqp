@@ -42,8 +42,7 @@ Python
     q = np.zeros(n+m)
     A = sparse.vstack([
             sparse.hstack([Ad, -sparse.eye(m)]),
-            sparse.hstack((sparse.eye(n), sparse.csc_matrix((n, m))))
-        ]).tocsc()
+            sparse.hstack([sparse.eye(n), sparse.csc_matrix((n, m))])], format='csc')
     l = np.hstack([b, np.zeros(n)])
     u = np.hstack([b, np.ones(n)])
 

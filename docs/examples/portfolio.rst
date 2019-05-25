@@ -60,7 +60,7 @@ Python
             sparse.hstack([F.T, -sparse.eye(k)]),
             sparse.hstack([sparse.csc_matrix(np.ones((1, n))), sparse.csc_matrix((1, k))]),
             sparse.hstack((sparse.eye(n), sparse.csc_matrix((n, k))))
-        ]).tocsc()
+        ], format='csc')
     l = np.hstack([np.zeros(k), 1., np.zeros(n)])
     u = np.hstack([np.zeros(k), 1., np.ones(n)])
 
