@@ -469,21 +469,21 @@ static const char* test_basic_qp_update_rho()
   osqp_solve(work);
 
   // Compare solver statuses
-  mu_assert("Update rho test update: Error in solver status!",
+  mu_assert("Basic QP test update rho: Error in solver status!",
             work->info->status_val == sols_data->status_test);
 
   // Compare primal solutions
-  mu_assert("Update rho test update: Error in primal solution!",
+  mu_assert("Basic QP test update rho: Error in primal solution!",
             vec_norm_inf_diff(work->solution->x, sols_data->x_test,
                               data->n)/vec_norm_inf(sols_data->x_test, data->n) < TESTS_TOL);
 
   // Compare dual solutions
-  mu_assert("Update rho test update: Error in dual solution!",
+  mu_assert("Basic QP test update rho: Error in dual solution!",
             vec_norm_inf_diff(work->solution->y, sols_data->y_test,
                               data->m)/vec_norm_inf(sols_data->y_test, data->m)< TESTS_TOL);
 
   // Compare objective values
-  mu_assert("Update rho test update: Error in objective value!",
+  mu_assert("Basic QP test update rho: Error in objective value!",
             c_absval(work->info->obj_val - sols_data->obj_value_test) <
             TESTS_TOL);
 
@@ -491,7 +491,7 @@ static const char* test_basic_qp_update_rho()
   n_iter_update_rho = work->info->iter;
 
   // Assert same number of iterations
-  mu_assert("Update rho test update: Error in number of iterations!",
+  mu_assert("Basic QP test update rho: Error in number of iterations!",
             n_iter_new_solver == n_iter_update_rho);
 
   // Cleanup solver
@@ -526,14 +526,14 @@ static const char* test_basic_qp_time_limit()
   // Define Solver settings as default
   osqp_set_default_settings(settings);
 
-  // Check dfault time limit
-  mu_assert("Time limit test: Default not correct", settings->time_limit == 0);
+  // Check default time limit
+  mu_assert("Basic QP test time limit: Default not correct", settings->time_limit == 0);
 
   // Setup workspace
   exitflag = osqp_setup(&work, data, settings);
 
   // Setup correct
-  mu_assert("Time limit test: Setup error!", exitflag == 0);
+  mu_assert("Basic QP test time limit: Setup error!", exitflag == 0);
 
   // Solve Problem
   osqp_solve(work);
@@ -551,7 +551,7 @@ static const char* test_basic_qp_time_limit()
   osqp_solve(work);
 
   // Compare solver statuses
-  mu_assert("Time limit test: Error in timed out solver status!",
+  mu_assert("Basic QP test time limit: Error in timed out solver status!",
 	    work->info->status_val == OSQP_TIME_LIMIT_REACHED);
 
   // Cleanup solver
@@ -567,6 +567,71 @@ static const char* test_basic_qp_time_limit()
   return 0;
 }
 
+
+static const char* test_basic_qp_warm_start()
+{
+  c_int exitflag, iter;
+
+  // Cold started variables
+  c_float x0[2] = { 0.0, 0.0, };
+  c_float y0[4] = { 0.0, 0.0, 0.0, 0.0, };
+
+  // Optimal solution
+  c_float xopt[2] = { 0.3, 0.7, };
+  c_float yopt[4] = {-2.9, 0.0, 0.2, 0.0, };
+
+  // Problem settings
+  OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
+
+  // Structures
+  OSQPWorkspace *work; // Workspace
+  OSQPData *data;      // Data
+  basic_qp_sols_data *sols_data;
+
+  // Populate data
+  data = generate_problem_basic_qp();
+  sols_data = generate_problem_basic_qp_sols_data();
+
+  // Define Solver settings as default
+  osqp_set_default_settings(settings);
+  settings->check_termination = 1;
+
+  // Setup workspace
+  exitflag = osqp_setup(&work, data, settings);
+
+  // Solve Problem
+  osqp_solve(work);
+  iter = work->info->iter;
+
+  // Cold start and solve again
+  osqp_warm_start(work, x0, y0);
+  osqp_solve(work);
+
+  // Check if the number of iterations is the same
+  mu_assert("Basic QP test warm start: Cold start error!", work->info->iter == iter);
+
+  // Warm start from the solution and solve again
+  osqp_warm_start_x(work, xopt);
+  osqp_warm_start_y(work, yopt);
+  osqp_solve(work);
+
+  // Check that the number of iterations equals 1
+  mu_assert("Basic QP test warm start: Warm start error!", work->info->iter == 1);
+
+  // Cleanup solver
+  osqp_cleanup(work);
+
+  // Cleanup data
+  clean_problem_basic_qp(data);
+  clean_problem_basic_qp_sols_data(sols_data);
+
+  // Cleanup
+  c_free(settings);
+
+  return 0;
+}
+
+
 static const char* test_basic_qp()
 {
   mu_run_test(test_basic_qp_solve);
@@ -577,6 +642,7 @@ static const char* test_basic_qp()
   mu_run_test(test_basic_qp_check_termination);
   mu_run_test(test_basic_qp_update_rho);
   mu_run_test(test_basic_qp_time_limit);
+  mu_run_test(test_basic_qp_warm_start);
 
   return 0;
 }

@@ -167,7 +167,9 @@ void print_polish(OSQPWorkspace *work) {
 
   // Different characters for windows/unix
 # ifdef IS_WINDOWS
-# ifndef PYTHON
+# ifdef PYTHON
+  c_print("   --------");
+# else
   c_print("  ---------");
 # endif /* ifdef PYTHON */
 # else  /* ifdef IS_WINDOWS */
