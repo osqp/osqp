@@ -54,7 +54,7 @@ Python
     Onm = sparse.csc_matrix((n, m))
 
     # OSQP data
-    P = sparse.block_diag((On, sparse.eye(m), On), format='csc')
+    P = sparse.block_diag([On, sparse.eye(m), On], format='csc')
     q = np.zeros(2*n + m)
     A = sparse.vstack([sparse.hstack([Ad, -Im, Onm.T]),
                        sparse.hstack([In, Onm, -In]),

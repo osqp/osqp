@@ -38,7 +38,7 @@ Python
     b = np.random.randn(m)
 
     # OSQP data
-    P = sparse.block_diag((sparse.csc_matrix((n, n)), sparse.eye(m)), format='csc')
+    P = sparse.block_diag([sparse.csc_matrix((n, n)), sparse.eye(m)], format='csc')
     q = np.zeros(n+m)
     A = sparse.vstack([
             sparse.hstack([Ad, -sparse.eye(m)]),

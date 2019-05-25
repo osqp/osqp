@@ -54,7 +54,7 @@ Python
     gamma = 1
 
     # OSQP data
-    P = sparse.block_diag((D, sparse.eye(k)), format='csc')
+    P = sparse.block_diag([D, sparse.eye(k)], format='csc')
     q = np.hstack([-mu / (2*gamma), np.zeros(k)])
     A = sparse.vstack([
             sparse.hstack([F.T, -sparse.eye(k)]),

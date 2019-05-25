@@ -49,7 +49,7 @@ Python
 
     # OSQP data
     Im = sparse.eye(m)
-    P = sparse.block_diag((sparse.eye(n), sparse.csc_matrix((m, m))), format='csc')
+    P = sparse.block_diag([sparse.eye(n), sparse.csc_matrix((m, m))], format='csc')
     q = np.hstack([np.zeros(n), gamma*np.ones(m)])
     A = sparse.vstack([
             sparse.hstack([sparse.diags(b).dot(Ad), -Im]),
