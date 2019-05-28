@@ -133,9 +133,9 @@ static const char* test_update() {
 
   // Update P
   nnzP       = data->test_solve_Pu->p[data->test_solve_Pu->n];
-  Px_new_idx = (c_int*) c_malloc(nnzP * sizeof(c_int)); // Generate indices going from
-                                               // beginning to end of P
+  Px_new_idx = (c_int*) c_malloc(nnzP * sizeof(c_int));
 
+  // Generate indices going from beginning to end of P
   for (i = 0; i < nnzP; i++) {
     Px_new_idx[i] = i;
   }
@@ -146,32 +146,57 @@ static const char* test_update() {
   osqp_solve(work);
 
   // Compare solver statuses
-  mu_assert("Update matrices: problem with P updated, error in solver status!",
+  mu_assert("Update matrices: problem with updating P, error in solver status!",
             work->info->status_val == data->test_solve_P_new_status);
 
   // Compare primal solutions
-  mu_assert("Update matrices: problem with P updated, error in primal solution!",
+  mu_assert("Update matrices: problem with updating P, error in primal solution!",
             vec_norm_inf_diff(work->solution->x, data->test_solve_P_new_x,
                               data->n) < TESTS_TOL);
 
   // Compare dual solutions
-  mu_assert("Update matrices: problem with P updated, error in dual solution!",
+  mu_assert("Update matrices: problem with updating P, error in dual solution!",
             vec_norm_inf_diff(work->solution->y, data->test_solve_P_new_y,
                               data->m) < TESTS_TOL);
-
-
-  // Update A
-  nnzA       = data->test_solve_A->p[data->test_solve_A->n];
-  Ax_new_idx = (c_int*) c_malloc(nnzA * sizeof(c_int)); // Generate indices going from
-                                                        // beginning to end of A
-
-  for (i = 0; i < nnzA; i++) {
-    Ax_new_idx[i] = i;
-  }
 
   // Cleanup and setup workspace
   osqp_cleanup(work);
   exitflag = osqp_setup(&work, problem, settings);
+
+
+  // Update P (all indices)
+  osqp_update_P(work, data->test_solve_Pu_new->x, OSQP_NULL, nnzP);
+
+  // Solve Problem
+  osqp_solve(work);
+
+  // Compare solver statuses
+  mu_assert("Update matrices: problem with updating P (all indices), error in solver status!",
+            work->info->status_val == data->test_solve_P_new_status);
+
+  // Compare primal solutions
+  mu_assert("Update matrices: problem with updating P (all indices), error in primal solution!",
+            vec_norm_inf_diff(work->solution->x, data->test_solve_P_new_x,
+                              data->n) < TESTS_TOL);
+
+  // Compare dual solutions
+  mu_assert("Update matrices: problem with updating P (all indices), error in dual solution!",
+            vec_norm_inf_diff(work->solution->y, data->test_solve_P_new_y,
+                              data->m) < TESTS_TOL);
+
+  // Cleanup and setup workspace
+  osqp_cleanup(work);
+  exitflag = osqp_setup(&work, problem, settings);
+
+
+  // Update A
+  nnzA       = data->test_solve_A->p[data->test_solve_A->n];
+  Ax_new_idx = (c_int*) c_malloc(nnzA * sizeof(c_int));
+
+  // Generate indices going from beginning to end of A
+  for (i = 0; i < nnzA; i++) {
+    Ax_new_idx[i] = i;
+  }
 
   osqp_update_A(work, data->test_solve_A_new->x, Ax_new_idx, nnzA);
 
@@ -179,16 +204,41 @@ static const char* test_update() {
   osqp_solve(work);
 
   // Compare solver statuses
-  mu_assert("Update matrices: problem with A updated, error in solver status!",
+  mu_assert("Update matrices: problem with updating A, error in solver status!",
             work->info->status_val == data->test_solve_A_new_status);
 
   // Compare primal solutions
-  mu_assert("Update matrices: problem with A updated, error in primal solution!",
+  mu_assert("Update matrices: problem with updating A, error in primal solution!",
             vec_norm_inf_diff(work->solution->x, data->test_solve_A_new_x,
                               data->n) < TESTS_TOL);
 
   // Compare dual solutions
-  mu_assert("Update matrices: problem with A updated, error in dual solution!",
+  mu_assert("Update matrices: problem with updating A, error in dual solution!",
+            vec_norm_inf_diff(work->solution->y, data->test_solve_A_new_y,
+                              data->m) < TESTS_TOL);
+
+  // Cleanup and setup workspace
+  osqp_cleanup(work);
+  exitflag = osqp_setup(&work, problem, settings);
+
+
+  // Update A (all indices)
+  osqp_update_A(work, data->test_solve_A_new->x, OSQP_NULL, nnzA);
+
+  // Solve Problem
+  osqp_solve(work);
+
+  // Compare solver statuses
+  mu_assert("Update matrices: problem with updating A (all indices), error in solver status!",
+            work->info->status_val == data->test_solve_A_new_status);
+
+  // Compare primal solutions
+  mu_assert("Update matrices: problem with updating A (all indices), error in primal solution!",
+            vec_norm_inf_diff(work->solution->x, data->test_solve_A_new_x,
+                              data->n) < TESTS_TOL);
+
+  // Compare dual solutions
+  mu_assert("Update matrices: problem with updating A (all indices), error in dual solution!",
             vec_norm_inf_diff(work->solution->y, data->test_solve_A_new_y,
                               data->m) < TESTS_TOL);
 
@@ -197,6 +247,7 @@ static const char* test_update() {
   osqp_cleanup(work);
   exitflag = osqp_setup(&work, problem, settings);
 
+  // Update P and A
   osqp_update_P_A(work, data->test_solve_Pu_new->x, Px_new_idx, nnzP,
                   data->test_solve_A_new->x, Ax_new_idx, nnzA);
 
@@ -205,18 +256,47 @@ static const char* test_update() {
 
   // Compare solver statuses
   mu_assert(
-    "Update matrices: problem with P and A updated, error in solver status!",
+    "Update matrices: problem with updating P and A, error in solver status!",
     work->info->status_val == data->test_solve_P_A_new_status);
 
   // Compare primal solutions
   mu_assert(
-    "Update matrices: problem with P and A updated, error in primal solution!",
+    "Update matrices: problem with updating P and A, error in primal solution!",
     vec_norm_inf_diff(work->solution->x, data->test_solve_P_A_new_x,
                       data->n) < TESTS_TOL);
 
   // Compare dual solutions
   mu_assert(
-    "Update matrices: problem with P and A updated, error in dual solution!",
+    "Update matrices: problem with updating P and A, error in dual solution!",
+    vec_norm_inf_diff(work->solution->y, data->test_solve_P_A_new_y,
+                      data->m) < TESTS_TOL * TESTS_TOL);
+
+  // Cleanup and setup workspace
+  osqp_cleanup(work);
+  exitflag = osqp_setup(&work, problem, settings);
+
+
+  // Update P and A (all indices)
+  osqp_update_P_A(work, data->test_solve_Pu_new->x, OSQP_NULL, nnzP,
+                  data->test_solve_A_new->x, OSQP_NULL, nnzA);
+
+  // Solve Problem
+  osqp_solve(work);
+
+  // Compare solver statuses
+  mu_assert(
+    "Update matrices: problem with updating P and A (all indices), error in solver status!",
+    work->info->status_val == data->test_solve_P_A_new_status);
+
+  // Compare primal solutions
+  mu_assert(
+    "Update matrices: problem with updating P and A (all indices), error in primal solution!",
+    vec_norm_inf_diff(work->solution->x, data->test_solve_P_A_new_x,
+                      data->n) < TESTS_TOL);
+
+  // Compare dual solutions
+  mu_assert(
+    "Update matrices: problem with updating P and A (all indices), error in dual solution!",
     vec_norm_inf_diff(work->solution->y, data->test_solve_P_A_new_y,
                       data->m) < TESTS_TOL * TESTS_TOL);
 

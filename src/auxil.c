@@ -910,7 +910,7 @@ c_int validate_settings(const OSQPSettings *settings) {
   }
 # endif /* ifdef PROFILING */
 
-  if (settings->adaptive_rho_tolerance < 1) {
+  if (settings->adaptive_rho_tolerance < 1.0) {
 # ifdef PRINTING
     c_eprint("adaptive_rho_tolerance must be >= 1");
 # endif /* ifdef PRINTING */
@@ -924,14 +924,21 @@ c_int validate_settings(const OSQPSettings *settings) {
     return 1;
   }
 
-  if (settings->rho <= 0) {
+  if (settings->rho <= 0.0) {
 # ifdef PRINTING
     c_eprint("rho must be positive");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if (settings->delta <= 0) {
+  if (settings->sigma <= 0.0) {
+# ifdef PRINTING
+    c_eprint("sigma must be positive");
+# endif /* ifdef PRINTING */
+    return 1;
+  }
+
+  if (settings->delta <= 0.0) {
 # ifdef PRINTING
     c_eprint("delta must be positive");
 # endif /* ifdef PRINTING */
@@ -945,44 +952,46 @@ c_int validate_settings(const OSQPSettings *settings) {
     return 1;
   }
 
-  if (settings->eps_abs < 0) {
+  if (settings->eps_abs < 0.0) {
 # ifdef PRINTING
     c_eprint("eps_abs must be nonnegative");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if (settings->eps_rel < 0) {
+  if (settings->eps_rel < 0.0) {
 # ifdef PRINTING
     c_eprint("eps_rel must be nonnegative");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if ((settings->eps_rel == 0) && (settings->eps_abs == 0)) {
+  if ((settings->eps_rel == 0.0) &&
+      (settings->eps_abs == 0.0)) {
 # ifdef PRINTING
     c_eprint("at least one of eps_abs and eps_rel must be positive");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if (settings->eps_prim_inf < 0) {
+  if (settings->eps_prim_inf <= 0.0) {
 # ifdef PRINTING
-    c_eprint("eps_prim_inf must be nonnegative");
+    c_eprint("eps_prim_inf must be positive");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if (settings->eps_dual_inf < 0) {
+  if (settings->eps_dual_inf <= 0.0) {
 # ifdef PRINTING
-    c_eprint("eps_dual_inf must be nonnegative");
+    c_eprint("eps_dual_inf must be positive");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if ((settings->alpha <= 0) || (settings->alpha >= 2)) {
+  if ((settings->alpha <= 0.0) ||
+      (settings->alpha >= 2.0)) {
 # ifdef PRINTING
-    c_eprint("alpha must be between 0 and 2");
+    c_eprint("alpha must be strictly between 0 and 2");
 # endif /* ifdef PRINTING */
     return 1;
   }
@@ -994,7 +1003,8 @@ c_int validate_settings(const OSQPSettings *settings) {
     return 1;
   }
 
-  if ((settings->verbose != 0) && (settings->verbose != 1)) {
+  if ((settings->verbose != 0) &&
+      (settings->verbose != 1)) {
 # ifdef PRINTING
     c_eprint("verbose must be either 0 or 1");
 # endif /* ifdef PRINTING */
@@ -1016,7 +1026,8 @@ c_int validate_settings(const OSQPSettings *settings) {
     return 1;
   }
 
-  if ((settings->warm_start != 0) && (settings->warm_start != 1)) {
+  if ((settings->warm_start != 0) &&
+      (settings->warm_start != 1)) {
 # ifdef PRINTING
     c_eprint("warm_start must be either 0 or 1");
 # endif /* ifdef PRINTING */
@@ -1024,7 +1035,7 @@ c_int validate_settings(const OSQPSettings *settings) {
   }
 # ifdef PROFILING
 
-  if (settings->time_limit < 0) {
+  if (settings->time_limit < 0.0) {
 #  ifdef PRINTING
     c_eprint("time_limit must be nonnegative\n");
 #  endif /* ifdef PRINTING */

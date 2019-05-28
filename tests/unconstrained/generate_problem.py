@@ -2,7 +2,7 @@ import numpy as np
 from scipy import sparse
 import utils.codegen_utils as cu
 
-P = sparse.diags([0.617022, 0.92032449, 0.20011437, 0.50233257, 0.34675589]).tocsc()
+P = sparse.diags([0.617022, 0.92032449, 0.20011437, 0.50233257, 0.34675589], format='csc')
 q = np.array([-1.10593508, -1.65451545, -2.3634686, 1.13534535, -1.01701414])
 A = sparse.csc_matrix((0,5))
 l = np.array([])

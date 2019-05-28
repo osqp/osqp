@@ -15,7 +15,7 @@ test_solve_KKT_P = sparse.random(test_solve_KKT_n, test_solve_KKT_n,
 test_solve_KKT_P = test_solve_KKT_P.dot(test_solve_KKT_P.T).tocsc()
 test_solve_KKT_A = sparse.random(test_solve_KKT_m, test_solve_KKT_n,
                                  density=0.4, format='csc')
-test_solve_KKT_Pu = sparse.triu(test_solve_KKT_P).tocsc()
+test_solve_KKT_Pu = sparse.triu(test_solve_KKT_P, format='csc')
 
 test_solve_KKT_rho = 4.0
 test_solve_KKT_sigma = 1.0
@@ -23,9 +23,10 @@ test_solve_KKT_KKT = sparse.vstack([
                         sparse.hstack([test_solve_KKT_P + test_solve_KKT_sigma *
                         sparse.eye(test_solve_KKT_n), test_solve_KKT_A.T]),
                         sparse.hstack([test_solve_KKT_A,
-                        -1./test_solve_KKT_rho * sparse.eye(test_solve_KKT_m)])]).tocsc()
+                        -1./test_solve_KKT_rho * sparse.eye(test_solve_KKT_m)])
+                        ], format='csc')
 test_solve_KKT_rhs = np.random.randn(test_solve_KKT_m + test_solve_KKT_n)
-test_solve_KKT_x = spla.splu(test_solve_KKT_KKT.tocsc()).solve(test_solve_KKT_rhs)
+test_solve_KKT_x = spla.splu(test_solve_KKT_KKT).solve(test_solve_KKT_rhs)
 
 test_solve_KKT_x[test_solve_KKT_n:] = test_solve_KKT_rhs[test_solve_KKT_n:] + \
                                       test_solve_KKT_x[test_solve_KKT_n:] / test_solve_KKT_rho
