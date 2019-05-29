@@ -41,15 +41,11 @@ static void print_line(void) {
 
 void print_header(void) {
   // Different indentation required for windows
-# ifdef IS_WINDOWS
-# ifdef PYTHON
-  c_print("iter   ");
-# else  /* ifdef PYTHON */
+#if defined(IS_WINDOWS) && !defined(PYTHON)
   c_print("iter  ");
-# endif /* ifdef PYTHON */
-# else  /* ifdef IS_WINDOWS */
+#else
   c_print("iter   ");
-# endif /* ifdef IS_WINDOWS */
+#endif
 
   // Main information
   c_print("objective    pri res    dua res    rho");
@@ -166,15 +162,12 @@ void print_polish(OSQPWorkspace *work) {
   c_print("  %9.2e", info->dua_res);
 
   // Different characters for windows/unix
-# ifdef IS_WINDOWS
-# ifdef PYTHON
-  c_print("   --------");
-# else
+#if defined(IS_WINDOWS) && !defined(PYTHON)
   c_print("  ---------");
-# endif /* ifdef PYTHON */
-# else  /* ifdef IS_WINDOWS */
+#else
   c_print("   --------");
-# endif /* ifdef IS_WINDOWS */
+#endif
+
 # ifdef PROFILING
   if (work->first_run) {
     // total time: setup + solve
@@ -226,6 +219,8 @@ void print_footer(OSQPInfo *info, c_int polish) {
 
 OSQPSettings* copy_settings(const OSQPSettings *settings) {
   OSQPSettings *new = c_malloc(sizeof(OSQPSettings));
+
+  if (!new) return OSQP_NULL;
 
   // Copy settings
   // NB. Copying them explicitly because memcpy is not

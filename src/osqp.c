@@ -96,12 +96,7 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
   work = c_calloc(1, sizeof(OSQPWorkspace));
   *workp = work;
 
-  if (!(work)) {
-# ifdef PRINTING
-    c_eprint("Workspace allocation failure");
-# endif /* ifdef PRINTING */
-    return OSQP_MEMORY_ALLOCATION_ERROR;
-  }
+  if (!(work)) return memory_alloc_error();
 
 
   // Start and allocate directly timer
@@ -111,7 +106,8 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
 # endif /* ifdef PROFILING */
 
   // Copy problem data into workspace
-  work->data    = c_malloc(sizeof(OSQPData));
+  work->data = c_malloc(sizeof(OSQPData));
+  if (!(work->data)) return memory_alloc_error();
   work->data->n = data->n;                    // Number of variables
   work->data->m = data->m;                    // Number of linear constraints
   work->data->P = copy_csc_mat(data->P);      // Cost function matrix
@@ -119,23 +115,29 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
   work->data->A = copy_csc_mat(data->A);      // Linear constraints matrix
   work->data->l = vec_copy(data->l, data->m); // Lower bounds on constraints
   work->data->u = vec_copy(data->u, data->m); // Upper bounds on constraints
+  if (!(work->data->P) || !(work->data->q) || !(work->data->A) ||
+      !(work->data->l) || !(work->data->u))
+    return memory_alloc_error();
 
   // Vectorized rho parameter
   work->rho_vec     = c_malloc(work->data->m * sizeof(c_float));
   work->rho_inv_vec = c_malloc(work->data->m * sizeof(c_float));
+  if (!(work->rho_vec) || !(work->rho_inv_vec)) return memory_alloc_error();
 
   // Type of constraints
   work->constr_type = c_calloc(work->data->m, sizeof(c_int));
+  if (!(work->constr_type)) return memory_alloc_error();
 
-  /*
-   *  Allocate internal solver variables (ADMM steps)
-   */
+  // Allocate internal solver variables (ADMM steps)
   work->x        = c_calloc(work->data->n, sizeof(c_float));
   work->z        = c_calloc(work->data->m, sizeof(c_float));
   work->xz_tilde = c_calloc(work->data->n + work->data->m, sizeof(c_float));
   work->x_prev   = c_calloc(work->data->n, sizeof(c_float));
   work->z_prev   = c_calloc(work->data->m, sizeof(c_float));
   work->y        = c_calloc(work->data->m, sizeof(c_float));
+  if (!(work->x) || !(work->z) || !(work->xz_tilde) ||
+      !(work->x_prev) || !(work->z_prev) || !(work->y))
+    return memory_alloc_error();
 
   // Initialize variables x, y, z to 0
   cold_start(work);
@@ -154,27 +156,38 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
   work->Pdelta_x = c_calloc(work->data->n, sizeof(c_float));
   work->Adelta_x = c_calloc(work->data->m, sizeof(c_float));
 
+  if (!(work->Ax) || !(work->Px) || !(work->Aty) ||
+      !(work->delta_y) || !(work->Atdelta_y) ||
+      !(work->delta_x) || !(work->Pdelta_x) || !(work->Adelta_x))
+    return memory_alloc_error();
+
   // Copy settings
   work->settings = copy_settings(settings);
+  if (!(work->settings)) return memory_alloc_error();
 
   // Perform scaling
   if (settings->scaling) {
     // Allocate scaling structure
-    work->scaling       = c_malloc(sizeof(OSQPScaling));
+    work->scaling = c_malloc(sizeof(OSQPScaling));
+    if (!(work->scaling)) return memory_alloc_error();
     work->scaling->D    = c_malloc(work->data->n * sizeof(c_float));
     work->scaling->Dinv = c_malloc(work->data->n * sizeof(c_float));
     work->scaling->E    = c_malloc(work->data->m * sizeof(c_float));
     work->scaling->Einv = c_malloc(work->data->m * sizeof(c_float));
+    if (!(work->scaling->D) || !(work->scaling->Dinv) ||
+        !(work->scaling->E) || !(work->scaling->Einv))
+      return memory_alloc_error();
 
     // Allocate workspace variables used in scaling
     work->D_temp   = c_malloc(work->data->n * sizeof(c_float));
     work->D_temp_A = c_malloc(work->data->n * sizeof(c_float));
     work->E_temp   = c_malloc(work->data->m * sizeof(c_float));
+    if (!(work->D_temp) || !(work->D_temp_A) || !(work->E_temp))
+      return memory_alloc_error();
 
     // Scale data
     scale_data(work);
-  }
-  else {
+  } else {
     work->scaling = OSQP_NULL;
   }
 
@@ -203,9 +216,9 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
     return exitflag;
   }
 
-
   // Initialize active constraints structure
-  work->pol            = c_malloc(sizeof(OSQPPolish));
+  work->pol = c_malloc(sizeof(OSQPPolish));
+  if (!(work->pol)) return memory_alloc_error();
   work->pol->Alow_to_A = c_malloc(work->data->m * sizeof(c_int));
   work->pol->Aupp_to_A = c_malloc(work->data->m * sizeof(c_int));
   work->pol->A_to_Alow = c_malloc(work->data->m * sizeof(c_int));
@@ -213,15 +226,20 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
   work->pol->x         = c_malloc(work->data->n * sizeof(c_float));
   work->pol->z         = c_malloc(work->data->m * sizeof(c_float));
   work->pol->y         = c_malloc(work->data->m * sizeof(c_float));
-
+  if (!(work->pol->Alow_to_A) || !(work->pol->Aupp_to_A) ||
+      !(work->pol->A_to_Alow) || !(work->pol->A_to_Aupp) ||
+      !(work->pol->x) || !(work->pol->z) || !(work->pol->y))
+    return memory_alloc_error();
 
   // Allocate solution
-  work->solution    = c_calloc(1, sizeof(OSQPSolution));
+  work->solution = c_calloc(1, sizeof(OSQPSolution));
+  if (!(work->solution)) return memory_alloc_error();
   work->solution->x = c_calloc(1, work->data->n * sizeof(c_float));
   work->solution->y = c_calloc(1, work->data->m * sizeof(c_float));
+  if (!(work->solution->x) || !(work->solution->y)) return memory_alloc_error();
 
   // Allocate and initialize information
-  work->info                = c_calloc(1, sizeof(OSQPInfo));
+  work->info = c_calloc(1, sizeof(OSQPInfo));
   work->info->status_polish = 0;              // Polishing not performed
   update_status(work->info, OSQP_UNSOLVED);
 # ifdef PROFILING
@@ -234,26 +252,19 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
   work->clear_update_time = 0;
   work->rho_update_from_solve = 0;
 # endif /* ifdef PROFILING */
-# if EMBEDDED != 1
   work->info->rho_updates  = 0;                    // Rho updates set to 0
   work->info->rho_estimate = work->settings->rho;  // Best rho estimate
-# endif /* if EMBEDDED != 1 */
 
   // Print header
 # ifdef PRINTING
-
   if (work->settings->verbose) print_setup_header(work);
   work->summary_printed = 0; // Initialize last summary  to not printed
 # endif /* ifdef PRINTING */
 
 
-
-# if EMBEDDED != 1
-
   // If adaptive rho and automatic interval, but profiling disabled, we need to
   // set the interval to a default value
-#  ifndef PROFILING
-
+# ifndef PROFILING
   if (work->settings->adaptive_rho && !work->settings->adaptive_rho_interval) {
     if (work->settings->check_termination) {
       // If check_termination is enabled, we set it to a multiple of the check
@@ -265,8 +276,7 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
       work->settings->adaptive_rho_interval = ADAPTIVE_RHO_FIXED;
     }
   }
-#  endif /* ifndef PROFILING */
-# endif  /* if EMBEDDED != 1 */
+# endif /* ifndef PROFILING */
 
   // Return exit flag
   return 0;
@@ -638,13 +648,9 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
     // Free Data
     if (work->data) {
       if (work->data->P) csc_spfree(work->data->P);
-
       if (work->data->A) csc_spfree(work->data->A);
-
       if (work->data->q) c_free(work->data->q);
-
       if (work->data->l) c_free(work->data->l);
-
       if (work->data->u) c_free(work->data->u);
       c_free(work->data);
     }
@@ -652,22 +658,17 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
     // Free scaling
     if (work->settings->scaling) {
       if (work->scaling){
-        if (work->scaling->D) c_free(work->scaling->D);
-
+        if (work->scaling->D)    c_free(work->scaling->D);
         if (work->scaling->Dinv) c_free(work->scaling->Dinv);
-
-        if (work->scaling->E) c_free(work->scaling->E);
-
+        if (work->scaling->E)    c_free(work->scaling->E);
         if (work->scaling->Einv) c_free(work->scaling->Einv);
       }
       c_free(work->scaling);
 
       // Free workspace variables
-      if (work->D_temp) c_free(work->D_temp);
-
+      if (work->D_temp)   c_free(work->D_temp);
       if (work->D_temp_A) c_free(work->D_temp_A);
-
-      if (work->E_temp) c_free(work->E_temp);
+      if (work->E_temp)   c_free(work->E_temp);
     }
 
     // Free linear system solver structure
@@ -680,59 +681,40 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
     // Unload linear system solver after free
     exitflag = unload_linsys_solver(work->settings->linsys_solver);
 
-
+#ifndef EMBEDDED
     // Free active constraints structure
     if (work->pol) {
       if (work->pol->Alow_to_A) c_free(work->pol->Alow_to_A);
-
       if (work->pol->Aupp_to_A) c_free(work->pol->Aupp_to_A);
-
       if (work->pol->A_to_Alow) c_free(work->pol->A_to_Alow);
-
       if (work->pol->A_to_Aupp) c_free(work->pol->A_to_Aupp);
-
-      if (work->pol->x) c_free(work->pol->x);
-
-      if (work->pol->z) c_free(work->pol->z);
-
-      if (work->pol->y) c_free(work->pol->y);
+      if (work->pol->x)         c_free(work->pol->x);
+      if (work->pol->z)         c_free(work->pol->z);
+      if (work->pol->y)         c_free(work->pol->y);
       c_free(work->pol);
     }
+#endif /* ifndef EMBEDDED */
 
     // Free other Variables
-    if (work->constr_type) c_free(work->constr_type);
-
-    if (work->rho_vec) c_free(work->rho_vec);
-
+    if (work->rho_vec)     c_free(work->rho_vec);
     if (work->rho_inv_vec) c_free(work->rho_inv_vec);
-
-    if (work->x) c_free(work->x);
-
-    if (work->z) c_free(work->z);
-
-    if (work->xz_tilde) c_free(work->xz_tilde);
-
-    if (work->x_prev) c_free(work->x_prev);
-
-    if (work->z_prev) c_free(work->z_prev);
-
-    if (work->y) c_free(work->y);
-
-    if (work->Ax) c_free(work->Ax);
-
-    if (work->Px) c_free(work->Px);
-
-    if (work->Aty) c_free(work->Aty);
-
-    if (work->delta_y) c_free(work->delta_y);
-
-    if (work->Atdelta_y) c_free(work->Atdelta_y);
-
-    if (work->delta_x) c_free(work->delta_x);
-
-    if (work->Pdelta_x) c_free(work->Pdelta_x);
-
-    if (work->Adelta_x) c_free(work->Adelta_x);
+#if EMBEDDED != 1
+    if (work->constr_type) c_free(work->constr_type);
+#endif
+    if (work->x)           c_free(work->x);
+    if (work->z)           c_free(work->z);
+    if (work->xz_tilde)    c_free(work->xz_tilde);
+    if (work->x_prev)      c_free(work->x_prev);
+    if (work->z_prev)      c_free(work->z_prev);
+    if (work->y)           c_free(work->y);
+    if (work->Ax)          c_free(work->Ax);
+    if (work->Px)          c_free(work->Px);
+    if (work->Aty)         c_free(work->Aty);
+    if (work->delta_y)     c_free(work->delta_y);
+    if (work->Atdelta_y)   c_free(work->Atdelta_y);
+    if (work->delta_x)     c_free(work->delta_x);
+    if (work->Pdelta_x)    c_free(work->Pdelta_x);
+    if (work->Adelta_x)    c_free(work->Adelta_x);
 
     // Free Settings
     if (work->settings) c_free(work->settings);
@@ -985,8 +967,8 @@ c_int osqp_warm_start_y(OSQPWorkspace *work, const c_float *y) {
   return 0;
 }
 
-#if EMBEDDED != 1
 
+#if EMBEDDED != 1
 
 c_int osqp_update_P(OSQPWorkspace *work,
                     const c_float *Px_new,

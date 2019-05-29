@@ -167,9 +167,16 @@ c_int validate_data(const OSQPData *data);
 /**
  * Validate problem settings
  * @param  settings OSQPSettings to be validated
- * @return      Exitflag to check
+ * @return          Exitflag to check
  */
 c_int validate_settings(const OSQPSettings *settings);
+
+
+/**
+ * Memory allocation problem
+ * @return  OSQP_MEMORY_ALLOCATION_ERROR
+ */
+c_int memory_alloc_error(void);
 
 # endif // #ifndef EMBEDDED
 

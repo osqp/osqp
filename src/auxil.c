@@ -1046,4 +1046,11 @@ c_int validate_settings(const OSQPSettings *settings) {
   return 0;
 }
 
+c_int memory_alloc_error(void) {
+# ifdef PRINTING
+    c_eprint("Workspace allocation failure");
+# endif
+  return OSQP_MEMORY_ALLOCATION_ERROR;
+}
+
 #endif // #ifndef EMBEDDED
