@@ -134,10 +134,13 @@ static c_int iterative_refinement(OSQPWorkspace *work,
                                   LinSysSolver  *p,
                                   c_float       *z,
                                   c_float       *b) {
+  c_int i, j, n, exitflag;
+  c_float *dz;
+  c_float *rhs;
+
+  exitflag = 0;
+
   if (work->settings->polish_refine_iter > 0) {
-    c_int i, j, n, exitflag = 0;
-    c_float *dz;
-    c_float *rhs;
 
     // Assign dimension n
     n = work->data->n + work->pol->Ared->m;
@@ -158,7 +161,7 @@ static c_int iterative_refinement(OSQPWorkspace *work,
         mat_vec(work->data->P, z, rhs, -1);
 
         // -= Px (lower triang)
-        mat_tpose_vec(work->data->P,   z,                 rhs, -1, 1);
+	mat_tpose_vec(work->data->P,   z,                 rhs, -1, 1);
 
         // -= Ared'*y_red
         mat_tpose_vec(work->pol->Ared, z + work->data->n, rhs, -1, 0);
@@ -177,9 +180,8 @@ static c_int iterative_refinement(OSQPWorkspace *work,
     }
     if (dz)  c_free(dz);
     if (rhs) c_free(rhs);
-
-    return exitflag;
   }
+  return exitflag;
 }
 
 /**

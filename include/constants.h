@@ -51,9 +51,7 @@ extern "C" {
 * Linear System Solvers *
 *************************/
 enum linsys_solver_type { QDLDL_SOLVER, MKL_PARDISO_SOLVER };
-static const char *LINSYS_SOLVER_NAME[] = {
-  "qdldl", "mkl pardiso"
-};
+extern const char * LINSYS_SOLVER_NAME[];
 
 /**********************************
 * Solver Parameters and Settings *
