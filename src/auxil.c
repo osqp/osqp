@@ -1068,3 +1068,11 @@ c_int memory_alloc_error(void) {
 }
 
 #endif // #ifndef EMBEDDED
+
+
+c_int work_not_init_error(void) {
+# ifdef PRINTING
+    c_eprint("Workspace not initialized");
+# endif
+  return OSQP_WORKSPACE_NOT_INIT_ERROR;
+}

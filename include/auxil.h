@@ -181,6 +181,13 @@ c_int memory_alloc_error(void);
 # endif // #ifndef EMBEDDED
 
 
+/**
+ * Workspace not initialized
+ * @return  OSQP_WORKSPACE_NOT_INIT_ERROR
+ */
+c_int work_not_init_error(void);
+
+
 # ifdef __cplusplus
 }
 # endif // ifdef __cplusplus
