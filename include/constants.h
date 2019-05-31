@@ -41,7 +41,7 @@ extern const char * LINSYS_SOLVER_NAME[];
 * Solver Errors  *
 ******************/
 enum osqp_error_type {
-    DATA_VALIDATION_ERROR,
+    DATA_VALIDATION_ERROR = 1,
     SETTINGS_VALIDATION_ERROR,
     LINSYS_SOLVER_LOAD_ERROR,
     LINSYS_SOLVER_INIT_ERROR,
