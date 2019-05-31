@@ -161,7 +161,7 @@ static c_int iterative_refinement(OSQPWorkspace *work,
         mat_vec(work->data->P, z, rhs, -1);
 
         // -= Px (lower triang)
-	      mat_tpose_vec(work->data->P, z, rhs, -1, 1);
+        mat_tpose_vec(work->data->P, z, rhs, -1, 1);
 
         // -= Ared'*y_red
         mat_tpose_vec(work->pol->Ared, z + work->data->n, rhs, -1, 0);
