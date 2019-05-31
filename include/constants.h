@@ -9,24 +9,7 @@ extern "C" {
 /*******************
 * OSQP Versioning *
 *******************/
-# define OSQP_VERSION ("0.6.0.dev1") /* string literals automatically null-terminated
-                                   */
-
-/******************
-* Setup Status   *
-******************/
-# define OSQP_DATA_VALIDATION_ERROR (1)
-# define OSQP_SETTINGS_VALIDATION_ERROR (2)
-# define OSQP_MEMORY_ALLOCATION_ERROR (3)
-# define OSQP_LOAD_LINSYS_SOLVER_ERROR (4)
-# define OSQP_INIT_LINSYS_SOLVER_ERROR (5)
-# define OSQP_INIT_LINSYS_SOLVER_NONCVX_ERROR (6)
-
-
-/******************
-* Update Status  *
-******************/
-# define OSQP_WORKSPACE_NOT_INIT_ERROR (1)
+# define OSQP_VERSION ("0.6.0.dev1") /* string literals automatically null-terminated */
 
 
 /******************
@@ -52,6 +35,23 @@ extern "C" {
 *************************/
 enum linsys_solver_type { QDLDL_SOLVER, MKL_PARDISO_SOLVER };
 extern const char * LINSYS_SOLVER_NAME[];
+
+
+/******************
+* Solver Errors  *
+******************/
+enum osqp_error_type {
+    DATA_VALIDATION_ERROR,
+    SETTINGS_VALIDATION_ERROR,
+    LINSYS_SOLVER_LOAD_ERROR,
+    LINSYS_SOLVER_INIT_ERROR,
+    LINSYS_SOLVER_NONCVX_ERROR,
+    WORKSPACE_MEM_ALLOC_ERROR,
+    WORKSPACE_NOT_INIT_ERROR,
+    POLISH_MEM_ALLOC_ERROR,
+};
+extern const char * OSQP_ERROR_DESCR[];
+
 
 /**********************************
 * Solver Parameters and Settings *

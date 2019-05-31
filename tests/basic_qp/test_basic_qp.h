@@ -116,14 +116,14 @@ static const char* test_basic_qp_solve()
   // Setup workspace with empty settings
   exitflag = osqp_setup(&work, data, OSQP_NULL);
   mu_assert("Basic QP test solve: Setup should result in error due to empty settings",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
 
   // Setup workspace with a wrong number of scaling iterations
   tmp_int = settings->scaling;
   settings->scaling = -1;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to a negative number of scaling iterations",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->scaling = tmp_int;
 
   // Setup workspace with wrong settings->adaptive_rho
@@ -131,7 +131,7 @@ static const char* test_basic_qp_solve()
   settings->adaptive_rho = 2;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to non-boolean settings->adaptive_rho",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->adaptive_rho = tmp_int;
 
   // Setup workspace with wrong settings->adaptive_rho_interval
@@ -139,7 +139,7 @@ static const char* test_basic_qp_solve()
   settings->adaptive_rho_interval = -1;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to negative settings->adaptive_rho_interval",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->adaptive_rho_interval = tmp_int;
 
   // Setup workspace with wrong settings->adaptive_rho_fraction
@@ -147,7 +147,7 @@ static const char* test_basic_qp_solve()
   settings->adaptive_rho_fraction = -1.5;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to non-positive settings->adaptive_rho_fraction",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->adaptive_rho_fraction = tmp_float;
 
   // Setup workspace with wrong settings->adaptive_rho_fraction
@@ -155,7 +155,7 @@ static const char* test_basic_qp_solve()
   settings->adaptive_rho_tolerance = 0.5;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to wrong settings->adaptive_rho_tolerance",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->adaptive_rho_tolerance = tmp_float;
 
   // Setup workspace with wrong settings->polish_refine_iter
@@ -163,7 +163,7 @@ static const char* test_basic_qp_solve()
   settings->polish_refine_iter = -3;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to negative settings->polish_refine_iter",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->polish_refine_iter = tmp_int;
 
   // Setup workspace with wrong settings->rho
@@ -171,7 +171,7 @@ static const char* test_basic_qp_solve()
   settings->rho = 0.0;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to non-positive settings->rho",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->rho = tmp_float;
 
   // Setup workspace with wrong settings->sigma
@@ -179,7 +179,7 @@ static const char* test_basic_qp_solve()
   settings->sigma = -0.1;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to non-positive settings->sigma",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->sigma = tmp_float;
 
   // Setup workspace with wrong settings->delta
@@ -187,7 +187,7 @@ static const char* test_basic_qp_solve()
   settings->delta = -1.1;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to non-positive settings->delta",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->delta = tmp_float;
 
   // Setup workspace with wrong settings->max_iter
@@ -195,7 +195,7 @@ static const char* test_basic_qp_solve()
   settings->max_iter = 0;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to non-positive settings->max_iter",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->max_iter = tmp_int;
 
   // Setup workspace with wrong settings->eps_abs
@@ -203,7 +203,7 @@ static const char* test_basic_qp_solve()
   settings->eps_abs = -1.1;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to negative settings->eps_abs",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->eps_abs = tmp_float;
 
   // Setup workspace with wrong settings->eps_rel
@@ -211,7 +211,7 @@ static const char* test_basic_qp_solve()
   settings->eps_rel = -0.1;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to negative settings->eps_rel",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->eps_rel = tmp_float;
 
   // Setup workspace with wrong settings->eps_prim_inf
@@ -219,7 +219,7 @@ static const char* test_basic_qp_solve()
   settings->eps_prim_inf = -0.1;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to non-positive settings->eps_prim_inf",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->eps_prim_inf = tmp_float;
 
   // Setup workspace with wrong settings->eps_dual_inf
@@ -227,7 +227,7 @@ static const char* test_basic_qp_solve()
   settings->eps_dual_inf = 0.0;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to non-positive settings->eps_dual_inf",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->eps_dual_inf = tmp_float;
 
   // Setup workspace with wrong settings->alpha
@@ -235,7 +235,7 @@ static const char* test_basic_qp_solve()
   settings->alpha = 2.0;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to wrong settings->alpha",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->alpha = tmp_float;
 
   // Setup workspace with wrong settings->linsys_solver
@@ -243,7 +243,7 @@ static const char* test_basic_qp_solve()
   settings->linsys_solver = 5;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to wrong settings->linsys_solver",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->linsys_solver = tmp_int;
 
   // Setup workspace with wrong settings->verbose
@@ -251,7 +251,7 @@ static const char* test_basic_qp_solve()
   settings->verbose = 2;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to non-boolean settings->verbose",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->verbose = tmp_int;
 
   // Setup workspace with wrong settings->scaled_termination
@@ -259,7 +259,7 @@ static const char* test_basic_qp_solve()
   settings->scaled_termination = 2;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to non-boolean settings->scaled_termination",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->scaled_termination = tmp_int;
 
   // Setup workspace with wrong settings->check_termination
@@ -267,7 +267,7 @@ static const char* test_basic_qp_solve()
   settings->check_termination = -1;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to non-boolean settings->check_termination",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->check_termination = tmp_int;
 
   // Setup workspace with wrong settings->warm_start
@@ -275,7 +275,7 @@ static const char* test_basic_qp_solve()
   settings->warm_start = 5;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to non-boolean settings->warm_start",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->warm_start = tmp_int;
 
   // Setup workspace with wrong settings->time_limit
@@ -283,7 +283,7 @@ static const char* test_basic_qp_solve()
   settings->time_limit = -0.2;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to wrong settings->time_limit",
-            exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
+            exitflag == SETTINGS_VALIDATION_ERROR);
   settings->time_limit = tmp_float;
 
 
@@ -294,14 +294,14 @@ static const char* test_basic_qp_solve()
   // Setup workspace with empty data
   exitflag = osqp_setup(&work, OSQP_NULL, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to empty data",
-            exitflag == OSQP_DATA_VALIDATION_ERROR);
+            exitflag == DATA_VALIDATION_ERROR);
 
   // Setup workspace with wrong data->m
   tmp_int = data->m;
   data->m = data->m - 1;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to wrong data->m",
-            exitflag == OSQP_DATA_VALIDATION_ERROR);
+            exitflag == DATA_VALIDATION_ERROR);
   data->m = tmp_int;
 
   // Setup workspace with wrong data->n
@@ -309,13 +309,13 @@ static const char* test_basic_qp_solve()
   data->n = data->n + 1;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to wrong data->n",
-            exitflag == OSQP_DATA_VALIDATION_ERROR);
+            exitflag == DATA_VALIDATION_ERROR);
 
   // Setup workspace with zero data->n
   data->n = 0;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to zero data->n",
-            exitflag == OSQP_DATA_VALIDATION_ERROR);
+            exitflag == DATA_VALIDATION_ERROR);
   data->n = tmp_int;
 
   // Setup workspace with wrong P->m
@@ -323,7 +323,7 @@ static const char* test_basic_qp_solve()
   data->P->m = data->n + 1;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to wrong P->m",
-            exitflag == OSQP_DATA_VALIDATION_ERROR);
+            exitflag == DATA_VALIDATION_ERROR);
   data->P->m = tmp_int;
 
   // Setup workspace with wrong P->n
@@ -331,7 +331,7 @@ static const char* test_basic_qp_solve()
   data->P->n = data->n + 1;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to wrong P->n",
-            exitflag == OSQP_DATA_VALIDATION_ERROR);
+            exitflag == DATA_VALIDATION_ERROR);
   data->P->n = tmp_int;
 
   // Setup workspace with non-upper-triangular P
@@ -361,14 +361,14 @@ static const char* test_basic_qp_solve()
   data->P = P_tmp;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to non-triu structure of P",
-            exitflag == OSQP_DATA_VALIDATION_ERROR);
+            exitflag == DATA_VALIDATION_ERROR);
   data->P = tmp_mat;
 
   // Setup workspace with non-consistent bounds
   data->l[0] = data->u[0] + 1.0;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to non-consistent bounds",
-            exitflag == OSQP_DATA_VALIDATION_ERROR);
+            exitflag == DATA_VALIDATION_ERROR);
 
 
   // Cleanup data

@@ -33,7 +33,7 @@ static const char* test_non_cvx_solve()
 
   // Setup should fail due to (P + sigma I) having a negative eigenvalue
   mu_assert("Non Convex test solve: Setup should have failed!",
-            exitflag == OSQP_INIT_LINSYS_SOLVER_NONCVX_ERROR);
+            exitflag == LINSYS_SOLVER_NONCVX_ERROR);
 
   osqp_cleanup(work);
 

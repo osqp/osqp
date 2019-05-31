@@ -788,8 +788,8 @@ c_int check_termination(OSQPWorkspace *work, c_int approximate) {
   return exitflag;
 }
 
-#ifndef EMBEDDED
 
+#ifndef EMBEDDED
 
 c_int validate_data(const OSQPData *data) {
   c_int j, ptr;
@@ -1060,19 +1060,4 @@ c_int validate_settings(const OSQPSettings *settings) {
   return 0;
 }
 
-c_int memory_alloc_error(void) {
-# ifdef PRINTING
-    c_eprint("Workspace allocation failure");
-# endif
-  return OSQP_MEMORY_ALLOCATION_ERROR;
-}
-
 #endif // #ifndef EMBEDDED
-
-
-c_int work_not_init_error(void) {
-# ifdef PRINTING
-    c_eprint("Workspace not initialized");
-# endif
-  return OSQP_WORKSPACE_NOT_INIT_ERROR;
-}
