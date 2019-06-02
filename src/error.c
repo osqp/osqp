@@ -1,14 +1,14 @@
 #include "error.h"
 
 const char *OSQP_ERROR_DESCR[] = {
-  "Problem data validation error",
-  "Solver settings validation error",
-  "Linear system solver not available.\nTried to obtain it from shared library",
-  "Linear system solver initialization error",
-  "Error in KKT matrix factorization.\nThe problem seems to be non-convex",
-  "Solver workspace memory allocation error",
-  "Solver workspace not initialized",
-  "Polishing workspace memory allocation error",
+  "Problem data validation.",
+  "Solver settings validation.",
+  "Linear system solver not available.\nTried to obtain it from shared library.",
+  "Linear system solver initialization.",
+  "KKT matrix factorization.\nThe problem seems to be non-convex.",
+  "Solver workspace memory allocation.",
+  "Solver workspace not initialized.",
+  "Polishing workspace memory allocation.",
 };
 
 

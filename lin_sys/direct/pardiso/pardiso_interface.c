@@ -144,7 +144,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
 	    c_eprint("Error in forming KKT matrix");
 #endif
         free_linsys_solver_pardiso(s);
-        return LINSYS_SOLVER_INIT_ERROR;
+        return OSQP_LINSYS_SOLVER_INIT_ERROR;
     } else {
 	    // Adjust indexing for Pardiso
 	    nnzKKT = s->KKT->p[s->KKT->m];
@@ -205,7 +205,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
 #endif
         free_linsys_solver_pardiso(s);
         *sp = OSQP_NULL;
-        return LINSYS_SOLVER_INIT_ERROR;
+        return OSQP_LINSYS_SOLVER_INIT_ERROR;
     }
 
     // Numerical factorization
@@ -219,7 +219,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
 #endif
         free_linsys_solver_pardiso(s);
         *sp = OSQP_NULL;
-        return LINSYS_SOLVER_INIT_ERROR;
+        return OSQP_LINSYS_SOLVER_INIT_ERROR;
     }
 
 
