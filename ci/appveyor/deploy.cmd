@@ -3,14 +3,15 @@
 REM Needed to enable to define OSQP_BIN within the file
 @setlocal enabledelayedexpansion
 
-set OSQP_VERSION="0.6.0.dev1"
-set OSQP_PACKAGE_NAME="OSQP"
-IF NOT "!OSQP_VERSION!"=="!OSQP_VERSION:dev=!" (
-	REM We are using a development version
-	set OSQP_PACKAGE_NAME="!OSQP_PACKAGE_NAME!-dev"
-)
-
 IF "%APPVEYOR_REPO_TAG%" == "true" (
+
+    REM Deply only on tags (releases)
+    set OSQP_VERSION="0.6.0.dev1"
+    set OSQP_PACKAGE_NAME="OSQP"
+    IF NOT "!OSQP_VERSION!"=="!OSQP_VERSION:dev=!" (
+	    REM We are using a development version
+	    set OSQP_PACKAGE_NAME="!OSQP_PACKAGE_NAME!-dev"
+    )
 
     REM Build C libraries
     cd %APPVEYOR_BUILD_FOLDER%
