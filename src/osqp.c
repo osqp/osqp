@@ -85,19 +85,19 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
 
   // Allocate empty workspace
   work = c_calloc(1, sizeof(OSQPWorkspace));
-  if (!(work)) return osqp_error(OSQP_WORKSPACE_MEM_ALLOC_ERROR);
+  if (!(work)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   *workp = work;
 
   // Start and allocate directly timer
 # ifdef PROFILING
   work->timer = c_malloc(sizeof(OSQPTimer));
-  if (!(work->timer)) return osqp_error(OSQP_WORKSPACE_MEM_ALLOC_ERROR);
+  if (!(work->timer)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   osqp_tic(work->timer);
 # endif /* ifdef PROFILING */
 
   // Copy problem data into workspace
   work->data = c_malloc(sizeof(OSQPData));
-  if (!(work->data)) return osqp_error(OSQP_WORKSPACE_MEM_ALLOC_ERROR);
+  if (!(work->data)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   work->data->n = data->n;                    // Number of variables
   work->data->m = data->m;                    // Number of linear constraints
   work->data->P = copy_csc_mat(data->P);      // Cost function matrix
@@ -107,16 +107,16 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
   work->data->u = vec_copy(data->u, data->m); // Upper bounds on constraints
   if (!(work->data->P) || !(work->data->q) || !(work->data->A) ||
       !(work->data->l) || !(work->data->u))
-    return osqp_error(OSQP_WORKSPACE_MEM_ALLOC_ERROR);
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Vectorized rho parameter
   work->rho_vec     = c_malloc(work->data->m * sizeof(c_float));
   work->rho_inv_vec = c_malloc(work->data->m * sizeof(c_float));
-  if (!(work->rho_vec) || !(work->rho_inv_vec)) return osqp_error(OSQP_WORKSPACE_MEM_ALLOC_ERROR);
+  if (!(work->rho_vec) || !(work->rho_inv_vec)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Type of constraints
   work->constr_type = c_calloc(work->data->m, sizeof(c_int));
-  if (!(work->constr_type)) return osqp_error(OSQP_WORKSPACE_MEM_ALLOC_ERROR);
+  if (!(work->constr_type)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Allocate internal solver variables (ADMM steps)
   work->x        = c_calloc(work->data->n, sizeof(c_float));
@@ -127,7 +127,7 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
   work->y        = c_calloc(work->data->m, sizeof(c_float));
   if (!(work->x) || !(work->z) || !(work->xz_tilde) ||
       !(work->x_prev) || !(work->z_prev) || !(work->y))
-    return osqp_error(OSQP_WORKSPACE_MEM_ALLOC_ERROR);
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Initialize variables x, y, z to 0
   cold_start(work);
@@ -149,31 +149,31 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
   if (!(work->Ax) || !(work->Px) || !(work->Aty) ||
       !(work->delta_y) || !(work->Atdelta_y) ||
       !(work->delta_x) || !(work->Pdelta_x) || !(work->Adelta_x))
-    return osqp_error(OSQP_WORKSPACE_MEM_ALLOC_ERROR);
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Copy settings
   work->settings = copy_settings(settings);
-  if (!(work->settings)) return osqp_error(OSQP_WORKSPACE_MEM_ALLOC_ERROR);
+  if (!(work->settings)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Perform scaling
   if (settings->scaling) {
     // Allocate scaling structure
     work->scaling = c_malloc(sizeof(OSQPScaling));
-    if (!(work->scaling)) return osqp_error(OSQP_WORKSPACE_MEM_ALLOC_ERROR);
+    if (!(work->scaling)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
     work->scaling->D    = c_malloc(work->data->n * sizeof(c_float));
     work->scaling->Dinv = c_malloc(work->data->n * sizeof(c_float));
     work->scaling->E    = c_malloc(work->data->m * sizeof(c_float));
     work->scaling->Einv = c_malloc(work->data->m * sizeof(c_float));
     if (!(work->scaling->D) || !(work->scaling->Dinv) ||
         !(work->scaling->E) || !(work->scaling->Einv))
-      return osqp_error(OSQP_WORKSPACE_MEM_ALLOC_ERROR);
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
     // Allocate workspace variables used in scaling
     work->D_temp   = c_malloc(work->data->n * sizeof(c_float));
     work->D_temp_A = c_malloc(work->data->n * sizeof(c_float));
     work->E_temp   = c_malloc(work->data->m * sizeof(c_float));
     if (!(work->D_temp) || !(work->D_temp_A) || !(work->E_temp))
-      return osqp_error(OSQP_WORKSPACE_MEM_ALLOC_ERROR);
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
     // Scale data
     scale_data(work);
@@ -198,7 +198,7 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
 
   // Initialize active constraints structure
   work->pol = c_malloc(sizeof(OSQPPolish));
-  if (!(work->pol)) return osqp_error(OSQP_WORKSPACE_MEM_ALLOC_ERROR);
+  if (!(work->pol)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   work->pol->Alow_to_A = c_malloc(work->data->m * sizeof(c_int));
   work->pol->Aupp_to_A = c_malloc(work->data->m * sizeof(c_int));
   work->pol->A_to_Alow = c_malloc(work->data->m * sizeof(c_int));
@@ -209,18 +209,18 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
   if (!(work->pol->Alow_to_A) || !(work->pol->Aupp_to_A) ||
       !(work->pol->A_to_Alow) || !(work->pol->A_to_Aupp) ||
       !(work->pol->x) || !(work->pol->z) || !(work->pol->y))
-    return osqp_error(OSQP_WORKSPACE_MEM_ALLOC_ERROR);
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Allocate solution
   work->solution = c_calloc(1, sizeof(OSQPSolution));
-  if (!(work->solution)) return osqp_error(OSQP_WORKSPACE_MEM_ALLOC_ERROR);
+  if (!(work->solution)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   work->solution->x = c_calloc(1, work->data->n * sizeof(c_float));
   work->solution->y = c_calloc(1, work->data->m * sizeof(c_float));
-  if (!(work->solution->x) || !(work->solution->y)) return osqp_error(OSQP_WORKSPACE_MEM_ALLOC_ERROR);
+  if (!(work->solution->x) || !(work->solution->y)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Allocate and initialize information
   work->info = c_calloc(1, sizeof(OSQPInfo));
-  if (!(work->info)) return osqp_error(OSQP_WORKSPACE_MEM_ALLOC_ERROR);
+  if (!(work->info)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   work->info->status_polish = 0;              // Polishing not performed
   update_status(work->info, OSQP_UNSOLVED);
 # ifdef PROFILING

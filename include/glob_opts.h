@@ -158,11 +158,8 @@ typedef float c_float;  /* for numerical values  */
 #  endif /* ifdef MATLAB */
 
 // Print error macro
-// #define c_eprint(desc...) (c_print("ERROR in %s: ", __FUNCTION__); c_print
-// (stderr, desc); c_print("\n");)
-#  define c_eprint(...) c_print("ERROR in %s: ", __FUNCTION__); c_print( \
+#  define c_eprint(...) c_print("ERROR in %s: ", __FUNCTION__); c_print(\
     __VA_ARGS__); c_print("\n");
-
 # endif /* ifdef PRINTING */
 
 

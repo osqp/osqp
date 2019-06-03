@@ -5,6 +5,7 @@
 #include "lin_sys.h"
 #include "kkt.h"
 #include "proj.h"
+#include "error.h"
 
 /**
  * Form reduced matrix A that contains only rows that are active at the
@@ -134,11 +135,9 @@ static c_int iterative_refinement(OSQPWorkspace *work,
                                   LinSysSolver  *p,
                                   c_float       *z,
                                   c_float       *b) {
-  c_int i, j, n, exitflag;
+  c_int i, j, n;
   c_float *dz;
   c_float *rhs;
-
-  exitflag = 0;
 
   if (work->settings->polish_refine_iter > 0) {
 
@@ -150,7 +149,7 @@ static c_int iterative_refinement(OSQPWorkspace *work,
     rhs = (c_float *)c_malloc(sizeof(c_float) * n);
 
     if (!dz || !rhs) {
-      exitflag = 1;
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
     } else {
       for (i = 0; i < work->settings->polish_refine_iter; i++) {
         // Form the RHS for the iterative refinement:  b - K*z
@@ -181,7 +180,7 @@ static c_int iterative_refinement(OSQPWorkspace *work,
     if (dz)  c_free(dz);
     if (rhs) c_free(rhs);
   }
-  return exitflag;
+  return 0;
 }
 
 /**
