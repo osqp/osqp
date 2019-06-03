@@ -6,7 +6,7 @@ REM Needed to enable to define OSQP_BIN within the file
 IF "%APPVEYOR_REPO_TAG%" == "true" (
 
     REM Deply only on tags (releases)
-    set OSQP_VERSION="0.6.0.dev2"
+    set OSQP_VERSION="0.6.0.dev3"
     set OSQP_PACKAGE_NAME="OSQP"
     IF NOT "!OSQP_VERSION!"=="!OSQP_VERSION:dev=!" (
 	    REM We are using a development version
