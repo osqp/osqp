@@ -2,6 +2,10 @@
 
 #include "qdldl_interface.h" // Include only this solver in the same directory
 
+const char *LINSYS_SOLVER_NAME[] = {
+  "qdldl", "mkl pardiso"
+};
+
 #ifdef ENABLE_MKL_PARDISO
 # include "pardiso_interface.h"
 # include "pardiso_loader.h"

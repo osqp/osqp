@@ -167,12 +167,12 @@ c_int validate_data(const OSQPData *data);
 /**
  * Validate problem settings
  * @param  settings OSQPSettings to be validated
- * @return      Exitflag to check
+ * @return          Exitflag to check
  */
 c_int validate_settings(const OSQPSettings *settings);
 
-# endif // #ifndef EMBEDDED
 
+# endif // #ifndef EMBEDDED
 
 # ifdef __cplusplus
 }

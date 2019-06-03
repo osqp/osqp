@@ -788,8 +788,8 @@ c_int check_termination(OSQPWorkspace *work, c_int approximate) {
   return exitflag;
 }
 
-#ifndef EMBEDDED
 
+#ifndef EMBEDDED
 
 c_int validate_data(const OSQPData *data) {
   c_int j, ptr;
@@ -797,7 +797,21 @@ c_int validate_data(const OSQPData *data) {
   if (!data) {
 # ifdef PRINTING
     c_eprint("Missing data");
-# endif /* ifdef PRINTING */
+# endif
+    return 1;
+  }
+
+  if (!(data->P)) {
+# ifdef PRINTING
+    c_eprint("Missing matrix P");
+# endif
+    return 1;
+  }
+
+  if (!(data->A)) {
+# ifdef PRINTING
+    c_eprint("Missing matrix A");
+# endif
     return 1;
   }
 

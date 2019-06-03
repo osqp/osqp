@@ -104,6 +104,7 @@ c_float* vec_copy(c_float *a, c_int n) {
   c_int    i;
 
   b = c_malloc(n * sizeof(c_float));
+  if (!b) return OSQP_NULL;
 
   for (i = 0; i < n; i++) {
     b[i] = a[i];

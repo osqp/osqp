@@ -287,7 +287,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const csc * P, const csc * A,
 #endif
         free_linsys_solver_qdldl(s);
         *sp = OSQP_NULL;
-        return OSQP_INIT_LINSYS_SOLVER_ERROR;
+        return OSQP_LINSYS_SOLVER_INIT_ERROR;
     }
 
     // Factorize the KKT matrix
@@ -295,7 +295,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const csc * P, const csc * A,
         csc_spfree(KKT_temp);
         free_linsys_solver_qdldl(s);
         *sp = OSQP_NULL;
-        return OSQP_INIT_LINSYS_SOLVER_NONCVX_ERROR;
+        return OSQP_NONCVX_ERROR;
     }
 
     if (polish){ // If KKT passed, assign it to KKT_temp

@@ -45,9 +45,23 @@ extern "C" {
 * Linear System Solvers *
 *************************/
 enum linsys_solver_type { QDLDL_SOLVER, MKL_PARDISO_SOLVER };
-static const char *LINSYS_SOLVER_NAME[] = {
-  "qdldl", "mkl pardiso"
+extern const char * LINSYS_SOLVER_NAME[];
+
+
+/******************
+* Solver Errors  *
+******************/
+enum osqp_error_type {
+    OSQP_DATA_VALIDATION_ERROR = 1,  /* Start errors from 1 */
+    OSQP_SETTINGS_VALIDATION_ERROR,
+    OSQP_LINSYS_SOLVER_LOAD_ERROR,
+    OSQP_LINSYS_SOLVER_INIT_ERROR,
+    OSQP_NONCVX_ERROR,
+    OSQP_MEM_ALLOC_ERROR,
+    OSQP_WORKSPACE_NOT_INIT_ERROR,
 };
+extern const char * OSQP_ERROR_MESSAGE[];
+
 
 /**********************************
 * Solver Parameters and Settings *
