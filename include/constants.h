@@ -13,17 +13,6 @@ extern "C" {
                                    */
 
 /******************
-* Setup Status  *
-******************/
-# define OSQP_DATA_VALIDATION_ERROR (1)
-# define OSQP_SETTINGS_VALIDATION_ERROR (2)
-# define OSQP_MEMORY_ALLOCATION_ERROR (3)
-# define OSQP_LOAD_LINSYS_SOLVER_ERROR (4)
-# define OSQP_INIT_LINSYS_SOLVER_ERROR (5)
-# define OSQP_INIT_LINSYS_SOLVER_NONCVX_ERROR (6)
-
-
-/******************
 * Solver Status  *
 ******************/
 # define OSQP_DUAL_INFEASIBLE_INACCURATE (4)
