@@ -10,12 +10,19 @@ extern "C" {
 # include "types.h"
 
 
+/* OSQP error macro */
+#  define osqp_error(error_code) _osqp_error(error_code, __FUNCTION__);
+
+
 /**
- * Print error description and return error code
+ * Internal function to print error description and return error code.
  * @param  Error code
- * @return Error code.
+ * @param  Function name
+ * @return Error code
  */
-c_int osqp_error(enum osqp_error_type error_code);
+  c_int _osqp_error(enum osqp_error_type error_code,
+		    const char * function_name);
+
 
 
 # ifdef __cplusplus
