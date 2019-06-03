@@ -13,7 +13,7 @@ const char *OSQP_ERROR_MESSAGE[] = {
 
 c_int osqp_error(enum osqp_error_type error_code) {
 # ifdef PRINTING
-  c_eprint("%s", OSQP_ERROR_MESSAGE[error_code]);
+  c_eprint("%s", OSQP_ERROR_MESSAGE[error_code-1]);
 # endif
   return (c_int)error_code;
 }
