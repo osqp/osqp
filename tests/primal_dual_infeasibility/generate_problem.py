@@ -2,7 +2,7 @@ import numpy as np
 from scipy import sparse
 import utils.codegen_utils as cu
 
-P = sparse.diags([1., 0.]).tocsc()
+P = sparse.diags([1., 0.], format='csc')
 q = np.array([1., -1.])
 
 A12 = sparse.csc_matrix([[1., 1.], [1., 0.], [0., 1.]])

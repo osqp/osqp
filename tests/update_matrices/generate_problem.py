@@ -13,18 +13,19 @@ test_form_KKT_n = n
 test_form_KKT_m = m
 p = 0.7
 
-test_form_KKT_A = sparse.random(test_form_KKT_m, test_form_KKT_n, density=p).tocsc()
+test_form_KKT_A = sparse.random(test_form_KKT_m, test_form_KKT_n, density=p, format='csc')
 test_form_KKT_P = sparse.random(n, n, density=p)
-test_form_KKT_P = test_form_KKT_P.dot(test_form_KKT_P.T).tocsc() + sparse.eye(n).tocsc()
-test_form_KKT_Pu = sparse.triu(test_form_KKT_P).tocsc()
+test_form_KKT_P = test_form_KKT_P.dot(test_form_KKT_P.T).tocsc() + sparse.eye(n, format='csc')
+test_form_KKT_Pu = sparse.triu(test_form_KKT_P, format='csc')
 test_form_KKT_rho = 1.6
 test_form_KKT_sigma = 0.1
 test_form_KKT_KKT = sparse.vstack([
                         sparse.hstack([test_form_KKT_P + test_form_KKT_sigma *
                         sparse.eye(test_form_KKT_n), test_form_KKT_A.T]),
                         sparse.hstack([test_form_KKT_A,
-                        -1./test_form_KKT_rho * sparse.eye(test_form_KKT_m)])]).tocsc()
-test_form_KKT_KKTu = sparse.triu(test_form_KKT_KKT).tocsc()
+                        -1./test_form_KKT_rho * sparse.eye(test_form_KKT_m)])
+                        ], format='csc')
+test_form_KKT_KKTu = sparse.triu(test_form_KKT_KKT, format='csc')
 
 
 # Create new P, A and KKT
@@ -38,8 +39,9 @@ test_form_KKT_KKT_new = sparse.vstack([
                         sparse.hstack([test_form_KKT_P_new + test_form_KKT_sigma *
                         sparse.eye(test_form_KKT_n), test_form_KKT_A_new.T]),
                         sparse.hstack([test_form_KKT_A_new,
-                        -1./test_form_KKT_rho * sparse.eye(test_form_KKT_m)])]).tocsc()
-test_form_KKT_KKTu_new = sparse.triu(test_form_KKT_KKT_new).tocsc()
+                        -1./test_form_KKT_rho * sparse.eye(test_form_KKT_m)])
+                        ], format='csc')
+test_form_KKT_KKTu_new = sparse.triu(test_form_KKT_KKT_new, format='csc')
 
 
 # Test solve problem with initial P and A

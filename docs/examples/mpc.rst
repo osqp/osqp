@@ -81,7 +81,7 @@ Python
     # Cast MPC problem to a QP: x = (x(0),x(1),...,x(N),u(0),...,u(N-1))
     # - quadratic objective
     P = sparse.block_diag([sparse.kron(sparse.eye(N), Q), QN,
-                           sparse.kron(sparse.eye(N), R)]).tocsc()
+                           sparse.kron(sparse.eye(N), R)], format='csc')
     # - linear objective
     q = np.hstack([np.kron(np.ones(N), -Q.dot(xr)), -QN.dot(xr),
                    np.zeros(N*nu)])
@@ -96,7 +96,7 @@ Python
     lineq = np.hstack([np.kron(np.ones(N+1), xmin), np.kron(np.ones(N), umin)])
     uineq = np.hstack([np.kron(np.ones(N+1), xmax), np.kron(np.ones(N), umax)])
     # - OSQP constraints
-    A = sparse.vstack([Aeq, Aineq]).tocsc()
+    A = sparse.vstack([Aeq, Aineq], format='csc')
     l = np.hstack([leq, lineq])
     u = np.hstack([ueq, uineq])
 
