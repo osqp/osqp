@@ -98,57 +98,65 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
   // Copy problem data into workspace
   work->data = c_malloc(sizeof(OSQPData));
   if (!(work->data)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  work->data->n = data->n;                    // Number of variables
-  work->data->m = data->m;                    // Number of linear constraints
-  work->data->P = copy_csc_mat(data->P);      // Cost function matrix
-  work->data->q = vec_copy(data->q, data->n); // Linear part of cost function
-  work->data->A = copy_csc_mat(data->A);      // Linear constraints matrix
-  work->data->l = vec_copy(data->l, data->m); // Lower bounds on constraints
-  work->data->u = vec_copy(data->u, data->m); // Upper bounds on constraints
-  if (!(work->data->P) || !(work->data->q) || !(work->data->A) ||
-      !(work->data->l) || !(work->data->u))
+  work->data->n = data->n;
+  work->data->m = data->m;
+
+  // Cost function
+  work->data->P = copy_csc_mat(data->P);
+  work->data->q = vec_copy(data->q, data->n);
+  if (!(work->data->P) || !(work->data->q)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+
+  // Constraints
+  work->data->A = copy_csc_mat(data->A);
+  if (!(work->data->A)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  work->data->l = vec_copy(data->l, data->m);
+  work->data->u = vec_copy(data->u, data->m);
+  if ( data->m && (!(work->data->l) || !(work->data->u)) )
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Vectorized rho parameter
-  work->rho_vec     = c_malloc(work->data->m * sizeof(c_float));
-  work->rho_inv_vec = c_malloc(work->data->m * sizeof(c_float));
-  if (!(work->rho_vec) || !(work->rho_inv_vec)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  work->rho_vec     = c_malloc(data->m * sizeof(c_float));
+  work->rho_inv_vec = c_malloc(data->m * sizeof(c_float));
+  if ( data->m && (!(work->rho_vec) || !(work->rho_inv_vec)) )
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Type of constraints
-  work->constr_type = c_calloc(work->data->m, sizeof(c_int));
-  if (!(work->constr_type)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  work->constr_type = c_calloc(data->m, sizeof(c_int));
+  if (data->m && !(work->constr_type)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Allocate internal solver variables (ADMM steps)
-  work->x        = c_calloc(work->data->n, sizeof(c_float));
-  work->z        = c_calloc(work->data->m, sizeof(c_float));
-  work->xz_tilde = c_calloc(work->data->n + work->data->m, sizeof(c_float));
-  work->x_prev   = c_calloc(work->data->n, sizeof(c_float));
-  work->z_prev   = c_calloc(work->data->m, sizeof(c_float));
-  work->y        = c_calloc(work->data->m, sizeof(c_float));
-  if (!(work->x) || !(work->z) || !(work->xz_tilde) ||
-      !(work->x_prev) || !(work->z_prev) || !(work->y))
+  work->x        = c_calloc(data->n, sizeof(c_float));
+  work->z        = c_calloc(data->m, sizeof(c_float));
+  work->xz_tilde = c_calloc(data->n + data->m, sizeof(c_float));
+  work->x_prev   = c_calloc(data->n, sizeof(c_float));
+  work->z_prev   = c_calloc(data->m, sizeof(c_float));
+  work->y        = c_calloc(data->m, sizeof(c_float));
+  if (!(work->x) || !(work->xz_tilde) || !(work->x_prev))
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  if ( data->m && (!(work->z) || !(work->z_prev) || !(work->y)) )
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Initialize variables x, y, z to 0
   cold_start(work);
 
   // Primal and dual residuals variables
-  work->Ax  = c_calloc(work->data->m, sizeof(c_float));
-  work->Px  = c_calloc(work->data->n, sizeof(c_float));
-  work->Aty = c_calloc(work->data->n, sizeof(c_float));
+  work->Ax  = c_calloc(data->m, sizeof(c_float));
+  work->Px  = c_calloc(data->n, sizeof(c_float));
+  work->Aty = c_calloc(data->n, sizeof(c_float));
 
   // Primal infeasibility variables
-  work->delta_y   = c_calloc(work->data->m, sizeof(c_float));
-  work->Atdelta_y = c_calloc(work->data->n, sizeof(c_float));
+  work->delta_y   = c_calloc(data->m, sizeof(c_float));
+  work->Atdelta_y = c_calloc(data->n, sizeof(c_float));
 
   // Dual infeasibility variables
-  work->delta_x  = c_calloc(work->data->n, sizeof(c_float));
-  work->Pdelta_x = c_calloc(work->data->n, sizeof(c_float));
-  work->Adelta_x = c_calloc(work->data->m, sizeof(c_float));
+  work->delta_x  = c_calloc(data->n, sizeof(c_float));
+  work->Pdelta_x = c_calloc(data->n, sizeof(c_float));
+  work->Adelta_x = c_calloc(data->m, sizeof(c_float));
 
-  if (!(work->Ax) || !(work->Px) || !(work->Aty) ||
-      !(work->delta_y) || !(work->Atdelta_y) ||
-      !(work->delta_x) || !(work->Pdelta_x) || !(work->Adelta_x))
+  if (!(work->Px) || !(work->Aty) || !(work->Atdelta_y) ||
+      !(work->delta_x) || !(work->Pdelta_x))
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  if ( data->m && (!(work->Ax) || !(work->delta_y) || !(work->Adelta_x)) )
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Copy settings
@@ -160,20 +168,24 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
     // Allocate scaling structure
     work->scaling = c_malloc(sizeof(OSQPScaling));
     if (!(work->scaling)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-    work->scaling->D    = c_malloc(work->data->n * sizeof(c_float));
-    work->scaling->Dinv = c_malloc(work->data->n * sizeof(c_float));
-    work->scaling->E    = c_malloc(work->data->m * sizeof(c_float));
-    work->scaling->Einv = c_malloc(work->data->m * sizeof(c_float));
-    if (!(work->scaling->D) || !(work->scaling->Dinv) ||
-        !(work->scaling->E) || !(work->scaling->Einv))
+    work->scaling->D    = c_malloc(data->n * sizeof(c_float));
+    work->scaling->Dinv = c_malloc(data->n * sizeof(c_float));
+    work->scaling->E    = c_malloc(data->m * sizeof(c_float));
+    work->scaling->Einv = c_malloc(data->m * sizeof(c_float));
+    if (!(work->scaling->D) || !(work->scaling->Dinv))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    if ( data->m && (!(work->scaling->E) || !(work->scaling->Einv)) )
       return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
+
     // Allocate workspace variables used in scaling
-    work->D_temp   = c_malloc(work->data->n * sizeof(c_float));
-    work->D_temp_A = c_malloc(work->data->n * sizeof(c_float));
-    work->E_temp   = c_malloc(work->data->m * sizeof(c_float));
-    if (!(work->D_temp) || !(work->D_temp_A) || !(work->E_temp))
-      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    work->D_temp   = c_malloc(data->n * sizeof(c_float));
+    work->D_temp_A = c_malloc(data->n * sizeof(c_float));
+    work->E_temp   = c_malloc(data->m * sizeof(c_float));
+    // if (!(work->D_temp) || !(work->D_temp_A) || !(work->E_temp))
+    //   return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    if (!(work->D_temp) || !(work->D_temp_A)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    if (data->m && !(work->E_temp))           return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
     // Scale data
     scale_data(work);
@@ -199,24 +211,26 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
   // Initialize active constraints structure
   work->pol = c_malloc(sizeof(OSQPPolish));
   if (!(work->pol)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  work->pol->Alow_to_A = c_malloc(work->data->m * sizeof(c_int));
-  work->pol->Aupp_to_A = c_malloc(work->data->m * sizeof(c_int));
-  work->pol->A_to_Alow = c_malloc(work->data->m * sizeof(c_int));
-  work->pol->A_to_Aupp = c_malloc(work->data->m * sizeof(c_int));
-  work->pol->x         = c_malloc(work->data->n * sizeof(c_float));
-  work->pol->z         = c_malloc(work->data->m * sizeof(c_float));
-  work->pol->y         = c_malloc(work->data->m * sizeof(c_float));
-  if (!(work->pol->Alow_to_A) || !(work->pol->Aupp_to_A) ||
+  work->pol->Alow_to_A = c_malloc(data->m * sizeof(c_int));
+  work->pol->Aupp_to_A = c_malloc(data->m * sizeof(c_int));
+  work->pol->A_to_Alow = c_malloc(data->m * sizeof(c_int));
+  work->pol->A_to_Aupp = c_malloc(data->m * sizeof(c_int));
+  work->pol->x         = c_malloc(data->n * sizeof(c_float));
+  work->pol->z         = c_malloc(data->m * sizeof(c_float));
+  work->pol->y         = c_malloc(data->m * sizeof(c_float));
+  if (!(work->pol->x)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  if ( data->m && (!(work->pol->Alow_to_A) || !(work->pol->Aupp_to_A) ||
       !(work->pol->A_to_Alow) || !(work->pol->A_to_Aupp) ||
-      !(work->pol->x) || !(work->pol->z) || !(work->pol->y))
+      !(work->pol->z) || !(work->pol->y)) )
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Allocate solution
   work->solution = c_calloc(1, sizeof(OSQPSolution));
   if (!(work->solution)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  work->solution->x = c_calloc(1, work->data->n * sizeof(c_float));
-  work->solution->y = c_calloc(1, work->data->m * sizeof(c_float));
-  if (!(work->solution->x) || !(work->solution->y)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  work->solution->x = c_calloc(1, data->n * sizeof(c_float));
+  work->solution->y = c_calloc(1, data->m * sizeof(c_float));
+  if (!(work->solution->x))            return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  if (data->m && !(work->solution->y)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Allocate and initialize information
   work->info = c_calloc(1, sizeof(OSQPInfo));
