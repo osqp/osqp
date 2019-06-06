@@ -33,7 +33,7 @@ before_deploy:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\package.cmd"
 
 artifacts:
-  - path: `osqp-*.tar.gz`
+  - path: 'osqp-*.tar.gz'
 
 deploy:
 - provider: BinTray

@@ -60,5 +60,4 @@ if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
 else if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     export DYLD_LIBRARY_PATH=${MKL_SHARED_LIB_DIR}:${DYLD_LIBRARY_PATH}
 fi
-fi
 
