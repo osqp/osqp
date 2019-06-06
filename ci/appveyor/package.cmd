@@ -3,15 +3,8 @@
 REM Needed to enable to define OSQP_BIN within the file
 @setlocal enabledelayedexpansion
 
-IF "%APPVEYOR_REPO_TAG%" == "true" (
+rem IF "%APPVEYOR_REPO_TAG%" == "true" (
 
-    REM Deply only on tags (releases)
-    set OSQP_VERSION="0.6.0.dev3"
-    set OSQP_PACKAGE_NAME="OSQP"
-    IF NOT "!OSQP_VERSION!"=="!OSQP_VERSION:dev=!" (
-	    REM We are using a development version
-	    set OSQP_PACKAGE_NAME="!OSQP_PACKAGE_NAME!-dev"
-    )
 
     REM Build C libraries
     cd %APPVEYOR_BUILD_FOLDER%
@@ -51,16 +44,15 @@ IF "%APPVEYOR_REPO_TAG%" == "true" (
     7z a -ttar !OSQP_BIN!.tar !OSQP_BIN!
     7z a -tgzip !OSQP_BIN!.tar.gz !OSQP_BIN!.tar
 
-    REM Deploy to Bintray
-    curl -T !OSQP_BIN!.tar.gz -ubstellato:%BINTRAY_API_KEY% -H "X-Bintray-Package:!OSQP_PACKAGE_NAME!" -H "X-Bintray-Version:!OSQP_VERSION!" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/!OSQP_PACKAGE_NAME!/!OSQP_VERSION!/
-    if errorlevel 1 exit /b 1
+    rem REM Deploy to Bintray
+    rem curl -T !OSQP_BIN!.tar.gz -ubstellato:%BINTRAY_API_KEY% -H "X-Bintray-Package:!OSQP_PACKAGE_NAME!" -H "X-Bintray-Version:!OSQP_VERSION!" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/!OSQP_PACKAGE_NAME!/!OSQP_VERSION!/
+    rem if errorlevel 1 exit /b 1
 
-    REM Publish
-    curl -X POST -ubstellato:%BINTRAY_API_KEY% https://api.bintray.com/content/bstellato/generic/!OSQP_PACKAGE_NAME!/!OSQP_VERSION!/publish
-    if errorlevel 1 exit /b 1
-
+    rem REM Publish
+    rem curl -X POST -ubstellato:%BINTRAY_API_KEY% https://api.bintray.com/content/bstellato/generic/!OSQP_PACKAGE_NAME!/!OSQP_VERSION!/publish
+    rem if errorlevel 1 exit /b 1
 
 
 REM Close parenthesis for deploying only if it is a tagged commit
-)
+rem )
 @echo off

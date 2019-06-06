@@ -1,6 +1,10 @@
 #!/bin/bash
 set -ev
 
+if [[ ${OSQP_VERSION} == *"dev"* ]]; then
+    OSQP_PACKAGE_NAME="${OSQP_PACKAGE_NAME}-dev";
+fi
+
 # Create deps dir
 mkdir ${DEPS_DIR}
 cd ${DEPS_DIR}
@@ -47,3 +51,14 @@ conda config --set always_yes yes --set changeps1 no
 conda update --yes -q conda
 conda create -n testenv --yes python=$PYTHON_VERSION numpy scipy future
 source activate testenv
+
+# Add MKL shared libraries to the path
+MKL_SHARED_LIB_DIR=`python -c 'import numpy.distutils.system_info as sysinfo; print(sysinfo.get_info("mkl")["library_dirs"][0])'`
+
+if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+    export LD_LIBRARY_PATH=${MKL_SHARED_LIB_DIR}:${LD_LIBRARY_PATH}
+else if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    export DYLD_LIBRARY_PATH=${MKL_SHARED_LIB_DIR}:${DYLD_LIBRARY_PATH}
+fi
+fi
+

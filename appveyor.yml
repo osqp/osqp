@@ -6,17 +6,22 @@ platform:
   - x86
 
 environment:
-  BINTRAY_API_KEY:
-    secure: ng7NUNQat2LczU5XjKKyDLITkZbZsJeAdPGDjuTdQDHDiaL03JJF6Usab+miNVsO
   MINICONDA: C:\Miniconda
   CMAKE_PROJECT: MinGW Makefiles
-  PYTHON_VERSION: 3.6
-
+  PYTHON_VERSION: 3.7
+  OSQP_VERSION: 0.6.0.dev3
+  OSQP_PACKAGE_NAME: OSQP
 
 init:
   # Uncomment for remote desktop debug
   # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
   - ECHO %PYTHON_VERSION% %MINICONDA%
+  - |-
+    IF NOT "!OSQP_VERSION!"=="!OSQP_VERSION:dev=!" (
+      REM We are using a development version
+      set OSQP_PACKAGE_NAME="!OSQP_PACKAGE_NAME!-dev"
+    )
+
 
 install:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\install.cmd"
@@ -24,8 +29,25 @@ install:
 test_script:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\script.cmd"
 
-deploy_script:
-  - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\deploy.cmd"
+before_deploy:
+  - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\package.cmd"
+
+artifacts:
+  - path: `osqp-*.tar.gz`
+
+deploy:
+- provider: BinTray
+  on:
+    APPVEYOR_REPO_TAG: true
+  username: bstellato
+  api_key:
+    secure: ng7NUNQat2LczU5XjKKyDLITkZbZsJeAdPGDjuTdQDHDiaL03JJF6Usab+miNVsO
+  subject: bstellato
+  repo: generic
+  package: %OSQP_PACKAGE%
+  version: %OSQP_VERSION%
+  publish: true
+  override: true
 
 # on_finish:
 #   # Uncomment for remote desktop debug
