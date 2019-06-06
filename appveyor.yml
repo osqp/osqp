@@ -16,7 +16,7 @@ init:
   # Uncomment for remote desktop debug
   # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
   - ECHO %PYTHON_VERSION% %MINICONDA%
-  - |-
+  - cmd: >-
     IF NOT "!OSQP_VERSION!"=="!OSQP_VERSION:dev=!" (
       REM We are using a development version
       set OSQP_PACKAGE_NAME="!OSQP_PACKAGE_NAME!-dev"
