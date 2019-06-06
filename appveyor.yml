@@ -39,13 +39,13 @@ deploy:
 - provider: BinTray
   on:
     APPVEYOR_REPO_TAG: true
-  username: bstellato
+  username: 'bstellato'
   api_key:
     secure: ng7NUNQat2LczU5XjKKyDLITkZbZsJeAdPGDjuTdQDHDiaL03JJF6Usab+miNVsO
-  subject: bstellato
-  repo: generic
-  package: %OSQP_PACKAGE%
-  version: %OSQP_VERSION%
+  subject: 'bstellato'
+  repo: 'generic'
+  package: '%OSQP_PACKAGE%'
+  version: '%OSQP_VERSION%'
   publish: true
   override: true
 
