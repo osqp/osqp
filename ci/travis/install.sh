@@ -59,9 +59,9 @@ export MKL_SHARED_LIB_DIR=`python -c 'import numpy.distutils.system_info as sysi
 
 echo "MKL shared library path: ${MKL_SHARED_LIB_DIR}"
 
-# if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-#     export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MKL_SHARED_LIB_DIR}
-# else if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-#     export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${MKL_SHARED_LIB_DIR}
-# fi
-# fi
+if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MKL_SHARED_LIB_DIR}
+else if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${MKL_SHARED_LIB_DIR}
+fi
+fi

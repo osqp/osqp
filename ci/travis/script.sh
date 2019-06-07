@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Test C interface
 # ---------------------------------------------------
@@ -67,8 +68,10 @@ cd ${TRAVIS_BUILD_DIR}
 rm -rf build
 mkdir build
 cd build
-cmake -DUNITTESTS=OFF \
+cmake -DUNITTESTS=ON \
     -DOSQP_CUSTOM_MEMORY=${TRAVIS_BUILD_DIR}/tests/custom_memory/custom_memory.h \
     ..
 make osqp_tester_custom_memory
 ${TRAVIS_BUILD_DIR}/build/out/osqp_demo
+
+set +e
