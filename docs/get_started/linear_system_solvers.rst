@@ -65,7 +65,7 @@ Anaconda environments should add them automatically so in most cases you do not 
 
 .. code::
 
-   echo "`ls -rd ${ANACONDA_ROOT}/pkgs/*/ | grep mkl-2 | head -n 1`/lib"
+   echo "`ls -rd ${CONDA_ROOT}/pkgs/*/ | grep mkl-2 | head -n 1`/lib:`ls -rd ${CONDA_ROOT}/pkgs/*/ | grep intel-openmp- | head -n 1`/lib"
 
 
 where :code:`ANACONDA_ROOT` is the root of your anaconda installation.

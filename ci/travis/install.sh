@@ -18,7 +18,8 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
 else
     wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
 fi
-chmod +x miniconda.sh && ./miniconda.sh -b -p ${DEPS_DIR}/miniconda
+export CONDA_ROOT=${DEPS_DIR}/miniconda
+chmod +x miniconda.sh && ./miniconda.sh -b -p $CONDA_ROOT
 export PATH=${DEPS_DIR}/miniconda/bin:$PATH
 hash -r
 conda config --set always_yes yes --set changeps1 no
@@ -55,7 +56,7 @@ gem install coveralls-lcov
 
 
 # Add MKL shared libraries to the path
-export MKL_SHARED_LIB_DIR=`ls -rd ${DEPS_DIR}/miniconda/pkgs/*/ | grep mkl-2 | head -n 1`/lib
+export MKL_SHARED_LIB_DIR=`ls -rd ${CONDA_ROOT}/pkgs/*/ | grep mkl-2 | head -n 1`/lib:`ls -rd ${CONDA_ROOT}/pkgs/*/ | grep intel-openmp- | head -n 1`/lib
 
 echo "MKL shared library path: ${MKL_SHARED_LIB_DIR}"
 
