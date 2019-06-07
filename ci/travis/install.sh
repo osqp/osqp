@@ -53,7 +53,9 @@ conda create -n testenv --yes python=$PYTHON_VERSION numpy scipy future
 source activate testenv
 
 # Add MKL shared libraries to the path
-MKL_SHARED_LIB_DIR=`python -c 'import numpy.distutils.system_info as sysinfo; print(sysinfo.get_info("mkl")["library_dirs"][0])'`
+export MKL_SHARED_LIB_DIR=`python -c 'import numpy.distutils.system_info as sysinfo; print(sysinfo.get_info("mkl")["library_dirs"][0])'`
+
+echo "MKL shared library path: ${MKL_SHARED_LIB_DIR}"
 
 if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
     export LD_LIBRARY_PATH=${MKL_SHARED_LIB_DIR}:${LD_LIBRARY_PATH}
