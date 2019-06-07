@@ -1,6 +1,4 @@
 #!/bin/bash
-set -ev
-
 
 echo "Deploying docs to website osqp.org..."
 

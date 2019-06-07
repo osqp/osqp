@@ -1,5 +1,4 @@
 #!/bin/bash
-set -ev
 
 if [[ ${OSQP_VERSION} == *"dev"* ]]; then
     OSQP_PACKAGE_NAME="${OSQP_PACKAGE_NAME}-dev";
