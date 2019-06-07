@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 echo "Creating Bintray package..."
 
 # Compile OSQP
@@ -65,3 +66,5 @@ sed -e "s/@OSQP_PACKAGE_NAME@/${OSQP_PACKAGE_NAME}/g" \
 
 # # Publish deployed files
 # curl -X POST -ubstellato:$BINTRAY_API_KEY https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/publish
+
+set +e
