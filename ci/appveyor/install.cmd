@@ -47,4 +47,9 @@ call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86
 )
 
 
+IF NOT "!OSQP_VERSION!"=="!OSQP_VERSION:dev=!" (
+REM We are using a development version
+set OSQP_PACKAGE_NAME="!OSQP_PACKAGE_NAME!-dev"
+)
+
 @echo off
