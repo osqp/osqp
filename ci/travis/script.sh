@@ -72,6 +72,6 @@ cmake -DUNITTESTS=ON \
     -DOSQP_CUSTOM_MEMORY=${TRAVIS_BUILD_DIR}/tests/custom_memory/custom_memory.h \
     ..
 make osqp_tester_custom_memory
-${TRAVIS_BUILD_DIR}/build/out/osqp_demo
+${TRAVIS_BUILD_DIR}/build/out/osqp_tester_custom_memory
 
 set +e
