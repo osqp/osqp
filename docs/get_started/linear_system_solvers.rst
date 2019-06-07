@@ -61,9 +61,12 @@ Install with Anaconda
 ^^^^^^^^^^^^^^^^^^^^^
 `Anaconda Python distribution <https://www.anaconda.com/download/>`_ comes with the intel MKL libraries preinstalled including MKL Pardiso.
 To use this version, the Anaconda libraries folders have to be in your system path.
-Anaconda environments should add them automatically so in most cases you do not have do to anything. If you get an error where OSQP cannot find MKL, you can add the right path by adding the output from the following command to your path:
+Anaconda environments should add them automatically so in most cases you do not have do to anything. If you get an error where OSQP cannot find MKL, you can add the right path by adding the output from the following command to your path variable:
 
 .. code::
 
-   python -c 'import numpy.distutils.system_info as sysinfo; print(sysinfo.get_info("mkl")["library_dirs"][0])'
+   echo "`ls -rd ${ANACONDA_ROOT}/pkgs/*/ | grep mkl-2 | head -n 1`/lib"
+
+
+where :code:`ANACONDA_ROOT` is the root of your anaconda installation.
 
