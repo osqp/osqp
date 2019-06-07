@@ -56,7 +56,7 @@ gem install coveralls-lcov
 
 
 # Add MKL shared libraries to the path
-export MKL_SHARED_LIB_DIR=`ls -rd ${CONDA_ROOT}/pkgs/*/ | grep mkl-2 | head -n 1`/lib:`ls -rd ${CONDA_ROOT}/pkgs/*/ | grep intel-openmp- | head -n 1`/lib
+export MKL_SHARED_LIB_DIR=`ls -rd ${CONDA_ROOT}/pkgs/*/ | grep mkl-2 | head -n 1`lib:`ls -rd ${CONDA_ROOT}/pkgs/*/ | grep intel-openmp- | head -n 1`lib
 
 echo "MKL shared library path: ${MKL_SHARED_LIB_DIR}"
 
