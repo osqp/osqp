@@ -55,7 +55,7 @@ gem install coveralls-lcov
 
 
 # Add MKL shared libraries to the path
-export MKL_SHARED_LIB_DIR=`ls -rd $HOME/miniconda/pkgs/*/ | grep mkl-2 | head -n 1`/lib
+export MKL_SHARED_LIB_DIR=`ls -rd ${DEPS_DIR}/miniconda/pkgs/*/ | grep mkl-2 | head -n 1`/lib
 
 echo "MKL shared library path: ${MKL_SHARED_LIB_DIR}"
 
