@@ -60,9 +60,9 @@ export MKL_SHARED_LIB_DIR=`ls -rd ${CONDA_ROOT}/pkgs/*/ | grep mkl-2 | head -n 1
 
 echo "MKL shared library path: ${MKL_SHARED_LIB_DIR}"
 
-# if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
     export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MKL_SHARED_LIB_DIR}
-# else if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-#     export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${MKL_SHARED_LIB_DIR}
-# fi
-# fi
+else if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${MKL_SHARED_LIB_DIR}
+fi
+fi

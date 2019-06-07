@@ -1,12 +1,6 @@
 #!/bin/bash
 set -e
 
-
-echo $MKL_SHARED_LIB_DIR
-ls `ls -rd ${CONDA_ROOT}/pkgs/*/ | grep mkl-2 | head -n 1`lib
-ls `ls -rd ${CONDA_ROOT}/pkgs/*/ | grep intel-openmp- | head -n 1`lib
-echo $LD_LIBRARY_PATH
-
 # Test C interface
 # ---------------------------------------------------
 
