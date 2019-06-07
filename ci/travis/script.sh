@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+
+echo $MKL_SHARED_LIB_DIR
+echo $DYLD_LIBRARY_PATH
+
 # Test C interface
 # ---------------------------------------------------
 
