@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 if [[ ${OSQP_VERSION} == *"dev"* ]]; then
     OSQP_PACKAGE_NAME="${OSQP_PACKAGE_NAME}-dev";
 fi
@@ -66,4 +65,3 @@ echo "MKL shared library path: ${MKL_SHARED_LIB_DIR}"
 #     export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${MKL_SHARED_LIB_DIR}
 # fi
 # fi
-

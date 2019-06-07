@@ -1,5 +1,4 @@
 #!/bin/bash
-
 echo "Creating Bintray package..."
 
 # Compile OSQP

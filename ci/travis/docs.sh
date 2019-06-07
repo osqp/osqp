@@ -45,4 +45,3 @@ if [[ $TRAVIS_OS_NAME == "linux" ]]; then
 	git push -q origin master
 
 fi
-
