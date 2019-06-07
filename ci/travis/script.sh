@@ -3,6 +3,7 @@ set -e
 
 
 echo $MKL_SHARED_LIB_DIR
+ls $MKL_SHARED_LIB_DIR
 echo $DYLD_LIBRARY_PATH
 
 # Test C interface
