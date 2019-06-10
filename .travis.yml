@@ -25,10 +25,10 @@ install:
  - source ${TRAVIS_BUILD_DIR}/ci/travis/install.sh
 
 script:
- - sh ${TRAVIS_BUILD_DIR}/ci/travis/script.sh
+ - ./${TRAVIS_BUILD_DIR}/ci/travis/script.sh
 
 before_deploy:
- - sh ${TRAVIS_BUILD_DIR}/ci/travis/package.sh
+ - ./${TRAVIS_BUILD_DIR}/ci/travis/package.sh
 
 deploy:
   # Deploy shared libraries to bintray
