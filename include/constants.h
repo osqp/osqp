@@ -52,6 +52,14 @@ enum osqp_error_type {
 extern const char * OSQP_ERROR_MESSAGE[];
 
 
+/*************************
+* OSQP Algorithm Phases  *
+**************************/
+enum osqp_phase_type { OSQP_ADMM_PHASE,
+		       OSQP_POLISH_PHASE,
+		       OSQP_DIFFERENTIATE_PHASE };
+
+
 /**********************************
 * Solver Parameters and Settings *
 **********************************/

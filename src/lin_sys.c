@@ -62,18 +62,18 @@ c_int init_linsys_solver(LinSysSolver          **s,
                          c_float                 sigma,
                          const c_float          *rho_vec,
                          enum linsys_solver_type linsys_solver,
-                         c_int                   polish) {
+                         enum osqp_phase_type    phase) {
   switch (linsys_solver) {
   case QDLDL_SOLVER:
-    return init_linsys_solver_qdldl((qdldl_solver **)s, P, A, sigma, rho_vec, polish);
+    return init_linsys_solver_qdldl((qdldl_solver **)s, P, A, sigma, rho_vec, phase);
 
 # ifdef ENABLE_MKL_PARDISO
   case MKL_PARDISO_SOLVER:
-    return init_linsys_solver_pardiso((pardiso_solver **)s, P, A, sigma, rho_vec, polish);
+    return init_linsys_solver_pardiso((pardiso_solver **)s, P, A, sigma, rho_vec, phase);
 
 # endif /* ifdef ENABLE_MKL_PARDISO */
   default: // QDLDL
-    return init_linsys_solver_qdldl((qdldl_solver **)s, P, A, sigma, rho_vec, polish);
+    return init_linsys_solver_qdldl((qdldl_solver **)s, P, A, sigma, rho_vec, phase);
   }
 }
 

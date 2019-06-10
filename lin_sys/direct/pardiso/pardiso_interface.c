@@ -39,8 +39,8 @@ void free_linsys_solver_pardiso(pardiso_solver *s) {
     if (s) {
 
         // Free pardiso solver using internal function
-        s->phase = PARDISO_CLEANUP;
-        pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
+        s->pardiso_phase = PARDISO_CLEANUP;
+        pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->pardiso_phase),
                  &(s->nKKT), &(s->fdum), s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
                  s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
 
@@ -70,7 +70,7 @@ void free_linsys_solver_pardiso(pardiso_solver *s) {
 
 
 // Initialize factorization structure
-c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc * A, c_float sigma, const c_float * rho_vec, c_int polish){
+c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc * A, c_float sigma, const c_float * rho_vec, enum osqp_phase_type phase){
     c_int i;                     // loop counter
     c_int nnzKKT;                // Number of nonzeros in KKT
     // Define Variables
@@ -91,8 +91,8 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
     // Sigma parameter
     s->sigma = sigma;
 
-    // Polishing flag
-    s->polish = polish;
+    // OSQP phase
+    s->phase = phase;
 
     // Link Functions
     s->solve = &solve_linsys_pardiso;
@@ -113,7 +113,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
     s->rho_inv_vec = (c_float *)c_malloc(sizeof(c_float) * n_plus_m);
 
     // Form KKT matrix
-    if (polish){ // Called from polish()
+    if (phase == OSQP_POLISH_PHASE){ // Called from polish()
         // Use s->rho_inv_vec for storing param2 = vec(delta)
         for (i = 0; i < A->m; i++){
             s->rho_inv_vec[i] = sigma;
@@ -180,7 +180,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
     }
     s->iparm[0] = 1;      // No solver default
     s->iparm[1] = 3;      // Fill-in reordering from OpenMP
-    if (polish) {
+    if (phase == OSQP_POLISH_PHASE) {
         s->iparm[5] = 1;  // Write solution into b
     } else {
         s->iparm[5] = 0;  // Do NOT write solution into b
@@ -195,8 +195,8 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
     s->nthreads = mkl_get_max_threads();
 
     // Reordering and symbolic factorization
-    s->phase = PARDISO_SYMBOLIC;
-    pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
+    s->pardiso_phase = PARDISO_SYMBOLIC;
+    pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->pardiso_phase),
              &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
     if ( s->error != 0 ){
@@ -209,8 +209,8 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
     }
 
     // Numerical factorization
-    s->phase = PARDISO_NUMERIC;
-    pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
+    s->pardiso_phase = PARDISO_NUMERIC;
+    pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->pardiso_phase),
              &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
     if ( s->error ){
@@ -232,8 +232,8 @@ c_int solve_linsys_pardiso(pardiso_solver * s, c_float * b) {
     c_int j;
 
     // Back substitution and iterative refinement
-    s->phase = PARDISO_SOLVE;
-    pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
+    s->pardiso_phase = PARDISO_SOLVE;
+    pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->pardiso_phase),
              &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), b, s->sol, &(s->error));
     if ( s->error != 0 ){
@@ -243,7 +243,7 @@ c_int solve_linsys_pardiso(pardiso_solver * s, c_float * b) {
         return 1;
     }
 
-    if (!(s->polish)) {
+    if (s->phase != OSQP_POLISH_PHASE) {
         /* copy x_tilde from s->sol */
         for (j = 0 ; j < s->n ; j++) {
             b[j] = s->sol[j];
@@ -268,8 +268,8 @@ c_int update_linsys_solver_matrices_pardiso(pardiso_solver * s, const csc *P, co
     update_KKT_A(s->KKT, A, s->AtoKKT);
 
     // Perform numerical factorization
-    s->phase = PARDISO_NUMERIC;
-    pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
+    s->pardiso_phase = PARDISO_NUMERIC;
+    pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->pardiso_phase),
              &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
 
@@ -290,8 +290,8 @@ c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver * s, const c_float * r
     update_KKT_param2(s->KKT, s->rho_inv_vec, s->rhotoKKT, s->m);
 
     // Perform numerical factorization
-    s->phase = PARDISO_NUMERIC;
-    pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
+    s->pardiso_phase = PARDISO_NUMERIC;
+    pardiso (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->pardiso_phase),
              &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
              s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
 

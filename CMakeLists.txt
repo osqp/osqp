@@ -168,6 +168,7 @@ set(
     src/ctrlc.c
     src/error.c
     src/kkt.c
+    src/differentiate.c
     src/lin_alg.c
     src/lin_sys.c
     src/osqp.c
@@ -186,6 +187,7 @@ set(
     include/error.h
     include/glob_opts.h
     include/kkt.h
+    include/differentiate.h
     include/lin_alg.h
     include/lin_sys.h
     include/osqp.h

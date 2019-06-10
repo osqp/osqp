@@ -163,7 +163,7 @@ static c_int permute_KKT(csc ** KKT, qdldl_solver * p, c_int Pnz, c_int Anz, c_i
 
 
 // Initialize LDL Factorization structure
-c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const csc * P, const csc * A, c_float sigma, const c_float * rho_vec, c_int polish){
+c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const csc * P, const csc * A, c_float sigma, const c_float * rho_vec, enum osqp_phase_type phase){
 
     // Define Variables
     csc * KKT_temp;     // Temporary KKT pointer
@@ -183,8 +183,8 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const csc * P, const csc * A,
     // Sigma parameter
     s->sigma = sigma;
 
-    // Polishing flag
-    s->polish = polish;
+    // Phase
+    s->phase = phase;
 
     // Link Functions
     s->solve = &solve_linsys_qdldl;
@@ -247,7 +247,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const csc * P, const csc * A,
     s->fwork = (QDLDL_float *)c_malloc(sizeof(QDLDL_float)*n_plus_m);
 
     // Form and permute KKT matrix
-    if (polish){ // Called from polish()
+    if (phase == OSQP_POLISH_PHASE){
         // Use s->rho_inv_vec for storing param2 = vec(delta)
         for (i = 0; i < A->m; i++){
             s->rho_inv_vec[i] = sigma;
@@ -298,7 +298,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const csc * P, const csc * A,
         return OSQP_NONCVX_ERROR;
     }
 
-    if (polish){ // If KKT passed, assign it to KKT_temp
+    if (phase == OSQP_POLISH_PHASE){ // If KKT passed, assign it to KKT_temp
         // Polish, no need for KKT_temp
         csc_spfree(KKT_temp);
     }
@@ -340,7 +340,7 @@ c_int solve_linsys_qdldl(qdldl_solver * s, c_float * b) {
     c_int j;
 
 #ifndef EMBEDDED
-    if (s->polish) {
+    if (s->phase == OSQP_POLISH_PHASE) {
         /* stores solution to the KKT system in b */
         LDLSolve(b, b, s->L, s->Dinv, s->P, s->bp);
     } else {

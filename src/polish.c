@@ -234,7 +234,7 @@ c_int polish(OSQPWorkspace *work) {
   // Form and factorize reduced KKT
   exitflag = init_linsys_solver(&plsh, work->data->P, work->pol->Ared,
                                 work->settings->delta, OSQP_NULL,
-                                work->settings->linsys_solver, 1);
+                                work->settings->linsys_solver, OSQP_POLISH_PHASE);
 
   if (exitflag) {
     // Polishing failed

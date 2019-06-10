@@ -45,7 +45,7 @@ struct pardiso {
     c_float *sol;           ///< solution to the KKT system
     c_float *rho_inv_vec;   ///< parameter vector
     c_float sigma;          ///< scalar parameter
-    c_int polish;           ///< polishing flag
+    c_int phase;            ///< osqp solver phase
     c_int n;                ///< number of QP variables
     c_int m;                ///< number of QP constraints
 
@@ -57,7 +57,7 @@ struct pardiso {
     c_int nrhs;       ///< number of right-hand sides (1 for our needs)
     c_int maxfct;     ///< maximum number of factors (1 for our needs)
     c_int mnum;       ///< indicates matrix for the solution phase (1 for our needs)
-    c_int phase;      ///< control the execution phases of the solver
+    c_int pardiso_phase;      ///< control the execution phases of the solver
     c_int error;      ///< the error indicator (0 for no error)
     c_int msglvl;     ///< Message level information (0 for no output)
     c_int idum;       ///< dummy integer
@@ -80,10 +80,10 @@ struct pardiso {
  * @param  A         Constraints matrix
  * @param  sigma     Algorithm parameter. If polish, then sigma = delta.
  * @param  rho_vec   Algorithm parameter. If polish, then rho_vec = OSQP_NULL.
- * @param  polish    Flag whether we are initializing for polish or not
+ * @param  phase     OSQP algorithm phase
  * @return           Exitflag for error (0 if no errors)
  */
-c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc * A, c_float sigma, const c_float * rho_vec, c_int polish);
+c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc * A, c_float sigma, const c_float * rho_vec, enum osqp_phase_type phase);
 
 
 /**
