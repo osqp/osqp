@@ -20,6 +20,10 @@ add_library(linsys_lib_handler
             ${CMAKE_CURRENT_SOURCE_DIR}/lib_handler.c)
 target_include_directories(linsys_lib_handler PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
+install(TARGETS linsys_lib_handler
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 endif()
 
 

@@ -37,3 +37,8 @@ set(qdldl_interface_src
 add_library(linsys_qdldl ${qdldl_interface_src})
 target_link_libraries(linsys_qdldl ${qdldl_LIBRARIES})
 target_include_directories(linsys_qdldl PRIVATE ${qdldl_interface_includes} ${PROJECT_SOURCE_DIR}/include)
+
+install(TARGETS linsys_qdldl
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

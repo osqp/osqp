@@ -26,9 +26,16 @@ if (ENABLE_MKL_PARDISO)
 	# Add parent directory for library handler
 	target_include_directories(linsys_pardiso PRIVATE  ${pardiso_includes} ${PROJECT_SOURCE_DIR}/include)
 
+	target_link_libraries(linsys_pardiso linsys_lib_handler)
+
 	set(direct_linsys_solvers ${direct_linsys_solvers} linsys_pardiso)
 
 	set(direct_linsys_solvers_includes "${direct_linsys_solvers_includes};${CMAKE_CURRENT_SOURCE_DIR}/pardiso/")
+
+	install(TARGETS linsys_pardiso
+			ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+			LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+			RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 endif()
 
 
