@@ -13,6 +13,17 @@ extern "C" {
 * Internal types *
 ******************/
 
+/*
+ * OSQPVector types.   Not defined here since it
+ *   is implementation specific
+ */
+
+/* integer valued vectors */
+typedef struct OSQPVectori_ OSQPVectori;
+
+/* float valued vectors*/
+typedef struct OSQPVectorf_ OSQPVectorf;
+
 /**
  *  Matrix in compressed-column or triplet form
  */

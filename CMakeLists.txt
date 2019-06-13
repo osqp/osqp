@@ -168,7 +168,8 @@ set(
     src/ctrlc.c
     src/error.c
     src/kkt.c
-    src/lin_alg.c
+    algebra/vector.c
+    algebra/matrix.c
     src/lin_sys.c
     src/osqp.c
     src/polish.c
@@ -187,6 +188,8 @@ set(
     include/glob_opts.h
     include/kkt.h
     include/lin_alg.h
+    include/algebra_vector.h
+    include/algebra_matrix.h
     include/lin_sys.h
     include/osqp.h
     include/osqp_configure.h
