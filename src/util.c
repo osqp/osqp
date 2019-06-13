@@ -307,7 +307,7 @@ c_float osqp_toc(OSQPTimer *t)
 }
 
 // Linux
-# else  /* ifdef IS_WINDOWS */
+# elif defined IS_LINUX
 
 /* read current time */
 void osqp_tic(OSQPTimer *t)

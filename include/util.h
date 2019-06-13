@@ -88,6 +88,8 @@ void print_footer(OSQPInfo *info,
 
 # ifdef PROFILING
 
+#  ifndef OSQP_CUSTOM_TICTOC
+
 // Windows
 #  ifdef IS_WINDOWS
 
@@ -119,7 +121,7 @@ struct OSQP_TIMER {
 };
 
 // Linux
-#  else // ifdef IS_WINDOWS
+#  elif defined IS_LINUX
 
 /* Use POSIX clock_gettime() for timing on non-Windows machines */
 #   include <time.h>
@@ -151,6 +153,8 @@ void    osqp_tic(OSQPTimer *t);
  * @return   Reported time
  */
 c_float osqp_toc(OSQPTimer *t);
+
+#  endif /* #ifndef OSQP_CUSTOM_TICTOC */
 
 # endif /* END #ifdef PROFILING */
 
