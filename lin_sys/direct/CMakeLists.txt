@@ -15,7 +15,7 @@ set(direct_linsys_solvers_includes
 
 
 # Add other solvers if embedded option is false
-if(NOT DEFINED EMBEDDED)
+if(NOT EMBEDDED)
 
 # MKL Pardiso MKL
 # -----------

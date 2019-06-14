@@ -41,14 +41,23 @@ option (UNITTESTS "Enable unittests generation" OFF)
 #   1 :   Yes. Matrix update not allowed.
 #   2 :   Yes. Matrix update allowed.
 if (NOT DEFINED EMBEDDED)
+    set(EMBEDDED 0)
+endif()
+if (EMBEDDED EQUAL 2)
+    message(STATUS "Embedded is ON: Updating of vectors and matrices supported")
+elseif (EMBEDDED EQUAL 1)
+    message(STATUS "Embedded is ON: Updating of vectors supported")
+elseif (EMBEDDED EQUAL 0)
     message(STATUS "Embedded is OFF")
 else()
-    message(STATUS "Embedded is ${EMBEDDED}")
+    # If it is not a valid number, error
+    message(FATAL_ERROR "Undefined option ${EMBEDDED} for EMBEDDED")
 endif()
+
 
 # Is printing enabled?
 option (PRINTING "Enable solver printing" ON)
-if (DEFINED EMBEDDED)
+if (EMBEDDED)
     message(STATUS "Disabling printing for embedded")
     set(PRINTING OFF)
 endif()
@@ -57,7 +66,7 @@ message(STATUS "Printing is ${PRINTING}")
 
 # Is profiling enabled?
 option (PROFILING "Enable solver profiling (timing)" ON)
-if (DEFINED EMBEDDED)
+if (EMBEDDED)
     message(STATUS "Disabling profiling for embedded")
     set(PROFILING OFF)
 endif()
@@ -65,7 +74,7 @@ message(STATUS "Profiling is ${PROFILING}")
 
 # Is user interrupt enabled?
 option (CTRLC "Enable user interrupt (Ctrl-C)" ON)
-if (DEFINED EMBEDDED)
+if (EMBEDDED)
     message(STATUS "Disabling user interrupt for embedded")
     set(CTRLC OFF)
 endif()
@@ -73,7 +82,11 @@ message(STATUS "User interrupt is ${CTRLC}")
 
 # Use floats instead of integers
 option (DFLOAT "Use float numbers instead of doubles" OFF)
-message(STATUS "Floats are ${DFLOAT}")
+if (DFLOAT)
+    message(STATUS "Using single precision floats instead of doubles")
+else()
+    message(STATUS "Using double precision numbers")
+endif()
 
 # Use long integers for indexing
 option (DLONG "Use long integers (64bit) for indexing" ON)
@@ -119,7 +132,7 @@ option (ENABLE_MKL_PARDISO "Enable MKL Pardiso solver" ON)
 if (DFLOAT)
 	message(STATUS "Disabling MKL Pardiso Solver with floats")
 	set(ENABLE_MKL_PARDISO OFF)
-elseif(DEFINED EMBEDDED)
+elseif(EMBEDDED)
 	message(STATUS "Disabling MKL Pardiso Solver for embedded")
 	set(ENABLE_MKL_PARDISO OFF)
 endif()
@@ -197,7 +210,7 @@ set(
     include/util.h
 )
 
-if (DEFINED EMBEDDED)
+if (EMBEDDED)
     # osqp_src
     list(REMOVE_ITEM osqp_src "src/cs.c")
     list(REMOVE_ITEM osqp_src "src/ctrlc.c")

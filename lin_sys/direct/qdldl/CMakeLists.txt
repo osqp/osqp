@@ -2,7 +2,7 @@
 add_subdirectory(qdldl_sources)
 
 
-if(NOT DEFINED EMBEDDED)
+if(NOT EMBEDDED)
 set(
     amd_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/amd/include/amd_internal.h
