@@ -142,6 +142,7 @@ static const char* test_basic_qp_solve()
             exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
   settings->adaptive_rho_interval = tmp_int;
 
+#ifdef PROFILING
   // Setup workspace with wrong settings->adaptive_rho_fraction
   tmp_float = settings->adaptive_rho_fraction;
   settings->adaptive_rho_fraction = -1.5;
@@ -149,8 +150,9 @@ static const char* test_basic_qp_solve()
   mu_assert("Basic QP test solve: Setup should result in error due to non-positive settings->adaptive_rho_fraction",
             exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
   settings->adaptive_rho_fraction = tmp_float;
+#endif
 
-  // Setup workspace with wrong settings->adaptive_rho_fraction
+  // Setup workspace with wrong settings->adaptive_rho_tolerance
   tmp_float = settings->adaptive_rho_tolerance;
   settings->adaptive_rho_tolerance = 0.5;
   exitflag = osqp_setup(&work, data, settings);
@@ -278,6 +280,7 @@ static const char* test_basic_qp_solve()
             exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
   settings->warm_start = tmp_int;
 
+#ifdef PROFILING
   // Setup workspace with wrong settings->time_limit
   tmp_float = settings->time_limit;
   settings->time_limit = -0.2;
@@ -285,6 +288,7 @@ static const char* test_basic_qp_solve()
   mu_assert("Basic QP test solve: Setup should result in error due to wrong settings->time_limit",
             exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
   settings->time_limit = tmp_float;
+#endif
 
 
   /* =========================
@@ -773,6 +777,7 @@ static const char* test_basic_qp_update_rho()
   return 0;
 }
 
+#ifdef PROFILING
 static const char* test_basic_qp_time_limit()
 {
   c_int exitflag;
@@ -832,6 +837,7 @@ static const char* test_basic_qp_time_limit()
 
   return 0;
 }
+#endif // PROFILING
 
 
 static const char* test_basic_qp_warm_start()
@@ -907,7 +913,9 @@ static const char* test_basic_qp()
   mu_run_test(test_basic_qp_update);
   mu_run_test(test_basic_qp_check_termination);
   mu_run_test(test_basic_qp_update_rho);
+#ifdef PROFILING
   mu_run_test(test_basic_qp_time_limit);
+#endif
   mu_run_test(test_basic_qp_warm_start);
 
   return 0;
