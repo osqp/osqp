@@ -136,7 +136,6 @@ static c_int iterative_refinement(OSQPWorkspace *work,
                                   c_float       *z,
                                   c_float       *b) {
   c_int i, j, n;
-  c_float *dz;
   c_float *rhs;
 
   if (work->settings->polish_refine_iter > 0) {
@@ -144,11 +143,10 @@ static c_int iterative_refinement(OSQPWorkspace *work,
     // Assign dimension n
     n = work->data->n + work->pol->Ared->m;
 
-    // Allocate dz and rhs vectors
-    dz  = (c_float *)c_malloc(sizeof(c_float) * n);
+    // Allocate rhs vector
     rhs = (c_float *)c_malloc(sizeof(c_float) * n);
 
-    if (!dz || !rhs) {
+    if (!rhs) {
       return osqp_error(OSQP_MEM_ALLOC_ERROR);
     } else {
       for (i = 0; i < work->settings->polish_refine_iter; i++) {
@@ -177,7 +175,6 @@ static c_int iterative_refinement(OSQPWorkspace *work,
         }
       }
     }
-    if (dz)  c_free(dz);
     if (rhs) c_free(rhs);
   }
   return 0;
