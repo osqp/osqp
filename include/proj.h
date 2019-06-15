@@ -6,17 +6,49 @@ extern "C" {
 # endif // ifdef __cplusplus
 
 # include "types.h"
+# include "lin_alg.h"
 
 
 /* Define Projections onto set C involved in the ADMM algorithm */
 
 /**
- * Project z onto \f$C = [l, u]\f$
- * @param z    Vector to project
+ * Project y onto the polar of the rec cone of \f$C = [l, u]\f$
+ * @param y         Vector to project
+ * @param l         lower bound vector
+ * @param u         upper bound bector
+ * @param neginf    Negative value treated as -infinity
+* @param neginf     Positive value treated as infinity
  * @param work Workspace
  */
-void project(OSQPWorkspace *work,
-             c_float       *z);
+ void project_polar_reccone(OSQPVectorf      *y,
+                            OSQPVectorf      *l,
+                            OSQPVectorf      *u,
+                            c_float      neginf,
+                            c_float      posinf);
+/**
+ * Project z onto \f$C = [l, u]\f$
+ * @param y         Vector to project
+ * @param l         lower bound vector
+ * @param u         upper bound bector
+ * @param neginf    Negative value treated as -infinity
+* @param neginf     Positive value treated as infinity
+ * @param work Workspace
+ */
+c_int test_in_polar_reccone(OSQPVectorf      *y,
+                            OSQPVectorf      *l,
+                            OSQPVectorf      *u,
+                            c_float      neginf,
+                            c_float      posinf,
+                            c_float         tol);
+
+// Project y onto \f$C = [l, u]\f$
+/**
+ * Project z onto polar of the recession cone of $[l,u]$
+ * @param y    Vector to project
+ * @param work Workspace
+ */
+
+void project(OSQPWorkspace *work, OSQPVectorf *y);
 
 
 /**
@@ -25,10 +57,7 @@ void project(OSQPWorkspace *work,
  * @param z    Primal variable z
  * @param y    Dual variable y
  */
-void project_normalcone(OSQPWorkspace *work,
-                        c_float       *z,
-                        c_float       *y);
-
+ void project_normalcone(OSQPWorkspace *work, OSQPVectorf *z, OSQPVectorf *y);
 
 # ifdef __cplusplus
 }

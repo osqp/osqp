@@ -22,22 +22,22 @@ c_float compute_rho_estimate(OSQPWorkspace *work) {
   m = work->data->m;
 
   // Get primal and dual residuals
-  pri_res = vec_norm_inf(work->z_prev, m);
-  dua_res = vec_norm_inf(work->x_prev, n);
+  pri_res = OSQPVectorf_norm_inf(work->z_prev);
+  dua_res = OSQPVectorf_norm_inf(work->x_prev);
 
   // Normalize primal residual
-  pri_res_norm  = vec_norm_inf(work->z, m);           // ||z||
-  temp_res_norm = vec_norm_inf(work->Ax, m);          // ||Ax||
+  pri_res_norm  = OSQPVectorf_norm_inf(work->z);           // ||z||
+  temp_res_norm = OSQPVectorf_norm_inf(work->Ax);          // ||Ax||
   pri_res_norm  = c_max(pri_res_norm, temp_res_norm); // max (||z||,||Ax||)
   pri_res      /= (pri_res_norm + 1e-10);             // Normalize primal
                                                       // residual (prevent 0
                                                       // division)
 
   // Normalize dual residual
-  dua_res_norm  = vec_norm_inf(work->data->q, n);     // ||q||
-  temp_res_norm = vec_norm_inf(work->Aty, n);         // ||A' y||
+  dua_res_norm  = OSQPVectorf_norm_inf(work->data->q);     // ||q||
+  temp_res_norm = OSQPVectorf_norm_inf(work->Aty);         // ||A' y||
   dua_res_norm  = c_max(dua_res_norm, temp_res_norm);
-  temp_res_norm = vec_norm_inf(work->Px, n);          //  ||P x||
+  temp_res_norm = OSQPVectorf_norm_inf(work->Px);          //  ||P x||
   dua_res_norm  = c_max(dua_res_norm, temp_res_norm); // max(||q||,||A' y||,||P
                                                       // x||)
   dua_res      /= (dua_res_norm + 1e-10);             // Normalize dual residual
@@ -81,55 +81,65 @@ void set_rho_vec(OSQPWorkspace *work) {
 
   work->settings->rho = c_min(c_max(work->settings->rho, RHO_MIN), RHO_MAX);
 
+  c_float* l           = OSQPVectorf_data(work->data->l);
+  c_float* u           = OSQPVectorf_data(work->data->u);
+  c_float* rho_vec     = OSQPVectorf_data(work->rho_vec);
+  c_int   *constr_type = OSQPVectori_data(work->constr_type);
+
   for (i = 0; i < work->data->m; i++) {
-    if ((work->data->l[i] < -OSQP_INFTY * MIN_SCALING) &&
-        (work->data->u[i] > OSQP_INFTY * MIN_SCALING)) {
+    if ((l[i] < -OSQP_INFTY * MIN_SCALING) && (u[i] > OSQP_INFTY * MIN_SCALING)) {
       // Loose bounds
-      work->constr_type[i] = -1;
-      work->rho_vec[i]     = RHO_MIN;
-    } else if (work->data->u[i] - work->data->l[i] < RHO_TOL) {
+      constr_type[i] = -1;
+      rho_vec[i]     = RHO_MIN;
+    } else if (u[i] - l[i] < RHO_TOL) {
       // Equality constraints
-      work->constr_type[i] = 1;
-      work->rho_vec[i]     = RHO_EQ_OVER_RHO_INEQ * work->settings->rho;
+      constr_type[i] = 1;
+      rho_vec[i]     = RHO_EQ_OVER_RHO_INEQ * work->settings->rho;
     } else {
       // Inequality constraints
-      work->constr_type[i] = 0;
-      work->rho_vec[i]     = work->settings->rho;
+      constr_type[i] = 0;
+      rho_vec[i]     = work->settings->rho;
     }
-    work->rho_inv_vec[i] = 1. / work->rho_vec[i];
+    OSQPVectorf_ew_reciprocal(work->rho_vec,work->rho_inv_vec);
   }
 }
 
 c_int update_rho_vec(OSQPWorkspace *work) {
+
   c_int i, exitflag, constr_type_changed;
+
+  c_float* l           = OSQPVectorf_data(work->data->l);
+  c_float* u           = OSQPVectorf_data(work->data->u);
+  c_float* rho_vec     = OSQPVectorf_data(work->rho_vec);
+  c_float* rho_inv_vec = OSQPVectorf_data(work->rho_inv_vec);
+  c_int   *constr_type = OSQPVectori_data(work->constr_type);
 
   exitflag            = 0;
   constr_type_changed = 0;
 
   for (i = 0; i < work->data->m; i++) {
-    if ((work->data->l[i] < -OSQP_INFTY * MIN_SCALING) &&
-        (work->data->u[i] > OSQP_INFTY * MIN_SCALING)) {
+    if ((l[i] < -OSQP_INFTY * MIN_SCALING) && (u[i] > OSQP_INFTY * MIN_SCALING)) {
       // Loose bounds
-      if (work->constr_type[i] != -1) {
-        work->constr_type[i] = -1;
-        work->rho_vec[i]     = RHO_MIN;
-        work->rho_inv_vec[i] = 1. / RHO_MIN;
+      if (constr_type[i] != -1) {
+        constr_type[i] = -1;
+        rho_vec[i]     = RHO_MIN;
+        rho_inv_vec[i] = 1. / RHO_MIN;
         constr_type_changed  = 1;
       }
-    } else if (work->data->u[i] - work->data->l[i] < RHO_TOL) {
+    } else if (u[i] - l[i] < RHO_TOL) {
       // Equality constraints
-      if (work->constr_type[i] != 1) {
-        work->constr_type[i] = 1;
-        work->rho_vec[i]     = RHO_EQ_OVER_RHO_INEQ * work->settings->rho;
-        work->rho_inv_vec[i] = 1. / work->rho_vec[i];
+      if (constr_type[i] != 1) {
+        constr_type[i] = 1;
+        rho_vec[i]     = RHO_EQ_OVER_RHO_INEQ * work->settings->rho;
+        rho_inv_vec[i] = 1. / rho_vec[i];
         constr_type_changed  = 1;
       }
     } else {
       // Inequality constraints
-      if (work->constr_type[i] != 0) {
-        work->constr_type[i] = 0;
-        work->rho_vec[i]     = work->settings->rho;
-        work->rho_inv_vec[i] = 1. / work->settings->rho;
+      if (constr_type[i] != 0) {
+        constr_type[i] = 0;
+        rho_vec[i]     = work->settings->rho;
+        rho_inv_vec[i] = 1. / work->settings->rho;
         constr_type_changed  = 1;
       }
     }
@@ -138,7 +148,7 @@ c_int update_rho_vec(OSQPWorkspace *work) {
   // Update rho_vec in KKT matrix if constraints type has changed
   if (constr_type_changed == 1) {
     exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
-                                                   work->rho_vec);
+                                                   OSQPVectorf_data(work->rho_vec));
   }
 
   return exitflag;
@@ -147,8 +157,8 @@ c_int update_rho_vec(OSQPWorkspace *work) {
 #endif // EMBEDDED != 1
 
 
-void swap_vectors(c_float **a, c_float **b) {
-  c_float *temp;
+void swap_vectors(OSQPVectorf **a, OSQPVectorf **b) {
+  OSQPVectorf *temp;
 
   temp = *b;
   *b   = *a;
@@ -156,25 +166,22 @@ void swap_vectors(c_float **a, c_float **b) {
 }
 
 void cold_start(OSQPWorkspace *work) {
-  vec_set_scalar(work->x, 0., work->data->n);
-  vec_set_scalar(work->z, 0., work->data->m);
-  vec_set_scalar(work->y, 0., work->data->m);
+  OSQPVectorf_set_scalar(work->x, 0.);
+  OSQPVectorf_set_scalar(work->z, 0.);
+  OSQPVectorf_set_scalar(work->y, 0.);
 }
 
 static void compute_rhs(OSQPWorkspace *work) {
   c_int i; // Index
 
-  for (i = 0; i < work->data->n; i++) {
-    // Cycle over part related to x variables
-    work->xz_tilde[i] = work->settings->sigma * work->x_prev[i] -
-                        work->data->q[i];
-  }
+  //part related to x variables
+  OSQPVectorf_add_scaled(work->xtilde_view,
+                         work->settings->sigma,work->x_prev,
+                         -1., work->data->q);
 
-  for (i = 0; i < work->data->m; i++) {
-    // Cycle over dual variable in the first step (nu)
-    work->xz_tilde[i + work->data->n] = work->z_prev[i] - work->rho_inv_vec[i] *
-                                        work->y[i];
-  }
+  //part related to dual variable in the equality constrained QP (nu)
+  OSQPVectorf_ew_prod(work->ztilde_view, work->rho_inv_vec, work->y);
+  OSQPVectorf_minus(work->ztilde_view, work->z_prev, work->ztilde_view);
 }
 
 void update_xz_tilde(OSQPWorkspace *work) {
@@ -182,34 +189,31 @@ void update_xz_tilde(OSQPWorkspace *work) {
   compute_rhs(work);
 
   // Solve linear system
-  work->linsys_solver->solve(work->linsys_solver, work->xz_tilde);
+  work->linsys_solver->solve(work->linsys_solver, OSQPVectorf_data(work->xz_tilde));
 }
 
 void update_x(OSQPWorkspace *work) {
   c_int i;
 
   // update x
-  for (i = 0; i < work->data->n; i++) {
-    work->x[i] = work->settings->alpha * work->xz_tilde[i] +
-                 ((c_float)1.0 - work->settings->alpha) * work->x_prev[i];
-  }
+  OSQPVectorf_add_scaled(work->x,
+                         work->settings->alpha,work->xz_tilde,
+                         ((c_float)1.0 - work->settings->alpha),work->x_prev);
 
   // update delta_x
-  for (i = 0; i < work->data->n; i++) {
-    work->delta_x[i] = work->x[i] - work->x_prev[i];
-  }
+  OSQPVectorf_minus(work->delta_x,work->x,work->x_prev);
 }
 
 void update_z(OSQPWorkspace *work) {
   c_int i;
 
   // update z
-  for (i = 0; i < work->data->m; i++) {
-    work->z[i] = work->settings->alpha * work->xz_tilde[i + work->data->n] +
-                 ((c_float)1.0 - work->settings->alpha) * work->z_prev[i] +
-                 work->rho_inv_vec[i] * work->y[i];
-  }
+  OSQPVectorf_ew_prod(work->z, work->rho_inv_vec,work->y);
 
+  OSQPVectorf_add_scaled3(work->z,
+                          1., work->z,
+                          work->settings->alpha, work->ztilde_view,
+                          ((c_float)1.0 - work->settings->alpha), work->z_prev);
   // project z
   project(work, work->z);
 }
@@ -217,21 +221,21 @@ void update_z(OSQPWorkspace *work) {
 void update_y(OSQPWorkspace *work) {
   c_int i; // Index
 
-  for (i = 0; i < work->data->m; i++) {
-    work->delta_y[i] = work->rho_vec[i] *
-                       (work->settings->alpha *
-                        work->xz_tilde[i + work->data->n] +
-                        ((c_float)1.0 - work->settings->alpha) * work->z_prev[i] -
-                        work->z[i]);
-    work->y[i] += work->delta_y[i];
-  }
+    OSQPVectorf_add_scaled3(work->delta_y,
+                            work->settings->alpha,work->ztilde_view,
+                            ((c_float)1.0 - work->settings->alpha),work->z_prev,
+                            -1.,work->z);
+
+    OSQPVectorf_ew_prod(work->delta_y,work->delta_y,work->rho_vec);
+
+    OSQPVectorf_plus(work->y,work->y,work->delta_y);
 }
 
-c_float compute_obj_val(OSQPWorkspace *work, c_float *x) {
+c_float compute_obj_val(OSQPWorkspace *work, OSQPVectorf *x) {
   c_float obj_val;
 
-  obj_val = quad_form(work->data->P, x) +
-            vec_prod(work->data->q, x, work->data->n);
+  obj_val = quad_form(work->data->P, OSQPVectorf_data(x)) +
+            OSQPVectorf_dot_prod(work->data->q, x);
 
   if (work->settings->scaling) {
     obj_val *= work->scaling->cinv;
@@ -240,20 +244,20 @@ c_float compute_obj_val(OSQPWorkspace *work, c_float *x) {
   return obj_val;
 }
 
-c_float compute_pri_res(OSQPWorkspace *work, c_float *x, c_float *z) {
+c_float compute_pri_res(OSQPWorkspace *work, OSQPVectorf *x, OSQPVectorf *z) {
   // NB: Use z_prev as working vector
   // pr = Ax - z
 
-  mat_vec(work->data->A, x, work->Ax, 0); // Ax
-  vec_add_scaled(work->z_prev, work->Ax, z, work->data->m, -1);
+  mat_vec(work->data->A, OSQPVectorf_data(x), OSQPVectorf_data(work->Ax), 0); // Ax
+  OSQPVectorf_minus(work->z_prev, work->Ax, z);
 
   // If scaling active -> rescale residual
   if (work->settings->scaling && !work->settings->scaled_termination) {
-    return vec_scaled_norm_inf(work->scaling->Einv, work->z_prev, work->data->m);
+    OSQPVectorf_scaled_norm_inf(work->scaling->Einv, work->z_prev);
   }
 
   // Return norm of the residual
-  return vec_norm_inf(work->z_prev, work->data->m);
+  return OSQPVectorf_norm_inf(work->z_prev);
 }
 
 c_float compute_pri_tol(OSQPWorkspace *work, c_float eps_abs, c_float eps_rel) {
@@ -263,21 +267,22 @@ c_float compute_pri_tol(OSQPWorkspace *work, c_float eps_abs, c_float eps_rel) {
   if (work->settings->scaling && !work->settings->scaled_termination) {
     // ||Einv * z||
     max_rel_eps =
-      vec_scaled_norm_inf(work->scaling->Einv, work->z, work->data->m);
+    OSQPVectorf_scaled_norm_inf(work->scaling->Einv, work->z);
 
     // ||Einv * A * x||
-    temp_rel_eps = vec_scaled_norm_inf(work->scaling->Einv,
-                                       work->Ax,
-                                       work->data->m);
+    temp_rel_eps =
+    OSQPVectorf_scaled_norm_inf(work->scaling->Einv, work->Ax);
 
     // Choose maximum
     max_rel_eps = c_max(max_rel_eps, temp_rel_eps);
-  } else { // No unscaling required
+  }
+
+  else { // No unscaling required
     // ||z||
-    max_rel_eps = vec_norm_inf(work->z, work->data->m);
+    max_rel_eps = OSQPVectorf_norm_inf(work->z);
 
     // ||A * x||
-    temp_rel_eps = vec_norm_inf(work->Ax, work->data->m);
+    temp_rel_eps = OSQPVectorf_norm_inf(work->Ax);
 
     // Choose maximum
     max_rel_eps = c_max(max_rel_eps, temp_rel_eps);
@@ -287,37 +292,36 @@ c_float compute_pri_tol(OSQPWorkspace *work, c_float eps_abs, c_float eps_rel) {
   return eps_abs + eps_rel * max_rel_eps;
 }
 
-c_float compute_dua_res(OSQPWorkspace *work, c_float *x, c_float *y) {
+c_float compute_dua_res(OSQPWorkspace *work, OSQPVectorf *x, OSQPVectorf *y) {
   // NB: Use x_prev as temporary vector
   // NB: Only upper triangular part of P is stored.
   // dr = q + A'*y + P*x
 
   // dr = q
-  prea_vec_copy(work->data->q, work->x_prev, work->data->n);
+  OSQPVectorf_copy(work->x_prev,work->data->q);
 
   // P * x (upper triangular part)
-  mat_vec(work->data->P, x, work->Px, 0);
+  mat_vec(work->data->P, OSQPVectorf_data(x), OSQPVectorf_data(work->Px), 0);
 
   // P' * x (lower triangular part with no diagonal)
-  mat_tpose_vec(work->data->P, x, work->Px, 1, 1);
+  mat_tpose_vec(work->data->P, OSQPVectorf_data(x), OSQPVectorf_data(work->Px), 1, 1);
 
   // dr += P * x (full P matrix)
-  vec_add_scaled(work->x_prev, work->x_prev, work->Px, work->data->n, 1);
+  OSQPVectorf_plus(work->x_prev, work->x_prev, work->Px);
 
   // dr += A' * y
   if (work->data->m > 0) {
-    mat_tpose_vec(work->data->A, y, work->Aty, 0, 0);
-    vec_add_scaled(work->x_prev, work->x_prev, work->Aty, work->data->n, 1);
+    mat_tpose_vec(work->data->A, OSQPVectorf_data(y), OSQPVectorf_data(work->Aty), 0, 0);
+    OSQPVectorf_plus(work->x_prev, work->x_prev, work->Aty);
   }
 
   // If scaling active -> rescale residual
   if (work->settings->scaling && !work->settings->scaled_termination) {
-    return work->scaling->cinv * vec_scaled_norm_inf(work->scaling->Dinv,
-                                                     work->x_prev,
-                                                     work->data->n);
+    return work->scaling->cinv * OSQPVectorf_scaled_norm_inf(work->scaling->Dinv,
+                                                             work->x_prev);
   }
 
-  return vec_norm_inf(work->x_prev, work->data->n);
+  return OSQPVectorf_norm_inf(work->x_prev);
 }
 
 c_float compute_dua_tol(OSQPWorkspace *work, c_float eps_abs, c_float eps_rel) {
@@ -326,34 +330,36 @@ c_float compute_dua_tol(OSQPWorkspace *work, c_float eps_abs, c_float eps_rel) {
   // max_rel_eps = max(||q||, ||A' y|, ||P x||)
   if (work->settings->scaling && !work->settings->scaled_termination) {
     // || Dinv q||
-    max_rel_eps = vec_scaled_norm_inf(work->scaling->Dinv,
-                                      work->data->q,
-                                      work->data->n);
+    max_rel_eps =
+    OSQPVectorf_scaled_norm_inf(work->scaling->Dinv,
+                                work->data->q);
 
     // || Dinv A' y ||
-    temp_rel_eps = vec_scaled_norm_inf(work->scaling->Dinv,
-                                       work->Aty,
-                                       work->data->n);
+    temp_rel_eps =
+    OSQPVectorf_scaled_norm_inf(work->scaling->Dinv,
+                                work->Aty);
+
     max_rel_eps = c_max(max_rel_eps, temp_rel_eps);
 
     // || Dinv P x||
-    temp_rel_eps = vec_scaled_norm_inf(work->scaling->Dinv,
-                                       work->Px,
-                                       work->data->n);
+    temp_rel_eps =
+    OSQPVectorf_scaled_norm_inf(work->scaling->Dinv,
+                                work->Px);
+
     max_rel_eps = c_max(max_rel_eps, temp_rel_eps);
 
     // Multiply by cinv
     max_rel_eps *= work->scaling->cinv;
   } else { // No scaling required
     // ||q||
-    max_rel_eps = vec_norm_inf(work->data->q, work->data->n);
+    max_rel_eps = OSQPVectorf_norm_inf(work->data->q);
 
     // ||A'*y||
-    temp_rel_eps = vec_norm_inf(work->Aty, work->data->n);
+    temp_rel_eps = OSQPVectorf_norm_inf(work->Aty);
     max_rel_eps  = c_max(max_rel_eps, temp_rel_eps);
 
     // ||P*x||
-    temp_rel_eps = vec_norm_inf(work->Px, work->data->n);
+    temp_rel_eps = OSQPVectorf_norm_inf(work->Px);
     max_rel_eps  = c_max(max_rel_eps, temp_rel_eps);
   }
 
@@ -374,51 +380,44 @@ c_int is_primal_infeasible(OSQPWorkspace *work, c_float eps_prim_inf) {
   c_float ineq_lhs = 0.0;
 
   // Project delta_y onto the polar of the recession cone of [l,u]
-  for (i = 0; i < work->data->m; i++) {
-    if (work->data->u[i] > OSQP_INFTY * MIN_SCALING) {          // Infinite upper bound
-      if (work->data->l[i] < -OSQP_INFTY * MIN_SCALING) {       // Infinite lower bound
-        // Both bounds infinite
-        work->delta_y[i] = 0.0;
-      } else {
-        // Only upper bound infinite
-        work->delta_y[i] = c_min(work->delta_y[i], 0.0);
-      }
-    } else if (work->data->l[i] < -OSQP_INFTY * MIN_SCALING) {  // Infinite lower bound
-      // Only lower bound infinite
-      work->delta_y[i] = c_max(work->delta_y[i], 0.0);
-    }
-  }
+  project_polar_reccone(work->delta_y,
+                        work->data->l,
+                        work->data->u,
+                        -OSQP_INFTY * MIN_SCALING,
+                        +OSQP_INFTY * MIN_SCALING);
 
   // Compute infinity norm of delta_y (unscale if necessary)
   if (work->settings->scaling && !work->settings->scaled_termination) {
     // Use work->Adelta_x as temporary vector
-    vec_ew_prod(work->scaling->E, work->delta_y, work->Adelta_x, work->data->m);
-    norm_delta_y = vec_norm_inf(work->Adelta_x, work->data->m);
-  } else {
-    norm_delta_y = vec_norm_inf(work->delta_y, work->data->m);
+    OSQPVectorf_ew_prod(work->Adelta_x,
+                        work->scaling->E,
+                        work->delta_y);
+    norm_delta_y = OSQPVectorf_norm_inf(work->Adelta_x);
+  }
+  else {
+    norm_delta_y = OSQPVectorf_norm_inf(work->delta_y);
   }
 
   if (norm_delta_y > eps_prim_inf) { // ||delta_y|| > 0
 
-    for (i = 0; i < work->data->m; i++) {
-      ineq_lhs += work->data->u[i] * c_max(work->delta_y[i], 0) + \
-                  work->data->l[i] * c_min(work->delta_y[i], 0);
-    }
+    ineq_lhs  = OSQPVectorf_dot_prod_signed(work->data->u, work->delta_y,+1);
+    ineq_lhs += OSQPVectorf_dot_prod_signed(work->data->l, work->delta_y,-1);
 
     // Check if the condition is satisfied: ineq_lhs < -eps
     if (ineq_lhs < -eps_prim_inf * norm_delta_y) {
       // Compute and return ||A'delta_y|| < eps_prim_inf
-      mat_tpose_vec(work->data->A, work->delta_y, work->Atdelta_y, 0, 0);
+      mat_tpose_vec(work->data->A,
+                    OSQPVectorf_data(work->delta_y),
+                    OSQPVectorf_data(work->Atdelta_y), 0, 0);
 
       // Unscale if necessary
       if (work->settings->scaling && !work->settings->scaled_termination) {
-        vec_ew_prod(work->scaling->Dinv,
-                    work->Atdelta_y,
-                    work->Atdelta_y,
-                    work->data->n);
+        OSQPVectorf_ew_prod(work->Atdelta_y,
+                            work->Atdelta_y,
+                            work->scaling->Dinv);
       }
 
-      return vec_norm_inf(work->Atdelta_y, work->data->n) < eps_prim_inf * norm_delta_y;
+      return OSQPVectorf_norm_inf(work->Atdelta_y) < eps_prim_inf * norm_delta_y;
     }
   }
 
@@ -447,12 +446,12 @@ c_int is_dual_infeasible(OSQPWorkspace *work, c_float eps_dual_inf) {
   if (work->settings->scaling && !work->settings->scaled_termination) { // Unscale
                                                                         // if
                                                                         // necessary
-    norm_delta_x = vec_scaled_norm_inf(work->scaling->D,
-                                       work->delta_x,
-                                       work->data->n);
+    norm_delta_x =
+    OSQPVectorf_scaled_norm_inf(work->scaling->D,
+                                work->delta_x);
     cost_scaling = work->scaling->c;
   } else {
-    norm_delta_x = vec_norm_inf(work->delta_x, work->data->n);
+    norm_delta_x = OSQPVectorf_norm_inf(work->delta_x);
     cost_scaling = 1.0;
   }
 
@@ -463,49 +462,50 @@ c_int is_dual_infeasible(OSQPWorkspace *work, c_float eps_dual_inf) {
     /* vec_mult_scalar(work->delta_x, 1./norm_delta_x, work->data->n); */
 
     // Check first if q'*delta_x < 0
-    if (vec_prod(work->data->q, work->delta_x, work->data->n) <
+    if (OSQPVectorf_dot_prod(work->data->q, work->delta_x) <
         -cost_scaling * eps_dual_inf * norm_delta_x) {
       // Compute product P * delta_x (NB: P is store in upper triangular form)
-      mat_vec(work->data->P, work->delta_x, work->Pdelta_x, 0);
-      mat_tpose_vec(work->data->P, work->delta_x, work->Pdelta_x, 1, 1);
+      mat_vec(work->data->P,
+              OSQPVectorf_data(work->delta_x),
+              OSQPVectorf_data(work->Pdelta_x), 0);
+      mat_tpose_vec(work->data->P,
+                    OSQPVectorf_data(work->delta_x),
+                    OSQPVectorf_data(work->Pdelta_x), 1, 1);
 
       // Scale if necessary
       if (work->settings->scaling && !work->settings->scaled_termination) {
-        vec_ew_prod(work->scaling->Dinv,
-                    work->Pdelta_x,
-                    work->Pdelta_x,
-                    work->data->n);
+        OSQPVectorf_ew_prod(work->Pdelta_x,
+                            work->Pdelta_x,
+                            work->scaling->Dinv);
       }
 
       // Check if || P * delta_x || = 0
-      if (vec_norm_inf(work->Pdelta_x, work->data->n) <
+      if (OSQPVectorf_norm_inf(work->Pdelta_x) <
           cost_scaling * eps_dual_inf * norm_delta_x) {
         // Compute A * delta_x
-        mat_vec(work->data->A, work->delta_x, work->Adelta_x, 0);
+        mat_vec(work->data->A,
+                OSQPVectorf_data(work->delta_x),
+                OSQPVectorf_data(work->Adelta_x), 0);
 
         // Scale if necessary
         if (work->settings->scaling && !work->settings->scaled_termination) {
-          vec_ew_prod(work->scaling->Einv,
-                      work->Adelta_x,
-                      work->Adelta_x,
-                      work->data->m);
+          OSQPVectorf_ew_prod(work->Adelta_x,
+                              work->Adelta_x,
+                              work->scaling->Einv);
         }
 
         // De Morgan Law Applied to dual infeasibility conditions for A * x
         // NB: Note that MIN_SCALING is used to adjust the infinity value
-        //     in case the problem is scaled.
-        for (i = 0; i < work->data->m; i++) {
-          if (((work->data->u[i] < OSQP_INFTY * MIN_SCALING) &&
-               (work->Adelta_x[i] >  eps_dual_inf * norm_delta_x)) ||
-              ((work->data->l[i] > -OSQP_INFTY * MIN_SCALING) &&
-               (work->Adelta_x[i] < -eps_dual_inf * norm_delta_x))) {
-            // At least one condition not satisfied -> not dual infeasible
-            return 0;
-          }
-        }
+        // in case the problem is scaled.
 
-        // All conditions passed -> dual infeasible
-        return 1;
+        //if you get this far, then all tests passed,
+        //so return results from final test
+        return test_in_polar_reccone(work->Adelta_x,
+                              work->data->l,work->data->u,
+                              -OSQP_INFTY * MIN_SCALING,
+                              +OSQP_INFTY * MIN_SCALING,
+                              eps_dual_inf * norm_delta_x);
+
       }
     }
   }
@@ -530,16 +530,16 @@ void store_solution(OSQPWorkspace *work) {
 #endif /* ifndef EMBEDDED */
 
   if (has_solution(work->info)) {
-    prea_vec_copy(work->x, work->solution->x, work->data->n); // primal
-    prea_vec_copy(work->y, work->solution->y, work->data->m); // dual
+    OSQPVectorf_copy(work->solution->x, work->x); // primal
+    OSQPVectorf_copy(work->solution->y, work->y); // dual
 
     // Unscale solution if scaling has been performed
     if (work->settings->scaling)
       unscale_solution(work);
   } else {
     // No solution present. Solution is NaN
-    vec_set_scalar(work->solution->x, OSQP_NAN, work->data->n);
-    vec_set_scalar(work->solution->y, OSQP_NAN, work->data->m);
+    OSQPVectorf_set_scalar(work->solution->x, OSQP_NAN);
+    OSQPVectorf_set_scalar(work->solution->y, OSQP_NAN);
 
 #ifndef EMBEDDED
 
@@ -547,14 +547,14 @@ void store_solution(OSQPWorkspace *work) {
     // NB: It requires a division
     if ((work->info->status_val == OSQP_PRIMAL_INFEASIBLE) ||
         ((work->info->status_val == OSQP_PRIMAL_INFEASIBLE_INACCURATE))) {
-      norm_vec = vec_norm_inf(work->delta_y, work->data->m);
-      vec_mult_scalar(work->delta_y, 1. / norm_vec, work->data->m);
+      norm_vec = OSQPVectorf_norm_inf(work->delta_y);
+      OSQPVectorf_mult_scalar(work->delta_y, 1. / norm_vec);
     }
 
     if ((work->info->status_val == OSQP_DUAL_INFEASIBLE) ||
         ((work->info->status_val == OSQP_DUAL_INFEASIBLE_INACCURATE))) {
-      norm_vec = vec_norm_inf(work->delta_x, work->data->n);
-      vec_mult_scalar(work->delta_x, 1. / norm_vec, work->data->n);
+      norm_vec = OSQPVectorf_norm_inf(work->delta_x);
+      OSQPVectorf_mult_scalar(work->delta_x, 1. / norm_vec);
     }
 
 #endif /* ifndef EMBEDDED */
@@ -568,8 +568,8 @@ void update_info(OSQPWorkspace *work,
                  c_int          iter,
                  c_int          compute_objective,
                  c_int          polish) {
-  c_float *x, *z, *y;                   // Allocate pointers to variables
-  c_float *obj_val, *pri_res, *dua_res; // objective value, residuals
+  OSQPVectorf *x, *z, *y;                   // Allocate pointers to vectors
+  c_float *obj_val, *pri_res, *dua_res;     // objective value, residuals
 
 #ifdef PROFILING
   c_float *run_time;                    // Execution time
@@ -764,7 +764,9 @@ c_int check_termination(OSQPWorkspace *work, c_int approximate) {
 
     if (work->settings->scaling && !work->settings->scaled_termination) {
       // Update infeasibility certificate
-      vec_ew_prod(work->scaling->E, work->delta_y, work->delta_y, work->data->m);
+      OSQPVectorf_ew_prod(work->delta_y,
+                          work->delta_y,
+                          work->scaling->E);
     }
     work->info->obj_val = OSQP_INFTY;
     exitflag            = 1;
@@ -779,7 +781,9 @@ c_int check_termination(OSQPWorkspace *work, c_int approximate) {
 
     if (work->settings->scaling && !work->settings->scaled_termination) {
       // Update infeasibility certificate
-      vec_ew_prod(work->scaling->D, work->delta_x, work->delta_x, work->data->n);
+      OSQPVectorf_ew_prod(work->delta_x,
+                          work->delta_x,
+                          work->scaling->D);
     }
     work->info->obj_val = -OSQP_INFTY;
     exitflag            = 1;
@@ -859,11 +863,14 @@ c_int validate_data(const OSQPData *data) {
   }
 
   // Lower and upper bounds
+  c_float* lv = OSQPVectorf_data(data->l);
+  c_float* uv = OSQPVectorf_data(data->u);
+
   for (j = 0; j < data->m; j++) {
-    if (data->l[j] > data->u[j]) {
+    if (lv[j] > uv[j]) {
 # ifdef PRINTING
       c_eprint("Lower bound at index %d is greater than upper bound: %.4e > %.4e",
-               (int)j, data->l[j], data->u[j]);
+               (int)j, lv[j], uv[j]);
 # endif /* ifdef PRINTING */
       return 1;
     }

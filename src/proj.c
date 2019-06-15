@@ -1,29 +1,74 @@
 #include "proj.h"
 
 
-void project(OSQPWorkspace *work, c_float *z) {
-  c_int i, m;
+void project(OSQPWorkspace *work, OSQPVectorf *z) {
+  OSQPVectorf_ew_bound_vec(z,z,work->data->l,work->data->u);
+}
 
-  m = work->data->m;
+void project_polar_reccone(OSQPVectorf      *yv,
+                           OSQPVectorf      *lv,
+                           OSQPVectorf      *uv,
+                           c_float      neginf,
+                           c_float      posinf){
+
+  c_int i; // Index for loops
+  c_int    m = OSQPVectorf_length(yv);
+  c_float* y = OSQPVectorf_data(yv);
+  c_float* l = OSQPVectorf_data(lv);
+  c_float* u = OSQPVectorf_data(uv);
 
   for (i = 0; i < m; i++) {
-    z[i] = c_min(c_max(z[i],
-                       work->data->l[i]), // Between lower
-                 work->data->u[i]);       // and upper bounds
+    if (u[i]   > posinf) {       // Infinite upper bound
+      if (l[i] < neginf) {       // Infinite lower bound
+        // Both bounds infinite
+        y[i] = 0.0;
+      } else {
+        // Only upper bound infinite
+        y[i] = c_min(y[i], 0.0);
+      }
+    } else if (l[i] < neginf) {  // Infinite lower bound
+      // Only lower bound infinite
+      y[i] = c_max(y[i], 0.0);
+    }
   }
 }
 
-void project_normalcone(OSQPWorkspace *work, c_float *z, c_float *y) {
-  c_int i, m;
+c_int test_in_polar_reccone(OSQPVectorf    *yv,
+                          OSQPVectorf      *lv,
+                          OSQPVectorf      *uv,
+                          c_float      neginf,
+                          c_float      posinf,
+                          c_float         tol){
+
+  c_int i; // Index for loops
+
+  c_int    m = OSQPVectorf_length(yv);
+  c_float* y = OSQPVectorf_data(yv);
+  c_float* l = OSQPVectorf_data(lv);
+  c_float* u = OSQPVectorf_data(uv);
+
+  for (i = 0; i < m; i++) {
+    if (((u[i] < posinf) &&
+         (y[i] >  tol)) ||
+        ((l[i] > neginf) &&
+         (y[i] < -tol))) {
+      // At least one condition not satisfied -> not dual infeasible
+      return 0;
+    }
+  }
+  return 1;
+}
+
+void project_normalcone(OSQPWorkspace *work, OSQPVectorf *z, OSQPVectorf *y) {
 
   // NB: Use z_prev as temporary vector
 
-  m = work->data->m;
+  //z_prev = z + y;
+  OSQPVectorf_plus(work->z_prev,z,y);
 
-  for (i = 0; i < m; i++) {
-    work->z_prev[i] = z[i] + y[i];
-    z[i]            = c_min(c_max(work->z_prev[i], work->data->l[i]),
-                            work->data->u[i]);
-    y[i] = work->z_prev[i] - z[i];
-  }
+  // z = min(max(z_prev,l),u)
+  OSQPVectorf_ew_bound_vec(z, work->z_prev, work->data->l, work->data->u);
+
+  //y = z_prev - z;
+  OSQPVectorf_minus(y,work->z_prev,z);
 }

@@ -53,19 +53,19 @@ typedef struct OSQP_TIMER OSQPTimer;
  */
 typedef struct {
   c_float  c;    ///< cost function scaling
-  c_float *D;    ///< primal variable scaling
-  c_float *E;    ///< dual variable scaling
+  OSQPVectorf *D;    ///< primal variable scaling
+  OSQPVectorf *E;    ///< dual variable scaling
   c_float  cinv; ///< cost function rescaling
-  c_float *Dinv; ///< primal variable rescaling
-  c_float *Einv; ///< dual variable rescaling
+  OSQPVectorf *Dinv; ///< primal variable rescaling
+  OSQPVectorf *Einv; ///< dual variable rescaling
 } OSQPScaling;
 
 /**
  * Solution structure
  */
 typedef struct {
-  c_float *x; ///< primal solution
-  c_float *y; ///< Lagrange multiplier associated to \f$l <= Ax <= u\f$
+  OSQPVectorf *x; ///< primal solution
+  OSQPVectorf *y; ///< Lagrange multiplier associated to \f$l <= Ax <= u\f$
 } OSQPSolution;
 
 
@@ -110,13 +110,13 @@ typedef struct {
   ///<    Ared = vstack[Alow, Aupp]
   c_int    n_low;     ///< number of lower-active rows
   c_int    n_upp;     ///< number of upper-active rows
-  c_int   *A_to_Alow; ///< Maps indices in A to indices in Alow
-  c_int   *A_to_Aupp; ///< Maps indices in A to indices in Aupp
-  c_int   *Alow_to_A; ///< Maps indices in Alow to indices in A
-  c_int   *Aupp_to_A; ///< Maps indices in Aupp to indices in A
-  c_float *x;         ///< optimal x-solution obtained by polish
-  c_float *z;         ///< optimal z-solution obtained by polish
-  c_float *y;         ///< optimal y-solution obtained by polish
+  OSQPVectori   *A_to_Alow; ///< Maps indices in A to indices in Alow
+  OSQPVectori   *A_to_Aupp; ///< Maps indices in A to indices in Aupp
+  OSQPVectori   *Alow_to_A; ///< Maps indices in Alow to indices in A
+  OSQPVectori   *Aupp_to_A; ///< Maps indices in Aupp to indices in A
+  OSQPVectorf *x;         ///< optimal x-solution obtained by polish
+  OSQPVectorf *z;         ///< optimal z-solution obtained by polish
+  OSQPVectorf *y;         ///< optimal y-solution obtained by polish
   c_float  obj_val;   ///< objective value at polished solution
   c_float  pri_res;   ///< primal residual at polished solution
   c_float  dua_res;   ///< dual residual at polished solution
@@ -136,9 +136,9 @@ typedef struct {
   c_int    m; ///< number of constraints m
   csc     *P; ///< the upper triangular part of the quadratic cost matrix P in csc format (size n x n).
   csc     *A; ///< linear constraints matrix A in csc format (size m x n)
-  c_float *q; ///< dense array for linear part of cost function (size n)
-  c_float *l; ///< dense array for lower bound (size m)
-  c_float *u; ///< dense array for upper bound (size m)
+  OSQPVectorf *q; ///< dense array for linear part of cost function (size n)
+  OSQPVectorf *l; ///< dense array for lower bound (size m)
+  OSQPVectorf *u; ///< dense array for upper bound (size m)
 } OSQPData;
 
 
@@ -204,28 +204,30 @@ typedef struct {
    * @name Vector used to store a vectorized rho parameter
    * @{
    */
-  c_float *rho_vec;     ///< vector of rho values
-  c_float *rho_inv_vec; ///< vector of inv rho values
+  OSQPVectorf *rho_vec;     ///< vector of rho values
+  OSQPVectorf *rho_inv_vec; ///< vector of inv rho values
 
   /** @} */
 
 # if EMBEDDED != 1
-  c_int *constr_type; ///< Type of constraints: loose (-1), equality (1), inequality (0)
+  OSQPVectori *constr_type; ///< Type of constraints: loose (-1), equality (1), inequality (0)
 # endif // if EMBEDDED != 1
 
   /**
    * @name Iterates
    * @{
    */
-  c_float *x;        ///< Iterate x
-  c_float *y;        ///< Iterate y
-  c_float *z;        ///< Iterate z
-  c_float *xz_tilde; ///< Iterate xz_tilde
+  OSQPVectorf *x;           ///< Iterate x
+  OSQPVectorf *y;           ///< Iterate y
+  OSQPVectorf *z;           ///< Iterate z
+  OSQPVectorf *xz_tilde;    ///< Iterate xz_tilde
+  OSQPVectorf *xtilde_view; ///< xtilde view into xz_tilde
+  OSQPVectorf *ztilde_view; ///< ztilde view into xz_tilde
 
-  c_float *x_prev;   ///< Previous x
+  OSQPVectorf *x_prev;   ///< Previous x
 
   /**< NB: Used also as workspace vector for dual residual */
-  c_float *z_prev;   ///< Previous z
+  OSQPVectorf *z_prev;   ///< Previous z
 
   /**< NB: Used also as workspace vector for primal residual */
 
@@ -236,9 +238,9 @@ typedef struct {
    * approximate tolerances computation and adapting rho
    * @{
    */
-  c_float *Ax;  ///< scaled A * x
-  c_float *Px;  ///< scaled P * x
-  c_float *Aty; ///< scaled A * x
+  OSQPVectorf *Ax;  ///< scaled A * x
+  OSQPVectorf *Px;  ///< scaled P * x
+  OSQPVectorf *Aty; ///< scaled A * x
 
   /** @} */
 
@@ -246,8 +248,8 @@ typedef struct {
    * @name Primal infeasibility variables
    * @{
    */
-  c_float *delta_y;   ///< difference between consecutive dual iterates
-  c_float *Atdelta_y; ///< A' * delta_y
+  OSQPVectorf *delta_y;   ///< difference between consecutive dual iterates
+  OSQPVectorf *Atdelta_y; ///< A' * delta_y
 
   /** @} */
 
@@ -255,9 +257,9 @@ typedef struct {
    * @name Dual infeasibility variables
    * @{
    */
-  c_float *delta_x;  ///< difference between consecutive primal iterates
-  c_float *Pdelta_x; ///< P * delta_x
-  c_float *Adelta_x; ///< A * delta_x
+  OSQPVectorf *delta_x;  ///< difference between consecutive primal iterates
+  OSQPVectorf *Pdelta_x; ///< P * delta_x
+  OSQPVectorf *Adelta_x; ///< A * delta_x
 
   /** @} */
 
@@ -266,9 +268,9 @@ typedef struct {
    * @{
    */
 
-  c_float *D_temp;   ///< temporary primal variable scaling vectors
-  c_float *D_temp_A; ///< temporary primal variable scaling vectors storing norms of A columns
-  c_float *E_temp;   ///< temporary constraints scaling vectors storing norms of A' columns
+  OSQPVectorf *D_temp;   ///< temporary primal variable scaling vectors
+  OSQPVectorf *D_temp_A; ///< temporary primal variable scaling vectors storing norms of A columns
+  OSQPVectorf *E_temp;   ///< temporary constraints scaling vectors storing norms of A' columns
 
 
   /** @} */

@@ -103,20 +103,20 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
 
   // Cost function
   work->data->P = copy_csc_mat(data->P);
-  work->data->q = vec_copy(data->q, data->n);
+  work->data->q = OSQPVectorf_copy_new(data->q);
   if (!(work->data->P) || !(work->data->q)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Constraints
   work->data->A = copy_csc_mat(data->A);
   if (!(work->data->A)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  work->data->l = vec_copy(data->l, data->m);
-  work->data->u = vec_copy(data->u, data->m);
+  work->data->l = OSQPVectorf_copy_new(data->l);
+  work->data->u = OSQPVectorf_copy_new(data->u);
   if ( data->m && (!(work->data->l) || !(work->data->u)) )
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Vectorized rho parameter
-  work->rho_vec     = c_malloc(data->m * sizeof(c_float));
-  work->rho_inv_vec = c_malloc(data->m * sizeof(c_float));
+  work->rho_vec     = OSQPVectorf_malloc(data->m);
+  work->rho_inv_vec = OSQPVectorf_malloc(data->m);
   if ( data->m && (!(work->rho_vec) || !(work->rho_inv_vec)) )
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
@@ -125,12 +125,14 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
   if (data->m && !(work->constr_type)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Allocate internal solver variables (ADMM steps)
-  work->x        = c_calloc(data->n, sizeof(c_float));
-  work->z        = c_calloc(data->m, sizeof(c_float));
-  work->xz_tilde = c_calloc(data->n + data->m, sizeof(c_float));
-  work->x_prev   = c_calloc(data->n, sizeof(c_float));
-  work->z_prev   = c_calloc(data->m, sizeof(c_float));
-  work->y        = c_calloc(data->m, sizeof(c_float));
+  work->x           = OSQPVectorf_calloc(data->n);
+  work->z           = OSQPVectorf_calloc(data->m);
+  work->xz_tilde    = OSQPVectorf_calloc(data->n + data->m);
+  work->xtilde_view = OSQPVectorf_view(work->xz_tilde,0,data->n);
+  work->ztilde_view = OSQPVectorf_view(work->xz_tilde,data->n,data->m);
+  work->x_prev      = OSQPVectorf_calloc(data->n);
+  work->z_prev      = OSQPVectorf_calloc(data->m);
+  work->y           = OSQPVectorf_calloc(data->m);
   if (!(work->x) || !(work->xz_tilde) || !(work->x_prev))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
   if ( data->m && (!(work->z) || !(work->z_prev) || !(work->y)) )
@@ -201,7 +203,8 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
 
   // Initialize linear system solver structure
   exitflag = init_linsys_solver(&(work->linsys_solver), work->data->P, work->data->A,
-                                work->settings->sigma, work->rho_vec,
+                                work->settings->sigma,
+                                OSQPVectorf_data(work->rho_vec),
                                 work->settings->linsys_solver, 0);
 
   if (exitflag) {
@@ -211,13 +214,13 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
   // Initialize active constraints structure
   work->pol = c_malloc(sizeof(OSQPPolish));
   if (!(work->pol)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  work->pol->Alow_to_A = c_malloc(data->m * sizeof(c_int));
-  work->pol->Aupp_to_A = c_malloc(data->m * sizeof(c_int));
-  work->pol->A_to_Alow = c_malloc(data->m * sizeof(c_int));
-  work->pol->A_to_Aupp = c_malloc(data->m * sizeof(c_int));
-  work->pol->x         = c_malloc(data->n * sizeof(c_float));
-  work->pol->z         = c_malloc(data->m * sizeof(c_float));
-  work->pol->y         = c_malloc(data->m * sizeof(c_float));
+  work->pol->Alow_to_A = OSQPVectori_malloc(data->m);
+  work->pol->Aupp_to_A = OSQPVectori_malloc(data->m);
+  work->pol->A_to_Alow = OSQPVectori_malloc(data->m);
+  work->pol->A_to_Aupp = OSQPVectori_malloc(data->m);
+  work->pol->x         = OSQPVectorf_malloc(data->n);
+  work->pol->z         = OSQPVectorf_malloc(data->m);
+  work->pol->y         = OSQPVectorf_malloc(data->m);
   if (!(work->pol->x)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   if ( data->m && (!(work->pol->Alow_to_A) || !(work->pol->Aupp_to_A) ||
       !(work->pol->A_to_Alow) || !(work->pol->A_to_Aupp) ||
@@ -639,26 +642,26 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
     if (work->data) {
       if (work->data->P) csc_spfree(work->data->P);
       if (work->data->A) csc_spfree(work->data->A);
-      if (work->data->q) c_free(work->data->q);
-      if (work->data->l) c_free(work->data->l);
-      if (work->data->u) c_free(work->data->u);
+      if (work->data->q) OSQPVectorf_free(work->data->q);
+      if (work->data->l) OSQPVectorf_free(work->data->l);
+      if (work->data->u) OSQPVectorf_free(work->data->u);
       c_free(work->data);
     }
 
     // Free scaling
     if (work->settings->scaling) {
       if (work->scaling){
-        if (work->scaling->D)    c_free(work->scaling->D);
-        if (work->scaling->Dinv) c_free(work->scaling->Dinv);
-        if (work->scaling->E)    c_free(work->scaling->E);
-        if (work->scaling->Einv) c_free(work->scaling->Einv);
+        if (work->scaling->D)    OSQPVectorf_free(work->scaling->D);
+        if (work->scaling->Dinv) OSQPVectorf_free(work->scaling->Dinv);
+        if (work->scaling->E)    OSQPVectorf_free(work->scaling->E);
+        if (work->scaling->Einv) OSQPVectorf_free(work->scaling->Einv);
       }
       c_free(work->scaling);
 
       // Free workspace variables
-      if (work->D_temp)   c_free(work->D_temp);
-      if (work->D_temp_A) c_free(work->D_temp_A);
-      if (work->E_temp)   c_free(work->E_temp);
+      if (work->D_temp)   OSQPVectorf_free(work->D_temp);
+      if (work->D_temp_A) OSQPVectorf_free(work->D_temp_A);
+      if (work->E_temp)   OSQPVectorf_free(work->E_temp);
     }
 
     // Free linear system solver structure
@@ -674,45 +677,47 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
 #ifndef EMBEDDED
     // Free active constraints structure
     if (work->pol) {
-      if (work->pol->Alow_to_A) c_free(work->pol->Alow_to_A);
-      if (work->pol->Aupp_to_A) c_free(work->pol->Aupp_to_A);
-      if (work->pol->A_to_Alow) c_free(work->pol->A_to_Alow);
-      if (work->pol->A_to_Aupp) c_free(work->pol->A_to_Aupp);
-      if (work->pol->x)         c_free(work->pol->x);
-      if (work->pol->z)         c_free(work->pol->z);
-      if (work->pol->y)         c_free(work->pol->y);
+      if (work->pol->Alow_to_A) OSQPVectori_free(work->pol->Alow_to_A);
+      if (work->pol->Aupp_to_A) OSQPVectori_free(work->pol->Aupp_to_A);
+      if (work->pol->A_to_Alow) OSQPVectori_free(work->pol->A_to_Alow);
+      if (work->pol->A_to_Aupp) OSQPVectori_free(work->pol->A_to_Aupp);
+      if (work->pol->x)         OSQPVectorf_free(work->pol->x);
+      if (work->pol->z)         OSQPVectorf_free(work->pol->z);
+      if (work->pol->y)         OSQPVectorf_free(work->pol->y);
       c_free(work->pol);
     }
 #endif /* ifndef EMBEDDED */
 
     // Free other Variables
-    if (work->rho_vec)     c_free(work->rho_vec);
-    if (work->rho_inv_vec) c_free(work->rho_inv_vec);
+    if (work->rho_vec)     OSQPVectorf_free(work->rho_vec);
+    if (work->rho_inv_vec) OSQPVectorf_free(work->rho_inv_vec);
 #if EMBEDDED != 1
-    if (work->constr_type) c_free(work->constr_type);
+    if (work->constr_type) OSQPVectori_free(work->constr_type);
 #endif
-    if (work->x)           c_free(work->x);
-    if (work->z)           c_free(work->z);
-    if (work->xz_tilde)    c_free(work->xz_tilde);
-    if (work->x_prev)      c_free(work->x_prev);
-    if (work->z_prev)      c_free(work->z_prev);
-    if (work->y)           c_free(work->y);
-    if (work->Ax)          c_free(work->Ax);
-    if (work->Px)          c_free(work->Px);
-    if (work->Aty)         c_free(work->Aty);
-    if (work->delta_y)     c_free(work->delta_y);
-    if (work->Atdelta_y)   c_free(work->Atdelta_y);
-    if (work->delta_x)     c_free(work->delta_x);
-    if (work->Pdelta_x)    c_free(work->Pdelta_x);
-    if (work->Adelta_x)    c_free(work->Adelta_x);
+    if (work->x)           OSQPVectorf_free(work->x);
+    if (work->z)           OSQPVectorf_free(work->z);
+    if (work->xz_tilde)    OSQPVectorf_free(work->xz_tilde);
+    if (work->xtilde_view) OSQPVectorf_view_free(work->xtilde_view);
+    if (work->ztilde_view) OSQPVectorf_view_free(work->ztilde_view);
+    if (work->x_prev)      OSQPVectorf_free(work->x_prev);
+    if (work->z_prev)      OSQPVectorf_free(work->z_prev);
+    if (work->y)           OSQPVectorf_free(work->y);
+    if (work->Ax)          OSQPVectorf_free(work->Ax);
+    if (work->Px)          OSQPVectorf_free(work->Px);
+    if (work->Aty)         OSQPVectorf_free(work->Aty);
+    if (work->delta_y)     OSQPVectorf_free(work->delta_y);
+    if (work->Atdelta_y)   OSQPVectorf_free(work->Atdelta_y);
+    if (work->delta_x)     OSQPVectorf_free(work->delta_x);
+    if (work->Pdelta_x)    OSQPVectorf_free(work->Pdelta_x);
+    if (work->Adelta_x)    OSQPVectorf_free(work->Adelta_x);
 
     // Free Settings
     if (work->settings) c_free(work->settings);
 
     // Free solution
     if (work->solution) {
-      if (work->solution->x) c_free(work->solution->x);
-      if (work->solution->y) c_free(work->solution->y);
+      if (work->solution->x) OSQPVectorf_free(work->solution->x);
+      if (work->solution->y) OSQPVectorf_free(work->solution->y);
       c_free(work->solution);
     }
 
@@ -751,12 +756,12 @@ c_int osqp_update_lin_cost(OSQPWorkspace *work, const c_float *q_new) {
 #endif /* ifdef PROFILING */
 
   // Replace q by the new vector
-  prea_vec_copy(q_new, work->data->q, work->data->n);
+  OSQPVectorf_copy_raw(work->data->q, q_new);
 
   // Scaling
   if (work->settings->scaling) {
-    vec_ew_prod(work->scaling->D, work->data->q, work->data->q, work->data->n);
-    vec_mult_scalar(work->data->q, work->scaling->c, work->data->n);
+    OSQPVectorf_ew_prod(work->data->q, work->data->q, work->scaling->D);
+    OSQPVectorf_mult_scalar(work->data->q, work->scaling->c);
   }
 
   // Reset solver information
@@ -796,13 +801,13 @@ c_int osqp_update_bounds(OSQPWorkspace *work,
   }
 
   // Replace l and u by the new vectors
-  prea_vec_copy(l_new, work->data->l, work->data->m);
-  prea_vec_copy(u_new, work->data->u, work->data->m);
+  OSQPVectorf_copy_raw(work->data->l, l_new);
+  OSQPVectorf_copy_raw(work->data->u, u_new);
 
   // Scaling
   if (work->settings->scaling) {
-    vec_ew_prod(work->scaling->E, work->data->l, work->data->l, work->data->m);
-    vec_ew_prod(work->scaling->E, work->data->u, work->data->u, work->data->m);
+    OSQPVectorf_ew_prod(work->data->l, work->data->l, work->scaling->E);
+    OSQPVectorf_ew_prod(work->data->u, work->data->u, work->scaling->E);
   }
 
   // Reset solver information
@@ -835,21 +840,19 @@ c_int osqp_update_lower_bound(OSQPWorkspace *work, const c_float *l_new) {
 #endif /* ifdef PROFILING */
 
   // Replace l by the new vector
-  prea_vec_copy(l_new, work->data->l, work->data->m);
+  OSQPVectorf_copy_raw(work->data->l, l_new);
 
   // Scaling
   if (work->settings->scaling) {
-    vec_ew_prod(work->scaling->E, work->data->l, work->data->l, work->data->m);
+    OSQPVectorf_ew_prod(work->data->l, work->data->l, work->scaling->E);
   }
 
   // Check if lower bound is smaller than upper bound
-  for (i = 0; i < work->data->m; i++) {
-    if (work->data->l[i] > work->data->u[i]) {
+  if(!OSQPVectorf_ew_lt(work->data->l,work->data->u)) {
 #ifdef PRINTING
       c_eprint("upper bound must be greater than or equal to lower bound");
 #endif /* ifdef PRINTING */
       return 1;
-    }
   }
 
   // Reset solver information
@@ -882,22 +885,20 @@ c_int osqp_update_upper_bound(OSQPWorkspace *work, const c_float *u_new) {
 #endif /* ifdef PROFILING */
 
   // Replace u by the new vector
-  prea_vec_copy(u_new, work->data->u, work->data->m);
+  OSQPVectorf_copy_raw(work->data->u, u_new);
 
   // Scaling
   if (work->settings->scaling) {
-    vec_ew_prod(work->scaling->E, work->data->u, work->data->u, work->data->m);
+    OSQPVectorf_ew_prod(work->data->u, work->data->u, work->scaling->E);
   }
 
   // Check if upper bound is greater than lower bound
-  for (i = 0; i < work->data->m; i++) {
-    if (work->data->u[i] < work->data->l[i]) {
+    if(!OSQPVectorf_ew_lt(work->data->l,work->data->u)) {
 #ifdef PRINTING
       c_eprint("lower bound must be lower than or equal to upper bound");
 #endif /* ifdef PRINTING */
       return 1;
     }
-  }
 
   // Reset solver information
   reset_info(work->info);
@@ -923,18 +924,18 @@ c_int osqp_warm_start(OSQPWorkspace *work, const c_float *x, const c_float *y) {
   if (!work->settings->warm_start) work->settings->warm_start = 1;
 
   // Copy primal and dual variables into the iterates
-  prea_vec_copy(x, work->x, work->data->n);
-  prea_vec_copy(y, work->y, work->data->m);
+  OSQPVectorf_copy_raw(work->x, x);
+  OSQPVectorf_copy_raw(work->y, y);
 
   // Scale iterates
   if (work->settings->scaling) {
-    vec_ew_prod(work->scaling->Dinv, work->x, work->x, work->data->n);
-    vec_ew_prod(work->scaling->Einv, work->y, work->y, work->data->m);
-    vec_mult_scalar(work->y, work->scaling->c, work->data->m);
+    OSQPVectorf_ew_prod(work->x, work->x, work->scaling->Dinv);
+    OSQPVectorf_ew_prod(work->y, work->y, work->scaling->Einv);
+    OSQPVectorf_mult_scalar(work->y, work->scaling->c);
   }
 
   // Compute Ax = z and store it in z
-  mat_vec(work->data->A, work->x, work->z, 0);
+  mat_vec(work->data->A, OSQPVectorf_data(work->x), OSQPVectorf_data(work->z), 0);
 
   return 0;
 }
@@ -948,15 +949,15 @@ c_int osqp_warm_start_x(OSQPWorkspace *work, const c_float *x) {
   if (!work->settings->warm_start) work->settings->warm_start = 1;
 
   // Copy primal variable into the iterate x
-  prea_vec_copy(x, work->x, work->data->n);
+  OSQPVectorf_copy_raw(work->x, x);
 
   // Scale iterate
   if (work->settings->scaling) {
-    vec_ew_prod(work->scaling->Dinv, work->x, work->x, work->data->n);
+    OSQPVectorf_ew_prod(work->x, work->x, work->scaling->Dinv);
   }
 
   // Compute Ax = z and store it in z
-  mat_vec(work->data->A, work->x, work->z, 0);
+  mat_vec(work->data->A, OSQPVectorf_data(work->x), OSQPVectorf_data(work->z), 0);
 
   return 0;
 }
@@ -970,12 +971,12 @@ c_int osqp_warm_start_y(OSQPWorkspace *work, const c_float *y) {
   if (!work->settings->warm_start) work->settings->warm_start = 1;
 
   // Copy primal variable into the iterate y
-  prea_vec_copy(y, work->y, work->data->m);
+  OSQPVectorf_copy_raw(work->y, y);
 
   // Scale iterate
   if (work->settings->scaling) {
-    vec_ew_prod(work->scaling->Einv, work->y, work->y, work->data->m);
-    vec_mult_scalar(work->y, work->scaling->c, work->data->m);
+    OSQPVectorf_ew_prod(work->y, work->y, work->scaling->Einv);
+    OSQPVectorf_mult_scalar(work->y, work->scaling->c);
   }
 
   return 0;
@@ -1281,22 +1282,16 @@ c_int osqp_update_rho(OSQPWorkspace *work, c_float rho_new) {
   work->settings->rho = c_min(c_max(rho_new, RHO_MIN), RHO_MAX);
 
   // Update rho_vec and rho_inv_vec
-  for (i = 0; i < work->data->m; i++) {
-    if (work->constr_type[i] == 0) {
-      // Inequalities
-      work->rho_vec[i]     = work->settings->rho;
-      work->rho_inv_vec[i] = 1. / work->settings->rho;
-    }
-    else if (work->constr_type[i] == 1) {
-      // Equalities
-      work->rho_vec[i]     = RHO_EQ_OVER_RHO_INEQ * work->settings->rho;
-      work->rho_inv_vec[i] = 1. / work->rho_vec[i];
-    }
-  }
+  OSQPVectorf_set_scalar_conditional(work->rho_vec,
+                                     work->constr_type,
+                                     RHO_EQ_OVER_RHO_INEQ * work->settings->rho,//constr = 1
+                                     work->settings->rho);                      //constr == 0
+
+  OSQPVectorf_ew_reciprocal(work->rho_inv_vec, work->rho_vec);
 
   // Update rho_vec in KKT matrix
   exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
-                                                 work->rho_vec);
+                                                 OSQPVectorf_data(work->rho_vec));
 
 #ifdef PROFILING
   if (work->rho_update_from_solve == 0)
@@ -1574,7 +1569,7 @@ c_int osqp_update_time_limit(OSQPWorkspace *work, c_float time_limit_new) {
 
   // Check if workspace has been initialized
   if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-  
+
   // Check that time_limit is nonnegative
   if (time_limit_new < 0.) {
 # ifdef PRINTING

@@ -49,8 +49,8 @@ c_int   update_rho_vec(OSQPWorkspace *work);
  * @param a first vector
  * @param b second vector
  */
-void swap_vectors(c_float **a,
-                  c_float **b);
+void swap_vectors(OSQPVectorf **a,
+                  OSQPVectorf **b);
 
 
 /**
@@ -97,7 +97,7 @@ void update_y(OSQPWorkspace *work);
  * @return      Objective function value
  */
 c_float compute_obj_val(OSQPWorkspace *work,
-                        c_float       *x);
+                        OSQPVectorf   *x);
 
 /**
  * Check whether QP has solution

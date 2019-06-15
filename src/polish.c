@@ -16,9 +16,20 @@
  * @param  work Workspace
  * @return      Number of rows in Ared, negative if error
  */
-static c_int form_Ared(OSQPWorkspace *work) {
+static c_int form_Ared(OSQPWorkspace *work){
+
   c_int j, ptr;
   c_int Ared_nnz = 0;
+
+  c_int* Alow_to_A = OSQPVectori_data(work->pol->Alow_to_A);
+  c_int* A_to_Alow = OSQPVectori_data(work->pol->A_to_Alow);
+  c_int* Aupp_to_A = OSQPVectori_data(work->pol->Aupp_to_A);
+  c_int* A_to_Aupp = OSQPVectori_data(work->pol->A_to_Aupp);
+  c_float* z = OSQPVectorf_data(work->z);
+  c_float* y = OSQPVectorf_data(work->y);
+  c_float* l = OSQPVectorf_data(work->data->l);
+  c_float* u = OSQPVectorf_data(work->data->u);
+
 
   // Initialize counters for active constraints
   work->pol->n_low = 0;
@@ -31,20 +42,20 @@ static c_int form_Ared(OSQPWorkspace *work) {
    * Ared is formed by stacking vertically Alow and Aupp.
    */
   for (j = 0; j < work->data->m; j++) {
-    if (work->z[j] - work->data->l[j] < -work->y[j]) { // lower-active
-      work->pol->Alow_to_A[work->pol->n_low] = j;
-      work->pol->A_to_Alow[j]                = work->pol->n_low++;
+    if (z[j] - l[j] < y[j]) { // lower-active
+      Alow_to_A[work->pol->n_low] = j;
+      A_to_Alow[j]                = work->pol->n_low++;
     } else {
-      work->pol->A_to_Alow[j] = -1;
+      A_to_Alow[j] = -1;
     }
   }
 
   for (j = 0; j < work->data->m; j++) {
-    if (work->data->u[j] - work->z[j] < work->y[j]) { // upper-active
-      work->pol->Aupp_to_A[work->pol->n_upp] = j;
-      work->pol->A_to_Aupp[j]                = work->pol->n_upp++;
+    if (u[j] - z[j] < y[j]) { // upper-active
+      Aupp_to_A[work->pol->n_upp] = j;
+      A_to_Aupp[j]                = work->pol->n_upp++;
     } else {
-      work->pol->A_to_Aupp[j] = -1;
+      A_to_Aupp[j] = -1;
     }
   }
 
@@ -59,8 +70,8 @@ static c_int form_Ared(OSQPWorkspace *work) {
 
   // Count number of elements in Ared
   for (j = 0; j < work->data->A->p[work->data->A->n]; j++) {
-    if ((work->pol->A_to_Alow[work->data->A->i[j]] != -1) ||
-        (work->pol->A_to_Aupp[work->data->A->i[j]] != -1)) Ared_nnz++;
+    if ((A_to_Alow[work->data->A->i[j]] != -1) ||
+        (A_to_Aupp[work->data->A->i[j]] != -1)) Ared_nnz++;
   }
 
   // Form Ared
@@ -75,14 +86,14 @@ static c_int form_Ared(OSQPWorkspace *work) {
 
     for (ptr = work->data->A->p[j]; ptr < work->data->A->p[j + 1]; ptr++) {
       // Cycle over elements in j-th column
-      if (work->pol->A_to_Alow[work->data->A->i[ptr]] != -1) {
+      if (A_to_Alow[work->data->A->i[ptr]] != -1) {
         // Lower-active rows of A
         work->pol->Ared->i[Ared_nnz] =
-          work->pol->A_to_Alow[work->data->A->i[ptr]];
+          A_to_Alow[work->data->A->i[ptr]];
         work->pol->Ared->x[Ared_nnz++] = work->data->A->x[ptr];
-      } else if (work->pol->A_to_Aupp[work->data->A->i[ptr]] != -1) {
+      } else if (A_to_Aupp[work->data->A->i[ptr]] != -1) {
         // Upper-active rows of A
-        work->pol->Ared->i[Ared_nnz] = work->pol->A_to_Aupp[work->data->A->i[ptr]] \
+        work->pol->Ared->i[Ared_nnz] = A_to_Aupp[work->data->A->i[ptr]] \
                                        + work->pol->n_low;
         work->pol->Ared->x[Ared_nnz++] = work->data->A->x[ptr];
       }
@@ -102,21 +113,26 @@ static c_int form_Ared(OSQPWorkspace *work) {
  * @param  rhs  right-hand-side
  * @return      reduced rhs
  */
-static void form_rhs_red(OSQPWorkspace *work, c_float *rhs) {
+static void form_rhs_red(OSQPWorkspace *work, OSQPVectorf *rhs) {
   c_int j;
 
-  // Form the rhs of the reduced KKT linear system
-  for (j = 0; j < work->data->n; j++) { // -q
-    rhs[j] = -work->data->q[j];
+  c_float* rhsv = OSQPVectorf_data(rhs);
+  c_float* q   = OSQPVectorf_data(work->data->q);
+  c_float* l   = OSQPVectorf_data(work->data->l);
+  c_float* u   = OSQPVectorf_data(work->data->u);
+  c_int* Alow_to_A = OSQPVectori_data(work->pol->Alow_to_A);
+  c_int* Aupp_to_A = OSQPVectori_data(work->pol->Aupp_to_A);
+
+  for(j = 0; j < work->data->n; j++){
+    rhsv[j] = -q[j];
   }
 
   for (j = 0; j < work->pol->n_low; j++) { // l_low
-    rhs[work->data->n + j] = work->data->l[work->pol->Alow_to_A[j]];
+    rhsv[work->data->n + j] = l[Alow_to_A[j]];
   }
 
   for (j = 0; j < work->pol->n_upp; j++) { // u_upp
-    rhs[work->data->n + work->pol->n_low + j] =
-      work->data->u[work->pol->Aupp_to_A[j]];
+    rhsv[work->data->n + work->pol->n_low + j] = u[Aupp_to_A[j]];
   }
 }
 
@@ -188,35 +204,41 @@ static c_int iterative_refinement(OSQPWorkspace *work,
  * @param work Workspace
  * @param yred Dual variables associated to active constraints
  */
-static void get_ypol_from_yred(OSQPWorkspace *work, c_float *yred) {
+static void get_ypol_from_yred(OSQPWorkspace *work, OSQPVectorf *yred_vf) {
+
   c_int j;
+
+  c_int* A_to_Alow = OSQPVectori_data(work->pol->A_to_Alow);
+  c_int* A_to_Aupp = OSQPVectori_data(work->pol->A_to_Aupp);
+  c_float* y       = OSQPVectorf_data(work->pol->y);
+  c_float* yred    = OSQPVectorf_data(yred_vf);
 
   // If there are no active constraints
   if (work->pol->n_low + work->pol->n_upp == 0) {
-    vec_set_scalar(work->pol->y, 0., work->data->m);
+    OSQPVectorf_set_scalar(work->pol->y, 0.);
     return;
   }
 
   // NB: yred = vstack[ylow, yupp]
   for (j = 0; j < work->data->m; j++) {
-    if (work->pol->A_to_Alow[j] != -1) {
+    if (A_to_Alow[j] != -1) {
       // lower-active
-      work->pol->y[j] = yred[work->pol->A_to_Alow[j]];
-    } else if (work->pol->A_to_Aupp[j] != -1) {
+      y[j] = yred[A_to_Alow[j]];
+    } else if (A_to_Aupp[j] != -1) {
       // upper-active
-      work->pol->y[j] = yred[work->pol->A_to_Aupp[j] + work->pol->n_low];
+      y[j] = yred[A_to_Aupp[j] + work->pol->n_low];
     } else {
       // inactive
-      work->pol->y[j] = 0.0;
+      y[j] = 0.0;
     }
   }
 }
 
 c_int polish(OSQPWorkspace *work) {
   c_int mred, polish_successful, exitflag;
-  c_float *rhs_red;
+  OSQPVectorf *rhs_red;
   LinSysSolver *plsh;
-  c_float *pol_sol; // Polished solution
+  OSQPVectorf *pol_sol; // Polished solution
 
 #ifdef PROFILING
   osqp_tic(work->timer); // Start timer
@@ -247,7 +269,7 @@ c_int polish(OSQPWorkspace *work) {
   }
 
   // Form reduced right-hand side rhs_red
-  rhs_red = c_malloc(sizeof(c_float) * (work->data->n + mred));
+  rhs_red = OSQPVectorf_malloc(work->data->n + mred);
   if (!rhs_red) {
     // Polishing failed
     work->info->status_polish = -1;
@@ -259,23 +281,24 @@ c_int polish(OSQPWorkspace *work) {
   }
   form_rhs_red(work, rhs_red);
 
-  pol_sol = vec_copy(rhs_red, work->data->n + mred);
+  pol_sol = OSQPVectorf_copy_new(rhs_red);
+
   if (!pol_sol) {
     // Polishing failed
     work->info->status_polish = -1;
 
     // Memory clean-up
     csc_spfree(work->pol->Ared);
-    c_free(rhs_red);
-  
+    OSQPVectorf_free(rhs_red);
+
     return -1;
   }
 
   // Solve the reduced KKT system
-  plsh->solve(plsh, pol_sol);
+  plsh->solve(plsh, OSQPVectorf_data(pol_sol));
 
   // Perform iterative refinement to compensate for the regularization error
-  exitflag = iterative_refinement(work, plsh, pol_sol, rhs_red);
+  exitflag = iterative_refinement(work, plsh, OSQPVectorf_data(pol_sol), OSQPVectorf_data(rhs_red));
 
   if (exitflag) {
     // Polishing failed
@@ -283,15 +306,15 @@ c_int polish(OSQPWorkspace *work) {
 
     // Memory clean-up
     csc_spfree(work->pol->Ared);
-    c_free(rhs_red);
-    c_free(pol_sol);
-  
+    OSQPVectorf_free(rhs_red);
+    OSQPVectorf_free(pol_sol);
+
     return -1;
   }
 
   // Store the polished solution (x,z,y)
-  prea_vec_copy(pol_sol, work->pol->x, work->data->n);   // pol->x
-  mat_vec(work->data->A, work->pol->x, work->pol->z, 0); // pol->z
+  OSQPVectorf_copy(work->pol->x, pol_sol);   // pol->x
+  mat_vec(work->data->A, OSQPVectorf_data(work->pol->x), OSQPVectorf_data(work->pol->z), 0); // pol->z
   get_ypol_from_yred(work, pol_sol + work->data->n);     // pol->y
 
   // Ensure (z,y) satisfies normal cone constraint
@@ -325,9 +348,9 @@ c_int polish(OSQPWorkspace *work) {
 
     // Update (x, z, y) in ADMM iterations
     // NB: z needed for warm starting
-    prea_vec_copy(work->pol->x, work->x, work->data->n);
-    prea_vec_copy(work->pol->z, work->z, work->data->m);
-    prea_vec_copy(work->pol->y, work->y, work->data->m);
+    OSQPVectorf_copy(work->x, work->pol->x);
+    OSQPVectorf_copy(work->z, work->pol->z);
+    OSQPVectorf_copy(work->y, work->pol->y);
 
     // Print summary
 #ifdef PRINTING
@@ -346,8 +369,8 @@ c_int polish(OSQPWorkspace *work) {
 
   // Checks that they are not NULL are already performed earlier
   csc_spfree(work->pol->Ared);
-  c_free(rhs_red);
-  c_free(pol_sol);
+  OSQPVectorf_free(rhs_red);
+  OSQPVectorf_free(pol_sol);
 
   return 0;
 }

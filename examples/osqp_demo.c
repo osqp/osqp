@@ -30,10 +30,10 @@ int main(int argc, char **argv) {
     data->n = n;
     data->m = m;
     data->P = csc_matrix(data->n, data->n, P_nnz, P_x, P_i, P_p);
-    data->q = q;
+    data->q = OSQPVectorf_new(q,n);
     data->A = csc_matrix(data->m, data->n, A_nnz, A_x, A_i, A_p);
-    data->l = l;
-    data->u = u;
+    data->l = OSQPVectorf_new(l,m);
+    data->u = OSQPVectorf_new(u,m);
   }
 
   // Define solver settings as default
