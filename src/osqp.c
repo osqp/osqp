@@ -113,7 +113,7 @@ c_int   osqp_setup(OSQPWorkspace** workp,
   work->data->P = copy_csc_mat(P);
   work->data->q = OSQPVectorf_new(q,n);
   if (!(work->data->P) || !(work->data->q)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-    
+
   // Constraints
   work->data->A = copy_csc_mat(A);
   if (!(work->data->A)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
@@ -143,6 +143,8 @@ c_int   osqp_setup(OSQPWorkspace** workp,
   work->y           = OSQPVectorf_calloc(m);
   if (!(work->x) || !(work->xz_tilde) || !(work->x_prev))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  if (!(work->xtilde_view) || !(work->ztilde_view))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
   if (!(work->z) || !(work->z_prev) || !(work->y))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
@@ -651,26 +653,26 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
     if (work->data) {
       if (work->data->P) csc_spfree(work->data->P);
       if (work->data->A) csc_spfree(work->data->A);
-      if (work->data->q) OSQPVectorf_free(work->data->q);
-      if (work->data->l) OSQPVectorf_free(work->data->l);
-      if (work->data->u) OSQPVectorf_free(work->data->u);
+      OSQPVectorf_free(work->data->q);
+      OSQPVectorf_free(work->data->l);
+      OSQPVectorf_free(work->data->u);
       c_free(work->data);
     }
 
     // Free scaling
     if (work->settings->scaling) {
       if (work->scaling){
-        if (work->scaling->D)    OSQPVectorf_free(work->scaling->D);
-        if (work->scaling->Dinv) OSQPVectorf_free(work->scaling->Dinv);
-        if (work->scaling->E)    OSQPVectorf_free(work->scaling->E);
-        if (work->scaling->Einv) OSQPVectorf_free(work->scaling->Einv);
+        OSQPVectorf_free(work->scaling->D);
+        OSQPVectorf_free(work->scaling->Dinv);
+        OSQPVectorf_free(work->scaling->E);
+        OSQPVectorf_free(work->scaling->Einv);
       }
       c_free(work->scaling);
 
       // Free workspace variables
-      if (work->D_temp)   OSQPVectorf_free(work->D_temp);
-      if (work->D_temp_A) OSQPVectorf_free(work->D_temp_A);
-      if (work->E_temp)   OSQPVectorf_free(work->E_temp);
+      OSQPVectorf_free(work->D_temp);
+      OSQPVectorf_free(work->D_temp_A);
+      OSQPVectorf_free(work->E_temp);
     }
 
     // Free linear system solver structure
@@ -686,39 +688,39 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
 #ifndef EMBEDDED
     // Free active constraints structure
     if (work->pol) {
-      if (work->pol->Alow_to_A) OSQPVectori_free(work->pol->Alow_to_A);
-      if (work->pol->Aupp_to_A) OSQPVectori_free(work->pol->Aupp_to_A);
-      if (work->pol->A_to_Alow) OSQPVectori_free(work->pol->A_to_Alow);
-      if (work->pol->A_to_Aupp) OSQPVectori_free(work->pol->A_to_Aupp);
-      if (work->pol->x)         OSQPVectorf_free(work->pol->x);
-      if (work->pol->z)         OSQPVectorf_free(work->pol->z);
-      if (work->pol->y)         OSQPVectorf_free(work->pol->y);
+      OSQPVectori_free(work->pol->Alow_to_A);
+      OSQPVectori_free(work->pol->Aupp_to_A);
+      OSQPVectori_free(work->pol->A_to_Alow);
+      OSQPVectori_free(work->pol->A_to_Aupp);
+      OSQPVectorf_free(work->pol->x);
+      OSQPVectorf_free(work->pol->z);
+      OSQPVectorf_free(work->pol->y);
       c_free(work->pol);
     }
 #endif /* ifndef EMBEDDED */
 
     // Free other Variables
-    if (work->rho_vec)     OSQPVectorf_free(work->rho_vec);
-    if (work->rho_inv_vec) OSQPVectorf_free(work->rho_inv_vec);
+    OSQPVectorf_free(work->rho_vec);
+    OSQPVectorf_free(work->rho_inv_vec);
 #if EMBEDDED != 1
     if (work->constr_type) OSQPVectori_free(work->constr_type);
 #endif
-    if (work->x)           OSQPVectorf_free(work->x);
-    if (work->z)           OSQPVectorf_free(work->z);
-    if (work->xz_tilde)    OSQPVectorf_free(work->xz_tilde);
-    if (work->xtilde_view) OSQPVectorf_view_free(work->xtilde_view);
-    if (work->ztilde_view) OSQPVectorf_view_free(work->ztilde_view);
-    if (work->x_prev)      OSQPVectorf_free(work->x_prev);
-    if (work->z_prev)      OSQPVectorf_free(work->z_prev);
-    if (work->y)           OSQPVectorf_free(work->y);
-    if (work->Ax)          OSQPVectorf_free(work->Ax);
-    if (work->Px)          OSQPVectorf_free(work->Px);
-    if (work->Aty)         OSQPVectorf_free(work->Aty);
-    if (work->delta_y)     OSQPVectorf_free(work->delta_y);
-    if (work->Atdelta_y)   OSQPVectorf_free(work->Atdelta_y);
-    if (work->delta_x)     OSQPVectorf_free(work->delta_x);
-    if (work->Pdelta_x)    OSQPVectorf_free(work->Pdelta_x);
-    if (work->Adelta_x)    OSQPVectorf_free(work->Adelta_x);
+    OSQPVectorf_free(work->x);
+    OSQPVectorf_free(work->z);
+    OSQPVectorf_free(work->xz_tilde);
+    OSQPVectorf_view_free(work->xtilde_view);
+    OSQPVectorf_view_free(work->ztilde_view);
+    OSQPVectorf_free(work->x_prev);
+    OSQPVectorf_free(work->z_prev);
+    OSQPVectorf_free(work->y);
+    OSQPVectorf_free(work->Ax);
+    OSQPVectorf_free(work->Px);
+    OSQPVectorf_free(work->Aty);
+    OSQPVectorf_free(work->delta_y);
+    OSQPVectorf_free(work->Atdelta_y);
+    OSQPVectorf_free(work->delta_x);
+    OSQPVectorf_free(work->Pdelta_x);
+    OSQPVectorf_free(work->Adelta_x);
 
     // Free Settings
     if (work->settings) c_free(work->settings);
@@ -857,7 +859,7 @@ c_int osqp_update_lower_bound(OSQPWorkspace *work, const c_float *l_new) {
   }
 
   // Check if lower bound is smaller than upper bound
-  if(!OSQPVectorf_ew_lt(work->data->l,work->data->u)) {
+  if(!OSQPVectorf_ew_lt_eq(work->data->l,work->data->u)) {
 #ifdef PRINTING
       c_eprint("upper bound must be greater than or equal to lower bound");
 #endif /* ifdef PRINTING */
@@ -902,7 +904,7 @@ c_int osqp_update_upper_bound(OSQPWorkspace *work, const c_float *u_new) {
   }
 
   // Check if upper bound is greater than lower bound
-    if(!OSQPVectorf_ew_lt(work->data->l,work->data->u)) {
+    if(!OSQPVectorf_ew_lt_eq(work->data->l,work->data->u)) {
 #ifdef PRINTING
       c_eprint("lower bound must be lower than or equal to upper bound");
 #endif /* ifdef PRINTING */
