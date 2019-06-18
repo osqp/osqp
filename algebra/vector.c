@@ -225,17 +225,13 @@ OSQPVectorf* OSQPVectorf_malloc(c_int len){
 
   OSQPVectorf *b;
   b         = c_malloc(sizeof(OSQPVectorf));
-  b->length = len;
-  b->values = c_malloc(len * sizeof(c_float));
-  return b;
-}
-
-OSQPVectorf* OSQPVectorf_calloc(c_int len){
-
-  OSQPVectorf *b;
-  b         = c_malloc(sizeof(OSQPVectorf));
-  b->length = len;
-  b->values = c_calloc(len,sizeof(c_float));
+  if(b)
+    b->length = len;
+    b->values = c_malloc(len * sizeof(c_float));
+    if(!b->values){
+      c_free(b);
+      b = NULL;
+    }
   return b;
 }
 
@@ -243,8 +239,27 @@ OSQPVectori* OSQPVectori_malloc(c_int len){
 
   OSQPVectori *b;
   b         = c_malloc(sizeof(OSQPVectori));
-  b->length = len;
-  b->values = c_malloc(len * sizeof(c_int));
+  if(b)
+    b->length = len;
+    b->values = c_malloc(len * sizeof(c_int));
+    if(!b->values){
+      c_free(b);
+      b = NULL;
+    }
+  return b;
+}
+
+OSQPVectorf* OSQPVectorf_calloc(c_int len){
+
+  OSQPVectorf *b;
+  b         = c_malloc(sizeof(OSQPVectorf));
+  if(b)
+    b->length = len;
+    b->values = c_calloc(len,sizeof(c_float));
+    if(!b->values){
+      c_free(b);
+      b = NULL;
+    }
   return b;
 }
 
@@ -252,8 +267,13 @@ OSQPVectori* OSQPVectori_calloc(c_int len){
 
   OSQPVectori *b;
   b         = c_malloc(sizeof(OSQPVectori));
-  b->length = len;
-  b->values = c_calloc(len,sizeof(c_int));
+  if(b)
+    b->length = len;
+    b->values = c_calloc(len,sizeof(c_int));
+    if(!b->values){
+      c_free(b);
+      b = NULL;
+    }
   return b;
 }
 
@@ -753,7 +773,7 @@ void OSQPVectorf_ew_min_vec(OSQPVectorf       *c,
   }
 }
 
-c_int OSQPVectorf_ew_lt(OSQPVectorf *l, OSQPVectorf* u){
+c_int OSQPVectorf_ew_lt_eq(OSQPVectorf *l, OSQPVectorf* u){
 
   assert(l->length == u->length);
 

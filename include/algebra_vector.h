@@ -329,7 +329,7 @@ c_float OSQPVectorf_dot_prod_signed(const OSQPVectorf *a,
                              const OSQPVectorf *b);
 
 /* check l <= u elementwise */
-c_int OSQPVectorf_ew_lt(OSQPVectorf *l, OSQPVectorf* u);
+c_int OSQPVectorf_ew_lt_eq(OSQPVectorf *l, OSQPVectorf* u);
 
  /* Elementwise bounding vectors x = min(max(z,l),u)
   * It is acceptable to assign x = z in this call, so
