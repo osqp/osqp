@@ -100,7 +100,7 @@ void set_rho_vec(OSQPWorkspace *work) {
       constr_type[i] = 0;
       rho_vec[i]     = work->settings->rho;
     }
-    OSQPVectorf_ew_reciprocal(work->rho_vec,work->rho_inv_vec);
+    OSQPVectorf_ew_reciprocal(work->rho_inv_vec, work->rho_vec);
   }
 }
 
@@ -172,8 +172,7 @@ void cold_start(OSQPWorkspace *work) {
 }
 
 static void compute_rhs(OSQPWorkspace *work) {
-  c_int i; // Index
-
+    
   //part related to x variables
   OSQPVectorf_add_scaled(work->xtilde_view,
                          work->settings->sigma,work->x_prev,
@@ -193,11 +192,10 @@ void update_xz_tilde(OSQPWorkspace *work) {
 }
 
 void update_x(OSQPWorkspace *work) {
-  c_int i;
 
   // update x
   OSQPVectorf_add_scaled(work->x,
-                         work->settings->alpha,work->xz_tilde,
+                         work->settings->alpha,work->xtilde_view,
                          ((c_float)1.0 - work->settings->alpha),work->x_prev);
 
   // update delta_x
@@ -205,21 +203,21 @@ void update_x(OSQPWorkspace *work) {
 }
 
 void update_z(OSQPWorkspace *work) {
-  c_int i;
 
   // update z
-  OSQPVectorf_ew_prod(work->z, work->rho_inv_vec,work->y);
+   OSQPVectorf_ew_prod(work->z, work->rho_inv_vec,work->y);
 
-  OSQPVectorf_add_scaled3(work->z,
+   OSQPVectorf_add_scaled3(work->z,
                           1., work->z,
                           work->settings->alpha, work->ztilde_view,
                           ((c_float)1.0 - work->settings->alpha), work->z_prev);
+
   // project z
   project(work, work->z);
+    
 }
 
 void update_y(OSQPWorkspace *work) {
-  c_int i; // Index
 
     OSQPVectorf_add_scaled3(work->delta_y,
                             work->settings->alpha,work->ztilde_view,
@@ -229,6 +227,7 @@ void update_y(OSQPWorkspace *work) {
     OSQPVectorf_ew_prod(work->delta_y,work->delta_y,work->rho_vec);
 
     OSQPVectorf_plus(work->y,work->y,work->delta_y);
+    
 }
 
 c_float compute_obj_val(OSQPWorkspace *work, OSQPVectorf *x) {
@@ -375,7 +374,6 @@ c_int is_primal_infeasible(OSQPWorkspace *work, c_float eps_prim_inf) {
   // 2) u'*max(delta_y, 0) + l'*min(delta_y, 0) < -eps * ||delta_y||
   //
 
-  c_int i; // Index for loops
   c_float norm_delta_y;
   c_float ineq_lhs = 0.0;
 
@@ -437,8 +435,6 @@ c_int is_dual_infeasible(OSQPWorkspace *work, c_float eps_dual_inf) {
   //    -> (A * delta_x)_i <  eps * || delta_x ||,    u_i != inf
   //
 
-
-  c_int   i; // Index for loops
   c_float norm_delta_x;
   c_float cost_scaling;
 
@@ -528,18 +524,29 @@ void store_solution(OSQPWorkspace *work) {
 #ifndef EMBEDDED
   c_float norm_vec;
 #endif /* ifndef EMBEDDED */
+    
 
   if (has_solution(work->info)) {
-    OSQPVectorf_copy(work->solution->x, work->x); // primal
-    OSQPVectorf_copy(work->solution->y, work->y); // dual
-
     // Unscale solution if scaling has been performed
-    if (work->settings->scaling)
-      unscale_solution(work);
-  } else {
+      if (work->settings->scaling){
+          //use x_prev and z_prev as scratch space
+          unscale_solution(work->x_prev,work->z_prev, //unscaled solution
+                           work->x,work->y,           //scaled solution
+                           work);
+          OSQPVectorf_to_raw(work->solution->x, work->x_prev); // primal
+          OSQPVectorf_to_raw(work->solution->y, work->z_prev); // dual
+      }
+      else{
+          OSQPVectorf_to_raw(work->solution->x, work->x); // primal
+          OSQPVectorf_to_raw(work->solution->y, work->y); // dual
+      }
+  }
+    
+  else {
+      
     // No solution present. Solution is NaN
-    OSQPVectorf_set_scalar(work->solution->x, OSQP_NAN);
-    OSQPVectorf_set_scalar(work->solution->y, OSQP_NAN);
+    vec_set_scalar(work->solution->x, OSQP_NAN, work->data->n);
+    vec_set_scalar(work->solution->y, OSQP_NAN, work->data->m);
 
 #ifndef EMBEDDED
 
@@ -795,24 +802,23 @@ c_int check_termination(OSQPWorkspace *work, c_int approximate) {
 
 #ifndef EMBEDDED
 
-c_int validate_data(const OSQPData *data) {
+c_int validate_data(const csc* P,
+                    const c_float* q,
+                    const csc* A,
+                    const c_float* l,
+                    const c_float* u,
+                    c_int m,
+                    c_int n) {
   c_int j, ptr;
 
-  if (!data) {
-# ifdef PRINTING
-    c_eprint("Missing data");
-# endif
-    return 1;
-  }
-
-  if (!(data->P)) {
+  if (!(P)) {
 # ifdef PRINTING
     c_eprint("Missing matrix P");
 # endif
     return 1;
   }
 
-  if (!(data->A)) {
+  if (!(A)) {
 # ifdef PRINTING
     c_eprint("Missing matrix A");
 # endif
@@ -820,32 +826,32 @@ c_int validate_data(const OSQPData *data) {
   }
 
   // General dimensions Tests
-  if ((data->n <= 0) || (data->m < 0)) {
+  if ((n <= 0) || (m < 0)) {
 # ifdef PRINTING
     c_eprint("n must be positive and m nonnegative; n = %i, m = %i",
-             (int)data->n, (int)data->m);
+             (int)n, (int)m);
 # endif /* ifdef PRINTING */
     return 1;
   }
 
   // Matrix P
-  if (data->P->m != data->n) {
+  if (P->m != n) {
 # ifdef PRINTING
-    c_eprint("P does not have dimension n x n with n = %i", (int)data->n);
+    c_eprint("P does not have dimension n x n with n = %i", (int)n);
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if (data->P->m != data->P->n) {
+  if (P->m != P->n) {
 # ifdef PRINTING
     c_eprint("P is not square");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  for (j = 0; j < data->n; j++) { // COLUMN
-    for (ptr = data->P->p[j]; ptr < data->P->p[j + 1]; ptr++) {
-      if (data->P->i[ptr] > j) {  // if ROW > COLUMN
+  for (j = 0; j < n; j++) { // COLUMN
+    for (ptr = P->p[j]; ptr < P->p[j + 1]; ptr++) {
+      if (P->i[ptr] > j) {  // if ROW > COLUMN
 # ifdef PRINTING
         c_eprint("P is not upper triangular");
 # endif /* ifdef PRINTING */
@@ -855,22 +861,19 @@ c_int validate_data(const OSQPData *data) {
   }
 
   // Matrix A
-  if ((data->A->m != data->m) || (data->A->n != data->n)) {
+  if ((A->m != m) || (A->n != n)) {
 # ifdef PRINTING
-    c_eprint("A does not have dimension %i x %i", (int)data->m, (int)data->n);
+    c_eprint("A does not have dimension %i x %i", (int)m, (int)n);
 # endif /* ifdef PRINTING */
     return 1;
   }
 
   // Lower and upper bounds
-  c_float* lv = OSQPVectorf_data(data->l);
-  c_float* uv = OSQPVectorf_data(data->u);
-
-  for (j = 0; j < data->m; j++) {
-    if (lv[j] > uv[j]) {
+  for (j = 0; j < m; j++) {
+    if (l[j] > u[j]) {
 # ifdef PRINTING
       c_eprint("Lower bound at index %d is greater than upper bound: %.4e > %.4e",
-               (int)j, lv[j], uv[j]);
+               (int)j, l[j], u[j]);
 # endif /* ifdef PRINTING */
       return 1;
     }

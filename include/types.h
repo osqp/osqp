@@ -64,8 +64,8 @@ typedef struct {
  * Solution structure
  */
 typedef struct {
-  OSQPVectorf *x; ///< primal solution
-  OSQPVectorf *y; ///< Lagrange multiplier associated to \f$l <= Ax <= u\f$
+  c_float *x; ///< primal solution
+  c_float *y; ///< Lagrange multiplier associated to \f$l <= Ax <= u\f$
 } OSQPSolution;
 
 

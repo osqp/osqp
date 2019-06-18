@@ -1,5 +1,6 @@
 #include "lin_alg.h"
-#include <assert.h>
+#include <assert.h> //DEBUG
+#include <stdio.h> //DEBUG
 
 /* VECTOR FUNCTIONS (old) ----------------------------------------------------------*/
 
@@ -210,13 +211,13 @@ void vec_ew_min_vec(const c_float *a, const c_float *b, c_float *c, c_int n) {
 
 OSQPVectorf* OSQPVectorf_new(const c_float *a, c_int length){
   OSQPVectorf* out = OSQPVectorf_malloc(length);
-  OSQPVectorf_copy_raw(out,a);
+  OSQPVectorf_from_raw(out,a);
   return out;
 }
 
 OSQPVectori* OSQPVectori_new(const c_int *a, c_int length){
   OSQPVectori* out = OSQPVectori_malloc(length);
-  OSQPVectori_copy_raw(out,a);
+  OSQPVectori_from_raw(out,a);
   return out;
 }
 
@@ -286,7 +287,7 @@ OSQPVectori* OSQPVectori_free(OSQPVectori *a){
 }
 
 OSQPVectorf* OSQPVectorf_view(const OSQPVectorf *a, c_int head, c_int len){
-  OSQPVectorf* view = c_malloc(sizeof(OSQPVectori));;
+  OSQPVectorf* view = c_malloc(sizeof(OSQPVectorf));
   view->length = len;
   view->values   = a->values + head;
   return view;
@@ -308,27 +309,45 @@ c_float* OSQPVectorf_data(const OSQPVectorf *a){return a->values;}
 c_int*   OSQPVectori_data(const OSQPVectori *a){return a->values;}
 
 void OSQPVectorf_copy(OSQPVectorf *b, const OSQPVectorf *a){
-  OSQPVectorf_copy_raw(b,a->values);
+  OSQPVectorf_from_raw(b,a->values);
 }
 
 void OSQPVectori_copy(OSQPVectori *b, const OSQPVectori *a){
-  OSQPVectori_copy_raw(b,a->values);
+  OSQPVectori_from_raw(b,a->values);
 }
 
-void OSQPVectorf_copy_raw(OSQPVectorf *b, const c_float *av){
+void OSQPVectorf_from_raw(OSQPVectorf *b, const c_float *av){
   c_int i;
-  c_float* bv;
+  c_float* bv = b->values;
 
   for (i = 0; i < b->length; i++) {
     bv[i] = av[i];
   }
 }
 
-void OSQPVectori_copy_raw(OSQPVectori *b, const c_int *av){
+void OSQPVectori_from_raw(OSQPVectori *b, const c_int *av){
   c_int i;
-  c_int* bv;
+  c_int* bv = b->values;
 
   for (i = 0; i < b->length; i++) {
+    bv[i] = av[i];
+  }
+}
+
+void OSQPVectorf_to_raw(c_float *bv, const OSQPVectorf *a){
+  c_int i;
+  c_float* av = a->values;
+
+  for (i = 0; i < a->length; i++) {
+    bv[i] = av[i];
+  }
+}
+
+void OSQPVectori_to_raw(c_int *bv, const OSQPVectori *a){
+  c_int i;
+  c_int* av = a->values;
+
+  for (i = 0; i < a->length; i++) {
     bv[i] = av[i];
   }
 }
@@ -467,7 +486,7 @@ void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
   }
   else{
     for (i = 0; i < x->length; i++) {
-      c->values[i] =  sca * a->values[i] + scb * b->values[i] + scc * c->values[i];
+      x->values[i] =  sca * a->values[i] + scb * b->values[i] + scc * c->values[i];
     }
   }
 }

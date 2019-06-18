@@ -188,10 +188,16 @@ typedef struct OSQPVectorf_ {
  void OSQPVectori_copy(OSQPVectori *b, const OSQPVectori *a);
 
  /* copy an array of floats into a into a vector b (pre-allocated) */
- void OSQPVectorf_copy_raw(OSQPVectorf *b, const c_float *a);
+ void OSQPVectorf_from_raw(OSQPVectorf *b, const c_float *a);
 
  /* copy an array of ints into a into a vector b (pre-allocated) */
- void OSQPVectori_copy_raw(OSQPVectori *b, const c_int *a);
+ void OSQPVectori_from_raw(OSQPVectori *b, const c_int *a);
+
+ /* copy a vector into an array of floats (pre-allocated) */
+ void OSQPVectorf_to_raw(c_float *bv, const OSQPVectorf *a);
+
+ /* copy a vector into an array of ints (pre-allocated) */
+ void OSQPVectori_to_raw(c_int *bv, const OSQPVectori *a);
 
  /* set float vector to scalar */
  void OSQPVectorf_set_scalar(OSQPVectorf *a, c_float sc);

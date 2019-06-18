@@ -51,11 +51,25 @@ void osqp_set_default_settings(OSQPSettings *settings);
  *during code generation
  *
  * @param  workp        Solver workspace pointer
- * @param  data         Problem data
+ * @param  P            Problem data (quadratic cost term, csc format)
+ * @param  q            Problem data (linear cost term)
+ * @param  A            Problem data (constraint matrix, csc format)
+ * @param  l            Problem data (constraint lower bound)
+ * @param  u            Problem data (constraint upper bound)
+ * @param  m            Problem data (number of constraints)
+ * @param  n            Problem data (number of variables)
  * @param  settings     Solver settings
  * @return              Exitflag for errors (0 if no errors)
  */
-c_int osqp_setup(OSQPWorkspace** workp, const OSQPData* data, const OSQPSettings* settings);
+ c_int osqp_setup(OSQPWorkspace** workp,
+                  const csc*     P,
+                  const c_float* q,
+                  const csc*     A,
+                  const c_float* l,
+                  const c_float* u,
+                  c_int m,
+                  c_int n,
+   const OSQPSettings *settings) ;
 
 # endif // #ifndef EMBEDDED
 

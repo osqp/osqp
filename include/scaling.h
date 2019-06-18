@@ -32,10 +32,14 @@ c_int unscale_data(OSQPWorkspace *work);
 
 /**
  * Unscale solution
+   @param  usolx unscaled x result
+   @param  usoly unscaled y result
+   @param  solx  x solution to be unscaled
+   @param  solx  y solution to be unscaled
  * @param  work Workspace
  * @return      exitflag
  */
-c_int unscale_solution(OSQPWorkspace *work);
+    c_int unscale_solution(OSQPVectorf* usolx, OSQPVectorf* usoly, const OSQPVectorf* solx, const OSQPVectorf* soly, OSQPWorkspace *work);
 
 # ifdef __cplusplus
 }

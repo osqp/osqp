@@ -178,7 +178,7 @@ c_float* csc_to_dns(csc *M);
 
 
 /* Print a csc sparse matrix */
-void print_csc_matrix(csc        *M,
+void print_csc_matrix(const csc  *M,
                       const char *name);
 
 /* Dump csc sparse matrix to file */

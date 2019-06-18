@@ -1,4 +1,5 @@
 #include "util.h"
+#include "algebra_vector.h"
 
 /***************
 * Versioning  *
@@ -346,7 +347,7 @@ c_float osqp_toc(OSQPTimer *t)
 
 #ifdef PRINTING
 
-void print_csc_matrix(csc *M, const char *name)
+void print_csc_matrix(const csc *M, const char *name)
 {
   c_int j, i, row_start, row_stop;
   c_int k = 0;
@@ -459,6 +460,7 @@ void print_vec_int(c_int *x, c_int n, const char *name) {
   c_print("]\n");
 }
 
+
 #endif // PRINTING
 
-#endif // DEBUG MODE
+#endif // DEBUG MODE  

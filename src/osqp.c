@@ -72,13 +72,21 @@ void osqp_set_default_settings(OSQPSettings *settings) {
 #ifndef EMBEDDED
 
 
-c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings *settings) {
+c_int   osqp_setup(OSQPWorkspace** workp,
+  const csc* P,
+  const c_float* q,
+  const csc* A,
+  const c_float* l,
+  const c_float* u,
+  c_int m,
+  c_int n,
+  const OSQPSettings *settings) {
   c_int exitflag;
 
   OSQPWorkspace * work;
 
   // Validate data
-  if (validate_data(data)) return osqp_error(OSQP_DATA_VALIDATION_ERROR);
+  if (validate_data(P,q,A,l,u,m,n)) return osqp_error(OSQP_DATA_VALIDATION_ERROR);
 
   // Validate settings
   if (validate_settings(settings)) return osqp_error(OSQP_SETTINGS_VALIDATION_ERROR);
@@ -98,67 +106,67 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
   // Copy problem data into workspace
   work->data = c_malloc(sizeof(OSQPData));
   if (!(work->data)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  work->data->n = data->n;
-  work->data->m = data->m;
+  work->data->m = m;
+  work->data->n = n;
 
   // Cost function
-  work->data->P = copy_csc_mat(data->P);
-  work->data->q = OSQPVectorf_copy_new(data->q);
+  work->data->P = copy_csc_mat(P);
+  work->data->q = OSQPVectorf_new(q,n);
   if (!(work->data->P) || !(work->data->q)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-
+    
   // Constraints
-  work->data->A = copy_csc_mat(data->A);
+  work->data->A = copy_csc_mat(A);
   if (!(work->data->A)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  work->data->l = OSQPVectorf_copy_new(data->l);
-  work->data->u = OSQPVectorf_copy_new(data->u);
-  if ( data->m && (!(work->data->l) || !(work->data->u)) )
+  work->data->l = OSQPVectorf_new(l,m);
+  work->data->u = OSQPVectorf_new(u,m);
+  if ((!(work->data->l) || !(work->data->u)) )
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Vectorized rho parameter
-  work->rho_vec     = OSQPVectorf_malloc(data->m);
-  work->rho_inv_vec = OSQPVectorf_malloc(data->m);
-  if ( data->m && (!(work->rho_vec) || !(work->rho_inv_vec)) )
+  work->rho_vec     = OSQPVectorf_malloc(m);
+  work->rho_inv_vec = OSQPVectorf_malloc(m);
+  if ((!(work->rho_vec) || !(work->rho_inv_vec)) )
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Type of constraints
-  work->constr_type = c_calloc(data->m, sizeof(c_int));
-  if (data->m && !(work->constr_type)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  work->constr_type = OSQPVectori_calloc(m);
+  if (!(work->constr_type)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Allocate internal solver variables (ADMM steps)
-  work->x           = OSQPVectorf_calloc(data->n);
-  work->z           = OSQPVectorf_calloc(data->m);
-  work->xz_tilde    = OSQPVectorf_calloc(data->n + data->m);
-  work->xtilde_view = OSQPVectorf_view(work->xz_tilde,0,data->n);
-  work->ztilde_view = OSQPVectorf_view(work->xz_tilde,data->n,data->m);
-  work->x_prev      = OSQPVectorf_calloc(data->n);
-  work->z_prev      = OSQPVectorf_calloc(data->m);
-  work->y           = OSQPVectorf_calloc(data->m);
+  work->x           = OSQPVectorf_calloc(n);
+  work->z           = OSQPVectorf_calloc(m);
+  work->xz_tilde    = OSQPVectorf_calloc(n + m);
+  work->xtilde_view = OSQPVectorf_view(work->xz_tilde,0,n);
+  work->ztilde_view = OSQPVectorf_view(work->xz_tilde,n,m);
+  work->x_prev      = OSQPVectorf_calloc(n);
+  work->z_prev      = OSQPVectorf_calloc(m);
+  work->y           = OSQPVectorf_calloc(m);
   if (!(work->x) || !(work->xz_tilde) || !(work->x_prev))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if ( data->m && (!(work->z) || !(work->z_prev) || !(work->y)) )
+  if (!(work->z) || !(work->z_prev) || !(work->y))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Initialize variables x, y, z to 0
   cold_start(work);
 
   // Primal and dual residuals variables
-  work->Ax  = c_calloc(data->m, sizeof(c_float));
-  work->Px  = c_calloc(data->n, sizeof(c_float));
-  work->Aty = c_calloc(data->n, sizeof(c_float));
+  work->Ax  = OSQPVectorf_calloc(m);
+  work->Px  = OSQPVectorf_calloc(n);
+  work->Aty = OSQPVectorf_calloc(n);
 
   // Primal infeasibility variables
-  work->delta_y   = c_calloc(data->m, sizeof(c_float));
-  work->Atdelta_y = c_calloc(data->n, sizeof(c_float));
+  work->delta_y   = OSQPVectorf_calloc(m);
+  work->Atdelta_y = OSQPVectorf_calloc(n);
 
   // Dual infeasibility variables
-  work->delta_x  = c_calloc(data->n, sizeof(c_float));
-  work->Pdelta_x = c_calloc(data->n, sizeof(c_float));
-  work->Adelta_x = c_calloc(data->m, sizeof(c_float));
+  work->delta_x  = OSQPVectorf_calloc(n);
+  work->Pdelta_x = OSQPVectorf_calloc(n);
+  work->Adelta_x = OSQPVectorf_calloc(m);
 
   if (!(work->Px) || !(work->Aty) || !(work->Atdelta_y) ||
       !(work->delta_x) || !(work->Pdelta_x))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if ( data->m && (!(work->Ax) || !(work->delta_y) || !(work->Adelta_x)) )
+  if ((!(work->Ax) || !(work->delta_y) || !(work->Adelta_x)) )
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Copy settings
@@ -170,24 +178,24 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
     // Allocate scaling structure
     work->scaling = c_malloc(sizeof(OSQPScaling));
     if (!(work->scaling)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-    work->scaling->D    = c_malloc(data->n * sizeof(c_float));
-    work->scaling->Dinv = c_malloc(data->n * sizeof(c_float));
-    work->scaling->E    = c_malloc(data->m * sizeof(c_float));
-    work->scaling->Einv = c_malloc(data->m * sizeof(c_float));
+    work->scaling->D    = OSQPVectorf_calloc(n);
+    work->scaling->Dinv = OSQPVectorf_calloc(n);
+    work->scaling->E    = OSQPVectorf_calloc(m);
+    work->scaling->Einv = OSQPVectorf_calloc(m);
     if (!(work->scaling->D) || !(work->scaling->Dinv))
       return osqp_error(OSQP_MEM_ALLOC_ERROR);
-    if ( data->m && (!(work->scaling->E) || !(work->scaling->Einv)) )
+    if ((!(work->scaling->E) || !(work->scaling->Einv)) )
       return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
 
     // Allocate workspace variables used in scaling
-    work->D_temp   = c_malloc(data->n * sizeof(c_float));
-    work->D_temp_A = c_malloc(data->n * sizeof(c_float));
-    work->E_temp   = c_malloc(data->m * sizeof(c_float));
+    work->D_temp   = OSQPVectorf_calloc(n);
+    work->D_temp_A = OSQPVectorf_calloc(n);
+    work->E_temp   = OSQPVectorf_calloc(m);;
     // if (!(work->D_temp) || !(work->D_temp_A) || !(work->E_temp))
     //   return osqp_error(OSQP_MEM_ALLOC_ERROR);
     if (!(work->D_temp) || !(work->D_temp_A)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-    if (data->m && !(work->E_temp))           return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    if (!(work->E_temp))           return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
     // Scale data
     scale_data(work);
@@ -214,15 +222,15 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
   // Initialize active constraints structure
   work->pol = c_malloc(sizeof(OSQPPolish));
   if (!(work->pol)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  work->pol->Alow_to_A = OSQPVectori_malloc(data->m);
-  work->pol->Aupp_to_A = OSQPVectori_malloc(data->m);
-  work->pol->A_to_Alow = OSQPVectori_malloc(data->m);
-  work->pol->A_to_Aupp = OSQPVectori_malloc(data->m);
-  work->pol->x         = OSQPVectorf_malloc(data->n);
-  work->pol->z         = OSQPVectorf_malloc(data->m);
-  work->pol->y         = OSQPVectorf_malloc(data->m);
+  work->pol->Alow_to_A = OSQPVectori_malloc(m);
+  work->pol->Aupp_to_A = OSQPVectori_malloc(m);
+  work->pol->A_to_Alow = OSQPVectori_malloc(m);
+  work->pol->A_to_Aupp = OSQPVectori_malloc(m);
+  work->pol->x         = OSQPVectorf_malloc(n);
+  work->pol->z         = OSQPVectorf_malloc(m);
+  work->pol->y         = OSQPVectorf_malloc(m);
   if (!(work->pol->x)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if ( data->m && (!(work->pol->Alow_to_A) || !(work->pol->Aupp_to_A) ||
+  if ((!(work->pol->Alow_to_A) || !(work->pol->Aupp_to_A) ||
       !(work->pol->A_to_Alow) || !(work->pol->A_to_Aupp) ||
       !(work->pol->z) || !(work->pol->y)) )
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
@@ -230,10 +238,10 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
   // Allocate solution
   work->solution = c_calloc(1, sizeof(OSQPSolution));
   if (!(work->solution)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  work->solution->x = c_calloc(1, data->n * sizeof(c_float));
-  work->solution->y = c_calloc(1, data->m * sizeof(c_float));
+  work->solution->x = c_calloc(1, n * sizeof(c_float));
+  work->solution->y = c_calloc(1, m * sizeof(c_float));
   if (!(work->solution->x))            return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (data->m && !(work->solution->y)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  if (!(work->solution->y)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Allocate and initialize information
   work->info = c_calloc(1, sizeof(OSQPInfo));
@@ -350,6 +358,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
                                                       // set x, z, y to zero
 
   // Main ADMM algorithm
+
   for (iter = 1; iter <= work->settings->max_iter; iter++) {
     // Update x_prev, z_prev (preallocated, no malloc)
     swap_vectors(&(work->x), &(work->x_prev));
@@ -716,8 +725,8 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
 
     // Free solution
     if (work->solution) {
-      if (work->solution->x) OSQPVectorf_free(work->solution->x);
-      if (work->solution->y) OSQPVectorf_free(work->solution->y);
+      if (work->solution->x) c_free(work->solution->x);
+      if (work->solution->y) c_free(work->solution->y);
       c_free(work->solution);
     }
 
@@ -756,7 +765,7 @@ c_int osqp_update_lin_cost(OSQPWorkspace *work, const c_float *q_new) {
 #endif /* ifdef PROFILING */
 
   // Replace q by the new vector
-  OSQPVectorf_copy_raw(work->data->q, q_new);
+  OSQPVectorf_from_raw(work->data->q, q_new);
 
   // Scaling
   if (work->settings->scaling) {
@@ -801,8 +810,8 @@ c_int osqp_update_bounds(OSQPWorkspace *work,
   }
 
   // Replace l and u by the new vectors
-  OSQPVectorf_copy_raw(work->data->l, l_new);
-  OSQPVectorf_copy_raw(work->data->u, u_new);
+  OSQPVectorf_from_raw(work->data->l, l_new);
+  OSQPVectorf_from_raw(work->data->u, u_new);
 
   // Scaling
   if (work->settings->scaling) {
@@ -826,7 +835,7 @@ c_int osqp_update_bounds(OSQPWorkspace *work,
 }
 
 c_int osqp_update_lower_bound(OSQPWorkspace *work, const c_float *l_new) {
-  c_int i, exitflag = 0;
+  c_int exitflag = 0;
 
   // Check if workspace has been initialized
   if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -840,7 +849,7 @@ c_int osqp_update_lower_bound(OSQPWorkspace *work, const c_float *l_new) {
 #endif /* ifdef PROFILING */
 
   // Replace l by the new vector
-  OSQPVectorf_copy_raw(work->data->l, l_new);
+  OSQPVectorf_from_raw(work->data->l, l_new);
 
   // Scaling
   if (work->settings->scaling) {
@@ -871,7 +880,7 @@ c_int osqp_update_lower_bound(OSQPWorkspace *work, const c_float *l_new) {
 }
 
 c_int osqp_update_upper_bound(OSQPWorkspace *work, const c_float *u_new) {
-  c_int i, exitflag = 0;
+  c_int exitflag = 0;
 
   // Check if workspace has been initialized
   if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -885,7 +894,7 @@ c_int osqp_update_upper_bound(OSQPWorkspace *work, const c_float *u_new) {
 #endif /* ifdef PROFILING */
 
   // Replace u by the new vector
-  OSQPVectorf_copy_raw(work->data->u, u_new);
+  OSQPVectorf_from_raw(work->data->u, u_new);
 
   // Scaling
   if (work->settings->scaling) {
@@ -924,8 +933,8 @@ c_int osqp_warm_start(OSQPWorkspace *work, const c_float *x, const c_float *y) {
   if (!work->settings->warm_start) work->settings->warm_start = 1;
 
   // Copy primal and dual variables into the iterates
-  OSQPVectorf_copy_raw(work->x, x);
-  OSQPVectorf_copy_raw(work->y, y);
+  OSQPVectorf_from_raw(work->x, x);
+  OSQPVectorf_from_raw(work->y, y);
 
   // Scale iterates
   if (work->settings->scaling) {
@@ -949,7 +958,7 @@ c_int osqp_warm_start_x(OSQPWorkspace *work, const c_float *x) {
   if (!work->settings->warm_start) work->settings->warm_start = 1;
 
   // Copy primal variable into the iterate x
-  OSQPVectorf_copy_raw(work->x, x);
+  OSQPVectorf_from_raw(work->x, x);
 
   // Scale iterate
   if (work->settings->scaling) {
@@ -971,7 +980,7 @@ c_int osqp_warm_start_y(OSQPWorkspace *work, const c_float *y) {
   if (!work->settings->warm_start) work->settings->warm_start = 1;
 
   // Copy primal variable into the iterate y
-  OSQPVectorf_copy_raw(work->y, y);
+  OSQPVectorf_from_raw(work->y, y);
 
   // Scale iterate
   if (work->settings->scaling) {
@@ -1255,7 +1264,7 @@ c_int osqp_update_P_A(OSQPWorkspace *work,
 }
 
 c_int osqp_update_rho(OSQPWorkspace *work, c_float rho_new) {
-  c_int exitflag, i;
+  c_int exitflag;
 
   // Check if workspace has been initialized
   if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
