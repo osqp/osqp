@@ -64,11 +64,33 @@ endif()
 message(STATUS "Printing is ${PRINTING}")
 
 
+# Custom timing functions for profiling
+# ----------------------------------------------
+
+# This allows the user to specify custom functions to compute
+# the elapsed time for the profiling statistics.
+#
+# The user must specify a header file that contains definitions
+# for the osqp_tic and osqp_toc functions. The header should
+# contain definitions for:
+#   void osqp_tic(OSQPTimer *timer)
+#   c_float osqp_toc(OSQPTimer *timer)
+#   struct OSQP_TIMER
+# And the user must then manually link against these custom
+# functions.
+
+if(OSQP_CUSTOM_TICTOC)
+    message(STATUS "User custom tic and toc functions provided in: ${OSQP_CUSTOM_TICTOC}")
+endif()
+
 # Is profiling enabled?
 option (PROFILING "Enable solver profiling (timing)" ON)
-if (EMBEDDED)
-    message(STATUS "Disabling profiling for embedded")
-    set(PROFILING OFF)
+if (PROFILING)
+    if (EMBEDDED AND NOT OSQP_CUSTOM_TICTOC)
+        message(STATUS "Profiling for embedded mode requires OSQP_CUSTOM_TICTOC to be set")
+        message(STATUS "Disabling profiling for embedded")
+        set(PROFILING OFF)
+    endif()
 endif()
 message(STATUS "Profiling is ${PROFILING}")
 

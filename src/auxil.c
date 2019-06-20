@@ -6,6 +6,10 @@
 #include "scaling.h"
 #include "util.h"
 
+#ifdef OSQP_CUSTOM_TICTOC
+# include OSQP_CUSTOM_TICTOC
+#endif /* ifdef OSQP_CUSTOM_TICTOC */
+
 /***********************************************************
 * Auxiliary functions needed to compute ADMM iterations * *
 ***********************************************************/

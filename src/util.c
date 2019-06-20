@@ -1,5 +1,9 @@
 #include "util.h"
 
+#ifdef OSQP_CUSTOM_TICTOC
+# include OSQP_CUSTOM_TICTOC
+#endif /* ifdef OSQP_CUSTOM_TICTOC */
+
 /***************
 * Versioning  *
 ***************/
@@ -267,8 +271,10 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
 
 #ifdef PROFILING
 
+# ifndef OSQP_CUSTOM_TICTOC
+
 // Windows
-# ifdef IS_WINDOWS
+#  ifdef IS_WINDOWS
 
 void osqp_tic(OSQPTimer *t)
 {
@@ -283,7 +289,7 @@ c_float osqp_toc(OSQPTimer *t)
 }
 
 // Mac
-# elif defined IS_MAC
+#  elif defined IS_MAC
 
 void osqp_tic(OSQPTimer *t)
 {
@@ -307,7 +313,7 @@ c_float osqp_toc(OSQPTimer *t)
 }
 
 // Linux
-# elif defined IS_LINUX
+#  elif defined IS_LINUX
 
 /* read current time */
 void osqp_tic(OSQPTimer *t)
@@ -332,7 +338,9 @@ c_float osqp_toc(OSQPTimer *t)
   return (c_float)temp.tv_sec + (c_float)temp.tv_nsec / 1e9;
 }
 
-# endif /* ifdef IS_WINDOWS */
+#  endif /* ifdef IS_WINDOWS */
+
+# endif /* ifndef OSQP_CUSTOM_TICTOC */
 
 #endif // If Profiling end
 

@@ -18,6 +18,10 @@
 # include "lin_sys.h"
 #endif /* ifndef EMBEDDED */
 
+#ifdef OSQP_CUSTOM_TICTOC
+# include OSQP_CUSTOM_TICTOC
+#endif /* ifdef OSQP_CUSTOM_TICTOC */
+
 /**********************
 * Main API Functions *
 **********************/

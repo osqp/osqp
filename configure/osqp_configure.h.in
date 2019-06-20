@@ -21,9 +21,7 @@ extern "C" {
 
 /* PROFILING */
 #cmakedefine PROFILING
-#ifdef OSQP_CUSTOM_TICTOC
-#include "@OSQP_CUSTOM_TICTOC@"
-#endif
+#cmakedefine OSQP_CUSTOM_TICTOC "@OSQP_CUSTOM_TICTOC@"
 
 /* CTRLC */
 #cmakedefine CTRLC
