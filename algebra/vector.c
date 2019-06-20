@@ -444,7 +444,6 @@ void OSQPVectorf_plus(OSQPVectorf      *x,
                      const OSQPVectorf *a,
                      const OSQPVectorf *b){
   c_int i;
-  assert(a->length == b->length);
 
   if(x == a){
     for (i = 0; i < a->length; i++) {
@@ -462,8 +461,6 @@ void OSQPVectorf_minus(OSQPVectorf     *x,
                      const OSQPVectorf *a,
                      const OSQPVectorf *b){
   c_int i;
-  assert(a->length == b->length);
-  assert(a->length == x->length);
 
   if(x == a){
     for (i = 0; i < a->length; i++) {
@@ -484,8 +481,6 @@ void OSQPVectorf_add_scaled(OSQPVectorf       *x,
                              c_float           scb,
                              const OSQPVectorf *b){
   c_int i;
-  assert(a->length == b->length);
-  assert(a->length == x->length);
 
   //shorter version when incrementing
   if(x == a && sca == 1.){
@@ -509,9 +504,6 @@ void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
                              c_float           scc,
                              const OSQPVectorf *c){
   c_int i;
-  assert(a->length == b->length);
-  assert(b->length == c->length);
-  assert(a->length == x->length);
 
   //shorter version when incrementing
   if(x == a && sca == 1.){
@@ -557,8 +549,6 @@ c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S, const OSQPVectorf *v){
   c_float absval;
   c_float normval = 0.0;
 
-  assert(S->length == v->length);
-
   for (i = 0; i < v->length; i++) {
     absval = c_absval(S->values[i] * v->values[i]);
     if (absval > normval) normval = absval;
@@ -570,8 +560,6 @@ c_float OSQPVectorf_scaled_norm_1(const OSQPVectorf *S, const OSQPVectorf *v){
 
   c_int   i;
   c_float normval = 0.0;
-
-  assert(S->length == v->length);
 
   for (i = 0; i < v->length; i++) {
     normval += c_absval(S->values[i] * v->values[i]);
@@ -585,8 +573,6 @@ c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
   c_float absval;
   c_float normDiff = 0.0;
 
-  assert(a->length == b->length);
-
   for (i = 0; i < a->length; i++) {
     absval = c_absval(a->values[i] - b->values[i]);
     if (absval > normDiff) normDiff = absval;
@@ -599,7 +585,6 @@ c_float OSQPVectorf_norm_1_diff(const OSQPVectorf *a,
 
   c_int   i;
   c_float normDiff = 0.0;
-  assert(a->length == b->length);
 
   for (i = 0; i < a->length; i++) {
     normDiff += c_absval(a->values[i] - b->values[i]);
@@ -623,7 +608,6 @@ c_float OSQPVectorf_dot_prod(const OSQPVectorf *a, const OSQPVectorf *b){
 
   c_int   i; // Index
   c_float dotprod = 0.0;
-  assert(a->length == b->length);
 
   for (i = 0; i < a->length; i++) {
     dotprod += a->values[i] * b->values[i];
@@ -635,7 +619,6 @@ c_float OSQPVectorf_dot_prod_signed(const OSQPVectorf *a, const OSQPVectorf *b, 
 
   c_int   i; // Index
   c_float dotprod = 0.0;
-  assert(a->length == b->length);
 
   if(sign == 1){  /* dot with positive part of b */
     for (i = 0; i < a->length; i++) {
@@ -659,8 +642,6 @@ void OSQPVectorf_ew_prod(OSQPVectorf       *c,
                          const OSQPVectorf *b){
 
     c_int i;
-    assert(a->length == b->length);
-    assert(a->length == c->length);
 
     if(c==a) {
       for (i = 0; i < a->length; i++) {
@@ -676,34 +657,24 @@ void OSQPVectorf_ew_prod(OSQPVectorf       *c,
 
 void OSQPVectorf_permute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p){
 
-  assert(x->length == b->length);
-  assert(x->length == p->length);
-
   for (c_int j = 0; j < x->length ; j++) x->values[j] = b->values[p->values[j]];
 }
 
 void OSQPVectori_permute(OSQPVectori *x, const OSQPVectori *b, const OSQPVectori *p){
-
-  assert(x->length == b->length);
-  assert(x->length == p->length);
 
   for (c_int j = 0; j < x->length ; j++) x->values[j] = b->values[p->values[j]];
 }
 
 void OSQPVectorf_ipermute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p){
 
-  assert(x->length == b->length);
-  assert(x->length == p->length);
-
   for (c_int j = 0; j < x->length ; j++) x->values[p->values[j]] = b->values[j];
+
 }
 
 void OSQPVectori_ipermute(OSQPVectori *x, const OSQPVectori *b, const OSQPVectori *p){
 
-  assert(x->length == b->length);
-  assert(x->length == p->length);
-
   for (c_int j = 0; j < x->length ; j++) x->values[p->values[j]] = b->values[j];
+
 }
 
 
@@ -724,8 +695,6 @@ void OSQPVectorf_ew_reciprocal(OSQPVectorf *b, const OSQPVectorf *a){
 
   c_int i;
 
-  assert(a->length == b->length);
-
   for (i = 0; i < a->length; i++) {
     b->values[i] = (c_float)1.0 / a->values[i];
   }
@@ -744,8 +713,6 @@ void OSQPVectorf_ew_max(OSQPVectorf *c, const OSQPVectorf *a, c_float max_val){
 
   c_int i;
 
-  assert(a->length == c->length);
-
   for (i = 0; i < c->length; i++) {
     c->values[i] = c_max(a->values[i], max_val);
   }
@@ -754,8 +721,6 @@ void OSQPVectorf_ew_max(OSQPVectorf *c, const OSQPVectorf *a, c_float max_val){
 void OSQPVectorf_ew_min(OSQPVectorf *c, const OSQPVectorf *a, c_float min_val){
 
   c_int i;
-
-  assert(a->length == c->length);
 
   for (i = 0; i < a->length; i++) {
     c->values[i] = c_min(a->values[i], min_val);
@@ -767,9 +732,6 @@ void OSQPVectorf_ew_max_vec(OSQPVectorf       *c,
                             const OSQPVectorf *b){
   c_int i;
 
-  assert(a->length == c->length);
-  assert(b->length == c->length);
-
   for (i = 0; i < a->length; i++) {
     c->values[i] = c_max(a->values[i], b->values[i]);
   }
@@ -780,17 +742,12 @@ void OSQPVectorf_ew_min_vec(OSQPVectorf       *c,
                             const OSQPVectorf *b){
   c_int i;
 
-  assert(a->length == c->length);
-  assert(b->length == c->length);
-
   for (i = 0; i < a->length; i++) {
     c->values[i] = c_min(a->values[i], b->values[i]);
   }
 }
 
 c_int OSQPVectorf_ew_lt_eq(OSQPVectorf *l, OSQPVectorf* u){
-
-  assert(l->length == u->length);
 
   c_int i;
   for (i = 0; i < l->length; i++) {
@@ -806,10 +763,6 @@ void OSQPVectorf_ew_bound_vec(OSQPVectorf *x,
 
   c_int i;
 
-  assert(x->length == z->length);
-  assert(x->length == l->length);
-  assert(x->length == u->length);
-
   for(i=0; i < x->length; i++){
       x->values[i] = c_min(c_max(z->values[i],l->values[i]),u->values[i]);
   }
@@ -820,7 +773,6 @@ void OSQPVectorf_set_scalar_if_lt(OSQPVectorf *x,
                                   c_float testval,
                                   c_float newval){
   c_int i;
-  assert(x->length == z->length);
   for(i=0; i < x->length; i++){
       x->values[i] = z->values[i] < testval ? newval : z->values[i];
   }
@@ -834,7 +786,6 @@ void OSQPVectorf_set_scalar_if_gt(OSQPVectorf *x,
                                   c_float testval,
                                   c_float newval){
   c_int i;
-  assert(x->length == z->length);
   for(i=0; i < x->length; i++){
       x->values[i] = z->values[i] > testval ? newval : z->values[i];
   }
