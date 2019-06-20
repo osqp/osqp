@@ -105,7 +105,7 @@ g++ -c ${TRAVIS_BUILD_DIR}/tests/custom_memory/custom_memory.c \
 #static library.   For real applications, users
 #may prefer to keep it separate and link both
 #to their application
-ar -rcs ${TRAVIS_BUILD_DIR}/build/out/libosqp.a \
+ar -r -cs ${TRAVIS_BUILD_DIR}/build/out/libosqp.a \
         ${TRAVIS_BUILD_DIR}/build/custom_memory.o
 
 #now make the rest of the demos and test
