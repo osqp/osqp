@@ -1,7 +1,4 @@
 #include "lin_alg.h"
-#include <assert.h> //DEBUG
-#include <stdio.h> //DEBUG
-#include "PG_debug.h"
 
 /* VECTOR FUNCTIONS (old) ----------------------------------------------------------*/
 

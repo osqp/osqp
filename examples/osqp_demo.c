@@ -23,15 +23,13 @@ int main(int argc, char **argv) {
   // Workspace structures
   OSQPWorkspace *work;
   OSQPSettings  *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
-    
+
   //Matrix data structures
   csc* P = csc_matrix(n, n, P_nnz, P_x, P_i, P_p);
   csc* A = csc_matrix(m, n, A_nnz, A_x, A_i, A_p);
 
   // Define solver settings as default
   if (settings) osqp_set_default_settings(settings);
-  
-  settings->scaling = 1;  //DEBUG
 
   // Setup workspace
   exitflag = osqp_setup(&work, P, q, A, l, u, m, n, settings);
