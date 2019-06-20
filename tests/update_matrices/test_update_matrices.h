@@ -74,7 +74,7 @@ static const char* test_form_KKT() {
 static const char* test_update() {
   c_int i, nnzP, nnzA;
   update_matrices_sols_data *data;
-  OSQPData *problem;
+  OSQPTestData *problem;
   OSQPWorkspace *work;
   OSQPSettings  *settings;
   c_int exitflag;
@@ -89,7 +89,7 @@ static const char* test_update() {
   data = generate_problem_update_matrices_sols_data();
 
   // Generate first problem data
-  problem    = (OSQPData*) c_malloc(sizeof(OSQPData));
+  problem    = (OSQPTestData*) c_malloc(sizeof(OSQPTestData));
   problem->P = data->test_solve_Pu;
   problem->q = data->test_solve_q;
   problem->A = data->test_solve_A;
@@ -108,7 +108,9 @@ static const char* test_update() {
   settings->verbose  = 1;
 
   // Setup workspace
-  exitflag = osqp_setup(&work, problem, settings);
+  exitflag = osqp_setup(&work,problem->P,problem->q,
+                      problem->A,problem->l,problem->u,
+                      problem->m,problem->n, settings);
 
   // Setup correct
   mu_assert("Update matrices: original problem, setup error!", exitflag == 0);
@@ -161,7 +163,9 @@ static const char* test_update() {
 
   // Cleanup and setup workspace
   osqp_cleanup(work);
-  exitflag = osqp_setup(&work, problem, settings);
+  exitflag = osqp_setup(&work,problem->P,problem->q,
+                      problem->A,problem->l,problem->u,
+                      problem->m,problem->n, settings);
 
 
   // Update P (all indices)
@@ -186,7 +190,9 @@ static const char* test_update() {
 
   // Cleanup and setup workspace
   osqp_cleanup(work);
-  exitflag = osqp_setup(&work, problem, settings);
+  exitflag = osqp_setup(&work,problem->P,problem->q,
+                      problem->A,problem->l,problem->u,
+                      problem->m,problem->n, settings);
 
 
   // Update A
@@ -219,7 +225,9 @@ static const char* test_update() {
 
   // Cleanup and setup workspace
   osqp_cleanup(work);
-  exitflag = osqp_setup(&work, problem, settings);
+  exitflag = osqp_setup(&work,problem->P,problem->q,
+                      problem->A,problem->l,problem->u,
+                      problem->m,problem->n, settings);
 
 
   // Update A (all indices)
@@ -245,7 +253,9 @@ static const char* test_update() {
 
   // Cleanup and setup workspace
   osqp_cleanup(work);
-  exitflag = osqp_setup(&work, problem, settings);
+  exitflag = osqp_setup(&work,problem->P,problem->q,
+                      problem->A,problem->l,problem->u,
+                      problem->m,problem->n, settings);
 
   // Update P and A
   osqp_update_P_A(work, data->test_solve_Pu_new->x, Px_new_idx, nnzP,
@@ -273,7 +283,9 @@ static const char* test_update() {
 
   // Cleanup and setup workspace
   osqp_cleanup(work);
-  exitflag = osqp_setup(&work, problem, settings);
+  exitflag = osqp_setup(&work,problem->P,problem->q,
+                      problem->A,problem->l,problem->u,
+                      problem->m,problem->n, settings);
 
 
   // Update P and A (all indices)
@@ -316,7 +328,7 @@ static const char* test_update() {
 static char* test_update_pardiso() {
   c_int i, nnzP, nnzA, exitflag;
   update_matrices_sols_data *data;
-  OSQPData *problem;
+  OSQPTestData *problem;
   OSQPWorkspace *work;
   OSQPSettings  *settings;
 
@@ -330,7 +342,7 @@ static char* test_update_pardiso() {
   data = generate_problem_update_matrices_sols_data();
 
   // Generate first problem data
-  problem    = c_malloc(sizeof(OSQPData));
+  problem    = c_malloc(sizeof(OSQPTestData));
   problem->P = data->test_solve_Pu;
   problem->q = data->test_solve_q;
   problem->A = data->test_solve_A;
@@ -350,7 +362,9 @@ static char* test_update_pardiso() {
   settings->linsys_solver = MKL_PARDISO_SOLVER;
 
   // Setup workspace
-  exitflag = osqp_setup(&work, problem, settings);
+  exitflag = osqp_setup(&work,problem->P,problem->q,
+                      problem->A,problem->l,problem->u,
+                      problem->m,problem->n, settings);
 
   // Setup correct
   mu_assert("Update matrices: original problem, setup error!", exitflag == 0);
@@ -413,7 +427,9 @@ static char* test_update_pardiso() {
 
   // Cleanup and setup workspace
   osqp_cleanup(work);
-  exitflag = osqp_setup(&work, problem, settings);
+  exitflag = osqp_setup(&work,problem->P,problem->q,
+                      problem->A,problem->l,problem->u,
+                      problem->m,problem->n, settings);
 
   osqp_update_A(work, data->test_solve_A_new->x, Ax_new_idx, nnzA);
 
@@ -437,7 +453,9 @@ static char* test_update_pardiso() {
 
   // Cleanup and setup workspace
   osqp_cleanup(work);
-  exitflag = osqp_setup(&work, problem, settings);
+  exitflag = osqp_setup(&work,problem->P,problem->q,
+                      problem->A,problem->l,problem->u,
+                      problem->m,problem->n, settings);
 
   osqp_update_P_A(work, data->test_solve_Pu_new->x, Px_new_idx, nnzP,
                   data->test_solve_A_new->x, Ax_new_idx, nnzA);

@@ -25,10 +25,10 @@ static const char* test_demo_solve()
 
   // Structures
   OSQPWorkspace *work; // Workspace
-  OSQPData *data;      // OSQPData
+  OSQPTestData *data;      // OSQPTestData
 
   // Populate data
-  data = (OSQPData *)c_malloc(sizeof(OSQPData));
+  data = (OSQPTestData *)c_malloc(sizeof(OSQPTestData));
   data->n = n;
   data->m = m;
   data->P = csc_matrix(data->n, data->n, P_nnz, P_x, P_i, P_p);
@@ -41,7 +41,9 @@ static const char* test_demo_solve()
   osqp_set_default_settings(settings);
 
   // Setup workspace
-  exitflag = osqp_setup(&work, data, settings);
+  exitflag = osqp_setup(&work,data->P,data->q,
+                      data->A,data->l,data->u,
+                      data->m,data->n, settings);
 
   // Setup correct
   mu_assert("Demo test solve: Setup error!", exitflag == 0);

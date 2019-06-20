@@ -14,7 +14,7 @@ static const char* test_non_cvx_solve()
 
   // Structures
   OSQPWorkspace *work; // Workspace
-  OSQPData *data;      // Data
+  OSQPTestData *data;      // Data
   non_cvx_sols_data *sols_data;
 
 
@@ -29,7 +29,9 @@ static const char* test_non_cvx_solve()
   settings->sigma = 1e-6;
 
   // Setup workspace
-  exitflag = osqp_setup(&work, data, settings);
+  exitflag = osqp_setup(&work,data->P,data->q,
+                      data->A,data->l,data->u,
+                      data->m,data->n, settings);
 
   // Setup should fail due to (P + sigma I) having a negative eigenvalue
   mu_assert("Non Convex test solve: Setup should have failed!",
@@ -41,7 +43,9 @@ static const char* test_non_cvx_solve()
   settings->sigma = sols_data->sigma_new;
 
   // Setup workspace again
-  exitflag = osqp_setup(&work, data, settings);
+  exitflag = osqp_setup(&work,data->P,data->q,
+                      data->A,data->l,data->u,
+                      data->m,data->n, settings);
 
   // Setup should work this time because (P + sigma I) is positive definite
   mu_assert("Non Convex test solve: Setup error!", exitflag == 0);

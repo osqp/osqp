@@ -795,7 +795,7 @@ c_int check_termination(OSQPWorkspace *work, c_int approximate) {
     work->info->obj_val = -OSQP_INFTY;
     exitflag            = 1;
   }
-
+    
   return exitflag;
 }
 

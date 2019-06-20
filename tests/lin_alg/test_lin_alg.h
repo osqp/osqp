@@ -113,9 +113,9 @@ static const char* test_vec_operations() {
 }
 
 static const char* test_mat_operations() {
+  
   csc *Ad, *dA; // Matrices used for tests
   // csc *A_ewsq, *A_ewabs;     // Matrices used for tests
-  c_int exitflag = 0;
 
   // c_float trace, fro_sq;
   c_float *inf_norm_cols_rows_test;

@@ -202,11 +202,12 @@ typedef struct OSQPVectorf_ {
  /* set float vector to scalar */
  void OSQPVectorf_set_scalar(OSQPVectorf *a, c_float sc);
 
- /* set float vector to one of two scalars based on vector of true/false */
+ /* set float vector to one of two scalars based on vector of ints.  No action
+    is taken on a[i] if test[i] is something other than zero or one*/
  void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
                                          OSQPVectori *test,
-                                         c_float sctrue,
-                                         c_float scfalse);
+                                         c_float val_if_zero,
+                                         c_float val_if_one);
 
  /* set int vector to scalar */
  void OSQPVectori_set_scalar(OSQPVectori *a, c_int sc);

@@ -12,7 +12,7 @@ static const char* test_optimal()
 
   // Structures
   OSQPWorkspace *work;    // Workspace
-  OSQPData *problem;      // Problem data
+  OSQPTestData *problem;      // Problem data
   OSQPSettings *settings; // Settings
   primal_dual_infeasibility_sols_data *data;
 
@@ -20,7 +20,7 @@ static const char* test_optimal()
   data = generate_problem_primal_dual_infeasibility_sols_data();
 
   // Populate problem data
-  problem    = (OSQPData*) c_malloc(sizeof(OSQPData));
+  problem    = (OSQPTestData*) c_malloc(sizeof(OSQPTestData));
   problem->P = data->P;
   problem->q = data->q;
   problem->A = data->A12;
@@ -39,7 +39,9 @@ static const char* test_optimal()
   settings->verbose  = 1;
 
   // Setup workspace
-  exitflag = osqp_setup(&work, problem, settings);
+  exitflag = osqp_setup(&work,problem->P,problem->q,
+                        problem->A,problem->l,problem->u,
+                        problem->m,problem->n, settings);
 
   // Setup correct
   mu_assert("Primal dual infeasibility test 1: Setup error!", exitflag == 0);
@@ -82,7 +84,7 @@ static const char* test_prim_infeas()
 
   // Structures
   OSQPWorkspace *work;    // Workspace
-  OSQPData *problem;      // Problem data
+  OSQPTestData *problem;      // Problem data
   OSQPSettings *settings; // Settings
   primal_dual_infeasibility_sols_data *data;
 
@@ -90,7 +92,7 @@ static const char* test_prim_infeas()
   data = generate_problem_primal_dual_infeasibility_sols_data();
 
   // Populate problem data
-  problem    = (OSQPData*) c_malloc(sizeof(OSQPData));
+  problem    = (OSQPTestData*) c_malloc(sizeof(OSQPTestData));
   problem->P = data->P;
   problem->q = data->q;
   problem->A = data->A12;
@@ -109,7 +111,9 @@ static const char* test_prim_infeas()
   settings->verbose  = 1;
 
   // Setup workspace
-  exitflag = osqp_setup(&work, problem, settings);
+  exitflag = osqp_setup(&work,problem->P,problem->q,
+                        problem->A,problem->l,problem->u,
+                        problem->m,problem->n, settings);
 
   // Setup correct
   mu_assert("Primal dual infeasibility test 2: Setup error!", exitflag == 0);
@@ -136,7 +140,7 @@ static const char* test_dual_infeas()
 
   // Structures
   OSQPWorkspace *work;    // Workspace
-  OSQPData *problem;      // Problem data
+  OSQPTestData *problem;      // Problem data
   OSQPSettings *settings; // Settings
   primal_dual_infeasibility_sols_data *data;
 
@@ -144,7 +148,7 @@ static const char* test_dual_infeas()
   data = generate_problem_primal_dual_infeasibility_sols_data();
 
   // Populate problem data
-  problem    = (OSQPData*) c_malloc(sizeof(OSQPData));
+  problem    = (OSQPTestData*) c_malloc(sizeof(OSQPTestData));
   problem->P = data->P;
   problem->q = data->q;
   problem->A = data->A34;
@@ -163,7 +167,9 @@ static const char* test_dual_infeas()
   settings->verbose  = 1;
 
   // Setup workspace
-  exitflag = osqp_setup(&work, problem, settings);
+  exitflag = osqp_setup(&work,problem->P,problem->q,
+                        problem->A,problem->l,problem->u,
+                        problem->m,problem->n, settings);
 
   // Setup correct
   mu_assert("Primal dual infeasibility test 3: Setup error!", exitflag == 0);
@@ -190,7 +196,7 @@ static const char* test_primal_dual_infeas()
 
   // Structures
   OSQPWorkspace *work;    // Workspace
-  OSQPData *problem;      // Problem data
+  OSQPTestData *problem;      // Problem data
   OSQPSettings *settings; // Settings
   primal_dual_infeasibility_sols_data *data;
 
@@ -198,7 +204,7 @@ static const char* test_primal_dual_infeas()
   data = generate_problem_primal_dual_infeasibility_sols_data();
 
   // Populate problem data
-  problem    = (OSQPData*) c_malloc(sizeof(OSQPData));
+  problem    = (OSQPTestData*) c_malloc(sizeof(OSQPTestData));
   problem->P = data->P;
   problem->q = data->q;
   problem->A = data->A34;
@@ -217,7 +223,9 @@ static const char* test_primal_dual_infeas()
   settings->verbose  = 1;
 
   // Setup workspace
-  exitflag = osqp_setup(&work, problem, settings);
+  exitflag = osqp_setup(&work,problem->P,problem->q,
+                        problem->A,problem->l,problem->u,
+                        problem->m,problem->n, settings);
 
   // Setup correct
   mu_assert("Primal dual infeasibility test 4: Setup error!", exitflag == 0);

@@ -1266,7 +1266,8 @@ c_int osqp_update_P_A(OSQPWorkspace *work,
 }
 
 c_int osqp_update_rho(OSQPWorkspace *work, c_float rho_new) {
-  c_int exitflag;
+
+    c_int exitflag;
 
   // Check if workspace has been initialized
   if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1295,8 +1296,8 @@ c_int osqp_update_rho(OSQPWorkspace *work, c_float rho_new) {
   // Update rho_vec and rho_inv_vec
   OSQPVectorf_set_scalar_conditional(work->rho_vec,
                                      work->constr_type,
-                                     RHO_EQ_OVER_RHO_INEQ * work->settings->rho,//constr = 1
-                                     work->settings->rho);                      //constr == 0
+                                     work->settings->rho,                       //constr == 0
+                                     RHO_EQ_OVER_RHO_INEQ*work->settings->rho); //constr = 1
 
   OSQPVectorf_ew_reciprocal(work->rho_inv_vec, work->rho_vec);
 

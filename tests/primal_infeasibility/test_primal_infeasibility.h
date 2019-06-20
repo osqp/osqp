@@ -15,7 +15,7 @@ static const char* test_primal_infeasible_qp_solve()
 
   // Structures
   OSQPWorkspace *work; // Workspace
-  OSQPData *data;      // Data
+  OSQPTestData *data;      // Data
   primal_infeasibility_sols_data *sols_data;
 
   // Populate data
@@ -33,7 +33,9 @@ static const char* test_primal_infeasible_qp_solve()
   settings->warm_start = 0;
 
   // Setup workspace
-  exitflag = osqp_setup(&work, data, settings);
+  exitflag = osqp_setup(&work,data->P,data->q,
+                      data->A,data->l,data->u,
+                      data->m,data->n, settings);
 
   // Setup correct
   mu_assert("Primal infeasible QP test solve: Setup error!", exitflag == 0);

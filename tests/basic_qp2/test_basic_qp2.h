@@ -14,7 +14,7 @@ static const char* test_basic_qp2_solve()
 
   // Structures
   OSQPWorkspace *work; // Workspace
-  OSQPData *data;      // Data
+  OSQPTestData *data;      // Data
   basic_qp2_sols_data *sols_data;
 
 
@@ -31,7 +31,9 @@ static const char* test_basic_qp2_solve()
   settings->verbose = 1;
 
   // Setup workspace
-  exitflag = osqp_setup(&work, data, settings);
+  exitflag = osqp_setup(&work,data->P,data->q,
+                      data->A,data->l,data->u,
+                      data->m,data->n, settings);
 
   // Setup correct
   mu_assert("Basic QP 2 test solve: Setup error!", exitflag == 0);
@@ -81,7 +83,7 @@ static char* test_basic_qp2_solve_pardiso()
 
   // Structures
   OSQPWorkspace *work; // Workspace
-  OSQPData *data;      // Data
+  OSQPTestData *data;      // Data
   basic_qp2_sols_data *sols_data;
 
 
@@ -99,7 +101,9 @@ static char* test_basic_qp2_solve_pardiso()
   settings->linsys_solver = MKL_PARDISO_SOLVER;
 
   // Setup workspace
-  exitflag = osqp_setup(&work, data, settings);
+  exitflag = osqp_setup(&work,data->P,data->q,
+                        data->A,data->l,data->u,
+                        data->m,data->n, settings);
 
   // Setup correct
   mu_assert("Basic QP 2 test solve: Setup error!", exitflag == 0);
@@ -152,7 +156,7 @@ static const char* test_basic_qp2_update()
 
   // Structures
   OSQPWorkspace *work; // Workspace
-  OSQPData *data;      // Data
+  OSQPTestData *data;      // Data
   basic_qp2_sols_data *sols_data;
 
 
@@ -170,7 +174,9 @@ static const char* test_basic_qp2_update()
   settings->verbose    = 1;
 
   // Setup workspace
-  exitflag = osqp_setup(&work, data, settings);
+  exitflag = osqp_setup(&work,data->P,data->q,
+                        data->A,data->l,data->u,
+                        data->m,data->n, settings);
 
   // Setup correct
   mu_assert("Basic QP 2 test update: Setup error!", exitflag == 0);

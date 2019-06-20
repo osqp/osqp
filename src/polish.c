@@ -30,7 +30,6 @@ static c_int form_Ared(OSQPWorkspace *work){
   c_float* l = OSQPVectorf_data(work->data->l);
   c_float* u = OSQPVectorf_data(work->data->u);
 
-
   // Initialize counters for active constraints
   work->pol->n_low = 0;
   work->pol->n_upp = 0;
@@ -42,7 +41,7 @@ static c_int form_Ared(OSQPWorkspace *work){
    * Ared is formed by stacking vertically Alow and Aupp.
    */
   for (j = 0; j < work->data->m; j++) {
-    if (z[j] - l[j] < y[j]) { // lower-active
+    if (z[j] - l[j] < -y[j]) { // lower-active
       Alow_to_A[work->pol->n_low] = j;
       A_to_Alow[j]                = work->pol->n_low++;
     } else {
@@ -73,7 +72,7 @@ static c_int form_Ared(OSQPWorkspace *work){
     if ((A_to_Alow[work->data->A->i[j]] != -1) ||
         (A_to_Aupp[work->data->A->i[j]] != -1)) Ared_nnz++;
   }
-
+    
   // Form Ared
   // Ared = vstack[Alow, Aupp]
   work->pol->Ared = csc_spalloc(work->pol->n_low + work->pol->n_upp,
@@ -238,7 +237,9 @@ c_int polish(OSQPWorkspace *work) {
   c_int mred, polish_successful, exitflag;
   OSQPVectorf *rhs_red;
   LinSysSolver *plsh;
-  OSQPVectorf *pol_sol; // Polished solution
+  OSQPVectorf *pol_sol; // Polished solution (x and reduced y)
+  OSQPVectorf *pol_sol_xview; // view into x part of polished solution
+  OSQPVectorf *pol_sol_yview; // view into (reduced) y part of polished solution
 
 #ifdef PROFILING
   osqp_tic(work->timer); // Start timer
@@ -280,16 +281,21 @@ c_int polish(OSQPWorkspace *work) {
     return -1;
   }
   form_rhs_red(work, rhs_red);
-
+    
   pol_sol = OSQPVectorf_copy_new(rhs_red);
-
-  if (!pol_sol) {
+  pol_sol_xview = OSQPVectorf_view(pol_sol,0,work->data->n);
+  pol_sol_yview = OSQPVectorf_view(pol_sol,work->data->n,mred);
+    
+  if (!pol_sol || !pol_sol_xview || !pol_sol_yview) {
     // Polishing failed
     work->info->status_polish = -1;
 
     // Memory clean-up
     csc_spfree(work->pol->Ared);
     OSQPVectorf_free(rhs_red);
+    OSQPVectorf_free(pol_sol);
+    OSQPVectorf_view_free(pol_sol_xview);
+    OSQPVectorf_view_free(pol_sol_yview);
 
     return -1;
   }
@@ -308,14 +314,16 @@ c_int polish(OSQPWorkspace *work) {
     csc_spfree(work->pol->Ared);
     OSQPVectorf_free(rhs_red);
     OSQPVectorf_free(pol_sol);
+    OSQPVectorf_view_free(pol_sol_xview);
+    OSQPVectorf_view_free(pol_sol_yview);
 
     return -1;
   }
 
   // Store the polished solution (x,z,y)
-  OSQPVectorf_copy(work->pol->x, pol_sol);   // pol->x
+  OSQPVectorf_copy(work->pol->x, pol_sol_xview);   // pol->x
   mat_vec(work->data->A, OSQPVectorf_data(work->pol->x), OSQPVectorf_data(work->pol->z), 0); // pol->z
-  get_ypol_from_yred(work, pol_sol + work->data->n);     // pol->y
+  get_ypol_from_yred(work, pol_sol_yview);     // pol->y
 
   // Ensure (z,y) satisfies normal cone constraint
   project_normalcone(work, work->pol->z, work->pol->y);
@@ -371,6 +379,7 @@ c_int polish(OSQPWorkspace *work) {
   csc_spfree(work->pol->Ared);
   OSQPVectorf_free(rhs_red);
   OSQPVectorf_free(pol_sol);
-
+  OSQPVectorf_view_free(pol_sol_xview);
+  OSQPVectorf_view_free(pol_sol_yview);
   return 0;
 }

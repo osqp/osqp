@@ -1,6 +1,7 @@
 #include "lin_alg.h"
 #include <assert.h> //DEBUG
 #include <stdio.h> //DEBUG
+#include "PG_debug.h"
 
 /* VECTOR FUNCTIONS (old) ----------------------------------------------------------*/
 
@@ -224,56 +225,72 @@ OSQPVectori* OSQPVectori_new(const c_int *a, c_int length){
 OSQPVectorf* OSQPVectorf_malloc(c_int len){
 
   OSQPVectorf *b;
-  b         = c_malloc(sizeof(OSQPVectorf));
-  if(b)
+  b = c_malloc(sizeof(OSQPVectorf));
+  if(b){
     b->length = len;
-    b->values = c_malloc(len * sizeof(c_float));
-    if(!b->values){
-      c_free(b);
-      b = NULL;
-    }
+    if(b->length){
+      b->values = c_malloc(len * sizeof(c_float));
+      if(!b->values){
+        c_free(b);
+        b = NULL;
+    } }
+    else{
+      b->values = NULL;
+  } }
   return b;
 }
 
 OSQPVectori* OSQPVectori_malloc(c_int len){
 
   OSQPVectori *b;
-  b         = c_malloc(sizeof(OSQPVectori));
-  if(b)
+  b = c_malloc(sizeof(OSQPVectori));
+  if(b){
     b->length = len;
-    b->values = c_malloc(len * sizeof(c_int));
-    if(!b->values){
-      c_free(b);
-      b = NULL;
-    }
+    if(b->length){
+      b->values = c_malloc(len * sizeof(c_int));
+      if(!b->values){
+        c_free(b);
+        b = NULL;
+    } }
+    else{
+      b->values = NULL;
+  } }
   return b;
 }
 
 OSQPVectorf* OSQPVectorf_calloc(c_int len){
 
   OSQPVectorf *b;
-  b         = c_malloc(sizeof(OSQPVectorf));
-  if(b)
+  b = c_malloc(sizeof(OSQPVectorf));
+  if(b){
     b->length = len;
-    b->values = c_calloc(len,sizeof(c_float));
-    if(!b->values){
-      c_free(b);
-      b = NULL;
-    }
+    if(b->length){
+      b->values = c_calloc(len,sizeof(c_float));
+      if(!b->values){
+        c_free(b);
+        b = NULL;
+    } }
+    else{
+      b->values = NULL;
+  } }
   return b;
 }
 
 OSQPVectori* OSQPVectori_calloc(c_int len){
 
   OSQPVectori *b;
-  b         = c_malloc(sizeof(OSQPVectori));
-  if(b)
+  b = c_malloc(sizeof(OSQPVectori));
+  if(b){
     b->length = len;
-    b->values = c_calloc(len,sizeof(c_int));
-    if(!b->values){
-      c_free(b);
-      b = NULL;
-    }
+    if(b->length){
+      b->values = c_calloc(len,sizeof(c_int));
+      if(!b->values){
+        c_free(b);
+        b = NULL;
+    } }
+    else{
+      b->values = NULL;
+  } }
   return b;
 }
 
@@ -389,11 +406,12 @@ void OSQPVectori_set_scalar(OSQPVectori *a, c_int sc){
 
 void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
                                         OSQPVectori *test,
-                                        c_float sctrue,
-                                        c_float scfalse){
+                                        c_float sc_if_zero,
+                                        c_float sc_if_one){
     c_int i;
     for (i = 0; i < a->length; i++) {
-      a->values[i] = test->values[i] ? sctrue : scfalse;
+        if(test->values[i] == 0)      a->values[i] = sc_if_zero;
+        else if(test->values[i] == 1) a->values[i] = sc_if_one;
     }
 }
 
