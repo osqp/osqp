@@ -657,23 +657,27 @@ void OSQPVectorf_ew_prod(OSQPVectorf       *c,
 
 void OSQPVectorf_permute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p){
 
-  for (c_int j = 0; j < x->length ; j++) x->values[j] = b->values[p->values[j]];
+  c_int j;
+  for(j = 0; j < x->length ; j++) x->values[j] = b->values[p->values[j]];
 }
 
 void OSQPVectori_permute(OSQPVectori *x, const OSQPVectori *b, const OSQPVectori *p){
 
-  for (c_int j = 0; j < x->length ; j++) x->values[j] = b->values[p->values[j]];
+  c_int j;
+  for(j = 0; j < x->length ; j++) x->values[j] = b->values[p->values[j]];
 }
 
 void OSQPVectorf_ipermute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p){
 
-  for (c_int j = 0; j < x->length ; j++) x->values[p->values[j]] = b->values[j];
+  c_int j;
+  for(j = 0; j < x->length ; j++) x->values[p->values[j]] = b->values[j];
 
 }
 
 void OSQPVectori_ipermute(OSQPVectori *x, const OSQPVectori *b, const OSQPVectori *p){
 
-  for (c_int j = 0; j < x->length ; j++) x->values[p->values[j]] = b->values[j];
+  c_int j;
+  for(j = 0; j < x->length ; j++) x->values[p->values[j]] = b->values[j];
 
 }
 
