@@ -72,17 +72,17 @@ void osqp_set_default_settings(OSQPSettings *settings) {
 #ifndef EMBEDDED
 
 
-c_int   osqp_setup(OSQPWorkspace** workp,
-  const csc* P,
-  const c_float* q,
-  const csc* A,
-  const c_float* l,
-  const c_float* u,
-  c_int m,
-  c_int n,
-  const OSQPSettings *settings) {
-  c_int exitflag;
+c_int osqp_setup(OSQPWorkspace** workp,
+                 const csc* P,
+                 const c_float* q,
+                 const csc* A,
+                 const c_float* l,
+                 const c_float* u,
+                 c_int m,
+                 c_int n,
+                 const OSQPSettings *settings) {
 
+  c_int exitflag;
   OSQPWorkspace * work;
 
   // Validate data
