@@ -18,7 +18,7 @@ static const char* test_demo_solve()
   c_int n = 2;
   c_int m = 3;
 
-    /* Exitflag */
+  /* Exitflag */
   c_int exitflag;
 
   /* Workspace, settings, matrices */
