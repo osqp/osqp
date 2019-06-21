@@ -202,7 +202,7 @@ c_float quad_form(const csc *P, const c_float *x) {
 #ifdef PRINTING
         c_eprint("quad_form matrix is not upper triangular");
 #endif /* ifdef PRINTING */
-        return OSQP_NULL;
+        return -1.;
       }
     }
   }
