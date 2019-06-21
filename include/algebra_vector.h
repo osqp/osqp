@@ -4,18 +4,18 @@
 
 # ifdef __cplusplus
 extern "C" {
-# endif // ifdef __cplusplus
+# endif /* ifdef __cplusplus */
 
 # include "types.h"
 
-/* VECTOR FUNCTIONS ----------------------------------------------------------*/
+/* VECTOR FUNCTIONS ---------------------------------------------------------- */
 
 # ifndef EMBEDDED
 
-/* copy vector a into output (Uses MALLOC)*/
+/* copy vector a into output (Uses MALLOC) */
 c_float* vec_copy(c_float *a,
                   c_int    n);
-# endif // ifndef EMBEDDED
+# endif /* ifndef EMBEDDED */
 
 /* copy vector a into preallocated vector b */
 void prea_vec_copy(const c_float *a,
@@ -37,7 +37,7 @@ void int_vec_set_scalar(c_int *a,
                         c_int  sc,
                         c_int  n);
 
-/* add scalar to vector*/
+/* add scalar to vector */
 void vec_add_scalar(c_float *a,
                     c_float  sc,
                     c_int    n);
@@ -78,7 +78,7 @@ c_float vec_mean(const c_float *a,
 void vec_ew_recipr(const c_float *a,
                    c_float       *b,
                    c_int          n);
-# endif // if EMBEDDED != 1
+# endif /* if EMBEDDED != 1 */
 
 /* Inner product a'b */
 c_float vec_prod(const c_float *a,
@@ -120,7 +120,7 @@ void vec_ew_min_vec(const c_float *a,
                     c_int          n);
 
 
-# endif // if EMBEDDED != 1
+# endif /* if EMBEDDED != 1 */
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 
@@ -136,43 +136,43 @@ typedef struct OSQPVectorf_ {
 
  # ifndef EMBEDDED
 
- //malloc/calloc for floats and ints (USES MALLOC/CALLOC)
- OSQPVectorf* OSQPVectorf_malloc(c_int len);
- OSQPVectorf* OSQPVectorf_calloc(c_int len);
- OSQPVectori* OSQPVectori_malloc(c_int len);
- OSQPVectori* OSQPVectori_calloc(c_int len);
+ /* malloc/calloc for floats and ints (USES MALLOC/CALLOC) */
+ OSQPVectorf* OSQPVectorf_malloc(c_int length);
+ OSQPVectorf* OSQPVectorf_calloc(c_int length);
+ OSQPVectori* OSQPVectori_malloc(c_int length);
+ OSQPVectori* OSQPVectori_calloc(c_int length);
 
- /* Return a float vector using a raw array as input (Uses MALLOC)*/
+ /* Return a float vector using a raw array as input (Uses MALLOC) */
  OSQPVectorf* OSQPVectorf_new(const c_float *a, c_int length);
 
- /* Return an in vector using a raw array as input (Uses MALLOC)*/
+ /* Return an in vector using a raw array as input (Uses MALLOC) */
  OSQPVectori* OSQPVectori_new(const c_int *a, c_int length);
 
- /* Return a copy of a float vector a as output (Uses MALLOC)*/
+ /* Return a copy of a float vector a as output (Uses MALLOC) */
  OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf *a);
 
- /* Return a copy of an int vector a as output (Uses MALLOC)*/
+ /* Return a copy of an int vector a as output (Uses MALLOC) */
  OSQPVectori* OSQPVectori_copy_new(const OSQPVectori *a);
 
- /* Free a float vector*/
+ /* Free a float vector */
  void OSQPVectorf_free(OSQPVectorf *a);
 
- /* Free an int vector*/
+ /* Free an int vector */
  void OSQPVectori_free(OSQPVectori *a);
 
-/*create subview of a larger vector.  internal data should not be freed
-  Behavior is otherwise identical to OSQPVectorf (Uses MALLOC)*/
- OSQPVectorf* OSQPVectorf_view(const OSQPVectorf *a, c_int head, c_int len);
+/* Create subview of a larger vector.  Internal data should not be freed.
+   Behavior is otherwise identical to OSQPVectorf (Uses MALLOC) */
+ OSQPVectorf* OSQPVectorf_view(const OSQPVectorf *a, c_int head, c_int length);
 
- /*free a view of a float vector*/
+ /* Free a view of a float vector */
  void OSQPVectorf_view_free(OSQPVectorf *a);
 
- # endif // ifndef EMBEDDED
+ # endif /* ifndef EMBEDDED */
 
  /* Length of the vector (floats) */
  c_int OSQPVectorf_length(const OSQPVectorf *a);
 
- /* Length of the vector (ints)*/
+ /* Length of the vector (ints) */
  c_int OSQPVectori_length(const OSQPVectori *a);
 
  /* Pointer to vector data (floats) */
@@ -181,13 +181,13 @@ typedef struct OSQPVectorf_ {
  /* Pointer to vector data (ints) */
  c_int* OSQPVectori_data(const OSQPVectori *a);
 
- /* copy a float vector a into another vector b (pre-allocated) */
+ /* Copy a float vector a into another vector b (pre-allocated) */
  void OSQPVectorf_copy(OSQPVectorf *b, const OSQPVectorf *a);
 
- /* copy an int vector a into another vector b (pre-allocated) */
+ /* Copy an int vector a into another vector b (pre-allocated) */
  void OSQPVectori_copy(OSQPVectori *b, const OSQPVectori *a);
 
- /* copy an array of floats into a into a vector b (pre-allocated) */
+ /* Copy an array of floats into a into a vector b (pre-allocated) */
  void OSQPVectorf_from_raw(OSQPVectorf *b, const c_float *a);
 
  /* copy an array of ints into a into a vector b (pre-allocated) */
@@ -330,7 +330,7 @@ c_float OSQPVectorf_dot_prod_signed(const OSQPVectorf *a,
                              const OSQPVectorf *b);
 
 /* check l <= u elementwise */
-c_int OSQPVectorf_ew_lt_eq(OSQPVectorf *l, OSQPVectorf* u);
+c_int OSQPVectorf_ew_leq(OSQPVectorf *l, OSQPVectorf* u);
 
  /* Elementwise bounding vectors x = min(max(z,l),u)
   * It is acceptable to assign x = z in this call, so
@@ -357,11 +357,11 @@ void OSQPVectorf_set_scalar_if_gt(OSQPVectorf *x,
                                   c_float testval,
                                   c_float newval);
 
- # endif // if EMBEDDED != 1
+ # endif /* if EMBEDDED != 1 */
 
 
 # ifdef __cplusplus
 }
-# endif // ifdef __cplusplus
+# endif /* ifdef __cplusplus */
 
-#endif // ifndef ALGEBRA_VECTOR_H
+#endif /* ifndef ALGEBRA_VECTOR_H */

@@ -373,7 +373,7 @@ void dump_csc_matrix(csc *M, const char *file_name) {
   c_int k = 0;
   FILE *f = fopen(file_name, "w");
 
-  if (f != NULL) {
+  if (f) {
     for (j = 0; j < M->n; j++) {
       row_strt = M->p[j];
       row_stop = M->p[j + 1];
@@ -438,7 +438,7 @@ void dump_vec(c_float *v, c_int len, const char *file_name) {
   c_int i;
   FILE *f = fopen(file_name, "w");
 
-  if (f != NULL) {
+  if (f) {
     for (i = 0; i < len; i++) {
       fprintf(f, "%20.18e\n", v[i]);
     }

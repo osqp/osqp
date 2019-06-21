@@ -14,7 +14,7 @@ extern "C" {
 ******************/
 
 /*
- * OSQPVector types.   Not defined here since it
+ * OSQPVector types.  Not defined here since it
  *   is implementation specific
  */
 
@@ -52,12 +52,12 @@ typedef struct OSQP_TIMER OSQPTimer;
  * Problem scaling matrices stored as vectors
  */
 typedef struct {
-  c_float  c;    ///< cost function scaling
-  OSQPVectorf *D;    ///< primal variable scaling
-  OSQPVectorf *E;    ///< dual variable scaling
-  c_float  cinv; ///< cost function rescaling
-  OSQPVectorf *Dinv; ///< primal variable rescaling
-  OSQPVectorf *Einv; ///< dual variable rescaling
+  c_float  c;         ///< cost function scaling
+  OSQPVectorf *D;     ///< primal variable scaling
+  OSQPVectorf *E;     ///< dual variable scaling
+  c_float  cinv;      ///< cost function rescaling
+  OSQPVectorf *Dinv;  ///< primal variable rescaling
+  OSQPVectorf *Einv;  ///< dual variable rescaling
 } OSQPScaling;
 
 /**

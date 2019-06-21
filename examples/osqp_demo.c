@@ -1,7 +1,7 @@
 #include "osqp.h"
 
 int main(int argc, char **argv) {
-  // Load problem data
+  /* Load problem data */
   c_float P_x[3] = { 4.0, 1.0, 2.0, };
   c_int   P_nnz  = 3;
   c_int   P_i[3] = { 0, 0, 1, };
@@ -16,31 +16,33 @@ int main(int argc, char **argv) {
   c_int n = 2;
   c_int m = 3;
 
-  // Exitflag
-  c_int exitflag = 0;
+  /* Exitflag */
+  c_int exitflag;
 
-  // Workspace structures
+  /* Workspace, settings, matrices */
   OSQPWorkspace *work;
-  OSQPSettings  *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
+  OSQPSettings *settings;
+  csc *P, *A;
 
-  //Matrix data structures
-  csc* P = csc_matrix(n, n, P_nnz, P_x, P_i, P_p);
-  csc* A = csc_matrix(m, n, A_nnz, A_x, A_i, A_p);
+  /* Populate matrices */
+  P = csc_matrix(n, n, P_nnz, P_x, P_i, P_p);
+  A = csc_matrix(m, n, A_nnz, A_x, A_i, A_p);
 
-  // Define solver settings as default
+  /* Set default settings */
+  settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
   if (settings) osqp_set_default_settings(settings);
 
-  // Setup workspace
+  /* Setup workspace */
   exitflag = osqp_setup(&work, P, q, A, l, u, m, n, settings);
 
-  // Solve Problem
+  /* Solve problem */
   osqp_solve(work);
 
-  // Clean workspace
+  /* Clean workspace */
   osqp_cleanup(work);
-  if (A) c_free(A);
-  if (P) c_free(P);
-  if (settings)  c_free(settings);
+  c_free(A);
+  c_free(P);
+  c_free(settings);
 
   return exitflag;
 }

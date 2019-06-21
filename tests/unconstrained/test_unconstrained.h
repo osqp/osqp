@@ -28,9 +28,9 @@ static const char* test_unconstrained_solve()
   settings->verbose = 1;
 
   // Setup workspace
-  exitflag = osqp_setup(&work,data->P,data->q,
-                      data->A,data->l,data->u,
-                      data->m,data->n, settings);
+  exitflag = osqp_setup(&work, data->P, data->q,
+                        data->A, data->l, data->u,
+                        data->m, data->n, settings);
 
   // Setup correct
   mu_assert("Unconstrained test solve: Setup error!", exitflag == 0);
