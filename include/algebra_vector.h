@@ -155,17 +155,17 @@ typedef struct OSQPVectorf_ {
  OSQPVectori* OSQPVectori_copy_new(const OSQPVectori *a);
 
  /* Free a float vector*/
- OSQPVectorf* OSQPVectorf_free(OSQPVectorf *a);
+ void OSQPVectorf_free(OSQPVectorf *a);
 
  /* Free an int vector*/
- OSQPVectori* OSQPVectori_free(OSQPVectori *a);
+ void OSQPVectori_free(OSQPVectori *a);
 
 /*create subview of a larger vector.  internal data should not be freed
   Behavior is otherwise identical to OSQPVectorf (Uses MALLOC)*/
  OSQPVectorf* OSQPVectorf_view(const OSQPVectorf *a, c_int head, c_int len);
 
  /*free a view of a float vector*/
- OSQPVectorf* OSQPVectorf_view_free(OSQPVectorf *a);
+ void OSQPVectorf_view_free(OSQPVectorf *a);
 
  # endif // ifndef EMBEDDED
 

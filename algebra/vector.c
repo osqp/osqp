@@ -1,4 +1,4 @@
-#include "lin_alg.h"
+#include "algebra_vector.h"
 
 /* VECTOR FUNCTIONS (old) ----------------------------------------------------------*/
 
@@ -227,7 +227,7 @@ OSQPVectorf* OSQPVectorf_malloc(c_int len){
     b->length = len;
     if(b->length){
       b->values = c_malloc(len * sizeof(c_float));
-      if(!b->values){
+      if(!(b->values)){
         c_free(b);
         b = NULL;
     } }
@@ -245,7 +245,7 @@ OSQPVectori* OSQPVectori_malloc(c_int len){
     b->length = len;
     if(b->length){
       b->values = c_malloc(len * sizeof(c_int));
-      if(!b->values){
+      if(!(b->values)){
         c_free(b);
         b = NULL;
     } }
@@ -263,7 +263,7 @@ OSQPVectorf* OSQPVectorf_calloc(c_int len){
     b->length = len;
     if(b->length){
       b->values = c_calloc(len,sizeof(c_float));
-      if(!b->values){
+      if(!(b->values)){
         c_free(b);
         b = NULL;
     } }
@@ -281,7 +281,7 @@ OSQPVectori* OSQPVectori_calloc(c_int len){
     b->length = len;
     if(b->length){
       b->values = c_calloc(len,sizeof(c_int));
-      if(!b->values){
+      if(!(b->values)){
         c_free(b);
         b = NULL;
     } }
@@ -307,17 +307,15 @@ OSQPVectori* OSQPVectori_copy_new(const OSQPVectori *a){
 }
 
 /* Free a float vector*/
-OSQPVectorf* OSQPVectorf_free(OSQPVectorf *a){
+void OSQPVectorf_free(OSQPVectorf *a){
   if(a) c_free(a->values);
   c_free(a);
-  return OSQP_NULL;
 }
 
 /* Free an int vector*/
-OSQPVectori* OSQPVectori_free(OSQPVectori *a){
+void OSQPVectori_free(OSQPVectori *a){
   if(a) c_free(a->values);
   c_free(a);
-  return OSQP_NULL;
 }
 
 OSQPVectorf* OSQPVectorf_view(const OSQPVectorf *a, c_int head, c_int len){
@@ -327,9 +325,8 @@ OSQPVectorf* OSQPVectorf_view(const OSQPVectorf *a, c_int head, c_int len){
   return view;
 }
 
-OSQPVectorf* OSQPVectorf_view_free(OSQPVectorf *a){
+void OSQPVectorf_view_free(OSQPVectorf *a){
   c_free(a);
-  return OSQP_NULL;
 }
 
 
@@ -391,7 +388,6 @@ void OSQPVectorf_set_scalar(OSQPVectorf *a, c_float sc){
   for (i = 0; i < a->length; i++) {
     a->values[i] = sc;
   }
-  return;
 }
 
 void OSQPVectori_set_scalar(OSQPVectori *a, c_int sc){

@@ -1,5 +1,4 @@
 #include "osqp.h"
-#include <stdio.h>
 
 int main(int argc, char **argv) {
   // Load problem data

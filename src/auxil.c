@@ -85,8 +85,9 @@ void set_rho_vec(OSQPWorkspace *work) {
   c_float* u           = OSQPVectorf_data(work->data->u);
   c_float* rho_vec     = OSQPVectorf_data(work->rho_vec);
   c_int   *constr_type = OSQPVectori_data(work->constr_type);
+  c_int m              = work->data->m;
 
-  for (i = 0; i < work->data->m; i++) {
+  for (i = 0; i < m; i++) {
     if ((l[i] < -OSQP_INFTY * MIN_SCALING) && (u[i] > OSQP_INFTY * MIN_SCALING)) {
       // Loose bounds
       constr_type[i] = -1;
@@ -172,7 +173,7 @@ void cold_start(OSQPWorkspace *work) {
 }
 
 static void compute_rhs(OSQPWorkspace *work) {
-    
+
   //part related to x variables
   OSQPVectorf_add_scaled(work->xtilde_view,
                          work->settings->sigma,work->x_prev,
@@ -214,7 +215,7 @@ void update_z(OSQPWorkspace *work) {
 
   // project z
   project(work, work->z);
-    
+
 }
 
 void update_y(OSQPWorkspace *work) {
@@ -227,7 +228,7 @@ void update_y(OSQPWorkspace *work) {
     OSQPVectorf_ew_prod(work->delta_y,work->delta_y,work->rho_vec);
 
     OSQPVectorf_plus(work->y,work->y,work->delta_y);
-    
+
 }
 
 c_float compute_obj_val(OSQPWorkspace *work, OSQPVectorf *x) {
@@ -524,7 +525,7 @@ void store_solution(OSQPWorkspace *work) {
 #ifndef EMBEDDED
   c_float norm_vec;
 #endif /* ifndef EMBEDDED */
-    
+
 
   if (has_solution(work->info)) {
     // Unscale solution if scaling has been performed
@@ -541,9 +542,9 @@ void store_solution(OSQPWorkspace *work) {
           OSQPVectorf_to_raw(work->solution->y, work->y); // dual
       }
   }
-    
+
   else {
-      
+
     // No solution present. Solution is NaN
     vec_set_scalar(work->solution->x, OSQP_NAN, work->data->n);
     vec_set_scalar(work->solution->y, OSQP_NAN, work->data->m);
@@ -795,7 +796,7 @@ c_int check_termination(OSQPWorkspace *work, c_int approximate) {
     work->info->obj_val = -OSQP_INFTY;
     exitflag            = 1;
   }
-    
+
   return exitflag;
 }
 
@@ -811,14 +812,14 @@ c_int validate_data(const csc* P,
                     c_int n) {
   c_int j, ptr;
 
-  if (!(P)) {
+  if (!P) {
 # ifdef PRINTING
     c_eprint("Missing matrix P");
 # endif
     return 1;
   }
 
-  if (!(A)) {
+  if (!A) {
 # ifdef PRINTING
     c_eprint("Missing matrix A");
 # endif

@@ -69,7 +69,7 @@ void osqp_set_default_settings(OSQPSettings *settings);
                   const c_float* u,
                   c_int m,
                   c_int n,
-   const OSQPSettings *settings) ;
+                  const OSQPSettings *settings) ;
 
 # endif // #ifndef EMBEDDED
 
