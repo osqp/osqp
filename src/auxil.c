@@ -78,14 +78,13 @@ c_int adapt_rho(OSQPWorkspace *work) {
 
 void set_rho_vec(OSQPWorkspace *work) {
   c_int i;
-
-  work->settings->rho = c_min(c_max(work->settings->rho, RHO_MIN), RHO_MAX);
-
+  c_int m              = work->data->m;
   c_float* l           = OSQPVectorf_data(work->data->l);
   c_float* u           = OSQPVectorf_data(work->data->u);
   c_float* rho_vec     = OSQPVectorf_data(work->rho_vec);
   c_int   *constr_type = OSQPVectori_data(work->constr_type);
-  c_int m              = work->data->m;
+
+  work->settings->rho = c_min(c_max(work->settings->rho, RHO_MIN), RHO_MAX);
 
   for (i = 0; i < m; i++) {
     if ((l[i] < -OSQP_INFTY * MIN_SCALING) && (u[i] > OSQP_INFTY * MIN_SCALING)) {
@@ -107,16 +106,15 @@ void set_rho_vec(OSQPWorkspace *work) {
 
 c_int update_rho_vec(OSQPWorkspace *work) {
 
-  c_int i, exitflag, constr_type_changed;
+  c_int i;
+  c_int exitflag = 0;
+  c_int constr_type_changed = 0;
 
   c_float* l           = OSQPVectorf_data(work->data->l);
   c_float* u           = OSQPVectorf_data(work->data->u);
   c_float* rho_vec     = OSQPVectorf_data(work->rho_vec);
   c_float* rho_inv_vec = OSQPVectorf_data(work->rho_inv_vec);
   c_int   *constr_type = OSQPVectori_data(work->constr_type);
-
-  exitflag            = 0;
-  constr_type_changed = 0;
 
   for (i = 0; i < work->data->m; i++) {
     if ((l[i] < -OSQP_INFTY * MIN_SCALING) && (u[i] > OSQP_INFTY * MIN_SCALING)) {
