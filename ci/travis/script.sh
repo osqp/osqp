@@ -54,6 +54,7 @@ fi
 if [[ $TRAVIS_OS_NAME == "linux" ]]; then
     echo "Testing OSQP with valgrind"
     cd ${TRAVIS_BUILD_DIR}
+    rm -rf build
     mkdir build
     cd build
     #disable PARDISO since intel instructions in MKL
