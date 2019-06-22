@@ -298,7 +298,7 @@ void OSQPVectorf_ew_prod(OSQPVectorf       *c,
                          const OSQPVectorf *b);
 
 /* check l <= u elementwise */
-c_int OSQPVectorf_ew_leq(OSQPVectorf *l, OSQPVectorf* u);
+c_int OSQPVectorf_all_leq(OSQPVectorf *l, OSQPVectorf* u);
 
 /* Elementwise bounding vectors x = min(max(z,l),u)
  * It is acceptable to assign x = z in this call, so

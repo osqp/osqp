@@ -61,8 +61,6 @@ c_int mkl_get_max_threads() {
 
 
 c_int lh_load_pardiso(const char* libname) {
-    // DEBUG
-    // if (Pardiso_handle) return 0;
 
     // Load Pardiso library
     if (libname) {

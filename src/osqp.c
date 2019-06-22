@@ -857,7 +857,7 @@ c_int osqp_update_lower_bound(OSQPWorkspace *work, const c_float *l_new) {
   }
 
   // Check if lower bound is smaller than upper bound
-  if(!OSQPVectorf_ew_leq(work->data->l,work->data->u)) {
+  if(!OSQPVectorf_all_leq(work->data->l,work->data->u)) {
 #ifdef PRINTING
       c_eprint("upper bound must be greater than or equal to lower bound");
 #endif /* ifdef PRINTING */
@@ -902,7 +902,7 @@ c_int osqp_update_upper_bound(OSQPWorkspace *work, const c_float *u_new) {
   }
 
   // Check if upper bound is greater than lower bound
-  if(!OSQPVectorf_ew_leq(work->data->l, work->data->u)) {
+  if(!OSQPVectorf_all_leq(work->data->l, work->data->u)) {
 #ifdef PRINTING
     c_eprint("lower bound must be lower than or equal to upper bound");
 #endif /* ifdef PRINTING */

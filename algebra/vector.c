@@ -690,7 +690,7 @@ void OSQPVectorf_ew_prod(OSQPVectorf       *c,
   }
 }
 
-c_int OSQPVectorf_ew_leq(OSQPVectorf *l, OSQPVectorf* u){
+c_int OSQPVectorf_all_leq(OSQPVectorf *l, OSQPVectorf* u){
 
   c_int i;
   c_int length = l->length;
