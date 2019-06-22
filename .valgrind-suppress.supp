@@ -8,6 +8,8 @@
    fun:__kmp_middle_initialize
    fun:omp_get_num_procs@@VERSION
    fun:mkl_serv_domain_get_max_threads
+   fun:mkl_get_max_threads
+   fun:__intel_mkl_features_init_x
    obj:*
 }
 
@@ -15,6 +17,8 @@
    ignore mkl_get_max_threads
    Memcheck:Cond
    fun:mkl_serv_domain_get_max_threads
+   fun:mkl_get_max_threads
+   fun:__intel_mkl_features_init_x
    obj:*
 }
 
