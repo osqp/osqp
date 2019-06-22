@@ -39,8 +39,6 @@ make
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
 
 if [[ $TRAVIS_OS_NAME == "linux" ]]; then
-    # Check memory with valgrind
-    valgrind --suppressions=${TRAVIS_BUILD_DIR}/.valgrind-suppress.supp --leak-check=full --gen-suppressions=all --track-origins=yes --error-exitcode=42 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
     # Perform code coverage
     cd ${TRAVIS_BUILD_DIR}/build
     lcov --directory . --capture -o coverage.info # capture coverage info
@@ -53,6 +51,17 @@ if [[ $TRAVIS_OS_NAME == "linux" ]]; then
     coveralls-lcov coverage.info # uploads to coveralls
 fi
 
+if [[ $TRAVIS_OS_NAME == "linux" ]]; then
+    echo "Testing OSQP with valgrind"
+    cd ${TRAVIS_BUILD_DIR}
+    mkdir build
+    cd build
+    #disable PARDISO since intel instructions in MKL
+    #cause valgrind 3.11 to fail
+    cmake -G "Unix Makefiles" -DENABLE_MKL_PARDISO=OFF -DUNITTESTS=ON ..
+    make
+    valgrind --suppressions=${TRAVIS_BUILD_DIR}/.valgrind-suppress.supp --leak-check=full --gen-suppressions=all --track-origins=yes --error-exitcode=42 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
+fi
 
 echo "Testing OSQP with floats"
 cd ${TRAVIS_BUILD_DIR}
