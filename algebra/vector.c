@@ -690,6 +690,30 @@ void OSQPVectorf_ew_prod(OSQPVectorf       *c,
   }
 }
 
+c_int OSQPVectorf_ew_leq(OSQPVectorf *l, OSQPVectorf* u){
+
+  c_int i;
+  c_int length = l->length;
+
+  for (i = 0; i < length; i++) {
+    if (l->values[i] > u->values[i]) return 0;
+  }
+  return 1;
+}
+
+void OSQPVectorf_ew_bound_vec(OSQPVectorf *x,
+                              OSQPVectorf *z,
+                              const OSQPVectorf *l,
+                              const OSQPVectorf *u){
+
+  c_int i;
+  c_int length = x->length;
+
+  for (i = 0; i < length; i++) {
+    x->values[i] = c_min(c_max(z->values[i], l->values[i]), u->values[i]);
+  }
+}
+
 void OSQPVectorf_permute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p){
 
   c_int j;
@@ -803,30 +827,6 @@ void OSQPVectorf_ew_min_vec(OSQPVectorf       *c,
 
   for (i = 0; i < length; i++) {
     c->values[i] = c_min(a->values[i], b->values[i]);
-  }
-}
-
-c_int OSQPVectorf_ew_leq(OSQPVectorf *l, OSQPVectorf* u){
-
-  c_int i;
-  c_int length = l->length;
-
-  for (i = 0; i < length; i++) {
-    if (l->values[i] > u->values[i]) return 0;
-  }
-  return 1;
-}
-
-void OSQPVectorf_ew_bound_vec(OSQPVectorf *x,
-                              OSQPVectorf *z,
-                              const OSQPVectorf *l,
-                              const OSQPVectorf *u){
-
-  c_int i;
-  c_int length = x->length;
-
-  for (i = 0; i < length; i++) {
-    x->values[i] = c_min(c_max(z->values[i], l->values[i]), u->values[i]);
   }
 }
 
