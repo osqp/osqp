@@ -8,6 +8,16 @@ fi
 mkdir ${DEPS_DIR}
 cd ${DEPS_DIR}
 
+# Install lcov and valgrind on linux
+if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    sudo apt-get update -y
+    sudo apt-get install -y lcov
+    sudo apt-get install -y valgrind
+else if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    brew update
+    brew install lcov
+    fi
+fi
 
 # Install Anaconda
 
@@ -28,7 +38,7 @@ conda create -n testenv --yes python=$PYTHON_VERSION numpy scipy future
 source activate testenv
 
 # Install cmake valgrind and lcov
-conda install --yes -c conda-forge cmake valgrind lcov
+conda install --yes -c conda-forge cmake 
 
 # # Install CMake
 # if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
