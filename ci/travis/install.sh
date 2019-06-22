@@ -52,17 +52,3 @@ conda install --yes -c conda-forge cmake valgrind lcov
 # fi
 
 gem install coveralls-lcov
-
-
-
-# Add MKL shared libraries to the path
-export MKL_SHARED_LIB_DIR=`ls -rd ${CONDA_ROOT}/pkgs/*/ | grep mkl-2 | head -n 1`lib:`ls -rd ${CONDA_ROOT}/pkgs/*/ | grep intel-openmp- | head -n 1`lib
-
-echo "MKL shared library path: ${MKL_SHARED_LIB_DIR}"
-
-if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MKL_SHARED_LIB_DIR}
-else if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${MKL_SHARED_LIB_DIR}
-fi
-fi

@@ -1,6 +1,21 @@
 #!/bin/bash
 set -e
 
+# Add MKL shared libraries to the path
+# This unfortunately does not work in travis OSX if I put the export command
+# in the install.sh (it works on linux though)
+export MKL_SHARED_LIB_DIR=`ls -rd ${CONDA_ROOT}/pkgs/*/ | grep mkl-2 | head -n 1`lib:`ls -rd ${CONDA_ROOT}/pkgs/*/ | grep intel-openmp- | head -n 1`lib
+
+echo "MKL shared library path: ${MKL_SHARED_LIB_DIR}"
+
+if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MKL_SHARED_LIB_DIR}
+else if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${MKL_SHARED_LIB_DIR}
+fi
+fi
+
+
 # Test C interface
 # ---------------------------------------------------
 
