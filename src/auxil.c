@@ -77,31 +77,21 @@ c_int adapt_rho(OSQPWorkspace *work) {
 }
 
 void set_rho_vec(OSQPWorkspace *work) {
-  c_int i;
-  c_int m              = work->data->m;
-  c_float* l           = OSQPVectorf_data(work->data->l);
-  c_float* u           = OSQPVectorf_data(work->data->u);
-  c_float* rho_vec     = OSQPVectorf_data(work->rho_vec);
-  c_int   *constr_type = OSQPVectori_data(work->constr_type);
 
   work->settings->rho = c_min(c_max(work->settings->rho, RHO_MIN), RHO_MAX);
 
-  for (i = 0; i < m; i++) {
-    if ((l[i] < -OSQP_INFTY * MIN_SCALING) && (u[i] > OSQP_INFTY * MIN_SCALING)) {
-      // Loose bounds
-      constr_type[i] = -1;
-      rho_vec[i]     = RHO_MIN;
-    } else if (u[i] - l[i] < RHO_TOL) {
-      // Equality constraints
-      constr_type[i] = 1;
-      rho_vec[i]     = RHO_EQ_OVER_RHO_INEQ * work->settings->rho;
-    } else {
-      // Inequality constraints
-      constr_type[i] = 0;
-      rho_vec[i]     = work->settings->rho;
-    }
-    OSQPVectorf_ew_reciprocal(work->rho_inv_vec, work->rho_vec);
-  }
+  OSQPVectorf_ew_bounds_type(work->constr_type,
+                             work->data->l,
+                             work->data->u,
+                             RHO_TOL, OSQP_INFTY * MIN_SCALING);
+
+  OSQPVectorf_set_scalar_conditional(work->rho_vec,
+                                     work->constr_type,
+                                     RHO_MIN,                                   //const  == -1
+                                     work->settings->rho,                       //constr == 0
+                                     RHO_EQ_OVER_RHO_INEQ*work->settings->rho); //constr == 1
+
+  OSQPVectorf_ew_reciprocal(work->rho_inv_vec, work->rho_vec);
 }
 
 c_int update_rho_vec(OSQPWorkspace *work) {

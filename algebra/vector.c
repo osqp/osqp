@@ -414,14 +414,17 @@ void OSQPVectori_set_scalar(OSQPVectori *a, c_int sc){
 
 void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
                                         OSQPVectori *test,
+                                        c_float sc_if_neg,
                                         c_float sc_if_zero,
-                                        c_float sc_if_one){
-  c_int i;
-  c_int length = a->length;
+                                        c_float sc_if_pos){
+  c_int     i;
+  c_int     length = a->length;
+  c_float*  av     = a->values;
 
   for (i = 0; i < length; i++) {
-      if (test->values[i] == 0)      a->values[i] = sc_if_zero;
-      else if (test->values[i] == 1) a->values[i] = sc_if_one;
+      if (test->values[i] == 0)      av[i] = sc_if_zero;
+      else if (test->values[i] > 0)  av[i] = sc_if_pos;
+      else                           av[i] = sc_if_neg;
   }
 }
 
@@ -827,6 +830,32 @@ void OSQPVectorf_ew_min_vec(OSQPVectorf       *c,
 
   for (i = 0; i < length; i++) {
     c->values[i] = c_min(a->values[i], b->values[i]);
+  }
+}
+
+void OSQPVectorf_ew_bounds_type(OSQPVectori* iseq,
+                                const OSQPVectorf* l,
+                                const OSQPVectorf* u,
+                                c_float tol,
+                                c_float infval){
+
+  c_int i;
+  c_int length   = iseq->length;
+  c_int*   iseqv = iseq->values;
+  c_float* lv    = l->values;
+  c_float* uv    = u->values;
+
+  for (i = 0; i < length; i++) {
+    if ((lv[i] < -infval) && (uv[i] > infval)) {
+      // Loose bounds
+      iseqv[i] = -1;
+    } else if (uv[i] - lv[i] < tol) {
+      // Equality constraints
+      iseqv[i] = 1;
+    } else {
+      // Inequality constraints
+      iseqv[i] = 0;
+    }
   }
 }
 

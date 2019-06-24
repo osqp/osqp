@@ -205,13 +205,13 @@ void OSQPVectori_to_raw(c_int *bv, const OSQPVectori *a);
 /* set float vector to scalar */
 void OSQPVectorf_set_scalar(OSQPVectorf *a, c_float sc);
 
-/* Set float vector to one of two scalars based on vector of ints.
- * No action is taken on a[i] if test[i] is something other than zero or one
+/* Set float vector to one of three scalars based on sign of vector of ints.
  */
 void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
                                         OSQPVectori *test,
+                                        c_float val_if_neg,
                                         c_float val_if_zero,
-                                        c_float val_if_one);
+                                        c_float val_if_pos);
 
 /* set int vector to scalar */
 void OSQPVectori_set_scalar(OSQPVectori *a, c_int sc);
@@ -344,6 +344,18 @@ void OSQPVectorf_ew_max_vec(OSQPVectorf       *c,
 void OSQPVectorf_ew_min_vec(OSQPVectorf       *c,
                             const OSQPVectorf *a,
                             const OSQPVectorf *b);
+
+/* Elementwise check for constraint type.
+   if u[i] - l[i] < tol, iseq[i] = 1 otherwise iseq[i] = 0,
+   unless values exceed +/- infval, in which case marked
+   as iseq[i] = -1.
+ */
+void OSQPVectorf_ew_bounds_type(OSQPVectori* iseq,
+                                const OSQPVectorf* l,
+                                const OSQPVectorf* u,
+                                c_float tol,
+                                c_float infval);
+
 
 /* Elementwise replacement based on lt comparison.
    x[i] = z[i] < testval ? newval : z[i];
