@@ -203,7 +203,8 @@ c_int osqp_setup(OSQPWorkspace** workp,
     work->scaling = OSQP_NULL;
   }
 
-  // Set type of constraints
+  // Set type of constraints.  Ignore return value
+  // because we will definitely factor KKT.
   set_rho_vec(work);
 
   // Load linear system solver

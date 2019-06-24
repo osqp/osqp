@@ -349,8 +349,10 @@ void OSQPVectorf_ew_min_vec(OSQPVectorf       *c,
    if u[i] - l[i] < tol, iseq[i] = 1 otherwise iseq[i] = 0,
    unless values exceed +/- infval, in which case marked
    as iseq[i] = -1.
+
+   Returns 1 if any value in iseq has been modified.   O otherwise.
  */
-void OSQPVectorf_ew_bounds_type(OSQPVectori* iseq,
+c_int OSQPVectorf_ew_bounds_type(OSQPVectori* iseq,
                                 const OSQPVectorf* l,
                                 const OSQPVectorf* u,
                                 c_float tol,

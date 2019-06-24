@@ -833,7 +833,7 @@ void OSQPVectorf_ew_min_vec(OSQPVectorf       *c,
   }
 }
 
-void OSQPVectorf_ew_bounds_type(OSQPVectori* iseq,
+c_int OSQPVectorf_ew_bounds_type(OSQPVectori* iseq,
                                 const OSQPVectorf* l,
                                 const OSQPVectorf* u,
                                 c_float tol,
@@ -844,8 +844,14 @@ void OSQPVectorf_ew_bounds_type(OSQPVectori* iseq,
   c_int*   iseqv = iseq->values;
   c_float* lv    = l->values;
   c_float* uv    = u->values;
+  c_int old_value, has_changed;
+
+  has_changed = 0;
 
   for (i = 0; i < length; i++) {
+
+    old_value = iseqv[i];
+
     if ((lv[i] < -infval) && (uv[i] > infval)) {
       // Loose bounds
       iseqv[i] = -1;
@@ -856,7 +862,13 @@ void OSQPVectorf_ew_bounds_type(OSQPVectori* iseq,
       // Inequality constraints
       iseqv[i] = 0;
     }
+
+    //has anything changed?
+    has_changed = has_changed || (iseqv[i] != old_value);
   }
+
+  return has_changed;
+
 }
 
 void OSQPVectorf_set_scalar_if_lt(OSQPVectorf *x,

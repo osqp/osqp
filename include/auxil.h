@@ -28,10 +28,12 @@ c_float compute_rho_estimate(OSQPWorkspace *work);
 c_int   adapt_rho(OSQPWorkspace *work);
 
 /**
- * Set values of rho vector based on constraint types
+ * Set values of rho vector based on constraint types.
+ * returns 1 if any constraint types have been updated,
+ * and 0 otherwise.
  * @param work Workspace
  */
-void    set_rho_vec(OSQPWorkspace *work);
+c_int    set_rho_vec(OSQPWorkspace *work);
 
 /**
  * Update values of rho vector based on updated constraints.

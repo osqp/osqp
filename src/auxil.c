@@ -76,63 +76,43 @@ c_int adapt_rho(OSQPWorkspace *work) {
   return exitflag;
 }
 
-void set_rho_vec(OSQPWorkspace *work) {
+c_int set_rho_vec(OSQPWorkspace *work) {
+
+  c_int constr_types_changed = 0;
 
   work->settings->rho = c_min(c_max(work->settings->rho, RHO_MIN), RHO_MAX);
 
-  OSQPVectorf_ew_bounds_type(work->constr_type,
+  constr_types_changed = OSQPVectorf_ew_bounds_type(work->constr_type,
                              work->data->l,
                              work->data->u,
                              RHO_TOL, OSQP_INFTY * MIN_SCALING);
 
-  OSQPVectorf_set_scalar_conditional(work->rho_vec,
+
+  //NB: Always refreseh the complete rho vector, since the rho_vals
+  //might be garbage if they have not been initialised yet.  This means
+  //that there is some wasted effort in the case that he constraint types
+  //haven't changed and the rho values are already correct, but such is life.
+  OSQPVectorf_set_scalar_conditional(
+                                     work->rho_vec,
                                      work->constr_type,
                                      RHO_MIN,                                   //const  == -1
                                      work->settings->rho,                       //constr == 0
                                      RHO_EQ_OVER_RHO_INEQ*work->settings->rho); //constr == 1
 
   OSQPVectorf_ew_reciprocal(work->rho_inv_vec, work->rho_vec);
+
+  return constr_types_changed;
+
 }
+
 
 c_int update_rho_vec(OSQPWorkspace *work) {
 
-  c_int i;
+  c_int constr_type_changed;
   c_int exitflag = 0;
-  c_int constr_type_changed = 0;
 
-  c_float* l           = OSQPVectorf_data(work->data->l);
-  c_float* u           = OSQPVectorf_data(work->data->u);
-  c_float* rho_vec     = OSQPVectorf_data(work->rho_vec);
-  c_float* rho_inv_vec = OSQPVectorf_data(work->rho_inv_vec);
-  c_int   *constr_type = OSQPVectori_data(work->constr_type);
-
-  for (i = 0; i < work->data->m; i++) {
-    if ((l[i] < -OSQP_INFTY * MIN_SCALING) && (u[i] > OSQP_INFTY * MIN_SCALING)) {
-      // Loose bounds
-      if (constr_type[i] != -1) {
-        constr_type[i] = -1;
-        rho_vec[i]     = RHO_MIN;
-        rho_inv_vec[i] = 1. / RHO_MIN;
-        constr_type_changed  = 1;
-      }
-    } else if (u[i] - l[i] < RHO_TOL) {
-      // Equality constraints
-      if (constr_type[i] != 1) {
-        constr_type[i] = 1;
-        rho_vec[i]     = RHO_EQ_OVER_RHO_INEQ * work->settings->rho;
-        rho_inv_vec[i] = 1. / rho_vec[i];
-        constr_type_changed  = 1;
-      }
-    } else {
-      // Inequality constraints
-      if (constr_type[i] != 0) {
-        constr_type[i] = 0;
-        rho_vec[i]     = work->settings->rho;
-        rho_inv_vec[i] = 1. / work->settings->rho;
-        constr_type_changed  = 1;
-      }
-    }
-  }
+  //update rho_vec and see if anything changed
+  constr_type_changed = set_rho_vec(work);
 
   // Update rho_vec in KKT matrix if constraints type has changed
   if (constr_type_changed == 1) {
