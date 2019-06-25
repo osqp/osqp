@@ -225,7 +225,7 @@ OSQPVectorf* OSQPVectorf_malloc(c_int length){
   b = c_malloc(sizeof(OSQPVectorf));
   if (b) {
     b->length = length;
-    if (b->length) {
+    if (length) {
       b->values = c_malloc(length * sizeof(c_float));
       if (!(b->values)) {
         c_free(b);
@@ -246,7 +246,7 @@ OSQPVectori* OSQPVectori_malloc(c_int length){
   b = c_malloc(sizeof(OSQPVectori));
   if (b) {
     b->length = length;
-    if (b->length) {
+    if (length) {
       b->values = c_malloc(length * sizeof(c_int));
       if (!(b->values)) {
         c_free(b);
@@ -266,7 +266,7 @@ OSQPVectorf* OSQPVectorf_calloc(c_int length){
   b = c_malloc(sizeof(OSQPVectorf));
   if (b) {
     b->length = length;
-    if (b->length) {
+    if (length) {
       b->values = c_calloc(length, sizeof(c_float));
       if (!(b->values)) {
         c_free(b);
@@ -286,7 +286,7 @@ OSQPVectori* OSQPVectori_calloc(c_int length){
   b = c_malloc(sizeof(OSQPVectori));
   if (b) {
     b->length = length;
-    if (b->length) {
+    if (length) {
       b->values = c_calloc(length, sizeof(c_int));
       if (!(b->values)) {
         c_free(b);
