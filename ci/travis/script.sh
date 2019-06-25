@@ -30,20 +30,17 @@ make
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
 
 if [[ $TRAVIS_OS_NAME == "linux" ]]; then
-    # Check memory with valgrind
+    echo "Testing OSQP with valgrind (disabling MKL pardiso for memory allocation issues)"
+    cd ${TRAVIS_BUILD_DIR}
+    rm -rf build
+    mkdir build
+    cd build
+    #disable PARDISO since intel instructions in MKL
+    #cause valgrind 3.11 to fail
+    cmake -G "Unix Makefiles" -DENABLE_MKL_PARDISO=OFF -DUNITTESTS=ON ..
+    make
     valgrind --suppressions=${TRAVIS_BUILD_DIR}/.valgrind-suppress.supp --leak-check=full --gen-suppressions=all --track-origins=yes --error-exitcode=42 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
-    # Perform code coverage
-    cd ${TRAVIS_BUILD_DIR}/build
-    lcov --directory . --capture -o coverage.info # capture coverage info
-    lcov --remove coverage.info "${TRAVIS_BUILD_DIR}/tests/*" \
-        "${TRAVIS_BUILD_DIR}/lin_sys/direct/qdldl/amd/*" \
-        "${TRAVIS_BUILD_DIR}/lin_sys/direct/qdldl/qdldl_sources/*" \
-        "/usr/include/x86_64-linux-gnu/**/*" \
-        -o coverage.info # filter out tests and unnecessary files
-    lcov --list coverage.info # debug before upload
-    coveralls-lcov coverage.info # uploads to coveralls
 fi
-
 
 echo "Testing OSQP with floats"
 cd ${TRAVIS_BUILD_DIR}
@@ -62,7 +59,6 @@ cd build
 cmake -G "Unix Makefiles" -DDLONG=OFF -DUNITTESTS=ON ..
 make
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
-
 
 
 echo "Testing OSQP without printing"
