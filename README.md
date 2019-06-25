@@ -9,7 +9,7 @@
 ![PyPI - downloads](https://img.shields.io/pypi/dm/osqp.svg?label=Pypi%20downloads)
 ![Conda - downloads](https://img.shields.io/conda/dn/conda-forge/osqp.svg?label=Conda%20downloads)
 
-[**Join our forum**](https://groups.google.com/forum/#!forum/osqp) for any questions related to the solver!
+[**Join our forum on Discourse**](https://osqp.discourse.group) for any questions related to the solver!
 
 **The documentation** is available at [**osqp.org**](https://osqp.org/)
 
