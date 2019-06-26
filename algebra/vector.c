@@ -422,7 +422,7 @@ void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
   c_int     i;
   c_int     length = a->length;
   c_float*  av     = a->values;
-  c_float*  testv  = test->values;
+  c_int*    testv  = test->values;
 
   for (i = 0; i < length; i++) {
       if (testv[i] == 0)      av[i] = sc_if_zero;

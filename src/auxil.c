@@ -350,8 +350,7 @@ c_int is_primal_infeasible(OSQPWorkspace *work, c_float eps_prim_inf) {
   project_polar_reccone(work->delta_y,
                         work->data->l,
                         work->data->u,
-                        -OSQP_INFTY * MIN_SCALING,
-                        +OSQP_INFTY * MIN_SCALING);
+                        OSQP_INFTY * MIN_SCALING);
 
   // Compute infinity norm of delta_y (unscale if necessary)
   if (work->settings->scaling && !work->settings->scaled_termination) {
@@ -467,8 +466,7 @@ c_int is_dual_infeasible(OSQPWorkspace *work, c_float eps_dual_inf) {
         //so return results from final test
         return test_in_polar_reccone(work->Adelta_x,
                               work->data->l,work->data->u,
-                              -OSQP_INFTY * MIN_SCALING,
-                              +OSQP_INFTY * MIN_SCALING,
+                              OSQP_INFTY * MIN_SCALING,
                               eps_dual_inf * norm_delta_x);
 
       }

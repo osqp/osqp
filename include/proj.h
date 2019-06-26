@@ -16,29 +16,25 @@ extern "C" {
  * @param y         Vector to project
  * @param l         lower bound vector
  * @param u         upper bound bector
- * @param neginf    Negative value treated as -infinity
-* @param neginf     Positive value treated as infinity
+* @param infval     value treated as infinity
  * @param work Workspace
  */
  void project_polar_reccone(OSQPVectorf      *y,
                             OSQPVectorf      *l,
                             OSQPVectorf      *u,
-                            c_float      neginf,
-                            c_float      posinf);
+                            c_float      infval);
 /**
  * Project z onto \f$C = [l, u]\f$
  * @param y         Vector to project
  * @param l         lower bound vector
  * @param u         upper bound bector
- * @param neginf    Negative value treated as -infinity
-* @param neginf     Positive value treated as infinity
+* @param infval     Positive value treated as infinity
  * @param work Workspace
  */
 c_int test_in_polar_reccone(OSQPVectorf      *y,
                             OSQPVectorf      *l,
                             OSQPVectorf      *u,
-                            c_float      neginf,
-                            c_float      posinf,
+                            c_float      infval,
                             c_float         tol);
 
 // Project y onto \f$C = [l, u]\f$

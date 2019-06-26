@@ -8,8 +8,7 @@ void project(OSQPWorkspace *work, OSQPVectorf *z) {
 void project_polar_reccone(OSQPVectorf      *yv,
                            OSQPVectorf      *lv,
                            OSQPVectorf      *uv,
-                           c_float      neginf,
-                           c_float      posinf){
+                           c_float       infval){
 
   c_int i; // Index for loops
   c_int    m = OSQPVectorf_length(yv);
@@ -18,15 +17,15 @@ void project_polar_reccone(OSQPVectorf      *yv,
   c_float* u = OSQPVectorf_data(uv);
 
   for (i = 0; i < m; i++) {
-    if (u[i]   > posinf) {       // Infinite upper bound
-      if (l[i] < neginf) {       // Infinite lower bound
+    if (u[i]   > +infval) {       // Infinite upper bound
+      if (l[i] < -infval) {       // Infinite lower bound
         // Both bounds infinite
         y[i] = 0.0;
       } else {
         // Only upper bound infinite
         y[i] = c_min(y[i], 0.0);
       }
-    } else if (l[i] < neginf) {  // Infinite lower bound
+    } else if (l[i] < -infval) {  // Infinite lower bound
       // Only lower bound infinite
       y[i] = c_max(y[i], 0.0);
     }
@@ -36,8 +35,7 @@ void project_polar_reccone(OSQPVectorf      *yv,
 c_int test_in_polar_reccone(OSQPVectorf    *yv,
                           OSQPVectorf      *lv,
                           OSQPVectorf      *uv,
-                          c_float      neginf,
-                          c_float      posinf,
+                          c_float       infval,
                           c_float         tol){
 
   c_int i; // Index for loops
@@ -48,9 +46,9 @@ c_int test_in_polar_reccone(OSQPVectorf    *yv,
   c_float* u = OSQPVectorf_data(uv);
 
   for (i = 0; i < m; i++) {
-    if (((u[i] < posinf) &&
-         (y[i] >  tol)) ||
-        ((l[i] > neginf) &&
+    if (((u[i] < +infval) &&
+         (y[i] > +tol)) ||
+        ((l[i] > -infval) &&
          (y[i] < -tol))) {
       // At least one condition not satisfied -> not dual infeasible
       return 0;
