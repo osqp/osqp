@@ -762,6 +762,59 @@ void OSQPVectorf_ew_bound_vec(OSQPVectorf *x,
   }
 }
 
+void OSQPVectorf_project_polar_reccone(OSQPVectorf       *y,
+                                       const OSQPVectorf *l,
+                                       const OSQPVectorf *u,
+                                       c_float        infval){
+
+  c_int i; // Index for loops
+  c_int    length = y->length;
+  c_float* yv = y->values;
+  c_float* lv = l->values;
+  c_float* uv = u->values;
+
+  for (i = 0; i < length; i++) {
+    if (uv[i]   > +infval) {       // Infinite upper bound
+      if (lv[i] < -infval) {       // Infinite lower bound
+        // Both bounds infinite
+        yv[i] = 0.0;
+      } else {
+        // Only upper bound infinite
+        yv[i] = c_min(yv[i], 0.0);
+      }
+    } else if (lv[i] < -infval) {  // Infinite lower bound
+      // Only lower bound infinite
+      yv[i] = c_max(yv[i], 0.0);
+    }
+  }
+}
+
+c_int OSQPVectorf_in_polar_reccone(const OSQPVectorf *y,
+                                   const OSQPVectorf *l,
+                                   const OSQPVectorf *u,
+                                   c_float           infval,
+                                   c_float           tol){
+
+  c_int i; // Index for loops
+
+  c_int    length = y->length;
+  c_float* yv     = y->values;
+  c_float* lv     = l->values;
+  c_float* uv     = u->values;
+
+  for (i = 0; i < length; i++) {
+    if (((uv[i] < +infval) &&
+         (yv[i] > +tol)) ||
+        ((lv[i] > -infval) &&
+         (yv[i] < -tol))) {
+      // At least one condition not satisfied -> not dual infeasible
+      return 0;
+    }
+  }
+  return 1;
+}
+
+
 void OSQPVectorf_permute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p){
 
   c_int j;

@@ -309,6 +309,27 @@ void OSQPVectorf_ew_bound_vec(OSQPVectorf *x,
                                const OSQPVectorf *l,
                                const OSQPVectorf *u);
 
+
+/* Elementwise projection of y onto the polar recession cone
+   of the set [l u].  Values of +/- infval or larger are
+   treated as infinite
+ */
+void OSQPVectorf_project_polar_reccone(OSQPVectorf       *y,
+                                       const OSQPVectorf *l,
+                                       const OSQPVectorf *u,
+                                       c_float        infval);
+
+/* Elementwise test of whether y is in the polar recession
+   cone of the set [l u].  Values of +/- infval or larger are
+   treated as infinite.  Values in y within tol of zero are treated
+   as zero.
+ */
+c_int OSQPVectorf_in_polar_reccone(const OSQPVectorf *y,
+                                   const OSQPVectorf *l,
+                                   const OSQPVectorf *u,
+                                   c_float           infval,
+                                   c_float           tol);
+
 /* vector permutation x[:] = b(p[:]) */
 void OSQPVectorf_permute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p);
 void OSQPVectori_permute(OSQPVectori *x, const OSQPVectori *b, const OSQPVectori *p);

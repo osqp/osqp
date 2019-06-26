@@ -31,11 +31,11 @@ extern "C" {
 * @param infval     Positive value treated as infinity
  * @param work Workspace
  */
-c_int test_in_polar_reccone(OSQPVectorf      *y,
-                            OSQPVectorf      *l,
-                            OSQPVectorf      *u,
-                            c_float      infval,
-                            c_float         tol);
+c_int test_in_polar_reccone(const OSQPVectorf  *y,
+                            const OSQPVectorf  *l,
+                            const OSQPVectorf  *u,
+                            c_float        infval,
+                            c_float          tol);
 
 // Project y onto \f$C = [l, u]\f$
 /**
