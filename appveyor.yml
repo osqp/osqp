@@ -30,7 +30,7 @@ artifacts:
   - path: 'osqp-*.tar.gz'
 
 deploy:
-- provider: BinTray
+- provider: Bintray
   on:
     APPVEYOR_REPO_TAG: true
   username: 'bstellato'

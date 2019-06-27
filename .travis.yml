@@ -34,7 +34,7 @@ before_deploy:
 deploy:
   # Deploy shared libraries to bintray
   - provider: bintray
-    file: "./ci/travis/bintray.json"
+    file: "${TRAVIS_BUILD_DIR}/ci/travis/bintray.json"
     user: "bstellato"
     key: ${BINTRAY_API_KEY}
     on:
@@ -42,6 +42,6 @@ deploy:
     skip_cleanup: true # to upload artifacts created during the build
   # Deploy docs
   - provider: script
-    script: "bash $TRAVIS_BUILD_DIR/ci/travis/docs.sh"
+    script: "bash ${TRAVIS_BUILD_DIR}/ci/travis/docs.sh"
     on:
       branch: master
