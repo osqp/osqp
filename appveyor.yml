@@ -27,7 +27,9 @@ before_deploy:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\package.cmd"
 
 artifacts:
-  - path: 'osqp-*.tar.gz'
+  - path: osqp-*.tar.gz
+    name: osqplibs
+
 
 deploy:
 - provider: BinTray
@@ -42,6 +44,7 @@ deploy:
   version: '%OSQP_VERSION%'
   publish: true
   override: true
+  artifacts: osqplibs
 
 # on_finish:
 #   # Uncomment for remote desktop debug
