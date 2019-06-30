@@ -10,7 +10,7 @@ matrix:
 sudo: required
 env:
   global:
-    - OSQP_VERSION="0.6.0.dev6"
+    - OSQP_VERSION="0.6.0.dev7"
     - OSQP_PACKAGE_NAME="OSQP"
     - DEPS_DIR="${HOME}/deps"
     # Bintray API key
