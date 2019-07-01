@@ -27,7 +27,8 @@ before_deploy:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\package.cmd"
 
 artifacts:
-  - path: 'dist/*.tar.gz'
+  - path: './dist/*.gz'
+    name: libs
 
 deploy:
 - provider: BinTray
@@ -42,6 +43,7 @@ deploy:
   version: '%OSQP_VERSION%'
   publish: true
   override: true
+  artifact: libs
 
 # on_finish:
 #   # Uncomment for remote desktop debug
