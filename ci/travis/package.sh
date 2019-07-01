@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-echo "Creating Bintray package..."
+echo "Creating Bintray shared library package..."
 
 # Compile OSQP
 cd ${TRAVIS_BUILD_DIR}
@@ -55,6 +55,12 @@ BINTRAY_TEMPLATE_FILE="${BINTRAY_DEST_FILE}.in"
 sed -e "s/@OSQP_PACKAGE_NAME@/${OSQP_PACKAGE_NAME}/g" \
     -e "s/@OSQP_VERSION@/${OSQP_VERSION}/g" \
     "${BINTRAY_TEMPLATE_FILE}" > "${BINTRAY_DEST_FILE}"
+
+# Create dist folder and copy artifacts
+DIST_DIR=${TRAVIS_BUILD_DIR}/dist
+mkdir ${DIST_DIR}
+cp ${TRAVIS_BUILD_DIR}/${OSQP_SOURCES}.tar.gz ${DIST_DIR}
+cp ${TRAVIS_BUILD_DIR}/${OSQP_BIN}.tar.gz ${DIST_DIR}
 
 # # Deploy package
 # curl -T ${TRAVIS_BUILD_DIR}/${OSQP_BIN}.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:${OSQP_PACKAGE_NAME}" -H "X-Bintray-Version:${OSQP_VERSION}" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/

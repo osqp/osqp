@@ -9,7 +9,7 @@
     },
     "files":
         [
-            {"includePattern": "(.*\.tar\.gz)",
+            {"includePattern": "dist/(.*)",
 	     "uploadPattern": "$1"}
         ],
     "publish": true
