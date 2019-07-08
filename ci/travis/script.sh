@@ -111,3 +111,33 @@ ar -rcs ${TRAVIS_BUILD_DIR}/build/out/libosqp.a \
 #now make the rest of the demos and test
 make osqp_demo
 ${TRAVIS_BUILD_DIR}/build/out/osqp_demo
+
+
+# Test custom timing functions
+# ---------------------------------------------------
+
+echo "Test OSQP custom timing functions"
+cd ${TRAVIS_BUILD_DIR}
+rm -rf build
+mkdir build
+cd build
+cmake -DUNITTESTS=OFF \
+    -DOSQP_CUSTOM_TICTOC=${TRAVIS_BUILD_DIR}/tests/custom_tictoc/custom_tictoc.h \
+    ..
+#make the static library first: it will be missing symbols
+#for the custom memory functions
+make osqpstatic
+#compile the custom memory management functions
+g++ -c ${TRAVIS_BUILD_DIR}/tests/custom_tictoc/custom_tictoc.c \
+    -I ${TRAVIS_BUILD_DIR}/include \
+    -o ${TRAVIS_BUILD_DIR}/build/custom_tictoc.o
+#for testing purposes, just add this to osqp
+#static library.   For real applications, users
+#may prefer to keep it separate and link both
+#to their application
+ar -rcs ${TRAVIS_BUILD_DIR}/build/out/libosqp.a \
+        ${TRAVIS_BUILD_DIR}/build/custom_tictoc.o
+
+#now make the rest of the demos and test
+make osqp_demo
+${TRAVIS_BUILD_DIR}/build/out/osqp_demo
