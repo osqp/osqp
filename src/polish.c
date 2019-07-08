@@ -7,6 +7,10 @@
 #include "proj.h"
 #include "error.h"
 
+#ifdef OSQP_CUSTOM_TICTOC
+# include OSQP_CUSTOM_TICTOC
+#endif /* ifdef OSQP_CUSTOM_TICTOC */
+
 /**
  * Form reduced matrix A that contains only rows that are active at the
  * solution.
@@ -267,7 +271,7 @@ c_int polish(OSQPWorkspace *work) {
     // Memory clean-up
     csc_spfree(work->pol->Ared);
     c_free(rhs_red);
-  
+
     return -1;
   }
 
@@ -285,7 +289,7 @@ c_int polish(OSQPWorkspace *work) {
     csc_spfree(work->pol->Ared);
     c_free(rhs_red);
     c_free(pol_sol);
-  
+
     return -1;
   }
 
