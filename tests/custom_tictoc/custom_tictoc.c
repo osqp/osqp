@@ -13,6 +13,8 @@
 void osqp_tic(OSQPTimer *timer)
 {
   timer->cnt = 0;
+
+  printf( "OSQP timing (tic)\n");
 }
 
 
@@ -24,5 +26,7 @@ void osqp_tic(OSQPTimer *timer)
 c_float osqp_toc(OSQPTimer *timer)
 {
   timer->cnt++;
+  printf( "OSQP timing (toc): %d calls\n", timer->cnt );
+
   return timer->cnt;
 }
