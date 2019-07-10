@@ -11,20 +11,13 @@ set(CMAKE_FIND_APPBUNDLE "NEVER")
 find_program(R_EXEC NAMES R R.exe)
 set(CMAKE_FIND_APPBUNDLE ${TEMP_CMAKE_FIND_APPBUNDLE})
 
-set(ENV{R_HOME} "blah")
-
 #---Find includes and libraries if R exists
 if(R_EXEC)
 
   set(R_FOUND TRUE)
 
-  # On CRAN/Solaris an R_HOME env variable is set and causes
-  # assignment of R_ROOT_DIR to fail since 'R RHOME'
-  # issues a warning as its first output.   Unset if needed.
-
-  # if((CMAKE_HOST_SOLARIS) AND (DEFINED ENV{R_HOME}))
-  if((TRUE) AND (DEFINED ENV{R_HOME}))
-      message(STATUS "Rogue R_HOME defined on Solaris.  Will ignore.")
+  if((CMAKE_HOST_SOLARIS) AND (DEFINED ENV{R_HOME}))
+      message(STATUS "Unsetting R_HOME on Solaris.")
       unset(ENV{R_HOME})
   endif()
 
