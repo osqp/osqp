@@ -27,7 +27,7 @@ before_deploy:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\package.cmd"
 
 artifacts:
-  - path: './dist/*.gz'
+  - path: 'dist\*.gz'
     name: libs
 
 deploy:

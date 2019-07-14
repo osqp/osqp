@@ -48,14 +48,6 @@ rem IF "%APPVEYOR_REPO_TAG%" == "true" (
     mkdir %APPVEYOR_BUILD_FOLDER%\dist
     xcopy !OSQP_BIN!.tar.gz %APPVEYOR_BUILD_FOLDER%\dist
 
-    rem REM Deploy to Bintray
-    rem curl -T !OSQP_BIN!.tar.gz -ubstellato:%BINTRAY_API_KEY% -H "X-Bintray-Package:!OSQP_PACKAGE_NAME!" -H "X-Bintray-Version:!OSQP_VERSION!" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/!OSQP_PACKAGE_NAME!/!OSQP_VERSION!/
-    rem if errorlevel 1 exit /b 1
-
-    rem REM Publish
-    rem curl -X POST -ubstellato:%BINTRAY_API_KEY% https://api.bintray.com/content/bstellato/generic/!OSQP_PACKAGE_NAME!/!OSQP_VERSION!/publish
-    rem if errorlevel 1 exit /b 1
-
 
 REM Close parenthesis for deploying only if it is a tagged commit
 rem )
