@@ -9,7 +9,7 @@
     },
     "files":
         [
-            {"includePattern": "dist/(.*gz)",
+            {"includePattern": "/home/travis/build/oxfordcontrol/osqp/dist/(.*gz)",
 	     "uploadPattern": "$1"}
         ],
     "publish": true
