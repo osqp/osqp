@@ -42,9 +42,7 @@ REM Compress package
 7z a -tgzip !OSQP_BIN!.tar.gz !OSQP_BIN!.tar
 
 rem Copy archive to main folder
-mkdir %APPVEYOR_BUILD_FOLDER%\dist
-xcopy !OSQP_BIN!.tar.gz %APPVEYOR_BUILD_FOLDER%\dist
-
+xcopy !OSQP_BIN!.tar.gz %APPVEYOR_BUILD_FOLDER%
 cd %APPVEYOR_BUILD_FOLDER%
 
 @echo off

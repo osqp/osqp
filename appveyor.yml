@@ -26,10 +26,6 @@ test_script:
 before_deploy:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\package.cmd"
 
-artifacts:
-  - path: 'dist\*.gz'
-    name: sharedlibs
-
 deploy:
 - provider: BinTray
   on:
@@ -43,7 +39,7 @@ deploy:
   version: '%OSQP_VERSION%'
   publish: true
   override: true
-  artifact: sharedlibs
+  artifact: /osqp.*\.gz/
 
 # on_finish:
 #   # Uncomment for remote desktop debug
