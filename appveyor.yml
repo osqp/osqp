@@ -9,7 +9,7 @@ environment:
   MINICONDA: C:\Miniconda
   CMAKE_PROJECT: MinGW Makefiles
   PYTHON_VERSION: 3.7
-  OSQP_VERSION: 0.6.0.dev13
+  OSQP_VERSION: 0.6.0.dev14
   OSQP_PACKAGE_NAME: OSQP
 
 init:
