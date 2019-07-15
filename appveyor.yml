@@ -26,10 +26,16 @@ test_script:
 before_deploy:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\package.cmd"
 
+
+artifacts:
+  - path: 'osqp-*.gz'
+    name: libs
+
+    
 deploy:
 - provider: BinTray
-  on:
-    APPVEYOR_REPO_TAG: true
+  # on:
+  #   APPVEYOR_REPO_TAG: true
   username: 'bstellato'
   api_key:
     secure: ng7NUNQat2LczU5XjKKyDLITkZbZsJeAdPGDjuTdQDHDiaL03JJF6Usab+miNVsO
@@ -39,7 +45,7 @@ deploy:
   version: '%OSQP_VERSION%'
   publish: true
   override: true
-  artifact: /osqp.*\.gz/
+  artifact: libs
 
 # on_finish:
 #   # Uncomment for remote desktop debug
