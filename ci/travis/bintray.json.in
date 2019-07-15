@@ -9,8 +9,10 @@
     },
     "files":
         [
-            {"includePattern": "/home/travis/build/oxfordcontrol/osqp/dist/(.*gz)",
-	     "uploadPattern": "$1"}
+            {"includePattern": "dist/(.*gz)",
+	     "uploadPattern": "$1",
+             "matrixParams": {"override": 1 }
+	    }
         ],
     "publish": true
 }

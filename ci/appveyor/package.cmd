@@ -3,52 +3,48 @@
 REM Needed to enable to define OSQP_BIN within the file
 @setlocal enabledelayedexpansion
 
-rem IF "%APPVEYOR_REPO_TAG%" == "true" (
+REM Build C libraries
+cd %APPVEYOR_BUILD_FOLDER%
+del /F /Q build
+mkdir build
+cd build
+cmake -G "%CMAKE_PROJECT%" ..
+cmake --build .
 
+REM Go to output folder
+cd %APPVEYOR_BUILD_FOLDER%\build\out
 
-    REM Build C libraries
-    cd %APPVEYOR_BUILD_FOLDER%
-    del /F /Q build
-    mkdir build
-    cd build
-    cmake -G "%CMAKE_PROJECT%" ..
-    cmake --build .
+IF "%PLATFORM%" == "x86" (
+    set OSQP_BIN="osqp-!OSQP_VERSION!-windows32"
+) ELSE (
+    set OSQP_BIN="osqp-!OSQP_VERSION!-windows64"
+)
+REM Create directories
+REM NB. We force expansion of the variable at execution time!
+mkdir !OSQP_BIN!
+mkdir !OSQP_BIN!\lib
+mkdir !OSQP_BIN!\include
 
-    REM Go to output folder
-    cd %APPVEYOR_BUILD_FOLDER%\build\out
+REM Copy License
+xcopy ..\..\LICENSE !OSQP_BIN!
 
-    IF "%PLATFORM%" == "x86" (
-        set OSQP_BIN="osqp-!OSQP_VERSION!-windows32"
-    ) ELSE (
-        set OSQP_BIN="osqp-!OSQP_VERSION!-windows64"
-    )
-    REM Create directories
-    REM NB. We force expansion of the variable at execution time!
-    mkdir !OSQP_BIN!
-    mkdir !OSQP_BIN!\lib
-    mkdir !OSQP_BIN!\include
+REM Copy includes
+xcopy ..\..\include\*.h !OSQP_BIN!\include
 
-    REM Copy License
-    xcopy ..\..\LICENSE !OSQP_BIN!
+REM Copy static library
+xcopy libosqp.a !OSQP_BIN!\lib
 
-    REM Copy includes
-    xcopy ..\..\include\*.h !OSQP_BIN!\include
+REM Copy shared library
+xcopy libosqp.dll !OSQP_BIN!\lib
 
-    REM Copy static library
-    xcopy libosqp.a !OSQP_BIN!\lib
+REM Compress package
+7z a -ttar !OSQP_BIN!.tar !OSQP_BIN!
+7z a -tgzip !OSQP_BIN!.tar.gz !OSQP_BIN!.tar
 
-    REM Copy shared library
-    xcopy libosqp.dll !OSQP_BIN!\lib
+rem Copy archive to main folder
+mkdir %APPVEYOR_BUILD_FOLDER%\dist
+xcopy !OSQP_BIN!.tar.gz %APPVEYOR_BUILD_FOLDER%\dist
 
-    REM Compress package
-    7z a -ttar !OSQP_BIN!.tar !OSQP_BIN!
-    7z a -tgzip !OSQP_BIN!.tar.gz !OSQP_BIN!.tar
+cd %APPVEYOR_BUILD_FOLDER%
 
-    rem Copy archive to main folder
-    mkdir %APPVEYOR_BUILD_FOLDER%\dist
-    xcopy !OSQP_BIN!.tar.gz %APPVEYOR_BUILD_FOLDER%\dist
-
-
-REM Close parenthesis for deploying only if it is a tagged commit
-rem )
 @echo off

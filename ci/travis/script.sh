@@ -85,4 +85,7 @@ cmake -DUNITTESTS=ON \
 make osqp_tester_custom_memory
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester_custom_memory
 
+
+cd ${TRAVIS_BUILD_DIR}
+
 set +e

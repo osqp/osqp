@@ -62,15 +62,6 @@ mkdir ${DIST_DIR}
 cp ${TRAVIS_BUILD_DIR}/${OSQP_SOURCES}.tar.gz ${DIST_DIR}
 cp ${TRAVIS_BUILD_DIR}/${OSQP_BIN}.tar.gz ${DIST_DIR}
 
-# # Deploy package
-# curl -T ${TRAVIS_BUILD_DIR}/${OSQP_BIN}.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:${OSQP_PACKAGE_NAME}" -H "X-Bintray-Version:${OSQP_VERSION}" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/
-
-
-# # Deploy sources
-# curl -T ${TRAVIS_BUILD_DIR}/${OSQP_SOURCES}.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:${OSQP_PACKAGE_NAME}" -H "X-Bintray-Version:${OSQP_VERSION}" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/
-
-
-# # Publish deployed files
-# curl -X POST -ubstellato:$BINTRAY_API_KEY https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/publish
+cd ${TRAVIS_BUILD_DIR}
 
 set +e

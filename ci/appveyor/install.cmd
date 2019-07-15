@@ -1,4 +1,4 @@
-@echo on
+n@echo on
 :: Make sure all the submodules are updated correctly
 cd %APPVEYOR_BUILD_FOLDER%
 git submodule update --init --recursive
@@ -51,5 +51,7 @@ IF NOT "!OSQP_VERSION!"=="!OSQP_VERSION:dev=!" (
 REM We are using a development version
 set OSQP_PACKAGE_NAME="!OSQP_PACKAGE_NAME!-dev"
 )
+
+cd %APPVEYOR_BUILD_FOLDER%
 
 @echo off

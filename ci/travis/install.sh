@@ -41,3 +41,5 @@ conda install --yes -c conda-forge cmake
 
 # Install coveralls lcov
 gem install coveralls-lcov
+
+cd ${TRAVIS_BUILD_DIR}

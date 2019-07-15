@@ -28,7 +28,7 @@ before_deploy:
 
 artifacts:
   - path: 'dist\*.gz'
-    name: libs
+    name: sharedlibs
 
 deploy:
 - provider: BinTray
@@ -43,7 +43,7 @@ deploy:
   version: '%OSQP_VERSION%'
   publish: true
   override: true
-  artifact: libs
+  artifact: sharedlibs
 
 # on_finish:
 #   # Uncomment for remote desktop debug
