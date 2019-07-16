@@ -6,6 +6,8 @@ platform:
   - x86
 
 environment:
+  BINTRAY_API_KEY:
+    secure: ng7NUNQat2LczU5XjKKyDLITkZbZsJeAdPGDjuTdQDHDiaL03JJF6Usab+miNVsO
   MINICONDA: C:\Miniconda
   CMAKE_PROJECT: MinGW Makefiles
   PYTHON_VERSION: 3.7
@@ -22,29 +24,9 @@ install:
 
 test_script:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\script.cmd"
-  - |
-    rem IF "%APPVEYOR_REPO_TAG%" == "true" (
-        "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\package.cmd"
-    rem )
 
-artifacts:
-  - path: "dist\\*.tar.gz"
-    name: libraries
-    
-deploy:
-- provider: BinTray
-  # on:
-  #   APPVEYOR_REPO_TAG: true
-  username: 'bstellato'
-  api_key:
-    secure: ng7NUNQat2LczU5XjKKyDLITkZbZsJeAdPGDjuTdQDHDiaL03JJF6Usab+miNVsO
-  subject: 'bstellato'
-  repo: 'generic'
-  package: '%OSQP_PACKAGE%'
-  version: '%OSQP_VERSION%'
-  publish: true
-  override: true
-  artifact: libraries
+deploy_script:
+  - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\deploy.cmd"
 
 on_finish:
   # Uncomment for remote desktop debug

@@ -28,17 +28,12 @@ install:
 script:
  - bash ${TRAVIS_BUILD_DIR}/ci/travis/script.sh
 
-before_deploy:
- - bash ${TRAVIS_BUILD_DIR}/ci/travis/package.sh
-
 deploy:
   # Deploy shared libraries to bintray
-  - provider: bintray
-    file: "${TRAVIS_BUILD_DIR}/ci/travis/bintray.json"
-    user: "bstellato"
-    key: ${BINTRAY_API_KEY}
-    on:
-      tags: true
+  - provider: script
+    script: "bash ${TRAVIS_BUILD_DIR}/ci/travis/deploy.sh"
+    # on:
+    #   tags: true
     skip_cleanup: true # to upload artifacts created during the build
   # Deploy docs
   - provider: script

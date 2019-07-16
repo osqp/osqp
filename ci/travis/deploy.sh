@@ -49,19 +49,20 @@ cd ..
 # Create archive ignoring hidden files
 tar --exclude=".*" -czvf ${TRAVIS_BUILD_DIR}/${OSQP_SOURCES}.tar.gz ${OSQP_SOURCES}
 
-# Create bintray.json file from bintray.json.in
-BINTRAY_DEST_FILE="${TRAVIS_BUILD_DIR}/ci/travis/bintray.json"
-BINTRAY_TEMPLATE_FILE="${BINTRAY_DEST_FILE}.in"
-sed -e "s/@OSQP_PACKAGE_NAME@/${OSQP_PACKAGE_NAME}/g" \
-    -e "s/@OSQP_VERSION@/${OSQP_VERSION}/g" \
-    "${BINTRAY_TEMPLATE_FILE}" > "${BINTRAY_DEST_FILE}"
-
 # Create dist folder and copy artifacts
 DIST_DIR=${TRAVIS_BUILD_DIR}/dist
 mkdir ${DIST_DIR}
 cp ${TRAVIS_BUILD_DIR}/${OSQP_SOURCES}.tar.gz ${DIST_DIR}
 cp ${TRAVIS_BUILD_DIR}/${OSQP_BIN}.tar.gz ${DIST_DIR}
 
-cd ${TRAVIS_BUILD_DIR}
+# Upload to Bintray
+# Deploy sources
+curl -T ${DIST_DIR}/${OSQP_SOURCES}.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:${OSQP_PACKAGE_NAME}" -H "X-Bintray-Version:${OSQP_VERSION}" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/
+
+# Deploy shared library binaries
+curl -T ${DIST_DIR}/${OSQP_BIN}.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:${OSQP_PACKAGE_NAME}" -H "X-Bintray-Version:${OSQP_VERSION}" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/
+
+# Publish deployed files
+curl -X POST -ubstellato:$BINTRAY_API_KEY https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/publish
 
 set +e
