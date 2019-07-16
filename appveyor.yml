@@ -28,7 +28,7 @@ test_script:
     rem )
 
 artifacts:
-  - path: 'dist\\*'
+  - path: "dist\\*.tar.gz"
     name: libraries
     
 deploy:
