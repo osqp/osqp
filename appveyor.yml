@@ -28,8 +28,7 @@ before_deploy:
 
 
 artifacts:
-  - path: 'osqp-*.gz'
-    name: libs
+  - path: 'dist\*.tar.gz'
 
     
 deploy:
@@ -45,7 +44,6 @@ deploy:
   version: '%OSQP_VERSION%'
   publish: true
   override: true
-  artifact: libs
 
 on_finish:
   # Uncomment for remote desktop debug
