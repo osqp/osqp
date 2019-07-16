@@ -1,8 +1,5 @@
 @echo on
 
-REM Needed to enable to define OSQP_BIN within the file
-@setlocal enabledelayedexpansion
-
 :: Make sure all the submodules are updated correctly
 cd %APPVEYOR_BUILD_FOLDER%
 git submodule update --init --recursive
@@ -50,12 +47,13 @@ REM Set environment for 32bit
 call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86
 )
 
+REM Needed to enable to define OSQP_VERSION within the file
+@setlocal enabledelayedexpansion
 
 IF NOT "!OSQP_VERSION!"=="!OSQP_VERSION:dev=!" (
 REM We are using a development version
 set OSQP_PACKAGE_NAME="!OSQP_PACKAGE_NAME!-dev"
 )
 
-cd %APPVEYOR_BUILD_FOLDER%
 
 @echo off
