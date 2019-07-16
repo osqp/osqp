@@ -1,4 +1,8 @@
-n@echo on
+@echo on
+
+REM Needed to enable to define OSQP_BIN within the file
+@setlocal enabledelayedexpansion
+
 :: Make sure all the submodules are updated correctly
 cd %APPVEYOR_BUILD_FOLDER%
 git submodule update --init --recursive
