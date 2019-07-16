@@ -12,7 +12,6 @@ environment:
   CMAKE_PROJECT: MinGW Makefiles
   PYTHON_VERSION: 3.7
   OSQP_VERSION: 0.6.0.dev15
-  OSQP_PACKAGE_NAME: OSQP
 
 init:
   # Uncomment for remote desktop debug

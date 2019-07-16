@@ -2,13 +2,15 @@
 
 REM Needed to enable to define OSQP_BIN within the file
 @setlocal enabledelayedexpansion
-IF "%APPVEYOR_REPO_TAG%" == "true" (
 
-    IF NOT "!OSQP_VERSION!"=="!OSQP_VERSION:dev=!" (
-    REM We are using a development version
-    set OSQP_PACKAGE_NAME="!OSQP_PACKAGE_NAME!-dev"
+rem IF "%APPVEYOR_REPO_TAG%" == "true" (
+
+    IF NOT "%OSQP_VERSION%"=="%OSQP_VERSION:dev=%" (
+    rem We are using a development version
+    set OSQP_PACKAGE_NAME="OSQP-dev"
+    ) ELSE (
+    set OSQP_PACKAGE_NAME="OSQP"
     )
-
 
     REM Build C libraries
     cd %APPVEYOR_BUILD_FOLDER%
@@ -57,6 +59,6 @@ IF "%APPVEYOR_REPO_TAG%" == "true" (
     if errorlevel 1 exit /b 1
 
 rem End of IF for appveyor tag
-)
+rem )
 
 @echo off

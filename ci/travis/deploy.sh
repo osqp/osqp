@@ -4,7 +4,9 @@ echo "Creating Bintray shared library package..."
 
 if [[ ${OSQP_VERSION} == *"dev"* ]]; then
     # Using dev version
-    OSQP_PACKAGE_NAME="${OSQP_PACKAGE_NAME}-dev";
+    OSQP_PACKAGE_NAME="OSQP-dev";
+else
+    OSQP_PACKAGE_NAME="OSQP";
 fi
 
 # Compile OSQP
