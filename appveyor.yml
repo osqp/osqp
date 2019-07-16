@@ -22,15 +22,11 @@ install:
 
 test_script:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\script.cmd"
-
-before_deploy:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\package.cmd"
 
-
 artifacts:
-  - path: 'dist\*'
+  - path: 'dist\\*'
     name: libraries
-
     
 deploy:
 - provider: BinTray
