@@ -28,7 +28,7 @@ before_deploy:
 
 
 artifacts:
-  - path: 'C:\projects\osqp\dist\*'
+  - path: 'dist\*'
     name: libraries
 
     
