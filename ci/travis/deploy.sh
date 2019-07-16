@@ -2,6 +2,11 @@
 set -e
 echo "Creating Bintray shared library package..."
 
+if [[ ${OSQP_VERSION} == *"dev"* ]]; then
+    # Using dev version
+    OSQP_PACKAGE_NAME="${OSQP_PACKAGE_NAME}-dev";
+fi
+
 # Compile OSQP
 cd ${TRAVIS_BUILD_DIR}
 rm -rf build

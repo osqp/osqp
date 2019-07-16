@@ -1,9 +1,5 @@
 #!/bin/bash
 
-if [[ ${OSQP_VERSION} == *"dev"* ]]; then
-    OSQP_PACKAGE_NAME="${OSQP_PACKAGE_NAME}-dev";
-fi
-
 # Create deps dir
 mkdir ${DEPS_DIR}
 cd ${DEPS_DIR}
