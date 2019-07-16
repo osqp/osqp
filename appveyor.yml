@@ -22,7 +22,10 @@ install:
 
 test_script:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\script.cmd"
-  - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\package.cmd"
+  - |
+    rem IF "%APPVEYOR_REPO_TAG%" == "true" (
+        "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\package.cmd"
+    rem )
 
 artifacts:
   - path: 'dist\\*'
