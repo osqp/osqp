@@ -2,7 +2,7 @@
 
 REM Needed to enable to define OSQP_BIN within the file
 @setlocal enabledelayedexpansion
-rem IF "%APPVEYOR_REPO_TAG%" == "true" (
+IF "%APPVEYOR_REPO_TAG%" == "true" (
 
     IF NOT "!OSQP_VERSION!"=="!OSQP_VERSION:dev=!" (
     REM We are using a development version
@@ -57,6 +57,6 @@ rem IF "%APPVEYOR_REPO_TAG%" == "true" (
     if errorlevel 1 exit /b 1
 
 rem End of IF for appveyor tag
-rem )
+)
 
 @echo off

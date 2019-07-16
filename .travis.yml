@@ -33,9 +33,7 @@ deploy:
   - provider: script
     script: "bash ${TRAVIS_BUILD_DIR}/ci/travis/deploy.sh"
     on:
-      all_branches: true
-    # on:
-    #   tags: true
+      tags: true
     skip_cleanup: true # to upload artifacts created during the build
   # Deploy docs
   - provider: script
