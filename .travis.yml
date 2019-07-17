@@ -10,7 +10,7 @@ matrix:
 sudo: required
 env:
   global:
-    - OSQP_VERSION="0.6.0.dev16"
+    - OSQP_VERSION="0.6.0.dev17"
     - DEPS_DIR="${HOME}/deps"
     # Bintray API key
     - secure: "RgZWa1zTkbXzbF+TW89CDa0OD+hjVrZCSnsG9X3OQRyMRcR8yp61SudC0sopJyAhrXA++6zRENI/T1rTmTr1WYcitF22x3fzVvPL+IQEUCxXPV6GOb3cBB/f3rxkpxeBYXO+tgsH1ad+A9T2oihO0/94fKVpZ5uN5mjJbP4yatF+DyEk5+IlHkp0yrgNxyLYEo7QCaDQJhffBJCa4R3C2sb2oL5S3JV6C1svWeSRVey5lrkNwk+rL1Af0kIEfWCXYBq5dchDLFGgfJlzFTw3i/UmKSqtdkq/Eq3vKpvvqMCHcm9ibcWeJX1iNSXVmblycLitI/K1LjONWvrAioHsv9qRaf+YXtLtyb1WXLmaPdi0P138TIDMHLslFYBq1Sf+1WZJ5U3KItzNXjFw/c2yUIDXMePrXNbHodYwND+3QS+yAoIHXT0buxUjjEbD6g54YfqjsTX8w510l+dy7WZQUM6GJn7byiEDfEEu9RbhLuDRHMG8h2viya9aLgIEAMq92/XbS6v01aX24dPmrlSZEocqwrp8yJxGU4tYk+gj4rnWXYF7XfaOVvINc5RRwejZ1mIkMg1fCEqaBmKQiOwDuypoG0L9kDaX85fGwo7/LIdApsJWZvXewlW8ZQERSqFwXDJpQXjS8iHcCzJUR+WUWkrVMYzzr74Fr+XeKmQeQC4="
