@@ -9,9 +9,10 @@ IF "%APPVEYOR_REPO_TAG%" == "true" (
     rem We are using a development version
     set OSQP_PACKAGE_NAME="OSQP-dev"
     ) ELSE (
+    rem We are using standard version
     set OSQP_PACKAGE_NAME="OSQP"
     )
-
+    
     REM Build C libraries
     cd %APPVEYOR_BUILD_FOLDER%
     del /F /Q build
@@ -51,11 +52,11 @@ IF "%APPVEYOR_REPO_TAG%" == "true" (
     7z a -tgzip !OSQP_BIN!.tar.gz !OSQP_BIN!.tar
 
     REM Deploy to Bintray
-    curl -T !OSQP_BIN!.tar.gz -ubstellato:%BINTRAY_API_KEY% -H "X-Bintray-Package:%OSQP_PACKAGE_NAME%" -H "X-Bintray-Version:%OSQP_VERSION%" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/%OSQP_PACKAGE_NAME%/%OSQP_VERSION%/
+    curl -T !OSQP_BIN!.tar.gz -ubstellato:!BINTRAY_API_KEY! -H X-Bintray-Package:!OSQP_PACKAGE_NAME! -H X-Bintray-Version:!OSQP_VERSION! -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/!OSQP_PACKAGE_NAME!/!OSQP_VERSION!/
     if errorlevel 1 exit /b 1
 
     REM Publish
-    curl -X POST -ubstellato:%BINTRAY_API_KEY% https://api.bintray.com/content/bstellato/generic/%OSQP_PACKAGE_NAME%/%OSQP_VERSION%/publish
+    curl -X POST -ubstellato:!BINTRAY_API_KEY! https://api.bintray.com/content/bstellato/generic/!OSQP_PACKAGE_NAME!/!OSQP_VERSION!/publish
     if errorlevel 1 exit /b 1
 
 rem End of IF for appveyor tag
