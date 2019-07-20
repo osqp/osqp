@@ -464,6 +464,19 @@ if (UNITTESTS)
                 ${codegen_test_headers})
     target_link_libraries (osqp_tester osqpstatic)
 
+    # Add custom memory target
+    add_executable(osqp_tester_custom_memory
+                   EXCLUDE_FROM_ALL
+                   ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c
+                   ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
+	           ${PROJECT_SOURCE_DIR}/tests/minunit.h
+                   ${test_headers}
+                   ${codegen_test_headers}
+		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.c
+		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.h
+		)
+    target_link_libraries (osqp_tester_custom_memory osqpstatic)
+
     # Add testing
     include(CTest)
     enable_testing()

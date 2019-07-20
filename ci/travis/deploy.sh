@@ -1,24 +1,13 @@
 #!/bin/bash
-set -ev
+set -e
+echo "Creating Bintray shared library package..."
 
-OSQP_VERSION="0.6.0.dev3"
-OSQP_PACKAGE_NAME="OSQP"
 if [[ ${OSQP_VERSION} == *"dev"* ]]; then
-    OSQP_PACKAGE_NAME="${OSQP_PACKAGE_NAME}-dev"
+    # Using dev version
+    OSQP_PACKAGE_NAME="OSQP-dev";
+else
+    OSQP_PACKAGE_NAME="OSQP";
 fi
-
-# Update variables from install
-# CMake
-if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-    export PATH=${DEPS_DIR}/cmake/bin:${PATH}
-fi
-# Anaconda
-export PATH=${DEPS_DIR}/miniconda/bin:$PATH
-hash -r
-source activate testenv
-
-
-echo "Creating Bintray package..."
 
 # Compile OSQP
 cd ${TRAVIS_BUILD_DIR}
@@ -67,16 +56,14 @@ cd ..
 # Create archive ignoring hidden files
 tar --exclude=".*" -czvf ${TRAVIS_BUILD_DIR}/${OSQP_SOURCES}.tar.gz ${OSQP_SOURCES}
 
-# Deploy package
-curl -T ${TRAVIS_BUILD_DIR}/${OSQP_BIN}.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:${OSQP_PACKAGE_NAME}" -H "X-Bintray-Version:${OSQP_VERSION}" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/
-
-
+# Upload to Bintray
 # Deploy sources
 curl -T ${TRAVIS_BUILD_DIR}/${OSQP_SOURCES}.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:${OSQP_PACKAGE_NAME}" -H "X-Bintray-Version:${OSQP_VERSION}" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/
 
+# Deploy shared library binaries
+curl -T ${TRAVIS_BUILD_DIR}/${OSQP_BIN}.tar.gz -ubstellato:$BINTRAY_API_KEY -H "X-Bintray-Package:${OSQP_PACKAGE_NAME}" -H "X-Bintray-Version:${OSQP_VERSION}" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/
 
 # Publish deployed files
 curl -X POST -ubstellato:$BINTRAY_API_KEY https://api.bintray.com/content/bstellato/generic/${OSQP_PACKAGE_NAME}/${OSQP_VERSION}/publish
 
-
-exit 0
+set +e

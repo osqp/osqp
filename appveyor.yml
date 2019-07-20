@@ -10,8 +10,8 @@ environment:
     secure: ng7NUNQat2LczU5XjKKyDLITkZbZsJeAdPGDjuTdQDHDiaL03JJF6Usab+miNVsO
   MINICONDA: C:\Miniconda
   CMAKE_PROJECT: MinGW Makefiles
-  PYTHON_VERSION: 3.6
-
+  PYTHON_VERSION: 3.7
+  OSQP_VERSION: 0.6.0.dev17
 
 init:
   # Uncomment for remote desktop debug
@@ -27,6 +27,6 @@ test_script:
 deploy_script:
   - "%APPVEYOR_BUILD_FOLDER%\\ci\\appveyor\\deploy.cmd"
 
-# on_finish:
-#   # Uncomment for remote desktop debug
-#   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+on_finish:
+  # Uncomment for remote desktop debug
+  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
