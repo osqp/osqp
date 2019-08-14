@@ -10,6 +10,13 @@ Anaconda
 
    conda install -c oxfordcontrol osqp
 
+   
+For the bleeding edge development version install OSQP with
+
+.. code:: bash
+
+   conda install -c oxfordcontrol/label/dev osqp
+
 
 Pip
 ----
@@ -18,6 +25,14 @@ Pip
 
    pip install osqp
 
+
+For the bleeding edge development version install OSQP with
+
+.. code:: bash
+
+   pip install --pre --extra-index-url https://test.pypi.org/simple/ osqp
+
+   
 
 Sources
 ---------
