@@ -1,9 +1,10 @@
-Unreleased
+Version 0.6.0
 ----------------
 * Added meaningful return values to internal functions. Changed syntax of `osqp_setup` function. It now returns an exitflag.
 * `osqp_setup` function requires `P` to be upper triangular. It returns a nonzero exitflag otherwise.
 * Custom memory allocators via cmake and the configure file.
 * Changed interfaces to linsys solver functions. The solve function now computes `(x_tilde,z_tilde)` instead of `(x_tilde,nu)`. This allows to implement custom linear system solvers (also indirect).
+* Added `solve` function in Python interface that performs `setup` `solve` and `cleanup` for you directly and disables GIL.
 
 
 Version 0.5.0 (10 December 2018)
