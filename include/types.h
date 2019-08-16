@@ -7,34 +7,22 @@ extern "C" {
 
 # include "glob_opts.h"
 # include "constants.h"
+# include "lin_alg.h"
 
 
 /******************
 * Internal types *
 ******************/
 
-/*
- * OSQPVector types.  Not defined here since it
- *   is implementation specific
- */
-
-/* integer valued vectors */
-typedef struct OSQPVectori_ OSQPVectori;
-
-/* float valued vectors*/
-typedef struct OSQPVectorf_ OSQPVectorf;
-
 /**
- *  Matrix in compressed-column or triplet form
+ *  Matrix in compressed sparse column format
  */
 typedef struct {
-  c_int    nzmax; ///< maximum number of entries
   c_int    m;     ///< number of rows
   c_int    n;     ///< number of columns
   c_int   *p;     ///< column pointers (size n+1); col indices (size nzmax) start from 0 when using triplet format (direct KKT matrix formation)
   c_int   *i;     ///< row indices, size nzmax starting from 0
   c_float *x;     ///< numerical values, size nzmax
-  c_int    nz;    ///< number of entries in triplet matrix, -1 for csc
 } csc;
 
 /**

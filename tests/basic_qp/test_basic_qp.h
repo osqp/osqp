@@ -32,7 +32,7 @@ static const char* test_basic_qp_solve()
   settings->scaling    = 0;
   settings->verbose    = 1;
   settings->warm_start = 0;
-    
+
   // Setup workspace
   exitflag = osqp_setup(&work, data->P, data->q,
                         data->A, data->l, data->u,
@@ -64,14 +64,14 @@ static const char* test_basic_qp_solve()
   mu_assert("Basic QP test solve: Error in objective value!",
 	    c_absval(work->info->obj_val - sols_data->obj_value_test) <
 	    TESTS_TOL);
-    
+
   // Try to set wrong settings
   mu_assert("Basic QP test solve: Wrong value of rho not caught!",
 	    osqp_update_rho(work, -0.1) == 1);
 
   mu_assert("Basic QP test solve: Wrong value of max_iter not caught!",
 	    osqp_update_max_iter(work, -1) == 1);
-    
+
   mu_assert("Basic QP test solve: Wrong value of eps_abs not caught!",
 	    osqp_update_eps_abs(work, -1.) == 1);
 
@@ -107,7 +107,7 @@ static const char* test_basic_qp_solve()
 
   mu_assert("Basic QP test solve: Wrong value of verbose not caught!",
 	    osqp_update_verbose(work, 2) == 1);
-    
+
 
   // Clean workspace
   osqp_cleanup(work);
@@ -401,7 +401,7 @@ static const char* test_basic_qp_solve()
   P_tmp = (csc*) c_malloc(sizeof(csc));
   P_tmp->m = 2;
   P_tmp->n = 2;
-  P_tmp->nz = -1;
+  P_tmp->nnz = -1;
   P_tmp->nzmax = 4;
   P_tmp->x = (c_float*) c_malloc(4 * sizeof(c_float));
   P_tmp->x[0] = 4.0;
@@ -745,7 +745,7 @@ static const char* test_basic_qp_update_rho()
   settings->eps_rel           = 5e-05;
   settings->check_termination = 1;
 
-    
+
   // Setup workspace
   exitflag = osqp_setup(&work, data->P, data->q,
                         data->A, data->l, data->u,
