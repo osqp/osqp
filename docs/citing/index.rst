@@ -9,7 +9,7 @@ If you use OSQP for published work, we encourage you to put a star on `GitHub <h
 .. glossary::
 
     Main paper
-        Main algorithm description, derivation and benchmark available in this `preprint <https://arxiv.org/pdf/1711.08013.pdf>`_.
+        Main algorithm description, derivation and benchmark available in this `preprint <https://arxiv.org/pdf/1711.08013.pdf>`__.
 
         .. code:: latex
 
@@ -28,14 +28,15 @@ If you use OSQP for published work, we encourage you to put a star on `GitHub <h
           }
 
     Infeasibility detection
-        Infeasibility detection proofs using ADMM (also for general conic programs) in this `preprint <https://stanford.edu/~boyd/papers/pdf/admm_infeas.pdf>`_.
+        Infeasibility detection proofs using ADMM (also for general conic programs) in this `preprint <https://stanford.edu/~boyd/papers/pdf/admm_infeas.pdf>`__.
 
         .. code:: latex
 
           @article{osqp-infeasibility,
             title   = {Infeasibility detection in the alternating direction method of multipliers for convex optimization},
+            journal = {Journal of Optimization Theory and Applications (To appear)},
             author  = {Banjac, G. and Goulart, P. and Stellato, B. and Boyd, S.},
-            year    = {2017},
+            year    = {2019},
             url     = {https://stanford.edu/~boyd/papers/pdf/admm_infeas.pdf},
           }
 
