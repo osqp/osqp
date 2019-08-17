@@ -1,3 +1,4 @@
+#include "glob_opts.h"
 #include "error.h"
 
 const char *OSQP_ERROR_MESSAGE[] = {

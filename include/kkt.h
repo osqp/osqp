@@ -9,7 +9,7 @@ extern "C" {
 
 # ifndef EMBEDDED
 
-#  include "cs.h"
+#  include "csc.h"
 
 /**
  * Form square symmetric KKT matrix of the form

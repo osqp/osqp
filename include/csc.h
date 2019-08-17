@@ -5,30 +5,12 @@
 extern "C" {
 # endif // ifdef __cplusplus
 
-# include "types.h"   // CSC matrix type
-# include "lin_alg.h" // Vector copy operations
+# include "osqp_api_types.h" // CSC matrix type
+# include "lin_alg.h"        // Vector copy operations
 
 /*****************************************************************************
 * Create and free CSC Matrices                                              *
 *****************************************************************************/
-
-/**
- * Create Compressed-Column-Sparse matrix from existing arrays
-    (no MALLOC to create inner arrays x, i, p)
- * @param  m     First dimension
- * @param  n     Second dimension
- * @param  nzmax Maximum number of nonzero elements
- * @param  x     Vector of data
- * @param  i     Vector of row indices
- * @param  p     Vector of column pointers
- * @return       New matrix pointer
- */
-csc* csc_matrix(c_int    m,
-                c_int    n,
-                c_int    nzmax,
-                c_float *x,
-                c_int   *i,
-                c_int   *p);
 
 
 /**

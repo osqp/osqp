@@ -72,7 +72,7 @@ static c_int form_Ared(OSQPWorkspace *work){
     if ((A_to_Alow[work->data->A->i[j]] != -1) ||
         (A_to_Aupp[work->data->A->i[j]] != -1)) Ared_nnz++;
   }
-    
+
   // Form Ared
   // Ared = vstack[Alow, Aupp]
   work->pol->Ared = csc_spalloc(work->pol->n_low + work->pol->n_upp,
@@ -146,7 +146,7 @@ static void form_rhs_red(OSQPWorkspace *work, OSQPVectorf *rhs) {
  * @param  b    RHS of the linear system
  * @return      Exitflag
  */
-static c_int iterative_refinement(OSQPWorkspace *work,
+static c_int iterative_refinement(OSQPSolver    *solver,
                                   LinSysSolver  *p,
                                   c_float       *z,
                                   c_float       *b) {
@@ -154,7 +154,10 @@ static c_int iterative_refinement(OSQPWorkspace *work,
   c_float *dz;
   c_float *rhs;
 
-  if (work->settings->polish_refine_iter > 0) {
+  OSQPSettings*  settings = solver->settings;
+  OSQPWorkspace* work     = solver->work;
+
+  if (settings->polish_refine_iter > 0) {
 
     // Assign dimension n
     n = work->data->n + work->pol->Ared->m;
@@ -166,7 +169,7 @@ static c_int iterative_refinement(OSQPWorkspace *work,
     if (!dz || !rhs) {
       return osqp_error(OSQP_MEM_ALLOC_ERROR);
     } else {
-      for (i = 0; i < work->settings->polish_refine_iter; i++) {
+      for (i = 0; i < settings->polish_refine_iter; i++) {
         // Form the RHS for the iterative refinement:  b - K*z
         prea_vec_copy(b, rhs, n);
 
@@ -233,13 +236,19 @@ static void get_ypol_from_yred(OSQPWorkspace *work, OSQPVectorf *yred_vf) {
   }
 }
 
-c_int polish(OSQPWorkspace *work) {
+c_int polish(OSQPSolver *solver) {
+
   c_int mred, polish_successful, exitflag;
-  OSQPVectorf *rhs_red;
+
   LinSysSolver *plsh;
+  OSQPVectorf *rhs_red;
   OSQPVectorf *pol_sol; // Polished solution (x and reduced y)
   OSQPVectorf *pol_sol_xview; // view into x part of polished solution
-  OSQPVectorf *pol_sol_yview; // view into (reduced) y part of polished solution
+  OSQPVectorf *pol_sol_yview; // view into (reduced) y part of polished solutions
+
+  OSQPInfo*      info      = solver->info;
+  OSQPSettings*  settings  = solver->settings;
+  OSQPWorkspace* work      = solver->work;
 
 #ifdef PROFILING
   osqp_tic(work->timer); // Start timer
@@ -249,19 +258,19 @@ c_int polish(OSQPWorkspace *work) {
   mred = form_Ared(work);
   if (mred < 0) { // work->pol->red = OSQP_NULL
     // Polishing failed
-    work->info->status_polish = -1;
+    info->status_polish = -1;
 
     return -1;
   }
 
   // Form and factorize reduced KKT
   exitflag = init_linsys_solver(&plsh, work->data->P, work->pol->Ared,
-                                work->settings->delta, OSQP_NULL,
-                                work->settings->linsys_solver, 1);
+                                settings->delta, OSQP_NULL,
+                                settings->linsys_solver, 1);
 
   if (exitflag) {
     // Polishing failed
-    work->info->status_polish = -1;
+    info->status_polish = -1;
 
     // Memory clean-up
     if (work->pol->Ared) csc_spfree(work->pol->Ared);
@@ -273,7 +282,7 @@ c_int polish(OSQPWorkspace *work) {
   rhs_red = OSQPVectorf_malloc(work->data->n + mred);
   if (!rhs_red) {
     // Polishing failed
-    work->info->status_polish = -1;
+    info->status_polish = -1;
 
     // Memory clean-up
     csc_spfree(work->pol->Ared);
@@ -281,14 +290,15 @@ c_int polish(OSQPWorkspace *work) {
     return -1;
   }
   form_rhs_red(work, rhs_red);
-    
+
   pol_sol = OSQPVectorf_copy_new(rhs_red);
   pol_sol_xview = OSQPVectorf_view(pol_sol,0,work->data->n);
   pol_sol_yview = OSQPVectorf_view(pol_sol,work->data->n,mred);
-    
+
   if (!pol_sol || !pol_sol_xview || !pol_sol_yview) {
+
     // Polishing failed
-    work->info->status_polish = -1;
+    info->status_polish = -1;
 
     // Memory clean-up
     csc_spfree(work->pol->Ared);
@@ -304,11 +314,11 @@ c_int polish(OSQPWorkspace *work) {
   plsh->solve(plsh, OSQPVectorf_data(pol_sol));
 
   // Perform iterative refinement to compensate for the regularization error
-  exitflag = iterative_refinement(work, plsh, OSQPVectorf_data(pol_sol), OSQPVectorf_data(rhs_red));
+  exitflag = iterative_refinement(solver, plsh, OSQPVectorf_data(pol_sol), OSQPVectorf_data(rhs_red));
 
   if (exitflag) {
     // Polishing failed
-    work->info->status_polish = -1;
+    info->status_polish = -1;
 
     // Memory clean-up
     csc_spfree(work->pol->Ared);
@@ -329,30 +339,30 @@ c_int polish(OSQPWorkspace *work) {
   project_normalcone(work, work->pol->z, work->pol->y);
 
   // Compute primal and dual residuals at the polished solution
-  update_info(work, 0, 1, 1);
+  update_info(solver, 0, 1, 1);
 
   // Check if polish was successful
-  polish_successful = (work->pol->pri_res < work->info->pri_res &&
-                       work->pol->dua_res < work->info->dua_res) || // Residuals
+  polish_successful = (work->pol->pri_res < info->pri_res &&
+                       work->pol->dua_res < info->dua_res) || // Residuals
                                                                     // are
                                                                     // reduced
-                      (work->pol->pri_res < work->info->pri_res &&
-                       work->info->dua_res < 1e-10) ||              // Dual
+                      (work->pol->pri_res < info->pri_res &&
+                       info->dua_res < 1e-10) ||              // Dual
                                                                     // residual
                                                                     // already
                                                                     // tiny
-                      (work->pol->dua_res < work->info->dua_res &&
-                       work->info->pri_res < 1e-10);                // Primal
+                      (work->pol->dua_res < info->dua_res &&
+                       info->pri_res < 1e-10);                // Primal
                                                                     // residual
                                                                     // already
                                                                     // tiny
 
   if (polish_successful) {
     // Update solver information
-    work->info->obj_val       = work->pol->obj_val;
-    work->info->pri_res       = work->pol->pri_res;
-    work->info->dua_res       = work->pol->dua_res;
-    work->info->status_polish = 1;
+    info->obj_val       = work->pol->obj_val;
+    info->pri_res       = work->pol->pri_res;
+    info->dua_res       = work->pol->dua_res;
+    info->status_polish = 1;
 
     // Update (x, z, y) in ADMM iterations
     // NB: z needed for warm starting
@@ -363,10 +373,10 @@ c_int polish(OSQPWorkspace *work) {
     // Print summary
 #ifdef PRINTING
 
-    if (work->settings->verbose) print_polish(work);
+    if (settings->verbose) print_polish(solver);
 #endif /* ifdef PRINTING */
   } else { // Polishing failed
-    work->info->status_polish = -1;
+    info->status_polish = -1;
 
     // TODO: Try to find a better solution on the line connecting ADMM
     //       and polished solution

@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+#include "osqp.h"      //includes API error codes
 #include "lin_alg.h"
 #include "kkt.h"
 

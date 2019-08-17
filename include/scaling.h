@@ -6,28 +6,29 @@ extern "C" {
 # endif // ifdef __cplusplus
 
 // Functions to scale problem data
+# include "osqp.h"
 # include "types.h"
 # include "lin_alg.h"
-# include "constants.h"
+
 
 // Enable data scaling if EMBEDDED is disabled or if EMBEDDED == 2
 # if EMBEDDED != 1
 
 /**
  * Scale problem matrices
- * @param  work Workspace
+ * @param  solver OSQP solver
  * @return      exitflag
  */
-c_int scale_data(OSQPWorkspace *work);
+c_int scale_data(OSQPSolver *solver);
 # endif // if EMBEDDED != 1
 
 
 /**
  * Unscale problem matrices
- * @param  work Workspace
+ * @param  solver OSQP solver
  * @return      exitflag
  */
-c_int unscale_data(OSQPWorkspace *work);
+c_int unscale_data(OSQPSolver *solver);
 
 
 /**

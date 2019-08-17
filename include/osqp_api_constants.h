@@ -1,5 +1,5 @@
-#ifndef CONSTANTS_H
-# define CONSTANTS_H
+#ifndef OSQP_API_CONSTANTS_H
+# define OSQP_API_CONSTANTS_H
 
 # ifdef __cplusplus
 extern "C" {
@@ -9,8 +9,7 @@ extern "C" {
 /*******************
 * OSQP Versioning *
 *******************/
-# define OSQP_VERSION ("0.6.0.dev3") /* string literals automatically null-terminated
-                                   */
+# define OSQP_VERSION ("0.6.0.dev3") /* string literals automatically null-terminated*/
 
 /******************
 * Solver Status  *
@@ -122,4 +121,4 @@ extern const char * OSQP_ERROR_MESSAGE[];
 }
 # endif // ifdef __cplusplus
 
-#endif // ifndef CONSTANTS_H
+#endif // ifndef OSQP_API_CONSTANTS_H

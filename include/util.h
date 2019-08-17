@@ -5,8 +5,8 @@
 extern "C" {
 # endif // ifdef __cplusplus
 
+# include "osqp.h"
 # include "types.h"
-# include "constants.h"
 
 /******************
 * Versioning     *
@@ -47,9 +47,9 @@ void c_strcpy(char       dest[],
 
 /**
  * Print Header before running the algorithm
- * @param work     osqp workspace
+ * @param solver     osqp solver
  */
-void print_setup_header(const OSQPWorkspace *work);
+void print_setup_header(const OSQPSolver *solver);
 
 /**
  * Print header with data to be displayed per iteration
@@ -58,15 +58,15 @@ void print_header(void);
 
 /**
  * Print iteration summary
- * @param work current workspace
+ * @param solver osqp solver
  */
-void print_summary(OSQPWorkspace *work);
+void print_summary(OSQPSolver *solver);
 
 /**
  * Print information after polish
- * @param work current workspace
+ * @param solver osqp solver
  */
-void print_polish(OSQPWorkspace *work);
+void print_polish(OSQPSolver *solver);
 
 /**
  * Print footer when algorithm terminates

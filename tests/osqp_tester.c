@@ -7,6 +7,7 @@
 
 #include "minunit.h"
 #include "osqp.h"
+#include "glob_opts.h"
 #include "osqp_tester.h"
 
 // Include tests

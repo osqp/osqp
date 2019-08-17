@@ -1,5 +1,5 @@
 #include "osqp.h"    // OSQP API
-#include "cs.h"      // CSC data structure
+#include "csc.h"      // CSC data structure
 #include "util.h"    // Utilities for testing
 #include "minunit.h" // Basic testing script header
 

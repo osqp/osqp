@@ -15,34 +15,34 @@ extern "C" {
 
 /**
  * Compute rho estimate from residuals
- * @param work Workspace
+ * @param solver Solver
  * @return     rho estimate
  */
-c_float compute_rho_estimate(OSQPWorkspace *work);
+c_float compute_rho_estimate(OSQPSolver *solver);
 
 /**
  * Adapt rho value based on current unscaled primal/dual residuals
- * @param work Workspace
+ * @param solver Solver
  * @return     Exitflag
  */
-c_int   adapt_rho(OSQPWorkspace *work);
+c_int   adapt_rho(OSQPSolver *solver);
 
 /**
  * Set values of rho vector based on constraint types.
  * returns 1 if any constraint types have been updated,
  * and 0 otherwise.
- * @param work Workspace
+ * @param solver Solver
  */
-c_int    set_rho_vec(OSQPWorkspace *work);
+c_int    set_rho_vec(OSQPSolver *solver);
 
 /**
  * Update values of rho vector based on updated constraints.
  * If the constraints change, update the linear systems solver.
  *
- * @param work Workspace
+ * @param solver Solver
  * @return     Exitflag
  */
-c_int   update_rho_vec(OSQPWorkspace *work);
+c_int   update_rho_vec(OSQPSolver *solver);
 
 # endif // EMBEDDED
 
@@ -57,48 +57,48 @@ void swap_vectors(OSQPVectorf **a,
 
 /**
  * Cold start workspace variables xz and y
- * @param work Workspace
+ * @param solver Solver
  */
-void cold_start(OSQPWorkspace *work);
+void cold_start(OSQPSolver *solver);
 
 
 /**
  * Update x_tilde and z_tilde variable (first ADMM step)
- * @param work [description]
+ * @param solver Solver
  */
-void update_xz_tilde(OSQPWorkspace *work);
+void update_xz_tilde(OSQPSolver *solver);
 
 
 /**
  * Update x (second ADMM step)
  * Update also delta_x (For for dual infeasibility)
- * @param work Workspace
+ * @param solver Solver
  */
-void update_x(OSQPWorkspace *work);
+void update_x(OSQPSolver *solver);
 
 
 /**
  * Update z (third ADMM step)
- * @param work Workspace
+ * @param solver Solver
  */
-void update_z(OSQPWorkspace *work);
+void update_z(OSQPSolver *solver);
 
 
 /**
  * Update y variable (fourth ADMM step)
  * Update also delta_y to check for primal infeasibility
- * @param work Workspace
+ * @param solver Solver
  */
-void update_y(OSQPWorkspace *work);
+void update_y(OSQPSolver *solver);
 
 
 /**
  * Compute objective function from data at value x
- * @param  work OSQPWorkspace structure
+ * @param  solver Solver
  * @param  x    Value x
  * @return      Objective function value
  */
-c_float compute_obj_val(OSQPWorkspace *work,
+c_float compute_obj_val(OSQPSolver *solver,
                         OSQPVectorf   *x);
 
 /**
@@ -109,22 +109,22 @@ c_int has_solution(OSQPInfo *info);
 
 /**
  * Store the QP solution
- * @param work Workspace
+ * @param solver Solver
  */
-void store_solution(OSQPWorkspace *work);
+void store_solution(OSQPSolver *solver);
 
 
 /**
  * Update solver information
- * @param work               Workspace
+ * @param solver             Solver
  * @param iter               Iteration number
  * @param compute_objective  Boolean (if compute the objective or not)
  * @param polish             Boolean (if called from polish)
  */
-void update_info(OSQPWorkspace *work,
-                 c_int          iter,
-                 c_int          compute_objective,
-                 c_int          polish);
+void update_info(OSQPSolver *solver,
+                 c_int       iter,
+                 c_int       compute_objective,
+                 c_int       polish);
 
 
 /**
@@ -148,11 +148,11 @@ void update_status(OSQPInfo *info,
  * If the boolean flag is ON, it checks for approximate conditions (10 x larger
  * tolerances than the ones set)
  *
- * @param  work        Workspace
+ * @param  solver        Solver
  * @param  approximate Boolean
  * @return      Residuals check
  */
-c_int check_termination(OSQPWorkspace *work,
+c_int check_termination(OSQPSolver *solver,
                         c_int          approximate);
 
 

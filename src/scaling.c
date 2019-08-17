@@ -44,7 +44,7 @@ void compute_inf_norm_cols_KKT(const csc *P, const csc *A,
   mat_inf_norm_rows(A, E);
 }
 
-c_int scale_data(OSQPWorkspace *work) {
+c_int scale_data(OSQPSolver* solver) {
   // Scale KKT matrix
   //
   //    [ P   A']
@@ -61,6 +61,9 @@ c_int scale_data(OSQPWorkspace *work) {
   c_float c_temp;     // Cost function scaling
   c_float inf_norm_q; // Infinity norm of q
 
+  OSQPSettings*  settings = solver->settings;
+  OSQPWorkspace* work     = solver->work;
+
   n = work->data->n;
   m = work->data->m;
 
@@ -72,7 +75,7 @@ c_int scale_data(OSQPWorkspace *work) {
   OSQPVectorf_set_scalar(work->scaling->Einv, 1.);
 
 
-  for (i = 0; i < work->settings->scaling; i++) {
+  for (i = 0; i < settings->scaling; i++) {
     //
     // First Ruiz step
     //
@@ -161,7 +164,10 @@ c_int scale_data(OSQPWorkspace *work) {
 
 #endif // EMBEDDED
 
-c_int unscale_data(OSQPWorkspace *work) {
+c_int unscale_data(OSQPSolver *solver) {
+
+  OSQPWorkspace* work     = solver->work;
+
   // Unscale cost
   mat_mult_scalar(work->data->P, work->scaling->cinv);
   mat_premult_diag(work->data->P, OSQPVectorf_data(work->scaling->Dinv));
@@ -184,7 +190,7 @@ c_int unscale_data(OSQPWorkspace *work) {
 }
 
 c_int unscale_solution(OSQPVectorf* usolx, OSQPVectorf* usoly, const OSQPVectorf* solx, const OSQPVectorf* soly, OSQPWorkspace *work) {
-  
+
   // primal
   OSQPVectorf_ew_prod(usolx,solx,work->scaling->D);
 

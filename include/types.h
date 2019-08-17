@@ -6,8 +6,7 @@ extern "C" {
 # endif // ifdef __cplusplus
 
 # include "glob_opts.h"
-# include "constants.h"
-
+# include "osqp.h"
 
 /******************
 * Internal types *
@@ -23,19 +22,6 @@ typedef struct OSQPVectori_ OSQPVectori;
 
 /* float valued vectors*/
 typedef struct OSQPVectorf_ OSQPVectorf;
-
-/**
- *  Matrix in compressed-column or triplet form
- */
-typedef struct {
-  c_int    nzmax; ///< maximum number of entries
-  c_int    m;     ///< number of rows
-  c_int    n;     ///< number of columns
-  c_int   *p;     ///< column pointers (size n+1); col indices (size nzmax) start from 0 when using triplet format (direct KKT matrix formation)
-  c_int   *i;     ///< row indices, size nzmax starting from 0
-  c_float *x;     ///< numerical values, size nzmax
-  c_int    nz;    ///< number of entries in triplet matrix, -1 for csc
-} csc;
 
 /**
  * Linear system solver structure (sublevel objects initialize it differently)
@@ -60,44 +46,7 @@ typedef struct {
   OSQPVectorf *Einv;  ///< dual variable rescaling
 } OSQPScaling;
 
-/**
- * Solution structure
- */
-typedef struct {
-  c_float *x; ///< primal solution
-  c_float *y; ///< Lagrange multiplier associated to \f$l <= Ax <= u\f$
-} OSQPSolution;
 
-
-/**
- * Solver return information
- */
-typedef struct {
-  c_int iter;          ///< number of iterations taken
-  char  status[32];    ///< status string, e.g. 'solved'
-  c_int status_val;    ///< status as c_int, defined in constants.h
-
-# ifndef EMBEDDED
-  c_int status_polish; ///< polish status: successful (1), unperformed (0), (-1) unsuccessful
-# endif // ifndef EMBEDDED
-
-  c_float obj_val;     ///< primal objective
-  c_float pri_res;     ///< norm of primal residual
-  c_float dua_res;     ///< norm of dual residual
-
-# ifdef PROFILING
-  c_float setup_time;  ///< time taken for setup phase (seconds)
-  c_float solve_time;  ///< time taken for solve phase (seconds)
-  c_float update_time; ///< time taken for update phase (seconds)
-  c_float polish_time; ///< time taken for polish phase (seconds)
-  c_float run_time;    ///< total time  (seconds)
-# endif // ifdef PROFILING
-
-# if EMBEDDED != 1
-  c_int   rho_updates;  ///< number of rho updates
-  c_float rho_estimate; ///< best rho estimate so far from residuals
-# endif // if EMBEDDED != 1
-} OSQPInfo;
 
 
 # ifndef EMBEDDED
@@ -129,7 +78,7 @@ typedef struct {
 **********************************/
 
 /**
- * Data structure
+ * QP problem data (possibly internally scaled)
  */
 typedef struct {
   c_int    n; ///< number of variables n
@@ -143,52 +92,9 @@ typedef struct {
 
 
 /**
- * Settings struct
- */
-typedef struct {
-  c_float rho;                    ///< ADMM step rho
-  c_float sigma;                  ///< ADMM step sigma
-  c_int   scaling;                ///< heuristic data scaling iterations; if 0, then disabled.
-
-# if EMBEDDED != 1
-  c_int   adaptive_rho;           ///< boolean, is rho step size adaptive?
-  c_int   adaptive_rho_interval;  ///< number of iterations between rho adaptations; if 0, then it is automatic
-  c_float adaptive_rho_tolerance; ///< tolerance X for adapting rho. The new rho has to be X times larger or 1/X times smaller than the current one to trigger a new factorization.
-#  ifdef PROFILING
-  c_float adaptive_rho_fraction;  ///< interval for adapting rho (fraction of the setup time)
-#  endif // Profiling
-# endif // EMBEDDED != 1
-
-  c_int                   max_iter;      ///< maximum number of iterations
-  c_float                 eps_abs;       ///< absolute convergence tolerance
-  c_float                 eps_rel;       ///< relative convergence tolerance
-  c_float                 eps_prim_inf;  ///< primal infeasibility tolerance
-  c_float                 eps_dual_inf;  ///< dual infeasibility tolerance
-  c_float                 alpha;         ///< relaxation parameter
-  enum linsys_solver_type linsys_solver; ///< linear system solver to use
-
-# ifndef EMBEDDED
-  c_float delta;                         ///< regularization parameter for polishing
-  c_int   polish;                        ///< boolean, polish ADMM solution
-  c_int   polish_refine_iter;            ///< number of iterative refinement steps in polishing
-
-  c_int verbose;                         ///< boolean, write out progress
-# endif // ifndef EMBEDDED
-
-  c_int scaled_termination;              ///< boolean, use scaled termination criteria
-  c_int check_termination;               ///< integer, check termination interval; if 0, then termination checking is disabled
-  c_int warm_start;                      ///< boolean, warm start
-
-# ifdef PROFILING
-  c_float time_limit;                    ///< maximum number of seconds allowed to solve the problem; if 0, then disabled
-# endif // ifdef PROFILING
-} OSQPSettings;
-
-
-/**
  * OSQP Workspace
  */
-typedef struct {
+typedef struct OSQPWorkspace_ {
   /// Problem data to work on (possibly scaled)
   OSQPData *data;
 
@@ -272,13 +178,8 @@ typedef struct {
   OSQPVectorf *D_temp_A; ///< temporary primal variable scaling vectors storing norms of A columns
   OSQPVectorf *E_temp;   ///< temporary constraints scaling vectors storing norms of A' columns
 
-
   /** @} */
-
-  OSQPSettings *settings; ///< problem settings
   OSQPScaling  *scaling;  ///< scaling vectors
-  OSQPSolution *solution; ///< problem solution
-  OSQPInfo     *info;     ///< solver information
 
 # ifdef PROFILING
   OSQPTimer *timer;       ///< timer object

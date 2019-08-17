@@ -70,21 +70,6 @@ static void* c_calloc(size_t num, size_t size) {
 # endif // end ifndef EMBEDDED
 
 
-/* Use customized number representation -----------------------------------   */
-# ifdef DLONG            // long integers
-typedef long long c_int; /* for indices */
-# else // standard integers
-typedef int c_int;       /* for indices */
-# endif /* ifdef DLONG */
-
-
-# ifndef DFLOAT         // Doubles
-typedef double c_float; /* for numerical values  */
-# else                  // Floats
-typedef float c_float;  /* for numerical values  */
-# endif /* ifndef DFLOAT */
-
-
 /* Use customized operations */
 
 # ifndef c_absval

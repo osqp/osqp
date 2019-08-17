@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "osqp.h"
+#include "lin_alg.h"
 #include "minunit.h"
 
 #include "lin_alg/data.h"
@@ -113,7 +114,7 @@ static const char* test_vec_operations() {
 }
 
 static const char* test_mat_operations() {
-  
+
   csc *Ad, *dA; // Matrices used for tests
   // csc *A_ewsq, *A_ewabs;     // Matrices used for tests
 

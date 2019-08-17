@@ -1,3 +1,4 @@
+#include "osqp.h"
 #include "util.h"
 #include "algebra_vector.h"
 
@@ -56,13 +57,17 @@ void print_header(void) {
   c_print("\n");
 }
 
-void print_setup_header(const OSQPWorkspace *work) {
-  OSQPData *data;
-  OSQPSettings *settings;
+void print_setup_header(const OSQPSolver *solver) {
+
+  OSQPWorkspace *work;
+  OSQPData      *data;
+  OSQPSettings  *settings;
+
   c_int nnz; // Number of nonzeros in the problem
 
-  data     = work->data;
-  settings = work->settings;
+  work     = solver->work;
+  data     = solver->work->data;
+  settings = solver->settings;
 
   // Number of nonzeros
   nnz = data->P->p[data->P->n] + data->A->p[data->A->n];
@@ -127,16 +132,18 @@ void print_setup_header(const OSQPWorkspace *work) {
   c_print("\n");
 }
 
-void print_summary(OSQPWorkspace *work) {
-  OSQPInfo *info;
+void print_summary(OSQPSolver *solver) {
 
-  info = work->info;
+  OSQPInfo*      info     = solver->info;
+  OSQPSettings*  settings = solver->settings;
+  OSQPWorkspace* work     = solver->work;
 
   c_print("%4i",     (int)info->iter);
   c_print(" %12.4e", info->obj_val);
   c_print("  %9.2e", info->pri_res);
   c_print("  %9.2e", info->dua_res);
-  c_print("  %9.2e", work->settings->rho);
+  c_print("  %9.2e", settings->rho);
+
 # ifdef PROFILING
 
   if (work->first_run) {
@@ -152,10 +159,10 @@ void print_summary(OSQPWorkspace *work) {
   work->summary_printed = 1; // Summary has been printed
 }
 
-void print_polish(OSQPWorkspace *work) {
-  OSQPInfo *info;
+void print_polish(OSQPSolver *solver) {
 
-  info = work->info;
+  OSQPInfo*      info = solver->info;
+  OSQPWorkspace* work = solver->work;
 
   c_print("%4s",     "plsh");
   c_print(" %12.4e", info->obj_val);
@@ -218,7 +225,7 @@ void print_footer(OSQPInfo *info, c_int polish) {
 
 #ifndef EMBEDDED
 
-OSQPSettings* copy_settings(const OSQPSettings *settings) {
+  OSQPSettings* copy_settings(const OSQPSettings *settings) {
   OSQPSettings *new = c_malloc(sizeof(OSQPSettings));
 
   if (!new) return OSQP_NULL;
@@ -463,4 +470,4 @@ void print_vec_int(c_int *x, c_int n, const char *name) {
 
 #endif // PRINTING
 
-#endif // DEBUG MODE  
+#endif // DEBUG MODE

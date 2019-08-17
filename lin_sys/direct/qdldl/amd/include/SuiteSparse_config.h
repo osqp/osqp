@@ -42,7 +42,7 @@
 extern "C" {
 #endif
 
-#include "glob_opts.h"
+#include "osqp.h"
 #include <limits.h>
 #include <stdlib.h>
 

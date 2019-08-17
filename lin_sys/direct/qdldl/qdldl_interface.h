@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "types.h"
+#include "osqp.h"
 #include "qdldl_types.h"
 
 /**

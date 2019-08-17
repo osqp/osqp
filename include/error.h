@@ -7,7 +7,7 @@
 extern "C" {
 # endif // ifdef __cplusplus
 
-# include "types.h"
+# include "osqp.h"
 
 
 /* OSQP error macro */

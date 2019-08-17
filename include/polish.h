@@ -6,17 +6,17 @@
 extern "C" {
 # endif // ifdef __cplusplus
 
-
+# include "osqp.h"
 # include "types.h"
 
 /**
  * Solution polish: Solve equality constrained QP with assumed active
  *constraints
- * @param  work Workspace
+ * @param  solver OSQP solver
  * @return      Exitflag:  0: Factorization successful
  *                         1: Factorization unsuccessful
  */
-c_int polish(OSQPWorkspace *work);
+c_int polish(OSQPSolver *solver);
 
 
 # ifdef __cplusplus

@@ -5,6 +5,7 @@
 extern "C" {
 # endif // ifdef __cplusplus
 
+# include "osqp.h"
 # include "types.h"
 # include "lin_alg.h"
 

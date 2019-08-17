@@ -1,8 +1,9 @@
+#include "glob_opts.h"
 #include "osqp.h"
+#include "csc.h"
 #include "auxil.h"
 #include "util.h"
 #include "scaling.h"
-#include "glob_opts.h"
 #include "error.h"
 
 
@@ -72,7 +73,7 @@ void osqp_set_default_settings(OSQPSettings *settings) {
 #ifndef EMBEDDED
 
 
-c_int osqp_setup(OSQPWorkspace** workp,
+c_int osqp_setup(OSQPSolver** solverp,
                  const csc* P,
                  const c_float* q,
                  const csc* A,
@@ -83,7 +84,9 @@ c_int osqp_setup(OSQPWorkspace** workp,
                  const OSQPSettings *settings) {
 
   c_int exitflag;
-  OSQPWorkspace * work;
+
+  OSQPSolver*    solver;
+  OSQPWorkspace* work;
 
   // Validate data
   if (validate_data(P,q,A,l,u,m,n)) return osqp_error(OSQP_DATA_VALIDATION_ERROR);
@@ -91,10 +94,15 @@ c_int osqp_setup(OSQPWorkspace** workp,
   // Validate settings
   if (validate_settings(settings)) return osqp_error(OSQP_SETTINGS_VALIDATION_ERROR);
 
+  // Allocate empty solver
+  solver = c_calloc(1, sizeof(OSQPSolver));
+  if (!(solver)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  *solverp = solver;
+
   // Allocate empty workspace
-  work = c_calloc(1, sizeof(OSQPWorkspace));
+  work   = c_calloc(1, sizeof(OSQPWorkspace));
   if (!(work)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  *workp = work;
+  solver->work = work;
 
   // Start and allocate directly timer
 # ifdef PROFILING
@@ -149,7 +157,7 @@ c_int osqp_setup(OSQPWorkspace** workp,
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Initialize variables x, y, z to 0
-  cold_start(work);
+  cold_start(solver);
 
   // Primal and dual residuals variables
   work->Ax  = OSQPVectorf_calloc(m);
@@ -173,8 +181,8 @@ c_int osqp_setup(OSQPWorkspace** workp,
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Copy settings
-  work->settings = copy_settings(settings);
-  if (!(work->settings)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  solver->settings = copy_settings(settings);
+  if (!(solver->settings)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Perform scaling
   if (settings->scaling) {
@@ -198,23 +206,23 @@ c_int osqp_setup(OSQPWorkspace** workp,
       return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
     // Scale data
-    scale_data(work);
+    scale_data(solver);
   } else {
     work->scaling = OSQP_NULL;
   }
 
   // Set type of constraints.  Ignore return value
   // because we will definitely factor KKT.
-  set_rho_vec(work);
+  set_rho_vec(solver);
 
   // Load linear system solver
-  if (load_linsys_solver(work->settings->linsys_solver)) return osqp_error(OSQP_LINSYS_SOLVER_LOAD_ERROR);
+  if (load_linsys_solver(settings->linsys_solver)) return osqp_error(OSQP_LINSYS_SOLVER_LOAD_ERROR);
 
   // Initialize linear system solver structure
   exitflag = init_linsys_solver(&(work->linsys_solver), work->data->P, work->data->A,
-                                work->settings->sigma,
+                                settings->sigma,
                                 OSQPVectorf_data(work->rho_vec),
-                                work->settings->linsys_solver, 0);
+                                settings->linsys_solver, 0);
 
   if (exitflag) {
     return osqp_error(exitflag);
@@ -237,35 +245,35 @@ c_int osqp_setup(OSQPWorkspace** workp,
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Allocate solution
-  work->solution = c_calloc(1, sizeof(OSQPSolution));
-  if (!(work->solution)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  work->solution->x = c_calloc(1, n * sizeof(c_float));
-  work->solution->y = c_calloc(1, m * sizeof(c_float));
-  if (!(work->solution->x))      return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (m && !(work->solution->y)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  solver->solution = c_calloc(1, sizeof(OSQPSolution));
+  if (!(solver->solution)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  solver->solution->x = c_calloc(1, n * sizeof(c_float));
+  solver->solution->y = c_calloc(1, m * sizeof(c_float));
+  if (!(solver->solution->x))      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  if (m && !(solver->solution->y)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Allocate and initialize information
-  work->info = c_calloc(1, sizeof(OSQPInfo));
-  if (!(work->info)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  work->info->status_polish = 0;              // Polishing not performed
-  update_status(work->info, OSQP_UNSOLVED);
+  solver->info = c_calloc(1, sizeof(OSQPInfo));
+  if (!(solver->info)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  solver->info->status_polish = 0;              // Polishing not performed
+  update_status(solver->info, OSQP_UNSOLVED);
 # ifdef PROFILING
-  work->info->solve_time  = 0.0;                   // Solve time to zero
-  work->info->update_time = 0.0;                   // Update time to zero
-  work->info->polish_time = 0.0;                   // Polish time to zero
-  work->info->run_time    = 0.0;                   // Total run time to zero
-  work->info->setup_time  = osqp_toc(work->timer); // Update timer information
+  solver->info->solve_time  = 0.0;                   // Solve time to zero
+  solver->info->update_time = 0.0;                   // Update time to zero
+  solver->info->polish_time = 0.0;                   // Polish time to zero
+  solver->info->run_time    = 0.0;                   // Total run time to zero
+  solver->info->setup_time  = osqp_toc(work->timer); // Update timer information
 
   work->first_run         = 1;
   work->clear_update_time = 0;
   work->rho_update_from_solve = 0;
 # endif /* ifdef PROFILING */
-  work->info->rho_updates  = 0;                    // Rho updates set to 0
-  work->info->rho_estimate = work->settings->rho;  // Best rho estimate
+  solver->info->rho_updates  = 0;                      // Rho updates set to 0
+  solver->info->rho_estimate = solver->settings->rho;  // Best rho estimate
 
   // Print header
 # ifdef PRINTING
-  if (work->settings->verbose) print_setup_header(work);
+  if (solver->settings->verbose) print_setup_header(solver);
   work->summary_printed = 0; // Initialize last summary  to not printed
 # endif /* ifdef PRINTING */
 
@@ -273,15 +281,15 @@ c_int osqp_setup(OSQPWorkspace** workp,
   // If adaptive rho and automatic interval, but profiling disabled, we need to
   // set the interval to a default value
 # ifndef PROFILING
-  if (work->settings->adaptive_rho && !work->settings->adaptive_rho_interval) {
-    if (work->settings->check_termination) {
+  if (solver->settings->adaptive_rho && !solver->settings->adaptive_rho_interval) {
+    if (solver->settings->check_termination) {
       // If check_termination is enabled, we set it to a multiple of the check
       // termination interval
-      work->settings->adaptive_rho_interval = ADAPTIVE_RHO_MULTIPLE_TERMINATION *
-                                              work->settings->check_termination;
+      solver->settings->adaptive_rho_interval = ADAPTIVE_RHO_MULTIPLE_TERMINATION *
+                                              solver->settings->check_termination;
     } else {
       // If check_termination is disabled we set it to a predefined fix number
-      work->settings->adaptive_rho_interval = ADAPTIVE_RHO_FIXED;
+      solver->settings->adaptive_rho_interval = ADAPTIVE_RHO_FIXED;
     }
   }
 # endif /* ifndef PROFILING */
@@ -293,12 +301,13 @@ c_int osqp_setup(OSQPWorkspace** workp,
 #endif // #ifndef EMBEDDED
 
 
-c_int osqp_solve(OSQPWorkspace *work) {
+c_int osqp_solve(OSQPSolver *solver) {
 
   c_int exitflag;
   c_int iter;
   c_int compute_cost_function; // Boolean: compute the cost function in the loop or not
   c_int can_check_termination; // Boolean: check termination or not
+  OSQPWorkspace* work;
 
 #ifdef PROFILING
   c_float temp_run_time;       // Temporary variable to store current run time
@@ -308,12 +317,13 @@ c_int osqp_solve(OSQPWorkspace *work) {
   c_int can_print;             // Boolean whether you can print
 #endif /* ifdef PRINTING */
 
-  // Check if workspace has been initialized
-  if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  // Check if solver has been initialized
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  work = solver->work;
 
 #ifdef PROFILING
   if (work->clear_update_time == 1)
-    work->info->update_time = 0.0;
+    solver->info->update_time = 0.0;
   work->rho_update_from_solve = 1;
 #endif /* ifdef PROFILING */
 
@@ -321,10 +331,10 @@ c_int osqp_solve(OSQPWorkspace *work) {
   exitflag              = 0;
   can_check_termination = 0;
 #ifdef PRINTING
-  can_print = work->settings->verbose;
+  can_print = solver->settings->verbose;
 #endif /* ifdef PRINTING */
 #ifdef PRINTING
-  compute_cost_function = work->settings->verbose; // Compute cost function only
+  compute_cost_function = solver->settings->verbose;       // Compute cost function only
                                                    // if verbose is on
 #else /* ifdef PRINTING */
   compute_cost_function = 0;                       // Never compute cost
@@ -342,7 +352,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
 
 #ifdef PRINTING
 
-  if (work->settings->verbose) {
+  if (solver->settings->verbose) {
     // Print Header for every column
     print_header();
   }
@@ -355,28 +365,28 @@ c_int osqp_solve(OSQPWorkspace *work) {
 #endif /* ifdef CTRLC */
 
   // Initialize variables (cold start or warm start depending on settings)
-  if (!work->settings->warm_start) cold_start(work);  // If not warm start ->
-                                                      // set x, z, y to zero
+  if (!solver->settings->warm_start) cold_start(solver);  // If not warm start ->
+                                                          // set x, z, y to zero
 
   // Main ADMM algorithm
 
-  for (iter = 1; iter <= work->settings->max_iter; iter++) {
+  for (iter = 1; iter <= solver->settings->max_iter; iter++) {
     // Update x_prev, z_prev (preallocated, no malloc)
     swap_vectors(&(work->x), &(work->x_prev));
     swap_vectors(&(work->z), &(work->z_prev));
 
     /* ADMM STEPS */
     /* Compute \tilde{x}^{k+1}, \tilde{z}^{k+1} */
-    update_xz_tilde(work);
+    update_xz_tilde(solver);
 
     /* Compute x^{k+1} */
-    update_x(work);
+    update_x(solver);
 
     /* Compute z^{k+1} */
-    update_z(work);
+    update_z(solver);
 
     /* Compute y^{k+1} */
-    update_y(work);
+    update_y(solver);
 
     /* End of ADMM Steps */
 
@@ -384,7 +394,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
 
     // Check the interrupt signal
     if (osqp_is_interrupted()) {
-      update_status(work->info, OSQP_SIGINT);
+      update_status(solver->info, OSQP_SIGINT);
 # ifdef PRINTING
       c_print("Solver interrupted\n");
 # endif /* ifdef PRINTING */
@@ -398,18 +408,18 @@ c_int osqp_solve(OSQPWorkspace *work) {
     // Check if solver time_limit is enabled. In case, check if the current
     // run time is more than the time_limit option.
     if (work->first_run) {
-      temp_run_time = work->info->setup_time + osqp_toc(work->timer);
+      temp_run_time = solver->info->setup_time + osqp_toc(work->timer);
     }
     else {
       temp_run_time = osqp_toc(work->timer);
     }
 
-    if (work->settings->time_limit &&
-        (temp_run_time >= work->settings->time_limit)) {
-      update_status(work->info, OSQP_TIME_LIMIT_REACHED);
+    if (solver->settings->time_limit &&
+        (temp_run_time >= solver->settings->time_limit)) {
+      update_status(solver->info, OSQP_TIME_LIMIT_REACHED);
 # ifdef PRINTING
 
-      if (work->settings->verbose) c_print("run time limit reached\n");
+      if (solver->settings->verbose) c_print("run time limit reached\n");
 # endif /* ifdef PRINTING */
       exitflag = 1;
       goto exit;
@@ -418,28 +428,28 @@ c_int osqp_solve(OSQPWorkspace *work) {
 
 
     // Can we check for termination ?
-    can_check_termination = work->settings->check_termination &&
-                            (iter % work->settings->check_termination == 0);
+    can_check_termination = solver->settings->check_termination &&
+                            (iter % solver->settings->check_termination == 0);
 
 #ifdef PRINTING
 
     // Can we print ?
-    can_print = work->settings->verbose &&
+    can_print = solver->settings->verbose &&
                 ((iter % PRINT_INTERVAL == 0) || (iter == 1));
 
     if (can_check_termination || can_print) { // Update status in either of
                                               // these cases
       // Update information
-      update_info(work, iter, compute_cost_function, 0);
+      update_info(solver, iter, compute_cost_function, 0);
 
       if (can_print) {
         // Print summary
-        print_summary(work);
+        print_summary(solver);
       }
 
       if (can_check_termination) {
         // Check algorithm termination
-        if (check_termination(work, 0)) {
+        if (check_termination(solver, 0)) {
           // Terminate algorithm
           break;
         }
@@ -449,10 +459,10 @@ c_int osqp_solve(OSQPWorkspace *work) {
 
     if (can_check_termination) {
       // Update information and compute also objective value
-      update_info(work, iter, compute_cost_function, 0);
+      update_info(solver, iter, compute_cost_function, 0);
 
       // Check algorithm termination
-      if (check_termination(work, 0)) {
+      if (check_termination(solver, 0)) {
         // Terminate algorithm
         break;
       }
@@ -466,57 +476,58 @@ c_int osqp_solve(OSQPWorkspace *work) {
     // If adaptive rho with automatic interval, check if the solve time is a
     // certain fraction
     // of the setup time.
-    if (work->settings->adaptive_rho && !work->settings->adaptive_rho_interval) {
+    if (solver->settings->adaptive_rho && !solver->settings->adaptive_rho_interval) {
       // Check time
       if (osqp_toc(work->timer) >
-          work->settings->adaptive_rho_fraction * work->info->setup_time) {
+          solver->settings->adaptive_rho_fraction * solver->info->setup_time) {
         // Enough time has passed. We now get the number of iterations between
         // the updates.
-        if (work->settings->check_termination) {
+        if (solver->settings->check_termination) {
           // If check_termination is enabled, we round the number of iterations
           // between
           // rho updates to the closest multiple of check_termination
-          work->settings->adaptive_rho_interval = (c_int)c_roundmultiple(iter,
-                                                                         work->settings->check_termination);
-        } else {
+          solver->settings->adaptive_rho_interval =
+          (c_int)c_roundmultiple(iter, solver->settings->check_termination);
+         }
+         else {
           // If check_termination is disabled, we round the number of iterations
           // between
           // updates to the closest multiple of the default check_termination
           // interval.
-          work->settings->adaptive_rho_interval = (c_int)c_roundmultiple(iter,
+          solver->settings->adaptive_rho_interval = (c_int)c_roundmultiple(iter,
                                                                          CHECK_TERMINATION);
         }
 
         // Make sure the interval is not 0 and at least check_termination times
-        work->settings->adaptive_rho_interval = c_max(
-          work->settings->adaptive_rho_interval,
-          work->settings->check_termination);
+          solver->settings->adaptive_rho_interval = c_max(
+          solver->settings->adaptive_rho_interval,
+          solver->settings->check_termination);
       } // If time condition is met
     }   // If adaptive rho enabled and interval set to auto
 # endif // PROFILING
 
     // Adapt rho
-    if (work->settings->adaptive_rho &&
-        work->settings->adaptive_rho_interval &&
-        (iter % work->settings->adaptive_rho_interval == 0)) {
+    if (solver->settings->adaptive_rho &&
+        solver->settings->adaptive_rho_interval &&
+        (iter % solver->settings->adaptive_rho_interval == 0)) {
       // Update info with the residuals if it hasn't been done before
 # ifdef PRINTING
 
       if (!can_check_termination && !can_print) {
         // Information has not been computed neither for termination or printing
         // reasons
-        update_info(work, iter, compute_cost_function, 0);
+        update_info(solver, iter, compute_cost_function, 0);
       }
 # else /* ifdef PRINTING */
 
       if (!can_check_termination) {
         // Information has not been computed before for termination check
-        update_info(work, iter, compute_cost_function, 0);
+        update_info(solver, iter, compute_cost_function, 0);
       }
 # endif /* ifdef PRINTING */
 
       // Actually update rho
-      if (adapt_rho(work)) {
+      if (adapt_rho(solver)) {
 # ifdef PRINTING
         c_eprint("Failed rho update");
 # endif // PRINTING
@@ -538,75 +549,75 @@ c_int osqp_solve(OSQPWorkspace *work) {
     if (!can_print) {
       // Update info only if it hasn't been updated before for printing
       // reasons
-      update_info(work, iter - 1, compute_cost_function, 0);
+      update_info(solver, iter - 1, compute_cost_function, 0);
     }
 #else /* ifdef PRINTING */
 
     // If no printing is enabled, update info directly
-    update_info(work, iter - 1, compute_cost_function, 0);
+    update_info(solver, iter - 1, compute_cost_function, 0);
 #endif /* ifdef PRINTING */
 
 #ifdef PRINTING
 
     /* Print summary */
-    if (work->settings->verbose && !work->summary_printed) print_summary(work);
+    if (solver->settings->verbose && !work->summary_printed) print_summary(solver);
 #endif /* ifdef PRINTING */
 
     /* Check whether a termination criterion is triggered */
-    check_termination(work, 0);
+    check_termination(solver, 0);
 
   }
 
   // Compute objective value in case it was not
   // computed during the iterations
-  if (!compute_cost_function && has_solution(work->info)){
-    work->info->obj_val = compute_obj_val(work, work->x);
+  if (!compute_cost_function && has_solution(solver->info)){
+    solver->info->obj_val = compute_obj_val(solver, work->x);
   }
 
 
 #ifdef PRINTING
   /* Print summary for last iteration */
-  if (work->settings->verbose && !work->summary_printed) {
-    print_summary(work);
+  if (solver->settings->verbose && !work->summary_printed) {
+    print_summary(solver);
   }
 #endif /* ifdef PRINTING */
 
   /* if max iterations reached, change status accordingly */
-  if (work->info->status_val == OSQP_UNSOLVED) {
-    if (!check_termination(work, 1)) { // Try to check for approximate
-      update_status(work->info, OSQP_MAX_ITER_REACHED);
+  if (solver->info->status_val == OSQP_UNSOLVED) {
+    if (!check_termination(solver, 1)) { // Try to check for approximate
+      update_status(solver->info, OSQP_MAX_ITER_REACHED);
     }
   }
 
 #if EMBEDDED != 1
   /* Update rho estimate */
-  work->info->rho_estimate = compute_rho_estimate(work);
+  solver->info->rho_estimate = compute_rho_estimate(solver);
 #endif /* if EMBEDDED != 1 */
 
   /* Update solve time */
 #ifdef PROFILING
-  work->info->solve_time = osqp_toc(work->timer);
+  solver->info->solve_time = osqp_toc(work->timer);
 #endif /* ifdef PROFILING */
 
 
 #ifndef EMBEDDED
   // Polish the obtained solution
-  if (work->settings->polish && (work->info->status_val == OSQP_SOLVED))
-    polish(work);
+  if (solver->settings->polish && (solver->info->status_val == OSQP_SOLVED))
+    polish(solver);
 #endif /* ifndef EMBEDDED */
 
 #ifdef PROFILING
   /* Update total time */
   if (work->first_run) {
     // total time: setup + solve + polish
-    work->info->run_time = work->info->setup_time +
-                           work->info->solve_time +
-                           work->info->polish_time;
+    solver->info->run_time = solver->info->setup_time +
+                             solver->info->solve_time +
+                             solver->info->polish_time;
   } else {
     // total time: update + solve + polish
-    work->info->run_time = work->info->update_time +
-                           work->info->solve_time +
-                           work->info->polish_time;
+    solver->info->run_time = solver->info->update_time +
+                             solver->info->solve_time +
+                             solver->info->polish_time;
   }
 
   // Indicate that the solve function has already been executed
@@ -621,11 +632,11 @@ c_int osqp_solve(OSQPWorkspace *work) {
 
 #ifdef PRINTING
   /* Print final footer */
-  if (work->settings->verbose) print_footer(work->info, work->settings->polish);
+  if (solver->settings->verbose) print_footer(solver->info, solver->settings->polish);
 #endif /* ifdef PRINTING */
 
   // Store solution
-  store_solution(work);
+  store_solution(solver);
 
 
 // Define exit flag for quitting function
@@ -644,8 +655,14 @@ exit:
 
 #ifndef EMBEDDED
 
-c_int osqp_cleanup(OSQPWorkspace *work) {
+c_int osqp_cleanup(OSQPSolver *solver) {
+
   c_int exitflag = 0;
+  OSQPWorkspace* work;
+
+  if(!solver) return 0;   //exit on null
+
+  work = solver->work;
 
   if (work) { // If workspace has been allocated
     // Free Data
@@ -659,7 +676,7 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
     }
 
     // Free scaling
-    if (work->settings->scaling) {
+    if (solver->settings->scaling) {
       if (work->scaling){
         OSQPVectorf_free(work->scaling->D);
         OSQPVectorf_free(work->scaling->Dinv);
@@ -682,7 +699,7 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
     }
 
     // Unload linear system solver after free
-    exitflag = unload_linsys_solver(work->settings->linsys_solver);
+    exitflag = unload_linsys_solver(solver->settings->linsys_solver);
 
 #ifndef EMBEDDED
     // Free active constraints structure
@@ -722,17 +739,17 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
     OSQPVectorf_free(work->Adelta_x);
 
     // Free Settings
-    if (work->settings) c_free(work->settings);
+    if (solver->settings) c_free(solver->settings);
 
     // Free solution
-    if (work->solution) {
-      if (work->solution->x) c_free(work->solution->x);
-      if (work->solution->y) c_free(work->solution->y);
-      c_free(work->solution);
+    if (solver->solution) {
+      if (solver->solution->x) c_free(solver->solution->x);
+      if (solver->solution->y) c_free(solver->solution->y);
+      c_free(solver->solution);
     }
 
     // Free information
-    if (work->info) c_free(work->info);
+    if (solver->info) c_free(solver->info);
 
 # ifdef PROFILING
     // Free timer
@@ -743,6 +760,9 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
     c_free(work);
   }
 
+  // Free solver
+  c_free(solver);
+
   return exitflag;
 }
 
@@ -752,15 +772,18 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
 /************************
 * Update problem data  *
 ************************/
-c_int osqp_update_lin_cost(OSQPWorkspace *work, const c_float *q_new) {
+c_int osqp_update_lin_cost(OSQPSolver *solver, const c_float *q_new) {
+
+  OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  work = solver->work;
 
 #ifdef PROFILING
   if (work->clear_update_time == 1) {
     work->clear_update_time = 0;
-    work->info->update_time = 0.0;
+    solver->info->update_time = 0.0;
   }
   osqp_tic(work->timer); // Start timer
 #endif /* ifdef PROFILING */
@@ -769,33 +792,35 @@ c_int osqp_update_lin_cost(OSQPWorkspace *work, const c_float *q_new) {
   OSQPVectorf_from_raw(work->data->q, q_new);
 
   // Scaling
-  if (work->settings->scaling) {
+  if (solver->settings->scaling) {
     OSQPVectorf_ew_prod(work->data->q, work->data->q, work->scaling->D);
     OSQPVectorf_mult_scalar(work->data->q, work->scaling->c);
   }
 
   // Reset solver information
-  reset_info(work->info);
+  reset_info(solver->info);
 
 #ifdef PROFILING
-  work->info->update_time += osqp_toc(work->timer);
+  solver->info->update_time += osqp_toc(work->timer);
 #endif /* ifdef PROFILING */
 
   return 0;
 }
 
-c_int osqp_update_bounds(OSQPWorkspace *work,
+c_int osqp_update_bounds(OSQPSolver *solver,
                          const c_float *l_new,
                          const c_float *u_new) {
   c_int i, exitflag = 0;
+  OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  work = solver->work;
 
 #ifdef PROFILING
   if (work->clear_update_time == 1) {
-    work->clear_update_time = 0;
-    work->info->update_time = 0.0;
+    work->clear_update_time    = 0;
+    solver->info->update_time  = 0.0;
   }
   osqp_tic(work->timer); // Start timer
 #endif /* ifdef PROFILING */
@@ -815,36 +840,39 @@ c_int osqp_update_bounds(OSQPWorkspace *work,
   OSQPVectorf_from_raw(work->data->u, u_new);
 
   // Scaling
-  if (work->settings->scaling) {
+  if (solver->settings->scaling) {
     OSQPVectorf_ew_prod(work->data->l, work->data->l, work->scaling->E);
     OSQPVectorf_ew_prod(work->data->u, work->data->u, work->scaling->E);
   }
 
   // Reset solver information
-  reset_info(work->info);
+  reset_info(solver->info);
 
 #if EMBEDDED != 1
   // Update rho_vec and refactor if constraints type changes
-  exitflag = update_rho_vec(work);
+  exitflag = update_rho_vec(solver);
 #endif // EMBEDDED != 1
 
 #ifdef PROFILING
-  work->info->update_time += osqp_toc(work->timer);
+  solver->info->update_time += osqp_toc(work->timer);
 #endif /* ifdef PROFILING */
 
   return exitflag;
 }
 
-c_int osqp_update_lower_bound(OSQPWorkspace *work, const c_float *l_new) {
+c_int osqp_update_lower_bound(OSQPSolver *solver, const c_float *l_new) {
+
   c_int exitflag = 0;
+  OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  work = solver->work;
 
 #ifdef PROFILING
   if (work->clear_update_time == 1) {
     work->clear_update_time = 0;
-    work->info->update_time = 0.0;
+    solver->info->update_time = 0.0;
   }
   osqp_tic(work->timer); // Start timer
 #endif /* ifdef PROFILING */
@@ -853,7 +881,7 @@ c_int osqp_update_lower_bound(OSQPWorkspace *work, const c_float *l_new) {
   OSQPVectorf_from_raw(work->data->l, l_new);
 
   // Scaling
-  if (work->settings->scaling) {
+  if (solver->settings->scaling) {
     OSQPVectorf_ew_prod(work->data->l, work->data->l, work->scaling->E);
   }
 
@@ -866,30 +894,33 @@ c_int osqp_update_lower_bound(OSQPWorkspace *work, const c_float *l_new) {
   }
 
   // Reset solver information
-  reset_info(work->info);
+  reset_info(solver->info);
 
 #if EMBEDDED != 1
   // Update rho_vec and refactor if constraints type changes
-  exitflag = update_rho_vec(work);
+  exitflag = update_rho_vec(solver);
 #endif // EMBEDDED ! =1
 
 #ifdef PROFILING
-  work->info->update_time += osqp_toc(work->timer);
+  solver->info->update_time += osqp_toc(work->timer);
 #endif /* ifdef PROFILING */
 
   return exitflag;
 }
 
-c_int osqp_update_upper_bound(OSQPWorkspace *work, const c_float *u_new) {
+c_int osqp_update_upper_bound(OSQPSolver *solver, const c_float *u_new) {
+
   c_int exitflag = 0;
+  OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  work = solver->work;
 
 #ifdef PROFILING
   if (work->clear_update_time == 1) {
-    work->clear_update_time = 0;
-    work->info->update_time = 0.0;
+    work->clear_update_time   = 0;
+    solver->info->update_time = 0.0;
   }
   osqp_tic(work->timer); // Start timer
 #endif /* ifdef PROFILING */
@@ -898,7 +929,7 @@ c_int osqp_update_upper_bound(OSQPWorkspace *work, const c_float *u_new) {
   OSQPVectorf_from_raw(work->data->u, u_new);
 
   // Scaling
-  if (work->settings->scaling) {
+  if (solver->settings->scaling) {
     OSQPVectorf_ew_prod(work->data->u, work->data->u, work->scaling->E);
   }
 
@@ -911,34 +942,37 @@ c_int osqp_update_upper_bound(OSQPWorkspace *work, const c_float *u_new) {
   }
 
   // Reset solver information
-  reset_info(work->info);
+  reset_info(solver->info);
 
 #if EMBEDDED != 1
   // Update rho_vec and refactor if constraints type changes
-  exitflag = update_rho_vec(work);
+  exitflag = update_rho_vec(solver);
 #endif // EMBEDDED != 1
 
 #ifdef PROFILING
-  work->info->update_time += osqp_toc(work->timer);
+  solver->info->update_time += osqp_toc(work->timer);
 #endif /* ifdef PROFILING */
 
   return exitflag;
 }
 
-c_int osqp_warm_start(OSQPWorkspace *work, const c_float *x, const c_float *y) {
+c_int osqp_warm_start(OSQPSolver *solver, const c_float *x, const c_float *y) {
+
+  OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  work = solver->work;
 
   // Update warm_start setting to true
-  if (!work->settings->warm_start) work->settings->warm_start = 1;
+  if (!solver->settings->warm_start) solver->settings->warm_start = 1;
 
   // Copy primal and dual variables into the iterates
   OSQPVectorf_from_raw(work->x, x);
   OSQPVectorf_from_raw(work->y, y);
 
   // Scale iterates
-  if (work->settings->scaling) {
+  if (solver->settings->scaling) {
     OSQPVectorf_ew_prod(work->x, work->x, work->scaling->Dinv);
     OSQPVectorf_ew_prod(work->y, work->y, work->scaling->Einv);
     OSQPVectorf_mult_scalar(work->y, work->scaling->c);
@@ -950,19 +984,22 @@ c_int osqp_warm_start(OSQPWorkspace *work, const c_float *x, const c_float *y) {
   return 0;
 }
 
-c_int osqp_warm_start_x(OSQPWorkspace *work, const c_float *x) {
+c_int osqp_warm_start_x(OSQPSolver *solver, const c_float *x) {
+
+  OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  work = solver->work;
 
   // Update warm_start setting to true
-  if (!work->settings->warm_start) work->settings->warm_start = 1;
+  if (!solver->settings->warm_start) solver->settings->warm_start = 1;
 
   // Copy primal variable into the iterate x
   OSQPVectorf_from_raw(work->x, x);
 
   // Scale iterate
-  if (work->settings->scaling) {
+  if (solver->settings->scaling) {
     OSQPVectorf_ew_prod(work->x, work->x, work->scaling->Dinv);
   }
 
@@ -972,19 +1009,22 @@ c_int osqp_warm_start_x(OSQPWorkspace *work, const c_float *x) {
   return 0;
 }
 
-c_int osqp_warm_start_y(OSQPWorkspace *work, const c_float *y) {
+c_int osqp_warm_start_y(OSQPSolver *solver, const c_float *y) {
+
+  OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  work = solver->work;
 
   // Update warm_start setting to true
-  if (!work->settings->warm_start) work->settings->warm_start = 1;
+  if (!solver->settings->warm_start) solver->settings->warm_start = 1;
 
   // Copy primal variable into the iterate y
   OSQPVectorf_from_raw(work->y, y);
 
   // Scale iterate
-  if (work->settings->scaling) {
+  if (solver->settings->scaling) {
     OSQPVectorf_ew_prod(work->y, work->y, work->scaling->Einv);
     OSQPVectorf_mult_scalar(work->y, work->scaling->c);
   }
@@ -995,21 +1035,23 @@ c_int osqp_warm_start_y(OSQPWorkspace *work, const c_float *y) {
 
 #if EMBEDDED != 1
 
-c_int osqp_update_P(OSQPWorkspace *work,
+c_int osqp_update_P(OSQPSolver    *solver,
                     const c_float *Px_new,
                     const c_int   *Px_new_idx,
                     c_int          P_new_n) {
   c_int i;        // For indexing
   c_int exitflag; // Exit flag
   c_int nnzP;     // Number of nonzeros in P
+  OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  work = solver->work;
 
 #ifdef PROFILING
   if (work->clear_update_time == 1) {
     work->clear_update_time = 0;
-    work->info->update_time = 0.0;
+    solver->info->update_time = 0.0;
   }
   osqp_tic(work->timer); // Start timer
 #endif /* ifdef PROFILING */
@@ -1029,9 +1071,9 @@ c_int osqp_update_P(OSQPWorkspace *work,
     }
   }
 
-  if (work->settings->scaling) {
+  if (solver->settings->scaling) {
     // Unscale data
-    unscale_data(work);
+    unscale_data(solver);
   }
 
   // Update P elements
@@ -1047,9 +1089,9 @@ c_int osqp_update_P(OSQPWorkspace *work,
     }
   }
 
-  if (work->settings->scaling) {
+  if (solver->settings->scaling) {
     // Scale data
-    scale_data(work);
+    scale_data(solver);
   }
 
   // Update linear system structure with new data
@@ -1058,7 +1100,7 @@ c_int osqp_update_P(OSQPWorkspace *work,
                                                   work->data->A);
 
   // Reset solver information
-  reset_info(work->info);
+  reset_info(solver->info);
 
 # ifdef PRINTING
 
@@ -1068,28 +1110,30 @@ c_int osqp_update_P(OSQPWorkspace *work,
 # endif /* ifdef PRINTING */
 
 #ifdef PROFILING
-  work->info->update_time += osqp_toc(work->timer);
+  solver->info->update_time += osqp_toc(work->timer);
 #endif /* ifdef PROFILING */
 
   return exitflag;
 }
 
 
-c_int osqp_update_A(OSQPWorkspace *work,
+c_int osqp_update_A(OSQPSolver *solver,
                     const c_float *Ax_new,
                     const c_int   *Ax_new_idx,
                     c_int          A_new_n) {
   c_int i;        // For indexing
   c_int exitflag; // Exit flag
   c_int nnzA;     // Number of nonzeros in A
+  OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  work = solver->work;
 
 #ifdef PROFILING
   if (work->clear_update_time == 1) {
     work->clear_update_time = 0;
-    work->info->update_time = 0.0;
+    solver->info->update_time = 0.0;
   }
   osqp_tic(work->timer); // Start timer
 #endif /* ifdef PROFILING */
@@ -1109,9 +1153,9 @@ c_int osqp_update_A(OSQPWorkspace *work,
     }
   }
 
-  if (work->settings->scaling) {
+  if (solver->settings->scaling) {
     // Unscale data
-    unscale_data(work);
+    unscale_data(solver);
   }
 
   // Update A elements
@@ -1126,9 +1170,9 @@ c_int osqp_update_A(OSQPWorkspace *work,
     }
   }
 
-  if (work->settings->scaling) {
+  if (solver->settings->scaling) {
     // Scale data
-    scale_data(work);
+    scale_data(solver);
   }
 
   // Update linear system structure with new data
@@ -1137,7 +1181,7 @@ c_int osqp_update_A(OSQPWorkspace *work,
                                                   work->data->A);
 
   // Reset solver information
-  reset_info(work->info);
+  reset_info(solver->info);
 
 # ifdef PRINTING
 
@@ -1147,14 +1191,14 @@ c_int osqp_update_A(OSQPWorkspace *work,
 # endif /* ifdef PRINTING */
 
 #ifdef PROFILING
-  work->info->update_time += osqp_toc(work->timer);
+  solver->info->update_time += osqp_toc(work->timer);
 #endif /* ifdef PROFILING */
 
   return exitflag;
 }
 
 
-c_int osqp_update_P_A(OSQPWorkspace *work,
+c_int osqp_update_P_A(OSQPSolver    *solver,
                       const c_float *Px_new,
                       const c_int   *Px_new_idx,
                       c_int          P_new_n,
@@ -1164,14 +1208,16 @@ c_int osqp_update_P_A(OSQPWorkspace *work,
   c_int i;          // For indexing
   c_int exitflag;   // Exit flag
   c_int nnzP, nnzA; // Number of nonzeros in P and A
+  OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  work = solver->work;
 
 #ifdef PROFILING
   if (work->clear_update_time == 1) {
     work->clear_update_time = 0;
-    work->info->update_time = 0.0;
+    solver->info->update_time = 0.0;
   }
   osqp_tic(work->timer); // Start timer
 #endif /* ifdef PROFILING */
@@ -1207,9 +1253,9 @@ c_int osqp_update_P_A(OSQPWorkspace *work,
     }
   }
 
-  if (work->settings->scaling) {
+  if (solver->settings->scaling) {
     // Unscale data
-    unscale_data(work);
+    unscale_data(solver);
   }
 
   // Update P elements
@@ -1237,9 +1283,9 @@ c_int osqp_update_P_A(OSQPWorkspace *work,
     }
   }
 
-  if (work->settings->scaling) {
+  if (solver->settings->scaling) {
     // Scale data
-    scale_data(work);
+    scale_data(solver);
   }
 
   // Update linear system structure with new data
@@ -1248,7 +1294,7 @@ c_int osqp_update_P_A(OSQPWorkspace *work,
                                                   work->data->A);
 
   // Reset solver information
-  reset_info(work->info);
+  reset_info(solver->info);
 
 # ifdef PRINTING
 
@@ -1258,18 +1304,20 @@ c_int osqp_update_P_A(OSQPWorkspace *work,
 # endif /* ifdef PRINTING */
 
 #ifdef PROFILING
-  work->info->update_time += osqp_toc(work->timer);
+  solver->info->update_time += osqp_toc(work->timer);
 #endif /* ifdef PROFILING */
 
   return exitflag;
 }
 
-c_int osqp_update_rho(OSQPWorkspace *work, c_float rho_new) {
+c_int osqp_update_rho(OSQPSolver *solver, c_float rho_new) {
 
     c_int exitflag;
+    OSQPWorkspace* work;
 
-  // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+    // Check if workspace has been initialized
+    if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+    work = solver->work;
 
   // Check value of rho
   if (rho_new <= 0) {
@@ -1283,21 +1331,21 @@ c_int osqp_update_rho(OSQPWorkspace *work, c_float rho_new) {
   if (work->rho_update_from_solve == 0) {
     if (work->clear_update_time == 1) {
       work->clear_update_time = 0;
-      work->info->update_time = 0.0;
+      solver->info->update_time = 0.0;
     }
     osqp_tic(work->timer); // Start timer
   }
 #endif /* ifdef PROFILING */
 
   // Update rho in settings
-  work->settings->rho = c_min(c_max(rho_new, RHO_MIN), RHO_MAX);
+  solver->settings->rho = c_min(c_max(rho_new, RHO_MIN), RHO_MAX);
 
   // Update rho_vec and rho_inv_vec
   OSQPVectorf_set_scalar_conditional(work->rho_vec,
                                      work->constr_type,
-                                     RHO_MIN,                                   //const  == -1
-                                     work->settings->rho,                       //constr == 0
-                                     RHO_EQ_OVER_RHO_INEQ*work->settings->rho); //constr == 1
+                                     RHO_MIN,                                     //const  == -1
+                                     solver->settings->rho,                       //constr == 0
+                                     RHO_EQ_OVER_RHO_INEQ*solver->settings->rho); //constr == 1
 
   OSQPVectorf_ew_reciprocal(work->rho_inv_vec, work->rho_vec);
 
@@ -1307,7 +1355,7 @@ c_int osqp_update_rho(OSQPWorkspace *work, c_float rho_new) {
 
 #ifdef PROFILING
   if (work->rho_update_from_solve == 0)
-    work->info->update_time += osqp_toc(work->timer);
+    solver->info->update_time += osqp_toc(work->timer);
 #endif /* ifdef PROFILING */
 
   return exitflag;
@@ -1318,10 +1366,10 @@ c_int osqp_update_rho(OSQPWorkspace *work, c_float rho_new) {
 /****************************
 * Update problem settings  *
 ****************************/
-c_int osqp_update_max_iter(OSQPWorkspace *work, c_int max_iter_new) {
+c_int osqp_update_max_iter(OSQPSolver *solver, c_int max_iter_new) {
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that max_iter is positive
   if (max_iter_new <= 0) {
@@ -1332,15 +1380,15 @@ c_int osqp_update_max_iter(OSQPWorkspace *work, c_int max_iter_new) {
   }
 
   // Update max_iter
-  work->settings->max_iter = max_iter_new;
+  solver->settings->max_iter = max_iter_new;
 
   return 0;
 }
 
-c_int osqp_update_eps_abs(OSQPWorkspace *work, c_float eps_abs_new) {
+c_int osqp_update_eps_abs(OSQPSolver*solver, c_float eps_abs_new) {
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that eps_abs is positive
   if (eps_abs_new < 0.) {
@@ -1351,15 +1399,15 @@ c_int osqp_update_eps_abs(OSQPWorkspace *work, c_float eps_abs_new) {
   }
 
   // Update eps_abs
-  work->settings->eps_abs = eps_abs_new;
+  solver->settings->eps_abs = eps_abs_new;
 
   return 0;
 }
 
-c_int osqp_update_eps_rel(OSQPWorkspace *work, c_float eps_rel_new) {
+c_int osqp_update_eps_rel(OSQPSolver *solver, c_float eps_rel_new) {
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that eps_rel is positive
   if (eps_rel_new < 0.) {
@@ -1370,15 +1418,15 @@ c_int osqp_update_eps_rel(OSQPWorkspace *work, c_float eps_rel_new) {
   }
 
   // Update eps_rel
-  work->settings->eps_rel = eps_rel_new;
+  solver->settings->eps_rel = eps_rel_new;
 
   return 0;
 }
 
-c_int osqp_update_eps_prim_inf(OSQPWorkspace *work, c_float eps_prim_inf_new) {
+c_int osqp_update_eps_prim_inf(OSQPSolver *solver, c_float eps_prim_inf_new) {
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that eps_prim_inf is positive
   if (eps_prim_inf_new < 0.) {
@@ -1389,15 +1437,15 @@ c_int osqp_update_eps_prim_inf(OSQPWorkspace *work, c_float eps_prim_inf_new) {
   }
 
   // Update eps_prim_inf
-  work->settings->eps_prim_inf = eps_prim_inf_new;
+  solver->settings->eps_prim_inf = eps_prim_inf_new;
 
   return 0;
 }
 
-c_int osqp_update_eps_dual_inf(OSQPWorkspace *work, c_float eps_dual_inf_new) {
+c_int osqp_update_eps_dual_inf(OSQPSolver *solver, c_float eps_dual_inf_new) {
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that eps_dual_inf is positive
   if (eps_dual_inf_new < 0.) {
@@ -1408,16 +1456,16 @@ c_int osqp_update_eps_dual_inf(OSQPWorkspace *work, c_float eps_dual_inf_new) {
   }
 
   // Update eps_dual_inf
-  work->settings->eps_dual_inf = eps_dual_inf_new;
+  solver->settings->eps_dual_inf = eps_dual_inf_new;
 
 
   return 0;
 }
 
-c_int osqp_update_alpha(OSQPWorkspace *work, c_float alpha_new) {
+c_int osqp_update_alpha(OSQPSolver*solver, c_float alpha_new) {
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that alpha is between 0 and 2
   if ((alpha_new <= 0.) || (alpha_new >= 2.)) {
@@ -1428,15 +1476,15 @@ c_int osqp_update_alpha(OSQPWorkspace *work, c_float alpha_new) {
   }
 
   // Update alpha
-  work->settings->alpha = alpha_new;
+  solver->settings->alpha = alpha_new;
 
   return 0;
 }
 
-c_int osqp_update_warm_start(OSQPWorkspace *work, c_int warm_start_new) {
+c_int osqp_update_warm_start(OSQPSolver *solver, c_int warm_start_new) {
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that warm_start is either 0 or 1
   if ((warm_start_new != 0) && (warm_start_new != 1)) {
@@ -1447,15 +1495,15 @@ c_int osqp_update_warm_start(OSQPWorkspace *work, c_int warm_start_new) {
   }
 
   // Update warm_start
-  work->settings->warm_start = warm_start_new;
+  solver->settings->warm_start = warm_start_new;
 
   return 0;
 }
 
-c_int osqp_update_scaled_termination(OSQPWorkspace *work, c_int scaled_termination_new) {
+c_int osqp_update_scaled_termination(OSQPSolver *solver, c_int scaled_termination_new) {
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that scaled_termination is either 0 or 1
   if ((scaled_termination_new != 0) && (scaled_termination_new != 1)) {
@@ -1466,15 +1514,15 @@ c_int osqp_update_scaled_termination(OSQPWorkspace *work, c_int scaled_terminati
   }
 
   // Update scaled_termination
-  work->settings->scaled_termination = scaled_termination_new;
+  solver->settings->scaled_termination = scaled_termination_new;
 
   return 0;
 }
 
-c_int osqp_update_check_termination(OSQPWorkspace *work, c_int check_termination_new) {
+c_int osqp_update_check_termination(OSQPSolver *solver, c_int check_termination_new) {
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that check_termination is nonnegative
   if (check_termination_new < 0) {
@@ -1485,17 +1533,17 @@ c_int osqp_update_check_termination(OSQPWorkspace *work, c_int check_termination
   }
 
   // Update check_termination
-  work->settings->check_termination = check_termination_new;
+  solver->settings->check_termination = check_termination_new;
 
   return 0;
 }
 
 #ifndef EMBEDDED
 
-c_int osqp_update_delta(OSQPWorkspace *work, c_float delta_new) {
+c_int osqp_update_delta(OSQPSolver *solver, c_float delta_new) {
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that delta is positive
   if (delta_new <= 0.) {
@@ -1506,15 +1554,15 @@ c_int osqp_update_delta(OSQPWorkspace *work, c_float delta_new) {
   }
 
   // Update delta
-  work->settings->delta = delta_new;
+  solver->settings->delta = delta_new;
 
   return 0;
 }
 
-c_int osqp_update_polish(OSQPWorkspace *work, c_int polish_new) {
+c_int osqp_update_polish(OSQPSolver *solver, c_int polish_new) {
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that polish is either 0 or 1
   if ((polish_new != 0) && (polish_new != 1)) {
@@ -1525,21 +1573,21 @@ c_int osqp_update_polish(OSQPWorkspace *work, c_int polish_new) {
   }
 
   // Update polish
-  work->settings->polish = polish_new;
+  solver->settings->polish = polish_new;
 
 # ifdef PROFILING
 
   // Reset polish time to zero
-  work->info->polish_time = 0.0;
+  solver->info->polish_time = 0.0;
 # endif /* ifdef PROFILING */
 
   return 0;
 }
 
-c_int osqp_update_polish_refine_iter(OSQPWorkspace *work, c_int polish_refine_iter_new) {
+c_int osqp_update_polish_refine_iter(OSQPSolver *solver, c_int polish_refine_iter_new) {
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that polish_refine_iter is nonnegative
   if (polish_refine_iter_new < 0) {
@@ -1550,15 +1598,15 @@ c_int osqp_update_polish_refine_iter(OSQPWorkspace *work, c_int polish_refine_it
   }
 
   // Update polish_refine_iter
-  work->settings->polish_refine_iter = polish_refine_iter_new;
+  solver->settings->polish_refine_iter = polish_refine_iter_new;
 
   return 0;
 }
 
-c_int osqp_update_verbose(OSQPWorkspace *work, c_int verbose_new) {
+c_int osqp_update_verbose(OSQPSolver *solver, c_int verbose_new) {
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that verbose is either 0 or 1
   if ((verbose_new != 0) && (verbose_new != 1)) {
@@ -1569,7 +1617,7 @@ c_int osqp_update_verbose(OSQPWorkspace *work, c_int verbose_new) {
   }
 
   // Update verbose
-  work->settings->verbose = verbose_new;
+  solver->settings->verbose = verbose_new;
 
   return 0;
 }
@@ -1577,10 +1625,10 @@ c_int osqp_update_verbose(OSQPWorkspace *work, c_int verbose_new) {
 #endif // EMBEDDED
 
 #ifdef PROFILING
-c_int osqp_update_time_limit(OSQPWorkspace *work, c_float time_limit_new) {
+c_int osqp_update_time_limit(OSQPSolver *solver, c_float time_limit_new) {
 
   // Check if workspace has been initialized
-  if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that time_limit is nonnegative
   if (time_limit_new < 0.) {
@@ -1591,9 +1639,25 @@ c_int osqp_update_time_limit(OSQPWorkspace *work, c_float time_limit_new) {
   }
 
   // Update time_limit
-  work->settings->time_limit = time_limit_new;
+  solver->settings->time_limit = time_limit_new;
 
   return 0;
 }
 
 #endif /* ifdef PROFILING */
+
+/****************************
+* User API Helper functions
+****************************/
+
+
+void csc_set_data(csc* M, c_int m, c_int n, c_int nzmax, c_float *x, c_int *i, c_int *p)
+{
+  M->m     = m;
+  M->n     = n;
+  M->nz    = -1;
+  M->nzmax = nzmax;
+  M->x     = x;
+  M->i     = i;
+  M->p     = p;
+}
