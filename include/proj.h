@@ -1,5 +1,5 @@
 #ifndef PROJ_H
-# define PROJ_H
+#define PROJ_H
 
 # ifdef __cplusplus
 extern "C" {

@@ -11,7 +11,7 @@ static const char* test_optimal()
   c_int exitflag;
 
   // Structures
-  OSQPWorkspace *work;    // Workspace
+  OSQPSolver *solver;    // Solver
   OSQPTestData *problem;      // Problem data
   OSQPSettings *settings; // Settings
   primal_dual_infeasibility_sols_data *data;
@@ -39,7 +39,7 @@ static const char* test_optimal()
   settings->verbose  = 1;
 
   // Setup workspace
-  exitflag = osqp_setup(&work,problem->P,problem->q,
+  exitflag = osqp_setup(&solver,problem->P,problem->q,
                         problem->A,problem->l,problem->u,
                         problem->m,problem->n, settings);
 
@@ -47,30 +47,30 @@ static const char* test_optimal()
   mu_assert("Primal dual infeasibility test 1: Setup error!", exitflag == 0);
 
   // Solve Problem
-  osqp_solve(work);
+  osqp_solve(solver);
 
   // Compare solver statuses
   mu_assert("Primal dual infeasibility test 1: Error in solver status!",
-            work->info->status_val == OSQP_SOLVED);
+            solver->info->status_val == OSQP_SOLVED);
 
   // Compare primal solutions
   mu_assert("Primal dual infeasibility test 1: Error in primal solution!",
-            vec_norm_inf_diff(work->solution->x, data->x1,
+            vec_norm_inf_diff(solver->solution->x, data->x1,
                               problem->n) < TESTS_TOL);
 
   // Compare dual solutions
   mu_assert("Primal dual infeasibility test 1: Error in dual solution!",
-            vec_norm_inf_diff(work->solution->y, data->y1,
+            vec_norm_inf_diff(solver->solution->y, data->y1,
                               problem->m) < TESTS_TOL);
 
 
   // Compare objective values
   mu_assert("Primal dual infeasibility test 1: Error in objective value!",
-            c_absval(work->info->obj_val - data->obj_value1) < TESTS_TOL);
+            c_absval(solver->info->obj_val - data->obj_value1) < TESTS_TOL);
 
 
   // Cleanup
-  osqp_cleanup(work);
+  osqp_cleanup(solver);
   clean_problem_primal_dual_infeasibility_sols_data(data);
   c_free(problem);
   c_free(settings);
@@ -83,7 +83,7 @@ static const char* test_prim_infeas()
   c_int exitflag;
 
   // Structures
-  OSQPWorkspace *work;    // Workspace
+  OSQPSolver *solver;    // Workspace
   OSQPTestData *problem;      // Problem data
   OSQPSettings *settings; // Settings
   primal_dual_infeasibility_sols_data *data;
@@ -111,7 +111,7 @@ static const char* test_prim_infeas()
   settings->verbose  = 1;
 
   // Setup workspace
-  exitflag = osqp_setup(&work,problem->P,problem->q,
+  exitflag = osqp_setup(&solver,problem->P,problem->q,
                         problem->A,problem->l,problem->u,
                         problem->m,problem->n, settings);
 
@@ -119,14 +119,14 @@ static const char* test_prim_infeas()
   mu_assert("Primal dual infeasibility test 2: Setup error!", exitflag == 0);
 
   // Solve Problem
-  osqp_solve(work);
+  osqp_solve(solver);
 
   // Compare solver statuses
   mu_assert("Primal dual infeasibility test 2: Error in solver status!",
-            work->info->status_val == OSQP_PRIMAL_INFEASIBLE);
+            solver->info->status_val == OSQP_PRIMAL_INFEASIBLE);
 
   // Cleanup
-  osqp_cleanup(work);
+  osqp_cleanup(solver);
   clean_problem_primal_dual_infeasibility_sols_data(data);
   c_free(problem);
   c_free(settings);
@@ -139,7 +139,7 @@ static const char* test_dual_infeas()
   c_int exitflag;
 
   // Structures
-  OSQPWorkspace *work;    // Workspace
+  OSQPSolver *solver;    // Solver
   OSQPTestData *problem;      // Problem data
   OSQPSettings *settings; // Settings
   primal_dual_infeasibility_sols_data *data;
@@ -166,8 +166,8 @@ static const char* test_dual_infeas()
   settings->scaling  = 0;
   settings->verbose  = 1;
 
-  // Setup workspace
-  exitflag = osqp_setup(&work,problem->P,problem->q,
+  // Setup solver
+  exitflag = osqp_setup(&solver,problem->P,problem->q,
                         problem->A,problem->l,problem->u,
                         problem->m,problem->n, settings);
 
@@ -175,14 +175,14 @@ static const char* test_dual_infeas()
   mu_assert("Primal dual infeasibility test 3: Setup error!", exitflag == 0);
 
   // Solve Problem
-  osqp_solve(work);
+  osqp_solve(solver);
 
   // Compare solver statuses
   mu_assert("Primal dual infeasibility test 3: Error in solver status!",
-            work->info->status_val == OSQP_DUAL_INFEASIBLE);
+            solver->info->status_val == OSQP_DUAL_INFEASIBLE);
 
   // Cleanup
-  osqp_cleanup(work);
+  osqp_cleanup(solver);
   clean_problem_primal_dual_infeasibility_sols_data(data);
   c_free(problem);
   c_free(settings);
@@ -195,7 +195,7 @@ static const char* test_primal_dual_infeas()
   c_int exitflag;
 
   // Structures
-  OSQPWorkspace *work;    // Workspace
+  OSQPSolver *solver;    // Solver
   OSQPTestData *problem;      // Problem data
   OSQPSettings *settings; // Settings
   primal_dual_infeasibility_sols_data *data;
@@ -222,8 +222,8 @@ static const char* test_primal_dual_infeas()
   settings->scaling  = 0;
   settings->verbose  = 1;
 
-  // Setup workspace
-  exitflag = osqp_setup(&work,problem->P,problem->q,
+  // Setup Solver
+  exitflag = osqp_setup(&solver,problem->P,problem->q,
                         problem->A,problem->l,problem->u,
                         problem->m,problem->n, settings);
 
@@ -231,15 +231,15 @@ static const char* test_primal_dual_infeas()
   mu_assert("Primal dual infeasibility test 4: Setup error!", exitflag == 0);
 
   // Solve Problem
-  osqp_solve(work);
+  osqp_solve(solver);
 
   // Compare solver statuses
   mu_assert("Primal dual infeasibility test 4: Error in solver status!",
-            ((work->info->status_val == OSQP_PRIMAL_INFEASIBLE) ||
-             (work->info->status_val == OSQP_DUAL_INFEASIBLE)));
+            ((solver->info->status_val == OSQP_PRIMAL_INFEASIBLE) ||
+             (solver->info->status_val == OSQP_DUAL_INFEASIBLE)));
 
   // Cleanup
-  osqp_cleanup(work);
+  osqp_cleanup(solver);
   clean_problem_primal_dual_infeasibility_sols_data(data);
   c_free(problem);
   c_free(settings);

@@ -14,7 +14,7 @@ static const char* test_primal_infeasible_qp_solve()
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
   // Structures
-  OSQPWorkspace *work; // Workspace
+  OSQPSolver *solver; // Workspace
   OSQPTestData *data;      // Data
   primal_infeasibility_sols_data *sols_data;
 
@@ -33,7 +33,7 @@ static const char* test_primal_infeasible_qp_solve()
   settings->warm_start = 0;
 
   // Setup workspace
-  exitflag = osqp_setup(&work, data->P, data->q,
+  exitflag = osqp_setup(&solver, data->P, data->q,
                         data->A, data->l, data->u,
                         data->m, data->n, settings);
 
@@ -41,15 +41,15 @@ static const char* test_primal_infeasible_qp_solve()
   mu_assert("Primal infeasible QP test solve: Setup error!", exitflag == 0);
 
   // Solve Problem
-  osqp_solve(work);
+  osqp_solve(solver);
 
   // Compare solver statuses
   mu_assert("Primal infeasible QP test solve: Error in solver status!",
-            work->info->status_val == sols_data->status_test);
+            solver->info->status_val == sols_data->status_test);
 
 
   // Clean workspace
-  osqp_cleanup(work);
+  osqp_cleanup(solver);
 
 
   // Cleanup data

@@ -1,5 +1,5 @@
 #ifndef SCALING_H
-# define SCALING_H
+#define SCALING_H
 
 # ifdef __cplusplus
 extern "C" {

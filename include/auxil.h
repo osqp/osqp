@@ -1,5 +1,5 @@
 #ifndef AUXIL_H
-# define AUXIL_H
+#define AUXIL_H
 
 # ifdef __cplusplus
 extern "C" {

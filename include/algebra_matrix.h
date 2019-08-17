@@ -1,5 +1,5 @@
 #ifndef ALGEBRA_MATRIX_H
-# define ALGEBRA_MATRIX_H
+#define ALGEBRA_MATRIX_H
 
 
 # ifdef __cplusplus

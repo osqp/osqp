@@ -1,5 +1,5 @@
 #ifndef ALGEBRA_VECTOR_H
-# define ALGEBRA_VECTOR_H
+#define ALGEBRA_VECTOR_H
 
 
 # ifdef __cplusplus

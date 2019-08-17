@@ -13,7 +13,7 @@ static const char* test_unconstrained_solve()
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
   // Structures
-  OSQPWorkspace *work; // Workspace
+  OSQPSolver *solver; // Solver
   OSQPTestData *data;      // Data
   unconstrained_sols_data *sols_data;
 
@@ -27,8 +27,8 @@ static const char* test_unconstrained_solve()
   osqp_set_default_settings(settings);
   settings->verbose = 1;
 
-  // Setup workspace
-  exitflag = osqp_setup(&work, data->P, data->q,
+  // Setup solver
+  exitflag = osqp_setup(&solver, data->P, data->q,
                         data->A, data->l, data->u,
                         data->m, data->n, settings);
 
@@ -36,24 +36,24 @@ static const char* test_unconstrained_solve()
   mu_assert("Unconstrained test solve: Setup error!", exitflag == 0);
 
   // Solve Problem first time
-  osqp_solve(work);
+  osqp_solve(solver);
 
   // Compare solver statuses
   mu_assert("Unconstrained test solve: Error in solver status!",
-            work->info->status_val == sols_data->status_test);
+            solver->info->status_val == sols_data->status_test);
 
   // Compare primal solutions
   mu_assert("Unconstrained test solve: Error in primal solution!",
-            vec_norm_inf_diff(work->solution->x, sols_data->x_test,
+            vec_norm_inf_diff(solver->solution->x, sols_data->x_test,
                               data->n) < TESTS_TOL);
 
   // Compare objective values
   mu_assert("Unconstrained test solve: Error in objective value!",
-            c_absval(work->info->obj_val - sols_data->obj_value_test) <
+            c_absval(solver->info->obj_val - sols_data->obj_value_test) <
             TESTS_TOL);
 
-  // Clean workspace
-  osqp_cleanup(work);
+  // Clean solver
+  osqp_cleanup(solver);
 
   // Cleanup settings and data
   c_free(settings);

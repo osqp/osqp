@@ -1,5 +1,5 @@
 #ifndef LIN_ALG_H
-# define LIN_ALG_H
+#define LIN_ALG_H
 
 
 # ifdef __cplusplus

@@ -13,7 +13,7 @@ static const char* test_basic_qp2_solve()
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
   // Structures
-  OSQPWorkspace *work; // Workspace
+  OSQPSolver *solver; // Workspace
   OSQPTestData *data;      // Data
   basic_qp2_sols_data *sols_data;
 
@@ -31,7 +31,7 @@ static const char* test_basic_qp2_solve()
   settings->verbose = 1;
 
   // Setup workspace
-  exitflag = osqp_setup(&work, data->P, data->q,
+  exitflag = osqp_setup(&solver, data->P, data->q,
                         data->A, data->l, data->u,
                         data->m, data->n, settings);
 
@@ -39,31 +39,31 @@ static const char* test_basic_qp2_solve()
   mu_assert("Basic QP 2 test solve: Setup error!", exitflag == 0);
 
   // Solve Problem first time
-  osqp_solve(work);
+  osqp_solve(solver);
 
   // Compare solver statuses
   mu_assert("Basic QP 2 test solve: Error in solver status!",
-            work->info->status_val == sols_data->status_test);
+            solver->info->status_val == sols_data->status_test);
 
   // Compare primal solutions
   mu_assert("Basic QP 2 test solve: Error in primal solution!",
-            vec_norm_inf_diff(work->solution->x, sols_data->x_test,
+            vec_norm_inf_diff(solver->solution->x, sols_data->x_test,
                               data->n) /
             vec_norm_inf(sols_data->x_test_new, data->n) < TESTS_TOL);
 
 
   // Compare dual solutions
   mu_assert("Basic QP 2 test solve: Error in dual solution!",
-            vec_norm_inf_diff(work->solution->y, sols_data->y_test,
+            vec_norm_inf_diff(solver->solution->y, sols_data->y_test,
                               data->m) /
             vec_norm_inf(sols_data->y_test_new, data->m) < TESTS_TOL);
 
   // Compare objective values
   mu_assert("Basic QP 2 test solve: Error in objective value!",
-            c_absval(work->info->obj_val - sols_data->obj_value_test)/(c_absval(sols_data->obj_value_test)) < TESTS_TOL);
+            c_absval(solver->info->obj_val - sols_data->obj_value_test)/(c_absval(sols_data->obj_value_test)) < TESTS_TOL);
 
   // Clean workspace
-  osqp_cleanup(work);
+  osqp_cleanup(solver);
 
   // Cleanup settings and data
   c_free(settings);
@@ -82,7 +82,7 @@ static char* test_basic_qp2_solve_pardiso()
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
   // Structures
-  OSQPWorkspace *work; // Workspace
+  OSQPSolver *solver; // Workspace
   OSQPTestData *data;      // Data
   basic_qp2_sols_data *sols_data;
 
@@ -101,7 +101,7 @@ static char* test_basic_qp2_solve_pardiso()
   settings->linsys_solver = MKL_PARDISO_SOLVER;
 
   // Setup workspace
-  exitflag = osqp_setup(&work, data->P, data->q,
+  exitflag = osqp_setup(&solver, data->P, data->q,
                         data->A, data->l, data->u,
                         data->m, data->n, settings);
 
@@ -109,34 +109,34 @@ static char* test_basic_qp2_solve_pardiso()
   mu_assert("Basic QP 2 test solve: Setup error!", exitflag == 0);
 
   // Solve Problem first time
-  osqp_solve(work);
+  osqp_solve(solver);
 
   // Compare solver statuses
   mu_assert("Basic QP 2 test solve: Error in solver status!",
-            work->info->status_val == sols_data->status_test);
+            solver->info->status_val == sols_data->status_test);
 
   // Compare primal solutions
   mu_assert("Basic QP 2 test solve: Error in primal solution!",
-            vec_norm_inf_diff(work->solution->x, sols_data->x_test,
+            vec_norm_inf_diff(solver->solution->x, sols_data->x_test,
                               data->n) /
             vec_norm_inf(sols_data->x_test_new, data->n) < TESTS_TOL);
 
 
   // Compare dual solutions
   mu_assert("Basic QP 2 test solve: Error in dual solution!",
-            vec_norm_inf_diff(work->solution->y, sols_data->y_test,
+            vec_norm_inf_diff(solver->solution->y, sols_data->y_test,
                               data->m) /
             vec_norm_inf(sols_data->y_test_new, data->m) < TESTS_TOL);
 
 
   // Compare objective values
   mu_assert("Basic QP 2 test solve: Error in objective value!",
-            c_absval(work->info->obj_val - sols_data->obj_value_test) <
+            c_absval(solver->info->obj_val - sols_data->obj_value_test) <
             TESTS_TOL);
 
 
   // Clean workspace
-  osqp_cleanup(work);
+  osqp_cleanup(solver);
 
   // Cleanup settings and data
   c_free(settings);
@@ -155,7 +155,7 @@ static const char* test_basic_qp2_update()
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
   // Structures
-  OSQPWorkspace *work; // Workspace
+  OSQPSolver*solver; // Workspace
   OSQPTestData *data;      // Data
   basic_qp2_sols_data *sols_data;
 
@@ -174,7 +174,7 @@ static const char* test_basic_qp2_update()
   settings->verbose    = 1;
 
   // Setup workspace
-  exitflag = osqp_setup(&work, data->P, data->q,
+  exitflag = osqp_setup(&solver, data->P, data->q,
                         data->A, data->l, data->u,
                         data->m, data->n, settings);
 
@@ -183,25 +183,25 @@ static const char* test_basic_qp2_update()
 
 
   // Modify linear cost and upper bound
-  osqp_update_lin_cost(work, sols_data->q_new);
-  osqp_update_upper_bound(work, sols_data->u_new);
+  osqp_update_lin_cost(solver, sols_data->q_new);
+  osqp_update_upper_bound(solver, sols_data->u_new);
 
   // Solve Problem second time(with different data now)
-  osqp_solve(work);
+  osqp_solve(solver);
 
   // Compare solver statuses
   mu_assert("Basic QP 2 test update: Error in solver status!",
-            work->info->status_val == sols_data->status_test_new);
+            solver->info->status_val == sols_data->status_test_new);
 
   // Compare primal solutions
   mu_assert("Basic QP 2 test update: Error in primal solution!",
-            vec_norm_inf_diff(work->solution->x, sols_data->x_test_new,
+            vec_norm_inf_diff(solver->solution->x, sols_data->x_test_new,
                               data->n) /
             vec_norm_inf(sols_data->x_test_new, data->n) < TESTS_TOL);
 
   // Compare dual solutions
   mu_assert("Basic QP 2 test update: Error in dual solution!",
-            vec_norm_inf_diff(work->solution->y, sols_data->y_test_new,
+            vec_norm_inf_diff(solver->solution->y, sols_data->y_test_new,
                               data->m) /
             vec_norm_inf(sols_data->y_test_new, data->m) < TESTS_TOL);
 
@@ -209,10 +209,10 @@ static const char* test_basic_qp2_update()
   // Compare objective values
   mu_assert("Basic QP 2 test update: Error in objective value!",
             c_absval(
-              work->info->obj_val - sols_data->obj_value_test_new)/(c_absval(sols_data->obj_value_test_new)) < TESTS_TOL);
+              solver->info->obj_val - sols_data->obj_value_test_new)/(c_absval(sols_data->obj_value_test_new)) < TESTS_TOL);
 
   // Clean workspace
-  osqp_cleanup(work);
+  osqp_cleanup(solver);
 
   // Cleanup settings and data
   c_free(settings);

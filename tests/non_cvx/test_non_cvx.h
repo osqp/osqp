@@ -13,7 +13,7 @@ static const char* test_non_cvx_solve()
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
 
   // Structures
-  OSQPWorkspace *work; // Workspace
+  OSQPSolver *solver; // Workspace
   OSQPTestData *data;      // Data
   non_cvx_sols_data *sols_data;
 
@@ -29,7 +29,7 @@ static const char* test_non_cvx_solve()
   settings->sigma = 1e-6;
 
   // Setup workspace
-  exitflag = osqp_setup(&work, data->P, data->q,
+  exitflag = osqp_setup(&solver, data->P, data->q,
                         data->A, data->l, data->u,
                         data->m, data->n, settings);
 
@@ -37,13 +37,13 @@ static const char* test_non_cvx_solve()
   mu_assert("Non Convex test solve: Setup should have failed!",
             exitflag == OSQP_NONCVX_ERROR);
 
-  osqp_cleanup(work);
+  osqp_cleanup(solver);
 
   // Update Solver settings
   settings->sigma = sols_data->sigma_new;
 
   // Setup workspace again
-  exitflag = osqp_setup(&work, data->P, data->q,
+  exitflag = osqp_setup(&solver, data->P, data->q,
                         data->A, data->l, data->u,
                         data->m, data->n, settings);
 
@@ -51,18 +51,18 @@ static const char* test_non_cvx_solve()
   mu_assert("Non Convex test solve: Setup error!", exitflag == 0);
 
   // Solve Problem first time
-  osqp_solve(work);
+  osqp_solve(solver);
 
   // Compare solver statuses
   mu_assert("Non Convex test solve: Error in solver status!",
-            work->info->status_val == OSQP_NON_CVX);
+            solver->info->status_val == OSQP_NON_CVX);
 
   // Compare objective values
   mu_assert("Non Convex test solve: Error in objective value!",
-            work->info->obj_val == OSQP_NAN);
+            solver->info->obj_val == OSQP_NAN);
 
-  // Clean workspace
-  osqp_cleanup(work);
+  // Clean solver
+  osqp_cleanup(solver);
 
   // Cleanup settings and data
   c_free(settings);

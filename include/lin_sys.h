@@ -1,5 +1,5 @@
 #ifndef LIN_SYS_H
-# define LIN_SYS_H
+#define LIN_SYS_H
 
 /* KKT linear system definition and solution */
 

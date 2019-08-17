@@ -1,10 +1,11 @@
 #ifndef OSQP_API_CONSTANTS_H
-# define OSQP_API_CONSTANTS_H
+#define OSQP_API_CONSTANTS_H
 
 # ifdef __cplusplus
 extern "C" {
 # endif // ifdef __cplusplus
 
+#include "osqp_configure.h"
 
 /*******************
 * OSQP Versioning *

@@ -1,5 +1,5 @@
 #ifndef KKT_H
-# define KKT_H
+#define KKT_H
 
 # ifdef __cplusplus
 extern "C" {

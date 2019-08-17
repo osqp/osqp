@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "osqp.h"
+#include "csc.h"
 #include "lin_alg.h"
 #include "minunit.h"
 

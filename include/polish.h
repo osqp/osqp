@@ -1,6 +1,6 @@
 /* Solution polish based on assuming the active set */
 #ifndef POLISH_H
-# define POLISH_H
+#define POLISH_H
 
 # ifdef __cplusplus
 extern "C" {

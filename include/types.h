@@ -1,5 +1,5 @@
 #ifndef OSQP_TYPES_H
-# define OSQP_TYPES_H
+#define OSQP_TYPES_H
 
 # ifdef __cplusplus
 extern "C" {

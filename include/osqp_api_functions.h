@@ -1,11 +1,12 @@
 #ifndef  OSQP_API_FUNCTIONS_H
-# define OSQP_API_FUNCTIONS_H
+#define  OSQP_API_FUNCTIONS_H
 
 # ifdef __cplusplus
 extern "C" {
 # endif // ifdef __cplusplus
 
 /* Types required by the OSQP API */
+# include "osqp_configure.h"
 # include "osqp_api_types.h"
 
 /********************

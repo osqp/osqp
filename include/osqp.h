@@ -1,5 +1,5 @@
 #ifndef OSQP_H
-# define OSQP_H
+#define OSQP_H
 
 # ifdef __cplusplus
 extern "C" {

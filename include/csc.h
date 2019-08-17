@@ -1,5 +1,5 @@
-#ifndef CS_H
-# define CS_H
+#ifndef CSC_H
+#define CSC_H
 
 # ifdef __cplusplus
 extern "C" {
