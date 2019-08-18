@@ -178,10 +178,7 @@ endif (NOT MSVC)
 set(
     osqp_src
     src/auxil.c
-<<<<<<< HEAD
     src/csc.c
-=======
->>>>>>> pg/matrix_algebra
     src/ctrlc.c
     src/error.c
     src/kkt.c
@@ -199,11 +196,7 @@ set(
 set(
     osqp_headers
     include/auxil.h
-<<<<<<< HEAD
     include/csc.h
-=======
-    include/constants.h
->>>>>>> pg/matrix_algebra
     include/ctrlc.h
     include/error.h
     include/glob_opts.h
