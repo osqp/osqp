@@ -6,24 +6,33 @@ extern "C" {
 # endif // ifdef __cplusplus
 
 # include "glob_opts.h"
+<<<<<<< HEAD
 # include "osqp.h"
+=======
+# include "constants.h"
+# include "lin_alg.h"
+
+>>>>>>> pg/matrix_algebra
 
 /******************
 * Internal types *
 ******************/
 
-/*
- * OSQPVector types.  Not defined here since it
- *   is implementation specific
+/**
+<<<<<<< HEAD
+=======
+ *  Matrix in compressed sparse column format
  */
-
-/* integer valued vectors */
-typedef struct OSQPVectori_ OSQPVectori;
-
-/* float valued vectors*/
-typedef struct OSQPVectorf_ OSQPVectorf;
+typedef struct {
+  c_int    m;     ///< number of rows
+  c_int    n;     ///< number of columns
+  c_int   *p;     ///< column pointers (size n+1); col indices (size nzmax) start from 0 when using triplet format (direct KKT matrix formation)
+  c_int   *i;     ///< row indices, size nzmax starting from 0
+  c_float *x;     ///< numerical values, size nzmax
+} csc;
 
 /**
+>>>>>>> pg/matrix_algebra
  * Linear system solver structure (sublevel objects initialize it differently)
  */
 

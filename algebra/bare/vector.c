@@ -1,4 +1,7 @@
+#include "constants.h"
 #include "algebra_vector.h"
+#include "./algebra_bare.h"
+
 
 /* VECTOR FUNCTIONS (old) ----------------------------------------------------------*/
 

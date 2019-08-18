@@ -6,7 +6,18 @@
 extern "C" {
 # endif /* ifdef __cplusplus */
 
-# include "types.h"
+#include "glob_opts.h"
+
+/*
+ * OSQPVector[fi] types.  Not defined here since it
+ * is implementation specific
+ */
+
+/* integer valued vectors */
+typedef struct OSQPVectori_ OSQPVectori;
+
+/* float valued vectors*/
+typedef struct OSQPVectorf_ OSQPVectorf;
 
 /* VECTOR FUNCTIONS ---------------------------------------------------------- */
 
@@ -123,17 +134,6 @@ void vec_ew_min_vec(const c_float *a,
 # endif /* if EMBEDDED != 1 */
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
-
-typedef struct OSQPVectori_ {
-  c_int* values;
-  c_int length;
-} OSQPVectori;
-
-typedef struct OSQPVectorf_ {
-  c_float* values;
-  c_int length;
-} OSQPVectorf;
-
 
 # ifndef EMBEDDED
 

@@ -1,3 +1,4 @@
+<<<<<<< HEAD:include/csc.h
 #ifndef CSC_H
 #define CSC_H
 
@@ -160,3 +161,5 @@ csc* csc_symperm(const csc   *A,
 # endif // ifdef __cplusplus
 
 #endif // ifndef CS_H
+=======
+>>>>>>> pg/matrix_algebra:include/cs.h

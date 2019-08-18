@@ -1,3 +1,4 @@
+<<<<<<< HEAD:src/csc.c
 #include "csc.h"
 
 
@@ -316,3 +317,5 @@ csc* csc_to_triu(csc *M) {
   // Return matrix in triplet form
   return M_triu;
 }
+=======
+>>>>>>> pg/matrix_algebra:src/cs.c

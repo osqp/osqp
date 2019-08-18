@@ -211,7 +211,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const csc * P, const csc * A,
     s->L = c_malloc(sizeof(csc));
     s->L->m = n_plus_m;
     s->L->n = n_plus_m;
-    s->L->nz = -1;
+    s->L->nnz = -1;
 
     // Diagonal matrix stored as a vector D
     s->Dinv = (QDLDL_float *)c_malloc(sizeof(QDLDL_float) * n_plus_m);

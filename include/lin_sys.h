@@ -28,7 +28,7 @@ c_int load_linsys_solver(enum linsys_solver_type linsys_solver);
 c_int unload_linsys_solver(enum linsys_solver_type linsys_solver);
 
 
-// NB: Only the upper triangular part of P is stuffed!
+// NB: Only the upper triangular part of P is filled.
 
 /**
  * Initialize linear system solver structure

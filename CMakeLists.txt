@@ -111,6 +111,20 @@ if(OSQP_CUSTOM_MEMORY)
 	message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY}")
 endif()
 
+# Algebra implementation
+# ----------------------------------------------
+
+# Directory for custom algebra implementation.  Defaults
+# to the OSQP bare C implementation, which also serves
+#a s reference implementation
+
+if(OSQP_ALGEBRA_DIR)
+	message(STATUS "Using custom algebra implementation in ${OSQP_ALGEBRA_DIR}")
+else()
+  set(OSQP_ALGEBRA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/algebra/bare/)
+  message(STATUS "Using OSQP standard algebra implementation")
+endif()
+
 
 
 # Linear solvers dependencies
@@ -164,12 +178,16 @@ endif (NOT MSVC)
 set(
     osqp_src
     src/auxil.c
+<<<<<<< HEAD
     src/csc.c
+=======
+>>>>>>> pg/matrix_algebra
     src/ctrlc.c
     src/error.c
     src/kkt.c
-    algebra/vector.c
-    algebra/matrix.c
+    ${OSQP_ALGEBRA_DIR}/vector.c
+    ${OSQP_ALGEBRA_DIR}/matrix.c
+    ${OSQP_ALGEBRA_DIR}/csc.c
     src/lin_sys.c
     src/osqp_api.c
     src/polish.c
@@ -181,7 +199,11 @@ set(
 set(
     osqp_headers
     include/auxil.h
+<<<<<<< HEAD
     include/csc.h
+=======
+    include/constants.h
+>>>>>>> pg/matrix_algebra
     include/ctrlc.h
     include/error.h
     include/glob_opts.h
@@ -189,6 +211,8 @@ set(
     include/lin_alg.h
     include/algebra_vector.h
     include/algebra_matrix.h
+    ${OSQP_ALGEBRA_DIR}/csc.h
+    ${OSQP_ALGEBRA_DIR}/algebra_bare.h
     include/lin_sys.h
     include/osqp.h
     include/osqp_api_constants.h

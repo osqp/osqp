@@ -122,7 +122,7 @@ csc* form_KKT(const csc  *P,
   }
 
   // Allocate number of nonzeros
-  KKT_trip->nz = zKKT;
+  KKT_trip->nnz = zKKT;
 
   // Convert triplet matrix to csc format
   if (!PtoKKT && !AtoKKT && !param2toKKT) {
