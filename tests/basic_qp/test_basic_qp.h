@@ -816,6 +816,8 @@ static const char* test_basic_qp_time_limit()
   // Update time limit
   osqp_update_time_limit(work, 1e-5);
   osqp_update_max_iter(work, (c_int)2e9);
+  osqp_update_eps_rel(work, 1e-09);
+  osqp_update_eps_abs(work, 1e-09);
   osqp_update_check_termination(work, 0);
 
   // Solve Problem
