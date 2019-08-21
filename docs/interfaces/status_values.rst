@@ -1,7 +1,12 @@
 .. _status_values :
 
+
+
+Status values and errors
+========================
+
 Status values
-==============
+-------------
 
 These are the exit statuses, their respective constants and values returned by the solver as defined in `constants.h <https://github.com/oxfordcontrol/osqp/blob/master/include/constants.h>`_.
 The *inaccurate* statuses define when the optimality, primal infeasibility or dual infeasibility conditions are satisfied with tolerances 10 times larger than the ones set.
@@ -45,5 +50,36 @@ The *inaccurate* statuses define when the optimality, primal infeasibility or du
    * I` is not positive semidefinite. However, it might fail to detect
    non-convexity when :code:`P` has slightly negative eigenvalues, i.e., when
    :code:`P + sigma * I` is positive semidefinite and :code:`P` is not.
+
+
+
+	 
+Solver Errors
+-------------
+
+OSQP can return errors during the setup and solve steps. Here is a table of the meaning
+and their constant values.
+
+
++------------------------------------------------+-----------------------------------+-------+
+| Errors                                         | Constant                          | Value |
++================================================+===================================+=======+
+| Data validation                                | OSQP_DATA_VALIDATION_ERROR        | 1     |
++------------------------------------------------+-----------------------------------+-------+
+| Settings validation                            | OSQP_SETTINGS_VALIDATION_ERROR    | 2     |
++------------------------------------------------+-----------------------------------+-------+
+| Linear system solver loading                   | OSQP_LINSYS_SOLVER_LOAD_ERROR     | 3     |
++------------------------------------------------+-----------------------------------+-------+
+| Linear system solver initialization            | OSQP_LINSYS_SOLVER_INIT_ERROR     | 4     |
++------------------------------------------------+-----------------------------------+-------+
+| Non convex problem                             | OSQP_NONCVX_ERROR                 | 5     |
++------------------------------------------------+-----------------------------------+-------+
+| Memory allocation                              | OSQP_MEM_ALLOC_ERROR              | 6     |
++------------------------------------------------+-----------------------------------+-------+
+| Workspace not initialized                      | OSQP_WORKSPACE_NOT_INIT           | 7     |
++------------------------------------------------+-----------------------------------+-------+
+
+
+
 
 

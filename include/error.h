@@ -11,7 +11,13 @@ extern "C" {
 
 
 /* OSQP error macro */
+# if __STDC_VERSION__ >= 199901L
+/* The C99 standard gives the __func__ macro, which is preferred over __FUNCTION__ */
+#  define osqp_error(error_code) _osqp_error(error_code, __func__);
+#else
 #  define osqp_error(error_code) _osqp_error(error_code, __FUNCTION__);
+#endif
+
 
 
 /**
