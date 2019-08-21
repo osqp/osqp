@@ -389,7 +389,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
       temp_run_time = work->info->setup_time + osqp_toc(work->timer);
     }
     else {
-      temp_run_time = osqp_toc(work->timer);
+      temp_run_time = work->info->update_time + osqp_toc(work->timer);
     }
 
     if (work->settings->time_limit &&
