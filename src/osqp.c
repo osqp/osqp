@@ -396,10 +396,10 @@ c_int osqp_solve(OSQPWorkspace *work) {
         (temp_run_time >= work->settings->time_limit)) {
       update_status(work->info, OSQP_TIME_LIMIT_REACHED);
 # ifdef PRINTING
-
       if (work->settings->verbose) c_print("run time limit reached\n");
-# endif /* ifdef PRINTING */      
-       goto exit;
+      can_print = 0;  // Not printing at this iteration
+# endif /* ifdef PRINTING */
+      break;
     }
 #endif /* ifdef PROFILING */
 
@@ -541,7 +541,6 @@ c_int osqp_solve(OSQPWorkspace *work) {
 
     /* Check whether a termination criterion is triggered */
     check_termination(work, 0);
-
   }
 
   // Compute objective value in case it was not
@@ -564,6 +563,14 @@ c_int osqp_solve(OSQPWorkspace *work) {
       update_status(work->info, OSQP_MAX_ITER_REACHED);
     }
   }
+
+  /* if time-limit reached check termination and update status accordingly */
+ if (work->info->status_val == OSQP_TIME_LIMIT_REACHED) {
+    if (!check_termination(work, 1)) { // Try for approximate solutions
+      update_status(work->info, OSQP_TIME_LIMIT_REACHED); /* Change update status back to OSQP_TIME_LIMIT_REACHED */
+    }
+  }
+  
 
 #if EMBEDDED != 1
   /* Update rho estimate */
