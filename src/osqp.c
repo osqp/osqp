@@ -564,12 +564,14 @@ c_int osqp_solve(OSQPWorkspace *work) {
     }
   }
 
+#ifdef PROFILING
   /* if time-limit reached check termination and update status accordingly */
  if (work->info->status_val == OSQP_TIME_LIMIT_REACHED) {
     if (!check_termination(work, 1)) { // Try for approximate solutions
       update_status(work->info, OSQP_TIME_LIMIT_REACHED); /* Change update status back to OSQP_TIME_LIMIT_REACHED */
     }
   }
+#endif /* ifdef PROFILING */
   
 
 #if EMBEDDED != 1
