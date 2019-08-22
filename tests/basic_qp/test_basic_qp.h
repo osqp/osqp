@@ -797,7 +797,7 @@ static const char* test_basic_qp_time_limit()
 
   // Define Solver settings as default
   osqp_set_default_settings(settings);
-  settings->rho = 100;
+  settings->rho = 20;
   settings->adaptive_rho = 0;
 
   // Check default time limit
