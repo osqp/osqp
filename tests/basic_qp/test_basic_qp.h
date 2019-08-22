@@ -1,4 +1,5 @@
 #include "osqp.h"    // OSQP API
+#include "auxil.h"   // Needed for cold_start()
 #include "cs.h"      // CSC data structure
 #include "util.h"    // Utilities for testing
 #include "minunit.h" // Basic testing script header
@@ -796,6 +797,8 @@ static const char* test_basic_qp_time_limit()
 
   // Define Solver settings as default
   osqp_set_default_settings(settings);
+  settings->rho = 100;
+  settings->adaptive_rho = 0;
 
   // Check default time limit
   mu_assert("Basic QP test time limit: Default not correct", settings->time_limit == 0);
@@ -821,6 +824,7 @@ static const char* test_basic_qp_time_limit()
   osqp_update_check_termination(work, 0);
 
   // Solve Problem
+  cold_start(work);
   osqp_solve(work);
 
   // Compare solver statuses
