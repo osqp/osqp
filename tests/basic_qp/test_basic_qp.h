@@ -814,10 +814,18 @@ static const char* test_basic_qp_time_limit()
 	    work->info->status_val == sols_data->status_test);
 
   // Update time limit
+# ifdef PRINTING
   osqp_update_time_limit(work, 1e-5);
-  osqp_update_max_iter(work, (c_int)2e9);
   osqp_update_eps_rel(work, 1e-09);
   osqp_update_eps_abs(work, 1e-09);
+# else
+  // Not printing makes the code run a lot faster, so we need to make it work harder
+  // to fail by time limit exceeded
+  osqp_update_time_limit(work, 1e-5);
+  osqp_update_eps_rel(work, 1e-12);
+  osqp_update_eps_abs(work, 1e-12);
+# endif
+  osqp_update_max_iter(work, (c_int)2e9);
   osqp_update_check_termination(work, 0);
 
   // Solve Problem
