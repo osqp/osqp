@@ -124,7 +124,7 @@ void print_setup_header(const OSQPWorkspace *work) {
   if (settings->polish) c_print("polish: on, ");
   else c_print("polish: off, ");
 
-  if (settings->time_limit) c_print("time_limit: %.2e\n", settings->time_limit);
+  if (settings->time_limit) c_print("time_limit: %.2e sec\n", settings->time_limit);
   else c_print("time_limit: off\n");
 
   c_print("\n");
