@@ -60,7 +60,6 @@ cmake -G "Unix Makefiles" -DDLONG=OFF -DUNITTESTS=ON ..
 make
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
 
-
 echo "Testing OSQP without printing"
 cd ${TRAVIS_BUILD_DIR}
 rm -rf build
@@ -69,6 +68,22 @@ cd build
 cmake -G "Unix Makefiles" -DPRINTING=OFF -DUNITTESTS=ON ..
 make
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
+
+echo "Building OSQP with embedded=1"
+cd ${TRAVIS_BUILD_DIR}
+rm -rf build
+mkdir build
+cd build
+cmake -G "Unix Makefiles" -DEMBEDDED=1 ..
+make
+
+echo "Building OSQP with embedded=2"
+cd ${TRAVIS_BUILD_DIR}
+rm -rf build
+mkdir build
+cd build
+cmake -G "Unix Makefiles" -DEMBEDDED=2 ..
+make
 
 
 # Test custom memory management
