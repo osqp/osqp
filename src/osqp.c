@@ -30,7 +30,7 @@ void osqp_set_default_settings(OSQPSettings *settings) {
   settings->adaptive_rho           = ADAPTIVE_RHO;
   settings->adaptive_rho_interval  = ADAPTIVE_RHO_INTERVAL;
   settings->adaptive_rho_tolerance = (c_float)ADAPTIVE_RHO_TOLERANCE;
-  
+
 # ifdef PROFILING
   settings->adaptive_rho_fraction = (c_float)ADAPTIVE_RHO_FRACTION;
 # endif /* ifdef PROFILING */
@@ -564,13 +564,15 @@ c_int osqp_solve(OSQPWorkspace *work) {
     }
   }
 
+#ifdef PROFILING
   /* if time-limit reached check termination and update status accordingly */
  if (work->info->status_val == OSQP_TIME_LIMIT_REACHED) {
     if (!check_termination(work, 1)) { // Try for approximate solutions
       update_status(work->info, OSQP_TIME_LIMIT_REACHED); /* Change update status back to OSQP_TIME_LIMIT_REACHED */
     }
   }
-  
+#endif /* ifdef PROFILING */
+
 
 #if EMBEDDED != 1
   /* Update rho estimate */
@@ -1582,7 +1584,7 @@ c_int osqp_update_time_limit(OSQPWorkspace *work, c_float time_limit_new) {
 
   // Check if workspace has been initialized
   if (!work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-  
+
   // Check that time_limit is nonnegative
   if (time_limit_new < 0.) {
 # ifdef PRINTING
