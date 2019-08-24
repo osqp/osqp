@@ -17,9 +17,8 @@
  */
 static c_int form_Ared(OSQPWorkspace *work){
 
-  c_int j, ptr, n_active;
-  c_int Ared_nnz = 0;
-
+  c_int j, n_active;
+    
   c_int* active_flags       = OSQPVectori_data(work->pol->active_flags);
   c_float* z = OSQPVectorf_data(work->z);
   c_float* y = OSQPVectorf_data(work->y);
@@ -111,7 +110,7 @@ static c_int iterative_refinement(OSQPSolver    *solver,
                                   LinSysSolver  *p,
                                   OSQPVectorf   *z,
                                   OSQPVectorf   *b) {
-  c_int i, j;
+  c_int i;
   OSQPVectorf *rhs, *rhs1, *rhs2;
   OSQPVectorf *z1, *z2;
 

@@ -79,7 +79,6 @@ void csc_rmult_diag(csc* A, const c_float* d){
 
   c_int j, i;
   c_int*   Ap = A->p;
-  c_int*   Ai = A->i;
   c_float* Ax = A->x;
   c_int     n = A->n;
 
@@ -89,6 +88,61 @@ void csc_rmult_diag(csc* A, const c_float* d){
                                            // of d for column j
     }
   }
+}
+
+//y = alpha*A*x + beta*y, where A is symmetric and only triu is stored
+void csc_Axpy_sym_triu(const csc   *A,
+              const c_float *x,
+              c_float *y,
+              c_float alpha,
+              c_float beta) {
+    
+    c_int i, j;
+    c_int*   Ap = A->p;
+    c_int*   Ai = A->i;
+    c_float* Ax = A->x;
+    c_int    An = A->n;
+    c_int    Am = A->m;
+    
+    // first do the b*y part
+    if (beta == 0)        vec_set_scalar(y, 0.0, Am);
+    else if (beta ==  1)  ; //do nothing
+    else if (beta == -1)  vec_negate(y, Am);
+    else vec_mult_scalar(y,beta, Am);
+    
+    
+    // if A is empty or zero
+    if (Ap[An] == 0 || alpha == 0.0) return;
+    
+    if (alpha == -1) {
+        // y -= A*x
+        for (j = 0; j < An; j++) {
+            for (i = Ap[j]; i < Ap[j + 1]; i++) {
+                y[Ai[i]] -= Ax[i] * x[j];
+                if(Ai[i] != j){
+                    y[j]     -= Ax[i] * x[Ai[i]];
+                }
+    }}}
+    
+    else if(alpha == 1){
+        // y +=  A*x
+        for (j = 0; j < An; j++) {
+            for (i = Ap[j]; i < Ap[j + 1]; i++) {
+                y[Ai[i]] += Ax[i] * x[j];
+                if(Ai[i] != j){
+                    y[j]     += Ax[i] * x[Ai[i]];
+                }
+    }}}
+    
+    else{
+        // y +=  alpha*A*x
+        for (j = 0; j < An; j++) {
+            for (i = Ap[j]; i < Ap[j + 1]; i++) {
+                y[Ai[i]] += alpha*Ax[i] * x[j];
+                if(Ai[i] != j){
+                    y[j]     += alpha*Ax[i] * x[Ai[i]];
+                }
+    }}}
 }
 
 //y = alpha*A*x + beta*y
@@ -122,7 +176,7 @@ void csc_Axpy(const csc   *A,
         y[Ai[i]] -= Ax[i] * x[j];
     }}}
 
-  else if(alpha == 1){
+  else if(alpha == +1){
     // y +=  A*x
     for (j = 0; j < An; j++) {
       for (i = Ap[j]; i < Ap[j + 1]; i++) {
@@ -140,13 +194,12 @@ void csc_Axpy(const csc   *A,
 //y = alpha*A'*x + beta*y
 
 void csc_Atxpy(const csc *A, const c_float *x, c_float *y,
-                     c_float alpha, c_float beta, c_int skip_diag) {
-  c_int i, j, k;
+                     c_float alpha, c_float beta) {
+  c_int j, k;
   c_int*   Ap = A->p;
   c_int*   Ai = A->i;
   c_float* Ax = A->x;
   c_int    An = A->n;
-  c_int    Am = A->m;
 
   // first do the b*y part
   if (beta == 0)        vec_set_scalar(y, 0.0, An);
@@ -159,47 +212,23 @@ void csc_Atxpy(const csc *A, const c_float *x, c_float *y,
     return;
   }
 
-  if(skip_diag){
-
-      if(alpha == 1){
-        for (j = 0; j < A->n; j++) {
-          for (k = Ap[j]; k < Ap[j + 1]; k++) {
-            y[j] -= i == j ? 0 : Ax[k] * x[Ai[k]];
-      }}}
-
-      else if(alpha == -1){
-        for (j = 0; j < A->n; j++) {
-          for (k = Ap[j]; k < Ap[j + 1]; k++) {
-            y[j] += i == j ? 0 : Ax[k] * x[Ai[k]];
-      }}}
-
-      else{
-        for (j = 0; j < A->n; j++) {
-          for (k = Ap[j]; k < Ap[j + 1]; k++) {
-            y[j] += i == j ? 0 : alpha * Ax[k] * x[Ai[k]];
-      }}}
-  }
-
-  else {  //not skipping the diagonal
-
-    if(alpha == 1){
+    if(alpha == -1){
       for (j = 0; j < A->n; j++) {
         for (k = Ap[j]; k < Ap[j + 1]; k++) {
           y[j] -= Ax[k] * x[Ai[k]];
     }}}
-
-    else if(alpha == -1){
+    
+    else if(alpha == +1){
       for (j = 0; j < A->n; j++) {
         for (k = Ap[j]; k < Ap[j + 1]; k++) {
           y[j] += Ax[k] * x[Ai[k]];
     }}}
-
+    
     else{
       for (j = 0; j < A->n; j++) {
         for (k = Ap[j]; k < Ap[j + 1]; k++) {
           y[j] += alpha*Ax[k] * x[Ai[k]];
     }}}
-  }
 }
 
 // 1/2 x'*P*x
@@ -243,7 +272,6 @@ void csc_col_norm_inf(const csc *M, c_float *E) {
 
   c_int j, ptr;
   c_int*   Mp = M->p;
-  c_int*   Mi = M->i;
   c_float* Mx = M->x;
   c_int    Mn = M->n;
 

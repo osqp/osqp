@@ -203,10 +203,8 @@ void update_KKT_P(csc          *KKT,
   c_int i, j; // Iterations
 
   //direct access to csc format data for P
-  c_int    P_m = OSQPMatrix_get_m(P);
   c_int    P_n = OSQPMatrix_get_n(P);
   c_float* P_x = OSQPMatrix_get_x(P);
-  c_int*   P_i = OSQPMatrix_get_i(P);
   c_int*   P_p = OSQPMatrix_get_p(P);
 
   // Update elements of KKT using P
@@ -227,10 +225,8 @@ void update_KKT_A(csc *KKT, const OSQPMatrix *A, const c_int *AtoKKT) {
   c_int i; // Iterations
 
   //direct access to csc format data for P and A
-  c_int    A_m = OSQPMatrix_get_m(A);
   c_int    A_n = OSQPMatrix_get_n(A);
   c_float* A_x = OSQPMatrix_get_x(A);
-  c_int*   A_i = OSQPMatrix_get_i(A);
   c_int*   A_p = OSQPMatrix_get_p(A);
 
   // Update elements of KKT using A

@@ -316,7 +316,7 @@ c_float compute_dua_res(OSQPSolver *solver, OSQPVectorf *x, OSQPVectorf *y) {
 
   // dr += A' * y
   if (work->data->m > 0) {
-    OSQPMatrix_Atxpy(work->data->A,y,work->Ax,1.0,0.0); //Ax = A*x
+    OSQPMatrix_Atxpy(work->data->A,y,work->Aty,1.0,0.0); //Ax = A*x
     OSQPVectorf_plus(work->x_prev, work->x_prev, work->Aty);
   }
 

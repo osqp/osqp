@@ -45,6 +45,13 @@ void csc_scale(csc* A, c_float sc);
 void csc_lmult_diag(csc* A, const c_float *L);
 
 void csc_rmult_diag(csc* A, const c_float *R);
+    
+//y = alpha*A*x + beta*y, where A is symmetric and only triu is stored
+void csc_Axpy_sym_triu(const csc   *A,
+                       const c_float *x,
+                       c_float *y,
+                       c_float alpha,
+                       c_float beta);
 
 //y = alpha*A*x + beta*y
 void csc_Axpy(const csc   *A,
@@ -58,8 +65,7 @@ void csc_Atxpy(const csc *A,
                      const c_float *x,
                      c_float *y,
                      c_float alpha,
-                     c_float beta,
-                     c_int skip_diag);
+                     c_float beta);
 
 c_float csc_quad_form(const csc *P, const c_float *x);
 

@@ -4,6 +4,7 @@
 #include "util.h"
 #include "scaling.h"
 #include "error.h"
+#include "PG_debug.h"
 
 
 #ifndef EMBEDDED
@@ -356,6 +357,7 @@ c_int osqp_solve(OSQPSolver *solver) {
   // Main ADMM algorithm
 
   for (iter = 1; iter <= solver->settings->max_iter; iter++) {
+
     // Update x_prev, z_prev (preallocated, no malloc)
     swap_vectors(&(work->x), &(work->x_prev));
     swap_vectors(&(work->z), &(work->z_prev));
@@ -1021,7 +1023,7 @@ c_int osqp_update_P(OSQPSolver    *solver,
                     const c_float *Px_new,
                     const c_int   *Px_new_idx,
                     c_int          P_new_n) {
-  c_int i;        // For indexing
+
   c_int exitflag; // Exit flag
   c_int nnzP;     // Number of nonzeros in P
   OSQPWorkspace* work;
@@ -1092,7 +1094,7 @@ c_int osqp_update_A(OSQPSolver *solver,
                     const c_float *Ax_new,
                     const c_int   *Ax_new_idx,
                     c_int          A_new_n) {
-  c_int i;        // For indexing
+
   c_int exitflag; // Exit flag
   c_int nnzA;     // Number of nonzeros in A
   OSQPWorkspace* work;
@@ -1167,7 +1169,7 @@ c_int osqp_update_P_A(OSQPSolver    *solver,
                       const c_float *Ax_new,
                       const c_int   *Ax_new_idx,
                       c_int          A_new_n) {
-  c_int i;          // For indexing
+
   c_int exitflag;   // Exit flag
   c_int nnzP, nnzA; // Number of nonzeros in P and A
   OSQPWorkspace* work;

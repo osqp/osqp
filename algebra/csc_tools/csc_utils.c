@@ -79,7 +79,6 @@ csc* csc_submatrix_byrows(const csc* A, c_int* rows, c_int nrows){
   c_int    j;
   csc*     R;
   c_int    nzR = 0;
-  c_int    Am = A->m;
   c_int    An = A->n;
   c_int*   Ap = A->p;
   c_int*   Ai = A->i;
