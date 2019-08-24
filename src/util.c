@@ -121,8 +121,12 @@ void print_setup_header(const OSQPWorkspace *work) {
   if (settings->warm_start) c_print("          warm start: on, ");
   else c_print("          warm start: off, ");
 
-  if (settings->polish) c_print("polish: on\n");
-  else c_print("polish: off\n");
+  if (settings->polish) c_print("polish: on, ");
+  else c_print("polish: off, ");
+
+  if (settings->time_limit) c_print("time_limit: %.2e sec\n", settings->time_limit);
+  else c_print("time_limit: off\n");
+
   c_print("\n");
 }
 
