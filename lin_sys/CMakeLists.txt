@@ -29,7 +29,7 @@ endif()
 # TODO: Add indirect ones
 # Add library handler if desktop version
 set(linsys_solvers
-    ${kkt_common}
+    $<TARGET_OBJECTS:kkt_common>
     ${direct_linsys_solvers}
     ${linsys_lib_handler}
     PARENT_SCOPE)

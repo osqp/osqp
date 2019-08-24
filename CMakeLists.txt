@@ -180,8 +180,8 @@ set(
     src/auxil.c
     src/ctrlc.c
     src/error.c
-    algebra/csc_tools/csc_math.c
-    algebra/csc_tools/csc_utils.c
+    ${PROJECT_SOURCE_DIR}/algebra/csc_tools/csc_math.c
+    ${PROJECT_SOURCE_DIR}/algebra/csc_tools/csc_utils.c
     ${OSQP_ALGEBRA_DIR}/matrix.c
     ${OSQP_ALGEBRA_DIR}/vector.c
     src/lin_sys.c
@@ -202,8 +202,8 @@ set(
     include/algebra_vector.h
     include/algebra_matrix.h
     include/csc_type.h
-    algebra/csc_tools/csc_math.h
-    algebra/csc_tools/csc_utils.h
+    ${PROJECT_SOURCE_DIR}/algebra/csc_tools/csc_math.h
+    ${PROJECT_SOURCE_DIR}/algebra/csc_tools/csc_utils.h
     ${OSQP_ALGEBRA_DIR}/algebra_impl.h
     include/lin_sys.h
     include/osqp.h
@@ -220,11 +220,11 @@ set(
 
 if (DEFINED EMBEDDED)
     # osqp_src
-    list(REMOVE_ITEM osqp_src "algebra/csc_tools/csc_utils.c")
+    list(REMOVE_ITEM osqp_src "${PROJECT_SOURCE_DIR}/algebra/csc_tools/csc_utils.c")
     list(REMOVE_ITEM osqp_src "src/ctrlc.c")
     list(REMOVE_ITEM osqp_src "src/polish.c")
     # osqp_headers
-    list(REMOVE_ITEM osqp_headers "algebra/csc_tools/csc_utils.h")
+    list(REMOVE_ITEM osqp_headers "${PROJECT_SOURCE_DIR}/algebra/csc_tools/csc_utils.h")
     list(REMOVE_ITEM osqp_headers "include/ctrlc.h")
     list(REMOVE_ITEM osqp_headers "include/polish.h")
 elseif (NOT CTRLC)
@@ -338,7 +338,7 @@ set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
 # Include directories for linear system solvers
 target_include_directories(osqpstatic PRIVATE
                            ${linsys_solvers_includes}
-                           algebra/csc_tools/)
+                           ${PROJECT_SOURCE_DIR}/algebra/csc_tools/)
 
 # Declare include directories for the cmake exported target
 target_include_directories(osqpstatic
