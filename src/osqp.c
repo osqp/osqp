@@ -191,7 +191,10 @@ c_int osqp_setup(OSQPWorkspace** workp, const OSQPData *data, const OSQPSettings
     // Scale data
     scale_data(work);
   } else {
-    work->scaling = OSQP_NULL;
+    work->scaling  = OSQP_NULL;
+    work->D_temp   = OSQP_NULL;
+    work->D_temp_A = OSQP_NULL;
+    work->E_temp   = OSQP_NULL;
   }
 
   // Set type of constraints
@@ -654,21 +657,19 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
       c_free(work->data);
     }
 
-    // Free scaling
-    if (work->settings->scaling) {
-      if (work->scaling){
-        if (work->scaling->D)    c_free(work->scaling->D);
-        if (work->scaling->Dinv) c_free(work->scaling->Dinv);
-        if (work->scaling->E)    c_free(work->scaling->E);
-        if (work->scaling->Einv) c_free(work->scaling->Einv);
-      }
+    // Free scaling variables
+    if (work->scaling){
+      if (work->scaling->D)    c_free(work->scaling->D);
+      if (work->scaling->Dinv) c_free(work->scaling->Dinv);
+      if (work->scaling->E)    c_free(work->scaling->E);
+      if (work->scaling->Einv) c_free(work->scaling->Einv);
       c_free(work->scaling);
-
-      // Free workspace variables
-      if (work->D_temp)   c_free(work->D_temp);
-      if (work->D_temp_A) c_free(work->D_temp_A);
-      if (work->E_temp)   c_free(work->E_temp);
     }
+
+    // Free temp workspace variables for scaling
+    if (work->D_temp)   c_free(work->D_temp);
+    if (work->D_temp_A) c_free(work->D_temp_A);
+    if (work->E_temp)   c_free(work->E_temp);
 
     // Free linear system solver structure
     if (work->linsys_solver) {
@@ -678,7 +679,9 @@ c_int osqp_cleanup(OSQPWorkspace *work) {
     }
 
     // Unload linear system solver after free
-    exitflag = unload_linsys_solver(work->settings->linsys_solver);
+    if (work->settings) {
+      exitflag = unload_linsys_solver(work->settings->linsys_solver);
+    }
 
 #ifndef EMBEDDED
     // Free active constraints structure
