@@ -1,6 +1,5 @@
 #include "glob_opts.h"
 #include "osqp.h"
-#include "csc.h"
 #include "auxil.h"
 #include "util.h"
 #include "scaling.h"
@@ -26,7 +25,7 @@ void osqp_set_default_settings(OSQPSettings *settings) {
 
   settings->rho           = (c_float)RHO;            /* ADMM step */
   settings->sigma         = (c_float)SIGMA;          /* ADMM step */
-  settings->scaling = SCALING;                       /* heuristic problem scaling */
+  settings->scaling       = SCALING;                 /* heuristic problem scaling */
 #if EMBEDDED != 1
   settings->adaptive_rho           = ADAPTIVE_RHO;
   settings->adaptive_rho_interval  = ADAPTIVE_RHO_INTERVAL;
@@ -36,33 +35,23 @@ void osqp_set_default_settings(OSQPSettings *settings) {
 # endif /* ifdef PROFILING */
 #endif  /* if EMBEDDED != 1 */
 
-  settings->max_iter      = MAX_ITER;                /* maximum iterations to
-                                                        take */
-  settings->eps_abs       = (c_float)EPS_ABS;        /* absolute convergence
-                                                        tolerance */
-  settings->eps_rel       = (c_float)EPS_REL;        /* relative convergence
-                                                        tolerance */
-  settings->eps_prim_inf  = (c_float)EPS_PRIM_INF;   /* primal infeasibility
-                                                        tolerance */
-  settings->eps_dual_inf  = (c_float)EPS_DUAL_INF;   /* dual infeasibility
-                                                        tolerance */
+  settings->max_iter      = MAX_ITER;                /* maximum iterations */
+  settings->eps_abs       = (c_float)EPS_ABS;        /* absolute convergence tolerance */
+  settings->eps_rel       = (c_float)EPS_REL;        /* relative convergence tolerance */
+  settings->eps_prim_inf  = (c_float)EPS_PRIM_INF;   /* primal infeasibility tolerance */
+  settings->eps_dual_inf  = (c_float)EPS_DUAL_INF;   /* dual infeasibility   tolerance */
   settings->alpha         = (c_float)ALPHA;          /* relaxation parameter */
   settings->linsys_solver = LINSYS_SOLVER;           /* relaxation parameter */
 
 #ifndef EMBEDDED
-  settings->delta              = DELTA;              /* regularization parameter
-                                                        for polish */
-  settings->polish             = POLISH;             /* ADMM solution polish: 1
-                                                      */
-  settings->polish_refine_iter = POLISH_REFINE_ITER; /* iterative refinement
-                                                        steps in polish */
+  settings->delta              = DELTA;              /* regularization parameter for polish */
+  settings->polish             = POLISH;             /* ADMM solution polish: 1 */
+  settings->polish_refine_iter = POLISH_REFINE_ITER; /* iterative refinement steps in polish */
   settings->verbose            = VERBOSE;            /* print output */
 #endif /* ifndef EMBEDDED */
 
-  settings->scaled_termination = SCALED_TERMINATION; /* Evaluate scaled
-                                                        termination criteria*/
-  settings->check_termination  = CHECK_TERMINATION;  /* Interval for evaluating
-                                                        termination criteria */
+  settings->scaled_termination = SCALED_TERMINATION; /* Evaluate scaled termination criteria*/
+  settings->check_termination  = CHECK_TERMINATION;  /* Interval for evaluating termination criteria */
   settings->warm_start         = WARM_START;         /* warm starting */
 
 #ifdef PROFILING
@@ -118,12 +107,12 @@ c_int osqp_setup(OSQPSolver** solverp,
   work->data->n = n;
 
   // Cost function
-  work->data->P = copy_csc_mat(P);
+  work->data->P = OSQPMatrix_new_from_csc(P,1);   //copy assuming triu form
   work->data->q = OSQPVectorf_new(q,n);
   if (!(work->data->P) || !(work->data->q)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Constraints
-  work->data->A = copy_csc_mat(A);
+  work->data->A = OSQPMatrix_new_from_csc(A,0); //assumes non-triu form (i.e. full)
   if (!(work->data->A)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   work->data->l = OSQPVectorf_new(l,m);
   work->data->u = OSQPVectorf_new(u,m);
@@ -221,7 +210,7 @@ c_int osqp_setup(OSQPSolver** solverp,
   // Initialize linear system solver structure
   exitflag = init_linsys_solver(&(work->linsys_solver), work->data->P, work->data->A,
                                 settings->sigma,
-                                OSQPVectorf_data(work->rho_vec),
+                                work->rho_vec,
                                 settings->linsys_solver, 0);
 
   if (exitflag) {
@@ -231,16 +220,12 @@ c_int osqp_setup(OSQPSolver** solverp,
   // Initialize active constraints structure
   work->pol = c_malloc(sizeof(OSQPPolish));
   if (!(work->pol)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  work->pol->Alow_to_A = OSQPVectori_malloc(m);
-  work->pol->Aupp_to_A = OSQPVectori_malloc(m);
-  work->pol->A_to_Alow = OSQPVectori_malloc(m);
-  work->pol->A_to_Aupp = OSQPVectori_malloc(m);
+  work->pol->active_flags      = OSQPVectori_malloc(m);
   work->pol->x         = OSQPVectorf_malloc(n);
   work->pol->z         = OSQPVectorf_malloc(m);
   work->pol->y         = OSQPVectorf_malloc(m);
   if (!(work->pol->x)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (!(work->pol->Alow_to_A) || !(work->pol->Aupp_to_A) ||
-      !(work->pol->A_to_Alow) || !(work->pol->A_to_Aupp) ||
+  if (!(work->pol->active_flags) ||
       !(work->pol->z) || !(work->pol->y))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
@@ -503,7 +488,7 @@ c_int osqp_solve(OSQPSolver *solver) {
           solver->settings->adaptive_rho_interval,
           solver->settings->check_termination);
       } // If time condition is met
-    }   // If adaptive rho enabled and interval set to auto
+    }   // If adaptive rho enabled and interval set to auto®
 # endif // PROFILING
 
     // Adapt rho
@@ -667,8 +652,8 @@ c_int osqp_cleanup(OSQPSolver *solver) {
   if (work) { // If workspace has been allocated
     // Free Data
     if (work->data) {
-      if (work->data->P) csc_spfree(work->data->P);
-      if (work->data->A) csc_spfree(work->data->A);
+      if (work->data->P) OSQPMatrix_free(work->data->P);
+      if (work->data->A) OSQPMatrix_free(work->data->A);
       OSQPVectorf_free(work->data->q);
       OSQPVectorf_free(work->data->l);
       OSQPVectorf_free(work->data->u);
@@ -704,10 +689,7 @@ c_int osqp_cleanup(OSQPSolver *solver) {
 #ifndef EMBEDDED
     // Free active constraints structure
     if (work->pol) {
-      OSQPVectori_free(work->pol->Alow_to_A);
-      OSQPVectori_free(work->pol->Aupp_to_A);
-      OSQPVectori_free(work->pol->A_to_Alow);
-      OSQPVectori_free(work->pol->A_to_Aupp);
+      OSQPVectori_free(work->pol->active_flags);
       OSQPVectorf_free(work->pol->x);
       OSQPVectorf_free(work->pol->z);
       OSQPVectorf_free(work->pol->y);
@@ -979,7 +961,7 @@ c_int osqp_warm_start(OSQPSolver *solver, const c_float *x, const c_float *y) {
   }
 
   // Compute Ax = z and store it in z
-  mat_vec(work->data->A, OSQPVectorf_data(work->x), OSQPVectorf_data(work->z), 0);
+  OSQPMatrix_Axpy(work->data->A, work->x, work->z, 1.0, 0.0);
 
   return 0;
 }
@@ -1004,7 +986,7 @@ c_int osqp_warm_start_x(OSQPSolver *solver, const c_float *x) {
   }
 
   // Compute Ax = z and store it in z
-  mat_vec(work->data->A, OSQPVectorf_data(work->x), OSQPVectorf_data(work->z), 0);
+  OSQPMatrix_Axpy(work->data->A, work->x, work->z, 1.0, 0.0);
 
   return 0;
 }
@@ -1056,7 +1038,7 @@ c_int osqp_update_P(OSQPSolver    *solver,
   osqp_tic(work->timer); // Start timer
 #endif /* ifdef PROFILING */
 
-  nnzP = work->data->P->p[work->data->P->n];
+  nnzP = OSQPMatrix_get_nnz(work->data->P);
 
   if (Px_new_idx) { // Passing the index of elements changed
     // Check if number of elements is less or equal than the total number of
@@ -1076,18 +1058,7 @@ c_int osqp_update_P(OSQPSolver    *solver,
     unscale_data(solver);
   }
 
-  // Update P elements
-  if (Px_new_idx) { // Change only Px_new_idx
-    for (i = 0; i < P_new_n; i++) {
-      work->data->P->x[Px_new_idx[i]] = Px_new[i];
-    }
-  }
-  else // Change whole P
-  {
-    for (i = 0; i < nnzP; i++) {
-      work->data->P->x[i] = Px_new[i];
-    }
-  }
+  OSQPMatrix_update_values(work->data->P,Px_new,Px_new_idx,P_new_n);
 
   if (solver->settings->scaling) {
     // Scale data
@@ -1138,7 +1109,7 @@ c_int osqp_update_A(OSQPSolver *solver,
   osqp_tic(work->timer); // Start timer
 #endif /* ifdef PROFILING */
 
-  nnzA = work->data->A->p[work->data->A->n];
+  nnzA = OSQPMatrix_get_nnz(work->data->A);
 
   if (Ax_new_idx) { // Passing the index of elements changed
     // Check if number of elements is less or equal than the total number of
@@ -1159,16 +1130,7 @@ c_int osqp_update_A(OSQPSolver *solver,
   }
 
   // Update A elements
-  if (Ax_new_idx) { // Change only Ax_new_idx
-    for (i = 0; i < A_new_n; i++) {
-      work->data->A->x[Ax_new_idx[i]] = Ax_new[i];
-    }
-  }
-  else { // Change whole A
-    for (i = 0; i < nnzA; i++) {
-      work->data->A->x[i] = Ax_new[i];
-    }
-  }
+  OSQPMatrix_update_values(work->data->A,Ax_new,Ax_new_idx,A_new_n);
 
   if (solver->settings->scaling) {
     // Scale data
@@ -1222,8 +1184,8 @@ c_int osqp_update_P_A(OSQPSolver    *solver,
   osqp_tic(work->timer); // Start timer
 #endif /* ifdef PROFILING */
 
-  nnzP = work->data->P->p[work->data->P->n];
-  nnzA = work->data->A->p[work->data->A->n];
+  nnzP = OSQPMatrix_get_nnz(work->data->P);
+  nnzA = OSQPMatrix_get_nnz(work->data->A);
 
 
   if (Px_new_idx) { // Passing the index of elements changed
@@ -1259,29 +1221,10 @@ c_int osqp_update_P_A(OSQPSolver    *solver,
   }
 
   // Update P elements
-  if (Px_new_idx) { // Change only Px_new_idx
-    for (i = 0; i < P_new_n; i++) {
-      work->data->P->x[Px_new_idx[i]] = Px_new[i];
-    }
-  }
-  else // Change whole P
-  {
-    for (i = 0; i < nnzP; i++) {
-      work->data->P->x[i] = Px_new[i];
-    }
-  }
+    OSQPMatrix_update_values(work->data->P,Px_new,Px_new_idx,P_new_n);
 
   // Update A elements
-  if (Ax_new_idx) { // Change only Ax_new_idx
-    for (i = 0; i < A_new_n; i++) {
-      work->data->A->x[Ax_new_idx[i]] = Ax_new[i];
-    }
-  }
-  else { // Change whole A
-    for (i = 0; i < nnzA; i++) {
-      work->data->A->x[i] = Ax_new[i];
-    }
-  }
+    OSQPMatrix_update_values(work->data->A,Ax_new,Ax_new_idx,A_new_n);
 
   if (solver->settings->scaling) {
     // Scale data
@@ -1350,8 +1293,7 @@ c_int osqp_update_rho(OSQPSolver *solver, c_float rho_new) {
   OSQPVectorf_ew_reciprocal(work->rho_inv_vec, work->rho_vec);
 
   // Update rho_vec in KKT matrix
-  exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
-                                                 OSQPVectorf_data(work->rho_vec));
+  exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver, work->rho_vec);
 
 #ifdef PROFILING
   if (work->rho_update_from_solve == 0)
@@ -1655,7 +1597,7 @@ void csc_set_data(csc* M, c_int m, c_int n, c_int nzmax, c_float *x, c_int *i, c
 {
   M->m     = m;
   M->n     = n;
-  M->nz    = -1;
+  M->nz   = -1;
   M->nzmax = nzmax;
   M->x     = x;
   M->i     = i;

@@ -55,12 +55,12 @@ c_int unload_linsys_solver(enum linsys_solver_type linsys_solver) {
 }
 
 // Initialize linear system solver structure
-// NB: Only the upper triangular part of P is stuffed!
+// NB: Only the upper triangular part of P is filled
 c_int init_linsys_solver(LinSysSolver          **s,
-                         const csc              *P,
-                         const csc              *A,
+                         const OSQPMatrix       *P,
+                         const OSQPMatrix       *A,
                          c_float                 sigma,
-                         const c_float          *rho_vec,
+                         const OSQPVectorf      *rho_vec,
                          enum linsys_solver_type linsys_solver,
                          c_int                   polish) {
   switch (linsys_solver) {

@@ -2,9 +2,8 @@
 
 #ifndef EMBEDDED
 
-
-csc* form_KKT(const csc  *P,
-              const  csc *A,
+csc* form_KKT(const  OSQPMatrix *P,
+              const  OSQPMatrix *A,
               c_int       format,
               c_float     param1,
               c_float    *param2,
@@ -13,6 +12,7 @@ csc* form_KKT(const csc  *P,
               c_int     **Pdiag_idx,
               c_int      *Pdiag_n,
               c_int      *param2toKKT) {
+
   c_int  nKKT, nnzKKTmax; // Size, number of nonzeros and max number of nonzeros
                           // in KKT matrix
   csc   *KKT_trip, *KKT;  // KKT matrix in triplet format and CSC format
@@ -22,14 +22,26 @@ csc* form_KKT(const csc  *P,
   c_int *KKT_TtoC;        // Pointer to vector mapping from KKT in triplet form
                           // to CSC
 
+ //direct access to csc format data for P and A
+ c_int    P_m = OSQPMatrix_get_m(P);
+ c_int    P_n = OSQPMatrix_get_n(P);
+ c_float* P_x = OSQPMatrix_get_x(P);
+ c_int*   P_i = OSQPMatrix_get_i(P);
+ c_int*   P_p = OSQPMatrix_get_p(P);
+ c_int    A_m = OSQPMatrix_get_m(A);
+ c_int    A_n = OSQPMatrix_get_n(A);
+ c_float* A_x = OSQPMatrix_get_x(A);
+ c_int*   A_i = OSQPMatrix_get_i(A);
+ c_int*   A_p = OSQPMatrix_get_p(A);
+
   // Get matrix dimensions
-  nKKT = P->m + A->m;
+  nKKT = P_m + A_m;
 
   // Get maximum number of nonzero elements (only upper triangular part)
-  nnzKKTmax = P->p[P->n] + // Number of elements in P
-              P->m +       // Number of elements in param1 * I
-              A->p[A->n] + // Number of nonzeros in A
-              A->m;        // Number of elements in - diag(param2)
+  nnzKKTmax = P_p[P_n] +  // Number of elements in P
+              P_m +       // Number of elements in param1 * I
+              A_p[A_n] +  // Number of nonzeros in A
+              A_m;        // Number of elements in - diag(param2)
 
   // Preallocate KKT matrix in triplet format
   KKT_trip = csc_spalloc(nKKT, nKKT, nnzKKTmax, 1, 1);
@@ -38,29 +50,29 @@ csc* form_KKT(const csc  *P,
 
   // Allocate vector of indices on the diagonal. Worst case it has m elements
   if (Pdiag_idx != OSQP_NULL) {
-    (*Pdiag_idx) = c_malloc(P->m * sizeof(c_int));
+    (*Pdiag_idx) = c_malloc(P_m * sizeof(c_int));
     *Pdiag_n     = 0; // Set 0 diagonal elements to start
   }
 
   // Allocate Triplet matrices
   // P + param1 I
-  for (j = 0; j < P->n; j++) { // cycle over columns
+  for (j = 0; j < P_n; j++) { // cycle over columns
     // No elements in column j => add diagonal element param1
-    if (P->p[j] == P->p[j + 1]) {
+    if (P_p[j] == P_p[j + 1]) {
       KKT_trip->i[zKKT] = j;
       KKT_trip->p[zKKT] = j;
       KKT_trip->x[zKKT] = param1;
       zKKT++;
     }
 
-    for (ptr = P->p[j]; ptr < P->p[j + 1]; ptr++) { // cycle over rows
+    for (ptr = P_p[j]; ptr < P_p[j + 1]; ptr++) { // cycle over rows
       // Get current row
-      i = P->i[ptr];
+      i = P_i[ptr];
 
       // Add element of P
       KKT_trip->i[zKKT] = i;
       KKT_trip->p[zKKT] = j;
-      KKT_trip->x[zKKT] = P->x[ptr];
+      KKT_trip->x[zKKT] = P_x[ptr];
 
       if (PtoKKT != OSQP_NULL) PtoKKT[ptr] = zKKT;  // Update index from P to
                                                     // KKTtrip
@@ -79,7 +91,7 @@ csc* form_KKT(const csc  *P,
 
       // Add diagonal param1 in case
       if ((i < j) &&                  // Diagonal element not reached
-          (ptr + 1 == P->p[j + 1])) { // last element of column j
+          (ptr + 1 == P_p[j + 1])) { // last element of column j
         // Add diagonal element param1
         KKT_trip->i[zKKT] = j;
         KKT_trip->p[zKKT] = j;
@@ -96,13 +108,13 @@ csc* form_KKT(const csc  *P,
 
 
   // A' at top right
-  for (j = 0; j < A->n; j++) {                      // Cycle over columns of A
-    for (ptr = A->p[j]; ptr < A->p[j + 1]; ptr++) {
-      KKT_trip->p[zKKT] = P->m + A->i[ptr];         // Assign column index from
+  for (j = 0; j < A_n; j++) {                      // Cycle over columns of A
+    for (ptr = A_p[j]; ptr < A_p[j + 1]; ptr++) {
+      KKT_trip->p[zKKT] = P_m + A_i[ptr];         // Assign column index from
                                                     // row index of A
       KKT_trip->i[zKKT] = j;                        // Assign row index from
                                                     // column index of A
-      KKT_trip->x[zKKT] = A->x[ptr];                // Assign A value element
+      KKT_trip->x[zKKT] = A_x[ptr];                // Assign A value element
 
       if (AtoKKT != OSQP_NULL) AtoKKT[ptr] = zKKT;  // Update index from A to
                                                     // KKTtrip
@@ -111,9 +123,9 @@ csc* form_KKT(const csc  *P,
   }
 
   // - diag(param2) at bottom right
-  for (j = 0; j < A->m; j++) {
-    KKT_trip->i[zKKT] = j + P->n;
-    KKT_trip->p[zKKT] = j + P->n;
+  for (j = 0; j < A_m; j++) {
+    KKT_trip->i[zKKT] = j + P_n;
+    KKT_trip->p[zKKT] = j + P_n;
     KKT_trip->x[zKKT] = -param2[j];
 
     if (param2toKKT != OSQP_NULL) param2toKKT[j] = zKKT;  // Update index from
@@ -122,7 +134,7 @@ csc* form_KKT(const csc  *P,
   }
 
   // Allocate number of nonzeros
-  KKT_trip->nnz = zKKT;
+  KKT_trip->nz = zKKT;
 
   // Convert triplet matrix to csc format
   if (!PtoKKT && !AtoKKT && !param2toKKT) {
@@ -149,19 +161,19 @@ csc* form_KKT(const csc  *P,
 
     // Update vectors of indices from P, A, param2 to KKT (now in CSC format)
     if (PtoKKT != OSQP_NULL) {
-      for (i = 0; i < P->p[P->n]; i++) {
+      for (i = 0; i < P_p[P_n]; i++) {
         PtoKKT[i] = KKT_TtoC[PtoKKT[i]];
       }
     }
 
     if (AtoKKT != OSQP_NULL) {
-      for (i = 0; i < A->p[A->n]; i++) {
+      for (i = 0; i < A_p[A_n]; i++) {
         AtoKKT[i] = KKT_TtoC[AtoKKT[i]];
       }
     }
 
     if (param2toKKT != OSQP_NULL) {
-      for (i = 0; i < A->m; i++) {
+      for (i = 0; i < A_m; i++) {
         param2toKKT[i] = KKT_TtoC[param2toKKT[i]];
       }
     }
@@ -182,16 +194,24 @@ csc* form_KKT(const csc  *P,
 #if EMBEDDED != 1
 
 void update_KKT_P(csc          *KKT,
-                  const csc    *P,
+                  const OSQPMatrix  *P,
                   const c_int  *PtoKKT,
                   const c_float param1,
                   const c_int  *Pdiag_idx,
                   const c_int   Pdiag_n) {
+
   c_int i, j; // Iterations
 
+  //direct access to csc format data for P
+  c_int    P_m = OSQPMatrix_get_m(P);
+  c_int    P_n = OSQPMatrix_get_n(P);
+  c_float* P_x = OSQPMatrix_get_x(P);
+  c_int*   P_i = OSQPMatrix_get_i(P);
+  c_int*   P_p = OSQPMatrix_get_p(P);
+
   // Update elements of KKT using P
-  for (i = 0; i < P->p[P->n]; i++) {
-    KKT->x[PtoKKT[i]] = P->x[i];
+  for (i = 0; i < P_p[P_n]; i++) {
+    KKT->x[PtoKKT[i]] = P_x[i];
   }
 
   // Update diagonal elements of KKT by adding sigma
@@ -202,12 +222,20 @@ void update_KKT_P(csc          *KKT,
   }
 }
 
-void update_KKT_A(csc *KKT, const csc *A, const c_int *AtoKKT) {
+void update_KKT_A(csc *KKT, const OSQPMatrix *A, const c_int *AtoKKT) {
+
   c_int i; // Iterations
 
+  //direct access to csc format data for P and A
+  c_int    A_m = OSQPMatrix_get_m(A);
+  c_int    A_n = OSQPMatrix_get_n(A);
+  c_float* A_x = OSQPMatrix_get_x(A);
+  c_int*   A_i = OSQPMatrix_get_i(A);
+  c_int*   A_p = OSQPMatrix_get_p(A);
+
   // Update elements of KKT using A
-  for (i = 0; i < A->p[A->n]; i++) {
-    KKT->x[AtoKKT[i]] = A->x[i];
+  for (i = 0; i < A_p[A_n]; i++) {
+    KKT->x[AtoKKT[i]] = A_x[i];
   }
 }
 

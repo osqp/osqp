@@ -8,9 +8,10 @@ extern "C" {
 /* Types, functions etc required by the OSQP API */
 # include "osqp_configure.h"
 # include "osqp_api_constants.h"
-# include "osqp_api_functions.h"
 # include "osqp_api_types.h"
+# include "csc_type.h"
 # include "osqp_api_utils.h"
+# include "osqp_api_functions.h"
 
 # ifdef __cplusplus
 }

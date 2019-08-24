@@ -1,0 +1,77 @@
+#ifndef CSC_MATH_H
+# define CSC_MATH_H
+
+# ifdef __cplusplus
+extern "C" {
+# endif // ifdef __cplusplus
+
+# include "csc_type.h"
+
+/*****************************************************************************
+* CSC Matrix updates                                                        *
+*****************************************************************************/
+
+ /**
+  * Update elements of a previously allocated csc matrix
+  * without changing its sparsity structure.
+  *
+  *  If Mx_new_idx is OSQP_NULL, Mx_new is assumed to be as long as M->x
+  *  and all matrix entries are replaced
+  *
+  *  The caller is responsible for ensuring that P_new_n is not greater
+  *  the number of nonzeros in the matrix
+  *
+  * @param  M          csc matrix
+  * @param  Mx_new     Vector of new elements in M->x
+  * @param  Mx_new_idx Index mapping new elements to positions in M->x
+  * @param  P_new_n    Number of new elements to be changed
+  *
+  */
+
+void csc_update_values(csc           *M,
+                       const c_float *Mx_new,
+                       const c_int   *Mx_new_idx,
+                       c_int          P_new_n);
+
+/*****************************************************************************
+* CSC Algebraic Operations                                    ******************************************************************************/
+
+//DEBUG : ADD documentation
+
+/* matrix times scalar */
+
+void csc_scale(csc* A, c_float sc);
+
+void csc_lmult_diag(csc* A, const c_float *L);
+
+void csc_rmult_diag(csc* A, const c_float *R);
+
+//y = alpha*A*x + beta*y
+void csc_Axpy(const csc   *A,
+                    const c_float *x,
+                    c_float *y,
+                    c_float alpha,
+                    c_float beta);
+
+
+void csc_Atxpy(const csc *A,
+                     const c_float *x,
+                     c_float *y,
+                     c_float alpha,
+                     c_float beta,
+                     c_int skip_diag);
+
+c_float csc_quad_form(const csc *P, const c_float *x);
+
+void csc_col_norm_inf(const csc *M, c_float *E);
+
+void csc_row_norm_inf(const csc *M, c_float *E);
+
+void csc_row_norm_inf_sym_triu(const csc *M, c_float *E);
+
+
+# ifdef __cplusplus
+}
+# endif // ifdef __cplusplus
+
+#endif // ifndef CSC_MATH_H

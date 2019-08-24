@@ -1,20 +1,22 @@
-#ifndef CSC_H
-#define CSC_H
+#ifndef CSC_UTILS_H
+#define CSC_UTILS_H
 
 # ifdef __cplusplus
 extern "C" {
 # endif // ifdef __cplusplus
 
-# include "osqp_api_types.h" // CSC matrix type
-# include "lin_alg.h"        // Vector copy operations
+# include "csc_type.h"
+# include "osqp_configure.h"
+# include "glob_opts.h"
+
+#ifndef EMBEDDED
 
 /*****************************************************************************
 * Create and free CSC Matrices                                              *
 *****************************************************************************/
 
-
 /**
- * Create uninitialized CSC matrix atricture
+ * Create uninitialized CSC matrix structure
     (uses MALLOC to create inner arrays x, i, p)
  * @param  m       First dimension
  * @param  n       Second dimension
@@ -36,6 +38,17 @@ csc* csc_spalloc(c_int m,
  * @param  A Matrix in CSC format
  */
 void csc_spfree(csc *A);
+
+/**
+ * Create a new matrix from a subset of the rows of A
+    (uses MALLOC to create the new matrix)
+    * @param  A      CSC matrix
+    * @param  rows   vector indicating which rows to select (all nonzeros are selected)
+                     this should be the same length as A->m
+    * @param  nrows  total number of rows in output.  Should equal sum(rows)
+    * @return    Returns A(rows,:) if successful, null otherwise
+ */
+csc* csc_submatrix_byrows(const csc* A, c_int* rows, c_int nrows);
 
 
 /**
@@ -59,11 +72,11 @@ csc* csc_done(csc  *C,
  *  Copy sparse CSC matrix A to output.
  *  output is allocated by this function (uses MALLOC)
  */
-csc* copy_csc_mat(const csc *A);
+csc* csc_copy(const csc *A);
 
 
 /**
- *  Copy sparse CSC matrix A to B (B is preallocated, NO MALOC)
+ *  Copy sparse CSC matrix A to B (B is preallocated, NO MALLOC)
  */
 void prea_copy_csc_mat(const csc *A,
                        csc       *B);
@@ -154,9 +167,11 @@ csc* csc_symperm(const csc   *A,
                  c_int       *AtoC,
                  c_int        values);
 
+#endif //EMBEDDED
+
 
 # ifdef __cplusplus
 }
 # endif // ifdef __cplusplus
 
-#endif // ifndef CS_H
+#endif // ifndef CSC_UTILS_H

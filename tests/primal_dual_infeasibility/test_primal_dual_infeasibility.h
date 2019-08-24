@@ -1,5 +1,4 @@
 #include "osqp.h"
-#include "csc.h"
 #include "util.h"
 #include "minunit.h"
 

@@ -5,7 +5,7 @@
 extern "C" {
 # endif // ifdef __cplusplus
 
-#include "./csc.h"
+#include "csc_math.h"
 
 /*********************************************
 *   Internal definition of OSQPVector types
@@ -23,7 +23,6 @@ typedef struct OSQPVectorf_ {
 } OSQPVectorf;
 
 
-
 /*********************************************
 *   Internal definition of OSQPMatrix type
 *   and supporting definitions
@@ -37,7 +36,7 @@ typedef struct OSQPVectorf_ {
 typedef enum OSQPMatrix_symmetry_type {NONE,TRIU} OSQPMatrix_symmetry_type;
 
 typedef struct OSQPMatrix_ {
-  CscMatrix*                       csc;
+  csc*                             csc;
   OSQPMatrix_symmetry_type    symmetry;
 } OSQPMatrix;
 

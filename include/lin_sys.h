@@ -43,10 +43,10 @@ c_int unload_linsys_solver(enum linsys_solver_type linsys_solver);
  * @return                Exitflag for error (0 if no errors)
  */
 c_int init_linsys_solver(LinSysSolver          **s,
-                         const csc              *P,
-                         const csc              *A,
+                         const OSQPMatrix       *P,
+                         const OSQPMatrix       *A,
                          c_float                 sigma,
-                         const c_float          *rho_vec,
+                         const OSQPVectorf      *rho_vec,
                          enum linsys_solver_type linsys_solver,
                          c_int                   polish);
 

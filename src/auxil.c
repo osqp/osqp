@@ -127,8 +127,7 @@ c_int update_rho_vec(OSQPSolver *solver) {
 
   // Update rho_vec in KKT matrix if constraints type has changed
   if (constr_type_changed == 1) {
-    exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
-                                                   OSQPVectorf_data(work->rho_vec));
+    exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver, work->rho_vec);
   }
 
   return exitflag;
@@ -175,7 +174,7 @@ void update_xz_tilde(OSQPSolver *solver) {
   compute_rhs(solver);
 
   // Solve linear system
-  work->linsys_solver->solve(work->linsys_solver, OSQPVectorf_data(work->xz_tilde));
+  work->linsys_solver->solve(work->linsys_solver, work->xz_tilde);
 }
 
 void update_x(OSQPSolver *solver) {
@@ -232,7 +231,7 @@ c_float compute_obj_val(OSQPSolver *solver, OSQPVectorf *x) {
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
 
-  obj_val = quad_form(work->data->P, OSQPVectorf_data(x)) +
+  obj_val = OSQPMatrix_quad_form(work->data->P, x) +
             OSQPVectorf_dot_prod(work->data->q, x);
 
   if (settings->scaling) {
@@ -250,7 +249,7 @@ c_float compute_pri_res(OSQPSolver *solver, OSQPVectorf *x, OSQPVectorf *z) {
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
 
-  mat_vec(work->data->A, OSQPVectorf_data(x), OSQPVectorf_data(work->Ax), 0); // Ax
+  OSQPMatrix_Axpy(work->data->A,x,work->Ax,1.0,0.0); //Ax = A*x
   OSQPVectorf_minus(work->z_prev, work->Ax, z);
 
   // If scaling active -> rescale residual
@@ -310,17 +309,14 @@ c_float compute_dua_res(OSQPSolver *solver, OSQPVectorf *x, OSQPVectorf *y) {
   OSQPVectorf_copy(work->x_prev,work->data->q);
 
   // P * x (upper triangular part)
-  mat_vec(work->data->P, OSQPVectorf_data(x), OSQPVectorf_data(work->Px), 0);
-
-  // P' * x (lower triangular part with no diagonal)
-  mat_tpose_vec(work->data->P, OSQPVectorf_data(x), OSQPVectorf_data(work->Px), 1, 1);
+  OSQPMatrix_Axpy(work->data->P,x,work->Px, 1.0, 0.0); //Px = P*x
 
   // dr += P * x (full P matrix)
   OSQPVectorf_plus(work->x_prev, work->x_prev, work->Px);
 
   // dr += A' * y
   if (work->data->m > 0) {
-    mat_tpose_vec(work->data->A, OSQPVectorf_data(y), OSQPVectorf_data(work->Aty), 0, 0);
+    OSQPMatrix_Atxpy(work->data->A,y,work->Ax,1.0,0.0); //Ax = A*x
     OSQPVectorf_plus(work->x_prev, work->x_prev, work->Aty);
   }
 
@@ -419,9 +415,7 @@ c_int is_primal_infeasible(OSQPSolver *solver, c_float eps_prim_inf) {
     // Check if the condition is satisfied: ineq_lhs < -eps
     if (ineq_lhs < -eps_prim_inf * norm_delta_y) {
       // Compute and return ||A'delta_y|| < eps_prim_inf
-      mat_tpose_vec(work->data->A,
-                    OSQPVectorf_data(work->delta_y),
-                    OSQPVectorf_data(work->Atdelta_y), 0, 0);
+      OSQPMatrix_Atxpy(work->data->A, work->delta_y, work->Atdelta_y,1.0,0.0);
 
       // Unscale if necessary
       if (settings->scaling && !settings->scaled_termination) {
@@ -477,13 +471,8 @@ c_int is_dual_infeasible(OSQPSolver *solver, c_float eps_dual_inf) {
     // Check first if q'*delta_x < 0
     if (OSQPVectorf_dot_prod(work->data->q, work->delta_x) <
         -cost_scaling * eps_dual_inf * norm_delta_x) {
-      // Compute product P * delta_x (NB: P is store in upper triangular form)
-      mat_vec(work->data->P,
-              OSQPVectorf_data(work->delta_x),
-              OSQPVectorf_data(work->Pdelta_x), 0);
-      mat_tpose_vec(work->data->P,
-                    OSQPVectorf_data(work->delta_x),
-                    OSQPVectorf_data(work->Pdelta_x), 1, 1);
+      // Compute product P * delta_x
+      OSQPMatrix_Axpy(work->data->P, work->delta_x, work->Pdelta_x, 1.0, 0.0);
 
       // Scale if necessary
       if (settings->scaling && !settings->scaled_termination) {
@@ -496,9 +485,7 @@ c_int is_dual_infeasible(OSQPSolver *solver, c_float eps_dual_inf) {
       if (OSQPVectorf_norm_inf(work->Pdelta_x) <
           cost_scaling * eps_dual_inf * norm_delta_x) {
         // Compute A * delta_x
-        mat_vec(work->data->A,
-                OSQPVectorf_data(work->delta_x),
-                OSQPVectorf_data(work->Adelta_x), 0);
+        OSQPMatrix_Axpy(work->data->A, work->delta_x, work->Adelta_x,1.0,0.0);
 
         // Scale if necessary
         if (settings->scaling && !settings->scaled_termination) {
@@ -538,6 +525,7 @@ c_int has_solution(OSQPInfo * info){
 
 void store_solution(OSQPSolver *solver) {
 
+  c_int   i;
 #ifndef EMBEDDED
   c_float norm_vec;
 #endif /* ifndef EMBEDDED */
@@ -567,8 +555,9 @@ void store_solution(OSQPSolver *solver) {
   else {
 
     // No solution present. Solution is NaN
-    vec_set_scalar(solution->x, OSQP_NAN, work->data->n);
-    vec_set_scalar(solution->y, OSQP_NAN, work->data->m);
+    for(i = 0; i < work->data->n; i++) solution->x[i] = OSQP_NAN;
+    for(i = 0; i < work->data->m; i++) solution->y[i] = OSQP_NAN;
+
 
 #ifndef EMBEDDED
 

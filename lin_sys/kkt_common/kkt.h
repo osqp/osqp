@@ -5,11 +5,13 @@
 extern "C" {
 # endif // ifdef __cplusplus
 
+# include "osqp.h"
 # include "types.h"
+# include "lin_alg.h"
 
 # ifndef EMBEDDED
 
-#  include "csc.h"
+#  include "csc_utils.h"
 
 /**
  * Form square symmetric KKT matrix of the form
@@ -17,7 +19,7 @@ extern "C" {
  * [P + param1 I,            A';
  *  A             -diag(param2)]
  *
- * NB: Only the upper triangular part is stuffed!
+ * NB: Only the upper triangular part is filled
  *
  *
  *  If Pdiag_idx is not OSQP_NULL, it saves the index of the diagonal
@@ -41,8 +43,8 @@ extern "C" {
  *KKT
  * @return            return status flag
  */
-csc* form_KKT(const csc  *P,
-              const  csc *A,
+csc* form_KKT(const  OSQPMatrix *P,
+              const  OSQPMatrix *A,
               c_int       format,
               c_float     param1,
               c_float    *param2,
@@ -67,7 +69,7 @@ csc* form_KKT(const csc  *P,
  * @param Pdiag_n   Number of diagonal elements of P
  */
 void update_KKT_P(csc          *KKT,
-                  const csc    *P,
+                  const OSQPMatrix    *P,
                   const c_int  *PtoKKT,
                   const c_float param1,
                   const c_int  *Pdiag_idx,
@@ -82,7 +84,7 @@ void update_KKT_P(csc          *KKT,
  * @param AtoKKT    Vector of pointers from A->x to KKT->x
  */
 void update_KKT_A(csc         *KKT,
-                  const csc   *A,
+                  const OSQPMatrix   *A,
                   const c_int *AtoKKT);
 
 

@@ -1,11 +1,15 @@
 # Add subdirectory for each linear systems solver
 
 if (NOT DEFINED EMBEDDED)
+
 # Include this directory for library handler
 # NB Needed for subfolders
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 endif()
+
+# support for KKT matrix formation
+add_subdirectory(kkt_common)
 
 # Direct solver
 add_subdirectory(direct)
@@ -21,18 +25,18 @@ set(linsys_lib_handler
 endif()
 
 
-
 # Combine solvers
 # TODO: Add indirect ones
 # Add library handler if desktop version
 set(linsys_solvers
+    ${kkt_common}
     ${direct_linsys_solvers}
     ${linsys_lib_handler}
     PARENT_SCOPE)
 
 
-
 # Combine solvers external libraries
 set(linsys_solvers_includes
+    ${kkt_common_includes}
     ${direct_linsys_solvers_includes}
     PARENT_SCOPE)

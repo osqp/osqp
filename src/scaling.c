@@ -28,20 +28,20 @@ void limit_scaling_vector(OSQPVectorf* v) {
  * @param E        Norm of columns related to constraints
  * @param n        Dimension of KKT matrix
  */
-void compute_inf_norm_cols_KKT(const csc *P, const csc *A,
-                               c_float *D, c_float *D_temp_A,
-                               c_float *E, c_int n) {
+void compute_inf_norm_cols_KKT(const OSQPMatrix *P, const OSQPMatrix *A,
+                               OSQPVectorf *D, OSQPVectorf *D_temp_A,
+                               OSQPVectorf *E) {
   // First half
   //  [ P ]
   //  [ A ]
-  mat_inf_norm_cols_sym_triu(P, D);
-  mat_inf_norm_cols(A, D_temp_A);
-  vec_ew_max_vec(D, D_temp_A, D, n);
+  OSQPMatrix_col_norm_inf(P,D);
+  OSQPMatrix_col_norm_inf(A, D_temp_A);
+  OSQPVectorf_ew_max_vec(D, D_temp_A, D);
 
   // Second half
   //  [ A']
   //  [ 0 ]
-  mat_inf_norm_rows(A, E);
+  OSQPMatrix_row_norm_inf(A,E);
 }
 
 c_int scale_data(OSQPSolver* solver) {
@@ -82,9 +82,9 @@ c_int scale_data(OSQPSolver* solver) {
 
     // Compute norm of KKT columns
     compute_inf_norm_cols_KKT(work->data->P, work->data->A,
-                              OSQPVectorf_data(work->D_temp),
-                              OSQPVectorf_data(work->D_temp_A),
-                              OSQPVectorf_data(work->E_temp), n);
+                              work->D_temp,
+                              work->D_temp_A,
+                              work->E_temp);
 
     // Set to 1 values with 0 norms (avoid crazy scaling)
     limit_scaling_vector(work->D_temp);
@@ -100,12 +100,12 @@ c_int scale_data(OSQPSolver* solver) {
 
     // Equilibrate matrices P and A and vector q
     // P <- DPD
-    mat_premult_diag(work->data->P, OSQPVectorf_data(work->D_temp));
-    mat_postmult_diag(work->data->P, OSQPVectorf_data(work->D_temp));
+    OSQPMatrix_lmult_diag(work->data->P,work->D_temp);
+    OSQPMatrix_rmult_diag(work->data->P,work->D_temp);
 
     // A <- EAD
-    mat_premult_diag(work->data->A, OSQPVectorf_data(work->E_temp));
-    mat_postmult_diag(work->data->A, OSQPVectorf_data(work->D_temp));
+    OSQPMatrix_lmult_diag(work->data->A,work->E_temp);
+    OSQPMatrix_rmult_diag(work->data->A,work->D_temp);
 
     // q <- Dq
     OSQPVectorf_ew_prod(work->data->q, work->data->q, work->D_temp);
@@ -119,7 +119,7 @@ c_int scale_data(OSQPSolver* solver) {
     //
 
     // Compute avg norm of cols of P
-    mat_inf_norm_cols_sym_triu(work->data->P, OSQPVectorf_data(work->D_temp));
+    OSQPMatrix_col_norm_inf(work->data->P, work->D_temp);
     c_temp = OSQPVectorf_mean(work->D_temp);
 
     // Compute inf norm of q
@@ -139,7 +139,7 @@ c_int scale_data(OSQPSolver* solver) {
     c_temp = 1. / c_temp;
 
     // Scale P
-    mat_mult_scalar(work->data->P, c_temp);
+    OSQPMatrix_mult_scalar(work->data->P,c_temp);
 
     // Scale q
     OSQPVectorf_mult_scalar(work->data->q, c_temp);
@@ -169,15 +169,15 @@ c_int unscale_data(OSQPSolver *solver) {
   OSQPWorkspace* work     = solver->work;
 
   // Unscale cost
-  mat_mult_scalar(work->data->P, work->scaling->cinv);
-  mat_premult_diag(work->data->P, OSQPVectorf_data(work->scaling->Dinv));
-  mat_postmult_diag(work->data->P, OSQPVectorf_data(work->scaling->Dinv));
-  OSQPVectorf_mult_scalar(work->data->q, work->scaling->cinv);
+  OSQPMatrix_mult_scalar(work->data->P, work->scaling->cinv);
+  OSQPMatrix_lmult_diag(work->data->P,  work->scaling->Dinv);
+  OSQPMatrix_rmult_diag(work->data->P,  work->scaling->Dinv);
+  OSQPVectorf_mult_scalar(work->data->q,work->scaling->cinv);
   OSQPVectorf_ew_prod(work->data->q, work->data->q, work->scaling->Dinv);
 
   // Unscale constraints
-  mat_premult_diag(work->data->A, OSQPVectorf_data(work->scaling->Einv));
-  mat_postmult_diag(work->data->A, OSQPVectorf_data(work->scaling->Dinv));
+  OSQPMatrix_lmult_diag(work->data->A,work->scaling->Einv);
+  OSQPMatrix_rmult_diag(work->data->A,work->scaling->Dinv);
 
   OSQPVectorf_ew_prod(work->data->l,
                       work->data->l,

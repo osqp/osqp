@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "osqp.h"
-#include "csc.h"
 #include "lin_alg.h"
 #include "minunit.h"
 
@@ -127,8 +126,8 @@ static const char* test_mat_operations() {
 
 
   // Copy matrices
-  Ad = copy_csc_mat(data->test_mat_ops_A);
-  dA = copy_csc_mat(data->test_mat_ops_A);
+  Ad = csc_copy(data->test_mat_ops_A);
+  dA = csc_copy(data->test_mat_ops_A);
 
 
   // Premultiply matrix A

@@ -6,7 +6,8 @@ extern "C" {
 # endif // ifdef __cplusplus
 
 # include "glob_opts.h"
-# include "osqp.h"
+# include "osqp.h"       //includes user API types
+# include "lin_alg.h"
 
 /******************
 * Internal types *
@@ -43,21 +44,18 @@ typedef struct {
 /**
  * Polish structure
  */
+
 typedef struct {
-  csc *Ared;          ///< active rows of A
-  ///<    Ared = vstack[Alow, Aupp]
-  c_int    n_low;     ///< number of lower-active rows
-  c_int    n_upp;     ///< number of upper-active rows
-  OSQPVectori   *A_to_Alow; ///< Maps indices in A to indices in Alow
-  OSQPVectori   *A_to_Aupp; ///< Maps indices in A to indices in Aupp
-  OSQPVectori   *Alow_to_A; ///< Maps indices in Alow to indices in A
-  OSQPVectori   *Aupp_to_A; ///< Maps indices in Aupp to indices in A
-  OSQPVectorf *x;         ///< optimal x-solution obtained by polish
-  OSQPVectorf *z;         ///< optimal z-solution obtained by polish
-  OSQPVectorf *y;         ///< optimal y-solution obtained by polish
-  c_float  obj_val;   ///< objective value at polished solution
-  c_float  pri_res;   ///< primal residual at polished solution
-  c_float  dua_res;   ///< dual residual at polished solution
+  OSQPMatrix *Ared;        ///< active rows of A
+                           //   Ared = vstack[Alow, Aupp]
+  c_int        n_active;      ///< total active constraints
+  OSQPVectori  *active_flags;     ///< -1/0/1 to indicate  lower/ inactive / upper active constraints
+  OSQPVectorf *x;          ///< optimal x-solution obtained by polish
+  OSQPVectorf *z;          ///< optimal z-solution obtained by polish
+  OSQPVectorf *y;          ///< optimal y-solution obtained by polish
+  c_float     obj_val;     ///< objective value at polished solution
+  c_float     pri_res;     ///< primal residual at polished solution
+  c_float     dua_res;     ///< dual residual at polished solution
 } OSQPPolish;
 # endif // ifndef EMBEDDED
 
@@ -72,8 +70,8 @@ typedef struct {
 typedef struct {
   c_int    n; ///< number of variables n
   c_int    m; ///< number of constraints m
-  csc     *P; ///< the upper triangular part of the quadratic cost matrix P in csc format (size n x n).
-  csc     *A; ///< linear constraints matrix A in csc format (size m x n)
+  OSQPMatrix  *P; ///< the upper triangular part of the quadratic cost matrix P (size n x n).
+  OSQPMatrix  *A; ///< linear constraints matrix A (size m x n)
   OSQPVectorf *q; ///< dense array for linear part of cost function (size n)
   OSQPVectorf *l; ///< dense array for lower bound (size m)
   OSQPVectorf *u; ///< dense array for upper bound (size m)
@@ -199,7 +197,7 @@ typedef struct OSQPWorkspace_ {
 struct linsys_solver {
   enum linsys_solver_type type;                 ///< linear system solver type functions
   c_int (*solve)(LinSysSolver *self,
-                 c_float      *b);              ///< solve linear system
+                 OSQPVectorf  *b);              ///< solve linear system
 
 # ifndef EMBEDDED
   void (*free)(LinSysSolver *self);             ///< free linear system solver (only in desktop version)
@@ -207,11 +205,11 @@ struct linsys_solver {
 
 # if EMBEDDED != 1
   c_int (*update_matrices)(LinSysSolver *s,
-                           const csc *P,            ///< update matrices P
-                           const csc *A);           //   and A in the solver
+                           const OSQPMatrix *P,            ///< update matrices P
+                           const OSQPMatrix *A);           //   and A in the solver
 
-  c_int (*update_rho_vec)(LinSysSolver  *s,
-                          const c_float *rho_vec);  ///< Update rho_vec
+  c_int (*update_rho_vec)(LinSysSolver      *s,
+                          const OSQPVectorf *rho_vec);  ///< Update rho_vec
 # endif // if EMBEDDED != 1
 
 # ifndef EMBEDDED

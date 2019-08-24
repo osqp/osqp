@@ -70,7 +70,7 @@ void print_setup_header(const OSQPSolver *solver) {
   settings = solver->settings;
 
   // Number of nonzeros
-  nnz = data->P->p[data->P->n] + data->A->p[data->A->n];
+  nnz = OSQPMatrix_get_nnz(data->P) + OSQPMatrix_get_nnz(data->A);
 
   print_line();
   c_print("           OSQP v%s  -  Operator Splitting QP Solver\n"

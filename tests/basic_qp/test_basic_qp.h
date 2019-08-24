@@ -1,5 +1,4 @@
 #include "osqp.h"    // OSQP API
-#include "csc.h"      // CSC data structure
 #include "util.h"    // Utilities for testing
 #include "minunit.h" // Basic testing script header
 
@@ -32,15 +31,9 @@ static const char* test_basic_qp_solve()
   settings->scaling    = 0;
   settings->verbose    = 1;
   settings->warm_start = 0;
-<<<<<<< HEAD
-    
+
   // Setup solver
   exitflag = osqp_setup(&solver, data->P, data->q,
-=======
-
-  // Setup workspace
-  exitflag = osqp_setup(&work, data->P, data->q,
->>>>>>> pg/matrix_algebra
                         data->A, data->l, data->u,
                         data->m, data->n, settings);
 
@@ -76,13 +69,8 @@ static const char* test_basic_qp_solve()
 	    osqp_update_rho(solver, -0.1) == 1);
 
   mu_assert("Basic QP test solve: Wrong value of max_iter not caught!",
-<<<<<<< HEAD
 	    osqp_update_max_iter(solver, -1) == 1);
-    
-=======
-	    osqp_update_max_iter(work, -1) == 1);
 
->>>>>>> pg/matrix_algebra
   mu_assert("Basic QP test solve: Wrong value of eps_abs not caught!",
 	    osqp_update_eps_abs(solver, -1.) == 1);
 
@@ -117,13 +105,7 @@ static const char* test_basic_qp_solve()
 	    osqp_update_polish_refine_iter(solver, -1) == 1);
 
   mu_assert("Basic QP test solve: Wrong value of verbose not caught!",
-<<<<<<< HEAD
 	    osqp_update_verbose(solver, 2) == 1);
-    
-=======
-	    osqp_update_verbose(work, 2) == 1);
-
->>>>>>> pg/matrix_algebra
 
   // Clean solver
   osqp_cleanup(solver);
@@ -417,7 +399,7 @@ static const char* test_basic_qp_solve()
   P_tmp = (csc*) c_malloc(sizeof(csc));
   P_tmp->m = 2;
   P_tmp->n = 2;
-  P_tmp->nnz = -1;
+  P_tmp->nz = -1;
   P_tmp->nzmax = 4;
   P_tmp->x = (c_float*) c_malloc(4 * sizeof(c_float));
   P_tmp->x[0] = 4.0;
@@ -761,15 +743,8 @@ static const char* test_basic_qp_update_rho()
   settings->eps_rel           = 5e-05;
   settings->check_termination = 1;
 
-<<<<<<< HEAD
-    
   // Setup solver
   exitflag = osqp_setup(&solver, data->P, data->q,
-=======
-
-  // Setup workspace
-  exitflag = osqp_setup(&work, data->P, data->q,
->>>>>>> pg/matrix_algebra
                         data->A, data->l, data->u,
                         data->m, data->n, settings);
 

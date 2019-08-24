@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include "osqp.h"
+#include "types.h"  //OSQPMatrix and OSQPVector[fi] types
 #include "qdldl_types.h"
 
 /**
@@ -20,7 +21,7 @@ struct qdldl {
      * @name Functions
      * @{
      */
-    c_int (*solve)(struct qdldl * self, c_float * b);
+    c_int (*solve)(struct qdldl* self, OSQPVectorf* b);
 
 #ifndef EMBEDDED
     void (*free)(struct qdldl * self); ///< Free workspace (only if desktop)
@@ -28,8 +29,11 @@ struct qdldl {
 
     // This used only in non embedded or embedded 2 version
 #if EMBEDDED != 1
-    c_int (*update_matrices)(struct qdldl * self, const csc *P, const csc *A);  ///< Update solver matrices
-    c_int (*update_rho_vec)(struct qdldl * self, const c_float * rho_vec);      ///< Update rho_vec parameter
+    c_int (*update_matrices)(struct qdldl * self,
+                             const OSQPMatrix *P,
+                             const OSQPMatrix *A);         ///< Update solver matrices
+    c_int (*update_rho_vec)(struct qdldl * self,
+                            const OSQPVectorf* rho);       ///< Update rho_vec parameter
 #endif
 
 #ifndef EMBEDDED
@@ -86,7 +90,7 @@ struct qdldl {
  * @param  polish    Flag whether we are initializing for polish or not
  * @return           Exitflag for error (0 if no errors)
  */
-c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const csc * P, const csc * A, c_float sigma, const c_float * rho_vec, c_int polish);
+c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const OSQPMatrix * P, const OSQPMatrix * A, c_float sigma, const OSQPVectorf* rho_vec, c_int polish);
 
 /**
  * Solve linear system and store result in b
@@ -94,7 +98,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const csc * P, const csc * A,
  * @param  b        Right-hand side
  * @return          Exitflag
  */
-c_int solve_linsys_qdldl(qdldl_solver * s, c_float * b);
+c_int solve_linsys_qdldl(qdldl_solver * s, OSQPVectorf * b);
 
 
 #if EMBEDDED != 1
@@ -105,7 +109,7 @@ c_int solve_linsys_qdldl(qdldl_solver * s, c_float * b);
  * @param  A        Matrix A
  * @return          Exitflag
  */
-c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s, const csc *P, const csc *A);
+c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s, const OSQPMatrix *P, const OSQPMatrix *A);
 
 
 
@@ -116,7 +120,7 @@ c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s, const csc *P, const 
  * @param  rho_vec  new rho_vec value
  * @return          exitflag
  */
-c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver * s, const c_float * rho_vec);
+c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver * s, const OSQPVectorf* rho_vec);
 
 #endif
 

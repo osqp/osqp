@@ -115,13 +115,13 @@ endif()
 # ----------------------------------------------
 
 # Directory for custom algebra implementation.  Defaults
-# to the OSQP bare C implementation, which also serves
+# to the OSQP basic C implementation, which also serves
 #a s reference implementation
 
 if(OSQP_ALGEBRA_DIR)
 	message(STATUS "Using custom algebra implementation in ${OSQP_ALGEBRA_DIR}")
 else()
-  set(OSQP_ALGEBRA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/algebra/bare/)
+  set(OSQP_ALGEBRA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/algebra/default/)
   message(STATUS "Using OSQP standard algebra implementation")
 endif()
 
@@ -178,13 +178,12 @@ endif (NOT MSVC)
 set(
     osqp_src
     src/auxil.c
-    src/csc.c
     src/ctrlc.c
     src/error.c
-    src/kkt.c
-    ${OSQP_ALGEBRA_DIR}/vector.c
+    algebra/csc_tools/csc_math.c
+    algebra/csc_tools/csc_utils.c
     ${OSQP_ALGEBRA_DIR}/matrix.c
-    ${OSQP_ALGEBRA_DIR}/csc.c
+    ${OSQP_ALGEBRA_DIR}/vector.c
     src/lin_sys.c
     src/osqp_api.c
     src/polish.c
@@ -196,16 +195,16 @@ set(
 set(
     osqp_headers
     include/auxil.h
-    include/csc.h
     include/ctrlc.h
     include/error.h
     include/glob_opts.h
-    include/kkt.h
     include/lin_alg.h
     include/algebra_vector.h
     include/algebra_matrix.h
-    ${OSQP_ALGEBRA_DIR}/csc.h
-    ${OSQP_ALGEBRA_DIR}/algebra_bare.h
+    include/csc_type.h
+    algebra/csc_tools/csc_math.h
+    algebra/csc_tools/csc_utils.h
+    ${OSQP_ALGEBRA_DIR}/algebra_impl.h
     include/lin_sys.h
     include/osqp.h
     include/osqp_api_constants.h
@@ -221,17 +220,18 @@ set(
 
 if (DEFINED EMBEDDED)
     # osqp_src
-    list(REMOVE_ITEM osqp_src "src/csc.c")
+    list(REMOVE_ITEM osqp_src "algebra/csc_tools/csc_utils.c")
     list(REMOVE_ITEM osqp_src "src/ctrlc.c")
     list(REMOVE_ITEM osqp_src "src/polish.c")
     # osqp_headers
+    list(REMOVE_ITEM osqp_headers "algebra/csc_tools/csc_utils.h")
     list(REMOVE_ITEM osqp_headers "include/ctrlc.h")
-    list(REMOVE_ITEM osqp_headers "include/csc.h")
     list(REMOVE_ITEM osqp_headers "include/polish.h")
 elseif (NOT CTRLC)
     list(REMOVE_ITEM osqp_src "src/ctrlc.c")
     list(REMOVE_ITEM osqp_headers "include/ctrlc.h")
 endif()
+
 
 # if we are building the Python interface, let's look for Python
 # and set some options
@@ -336,7 +336,9 @@ add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
 set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
 
 # Include directories for linear system solvers
-target_include_directories(osqpstatic PRIVATE ${linsys_solvers_includes})
+target_include_directories(osqpstatic PRIVATE
+                           ${linsys_solvers_includes}
+                           algebra/csc_tools/)
 
 # Declare include directories for the cmake exported target
 target_include_directories(osqpstatic

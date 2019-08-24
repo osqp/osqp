@@ -1,6 +1,10 @@
-<<<<<<< HEAD:src/csc.c
-#include "csc.h"
 
+#ifndef EMBEDDED
+
+#include "csc_utils.h"
+
+
+//========= Internal utility functions  ===========
 
 static void* csc_malloc(c_int n, c_int size) {
   return c_malloc(n * size);
@@ -10,6 +14,23 @@ static void* csc_calloc(c_int n, c_int size) {
   return c_calloc(n, size);
 }
 
+void prea_int_vec_copy(const c_int *a, c_int *b, c_int n) {
+  c_int i;
+  for (i = 0; i < n; i++) b[i] = a[i];
+}
+
+void prea_vec_copy(const c_float *a, c_float *b, c_int n) {
+  c_int i;
+  for (i = 0; i < n; i++)  b[i] = a[i];
+}
+
+void int_vec_set_scalar(c_int *a, c_int sc, c_int n) {
+  c_int i;
+  for (i = 0; i < n; i++) a[i] = sc;
+}
+
+//==================================================
+
 csc* csc_matrix(c_int m, c_int n, c_int nzmax, c_float *x, c_int *i, c_int *p)
 {
   csc *M = (csc *)c_malloc(sizeof(csc));
@@ -18,7 +39,7 @@ csc* csc_matrix(c_int m, c_int n, c_int nzmax, c_float *x, c_int *i, c_int *p)
 
   M->m     = m;
   M->n     = n;
-  M->nz    = -1;
+  M->nz   = -1;
   M->nzmax = nzmax;
   M->x     = x;
   M->i     = i;
@@ -34,7 +55,7 @@ csc* csc_spalloc(c_int m, c_int n, c_int nzmax, c_int values, c_int triplet) {
   A->m     = m;                        /* define dimensions and nzmax */
   A->n     = n;
   A->nzmax = nzmax = c_max(nzmax, 1);
-  A->nz    = triplet ? 0 : -1;         /* allocate triplet or comp.col */
+  A->nz   = triplet ? 0 : -1;         /* allocate triplet or comp.col */
   A->p     = csc_malloc(triplet ? nzmax : n + 1, sizeof(c_int));
   A->i     = csc_malloc(nzmax,  sizeof(c_int));
   A->x     = values ? csc_malloc(nzmax,  sizeof(c_float)) : OSQP_NULL;
@@ -51,6 +72,66 @@ void csc_spfree(csc *A) {
     if (A->x) c_free(A->x);
     c_free(A);
   }
+}
+
+csc* csc_submatrix_byrows(const csc* A, c_int* rows, c_int nrows){
+
+  c_int    j;
+  csc*     R;
+  c_int    nzR = 0;
+  c_int    Am = A->m;
+  c_int    An = A->n;
+  c_int*   Ap = A->p;
+  c_int*   Ai = A->i;
+  c_float* Ax = A->x;
+  c_int*   Rp;
+  c_int*   Ri;
+  c_float* Rx;
+  c_int    Rm = nrows;
+  c_int    ptr;
+
+  // Check if there are no active constraints
+  if (Rm == 0) {
+    // Form empty output
+    R = csc_spalloc(0, An, 0, 1, 0);
+    if (!(R)) return OSQP_NULL;
+    int_vec_set_scalar(R->p, 0, An + 1);
+    return R;
+  }
+
+  // Count number of elements in Ared
+  for (j = 0; j < Ap[An]; j++) {
+    nzR += rows[A->i[j]];
+  }
+
+  // Form R = A(rows,:), where nrows = sum(rows != 0)
+  R= csc_spalloc(Rm, An, nzR, 1, 0);
+
+  if (!R) return OSQP_NULL;
+
+  nzR = 0; // reset counter
+  Rp = R->p;
+  Ri = R->i;
+  Rx = R->x;
+
+  for (j = 0; j < An; j++) { // Cycle over columns of A
+
+    Rp[j] = nzR;
+
+    for (ptr = Ap[j]; ptr < Ap[j + 1]; ptr++) {
+
+      // Cycle over elements in j-th column
+      if (rows[A->i[ptr]]) {
+        Ri[nzR] = Ai[ptr];
+        Rx[nzR] = Ax[ptr];
+        nzR++;
+      }
+    }
+  }
+  // Update the last element in R->p
+  Rp[An] = nzR;
+
+  return R;
 }
 
 csc* triplet_to_csc(const csc *T, c_int *TtoC) {
@@ -206,7 +287,7 @@ csc* csc_symperm(const csc *A, const c_int *pinv, c_int *AtoC, c_int values) {
   return csc_done(C, w, OSQP_NULL, 1); /* success; free workspace, return C */
 }
 
-csc* copy_csc_mat(const csc *A) {
+csc* csc_copy(const csc *A) {
   csc *B = csc_spalloc(A->m, A->n, A->p[A->n], 1, 0);
 
   if (!B) return OSQP_NULL;
@@ -317,5 +398,5 @@ csc* csc_to_triu(csc *M) {
   // Return matrix in triplet form
   return M_triu;
 }
-=======
->>>>>>> pg/matrix_algebra:src/cs.c
+
+#endif  //EMBEDDED
