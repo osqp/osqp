@@ -27,7 +27,11 @@ if (ENABLE_MKL_PARDISO)
 	add_library(linsys_pardiso OBJECT ${pardiso_sources})
 
 	# Add parent directory for library handler
-	target_include_directories(linsys_pardiso PRIVATE ${pardiso_includes} ${PROJECT_SOURCE_DIR}/include)
+	target_include_directories(linsys_pardiso PRIVATE
+														 ${pardiso_includes}
+														 ${PROJECT_SOURCE_DIR}/include
+														 ${PROJECT_SOURCE_DIR}/algebra/csc_tools
+														 ${PROJECT_SOURCE_DIR}/lin_sys/kkt_common)
 
 	set(direct_linsys_solvers ${direct_linsys_solvers} $<TARGET_OBJECTS:linsys_pardiso>)
 

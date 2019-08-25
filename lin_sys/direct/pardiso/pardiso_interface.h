@@ -5,9 +5,8 @@
 extern "C" {
 #endif
 
-#include "osqp.h"      //includes API error codes
-#include "lin_alg.h"
-#include "kkt.h"
+#include "osqp.h"
+#include "types.h"  //OSQPMatrix and OSQPVector[fi] types
 
 /**
  * Pardiso solver structure
@@ -23,12 +22,15 @@ struct pardiso {
      * @name Functions
      * @{
      */
-    c_int (*solve)(struct pardiso * self, c_float * b);
+    c_int (*solve)(struct pardiso * self, OSQPVectorf * b);
 
     void (*free)(struct pardiso * self); ///< Free workspace (only if desktop)
 
-    c_int (*update_matrices)(struct pardiso * self, const csc *P, const csc *A);    ///< Update solver matrices
-    c_int (*update_rho_vec)(struct pardiso * self, const c_float * rho_vec);        ///< Update rho_vec parameter
+    c_int (*update_matrices)(struct pardiso * self,
+                             const OSQPMatrix *P,
+                             const OSQPMatrix *A);    ///< Update solver matrices
+    c_int (*update_rho_vec)(struct pardiso * self,
+                            const OSQPVectorf * rho_vec);    ///< Update rho_vec parameter
 
     c_int nthreads;
     /** @} */
@@ -84,7 +86,7 @@ struct pardiso {
  * @param  polish    Flag whether we are initializing for polish or not
  * @return           Exitflag for error (0 if no errors)
  */
-c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc * A, c_float sigma, const c_float * rho_vec, c_int polish);
+c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const OSQPMatrix * P, const OSQPMatrix * A, c_float sigma, const OSQPVectorf * rho_vec, c_int polish);
 
 
 /**
@@ -93,7 +95,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const csc * P, const csc 
  * @param  b        Right-hand side
  * @return          Exitflag
  */
-c_int solve_linsys_pardiso(pardiso_solver * s, c_float * b);
+c_int solve_linsys_pardiso(pardiso_solver * s, OSQPVectorf * b);
 
 
 /**
@@ -103,7 +105,7 @@ c_int solve_linsys_pardiso(pardiso_solver * s, c_float * b);
  * @param  A        Matrix A
  * @return          Exitflag
  */
-c_int update_linsys_solver_matrices_pardiso(pardiso_solver * s, const csc *P, const csc *A);
+c_int update_linsys_solver_matrices_pardiso(pardiso_solver * s, const OSQPMatrix *P, const OSQPMatrix *A);
 
 
 /**
@@ -112,7 +114,7 @@ c_int update_linsys_solver_matrices_pardiso(pardiso_solver * s, const csc *P, co
  * @param  rho_vec  new rho_vec value
  * @return          exitflag
  */
-c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver * s, const c_float * rho_vec);
+c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver * s, const OSQPVectorf * rho_vec);
 
 
 /**
