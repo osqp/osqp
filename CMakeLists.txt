@@ -379,6 +379,9 @@ if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
     # Include directories for linear system solvers
     target_include_directories(osqp PRIVATE ${linsys_solvers_includes})
 
+    #include directories for csc utilities
+    target_include_directories(osqp PRIVATE ${PROJECT_SOURCE_DIR}/algebra/csc_tools/)
+
     # Declare include directories for the cmake exported target
     target_include_directories(osqp
                                PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
