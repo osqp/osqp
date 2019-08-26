@@ -9,9 +9,6 @@ extern "C" {
 
 # include "types.h"
 
-# ifndef EMBEDDED
-
-
 /**
  * Load linear system solver shared library
  * @param	linsys_solver  Linear system solver
@@ -49,10 +46,6 @@ c_int init_linsys_solver(LinSysSolver          **s,
                          const c_float          *rho_vec,
                          enum linsys_solver_type linsys_solver,
                          c_int                   polish);
-
-
-# endif // EMBEDDED
-
 
 # ifdef __cplusplus
 }
