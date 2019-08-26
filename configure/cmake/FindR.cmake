@@ -11,11 +11,15 @@ set(CMAKE_FIND_APPBUNDLE "NEVER")
 find_program(R_EXEC NAMES R R.exe)
 set(CMAKE_FIND_APPBUNDLE ${TEMP_CMAKE_FIND_APPBUNDLE})
 
-
 #---Find includes and libraries if R exists
 if(R_EXEC)
 
   set(R_FOUND TRUE)
+
+  if((CMAKE_HOST_SOLARIS) AND (DEFINED ENV{R_HOME}))
+      message(STATUS "Unsetting R_HOME on Solaris.")
+      unset(ENV{R_HOME})
+  endif()
 
   execute_process(WORKING_DIRECTORY .
   COMMAND ${R_EXEC} RHOME
