@@ -6,7 +6,6 @@ set(
     "${CMAKE_CURRENT_SOURCE_DIR}/error.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/glob_opts.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/lin_alg.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lin_sys.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/osqp.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/osqp_configure.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/proj.h"
@@ -31,6 +30,7 @@ if (NOT DEFINED EMBEDDED)
       osqp_headers
       "${CMAKE_CURRENT_SOURCE_DIR}/cs.h"
       "${CMAKE_CURRENT_SOURCE_DIR}/polish.h"
+      "${CMAKE_CURRENT_SOURCE_DIR}/lin_sys.h"
     )
 endif()
 

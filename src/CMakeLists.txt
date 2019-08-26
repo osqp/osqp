@@ -4,7 +4,6 @@ set(
     "${CMAKE_CURRENT_SOURCE_DIR}/auxil.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/error.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/lin_alg.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lin_sys.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/osqp.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/proj.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/scaling.c"
@@ -27,6 +26,7 @@ if (NOT DEFINED EMBEDDED)
       osqp_src
       "${CMAKE_CURRENT_SOURCE_DIR}/cs.c"
       "${CMAKE_CURRENT_SOURCE_DIR}/polish.c"
+      "${CMAKE_CURRENT_SOURCE_DIR}/lin_sys.c"
     )
 endif()
 
