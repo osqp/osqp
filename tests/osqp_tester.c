@@ -11,6 +11,7 @@
 #include "osqp_tester.h"
 
 // Include tests
+#include "utils/c_test_utils.h" //helper functions
 #include "lin_alg/test_lin_alg.h"
 #include "solve_linsys/test_solve_linsys.h"
 #include "demo/test_demo.h"

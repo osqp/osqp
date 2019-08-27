@@ -11,6 +11,10 @@ extern "C" {
 
 #ifndef EMBEDDED
 
+// ========== Logical, testing and debug ===========
+
+c_int csc_is_eq(csc *A, csc *B, c_float tol);
+
 /*****************************************************************************
 * Create and free CSC Matrices                                              *
 *****************************************************************************/
@@ -45,10 +49,9 @@ void csc_spfree(csc *A);
     * @param  A      CSC matrix
     * @param  rows   vector indicating which rows to select (all nonzeros are selected)
                      this should be the same length as A->m
-    * @param  nrows  total number of rows in output.  Should equal sum(rows)
     * @return    Returns A(rows,:) if successful, null otherwise
  */
-csc* csc_submatrix_byrows(const csc* A, c_int* rows, c_int nrows);
+csc* csc_submatrix_byrows(const csc* A, c_int* rows);
 
 
 /**

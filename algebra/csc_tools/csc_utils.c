@@ -3,6 +3,28 @@
 
 #include "csc_utils.h"
 
+//========== Logical, testing and debug ===========
+
+c_int csc_is_eq(csc *A, csc *B, c_float tol) {
+  c_int j, i;
+
+  // If number of columns does not coincide, they are not equal.
+  if (A->n != B->n) return 0;
+
+  for (j = 0; j < A->n; j++) { // Cycle over columns j
+    // if column pointer does not coincide, they are not equal
+    if (A->p[j] != B->p[j]) return 0;
+
+    for (i = A->p[j]; i < A->p[j + 1]; i++) { // Cycle rows i in column j
+      if ((A->i[i] != B->i[i]) ||             // Different row indices
+          (c_absval(A->x[i] - B->x[i]) > tol)) {
+        return 0;
+      }
+    }
+  }
+  return 1;
+}
+
 
 //========= Internal utility functions  ===========
 
@@ -74,66 +96,74 @@ void csc_spfree(csc *A) {
   }
 }
 
-csc* csc_submatrix_byrows(const csc* A, c_int* rows, c_int nrows){
+csc* csc_submatrix_byrows(const csc* A, c_int* rows){
 
   c_int    j;
   csc*     R;
   c_int    nzR = 0;
   c_int    An = A->n;
+  c_int    Am = A->m;
   c_int*   Ap = A->p;
   c_int*   Ai = A->i;
   c_float* Ax = A->x;
   c_int*   Rp;
   c_int*   Ri;
   c_float* Rx;
-  c_int    Rm = nrows;
+  c_int    Rm = 0;
   c_int    ptr;
+  c_int*   rridx; //mapping from row indices to reduced row indices
 
-  // Check if there are no active constraints
-  if (Rm == 0) {
-    // Form empty output
-    R = csc_spalloc(0, An, 0, 1, 0);
-    if (!(R)) return OSQP_NULL;
-    int_vec_set_scalar(R->p, 0, An + 1);
-    return R;
+  rridx = (c_int*)c_malloc(Am * sizeof(c_int));
+  if(!rridx) return OSQP_NULL;
+
+  //count the number of rows in the reduced
+  //matrix, and build an index from the input
+  //matrix rows to the reduced rows
+  Rm    = 0;
+  for(j = 0; j < Am; j++){
+     if(rows[j]) rridx[j] = Rm++;
   }
 
-  // Count number of elements in Ared
+  // Count number of nonzeros in Ared
   for (j = 0; j < Ap[An]; j++) {
-    nzR += rows[A->i[j]];
+    if(rows[A->i[j]]) nzR++;
   }
 
   // Form R = A(rows,:), where nrows = sum(rows != 0)
-  R= csc_spalloc(Rm, An, nzR, 1, 0);
-
+  R = csc_spalloc(Rm, An, nzR, 1, 0);
   if (!R) return OSQP_NULL;
 
-  nzR = 0; // reset counter
-  Rp = R->p;
-  Ri = R->i;
-  Rx = R->x;
-
-  for (j = 0; j < An; j++) { // Cycle over columns of A
-
-    Rp[j] = nzR;
-
-    for (ptr = Ap[j]; ptr < Ap[j + 1]; ptr++) {
-
-      // Cycle over elements in j-th column
-      if (rows[A->i[ptr]]) {
-        Ri[nzR] = Ai[ptr];
-        Rx[nzR] = Ax[ptr];
-        nzR++;
-      }
-    }
+  // no active constraints
+  if (Rm == 0) {
+    int_vec_set_scalar(R->p, 0, An + 1);
   }
-  // Update the last element in R->p
-  Rp[An] = nzR;
+
+  else{
+    nzR = 0; // reset counter
+    Rp = R->p;
+    Ri = R->i;
+    Rx = R->x;
+
+    for (j = 0; j < An; j++) { // Cycle over columns of A
+      Rp[j] = nzR;
+      for (ptr = Ap[j]; ptr < Ap[j + 1]; ptr++) {
+        // Cycle over elements in j-th column
+        if (rows[A->i[ptr]]) {
+          Ri[nzR] = rridx[Ai[ptr]];
+          Rx[nzR] = Ax[ptr];
+          nzR++;
+    }}}
+    // Update the last element in R->p
+    Rp[An] = nzR;
+  }
+
+  c_free(rridx); //free internal work index
 
   return R;
 }
 
 csc* triplet_to_csc(const csc *T, c_int *TtoC) {
+
   c_int m, n, nz, p, k, *Cp, *Ci, *w, *Ti, *Tj;
   c_float *Cx, *Tx;
   csc     *C;

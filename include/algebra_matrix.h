@@ -17,6 +17,10 @@ extern "C" {
 typedef struct OSQPMatrix_ OSQPMatrix;
 
 
+/*  logical functions ------------------------------------------------------*/
+
+c_int OSQPMatrix_is_eq(OSQPMatrix *A, OSQPMatrix* B, c_float tol);
+
 /*  Non-embeddable functions (using malloc) ----------------------------------*/
 
 #ifndef EMBEDDED
@@ -89,7 +93,7 @@ void OSQPMatrix_row_norm_inf(const OSQPMatrix *M, OSQPVectorf *E);
 
 void OSQPMatrix_free(OSQPMatrix *M);
 
-OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix* A, const OSQPVectori* rows, c_int nrows);
+OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix* A, const OSQPVectori* rows);
 
 #endif // ndef EMBEDDED
 

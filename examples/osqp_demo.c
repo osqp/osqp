@@ -34,6 +34,7 @@ int main(int argc, char **argv) {
   /* Set default settings */
   settings = (OSQPSettings *)malloc(sizeof(OSQPSettings));
   if (settings) osqp_set_default_settings(settings);
+  settings->polish = 1;
 
   /* Setup workspace */
   exitflag = osqp_setup(&solver, P, q, A, l, u, m, n, settings);

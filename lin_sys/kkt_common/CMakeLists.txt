@@ -1,10 +1,9 @@
 
 set(kkt_common_includes
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/kkt.h
 )
 
 set(kkt_common_src
-    ${CMAKE_CURRENT_SOURCE_DIR}/kkt.h
     ${CMAKE_CURRENT_SOURCE_DIR}/kkt.c
 )
 

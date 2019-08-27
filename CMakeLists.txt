@@ -483,12 +483,20 @@ if (UNITTESTS)
 
     # Direct linear solver testing
     include_directories(tests)
+
     add_executable(osqp_tester
                 ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c
                 ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
-		${PROJECT_SOURCE_DIR}/tests/minunit.h
+		            ${PROJECT_SOURCE_DIR}/tests/minunit.h
+                ${linsys_solvers_includes}
                 ${test_headers}
                 ${codegen_test_headers})
+
+    target_include_directories(osqp_tester PRIVATE
+                               ${PROJECT_SOURCE_DIR}/lin_sys/kkt_common
+                               ${PROJECT_SOURCE_DIR}/algebra/csc_tools
+                               )
+
     target_link_libraries (osqp_tester osqpstatic)
 
     # Add testing

@@ -15,11 +15,12 @@ test_sp_matrix_A = sparse.csc_matrix(test_sp_matrix_Adns)
 test_vec_ops_n = 10
 test_vec_ops_v1 = np.random.randn(test_vec_ops_n)
 test_vec_ops_v2 = np.random.randn(test_vec_ops_n)
-test_vec_ops_sc = np.random.randn()
+test_vec_ops_sc1 = np.random.randn()
+test_vec_ops_sc2 = np.random.randn()
 test_vec_ops_norm_inf = np.linalg.norm(test_vec_ops_v1, np.inf)
 test_vec_ops_norm_inf_diff = np.linalg.norm(test_vec_ops_v1 - test_vec_ops_v2,
                                             np.inf)
-test_vec_ops_add_scaled = test_vec_ops_v1 + test_vec_ops_sc * test_vec_ops_v2
+test_vec_ops_add_scaled = test_vec_ops_sc1 * test_vec_ops_v1 + test_vec_ops_sc2 * test_vec_ops_v2
 test_vec_ops_ew_reciprocal = np.reciprocal(test_vec_ops_v1)
 test_vec_ops_vec_prod = test_vec_ops_v1.dot(test_vec_ops_v2)
 test_vec_ops_ew_max_vec = np.maximum(test_vec_ops_v1, test_vec_ops_v2)
@@ -83,7 +84,8 @@ data = {'test_sp_matrix_A': test_sp_matrix_A,
         'test_vec_ops_n': test_vec_ops_n,
         'test_vec_ops_v1': test_vec_ops_v1,
         'test_vec_ops_v2': test_vec_ops_v2,
-        'test_vec_ops_sc': test_vec_ops_sc,
+        'test_vec_ops_sc1': test_vec_ops_sc1,
+        'test_vec_ops_sc2': test_vec_ops_sc2,
         'test_vec_ops_norm_inf': test_vec_ops_norm_inf,
         'test_vec_ops_norm_inf_diff': test_vec_ops_norm_inf_diff,
         'test_vec_ops_add_scaled': test_vec_ops_add_scaled,

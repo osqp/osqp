@@ -4,6 +4,14 @@
 #include "csc_math.h"
 #include "csc_utils.h"
 
+/*  logical functions ------------------------------------------------------*/
+
+c_int OSQPMatrix_is_eq(OSQPMatrix *A, OSQPMatrix* B, c_float tol){
+  return (A->symmetry == B->symmetry &&
+          csc_is_eq(A->csc, B->csc, tol) );
+}
+
+
 /*  Non-embeddable functions (using malloc) ----------------------------------*/
 
 #ifndef EMBEDDED
@@ -79,7 +87,7 @@ c_float* yf = OSQPVectorf_data(y);
   }
   else{
     //should be TRIU here, but not directly checked
-    csc_Axpy_sym_triu(A->csc, xf, yf, alpha, beta); 
+    csc_Axpy_sym_triu(A->csc, xf, yf, alpha, beta);
   }
 }
 
@@ -122,17 +130,19 @@ void OSQPMatrix_free(OSQPMatrix *M){
   c_free(M);
 }
 
-OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix* A, const OSQPVectori* rows, c_int nrows){
+OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix* A, const OSQPVectori* rows){
 
   csc        *M;
   OSQPMatrix *out;
 
+  #ifdef PRINTING
   if(A->symmetry == TRIU){
     c_eprint("row selection not implemented for partially filled matrices");
     return OSQP_NULL;
   }
+  #endif
 
-  M = csc_submatrix_byrows(A->csc, OSQPVectori_data(rows), nrows);
+  M = csc_submatrix_byrows(A->csc, OSQPVectori_data(rows));
 
   if(!M) return OSQP_NULL;
 

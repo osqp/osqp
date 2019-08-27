@@ -31,7 +31,7 @@ void csc_update_values(csc           *M,
   c_int i;
 
   // Update P elements
-  if (M_new_n) { // Change only Mx_new_idx
+  if (Mx_new_idx) { // Change only Mx_new_idx
     for (i = 0; i < M_new_n; i++) {
       M->x[Mx_new_idx[i]] = Mx_new[i];
     }

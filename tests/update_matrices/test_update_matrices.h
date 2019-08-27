@@ -2,16 +2,17 @@
 #include "osqp.h"
 #include "util.h"
 #include "minunit.h"
-#include "kkt.h"
 #include "lin_sys.h"
-
+#include "kkt.h"
 
 #include "update_matrices/data.h"
 
 
 static const char* test_form_KKT() {
+
   update_matrices_sols_data *data;
-  c_float sigma, *rho_vec, *rho_inv_vec;
+  c_float sigma;
+  OSQPVectorf *rho_vec, *rho_inv_vec;
   c_int   m, *PtoKKT, *AtoKKT, *Pdiag_idx, Pdiag_n;
   csc    *KKT;
 
@@ -21,10 +22,10 @@ static const char* test_form_KKT() {
   // Define rho_vec and sigma to form KKT
   sigma       = data->test_form_KKT_sigma;
   m           = data->test_form_KKT_A->m;
-  rho_vec     = (c_float*) c_calloc(m, sizeof(c_float));
-  rho_inv_vec = (c_float*) c_calloc(m, sizeof(c_float));
-  vec_add_scalar(rho_vec, data->test_form_KKT_rho, m);
-  vec_ew_recipr(rho_vec, rho_inv_vec, m);
+  rho_vec     = OSQPVectorf_malloc(m);
+  rho_inv_vec = OSQPVectorf_malloc(m);
+  OSQPVectorf_set_scalar(rho_vec, data->test_form_KKT_rho);
+  OSQPVectorf_ew_reciprocal(rho_inv_vec,rho_vec);
 
   // Allocate vectors of indices
   PtoKKT = (c_int*) c_malloc((data->test_form_KKT_Pu->p[data->test_form_KKT_Pu->n]) *
@@ -33,11 +34,17 @@ static const char* test_form_KKT() {
                     sizeof(c_int));
 
   // Form KKT matrix storing the index vectors
-  KKT = form_KKT(data->test_form_KKT_Pu,
-                 data->test_form_KKT_A,
+  KKT = form_KKT(data->test_form_KKT_Pu->x,
+                 data->test_form_KKT_Pu->i,
+                 data->test_form_KKT_Pu->p,
+                 data->test_form_KKT_A->x,
+                 data->test_form_KKT_A->i,
+                 data->test_form_KKT_A->p,
+                 data->test_form_KKT_A->m,
+                 data->test_form_KKT_Pu_new->n,
                  0,
                  sigma,
-                 rho_inv_vec,
+                 OSQPVectorf_data(rho_inv_vec),
                  PtoKKT,
                  AtoKKT,
                  &Pdiag_idx,
@@ -46,17 +53,28 @@ static const char* test_form_KKT() {
 
   // Assert if KKT matrix is the same as predicted one
   mu_assert("Update matrices: error in forming KKT matrix!",
-            is_eq_csc(KKT, data->test_form_KKT_KKTu, TESTS_TOL));
+            csc_is_eq(KKT, data->test_form_KKT_KKTu, TESTS_TOL));
 
   // Update KKT matrix with new P and new A
-  update_KKT_P(KKT, data->test_form_KKT_Pu_new, PtoKKT, sigma, Pdiag_idx,
-               Pdiag_n);
-  update_KKT_A(KKT, data->test_form_KKT_A_new, AtoKKT);
+  update_KKT_P(KKT,
+               data->test_form_KKT_Pu_new->x,
+               data->test_form_KKT_Pu_new->i,
+               data->test_form_KKT_Pu_new->p,
+               data->test_form_KKT_A_new->m,
+               data->test_form_KKT_Pu_new->n,
+               PtoKKT, sigma, Pdiag_idx, Pdiag_n);
+  update_KKT_A(KKT,
+              data->test_form_KKT_A_new->x,
+              data->test_form_KKT_A_new->i,
+              data->test_form_KKT_A_new->p,
+              data->test_form_KKT_A_new->m,
+              data->test_form_KKT_Pu_new->n,
+              AtoKKT);
 
 
   // Assert if KKT matrix is the same as predicted one
   mu_assert("Update matrices: error in updating KKT matrix!",
-            is_eq_csc(KKT, data->test_form_KKT_KKTu_new, TESTS_TOL));
+            csc_is_eq(KKT, data->test_form_KKT_KKTu_new, TESTS_TOL));
 
 
   // Cleanup

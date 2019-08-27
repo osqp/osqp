@@ -18,7 +18,7 @@
 static c_int form_Ared(OSQPWorkspace *work){
 
   c_int j, n_active;
-    
+
   c_int* active_flags       = OSQPVectori_data(work->pol->active_flags);
   c_float* z = OSQPVectorf_data(work->z);
   c_float* y = OSQPVectorf_data(work->y);
@@ -55,7 +55,7 @@ static c_int form_Ared(OSQPWorkspace *work){
   work->pol->n_active = n_active;
 
   //extract the relevant rows
-  work->pol->Ared = OSQPMatrix_submatrix_byrows(work->data->A, work->pol->active_flags, n_active);
+  work->pol->Ared = OSQPMatrix_submatrix_byrows(work->data->A, work->pol->active_flags);
 
   // Return number of rows in Ared
   return n_active;
@@ -139,14 +139,14 @@ static c_int iterative_refinement(OSQPSolver    *solver,
 
       // Upper Part: R^{n}
       // -= Px  (in the top partition)
-      OSQPMatrix_Axpy(work->data->P, z1, rhs1, 1.0, -1.0);
+      OSQPMatrix_Axpy(work->data->P, z1, rhs1, -1.0, 1.0);
 
       // -= Ared'*y_red  (in the top partition)
-      OSQPMatrix_Atxpy(work->pol->Ared, z2, rhs1, 1.0, -1.0);
+      OSQPMatrix_Atxpy(work->pol->Ared, z2, rhs1, -1.0, 1.0);
 
       // Lower Part: R^{m}
       // -= A*x  (in the bottom partition)
-      OSQPMatrix_Axpy(work->pol->Ared, z1, rhs2, 1.0, -1.0);
+      OSQPMatrix_Axpy(work->pol->Ared, z1, rhs2, -1.0, 1.0);
 
       // Solve linear system. Store solution in rhs
       p->solve(p, rhs);
@@ -292,7 +292,7 @@ c_int polish(OSQPSolver *solver) {
 
   // Store the polished solution (x,z,y)
   OSQPVectorf_copy(work->pol->x, pol_sol_xview);   // pol->x
-  OSQPMatrix_Axpy(work->data->A, work->pol->x, work->pol->z, 0.0, 1.0);
+  OSQPMatrix_Axpy(work->data->A, work->pol->x, work->pol->z, 1.0, 0.0);
   get_ypol_from_yred(work, pol_sol_yview);     // pol->y
 
   // Ensure (z,y) satisfies normal cone constraint

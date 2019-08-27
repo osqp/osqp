@@ -169,7 +169,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const OSQPMatrix* P, const OS
     csc * KKT_temp;     // Temporary KKT pointer
     c_int i;            // Loop counter
     c_int n_plus_m;     // Define n_plus_m dimension
-    c_float* rhov = OSQPVectorf_data(rho_vec);
+    c_float* rhov;      //used for direct access to rho_vec data when polish=false
 
     // Allocate private structure to store KKT factorization
     qdldl_solver *s;
@@ -196,7 +196,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const OSQPMatrix* P, const OS
 
 #if EMBEDDED != 1
     s->update_matrices = &update_linsys_solver_matrices_qdldl;
-    s->update_rho_vec = &update_linsys_solver_rho_vec_qdldl;
+    s->update_rho_vec  = &update_linsys_solver_rho_vec_qdldl;
 #endif
 
     // Assign type
@@ -254,7 +254,15 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const OSQPMatrix* P, const OS
             s->rho_inv_vec[i] = sigma;
         }
 
-        KKT_temp = form_KKT(P, A, 0, sigma, s->rho_inv_vec, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
+        KKT_temp = form_KKT(OSQPMatrix_get_x(P),
+                            OSQPMatrix_get_i(P),
+                            OSQPMatrix_get_p(P),
+                            OSQPMatrix_get_x(A),
+                            OSQPMatrix_get_i(A),
+                            OSQPMatrix_get_p(A),
+                            OSQPMatrix_get_m(A),
+                            OSQPMatrix_get_n(P),
+                            0, sigma, s->rho_inv_vec, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
 
         // Permute matrix
         if (KKT_temp)
@@ -268,11 +276,20 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const OSQPMatrix* P, const OS
         s->rhotoKKT = c_malloc(OSQPMatrix_get_m(A) * sizeof(c_int));
 
         // Use p->rho_inv_vec for storing param2 = rho_inv_vec
+        rhov = OSQPVectorf_data(rho_vec);
         for (i = 0; i < s->m; i++){
             s->rho_inv_vec[i] = 1. / rhov[i];
         }
 
-        KKT_temp = form_KKT(P, A, 0, sigma, s->rho_inv_vec,
+        KKT_temp = form_KKT(OSQPMatrix_get_x(P),
+                            OSQPMatrix_get_i(P),
+                            OSQPMatrix_get_p(P),
+                            OSQPMatrix_get_x(A),
+                            OSQPMatrix_get_i(A),
+                            OSQPMatrix_get_p(A),
+                            OSQPMatrix_get_m(A),
+                            OSQPMatrix_get_n(P),
+                            0, sigma, s->rho_inv_vec,
                             s->PtoKKT, s->AtoKKT,
                             &(s->Pdiag_idx), &(s->Pdiag_n), s->rhotoKKT);
 
@@ -373,10 +390,22 @@ c_int solve_linsys_qdldl(qdldl_solver * s, OSQPVectorf* b) {
 c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s, const OSQPMatrix *P, const OSQPMatrix *A) {
 
     // Update KKT matrix with new P
-    update_KKT_P(s->KKT, P, s->PtoKKT, s->sigma, s->Pdiag_idx, s->Pdiag_n);
+    update_KKT_P(s->KKT,
+                 OSQPMatrix_get_x(P),
+                 OSQPMatrix_get_i(P),
+                 OSQPMatrix_get_p(P),
+                 OSQPMatrix_get_m(A),
+                 OSQPMatrix_get_n(P),
+                 s->PtoKKT, s->sigma, s->Pdiag_idx, s->Pdiag_n);
 
     // Update KKT matrix with new A
-    update_KKT_A(s->KKT, A, s->AtoKKT);
+    update_KKT_A(s->KKT,
+                 OSQPMatrix_get_x(A),
+                 OSQPMatrix_get_i(A),
+                 OSQPMatrix_get_p(A),
+                 OSQPMatrix_get_m(A),
+                 OSQPMatrix_get_n(P),
+                 s->AtoKKT);
 
     return (QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
         s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
