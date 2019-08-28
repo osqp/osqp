@@ -14,6 +14,11 @@ void vec_mult_scalar(c_float* v, c_float val, c_int n){
   for(i = 0; i< n; i++) v[i] *= val;
 }
 
+void vec_negate(c_float* v, c_int n){
+  c_int i;
+  for(i = 0; i< n; i++) v[i] = -v[i];
+}
+
 
 /* CSC matrix operations implementation ------*/
 
