@@ -163,7 +163,7 @@ c_float osqp_toc(OSQPTimer *t);
 # ifndef EMBEDDED
 
 /* Compare CSC matrices */
-c_int is_eq_csc(csc    *A,
+c_int csc_is_eq(csc    *A,
                 csc    *B,
                 c_float tol);
 

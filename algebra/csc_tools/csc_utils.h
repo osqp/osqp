@@ -81,8 +81,8 @@ csc* csc_copy(const csc *A);
 /**
  *  Copy sparse CSC matrix A to B (B is preallocated, NO MALLOC)
  */
-void prea_copy_csc_mat(const csc *A,
-                       csc       *B);
+void csc_copy_prea(const csc *A,
+                   csc       *B);
 
 
 /*****************************************************************************
@@ -116,12 +116,6 @@ csc* triplet_to_csc(const csc *T,
  */
 csc* triplet_to_csr(const csc *T,
                     c_int     *TtoC);
-
-
-/**
- * Convert sparse to dense
- */
-c_float* csc_to_dns(csc *M);
 
 
 /**

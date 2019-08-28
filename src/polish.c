@@ -155,11 +155,11 @@ static c_int iterative_refinement(OSQPSolver    *solver,
       OSQPVectorf_plus(z,z,rhs);
     }
 
-    if (rhs)  OSQPVectorf_free(rhs);
-    if (rhs1) OSQPVectorf_view_free(rhs1);
-    if (rhs2) OSQPVectorf_view_free(rhs2);
-    if (z1)   OSQPVectorf_view_free(z1);
-    if (z2)   OSQPVectorf_view_free(z2);
+    OSQPVectorf_free(rhs);
+    OSQPVectorf_view_free(rhs1);
+    OSQPVectorf_view_free(rhs2);
+    OSQPVectorf_view_free(z1);
+    OSQPVectorf_view_free(z2);
   }
   return 0;
 }
@@ -233,7 +233,7 @@ c_int polish(OSQPSolver *solver) {
     info->status_polish = -1;
 
     // Memory clean-up
-    if (work->pol->Ared) OSQPMatrix_free(work->pol->Ared);
+    OSQPMatrix_free(work->pol->Ared);
 
     return 1;
   }

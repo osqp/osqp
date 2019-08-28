@@ -328,7 +328,8 @@ csc* csc_copy(const csc *A) {
   return B;
 }
 
-void prea_copy_csc_mat(const csc *A, csc *B) {
+void csc_copy_prea(const csc *A, csc *B) {
+
   prea_int_vec_copy(A->p, B->p, A->n + 1);
   prea_int_vec_copy(A->i, B->i, A->p[A->n]);
   prea_vec_copy(A->x, B->x, A->p[A->n]);

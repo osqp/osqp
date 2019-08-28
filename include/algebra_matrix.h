@@ -65,8 +65,6 @@ c_int    OSQPMatrix_get_nz(const OSQPMatrix *M);
 
 /* math functions ----------------------------------------------------------*/
 
-//DEBUG: OSQP Wrappers.   Provide documentation of functions
-
 //A = sc*A
 void OSQPMatrix_mult_scalar(OSQPMatrix *A, c_float sc);
 

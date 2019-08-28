@@ -189,14 +189,17 @@ c_int osqp_setup(OSQPSolver** solverp,
     // Allocate workspace variables used in scaling
     work->D_temp   = OSQPVectorf_calloc(n);
     work->D_temp_A = OSQPVectorf_calloc(n);
-    work->E_temp   = OSQPVectorf_calloc(m);;
+    work->E_temp   = OSQPVectorf_calloc(m);
     if (!(work->D_temp) || !(work->D_temp_A) || !(work->E_temp))
       return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
     // Scale data
     scale_data(solver);
   } else {
-    work->scaling = OSQP_NULL;
+    work->scaling  = OSQP_NULL;
+    work->D_temp   = OSQP_NULL;
+    work->D_temp_A = OSQP_NULL;
+    work->E_temp   = OSQP_NULL;
   }
 
   // Set type of constraints.  Ignore return value
@@ -652,8 +655,8 @@ c_int osqp_cleanup(OSQPSolver *solver) {
   if (work) { // If workspace has been allocated
     // Free Data
     if (work->data) {
-      if (work->data->P) OSQPMatrix_free(work->data->P);
-      if (work->data->A) OSQPMatrix_free(work->data->A);
+      OSQPMatrix_free(work->data->P);
+      OSQPMatrix_free(work->data->A);
       OSQPVectorf_free(work->data->q);
       OSQPVectorf_free(work->data->l);
       OSQPVectorf_free(work->data->u);
@@ -661,20 +664,18 @@ c_int osqp_cleanup(OSQPSolver *solver) {
     }
 
     // Free scaling
-    if (solver->settings->scaling) {
-      if (work->scaling){
-        OSQPVectorf_free(work->scaling->D);
-        OSQPVectorf_free(work->scaling->Dinv);
-        OSQPVectorf_free(work->scaling->E);
-        OSQPVectorf_free(work->scaling->Einv);
-      }
-      c_free(work->scaling);
-
-      // Free workspace variables
-      OSQPVectorf_free(work->D_temp);
-      OSQPVectorf_free(work->D_temp_A);
-      OSQPVectorf_free(work->E_temp);
+    if (work->scaling){
+      OSQPVectorf_free(work->scaling->D);
+      OSQPVectorf_free(work->scaling->Dinv);
+      OSQPVectorf_free(work->scaling->E);
+      OSQPVectorf_free(work->scaling->Einv);
     }
+    c_free(work->scaling);
+
+    // Free workspace variables
+    OSQPVectorf_free(work->D_temp);
+    OSQPVectorf_free(work->D_temp_A);
+    OSQPVectorf_free(work->E_temp);
 
     // Free linear system solver structure
     if (work->linsys_solver) {
@@ -701,7 +702,7 @@ c_int osqp_cleanup(OSQPSolver *solver) {
     OSQPVectorf_free(work->rho_vec);
     OSQPVectorf_free(work->rho_inv_vec);
 #if EMBEDDED != 1
-    if (work->constr_type) OSQPVectori_free(work->constr_type);
+    OSQPVectori_free(work->constr_type);
 #endif
     OSQPVectorf_free(work->x);
     OSQPVectorf_free(work->z);
