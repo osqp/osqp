@@ -160,19 +160,6 @@ c_float osqp_toc(OSQPTimer *t);
 /*! \cond PRIVATE */
 
 
-# ifndef EMBEDDED
-
-/* Compare CSC matrices */
-c_int csc_is_eq(csc    *A,
-                csc    *B,
-                c_float tol);
-
-/* Convert sparse CSC to dense */
-c_float* csc_to_dns(csc *M);
-
-# endif // #ifndef EMBEDDED
-
-
 # ifdef PRINTING
 #  include <stdio.h>
 

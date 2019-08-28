@@ -77,13 +77,14 @@ csc* csc_done(csc  *C,
  */
 csc* csc_copy(const csc *A);
 
-
 /**
  *  Copy sparse CSC matrix A to B (B is preallocated, NO MALLOC)
  */
 void csc_copy_prea(const csc *A,
                    csc       *B);
 
+/* Convert sparse CSC to dense (uses MALLOC)*/
+c_float* csc_to_dns(csc *M);
 
 /*****************************************************************************
 * Matrices Conversion                                                       *
