@@ -4,7 +4,7 @@
 #include "csc_math.h"
 #include "csc_utils.h"
 
-/*  logical functions ------------------------------------------------------*/
+/*  logical test functions ----------------------------------------------------*/
 
 c_int OSQPMatrix_is_eq(OSQPMatrix *A, OSQPMatrix* B, c_float tol){
   return (A->symmetry == B->symmetry &&
@@ -53,7 +53,7 @@ c_int    OSQPMatrix_get_n(const OSQPMatrix *M){return M->csc->n;}
 c_float* OSQPMatrix_get_x(const OSQPMatrix *M){return M->csc->x;}
 c_int*   OSQPMatrix_get_i(const OSQPMatrix *M){return M->csc->i;}
 c_int*   OSQPMatrix_get_p(const OSQPMatrix *M){return M->csc->p;}
-c_int    OSQPMatrix_get_nnz(const OSQPMatrix *M){return M->csc->p[M->csc->n];}
+c_int    OSQPMatrix_get_nz(const OSQPMatrix *M){return M->csc->p[M->csc->n];}
 
 
 /* math functions ----------------------------------------------------------*/

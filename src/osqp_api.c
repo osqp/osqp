@@ -1038,7 +1038,7 @@ c_int osqp_update_P(OSQPSolver    *solver,
   osqp_tic(work->timer); // Start timer
 #endif /* ifdef PROFILING */
 
-  nnzP = OSQPMatrix_get_nnz(work->data->P);
+  nnzP = OSQPMatrix_get_nz(work->data->P);
 
   if (Px_new_idx) { // Passing the index of elements changed
     // Check if number of elements is less or equal than the total number of
@@ -1109,7 +1109,7 @@ c_int osqp_update_A(OSQPSolver *solver,
   osqp_tic(work->timer); // Start timer
 #endif /* ifdef PROFILING */
 
-  nnzA = OSQPMatrix_get_nnz(work->data->A);
+  nnzA = OSQPMatrix_get_nz(work->data->A);
 
   if (Ax_new_idx) { // Passing the index of elements changed
     // Check if number of elements is less or equal than the total number of
@@ -1184,8 +1184,8 @@ c_int osqp_update_P_A(OSQPSolver    *solver,
   osqp_tic(work->timer); // Start timer
 #endif /* ifdef PROFILING */
 
-  nnzP = OSQPMatrix_get_nnz(work->data->P);
-  nnzA = OSQPMatrix_get_nnz(work->data->A);
+  nnzP = OSQPMatrix_get_nz(work->data->P);
+  nnzA = OSQPMatrix_get_nz(work->data->A);
 
 
   if (Px_new_idx) { // Passing the index of elements changed

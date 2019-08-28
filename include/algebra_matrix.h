@@ -33,8 +33,8 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const csc* A, c_int is_triu);
 
 /*  direct data access functions ---------------------------------------------*/
 
-/*  These functions allow getting/setting data
-*   in the OSQPMatrix type.   Data is passed in/out using bare
+/*  These functions allow getting data in csc format from the
+*   the OSQPMatrix type.   Data is passed in/out using bare
 *   pointers instead of OSQPVectors since these functions interface
 *   with user defined linear solvers and the user API
 */
@@ -44,12 +44,23 @@ void OSQPMatrix_update_values(OSQPMatrix    *M,
                             const c_int     *Mx_new_idx,
                             c_int           M_new_n);
 
+/* returns the row dimension */
 c_int    OSQPMatrix_get_m(const OSQPMatrix *M);
+
+/* returns the columns dimension */
 c_int    OSQPMatrix_get_n(const OSQPMatrix *M);
+
+/* returns a pointer to the array of data values */
 c_float* OSQPMatrix_get_x(const OSQPMatrix *M);
+
+/* returns a pointer to the array of row indices */
 c_int*   OSQPMatrix_get_i(const OSQPMatrix *M);
+
+/* returns a pointer to the array of col indices (csc format).  Should be n+1 long */
 c_int*   OSQPMatrix_get_p(const OSQPMatrix *M);
-c_int    OSQPMatrix_get_nnz(const OSQPMatrix *M);
+
+/* returns the number of nonzeros (length of x and i arrays) */
+c_int    OSQPMatrix_get_nz(const OSQPMatrix *M);
 
 
 /* math functions ----------------------------------------------------------*/

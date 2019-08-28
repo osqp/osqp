@@ -170,7 +170,7 @@ c_float OSQPVectorf_mean(const OSQPVectorf *a);
 c_float OSQPVectorf_dot_prod(const OSQPVectorf *a,
                             const OSQPVectorf *b);
 
-/* Inner product a'b, but using only the positive or Negative
+/* Inner product a'b, but using only the positive or negative
  * terms in b.   Use sign = 1 for positive terms, sign = -1 for
  * negative terms.   Setting any other value for sign will return
  * the normal dot product
@@ -184,7 +184,9 @@ void OSQPVectorf_ew_prod(OSQPVectorf       *c,
                          const OSQPVectorf *a,
                          const OSQPVectorf *b);
 
-/* check l <= u elementwise */
+/* check l <= u elementwise.  Returns 1 if inequality is true
+ * for every element pair in both vectors  
+ */
 c_int OSQPVectorf_all_leq(OSQPVectorf *l, OSQPVectorf* u);
 
 /* Elementwise bounding vectors x = min(max(z,l),u)

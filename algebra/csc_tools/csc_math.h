@@ -36,16 +36,15 @@ void csc_update_values(csc           *M,
 /*****************************************************************************
 * CSC Algebraic Operations                                    ******************************************************************************/
 
-//DEBUG : ADD documentation
-
-/* matrix times scalar */
-
+// A = sc*A
 void csc_scale(csc* A, c_float sc);
 
+// A = diag(L)*A
 void csc_lmult_diag(csc* A, const c_float *L);
 
+// A = A*diag(R)
 void csc_rmult_diag(csc* A, const c_float *R);
-    
+
 //y = alpha*A*x + beta*y, where A is symmetric and only triu is stored
 void csc_Axpy_sym_triu(const csc   *A,
                        const c_float *x,
@@ -60,19 +59,23 @@ void csc_Axpy(const csc   *A,
                     c_float alpha,
                     c_float beta);
 
-
+//y = alpha*A^T*x + beta*y
 void csc_Atxpy(const csc *A,
                      const c_float *x,
                      c_float *y,
                      c_float alpha,
                      c_float beta);
 
+// returns 1/2 x'*P*x
 c_float csc_quad_form(const csc *P, const c_float *x);
 
+// E[i] = inf_norm(M(:,i))
 void csc_col_norm_inf(const csc *M, c_float *E);
 
+// E[i] = inf_norm(M(i,:))
 void csc_row_norm_inf(const csc *M, c_float *E);
 
+// E[i] = inf_norm(M(i,:)), where M stores triu part only
 void csc_row_norm_inf_sym_triu(const csc *M, c_float *E);
 
 

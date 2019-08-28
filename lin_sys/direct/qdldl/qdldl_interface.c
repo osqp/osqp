@@ -271,8 +271,8 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const OSQPMatrix* P, const OS
     else { // Called from ADMM algorithm
 
         // Allocate vectors of indices
-        s->PtoKKT = c_malloc(OSQPMatrix_get_nnz(P) * sizeof(c_int));
-        s->AtoKKT = c_malloc(OSQPMatrix_get_nnz(A) * sizeof(c_int));
+        s->PtoKKT = c_malloc(OSQPMatrix_get_nz(P) * sizeof(c_int));
+        s->AtoKKT = c_malloc(OSQPMatrix_get_nz(A) * sizeof(c_int));
         s->rhotoKKT = c_malloc(OSQPMatrix_get_m(A) * sizeof(c_int));
 
         // Use p->rho_inv_vec for storing param2 = rho_inv_vec
@@ -295,7 +295,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const OSQPMatrix* P, const OS
 
         // Permute matrix
         if (KKT_temp)
-            permute_KKT(&KKT_temp, s, OSQPMatrix_get_nnz(P), OSQPMatrix_get_nnz(A), s->m, s->PtoKKT, s->AtoKKT, s->rhotoKKT);
+            permute_KKT(&KKT_temp, s, OSQPMatrix_get_nz(P), OSQPMatrix_get_nz(A), s->m, s->PtoKKT, s->AtoKKT, s->rhotoKKT);
     }
 
     // Check if matrix has been created
