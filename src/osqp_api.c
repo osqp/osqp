@@ -4,8 +4,6 @@
 #include "util.h"
 #include "scaling.h"
 #include "error.h"
-#include "PG_debug.h"
-
 
 #ifndef EMBEDDED
 # include "polish.h"

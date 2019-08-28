@@ -248,17 +248,19 @@ c_float compute_pri_res(OSQPSolver *solver, OSQPVectorf *x, OSQPVectorf *z) {
 
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
+  c_float pri_res;
 
-  OSQPMatrix_Axpy(work->data->A,x,work->Ax,1.0,0.0); //Ax = A*x
+  OSQPMatrix_Axpy(work->data->A,x,work->Ax, 1.0, 0.0); //Ax = A*x
   OSQPVectorf_minus(work->z_prev, work->Ax, z);
 
   // If scaling active -> rescale residual
   if (settings->scaling && !settings->scaled_termination) {
-    OSQPVectorf_scaled_norm_inf(work->scaling->Einv, work->z_prev);
+    pri_res =  OSQPVectorf_scaled_norm_inf(work->scaling->Einv, work->z_prev);
   }
-
-  // Return norm of the residual
-  return OSQPVectorf_norm_inf(work->z_prev);
+  else{
+   pri_res  = OSQPVectorf_norm_inf(work->z_prev);
+  }
+  return pri_res;
 }
 
 c_float compute_pri_tol(OSQPSolver *solver, c_float eps_abs, c_float eps_rel) {
@@ -304,29 +306,33 @@ c_float compute_dua_res(OSQPSolver *solver, OSQPVectorf *x, OSQPVectorf *y) {
 
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
+  c_float dua_res;
 
   // dr = q
   OSQPVectorf_copy(work->x_prev,work->data->q);
 
   // P * x (upper triangular part)
-  OSQPMatrix_Axpy(work->data->P,x,work->Px, 1.0, 0.0); //Px = P*x
+  OSQPMatrix_Axpy(work->data->P, x, work->Px, 1.0, 0.0); //Px = P*x
 
   // dr += P * x (full P matrix)
   OSQPVectorf_plus(work->x_prev, work->x_prev, work->Px);
 
   // dr += A' * y
   if (work->data->m > 0) {
-    OSQPMatrix_Atxpy(work->data->A,y,work->Aty,1.0,0.0); //Ax = A*x
+    OSQPMatrix_Atxpy(work->data->A, y, work->Aty, 1.0, 0.0); //Ax = A*x
     OSQPVectorf_plus(work->x_prev, work->x_prev, work->Aty);
   }
 
   // If scaling active -> rescale residual
   if (settings->scaling && !settings->scaled_termination) {
-    return work->scaling->cinv * OSQPVectorf_scaled_norm_inf(work->scaling->Dinv,
-                                                             work->x_prev);
+    dua_res =  work->scaling->cinv * OSQPVectorf_scaled_norm_inf(work->scaling->Dinv,
+                                                                 work->x_prev);
   }
-
-  return OSQPVectorf_norm_inf(work->x_prev);
+  else {
+    dua_res = OSQPVectorf_norm_inf(work->x_prev);
+  }
+    
+  return dua_res;
 }
 
 c_float compute_dua_tol(OSQPSolver *solver, c_float eps_abs, c_float eps_rel) {
