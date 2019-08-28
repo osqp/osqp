@@ -100,20 +100,8 @@ void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
                                         c_float val_if_zero,
                                         c_float val_if_pos);
 
-/* set int vector to scalar */
-void OSQPVectori_set_scalar(OSQPVectori *a, c_int sc);
-
-/* add scalar to float vector */
-void OSQPVectorf_add_scalar(OSQPVectorf *a, c_float sc);
-
-/* add scalar to int vector */
-void OSQPVectori_add_scalar(OSQPVectori *a, c_int sc);
-
 /* multiply float vector by float */
 void OSQPVectorf_mult_scalar(OSQPVectorf *a, c_float sc);
-
-/* change sign */
-void OSQPVectorf_negate(OSQPVectorf *a);
 
 /* x = a + b.  Set x == a for x += b.  */
 void OSQPVectorf_plus(OSQPVectorf      *x,
@@ -185,7 +173,7 @@ void OSQPVectorf_ew_prod(OSQPVectorf       *c,
                          const OSQPVectorf *b);
 
 /* check l <= u elementwise.  Returns 1 if inequality is true
- * for every element pair in both vectors  
+ * for every element pair in both vectors
  */
 c_int OSQPVectorf_all_leq(OSQPVectorf *l, OSQPVectorf* u);
 

@@ -3,10 +3,6 @@
 #include "osqp.h"
 
 /* internal utilities for zero-ing, setting and scaling without libraries */
-void vec_negate(c_float* v, c_int n){
-  c_int i;
-  for(i = 0; i< n; i++) v[i] = v[-i];
-}
 
 void vec_set_scalar(c_float* v, c_float val, c_int n){
   c_int i;
@@ -96,24 +92,24 @@ void csc_Axpy_sym_triu(const csc   *A,
               c_float *y,
               c_float alpha,
               c_float beta) {
-    
+
     c_int i, j;
     c_int*   Ap = A->p;
     c_int*   Ai = A->i;
     c_float* Ax = A->x;
     c_int    An = A->n;
     c_int    Am = A->m;
-    
+
     // first do the b*y part
     if (beta == 0)        vec_set_scalar(y, 0.0, Am);
     else if (beta ==  1)  ; //do nothing
     else if (beta == -1)  vec_negate(y, Am);
     else vec_mult_scalar(y,beta, Am);
-    
-    
+
+
     // if A is empty or zero
     if (Ap[An] == 0 || alpha == 0.0) return;
-    
+
     if (alpha == -1) {
         // y -= A*x
         for (j = 0; j < An; j++) {
@@ -123,7 +119,7 @@ void csc_Axpy_sym_triu(const csc   *A,
                     y[j]     -= Ax[i] * x[Ai[i]];
                 }
     }}}
-    
+
     else if(alpha == 1){
         // y +=  A*x
         for (j = 0; j < An; j++) {
@@ -133,7 +129,7 @@ void csc_Axpy_sym_triu(const csc   *A,
                     y[j]     += Ax[i] * x[Ai[i]];
                 }
     }}}
-    
+
     else{
         // y +=  alpha*A*x
         for (j = 0; j < An; j++) {
@@ -217,13 +213,13 @@ void csc_Atxpy(const csc *A, const c_float *x, c_float *y,
         for (k = Ap[j]; k < Ap[j + 1]; k++) {
           y[j] -= Ax[k] * x[Ai[k]];
     }}}
-    
+
     else if(alpha == +1){
       for (j = 0; j < A->n; j++) {
         for (k = Ap[j]; k < Ap[j + 1]; k++) {
           y[j] += Ax[k] * x[Ai[k]];
     }}}
-    
+
     else{
       for (j = 0; j < A->n; j++) {
         for (k = Ap[j]; k < Ap[j + 1]; k++) {

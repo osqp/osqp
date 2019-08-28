@@ -203,15 +203,6 @@ void OSQPVectorf_set_scalar(OSQPVectorf *a, c_float sc){
   }
 }
 
-void OSQPVectori_set_scalar(OSQPVectori *a, c_int sc){
-  c_int i;
-  c_int length = a->length;
-  c_int* av    = a->values;
-
-  for (i = 0; i < length; i++) {
-    av[i] = sc;
-  }
-}
 
 void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
                                         OSQPVectori *test,
@@ -230,25 +221,6 @@ void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
   }
 }
 
-void OSQPVectorf_add_scalar(OSQPVectorf *a, c_float sc){
-  c_int i;
-  c_int length = a->length;
-  c_float*  av = a->values;
-
-  for (i = 0; i < length; i++) {
-    av[i] += sc;
-  }
-}
-
-void OSQPVectori_add_scalar(OSQPVectori *a, c_int sc){
-  c_int i;
-  c_int length = a->length;
-  c_int*  av   = a->values;
-
-  for (i = 0; i < length; i++) {
-    av[i] += sc;
-  }
-}
 
 void OSQPVectorf_mult_scalar(OSQPVectorf *a, c_float sc){
   c_int i;
@@ -257,16 +229,6 @@ void OSQPVectorf_mult_scalar(OSQPVectorf *a, c_float sc){
 
   for (i = 0; i < length; i++) {
     av[i] *= sc;
-  }
-}
-
-void OSQPVectorf_negate(OSQPVectorf *a){
-  c_int i;
-  c_int length = a->length;
-  c_float*  av = a->values;
-
-  for (i = 0; i < length; i++) {
-    av[i] = -av[i];
   }
 }
 
