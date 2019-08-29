@@ -292,7 +292,7 @@ c_int osqp_setup(OSQPSolver** solverp,
 c_int osqp_solve(OSQPSolver *solver) {
 
   c_int exitflag;
-  c_int iter;
+  c_int iter, max_iter;
   c_int compute_cost_function; // Boolean: compute the cost function in the loop or not
   c_int can_check_termination; // Boolean: check termination or not
   OSQPWorkspace* work;
@@ -358,7 +358,8 @@ c_int osqp_solve(OSQPSolver *solver) {
 
   // Main ADMM algorithm
 
-  for (iter = 1; iter <= solver->settings->max_iter; iter++) {
+  max_iter = solver->settings->max_iter;
+  for (iter = 1; iter <= max_iter; iter++) {
 
     // Update x_prev, z_prev (preallocated, no malloc)
     swap_vectors(&(work->x), &(work->x_prev));

@@ -80,7 +80,7 @@ void osqp_set_default_settings(OSQPSettings *settings);
  * If the problem is dual infeasible, the certificate is stored in \a
  * solver->delta_x
  *
- * @param  work Workspace allocated
+ * @param  solver Solver
  * @return      Exitflag for errors
  */
 c_int osqp_solve(OSQPSolver *solver);

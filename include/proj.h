@@ -26,11 +26,11 @@ extern "C" {
                             c_float      infval);
 /**
  * Project z onto \f$C = [l, u]\f$
- * @param y         Vector to project
+ * @param y         vector to project
  * @param l         lower bound vector
  * @param u         upper bound bector
-* @param infval     Positive value treated as infinity
- * @param work Workspace
+* @param infval     positive value treated as infinity
+ * @param tol       projection tolerance
  */
 c_int test_in_polar_reccone(const OSQPVectorf  *y,
                             const OSQPVectorf  *l,
@@ -40,9 +40,8 @@ c_int test_in_polar_reccone(const OSQPVectorf  *y,
 
 // Project y onto \f$C = [l, u]\f$
 /**
- * Project z onto polar of the recession cone of $[l,u]$
- * @param y    Vector to project
- * @param work Workspace
+* @param work  Workspace
+ * @param y    vector to project
  */
 
 void project(OSQPWorkspace *work, OSQPVectorf *y);

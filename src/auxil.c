@@ -99,9 +99,9 @@ c_int set_rho_vec(OSQPSolver *solver) {
                              RHO_TOL, OSQP_INFTY * MIN_SCALING);
 
 
-  //NB: Always refreseh the complete rho vector, since the rho_vals
+  //NB: Always refresh the complete rho vector, since the rho_vals
   //might be garbage if they have not been initialised yet.  This means
-  //that there is some wasted effort in the case that he constraint types
+  //that there is some wasted effort in the case that the constraint types
   //haven't changed and the rho values are already correct, but such is life.
   OSQPVectorf_set_scalar_conditional(work->rho_vec,
                                      work->constr_type,
@@ -209,8 +209,8 @@ void update_y(OSQPSolver *solver) {
 
   OSQPVectorf_add_scaled3(work->delta_y,
                           settings->alpha,work->ztilde_view,
-                          ((c_float)1.0 - settings->alpha),work->z_prev,
-                          -1.,work->z);
+                          (1.0 - settings->alpha),work->z_prev,
+                          -1.0,work->z);
 
   OSQPVectorf_ew_prod(work->delta_y,work->delta_y,work->rho_vec);
 

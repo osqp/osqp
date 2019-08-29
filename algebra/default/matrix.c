@@ -123,6 +123,8 @@ void OSQPMatrix_row_norm_inf(const OSQPMatrix *M, OSQPVectorf *E) {
    else                    csc_row_norm_inf_sym_triu(M->csc, OSQPVectorf_data(E));
 }
 
+#endif // endef EMBEDDED
+
 #ifndef EMBEDDED
 
 void OSQPMatrix_free(OSQPMatrix *M){
@@ -159,8 +161,5 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix* A, const OSQPVectori* 
   return out;
 
 }
-
-#endif // ndef EMBEDDED
-
 
 #endif /* if EMBEDDED != 1 */

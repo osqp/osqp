@@ -1,5 +1,5 @@
-#ifndef ALGEBRA_BARE_H
-# define ALGEBRA_BARE_H
+#ifndef ALGEBRA_IMPL_H
+# define ALGEBRA_IMPL_H
 
 # ifdef __cplusplus
 extern "C" {
@@ -45,4 +45,4 @@ typedef struct OSQPMatrix_ {
 }
 # endif // ifdef __cplusplus
 
-#endif // ifndef ALGEBRA_BARE_H
+#endif // ifndef ALGEBRA_IMPL_H

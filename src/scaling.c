@@ -189,7 +189,11 @@ c_int unscale_data(OSQPSolver *solver) {
   return 0;
 }
 
-c_int unscale_solution(OSQPVectorf* usolx, OSQPVectorf* usoly, const OSQPVectorf* solx, const OSQPVectorf* soly, OSQPWorkspace *work) {
+c_int unscale_solution(OSQPVectorf* usolx,
+                       OSQPVectorf* usoly,
+                       const OSQPVectorf* solx,
+                       const OSQPVectorf* soly,
+                       OSQPWorkspace *work) {
 
   // primal
   OSQPVectorf_ew_prod(usolx,solx,work->scaling->D);

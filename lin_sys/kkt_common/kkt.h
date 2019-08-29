@@ -31,9 +31,9 @@ extern "C" {
  * @param  P_x        value data for P in csc format (triu form)
  * @param  P_i        row data for P in csc format (triu form)
  * @param  P_p        column data for P in csc format (triu form)
- * @param  A_x        value data for A in csc format (triu form)
- * @param  A_i        row data for A in csc format (triu form)
- * @param  A_p        column data for A in csc format (triu form)
+ * @param  A_x        value data for A in csc format
+ * @param  A_i        row data for A in csc format
+ * @param  A_p        column data for A in csc format
  * @param  m          number of constraints (A is m x n)
  * @param  n          number of primal variables (P is n x n)
  * @param  format     CSC (0) or CSR (1)
@@ -98,9 +98,9 @@ extern "C" {
  * Update KKT matrix using the elements of A
  *
  * @param KKT       KKT matrix in CSC form (upper-triangular)
- * @param  A_x        value data for A in csc format (triu form)
- * @param  A_i        row data for A in csc format (triu form)
- * @param  A_p        column data for A in csc format (triu form)
+ * @param  A_x        value data for A in csc format
+ * @param  A_i        row data for A in csc format
+ * @param  A_p        column data for A in csc format
  * @param  m          number of constraints (A is m x n)
  * @param  n          number of primal variables (P is n x n)
  * @param AtoKKT    Vector of pointers from A->x to KKT->x

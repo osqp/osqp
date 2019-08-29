@@ -167,7 +167,12 @@ static c_int permute_KKT(csc ** KKT, qdldl_solver * p, c_int Pnz, c_int Anz, c_i
 
 
 // Initialize LDL Factorization structure
-c_int init_linsys_solver_qdldl(qdldl_solver ** sp, const OSQPMatrix* P, const OSQPMatrix* A, c_float sigma, const OSQPVectorf* rho_vec, c_int polish){
+c_int init_linsys_solver_qdldl(qdldl_solver ** sp,
+                               const OSQPMatrix* P,
+                               const OSQPMatrix* A,
+                               c_float sigma,
+                               const OSQPVectorf* rho_vec,
+                               c_int polish){
 
     // Define Variables
     csc * KKT_temp;     // Temporary KKT pointer
@@ -391,7 +396,10 @@ c_int solve_linsys_qdldl(qdldl_solver * s, OSQPVectorf* b) {
 
 #if EMBEDDED != 1
 // Update private structure with new P and A
-c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s, const OSQPMatrix *P, const OSQPMatrix *A) {
+c_int update_linsys_solver_matrices_qdldl(
+                    qdldl_solver * s,
+                    const OSQPMatrix *P,
+                    const OSQPMatrix *A) {
 
     // Update KKT matrix with new P
     update_KKT_P(s->KKT,
@@ -418,7 +426,9 @@ c_int update_linsys_solver_matrices_qdldl(qdldl_solver * s, const OSQPMatrix *P,
 }
 
 
-c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver * s, const OSQPVectorf * rho){
+c_int update_linsys_solver_rho_vec_qdldl(
+                      qdldl_solver * s,
+                      const OSQPVectorf * rho){
 
     c_int i;
     c_float* rho_vec = OSQPVectorf_data(rho);

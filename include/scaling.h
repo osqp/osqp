@@ -40,7 +40,11 @@ c_int unscale_data(OSQPSolver *solver);
  * @param  work Workspace
  * @return      exitflag
  */
-    c_int unscale_solution(OSQPVectorf* usolx, OSQPVectorf* usoly, const OSQPVectorf* solx, const OSQPVectorf* soly, OSQPWorkspace *work);
+  c_int unscale_solution(OSQPVectorf* usolx,
+                         OSQPVectorf* usoly,
+                         const OSQPVectorf* solx,
+                         const OSQPVectorf* soly,
+                         OSQPWorkspace *work);
 
 # ifdef __cplusplus
 }

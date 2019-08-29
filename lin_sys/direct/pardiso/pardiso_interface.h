@@ -86,7 +86,12 @@ struct pardiso {
  * @param  polish    Flag whether we are initializing for polish or not
  * @return           Exitflag for error (0 if no errors)
  */
-c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const OSQPMatrix * P, const OSQPMatrix * A, c_float sigma, const OSQPVectorf * rho_vec, c_int polish);
+c_int init_linsys_solver_pardiso(pardiso_solver ** sp,
+                                 const OSQPMatrix * P,
+                                 const OSQPMatrix * A,
+                                 c_float sigma,
+                                 const OSQPVectorf * rho_vec,
+                                 c_int polish);
 
 
 /**
@@ -105,7 +110,10 @@ c_int solve_linsys_pardiso(pardiso_solver * s, OSQPVectorf * b);
  * @param  A        Matrix A
  * @return          Exitflag
  */
-c_int update_linsys_solver_matrices_pardiso(pardiso_solver * s, const OSQPMatrix *P, const OSQPMatrix *A);
+c_int update_linsys_solver_matrices_pardiso(
+                    pardiso_solver * s,
+                    const OSQPMatrix *P,
+                    const OSQPMatrix *A);
 
 
 /**
@@ -114,7 +122,9 @@ c_int update_linsys_solver_matrices_pardiso(pardiso_solver * s, const OSQPMatrix
  * @param  rho_vec  new rho_vec value
  * @return          exitflag
  */
-c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver * s, const OSQPVectorf * rho_vec);
+c_int update_linsys_solver_rho_vec_pardiso(
+                    pardiso_solver * s,
+                    const OSQPVectorf * rho_vec);
 
 
 /**

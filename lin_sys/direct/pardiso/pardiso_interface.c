@@ -73,7 +73,12 @@ void free_linsys_solver_pardiso(pardiso_solver *s) {
 
 
 // Initialize factorization structure
-c_int init_linsys_solver_pardiso(pardiso_solver ** sp, const OSQPMatrix * P, const OSQPMatrix * A, c_float sigma, const OSQPVectorf * rho_vec, c_int polish){
+c_int init_linsys_solver_pardiso(pardiso_solver ** sp,
+                                 const OSQPMatrix * P,
+                                 const OSQPMatrix * A,
+                                 c_float sigma,
+                                 const OSQPVectorf * rho_vec,
+                                 c_int polish){
 
     c_int i;                     // loop counter
     c_int nnzKKT;                // Number of nonzeros in KKT
@@ -283,7 +288,10 @@ c_int solve_linsys_pardiso(pardiso_solver * s, OSQPVectorf * b) {
 }
 
 // Update solver structure with new P and A
-c_int update_linsys_solver_matrices_pardiso(pardiso_solver * s, const OSQPMatrix *P, const OSQPMatrix *A) {
+c_int update_linsys_solver_matrices_pardiso(
+                  pardiso_solver * s,
+                  const OSQPMatrix *P,
+                  const OSQPMatrix *A) {
 
     // Update KKT matrix with new P
     update_KKT_P(s->KKT,
@@ -314,7 +322,9 @@ c_int update_linsys_solver_matrices_pardiso(pardiso_solver * s, const OSQPMatrix
 }
 
 
-c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver * s,const OSQPVectorf * rho){
+c_int update_linsys_solver_rho_vec_pardiso(
+                pardiso_solver * s,
+                const OSQPVectorf * rho){
 
     c_int i;
     c_float* rho_vec = OSQPVectorf_data(rho);
