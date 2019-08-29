@@ -151,6 +151,7 @@ static const char* test_basic_qp_solve()
             exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
   settings->adaptive_rho_interval = tmp_int;
 
+#ifdef PROFILING
   // Setup solver with wrong settings->adaptive_rho_fraction
   tmp_float = settings->adaptive_rho_fraction;
   settings->adaptive_rho_fraction = -1.5;
@@ -161,6 +162,7 @@ static const char* test_basic_qp_solve()
   mu_assert("Basic QP test solve: Setup should result in error due to non-positive settings->adaptive_rho_fraction",
             exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
   settings->adaptive_rho_fraction = tmp_float;
+#endif
 
   // Setup solver with wrong settings->adaptive_rho_fraction
   tmp_float = settings->adaptive_rho_tolerance;
@@ -322,6 +324,7 @@ static const char* test_basic_qp_solve()
             exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
   settings->warm_start = tmp_int;
 
+#ifdef PROFILING
   // Setup solver with wrong settings->time_limit
   tmp_float = settings->time_limit;
   settings->time_limit = -0.2;
@@ -331,6 +334,7 @@ static const char* test_basic_qp_solve()
   mu_assert("Basic QP test solve: Setup should result in error due to wrong settings->time_limit",
             exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
   settings->time_limit = tmp_float;
+#endif
 
 
   /* =========================
@@ -842,6 +846,7 @@ static const char* test_basic_qp_update_rho()
   return 0;
 }
 
+#ifdef PROFILING
 static const char* test_basic_qp_time_limit()
 {
   c_int exitflag;
@@ -860,6 +865,8 @@ static const char* test_basic_qp_time_limit()
 
   // Define Solver settings as default
   osqp_set_default_settings(settings);
+  settings->rho = 20;
+  settings->adaptive_rho = 0;
 
   // Check default time limit
   mu_assert("Basic QP test time limit: Default not correct", settings->time_limit == 0);
@@ -880,11 +887,22 @@ static const char* test_basic_qp_time_limit()
 	    solver->info->status_val == sols_data->status_test);
 
   // Update time limit
+# ifdef PRINTING
   osqp_update_time_limit(solver, 1e-5);
+  osqp_update_eps_rel(solver, 1e-09);
+  osqp_update_eps_abs(solver, 1e-09);
+# else
+  // Not printing makes the code run a lot faster, so we need to make it work harder
+  // to fail by time limit exceeded
+  osqp_update_time_limit(solver, 1e-7);
+  osqp_update_eps_rel(solver, 1e-12);
+  osqp_update_eps_abs(solver, 1e-12);
+# endif
   osqp_update_max_iter(solver, (c_int)2e9);
   osqp_update_check_termination(solver, 0);
 
   // Solve Problem
+  osqp_cold_start(solver);
   osqp_solve(solver);
 
   // Compare solver statuses
@@ -903,6 +921,7 @@ static const char* test_basic_qp_time_limit()
 
   return 0;
 }
+#endif // PROFILING
 
 
 static const char* test_basic_qp_warm_start()
@@ -980,7 +999,9 @@ static const char* test_basic_qp()
   mu_run_test(test_basic_qp_update);
   mu_run_test(test_basic_qp_check_termination);
   mu_run_test(test_basic_qp_update_rho);
+#ifdef PROFILING
   mu_run_test(test_basic_qp_time_limit);
+#endif
   mu_run_test(test_basic_qp_warm_start);
 
   return 0;

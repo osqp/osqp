@@ -89,6 +89,18 @@ Note that if multiple solves are executed from single setup, then after the
 first one :code:`run_time` includes :code:`update_time` + :code:`solve_time`
 + :code:`polish_time`.
 
+  
+Solve in just one function (with GIL disabled)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We have a dedicated solve function that performs :code:`setup` and :code:`solve` operations for you. It also disables the GIL in case you
+need it. Just run it from the main module without creating the object as follows
+
+
+.. code:: python
+
+    results = osqp.solve(P=P, q=q, A=A, l=l, u=u, **settings)
+
 
 Update
 ------

@@ -22,6 +22,12 @@ set(
 )
 endif()
 
+set(qdldl_interface_sources
+    ${amd_sources}
+    ${CMAKE_CURRENT_SOURCE_DIR}/qdldl_interface.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/qdldl_interface.c
+)
+
 
 set(qdldl_interface_includes
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -29,17 +35,12 @@ set(qdldl_interface_includes
     ${CMAKE_CURRENT_SOURCE_DIR}/qdldl_sources/include
 )
 
-set(qdldl_interface_src
-    ${amd_sources}
-    ${CMAKE_CURRENT_SOURCE_DIR}/qdldl_interface.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/qdldl_interface.c
-)
-
 # Create object library for linear system solver interface
-add_library(linsys_qdldl OBJECT ${qdldl_interface_src})
+add_library(linsys_qdldl OBJECT ${qdldl_interface_sources})
 
-target_include_directories(linsys_qdldl PRIVATE ${qdldl_interface_includes}
-                           ${PROJECT_SOURCE_DIR}/algebra/csc_tools
+target_include_directories(linsys_qdldl PRIVATE
+                           ${qdldl_interface_includes}
+                           ${csc_tools_includes}
                            ${PROJECT_SOURCE_DIR}/lin_sys/kkt_common
                            ${PROJECT_SOURCE_DIR}/include
                            )

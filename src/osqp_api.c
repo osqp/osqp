@@ -29,6 +29,7 @@ void osqp_set_default_settings(OSQPSettings *settings) {
   settings->adaptive_rho           = ADAPTIVE_RHO;
   settings->adaptive_rho_interval  = ADAPTIVE_RHO_INTERVAL;
   settings->adaptive_rho_tolerance = (c_float)ADAPTIVE_RHO_TOLERANCE;
+
 # ifdef PROFILING
   settings->adaptive_rho_fraction = (c_float)ADAPTIVE_RHO_FRACTION;
 # endif /* ifdef PROFILING */
@@ -145,7 +146,7 @@ c_int osqp_setup(OSQPSolver** solverp,
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Initialize variables x, y, z to 0
-  cold_start(solver);
+  osqp_cold_start(solver);
 
   // Primal and dual residuals variables
   work->Ax  = OSQPVectorf_calloc(m);
@@ -352,8 +353,8 @@ c_int osqp_solve(OSQPSolver *solver) {
 #endif /* ifdef CTRLC */
 
   // Initialize variables (cold start or warm start depending on settings)
-  if (!solver->settings->warm_start) cold_start(solver);  // If not warm start ->
-                                                          // set x, z, y to zero
+  if (!solver->settings->warm_start) osqp_cold_start(solver);  // If not warm start ->
+                                                               // set x, z, y to zero
 
   // Main ADMM algorithm
 
@@ -399,7 +400,7 @@ c_int osqp_solve(OSQPSolver *solver) {
       temp_run_time = solver->info->setup_time + osqp_toc(work->timer);
     }
     else {
-      temp_run_time = osqp_toc(work->timer);
+      temp_run_time = solver->info->update_time + osqp_toc(work->timer);
     }
 
     if (solver->settings->time_limit &&
@@ -408,9 +409,9 @@ c_int osqp_solve(OSQPSolver *solver) {
 # ifdef PRINTING
 
       if (solver->settings->verbose) c_print("run time limit reached\n");
+      can_print = 0;  // Not printing at this iteration
 # endif /* ifdef PRINTING */
-      exitflag = 1;
-      goto exit;
+      break;
     }
 #endif /* ifdef PROFILING */
 
@@ -577,6 +578,16 @@ c_int osqp_solve(OSQPSolver *solver) {
     }
   }
 
+#ifdef PROFILING
+  /* if time-limit reached check termination and update status accordingly */
+ if (solver->info->status_val == OSQP_TIME_LIMIT_REACHED) {
+    if (!check_termination(solver, 1)) { // Try for approximate solutions
+      update_status(solver->info, OSQP_TIME_LIMIT_REACHED); /* Change update status back to OSQP_TIME_LIMIT_REACHED */
+    }
+  }
+#endif /* ifdef PROFILING */
+
+
 #if EMBEDDED != 1
   /* Update rho estimate */
   solver->info->rho_estimate = compute_rho_estimate(solver);
@@ -685,7 +696,9 @@ c_int osqp_cleanup(OSQPSolver *solver) {
     }
 
     // Unload linear system solver after free
-    exitflag = unload_linsys_solver(solver->settings->linsys_solver);
+    if (solver->settings) {
+      exitflag = unload_linsys_solver(solver->settings->linsys_solver);
+    }
 
 #ifndef EMBEDDED
     // Free active constraints structure
@@ -937,6 +950,13 @@ c_int osqp_update_upper_bound(OSQPSolver *solver, const c_float *u_new) {
 #endif /* ifdef PROFILING */
 
   return exitflag;
+}
+
+void osqp_cold_start(OSQPSolver *solver) {
+  OSQPWorkspace* work  = solver->work;
+  OSQPVectorf_set_scalar(work->x, 0.);
+  OSQPVectorf_set_scalar(work->z, 0.);
+  OSQPVectorf_set_scalar(work->y, 0.);
 }
 
 c_int osqp_warm_start(OSQPSolver *solver, const c_float *x, const c_float *y) {
@@ -1369,6 +1389,7 @@ c_int osqp_update_eps_rel(OSQPSolver *solver, c_float eps_rel_new) {
 c_int osqp_update_eps_prim_inf(OSQPSolver *solver, c_float eps_prim_inf_new) {
 
   // Check if workspace has been initialized
+
   if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that eps_prim_inf is positive
@@ -1388,7 +1409,7 @@ c_int osqp_update_eps_prim_inf(OSQPSolver *solver, c_float eps_prim_inf_new) {
 c_int osqp_update_eps_dual_inf(OSQPSolver *solver, c_float eps_dual_inf_new) {
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that eps_dual_inf is positive
   if (eps_dual_inf_new < 0.) {
@@ -1408,7 +1429,7 @@ c_int osqp_update_eps_dual_inf(OSQPSolver *solver, c_float eps_dual_inf_new) {
 c_int osqp_update_alpha(OSQPSolver*solver, c_float alpha_new) {
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that alpha is between 0 and 2
   if ((alpha_new <= 0.) || (alpha_new >= 2.)) {
@@ -1427,7 +1448,7 @@ c_int osqp_update_alpha(OSQPSolver*solver, c_float alpha_new) {
 c_int osqp_update_warm_start(OSQPSolver *solver, c_int warm_start_new) {
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that warm_start is either 0 or 1
   if ((warm_start_new != 0) && (warm_start_new != 1)) {
@@ -1446,7 +1467,7 @@ c_int osqp_update_warm_start(OSQPSolver *solver, c_int warm_start_new) {
 c_int osqp_update_scaled_termination(OSQPSolver *solver, c_int scaled_termination_new) {
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that scaled_termination is either 0 or 1
   if ((scaled_termination_new != 0) && (scaled_termination_new != 1)) {
@@ -1465,7 +1486,7 @@ c_int osqp_update_scaled_termination(OSQPSolver *solver, c_int scaled_terminatio
 c_int osqp_update_check_termination(OSQPSolver *solver, c_int check_termination_new) {
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that check_termination is nonnegative
   if (check_termination_new < 0) {
@@ -1486,7 +1507,7 @@ c_int osqp_update_check_termination(OSQPSolver *solver, c_int check_termination_
 c_int osqp_update_delta(OSQPSolver *solver, c_float delta_new) {
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that delta is positive
   if (delta_new <= 0.) {
@@ -1505,7 +1526,7 @@ c_int osqp_update_delta(OSQPSolver *solver, c_float delta_new) {
 c_int osqp_update_polish(OSQPSolver *solver, c_int polish_new) {
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that polish is either 0 or 1
   if ((polish_new != 0) && (polish_new != 1)) {
@@ -1530,7 +1551,7 @@ c_int osqp_update_polish(OSQPSolver *solver, c_int polish_new) {
 c_int osqp_update_polish_refine_iter(OSQPSolver *solver, c_int polish_refine_iter_new) {
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that polish_refine_iter is nonnegative
   if (polish_refine_iter_new < 0) {
@@ -1549,7 +1570,7 @@ c_int osqp_update_polish_refine_iter(OSQPSolver *solver, c_int polish_refine_ite
 c_int osqp_update_verbose(OSQPSolver *solver, c_int verbose_new) {
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that verbose is either 0 or 1
   if ((verbose_new != 0) && (verbose_new != 1)) {
@@ -1571,7 +1592,7 @@ c_int osqp_update_verbose(OSQPSolver *solver, c_int verbose_new) {
 c_int osqp_update_time_limit(OSQPSolver *solver, c_float time_limit_new) {
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that time_limit is nonnegative
   if (time_limit_new < 0.) {
@@ -1586,7 +1607,6 @@ c_int osqp_update_time_limit(OSQPSolver *solver, c_float time_limit_new) {
 
   return 0;
 }
-
 #endif /* ifdef PROFILING */
 
 /****************************

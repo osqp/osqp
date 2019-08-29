@@ -13,8 +13,8 @@ extern "C" {
  * Solution polish: Solve equality constrained QP with assumed active
  *constraints
  * @param  solver OSQP solver
- * @return      Exitflag:  0: Factorization successful
- *                         1: Factorization unsuccessful
+ * @return        Exitflag:  0: Factorization successful
+ *                           1: Factorization unsuccessful
  */
 c_int polish(OSQPSolver *solver);
 

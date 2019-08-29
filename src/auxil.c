@@ -144,13 +144,6 @@ void swap_vectors(OSQPVectorf **a, OSQPVectorf **b) {
   *a   = temp;
 }
 
-void cold_start(OSQPSolver *solver) {
-  OSQPWorkspace* work     = solver->work;
-  OSQPVectorf_set_scalar(work->x, 0.);
-  OSQPVectorf_set_scalar(work->z, 0.);
-  OSQPVectorf_set_scalar(work->y, 0.);
-}
-
 static void compute_rhs(OSQPSolver *solver) {
 
   OSQPWorkspace* work     = solver->work;
@@ -331,7 +324,7 @@ c_float compute_dua_res(OSQPSolver *solver, OSQPVectorf *x, OSQPVectorf *y) {
   else {
     dua_res = OSQPVectorf_norm_inf(work->x_prev);
   }
-    
+
   return dua_res;
 }
 
@@ -561,8 +554,13 @@ void store_solution(OSQPSolver *solver) {
   else {
 
     // No solution present. Solution is NaN
-    for(i = 0; i < work->data->n; i++) solution->x[i] = OSQP_NAN;
-    for(i = 0; i < work->data->m; i++) solution->y[i] = OSQP_NAN;
+    OSQPVectorf_set_scalar(work->x, OSQP_NAN);
+    OSQPVectorf_set_scalar(work->y, OSQP_NAN);
+    OSQPVectorf_to_raw(solution->x, work->x); // primal
+    OSQPVectorf_to_raw(solution->y, work->y); // dual
+
+    // reset iterates to 0 for next run (they cannot start from NaN)
+    osqp_cold_start(solver);
 
 
 #ifndef EMBEDDED
@@ -582,9 +580,6 @@ void store_solution(OSQPSolver *solver) {
     }
 
 #endif /* ifndef EMBEDDED */
-
-    // Cold start iterates to 0 for next runs (they cannot start from NaN)
-    cold_start(solver);
   }
 }
 

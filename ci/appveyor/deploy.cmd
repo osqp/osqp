@@ -5,14 +5,14 @@ REM Needed to enable to define OSQP_BIN within the file
 
 IF "%APPVEYOR_REPO_TAG%" == "true" (
 
-    REM Deply only on tags (releases)
-    set OSQP_VERSION="0.6.0.dev3"
+    IF NOT "%OSQP_VERSION%"=="%OSQP_VERSION:dev=%" (
+    rem We are using a development version
+    set OSQP_PACKAGE_NAME="OSQP-dev"
+    ) ELSE (
+    rem We are using standard version
     set OSQP_PACKAGE_NAME="OSQP"
-    IF NOT "!OSQP_VERSION!"=="!OSQP_VERSION:dev=!" (
-	    REM We are using a development version
-	    set OSQP_PACKAGE_NAME="!OSQP_PACKAGE_NAME!-dev"
     )
-
+    
     REM Build C libraries
     cd %APPVEYOR_BUILD_FOLDER%
     del /F /Q build
@@ -25,9 +25,9 @@ IF "%APPVEYOR_REPO_TAG%" == "true" (
     cd %APPVEYOR_BUILD_FOLDER%\build\out
 
     IF "%PLATFORM%" == "x86" (
-        set OSQP_BIN="osqp-!OSQP_VERSION!-windows32"
+    set OSQP_BIN="osqp-!OSQP_VERSION!-windows32"
     ) ELSE (
-        set OSQP_BIN="osqp-!OSQP_VERSION!-windows64"
+    set OSQP_BIN="osqp-!OSQP_VERSION!-windows64"
     )
     REM Create directories
     REM NB. We force expansion of the variable at execution time!
@@ -52,15 +52,14 @@ IF "%APPVEYOR_REPO_TAG%" == "true" (
     7z a -tgzip !OSQP_BIN!.tar.gz !OSQP_BIN!.tar
 
     REM Deploy to Bintray
-    curl -T !OSQP_BIN!.tar.gz -ubstellato:%BINTRAY_API_KEY% -H "X-Bintray-Package:!OSQP_PACKAGE_NAME!" -H "X-Bintray-Version:!OSQP_VERSION!" -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/!OSQP_PACKAGE_NAME!/!OSQP_VERSION!/
+    curl -T !OSQP_BIN!.tar.gz -ubstellato:!BINTRAY_API_KEY! -H X-Bintray-Package:!OSQP_PACKAGE_NAME! -H X-Bintray-Version:!OSQP_VERSION! -H "X-Bintray-Override: 1" https://api.bintray.com/content/bstellato/generic/!OSQP_PACKAGE_NAME!/!OSQP_VERSION!/
     if errorlevel 1 exit /b 1
 
     REM Publish
-    curl -X POST -ubstellato:%BINTRAY_API_KEY% https://api.bintray.com/content/bstellato/generic/!OSQP_PACKAGE_NAME!/!OSQP_VERSION!/publish
+    curl -X POST -ubstellato:!BINTRAY_API_KEY! https://api.bintray.com/content/bstellato/generic/!OSQP_PACKAGE_NAME!/!OSQP_VERSION!/publish
     if errorlevel 1 exit /b 1
 
-
-
-REM Close parenthesis for deploying only if it is a tagged commit
+rem End of IF for appveyor tag
 )
+
 @echo off

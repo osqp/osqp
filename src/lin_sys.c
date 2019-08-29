@@ -11,9 +11,6 @@ const char *LINSYS_SOLVER_NAME[] = {
 # include "pardiso_loader.h"
 #endif /* ifdef ENABLE_MKL_PARDISO */
 
-
-#ifndef EMBEDDED
-
 // Load linear system solver shared library
 c_int load_linsys_solver(enum linsys_solver_type linsys_solver) {
   switch (linsys_solver) {
@@ -76,5 +73,3 @@ c_int init_linsys_solver(LinSysSolver          **s,
     return init_linsys_solver_qdldl((qdldl_solver **)s, P, A, sigma, rho_vec, polish);
   }
 }
-
-#endif /* ifndef EMBEDDED */

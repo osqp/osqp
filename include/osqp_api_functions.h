@@ -154,6 +154,11 @@ c_int osqp_update_lower_bound(OSQPSolver    *solver,
 c_int osqp_update_upper_bound(OSQPSolver    *solver,
                               const c_float *u_new);
 
+/**
+ * Cold start workspace variables xz and y
+ * @param solver Solver
+ */
+void osqp_cold_start(OSQPSolver *solver);
 
 /**
  * Warm start primal and dual variables

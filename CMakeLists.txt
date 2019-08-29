@@ -111,22 +111,6 @@ if(OSQP_CUSTOM_MEMORY)
 	message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY}")
 endif()
 
-# Algebra implementation
-# ----------------------------------------------
-
-# Directory for custom algebra implementation.  Defaults
-# to the OSQP basic C implementation, which also serves
-#a s reference implementation
-
-if(OSQP_ALGEBRA_DIR)
-	message(STATUS "Using custom algebra implementation in ${OSQP_ALGEBRA_DIR}")
-else()
-  set(OSQP_ALGEBRA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/algebra/default/)
-  message(STATUS "Using OSQP standard algebra implementation")
-endif()
-
-
-
 # Linear solvers dependencies
 # ---------------------------------------------
 option (ENABLE_MKL_PARDISO "Enable MKL Pardiso solver" ON)
@@ -173,64 +157,18 @@ if (NOT MSVC)
     endif()
 endif (NOT MSVC)
 
-# Set sources
+# Set OSQP core sources and includes
 # ----------------------------------------------
-set(
-    osqp_src
-    src/auxil.c
-    src/ctrlc.c
-    src/error.c
-    ${PROJECT_SOURCE_DIR}/algebra/csc_tools/csc_math.c
-    ${PROJECT_SOURCE_DIR}/algebra/csc_tools/csc_utils.c
-    ${OSQP_ALGEBRA_DIR}/matrix.c
-    ${OSQP_ALGEBRA_DIR}/vector.c
-    src/lin_sys.c
-    src/osqp_api.c
-    src/polish.c
-    src/proj.c
-    src/scaling.c
-    src/util.c
-)
+add_subdirectory (src)
+add_subdirectory (include)
 
-set(
-    osqp_headers
-    include/auxil.h
-    include/ctrlc.h
-    include/error.h
-    include/glob_opts.h
-    include/lin_alg.h
-    include/algebra_vector.h
-    include/algebra_matrix.h
-    include/csc_type.h
-    ${PROJECT_SOURCE_DIR}/algebra/csc_tools/csc_math.h
-    ${PROJECT_SOURCE_DIR}/algebra/csc_tools/csc_utils.h
-    ${OSQP_ALGEBRA_DIR}/algebra_impl.h
-    include/lin_sys.h
-    include/osqp.h
-    include/osqp_api_constants.h
-    include/osqp_api_types.h
-    include/osqp_api_functions.h
-    include/osqp_configure.h
-    include/polish.h
-    include/proj.h
-    include/scaling.h
-    include/types.h
-    include/util.h
-)
+#location of the osqp api includes
+set(osqp_api_includes ${CMAKE_CURRENT_SOURCE_DIR}/include/)
 
-if (DEFINED EMBEDDED)
-    # osqp_src
-    list(REMOVE_ITEM osqp_src "${PROJECT_SOURCE_DIR}/algebra/csc_tools/csc_utils.c")
-    list(REMOVE_ITEM osqp_src "src/ctrlc.c")
-    list(REMOVE_ITEM osqp_src "src/polish.c")
-    # osqp_headers
-    list(REMOVE_ITEM osqp_headers "${PROJECT_SOURCE_DIR}/algebra/csc_tools/csc_utils.h")
-    list(REMOVE_ITEM osqp_headers "include/ctrlc.h")
-    list(REMOVE_ITEM osqp_headers "include/polish.h")
-elseif (NOT CTRLC)
-    list(REMOVE_ITEM osqp_src "src/ctrlc.c")
-    list(REMOVE_ITEM osqp_headers "include/ctrlc.h")
-endif()
+# Algebra implementation and CSC support
+# ----------------------------------------------
+add_subdirectory(algebra)
+set(osqp_objects $<TARGET_OBJECTS:osqp_algebra>)
 
 
 # if we are building the Python interface, let's look for Python
@@ -331,14 +269,16 @@ endif (R_LANG)
 add_subdirectory(lin_sys)
 
 # Static library
-add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
+add_library (osqpstatic STATIC ${osqp_src} ${osqp_objects} ${osqp_headers} ${linsys_solvers})
+
 # Give same name to static library output
 set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
 
 # Include directories for linear system solvers
 target_include_directories(osqpstatic PRIVATE
                            ${linsys_solvers_includes}
-                           ${PROJECT_SOURCE_DIR}/algebra/csc_tools/)
+                           ${csc_tools_includes})
+
 
 # Declare include directories for the cmake exported target
 target_include_directories(osqpstatic
@@ -363,7 +303,6 @@ install(TARGETS osqpstatic
 install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
 
 
-
 if (MATLAB)
 target_link_libraries (osqpstatic ${Matlab_LIBRARIES})
 endif (MATLAB)
@@ -374,13 +313,13 @@ endif (MATLAB)
 if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
     # Create osqp shared library
     # NB: Add all the linear system solvers here
-    add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
+    add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${osqp_objects} ${linsys_solvers})
 
     # Include directories for linear system solvers
     target_include_directories(osqp PRIVATE ${linsys_solvers_includes})
 
     #include directories for csc utilities
-    target_include_directories(osqp PRIVATE ${PROJECT_SOURCE_DIR}/algebra/csc_tools/)
+    target_include_directories(osqp PRIVATE ${csc_tools_includes})
 
     # Declare include directories for the cmake exported target
     target_include_directories(osqp
@@ -498,6 +437,19 @@ if (UNITTESTS)
                                )
 
     target_link_libraries (osqp_tester osqpstatic)
+
+    # Add custom memory target
+    add_executable(osqp_tester_custom_memory
+                   EXCLUDE_FROM_ALL
+                   ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c
+                   ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
+	           ${PROJECT_SOURCE_DIR}/tests/minunit.h
+                   ${test_headers}
+                   ${codegen_test_headers}
+		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.c
+		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.h
+		)
+    target_link_libraries (osqp_tester_custom_memory osqpstatic)
 
     # Add testing
     include(CTest)

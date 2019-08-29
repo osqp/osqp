@@ -112,7 +112,11 @@ static c_int permute_KKT(csc ** KKT, qdldl_solver * p, c_int Pnz, c_int Anz, c_i
 #else
     amd_status = amd_order((*KKT)->n, (*KKT)->p, (*KKT)->i, p->P, (c_float *)OSQP_NULL, info);
 #endif
-    if (amd_status < 0) return (amd_status);
+    if (amd_status < 0) {
+        // Free Amd info and return an error
+        c_free(info);
+        return amd_status;
+    }
 
 
     // Inverse of the permutation vector

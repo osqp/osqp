@@ -56,13 +56,6 @@ void swap_vectors(OSQPVectorf **a,
 
 
 /**
- * Cold start workspace variables xz and y
- * @param solver Solver
- */
-void cold_start(OSQPSolver *solver);
-
-
-/**
  * Update x_tilde and z_tilde variable (first ADMM step)
  * @param solver Solver
  */
