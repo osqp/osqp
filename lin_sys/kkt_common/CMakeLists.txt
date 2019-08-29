@@ -15,3 +15,5 @@ add_library(kkt_common OBJECT
 target_include_directories(kkt_common PRIVATE
                            ${csc_tools_includes}
                            ${osqp_api_includes})
+
+set(kkt_common_includes ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)

@@ -432,11 +432,12 @@ if (UNITTESTS)
                 ${codegen_test_headers})
 
     target_include_directories(osqp_tester PRIVATE
-                               ${PROJECT_SOURCE_DIR}/lin_sys/kkt_common
-                               ${PROJECT_SOURCE_DIR}/algebra/csc_tools
+                               ${linsys_solvers_includes}
+                               ${csc_tools_includes}
                                )
 
     target_link_libraries (osqp_tester osqpstatic)
+
 
     # Add custom memory target
     add_executable(osqp_tester_custom_memory
@@ -445,11 +446,17 @@ if (UNITTESTS)
                    ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
 	           ${PROJECT_SOURCE_DIR}/tests/minunit.h
                    ${test_headers}
+                   ${csc_tools_includes}
                    ${codegen_test_headers}
 		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.c
 		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.h
 		)
-    target_link_libraries (osqp_tester_custom_memory osqpstatic)
+    target_link_libraries(osqp_tester_custom_memory osqpstatic)
+
+    target_include_directories(osqp_tester_custom_memory PRIVATE
+                               ${linsys_solvers_includes}
+                               ${csc_tools_includes}
+                               )
 
     # Add testing
     include(CTest)
