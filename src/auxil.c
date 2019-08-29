@@ -524,7 +524,6 @@ c_int has_solution(OSQPInfo * info){
 
 void store_solution(OSQPSolver *solver) {
 
-  c_int   i;
 #ifndef EMBEDDED
   c_float norm_vec;
 #endif /* ifndef EMBEDDED */
