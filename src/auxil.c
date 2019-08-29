@@ -178,7 +178,7 @@ void update_x(OSQPSolver *solver) {
   // update x
   OSQPVectorf_add_scaled(work->x,
                          settings->alpha,work->xtilde_view,
-                         ((c_float)1.0 - settings->alpha),work->x_prev);
+                         (1.0 - settings->alpha),work->x_prev);
 
   // update delta_x
   OSQPVectorf_minus(work->delta_x,work->x,work->x_prev);
@@ -195,7 +195,7 @@ void update_z(OSQPSolver* solver) {
    OSQPVectorf_add_scaled3(work->z,
                           1., work->z,
                           settings->alpha, work->ztilde_view,
-                          ((c_float)1.0 - settings->alpha), work->z_prev);
+                          (1.0 - settings->alpha), work->z_prev);
 
   // project z
   project(work, work->z);
