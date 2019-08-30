@@ -774,7 +774,7 @@ c_int osqp_update_lin_cost(OSQPSolver *solver, const c_float *q_new) {
   OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   work = solver->work;
 
 #ifdef PROFILING
