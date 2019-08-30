@@ -404,18 +404,14 @@ c_int update_linsys_solver_matrices_qdldl(
     // Update KKT matrix with new P
     update_KKT_P(s->KKT,
                  OSQPMatrix_get_x(P),
-                 OSQPMatrix_get_i(P),
                  OSQPMatrix_get_p(P),
-                 OSQPMatrix_get_m(A),
                  OSQPMatrix_get_n(P),
                  s->PtoKKT, s->sigma, s->Pdiag_idx, s->Pdiag_n);
 
     // Update KKT matrix with new A
     update_KKT_A(s->KKT,
                  OSQPMatrix_get_x(A),
-                 OSQPMatrix_get_i(A),
                  OSQPMatrix_get_p(A),
-                 OSQPMatrix_get_m(A),
                  OSQPMatrix_get_n(P),
                  s->AtoKKT);
 

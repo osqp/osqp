@@ -834,14 +834,35 @@ c_int validate_data(const csc* P,
 
   if (!P) {
 # ifdef PRINTING
-    c_eprint("Missing matrix P");
+    c_eprint("Missing quadratic cost matrix P");
 # endif
     return 1;
   }
 
   if (!A) {
 # ifdef PRINTING
-    c_eprint("Missing matrix A");
+    c_eprint("Missing constraint matrix A");
+# endif
+    return 1;
+  }
+
+  if (!q) {
+# ifdef PRINTING
+    c_eprint("Missing linear cost vector q");
+# endif
+    return 1;
+  }
+
+  if (!l) {
+# ifdef PRINTING
+    c_eprint("Missing lower bound vector l");
+# endif
+    return 1;
+  }
+
+  if (!u) {
+# ifdef PRINTING
+    c_eprint("Missing upper bound vector u");
 # endif
     return 1;
   }
@@ -899,8 +920,6 @@ c_int validate_data(const csc* P,
       return 1;
     }
   }
-
-  // TODO: Complete with other checks
 
   return 0;
 }

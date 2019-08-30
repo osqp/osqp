@@ -189,9 +189,7 @@ csc* form_KKT(c_float*    P_x,
 
 void update_KKT_P(csc         *KKT,
                   c_float*    P_x,
-                  c_int*      P_i,
                   c_int*      P_p,
-                  c_int       m,
                   c_int       n,
                   c_int  *PtoKKT,
                   c_float param1,
@@ -215,9 +213,7 @@ void update_KKT_P(csc         *KKT,
 
 void update_KKT_A(csc *KKT,
                   c_float*    A_x,
-                  c_int*      A_i,
                   c_int*      A_p,
-                  c_int       m,
                   c_int       n,
                   c_int*      AtoKKT) {
 
