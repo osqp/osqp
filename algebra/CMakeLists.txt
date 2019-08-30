@@ -9,7 +9,11 @@ if(NOT DEFINED ALGEBRA)
   set(ALGEBRA "default")
 endif()
 
-set(OSQP_ALGEBRA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${ALGEBRA})
+if(IS_ABSOLUTE ${ALGEBRA})
+  set(OSQP_ALGEBRA_DIR ${ALGEBRA}
+else()
+  set(OSQP_ALGEBRA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${ALGEBRA})
+endif()
 
 #make sure that the algebra target actually exists
 if(NOT EXISTS ${OSQP_ALGEBRA_DIR})
