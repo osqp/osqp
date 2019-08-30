@@ -12,15 +12,15 @@ extern "C" {
 *   and supporting definitions
 *********************************************/
 
-typedef struct OSQPVectori_ {
+struct OSQPVectori_ {
   c_int* values;
   c_int length;
-} OSQPVectori;
+};
 
-typedef struct OSQPVectorf_ {
+struct OSQPVectorf_ {
   c_float* values;
   c_int length;
-} OSQPVectorf;
+};
 
 
 /*********************************************
@@ -35,10 +35,10 @@ typedef struct OSQPVectorf_ {
  */
 typedef enum OSQPMatrix_symmetry_type {NONE,TRIU} OSQPMatrix_symmetry_type;
 
-typedef struct OSQPMatrix_ {
+struct OSQPMatrix_ {
   csc*                             csc;
   OSQPMatrix_symmetry_type    symmetry;
-} OSQPMatrix;
+};
 
 
 # ifdef __cplusplus

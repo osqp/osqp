@@ -81,7 +81,8 @@ typedef struct {
 /**
  * OSQP Workspace
  */
-typedef struct OSQPWorkspace_ {
+
+struct OSQPWorkspace_ {
   /// Problem data to work on (possibly scaled)
   OSQPData *data;
 
@@ -184,8 +185,10 @@ typedef struct OSQPWorkspace_ {
 # ifdef PRINTING
   c_int summary_printed; ///< Has last summary been printed? (true/false)
 # endif // ifdef PRINTING
+};
 
-} OSQPWorkspace;
+// NB: "typedef struct OSQPWorkspace_ OSQPWorkspace" is declared already 
+// in the osqp API where the main OSQPSolver is defined.
 
 
 /**

@@ -19,7 +19,7 @@ static c_int form_Ared(OSQPWorkspace *work){
 
   c_int j, n_active;
 
-  c_int* active_flags       = OSQPVectori_data(work->pol->active_flags);
+  c_int* active_flags = OSQPVectori_data(work->pol->active_flags);
   c_float* z = OSQPVectorf_data(work->z);
   c_float* y = OSQPVectorf_data(work->y);
   c_float* l = OSQPVectorf_data(work->data->l);
