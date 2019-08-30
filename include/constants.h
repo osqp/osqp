@@ -97,7 +97,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # endif /* ifndef OSQP_NAN */
 
 # ifndef OSQP_INFTY
-#  define OSQP_INFTY ((c_float)1e20)        // infinity
+#  define OSQP_INFTY ((c_float)1e30)        // infinity
 # endif /* ifndef OSQP_INFTY */
 
 
