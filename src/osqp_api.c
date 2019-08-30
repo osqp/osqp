@@ -1371,7 +1371,7 @@ c_int osqp_update_eps_abs(OSQPSolver*solver, c_float eps_abs_new) {
 c_int osqp_update_eps_rel(OSQPSolver *solver, c_float eps_rel_new) {
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   // Check that eps_rel is positive
   if (eps_rel_new < 0.) {
