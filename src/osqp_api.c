@@ -863,7 +863,7 @@ c_int osqp_update_lower_bound(OSQPSolver *solver, const c_float *l_new) {
   OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   work = solver->work;
 
 #ifdef PROFILING
