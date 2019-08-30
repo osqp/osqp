@@ -159,57 +159,11 @@ if (NOT MSVC)
     endif()
 endif (NOT MSVC)
 
-# Set sources
+# Set sources and includes
 # ----------------------------------------------
-set(
-    osqp_src
-    src/auxil.c
-    src/cs.c
-    src/ctrlc.c
-    src/error.c
-    src/kkt.c
-    src/lin_alg.c
-    src/lin_sys.c
-    src/osqp.c
-    src/polish.c
-    src/proj.c
-    src/scaling.c
-    src/util.c
-)
+add_subdirectory (src)
+add_subdirectory (include)
 
-set(
-    osqp_headers
-    include/auxil.h
-    include/constants.h
-    include/cs.h
-    include/ctrlc.h
-    include/error.h
-    include/glob_opts.h
-    include/kkt.h
-    include/lin_alg.h
-    include/lin_sys.h
-    include/osqp.h
-    include/osqp_configure.h
-    include/polish.h
-    include/proj.h
-    include/scaling.h
-    include/types.h
-    include/util.h
-)
-
-if (DEFINED EMBEDDED)
-    # osqp_src
-    list(REMOVE_ITEM osqp_src "src/cs.c")
-    list(REMOVE_ITEM osqp_src "src/ctrlc.c")
-    list(REMOVE_ITEM osqp_src "src/polish.c")
-    # osqp_headers
-    list(REMOVE_ITEM osqp_headers "include/ctrlc.h")
-    list(REMOVE_ITEM osqp_headers "include/cs.h")
-    list(REMOVE_ITEM osqp_headers "include/polish.h")
-elseif (NOT CTRLC)
-    list(REMOVE_ITEM osqp_src "src/ctrlc.c")
-    list(REMOVE_ITEM osqp_headers "include/ctrlc.h")
-endif()
 
 # if we are building the Python interface, let's look for Python
 # and set some options
