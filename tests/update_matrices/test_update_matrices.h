@@ -58,16 +58,12 @@ static const char* test_form_KKT() {
   // Update KKT matrix with new P and new A
   update_KKT_P(KKT,
                data->test_form_KKT_Pu_new->x,
-               data->test_form_KKT_Pu_new->i,
                data->test_form_KKT_Pu_new->p,
-               data->test_form_KKT_A_new->m,
                data->test_form_KKT_Pu_new->n,
                PtoKKT, sigma, Pdiag_idx, Pdiag_n);
   update_KKT_A(KKT,
               data->test_form_KKT_A_new->x,
-              data->test_form_KKT_A_new->i,
               data->test_form_KKT_A_new->p,
-              data->test_form_KKT_A_new->m,
               data->test_form_KKT_Pu_new->n,
               AtoKKT);
 
