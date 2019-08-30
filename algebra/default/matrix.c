@@ -78,8 +78,8 @@ void OSQPMatrix_Axpy(const OSQPMatrix *A,
                      c_float alpha,
                      c_float beta) {
 
-c_float* xf = OSQPVectorf_data(x);
-c_float* yf = OSQPVectorf_data(y);
+  c_float* xf = OSQPVectorf_data(x);
+  c_float* yf = OSQPVectorf_data(y);
 
   if(A->symmetry == NONE){
     //full matrix
@@ -137,12 +137,14 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix* A, const OSQPVectori* 
   csc        *M;
   OSQPMatrix *out;
 
-  #ifdef PRINTING
+
   if(A->symmetry == TRIU){
+#ifdef PRINTING
     c_eprint("row selection not implemented for partially filled matrices");
+#endif
     return OSQP_NULL;
   }
-  #endif
+
 
   M = csc_submatrix_byrows(A->csc, OSQPVectori_data(rows));
 

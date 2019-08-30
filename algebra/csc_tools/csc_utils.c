@@ -12,8 +12,9 @@ c_int csc_is_eq(csc *A, csc *B, c_float tol) {
   if (A->n != B->n) return 0;
 
   for (j = 0; j < A->n; j++) { // Cycle over columns j
-    // if column pointer does not coincide, they are not equal
-    if (A->p[j] != B->p[j]) return 0;
+    // if column pointer of next colimn does not coincide, they are not equal
+    // NB: first column always has A->p[0] = B->p[0] = 0 by construction.
+    if (A->p[j+1] != B->p[j+1]) return 0;
 
     for (i = A->p[j]; i < A->p[j + 1]; i++) { // Cycle rows i in column j
       if ((A->i[i] != B->i[i]) ||             // Different row indices
@@ -61,7 +62,7 @@ csc* csc_matrix(c_int m, c_int n, c_int nzmax, c_float *x, c_int *i, c_int *p)
 
   M->m     = m;
   M->n     = n;
-  M->nz   = -1;
+  M->nz    = -1;
   M->nzmax = nzmax;
   M->x     = x;
   M->i     = i;
@@ -77,7 +78,7 @@ csc* csc_spalloc(c_int m, c_int n, c_int nzmax, c_int values, c_int triplet) {
   A->m     = m;                        /* define dimensions and nzmax */
   A->n     = n;
   A->nzmax = nzmax = c_max(nzmax, 1);
-  A->nz   = triplet ? 0 : -1;         /* allocate triplet or comp.col */
+  A->nz    = triplet ? 0 : -1;         /* allocate triplet or comp.col */
   A->p     = csc_malloc(triplet ? nzmax : n + 1, sizeof(c_int));
   A->i     = csc_malloc(nzmax,  sizeof(c_int));
   A->x     = values ? csc_malloc(nzmax,  sizeof(c_float)) : OSQP_NULL;
@@ -344,6 +345,7 @@ c_float* csc_to_dns(csc *M)
 
   // Initialize matrix of zeros
   c_float *A = (c_float *)c_calloc(M->m * M->n, sizeof(c_float));
+  if (!A) return OSQP_NULL;
 
   // Allocate elements
   for (idx = 0; idx < M->p[M->n]; idx++)

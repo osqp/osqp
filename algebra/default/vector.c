@@ -7,14 +7,24 @@
 #ifndef EMBEDDED
 
 OSQPVectorf* OSQPVectorf_new(const c_float *a, c_int length){
+
   OSQPVectorf* out = OSQPVectorf_malloc(length);
-  OSQPVectorf_from_raw(out, a);
+  if(!out) return OSQP_NULL;
+
+  if (length > 0) {
+    OSQPVectorf_from_raw(out, a);
+  }
   return out;
 }
 
 OSQPVectori* OSQPVectori_new(const c_int *a, c_int length){
+
   OSQPVectori* out = OSQPVectori_malloc(length);
-  OSQPVectori_from_raw(out, a);
+  if(!out) return OSQP_NULL;
+
+  if (length > 0) {
+    OSQPVectori_from_raw(out, a);
+  }
   return out;
 }
 
@@ -156,7 +166,7 @@ void OSQPVectori_copy(OSQPVectori *b, const OSQPVectori *a){
 void OSQPVectorf_from_raw(OSQPVectorf *b, const c_float *av){
   c_int i;
   c_int length = b->length;
-  c_float* bv = b->values;
+  c_float* bv  = b->values;
 
   for (i = 0; i < length; i++) {
     bv[i] = av[i];
