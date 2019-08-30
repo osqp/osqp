@@ -1,7 +1,7 @@
 #include "osqp.h"
 #include <stdlib.h>
 
-int main(int argc, char **argv) {
+int main(void) {
 
   /* Load problem data */
   c_float P_x[3] = { 4.0, 1.0, 2.0, };
