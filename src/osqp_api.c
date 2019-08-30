@@ -911,7 +911,7 @@ c_int osqp_update_upper_bound(OSQPSolver *solver, const c_float *u_new) {
   OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   work = solver->work;
 
 #ifdef PROFILING
@@ -965,7 +965,7 @@ c_int osqp_warm_start(OSQPSolver *solver, const c_float *x, const c_float *y) {
   OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   work = solver->work;
 
   // Update warm_start setting to true
@@ -993,7 +993,7 @@ c_int osqp_warm_start_x(OSQPSolver *solver, const c_float *x) {
   OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   work = solver->work;
 
   // Update warm_start setting to true
@@ -1018,7 +1018,7 @@ c_int osqp_warm_start_y(OSQPSolver *solver, const c_float *y) {
   OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   work = solver->work;
 
   // Update warm_start setting to true
@@ -1049,7 +1049,7 @@ c_int osqp_update_P(OSQPSolver    *solver,
   OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   work = solver->work;
 
 #ifdef PROFILING
@@ -1120,7 +1120,7 @@ c_int osqp_update_A(OSQPSolver *solver,
   OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   work = solver->work;
 
 #ifdef PROFILING
@@ -1195,7 +1195,7 @@ c_int osqp_update_P_A(OSQPSolver    *solver,
   OSQPWorkspace* work;
 
   // Check if workspace has been initialized
-  if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   work = solver->work;
 
 #ifdef PROFILING
@@ -1281,7 +1281,7 @@ c_int osqp_update_rho(OSQPSolver *solver, c_float rho_new) {
     OSQPWorkspace* work;
 
     // Check if workspace has been initialized
-    if (!solver || !solver->work) osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+    if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
     work = solver->work;
 
   // Check value of rho
