@@ -72,9 +72,9 @@ extern "C" {
  * Update KKT matrix using the elements of P
  *
  * @param KKT       KKT matrix in CSC form (upper-triangular)
- * @param  P_x        value data for P in csc format (triu form)
- * @param  P_p        column data for P in csc format (triu form)
- * @param  n          number of primal variables (P is n x n)
+ * @param  P_x      value data for P in csc format (triu form)
+ * @param  P_p      column data for P in csc format (triu form)
+ * @param  n        number of primal variables (P is n x n)
  * @param PtoKKT    Vector of pointers from P->x to KKT->x
  * @param param1    Parameter added to the diagonal elements of P
  * @param Pdiag_idx Index of diagonal elements in P->x
@@ -94,9 +94,9 @@ extern "C" {
  * Update KKT matrix using the elements of A
  *
  * @param KKT       KKT matrix in CSC form (upper-triangular)
- * @param  A_x        value data for A in csc format
- * @param  A_p        column data for A in csc format
- * @param  n          number of primal variables (P is n x n)
+ * @param  A_x      value data for A in csc format
+ * @param  A_p      column data for A in csc format
+ * @param  n        number of primal variables (P is n x n)
  * @param AtoKKT    Vector of pointers from A->x to KKT->x
  */
  void update_KKT_A(csc *KKT,

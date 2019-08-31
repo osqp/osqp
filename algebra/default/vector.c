@@ -112,7 +112,7 @@ OSQPVectori* OSQPVectori_calloc(c_int length){
 OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf *a){
 
   OSQPVectorf* b = OSQPVectorf_malloc(a->length);
-  OSQPVectorf_copy(b,a);
+  if(b) OSQPVectorf_copy(b,a);
   return b;
 
 }
@@ -120,7 +120,7 @@ OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf *a){
 OSQPVectori* OSQPVectori_copy_new(const OSQPVectori *a){
 
   OSQPVectori* b = OSQPVectori_malloc(a->length);
-  OSQPVectori_copy(b,a);
+  if(b) OSQPVectori_copy(b,a);
   return b;
 }
 
@@ -135,9 +135,12 @@ void OSQPVectori_free(OSQPVectori *a){
 }
 
 OSQPVectorf* OSQPVectorf_view(const OSQPVectorf *a, c_int head, c_int length){
+
   OSQPVectorf* view = c_malloc(sizeof(OSQPVectorf));
-  view->length = length;
-  view->values   = a->values + head;
+  if(view){
+    view->length = length;
+    view->values   = a->values + head;
+  }
   return view;
 }
 

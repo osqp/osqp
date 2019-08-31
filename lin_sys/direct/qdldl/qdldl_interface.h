@@ -33,7 +33,7 @@ struct qdldl {
                              const OSQPMatrix *P,
                              const OSQPMatrix *A);         ///< Update solver matrices
     c_int (*update_rho_vec)(struct qdldl * self,
-                            const OSQPVectorf* rho);       ///< Update rho_vec parameter
+                            const OSQPVectorf* rho_vec);   ///< Update rho_vec parameter
 #endif
 
 #ifndef EMBEDDED

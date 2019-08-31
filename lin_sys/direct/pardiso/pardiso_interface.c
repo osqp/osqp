@@ -142,8 +142,8 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp,
     else { // Called from ADMM algorithm
 
         // Allocate vectors of indices
-        s->PtoKKT = c_malloc(OSQPMatrix_get_nz(P) * sizeof(c_int));
-        s->AtoKKT = c_malloc(OSQPMatrix_get_nz(A) * sizeof(c_int));
+        s->PtoKKT   = c_malloc(OSQPMatrix_get_nz(P) * sizeof(c_int));
+        s->AtoKKT   = c_malloc(OSQPMatrix_get_nz(A) * sizeof(c_int));
         s->rhotoKKT = c_malloc(OSQPMatrix_get_m(A) * sizeof(c_int));
 
         // Use s->rho_inv_vec for storing param2 = rho_inv_vec

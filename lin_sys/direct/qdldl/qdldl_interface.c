@@ -424,14 +424,14 @@ c_int update_linsys_solver_matrices_qdldl(
 
 c_int update_linsys_solver_rho_vec_qdldl(
                       qdldl_solver * s,
-                      const OSQPVectorf * rho){
+                      const OSQPVectorf * rho_vec){
 
     c_int i;
-    c_float* rho_vec = OSQPVectorf_data(rho);
+    c_float* rhov = OSQPVectorf_data(rho_vec);
 
     // Update internal rho_inv_vec
     for (i = 0; i < s->m; i++){
-        s->rho_inv_vec[i] = 1. / rho_vec[i];
+        s->rho_inv_vec[i] = 1. / rhov[i];
     }
 
     // Update KKT matrix with new rho_vec
