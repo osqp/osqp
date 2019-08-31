@@ -14,7 +14,9 @@ extern "C" {
 ******************/
 
 /**
- *  Matrix in compressed-column or triplet form
+ *  Matrix in compressed-column form.
+ *  The structure is used internally to store matrices in the triplet form as well,
+ *  but the API requires that the matrices are in the CSC format.
  */
 typedef struct {
   c_int    nzmax; ///< maximum number of entries
