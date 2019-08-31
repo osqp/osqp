@@ -1,0 +1,57 @@
+{
+   ignore_get_max_threads_intel
+   Memcheck:Param
+   sched_setaffinity(mask)
+   fun:syscall
+   fun:__kmp_affinity_determine_capable
+   fun:_Z20__kmp_env_initializePKc
+   fun:__kmp_middle_initialize
+   fun:omp_get_num_procs@@VERSION
+   fun:mkl_serv_domain_get_max_threads
+   obj:*
+}
+
+{
+   ignore mkl_get_max_threads
+   Memcheck:Cond
+   fun:mkl_serv_domain_get_max_threads
+   obj:*
+}
+
+{
+   ignore_libiomp_intel
+   Memcheck:Cond
+   fun:__intel_sse2_strrchr
+   fun:*_INTERNAL_45_______src_thirdparty_tbb_omp_dynamic_link_cpp_*
+   fun:__sti__$E
+   obj:*libiomp*.so
+}
+
+
+{
+   mkl_malloc
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:_dl_signal_error
+   fun:_dl_open
+   fun:dlopen_doit
+   fun:_dl_catch_error
+   fun:_dlerror_run
+   fun:dlopen@@GLIBC_2.2.5
+   fun:mkl_serv_inspector_suppress
+   fun:mkl_serv_lock
+   fun:mkl_serv_core_register_cleanup
+   fun:__sti__$E
+   fun:call_init.part.0
+}
+
+{
+   another_intel
+   Memcheck:Addr16
+   fun:__intel_sse2_strrchr
+   fun:_ZN67_INTERNAL_45_______src_thirdparty_tbb_omp_dynamic_link_cpp_d77f5ef55__kmp12init_dl_dataEv
+   fun:__sti__$E
+   obj:*libiomp5.so
+   obj:*libiomp5.so
+}

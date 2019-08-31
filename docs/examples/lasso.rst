@@ -35,7 +35,7 @@ Python
     import osqp
     import numpy as np
     import scipy as sp
-    import scipy.sparse as sparse
+    from scipy import sparse
 
     # Generate problem data
     sp.random.seed(1)
@@ -54,11 +54,11 @@ Python
     Onm = sparse.csc_matrix((n, m))
 
     # OSQP data
-    P = sparse.block_diag((On, sparse.eye(m), On), format='csc')
+    P = sparse.block_diag([On, sparse.eye(m), On], format='csc')
     q = np.zeros(2*n + m)
     A = sparse.vstack([sparse.hstack([Ad, -Im, Onm.T]),
                        sparse.hstack([In, Onm, -In]),
-                       sparse.hstack([In, Onm, In])]).tocsc()
+                       sparse.hstack([In, Onm, In])], format='csc')
     l = np.hstack([b, -np.inf * np.ones(n), np.zeros(n)])
     u = np.hstack([b, np.zeros(n), np.inf * np.ones(n)])
 
@@ -128,7 +128,7 @@ CVXPY
     from cvxpy import *
     import numpy as np
     import scipy as sp
-    import scipy.sparse as sparse
+    from scipy import sparse
 
     # Generate problem data
     sp.random.seed(1)

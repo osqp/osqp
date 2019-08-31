@@ -30,9 +30,6 @@ c_int scale_data(OSQPWorkspace *work);
 c_int unscale_data(OSQPWorkspace *work);
 
 
-// Scale solution
-// c_int scale_solution(OSQPWorkspace *work);
-
 /**
  * Unscale solution
  * @param  work Workspace

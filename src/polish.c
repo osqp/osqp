@@ -5,6 +5,7 @@
 #include "lin_sys.h"
 #include "kkt.h"
 #include "proj.h"
+#include "error.h"
 
 /**
  * Form reduced matrix A that contains only rows that are active at the
@@ -13,7 +14,7 @@
  * Active constraints are guessed from the primal and dual solution returned by
  * the ADMM.
  * @param  work Workspace
- * @return      Number of rows in Ared
+ * @return      Number of rows in Ared, negative if error
  */
 static c_int form_Ared(OSQPWorkspace *work) {
   c_int j, ptr;
@@ -51,6 +52,7 @@ static c_int form_Ared(OSQPWorkspace *work) {
   if (work->pol->n_low + work->pol->n_upp == 0) {
     // Form empty Ared
     work->pol->Ared = csc_spalloc(0, work->data->n, 0, 1, 0);
+    if (!(work->pol->Ared)) return -1;
     int_vec_set_scalar(work->pol->Ared->p, 0, work->data->n + 1);
     return 0; // mred = 0
   }
@@ -65,7 +67,8 @@ static c_int form_Ared(OSQPWorkspace *work) {
   // Ared = vstack[Alow, Aupp]
   work->pol->Ared = csc_spalloc(work->pol->n_low + work->pol->n_upp,
                                 work->data->n, Ared_nnz, 1, 0);
-  Ared_nnz = 0;                         // counter
+  if (!(work->pol->Ared)) return -1;
+  Ared_nnz = 0; // counter
 
   for (j = 0; j < work->data->n; j++) { // Cycle over columns of A
     work->pol->Ared->p[j] = Ared_nnz;
@@ -96,7 +99,7 @@ static c_int form_Ared(OSQPWorkspace *work) {
 /**
  * Form reduced right-hand side rhs_red = vstack[-q, l_low, u_upp]
  * @param  work Workspace
- * @param  rhs right-hand-side
+ * @param  rhs  right-hand-side
  * @return      reduced rhs
  */
 static void form_rhs_red(OSQPWorkspace *work, c_float *rhs) {
@@ -126,52 +129,55 @@ static void form_rhs_red(OSQPWorkspace *work, c_float *rhs) {
  * @param  p    Private variable for solving linear system
  * @param  z    Initial z value
  * @param  b    RHS of the linear system
- * @return      More accurate solution
+ * @return      Exitflag
  */
-static void iterative_refinement(OSQPWorkspace *work,
-                                 LinSysSolver  *p,
-                                 c_float       *z,
-                                 c_float       *b) {
+static c_int iterative_refinement(OSQPWorkspace *work,
+                                  LinSysSolver  *p,
+                                  c_float       *z,
+                                  c_float       *b) {
+  c_int i, j, n;
+  c_float *rhs;
+
   if (work->settings->polish_refine_iter > 0) {
-    c_int i, j, n;
-    c_float *dz;
-    c_float *rhs;
 
     // Assign dimension n
     n = work->data->n + work->pol->Ared->m;
 
-    // Allocate dz and rhs vectors
-    dz  = (c_float *)c_malloc(sizeof(c_float) * n);
+    // Allocate rhs vector
     rhs = (c_float *)c_malloc(sizeof(c_float) * n);
 
-    for (i = 0; i < work->settings->polish_refine_iter; i++) {
-      // Form the RHS for the iterative refinement:  b - K*z
-      prea_vec_copy(b, rhs, n);
+    if (!rhs) {
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    } else {
+      for (i = 0; i < work->settings->polish_refine_iter; i++) {
+        // Form the RHS for the iterative refinement:  b - K*z
+        prea_vec_copy(b, rhs, n);
 
-      // Upper Part: R^{n}
-      // -= Px (upper triang)
-      mat_vec(work->data->P, z, rhs, -1);
+        // Upper Part: R^{n}
+        // -= Px (upper triang)
+        mat_vec(work->data->P, z, rhs, -1);
 
-      // -= Px (lower triang)
-      mat_tpose_vec(work->data->P,   z,                 rhs, -1, 1);
+        // -= Px (lower triang)
+        mat_tpose_vec(work->data->P, z, rhs, -1, 1);
 
-      // -= Ared'*y_red
-      mat_tpose_vec(work->pol->Ared, z + work->data->n, rhs, -1, 0);
+        // -= Ared'*y_red
+        mat_tpose_vec(work->pol->Ared, z + work->data->n, rhs, -1, 0);
 
-      // Lower Part: R^{m}
-      mat_vec(work->pol->Ared, z, rhs + work->data->n, -1);
+        // Lower Part: R^{m}
+        mat_vec(work->pol->Ared, z, rhs + work->data->n, -1);
 
-      // Solve linear system. Store solution in rhs
-      p->solve(p, rhs, work->settings);
+        // Solve linear system. Store solution in rhs
+        p->solve(p, rhs);
 
-      // Update solution
-      for (j = 0; j < n; j++) {
-        z[j] += rhs[j];
+        // Update solution
+        for (j = 0; j < n; j++) {
+          z[j] += rhs[j];
+        }
       }
     }
-    c_free(dz);
-    c_free(rhs);
+    if (rhs) c_free(rhs);
   }
+  return 0;
 }
 
 /**
@@ -204,7 +210,7 @@ static void get_ypol_from_yred(OSQPWorkspace *work, c_float *yred) {
 }
 
 c_int polish(OSQPWorkspace *work) {
-  c_int mred, polish_successful;
+  c_int mred, polish_successful, exitflag;
   c_float *rhs_red;
   LinSysSolver *plsh;
   c_float *pol_sol; // Polished solution
@@ -215,33 +221,70 @@ c_int polish(OSQPWorkspace *work) {
 
   // Form Ared by assuming the active constraints and store in work->pol->Ared
   mred = form_Ared(work);
+  if (mred < 0) { // work->pol->red = OSQP_NULL
+    // Polishing failed
+    work->info->status_polish = -1;
+
+    return -1;
+  }
 
   // Form and factorize reduced KKT
-  plsh = init_linsys_solver(work->data->P, work->pol->Ared,
-                            work->settings->delta, OSQP_NULL,
-                            work->settings->linsys_solver, 1);
+  exitflag = init_linsys_solver(&plsh, work->data->P, work->pol->Ared,
+                                work->settings->delta, OSQP_NULL,
+                                work->settings->linsys_solver, 1);
 
-  if (!plsh) {
+  if (exitflag) {
     // Polishing failed
     work->info->status_polish = -1;
 
     // Memory clean-up
-    if (work->pol) {
-      if (work->pol->Ared) csc_spfree(work->pol->Ared);
-    }
+    if (work->pol->Ared) csc_spfree(work->pol->Ared);
+
     return 1;
   }
 
   // Form reduced right-hand side rhs_red
   rhs_red = c_malloc(sizeof(c_float) * (work->data->n + mred));
+  if (!rhs_red) {
+    // Polishing failed
+    work->info->status_polish = -1;
+
+    // Memory clean-up
+    csc_spfree(work->pol->Ared);
+
+    return -1;
+  }
   form_rhs_red(work, rhs_red);
 
-  // Solve the reduced KKT system
   pol_sol = vec_copy(rhs_red, work->data->n + mred);
-  plsh->solve(plsh, pol_sol, work->settings);
+  if (!pol_sol) {
+    // Polishing failed
+    work->info->status_polish = -1;
+
+    // Memory clean-up
+    csc_spfree(work->pol->Ared);
+    c_free(rhs_red);
+  
+    return -1;
+  }
+
+  // Solve the reduced KKT system
+  plsh->solve(plsh, pol_sol);
 
   // Perform iterative refinement to compensate for the regularization error
-  iterative_refinement(work, plsh, pol_sol, rhs_red);
+  exitflag = iterative_refinement(work, plsh, pol_sol, rhs_red);
+
+  if (exitflag) {
+    // Polishing failed
+    work->info->status_polish = -1;
+
+    // Memory clean-up
+    csc_spfree(work->pol->Ared);
+    c_free(rhs_red);
+    c_free(pol_sol);
+  
+    return -1;
+  }
 
   // Store the polished solution (x,z,y)
   prea_vec_copy(pol_sol, work->pol->x, work->data->n);   // pol->x
@@ -298,9 +341,8 @@ c_int polish(OSQPWorkspace *work) {
   // Memory clean-up
   plsh->free(plsh);
 
-  if (work->pol) {
-    if (work->pol->Ared) csc_spfree(work->pol->Ared);
-  }
+  // Checks that they are not NULL are already performed earlier
+  csc_spfree(work->pol->Ared);
   c_free(rhs_red);
   c_free(pol_sol);
 

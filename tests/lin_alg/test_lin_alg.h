@@ -10,7 +10,7 @@ static const char* test_constr_sparse_mat() {
   lin_alg_sols_data *data = generate_problem_lin_alg_sols_data();
 
   // Convert sparse to dense
-  Adns =  csc_to_dns(data->test_sp_matrix_A);
+  Adns = csc_to_dns(data->test_sp_matrix_A);
 
   // Compute norm of the elementwise difference with
   mu_assert("Linear algebra tests: error in constructing sparse/dense matrix!",
@@ -280,7 +280,6 @@ static const char* test_extract_upper_triangular() {
   c_free(inf_norm_cols_test);
   csc_spfree(Ptriu);
   clean_problem_lin_alg_sols_data(data);
-
 
   return 0;
 }

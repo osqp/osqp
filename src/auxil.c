@@ -67,8 +67,8 @@ c_int adapt_rho(OSQPWorkspace *work) {
   work->info->rho_estimate = rho_new;
 
   // Check if the new rho is large or small enough and update it in case
-  if ((rho_new > work->settings->rho * ADAPTIVE_RHO_TOLERANCE) ||
-      (rho_new < work->settings->rho /  ADAPTIVE_RHO_TOLERANCE)) {
+  if ((rho_new > work->settings->rho * work->settings->adaptive_rho_tolerance) ||
+      (rho_new < work->settings->rho /  work->settings->adaptive_rho_tolerance)) {
     exitflag                 = osqp_update_rho(work, rho_new);
     work->info->rho_updates += 1;
   }
@@ -138,8 +138,7 @@ c_int update_rho_vec(OSQPWorkspace *work) {
   // Update rho_vec in KKT matrix if constraints type has changed
   if (constr_type_changed == 1) {
     exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver,
-                                                   work->rho_vec,
-                                                   work->data->m);
+                                                   work->rho_vec);
   }
 
   return exitflag;
@@ -178,25 +177,12 @@ static void compute_rhs(OSQPWorkspace *work) {
   }
 }
 
-static void update_z_tilde(OSQPWorkspace *work) {
-  c_int i; // Index
-
-  for (i = 0; i < work->data->m; i++) {
-    work->xz_tilde[i + work->data->n] = work->z_prev[i] + work->rho_inv_vec[i] *
-                                        (work->xz_tilde[i + work->data->n] -
-                                         work->y[i]);
-  }
-}
-
 void update_xz_tilde(OSQPWorkspace *work) {
   // Compute right-hand side
   compute_rhs(work);
 
   // Solve linear system
-  work->linsys_solver->solve(work->linsys_solver, work->xz_tilde, work->settings);
-
-  // Update z_tilde variable after solving linear system
-  update_z_tilde(work);
+  work->linsys_solver->solve(work->linsys_solver, work->xz_tilde);
 }
 
 void update_x(OSQPWorkspace *work) {
@@ -383,14 +369,28 @@ c_int is_primal_infeasible(OSQPWorkspace *work, c_float eps_prim_inf) {
   // 2) u'*max(delta_y, 0) + l'*min(delta_y, 0) < -eps * ||delta_y||
   //
 
-  c_int   i; // Index for loops
+  c_int i; // Index for loops
   c_float norm_delta_y;
-  c_float ineq_lhs;
+  c_float ineq_lhs = 0.0;
 
-  // Compute infinity norm of delta_y
-  if (work->settings->scaling && !work->settings->scaled_termination) { // Unscale
-                                                                        // if
-                                                                        // necessary
+  // Project delta_y onto the polar of the recession cone of [l,u]
+  for (i = 0; i < work->data->m; i++) {
+    if (work->data->u[i] > OSQP_INFTY * MIN_SCALING) {          // Infinite upper bound
+      if (work->data->l[i] < -OSQP_INFTY * MIN_SCALING) {       // Infinite lower bound
+        // Both bounds infinite
+        work->delta_y[i] = 0.0;
+      } else {
+        // Only upper bound infinite
+        work->delta_y[i] = c_min(work->delta_y[i], 0.0);
+      }
+    } else if (work->data->l[i] < -OSQP_INFTY * MIN_SCALING) {  // Infinite lower bound
+      // Only lower bound infinite
+      work->delta_y[i] = c_max(work->delta_y[i], 0.0);
+    }
+  }
+
+  // Compute infinity norm of delta_y (unscale if necessary)
+  if (work->settings->scaling && !work->settings->scaled_termination) {
     // Use work->Adelta_x as temporary vector
     vec_ew_prod(work->scaling->E, work->delta_y, work->Adelta_x, work->data->m);
     norm_delta_y = vec_norm_inf(work->Adelta_x, work->data->m);
@@ -399,7 +399,6 @@ c_int is_primal_infeasible(OSQPWorkspace *work, c_float eps_prim_inf) {
   }
 
   if (norm_delta_y > eps_prim_inf) { // ||delta_y|| > 0
-    ineq_lhs = 0;
 
     for (i = 0; i < work->data->m; i++) {
       ineq_lhs += work->data->u[i] * c_max(work->delta_y[i], 0) + \
@@ -411,16 +410,15 @@ c_int is_primal_infeasible(OSQPWorkspace *work, c_float eps_prim_inf) {
       // Compute and return ||A'delta_y|| < eps_prim_inf
       mat_tpose_vec(work->data->A, work->delta_y, work->Atdelta_y, 0, 0);
 
-      if (work->settings->scaling && !work->settings->scaled_termination) { // Unscale
-                                                                            // if
-                                                                            // necessary
+      // Unscale if necessary
+      if (work->settings->scaling && !work->settings->scaled_termination) {
         vec_ew_prod(work->scaling->Dinv,
                     work->Atdelta_y,
                     work->Atdelta_y,
                     work->data->n);
       }
-      return vec_norm_inf(work->Atdelta_y,
-                          work->data->n) < eps_prim_inf * norm_delta_y;
+
+      return vec_norm_inf(work->Atdelta_y, work->data->n) < eps_prim_inf * norm_delta_y;
     }
   }
 
@@ -494,8 +492,8 @@ c_int is_dual_infeasible(OSQPWorkspace *work, c_float eps_dual_inf) {
         }
 
         // De Morgan Law Applied to dual infeasibility conditions for A * x
-        // NB: Note that 1e-06 is used to adjust the infinity value
-        //      in case the problem is scaled.
+        // NB: Note that MIN_SCALING is used to adjust the infinity value
+        //     in case the problem is scaled.
         for (i = 0; i < work->data->m; i++) {
           if (((work->data->u[i] < OSQP_INFTY * MIN_SCALING) &&
                (work->Adelta_x[i] >  eps_dual_inf * norm_delta_x)) ||
@@ -701,8 +699,8 @@ c_int check_termination(OSQPWorkspace *work, c_int approximate) {
   eps_dual_inf = work->settings->eps_dual_inf;
 
   // If residuals are too large, the problem is probably non convex
-  if ((work->info->pri_res > 2 * OSQP_INFTY) ||
-      (work->info->dua_res > 2 * OSQP_INFTY)){
+  if ((work->info->pri_res > OSQP_INFTY) ||
+      (work->info->dua_res > OSQP_INFTY)){
     // Looks like residuals are diverging. Probably the problem is non convex!
     // Terminate and report it
     update_status(work->info, OSQP_NON_CVX);
@@ -790,16 +788,30 @@ c_int check_termination(OSQPWorkspace *work, c_int approximate) {
   return exitflag;
 }
 
+
 #ifndef EMBEDDED
 
-
 c_int validate_data(const OSQPData *data) {
-  c_int j;
+  c_int j, ptr;
 
   if (!data) {
 # ifdef PRINTING
     c_eprint("Missing data");
-# endif /* ifdef PRINTING */
+# endif
+    return 1;
+  }
+
+  if (!(data->P)) {
+# ifdef PRINTING
+    c_eprint("Missing matrix P");
+# endif
+    return 1;
+  }
+
+  if (!(data->A)) {
+# ifdef PRINTING
+    c_eprint("Missing matrix A");
+# endif
     return 1;
   }
 
@@ -827,11 +839,21 @@ c_int validate_data(const OSQPData *data) {
     return 1;
   }
 
+  for (j = 0; j < data->n; j++) { // COLUMN
+    for (ptr = data->P->p[j]; ptr < data->P->p[j + 1]; ptr++) {
+      if (data->P->i[ptr] > j) {  // if ROW > COLUMN
+# ifdef PRINTING
+        c_eprint("P is not upper triangular");
+# endif /* ifdef PRINTING */
+        return 1;
+      }
+    }
+  }
+
   // Matrix A
   if ((data->A->m != data->m) || (data->A->n != data->n)) {
 # ifdef PRINTING
-    c_eprint("A does not have dimension m x n with m = %i and n = %i",
-             (int)data->m, (int)data->n);
+    c_eprint("A does not have dimension %i x %i", (int)data->m, (int)data->n);
 # endif /* ifdef PRINTING */
     return 1;
   }
@@ -902,7 +924,7 @@ c_int validate_settings(const OSQPSettings *settings) {
   }
 # endif /* ifdef PROFILING */
 
-  if (settings->adaptive_rho_tolerance < 1) {
+  if (settings->adaptive_rho_tolerance < 1.0) {
 # ifdef PRINTING
     c_eprint("adaptive_rho_tolerance must be >= 1");
 # endif /* ifdef PRINTING */
@@ -916,14 +938,21 @@ c_int validate_settings(const OSQPSettings *settings) {
     return 1;
   }
 
-  if (settings->rho <= 0) {
+  if (settings->rho <= 0.0) {
 # ifdef PRINTING
     c_eprint("rho must be positive");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if (settings->delta <= 0) {
+  if (settings->sigma <= 0.0) {
+# ifdef PRINTING
+    c_eprint("sigma must be positive");
+# endif /* ifdef PRINTING */
+    return 1;
+  }
+
+  if (settings->delta <= 0.0) {
 # ifdef PRINTING
     c_eprint("delta must be positive");
 # endif /* ifdef PRINTING */
@@ -937,44 +966,46 @@ c_int validate_settings(const OSQPSettings *settings) {
     return 1;
   }
 
-  if (settings->eps_abs < 0) {
+  if (settings->eps_abs < 0.0) {
 # ifdef PRINTING
     c_eprint("eps_abs must be nonnegative");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if (settings->eps_rel < 0) {
+  if (settings->eps_rel < 0.0) {
 # ifdef PRINTING
     c_eprint("eps_rel must be nonnegative");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if ((settings->eps_rel == 0) && (settings->eps_abs == 0)) {
+  if ((settings->eps_rel == 0.0) &&
+      (settings->eps_abs == 0.0)) {
 # ifdef PRINTING
     c_eprint("at least one of eps_abs and eps_rel must be positive");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if (settings->eps_prim_inf < 0) {
+  if (settings->eps_prim_inf <= 0.0) {
 # ifdef PRINTING
-    c_eprint("eps_prim_inf must be nonnegative");
+    c_eprint("eps_prim_inf must be positive");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if (settings->eps_dual_inf < 0) {
+  if (settings->eps_dual_inf <= 0.0) {
 # ifdef PRINTING
-    c_eprint("eps_dual_inf must be nonnegative");
+    c_eprint("eps_dual_inf must be positive");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if ((settings->alpha <= 0) || (settings->alpha >= 2)) {
+  if ((settings->alpha <= 0.0) ||
+      (settings->alpha >= 2.0)) {
 # ifdef PRINTING
-    c_eprint("alpha must be between 0 and 2");
+    c_eprint("alpha must be strictly between 0 and 2");
 # endif /* ifdef PRINTING */
     return 1;
   }
@@ -986,7 +1017,8 @@ c_int validate_settings(const OSQPSettings *settings) {
     return 1;
   }
 
-  if ((settings->verbose != 0) && (settings->verbose != 1)) {
+  if ((settings->verbose != 0) &&
+      (settings->verbose != 1)) {
 # ifdef PRINTING
     c_eprint("verbose must be either 0 or 1");
 # endif /* ifdef PRINTING */
@@ -1008,7 +1040,8 @@ c_int validate_settings(const OSQPSettings *settings) {
     return 1;
   }
 
-  if ((settings->warm_start != 0) && (settings->warm_start != 1)) {
+  if ((settings->warm_start != 0) &&
+      (settings->warm_start != 1)) {
 # ifdef PRINTING
     c_eprint("warm_start must be either 0 or 1");
 # endif /* ifdef PRINTING */
@@ -1016,7 +1049,7 @@ c_int validate_settings(const OSQPSettings *settings) {
   }
 # ifdef PROFILING
 
-  if (settings->time_limit < 0) {
+  if (settings->time_limit < 0.0) {
 #  ifdef PRINTING
     c_eprint("time_limit must be nonnegative\n");
 #  endif /* ifdef PRINTING */

@@ -1,12 +1,11 @@
 import numpy as np
-import scipy.sparse as spa
+from scipy import sparse
 import utils.codegen_utils as cu
 
-P = spa.csc_matrix(np.array([[2., 5.], [5., 1.]]))
+P = sparse.triu([[2., 5.], [5., 1.]], format='csc')
 q = np.array([3., 4.])
 
-A = spa.csc_matrix(np.array([[-1.0, 0.], [0., -1.], [-1., 3.],
-                             [2., 5.], [3., 4]]))
+A = sparse.csc_matrix([[-1., 0.], [0., -1.], [-1., 3.], [2., 5.], [3., 4]])
 l = -np.inf * np.ones(A.shape[0])
 u = np.array([0., 0., -15., 100., 80.])
 

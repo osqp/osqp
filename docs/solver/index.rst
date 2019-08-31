@@ -16,8 +16,7 @@ where :math:`x\in\mathbf{R}^{n}` is the optimization variable.
 The objective function is defined by a positive semidefinite matrix
 :math:`P \in \mathbf{S}^{n}_{+}` and vector :math:`q\in \mathbf{R}^{n}`.
 The linear constraints are defined by matrix :math:`A\in\mathbf{R}^{m \times n}`
-and vectors :math:`l \in \mathbf{R}^{m} \cup \{-\infty\}^{m}`,
-:math:`u \in \mathbf{R}^{m} \cup \{+\infty\}^{m}`.
+and vectors :math:`l` and :math:`u` so that :math:`l_i \in \mathbf{R} \cup \{-\infty\}` and :math:`u_i \in \mathbf{R} \cup \{+\infty\}` for all :math:`i \in \{1,\ldots,m\}`.
 
 
 Algorithm
