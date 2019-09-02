@@ -37,6 +37,9 @@ If you use OSQP for published work, we encourage you to put a star on `GitHub <h
             title   = {Infeasibility detection in the alternating direction method of multipliers for convex optimization},
             journal = {Journal of Optimization Theory and Applications},
             year    = {2019},
+            volume  = {183},
+            number  = {2},
+            pages   = {490--519},
             doi     = {10.1007/s10957-019-01575-y},
             url     = {https://doi.org/10.1007/s10957-019-01575-y},
           }
