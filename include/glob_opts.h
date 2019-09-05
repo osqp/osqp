@@ -120,6 +120,10 @@ typedef float c_float;  /* for numerical values  */
 
 # endif // end EMBEDDED
 
+# ifdef PRINTING
+#  include <stdio.h>
+#  include <string.h>
+
 /* informational print function */
 #  ifdef MATLAB
 #   define c_print mexPrintf
