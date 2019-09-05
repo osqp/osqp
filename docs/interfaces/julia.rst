@@ -101,7 +101,7 @@ Update problem vectors
 ^^^^^^^^^^^^^^^^^^^^^^
 Vectors :code:`q`, :code:`l` and :code:`u` can be updated with new values :code:`q_new`, :code:`l_new` and :code:`u_new` by just running
 
-.. code:: python
+.. code:: julia
 
     OSQP.update!(m; q=q_new, l=l_new, u=u_new)
 

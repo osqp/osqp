@@ -83,9 +83,34 @@ if (NOT (CMAKE_SIZEOF_VOID_P EQUAL 8))
 endif()
 message(STATUS "Long integers (64bit) are ${DLONG}")
 
+
+option (DEBUG "Debug mode" OFF)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	set (DEBUG ON)
+	message(STATUS "Debug mode is ${DEBUG}")
+endif()
+
 # Add code coverage
 option (COVERAGE "Perform code coverage" OFF)
 message(STATUS "Code coverage is ${COVERAGE}")
+
+
+# Memory allocators
+# ----------------------------------------------
+
+#Report on custom user header options.  This is intended to allow
+#users to provide definitions of their own memory functions
+# The header should define the functions as follows
+#
+# define c_malloc mymalloc
+# define c_calloc mycalloc
+# define c_realloc myrealloc
+# define c_free myfree
+
+if(OSQP_CUSTOM_MEMORY)
+	message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY}")
+endif()
+
 
 
 # Linear solvers dependencies
@@ -93,6 +118,9 @@ message(STATUS "Code coverage is ${COVERAGE}")
 option (ENABLE_MKL_PARDISO "Enable MKL Pardiso solver" ON)
 if (DFLOAT)
 	message(STATUS "Disabling MKL Pardiso Solver with floats")
+	set(ENABLE_MKL_PARDISO OFF)
+elseif(DEFINED EMBEDDED)
+	message(STATUS "Disabling MKL Pardiso Solver for embedded")
 	set(ENABLE_MKL_PARDISO OFF)
 endif()
 message(STATUS "MKL Pardiso: ${ENABLE_MKL_PARDISO}")
@@ -108,8 +136,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
 # ----------------------------------------------
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
 
-# Add specific flag for debug
-set(CMAKE_C_FLAGS_DEBUG "-DDDEBUG")
 
 if (NOT MSVC)
 
@@ -120,8 +146,12 @@ if (NOT MSVC)
 	endif(FORTRAN)
     endif()
 
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g")
+    if (DEBUG)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g")
+    else()
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+    endif()
+
     set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")      # Include math
     # Include real time library in linux
     if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
@@ -129,73 +159,10 @@ if (NOT MSVC)
     endif()
 endif (NOT MSVC)
 
-# Set sources
+# Set sources and includes
 # ----------------------------------------------
-if(NOT DEFINED EMBEDDED)
-    set(
-        osqp_src
-        src/auxil.c
-        src/cs.c
-        src/ctrlc.c
-        src/kkt.c
-        src/lin_alg.c
-        src/lin_sys.c
-        src/osqp.c
-        src/polish.c
-        src/proj.c
-        src/scaling.c
-        src/util.c
-    )
-
-    set(
-        osqp_headers
-        include/auxil.h
-        include/constants.h
-        include/cs.h
-        include/ctrlc.h
-        include/glob_opts.h
-        include/kkt.h
-        include/lin_alg.h
-        include/lin_sys.h
-        include/osqp.h
-        include/osqp_configure.h
-        include/types.h
-        include/polish.h
-        include/proj.h
-        include/scaling.h
-        include/util.h
-    )
-else()
-    # If embedded is enabled, do not use cs, polish
-    set(
-        osqp_src
-        src/auxil.c
-        src/lin_alg.c
-        src/lin_sys.c
-        src/osqp.c
-        src/kkt.c
-        src/proj.c
-        src/scaling.c
-        src/util.c
-    )
-
-    set(
-        osqp_headers
-        include/auxil.h
-        include/constants.h
-        include/glob_opts.h
-        include/lin_alg.h
-        include/lin_sys.h
-        include/kkt.h
-        include/osqp.h
-        include/osqp_configure.h
-        include/types.h
-        include/proj.h
-        include/scaling.h
-        include/util.h
-    )
-endif()
-
+add_subdirectory (src)
+add_subdirectory (include)
 
 
 # if we are building the Python interface, let's look for Python
@@ -334,7 +301,7 @@ endif (MATLAB)
 # If we are building Python/Matlab/R interface:
 #   - do not build shared library
 #   - do not build demo
-if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG)
+if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
     # Create osqp shared library
     # NB: Add all the linear system solvers here
     add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
@@ -358,7 +325,7 @@ if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG)
     add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
     target_link_libraries (osqp_demo osqpstatic)
 
-endif (NOT PYTHON AND NOT MATLAB AND NOT R_LANG)
+endif (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
 
 # Create CMake packages for the build directory
 # ----------------------------------------------
@@ -450,6 +417,19 @@ if (UNITTESTS)
                 ${test_headers}
                 ${codegen_test_headers})
     target_link_libraries (osqp_tester osqpstatic)
+
+    # Add custom memory target
+    add_executable(osqp_tester_custom_memory
+                   EXCLUDE_FROM_ALL
+                   ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c
+                   ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
+	           ${PROJECT_SOURCE_DIR}/tests/minunit.h
+                   ${test_headers}
+                   ${codegen_test_headers}
+		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.c
+		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.h
+		)
+    target_link_libraries (osqp_tester_custom_memory osqpstatic)
 
     # Add testing
     include(CTest)

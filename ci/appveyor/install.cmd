@@ -1,4 +1,5 @@
 @echo on
+
 :: Make sure all the submodules are updated correctly
 cd %APPVEYOR_BUILD_FOLDER%
 git submodule update --init --recursive
@@ -45,6 +46,5 @@ call "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
 REM Set environment for 32bit
 call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86
 )
-
 
 @echo off

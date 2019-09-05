@@ -1,6 +1,4 @@
 #!/bin/bash
-set -ev
-
 
 echo "Deploying docs to website osqp.org..."
 
@@ -47,4 +45,3 @@ if [[ $TRAVIS_OS_NAME == "linux" ]]; then
 	git push -q origin master
 
 fi
-

@@ -189,3 +189,10 @@ p.breathe-sectiondef-title.rubric {
     margin-bottom: 0px !important;
     margin-left: 0px !important;
 }
+
+
+/* Margin below tables */
+table p {
+    margin-bottom: 0px;
+}
+

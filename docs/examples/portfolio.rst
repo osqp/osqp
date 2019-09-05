@@ -42,7 +42,7 @@ Python
     import osqp
     import numpy as np
     import scipy as sp
-    import scipy.sparse as sparse
+    from scipy import sparse
 
     # Generate problem data
     sp.random.seed(1)
@@ -54,13 +54,13 @@ Python
     gamma = 1
 
     # OSQP data
-    P = sparse.block_diag((D, sparse.eye(k)), format='csc')
+    P = sparse.block_diag([D, sparse.eye(k)], format='csc')
     q = np.hstack([-mu / (2*gamma), np.zeros(k)])
     A = sparse.vstack([
             sparse.hstack([F.T, -sparse.eye(k)]),
             sparse.hstack([sparse.csc_matrix(np.ones((1, n))), sparse.csc_matrix((1, k))]),
             sparse.hstack((sparse.eye(n), sparse.csc_matrix((n, k))))
-        ]).tocsc()
+        ], format='csc')
     l = np.hstack([np.zeros(k), 1., np.zeros(n)])
     u = np.hstack([np.zeros(k), 1., np.ones(n)])
 
@@ -117,7 +117,7 @@ CVXPY
     from cvxpy import *
     import numpy as np
     import scipy as sp
-    import scipy.sparse as sparse
+    from scipy import sparse
 
     # Generate problem data
     sp.random.seed(1)

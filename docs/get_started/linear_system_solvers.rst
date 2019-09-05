@@ -31,7 +31,7 @@ QDLDL
 OSQP comes with `QDLDL <https://github.com/oxfordcontrol/qdldl>`_ internally installed.
 It does not require any external shared library.
 QDLDL is a sparse direct solver that works well for most small to medium sized problems.
-However, its becomes not really efficient for large scale problems since it is not multi-threaded.
+However, it becomes not really efficient for large scale problems since it is not multi-threaded.
 
 
 MKL Pardiso
@@ -60,18 +60,13 @@ where :code:`MKLROOT` is the MKL installation directory.
 Install with Anaconda
 ^^^^^^^^^^^^^^^^^^^^^
 `Anaconda Python distribution <https://www.anaconda.com/download/>`_ comes with the intel MKL libraries preinstalled including MKL Pardiso.
-To use this version, the Anaconda libraries folders have to be added to the system path.
-In particular, given the Anaconda installation directory :code:`ANACONDA_ROOT`, we need to add the following folders:
+To use this version, the Anaconda libraries folders have to be in your system path.
+Anaconda environments should add them automatically so in most cases you do not have to do anything. If you get an error where OSQP cannot find MKL, you can add the right path by adding the output from the following command to your path variable:
 
-* :code:`libmkl_rt`: This library is located in the folder :code:`ANACONDA_ROOT/pkgs/mkl-VERSION/lib` where :code:`VERSION` is the version of the :code:`mkl` package.
+.. code::
 
-* :code:`libiomp`: This library is located in the folder :code:`ANACONDA_ROOT/pkgs/intel-openmp-VERSION/lib` where :code:`VERSION` is the version of the :code:`intel-openmp` package.
-
-
+   echo "`ls -rd ${CONDA_ROOT}/pkgs/*/ | grep mkl-2 | head -n 1`lib:`ls -rd ${CONDA_ROOT}/pkgs/*/ | grep intel-openmp- | head -n 1`lib"
 
 
-
-
-
-
+where :code:`ANACONDA_ROOT` is the root of your anaconda installation.
 

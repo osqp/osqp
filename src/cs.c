@@ -13,6 +13,8 @@ csc* csc_matrix(c_int m, c_int n, c_int nzmax, c_float *x, c_int *i, c_int *p)
 {
   csc *M = (csc *)c_malloc(sizeof(csc));
 
+  if (!M) return OSQP_NULL;
+
   M->m     = m;
   M->n     = n;
   M->nz    = -1;
@@ -206,6 +208,8 @@ csc* csc_symperm(const csc *A, const c_int *pinv, c_int *AtoC, c_int values) {
 csc* copy_csc_mat(const csc *A) {
   csc *B = csc_spalloc(A->m, A->n, A->p[A->n], 1, 0);
 
+  if (!B) return OSQP_NULL;
+
   prea_int_vec_copy(A->p, B->p, A->n + 1);
   prea_int_vec_copy(A->i, B->i, A->p[A->n]);
   prea_vec_copy(A->x, B->x, A->p[A->n]);
@@ -246,7 +250,6 @@ csc* csc_to_triu(csc *M) {
 #ifdef PRINTING
     c_eprint("Matrix M not square");
 #endif /* ifdef PRINTING */
-
     return OSQP_NULL;
   }
   n = M->n;

@@ -17,3 +17,7 @@ indent_size = 4
 # Python
 [*.yml]
 indent_size = 2
+
+# CMake
+[CMakeLists.txt]
+indent_size = 4

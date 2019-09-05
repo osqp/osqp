@@ -1,7 +1,7 @@
 # Compatibility with Python 2
 from __future__ import print_function
 
-import scipy.sparse as spa
+from scipy import sparse
 import numpy as np
 
 
@@ -380,7 +380,7 @@ def generate_data(problem_name, sols_data):
             # Status test get from C code
             f.write("c_int %s;\n" % key)
         # Check if it is an array or a scalar
-        elif spa.issparse(value):  # Sparse matrix
+        elif sparse.issparse(value):  # Sparse matrix
             f.write("csc * %s;\n" % key)
         elif isinstance(value, np.ndarray):
             if isinstance(value.flatten(order='F')[0], int):
@@ -420,7 +420,7 @@ def generate_data(problem_name, sols_data):
             elif value == 'dual_infeasible':
                 f.write("data->%s = %s;\n" % (key, 'OSQP_DUAL_INFEASIBLE'))
         # Check if it is an array or a scalar
-        elif spa.issparse(value):  # Sparse matrix
+        elif sparse.issparse(value):  # Sparse matrix
             write_mat_sparse(f, value, key, "data")
         elif type(value) is np.ndarray:
             if isinstance(value.flatten(order='F')[0], int):
@@ -447,7 +447,7 @@ def generate_data(problem_name, sols_data):
     # Generate further data and solutions
     for key, value in sols_data.items():
         # Check if it is an array or a scalar
-        if spa.issparse(value):  # Sparse matrix
+        if sparse.issparse(value):  # Sparse matrix
             clean_mat(f, key, "data")
         elif type(value) is np.ndarray:
             clean_vec(f, key, "data")
