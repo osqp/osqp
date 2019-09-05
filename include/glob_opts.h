@@ -120,33 +120,9 @@ typedef float c_float;  /* for numerical values  */
 
 # endif // end EMBEDDED
 
-
-# ifdef PRINTING
-#  include <stdio.h>
-#  include <string.h>
-
+/* informational print function */
 #  ifdef MATLAB
 #   define c_print mexPrintf
-
-// The following trick slows down the performance a lot. Since many solvers
-// actually
-// call mexPrintf and immediately force print buffer flush
-// otherwise messages don't appear until solver termination
-// ugly because matlab does not provide a vprintf mex interface
-// #include <stdarg.h>
-// static int c_print(char *msg, ...)
-// {
-//   va_list argList;
-//   va_start(argList, msg);
-//   //message buffer
-//   int bufferSize = 256;
-//   char buffer[bufferSize];
-//   vsnprintf(buffer,bufferSize-1, msg, argList);
-//   va_end(argList);
-//   int out = mexPrintf(buffer); //print to matlab display
-//   mexEvalString("drawnow;");   // flush matlab print buffer
-//   return out;
-// }
 #  elif defined PYTHON
 #   include <Python.h>
 #   define c_print PySys_WriteStdout
@@ -155,11 +131,15 @@ typedef float c_float;  /* for numerical values  */
 #   define c_print Rprintf
 #  else  /* ifdef MATLAB */
 #   define c_print printf
-#  endif /* ifdef MATLAB */
+#  endif /* c_print configuration */
 
-/* Print error macro */
-#  define c_eprint(...) c_print("ERROR in %s: ", __FUNCTION__); c_print(\
-    __VA_ARGS__); c_print("\n");
+/* error printing function */
+#  ifdef R_LANG
+#   define c_eprint Rprintf
+#  else
+#   define c_eprint(...) c_print("ERROR in %s: ", __FUNCTION__); \
+            c_print(__VA_ARGS__); c_print("\n");
+#  endif /* c_eprint configuration */
 
 # endif  /* PRINTING */
 
