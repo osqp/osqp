@@ -139,6 +139,8 @@ typedef float c_float;  /* for numerical values  */
 
 /* error printing function */
 #  ifdef R_LANG
+    /* Some CRAN builds complain about __VA_ARGS__, so just print */
+    /* out the error messages on R without the __FUNCTION__ trace */
 #   define c_eprint Rprintf
 #  else
 #   define c_eprint(...) c_print("ERROR in %s: ", __FUNCTION__); \
