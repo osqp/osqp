@@ -75,6 +75,7 @@ The following people have been involved in the development of OSQP:
 * `Paul Goulart <http://users.ox.ac.uk/~engs1373/>`_ (University of Oxford): methods, maths, and Matlab interface
 * `Alberto Bemporad <http://cse.lab.imtlucca.it/~bemporad/>`_ (IMT Lucca): methods and maths
 * `Stephen Boyd <https://web.stanford.edu/~boyd/>`_ (Stanford University): methods and maths
+* `Ian McInerney <mailto:i.mcinerney17@imperial.ac.uk>`_ (Imperial College London): code generation, software development
 
 Interfaces development
 
