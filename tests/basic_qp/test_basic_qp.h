@@ -969,8 +969,8 @@ static const char* test_basic_qp_warm_start()
   mu_assert("Basic QP test warm start: Cold start error!", solver->info->iter == iter);
 
   // Warm start from the solution and solve again
-  osqp_warm_start_x(solver, xopt);
-  osqp_warm_start_y(solver, yopt);
+  osqp_warm_start(solver, xopt, OSQP_NULL);
+  osqp_warm_start(solver, OSQP_NULL, yopt);
   osqp_solve(solver);
 
   // Check that the number of iterations equals 1

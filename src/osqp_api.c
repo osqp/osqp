@@ -854,7 +854,7 @@ c_int osqp_update_bounds(OSQPSolver    *solver,
     work->clear_update_time    = 0;
     solver->info->update_time  = 0.0;
   }
-  osqp_tic(work->timer); // Start timer
+  osqp_tic(work->timer); /* Start timer */
 #endif /* ifdef PROFILING */
 
   /* Use z_prev and delta_y to store l_new and u_new */
@@ -902,7 +902,7 @@ c_int osqp_update_bounds(OSQPSolver    *solver,
 #if EMBEDDED != 1
   /* Update rho_vec and refactor if constraints type changes */
   exitflag = update_rho_vec(solver);
-#endif // EMBEDDED != 1
+#endif /* EMBEDDED != 1 */
 
 #ifdef PROFILING
   solver->info->update_time += osqp_toc(work->timer);
@@ -918,78 +918,34 @@ void osqp_cold_start(OSQPSolver *solver) {
   OSQPVectorf_set_scalar(work->y, 0.);
 }
 
-c_int osqp_warm_start(OSQPSolver *solver, const c_float *x, const c_float *y) {
+c_int osqp_warm_start(OSQPSolver    *solver,
+                      const c_float *x,
+                      const c_float *y) {
 
   OSQPWorkspace* work;
 
-  // Check if workspace has been initialized
+  /* Check if workspace has been initialized */
   if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   work = solver->work;
 
-  // Update warm_start setting to true
+  /* Update warm_start setting to true */
   if (!solver->settings->warm_start) solver->settings->warm_start = 1;
 
-  // Copy primal and dual variables into the iterates
-  OSQPVectorf_from_raw(work->x, x);
-  OSQPVectorf_from_raw(work->y, y);
+  /* Copy primal and dual variables into the iterates */
+  if (x) OSQPVectorf_from_raw(work->x, x);
+  if (y) OSQPVectorf_from_raw(work->y, y);
 
-  // Scale iterates
+  /* Scale iterates */
   if (solver->settings->scaling) {
-    OSQPVectorf_ew_prod(work->x, work->x, work->scaling->Dinv);
-    OSQPVectorf_ew_prod(work->y, work->y, work->scaling->Einv);
-    OSQPVectorf_mult_scalar(work->y, work->scaling->c);
+    if (x) OSQPVectorf_ew_prod(work->x, work->x, work->scaling->Dinv);
+    if (y) {
+      OSQPVectorf_ew_prod(work->y, work->y, work->scaling->Einv);
+      OSQPVectorf_mult_scalar(work->y, work->scaling->c);
+    }
   }
 
-  // Compute Ax = z and store it in z
-  OSQPMatrix_Axpy(work->data->A, work->x, work->z, 1.0, 0.0);
-
-  return 0;
-}
-
-c_int osqp_warm_start_x(OSQPSolver *solver, const c_float *x) {
-
-  OSQPWorkspace* work;
-
-  // Check if workspace has been initialized
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-  work = solver->work;
-
-  // Update warm_start setting to true
-  if (!solver->settings->warm_start) solver->settings->warm_start = 1;
-
-  // Copy primal variable into the iterate x
-  OSQPVectorf_from_raw(work->x, x);
-
-  // Scale iterate
-  if (solver->settings->scaling) {
-    OSQPVectorf_ew_prod(work->x, work->x, work->scaling->Dinv);
-  }
-
-  // Compute Ax = z and store it in z
-  OSQPMatrix_Axpy(work->data->A, work->x, work->z, 1.0, 0.0);
-
-  return 0;
-}
-
-c_int osqp_warm_start_y(OSQPSolver *solver, const c_float *y) {
-
-  OSQPWorkspace* work;
-
-  // Check if workspace has been initialized
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-  work = solver->work;
-
-  // Update warm_start setting to true
-  if (!solver->settings->warm_start) solver->settings->warm_start = 1;
-
-  // Copy primal variable into the iterate y
-  OSQPVectorf_from_raw(work->y, y);
-
-  // Scale iterate
-  if (solver->settings->scaling) {
-    OSQPVectorf_ew_prod(work->y, work->y, work->scaling->Einv);
-    OSQPVectorf_mult_scalar(work->y, work->scaling->c);
-  }
+  /* Compute Ax = z and store it in z */
+  if (x) OSQPMatrix_Axpy(work->data->A, work->x, work->z, 1.0, 0.0);
 
   return 0;
 }

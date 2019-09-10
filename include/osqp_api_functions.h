@@ -165,33 +165,13 @@ void osqp_cold_start(OSQPSolver *solver);
 /**
  * Warm start primal and dual variables
  * @param  solver OSQPSolver structure
- * @param  x      Primal variable
- * @param  y      Dual variable
+ * @param  x      Primal variable, NULL if none
+ * @param  y      Dual variable, NULL if none
  * @return        Exitflag
  */
 c_int osqp_warm_start(OSQPSolver    *solver,
                       const c_float *x,
                       const c_float *y);
-
-
-/**
- * Warm start primal variable
- * @param  solver OSQPSolver structure
- * @param  x      Primal variable
- * @return        Exitflag
- */
-c_int osqp_warm_start_x(OSQPSolver    *solver,
-                        const c_float *x);
-
-
-/**
- * Warm start dual variable
- * @param  solver OSQPSolver structure
- * @param  y      Dual variable
- * @return        Exitflag
- */
-c_int osqp_warm_start_y(OSQPSolver    *solver,
-                        const c_float *y);
 
 
 # if EMBEDDED != 1
