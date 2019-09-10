@@ -39,7 +39,7 @@ void osqp_get_dimensions(OSQPSolver *solver,
   }
   else {
     *m = solver->work->data->m;
-    *m = solver->work->data->m;
+    *n = solver->work->data->n;
   }
 }
 
