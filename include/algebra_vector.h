@@ -167,7 +167,7 @@ c_float OSQPVectorf_dot_prod_signed(const OSQPVectorf *a,
                                     const OSQPVectorf *b,
                                     c_int sign);
 
-/* elementwise product a.*b stored in c.  Set c==a for c *= b*/
+/* elementwise product a.*b stored in c.  Set c==a for c *= b */
 void OSQPVectorf_ew_prod(OSQPVectorf       *c,
                          const OSQPVectorf *a,
                          const OSQPVectorf *b);

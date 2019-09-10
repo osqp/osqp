@@ -32,7 +32,7 @@ void osqp_get_dimensions(OSQPSolver *solver,
                          c_int      *m,
                          c_int      *n) {
 
-  // Check if the solver has been initialized
+  /* Check if the solver has been initialized */
   if (!solver || !solver->work || !solver->work->data) {
     *m = -1;
     *n = -1;
@@ -834,13 +834,18 @@ c_int osqp_update_lin_cost(OSQPSolver *solver, const c_float *q_new) {
   return 0;
 }
 
-c_int osqp_update_bounds(OSQPSolver *solver,
+c_int osqp_update_bounds(OSQPSolver    *solver,
                          const c_float *l_new,
                          const c_float *u_new) {
+  
   c_int i, exitflag = 0;
+  OSQPVectorf *l_tmp, *u_tmp;
   OSQPWorkspace* work;
 
-  // Check if workspace has been initialized
+  /* If both l_new and u_new are empty, then return */
+  if (!l_new && !u_new) return 0;
+
+  /* Check if workspace has been initialized */
   if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   work = solver->work;
 
@@ -852,127 +857,50 @@ c_int osqp_update_bounds(OSQPSolver *solver,
   osqp_tic(work->timer); // Start timer
 #endif /* ifdef PROFILING */
 
-  // Check if lower bound is smaller than upper bound
-  for (i = 0; i < work->data->m; i++) {
-    if (l_new[i] > u_new[i]) {
-#ifdef PRINTING
-      c_eprint("lower bound must be lower than or equal to upper bound");
-#endif /* ifdef PRINTING */
-      return 1;
-    }
-  }
+  /* Use z_prev and delta_y to store l_new and u_new */
+  l_tmp = work->z_prev;
+  u_tmp = work->delta_y;
 
-  // Replace l and u by the new vectors
-  OSQPVectorf_from_raw(work->data->l, l_new);
-  OSQPVectorf_from_raw(work->data->u, u_new);
+  /* Copy l_new and u_new to l_tmp and u_tmp */
+  if (l_new) OSQPVectorf_from_raw(l_tmp, l_new);
+  if (u_new) OSQPVectorf_from_raw(u_tmp, u_new);
 
-  // Scaling
+  /* Scaling */
   if (solver->settings->scaling) {
-    OSQPVectorf_ew_prod(work->data->l, work->data->l, work->scaling->E);
-    OSQPVectorf_ew_prod(work->data->u, work->data->u, work->scaling->E);
+    if (l_new) OSQPVectorf_ew_prod(l_tmp, l_tmp, work->scaling->E);
+    if (u_new) OSQPVectorf_ew_prod(u_tmp, u_tmp, work->scaling->E);
   }
 
-  // Reset solver information
-  reset_info(solver->info);
+  /* Check if upper bound is greater than lower bound */
+  if (l_new && u_new)
+    exitflag = !OSQPVectorf_all_leq(l_tmp, u_tmp);
+  else if (l_new)
+    exitflag = !OSQPVectorf_all_leq(l_tmp, work->data->u);
+  else
+    exitflag = !OSQPVectorf_all_leq(work->data->l, u_tmp);
 
-#if EMBEDDED != 1
-  // Update rho_vec and refactor if constraints type changes
-  exitflag = update_rho_vec(solver);
-#endif // EMBEDDED != 1
-
-#ifdef PROFILING
-  solver->info->update_time += osqp_toc(work->timer);
-#endif /* ifdef PROFILING */
-
-  return exitflag;
-}
-
-c_int osqp_update_lower_bound(OSQPSolver *solver, const c_float *l_new) {
-
-  c_int exitflag = 0;
-  OSQPWorkspace* work;
-
-  // Check if workspace has been initialized
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-  work = solver->work;
-
-#ifdef PROFILING
-  if (work->clear_update_time == 1) {
-    work->clear_update_time = 0;
-    solver->info->update_time = 0.0;
-  }
-  osqp_tic(work->timer); // Start timer
-#endif /* ifdef PROFILING */
-
-  // Replace l by the new vector
-  OSQPVectorf_from_raw(work->data->l, l_new);
-
-  // Scaling
-  if (solver->settings->scaling) {
-    OSQPVectorf_ew_prod(work->data->l, work->data->l, work->scaling->E);
-  }
-
-  // Check if lower bound is smaller than upper bound
-  if(!OSQPVectorf_all_leq(work->data->l,work->data->u)) {
-#ifdef PRINTING
-      c_eprint("upper bound must be greater than or equal to lower bound");
-#endif /* ifdef PRINTING */
-      return 1;
-  }
-
-  // Reset solver information
-  reset_info(solver->info);
-
-#if EMBEDDED != 1
-  // Update rho_vec and refactor if constraints type changes
-  exitflag = update_rho_vec(solver);
-#endif // EMBEDDED ! =1
-
-#ifdef PROFILING
-  solver->info->update_time += osqp_toc(work->timer);
-#endif /* ifdef PROFILING */
-
-  return exitflag;
-}
-
-c_int osqp_update_upper_bound(OSQPSolver *solver, const c_float *u_new) {
-
-  c_int exitflag = 0;
-  OSQPWorkspace* work;
-
-  // Check if workspace has been initialized
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-  work = solver->work;
-
-#ifdef PROFILING
-  if (work->clear_update_time == 1) {
-    work->clear_update_time   = 0;
-    solver->info->update_time = 0.0;
-  }
-  osqp_tic(work->timer); // Start timer
-#endif /* ifdef PROFILING */
-
-  // Replace u by the new vector
-  OSQPVectorf_from_raw(work->data->u, u_new);
-
-  // Scaling
-  if (solver->settings->scaling) {
-    OSQPVectorf_ew_prod(work->data->u, work->data->u, work->scaling->E);
-  }
-
-  // Check if upper bound is greater than lower bound
-  if(!OSQPVectorf_all_leq(work->data->l, work->data->u)) {
+  if (exitflag) {
 #ifdef PRINTING
     c_eprint("lower bound must be lower than or equal to upper bound");
 #endif /* ifdef PRINTING */
     return 1;
   }
 
-  // Reset solver information
+  /*  Swap vectors l_tmp and l.
+   *  NB: Use work->z_prev rather than l_tmp.
+   */
+  if (l_new) swap_vectors(&work->z_prev, &work->data->l);
+
+  /*  Swap vectors u_tmp and u.
+   *  NB: Use work->delta_y rather than u_tmp.
+   */
+  if (u_new) swap_vectors(&work->delta_y, &work->data->u);
+
+  /* Reset solver information */
   reset_info(solver->info);
 
 #if EMBEDDED != 1
-  // Update rho_vec and refactor if constraints type changes
+  /* Update rho_vec and refactor if constraints type changes */
   exitflag = update_rho_vec(solver);
 #endif // EMBEDDED != 1
 

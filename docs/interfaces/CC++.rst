@@ -46,10 +46,6 @@ Problem data can be updated without executing the setup again using the followin
 
 .. doxygenfunction:: osqp_update_lin_cost
 
-.. doxygenfunction:: osqp_update_lower_bound
-
-.. doxygenfunction:: osqp_update_upper_bound
-
 .. doxygenfunction:: osqp_update_bounds
 
 .. doxygenfunction:: osqp_update_P

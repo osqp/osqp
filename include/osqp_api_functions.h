@@ -147,33 +147,14 @@ c_int osqp_update_lin_cost(OSQPSolver    *solver,
 /**
  * Update lower and upper bounds in the problem constraints
  * @param  solver  OSQPSolver
- * @param  l_new   New lower bound
- * @param  u_new   New upper bound
- * @return        Exitflag: 1 if new lower bound is not <= than new upper bound
+ * @param  l_new   New lower bound, NULL if none
+ * @param  u_new   New upper bound, NULL if none
+ * @return         Exitflag: 1 if new lower bound is not <= than new upper bound
  */
 c_int osqp_update_bounds(OSQPSolver    *solver,
                          const c_float *l_new,
                          const c_float *u_new);
 
-
-/**
- * Update lower bound in the problem constraints
- * @param  solver  OSQPSolver
- * @param  l_new   New lower bound
- * @return        Exitflag: 1 if new lower bound is not <= than upper bound
- */
-c_int osqp_update_lower_bound(OSQPSolver    *solver,
-                              const c_float *l_new);
-
-
-/**
- * Update upper bound in the problem constraints
- * @param  solver  OSQPSolver
- * @param  u_new   New upper bound
- * @return         Exitflag: 1 if new upper bound is not >= than lower bound
- */
-c_int osqp_update_upper_bound(OSQPSolver    *solver,
-                              const c_float *u_new);
 
 /**
  * Cold start workspace variables xz and y
