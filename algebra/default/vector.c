@@ -563,11 +563,11 @@ void OSQPVectorf_project_polar_reccone(OSQPVectorf       *y,
   }
 }
 
-c_int OSQPVectorf_in_polar_reccone(const OSQPVectorf *y,
-                                   const OSQPVectorf *l,
-                                   const OSQPVectorf *u,
-                                   c_float           infval,
-                                   c_float           tol){
+c_int OSQPVectorf_in_reccone(const OSQPVectorf *y,
+                             const OSQPVectorf *l,
+                             const OSQPVectorf *u,
+                             c_float           infval,
+                             c_float           tol){
 
   c_int i; // Index for loops
 

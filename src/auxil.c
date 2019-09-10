@@ -499,10 +499,11 @@ c_int is_dual_infeasible(OSQPSolver *solver, c_float eps_dual_inf) {
 
         //if you get this far, then all tests passed,
         //so return results from final test
-        return test_in_polar_reccone(work->Adelta_x,
-                              work->data->l,work->data->u,
-                              OSQP_INFTY * MIN_SCALING,
-                              eps_dual_inf * norm_delta_x);
+        return test_in_reccone(work->Adelta_x,
+                               work->data->l,
+                               work->data->u,
+                               OSQP_INFTY * MIN_SCALING,
+                               eps_dual_inf * norm_delta_x);
 
       }
     }
@@ -548,6 +549,11 @@ void store_solution(OSQPSolver *solver) {
           OSQPVectorf_to_raw(solution->x, work->x); // primal
           OSQPVectorf_to_raw(solution->y, work->y); // dual
       }
+      /* Set infeasibility certificates to NaN */
+      OSQPVectorf_set_scalar(work->delta_y, OSQP_NAN);
+      OSQPVectorf_set_scalar(work->delta_x, OSQP_NAN);
+      OSQPVectorf_to_raw(solution->prim_inf_cert, work->delta_y);
+      OSQPVectorf_to_raw(solution->dual_inf_cert, work->delta_x);
   }
 
   else {
@@ -570,12 +576,22 @@ void store_solution(OSQPSolver *solver) {
         ((info->status_val == OSQP_PRIMAL_INFEASIBLE_INACCURATE))) {
       norm_vec = OSQPVectorf_norm_inf(work->delta_y);
       OSQPVectorf_mult_scalar(work->delta_y, 1. / norm_vec);
+      OSQPVectorf_to_raw(solution->prim_inf_cert, work->delta_y);
+
+      /* Set dual infeasibility certificate to NaN */
+      OSQPVectorf_set_scalar(work->delta_x, OSQP_NAN);
+      OSQPVectorf_to_raw(solution->dual_inf_cert, work->delta_x);
     }
 
     if ((info->status_val == OSQP_DUAL_INFEASIBLE) ||
         ((info->status_val == OSQP_DUAL_INFEASIBLE_INACCURATE))) {
       norm_vec = OSQPVectorf_norm_inf(work->delta_x);
       OSQPVectorf_mult_scalar(work->delta_x, 1. / norm_vec);
+      OSQPVectorf_to_raw(solution->dual_inf_cert, work->delta_x);
+
+      /* Set primal infeasibility certificate to NaN */
+      OSQPVectorf_set_scalar(work->delta_y, OSQP_NAN);
+      OSQPVectorf_to_raw(solution->prim_inf_cert, work->delta_y);
     }
 
 #endif /* ifndef EMBEDDED */

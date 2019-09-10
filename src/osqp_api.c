@@ -17,9 +17,33 @@
 # include "lin_sys.h"
 #endif /* ifndef EMBEDDED */
 
+
+
+
 /**********************
 * Main API Functions *
 **********************/
+const char* osqp_version(void) {
+  return OSQP_VERSION;
+}
+
+
+void osqp_get_dimensions(OSQPSolver *solver,
+                         c_int      *m,
+                         c_int      *n) {
+
+  // Check if the solver has been initialized
+  if (!solver || !solver->work || !solver->work->data) {
+    *m = -1;
+    *n = -1;
+  }
+  else {
+    *m = solver->work->data->m;
+    *m = solver->work->data->m;
+  }
+}
+
+
 void osqp_set_default_settings(OSQPSettings *settings) {
 
   settings->rho           = (c_float)RHO;            /* ADMM step */
@@ -223,10 +247,10 @@ c_int osqp_setup(OSQPSolver** solverp,
   // Initialize active constraints structure
   work->pol = c_malloc(sizeof(OSQPPolish));
   if (!(work->pol)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  work->pol->active_flags      = OSQPVectori_malloc(m);
-  work->pol->x         = OSQPVectorf_malloc(n);
-  work->pol->z         = OSQPVectorf_malloc(m);
-  work->pol->y         = OSQPVectorf_malloc(m);
+  work->pol->active_flags = OSQPVectori_malloc(m);
+  work->pol->x            = OSQPVectorf_malloc(n);
+  work->pol->z            = OSQPVectorf_malloc(m);
+  work->pol->y            = OSQPVectorf_malloc(m);
   if (!(work->pol->x)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   if (!(work->pol->active_flags) ||
       !(work->pol->z) || !(work->pol->y))
@@ -235,10 +259,14 @@ c_int osqp_setup(OSQPSolver** solverp,
   // Allocate solution
   solver->solution = c_calloc(1, sizeof(OSQPSolution));
   if (!(solver->solution)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  solver->solution->x = c_calloc(1, n * sizeof(c_float));
-  solver->solution->y = c_calloc(1, m * sizeof(c_float));
-  if (!(solver->solution->x))      return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if (m && !(solver->solution->y)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  solver->solution->x             = c_calloc(1, n * sizeof(c_float));
+  solver->solution->y             = c_calloc(1, m * sizeof(c_float));
+  solver->solution->prim_inf_cert = c_calloc(1, m * sizeof(c_float));
+  solver->solution->dual_inf_cert = c_calloc(1, n * sizeof(c_float));
+  if ( !(solver->solution->x) || !(solver->solution->dual_inf_cert) )
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  if ( m && (!(solver->solution->y) || !(solver->solution->prim_inf_cert)) )
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Allocate and initialize information
   solver->info = c_calloc(1, sizeof(OSQPInfo));
@@ -740,8 +768,10 @@ c_int osqp_cleanup(OSQPSolver *solver) {
 
     // Free solution
     if (solver->solution) {
-      if (solver->solution->x) c_free(solver->solution->x);
-      if (solver->solution->y) c_free(solver->solution->y);
+      c_free(solver->solution->x);
+      c_free(solver->solution->y);
+      c_free(solver->solution->prim_inf_cert);
+      c_free(solver->solution->dual_inf_cert);
       c_free(solver->solution);
     }
 

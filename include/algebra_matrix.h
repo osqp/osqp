@@ -33,7 +33,7 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const csc* A, c_int is_triu);
 
 /*  direct data access functions ---------------------------------------------*/
 
-/*  These functions allow getting data in csc format from the
+/*  These functions allow getting data in csc format from
 *   the OSQPMatrix type.   Data is passed in/out using bare
 *   pointers instead of OSQPVectors since these functions interface
 *   with user defined linear solvers and the user API

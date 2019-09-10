@@ -9,6 +9,8 @@ extern "C" {
 # include "osqp_configure.h"
 # include "osqp_api_types.h"
 
+
+
 /********************
 * Main Solver API  *
 ********************/
@@ -17,6 +19,25 @@ extern "C" {
  * @name Main solver API
  * @{
  */
+
+
+/**
+ * Return OSQP version
+ * @return  OSQP version
+ */
+const char* osqp_version(void);
+
+
+/**
+ * Return the number of variables and constraints
+ * @param  solver Solver
+ * @param  m      Pointer to m
+ * @param  n      Pointer to n
+ */
+void osqp_get_dimensions(OSQPSolver *solver,
+                         c_int      *m,
+                         c_int      *n);
+
 
 /**
  * Set default settings from osqp_api_constants.h file
