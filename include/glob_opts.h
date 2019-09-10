@@ -129,7 +129,12 @@ typedef float c_float;  /* for numerical values  */
 #   define c_print mexPrintf
 #  elif defined PYTHON
 #   include <Python.h>
-#   define c_print PySys_WriteStdout
+# define c_print(...)                                \
+  {                                                  \
+    PyGILState_STATE gilstate = PyGILState_Ensure(); \
+    PySys_WriteStdout(__VA_ARGS__);                  \
+    PyGILState_Release(gilstate);                    \
+  }
 #  elif defined R_LANG
 #   include <R_ext/Print.h>
 #   define c_print Rprintf
