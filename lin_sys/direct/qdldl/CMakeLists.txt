@@ -50,6 +50,9 @@ target_include_directories(OSQPLIB
 
 add_subdirectory(qdldl_sources)
 
+set_source_files_properties($<TARGET_OBJECTS:qdldlobject> PROPERTIES GENERATED 1)
+
+
 target_sources(OSQPLIB
         PRIVATE
         $<TARGET_OBJECTS:qdldlobject>)

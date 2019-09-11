@@ -270,7 +270,7 @@ endif (R_LANG)
 add_subdirectory(lin_sys)
 
 # Static library
-add_library(osqpstatic STATIC $<TARGET_OBJECTS:OSQPLIB>)
+add_library(osqpstatic STATIC $<TARGET_OBJECTS:OSQPLIB> $<TARGET_OBJECTS:qdldlobject>)
 
 # Give same name to static library output
 set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
@@ -309,7 +309,7 @@ endif (MATLAB)
 if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
     # Create osqp shared library
     # NB: Add all the linear system solvers here
-    add_library(osqp SHARED $<TARGET_OBJECTS:OSQPLIB>)
+    add_library(osqp SHARED $<TARGET_OBJECTS:OSQPLIB> $<TARGET_OBJECTS:qdldlobject>)
 
     # Declare include directories for the cmake exported target
     target_include_directories(osqp
