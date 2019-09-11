@@ -317,8 +317,9 @@ void OSQPVectorf_plus(OSQPVectorf      *x,
 
   if (x == a){
     const MKL_INT lengthmkl = a->length;
-    const MKL_INT INCX = 1; // The spacing must be at least 1 here, not sure why
+    const MKL_INT INCX = 1;
     const MKL_INT INCY = 1;
+
     const c_float scalar = 1; // The number b is scaled by
     blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY);
   }
@@ -376,40 +377,24 @@ void OSQPVectorf_minus(OSQPVectorf       *x,
                        const OSQPVectorf *a,
                        const OSQPVectorf *b){
 
-  c_int i =0;
-  c_int length = a->length;
-  c_float*  av = a->values;
-  c_float*  bv = b->values;
-  c_float*  xv = x->values;
+  const MKL_INT lengthmkl = a->length;
+  const MKL_INT INCX = 1;
+  const MKL_INT INCY = 1;
+  c_float scalar;
 
   if (x == a){
-    const MKL_INT lengthmkl = a->length;
-    const MKL_INT INCX = 1;
-    const MKL_INT INCY = 1;
-    const c_float scalar = -1.0; // The number b is scaled by
+    scalar = -1;
     blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY);
-    //printf("hello world");
+  }
+  else if (x == b){
+    scalar = 1.0;
+    OSQPVectorf_mult_scalar(x,-1.);
+    blas_axpy(&lengthmkl, &scalar, a->values, &INCX, x->values, &INCY);
   }
   else {
-    const MKL_INT lengthmkl = a->length;
-    const MKL_INT INCX = 1;
-    const MKL_INT INCY = 1;
-    const c_float scalar = -1.0; // The number b is scaled by
-    blas_copy(&lengthmkl, a->values, &INCX, x->values, &INCY);
-    //puts("start");
-    //printf("x->values[0]=%f,x->values[1]=%f\n", x->values[0], x->values[1]);
-    blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY);
-    //printf("b[0]=%f,b[1]=%f\n", b->values[0], b->values[1]);
-   // printf("x->values[0]=%f,x->values[1]=%f\n", x->values[0], x->values[1]);
-    //puts("end");
-    /*
-    const MKL_INT lengthmkl = x->length;
-    const MKL_INT INCX = 1;
-    const MKL_INT INCY = 1;
-    const c_float scalar = -1.0;
+    scalar = -1.0;
     blas_copy(&lengthmkl, a->values, &INCX, x->values, &INCY);
     blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY);
-    */
   }
 }
 
