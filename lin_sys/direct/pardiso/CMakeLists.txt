@@ -6,3 +6,7 @@ target_sources(OSQPLIB
       ${CMAKE_CURRENT_SOURCE_DIR}/pardiso_loader.h
       ${CMAKE_CURRENT_SOURCE_DIR}/pardiso_loader.c
 )
+
+target_include_directories(OSQPLIB
+PRIVATE
+${CMAKE_CURRENT_SOURCE_DIR})
