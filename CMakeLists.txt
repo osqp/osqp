@@ -1,5 +1,5 @@
 # Minimum version required
-cmake_minimum_required (VERSION 3.2)
+cmake_minimum_required(VERSION 3.13)
 
 # Project name
 project (osqp)
@@ -157,18 +157,19 @@ if (NOT MSVC)
     endif()
 endif (NOT MSVC)
 
+# An empty library for OSQP sources.  All
+# subdirectory sources will be assembled here
+# ----------------------------------------------
+add_library(OSQPLIB OBJECT "")
+
 # Set OSQP core sources and includes
 # ----------------------------------------------
 add_subdirectory (src)
 add_subdirectory (include)
 
-#location of the osqp api includes
-set(osqp_api_includes ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-
 # Algebra implementation and CSC support
 # ----------------------------------------------
 add_subdirectory(algebra)
-set(osqp_objects $<TARGET_OBJECTS:osqp_algebra>)
 
 
 # if we are building the Python interface, let's look for Python
@@ -269,15 +270,10 @@ endif (R_LANG)
 add_subdirectory(lin_sys)
 
 # Static library
-add_library (osqpstatic STATIC ${osqp_src} ${osqp_objects} ${osqp_headers} ${linsys_solvers})
+add_library(osqpstatic STATIC $<TARGET_OBJECTS:OSQPLIB>)
 
 # Give same name to static library output
 set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
-
-# Include directories for linear system solvers
-target_include_directories(osqpstatic PRIVATE
-                           ${linsys_solvers_includes}
-                           ${csc_tools_includes})
 
 
 # Declare include directories for the cmake exported target
@@ -313,13 +309,7 @@ endif (MATLAB)
 if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
     # Create osqp shared library
     # NB: Add all the linear system solvers here
-    add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${osqp_objects} ${linsys_solvers})
-
-    # Include directories for linear system solvers
-    target_include_directories(osqp PRIVATE ${linsys_solvers_includes})
-
-    #include directories for csc utilities
-    target_include_directories(osqp PRIVATE ${csc_tools_includes})
+    add_library(osqp SHARED $<TARGET_OBJECTS:OSQPLIB>)
 
     # Declare include directories for the cmake exported target
     target_include_directories(osqp
@@ -436,7 +426,7 @@ if (UNITTESTS)
                                ${csc_tools_includes}
                                )
 
-    target_link_libraries (osqp_tester osqpstatic)
+    target_link_libraries(osqp_tester osqpstatic)
 
 
     # Add custom memory target
