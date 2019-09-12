@@ -306,6 +306,7 @@ endif (MATLAB)
 # If we are building Python/Matlab/R interface:
 #   - do not build shared library
 #   - do not build demo
+
 if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
     # Create osqp shared library
     # NB: Add all the linear system solvers here
@@ -313,12 +314,13 @@ if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
 
     # Declare include directories for the cmake exported target
     target_include_directories(osqp
-                               PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-                                      "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
+            PUBLIC
+            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+            "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
     # Install osqp shared library
     install(TARGETS osqp
-            EXPORT  ${PROJECT_NAME}
+            EXPORT        ${PROJECT_NAME}
             LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
             ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
             RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
@@ -368,7 +370,6 @@ if(NOT TARGET uninstall)
     add_custom_target(uninstall
         COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
-
 
 
 # Add testing
@@ -421,12 +422,14 @@ if (UNITTESTS)
                 ${test_headers}
                 ${codegen_test_headers})
 
-    target_include_directories(osqp_tester PRIVATE
-                               ${linsys_solvers_includes}
-                               ${csc_tools_includes}
-                               )
-
     target_link_libraries(osqp_tester osqpstatic)
+
+    #since osqp_tester exercises internal OSQP functions,
+    #extract the include directories for OSQPLIB and add
+    #them to the include paths for osqp_tester
+    get_property(osqpinternalincludes TARGET OSQPLIB PROPERTY INCLUDE_DIRECTORIES)
+    target_include_directories(osqp_tester
+                               PRIVATE "${osqpinternalincludes}")
 
 
     # Add custom memory target
@@ -435,18 +438,13 @@ if (UNITTESTS)
                    ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c
                    ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
 	           ${PROJECT_SOURCE_DIR}/tests/minunit.h
-                   ${test_headers}
-                   ${csc_tools_includes}
                    ${codegen_test_headers}
 		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.c
 		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.h
 		)
     target_link_libraries(osqp_tester_custom_memory osqpstatic)
-
-    target_include_directories(osqp_tester_custom_memory PRIVATE
-                               ${linsys_solvers_includes}
-                               ${csc_tools_includes}
-                               )
+    target_include_directories(osqp_tester_custom_memory
+                               PRIVATE "${osqpinternalincludes}")
 
     # Add testing
     include(CTest)
