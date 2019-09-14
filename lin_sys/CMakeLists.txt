@@ -26,3 +26,6 @@ endif()
 
 # Direct solvers
 add_subdirectory(direct)
+
+# Indirect solvers
+add_subdirectory(indirect)

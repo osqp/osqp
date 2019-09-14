@@ -3,12 +3,13 @@
 #include "qdldl_interface.h" // Include only this solver in the same directory
 
 const char *LINSYS_SOLVER_NAME[] = {
-  "qdldl", "mkl pardiso"
+  "qdldl", "mkl pardiso", "mkl indirect"
 };
 
 #ifdef ENABLE_MKL_PARDISO
 # include "pardiso_interface.h"
 # include "pardiso_loader.h"
+# include "mkl-cg_interface.h"
 #endif /* ifdef ENABLE_MKL_PARDISO */
 
 // Load linear system solver shared library
@@ -25,7 +26,13 @@ c_int load_linsys_solver(enum linsys_solver_type linsys_solver) {
     // Load Pardiso library
     return lh_load_pardiso(OSQP_NULL);
 
+  case MKL_INDIRECT_SOLVER:
+
+    // statically linked for now
+    return 0;
+
 # endif /* ifdef ENABLE_MKL_PARDISO */
+
   default: // QDLDL
     return 0;
   }
@@ -67,6 +74,9 @@ c_int init_linsys_solver(LinSysSolver          **s,
 # ifdef ENABLE_MKL_PARDISO
   case MKL_PARDISO_SOLVER:
     return init_linsys_solver_pardiso((pardiso_solver **)s, P, A, sigma, rho_vec, polish);
+
+  case MKL_INDIRECT_SOLVER:
+    return init_linsys_mklcg((mklcg_solver **)s, P, A, sigma, rho_vec, polish);
 
 # endif /* ifdef ENABLE_MKL_PARDISO */
   default: // QDLDL

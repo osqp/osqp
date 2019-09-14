@@ -926,7 +926,9 @@ c_int validate_data(const csc* P,
 
 c_int validate_linsys_solver(c_int linsys_solver) {
   if ((linsys_solver != QDLDL_SOLVER) &&
-      (linsys_solver != MKL_PARDISO_SOLVER)) {
+      (linsys_solver != MKL_PARDISO_SOLVER) &&
+      (linsys_solver != MKL_INDIRECT_SOLVER)
+     ) {
     return 1;
   }
 
