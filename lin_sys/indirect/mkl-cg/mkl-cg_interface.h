@@ -46,7 +46,7 @@ typedef struct mklcg_solver_ {
   // to allow warm starting.  We will also take
   // a copy of the rhs from OSQP to keep the subviews
   // in order
-  OSQPVectorf *lhs, *rhs;
+  OSQPVectorf *xz, *rhs;
 
   // MKL CG internal data
   MKL_INT     iparm[128];       ///< MKL control parameters (integer)
@@ -57,8 +57,8 @@ typedef struct mklcg_solver_ {
   // its underlying pointer, but we make it an OSQPVectorf
   // so that we can make some views into it for multiplication
 
-  // Vector views to help with KKT multiplication
-  OSQPVectorf *x, *y, *r1, *r2;
+  // Vector views of the input and output vectors
+  OSQPVectorf *x, *z, *r1, *r2;
 
   // Vector views into tmp for K*v1 = v2
   OSQPVectorf *v1, *v2;

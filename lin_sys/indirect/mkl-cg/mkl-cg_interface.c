@@ -93,13 +93,13 @@ c_int init_linsys_mklcg(mklcg_solver ** sp,
   //RHS and LHS of the full KKT system to solve
   //Initialise lhs to zero since it provides the
   //cold start condition for the CG inner solver
-  s->lhs = OSQPVectorf_calloc(m+n);
+  s->xz = OSQPVectorf_calloc(m+n);
   s->rhs = OSQPVectorf_malloc(m+n);
 
   //make subviews for lhs and rhs since we will
   //do a blockwise solve of the KKT system
-  s->x  = OSQPVectorf_view(s->lhs, 0, n);
-  s->y  = OSQPVectorf_view(s->lhs, n, m);
+  s->x  = OSQPVectorf_view(s->xz, 0, n);
+  s->z  = OSQPVectorf_view(s->xz, n, m);
   s->r1 = OSQPVectorf_view(s->rhs, 0, n);
   s->r2 = OSQPVectorf_view(s->rhs, n, m);
 
@@ -148,29 +148,19 @@ c_int solve_linsys_mklcg(mklcg_solver * s,
          &rci_request, s->iparm, s->dparm, OSQPVectorf_data(s->tmp));
     if(rci_request == 1){
       //multiply for condensed system
-      cg_times(s->P, s->A, s->v1, s->v2, s->rho_vec, s->sigma, s->y);
+      cg_times(s->P, s->A, s->v1, s->v2, s->rho_vec, s->sigma, s->z);
     } else {
       break;
     }
   }
 
-  if(rci_request == 0){  //solution was found.  Backfill y solution
-    // y = rho.*(Ax - r2), but remember we already have set r2 = rho.*r2
-    OSQPMatrix_Axpy(s->A, s->x, s->y, 1.0, 0.0);      //y = Ax
-    OSQPVectorf_ew_prod(s->y, s->y, s->rho_vec);       //y = rho.*Ax
-    OSQPVectorf_minus(s->y, s->y, s->r2);              //y = rho.*Ax - rho.*r2
+  if(rci_request == 0){  //solution was found for x.
+    OSQPMatrix_Axpy(s->A, s->x, s->z, 1.0, 0.0);      //z = Ax
   }
 
-  /* copy x_tilde from s->sol */
-  for (int j = 0 ; j < s->n ; j++) {
-      OSQPVectorf_data(b)[j] = OSQPVectorf_data(s->lhs)[j];
-  }
-
-  /* compute z_tilde from b and s->sol */
-  for (int j = 0 ; j < s->m ; j++) {
-      OSQPVectorf_data(b)[j + s->n] +=
-          OSQPVectorf_data(s->lhs)[j + s->n] / OSQPVectorf_data(s->rho_vec)[j];
-  }
+  //copy the solution back to OSQPs vector
+  //since we are supposed to solve in place
+  OSQPVectorf_copy(b, s->xz);
 
   return rci_request; //0 on succcess, otherwise MKL CG error code
 
@@ -202,10 +192,10 @@ void free_linsys_mklcg(mklcg_solver * s){
 
   if(s->tmp){
     OSQPVectorf_free(s->tmp);
-    OSQPVectorf_free(s->lhs);
+    OSQPVectorf_free(s->xz);
     OSQPVectorf_free(s->rhs);
     OSQPVectorf_view_free(s->x);
-    OSQPVectorf_view_free(s->y);
+    OSQPVectorf_view_free(s->z);
     OSQPVectorf_view_free(s->r1);
     OSQPVectorf_view_free(s->r2);
     OSQPVectorf_view_free(s->v1);
