@@ -15,7 +15,7 @@ MKL_INT cg_solver_init(mklcg_solver * s){
   s->iparm[7] = 1;        // maximum iteration stopping test
   s->iparm[8] = 0;        // residual stopping test
   s->iparm[9] = 0;        // user defined stopping test
-  s->dparm[0] = 1.E-10;    // relative tolerance (default)
+  s->dparm[0] = 1.E-5;    // relative tolerance (default)
 
   //returns -1 for dcg failure, 0 otherwise
   dcg_check(&mkln, NULL, NULL, &rci_request,
@@ -65,11 +65,19 @@ c_int init_linsys_mklcg(mklcg_solver ** sp,
   //data, no copies or processing required
   s->P       = *(OSQPMatrix**)(&P);
   s->A       = *(OSQPMatrix**)(&A);
-  s->rho_vec = *(OSQPVectorf**)(&rho_vec);
   s->sigma   = sigma;
   s->polish  = polish;
   s->m       = m;
   s->n       = n;
+
+  //if polish is false, use the rho_vec we get.
+  //Otherwise, use rho_vec = ones.*(1/sigma)
+  s->rho_vec = OSQPVectorf_malloc(m);
+  if(!polish){
+    s->rho_vec = OSQPVectorf_copy_new(rho_vec);
+  } else {
+    OSQPVectorf_set_scalar(s->rho_vec, 1/sigma);
+  }
 
   //Link functions
   s->solve           = &solve_linsys_mklcg;
@@ -92,6 +100,9 @@ c_int init_linsys_mklcg(mklcg_solver ** sp,
   //Initialise solver state to zero since it provides
   //cold start condition for the CG inner solver
   s->x = OSQPVectorf_calloc(n);
+
+  //Workspace for CG products and polishing
+  s->ywork = OSQPVectorf_malloc(m);
 
   //make subviews for the rhs.   OSQP passes
   //a different RHS pointer at every iteration,
@@ -121,12 +132,12 @@ c_int solve_linsys_mklcg(mklcg_solver * s,
   OSQPVectorf_view_update(s->r1, b,    0, s->n);
   OSQPVectorf_view_update(s->r2, b, s->n, s->m);
 
-  //Set r_2 = rho . *r_2
-  OSQPVectorf_ew_prod(s->r2, s->r2, s->rho_vec);
+  //Set ywork = rho . *r_2
+  OSQPVectorf_ew_prod(s->ywork, s->r2, s->rho_vec);
 
   //Compute r_1 = r_1 + A' (rho.*r_2)
   //This is the RHS for our CG solve
-  OSQPMatrix_Atxpy(s->A, s->r2, s->r1, 1.0, 1.0);
+  OSQPMatrix_Atxpy(s->A, s->ywork, s->r1, 1.0, 1.0);
 
   // Solve the CG system
   // -------------------
@@ -139,18 +150,28 @@ c_int solve_linsys_mklcg(mklcg_solver * s,
     dcg (&mkln, OSQPVectorf_data(s->x), OSQPVectorf_data(s->r1),
          &rci_request, s->iparm, s->dparm, OSQPVectorf_data(s->tmp));
     if(rci_request == 1){
-      //multiply for condensed system.  We can use s->r2 as
-      //work now since we already have the condensed rhs
-      cg_times(s->P, s->A, s->v1, s->v2, s->rho_vec, s->sigma, s->r2);
+      //multiply for condensed system. v1 and v2 are subviews of
+      //the cg workspace variable s->tmp.
+      cg_times(s->P, s->A, s->v1, s->v2, s->rho_vec, s->sigma, s->ywork);
     } else {
       break;
     }
   }
 
   if(rci_request == 0){  //solution was found for x.
-    //OSQP wants us to return (x,Ax) in place
+
     OSQPVectorf_copy(s->r1, s->x);
-    OSQPMatrix_Axpy(s->A, s->x, s->r2, 1.0, 0.0);
+
+    if(!s->polish){
+      //OSQP wants us to return (x,Ax) in place
+      OSQPMatrix_Axpy(s->A, s->x, s->r2, 1.0, 0.0);
+
+    } else{
+      //OSQP wants us to return (x,\nu) in place,
+      // where r2 = \nu = rho.*(Ax - r2)
+      OSQPMatrix_Axpy(s->A, s->x, s->r2, 1.0, -1.0);
+      OSQPVectorf_ew_prod(s->r2, s->r2, s->rho_vec);
+    }
   }
 
   return rci_request; //0 on succcess, otherwise MKL CG error code
@@ -183,7 +204,9 @@ void free_linsys_mklcg(mklcg_solver * s){
 
   if(s->tmp){
     OSQPVectorf_free(s->tmp);
+    OSQPVectorf_free(s->rho_vec);
     OSQPVectorf_free(s->x);
+    OSQPVectorf_free(s->ywork);
     OSQPVectorf_view_free(s->r1);
     OSQPVectorf_view_free(s->r2);
     OSQPVectorf_view_free(s->v1);

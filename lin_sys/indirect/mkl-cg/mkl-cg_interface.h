@@ -45,6 +45,9 @@ typedef struct mklcg_solver_ {
   // enable warm starting between successive solves
   OSQPVectorf *x;
 
+  // A work array for intermediate CG products
+  OSQPVectorf* ywork;
+
   // MKL CG internal data
   MKL_INT     iparm[128];       ///< MKL control parameters (integer)
   double      dparm[128];       ///< MKL control parameters (double)
