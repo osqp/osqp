@@ -53,6 +53,10 @@ void OSQPVectori_free(OSQPVectori *a);
  */
 OSQPVectorf* OSQPVectorf_view(const OSQPVectorf *a, c_int head, c_int length);
 
+/* Points existing subview somewhere else.  (Does not use MALLOC)
+ */
+void OSQPVectorf_view_update(OSQPVectorf *a, const OSQPVectorf *b, c_int head, c_int length);
+
 /* Free a view of a float vector */
 void OSQPVectorf_view_free(OSQPVectorf *a);
 

@@ -41,12 +41,9 @@ typedef struct mklcg_solver_ {
   c_int       n;        // number of variables
   c_int       polish;   //polishing or not?
 
-  // NB: MKL does not solve in place, so we need
-  // explicit place to store the solution and
-  // to allow warm starting.  We will also take
-  // a copy of the rhs from OSQP to keep the subviews
-  // in order
-  OSQPVectorf *xz, *rhs;
+  // Hold an internal copy of the solution x to
+  // enable warm starting between successive solves
+  OSQPVectorf *x;
 
   // MKL CG internal data
   MKL_INT     iparm[128];       ///< MKL control parameters (integer)
@@ -57,8 +54,8 @@ typedef struct mklcg_solver_ {
   // its underlying pointer, but we make it an OSQPVectorf
   // so that we can make some views into it for multiplication
 
-  // Vector views of the input and output vectors
-  OSQPVectorf *x, *z, *r1, *r2;
+  // Vector views of the input vector
+  OSQPVectorf *r1, *r2;
 
   // Vector views into tmp for K*v1 = v2
   OSQPVectorf *v1, *v2;

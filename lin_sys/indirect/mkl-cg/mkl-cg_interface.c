@@ -93,15 +93,14 @@ c_int init_linsys_mklcg(mklcg_solver ** sp,
   //RHS and LHS of the full KKT system to solve
   //Initialise lhs to zero since it provides the
   //cold start condition for the CG inner solver
-  s->xz = OSQPVectorf_calloc(m+n);
-  s->rhs = OSQPVectorf_malloc(m+n);
+  s->x = OSQPVectorf_calloc(n);
 
-  //make subviews for lhs and rhs since we will
-  //do a blockwise solve of the KKT system
-  s->x  = OSQPVectorf_view(s->xz, 0, n);
-  s->z  = OSQPVectorf_view(s->xz, n, m);
-  s->r1 = OSQPVectorf_view(s->rhs, 0, n);
-  s->r2 = OSQPVectorf_view(s->rhs, n, m);
+  //make subviews for the rhs.   OSQP passes
+  //a different RHS pointer at every iteration,
+  //so we will need to update these views every
+  //pass.   Just point them at x for now.
+  s->r1 = OSQPVectorf_view(s->x, 0, 0);
+  s->r2 = OSQPVectorf_view(s->x, 0, 0);
 
   //subviews to tmp when computing M v1 = v2, where
   //M is the condensed matrix used in the CG iterations
@@ -123,11 +122,9 @@ c_int solve_linsys_mklcg(mklcg_solver * s,
   //initialise the parameters
   OSQPVectorf_set_scalar(s->tmp,0.);
 
-  //copy the b input data into our RHS.   This
-  //might be unnecessary but it means that the
-  //r1 and r2 views for the KKT system will be
-  //correct
-  OSQPVectorf_copy(s->rhs, b);
+  //Point our subviews at the OSQP RHS
+  OSQPVectorf_view_update(s->r1, b,    0, s->n);
+  OSQPVectorf_view_update(s->r2, b, s->n, s->m);
 
   //Set r_2 = rho . *r_2
   OSQPVectorf_ew_prod(s->r2, s->r2, s->rho_vec);
@@ -147,20 +144,19 @@ c_int solve_linsys_mklcg(mklcg_solver * s,
     dcg (&mkln, OSQPVectorf_data(s->x), OSQPVectorf_data(s->r1),
          &rci_request, s->iparm, s->dparm, OSQPVectorf_data(s->tmp));
     if(rci_request == 1){
-      //multiply for condensed system
-      cg_times(s->P, s->A, s->v1, s->v2, s->rho_vec, s->sigma, s->z);
+      //multiply for condensed system.  We can use s->r2 as
+      //work now since we already have the condensed rhs
+      cg_times(s->P, s->A, s->v1, s->v2, s->rho_vec, s->sigma, s->r2);
     } else {
       break;
     }
   }
 
   if(rci_request == 0){  //solution was found for x.
-    OSQPMatrix_Axpy(s->A, s->x, s->z, 1.0, 0.0);      //z = Ax
+    //OSQP wants us to return (x,Ax) in place
+    OSQPVectorf_copy(s->r1, s->x);
+    OSQPMatrix_Axpy(s->A, s->x, s->r2, 1.0, 0.0);
   }
-
-  //copy the solution back to OSQPs vector
-  //since we are supposed to solve in place
-  OSQPVectorf_copy(b, s->xz);
 
   return rci_request; //0 on succcess, otherwise MKL CG error code
 
@@ -192,10 +188,7 @@ void free_linsys_mklcg(mklcg_solver * s){
 
   if(s->tmp){
     OSQPVectorf_free(s->tmp);
-    OSQPVectorf_free(s->xz);
-    OSQPVectorf_free(s->rhs);
-    OSQPVectorf_view_free(s->x);
-    OSQPVectorf_view_free(s->z);
+    OSQPVectorf_free(s->x);
     OSQPVectorf_view_free(s->r1);
     OSQPVectorf_view_free(s->r2);
     OSQPVectorf_view_free(s->v1);

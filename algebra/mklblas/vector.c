@@ -160,10 +160,14 @@ OSQPVectorf* OSQPVectorf_view(const OSQPVectorf *a, c_int head, c_int length){
 
   OSQPVectorf* view = c_malloc(sizeof(OSQPVectorf));
   if(view){
-    view->length = length;
-    view->values   = a->values + head;
+    OSQPVectorf_view_update(view,a,head,length);
   }
   return view;
+}
+
+void OSQPVectorf_view_update(OSQPVectorf *a, const OSQPVectorf *b, c_int head, c_int length){
+    a->length = length;
+    a->values   = b->values + head;
 }
 
 void OSQPVectorf_view_free(OSQPVectorf *a){
