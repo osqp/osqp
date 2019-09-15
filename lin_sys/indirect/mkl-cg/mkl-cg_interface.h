@@ -54,11 +54,11 @@ typedef struct mklcg_solver_ {
   // its underlying pointer, but we make it an OSQPVectorf
   // so that we can make some views into it for multiplication
 
-  // Vector views of the input vector
-  OSQPVectorf *r1, *r2;
-
   // Vector views into tmp for K*v1 = v2
   OSQPVectorf *v1, *v2;
+
+  // Vector views of the input vector
+  OSQPVectorf *r1, *r2;
 
 } mklcg_solver;
 

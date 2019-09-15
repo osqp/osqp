@@ -6,13 +6,12 @@ MKL_INT cg_solver_init(mklcg_solver * s){
 
   MKL_INT mkln = s->n;
   MKL_INT rci_request = 1;
-  OSQPVectorf_set_scalar(s->tmp,0.);
 
   //intialise the parameters
   dcg_init(&mkln, NULL, NULL, &rci_request,
            s->iparm, s->dparm, OSQPVectorf_data(s->tmp));
 
-  //Set MKL control paramters
+  //Set MKL control parameters
   s->iparm[7] = 1;        // maximum iteration stopping test
   s->iparm[8] = 0;        // residual stopping test
   s->iparm[9] = 0;        // user defined stopping test
@@ -81,8 +80,8 @@ c_int init_linsys_mklcg(mklcg_solver ** sp,
   // Assign type
   s->type = MKL_INDIRECT_SOLVER;
 
-  //Don't know the thread count.  Make it 999
-  //as a marker to come back and fix this
+  //Don't know the thread count.  Just use
+  //the same thing as the pardiso solver
   s->nthreads = mkl_get_max_threads();
 
   //allocate a vector 3*(m+n) for MKL workspace
@@ -90,15 +89,14 @@ c_int init_linsys_mklcg(mklcg_solver ** sp,
   //if we don't use a preconditioner
   s->tmp = OSQPVectorf_malloc(3*n);
 
-  //RHS and LHS of the full KKT system to solve
-  //Initialise lhs to zero since it provides the
+  //Initialise solver state to zero since it provides
   //cold start condition for the CG inner solver
   s->x = OSQPVectorf_calloc(n);
 
   //make subviews for the rhs.   OSQP passes
   //a different RHS pointer at every iteration,
   //so we will need to update these views every
-  //pass.   Just point them at x for now.
+  //time we solve.   Just point them at x for now.
   s->r1 = OSQPVectorf_view(s->x, 0, 0);
   s->r2 = OSQPVectorf_view(s->x, 0, 0);
 
@@ -118,9 +116,6 @@ c_int solve_linsys_mklcg(mklcg_solver * s,
 
   MKL_INT  rci_request  = 1;
   MKL_INT  mkln         = s->n;
-
-  //initialise the parameters
-  OSQPVectorf_set_scalar(s->tmp,0.);
 
   //Point our subviews at the OSQP RHS
   OSQPVectorf_view_update(s->r1, b,    0, s->n);
