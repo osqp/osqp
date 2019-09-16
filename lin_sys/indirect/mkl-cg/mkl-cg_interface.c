@@ -194,7 +194,7 @@ c_int update_matrices_linsys_mklcg(
 c_int update_rho_linsys_mklcg(
                    mklcg_solver * s,
                    const OSQPVectorf* rho_vec){
-  s->rho_vec = *(OSQPVectorf**)(&rho_vec);
+  OSQPVectorf_copy(s->rho_vec, rho_vec);
   return 0;
 }
 
