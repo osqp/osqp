@@ -1,6 +1,5 @@
 #include "mkl-cg_interface.h"
 #include "mkl_rci.h"
-#include "PG_debug.h"
 
 MKL_INT cg_solver_init(mklcg_solver * s){
 
