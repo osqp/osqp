@@ -4,23 +4,49 @@
 #include "stdio.h"
 #include "time.h"
 
+
+
 #define USEMKLBLAS
 #ifdef USEMKLBLAS
-  #include "mkl_blas.h"
+  #include "mkl.h"
   #ifdef DFLOAT
-    #define blas_copy scopy
-    #define blas_dot sdot
-    #define blas_scale sscal
-    #define blas_swap sswap
+    #define blas_asum sasum
+      #define asum cblas_sasum
     #define blas_axpy saxpy
+      #define axpy cblas_saxpy
+    #define blas_copy scopy
+      #define copy cblas_scopy
+    #define blas_dot sdot
+      #define dot cblas_sdot
+    #define blas_scale sscal
+      #define scal cblas_sscal
+    #define blas_swap sswap
+      #define swap cblas_sswap
     #define blas_2norm snrm2
+    /**/
+    #define imax cblas_isamax
+    #define imin cblas_isamin
+    #define axpby cblas_saxpby
+    
     #else
-      #define blas_copy dcopy
-      #define blas_dot ddot
-      #define blas_scale dscal
-      #define blas_swap dswap
-      #define blas_axpy daxpy
-      #define blas_2norm dnrm2
+      #define blas_asum dasum
+      #define asum cblas_dasum
+    #define blas_axpy daxpy
+      #define axpy cblas_daxpy
+    #define blas_copy dcopy
+      #define copy cblas_dcopy
+    #define blas_dot ddot
+      #define dot cblas_ddot
+    #define blas_scale dscal
+      #define scal cblas_dscal
+    #define blas_swap dswap
+      #define swap cblas_dswap
+    #define blas_2norm dnrm2
+    /**/
+    #define imax cblas_idamax
+    #define imin cblas_idamin
+    #define axpby cblas_daxpby
+
   #endif //dfloat endif
 #endif //Usemkl endif
 
@@ -180,23 +206,11 @@ c_int OSQPVectori_length(const OSQPVectori *a){return a->length;}
 c_float* OSQPVectorf_data(const OSQPVectorf *a){return a->values;}
 c_int*   OSQPVectori_data(const OSQPVectori *a){return a->values;}
 
-// Which of these functions are actually called elsewhere?
 
 #ifdef USEMKLBLAS
 
 void OSQPVectorf_copy(OSQPVectorf *b, const OSQPVectorf *a){
-  const MKL_INT length = a->length;
-  const MKL_INT INCX = 1; //How long should the spacing be (?)
-  const MKL_INT INCY = 1;
-  blas_copy(&length, a->values, &INCX, b->values, &INCY);
-
-}
-
-void OSQPVectori_copy(OSQPVectori *b, const OSQPVectori *a){
-  const MKL_INT length = a->length;
-  const MKL_INT INCX = 1; //How long should the spacing be (?)
-  const MKL_INT INCY = 1;
-  //blas_copy(&length, a->values, &INCX, b->values, &INCY);
+  copy(a->length, a->values, 1, b->values, 1);
 }
 
 #else
@@ -205,11 +219,11 @@ void OSQPVectorf_copy(OSQPVectorf *b, const OSQPVectorf *a){
   OSQPVectorf_from_raw(b, a->values);
 }
 
+#endif /* MKL for vector float/double copy */
+
 void OSQPVectori_copy(OSQPVectori *b, const OSQPVectori *a){
   OSQPVectori_from_raw(b, a->values);
 }
-
-#endif // MKL for vector copy
 
 void OSQPVectorf_from_raw(OSQPVectorf *b, const c_float *av){
   c_int i;
@@ -251,9 +265,6 @@ void OSQPVectori_to_raw(c_int *bv, const OSQPVectori *a){
   }
 }
 
-// For now I wont deal with the raw functions, I hope they dont feel left out :(
-
-
 void OSQPVectorf_set_scalar(OSQPVectorf *a, c_float sc){
   c_int i;
   c_int length = a->length;
@@ -264,7 +275,6 @@ void OSQPVectorf_set_scalar(OSQPVectorf *a, c_float sc){
   }
 }
 
-// I seem to have the same problem here, if I try to exploit the copy function, I will still need to compare the values and populate an initial vector
 
 void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
                                         OSQPVectori *test,
@@ -283,13 +293,10 @@ void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
   }
 }
 
-// Scaling a vector by a constant
 #ifdef USEMKLBLAS
 
 void OSQPVectorf_mult_scalar(OSQPVectorf *a, c_float sc){
-  const MKL_INT length = a->length;
-  const MKL_INT INCX = 1; //How long should the spacing be (?)
-  blas_scale(&length, &sc, a->values, &INCX);
+  scal(a->length, sc, a->values, 1);
 }
 #else
 void OSQPVectorf_mult_scalar(OSQPVectorf *a, c_float sc){
@@ -308,40 +315,18 @@ void OSQPVectorf_mult_scalar(OSQPVectorf *a, c_float sc){
 void OSQPVectorf_plus(OSQPVectorf      *x,
                      const OSQPVectorf *a,
                      const OSQPVectorf *b){
-  c_int length = a->length;
-  c_float*  av = a->values;
-  c_float*  bv = b->values;
-  c_float*  xv = x->values;
-
-
+ 
+  c_float scalar = 1;
 
   if (x == a){
-    const MKL_INT lengthmkl = a->length;
-    const MKL_INT INCX = 1;
-    const MKL_INT INCY = 1;
-
-    const c_float scalar = 1; // The number b is scaled by
-    blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY);
+    axpy(a->length, 1, b->values, 1, x->values, 1);
+  }
+  else if (x == b){
+    axpy(a->length, 1, a->values, 1, x->values, 1);
   }
   else {
-   /*
-    for (i = 0; i < length; i++) {
-      puts("hi");
-      xv[i] = av[i] + bv[i];
-    }
-    */
-    // need some help to get the test pointers working to be able to debug this
-    // Little experiment here
-    //printf("..\n");
-    const MKL_INT lengthmkl = a->length;
-    const MKL_INT INCX = 1; // The sapcing must be at least 1 here, not sure why
-    const MKL_INT INCY = 1;
-    const c_float scalar = 1; // The number b is scaled by
-    blas_copy(&lengthmkl, a->values, &INCX, x->values, &INCY); // I copy av into xv
-    blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY); //final addition
-
-    // I am not sure if the extra function calls justifies the blas implementation, I can only find out when I get the benchamrk code working
-    //I think I got the code to work properly now
+    copy(a->length, a->values, 1, x->values, 1); 
+    axpy(a->length, 1, b->values, 1, x->values, 1);
   }
 }
 
@@ -368,7 +353,7 @@ void OSQPVectorf_plus(OSQPVectorf      *x,
   }
 }
 
-#endif // MKL blas for the y = ax + y problem (i was only able to substitute one case)
+#endif // MKL blas for the y = ax + y problem 
 
 
 #ifdef USEMKLBLAS
@@ -376,25 +361,24 @@ void OSQPVectorf_plus(OSQPVectorf      *x,
 void OSQPVectorf_minus(OSQPVectorf       *x,
                        const OSQPVectorf *a,
                        const OSQPVectorf *b){
-
-  const MKL_INT lengthmkl = a->length;
-  const MKL_INT INCX = 1;
-  const MKL_INT INCY = 1;
+  
   c_float scalar;
 
   if (x == a){
-    scalar = -1;
-    blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY);
+    scalar = -1.0;
+    axpy(a->length, -1, b->values, 1, x->values, 1);
   }
   else if (x == b){
     scalar = 1.0;
-    OSQPVectorf_mult_scalar(x,-1.);
-    blas_axpy(&lengthmkl, &scalar, a->values, &INCX, x->values, &INCY);
+    OSQPVectorf_mult_scalar(x,-1.); //should I use scal here (?) 
+    //You could also just try to use axpby to reduce some if loops here, since you can scale on both ends
+    axpy(a->length, 1, a->values, 1, x->values, 1);
   }
   else {
     scalar = -1.0;
-    blas_copy(&lengthmkl, a->values, &INCX, x->values, &INCY);
-    blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY);
+    copy(a->length, a->values, 1, x->values, 1);
+    axpy(a->length, -1, b->values, 1, x->values, 1);
+
   }
 }
 
@@ -421,7 +405,7 @@ void OSQPVectorf_minus(OSQPVectorf       *x,
   }
 }
 
-#endif // axpy problem with minus sign
+#endif /* axpy problem minus sign */
 
 #ifdef USEMKLBLAS
 
@@ -430,23 +414,28 @@ void OSQPVectorf_add_scaled(OSQPVectorf       *x,
                             const OSQPVectorf *a,
                             c_float           scb,
                             const OSQPVectorf *b){
-  c_int i;
-  c_int length = x->length;
-  c_float*  av = a->values;
-  c_float*  bv = b->values;
-  c_float*  xv = x->values;
+  const MKL_INT lengthmkl = a->length; // Is this even neccesarry anymore (?)
 
   /* shorter version when incrementing */
   if (x == a && sca == 1.){
-    const MKL_INT lengthmkl = x->length;
-    const MKL_INT INCX = 1; // The spacing must be at least 1 here, not sure why
-    const MKL_INT INCY = 1;
-    blas_axpy(&lengthmkl, &scb, b->values, &INCX, x->values, &INCY);
+    axpy(lengthmkl, scb, b->values, 1, x->values, 1);
+  }
+  else if (x == a){
+    scal(lengthmkl, sca, x->values, 1);
+    axpy(lengthmkl, scb, b->values, 1, x->values, 1);
+  }
+  else if (x == b && scb == 1.){
+    axpy(lengthmkl, sca, a->values, 1, x->values, 1);
+  }
+  else if (x == b){
+    scal(lengthmkl, sca, x->values, 1, scb);
+    axpy(lengthmkl, sca, a->values, 1, x->values, 1);
   }
   else {
-    for (i = 0; i < length; i++) {
-      xv[i] = sca * av[i] + scb * bv[i];
-    }
+    copy(a->length, a->values, 1, x->values, 1);
+    scal(a->length, sca, x->values, 1);
+    axpy(a->length, scb, b->values, 1, x->values, 1);
+    //Maybe you can use cblas_?axpby here instead
   }
 
 }
@@ -478,7 +467,36 @@ void OSQPVectorf_add_scaled(OSQPVectorf       *x,
 
 }
 
-#endif // axpy using scaling
+#endif /* sum scaled MKL */
+
+#ifdef notUSEMKLBLAS
+
+
+void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
+                             c_float           sca,
+                             const OSQPVectorf *a,
+                             c_float           scb,
+                             const OSQPVectorf *b,
+                             c_float           scc,
+                             const OSQPVectorf *c){
+  c_int i;
+  c_int length = x->length;
+  c_float*  av = a->values;
+  c_float*  bv = b->values;
+  c_float*  cv = c->values;
+  c_float*  xv = x->values;
+
+  if (x == a){
+    axpby(a->length, sca, x->values) // not finished
+
+  }
+  else {
+    copy(a->length, c->values, 1, x->values, 1);
+
+  }
+}
+  
+#else
 
 void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
                              c_float           sca,
@@ -507,6 +525,21 @@ void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
   }
 }
 
+#endif // still not implemented, addition of 3 scalars using blas, Think about it a bit more
+
+#ifdef USEMKLBLAS
+
+c_float OSQPVectorf_norm_inf(const OSQPVectorf *v){
+
+  MKL_INT I;
+  c_float normval;
+
+  I = imax(v->length, v->values, 1);
+  normval = *(v->values + I);
+  return normval;
+}
+
+#else
 
 c_float OSQPVectorf_norm_inf(const OSQPVectorf *v){
 
@@ -515,13 +548,26 @@ c_float OSQPVectorf_norm_inf(const OSQPVectorf *v){
   c_float*  vv  = v->values;
   c_float normval = 0.0;
   c_float absval;
-
   for (i = 0; i < length; i++) {
     absval = c_absval(vv[i]);
     if (absval > normval) normval = absval;
   }
   return normval;
 }
+
+#endif // infinity norm using blas
+
+#ifdef USEMKLBLAS
+
+c_float OSQPVectorf_norm_1(const OSQPVectorf *v){
+
+  c_float normval;
+
+  normval = asum(v->length, v->values, 1);
+  return normval;
+}
+
+#else
 
 c_float OSQPVectorf_norm_1(const OSQPVectorf *v){
 
@@ -535,6 +581,9 @@ c_float OSQPVectorf_norm_1(const OSQPVectorf *v){
   }
   return normval;
 }
+
+#endif // manhattan norm using blas
+
 
 c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S, const OSQPVectorf *v){
 
@@ -597,6 +646,15 @@ c_float OSQPVectorf_norm_1_diff(const OSQPVectorf *a,
   return normDiff;
 }
 
+#ifdef USEMKLBLAS
+c_float OSQPVectorf_sum(const OSQPVectorf *a){
+
+  c_float val;
+
+  val = asum(a->length, a->values, 1);
+  return val;
+}
+#else
 c_float OSQPVectorf_sum(const OSQPVectorf *a){
 
   c_int   i;
@@ -611,21 +669,18 @@ c_float OSQPVectorf_sum(const OSQPVectorf *a){
   return val;
 }
 
-
+#endif /* sum of all entries*/
 
 #ifdef USEMKLBLAS
 
 c_float OSQPVectorf_dot_prod(const OSQPVectorf *a, const OSQPVectorf *b){
-  const MKL_INT length = a->length;
-  const MKL_INT INCX = 1; //How long should the spacing be (?)
-  const MKL_INT INCY = 1;
 
-  return blas_dot(&length, a->values, &INCX, b->values, &INCY); // blas_dot is called the preprocesor
+
+  return dot(a->length, a->values, 1, b->values, 1); // is this risky to do (?)
 }
 
 #else
 
-//original dot product function
 
 c_float OSQPVectorf_dot_prod(const OSQPVectorf *a, const OSQPVectorf *b) {
 
