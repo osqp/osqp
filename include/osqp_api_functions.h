@@ -9,6 +9,8 @@ extern "C" {
 # include "osqp_configure.h"
 # include "osqp_api_types.h"
 
+
+
 /********************
 * Main Solver API  *
 ********************/
@@ -17,6 +19,25 @@ extern "C" {
  * @name Main solver API
  * @{
  */
+
+
+/**
+ * Return OSQP version
+ * @return  OSQP version
+ */
+const char* osqp_version(void);
+
+
+/**
+ * Return the number of variables and constraints
+ * @param  solver Solver
+ * @param  m      Pointer to m
+ * @param  n      Pointer to n
+ */
+void osqp_get_dimensions(OSQPSolver *solver,
+                         c_int      *m,
+                         c_int      *n);
+
 
 /**
  * Set default settings from osqp_api_constants.h file
@@ -126,33 +147,14 @@ c_int osqp_update_lin_cost(OSQPSolver    *solver,
 /**
  * Update lower and upper bounds in the problem constraints
  * @param  solver  OSQPSolver
- * @param  l_new   New lower bound
- * @param  u_new   New upper bound
- * @return        Exitflag: 1 if new lower bound is not <= than new upper bound
+ * @param  l_new   New lower bound, NULL if none
+ * @param  u_new   New upper bound, NULL if none
+ * @return         Exitflag: 1 if new lower bound is not <= than new upper bound
  */
 c_int osqp_update_bounds(OSQPSolver    *solver,
                          const c_float *l_new,
                          const c_float *u_new);
 
-
-/**
- * Update lower bound in the problem constraints
- * @param  solver  OSQPSolver
- * @param  l_new   New lower bound
- * @return        Exitflag: 1 if new lower bound is not <= than upper bound
- */
-c_int osqp_update_lower_bound(OSQPSolver    *solver,
-                              const c_float *l_new);
-
-
-/**
- * Update upper bound in the problem constraints
- * @param  solver  OSQPSolver
- * @param  u_new   New upper bound
- * @return         Exitflag: 1 if new upper bound is not >= than lower bound
- */
-c_int osqp_update_upper_bound(OSQPSolver    *solver,
-                              const c_float *u_new);
 
 /**
  * Cold start workspace variables xz and y
@@ -163,33 +165,13 @@ void osqp_cold_start(OSQPSolver *solver);
 /**
  * Warm start primal and dual variables
  * @param  solver OSQPSolver structure
- * @param  x      Primal variable
- * @param  y      Dual variable
+ * @param  x      Primal variable, NULL if none
+ * @param  y      Dual variable, NULL if none
  * @return        Exitflag
  */
 c_int osqp_warm_start(OSQPSolver    *solver,
                       const c_float *x,
                       const c_float *y);
-
-
-/**
- * Warm start primal variable
- * @param  solver OSQPSolver structure
- * @param  x      Primal variable
- * @return        Exitflag
- */
-c_int osqp_warm_start_x(OSQPSolver    *solver,
-                        const c_float *x);
-
-
-/**
- * Warm start dual variable
- * @param  solver OSQPSolver structure
- * @param  y      Dual variable
- * @return        Exitflag
- */
-c_int osqp_warm_start_y(OSQPSolver    *solver,
-                        const c_float *y);
 
 
 # if EMBEDDED != 1

@@ -594,29 +594,29 @@ static const char* test_basic_qp_update()
   // Try to update with non-consistent values
   mu_assert(
     "Basic QP test update: Error in lower bound update ordering not caught!",
-    osqp_update_lower_bound(solver, sols_data->u_new) == 1);
+    osqp_update_bounds(solver, sols_data->u_new, OSQP_NULL) == 1);
 
   // Now update with correct values
   mu_assert("Basic QP test update: Error in lower bound update ordering!",
-            osqp_update_lower_bound(solver, sols_data->l_new) == 0);
+            osqp_update_bounds(solver, sols_data->l_new, OSQP_NULL) == 0);
 
   mu_assert("Basic QP test update: Error in updating lower bound!",
             vec_norm_inf_diff(OSQPVectorf_data(solver->work->data->l), sols_data->l_new,
                               data->m) < TESTS_TOL);
 
   // Return original values
-  osqp_update_lower_bound(solver, data->l);
+  osqp_update_bounds(solver, data->l, OSQP_NULL);
 
 
   // UPDATE UPPER BOUND
   // Try to update with non-consistent values
   mu_assert(
     "Basic QP test update: Error in upper bound update: ordering not caught!",
-    osqp_update_upper_bound(solver, sols_data->l_new) == 1);
+    osqp_update_bounds(solver, OSQP_NULL, sols_data->l_new) == 1);
 
   // Now update with correct values
   mu_assert("Basic QP test update: Error in upper bound update: ordering!",
-            osqp_update_upper_bound(solver, sols_data->u_new) == 0);
+            osqp_update_bounds(solver, OSQP_NULL, sols_data->u_new) == 0);
 
   mu_assert("Basic QP test update: Error in updating upper bound!",
             vec_norm_inf_diff(OSQPVectorf_data(solver->work->data->u), sols_data->u_new,
@@ -969,8 +969,8 @@ static const char* test_basic_qp_warm_start()
   mu_assert("Basic QP test warm start: Cold start error!", solver->info->iter == iter);
 
   // Warm start from the solution and solve again
-  osqp_warm_start_x(solver, xopt);
-  osqp_warm_start_y(solver, yopt);
+  osqp_warm_start(solver, xopt, OSQP_NULL);
+  osqp_warm_start(solver, OSQP_NULL, yopt);
   osqp_solve(solver);
 
   // Check that the number of iterations equals 1

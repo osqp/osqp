@@ -171,7 +171,7 @@ c_float OSQPVectorf_dot_prod_signed(const OSQPVectorf *a,
                                     const OSQPVectorf *b,
                                     c_int sign);
 
-/* elementwise product a.*b stored in c.  Set c==a for c *= b*/
+/* elementwise product a.*b stored in c.  Set c==a for c *= b */
 void OSQPVectorf_ew_prod(OSQPVectorf       *c,
                          const OSQPVectorf *a,
                          const OSQPVectorf *b);
@@ -205,11 +205,11 @@ void OSQPVectorf_project_polar_reccone(OSQPVectorf       *y,
    treated as infinite.  Values in y within tol of zero are treated
    as zero.
  */
-c_int OSQPVectorf_in_polar_reccone(const OSQPVectorf *y,
-                                   const OSQPVectorf *l,
-                                   const OSQPVectorf *u,
-                                   c_float           infval,
-                                   c_float           tol);
+c_int OSQPVectorf_in_reccone(const OSQPVectorf *y,
+                             const OSQPVectorf *l,
+                             const OSQPVectorf *u,
+                             c_float           infval,
+                             c_float           tol);
 
 /* vector permutation x[:] = b(p[:]) */
 void OSQPVectorf_permute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p);

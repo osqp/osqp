@@ -8,16 +8,6 @@ extern "C" {
 # include "osqp.h"
 # include "types.h"
 
-/******************
-* Versioning     *
-******************/
-
-/**
- * Return OSQP version
- * @return  OSQP version
- */
-const char* osqp_version(void);
-
 
 /**********************
 * Utility Functions  *

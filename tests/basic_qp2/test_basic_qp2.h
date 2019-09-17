@@ -184,7 +184,7 @@ static const char* test_basic_qp2_update()
 
   // Modify linear cost and upper bound
   osqp_update_lin_cost(solver, sols_data->q_new);
-  osqp_update_upper_bound(solver, sols_data->u_new);
+  osqp_update_bounds(solver, OSQP_NULL, sols_data->u_new);
 
   // Solve Problem second time(with different data now)
   osqp_solve(solver);

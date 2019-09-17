@@ -17,13 +17,13 @@ void project_polar_reccone(OSQPVectorf      *y,
 }
 
 
-c_int test_in_polar_reccone(const OSQPVectorf *y,
-                            const OSQPVectorf *l,
-                            const OSQPVectorf *u,
-                            c_float        infval,
-                            c_float          tol){
+c_int test_in_reccone(const OSQPVectorf *y,
+                      const OSQPVectorf *l,
+                      const OSQPVectorf *u,
+                      c_float        infval,
+                      c_float          tol){
 
-  return OSQPVectorf_in_polar_reccone(y,l,u,infval,tol);
+  return OSQPVectorf_in_reccone(y,l,u,infval,tol);
   
 }
 

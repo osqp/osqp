@@ -32,11 +32,11 @@ extern "C" {
 * @param infval     positive value treated as infinity
  * @param tol       projection tolerance
  */
-c_int test_in_polar_reccone(const OSQPVectorf  *y,
-                            const OSQPVectorf  *l,
-                            const OSQPVectorf  *u,
-                            c_float        infval,
-                            c_float          tol);
+c_int test_in_reccone(const OSQPVectorf  *y,
+                      const OSQPVectorf  *l,
+                      const OSQPVectorf  *u,
+                      c_float        infval,
+                      c_float          tol);
 
 // Project y onto \f$C = [l, u]\f$
 /**
