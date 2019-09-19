@@ -4,6 +4,7 @@
 #include "stdio.h"
 #include "time.h"
 
+/* USEMKLBLAS and the blas_ functions will be removed after testing */
 
 
 #define USEMKLBLAS
@@ -24,7 +25,7 @@
       #define swap cblas_sswap
     #define blas_2norm snrm2
     /**/
-    #define imax cblas_isamax
+    #define iamax cblas_isamax
     #define imin cblas_isamin
     #define axpby cblas_saxpby
     
@@ -43,7 +44,7 @@
       #define swap cblas_dswap
     #define blas_2norm dnrm2
     /**/
-    #define imax cblas_idamax
+    #define iamax cblas_idamax
     #define imin cblas_idamin
     #define axpby cblas_daxpby
 
@@ -296,7 +297,9 @@ void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
 #ifdef USEMKLBLAS
 
 void OSQPVectorf_mult_scalar(OSQPVectorf *a, c_float sc){
-  scal(a->length, sc, a->values, 1);
+  const MKL_INT length = a->length;
+  const c_float* val = a->values;
+  scal(length, sc, val, 1);
 }
 #else
 void OSQPVectorf_mult_scalar(OSQPVectorf *a, c_float sc){
@@ -317,16 +320,20 @@ void OSQPVectorf_plus(OSQPVectorf      *x,
                      const OSQPVectorf *b){
  
   c_float scalar = 1;
+  const MKL_INT length = a->length;
+  const c_float* vala = a->values;
+  const c_float* valb = b->values;
+  c_float* valx = x->values;
 
   if (x == a){
-    axpy(a->length, 1, b->values, 1, x->values, 1);
+    axpy(length, 1, valb, 1, valx, 1);
   }
   else if (x == b){
-    axpy(a->length, 1, a->values, 1, x->values, 1);
+    axpy(length, 1, vala, 1, valx, 1);
   }
   else {
-    copy(a->length, a->values, 1, x->values, 1); 
-    axpy(a->length, 1, b->values, 1, x->values, 1);
+    copy(length, vala, 1, valx, 1); 
+    axpy(length, 1, valb, 1, valx, 1);
   }
 }
 
@@ -362,22 +369,24 @@ void OSQPVectorf_minus(OSQPVectorf       *x,
                        const OSQPVectorf *a,
                        const OSQPVectorf *b){
   
-  c_float scalar;
+  c_float scalar; // This is not necessary as I am calling the variables directly, I can remove it depending on what is faster. (?)
+  const MKL_INT length = a->length;
+  const c_float* vala = a->values;
+  const c_float* valb = b->values;
+  c_float* valx = x->values;
 
   if (x == a){
-    scalar = -1.0;
-    axpy(a->length, -1, b->values, 1, x->values, 1);
+    scalar = -1.0; 
+    axpy(length, -1, valb, 1, valx, 1);
   }
   else if (x == b){
     scalar = 1.0;
-    OSQPVectorf_mult_scalar(x,-1.); //should I use scal here (?) 
-    //You could also just try to use axpby to reduce some if loops here, since you can scale on both ends
-    axpy(a->length, 1, a->values, 1, x->values, 1);
+    axpby(length, 1, vala, 1, -1.0, valx, 1);
   }
   else {
     scalar = -1.0;
-    copy(a->length, a->values, 1, x->values, 1);
-    axpy(a->length, -1, b->values, 1, x->values, 1);
+    copy(length, vala, 1, valx, 1);
+    axpy(length, -1, valb, 1, valx, 1);
 
   }
 }
@@ -414,28 +423,27 @@ void OSQPVectorf_add_scaled(OSQPVectorf       *x,
                             const OSQPVectorf *a,
                             c_float           scb,
                             const OSQPVectorf *b){
-  const MKL_INT lengthmkl = a->length; // Is this even neccesarry anymore (?)
+  const MKL_INT length = a->length;
+  const c_float* vala = a->values;
+  const c_float* valb = b->values;
+  c_float* valx = x->values;
 
   /* shorter version when incrementing */
   if (x == a && sca == 1.){
-    axpy(lengthmkl, scb, b->values, 1, x->values, 1);
+    axpy(length, scb, valb, 1, valx, 1);
   }
   else if (x == a){
-    scal(lengthmkl, sca, x->values, 1);
-    axpy(lengthmkl, scb, b->values, 1, x->values, 1);
+    axpby(length, scb, valb, 1, sca, valx, 1);
   }
   else if (x == b && scb == 1.){
-    axpy(lengthmkl, sca, a->values, 1, x->values, 1);
+    axpy(length, sca, vala, 1, valx, 1);
   }
   else if (x == b){
-    scal(lengthmkl, sca, x->values, 1, scb);
-    axpy(lengthmkl, sca, a->values, 1, x->values, 1);
+    axpby(length, sca, vala, 1, scb, valx, 1); 
   }
   else {
-    copy(a->length, a->values, 1, x->values, 1);
-    scal(a->length, sca, x->values, 1);
-    axpy(a->length, scb, b->values, 1, x->values, 1);
-    //Maybe you can use cblas_?axpby here instead
+    copy(length, vala, 1, valx, 1);
+    axpby(length, scb, valb, 1, sca, valx, 1); 
   }
 
 }
@@ -469,7 +477,7 @@ void OSQPVectorf_add_scaled(OSQPVectorf       *x,
 
 #endif /* sum scaled MKL */
 
-#ifdef notUSEMKLBLAS
+#ifdef USEMKLBLAS
 
 
 void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
@@ -479,20 +487,30 @@ void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
                              const OSQPVectorf *b,
                              c_float           scc,
                              const OSQPVectorf *c){
-  c_int i;
-  c_int length = x->length;
-  c_float*  av = a->values;
-  c_float*  bv = b->values;
-  c_float*  cv = c->values;
-  c_float*  xv = x->values;
+
+  const MKL_INT length = a->length;
+  const c_float* vala = a->values;
+  const c_float* valb = b->values;
+  const c_float* valc = c->values;
+  c_float* valx = x->values; 
 
   if (x == a){
-    axpby(a->length, sca, x->values) // not finished
-
+    axpby(length, scb, valb, 1, sca, valx, 1);
+    axpy(length, scc, valc, 1, valx, 1);
+  }
+  /* Security code to ensure that the function will still work even when called in an unconventional way. E. g. [inputs](x, y, x, z) instead of [inputs](x, x, y, z) */
+  else if (x == b){
+    axpby(length, sca, vala, 1, scb, valx, 1);
+    axpy(length, scc, valc, 1, valx, 1);
+  }
+  else if (x == c){
+    axpby(length, sca, vala, 1, scc, valx, 1);
+    axpy(length, scb, valb, 1, valx, 1);
   }
   else {
-    copy(a->length, c->values, 1, x->values, 1);
-
+    copy(length, vala, 1, valx, 1);
+    axpby(length, scb, valb, 1, sca, valx, 1);
+    axpy(length, scc, valc, 1, valx, 1);
   }
 }
   
@@ -525,17 +543,19 @@ void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
   }
 }
 
-#endif // still not implemented, addition of 3 scalars using blas, Think about it a bit more
+#endif // add 3 scaled vectors BLAS implementation
 
 #ifdef USEMKLBLAS
 
 c_float OSQPVectorf_norm_inf(const OSQPVectorf *v){
 
+  c_float* valv = v->values;
+  const MKL_INT length = v->length;
   MKL_INT I;
   c_float normval;
-
-  I = imax(v->length, v->values, 1);
-  normval = *(v->values + I);
+  
+  I = iamax(length, valv, 1); // iamax gives the index of the largest absolute value in the array
+  normval = *(valv + I); // Using pointer math to find that value
   return normval;
 }
 
@@ -562,6 +582,8 @@ c_float OSQPVectorf_norm_inf(const OSQPVectorf *v){
 c_float OSQPVectorf_norm_1(const OSQPVectorf *v){
 
   c_float normval;
+  c_float* valv = v->values;
+  const MKL_INT length = v->length;
 
   normval = asum(v->length, v->values, 1);
   return normval;
@@ -584,8 +606,8 @@ c_float OSQPVectorf_norm_1(const OSQPVectorf *v){
 
 #endif // manhattan norm using blas
 
-
-c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S, const OSQPVectorf *v){
+// TODO: you could possibly execute a scal and the norm inf in the case where the vecto S is only one repeated character
+c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S, const OSQPVectorf *v){ 
 
   c_int   i;
   c_int length  = v->length;
@@ -614,7 +636,24 @@ c_float OSQPVectorf_scaled_norm_1(const OSQPVectorf *S, const OSQPVectorf *v){
   }
   return normval;
 }
+#ifdef notUSEMKLBLAS // TODO
 
+c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
+                                  const OSQPVectorf *b){ // TODO
+  
+  MKL_INT I;
+  c_float normDiff;
+  OSQPVectorf *x; //cant solve the problem (yet) because I am unable to initialize without using up computational time
+  
+  OSQPVectorf_minus(x,a,b);
+  puts("hola");
+  I = iamax(a->length, x->values, 1); // iamax gives the index of the largest absolute value in the array
+  normDiff = *(x->values + I); // Using pointer math to find that value
+  return normDiff;
+}
+
+#else
+// TODO: you could implement the minus function and followed by the c_absval through all its values, however I dont even know if that would improve the function
 c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
                                   const OSQPVectorf *b){
   c_int   i;
@@ -631,6 +670,9 @@ c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
   return normDiff;
 }
 
+#endif // norm diff
+
+// TODO
 c_float OSQPVectorf_norm_1_diff(const OSQPVectorf *a,
                                 const OSQPVectorf *b){
 
@@ -639,7 +681,8 @@ c_float OSQPVectorf_norm_1_diff(const OSQPVectorf *a,
   c_float*  av   = a->values;
   c_float*  bv   = b->values;
   c_float normDiff = 0.0;
-
+  
+  // use axpy to substract the vectors then use asum
   for (i = 0; i < length; i++) {
     normDiff += c_absval(av[i] - bv[i]);
   }
@@ -647,11 +690,14 @@ c_float OSQPVectorf_norm_1_diff(const OSQPVectorf *a,
 }
 
 #ifdef USEMKLBLAS
+
 c_float OSQPVectorf_sum(const OSQPVectorf *a){
 
   c_float val;
+  const MKL_INT length = a->length;
+  const c_float* vala = a->values;
 
-  val = asum(a->length, a->values, 1);
+  val = asum(length, vala, 1); // this performs an absolute sum, be careful with the negatives
   return val;
 }
 #else
@@ -675,8 +721,11 @@ c_float OSQPVectorf_sum(const OSQPVectorf *a){
 
 c_float OSQPVectorf_dot_prod(const OSQPVectorf *a, const OSQPVectorf *b){
 
+  const MKL_INT length = a->length;
+  const c_float* vala = a->values;
+  const c_float* valb = b->values;
 
-  return dot(a->length, a->values, 1, b->values, 1); // is this risky to do (?)
+  return dot(length, vala, 1, valb, 1); 
 }
 
 #else
@@ -696,6 +745,7 @@ c_float OSQPVectorf_dot_prod(const OSQPVectorf *a, const OSQPVectorf *b) {
   return dotprod;
   }
 #endif
+
 
 c_float OSQPVectorf_dot_prod_signed(const OSQPVectorf *a, const OSQPVectorf *b, c_int sign){
 
