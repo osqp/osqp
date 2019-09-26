@@ -1,6 +1,6 @@
 #include "osqp.h"
 #include "algebra_vector.h"
-#include "algebra_impl.h"
+#include "algebra_types.h"
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 

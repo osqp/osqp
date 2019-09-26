@@ -4,8 +4,7 @@
 CUDA_Handle_t *CUDA_handle;
 
 void algebra_init_libs(void) {
-  CUDA_handle = CUDA_init_libs();
-  cuda_init_libs();
+  CUDA_handle = cuda_init_libs();
 }
 
 void algebra_free_libs(void) {

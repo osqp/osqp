@@ -1,6 +1,6 @@
 #include "osqp.h"
 #include "lin_alg.h"
-#include "algebra_impl.h"
+#include "algebra_types.h"
 #include "csc_math.h"
 #include "csc_utils.h"
 
