@@ -117,6 +117,9 @@ c_int osqp_setup(OSQPSolver** solverp,
   if (!(work)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   solver->work = work;
 
+  // Initialize algebra libraries
+  algebra_init_libs();
+
   // Start and allocate directly timer
 # ifdef PROFILING
   work->timer = c_malloc(sizeof(OSQPTimer));
@@ -693,6 +696,9 @@ c_int osqp_cleanup(OSQPSolver *solver) {
   work = solver->work;
 
   if (work) { // If workspace has been allocated
+    // Free algebra library handlers
+    algebra_free_libs();
+
     // Free Data
     if (work->data) {
       OSQPMatrix_free(work->data->P);

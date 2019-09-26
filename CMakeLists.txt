@@ -327,6 +327,11 @@ install(TARGETS osqpstatic
 install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
 
 
+if (CUDA_SUPPORT)
+    target_link_libraries (osqpstatic cublas cusparse)
+endif()
+
+
 if (MATLAB)
 target_link_libraries (osqpstatic ${Matlab_LIBRARIES})
 endif (MATLAB)

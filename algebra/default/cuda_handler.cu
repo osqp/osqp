@@ -2,7 +2,7 @@
 #include "helper_cuda.h"
 
 
-CUDA_Handle_t* CUDA_init_libs(void) {
+CUDA_Handle_t* cuda_init_libs(void) {
 
   int deviceCount = 0;
 
@@ -27,7 +27,7 @@ CUDA_Handle_t* CUDA_init_libs(void) {
 }
 
 
-void CUDA_free_libs(CUDA_Handle_t *CUDA_handle) {
+void cuda_free_libs(CUDA_Handle_t *CUDA_handle) {
   cusparseDestroy(CUDA_handle->cusparseHandle);
   cublasDestroy(CUDA_handle->cublasHandle);
   cudaFree(CUDA_handle->d_index);
