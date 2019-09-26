@@ -20,6 +20,17 @@ typedef struct OSQPVectori_ OSQPVectori;
 typedef struct OSQPVectorf_ OSQPVectorf;
 
 
+/* ALGEBRA LIBRARIES ---------------------------------------------------------*/
+
+// GB: This should probably go in a different file, e.g. algebra_libs.h
+
+/* Initialize libraries that implement algebra. */
+void algebra_init_libs(void);
+
+/* Free libraries that implement algebra. */
+void algebra_free_libs(void);
+
+
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 
 # ifndef EMBEDDED
