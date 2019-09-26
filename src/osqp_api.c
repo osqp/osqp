@@ -118,7 +118,10 @@ c_int osqp_setup(OSQPSolver** solverp,
   solver->work = work;
 
   // Initialize algebra libraries
-  algebra_init_libs();
+  exitflag = algebra_init_libs();
+  if (exitflag) {
+    return osqp_error(OSQP_ALGEBRA_LOAD_ERROR);
+  }
 
   // Start and allocate directly timer
 # ifdef PROFILING
