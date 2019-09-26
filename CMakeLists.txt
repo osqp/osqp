@@ -46,6 +46,10 @@ else()
     message(STATUS "Embedded is ${EMBEDDED}")
 endif()
 
+# Is the CUDA support enabled?
+option (CUDA_SUPPORT "Enable CUDA support" OFF)
+message(STATUS "CUDA support is ${CUDA_SUPPORT}")
+
 # Is printing enabled?
 option (PRINTING "Enable solver printing" ON)
 if (DEFINED EMBEDDED)
@@ -78,7 +82,10 @@ message(STATUS "Floats are ${DFLOAT}")
 # Use long integers for indexing
 option (DLONG "Use long integers (64bit) for indexing" ON)
 if (NOT (CMAKE_SIZEOF_VOID_P EQUAL 8))
-	message(STATUS "Disabling long integers (64bit) on 32bit machine")
+    message(STATUS "Disabling long integers (64bit) on 32bit machine")
+    set(DLONG OFF)
+elseif (CUDA_SUPPORT)
+	message(STATUS "Disabling long integers (64bit) for CUDA")
 	set(DLONG OFF)
 endif()
 message(STATUS "Long integers (64bit) are ${DLONG}")
@@ -93,6 +100,23 @@ endif()
 # Add code coverage
 option (COVERAGE "Perform code coverage" OFF)
 message(STATUS "Code coverage is ${COVERAGE}")
+
+
+# CUDA support
+# ----------------------------------------------
+if (CUDA_SUPPORT)
+    enable_language(CUDA)
+    find_package(CUDA)
+
+    # cublas and cusparse headers
+    include_directories(${CUDA_INCLUDE_DIRS})
+
+    # helper_cuda.h
+    include_directories(${CUDA_TOOLKIT_ROOT_DIR}/samples/common/inc)
+
+    # sm_75 -> Turing support
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_30 --gpu_code=compute_30,sm_75")
+endif()
 
 
 # Memory allocators
