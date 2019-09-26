@@ -20,13 +20,15 @@ extern CUDA_Handle_t *CUDA_handle;
 *********************************************/
 
 struct OSQPVectori_ {
-  c_int* values;
-  c_int length;
+  c_int *d_val;
+  c_int *values;
+  c_int  length;
 };
 
 struct OSQPVectorf_ {
-  c_float* values;
-  c_int length;
+  c_float *d_val;
+  c_float *values;
+  c_int    length;
 };
 
 
