@@ -14,23 +14,17 @@ typedef struct {
   int              *d_index;
 } CUDA_Handle_t;
 
-extern CUDA_Handle_t CUDA_handle;
+
+/* Initialize CUDA library handle. */
+void CUDA_init_libs(void);
 
 
-/** Initialize CUDA library handle.
- * @return	CUDA library handle, or NULL if failure.
- */
-CUDA_Handle_t* CUDA_init_libs(void);
-
-
-/** Free CUDA library handle.
- * @param CUDA_handle	CUDA library handle.
- */
-void CUDA_free_libs(CUDA_Handle_t *CUDA_handle);
+/* Free CUDA library handle. */
+void CUDA_free_libs(void);
 
 
 # ifdef __cplusplus
 }
 # endif
 
-#endif
+#endif /* ifndef CUDA_HANDLER_H */

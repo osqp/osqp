@@ -2,10 +2,8 @@
 #include "helper_cuda.h"
 
 
-CUDA_Handle_t CUDA_handle;
-CUDA_handle.cublasHandle   = NULL;
-CUDA_handle.cusparseHandle = NULL;
-CUDA_handle.d_index        = NULL;
+// Handle is a static variable
+static CUDA_Handle_t CUDA_handle = { .cublasHandle=NULL, .cusparseHandle=NULL, .d_index=0 };
 
 
 void CUDA_init_libs(void) {
@@ -22,8 +20,9 @@ void CUDA_init_libs(void) {
 }
 
 
-void CUDA_free_libs() {
+void CUDA_free_libs(void) {
   cusparseDestroy(CUDA_handle.cusparseHandle);
   cublasDestroy(CUDA_handle.cublasHandle);
   cudaFree(CUDA_handle.d_index);
 }
+
