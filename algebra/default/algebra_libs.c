@@ -3,7 +3,7 @@
 
 CUDA_Handle_t *CUDA_handle;
 
-int algebra_init_libs(void) {
+c_int algebra_init_libs(void) {
   CUDA_handle = cuda_init_libs();
   if (!CUDA_handle) return 1;
   return 0;
