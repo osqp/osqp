@@ -56,13 +56,14 @@ void cuda_vec_mult_sc(c_float *d_a,
                       c_int    n);
 
 /**
- * d_z[i] = d_x[i] + alpha* d_y[i] for i in [0,n-1]
+ * d_x[i] = sca * d_a[i] + scb * d_b[i] for i in [0,n-1]
  */
-void cuda_vec_xpay(c_float       *d_z,
-                   const c_float *d_x,
-                   const c_float *d_y,
-                   c_float        alpha,
-                   c_int          n);
+void cuda_vec_add_scaled(c_float       *d_x,
+                         const c_float *d_a,
+                         const c_float *d_b,
+                         c_float        sca,
+                         c_float        scb,
+                         c_int          n);
 
 # ifdef __cplusplus
 }

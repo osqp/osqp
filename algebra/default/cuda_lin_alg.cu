@@ -93,17 +93,30 @@ void cuda_vec_mult_sc(c_float *d_a,
   checkCudaErrors(cublasTscal(CUDA_handle->cublasHandle, n, &sc, d_a, 1));
 }
 
-void cuda_vec_xpay(c_float       *d_z,
-                   const c_float *d_x,
-                   const c_float *d_y,
-                   c_float        alpha,
-                   c_int          n) {
+void cuda_vec_add_scaled(c_float       *d_x,
+                         const c_float *d_a,
+                         const c_float *d_b,
+                         c_float        sca,
+                         c_float        scb,
+                         c_int          n) {
 
-  if (d_z != d_x) {
-    /* d_z = d_x */
-    checkCudaErrors(cudaMemcpy(d_z, d_x, n * sizeof(c_float), cudaMemcpyDeviceToDevice));
+  if (d_x != d_a || sca != 1.0) {
+    if (sca == 1.0) {
+      /* d_x = d_a */
+      checkCudaErrors(cudaMemcpy(d_x, d_a, n * sizeof(c_float), cudaMemcpyDeviceToDevice));
+    }
+    else if (d_x == d_a) {
+      /* d_x *= sca */
+      checkCudaErrors(cublasTscal(CUDA_handle->cublasHandle, n, &sca, d_a, 1));
+    }
+    else {
+      /* d_x = 0 */
+      checkCudaErrors(cudaMemset(d_x, 0, n * sizeof(c_float)));
+
+      /* d_x += sca * d_a */
+      checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, &sca, d_a, 1, d_x, 1));
+    }
   }
-  
-  /* d_z += alpha * d_y */
-  checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, &alpha, d_y, 1, d_z, 1));
+  /* d_x += scb * d_b */
+  checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, &scb, d_b, 1, d_x, 1));
 }
