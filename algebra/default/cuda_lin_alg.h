@@ -22,6 +22,19 @@ void cuda_vec_copy_h2d(c_float       *d_y,
                        const c_float *h_x,
                        c_int          n);
 
+/*
+ * h_y[i] = d_x[i] for i in [0,n-1]
+*/
+void cuda_vec_copy_d2h(c_float       *h_y,
+                       const c_float *d_x,
+                       c_int          n);
+
+/**
+ * d_a[i] = sc for i in [0,n-1]
+ */
+void cuda_set_scalar(c_float *d_a,
+                     c_float  sc,
+                     c_int    n);
 
 # ifdef __cplusplus
 }

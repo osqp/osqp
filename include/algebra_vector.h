@@ -33,9 +33,6 @@ OSQPVectori* OSQPVectori_calloc(c_int length);
 /* Return a float vector using a raw array as input (Uses MALLOC) */
 OSQPVectorf* OSQPVectorf_new(const c_float *a, c_int length);
 
-/* Return an in vector using a raw array as input (Uses MALLOC) */
-OSQPVectori* OSQPVectori_new(const c_int *a, c_int length);
-
 /* Return a copy of a float vector a as output (Uses MALLOC) */
 OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf *a);
 
@@ -71,20 +68,11 @@ c_int* OSQPVectori_data(const OSQPVectori *a);
 /* Copy a float vector a into another vector b (pre-allocated) */
 void OSQPVectorf_copy(OSQPVectorf *b, const OSQPVectorf *a);
 
-/* Copy an int vector a into another vector b (pre-allocated) */
-void OSQPVectori_copy(OSQPVectori *b, const OSQPVectori *a);
-
 /* Copy an array of floats into a into a vector b (pre-allocated) */
 void OSQPVectorf_from_raw(OSQPVectorf *b, const c_float *a);
 
-/* copy an array of ints into a into a vector b (pre-allocated) */
-void OSQPVectori_from_raw(OSQPVectori *b, const c_int *a);
-
 /* copy a vector into an array of floats (pre-allocated) */
 void OSQPVectorf_to_raw(c_float *bv, const OSQPVectorf *a);
-
-/* copy a vector into an array of ints (pre-allocated) */
-void OSQPVectori_to_raw(c_int *bv, const OSQPVectori *a);
 
 /* set float vector to scalar */
 void OSQPVectorf_set_scalar(OSQPVectorf *a, c_float sc);

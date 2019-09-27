@@ -15,6 +15,8 @@ extern void cuda_free(void** devPtr);
 /* cuda_lin_alg.h */
 extern void cuda_vec_copy_d2d(c_float *d_y, const c_float *d_x, c_int n);
 extern void cuda_vec_copy_h2d(c_float *d_y, const c_float *h_x, c_int n);
+extern void cuda_vec_copy_d2h(c_float *h_y, const c_float *d_x, c_int n);
+extern void cuda_set_scalar(c_float *d_a, c_float sc, c_int n);
 
 
 /*******************************************************************************
@@ -28,17 +30,6 @@ OSQPVectorf* OSQPVectorf_new(const c_float *a,
   if (!out) return OSQP_NULL;
 
   if (length > 0) OSQPVectorf_from_raw(out, a);
-  
-  return out;
-}
-
-OSQPVectori* OSQPVectori_new(const c_int *a,
-                             c_int        length) {
-
-  OSQPVectori* out = OSQPVectori_malloc(length);
-  if (!out) return OSQP_NULL;
-
-  if (length > 0) OSQPVectori_from_raw(out, a);
   
   return out;
 }
@@ -190,12 +181,6 @@ void OSQPVectorf_copy(OSQPVectorf       *b,
   OSQPVectorf_from_raw(b, a->values);
 }
 
-void OSQPVectori_copy(OSQPVectori       *b,
-                      const OSQPVectori *a) {
-
-  OSQPVectori_from_raw(b, a->values);
-}
-
 void OSQPVectorf_from_raw(OSQPVectorf   *b,
                           const c_float *av) {
 
@@ -206,20 +191,7 @@ void OSQPVectorf_from_raw(OSQPVectorf   *b,
   for (i = 0; i < length; i++) {
     bv[i] = av[i];
   }
-  
-  cuda_vec_copy_h2d(b->d_val, av, length);
-}
-
-void OSQPVectori_from_raw(OSQPVectori *b,
-                          const c_int *av) {
-
-  c_int i;
-  c_int length = b->length;
-  c_int* bv = b->values;
-
-  for (i = 0; i < length; i++) {
-    bv[i] = av[i];
-  }
+  cuda_vec_copy_h2d(b->d_val, av, b->length);
 }
 
 void OSQPVectorf_to_raw(c_float           *bv,
@@ -232,18 +204,7 @@ void OSQPVectorf_to_raw(c_float           *bv,
   for (i = 0; i < length; i++) {
     bv[i] = av[i];
   }
-}
-
-void OSQPVectori_to_raw(c_int             *bv,
-                        const OSQPVectori *a) {
-
-  c_int i;
-  c_int length = a->length;
-  c_int* av = a->values;
-
-  for (i = 0; i < length; i++) {
-    bv[i] = av[i];
-  }
+  cuda_vec_copy_d2h(bv, b->d_val, a->length);
 }
 
 void OSQPVectorf_set_scalar(OSQPVectorf *a,
@@ -256,6 +217,7 @@ void OSQPVectorf_set_scalar(OSQPVectorf *a,
   for (i = 0; i < length; i++) {
     av[i] = sc;
   }
+  cuda_set_scalar(a->d_val, sc, a->length);
 }
 
 
