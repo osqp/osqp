@@ -8,24 +8,25 @@
 #ifndef CUDA_WRAPPER_H
 # define CUDA_WRAPPER_H
 
-#include "cuda_configure.h"
 #include <cusparse.h>
 #include <cublas_v2.h>
+
+#include "osqp_api_types.h"
 
 
 static cusparseStatus_t cusparseTcsrmv(cusparseHandle_t          handle,
                                        cusparseOperation_t       transA,
-                                       GPU_int                   m,
-                                       GPU_int                   n,
-                                       GPU_int                   nnz,
-                                       const GPU_float          *alpha,
+                                       c_int                     m,
+                                       c_int                     n,
+                                       c_int                     nnz,
+                                       const c_float            *alpha,
                                        const cusparseMatDescr_t  descrA,
-                                       const GPU_float          *csrValA,
-                                       const GPU_int            *csrRowPtrA,
-                                       const GPU_int            *csrColIndA,
-                                       const GPU_float          *x,
-                                       const GPU_float          *beta,
-                                       GPU_float                *y) {
+                                       const c_float            *csrValA,
+                                       const c_int              *csrRowPtrA,
+                                       const c_int              *csrColIndA,
+                                       const c_float            *x,
+                                       const c_float            *beta,
+                                       c_float                  *y) {
 
 #ifdef DFLOAT
   return cusparseScsrmv(handle, transA, m, n, nnz, alpha,
@@ -39,13 +40,13 @@ static cusparseStatus_t cusparseTcsrmv(cusparseHandle_t          handle,
 }
 
 
-static cublasStatus_t cublasTaxpy(cublasHandle_t   handle,
-                                  GPU_int          n,
-                                  const GPU_float *alpha,
-                                  const GPU_float *x,
-                                  GPU_int          incx,
-                                  GPU_float       *y,
-                                  GPU_int          incy) {
+static cublasStatus_t cublasTaxpy(cublasHandle_t  handle,
+                                  c_int           n,
+                                  const c_float  *alpha,
+                                  const c_float  *x,
+                                  c_int           incx,
+                                  c_float        *y,
+                                  c_int           incy) {
 
 #ifdef DFLOAT
   return cublasSaxpy(handle, n, alpha, x, incx, y, incy);
@@ -54,11 +55,11 @@ static cublasStatus_t cublasTaxpy(cublasHandle_t   handle,
 #endif
 }
 
-static cublasStatus_t cublasTscal(cublasHandle_t   handle,
-                                  GPU_int          n,
-                                  const GPU_float *alpha,
-                                  GPU_float        *x,
-                                  GPU_int           incx) {
+static cublasStatus_t cublasTscal(cublasHandle_t  handle,
+                                  c_int           n,
+                                  const c_float  *alpha,
+                                  c_float        *x,
+                                  c_int           incx) {
 
 #ifdef DFLOAT
   return cublasSscal(handle, n, alpha, x, incx);
@@ -68,13 +69,13 @@ static cublasStatus_t cublasTscal(cublasHandle_t   handle,
 }
 
 
-static cublasStatus_t cublasTdot(cublasHandle_t   handle,
-                                 GPU_int          n,
-                                 const GPU_float *x,
-                                 GPU_int          incx,
-                                 const GPU_float *y,
-                                 GPU_int          incy,
-                                 GPU_float       *result) {
+static cublasStatus_t cublasTdot(cublasHandle_t  handle,
+                                 c_int           n,
+                                 const c_float  *x,
+                                 c_int           incx,
+                                 const c_float  *y,
+                                 c_int           incy,
+                                 c_float        *result) {
 
 #ifdef DFLOAT
   return cublasSdot (handle, n, x, incx, y, incy, result);
@@ -84,11 +85,11 @@ static cublasStatus_t cublasTdot(cublasHandle_t   handle,
 }
 
 
-static cublasStatus_t cublasITamax(cublasHandle_t   handle,
-                                   GPU_int          n,
-                                   const GPU_float *x,
-                                   GPU_int          incx,
-                                   GPU_int         *result) {
+static cublasStatus_t cublasITamax(cublasHandle_t  handle,
+                                   c_int           n,
+                                   const c_float  *x,
+                                   c_int           incx,
+                                   c_int          *result) {
 
 #ifdef DFLOAT
   return cublasIsamax(handle, n, x, incx, result);
@@ -98,11 +99,11 @@ static cublasStatus_t cublasITamax(cublasHandle_t   handle,
 }
 
 
-static cublasStatus_t cublasTasum(cublasHandle_t   handle,
-                                  GPU_int          n,
-                                  const GPU_float *x,
-                                  GPU_int          incx,
-                                  GPU_float       *result) {
+static cublasStatus_t cublasTasum(cublasHandle_t  handle,
+                                  c_int           n,
+                                  const c_float  *x,
+                                  c_int           incx,
+                                  c_float        *result) {
 
 #ifdef DFLOAT
   return cublasSasum(handle, n, x, incx, result);
@@ -116,12 +117,12 @@ static cublasStatus_t cublasTtbmv(cublasHandle_t     handle,
                                   cublasFillMode_t   uplo,
                                   cublasOperation_t  trans,
                                   cublasDiagType_t   diag,
-                                  GPU_int            n,
-                                  GPU_int            k,
-                                  const GPU_float   *A,
-                                  GPU_int            lda,
-                                  GPU_float         *x,
-                                  GPU_int            incx) {
+                                  c_int              n,
+                                  c_int              k,
+                                  const c_float     *A,
+                                  c_int              lda,
+                                  c_float           *x,
+                                  c_int              incx) {
 
 #ifdef DFLOAT
   return cublasStbmv(handle, uplo, trans, diag, n, k, A, lda, x, incx);
@@ -132,10 +133,10 @@ static cublasStatus_t cublasTtbmv(cublasHandle_t     handle,
 
 
 static cusparseStatus_t cusparseTgthr(cusparseHandle_t     handle,
-                                      GPU_int              nnz,
-                                      const GPU_float     *y,
-                                      GPU_float           *xVal,
-                                      const GPU_int       *xInd,
+                                      c_int                nnz,
+                                      const c_float       *y,
+                                      c_float             *xVal,
+                                      const c_int         *xInd,
                                       cusparseIndexBase_t  idxBase) {
 
 #ifdef DFLOAT
@@ -146,18 +147,18 @@ static cusparseStatus_t cusparseTgthr(cusparseHandle_t     handle,
 }
 
 
-static cusparseStatus_t cusparseTcsr2csc(cusparseHandle_t handle,
-                                         GPU_int m,
-                                         GPU_int n,
-                                         GPU_int nnz,
-                                        const GPU_float *csrVal,
-                                        const GPU_int *csrRowPtr,
-                                        const GPU_int *csrColInd,
-                                        GPU_float           *cscVal,
-                                        GPU_int *cscRowInd,
-                                        GPU_int *cscColPtr,
-                                        cusparseAction_t copyValues,
-                                        cusparseIndexBase_t idxBase) {
+static cusparseStatus_t cusparseTcsr2csc(cusparseHandle_t     handle,
+                                         c_int                m,
+                                         c_int                n,
+                                         c_int                nnz,
+                                         const c_float       *csrVal,
+                                         const c_int         *csrRowPtr,
+                                         const c_int         *csrColInd,
+                                         c_float             *cscVal,
+                                         c_int               *cscRowInd,
+                                         c_int               *cscColPtr,
+                                         cusparseAction_t     copyValues,
+                                         cusparseIndexBase_t  idxBase) {
 
 #ifdef DFLOAT
   return cusparseScsr2csc(handle, m, n, nnz, csrVal, csrRowPtr, csrColInd,
@@ -169,12 +170,12 @@ static cusparseStatus_t cusparseTcsr2csc(cusparseHandle_t handle,
 }
 
 
-static cublasStatus_t cublasTcopy(cublasHandle_t   handle,
-                                  GPU_int          n,
-                                  const GPU_float *x,
-                                  GPU_int          incx,
-                                  GPU_float       *y,
-                                  GPU_int          incy) {
+static cublasStatus_t cublasTcopy(cublasHandle_t  handle,
+                                  c_int           n,
+                                  const c_float  *x,
+                                  c_int           incx,
+                                  c_float        *y,
+                                  c_int           incy) {
 
 #ifdef DFLOAT
   return cublasScopy(handle, n, x, incx, y, incy);
@@ -184,11 +185,11 @@ static cublasStatus_t cublasTcopy(cublasHandle_t   handle,
 }
 
 
-static cublasStatus_t cublasTnrm2(cublasHandle_t   handle,
-                                  GPU_int          n,
-                                  const GPU_float *x,
-                                  GPU_int          incx,
-                                  GPU_float       *result) {
+static cublasStatus_t cublasTnrm2(cublasHandle_t  handle,
+                                  c_int           n,
+                                  const c_float  *x,
+                                  c_int           incx,
+                                  c_float        *result) {
 
 #ifdef DFLOAT
   return cublasSnrm2(handle, n, x, incx, result);
@@ -200,17 +201,17 @@ static cublasStatus_t cublasTnrm2(cublasHandle_t   handle,
 
 static cusparseStatus_t cusparseCsrmv(cusparseHandle_t          handle,
                                       cusparseAlgMode_t         alg,
-                                      GPU_int                   m,
-                                      GPU_int                   n,
-                                      GPU_int                   nnz,
-                                      const GPU_float          *alpha,
+                                      c_int                     m,
+                                      c_int                     n,
+                                      c_int                     nnz,
+                                      const c_float            *alpha,
                                       const cusparseMatDescr_t  descrA,
-                                      const GPU_float          *csrValA,
-                                      const GPU_int            *csrRowPtrA,
-                                      const GPU_int            *csrColIndA,
-                                      const GPU_float          *x,
-                                      const GPU_float          *beta,
-                                      GPU_float                *y,
+                                      const c_float            *csrValA,
+                                      const c_int              *csrRowPtrA,
+                                      const c_int              *csrColIndA,
+                                      const c_float            *x,
+                                      const c_float            *beta,
+                                      c_float                  *y,
                                       void                     *buffer) {
 
 #ifdef DFLOAT
@@ -227,17 +228,17 @@ static cusparseStatus_t cusparseCsrmv(cusparseHandle_t          handle,
 
 static cusparseStatus_t cusparseCsrmv_bufferSize(cusparseHandle_t          handle,
                                                  cusparseAlgMode_t         alg,
-                                                 GPU_int                   m,
-                                                 GPU_int                   n,
-                                                 GPU_int                   nnz,
-                                                 const GPU_float          *alpha,
+                                                 c_int                     m,
+                                                 c_int                     n,
+                                                 c_int                     nnz,
+                                                 const c_float            *alpha,
                                                  const cusparseMatDescr_t  descrA,
-                                                 const GPU_float          *csrValA,
-                                                 const GPU_int            *csrRowPtrA,
-                                                 const GPU_int            *csrColIndA,
-                                                 const GPU_float          *x,
-                                                 const GPU_float          *beta,
-                                                 GPU_float                *y,
+                                                 const c_float            *csrValA,
+                                                 const c_int              *csrRowPtrA,
+                                                 const c_int              *csrColIndA,
+                                                 const c_float            *x,
+                                                 const c_float            *beta,
+                                                 c_float                  *y,
                                                  size_t                   *bufferSizeInBytes) {
 
 #ifdef DFLOAT
@@ -253,15 +254,15 @@ static cusparseStatus_t cusparseCsrmv_bufferSize(cusparseHandle_t          handl
 
 
 static cusparseStatus_t cusparseCsr2csc_bufferSize(cusparseHandle_t      handle,
-                                                   GPU_int               m,
-                                                   GPU_int               n,
-                                                   GPU_int               nnz,
+                                                   c_int                 m,
+                                                   c_int                 n,
+                                                   c_int                 nnz,
                                                    const void           *csrVal,
-                                                   const GPU_int        *csrRowPtr,
-                                                   const GPU_int        *csrColInd,
+                                                   const c_int          *csrRowPtr,
+                                                   const c_int          *csrColInd,
                                                    void                 *cscVal,
-                                                   GPU_int              *cscColPtr,
-                                                   GPU_int              *cscRowInd,
+                                                   c_int                *cscColPtr,
+                                                   c_int                *cscRowInd,
                                                    cusparseAction_t      copyValues,
                                                    cusparseIndexBase_t   idxBase,
                                                    cusparseCsr2CscAlg_t  alg,
@@ -280,15 +281,15 @@ static cusparseStatus_t cusparseCsr2csc_bufferSize(cusparseHandle_t      handle,
 
 
 static cusparseStatus_t cusparseCsr2csc(cusparseHandle_t      handle,
-                                        GPU_int               m,
-                                        GPU_int               n,
-                                        GPU_int               nnz,
+                                        c_int                 m,
+                                        c_int                 n,
+                                        c_int                 nnz,
                                         const void           *csrVal,
-                                        const GPU_int        *csrRowPtr,
-                                        const GPU_int        *csrColInd,
+                                        const c_int          *csrRowPtr,
+                                        const c_int          *csrColInd,
                                         void                 *cscVal,
-                                        GPU_int              *cscColPtr,
-                                        GPU_int              *cscRowInd,
+                                        c_int                *cscColPtr,
+                                        c_int                *cscRowInd,
                                         cusparseAction_t      copyValues,
                                         cusparseIndexBase_t   idxBase,
                                         cusparseCsr2CscAlg_t  alg,

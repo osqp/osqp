@@ -8,10 +8,9 @@ extern "C" {
 #include "csc_math.h"
 
 
-/* CUDA headers */
-#include "cuda_handler.h"
-
-extern CUDA_Handle_t *CUDA_handle;
+// /* CUDA headers */
+// #include "cuda_handler.h"
+// extern CUDA_Handle_t *CUDA_handle;
 
 
 /*********************************************

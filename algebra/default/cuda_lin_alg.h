@@ -32,9 +32,21 @@ void cuda_vec_copy_d2h(c_float       *h_y,
 /**
  * d_a[i] = sc for i in [0,n-1]
  */
-void cuda_set_scalar(c_float *d_a,
+void cuda_vec_set_sc(c_float *d_a,
                      c_float  sc,
                      c_int    n);
+
+void cuda_vec_set_sc_cond(c_float     *d_a,
+                          const c_int *d_test,
+                          c_float      sc_if_neg,
+                          c_float      sc_if_zero,
+                          c_float      sc_if_pos,
+                          c_float      n);
+
+void cuda_vec_mult_sc(c_float *d_a,
+                      c_float  sc,
+                      c_int    n);
+
 
 # ifdef __cplusplus
 }

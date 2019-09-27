@@ -77,8 +77,7 @@ void OSQPVectorf_to_raw(c_float *bv, const OSQPVectorf *a);
 /* set float vector to scalar */
 void OSQPVectorf_set_scalar(OSQPVectorf *a, c_float sc);
 
-/* Set float vector to one of three scalars based on sign of vector of ints.
- */
+/* Set float vector to one of three scalars based on sign of vector of ints */
 void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
                                         OSQPVectori *test,
                                         c_float val_if_neg,

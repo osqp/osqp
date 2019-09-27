@@ -16,7 +16,9 @@ extern void cuda_free(void** devPtr);
 extern void cuda_vec_copy_d2d(c_float *d_y, const c_float *d_x, c_int n);
 extern void cuda_vec_copy_h2d(c_float *d_y, const c_float *h_x, c_int n);
 extern void cuda_vec_copy_d2h(c_float *h_y, const c_float *d_x, c_int n);
-extern void cuda_set_scalar(c_float *d_a, c_float sc, c_int n);
+extern void cuda_vec_set_sc(c_float *d_a, c_float sc, c_int n);
+extern void cuda_vec_set_sc_cond(c_float *d_a, const c_int *d_test, c_float sc_if_neg, c_float sc_if_zero, c_float sc_if_pos, c_float n);
+extern void cuda_vec_mult_sc(c_float *d_a, c_float sc, c_int n);
 
 
 /*******************************************************************************
@@ -217,7 +219,7 @@ void OSQPVectorf_set_scalar(OSQPVectorf *a,
   for (i = 0; i < length; i++) {
     av[i] = sc;
   }
-  cuda_set_scalar(a->d_val, sc, a->length);
+  cuda_vec_set_sc(a->d_val, sc, a->length);
 }
 
 
@@ -237,6 +239,7 @@ void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
       else if (testv[i] > 0)  av[i] = sc_if_pos;
       else                    av[i] = sc_if_neg;
   }
+  cuda_vec_set_sc_cond(a->d_val, test->d_val, sc_if_neg, sc_if_zero, sc_if_pos, a->length);
 }
 
 
@@ -250,6 +253,9 @@ void OSQPVectorf_mult_scalar(OSQPVectorf *a,
   for (i = 0; i < length; i++) {
     av[i] *= sc;
   }
+
+  if (sc == 1.0 || !a->d_val) return;
+  cuda_vec_mult_sc(a->d_val, sc, a->length);
 }
 
 void OSQPVectorf_plus(OSQPVectorf      *x,
