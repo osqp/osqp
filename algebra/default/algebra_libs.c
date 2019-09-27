@@ -1,4 +1,5 @@
 
+#include "osqp_api_types.h"
 #include "cuda_handler.h"
 
 CUDA_Handle_t *CUDA_handle;
