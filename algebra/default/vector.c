@@ -37,6 +37,7 @@ OSQPVectorf* OSQPVectorf_malloc(c_int length){
     b->length = length;
     if (length) {
       b->values = (c_float*) c_malloc(length * sizeof(c_float));
+      cuda_malloc(&b->d_val, length * sizeof(c_float));
       if (!(b->values)) {
         c_free(b);
         b = OSQP_NULL;
@@ -44,6 +45,7 @@ OSQPVectorf* OSQPVectorf_malloc(c_int length){
     }
     else {
       b->values = OSQP_NULL;
+      b->d_val  = OSQP_NULL;
     }
   }
   return b;
@@ -58,6 +60,7 @@ OSQPVectori* OSQPVectori_malloc(c_int length){
     b->length = length;
     if (length) {
       b->values = (c_int*) c_malloc(length * sizeof(c_int));
+      cuda_malloc(&b->d_val, length * sizeof(c_int));
       if (!(b->values)) {
         c_free(b);
         b = OSQP_NULL;
@@ -65,6 +68,7 @@ OSQPVectori* OSQPVectori_malloc(c_int length){
     }
     else {
       b->values = OSQP_NULL;
+      b->d_val  = OSQP_NULL;
     }
   }
   return b;
@@ -78,6 +82,7 @@ OSQPVectorf* OSQPVectorf_calloc(c_int length){
     b->length = length;
     if (length) {
       b->values = (c_float*) c_calloc(length, sizeof(c_float));
+      cuda_calloc(&b->d_val, length * sizeof(c_float));
       if (!(b->values)) {
         c_free(b);
         b = OSQP_NULL;
@@ -85,6 +90,7 @@ OSQPVectorf* OSQPVectorf_calloc(c_int length){
     }
     else {
       b->values = OSQP_NULL;
+      b->d_val  = OSQP_NULL;
     }
   }
   return b;
@@ -98,6 +104,7 @@ OSQPVectori* OSQPVectori_calloc(c_int length){
     b->length = length;
     if (length) {
       b->values = (c_int*) c_calloc(length, sizeof(c_int));
+      cuda_calloc(&b->d_val, length * sizeof(c_int));
       if (!(b->values)) {
         c_free(b);
         b = OSQP_NULL;
@@ -105,6 +112,7 @@ OSQPVectori* OSQPVectori_calloc(c_int length){
     }
     else {
       b->values = OSQP_NULL;
+      b->d_val  = OSQP_NULL;
     }
   }
   return b;
@@ -126,12 +134,18 @@ OSQPVectori* OSQPVectori_copy_new(const OSQPVectori *a){
 }
 
 void OSQPVectorf_free(OSQPVectorf *a){
-  if (a) c_free(a->values);
+  if (a) {
+    c_free(a->values);
+    cuda_free(&a->d_val);
+  }
   c_free(a);
 }
 
 void OSQPVectori_free(OSQPVectori *a){
-  if (a) c_free(a->values);
+  if (a) {
+    c_free(a->values);
+    cuda_free(&a->d_val);
+  }
   c_free(a);
 }
 
