@@ -204,7 +204,7 @@ void OSQPVectorf_to_raw(c_float           *bv,
   for (i = 0; i < length; i++) {
     bv[i] = av[i];
   }
-  cuda_vec_copy_d2h(bv, b->d_val, a->length);
+  // cuda_vec_copy_d2h(bv, a->d_val, a->length);
 }
 
 void OSQPVectorf_set_scalar(OSQPVectorf *a,
