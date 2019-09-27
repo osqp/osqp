@@ -117,6 +117,41 @@ void cuda_vec_add_scaled(c_float       *d_x,
       checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, &sca, d_a, 1, d_x, 1));
     }
   }
+
   /* d_x += scb * d_b */
   checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, &scb, d_b, 1, d_x, 1));
+}
+
+void cuda_vec_add_scaled3(c_float       *d_x,
+                          const c_float *d_a,
+                          const c_float *d_b,
+                          const c_float *d_c,
+                          c_float        sca,
+                          c_float        scb,
+                          c_float        scc,
+                          c_int          n) {
+
+  if (d_x != d_a || sca != 1.0) {
+    if (sca == 1.0) {
+      /* d_x = d_a */
+      checkCudaErrors(cudaMemcpy(d_x, d_a, n * sizeof(c_float), cudaMemcpyDeviceToDevice));
+    }
+    else if (d_x == d_a) {
+      /* d_x *= sca */
+      checkCudaErrors(cublasTscal(CUDA_handle->cublasHandle, n, &sca, d_x, 1));
+    }
+    else {
+      /* d_x = 0 */
+      checkCudaErrors(cudaMemset(d_x, 0, n * sizeof(c_float)));
+
+      /* d_x += sca * d_a */
+      checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, &sca, d_a, 1, d_x, 1));
+    }
+  }
+
+  /* d_x += scb * d_b */
+  checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, &scb, d_b, 1, d_x, 1));
+
+  /* d_x += scc * d_c */
+  checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, &scc, d_c, 1, d_x, 1));
 }

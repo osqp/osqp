@@ -20,6 +20,7 @@ extern void cuda_vec_set_sc(c_float *d_a, c_float sc, c_int n);
 extern void cuda_vec_set_sc_cond(c_float *d_a, const c_int *d_test, c_float sc_if_neg, c_float sc_if_zero, c_float sc_if_pos, c_float n);
 extern void cuda_vec_mult_sc(c_float *d_a, c_float sc, c_int n);
 extern void cuda_vec_add_scaled(c_float *d_x, const c_float *d_a, const c_float *d_b, c_float sca, c_float scb, c_int n);
+extern void cuda_vec_add_scaled3(c_float *d_x, const c_float *d_a, const c_float *d_b, const c_float *d_c, c_float sca, c_float scb, c_float scc, c_int n);
 
 
 /*******************************************************************************
@@ -358,6 +359,7 @@ void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
       xv[i] =  sca * av[i] + scb * bv[i] + scc * cv[i];
     }
   }
+  cuda_vec_add_scaled3(x->d_val, a->d_val, b->d_val, c->d_val, sca, scb, scc, x->length);
 }
 
 
