@@ -5,6 +5,15 @@
 extern "C" {
 #endif
 
+#include "glob_opts.h"
+
+#define FAST_MATRIX_UPDATE
+
+
+/* GPU integer and float types */
+typedef c_int   GPU_int;
+typedef c_float GPU_float;
+
 
 #define ELEMENTS_PER_THREAD (8)
 #define THREADS_PER_BLOCK   (1024)
