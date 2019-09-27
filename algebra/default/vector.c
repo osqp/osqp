@@ -3,7 +3,7 @@
 #include "algebra_types.h"
 
 #include "cuda_handler.h"
-#include "cuda_malloc.h"
+//#include "cuda_malloc.h"
 #include "cuda_wrapper.h"
 #include "helper_cuda.h"    /* --> checkCudaErrors */
 
