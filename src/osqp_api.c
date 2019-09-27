@@ -117,18 +117,18 @@ c_int osqp_setup(OSQPSolver** solverp,
   if (!(work)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   solver->work = work;
 
-  // Initialize algebra libraries
-  exitflag = algebra_init_libs();
-  if (exitflag) {
-    return osqp_error(OSQP_ALGEBRA_LOAD_ERROR);
-  }
-
   // Start and allocate directly timer
 # ifdef PROFILING
   work->timer = c_malloc(sizeof(OSQPTimer));
   if (!(work->timer)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   osqp_tic(work->timer);
 # endif /* ifdef PROFILING */
+
+  // Initialize algebra libraries
+  exitflag = algebra_init_libs();
+  if (exitflag) {
+    return osqp_error(OSQP_ALGEBRA_LOAD_ERROR);
+  }
 
   // Copy problem data into workspace
   work->data = c_malloc(sizeof(OSQPData));
