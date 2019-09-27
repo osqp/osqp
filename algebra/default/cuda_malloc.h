@@ -1,24 +1,21 @@
 #ifndef CUDA_MALLOC_H
 # define CUDA_MALLOC_H
 
-#define c_cudaMalloc cudaMalloc
 
-template<typename T>
-inline cudaError_t c_cudaFree(T** devPtr) {
-  cudaError_t cuda_error = cudaFree(*devPtr);
-  *devPtr = NULL;
-  return cuda_error;
-}
+# ifdef __cplusplus
+extern "C" {
+# endif /* ifdef __cplusplus */
 
-template<typename T>
-inline cudaError_t  c_cudaCalloc(T** devPtr, size_t size) {
-  cudaError_t cudaCalloc_er = cudaMalloc(devPtr, size);
-  if (cudaCalloc_er == cudaSuccess) {
-    return cudaMemset(*devPtr,0,size);
-  }
-  else {
-    return cudaCalloc_er;
-  }
+
+void cuda_malloc(void** devPtr, size_t size);
+
+void cuda_calloc(void** devPtr, size_t size);
+
+void cuda_free(void** devPtr);
+
+
+# ifdef __cplusplus
 }
+# endif
 
 #endif /* ifndef CUDA_MALLOC_H */

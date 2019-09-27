@@ -2,10 +2,6 @@
 #include "algebra_vector.h"
 #include "algebra_types.h"
 
-#include "cuda_handler.h"
-//#include "cuda_malloc.h"
-#include "cuda_wrapper.h"
-//#include "helper_cuda.h"    /* --> checkCudaErrors */
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 
@@ -14,7 +10,7 @@
 OSQPVectorf* OSQPVectorf_new(const c_float *a, c_int length){
 
   OSQPVectorf* out = OSQPVectorf_malloc(length);
-  if(!out) return OSQP_NULL;
+  if (!out) return OSQP_NULL;
 
   if (length > 0) {
     OSQPVectorf_from_raw(out, a);
