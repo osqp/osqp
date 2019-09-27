@@ -36,11 +36,11 @@ OSQPVectori* OSQPVectori_new(const c_int *a, c_int length){
 OSQPVectorf* OSQPVectorf_malloc(c_int length){
 
   OSQPVectorf *b;
-  b = c_malloc(sizeof(OSQPVectorf));
+  b = (OSQPVectorf*) c_malloc(sizeof(OSQPVectorf));
   if (b) {
     b->length = length;
     if (length) {
-      b->values = c_malloc(length * sizeof(c_float));
+      b->values = (c_float*) c_malloc(length * sizeof(c_float));
       if (!(b->values)) {
         c_free(b);
         b = OSQP_NULL;
@@ -57,11 +57,11 @@ OSQPVectori* OSQPVectori_malloc(c_int length){
 
   OSQPVectori *b;
 
-  b = c_malloc(sizeof(OSQPVectori));
+  b = (OSQPVectori*) c_malloc(sizeof(OSQPVectori));
   if (b) {
     b->length = length;
     if (length) {
-      b->values = c_malloc(length * sizeof(c_int));
+      b->values = (c_int*) c_malloc(length * sizeof(c_int));
       if (!(b->values)) {
         c_free(b);
         b = OSQP_NULL;
@@ -77,11 +77,11 @@ OSQPVectori* OSQPVectori_malloc(c_int length){
 OSQPVectorf* OSQPVectorf_calloc(c_int length){
 
   OSQPVectorf *b;
-  b = c_malloc(sizeof(OSQPVectorf));
+  b = (OSQPVectorf*) c_malloc(sizeof(OSQPVectorf));
   if (b) {
     b->length = length;
     if (length) {
-      b->values = c_calloc(length, sizeof(c_float));
+      b->values = (c_float*) c_calloc(length, sizeof(c_float));
       if (!(b->values)) {
         c_free(b);
         b = OSQP_NULL;
@@ -97,11 +97,11 @@ OSQPVectorf* OSQPVectorf_calloc(c_int length){
 OSQPVectori* OSQPVectori_calloc(c_int length){
 
   OSQPVectori *b;
-  b = c_malloc(sizeof(OSQPVectori));
+  b = (OSQPVectori*) c_malloc(sizeof(OSQPVectori));
   if (b) {
     b->length = length;
     if (length) {
-      b->values = c_calloc(length, sizeof(c_int));
+      b->values = (c_int*) c_calloc(length, sizeof(c_int));
       if (!(b->values)) {
         c_free(b);
         b = OSQP_NULL;
@@ -141,7 +141,7 @@ void OSQPVectori_free(OSQPVectori *a){
 
 OSQPVectorf* OSQPVectorf_view(const OSQPVectorf *a, c_int head, c_int length){
 
-  OSQPVectorf* view = c_malloc(sizeof(OSQPVectorf));
+  OSQPVectorf* view = (OSQPVectorf*) c_malloc(sizeof(OSQPVectorf));
   if(view){
     view->length = length;
     view->values   = a->values + head;
