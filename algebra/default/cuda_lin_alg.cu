@@ -90,5 +90,5 @@ void cuda_vec_mult_sc(c_float *d_a,
                       c_float  sc,
                       c_int    n) {
 
-  checkCudaErrors(cublasTscal(CUDA_handle->cublasHandle, n, sc, d_a, 1));
+  checkCudaErrors(cublasTscal(CUDA_handle->cublasHandle, n, &sc, d_a, 1));
 }
