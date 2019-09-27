@@ -12,9 +12,11 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 
 # Some non-standard CMake modules
-LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/configure/cmake)
-INCLUDE(FindPythonModule)
-INCLUDE(Utils)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/configure/cmake)
+include(GNUInstallDirs)
+include(FindPythonModule)
+include(Utils)
+include(FetchContent)
 # include(FindMKL)  # Find MKL module
 
 
@@ -157,6 +159,22 @@ if (NOT MSVC)
     endif()
 endif (NOT MSVC)
 
+# Get and setup the QDLDL library
+# ---------------------------------------------
+FetchContent_Declare(
+  qdldl
+  GIT_REPOSITORY https://github.com/oxfordcontrol/qdldl.git
+  GIT_TAG        v0.1.4
+  SOURCE_DIR     ${PROJECT_SOURCE_DIR}/lin_sys/direct/qdldl/qdldl_sources
+)
+
+FetchContent_GetProperties(qdldl)
+if(NOT qdldl_POPULATED)
+  message(STATUS "Downloading QDLDL sources")
+  FetchContent_Populate(qdldl)
+endif()
+
+
 # An empty library for OSQP sources.  All
 # subdirectory sources will be assembled here
 # ----------------------------------------------
@@ -283,8 +301,6 @@ target_include_directories(osqpstatic
 
 # Install Static Library
 # ----------------------------------------------
-
-include(GNUInstallDirs)
 
 install(TARGETS osqpstatic
         EXPORT  ${PROJECT_NAME}

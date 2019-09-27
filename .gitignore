@@ -3,6 +3,9 @@
 # Compile commands for cquery
 compile_commands.json
 
+# The qdldl sources are automatically populated by CMake
+lin_sys/direct/qdldl/qdldl_sources
+
 # Out folder
 out/
 
