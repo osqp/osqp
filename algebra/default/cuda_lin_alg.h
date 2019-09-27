@@ -65,6 +65,9 @@ void cuda_vec_add_scaled(c_float       *d_x,
                          c_float        scb,
                          c_int          n);
 
+/**
+ * d_x[i] = sca * d_a[i] + scb * d_b[i] + scc * d_c[i] for i in [0,n-1]
+ */
 void cuda_vec_add_scaled3(c_float       *d_x,
                           const c_float *d_a,
                           const c_float *d_b,
