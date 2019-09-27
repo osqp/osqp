@@ -139,7 +139,7 @@ OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf *a) {
 
   OSQPVectorf* b = OSQPVectorf_malloc(a->length);
   if (b) OSQPVectorf_copy(b, a);
-  if (b) cuda_vec_copy(b->d_val, a->d_val, a->length);
+  if (b) cuda_vec_copy_d2d(b->d_val, a->d_val, a->length);
 
   return b;
 }
@@ -207,7 +207,7 @@ void OSQPVectorf_from_raw(OSQPVectorf   *b,
     bv[i] = av[i];
   }
   
-  cuda_vec_copy_h2d(b->d_val, av, c_int n);
+  cuda_vec_copy_h2d(b->d_val, av, length);
 }
 
 void OSQPVectori_from_raw(OSQPVectori *b,
