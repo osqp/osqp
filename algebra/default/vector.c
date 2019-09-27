@@ -19,7 +19,7 @@ extern void cuda_vec_copy_d2h(c_float *h_y, const c_float *d_x, c_int n);
 extern void cuda_vec_set_sc(c_float *d_a, c_float sc, c_int n);
 extern void cuda_vec_set_sc_cond(c_float *d_a, const c_int *d_test, c_float sc_if_neg, c_float sc_if_zero, c_float sc_if_pos, c_float n);
 extern void cuda_vec_mult_sc(c_float *d_a, c_float sc, c_int n);
-cuda_vec_add_scaled(c_float *d_x, const c_float *d_a, const c_float *d_b, c_float sca, c_float scb, c_int n);
+extern void cuda_vec_add_scaled(c_float *d_x, const c_float *d_a, const c_float *d_b, c_float sca, c_float scb, c_int n);
 
 
 /*******************************************************************************

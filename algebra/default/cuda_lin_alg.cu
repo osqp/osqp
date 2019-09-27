@@ -107,7 +107,7 @@ void cuda_vec_add_scaled(c_float       *d_x,
     }
     else if (d_x == d_a) {
       /* d_x *= sca */
-      checkCudaErrors(cublasTscal(CUDA_handle->cublasHandle, n, &sca, d_a, 1));
+      checkCudaErrors(cublasTscal(CUDA_handle->cublasHandle, n, &sca, d_x, 1));
     }
     else {
       /* d_x = 0 */
