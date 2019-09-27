@@ -3,9 +3,9 @@
 set(algebra_impl_src
     "${CMAKE_CURRENT_SOURCE_DIR}/algebra_libs.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/cuda_handler.cu"
-    "${CMAKE_CURRENT_SOURCE_DIR}/cuda_malloc.cu"
+    # "${CMAKE_CURRENT_SOURCE_DIR}/cuda_malloc.cu"
     "${CMAKE_CURRENT_SOURCE_DIR}/matrix.c"
-    "${CMAKE_CURRENT_SOURCE_DIR}/vector.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/vector.cu"
 )
 
 set(algebra_impl_headers
