@@ -2,6 +2,9 @@
 #include "algebra_vector.h"
 #include "algebra_types.h"
 
+#include <cuda_runtime.h>
+#include "cuda_malloc.h"
+
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 

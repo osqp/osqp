@@ -23,6 +23,8 @@ inline cudaError_t c_cudaFree(T** devPtr) {
 }
 
 
+extern "C" {
+
 void cuda_malloc(void** devPtr, size_t size) {
   checkCudaErrors(c_cudaMalloc(devPtr, size));
 }
@@ -36,3 +38,4 @@ void cuda_free(void** devPtr, size_t size) {
   c_cudaFree(devPtr);
 }
 
+}
