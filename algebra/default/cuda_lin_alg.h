@@ -36,6 +36,11 @@ void cuda_vec_set_sc(c_float *d_a,
                      c_float  sc,
                      c_int    n);
 
+/**
+ *           | sc_if_neg   d_test[i]  < 0
+ * d_a[i] = <  sc_if_zero  d_test[i] == 0   for i in [0,n-1]
+ *           | sc_if_pos   d_test[i]  > 0
+ */
 void cuda_vec_set_sc_cond(c_float     *d_a,
                           const c_int *d_test,
                           c_float      sc_if_neg,
@@ -43,9 +48,20 @@ void cuda_vec_set_sc_cond(c_float     *d_a,
                           c_float      sc_if_pos,
                           c_float      n);
 
+/**
+ * d_a[i] *= sc for i in [0,n-1]
+ */
 void cuda_vec_mult_sc(c_float *d_a,
                       c_float  sc,
                       c_int    n);
+
+/**
+ * d_x[i] = d_a[i] + d_b[i] for i in [0,n-1]
+ */
+void cuda_vec_plus(c_float       *d_x,
+                   const c_float *d_a,
+                   const c_float *d_b,
+                   c_int          n);
 
 
 # ifdef __cplusplus
