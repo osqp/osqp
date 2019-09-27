@@ -31,6 +31,6 @@ void cuda_calloc(void** devPtr, size_t size) {
   checkCudaErrors(c_cudaCalloc(devPtr, size));
 }
 
-void cuda_free(void** devPtr, size_t size) {
+void cuda_free(void** devPtr) {
   c_cudaFree(devPtr);
 }
