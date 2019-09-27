@@ -4,12 +4,17 @@
 
 
 /*******************************************************************************
- *                       External CUDA function                                *
+ *                       External CUDA Functions                               *
  *******************************************************************************/
 
+/* cuda_malloc.h */
 extern void cuda_malloc(void** devPtr, size_t size);
 extern void cuda_calloc(void** devPtr, size_t size);
 extern void cuda_free(void** devPtr);
+
+/* cuda_lin_alg.h */
+extern void cuda_vec_copy_d2d(c_float *d_y, const c_float *d_x, c_int n);
+extern void cuda_vec_copy_h2d(c_float *d_y, const c_float *h_x, c_int n);
 
 
 /*******************************************************************************
@@ -22,7 +27,7 @@ OSQPVectorf* OSQPVectorf_new(const c_float *a,
   OSQPVectorf* out = OSQPVectorf_malloc(length);
   if (!out) return OSQP_NULL;
 
-  if (length > 0)  OSQPVectorf_from_raw(out, a);
+  if (length > 0) OSQPVectorf_from_raw(out, a);
   
   return out;
 }
@@ -134,13 +139,8 @@ OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf *a) {
 
   OSQPVectorf* b = OSQPVectorf_malloc(a->length);
   if (b) OSQPVectorf_copy(b, a);
-  return b;
-}
+  if (b) cuda_vec_copy(b->d_val, a->d_val, a->length);
 
-OSQPVectori* OSQPVectori_copy_new(const OSQPVectori *a) {
-
-  OSQPVectori* b = OSQPVectori_malloc(a->length);
-  if (b) OSQPVectori_copy(b, a);
   return b;
 }
 
@@ -206,6 +206,8 @@ void OSQPVectorf_from_raw(OSQPVectorf   *b,
   for (i = 0; i < length; i++) {
     bv[i] = av[i];
   }
+  
+  cuda_vec_copy_h2d(b->d_val, av, c_int n);
 }
 
 void OSQPVectori_from_raw(OSQPVectori *b,

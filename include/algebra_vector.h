@@ -39,9 +39,6 @@ OSQPVectori* OSQPVectori_new(const c_int *a, c_int length);
 /* Return a copy of a float vector a as output (Uses MALLOC) */
 OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf *a);
 
-/* Return a copy of an int vector a as output (Uses MALLOC) */
-OSQPVectori* OSQPVectori_copy_new(const OSQPVectori *a);
-
 /* Free a float vector */
 void OSQPVectorf_free(OSQPVectorf *a);
 
