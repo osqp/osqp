@@ -19,7 +19,7 @@ extern void cuda_vec_copy_d2h(c_float *h_y, const c_float *d_x, c_int n);
 extern void cuda_vec_set_sc(c_float *d_a, c_float sc, c_int n);
 extern void cuda_vec_set_sc_cond(c_float *d_a, const c_int *d_test, c_float sc_if_neg, c_float sc_if_zero, c_float sc_if_pos, c_float n);
 extern void cuda_vec_mult_sc(c_float *d_a, c_float sc, c_int n);
-extern void cuda_vec_plus(c_float *d_x, const c_float *d_a, const c_float *d_b, c_int n);
+extern void cuda_vec_xpay(c_float *d_z, const c_float *d_x, const c_float *d_y, c_float alpha, c_int n);
 
 
 /*******************************************************************************
@@ -279,7 +279,7 @@ void OSQPVectorf_plus(OSQPVectorf      *x,
       xv[i] = av[i] + bv[i];
     }
   }
-  cuda_vec_plus(x->d_val, a->d_val, b->d_val, a->length);
+  cuda_vec_xpay(x->d_val, a->d_val, b->d_val, 1.0, a->length);
 }
 
 void OSQPVectorf_minus(OSQPVectorf       *x,
@@ -302,6 +302,7 @@ void OSQPVectorf_minus(OSQPVectorf       *x,
       xv[i] = av[i] - bv[i];
     }
   }
+  cuda_vec_xpay(x->d_val, a->d_val, b->d_val, -1.0, a->length);
 }
 
 

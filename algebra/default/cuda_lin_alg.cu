@@ -93,22 +93,17 @@ void cuda_vec_mult_sc(c_float *d_a,
   checkCudaErrors(cublasTscal(CUDA_handle->cublasHandle, n, &sc, d_a, 1));
 }
 
-void cuda_vec_plus(c_float       *d_x,
-                   const c_float *d_a,
-                   const c_float *d_b,
+void cuda_vec_xpay(c_float       *d_z,
+                   const c_float *d_x,
+                   const c_float *d_y,
+                   c_float        alpha,
                    c_int          n) {
 
-  c_float alpha  = 1.0;
-
-  if (d_x == d_a) {
-    /* x += b */
-    checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, &alpha, d_b, 1, d_x, 1));
+  if (d_z != d_x) {
+    /* d_z = d_x */
+    checkCudaErrors(cudaMemcpy(d_z, d_x, n * sizeof(c_float), cudaMemcpyDeviceToDevice));
   }
-  else {
-    /* x = a */
-    checkCudaErrors(cudaMemcpy(d_x, d_a, n * sizeof(c_float), cudaMemcpyDeviceToDevice));
-
-    /* x += b */
-    checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, &alpha, d_b, 1, d_x, 1));
-  }
+  
+  /* d_z += alpha * d_y */
+  checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, &alpha, d_y, 1, d_z, 1));
 }
