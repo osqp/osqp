@@ -4,7 +4,6 @@
 
 #include <cuda_runtime.h>
 
-/* cuda_malloc.h */
 extern void cuda_malloc(void** devPtr, size_t size);
 extern void cuda_calloc(void** devPtr, size_t size);
 extern void cuda_free(void** devPtr);
