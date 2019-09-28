@@ -92,10 +92,10 @@ __global__ void vec_ew_prod_kernel(c_float       *c,
   }
 }
 
-__global__ void vec_all_leq_kernel(const c_float *l,
-                                   const c_float *u,
-                                   c_int         *res,
-                                   c_int          n) {
+__global__ void vec_leq_kernel(const c_float *l,
+                               const c_float *u,
+                               c_int         *res,
+                               c_int          n) {
 
   c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
   c_int grid_size = blockDim.x * gridDim.x;
@@ -105,11 +105,11 @@ __global__ void vec_all_leq_kernel(const c_float *l,
   }
 }
 
-__global__ void vec_ew_bound_kernel(c_float       *x,
-                                    const c_float *z,
-                                    const c_float *l,
-                                    const c_float *u,
-                                    c_int          n) {
+__global__ void vec_bound_kernel(c_float       *x,
+                                 const c_float *z,
+                                 const c_float *l,
+                                 const c_float *u,
+                                 c_int          n) {
 
   c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
   c_int grid_size = blockDim.x * gridDim.x;
@@ -164,9 +164,9 @@ __global__ void vec_in_reccone_kernel(const c_float *y,
   }
 }
 
-__global__ void vec_ew_reciprocal_kernel(c_float       *b,
-                                         const c_float *a,
-                                         c_int          n) {
+__global__ void vec_reciprocal_kernel(c_float       *b,
+                                      const c_float *a,
+                                      c_int          n) {
 
   c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
   c_int grid_size = blockDim.x * gridDim.x;
@@ -180,8 +180,8 @@ __global__ void vec_ew_reciprocal_kernel(c_float       *b,
   }
 }
 
-__global__ void vec_ew_sqrt_kernel(c_float *a,
-                                   c_int    n) {
+__global__ void vec_sqrt_kernel(c_float *a,
+                                c_int    n) {
 
   c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
   c_int grid_size = blockDim.x * gridDim.x;
@@ -192,6 +192,32 @@ __global__ void vec_ew_sqrt_kernel(c_float *a,
 #else
     a[i] = __drcp_rn(__dsqrt_rn(a[i]));
 #endif
+  }
+}
+
+__global__ void vec_max_kernel(c_float       *c,
+                               const c_float *a,
+                               const c_float *b,
+                               c_int          n) {
+
+  c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  c_int grid_size = blockDim.x * gridDim.x;
+
+  for(c_int i = idx; i < n; i += grid_size) {
+    c[i] = c_max(a[i], b[i]);
+  }
+}
+
+__global__ void vec_min_kernel(c_float       *c,
+                               const c_float *a,
+                               const c_float *b,
+                               c_int          n) {
+
+  c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  c_int grid_size = blockDim.x * gridDim.x;
+
+  for(c_int i = idx; i < n; i += grid_size) {
+    c[i] = c_min(a[i], b[i]);
   }
 }
 
@@ -381,10 +407,10 @@ void cuda_vec_ew_prod(c_float       *d_c,
   vec_ew_prod_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_c, d_a, d_b, n);
 }
 
-void cuda_vec_all_leq(const c_float *d_l,
-                      const c_float *d_u,
-                      c_int          n,
-                      c_int         *h_res) {
+void cuda_vec_leq(const c_float *d_l,
+                   const c_float *d_u,
+                   c_int          n,
+                   c_int         *h_res) {
 
   c_int *d_res;
   c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
@@ -395,22 +421,22 @@ void cuda_vec_all_leq(const c_float *d_l,
   *h_res = 1;
   checkCudaErrors(cudaMemcpy(d_res, h_res, sizeof(c_int), cudaMemcpyHostToDevice));
 
-  vec_all_leq_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_l, d_u, d_res, n);
+  vec_all_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_l, d_u, d_res, n);
 
   checkCudaErrors(cudaMemcpy(h_res, d_res, sizeof(c_int), cudaMemcpyDeviceToHost));
 
   cuda_free((void **) &d_res);
 }
 
-void cuda_vec_ew_bound(c_float       *d_x,
-                       const c_float *d_z,
-                       const c_float *d_l,
-                       const c_float *d_u,
-                       c_int          n) {
+void cuda_vec_bound(c_float       *d_x,
+                    const c_float *d_z,
+                    const c_float *d_l,
+                    const c_float *d_u,
+                    c_int          n) {
 
   c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
 
-  vec_ew_bound_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_x, d_z, d_l, d_u, n);
+  vec_bound_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_x, d_z, d_l, d_u, n);
 }
 
 void cuda_vec_project_polar_reccone(c_float       *d_y,
@@ -448,19 +474,39 @@ void cuda_vec_in_reccone(const c_float *d_y,
   cuda_free((void **) &d_res);
 }
 
-void cuda_vec_ew_reciprocal(c_float       *d_b,
-                            const c_float *d_a,
-                            c_int          n) {
+void cuda_vec_reciprocal(c_float       *d_b,
+                         const c_float *d_a,
+                         c_int          n) {
 
   c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
 
-  vec_ew_reciprocal_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_b, d_a, n);
+  vec_reciprocal_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_b, d_a, n);
 }
 
-void cuda_vec_ew_sqrt(c_float *d_a,
-                      c_int    n) {
+void cuda_vec_sqrt(c_float *d_a,
+                   c_int    n) {
 
   c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
 
-  vec_ew_sqrt_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_a, n);
+  vec_sqrt_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_a, n);
+}
+
+void cuda_vec_max(c_float       *d_c,
+                  const c_float *d_a,
+                  const c_float *d_b,
+                  c_int          n) {
+
+  c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
+
+  vec_max_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_c, d_a, d_b, n);
+}
+
+void cuda_vec_min(c_float       *d_c,
+                  const c_float *d_a,
+                  const c_float *d_b,
+                  c_int          n) {
+
+  c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
+
+  vec_min_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_c, d_a, d_b, n);
 }

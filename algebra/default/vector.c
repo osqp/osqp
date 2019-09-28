@@ -27,12 +27,14 @@ extern void cuda_vec_mean(const c_float *d_x, c_int n, c_float *h_res);
 extern void cuda_vec_prod(const c_float *d_a, const c_float *d_b, c_int n, c_float *h_res);
 extern void cuda_vec_prod_signed(const c_float *d_a, const c_float *d_b, c_int sign, c_int n, c_float *h_res);
 extern void cuda_vec_ew_prod(c_float *d_c, const c_float *d_a, const c_float *d_b, c_int n);
-extern void cuda_vec_all_leq(const c_float *d_l, const c_float *d_u, c_int n, c_int *h_res);
-extern void cuda_vec_ew_bound(c_float *d_x, const c_float *d_z, const c_float *d_l, const c_float *d_u, c_int n);
+extern void cuda_vec_leq(const c_float *d_l, const c_float *d_u, c_int n, c_int *h_res);
+extern void cuda_vec_bound(c_float *d_x, const c_float *d_z, const c_float *d_l, const c_float *d_u, c_int n);
 extern void cuda_vec_project_polar_reccone(c_float *d_y, const c_float *d_l, const c_float *d_u, c_float infval, c_int n);
 extern void cuda_vec_in_reccone(const c_float *d_y, const c_float *d_l, const c_float *d_u, c_float infval, c_float tol, c_int n, c_int *h_res);
-extern void cuda_vec_ew_reciprocal(c_float *d_b, const c_float *d_a, c_int n);
-extern void cuda_vec_ew_sqrt(c_float *d_a, c_int n);
+extern void cuda_vec_reciprocal(c_float *d_b, const c_float *d_a, c_int n);
+extern void cuda_vec_sqrt(c_float *d_a, c_int n);
+extern void cuda_vec_max(c_float *d_c, const c_float *d_a, const c_float *d_b, c_int n);
+extern void cuda_vec_min(c_float *d_c, const c_float *d_a, const c_float *d_b, c_int n);
 
 
 /*******************************************************************************
@@ -559,7 +561,7 @@ c_int OSQPVectorf_all_leq(OSQPVectorf *l,
   c_float*  uv = u->values;
   c_int  cuda_res;
 
-  cuda_vec_all_leq(l->d_val, u->d_val, l->length, &cuda_res);
+  cuda_vec_leq(l->d_val, u->d_val, l->length, &cuda_res);
 
   for (i = 0; i < length; i++) {
     if (lv[i] > uv[i]) return 0;
@@ -579,7 +581,7 @@ void OSQPVectorf_ew_bound_vec(OSQPVectorf       *x,
   c_float*  lv = l->values;
   c_float*  uv = u->values;
 
-  cuda_vec_ew_bound(x->d_val, z->d_val, l->d_val, u->d_val, x->length);
+  cuda_vec_bound(x->d_val, z->d_val, l->d_val, u->d_val, x->length);
 
   for (i = 0; i < length; i++) {
     xv[i] = c_min(c_max(zv[i], lv[i]), uv[i]);
@@ -651,7 +653,7 @@ void OSQPVectorf_ew_reciprocal(OSQPVectorf       *b,
   c_float*  av = a->values;
   c_float*  bv = b->values;
 
-  if (b->length) cuda_vec_ew_reciprocal(b->d_val, a->d_val, b->length);
+  if (b->length) cuda_vec_reciprocal(b->d_val, a->d_val, b->length);
 
   for (i = 0; i < length; i++) {
     bv[i] = (c_float)1.0 / av[i];
@@ -664,38 +666,10 @@ void OSQPVectorf_ew_sqrt(OSQPVectorf *a) {
   c_int length = a->length;
   c_float*  av = a->values;
 
-  if (a->length) cuda_vec_ew_sqrt(a->d_val, a->length);
+  if (a->length) cuda_vec_sqrt(a->d_val, a->length);
 
   for (i = 0; i < length; i++) {
     av[i] = c_sqrt(av[i]);
-  }
-}
-
-void OSQPVectorf_ew_max(OSQPVectorf       *c,
-                        const OSQPVectorf *a,
-                        c_float            max_val) {
-
-  c_int i;
-  c_int length = c->length;
-  c_float*  av = a->values;
-  c_float*  cv = c->values;
-
-  for (i = 0; i < length; i++) {
-    cv[i] = c_max(av[i], max_val);
-  }
-}
-
-void OSQPVectorf_ew_min(OSQPVectorf       *c,
-                        const OSQPVectorf *a,
-                        c_float            min_val) {
-
-  c_int i;
-  c_int length = a->length;
-  c_float*  av = a->values;
-  c_float*  cv = c->values;
-
-  for (i = 0; i < length; i++) {
-    cv[i] = c_min(av[i], min_val);
   }
 }
 
@@ -708,6 +682,8 @@ void OSQPVectorf_ew_max_vec(OSQPVectorf       *c,
   c_float*  av = a->values;
   c_float*  bv = b->values;
   c_float*  cv = c->values;
+
+  if (c->length) cuda_vec_max(c->d_val, a->d_val, b->d_val, c->length);
 
   for (i = 0; i < length; i++) {
     cv[i] = c_max(av[i], bv[i]);
@@ -723,6 +699,8 @@ void OSQPVectorf_ew_min_vec(OSQPVectorf       *c,
   c_float*  av = a->values;
   c_float*  bv = b->values;
   c_float*  cv = c->values;
+
+  if (c->length) cuda_vec_min(c->d_val, a->d_val, b->d_val, c->length);
 
   for (i = 0; i < length; i++) {
     cv[i] = c_min(av[i], bv[i]);

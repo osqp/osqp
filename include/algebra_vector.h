@@ -196,12 +196,6 @@ void OSQPVectorf_ew_reciprocal( OSQPVectorf *b, const OSQPVectorf *a);
 /* elementwise sqrt of the vector elements */
 void OSQPVectorf_ew_sqrt(OSQPVectorf *a);
 
-/* Elementwise maximum between vector and scalar c = max(a, sc) */
-void OSQPVectorf_ew_max(OSQPVectorf *c, const OSQPVectorf *a, c_float sc);
-
-/* Elementwise minimum between vector and scalar c = min(a, sc) */
-void OSQPVectorf_ew_min(OSQPVectorf *c, const OSQPVectorf *a, c_float sc);
-
 /* Elementwise maximum between vectors c = max(a, b) */
 void OSQPVectorf_ew_max_vec(OSQPVectorf       *c,
                             const OSQPVectorf *a,
