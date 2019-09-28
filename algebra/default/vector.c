@@ -23,6 +23,8 @@ extern void cuda_vec_add_scaled(c_float *d_x, const c_float *d_a, const c_float 
 extern void cuda_vec_add_scaled3(c_float *d_x, const c_float *d_a, const c_float *d_b, const c_float *d_c, c_float sca, c_float scb, c_float scc, c_int n);
 extern void cuda_vec_norm_inf(const c_float *d_x, c_int n, c_float *h_res);
 extern void cuda_vec_norm_1(const c_float *d_x, c_int n, c_float *h_res);
+extern void cuda_vec_scaled_norm_inf(const c_float *d_S, const c_float *d_v, c_int n, c_float *h_res);
+extern void cuda_vec_diff_norm_inf(const c_float *d_a, const c_float *d_b, c_int n, c_float *h_res);
 extern void cuda_vec_mean(const c_float *d_x, c_int n, c_float *h_res);
 extern void cuda_vec_prod(const c_float *d_a, const c_float *d_b, c_int n, c_float *h_res);
 extern void cuda_vec_prod_signed(const c_float *d_a, const c_float *d_b, c_int sign, c_int n, c_float *h_res);
@@ -415,7 +417,6 @@ c_float OSQPVectorf_norm_1(const OSQPVectorf *v) {
   return normval;
 }
 
-// TODO
 c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S,
                                     const OSQPVectorf *v) {
 
@@ -425,6 +426,10 @@ c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S,
   c_float*  Sv  = S->values;
   c_float absval;
   c_float normval = 0.0;
+  c_float cuda_normval;
+
+  if (v->length) cuda_vec_scaled_norm_inf(S->d_val, v->d_val, v->length, &cuda_normval);
+  else           cuda_normval = 0.0;
 
   for (i = 0; i < length; i++) {
     absval = c_absval(Sv[i] * vv[i]);
@@ -433,7 +438,6 @@ c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S,
   return normval;
 }
 
-// TODO
 c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
                                   const OSQPVectorf *b) {
 
@@ -443,6 +447,10 @@ c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
   c_float*  bv   = b->values;
   c_float absval;
   c_float normDiff = 0.0;
+  c_float cuda_normDiff;
+
+  if (a->length) cuda_vec_diff_norm_inf(a->d_val, b->d_val, a->length, &cuda_normDiff);
+  else           cuda_normDiff = 0.0;
 
   for (i = 0; i < length; i++) {
     absval = c_absval(av[i] - bv[i]);

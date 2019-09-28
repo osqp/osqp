@@ -419,6 +419,42 @@ void cuda_vec_norm_1(const c_float *d_x,
   cublasTasum(CUDA_handle->cublasHandle, n, d_x, 1, h_res);
 }
 
+void cuda_vec_scaled_norm_inf(const c_float *d_S,
+                              const c_float *d_v,
+                              c_int          n,
+                              c_float       *h_res) {
+
+  c_float *d_v_scaled;
+
+  cuda_malloc((void **) &d_v_scaled, n * sizeof(c_float));
+
+  /* d_v_scaled = d_S * d_v */
+  cuda_vec_ew_prod(d_v_scaled, d_S, d_v, n);
+
+  /* (*h_res) = |d_v_scaled|_inf */
+  cuda_vec_norm_inf(d_v_scaled, n, h_res);
+
+  cuda_free((void **) &d_v_scaled);
+}
+
+void cuda_vec_diff_norm_inf(const c_float *d_a,
+                            const c_float *d_b,
+                            c_int          n,
+                            c_float       *h_res) {
+
+  c_float *d_diff;
+
+  cuda_malloc((void **) &d_diff, n * sizeof(c_float));
+
+  /* d_diff = d_a - d_b */
+  cuda_vec_add_scaled(d_diff, d_a, d_b, 1.0, -1.0, n);
+
+  /* (*h_res) = |d_diff|_inf */
+  cuda_vec_norm_inf(d_diff, n, h_res);
+
+  cuda_free((void **) &d_diff);
+}
+
 void cuda_vec_mean(const c_float *d_x,
                    c_int          n,
                    c_float       *h_res) {

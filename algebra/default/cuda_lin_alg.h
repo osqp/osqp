@@ -92,6 +92,22 @@ void cuda_vec_norm_1(const c_float *d_x,
                      c_float       *h_res);
 
 /**
+ * h_res = |S*v|_inf
+ */
+void cuda_vec_scaled_norm_inf(const c_float *d_S,
+                              const c_float *d_v,
+                              c_int          n,
+                              c_float       *h_res);
+
+/**
+ * h_res = |d_a - d_b|_inf
+ */
+void cuda_vec_diff_norm_inf(const c_float *d_a,
+                            const c_float *d_b,
+                            c_int          n,
+                            c_float       *h_res);
+
+/**
  * h_res = sum(d_x) / n
  */
 void cuda_vec_mean(const c_float *d_x,
