@@ -1,4 +1,4 @@
-#include "osqp.h"
+#include "osqp_api_types.h"
 #include "algebra_vector.h"
 #include "algebra_types.h"
 
