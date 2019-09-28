@@ -101,7 +101,7 @@ __global__ void vec_all_leq_kernel(const c_float *l,
   c_int grid_size = blockDim.x * gridDim.x;
 
   for(c_int i = idx; i < n; i += grid_size) {
-    if (l[i] > u[i]) atomicAnd(retval, 0);
+    if (l[i] > u[i]) atomicAnd(res, 0);
   }
 }
 
