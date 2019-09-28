@@ -41,6 +41,38 @@ __global__ void vec_set_sc_cond_kernel(c_float     *a,
   }
 }
 
+__global__ void vec_prod_pos_kernel(const c_float *a,
+                                    const c_float *b,
+                                    c_float       *res,
+                                    c_int          n) {
+
+  c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  c_int grid_size = blockDim.x * gridDim.x;
+
+  c_float res_kernel = 0.0;
+
+  for(c_int i = idx; i < n; i += grid_size) {
+    res_kernel += a[i] * c_max(b[i], 0.0);
+  }
+  atomicAdd(res, res_kernel);
+}
+
+__global__ void vec_prod_neg_kernel(const c_float *a,
+                                    const c_float *b,
+                                    c_float       *res,
+                                    c_int          n) {
+
+  c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  c_int grid_size = blockDim.x * gridDim.x;
+
+  c_float res_kernel = 0.0;
+
+  for(c_int i = idx; i < n; i += grid_size) {
+    res_kernel += a[i] * c_min(b[i], 0.0);
+  }
+  atomicAdd(res, res_kernel);
+}
+
 
 /*******************************************************************************
  *                           API Functions                                     *
@@ -200,7 +232,7 @@ void cuda_vec_prod_signed(const c_float *d_a,
   c_float *d_res;
   c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
 
-  checkCudaErrors(c_cudaCalloc(&d_res, sizeof(c_float)));
+  checkCudaErrors(cuda_calloc((void **) &d_res, sizeof(c_float)));
 
   if (sign == 1) {
     vec_prod_pos_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_a, d_b, d_res, n);
@@ -214,5 +246,5 @@ void cuda_vec_prod_signed(const c_float *d_a,
     checkCudaErrors(cublasTdot(CUDA_handle->cublasHandle, n, d_a, 1, d_b, 1, h_res));
   }
 
-  cuda_free(&d_dotprod);
+  cuda_free((void **) &d_dotprod);
 }
