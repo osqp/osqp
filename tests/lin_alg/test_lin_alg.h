@@ -297,6 +297,9 @@ static const char* test_quad_form_upper_triang() {
 
 static const char* test_lin_alg()
 {
+  // initialize algebra libraries
+  osqp_algebra_init_libs();
+
   mu_run_test(test_constr_sparse_mat);
   mu_run_test(test_vec_operations);
   mu_run_test(test_mat_operations);

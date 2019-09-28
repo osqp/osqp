@@ -125,7 +125,7 @@ c_int osqp_setup(OSQPSolver** solverp,
 # endif /* ifdef PROFILING */
 
   // Initialize algebra libraries
-  exitflag = algebra_init_libs();
+  exitflag = osqp_algebra_init_libs();
   if (exitflag) {
     return osqp_error(OSQP_ALGEBRA_LOAD_ERROR);
   }
@@ -700,7 +700,7 @@ c_int osqp_cleanup(OSQPSolver *solver) {
 
   if (work) { // If workspace has been allocated
     // Free algebra library handlers
-    algebra_free_libs();
+    osqp_algebra_free_libs();
 
     // Free Data
     if (work->data) {
