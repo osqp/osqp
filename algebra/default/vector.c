@@ -26,6 +26,7 @@ extern void cuda_vec_norm_1(const c_float *d_x, c_int n, c_float *h_res);
 extern void cuda_vec_mean(const c_float *d_x, c_int n, c_float *h_res);
 extern void cuda_vec_prod(const c_float *d_a, const c_float *d_b, c_int n, c_float *h_res);
 extern void cuda_vec_prod_signed(const c_float *d_a, const c_float *d_b, c_int sign, c_int n, c_float *h_res);
+extern void cuda_vec_ew_prod(c_float *d_c, const c_float *d_a, const c_float *d_b, c_int n);
 
 
 /*******************************************************************************
@@ -529,6 +530,7 @@ void OSQPVectorf_ew_prod(OSQPVectorf       *c,
   c_float*  bv   = b->values;
   c_float*  cv   = c->values;
 
+  if (c->length) cuda_vec_ew_prod(c->d_val, a->d_val, b->d_val, c->length);
 
   if (c == a) {
     for (i = 0; i < length; i++) {

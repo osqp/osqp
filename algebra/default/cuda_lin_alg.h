@@ -117,6 +117,14 @@ void cuda_vec_prod_signed(const c_float *d_a,
                           c_int          n,
                           c_float       *h_res);
 
+/**
+ * d_c[i] = d_a[i] * d_b[i] for i in [0,n-1]
+ */
+void cuda_vec_ew_prod(c_float       *d_c,
+                      const c_float *d_a,
+                      const c_float *d_b,
+                      c_int          n);
+
 # ifdef __cplusplus
 }
 # endif /* ifdef __cplusplus */

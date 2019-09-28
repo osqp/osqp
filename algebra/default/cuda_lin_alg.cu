@@ -75,6 +75,23 @@ __global__ void vec_prod_neg_kernel(const c_float *a,
   atomicAdd(res, res_kernel);
 }
 
+__global__ void ew_prod_kernel(c_float       *c,
+                               const c_float *a,
+                               const c_float *b,
+                               c_int          n) {
+
+  c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  c_int grid_size = blockDim.x * gridDim.x;
+
+  for(c_int i = idx; i < n; i += grid_size) {
+#ifdef DFLOAT
+    c[i] = __fmul_rn(a[i], b[i]);
+#else
+    c[i] = __dmul_rn(a[i], b[i]);
+#endif
+  }
+}
+
 
 /*******************************************************************************
  *                           API Functions                                     *
@@ -249,4 +266,14 @@ void cuda_vec_prod_signed(const c_float *d_a,
   }
 
   cuda_free((void **) &d_res);
+}
+
+void cuda_vec_ew_prod(c_float       *d_c,
+                      const c_float *d_a,
+                      const c_float *d_b,
+                      c_int          n) {
+
+  c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
+
+  vec_ew_prod_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_c, d_a, d_b, n);
 }
