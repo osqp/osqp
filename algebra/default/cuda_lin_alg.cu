@@ -164,6 +164,37 @@ __global__ void vec_in_reccone_kernel(const c_float *y,
   }
 }
 
+__global__ void vec_ew_reciprocal_kernel(c_float       *b,
+                                         const c_float *a,
+                                         c_int          n) {
+
+  c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  c_int grid_size = blockDim.x * gridDim.x;
+
+  for(c_int i = idx; i < n; i += grid_size) {
+#ifdef DFLOAT
+    b[i] = __frcp_rn(a[i]);
+#else
+    b[i] = __drcp_rn(a[i]);
+#endif
+  }
+}
+
+__global__ void vec_ew_sqrt_kernel(c_float *a,
+                                   c_int    n) {
+
+  c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  c_int grid_size = blockDim.x * gridDim.x;
+
+  for(c_int i = idx; i < n; i += grid_size) {
+#ifdef DFLOAT
+    a[i] = __frsqrt_rn(a[i]);
+#else
+    a[i] = __drcp_rn(__dsqrt_rn(a[i]));
+#endif
+  }
+}
+
 
 /*******************************************************************************
  *                           API Functions                                     *
@@ -415,4 +446,21 @@ void cuda_vec_in_reccone(const c_float *d_y,
   checkCudaErrors(cudaMemcpy(&h_res, d_res, sizeof(c_int), cudaMemcpyDeviceToHost));
 
   cuda_free((void **) &d_res);
+}
+
+void cuda_vec_ew_reciprocal(c_float       *d_b,
+                            const c_float *d_a,
+                            c_int          n) {
+
+  c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
+
+  vec_ew_reciprocal_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_b, d_a, n);
+}
+
+void cuda_vec_ew_sqrt(c_float *d_a,
+                      c_int    n) {
+
+  c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
+
+  vec_ew_sqrt_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_a, n);
 }

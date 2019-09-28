@@ -184,12 +184,6 @@ c_int OSQPVectorf_in_reccone(const OSQPVectorf *y,
                              c_float           infval,
                              c_float           tol);
 
-/* vector permutation x[:] = b(p[:]) */
-void OSQPVectorf_permute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p);
-
-/* vector inverse permutation x(p[:]) = b */
-void OSQPVectorf_ipermute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p);
-
 
 # if EMBEDDED != 1
 

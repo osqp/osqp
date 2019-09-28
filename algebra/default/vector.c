@@ -31,6 +31,9 @@ extern void cuda_vec_all_leq(const c_float *d_l, const c_float *d_u, c_int n, c_
 extern void cuda_vec_ew_bound(c_float *d_x, const c_float *d_z, const c_float *d_l, const c_float *d_u, c_int n);
 extern void cuda_vec_project_polar_reccone(c_float *d_y, const c_float *d_l, const c_float *d_u, c_float infval, c_int n);
 extern void cuda_vec_in_reccone(const c_float *d_y, const c_float *d_l, const c_float *d_u, c_float infval, c_float tol, c_int n, c_int *h_res);
+extern void cuda_vec_ew_reciprocal(c_float *d_b, const c_float *d_a, c_int n);
+extern void cuda_vec_ew_sqrt(c_float *d_a, c_int n);
+
 
 /*******************************************************************************
  *                           API Functions                                     *
@@ -640,37 +643,6 @@ c_int OSQPVectorf_in_reccone(const OSQPVectorf *y,
   return 1;
 }
 
-
-void OSQPVectorf_permute(OSQPVectorf       *x,
-                         const OSQPVectorf *b,
-                         const OSQPVectori *p) {
-
-  c_int j;
-  c_int length = x->length;
-  c_float*  xv = x->values;
-  c_float*  bv = b->values;
-  c_int*    pv = p->values;
-
-  for (j = 0; j < length; j++) {
-    xv[j] = bv[pv[j]];
-  }
-}
-
-void OSQPVectorf_ipermute(OSQPVectorf       *x,
-                          const OSQPVectorf *b,
-                          const OSQPVectori *p) {
-
-  c_int j;
-  c_int length = x->length;
-  c_float*  xv = x->values;
-  c_float*  bv = b->values;
-  c_int*    pv = p->values;
-
-  for (j = 0; j < length; j++) {
-    xv[pv[j]] = bv[j];
-  }
-}
-
 void OSQPVectorf_ew_reciprocal(OSQPVectorf       *b,
                                const OSQPVectorf *a) {
 
@@ -678,6 +650,8 @@ void OSQPVectorf_ew_reciprocal(OSQPVectorf       *b,
   c_int length = a->length;
   c_float*  av = a->values;
   c_float*  bv = b->values;
+
+  if (b->length) cuda_vec_ew_reciprocal(b->d_val, a->d_val, b->length);
 
   for (i = 0; i < length; i++) {
     bv[i] = (c_float)1.0 / av[i];
@@ -689,6 +663,8 @@ void OSQPVectorf_ew_sqrt(OSQPVectorf *a) {
   c_int i;
   c_int length = a->length;
   c_float*  av = a->values;
+
+  if (a->length) cuda_vec_ew_sqrt(a->d_val, a->length);
 
   for (i = 0; i < length; i++) {
     av[i] = c_sqrt(av[i]);

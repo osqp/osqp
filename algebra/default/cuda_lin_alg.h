@@ -134,7 +134,7 @@ void cuda_vec_all_leq(const c_float *d_l,
                       c_int         *h_res);
 
 /**
- * d_x[i] = min( max(d_z[i], d_l[i]), d_u[i] )
+ * d_x[i] = min( max(d_z[i], d_l[i]), d_u[i] ) for i in [0,n-1]
  */
 void cuda_vec_ew_bound(c_float       *d_x,
                        const c_float *d_z,
@@ -165,6 +165,19 @@ void cuda_vec_in_reccone(const c_float *d_y,
                          c_float        tol,
                          c_int          n,
                          c_int         *h_res);
+
+/**
+ * d_b[i] = 1 / d_a[i] for i in [0,n-1]
+ */
+void cuda_vec_ew_reciprocal(c_float       *d_b,
+                            const c_float *d_a,
+                            c_int          n);
+
+/**
+ * d_a[i] = sqrt(d_a[i]) for i in [0,n-1]
+ */
+void cuda_vec_ew_sqrt(c_float *d_a,
+                      c_int    n);
 
 # ifdef __cplusplus
 }
