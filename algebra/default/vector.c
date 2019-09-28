@@ -28,7 +28,7 @@ extern void cuda_vec_prod(const c_float *d_a, const c_float *d_b, c_int n, c_flo
 extern void cuda_vec_prod_signed(const c_float *d_a, const c_float *d_b, c_int sign, c_int n, c_float *h_res);
 extern void cuda_vec_ew_prod(c_float *d_c, const c_float *d_a, const c_float *d_b, c_int n);
 extern void cuda_vec_all_leq(const c_float *d_l, const c_float *d_u, c_int n, c_int *h_res);
-
+extern void cuda_vec_ew_bound(c_float *d_x, const c_float *d_z, const c_float *d_l, const c_float *d_u, c_int n);
 
 /*******************************************************************************
  *                           API Functions                                     *
@@ -563,7 +563,7 @@ c_int OSQPVectorf_all_leq(OSQPVectorf *l,
 }
 
 void OSQPVectorf_ew_bound_vec(OSQPVectorf       *x,
-                              OSQPVectorf       *z,
+                              const OSQPVectorf *z,
                               const OSQPVectorf *l,
                               const OSQPVectorf *u) {
 
@@ -573,6 +573,8 @@ void OSQPVectorf_ew_bound_vec(OSQPVectorf       *x,
   c_float*  zv = z->values;
   c_float*  lv = l->values;
   c_float*  uv = u->values;
+
+  cuda_vec_ew_bound(x->d_val, z->d_val, l->d_val, u->d_val, x->length);
 
   for (i = 0; i < length; i++) {
     xv[i] = c_min(c_max(zv[i], lv[i]), uv[i]);
@@ -647,21 +649,6 @@ void OSQPVectorf_permute(OSQPVectorf       *x,
   }
 }
 
-void OSQPVectori_permute(OSQPVectori       *x,
-                         const OSQPVectori *b,
-                         const OSQPVectori *p) {
-
-  c_int j;
-  c_int length = x->length;
-  c_int*    xv = x->values;
-  c_int*    bv = b->values;
-  c_int*    pv = p->values;
-
-  for (j = 0; j < length; j++) {
-    xv[j] = bv[pv[j]];
-  }
-}
-
 void OSQPVectorf_ipermute(OSQPVectorf       *x,
                           const OSQPVectorf *b,
                           const OSQPVectori *p) {
@@ -670,21 +657,6 @@ void OSQPVectorf_ipermute(OSQPVectorf       *x,
   c_int length = x->length;
   c_float*  xv = x->values;
   c_float*  bv = b->values;
-  c_int*    pv = p->values;
-
-  for (j = 0; j < length; j++) {
-    xv[pv[j]] = bv[j];
-  }
-}
-
-void OSQPVectori_ipermute(OSQPVectori       *x,
-                          const OSQPVectori *b,
-                          const OSQPVectori *p) {
-
-  c_int j;
-  c_int length = x->length;
-  c_int*    xv = x->values;
-  c_int*    bv = b->values;
   c_int*    pv = p->values;
 
   for (j = 0; j < length; j++) {

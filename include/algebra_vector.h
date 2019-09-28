@@ -159,9 +159,9 @@ c_int OSQPVectorf_all_leq(OSQPVectorf *l, OSQPVectorf* u);
  * that x = min(max(x,l),u) is allowed
  */
 void OSQPVectorf_ew_bound_vec(OSQPVectorf *x,
-                               OSQPVectorf *z,
-                               const OSQPVectorf *l,
-                               const OSQPVectorf *u);
+                              const OSQPVectorf *z,
+                              const OSQPVectorf *l,
+                              const OSQPVectorf *u);
 
 
 /* Elementwise projection of y onto the polar recession cone
@@ -186,11 +186,9 @@ c_int OSQPVectorf_in_reccone(const OSQPVectorf *y,
 
 /* vector permutation x[:] = b(p[:]) */
 void OSQPVectorf_permute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p);
-void OSQPVectori_permute(OSQPVectori *x, const OSQPVectori *b, const OSQPVectori *p);
 
 /* vector inverse permutation x(p[:]) = b */
 void OSQPVectorf_ipermute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p);
-void OSQPVectori_ipermute(OSQPVectori *x, const OSQPVectori *b, const OSQPVectori *p);
 
 
 # if EMBEDDED != 1

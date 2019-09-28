@@ -125,10 +125,22 @@ void cuda_vec_ew_prod(c_float       *d_c,
                       const c_float *d_b,
                       c_int          n);
 
+/**
+ * h_res = all(d_l <= d_u)
+ */
 void cuda_vec_all_leq(const c_float *d_l,
                       const c_float *d_u,
                       c_int          n,
                       c_int         *h_res);
+
+/**
+ * d_x[i] = min( max(d_z[i], d_l[i]), d_u[i] )
+ */
+void cuda_vec_ew_bound(c_float       *d_x,
+                       const c_float *d_z,
+                       const c_float *d_l,
+                       const c_float *d_u,
+                       c_int          n);
 
 # ifdef __cplusplus
 }

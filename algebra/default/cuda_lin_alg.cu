@@ -105,6 +105,20 @@ __global__ void vec_all_leq_kernel(const c_float *l,
   }
 }
 
+__global__ void vec_ew_bound_kernel(c_float       *x,
+                                    const c_float *z,
+                                    const c_float *l,
+                                    const c_float *u,
+                                    c_int          n) {
+
+  c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  c_int grid_size = blockDim.x * gridDim.x;
+
+  for(c_int i = idx; i < n; i += grid_size) {
+    x[i] = c_min(c_max(z[i], l[i]), u[i]);
+  }
+}
+
 
 /*******************************************************************************
  *                           API Functions                                     *
@@ -310,4 +324,15 @@ void cuda_vec_all_leq(const c_float *d_l,
   checkCudaErrors(cudaMemcpy(h_res, d_res, sizeof(c_int), cudaMemcpyDeviceToHost));
 
   cuda_free((void **) &d_res);
+}
+
+void cuda_vec_ew_bound(c_float       *d_x,
+                       const c_float *d_z,
+                       const c_float *d_l,
+                       const c_float *d_u,
+                       c_int          n) {
+
+  c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
+
+  vec_ew_bound_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_x, d_z, d_l, d_u, n);
 }
