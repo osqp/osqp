@@ -171,14 +171,14 @@ void cuda_vec_norm_1(const c_float *d_x,
                      c_int          n,
                      c_float       *h_res) {
 
-  cublasTasum(CUDA_handle->cublasHandle, n, d_x, 1, &h_res);
+  cublasTasum(CUDA_handle->cublasHandle, n, d_x, 1, h_res);
 }
 
 void cuda_vec_mean(const c_float *d_x,
                    c_int          n,
                    c_float       *h_res) {
 
-  cublasTasum(CUDA_handle->cublasHandle, n, d_x, 1, &h_res);
+  cublasTasum(CUDA_handle->cublasHandle, n, d_x, 1, h_res);
   (*h_res) /= n;
 }
 
@@ -187,5 +187,5 @@ void cuda_vec_prod(const c_float *d_a,
                    c_int          n,
                    c_float       *h_res) {
 
-  checkCudaErrors(cublasTdot(CUDA_handle->cublasHandle, n, d_a, 1, d_b, 1, &h_res));
+  checkCudaErrors(cublasTdot(CUDA_handle->cublasHandle, n, d_a, 1, d_b, 1, h_res));
 }
