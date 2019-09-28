@@ -75,10 +75,10 @@ __global__ void vec_prod_neg_kernel(const c_float *a,
   atomicAdd(res, res_kernel);
 }
 
-__global__ void ew_prod_kernel(c_float       *c,
-                               const c_float *a,
-                               const c_float *b,
-                               c_int          n) {
+__global__ void vec_ew_prod_kernel(c_float       *c,
+                                   const c_float *a,
+                                   const c_float *b,
+                                   c_int          n) {
 
   c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
   c_int grid_size = blockDim.x * gridDim.x;
