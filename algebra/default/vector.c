@@ -27,7 +27,7 @@ extern void cuda_vec_mean(const c_float *d_x, c_int n, c_float *h_res);
 extern void cuda_vec_prod(const c_float *d_a, const c_float *d_b, c_int n, c_float *h_res);
 extern void cuda_vec_prod_signed(const c_float *d_a, const c_float *d_b, c_int sign, c_int n, c_float *h_res);
 extern void cuda_vec_ew_prod(c_float *d_c, const c_float *d_a, const c_float *d_b, c_int n);
-extern void cuda_vec_all_leq(const c_float *d_l, const c_float *d_u, c_int n, c_float *h_res);
+extern void cuda_vec_all_leq(const c_float *d_l, const c_float *d_u, c_int n, c_int *h_res);
 
 
 /*******************************************************************************

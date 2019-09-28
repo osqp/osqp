@@ -128,7 +128,7 @@ void cuda_vec_ew_prod(c_float       *d_c,
 void cuda_vec_all_leq(const c_float *d_l,
                       const c_float *d_u,
                       c_int          n,
-                      c_float       *h_res);
+                      c_int         *h_res);
 
 # ifdef __cplusplus
 }
