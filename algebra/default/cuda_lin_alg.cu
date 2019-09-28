@@ -119,6 +119,50 @@ __global__ void vec_ew_bound_kernel(c_float       *x,
   }
 }
 
+__global__ void vec_project_polar_reccone_kernel(c_float       *y,
+                                                 const c_float *l,
+                                                 const c_float *u,
+                                                 c_int          n) {
+
+  c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  c_int grid_size = blockDim.x * gridDim.x;
+
+  for(c_int i = idx; i < n; i += grid_size) {
+    if (u[i] > +infval) {
+      if (l[i] < -infval) {
+        /* Both bounds infinite */
+        y[i] = 0.0;
+      }
+      else {
+        /* Only upper bound infinite */
+        y[i] = c_min(y[i], 0.0);
+      }
+    }
+    else if (l[i] < -infval) {
+      /* Only lower bound infinite */
+      y[i] = c_max(y[i], 0.0);
+    }
+  }
+}
+
+__global__ void vec_in_reccone_kernel(const c_float *y,
+                                      const c_float *l,
+                                      const c_float *u,
+                                      c_float        infval,
+                                      c_float        tol,
+                                      c_int         *res,
+                                      c_int          n) {
+
+  c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  c_int grid_size = blockDim.x * gridDim.x;
+
+  for(c_int i = idx; i < n; i += grid_size) {
+    if ( (u[i] < +infval && y[i] > +tol) ||
+         (l[i] > -infval && y[i] < -tol) )
+      atomicAnd(res, 0);
+  }
+}
+
 
 /*******************************************************************************
  *                           API Functions                                     *
@@ -335,4 +379,39 @@ void cuda_vec_ew_bound(c_float       *d_x,
   c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
 
   vec_ew_bound_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_x, d_z, d_l, d_u, n);
+}
+
+void cuda_vec_project_polar_reccone(c_float       *d_y,
+                                    const c_float *d_l,
+                                    const c_float *d_u,
+                                    c_float        infval,
+                                    c_int          n) {
+
+  c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
+
+  vec_project_polar_reccone_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_y, d_l, d_u, n);
+}
+
+void cuda_vec_in_reccone(const c_float *d_y,
+                         const c_float *d_l,
+                         const c_float *d_u,
+                         c_float        infval,
+                         c_float        tol,
+                         c_int          n,
+                         c_int         *h_res) {
+
+  c_int *d_res;
+  c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
+
+  cuda_malloc((void **) &d_res, sizeof(c_int));
+
+  /* Initialize d_res to 1 */
+  *h_res = 1;
+  checkCudaErrors(cudaMemcpy(d_res, h_res, sizeof(c_int), cudaMemcpyHostToDevice));
+
+  vec_in_reccone_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_y, d_l, d_u, infval, tol, d_res, n);
+
+  checkCudaErrors(cudaMemcpy(&h_res, d_res, sizeof(c_int), cudaMemcpyDeviceToHost));
+
+  cuda_free((void **) &d_res);
 }

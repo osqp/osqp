@@ -142,6 +142,30 @@ void cuda_vec_ew_bound(c_float       *d_x,
                        const c_float *d_u,
                        c_int          n);
 
+/**
+ *           | 0.0               d_l < -infval AND d_u > +infval
+ * d_y[i] = <  min(d_y[i], 0.0)  d_u > +infval
+ *           | max(d_y[i], 0.0)  d_l < -infval
+ */
+void cuda_vec_project_polar_reccone(c_float       *d_y,
+                                    const c_float *d_l,
+                                    const c_float *d_u,
+                                    c_float        infval,
+                                    c_int          n);
+
+/**
+ *          | d_y[i] \in [-tol,tol]  d_l[i] > -infval AND d_u[i] < +infval
+ * h_res = <  d_y[i] < +tol          d_l[i] < -infval AND d_u[i] < +infval
+ *          | d_y[i] > -tol          d_l[i] > -infval AND d_u[i] > +infval
+ */
+void cuda_vec_in_reccone(const c_float *d_y,
+                         const c_float *d_l,
+                         const c_float *d_u,
+                         c_float        infval,
+                         c_float        tol,
+                         c_int          n,
+                         c_int         *h_res);
+
 # ifdef __cplusplus
 }
 # endif /* ifdef __cplusplus */

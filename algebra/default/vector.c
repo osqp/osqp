@@ -29,6 +29,8 @@ extern void cuda_vec_prod_signed(const c_float *d_a, const c_float *d_b, c_int s
 extern void cuda_vec_ew_prod(c_float *d_c, const c_float *d_a, const c_float *d_b, c_int n);
 extern void cuda_vec_all_leq(const c_float *d_l, const c_float *d_u, c_int n, c_int *h_res);
 extern void cuda_vec_ew_bound(c_float *d_x, const c_float *d_z, const c_float *d_l, const c_float *d_u, c_int n);
+extern void cuda_vec_project_polar_reccone(c_float *d_y, const c_float *d_l, const c_float *d_u, c_float infval, c_int n);
+extern void cuda_vec_in_reccone(const c_float *d_y, const c_float *d_l, const c_float *d_u, c_float infval, c_float tol, c_int n, c_int *h_res);
 
 /*******************************************************************************
  *                           API Functions                                     *
@@ -592,6 +594,8 @@ void OSQPVectorf_project_polar_reccone(OSQPVectorf       *y,
   c_float* lv = l->values;
   c_float* uv = u->values;
 
+  cuda_vec_project_polar_reccone(y->d_val, l->d_val, u->d_val, infval, y->length);
+
   for (i = 0; i < length; i++) {
     if (uv[i]   > +infval) {       // Infinite upper bound
       if (lv[i] < -infval) {       // Infinite lower bound
@@ -620,6 +624,9 @@ c_int OSQPVectorf_in_reccone(const OSQPVectorf *y,
   c_float* yv     = y->values;
   c_float* lv     = l->values;
   c_float* uv     = u->values;
+  c_int cuda_res;
+
+  cuda_vec_in_reccone(y->d_val, l->d_val, u->d_val, infval, tol, y->length, &cuda_res);
 
   for (i = 0; i < length; i++) {
     if (((uv[i] < +infval) &&
