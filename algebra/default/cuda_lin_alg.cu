@@ -421,7 +421,7 @@ void cuda_vec_leq(const c_float *d_l,
   *h_res = 1;
   checkCudaErrors(cudaMemcpy(d_res, h_res, sizeof(c_int), cudaMemcpyHostToDevice));
 
-  vec_all_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_l, d_u, d_res, n);
+  vec_leq_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_l, d_u, d_res, n);
 
   checkCudaErrors(cudaMemcpy(h_res, d_res, sizeof(c_int), cudaMemcpyDeviceToHost));
 
