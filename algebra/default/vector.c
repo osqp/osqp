@@ -25,6 +25,7 @@ extern void cuda_vec_norm_inf(const c_float *d_x, c_int n, c_float *h_res);
 extern void cuda_vec_norm_1(const c_float *d_x, c_int n, c_float *h_res);
 extern void cuda_vec_mean(const c_float *d_x, c_int n, c_float *h_res);
 extern void cuda_vec_prod(const c_float *d_a, const c_float *d_b, c_int n, c_float *h_res);
+extern void cuda_vec_prod_signed(const c_float *d_a, const c_float *d_b, c_int sign, c_int n, c_float *h_res);
 
 
 /*******************************************************************************
@@ -496,6 +497,10 @@ c_float OSQPVectorf_dot_prod_signed(const OSQPVectorf *a,
   c_float*  av   = a->values;
   c_float*  bv   = b->values;
   c_float dotprod = 0.0;
+  c_float cuda_res;
+
+  if (a->length) cuda_vec_prod_signed(a->d_val, b->d_val, sign, a->length, &cuda_res);
+  else           cuda_res = 0.0;
 
   if (sign == 1) {  /* dot with positive part of b */
     for (i = 0; i < length; i++) {
@@ -504,7 +509,7 @@ c_float OSQPVectorf_dot_prod_signed(const OSQPVectorf *a,
   }
   else if (sign == -1){  /* dot with negative part of b */
     for (i = 0; i < length; i++) {
-      dotprod += av[i] * c_min(bv[i],0.);
+      dotprod += av[i] * c_min(bv[i], 0.);
     }
   }
   else{

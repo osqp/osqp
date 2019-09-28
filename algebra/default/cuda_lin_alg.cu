@@ -1,6 +1,7 @@
 #include "cuda_lin_alg.h"
 #include "cuda_configure.h"
 #include "cuda_handler.h"
+#include "cuda_malloc.h"
 #include "cuda_wrapper.h"
 #include "helper_cuda.h"    /* --> checkCudaErrors */
 
@@ -188,4 +189,30 @@ void cuda_vec_prod(const c_float *d_a,
                    c_float       *h_res) {
 
   checkCudaErrors(cublasTdot(CUDA_handle->cublasHandle, n, d_a, 1, d_b, 1, h_res));
+}
+
+void cuda_vec_prod_signed(const c_float *d_a,
+                          const c_float *d_b,
+                          c_int          sign,
+                          c_int          n,
+                          c_float       *h_res) {
+
+  c_float *d_res;
+  c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
+
+  checkCudaErrors(c_cudaCalloc(&d_res, sizeof(c_float)));
+
+  if (sign == 1) {
+    vec_prod_pos_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_a, d_b, d_res, n);
+    checkCudaErrors(cudaMemcpy(h_res, d_res, sizeof(c_float), cudaMemcpyDeviceToHost));
+  }
+  else if (sign == -1) {
+    vec_prod_neg_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_a, d_b, d_res, n);
+    checkCudaErrors(cudaMemcpy(h_res, d_res, sizeof(c_float), cudaMemcpyDeviceToHost));
+  }
+  else {
+    checkCudaErrors(cublasTdot(CUDA_handle->cublasHandle, n, d_a, 1, d_b, 1, h_res));
+  }
+
+  cuda_free(&d_dotprod);
 }

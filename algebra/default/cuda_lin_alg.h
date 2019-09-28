@@ -98,10 +98,24 @@ void cuda_vec_mean(const c_float *d_x,
                    c_int          n,
                    c_float       *h_res);
 
+/**
+ * h_res = d_a' * d_b
+ */
 void cuda_vec_prod(const c_float *d_a,
                    const c_float *d_b,
                    c_int          n,
                    c_float       *h_res);
+
+/**
+ *          | d_a' * max(d_b, 0)  sign ==  1
+ * h_res = <  d_a' * min(d_b, 0)  sign == -1
+ *          | d_a' * d_b          otherwise
+ */
+void cuda_vec_prod_signed(const c_float *d_a,
+                          const c_float *d_b,
+                          c_int          sign,
+                          c_int          n,
+                          c_float       *h_res);
 
 # ifdef __cplusplus
 }
