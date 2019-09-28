@@ -122,16 +122,9 @@ c_float OSQPVectorf_norm_1(const OSQPVectorf *v);
 /* ||Sv||_inf */
 c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S, const OSQPVectorf *v);
 
-/* ||Sv||_1 */
-c_float OSQPVectorf_scaled_norm_1(const OSQPVectorf *S, const OSQPVectorf *v);
-
 /* ||a - b||_inf */
 c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
                                   const OSQPVectorf *b);
-
-
-/* sum of vector elements */
-c_float OSQPVectorf_sum(const OSQPVectorf *a);
 
 /* mean of vector elements */
 c_float OSQPVectorf_mean(const OSQPVectorf *a);

@@ -78,11 +78,30 @@ void cuda_vec_add_scaled3(c_float       *d_x,
                           c_int          n);
 
 /**
- * res = |d_x|_inf
+ * h_res = |d_x|_inf
  */
 void cuda_vec_norm_inf(const c_float *d_x,
                        c_int          n,
                        c_float       *h_res);
+
+/**
+ * h_res = |d_x|_1
+ */
+void cuda_vec_norm_1(const c_float *d_x,
+                     c_int          n,
+                     c_float       *h_res);
+
+/**
+ * h_res = sum(d_x) / n
+ */
+void cuda_vec_mean(const c_float *d_x,
+                   c_int          n,
+                   c_float       *h_res);
+
+void cuda_vec_prod(const c_float *d_a,
+                   const c_float *d_b,
+                   c_int          n,
+                   c_float       *h_res);
 
 # ifdef __cplusplus
 }

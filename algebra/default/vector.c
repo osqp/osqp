@@ -22,6 +22,9 @@ extern void cuda_vec_mult_sc(c_float *d_a, c_float sc, c_int n);
 extern void cuda_vec_add_scaled(c_float *d_x, const c_float *d_a, const c_float *d_b, c_float sca, c_float scb, c_int n);
 extern void cuda_vec_add_scaled3(c_float *d_x, const c_float *d_a, const c_float *d_b, const c_float *d_c, c_float sca, c_float scb, c_float scc, c_int n);
 extern void cuda_vec_norm_inf(const c_float *d_x, c_int n, c_float *h_res);
+extern void cuda_vec_norm_1(const c_float *d_x, c_int n, c_float *h_res);
+extern void cuda_vec_mean(const c_float *d_x, c_int n, c_float *h_res);
+extern void cuda_vec_prod(const c_float *d_a, const c_float *d_b, c_int n, c_float *h_res);
 
 
 /*******************************************************************************
@@ -388,6 +391,10 @@ c_float OSQPVectorf_norm_1(const OSQPVectorf *v) {
   c_int length  = v->length;
   c_float*  vv  = v->values;
   c_float normval = 0.0;
+  c_float cuda_normval;
+
+  if (v->length) cuda_vec_norm_1(v->d_val, v->length, &cuda_normval);
+  else           cuda_normval = 0.0;
 
   for (i = 0; i < length; i++) {
     normval += c_absval(vv[i]);
@@ -395,6 +402,7 @@ c_float OSQPVectorf_norm_1(const OSQPVectorf *v) {
   return normval;
 }
 
+// TODO
 c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S,
                                     const OSQPVectorf *v) {
 
@@ -412,21 +420,7 @@ c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S,
   return normval;
 }
 
-c_float OSQPVectorf_scaled_norm_1(const OSQPVectorf *S,
-                                  const OSQPVectorf *v) {
-
-  c_int   i;
-  c_int length  = v->length;
-  c_float*  vv  = v->values;
-  c_float*  Sv  = S->values;
-  c_float normval = 0.0;
-
-  for (i = 0; i < length; i++) {
-    normval += c_absval(Sv[i] * vv[i]);
-  }
-  return normval;
-}
-
+// TODO
 c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
                                   const OSQPVectorf *b) {
 
@@ -444,21 +438,7 @@ c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
   return normDiff;
 }
 
-c_float OSQPVectorf_norm_1_diff(const OSQPVectorf *a,
-                                const OSQPVectorf *b) {
-
-  c_int   i;
-  c_int   length = a->length;
-  c_float*  av   = a->values;
-  c_float*  bv   = b->values;
-  c_float normDiff = 0.0;
-
-  for (i = 0; i < length; i++) {
-    normDiff += c_absval(av[i] - bv[i]);
-  }
-  return normDiff;
-}
-
+// REMOVE
 c_float OSQPVectorf_sum(const OSQPVectorf *a) {
 
   c_int   i;
@@ -473,6 +453,21 @@ c_float OSQPVectorf_sum(const OSQPVectorf *a) {
   return val;
 }
 
+c_float OSQPVectorf_mean(const OSQPVectorf *a) {
+
+  c_float cuda_val;
+
+  if (a->length) cuda_vec_mean(a->d_val, a->length, &cuda_val);
+  else           cuda_val = 0.0;
+
+  if (a->length) {
+    return OSQPVectorf_sum(a) / (a->length);
+  }
+  else {
+    return 0;
+  }
+}
+
 c_float OSQPVectorf_dot_prod(const OSQPVectorf *a,
                              const OSQPVectorf *b) {
 
@@ -481,6 +476,10 @@ c_float OSQPVectorf_dot_prod(const OSQPVectorf *a,
   c_float*  av   = a->values;
   c_float*  bv   = b->values;
   c_float dotprod = 0.0;
+  c_float cuda_res;
+
+  if (a->length) cuda_vec_prod(a->d_val, b->d_val, a->length, &cuda_res);
+  else           cuda_res = 0.0;
 
   for (i = 0; i < length; i++) {
     dotprod += av[i] * bv[i];
@@ -679,17 +678,6 @@ void OSQPVectori_ipermute(OSQPVectori       *x,
 
   for (j = 0; j < length; j++) {
     xv[pv[j]] = bv[j];
-  }
-}
-
-
-c_float OSQPVectorf_mean(const OSQPVectorf *a) {
-
-  if (a->length) {
-    return OSQPVectorf_sum(a) / (a->length);
-  }
-  else {
-    return 0;
   }
 }
 
