@@ -6,11 +6,7 @@ extern "C" {
 # endif // ifdef __cplusplus
 
 #include "csc_math.h"
-
-
-// /* CUDA headers */
-// #include "cuda_handler.h"
-// extern CUDA_Handle_t *CUDA_handle;
+#include "csr_type.h"
 
 
 /*********************************************
@@ -46,6 +42,14 @@ typedef enum OSQPMatrix_symmetry_type {NONE,TRIU} OSQPMatrix_symmetry_type;
 struct OSQPMatrix_ {
   csc*                             csc;
   OSQPMatrix_symmetry_type    symmetry;
+
+  csr     *S;   /* P or A */
+  csr     *At;
+  c_int   *d_A_to_At_ind;
+  c_float *d_P_triu_val;
+  c_int   *d_P_triu_to_full_ind;
+  c_int   *d_P_diag_ind;
+  c_int    symmetric;
 };
 
 

@@ -11,6 +11,7 @@ set(algebra_impl_src
 
 set(algebra_impl_headers
     "${CMAKE_CURRENT_SOURCE_DIR}/algebra_types.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/csr_type.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/cuda_configure.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/cuda_handler.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/cuda_lin_alg.h"
