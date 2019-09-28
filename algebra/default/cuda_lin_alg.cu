@@ -234,7 +234,7 @@ void cuda_vec_prod_signed(const c_float *d_a,
   c_float *d_res;
   c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
 
-  checkCudaErrors(cuda_calloc((void **) &d_res, sizeof(c_float)));
+  cuda_calloc((void **) &d_res, sizeof(c_float));
 
   if (sign == 1) {
     vec_prod_pos_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_a, d_b, d_res, n);
@@ -248,5 +248,5 @@ void cuda_vec_prod_signed(const c_float *d_a,
     checkCudaErrors(cublasTdot(CUDA_handle->cublasHandle, n, d_a, 1, d_b, 1, h_res));
   }
 
-  cuda_free((void **) &d_dotprod);
+  cuda_free((void **) &d_res);
 }
