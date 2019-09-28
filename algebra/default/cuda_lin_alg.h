@@ -77,6 +77,13 @@ void cuda_vec_add_scaled3(c_float       *d_x,
                           c_float        scc,
                           c_int          n);
 
+/**
+ * res = |d_x|_inf
+ */
+void cuda_norm_inf(const c_float *d_x,
+                   c_int          n,
+                   c_float       *h_res);
+
 # ifdef __cplusplus
 }
 # endif /* ifdef __cplusplus */

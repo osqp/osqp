@@ -21,6 +21,7 @@ extern void cuda_vec_set_sc_cond(c_float *d_a, const c_int *d_test, c_float sc_i
 extern void cuda_vec_mult_sc(c_float *d_a, c_float sc, c_int n);
 extern void cuda_vec_add_scaled(c_float *d_x, const c_float *d_a, const c_float *d_b, c_float sca, c_float scb, c_int n);
 extern void cuda_vec_add_scaled3(c_float *d_x, const c_float *d_a, const c_float *d_b, const c_float *d_c, c_float sca, c_float scb, c_float scc, c_int n);
+extern void cuda_norm_inf(const c_float *d_x, c_int n, c_float *h_res);
 
 
 /*******************************************************************************
@@ -369,7 +370,9 @@ c_float OSQPVectorf_norm_inf(const OSQPVectorf *v) {
   c_int length  = v->length;
   c_float*  vv  = v->values;
   c_float normval = 0.0;
-  c_float absval;
+  c_float absval, cuda_normval;
+
+  cuda_norm_inf(v->d_val, v->length, &cuda_normval);
 
   for (i = 0; i < length; i++) {
     absval = c_absval(vv[i]);
