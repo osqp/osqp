@@ -221,6 +221,70 @@ __global__ void vec_min_kernel(c_float       *c,
   }
 }
 
+__global__ void vec_bounds_type_kernel(c_int         *iseq,
+                                       const c_float *l,
+                                       const c_float *u,
+                                       c_float        infval,
+                                       c_float        tol,
+                                       c_int         *has_changed,
+                                       c_int          n) {
+
+  c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  c_int grid_size = blockDim.x * gridDim.x;
+
+  for(c_int i = idx; i < n; i += grid_size) {
+    if (u[i] - l[i] < tol) {
+      /* Equality constraints */
+      if (iseq[i] != 1) {
+        iseq[i] = 1;
+        atomicOr(has_changed, 1);
+      }
+    }
+    else if ( (l[i] < -infval) && (u[i] > infval) ) {
+      /* Loose bounds */
+      if (iseq[i] != -1) {
+        iseq[i] = -1;
+        atomicOr(has_changed, 1);
+      }
+    }
+    else {
+      /* Inequality constraints */
+      if (iseq[i] != 0) {
+        iseq[i] = 0;
+        atomicOr(has_changed, 1);
+      }
+    }
+  }
+}
+
+__global__ void vec_set_sc_if_lt_kernel(c_float       *x,
+                                        const c_float *z,
+                                        c_float        testval,
+                                        c_float        newval,
+                                        c_int          n) {
+
+  c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  c_int grid_size = blockDim.x * gridDim.x;
+
+  for(c_int i = idx; i < n; i += grid_size) {
+    x[i] = z[i] < testval ? newval : z[i];
+  }
+}
+
+__global__ void vec_set_sc_if_gt_kernel(c_float       *x,
+                                        const c_float *z,
+                                        c_float        testval,
+                                        c_float        newval,
+                                        c_int          n) {
+
+  c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  c_int grid_size = blockDim.x * gridDim.x;
+
+  for(c_int i = idx; i < n; i += grid_size) {
+    x[i] = z[i] > testval ? newval : z[i];
+  }
+}
+
 
 /*******************************************************************************
  *                           API Functions                                     *
@@ -469,7 +533,7 @@ void cuda_vec_in_reccone(const c_float *d_y,
 
   vec_in_reccone_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_y, d_l, d_u, infval, tol, d_res, n);
 
-  checkCudaErrors(cudaMemcpy(&h_res, d_res, sizeof(c_int), cudaMemcpyDeviceToHost));
+  checkCudaErrors(cudaMemcpy(h_res, d_res, sizeof(c_int), cudaMemcpyDeviceToHost));
 
   cuda_free((void **) &d_res);
 }
@@ -509,4 +573,45 @@ void cuda_vec_min(c_float       *d_c,
   c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
 
   vec_min_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_c, d_a, d_b, n);
+}
+
+void cuda_vec_bounds_type(c_float       *d_iseq,
+                          const c_float *d_l,
+                          const c_float *d_u,
+                          c_float        infval,
+                          c_float        tol,
+                          c_int          n,
+                          c_int         *h_has_changed) {
+
+  c_int *d_has_changed;
+  c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
+
+  /* Initialize d_has_changed to zero */
+  cuda_calloc((void **) &d_has_changed, sizeof(c_int));
+
+  vec_bounds_type_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_iseq, d_l, d_u, infval, tol, d_has_changed, n);
+
+  checkCudaErrors(cudaMemcpy(h_has_changed, d_has_changed, sizeof(c_int), cudaMemcpyDeviceToHost));
+
+  cuda_free((void **) &d_has_changed);
+}
+
+void cuda_vec_set_sc_if_lt(c_float       *d_x,
+                           const c_float *d_z,
+                           c_float        testval,
+                           c_float        newval) {
+
+  c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
+
+  vec_set_sc_if_lt_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_x, d_z, testval, newval, n);
+}
+
+void cuda_vec_set_sc_if_gt(c_float       *d_x,
+                           const c_float *d_z,
+                           c_float        testval,
+                           c_float        newval) {
+
+  c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
+
+  vec_set_sc_if_gt_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_x, d_z, testval, newval, n);
 }
