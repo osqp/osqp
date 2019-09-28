@@ -122,6 +122,7 @@ __global__ void vec_ew_bound_kernel(c_float       *x,
 __global__ void vec_project_polar_reccone_kernel(c_float       *y,
                                                  const c_float *l,
                                                  const c_float *u,
+                                                 c_float        infval,
                                                  c_int          n) {
 
   c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
@@ -389,7 +390,7 @@ void cuda_vec_project_polar_reccone(c_float       *d_y,
 
   c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
 
-  vec_project_polar_reccone_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_y, d_l, d_u, n);
+  vec_project_polar_reccone_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_y, d_l, d_u, infval, n);
 }
 
 void cuda_vec_in_reccone(const c_float *d_y,
