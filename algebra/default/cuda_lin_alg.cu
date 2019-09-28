@@ -5,6 +5,8 @@
 #include "cuda_wrapper.h"
 #include "helper_cuda.h"    /* --> checkCudaErrors */
 
+#include "glob_opts.h"
+
 
 extern CUDA_Handle_t *CUDA_handle;
 
