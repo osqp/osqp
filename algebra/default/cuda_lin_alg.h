@@ -195,7 +195,7 @@ void cuda_vec_min(c_float       *d_c,
                   const c_float *d_b,
                   c_int          n);
 
-void cuda_vec_bounds_type(c_float       *d_iseq,
+void cuda_vec_bounds_type(c_int         *d_iseq,
                           const c_float *d_l,
                           const c_float *d_u,
                           c_float        infval,
@@ -206,12 +206,14 @@ void cuda_vec_bounds_type(c_float       *d_iseq,
 void cuda_vec_set_sc_if_lt(c_float       *d_x,
                            const c_float *d_z,
                            c_float        testval,
-                           c_float        newval);
+                           c_float        newval,
+                           c_int          n);
 
 void cuda_vec_set_sc_if_gt(c_float       *d_x,
                            const c_float *d_z,
                            c_float        testval,
-                           c_float        newval);
+                           c_float        newval,
+                           c_int          n);
 
 # ifdef __cplusplus
 }

@@ -35,9 +35,9 @@ extern void cuda_vec_reciprocal(c_float *d_b, const c_float *d_a, c_int n);
 extern void cuda_vec_sqrt(c_float *d_a, c_int n);
 extern void cuda_vec_max(c_float *d_c, const c_float *d_a, const c_float *d_b, c_int n);
 extern void cuda_vec_min(c_float *d_c, const c_float *d_a, const c_float *d_b, c_int n);
-extern void cuda_vec_bounds_type(c_float *d_iseq, const c_float *d_l, const c_float *d_u, c_float infval, c_float tol, c_int n, c_int *h_has_changed);
-extern void cuda_vec_set_sc_if_lt(c_float *d_x, const c_float *d_z, c_float testval, c_float newval);
-extern void cuda_vec_set_sc_if_gt(c_float *d_x, const c_float *d_z, c_float testval, c_float newval);
+extern void cuda_vec_bounds_type(c_int *d_iseq, const c_float *d_l, const c_float *d_u, c_float infval, c_float tol, c_int n, c_int *h_has_changed);
+extern void cuda_vec_set_sc_if_lt(c_float *d_x, const c_float *d_z, c_float testval, c_float newval, c_int n);
+extern void cuda_vec_set_sc_if_gt(c_float *d_x, const c_float *d_z, c_float testval, c_float newval, c_int n);
 
 
 /*******************************************************************************
@@ -759,7 +759,7 @@ void OSQPVectorf_set_scalar_if_lt(OSQPVectorf       *x,
   c_float*  xv = x->values;
   c_float*  zv = z->values;
 
-  cuda_vec_set_sc_if_lt(x->d_val, z->d_val, testval, newval);
+  cuda_vec_set_sc_if_lt(x->d_val, z->d_val, testval, newval, x->length);
 
   for (i = 0; i < length; i++) {
     xv[i] = zv[i] < testval ? newval : zv[i];
@@ -776,7 +776,7 @@ void OSQPVectorf_set_scalar_if_gt(OSQPVectorf       *x,
   c_float*  xv = x->values;
   c_float*  zv = z->values;
 
-  cuda_vec_set_sc_if_gt(x->d_val, z->d_val, testval, newval);
+  cuda_vec_set_sc_if_gt(x->d_val, z->d_val, testval, newval, x->length);
 
   for (i = 0; i < length; i++) {
     xv[i] = zv[i] > testval ? newval : zv[i];
