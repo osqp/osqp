@@ -156,11 +156,11 @@ void cuda_vec_add_scaled3(c_float       *d_x,
   checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, &scc, d_c, 1, d_x, 1));
 }
 
-void cuda_norm_inf(const c_float *d_x,
-                   c_int          n,
-                   c_float       *h_res) {
+void cuda_vec_norm_inf(const c_float *d_x,
+                       c_int          n,
+                       c_float       *h_res) {
 
-  c_int   idx;
+  c_int idx;
 
   checkCudaErrors(cublasITamax(CUDA_handle->cublasHandle, n, d_x, 1, &idx));
   checkCudaErrors(cudaMemcpy(h_res, d_x + (idx-1), sizeof(c_float), cudaMemcpyDeviceToHost));
