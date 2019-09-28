@@ -11,10 +11,10 @@ extern "C" {
 
 
 /* Initialize libraries that implement algebra. */
-c_int algebra_init_libs(void);
+c_int osqp_algebra_init_libs(void);
 
 /* Free libraries that implement algebra. */
-void algebra_free_libs(void);
+void osqp_algebra_free_libs(void);
 
 
 # ifdef __cplusplus
