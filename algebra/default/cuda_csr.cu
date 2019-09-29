@@ -404,10 +404,9 @@ void csr_triu_to_full(csr    *P_triu,
 
   permute_vector(Full_P->val, P_triu->val, d_P, Full_nnz);
 
-
-  checkCudaErrors(c_cudaMalloc(P_triu_to_full_permutation, Full_nnz * sizeof(c_int)));
+  cuda_malloc((void **) P_triu_to_full_permutation, Full_nnz * sizeof(c_int));
   checkCudaErrors(cudaMemcpy(*P_triu_to_full_permutation, d_P, Full_nnz * sizeof(c_int), cudaMemcpyDeviceToDevice));
-  checkCudaErrors(c_cudaMalloc(P_diag_indices, n * sizeof(c_int)));
+  cuda_malloc((void **) P_diag_indices, n * sizeof(c_int));
 
   number_of_blocks = (Full_nnz / THREADS_PER_BLOCK) + 1;
   get_diagonal_indices_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(Full_P->row_ind, Full_P->col_ind, Full_nnz, *P_diag_indices);
