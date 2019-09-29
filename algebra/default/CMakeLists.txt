@@ -2,6 +2,7 @@
 
 set(algebra_impl_src
     "${CMAKE_CURRENT_SOURCE_DIR}/algebra_libs.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cuda_csr.cu"
     "${CMAKE_CURRENT_SOURCE_DIR}/cuda_handler.cu"
     "${CMAKE_CURRENT_SOURCE_DIR}/cuda_lin_alg.cu"
     "${CMAKE_CURRENT_SOURCE_DIR}/cuda_malloc.cu"
@@ -12,6 +13,7 @@ set(algebra_impl_src
 set(algebra_impl_headers
     "${CMAKE_CURRENT_SOURCE_DIR}/algebra_types.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/csr_type.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cuda_csr.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/cuda_configure.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/cuda_handler.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/cuda_lin_alg.h"

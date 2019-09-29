@@ -4,6 +4,16 @@
 #include "csc_math.h"
 #include "csc_utils.h"
 
+
+/*******************************************************************************
+ *                       External CUDA Functions                               *
+ *******************************************************************************/
+
+/* cuda_csr.h */
+extern void cuda_mat_init_P(const csc *mat, csr **P, c_float **d_P_triu_val, c_int **d_P_triu_to_full_ind, c_int **d_P_diag_ind);
+// extern void cuda_mat_init_A(const csc *mat, csr **A, csr **At, c_int **d_A_to_At_ind);
+
+
 /*  logical test functions ----------------------------------------------------*/
 
 c_int OSQPMatrix_is_eq(OSQPMatrix *A, OSQPMatrix* B, c_float tol){
@@ -12,20 +22,31 @@ c_int OSQPMatrix_is_eq(OSQPMatrix *A, OSQPMatrix* B, c_float tol){
 }
 
 
-/*  Non-embeddable functions (using malloc) ----------------------------------*/
+/*******************************************************************************
+ *                           API Functions                                     *
+ *******************************************************************************/
 
-#ifndef EMBEDDED
+OSQPMatrix* OSQPMatrix_new_from_csc(const csc *M,
+                                    c_int      is_triu) {
 
-//Make a copy from a csc matrix.  Returns OSQP_NULL on failure
-OSQPMatrix* OSQPMatrix_new_from_csc(const csc* A, c_int is_triu){
+  OSQPMatrix* out = c_calloc(sizeof(OSQPMatrix));
+  if (!out) return OSQP_NULL;
 
-  OSQPMatrix* out = c_malloc(sizeof(OSQPMatrix));
-  if(!out) return OSQP_NULL;
+  if (is_triu) {
+    /* Initialize P */
+    out->symmetric = 1;
+    cuda_mat_init_P(M, &out->S, &out->d_P_triu_val, &out->d_P_triu_to_full_ind, &out->d_P_diag_ind);
+  }
+  // else {
+  //   /* Initialize A */
+  //   out->symmetric = 0;
+  //   cuda_mat_init_A(M, &out->S, &out->At, &out->d_A_to_At_ind);
+  // }
 
-  if(is_triu) out->symmetry = TRIU;
-  else        out->symmetry = NONE;
+  if (is_triu) out->symmetry = TRIU;
+  else         out->symmetry = NONE;
 
-  out->csc = csc_copy(A);
+  out->csc = csc_copy(M);
 
   if(!out->csc){
     c_free(out);
@@ -36,7 +57,6 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const csc* A, c_int is_triu){
   }
 }
 
-#endif //EMBEDDED
 
 /*  direct data access functions ---------------------------------------------*/
 
@@ -112,7 +132,6 @@ c_float OSQPMatrix_quad_form(const OSQPMatrix *P, const OSQPVectorf *x) {
    }
 }
 
-#if EMBEDDED != 1
 
 void OSQPMatrix_col_norm_inf(const OSQPMatrix *M, OSQPVectorf *E) {
    csc_col_norm_inf(M->csc, OSQPVectorf_data(E));
@@ -123,13 +142,19 @@ void OSQPMatrix_row_norm_inf(const OSQPMatrix *M, OSQPVectorf *E) {
    else                    csc_row_norm_inf_sym_triu(M->csc, OSQPVectorf_data(E));
 }
 
-#endif // endef EMBEDDED
 
-#ifndef EMBEDDED
 
-void OSQPMatrix_free(OSQPMatrix *M){
-  if (M) csc_spfree(M->csc);
-  c_free(M);
+void OSQPMatrix_free(OSQPMatrix *mat){
+  if (mat) {
+    csc_spfree(mat->csc);
+    csr_free(mat->S);
+    csr_free(mat->At);
+    cuda_free(&mat->d_A_to_At_ind);
+    cuda_free(&mat->d_P_triu_to_full_ind);
+    cuda_free(&mat->d_P_diag_ind);
+    cuda_free(&mat->d_P_triu_val);
+    c_free(mat);
+  }
 }
 
 OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix* A, const OSQPVectori* rows){
@@ -164,4 +189,3 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix* A, const OSQPVectori* 
 
 }
 
-#endif /* if EMBEDDED != 1 */

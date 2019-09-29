@@ -5,7 +5,6 @@
 extern "C" {
 # endif /* ifdef __cplusplus */
 
-
 #include <cusparse_v2.h>
 #include "osqp_api_types.h"   /* --> c_int, c_float */
 

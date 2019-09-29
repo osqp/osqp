@@ -3,7 +3,7 @@
 
 # ifdef __cplusplus
 extern "C" {
-# endif // ifdef __cplusplus
+# endif /* ifdef __cplusplus */
 
 
 void cuda_malloc(void** devPtr, size_t size);
