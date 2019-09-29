@@ -20,6 +20,8 @@ void cuda_mat_init_P(const csc  *mat,
 //                      csr       **At,
 //                      c_int     **d_A_to_At_ind);
 
+void cuda_mat_free(csr *dev_mat);
+
 
 # ifdef __cplusplus
 }
