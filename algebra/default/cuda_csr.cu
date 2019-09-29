@@ -162,7 +162,7 @@ void update_mp_buffer(csr *P) {
   
   if (bufferSizeInBytes > P->bufferSizeInBytes) {
     cuda_free((void **) &P->buffer);                            
-    checkCudaErrors(cuda_malloc((void **) &P->buffer, bufferSizeInBytes));
+    cuda_malloc((void **) &P->buffer, bufferSizeInBytes);
     P->bufferSizeInBytes = bufferSizeInBytes;
   }
 }
@@ -202,12 +202,12 @@ csr* csr_alloc(c_int m,
   cusparseSetMatIndexBase(dev_mat->MatDescription, CUSPARSE_INDEX_BASE_ZERO);
 
   if (allocate_on_device > 0) {
-    checkCudaErrors(cuda_calloc((void **) &dev_mat->val, (dev_mat->nnz + 1) * sizeof(c_float)));
-    checkCudaErrors(cuda_malloc((void **) &dev_mat->row_ptr, (dev_mat->m + 1) * sizeof(c_int))); 
-    checkCudaErrors(cuda_malloc((void **) &dev_mat->col_ind, dev_mat->nnz * sizeof(c_int)));
+    cuda_calloc((void **) &dev_mat->val, (dev_mat->nnz + 1) * sizeof(c_float));
+    cuda_malloc((void **) &dev_mat->row_ptr, (dev_mat->m + 1) * sizeof(c_int)); 
+    cuda_malloc((void **) &dev_mat->col_ind, dev_mat->nnz * sizeof(c_int));
 
     if (allocate_on_device > 1) {
-      checkCudaErrors(cuda_malloc((void **) &dev_mat->row_ind, dev_mat->nnz * sizeof(c_int)));
+      cuda_malloc((void **) &dev_mat->row_ind, dev_mat->nnz * sizeof(c_int));
     } 
   }
   return dev_mat;
@@ -253,14 +253,14 @@ csr* csr_init(c_int          m,
 void compress_row_ind(csr *mat) {
 
   cuda_free((void** ) &mat->row_ptr);
-  checkCudaErrors(cuda_malloc((void** ) &mat->row_ptr, (mat->m + 1) * sizeof(c_float) ));
+  cuda_malloc((void** ) &mat->row_ptr, (mat->m + 1) * sizeof(c_float));
   checkCudaErrors(cusparseXcoo2csr(CUDA_handle->cusparseHandle, mat->row_ind, mat->nnz, mat->m, mat->row_ptr, CUSPARSE_INDEX_BASE_ZERO));
 }
 
 void csr_expand_row_ind(csr *mat) {
 
   if (!mat->row_ind) {
-    checkCudaErrors(c_cudaMalloc(&mat->row_ind, mat->nnz * sizeof(c_float)));
+    cuda_malloc((void** ) &mat->row_ind, mat->nnz * sizeof(c_float));
     checkCudaErrors(cusparseXcsr2coo(CUDA_handle->cusparseHandle, mat->row_ptr, mat->nnz, mat->m, mat->row_ind, CUSPARSE_INDEX_BASE_ZERO));
   }
 }
@@ -387,7 +387,7 @@ void csr_triu_to_full(csr    *P_triu,
   update_mp_buffer(Full_P); 
   copy_csr(P_triu, Full_P);
 
-  csr_free(Full_P);
+  cuda_mat_free(Full_P);
   cuda_free((void **) &d_P);
   cuda_free((void **) &d_nnz_diag);
   cuda_free((void **) &has_non_zero_diag_element);
@@ -415,13 +415,13 @@ void cuda_mat_init_P(const csc  *mat,
   csr_expand_row_ind(*P);
 
   /* We need 0.0 at val[nzz] -> nnz+1 elements */
-  checkCudaErrors(cuda_calloc((void **) d_P_triu_val, (nnz+1) * sizeof(c_float)));
+  cuda_calloc((void **) d_P_triu_val, (nnz+1) * sizeof(c_float));
 
   /* Store triu elements */
   checkCudaErrors(cudaMemcpy(*d_P_triu_val, mat->x, nnz * sizeof(c_float), cudaMemcpyHostToDevice));
 }
 
-void csr_free(csr *dev_mat) {
+void cuda_mat_free(csr *dev_mat) {
   if (dev_mat) {
     cuda_free((void **) &dev_mat->val);
     cuda_free((void **) &dev_mat->row_ptr);

@@ -148,8 +148,8 @@ void OSQPMatrix_row_norm_inf(const OSQPMatrix *M, OSQPVectorf *E) {
 void OSQPMatrix_free(OSQPMatrix *mat){
   if (mat) {
     csc_spfree(mat->csc);
-    csr_free(mat->S);
-    csr_free(mat->At);
+    cuda_mat_free(mat->S);
+    cuda_mat_free(mat->At);
     cuda_free(&mat->d_A_to_At_ind);
     cuda_free(&mat->d_P_triu_to_full_ind);
     cuda_free(&mat->d_P_diag_ind);
