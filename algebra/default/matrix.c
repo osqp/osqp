@@ -174,6 +174,9 @@ void OSQPMatrix_col_norm_inf(const OSQPMatrix *mat,
                              OSQPVectorf      *res) {
 
   csc_col_norm_inf(mat->csc, OSQPVectorf_data(res));
+
+  if (mat->symmetric) cuda_mat_row_norm_inf(mat->S,  res->d_val);
+  else                cuda_mat_row_norm_inf(mat->At, res->d_val);
 }
 
 void OSQPMatrix_row_norm_inf(const OSQPMatrix *mat,
