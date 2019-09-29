@@ -14,10 +14,10 @@ void cuda_mat_init_P(const csc  *mat,
                      c_int     **d_P_triu_to_full_ind,
                      c_int     **d_P_diag_ind);
                      
-// void cuda_mat_init_A(const csc  *mat,
-//                      csr       **A,
-//                      csr       **At,
-//                      c_int     **d_A_to_At_ind);
+void cuda_mat_init_A(const csc  *mat,
+                     csr       **A,
+                     csr       **At,
+                     c_int     **d_A_to_At_ind);
 
 void cuda_mat_free(csr *dev_mat);
 

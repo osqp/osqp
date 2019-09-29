@@ -36,11 +36,11 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const csc *M,
   OSQPMatrix* out = c_calloc(1, sizeof(OSQPMatrix));
   if (!out) return OSQP_NULL;
 
-  // if (is_triu) {
-  //   /* Initialize P */
-  //   out->symmetric = 1;
-  //   cuda_mat_init_P(M, &out->S, &out->d_P_triu_val, &out->d_P_triu_to_full_ind, &out->d_P_diag_ind);
-  // }
+  if (is_triu) {
+    /* Initialize P */
+    out->symmetric = 1;
+    cuda_mat_init_P(M, &out->S, &out->d_P_triu_val, &out->d_P_triu_to_full_ind, &out->d_P_diag_ind);
+  }
   // else {
   //   /* Initialize A */
   //   out->symmetric = 0;

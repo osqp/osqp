@@ -271,7 +271,7 @@ void csr_expand_row_ind(csr *mat) {
  *  Sorts matrix in COO format by row. It returns a permutation
  *  vector that describes reordering of the elements.
  */
-c_int* sort_coo(csr *A) {
+c_int* coo_sort(csr *A) {
 
   c_int *A_to_At_permutation;  
   char *pBuffer;
@@ -289,6 +289,19 @@ c_int* sort_coo(csr *A) {
   cuda_free((void **) &pBuffer);
 
   return A_to_At_permutation;
+}
+
+/*
+ * Compute transpose of a matrix in COO format.
+ */
+void coo_tranpose(csr* A) {
+  c_int m = A->m;
+  A->m = A->n;
+  A->n = m;
+
+  c_int *row_ind = A->row_ind;
+  A->row_ind = A->col_ind;
+  A->col_ind = row_ind;
 }
 
 /*
@@ -398,7 +411,7 @@ void csr_triu_to_full(csr    *P_triu,
   checkCudaErrors(cudaMemcpy(&h_nnz_diag, d_nnz_diag, sizeof(c_int), cudaMemcpyDeviceToHost));
 
   Full_nnz = (2 * (nnz_triu - h_nnz_diag)) + n;
-  c_int *d_P = sort_coo(Full_P);
+  c_int *d_P = coo_sort(Full_P);
 
   number_of_blocks = (nnz_triu / THREADS_PER_BLOCK) + 1;
   reduce_permutation_kernel<<<number_of_blocks,THREADS_PER_BLOCK>>>(d_P, nnz_triu, Full_nnz);
@@ -421,6 +434,36 @@ void csr_triu_to_full(csr    *P_triu,
   cuda_free((void **) &d_P);
   cuda_free((void **) &d_nnz_diag);
   cuda_free((void **) &has_non_zero_diag_element);
+}
+
+/**
+ * Matrix A is converted from CSC to CSR. The data in A is interpreted as
+ * being in CSC format, even if it is in CSR.
+ * This operation is equivalent to a transpose. We temporarily allocate space
+ * for the new matrix since this operation cannot be done inplace.
+ * Additionally, a gather indices vector is generated to perform the conversion
+ * from A to A' faster during a matrix update.
+ */
+void csr_transpose(csr    *A,
+                   c_int **A_to_At_permutation) {
+
+  (*A_to_At_permutation) = NULL;
+
+  if (A->nnz == 0) {
+    c_int tmp = A->n;
+    A->n = A->m;
+    A->m = tmp;
+    return;
+  }
+
+  csr_expand_row_ind(A);
+  coo_tranpose(A);
+  (*A_to_At_permutation) = coo_sort(A);
+  compress_row_ind(A);
+
+  permute_vector(A->val, *A_to_At_permutation, A->nnz);
+
+  update_mp_buffer(A);
 }
 
 
@@ -449,6 +492,21 @@ void cuda_mat_init_P(const csc  *mat,
 
   /* Store triu elements */
   checkCudaErrors(cudaMemcpy(*d_P_triu_val, mat->x, nnz * sizeof(c_float), cudaMemcpyHostToDevice));
+}
+
+void cuda_mat_init_A(const csc  *mat,
+                     csr       **A,
+                     csr       **At,
+                     c_int     **d_A_to_At_ind) {
+
+  /* Initializing At is easy since it is equal to A in CSC */
+  *At = csr_init(n, m, mat->p, mat->i, mat->x);
+  csr_expand_row_ind(*At);
+
+  /* We need to take transpose of At to get A */
+  *A = csr_init(n, m, mat->p, mat->i, mat->x);
+  csr_transpose(*A, d_A_to_At_ind);
+  csr_expand_row_ind(*A);
 }
 
 void cuda_mat_free(csr *dev_mat) {
