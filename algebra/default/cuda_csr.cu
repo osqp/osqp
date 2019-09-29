@@ -499,6 +499,9 @@ void cuda_mat_init_A(const csc  *mat,
                      csr       **At,
                      c_int     **d_A_to_At_ind) {
 
+  c_int m = mat->m;
+  c_int n = mat->n;
+
   /* Initializing At is easy since it is equal to A in CSC */
   *At = csr_init(n, m, mat->p, mat->i, mat->x);
   csr_expand_row_ind(*At);
