@@ -17,6 +17,13 @@ extern void cuda_mat_init_P(const csc *mat, csr **P, c_float **d_P_triu_val, c_i
 extern void cuda_mat_init_A(const csc *mat, csr **A, csr **At, c_int **d_A_to_At_ind);
 extern void cuda_mat_free(csr *dev_mat);
 
+/* cuda_lin_alg.h */
+extern void cuda_mat_mult_sc(csr *S, csr *At, c_int symmetric, c_float sc);
+extern void cuda_mat_lmult_diag(csr *S, csr *At, c_int symmetric, const c_float *d_diag);
+extern void cuda_mat_rmult_diag(csr *S, csr *At, c_int symmetric, const c_float *d_diag);
+extern void cuda_mat_Axpy(const csr *A, const c_float *d_x, c_float *d_y, c_float alpha, c_float beta);
+extern void cuda_mat_quad_form(const csr *P, const c_float *d_x, c_float *h_res);
+
 
 /*  logical test functions ----------------------------------------------------*/
 
@@ -64,81 +71,105 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const csc *M,
 
 /*  direct data access functions ---------------------------------------------*/
 
-void OSQPMatrix_update_values(OSQPMatrix  *M,
-                            const c_float *Mx_new,
-                            const c_int   *Mx_new_idx,
-                            c_int          M_new_n){
-  csc_update_values(M->csc, Mx_new, Mx_new_idx, M_new_n);
+void OSQPMatrix_update_values(OSQPMatrix    *mat,
+                              const c_float *Mx_new,
+                              const c_int   *Mx_new_idx,
+                              c_int          Mx_new_n) {
+
+  csc_update_values(mat->csc, Mx_new, Mx_new_idx, Mx_new_n);
 }
 
 /* Matrix dimensions and data access */
-c_int    OSQPMatrix_get_m(const OSQPMatrix *M){return M->csc->m;}
-c_int    OSQPMatrix_get_n(const OSQPMatrix *M){return M->csc->n;}
-c_float* OSQPMatrix_get_x(const OSQPMatrix *M){return M->csc->x;}
-c_int*   OSQPMatrix_get_i(const OSQPMatrix *M){return M->csc->i;}
-c_int*   OSQPMatrix_get_p(const OSQPMatrix *M){return M->csc->p;}
-c_int    OSQPMatrix_get_nz(const OSQPMatrix *M){return M->csc->p[M->csc->n];}
+c_int    OSQPMatrix_get_m( const OSQPMatrix *mat){return mat->csc->m;}
+c_int    OSQPMatrix_get_n( const OSQPMatrix *mat){return mat->csc->n;}
+c_float* OSQPMatrix_get_x( const OSQPMatrix *mat){return mat->csc->x;}
+c_int*   OSQPMatrix_get_i( const OSQPMatrix *mat){return mat->csc->i;}
+c_int*   OSQPMatrix_get_p( const OSQPMatrix *mat){return mat->csc->p;}
+c_int    OSQPMatrix_get_nz(const OSQPMatrix *mat){return mat->csc->p[mat->csc->n];}
 
 
-/* math functions ----------------------------------------------------------*/
+void OSQPMatrix_mult_scalar(OSQPMatrix *mat,
+                            c_float     sc) {
 
-//A = sc*A
-void OSQPMatrix_mult_scalar(OSQPMatrix *A, c_float sc){
-  csc_scale(A->csc,sc);
+  csc_scale(mat->csc, sc);
+
+  cuda_mat_mult_sc(mat->S, mat->At, mat->symmetric, sc);
 }
 
-void OSQPMatrix_lmult_diag(OSQPMatrix *A, const OSQPVectorf *L) {
-  csc_lmult_diag(A->csc, OSQPVectorf_data(L));
+void OSQPMatrix_lmult_diag(OSQPMatrix        *mat,
+                           const OSQPVectorf *D) {
+
+  csc_lmult_diag(mat->csc, OSQPVectorf_data(D));
+
+  cuda_mat_lmult_diag(mat->S, mat->At, mat->symmetric, D->d_val);
 }
 
-void OSQPMatrix_rmult_diag(OSQPMatrix *A, const OSQPVectorf *R) {
-  csc_rmult_diag(A->csc, OSQPVectorf_data(R));
+void OSQPMatrix_rmult_diag(OSQPMatrix        *mat,
+                           const OSQPVectorf *D) {
+
+  csc_rmult_diag(mat->csc, OSQPVectorf_data(D));
+
+  cuda_mat_rmult_diag(mat->S, mat->At, mat->symmetric, D->d_val);
 }
 
-//y = alpha*A*x + beta*y
-void OSQPMatrix_Axpy(const OSQPMatrix *A,
+// y = alpha*A*x + beta*y
+void OSQPMatrix_Axpy(const OSQPMatrix  *mat,
                      const OSQPVectorf *x,
-                     OSQPVectorf *y,
-                     c_float alpha,
-                     c_float beta) {
+                     OSQPVectorf       *y,
+                     c_float            alpha,
+                     c_float            beta) {
 
   c_float* xf = OSQPVectorf_data(x);
   c_float* yf = OSQPVectorf_data(y);
 
-  if(A->symmetry == NONE){
-    //full matrix
-    csc_Axpy(A->csc, xf, yf, alpha, beta);
+  if(mat->symmetry == NONE){
+    // full matrix
+    csc_Axpy(mat->csc, xf, yf, alpha, beta);
   }
   else{
-    //should be TRIU here, but not directly checked
-    csc_Axpy_sym_triu(A->csc, xf, yf, alpha, beta);
+    // should be TRIU here, but not directly checked
+    csc_Axpy_sym_triu(mat->csc, xf, yf, alpha, beta);
+  }
+
+  cuda_mat_Axpy(mat->S, x->d_val, y->d_val, alpha, beta);
+}
+
+void OSQPMatrix_Atxpy(const OSQPMatrix  *mat,
+                      const OSQPVectorf *x,
+                      OSQPVectorf       *y,
+                      c_float            alpha,
+                      c_float            beta) {
+
+  if (mat->symmetry == NONE) csc_Atxpy(mat->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
+  else csc_Axpy_sym_triu(mat->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
+
+  if (mat->symmetric) cuda_mat_Axpy(mat->S,  x->d_val, y->d_val, alpha, beta);
+  else                cuda_mat_Axpy(mat->At, x->d_val, y->d_val, alpha, beta);
+}
+
+
+c_float OSQPMatrix_quad_form(const OSQPMatrix  *mat,
+                             const OSQPVectorf *x) {
+
+  c_float res;
+
+  if (mat->symmetric) {
+    cuda_mat_quad_form(mat->S, x->d_val, &res);
+    return csc_quad_form(mat->csc, OSQPVectorf_data(x));
+  }
+  else {
+#ifdef PRINTING
+    c_eprint("quad_form matrix is not upper triangular");
+#endif /* ifdef PRINTING */
+    return -1.0;
   }
 }
 
-void OSQPMatrix_Atxpy(const OSQPMatrix *A,
-                      const OSQPVectorf *x,
-                      OSQPVectorf *y,
-                      c_float alpha,
-                      c_float beta) {
 
-   if(A->symmetry == NONE) csc_Atxpy(A->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
-   else            csc_Axpy_sym_triu(A->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
-}
+void OSQPMatrix_col_norm_inf(const OSQPMatrix *M,
+                             OSQPVectorf      *E) {
 
-
-c_float OSQPMatrix_quad_form(const OSQPMatrix *P, const OSQPVectorf *x) {
-   if(P->symmetry == TRIU) return csc_quad_form(P->csc, OSQPVectorf_data(x));
-   else {
-#ifdef PRINTING
-     c_eprint("quad_form matrix is not upper triangular");
-#endif /* ifdef PRINTING */
-     return -1.0;
-   }
-}
-
-
-void OSQPMatrix_col_norm_inf(const OSQPMatrix *M, OSQPVectorf *E) {
-   csc_col_norm_inf(M->csc, OSQPVectorf_data(E));
+  csc_col_norm_inf(M->csc, OSQPVectorf_data(E));
 }
 
 void OSQPMatrix_row_norm_inf(const OSQPMatrix *M, OSQPVectorf *E) {
@@ -166,22 +197,20 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix* A, const OSQPVectori* 
   csc        *M;
   OSQPMatrix *out;
 
-
-  if(A->symmetry == TRIU){
+  if (A->symmetry == TRIU) {
 #ifdef PRINTING
     c_eprint("row selection not implemented for partially filled matrices");
 #endif
     return OSQP_NULL;
   }
 
-
   M = csc_submatrix_byrows(A->csc, OSQPVectori_data(rows));
 
-  if(!M) return OSQP_NULL;
+  if (!M) return OSQP_NULL;
 
   out = c_calloc(1, sizeof(OSQPMatrix));
 
-  if(!out){
+  if (!out) {
     csc_spfree(M);
     return OSQP_NULL;
   }
@@ -190,6 +219,5 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix* A, const OSQPVectori* 
   out->csc      = M;
 
   return out;
-
 }
 

@@ -285,6 +285,34 @@ __global__ void vec_set_sc_if_gt_kernel(c_float       *x,
   }
 }
 
+__global__ void mat_lmult_diag_kernel(const c_int   *row_ind,
+                                      const c_float *diag,
+                                      c_float       *data,
+                                      c_int          nnz) {
+
+  c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  c_int grid_size = blockDim.x * gridDim.x;
+
+  for(c_int i = idx; i < nnz; i += grid_size) {
+    c_int row = row_ind[i];
+    data[i] *= diag[row];
+  }
+}
+
+__global__ void mat_rmult_diag_kernel(const c_int   *col_ind,
+                                      const c_float *diag,
+                                      c_float       *data,
+                                      c_int          nnz) {
+
+  c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  c_int grid_size = blockDim.x * gridDim.x;
+
+  for(c_int i = idx; i < nnz; i += grid_size) {
+    c_int column = col_ind[i];
+    data[i] *= diag[column];
+  }
+}
+
 
 /*******************************************************************************
  *                           API Functions                                     *
@@ -652,4 +680,82 @@ void cuda_vec_set_sc_if_gt(c_float       *d_x,
   c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
 
   vec_set_sc_if_gt_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_x, d_z, testval, newval, n);
+}
+
+void cuda_mat_mult_sc(csr     *S,
+                      csr     *At,
+                      c_int    symmetric,
+                      c_float  sc) {
+
+  checkCudaErrors(cublasTscal(CUDA_handle->cublasHandle, S->nnz, &sc, S->val, 1));
+
+  if (!symmetric) {
+    /* Update At as well */
+    checkCudaErrors(cublasTscal(CUDA_handle->cublasHandle, At->nnz, &sc, At->val, 1));
+  }
+}
+
+void cuda_mat_lmult_diag(csr           *S,
+                         csr           *At,
+                         c_int          symmetric,
+                         const c_float *d_diag) {
+
+  c_int nnz = S->nnz;
+  c_int number_of_blocks = (nnz / THREADS_PER_BLOCK) / ELEMENTS_PER_THREAD + 1;
+
+  mat_lmult_diag_kernel<<<number_of_blocks,THREADS_PER_BLOCK>>>(S->row_ind, d_diag, S->val, nnz);
+
+  if (!symmetric) {
+    /* Multiply At from right */
+    mat_rmult_diag_kernel<<<number_of_blocks,THREADS_PER_BLOCK>>>(At->col_ind, d_diag, At->val, nnz);
+  }
+}
+
+void cuda_mat_rmult_diag(csr           *S,
+                         csr           *At,
+                         c_int          symmetric,
+                         const c_float *d_diag) {
+
+  c_int nnz = S->nnz;
+  c_int number_of_blocks = (nnz / THREADS_PER_BLOCK) / ELEMENTS_PER_THREAD + 1;
+
+  mat_rmult_diag_kernel<<<number_of_blocks,THREADS_PER_BLOCK>>>(S->col_ind, d_diag, S->val, nnz);
+
+  if (!symmetric) {
+    /* Multiply At from left */
+    mat_lmult_diag_kernel<<<number_of_blocks,THREADS_PER_BLOCK>>>(At->row_ind, d_diag, At->val, nnz);
+  }
+}
+
+void cuda_mat_Axpy(const csr     *A,
+                   const c_float *d_x,
+                   c_float       *d_y,
+                   c_float        alpha,
+                   c_float        beta) {
+
+  if (A->nnz == 0 || alpha = 0.0) {
+    /* d_y = beta * d_y */
+    cuda_vec_mult_sc(d_y, beta, A->m);
+    return;
+  }
+
+  checkCudaErrors(cusparseCsrmv(CUDA_handle->cusparseHandle, A->alg, A->m, A->n, A->nnz, &alpha, A->MatDescription, A->val, A->row_ptr, A->col_ind, d_x, &beta, d_y, A->buffer));
+}
+
+void cuda_mat_quad_form(const csr     *P,
+                        const c_float *d_x,
+                        c_float       *h_res) {
+
+  c_int n = P->n;
+  c_float *d_Px;
+
+  cuda_malloc((void **) &d_Px, n * sizeof(c_float));
+
+  /* d_Px = P * x */
+  cuda_mat_Axpy(P, d_x, d_Px, 1.0, 0.0);
+
+  /* h_res = d_Px' * d_x */
+  cuda_vec_prod(d_Px, d_x, n, h_res);
+
+  cuda_free((void **) &d_Px);
 }

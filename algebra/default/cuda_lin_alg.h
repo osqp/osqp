@@ -1,12 +1,16 @@
 #ifndef CUDA_LIN_ALG_H
 # define CUDA_LIN_ALG_H
 
-#include "osqp_api_types.h"
+#include "algebra_types.h"
 
 # ifdef __cplusplus
 extern "C" {
 # endif /* ifdef __cplusplus */
 
+
+/*******************************************************************************
+ *                           Vector Functions                                  *
+ *******************************************************************************/
 
 /*
  * d_y[i] = d_x[i] for i in [0,n-1]
@@ -230,6 +234,39 @@ void cuda_vec_set_sc_if_gt(c_float       *d_x,
                            c_float        testval,
                            c_float        newval,
                            c_int          n);
+
+
+/*******************************************************************************
+ *                           Matrix Functions                                  *
+ *******************************************************************************/
+
+void cuda_mat_mult_sc(csr     *S,
+                      csr     *At,
+                      c_int    symmetric,
+                      c_float  sc);
+
+void cuda_mat_lmult_diag(csr           *S,
+                         csr           *At,
+                         c_int          symmetric,
+                         const c_float *d_diag);
+
+void cuda_mat_rmult_diag(csr           *S,
+                         csr           *At,
+                         c_int          symmetric,
+                         const c_float *d_diag);
+
+/**
+ * d_y = alpha*A*d_x + beta*d_y
+ */
+void cuda_mat_Axpy(const csr     *A,
+                   const c_float *d_x,
+                   c_float       *d_y,
+                   c_float        alpha,
+                   c_float        beta);
+
+void cuda_mat_quad_form(const csr     *P,
+                        const c_float *d_x,
+                        c_float       *h_res);
 
 # ifdef __cplusplus
 }
