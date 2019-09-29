@@ -25,6 +25,9 @@ extern void cuda_mat_Axpy(const csr *A, const c_float *d_x, c_float *d_y, c_floa
 extern void cuda_mat_quad_form(const csr *P, const c_float *d_x, c_float *h_res);
 extern void cuda_mat_row_norm_inf(const csr *S, c_float *d_res);
 
+// THIS FUNCTION IS ADDED HERE TEMPORARILY
+extern void cuda_vec_copy_h2d(c_float *d_y, const c_float *h_x, c_int n);
+
 
 /*  logical test functions ----------------------------------------------------*/
 
@@ -135,6 +138,10 @@ void OSQPMatrix_Axpy(const OSQPMatrix  *mat,
   if (mat->S) { /* Needed temporarily to avoid core dump in polish */
     cuda_mat_Axpy(mat->S, x->d_val, y->d_val, alpha, beta);
   }
+  else {
+    /* TEMPORARY CODE: Copy the result of Axpy to y->d_val */
+    cuda_vec_copy_h2d(y->d_val, y->values, y->length);
+  }
 }
 
 void OSQPMatrix_Atxpy(const OSQPMatrix  *mat,
@@ -149,6 +156,10 @@ void OSQPMatrix_Atxpy(const OSQPMatrix  *mat,
   if (mat->S) { /* Needed temporarily to avoid core dump in polish */
     if (mat->symmetric) cuda_mat_Axpy(mat->S,  x->d_val, y->d_val, alpha, beta);
     else                cuda_mat_Axpy(mat->At, x->d_val, y->d_val, alpha, beta);
+  }
+  else {
+    /* TEMPORARY CODE: Copy the result of Axpy to y->d_val */
+    cuda_vec_copy_h2d(y->d_val, y->values, y->length);
   }
 }
 
