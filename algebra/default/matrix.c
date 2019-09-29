@@ -131,7 +131,9 @@ void OSQPMatrix_Axpy(const OSQPMatrix  *mat,
     csc_Axpy_sym_triu(mat->csc, xf, yf, alpha, beta);
   }
 
-  cuda_mat_Axpy(mat->S, x->d_val, y->d_val, alpha, beta);
+  if (mat->S) { /* Needed temporarily to avoid core dump in polish */
+    cuda_mat_Axpy(mat->S, x->d_val, y->d_val, alpha, beta);
+  }
 }
 
 void OSQPMatrix_Atxpy(const OSQPMatrix  *mat,
@@ -143,8 +145,10 @@ void OSQPMatrix_Atxpy(const OSQPMatrix  *mat,
   if (mat->symmetry == NONE) csc_Atxpy(mat->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
   else csc_Axpy_sym_triu(mat->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
 
-  if (mat->symmetric) cuda_mat_Axpy(mat->S,  x->d_val, y->d_val, alpha, beta);
-  else                cuda_mat_Axpy(mat->At, x->d_val, y->d_val, alpha, beta);
+  if (mat->S) { /* Needed temporarily to avoid core dump in polish */
+    if (mat->symmetric) cuda_mat_Axpy(mat->S,  x->d_val, y->d_val, alpha, beta);
+    else                cuda_mat_Axpy(mat->At, x->d_val, y->d_val, alpha, beta);
+  }
 }
 
 
