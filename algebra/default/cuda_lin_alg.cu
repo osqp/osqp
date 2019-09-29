@@ -881,8 +881,8 @@ void cuda_mat_row_norm_inf(const csr *S,
   *  For rows with only one element, the element itself is returned.
   *  Therefore, we have to take the absolute value to get the inf-norm.
   */
-  Segmented_reduce(S->row_ind, nnz, num_rows, S->val, d_buffer, res, binary_op);
-  abs_kernel<<<num_rows/THREADS_PER_BLOCK+1,THREADS_PER_BLOCK>>>(res, num_rows);
+  Segmented_reduce(S->row_ind, nnz, num_rows, S->val, d_buffer, d_res, binary_op);
+  abs_kernel<<<num_rows/THREADS_PER_BLOCK+1,THREADS_PER_BLOCK>>>(d_res, num_rows);
 
   cuda_free(&d_buffer);
 }
