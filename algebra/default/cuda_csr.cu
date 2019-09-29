@@ -1,4 +1,5 @@
 #include "cuda_csr.h"
+#include "cuda_configure.h"
 #include "cuda_handler.h"
 #include "cuda_malloc.h"
 #include "cuda_wrapper.h"
@@ -275,18 +276,47 @@ c_int* sort_coo(csr *A) {
   char *pBuffer;
   size_t pBufferSizeInBytes;
 
-  checkCudaErrors(cuda_malloc((void **) &A_to_At_permutation, A->nnz * sizeof(c_int)));
+  cuda_malloc((void **) &A_to_At_permutation, A->nnz * sizeof(c_int));
   checkCudaErrors(cusparseCreateIdentityPermutation(CUDA_handle->cusparseHandle, A->nnz, A_to_At_permutation));
 
   checkCudaErrors(cusparseXcoosort_bufferSizeExt(CUDA_handle->cusparseHandle, A->m, A->n, A->nnz, A->row_ind, A->col_ind, &pBufferSizeInBytes));
 
-  checkCudaErrors(cuda_malloc((void **) &pBuffer, pBufferSizeInBytes * sizeof(char)));
+  cuda_malloc((void **) &pBuffer, pBufferSizeInBytes * sizeof(char));
 
   checkCudaErrors(cusparseXcoosortByRow(CUDA_handle->cusparseHandle, A->m, A->n, A->nnz, A->row_ind, A->col_ind, A_to_At_permutation, pBuffer));
 
   cuda_free((void **) &pBuffer);
 
   return A_to_At_permutation;
+}
+
+/*
+ *  values[i] = values[permutation[i]] for i in [0,n-1]
+ */
+void permute_vector(c_float     *values,
+                    const c_int *permutation,
+                    c_int        n) {
+
+  c_float *permuted_values;
+  cuda_malloc((void **) &permuted_values, n * sizeof(c_float));
+
+  checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, n, values, permuted_values, permutation, CUSPARSE_INDEX_BASE_ZERO));
+
+  checkCudaErrors(cudaMemcpy(values, permuted_values, n * sizeof(c_float), cudaMemcpyDeviceToDevice));
+  cuda_free((void **) &permuted_values);
+}
+
+/*
+ *  target[i] = source[permutation[i]] for i in [0,n-1]
+ *  
+ *  target and source cannot point to the same location
+ */
+void permute_vector(c_float       *target,
+                    const c_float *source,
+                    const c_int   *permutation,
+                    c_int          n) {
+
+  checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, n, source, target, permutation, CUSPARSE_INDEX_BASE_ZERO));
 }
 
 /*
@@ -345,8 +375,8 @@ void csr_triu_to_full(csr    *P_triu,
   nnz_max_Full = 2*nnz_triu + n;
 
   csr *Full_P = csr_alloc(n, n, nnz_max_Full, 2);
-  checkCudaErrors(c_cudaCalloc(&has_non_zero_diag_element, n * sizeof(c_int)));
-  checkCudaErrors(c_cudaCalloc(&d_nnz_diag, sizeof(c_int)));
+  cuda_malloc((void **) &has_non_zero_diag_element, n * sizeof(c_int));
+  cuda_calloc((void **) &d_nnz_diag, sizeof(c_int));
 
   csr_expand_row_ind(P_triu);
 
