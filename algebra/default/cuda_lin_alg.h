@@ -240,23 +240,32 @@ void cuda_vec_set_sc_if_gt(c_float       *d_x,
  *                           Matrix Functions                                  *
  *******************************************************************************/
 
+/**
+ * S = sc * S
+ */
 void cuda_mat_mult_sc(csr     *S,
                       csr     *At,
                       c_int    symmetric,
                       c_float  sc);
 
+/**
+ * S = D * S
+ */
 void cuda_mat_lmult_diag(csr           *S,
                          csr           *At,
                          c_int          symmetric,
                          const c_float *d_diag);
 
+/**
+ * S = S * D
+ */
 void cuda_mat_rmult_diag(csr           *S,
                          csr           *At,
                          c_int          symmetric,
                          const c_float *d_diag);
 
 /**
- * d_y = alpha*A*d_x + beta*d_y
+ * d_y = alpha * A*d_x + beta*d_y
  */
 void cuda_mat_Axpy(const csr     *A,
                    const c_float *d_x,
@@ -264,9 +273,18 @@ void cuda_mat_Axpy(const csr     *A,
                    c_float        alpha,
                    c_float        beta);
 
+/**
+ * h_res = d_x' * P * d_x
+ */
 void cuda_mat_quad_form(const csr     *P,
                         const c_float *d_x,
                         c_float       *h_res);
+
+/**
+ * d_res[i] = |S_i|_inf where S_i is i-th row of S
+ */
+void cuda_mat_row_norm_inf(const csr *S,
+                           c_float   *d_res);
 
 # ifdef __cplusplus
 }

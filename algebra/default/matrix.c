@@ -23,6 +23,7 @@ extern void cuda_mat_lmult_diag(csr *S, csr *At, c_int symmetric, const c_float 
 extern void cuda_mat_rmult_diag(csr *S, csr *At, c_int symmetric, const c_float *d_diag);
 extern void cuda_mat_Axpy(const csr *A, const c_float *d_x, c_float *d_y, c_float alpha, c_float beta);
 extern void cuda_mat_quad_form(const csr *P, const c_float *d_x, c_float *h_res);
+extern void cuda_mat_row_norm_inf(const csr *S, c_float *d_res);
 
 
 /*  logical test functions ----------------------------------------------------*/
@@ -151,7 +152,6 @@ void OSQPMatrix_Atxpy(const OSQPMatrix  *mat,
   }
 }
 
-
 c_float OSQPMatrix_quad_form(const OSQPMatrix  *mat,
                              const OSQPVectorf *x) {
 
@@ -170,15 +170,19 @@ c_float OSQPMatrix_quad_form(const OSQPMatrix  *mat,
 }
 
 
-void OSQPMatrix_col_norm_inf(const OSQPMatrix *M,
-                             OSQPVectorf      *E) {
+void OSQPMatrix_col_norm_inf(const OSQPMatrix *mat,
+                             OSQPVectorf      *res) {
 
-  csc_col_norm_inf(M->csc, OSQPVectorf_data(E));
+  csc_col_norm_inf(mat->csc, OSQPVectorf_data(res));
 }
 
-void OSQPMatrix_row_norm_inf(const OSQPMatrix *M, OSQPVectorf *E) {
-   if(M->symmetry == NONE) csc_row_norm_inf(M->csc, OSQPVectorf_data(E));
-   else                    csc_row_norm_inf_sym_triu(M->csc, OSQPVectorf_data(E));
+void OSQPMatrix_row_norm_inf(const OSQPMatrix *mat,
+                             OSQPVectorf      *res) {
+
+  if (mat->symmetry == NONE) csc_row_norm_inf(mat->csc, OSQPVectorf_data(res));
+  else                       csc_row_norm_inf_sym_triu(mat->csc, OSQPVectorf_data(res));
+
+  cuda_mat_row_norm_inf(mat->S, res->d_val);
 }
 
 

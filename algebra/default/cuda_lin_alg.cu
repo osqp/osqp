@@ -8,6 +8,9 @@
 #include "csr_type.h"
 #include "glob_opts.h"
 
+#include <thrust/reduce.h>
+#include <thrust/execution_policy.h>
+
 
 extern CUDA_Handle_t *CUDA_handle;
 
@@ -313,6 +316,107 @@ __global__ void mat_rmult_diag_kernel(const c_int   *col_ind,
     data[i] *= diag[column];
   }
 }
+
+__global__ void abs_kernel(c_float *a,
+                           c_int    n) {
+
+  c_int i  = threadIdx.x + blockDim.x * blockIdx.x;
+
+  if (i < n) {
+#ifdef DFLOAT
+    a[i] = fabsf(a[i]);
+#else
+    a[i] = fabs(a[i]);
+#endif
+  }
+}
+
+__global__ void scatter_kernel(c_float       *out,
+                               const c_float *in,
+                               const c_int   *ind,
+                               c_int          n) {
+
+  c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  c_int grid_size = blockDim.x * gridDim.x;
+
+  for(c_int i = idx; i < n; i += grid_size) {
+    c_int j = ind[i];
+    out[j] = in[i];
+  }
+}
+
+
+/*******************************************************************************
+ *                         Private functions                                   *
+ *******************************************************************************/
+
+/*
+ *  out[j] = in[i], where j = ind[i] for i in [0,n-1]
+ */
+void scatter(c_float       *out,
+             const c_float *in,
+             const c_int   *ind,
+             c_int          n) {
+
+  c_int num_blocks = (n / THREADS_PER_BLOCK) + 1;
+  scatter_kernel<<<num_blocks, THREADS_PER_BLOCK>>>(out, in, ind, n);
+}
+
+
+/*******************************************************************************
+ *                          Thrust-related functions                           *
+ *******************************************************************************/
+
+template<typename BinaryFunction>
+void Segmented_reduce(const c_int    *key_start,
+                      c_int           number_of_keys,
+                      c_int           num_segments,
+                      const c_float  *values,
+                      void           *buffer,
+                      c_float        *result,
+                      BinaryFunction  binary_op) {
+ 
+  c_int num_nnz_rows;
+
+ /*  Memory layout of buffer:
+  *  [ m*sizeof(c_float) Bytes | m*sizeof(c_int) Bytes]
+  *  where m = "number of rows"
+  */
+  c_float *intermediate_result = (c_float*) buffer; 
+  c_int   *nnz_rows            = (c_int*) (&intermediate_result[num_segments]);
+
+  thrust::pair<c_int*,c_float*> new_end;
+  thrust::equal_to<c_int> binary_pred;
+  
+  new_end = thrust::reduce_by_key(thrust::device,
+                                  key_start,
+                                  key_start + number_of_keys,
+                                  values,
+                                  nnz_rows,
+                                  intermediate_result,
+                                  binary_pred,
+                                  binary_op);
+
+  num_nnz_rows = new_end.first - nnz_rows;
+  checkCudaErrors(cudaMemset(result, 0, num_segments * sizeof(c_float)));
+  scatter(result, intermediate_result, nnz_rows, num_nnz_rows);
+}
+
+template<typename T>
+struct abs_maximum {
+  typedef T first_argument_type;
+  typedef T second_argument_type;
+  typedef T result_type;
+  __host__ __device__ T operator()(const T &lhs, const T &rhs) const {return max(abs(lhs), abs(rhs));}
+ };
+
+template void Segmented_reduce<abs_maximum<c_float>>(const c_int          *key_start,
+                                                     c_int                 number_of_keys,
+                                                     c_int                 number_of_segments,
+                                                     const c_float        *values,
+                                                     void                 *buffer,
+                                                     c_float              *result,
+                                                     abs_maximum<c_float>  binary_op);
 
 
 /*******************************************************************************
@@ -759,4 +863,26 @@ void cuda_mat_quad_form(const csr     *P,
   cuda_vec_prod(d_Px, d_x, n, h_res);
 
   cuda_free((void **) &d_Px);
+}
+
+void cuda_mat_row_norm_inf(const csr *S,
+                           c_float   *d_res) {
+
+  c_int nnz      = S->nnz;
+  c_int num_rows = S->m;
+
+  if (nnz == 0) return;
+
+  abs_maximum<c_float> binary_op;
+  void *d_buffer;
+  cuda_malloc(&d_buffer, num_rows * (sizeof(c_float) + sizeof(c_int)));
+
+  /* 
+  *  For rows with only one element, the element itself is returned.
+  *  Therefore, we have to take the absolute value to get the inf-norm.
+  */
+  Segmented_reduce(S->row_ind, nnz, num_rows, S->val, d_buffer, res, binary_op);
+  abs_kernel<<<num_rows/THREADS_PER_BLOCK+1,THREADS_PER_BLOCK>>>(res, num_rows);
+
+  cuda_free(&d_buffer);
 }
