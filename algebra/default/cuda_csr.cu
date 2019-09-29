@@ -5,6 +5,7 @@
 #include "cuda_wrapper.h"
 #include "helper_cuda.h"    /* --> checkCudaErrors */
 
+#include "csr_type.h"
 #include "glob_opts.h"
 
 

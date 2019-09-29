@@ -6,7 +6,6 @@ extern "C" {
 # endif // ifdef __cplusplus
 
 #include "csc_type.h"
-#include "csr_type.h"
 
 
 /*********************************************
@@ -38,6 +37,9 @@ struct OSQPVectorf_ {
  *  TRUI : matrix is symmetric and only upper triangle is stored
  */
 typedef enum OSQPMatrix_symmetry_type {NONE,TRIU} OSQPMatrix_symmetry_type;
+
+/* Matrix in CSR format stored in GPU memory */
+typedef struct csr_t csr;
 
 struct OSQPMatrix_ {
   csc*                             csc;

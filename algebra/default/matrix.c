@@ -9,9 +9,12 @@
  *                       External CUDA Functions                               *
  *******************************************************************************/
 
+/* cuda_malloc.h */
+extern void cuda_free(void** devPtr);
+
 /* cuda_csr.h */
 extern void cuda_mat_init_P(const csc *mat, csr **P, c_float **d_P_triu_val, c_int **d_P_triu_to_full_ind, c_int **d_P_diag_ind);
-// extern void cuda_mat_init_A(const csc *mat, csr **A, csr **At, c_int **d_A_to_At_ind);
+extern void cuda_mat_init_A(const csc *mat, csr **A, csr **At, c_int **d_A_to_At_ind);
 extern void cuda_mat_free(csr *dev_mat);
 
 
@@ -30,14 +33,14 @@ c_int OSQPMatrix_is_eq(OSQPMatrix *A, OSQPMatrix* B, c_float tol){
 OSQPMatrix* OSQPMatrix_new_from_csc(const csc *M,
                                     c_int      is_triu) {
 
-  OSQPMatrix* out = c_calloc(sizeof(OSQPMatrix));
+  OSQPMatrix* out = c_calloc(1, sizeof(OSQPMatrix));
   if (!out) return OSQP_NULL;
 
-  if (is_triu) {
-    /* Initialize P */
-    out->symmetric = 1;
-    cuda_mat_init_P(M, &out->S, &out->d_P_triu_val, &out->d_P_triu_to_full_ind, &out->d_P_diag_ind);
-  }
+  // if (is_triu) {
+  //   /* Initialize P */
+  //   out->symmetric = 1;
+  //   cuda_mat_init_P(M, &out->S, &out->d_P_triu_val, &out->d_P_triu_to_full_ind, &out->d_P_diag_ind);
+  // }
   // else {
   //   /* Initialize A */
   //   out->symmetric = 0;
@@ -150,10 +153,10 @@ void OSQPMatrix_free(OSQPMatrix *mat){
     csc_spfree(mat->csc);
     cuda_mat_free(mat->S);
     cuda_mat_free(mat->At);
-    cuda_free(&mat->d_A_to_At_ind);
-    cuda_free(&mat->d_P_triu_to_full_ind);
-    cuda_free(&mat->d_P_diag_ind);
-    cuda_free(&mat->d_P_triu_val);
+    cuda_free((void **) &mat->d_A_to_At_ind);
+    cuda_free((void **) &mat->d_P_triu_to_full_ind);
+    cuda_free((void **) &mat->d_P_diag_ind);
+    cuda_free((void **) &mat->d_P_triu_val);
     c_free(mat);
   }
 }
@@ -176,7 +179,7 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix* A, const OSQPVectori* 
 
   if(!M) return OSQP_NULL;
 
-  out = c_malloc(sizeof(OSQPMatrix));
+  out = c_calloc(1, sizeof(OSQPMatrix));
 
   if(!out){
     csc_spfree(M);

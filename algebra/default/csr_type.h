@@ -10,7 +10,7 @@ extern "C" {
 
 
 /* CSR matrix structure */
-typedef struct {
+struct csr_t {
   c_int               m;          ///< number of rows
   c_int               n;          ///< number of columns
   c_int              *row_ptr;    ///< column pointers (size m+1)
@@ -23,7 +23,7 @@ typedef struct {
   size_t              bufferSizeInBytes;
   cusparseAlgMode_t   alg;
   cusparseMatDescr_t  MatDescription;
-} csr;
+};
 
 
 # ifdef __cplusplus
