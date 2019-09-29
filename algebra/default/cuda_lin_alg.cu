@@ -5,6 +5,7 @@
 #include "cuda_wrapper.h"
 #include "helper_cuda.h"    /* --> checkCudaErrors */
 
+#include "csr_type.h"
 #include "glob_opts.h"
 
 
@@ -733,7 +734,7 @@ void cuda_mat_Axpy(const csr     *A,
                    c_float        alpha,
                    c_float        beta) {
 
-  if (A->nnz == 0 || alpha = 0.0) {
+  if (A->nnz == 0 || alpha == 0.0) {
     /* d_y = beta * d_y */
     cuda_vec_mult_sc(d_y, beta, A->m);
     return;
