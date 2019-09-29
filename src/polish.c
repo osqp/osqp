@@ -110,7 +110,7 @@ static c_int iterative_refinement(OSQPSolver    *solver,
                                   LinSysSolver  *p,
                                   OSQPVectorf   *z,
                                   OSQPVectorf   *b) {
-  c_int i;
+  c_int i, mred;
   OSQPVectorf *rhs, *rhs1, *rhs2;
   OSQPVectorf *z1, *z2;
 
@@ -118,15 +118,16 @@ static c_int iterative_refinement(OSQPSolver    *solver,
   OSQPWorkspace* work     = solver->work;
 
   if (settings->polish_refine_iter > 0) {
+    mred = OSQPMatrix_get_m(work->pol->Ared);
 
     // Allocate dz and rhs vectors
-    rhs = OSQPVectorf_malloc(work->data->n + OSQPMatrix_get_m(work->pol->Ared));
+    rhs = OSQPVectorf_malloc(work->data->n + mred);
 
     //form views of the top/bottom parts of rhs and z
     rhs1 = OSQPVectorf_view(rhs,0,work->data->n);
-    rhs2 = OSQPVectorf_view(rhs,work->data->n,work->data->m);
+    rhs2 = OSQPVectorf_view(rhs,work->data->n,mred);
     z1   = OSQPVectorf_view(z,0,work->data->n);
-    z2   = OSQPVectorf_view(z,work->data->n,work->data->m);
+    z2   = OSQPVectorf_view(z,work->data->n,mred);
 
     if (!rhs || !rhs1 || !rhs2 || !z1 || !z2) {
       return osqp_error(OSQP_MEM_ALLOC_ERROR);

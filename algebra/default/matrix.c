@@ -140,7 +140,7 @@ void OSQPMatrix_Axpy(const OSQPMatrix  *mat,
   }
   else {
     /* TEMPORARY CODE: Copy the result of Axpy to y->d_val */
-    cuda_vec_copy_h2d(y->d_val, y->values, y->length);
+    if (y->length) cuda_vec_copy_h2d(y->d_val, y->values, y->length);
   }
 }
 
@@ -159,7 +159,7 @@ void OSQPMatrix_Atxpy(const OSQPMatrix  *mat,
   }
   else {
     /* TEMPORARY CODE: Copy the result of Axpy to y->d_val */
-    cuda_vec_copy_h2d(y->d_val, y->values, y->length);
+    if (y->length) cuda_vec_copy_h2d(y->d_val, y->values, y->length);
   }
 }
 
