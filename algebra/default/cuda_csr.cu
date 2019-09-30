@@ -389,7 +389,7 @@ void csr_triu_to_full(csr    *P_triu,
   nnz_max_Full = 2*nnz_triu + n;
 
   csr *Full_P = csr_alloc(n, n, nnz_max_Full, 2);
-  cuda_malloc((void **) &has_non_zero_diag_element, n * sizeof(c_int));
+  cuda_calloc((void **) &has_non_zero_diag_element, n * sizeof(c_int));
   cuda_calloc((void **) &d_nnz_diag, sizeof(c_int));
 
   csr_expand_row_ind(P_triu);
