@@ -8,6 +8,8 @@
 #include "csr_type.h"
 #include "glob_opts.h"
 
+#include <thrust/scan.h>
+#include <thrust/execution_policy.h>
 
 extern CUDA_Handle_t *CUDA_handle;
 
@@ -522,4 +524,102 @@ void cuda_mat_free(csr *dev_mat) {
     cusparseDestroyMatDescr(dev_mat->MatDescription);
     c_free(dev_mat);
   }
+}
+
+
+__global__ void predicate_generator_kernel(const c_int* row_ind, const c_int *row_predicate, c_int *predicate, c_int number_ellements) {
+  int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  int grid_stride = gridDim.x * blockDim.x;
+
+  for(int i = idx; i < number_ellements; i += grid_stride) {
+    int row = row_ind[i];
+    predicate[i] = row_predicate[row];
+  }
+}
+
+template<typename T>
+__global__ void compact(const T* data_in, T* data_out, c_int* predicate, c_int* scatter_addres, c_int n) {
+  int idx = threadIdx.x + blockDim.x * blockIdx.x;
+
+  if(idx < n) {
+    if(predicate[idx]) {
+      int write_ind = scatter_addres[idx] - 1;
+      data_out[write_ind] = data_in[idx];
+    }
+  }
+}
+
+__global__ void compact_rows(const c_int* row_ind, c_int* data_out, c_int* new_row_number,  c_int* predicate, c_int* scatter_addres, c_int n) {
+  int idx = threadIdx.x + blockDim.x * blockIdx.x;
+
+  if(idx < n) {
+    if(predicate[idx]) {
+      int write_ind = scatter_addres[idx] - 1;
+      int row = row_ind[idx];
+      data_out[write_ind] = new_row_number[row]-1;
+    }
+  }
+}
+
+__global__ void vector_init_abs_kernel(const c_int *a, c_int *b, c_int    n) {
+  c_int i  = threadIdx.x + blockDim.x * blockIdx.x;
+
+  if (i < n) {
+    b[i] = abs(a[i]);
+  }
+}
+
+csr* cuda_submatrix_byrows(csr *A, c_int *rows) {
+  c_int n   = A->n;
+  c_int m   = A->m;
+  c_int nnz = A->nnz;
+
+  c_int* d_predicate;
+  c_int* d_compact_address;
+  c_int* d_row_predicate;
+  c_int* d_new_row_number;
+
+  cuda_malloc((void **) &d_row_predicate, m * sizeof(c_int));
+  cuda_malloc((void **) &d_new_row_number, m * sizeof(c_int));
+
+  cuda_malloc((void **) &d_predicate, nnz * sizeof(c_int));
+  cuda_malloc((void **) &d_compact_address, nnz * sizeof(c_int));
+
+  // Copy rows array to device and set -1s to ones
+  checkCudaErrors(cudaMemcpy(d_row_predicate, rows, m * sizeof(c_int), cudaMemcpyHostToDevice));
+  vector_init_abs_kernel<<<(m/THREADS_PER_BLOCK) + 1,THREADS_PER_BLOCK>>>(d_row_predicate, d_row_predicate, m);
+
+  // Calcualte new row numbering and get new number of rows
+  thrust::inclusive_scan(thrust::device, d_row_predicate, d_row_predicate + m, d_new_row_number);
+  c_int new_m;
+  checkCudaErrors(cudaMemcpy(&new_m, &d_new_row_number[m-1], 1 * sizeof(c_int), cudaMemcpyDeviceToHost));
+
+  // Calculate row indies for original matrix A
+  csr_expand_row_ind(A);
+
+  // Generate predicates per ellement from per row predicate
+  predicate_generator_kernel<<<(nnz/THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK>>>(A->row_ind, d_row_predicate, d_predicate, nnz);
+
+  // Get array offset for compacting and new nnz
+  thrust::inclusive_scan(thrust::device, d_predicate, d_predicate + nnz, d_compact_address);
+  c_int nnz_new;
+  checkCudaErrors(cudaMemcpy(&nnz_new, &d_compact_address[nnz-1], 1 * sizeof(c_int), cudaMemcpyDeviceToHost));
+
+  // allocate new matrix (2 -> allocate row indiece as well)
+  csr *new_A = csr_alloc(new_m, n, nnz_new, 2);
+
+  // Compact arrays according to given predicates, special care has to be taken for the rows
+  compact_rows<<<(nnz/THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK>>>(A->row_ind, new_A->row_ind, d_new_row_number,  d_predicate, d_compact_address, nnz);
+  compact<<<(nnz/THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK>>>(A->col_ind , new_A->col_ind, d_predicate, d_compact_address, nnz);
+  compact<<<(nnz/THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK>>>(A->val     , new_A->val    , d_predicate, d_compact_address, nnz);
+
+  // Generate row pointer
+  compress_row_ind(new_A);
+
+  cuda_free((void**)&d_predicate);
+  cuda_free((void**)&d_compact_address);
+  cuda_free((void**)&d_row_predicate);
+  cuda_free((void**)&d_new_row_number);
+  
+  return new_A;  
 }
