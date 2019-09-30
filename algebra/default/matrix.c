@@ -16,7 +16,7 @@ extern void cuda_free(void** devPtr);
 extern void cuda_mat_init_P(const csc *mat, csr **P, c_float **d_P_triu_val, c_int **d_P_triu_to_full_ind, c_int **d_P_diag_ind);
 extern void cuda_mat_init_A(const csc *mat, csr **A, csr **At, c_int **d_A_to_At_ind);
 extern void cuda_mat_free(csr *dev_mat);
-extern csr* cuda_submatrix_byrows(csr *A, c_int *rows);
+extern void cuda_submat_byrows(csr *submat, csr *submat_tpose, const csr *mat, const c_int *d_rows);
 
 /* cuda_lin_alg.h */
 extern void cuda_mat_mult_sc(csr *S, csr *At, c_int symmetric, c_float sc);
@@ -215,9 +215,11 @@ void OSQPMatrix_free(OSQPMatrix *mat){
   }
 }
 
-OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix* A, const OSQPVectori* rows){
+OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix  *mat,
+                                        const OSQPVectori *rows) {
 
   csc        *M;
+  csr        *submat, *submat_tpose;
   OSQPMatrix *out;
 
   if (A->symmetry == TRIU) {
@@ -227,9 +229,9 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix* A, const OSQPVectori* 
     return OSQP_NULL;
   }
 
-  M = csc_submatrix_byrows(A->csc, OSQPVectori_data(rows));
+  M = csc_submatrix_byrows(mat->csc, OSQPVectori_data(rows));
 
-  cuda_submatrix_byrows(A->S,  OSQPVectori_data(rows));
+  cuda_submat_byrows(submat, submat_tpose, mat->S, rows->d_val);
 
   if (!M) return OSQP_NULL;
 
@@ -242,6 +244,10 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix* A, const OSQPVectori* 
 
   out->symmetry = NONE;
   out->csc      = M;
+  out->S        = submat;
+  // out->At       = submat_tpose;
+
+  // GB: We should also compute transpose of the submatrix in cuda_submat_byrows()
 
   return out;
 }
