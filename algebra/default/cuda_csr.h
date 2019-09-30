@@ -24,7 +24,7 @@ void cuda_mat_free(csr *dev_mat);
 void cuda_submat_byrows(csr         *submat,
                         csr         *submat_tpose,
                         const csr   *mat,
-                        const c_int *h_rows);
+                        const c_int *d_rows);
 
 
 # ifdef __cplusplus
