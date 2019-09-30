@@ -11,9 +11,6 @@
 #include <thrust/scan.h>
 #include <thrust/execution_policy.h>
 
-#include "cuda_debug.h"
-
-
 extern CUDA_Handle_t *CUDA_handle;
 
 

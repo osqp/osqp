@@ -115,9 +115,7 @@ if (CUDA_SUPPORT)
     include_directories(${CUDA_TOOLKIT_ROOT_DIR}/samples/common/inc)
 
     # sm_75 -> Turing support
-    #set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_60 --gpu-code=compute_60,sm_75")
-    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_30 --gpu-code=compute_30,sm_75 -g -lineinfo")
-    #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_60 --gpu-code=compute_60,sm_75")
 endif()
 
 
