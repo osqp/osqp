@@ -78,11 +78,11 @@ void OSQPVectorf_to_raw(c_float *bv, const OSQPVectorf *a);
 void OSQPVectorf_set_scalar(OSQPVectorf *a, c_float sc);
 
 /* Set float vector to one of three scalars based on sign of vector of ints */
-void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
-                                        OSQPVectori *test,
-                                        c_float val_if_neg,
-                                        c_float val_if_zero,
-                                        c_float val_if_pos);
+void OSQPVectorf_set_scalar_conditional(OSQPVectorf       *a,
+                                        const OSQPVectori *test,
+                                        c_float            val_if_neg,
+                                        c_float            val_if_zero,
+                                        c_float            val_if_pos);
 
 /* multiply float vector by float */
 void OSQPVectorf_mult_scalar(OSQPVectorf *a, c_float sc);

@@ -244,11 +244,11 @@ void OSQPVectorf_set_scalar(OSQPVectorf *a,
 }
 
 
-void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
-                                        OSQPVectori *test,
-                                        c_float      sc_if_neg,
-                                        c_float      sc_if_zero,
-                                        c_float      sc_if_pos) {
+void OSQPVectorf_set_scalar_conditional(OSQPVectorf       *a,
+                                        const OSQPVectori *test,
+                                        c_float            sc_if_neg,
+                                        c_float            sc_if_zero,
+                                        c_float            sc_if_pos) {
 
   c_int     i;
   c_int     length = a->length;
