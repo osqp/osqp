@@ -16,6 +16,7 @@ extern void cuda_free(void** devPtr);
 extern void cuda_mat_init_P(const csc *mat, csr **P, c_float **d_P_triu_val, c_int **d_P_triu_to_full_ind, c_int **d_P_diag_ind);
 extern void cuda_mat_init_A(const csc *mat, csr **A, csr **At, c_int **d_A_to_At_ind);
 extern void cuda_mat_free(csr *dev_mat);
+extern csr* cuda_submatrix_byrows(csr *A, c_int *rows);
 
 /* cuda_lin_alg.h */
 extern void cuda_mat_mult_sc(csr *S, csr *At, c_int symmetric, c_float sc);
@@ -227,6 +228,8 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix* A, const OSQPVectori* 
   }
 
   M = csc_submatrix_byrows(A->csc, OSQPVectori_data(rows));
+
+  cuda_submatrix_byrows(A->S,  OSQPVectori_data(rows));
 
   if (!M) return OSQP_NULL;
 
