@@ -16,7 +16,7 @@ extern void cuda_free(void** devPtr);
 extern void cuda_mat_init_P(const csc *mat, csr **P, c_float **d_P_triu_val, c_int **d_P_triu_to_full_ind, c_int **d_P_diag_ind);
 extern void cuda_mat_init_A(const csc *mat, csr **A, csr **At, c_int **d_A_to_At_ind);
 extern void cuda_mat_free(csr *dev_mat);
-extern void cuda_submat_byrows(csr *submat, csr *submat_tpose, const csr *mat, const c_int *d_rows);
+extern void cuda_submat_byrows(const csr *A, const c_int *d_rows, csr **Ared, csr **Aredt);
 
 /* cuda_lin_alg.h */
 extern void cuda_mat_mult_sc(csr *S, csr *At, c_int symmetric, c_float sc);
@@ -218,34 +218,24 @@ void OSQPMatrix_free(OSQPMatrix *mat){
 OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix  *mat,
                                         const OSQPVectori *rows) {
 
-  csc        *M;
-  csr        *submat, *submat_tpose;
   OSQPMatrix *out;
 
-  if (A->symmetry == TRIU) {
+  if (mat->symmetry == TRIU) {
 #ifdef PRINTING
     c_eprint("row selection not implemented for partially filled matrices");
 #endif
     return OSQP_NULL;
   }
 
-  M = csc_submatrix_byrows(mat->csc, OSQPVectori_data(rows));
-
-  cuda_submat_byrows(submat, submat_tpose, mat->S, rows->d_val);
-
-  if (!M) return OSQP_NULL;
-
   out = c_calloc(1, sizeof(OSQPMatrix));
 
-  if (!out) {
-    csc_spfree(M);
-    return OSQP_NULL;
-  }
+  if (!out) return OSQP_NULL;
 
   out->symmetry = NONE;
-  out->csc      = M;
-  out->S        = submat;
-  // out->At       = submat_tpose;
+  out->csc = csc_submatrix_byrows(mat->csc, rows->values);
+
+  out->symmetric = 0;
+  cuda_submat_byrows(mat->S, rows->d_val, &out->S, &out->At);
 
   // GB: We should also compute transpose of the submatrix in cuda_submat_byrows()
 

@@ -21,10 +21,10 @@ void cuda_mat_init_A(const csc  *mat,
 
 void cuda_mat_free(csr *dev_mat);
 
-void cuda_submat_byrows(csr         *submat,
-                        csr         *submat_tpose,
-                        const csr   *mat,
-                        const c_int *d_rows);
+void cuda_submat_byrows(const csr    *A,
+                        const c_int  *d_rows,
+                        csr         **Ared,
+                        csr         **Aredt);
 
 
 # ifdef __cplusplus

@@ -586,16 +586,16 @@ void cuda_mat_free(csr *dev_mat) {
   }
 }
 
-void cuda_submat_byrows(csr         *submat,
-                        csr         *submat_tpose,
-                        const csr   *mat,
-                        const c_int *d_rows) {
+void cuda_submat_byrows(const csr    *A,
+                        const c_int  *d_rows,
+                        csr         **Ared,
+                        csr         **Aredt) {
 
   c_int new_m;
 
-  c_int n   = mat->n;
-  c_int m   = mat->m;
-  c_int nnz = mat->nnz;
+  c_int n   = A->n;
+  c_int m   = A->m;
+  c_int nnz = A->nnz;
 
   c_int *d_predicate;
   c_int *d_compact_address;
@@ -617,10 +617,11 @@ void cuda_submat_byrows(csr         *submat,
   checkCudaErrors(cudaMemcpy(&new_m, &d_new_row_number[m-1], sizeof(c_int), cudaMemcpyDeviceToHost));
 
   // Calculate row indices for original matrix
-  csr_expand_row_ind(mat);
+  // GB: This has already been done for matrix A
+  // csr_expand_row_ind(*A);
 
   // Generate predicates per element from per row predicate
-  predicate_generator_kernel<<<(nnz/THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK>>>(mat->row_ind, d_row_predicate, d_predicate, nnz);
+  predicate_generator_kernel<<<(nnz/THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK>>>(A->row_ind, d_row_predicate, d_predicate, nnz);
 
   // Get array offset for compacting and new nnz
   thrust::inclusive_scan(thrust::device, d_predicate, d_predicate + nnz, d_compact_address);
@@ -628,17 +629,17 @@ void cuda_submat_byrows(csr         *submat,
   checkCudaErrors(cudaMemcpy(&nnz_new, &d_compact_address[nnz-1], sizeof(c_int), cudaMemcpyDeviceToHost));
 
   // allocate new matrix (2 -> allocate row indiece as well)
-  submat = csr_alloc(new_m, n, nnz_new, 2);
+  (*Ared) = csr_alloc(new_m, n, nnz_new, 2);
 
   // Compact arrays according to given predicates, special care has to be taken for the rows
-  compact_rows<<<(nnz/THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK>>>(A->row_ind, submat->row_ind, d_new_row_number, d_predicate, d_compact_address, nnz);
-  compact<<<(nnz/THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK>>>(A->col_ind, submat->col_ind, d_predicate, d_compact_address, nnz);
-  compact<<<(nnz/THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK>>>(A->val, submat->val, d_predicate, d_compact_address, nnz);
+  compact_rows<<<(nnz/THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK>>>(A->row_ind, (*Ared)->row_ind, d_new_row_number, d_predicate, d_compact_address, nnz);
+  compact<<<(nnz/THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK>>>(A->col_ind, (*Ared)->col_ind, d_predicate, d_compact_address, nnz);
+  compact<<<(nnz/THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK>>>(A->val, (*Ared)->val, d_predicate, d_compact_address, nnz);
 
   // Generate row pointer
-  compress_row_ind(submat);
+  compress_row_ind(*Ared);
 
-  // TODO: Compute transpose of submat and store in submat_tpose
+  // TODO: Compute transpose of Ared and store in Aredt
 
   cuda_free((void**)&d_predicate);
   cuda_free((void**)&d_compact_address);
