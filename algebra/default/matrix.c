@@ -235,7 +235,8 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix  *mat,
   out->csc = csc_submatrix_byrows(mat->csc, rows->values);
 
   out->symmetric = 0;
-  cuda_submat_byrows(mat->S, rows->d_val, &out->S, &out->At);
+  // GB: There is currently a core dump when doing a mat-vec product with Ared
+  // cuda_submat_byrows(mat->S, rows->d_val, &out->S, &out->At);
 
   // GB: We should also compute transpose of the submatrix in cuda_submat_byrows()
 

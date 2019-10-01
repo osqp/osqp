@@ -640,6 +640,7 @@ void cuda_submat_byrows(const csr    *A,
   compress_row_ind(*Ared);
 
   // TODO: Compute transpose of Ared and store in Aredt
+  *Aredt = NULL;
 
   cuda_free((void**)&d_predicate);
   cuda_free((void**)&d_compact_address);
