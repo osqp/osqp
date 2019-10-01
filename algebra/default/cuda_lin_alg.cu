@@ -869,6 +869,9 @@ void cuda_mat_quad_form(const csr     *P,
   /* h_res = d_Px' * d_x */
   cuda_vec_prod(d_Px, d_x, n, h_res);
 
+  /* h_res *= 0.5 */
+  (*h_res) *= 0.5;
+
   cuda_free((void **) &d_Px);
 }
 

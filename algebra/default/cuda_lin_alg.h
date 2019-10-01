@@ -281,7 +281,7 @@ void cuda_mat_Axpy(const csr     *A,
                    c_float        beta);
 
 /**
- * h_res = d_x' * P * d_x
+ * h_res = (1/2) d_x' * P * d_x
  */
 void cuda_mat_quad_form(const csr     *P,
                         const c_float *d_x,
