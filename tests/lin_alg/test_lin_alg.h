@@ -306,5 +306,8 @@ static const char* test_lin_alg()
   mu_run_test(test_mat_vec_multiplication);
   mu_run_test(test_quad_form_upper_triang);
 
+  // free algebra libraries
+  osqp_algebra_free_libs();
+
   return 0;
 }
