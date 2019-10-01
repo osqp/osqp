@@ -3,6 +3,19 @@
 #include "algebra_impl.h"
 #include "csc_math.h"
 #include "csc_utils.h"
+//#include "PG_debug.h"
+//#include "assert.h"
+
+#define mkl
+#ifdef mkl
+  #ifdef DFLOAT
+    #define cscmv mkl_scscmv
+  #else
+    #define cscmv mkl_dcscmv
+  #endif //float or double
+
+#endif // mkl def
+
 
 /*  logical test functions ----------------------------------------------------*/
 
@@ -17,6 +30,8 @@ c_int OSQPMatrix_is_eq(OSQPMatrix *A, OSQPMatrix* B, c_float tol){
 #ifndef EMBEDDED
 
 //Make a copy from a csc matrix.  Returns OSQP_NULL on failure
+
+// TODO: add the struc matdescra variables
 OSQPMatrix* OSQPMatrix_new_from_csc(const csc* A, c_int is_triu){
 
   OSQPMatrix* out = c_malloc(sizeof(OSQPMatrix));
@@ -59,20 +74,93 @@ c_int    OSQPMatrix_get_nz(const OSQPMatrix *M){return M->csc->p[M->csc->n];}
 /* math functions ----------------------------------------------------------*/
 
 //A = sc*A
+#ifdef mkl
 void OSQPMatrix_mult_scalar(OSQPMatrix *A, c_float sc){
   csc_scale(A->csc,sc);
 }
 
+#else
+void OSQPMatrix_mult_scalar(OSQPMatrix *A, c_float sc){
+  csc_scale(A->csc,sc);
+}
+
+#endif // mult scalar
+
+#ifdef mkl
 void OSQPMatrix_lmult_diag(OSQPMatrix *A, const OSQPVectorf *L) {
   csc_lmult_diag(A->csc, OSQPVectorf_data(L));
 }
 
+#else
+void OSQPMatrix_lmult_diag(OSQPMatrix *A, const OSQPVectorf *L) {
+  csc_lmult_diag(A->csc, OSQPVectorf_data(L));
+}
+
+#endif // L*A mult
+
+#ifdef mkl
 void OSQPMatrix_rmult_diag(OSQPMatrix *A, const OSQPVectorf *R) {
   csc_rmult_diag(A->csc, OSQPVectorf_data(R));
 }
 
+#else
+void OSQPMatrix_rmult_diag(OSQPMatrix *A, const OSQPVectorf *R) {
+  csc_rmult_diag(A->csc, OSQPVectorf_data(R));
+}
+
+#endif // A*R mult
+
 //y = alpha*A*x + beta*y
-void OSQPMatrix_Axpy(const OSQPMatrix *A,
+#ifdef mkl
+void OSQPMatrix_Axpy(/*const*/ OSQPMatrix *A,
+                     const OSQPVectorf *x,
+                     OSQPVectorf *y,
+                     c_float alpha,
+                     c_float beta) {
+  const c_float* xf = x->values;
+  c_float* yf = y->values;
+  const MKL_INT m = A->csc->m; // row
+  const MKL_INT k = A->csc->n; // columns
+  char transa = 'n';
+  A->matdescra[0] = 'g';
+  A->matdescra[1] = 'u';
+  A->matdescra[2] = 'n';
+  A->matdescra[3] = 'c';
+  const c_float* val = A->csc->x; // numerical values
+  const MKL_INT* indx = A->csc->i; // row indices
+  const MKL_INT* pntrb = (A->csc->p); // column pointer starting with zero
+  const MKL_INT* pntre = (A->csc->p + 1); // column pointer ending with 'k' (number of columns) 
+
+  // printf("sizeof int = %d, sizeof MKLINT = %d\n", sizeof(c_int), sizeof(MKL_INT));
+  //assert(x->length == k); 
+
+  if (A->symmetry == NONE){
+    // OSQPMatrix_print(A, "A1");
+    // OSQPVectorf_print(x, "x");
+    // OSQPVectorf_print(y, "y");
+    // printf("%f %f are the const vals\n", alpha, beta);
+    cscmv (&transa , &m , &k , &alpha , A->matdescra , val , indx , pntrb , pntre , xf , &beta , yf );
+    // OSQPMatrix_print(A, "A2");
+    // OSQPVectorf_print(x, "x");
+    // OSQPVectorf_print(y, "y");
+    // printf("%f %f are the const vals\n", alpha, beta);
+  }
+  else{ 
+    A->matdescra[0] = 's';
+    // OSQPMatrix_print(A, "A1_");
+    // OSQPVectorf_print(x, "x_");
+    // OSQPVectorf_print(y, "y_");
+    // printf("%f %f are the const vals\n", alpha, beta);
+    cscmv (&transa , &m , &k , &alpha , A->matdescra , val , indx , pntrb , pntre , xf , &beta , yf );
+    // OSQPMatrix_print(A, "A2_");
+    // OSQPVectorf_print(x, "x_");
+    // OSQPVectorf_print(y, "y_");
+    // printf("%f %f are the const vals\n", alpha, beta);
+  } 
+} 
+ #else
+ 
+ void OSQPMatrix_Axpy(const OSQPMatrix *A,
                      const OSQPVectorf *x,
                      OSQPVectorf *y,
                      c_float alpha,
@@ -91,6 +179,41 @@ void OSQPMatrix_Axpy(const OSQPMatrix *A,
   }
 }
 
+
+#endif // Axpy matrix sparse blas implementation
+
+#ifdef mkl// It has a bug Im not sure how to fix yet.
+
+void OSQPMatrix_Atxpy(/*const*/ OSQPMatrix *A,
+                      const OSQPVectorf *x,
+                      OSQPVectorf *y,
+                      c_float alpha,
+                      c_float beta) {
+    char transa = 't'; // Treating the transpose of the matrix
+    const c_float* xf = x->values;
+    c_float* yf = y->values;
+    const MKL_INT m = A->csc->m; // row
+    const MKL_INT k = A->csc->n; // columns
+    A->matdescra[1] = 'u';
+    A->matdescra[2] = 'n';
+    A->matdescra[3] = 'c';
+    const c_float* val = A->csc->x; // numerical values
+    const MKL_INT* indx = A->csc->i; // row indices
+    const MKL_INT* pntrb = (A->csc->p); // column pointer starting with zero
+    const MKL_INT* pntre = (A->csc->p + 1); // column pointer ending with 'k' (number of columns) 
+
+   if(A->symmetry == NONE){
+    A->matdescra[0] = 'g';
+    cscmv (&transa , &m , &k , &alpha , A->matdescra , val , indx , pntrb , pntre , xf , &beta , yf );
+   }
+   else{
+    A->matdescra[0] = 's';
+    cscmv (transa , &m , &k , &alpha , A->matdescra , val , indx , pntrb , pntre , xf , &beta , yf );
+   }
+}
+
+#else
+
 void OSQPMatrix_Atxpy(const OSQPMatrix *A,
                       const OSQPVectorf *x,
                       OSQPVectorf *y,
@@ -102,15 +225,37 @@ void OSQPMatrix_Atxpy(const OSQPMatrix *A,
 }
 
 
-c_float OSQPMatrix_quad_form(const OSQPMatrix *P, const OSQPVectorf *x) {
-   if(P->symmetry == TRIU) return csc_quad_form(P->csc, OSQPVectorf_data(x));
-   else {
+#endif // transposed AXPY 
+
+
+#ifdef mkl 
+c_float OSQPMatrix_quad_form(const OSQPMatrix* P, const OSQPVectorf* x) {
+  if (P->symmetry == TRIU) {
+    OSQPVectorf* y;
+    y = OSQPVectorf_malloc(x->length);
+    OSQPMatrix_Axpy(P, x, y, 1, 0); // Performing y=(P'*x)
+    return 0.5*OSQPVectorf_dot_prod(y, x); // Performing y'*x = (P'*x)'*y = x'*P*x (quad form)
+  }
+  else {
 #ifdef PRINTING
-     c_eprint("quad_form matrix is not upper triangular");
+    c_eprint("quad_form matrix is not upper triangular");
 #endif /* ifdef PRINTING */
-     return -1.0;
-   }
+    return -1.0;
+  }
 }
+
+#else
+
+c_float OSQPMatrix_quad_form(const OSQPMatrix* P, const OSQPVectorf* x) {
+  if (P->symmetry == TRIU) return csc_quad_form(P->csc, OSQPVectorf_data(x));
+  else {
+#ifdef PRINTING
+    c_eprint("quad_form matrix is not upper triangular");
+#endif /* ifdef PRINTING */
+    return -1.0;
+  }
+}
+#endif // quad form
 
 #if EMBEDDED != 1
 
