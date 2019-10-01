@@ -118,10 +118,16 @@ static char* test_solveKKT_pardiso() {
 
 static const char* test_solve_linsys()
 {
+  // initialize algebra libraries
+  osqp_algebra_init_libs();
+
   mu_run_test(test_solveKKT);
 #ifdef ENABLE_MKL_PARDISO
   mu_run_test(test_solveKKT_pardiso);
 #endif
+
+  // free algebra libraries
+  osqp_algebra_free_libs();
 
   return 0;
 }
