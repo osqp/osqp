@@ -335,7 +335,7 @@ void csr_expand_row_ind(csr *mat) {
  */
 c_int* coo_sort(csr *A) {
 
-  c_int *A_to_At_permutation;  
+  c_int *A_to_At_permutation;
   char *pBuffer;
   size_t pBufferSizeInBytes;
 
@@ -628,7 +628,7 @@ void cuda_submat_byrows(const csr    *A,
   c_int nnz_new;
   checkCudaErrors(cudaMemcpy(&nnz_new, &d_compact_address[nnz-1], sizeof(c_int), cudaMemcpyDeviceToHost));
 
-  // allocate new matrix (2 -> allocate row indiece as well)
+  // allocate new matrix (2 -> allocate row indices as well)
   (*Ared) = csr_alloc(new_m, n, nnz_new, 2);
 
   // Compact arrays according to given predicates, special care has to be taken for the rows

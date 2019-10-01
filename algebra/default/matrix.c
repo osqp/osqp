@@ -154,7 +154,7 @@ void OSQPMatrix_Atxpy(const OSQPMatrix  *mat,
   if (mat->symmetry == NONE) csc_Atxpy(mat->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
   else csc_Axpy_sym_triu(mat->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
 
-  if (mat->S) { /* Needed temporarily to avoid core dump in polish */
+  if ( (mat->symmetric && mat->S) || (!mat->symmetric && mat->At) ) { /* Needed temporarily to avoid core dump in polish */
     if (mat->symmetric) cuda_mat_Axpy(mat->S,  x->d_val, y->d_val, alpha, beta);
     else                cuda_mat_Axpy(mat->At, x->d_val, y->d_val, alpha, beta);
   }
@@ -235,8 +235,7 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix  *mat,
   out->csc = csc_submatrix_byrows(mat->csc, rows->values);
 
   out->symmetric = 0;
-  // GB: There is currently a core dump when doing a mat-vec product with Ared
-  // cuda_submat_byrows(mat->S, rows->d_val, &out->S, &out->At);
+  cuda_submat_byrows(mat->S, rows->d_val, &out->S, &out->At);
 
   // GB: We should also compute transpose of the submatrix in cuda_submat_byrows()
 
