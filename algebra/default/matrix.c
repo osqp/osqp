@@ -149,8 +149,7 @@ void OSQPMatrix_Atxpy(const OSQPMatrix  *mat,
   else csc_Axpy_sym_triu(mat->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
 
   if (!mat->symmetric && mat->At) { /* Needed temporarily to avoid core dump in polish */
-    if (mat->symmetric) cuda_mat_Axpy(mat->S,  x->d_val, y->d_val, alpha, beta);
-    else                cuda_mat_Axpy(mat->At, x->d_val, y->d_val, alpha, beta);
+    cuda_mat_Axpy(mat->At, x->d_val, y->d_val, alpha, beta);
   }
   else {
     /* TEMPORARY CODE: Copy the result of Atxpy to y->d_val */
