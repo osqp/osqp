@@ -38,6 +38,7 @@ typedef enum OSQPMatrix_symmetry_type {NONE,TRIU} OSQPMatrix_symmetry_type;
 struct OSQPMatrix_ {
   csc*                             csc;
   OSQPMatrix_symmetry_type    symmetry;
+  char matdescra[6];
 };
 
 
