@@ -192,9 +192,9 @@ __global__ void vec_sqrt_kernel(c_float *a,
 
   for(c_int i = idx; i < n; i += grid_size) {
 #ifdef DFLOAT
-    a[i] = __frsqrt_rn(a[i]);
+    a[i] = __fsqrt_rn(a[i]);
 #else
-    a[i] = __drcp_rn(__dsqrt_rn(a[i]));
+    a[i] = __dsqrt_rn(a[i]);
 #endif
   }
 }
