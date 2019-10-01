@@ -33,6 +33,13 @@ void cuda_vec_copy_d2h(c_float       *h_y,
                        const c_float *d_x,
                        c_int          n);
 
+/*
+ * d_y[i] = h_x[i] for i in [0,n-1] (integers)
+*/
+void cuda_vec_int_copy_h2d(c_int       *d_y,
+                           const c_int *h_x,
+                           c_int        n);
+
 /**
  * d_a[i] = sc for i in [0,n-1]
  */

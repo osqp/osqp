@@ -51,6 +51,9 @@ static c_int form_Ared(OSQPWorkspace *work){
     }
   }
 
+  // Copy raw vector into OSQPVectori structure
+  OSQPVectori_from_raw(work->pol->active_flags, active_flags);
+
   //total active constraints
   work->pol->n_active = n_active;
 

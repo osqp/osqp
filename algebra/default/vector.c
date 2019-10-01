@@ -16,6 +16,7 @@ extern void cuda_free(void** devPtr);
 extern void cuda_vec_copy_d2d(c_float *d_y, const c_float *d_x, c_int n);
 extern void cuda_vec_copy_h2d(c_float *d_y, const c_float *h_x, c_int n);
 extern void cuda_vec_copy_d2h(c_float *h_y, const c_float *d_x, c_int n);
+extern void cuda_vec_int_copy_h2d(c_int *d_y, const c_int *h_x, c_int n);
 extern void cuda_vec_set_sc(c_float *d_a, c_float sc, c_int n);
 extern void cuda_vec_set_sc_cond(c_float *d_a, const c_int *d_test, c_float sc_if_neg, c_float sc_if_zero, c_float sc_if_pos, c_float n);
 extern void cuda_vec_mult_sc(c_float *d_a, c_float sc, c_int n);
@@ -215,6 +216,19 @@ void OSQPVectorf_from_raw(OSQPVectorf   *b,
     bv[i] = av[i];
   }
   cuda_vec_copy_h2d(b->d_val, av, b->length);
+}
+
+void OSQPVectori_from_raw(OSQPVectori *b,
+                          const c_int *av) {
+
+  c_int i;
+  c_int length = b->length;
+  c_int* bv = b->values;
+
+  for (i = 0; i < length; i++) {
+    bv[i] = av[i];
+  }
+  cuda_vec_int_copy_h2d(b->d_val, av, b->length);
 }
 
 void OSQPVectorf_to_raw(c_float           *bv,

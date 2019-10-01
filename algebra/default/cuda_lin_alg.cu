@@ -444,6 +444,13 @@ void cuda_vec_copy_d2h(c_float       *h_y,
   checkCudaErrors(cudaMemcpy(h_y, d_x, n * sizeof(c_float), cudaMemcpyDeviceToHost));
 }
 
+void cuda_vec_int_copy_h2d(c_int       *d_y,
+                           const c_int *h_x,
+                           c_int        n) {
+
+  checkCudaErrors(cudaMemcpy(d_y, h_x, n * sizeof(c_int), cudaMemcpyHostToDevice));
+}
+
 void cuda_vec_set_sc(c_float *d_a,
                      c_float  sc,
                      c_int    n) {

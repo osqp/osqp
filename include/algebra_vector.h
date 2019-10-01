@@ -71,6 +71,9 @@ void OSQPVectorf_copy(OSQPVectorf *b, const OSQPVectorf *a);
 /* Copy an array of floats into a into a vector b (pre-allocated) */
 void OSQPVectorf_from_raw(OSQPVectorf *b, const c_float *a);
 
+/* copy an array of ints into a into a vector b (pre-allocated) */
+void OSQPVectori_from_raw(OSQPVectori *b, const c_int *a);
+
 /* copy a vector into an array of floats (pre-allocated) */
 void OSQPVectorf_to_raw(c_float *bv, const OSQPVectorf *a);
 
