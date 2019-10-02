@@ -19,6 +19,21 @@ void cuda_mat_init_A(const csc  *mat,
                      csr       **At,
                      c_int     **d_A_to_At_ind);
 
+void cuda_mat_update_P(const c_float  *Px,
+                       const c_int    *Px_idx,
+                       c_int           Px_n,
+                       csr           **P,
+                       c_float        *d_P_triu_val,
+                       c_int          *d_P_triu_to_full_ind,
+                       c_int          *d_P_diag_ind);
+
+void cuda_mat_update_A(const c_float  *Ax,
+                       const c_int    *Ax_idx,
+                       c_int           Ax_n,
+                       csr           **A,
+                       csr           **At,
+                       c_int          *d_A_to_At_ind);
+
 void cuda_mat_free(csr *dev_mat);
 
 void cuda_submat_byrows(const csr    *A,

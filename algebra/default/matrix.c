@@ -15,6 +15,8 @@ extern void cuda_free(void** devPtr);
 /* cuda_csr.h */
 extern void cuda_mat_init_P(const csc *mat, csr **P, c_float **d_P_triu_val, c_int **d_P_triu_to_full_ind, c_int **d_P_diag_ind);
 extern void cuda_mat_init_A(const csc *mat, csr **A, csr **At, c_int **d_A_to_At_ind);
+extern void cuda_mat_update_P(const c_float *Px, const c_int *Px_idx, c_int Px_n, csr **P, c_float *d_P_triu_val, c_int *d_P_triu_to_full_ind, c_int *d_P_diag_ind);
+extern void cuda_mat_update_A(const c_float *Ax, const c_int *Ax_idx, c_int Ax_n, csr **A, csr **At, c_int *d_A_to_At_ind);
 extern void cuda_mat_free(csr *dev_mat);
 extern void cuda_submat_byrows(const csr *A, const c_int *d_rows, csr **Ared, csr **Aredt);
 
@@ -25,9 +27,6 @@ extern void cuda_mat_rmult_diag(csr *S, csr *At, c_int symmetric, const c_float 
 extern void cuda_mat_Axpy(const csr *A, const c_float *d_x, c_float *d_y, c_float alpha, c_float beta);
 extern void cuda_mat_quad_form(const csr *P, const c_float *d_x, c_float *h_res);
 extern void cuda_mat_row_norm_inf(const csr *S, c_float *d_res);
-
-// THIS FUNCTION IS ADDED HERE TEMPORARILY
-extern void cuda_vec_copy_h2d(c_float *d_y, const c_float *h_x, c_int n);
 
 
 /*  logical test functions ----------------------------------------------------*/
@@ -73,15 +72,20 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const csc *M,
   }
 }
 
-
-/*  direct data access functions ---------------------------------------------*/
-
 void OSQPMatrix_update_values(OSQPMatrix    *mat,
                               const c_float *Mx_new,
                               const c_int   *Mx_new_idx,
                               c_int          Mx_new_n) {
 
   csc_update_values(mat->csc, Mx_new, Mx_new_idx, Mx_new_n);
+
+  if (mat->symmetric) {
+    cuda_mat_update_P(Mx_new, Mx_new_idx, Mx_new_n, &mat->S, mat->d_P_triu_val,
+                      mat->d_P_triu_to_full_ind, mat->d_P_diag_ind);
+  }
+  else {
+    cuda_mat_update_A(Mx_new, Mx_new_idx, Mx_new_n, &mat->S, &mat->At, mat->d_A_to_At_ind);
+  }
 }
 
 /* Matrix dimensions and data access */
@@ -145,16 +149,14 @@ void OSQPMatrix_Atxpy(const OSQPMatrix  *mat,
                       c_float            alpha,
                       c_float            beta) {
 
-  if (mat->symmetry == NONE) csc_Atxpy(mat->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
-  else csc_Axpy_sym_triu(mat->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
+  if (mat->symmetry == NONE){
+    csc_Atxpy(mat->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
+  }
+  else{
+    csc_Axpy_sym_triu(mat->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
+  }
 
-  if (!mat->symmetric && mat->At) { /* Needed temporarily to avoid core dump in polish */
-    cuda_mat_Axpy(mat->At, x->d_val, y->d_val, alpha, beta);
-  }
-  else {
-    /* TEMPORARY CODE: Copy the result of Atxpy to y->d_val */
-    if (y->length) cuda_vec_copy_h2d(y->d_val, y->values, y->length);
-  }
+  cuda_mat_Axpy(mat->At, x->d_val, y->d_val, alpha, beta);
 }
 
 c_float OSQPMatrix_quad_form(const OSQPMatrix  *mat,
@@ -230,8 +232,6 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix  *mat,
 
   out->symmetric = 0;
   cuda_submat_byrows(mat->S, rows->d_val, &out->S, &out->At);
-
-  // GB: We should also compute transpose of the submatrix in cuda_submat_byrows()
 
   return out;
 }

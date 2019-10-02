@@ -13,6 +13,9 @@
 
 extern CUDA_Handle_t *CUDA_handle;
 
+/* This function is implemented in cuda_lin_alg.cu */
+extern void scatter(c_float *out, const c_float *in, const c_int *ind, c_int n);
+
 
 /*******************************************************************************
  *                            GPU Kernels                                      *
@@ -574,6 +577,93 @@ void cuda_mat_init_A(const csc  *mat,
   csr_expand_row_ind(*A);
 }
 
+void cuda_mat_update_P(const c_float  *Px,
+                       const c_int    *Px_idx,
+                       c_int           Px_n,
+                       csr           **P,
+                       c_float        *d_P_triu_val,
+                       c_int          *d_P_triu_to_full_ind,
+                       c_int          *d_P_diag_ind) {
+
+  if (!Px_idx) { /* Update whole P */
+    c_float *d_P_val_new;
+    c_int nnz = (*P)->nnz;
+
+    /* Allocate memory */
+    cuda_malloc((void **) &d_P_val_new, (nnz + 1) * sizeof(c_float));
+
+    /* Copy new values from host to device */
+    checkCudaErrors(cudaMemcpy(d_P_val_new, Px, nnz * sizeof(c_float), cudaMemcpyHostToDevice));
+
+    checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, nnz, d_P_val_new, (*P)->val, d_P_triu_to_full_ind, CUSPARSE_INDEX_BASE_ZERO));
+
+    cuda_free((void **) &d_P_val_new);
+  }
+  else { /* Update P partially */
+    c_float *d_P_val_new;
+    c_int   *d_P_ind_new;
+    c_int nnz = (*P)->nnz;
+
+    /* Allocate memory */
+    cuda_malloc((void **) &d_P_val_new, Px_n * sizeof(c_float));
+    cuda_malloc((void **) &d_P_ind_new, Px_n * sizeof(c_int));
+
+    /* Copy new values and indices from host to device */
+    checkCudaErrors(cudaMemcpy(d_P_val_new, Px,     Px_n * sizeof(c_float), cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMemcpy(d_P_ind_new, Px_idx, Px_n * sizeof(c_int),   cudaMemcpyHostToDevice));
+
+    /* Update d_P_triu_val */
+    scatter(d_P_triu_val, d_P_val_new, d_P_ind_new, Px_n);
+
+    /* Gather from d_P_triu_val to update full P */
+    checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, nnz, d_P_triu_val, (*P)->val, d_P_triu_to_full_ind, CUSPARSE_INDEX_BASE_ZERO));
+
+    cuda_free((void **) &d_P_val_new);
+    cuda_free((void **) &d_P_ind_new);
+  }
+}
+
+void cuda_mat_update_A(const c_float  *Ax,
+                       const c_int    *Ax_idx,
+                       c_int           Ax_n,
+                       csr           **A,
+                       csr           **At,
+                       c_int          *d_A_to_At_ind) {
+
+  c_int Annz     = (*A)->nnz;
+  c_float *Aval  = (*A)->val;
+  c_float *Atval = (*At)->val;
+
+  if (!Ax_idx) { /* Update whole A */
+    /* Updating At is easy since it is equal to A in CSC */
+    checkCudaErrors(cudaMemcpy(Atval, Ax, Annz * sizeof(c_float), cudaMemcpyHostToDevice));
+
+    /* Updating A requires transpose of A_new */
+    checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, Annz, Atval, Aval, d_A_to_At_ind, CUSPARSE_INDEX_BASE_ZERO));
+  }
+  else { /* Update A partially */
+    c_float *d_At_val_new;
+    c_int   *d_At_ind_new;
+
+    /* Allocate memory */
+    cuda_malloc((void **) &d_At_val_new, Ax_n * sizeof(c_float));
+    cuda_malloc((void **) &d_At_ind_new, Ax_n * sizeof(c_int));
+
+    /* Copy new values and indices from host to device */
+    checkCudaErrors(cudaMemcpy(d_At_val_new, Ax,     Ax_n * sizeof(c_float), cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMemcpy(d_At_ind_new, Ax_idx, Ax_n * sizeof(c_int),   cudaMemcpyHostToDevice));
+
+    /* Update At first since it is equal to A in CSC */
+    scatter(Atval, d_At_val_new, d_At_ind_new, Ax_n);
+
+    cuda_free((void **) &d_At_val_new);
+    cuda_free((void **) &d_At_ind_new);
+
+    /* Gather from Atval to construct Aval */
+    checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, Annz, Atval, Aval, d_A_to_At_ind, CUSPARSE_INDEX_BASE_ZERO));
+  }
+}
+
 void cuda_mat_free(csr *dev_mat) {
   if (dev_mat) {
     cuda_free((void **) &dev_mat->val);
@@ -612,13 +702,9 @@ void cuda_submat_byrows(const csr    *A,
   checkCudaErrors(cudaMemcpy(d_row_predicate, d_rows, m * sizeof(c_int), cudaMemcpyDeviceToDevice));
   vector_init_abs_kernel<<<(m/THREADS_PER_BLOCK) + 1,THREADS_PER_BLOCK>>>(d_row_predicate, d_row_predicate, m);
 
-  // Calcualte new row numbering and get new number of rows
+  // Calculate new row numbering and get new number of rows
   thrust::inclusive_scan(thrust::device, d_row_predicate, d_row_predicate + m, d_new_row_number);
   checkCudaErrors(cudaMemcpy(&new_m, &d_new_row_number[m-1], sizeof(c_int), cudaMemcpyDeviceToHost));
-
-  // Calculate row indices for original matrix
-  // GB: This has already been done for matrix A
-  // csr_expand_row_ind(*A);
 
   // Generate predicates per element from per row predicate
   predicate_generator_kernel<<<(nnz/THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK>>>(A->row_ind, d_row_predicate, d_predicate, nnz);
@@ -639,9 +725,16 @@ void cuda_submat_byrows(const csr    *A,
   // Generate row pointer
   compress_row_ind(*Ared);
 
-  // TODO: Compute transpose of Ared and store in Aredt
-  *Aredt = NULL;
+  // We first make a copy of Ared
+  *Aredt = csr_alloc(new_m, n, nnz_new, 1);
+  checkCudaErrors(cudaMemcpy((*Aredt)->val,     (*Ared)->val,     nnz_new   * sizeof(c_float), cudaMemcpyDeviceToDevice));
+  checkCudaErrors(cudaMemcpy((*Aredt)->row_ptr, (*Ared)->row_ptr, (new_m+1) * sizeof(c_int),   cudaMemcpyDeviceToDevice));
+  checkCudaErrors(cudaMemcpy((*Aredt)->col_ind, (*Ared)->col_ind, nnz_new   * sizeof(c_int),   cudaMemcpyDeviceToDevice));
 
+  c_int *d_A_to_At_ind;
+  csr_transpose(*Aredt, &d_A_to_At_ind);;
+
+  cuda_free((void**)&d_A_to_At_ind);
   cuda_free((void**)&d_predicate);
   cuda_free((void**)&d_compact_address);
   cuda_free((void**)&d_row_predicate);
