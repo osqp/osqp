@@ -17,8 +17,11 @@ extern void cuda_mat_init_P(const csc *mat, csr **P, c_float **d_P_triu_val, c_i
 extern void cuda_mat_init_A(const csc *mat, csr **A, csr **At, c_int **d_A_to_At_ind);
 extern void cuda_mat_update_P(const c_float *Px, const c_int *Px_idx, c_int Px_n, csr **P, c_float *d_P_triu_val, c_int *d_P_triu_to_full_ind, c_int *d_P_diag_ind, c_int P_triu_nnz);
 extern void cuda_mat_update_A(const c_float *Ax, const c_int *Ax_idx, c_int Ax_n, csr **A, csr **At, c_int *d_A_to_At_ind);
-extern void cuda_mat_free(csr *dev_mat);
+extern void cuda_mat_free(csr *mat);
 extern void cuda_submat_byrows(const csr *A, const c_int *d_rows, csr **Ared, csr **Aredt);
+extern void cuda_mat_get_m(const csr *mat, c_int *m);
+extern void cuda_mat_get_n(const csr *mat, c_int *n);
+extern void cuda_mat_get_nnz(const csr *mat, c_int *nnz);
 
 /* cuda_lin_alg.h */
 extern void cuda_mat_mult_sc(csr *S, csr *At, c_int symmetric, c_float sc);
@@ -89,13 +92,30 @@ void OSQPMatrix_update_values(OSQPMatrix    *mat,
   }
 }
 
-/* Matrix dimensions and data access */
-c_int    OSQPMatrix_get_m( const OSQPMatrix *mat){return mat->csc->m;}
-c_int    OSQPMatrix_get_n( const OSQPMatrix *mat){return mat->csc->n;}
+c_int OSQPMatrix_get_m( const OSQPMatrix *mat) {
+  c_int m;
+  cuda_mat_get_nnz(mat, &m);
+  return m;
+}
+
+c_int OSQPMatrix_get_n( const OSQPMatrix *mat) {
+  c_int n;
+  cuda_mat_get_nnz(mat, &n);
+  return n;
+}
+
+c_int OSQPMatrix_get_nz(const OSQPMatrix *mat) {
+  c_int nnz;
+  if (mat->symmetric) nnz = mat->P_triu_nnz;
+  else                cuda_mat_get_nnz(mat, &nnz);
+  return nnz;
+}
+
+// GB: These are only used by direct solver interfaces. We will not need them in the PCG solver.
+//     Anyway, they should be implemented by allocating c_float array and copying values there.
 c_float* OSQPMatrix_get_x( const OSQPMatrix *mat){return mat->csc->x;}
 c_int*   OSQPMatrix_get_i( const OSQPMatrix *mat){return mat->csc->i;}
 c_int*   OSQPMatrix_get_p( const OSQPMatrix *mat){return mat->csc->p;}
-c_int    OSQPMatrix_get_nz(const OSQPMatrix *mat){return mat->csc->p[mat->csc->n];}
 
 
 void OSQPMatrix_mult_scalar(OSQPMatrix *mat,

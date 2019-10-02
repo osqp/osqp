@@ -35,13 +35,21 @@ void cuda_mat_update_A(const c_float  *Ax,
                        csr           **At,
                        c_int          *d_A_to_At_ind);
 
-void cuda_mat_free(csr *dev_mat);
+void cuda_mat_free(csr *mat);
 
 void cuda_submat_byrows(const csr    *A,
                         const c_int  *d_rows,
                         csr         **Ared,
                         csr         **Aredt);
 
+void cuda_mat_get_m(const csr *mat,
+                    c_int     *m);
+
+void cuda_mat_get_n(const csr *mat,
+                    c_int     *n);
+
+void cuda_mat_get_nnz(const csr *mat,
+                      c_int     *nnz);
 
 # ifdef __cplusplus
 }

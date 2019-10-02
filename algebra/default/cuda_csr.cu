@@ -22,7 +22,7 @@ extern void scatter(c_float *out, const c_float *in, const c_int *ind, c_int n);
  *******************************************************************************/
 
  /*
- * Expand an upper triangular matrix given in COO format to a symetric
+ * Expand an upper triangular matrix given in COO format to a symmetric
  * matrix. Each entry is duplicated with its column- and row index switched.
  * In the case of a diagonal element we set the indices to a value  that is
  * larger than n to easily remove it later. This is done to keep the memory
@@ -663,15 +663,15 @@ void cuda_mat_update_A(const c_float  *Ax,
   }
 }
 
-void cuda_mat_free(csr *dev_mat) {
-  if (dev_mat) {
-    cuda_free((void **) &dev_mat->val);
-    cuda_free((void **) &dev_mat->row_ptr);
-    cuda_free((void **) &dev_mat->col_ind);
-    cuda_free((void **) &dev_mat->buffer);
-    cuda_free((void **) &dev_mat->row_ind);
-    cusparseDestroyMatDescr(dev_mat->MatDescription);
-    c_free(dev_mat);
+void cuda_mat_free(csr *mat) {
+  if (mat) {
+    cuda_free((void **) &mat->val);
+    cuda_free((void **) &mat->row_ptr);
+    cuda_free((void **) &mat->col_ind);
+    cuda_free((void **) &mat->buffer);
+    cuda_free((void **) &mat->row_ind);
+    cusparseDestroyMatDescr(mat->MatDescription);
+    c_free(mat);
   }
 }
 
@@ -738,4 +738,22 @@ void cuda_submat_byrows(const csr    *A,
   cuda_free((void**)&d_compact_address);
   cuda_free((void**)&d_row_predicate);
   cuda_free((void**)&d_new_row_number);
+}
+
+void cuda_mat_get_m(const csr *mat,
+                    c_int     *m) {
+
+  (*m) = mat->m;
+}
+
+void cuda_mat_get_n(const csr *mat,
+                    c_int     *n) {
+
+  (*n) = mat->n;
+}
+
+void cuda_mat_get_nnz(const csr *mat,
+                      c_int     *nnz) {
+
+  (*nnz) = mat->nnz;
 }
