@@ -583,19 +583,19 @@ void cuda_mat_update_P(const c_float  *Px,
                        csr           **P,
                        c_float        *d_P_triu_val,
                        c_int          *d_P_triu_to_full_ind,
-                       c_int          *d_P_diag_ind) {
+                       c_int          *d_P_diag_ind,
+                       c_int           P_triu_nnz) {
 
   if (!Px_idx) { /* Update whole P */
     c_float *d_P_val_new;
-    c_int nnz = (*P)->nnz;
 
     /* Allocate memory */
-    cuda_malloc((void **) &d_P_val_new, (nnz + 1) * sizeof(c_float));
+    cuda_malloc((void **) &d_P_val_new, (P_triu_nnz + 1) * sizeof(c_float));
 
     /* Copy new values from host to device */
-    checkCudaErrors(cudaMemcpy(d_P_val_new, Px, nnz * sizeof(c_float), cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMemcpy(d_P_val_new, Px, P_triu_nnz * sizeof(c_float), cudaMemcpyHostToDevice));
 
-    checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, nnz, d_P_val_new, (*P)->val, d_P_triu_to_full_ind, CUSPARSE_INDEX_BASE_ZERO));
+    checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, P_triu_nnz, d_P_val_new, (*P)->val, d_P_triu_to_full_ind, CUSPARSE_INDEX_BASE_ZERO));
 
     cuda_free((void **) &d_P_val_new);
   }

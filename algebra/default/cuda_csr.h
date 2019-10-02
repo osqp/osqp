@@ -25,7 +25,8 @@ void cuda_mat_update_P(const c_float  *Px,
                        csr           **P,
                        c_float        *d_P_triu_val,
                        c_int          *d_P_triu_to_full_ind,
-                       c_int          *d_P_diag_ind);
+                       c_int          *d_P_diag_ind,
+                       c_int           P_triu_nnz);
 
 void cuda_mat_update_A(const c_float  *Ax,
                        const c_int    *Ax_idx,

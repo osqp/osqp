@@ -15,7 +15,7 @@ extern void cuda_free(void** devPtr);
 /* cuda_csr.h */
 extern void cuda_mat_init_P(const csc *mat, csr **P, c_float **d_P_triu_val, c_int **d_P_triu_to_full_ind, c_int **d_P_diag_ind);
 extern void cuda_mat_init_A(const csc *mat, csr **A, csr **At, c_int **d_A_to_At_ind);
-extern void cuda_mat_update_P(const c_float *Px, const c_int *Px_idx, c_int Px_n, csr **P, c_float *d_P_triu_val, c_int *d_P_triu_to_full_ind, c_int *d_P_diag_ind);
+extern void cuda_mat_update_P(const c_float *Px, const c_int *Px_idx, c_int Px_n, csr **P, c_float *d_P_triu_val, c_int *d_P_triu_to_full_ind, c_int *d_P_diag_ind, c_int P_triu_nnz);
 extern void cuda_mat_update_A(const c_float *Ax, const c_int *Ax_idx, c_int Ax_n, csr **A, csr **At, c_int *d_A_to_At_ind);
 extern void cuda_mat_free(csr *dev_mat);
 extern void cuda_submat_byrows(const csr *A, const c_int *d_rows, csr **Ared, csr **Aredt);
@@ -50,6 +50,7 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const csc *M,
   if (is_triu) {
     /* Initialize P */
     out->symmetric = 1;
+    out->P_triu_nnz = M->p[M->n];
     cuda_mat_init_P(M, &out->S, &out->d_P_triu_val, &out->d_P_triu_to_full_ind, &out->d_P_diag_ind);
   }
   else {
@@ -81,7 +82,7 @@ void OSQPMatrix_update_values(OSQPMatrix    *mat,
 
   if (mat->symmetric) {
     cuda_mat_update_P(Mx_new, Mx_new_idx, Mx_new_n, &mat->S, mat->d_P_triu_val,
-                      mat->d_P_triu_to_full_ind, mat->d_P_diag_ind);
+                      mat->d_P_triu_to_full_ind, mat->d_P_diag_ind, mat->P_triu_nnz);
   }
   else {
     cuda_mat_update_A(Mx_new, Mx_new_idx, Mx_new_n, &mat->S, &mat->At, mat->d_A_to_At_ind);

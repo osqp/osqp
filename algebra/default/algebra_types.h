@@ -51,6 +51,7 @@ struct OSQPMatrix_ {
   c_float *d_P_triu_val;
   c_int   *d_P_triu_to_full_ind;
   c_int   *d_P_diag_ind;
+  c_int    P_triu_nnz;
   c_int    symmetric;
 };
 
