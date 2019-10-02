@@ -595,14 +595,13 @@ void cuda_mat_update_P(const c_float  *Px,
     /* Copy new values from host to device */
     checkCudaErrors(cudaMemcpy(d_P_val_new, Px, P_triu_nnz * sizeof(c_float), cudaMemcpyHostToDevice));
 
-    checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, P_triu_nnz, d_P_val_new, (*P)->val, d_P_triu_to_full_ind, CUSPARSE_INDEX_BASE_ZERO));
+    checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, (*P)->nnz, d_P_val_new, (*P)->val, d_P_triu_to_full_ind, CUSPARSE_INDEX_BASE_ZERO));
 
     cuda_free((void **) &d_P_val_new);
   }
   else { /* Update P partially */
     c_float *d_P_val_new;
     c_int   *d_P_ind_new;
-    c_int nnz = (*P)->nnz;
 
     /* Allocate memory */
     cuda_malloc((void **) &d_P_val_new, Px_n * sizeof(c_float));
@@ -616,7 +615,7 @@ void cuda_mat_update_P(const c_float  *Px,
     scatter(d_P_triu_val, d_P_val_new, d_P_ind_new, Px_n);
 
     /* Gather from d_P_triu_val to update full P */
-    checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, nnz, d_P_triu_val, (*P)->val, d_P_triu_to_full_ind, CUSPARSE_INDEX_BASE_ZERO));
+    checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, (*P)->nnz, d_P_triu_val, (*P)->val, d_P_triu_to_full_ind, CUSPARSE_INDEX_BASE_ZERO));
 
     cuda_free((void **) &d_P_val_new);
     cuda_free((void **) &d_P_ind_new);
