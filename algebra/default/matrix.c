@@ -4,32 +4,10 @@
 #include "csc_math.h"
 #include "csc_utils.h"
 
+#include "cuda_csr.h"
+#include "cuda_lin_alg.h"
+#include "cuda_malloc.h"
 
-/*******************************************************************************
- *                       External CUDA Functions                               *
- *******************************************************************************/
-
-/* cuda_malloc.h */
-extern void cuda_free(void** devPtr);
-
-/* cuda_csr.h */
-extern void cuda_mat_init_P(const csc *mat, csr **P, c_float **d_P_triu_val, c_int **d_P_triu_to_full_ind, c_int **d_P_diag_ind);
-extern void cuda_mat_init_A(const csc *mat, csr **A, csr **At, c_int **d_A_to_At_ind);
-extern void cuda_mat_update_P(const c_float *Px, const c_int *Px_idx, c_int Px_n, csr **P, c_float *d_P_triu_val, c_int *d_P_triu_to_full_ind, c_int *d_P_diag_ind, c_int P_triu_nnz);
-extern void cuda_mat_update_A(const c_float *Ax, const c_int *Ax_idx, c_int Ax_n, csr **A, csr **At, c_int *d_A_to_At_ind);
-extern void cuda_mat_free(csr *mat);
-extern void cuda_submat_byrows(const csr *A, const c_int *d_rows, csr **Ared, csr **Aredt);
-extern void cuda_mat_get_m(const csr *mat, c_int *m);
-extern void cuda_mat_get_n(const csr *mat, c_int *n);
-extern void cuda_mat_get_nnz(const csr *mat, c_int *nnz);
-
-/* cuda_lin_alg.h */
-extern void cuda_mat_mult_sc(csr *S, csr *At, c_int symmetric, c_float sc);
-extern void cuda_mat_lmult_diag(csr *S, csr *At, c_int symmetric, const c_float *d_diag);
-extern void cuda_mat_rmult_diag(csr *S, csr *At, c_int symmetric, const c_float *d_diag);
-extern void cuda_mat_Axpy(const csr *A, const c_float *d_x, c_float *d_y, c_float alpha, c_float beta);
-extern void cuda_mat_quad_form(const csr *P, const c_float *d_x, c_float *h_res);
-extern void cuda_mat_row_norm_inf(const csr *S, c_float *d_res);
 
 
 /*  logical test functions ----------------------------------------------------*/

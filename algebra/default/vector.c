@@ -2,45 +2,8 @@
 #include "algebra_vector.h"
 #include "algebra_types.h"
 
-
-/*******************************************************************************
- *                       External CUDA Functions                               *
- *******************************************************************************/
-
-/* cuda_malloc.h */
-extern void cuda_malloc(void** devPtr, size_t size);
-extern void cuda_calloc(void** devPtr, size_t size);
-extern void cuda_free(void** devPtr);
-
-/* cuda_lin_alg.h */
-extern void cuda_vec_copy_d2d(c_float *d_y, const c_float *d_x, c_int n);
-extern void cuda_vec_copy_h2d(c_float *d_y, const c_float *h_x, c_int n);
-extern void cuda_vec_copy_d2h(c_float *h_y, const c_float *d_x, c_int n);
-extern void cuda_vec_int_copy_h2d(c_int *d_y, const c_int *h_x, c_int n);
-extern void cuda_vec_set_sc(c_float *d_a, c_float sc, c_int n);
-extern void cuda_vec_set_sc_cond(c_float *d_a, const c_int *d_test, c_float sc_if_neg, c_float sc_if_zero, c_float sc_if_pos, c_float n);
-extern void cuda_vec_mult_sc(c_float *d_a, c_float sc, c_int n);
-extern void cuda_vec_add_scaled(c_float *d_x, const c_float *d_a, const c_float *d_b, c_float sca, c_float scb, c_int n);
-extern void cuda_vec_add_scaled3(c_float *d_x, const c_float *d_a, const c_float *d_b, const c_float *d_c, c_float sca, c_float scb, c_float scc, c_int n);
-extern void cuda_vec_norm_inf(const c_float *d_x, c_int n, c_float *h_res);
-extern void cuda_vec_norm_1(const c_float *d_x, c_int n, c_float *h_res);
-extern void cuda_vec_scaled_norm_inf(const c_float *d_S, const c_float *d_v, c_int n, c_float *h_res);
-extern void cuda_vec_diff_norm_inf(const c_float *d_a, const c_float *d_b, c_int n, c_float *h_res);
-extern void cuda_vec_mean(const c_float *d_x, c_int n, c_float *h_res);
-extern void cuda_vec_prod(const c_float *d_a, const c_float *d_b, c_int n, c_float *h_res);
-extern void cuda_vec_prod_signed(const c_float *d_a, const c_float *d_b, c_int sign, c_int n, c_float *h_res);
-extern void cuda_vec_ew_prod(c_float *d_c, const c_float *d_a, const c_float *d_b, c_int n);
-extern void cuda_vec_leq(const c_float *d_l, const c_float *d_u, c_int n, c_int *h_res);
-extern void cuda_vec_bound(c_float *d_x, const c_float *d_z, const c_float *d_l, const c_float *d_u, c_int n);
-extern void cuda_vec_project_polar_reccone(c_float *d_y, const c_float *d_l, const c_float *d_u, c_float infval, c_int n);
-extern void cuda_vec_in_reccone(const c_float *d_y, const c_float *d_l, const c_float *d_u, c_float infval, c_float tol, c_int n, c_int *h_res);
-extern void cuda_vec_reciprocal(c_float *d_b, const c_float *d_a, c_int n);
-extern void cuda_vec_sqrt(c_float *d_a, c_int n);
-extern void cuda_vec_max(c_float *d_c, const c_float *d_a, const c_float *d_b, c_int n);
-extern void cuda_vec_min(c_float *d_c, const c_float *d_a, const c_float *d_b, c_int n);
-extern void cuda_vec_bounds_type(c_int *d_iseq, const c_float *d_l, const c_float *d_u, c_float infval, c_float tol, c_int n, c_int *h_has_changed);
-extern void cuda_vec_set_sc_if_lt(c_float *d_x, const c_float *d_z, c_float testval, c_float newval, c_int n);
-extern void cuda_vec_set_sc_if_gt(c_float *d_x, const c_float *d_z, c_float testval, c_float newval, c_int n);
+#include "cuda_lin_alg.h"
+#include "cuda_malloc.h"
 
 
 /*******************************************************************************
