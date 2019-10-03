@@ -95,17 +95,19 @@ void OSQPMatrix_update_values(OSQPMatrix    *mat,
 c_int OSQPMatrix_get_m( const OSQPMatrix *mat) {
   c_int m;
 
-  cuda_mat_get_nnz(mat->S, &m);
+  cuda_mat_get_m(mat->S, &m);
 
-  return mat->csc->m;
+  //return mat->csc->m;
+  return m;
 }
 
 c_int OSQPMatrix_get_n( const OSQPMatrix *mat) {
   c_int n;
 
-  cuda_mat_get_nnz(mat->S, &n);
+  cuda_mat_get_n(mat->S, &n);
 
-  return mat->csc->n;
+  //return mat->csc->n;
+  return n;
 }
 
 c_int OSQPMatrix_get_nz(const OSQPMatrix *mat) {
@@ -116,7 +118,8 @@ c_int OSQPMatrix_get_nz(const OSQPMatrix *mat) {
   if (mat->symmetric) nnz = mat->P_triu_nnz;
   else                cuda_mat_get_nnz(mat->S, &nnz);
 
-  return mat->csc->p[mat->csc->n];
+  //return mat->csc->p[mat->csc->n];
+  return nnz;
 }
 
 // GB: These are only used by direct solver interfaces. We will not need them in the PCG solver.
