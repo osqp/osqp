@@ -31,18 +31,25 @@ if (ENABLE_MKL_PARDISO)
 														 ${pardiso_includes}
 														 ${PROJECT_SOURCE_DIR}/include
 														 ${PROJECT_SOURCE_DIR}/algebra/csc_tools
-														 ${PROJECT_SOURCE_DIR}/lin_sys/kkt_common)
+														 ${PROJECT_SOURCE_DIR}/lin_sys/direct/kkt_common)
 
 	set(direct_linsys_solvers ${direct_linsys_solvers} $<TARGET_OBJECTS:linsys_pardiso>)
 
 	set(direct_linsys_solvers_includes "${direct_linsys_solvers_includes};${CMAKE_CURRENT_SOURCE_DIR}/pardiso/")
 endif()
 
+endif()
+
+# Add the KKT object only in normal mode and matrix-updating embedded mode (not mode 1)
+if (NOT (EMBEDDED EQUAL 1))
+
+  add_subdirectory(kkt_common)
+
+  set(direct_linsys_solvers ${direct_linsys_solvers} $<TARGET_OBJECTS:kkt_common>)
+  set(direct_linsys_solvers_includes ${direct_linsys_solvers_includes} ${kkt_common_includes})
 
 endif()
 
-# Make direct_linsys_solvers list visible from parent directory
+# Pass upwards
 set(direct_linsys_solvers ${direct_linsys_solvers} PARENT_SCOPE)
-
-# Make external linsys solvers includes visible from parent directory
 set(direct_linsys_solvers_includes ${direct_linsys_solvers_includes} PARENT_SCOPE)

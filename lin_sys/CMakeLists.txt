@@ -32,16 +32,6 @@ set(linsys_solvers
 set(linsys_solvers_includes
     ${direct_linsys_solvers_includes})
 
-# Add the KKT object only in normal mode and matrix-updating embedded mode (not mode 1)
-if (NOT (EMBEDDED EQUAL 1))
-
-  add_subdirectory(kkt_common)
-
-  set(linsys_solvers ${linsys_solvers} $<TARGET_OBJECTS:kkt_common>)
-  set(linsys_solvers_includes ${linsys_solvers_includes} ${kkt_common_includes})
-
-endif()
-
 #pass upwards
 set(linsys_solvers ${linsys_solvers} PARENT_SCOPE)
 set(linsys_solvers_includes ${linsys_solvers_includes} PARENT_SCOPE)
