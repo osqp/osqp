@@ -229,7 +229,7 @@ c_int polish(OSQPSolver *solver) {
 
   // Form and factorize reduced KKT
   exitflag = init_linsys_solver(&plsh, work->data->P, work->pol->Ared,
-                                OSQP_NULL, settings, 1);
+                                OSQP_NULL, settings, OSQP_NULL, OSQP_NULL, 1);
 
   if (exitflag) {
     // Polishing failed

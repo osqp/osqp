@@ -26,8 +26,8 @@ c_float compute_rho_estimate(OSQPSolver *solver) {
   m = work->data->m;
 
   // Get primal and dual residuals
-  pri_res = OSQPVectorf_norm_inf(work->z_prev);
-  dua_res = OSQPVectorf_norm_inf(work->x_prev);
+  pri_res = work->scaled_pri_res;
+  dua_res = work->scaled_dua_res;
 
   // Normalize primal residual
   pri_res_norm  = OSQPVectorf_norm_inf(work->z);           // ||z||
@@ -246,12 +246,14 @@ c_float compute_pri_res(OSQPSolver *solver, OSQPVectorf *x, OSQPVectorf *z) {
   OSQPMatrix_Axpy(work->data->A,x,work->Ax, 1.0, 0.0); //Ax = A*x
   OSQPVectorf_minus(work->z_prev, work->Ax, z);
 
+  work->scaled_pri_res = OSQPVectorf_norm_inf(work->z_prev);
+
   // If scaling active -> rescale residual
   if (settings->scaling && !settings->scaled_termination) {
     pri_res =  OSQPVectorf_scaled_norm_inf(work->scaling->Einv, work->z_prev);
   }
   else{
-   pri_res  = OSQPVectorf_norm_inf(work->z_prev);
+    pri_res  = work->scaled_pri_res;
   }
   return pri_res;
 }
@@ -316,13 +318,15 @@ c_float compute_dua_res(OSQPSolver *solver, OSQPVectorf *x, OSQPVectorf *y) {
     OSQPVectorf_plus(work->x_prev, work->x_prev, work->Aty);
   }
 
+  work->scaled_dua_res = OSQPVectorf_norm_inf(work->x_prev);
+
   // If scaling active -> rescale residual
   if (settings->scaling && !settings->scaled_termination) {
     dua_res =  work->scaling->cinv * OSQPVectorf_scaled_norm_inf(work->scaling->Dinv,
                                                                  work->x_prev);
   }
   else {
-    dua_res = OSQPVectorf_norm_inf(work->x_prev);
+    dua_res = work->scaled_dua_res;
   }
 
   return dua_res;

@@ -169,6 +169,11 @@ struct OSQPWorkspace_ {
   /** @} */
   OSQPScaling  *scaling;  ///< scaling vectors
 
+  /// Scaled primal and dual residuals used for computing rho estimate.
+  /// They are also passed to indirect linear system solvers for computing required accuracy.
+  c_float scaled_pri_res;
+  c_float scaled_dua_res;
+
 # ifdef PROFILING
   OSQPTimer *timer;       ///< timer object
 

@@ -58,6 +58,8 @@ c_int init_linsys_solver(LinSysSolver      **s,
                          const OSQPMatrix   *A,
                          const OSQPVectorf  *rho_vec,
                          OSQPSettings       *settings,
+                         c_float            *scaled_pri_res,
+                         c_float            *scaled_dua_res,
                          c_int               polish) {
 
   switch (settings->linsys_solver) {
