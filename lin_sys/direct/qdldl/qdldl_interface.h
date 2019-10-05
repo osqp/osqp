@@ -21,19 +21,21 @@ struct qdldl {
      * @name Functions
      * @{
      */
-    c_int (*solve)(struct qdldl* self, OSQPVectorf* b);
+    c_int (*solve)(struct qdldl *self,
+                   OSQPVectorf  *b,
+                   c_int         admm_iter);
 
 #ifndef EMBEDDED
-    void (*free)(struct qdldl * self); ///< Free workspace (only if desktop)
+    void (*free)(struct qdldl *self); ///< Free workspace (only if desktop)
 #endif
 
     // This used only in non embedded or embedded 2 version
 #if EMBEDDED != 1
-    c_int (*update_matrices)(struct qdldl * self,
+    c_int (*update_matrices)(struct qdldl     *self,
                              const OSQPMatrix *P,
                              const OSQPMatrix *A);         ///< Update solver matrices
-    c_int (*update_rho_vec)(struct qdldl * self,
-                            const OSQPVectorf* rho_vec);   ///< Update rho_vec parameter
+    c_int (*update_rho_vec)(struct qdldl      *self,
+                            const OSQPVectorf *rho_vec);   ///< Update rho_vec parameter
 #endif
 
 #ifndef EMBEDDED

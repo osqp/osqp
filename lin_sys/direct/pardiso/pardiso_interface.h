@@ -22,15 +22,17 @@ struct pardiso {
      * @name Functions
      * @{
      */
-    c_int (*solve)(struct pardiso * self, OSQPVectorf * b);
+    c_int (*solve)(struct pardiso *self,
+                   OSQPVectorf    *b,
+                   c_int           admm_iter);
 
     void (*free)(struct pardiso * self); ///< Free workspace (only if desktop)
 
-    c_int (*update_matrices)(struct pardiso * self,
+    c_int (*update_matrices)(struct pardiso   *self,
                              const OSQPMatrix *P,
                              const OSQPMatrix *A);    ///< Update solver matrices
-    c_int (*update_rho_vec)(struct pardiso * self,
-                            const OSQPVectorf * rho_vec);    ///< Update rho_vec parameter
+    c_int (*update_rho_vec)(struct pardiso    *self,
+                            const OSQPVectorf *rho_vec);    ///< Update rho_vec parameter
 
     c_int nthreads;
     /** @} */
