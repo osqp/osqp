@@ -1,5 +1,5 @@
 #include "cuda_pcg_interface.h"
-//#include "cuda_pcg.h"
+#include "cuda_pcg.h"
 
 #include "cuda_lin_alg.h"
 #include "cuda_malloc.h"

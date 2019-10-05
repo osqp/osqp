@@ -1,9 +1,6 @@
 #ifndef CSR_TYPE_H
 # define CSR_TYPE_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif /* ifdef __cplusplus */
 
 #include <cusparse_v2.h>
 #include "osqp_api_types.h"   /* --> c_int, c_float */
@@ -26,8 +23,5 @@ struct csr_t {
 };
 
 
-# ifdef __cplusplus
-}
-# endif /* ifdef __cplusplus */
-
 #endif /* ifndef CSR_TYPE_H */
+
