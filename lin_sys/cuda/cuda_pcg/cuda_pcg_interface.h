@@ -86,8 +86,10 @@ typedef struct cudapcg_solver_ {
   c_float *d_rhs;           ///<  right-hand side of Kx = b
   c_float *d_z;             ///<  holds z = A*x for computing A'*z = A'*(A*x);
 
-  /* PCG scalar values (in device memory) */
+  /* Pointer to page-locked host memory */
   c_float *h_r_norm;
+
+  /* PCG scalar values (in device memory) */
   c_float *d_r_norm;
   c_float *rTy;
   c_float *rTy_prev;

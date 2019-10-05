@@ -67,7 +67,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
     *s->h_rho  = 1. / settings->delta;
   }
 
-    /* Allocate PCG iterates */
+  /* Allocate PCG iterates */
   cuda_calloc((void **) &s->d_x,   n * sizeof(c_float));    /* Set d_x to zero */
   cuda_malloc((void **) &s->d_p,   n * sizeof(c_float));
   cuda_malloc((void **) &s->d_Kp,  n * sizeof(c_float));
@@ -76,6 +76,8 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   cuda_malloc((void **) &s->d_rhs, n * sizeof(c_float));
   if (m != 0) cuda_malloc((void **) &s->d_z, m * sizeof(c_float));
 
+  /* Allocate scalar in host memory that is page-locked and accessible to device */
+  cuda_malloc_host((void **) &s->h_r_norm, sizeof(c_float));
 
   /* Link functions */
   s->free = &free_linsys_solver_cudapcg;
@@ -96,6 +98,9 @@ void free_linsys_solver_cudapcg(cudapcg_solver *s) {
     cuda_free((void **) &s->d_r);
     cuda_free((void **) &s->d_rhs);
     cuda_free((void **) &s->d_z);
+
+    /* Free page-locked host memory */
+    cuda_free_host((void **) s->h_r_norm);
 
     c_free(s);
   }
