@@ -301,6 +301,7 @@ set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
 # Include directories for linear system solvers
 target_include_directories(osqpstatic PRIVATE
                            ${linsys_solvers_includes}
+                           ${algebra_impl_includes}
                            ${csc_tools_includes})
 
 
@@ -344,11 +345,12 @@ if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
     # NB: Add all the linear system solvers here
     add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${osqp_objects} ${linsys_solvers})
 
-    # Include directories for linear system solvers
-    target_include_directories(osqp PRIVATE ${linsys_solvers_includes})
-
-    #include directories for csc utilities
-    target_include_directories(osqp PRIVATE ${csc_tools_includes})
+    # Include directories
+    target_include_directories(osqp PRIVATE
+                               ${linsys_solvers_includes}
+                               ${csc_tools_includes}
+                               ${algebra_impl_includes}
+    )
 
     # Declare include directories for the cmake exported target
     target_include_directories(osqp
@@ -453,17 +455,19 @@ if (UNITTESTS)
     include_directories(tests)
 
     add_executable(osqp_tester
-                ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c
-                ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
-		            ${PROJECT_SOURCE_DIR}/tests/minunit.h
-                ${linsys_solvers_includes}
-                ${test_headers}
-                ${codegen_test_headers})
+                   ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c
+                   ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
+                   ${PROJECT_SOURCE_DIR}/tests/minunit.h
+                   ${linsys_solvers_includes}
+                   ${test_headers}
+                   ${codegen_test_headers}
+    )
 
     target_include_directories(osqp_tester PRIVATE
                                ${linsys_solvers_includes}
+                               ${algebra_impl_includes}
                                ${csc_tools_includes}
-                               )
+    )
 
     target_link_libraries (osqp_tester osqpstatic)
 
@@ -473,19 +477,19 @@ if (UNITTESTS)
                    EXCLUDE_FROM_ALL
                    ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c
                    ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
-	           ${PROJECT_SOURCE_DIR}/tests/minunit.h
+                   ${PROJECT_SOURCE_DIR}/tests/minunit.h
                    ${test_headers}
-                   ${csc_tools_includes}
                    ${codegen_test_headers}
-		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.c
-		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.h
-		)
+                   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.c
+                   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.h
+    )
     target_link_libraries(osqp_tester_custom_memory osqpstatic)
 
     target_include_directories(osqp_tester_custom_memory PRIVATE
                                ${linsys_solvers_includes}
+                               ${algebra_impl_includes}
                                ${csc_tools_includes}
-                               )
+    )
 
     # Add testing
     include(CTest)

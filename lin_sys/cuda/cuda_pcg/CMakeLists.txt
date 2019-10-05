@@ -20,3 +20,7 @@ target_include_directories(linsys_cuda_pcg PRIVATE
                            ${cuda_pcg_includes}
                            ${osqp_api_includes}
                            ${algebra_impl_includes})
+
+# Pass upwards
+set(cuda_pcg_includes ${cuda_pcg_includes} PARENT_SCOPE)
+

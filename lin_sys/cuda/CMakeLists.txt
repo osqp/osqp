@@ -3,7 +3,7 @@
 
 # CUDA-PCG (Default)
 # -------------------------
-add_subdirectory(cuda-pcg)
+add_subdirectory(cuda_pcg)
 
 set(cuda_linsys_solvers $<TARGET_OBJECTS:linsys_cuda_pcg>)
 
