@@ -1,4 +1,5 @@
 #include "cuda_pcg_interface.h"
+#include "cuda_pcg.h"
 
 #include "cuda_malloc.h"
 
@@ -79,6 +80,31 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   /* Allocate scalar in host memory that is page-locked and accessible to device */
   cuda_malloc_host((void **) &s->h_r_norm, sizeof(c_float));
 
+  /* Allocate device-side scalar values. This way scalars are packed in device memory */
+  cuda_malloc((void **) &s->d_r_norm, 9 * sizeof(c_float));
+  s->rTy         = s->d_r_norm + 1;
+  s->rTy_prev    = s->d_r_norm + 2;
+  s->alpha       = s->d_r_norm + 3;
+  s->beta        = s->d_r_norm + 4;
+  s->pKp         = s->d_r_norm + 5;
+  s->D_MINUS_ONE = s->d_r_norm + 6;
+  s->d_rho       = s->d_r_norm + 7;
+  s->d_sigma     = s->d_r_norm + 8;
+  cuda_vec_copy_h2d(s->D_MINUS_ONE, &H_MINUS_ONE, 1);
+  cuda_vec_copy_h2d(s->d_sigma,     s->h_sigma,   1);
+
+  /* Allocate memory for PCG preconditioning */
+  if (s->precondition) {
+    cuda_malloc((void **) &s->d_P_diag_val,       n * sizeof(c_float));
+    cuda_malloc((void **) &s->d_AtRA_diag_val,    n * sizeof(c_float));
+    cuda_malloc((void **) &s->d_diag_precond,     n * sizeof(c_float));
+    cuda_malloc((void **) &s->d_diag_precond_inv, n * sizeof(c_float));
+    if (!s->d_rho_vec) cuda_malloc((void **) &s->d_AtA_diag_val, n * sizeof(c_float));
+  }
+
+  /* Initialize PCG preconditioner */
+  if (s->precondition) cuda_pcg_update_precond(s, 1, 1, 1);
+
   /* Link functions */
   s->free = &free_linsys_solver_cudapcg;
 
@@ -101,6 +127,16 @@ void free_linsys_solver_cudapcg(cudapcg_solver *s) {
 
     /* Free page-locked host memory */
     cuda_free_host((void **) s->h_r_norm);
+
+    /* Device-side scalar values */
+    cuda_free((void **) &s->d_r_norm);
+
+    /* PCG preconditioner */
+    cuda_free((void **) &s->d_P_diag_val);
+    cuda_free((void **) &s->d_AtA_diag_val);
+    cuda_free((void **) &s->d_AtRA_diag_val);
+    cuda_free((void **) &s->d_diag_precond);
+    cuda_free((void **) &s->d_diag_precond_inv);
 
     c_free(s);
   }
