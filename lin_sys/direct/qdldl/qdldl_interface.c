@@ -363,7 +363,9 @@ static void LDLSolve(c_float *x, c_float *b, const csc *L, const c_float *Dinv, 
 }
 
 
-c_int solve_linsys_qdldl(qdldl_solver * s, OSQPVectorf* b) {
+c_int solve_linsys_qdldl(qdldl_solver *s,
+                         OSQPVectorf  *b,
+                         c_int         admm_iter) {
 
     c_int j;
     c_float* bv = OSQPVectorf_data(b);

@@ -159,7 +159,7 @@ static void compute_rhs(OSQPSolver *solver) {
   OSQPVectorf_minus(work->ztilde_view, work->z_prev, work->ztilde_view);
 }
 
-void update_xz_tilde(OSQPSolver *solver) {
+void update_xz_tilde(OSQPSolver *solver, c_int admm_iter) {
 
   OSQPWorkspace* work     = solver->work;
 
@@ -167,7 +167,7 @@ void update_xz_tilde(OSQPSolver *solver) {
   compute_rhs(solver);
 
   // Solve linear system
-  work->linsys_solver->solve(work->linsys_solver, work->xz_tilde);
+  work->linsys_solver->solve(work->linsys_solver, work->xz_tilde, admm_iter);
 }
 
 void update_x(OSQPSolver *solver) {

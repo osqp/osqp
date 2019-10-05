@@ -153,7 +153,7 @@ static c_int iterative_refinement(OSQPSolver    *solver,
       OSQPMatrix_Axpy(work->pol->Ared, z1, rhs2, -1.0, 1.0);
 
       // Solve linear system. Store solution in rhs
-      p->solve(p, rhs);
+      p->solve(p, rhs, 1);
 
       // Update solution
       OSQPVectorf_plus(z,z,rhs);
@@ -275,7 +275,7 @@ c_int polish(OSQPSolver *solver) {
   }
 
   // Solve the reduced KKT system
-  plsh->solve(plsh, pol_sol);
+  plsh->solve(plsh, pol_sol, 1);
 
   // Perform iterative refinement to compensate for the regularization error
   exitflag = iterative_refinement(solver, plsh, pol_sol, rhs_red);

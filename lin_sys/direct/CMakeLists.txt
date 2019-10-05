@@ -61,4 +61,3 @@ endif()
 # Pass upwards
 set(direct_linsys_solvers ${direct_linsys_solvers} PARENT_SCOPE)
 set(direct_linsys_solvers_includes ${direct_linsys_solvers_includes} PARENT_SCOPE)
-

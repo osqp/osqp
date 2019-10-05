@@ -100,7 +100,9 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp,
  * @param  b        Right-hand side
  * @return          Exitflag
  */
-c_int solve_linsys_pardiso(pardiso_solver * s, OSQPVectorf * b);
+c_int solve_linsys_pardiso(pardiso_solver *s,
+                           OSQPVectorf    *b,
+                           c_int           admm_iter);
 
 
 /**

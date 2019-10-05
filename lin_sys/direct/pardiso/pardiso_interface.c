@@ -255,7 +255,9 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp,
 }
 
 // Returns solution to linear system  Ax = b with solution stored in b
-c_int solve_linsys_pardiso(pardiso_solver * s, OSQPVectorf * b) {
+c_int solve_linsys_pardiso(pardiso_solver *s,
+                           OSQPVectorf    *b,
+                           c_int           admm_iter) {
 
     c_int j;
     c_float* bv = OSQPVectorf_data(b);

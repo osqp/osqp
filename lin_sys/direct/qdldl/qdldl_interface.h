@@ -103,7 +103,9 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp,
  * @param  b        Right-hand side
  * @return          Exitflag
  */
-c_int solve_linsys_qdldl(qdldl_solver * s, OSQPVectorf * b);
+c_int solve_linsys_qdldl(qdldl_solver *s,
+                         OSQPVectorf  *b,
+                         c_int         admm_iter);
 
 
 #if EMBEDDED != 1

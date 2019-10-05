@@ -200,7 +200,8 @@ struct OSQPWorkspace_ {
 struct linsys_solver {
   enum linsys_solver_type type;                 ///< linear system solver type functions
   c_int (*solve)(LinSysSolver *self,
-                 OSQPVectorf  *b);              ///< solve linear system
+                 OSQPVectorf  *b,
+                 c_int         admm_iter);
 
 # ifndef EMBEDDED
   void (*free)(LinSysSolver *self);             ///< free linear system solver (only in desktop version)

@@ -36,7 +36,7 @@ static const char* test_solveKKT() {
 
   // Solve  KKT x = b via LDL given factorization
   rhs = OSQPVectorf_new(data->test_solve_KKT_rhs, m+n);
-  s->solve(s, rhs);
+  s->solve(s, rhs, 1);
   ref = OSQPVectorf_new(data->test_solve_KKT_x, m+n);
 
   mu_assert(
@@ -91,7 +91,7 @@ static char* test_solveKKT_pardiso() {
 
   // Solve  KKT x = b via LDL given factorization
   rhs = OSQPVectorf_new(data->test_solve_KKT_rhs, m+n);
-  s->solve(s, rhs);
+  s->solve(s, rhs, 1);
   ref = OSQPVectorf_new(data->test_solve_KKT_x, m+n);
 
   mu_assert(
