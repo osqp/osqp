@@ -9,8 +9,8 @@ set(cuda_pcg_sources
     ${CMAKE_CURRENT_SOURCE_DIR}/cuda_pcg_interface.h
     ${CMAKE_CURRENT_SOURCE_DIR}/cuda_pcg_interface.c
     ${CMAKE_CURRENT_SOURCE_DIR}/include/cuda_pcg_constants.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/cuda_pcg.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/cuda_pcg.cu
+    #${CMAKE_CURRENT_SOURCE_DIR}/include/cuda_pcg.h
+    #${CMAKE_CURRENT_SOURCE_DIR}/src/cuda_pcg.cu
 )
 
 # Create object library for linear system solver interface

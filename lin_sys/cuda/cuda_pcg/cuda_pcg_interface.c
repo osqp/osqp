@@ -1,6 +1,7 @@
 #include "cuda_pcg_interface.h"
-#include "cuda_pcg.h"
+//#include "cuda_pcg.h"
 
+#include "cuda_lin_alg.h"
 #include "cuda_malloc.h"
 
 #include "glob_opts.h"
@@ -103,7 +104,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   }
 
   /* Initialize PCG preconditioner */
-  if (s->precondition) cuda_pcg_update_precond(s, 1, 1, 1);
+  //if (s->precondition) cuda_pcg_update_precond(s, 1, 1, 1);
 
   /* Link functions */
   s->free = &free_linsys_solver_cudapcg;
