@@ -1,9 +1,9 @@
 # Define the algebra implementation
 
 set(algebra_impl_src
+    ${CMAKE_CURRENT_SOURCE_DIR}/algebra_libs.c
     ${CMAKE_CURRENT_SOURCE_DIR}/matrix.c
     ${CMAKE_CURRENT_SOURCE_DIR}/vector.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/algebra_libs.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cuda_csr.cu
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cuda_handler.cu
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cuda_lin_alg.cu

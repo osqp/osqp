@@ -40,8 +40,10 @@ add_subdirectory(${ALGEBRA})
 # Create object library for algebra
 add_library(osqp_algebra OBJECT ${algebra_impl} ${csc_tools})
 target_include_directories(osqp_algebra PRIVATE
-                         ${osqp_api_includes}
-                         ${csc_tools_includes})
+                           ${algebra_impl_includes}
+                           ${csc_tools_includes}
+                           ${osqp_api_includes}
+                           )
 
 #pass the csc tools include directory upwards
 #for accessibility from linear solvers

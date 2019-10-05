@@ -117,12 +117,12 @@ OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf *a){
 
 }
 
-OSQPVectori* OSQPVectori_copy_new(const OSQPVectori *a){
-
-  OSQPVectori* b = OSQPVectori_malloc(a->length);
-  if(b) OSQPVectori_copy(b,a);
-  return b;
-}
+//OSQPVectori* OSQPVectori_copy_new(const OSQPVectori *a){
+//
+//  OSQPVectori* b = OSQPVectori_malloc(a->length);
+//  if(b) OSQPVectori_copy(b,a);
+//  return b;
+//}
 
 void OSQPVectorf_free(OSQPVectorf *a){
   if (a) c_free(a->values);
@@ -162,9 +162,9 @@ void OSQPVectorf_copy(OSQPVectorf *b, const OSQPVectorf *a){
   OSQPVectorf_from_raw(b, a->values);
 }
 
-void OSQPVectori_copy(OSQPVectori *b, const OSQPVectori *a){
-  OSQPVectori_from_raw(b, a->values);
-}
+//void OSQPVectori_copy(OSQPVectori *b, const OSQPVectori *a){
+//  OSQPVectori_from_raw(b, a->values);
+//}
 
 void OSQPVectorf_from_raw(OSQPVectorf *b, const c_float *av){
   c_int i;
@@ -218,7 +218,7 @@ void OSQPVectorf_set_scalar(OSQPVectorf *a, c_float sc){
 
 
 void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
-                                        OSQPVectori *test,
+                                        const OSQPVectori *test,
                                         c_float sc_if_neg,
                                         c_float sc_if_zero,
                                         c_float sc_if_pos){
@@ -520,7 +520,7 @@ c_int OSQPVectorf_all_leq(OSQPVectorf *l, OSQPVectorf* u){
 }
 
 void OSQPVectorf_ew_bound_vec(OSQPVectorf *x,
-                              OSQPVectorf *z,
+                              const OSQPVectorf *z,
                               const OSQPVectorf *l,
                               const OSQPVectorf *u){
 
