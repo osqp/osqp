@@ -8,11 +8,16 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 endif()
 
-# Direct solver
+# Direct solvers
 add_subdirectory(direct)
 
-# Indirect solver
+# Indirect solvers
 # TODO: Add!
+
+# CUDA solvers
+if (CUDA_SUPPORT)
+    add_subdirectory(cuda)
+endif()
 
 # Add linsys handler if not embedded
 if (NOT DEFINED EMBEDDED)
@@ -26,12 +31,16 @@ endif()
 # Add library handler if desktop version
 set(linsys_solvers
     ${direct_linsys_solvers}
-    ${linsys_lib_handler})
+    ${cuda_linsys_solvers}
+    ${linsys_lib_handler}
+)
 
 # Combine solvers external libraries
 set(linsys_solvers_includes
-    ${direct_linsys_solvers_includes})
+    ${direct_linsys_solvers_includes}
+    ${cuda_linsys_solvers_includes}
+)
 
-#pass upwards
+# Pass upwards
 set(linsys_solvers ${linsys_solvers} PARENT_SCOPE)
 set(linsys_solvers_includes ${linsys_solvers_includes} PARENT_SCOPE)

@@ -38,21 +38,20 @@ if(NOT DEFINED EMBEDDED)
     # If MKL Pardiso is enabled, include pardiso directory
     if (ENABLE_MKL_PARDISO)
         # Add Pardiso interface
-	add_subdirectory(pardiso)
+        add_subdirectory(pardiso)
 
-	add_library(linsys_pardiso OBJECT ${pardiso_sources})
+        add_library(linsys_pardiso OBJECT ${pardiso_sources})
 
 	# Add parent directory for library handler
-	target_include_directories(linsys_pardiso PRIVATE
+        target_include_directories(linsys_pardiso PRIVATE
                                    ${pardiso_includes}
                                    ${osqp_api_includes}
                                    ${csc_tools_includes}
-                                   ${kkt_common_includes}
-        )
+                                   ${kkt_common_includes})
 
-	set(direct_linsys_solvers ${direct_linsys_solvers} $<TARGET_OBJECTS:linsys_pardiso>)
+	      set(direct_linsys_solvers ${direct_linsys_solvers} $<TARGET_OBJECTS:linsys_pardiso>)
 
-	set(direct_linsys_solvers_includes ${direct_linsys_solvers_includes} ${pardiso_includes})
+	      set(direct_linsys_solvers_includes ${direct_linsys_solvers_includes} ${pardiso_includes})
     endif()
 
 endif()

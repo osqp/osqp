@@ -42,6 +42,5 @@ target_include_directories(linsys_qdldl PRIVATE
                            ${qdldl_interface_includes}
                            ${csc_tools_includes}
                            ${osqp_api_includes}
-                           ${kkt_common_includes}
-                           )
+                           ${kkt_common_includes})
 

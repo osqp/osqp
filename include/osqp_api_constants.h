@@ -34,7 +34,7 @@ extern "C" {
 /*************************
 * Linear System Solvers *
 *************************/
-enum linsys_solver_type { QDLDL_SOLVER, MKL_PARDISO_SOLVER };
+enum linsys_solver_type { QDLDL_SOLVER, MKL_PARDISO_SOLVER, CUDA_PCG_SOLVER };
 extern const char * LINSYS_SOLVER_NAME[];
 
 
