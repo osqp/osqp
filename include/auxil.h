@@ -59,7 +59,7 @@ void swap_vectors(OSQPVectorf **a,
  * Update x_tilde and z_tilde variable (first ADMM step)
  * @param solver Solver
  */
-void update_xz_tilde(OSQPSolver *solver);
+void update_xz_tilde(OSQPSolver *solver, c_int admm_iter);
 
 
 /**

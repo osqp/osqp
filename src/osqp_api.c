@@ -401,7 +401,7 @@ c_int osqp_solve(OSQPSolver *solver) {
 
     /* ADMM STEPS */
     /* Compute \tilde{x}^{k+1}, \tilde{z}^{k+1} */
-    update_xz_tilde(solver);
+    update_xz_tilde(solver, iter);
 
     /* Compute x^{k+1} */
     update_x(solver);
