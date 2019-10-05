@@ -203,21 +203,24 @@ struct OSQPWorkspace_ {
  *      on the choice
  */
 struct linsys_solver {
-  enum linsys_solver_type type;                 ///< linear system solver type functions
+  enum linsys_solver_type type;             ///< linear system solver type functions
   c_int (*solve)(LinSysSolver *self,
                  OSQPVectorf  *b,
                  c_int         admm_iter);
 
+  void (*warm_start)(LinSysSolver      *self,
+                     const OSQPVectorf *x);
+
 # ifndef EMBEDDED
-  void (*free)(LinSysSolver *self);             ///< free linear system solver (only in desktop version)
+  void (*free)(LinSysSolver *self);         ///< free linear system solver (only in desktop version)
 # endif // ifndef EMBEDDED
 
 # if EMBEDDED != 1
-  c_int (*update_matrices)(LinSysSolver *s,
+  c_int (*update_matrices)(LinSysSolver     *self,
                            const OSQPMatrix *P,            ///< update matrices P
                            const OSQPMatrix *A);           //   and A in the solver
 
-  c_int (*update_rho_vec)(LinSysSolver      *s,
+  c_int (*update_rho_vec)(LinSysSolver      *self,
                           const OSQPVectorf *rho_vec);  ///< Update rho_vec
 # endif // if EMBEDDED != 1
 

@@ -37,6 +37,12 @@ void pardiso(void**,         // pt
 c_int mkl_set_interface_layer(c_int);
 c_int mkl_get_max_threads();
 
+// Warm starting not used by direct solvers
+void warm_start_linsys_solver_pardiso(pardiso_solver    *s,
+                                      const OSQPVectorf *x) {
+  return;
+}
+
 // Free LDL Factorization structure
 void free_linsys_solver_pardiso(pardiso_solver *s) {
     if (s) {
@@ -105,10 +111,11 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
     s->polish = polish;
 
     // Link Functions
-    s->solve = &solve_linsys_pardiso;
-    s->free = &free_linsys_solver_pardiso;
+    s->solve           = &solve_linsys_pardiso;
+    s->free            = &free_linsys_solver_pardiso;
+    s->warm_start      = &warm_start_linsys_solver_pardiso;
     s->update_matrices = &update_linsys_solver_matrices_pardiso;
-    s->update_rho_vec = &update_linsys_solver_rho_vec_pardiso;
+    s->update_rho_vec  = &update_linsys_solver_rho_vec_pardiso;
 
     // Assign type
     s->type = MKL_PARDISO_SOLVER;

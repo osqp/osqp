@@ -175,9 +175,6 @@ c_int osqp_setup(OSQPSolver** solverp,
   if (!(work->x_prev) || !(work->z_prev) || !(work->y))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
-  // Initialize variables x, y, z to 0
-  osqp_cold_start(solver);
-
   // Primal and dual residuals variables
   work->Ax  = OSQPVectorf_calloc(m);
   work->Px  = OSQPVectorf_calloc(n);
@@ -245,9 +242,10 @@ c_int osqp_setup(OSQPSolver** solverp,
                                 work->rho_vec, solver->settings,
                                 &work->scaled_pri_res, &work->scaled_dua_res, 0);
 
-  if (exitflag) {
-    return osqp_error(exitflag);
-  }
+  if (exitflag) return osqp_error(exitflag);
+
+  // Initialize variables x, y, z to 0
+  osqp_cold_start(solver);
 
   // Initialize active constraints structure
   work->pol = c_malloc(sizeof(OSQPPolish));
@@ -920,10 +918,13 @@ c_int osqp_update_bounds(OSQPSolver    *solver,
 }
 
 void osqp_cold_start(OSQPSolver *solver) {
-  OSQPWorkspace* work  = solver->work;
+  OSQPWorkspace *work  = solver->work;
   OSQPVectorf_set_scalar(work->x, 0.);
   OSQPVectorf_set_scalar(work->z, 0.);
   OSQPVectorf_set_scalar(work->y, 0.);
+
+  /* Cold start the linear system solver */
+  work->linsys_solver->warm_start(work->linsys_solver, work->x);
 }
 
 c_int osqp_warm_start(OSQPSolver    *solver,
@@ -954,6 +955,9 @@ c_int osqp_warm_start(OSQPSolver    *solver,
 
   /* Compute Ax = z and store it in z */
   if (x) OSQPMatrix_Axpy(work->data->A, work->x, work->z, 1.0, 0.0);
+
+  /* Warm start the linear system solver */
+  work->linsys_solver->warm_start(work->linsys_solver, work->x);
 
   return 0;
 }

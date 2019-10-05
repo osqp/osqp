@@ -25,6 +25,9 @@ struct qdldl {
                    OSQPVectorf  *b,
                    c_int         admm_iter);
 
+    void (*warm_start)(struct qdldl      *self,
+                       const OSQPVectorf *x);
+
 #ifndef EMBEDDED
     void (*free)(struct qdldl *self); ///< Free workspace (only if desktop)
 #endif
@@ -108,6 +111,10 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
 c_int solve_linsys_qdldl(qdldl_solver *s,
                          OSQPVectorf  *b,
                          c_int         admm_iter);
+
+
+void warm_start_linsys_qdldl(qdldl_solver      *s,
+                             const OSQPVectorf *x);
 
 
 #if EMBEDDED != 1

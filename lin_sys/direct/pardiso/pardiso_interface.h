@@ -26,13 +26,17 @@ struct pardiso {
                    OSQPVectorf    *b,
                    c_int           admm_iter);
 
-    void (*free)(struct pardiso * self); ///< Free workspace (only if desktop)
+    void (*warm_start)(struct pardiso    *self,
+                       const OSQPVectorf *x);
+
+    void (*free)(struct pardiso * self);
 
     c_int (*update_matrices)(struct pardiso   *self,
                              const OSQPMatrix *P,
-                             const OSQPMatrix *A);    ///< Update solver matrices
+                             const OSQPMatrix *A);
+
     c_int (*update_rho_vec)(struct pardiso    *self,
-                            const OSQPVectorf *rho_vec);    ///< Update rho_vec parameter
+                            const OSQPVectorf *rho_vec);
 
     c_int nthreads;
     /** @} */
@@ -106,6 +110,9 @@ c_int solve_linsys_pardiso(pardiso_solver *s,
                            OSQPVectorf    *b,
                            c_int           admm_iter);
 
+
+void warm_start_linsys_solver_pardiso(pardiso_solver    *s,
+                                      const OSQPVectorf *x);
 
 /**
  * Update linear system solver matrices
