@@ -5,8 +5,12 @@
 # OSQP provided CSC implementation by default, which
 # also serves as a reference implementation
 
-if(NOT DEFINED ALGEBRA)
-  set(ALGEBRA "default")
+if (NOT DEFINED ALGEBRA)
+  if (CUDA_SUPPORT)
+    set(ALGEBRA "cuda")
+  else()
+    set(ALGEBRA "default")
+    endif()
 endif()
 
 if(IS_ABSOLUTE ${ALGEBRA})
@@ -43,3 +47,8 @@ target_include_directories(osqp_algebra PRIVATE
 #for accessibility from linear solvers
 
 set(csc_tools_includes "${csc_tools_includes}" PARENT_SCOPE)
+
+# GB: Including csc_tools in the object library and in PARENT_SCOPE when CUDA_SUPPORT=ON is just temporary
+if (CUDA_SUPPORT)
+  set(algebra_impl_includes "${algebra_impl_includes}" PARENT_SCOPE)
+endif()
