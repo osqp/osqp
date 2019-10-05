@@ -167,12 +167,12 @@ static c_int permute_KKT(csc ** KKT, qdldl_solver * p, c_int Pnz, c_int Anz, c_i
 
 
 // Initialize LDL Factorization structure
-c_int init_linsys_solver_qdldl(qdldl_solver ** sp,
-                               const OSQPMatrix* P,
-                               const OSQPMatrix* A,
-                               c_float sigma,
-                               const OSQPVectorf* rho_vec,
-                               c_int polish){
+c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
+                               const OSQPMatrix   *P,
+                               const OSQPMatrix   *A,
+                               const OSQPVectorf  *rho_vec,
+                               OSQPSettings       *settings,
+                               c_int               polish) {
 
     // Define Variables
     csc * KKT_temp;     // Temporary KKT pointer
@@ -180,9 +180,10 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp,
     c_int n_plus_m;     // Define n_plus_m dimension
     c_float* rhov;      //used for direct access to rho_vec data when polish=false
 
+    c_float sigma = settings->sigma;
+
     // Allocate private structure to store KKT factorization
-    qdldl_solver *s;
-    s = c_calloc(1, sizeof(qdldl_solver));
+    qdldl_solver *s = c_calloc(1, sizeof(qdldl_solver));
     *sp = s;
 
     // Size of KKT

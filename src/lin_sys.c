@@ -53,23 +53,23 @@ c_int unload_linsys_solver(enum linsys_solver_type linsys_solver) {
 
 // Initialize linear system solver structure
 // NB: Only the upper triangular part of P is filled
-c_int init_linsys_solver(LinSysSolver          **s,
-                         const OSQPMatrix       *P,
-                         const OSQPMatrix       *A,
-                         c_float                 sigma,
-                         const OSQPVectorf      *rho_vec,
-                         enum linsys_solver_type linsys_solver,
-                         c_int                   polish) {
-  switch (linsys_solver) {
+c_int init_linsys_solver(LinSysSolver      **s,
+                         const OSQPMatrix   *P,
+                         const OSQPMatrix   *A,
+                         const OSQPVectorf  *rho_vec,
+                         OSQPSettings       *settings,
+                         c_int               polish) {
+
+  switch (settings->linsys_solver) {
   case QDLDL_SOLVER:
-    return init_linsys_solver_qdldl((qdldl_solver **)s, P, A, sigma, rho_vec, polish);
+    return init_linsys_solver_qdldl((qdldl_solver **)s, P, A, rho_vec, settings, polish);
 
 # ifdef ENABLE_MKL_PARDISO
   case MKL_PARDISO_SOLVER:
-    return init_linsys_solver_pardiso((pardiso_solver **)s, P, A, sigma, rho_vec, polish);
+    return init_linsys_solver_pardiso((pardiso_solver **)s, P, A, rho_vec, settings, polish);
 
 # endif /* ifdef ENABLE_MKL_PARDISO */
   default: // QDLDL
-    return init_linsys_solver_qdldl((qdldl_solver **)s, P, A, sigma, rho_vec, polish);
+    return init_linsys_solver_qdldl((qdldl_solver **)s, P, A, rho_vec, settings, polish);
   }
 }

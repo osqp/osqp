@@ -18,8 +18,9 @@ static const char* test_solveKKT() {
   solve_linsys_sols_data *data = generate_problem_solve_linsys_sols_data();
 
   // Settings
-  settings->rho   = data->test_solve_KKT_rho;
-  settings->sigma = data->test_solve_KKT_sigma;
+  settings->rho           = data->test_solve_KKT_rho;
+  settings->sigma         = data->test_solve_KKT_sigma;
+  settings->linsys_solver = LINSYS_SOLVER;
 
   // Set rho_vec
   m       = data->test_solve_KKT_A->m;
@@ -32,7 +33,7 @@ static const char* test_solveKKT() {
   A  = OSQPMatrix_new_from_csc(data->test_solve_KKT_A, 0);
 
   // Form and factorize KKT matrix
-  exitflag = init_linsys_solver(&s, Pu, A, settings->sigma, rho_vec, LINSYS_SOLVER, 0);
+  exitflag = init_linsys_solver(&s, Pu, A, rho_vec, settings, 0);
 
   // Solve  KKT x = b via LDL given factorization
   rhs = OSQPVectorf_new(data->test_solve_KKT_rhs, m+n);
@@ -68,8 +69,9 @@ static char* test_solveKKT_pardiso() {
   solve_linsys_sols_data *data = generate_problem_solve_linsys_sols_data();
 
   // Settings
-  settings->rho   = data->test_solve_KKT_rho;
-  settings->sigma = data->test_solve_KKT_sigma;
+  settings->rho           = data->test_solve_KKT_rho;
+  settings->sigma         = data->test_solve_KKT_sigma;
+  settings->linsys_solver = MKL_PARDISO_SOLVER;
 
   // Set rho_vec
   m       = data->test_solve_KKT_A->m;
@@ -87,7 +89,7 @@ static char* test_solveKKT_pardiso() {
             exitflag == 0);
 
   // Form and factorize KKT matrix
-  exitflag = init_linsys_solver(&s, Pu, A, settings->sigma, rho_vec, MKL_PARDISO_SOLVER, 0);
+  exitflag = init_linsys_solver(&s, Pu, A, rho_vec, settings, 0);
 
   // Solve  KKT x = b via LDL given factorization
   rhs = OSQPVectorf_new(data->test_solve_KKT_rhs, m+n);

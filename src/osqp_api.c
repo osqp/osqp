@@ -241,10 +241,8 @@ c_int osqp_setup(OSQPSolver** solverp,
   if (load_linsys_solver(settings->linsys_solver)) return osqp_error(OSQP_LINSYS_SOLVER_LOAD_ERROR);
 
   // Initialize linear system solver structure
-  exitflag = init_linsys_solver(&(work->linsys_solver), work->data->P, work->data->A,
-                                settings->sigma,
-                                work->rho_vec,
-                                settings->linsys_solver, 0);
+  exitflag = init_linsys_solver(&(work->linsys_solver), work->data->P, work->data->A, 
+                                work->rho_vec, solver->settings, 0);
 
   if (exitflag) {
     return osqp_error(exitflag);
