@@ -1,5 +1,7 @@
 #include "cuda_pcg_interface.h"
 
+#include "cuda_malloc.h"
+
 #include "glob_opts.h"
 
 
@@ -65,6 +67,16 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
     *s->h_rho  = 1. / settings->delta;
   }
 
+    /* Allocate PCG iterates */
+  cuda_calloc((void **) &s->d_x,   n * sizeof(c_float));    /* Set d_x to zero */
+  cuda_malloc((void **) &s->d_p,   n * sizeof(c_float));
+  cuda_malloc((void **) &s->d_Kp,  n * sizeof(c_float));
+  cuda_malloc((void **) &s->d_y,   n * sizeof(c_float));
+  cuda_malloc((void **) &s->d_r,   n * sizeof(c_float));
+  cuda_malloc((void **) &s->d_rhs, n * sizeof(c_float));
+  if (m != 0) cuda_malloc((void **) &s->d_z, m * sizeof(c_float));
+
+
   /* Link functions */
   s->free = &free_linsys_solver_cudapcg;
 
@@ -75,6 +87,16 @@ void free_linsys_solver_cudapcg(cudapcg_solver *s) {
 
   if (s) {
     if (s->polish) c_free(s->h_rho);
+
+    /* PCG iterates */
+    cuda_free((void **) &s->d_x);
+    cuda_free((void **) &s->d_p);
+    cuda_free((void **) &s->d_Kp);
+    cuda_free((void **) &s->d_y);
+    cuda_free((void **) &s->d_r);
+    cuda_free((void **) &s->d_rhs);
+    cuda_free((void **) &s->d_z);
+
     c_free(s);
   }
 
