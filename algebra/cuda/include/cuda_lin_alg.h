@@ -103,6 +103,13 @@ void cuda_vec_norm_1(const c_float *d_x,
                      c_float       *h_res);
 
 /**
+ * res = |d_x|_2
+ */
+void cuda_vec_norm_2(const c_float *d_x,
+                     c_int          n,
+                     c_float       *h_res);
+
+/**
  * h_res = |S*v|_inf
  */
 void cuda_vec_scaled_norm_inf(const c_float *d_S,
@@ -242,6 +249,13 @@ void cuda_vec_set_sc_if_gt(c_float       *d_x,
                            c_float        newval,
                            c_int          n);
 
+void cuda_vec_segmented_sum(const c_float *d_values,
+                            const c_int   *d_keys,
+                            c_float       *d_res,
+                            void          *d_buffer,
+                            c_int          num_segments,
+                            c_int          num_elements);
+
 
 /*******************************************************************************
  *                           Matrix Functions                                  *
@@ -270,6 +284,14 @@ void cuda_mat_rmult_diag(csr           *S,
                          csr           *At,
                          c_int          symmetric,
                          const c_float *d_diag);
+
+/**
+ * X = S * D
+ * X->val values are stored in d_buffer.
+ */
+void cuda_mat_rmult_diag_new(const csr     *S,
+                             c_float       *d_buffer,
+                             const c_float *d_diag);
 
 /**
  * d_y = alpha * A*d_x + beta*d_y

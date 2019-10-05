@@ -103,12 +103,24 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
     if (!s->d_rho_vec) cuda_malloc((void **) &s->d_AtA_diag_val, n * sizeof(c_float));
   }
 
-  /* Initialize PCG preconditioner */
-  //if (s->precondition) cuda_pcg_update_precond(s, 1, 1, 1);
+  /* Set the vector norm */
+  switch (s->norm) {
+    case 0:
+      s->vector_norm = &cuda_vec_norm_inf;
+      break;
+
+    case 2:
+      s->vector_norm = &cuda_vec_norm_2;
+      break;
+  }
 
   /* Link functions */
   s->free = &free_linsys_solver_cudapcg;
 
+  /* Initialize PCG preconditioner */
+  if (s->precondition) cuda_pcg_update_precond(s, 1, 1, 1);
+
+  /* No error */
   return 0;
 }
 

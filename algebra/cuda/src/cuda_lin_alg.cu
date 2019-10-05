@@ -317,8 +317,23 @@ __global__ void mat_rmult_diag_kernel(const c_int   *col_ind,
   }
 }
 
-__global__ void abs_kernel(c_float *a,
-                           c_int    n) {
+__global__ void mat_rmult_diag_new_kernel(const c_int   *col_ind,
+                                          const c_float *diag,
+                                          const c_float *data_in,
+                                          c_float       *data_out,
+                                          c_int          nnz) {
+
+  c_int idx = threadIdx.x + blockDim.x * blockIdx.x;
+  c_int grid_size = blockDim.x * gridDim.x;
+
+  for(c_int i = idx; i < nnz; i += grid_size) {
+    c_int column = col_ind[i];
+    data_out[i] = data_in[i] * diag[column];
+  }
+}
+
+__global__ void vec_abs_kernel(c_float *a,
+                               c_int    n) {
 
   c_int i  = threadIdx.x + blockDim.x * blockIdx.x;
 
@@ -343,6 +358,18 @@ __global__ void scatter_kernel(c_float       *out,
     c_int j = ind[i];
     out[j] = in[i];
   }
+}
+
+/*
+ * This code complements the cublasITamax routine which only returns the 
+ * one-based index to the maximum absolute value in d_x. 
+*/
+__global__ void abs_kernel(const c_int   *index_one_based,
+                           const c_float *d_x,
+                           c_float       *res) {
+
+  /* cublasITamax returns one-based index */
+  (*res) = abs(d_x[(*index_one_based)-1]);
 }
 
 
@@ -545,11 +572,19 @@ void cuda_vec_norm_inf(const c_float *d_x,
                        c_int          n,
                        c_float       *h_res) {
 
-  c_int idx;
+  cublasPointerMode_t mode;
+  checkCudaErrors(cublasGetPointerMode(CUDA_handle->cublasHandle, &mode));
 
-  checkCudaErrors(cublasITamax(CUDA_handle->cublasHandle, n, d_x, 1, &idx));
-  checkCudaErrors(cudaMemcpy(h_res, d_x + (idx-1), sizeof(c_float), cudaMemcpyDeviceToHost));
-  (*h_res) = abs(*h_res);
+  if (mode == CUBLAS_POINTER_MODE_DEVICE) {
+    checkCudaErrors(cublasITamax(CUDA_handle->cublasHandle, n, d_x, 1, CUDA_handle->d_index));
+    abs_kernel<<<1,1>>>(CUDA_handle->d_index, d_x, h_res);  /* d_res actually */
+  }
+  else {
+    c_int idx;
+    checkCudaErrors(cublasITamax(CUDA_handle->cublasHandle, n, d_x, 1, &idx));
+    checkCudaErrors(cudaMemcpy(h_res, d_x + (idx-1), sizeof(c_float), cudaMemcpyDeviceToHost));
+    (*h_res) = abs(*h_res);
+  }
 }
 
 void cuda_vec_norm_1(const c_float *d_x,
@@ -557,6 +592,13 @@ void cuda_vec_norm_1(const c_float *d_x,
                      c_float       *h_res) {
 
   cublasTasum(CUDA_handle->cublasHandle, n, d_x, 1, h_res);
+}
+
+void cuda_vec_norm_2(const c_float *d_x,
+                     c_int          n,
+                     c_float       *h_res) {
+
+  cublasTnrm2(CUDA_handle->cublasHandle, n, d_x, 1, h_res);
 }
 
 void cuda_vec_scaled_norm_inf(const c_float *d_S,
@@ -794,6 +836,17 @@ void cuda_vec_set_sc_if_gt(c_float       *d_x,
   vec_set_sc_if_gt_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_x, d_z, testval, newval, n);
 }
 
+void cuda_vec_segmented_sum(const c_float *d_values,
+                            const c_int   *d_keys,
+                            c_float       *d_res,
+                            void          *d_buffer,
+                            c_int          num_segments,
+                            c_int          num_elements) {
+
+  thrust::plus<c_float> binary_op;
+  Segmented_reduce(d_keys, num_elements, num_segments, d_values, d_buffer, d_res, binary_op);
+}
+
 void cuda_mat_mult_sc(csr     *S,
                       csr     *At,
                       c_int    symmetric,
@@ -837,6 +890,16 @@ void cuda_mat_rmult_diag(csr           *S,
     /* Multiply At from left */
     mat_lmult_diag_kernel<<<number_of_blocks,THREADS_PER_BLOCK>>>(At->row_ind, d_diag, At->val, nnz);
   }
+}
+
+void cuda_mat_rmult_diag_new(const csr     *S,
+                             c_float       *d_buffer,
+                             const c_float *d_diag) {
+
+  c_int nnz = S->nnz;
+  c_int number_of_blocks = (nnz / THREADS_PER_BLOCK) / ELEMENTS_PER_THREAD + 1;
+
+  mat_rmult_diag_new_kernel<<<number_of_blocks,THREADS_PER_BLOCK>>>(S->col_ind, d_diag, S->val, d_buffer, nnz);
 }
 
 void cuda_mat_Axpy(const csr     *A,
@@ -892,7 +955,7 @@ void cuda_mat_row_norm_inf(const csr *S,
   *  Therefore, we have to take the absolute value to get the inf-norm.
   */
   Segmented_reduce(S->row_ind, nnz, num_rows, S->val, d_buffer, d_res, binary_op);
-  abs_kernel<<<num_rows/THREADS_PER_BLOCK+1,THREADS_PER_BLOCK>>>(d_res, num_rows);
+  vec_abs_kernel<<<num_rows/THREADS_PER_BLOCK+1,THREADS_PER_BLOCK>>>(d_res, num_rows);
 
   cuda_free(&d_buffer);
 }
