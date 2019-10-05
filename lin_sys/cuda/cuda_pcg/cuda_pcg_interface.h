@@ -62,11 +62,20 @@ typedef struct cudapcg_solver_ {
   c_float dec_rate;
   
   /* Residual tolerance strategy parameters */
-  c_float *scaled_pri_res;
-  c_float *scaled_dua_res;
   c_int    reduction_threshold;
   c_float  reduction_factor;
   c_float  eps_prev;
+  c_float *scaled_pri_res;
+  c_float *scaled_dua_res;
+
+  /* Pointers to problem data and ADMM settings */
+  csr     *A;
+  csr     *At;
+  csr     *P;
+  c_int   *d_P_diag_ind;
+  c_float *d_rho_vec;
+  c_float *h_sigma;
+  c_float *h_rho;
 
   /* PCG iterates */
   c_float *d_x;             ///<  current iterate solution
@@ -95,15 +104,6 @@ typedef struct cudapcg_solver_ {
   c_float *d_AtRA_diag_val;
   c_float *d_diag_precond;
   c_float *d_diag_precond_inv;
-
-  /* Pointers to problem data and ADMM settings */
-  csr     *A;
-  csr     *At;
-  csr     *P;
-  c_int   *d_P_diag_ind;
-  c_float *h_sigma;
-  c_float *h_rho;
-  c_float *d_rho_vec;
 
   /* Function pointer to handle different vector norms */
   void (*vector_norm)(const c_float *d_x,
