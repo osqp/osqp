@@ -12,8 +12,8 @@
 #endif
 
 // Warm starting not used by direct solvers
-void warm_start_linsys_qdldl(qdldl_solver      *s,
-                             const OSQPVectorf *x) {
+void warm_start_linsys_solver_qdldl(qdldl_solver      *s,
+                                    const OSQPVectorf *x) {
   return;
 }
 
@@ -205,7 +205,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
 
     // Link Functions
     s->solve      = &solve_linsys_qdldl;
-    s->warm_start = &warm_start_linsys_qdldl;
+    s->warm_start = &warm_start_linsys_solver_qdldl;
 
 #ifndef EMBEDDED
     s->free = &free_linsys_solver_qdldl;

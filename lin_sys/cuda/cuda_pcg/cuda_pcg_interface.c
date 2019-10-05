@@ -7,6 +7,56 @@
 #include "glob_opts.h"
 
 
+/*******************************************************************************
+ *                           Private Functions                                 *
+ *******************************************************************************/
+
+c_float compute_tolerance(cudapcg_solver *s,
+                          c_int           admm_iter) {
+
+  c_float eps, rhs_norm;
+
+  /* Compute the norm of RHS of the linear system */
+  s->vector_norm(s->d_rhs, s->n, &rhs_norm);
+
+  if (s->polish) return rhs_norm * CUDA_PCG_POLISH_ACCURACY;
+
+  switch (s->eps_strategy) {
+
+    /* SCS strategy */
+    case SCS_STRATEGY:
+      eps = rhs_norm * s->start_tol  / pow((admm_iter + 1), s->dec_rate);
+      eps = c_max(eps, CUDA_PCG_EPS_MIN);
+      break;
+
+    /* Residual strategy */
+    case RESIDUAL_STRATEGY:
+      if (admm_iter == 1) {
+        /* In case rhs = 0.0 we don't want to set eps_prev to 0.0 */
+        if (rhs_norm < CUDA_PCG_EPS_MIN) s->eps_prev = 1.0;
+        else s->eps_prev = rhs_norm * s->reduction_factor;
+        /* Return early since scaled_pri_res and scaled_dua_res are meaningless before the first ADMM iteration */
+        return s->eps_prev;
+      }
+
+      if (s->zero_pcg_iters >= s->reduction_threshold) {
+        s->reduction_factor /= 2;
+        s->zero_pcg_iters = 0;
+      }
+
+      eps = s->reduction_factor * sqrt((*s->scaled_pri_res) * (*s->scaled_dua_res));
+      eps = c_max(c_min(eps, s->eps_prev), CUDA_PCG_EPS_MIN);
+      s->eps_prev = eps;
+      break;
+  }
+  return eps;
+}
+
+
+/*******************************************************************************
+ *                              API Functions                                  *
+ *******************************************************************************/
+
 c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
                                  const OSQPMatrix   *P,
                                  const OSQPMatrix   *A,
@@ -115,7 +165,11 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   }
 
   /* Link functions */
-  s->free = &free_linsys_solver_cudapcg;
+  s->solve           = &solve_linsys_cudapcg;
+  s->warm_start      = &warm_start_linsys_solver_cudapcg;
+  s->free            = &free_linsys_solver_cudapcg;
+  s->update_matrices = &update_linsys_solver_matrices_cudapcg;
+  s->update_rho_vec  = &update_linsys_solver_rho_vec_cudapcg;
 
   /* Initialize PCG preconditioner */
   if (s->precondition) cuda_pcg_update_precond(s, 1, 1, 1);
@@ -123,6 +177,43 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   /* No error */
   return 0;
 }
+
+
+c_int solve_linsys_cudapcg(cudapcg_solver *s,
+                           OSQPVectorf    *b,
+                           c_int           admm_iter) {
+
+  c_int   pcg_iters;
+  c_float eps;
+
+  /* Set the maximum number of PCG iterations */
+  c_int max_iter = (s->polish) ? CUDA_PCG_POLISH_MAX_ITER : s->max_iter;
+
+  /* Copy b to d_rhs */
+  cuda_vec_copy_d2d(s->d_rhs, b->d_val, b->length);
+
+  /* Compute the required solution precision */
+  eps = compute_tolerance(s, admm_iter);
+
+  /* Solve the linear system with PCG */
+  pcg_iters = cuda_pcg_alg(s, eps, max_iter);
+
+  /* Copy solution to b */
+  cuda_vec_copy_d2d(b->d_val, s->d_x, b->length);
+
+  // GB: Should we set zero_pcg_iters to zero otherwise?
+  if (pcg_iters == 0) s->zero_pcg_iters++;
+
+  return 0;
+}
+
+
+void warm_start_linsys_solver_cudapcg(cudapcg_solver    *s,
+                                      const OSQPVectorf *x) {
+
+  cuda_vec_copy_d2d(s->d_x, x->d_val, x->length);
+}
+
 
 void free_linsys_solver_cudapcg(cudapcg_solver *s) {
 
@@ -153,6 +244,19 @@ void free_linsys_solver_cudapcg(cudapcg_solver *s) {
 
     c_free(s);
   }
-
 }
 
+
+c_int update_linsys_solver_matrices_cudapcg(cudapcg_solver   *s,
+                                     const OSQPMatrix *P,
+                                     const OSQPMatrix *A) {
+
+  if (s->precondition) cuda_pcg_update_precond(s, 1, 1, 0);
+}
+
+
+c_int update_linsys_solver_rho_vec_cudapcg(cudapcg_solver    *s,
+                                           const OSQPVectorf *rho_vec) {
+
+  if (s->precondition) cuda_pcg_update_precond(s, 0, 0, 1);
+}

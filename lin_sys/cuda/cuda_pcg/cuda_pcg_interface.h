@@ -116,8 +116,6 @@ typedef struct cudapcg_solver_ {
 
 
 
-// GB: 'extern' is here only temporarily
-
 c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
                                  const OSQPMatrix   *P,
                                  const OSQPMatrix   *A,
@@ -132,8 +130,8 @@ c_int solve_linsys_cudapcg(cudapcg_solver *s,
                            OSQPVectorf    *b,
                            c_int           admm_iter);
 
-void warm_start_linsys_cudapcg(cudapcg_solver    *s,
-                               const OSQPVectorf *x);
+void warm_start_linsys_solver_cudapcg(cudapcg_solver    *s,
+                                      const OSQPVectorf *x);
 
 void free_linsys_solver_cudapcg(cudapcg_solver *s);
 

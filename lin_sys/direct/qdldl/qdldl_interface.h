@@ -113,8 +113,8 @@ c_int solve_linsys_qdldl(qdldl_solver *s,
                          c_int         admm_iter);
 
 
-void warm_start_linsys_qdldl(qdldl_solver      *s,
-                             const OSQPVectorf *x);
+void warm_start_linsys_solver_qdldl(qdldl_solver      *s,
+                                    const OSQPVectorf *x);
 
 
 #if EMBEDDED != 1
