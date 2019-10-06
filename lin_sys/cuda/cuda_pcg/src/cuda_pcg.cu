@@ -88,9 +88,9 @@ c_int cuda_pcg_alg(cudapcg_solver *s,
 
   c_float *tmp;
 
-  c_int iter    = 0;
-  c_int n       = s->n;
-  c_float H_ONE = 1.0;
+  c_int iter = 0;
+  c_int n    = s->n;
+  c_float H_MINUS_ONE = -1.0;
 
   if (!s->warm_start) {
     /* d_x = 0 */
@@ -104,7 +104,7 @@ c_int cuda_pcg_alg(cudapcg_solver *s,
   mat_vec_prod(s, s->d_r, s->d_x, 0);
 
   /* d_r -= d_rhs */
-  checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, &H_ONE, s->d_rhs, 1, s->d_r, 1));
+  checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, &H_MINUS_ONE, s->d_rhs, 1, s->d_r, 1));
 
   /* h_r_norm = |d_r| */
   s->vector_norm(s->d_r, n, s->h_r_norm);
