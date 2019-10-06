@@ -52,7 +52,7 @@ c_float compute_tolerance(cudapcg_solver *s,
   return eps;
 }
 
-/* b_red = b1 + A' * rho * b2 */
+/* d_rhs = d_b1 + A' * rho * d_b2 */
 void compute_rhs(cudapcg_solver *s,
                  c_float        *d_b) {
 
