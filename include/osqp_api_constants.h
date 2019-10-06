@@ -66,7 +66,12 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define EPS_PRIM_INF (1E-4)
 # define EPS_DUAL_INF (1E-4)
 # define ALPHA (1.6)
+
+#ifdef CUDA_SUPPORT
+# define LINSYS_SOLVER (CUDA_PCG_SOLVER)
+#else
 # define LINSYS_SOLVER (QDLDL_SOLVER)
+#endif
 
 # define RHO_MIN (1e-06)
 # define RHO_MAX (1e06)
