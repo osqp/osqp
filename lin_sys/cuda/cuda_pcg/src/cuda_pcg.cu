@@ -50,6 +50,17 @@ void mat_vec_prod(cudapcg_solver *s,
     sigma = s->h_sigma;
   }
 
+  /* d_y = d_x */
+  checkCudaErrors(cudaMemcpy(d_y, d_x, n * sizeof(c_float), cudaMemcpyDeviceToDevice));
+
+  /* d_y *= sigma */
+  checkCudaErrors(cublasTscal(CUDA_handle->cublasHandle, n, sigma, d_y, 1));
+
+  /* d_y += P * d_x */
+  checkCudaErrors(cusparseCsrmv(CUDA_handle->cusparseHandle, P->alg, P->m, P->n, P->nnz, &H_ONE, P->MatDescription, P->val, P->row_ptr, P->col_ind, d_x, &H_ONE, d_y, P->buffer));
+
+  if (m == 0) return;
+
   if (!s->d_rho_vec) {
     /* d_z = rho * A * d_x */
     checkCudaErrors(cusparseCsrmv(CUDA_handle->cusparseHandle, A->alg, A->m, A->n, A->nnz, rho, A->MatDescription, A->val, A->row_ptr, A->col_ind, d_x, &H_ZERO, s->d_z, A->buffer));
@@ -62,14 +73,8 @@ void mat_vec_prod(cudapcg_solver *s,
     cuda_vec_ew_prod(s->d_z, s->d_z, s->d_rho_vec, m);
   }
 
-  /* d_y = A' * d_z */
-  checkCudaErrors(cusparseCsrmv(CUDA_handle->cusparseHandle, At->alg, At->m, At->n, At->nnz, &H_ONE, At->MatDescription, At->val, At->row_ptr, At->col_ind, s->d_z, &H_ZERO, d_y, A->buffer));
-
-  /* d_y += P * d_x */
-  checkCudaErrors(cusparseCsrmv(CUDA_handle->cusparseHandle, P->alg, P->m, P->n, P->nnz, &H_ONE, P->MatDescription, P->val, P->row_ptr, P->col_ind, d_x, &H_ONE, d_y, P->buffer));
-
-  /* d_y += sigma * d_x */
-  checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, sigma, d_x, 1, d_y, 1));
+  /* d_y += A' * d_z */
+  checkCudaErrors(cusparseCsrmv(CUDA_handle->cusparseHandle, At->alg, At->m, At->n, At->nnz, &H_ONE, At->MatDescription, At->val, At->row_ptr, At->col_ind, s->d_z, &H_ONE, d_y, A->buffer));
 }
 
 

@@ -52,6 +52,32 @@ c_float compute_tolerance(cudapcg_solver *s,
   return eps;
 }
 
+/* b_red = b1 + A' * rho * b2 */
+void compute_rhs(cudapcg_solver *s,
+                 c_float        *d_b) {
+
+  c_int n = s->n;
+  c_int m = s->m;
+  c_float *d_b2 = d_b + n;
+
+  /* d_rhs = d_b1 */
+  cuda_vec_copy_d2d(s->d_rhs, d_b, n);
+
+  if (m == 0) return;
+
+  if (!s->d_rho_vec) {
+    /* d_b2 *= rho */
+    cuda_vec_mult_sc(d_b2, *s->h_rho, m);
+  }
+  else {
+    /* d_b2 = diag(d_rho_vec) * db_2 */
+    cuda_vec_ew_prod(d_b2, d_b2, s->d_rho_vec, m);
+  }
+
+  /* d_rhs += A' * d_b2 */
+  cuda_mat_Axpy(s->At, d_b2, s->d_rhs, 1.0, 1.0);
+}
+
 
 /*******************************************************************************
  *                              API Functions                                  *
@@ -189,8 +215,8 @@ c_int solve_linsys_cudapcg(cudapcg_solver *s,
   /* Set the maximum number of PCG iterations */
   c_int max_iter = (s->polish) ? CUDA_PCG_POLISH_MAX_ITER : s->max_iter;
 
-  /* Copy b to d_rhs */
-  cuda_vec_copy_d2d(s->d_rhs, b->d_val, b->length);
+  /* Compute the RHS of the reduced KKT system and store it in s->d_rhs */
+  compute_rhs(s, b->d_val);
 
   /* Compute the required solution precision */
   eps = compute_tolerance(s, admm_iter);
@@ -198,8 +224,11 @@ c_int solve_linsys_cudapcg(cudapcg_solver *s,
   /* Solve the linear system with PCG */
   pcg_iters = cuda_pcg_alg(s, eps, max_iter);
 
-  /* Copy solution to b */
-  cuda_vec_copy_d2d(b->d_val, s->d_x, b->length);
+  /* Copy the first part of the solution to b->d_val */
+  cuda_vec_copy_d2d(b->d_val, s->d_x, s->n);
+
+  /* Compute d_z = A * d_x */
+  if (s->m) cuda_mat_Axpy(s->A, s->d_x, b->d_val + s->n, 1.0, 0.0);
 
   // GB: Should we set zero_pcg_iters to zero otherwise?
   if (pcg_iters == 0) s->zero_pcg_iters++;
