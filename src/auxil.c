@@ -156,7 +156,7 @@ static void compute_rhs(OSQPSolver *solver) {
 
   //part related to dual variable in the equality constrained QP (nu)
   OSQPVectorf_ew_prod(work->ztilde_view, work->rho_inv_vec, work->y);
-  OSQPVectorf_minus(work->ztilde_view, work->z_prev, work->ztilde_view);
+  OSQPVectorf_add_scaled(work->ztilde_view, -1.0, work->ztilde_view, 1.0, work->z_prev);
 }
 
 void update_xz_tilde(OSQPSolver *solver, c_int admm_iter) {

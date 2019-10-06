@@ -27,10 +27,10 @@ __global__ void scalar_division_kernel(c_float       *res,
 /*
  * d_y = (P + sigma*I + A'*R*A) * d_x
  */
-void mat_vec_prod(cudapcg_solver *s,
-                  c_float        *d_y,
-                  const c_float  *d_x,
-                  c_int           device) {
+static void mat_vec_prod(cudapcg_solver *s,
+                         c_float        *d_y,
+                         const c_float  *d_x,
+                         c_int           device) {
 
   c_float *rho, *sigma;
   c_float H_ZERO = 0.0;

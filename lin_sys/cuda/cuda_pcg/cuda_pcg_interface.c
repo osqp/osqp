@@ -11,8 +11,8 @@
  *                           Private Functions                                 *
  *******************************************************************************/
 
-c_float compute_tolerance(cudapcg_solver *s,
-                          c_int           admm_iter) {
+static c_float compute_tolerance(cudapcg_solver *s,
+                                 c_int           admm_iter) {
 
   c_float eps, rhs_norm;
 
@@ -53,8 +53,8 @@ c_float compute_tolerance(cudapcg_solver *s,
 }
 
 /* d_rhs = d_b1 + A' * rho * d_b2 */
-void compute_rhs(cudapcg_solver *s,
-                 c_float        *d_b) {
+static void compute_rhs(cudapcg_solver *s,
+                        c_float        *d_b) {
 
   c_int n = s->n;
   c_int m = s->m;
@@ -292,3 +292,4 @@ c_int update_linsys_solver_rho_vec_cudapcg(cudapcg_solver    *s,
 
   if (s->precondition) cuda_pcg_update_precond(s, 0, 0, 1);
 }
+
