@@ -45,7 +45,7 @@ void cuda_calloc(void** devPtr, size_t size) {
 }
 
 void cuda_free(void** devPtr) {
-  c_cudaFree(devPtr);
+  checkCudaErrors(c_cudaFree(devPtr));
 }
 
 void cuda_free_host(void** devPtr) {
