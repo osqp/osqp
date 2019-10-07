@@ -32,7 +32,7 @@ static void mat_vec_prod(cudapcg_solver *s,
                          const c_float  *d_x,
                          c_int           device) {
 
-  c_float *rho, *sigma;
+  c_float *sigma;
   c_float H_ZERO = 0.0;
   c_float H_ONE  = 1.0;
   c_int n = s->n;
@@ -42,11 +42,9 @@ static void mat_vec_prod(cudapcg_solver *s,
   csr *At = s->At;
 
   if (device) {
-    rho   = s->d_rho;
     sigma = s->d_sigma;
   }
   else {
-    rho   = s->h_rho;
     sigma = s->h_sigma;
   }
 
@@ -63,7 +61,7 @@ static void mat_vec_prod(cudapcg_solver *s,
 
   if (!s->d_rho_vec) {
     /* d_z = rho * A * d_x */
-    checkCudaErrors(cusparseCsrmv(CUDA_handle->cusparseHandle, A->alg, A->m, A->n, A->nnz, rho, A->MatDescription, A->val, A->row_ptr, A->col_ind, d_x, &H_ZERO, s->d_z, A->buffer));
+    checkCudaErrors(cusparseCsrmv(CUDA_handle->cusparseHandle, A->alg, A->m, A->n, A->nnz, s->h_rho, A->MatDescription, A->val, A->row_ptr, A->col_ind, d_x, &H_ZERO, s->d_z, A->buffer));
   }
   else {
     /* d_z = A * d_x */

@@ -724,6 +724,9 @@ void cuda_submat_byrows(const csr    *A,
   // Generate row pointer
   compress_row_ind(*Ared);
 
+  // Update merge path buffer (CsrmvEx)
+  update_mp_buffer(*Ared);
+
   // We first make a copy of Ared
   *Aredt = csr_alloc(new_m, n, nnz_new, 1);
   checkCudaErrors(cudaMemcpy((*Aredt)->val,     (*Ared)->val,     nnz_new   * sizeof(c_float), cudaMemcpyDeviceToDevice));
@@ -731,7 +734,10 @@ void cuda_submat_byrows(const csr    *A,
   checkCudaErrors(cudaMemcpy((*Aredt)->col_ind, (*Ared)->col_ind, nnz_new   * sizeof(c_int),   cudaMemcpyDeviceToDevice));
 
   c_int *d_A_to_At_ind;
-  csr_transpose(*Aredt, &d_A_to_At_ind);;
+  csr_transpose(*Aredt, &d_A_to_At_ind);
+
+  // Update merge path buffer (CsrmvEx)
+  update_mp_buffer(*Aredt);
 
   cuda_free((void**)&d_A_to_At_ind);
   cuda_free((void**)&d_predicate);
