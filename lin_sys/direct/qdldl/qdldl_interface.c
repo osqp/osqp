@@ -22,7 +22,13 @@ void warm_start_linsys_solver_qdldl(qdldl_solver      *s,
 // Free LDL Factorization structure
 void free_linsys_solver_qdldl(qdldl_solver *s) {
     if (s) {
-        if (s->L)           csc_spfree(s->L);
+        if (s->L) {
+            if (s->L->p) c_free(s->L->p);
+            if (s->L->i) c_free(s->L->i);
+            if (s->L->x) c_free(s->L->x);
+            c_free(s->L);
+        }
+
         if (s->P)           c_free(s->P);
         if (s->Dinv)        c_free(s->Dinv);
         if (s->bp)          c_free(s->bp);
@@ -226,10 +232,11 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
     // NB: We don not allocate L completely (CSC elements)
     //      L will be allocated during the factorization depending on the
     //      resulting number of elements.
-    s->L = c_malloc(sizeof(csc));
-    s->L->m   = n_plus_m;
-    s->L->n   = n_plus_m;
+    s->L = c_calloc(1, sizeof(csc));
+    s->L->m  = n_plus_m;
+    s->L->n  = n_plus_m;
     s->L->nz = -1;
+    s->L->p  = (c_int *)c_malloc((n_plus_m+1) * sizeof(QDLDL_int));
 
     // Diagonal matrix stored as a vector D
     s->Dinv = (QDLDL_float *)c_malloc(sizeof(QDLDL_float) * n_plus_m);
@@ -250,14 +257,6 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
     // Elimination tree workspace
     s->etree = (QDLDL_int *)c_malloc(n_plus_m * sizeof(QDLDL_int));
     s->Lnz   = (QDLDL_int *)c_malloc(n_plus_m * sizeof(QDLDL_int));
-
-    // Preallocate L matrix (Lx and Li are sparsity dependent)
-    s->L->p = (c_int *)c_malloc((n_plus_m+1) * sizeof(QDLDL_int));
-
-    // Lx and Li are sparsity dependent, so set them to
-    // null initially so we don't try to free them prematurely
-    s->L->i = OSQP_NULL;
-    s->L->x = OSQP_NULL;
 
     // Preallocate workspace
     s->iwork = (QDLDL_int *)c_malloc(sizeof(QDLDL_int)*(3*n_plus_m));

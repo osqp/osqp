@@ -844,7 +844,7 @@ c_int osqp_update_bounds(OSQPSolver    *solver,
                          const c_float *l_new,
                          const c_float *u_new) {
   
-  c_int i, exitflag = 0;
+  c_int exitflag = 0;
   OSQPVectorf *l_tmp, *u_tmp;
   OSQPWorkspace* work;
 
