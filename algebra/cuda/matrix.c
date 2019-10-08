@@ -118,7 +118,7 @@ void OSQPMatrix_mult_scalar(OSQPMatrix *mat,
 void OSQPMatrix_lmult_diag(OSQPMatrix        *mat,
                            const OSQPVectorf *D) {
 
-  csc_lmult_diag(mat->csc, OSQPVectorf_data(D));
+  csc_lmult_diag(mat->csc, D->values);
 
   cuda_mat_lmult_diag(mat->S, mat->At, mat->symmetric, D->d_val);
 }
@@ -126,7 +126,7 @@ void OSQPMatrix_lmult_diag(OSQPMatrix        *mat,
 void OSQPMatrix_rmult_diag(OSQPMatrix        *mat,
                            const OSQPVectorf *D) {
 
-  csc_rmult_diag(mat->csc, OSQPVectorf_data(D));
+  csc_rmult_diag(mat->csc, D->values);
 
   cuda_mat_rmult_diag(mat->S, mat->At, mat->symmetric, D->d_val);
 }
@@ -138,16 +138,13 @@ void OSQPMatrix_Axpy(const OSQPMatrix  *mat,
                      c_float            alpha,
                      c_float            beta) {
 
-  c_float* xf = OSQPVectorf_data(x);
-  c_float* yf = OSQPVectorf_data(y);
-
   if(mat->symmetry == NONE){
     // full matrix
-    csc_Axpy(mat->csc, xf, yf, alpha, beta);
+    csc_Axpy(mat->csc, x->values, y->values, alpha, beta);
   }
   else{
     // should be TRIU here, but not directly checked
-    csc_Axpy_sym_triu(mat->csc, xf, yf, alpha, beta);
+    csc_Axpy_sym_triu(mat->csc, x->values, y->values, alpha, beta);
   }
 
   cuda_mat_Axpy(mat->S, x->d_val, y->d_val, alpha, beta);
@@ -160,10 +157,10 @@ void OSQPMatrix_Atxpy(const OSQPMatrix  *mat,
                       c_float            beta) {
 
   if (mat->symmetry == NONE){
-    csc_Atxpy(mat->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
+    csc_Atxpy(mat->csc, x->values, y->values, alpha, beta);
   }
   else{
-    csc_Axpy_sym_triu(mat->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
+    csc_Axpy_sym_triu(mat->csc, x->values, y->values, alpha, beta);
   }
 
   cuda_mat_Axpy(mat->At, x->d_val, y->d_val, alpha, beta);
@@ -176,7 +173,7 @@ c_float OSQPMatrix_quad_form(const OSQPMatrix  *mat,
 
   if (mat->symmetric) {
     cuda_mat_quad_form(mat->S, x->d_val, &res);
-    return csc_quad_form(mat->csc, OSQPVectorf_data(x));
+    return csc_quad_form(mat->csc, x->values);
   }
   else {
 #ifdef PRINTING
@@ -190,8 +187,8 @@ c_float OSQPMatrix_quad_form(const OSQPMatrix  *mat,
 void OSQPMatrix_col_norm_inf(const OSQPMatrix *mat,
                              OSQPVectorf      *res) {
 
-  if (mat->symmetry == NONE) csc_col_norm_inf(mat->csc, OSQPVectorf_data(res));
-  else                       csc_row_norm_inf_sym_triu(mat->csc, OSQPVectorf_data(res));
+  if (mat->symmetry == NONE) csc_col_norm_inf(mat->csc, res->values);
+  else                       csc_row_norm_inf_sym_triu(mat->csc, res->values);
 
   if (mat->symmetric) cuda_mat_row_norm_inf(mat->S,  res->d_val);
   else                cuda_mat_row_norm_inf(mat->At, res->d_val);
@@ -200,8 +197,8 @@ void OSQPMatrix_col_norm_inf(const OSQPMatrix *mat,
 void OSQPMatrix_row_norm_inf(const OSQPMatrix *mat,
                              OSQPVectorf      *res) {
 
-  if (mat->symmetry == NONE) csc_row_norm_inf(mat->csc, OSQPVectorf_data(res));
-  else                       csc_row_norm_inf_sym_triu(mat->csc, OSQPVectorf_data(res));
+  if (mat->symmetry == NONE) csc_row_norm_inf(mat->csc, res->values);
+  else                       csc_row_norm_inf_sym_triu(mat->csc, res->values);
 
   cuda_mat_row_norm_inf(mat->S, res->d_val);
 }

@@ -64,11 +64,11 @@ void OSQPMatrix_mult_scalar(OSQPMatrix *A, c_float sc){
 }
 
 void OSQPMatrix_lmult_diag(OSQPMatrix *A, const OSQPVectorf *L) {
-  csc_lmult_diag(A->csc, OSQPVectorf_data(L));
+  csc_lmult_diag(A->csc, L->values);
 }
 
 void OSQPMatrix_rmult_diag(OSQPMatrix *A, const OSQPVectorf *R) {
-  csc_rmult_diag(A->csc, OSQPVectorf_data(R));
+  csc_rmult_diag(A->csc, R->values);
 }
 
 //y = alpha*A*x + beta*y
@@ -78,16 +78,13 @@ void OSQPMatrix_Axpy(const OSQPMatrix *A,
                      c_float alpha,
                      c_float beta) {
 
-  c_float* xf = OSQPVectorf_data(x);
-  c_float* yf = OSQPVectorf_data(y);
-
   if(A->symmetry == NONE){
     //full matrix
-    csc_Axpy(A->csc, xf, yf, alpha, beta);
+    csc_Axpy(A->csc, x->values, y->values, alpha, beta);
   }
   else{
     //should be TRIU here, but not directly checked
-    csc_Axpy_sym_triu(A->csc, xf, yf, alpha, beta);
+    csc_Axpy_sym_triu(A->csc, x->values, y->values, alpha, beta);
   }
 }
 
@@ -97,13 +94,13 @@ void OSQPMatrix_Atxpy(const OSQPMatrix *A,
                       c_float alpha,
                       c_float beta) {
 
-   if(A->symmetry == NONE) csc_Atxpy(A->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
-   else            csc_Axpy_sym_triu(A->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
+   if(A->symmetry == NONE) csc_Atxpy(A->csc, x->values, y->values, alpha, beta);
+   else            csc_Axpy_sym_triu(A->csc, x->values, y->values, alpha, beta);
 }
 
 
 c_float OSQPMatrix_quad_form(const OSQPMatrix *P, const OSQPVectorf *x) {
-   if(P->symmetry == TRIU) return csc_quad_form(P->csc, OSQPVectorf_data(x));
+   if(P->symmetry == TRIU) return csc_quad_form(P->csc, x->values);
    else {
 #ifdef PRINTING
      c_eprint("quad_form matrix is not upper triangular");
@@ -115,12 +112,12 @@ c_float OSQPMatrix_quad_form(const OSQPMatrix *P, const OSQPVectorf *x) {
 #if EMBEDDED != 1
 
 void OSQPMatrix_col_norm_inf(const OSQPMatrix *M, OSQPVectorf *E) {
-   csc_col_norm_inf(M->csc, OSQPVectorf_data(E));
+   csc_col_norm_inf(M->csc, E->values);
 }
 
 void OSQPMatrix_row_norm_inf(const OSQPMatrix *M, OSQPVectorf *E) {
-   if(M->symmetry == NONE) csc_row_norm_inf(M->csc, OSQPVectorf_data(E));
-   else                    csc_row_norm_inf_sym_triu(M->csc, OSQPVectorf_data(E));
+   if(M->symmetry == NONE) csc_row_norm_inf(M->csc, E->values);
+   else                    csc_row_norm_inf_sym_triu(M->csc, E->values);
 }
 
 #endif // endef EMBEDDED

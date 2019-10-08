@@ -23,12 +23,6 @@ static c_int form_Ared(OSQPWorkspace *work){
   c_int *active_flags;
   c_float *z, *y, *u, *l;
 
-  // c_int* active_flags = OSQPVectori_data(work->pol->active_flags);
-  // c_float* z = OSQPVectorf_data(work->z);
-  // c_float* y = OSQPVectorf_data(work->y);
-  // c_float* l = OSQPVectorf_data(work->data->l);
-  // c_float* u = OSQPVectorf_data(work->data->u);
-
   // Allocate raw arrays
   active_flags = (c_int *) c_malloc(m * sizeof(c_int));
   z = (c_float *) c_malloc(m * sizeof(c_float));
@@ -104,12 +98,6 @@ static void form_rhs_red(OSQPWorkspace *work, OSQPVectorf *rhs) {
 
   c_int *active_flags;
   c_float *rhsv, *q, *l, *u;
-
-  // c_float* rhsv = OSQPVectorf_data(rhs);
-  // c_float* q   = OSQPVectorf_data(work->data->q);
-  // c_float* l   = OSQPVectorf_data(work->data->l);
-  // c_float* u   = OSQPVectorf_data(work->data->u);
-  // c_int* active_flags = OSQPVectori_data(work->pol->active_flags);
 
   // Allocate raw arrays
   active_flags = (c_int *)   c_malloc(m           * sizeof(c_int));
@@ -236,10 +224,6 @@ static void get_ypol_from_yred(OSQPWorkspace *work, OSQPVectorf *yred_vf) {
 
   c_int *active_flags;
   c_float *y, *yred;
-
-  // c_int* active_flags = OSQPVectori_data(work->pol->active_flags);
-  // c_float* y     = OSQPVectorf_data(work->pol->y);
-  // c_float* yred  = OSQPVectorf_data(yred_vf);
 
   // Allocate raw arrays
   active_flags = (c_int *)   c_malloc(m    * sizeof(c_int));

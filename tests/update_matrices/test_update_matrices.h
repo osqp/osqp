@@ -11,7 +11,7 @@
 static const char* test_form_KKT() {
 
   update_matrices_sols_data *data;
-  c_float sigma;
+  c_float sigma, *rho_inv_vec_val;
   OSQPVectorf *rho_vec, *rho_inv_vec;
   c_int   m, *PtoKKT, *AtoKKT, *Pdiag_idx, Pdiag_n;
   csc    *KKT;
@@ -26,6 +26,10 @@ static const char* test_form_KKT() {
   rho_inv_vec = OSQPVectorf_malloc(m);
   OSQPVectorf_set_scalar(rho_vec, data->test_form_KKT_rho);
   OSQPVectorf_ew_reciprocal(rho_inv_vec,rho_vec);
+
+  // Copy value of rho_inv_vec to a bare array
+  rho_inv_vec_val = (c_float *) c_malloc(m * sizeof(c_float));
+  OSQPVectorf_to_raw(rho_inv_vec_val, rho_inv_vec);
 
   // Allocate vectors of indices
   PtoKKT = (c_int*) c_malloc((data->test_form_KKT_Pu->p[data->test_form_KKT_Pu->n]) *
@@ -44,7 +48,7 @@ static const char* test_form_KKT() {
                  data->test_form_KKT_Pu_new->n,
                  0,
                  sigma,
-                 OSQPVectorf_data(rho_inv_vec),
+                 rho_inv_vec_val,
                  PtoKKT,
                  AtoKKT,
                  &Pdiag_idx,
@@ -75,6 +79,7 @@ static const char* test_form_KKT() {
 
   // Cleanup
   clean_problem_update_matrices_sols_data(data);
+  c_free(rho_inv_vec_val);
   c_free(Pdiag_idx);
   csc_spfree(KKT);
   OSQPVectorf_free(rho_vec);
