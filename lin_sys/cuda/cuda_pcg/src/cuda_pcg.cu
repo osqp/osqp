@@ -193,11 +193,6 @@ void cuda_pcg_update_precond(cudapcg_solver *s,
 
   if (!P_updated && !A_updated && !R_updated) return;
 
-  if (R_updated) {
-    /* Copy rho parameter from host to device */
-    checkCudaErrors(cudaMemcpy(s->d_rho, s->h_rho, sizeof(c_float), cudaMemcpyHostToDevice));
-  }
-
   if (P_updated) {
     /* Update d_P_diag_val */
     checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, n, s->P->val, s->d_P_diag_val, s->d_P_diag_ind, CUSPARSE_INDEX_BASE_ZERO));

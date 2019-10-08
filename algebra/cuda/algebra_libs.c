@@ -2,7 +2,7 @@
 #include "osqp_api_types.h"
 #include "cuda_handler.h"
 
-CUDA_Handle_t *CUDA_handle = NULL;
+CUDA_Handle_t *CUDA_handle = OSQP_NULL;
 
 c_int osqp_algebra_init_libs(void) {
   /* This is to prevent a memory leak when multiple OSQP objects are created */
@@ -18,5 +18,5 @@ void osqp_algebra_free_libs(void) {
   if (!CUDA_handle) return;
 
   cuda_free_libs(CUDA_handle);
-  CUDA_handle = NULL;
+  CUDA_handle = OSQP_NULL;
 }

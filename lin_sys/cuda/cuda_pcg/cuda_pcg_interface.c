@@ -158,15 +158,14 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   cuda_malloc_host((void **) &s->h_r_norm, sizeof(c_float));
 
   /* Allocate device-side scalar values. This way scalars are packed in device memory */
-  cuda_malloc((void **) &s->d_r_norm, 9 * sizeof(c_float));
+  cuda_malloc((void **) &s->d_r_norm, 8 * sizeof(c_float));
   s->rTy         = s->d_r_norm + 1;
   s->rTy_prev    = s->d_r_norm + 2;
   s->alpha       = s->d_r_norm + 3;
   s->beta        = s->d_r_norm + 4;
   s->pKp         = s->d_r_norm + 5;
   s->D_MINUS_ONE = s->d_r_norm + 6;
-  s->d_rho       = s->d_r_norm + 7;
-  s->d_sigma     = s->d_r_norm + 8;
+  s->d_sigma     = s->d_r_norm + 7;
   cuda_vec_copy_h2d(s->D_MINUS_ONE, &H_MINUS_ONE, 1);
   cuda_vec_copy_h2d(s->d_sigma,     s->h_sigma,   1);
 

@@ -97,7 +97,6 @@ typedef struct cudapcg_solver_ {
   c_float *beta;
   c_float *pKp;
   c_float *D_MINUS_ONE;     ///<  constant -1.0 in device memory
-  c_float *d_rho;
   c_float *d_sigma;
 
   /* PCG preconditioner */
