@@ -951,6 +951,7 @@ static const char* test_basic_qp_warm_start()
   // Define Solver settings as default
   osqp_set_default_settings(settings);
   settings->check_termination = 1;
+  settings->adaptive_rho = 0;
 
   // Setup solver
   exitflag = osqp_setup(&solver, data->P, data->q,
