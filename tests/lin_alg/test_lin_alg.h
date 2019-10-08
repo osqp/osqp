@@ -136,6 +136,7 @@ static const char* test_mat_operations() {
   dA = OSQPMatrix_new_from_csc(data->test_mat_ops_A,0); //asymmetric
   d  = OSQPVectorf_new(data->test_mat_ops_d, data->test_mat_ops_n);
 
+#ifndef CUDA_SUPPORT
 
   // Premultiply matrix A
   OSQPMatrix_lmult_diag(dA, d);
@@ -153,6 +154,8 @@ static const char* test_mat_operations() {
     "Linear algebra tests: error in matrix operation, postmultiply diagonal",
     OSQPMatrix_is_eq(Ad, refM, TESTS_TOL));
   OSQPMatrix_free(refM);
+
+#endif /* ifndef CUDA_SUPPORT */
 
   // Maximum norm over columns
   resultv = OSQPVectorf_malloc(data->test_mat_ops_n);

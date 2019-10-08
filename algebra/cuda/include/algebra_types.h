@@ -15,13 +15,11 @@ extern "C" {
 
 struct OSQPVectori_ {
   c_int *d_val;
-  c_int *values;
   c_int  length;
 };
 
 struct OSQPVectorf_ {
   c_float *d_val;
-  c_float *values;
   c_int    length;
 };
 
@@ -31,20 +29,10 @@ struct OSQPVectorf_ {
 *   and supporting definitions
 *********************************************/
 
-/**
- *  An enum used to indicate whether a matrix is symmetric.   Options
- *  NONE : matrix is fully populated
- *  TRUI : matrix is symmetric and only upper triangle is stored
- */
-typedef enum OSQPMatrix_symmetry_type {NONE,TRIU} OSQPMatrix_symmetry_type;
-
 /* Matrix in CSR format stored in GPU memory */
 typedef struct csr_t csr;
 
 struct OSQPMatrix_ {
-  csc*                             csc;
-  OSQPMatrix_symmetry_type    symmetry;
-
   csr     *S;   /* P or A */
   csr     *At;
   c_int   *d_A_to_At_ind;

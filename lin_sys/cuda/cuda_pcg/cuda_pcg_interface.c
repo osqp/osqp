@@ -241,9 +241,6 @@ c_int solve_linsys_cudapcg(cudapcg_solver *s,
   // GB: Should we set zero_pcg_iters to zero otherwise?
   if (pcg_iters == 0) s->zero_pcg_iters++;
 
-  // TEMPORARY COMMAND: Copy the content of b->d_val to b->values
-  cuda_vec_copy_d2h(b->values, b->d_val, s->n + s->m);
-
   return 0;
 }
 
