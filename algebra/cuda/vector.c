@@ -158,9 +158,8 @@ void OSQPVectorf_view_free(OSQPVectorf *a) {
 c_int OSQPVectorf_length(const OSQPVectorf *a) {return a->length;}
 c_int OSQPVectori_length(const OSQPVectori *a) {return a->length;}
 
-/* Pointer to vector data (floats) */
-c_float* OSQPVectorf_data(const OSQPVectorf *a){return a->values;}
-c_int*   OSQPVectori_data(const OSQPVectori *a){return a->values;}
+// c_float* OSQPVectorf_data(const OSQPVectorf *a){return a->values;}
+// c_int*   OSQPVectori_data(const OSQPVectori *a){return a->values;}
 
 void OSQPVectorf_copy(OSQPVectorf       *b,
                       const OSQPVectorf *a) {
@@ -197,14 +196,27 @@ void OSQPVectori_from_raw(OSQPVectori *b,
 void OSQPVectorf_to_raw(c_float           *bv,
                         const OSQPVectorf *a) {
 
-  c_int i;
-  c_int length = a->length;
-  c_float* av = a->values;
+  // c_int i;
+  // c_int length = a->length;
+  // c_float* av = a->values;
 
-  for (i = 0; i < length; i++) {
-    bv[i] = av[i];
-  }
-  // cuda_vec_copy_d2h(bv, a->d_val, a->length);
+  // for (i = 0; i < length; i++) {
+  //   bv[i] = av[i];
+  // }
+  cuda_vec_copy_d2h(bv, a->d_val, a->length);
+}
+
+void OSQPVectori_to_raw(c_int             *bv,
+                        const OSQPVectori *a) {
+
+  // c_int i;
+  // c_int length = a->length;
+  // c_int* av = a->values;
+
+  // for (i = 0; i < length; i++) {
+  //   bv[i] = av[i];
+  // }
+  cuda_vec_int_copy_d2h(bv, a->d_val, a->length);
 }
 
 void OSQPVectorf_set_scalar(OSQPVectorf *a,

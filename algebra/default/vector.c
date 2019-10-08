@@ -156,7 +156,8 @@ c_int OSQPVectori_length(const OSQPVectori *a){return a->length;}
 
 /* Pointer to vector data (floats) */
 c_float* OSQPVectorf_data(const OSQPVectorf *a){return a->values;}
-c_int*   OSQPVectori_data(const OSQPVectori *a){return a->values;}
+
+// c_int*   OSQPVectori_data(const OSQPVectori *a){return a->values;}
 
 void OSQPVectorf_copy(OSQPVectorf *b, const OSQPVectorf *a){
   OSQPVectorf_from_raw(b, a->values);

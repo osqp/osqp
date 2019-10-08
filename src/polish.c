@@ -18,12 +18,24 @@
 static c_int form_Ared(OSQPWorkspace *work){
 
   c_int j, n_active;
+  c_int m = work->data->m;
 
-  c_int* active_flags = OSQPVectori_data(work->pol->active_flags);
-  c_float* z = OSQPVectorf_data(work->z);
-  c_float* y = OSQPVectorf_data(work->y);
-  c_float* l = OSQPVectorf_data(work->data->l);
-  c_float* u = OSQPVectorf_data(work->data->u);
+  c_int *active_flags;
+  c_float *z, *y, *u, *l;
+
+  // Allocate raw arrays
+  active_flags = (c_int *) c_malloc(m * sizeof(c_int));
+  z = (c_float *) c_malloc(m * sizeof(c_float));
+  y = (c_float *) c_malloc(m * sizeof(c_float));
+  l = (c_float *) c_malloc(m * sizeof(c_float));
+  u = (c_float *) c_malloc(m * sizeof(c_float));
+
+  // Copy data to raw arrays
+  OSQPVectori_to_raw(active_flags, work->pol->active_flags);
+  OSQPVectorf_to_raw(z, work->z);
+  OSQPVectorf_to_raw(y, work->y);
+  OSQPVectorf_to_raw(l, work->data->l);
+  OSQPVectorf_to_raw(u, work->data->u);
 
   // Initialize counters for active constraints
   n_active = 0;
@@ -60,6 +72,13 @@ static c_int form_Ared(OSQPWorkspace *work){
   //extract the relevant rows
   work->pol->Ared = OSQPMatrix_submatrix_byrows(work->data->A, work->pol->active_flags);
 
+  // Memory clean-up
+  c_free(active_flags);
+  c_free(z);
+  c_free(y);
+  c_free(l);
+  c_free(u);
+
   // Return number of rows in Ared
   return n_active;
 }
@@ -73,12 +92,26 @@ static c_int form_Ared(OSQPWorkspace *work){
 static void form_rhs_red(OSQPWorkspace *work, OSQPVectorf *rhs) {
 
   c_int j, counter;
+  c_int n = work->data->n;
+  c_int m = work->data->m;
+  c_int n_plus_mred = OSQPVectorf_length(rhs);
 
-  c_float* rhsv = OSQPVectorf_data(rhs);
-  c_float* q   = OSQPVectorf_data(work->data->q);
-  c_float* l   = OSQPVectorf_data(work->data->l);
-  c_float* u   = OSQPVectorf_data(work->data->u);
-  c_int* active_flags = OSQPVectori_data(work->pol->active_flags);
+  c_int *active_flags;
+  c_float *rhsv, *q, *l, *u;
+
+  // Allocate raw arrays
+  active_flags = (c_int *)   c_malloc(m           * sizeof(c_int));
+  rhsv         = (c_float *) c_malloc(n_plus_mred * sizeof(c_float));
+  q            = (c_float *) c_malloc(n           * sizeof(c_float));
+  l            = (c_float *) c_malloc(m           * sizeof(c_float));
+  u            = (c_float *) c_malloc(m           * sizeof(c_float));
+
+  // Copy data to raw arrays
+  OSQPVectori_to_raw(active_flags, work->pol->active_flags);
+  OSQPVectorf_to_raw(rhsv, rhs);
+  OSQPVectorf_to_raw(q, work->data->q);
+  OSQPVectorf_to_raw(l, work->data->l);
+  OSQPVectorf_to_raw(u, work->data->u);
 
   for(j = 0; j < work->data->n; j++){
     rhsv[j] = -q[j];
@@ -99,6 +132,13 @@ static void form_rhs_red(OSQPWorkspace *work, OSQPVectorf *rhs) {
 
   // Copy raw vector into OSQPVectorf structure
   OSQPVectorf_from_raw(rhs, rhsv);
+
+  // Memory clean-up
+  c_free(active_flags);
+  c_free(rhsv);
+  c_free(q);
+  c_free(l);
+  c_free(u);
 }
 
 /**
@@ -179,10 +219,21 @@ static c_int iterative_refinement(OSQPSolver    *solver,
 static void get_ypol_from_yred(OSQPWorkspace *work, OSQPVectorf *yred_vf) {
 
   c_int j, counter;
+  c_int m = work->data->m;
+  c_int mred = OSQPVectorf_length(yred_vf);
 
-  c_int* active_flags = OSQPVectori_data(work->pol->active_flags);
-  c_float* y     = OSQPVectorf_data(work->pol->y);
-  c_float* yred  = OSQPVectorf_data(yred_vf);
+  c_int *active_flags;
+  c_float *y, *yred;
+
+  // Allocate raw arrays
+  active_flags = (c_int *)   c_malloc(m    * sizeof(c_int));
+  y            = (c_float *) c_malloc(m    * sizeof(c_float));
+  yred         = (c_float *) c_malloc(mred * sizeof(c_float));
+
+  // Copy data to raw arrays
+  OSQPVectori_to_raw(active_flags, work->pol->active_flags);
+  OSQPVectorf_to_raw(y, work->y);
+  OSQPVectorf_to_raw(yred, yred_vf);
 
   // If there are no active constraints
   if (work->pol->n_active == 0) {
@@ -205,6 +256,11 @@ static void get_ypol_from_yred(OSQPWorkspace *work, OSQPVectorf *yred_vf) {
 
   // Copy raw vector into OSQPVectorf structure
   OSQPVectorf_from_raw(work->pol->y, y);
+
+  // Memory clean-up
+  c_free(active_flags);
+  c_free(y);
+  c_free(yred);
 }
 
 c_int polish(OSQPSolver *solver) {
