@@ -146,7 +146,7 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix* A, const OSQPVectori* 
   }
 
 
-  M = csc_submatrix_byrows(A->csc, OSQPVectori_data(rows));
+  M = csc_submatrix_byrows(A->csc, rows->values);
 
   if(!M) return OSQP_NULL;
 
