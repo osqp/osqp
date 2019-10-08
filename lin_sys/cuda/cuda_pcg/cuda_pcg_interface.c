@@ -58,24 +58,26 @@ static void compute_rhs(cudapcg_solver *s,
 
   c_int n = s->n;
   c_int m = s->m;
-  c_float *d_b2 = d_b + n;
 
   /* d_rhs = d_b1 */
   cuda_vec_copy_d2d(s->d_rhs, d_b, n);
 
   if (m == 0) return;
 
+  /* d_z = d_b2 */
+  cuda_vec_copy_d2d(s->d_z, d_b + n, m);
+
   if (!s->d_rho_vec) {
-    /* d_b2 *= rho */
-    cuda_vec_mult_sc(d_b2, *s->h_rho, m);
+    /* d_z *= rho */
+    cuda_vec_mult_sc(s->d_z, *s->h_rho, m);
   }
   else {
-    /* d_b2 = diag(d_rho_vec) * db_2 */
-    cuda_vec_ew_prod(d_b2, d_b2, s->d_rho_vec, m);
+    /* d_z = diag(d_rho_vec) * d_z */
+    cuda_vec_ew_prod(s->d_z, s->d_z, s->d_rho_vec, m);
   }
 
-  /* d_rhs += A' * d_b2 */
-  cuda_mat_Axpy(s->At, d_b2, s->d_rhs, 1.0, 1.0);
+  /* d_rhs += A' * d_z */
+  cuda_mat_Axpy(s->At, s->d_z, s->d_rhs, 1.0, 1.0);
 }
 
 
@@ -226,8 +228,15 @@ c_int solve_linsys_cudapcg(cudapcg_solver *s,
   /* Copy the first part of the solution to b->d_val */
   cuda_vec_copy_d2d(b->d_val, s->d_x, s->n);
 
-  /* Compute d_z = A * d_x */
-  if (s->m) cuda_mat_Axpy(s->A, s->d_x, b->d_val + s->n, 1.0, 0.0);
+  if (!s->polish) {
+    /* Compute d_z = A * d_x */
+    if (s->m) cuda_mat_Axpy(s->A, s->d_x, b->d_val + s->n, 1.0, 0.0);
+  }
+  else {
+    /* Compute yred = (A * d_x - b) / delta */
+    cuda_mat_Axpy(s->A, s->d_x, b->d_val + s->n, 1.0, -1.0);
+    cuda_vec_mult_sc(b->d_val + s->n, *s->h_rho, s->m);
+  }
 
   // GB: Should we set zero_pcg_iters to zero otherwise?
   if (pcg_iters == 0) s->zero_pcg_iters++;

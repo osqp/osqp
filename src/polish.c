@@ -96,6 +96,9 @@ static void form_rhs_red(OSQPWorkspace *work, OSQPVectorf *rhs) {
        counter++;
     }
   }
+
+  // Copy raw vector into OSQPVectorf structure
+  OSQPVectorf_from_raw(rhs, rhsv);
 }
 
 /**
@@ -199,6 +202,9 @@ static void get_ypol_from_yred(OSQPWorkspace *work, OSQPVectorf *yred_vf) {
       counter++;
     }
   }
+
+  // Copy raw vector into OSQPVectorf structure
+  OSQPVectorf_from_raw(work->pol->y, y);
 }
 
 c_int polish(OSQPSolver *solver) {
@@ -272,6 +278,9 @@ c_int polish(OSQPSolver *solver) {
 
     return -1;
   }
+
+  // Warm start the polished solution
+  plsh->warm_start(plsh, work->x);
 
   // Solve the reduced KKT system
   plsh->solve(plsh, pol_sol, 1);
