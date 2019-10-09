@@ -2,6 +2,7 @@
 # define CUDA_CSR_H
 
 #include "algebra_types.h"
+#include "csc_type.h"
 
 # ifdef __cplusplus
 extern "C" {

@@ -1,6 +1,5 @@
-#include "osqp_api_types.h"
-#include "algebra_vector.h"
 #include "algebra_types.h"
+#include "algebra_vector.h"
 
 #include "cuda_lin_alg.h"
 #include "cuda_malloc.h"

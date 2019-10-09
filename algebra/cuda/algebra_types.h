@@ -5,7 +5,8 @@
 extern "C" {
 # endif // ifdef __cplusplus
 
-#include "csc_type.h"
+
+#include "osqp_api_types.h"
 
 
 /*********************************************
