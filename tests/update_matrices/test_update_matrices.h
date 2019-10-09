@@ -124,6 +124,8 @@ static const char* test_update() {
   settings->max_iter = 1000;
   settings->alpha    = 1.6;
   settings->verbose  = 1;
+  settings->eps_abs  = 1e-05;
+  settings->eps_rel  = 1e-05;
 
   // Setup solver
   exitflag = osqp_setup(&solver,problem->P,problem->q,

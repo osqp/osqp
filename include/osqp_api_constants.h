@@ -75,8 +75,13 @@ extern const char * OSQP_ERROR_MESSAGE[];
 
 # define RHO_MIN (1e-06)
 # define RHO_MAX (1e06)
-# define RHO_EQ_OVER_RHO_INEQ (1e03)
 # define RHO_TOL (1e-04) ///< tolerance for detecting if an inequality is set to equality
+
+#ifdef CUDA_SUPPORT
+#  define RHO_EQ_OVER_RHO_INEQ (1.0)
+#else
+#  define RHO_EQ_OVER_RHO_INEQ (1e03)
+#endif
 
 
 # ifndef EMBEDDED
@@ -86,8 +91,13 @@ extern const char * OSQP_ERROR_MESSAGE[];
 #  define VERBOSE (1)
 # endif // ifndef EMBEDDED
 
+#ifdef CUDA_SUPPORT
+#  define CHECK_TERMINATION (5)
+#else
+#  define CHECK_TERMINATION (25)
+#endif
+
 # define SCALED_TERMINATION (0)
-# define CHECK_TERMINATION (25)
 # define WARM_START (1)
 # define SCALING (10)
 
@@ -110,11 +120,18 @@ extern const char * OSQP_ERROR_MESSAGE[];
 
 # if EMBEDDED != 1
 #  define ADAPTIVE_RHO (1)
+
+#ifdef CUDA_SUPPORT
+#  define ADAPTIVE_RHO_INTERVAL (10)
+#  define ADAPTIVE_RHO_TOLERANCE (1)
+#else
 #  define ADAPTIVE_RHO_INTERVAL (0)
+#  define ADAPTIVE_RHO_TOLERANCE(5)             ///< tolerance for adopting new rho; minimum ratio between new rho and the current one
+#endif
+
 #  define ADAPTIVE_RHO_FRACTION (0.4)           ///< fraction of setup time after which we update rho
 #  define ADAPTIVE_RHO_MULTIPLE_TERMINATION (4) ///< multiple of check_termination after which we update rho (if PROFILING disabled)
 #  define ADAPTIVE_RHO_FIXED (100)              ///< number of iterations after which we update rho if termination_check  and PROFILING are disabled
-#  define ADAPTIVE_RHO_TOLERANCE (5)            ///< tolerance for adopting new rho; minimum ratio between new rho and the current one
 # endif // if EMBEDDED != 1
 
 # ifdef PROFILING

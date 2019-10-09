@@ -26,6 +26,7 @@ static const char* test_non_cvx_solve()
   // Define Solver settings as default
   osqp_set_default_settings(settings);
   settings->verbose = 1;
+  settings->adaptive_rho = 0;
   settings->sigma = 1e-6;
 
 #ifndef CUDA_SUPPORT 
