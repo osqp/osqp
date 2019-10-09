@@ -127,7 +127,7 @@ c_int update_rho_vec(OSQPSolver *solver) {
 
   // Update rho_vec in KKT matrix if constraints type has changed
   if (constr_type_changed == 1) {
-    exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver, work->rho_vec);
+    exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver, work->rho_vec, solver->settings->rho);
   }
 
   return exitflag;
@@ -155,8 +155,17 @@ static void compute_rhs(OSQPSolver *solver) {
                          -1., work->data->q);
 
   //part related to dual variable in the equality constrained QP (nu)
-  OSQPVectorf_ew_prod(work->ztilde_view, work->rho_inv_vec, work->y);
-  OSQPVectorf_add_scaled(work->ztilde_view, -1.0, work->ztilde_view, 1.0, work->z_prev);
+  if (settings->rho_is_vec) {
+    OSQPVectorf_ew_prod(work->ztilde_view, work->rho_inv_vec, work->y);
+    OSQPVectorf_add_scaled(work->ztilde_view,
+                           -1.0, work->ztilde_view,
+                           1.0, work->z_prev);
+  }
+  else {
+    OSQPVectorf_add_scaled(work->ztilde_view,
+                           1.0, work->z_prev,
+                           -work->rho_inv, work->y);
+  }
 }
 
 void update_xz_tilde(OSQPSolver *solver, c_int admm_iter) {
@@ -190,12 +199,19 @@ void update_z(OSQPSolver* solver) {
   OSQPWorkspace* work     = solver->work;
 
   // update z
-   OSQPVectorf_ew_prod(work->z, work->rho_inv_vec,work->y);
-
-   OSQPVectorf_add_scaled3(work->z,
-                          1., work->z,
-                          settings->alpha, work->ztilde_view,
-                          (1.0 - settings->alpha), work->z_prev);
+  if (settings->rho_is_vec) {
+    OSQPVectorf_ew_prod(work->z, work->rho_inv_vec,work->y);
+    OSQPVectorf_add_scaled3(work->z,
+                            1., work->z,
+                            settings->alpha, work->ztilde_view,
+                            (1.0 - settings->alpha), work->z_prev);
+  }
+  else {
+    OSQPVectorf_add_scaled3(work->z,
+                            settings->alpha, work->ztilde_view,
+                            (1.0 - settings->alpha), work->z_prev,
+                            work->rho_inv, work->y);
+  }
 
   // project z
   project(work, work->z);
@@ -208,13 +224,18 @@ void update_y(OSQPSolver *solver) {
   OSQPWorkspace* work     = solver->work;
 
   OSQPVectorf_add_scaled3(work->delta_y,
-                          settings->alpha,work->ztilde_view,
-                          (1.0 - settings->alpha),work->z_prev,
-                          -1.0,work->z);
+                          settings->alpha, work->ztilde_view,
+                          (1.0 - settings->alpha), work->z_prev,
+                          -1.0, work->z);
 
-  OSQPVectorf_ew_prod(work->delta_y,work->delta_y,work->rho_vec);
+  if (settings->rho_is_vec) {
+    OSQPVectorf_ew_prod(work->delta_y, work->delta_y, work->rho_vec);
+  }
+  else {
+    OSQPVectorf_mult_scalar(work->delta_y, settings->rho);
+  }
 
-  OSQPVectorf_plus(work->y,work->y,work->delta_y);
+  OSQPVectorf_plus(work->y, work->y, work->delta_y);
 
 }
 
@@ -1022,6 +1043,14 @@ c_int validate_settings(const OSQPSettings *settings) {
   if (settings->rho <= 0.0) {
 # ifdef PRINTING
     c_eprint("rho must be positive");
+# endif /* ifdef PRINTING */
+    return 1;
+  }
+
+  if ((settings->rho_is_vec != 0) &&
+      (settings->rho_is_vec != 1)) {
+# ifdef PRINTING
+    c_eprint("rho_is_vec must be either 0 or 1");
 # endif /* ifdef PRINTING */
     return 1;
   }

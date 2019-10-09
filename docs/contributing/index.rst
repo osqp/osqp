@@ -58,7 +58,7 @@ The linear system solver object is defined in :code:`mysolver.h` as follows
             c_int (*solve)(struct mysolver * self, c_float * b);
             void (*free)(struct mysolver * self);
             c_int (*update_matrices)(struct mysolver * self, const csc *P, const csc *A);
-            c_int (*update_rho_vec)(struct mysolver * self, const c_float * rho_vec);
+            c_int (*update_rho_vec)(struct mysolver * self, const c_float * rho_vec, c_float rho_sc);
 
             // Attributes
             c_int nthreads; // Number of threads used (required!)

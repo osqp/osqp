@@ -36,7 +36,8 @@ struct pardiso {
                              const OSQPMatrix *A);
 
     c_int (*update_rho_vec)(struct pardiso    *self,
-                            const OSQPVectorf *rho_vec);
+                            const OSQPVectorf *rho_vec,
+                            c_float            rho_sc);
 
     c_int nthreads;
     /** @} */
@@ -54,6 +55,7 @@ struct pardiso {
     c_float *sol;           ///< solution to the KKT system
     c_float *rho_inv_vec;   ///< parameter vector
     c_float sigma;          ///< scalar parameter
+    c_float rho_inv;        ///< scalar parameter (used if rho_inv_vec == NULL)
     c_int polish;           ///< polishing flag
     c_int n;                ///< number of QP variables
     c_int m;                ///< number of QP constraints
@@ -133,9 +135,9 @@ c_int update_linsys_solver_matrices_pardiso(
  * @param  rho_vec  new rho_vec value
  * @return          exitflag
  */
-c_int update_linsys_solver_rho_vec_pardiso(
-                    pardiso_solver * s,
-                    const OSQPVectorf * rho_vec);
+c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver    *s,
+                                           const OSQPVectorf *rho_vec,
+                                           c_float            rho_sc);
 
 
 /**

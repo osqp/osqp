@@ -76,13 +76,13 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define RHO_MIN (1e-06)
 # define RHO_MAX (1e06)
 # define RHO_TOL (1e-04) ///< tolerance for detecting if an inequality is set to equality
+# define RHO_EQ_OVER_RHO_INEQ (1e03)
 
 #ifdef CUDA_SUPPORT
-#  define RHO_EQ_OVER_RHO_INEQ (1.0)
+#  define RHO_IS_VEC (0)
 #else
-#  define RHO_EQ_OVER_RHO_INEQ (1e03)
+#  define RHO_IS_VEC (1)  ///< boolean, defines if rho is scalar or vector
 #endif
-
 
 # ifndef EMBEDDED
 #  define DELTA (1E-6)
@@ -126,7 +126,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 #  define ADAPTIVE_RHO_TOLERANCE (1)
 #else
 #  define ADAPTIVE_RHO_INTERVAL (0)
-#  define ADAPTIVE_RHO_TOLERANCE(5)             ///< tolerance for adopting new rho; minimum ratio between new rho and the current one
+#  define ADAPTIVE_RHO_TOLERANCE (5)            ///< tolerance for adopting new rho; minimum ratio between new rho and the current one
 #endif
 
 #  define ADAPTIVE_RHO_FRACTION (0.4)           ///< fraction of setup time after which we update rho

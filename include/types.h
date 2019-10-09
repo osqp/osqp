@@ -174,6 +174,9 @@ struct OSQPWorkspace_ {
   c_float scaled_pri_res;
   c_float scaled_dua_res;
 
+  /// Reciprocal of rho
+  c_float rho_inv;
+
 # ifdef PROFILING
   OSQPTimer *timer;       ///< timer object
 
@@ -221,7 +224,8 @@ struct linsys_solver {
                            const OSQPMatrix *A);           //   and A in the solver
 
   c_int (*update_rho_vec)(LinSysSolver      *self,
-                          const OSQPVectorf *rho_vec);  ///< Update rho_vec
+                          const OSQPVectorf *rho_vec,
+                          c_float            rho_sc);  ///< Update rho_vec
 # endif // if EMBEDDED != 1
 
 # ifndef EMBEDDED

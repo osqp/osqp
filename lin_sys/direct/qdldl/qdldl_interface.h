@@ -37,8 +37,10 @@ struct qdldl {
     c_int (*update_matrices)(struct qdldl     *self,
                              const OSQPMatrix *P,
                              const OSQPMatrix *A);         ///< Update solver matrices
+
     c_int (*update_rho_vec)(struct qdldl      *self,
-                            const OSQPVectorf *rho_vec);   ///< Update rho_vec parameter
+                            const OSQPVectorf *rho_vec,
+                            c_float            rho_sc);    ///< Update rho_vec parameter
 #endif
 
 #ifndef EMBEDDED
@@ -57,6 +59,7 @@ struct qdldl {
     c_float *sol;           ///< solution to the KKT system
     c_float *rho_inv_vec;   ///< parameter vector
     c_float sigma;          ///< scalar parameter
+    c_float rho_inv;        ///< scalar parameter (used if rho_inv_vec == NULL)
 #ifndef EMBEDDED
     c_int polish;           ///< polishing flag
 #endif
@@ -139,9 +142,9 @@ c_int update_linsys_solver_matrices_qdldl(
  * @param  rho_vec  new rho_vec value
  * @return          exitflag
  */
-c_int update_linsys_solver_rho_vec_qdldl(
-                   qdldl_solver * s,
-                   const OSQPVectorf* rho_vec);
+c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver      *s,
+                                         const OSQPVectorf *rho_vec,
+                                         c_float            rho_sc);
 
 #endif
 

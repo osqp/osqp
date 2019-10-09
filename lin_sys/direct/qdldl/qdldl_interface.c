@@ -203,8 +203,9 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
     s->m = OSQPMatrix_get_m(A);
     n_plus_m = s->n + s->m;
 
-    // Sigma parameter
+    // Scalar parameters
     s->sigma = sigma;
+    s->rho_inv = 1. / settings->rho;
 
     // Polishing flag
     s->polish = polish;
@@ -252,7 +253,10 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
     s->sol  = (QDLDL_float *)c_malloc(sizeof(QDLDL_float) * n_plus_m);
 
     // Parameter vector
-    s->rho_inv_vec = (c_float *)c_malloc(sizeof(c_float) * s->m);
+    if (rho_vec) {
+      s->rho_inv_vec = (c_float *)c_malloc(sizeof(c_float) * s->m);
+    }
+    // else it is NULL
 
     // Elimination tree workspace
     s->etree = (QDLDL_int *)c_malloc(n_plus_m * sizeof(QDLDL_int));
@@ -265,11 +269,6 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
 
     // Form and permute KKT matrix
     if (polish){ // Called from polish()
-        // Use s->rho_inv_vec for storing param2 = vec(delta)
-        for (i = 0; i < s->m; i++){
-            s->rho_inv_vec[i] = sigma;
-        }
-
         KKT_temp = form_KKT(OSQPMatrix_get_x(P),
                             OSQPMatrix_get_i(P),
                             OSQPMatrix_get_p(P),
@@ -278,7 +277,8 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
                             OSQPMatrix_get_p(A),
                             OSQPMatrix_get_m(A),
                             OSQPMatrix_get_n(P),
-                            0, sigma, s->rho_inv_vec, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
+                            0, sigma, s->rho_inv_vec, sigma,
+                            OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
 
         // Permute matrix
         if (KKT_temp)
@@ -292,9 +292,14 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
         s->rhotoKKT = c_malloc(OSQPMatrix_get_m(A) * sizeof(c_int));
 
         // Use p->rho_inv_vec for storing param2 = rho_inv_vec
-        rhov = OSQPVectorf_data(rho_vec);
-        for (i = 0; i < s->m; i++){
-            s->rho_inv_vec[i] = 1. / rhov[i];
+        if (rho_vec) {
+          rhov = OSQPVectorf_data(rho_vec);
+          for (i = 0; i < s->m; i++){
+              s->rho_inv_vec[i] = 1. / rhov[i];
+          }
+        }
+        else {
+          s->rho_inv = 1. / settings->rho;
         }
 
         KKT_temp = form_KKT(OSQPMatrix_get_x(P),
@@ -305,7 +310,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
                             OSQPMatrix_get_p(A),
                             OSQPMatrix_get_m(A),
                             OSQPMatrix_get_n(P),
-                            0, sigma, s->rho_inv_vec,
+                            0, sigma, s->rho_inv_vec, s->rho_inv,
                             s->PtoKKT, s->AtoKKT,
                             &(s->Pdiag_idx), &(s->Pdiag_n), s->rhotoKKT);
 
@@ -392,8 +397,15 @@ c_int solve_linsys_qdldl(qdldl_solver *s,
         }
 
         /* compute z_tilde from b and s->sol */
-        for (j = 0 ; j < s->m ; j++) {
-            bv[j + s->n] += s->rho_inv_vec[j] * s->sol[j + s->n];
+        if (s->rho_inv_vec) {
+          for (j = 0 ; j < s->m ; j++) {
+              bv[j + s->n] += s->rho_inv_vec[j] * s->sol[j + s->n];
+          }
+        }
+        else {
+          for (j = 0 ; j < s->m ; j++) {
+              bv[j + s->n] += s->rho_inv * s->sol[j + s->n];
+          }
         }
 #ifndef EMBEDDED
     }
@@ -431,20 +443,25 @@ c_int update_linsys_solver_matrices_qdldl(
 }
 
 
-c_int update_linsys_solver_rho_vec_qdldl(
-                      qdldl_solver * s,
-                      const OSQPVectorf * rho_vec){
+c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver      *s,
+                                         const OSQPVectorf *rho_vec,
+                                         c_float            rho_sc) {
 
     c_int i;
     c_float* rhov = OSQPVectorf_data(rho_vec);
 
     // Update internal rho_inv_vec
-    for (i = 0; i < s->m; i++){
-        s->rho_inv_vec[i] = 1. / rhov[i];
+    if (s->rho_inv_vec) {
+      for (i = 0; i < s->m; i++){
+          s->rho_inv_vec[i] = 1. / rhov[i];
+      }
+    }
+    else {
+      s->rho_inv = 1. / rho_sc;
     }
 
     // Update KKT matrix with new rho_vec
-    update_KKT_param2(s->KKT, s->rho_inv_vec, s->rhotoKKT, s->m);
+    update_KKT_param2(s->KKT, s->rho_inv_vec, s->rho_inv, s->rhotoKKT, s->m);
 
     return (QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
         s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,

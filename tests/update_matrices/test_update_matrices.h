@@ -49,6 +49,7 @@ static const char* test_form_KKT() {
                  0,
                  sigma,
                  rho_inv_vec_val,
+                 1.0, // dummy
                  PtoKKT,
                  AtoKKT,
                  &Pdiag_idx,
