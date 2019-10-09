@@ -31,26 +31,38 @@ else()
 endif()
 
 
-#include the csc_tools support directory
-#and the build-specific algebra implementation
-
-add_subdirectory(csc_tools)
 add_subdirectory(${ALGEBRA})
 
-# Create object library for algebra
-add_library(osqp_algebra OBJECT ${algebra_impl} ${csc_tools})
-target_include_directories(osqp_algebra PRIVATE
-                           ${algebra_impl_includes}
-                           ${csc_tools_includes}
-                           ${osqp_api_includes}
-                           )
+if (CUDA_SUPPORT)
 
-#pass the csc tools include directory upwards
-#for accessibility from linear solvers
+  # Create object library for algebra
+  add_library(osqp_algebra OBJECT ${algebra_impl})
+  target_include_directories(osqp_algebra PRIVATE
+                             ${algebra_impl_includes}
+                             ${osqp_api_includes})
 
-set(csc_tools_includes "${csc_tools_includes}" PARENT_SCOPE)
+else()
 
-# GB: Including csc_tools in the object library and in PARENT_SCOPE when CUDA_SUPPORT=ON is just temporary
+  #include the csc_tools support directory
+  #and the build-specific algebra implementation
+
+  add_subdirectory(csc_tools)
+
+  # Create object library for algebra
+  add_library(osqp_algebra OBJECT ${algebra_impl} ${csc_tools})
+  target_include_directories(osqp_algebra PRIVATE
+                             ${algebra_impl_includes}
+                             ${csc_tools_includes}
+                             ${osqp_api_includes})
+
+  #pass the csc tools include directory upwards
+  #for accessibility from linear solvers
+
+  set(csc_tools_includes "${csc_tools_includes}" PARENT_SCOPE)
+
+endif()
+
 if (CUDA_SUPPORT)
   set(algebra_impl_includes "${algebra_impl_includes}" PARENT_SCOPE)
 endif()
+

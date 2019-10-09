@@ -126,7 +126,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 #  define ADAPTIVE_RHO_TOLERANCE (1)
 #else
 #  define ADAPTIVE_RHO_INTERVAL (0)
-#  define ADAPTIVE_RHO_TOLERANCE(5)             ///< tolerance for adopting new rho; minimum ratio between new rho and the current one
+#  define ADAPTIVE_RHO_TOLERANCE (5)            ///< tolerance for adopting new rho; minimum ratio between new rho and the current one
 #endif
 
 #  define ADAPTIVE_RHO_FRACTION (0.4)           ///< fraction of setup time after which we update rho
