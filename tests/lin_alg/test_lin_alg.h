@@ -1,9 +1,13 @@
 #include <stdio.h>
 #include "osqp.h"
 #include "lin_alg.h"
-#include "csc_utils.h"
 #include "minunit.h"
 #include "lin_alg/data.h"
+
+#ifndef CUDA_SUPPORT
+
+#include "csc_utils.h"
+
 
 static const char* test_constr_sparse_mat() {
 
@@ -35,6 +39,8 @@ static const char* test_constr_sparse_mat() {
 
   return 0;
 }
+
+#endif /* ifndef CUDA_SUPPORT */
 
 static const char* test_vec_operations() {
 
@@ -303,7 +309,10 @@ static const char* test_lin_alg()
   // initialize algebra libraries
   osqp_algebra_init_libs();
 
+#ifndef CUDA_SUPPORT
   mu_run_test(test_constr_sparse_mat);
+#endif
+
   mu_run_test(test_vec_operations);
   mu_run_test(test_mat_operations);
   mu_run_test(test_mat_vec_multiplication);

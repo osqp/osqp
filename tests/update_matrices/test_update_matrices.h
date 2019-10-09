@@ -3,10 +3,12 @@
 #include "util.h"
 #include "minunit.h"
 #include "lin_sys.h"
-#include "kkt.h"
 
 #include "update_matrices/data.h"
 
+#ifndef CUDA_SUPPORT
+
+#include "kkt.h"
 
 static const char* test_form_KKT() {
 
@@ -89,6 +91,9 @@ static const char* test_form_KKT() {
   c_free(PtoKKT);
   return 0;
 }
+
+#endif /* ifndef CUDA_SUPPORT */
+
 
 static const char* test_update() {
   c_int i, nnzP, nnzA;
@@ -516,7 +521,10 @@ static char* test_update_pardiso() {
 
 static const char* test_update_matrices()
 {
+#ifndef CUDA_SUPPORT
   mu_run_test(test_form_KKT);
+#endif
+
   mu_run_test(test_update);
 
 #ifdef ENABLE_MKL_PARDISO
