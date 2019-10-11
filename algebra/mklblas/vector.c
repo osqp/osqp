@@ -2,54 +2,37 @@
 #include "algebra_vector.h"
 #include "algebra_impl.h"
 #include "stdio.h"
-#include "time.h"
+#include "mkl.h"
 
-/* USEMKLBLAS and the blas_ functions will be removed after testing */
-
-
-#define USEMKLBLAS
-#ifdef USEMKLBLAS
-  #include "mkl.h"
-  #ifdef DFLOAT
-    #define blas_asum sasum
-      #define asum cblas_sasum
-    #define blas_axpy saxpy
-      #define axpy cblas_saxpy
-    #define blas_copy scopy
-      #define copy cblas_scopy
-    #define blas_dot sdot
-      #define dot cblas_sdot
-    #define blas_scale sscal
-      #define scal cblas_sscal
-    #define blas_swap sswap
-      #define swap cblas_sswap
-    #define blas_2norm snrm2
-    /**/
-    #define iamax cblas_isamax
-    #define imin cblas_isamin
-    #define axpby cblas_saxpby
-    
-    #else
-      #define blas_asum dasum
-      #define asum cblas_dasum
-    #define blas_axpy daxpy
-      #define axpy cblas_daxpy
-    #define blas_copy dcopy
-      #define copy cblas_dcopy
-    #define blas_dot ddot
-      #define dot cblas_ddot
-    #define blas_scale dscal
-      #define scal cblas_dscal
-    #define blas_swap dswap
-      #define swap cblas_dswap
-    #define blas_2norm dnrm2
-    /**/
-    #define iamax cblas_idamax
-    #define imin cblas_idamin
-    #define axpby cblas_daxpby
-
-  #endif //dfloat endif
-#endif //Usemkl endif
+#ifdef DFLOAT // Switch that chooses the correct data type for BLAS/MKL functions
+  /* BLAS Level 1 functions */
+  #define asum cblas_sasum
+  #define axpy cblas_saxpy
+  #define copy cblas_scopy
+  #define dot cblas_sdot
+  #define scal cblas_sscal
+  #define swap cblas_sswap
+  /* Intel MKL specific functions*/
+  #define iamax cblas_isamax
+  #define imin cblas_isamin
+  #define axpby cblas_saxpby
+  #define vMul vsMul
+  #define vSub vsSub 
+#else
+  /* BLAS Level 1 functions */
+  #define asum cblas_dasum
+  #define axpy cblas_daxpy
+  #define copy cblas_dcopy
+  #define dot cblas_ddot
+  #define scal cblas_dscal
+  #define swap cblas_dswap
+  /* Intel MKL specific functions*/
+  #define iamax cblas_idamax
+  #define imin cblas_idamin
+  #define axpby cblas_daxpby
+  #define vMul vdMul
+  #define vSub vdSub 
+#endif // DFLOAT endif
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 
@@ -163,7 +146,6 @@ OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf *a){
   OSQPVectorf* b = OSQPVectorf_malloc(a->length);
   if(b) OSQPVectorf_copy(b,a);
   return b;
-
 }
 
 OSQPVectori* OSQPVectori_copy_new(const OSQPVectori *a){
@@ -208,19 +190,9 @@ c_float* OSQPVectorf_data(const OSQPVectorf *a){return a->values;}
 c_int*   OSQPVectori_data(const OSQPVectori *a){return a->values;}
 
 
-#ifdef USEMKLBLAS
-
 void OSQPVectorf_copy(OSQPVectorf *b, const OSQPVectorf *a){
   copy(a->length, a->values, 1, b->values, 1);
 }
-
-#else
-
-void OSQPVectorf_copy(OSQPVectorf *b, const OSQPVectorf *a){
-  OSQPVectorf_from_raw(b, a->values);
-}
-
-#endif /* MKL for vector float/double copy */
 
 void OSQPVectori_copy(OSQPVectori *b, const OSQPVectori *a){
   OSQPVectori_from_raw(b, a->values);
@@ -294,31 +266,15 @@ void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
   }
 }
 
-#ifdef USEMKLBLAS
-
-void OSQPVectorf_mult_scalar(OSQPVectorf *a, c_float sc){
+void OSQPVectorf_mult_scalar(OSQPVectorf *a, c_float sc){ /* MKL BLAS LEVEL 1 */
   const MKL_INT length = a->length;
   const c_float* val = a->values;
   scal(length, sc, val, 1);
 }
-#else
-void OSQPVectorf_mult_scalar(OSQPVectorf *a, c_float sc){
-  c_int i;
-  c_int length = a->length;
-  c_float*  av = a->values;
-
-  for (i = 0; i < length; i++) {
-    av[i] *= sc;
-  }
-}
-#endif // for mult scalar MKL
-
-#ifdef USEMKLBLAS
 
 void OSQPVectorf_plus(OSQPVectorf      *x,
                      const OSQPVectorf *a,
-                     const OSQPVectorf *b){
- 
+                     const OSQPVectorf *b){ /* MKL BLAS LEVEL 1 */
   c_float scalar = 1;
   const MKL_INT length = a->length;
   const c_float* vala = a->values;
@@ -337,92 +293,32 @@ void OSQPVectorf_plus(OSQPVectorf      *x,
   }
 }
 
-#else
-
-void OSQPVectorf_plus(OSQPVectorf      *x,
-                     const OSQPVectorf *a,
-                     const OSQPVectorf *b){
-  c_int i;
-  c_int length = a->length;
-  c_float*  av = a->values;
-  c_float*  bv = b->values;
-  c_float*  xv = x->values;
-
-  if (x == a){
-    for (i = 0; i < length; i++) {
-      xv[i] += bv[i];
-    }
-  }
-  else {
-    for (i = 0; i < length; i++) {
-      xv[i] = av[i] + bv[i];
-    }
-  }
-}
-
-#endif // MKL blas for the y = ax + y problem 
-
-
-#ifdef USEMKLBLAS
-
 void OSQPVectorf_minus(OSQPVectorf       *x,
                        const OSQPVectorf *a,
-                       const OSQPVectorf *b){
+                       const OSQPVectorf *b){/* MKL BLAS LEVEL 1 */
   
-  c_float scalar; // This is not necessary as I am calling the variables directly, I can remove it depending on what is faster. (?)
   const MKL_INT length = a->length;
   const c_float* vala = a->values;
   const c_float* valb = b->values;
   c_float* valx = x->values;
 
   if (x == a){
-    scalar = -1.0; 
-    axpy(length, -1, valb, 1, valx, 1);
+    axpy(length, -1, valb, 1, valx, 1); // Second parameter determines the scaling of x
   }
   else if (x == b){
-    scalar = 1.0;
     axpby(length, 1, vala, 1, -1.0, valx, 1);
   }
   else {
-    scalar = -1.0;
     copy(length, vala, 1, valx, 1);
     axpy(length, -1, valb, 1, valx, 1);
-
   }
 }
-
-#else
-
-void OSQPVectorf_minus(OSQPVectorf       *x,
-                       const OSQPVectorf *a,
-                       const OSQPVectorf *b){
-  c_int i;
-  c_int length = a->length;
-  c_float*  av = a->values;
-  c_float*  bv = b->values;
-  c_float*  xv = x->values;
-
-  if (x == a) {
-    for (i = 0; i < length; i++) {
-      xv[i] -= bv[i];
-    }
-  }
-  else {
-    for (i = 0; i < length; i++) {
-      xv[i] = av[i] - bv[i];
-    }
-  }
-}
-
-#endif /* axpy problem minus sign */
-
-#ifdef USEMKLBLAS
 
 void OSQPVectorf_add_scaled(OSQPVectorf       *x,
                             c_float           sca,
                             const OSQPVectorf *a,
                             c_float           scb,
-                            const OSQPVectorf *b){
+                            const OSQPVectorf *b){/* MKL BLAS LEVEL 1 */
   const MKL_INT length = a->length;
   const c_float* vala = a->values;
   const c_float* valb = b->values;
@@ -445,40 +341,7 @@ void OSQPVectorf_add_scaled(OSQPVectorf       *x,
     copy(length, vala, 1, valx, 1);
     axpby(length, scb, valb, 1, sca, valx, 1); 
   }
-
 }
-
-#else
-
-void OSQPVectorf_add_scaled(OSQPVectorf       *x,
-                            c_float           sca,
-                            const OSQPVectorf *a,
-                            c_float           scb,
-                            const OSQPVectorf *b){
-  c_int i;
-  c_int length = x->length;
-  c_float*  av = a->values;
-  c_float*  bv = b->values;
-  c_float*  xv = x->values;
-
-  /* shorter version when incrementing */
-  if (x == a && sca == 1.){
-    for (i = 0; i < length; i++) {
-      xv[i] += scb * bv[i];
-    }
-  }
-  else {
-    for (i = 0; i < length; i++) {
-      xv[i] = sca * av[i] + scb * bv[i];
-    }
-  }
-
-}
-
-#endif /* sum scaled MKL */
-
-#ifdef USEMKLBLAS
-
 
 void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
                              c_float           sca,
@@ -486,7 +349,7 @@ void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
                              c_float           scb,
                              const OSQPVectorf *b,
                              c_float           scc,
-                             const OSQPVectorf *c){
+                             const OSQPVectorf *c){/* MKL BLAS LEVEL 1 */
 
   const MKL_INT length = a->length;
   const c_float* vala = a->values;
@@ -513,41 +376,8 @@ void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
     axpy(length, scc, valc, 1, valx, 1);
   }
 }
-  
-#else
 
-void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
-                             c_float           sca,
-                             const OSQPVectorf *a,
-                             c_float           scb,
-                             const OSQPVectorf *b,
-                             c_float           scc,
-                             const OSQPVectorf *c){
-  c_int i;
-  c_int length = x->length;
-  c_float*  av = a->values;
-  c_float*  bv = b->values;
-  c_float*  cv = c->values;
-  c_float*  xv = x->values;
-
-  /* shorter version when incrementing */
-  if (x == a && sca == 1.){
-    for (i = 0; i < length; i++) {
-      xv[i] += scb * bv[i] + scc * cv[i];
-    }
-  }
-  else {
-    for (i = 0; i < length; i++) {
-      xv[i] =  sca * av[i] + scb * bv[i] + scc * cv[i];
-    }
-  }
-}
-
-#endif // add 3 scaled vectors BLAS implementation
-
-#ifdef USEMKLBLAS
-
-c_float OSQPVectorf_norm_inf(const OSQPVectorf *v){
+c_float OSQPVectorf_norm_inf(const OSQPVectorf *v){/* MKL BLAS LEVEL 1 */
 
   c_float* valv = v->values;
   const MKL_INT length = v->length;
@@ -556,30 +386,11 @@ c_float OSQPVectorf_norm_inf(const OSQPVectorf *v){
   
   I = iamax(length, valv, 1); // iamax gives the index of the largest absolute value in the array
   normval = *(valv + I); // Using pointer math to find that value
+  normval = c_absval(normval); 
   return normval;
 }
 
-#else
-
-c_float OSQPVectorf_norm_inf(const OSQPVectorf *v){
-
-  c_int   i;
-  c_int length  = v->length;
-  c_float*  vv  = v->values;
-  c_float normval = 0.0;
-  c_float absval;
-  for (i = 0; i < length; i++) {
-    absval = c_absval(vv[i]);
-    if (absval > normval) normval = absval;
-  }
-  return normval;
-}
-
-#endif // infinity norm using blas
-
-#ifdef USEMKLBLAS
-
-c_float OSQPVectorf_norm_1(const OSQPVectorf *v){
+c_float OSQPVectorf_norm_1(const OSQPVectorf *v){/* MKL BLAS LEVEL 1 */
 
   c_float normval;
   c_float* valv = v->values;
@@ -589,24 +400,6 @@ c_float OSQPVectorf_norm_1(const OSQPVectorf *v){
   return normval;
 }
 
-#else
-
-c_float OSQPVectorf_norm_1(const OSQPVectorf *v){
-
-  c_int   i;
-  c_int length  = v->length;
-  c_float*  vv  = v->values;
-  c_float normval = 0.0;
-
-  for (i = 0; i < length; i++) {
-    normval += c_absval(vv[i]);
-  }
-  return normval;
-}
-
-#endif // manhattan norm using blas
-
-// TODO: you could possibly execute a scal and the norm inf in the case where the vecto S is only one repeated character
 c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S, const OSQPVectorf *v){ 
 
   c_int   i;
@@ -636,24 +429,7 @@ c_float OSQPVectorf_scaled_norm_1(const OSQPVectorf *S, const OSQPVectorf *v){
   }
   return normval;
 }
-#ifdef notUSEMKLBLAS // TODO
 
-c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
-                                  const OSQPVectorf *b){ // TODO
-  
-  MKL_INT I;
-  c_float normDiff;
-  OSQPVectorf *x; //cant solve the problem (yet) because I am unable to initialize without using up computational time
-  
-  OSQPVectorf_minus(x,a,b);
-  puts("hola");
-  I = iamax(a->length, x->values, 1); // iamax gives the index of the largest absolute value in the array
-  normDiff = *(x->values + I); // Using pointer math to find that value
-  return normDiff;
-}
-
-#else
-// TODO: you could implement the minus function and followed by the c_absval through all its values, however I dont even know if that would improve the function
 c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
                                   const OSQPVectorf *b){
   c_int   i;
@@ -670,9 +446,6 @@ c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
   return normDiff;
 }
 
-#endif // norm diff
-
-// TODO
 c_float OSQPVectorf_norm_1_diff(const OSQPVectorf *a,
                                 const OSQPVectorf *b){
 
@@ -682,25 +455,12 @@ c_float OSQPVectorf_norm_1_diff(const OSQPVectorf *a,
   c_float*  bv   = b->values;
   c_float normDiff = 0.0;
   
-  // use axpy to substract the vectors then use asum
   for (i = 0; i < length; i++) {
     normDiff += c_absval(av[i] - bv[i]);
   }
   return normDiff;
 }
 
-#ifdef USEMKLBLAS
-
-c_float OSQPVectorf_sum(const OSQPVectorf *a){
-
-  c_float val;
-  const MKL_INT length = a->length;
-  const c_float* vala = a->values;
-
-  val = asum(length, vala, 1); // this performs an absolute sum, be careful with the negatives
-  return val;
-}
-#else
 c_float OSQPVectorf_sum(const OSQPVectorf *a){
 
   c_int   i;
@@ -715,37 +475,12 @@ c_float OSQPVectorf_sum(const OSQPVectorf *a){
   return val;
 }
 
-#endif /* sum of all entries*/
-
-#ifdef USEMKLBLAS
-
-c_float OSQPVectorf_dot_prod(const OSQPVectorf *a, const OSQPVectorf *b){
-
+c_float OSQPVectorf_dot_prod(const OSQPVectorf *a, const OSQPVectorf *b){/* MKL BLAS LEVEL 1 */
   const MKL_INT length = a->length;
   const c_float* vala = a->values;
   const c_float* valb = b->values;
-
   return dot(length, vala, 1, valb, 1); 
 }
-
-#else
-
-
-c_float OSQPVectorf_dot_prod(const OSQPVectorf *a, const OSQPVectorf *b) {
-
-  c_int   i;
-  c_int   length = a->length;
-  c_float*  av   = a->values;
-  c_float*  bv   = b->values;
-  c_float dotprod = 0.0;
-
-  for (i = 0; i < length; i++) {
-    dotprod += av[i] * bv[i];
-  }
-  return dotprod;
-  }
-#endif
-
 
 c_float OSQPVectorf_dot_prod_signed(const OSQPVectorf *a, const OSQPVectorf *b, c_int sign){
 
@@ -774,25 +509,13 @@ c_float OSQPVectorf_dot_prod_signed(const OSQPVectorf *a, const OSQPVectorf *b, 
 
 void OSQPVectorf_ew_prod(OSQPVectorf       *c,
                          const OSQPVectorf *a,
-                         const OSQPVectorf *b){
+                         const OSQPVectorf *b){/* MKL BLAS LEVEL 1 */
 
-  c_int i;
-  c_int   length = a->length;
-  c_float*  av   = a->values;
-  c_float*  bv   = b->values;
-  c_float*  cv   = c->values;
-
-
-  if (c == a) {
-    for (i = 0; i < length; i++) {
-      cv[i] *= bv[i];
-    }
-  }
-  else {
-    for (i = 0; i < length; i++) {
-      cv[i] = av[i] * bv[i];
-    }
-  }
+  const MKL_INT n = a->length;
+  const c_float* av = a->values;
+  const c_float* bv = b->values;
+  c_float* cv = c->values;
+  vMul ( n, av, bv, cv);
 }
 
 c_int OSQPVectorf_all_leq(OSQPVectorf *l, OSQPVectorf* u){
@@ -931,7 +654,6 @@ void OSQPVectori_ipermute(OSQPVectori *x, const OSQPVectori *b, const OSQPVector
 }
 
 
-
 #if EMBEDDED != 1
 
 c_float OSQPVectorf_mean(const OSQPVectorf *a){
@@ -967,7 +689,7 @@ void OSQPVectorf_ew_sqrt(OSQPVectorf *a){
   }
 }
 
-void OSQPVectorf_ew_max(OSQPVectorf *c, const OSQPVectorf *a, c_float max_val){
+void OSQPVectorf_ew_max(OSQPVectorf *c, const OSQPVectorf *a, c_float max_val){ 
 
   c_int i;
   c_int length = c->length;

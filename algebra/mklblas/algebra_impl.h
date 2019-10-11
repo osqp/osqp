@@ -1,6 +1,10 @@
 #ifndef ALGEBRA_IMPL_H
 # define ALGEBRA_IMPL_H
 
+#ifdef DLONG 
+#define MKL_ILP64 
+#endif // Redefition to not have discrepancies between sizes of MKL_INT and c_int
+
 # ifdef __cplusplus
 extern "C" {
 # endif // ifdef __cplusplus
@@ -38,7 +42,7 @@ typedef enum OSQPMatrix_symmetry_type {NONE,TRIU} OSQPMatrix_symmetry_type;
 struct OSQPMatrix_ {
   csc*                             csc;
   OSQPMatrix_symmetry_type    symmetry;
-  char matdescra[6];
+  char                    matdescra[6]; // necessary for MKL BLAS LEVEL 2 Axpy  
 };
 
 
