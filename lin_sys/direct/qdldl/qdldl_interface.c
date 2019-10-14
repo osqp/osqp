@@ -61,7 +61,13 @@ static c_int LDL_factor(csc *A,  qdldl_solver * p, c_int nvar){
     if (sum_Lnz < 0){
       // Error
 #ifdef PRINTING
-      c_eprint("Error in KKT matrix LDL factorization when computing the elimination tree. A is not perfectly upper triangular");
+      c_eprint("Error in KKT matrix LDL factorization when computing the elimination tree.");
+      if(sum_Lnz == -1){
+        c_eprint("Matrix is not perfectly upper triangular.");
+      }
+      else if(sum_Lnz == -2){
+        c_eprint("Integer overflow in L nonzero count.");
+      }
 #endif
       return sum_Lnz;
     }
