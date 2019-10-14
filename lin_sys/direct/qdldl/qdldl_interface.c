@@ -75,6 +75,7 @@ static c_int LDL_factor(csc *A,  qdldl_solver * p, c_int nvar){
     // Allocate memory for Li and Lx
     p->L->i = (c_int *)c_malloc(sizeof(c_int)*sum_Lnz);
     p->L->x = (c_float *)c_malloc(sizeof(c_float)*sum_Lnz);
+    p->L->nzmax = sum_Lnz;
 
     // Factor matrix
     factor_status = QDLDL_factor(A->n, A->p, A->i, A->x,
