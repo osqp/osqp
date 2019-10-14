@@ -9,7 +9,7 @@ Binaries
 Precompiled platform-dependent shared and static libraries are available on `Bintray <https://bintray.com/bstellato/generic/OSQP/0.6.0>`_.
 We here assume that the user uncompressed each archive to :code:`OSQP_FOLDER`.
 
-Each archive contains static :code:`OSQP_FOLDER/lib/libosqp.a` and shared :code:`OSQP_FOLER/lib/libosqp.ext` libraries to be used to interface OSQP to any C/C++ software.
+Each archive contains static :code:`OSQP_FOLDER/lib/libosqp.a` and shared :code:`OSQP_FOLDER/lib/libosqp.ext` libraries to be used to interface OSQP to any C/C++ software.
 The extension :code:`.ext` is platform dependent and is :code:`.so` for Linux, :code:`.dylib` for Mac and :code:`.dll` for Windows.
 The required include files can be found in :code:`OSQP_FOLDER/include`.
 
