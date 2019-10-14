@@ -128,6 +128,42 @@ Julia
 
 
 
+R
+-
+
+.. code:: r
+
+    library(osqp)
+    library(Matrix)
+
+    # Define problem data
+    P <- Matrix(c(4., 1.,
+                  1., 2.), 2, 2, sparse = TRUE)
+    q <- c(1., 1.)
+    A <- Matrix(c(1., 1., 0.,
+                  1., 0., 1.), 3, 2, sparse = TRUE)
+    l <- c(1., 0., 0.)
+    u <- c(1., 0.7, 0.7)
+
+    # Setup workspace
+    model <- osqp(P, q, A, l, u)
+
+    # Solve problem
+    res <- model$Solve()
+
+    # Update problem
+    # NB: Update only upper triangular part of P
+    P_new <- Matrix(c(5., 1.5,
+                      1.5, 1.), 2, 2, sparse = TRUE)
+    A_new <- Matrix(c(1.2, 1.5, 0.,
+                      1.1, 0., 0.8), 3, 2, sparse = TRUE)
+    model$Update(Px = P_new@x, Ax = A_new@x)
+
+    # Solve updated problem
+    res <- model$Solve()
+
+
+
 C
 -
 

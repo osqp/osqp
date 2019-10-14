@@ -192,6 +192,7 @@ p.breathe-sectiondef-title.rubric {
 
 
 /* Margin below tables */
-p {
+table p {
     margin-bottom: 0px;
 }
+

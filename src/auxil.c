@@ -743,8 +743,8 @@ c_int check_termination(OSQPSolver *solver, c_int approximate) {
   eps_dual_inf = settings->eps_dual_inf;
 
   // If residuals are too large, the problem is probably non convex
-  if ((info->pri_res > 2 * OSQP_INFTY) ||
-      (info->dua_res > 2 * OSQP_INFTY)){
+  if ((info->pri_res > OSQP_INFTY) ||
+      (info->dua_res > OSQP_INFTY)){
     // Looks like residuals are diverging. Probably the problem is non convex!
     // Terminate and report it
     update_status(info, OSQP_NON_CVX);

@@ -61,7 +61,13 @@ static c_int LDL_factor(csc *A,  qdldl_solver * p, c_int nvar){
     if (sum_Lnz < 0){
       // Error
 #ifdef PRINTING
-      c_eprint("Error in KKT matrix LDL factorization when computing the elimination tree. A is not perfectly upper triangular");
+      c_eprint("Error in KKT matrix LDL factorization when computing the elimination tree.");
+      if(sum_Lnz == -1){
+        c_eprint("Matrix is not perfectly upper triangular.");
+      }
+      else if(sum_Lnz == -2){
+        c_eprint("Integer overflow in L nonzero count.");
+      }
 #endif
       return sum_Lnz;
     }
@@ -69,6 +75,7 @@ static c_int LDL_factor(csc *A,  qdldl_solver * p, c_int nvar){
     // Allocate memory for Li and Lx
     p->L->i = (c_int *)c_malloc(sizeof(c_int)*sum_Lnz);
     p->L->x = (c_float *)c_malloc(sizeof(c_float)*sum_Lnz);
+    p->L->nzmax = sum_Lnz;
 
     // Factor matrix
     factor_status = QDLDL_factor(A->n, A->p, A->i, A->x,

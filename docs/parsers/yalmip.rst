@@ -1,7 +1,7 @@
 YALMIP
 ======
 
-`YALMIP <https://yalmip.github.io/download/>`_ support the OSQP solver. You can easily define problems in high-level format and then specify OSQP by simply setting
+`YALMIP <https://yalmip.github.io/>`_ support the OSQP solver. You can easily define problems in high-level format and then specify OSQP by simply setting
 
 .. code:: matlab
 
