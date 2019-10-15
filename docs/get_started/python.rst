@@ -3,21 +3,6 @@ Python
 
 Python interface supports Python 2.7 and 3.5 or newer.
 
-Anaconda
---------
-
-.. code:: bash
-
-   conda install -c oxfordcontrol osqp
-
-   
-For the bleeding edge development version install OSQP with
-
-.. code:: bash
-
-   conda install -c oxfordcontrol/label/dev osqp
-
-
 Pip
 ----
 
@@ -26,13 +11,13 @@ Pip
    pip install osqp
 
 
-For the bleeding edge development version install OSQP with
+Anaconda
+--------
 
 .. code:: bash
 
-   pip install --pre --extra-index-url https://test.pypi.org/simple/ osqp
+   conda install -c conda-forge osqp
 
-   
 
 Sources
 ---------

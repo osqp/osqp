@@ -93,6 +93,32 @@ Julia
 
 
 
+R
+-
+
+.. code:: r
+
+    library(osqp)
+    library(Matrix)
+
+    # Define problem data
+    P <- Matrix(c(4., 1.,
+                  1., 2.), 2, 2, sparse = TRUE)
+    q <- c(1., 1.)
+    A <- Matrix(c(1., 1., 0.,
+                  1., 0., 1.), 3, 2, sparse = TRUE)
+    l <- c(1., 0., 0.)
+    u <- c(1., 0.7, 0.7)
+
+    # Change alpha parameter and setup workspace
+    settings <- osqpSettings(alpha = 1.0)
+    model <- osqp(P, q, A, l, u, settings)
+
+    # Solve problem
+    res <- model$Solve()
+
+
+
 C
 -
 

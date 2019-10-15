@@ -28,6 +28,18 @@ cd build
 cmake -G "Unix Makefiles" -DCOVERAGE=ON -DUNITTESTS=ON ..
 make
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
+# Pefrorm code coverage (only in Linux case)
+if [[ $TRAVIS_OS_NAME == "linux" ]]; then
+    cd ${TRAVIS_BUILD_DIR}/build
+    lcov --directory . --capture -o coverage.info # capture coverage info
+    lcov --remove coverage.info "${TRAVIS_BUILD_DIR}/tests/*" \
+        "${TRAVIS_BUILD_DIR}/lin_sys/direct/qdldl/amd/*" \
+        "${TRAVIS_BUILD_DIR}/lin_sys/direct/qdldl/qdldl_sources/*" \
+        "/usr/include/x86_64-linux-gnu/**/*" \
+        -o coverage.info # filter out tests and unnecessary files
+    lcov --list coverage.info # debug before upload
+    coveralls-lcov coverage.info # uploads to coveralls
+fi
 
 if [[ $TRAVIS_OS_NAME == "linux" ]]; then
     echo "Testing OSQP with valgrind (disabling MKL pardiso for memory allocation issues)"
@@ -74,6 +86,22 @@ rm -rf build
 mkdir build
 cd build
 cmake -G "Unix Makefiles" -DEMBEDDED=2 ..
+make
+
+echo "Building OSQP without profiling"
+cd ${TRAVIS_BUILD_DIR}
+rm -rf build
+mkdir build
+cd build
+cmake -G "Unix Makefiles" -DPROFILING=OFF ..
+make
+
+echo "Building OSQP without user interrupt"
+cd ${TRAVIS_BUILD_DIR}
+rm -rf build
+mkdir build
+cd build
+cmake -G "Unix Makefiles" -DCTRLC=OFF ..
 make
 
 echo "Testing OSQP without printing"
