@@ -467,8 +467,10 @@ c_int osqp_solve(OSQPSolver *solver) {
     can_print = solver->settings->verbose &&
                 ((iter % PRINT_INTERVAL == 0) || (iter == 1));
 
-    if (can_check_termination || can_print) { // Update status in either of
-                                              // these cases
+    // NB: We always update info in the first iteration because indirect solvers
+    //     use residual values to compute required accuracy of their solution.
+    if (can_check_termination || can_print || iter == 1) { // Update status in either of
+                                                           // these cases
       // Update information
       update_info(solver, iter, compute_cost_function, 0);
 
