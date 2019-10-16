@@ -11,8 +11,10 @@
 #include <thrust/reduce.h>
 #include <thrust/execution_policy.h>
 
+#ifdef __cplusplus
+extern "C" {extern CUDA_Handle_t *CUDA_handle;}
+#endif
 
-extern CUDA_Handle_t *CUDA_handle;
 
 /*******************************************************************************
  *                              GPU Kernels                                    *

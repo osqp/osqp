@@ -6,7 +6,9 @@
 #include "cuda_wrapper.h"
 #include "helper_cuda.h"    /* --> checkCudaErrors */
 
-extern CUDA_Handle_t *CUDA_handle;
+#ifdef __cplusplus
+extern "C" {extern CUDA_Handle_t *CUDA_handle; }
+#endif
 
 /*******************************************************************************
  *                              GPU Kernels                                    *
