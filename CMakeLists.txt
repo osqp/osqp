@@ -111,9 +111,6 @@ if (CUDA_SUPPORT)
     # cublas and cusparse headers
     include_directories(${CUDA_INCLUDE_DIRS})
 
-    # helper_cuda.h
-    include_directories(${CUDA_TOOLKIT_ROOT_DIR}/samples/common/inc)
-
     # sm_75 -> Turing support
     set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_60 --gpu-code=compute_60,sm_75")
 endif()

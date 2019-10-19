@@ -19,6 +19,8 @@ set(algebra_impl_headers
     ${CMAKE_CURRENT_SOURCE_DIR}/include/cuda_lin_alg.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/cuda_malloc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/cuda_wrapper.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/helper_cuda.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/helper_string.h
 )
 
 set(algebra_impl_includes
