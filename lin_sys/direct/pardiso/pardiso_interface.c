@@ -343,10 +343,11 @@ c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver    *s,
                                            c_float            rho_sc) {
 
     c_int i;
-    c_float* rhov = OSQPVectorf_data(rho_vec);
+    c_float* rhov;
 
     // Update internal rho_inv_vec
     if (s->rho_inv_vec) {
+      rhov = OSQPVectorf_data(rho_vec);
       for (i = 0; i < s->m; i++){
           s->rho_inv_vec[i] = 1. / rhov[i];
       }
