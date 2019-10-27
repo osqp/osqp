@@ -15,7 +15,7 @@ extern "C" {
 /* Tolerance parameters */
 #define CUDA_PCG_START_TOL           (50)
 #define CUDA_PCG_DECAY_RATE          (2.75)
-#define CUDA_PCG_REDUCTION_FACTOR    (0.17)
+#define CUDA_PCG_REDUCTION_FACTOR    (0.15)
 #define CUDA_PCG_REDUCTION_THRESHOLD (10)
 
 /* Polishing parameters */
