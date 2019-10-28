@@ -114,7 +114,7 @@ if (CUDA_SUPPORT)
     # sm_75 -> Turing support
     if (DFLOAT)
         set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_30 --gpu-code=compute_30,sm_75")
-    elseif(DFLOAT)
+    else()
         # To use doubles we need compute capability 6.0 for atomic adds
         set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_60 --gpu-code=compute_60,sm_75")
     endif()
