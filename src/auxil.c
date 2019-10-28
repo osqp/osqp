@@ -815,6 +815,27 @@ c_int validate_data(const OSQPData *data) {
     return 1;
   }
 
+  if (!(data->q)) {
+# ifdef PRINTING
+    c_eprint("Missing vector q");
+# endif
+    return 1;
+  }
+
+  if (!(data->l)) {
+# ifdef PRINTING
+    c_eprint("Missing vector l");
+# endif
+    return 1;
+  }
+
+  if (!(data->u)) {
+# ifdef PRINTING
+    c_eprint("Missing vector u");
+# endif
+    return 1;
+  }
+
   // General dimensions Tests
   if ((data->n <= 0) || (data->m < 0)) {
 # ifdef PRINTING
