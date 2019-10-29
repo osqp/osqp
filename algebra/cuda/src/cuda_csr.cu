@@ -698,7 +698,7 @@ void cuda_submat_byrows(const csr    *A,
                         csr         **Ared,
                         csr         **Aredt) {
 
-  c_int new_m;
+  c_int new_m = 0;
 
   c_int n   = A->n;
   c_int m   = A->m;
@@ -721,7 +721,18 @@ void cuda_submat_byrows(const csr    *A,
 
   // Calculate new row numbering and get new number of rows
   thrust::inclusive_scan(thrust::device, d_row_predicate, d_row_predicate + m, d_new_row_number);
-  checkCudaErrors(cudaMemcpy(&new_m, &d_new_row_number[m-1], sizeof(c_int), cudaMemcpyDeviceToHost));
+  if (m) {
+    checkCudaErrors(cudaMemcpy(&new_m, &d_new_row_number[m-1], sizeof(c_int), cudaMemcpyDeviceToHost));
+  }
+  else {
+    (*Ared) = (csr *) c_calloc(1, sizeof(csr));
+    (*Ared)->n = n;
+
+    (*Aredt) = (csr *) c_calloc(1, sizeof(csr));
+    (*Aredt)->m = n;
+
+    return;
+  }
 
   // Generate predicates per element from per row predicate
   predicate_generator_kernel<<<(nnz/THREADS_PER_BLOCK) + 1, THREADS_PER_BLOCK>>>(A->row_ind, d_row_predicate, d_predicate, nnz);
@@ -729,7 +740,7 @@ void cuda_submat_byrows(const csr    *A,
   // Get array offset for compacting and new nnz
   thrust::inclusive_scan(thrust::device, d_predicate, d_predicate + nnz, d_compact_address);
   c_int nnz_new;
-  checkCudaErrors(cudaMemcpy(&nnz_new, &d_compact_address[nnz-1], sizeof(c_int), cudaMemcpyDeviceToHost));
+  if (nnz) checkCudaErrors(cudaMemcpy(&nnz_new, &d_compact_address[nnz-1], sizeof(c_int), cudaMemcpyDeviceToHost));
 
   // allocate new matrix (2 -> allocate row indices as well)
   (*Ared) = csr_alloc(new_m, n, nnz_new, 2);
