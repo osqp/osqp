@@ -136,7 +136,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   s->norm           = CUDA_PCG_NORM;
   s->precondition   = CUDA_PCG_PRECONDITION;
   s->warm_start_pcg = CUDA_PCG_WARM_START;
-  s->max_iter       = CUDA_PCG_MAX_ITER;
+  s->max_iter = (polish) ? CUDA_PCG_POLISH_MAX_ITER : CUDA_PCG_MAX_ITER;
 
   /* Tolerance strategy parameters */
   s->start_tol           = CUDA_PCG_START_TOL;
@@ -229,9 +229,6 @@ c_int solve_linsys_cudapcg(cudapcg_solver *s,
   c_int   pcg_iters;
   c_float eps;
 
-  /* Set the maximum number of PCG iterations */
-  c_int max_iter = (s->polish) ? CUDA_PCG_POLISH_MAX_ITER : s->max_iter;
-
   /* Compute the RHS of the reduced KKT system and store it in s->d_rhs */
   compute_rhs(s, b->d_val);
 
@@ -239,7 +236,7 @@ c_int solve_linsys_cudapcg(cudapcg_solver *s,
   eps = compute_tolerance(s, admm_iter);
 
   /* Solve the linear system with PCG */
-  pcg_iters = cuda_pcg_alg(s, eps, max_iter);
+  pcg_iters = cuda_pcg_alg(s, eps, s->max_iter);
 
   /* Copy the first part of the solution to b->d_val */
   cuda_vec_copy_d2d(b->d_val, s->d_x, s->n);

@@ -114,7 +114,12 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # endif /* ifndef OSQP_NAN */
 
 # ifndef OSQP_INFTY
+#if defined(CUDA_SUPPORT) && defined(DFLOAT)
+// Multiplying two numbers that are of the order 1e20 results in an overflow
+#  define OSQP_INFTY ((c_float)1e17)
+#else
 #  define OSQP_INFTY ((c_float)1e20)        // infinity
+#endif
 # endif /* ifndef OSQP_INFTY */
 
 
