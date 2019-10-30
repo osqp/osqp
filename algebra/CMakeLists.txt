@@ -41,6 +41,9 @@ if (CUDA_SUPPORT)
                              ${algebra_impl_includes}
                              ${osqp_api_includes})
 
+  # Pass upwards for accesibility from CUDA linear system solvers
+  set(algebra_impl_includes "${algebra_impl_includes}" PARENT_SCOPE)
+
 else()
 
   #include the csc_tools support directory
@@ -61,8 +64,3 @@ else()
   set(csc_tools_includes "${csc_tools_includes}" PARENT_SCOPE)
 
 endif()
-
-if (CUDA_SUPPORT)
-  set(algebra_impl_includes "${algebra_impl_includes}" PARENT_SCOPE)
-endif()
-

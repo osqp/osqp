@@ -30,7 +30,7 @@ c_int load_linsys_solver(enum linsys_solver_type linsys_solver) {
 #ifdef CUDA_SUPPORT
 
   case CUDA_PCG_SOLVER:
-    /* CUDA libraries have already been loaded by algebra_init_libs() */
+    /* CUDA libraries have already been loaded by osqp_algebra_init_libs() */
     return 0;
 
   default: /* CUDA_PCG_SOLVER */
@@ -62,7 +62,7 @@ c_int unload_linsys_solver(enum linsys_solver_type linsys_solver) {
 #ifdef CUDA_SUPPORT
 
   case CUDA_PCG_SOLVER:
-    /* CUDA libraries have already been unloaded by algebra_free_libs() */
+    /* CUDA libraries have already been unloaded by osqp_algebra_free_libs() */
     return 0;
 
   default: /* CUDA_PCG_SOLVER */
