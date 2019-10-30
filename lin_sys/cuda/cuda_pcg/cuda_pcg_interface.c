@@ -35,7 +35,7 @@ static c_float compute_tolerance(cudapcg_solver *s,
   /* Compute the norm of RHS of the linear system */
   s->vector_norm(s->d_rhs, s->n, &rhs_norm);
 
-  if (s->polish) return rhs_norm * CUDA_PCG_POLISH_ACCURACY;
+  if (s->polish) return c_max(rhs_norm * CUDA_PCG_POLISH_ACCURACY, CUDA_PCG_EPS_MIN);
 
   switch (s->eps_strategy) {
 
