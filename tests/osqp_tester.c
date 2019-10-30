@@ -29,9 +29,7 @@ int tests_run = 0;
 
 static const char* all_tests() {
   mu_run_test(test_lin_alg);
-#ifndef CUDA_SUPPORT
   mu_run_test(test_solve_linsys);
-#endif
   mu_run_test(test_demo);
   mu_run_test(test_basic_qp);
   mu_run_test(test_basic_qp2);
