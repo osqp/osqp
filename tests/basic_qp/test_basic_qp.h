@@ -750,8 +750,8 @@ static const char* test_basic_qp_update_rho()
   osqp_set_default_settings(settings);
   settings->rho               = rho;
   settings->adaptive_rho      = 0; // Disable adaptive rho for this test
-  settings->eps_abs           = 1e-05;
-  settings->eps_rel           = 1e-05;
+  settings->eps_abs           = 5e-05;
+  settings->eps_rel           = 5e-05;
   settings->check_termination = 1;
 
   // Setup solver
@@ -796,8 +796,8 @@ static const char* test_basic_qp_update_rho()
   settings->rho               = 0.1;
   settings->adaptive_rho      = 0;
   settings->check_termination = 1;
-  settings->eps_abs           = 1e-05;
-  settings->eps_rel           = 1e-05;
+  settings->eps_abs           = 5e-05;
+  settings->eps_rel           = 5e-05;
 
   // Setup solver
   exitflag = osqp_setup(&solver, data->P, data->q,
