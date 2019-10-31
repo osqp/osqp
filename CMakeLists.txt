@@ -362,6 +362,11 @@ if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
                                PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
                                       "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
+    if (CUDA_SUPPORT AND MSVC)
+        # Visual Studio needs the cuda libaries to be linked as well
+        target_link_libraries (osqp cublas cusparse)
+    endif (CUDA_SUPPORT AND MSVC)
+    
     # Install osqp shared library
     install(TARGETS osqp
             EXPORT  ${PROJECT_NAME}
