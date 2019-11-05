@@ -7,6 +7,9 @@ matrix:
     - os: osx
       # Specify version to avoid bug (https://github.com/travis-ci/travis-ci/issues/6522)
       osx_image: xcode9.3
+    - os: linux
+      arch: arm64
+
 sudo: required
 env:
   global:
