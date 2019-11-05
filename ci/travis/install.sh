@@ -22,7 +22,7 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
     wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
 else
     if [[ "$TRAVIS_CPU_ARCH" == "arm64" ]]; then
-        wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-armv7l.sh -O miniconda.sh;
+        travis_wait wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-armv7l.sh -O miniconda.sh;
     else
         wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
     fi
