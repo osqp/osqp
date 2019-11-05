@@ -21,7 +21,11 @@ fi
 if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
     wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
 else
-    wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    if [[ "$TRAVIS_CPU_ARCH" == "arm64" ]]; then
+        wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-armv7l.sh -O miniconda.sh;
+    else
+        wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
 fi
 export CONDA_ROOT=${DEPS_DIR}/miniconda
 chmod +x miniconda.sh && ./miniconda.sh -b -p $CONDA_ROOT
@@ -33,7 +37,7 @@ conda create -n testenv --yes python=$PYTHON_VERSION numpy scipy future
 source activate testenv
 
 # Install cmake
-conda install --yes -c conda-forge cmake 
+conda install --yes -c conda-forge cmake
 
 # Install coveralls lcov
 gem install coveralls-lcov

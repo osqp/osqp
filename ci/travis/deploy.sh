@@ -19,15 +19,15 @@ make
 
 cd ${TRAVIS_BUILD_DIR}/build/out
 if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    OS_NAME="mac"
-    OS_SHARED_LIB_EXT="dylib"
+    OS_NAME="mac";
+    OS_SHARED_LIB_EXT="dylib";
 else
-    if [[ "$TRAVIS_CPU_ARCH" == "arm64"]]; then
-        OS_NAME="arm"
+    if [[ "$TRAVIS_CPU_ARCH" == "arm64" ]]; then
+        OS_NAME="arm";
     else
-        OS_NAME="linux"
+        OS_NAME="linux";
     fi
-    OS_SHARED_LIB_EXT="so"
+    OS_SHARED_LIB_EXT="so";
 fi
 OSQP_BIN=osqp-${OSQP_VERSION}-${OS_NAME}64
 mkdir $OSQP_BIN/
