@@ -75,8 +75,13 @@ if (DEFINED EMBEDDED)
 endif()
 message(STATUS "User interrupt is ${CTRLC}")
 
-# Use floats instead of integers
-option (DFLOAT "Use float numbers instead of doubles" OFF)
+# Use floats instead of doubles
+if (CUDA_SUPPORT)
+    # Use floats with CUDA by default
+    option (DFLOAT "Use float numbers instead of doubles" ON)
+else ()
+    option (DFLOAT "Use float numbers instead of doubles" OFF)
+endif()
 message(STATUS "Floats are ${DFLOAT}")
 
 # Use long integers for indexing
