@@ -19,7 +19,7 @@ OSQP has several interfaces. The information about settings, status values and h
    status_values.rst
 
 
-Supported
+Official
 ----------
 
 +------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
