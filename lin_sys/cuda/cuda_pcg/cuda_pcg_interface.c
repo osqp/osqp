@@ -302,6 +302,7 @@ c_int update_linsys_solver_matrices_cudapcg(cudapcg_solver   *s,
                                      const OSQPMatrix *A) {
 
   if (s->precondition) cuda_pcg_update_precond(s, 1, 1, 0);
+  return 0;
 }
 
 
@@ -310,5 +311,6 @@ c_int update_linsys_solver_rho_vec_cudapcg(cudapcg_solver    *s,
                                            c_float            rho_sc) {
 
   if (s->precondition) cuda_pcg_update_precond(s, 0, 0, 1);
+  return 0;
 }
 
