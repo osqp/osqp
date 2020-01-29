@@ -229,7 +229,7 @@ typedef struct {
    */
   c_float *Ax;  ///< scaled A * x
   c_float *Px;  ///< scaled P * x
-  c_float *Aty; ///< scaled A * x
+  c_float *Aty; ///< scaled A' * y
 
   /** @} */
 
