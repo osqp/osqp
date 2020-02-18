@@ -1,6 +1,5 @@
 import numpy as np
 from scipy import sparse
-import scipy as sp
 import utils.codegen_utils as cu
 
 # Set numpy seed for reproducibility
@@ -13,14 +12,14 @@ m = 150
 Pt = sparse.random(n, n)
 P = Pt.T.dot(Pt) + sparse.eye(n)
 P = sparse.triu(P, format='csc')
-q = sp.randn(n)
+q = np.random.randn(n)
 A = sparse.random(m, n).tolil()  # Lil for efficiency
-u = 3 + sp.randn(m)
-l = -3 + sp.randn(m)
+u = 3 + np.random.randn(m)
+l = -3 + np.random.randn(m)
 
 # Make random problem primal infeasible
 A[int(n/2), :] = A[int(n/2)+1, :]
-l[int(n/2)] = u[int(n/2)+1] + 10 * sp.rand()
+l[int(n/2)] = u[int(n/2)+1] + 10 * np.random.rand()
 u[int(n/2)] = l[int(n/2)] + 0.5
 
 # Convert A to csc
