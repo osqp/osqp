@@ -9,26 +9,21 @@ If you use OSQP for published work, we encourage you to put a star on `GitHub <h
 .. glossary::
 
     Main paper
-        Main algorithm description, derivation and benchmark available in this `preprint <https://arxiv.org/pdf/1711.08013.pdf>`__.
+        Main algorithm description, derivation and benchmark available in this `paper <http://web.stanford.edu/~boyd/papers/pdf/osqp.pdf>`__.
 
         .. code:: latex
 
           @article{osqp,
-            author = {Stellato, B. and Banjac, G. and Goulart, P. and Bemporad, A. and Boyd, S.},
-            title = {{OSQP}: An Operator Splitting Solver for Quadratic Programs},
-            journal = {ArXiv e-prints},
-            year = {2017},
-            month = nov,
-            adsnote = {Provided by the SAO/NASA Astrophysics Data System},
-            adsurl = {http://adsabs.harvard.edu/abs/2017arXiv171108013S},
-            archiveprefix = {arXiv},
-            eprint = {1711.08013},
-            keywords = {Mathematics - Optimization and Control},
-            primaryclass = {math.OC},
+            author  = {Stellato, Bartolomeo and Banjac, Goran and Goulart, Paul and Bemporad, Alberto and Boyd, Stephen},
+            title   = {{{OSQP}}: An Operator Splitting Solver for Quadratic Programs},
+            journal = {Mathematical Programming Computation},
+            year    = {2020},
+            doi     = {10.1007/s12532-020-00179-2},
+            url     = {https://doi.org/10.1007/s12532-020-00179-2}
           }
 
     Infeasibility detection
-        Infeasibility detection proofs using ADMM (also for general conic programs) in this `preprint <https://stanford.edu/~boyd/papers/pdf/admm_infeas.pdf>`__.
+        Infeasibility detection proofs using ADMM (also for general conic programs) in this `paper <https://stanford.edu/~boyd/papers/pdf/admm_infeas.pdf>`__.
 
         .. code:: latex
 
