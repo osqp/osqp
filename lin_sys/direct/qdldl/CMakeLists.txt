@@ -76,7 +76,9 @@ FetchContent_GetProperties( qdldl )
 if( NOT qdldl_POPULATED )
     message( STATUS " ++ Populating QDLDL sources" )
     FetchContent_populate( qdldl )
-    add_subdirectory( ${qdldl_SOURCE_DIR} ${qdldl_BINARY_DIR} )
+
+    # We don't actually want to build anything from here
+    add_subdirectory( ${qdldl_SOURCE_DIR} ${qdldl_BINARY_DIR} EXCLUDE_FROM_ALL )
 else()
     message( STATUS " ++ QDLDL already populated" )
 endif()
@@ -84,13 +86,6 @@ endif()
 # --------------------
 # Configure the QDLDL library target
 # ---------------------
-
-# Ignore the extra qdldl targets, we only use the qdldlobject target to get the object file
-set_target_properties(qdldlstatic qdldl qdldl_example
-    PROPERTIES
-    EXCLUDE_FROM_ALL 1
-    EXCLUDE_FROM_DEFAULT_BUILD 1
-    )
 
 set_source_files_properties($<TARGET_OBJECTS:qdldlobject> PROPERTIES GENERATED 1)
 

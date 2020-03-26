@@ -96,6 +96,8 @@ endif()
 option (COVERAGE "Perform code coverage" OFF)
 message(STATUS "Code coverage is ${COVERAGE}")
 
+option( OSQP_BUILD_EXAMPLES "Build examples" ON )
+
 
 # Memory allocators
 # ----------------------------------------------
@@ -129,7 +131,7 @@ message(STATUS "MKL Pardiso: ${ENABLE_MKL_PARDISO}")
 # Generate header file with the global options
 # ---------------------------------------------
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/include/osqp_configure.h
+               ${CMAKE_CURRENT_SOURCE_DIR}/include/public/osqp_configure.h
                NEWLINE_STYLE LF)
 
 # Set Compiler flags
@@ -281,7 +283,7 @@ set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
 
 # Declare include directories for the cmake exported target
 target_include_directories(osqpstatic
-                           PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+                           PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/public>"
                                   "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
 # Install Static Library
@@ -296,8 +298,8 @@ install(TARGETS osqpstatic
 
 # Install Headers
 # ----------------------------------------------
-
-install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
+message( STATUS "$<TARGET_PROPERTY:QSQPLIB,INCLUDE_DIRECTORIES>" )
+install( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/public/" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
 
 
 if (MATLAB)
@@ -316,7 +318,7 @@ if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
     # Declare include directories for the cmake exported target
     target_include_directories(osqp
             PUBLIC
-            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/public>"
             "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
     # Install osqp shared library
@@ -326,11 +328,17 @@ if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
             ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
             RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
-    # Create demo executable (linked to static library)
-    add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
-    target_link_libraries (osqp_demo osqpstatic)
-
 endif (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
+
+
+# Build the example programs
+# ----------------------------------------------
+if( OSQP_BUILD_EXAMPLES )
+    # Pull in the demo executable
+    message( STATUS "Adding OSQP examples" )
+    add_subdirectory( examples )
+endif()
+
 
 # Create CMake packages for the build directory
 # ----------------------------------------------
