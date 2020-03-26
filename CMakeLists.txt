@@ -159,21 +159,6 @@ if (NOT MSVC)
     endif()
 endif (NOT MSVC)
 
-# Get and setup the QDLDL library
-# ---------------------------------------------
-FetchContent_Declare(
-  qdldl
-  GIT_REPOSITORY https://github.com/oxfordcontrol/qdldl.git
-  GIT_TAG        v0.1.4
-  SOURCE_DIR     ${PROJECT_SOURCE_DIR}/lin_sys/direct/qdldl/qdldl_sources
-)
-
-FetchContent_GetProperties(qdldl)
-if(NOT qdldl_POPULATED)
-  message(STATUS "Downloading QDLDL sources")
-  FetchContent_Populate(qdldl)
-endif()
-
 
 # An empty library for OSQP sources.  All
 # subdirectory sources will be assembled here
