@@ -9,7 +9,7 @@ If you use OSQP for published work, we encourage you to put a star on `GitHub <h
 .. glossary::
 
     Main paper
-        Main algorithm description, derivation and benchmark available in this `paper <http://web.stanford.edu/~boyd/papers/pdf/osqp.pdf>`__.
+        Main algorithm description, derivation and benchmark available in this `paper <https://web.stanford.edu/~boyd/papers/pdf/osqp.pdf>`__.
 
         .. code:: latex
 
@@ -40,7 +40,7 @@ If you use OSQP for published work, we encourage you to put a star on `GitHub <h
           }
 
     Code generation
-        Code generation functionality and example in this `paper <http://stanford.edu/~boyd/papers/pdf/osqp_embedded.pdf>`_.
+        Code generation functionality and example in this `paper <https://stanford.edu/~boyd/papers/pdf/osqp_embedded.pdf>`_.
 
         .. code:: latex
 
