@@ -298,7 +298,6 @@ install(TARGETS osqpstatic
 
 # Install Headers
 # ----------------------------------------------
-message( STATUS "$<TARGET_PROPERTY:QSQPLIB,INCLUDE_DIRECTORIES>" )
 install( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/public/" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
 
 
