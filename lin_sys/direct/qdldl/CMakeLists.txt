@@ -1,6 +1,3 @@
-# Add qdldl
-add_subdirectory(qdldl_sources)
-
 
 if(NOT DEFINED EMBEDDED)
 set(
@@ -27,7 +24,7 @@ endif()
 set(qdldl_interface_includes
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/amd/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/qdldl_sources/include
+    ${qdldl_INCLUDE_DIRS}
 )
 
 set(qdldl_interface_src
@@ -36,6 +33,12 @@ set(qdldl_interface_src
     ${CMAKE_CURRENT_SOURCE_DIR}/qdldl_interface.c
 )
 
-# Create object library for linear system solver interface
-add_library(linsys_qdldl OBJECT ${qdldl_interface_src})
+# Create library for linear system solver interface
+add_library(linsys_qdldl ${qdldl_interface_src})
+target_link_libraries(linsys_qdldl ${qdldl_LIBRARIES})
 target_include_directories(linsys_qdldl PRIVATE ${qdldl_interface_includes} ${PROJECT_SOURCE_DIR}/include)
+
+install(TARGETS linsys_qdldl
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

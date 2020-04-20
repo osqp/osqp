@@ -2,8 +2,10 @@
   <name>osqp</name>
   <version>0.0.0</version>
   <description>osqp</description>
-  <maintainer email="yvaind@ethz.ch">Yvain de Viragh</maintainer>
+  <maintainer email="avijayan@anybotics.com">Aravind Vijayan</maintainer>
+  <maintainer email="fgiraldez@anybotics.com">Francisco Giráldez Gámez</maintainer>
   <license>Apache 2.0</license>
   <author email="yvaind@ethz.ch">Yvain de Viragh</author>
   <buildtool_depend>catkin</buildtool_depend>
+  <depend>qdldl</depend>
 </package>

@@ -6,7 +6,7 @@ add_subdirectory(qdldl)
 
 # Need to add qdldlobject only here because it cannot be
 # included in another object library such as linsys_qdldl
-set(direct_linsys_solvers $<TARGET_OBJECTS:linsys_qdldl> $<TARGET_OBJECTS:qdldlobject>)
+set(direct_linsys_solvers linsys_qdldl)
 
 set(direct_linsys_solvers_includes "${CMAKE_CURRENT_SOURCE_DIR}/qdldl/")
 
@@ -21,14 +21,21 @@ if (ENABLE_MKL_PARDISO)
 	# Add Pardiso interface
 	add_subdirectory(pardiso)
 
-	add_library(linsys_pardiso OBJECT ${pardiso_sources})
+	add_library(linsys_pardiso ${pardiso_sources})
 
 	# Add parent directory for library handler
 	target_include_directories(linsys_pardiso PRIVATE  ${pardiso_includes} ${PROJECT_SOURCE_DIR}/include)
 
-	set(direct_linsys_solvers ${direct_linsys_solvers} $<TARGET_OBJECTS:linsys_pardiso>)
+	target_link_libraries(linsys_pardiso linsys_lib_handler)
+
+	set(direct_linsys_solvers ${direct_linsys_solvers} linsys_pardiso)
 
 	set(direct_linsys_solvers_includes "${direct_linsys_solvers_includes};${CMAKE_CURRENT_SOURCE_DIR}/pardiso/")
+
+	install(TARGETS linsys_pardiso
+			ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+			LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+			RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 endif()
 
 
