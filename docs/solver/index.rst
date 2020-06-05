@@ -130,7 +130,7 @@ The primal infeasibility check is then
 
 .. math::
 
-	\left\|A^T v \right\|_{\infty} \le \epsilon_{\rm prim\_inf}, \quad u^T (v)_{+} + l^T (v)_{-} \le - \epsilon_{\rm prim\_inf}.
+	\left\|A^T v \right\|_{\infty} \le \epsilon_{\rm prim\_inf}, \quad u^T (v)_{+} + l^T (v)_{-} \le \epsilon_{\rm prim\_inf}.
 
 
 
@@ -149,10 +149,10 @@ The dual infeasibility check is then
 .. math::
 
         \| P s \|_{\infty} \le \epsilon_{\rm dual\_inf} , \quad
-        q^T s \le -\epsilon_{\rm dual\_inf}, \\
+        q^T s \le \epsilon_{\rm dual\_inf}, \\
         (A s)_i \begin{cases} \in \left[-\epsilon_{\rm dual\_inf}, \epsilon_{\rm dual\_inf}\right] & u_i, l_i \in \mathbf{R}\\
-        \ge \epsilon_{\rm dual\_inf} &u_i = +\infty\\
-        \le  -\epsilon_{\rm dual\_inf} &l_i = -\infty.\end{cases}
+        \ge -\epsilon_{\rm dual\_inf} &u_i = +\infty\\
+        \le  \epsilon_{\rm dual\_inf} &l_i = -\infty.\end{cases}
 
 
 

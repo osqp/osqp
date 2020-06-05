@@ -406,7 +406,7 @@ c_int is_primal_infeasible(OSQPWorkspace *work, c_float eps_prim_inf) {
     }
 
     // Check if the condition is satisfied: ineq_lhs < -eps
-    if (ineq_lhs < -eps_prim_inf * norm_delta_y) {
+    if (ineq_lhs < eps_prim_inf * norm_delta_y) {
       // Compute and return ||A'delta_y|| < eps_prim_inf
       mat_tpose_vec(work->data->A, work->delta_y, work->Atdelta_y, 0, 0);
 
@@ -464,7 +464,7 @@ c_int is_dual_infeasible(OSQPWorkspace *work, c_float eps_dual_inf) {
 
     // Check first if q'*delta_x < 0
     if (vec_prod(work->data->q, work->delta_x, work->data->n) <
-        -cost_scaling * eps_dual_inf * norm_delta_x) {
+        cost_scaling * eps_dual_inf * norm_delta_x) {
       // Compute product P * delta_x (NB: P is store in upper triangular form)
       mat_vec(work->data->P, work->delta_x, work->Pdelta_x, 0);
       mat_tpose_vec(work->data->P, work->delta_x, work->Pdelta_x, 1, 1);
