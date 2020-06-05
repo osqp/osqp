@@ -1,7 +1,7 @@
 Model predictive control (MPC)
 ==============================
 
-We consider the problem of controlling a linear time-invariant dinamical system to some reference state :math:`x_r \in \mathbf{R}^{n_x}`.
+We consider the problem of controlling a linear time-invariant dynamical system to some reference state :math:`x_r \in \mathbf{R}^{n_x}`.
 To achieve this we use *constrained linear-quadratic MPC*, which solves at each time step the following finite-horizon optimal control problem
 
 .. math::
