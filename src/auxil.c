@@ -366,7 +366,7 @@ c_int is_primal_infeasible(OSQPWorkspace *work, c_float eps_prim_inf) {
   //
   // 1) A' * delta_y < eps * ||delta_y||
   //
-  // 2) u'*max(delta_y, 0) + l'*min(delta_y, 0) < -eps * ||delta_y||
+  // 2) u'*max(delta_y, 0) + l'*min(delta_y, 0) < eps * ||delta_y||
   //
 
   c_int i; // Index for loops
@@ -398,7 +398,7 @@ c_int is_primal_infeasible(OSQPWorkspace *work, c_float eps_prim_inf) {
     norm_delta_y = vec_norm_inf(work->delta_y, work->data->m);
   }
 
-  if (norm_delta_y > eps_prim_inf) { // ||delta_y|| > 0
+  if (norm_delta_y > 0) {
 
     for (i = 0; i < work->data->m; i++) {
       ineq_lhs += work->data->u[i] * c_max(work->delta_y[i], 0) + \
@@ -430,7 +430,7 @@ c_int is_dual_infeasible(OSQPWorkspace *work, c_float eps_dual_inf) {
   // This function checks for the scaled dual infeasibility termination
   // criteria.
   //
-  // 1) q * delta_x < - eps * || delta_x ||
+  // 1) q * delta_x < eps * || delta_x ||
   //
   // 2) ||P * delta_x || < eps * || delta_x ||
   //
@@ -457,7 +457,7 @@ c_int is_dual_infeasible(OSQPWorkspace *work, c_float eps_dual_inf) {
   }
 
   // Prevent 0 division || delta_x || > 0
-  if (norm_delta_x > eps_dual_inf) {
+  if (norm_delta_x > 0) {
     // Normalize delta_x by its norm
 
     /* vec_mult_scalar(work->delta_x, 1./norm_delta_x, work->data->n); */
