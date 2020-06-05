@@ -122,7 +122,7 @@ When the problem is primal infeasible, the algorithm generates a certificate of 
 
 .. math::
 
-   A^T v = 0, \quad u^T v_{+} + l^T v_{-} < 0,
+    A^T v = 0, \quad u^T v_{+} + l^T v_{-} < 0,
 
 where :math:`v_+=\max(v,0)` and :math:`v_-=\min(v,0)`.
 
@@ -130,7 +130,7 @@ The primal infeasibility check is then
 
 .. math::
 
-	\left\|A^T v \right\|_{\infty} \le \epsilon_{\rm prim\_inf}, \quad u^T (v)_{+} + l^T (v)_{-} \le \epsilon_{\rm prim\_inf}.
+    \left\|A^T v \right\|_{\infty} \le \epsilon_{\rm prim\_inf}, \quad u^T v_{+} + l^T v_{-} \le \epsilon_{\rm prim\_inf}.
 
 
 
@@ -141,18 +141,18 @@ When the problem is dual infeasible, OSQP generates a vector :math:`s\in\mathbf{
 
 .. math::
 
-   P s = 0, \quad q^T s < 0, \quad (As)_i = \begin{cases} 0 & l_i \in \mathbf{R}, u_i\in\mathbf{R} \\ \ge 0 & l_i\in\mathbf{R}, u_i=+\infty \\ \le 0 & u_i\in\mathbf{R}, l_i=-\infty. \end{cases}
+    P s = 0, \quad q^T s < 0, \quad (As)_i = \begin{cases} 0 & l_i \in \mathbf{R}, u_i\in\mathbf{R} \\ \ge 0 & l_i\in\mathbf{R}, u_i=+\infty \\ \le 0 & u_i\in\mathbf{R}, l_i=-\infty. \end{cases}
 
 
 The dual infeasibility check is then
 
 .. math::
 
-        \| P s \|_{\infty} \le \epsilon_{\rm dual\_inf} , \quad
-        q^T s \le \epsilon_{\rm dual\_inf}, \\
-        (A s)_i \begin{cases} \in \left[-\epsilon_{\rm dual\_inf}, \epsilon_{\rm dual\_inf}\right] & u_i, l_i \in \mathbf{R}\\
-        \ge -\epsilon_{\rm dual\_inf} &u_i = +\infty\\
-        \le  \epsilon_{\rm dual\_inf} &l_i = -\infty.\end{cases}
+    \| P s \|_{\infty} \le \epsilon_{\rm dual\_inf} , \quad
+    q^T s \le \epsilon_{\rm dual\_inf}, \\
+    (A s)_i \begin{cases} \in \left[-\epsilon_{\rm dual\_inf}, \epsilon_{\rm dual\_inf}\right] & u_i, l_i \in \mathbf{R}\\
+    \ge -\epsilon_{\rm dual\_inf} &u_i = +\infty\\
+    \le  \epsilon_{\rm dual\_inf} &l_i = -\infty.\end{cases}
 
 
 
