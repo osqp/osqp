@@ -114,14 +114,14 @@ if (CUDA_SUPPORT)
     find_package(CUDA)
 
     # cublas and cusparse headers
-    include_directories(${CUDA_INCLUDE_DIRS})
+    include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 
     # sm_75 -> Turing support
     if (DFLOAT)
-        set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_30 --gpu-code=compute_30,sm_75")
+        set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_52 --gpu-code=sm_52")
     else()
         # To use doubles we need compute capability 6.0 for atomic operations
-        set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_60 --gpu-code=compute_60,sm_75")
+        set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_60 --gpu-code=sm_60")
     endif()
 endif()
 
