@@ -272,8 +272,19 @@ csr* csr_alloc(c_int m,
   dev_mat->n   = n;
   dev_mat->nnz = nnz;
   
-  // Since CUDA 11 there is only algorithm    
+  #ifdef IS_WINDOWS
+    #ifndef CUDART_VERSION
+    #error CUDART_VERSION Undefined!
+    #elif (CUDART_VERSION < 11000)
+    // MERGE_PATH is not working properly on WINDWOS  
+    dev_mat->alg = CUSPARSE_ALG_NAIVE;
+    #else 
+    // Since CUDA 11 there is only one algorithm  
+    dev_mat->alg = CUSPARSE_ALG_MERGE_PATH;
+    #endif
+  #else 
   dev_mat->alg = CUSPARSE_ALG_MERGE_PATH;
+  #endif
 
   dev_mat->buffer = NULL;
   dev_mat->bufferSizeInBytes = 0;
