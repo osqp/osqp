@@ -76,6 +76,8 @@ The following people have been involved in the development of OSQP:
 * `Alberto Bemporad <http://cse.lab.imtlucca.it/~bemporad/>`_ (IMT Lucca): methods and maths
 * `Stephen Boyd <https://web.stanford.edu/~boyd/>`_ (Stanford University): methods and maths
 * `Ian McInerney <mailto:i.mcinerney17@imperial.ac.uk>`_ (Imperial College London): code generation, software development
+* `Michel Schubiger <mailto:michel.schubiger@bluewin.ch>`_ (Schindler R&D): GPU implementation
+* `John Lygeros <https://control.ee.ethz.ch/people/profile.john-lygeros.html>`_ (ETH Zurich): methods and maths
 
 Interfaces development
 
