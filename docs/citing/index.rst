@@ -39,6 +39,22 @@ If you use OSQP for published work, we encourage you to put a star on `GitHub <h
             url     = {https://doi.org/10.1007/s10957-019-01575-y},
           }
 
+    GPU implementation
+        GPU implementation and PCG method for solving linear systems in this `paper <https://arxiv.org/pdf/1912.04263.pdf>`__.
+
+        .. code:: latex
+
+          @article{osqp-gpu,
+            author  = {Schubiger, M. and Banjac, G. and Lygeros, J.},
+            title   = {{GPU} acceleration of {ADMM} for large-scale quadratic programming},
+            journal = {Journal of Parallel and Distributed Computing},
+            year    = {2020},
+            volume  = {144},
+            pages   = {55--67},
+            doi     = {10.1016/j.jpdc.2020.05.021},
+            url     = {https://doi.org/10.1016/j.jpdc.2020.05.021},
+          }
+
     Code generation
         Code generation functionality and example in this `paper <https://stanford.edu/~boyd/papers/pdf/osqp_embedded.pdf>`_.
 
@@ -51,4 +67,18 @@ If you use OSQP for published work, we encourage you to put a star on `GitHub <h
             year      = {2017},
             doi       = {10.1109/CDC.2017.8263928},
             url       = {https://doi.org/10.1109/CDC.2017.8263928},
+          }
+
+    Mixed-integer optimization
+        A branch-and-bound solver for mixed-integer quadratic optimization in this `paper <https://stellato.io/assets/downloads/publications/2018/miosqp_ecc.pdf>`_.
+
+        .. code:: latex
+
+          @inproceedings{miosqp,
+            author    = {Stellato, B. and Naik, V. V. and Bemporad, A. and Goulart, P. and Boyd, S.},
+            title     = {Embedded mixed-integer quadratic optimization using the {OSQP} solver},
+            booktitle = {European Control Conference (ECC)},
+            year      = {2018},
+            doi       = {10.23919/ECC.2018.8550136},
+            url       = {https://doi.org/10.23919/ECC.2018.8550136},
           }
