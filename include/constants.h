@@ -73,7 +73,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 
 
 # ifndef EMBEDDED
-#  define DELTA (1E-6)
+#  define OSQP_DELTA (1E-6)
 #  define POLISH (0)
 #  define POLISH_REFINE_ITER (3)
 #  define VERBOSE (1)

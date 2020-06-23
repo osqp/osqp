@@ -50,7 +50,7 @@ void osqp_set_default_settings(OSQPSettings *settings) {
   settings->linsys_solver = LINSYS_SOLVER;           /* relaxation parameter */
 
 #ifndef EMBEDDED
-  settings->delta              = DELTA;              /* regularization parameter
+  settings->delta              = OSQP_DELTA;              /* regularization parameter
                                                         for polish */
   settings->polish             = POLISH;             /* ADMM solution polish: 1
                                                       */
