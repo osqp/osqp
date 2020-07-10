@@ -21,6 +21,11 @@
 extern "C" {
 #endif
 
+#ifdef DFLOAT
+#define CUDA_FLOAT CUDA_R_32F
+#else
+#define CUDA_FLOAT CUDA_R_64F
+#endif
 
 #define ELEMENTS_PER_THREAD (8)
 #define THREADS_PER_BLOCK   (1024)

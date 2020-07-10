@@ -236,14 +236,13 @@ void update_mp_buffer(csr *P) {
   size_t bufferSizeInBytes = 0;
   c_float alpha = 1.0;
 
-  checkCudaErrors(cusparseCsrmv_bufferSize(CUDA_handle->cusparseHandle,
-                                           P->alg, P->m, P->n, P->nnz,
-                                           &alpha,
-                                           P->MatDescription, P->val, P->row_ptr, P->col_ind,
-                                           NULL,
-                                           &alpha,
-                                           NULL,
-                                           &bufferSizeInBytes));
+  checkCudaErrors(cusparseCsrmvEx_bufferSize(CUDA_handle->cusparseHandle, P->alg,
+                                             CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                             P->m, P->n, P->nnz, &alpha,
+                                             CUDA_FLOAT, P->MatDescription, P->val,
+                                             CUDA_FLOAT, P->row_ptr, P->col_ind, NULL,
+                                             CUDA_FLOAT, &alpha, CUDA_FLOAT, NULL,
+                                             CUDA_FLOAT, CUDA_FLOAT, &bufferSizeInBytes));
   
   if (bufferSizeInBytes > P->bufferSizeInBytes) {
     cuda_free((void **) &P->buffer);                            
@@ -398,7 +397,7 @@ void permute_vector(c_float     *values,
   c_float *permuted_values;
   cuda_malloc((void **) &permuted_values, n * sizeof(c_float));
 
-  checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, n, values, permuted_values, permutation, CUSPARSE_INDEX_BASE_ZERO));
+  checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, n, values, permuted_values, permutation));
 
   checkCudaErrors(cudaMemcpy(values, permuted_values, n * sizeof(c_float), cudaMemcpyDeviceToDevice));
   cuda_free((void **) &permuted_values);
@@ -414,7 +413,7 @@ void permute_vector(c_float       *target,
                     const c_int   *permutation,
                     c_int          n) {
 
-  checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, n, source, target, permutation, CUSPARSE_INDEX_BASE_ZERO));
+  checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, n, source, target, permutation));
 }
 
 /*
@@ -614,7 +613,7 @@ void cuda_mat_update_P(const c_float  *Px,
     /* Copy new values from host to device */
     checkCudaErrors(cudaMemcpy(d_P_val_new, Px, P_triu_nnz * sizeof(c_float), cudaMemcpyHostToDevice));
 
-    checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, (*P)->nnz, d_P_val_new, (*P)->val, d_P_triu_to_full_ind, CUSPARSE_INDEX_BASE_ZERO));
+    checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, (*P)->nnz, d_P_val_new, (*P)->val, d_P_triu_to_full_ind));
 
     cuda_free((void **) &d_P_val_new);
   }
@@ -634,7 +633,7 @@ void cuda_mat_update_P(const c_float  *Px,
     scatter(d_P_triu_val, d_P_val_new, d_P_ind_new, Px_n);
 
     /* Gather from d_P_triu_val to update full P */
-    checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, (*P)->nnz, d_P_triu_val, (*P)->val, d_P_triu_to_full_ind, CUSPARSE_INDEX_BASE_ZERO));
+    checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, (*P)->nnz, d_P_triu_val, (*P)->val, d_P_triu_to_full_ind));
 
     cuda_free((void **) &d_P_val_new);
     cuda_free((void **) &d_P_ind_new);
@@ -657,7 +656,7 @@ void cuda_mat_update_A(const c_float  *Ax,
     checkCudaErrors(cudaMemcpy(Atval, Ax, Annz * sizeof(c_float), cudaMemcpyHostToDevice));
 
     /* Updating A requires transpose of A_new */
-    checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, Annz, Atval, Aval, d_A_to_At_ind, CUSPARSE_INDEX_BASE_ZERO));
+    checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, Annz, Atval, Aval, d_A_to_At_ind));
   }
   else { /* Update A partially */
     c_float *d_At_val_new;
@@ -678,7 +677,7 @@ void cuda_mat_update_A(const c_float  *Ax,
     cuda_free((void **) &d_At_ind_new);
 
     /* Gather from Atval to construct Aval */
-    checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, Annz, Atval, Aval, d_A_to_At_ind, CUSPARSE_INDEX_BASE_ZERO));
+    checkCudaErrors(cusparseTgthr(CUDA_handle->cusparseHandle, Annz, Atval, Aval, d_A_to_At_ind));
   }
 }
 

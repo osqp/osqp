@@ -939,7 +939,13 @@ void cuda_mat_Axpy(const csr     *A,
     return;
   }
 
-  checkCudaErrors(cusparseCsrmv(CUDA_handle->cusparseHandle, A->alg, A->m, A->n, A->nnz, &alpha, A->MatDescription, A->val, A->row_ptr, A->col_ind, d_x, &beta, d_y, A->buffer));
+  checkCudaErrors(cusparseCsrmvEx(CUDA_handle->cusparseHandle, A->alg,
+                                  CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                  A->m, A->n, A->nnz, &alpha,
+                                  CUDA_FLOAT, A->MatDescription, A->val,
+                                  CUDA_FLOAT, A->row_ptr, A->col_ind, d_x,
+                                  CUDA_FLOAT, &beta, CUDA_FLOAT, d_y,
+                                  CUDA_FLOAT, CUDA_FLOAT, A->buffer));
 }
 
 void cuda_mat_quad_form(const csr     *P,

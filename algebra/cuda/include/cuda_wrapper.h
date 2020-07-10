@@ -104,17 +104,16 @@ static cublasStatus_t cublasTasum(cublasHandle_t  handle,
 }
 
 
-static cusparseStatus_t cusparseTgthr(cusparseHandle_t     handle,
-                                      c_int                nnz,
-                                      const c_float       *y,
-                                      c_float             *xVal,
-                                      const c_int         *xInd,
-                                      cusparseIndexBase_t  idxBase) {
+static cusparseStatus_t cusparseTgthr(cusparseHandle_t  handle,
+                                      c_int             nnz,
+                                      const c_float    *y,
+                                      c_float          *xVal,
+                                      const c_int      *xInd) {
 
 #ifdef DFLOAT
-  return cusparseSgthr(handle, nnz, y, xVal, xInd, idxBase);
+  return cusparseSgthr(handle, nnz, y, xVal, xInd, CUSPARSE_INDEX_BASE_ZERO);
 #else
-  return cusparseDgthr(handle, nnz, y, xVal, xInd, idxBase);
+  return cusparseDgthr(handle, nnz, y, xVal, xInd, CUSPARSE_INDEX_BASE_ZERO);
 #endif
 }
 
@@ -130,60 +129,6 @@ static cublasStatus_t cublasTnrm2(cublasHandle_t  handle,
 #else
   return cublasDnrm2(handle, n, x, incx, result);
 #endif
-}
-
-
-static cusparseStatus_t cusparseCsrmv(cusparseHandle_t          handle,
-                                      cusparseAlgMode_t         alg,
-                                      c_int                     m,
-                                      c_int                     n,
-                                      c_int                     nnz,
-                                      const c_float            *alpha,
-                                      const cusparseMatDescr_t  descrA,
-                                      const c_float            *csrValA,
-                                      const c_int              *csrRowPtrA,
-                                      const c_int              *csrColIndA,
-                                      const c_float            *x,
-                                      const c_float            *beta,
-                                      c_float                  *y,
-                                      void                     *buffer) {
-
-#ifdef DFLOAT
-  return cusparseCsrmvEx(handle, alg, CUSPARSE_OPERATION_NON_TRANSPOSE, m, n, nnz, alpha,
-                         CUDA_R_32F, descrA, csrValA, CUDA_R_32F, csrRowPtrA, csrColIndA, x,
-                         CUDA_R_32F, beta, CUDA_R_32F, y, CUDA_R_32F, CUDA_R_32F, buffer);
-#else
-  return cusparseCsrmvEx(handle, alg, CUSPARSE_OPERATION_NON_TRANSPOSE, m, n, nnz, alpha,
-                         CUDA_R_64F, descrA, csrValA, CUDA_R_64F, csrRowPtrA, csrColIndA, x,
-                         CUDA_R_64F, beta, CUDA_R_64F, y, CUDA_R_64F, CUDA_R_64F, buffer);
-#endif
-} 
-
-
-static cusparseStatus_t cusparseCsrmv_bufferSize(cusparseHandle_t          handle,
-                                                 cusparseAlgMode_t         alg,
-                                                 c_int                     m,
-                                                 c_int                     n,
-                                                 c_int                     nnz,
-                                                 const c_float            *alpha,
-                                                 const cusparseMatDescr_t  descrA,
-                                                 const c_float            *csrValA,
-                                                 const c_int              *csrRowPtrA,
-                                                 const c_int              *csrColIndA,
-                                                 const c_float            *x,
-                                                 const c_float            *beta,
-                                                 c_float                  *y,
-                                                 size_t                   *bufferSizeInBytes) {
-
-#ifdef DFLOAT
-  return cusparseCsrmvEx_bufferSize(handle, alg, CUSPARSE_OPERATION_NON_TRANSPOSE, m, n, nnz, alpha,
-                                    CUDA_R_32F, descrA, csrValA, CUDA_R_32F, csrRowPtrA, csrColIndA, x,
-                                    CUDA_R_32F, beta, CUDA_R_32F, y, CUDA_R_32F, CUDA_R_32F, bufferSizeInBytes);
-#else
-  return cusparseCsrmvEx_bufferSize(handle, alg, CUSPARSE_OPERATION_NON_TRANSPOSE, m, n, nnz, alpha,
-                                    CUDA_R_64F, descrA, csrValA, CUDA_R_64F, csrRowPtrA, csrColIndA, x,
-                                    CUDA_R_64F, beta, CUDA_R_64F, y, CUDA_R_64F, CUDA_R_64F, bufferSizeInBytes);
-#endif 
 }
 
 
