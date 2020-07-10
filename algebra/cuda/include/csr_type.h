@@ -1,5 +1,6 @@
 /**
- *  Copyright (c) 2019 ETH Zurich, Automatic Control Lab, Michel Schubiger, Goran Banjac.
+ *  Copyright (c) 2019-2020 ETH Zurich, Automatic Control Lab,
+ *  Michel Schubiger, Goran Banjac.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
