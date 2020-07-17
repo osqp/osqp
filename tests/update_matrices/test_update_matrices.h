@@ -269,7 +269,7 @@ static const char* test_update() {
   mu_assert(
     "Update matrices: problem with updating P and A, error in dual solution!",
     vec_norm_inf_diff(work->solution->y, data->test_solve_P_A_new_y,
-                      data->m) < TESTS_TOL * TESTS_TOL);
+                      data->m) < TESTS_TOL);
 
   // Cleanup and setup workspace
   osqp_cleanup(work);
@@ -298,7 +298,7 @@ static const char* test_update() {
   mu_assert(
     "Update matrices: problem with updating P and A (all indices), error in dual solution!",
     vec_norm_inf_diff(work->solution->y, data->test_solve_P_A_new_y,
-                      data->m) < TESTS_TOL * TESTS_TOL);
+                      data->m) < TESTS_TOL);
 
 
   // Cleanup problems
@@ -460,7 +460,7 @@ static char* test_update_pardiso() {
   mu_assert(
     "Update matrices: problem with P and A updated, error in dual solution!",
     vec_norm_inf_diff(work->solution->y, data->test_solve_P_A_new_y,
-                      data->m) < TESTS_TOL * TESTS_TOL);
+                      data->m) < TESTS_TOL);
 
 
   // Cleanup problems
