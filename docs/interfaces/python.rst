@@ -32,7 +32,7 @@ The problem is specified in the setup phase by running
 
 The arguments :code:`q`, :code:`l` and :code:`u` are numpy arrays. The elements of :code:`l` and :code:`u` can be :math:`\pm \infty` ( using :code:`numpy.inf`).
 
-The arguments :code:`P` and :code:`A` are scipy sparse matrices in CSC format. 
+The arguments :code:`P` and :code:`A` are scipy sparse matrices in CSC format.
 Matrix :code:`P` can be either complete or just the upper triangular
 part. OSQP will make use of only the upper triangular part.
 If they are sparse matrices are in another format, the interface will attempt to convert them. There is no need to specify all the arguments.
@@ -89,7 +89,7 @@ Note that if multiple solves are executed from single setup, then after the
 first one :code:`run_time` includes :code:`update_time` + :code:`solve_time`
 + :code:`polish_time`.
 
-  
+
 Solve in just one function (with GIL disabled)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -122,8 +122,8 @@ The user does not have to specify all the keyword arguments.
 
 Update problem matrices
 ^^^^^^^^^^^^^^^^^^^^^^^^
-Matrices :code:`A` and :code:`P` can be updated by changing the value of their elements but not their sparsity pattern. 
-The interface is designed to mimic the :ref:`C/C++ counterpart <c_cpp_update_data>`. 
+Matrices :code:`A` and :code:`P` can be updated by changing the value of their elements but not their sparsity pattern.
+The interface is designed to mimic the :ref:`C counterpart <c_cpp_update_data>`.
 Note that the new values of :code:`P` represent only the upper triangular part while :code:`A` is always represented as a full matrix.
 
 You can update the values of all the elements of :code:`P` by executing
@@ -172,4 +172,4 @@ OSQP automatically warm starts primal and dual variables from the previous QP so
     m.warm_start(x=x0, y=y0)
 
 
-where :code:`x0` and :code:`y0` are the new primal and dual variables. 
+where :code:`x0` and :code:`y0` are the new primal and dual variables.

@@ -25,7 +25,7 @@ Official
 +------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
 | Language                           | Maintainers                                              | Repository                                                                               |
 +====================================+==========================================================+==========================================================================================+
-| :ref:`C/C++ <c_cpp_interface>`     | | `Bartolomeo Stellato <bartolomeo.stellato@gmail.com>`_ | `github.com/oxfordcontrol/osqp <https://github.com/oxfordcontrol/osqp>`_                 |
+| :ref:`C <c_interface>`             | | `Bartolomeo Stellato <bartolomeo.stellato@gmail.com>`_ | `github.com/oxfordcontrol/osqp <https://github.com/oxfordcontrol/osqp>`_                 |
 |                                    | | `Goran Banjac <gbanjac@control.ee.ethz.ch>`_           |                                                                                          |
 |                                    | | `Paul Goulart <paul.goulart@eng.ox.ac.uk>`_            |                                                                                          |
 +------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
@@ -69,21 +69,23 @@ Community Maintained
 --------------------
 
 
-+---------------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
-| Language                                    | Maintainers                                              | Repository                                                                               |
-+=============================================+==========================================================+==========================================================================================+
-| :ref:`Eigen <eigen_interface>`              | | `Giulio Romualdi <giulio.romualdi@gmail.com>`_         | `github.com/robotology/osqp-eigen <https://github.com/robotology/osqp-eigen>`_           |
-+---------------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
-| :ref:`Rust <rust_interface>`                | | `Ed Barnard <eabarnard@gmail.com>`_                    | `github.com/oxfordcontrol/osqp.rs <https://github.com/oxfordcontrol/osqp.rs>`_           |
-+---------------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
-| :ref:`Ruby <ruby_interface>`                | | `Andrew Kane <andrew@chartkick.com>`_                  | `https://github.com/ankane/osqp <https://github.com/ankane/osqp>`_                       |
-+---------------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
-| :ref:`Fortran <fortran_interface>`          | | `Nick Gould <nick.gould@stfc.ac.uk>`_                  | `github.com/oxfordcontrol/osqp-fortran <https://github.com/oxfordcontrol/osqp-fortran>`_ |
-|                                             | | `Bartolomeo Stellato <bartolomeo.stellato@gmail.com>`_ |                                                                                          |
-|                                             | | `Paul Goulart <paul.goulart@eng.ox.ac.uk>`_            |                                                                                          |
-+---------------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
-| :ref:`Cutest <cutest_interface>`            | | `Nick Gould <nick.gould@stfc.ac.uk>`_                  | `github.com/ralna/CUTEst <https://github.com/ralna/CUTEst/tree/master/src/osqp>`_        |
-+---------------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
++------------------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
+| Language                                       | Maintainers                                              | Repository                                                                               |
++================================================+==========================================================+==========================================================================================+
+| :ref:`C++/Eigen Google <eigen_google>`         | | `Miles Lubin <miles.lubin@gmail.com>`_                 | `github.com/google/osqp-cpp <https://github.com/google/osqp-cpp>`_                       |
++------------------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
+| :ref:`C++/Eigen Robotology <eigen_robotology>` | | `Giulio Romualdi <giulio.romualdi@gmail.com>`_         | `github.com/robotology/osqp-eigen <https://github.com/robotology/osqp-eigen>`_           |
++------------------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
+| :ref:`Rust <rust_interface>`                   | | `Ed Barnard <eabarnard@gmail.com>`_                    | `github.com/oxfordcontrol/osqp.rs <https://github.com/oxfordcontrol/osqp.rs>`_           |
++------------------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
+| :ref:`Ruby <ruby_interface>`                   | | `Andrew Kane <andrew@chartkick.com>`_                  | `https://github.com/ankane/osqp <https://github.com/ankane/osqp>`_                       |
++------------------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
+| :ref:`Fortran <fortran_interface>`             | | `Nick Gould <nick.gould@stfc.ac.uk>`_                  | `github.com/oxfordcontrol/osqp-fortran <https://github.com/oxfordcontrol/osqp-fortran>`_ |
+|                                                | | `Bartolomeo Stellato <bartolomeo.stellato@gmail.com>`_ |                                                                                          |
+|                                                | | `Paul Goulart <paul.goulart@eng.ox.ac.uk>`_            |                                                                                          |
++------------------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
+| :ref:`Cutest <cutest_interface>`               | | `Nick Gould <nick.gould@stfc.ac.uk>`_                  | `github.com/ralna/CUTEst <https://github.com/ralna/CUTEst/tree/master/src/osqp>`_        |
++------------------------------------------------+----------------------------------------------------------+------------------------------------------------------------------------------------------+
 
 
 
@@ -92,7 +94,8 @@ Community Maintained
    :glob:
    :hidden:
 
-   eigen.rst
+   eigen_google.rst
+   eigen_robotology.rst
    rust.rst
    ruby.rst
    fortran.rst
