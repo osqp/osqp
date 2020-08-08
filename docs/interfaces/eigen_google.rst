@@ -1,6 +1,6 @@
 .. _eigen_google:
 
-Eigen interface by Google
-=========================
+Eigen interface developed at Google
+====================================
 
-The Eigen interface by Google is documented `here <https://github.com/google/osqp-cpp>`_.
+The Eigen interface developed at Google is documented `here <https://github.com/google/osqp-cpp>`_.
