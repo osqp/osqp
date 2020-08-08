@@ -56,7 +56,7 @@ If you use OSQP for published work, we encourage you to put a star on `GitHub <h
           }
 
     Code generation
-        Code generation functionality and example in this `paper <https://stanford.edu/~boyd/papers/pdf/osqp_embedded.pdf>`_.
+        Code generation functionality and example in this `paper <https://stanford.edu/~boyd/papers/pdf/osqp_embedded.pdf>`__.
 
         .. code:: latex
 
@@ -70,7 +70,7 @@ If you use OSQP for published work, we encourage you to put a star on `GitHub <h
           }
 
     Mixed-integer optimization
-        A branch-and-bound solver for mixed-integer quadratic optimization in this `paper <https://stellato.io/assets/downloads/publications/2018/miosqp_ecc.pdf>`_.
+        A branch-and-bound solver for mixed-integer quadratic optimization in this `paper <https://stellato.io/assets/downloads/publications/2018/miosqp_ecc.pdf>`__.
 
         .. code:: latex
 
