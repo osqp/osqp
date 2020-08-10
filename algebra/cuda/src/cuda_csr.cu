@@ -27,6 +27,7 @@
 
 #include <thrust/scan.h>
 #include <thrust/execution_policy.h>
+#include <thrust/gather.h>
 
 #ifdef __cplusplus
 extern "C" {extern CUDA_Handle_t *CUDA_handle;}
@@ -221,6 +222,16 @@ __global__ void vector_init_abs_kernel(const c_int *a,
   if (i < n) {
     b[i] = abs(a[i]);
   }
+}
+
+void cuda_gather(c_int          nnz,
+                 const c_float  *y,
+                 c_float        *xVal,
+                 const c_int    *xInd) {
+  thrust::gather(thrust::device,
+                 xInd, xInd + nnz,
+                 y,
+                 xVal);
 }
 
 
