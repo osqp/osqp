@@ -105,20 +105,6 @@ static cublasStatus_t cublasTasum(cublasHandle_t  handle,
 }
 
 
-static cusparseStatus_t cusparseTgthr(cusparseHandle_t  handle,
-                                      c_int             nnz,
-                                      const c_float    *y,
-                                      c_float          *xVal,
-                                      const c_int      *xInd) {
-
-#ifdef DFLOAT
-  return cusparseSgthr(handle, nnz, y, xVal, xInd, CUSPARSE_INDEX_BASE_ZERO);
-#else
-  return cusparseDgthr(handle, nnz, y, xVal, xInd, CUSPARSE_INDEX_BASE_ZERO);
-#endif
-}
-
-
 static cublasStatus_t cublasTnrm2(cublasHandle_t  handle,
                                   c_int           n,
                                   const c_float  *x,

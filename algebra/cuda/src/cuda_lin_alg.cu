@@ -517,7 +517,7 @@ void cuda_vec_set_sc_cond(c_float     *d_a,
                           c_float      sc_if_neg,
                           c_float      sc_if_zero,
                           c_float      sc_if_pos,
-                          c_float      n) {
+                          c_int        n) {
 
   c_int number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
 
