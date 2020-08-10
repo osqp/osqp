@@ -19,13 +19,18 @@ set(algebra_impl_headers
     ${CMAKE_CURRENT_SOURCE_DIR}/include/cuda_lin_alg.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/cuda_malloc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/cuda_wrapper.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/helper_cuda.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/helper_string.h
 )
+
+if (IS_WINDOWS)
+    set(helper_cuda_header_dir $ENV{NVCUDASAMPLES_ROOT}/common/inc)
+else ()
+    set(helper_cuda_header_dir ${CUDA_TOOLKIT_ROOT_DIR}/samples/common/inc)
+endif()
 
 set(algebra_impl_includes
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${helper_cuda_header_dir}
 )
 
 set(algebra_impl ${algebra_impl_src} ${algebra_impl_headers} PARENT_SCOPE)

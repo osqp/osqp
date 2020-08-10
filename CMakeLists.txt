@@ -186,7 +186,7 @@ if (NOT MSVC)
 
     set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")      # Include math
     # Include real time library in linux
-    if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    if(IS_LINUX)
         set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lrt -ldl")
     endif()
 endif (NOT MSVC)
