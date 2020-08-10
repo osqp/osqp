@@ -69,11 +69,6 @@ void cuda_mat_get_n(const csr *mat,
 void cuda_mat_get_nnz(const csr *mat,
                       c_int     *nnz);
 
-void cuda_gather(c_int         nnz,
-                 const c_float *y,
-                 c_float       *xVal,
-                 const c_int   *xInd);
-
 # ifdef __cplusplus
 }
 # endif /* ifdef __cplusplus */

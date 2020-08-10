@@ -25,7 +25,6 @@
 #ifndef CUDA_WRAPPER_H
 # define CUDA_WRAPPER_H
 
-#include <cusparse.h>
 #include <cublas_v2.h>
 
 #include "osqp_api_types.h"

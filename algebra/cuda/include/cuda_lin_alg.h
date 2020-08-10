@@ -81,7 +81,7 @@ void cuda_vec_set_sc_cond(c_float     *d_a,
                           c_float      sc_if_neg,
                           c_float      sc_if_zero,
                           c_float      sc_if_pos,
-                          c_int      n);
+                          c_int        n);
 
 /**
  * d_a[i] *= sc for i in [0,n-1]
@@ -235,7 +235,7 @@ void cuda_vec_reciprocal(c_float       *d_b,
  * d_a[i] = sqrt(d_a[i]) for i in [0,n-1]
  */
 void cuda_vec_sqrt(c_float *d_a,
-                      c_int    n);
+                   c_int    n);
 
 /**
  * d_c[i] = max(d_a[i], d_b[i]) for i in [0,n-1]
@@ -279,6 +279,11 @@ void cuda_vec_segmented_sum(const c_float *d_values,
                             void          *d_buffer,
                             c_int          num_segments,
                             c_int          num_elements);
+
+void cuda_vec_gather(c_int          nnz,
+                     const c_float *d_y,
+                     c_float       *d_xVal,
+                     const c_int   *d_xInd);
 
 
 /*******************************************************************************

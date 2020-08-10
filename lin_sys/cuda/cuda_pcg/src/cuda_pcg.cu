@@ -23,7 +23,6 @@
 #include "cuda_lin_alg.h"
 #include "cuda_wrapper.h"
 #include "helper_cuda.h"    /* --> checkCudaErrors */
-#include "cuda_csr.h"  /* --> cuda_gather */
 
 #ifdef __cplusplus
 extern "C" {extern CUDA_Handle_t *CUDA_handle;}
@@ -240,7 +239,7 @@ void cuda_pcg_update_precond(cudapcg_solver *s,
 
   if (P_updated) {
     /* Update d_P_diag_val */
-    cuda_gather(n, s->P->val, s->d_P_diag_val, s->d_P_diag_ind);
+    cuda_vec_gather(n, s->P->val, s->d_P_diag_val, s->d_P_diag_ind);
   }
 
   if (A_updated || R_updated) {

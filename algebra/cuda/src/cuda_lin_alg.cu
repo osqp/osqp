@@ -25,6 +25,7 @@
 #include "csr_type.h"
 #include "glob_opts.h"
 
+#include <thrust/gather.h>
 #include <thrust/reduce.h>
 #include <thrust/execution_policy.h>
 
@@ -873,6 +874,14 @@ void cuda_vec_segmented_sum(const c_float *d_values,
   Segmented_reduce(d_keys, num_elements, num_segments, d_values, d_buffer, d_res, binary_op);
 }
 
+void cuda_vec_gather(c_int          nnz,
+                     const c_float *d_y,
+                     c_float       *d_xVal,
+                     const c_int   *d_xInd) {
+
+  thrust::gather(thrust::device, d_xInd, d_xInd + nnz, d_y, d_xVal);
+}
+
 void cuda_mat_mult_sc(csr     *S,
                       csr     *At,
                       c_int    symmetric,
@@ -991,3 +1000,4 @@ void cuda_mat_row_norm_inf(const csr *S,
 
   cuda_free(&d_buffer);
 }
+
