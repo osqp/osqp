@@ -18,6 +18,7 @@
 #include "algebra_types.h"
 #include "lin_alg.h"
 
+#include "csr_type.h"
 #include "cuda_csr.h"
 #include "cuda_lin_alg.h"
 #include "cuda_malloc.h"
@@ -30,7 +31,7 @@
 OSQPMatrix* OSQPMatrix_new_from_csc(const csc *M,
                                     c_int      is_triu) {
 
-  OSQPMatrix* out = c_calloc(1, sizeof(OSQPMatrix));
+  OSQPMatrix* out = (OSQPMatrix *) c_calloc(1, sizeof(OSQPMatrix));
   if (!out) return OSQP_NULL;
 
   if (is_triu) {
@@ -62,33 +63,11 @@ void OSQPMatrix_update_values(OSQPMatrix    *mat,
   }
 }
 
-c_int OSQPMatrix_get_m( const OSQPMatrix *mat) {
+c_int OSQPMatrix_get_m( const OSQPMatrix *mat) { return mat->S->m; }
 
-  c_int m;
+c_int OSQPMatrix_get_n( const OSQPMatrix *mat) { return mat->S->n; }
 
-  cuda_mat_get_m(mat->S, &m);
-
-  return m;
-}
-
-c_int OSQPMatrix_get_n( const OSQPMatrix *mat) {
-
-  c_int n;
-
-  cuda_mat_get_n(mat->S, &n);
-
-  return n;
-}
-
-c_int OSQPMatrix_get_nz(const OSQPMatrix *mat) {
-
-  c_int nnz;
-
-  if (mat->symmetric) nnz = mat->P_triu_nnz;
-  else                cuda_mat_get_nnz(mat->S, &nnz);
-
-  return nnz;
-}
+c_int OSQPMatrix_get_nz(const OSQPMatrix *mat) { return mat->symmetric ? mat->P_triu_nnz : mat->S->nnz; }
 
 void OSQPMatrix_mult_scalar(OSQPMatrix *mat,
                             c_float     sc) {
@@ -183,7 +162,7 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix  *mat,
     return OSQP_NULL;
   }
 
-  out = c_calloc(1, sizeof(OSQPMatrix));
+  out = (OSQPMatrix *) c_calloc(1, sizeof(OSQPMatrix));
 
   if (!out) return OSQP_NULL;
 

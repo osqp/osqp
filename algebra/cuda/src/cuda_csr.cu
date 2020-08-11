@@ -776,21 +776,3 @@ void cuda_submat_byrows(const csr    *A,
   cuda_free((void**)&d_new_row_number);
 }
 
-void cuda_mat_get_m(const csr *mat,
-                    c_int     *m) {
-
-  (*m) = mat->m;
-}
-
-void cuda_mat_get_n(const csr *mat,
-                    c_int     *n) {
-
-  (*n) = mat->n;
-}
-
-void cuda_mat_get_nnz(const csr *mat,
-                      c_int     *nnz) {
-
-  (*nnz) = mat->nnz;
-}
-

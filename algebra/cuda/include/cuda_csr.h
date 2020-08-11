@@ -60,15 +60,6 @@ void cuda_submat_byrows(const csr    *A,
                         csr         **Ared,
                         csr         **Aredt);
 
-void cuda_mat_get_m(const csr *mat,
-                    c_int     *m);
-
-void cuda_mat_get_n(const csr *mat,
-                    c_int     *n);
-
-void cuda_mat_get_nnz(const csr *mat,
-                      c_int     *nnz);
-
 # ifdef __cplusplus
 }
 # endif /* ifdef __cplusplus */
