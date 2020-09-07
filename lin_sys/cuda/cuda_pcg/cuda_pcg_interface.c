@@ -299,8 +299,8 @@ void free_linsys_solver_cudapcg(cudapcg_solver *s) {
 
 
 c_int update_linsys_solver_matrices_cudapcg(cudapcg_solver   *s,
-                                     const OSQPMatrix *P,
-                                     const OSQPMatrix *A) {
+                                            const OSQPMatrix *P,
+                                            const OSQPMatrix *A) {
 
   if (s->precondition) cuda_pcg_update_precond(s, 1, 1, 0);
   return 0;

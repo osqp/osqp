@@ -61,12 +61,7 @@ static void mat_vec_prod(cudapcg_solver *s,
   csr *A  = s->A;
   csr *At = s->At;
 
-  if (device) {
-    sigma = s->d_sigma;
-  }
-  else {
-    sigma = s->h_sigma;
-  }
+  sigma = device ? s->d_sigma : s->h_sigma;
 
   /* d_y = d_x */
   checkCudaErrors(cudaMemcpy(d_y, d_x, n * sizeof(c_float), cudaMemcpyDeviceToDevice));
