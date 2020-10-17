@@ -14,12 +14,15 @@ If you use OSQP for published work, we encourage you to put a star on `GitHub <h
         .. code:: latex
 
           @article{osqp,
-            author  = {Stellato, Bartolomeo and Banjac, Goran and Goulart, Paul and Bemporad, Alberto and Boyd, Stephen},
-            title   = {{{OSQP}}: An Operator Splitting Solver for Quadratic Programs},
+            author  = {Stellato, B. and Banjac, G. and Goulart, P. and Bemporad, A. and Boyd, S.},
+            title   = {{OSQP}: an operator splitting solver for quadratic programs},
             journal = {Mathematical Programming Computation},
+            volume  = {12},
+            number  = {4},
+            pages   = {637--672},
             year    = {2020},
             doi     = {10.1007/s12532-020-00179-2},
-            url     = {https://doi.org/10.1007/s12532-020-00179-2}
+            url     = {https://doi.org/10.1007/s12532-020-00179-2},
           }
 
     Infeasibility detection
@@ -40,7 +43,7 @@ If you use OSQP for published work, we encourage you to put a star on `GitHub <h
           }
 
     GPU implementation
-        GPU implementation and PCG method for solving linear systems in this `paper <https://arxiv.org/pdf/1912.04263.pdf>`__.
+        GPU implementation and PCG method for solving linear systems in this `paper <https://doi.org/10.1016/j.jpdc.2020.05.021>`__.
 
         .. code:: latex
 
