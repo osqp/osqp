@@ -343,7 +343,7 @@ endif()
 # Create CMake packages for the install directory
 # ----------------------------------------------
 
-set(ConfigPackageLocation lib/cmake/osqp)
+set(ConfigPackageLocation ${CMAKE_INSTALL_LIBDIR}/cmake/osqp)
 
 install(EXPORT ${PROJECT_NAME}
         FILE osqp-targets.cmake
