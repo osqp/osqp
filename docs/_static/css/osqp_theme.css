@@ -52,7 +52,7 @@ b, strong {
     font-weight: normal;
 }
 
-/* Make types in C/C++ docs less bold */
+/* Make types in C docs less bold */
 .rst-content dl dt {
     font-weight: 600;
 }
@@ -164,7 +164,7 @@ tr td code span{
     margin-bottom: 20px;
 }
 
-/* Smaller rubric in C/C++ description */
+/* Smaller rubric in C description */
 p.breathe-sectiondef-title.rubric {
 	font-size: 100%;
 }

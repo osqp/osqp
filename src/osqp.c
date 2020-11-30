@@ -981,7 +981,7 @@ c_int osqp_warm_start_y(OSQPWorkspace *work, const c_float *y) {
   // Update warm_start setting to true
   if (!work->settings->warm_start) work->settings->warm_start = 1;
 
-  // Copy primal variable into the iterate y
+  // Copy dual variable into the iterate y
   prea_vec_copy(y, work->y, work->data->m);
 
   // Scale iterate

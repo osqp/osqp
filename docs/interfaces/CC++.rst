@@ -1,6 +1,6 @@
-.. _c_cpp_interface:
+.. _c_interface:
 
-C/C++
+C
 =====
 
 
@@ -11,7 +11,7 @@ C/C++
 Main solver API
 ---------------
 
-The main C/C++ API is imported from the header :code:`osqp.h` and provides the following functions
+The main C API is imported from the header :code:`osqp.h` and provides the following functions
 
 
 .. doxygenfunction:: osqp_setup
@@ -25,7 +25,7 @@ The main C/C++ API is imported from the header :code:`osqp.h` and provides the f
 
 Sublevel API
 ------------
-Sublevel C/C++ API is also imported from the header :code:`osqp.h` and provides the following functions
+Sublevel C API is also imported from the header :code:`osqp.h` and provides the following functions
 
 Warm start
 ^^^^^^^^^^
