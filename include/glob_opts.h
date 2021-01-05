@@ -134,7 +134,7 @@ typedef float c_float;  /* for numerical values  */
 #   define c_print mexPrintf
 #  elif defined PYTHON
 #   include <Python.h>
-# define c_print(...)                                \
+# define c_print(...)                              \
   {                                                  \
     PyGILState_STATE gilstate = PyGILState_Ensure(); \
     PySys_WriteStdout(__VA_ARGS__);                  \

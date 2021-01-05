@@ -58,10 +58,8 @@ struct SuiteSparse_config_struct SuiteSparse_config =
 {
     // Memory allocation from glob_opts.h in OSQP
     c_malloc, c_realloc, c_free,
-
-    // Suitesparse printing disabled
+    // Ignore printing
     NULL,
-
     SuiteSparse_hypot,
     SuiteSparse_divcomplex
 

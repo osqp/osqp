@@ -106,11 +106,8 @@ void print_setup_header(const OSQPWorkspace *work) {
 
   if (settings->check_termination) {
     c_print("          check_termination: on (interval %i),\n",
-        (int)settings->check_termination);
-  }
-  else {
-    c_print("          check_termination: off,\n");
-  }
+      (int)settings->check_termination);
+  } else {c_print("          check_termination: off,\n");}
 # ifdef PROFILING
   if (settings->time_limit) {
     c_print("          time_limit: %.2e sec,\n", settings->time_limit);
@@ -119,36 +116,33 @@ void print_setup_header(const OSQPWorkspace *work) {
 
   if (settings->scaling) {
     c_print("          scaling: on, ");
-  }
-  else {
+  } else {
     c_print("          scaling: off, ");
   }
+
   if (settings->scaled_termination) {
     c_print("scaled_termination: on\n");
-  }
-  else {
+  } else {
     c_print("scaled_termination: off\n");
   }
+
   if (settings->warm_start) {
     c_print("          warm start: on, ");
-  }
-  else {
+  } else {
     c_print("          warm start: off, ");
   }
+
   if (settings->polish) {
     c_print("polish: on, ");
-  }
-  else {
+  } else {
     c_print("polish: off, ");
   }
-# ifdef PROFILING
+
   if (settings->time_limit) {
     c_print("time_limit: %.2e sec\n", settings->time_limit);
-  }
-  else {
+  } else {
     c_print("time_limit: off\n");
   }
-# endif /* ifdef PROFILING */
 
   c_print("\n");
 }
