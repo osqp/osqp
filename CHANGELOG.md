@@ -3,6 +3,7 @@ Version 0.6.2 (6 January 2021)
 * Fix segfault python multithreading
 * Compatibility python 3.9
 * Updated QDLDL to version 0.1.5
+* Drop Python 2.7 support
 
 
 
