@@ -11,7 +11,7 @@ environment:
   MINICONDA: C:\Miniconda
   CMAKE_PROJECT: MinGW Makefiles
   PYTHON_VERSION: 3.7
-  OSQP_VERSION: 0.6.2.dev0
+  OSQP_VERSION: 0.6.2
 
 init:
   # Uncomment for remote desktop debug
