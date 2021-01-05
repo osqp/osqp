@@ -1,3 +1,11 @@
+Version 0.6.2 (6 January 2021)
+------------------------------
+* Fix segfault python multithreading
+* Compatibility python 3.9
+* Updated QDLDL to version 0.1.5
+
+
+
 Version 0.6.0 (30 August 2019)
 ------------------------------
 * Added meaningful return values to internal functions. Changed syntax of `osqp_setup` function. It now returns an exitflag.
