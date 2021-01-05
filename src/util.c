@@ -102,30 +102,30 @@ void print_setup_header(const OSQPWorkspace *work) {
           settings->sigma, settings->alpha);
   c_print("max_iter = %i\n", (int)settings->max_iter);
 
-  if (settings->check_termination) c_print(
-      "          check_termination: on (interval %i),\n",
-      (int)settings->check_termination);
-  else c_print("          check_termination: off,\n");
+  if (settings->check_termination) {
+    c_print("          check_termination: on (interval %i),\n",
+      (int)settings->check_termination);}
+  else {c_print("          check_termination: off,\n");}
 
 # ifdef PROFILING
   if (settings->time_limit) c_print("          time_limit: %.2e sec,\n",
                                     settings->time_limit);
 # endif /* ifdef PROFILING */
 
-  if (settings->scaling) c_print("          scaling: on, ");
-  else c_print("          scaling: off, ");
+  if (settings->scaling) {c_print("          scaling: on, ");}
+  else {c_print("          scaling: off, ");}
 
-  if (settings->scaled_termination) c_print("scaled_termination: on\n");
-  else c_print("scaled_termination: off\n");
+  if (settings->scaled_termination) {c_print("scaled_termination: on\n");}
+  else {c_print("scaled_termination: off\n");}
 
-  if (settings->warm_start) c_print("          warm start: on, ");
-  else c_print("          warm start: off, ");
+  if (settings->warm_start) {c_print("          warm start: on, ");}
+  else {c_print("          warm start: off, ");}
 
-  if (settings->polish) c_print("polish: on, ");
-  else c_print("polish: off, ");
+  if (settings->polish) {c_print("polish: on, ");}
+  else {c_print("polish: off, ");}
 
-  if (settings->time_limit) c_print("time_limit: %.2e sec\n", settings->time_limit);
-  else c_print("time_limit: off\n");
+  if (settings->time_limit) {c_print("time_limit: %.2e sec\n", settings->time_limit);}
+  else {c_print("time_limit: off\n");}
 
   c_print("\n");
 }
