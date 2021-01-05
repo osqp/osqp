@@ -138,11 +138,13 @@ void print_setup_header(const OSQPWorkspace *work) {
     c_print("polish: off, ");
   }
 
+# ifdef PROFILING
   if (settings->time_limit) {
     c_print("time_limit: %.2e sec\n", settings->time_limit);
   } else {
     c_print("time_limit: off\n");
   }
+# endif
 
   c_print("\n");
 }
