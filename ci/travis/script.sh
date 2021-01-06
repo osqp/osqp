@@ -88,6 +88,22 @@ cd build
 cmake -G "Unix Makefiles" -DEMBEDDED=2 ..
 make
 
+echo "Building OSQP without profiling"
+cd ${TRAVIS_BUILD_DIR}
+rm -rf build
+mkdir build
+cd build
+cmake -G "Unix Makefiles" -DPROFILING=OFF ..
+make
+
+echo "Building OSQP without user interrupt"
+cd ${TRAVIS_BUILD_DIR}
+rm -rf build
+mkdir build
+cd build
+cmake -G "Unix Makefiles" -DCTRLC=OFF ..
+make
+
 echo "Testing OSQP without printing"
 cd ${TRAVIS_BUILD_DIR}
 rm -rf build

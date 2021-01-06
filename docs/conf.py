@@ -24,7 +24,7 @@ import subprocess
 # sys.path.insert(0, os.path.abspath('.'))
 
 # Set version for bumpversion
-__version__ = "0.6.0"
+__version__ = "0.6.2"
 
 # -- General configuration ------------------------------------------------
 
@@ -51,7 +51,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'OSQP'
-copyright = '2020, Bartolomeo Stellato, Goran Banjac'
+copyright = '2021, Bartolomeo Stellato, Goran Banjac'
 author = 'Bartolomeo Stellato, Goran Banjac'
 
 # The version info for the project you're documenting, acts as replacement for

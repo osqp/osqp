@@ -29,7 +29,7 @@ c_float compute_rho_estimate(OSQPWorkspace *work) {
   pri_res_norm  = vec_norm_inf(work->z, m);           // ||z||
   temp_res_norm = vec_norm_inf(work->Ax, m);          // ||Ax||
   pri_res_norm  = c_max(pri_res_norm, temp_res_norm); // max (||z||,||Ax||)
-  pri_res      /= (pri_res_norm + 1e-10);             // Normalize primal
+  pri_res      /= (pri_res_norm + OSQP_DIVISION_TOL); // Normalize primal
                                                       // residual (prevent 0
                                                       // division)
 
@@ -37,20 +37,17 @@ c_float compute_rho_estimate(OSQPWorkspace *work) {
   dua_res_norm  = vec_norm_inf(work->data->q, n);     // ||q||
   temp_res_norm = vec_norm_inf(work->Aty, n);         // ||A' y||
   dua_res_norm  = c_max(dua_res_norm, temp_res_norm);
-  temp_res_norm = vec_norm_inf(work->Px, n);          //  ||P x||
+  temp_res_norm = vec_norm_inf(work->Px, n);          // ||P x||
   dua_res_norm  = c_max(dua_res_norm, temp_res_norm); // max(||q||,||A' y||,||P
                                                       // x||)
-  dua_res      /= (dua_res_norm + 1e-10);             // Normalize dual residual
+  dua_res      /= (dua_res_norm + OSQP_DIVISION_TOL); // Normalize dual residual
                                                       // (prevent 0 division)
 
 
   // Return rho estimate
-  rho_estimate = work->settings->rho * c_sqrt(pri_res / (dua_res + 1e-10)); // (prevent
-                                                                            // 0
-                                                                            // division)
-  rho_estimate = c_min(c_max(rho_estimate, RHO_MIN), RHO_MAX);              // Constrain
-                                                                            // rho
-                                                                            // values
+  rho_estimate = work->settings->rho * c_sqrt(pri_res / dua_res);
+  rho_estimate = c_min(c_max(rho_estimate, RHO_MIN), RHO_MAX);     // Constrain
+                                                                   // rho values
   return rho_estimate;
 }
 
@@ -366,7 +363,7 @@ c_int is_primal_infeasible(OSQPWorkspace *work, c_float eps_prim_inf) {
   //
   // 1) A' * delta_y < eps * ||delta_y||
   //
-  // 2) u'*max(delta_y, 0) + l'*min(delta_y, 0) < -eps * ||delta_y||
+  // 2) u'*max(delta_y, 0) + l'*min(delta_y, 0) < eps * ||delta_y||
   //
 
   c_int i; // Index for loops
@@ -398,7 +395,7 @@ c_int is_primal_infeasible(OSQPWorkspace *work, c_float eps_prim_inf) {
     norm_delta_y = vec_norm_inf(work->delta_y, work->data->m);
   }
 
-  if (norm_delta_y > eps_prim_inf) { // ||delta_y|| > 0
+  if (norm_delta_y > OSQP_DIVISION_TOL) {
 
     for (i = 0; i < work->data->m; i++) {
       ineq_lhs += work->data->u[i] * c_max(work->delta_y[i], 0) + \
@@ -406,7 +403,7 @@ c_int is_primal_infeasible(OSQPWorkspace *work, c_float eps_prim_inf) {
     }
 
     // Check if the condition is satisfied: ineq_lhs < -eps
-    if (ineq_lhs < -eps_prim_inf * norm_delta_y) {
+    if (ineq_lhs < eps_prim_inf * norm_delta_y) {
       // Compute and return ||A'delta_y|| < eps_prim_inf
       mat_tpose_vec(work->data->A, work->delta_y, work->Atdelta_y, 0, 0);
 
@@ -430,7 +427,7 @@ c_int is_dual_infeasible(OSQPWorkspace *work, c_float eps_dual_inf) {
   // This function checks for the scaled dual infeasibility termination
   // criteria.
   //
-  // 1) q * delta_x < - eps * || delta_x ||
+  // 1) q * delta_x < eps * || delta_x ||
   //
   // 2) ||P * delta_x || < eps * || delta_x ||
   //
@@ -457,14 +454,14 @@ c_int is_dual_infeasible(OSQPWorkspace *work, c_float eps_dual_inf) {
   }
 
   // Prevent 0 division || delta_x || > 0
-  if (norm_delta_x > eps_dual_inf) {
+  if (norm_delta_x > OSQP_DIVISION_TOL) {
     // Normalize delta_x by its norm
 
     /* vec_mult_scalar(work->delta_x, 1./norm_delta_x, work->data->n); */
 
     // Check first if q'*delta_x < 0
     if (vec_prod(work->data->q, work->delta_x, work->data->n) <
-        -cost_scaling * eps_dual_inf * norm_delta_x) {
+        cost_scaling * eps_dual_inf * norm_delta_x) {
       // Compute product P * delta_x (NB: P is store in upper triangular form)
       mat_vec(work->data->P, work->delta_x, work->Pdelta_x, 0);
       mat_tpose_vec(work->data->P, work->delta_x, work->Pdelta_x, 1, 1);
@@ -811,6 +808,13 @@ c_int validate_data(const OSQPData *data) {
   if (!(data->A)) {
 # ifdef PRINTING
     c_eprint("Missing matrix A");
+# endif
+    return 1;
+  }
+
+  if (!(data->q)) {
+# ifdef PRINTING
+    c_eprint("Missing vector q");
 # endif
     return 1;
   }

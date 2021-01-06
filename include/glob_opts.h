@@ -37,24 +37,29 @@ static void* c_realloc(void *ptr, size_t size) {
   mexMakeMemoryPersistent(m);
   return m;
 }
-
     #   define c_free mxFree
 #  elif defined PYTHON
 // Define memory allocation for python. Note that in Python 2 memory manager
 // Calloc is not implemented
-    #   include <Python.h>
-    #   define c_malloc PyMem_Malloc
-    #   if PY_MAJOR_VERSION >= 3
-    #    define c_calloc PyMem_Calloc
-    #   else  /* if PY_MAJOR_VERSION >= 3 */
+#   include <Python.h>
+#   if PY_MAJOR_VERSION >= 3
+// https://docs.python.org/3/c-api/memory.html
+// The following function sets are wrappers to the system allocator. These functions are thread-safe, the GIL does not need to be held.
+// The default raw memory allocator uses the following functions: malloc(), calloc(), realloc() and free(); call malloc(1) (or calloc(1, 1)) when requesting zero bytes.
+#    define c_malloc PyMem_RawMalloc
+#    define c_calloc PyMem_RawCalloc
+#    define c_free PyMem_RawFree
+#    define c_realloc PyMem_RawRealloc
+#   else  /* if PY_MAJOR_VERSION >= 3 */
+#   define c_malloc PyMem_Malloc
+#   define c_free PyMem_Free
+#   define c_realloc PyMem_Realloc
 static void* c_calloc(size_t num, size_t size) {
-  void *m = PyMem_Malloc(num * size);
-  memset(m, 0, num * size);
-  return m;
+	void *m = PyMem_Malloc(num * size);
+	memset(m, 0, num * size);
+	return m;
 }
-    #   endif /* if PY_MAJOR_VERSION >= 3 */
-    #   define c_free PyMem_Free
-    #   define c_realloc PyMem_Realloc
+#   endif /* if PY_MAJOR_VERSION >= 3 */
 
 # elif !defined OSQP_CUSTOM_MEMORY
 /* If no custom memory allocator defined, use
@@ -120,46 +125,37 @@ typedef float c_float;  /* for numerical values  */
 
 # endif // end EMBEDDED
 
-
 # ifdef PRINTING
 #  include <stdio.h>
 #  include <string.h>
 
+/* informational print function */
 #  ifdef MATLAB
 #   define c_print mexPrintf
-
-// The following trick slows down the performance a lot. Since many solvers
-// actually
-// call mexPrintf and immediately force print buffer flush
-// otherwise messages don't appear until solver termination
-// ugly because matlab does not provide a vprintf mex interface
-// #include <stdarg.h>
-// static int c_print(char *msg, ...)
-// {
-//   va_list argList;
-//   va_start(argList, msg);
-//   //message buffer
-//   int bufferSize = 256;
-//   char buffer[bufferSize];
-//   vsnprintf(buffer,bufferSize-1, msg, argList);
-//   va_end(argList);
-//   int out = mexPrintf(buffer); //print to matlab display
-//   mexEvalString("drawnow;");   // flush matlab print buffer
-//   return out;
-// }
 #  elif defined PYTHON
 #   include <Python.h>
-#   define c_print PySys_WriteStdout
+# define c_print(...)                              \
+  {                                                  \
+    PyGILState_STATE gilstate = PyGILState_Ensure(); \
+    PySys_WriteStdout(__VA_ARGS__);                  \
+    PyGILState_Release(gilstate);                    \
+  }
 #  elif defined R_LANG
 #   include <R_ext/Print.h>
 #   define c_print Rprintf
 #  else  /* ifdef MATLAB */
 #   define c_print printf
-#  endif /* ifdef MATLAB */
+#  endif /* c_print configuration */
 
-/* Print error macro */
-#  define c_eprint(...) c_print("ERROR in %s: ", __FUNCTION__); c_print(\
-    __VA_ARGS__); c_print("\n");
+/* error printing function */
+#  ifdef R_LANG
+    /* Some CRAN builds complain about __VA_ARGS__, so just print */
+    /* out the error messages on R without the __FUNCTION__ trace */
+#   define c_eprint Rprintf
+#  else
+#   define c_eprint(...) c_print("ERROR in %s: ", __FUNCTION__); \
+            c_print(__VA_ARGS__); c_print("\n");
+#  endif /* c_eprint configuration */
 
 # endif  /* PRINTING */
 
