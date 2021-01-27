@@ -44,7 +44,7 @@ Please report any issues via the [Github issue tracker](https://github.com/oxfor
 Numerical benchmarks against other solvers are available [here](https://github.com/oxfordcontrol/osqp_benchmarks).
 
 ## How to build with CUDA
-On Linux: `cmake -G "Unix Makefiles" -DDLONG=OFF -DDFLOAT=ON -CUDA_SUPPORT=ON ..` to configure and `cmake --build .` to build.
+On Linux: `cmake -G "Unix Makefiles" -DDLONG=OFF -DDFLOAT=ON -DCUDA_SUPPORT=ON ..` to configure and `cmake --build .` to build
 
 On Windows: `cmake -G "Visual Studio 15 2017 Win64" -DDLONG=OFF -DDFLOAT=ON -DCUDA_SUPPORT=ON ..` to configure and `cmake --build . --config Release` to build
 
