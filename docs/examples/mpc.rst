@@ -486,4 +486,4 @@ Julia
         # Update initial state
         l[1:nx], u[1:nx] = -x0, -x0
         OSQP.update!(m; l=l, u=u)
-end
+    end
