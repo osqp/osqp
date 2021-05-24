@@ -307,7 +307,7 @@ static const char* test_quad_form_upper_triang() {
 static const char* test_lin_alg()
 {
   // initialize algebra libraries
-  osqp_algebra_init_libs();
+  osqp_algebra_init_libs(0);
 
 #ifndef CUDA_SUPPORT
   mu_run_test(test_constr_sparse_mat);

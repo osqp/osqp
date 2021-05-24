@@ -66,7 +66,8 @@ void osqp_set_default_settings(OSQPSettings *settings) {
   settings->eps_prim_inf  = (c_float)EPS_PRIM_INF;   /* primal infeasibility tolerance */
   settings->eps_dual_inf  = (c_float)EPS_DUAL_INF;   /* dual infeasibility   tolerance */
   settings->alpha         = (c_float)ALPHA;          /* relaxation parameter */
-  settings->linsys_solver = LINSYS_SOLVER;           /* relaxation parameter */
+  settings->linsys_solver = LINSYS_SOLVER;           /* linear system solver */
+  settings->algebra_device = 0;                      /* algebra device identifier */
 
 #ifndef EMBEDDED
   settings->delta              = DELTA;              /* regularization parameter for polish */
@@ -126,7 +127,7 @@ c_int osqp_setup(OSQPSolver** solverp,
 # endif /* ifdef PROFILING */
 
   // Initialize algebra libraries
-  exitflag = osqp_algebra_init_libs();
+  exitflag = osqp_algebra_init_libs(settings->algebra_device);
   if (exitflag) {
     return osqp_error(OSQP_ALGEBRA_LOAD_ERROR);
   }

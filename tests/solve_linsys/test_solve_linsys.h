@@ -126,7 +126,7 @@ static char* test_solveKKT_pardiso() {
 static const char* test_solve_linsys()
 {
   // initialize algebra libraries
-  osqp_algebra_init_libs();
+  osqp_algebra_init_libs(0);
 
   mu_run_test(test_solveKKT);
 #ifdef ENABLE_MKL_PARDISO

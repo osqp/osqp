@@ -11,7 +11,7 @@ extern "C" {
 
 
 /* Initialize libraries that implement algebra. */
-c_int osqp_algebra_init_libs(void);
+c_int osqp_algebra_init_libs(c_int algebra_device);
 
 /* Free libraries that implement algebra. */
 void osqp_algebra_free_libs(void);

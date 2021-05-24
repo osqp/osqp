@@ -45,6 +45,7 @@ typedef struct {
   c_int check_termination;  ///< integer, check termination interval; if 0, checking is disabled
   c_int warm_start;         ///< boolean, warm start
   enum linsys_solver_type linsys_solver; ///< linear system solver to use
+  c_int algebra_device;     ///< algebra device identifier; currently used for cuda devices
 
 # if EMBEDDED != 1
   c_int   adaptive_rho;           ///< boolean, is rho step size adaptive?
