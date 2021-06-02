@@ -111,7 +111,9 @@ if(OSQP_CUSTOM_MEMORY)
 	message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY}")
 endif()
 
-
+# Optionally respect BUILD_SHARED_LIBS (this option targets packagers)
+option (OSQP_RESPECT_BUILD_SHARED_LIBS "Only produce a static or shared library, depending on BUILD_SHARED_LIB" OFF)
+message(STATUS "OSQP_RESPECT_BUILD_SHARED_LIBS is ${OSQP_RESPECT_BUILD_SHARED_LIBS}")
 
 # Linear solvers dependencies
 # ---------------------------------------------
@@ -256,36 +258,66 @@ if (R_LANG)
 endif (R_LANG)
 
 
-# Create Static Library
-# ----------------------------------------------
-
 # Add linear system solvers cumulative library
 add_subdirectory(lin_sys)
 
-# Static library
-add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
-# Give same name to static library output
-set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
-
-# Include directories for linear system solvers
-target_include_directories(osqpstatic PRIVATE ${linsys_solvers_includes})
-
-# Declare include directories for the cmake exported target
-target_include_directories(osqpstatic
-                           PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-                                  "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
-
-# Install Static Library
-# ----------------------------------------------
-
 include(GNUInstallDirs)
 
-install(TARGETS osqpstatic
-        EXPORT  ${PROJECT_NAME}
-        ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-        LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-        RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
+# Either build a static library, or respect BUILD_SHARED_LIBS
+if(NOT OSQP_RESPECT_BUILD_SHARED_LIBS)
+    # Create Static Library
+    # ----------------------------------------------
 
+    # Static library
+    add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
+    # Give same name to static library output
+    set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
+
+    # Include directories for linear system solvers
+    target_include_directories(osqpstatic PRIVATE ${linsys_solvers_includes})
+
+    # Declare include directories for the cmake exported target
+    target_include_directories(osqpstatic
+                               PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+                                      "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
+
+    # Install Static Library
+    # ----------------------------------------------
+    install(TARGETS osqpstatic
+            EXPORT  ${PROJECT_NAME}
+            ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+            LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+            RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
+else()
+    # Create Static or Shared Library depending on BUILD_SHARED_LIBS
+    # --------------------------------------------------------------
+
+    add_library (osqp ${osqp_src} ${osqp_headers} ${linsys_solvers})
+
+    # Include directories for linear system solvers
+    target_include_directories(osqp PRIVATE ${linsys_solvers_includes})
+
+    # Declare include directories for the cmake exported target
+    target_include_directories(osqp
+                               PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+                                      "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
+
+    # If osqp is shared, export automatically its symbols on Windows
+    if(BUILD_SHARED_LIBS)
+        set_target_properties(osqp PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+    endif()
+
+    # Install Static Library
+    # ----------------------------------------------
+    install(TARGETS osqp
+            EXPORT  ${PROJECT_NAME}
+            ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+            LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+            RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
+
+    # Add an osqpstatic alias on osqp to permit all the executables to link correctly
+    add_library(osqpstatic ALIAS osqp)
+endif()
 
 # Install Headers
 # ----------------------------------------------
@@ -302,24 +334,26 @@ endif (MATLAB)
 #   - do not build shared library
 #   - do not build demo
 if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
-    # Create osqp shared library
-    # NB: Add all the linear system solvers here
-    add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
+    if (NOT OSQP_RESPECT_BUILD_SHARED_LIBS)
+        # Create osqp shared library
+        # NB: Add all the linear system solvers here
+        add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
 
-    # Include directories for linear system solvers
-    target_include_directories(osqp PRIVATE ${linsys_solvers_includes})
+        # Include directories for linear system solvers
+        target_include_directories(osqp PRIVATE ${linsys_solvers_includes})
 
-    # Declare include directories for the cmake exported target
-    target_include_directories(osqp
-                               PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-                                      "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
+        # Declare include directories for the cmake exported target
+        target_include_directories(osqp
+                                   PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+                                          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
-    # Install osqp shared library
-    install(TARGETS osqp
-            EXPORT  ${PROJECT_NAME}
-            LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-            ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-            RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
+        # Install osqp shared library
+        install(TARGETS osqp
+                EXPORT  ${PROJECT_NAME}
+                LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+                ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+                RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
+    endif()
 
     # Create demo executable (linked to static library)
     add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
