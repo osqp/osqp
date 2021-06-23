@@ -25,11 +25,21 @@ echo "Testing OSQP with standard configuration"
 cd ${TRAVIS_BUILD_DIR}
 mkdir build
 cd build
-cmake -G "Unix Makefiles" -DCOVERAGE=ON -DUNITTESTS=ON ..
-make
-${TRAVIS_BUILD_DIR}/build/out/osqp_tester
+#cmake -G "Unix Makefiles" -DCOVERAGE=ON -DUNITTESTS=OFF ..
+#make
+#${TRAVIS_BUILD_DIR}/build/out/osqp_tester
 # Pefrorm code coverage (only in Linux case)
 if [[ $TRAVIS_OS_NAME == "linux" ]]; then
+    if [[ $PLAT == "aarch64" ]]; then
+       echo "Tanveen aarch"
+       cmake -G "Unix Makefiles" -DCOVERAGE=ON -DUNITTESTS=ON -DENABLE_MKL_PARDISO=OFF ..
+       make
+     else
+       echo "Tanveen non aarch"
+       cmake -G "Unix Makefiles" -DCOVERAGE=ON -DUNITTESTS=ON ..
+       make
+    fi
+    ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
     cd ${TRAVIS_BUILD_DIR}/build
     lcov --directory . --capture -o coverage.info # capture coverage info
     lcov --remove coverage.info "${TRAVIS_BUILD_DIR}/tests/*" \
@@ -37,8 +47,12 @@ if [[ $TRAVIS_OS_NAME == "linux" ]]; then
         "${TRAVIS_BUILD_DIR}/lin_sys/direct/qdldl/qdldl_sources/*" \
         "/usr/include/x86_64-linux-gnu/**/*" \
         -o coverage.info # filter out tests and unnecessary files
-    lcov --list coverage.info # debug before upload
-    coveralls-lcov coverage.info # uploads to coveralls
+     lcov --list coverage.info # debug before upload
+     coveralls-lcov coverage.info # uploads to coveralls
+else
+   cmake -G "Unix Makefiles" -DCOVERAGE=ON -DUNITTESTS=ON -DENABLE_MKL_PARDISO=OFF ..
+   make
+   ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
 fi
 
 if [[ $TRAVIS_OS_NAME == "linux" ]]; then
@@ -68,7 +82,12 @@ cd ${TRAVIS_BUILD_DIR}
 rm -rf build
 mkdir build
 cd build
-cmake -G "Unix Makefiles" -DDLONG=OFF -DUNITTESTS=ON ..
+if [[ $PLAT == 'aarch64' ]]; then
+    echo "Tanveen aarch 2"
+    cmake -G "Unix Makefiles" -DDLONG=OFF -DENABLE_MKL_PARDISO=OFF -DUNITTESTS=ON ..
+else
+    cmake -G "Unix Makefiles" -DDLONG=OFF -DUNITTESTS=ON ..
+fi
 make
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
 
@@ -109,7 +128,12 @@ cd ${TRAVIS_BUILD_DIR}
 rm -rf build
 mkdir build
 cd build
-cmake -G "Unix Makefiles" -DPRINTING=OFF -DUNITTESTS=ON ..
+if [[ $PLAT == 'aarch64' ]]; then
+    echo "Tanveen aarch 3"
+    cmake -G "Unix Makefiles" -DPRINTING=OFF -DUNITTESTS=ON -DENABLE_MKL_PARDISO=OFF ..
+else
+    cmake -G "Unix Makefiles" -DPRINTING=OFF -DUNITTESTS=ON ..
+fi
 make
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester
 
@@ -122,9 +146,12 @@ cd ${TRAVIS_BUILD_DIR}
 rm -rf build
 mkdir build
 cd build
-cmake -DUNITTESTS=ON \
-    -DOSQP_CUSTOM_MEMORY=${TRAVIS_BUILD_DIR}/tests/custom_memory/custom_memory.h \
-    ..
+if [[ $PLAT == 'aarch64' ]]; then
+    echo "Tanveen aarch64 4"
+    cmake -DUNITTESTS=ON -DENABLE_MKL_PARDISO=OFF -DOSQP_CUSTOM_MEMORY=${TRAVIS_BUILD_DIR}/tests/custom_memory/custom_memory.h ..
+else
+   cmake -DUNITTESTS=ON -DOSQP_CUSTOM_MEMORY=${TRAVIS_BUILD_DIR}/tests/custom_memory/custom_memory.h ..
+fi
 make osqp_tester_custom_memory
 ${TRAVIS_BUILD_DIR}/build/out/osqp_tester_custom_memory
 

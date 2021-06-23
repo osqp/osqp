@@ -21,15 +21,21 @@ fi
 if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
     wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
 else
-    wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+   if [[ $PLAT == 'aarch64' ]]; then
+       wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-aarch64.sh -O miniconda.sh;
+   else
+       wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+
+   fi
 fi
 export CONDA_ROOT=${DEPS_DIR}/miniconda
 chmod +x miniconda.sh && ./miniconda.sh -b -p $CONDA_ROOT
 export PATH=${DEPS_DIR}/miniconda/bin:$PATH
 hash -r
+$CONDA_ROOT/bin/conda --version
 conda config --set always_yes yes --set changeps1 no
 conda update --yes -q conda
-conda create -n testenv --yes python=$PYTHON_VERSION mkl numpy scipy future
+conda create -n testenv --yes python=$PYTHON_VERSION numpy scipy future
 source activate testenv
 
 # Install cmake
