@@ -10,6 +10,14 @@ matrix:
       virt: vm
       group: edge
       env:
+        - PYTHON_VERSION="3.9"
+        - PLAT=aarch64
+
+    - os: linux
+      arch: arm64-graviton
+      virt: vm
+      group: edge
+      env:
         - PYTHON_VERSION="3.7"
         - PLAT=aarch64
 
