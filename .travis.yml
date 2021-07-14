@@ -4,6 +4,15 @@ matrix:
   include:
     - os: linux
       dist: xenial
+
+    - os: linux
+      arch: arm64
+      #virt: vm
+      #group: edge
+      env:
+        - PYTHON_VERSION="3.7"
+        - PLAT=aarch64
+
     - os: linux
       arch: arm64-graviton2
       virt: vm
