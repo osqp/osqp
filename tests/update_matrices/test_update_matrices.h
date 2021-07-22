@@ -330,7 +330,7 @@ static char* test_update_pardiso() {
   data = generate_problem_update_matrices_sols_data();
 
   // Generate first problem data
-  problem    = c_malloc(sizeof(OSQPData));
+  problem    = (OSQPData*)c_malloc(sizeof(OSQPData));
   problem->P = data->test_solve_Pu;
   problem->q = data->test_solve_q;
   problem->A = data->test_solve_A;
@@ -375,7 +375,7 @@ static char* test_update_pardiso() {
 
   // Update P
   nnzP       = data->test_solve_Pu->p[data->test_solve_Pu->n];
-  Px_new_idx = c_malloc(nnzP * sizeof(c_int)); // Generate indices going from
+  Px_new_idx = (c_int*)c_malloc(nnzP * sizeof(c_int)); // Generate indices going from
                                                // beginning to end of P
 
   for (i = 0; i < nnzP; i++) {
@@ -404,7 +404,7 @@ static char* test_update_pardiso() {
 
   // Update A
   nnzA       = data->test_solve_A->p[data->test_solve_A->n];
-  Ax_new_idx = c_malloc(nnzA * sizeof(c_int)); // Generate indices going from
+  Ax_new_idx = (c_int*)c_malloc(nnzA * sizeof(c_int)); // Generate indices going from
                                                // beginning to end of P
 
   for (i = 0; i < nnzA; i++) {

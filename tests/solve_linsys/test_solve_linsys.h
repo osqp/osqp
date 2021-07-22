@@ -62,7 +62,7 @@ static char* test_solveKKT_pardiso() {
 
   // Set rho_vec
   m = data->test_solve_KKT_A->m;
-  rho_vec = c_calloc(m, sizeof(c_float));
+  rho_vec = (c_float*)c_calloc(m, sizeof(c_float));
   vec_add_scalar(rho_vec, settings->rho, m);
 
   // Load Pardiso shared library

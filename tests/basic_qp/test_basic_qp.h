@@ -242,12 +242,12 @@ static const char* test_basic_qp_solve()
   settings->alpha = tmp_float;
 
   // Setup workspace with wrong settings->linsys_solver
-  tmp_int = settings->linsys_solver;
-  settings->linsys_solver = 5;
+  enum linsys_solver_type tmp_solver_type= settings->linsys_solver;
+  settings->linsys_solver = UNKNOWN_SOLVER;
   exitflag = osqp_setup(&work, data, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to wrong settings->linsys_solver",
             exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
-  settings->linsys_solver = tmp_int;
+  settings->linsys_solver = tmp_solver_type;
 
   // Setup workspace with wrong settings->verbose
   tmp_int = settings->verbose;

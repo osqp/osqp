@@ -411,12 +411,13 @@ if (UNITTESTS)
     # Direct linear solver testing
     include_directories(tests)
     add_executable(osqp_tester
-                ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c
-                ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
-		${PROJECT_SOURCE_DIR}/tests/minunit.h
-                ${test_headers}
-                ${codegen_test_headers})
-    target_link_libraries (osqp_tester osqpstatic)
+            ${PROJECT_SOURCE_DIR}/tests/osqp_catch2_tester.cpp
+            ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
+            ${test_headers}
+            ${codegen_test_headers}
+            tests/test_catch2.cpp
+            )
+    target_link_libraries (osqp_tester osqpstatic ${CMAKE_DL_LIBS})
 
     # Add custom memory target
     add_executable(osqp_tester_custom_memory
