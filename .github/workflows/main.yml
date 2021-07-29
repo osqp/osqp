@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ master, develop, gh-actions ]
+    branches: [ master, develop**, gh-actions ]
   pull_request:
-    branches: [ master, develop ]
+    branches: [ master, develop** ]
 
 jobs:
 
@@ -25,6 +25,14 @@ jobs:
               cmake_flags_extra: '-DEMBEDDED=1'
             - cmake_flags: '-DUNITTESTS=ON -DCOVERAGE=ON'
               cmake_flags_extra: '-DEMBEDDED=2'
+
+          include:
+            - os: ubuntu-latest
+              cmake_generator: "Unix Makefiles"
+            - os: macos-latest
+              cmake_generator: "Unix Makefiles"
+            - os: windows-latest
+              cmake_generator: "MinGW Makefiles"
 
       defaults:
         run:
@@ -50,7 +58,6 @@ jobs:
         - name: Setup (Linux)
           if: runner.os == 'Linux'
           run: |
-            echo "CMAKE_GENERATOR=Unix Makefiles" >> $GITHUB_ENV
             echo "LD_LIBRARY_PATH=$CONDA_PREFIX/lib" >> $GITHUB_ENV
 
         - name: Setup (macOS)
@@ -60,14 +67,12 @@ jobs:
           #   doesn't work either.
           # Here we get around it by using a standard non-root location for .dylib files as a soft link
           run: |
-            echo "CMAKE_GENERATOR=Unix Makefiles" >> $GITHUB_ENV
             echo "DYLD_LIBRARY_PATH=$CONDA_PREFIX/lib" >> $GITHUB_ENV
             ln -s $CONDA_PREFIX/lib ~/lib
 
         - name: Setup (Windows)
           if: runner.os == 'Windows'
           run: |
-            echo "CMAKE_GENERATOR=MinGW Makefiles" >> $GITHUB_ENV
             echo "$CONDA_PREFIX/Library/bin" >> $GITHUB_PATH
         # -----------------
 
@@ -83,7 +88,7 @@ jobs:
 
         - name: Build
           run: |
-            cmake -S . -B build ${{ matrix.cmake_flags }} ${{ matrix.cmake_flags_extra }}
+            cmake -G ${{ matrix.cmake_generator }} -S . -B build ${{ matrix.cmake_flags }} ${{ matrix.cmake_flags_extra }}
             cmake --build build
 
         - name: Test
@@ -99,23 +104,17 @@ jobs:
           if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '-DENABLE_MKL_PARDISO=OFF' }}
 
         - name: Generate coverage
-          run: |
-            sudo apt-get install lcov
-            sudo gem install coveralls-lcov
-            lcov --directory build/ --capture -o coverage.info
-            lcov --remove coverage.info \
-              "$(pwd)/tests/*" \
-              "$(pwd)/lin_sys/direct/qdldl/amd/*" \
-              "$(pwd)/lin_sys/direct/qdldl/qdldl_sources/*" \
-              "/usr/include/*" \
-              -o coverage.info
-            lcov --list coverage.info
+        uses: imciner2/run-lcov@v1
+        with:
+          input_directory: '${{ runner.workspace }}/build'
+          exclude: '"$GITHUB_WORKSPACE/tests/*" "$GITHUB_WORKSPACE/lin_sys/direct/qdldl/amd/*" "$GITHUB_WORKSPACE/lin_sys/direct/qdldl/qdldl_sources/*"" "/usr/include/*"'
+          output_file: '${{ runner.workspace }}/build/coverage.info'
           if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '' }}
 
         - name: Coveralls
           uses: coverallsapp/github-action@master
           with:
-            path-to-lcov: coverage.info
+            path-to-lcov: '${{ runner.workspace }}/build/coverage.info'
             github-token: ${{ secrets.GITHUB_TOKEN }}
           if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '' }}
 
