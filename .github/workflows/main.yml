@@ -107,7 +107,7 @@ jobs:
           uses: imciner2/run-lcov@v1
           with:
             input_directory: '${{ runner.workspace }}/osqp/build'
-            exclude: '"$GITHUB_WORKSPACE/tests/*" "$GITHUB_WORKSPACE/lin_sys/direct/qdldl/amd/*" "$GITHUB_WORKSPACE/lin_sys/direct/qdldl/qdldl_sources/*"" "/usr/include/*"'
+            exclude: '"$GITHUB_WORKSPACE/tests/*" "$GITHUB_WORKSPACE/lin_sys/direct/qdldl/amd/*" "$GITHUB_WORKSPACE/lin_sys/direct/qdldl/qdldl_sources/*" "/usr/include/*"'
             output_file: '${{ runner.workspace }}/osqp/build/coverage.info'
           if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '' }}
 
