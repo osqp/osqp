@@ -104,12 +104,12 @@ jobs:
           if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '-DENABLE_MKL_PARDISO=OFF' }}
 
         - name: Generate coverage
-        uses: imciner2/run-lcov@v1
-        with:
-          input_directory: '${{ runner.workspace }}/build'
-          exclude: '"$GITHUB_WORKSPACE/tests/*" "$GITHUB_WORKSPACE/lin_sys/direct/qdldl/amd/*" "$GITHUB_WORKSPACE/lin_sys/direct/qdldl/qdldl_sources/*"" "/usr/include/*"'
-          output_file: '${{ runner.workspace }}/build/coverage.info'
-          if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '' }}
+          uses: imciner2/run-lcov@v1
+          with:
+            input_directory: '${{ runner.workspace }}/build'
+            exclude: '"$GITHUB_WORKSPACE/tests/*" "$GITHUB_WORKSPACE/lin_sys/direct/qdldl/amd/*" "$GITHUB_WORKSPACE/lin_sys/direct/qdldl/qdldl_sources/*"" "/usr/include/*"'
+            output_file: '${{ runner.workspace }}/build/coverage.info'
+            if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '' }}
 
         - name: Coveralls
           uses: coverallsapp/github-action@master
