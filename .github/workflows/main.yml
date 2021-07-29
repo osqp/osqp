@@ -88,7 +88,7 @@ jobs:
 
         - name: Build
           run: |
-            cmake -G ${{ matrix.cmake_generator }} -S . -B build ${{ matrix.cmake_flags }} ${{ matrix.cmake_flags_extra }}
+            cmake -G "${{ matrix.cmake_generator }}" -S . -B build ${{ matrix.cmake_flags }} ${{ matrix.cmake_flags_extra }}
             cmake --build build
 
         - name: Test
