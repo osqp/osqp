@@ -4,6 +4,14 @@ cmake_minimum_required (VERSION 3.2)
 # Project name
 project (osqp)
 
+set(OSQP_VERSION "0.0.0" CACHE STRING "The version number of OSQP")
+if(NOT OSQP_VERSION STREQUAL "0.0.0")
+    configure_file (
+        "${PROJECT_SOURCE_DIR}/include/version.h.in"
+        "${PROJECT_SOURCE_DIR}/include/version.h"
+    )
+endif()
+
 # Export compile commands
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

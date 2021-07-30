@@ -1,0 +1,3 @@
+#pragma once
+
+#define OSQP_VERSION "@OSQP_VERSION@"
