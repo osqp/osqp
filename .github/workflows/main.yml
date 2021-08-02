@@ -1,8 +1,9 @@
 name: Main
 
+
 on:
   push:
-    branches: [ master, develop**, ci ]
+    branches: [ master, develop**, ci, docs-integration ]
   pull_request:
     branches: [ master, develop** ]
 
@@ -144,7 +145,7 @@ jobs:
 
       - name: Build docs
         run: |
-          cd docs && make html && touch _build/html/.nojekyll
+          cd docs && make HTMLCOPYDIR=../site/docs html && touch ../site/docs/.nojekyll
 
       - name: Update gh-pages
         env:

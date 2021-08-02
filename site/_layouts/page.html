@@ -1,0 +1,18 @@
+---
+layout: default
+---
+
+<div class="content py-5 bg-white">
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col-md-10">
+
+				{%- if page.title -%}
+				<h2>{{ page.title }}</h2>
+				{%- endif -%}
+
+				{{ content }}
+			</div>
+		</div>
+	</div>
+</div>
