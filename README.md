@@ -1,7 +1,6 @@
 # The Operator Splitting QP Solver
 
-[![Build status of the master branch on Linux/OSX](https://img.shields.io/travis/oxfordcontrol/osqp/master.svg?label=Linux%20%2F%20OSX%20build)](https://travis-ci.org/oxfordcontrol/osqp)
-[![Build status of the master branch on Windows](https://img.shields.io/appveyor/ci/bstellato/osqp/master.svg?label=Windows%20build)](https://ci.appveyor.com/project/bstellato/osqp/branch/master)
+[![CI](https://github.com/osqp/osqp/actions/workflows/main.yml/badge.svg)](https://github.com/osqp/osqp/actions/workflows/main.yml)
 [![Code coverage](https://coveralls.io/repos/github/oxfordcontrol/osqp/badge.svg?branch=master)](https://coveralls.io/github/oxfordcontrol/osqp?branch=master)
 ![License](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)
 
