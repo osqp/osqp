@@ -417,7 +417,7 @@ if (UNITTESTS)
             ${codegen_test_headers}
             tests/test_catch2.cpp
             )
-    target_link_libraries (osqp_tester osqpstatic ${CMAKE_DL_LIBS})
+    target_link_libraries (osqp_tester osqpstatic ${CMAKE_DL_LIBS} gcov)
 
     # Add custom memory target
     add_executable(osqp_tester_custom_memory
