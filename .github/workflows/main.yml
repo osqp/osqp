@@ -3,7 +3,7 @@ name: Main
 
 on:
   push:
-    branches: [ master, develop**, ci, docs-integration ]
+    branches: [ master, develop**, ci ]
   pull_request:
     branches: [ master, develop** ]
 
