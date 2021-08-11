@@ -115,7 +115,7 @@ on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 if not on_rtd:  # only import and set the theme if we're building docs locally
     # Override default css to get a larger width for local build
     def setup(app):
-        app.add_stylesheet('css/osqp_theme.css')
+        app.add_css_file('css/osqp_theme.css')
 else:
     html_context = {
         'css_files': [
