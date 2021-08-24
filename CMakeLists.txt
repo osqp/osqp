@@ -141,6 +141,7 @@ if (NOT MSVC)
 
     if (COVERAGE)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
 	if(FORTRAN)
 		set(CMAKE_FORTRAN_FLAGS "${CMAKE_FORTRAN_FLAGS} --coverage")
 	endif(FORTRAN)
@@ -417,7 +418,13 @@ if (UNITTESTS)
             ${codegen_test_headers}
             tests/test_catch2.cpp
             )
-    target_link_libraries (osqp_tester osqpstatic ${CMAKE_DL_LIBS} gcov)
+    set_target_properties(osqp_tester
+            PROPERTIES
+                CXX_STANDARD 11
+                CXX_STANDARD_REQUIRED YES
+                CXX_EXTENSIONS NO
+            )
+    target_link_libraries (osqp_tester osqpstatic ${CMAKE_DL_LIBS})
 
     # Add custom memory target
     add_executable(osqp_tester_custom_memory
