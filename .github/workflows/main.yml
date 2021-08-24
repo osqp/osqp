@@ -54,11 +54,6 @@ jobs:
             auto-update-conda: true
             python-version: ${{ matrix.python-version }}
 
-        - name: Setup Envvars
-          run: |
-            if [[ $GITHUB_REF = "refs/tags/"* ]] ; then echo "OSQP_VERSION=${GITHUB_REF/refs\/tags\//}" ; else echo "OSQP_VERSION=0.0.0" ; fi >> $GITHUB_ENV
-            if [[ $GITHUB_REF = "refs/tags/"* ]] ; then echo "OSQP_NAME=osqp-${GITHUB_REF/refs\/tags\//}-${{ runner.os }}" ; else echo "OSQP_NAME=osqp-0.0.0-${{ runner.os }}" ; fi >> $GITHUB_ENV
-
         # -----------------
         # OS-specific setup
         # -----------------
@@ -95,7 +90,7 @@ jobs:
 
         - name: Build
           run: |
-            cmake -DOSQP_VERSION=$OSQP_VERSION -G "${{ matrix.cmake_generator }}" -S . -B build ${{ matrix.cmake_flags }} ${{ matrix.cmake_flags_extra }}
+            cmake -G "${{ matrix.cmake_generator }}" -S . -B build ${{ matrix.cmake_flags }} ${{ matrix.cmake_flags_extra }}
             cmake --build build
 
         # useful for inspecting the OSQP version information
@@ -130,32 +125,6 @@ jobs:
             path-to-lcov: '${{ runner.workspace }}/osqp/build/coverage.info'
             github-token: ${{ secrets.GITHUB_TOKEN }}
           if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '' }}
-
-        - name: Generate binary release file
-          if:  ${{ startsWith(github.ref, 'refs/tags/') && matrix.cmake_flags == '' && matrix.cmake_flags_extra == '' }}
-          run: |
-            mkdir -p $OSQP_NAME/lib $OSQP_NAME/include
-            cp LICENSE $OSQP_NAME/
-            cp include/*.h $OSQP_NAME/include/
-            cp build/out/libosqp.* $OSQP_NAME/lib/
-            cd $OSQP_NAME && tar -czvf ../$OSQP_NAME.tar.gz *
-
-        - name: Release binary
-          if: ${{ startsWith(github.ref, 'refs/tags/') && matrix.cmake_flags == '' && matrix.cmake_flags_extra == '' }}
-          uses: softprops/action-gh-release@v1
-          with:
-            files: ${{env.OSQP_NAME}}.tar.gz
-
-        - name: Generate source release file
-          if: ${{ runner.os == 'Linux' && startsWith(github.ref, 'refs/tags/') && matrix.cmake_flags == '' && matrix.cmake_flags_extra == '' }}
-          run: |
-            git ls-files --recurse-submodules | tar czf osqp-${{env.OSQP_VERSION}}-src.tar.gz --files-from -
-
-        - name: Release source
-          if: ${{ runner.os == 'Linux' && startsWith(github.ref, 'refs/tags/') && matrix.cmake_flags == '' && matrix.cmake_flags_extra == '' }}
-          uses: softprops/action-gh-release@v1
-          with:
-            files: osqp-${{env.OSQP_VERSION}}-src.tar.gz
 
   build_docs:
     runs-on: ubuntu-latest
