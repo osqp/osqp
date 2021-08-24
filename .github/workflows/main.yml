@@ -2,7 +2,7 @@ name: Main
 
 on:
   push:
-    branches: [ master, develop**, ci ]
+    branches: [ master, develop**, ci, catch2 ]
   pull_request:
     branches: [ master, develop** ]
 
@@ -15,7 +15,7 @@ jobs:
         fail-fast: false
 
         matrix:
-          os: [ubuntu-latest, macos-latest, windows-latest]
+          os: [macos-latest]
           python-version: [3.9]
           cmake_flags: ['', '-DUNITTESTS=ON -DCOVERAGE=ON']
           cmake_flags_extra: ['', '-DENABLE_MKL_PARDISO=OFF', '-DDFLOAT=ON', '-DDLONG=OFF', '-DEMBEDDED=1',
