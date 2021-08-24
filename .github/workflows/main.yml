@@ -2,7 +2,7 @@ name: Main
 
 on:
   push:
-    branches: [ master, develop**, ci, catch2 ]
+    branches: [ master, develop**, ci ]
   pull_request:
     branches: [ master, develop** ]
 
