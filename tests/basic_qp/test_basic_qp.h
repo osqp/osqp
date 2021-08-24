@@ -387,7 +387,7 @@ static const char* test_basic_qp_solve()
   c_free(P_tmp->p);
   c_free(P_tmp);
 
-  return 0;
+  return (char *)"";
 }
 
 #ifdef ENABLE_MKL_PARDISO
@@ -458,7 +458,7 @@ static char* test_basic_qp_solve_pardiso()
   // Cleanup
   c_free(settings);
 
-  return 0;
+  return (char *)"";
 }
 #endif
 
@@ -570,7 +570,7 @@ static const char* test_basic_qp_update()
   // Cleanup
   c_free(settings);
 
-  return 0;
+  return (char *)"";
 }
 
 static const char* test_basic_qp_check_termination()
@@ -645,7 +645,7 @@ static const char* test_basic_qp_check_termination()
   // Cleanup
   c_free(settings);
 
-  return 0;
+  return (char *)"";
 }
 
 static const char* test_basic_qp_update_rho()
@@ -775,7 +775,7 @@ static const char* test_basic_qp_update_rho()
   // Cleanup
   c_free(settings);
 
-  return 0;
+  return (char *)"";
 }
 
 #ifdef PROFILING
@@ -849,7 +849,7 @@ static const char* test_basic_qp_time_limit()
   // Cleanup
   c_free(settings);
 
-  return 0;
+  return (char *)"";
 }
 #endif // PROFILING
 
@@ -914,7 +914,7 @@ static const char* test_basic_qp_warm_start()
   // Cleanup
   c_free(settings);
 
-  return 0;
+  return (char *)"";
 }
 
 
@@ -932,5 +932,5 @@ static const char* test_basic_qp()
 #endif
   mu_run_test(test_basic_qp_warm_start);
 
-  return 0;
+  return (char *)"";
 }

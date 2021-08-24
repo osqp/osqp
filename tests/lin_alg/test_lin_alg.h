@@ -109,7 +109,7 @@ static const char* test_vec_operations() {
   c_free(vec_ew_max_vec_test);
   clean_problem_lin_alg_sols_data(data);
 
-  return 0;
+  return (char *)"";
 }
 
 static const char* test_mat_operations() {
@@ -167,7 +167,7 @@ static const char* test_mat_operations() {
   csc_spfree(dA);
   clean_problem_lin_alg_sols_data(data);
 
-  return 0;
+  return (char *)"";
 }
 
 static const char* test_mat_vec_multiplication() {
@@ -252,7 +252,7 @@ static const char* test_mat_vec_multiplication() {
   c_free(Px_cum);
   clean_problem_lin_alg_sols_data(data);
 
-  return 0;
+  return (char *)"";
 }
 
 static const char* test_extract_upper_triangular() {
@@ -281,7 +281,7 @@ static const char* test_extract_upper_triangular() {
   csc_spfree(Ptriu);
   clean_problem_lin_alg_sols_data(data);
 
-  return 0;
+  return (char *)"";
 }
 
 static const char* test_quad_form_upper_triang() {
@@ -299,7 +299,7 @@ static const char* test_quad_form_upper_triang() {
   // cleanup
   clean_problem_lin_alg_sols_data(data);
 
-  return 0;
+  return (char *)"";
 }
 
 static const char* test_lin_alg()
@@ -311,5 +311,5 @@ static const char* test_lin_alg()
   mu_run_test(test_extract_upper_triangular);
   mu_run_test(test_quad_form_upper_triang);
 
-  return 0;
+  return (char *)"";
 }

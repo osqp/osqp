@@ -68,7 +68,7 @@ static const char* test_basic_qp2_solve()
   clean_problem_basic_qp2(data);
   clean_problem_basic_qp2_sols_data(sols_data);
 
-  return 0;
+  return (char *)"";
 }
 
 #ifdef ENABLE_MKL_PARDISO
@@ -139,7 +139,7 @@ static char* test_basic_qp2_solve_pardiso()
   clean_problem_basic_qp2(data);
   clean_problem_basic_qp2_sols_data(sols_data);
 
-  return 0;
+  return (char *)"";
 }
 #endif
 
@@ -213,7 +213,7 @@ static const char* test_basic_qp2_update()
   clean_problem_basic_qp2(data);
   clean_problem_basic_qp2_sols_data(sols_data);
 
-  return 0;
+  return (char *)"";
 }
 
 static const char* test_basic_qp2()
@@ -224,5 +224,5 @@ static const char* test_basic_qp2()
 #endif
   mu_run_test(test_basic_qp2_update);
 
-  return 0;
+  return (char *)"";
 }

@@ -44,7 +44,7 @@ static const char* test_solveKKT() {
   c_free(rho_vec);
   clean_problem_solve_linsys_sols_data(data);
 
-  return 0;
+  return (char *)"";
 }
 
 #ifdef ENABLE_MKL_PARDISO
@@ -92,7 +92,7 @@ static char* test_solveKKT_pardiso() {
   // Unload Pardiso shared library
   exitflag = unload_linsys_solver(MKL_PARDISO_SOLVER);
 
-  return 0;
+  return (char *)"";
 }
 #endif
 
@@ -103,5 +103,5 @@ static const char* test_solve_linsys()
   mu_run_test(test_solveKKT_pardiso);
 #endif
 
-  return 0;
+  return (char *)"";
 }

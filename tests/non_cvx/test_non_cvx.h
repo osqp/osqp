@@ -65,12 +65,12 @@ static const char* test_non_cvx_solve()
   clean_problem_non_cvx(data);
   clean_problem_non_cvx_sols_data(sols_data);
 
-  return 0;
+  return (char *)"";
 }
 
 static const char* test_non_cvx()
 {
   mu_run_test(test_non_cvx_solve);
 
-  return 0;
+  return (char *)"";
 }
