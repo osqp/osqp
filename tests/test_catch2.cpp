@@ -14,7 +14,7 @@
 
 TEST_CASE( "test_lin_alg", "[multi-file:2]" ) {
     SECTION( "test_constr_sparse_mat" ) {
-        REQUIRE( test_constr_sparse_mat() == NULL );
+        REQUIRE( test_constr_sparse_mat() == "" );
     }
 //    SECTION( "test_vec_operations" ) {
 //        REQUIRE( test_vec_operations() == NULL );

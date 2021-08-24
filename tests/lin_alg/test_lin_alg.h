@@ -22,7 +22,7 @@ static const char* test_constr_sparse_mat() {
   c_free(Adns); // because of vars from file matrices.h
   clean_problem_lin_alg_sols_data(data);
 
-  return 0;
+  return (char *)"";
 }
 
 static const char* test_vec_operations() {
