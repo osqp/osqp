@@ -68,7 +68,7 @@ static const char* test_form_KKT() {
   c_free(rho_inv_vec);
   c_free(AtoKKT);
   c_free(PtoKKT);
-  return 0;
+  return (char *)"";
 }
 
 static const char* test_update() {
@@ -309,7 +309,7 @@ static const char* test_update() {
   c_free(Ax_new_idx);
   c_free(Px_new_idx);
 
-  return 0;
+  return (char *)"";
 }
 
 #ifdef ENABLE_MKL_PARDISO
@@ -471,7 +471,7 @@ static char* test_update_pardiso() {
   c_free(Ax_new_idx);
   c_free(Px_new_idx);
 
-  return 0;
+  return (char *)"";
 }
 #endif
 
@@ -484,5 +484,5 @@ static const char* test_update_matrices()
   mu_run_test(test_update_pardiso);
 #endif
 
-  return 0;
+  return (char *)"";
 }

@@ -58,12 +58,12 @@ static const char* test_unconstrained_solve()
   clean_problem_unconstrained(data);
   clean_problem_unconstrained_sols_data(sols_data);
 
-  return 0;
+  return (char *)"";
 }
 
 static const char* test_unconstrained()
 {
   mu_run_test(test_unconstrained_solve);
 
-  return 0;
+  return (char *)"";
 }

@@ -60,7 +60,7 @@ static const char* test_demo_solve()
   c_free(data);
   c_free(settings);
 
-  return 0;
+  return (char *)"";
 }
 
 
@@ -68,5 +68,5 @@ static const char* test_demo()
 {
   mu_run_test(test_demo_solve);
 
-  return 0;
+  return (char *)"";
 }

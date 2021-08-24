@@ -73,7 +73,7 @@ static const char* test_optimal()
   c_free(problem);
   c_free(settings);
 
-  return 0;
+  return (char *)"";
 }
 
 static const char* test_prim_infeas()
@@ -127,7 +127,7 @@ static const char* test_prim_infeas()
   c_free(problem);
   c_free(settings);
 
-  return 0;
+  return (char *)"";
 }
 
 static const char* test_dual_infeas()
@@ -181,7 +181,7 @@ static const char* test_dual_infeas()
   c_free(problem);
   c_free(settings);
 
-  return 0;
+  return (char *)"";
 }
 
 static const char* test_primal_dual_infeas()
@@ -236,7 +236,7 @@ static const char* test_primal_dual_infeas()
   c_free(problem);
   c_free(settings);
 
-  return 0;
+  return (char *)"";
 }
 
 static const char* test_primal_dual_infeasibility()
@@ -246,5 +246,5 @@ static const char* test_primal_dual_infeasibility()
   mu_run_test(test_dual_infeas);
   mu_run_test(test_primal_dual_infeas);
 
-  return 0;
+  return (char *)"";
 }
