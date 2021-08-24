@@ -146,4 +146,4 @@ TEST_CASE( "test_lin_alg", "[multi-file:2]" ) {
 //        REQUIRE( test_update_pardiso() == NULL );
 //    }
 //#endif
-}
+//}
