@@ -23,8 +23,7 @@ import subprocess
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-# Set version for bumpversion
-__version__ = "0.6.2"
+__version__ = os.environ.get('OSQP_VERSION', '0.0.0')
 
 # -- General configuration ------------------------------------------------
 
