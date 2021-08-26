@@ -19,6 +19,6 @@ help:
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-        ifneq ("$(HTMLCOPYDIR)", "$(BUILDDIR)/html")
-        cp -rT $(BUILDDIR)/html $(HTMLCOPYDIR)
-        endif
+ifneq ("$(HTMLCOPYDIR)", "$(BUILDDIR)/html")
+	cp -rT $(BUILDDIR)/html $(HTMLCOPYDIR)
+endif

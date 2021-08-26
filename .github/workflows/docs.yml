@@ -1,4 +1,4 @@
-name: Main
+name: Docs 
 
 on:
   push:
@@ -41,8 +41,8 @@ jobs:
         run: |
           cd docs && make HTMLCOPYDIR=../site/docs html && touch ../site/docs/.nojekyll
 
-      - name: Update gh-pages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ".github/workflows/build_docs.sh"
-        shell: bash
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@4.1.1
+        with:
+          branch: gh-pages
+          folder: site
