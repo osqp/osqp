@@ -1,0 +1,284 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Code generation &mdash; OSQP 0.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/osqp_theme.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Matlab" href="matlab.html" />
+    <link rel="prev" title="JuMP" href="../parsers/jump.html" />
+<meta name="twitter:card" content="summary_large_image" >
+<meta name="twitter:creator" content="@bstellato" >
+<meta name="twitter:image"
+      content="https://osqp.org/docs/_static/img/logo.png">
+<meta name="twitter:description" content="The OSQP (Operator Splitting
+Quadratic Program) solver is a numerical optimization package for solving
+convex quadratic programs." >
+<meta property="og:url" content="https://osqp.org" >
+<meta property="og:title" content="OSQP solver documentation" >
+<meta property="og:description" content="The OSQP (Operator Splitting Quadratic
+Program) solver is a numerical optimization package for solving convex
+quadratic programs." >
+<meta property="og:image"
+content="https://osqp.org/docs/_static/img/logo.png">
+<meta property="fb:app_id" content="129555174389689">
+<meta property="og:type" content="website" >
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">User Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../solver/index.html">The solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../get_started/index.html">Get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interfaces/index.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parsers/index.html">Parsers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Code generation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="matlab.html">Matlab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python.html">Python</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OSQP</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Code generation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/codegen/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="code-generation">
+<h1>Code generation<a class="headerlink" href="#code-generation" title="Permalink to this headline">¶</a></h1>
+<p>OSQP can generate tailored C code that compiles into a fast and reliable solver
+for the given family of QP problems in which the problem data, but not its
+dimensions, change between problem instances.</p>
+<p>The generated code is:</p>
+<dl class="glossary simple">
+<dt id="term-Malloc-free">Malloc-free<a class="headerlink" href="#term-Malloc-free" title="Permalink to this term">¶</a></dt><dd><p>It does not perform any dynamic memory allocation.</p>
+</dd>
+<dt id="term-Library-free">Library-free<a class="headerlink" href="#term-Library-free" title="Permalink to this term">¶</a></dt><dd><p>It is not linked to any external library.</p>
+</dd>
+<dt id="term-Division-free">Division-free<a class="headerlink" href="#term-Division-free" title="Permalink to this term">¶</a></dt><dd><p>There are no division required in the ADMM algorithm</p>
+</dd>
+</dl>
+<p>We make a distinction between two cases depending on which of the data are to be
+treated as parameters.</p>
+<dl class="glossary simple">
+<dt id="term-Vectors-as-parameters">Vectors as parameters<a class="headerlink" href="#term-Vectors-as-parameters" title="Permalink to this term">¶</a></dt><dd><p>Vectors <span class="math notranslate nohighlight">\(q\)</span>, <span class="math notranslate nohighlight">\(l\)</span> and <span class="math notranslate nohighlight">\(u\)</span> can change between problem instances.
+This corresponds to the compiler flag <code class="code docutils literal notranslate"><span class="pre">EMBEDDED=1</span></code>.
+<span class="math notranslate nohighlight">\(\rho\)</span> adaptation is not enabled.
+The generated code is division-free and has a very small footprint.</p>
+</dd>
+<dt id="term-Matrices-as-parameters">Matrices as parameters<a class="headerlink" href="#term-Matrices-as-parameters" title="Permalink to this term">¶</a></dt><dd><p>Both vectors <span class="math notranslate nohighlight">\(q\)</span>, <span class="math notranslate nohighlight">\(l\)</span>, <span class="math notranslate nohighlight">\(u\)</span> and values in matrices
+<span class="math notranslate nohighlight">\(P\)</span> and <span class="math notranslate nohighlight">\(A\)</span> can change between problem instances.
+This corresponds to the compiler flag <code class="code docutils literal notranslate"><span class="pre">EMBEDDED=2</span></code>.
+<span class="math notranslate nohighlight">\(\rho\)</span> adaptation is enabled but the frequency does not rely on any timing.
+We assume that the sparsity patterns of <span class="math notranslate nohighlight">\(P\)</span> and <span class="math notranslate nohighlight">\(A\)</span> are fixed.</p>
+</dd>
+</dl>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="matlab.html">Matlab</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python.html">Python</a></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="matlab.html" class="btn btn-neutral float-right" title="Matlab" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../parsers/jump.html" class="btn btn-neutral float-left" title="JuMP" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

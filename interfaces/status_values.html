@@ -1,0 +1,384 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Status values and errors &mdash; OSQP 0.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/osqp_theme.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="C" href="CC%2B%2B.html" />
+    <link rel="prev" title="Linear Systems Solvers" href="linear_systems_solvers.html" />
+<meta name="twitter:card" content="summary_large_image" >
+<meta name="twitter:creator" content="@bstellato" >
+<meta name="twitter:image"
+      content="https://osqp.org/docs/_static/img/logo.png">
+<meta name="twitter:description" content="The OSQP (Operator Splitting
+Quadratic Program) solver is a numerical optimization package for solving
+convex quadratic programs." >
+<meta property="og:url" content="https://osqp.org" >
+<meta property="og:title" content="OSQP solver documentation" >
+<meta property="og:description" content="The OSQP (Operator Splitting Quadratic
+Program) solver is a numerical optimization package for solving convex
+quadratic programs." >
+<meta property="og:image"
+content="https://osqp.org/docs/_static/img/logo.png">
+<meta property="fb:app_id" content="129555174389689">
+<meta property="og:type" content="website" >
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">User Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../solver/index.html">The solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../get_started/index.html">Get started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Interfaces</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="solver_settings.html">Solver settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear_systems_solvers.html">Linear Systems Solvers</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Status values and errors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Status values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#solver-errors">Solver Errors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#official">Official</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#community-maintained">Community Maintained</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../parsers/index.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../codegen/index.html">Code generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OSQP</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Interfaces</a> &raquo;</li>
+        
+      <li>Status values and errors</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/interfaces/status_values.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="status-values-and-errors">
+<span id="status-values"></span><h1>Status values and errors<a class="headerlink" href="#status-values-and-errors" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2>Status values<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>These are the exit statuses, their respective constants and values returned by the solver as defined in <a class="reference external" href="https://github.com/oxfordcontrol/osqp/blob/master/include/constants.h">constants.h</a>.
+The <em>inaccurate</em> statuses define when the optimality, primal infeasibility or dual infeasibility conditions are satisfied with tolerances 10 times larger than the ones set.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 42%" />
+<col style="width: 49%" />
+<col style="width: 10%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Status</p></th>
+<th class="head"><p>Constant</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>solved</p></td>
+<td><p>OSQP_SOLVED</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>solved inaccurate</p></td>
+<td><p>OSQP_SOLVED_INACCURATE</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-even"><td><p>maximum iterations reached</p></td>
+<td><p>OSQP_MAX_ITER_REACHED</p></td>
+<td><p>-2</p></td>
+</tr>
+<tr class="row-odd"><td><p>primal infeasible</p></td>
+<td><p>OSQP_PRIMAL_INFEASIBLE</p></td>
+<td><p>-3</p></td>
+</tr>
+<tr class="row-even"><td><p>primal infeasible inaccurate</p></td>
+<td><p>OSQP_PRIMAL_INFEASIBLE_INACCURATE</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-odd"><td><p>dual infeasible</p></td>
+<td><p>OSQP_DUAL_INFEASIBLE</p></td>
+<td><p>-4</p></td>
+</tr>
+<tr class="row-even"><td><p>dual infeasible inaccurate</p></td>
+<td><p>OSQP_DUAL_INFEASIBLE_INACCURATE</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-odd"><td><p>interrupted by user</p></td>
+<td><p>OSQP_SIGINT</p></td>
+<td><p>-5</p></td>
+</tr>
+<tr class="row-even"><td><p>run time limit reached</p></td>
+<td><p>OSQP_TIME_LIMIT_REACHED</p></td>
+<td><p>-6</p></td>
+</tr>
+<tr class="row-odd"><td><p>unsolved</p></td>
+<td><p>OSQP_UNSOLVED</p></td>
+<td><p>-10</p></td>
+</tr>
+<tr class="row-even"><td><p>problem non convex</p></td>
+<td><p>OSQP_NON_CVX</p></td>
+<td><p>-7</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We recommend the user to <strong>check the convexity of their problem before
+passing it to OSQP</strong>! If the user passes a non-convex problem we do not
+assure the solver will be able to detect it.</p>
+<p>OSQP will try to detect <strong>non-convex</strong> problems by checking if the residuals
+diverge or if there are any issues in the initial factorization (if a direct
+method is used). It will detect non-convex problems when one or more of the
+eigenvalues of <code class="code docutils literal notranslate"><span class="pre">P</span></code> are “clearly” negative, i.e., when <code class="code docutils literal notranslate"><span class="pre">P</span> <span class="pre">+</span> <span class="pre">sigma</span>
+<span class="pre">*</span> <span class="pre">I</span></code> is not positive semidefinite. However, it might fail to detect
+non-convexity when <code class="code docutils literal notranslate"><span class="pre">P</span></code> has slightly negative eigenvalues, i.e., when
+<code class="code docutils literal notranslate"><span class="pre">P</span> <span class="pre">+</span> <span class="pre">sigma</span> <span class="pre">*</span> <span class="pre">I</span></code> is positive semidefinite and <code class="code docutils literal notranslate"><span class="pre">P</span></code> is not.</p>
+</div>
+</div>
+<div class="section" id="solver-errors">
+<h2>Solver Errors<a class="headerlink" href="#solver-errors" title="Permalink to this headline">¶</a></h2>
+<p>OSQP can return errors during the setup and solve steps. Here is a table of the meaning
+and their constant values.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 53%" />
+<col style="width: 39%" />
+<col style="width: 8%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Errors</p></th>
+<th class="head"><p>Constant</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Data validation</p></td>
+<td><p>OSQP_DATA_VALIDATION_ERROR</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>Settings validation</p></td>
+<td><p>OSQP_SETTINGS_VALIDATION_ERROR</p></td>
+<td><p>2</p></td>
+</tr>
+<tr class="row-even"><td><p>Linear system solver loading</p></td>
+<td><p>OSQP_LINSYS_SOLVER_LOAD_ERROR</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-odd"><td><p>Linear system solver initialization</p></td>
+<td><p>OSQP_LINSYS_SOLVER_INIT_ERROR</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-even"><td><p>Non convex problem</p></td>
+<td><p>OSQP_NONCVX_ERROR</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-odd"><td><p>Memory allocation</p></td>
+<td><p>OSQP_MEM_ALLOC_ERROR</p></td>
+<td><p>6</p></td>
+</tr>
+<tr class="row-even"><td><p>Workspace not initialized</p></td>
+<td><p>OSQP_WORKSPACE_NOT_INIT</p></td>
+<td><p>7</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="CC%2B%2B.html" class="btn btn-neutral float-right" title="C" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="linear_systems_solvers.html" class="btn btn-neutral float-left" title="Linear Systems Solvers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,1276 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>C &mdash; OSQP 0.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/osqp_theme.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Python" href="python.html" />
+    <link rel="prev" title="Status values and errors" href="status_values.html" />
+<meta name="twitter:card" content="summary_large_image" >
+<meta name="twitter:creator" content="@bstellato" >
+<meta name="twitter:image"
+      content="https://osqp.org/docs/_static/img/logo.png">
+<meta name="twitter:description" content="The OSQP (Operator Splitting
+Quadratic Program) solver is a numerical optimization package for solving
+convex quadratic programs." >
+<meta property="og:url" content="https://osqp.org" >
+<meta property="og:title" content="OSQP solver documentation" >
+<meta property="og:description" content="The OSQP (Operator Splitting Quadratic
+Program) solver is a numerical optimization package for solving convex
+quadratic programs." >
+<meta property="og:image"
+content="https://osqp.org/docs/_static/img/logo.png">
+<meta property="fb:app_id" content="129555174389689">
+<meta property="og:type" content="website" >
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">User Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../solver/index.html">The solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../get_started/index.html">Get started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Interfaces</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="solver_settings.html">Solver settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear_systems_solvers.html">Linear Systems Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="status_values.html">Status values and errors</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#official">Official</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">C</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#main-solver-api">Main solver API</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sublevel-api">Sublevel API</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data-types">Data types</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python.html">Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="matlab.html">Matlab</a></li>
+<li class="toctree-l3"><a class="reference internal" href="julia.html">Julia</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rlang.html">R</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#community-maintained">Community Maintained</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../parsers/index.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../codegen/index.html">Code generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OSQP</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Interfaces</a> &raquo;</li>
+        
+      <li>C</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/interfaces/CC++.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="c">
+<span id="c-interface"></span><h1>C<a class="headerlink" href="#c" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="main-solver-api">
+<span id="c-main-api"></span><h2>Main solver API<a class="headerlink" href="#main-solver-api" title="Permalink to this headline">¶</a></h2>
+<p>The main C API is imported from the header <code class="code docutils literal notranslate"><span class="pre">osqp.h</span></code> and provides the following functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv410osqp_setupPP13OSQPWorkspacePK8OSQPDataPK12OSQPSettings">
+<span id="_CPPv310osqp_setupPP13OSQPWorkspacePK8OSQPDataPK12OSQPSettings"></span><span id="_CPPv210osqp_setupPP13OSQPWorkspacePK8OSQPDataPK12OSQPSettings"></span><span id="osqp_setup__OSQPWorkspacePP.OSQPDataCP.OSQPSettingsCP"></span><span class="target" id="df/d16/osqp_8h_1ab72a28dc87cf8c55a576c1a2fba6df24"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_setup</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">workp</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv48OSQPData" title="OSQPData"><span class="n"><span class="pre">OSQPData</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv412OSQPSettings" title="OSQPSettings"><span class="n"><span class="pre">OSQPSettings</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">settings</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv410osqp_setupPP13OSQPWorkspacePK8OSQPDataPK12OSQPSettings" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Initialize OSQP solver allocating memory.</p>
+<p>All the inputs must be already allocated in memory before calling.</p>
+<p>It performs:<ul class="simple">
+<li><p>data and settings validation</p></li>
+<li><p>problem data scaling</p></li>
+<li><p>automatic parameters tuning (if enabled)</p></li>
+<li><p>setup linear system solver:<ul>
+<li><p>direct solver: KKT matrix factorization is performed here</p></li>
+<li><p>indirect solver: KKT matrix preconditioning is performed here</p></li>
+</ul>
+</p></li>
+</ul>
+</p>
+<p>NB: This is the only function that allocates dynamic memory and is not used during code generation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>workp</strong> – Solver workspace pointer </p></li>
+<li><p><strong>data</strong> – Problem data </p></li>
+<li><p><strong>settings</strong> – Solver settings </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Exitflag for errors (0 if no errors) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv410osqp_solveP13OSQPWorkspace">
+<span id="_CPPv310osqp_solveP13OSQPWorkspace"></span><span id="_CPPv210osqp_solveP13OSQPWorkspace"></span><span id="osqp_solve__OSQPWorkspaceP"></span><span class="target" id="df/d16/osqp_8h_1a134d29d29c5aad75c15f751c567c393f"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_solve</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv410osqp_solveP13OSQPWorkspace" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Solve quadratic program</p>
+<p>The final solver information is stored in the <em>work-&gt;info</em> structure</p>
+<p>The solution is stored in the <em>work-&gt;solution</em> structure</p>
+<p>If the problem is primal infeasible, the certificate is stored in <em>work-&gt;delta_y</em> </p>
+<p>If the problem is dual infeasible, the certificate is stored in <em>work-&gt;delta_x</em> </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>work</strong> – Workspace allocated </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Exitflag for errors </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv412osqp_cleanupP13OSQPWorkspace">
+<span id="_CPPv312osqp_cleanupP13OSQPWorkspace"></span><span id="_CPPv212osqp_cleanupP13OSQPWorkspace"></span><span id="osqp_cleanup__OSQPWorkspaceP"></span><span class="target" id="df/d16/osqp_8h_1a1e4d4a89b260e564d9d4c07f5b95616a"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_cleanup</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412osqp_cleanupP13OSQPWorkspace" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Cleanup workspace by deallocating memory</p>
+<p>This function is not used in code generation </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>work</strong> – Workspace </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Exitflag for errors </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="sublevel-api">
+<span id="c-sublevel-api"></span><h2>Sublevel API<a class="headerlink" href="#sublevel-api" title="Permalink to this headline">¶</a></h2>
+<p>Sublevel C API is also imported from the header <code class="code docutils literal notranslate"><span class="pre">osqp.h</span></code> and provides the following functions</p>
+<div class="section" id="warm-start">
+<h3>Warm start<a class="headerlink" href="#warm-start" title="Permalink to this headline">¶</a></h3>
+<p>OSQP automatically warm starts primal and dual variables from the previous QP solution. If you would like to warm start their values manually, you can use</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv415osqp_warm_startP13OSQPWorkspacePK7c_floatPK7c_float">
+<span id="_CPPv315osqp_warm_startP13OSQPWorkspacePK7c_floatPK7c_float"></span><span id="_CPPv215osqp_warm_startP13OSQPWorkspacePK7c_floatPK7c_float"></span><span id="osqp_warm_start__OSQPWorkspaceP.c_floatCP.c_floatCP"></span><span class="target" id="df/d16/osqp_8h_1a3837d8cf590d7dfc6232bb7882dd8628"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_warm_start</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">x</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">y</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415osqp_warm_startP13OSQPWorkspacePK7c_floatPK7c_float" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Warm start primal and dual variables </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>work</strong> – Workspace structure </p></li>
+<li><p><strong>x</strong> – Primal variable </p></li>
+<li><p><strong>y</strong> – Dual variable </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Exitflag </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv417osqp_warm_start_xP13OSQPWorkspacePK7c_float">
+<span id="_CPPv317osqp_warm_start_xP13OSQPWorkspacePK7c_float"></span><span id="_CPPv217osqp_warm_start_xP13OSQPWorkspacePK7c_float"></span><span id="osqp_warm_start_x__OSQPWorkspaceP.c_floatCP"></span><span class="target" id="df/d16/osqp_8h_1a846c47ab273db3b33101f67ae046257c"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_warm_start_x</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">x</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417osqp_warm_start_xP13OSQPWorkspacePK7c_float" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Warm start primal variable </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>work</strong> – Workspace structure </p></li>
+<li><p><strong>x</strong> – Primal variable </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Exitflag </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv417osqp_warm_start_yP13OSQPWorkspacePK7c_float">
+<span id="_CPPv317osqp_warm_start_yP13OSQPWorkspacePK7c_float"></span><span id="_CPPv217osqp_warm_start_yP13OSQPWorkspacePK7c_float"></span><span id="osqp_warm_start_y__OSQPWorkspaceP.c_floatCP"></span><span class="target" id="df/d16/osqp_8h_1af927004f14a07c019153238141c6c805"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_warm_start_y</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">y</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417osqp_warm_start_yP13OSQPWorkspacePK7c_float" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Warm start dual variable </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>work</strong> – Workspace structure </p></li>
+<li><p><strong>y</strong> – Dual variable </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Exitflag </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="update-problem-data">
+<span id="c-cpp-update-data"></span><h3>Update problem data<a class="headerlink" href="#update-problem-data" title="Permalink to this headline">¶</a></h3>
+<p>Problem data can be updated without executing the setup again using the following functions.</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv420osqp_update_lin_costP13OSQPWorkspacePK7c_float">
+<span id="_CPPv320osqp_update_lin_costP13OSQPWorkspacePK7c_float"></span><span id="_CPPv220osqp_update_lin_costP13OSQPWorkspacePK7c_float"></span><span id="osqp_update_lin_cost__OSQPWorkspaceP.c_floatCP"></span><span class="target" id="df/d16/osqp_8h_1afe3b2e8fc11a75a90f62a1348710624a"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_update_lin_cost</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">q_new</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420osqp_update_lin_costP13OSQPWorkspacePK7c_float" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Update linear cost in the problem </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>work</strong> – Workspace </p></li>
+<li><p><strong>q_new</strong> – New linear cost </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Exitflag for errors and warnings </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv423osqp_update_lower_boundP13OSQPWorkspacePK7c_float">
+<span id="_CPPv323osqp_update_lower_boundP13OSQPWorkspacePK7c_float"></span><span id="_CPPv223osqp_update_lower_boundP13OSQPWorkspacePK7c_float"></span><span id="osqp_update_lower_bound__OSQPWorkspaceP.c_floatCP"></span><span class="target" id="df/d16/osqp_8h_1a7b62869a3a168ff793659ec3c4f4b9df"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_update_lower_bound</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">l_new</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv423osqp_update_lower_boundP13OSQPWorkspacePK7c_float" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Update lower bound in the problem constraints </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>work</strong> – Workspace </p></li>
+<li><p><strong>l_new</strong> – New lower bound </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Exitflag: 1 if new lower bound is not &lt;= than upper bound </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv423osqp_update_upper_boundP13OSQPWorkspacePK7c_float">
+<span id="_CPPv323osqp_update_upper_boundP13OSQPWorkspacePK7c_float"></span><span id="_CPPv223osqp_update_upper_boundP13OSQPWorkspacePK7c_float"></span><span id="osqp_update_upper_bound__OSQPWorkspaceP.c_floatCP"></span><span class="target" id="df/d16/osqp_8h_1a7d3fbc2531ecd4cddece5897a4368f23"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_update_upper_bound</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">u_new</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv423osqp_update_upper_boundP13OSQPWorkspacePK7c_float" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Update upper bound in the problem constraints </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>work</strong> – Workspace </p></li>
+<li><p><strong>u_new</strong> – New upper bound </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Exitflag: 1 if new upper bound is not &gt;= than lower bound </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv418osqp_update_boundsP13OSQPWorkspacePK7c_floatPK7c_float">
+<span id="_CPPv318osqp_update_boundsP13OSQPWorkspacePK7c_floatPK7c_float"></span><span id="_CPPv218osqp_update_boundsP13OSQPWorkspacePK7c_floatPK7c_float"></span><span id="osqp_update_bounds__OSQPWorkspaceP.c_floatCP.c_floatCP"></span><span class="target" id="df/d16/osqp_8h_1a207715d769b3c9cca9cdec0eb5e03301"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_update_bounds</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">l_new</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">u_new</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418osqp_update_boundsP13OSQPWorkspacePK7c_floatPK7c_float" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Update lower and upper bounds in the problem constraints </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>work</strong> – Workspace </p></li>
+<li><p><strong>l_new</strong> – New lower bound </p></li>
+<li><p><strong>u_new</strong> – New upper bound </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Exitflag: 1 if new lower bound is not &lt;= than new upper bound </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv413osqp_update_PP13OSQPWorkspacePK7c_floatPK5c_int5c_int">
+<span id="_CPPv313osqp_update_PP13OSQPWorkspacePK7c_floatPK5c_int5c_int"></span><span id="_CPPv213osqp_update_PP13OSQPWorkspacePK7c_floatPK5c_int5c_int"></span><span id="osqp_update_P__OSQPWorkspaceP.c_floatCP.c_intCP.c_int"></span><span class="target" id="df/d16/osqp_8h_1a5c5c604d45cfee252d8e664c08ae85a7"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_update_P</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">Px_new</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">Px_new_idx</span></span>, <span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">P_new_n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413osqp_update_PP13OSQPWorkspacePK7c_floatPK5c_int5c_int" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Update elements of matrix P (upper triangular) without changing sparsity structure.</p>
+<p>If Px_new_idx is OSQP_NULL, Px_new is assumed to be as long as P-&gt;x and the whole P-&gt;x is replaced.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>work</strong> – Workspace structure </p></li>
+<li><p><strong>Px_new</strong> – Vector of new elements in P-&gt;x (upper triangular) </p></li>
+<li><p><strong>Px_new_idx</strong> – Index mapping new elements to positions in P-&gt;x </p></li>
+<li><p><strong>P_new_n</strong> – Number of new elements to be changed </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>output flag: 0: OK 1: P_new_n &gt; nnzP &lt;0: error in the update </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv413osqp_update_AP13OSQPWorkspacePK7c_floatPK5c_int5c_int">
+<span id="_CPPv313osqp_update_AP13OSQPWorkspacePK7c_floatPK5c_int5c_int"></span><span id="_CPPv213osqp_update_AP13OSQPWorkspacePK7c_floatPK5c_int5c_int"></span><span id="osqp_update_A__OSQPWorkspaceP.c_floatCP.c_intCP.c_int"></span><span class="target" id="df/d16/osqp_8h_1a9d6c5e4721ee980ecc83a05f307414de"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_update_A</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">Ax_new</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">Ax_new_idx</span></span>, <span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">A_new_n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413osqp_update_AP13OSQPWorkspacePK7c_floatPK5c_int5c_int" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Update elements of matrix A without changing sparsity structure.</p>
+<p>If Ax_new_idx is OSQP_NULL, Ax_new is assumed to be as long as A-&gt;x and the whole A-&gt;x is replaced.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>work</strong> – Workspace structure </p></li>
+<li><p><strong>Ax_new</strong> – Vector of new elements in A-&gt;x </p></li>
+<li><p><strong>Ax_new_idx</strong> – Index mapping new elements to positions in A-&gt;x </p></li>
+<li><p><strong>A_new_n</strong> – Number of new elements to be changed </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>output flag: 0: OK 1: A_new_n &gt; nnzA &lt;0: error in the update </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv415osqp_update_P_AP13OSQPWorkspacePK7c_floatPK5c_int5c_intPK7c_floatPK5c_int5c_int">
+<span id="_CPPv315osqp_update_P_AP13OSQPWorkspacePK7c_floatPK5c_int5c_intPK7c_floatPK5c_int5c_int"></span><span id="_CPPv215osqp_update_P_AP13OSQPWorkspacePK7c_floatPK5c_int5c_intPK7c_floatPK5c_int5c_int"></span><span id="osqp_update_P_A__OSQPWorkspaceP.c_floatCP.c_intCP.c_int.c_floatCP.c_intCP.c_int"></span><span class="target" id="df/d16/osqp_8h_1ae60b0ecefdf13deda2ec97a19964b9b7"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_update_P_A</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">Px_new</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">Px_new_idx</span></span>, <span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">P_new_n</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">Ax_new</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">Ax_new_idx</span></span>, <span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">A_new_n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415osqp_update_P_AP13OSQPWorkspacePK7c_floatPK5c_int5c_intPK7c_floatPK5c_int5c_int" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Update elements of matrix P (upper triangular) and elements of matrix A without changing sparsity structure.</p>
+<p>If Px_new_idx is OSQP_NULL, Px_new is assumed to be as long as P-&gt;x and the whole P-&gt;x is replaced.</p>
+<p>If Ax_new_idx is OSQP_NULL, Ax_new is assumed to be as long as A-&gt;x and the whole A-&gt;x is replaced.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>work</strong> – Workspace structure </p></li>
+<li><p><strong>Px_new</strong> – Vector of new elements in P-&gt;x (upper triangular) </p></li>
+<li><p><strong>Px_new_idx</strong> – Index mapping new elements to positions in P-&gt;x </p></li>
+<li><p><strong>P_new_n</strong> – Number of new elements to be changed </p></li>
+<li><p><strong>Ax_new</strong> – Vector of new elements in A-&gt;x </p></li>
+<li><p><strong>Ax_new_idx</strong> – Index mapping new elements to positions in A-&gt;x </p></li>
+<li><p><strong>A_new_n</strong> – Number of new elements to be changed </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>output flag: 0: OK 1: P_new_n &gt; nnzP 2: A_new_n &gt; nnzA &lt;0: error in the update </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="data-types">
+<span id="c-cpp-data-types"></span><h2>Data types<a class="headerlink" href="#data-types" title="Permalink to this headline">¶</a></h2>
+<p>The most basic used datatypes are</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">c_int</span></code>: can be <code class="code docutils literal notranslate"><span class="pre">long</span></code> or <code class="code docutils literal notranslate"><span class="pre">int</span></code> if the compiler flag <code class="code docutils literal notranslate"><span class="pre">DLONG</span></code> is set or not</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">c_float</span></code>: can be a <code class="code docutils literal notranslate"><span class="pre">float</span></code> or a <code class="code docutils literal notranslate"><span class="pre">double</span></code> if the compiler flag <code class="code docutils literal notranslate"><span class="pre">DFLOAT</span></code> is set or not.</p></li>
+</ul>
+<p>The relevant structures used in the API are</p>
+<div class="section" id="data">
+<h3>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h3>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv48OSQPData">
+<span id="_CPPv38OSQPData"></span><span id="_CPPv28OSQPData"></span><span id="OSQPData"></span><span class="target" id="d9/d78/struct_o_s_q_p_data"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPData</span></span></span><a class="headerlink" href="#_CPPv48OSQPData" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Data structure </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPData1nE">
+<span id="_CPPv3N8OSQPData1nE"></span><span id="_CPPv2N8OSQPData1nE"></span><span id="OSQPData::n__c_int"></span><span class="target" id="d9/d78/struct_o_s_q_p_data_1ade021b58749dda8656c1228995600c5a"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">n</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPData1nE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>number of variables n </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPData1mE">
+<span id="_CPPv3N8OSQPData1mE"></span><span id="_CPPv2N8OSQPData1mE"></span><span id="OSQPData::m__c_int"></span><span class="target" id="d9/d78/struct_o_s_q_p_data_1a3edfa10d55c261ca743a26fd42d02948"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">m</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPData1mE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>number of constraints m </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPData1PE">
+<span id="_CPPv3N8OSQPData1PE"></span><span id="_CPPv2N8OSQPData1PE"></span><span id="OSQPData::P__cscP"></span><span class="target" id="d9/d78/struct_o_s_q_p_data_1a4596ee17e4496de2e3ab2aba225fc432"></span><a class="reference internal" href="#_CPPv43csc" title="csc"><span class="n"><span class="pre">csc</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">P</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPData1PE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>the upper triangular part of the quadratic cost matrix P in csc format (size n x n). </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPData1AE">
+<span id="_CPPv3N8OSQPData1AE"></span><span id="_CPPv2N8OSQPData1AE"></span><span id="OSQPData::A__cscP"></span><span class="target" id="d9/d78/struct_o_s_q_p_data_1a87cfcc8fe6b17332e2abc007cb59c872"></span><a class="reference internal" href="#_CPPv43csc" title="csc"><span class="n"><span class="pre">csc</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">A</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPData1AE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>linear constraints matrix A in csc format (size m x n) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPData1qE">
+<span id="_CPPv3N8OSQPData1qE"></span><span id="_CPPv2N8OSQPData1qE"></span><span id="OSQPData::q__c_floatP"></span><span class="target" id="d9/d78/struct_o_s_q_p_data_1acc4d246499dc84bb5006cb520180c46d"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">q</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPData1qE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>dense array for linear part of cost function (size n) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPData1lE">
+<span id="_CPPv3N8OSQPData1lE"></span><span id="_CPPv2N8OSQPData1lE"></span><span id="OSQPData::l__c_floatP"></span><span class="target" id="d9/d78/struct_o_s_q_p_data_1ad3929346e514d190a010a9ff4d13c6d3"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">l</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPData1lE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>dense array for lower bound (size m) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPData1uE">
+<span id="_CPPv3N8OSQPData1uE"></span><span id="_CPPv2N8OSQPData1uE"></span><span id="OSQPData::u__c_floatP"></span><span class="target" id="d9/d78/struct_o_s_q_p_data_1a69499e3fe5e035c33392adfcadbdd53e"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">u</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPData1uE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>dense array for upper bound (size m) </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<p>The matrices are defined in <a class="reference external" href="https://people.sc.fsu.edu/~jburkardt/data/cc/cc.html">Compressed Sparse Column (CSC) format</a> using zero-based indexing.</p>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv43csc">
+<span id="_CPPv33csc"></span><span id="_CPPv23csc"></span><span id="csc"></span><span class="target" id="d1/d66/structcsc"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">csc</span></span></span><a class="headerlink" href="#_CPPv43csc" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Matrix in compressed-column form. The structure is used internally to store matrices in the triplet form as well, but the API requires that the matrices are in the CSC format. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3csc5nzmaxE">
+<span id="_CPPv3N3csc5nzmaxE"></span><span id="_CPPv2N3csc5nzmaxE"></span><span id="csc::nzmax__c_int"></span><span class="target" id="d1/d66/structcsc_1af08bba669e8d665621fb54164dc2b796"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">nzmax</span></span></span><a class="headerlink" href="#_CPPv4N3csc5nzmaxE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>maximum number of entries </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3csc1mE">
+<span id="_CPPv3N3csc1mE"></span><span id="_CPPv2N3csc1mE"></span><span id="csc::m__c_int"></span><span class="target" id="d1/d66/structcsc_1ab38e34fbb77bc2f2e93dd4e35ad4f240"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">m</span></span></span><a class="headerlink" href="#_CPPv4N3csc1mE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>number of rows </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3csc1nE">
+<span id="_CPPv3N3csc1nE"></span><span id="_CPPv2N3csc1nE"></span><span id="csc::n__c_int"></span><span class="target" id="d1/d66/structcsc_1afd88f0e78767aaec330d8897ebaa350a"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">n</span></span></span><a class="headerlink" href="#_CPPv4N3csc1nE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>number of columns </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3csc1pE">
+<span id="_CPPv3N3csc1pE"></span><span id="_CPPv2N3csc1pE"></span><span id="csc::p__c_intP"></span><span class="target" id="d1/d66/structcsc_1a2fbab3288fdcc4fc7be6e66ad651bac1"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">p</span></span></span><a class="headerlink" href="#_CPPv4N3csc1pE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>column pointers (size n+1); col indices (size nzmax) start from 0 when using triplet format (direct KKT matrix formation) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3csc1iE">
+<span id="_CPPv3N3csc1iE"></span><span id="_CPPv2N3csc1iE"></span><span id="csc::i__c_intP"></span><span class="target" id="d1/d66/structcsc_1a90c55bbfc4e2e96882d613cc307bf307"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">i</span></span></span><a class="headerlink" href="#_CPPv4N3csc1iE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>row indices, size nzmax starting from 0 </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3csc1xE">
+<span id="_CPPv3N3csc1xE"></span><span id="_CPPv2N3csc1xE"></span><span id="csc::x__c_floatP"></span><span class="target" id="d1/d66/structcsc_1a8ccc8b2515a3043024d9e1d3e4dfa30d"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">x</span></span></span><a class="headerlink" href="#_CPPv4N3csc1xE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>numerical values, size nzmax </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3csc2nzE">
+<span id="_CPPv3N3csc2nzE"></span><span id="_CPPv2N3csc2nzE"></span><span id="csc::nz__c_int"></span><span class="target" id="d1/d66/structcsc_1a997d88bd1eaf1200053638b3f6a1872e"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">nz</span></span></span><a class="headerlink" href="#_CPPv4N3csc2nzE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>number of entries in triplet matrix, -1 for csc </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="settings">
+<h3>Settings<a class="headerlink" href="#settings" title="Permalink to this headline">¶</a></h3>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv412OSQPSettings">
+<span id="_CPPv312OSQPSettings"></span><span id="_CPPv212OSQPSettings"></span><span id="OSQPSettings"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPSettings</span></span></span><a class="headerlink" href="#_CPPv412OSQPSettings" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Settings struct </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings3rhoE">
+<span id="_CPPv3N12OSQPSettings3rhoE"></span><span id="_CPPv2N12OSQPSettings3rhoE"></span><span id="OSQPSettings::rho__c_float"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a9e379719cf9f86329a76bed9ae63c504"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">rho</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings3rhoE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>ADMM step rho. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings5sigmaE">
+<span id="_CPPv3N12OSQPSettings5sigmaE"></span><span id="_CPPv2N12OSQPSettings5sigmaE"></span><span id="OSQPSettings::sigma__c_float"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1acdc26500ecd0b731df3a19b923c83062"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">sigma</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings5sigmaE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>ADMM step sigma. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings7scalingE">
+<span id="_CPPv3N12OSQPSettings7scalingE"></span><span id="_CPPv2N12OSQPSettings7scalingE"></span><span id="OSQPSettings::scaling__c_int"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a97334db7d09d8a616dbd957b103657a4"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">scaling</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings7scalingE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>heuristic data scaling iterations; if 0, then disabled. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings12adaptive_rhoE">
+<span id="_CPPv3N12OSQPSettings12adaptive_rhoE"></span><span id="_CPPv2N12OSQPSettings12adaptive_rhoE"></span><span id="OSQPSettings::adaptive_rho__c_int"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a87945b2aedc27819ca9eee38d3d60ea7"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">adaptive_rho</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings12adaptive_rhoE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>boolean, is rho step size adaptive? </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings21adaptive_rho_intervalE">
+<span id="_CPPv3N12OSQPSettings21adaptive_rho_intervalE"></span><span id="_CPPv2N12OSQPSettings21adaptive_rho_intervalE"></span><span id="OSQPSettings::adaptive_rho_interval__c_int"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1aad9123c597b0e42baf1e68595e78fc23"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">adaptive_rho_interval</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings21adaptive_rho_intervalE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>number of iterations between rho adaptations; if 0, then it is automatic </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings22adaptive_rho_toleranceE">
+<span id="_CPPv3N12OSQPSettings22adaptive_rho_toleranceE"></span><span id="_CPPv2N12OSQPSettings22adaptive_rho_toleranceE"></span><span id="OSQPSettings::adaptive_rho_tolerance__c_float"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1ae44ddf14fcd7126ff210ddd5c02598c5"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">adaptive_rho_tolerance</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings22adaptive_rho_toleranceE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>tolerance X for adapting rho. The new rho has to be X times larger or 1/X times smaller than the current one to trigger a new factorization. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings21adaptive_rho_fractionE">
+<span id="_CPPv3N12OSQPSettings21adaptive_rho_fractionE"></span><span id="_CPPv2N12OSQPSettings21adaptive_rho_fractionE"></span><span id="OSQPSettings::adaptive_rho_fraction__c_float"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a29cc84ac590509eb93cf4eea4baf7857"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">adaptive_rho_fraction</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings21adaptive_rho_fractionE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>interval for adapting rho (fraction of the setup time) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings8max_iterE">
+<span id="_CPPv3N12OSQPSettings8max_iterE"></span><span id="_CPPv2N12OSQPSettings8max_iterE"></span><span id="OSQPSettings::max_iter__c_int"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1af82be631016ae0011110740ffb4eefc5"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">max_iter</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings8max_iterE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>maximum number of iterations </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings7eps_absE">
+<span id="_CPPv3N12OSQPSettings7eps_absE"></span><span id="_CPPv2N12OSQPSettings7eps_absE"></span><span id="OSQPSettings::eps_abs__c_float"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a221ca8f888dd11cdf363bf2bfac3ac9c"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">eps_abs</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings7eps_absE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>absolute convergence tolerance </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings7eps_relE">
+<span id="_CPPv3N12OSQPSettings7eps_relE"></span><span id="_CPPv2N12OSQPSettings7eps_relE"></span><span id="OSQPSettings::eps_rel__c_float"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1afb6ab8ad89c63304da227f189b692a42"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">eps_rel</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings7eps_relE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>relative convergence tolerance </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings12eps_prim_infE">
+<span id="_CPPv3N12OSQPSettings12eps_prim_infE"></span><span id="_CPPv2N12OSQPSettings12eps_prim_infE"></span><span id="OSQPSettings::eps_prim_inf__c_float"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a621c8d4bbaf336165c21e04b340326d3"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">eps_prim_inf</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings12eps_prim_infE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>primal infeasibility tolerance </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings12eps_dual_infE">
+<span id="_CPPv3N12OSQPSettings12eps_dual_infE"></span><span id="_CPPv2N12OSQPSettings12eps_dual_infE"></span><span id="OSQPSettings::eps_dual_inf__c_float"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a13b18034665e17b756e611465dca63cb"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">eps_dual_inf</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings12eps_dual_infE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>dual infeasibility tolerance </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings5alphaE">
+<span id="_CPPv3N12OSQPSettings5alphaE"></span><span id="_CPPv2N12OSQPSettings5alphaE"></span><span id="OSQPSettings::alpha__c_float"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1acc032f62d3524d54c80ed5da1de73478"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">alpha</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings5alphaE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>relaxation parameter </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings13linsys_solverE">
+<span id="_CPPv3N12OSQPSettings13linsys_solverE"></span><span id="_CPPv2N12OSQPSettings13linsys_solverE"></span><span id="OSQPSettings::linsys_solver__linsys_solver_type"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1adc7552adb5204058f73fae3007251ae9"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="n"><span class="pre">linsys_solver_type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">linsys_solver</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings13linsys_solverE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>linear system solver to use </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings5deltaE">
+<span id="_CPPv3N12OSQPSettings5deltaE"></span><span id="_CPPv2N12OSQPSettings5deltaE"></span><span id="OSQPSettings::delta__c_float"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a425506906cec5198289f6db390a63f50"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">delta</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings5deltaE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>regularization parameter for polishing </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings6polishE">
+<span id="_CPPv3N12OSQPSettings6polishE"></span><span id="_CPPv2N12OSQPSettings6polishE"></span><span id="OSQPSettings::polish__c_int"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1abc79e778d474e214c4a2acb27ab5a9d9"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">polish</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings6polishE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>boolean, polish ADMM solution </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings18polish_refine_iterE">
+<span id="_CPPv3N12OSQPSettings18polish_refine_iterE"></span><span id="_CPPv2N12OSQPSettings18polish_refine_iterE"></span><span id="OSQPSettings::polish_refine_iter__c_int"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1abd17ba3d12ebb071d2fcbbe329c0fa05"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">polish_refine_iter</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings18polish_refine_iterE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>number of iterative refinement steps in polishing </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings7verboseE">
+<span id="_CPPv3N12OSQPSettings7verboseE"></span><span id="_CPPv2N12OSQPSettings7verboseE"></span><span id="OSQPSettings::verbose__c_int"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1afe3c4657529075956bf89fd80846f6ba"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">verbose</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings7verboseE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>boolean, write out progress </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings18scaled_terminationE">
+<span id="_CPPv3N12OSQPSettings18scaled_terminationE"></span><span id="_CPPv2N12OSQPSettings18scaled_terminationE"></span><span id="OSQPSettings::scaled_termination__c_int"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a8910faf1011d80e6a0cddfd3cce48895"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">scaled_termination</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings18scaled_terminationE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>boolean, use scaled termination criteria </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings17check_terminationE">
+<span id="_CPPv3N12OSQPSettings17check_terminationE"></span><span id="_CPPv2N12OSQPSettings17check_terminationE"></span><span id="OSQPSettings::check_termination__c_int"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1aab7fca2ec731366b686ac96a16834659"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">check_termination</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings17check_terminationE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>integer, check termination interval; if 0, then termination checking is disabled </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings10warm_startE">
+<span id="_CPPv3N12OSQPSettings10warm_startE"></span><span id="_CPPv2N12OSQPSettings10warm_startE"></span><span id="OSQPSettings::warm_start__c_int"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a84068dbb53cab602b1da479f660e1770"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">warm_start</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings10warm_startE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>boolean, warm start </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings10time_limitE">
+<span id="_CPPv3N12OSQPSettings10time_limitE"></span><span id="_CPPv2N12OSQPSettings10time_limitE"></span><span id="OSQPSettings::time_limit__c_float"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a4b696fba61de958dd83ebb2658c8dad2"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">time_limit</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings10time_limitE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>maximum number of seconds allowed to solve the problem; if 0, then disabled </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="solution">
+<h3>Solution<a class="headerlink" href="#solution" title="Permalink to this headline">¶</a></h3>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv412OSQPSolution">
+<span id="_CPPv312OSQPSolution"></span><span id="_CPPv212OSQPSolution"></span><span id="OSQPSolution"></span><span class="target" id="d0/dc1/struct_o_s_q_p_solution"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPSolution</span></span></span><a class="headerlink" href="#_CPPv412OSQPSolution" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Solution structure </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSolution1xE">
+<span id="_CPPv3N12OSQPSolution1xE"></span><span id="_CPPv2N12OSQPSolution1xE"></span><span id="OSQPSolution::x__c_floatP"></span><span class="target" id="d0/dc1/struct_o_s_q_p_solution_1aa2f42ba9f68b544c72d00e05e35f3f44"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">x</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSolution1xE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>primal solution </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSolution1yE">
+<span id="_CPPv3N12OSQPSolution1yE"></span><span id="_CPPv2N12OSQPSolution1yE"></span><span id="OSQPSolution::y__c_floatP"></span><span class="target" id="d0/dc1/struct_o_s_q_p_solution_1abad431825c95706baffa4f1b1ff03191"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">y</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSolution1yE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Lagrange multiplier associated to <span class="math notranslate nohighlight">\(l &lt;= Ax &lt;= u\)</span>. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="info">
+<h3>Info<a class="headerlink" href="#info" title="Permalink to this headline">¶</a></h3>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv48OSQPInfo">
+<span id="_CPPv38OSQPInfo"></span><span id="_CPPv28OSQPInfo"></span><span id="OSQPInfo"></span><span class="target" id="d6/df9/struct_o_s_q_p_info"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPInfo</span></span></span><a class="headerlink" href="#_CPPv48OSQPInfo" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Solver return information </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo4iterE">
+<span id="_CPPv3N8OSQPInfo4iterE"></span><span id="_CPPv2N8OSQPInfo4iterE"></span><span id="OSQPInfo::iter__c_int"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1a7df214d51ee51826da3a5d7be3390859"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">iter</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo4iterE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>number of iterations taken </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo6statusE">
+<span id="_CPPv3N8OSQPInfo6statusE"></span><span id="_CPPv2N8OSQPInfo6statusE"></span><span id="OSQPInfo::status__cA"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1a8ffcad36873c241941b3daa659cd0568"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">status</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">32</span></span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo6statusE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>status string, e.g. ‘solved’ </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo10status_valE">
+<span id="_CPPv3N8OSQPInfo10status_valE"></span><span id="_CPPv2N8OSQPInfo10status_valE"></span><span id="OSQPInfo::status_val__c_int"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1a6b61fd569619c1a0735bf9656434edfb"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">status_val</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo10status_valE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>status as c_int, defined in constants.h </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo13status_polishE">
+<span id="_CPPv3N8OSQPInfo13status_polishE"></span><span id="_CPPv2N8OSQPInfo13status_polishE"></span><span id="OSQPInfo::status_polish__c_int"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1a27891b09d870059945733abd97714ac9"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">status_polish</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo13status_polishE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>polish status: successful (1), unperformed (0), (-1) unsuccessful </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo7obj_valE">
+<span id="_CPPv3N8OSQPInfo7obj_valE"></span><span id="_CPPv2N8OSQPInfo7obj_valE"></span><span id="OSQPInfo::obj_val__c_float"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1a3a44bff3d1edfc99df3621ef2a560fd2"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">obj_val</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo7obj_valE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>primal objective </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo7pri_resE">
+<span id="_CPPv3N8OSQPInfo7pri_resE"></span><span id="_CPPv2N8OSQPInfo7pri_resE"></span><span id="OSQPInfo::pri_res__c_float"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1a29d1886e37d7f0957262fef6e33cb7d8"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">pri_res</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo7pri_resE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>norm of primal residual </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo7dua_resE">
+<span id="_CPPv3N8OSQPInfo7dua_resE"></span><span id="_CPPv2N8OSQPInfo7dua_resE"></span><span id="OSQPInfo::dua_res__c_float"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1ae3878e4f1c047a3190c11fe6e82e68d9"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">dua_res</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo7dua_resE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>norm of dual residual </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo10setup_timeE">
+<span id="_CPPv3N8OSQPInfo10setup_timeE"></span><span id="_CPPv2N8OSQPInfo10setup_timeE"></span><span id="OSQPInfo::setup_time__c_float"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1adfe01ee2c88b9b8ea256cc4e2f7ea002"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setup_time</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo10setup_timeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>time taken for setup phase (seconds) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo10solve_timeE">
+<span id="_CPPv3N8OSQPInfo10solve_timeE"></span><span id="_CPPv2N8OSQPInfo10solve_timeE"></span><span id="OSQPInfo::solve_time__c_float"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1a03e2da818bb3f19684b8753750315426"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">solve_time</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo10solve_timeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>time taken for solve phase (seconds) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo11update_timeE">
+<span id="_CPPv3N8OSQPInfo11update_timeE"></span><span id="_CPPv2N8OSQPInfo11update_timeE"></span><span id="OSQPInfo::update_time__c_float"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1a00cad6850cf1af37e069a720b3b6024d"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">update_time</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo11update_timeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>time taken for update phase (seconds) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo11polish_timeE">
+<span id="_CPPv3N8OSQPInfo11polish_timeE"></span><span id="_CPPv2N8OSQPInfo11polish_timeE"></span><span id="OSQPInfo::polish_time__c_float"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1abcccb8025b70ab9f3e0bb067d5f00c50"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">polish_time</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo11polish_timeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>time taken for polish phase (seconds) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo8run_timeE">
+<span id="_CPPv3N8OSQPInfo8run_timeE"></span><span id="_CPPv2N8OSQPInfo8run_timeE"></span><span id="OSQPInfo::run_time__c_float"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1a956969f1ded374798f4a5c69bbf6bd52"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">run_time</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo8run_timeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>total time (seconds) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo11rho_updatesE">
+<span id="_CPPv3N8OSQPInfo11rho_updatesE"></span><span id="_CPPv2N8OSQPInfo11rho_updatesE"></span><span id="OSQPInfo::rho_updates__c_int"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1af19116f94fd6a0abb57241eebf040e41"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">rho_updates</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo11rho_updatesE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>number of rho updates </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo12rho_estimateE">
+<span id="_CPPv3N8OSQPInfo12rho_estimateE"></span><span id="_CPPv2N8OSQPInfo12rho_estimateE"></span><span id="OSQPInfo::rho_estimate__c_float"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1aa43f45c2dd56578cce5f32315d89c159"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">rho_estimate</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo12rho_estimateE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>best rho estimate so far from residuals </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="workspace">
+<h3>Workspace<a class="headerlink" href="#workspace" title="Permalink to this headline">¶</a></h3>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv413OSQPWorkspace">
+<span id="_CPPv313OSQPWorkspace"></span><span id="_CPPv213OSQPWorkspace"></span><span id="OSQPWorkspace"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPWorkspace</span></span></span><a class="headerlink" href="#_CPPv413OSQPWorkspace" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>OSQP Workspace </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-vector-used-to-store-a-vectorized-rho-parameter">Vector used to store a vectorized rho parameter</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace7rho_vecE">
+<span id="_CPPv3N13OSQPWorkspace7rho_vecE"></span><span id="_CPPv2N13OSQPWorkspace7rho_vecE"></span><span id="OSQPWorkspace::rho_vec__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1ad82fd9d0d539f8733423d52ce69ecf70"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">rho_vec</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace7rho_vecE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>vector of rho values </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace11rho_inv_vecE">
+<span id="_CPPv3N13OSQPWorkspace11rho_inv_vecE"></span><span id="_CPPv2N13OSQPWorkspace11rho_inv_vecE"></span><span id="OSQPWorkspace::rho_inv_vec__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1a27c134b0f5d3d18612ca3b7b124340f7"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">rho_inv_vec</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace11rho_inv_vecE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>vector of inv rho values </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-iterates">Iterates</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace1xE">
+<span id="_CPPv3N13OSQPWorkspace1xE"></span><span id="_CPPv2N13OSQPWorkspace1xE"></span><span id="OSQPWorkspace::x__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1a99038c9c050b5c49904c91630121f51e"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">x</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace1xE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Iterate x. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace1yE">
+<span id="_CPPv3N13OSQPWorkspace1yE"></span><span id="_CPPv2N13OSQPWorkspace1yE"></span><span id="OSQPWorkspace::y__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1a15c294c5684062149905497c3790e15a"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">y</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace1yE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Iterate y. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace1zE">
+<span id="_CPPv3N13OSQPWorkspace1zE"></span><span id="_CPPv2N13OSQPWorkspace1zE"></span><span id="OSQPWorkspace::z__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1a5e8bf9fa7c85ef1e1c52f6ce6a829811"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">z</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace1zE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Iterate z. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace8xz_tildeE">
+<span id="_CPPv3N13OSQPWorkspace8xz_tildeE"></span><span id="_CPPv2N13OSQPWorkspace8xz_tildeE"></span><span id="OSQPWorkspace::xz_tilde__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1a38114c89144196387685b3424eaf9b22"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">xz_tilde</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace8xz_tildeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Iterate xz_tilde. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace6x_prevE">
+<span id="_CPPv3N13OSQPWorkspace6x_prevE"></span><span id="_CPPv2N13OSQPWorkspace6x_prevE"></span><span id="OSQPWorkspace::x_prev__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1a668656a5294435b84be2601ae9d43944"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">x_prev</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace6x_prevE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Previous x. </p>
+<p>NB: Used also as workspace vector for dual residual </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace6z_prevE">
+<span id="_CPPv3N13OSQPWorkspace6z_prevE"></span><span id="_CPPv2N13OSQPWorkspace6z_prevE"></span><span id="OSQPWorkspace::z_prev__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1af3356375dead21b5bfbd66ed61f8f63a"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">z_prev</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace6z_prevE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Previous z. </p>
+<p>NB: Used also as workspace vector for primal residual </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-primal-and-dual-residuals-workspace-variables">Primal and dual residuals workspace variables</p>
+<p>Needed for residuals computation, tolerances computation, approximate tolerances computation and adapting rho </p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace2AxE">
+<span id="_CPPv3N13OSQPWorkspace2AxE"></span><span id="_CPPv2N13OSQPWorkspace2AxE"></span><span id="OSQPWorkspace::Ax__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1ab754ca10fed6d74369fcb5d44860f129"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">Ax</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace2AxE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>scaled A * x </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace2PxE">
+<span id="_CPPv3N13OSQPWorkspace2PxE"></span><span id="_CPPv2N13OSQPWorkspace2PxE"></span><span id="OSQPWorkspace::Px__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1a505d1959902cf499ed41bc1a4fedc5d7"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">Px</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace2PxE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>scaled P * x </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace3AtyE">
+<span id="_CPPv3N13OSQPWorkspace3AtyE"></span><span id="_CPPv2N13OSQPWorkspace3AtyE"></span><span id="OSQPWorkspace::Aty__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1a1f29640f6998969c5e2a25ba2dce3cd6"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">Aty</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace3AtyE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>scaled A’ * y </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-primal-infeasibility-variables">Primal infeasibility variables</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace7delta_yE">
+<span id="_CPPv3N13OSQPWorkspace7delta_yE"></span><span id="_CPPv2N13OSQPWorkspace7delta_yE"></span><span id="OSQPWorkspace::delta_y__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1afbcaa8b399f72baeb9879bc0e2b9a417"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">delta_y</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace7delta_yE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>difference between consecutive dual iterates </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace9Atdelta_yE">
+<span id="_CPPv3N13OSQPWorkspace9Atdelta_yE"></span><span id="_CPPv2N13OSQPWorkspace9Atdelta_yE"></span><span id="OSQPWorkspace::Atdelta_y__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1a4690588ec01c8fecc768e1956fdd8134"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">Atdelta_y</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace9Atdelta_yE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A’ * delta_y. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-dual-infeasibility-variables">Dual infeasibility variables</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace7delta_xE">
+<span id="_CPPv3N13OSQPWorkspace7delta_xE"></span><span id="_CPPv2N13OSQPWorkspace7delta_xE"></span><span id="OSQPWorkspace::delta_x__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1a1df271f84768858582c86b9043125644"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">delta_x</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace7delta_xE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>difference between consecutive primal iterates </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace8Pdelta_xE">
+<span id="_CPPv3N13OSQPWorkspace8Pdelta_xE"></span><span id="_CPPv2N13OSQPWorkspace8Pdelta_xE"></span><span id="OSQPWorkspace::Pdelta_x__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1a1fa4f7e6e866020f2decdf8a5cea0a8f"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">Pdelta_x</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace8Pdelta_xE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>P * delta_x. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace8Adelta_xE">
+<span id="_CPPv3N13OSQPWorkspace8Adelta_xE"></span><span id="_CPPv2N13OSQPWorkspace8Adelta_xE"></span><span id="OSQPWorkspace::Adelta_x__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1ab5529b6cca8447b92729267ea9060729"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">Adelta_x</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace8Adelta_xE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A * delta_x. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-temporary-vectors-used-in-scaling">Temporary vectors used in scaling</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace6D_tempE">
+<span id="_CPPv3N13OSQPWorkspace6D_tempE"></span><span id="_CPPv2N13OSQPWorkspace6D_tempE"></span><span id="OSQPWorkspace::D_temp__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1aee8fd6123d4095e77a20c0e0efb55a51"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">D_temp</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace6D_tempE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>temporary primal variable scaling vectors </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace8D_temp_AE">
+<span id="_CPPv3N13OSQPWorkspace8D_temp_AE"></span><span id="_CPPv2N13OSQPWorkspace8D_temp_AE"></span><span id="OSQPWorkspace::D_temp_A__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1a1c3e28d27ab9e445978dc2aac604f669"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">D_temp_A</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace8D_temp_AE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>temporary primal variable scaling vectors storing norms of A columns </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace6E_tempE">
+<span id="_CPPv3N13OSQPWorkspace6E_tempE"></span><span id="_CPPv2N13OSQPWorkspace6E_tempE"></span><span id="OSQPWorkspace::E_temp__c_floatP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1aee8fdc1b9d81dd42bb27b9b3a2f9abae"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">E_temp</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace6E_tempE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>temporary constraints scaling vectors storing norms of A’ columns </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace4dataE">
+<span id="_CPPv3N13OSQPWorkspace4dataE"></span><span id="_CPPv2N13OSQPWorkspace4dataE"></span><span id="OSQPWorkspace::data__OSQPDataP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1ad4e45ff5990cb59065246f1a3316f7de"></span><a class="reference internal" href="#_CPPv48OSQPData" title="OSQPData"><span class="n"><span class="pre">OSQPData</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">data</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace4dataE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Problem data to work on (possibly scaled) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace13linsys_solverE">
+<span id="_CPPv3N13OSQPWorkspace13linsys_solverE"></span><span id="_CPPv2N13OSQPWorkspace13linsys_solverE"></span><span id="OSQPWorkspace::linsys_solver__LinSysSolverP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1aeea2029ccfb7b8911440351b8781c983"></span><span class="n"><span class="pre">LinSysSolver</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">linsys_solver</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace13linsys_solverE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Linear System solver structure. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace3polE">
+<span id="_CPPv3N13OSQPWorkspace3polE"></span><span id="_CPPv2N13OSQPWorkspace3polE"></span><span id="OSQPWorkspace::pol__OSQPPolishP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1a7af6c3a409fb7d809d3f5226b0c12331"></span><a class="reference internal" href="#_CPPv410OSQPPolish" title="OSQPPolish"><span class="n"><span class="pre">OSQPPolish</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">pol</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace3polE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Polish structure. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace11constr_typeE">
+<span id="_CPPv3N13OSQPWorkspace11constr_typeE"></span><span id="_CPPv2N13OSQPWorkspace11constr_typeE"></span><span id="OSQPWorkspace::constr_type__c_intP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1a6f7777245b079b6b6c3f7b2d7a200f34"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">constr_type</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace11constr_typeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Type of constraints: loose (-1), equality (1), inequality (0) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace8settingsE">
+<span id="_CPPv3N13OSQPWorkspace8settingsE"></span><span id="_CPPv2N13OSQPWorkspace8settingsE"></span><span id="OSQPWorkspace::settings__OSQPSettingsP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1a8c303f7bdf057b41f4a15a565505039c"></span><a class="reference internal" href="#_CPPv412OSQPSettings" title="OSQPSettings"><span class="n"><span class="pre">OSQPSettings</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">settings</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace8settingsE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>problem settings </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace7scalingE">
+<span id="_CPPv3N13OSQPWorkspace7scalingE"></span><span id="_CPPv2N13OSQPWorkspace7scalingE"></span><span id="OSQPWorkspace::scaling__OSQPScalingP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1ac271b5a7f9ce349b38425f829c412340"></span><a class="reference internal" href="#_CPPv411OSQPScaling" title="OSQPScaling"><span class="n"><span class="pre">OSQPScaling</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">scaling</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace7scalingE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>scaling vectors </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace8solutionE">
+<span id="_CPPv3N13OSQPWorkspace8solutionE"></span><span id="_CPPv2N13OSQPWorkspace8solutionE"></span><span id="OSQPWorkspace::solution__OSQPSolutionP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1a581fcd1ef04332aa89392da2abb8ff5d"></span><a class="reference internal" href="#_CPPv412OSQPSolution" title="OSQPSolution"><span class="n"><span class="pre">OSQPSolution</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">solution</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace8solutionE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>problem solution </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace4infoE">
+<span id="_CPPv3N13OSQPWorkspace4infoE"></span><span id="_CPPv2N13OSQPWorkspace4infoE"></span><span id="OSQPWorkspace::info__OSQPInfoP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1a11532ce4f9207244ccf758cd8522810a"></span><a class="reference internal" href="#_CPPv48OSQPInfo" title="OSQPInfo"><span class="n"><span class="pre">OSQPInfo</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">info</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace4infoE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>solver information </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace5timerE">
+<span id="_CPPv3N13OSQPWorkspace5timerE"></span><span id="_CPPv2N13OSQPWorkspace5timerE"></span><span id="OSQPWorkspace::timer__OSQPTimerP"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1ad9f6008b234048dbf1e145afba6649ac"></span><span class="n"><span class="pre">OSQPTimer</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">timer</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace5timerE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>timer object </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace9first_runE">
+<span id="_CPPv3N13OSQPWorkspace9first_runE"></span><span id="_CPPv2N13OSQPWorkspace9first_runE"></span><span id="OSQPWorkspace::first_run__c_int"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1ae48be389b763ab05e229b648676429d4"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">first_run</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace9first_runE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>flag indicating whether the solve function has been run before </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace17clear_update_timeE">
+<span id="_CPPv3N13OSQPWorkspace17clear_update_timeE"></span><span id="_CPPv2N13OSQPWorkspace17clear_update_timeE"></span><span id="OSQPWorkspace::clear_update_time__c_int"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1ab8d26188c1bb9016b538b6ab1145aa70"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">clear_update_time</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace17clear_update_timeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>flag indicating whether the update_time should be cleared </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace21rho_update_from_solveE">
+<span id="_CPPv3N13OSQPWorkspace21rho_update_from_solveE"></span><span id="_CPPv2N13OSQPWorkspace21rho_update_from_solveE"></span><span id="OSQPWorkspace::rho_update_from_solve__c_int"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1afff146869a63e68c79304ccd771524ab"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">rho_update_from_solve</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace21rho_update_from_solveE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>flag indicating that osqp_update_rho is called from osqp_solve function </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPWorkspace15summary_printedE">
+<span id="_CPPv3N13OSQPWorkspace15summary_printedE"></span><span id="_CPPv2N13OSQPWorkspace15summary_printedE"></span><span id="OSQPWorkspace::summary_printed__c_int"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace_1a6b73981ca07fb45d03462d93ee843650"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">summary_printed</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPWorkspace15summary_printedE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Has last summary been printed? (true/false) </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="scaling">
+<h3>Scaling<a class="headerlink" href="#scaling" title="Permalink to this headline">¶</a></h3>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv411OSQPScaling">
+<span id="_CPPv311OSQPScaling"></span><span id="_CPPv211OSQPScaling"></span><span id="OSQPScaling"></span><span class="target" id="db/dc0/struct_o_s_q_p_scaling"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPScaling</span></span></span><a class="headerlink" href="#_CPPv411OSQPScaling" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Problem scaling matrices stored as vectors </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N11OSQPScaling1cE">
+<span id="_CPPv3N11OSQPScaling1cE"></span><span id="_CPPv2N11OSQPScaling1cE"></span><span id="OSQPScaling::c__c_float"></span><span class="target" id="db/dc0/struct_o_s_q_p_scaling_1a8e5e2c26e738785d51012d436defb4bb"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">c</span></span></span><a class="headerlink" href="#_CPPv4N11OSQPScaling1cE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>cost function scaling </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N11OSQPScaling1DE">
+<span id="_CPPv3N11OSQPScaling1DE"></span><span id="_CPPv2N11OSQPScaling1DE"></span><span id="OSQPScaling::D__c_floatP"></span><span class="target" id="db/dc0/struct_o_s_q_p_scaling_1ace1444efc13b6d786c6152d0b08fbacb"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">D</span></span></span><a class="headerlink" href="#_CPPv4N11OSQPScaling1DE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>primal variable scaling </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N11OSQPScaling1EE">
+<span id="_CPPv3N11OSQPScaling1EE"></span><span id="_CPPv2N11OSQPScaling1EE"></span><span id="OSQPScaling::E__c_floatP"></span><span class="target" id="db/dc0/struct_o_s_q_p_scaling_1a7350fa9af916d1d7a0680b149a693ad3"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">E</span></span></span><a class="headerlink" href="#_CPPv4N11OSQPScaling1EE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>dual variable scaling </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N11OSQPScaling4cinvE">
+<span id="_CPPv3N11OSQPScaling4cinvE"></span><span id="_CPPv2N11OSQPScaling4cinvE"></span><span id="OSQPScaling::cinv__c_float"></span><span class="target" id="db/dc0/struct_o_s_q_p_scaling_1acacae9bd81e2362ff8fc28704f535103"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cinv</span></span></span><a class="headerlink" href="#_CPPv4N11OSQPScaling4cinvE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>cost function rescaling </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N11OSQPScaling4DinvE">
+<span id="_CPPv3N11OSQPScaling4DinvE"></span><span id="_CPPv2N11OSQPScaling4DinvE"></span><span id="OSQPScaling::Dinv__c_floatP"></span><span class="target" id="db/dc0/struct_o_s_q_p_scaling_1a6e43ee9d41e62a1b27e40d9db50c5812"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">Dinv</span></span></span><a class="headerlink" href="#_CPPv4N11OSQPScaling4DinvE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>primal variable rescaling </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N11OSQPScaling4EinvE">
+<span id="_CPPv3N11OSQPScaling4EinvE"></span><span id="_CPPv2N11OSQPScaling4EinvE"></span><span id="OSQPScaling::Einv__c_floatP"></span><span class="target" id="db/dc0/struct_o_s_q_p_scaling_1aa3518e05e34e9e481f9e4dac3f571a49"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">Einv</span></span></span><a class="headerlink" href="#_CPPv4N11OSQPScaling4EinvE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>dual variable rescaling </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="polish">
+<h3>Polish<a class="headerlink" href="#polish" title="Permalink to this headline">¶</a></h3>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv410OSQPPolish">
+<span id="_CPPv310OSQPPolish"></span><span id="_CPPv210OSQPPolish"></span><span id="OSQPPolish"></span><span class="target" id="de/d59/struct_o_s_q_p_polish"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPPolish</span></span></span><a class="headerlink" href="#_CPPv410OSQPPolish" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Polish structure </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OSQPPolish4AredE">
+<span id="_CPPv3N10OSQPPolish4AredE"></span><span id="_CPPv2N10OSQPPolish4AredE"></span><span id="OSQPPolish::Ared__cscP"></span><span class="target" id="de/d59/struct_o_s_q_p_polish_1a0ffed22ca080b350590514ba7ee4c4a3"></span><a class="reference internal" href="#_CPPv43csc" title="csc"><span class="n"><span class="pre">csc</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">Ared</span></span></span><a class="headerlink" href="#_CPPv4N10OSQPPolish4AredE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Ared = vstack[Alow, Aupp]. </p>
+<p>active rows of A </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OSQPPolish5n_lowE">
+<span id="_CPPv3N10OSQPPolish5n_lowE"></span><span id="_CPPv2N10OSQPPolish5n_lowE"></span><span id="OSQPPolish::n_low__c_int"></span><span class="target" id="de/d59/struct_o_s_q_p_polish_1a61ad3dec090164f34198a33dae9936c5"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">n_low</span></span></span><a class="headerlink" href="#_CPPv4N10OSQPPolish5n_lowE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>number of lower-active rows </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OSQPPolish5n_uppE">
+<span id="_CPPv3N10OSQPPolish5n_uppE"></span><span id="_CPPv2N10OSQPPolish5n_uppE"></span><span id="OSQPPolish::n_upp__c_int"></span><span class="target" id="de/d59/struct_o_s_q_p_polish_1accc88d6e8169869147a6c80214905c03"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">n_upp</span></span></span><a class="headerlink" href="#_CPPv4N10OSQPPolish5n_uppE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>number of upper-active rows </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OSQPPolish9A_to_AlowE">
+<span id="_CPPv3N10OSQPPolish9A_to_AlowE"></span><span id="_CPPv2N10OSQPPolish9A_to_AlowE"></span><span id="OSQPPolish::A_to_Alow__c_intP"></span><span class="target" id="de/d59/struct_o_s_q_p_polish_1a97103807bc4b00220a0f97a596b35b46"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">A_to_Alow</span></span></span><a class="headerlink" href="#_CPPv4N10OSQPPolish9A_to_AlowE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Maps indices in A to indices in Alow. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OSQPPolish9A_to_AuppE">
+<span id="_CPPv3N10OSQPPolish9A_to_AuppE"></span><span id="_CPPv2N10OSQPPolish9A_to_AuppE"></span><span id="OSQPPolish::A_to_Aupp__c_intP"></span><span class="target" id="de/d59/struct_o_s_q_p_polish_1a32850ef40ba6870240d16b25adfb5d48"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">A_to_Aupp</span></span></span><a class="headerlink" href="#_CPPv4N10OSQPPolish9A_to_AuppE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Maps indices in A to indices in Aupp. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OSQPPolish9Alow_to_AE">
+<span id="_CPPv3N10OSQPPolish9Alow_to_AE"></span><span id="_CPPv2N10OSQPPolish9Alow_to_AE"></span><span id="OSQPPolish::Alow_to_A__c_intP"></span><span class="target" id="de/d59/struct_o_s_q_p_polish_1a7f45d974a7e0aae530fca55f6e40d850"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">Alow_to_A</span></span></span><a class="headerlink" href="#_CPPv4N10OSQPPolish9Alow_to_AE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Maps indices in Alow to indices in A. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OSQPPolish9Aupp_to_AE">
+<span id="_CPPv3N10OSQPPolish9Aupp_to_AE"></span><span id="_CPPv2N10OSQPPolish9Aupp_to_AE"></span><span id="OSQPPolish::Aupp_to_A__c_intP"></span><span class="target" id="de/d59/struct_o_s_q_p_polish_1a222d4096be4c45661aedee4d80aa778a"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">Aupp_to_A</span></span></span><a class="headerlink" href="#_CPPv4N10OSQPPolish9Aupp_to_AE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Maps indices in Aupp to indices in A. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OSQPPolish1xE">
+<span id="_CPPv3N10OSQPPolish1xE"></span><span id="_CPPv2N10OSQPPolish1xE"></span><span id="OSQPPolish::x__c_floatP"></span><span class="target" id="de/d59/struct_o_s_q_p_polish_1aff6024bdcad7ee15d9e1301cd24765b2"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">x</span></span></span><a class="headerlink" href="#_CPPv4N10OSQPPolish1xE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>optimal x-solution obtained by polish </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OSQPPolish1zE">
+<span id="_CPPv3N10OSQPPolish1zE"></span><span id="_CPPv2N10OSQPPolish1zE"></span><span id="OSQPPolish::z__c_floatP"></span><span class="target" id="de/d59/struct_o_s_q_p_polish_1a97ba65ff75e33b17e1441b38e96dbe26"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">z</span></span></span><a class="headerlink" href="#_CPPv4N10OSQPPolish1zE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>optimal z-solution obtained by polish </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OSQPPolish1yE">
+<span id="_CPPv3N10OSQPPolish1yE"></span><span id="_CPPv2N10OSQPPolish1yE"></span><span id="OSQPPolish::y__c_floatP"></span><span class="target" id="de/d59/struct_o_s_q_p_polish_1a03115d70f08777473ac7ef835dbd89ba"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">y</span></span></span><a class="headerlink" href="#_CPPv4N10OSQPPolish1yE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>optimal y-solution obtained by polish </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OSQPPolish7obj_valE">
+<span id="_CPPv3N10OSQPPolish7obj_valE"></span><span id="_CPPv2N10OSQPPolish7obj_valE"></span><span id="OSQPPolish::obj_val__c_float"></span><span class="target" id="de/d59/struct_o_s_q_p_polish_1ac678e074e00db28da0a93ed84a8dab48"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">obj_val</span></span></span><a class="headerlink" href="#_CPPv4N10OSQPPolish7obj_valE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>objective value at polished solution </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OSQPPolish7pri_resE">
+<span id="_CPPv3N10OSQPPolish7pri_resE"></span><span id="_CPPv2N10OSQPPolish7pri_resE"></span><span id="OSQPPolish::pri_res__c_float"></span><span class="target" id="de/d59/struct_o_s_q_p_polish_1a7c32dfed97cceab0c11fc6a2c9c0c6bb"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">pri_res</span></span></span><a class="headerlink" href="#_CPPv4N10OSQPPolish7pri_resE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>primal residual at polished solution </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OSQPPolish7dua_resE">
+<span id="_CPPv3N10OSQPPolish7dua_resE"></span><span id="_CPPv2N10OSQPPolish7dua_resE"></span><span id="OSQPPolish::dua_res__c_float"></span><span class="target" id="de/d59/struct_o_s_q_p_polish_1a2a2c221d7256266c44ecee5f8786a27b"></span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">dua_res</span></span></span><a class="headerlink" href="#_CPPv4N10OSQPPolish7dua_resE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>dual residual at polished solution </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="python.html" class="btn btn-neutral float-right" title="Python" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="status_values.html" class="btn btn-neutral float-left" title="Status values and errors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
