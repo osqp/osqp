@@ -5,7 +5,7 @@
 #include "basic_qp2/data.h"
 
 
-static const char* test_basic_qp2_solve()
+int test_basic_qp2_solve()
 {
   c_int exitflag;
 
@@ -68,7 +68,7 @@ static const char* test_basic_qp2_solve()
   clean_problem_basic_qp2(data);
   clean_problem_basic_qp2_sols_data(sols_data);
 
-  return (char *)"";
+  return 0;
 }
 
 #ifdef ENABLE_MKL_PARDISO
@@ -139,11 +139,11 @@ static char* test_basic_qp2_solve_pardiso()
   clean_problem_basic_qp2(data);
   clean_problem_basic_qp2_sols_data(sols_data);
 
-  return (char *)"";
+  return 0;
 }
 #endif
 
-static const char* test_basic_qp2_update()
+int test_basic_qp2_update()
 {
   c_int exitflag;
 
@@ -213,16 +213,5 @@ static const char* test_basic_qp2_update()
   clean_problem_basic_qp2(data);
   clean_problem_basic_qp2_sols_data(sols_data);
 
-  return (char *)"";
-}
-
-static const char* test_basic_qp2()
-{
-  mu_run_test(test_basic_qp2_solve);
-#ifdef ENABLE_MKL_PARDISO
-  mu_run_test(test_basic_qp2_solve_pardiso);
-#endif
-  mu_run_test(test_basic_qp2_update);
-
-  return (char *)"";
+  return 0;
 }

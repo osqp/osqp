@@ -6,7 +6,7 @@
 #include "primal_dual_infeasibility/data.h"
 
 
-static const char* test_optimal()
+int test_optimal()
 {
   c_int exitflag;
 
@@ -73,10 +73,10 @@ static const char* test_optimal()
   c_free(problem);
   c_free(settings);
 
-  return (char *)"";
+  return 0;
 }
 
-static const char* test_prim_infeas()
+int test_prim_infeas()
 {
   c_int exitflag;
 
@@ -127,10 +127,10 @@ static const char* test_prim_infeas()
   c_free(problem);
   c_free(settings);
 
-  return (char *)"";
+  return 0;
 }
 
-static const char* test_dual_infeas()
+int test_dual_infeas()
 {
   c_int exitflag;
 
@@ -181,10 +181,10 @@ static const char* test_dual_infeas()
   c_free(problem);
   c_free(settings);
 
-  return (char *)"";
+  return 0;
 }
 
-static const char* test_primal_dual_infeas()
+int test_primal_dual_infeas()
 {
   c_int exitflag;
 
@@ -236,15 +236,5 @@ static const char* test_primal_dual_infeas()
   c_free(problem);
   c_free(settings);
 
-  return (char *)"";
-}
-
-static const char* test_primal_dual_infeasibility()
-{
-  mu_run_test(test_optimal);
-  mu_run_test(test_prim_infeas);
-  mu_run_test(test_dual_infeas);
-  mu_run_test(test_primal_dual_infeas);
-
-  return (char *)"";
+  return 0;
 }

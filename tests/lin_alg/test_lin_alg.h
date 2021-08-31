@@ -4,7 +4,7 @@
 
 #include "lin_alg/data.h"
 
-static const char* test_constr_sparse_mat() {
+int test_constr_sparse_mat() {
   c_float *Adns; // Conversion to dense matrix
 
   lin_alg_sols_data *data = generate_problem_lin_alg_sols_data();
@@ -22,10 +22,10 @@ static const char* test_constr_sparse_mat() {
   c_free(Adns); // because of vars from file matrices.h
   clean_problem_lin_alg_sols_data(data);
 
-  return (char *)"";
+  return 0;
 }
 
-static const char* test_vec_operations() {
+int test_vec_operations() {
   c_float  norm_inf, vecprod; // normInf;
   c_float *ew_reciprocal;
   c_float *add_scaled;
@@ -109,10 +109,10 @@ static const char* test_vec_operations() {
   c_free(vec_ew_max_vec_test);
   clean_problem_lin_alg_sols_data(data);
 
-  return (char *)"";
+  return 0;
 }
 
-static const char* test_mat_operations() {
+int test_mat_operations() {
   csc *Ad, *dA; // Matrices used for tests
   // csc *A_ewsq, *A_ewabs;     // Matrices used for tests
   c_int exitflag = 0;
@@ -167,10 +167,10 @@ static const char* test_mat_operations() {
   csc_spfree(dA);
   clean_problem_lin_alg_sols_data(data);
 
-  return (char *)"";
+  return 0;
 }
 
-static const char* test_mat_vec_multiplication() {
+int test_mat_vec_multiplication() {
   c_float *Ax, *ATy, *Px, *Ax_cum, *ATy_cum, *Px_cum;
 
   lin_alg_sols_data *data = generate_problem_lin_alg_sols_data();
@@ -252,10 +252,10 @@ static const char* test_mat_vec_multiplication() {
   c_free(Px_cum);
   clean_problem_lin_alg_sols_data(data);
 
-  return (char *)"";
+  return 0;
 }
 
-static const char* test_extract_upper_triangular() {
+int test_extract_upper_triangular() {
   c_float *inf_norm_cols_test;
   lin_alg_sols_data *data = generate_problem_lin_alg_sols_data();
 
@@ -281,10 +281,10 @@ static const char* test_extract_upper_triangular() {
   csc_spfree(Ptriu);
   clean_problem_lin_alg_sols_data(data);
 
-  return (char *)"";
+  return 0;
 }
 
-static const char* test_quad_form_upper_triang() {
+int test_quad_form_upper_triang() {
   c_float quad_form_t;
 
   lin_alg_sols_data *data = generate_problem_lin_alg_sols_data();
@@ -299,17 +299,5 @@ static const char* test_quad_form_upper_triang() {
   // cleanup
   clean_problem_lin_alg_sols_data(data);
 
-  return (char *)"";
-}
-
-static const char* test_lin_alg()
-{
-  mu_run_test(test_constr_sparse_mat);
-  mu_run_test(test_vec_operations);
-  mu_run_test(test_mat_operations);
-  mu_run_test(test_mat_vec_multiplication);
-  mu_run_test(test_extract_upper_triangular);
-  mu_run_test(test_quad_form_upper_triang);
-
-  return (char *)"";
+  return 0;
 }

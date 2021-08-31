@@ -6,7 +6,7 @@
 #include "primal_infeasibility/data.h"
 
 
-static const char* test_primal_infeasible_qp_solve()
+int test_primal_infeasible_qp_solve()
 {
   c_int exitflag;
 
@@ -57,13 +57,5 @@ static const char* test_primal_infeasible_qp_solve()
   // Cleanup
   c_free(settings);
 
-  return (char *)"";
-}
-
-static const char* test_primal_infeasibility()
-{
-  mu_run_test(test_primal_infeasible_qp_solve);
-
-
-  return (char *)"";
+  return 0;
 }

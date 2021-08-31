@@ -9,7 +9,7 @@
 #include "solve_linsys/data.h"
 
 
-static const char* test_solveKKT() {
+int test_solveKKT() {
   c_int m, exitflag = 0;
   c_float *rho_vec;
   LinSysSolver *s;  // Private structure to form KKT factorization
@@ -44,7 +44,7 @@ static const char* test_solveKKT() {
   c_free(rho_vec);
   clean_problem_solve_linsys_sols_data(data);
 
-  return (char *)"";
+  return 0;
 }
 
 #ifdef ENABLE_MKL_PARDISO
@@ -92,16 +92,6 @@ static char* test_solveKKT_pardiso() {
   // Unload Pardiso shared library
   exitflag = unload_linsys_solver(MKL_PARDISO_SOLVER);
 
-  return (char *)"";
+  return 0;
 }
 #endif
-
-static const char* test_solve_linsys()
-{
-  mu_run_test(test_solveKKT);
-#ifdef ENABLE_MKL_PARDISO
-  mu_run_test(test_solveKKT_pardiso);
-#endif
-
-  return (char *)"";
-}

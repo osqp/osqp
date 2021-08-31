@@ -7,7 +7,7 @@
 #include "basic_qp/data.h"
 
 
-static const char* test_basic_qp_solve()
+int test_basic_qp_solve()
 {
   c_int exitflag, tmp_int;
   c_float tmp_float;
@@ -387,7 +387,7 @@ static const char* test_basic_qp_solve()
   c_free(P_tmp->p);
   c_free(P_tmp);
 
-  return (char *)"";
+  return 0;
 }
 
 #ifdef ENABLE_MKL_PARDISO
@@ -458,11 +458,11 @@ static char* test_basic_qp_solve_pardiso()
   // Cleanup
   c_free(settings);
 
-  return (char *)"";
+  return 0;
 }
 #endif
 
-static const char* test_basic_qp_update()
+int test_basic_qp_update()
 {
   c_int exitflag;
 
@@ -570,10 +570,10 @@ static const char* test_basic_qp_update()
   // Cleanup
   c_free(settings);
 
-  return (char *)"";
+  return 0;
 }
 
-static const char* test_basic_qp_check_termination()
+int test_basic_qp_check_termination()
 {
   c_int exitflag;
 
@@ -645,10 +645,10 @@ static const char* test_basic_qp_check_termination()
   // Cleanup
   c_free(settings);
 
-  return (char *)"";
+  return 0;
 }
 
-static const char* test_basic_qp_update_rho()
+int test_basic_qp_update_rho()
 {
   c_int extiflag;
 
@@ -775,11 +775,11 @@ static const char* test_basic_qp_update_rho()
   // Cleanup
   c_free(settings);
 
-  return (char *)"";
+  return 0;
 }
 
 #ifdef PROFILING
-static const char* test_basic_qp_time_limit()
+int test_basic_qp_time_limit()
 {
   c_int exitflag;
 
@@ -849,12 +849,12 @@ static const char* test_basic_qp_time_limit()
   // Cleanup
   c_free(settings);
 
-  return (char *)"";
+  return 0;
 }
 #endif // PROFILING
 
 
-static const char* test_basic_qp_warm_start()
+int test_basic_qp_warm_start()
 {
   c_int exitflag, iter;
 
@@ -914,23 +914,5 @@ static const char* test_basic_qp_warm_start()
   // Cleanup
   c_free(settings);
 
-  return (char *)"";
-}
-
-
-static const char* test_basic_qp()
-{
-  mu_run_test(test_basic_qp_solve);
-#ifdef ENABLE_MKL_PARDISO
-  mu_run_test(test_basic_qp_solve_pardiso);
-#endif
-  mu_run_test(test_basic_qp_update);
-  mu_run_test(test_basic_qp_check_termination);
-  mu_run_test(test_basic_qp_update_rho);
-#ifdef PROFILING
-  mu_run_test(test_basic_qp_time_limit);
-#endif
-  mu_run_test(test_basic_qp_warm_start);
-
-  return (char *)"";
+  return 0;
 }

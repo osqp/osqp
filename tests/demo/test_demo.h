@@ -1,7 +1,7 @@
 #include "osqp.h"    // OSQP API
 #include "minunit.h" // Basic testing script header
 
-static const char* test_demo_solve()
+int test_demo_solve()
 {
   // Load problem data
   c_float P_x[3] = { 4.0, 1.0, 2.0, };
@@ -60,13 +60,5 @@ static const char* test_demo_solve()
   c_free(data);
   c_free(settings);
 
-  return (char *)"";
-}
-
-
-static const char* test_demo()
-{
-  mu_run_test(test_demo_solve);
-
-  return (char *)"";
+  return 0;
 }
