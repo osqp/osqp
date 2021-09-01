@@ -1,0 +1,28 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+	<div class="container d-flex justify-content-between">
+		<!-- <a class="navbar-brand navbar-dark" href="{{ site.url }}"> {{ site.title}}</a> -->
+		<a class="navbar-brand" href="{{site.url}}" title="OSQP"><img class="img-fluid" src="{{site.baseurl}}/assets/images/logo.png" alt="OSQP" /></a>
+		<!-- <a class="navbar-brand visible-sm" href="{{site.url}}" title="MITaly"><img src="{{site.baseurl}}/assets/images/mitaly_logo.png" height="50" alt="MITaly" /></a> -->
+
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+
+		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav mr-auto">
+				<li class="nav-item"><a class="nav-link" href="{{ site.baseurl }}/docs/">Docs</a></li>
+				{% assign pages_list = site.pages | sort:"order" %}
+				{% assign group = 'navigation' %}
+				{% include pages_list %}
+				<li class="nav-item"><a class="nav-link" href="{{ site.discourse_link }}">Forum</a></li>
+				<li class="nav-item"><a class="nav-link" href="{{ site.github_link }}">GitHub</a></li>
+			</ul>
+			<ul class="navbar-nav">
+				<li><a class="nav-item" href="http://www.ox.ac.uk" title="University of Oxford"><img src="{{site.baseurl}}/assets/images/oxford_rectangle.png" class="img-fluid" alt="University of Oxford" /></a></li>
+			</ul>
+		</div>
+	</div>
+
+
+
+</nav>

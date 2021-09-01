@@ -108,7 +108,7 @@ jobs:
       - name: Generate source release file
         if: ${{ runner.os == 'Linux' }}
         run: |
-          git ls-files --recurse-submodules | tar czf osqp-${{env.OSQP_VERSION}}-src.tar.gz --files-from -
+          git ls-files --recurse-submodules | grep -v ^site/ | tar czf osqp-${{env.OSQP_VERSION}}-src.tar.gz --files-from -
 
       - name: Release source
         if: ${{ runner.os == 'Linux' }}
