@@ -1,0 +1,134 @@
+<!-- Bootstrap scripts -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+    <!-- Typed.js -->
+    <script type="text/javascript" src="https://rawgit.com/mattboldt/typed.js/master/lib/typed.min.js"></script>
+
+
+    <!-- Particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
+<!-- Dynamic typing -->
+  <script type="text/javascript">
+  var myQuotes =  new Array();
+  {% for line in site.quotes %}
+    myQuotes.push("{{ line.text }}");
+  {% endfor %}
+
+  function shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex ;
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+      // Pick a remaining element...
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+      // And swap it with the current element.
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+    return array;
+  }
+
+  {% if site.shuffle %}
+    shuffle(myQuotes)
+  {% endif %}
+
+  var typed = new Typed("#typed", {
+      strings: myQuotes,
+      typeSpeed: {{ site.type-speed }},
+      backSpeed: {{ site.back-speed }},
+      backDelay: {{ site.delete-delay }},
+      startDelay: {{ site.start-delay }},
+      loop: {{ site.loop }},
+      loopCount: {{ site.loop-count }},
+      cursorChar: "|"
+    });
+  </script>
+
+
+<!-- Place this tag in your head or just before your close body tag. -->
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+
+
+<!-- Slider -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.js"></script>
+
+
+<script type="text/javascript">
+	$.fn.randomize = function (selector) {
+		var $elems = selector ? $(this).find(selector) : $(this).children(),
+			$parents = $elems.parent();
+
+		$parents.each(function () {
+			$(this).children(selector).sort(function (childA, childB) {
+				// * Prevent last slide from being reordered
+				if($(childB).index() !== $(this).children(selector).length - 1) {
+					return Math.round(Math.random()) - 0.5;
+				}
+			}.bind(this)).detach().appendTo(this);
+		});
+
+		return this;
+	};
+
+
+
+	$('.slider').randomize().slick({
+		slidesToShow: 4,
+		slidesToScroll: 1,
+		autoplay: true,
+		autoplaySpeed: 2000,
+		  responsive: [
+			  {
+				  breakpoint: 992,
+				  settings: {
+					  slidesToShow: 3,
+				  }
+			  },
+			  {
+				  breakpoint: 768,
+				  settings: {
+					  slidesToShow: 2,
+				  }
+			  }
+		  ]
+	});
+</script>
+
+<script>particlesJS("particles-js", {
+    "particles": {
+        "number": {
+            "value": 60
+        },
+        "shape": {
+            "type": "circle"
+        },
+        "size": {
+            "value": 5,
+            "random": true
+        },
+        "line_linked": {
+            "enable": true
+        },
+        "move": {
+            "enable": true,
+            "speed": 3,
+            "direction": "none",
+            "straight": false
+        }
+    },
+    "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+            "onhover": {
+                "enable": false
+            },
+            "onclick": {
+                "enable": false,
+            }
+        },
+        "retina_detect": true
+    }
+});</script>

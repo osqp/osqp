@@ -1,0 +1,32 @@
+- title: Efficient
+  icon: fas fa-tachometer-alt
+  description: >
+    OSQP uses a specialized ADMM-based first-order method with custom sparse linear
+    algebra routines that exploit structure in problem data.
+
+- title: Robust
+  icon: fas fa-cogs
+  description: >
+    The algorithm is absolutely division free after the setup and it requires no
+    assumptions on problem data (the problem only needs to be convex). It just works!
+
+- title: Free
+  icon: fas fa-heart
+  description: >
+    OSQP is free and will always be free for everyone. Its license is Apache 2.0.
+
+- title: Embeddable
+  icon: fas fa-microchip
+  description: >
+    OSQP has an easy interface to generate customized embeddable C code with no memory manager required.
+
+
+- title: Many interfaces
+  icon: far fa-hand-pointer
+  description: >
+    OSQP supports many interfaces including C/C++, Fortran, Matlab, Python, R, Julia, Rust.
+
+- title: Library-free
+  icon: fas fa-dove
+  description: >
+    OSQP is self-contained and requires no external library to run.

@@ -3,6 +3,8 @@ name: Main
 on:
   push:
     branches: [ master, develop**, ci ]
+    tags:
+      - '*'
   pull_request:
     branches: [ master, develop** ]
 
@@ -44,7 +46,7 @@ jobs:
         - uses: actions/checkout@v2
           with:
             lfs: false
-            submodules: true
+            submodules: recursive
 
         - name: Set up conda
           uses: conda-incubator/setup-miniconda@v2
@@ -91,6 +93,12 @@ jobs:
             cmake -G "${{ matrix.cmake_generator }}" -S . -B build ${{ matrix.cmake_flags }} ${{ matrix.cmake_flags_extra }}
             cmake --build build
 
+        # useful for inspecting the OSQP version information
+        - name: OSQP Demo
+          run: |
+            ./build/out/osqp_demo
+          if: ${{ !contains(matrix.cmake_flags_extra, 'EMBEDDED') }}
+
         - name: Test
           run: |
             ./build/out/osqp_tester
@@ -117,37 +125,3 @@ jobs:
             path-to-lcov: '${{ runner.workspace }}/osqp/build/coverage.info'
             github-token: ${{ secrets.GITHUB_TOKEN }}
           if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '' }}
-
-  build_docs:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python: [3.9]
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          lfs: false
-
-      - name: Install OS dependencies
-        run: |
-          sudo apt-get install doxygen
-
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python }}
-
-      - name: Install Python dependencies
-        run: |
-          pip install sphinx sphinx-rtd-theme breathe
-
-      - name: Build docs
-        run: |
-          cd docs && make html && touch _build/html/.nojekyll
-
-      - name: Update gh-pages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ".github/workflows/build_docs.sh"
-        shell: bash
