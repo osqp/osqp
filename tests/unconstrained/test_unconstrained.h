@@ -5,7 +5,7 @@
 #include "unconstrained/data.h"
 
 
-int test_unconstrained_solve()
+void test_unconstrained_solve()
 {
   c_int exitflag;
 
@@ -57,6 +57,4 @@ int test_unconstrained_solve()
   c_free(settings);
   clean_problem_unconstrained(data);
   clean_problem_unconstrained_sols_data(sols_data);
-
-  return 0;
 }

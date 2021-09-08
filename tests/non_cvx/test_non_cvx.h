@@ -5,7 +5,7 @@
 #include "non_cvx/data.h"
 
 
-int test_non_cvx_solve()
+void test_non_cvx_solve()
 {
   c_int exitflag;
 
@@ -64,6 +64,4 @@ int test_non_cvx_solve()
   c_free(settings);
   clean_problem_non_cvx(data);
   clean_problem_non_cvx_sols_data(sols_data);
-
-  return 0;
 }

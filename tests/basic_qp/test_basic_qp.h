@@ -7,7 +7,7 @@
 #include "basic_qp/data.h"
 
 
-int test_basic_qp_solve()
+void test_basic_qp_solve()
 {
   c_int exitflag, tmp_int;
   c_float tmp_float;
@@ -386,12 +386,10 @@ int test_basic_qp_solve()
   c_free(P_tmp->i);
   c_free(P_tmp->p);
   c_free(P_tmp);
-
-  return 0;
 }
 
 #ifdef ENABLE_MKL_PARDISO
-static char* test_basic_qp_solve_pardiso()
+void test_basic_qp_solve_pardiso()
 {
   c_int exitflag;
 
@@ -457,12 +455,10 @@ static char* test_basic_qp_solve_pardiso()
 
   // Cleanup
   c_free(settings);
-
-  return 0;
 }
 #endif
 
-int test_basic_qp_update()
+void test_basic_qp_update()
 {
   c_int exitflag;
 
@@ -569,11 +565,9 @@ int test_basic_qp_update()
 
   // Cleanup
   c_free(settings);
-
-  return 0;
 }
 
-int test_basic_qp_check_termination()
+void test_basic_qp_check_termination()
 {
   c_int exitflag;
 
@@ -644,11 +638,9 @@ int test_basic_qp_check_termination()
 
   // Cleanup
   c_free(settings);
-
-  return 0;
 }
 
-int test_basic_qp_update_rho()
+void test_basic_qp_update_rho()
 {
   c_int extiflag;
 
@@ -774,12 +766,10 @@ int test_basic_qp_update_rho()
 
   // Cleanup
   c_free(settings);
-
-  return 0;
 }
 
 #ifdef PROFILING
-int test_basic_qp_time_limit()
+void test_basic_qp_time_limit()
 {
   c_int exitflag;
 
@@ -848,13 +838,11 @@ int test_basic_qp_time_limit()
 
   // Cleanup
   c_free(settings);
-
-  return 0;
 }
 #endif // PROFILING
 
 
-int test_basic_qp_warm_start()
+void test_basic_qp_warm_start()
 {
   c_int exitflag, iter;
 
@@ -913,6 +901,4 @@ int test_basic_qp_warm_start()
 
   // Cleanup
   c_free(settings);
-
-  return 0;
 }

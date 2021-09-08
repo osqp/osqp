@@ -6,7 +6,7 @@
 #include "primal_dual_infeasibility/data.h"
 
 
-int test_optimal()
+void test_optimal()
 {
   c_int exitflag;
 
@@ -72,11 +72,9 @@ int test_optimal()
   clean_problem_primal_dual_infeasibility_sols_data(data);
   c_free(problem);
   c_free(settings);
-
-  return 0;
 }
 
-int test_prim_infeas()
+void test_prim_infeas()
 {
   c_int exitflag;
 
@@ -126,11 +124,9 @@ int test_prim_infeas()
   clean_problem_primal_dual_infeasibility_sols_data(data);
   c_free(problem);
   c_free(settings);
-
-  return 0;
 }
 
-int test_dual_infeas()
+void test_dual_infeas()
 {
   c_int exitflag;
 
@@ -180,11 +176,9 @@ int test_dual_infeas()
   clean_problem_primal_dual_infeasibility_sols_data(data);
   c_free(problem);
   c_free(settings);
-
-  return 0;
 }
 
-int test_primal_dual_infeas()
+void test_primal_dual_infeas()
 {
   c_int exitflag;
 
@@ -235,6 +229,4 @@ int test_primal_dual_infeas()
   clean_problem_primal_dual_infeasibility_sols_data(data);
   c_free(problem);
   c_free(settings);
-
-  return 0;
 }

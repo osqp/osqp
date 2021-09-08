@@ -1,7 +1,7 @@
 #include "osqp.h"        // OSQP API
 #include "osqp_tester.h" // Basic testing script header
 
-int test_demo_solve()
+void test_demo_solve()
 {
   // Load problem data
   c_float P_x[3] = { 4.0, 1.0, 2.0, };
@@ -59,6 +59,4 @@ int test_demo_solve()
   c_free(data->P);
   c_free(data);
   c_free(settings);
-
-  return 0;
 }

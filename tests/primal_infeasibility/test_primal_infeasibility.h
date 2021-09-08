@@ -6,7 +6,7 @@
 #include "primal_infeasibility/data.h"
 
 
-int test_primal_infeasible_qp_solve()
+void test_primal_infeasible_qp_solve()
 {
   c_int exitflag;
 
@@ -56,6 +56,4 @@ int test_primal_infeasible_qp_solve()
 
   // Cleanup
   c_free(settings);
-
-  return 0;
 }

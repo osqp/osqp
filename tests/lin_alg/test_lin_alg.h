@@ -4,7 +4,7 @@
 
 #include "lin_alg/data.h"
 
-int test_constr_sparse_mat() {
+void test_constr_sparse_mat() {
   c_float *Adns; // Conversion to dense matrix
 
   lin_alg_sols_data *data = generate_problem_lin_alg_sols_data();
@@ -22,10 +22,9 @@ int test_constr_sparse_mat() {
   c_free(Adns); // because of vars from file matrices.h
   clean_problem_lin_alg_sols_data(data);
 
-  return 0;
 }
 
-int test_vec_operations() {
+void test_vec_operations() {
   c_float  norm_inf, vecprod; // normInf;
   c_float *ew_reciprocal;
   c_float *add_scaled;
@@ -108,11 +107,9 @@ int test_vec_operations() {
   c_free(vec_ew_min_vec_test);
   c_free(vec_ew_max_vec_test);
   clean_problem_lin_alg_sols_data(data);
-
-  return 0;
 }
 
-int test_mat_operations() {
+void test_mat_operations() {
   csc *Ad, *dA; // Matrices used for tests
   // csc *A_ewsq, *A_ewabs;     // Matrices used for tests
   c_int exitflag = 0;
@@ -166,11 +163,9 @@ int test_mat_operations() {
   csc_spfree(Ad);
   csc_spfree(dA);
   clean_problem_lin_alg_sols_data(data);
-
-  return 0;
 }
 
-int test_mat_vec_multiplication() {
+void test_mat_vec_multiplication() {
   c_float *Ax, *ATy, *Px, *Ax_cum, *ATy_cum, *Px_cum;
 
   lin_alg_sols_data *data = generate_problem_lin_alg_sols_data();
@@ -251,11 +246,9 @@ int test_mat_vec_multiplication() {
   c_free(ATy_cum);
   c_free(Px_cum);
   clean_problem_lin_alg_sols_data(data);
-
-  return 0;
 }
 
-int test_extract_upper_triangular() {
+void test_extract_upper_triangular() {
   c_float *inf_norm_cols_test;
   lin_alg_sols_data *data = generate_problem_lin_alg_sols_data();
 
@@ -280,11 +273,9 @@ int test_extract_upper_triangular() {
   c_free(inf_norm_cols_test);
   csc_spfree(Ptriu);
   clean_problem_lin_alg_sols_data(data);
-
-  return 0;
 }
 
-int test_quad_form_upper_triang() {
+void test_quad_form_upper_triang() {
   c_float quad_form_t;
 
   lin_alg_sols_data *data = generate_problem_lin_alg_sols_data();
@@ -298,6 +289,4 @@ int test_quad_form_upper_triang() {
 
   // cleanup
   clean_problem_lin_alg_sols_data(data);
-
-  return 0;
 }

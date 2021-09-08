@@ -10,7 +10,7 @@
 #include "update_matrices/data.h"
 
 
-int test_form_KKT() {
+void test_form_KKT() {
   update_matrices_sols_data *data;
   c_float sigma, *rho_vec, *rho_inv_vec;
   c_int   m, *PtoKKT, *AtoKKT, *Pdiag_idx, Pdiag_n;
@@ -68,10 +68,9 @@ int test_form_KKT() {
   c_free(rho_inv_vec);
   c_free(AtoKKT);
   c_free(PtoKKT);
-  return 0;
 }
 
-int test_update() {
+void test_update() {
   c_int i, nnzP, nnzA;
   update_matrices_sols_data *data;
   OSQPData *problem;
@@ -308,12 +307,10 @@ int test_update() {
   c_free(settings);
   c_free(Ax_new_idx);
   c_free(Px_new_idx);
-
-  return 0;
 }
 
 #ifdef ENABLE_MKL_PARDISO
-static char* test_update_pardiso() {
+void test_update_pardiso() {
   c_int i, nnzP, nnzA, exitflag;
   update_matrices_sols_data *data;
   OSQPData *problem;
@@ -470,7 +467,5 @@ static char* test_update_pardiso() {
   c_free(settings);
   c_free(Ax_new_idx);
   c_free(Px_new_idx);
-
-  return 0;
 }
 #endif
