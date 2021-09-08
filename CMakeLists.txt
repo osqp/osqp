@@ -416,7 +416,6 @@ if (UNITTESTS)
             ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
             ${test_headers}
             ${codegen_test_headers}
-            tests/test_catch2.cpp
             )
     set_target_properties(osqp_tester
             PROPERTIES
@@ -433,7 +432,6 @@ if (UNITTESTS)
             ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
             ${test_headers}
             ${codegen_test_headers}
-            tests/test_catch2.cpp
 		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.c
 		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.h
 		)

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "osqp.h"
-#include "minunit.h"
+#include "osqp_tester.h"
 
 #include "lin_alg/data.h"
 

@@ -1,8 +1,8 @@
-#include "osqp.h"    // OSQP API
-#include "auxil.h"   // Needed for cold_start()
-#include "cs.h"      // CSC data structure
-#include "util.h"    // Utilities for testing
-#include "minunit.h" // Basic testing script header
+#include "osqp.h"        // OSQP API
+#include "auxil.h"       // Needed for cold_start()
+#include "cs.h"          // CSC data structure
+#include "util.h"        // Utilities for testing
+#include "osqp_tester.h" // Basic testing script header
 
 #include "basic_qp/data.h"
 

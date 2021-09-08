@@ -2,7 +2,7 @@
 #include "osqp.h"
 #include "cs.h"
 #include "util.h"
-#include "minunit.h"
+#include "osqp_tester.h"
 #include "lin_sys.h"
 
 

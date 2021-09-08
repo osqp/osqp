@@ -1,5 +1,5 @@
-#include "osqp.h"    // OSQP API
-#include "minunit.h" // Basic testing script header
+#include "osqp.h"        // OSQP API
+#include "osqp_tester.h" // Basic testing script header
 
 
 #include "basic_qp2/data.h"
