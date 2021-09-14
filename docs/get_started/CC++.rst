@@ -15,7 +15,7 @@ The required include files can be found in :code:`OSQP_FOLDER/include`.
 
 Simply compile with the linker option with :code:`-LOSQP_FOLDER/lib` and :code:`-losqp`.
 
-If you are interested in development builds, you can find them on `GitHUB <https://github.com/osqp/osqp/releases>`__.
+If you are interested in development builds, you can find them on `GitHub <https://github.com/osqp/osqp/releases>`__.
 
 Sources
 -------
