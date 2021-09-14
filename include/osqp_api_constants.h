@@ -10,8 +10,7 @@ extern "C" {
 /*******************
 * OSQP Versioning *
 *******************/
-# define OSQP_VERSION ("0.6.0") /* string literals automatically null-terminated
-                                   */
+#include "version.h"
 
 /******************
 * Solver Status  *
@@ -48,7 +47,7 @@ enum osqp_error_type {
     OSQP_LINSYS_SOLVER_INIT_ERROR,
     OSQP_NONCVX_ERROR,
     OSQP_MEM_ALLOC_ERROR,
-    OSQP_WORKSPACE_NOT_INIT_ERROR
+    OSQP_WORKSPACE_NOT_INIT_ERROR,
 };
 extern const char * OSQP_ERROR_MESSAGE[];
 
@@ -100,6 +99,10 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # ifndef OSQP_INFTY
 #  define OSQP_INFTY ((c_float)1e30)        // infinity
 # endif /* ifndef OSQP_INFTY */
+
+# ifndef OSQP_DIVISION_TOL
+#  define OSQP_DIVISION_TOL ((c_float)1.0 / OSQP_INFTY)
+# endif /* ifndef OSQP_DIVISION_TOL */
 
 
 # if EMBEDDED != 1
