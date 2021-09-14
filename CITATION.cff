@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the article from the preferred-citation below."
+title: "OSQP Solver"
+authors:
+  - family-names: "Stellato"
+    given-names: "Bartolomeo"
+  - family-names: "Banjac"
+    given-names: "Goran"
+  - family-names: "Goulart"
+    given-names: "Paul"
+  - family-names: "Bemporad"
+    given-names: "Alberto"
+  - family-names: "Boyd"
+    given-names: "Stephen"
+url: "https://github.com/osqp/osqp"
+
+# This is the main OSQP paper that describes the algorithm
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Stellato"
+    given-names: "Bartolomeo"
+  - family-names: "Banjac"
+    given-names: "Goran"
+  - family-names: "Goulart"
+    given-names: "Paul"
+  - family-names: "Bemporad"
+    given-names: "Alberto"
+  - family-names: "Boyd"
+    given-names: "Stephen"
+  title: "OSQP: an operator splitting solver for quadratic programs"
+  journal: "Mathematical Programming Computation"
+  start: 637 # First page number
+  end: 672 # Last page number
+  volume: 12
+  issue: 4
+  year: 2020
+  doi: 10.1007/s12532-020-00179-2
+  url: https://doi.org/10.1007/s12532-020-00179-2
