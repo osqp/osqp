@@ -1,22 +1,21 @@
 /* Solution polish based on assuming the active set */
 #ifndef POLISH_H
-#define POLISH_H
+# define POLISH_H
 
 # ifdef __cplusplus
 extern "C" {
 # endif // ifdef __cplusplus
 
-# include "osqp.h"
+
 # include "types.h"
 
 /**
  * Solution polish: Solve equality constrained QP with assumed active
  *constraints
- * @param  solver OSQP solver
- * @return        Exitflag:  0: Factorization successful
- *                           1: Factorization unsuccessful
+ * @param  work Workspace
+ * @return      Exitflag
  */
-c_int polish(OSQPSolver *solver);
+c_int polish(OSQPWorkspace *work);
 
 
 # ifdef __cplusplus

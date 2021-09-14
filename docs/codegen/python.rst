@@ -132,7 +132,7 @@ If the code is generated with the option :code:`parameters` set to
 
 .. py:function:: update_A(Ax, Ax_idx, Ax_n)
   :noindex:
-  
+
   Update nonzero entries of the constraint matrix.
 
   :param ndarray Ax: Values of entries to be updated
@@ -165,4 +165,4 @@ You can update all the nonzero entries in matrix :math:`A` by running
 
     emosqp.update_A(Ax_new, None, 0);
 
-See C/C++ :ref:`C_sublevel_API` for more details on the input arguments.
+See C :ref:`C_sublevel_API` for more details on the input arguments.

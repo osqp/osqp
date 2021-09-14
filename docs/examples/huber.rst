@@ -18,12 +18,14 @@ with the Huber penalty function :math:`\phi_{\rm hub}:\mathbf{R}\to\mathbf{R}` d
       (2|u| - 1)  & |u| > 1
   \end{cases}
 
-The problem has the following equivalent form (see `here <http://doi.org/10.1109/34.877518>`_ for more details)
+The problem has the following equivalent form (see `here <https://doi.org/10.1109/34.877518>`_ for more details)
 
 .. math::
   \begin{array}{ll}
-    \mbox{minimize}   & u^T u + 2\,\boldsymbol{1}^T v \\
-    \mbox{subject to} & -v \le Ax - b - u \le v
+    \mbox{minimize}   & u^T u + 2\,\boldsymbol{1}^T (r+s) \\
+    \mbox{subject to} & Ax - b - u = r - s \\
+                      & r \ge 0 \\
+                      & s \ge 0
   \end{array}
 
 
@@ -51,14 +53,14 @@ Python
     # OSQP data
     Im = sparse.eye(m)
     P = sparse.block_diag([sparse.csc_matrix((n, n)), 2*Im,
-                           sparse.csc_matrix((m, m))],
+                           sparse.csc_matrix((2*m, 2*m))],
                            format='csc')
-    q = np.append(np.zeros(m+n), 2*np.ones(m))
-    A = sparse.vstack([
-            sparse.hstack([Ad, -Im, Im]),
-            sparse.hstack([Ad, -Im, -Im])], format='csc')
-    l = np.hstack([b, -np.inf*np.ones(m)])
-    u = np.hstack([np.inf*np.ones(m), b])
+    q = np.append(np.zeros(m+n), 2*np.ones(2*m))
+    A = sparse.bmat([[Ad,   -Im,   -Im,   Im],
+                     [None,  None,  Im,   None],
+                     [None,  None,  None, Im]], format='csc')
+    l = np.hstack([b, np.zeros(2*m)])
+    u = np.hstack([b, np.inf*np.ones(2*m)])
 
     # Create an OSQP object
     prob = osqp.OSQP()
@@ -87,12 +89,15 @@ Matlab
 
     % OSQP data
     Im = speye(m);
-    P = blkdiag(sparse(n, n), 2*Im, sparse(m, m));
-    q = [zeros(m + n, 1); 2*ones(m, 1)];
-    A = [Ad, -Im, Im;
-         Ad, -Im, -Im];
-    l = [b; -inf*ones(m, 1)];
-    u = [inf*ones(m, 1); b];
+    Om = sparse(m, m);
+    Omn = sparse(m, n);
+    P = blkdiag(sparse(n, n), 2*Im, sparse(2*m, 2*m));
+    q = [zeros(m + n, 1); 2*ones(2*m, 1)];
+    A = [Ad,  -Im, -Im, Im;
+         Omn,  Om,  Im, Om;
+         Omn,  Om,  Om, Im];
+    l = [b; zeros(2*m, 1)];
+    u = [b; inf*ones(2*m, 1)];
 
     % Create an OSQP object
     prob = osqp;

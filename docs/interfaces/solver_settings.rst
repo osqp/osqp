@@ -55,7 +55,7 @@ The solver settings are displayed in the following table. The settings marked wi
 | :code:`time_limit` *           | Run time limit in seconds                                   | 0 (disabled) or 0 <= :code:`time_limit`                      | 0               |
 +--------------------------------+-------------------------------------------------------------+--------------------------------------------------------------+-----------------+
 
-The boolean values :code:`True/False` are defined as :code:`1/0` in the C/C++ interfaces.
+The boolean values :code:`True/False` are defined as :code:`1/0` in the C interfaces.
 
 
 .. The infinity values correspond to:

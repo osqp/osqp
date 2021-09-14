@@ -1,6 +1,6 @@
-.. _c_cpp_interface:
+.. _c_interface:
 
-C/C++
+C
 =====
 
 
@@ -11,7 +11,7 @@ C/C++
 Main solver API
 ---------------
 
-The main C/C++ API is imported from the header :code:`osqp.h` and provides the following functions
+The main C API is imported from the header :code:`osqp.h` and provides the following functions
 
 
 .. doxygenfunction:: osqp_setup
@@ -25,13 +25,17 @@ The main C/C++ API is imported from the header :code:`osqp.h` and provides the f
 
 Sublevel API
 ------------
-Sublevel C/C++ API is also imported from the header :code:`osqp.h` and provides the following functions
+Sublevel C API is also imported from the header :code:`osqp.h` and provides the following functions
 
 Warm start
 ^^^^^^^^^^
 OSQP automatically warm starts primal and dual variables from the previous QP solution. If you would like to warm start their values manually, you can use
 
 .. doxygenfunction:: osqp_warm_start
+
+.. doxygenfunction:: osqp_warm_start_x
+
+.. doxygenfunction:: osqp_warm_start_y
 
 
 .. _c_cpp_update_data :
@@ -41,6 +45,10 @@ Update problem data
 Problem data can be updated without executing the setup again using the following functions.
 
 .. doxygenfunction:: osqp_update_lin_cost
+
+.. doxygenfunction:: osqp_update_lower_bound
+
+.. doxygenfunction:: osqp_update_upper_bound
 
 .. doxygenfunction:: osqp_update_bounds
 
