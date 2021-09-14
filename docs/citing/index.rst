@@ -3,7 +3,7 @@
 Citing OSQP
 ===========
 
-If you use OSQP for published work, we encourage you to put a star on `GitHub <https://github.com/oxfordcontrol/osqp>`_ and cite the accompanying papers:
+If you use OSQP for published work, we encourage you to put a star on `GitHub <https://github.com/osqp/osqp>`_ and cite the accompanying papers:
 
 
 .. glossary::
