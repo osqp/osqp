@@ -1,48 +1,24 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Update matrices &mdash; OSQP 0.0.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/osqp_theme.css" type="text/css" />
-
-  
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/osqp_theme.css" type="text/css" />
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
-  
-
-  
-  
-
-  
-
-  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Huber fitting" href="huber.html" />
@@ -66,36 +42,17 @@ content="https://osqp.org/docs/_static/img/logo.png">
 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html">
-          
-
-          
-            
             <img src="../_static/logo.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-            
-            
               <div class="version">
                 0.0.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -103,18 +60,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">User Documentation</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../solver/index.html">The solver</a></li>
@@ -143,74 +89,32 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">OSQP</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="index.html">Examples</a> &raquo;</li>
-        
       <li>Update matrices</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/examples/update-matrices.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="update-matrices">
+             
+  <section id="update-matrices">
 <h1>Update matrices<a class="headerlink" href="#update-matrices" title="Permalink to this headline">¶</a></h1>
 <p>Consider the following QP</p>
 <div class="math notranslate nohighlight">
@@ -225,7 +129,7 @@ Then we update the matrices <span class="math notranslate nohighlight">\(P\)</sp
   \mbox{minimize} &amp; \frac{1}{2} x^T \begin{bmatrix}5 &amp; 1.5\\ 1.5 &amp; 1 \end{bmatrix} x + \begin{bmatrix}1 \\ 1\end{bmatrix}^T x \\
   \mbox{subject to} &amp; \begin{bmatrix}1 \\ 0 \\ 0\end{bmatrix} \leq \begin{bmatrix} 1.2 &amp; 1.1\\ 1.5 &amp; 0\\ 0 &amp; 0.8\end{bmatrix} x \leq \begin{bmatrix}1 \\ 0.7 \\ 0.7\end{bmatrix}
 \end{array}\end{split}\]</div>
-<div class="section" id="python">
+<section id="python">
 <h2>Python<a class="headerlink" href="#python" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">osqp</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -257,8 +161,8 @@ Then we update the matrices <span class="math notranslate nohighlight">\(P\)</sp
 <span class="n">res</span> <span class="o">=</span> <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="matlab">
+</section>
+<section id="matlab">
 <h2>Matlab<a class="headerlink" href="#matlab" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Define problem data</span><span class="w"></span>
 <span class="n">P</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">sparse</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">]);</span><span class="w"></span>
@@ -286,8 +190,8 @@ Then we update the matrices <span class="math notranslate nohighlight">\(P\)</sp
 <span class="n">res</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">prob</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span><span class="w"></span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="julia">
+</section>
+<section id="julia">
 <h2>Julia<a class="headerlink" href="#julia" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span> <span class="n">OSQP</span>
 <span class="k">using</span> <span class="n">Compat</span><span class="o">.</span><span class="n">SparseArrays</span><span class="p">,</span> <span class="n">Compat</span><span class="o">.</span><span class="n">LinearAlgebra</span>
@@ -318,8 +222,8 @@ Then we update the matrices <span class="math notranslate nohighlight">\(P\)</sp
 <span class="n">results</span> <span class="o">=</span> <span class="n">OSQP</span><span class="o">.</span><span class="n">solve!</span><span class="p">(</span><span class="n">prob</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="r">
+</section>
+<section id="r">
 <h2>R<a class="headerlink" href="#r" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">osqp</span><span class="p">)</span>
 <span class="nf">library</span><span class="p">(</span><span class="n">Matrix</span><span class="p">)</span>
@@ -351,8 +255,8 @@ Then we update the matrices <span class="math notranslate nohighlight">\(P\)</sp
 <span class="n">res</span> <span class="o">&lt;-</span> <span class="n">model</span><span class="o">$</span><span class="nf">Solve</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="c">
+</section>
+<section id="c">
 <h2>C<a class="headerlink" href="#c" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;osqp.h&quot;</span><span class="cp"></span>
 
@@ -426,55 +330,38 @@ Then we update the matrices <span class="math notranslate nohighlight">\(P\)</sp
 <span class="p">};</span><span class="w"></span>
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="huber.html" class="btn btn-neutral float-right" title="Huber fitting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="update-vectors.html" class="btn btn-neutral float-left" title="Update vectors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="huber.html" class="btn btn-neutral float-right" title="Huber fitting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.
-
-    </p>
+    <p>&#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

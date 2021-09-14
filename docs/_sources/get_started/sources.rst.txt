@@ -58,13 +58,13 @@ Run the following commands from the terminal
 
 #. You first need to get the sources from one of these two options:
 
-    * Download the compressed file `from bintray.com <https://dl.bintray.com/bstellato/generic/OSQP/0.4.1/osqp-0.4.1.tar.gz>`_.
+    * Download the compressed source file from the latest OSQP release `at GitHub <https://github.com/osqp/osqp/releases>`_.
 
     * Clone the repository
 
         .. code:: bash
 
-            git clone --recursive https://github.com/oxfordcontrol/osqp
+            git clone --recursive https://github.com/osqp/osqp
 
 #. Create :code:`build` directory and change directory
 

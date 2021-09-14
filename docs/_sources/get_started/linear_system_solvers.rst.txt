@@ -28,7 +28,7 @@ The only requirement is that the shared library related to the solver is in the 
 
 QDLDL
 ---------------
-OSQP comes with `QDLDL <https://github.com/oxfordcontrol/qdldl>`_ internally installed.
+OSQP comes with `QDLDL <https://github.com/osqp/qdldl>`_ internally installed.
 It does not require any external shared library.
 QDLDL is a sparse direct solver that works well for most small to medium sized problems.
 However, it becomes not really efficient for large scale problems since it is not multi-threaded.
