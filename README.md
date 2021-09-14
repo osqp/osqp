@@ -1,7 +1,7 @@
 # The Operator Splitting QP Solver
 
 [![CI](https://github.com/osqp/osqp/actions/workflows/main.yml/badge.svg)](https://github.com/osqp/osqp/actions/workflows/main.yml)
-[![Code coverage](https://coveralls.io/repos/github/oxfordcontrol/osqp/badge.svg?branch=master)](https://coveralls.io/github/oxfordcontrol/osqp?branch=master)
+[![Code coverage](https://coveralls.io/repos/github/osqp/osqp/badge.svg?branch=master)](https://coveralls.io/github/osqp/osqp?branch=master)
 ![License](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)
 
 
@@ -36,9 +36,9 @@ If you are using OSQP for your work, we encourage you to
 
 ## Bug reports and support
 
-Please report any issues via the [Github issue tracker](https://github.com/oxfordcontrol/osqp/issues). All types of issues are welcome including bug reports, documentation typos, feature requests and so on.
+Please report any issues via the [Github issue tracker](https://github.com/osqp/osqp/issues). All types of issues are welcome including bug reports, documentation typos, feature requests and so on.
 
 
 ## Numerical benchmarks
-Numerical benchmarks against other solvers are available [here](https://github.com/oxfordcontrol/osqp_benchmarks).
+Numerical benchmarks against other solvers are available [here](https://github.com/osqp/osqp_benchmarks).
 

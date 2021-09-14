@@ -24,7 +24,7 @@ url: "https://osqp.org" # the base hostname & protocol for your site, e.g. http:
 # twitter_username: jekyllrb
 # github_username:  jekyll
 # facebook_link: https://www.facebook.com/groups/331532750262318/
-github_link: https://github.com/oxfordcontrol/osqp
+github_link: https://github.com/osqp/osqp
 google_analytics: UA-56714542-3
 discourse_link: https://osqp.discourse.group/
 
