@@ -10,8 +10,7 @@ extern "C" {
 /*******************
 * OSQP Versioning *
 *******************/
-# define OSQP_VERSION ("0.6.0") /* string literals automatically null-terminated
-                                   */
+#include "version.h"
 
 /******************
 * Solver Status  *

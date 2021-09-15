@@ -1,6 +1,7 @@
 # Add the OSQP headers
 set(
     osqp_headers
+    "${CMAKE_CURRENT_SOURCE_DIR}/version.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/algebra_vector.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/algebra_matrix.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/auxil.h"

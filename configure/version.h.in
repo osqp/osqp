@@ -1,0 +1,3 @@
+#ifndef OSQP_VERSION
+#define OSQP_VERSION "@OSQP_VERSION@"
+#endif
