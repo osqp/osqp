@@ -100,6 +100,10 @@ extern const char * OSQP_ERROR_MESSAGE[];
 #  define OSQP_INFTY ((c_float)1e30)        // infinity
 # endif /* ifndef OSQP_INFTY */
 
+# ifndef OSQP_DIVISION_TOL
+#  define OSQP_DIVISION_TOL ((c_float)1.0 / OSQP_INFTY)
+# endif /* ifndef OSQP_DIVISION_TOL */
+
 
 # if EMBEDDED != 1
 #  define ADAPTIVE_RHO (1)
