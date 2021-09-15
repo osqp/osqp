@@ -5,6 +5,8 @@
 extern "C" {
 # endif // ifdef __cplusplus
 
+#include "osqp_configure.h"
+
 /*******************
 * OSQP Versioning *
 *******************/
@@ -45,7 +47,7 @@ enum osqp_error_type {
     OSQP_LINSYS_SOLVER_INIT_ERROR,
     OSQP_NONCVX_ERROR,
     OSQP_MEM_ALLOC_ERROR,
-    OSQP_WORKSPACE_NOT_INIT_ERROR,
+    OSQP_WORKSPACE_NOT_INIT_ERROR
 };
 extern const char * OSQP_ERROR_MESSAGE[];
 
