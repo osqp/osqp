@@ -23,8 +23,7 @@ import subprocess
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-# Set version for bumpversion
-__version__ = "0.6.0"
+__version__ = os.environ.get('OSQP_VERSION', '0.0.0')
 
 # -- General configuration ------------------------------------------------
 
@@ -51,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'OSQP'
-copyright = '2019, Bartolomeo Stellato, Goran Banjac'
+copyright = '2021, Bartolomeo Stellato, Goran Banjac'
 author = 'Bartolomeo Stellato, Goran Banjac'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -115,7 +114,7 @@ on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 if not on_rtd:  # only import and set the theme if we're building docs locally
     # Override default css to get a larger width for local build
     def setup(app):
-        app.add_stylesheet('css/osqp_theme.css')
+        app.add_css_file('css/osqp_theme.css')
 else:
     html_context = {
         'css_files': [
