@@ -8,6 +8,7 @@ set(
     "${CMAKE_CURRENT_SOURCE_DIR}/glob_opts.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/lin_alg.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/osqp.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/osqp_api_types.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/osqp_configure.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/proj.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/scaling.h"
