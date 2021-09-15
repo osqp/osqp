@@ -5,6 +5,11 @@
 extern "C" {
 # endif // ifdef __cplusplus
 
+/*******************
+* OSQP Versioning *
+*******************/
+#include "version.h"
+
 /******************
 * Solver Status  *
 ******************/

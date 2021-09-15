@@ -7,22 +7,6 @@ extern "C" {
 
 #include "osqp_api_constants.h"
 
-/*******************
-* OSQP Versioning *
-*******************/
-#include "version.h"
-
-
-
-
-
-
-
-
-
-
-
-
 
 # ifdef __cplusplus
 }
