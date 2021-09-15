@@ -25,7 +25,7 @@ extern "C" {
  */
 
 /**
- * Set default settings from constants.h file
+ * Set default settings from osqp_api_constants.h file
  * assumes settings already allocated in memory
  * @param settings settings structure
  */

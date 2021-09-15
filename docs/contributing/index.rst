@@ -53,7 +53,7 @@ The linear system solver object is defined in :code:`mysolver.h` as follows
 
         struct mysolver {
             // Methods
-            enum linsys_solver_type type; // Linear system solver defined in constants.h
+            enum linsys_solver_type type; // Linear system solver defined in osqp_api_constants.h
 
             c_int (*solve)(struct mysolver * self, c_float * b);
             void (*free)(struct mysolver * self);

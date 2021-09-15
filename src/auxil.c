@@ -2,7 +2,7 @@
 #include "auxil.h"
 #include "proj.h"
 #include "lin_alg.h"
-#include "constants.h"
+#include "osqp_api_constants.h"
 #include "scaling.h"
 #include "util.h"
 

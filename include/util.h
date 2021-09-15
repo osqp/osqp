@@ -6,7 +6,7 @@ extern "C" {
 # endif // ifdef __cplusplus
 
 # include "types.h"
-# include "constants.h"
+# include "osqp_api_constants.h"
 
 /******************
 * Versioning     *

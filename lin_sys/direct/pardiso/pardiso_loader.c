@@ -2,7 +2,7 @@
 #include "pardiso_loader.h"
 
 #include "glob_opts.h"
-#include "constants.h"
+#include "osqp_api_constants.h"
 
 #ifdef IS_WINDOWS
 #define PARDISOLIBNAME "mkl_rt." SHAREDLIBEXT

@@ -8,7 +8,7 @@ extern "C" {
 // Functions to scale problem data
 # include "types.h"
 # include "lin_alg.h"
-# include "constants.h"
+# include "osqp_api_constants.h"
 
 // Enable data scaling if EMBEDDED is disabled or if EMBEDDED == 2
 # if EMBEDDED != 1

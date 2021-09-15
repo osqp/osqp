@@ -6,7 +6,7 @@ extern "C" {
 # endif // ifdef __cplusplus
 
 # include "glob_opts.h"
-# include "constants.h"
+# include "osqp_api_constants.h"
 
 
 /******************
@@ -66,7 +66,7 @@ typedef struct {
 typedef struct {
   c_int iter;          ///< number of iterations taken
   char  status[32];    ///< status string, e.g. 'solved'
-  c_int status_val;    ///< status as c_int, defined in constants.h
+  c_int status_val;    ///< status as c_int, defined in osqp_api_constants.h
 
 # ifndef EMBEDDED
   c_int status_polish; ///< polish status: successful (1), unperformed (0), (-1) unsuccessful
