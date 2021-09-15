@@ -4,6 +4,7 @@ set(
     "${CMAKE_CURRENT_SOURCE_DIR}/version.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/auxil.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/constants.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/osqp_api_constants.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/error.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/glob_opts.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/lin_alg.h"
