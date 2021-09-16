@@ -8,7 +8,7 @@ To get started simply choose your language interface and follow the easy install
    :glob:
 
    sources.rst
-   CC++.rst
+   C.rst
    python.rst
    julia.rst
    matlab.rst
