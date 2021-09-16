@@ -70,7 +70,6 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l2"><a class="reference internal" href="linear_systems_solvers.html">Linear Systems Solvers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="status_values.html">Status values and errors</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html#official">Official</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="CC%2B%2B.html">C</a></li>
 <li class="toctree-l3"><a class="reference internal" href="python.html">Python</a></li>
 <li class="toctree-l3"><a class="reference internal" href="matlab.html">Matlab</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Julia</a><ul>
@@ -228,7 +227,7 @@ first one <code class="code docutils literal notranslate"><span class="pre">run_
 </section>
 <section id="update-problem-matrices">
 <h3>Update problem matrices<a class="headerlink" href="#update-problem-matrices" title="Permalink to this headline">¶</a></h3>
-<p>Matrices <code class="code docutils literal notranslate"><span class="pre">A</span></code> and <code class="code docutils literal notranslate"><span class="pre">P</span></code> can be updated by changing the value of their elements but not their sparsity pattern. The interface is designed to mimic the <a class="reference internal" href="CC%2B%2B.html#c-cpp-update-data"><span class="std std-ref">C/C++ counterpart</span></a> with the Julia 1-based indexing. Note that the new values of <code class="code docutils literal notranslate"><span class="pre">P</span></code> represent only the upper triangular part while <code class="code docutils literal notranslate"><span class="pre">A</span></code> is always represented as a full matrix.</p>
+<p>Matrices <code class="code docutils literal notranslate"><span class="pre">A</span></code> and <code class="code docutils literal notranslate"><span class="pre">P</span></code> can be updated by changing the value of their elements but not their sparsity pattern. The interface is designed to mimic the <a class="reference internal" href="C.html#c-cpp-update-data"><span class="std std-ref">C/C++ counterpart</span></a> with the Julia 1-based indexing. Note that the new values of <code class="code docutils literal notranslate"><span class="pre">P</span></code> represent only the upper triangular part while <code class="code docutils literal notranslate"><span class="pre">A</span></code> is always represented as a full matrix.</p>
 <p>You can update the values of all the elements of <code class="code docutils literal notranslate"><span class="pre">P</span></code> by executing</p>
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">OSQP</span><span class="o">.</span><span class="n">update!</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">Px</span><span class="o">=</span><span class="n">Px_new</span><span class="p">)</span>
 </pre></div>
