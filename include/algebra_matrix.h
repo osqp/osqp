@@ -17,13 +17,14 @@ extern "C" {
 typedef struct OSQPMatrix_ OSQPMatrix;
 
 
+#ifndef EMBEDDED
+
 /*  logical functions ------------------------------------------------------*/
 
 c_int OSQPMatrix_is_eq(OSQPMatrix *A, OSQPMatrix* B, c_float tol);
 
 /*  Non-embeddable functions (using malloc) ----------------------------------*/
 
-#ifndef EMBEDDED
 
 //Make a copy from a csc matrix.  Returns OSQP_NULL on failure
 OSQPMatrix* OSQPMatrix_new_from_csc(const csc* A, c_int is_triu);
