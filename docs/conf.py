@@ -25,6 +25,14 @@ import subprocess
 
 __version__ = os.environ.get('OSQP_VERSION', '0.0.0')
 
+# An incoming version number of '0.0.0' is a placeholder for missing version information.
+# In such cases, use a <blank> version to effectively avoid mentioning the version number
+# in the built documentation at all.
+__version__ = '' if __version__ == '0.0.0' else __version__
+
+# Set OSQP_VERSION envvar in case subprocesses (like doxygen) need it too
+os.environ['OSQP_VERSION'] = __version__
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
