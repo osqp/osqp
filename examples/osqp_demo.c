@@ -21,7 +21,7 @@ int main(void) {
   /* Exitflag */
   c_int exitflag;
 
-  /* Workspace, settings, matrices */
+  /* Solver, settings, matrices */
   OSQPSolver   *solver;
   OSQPSettings *settings;
   csc *P = malloc(sizeof(csc));
@@ -33,20 +33,22 @@ int main(void) {
 
   /* Set default settings */
   settings = (OSQPSettings *)malloc(sizeof(OSQPSettings));
-  if (settings) osqp_set_default_settings(settings);
-  settings->polish = 1;
+  if (settings) {
+    osqp_set_default_settings(settings);
+    settings->polish = 1;
+  }
 
-  /* Setup workspace */
+  /* Setup solver */
   exitflag = osqp_setup(&solver, P, q, A, l, u, m, n, settings);
 
-  /* Solve Problem */
-  osqp_solve(solver);
+  /* Solve problem */
+  if (!exitflag) exitflag = osqp_solve(solver);
 
-  /* Clean workspace */
+  /* Cleanup */
   osqp_cleanup(solver);
-  free(A);
-  free(P);
-  free(settings);
+  if (A) free(A);
+  if (P) free(P);
+  if (settings) free(settings);
 
-  return exitflag;
+  return (int)exitflag;
 }

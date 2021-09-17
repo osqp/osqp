@@ -172,7 +172,7 @@ C
     #include "osqp.h"
 
     int main(int argc, char **argv) {
-        // Load problem data
+        /* Load problem data */
         c_float P_x[3] = {4.0, 1.0, 2.0, };
         c_float P_x_new[3] = {5.0, 1.5, 1.0, };
         c_int P_nnz = 3;
@@ -192,50 +192,43 @@ C
         c_int n = 2;
         c_int m = 3;
 
-        // Exitflag
+        /* Exitflag */
         c_int exitflag = 0;
 
-        // Workspace structures
-        OSQPWorkspace *work;
-        OSQPSettings  *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
-        OSQPData      *data     = (OSQPData *)c_malloc(sizeof(OSQPData));
+        /* Solver, settings, matrices */
+        OSQPSolver   *solver;
+        OSQPSettings *settings;
+        csc *P = malloc(sizeof(csc));
+        csc *A = malloc(sizeof(csc));
 
-        // Populate data
-        if (data) {
-            data = (OSQPData *)c_malloc(sizeof(OSQPData));
-            data->n = n;
-            data->m = m;
-            data->P = csc_matrix(data->n, data->n, P_nnz, P_x, P_i, P_p);
-            data->q = q;
-            data->A = csc_matrix(data->m, data->n, A_nnz, A_x, A_i, A_p);
-            data->l = l;
-            data->u = u;
-        }
+        /* Populate matrices */
+        csc_set_data(A, m, n, A_nnz, A_x, A_i, A_p);
+        csc_set_data(P, n, n, P_nnz, P_x, P_i, P_p);
 
-        // Define Solver settings as default
+        /* Set default settings */
+        settings = (OSQPSettings *)malloc(sizeof(OSQPSettings));
         if (settings) osqp_set_default_settings(settings);
 
-        // Setup workspace
-        exitflag = osqp_setup(&work, data, settings);
+        /* Setup solver */
+        exitflag = osqp_setup(&solver, P, q, A, l, u, m, n, settings);
 
-        // Solve problem
-        osqp_solve(work);
+        /* Solve problem */
+        if (!exitflag) exitflag = osqp_solve(solver);
 
-        // Update problem
-        // NB: Update only upper triangular part of P
-        osqp_update_P(work, P_x_new, OSQP_NULL, 3);
-        osqp_update_A(work, A_x_new, OSQP_NULL, 4);
+        /*  Update problem
+            NB: Update only upper triangular part of P
+         */
+        if (!exitflag) exitflag = osqp_update_P(solver, P_x_new, OSQP_NULL, 3);
+        if (!exitflag) exitflag = osqp_update_A(solver, A_x_new, OSQP_NULL, 4);
 
-        // Solve updated problem
-        osqp_solve(work);
+        /* Solve updated problem */
+        if (!exitflag) exitflag = osqp_solve(work);
 
-        // Cleanup
-        if (data) {
-            if (data->A) c_free(data->A);
-            if (data->P) c_free(data->P);
-            c_free(data);
-        }
-        if (settings) c_free(settings);
+        /* Cleanup */
+        osqp_cleanup(solver);
+        if (A) free(A);
+        if (P) free(P);
+        if (settings) free(settings);
 
-        return exitflag;
+        return (int)exitflag;
     };

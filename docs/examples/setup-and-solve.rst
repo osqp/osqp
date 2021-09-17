@@ -127,7 +127,7 @@ C
     #include "osqp.h"
 
     int main(int argc, char **argv) {
-        // Load problem data
+        /* Load problem data */
         c_float P_x[3] = {4.0, 1.0, 2.0, };
         c_int P_nnz = 3;
         c_int P_i[3] = {0, 0, 1, };
@@ -142,44 +142,37 @@ C
         c_int n = 2;
         c_int m = 3;
 
-        // Exitflag
+        /* Exitflag */
         c_int exitflag = 0;
 
-        // Workspace structures
-        OSQPWorkspace *work;
-        OSQPSettings  *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
-        OSQPData      *data     = (OSQPData *)c_malloc(sizeof(OSQPData));
+        /* Solver, settings, matrices */
+        OSQPSolver   *solver;
+        OSQPSettings *settings;
+        csc *P = malloc(sizeof(csc));
+        csc *A = malloc(sizeof(csc));
 
-        // Populate data
-        if (data) {
-            data->n = n;
-            data->m = m;
-            data->P = csc_matrix(data->n, data->n, P_nnz, P_x, P_i, P_p);
-            data->q = q;
-            data->A = csc_matrix(data->m, data->n, A_nnz, A_x, A_i, A_p);
-            data->l = l;
-            data->u = u;
-        }
+        /* Populate matrices */
+        csc_set_data(A, m, n, A_nnz, A_x, A_i, A_p);
+        csc_set_data(P, n, n, P_nnz, P_x, P_i, P_p);
 
-        // Define solver settings as default
+        /* Set default settings */
+        settings = (OSQPSettings *)malloc(sizeof(OSQPSettings));
         if (settings) {
             osqp_set_default_settings(settings);
-            settings->alpha = 1.0; // Change alpha parameter
+            settings->alpha = 1.0; /* Change alpha parameter */
         }
 
-        // Setup workspace
-        exitflag = osqp_setup(&work, data, settings);
+        /* Setup solver */
+        exitflag = osqp_setup(&solver, P, q, A, l, u, m, n, settings);
 
-        // Solve Problem
-        osqp_solve(work);
+        /* Solve problem */
+        if (!exitflag) exitflag = osqp_solve(solver);
 
-        // Cleanup
-        if (data) {
-            if (data->A) c_free(data->A);
-            if (data->P) c_free(data->P);
-            c_free(data);
-        }
-        if (settings) c_free(settings);
+        /* Cleanup */
+        osqp_cleanup(solver);
+        if (A) free(A);
+        if (P) free(P);
+        if (settings) free(settings);
 
-        return exitflag;
+        return (int)exitflag;
     };
