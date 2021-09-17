@@ -1,0 +1,128 @@
+// Intro jumbotron
+.head-intro {
+ // background: url(../images/home_header.jpg) center;
+ // background: black;
+ // background-size: cover;
+ // height: 500px;
+// width: 100%;
+height: 100vh;
+ color: white;
+ // text-shadow: 0px 2px 3px #555;
+  // -webkit-background-size: 100% 100%;           [> Safari 3.0 <]
+  //    -moz-background-size: 100% 100%;           [> Gecko 1.9.2 (Firefox 3.6) <]
+  //      -o-background-size: 100% 100%;           [> Opera 9.5 <]
+  //         background-size: 100% 100%;           [> Gecko 2.0 (Firefox 4.0) and other CSS3-compliant browsers <]
+
+}
+
+
+
+/* Sticky footer styles
+-------------------------------------------------- */
+body {
+  min-height: 100vh;
+}
+
+.flex-grow {
+   flex: 1;
+}
+
+
+.footer {
+	margin-top: 5rem;
+	a {
+		color: $secondary;
+	}
+}
+
+.navbar-brand .img-fluid {
+    height: 40px;
+}
+
+.nav-item .img-fluid {
+    height: 40px;
+}
+
+
+// Footer copyright
+.copyright{
+    font-size: .7rem;
+    text-align: right;
+    a, a:visited {
+	color: $secondary;
+	text-decoration: none;
+    }
+    a:hover{
+	color: $dark;
+	text-decoration: none;
+    }
+}
+
+// Features
+// The board
+.home-section{
+	padding-top: 5rem;
+	padding-top: 5rem;
+	text-align: center;
+	@include media-breakpoint-up(md) {
+	p {
+		font-size:.9rem;
+	}
+	}
+}
+
+/* Featurettes
+------------------------- */
+
+.featurette-divider {
+  margin: 5rem 0; /* Space out the Bootstrap <hr> more */
+}
+
+.featurette {
+text-align: left;
+}
+
+/* Thin out the marketing headings */
+.featurette-heading {
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -.05rem;
+}
+
+/* Slider */
+// .slider_block {
+//         display: inline-block;
+//         height: 100%;
+//         vertical-align: middle;
+//         margin: auto;
+// }
+
+.slider img {
+	display:block;
+	margin: auto;
+	height: 80px;
+//         @include media-breakpoint-up(md) {
+//         height: 100px;
+// }
+	@include media-breakpoint-up(lg) {
+	height: 100px;
+}
+	//   background: #3A6F9A;
+	// vertical-align: middle;
+	// max-height: 100px;
+	// max-width: 180px;// margin:auto;
+    -webkit-filter: grayscale(100%);
+    -moz-filter:    grayscale(100%);
+    -ms-filter:     grayscale(100%);
+    -o-filter:      grayscale(100%);
+}
+
+#particles-js{
+	background: #224873;
+	z-index: -10;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width:100%;
+	height: 100vh;
+}

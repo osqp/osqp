@@ -14,16 +14,16 @@ extern "C" {
 ********************/
 /**
  * Populates a Compressed-Column-Sparse matrix from existing arrays
-    (just assigns the pointers - no malloc or copying is done)
+   (just assigns the pointers - no malloc or copying is done)
+ * @param  M     Matrix pointer
  * @param  m     First dimension
  * @param  n     Second dimension
  * @param  nzmax Maximum number of nonzero elements
  * @param  x     Vector of data
  * @param  i     Vector of row indices
  * @param  p     Vector of column pointers
- * @return       New matrix pointer
  */
-void csc_set_data(csc* M,
+void csc_set_data(csc     *M,
                   c_int    m,
                   c_int    n,
                   c_int    nzmax,

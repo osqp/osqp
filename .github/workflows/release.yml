@@ -1,0 +1,117 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+
+  release:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: [3.9]
+
+        include:
+          - os: ubuntu-latest
+            cmake_generator: "Unix Makefiles"
+          - os: macos-latest
+            cmake_generator: "Unix Makefiles"
+          - os: windows-latest
+            cmake_generator: "MinGW Makefiles"
+
+    defaults:
+      run:
+        # Required when using an activated conda environment in steps
+        # See https://github.com/conda-incubator/setup-miniconda#IMPORTANT
+        shell: bash -l {0}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: false
+          submodules: recursive
+
+      - name: Set up conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+
+      - name: Setup Envvars
+        run: |
+          echo "OSQP_VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
+          echo "OSQP_NAME=osqp-${GITHUB_REF/refs\/tags\//}-${{ runner.os }}" >> $GITHUB_ENV
+
+      # -----------------
+      # OS-specific setup
+      # -----------------
+      - name: Setup (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          echo "LD_LIBRARY_PATH=$CONDA_PREFIX/lib" >> $GITHUB_ENV
+
+      - name: Setup (macOS)
+        if: runner.os == 'macOS'
+        # Newer versions of MacOS effectively block DYLD_LIBRARY_PATH being set (System Integrity Protection)
+        # Explicitly setting RPATH using `install_name_tool -add_rpath $CONDA_PREFIX/lib ./build/out/osqp_tester`
+        #   doesn't work either.
+        # Here we get around it by using a standard non-root location for .dylib files as a soft link
+        run: |
+          echo "DYLD_LIBRARY_PATH=$CONDA_PREFIX/lib" >> $GITHUB_ENV
+          ln -s $CONDA_PREFIX/lib ~/lib
+
+      - name: Setup (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          echo "$CONDA_PREFIX/Library/bin" >> $GITHUB_PATH
+      # -----------------
+
+      # Fetching mkl from the anaconda channel instead of defaults gives us the MKL runtime dynamic libraries
+      # as well (mkl_rt.<dll/so>), required during the runtime testing steps.
+      # MKL on Anaconda 2021.* seems to have inexplicably renamed mkl_rt.dll to mkl_rt.1.dll, so we insist on
+      # a version earlier than 2021
+      - name: Install python dependencies
+        run: |
+          conda install -c anaconda "mkl<2021" numpy scipy
+          conda info
+          conda list
+
+      - name: Build
+        run: |
+          cmake -DOSQP_VERSION=$OSQP_VERSION -G "${{ matrix.cmake_generator }}" -S . -B build
+          cmake --build build
+
+      # useful for inspecting the OSQP version information
+      - name: OSQP Demo
+        run: |
+          ./build/out/osqp_demo
+
+      - name: Generate binary release file
+        run: |
+          mkdir -p $OSQP_NAME/lib $OSQP_NAME/include
+          cp LICENSE $OSQP_NAME/
+          cp include/*.h $OSQP_NAME/include/
+          cp build/out/libosqp.* $OSQP_NAME/lib/
+          cd $OSQP_NAME && tar -czvf ../$OSQP_NAME.tar.gz *
+
+      - name: Release binary
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{env.OSQP_NAME}}.tar.gz
+
+      - name: Generate source release file
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          git ls-files --recurse-submodules | grep -v ^site/ | tar czf osqp-${{env.OSQP_VERSION}}-src.tar.gz --files-from -
+
+      - name: Release source
+        if: ${{ runner.os == 'Linux' }}
+        uses: softprops/action-gh-release@v1
+        with:
+          files: osqp-${{env.OSQP_VERSION}}-src.tar.gz

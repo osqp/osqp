@@ -15,7 +15,7 @@ optimization package for solving convex quadratic programs in the form
 where :math:`x` is the optimization variable and
 :math:`P \in \mathbf{S}^{n}_{+}` a positive semidefinite matrix.
 
-**Code available on** `GitHub <https://github.com/oxfordcontrol/osqp>`_.
+**Code available on** `GitHub <https://github.com/osqp/osqp>`_.
 
 .. rubric:: Citing OSQP
 
@@ -25,8 +25,8 @@ If you are using OSQP for your work, we encourage you to
 * Put a star on GitHub |github-star|
 
 
-.. |github-star| image:: https://img.shields.io/github/stars/oxfordcontrol/osqp.svg?style=social&label=Star
-  :target: https://github.com/oxfordcontrol/osqp
+.. |github-star| image:: https://img.shields.io/github/stars/osqp/osqp.svg?style=social&label=Star
+  :target: https://github.com/osqp/osqp
 
 
 **We are looking forward to hearing your success stories with OSQP!** Please `share them with us <bartolomeo.stellato@gmail.com>`_.
@@ -69,13 +69,15 @@ OSQP is distributed under the `Apache 2.0 License <https://www.apache.org/licens
 
 The following people have been involved in the development of OSQP:
 
-* `Bartolomeo Stellato <https://stellato.io/>`_ (MIT): main development
+* `Bartolomeo Stellato <https://stellato.io/>`_ (Princeton University): main development
 * `Goran Banjac <https://people.ee.ethz.ch/~gbanjac/>`_ (ETH Zürich): main development
 * `Nicholas Moehle <https://www.nicholasmoehle.com/>`_ (Stanford University): methods, maths, and code generation
 * `Paul Goulart <http://users.ox.ac.uk/~engs1373/>`_ (University of Oxford): methods, maths, and Matlab interface
 * `Alberto Bemporad <http://cse.lab.imtlucca.it/~bemporad/>`_ (IMT Lucca): methods and maths
 * `Stephen Boyd <https://web.stanford.edu/~boyd/>`_ (Stanford University): methods and maths
 * `Ian McInerney <mailto:i.mcinerney17@imperial.ac.uk>`_ (Imperial College London): code generation, software development
+* `Michel Schubiger <mailto:michel.schubiger@bluewin.ch>`_ (Schindler R&D): GPU implementation
+* `John Lygeros <https://control.ee.ethz.ch/people/profile.john-lygeros.html>`_ (ETH Zurich): methods and maths
 
 Interfaces development
 
@@ -85,12 +87,12 @@ Interfaces development
 
 .. rubric:: Bug reports and support
 
-Please report any issues via the `Github issue tracker <https://github.com/oxfordcontrol/osqp/issues>`_. All types of issues are welcome including bug reports, documentation typos, feature requests and so on.
+Please report any issues via the `Github issue tracker <https://github.com/osqp/osqp/issues>`_. All types of issues are welcome including bug reports, documentation typos, feature requests and so on.
 
 
 .. rubric:: Numerical benchmarks
 
-Numerical benchmarks against other solvers are available `here <https://github.com/oxfordcontrol/osqp_benchmarks>`_.
+Numerical benchmarks against other solvers are available `here <https://github.com/osqp/osqp_benchmarks>`_.
 
 
 .. toctree::

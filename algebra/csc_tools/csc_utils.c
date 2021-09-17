@@ -1,6 +1,3 @@
-
-#ifndef EMBEDDED
-
 #include "csc_utils.h"
 
 //========== Logical, testing and debug ===========
@@ -455,5 +452,3 @@ csc* csc_to_triu(csc *M) {
   // Return matrix in triplet form
   return M_triu;
 }
-
-#endif  //EMBEDDED

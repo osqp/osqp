@@ -6,13 +6,13 @@ OSQP Matlab interface requires Matlab 2015b or newer.
 Binaries
 --------
 
-Precompiled platform-dependent Matlab binaries are available on `Bintray <https://bintray.com/bstellato/generic/OSQP>`_.
+Precompiled platform-dependent Matlab binaries are available on `GitHub <https://github.com/osqp/osqp-matlab/releases>`_.
 
 To install the interface, just run the following commands:
 
 .. code:: matlab
 
-    websave('install_osqp.m', 'https://dl.bintray.com/bstellato/generic/OSQP/0.6.0/install_osqp.m');
+    websave('install_osqp.m','https://raw.githubusercontent.com/osqp/osqp-matlab/master/package/install_osqp.m');
     install_osqp
 
 
@@ -47,7 +47,7 @@ You can now build the interface by running inside Matlab
 
 .. code:: matlab
 
-   !git clone --recurse-submodules https://github.com/oxfordcontrol/osqp-matlab
+   !git clone --recurse-submodules https://github.com/osqp/osqp-matlab
    cd osqp-matlab
    make_osqp
 

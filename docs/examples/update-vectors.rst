@@ -171,57 +171,58 @@ C
 
     int main(int argc, char **argv) {
         /* Load problem data */
-        c_float P_x[3]   = {4.0, 1.0, 2.0, };
-        c_int   P_nnz    = 3;
-        c_int   P_i[3]   = {0, 0, 1, };
-        c_int   P_p[3]   = {0, 1, 3, };
-        c_float q[2]     = {1.0, 1.0, };
+        c_float P_x[3] = {4.0, 1.0, 2.0, };
+        c_int P_nnz = 3;
+        c_int P_i[3] = {0, 0, 1, };
+        c_int P_p[3] = {0, 1, 3, };
+        c_float q[2] = {1.0, 1.0, };
         c_float q_new[2] = {2.0, 3.0, };
-        c_float A_x[4]   = {1.0, 1.0, 1.0, 1.0, };
-        c_int   A_nnz    = 4;
-        c_int   A_i[4]   = {0, 1, 0, 2, };
-        c_int   A_p[3]   = {0, 2, 4, };
-        c_float l[3]     = {1.0, 0.0, 0.0, };
+        c_float A_x[4] = {1.0, 1.0, 1.0, 1.0, };
+        c_int A_nnz = 4;
+        c_int A_i[4] = {0, 1, 0, 2, };
+        c_int A_p[3] = {0, 2, 4, };
+        c_float l[3] = {1.0, 0.0, 0.0, };
         c_float l_new[3] = {2.0, -1.0, -1.0, };
-        c_float u[3]     = {1.0, 0.7, 0.7, };
+        c_float u[3] = {1.0, 0.7, 0.7, };
         c_float u_new[3] = {2.0, 2.5, 2.5, };
         c_int n = 2;
         c_int m = 3;
 
         /* Exitflag */
-        c_int exitflag;
+        c_int exitflag = 0;
 
-        /* Workspace, settings, matrices */
-        OSQPWorkspace *work;
+        /* Solver, settings, matrices */
+        OSQPSolver   *solver;
         OSQPSettings *settings;
-        csc *P, *A;
+        csc *P = malloc(sizeof(csc));
+        csc *A = malloc(sizeof(csc));
 
         /* Populate matrices */
-        P = csc_matrix(n, n, P_nnz, P_x, P_i, P_p);
-        A = csc_matrix(m, n, A_nnz, A_x, A_i, A_p);
+        csc_set_data(A, m, n, A_nnz, A_x, A_i, A_p);
+        csc_set_data(P, n, n, P_nnz, P_x, P_i, P_p);
 
         /* Set default settings */
-        settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
+        settings = (OSQPSettings *)malloc(sizeof(OSQPSettings));
         if (settings) osqp_set_default_settings(settings);
 
-        /* Setup workspace */
-        exitflag = osqp_setup(&work, P, q, A, l, u, m, n, settings);
+        /* Setup solver */
+        exitflag = osqp_setup(&solver, P, q, A, l, u, m, n, settings);
 
         /* Solve problem */
-        osqp_solve(work);
+        if (!exitflag) exitflag = osqp_solve(solver);
 
         /* Update problem */
-        osqp_update_lin_cost(work, q_new);
-        osqp_update_bounds(work, l_new, u_new);
+        if (!exitflag) exitflag = osqp_update_lin_cost(solver, q_new);
+        if (!exitflag) exitflag = osqp_update_bounds(solver, l_new, u_new);
 
         /* Solve updated problem */
-        osqp_solve(work);
+        if (!exitflag) exitflag = osqp_solve(work);
 
-        /* Clean workspace */
-        osqp_cleanup(work);
-        c_free(A);
-        c_free(P);
-        c_free(settings);
+        /* Cleanup */
+        osqp_cleanup(solver);
+        if (A) free(A);
+        if (P) free(P);
+        if (settings) free(settings);
 
-        return exitflag;
-    }
+        return (int)exitflag;
+    };
