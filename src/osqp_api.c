@@ -124,6 +124,10 @@ c_int osqp_setup(OSQPSolver** solverp,
   osqp_tic(work->timer);
 # endif /* ifdef PROFILING */
 
+  // Initialize algebra libraries
+  exitflag = osqp_algebra_init_libs();
+  if (exitflag) return osqp_error(OSQP_ALGEBRA_LOAD_ERROR);
+
   // Copy problem data into workspace
   work->data = c_malloc(sizeof(OSQPData));
   if (!(work->data)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
@@ -693,6 +697,9 @@ c_int osqp_cleanup(OSQPSolver *solver) {
   work = solver->work;
 
   if (work) { // If workspace has been allocated
+    // Free algebra library handlers
+    osqp_algebra_free_libs();
+
     // Free Data
     if (work->data) {
       OSQPMatrix_free(work->data->P);
