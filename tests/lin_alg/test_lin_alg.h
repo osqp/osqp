@@ -102,15 +102,6 @@ static const char* test_vec_operations() {
     "Linear algebra tests: error in vector operation, elementwise maximum between vectors",
     OSQPVectorf_norm_inf_diff(result, ref) < TESTS_TOL);
 
-  // Elementwise maximum
-  //-----------------------
-  OSQPVectorf_ew_min_vec(result, v1, v2);
-  OSQPVectorf_from_raw(ref, data->test_vec_ops_ew_min_vec);
-
-  mu_assert(
-    "Linear algebra tests: error in vector operation, elementwise minimum between vectors",
-    OSQPVectorf_norm_inf_diff(result, ref) < TESTS_TOL);
-
   // cleanup
   OSQPVectorf_free(v1);
   OSQPVectorf_free(v2);

@@ -25,7 +25,6 @@ test_vec_ops_add_scaled = test_vec_ops_sc1 * test_vec_ops_v1 + test_vec_ops_sc2 
 test_vec_ops_ew_reciprocal = np.reciprocal(test_vec_ops_v1)
 test_vec_ops_vec_prod = test_vec_ops_v1.dot(test_vec_ops_v2)
 test_vec_ops_ew_max_vec = np.maximum(test_vec_ops_v1, test_vec_ops_v2)
-test_vec_ops_ew_min_vec = np.minimum(test_vec_ops_v1, test_vec_ops_v2)
 
 
 # Test matrix operations
@@ -93,7 +92,6 @@ data = {'test_sp_matrix_A': test_sp_matrix_A,
         'test_vec_ops_ew_reciprocal': test_vec_ops_ew_reciprocal,
         'test_vec_ops_vec_prod': test_vec_ops_vec_prod,
         'test_vec_ops_ew_max_vec': test_vec_ops_ew_max_vec,
-        'test_vec_ops_ew_min_vec': test_vec_ops_ew_min_vec,
         'test_mat_ops_n': test_mat_ops_n,
         'test_mat_ops_A': test_mat_ops_A,
         'test_mat_ops_d': test_mat_ops_d,
