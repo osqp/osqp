@@ -125,13 +125,14 @@ if (CUDA_SUPPORT)
     include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 
     # sm_75 -> Turing support
-    set(CMAKE_CUDA_ARCHITECTURES 75)
-#    if (DFLOAT)
+    if (DFLOAT)
+        set(CMAKE_CUDA_ARCHITECTURES 52 75)
 #        set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_52 --gpu-code=sm_52,sm_75")
-#    else()
-#        # To use doubles we need compute capability 6.0 for atomic operations
+    else()
+        # To use doubles we need compute capability 6.0 for atomic operations
+        set(CMAKE_CUDA_ARCHITECTURES 60 75)
 #        set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_60 --gpu-code=sm_60,sm_75")
-#    endif()
+    endif()
 endif()
 
 
