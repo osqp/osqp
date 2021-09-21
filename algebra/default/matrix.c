@@ -10,10 +10,7 @@
 
 /*  logical test functions ----------------------------------------------------*/
 
-c_int OSQPMatrix_is_eq(const OSQPMatrix *A,
-                       const OSQPMatrix *B,
-                       c_float           tol){
-
+c_int OSQPMatrix_is_eq(OSQPMatrix *A, OSQPMatrix* B, c_float tol){
   return (A->symmetry == B->symmetry &&
           csc_is_eq(A->csc, B->csc, tol) );
 }
