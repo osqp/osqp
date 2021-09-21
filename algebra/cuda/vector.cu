@@ -325,8 +325,8 @@ void OSQPVectorf_ew_prod(OSQPVectorf       *c,
   if (c->length) cuda_vec_ew_prod(c->d_val, a->d_val, b->d_val, c->length);
 }
 
-c_int OSQPVectorf_all_leq(OSQPVectorf *l,
-                          OSQPVectorf *u) {
+c_int OSQPVectorf_all_leq(const OSQPVectorf *l,
+                          const OSQPVectorf *u) {
 
   c_int res;
 

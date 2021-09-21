@@ -193,7 +193,7 @@ c_int OSQPVectorf_all_leq(const OSQPVectorf *l,
  * that x = min(max(x,l),u) is allowed
  */
 void OSQPVectorf_ew_bound_vec(OSQPVectorf       *x,
-                              OSQPVectorf       *z,
+                              const OSQPVectorf *z,
                               const OSQPVectorf *l,
                               const OSQPVectorf *u);
 
