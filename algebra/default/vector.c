@@ -6,7 +6,8 @@
 
 #ifndef EMBEDDED
 
-OSQPVectorf* OSQPVectorf_new(const c_float *a, c_int length){
+OSQPVectorf* OSQPVectorf_new(const c_float *a,
+                             c_int          length){
 
   OSQPVectorf* out = OSQPVectorf_malloc(length);
   if(!out) return OSQP_NULL;
@@ -17,16 +18,16 @@ OSQPVectorf* OSQPVectorf_new(const c_float *a, c_int length){
   return out;
 }
 
-OSQPVectori* OSQPVectori_new(const c_int *a, c_int length){
+// OSQPVectori* OSQPVectori_new(const c_int *a, c_int length){
 
-  OSQPVectori* out = OSQPVectori_malloc(length);
-  if(!out) return OSQP_NULL;
+//   OSQPVectori* out = OSQPVectori_malloc(length);
+//   if(!out) return OSQP_NULL;
 
-  if (length > 0) {
-    OSQPVectori_from_raw(out, a);
-  }
-  return out;
-}
+//   if (length > 0) {
+//     OSQPVectori_from_raw(out, a);
+//   }
+//   return out;
+// }
 
 OSQPVectorf* OSQPVectorf_malloc(c_int length){
 
@@ -117,12 +118,12 @@ OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf *a){
 
 }
 
-OSQPVectori* OSQPVectori_copy_new(const OSQPVectori *a){
+// OSQPVectori* OSQPVectori_copy_new(const OSQPVectori *a){
 
-  OSQPVectori* b = OSQPVectori_malloc(a->length);
-  if(b) OSQPVectori_copy(b,a);
-  return b;
-}
+//   OSQPVectori* b = OSQPVectori_malloc(a->length);
+//   if(b) OSQPVectori_copy(b,a);
+//   return b;
+// }
 
 void OSQPVectorf_free(OSQPVectorf *a){
   if (a) c_free(a->values);
@@ -134,7 +135,9 @@ void OSQPVectori_free(OSQPVectori *a){
   c_free(a);
 }
 
-OSQPVectorf* OSQPVectorf_view(const OSQPVectorf *a, c_int head, c_int length){
+OSQPVectorf* OSQPVectorf_view(const OSQPVectorf *a,
+                              c_int              head,
+                              c_int              length){
 
   OSQPVectorf* view = c_malloc(sizeof(OSQPVectorf));
   if(view){
@@ -151,22 +154,25 @@ void OSQPVectorf_view_free(OSQPVectorf *a){
 
 #endif /* ifndef EMBEDDED */
 
-c_int OSQPVectorf_length(const OSQPVectorf *a){return a->length;}
-c_int OSQPVectori_length(const OSQPVectori *a){return a->length;}
+// c_int OSQPVectorf_length(const OSQPVectorf *a){return a->length;}
+// c_int OSQPVectori_length(const OSQPVectori *a){return a->length;}
 
 /* Pointer to vector data (floats) */
 c_float* OSQPVectorf_data(const OSQPVectorf *a){return a->values;}
 c_int*   OSQPVectori_data(const OSQPVectori *a){return a->values;}
 
-void OSQPVectorf_copy(OSQPVectorf *b, const OSQPVectorf *a){
+void OSQPVectorf_copy(OSQPVectorf       *b,
+                      const OSQPVectorf *a){
   OSQPVectorf_from_raw(b, a->values);
 }
 
-void OSQPVectori_copy(OSQPVectori *b, const OSQPVectori *a){
+void OSQPVectori_copy(OSQPVectori       *b,
+                      const OSQPVectori *a){
   OSQPVectori_from_raw(b, a->values);
 }
 
-void OSQPVectorf_from_raw(OSQPVectorf *b, const c_float *av){
+void OSQPVectorf_from_raw(OSQPVectorf   *b,
+                          const c_float *av){
   c_int i;
   c_int length = b->length;
   c_float* bv  = b->values;
@@ -176,7 +182,8 @@ void OSQPVectorf_from_raw(OSQPVectorf *b, const c_float *av){
   }
 }
 
-void OSQPVectori_from_raw(OSQPVectori *b, const c_int *av){
+void OSQPVectori_from_raw(OSQPVectori *b,
+                          const c_int *av){
   c_int i;
   c_int length = b->length;
   c_int* bv = b->values;
@@ -186,7 +193,8 @@ void OSQPVectori_from_raw(OSQPVectori *b, const c_int *av){
   }
 }
 
-void OSQPVectorf_to_raw(c_float *bv, const OSQPVectorf *a){
+void OSQPVectorf_to_raw(c_float           *bv,
+                        const OSQPVectorf *a){
   c_int i;
   c_int length = a->length;
   c_float* av = a->values;
@@ -196,17 +204,18 @@ void OSQPVectorf_to_raw(c_float *bv, const OSQPVectorf *a){
   }
 }
 
-void OSQPVectori_to_raw(c_int *bv, const OSQPVectori *a){
-  c_int i;
-  c_int length = a->length;
-  c_int* av = a->values;
+// void OSQPVectori_to_raw(c_int *bv, const OSQPVectori *a){
+//   c_int i;
+//   c_int length = a->length;
+//   c_int* av = a->values;
 
-  for (i = 0; i < length; i++) {
-    bv[i] = av[i];
-  }
-}
+//   for (i = 0; i < length; i++) {
+//     bv[i] = av[i];
+//   }
+// }
 
-void OSQPVectorf_set_scalar(OSQPVectorf *a, c_float sc){
+void OSQPVectorf_set_scalar(OSQPVectorf *a,
+                            c_float      sc){
   c_int i;
   c_int length = a->length;
   c_float* av  = a->values;
@@ -217,11 +226,11 @@ void OSQPVectorf_set_scalar(OSQPVectorf *a, c_float sc){
 }
 
 
-void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
-                                        OSQPVectori *test,
-                                        c_float sc_if_neg,
-                                        c_float sc_if_zero,
-                                        c_float sc_if_pos){
+void OSQPVectorf_set_scalar_conditional(OSQPVectorf       *a,
+                                        const OSQPVectori *test,
+                                        c_float            sc_if_neg,
+                                        c_float            sc_if_zero,
+                                        c_float            sc_if_pos){
   c_int     i;
   c_int     length = a->length;
   c_float*  av     = a->values;
@@ -235,7 +244,8 @@ void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
 }
 
 
-void OSQPVectorf_mult_scalar(OSQPVectorf *a, c_float sc){
+void OSQPVectorf_mult_scalar(OSQPVectorf *a,
+                             c_float      sc){
   c_int i;
   c_int length = a->length;
   c_float*  av = a->values;
@@ -289,9 +299,9 @@ void OSQPVectorf_minus(OSQPVectorf       *x,
 
 
 void OSQPVectorf_add_scaled(OSQPVectorf       *x,
-                            c_float           sca,
+                            c_float            sca,
                             const OSQPVectorf *a,
-                            c_float           scb,
+                            c_float            scb,
                             const OSQPVectorf *b){
   c_int i;
   c_int length = x->length;
@@ -314,11 +324,11 @@ void OSQPVectorf_add_scaled(OSQPVectorf       *x,
 }
 
 void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
-                             c_float           sca,
+                             c_float            sca,
                              const OSQPVectorf *a,
-                             c_float           scb,
+                             c_float            scb,
                              const OSQPVectorf *b,
-                             c_float           scc,
+                             c_float            scc,
                              const OSQPVectorf *c){
   c_int i;
   c_int length = x->length;
@@ -356,20 +366,21 @@ c_float OSQPVectorf_norm_inf(const OSQPVectorf *v){
   return normval;
 }
 
-c_float OSQPVectorf_norm_1(const OSQPVectorf *v){
+// c_float OSQPVectorf_norm_1(const OSQPVectorf *v){
 
-  c_int   i;
-  c_int length  = v->length;
-  c_float*  vv  = v->values;
-  c_float normval = 0.0;
+//   c_int   i;
+//   c_int length  = v->length;
+//   c_float*  vv  = v->values;
+//   c_float normval = 0.0;
 
-  for (i = 0; i < length; i++) {
-    normval += c_absval(vv[i]);
-  }
-  return normval;
-}
+//   for (i = 0; i < length; i++) {
+//     normval += c_absval(vv[i]);
+//   }
+//   return normval;
+// }
 
-c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S, const OSQPVectorf *v){
+c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S,
+                                    const OSQPVectorf *v){
 
   c_int   i;
   c_int length  = v->length;
@@ -385,19 +396,19 @@ c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S, const OSQPVectorf *v){
   return normval;
 }
 
-c_float OSQPVectorf_scaled_norm_1(const OSQPVectorf *S, const OSQPVectorf *v){
+// c_float OSQPVectorf_scaled_norm_1(const OSQPVectorf *S, const OSQPVectorf *v){
 
-  c_int   i;
-  c_int length  = v->length;
-  c_float*  vv  = v->values;
-  c_float*  Sv  = S->values;
-  c_float normval = 0.0;
+//   c_int   i;
+//   c_int length  = v->length;
+//   c_float*  vv  = v->values;
+//   c_float*  Sv  = S->values;
+//   c_float normval = 0.0;
 
-  for (i = 0; i < length; i++) {
-    normval += c_absval(Sv[i] * vv[i]);
-  }
-  return normval;
-}
+//   for (i = 0; i < length; i++) {
+//     normval += c_absval(Sv[i] * vv[i]);
+//   }
+//   return normval;
+// }
 
 c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
                                   const OSQPVectorf *b){
@@ -415,36 +426,37 @@ c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
   return normDiff;
 }
 
-c_float OSQPVectorf_norm_1_diff(const OSQPVectorf *a,
-                                const OSQPVectorf *b){
+// c_float OSQPVectorf_norm_1_diff(const OSQPVectorf *a,
+//                                 const OSQPVectorf *b){
 
-  c_int   i;
-  c_int   length = a->length;
-  c_float*  av   = a->values;
-  c_float*  bv   = b->values;
-  c_float normDiff = 0.0;
+//   c_int   i;
+//   c_int   length = a->length;
+//   c_float*  av   = a->values;
+//   c_float*  bv   = b->values;
+//   c_float normDiff = 0.0;
 
-  for (i = 0; i < length; i++) {
-    normDiff += c_absval(av[i] - bv[i]);
-  }
-  return normDiff;
-}
+//   for (i = 0; i < length; i++) {
+//     normDiff += c_absval(av[i] - bv[i]);
+//   }
+//   return normDiff;
+// }
 
-c_float OSQPVectorf_sum(const OSQPVectorf *a){
+// c_float OSQPVectorf_sum(const OSQPVectorf *a){
 
-  c_int   i;
-  c_int   length = a->length;
-  c_float*  av   = a->values;
-  c_float val = 0.0;
+//   c_int   i;
+//   c_int   length = a->length;
+//   c_float*  av   = a->values;
+//   c_float val = 0.0;
 
-  for (i = 0; i < length; i++) {
-    val += av[i];
-  }
+//   for (i = 0; i < length; i++) {
+//     val += av[i];
+//   }
 
-  return val;
-}
+//   return val;
+// }
 
-c_float OSQPVectorf_dot_prod(const OSQPVectorf *a, const OSQPVectorf *b){
+c_float OSQPVectorf_dot_prod(const OSQPVectorf *a,
+                             const OSQPVectorf *b){
 
   c_int   i;
   c_int   length = a->length;
@@ -458,7 +470,9 @@ c_float OSQPVectorf_dot_prod(const OSQPVectorf *a, const OSQPVectorf *b){
   return dotprod;
 }
 
-c_float OSQPVectorf_dot_prod_signed(const OSQPVectorf *a, const OSQPVectorf *b, c_int sign){
+c_float OSQPVectorf_dot_prod_signed(const OSQPVectorf *a,
+                                    const OSQPVectorf *b,
+                                    c_int              sign){
 
   c_int   i;
   c_int   length = a->length;
@@ -506,7 +520,8 @@ void OSQPVectorf_ew_prod(OSQPVectorf       *c,
   }
 }
 
-c_int OSQPVectorf_all_leq(OSQPVectorf *l, OSQPVectorf* u){
+c_int OSQPVectorf_all_leq(const OSQPVectorf *l,
+                          const OSQPVectorf *u){
 
   c_int i;
   c_int length = l->length;
@@ -519,8 +534,8 @@ c_int OSQPVectorf_all_leq(OSQPVectorf *l, OSQPVectorf* u){
   return 1;
 }
 
-void OSQPVectorf_ew_bound_vec(OSQPVectorf *x,
-                              OSQPVectorf *z,
+void OSQPVectorf_ew_bound_vec(OSQPVectorf       *x,
+                              OSQPVectorf       *z,
                               const OSQPVectorf *l,
                               const OSQPVectorf *u){
 
@@ -539,7 +554,7 @@ void OSQPVectorf_ew_bound_vec(OSQPVectorf *x,
 void OSQPVectorf_project_polar_reccone(OSQPVectorf       *y,
                                        const OSQPVectorf *l,
                                        const OSQPVectorf *u,
-                                       c_float        infval){
+                                       c_float            infval){
 
   c_int i; // Index for loops
   c_int    length = y->length;
@@ -566,8 +581,8 @@ void OSQPVectorf_project_polar_reccone(OSQPVectorf       *y,
 c_int OSQPVectorf_in_reccone(const OSQPVectorf *y,
                              const OSQPVectorf *l,
                              const OSQPVectorf *u,
-                             c_float           infval,
-                             c_float           tol){
+                             c_float            infval,
+                             c_float            tol){
 
   c_int i; // Index for loops
 
@@ -589,57 +604,57 @@ c_int OSQPVectorf_in_reccone(const OSQPVectorf *y,
 }
 
 
-void OSQPVectorf_permute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p){
+// void OSQPVectorf_permute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p){
 
-  c_int j;
-  c_int length = x->length;
-  c_float*  xv = x->values;
-  c_float*  bv = b->values;
-  c_int*    pv = p->values;
+//   c_int j;
+//   c_int length = x->length;
+//   c_float*  xv = x->values;
+//   c_float*  bv = b->values;
+//   c_int*    pv = p->values;
 
-  for (j = 0; j < length; j++) {
-    xv[j] = bv[pv[j]];
-  }
-}
+//   for (j = 0; j < length; j++) {
+//     xv[j] = bv[pv[j]];
+//   }
+// }
 
-void OSQPVectori_permute(OSQPVectori *x, const OSQPVectori *b, const OSQPVectori *p){
+// void OSQPVectori_permute(OSQPVectori *x, const OSQPVectori *b, const OSQPVectori *p){
 
-  c_int j;
-  c_int length = x->length;
-  c_int*    xv = x->values;
-  c_int*    bv = b->values;
-  c_int*    pv = p->values;
+//   c_int j;
+//   c_int length = x->length;
+//   c_int*    xv = x->values;
+//   c_int*    bv = b->values;
+//   c_int*    pv = p->values;
 
-  for (j = 0; j < length; j++) {
-    xv[j] = bv[pv[j]];
-  }
-}
+//   for (j = 0; j < length; j++) {
+//     xv[j] = bv[pv[j]];
+//   }
+// }
 
-void OSQPVectorf_ipermute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p){
+// void OSQPVectorf_ipermute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p){
 
-  c_int j;
-  c_int length = x->length;
-  c_float*  xv = x->values;
-  c_float*  bv = b->values;
-  c_int*    pv = p->values;
+//   c_int j;
+//   c_int length = x->length;
+//   c_float*  xv = x->values;
+//   c_float*  bv = b->values;
+//   c_int*    pv = p->values;
 
-  for (j = 0; j < length; j++) {
-    xv[pv[j]] = bv[j];
-  }
-}
+//   for (j = 0; j < length; j++) {
+//     xv[pv[j]] = bv[j];
+//   }
+// }
 
-void OSQPVectori_ipermute(OSQPVectori *x, const OSQPVectori *b, const OSQPVectori *p){
+// void OSQPVectori_ipermute(OSQPVectori *x, const OSQPVectori *b, const OSQPVectori *p){
 
-  c_int j;
-  c_int length = x->length;
-  c_int*    xv = x->values;
-  c_int*    bv = b->values;
-  c_int*    pv = p->values;
+//   c_int j;
+//   c_int length = x->length;
+//   c_int*    xv = x->values;
+//   c_int*    bv = b->values;
+//   c_int*    pv = p->values;
 
-  for (j = 0; j < length; j++) {
-    xv[pv[j]] = bv[j];
-  }
-}
+//   for (j = 0; j < length; j++) {
+//     xv[pv[j]] = bv[j];
+//   }
+// }
 
 
 
@@ -647,15 +662,22 @@ void OSQPVectori_ipermute(OSQPVectori *x, const OSQPVectori *b, const OSQPVector
 
 c_float OSQPVectorf_mean(const OSQPVectorf *a){
 
-  if (a->length) {
-    return OSQPVectorf_sum(a) / (a->length);
+  c_int i;
+  c_int length = a->length;
+  c_float *av  = a->values;
+  c_float val = 0.0;
+
+  if (length) {
+    for (i = 0; i < length; i++) {
+      val += av[i];
+    }
+    return val / length;
   }
-  else {
-    return 0;
-  }
+  else return val;
 }
 
-void OSQPVectorf_ew_reciprocal(OSQPVectorf *b, const OSQPVectorf *a){
+void OSQPVectorf_ew_reciprocal(OSQPVectorf      *b,
+                              const OSQPVectorf *a){
 
   c_int i;
   c_int length = a->length;
@@ -678,7 +700,9 @@ void OSQPVectorf_ew_sqrt(OSQPVectorf *a){
   }
 }
 
-void OSQPVectorf_ew_max(OSQPVectorf *c, const OSQPVectorf *a, c_float max_val){
+void OSQPVectorf_ew_max(OSQPVectorf       *c,
+                        const OSQPVectorf *a,
+                        c_float            max_val){
 
   c_int i;
   c_int length = c->length;
@@ -690,17 +714,17 @@ void OSQPVectorf_ew_max(OSQPVectorf *c, const OSQPVectorf *a, c_float max_val){
   }
 }
 
-void OSQPVectorf_ew_min(OSQPVectorf *c, const OSQPVectorf *a, c_float min_val){
+// void OSQPVectorf_ew_min(OSQPVectorf *c, const OSQPVectorf *a, c_float min_val){
 
-  c_int i;
-  c_int length = a->length;
-  c_float*  av = a->values;
-  c_float*  cv = c->values;
+//   c_int i;
+//   c_int length = a->length;
+//   c_float*  av = a->values;
+//   c_float*  cv = c->values;
 
-  for (i = 0; i < length; i++) {
-    cv[i] = c_min(av[i], min_val);
-  }
-}
+//   for (i = 0; i < length; i++) {
+//     cv[i] = c_min(av[i], min_val);
+//   }
+// }
 
 void OSQPVectorf_ew_max_vec(OSQPVectorf       *c,
                             const OSQPVectorf *a,
@@ -716,25 +740,25 @@ void OSQPVectorf_ew_max_vec(OSQPVectorf       *c,
   }
 }
 
-void OSQPVectorf_ew_min_vec(OSQPVectorf       *c,
-                            const OSQPVectorf *a,
-                            const OSQPVectorf *b){
-  c_int i;
-  c_int length = a->length;
-  c_float*  av = a->values;
-  c_float*  bv = b->values;
-  c_float*  cv = c->values;
+// void OSQPVectorf_ew_min_vec(OSQPVectorf       *c,
+//                             const OSQPVectorf *a,
+//                             const OSQPVectorf *b){
+//   c_int i;
+//   c_int length = a->length;
+//   c_float*  av = a->values;
+//   c_float*  bv = b->values;
+//   c_float*  cv = c->values;
 
-  for (i = 0; i < length; i++) {
-    cv[i] = c_min(av[i], bv[i]);
-  }
-}
+//   for (i = 0; i < length; i++) {
+//     cv[i] = c_min(av[i], bv[i]);
+//   }
+// }
 
-c_int OSQPVectorf_ew_bounds_type(OSQPVectori* iseq,
-                                const OSQPVectorf* l,
-                                const OSQPVectorf* u,
-                                c_float tol,
-                                c_float infval){
+c_int OSQPVectorf_ew_bounds_type(OSQPVectori      *iseq,
+                                const OSQPVectorf *l,
+                                const OSQPVectorf *u,
+                                c_float            tol,
+                                c_float            infval){
 
   c_int i;
   c_int length   = iseq->length;
@@ -768,10 +792,10 @@ c_int OSQPVectorf_ew_bounds_type(OSQPVectori* iseq,
 
 }
 
-void OSQPVectorf_set_scalar_if_lt(OSQPVectorf *x,
+void OSQPVectorf_set_scalar_if_lt(OSQPVectorf       *x,
                                   const OSQPVectorf *z,
-                                  c_float testval,
-                                  c_float newval){
+                                  c_float            testval,
+                                  c_float            newval){
   c_int i;
   c_int length = x->length;
   c_float*  xv = x->values;
@@ -782,15 +806,14 @@ void OSQPVectorf_set_scalar_if_lt(OSQPVectorf *x,
   }
 }
 
-void OSQPVectorf_set_scalar_if_gt(OSQPVectorf *x,
+void OSQPVectorf_set_scalar_if_gt(OSQPVectorf       *x,
                                   const OSQPVectorf *z,
-                                  c_float testval,
-                                  c_float newval){
+                                  c_float            testval,
+                                  c_float            newval){
   c_int i;
   c_int length = x->length;
   c_float*  xv = x->values;
   c_float*  zv = z->values;
-
 
   for (i = 0; i < length; i++) {
     xv[i] = zv[i] > testval ? newval : zv[i];

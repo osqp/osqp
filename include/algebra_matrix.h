@@ -21,13 +21,16 @@ typedef struct OSQPMatrix_ OSQPMatrix;
 
 /*  logical functions ------------------------------------------------------*/
 
-c_int OSQPMatrix_is_eq(OSQPMatrix *A, OSQPMatrix* B, c_float tol);
+c_int OSQPMatrix_is_eq(const OSQPMatrix *A,
+                       const OSQPMatrix *B,
+                       c_float           tol);
 
 /*  Non-embeddable functions (using malloc) ----------------------------------*/
 
 
 //Make a copy from a csc matrix.  Returns OSQP_NULL on failure
-OSQPMatrix* OSQPMatrix_new_from_csc(const csc* A, c_int is_triu);
+OSQPMatrix* OSQPMatrix_new_from_csc(const csc *A,
+                                    c_int      is_triu);
 
 #endif //EMBEDDED
 
@@ -41,9 +44,9 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const csc* A, c_int is_triu);
 */
 
 void OSQPMatrix_update_values(OSQPMatrix    *M,
-                            const c_float   *Mx_new,
-                            const c_int     *Mx_new_idx,
-                            c_int           M_new_n);
+                              const c_float *Mx_new,
+                              const c_int   *Mx_new_idx,
+                              c_int          M_new_n);
 
 /* returns the row dimension */
 c_int    OSQPMatrix_get_m(const OSQPMatrix *M);
@@ -67,35 +70,41 @@ c_int    OSQPMatrix_get_nz(const OSQPMatrix *M);
 /* math functions ----------------------------------------------------------*/
 
 //A = sc*A
-void OSQPMatrix_mult_scalar(OSQPMatrix *A, c_float sc);
+void OSQPMatrix_mult_scalar(OSQPMatrix *A,
+                            c_float     sc);
 
 //A = L*A, with diagonal entries of L specified
-void OSQPMatrix_lmult_diag(OSQPMatrix *A, const OSQPVectorf *L);
+void OSQPMatrix_lmult_diag(OSQPMatrix        *A,
+                           const OSQPVectorf *L);
 
 //A = A*R, with diagonal entries of R specified
-void OSQPMatrix_rmult_diag(OSQPMatrix *A, const OSQPVectorf *R);
+void OSQPMatrix_rmult_diag(OSQPMatrix        *A,
+                           const OSQPVectorf *R);
 
 //y = alpha*A*x + beta*y
-void OSQPMatrix_Axpy( const OSQPMatrix *A,
-                      const OSQPVectorf *x,
-                      OSQPVectorf *y,
-                      c_float alpha,
-                      c_float beta);
+void OSQPMatrix_Axpy(const OSQPMatrix  *A,
+                     const OSQPVectorf *x,
+                     OSQPVectorf       *y,
+                     c_float            alpha,
+                     c_float            beta);
 
 //y = alpha*A^T*x + beta*y
-void OSQPMatrix_Atxpy(const OSQPMatrix *A,
+void OSQPMatrix_Atxpy(const OSQPMatrix  *A,
                       const OSQPVectorf *x,
-                      OSQPVectorf *y,
-                      c_float alpha,
-                      c_float beta);
+                      OSQPVectorf       *y,
+                      c_float            alpha,
+                      c_float            beta);
 
-c_float OSQPMatrix_quad_form(const OSQPMatrix *P, const OSQPVectorf *x);
+c_float OSQPMatrix_quad_form(const OSQPMatrix  *P,
+                             const OSQPVectorf *x);
 
 #if EMBEDDED != 1
 
-void OSQPMatrix_col_norm_inf(const OSQPMatrix *M, OSQPVectorf *E);
+void OSQPMatrix_col_norm_inf(const OSQPMatrix *M,
+                             OSQPVectorf      *E);
 
-void OSQPMatrix_row_norm_inf(const OSQPMatrix *M, OSQPVectorf *E);
+void OSQPMatrix_row_norm_inf(const OSQPMatrix *M,
+                             OSQPVectorf      *E);
 
 #endif /* if EMBEDDED != 1 */
 
@@ -103,7 +112,8 @@ void OSQPMatrix_row_norm_inf(const OSQPMatrix *M, OSQPVectorf *E);
 
 void OSQPMatrix_free(OSQPMatrix *M);
 
-OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix* A, const OSQPVectori* rows);
+OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix  *A,
+                                        const OSQPVectori *rows);
 
 #endif // ndef EMBEDDED
 
