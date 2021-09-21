@@ -528,6 +528,7 @@ static char* test_basic_qp_solve_pardiso()
 static const char* test_basic_qp_update()
 {
   c_int exitflag;
+  OSQPVectorf *q_new, *l_new, *u_new;
 
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
@@ -565,9 +566,11 @@ static const char* test_basic_qp_update()
   // ====================================================================
 
   // Update linear cost
+  q_new = OSQPVectorf_new(sols_data->q_new, data->n);
   osqp_update_lin_cost(solver, sols_data->q_new);
   mu_assert("Basic QP test update: Error in updating linear cost!",
-            vec_norm_inf_diff(OSQPVectorf_data(solver->work->data->q), sols_data->q_new,data->n) < TESTS_TOL);
+            OSQPVectorf_norm_inf_diff(solver->work->data->q, q_new) < TESTS_TOL);
+  OSQPVectorf_free(q_new);
 
   // UPDATE BOUND
   // Try to update with non-consistent values
@@ -578,13 +581,15 @@ static const char* test_basic_qp_update()
   mu_assert("Basic QP test update: Error in bounds update ordering!",
             osqp_update_bounds(solver, sols_data->l_new, sols_data->u_new) == 0);
 
+  l_new = OSQPVectorf_new(sols_data->l_new, data->m);
   mu_assert("Basic QP test update: Error in bounds update, lower bound!",
-            vec_norm_inf_diff(OSQPVectorf_data(solver->work->data->l), sols_data->l_new,
-                              data->m) < TESTS_TOL);
+            OSQPVectorf_norm_inf_diff(solver->work->data->l, l_new) < TESTS_TOL);
+  OSQPVectorf_free(l_new);
 
+  u_new = OSQPVectorf_new(sols_data->u_new, data->m);
   mu_assert("Basic QP test update: Error in bounds update, upper bound!",
-            vec_norm_inf_diff(OSQPVectorf_data(solver->work->data->u), sols_data->u_new,
-                              data->m) < TESTS_TOL);
+            OSQPVectorf_norm_inf_diff(solver->work->data->u, u_new) < TESTS_TOL);
+  OSQPVectorf_free(u_new);
 
   // Return original values
   osqp_update_bounds(solver, data->l, data->u);
@@ -600,9 +605,10 @@ static const char* test_basic_qp_update()
   mu_assert("Basic QP test update: Error in lower bound update ordering!",
             osqp_update_bounds(solver, sols_data->l_new, OSQP_NULL) == 0);
 
+  l_new = OSQPVectorf_new(sols_data->l_new, data->m);
   mu_assert("Basic QP test update: Error in updating lower bound!",
-            vec_norm_inf_diff(OSQPVectorf_data(solver->work->data->l), sols_data->l_new,
-                              data->m) < TESTS_TOL);
+            OSQPVectorf_norm_inf_diff(solver->work->data->l, l_new) < TESTS_TOL);
+  OSQPVectorf_free(l_new);
 
   // Return original values
   osqp_update_bounds(solver, data->l, OSQP_NULL);
@@ -618,9 +624,10 @@ static const char* test_basic_qp_update()
   mu_assert("Basic QP test update: Error in upper bound update: ordering!",
             osqp_update_bounds(solver, OSQP_NULL, sols_data->u_new) == 0);
 
+  u_new = OSQPVectorf_new(sols_data->u_new, data->m);
   mu_assert("Basic QP test update: Error in updating upper bound!",
-            vec_norm_inf_diff(OSQPVectorf_data(solver->work->data->u), sols_data->u_new,
-                              data->m) < TESTS_TOL);
+            OSQPVectorf_norm_inf_diff(solver->work->data->u, u_new) < TESTS_TOL);
+  OSQPVectorf_free(u_new);
 
 
   // Clean solver
@@ -951,6 +958,7 @@ static const char* test_basic_qp_warm_start()
   // Define Solver settings as default
   osqp_set_default_settings(settings);
   settings->check_termination = 1;
+  settings->adaptive_rho = 0;
 
   // Setup solver
   exitflag = osqp_setup(&solver, data->P, data->q,

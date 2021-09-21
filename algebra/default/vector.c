@@ -154,22 +154,23 @@ void OSQPVectorf_view_free(OSQPVectorf *a){
 
 #endif /* ifndef EMBEDDED */
 
-// c_int OSQPVectorf_length(const OSQPVectorf *a){return a->length;}
+c_int OSQPVectorf_length(const OSQPVectorf *a){return a->length;}
 // c_int OSQPVectori_length(const OSQPVectori *a){return a->length;}
 
 /* Pointer to vector data (floats) */
 c_float* OSQPVectorf_data(const OSQPVectorf *a){return a->values;}
-c_int*   OSQPVectori_data(const OSQPVectori *a){return a->values;}
+
+// c_int*   OSQPVectori_data(const OSQPVectori *a){return a->values;}
 
 void OSQPVectorf_copy(OSQPVectorf       *b,
                       const OSQPVectorf *a){
   OSQPVectorf_from_raw(b, a->values);
 }
 
-void OSQPVectori_copy(OSQPVectori       *b,
-                      const OSQPVectori *a){
-  OSQPVectori_from_raw(b, a->values);
-}
+// void OSQPVectori_copy(OSQPVectori       *b,
+//                       const OSQPVectori *a){
+//   OSQPVectori_from_raw(b, a->values);
+// }
 
 void OSQPVectorf_from_raw(OSQPVectorf   *b,
                           const c_float *av){
@@ -204,15 +205,15 @@ void OSQPVectorf_to_raw(c_float           *bv,
   }
 }
 
-// void OSQPVectori_to_raw(c_int *bv, const OSQPVectori *a){
-//   c_int i;
-//   c_int length = a->length;
-//   c_int* av = a->values;
+void OSQPVectori_to_raw(c_int *bv, const OSQPVectori *a){
+  c_int i;
+  c_int length = a->length;
+  c_int* av = a->values;
 
-//   for (i = 0; i < length; i++) {
-//     bv[i] = av[i];
-//   }
-// }
+  for (i = 0; i < length; i++) {
+    bv[i] = av[i];
+  }
+}
 
 void OSQPVectorf_set_scalar(OSQPVectorf *a,
                             c_float      sc){
@@ -700,19 +701,19 @@ void OSQPVectorf_ew_sqrt(OSQPVectorf *a){
   }
 }
 
-void OSQPVectorf_ew_max(OSQPVectorf       *c,
-                        const OSQPVectorf *a,
-                        c_float            max_val){
+// void OSQPVectorf_ew_max(OSQPVectorf       *c,
+//                         const OSQPVectorf *a,
+//                         c_float            max_val){
 
-  c_int i;
-  c_int length = c->length;
-  c_float*  av = a->values;
-  c_float*  cv = c->values;
+//   c_int i;
+//   c_int length = c->length;
+//   c_float*  av = a->values;
+//   c_float*  cv = c->values;
 
-  for (i = 0; i < length; i++) {
-    cv[i] = c_max(av[i], max_val);
-  }
-}
+//   for (i = 0; i < length; i++) {
+//     cv[i] = c_max(av[i], max_val);
+//   }
+// }
 
 // void OSQPVectorf_ew_min(OSQPVectorf *c, const OSQPVectorf *a, c_float min_val){
 

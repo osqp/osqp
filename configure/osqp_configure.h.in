@@ -16,6 +16,9 @@ extern "C" {
 /* EMBEDDED */
 #cmakedefine EMBEDDED (@EMBEDDED@)
 
+/* CUDA_SUPPORT */
+#cmakedefine CUDA_SUPPORT
+
 /* PRINTING */
 #cmakedefine PRINTING
 

@@ -11,6 +11,7 @@
 static const char* test_solveKKT() {
 
   c_int m, n, exitflag = 0;
+  c_float pri_res, dua_res;
   OSQPVectorf *rho_vec, *rhs, *ref;
   OSQPMatrix *Pu, *A;
   LinSysSolver *s;  // Private structure to form KKT factorization
@@ -18,8 +19,9 @@ static const char* test_solveKKT() {
   solve_linsys_sols_data *data = generate_problem_solve_linsys_sols_data();
 
   // Settings
-  settings->rho   = data->test_solve_KKT_rho;
-  settings->sigma = data->test_solve_KKT_sigma;
+  settings->rho           = data->test_solve_KKT_rho;
+  settings->sigma         = data->test_solve_KKT_sigma;
+  settings->linsys_solver = LINSYS_SOLVER;
 
   // Set rho_vec
   m       = data->test_solve_KKT_A->m;
@@ -31,12 +33,16 @@ static const char* test_solveKKT() {
   Pu = OSQPMatrix_new_from_csc(data->test_solve_KKT_Pu,1);
   A  = OSQPMatrix_new_from_csc(data->test_solve_KKT_A, 0);
 
+  // Set residuals to small values to enforce accurate solution by indirect solvers
+  pri_res = 1e-7;
+  dua_res = 1e-7;
+
   // Form and factorize KKT matrix
-  exitflag = init_linsys_solver(&s, Pu, A, settings->sigma, rho_vec, LINSYS_SOLVER, 0);
+  exitflag = init_linsys_solver(&s, Pu, A, rho_vec, settings, &pri_res, &dua_res, 0);
 
   // Solve  KKT x = b via LDL given factorization
   rhs = OSQPVectorf_new(data->test_solve_KKT_rhs, m+n);
-  s->solve(s, rhs);
+  s->solve(s, rhs, 2);
   ref = OSQPVectorf_new(data->test_solve_KKT_x, m+n);
 
   mu_assert(
@@ -68,8 +74,9 @@ static char* test_solveKKT_pardiso() {
   solve_linsys_sols_data *data = generate_problem_solve_linsys_sols_data();
 
   // Settings
-  settings->rho   = data->test_solve_KKT_rho;
-  settings->sigma = data->test_solve_KKT_sigma;
+  settings->rho           = data->test_solve_KKT_rho;
+  settings->sigma         = data->test_solve_KKT_sigma;
+  settings->linsys_solver = MKL_PARDISO_SOLVER;
 
   // Set rho_vec
   m       = data->test_solve_KKT_A->m;
@@ -87,11 +94,11 @@ static char* test_solveKKT_pardiso() {
             exitflag == 0);
 
   // Form and factorize KKT matrix
-  exitflag = init_linsys_solver(&s, Pu, A, settings->sigma, rho_vec, MKL_PARDISO_SOLVER, 0);
+  exitflag = init_linsys_solver(&s, Pu, A, rho_vec, settings, OSQP_NULL, OSQP_NULL, 0);
 
   // Solve  KKT x = b via LDL given factorization
   rhs = OSQPVectorf_new(data->test_solve_KKT_rhs, m+n);
-  s->solve(s, rhs);
+  s->solve(s, rhs, 1);
   ref = OSQPVectorf_new(data->test_solve_KKT_x, m+n);
 
   mu_assert(

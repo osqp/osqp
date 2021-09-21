@@ -32,6 +32,7 @@ typedef float c_float;  /* for numerical values  */
  */
 typedef struct {
   c_float rho;              ///< ADMM step rho
+  c_int   rho_is_vec;       ///< boolean; defines whether rho is scalar or vector
   c_float sigma;            ///< ADMM step sigma
   c_int   scaling;          ///< heuristic data scaling iterations; if 0, then disabled.
   c_int   max_iter;         ///< maximum number of iterations

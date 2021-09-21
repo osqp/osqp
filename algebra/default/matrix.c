@@ -76,7 +76,7 @@ void OSQPMatrix_lmult_diag(OSQPMatrix        *A,
 }
 
 void OSQPMatrix_rmult_diag(OSQPMatrix *A, const OSQPVectorf *R) {
-  csc_rmult_diag(A->csc, OSQPVectorf_data(R));
+  csc_rmult_diag(A->csc, R->values);
 }
 
 //y = alpha*A*x + beta*y
@@ -86,16 +86,13 @@ void OSQPMatrix_Axpy(const OSQPMatrix  *A,
                      c_float            alpha,
                      c_float            beta) {
 
-  c_float* xf = OSQPVectorf_data(x);
-  c_float* yf = OSQPVectorf_data(y);
-
   if(A->symmetry == NONE){
     //full matrix
-    csc_Axpy(A->csc, xf, yf, alpha, beta);
+    csc_Axpy(A->csc, x->values, y->values, alpha, beta);
   }
   else{
     //should be TRIU here, but not directly checked
-    csc_Axpy_sym_triu(A->csc, xf, yf, alpha, beta);
+    csc_Axpy_sym_triu(A->csc, x->values, y->values, alpha, beta);
   }
 }
 
@@ -105,8 +102,8 @@ void OSQPMatrix_Atxpy(const OSQPMatrix  *A,
                       c_float            alpha,
                       c_float            beta) {
 
-   if(A->symmetry == NONE) csc_Atxpy(A->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
-   else            csc_Axpy_sym_triu(A->csc, OSQPVectorf_data(x), OSQPVectorf_data(y), alpha, beta);
+   if(A->symmetry == NONE) csc_Atxpy(A->csc, x->values, y->values, alpha, beta);
+   else            csc_Axpy_sym_triu(A->csc, x->values, y->values, alpha, beta);
 }
 
 
@@ -159,7 +156,7 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix  *A,
   }
 
 
-  M = csc_submatrix_byrows(A->csc, OSQPVectori_data(rows));
+  M = csc_submatrix_byrows(A->csc, rows->values);
 
   if(!M) return OSQP_NULL;
 

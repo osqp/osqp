@@ -22,15 +22,22 @@ struct pardiso {
      * @name Functions
      * @{
      */
-    c_int (*solve)(struct pardiso * self, OSQPVectorf * b);
+    c_int (*solve)(struct pardiso *self,
+                   OSQPVectorf    *b,
+                   c_int           admm_iter);
 
-    void (*free)(struct pardiso * self); ///< Free workspace (only if desktop)
+    void (*warm_start)(struct pardiso    *self,
+                       const OSQPVectorf *x);
 
-    c_int (*update_matrices)(struct pardiso * self,
+    void (*free)(struct pardiso * self);
+
+    c_int (*update_matrices)(struct pardiso   *self,
                              const OSQPMatrix *P,
-                             const OSQPMatrix *A);    ///< Update solver matrices
-    c_int (*update_rho_vec)(struct pardiso * self,
-                            const OSQPVectorf * rho_vec);    ///< Update rho_vec parameter
+                             const OSQPMatrix *A);
+
+    c_int (*update_rho_vec)(struct pardiso    *self,
+                            const OSQPVectorf *rho_vec,
+                            c_float            rho_sc);
 
     c_int nthreads;
     /** @} */
@@ -48,6 +55,7 @@ struct pardiso {
     c_float *sol;           ///< solution to the KKT system
     c_float *rho_inv_vec;   ///< parameter vector
     c_float sigma;          ///< scalar parameter
+    c_float rho_inv;        ///< scalar parameter (used if rho_inv_vec == NULL)
     c_int polish;           ///< polishing flag
     c_int n;                ///< number of QP variables
     c_int m;                ///< number of QP constraints
@@ -81,17 +89,17 @@ struct pardiso {
  * @param  s         Pointer to a private structure
  * @param  P         Cost function matrix (upper triangular form)
  * @param  A         Constraints matrix
- * @param  sigma     Algorithm parameter. If polish, then sigma = delta.
  * @param  rho_vec   Algorithm parameter. If polish, then rho_vec = OSQP_NULL.
+ * @param  settings  Solver settings
  * @param  polish    Flag whether we are initializing for polish or not
  * @return           Exitflag for error (0 if no errors)
  */
-c_int init_linsys_solver_pardiso(pardiso_solver ** sp,
-                                 const OSQPMatrix * P,
-                                 const OSQPMatrix * A,
-                                 c_float sigma,
-                                 const OSQPVectorf * rho_vec,
-                                 c_int polish);
+c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
+                                 const OSQPMatrix   *P,
+                                 const OSQPMatrix   *A,
+                                 const OSQPVectorf  *rho_vec,
+                                 OSQPSettings       *settings,
+                                 c_int               polish);
 
 
 /**
@@ -100,8 +108,13 @@ c_int init_linsys_solver_pardiso(pardiso_solver ** sp,
  * @param  b        Right-hand side
  * @return          Exitflag
  */
-c_int solve_linsys_pardiso(pardiso_solver * s, OSQPVectorf * b);
+c_int solve_linsys_pardiso(pardiso_solver *s,
+                           OSQPVectorf    *b,
+                           c_int           admm_iter);
 
+
+void warm_start_linsys_solver_pardiso(pardiso_solver    *s,
+                                      const OSQPVectorf *x);
 
 /**
  * Update linear system solver matrices
@@ -122,9 +135,9 @@ c_int update_linsys_solver_matrices_pardiso(
  * @param  rho_vec  new rho_vec value
  * @return          exitflag
  */
-c_int update_linsys_solver_rho_vec_pardiso(
-                    pardiso_solver * s,
-                    const OSQPVectorf * rho_vec);
+c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver    *s,
+                                           const OSQPVectorf *rho_vec,
+                                           c_float            rho_sc);
 
 
 /**

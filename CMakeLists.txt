@@ -54,6 +54,10 @@ else()
     message(STATUS "Embedded is ${EMBEDDED}")
 endif()
 
+# Is the CUDA support enabled?
+option (CUDA_SUPPORT "Enable CUDA support" OFF)
+message(STATUS "CUDA support is ${CUDA_SUPPORT}")
+
 # Is printing enabled?
 option (PRINTING "Enable solver printing" ON)
 if (DEFINED EMBEDDED)
@@ -79,14 +83,22 @@ if (DEFINED EMBEDDED)
 endif()
 message(STATUS "User interrupt is ${CTRLC}")
 
-# Use floats instead of integers
-option (DFLOAT "Use float numbers instead of doubles" OFF)
+# Use floats instead of doubles
+if (CUDA_SUPPORT)
+    # Use floats with CUDA by default
+    option (DFLOAT "Use float numbers instead of doubles" ON)
+else ()
+    option (DFLOAT "Use float numbers instead of doubles" OFF)
+endif()
 message(STATUS "Floats are ${DFLOAT}")
 
 # Use long integers for indexing
 option (DLONG "Use long integers (64bit) for indexing" ON)
 if (NOT (CMAKE_SIZEOF_VOID_P EQUAL 8))
-	message(STATUS "Disabling long integers (64bit) on 32bit machine")
+    message(STATUS "Disabling long integers (64bit) on 32bit machine")
+    set(DLONG OFF)
+elseif (CUDA_SUPPORT)
+	message(STATUS "Disabling long integers (64bit) for CUDA")
 	set(DLONG OFF)
 endif()
 message(STATUS "Long integers (64bit) are ${DLONG}")
@@ -101,6 +113,26 @@ endif()
 # Add code coverage
 option (COVERAGE "Perform code coverage" OFF)
 message(STATUS "Code coverage is ${COVERAGE}")
+
+
+# CUDA support
+# ----------------------------------------------
+if (CUDA_SUPPORT)
+    enable_language(CUDA)
+    find_package(CUDA)
+
+    # cublas and cusparse headers
+    include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+
+    # sm_75 -> Turing support
+    set(CMAKE_CUDA_ARCHITECTURES 75)
+#    if (DFLOAT)
+#        set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_52 --gpu-code=sm_52,sm_75")
+#    else()
+#        # To use doubles we need compute capability 6.0 for atomic operations
+#        set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_60 --gpu-code=sm_60,sm_75")
+#    endif()
+endif()
 
 
 # Memory allocators
@@ -125,11 +157,14 @@ endif()
 # ---------------------------------------------
 option (ENABLE_MKL_PARDISO "Enable MKL Pardiso solver" ON)
 if (DFLOAT)
-	message(STATUS "Disabling MKL Pardiso Solver with floats")
-	set(ENABLE_MKL_PARDISO OFF)
-elseif(DEFINED EMBEDDED)
-	message(STATUS "Disabling MKL Pardiso Solver for embedded")
-	set(ENABLE_MKL_PARDISO OFF)
+    message(STATUS "Disabling MKL Pardiso Solver with floats")
+    set(ENABLE_MKL_PARDISO OFF)
+elseif (DEFINED EMBEDDED)
+    message(STATUS "Disabling MKL Pardiso Solver for embedded")
+    set(ENABLE_MKL_PARDISO OFF)
+elseif (CUDA_SUPPORT)
+    message(STATUS "Disabling MKL Pardiso Solver for CUDA")
+    set(ENABLE_MKL_PARDISO OFF)
 endif()
 message(STATUS "MKL Pardiso: ${ENABLE_MKL_PARDISO}")
 
@@ -162,7 +197,7 @@ if (NOT MSVC)
 
     set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")      # Include math
     # Include real time library in linux
-    if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    if(IS_LINUX)
         set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lrt -ldl")
     endif()
 endif (NOT MSVC)
@@ -287,6 +322,7 @@ set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
 # Include directories for linear system solvers
 target_include_directories(osqpstatic PRIVATE
                            ${linsys_solvers_includes}
+                           ${algebra_impl_includes}
                            ${csc_tools_includes})
 
 
@@ -313,6 +349,11 @@ install(TARGETS osqpstatic
 install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
 
 
+if (CUDA_SUPPORT)
+    target_link_libraries (osqpstatic cublas cusparse)
+endif()
+
+
 if (MATLAB)
 target_link_libraries (osqpstatic ${Matlab_LIBRARIES})
 endif (MATLAB)
@@ -325,17 +366,23 @@ if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
     # NB: Add all the linear system solvers here
     add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${osqp_objects} ${linsys_solvers})
 
-    # Include directories for linear system solvers
-    target_include_directories(osqp PRIVATE ${linsys_solvers_includes})
-
-    #include directories for csc utilities
-    target_include_directories(osqp PRIVATE ${csc_tools_includes})
+    # Include directories
+    target_include_directories(osqp PRIVATE
+                               ${linsys_solvers_includes}
+                               ${csc_tools_includes}
+                               ${algebra_impl_includes}
+    )
 
     # Declare include directories for the cmake exported target
     target_include_directories(osqp
                                PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
                                       "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
+    if (CUDA_SUPPORT AND MSVC)
+        # Visual Studio needs the cuda libaries to be linked as well
+        target_link_libraries (osqp cublas cusparse)
+    endif (CUDA_SUPPORT AND MSVC)
+    
     # Install osqp shared library
     install(TARGETS osqp
             EXPORT  ${PROJECT_NAME}
@@ -434,17 +481,19 @@ if (UNITTESTS)
     include_directories(tests)
 
     add_executable(osqp_tester
-                ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c
-                ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
-		            ${PROJECT_SOURCE_DIR}/tests/minunit.h
-                ${linsys_solvers_includes}
-                ${test_headers}
-                ${codegen_test_headers})
+                   ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c
+                   ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
+                   ${PROJECT_SOURCE_DIR}/tests/minunit.h
+                   ${linsys_solvers_includes}
+                   ${test_headers}
+                   ${codegen_test_headers}
+    )
 
     target_include_directories(osqp_tester PRIVATE
                                ${linsys_solvers_includes}
+                               ${algebra_impl_includes}
                                ${csc_tools_includes}
-                               )
+    )
 
     target_link_libraries (osqp_tester osqpstatic)
 
@@ -454,19 +503,19 @@ if (UNITTESTS)
                    EXCLUDE_FROM_ALL
                    ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c
                    ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
-	           ${PROJECT_SOURCE_DIR}/tests/minunit.h
+                   ${PROJECT_SOURCE_DIR}/tests/minunit.h
                    ${test_headers}
-                   ${csc_tools_includes}
                    ${codegen_test_headers}
-		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.c
-		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.h
-		)
+                   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.c
+                   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.h
+    )
     target_link_libraries(osqp_tester_custom_memory osqpstatic)
 
     target_include_directories(osqp_tester_custom_memory PRIVATE
                                ${linsys_solvers_includes}
+                               ${algebra_impl_includes}
                                ${csc_tools_includes}
-                               )
+    )
 
     # Add testing
     include(CTest)

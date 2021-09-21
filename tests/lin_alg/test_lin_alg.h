@@ -1,9 +1,13 @@
 #include <stdio.h>
 #include "osqp.h"
 #include "lin_alg.h"
-#include "csc_utils.h"
 #include "minunit.h"
 #include "lin_alg/data.h"
+
+#ifndef CUDA_SUPPORT
+
+#include "csc_utils.h"
+
 
 static const char* test_constr_sparse_mat() {
 
@@ -35,6 +39,8 @@ static const char* test_constr_sparse_mat() {
 
   return 0;
 }
+
+#endif /* ifndef CUDA_SUPPORT */
 
 static const char* test_vec_operations() {
 
@@ -136,6 +142,7 @@ static const char* test_mat_operations() {
   dA = OSQPMatrix_new_from_csc(data->test_mat_ops_A,0); //asymmetric
   d  = OSQPVectorf_new(data->test_mat_ops_d, data->test_mat_ops_n);
 
+#ifndef CUDA_SUPPORT
 
   // Premultiply matrix A
   OSQPMatrix_lmult_diag(dA, d);
@@ -153,6 +160,8 @@ static const char* test_mat_operations() {
     "Linear algebra tests: error in matrix operation, postmultiply diagonal",
     OSQPMatrix_is_eq(Ad, refM, TESTS_TOL));
   OSQPMatrix_free(refM);
+
+#endif /* ifndef CUDA_SUPPORT */
 
   // Maximum norm over columns
   resultv = OSQPVectorf_malloc(data->test_mat_ops_n);
@@ -300,7 +309,10 @@ static const char* test_lin_alg()
   // initialize algebra libraries
   osqp_algebra_init_libs();
 
+#ifndef CUDA_SUPPORT
   mu_run_test(test_constr_sparse_mat);
+#endif
+
   mu_run_test(test_vec_operations);
   mu_run_test(test_mat_operations);
   mu_run_test(test_mat_vec_multiplication);

@@ -58,6 +58,7 @@ extern "C" {
                c_int       format,
                c_float     param1,
                c_float    *param2,
+               c_float     param2_sc,
                c_int      *PtoKKT,
                c_int      *AtoKKT,
                c_int     **Pdiag_idx,
@@ -114,8 +115,9 @@ extern "C" {
  * @param param2toKKT   index where param2 enters in the KKT matrix
  * @param m             number of constraints
  */
-void update_KKT_param2(csc           *KKT,
+void update_KKT_param2(csc     *KKT,
                        c_float *param2,
+                       c_float  param2_sc,
                        c_int   *param2toKKT,
                        c_int    m);
 

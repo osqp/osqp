@@ -5,8 +5,12 @@
 # OSQP provided CSC implementation by default, which
 # also serves as a reference implementation
 
-if(NOT DEFINED ALGEBRA)
-  set(ALGEBRA "default")
+if (NOT DEFINED ALGEBRA)
+  if (CUDA_SUPPORT)
+    set(ALGEBRA "cuda")
+  else()
+    set(ALGEBRA "default")
+    endif()
 endif()
 
 if(IS_ABSOLUTE ${ALGEBRA})
@@ -27,19 +31,36 @@ else()
 endif()
 
 
-#include the csc_tools support directory
-#and the build-specific algebra implementation
-
-add_subdirectory(csc_tools)
 add_subdirectory(${ALGEBRA})
 
-# Create object library for algebra
-add_library(osqp_algebra OBJECT ${algebra_impl} ${csc_tools})
-target_include_directories(osqp_algebra PRIVATE
-                         ${osqp_api_includes}
-                         ${csc_tools_includes})
+if (CUDA_SUPPORT)
 
-#pass the csc tools include directory upwards
-#for accessibility from linear solvers
+  # Create object library for algebra
+  add_library(osqp_algebra OBJECT ${algebra_impl})
+  target_include_directories(osqp_algebra PRIVATE
+                             ${algebra_impl_includes}
+                             ${osqp_api_includes})
 
-set(csc_tools_includes "${csc_tools_includes}" PARENT_SCOPE)
+  # Pass upwards for accesibility from CUDA linear system solvers
+  set(algebra_impl_includes "${algebra_impl_includes}" PARENT_SCOPE)
+
+else()
+
+  #include the csc_tools support directory
+  #and the build-specific algebra implementation
+
+  add_subdirectory(csc_tools)
+
+  # Create object library for algebra
+  add_library(osqp_algebra OBJECT ${algebra_impl} ${csc_tools})
+  target_include_directories(osqp_algebra PRIVATE
+                             ${algebra_impl_includes}
+                             ${csc_tools_includes}
+                             ${osqp_api_includes})
+
+  #pass the csc tools include directory upwards
+  #for accessibility from linear solvers
+
+  set(csc_tools_includes "${csc_tools_includes}" PARENT_SCOPE)
+
+endif()
