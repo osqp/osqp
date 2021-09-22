@@ -2,7 +2,7 @@ name: Main-Cuda
 
 on:
   push:
-    branches: [ master, develop**, ci, cuda2dev ]
+    branches: [ master, develop** ]
     tags:
       - '*'
   pull_request:
@@ -14,8 +14,6 @@ jobs:
       runs-on: [self-hosted, gpu]
 
       strategy:
-        fail-fast: false
-
         matrix:
           os: [ubuntu-latest]
           python-version: [3.9]
@@ -70,3 +68,4 @@ jobs:
         - name: Test
           run: |
             ./build/out/osqp_tester
+
