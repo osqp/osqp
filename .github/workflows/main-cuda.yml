@@ -1,0 +1,65 @@
+name: Main-Cuda
+
+on:
+  push:
+    branches: [ master, develop**, ci ]
+    tags:
+      - '*'
+  pull_request:
+    branches: [ master, develop** ]
+
+jobs:
+
+  build_and_test:
+      runs-on: [self-hosted, gpu]
+
+      strategy:
+        fail-fast: false
+
+        matrix:
+          os: [ubuntu-latest]
+          python-version: [3.9]
+          cmake_flags: ['', '-DUNITTESTS=ON -DCUDA_SUPPORT=ON']
+          cmake_flags_extra: ['']
+
+          include:
+            - os: ubuntu-latest
+              cmake_generator: "Unix Makefiles"
+
+      defaults:
+        run:
+          # Required when using an activated conda environment in steps
+          # See https://github.com/conda-incubator/setup-miniconda#IMPORTANT
+          shell: bash -l {0}
+
+      steps:
+        - uses: actions/checkout@v2
+          with:
+            lfs: false
+            submodules: recursive
+
+        - name: Set up conda
+          uses: conda-incubator/setup-miniconda@v2
+          with:
+            auto-update-conda: true
+            python-version: ${{ matrix.python-version }}
+
+        - name: Setup (Linux)
+          run: |
+            echo "LD_LIBRARY_PATH=$CONDA_PREFIX/lib" >> $GITHUB_ENV
+
+        - name: Build
+          run: |
+            cmake -G "${{ matrix.cmake_generator }}" -S . -B build ${{ matrix.cmake_flags }} ${{ matrix.cmake_flags_extra }}
+            cmake --build build
+
+        # useful for inspecting the OSQP version information
+        - name: OSQP Demo
+          run: |
+            ./build/out/osqp_demo
+          if: ${{ !contains(matrix.cmake_flags_extra, 'EMBEDDED') }}
+
+        - name: Test
+          run: |
+            ./build/out/osqp_tester
+          if: ${{ matrix.cmake_flags == '-DUNITTESTS=ON -DCUDA_SUPPORT=ON' }}
