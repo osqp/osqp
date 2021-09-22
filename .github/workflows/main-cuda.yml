@@ -43,6 +43,8 @@ jobs:
           with:
             auto-update-conda: true
             python-version: ${{ matrix.python-version }}
+          env:
+            CONDA: /opt/anaconda3
 
         - name: Setup (Linux)
           run: |
@@ -63,4 +65,3 @@ jobs:
           run: |
             ./build/out/osqp_tester
           if: ${{ matrix.cmake_flags == '-DUNITTESTS=ON -DCUDA_SUPPORT=ON' }}
-
