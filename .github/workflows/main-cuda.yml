@@ -19,8 +19,7 @@ jobs:
         matrix:
           os: [ubuntu-latest]
           python-version: [3.9]
-          cmake_flags: ['', '-DUNITTESTS=ON -DCUDA_SUPPORT=ON']
-          cmake_flags_extra: ['']
+          cmake_flags: ['-DUNITTESTS=ON -DCUDA_SUPPORT=ON']
 
           include:
             - os: ubuntu-latest
@@ -60,16 +59,14 @@ jobs:
 
         - name: Build
           run: |
-            cmake -G "${{ matrix.cmake_generator }}" -S . -B build ${{ matrix.cmake_flags }} ${{ matrix.cmake_flags_extra }}
+            cmake -G "${{ matrix.cmake_generator }}" -S . -B build ${{ matrix.cmake_flags }}
             cmake --build build
 
         # useful for inspecting the OSQP version information
         - name: OSQP Demo
           run: |
             ./build/out/osqp_demo
-          if: ${{ !contains(matrix.cmake_flags_extra, 'EMBEDDED') }}
 
         - name: Test
           run: |
             ./build/out/osqp_tester
-          if: ${{ matrix.cmake_flags == '-DUNITTESTS=ON -DCUDA_SUPPORT=ON' }}
