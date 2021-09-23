@@ -20,7 +20,7 @@ Version 0.6.0 (30 August 2019)
 Version 0.5.0 (10 December 2018)
 ----------------
 * Added `update_time` to the info structure.
-* Fixed [#101](https://github.com/oxfordcontrol/osqp/issues/101).
+* Fixed [#101](https://github.com/osqp/osqp/issues/101).
 
 
 Version 0.4.1 (25 September 2018)
@@ -33,15 +33,15 @@ Version 0.4.1 (25 September 2018)
 Version 0.4.0 (23 July 2018)
 ----------------------------
 * Added check for nonconvex cost function (non-positive semidefinite `P`).
-* Removed SuiteSparse LDL in favor of [QDLDL](https://github.com/oxfordcontrol/qdldl).
+* Removed SuiteSparse LDL in favor of [QDLDL](https://github.com/osqp/qdldl).
 * Static library `libosqpstatic` now renamed as `libosqp`.
 
 
 Version 0.3.1 (10 June 2018)
 ----------------------------
-* Fixed [#62](https://github.com/oxfordcontrol/osqp/issues/62).
+* Fixed [#62](https://github.com/osqp/osqp/issues/62).
 * Moved interfaces to separate repositories
-* Fixed [#54](https://github.com/oxfordcontrol/osqp/issues/54).
+* Fixed [#54](https://github.com/osqp/osqp/issues/54).
 * Changes to support Matlab 2018a
 * Added support for new interface in R
 
@@ -50,14 +50,14 @@ Version 0.3.0 (5 March 2018)
 * Added `time_limit` option
 * Added CUTEst interface
 * Fixed bug in upper triangular `P` extraction. Now the solver can accept both complete `P` matrix or just the upper triangular part.
-* Fixed [#33](https://github.com/oxfordcontrol/osqp/issues/33)
-* Fixed [#34](https://github.com/oxfordcontrol/osqp/issues/34)
-* Allow `eps_rel=0` [#40](https://github.com/oxfordcontrol/osqp/issues/40)
+* Fixed [#33](https://github.com/osqp/osqp/issues/33)
+* Fixed [#34](https://github.com/osqp/osqp/issues/34)
+* Allow `eps_rel=0` [#40](https://github.com/osqp/osqp/issues/40)
 * Fixed bug when calling `osqp_solve` or `osqp_cleanup` after failed linear system initialization
 * Add "install" CMake target and installation of CMake configuration files
-* Fixed potential name conflict with SCS [47](https://github.com/oxfordcontrol/osqp/issues/47)
+* Fixed potential name conflict with SCS [47](https://github.com/osqp/osqp/issues/47)
 * Changed `set_default_settings` to `osqp_set_default_settings` and brought function to main API header `osqp.h`
-* Fixed [#49](https://github.com/oxfordcontrol/osqp/issues/49)
+* Fixed [#49](https://github.com/osqp/osqp/issues/49)
 
 
 Version 0.2.1 (25 November 2017)
@@ -71,7 +71,7 @@ Version 0.2.0 (23 November 2017)
 *   Simplified several settings
     *  "early_terminate" and "early_terminate_interval" -> "check_termination"
     *  "scaling_iter" removed and put inside "scaling" parameter
-*   Julia interface [OSQP.jl](https://github.com/oxfordcontrol/OSQP.jl)
+*   Julia interface [OSQP.jl](https://github.com/osqp/OSQP.jl)
 *   Shared libraries available on bintray.com
 *   Added inaccurate return statuses
 *   Added new object-oriented structure for linear system solvers
@@ -92,9 +92,9 @@ Version 0.1.2 (20 July 2017)
 *   Now Matlab interface does support logical entries for the settings
 *   Fixed bug in index ordering of sparse matrices of Python interface
 *   Changed 2-norms to inf-norms
-*   Fixed code generation bug when scaling is disabled [#7](https://github.com/oxfordcontrol/osqp/issues/7)
+*   Fixed code generation bug when scaling is disabled [#7](https://github.com/osqp/osqp/issues/7)
 *   Removed warnings in code-generation for standard <= C99
-*   Fixed MATLAB 2015b compatibility [#6](https://github.com/oxfordcontrol/osqp/issues/6)
+*   Fixed MATLAB 2015b compatibility [#6](https://github.com/osqp/osqp/issues/6)
 
 
 Version 0.1.1 (11 April 2017)

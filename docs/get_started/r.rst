@@ -22,7 +22,7 @@ If you would like to use the most recent version of OSQP-R and have access to gi
 
 .. code:: r
 
-  git clone --recursive https://github.com/oxfordcontrol/osqp-r.git
+  git clone --recursive https://github.com/osqp/osqp-r.git
   cd osqp-r
   R CMD install .
 

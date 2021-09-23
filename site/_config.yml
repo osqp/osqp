@@ -1,0 +1,86 @@
+# Welcome to Jekyll!
+#
+# This config file is meant for settings that affect your whole blog, values
+# which you are expected to set up once and rarely edit after that. If you find
+# yourself editing this file very often, consider using Jekyll's data files
+# feature for the data you need to update frequently.
+#
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'bundle exec jekyll serve'. If you change this file, please restart the server process.
+
+# Site settings
+# These are used to personalize your new site. If you look in the HTML files,
+# you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
+# You can create any custom variable you would like, and they will be accessible
+# in the templates via {{ site.myvariable }}.
+title: OSQP
+email: bartolomeo.stellato@gmail.com
+description: >- # this means to ignore newlines until "baseurl:"
+  OSQP is an efficient general purpose solver for quadratic programs.
+  It is open-source and suite all range of applications from embedded
+  to large-scale.
+baseurl: "/" # the subpath of your site, e.g. /blog
+url: "https://osqp.org" # the base hostname & protocol for your site, e.g. http://example.com
+# twitter_username: jekyllrb
+# github_username:  jekyll
+# facebook_link: https://www.facebook.com/groups/331532750262318/
+github_link: https://github.com/osqp/osqp
+google_analytics: UA-56714542-3
+discourse_link: https://osqp.discourse.group/
+
+# Which folders to include?
+# gh pages does not currently support a source directive,
+#   and assumes that all source files are at the root folder
+# source: src
+# destination: _site
+
+include:
+    - _pages
+    - _static
+
+
+# Dynamic Text on the Header
+dynamic-typing: True
+shuffle: False # Shuffle the lines.
+loop: True
+loop-count: False # Set False for infinite loop, or set any number for finite loop
+type-speed: 30
+back-speed: 10
+start-delay: 100
+delete-delay: 2000
+quotes:
+  - text: "A QP solver for everyone."
+  - text: "Efficient, scalable and embeddable."
+  - text: "Open-source, with many interfaces."
+  - text: "Did I say it runs on your toaster too?"
+
+
+# Conversion
+markdown:    kramdown
+highlighter: rouge
+
+# Markdown Processors
+kramdown:
+  input: GFM
+  auto_ids: true
+  syntax_highlighter: rouge
+
+theme: minima
+
+# Sass/SCSS
+sass:
+  sass_dir: _sass 
+  style: compressed # http://sass-lang.com/documentation/file.SASS_REFERENCE.html#output_style
+
+
+# Exclude from processing.
+# The following items will not be processed, by default. Create a custom list
+# to override the default setting.
+# exclude:
+#   - Gemfile
+#   - Gemfile.lock
+#   - node_modules
+#   - vendor/bundle/
+#   - vendor/cache/
+#   - vendor/gems/
+#   - vendor/ruby/
