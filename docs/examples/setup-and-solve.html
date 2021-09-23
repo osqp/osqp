@@ -262,6 +262,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <span class="w">    </span><span class="n">osqp_solve</span><span class="p">(</span><span class="n">work</span><span class="p">);</span><span class="w"></span>
 
 <span class="w">    </span><span class="c1">// Cleanup</span>
+<span class="w">    </span><span class="n">osqp_cleanup</span><span class="p">(</span><span class="n">work</span><span class="p">);</span><span class="w"></span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">A</span><span class="p">)</span><span class="w"> </span><span class="n">c_free</span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">A</span><span class="p">);</span><span class="w"></span>
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">P</span><span class="p">)</span><span class="w"> </span><span class="n">c_free</span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">P</span><span class="p">);</span><span class="w"></span>
