@@ -224,6 +224,7 @@ C
         osqp_solve(work);
 
         // Cleanup
+        osqp_cleanup(work);
         if (data) {
             if (data->A) c_free(data->A);
             if (data->P) c_free(data->P);
