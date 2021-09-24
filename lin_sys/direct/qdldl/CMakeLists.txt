@@ -41,6 +41,6 @@ add_library(linsys_qdldl OBJECT ${qdldl_interface_sources})
 target_include_directories(linsys_qdldl PRIVATE
                            ${qdldl_interface_includes}
                            ${csc_tools_includes}
-                           ${PROJECT_SOURCE_DIR}/lin_sys/kkt_common
-                           ${PROJECT_SOURCE_DIR}/include
-                           )
+                           ${osqp_api_includes}
+                           ${kkt_common_includes})
+

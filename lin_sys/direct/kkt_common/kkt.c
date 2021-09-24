@@ -13,6 +13,7 @@ csc* form_KKT(c_float*    P_x,
               c_int       format,
               c_float     param1,
               c_float    *param2,
+              c_float     param2_sc,
               c_int      *PtoKKT,
               c_int      *AtoKKT,
               c_int     **Pdiag_idx,
@@ -117,14 +118,27 @@ csc* form_KKT(c_float*    P_x,
   }
 
   // - diag(param2) at bottom right
-  for (j = 0; j < m; j++) {
-    KKT_trip->i[zKKT] = j + n;
-    KKT_trip->p[zKKT] = j + n;
-    KKT_trip->x[zKKT] = -param2[j];
+  if (param2) {
+    for (j = 0; j < m; j++) {
+      KKT_trip->i[zKKT] = j + n;
+      KKT_trip->p[zKKT] = j + n;
+      KKT_trip->x[zKKT] = -param2[j];
 
-    if (param2toKKT != OSQP_NULL) param2toKKT[j] = zKKT;  // Update index from
-                                                          // param2 to KKTtrip
-    zKKT++;
+      if (param2toKKT != OSQP_NULL) param2toKKT[j] = zKKT;  // Update index from
+                                                            // param2 to KKTtrip
+      zKKT++;
+    }
+  }
+  else {
+    for (j = 0; j < m; j++) {
+      KKT_trip->i[zKKT] = j + n;
+      KKT_trip->p[zKKT] = j + n;
+      KKT_trip->x[zKKT] = -param2_sc;
+
+      if (param2toKKT != OSQP_NULL) param2toKKT[j] = zKKT;  // Update index from
+                                                            // param2 to KKTtrip
+      zKKT++;
+    }
   }
 
   // Allocate number of nonzeros
@@ -225,15 +239,23 @@ void update_KKT_A(csc *KKT,
   }
 }
 
-void update_KKT_param2(csc *KKT,
+void update_KKT_param2(csc     *KKT,
                        c_float *param2,
-                       c_int *param2toKKT,
-                       c_int m) {
+                       c_float  param2_sc,
+                       c_int   *param2toKKT,
+                       c_int    m) {
   c_int i; // Iterations
 
   // Update elements of KKT using param2
-  for (i = 0; i < m; i++) {
-    KKT->x[param2toKKT[i]] = -param2[i];
+  if (param2) {
+    for (i = 0; i < m; i++) {
+      KKT->x[param2toKKT[i]] = -param2[i];
+    }
+  }
+  else {
+    for (i = 0; i < m; i++) {
+      KKT->x[param2toKKT[i]] = -param2_sc;
+    }
   }
 }
 

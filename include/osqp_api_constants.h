@@ -33,7 +33,7 @@ extern "C" {
 /*************************
 * Linear System Solvers *
 *************************/
-enum linsys_solver_type { QDLDL_SOLVER, MKL_PARDISO_SOLVER };
+enum linsys_solver_type { QDLDL_SOLVER, MKL_PARDISO_SOLVER, CUDA_PCG_SOLVER };
 extern const char * LINSYS_SOLVER_NAME[];
 
 
@@ -65,13 +65,23 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define EPS_PRIM_INF (1E-4)
 # define EPS_DUAL_INF (1E-4)
 # define ALPHA (1.6)
+
+#ifdef CUDA_SUPPORT
+# define LINSYS_SOLVER (CUDA_PCG_SOLVER)
+#else
 # define LINSYS_SOLVER (QDLDL_SOLVER)
+#endif
 
 # define RHO_MIN (1e-06)
 # define RHO_MAX (1e06)
-# define RHO_EQ_OVER_RHO_INEQ (1e03)
 # define RHO_TOL (1e-04) ///< tolerance for detecting if an inequality is set to equality
+# define RHO_EQ_OVER_RHO_INEQ (1e03)
 
+#ifdef CUDA_SUPPORT
+#  define RHO_IS_VEC (0)
+#else
+#  define RHO_IS_VEC (1)  ///< boolean, defines if rho is scalar or vector
+#endif
 
 # ifndef EMBEDDED
 #  define DELTA (1E-6)
@@ -80,8 +90,13 @@ extern const char * OSQP_ERROR_MESSAGE[];
 #  define VERBOSE (1)
 # endif // ifndef EMBEDDED
 
+#ifdef CUDA_SUPPORT
+#  define CHECK_TERMINATION (5)
+#else
+#  define CHECK_TERMINATION (25)
+#endif
+
 # define SCALED_TERMINATION (0)
-# define CHECK_TERMINATION (25)
 # define WARM_START (1)
 # define SCALING (10)
 
@@ -98,7 +113,12 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # endif /* ifndef OSQP_NAN */
 
 # ifndef OSQP_INFTY
-#  define OSQP_INFTY ((c_float)1e30)        // infinity
+#if defined(CUDA_SUPPORT) && defined(DFLOAT)
+// Multiplying two floats that are in the order of 1e20 results in an overflow
+#  define OSQP_INFTY ((c_float)1e17)
+#else
+#  define OSQP_INFTY ((c_float)1e20)        // infinity
+#endif
 # endif /* ifndef OSQP_INFTY */
 
 # ifndef OSQP_DIVISION_TOL
@@ -108,11 +128,18 @@ extern const char * OSQP_ERROR_MESSAGE[];
 
 # if EMBEDDED != 1
 #  define ADAPTIVE_RHO (1)
+
+#ifdef CUDA_SUPPORT
+#  define ADAPTIVE_RHO_INTERVAL (10)
+#  define ADAPTIVE_RHO_TOLERANCE (2.0)
+#else
 #  define ADAPTIVE_RHO_INTERVAL (0)
+#  define ADAPTIVE_RHO_TOLERANCE (5.0)          ///< tolerance for adopting new rho; minimum ratio between new rho and the current one
+#endif
+
 #  define ADAPTIVE_RHO_FRACTION (0.4)           ///< fraction of setup time after which we update rho
 #  define ADAPTIVE_RHO_MULTIPLE_TERMINATION (4) ///< multiple of check_termination after which we update rho (if PROFILING disabled)
 #  define ADAPTIVE_RHO_FIXED (100)              ///< number of iterations after which we update rho if termination_check  and PROFILING are disabled
-#  define ADAPTIVE_RHO_TOLERANCE (5)            ///< tolerance for adopting new rho; minimum ratio between new rho and the current one
 # endif // if EMBEDDED != 1
 
 # ifdef PROFILING

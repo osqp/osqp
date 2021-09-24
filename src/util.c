@@ -226,15 +226,16 @@ void print_footer(OSQPInfo *info, c_int polish) {
 
 #ifndef EMBEDDED
 
-  OSQPSettings* copy_settings(const OSQPSettings *settings) {
-  OSQPSettings *new = c_malloc(sizeof(OSQPSettings));
+OSQPSettings* copy_settings(const OSQPSettings *settings) {
 
+  OSQPSettings *new = c_malloc(sizeof(OSQPSettings));
   if (!new) return OSQP_NULL;
 
   // Copy settings
   // NB. Copying them explicitly because memcpy is not
   // defined when PRINTING is disabled (appears in string.h)
   new->rho = settings->rho;
+  new->rho_is_vec = settings->rho_is_vec;
   new->sigma = settings->sigma;
   new->scaling = settings->scaling;
 

@@ -63,7 +63,7 @@ void OSQPVectorf_view_free(OSQPVectorf *a);
 
 
 /* Length of the vector (floats) */
-// c_int OSQPVectorf_length(const OSQPVectorf *a);
+c_int OSQPVectorf_length(const OSQPVectorf *a);
 
 /* Length of the vector (ints) */
 // c_int OSQPVectori_length(const OSQPVectori *a);
@@ -71,16 +71,16 @@ void OSQPVectorf_view_free(OSQPVectorf *a);
 /* Pointer to vector data (floats) */
 c_float* OSQPVectorf_data(const OSQPVectorf *a);
 
-/* Pointer to vector data (ints) */
-c_int* OSQPVectori_data(const OSQPVectori *a);
+// /* Pointer to vector data (ints) */
+// c_int* OSQPVectori_data(const OSQPVectori *a);
 
 /* Copy a float vector a into another vector b (pre-allocated) */
 void OSQPVectorf_copy(OSQPVectorf       *b,
                       const OSQPVectorf *a);
 
 /* Copy an int vector a into another vector b (pre-allocated) */
-void OSQPVectori_copy(OSQPVectori       *b,
-                      const OSQPVectori *a);
+// void OSQPVectori_copy(OSQPVectori       *b,
+//                       const OSQPVectori *a);
 
 /* Copy an array of floats into a into a vector b (pre-allocated) */
 void OSQPVectorf_from_raw(OSQPVectorf   *b,
@@ -95,14 +95,14 @@ void OSQPVectorf_to_raw(c_float           *bv,
                         const OSQPVectorf *a);
 
 /* copy a vector into an array of ints (pre-allocated) */
-// void OSQPVectori_to_raw(c_int *bv, const OSQPVectori *a);
+void OSQPVectori_to_raw(c_int             *bv,
+                        const OSQPVectori *a);
 
 /* set float vector to scalar */
 void OSQPVectorf_set_scalar(OSQPVectorf *a,
                             c_float      sc);
 
-/* Set float vector to one of three scalars based on sign of vector of ints.
- */
+/* Set float vector to one of three scalars based on sign of vector of ints */
 void OSQPVectorf_set_scalar_conditional(OSQPVectorf       *a,
                                         const OSQPVectori *test,
                                         c_float            val_if_neg,
@@ -156,7 +156,6 @@ c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S,
 c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
                                   const OSQPVectorf *b);
 
-
 /* sum of vector elements */
 // c_float OSQPVectorf_sum(const OSQPVectorf *a);
 
@@ -194,7 +193,7 @@ c_int OSQPVectorf_all_leq(const OSQPVectorf *l,
  * that x = min(max(x,l),u) is allowed
  */
 void OSQPVectorf_ew_bound_vec(OSQPVectorf       *x,
-                              OSQPVectorf       *z,
+                              const OSQPVectorf *z,
                               const OSQPVectorf *l,
                               const OSQPVectorf *u);
 
@@ -241,9 +240,9 @@ void OSQPVectorf_ew_reciprocal(OSQPVectorf       *b,
 void OSQPVectorf_ew_sqrt(OSQPVectorf *a);
 
 /* Elementwise maximum between vector and scalar c = max(a, sc) */
-void OSQPVectorf_ew_max(OSQPVectorf       *c,
-                        const OSQPVectorf *a,
-                        c_float            sc);
+// void OSQPVectorf_ew_max(OSQPVectorf       *c,
+//                         const OSQPVectorf *a,
+//                         c_float            sc);
 
 /* Elementwise minimum between vector and scalar c = min(a, sc) */
 // void OSQPVectorf_ew_min(OSQPVectorf *c, const OSQPVectorf *a, c_float sc);

@@ -21,19 +21,26 @@ struct qdldl {
      * @name Functions
      * @{
      */
-    c_int (*solve)(struct qdldl* self, OSQPVectorf* b);
+    c_int (*solve)(struct qdldl *self,
+                   OSQPVectorf  *b,
+                   c_int         admm_iter);
+
+    void (*warm_start)(struct qdldl      *self,
+                       const OSQPVectorf *x);
 
 #ifndef EMBEDDED
-    void (*free)(struct qdldl * self); ///< Free workspace (only if desktop)
+    void (*free)(struct qdldl *self); ///< Free workspace (only if desktop)
 #endif
 
     // This used only in non embedded or embedded 2 version
 #if EMBEDDED != 1
-    c_int (*update_matrices)(struct qdldl * self,
+    c_int (*update_matrices)(struct qdldl     *self,
                              const OSQPMatrix *P,
                              const OSQPMatrix *A);         ///< Update solver matrices
-    c_int (*update_rho_vec)(struct qdldl * self,
-                            const OSQPVectorf* rho_vec);   ///< Update rho_vec parameter
+
+    c_int (*update_rho_vec)(struct qdldl      *self,
+                            const OSQPVectorf *rho_vec,
+                            c_float            rho_sc);    ///< Update rho_vec parameter
 #endif
 
 #ifndef EMBEDDED
@@ -52,6 +59,7 @@ struct qdldl {
     c_float *sol;           ///< solution to the KKT system
     c_float *rho_inv_vec;   ///< parameter vector
     c_float sigma;          ///< scalar parameter
+    c_float rho_inv;        ///< scalar parameter (used if rho_inv_vec == NULL)
 #ifndef EMBEDDED
     c_int polish;           ///< polishing flag
 #endif
@@ -85,17 +93,17 @@ struct qdldl {
  * @param  s         Pointer to a private structure
  * @param  P         Cost function matrix (upper triangular form)
  * @param  A         Constraints matrix
- * @param  sigma     Algorithm parameter. If polish, then sigma = delta.
  * @param  rho_vec   Algorithm parameter. If polish, then rho_vec = OSQP_NULL.
+ * @param  settings  Solver settings
  * @param  polish    Flag whether we are initializing for polish or not
  * @return           Exitflag for error (0 if no errors)
  */
-c_int init_linsys_solver_qdldl(qdldl_solver ** sp,
-                               const OSQPMatrix * P,
-                               const OSQPMatrix * A,
-                               c_float sigma,
-                               const OSQPVectorf* rho_vec,
-                               c_int polish);
+c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
+                               const OSQPMatrix   *P,
+                               const OSQPMatrix   *A,
+                               const OSQPVectorf  *rho_vec,
+                               OSQPSettings       *settings,
+                               c_int               polish);
 
 /**
  * Solve linear system and store result in b
@@ -103,7 +111,13 @@ c_int init_linsys_solver_qdldl(qdldl_solver ** sp,
  * @param  b        Right-hand side
  * @return          Exitflag
  */
-c_int solve_linsys_qdldl(qdldl_solver * s, OSQPVectorf * b);
+c_int solve_linsys_qdldl(qdldl_solver *s,
+                         OSQPVectorf  *b,
+                         c_int         admm_iter);
+
+
+void warm_start_linsys_solver_qdldl(qdldl_solver      *s,
+                                    const OSQPVectorf *x);
 
 
 #if EMBEDDED != 1
@@ -128,9 +142,9 @@ c_int update_linsys_solver_matrices_qdldl(
  * @param  rho_vec  new rho_vec value
  * @return          exitflag
  */
-c_int update_linsys_solver_rho_vec_qdldl(
-                   qdldl_solver * s,
-                   const OSQPVectorf* rho_vec);
+c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver      *s,
+                                         const OSQPVectorf *rho_vec,
+                                         c_float            rho_sc);
 
 #endif
 

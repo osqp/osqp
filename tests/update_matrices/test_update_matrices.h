@@ -3,15 +3,17 @@
 #include "util.h"
 #include "minunit.h"
 #include "lin_sys.h"
-#include "kkt.h"
 
 #include "update_matrices/data.h"
 
+#ifndef CUDA_SUPPORT
+
+#include "kkt.h"
 
 static const char* test_form_KKT() {
 
   update_matrices_sols_data *data;
-  c_float sigma;
+  c_float sigma, *rho_inv_vec_val;
   OSQPVectorf *rho_vec, *rho_inv_vec;
   c_int   m, *PtoKKT, *AtoKKT, *Pdiag_idx, Pdiag_n;
   csc    *KKT;
@@ -26,6 +28,10 @@ static const char* test_form_KKT() {
   rho_inv_vec = OSQPVectorf_malloc(m);
   OSQPVectorf_set_scalar(rho_vec, data->test_form_KKT_rho);
   OSQPVectorf_ew_reciprocal(rho_inv_vec,rho_vec);
+
+  // Copy value of rho_inv_vec to a bare array
+  rho_inv_vec_val = (c_float *) c_malloc(m * sizeof(c_float));
+  OSQPVectorf_to_raw(rho_inv_vec_val, rho_inv_vec);
 
   // Allocate vectors of indices
   PtoKKT = (c_int*) c_malloc((data->test_form_KKT_Pu->p[data->test_form_KKT_Pu->n]) *
@@ -44,7 +50,8 @@ static const char* test_form_KKT() {
                  data->test_form_KKT_Pu_new->n,
                  0,
                  sigma,
-                 OSQPVectorf_data(rho_inv_vec),
+                 rho_inv_vec_val,
+                 1.0, // dummy
                  PtoKKT,
                  AtoKKT,
                  &Pdiag_idx,
@@ -75,6 +82,7 @@ static const char* test_form_KKT() {
 
   // Cleanup
   clean_problem_update_matrices_sols_data(data);
+  c_free(rho_inv_vec_val);
   c_free(Pdiag_idx);
   csc_spfree(KKT);
   OSQPVectorf_free(rho_vec);
@@ -83,6 +91,9 @@ static const char* test_form_KKT() {
   c_free(PtoKKT);
   return 0;
 }
+
+#endif /* ifndef CUDA_SUPPORT */
+
 
 static const char* test_update() {
   c_int i, nnzP, nnzA;
@@ -119,6 +130,8 @@ static const char* test_update() {
   settings->max_iter = 1000;
   settings->alpha    = 1.6;
   settings->verbose  = 1;
+  settings->eps_abs  = 1e-05;
+  settings->eps_rel  = 1e-05;
 
   // Setup solver
   exitflag = osqp_setup(&solver,problem->P,problem->q,
@@ -508,7 +521,10 @@ static char* test_update_pardiso() {
 
 static const char* test_update_matrices()
 {
+#ifndef CUDA_SUPPORT
   mu_run_test(test_form_KKT);
+#endif
+
   mu_run_test(test_update);
 
 #ifdef ENABLE_MKL_PARDISO

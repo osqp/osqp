@@ -25,6 +25,8 @@ static const char* test_unconstrained_solve()
 
   // Define Solver settings as default
   osqp_set_default_settings(settings);
+  settings->eps_abs = 1e-05;
+  settings->eps_rel = 1e-05;
   settings->verbose = 1;
 
   // Setup solver
