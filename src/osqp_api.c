@@ -86,15 +86,15 @@ void osqp_set_default_settings(OSQPSettings *settings) {
 #ifndef EMBEDDED
 
 
-c_int osqp_setup(OSQPSolver** solverp,
-                 const csc* P,
-                 const c_float* q,
-                 const csc* A,
-                 const c_float* l,
-                 const c_float* u,
-                 c_int m,
-                 c_int n,
-                 const OSQPSettings *settings) {
+c_int osqp_setup(OSQPSolver         **solverp,
+                 const csc           *P,
+                 const c_float       *q,
+                 const csc           *A,
+                 const c_float       *l,
+                 const c_float       *u,
+                 c_int                m,
+                 c_int                n,
+                 const OSQPSettings  *settings) {
 
   c_int exitflag;
 
@@ -806,7 +806,8 @@ c_int osqp_cleanup(OSQPSolver *solver) {
 /************************
 * Update problem data  *
 ************************/
-c_int osqp_update_lin_cost(OSQPSolver *solver, const c_float *q_new) {
+c_int osqp_update_lin_cost(OSQPSolver    *solver,
+                           const c_float *q_new) {
 
   OSQPWorkspace* work;
 
@@ -1031,7 +1032,7 @@ c_int osqp_update_P(OSQPSolver    *solver,
 }
 
 
-c_int osqp_update_A(OSQPSolver *solver,
+c_int osqp_update_A(OSQPSolver    *solver,
                     const c_float *Ax_new,
                     const c_int   *Ax_new_idx,
                     c_int          A_new_n) {
@@ -1251,6 +1252,18 @@ c_int osqp_update_rho(OSQPSolver *solver, c_float rho_new) {
 /****************************
 * Update problem settings  *
 ****************************/
+c_int osqp_update_settings(OSQPSolver         *solver,
+                           const OSQPSettings *settings) {
+
+  // Check if workspace has been initialized
+  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+
+  // Validate settings
+  if (validate_settings(settings)) return osqp_error(OSQP_SETTINGS_VALIDATION_ERROR);
+
+}
+
+
 c_int osqp_update_max_iter(OSQPSolver *solver, c_int max_iter_new) {
 
   // Check if workspace has been initialized

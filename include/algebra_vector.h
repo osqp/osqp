@@ -216,8 +216,8 @@ void OSQPVectorf_project_polar_reccone(OSQPVectorf       *y,
 c_int OSQPVectorf_in_reccone(const OSQPVectorf *y,
                              const OSQPVectorf *l,
                              const OSQPVectorf *u,
-                             c_float           infval,
-                             c_float           tol);
+                             c_float            infval,
+                             c_float            tol);
 
 /* vector permutation x[:] = b(p[:]) */
 // void OSQPVectorf_permute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p);

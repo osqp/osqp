@@ -76,15 +76,15 @@ void osqp_set_default_settings(OSQPSettings *settings);
  * @param  settings     Solver settings
  * @return              Exitflag for errors (0 if no errors)
  */
- c_int osqp_setup(OSQPSolver        **solverp,
-                  const csc          *P,
-                  const c_float      *q,
-                  const csc          *A,
-                  const c_float      *l,
-                  const c_float      *u,
-                  c_int               m,
-                  c_int               n,
-                  const OSQPSettings *settings);
+ c_int osqp_setup(OSQPSolver         **solverp,
+                  const csc           *P,
+                  const c_float       *q,
+                  const csc           *A,
+                  const c_float       *l,
+                  const c_float       *u,
+                  c_int                m,
+                  c_int                n,
+                  const OSQPSettings  *settings);
 
 # endif // #ifndef EMBEDDED
 
@@ -268,6 +268,16 @@ c_int osqp_update_rho(OSQPSolver *solver,
  * @name Update settings
  * @{
  */
+
+
+/**
+ * Update settings (sigma and rho are ignored)
+ * @param  solver    Solver
+ * @param  settings  Solver settings
+ * @return           Exitflag for errors (0 if no errors)
+ */
+c_int osqp_update_settings(OSQPSolver         *solver,
+                           const OSQPSettings *settings);
 
 
 /**
