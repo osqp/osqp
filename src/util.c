@@ -226,15 +226,16 @@ void print_footer(OSQPInfo *info, c_int polish) {
 
 #ifndef EMBEDDED
 
-  OSQPSettings* copy_settings(const OSQPSettings *settings) {
-  OSQPSettings *new = c_malloc(sizeof(OSQPSettings));
+OSQPSettings* copy_settings(const OSQPSettings *settings) {
 
+  OSQPSettings *new = c_malloc(sizeof(OSQPSettings));
   if (!new) return OSQP_NULL;
 
   // Copy settings
   // NB. Copying them explicitly because memcpy is not
   // defined when PRINTING is disabled (appears in string.h)
   new->rho = settings->rho;
+  new->rho_is_vec = settings->rho_is_vec;
   new->sigma = settings->sigma;
   new->scaling = settings->scaling;
 
@@ -355,7 +356,8 @@ c_float osqp_toc(OSQPTimer *t)
 
 #ifdef PRINTING
 
-void print_csc_matrix(const csc *M, const char *name)
+void print_csc_matrix(const csc  *M,
+                      const char *name)
 {
   c_int j, i, row_start, row_stop;
   c_int k = 0;
@@ -376,7 +378,8 @@ void print_csc_matrix(const csc *M, const char *name)
   }
 }
 
-void dump_csc_matrix(csc *M, const char *file_name) {
+void dump_csc_matrix(const csc  *M,
+                     const char *file_name) {
   c_int j, i, row_strt, row_stop;
   c_int k = 0;
   FILE *f = fopen(file_name, "w");
@@ -402,7 +405,8 @@ void dump_csc_matrix(csc *M, const char *file_name) {
   }
 }
 
-void print_trip_matrix(csc *M, const char *name)
+void print_trip_matrix(const csc  *M,
+                       const char *name)
 {
   c_int k = 0;
 
@@ -414,7 +418,10 @@ void print_trip_matrix(csc *M, const char *name)
   }
 }
 
-void print_dns_matrix(c_float *M, c_int m, c_int n, const char *name)
+void print_dns_matrix(const c_float *M,
+                      c_int          m,
+                      c_int          n,
+                      const char    *name)
 {
   c_int i, j;
 
@@ -438,11 +445,15 @@ void print_dns_matrix(c_float *M, c_int m, c_int n, const char *name)
   c_print("\n");
 }
 
-void print_vec(c_float *v, c_int n, const char *name) {
+void print_vec(const c_float *v,
+              c_int           n,
+              const char     *name) {
   print_dns_matrix(v, 1, n, name);
 }
 
-void dump_vec(c_float *v, c_int len, const char *file_name) {
+void dump_vec(const c_float *v,
+              c_int          len,
+              const char    *file_name) {
   c_int i;
   FILE *f = fopen(file_name, "w");
 
@@ -457,7 +468,9 @@ void dump_vec(c_float *v, c_int len, const char *file_name) {
   }
 }
 
-void print_vec_int(c_int *x, c_int n, const char *name) {
+void print_vec_int(const c_int *x,
+                   c_int        n,
+                   const char  *name) {
   c_int i;
 
   c_print("%s = [", name);

@@ -7,6 +7,7 @@ extern "C" {
 # endif // ifdef __cplusplus
 
 #include "glob_opts.h"
+#include "csc_type.h"
 
 /*
  * OSQPMatrix types.  Not defined here since it

@@ -18,12 +18,24 @@
 static c_int form_Ared(OSQPWorkspace *work){
 
   c_int j, n_active;
+  c_int m = work->data->m;
 
-  c_int* active_flags = OSQPVectori_data(work->pol->active_flags);
-  c_float* z = OSQPVectorf_data(work->z);
-  c_float* y = OSQPVectorf_data(work->y);
-  c_float* l = OSQPVectorf_data(work->data->l);
-  c_float* u = OSQPVectorf_data(work->data->u);
+  c_int *active_flags;
+  c_float *z, *y, *u, *l;
+
+  // Allocate raw arrays
+  active_flags = (c_int *) c_malloc(m * sizeof(c_int));
+  z = (c_float *) c_malloc(m * sizeof(c_float));
+  y = (c_float *) c_malloc(m * sizeof(c_float));
+  l = (c_float *) c_malloc(m * sizeof(c_float));
+  u = (c_float *) c_malloc(m * sizeof(c_float));
+
+  // Copy data to raw arrays
+  OSQPVectori_to_raw(active_flags, work->pol->active_flags);
+  OSQPVectorf_to_raw(z, work->z);
+  OSQPVectorf_to_raw(y, work->y);
+  OSQPVectorf_to_raw(l, work->data->l);
+  OSQPVectorf_to_raw(u, work->data->u);
 
   // Initialize counters for active constraints
   n_active = 0;
@@ -51,11 +63,21 @@ static c_int form_Ared(OSQPWorkspace *work){
     }
   }
 
+  // Copy raw vector into OSQPVectori structure
+  OSQPVectori_from_raw(work->pol->active_flags, active_flags);
+
   //total active constraints
   work->pol->n_active = n_active;
 
   //extract the relevant rows
   work->pol->Ared = OSQPMatrix_submatrix_byrows(work->data->A, work->pol->active_flags);
+
+  // Memory clean-up
+  c_free(active_flags);
+  c_free(z);
+  c_free(y);
+  c_free(l);
+  c_free(u);
 
   // Return number of rows in Ared
   return n_active;
@@ -70,12 +92,26 @@ static c_int form_Ared(OSQPWorkspace *work){
 static void form_rhs_red(OSQPWorkspace *work, OSQPVectorf *rhs) {
 
   c_int j, counter;
+  c_int n = work->data->n;
+  c_int m = work->data->m;
+  c_int n_plus_mred = OSQPVectorf_length(rhs);
 
-  c_float* rhsv = OSQPVectorf_data(rhs);
-  c_float* q   = OSQPVectorf_data(work->data->q);
-  c_float* l   = OSQPVectorf_data(work->data->l);
-  c_float* u   = OSQPVectorf_data(work->data->u);
-  c_int* active_flags = OSQPVectori_data(work->pol->active_flags);
+  c_int *active_flags;
+  c_float *rhsv, *q, *l, *u;
+
+  // Allocate raw arrays
+  active_flags = (c_int *)   c_malloc(m           * sizeof(c_int));
+  rhsv         = (c_float *) c_malloc(n_plus_mred * sizeof(c_float));
+  q            = (c_float *) c_malloc(n           * sizeof(c_float));
+  l            = (c_float *) c_malloc(m           * sizeof(c_float));
+  u            = (c_float *) c_malloc(m           * sizeof(c_float));
+
+  // Copy data to raw arrays
+  OSQPVectori_to_raw(active_flags, work->pol->active_flags);
+  OSQPVectorf_to_raw(rhsv, rhs);
+  OSQPVectorf_to_raw(q, work->data->q);
+  OSQPVectorf_to_raw(l, work->data->l);
+  OSQPVectorf_to_raw(u, work->data->u);
 
   for(j = 0; j < work->data->n; j++){
     rhsv[j] = -q[j];
@@ -93,6 +129,16 @@ static void form_rhs_red(OSQPWorkspace *work, OSQPVectorf *rhs) {
        counter++;
     }
   }
+
+  // Copy raw vector into OSQPVectorf structure
+  OSQPVectorf_from_raw(rhs, rhsv);
+
+  // Memory clean-up
+  c_free(active_flags);
+  c_free(rhsv);
+  c_free(q);
+  c_free(l);
+  c_free(u);
 }
 
 /**
@@ -110,7 +156,7 @@ static c_int iterative_refinement(OSQPSolver    *solver,
                                   LinSysSolver  *p,
                                   OSQPVectorf   *z,
                                   OSQPVectorf   *b) {
-  c_int i;
+  c_int i, mred;
   OSQPVectorf *rhs, *rhs1, *rhs2;
   OSQPVectorf *z1, *z2;
 
@@ -118,15 +164,16 @@ static c_int iterative_refinement(OSQPSolver    *solver,
   OSQPWorkspace* work     = solver->work;
 
   if (settings->polish_refine_iter > 0) {
+    mred = OSQPMatrix_get_m(work->pol->Ared);
 
     // Allocate dz and rhs vectors
-    rhs = OSQPVectorf_malloc(work->data->n + OSQPMatrix_get_m(work->pol->Ared));
+    rhs = OSQPVectorf_malloc(work->data->n + mred);
 
     //form views of the top/bottom parts of rhs and z
     rhs1 = OSQPVectorf_view(rhs,0,work->data->n);
-    rhs2 = OSQPVectorf_view(rhs,work->data->n,work->data->m);
+    rhs2 = OSQPVectorf_view(rhs,work->data->n,mred);
     z1   = OSQPVectorf_view(z,0,work->data->n);
-    z2   = OSQPVectorf_view(z,work->data->n,work->data->m);
+    z2   = OSQPVectorf_view(z,work->data->n,mred);
 
     if (!rhs || !rhs1 || !rhs2 || !z1 || !z2) {
       return osqp_error(OSQP_MEM_ALLOC_ERROR);
@@ -149,7 +196,7 @@ static c_int iterative_refinement(OSQPSolver    *solver,
       OSQPMatrix_Axpy(work->pol->Ared, z1, rhs2, -1.0, 1.0);
 
       // Solve linear system. Store solution in rhs
-      p->solve(p, rhs);
+      p->solve(p, rhs, 1);
 
       // Update solution
       OSQPVectorf_plus(z,z,rhs);
@@ -172,10 +219,21 @@ static c_int iterative_refinement(OSQPSolver    *solver,
 static void get_ypol_from_yred(OSQPWorkspace *work, OSQPVectorf *yred_vf) {
 
   c_int j, counter;
+  c_int m = work->data->m;
+  c_int mred = OSQPVectorf_length(yred_vf);
 
-  c_int* active_flags = OSQPVectori_data(work->pol->active_flags);
-  c_float* y     = OSQPVectorf_data(work->pol->y);
-  c_float* yred  = OSQPVectorf_data(yred_vf);
+  c_int *active_flags;
+  c_float *y, *yred;
+
+  // Allocate raw arrays
+  active_flags = (c_int *)   c_malloc(m    * sizeof(c_int));
+  y            = (c_float *) c_malloc(m    * sizeof(c_float));
+  yred         = (c_float *) c_malloc(mred * sizeof(c_float));
+
+  // Copy data to raw arrays
+  OSQPVectori_to_raw(active_flags, work->pol->active_flags);
+  OSQPVectorf_to_raw(y, work->y);
+  OSQPVectorf_to_raw(yred, yred_vf);
 
   // If there are no active constraints
   if (work->pol->n_active == 0) {
@@ -195,6 +253,14 @@ static void get_ypol_from_yred(OSQPWorkspace *work, OSQPVectorf *yred_vf) {
       counter++;
     }
   }
+
+  // Copy raw vector into OSQPVectorf structure
+  OSQPVectorf_from_raw(work->pol->y, y);
+
+  // Memory clean-up
+  c_free(active_flags);
+  c_free(y);
+  c_free(yred);
 }
 
 c_int polish(OSQPSolver *solver) {
@@ -225,8 +291,7 @@ c_int polish(OSQPSolver *solver) {
 
   // Form and factorize reduced KKT
   exitflag = init_linsys_solver(&plsh, work->data->P, work->pol->Ared,
-                                settings->delta, OSQP_NULL,
-                                settings->linsys_solver, 1);
+                                OSQP_NULL, settings, OSQP_NULL, OSQP_NULL, 1);
 
   if (exitflag) {
     // Polishing failed
@@ -270,8 +335,11 @@ c_int polish(OSQPSolver *solver) {
     return -1;
   }
 
+  // Warm start the polished solution
+  plsh->warm_start(plsh, work->x);
+
   // Solve the reduced KKT system
-  plsh->solve(plsh, pol_sol);
+  plsh->solve(plsh, pol_sol, 1);
 
   // Perform iterative refinement to compensate for the regularization error
   exitflag = iterative_refinement(solver, plsh, pol_sol, rhs_red);

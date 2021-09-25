@@ -16,14 +16,14 @@ extern "C" {
 /**
  * Compute rho estimate from residuals
  * @param solver Solver
- * @return     rho estimate
+ * @return       rho estimate
  */
-c_float compute_rho_estimate(OSQPSolver *solver);
+c_float compute_rho_estimate(const OSQPSolver *solver);
 
 /**
  * Adapt rho value based on current unscaled primal/dual residuals
  * @param solver Solver
- * @return     Exitflag
+ * @return       Exitflag
  */
 c_int   adapt_rho(OSQPSolver *solver);
 
@@ -57,9 +57,11 @@ void swap_vectors(OSQPVectorf **a,
 
 /**
  * Update x_tilde and z_tilde variable (first ADMM step)
- * @param solver Solver
+ * @param solver    Solver
+ * @param admm_iter Current ADMM iteration
  */
-void update_xz_tilde(OSQPSolver *solver);
+void update_xz_tilde(OSQPSolver *solver,
+                     c_int       admm_iter);
 
 
 /**
@@ -88,17 +90,17 @@ void update_y(OSQPSolver *solver);
 /**
  * Compute objective function from data at value x
  * @param  solver Solver
- * @param  x    Value x
- * @return      Objective function value
+ * @param  x      Value x
+ * @return        Objective function value
  */
-c_float compute_obj_val(OSQPSolver *solver,
-                        OSQPVectorf   *x);
+c_float compute_obj_val(const OSQPSolver  *solver,
+                        const OSQPVectorf *x);
 
 /**
  * Check whether QP has solution
  * @param info OSQPInfo
  */
-c_int has_solution(OSQPInfo *info);
+c_int has_solution(const OSQPInfo *info);
 
 /**
  * Store the QP solution
@@ -146,7 +148,7 @@ void update_status(OSQPInfo *info,
  * @return      Residuals check
  */
 c_int check_termination(OSQPSolver *solver,
-                        c_int          approximate);
+                        c_int       approximate);
 
 
 # ifndef EMBEDDED
@@ -162,13 +164,13 @@ c_int check_termination(OSQPSolver *solver,
  * @param  n            Problem data (number of variables)
  * @return      Exitflag to check
  */
-c_int validate_data(const csc* P,
-                    const c_float* q,
-                    const csc* A,
-                    const c_float* l,
-                    const c_float* u,
-                    c_int m,
-                    c_int n);
+c_int validate_data(const csc     *P,
+                    const c_float *q,
+                    const csc     *A,
+                    const c_float *l,
+                    const c_float *u,
+                    c_int          m,
+                    c_int          n);
 
 
 /**

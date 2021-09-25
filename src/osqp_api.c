@@ -47,6 +47,7 @@ void osqp_get_dimensions(OSQPSolver *solver,
 void osqp_set_default_settings(OSQPSettings *settings) {
 
   settings->rho           = (c_float)RHO;            /* ADMM step */
+  settings->rho_is_vec    = RHO_IS_VEC;              /* defines whether rho is scalar or vector*/
   settings->sigma         = (c_float)SIGMA;          /* ADMM step */
   settings->scaling       = SCALING;                 /* heuristic problem scaling */
 #if EMBEDDED != 1
@@ -65,7 +66,7 @@ void osqp_set_default_settings(OSQPSettings *settings) {
   settings->eps_prim_inf  = (c_float)EPS_PRIM_INF;   /* primal infeasibility tolerance */
   settings->eps_dual_inf  = (c_float)EPS_DUAL_INF;   /* dual infeasibility   tolerance */
   settings->alpha         = (c_float)ALPHA;          /* relaxation parameter */
-  settings->linsys_solver = LINSYS_SOLVER;           /* relaxation parameter */
+  settings->linsys_solver = LINSYS_SOLVER;           /* linear system solver */
 
 #ifndef EMBEDDED
   settings->delta              = DELTA;              /* regularization parameter for polish */
@@ -147,15 +148,17 @@ c_int osqp_setup(OSQPSolver         **solverp,
   if (!(work->data->l) || !(work->data->u))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
-  // Vectorized rho parameter
-  work->rho_vec     = OSQPVectorf_malloc(m);
-  work->rho_inv_vec = OSQPVectorf_malloc(m);
-  if (!(work->rho_vec) || !(work->rho_inv_vec))
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  if (settings->rho_is_vec) {
+    // Vectorized rho parameter
+    work->rho_vec     = OSQPVectorf_malloc(m);
+    work->rho_inv_vec = OSQPVectorf_malloc(m);
+    if (!(work->rho_vec) || !(work->rho_inv_vec))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
-  // Type of constraints
-  work->constr_type = OSQPVectori_calloc(m);
-  if (!(work->constr_type)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+    // Type of constraints
+    work->constr_type = OSQPVectori_calloc(m);
+    if (!(work->constr_type)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  }
 
   // Allocate internal solver variables (ADMM steps)
   work->x           = OSQPVectorf_calloc(n);
@@ -172,9 +175,6 @@ c_int osqp_setup(OSQPSolver         **solverp,
       return osqp_error(OSQP_MEM_ALLOC_ERROR);
   if (!(work->x_prev) || !(work->z_prev) || !(work->y))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
-
-  // Initialize variables x, y, z to 0
-  osqp_cold_start(solver);
 
   // Primal and dual residuals variables
   work->Ax  = OSQPVectorf_calloc(m);
@@ -231,22 +231,28 @@ c_int osqp_setup(OSQPSolver         **solverp,
     work->E_temp   = OSQP_NULL;
   }
 
-  // Set type of constraints.  Ignore return value
-  // because we will definitely factor KKT.
-  set_rho_vec(solver);
+  if (settings->rho_is_vec) {
+    // Set type of constraints.  Ignore return value
+    // because we will definitely factor KKT.
+    set_rho_vec(solver);
+  }
+  else {
+    solver->settings->rho = c_min(c_max(settings->rho, RHO_MIN), RHO_MAX);
+    work->rho_inv = 1. / settings->rho;
+  }
 
   // Load linear system solver
   if (load_linsys_solver(settings->linsys_solver)) return osqp_error(OSQP_LINSYS_SOLVER_LOAD_ERROR);
 
   // Initialize linear system solver structure
-  exitflag = init_linsys_solver(&(work->linsys_solver), work->data->P, work->data->A,
-                                settings->sigma,
-                                work->rho_vec,
-                                settings->linsys_solver, 0);
+  exitflag = init_linsys_solver(&(work->linsys_solver), work->data->P, work->data->A, 
+                                work->rho_vec, solver->settings,
+                                &work->scaled_pri_res, &work->scaled_dua_res, 0);
 
-  if (exitflag) {
-    return osqp_error(exitflag);
-  }
+  if (exitflag) return osqp_error(exitflag);
+
+  // Initialize variables x, y, z to 0
+  osqp_cold_start(solver);
 
   // Initialize active constraints structure
   work->pol = c_malloc(sizeof(OSQPPolish));
@@ -399,7 +405,7 @@ c_int osqp_solve(OSQPSolver *solver) {
 
     /* ADMM STEPS */
     /* Compute \tilde{x}^{k+1}, \tilde{z}^{k+1} */
-    update_xz_tilde(solver);
+    update_xz_tilde(solver, iter);
 
     /* Compute x^{k+1} */
     update_x(solver);
@@ -459,8 +465,10 @@ c_int osqp_solve(OSQPSolver *solver) {
     can_print = solver->settings->verbose &&
                 ((iter % PRINT_INTERVAL == 0) || (iter == 1));
 
-    if (can_check_termination || can_print) { // Update status in either of
-                                              // these cases
+    // NB: We always update info in the first iteration because indirect solvers
+    //     use residual values to compute required accuracy of their solution.
+    if (can_check_termination || can_print || iter == 1) { // Update status in either of
+                                                           // these cases
       // Update information
       update_info(solver, iter, compute_cost_function, 0);
 
@@ -846,7 +854,7 @@ c_int osqp_update_bounds(OSQPSolver    *solver,
                          const c_float *l_new,
                          const c_float *u_new) {
   
-  c_int i, exitflag = 0;
+  c_int exitflag = 0;
   OSQPVectorf *l_tmp, *u_tmp;
   OSQPWorkspace* work;
 
@@ -908,8 +916,10 @@ c_int osqp_update_bounds(OSQPSolver    *solver,
   reset_info(solver->info);
 
 #if EMBEDDED != 1
-  /* Update rho_vec and refactor if constraints type changes */
-  exitflag = update_rho_vec(solver);
+  if (solver->settings->rho_is_vec) {
+    /* Update rho_vec and refactor if constraints type changes */
+    exitflag = update_rho_vec(solver);
+  }
 #endif /* EMBEDDED != 1 */
 
 #ifdef PROFILING
@@ -920,10 +930,13 @@ c_int osqp_update_bounds(OSQPSolver    *solver,
 }
 
 void osqp_cold_start(OSQPSolver *solver) {
-  OSQPWorkspace* work  = solver->work;
+  OSQPWorkspace *work  = solver->work;
   OSQPVectorf_set_scalar(work->x, 0.);
   OSQPVectorf_set_scalar(work->z, 0.);
   OSQPVectorf_set_scalar(work->y, 0.);
+
+  /* Cold start the linear system solver */
+  work->linsys_solver->warm_start(work->linsys_solver, work->x);
 }
 
 c_int osqp_warm_start(OSQPSolver    *solver,
@@ -954,6 +967,9 @@ c_int osqp_warm_start(OSQPSolver    *solver,
 
   /* Compute Ax = z and store it in z */
   if (x) OSQPMatrix_Axpy(work->data->A, work->x, work->z, 1.0, 0.0);
+
+  /* Warm start the linear system solver */
+  work->linsys_solver->warm_start(work->linsys_solver, work->x);
 
   return 0;
 }
@@ -1227,17 +1243,22 @@ c_int osqp_update_rho(OSQPSolver *solver, c_float rho_new) {
   // Update rho in settings
   solver->settings->rho = c_min(c_max(rho_new, RHO_MIN), RHO_MAX);
 
-  // Update rho_vec and rho_inv_vec
-  OSQPVectorf_set_scalar_conditional(work->rho_vec,
-                                     work->constr_type,
-                                     RHO_MIN,                                     //const  == -1
-                                     solver->settings->rho,                       //constr == 0
-                                     RHO_EQ_OVER_RHO_INEQ*solver->settings->rho); //constr == 1
+  if (solver->settings->rho_is_vec) {
+    // Update rho_vec and rho_inv_vec
+    OSQPVectorf_set_scalar_conditional(work->rho_vec,
+                                       work->constr_type,
+                                       RHO_MIN,                                     //const  == -1
+                                       solver->settings->rho,                       //constr == 0
+                                       RHO_EQ_OVER_RHO_INEQ*solver->settings->rho); //constr == 1
 
-  OSQPVectorf_ew_reciprocal(work->rho_inv_vec, work->rho_vec);
+    OSQPVectorf_ew_reciprocal(work->rho_inv_vec, work->rho_vec);
+  }
+  else {
+    work->rho_inv = 1. / solver->settings->rho;
+  }
 
   // Update rho_vec in KKT matrix
-  exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver, work->rho_vec);
+  exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver, work->rho_vec, solver->settings->rho);
 
 #ifdef PROFILING
   if (work->rho_update_from_solve == 0)
