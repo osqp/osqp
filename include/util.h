@@ -159,33 +159,33 @@ void print_csc_matrix(const csc  *M,
                       const char *name);
 
 /* Dump csc sparse matrix to file */
-void dump_csc_matrix(csc        *M,
+void dump_csc_matrix(const csc  *M,
                      const char *file_name);
 
 /* Print a triplet format sparse matrix */
-void print_trip_matrix(csc        *M,
+void print_trip_matrix(const csc  *M,
                        const char *name);
 
 /* Print a dense matrix */
-void print_dns_matrix(c_float    *M,
-                      c_int       m,
-                      c_int       n,
-                      const char *name);
+void print_dns_matrix(const c_float *M,
+                      c_int          m,
+                      c_int          n,
+                      const char    *name);
 
 /* Print vector  */
-void print_vec(c_float    *v,
-               c_int       n,
-               const char *name);
+void print_vec(const c_float *v,
+               c_int          n,
+               const char    *name);
 
 /* Dump vector to file */
-void dump_vec(c_float    *v,
-              c_int       len,
-              const char *file_name);
+void dump_vec(const c_float *v,
+              c_int          len,
+              const char    *file_name);
 
 // Print int array
-void print_vec_int(c_int      *x,
-                   c_int       n,
-                   const char *name);
+void print_vec_int(const c_int *x,
+                   c_int        n,
+                   const char  *name);
 
 # endif // ifdef PRINTING
 
