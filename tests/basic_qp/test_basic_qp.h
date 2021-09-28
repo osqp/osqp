@@ -164,7 +164,7 @@ static const char* test_basic_qp_solve()
   settings->adaptive_rho_fraction = tmp_float;
 #endif
 
-  // Setup solver with wrong settings->adaptive_rho_fraction
+  // Setup solver with wrong settings->adaptive_rho_tolerance
   tmp_float = settings->adaptive_rho_tolerance;
   settings->adaptive_rho_tolerance = 0.5;
   exitflag = osqp_setup(&solver, data->P, data->q,
