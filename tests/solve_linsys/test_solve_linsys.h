@@ -2,14 +2,14 @@
 #include "osqp.h"
 #include "cs.h"
 #include "util.h"
-#include "minunit.h"
+#include "osqp_tester.h"
 #include "lin_sys.h"
 
 
 #include "solve_linsys/data.h"
 
 
-static const char* test_solveKKT() {
+void test_solveKKT() {
   c_int m, exitflag = 0;
   c_float *rho_vec;
   LinSysSolver *s;  // Private structure to form KKT factorization
@@ -43,12 +43,10 @@ static const char* test_solveKKT() {
   c_free(settings);
   c_free(rho_vec);
   clean_problem_solve_linsys_sols_data(data);
-
-  return 0;
 }
 
 #ifdef ENABLE_MKL_PARDISO
-static char* test_solveKKT_pardiso() {
+void test_solveKKT_pardiso() {
   c_int m, exitflag = 0;
   c_float *rho_vec;
   LinSysSolver *s;  // Private  structure  to  form  KKT  factorization
@@ -62,7 +60,7 @@ static char* test_solveKKT_pardiso() {
 
   // Set rho_vec
   m = data->test_solve_KKT_A->m;
-  rho_vec = c_calloc(m, sizeof(c_float));
+  rho_vec = (c_float*)c_calloc(m, sizeof(c_float));
   vec_add_scalar(rho_vec, settings->rho, m);
 
   // Load Pardiso shared library
@@ -91,17 +89,5 @@ static char* test_solveKKT_pardiso() {
 
   // Unload Pardiso shared library
   exitflag = unload_linsys_solver(MKL_PARDISO_SOLVER);
-
-  return 0;
 }
 #endif
-
-static const char* test_solve_linsys()
-{
-  mu_run_test(test_solveKKT);
-#ifdef ENABLE_MKL_PARDISO
-  mu_run_test(test_solveKKT_pardiso);
-#endif
-
-  return 0;
-}

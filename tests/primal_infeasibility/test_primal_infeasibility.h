@@ -1,12 +1,12 @@
-#include "osqp.h"    // OSQP API
-#include "cs.h"      // CSC data structure
-#include "util.h"    // Utilities for testing
-#include "minunit.h" // Basic testing script header
+#include "osqp.h"        // OSQP API
+#include "cs.h"          // CSC data structure
+#include "util.h"        // Utilities for testing
+#include "osqp_tester.h" // Basic testing script header
 
 #include "primal_infeasibility/data.h"
 
 
-static const char* test_primal_infeasible_qp_solve()
+void test_primal_infeasible_qp_solve()
 {
   c_int exitflag;
 
@@ -56,14 +56,4 @@ static const char* test_primal_infeasible_qp_solve()
 
   // Cleanup
   c_free(settings);
-
-  return 0;
-}
-
-static const char* test_primal_infeasibility()
-{
-  mu_run_test(test_primal_infeasible_qp_solve);
-
-
-  return 0;
 }

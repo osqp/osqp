@@ -2,7 +2,7 @@
 #include "osqp.h"
 #include "cs.h"
 #include "util.h"
-#include "minunit.h"
+#include "osqp_tester.h"
 #include "kkt.h"
 #include "lin_sys.h"
 
@@ -10,7 +10,7 @@
 #include "update_matrices/data.h"
 
 
-static const char* test_form_KKT() {
+void test_form_KKT() {
   update_matrices_sols_data *data;
   c_float sigma, *rho_vec, *rho_inv_vec;
   c_int   m, *PtoKKT, *AtoKKT, *Pdiag_idx, Pdiag_n;
@@ -68,10 +68,9 @@ static const char* test_form_KKT() {
   c_free(rho_inv_vec);
   c_free(AtoKKT);
   c_free(PtoKKT);
-  return 0;
 }
 
-static const char* test_update() {
+void test_update() {
   c_int i, nnzP, nnzA;
   update_matrices_sols_data *data;
   OSQPData *problem;
@@ -308,12 +307,10 @@ static const char* test_update() {
   c_free(settings);
   c_free(Ax_new_idx);
   c_free(Px_new_idx);
-
-  return 0;
 }
 
 #ifdef ENABLE_MKL_PARDISO
-static char* test_update_pardiso() {
+void test_update_pardiso() {
   c_int i, nnzP, nnzA, exitflag;
   update_matrices_sols_data *data;
   OSQPData *problem;
@@ -330,7 +327,7 @@ static char* test_update_pardiso() {
   data = generate_problem_update_matrices_sols_data();
 
   // Generate first problem data
-  problem    = c_malloc(sizeof(OSQPData));
+  problem    = (OSQPData*)c_malloc(sizeof(OSQPData));
   problem->P = data->test_solve_Pu;
   problem->q = data->test_solve_q;
   problem->A = data->test_solve_A;
@@ -375,7 +372,7 @@ static char* test_update_pardiso() {
 
   // Update P
   nnzP       = data->test_solve_Pu->p[data->test_solve_Pu->n];
-  Px_new_idx = c_malloc(nnzP * sizeof(c_int)); // Generate indices going from
+  Px_new_idx = (c_int*)c_malloc(nnzP * sizeof(c_int)); // Generate indices going from
                                                // beginning to end of P
 
   for (i = 0; i < nnzP; i++) {
@@ -404,7 +401,7 @@ static char* test_update_pardiso() {
 
   // Update A
   nnzA       = data->test_solve_A->p[data->test_solve_A->n];
-  Ax_new_idx = c_malloc(nnzA * sizeof(c_int)); // Generate indices going from
+  Ax_new_idx = (c_int*)c_malloc(nnzA * sizeof(c_int)); // Generate indices going from
                                                // beginning to end of P
 
   for (i = 0; i < nnzA; i++) {
@@ -470,19 +467,5 @@ static char* test_update_pardiso() {
   c_free(settings);
   c_free(Ax_new_idx);
   c_free(Px_new_idx);
-
-  return 0;
 }
 #endif
-
-static const char* test_update_matrices()
-{
-  mu_run_test(test_form_KKT);
-  mu_run_test(test_update);
-
-#ifdef ENABLE_MKL_PARDISO
-  mu_run_test(test_update_pardiso);
-#endif
-
-  return 0;
-}

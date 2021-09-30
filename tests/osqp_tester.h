@@ -1,6 +1,12 @@
 // Utilities for testing
 
+#ifndef OSQP_TESTER_H
+#define OSQP_TESTER_H
+
 #ifndef EMBEDDED
+
+#define mu_assert(msg, pred) do { INFO(msg); REQUIRE(pred); } while((void)0, 0)
+#define TESTS_TOL 1e-4 // Define tests tolerance
 
 c_float* csc_to_dns(csc *M)
 {
@@ -49,3 +55,4 @@ c_int is_eq_csc(csc *A, csc *B, c_float tol) {
 
 #endif // #ifndef EMBEDDED
 
+#endif // #ifndef OSQP_TESTER_H

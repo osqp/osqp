@@ -149,6 +149,7 @@ if (NOT MSVC)
 
     if (COVERAGE)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
 	if(FORTRAN)
 		set(CMAKE_FORTRAN_FLAGS "${CMAKE_FORTRAN_FLAGS} --coverage")
 	endif(FORTRAN)
@@ -419,25 +420,30 @@ if (UNITTESTS)
     # Direct linear solver testing
     include_directories(tests)
     add_executable(osqp_tester
-                ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c
-                ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
-		${PROJECT_SOURCE_DIR}/tests/minunit.h
-                ${test_headers}
-                ${codegen_test_headers})
-    target_link_libraries (osqp_tester osqpstatic)
+            ${PROJECT_SOURCE_DIR}/tests/osqp_tester.cpp
+            ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
+            ${test_headers}
+            ${codegen_test_headers}
+            )
+    set_target_properties(osqp_tester
+            PROPERTIES
+                CXX_STANDARD 11
+                CXX_STANDARD_REQUIRED YES
+                CXX_EXTENSIONS NO
+            )
+    target_link_libraries (osqp_tester osqpstatic ${CMAKE_DL_LIBS})
 
     # Add custom memory target
     add_executable(osqp_tester_custom_memory
-                   EXCLUDE_FROM_ALL
-                   ${PROJECT_SOURCE_DIR}/tests/osqp_tester.c
-                   ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
-	           ${PROJECT_SOURCE_DIR}/tests/minunit.h
-                   ${test_headers}
-                   ${codegen_test_headers}
+            EXCLUDE_FROM_ALL
+            ${PROJECT_SOURCE_DIR}/tests/osqp_tester.cpp
+            ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
+            ${test_headers}
+            ${codegen_test_headers}
 		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.c
 		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.h
 		)
-    target_link_libraries (osqp_tester_custom_memory osqpstatic)
+    target_link_libraries (osqp_tester_custom_memory osqpstatic ${CMAKE_DL_LIBS})
 
     # Add testing
     include(CTest)

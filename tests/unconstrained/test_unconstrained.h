@@ -1,11 +1,11 @@
-#include "osqp.h"    // OSQP API
-#include "minunit.h" // Basic testing script header
+#include "osqp.h"        // OSQP API
+#include "osqp_tester.h" // Basic testing script header
 
 
 #include "unconstrained/data.h"
 
 
-static const char* test_unconstrained_solve()
+void test_unconstrained_solve()
 {
   c_int exitflag;
 
@@ -57,13 +57,4 @@ static const char* test_unconstrained_solve()
   c_free(settings);
   clean_problem_unconstrained(data);
   clean_problem_unconstrained_sols_data(sols_data);
-
-  return 0;
-}
-
-static const char* test_unconstrained()
-{
-  mu_run_test(test_unconstrained_solve);
-
-  return 0;
 }
