@@ -93,7 +93,7 @@ TEST_CASE( "test_basic_qp2", "[multi-file:5]" ) {
     }
 #ifdef ENABLE_MKL_PARDISO
     SECTION( "test_basic_qp2_solve_pardiso" ) {
-        test_basic_qp2_solve_pardiso() == 0;
+        test_basic_qp2_solve_pardiso();
     }
 #endif
     SECTION( "test_basic_qp2_update" ) {

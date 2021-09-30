@@ -70,7 +70,7 @@ void test_basic_qp2_solve()
 }
 
 #ifdef ENABLE_MKL_PARDISO
-static char* test_basic_qp2_solve_pardiso()
+void test_basic_qp2_solve_pardiso()
 {
   c_int exitflag;
 
@@ -136,8 +136,6 @@ static char* test_basic_qp2_solve_pardiso()
   c_free(settings);
   clean_problem_basic_qp2(data);
   clean_problem_basic_qp2_sols_data(sols_data);
-
-  return 0;
 }
 #endif
 
