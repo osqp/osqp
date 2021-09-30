@@ -10,7 +10,7 @@ order: 1
 If you use OSQP for published work, we encourage you to
 
 * Cite the accompanying papers
-* Put a star on <a class="github-button" href="https://github.com/oxfordcontrol/osqp" data-size="large" data-show-count="true" aria-label="Star oxfordcontrol/osqp on GitHub">GitHub</a>
+* Put a star on <a class="github-button" href="https://github.com/osqp/osqp" data-size="large" data-show-count="true" aria-label="Star osqp/osqp on GitHub">GitHub</a>
 
 We are looking forward to hearing your success stories with OSQP! Please [share them with us](mailto:bartolomeo.stellato@gmail.com).
 
@@ -90,7 +90,7 @@ Code generation functionality and example in this [paper](https://stanford.edu/~
 {% endraw %}
 
 #### Mixed-integer optimization
-A branch-and-bound solver for mixed-integer quadratic optimization in this [paper](https://stellato.io/assets/downloads/publications/2018/miosqp_ecc.pdf).
+A branch-and-bound solver for mixed-integer quadratic optimization in this [paper](https://stellato.io/downloads/publications/2018/miosqp_ecc.pdf).
 
 {% raw %}
 ```latex
