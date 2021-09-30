@@ -1,11 +1,11 @@
 #include "osqp.h"    // OSQP API
-#include "minunit.h" // Basic testing script header
+#include "osqp_tester.h" // Basic testing script header
 
 
 #include "basic_qp2/data.h"
 
 
-static const char* test_basic_qp2_solve()
+void test_basic_qp2_solve()
 {
   c_int exitflag;
 
@@ -69,12 +69,10 @@ static const char* test_basic_qp2_solve()
   c_free(settings);
   clean_problem_basic_qp2(data);
   clean_problem_basic_qp2_sols_data(sols_data);
-
-  return 0;
 }
 
 #ifdef ENABLE_MKL_PARDISO
-static char* test_basic_qp2_solve_pardiso()
+void test_basic_qp2_solve_pardiso()
 {
   c_int exitflag;
 
@@ -142,12 +140,10 @@ static char* test_basic_qp2_solve_pardiso()
   c_free(settings);
   clean_problem_basic_qp2(data);
   clean_problem_basic_qp2_sols_data(sols_data);
-
-  return 0;
 }
 #endif
 
-static const char* test_basic_qp2_update()
+void test_basic_qp2_update()
 {
   c_int exitflag;
 
@@ -218,17 +214,4 @@ static const char* test_basic_qp2_update()
   c_free(settings);
   clean_problem_basic_qp2(data);
   clean_problem_basic_qp2_sols_data(sols_data);
-
-  return 0;
-}
-
-static const char* test_basic_qp2()
-{
-  mu_run_test(test_basic_qp2_solve);
-#ifdef ENABLE_MKL_PARDISO
-  mu_run_test(test_basic_qp2_solve_pardiso);
-#endif
-  mu_run_test(test_basic_qp2_update);
-
-  return 0;
 }
