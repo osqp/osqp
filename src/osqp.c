@@ -485,6 +485,21 @@ c_int osqp_solve(OSQPWorkspace *work) {
     }   // If adaptive rho enabled and interval set to auto
 # endif // PROFILING
 
+# if EMBEDDED == 2
+    if (work->settings->adaptive_rho && !work->settings->adaptive_rho_interval) {
+      // Set adaptive_rho_interval to constant value
+      if (work->settings->check_termination) {
+        // If check_termination is enabled, we set it to a multiple of the check
+        // termination interval
+        work->settings->adaptive_rho_interval = ADAPTIVE_RHO_MULTIPLE_TERMINATION *
+                                                work->settings->check_termination;
+      } else {
+        // If check_termination is disabled we set it to a predefined fix number
+        work->settings->adaptive_rho_interval = ADAPTIVE_RHO_FIXED;
+      }
+    }
+# endif /* if EMBEDDED == 2 */
+
     // Adapt rho
     if (work->settings->adaptive_rho &&
         work->settings->adaptive_rho_interval &&
@@ -1491,6 +1506,19 @@ c_int osqp_update_check_termination(OSQPWorkspace *work, c_int check_termination
 
   // Update check_termination
   work->settings->check_termination = check_termination_new;
+
+#if EMBEDDED == 2
+  // Update adaptive_rho_interval
+  if (work->settings->check_termination) {
+    // If check_termination is enabled, we set it to a multiple of the check
+    // termination interval
+    work->settings->adaptive_rho_interval = ADAPTIVE_RHO_MULTIPLE_TERMINATION *
+                                            work->settings->check_termination;
+  } else {
+    // If check_termination is disabled we set it to a predefined fix number
+    work->settings->adaptive_rho_interval = ADAPTIVE_RHO_FIXED;
+  }
+#endif /* #if EMBEDDED == 2 */
 
   return 0;
 }
