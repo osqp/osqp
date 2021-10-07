@@ -1,11 +1,11 @@
 #include "osqp.h"
 #include "util.h"
-#include "minunit.h"
+#include "osqp_tester.h"
 
 #include "primal_dual_infeasibility/data.h"
 
 
-static const char* test_optimal()
+void test_optimal()
 {
   c_int exitflag;
 
@@ -73,11 +73,9 @@ static const char* test_optimal()
   clean_problem_primal_dual_infeasibility_sols_data(data);
   c_free(problem);
   c_free(settings);
-
-  return 0;
 }
 
-static const char* test_prim_infeas()
+void test_prim_infeas()
 {
   c_int exitflag;
 
@@ -129,11 +127,9 @@ static const char* test_prim_infeas()
   clean_problem_primal_dual_infeasibility_sols_data(data);
   c_free(problem);
   c_free(settings);
-
-  return 0;
 }
 
-static const char* test_dual_infeas()
+void test_dual_infeas()
 {
   c_int exitflag;
 
@@ -185,11 +181,9 @@ static const char* test_dual_infeas()
   clean_problem_primal_dual_infeasibility_sols_data(data);
   c_free(problem);
   c_free(settings);
-
-  return 0;
 }
 
-static const char* test_primal_dual_infeas()
+void test_primal_dual_infeas()
 {
   c_int exitflag;
 
@@ -242,16 +236,4 @@ static const char* test_primal_dual_infeas()
   clean_problem_primal_dual_infeasibility_sols_data(data);
   c_free(problem);
   c_free(settings);
-
-  return 0;
-}
-
-static const char* test_primal_dual_infeasibility()
-{
-  mu_run_test(test_optimal);
-  mu_run_test(test_prim_infeas);
-  mu_run_test(test_dual_infeas);
-  mu_run_test(test_primal_dual_infeas);
-
-  return 0;
 }

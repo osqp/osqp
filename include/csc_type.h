@@ -8,7 +8,9 @@ extern "C" {
 #include "osqp_api_types.h"  //for c_int, c_float
 
 /**
- *  Matrix data in csc or triplet form
+ *  Matrix in compressed-column form.
+ *  The structure is used internally to store matrices in the triplet form as well,
+ *  but the API requires that the matrices are in the CSC format. 
  */
 typedef struct {
   c_int    m;     ///< number of rows

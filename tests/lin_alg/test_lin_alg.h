@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "osqp.h"
 #include "lin_alg.h"
-#include "minunit.h"
+#include "osqp_tester.h"
 #include "lin_alg/data.h"
 
 #ifndef CUDA_SUPPORT
@@ -9,7 +9,7 @@
 #include "csc_utils.h"
 
 
-static const char* test_constr_sparse_mat() {
+void test_constr_sparse_mat() {
 
   c_float *Adns; // Conversion to dense matrix
 
@@ -36,13 +36,11 @@ static const char* test_constr_sparse_mat() {
   OSQPVectorf_free(v1);
   OSQPVectorf_free(v2);
   clean_problem_lin_alg_sols_data(data);
-
-  return 0;
 }
 
 #endif /* ifndef CUDA_SUPPORT */
 
-static const char* test_vec_operations() {
+void test_vec_operations() {
 
   c_float  scresult, scref;
   OSQPVectorf *v1, *v2, *ref, *result;
@@ -123,11 +121,9 @@ static const char* test_vec_operations() {
   OSQPVectorf_free(ref);
   OSQPVectorf_free(result);
   clean_problem_lin_alg_sols_data(data);
-
-  return 0;
 }
 
-static const char* test_mat_operations() {
+void test_mat_operations() {
 
   OSQPMatrix *A, *Ad, *dA; // Matrices used for tests
   OSQPMatrix *refM;
@@ -190,11 +186,9 @@ static const char* test_mat_operations() {
   OSQPMatrix_free(Ad);
   OSQPMatrix_free(dA);
   clean_problem_lin_alg_sols_data(data);
-
-  return 0;
 }
 
-static const char* test_mat_vec_multiplication() {
+void test_mat_vec_multiplication() {
 
   OSQPVectorf *x, *y;
   OSQPVectorf *ref, *result;
@@ -278,11 +272,9 @@ static const char* test_mat_vec_multiplication() {
   OSQPMatrix_free(Pu);
 
   clean_problem_lin_alg_sols_data(data);
-
-  return 0;
 }
 
-static const char* test_quad_form_upper_triang() {
+void test_quad_form_upper_triang() {
 
   c_float val;
   lin_alg_sols_data *data = generate_problem_lin_alg_sols_data();
@@ -300,26 +292,4 @@ static const char* test_quad_form_upper_triang() {
   OSQPMatrix_free(P);
   OSQPVectorf_free(x);
   clean_problem_lin_alg_sols_data(data);
-
-  return 0;
-}
-
-static const char* test_lin_alg()
-{
-  // initialize algebra libraries
-  osqp_algebra_init_libs();
-
-#ifndef CUDA_SUPPORT
-  mu_run_test(test_constr_sparse_mat);
-#endif
-
-  mu_run_test(test_vec_operations);
-  mu_run_test(test_mat_operations);
-  mu_run_test(test_mat_vec_multiplication);
-  mu_run_test(test_quad_form_upper_triang);
-
-  // free algebra libraries
-  osqp_algebra_free_libs();
-
-  return 0;
 }

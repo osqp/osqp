@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include "osqp.h"
 #include "util.h"
-#include "minunit.h"
+#include "osqp_tester.h"
 #include "lin_sys.h"
 
 
 #include "solve_linsys/data.h"
 
 
-static const char* test_solveKKT() {
+void test_solveKKT() {
 
   c_int m, n, exitflag = 0;
   c_float pri_res, dua_res;
@@ -59,12 +59,10 @@ static const char* test_solveKKT() {
   OSQPMatrix_free(Pu);
   OSQPMatrix_free(A);
   clean_problem_solve_linsys_sols_data(data);
-
-  return 0;
 }
 
 #ifdef ENABLE_MKL_PARDISO
-static char* test_solveKKT_pardiso() {
+void test_solveKKT_pardiso() {
 
   c_int m, n, exitflag = 0;
   OSQPVectorf *rho_vec, *rhs, *ref;
@@ -118,23 +116,5 @@ static char* test_solveKKT_pardiso() {
 
   // Unload Pardiso shared library
   exitflag = unload_linsys_solver(MKL_PARDISO_SOLVER);
-
-  return 0;
 }
 #endif
-
-static const char* test_solve_linsys()
-{
-  // initialize algebra libraries
-  osqp_algebra_init_libs();
-
-  mu_run_test(test_solveKKT);
-#ifdef ENABLE_MKL_PARDISO
-  mu_run_test(test_solveKKT_pardiso);
-#endif
-
-  // free algebra libraries
-  osqp_algebra_free_libs();
-
-  return 0;
-}

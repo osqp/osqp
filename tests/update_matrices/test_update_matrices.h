@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "osqp.h"
 #include "util.h"
-#include "minunit.h"
+#include "osqp_tester.h"
 #include "lin_sys.h"
 
 #include "update_matrices/data.h"
@@ -10,7 +10,7 @@
 
 #include "kkt.h"
 
-static const char* test_form_KKT() {
+void test_form_KKT() {
 
   update_matrices_sols_data *data;
   c_float sigma, *rho_inv_vec_val;
@@ -89,13 +89,12 @@ static const char* test_form_KKT() {
   OSQPVectorf_free(rho_inv_vec);
   c_free(AtoKKT);
   c_free(PtoKKT);
-  return 0;
 }
 
 #endif /* ifndef CUDA_SUPPORT */
 
 
-static const char* test_update() {
+void test_update() {
   c_int i, nnzP, nnzA;
   update_matrices_sols_data *data;
   OSQPTestData *problem;
@@ -305,7 +304,7 @@ static const char* test_update() {
   mu_assert(
     "Update matrices: problem with updating P and A, error in dual solution!",
     vec_norm_inf_diff(solver->solution->y, data->test_solve_P_A_new_y,
-                      data->m) < TESTS_TOL * TESTS_TOL);
+                      data->m) < TESTS_TOL);
 
   // Cleanup and setup solver
   osqp_cleanup(solver);
@@ -336,7 +335,7 @@ static const char* test_update() {
   mu_assert(
     "Update matrices: problem with updating P and A (all indices), error in dual solution!",
     vec_norm_inf_diff(solver->solution->y, data->test_solve_P_A_new_y,
-                      data->m) < TESTS_TOL * TESTS_TOL);
+                      data->m) < TESTS_TOL);
 
 
   // Cleanup problems
@@ -346,12 +345,10 @@ static const char* test_update() {
   c_free(settings);
   c_free(Ax_new_idx);
   c_free(Px_new_idx);
-
-  return 0;
 }
 
 #ifdef ENABLE_MKL_PARDISO
-static char* test_update_pardiso() {
+void test_update_pardiso() {
   c_int i, nnzP, nnzA, exitflag;
   update_matrices_sols_data *data;
   OSQPTestData *problem;
@@ -368,7 +365,7 @@ static char* test_update_pardiso() {
   data = generate_problem_update_matrices_sols_data();
 
   // Generate first problem data
-  problem    = c_malloc(sizeof(OSQPTestData));
+  problem    = (OSQPTestData*)c_malloc(sizeof(OSQPTestData));
   problem->P = data->test_solve_Pu;
   problem->q = data->test_solve_q;
   problem->A = data->test_solve_A;
@@ -415,7 +412,7 @@ static char* test_update_pardiso() {
 
   // Update P
   nnzP       = data->test_solve_Pu->p[data->test_solve_Pu->n];
-  Px_new_idx = c_malloc(nnzP * sizeof(c_int)); // Generate indices going from
+  Px_new_idx = (c_int*)c_malloc(nnzP * sizeof(c_int)); // Generate indices going from
                                                // beginning to end of P
 
   for (i = 0; i < nnzP; i++) {
@@ -444,7 +441,7 @@ static char* test_update_pardiso() {
 
   // Update A
   nnzA       = data->test_solve_A->p[data->test_solve_A->n];
-  Ax_new_idx = c_malloc(nnzA * sizeof(c_int)); // Generate indices going from
+  Ax_new_idx = (c_int*)c_malloc(nnzA * sizeof(c_int)); // Generate indices going from
                                                // beginning to end of P
 
   for (i = 0; i < nnzA; i++) {
@@ -504,7 +501,7 @@ static char* test_update_pardiso() {
   mu_assert(
     "Update matrices: problem with P and A updated, error in dual solution!",
     vec_norm_inf_diff(solver->solution->y, data->test_solve_P_A_new_y,
-                      data->m) < TESTS_TOL * TESTS_TOL);
+                      data->m) < TESTS_TOL);
 
 
   // Cleanup problems
@@ -514,22 +511,5 @@ static char* test_update_pardiso() {
   c_free(settings);
   c_free(Ax_new_idx);
   c_free(Px_new_idx);
-
-  return 0;
 }
 #endif
-
-static const char* test_update_matrices()
-{
-#ifndef CUDA_SUPPORT
-  mu_run_test(test_form_KKT);
-#endif
-
-  mu_run_test(test_update);
-
-#ifdef ENABLE_MKL_PARDISO
-  mu_run_test(test_update_pardiso);
-#endif
-
-  return 0;
-}
