@@ -269,6 +269,11 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
     s->etree = (QDLDL_int *)c_malloc(n_plus_m * sizeof(QDLDL_int));
     s->Lnz   = (QDLDL_int *)c_malloc(n_plus_m * sizeof(QDLDL_int));
 
+    // Lx and Li are sparsity dependent, so set them to
+    // null initially so we don't try to free them prematurely
+    s->L->i = OSQP_NULL;
+    s->L->x = OSQP_NULL;
+	
     // Preallocate workspace
     s->iwork = (QDLDL_int *)c_malloc(sizeof(QDLDL_int)*(3*n_plus_m));
     s->bwork = (QDLDL_bool *)c_malloc(sizeof(QDLDL_bool)*n_plus_m);
