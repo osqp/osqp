@@ -1,7 +1,7 @@
 #include "osqp.h"    /* OSQP Public API */
-#include "minunit.h" /* Basic testing script header */
+#include "osqp_tester.h" /* Basic testing script header */
 
-static const char* test_demo_solve()
+void test_demo_solve()
 {
   /* Load problem data */
   c_float P_x[3] = { 4.0, 1.0, 2.0, };
@@ -24,8 +24,8 @@ static const char* test_demo_solve()
   /* Workspace, settings, matrices */
   OSQPSolver   *solver;
   OSQPSettings *settings;
-  csc *P = malloc(sizeof(csc));
-  csc *A = malloc(sizeof(csc));
+  csc *P = (csc*)malloc(sizeof(csc));
+  csc *A = (csc*)malloc(sizeof(csc));
 
   /* Populate matrices */
   csc_set_data(P, n, n, P_nnz, P_x, P_i, P_p);
@@ -53,14 +53,4 @@ static const char* test_demo_solve()
   free(A);
   free(P);
   free(settings);
-
-  return 0;
-}
-
-
-static const char* test_demo()
-{
-  mu_run_test(test_demo_solve);
-
-  return 0;
 }

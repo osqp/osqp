@@ -15,7 +15,7 @@ p = 0.7
 
 test_form_KKT_A = sparse.random(test_form_KKT_m, test_form_KKT_n, density=p, format='csc', random_state=rg)
 test_form_KKT_P = sparse.random(n, n, density=p, random_state=rg)
-test_form_KKT_P = test_form_KKT_P.dot(test_form_KKT_P.T).tocsc() + sparse.eye(n, format='csc')
+test_form_KKT_P = (test_form_KKT_P @ test_form_KKT_P.T).tocsc() + sparse.eye(n, format='csc')
 test_form_KKT_Pu = sparse.triu(test_form_KKT_P, format='csc')
 test_form_KKT_rho = 1.6
 test_form_KKT_sigma = 0.1

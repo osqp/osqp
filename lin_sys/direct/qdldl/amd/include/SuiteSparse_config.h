@@ -148,6 +148,9 @@ int SuiteSparse_divcomplex
 /* OSQP: disabling this timing code */
 #define NTIMER
 
+/* OSQP: disabling Suitesparse printing */
+#define NPRINT
+
 /* determine which timer to use, if any */
 #ifndef NTIMER
 #ifdef _POSIX_C_SOURCE

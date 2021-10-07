@@ -33,7 +33,7 @@ extern "C" {
 /*************************
 * Linear System Solvers *
 *************************/
-enum linsys_solver_type { QDLDL_SOLVER, MKL_PARDISO_SOLVER, CUDA_PCG_SOLVER };
+enum linsys_solver_type { QDLDL_SOLVER, MKL_PARDISO_SOLVER, CUDA_PCG_SOLVER, UNKNOWN_SOLVER=99 };
 extern const char * LINSYS_SOLVER_NAME[];
 
 
@@ -117,7 +117,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 // Multiplying two floats that are in the order of 1e20 results in an overflow
 #  define OSQP_INFTY ((c_float)1e17)
 #else
-#  define OSQP_INFTY ((c_float)1e20)        // infinity
+#  define OSQP_INFTY ((c_float)1e30)        // infinity
 #endif
 # endif /* ifndef OSQP_INFTY */
 
