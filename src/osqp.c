@@ -483,9 +483,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
           work->settings->check_termination);
       } // If time condition is met
     }   // If adaptive rho enabled and interval set to auto
-# endif // PROFILING
-
-# if EMBEDDED == 2
+# else // PROFILING
     if (work->settings->adaptive_rho && !work->settings->adaptive_rho_interval) {
       // Set adaptive_rho_interval to constant value
       if (work->settings->check_termination) {
@@ -498,7 +496,7 @@ c_int osqp_solve(OSQPWorkspace *work) {
         work->settings->adaptive_rho_interval = ADAPTIVE_RHO_FIXED;
       }
     }
-# endif /* if EMBEDDED == 2 */
+# endif /* ifdef PROFILING */
 
     // Adapt rho
     if (work->settings->adaptive_rho &&
