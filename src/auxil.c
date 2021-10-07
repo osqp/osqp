@@ -33,7 +33,7 @@ c_float compute_rho_estimate(OSQPSolver *solver) {
   pri_res_norm  = OSQPVectorf_norm_inf(work->z);           // ||z||
   temp_res_norm = OSQPVectorf_norm_inf(work->Ax);          // ||Ax||
   pri_res_norm  = c_max(pri_res_norm, temp_res_norm); // max (||z||,||Ax||)
-  pri_res      /= (pri_res_norm + 1e-10);             // Normalize primal
+  pri_res      /= (pri_res_norm + OSQP_DIVISION_TOL); // Normalize primal
                                                       // residual (prevent 0
                                                       // division)
 
@@ -44,17 +44,14 @@ c_float compute_rho_estimate(OSQPSolver *solver) {
   temp_res_norm = OSQPVectorf_norm_inf(work->Px);          //  ||P x||
   dua_res_norm  = c_max(dua_res_norm, temp_res_norm); // max(||q||,||A' y||,||P
                                                       // x||)
-  dua_res      /= (dua_res_norm + 1e-10);             // Normalize dual residual
+  dua_res      /= (dua_res_norm + OSQP_DIVISION_TOL); // Normalize dual residual                                         
                                                       // (prevent 0 division)
 
-
+                                           
   // Return rho estimate
-  rho_estimate = settings->rho * c_sqrt(pri_res / (dua_res + 1e-10)); // (prevent
-                                                                            // 0
-                                                                            // division)
-  rho_estimate = c_min(c_max(rho_estimate, RHO_MIN), RHO_MAX);              // Constrain
-                                                                            // rho
-                                                                            // values
+  rho_estimate = settings->rho * c_sqrt(pri_res / dua_res);
+  rho_estimate = c_min(c_max(rho_estimate, RHO_MIN), RHO_MAX);     // Constrain
+                                                                   // rho values
   return rho_estimate;
 }
 
@@ -405,7 +402,7 @@ c_int is_primal_infeasible(OSQPSolver *solver, c_float eps_prim_inf) {
   //
   // 1) A' * delta_y < eps * ||delta_y||
   //
-  // 2) u'*max(delta_y, 0) + l'*min(delta_y, 0) < -eps * ||delta_y||
+  // 2) u'*max(delta_y, 0) + l'*min(delta_y, 0) < eps * ||delta_y||
   //
 
   c_float norm_delta_y;
@@ -431,13 +428,13 @@ c_int is_primal_infeasible(OSQPSolver *solver, c_float eps_prim_inf) {
     norm_delta_y = OSQPVectorf_norm_inf(work->delta_y);
   }
 
-  if (norm_delta_y > eps_prim_inf) { // ||delta_y|| > 0
+  if (norm_delta_y > OSQP_DIVISION_TOL) {
 
     ineq_lhs  = OSQPVectorf_dot_prod_signed(work->data->u, work->delta_y,+1);
     ineq_lhs += OSQPVectorf_dot_prod_signed(work->data->l, work->delta_y,-1);
 
-    // Check if the condition is satisfied: ineq_lhs < -eps
-    if (ineq_lhs < -eps_prim_inf * norm_delta_y) {
+    // Check if the condition is satisfied: ineq_lhs < eps
+    if (ineq_lhs < eps_prim_inf * norm_delta_y) {
       // Compute and return ||A'delta_y|| < eps_prim_inf
       OSQPMatrix_Atxpy(work->data->A, work->delta_y, work->Atdelta_y,1.0,0.0);
 
@@ -460,7 +457,7 @@ c_int is_dual_infeasible(OSQPSolver *solver, c_float eps_dual_inf) {
   // This function checks for the scaled dual infeasibility termination
   // criteria.
   //
-  // 1) q * delta_x < - eps * || delta_x ||
+  // 1) q * delta_x < eps * || delta_x ||
   //
   // 2) ||P * delta_x || < eps * || delta_x ||
   //
@@ -487,14 +484,14 @@ c_int is_dual_infeasible(OSQPSolver *solver, c_float eps_dual_inf) {
   }
 
   // Prevent 0 division || delta_x || > 0
-  if (norm_delta_x > eps_dual_inf) {
+  if (norm_delta_x > OSQP_DIVISION_TOL) {
     // Normalize delta_x by its norm
 
     /* vec_mult_scalar(work->delta_x, 1./norm_delta_x, work->data->n); */
 
     // Check first if q'*delta_x < 0
     if (OSQPVectorf_dot_prod(work->data->q, work->delta_x) <
-        -cost_scaling * eps_dual_inf * norm_delta_x) {
+        cost_scaling * eps_dual_inf * norm_delta_x) {
       // Compute product P * delta_x
       OSQPMatrix_Axpy(work->data->P, work->delta_x, work->Pdelta_x, 1.0, 0.0);
 
@@ -890,20 +887,6 @@ c_int validate_data(const csc* P,
   if (!q) {
 # ifdef PRINTING
     c_eprint("Missing linear cost vector q");
-# endif
-    return 1;
-  }
-
-  if (!l) {
-# ifdef PRINTING
-    c_eprint("Missing lower bound vector l");
-# endif
-    return 1;
-  }
-
-  if (!u) {
-# ifdef PRINTING
-    c_eprint("Missing upper bound vector u");
 # endif
     return 1;
   }

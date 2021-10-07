@@ -718,7 +718,7 @@ c_int osqp_cleanup(OSQPSolver *solver) {
       c_free(work->data);
     }
 
-    // Free scaling
+    // Free scaling variables
     if (work->scaling){
       OSQPVectorf_free(work->scaling->D);
       OSQPVectorf_free(work->scaling->Dinv);

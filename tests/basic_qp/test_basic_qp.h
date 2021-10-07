@@ -1,11 +1,11 @@
 #include "osqp.h"    // OSQP API
 #include "util.h"    // Utilities for testing
-#include "minunit.h" // Basic testing script header
+#include "osqp_tester.h" // Basic testing script header
 
 #include "basic_qp/data.h"
 
 
-static const char* test_basic_qp_solve()
+void test_basic_qp_solve()
 {
   c_int exitflag, tmp_int;
   c_float tmp_float;
@@ -164,7 +164,7 @@ static const char* test_basic_qp_solve()
   settings->adaptive_rho_fraction = tmp_float;
 #endif
 
-  // Setup solver with wrong settings->adaptive_rho_fraction
+  // Setup solver with wrong settings->adaptive_rho_tolerance
   tmp_float = settings->adaptive_rho_tolerance;
   settings->adaptive_rho_tolerance = 0.5;
   exitflag = osqp_setup(&solver, data->P, data->q,
@@ -275,14 +275,14 @@ static const char* test_basic_qp_solve()
   settings->alpha = tmp_float;
 
   // Setup solver with wrong settings->linsys_solver
-  tmp_int = settings->linsys_solver;
-  settings->linsys_solver = 5;
+  enum linsys_solver_type tmp_solver_type= settings->linsys_solver;
+  settings->linsys_solver = UNKNOWN_SOLVER;
   exitflag = osqp_setup(&solver, data->P, data->q,
                         data->A, data->l, data->u,
                         data->m, data->n, settings);
   mu_assert("Basic QP test solve: Setup should result in error due to wrong settings->linsys_solver",
             exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
-  settings->linsys_solver = tmp_int;
+  settings->linsys_solver = tmp_solver_type;
 
   // Setup solver with wrong settings->verbose
   tmp_int = settings->verbose;
@@ -447,12 +447,10 @@ static const char* test_basic_qp_solve()
   c_free(P_tmp->i);
   c_free(P_tmp->p);
   c_free(P_tmp);
-
-  return 0;
 }
 
 #ifdef ENABLE_MKL_PARDISO
-static char* test_basic_qp_solve_pardiso()
+void test_basic_qp_solve_pardiso()
 {
   c_int exitflag;
 
@@ -520,12 +518,10 @@ static char* test_basic_qp_solve_pardiso()
 
   // Cleanup
   c_free(settings);
-
-  return 0;
 }
 #endif
 
-static const char* test_basic_qp_update()
+void test_basic_qp_update()
 {
   c_int exitflag;
   OSQPVectorf *q_new, *l_new, *u_new;
@@ -640,11 +636,9 @@ static const char* test_basic_qp_update()
 
   // Cleanup
   c_free(settings);
-
-  return 0;
 }
 
-static const char* test_basic_qp_check_termination()
+void test_basic_qp_check_termination()
 {
   c_int exitflag;
 
@@ -717,11 +711,9 @@ static const char* test_basic_qp_check_termination()
 
   // Cleanup
   c_free(settings);
-
-  return 0;
 }
 
-static const char* test_basic_qp_update_rho()
+void test_basic_qp_update_rho()
 {
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
@@ -849,12 +841,10 @@ static const char* test_basic_qp_update_rho()
 
   // Cleanup
   c_free(settings);
-
-  return 0;
 }
 
 #ifdef PROFILING
-static const char* test_basic_qp_time_limit()
+void test_basic_qp_time_limit()
 {
   c_int exitflag;
 
@@ -925,13 +915,11 @@ static const char* test_basic_qp_time_limit()
 
   // Cleanup
   c_free(settings);
-
-  return 0;
 }
 #endif // PROFILING
 
 
-static const char* test_basic_qp_warm_start()
+void test_basic_qp_warm_start()
 {
   c_int exitflag, iter;
 
@@ -993,24 +981,4 @@ static const char* test_basic_qp_warm_start()
 
   // Cleanup
   c_free(settings);
-
-  return 0;
-}
-
-
-static const char* test_basic_qp()
-{
-  mu_run_test(test_basic_qp_solve);
-#ifdef ENABLE_MKL_PARDISO
-  mu_run_test(test_basic_qp_solve_pardiso);
-#endif
-  mu_run_test(test_basic_qp_update);
-  mu_run_test(test_basic_qp_check_termination);
-  mu_run_test(test_basic_qp_update_rho);
-#ifdef PROFILING
-  mu_run_test(test_basic_qp_time_limit);
-#endif
-  mu_run_test(test_basic_qp_warm_start);
-
-  return 0;
 }

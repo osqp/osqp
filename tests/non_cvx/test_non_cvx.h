@@ -1,11 +1,11 @@
 #include "osqp.h"    // OSQP API
-#include "minunit.h" // Basic testing script header
+#include "osqp_tester.h" // Basic testing script header
 
 
 #include "non_cvx/data.h"
 
 
-static const char* test_non_cvx_solve()
+void test_non_cvx_solve()
 {
   c_int exitflag;
 
@@ -71,13 +71,4 @@ static const char* test_non_cvx_solve()
   c_free(settings);
   clean_problem_non_cvx(data);
   clean_problem_non_cvx_sols_data(sols_data);
-
-  return 0;
-}
-
-static const char* test_non_cvx()
-{
-  mu_run_test(test_non_cvx_solve);
-
-  return 0;
 }

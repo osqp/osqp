@@ -134,7 +134,7 @@ struct OSQPWorkspace_ {
    */
   OSQPVectorf *Ax;  ///< scaled A * x
   OSQPVectorf *Px;  ///< scaled P * x
-  OSQPVectorf *Aty; ///< scaled A * x
+  OSQPVectorf *Aty; ///< scaled A' * y
 
   /** @} */
 
