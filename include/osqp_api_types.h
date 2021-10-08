@@ -3,7 +3,7 @@
 
 # ifdef __cplusplus
 extern "C" {
-# endif // ifdef __cplusplus
+# endif /* ifdef __cplusplus */
 
 # include "osqp_configure.h"
 # include "osqp_api_constants.h"
@@ -31,72 +31,67 @@ typedef float c_float;  /* for numerical values  */
  * User settings
  */
 typedef struct {
-  c_float rho;              ///< ADMM step rho
-  c_int   rho_is_vec;       ///< boolean; defines whether rho is scalar or vector
-  c_float sigma;            ///< ADMM step sigma
-  c_int   scaling;          ///< heuristic data scaling iterations; if 0, then disabled.
-  c_int   max_iter;         ///< maximum number of iterations
-  c_float eps_abs;          ///< absolute convergence tolerance
-  c_float eps_rel;          ///< relative convergence tolerance
-  c_float eps_prim_inf;     ///< primal infeasibility tolerance
-  c_float eps_dual_inf;     ///< dual infeasibility tolerance
-  c_float  alpha;           ///< relaxation parameter
-  c_int scaled_termination; ///< boolean, use scaled termination criteria
-  c_int check_termination;  ///< integer, check termination interval; if 0, checking is disabled
-  c_int warm_start;         ///< boolean, warm start
+  // TODO: Add device ID
   enum linsys_solver_type linsys_solver; ///< linear system solver to use
+  c_int verbose;                         ///< boolean; write out progress
+  c_int warm_start;                      ///< boolean; warm start
+  c_int scaling;                         ///< data scaling iterations; if 0, then disabled
+  c_int polishing;                       ///< boolean; polish ADMM solution
 
-# if EMBEDDED != 1
+  // algorithm parameters
+  c_float rho;                    ///< ADMM penalty parameter
+  c_int   rho_is_vec;             ///< boolean; is rho scalar or vector?
+  c_float sigma;                  ///< ADMM penalty parameter
+  c_float alpha;                  ///< ADMM relaxation parameter
+
+  // TODO: Add CG settings
+
+  // adaptive rho logic
   c_int   adaptive_rho;           ///< boolean, is rho step size adaptive?
-  c_int   adaptive_rho_interval;  ///< number of iterations between rho adaptations; if 0, then it is automatic
-  c_float adaptive_rho_tolerance; ///< tolerance X for adapting rho. The new rho has to be X times larger or 1/X
-                                  ///  times smaller than the current one to trigger a new factorization.
-#  ifdef PROFILING
-  c_float adaptive_rho_fraction;  ///< interval for adapting rho (fraction of the setup time)
-#  endif // Profiling
-# endif // EMBEDDED != 1
+  c_int   adaptive_rho_interval;  ///< number of iterations between rho adaptations; if 0, then it is timing-based
+  c_float adaptive_rho_fraction;  ///< time interval for adapting rho (fraction of the setup time)
+  c_float adaptive_rho_tolerance; ///< tolerance X for adapting rho; new rho must be X times larger or smaller than the current one to change it
 
-# ifndef EMBEDDED
-  c_float delta;                         ///< regularization parameter for polishing
-  c_int   polish;                        ///< boolean, polish ADMM solution
-  c_int   polish_refine_iter;            ///< number of iterative refinement steps in polishing
-  c_int verbose;                         ///< boolean, write out progress
-# endif // ifndef EMBEDDED
+  // termination parameters
+  c_int   max_iter;               ///< maximum number of iterations
+  c_float eps_abs;                ///< absolute solution tolerance
+  c_float eps_rel;                ///< relative solution tolerance
+  c_float eps_prim_inf;           ///< primal infeasibility tolerance
+  c_float eps_dual_inf;           ///< dual infeasibility tolerance
+  c_int   scaled_termination;     ///< boolean; use scaled termination criteria
+  c_int   check_termination;      ///< integer, check termination interval; if 0, checking is disabled
+  c_float time_limit;             ///< maximum time to solve the problem (seconds)
 
-# ifdef PROFILING
-  c_float time_limit;                    ///< maximum seconds allowed to solve the problem; if 0, then disabled
-# endif // ifdef PROFILING
+  // polishing parameters
+  c_float delta;                  ///< regularization parameter for polishing
+  c_int   polish_refine_iter;     ///< number of iterative refinement steps in polishing
 } OSQPSettings;
 
 /**
  * Solver return information
  */
 typedef struct {
-  c_int iter;          ///< number of iterations taken
-  char  status[32];    ///< status string, e.g. 'solved'
-  c_int status_val;    ///< status as c_int, defined in osqp_api_constants.h
+  // solver status
+  char  status[32];     ///< status string, e.g. 'solved'
+  c_int status_val;     ///< status as c_int, defined in osqp_api_constants.h
+  c_int status_polish;  ///< polishing status: successful (1), unperformed (0), unsuccessful (-1)
 
-# if EMBEDDED != 1
+  // solution quality
+  c_float obj_val;      ///< primal objective
+  c_float pri_res;      ///< norm of primal residual
+  c_float dua_res;      ///< norm of dual residual
+
+  // algorithm information
+  c_int   iter;         ///< number of iterations taken
   c_int   rho_updates;  ///< number of rho updates
   c_float rho_estimate; ///< best rho estimate so far from residuals
-# endif // if EMBEDDED != 1
 
-# ifndef EMBEDDED
-  c_int status_polish; ///< polish status: successful (1), unperformed (0), (-1) unsuccessful
-# endif // ifndef EMBEDDED
-
-  c_float obj_val;     ///< primal objective
-  c_float pri_res;     ///< norm of primal residual
-  c_float dua_res;     ///< norm of dual residual
-
-# ifdef PROFILING
-  c_float setup_time;  ///< time taken for setup phase (seconds)
-  c_float solve_time;  ///< time taken for solve phase (seconds)
-  c_float update_time; ///< time taken for update phase (seconds)
-  c_float polish_time; ///< time taken for polish phase (seconds)
+  // timing information
+  c_float setup_time;  ///< setup  phase time (seconds)
+  c_float solve_time;  ///< solve  phase time (seconds)
+  c_float update_time; ///< update phase time (seconds)
+  c_float polish_time; ///< polish phase time (seconds)
   c_float run_time;    ///< total time  (seconds)
-# endif // ifdef PROFILING
-
 } OSQPInfo;
 
 

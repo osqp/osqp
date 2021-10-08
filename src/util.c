@@ -108,11 +108,13 @@ void print_setup_header(const OSQPSolver *solver) {
   if (settings->check_termination) {
     c_print("          check_termination: on (interval %i),\n",
       (int)settings->check_termination);
-  } else {c_print("          check_termination: off,\n");}
-# ifdef PROFILING
-  if (settings->time_limit) {
-    c_print("          time_limit: %.2e sec,\n", settings->time_limit);
   }
+  else
+    c_print("          check_termination: off,\n");
+  
+# ifdef PROFILING
+  if (settings->time_limit)
+    c_print("          time_limit: %.2e sec,\n", settings->time_limit);
 # endif /* ifdef PROFILING */
 
   if (settings->scaling) {
@@ -133,19 +135,11 @@ void print_setup_header(const OSQPSolver *solver) {
     c_print("          warm start: off, ");
   }
 
-  if (settings->polish) {
-    c_print("polish: on, ");
+  if (settings->polishing) {
+    c_print("polishing: on, ");
   } else {
-    c_print("polish: off, ");
+    c_print("polishing: off, ");
   }
-
-# ifdef PROFILING
-  if (settings->time_limit) {
-    c_print("time_limit: %.2e sec\n", settings->time_limit);
-  } else {
-    c_print("time_limit: off\n");
-  }
-# endif
 
   c_print("\n");
 }
@@ -208,16 +202,17 @@ void print_polish(OSQPSolver *solver) {
   c_print("\n");
 }
 
-void print_footer(OSQPInfo *info, c_int polish) {
+void print_footer(OSQPInfo *info,
+                  c_int     polishing) {
   c_print("\n"); // Add space after iterations
 
   c_print("status:               %s\n", info->status);
 
-  if (polish && (info->status_val == OSQP_SOLVED)) {
+  if (polishing && (info->status_val == OSQP_SOLVED)) {
     if (info->status_polish == 1) {
-      c_print("solution polish:      successful\n");
+      c_print("solution polishing:   successful\n");
     } else if (info->status_polish < 0) {
-      c_print("solution polish:      unsuccessful\n");
+      c_print("solution polishing:   unsuccessful\n");
     }
   }
 
@@ -272,7 +267,7 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->alpha = settings->alpha;
   new->linsys_solver = settings->linsys_solver;
   new->delta = settings->delta;
-  new->polish = settings->polish;
+  new->polishing = settings->polishing;
   new->polish_refine_iter = settings->polish_refine_iter;
   new->verbose = settings->verbose;
   new->scaled_termination = settings->scaled_termination;

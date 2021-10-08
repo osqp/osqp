@@ -1,4 +1,4 @@
-/* Solution polish based on assuming the active set */
+/* Solution polishing based on assuming the active set */
 #ifndef POLISH_H
 #define POLISH_H
 

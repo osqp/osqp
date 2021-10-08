@@ -3,7 +3,7 @@
 
 # ifdef __cplusplus
 extern "C" {
-# endif // ifdef __cplusplus
+# endif /* ifdef __cplusplus */
 
 /* Types required by the OSQP API */
 # include "osqp_configure.h"
@@ -40,9 +40,9 @@ void osqp_get_dimensions(OSQPSolver *solver,
 
 
 /**
- * Set default settings from osqp_api_constants.h file
- * assumes settings already allocated in memory
- * @param settings settings structure
+ * Set default settings from osqp_api_constants.h file.
+ * Assumes settings already allocated in memory.
+ * @param settings OSQPSettings structure
  */
 void osqp_set_default_settings(OSQPSettings *settings);
 
@@ -52,29 +52,26 @@ void osqp_set_default_settings(OSQPSettings *settings);
 /**
  * Initialize OSQP solver allocating memory.
  *
- * All the inputs must be already allocated in memory before calling.
- *
  * It performs:
  * - data and settings validation
  * - problem data scaling
- * - automatic parameters tuning (if enabled)
  * - setup linear system solver:
  *      - direct solver: KKT matrix factorization is performed here
- *      - indirect solver: KKT matrix preconditioning is performed here
+ *      - indirect solver: reduced KKT matrix preconditioning is performed here
  *
  * NB: This is the only function that allocates dynamic memory and is not used
- *during code generation
+ * during code generation
  *
- * @param  solverp      Solver pointer
- * @param  P            Problem data (upper triangular part of quadratic cost term, csc format)
- * @param  q            Problem data (linear cost term)
- * @param  A            Problem data (constraint matrix, csc format)
- * @param  l            Problem data (constraint lower bound)
- * @param  u            Problem data (constraint upper bound)
- * @param  m            Problem data (number of constraints)
- * @param  n            Problem data (number of variables)
- * @param  settings     Solver settings
- * @return              Exitflag for errors (0 if no errors)
+ * @param  solverp   Solver pointer
+ * @param  P         Problem data (upper triangular part of quadratic cost term, csc format)
+ * @param  q         Problem data (linear cost term)
+ * @param  A         Problem data (constraint matrix, csc format)
+ * @param  l         Problem data (constraint lower bound)
+ * @param  u         Problem data (constraint upper bound)
+ * @param  m         Problem data (number of constraints)
+ * @param  n         Problem data (number of variables)
+ * @param  settings  Solver settings
+ * @return           Exitflag for errors (0 if no errors)
  */
  c_int osqp_setup(OSQPSolver         **solverp,
                   const csc           *P,
@@ -86,12 +83,12 @@ void osqp_set_default_settings(OSQPSettings *settings);
                   c_int                n,
                   const OSQPSettings  *settings);
 
-# endif // #ifndef EMBEDDED
+# endif /* #ifndef EMBEDDED */
 
 /**
  * Solve quadratic program
  *
- * The final solver information is stored in the \a solver->info  structure
+ * The final solver information is stored in the  \a solver->info  structure
  *
  * The solution is stored in the  \a solver->solution  structure
  *
@@ -118,7 +115,8 @@ c_int osqp_solve(OSQPSolver *solver);
  */
 c_int osqp_cleanup(OSQPSolver *solver);
 
-# endif // ifndef EMBEDDED
+# endif /* ifndef EMBEDDED */
+
 
 /** @} */
 
@@ -126,41 +124,13 @@ c_int osqp_cleanup(OSQPSolver *solver);
 /********************************************
 * Sublevel API                             *
 *                                          *
-* Edit data without performing setup again *
+* The functions can be called without performing setup again *
 ********************************************/
 
 /**
  * @name Sublevel API
  * @{
  */
-
-/**
- * Update linear cost in the problem
- * @param  solver  Solver
- * @param  q_new   New linear cost
- * @return         Exitflag for errors (0 if no errors)
- */
-c_int osqp_update_lin_cost(OSQPSolver    *solver,
-                           const c_float *q_new);
-
-
-/**
- * Update lower and upper bounds in the problem constraints
- * @param  solver  Solver
- * @param  l_new   New lower bound, NULL if none
- * @param  u_new   New upper bound, NULL if none
- * @return         Exitflag for errors (0 if no errors)
- */
-c_int osqp_update_bounds(OSQPSolver    *solver,
-                         const c_float *l_new,
-                         const c_float *u_new);
-
-
-/**
- * Cold start workspace variables xz and y
- * @param solver Solver
- */
-void osqp_cold_start(OSQPSolver *solver);
 
 /**
  * Warm start primal and dual variables
@@ -173,68 +143,39 @@ c_int osqp_warm_start(OSQPSolver    *solver,
                       const c_float *x,
                       const c_float *y);
 
+/**
+ * Cold start workspace variables xz and y
+ * @param solver Solver
+ */
+void osqp_cold_start(OSQPSolver *solver);
+
+/**
+ * Update problem data vectors
+ * @param  solver  Solver
+ * @param  q_new   New linear cost, NULL if none
+ * @param  l_new   New lower bound, NULL if none
+ * @param  u_new   New upper bound, NULL if none
+ * @return         Exitflag for errors (0 if no errors)
+ */
+c_int osqp_update_data_vec(OSQPSolver    *solver,
+                           const c_float *q_new,
+                           const c_float *l_new,
+                           const c_float *u_new);
 
 # if EMBEDDED != 1
 
 /**
- * Update elements of matrix P (upper triangular)
- * without changing sparsity structure.
+ * Update elements of matrices P (upper triangular) and A by preserving
+ * their sparsity structures.
  *
- *
- *  If Px_new_idx is OSQP_NULL, Px_new is assumed to be as long as P->x
- *  and the whole P->x is replaced.
- *
- * @param  solver     OSQPSolver structure
- * @param  Px_new     Vector of new elements in P->x (upper triangular)
- * @param  Px_new_idx Index mapping new elements to positions in P->x
- * @param  P_new_n    Number of new elements to be changed
- * @return            output flag:  0: OK
- *                                  1: P_new_n > nnzP
- *                                 <0: error in the update
- */
-c_int osqp_update_P(OSQPSolver    *solver,
-                    const c_float *Px_new,
-                    const c_int   *Px_new_idx,
-                    c_int          P_new_n);
-
-
-/**
- * Update elements of matrix A without changing sparsity structure.
- *
- *
- *  If Ax_new_idx is OSQP_NULL, Ax_new is assumed to be as long as A->x
- *  and the whole A->x is replaced.
- *
- * @param  solver     OSQPSolver structure
- * @param  Ax_new     Vector of new elements in A->x
- * @param  Ax_new_idx Index mapping new elements to positions in A->x
- * @param  A_new_n    Number of new elements to be changed
- * @return            output flag:  0: OK
- *                                  1: A_new_n > nnzA
- *                                 <0: error in the update
- */
-c_int osqp_update_A(OSQPSolver    *solver,
-                    const c_float *Ax_new,
-                    const c_int   *Ax_new_idx,
-                    c_int          A_new_n);
-
-
-/**
- * Update elements of matrix P (upper triangular) and elements of matrix A
- * without changing sparsity structure.
- *
- *
- *  If Px_new_idx is OSQP_NULL, Px_new is assumed to be as long as P->x
- *  and the whole P->x is replaced.
- *
- *  If Ax_new_idx is OSQP_NULL, Ax_new is assumed to be as long as A->x
- *  and the whole A->x is replaced.
+ * If Px_new_idx (Ax_new_idx) is OSQP_NULL, Px_new (Ax_new) is assumed
+ * to be as long as P->x (A->x) and the whole P->x (A->x) is replaced.
  *
  * @param  solver     Solver
- * @param  Px_new     Vector of new elements in P->x (upper triangular)
+ * @param  Px_new     Vector of new elements in P->x (upper triangular), NULL if none
  * @param  Px_new_idx Index mapping new elements to positions in P->x
  * @param  P_new_n    Number of new elements to be changed
- * @param  Ax_new     Vector of new elements in A->x
+ * @param  Ax_new     Vector of new elements in A->x, NULL if none
  * @param  Ax_new_idx Index mapping new elements to positions in A->x
  * @param  A_new_n    Number of new elements to be changed
  * @return            output flag:  0: OK
@@ -242,24 +183,16 @@ c_int osqp_update_A(OSQPSolver    *solver,
  *                                  2: A_new_n > nnzA
  *                                 <0: error in the update
  */
-c_int osqp_update_P_A(OSQPSolver    *solver,
-                      const c_float *Px_new,
-                      const c_int   *Px_new_idx,
-                      c_int          P_new_n,
-                      const c_float *Ax_new,
-                      const c_int   *Ax_new_idx,
-                      c_int          A_new_n);
+c_int osqp_update_data_mat(OSQPSolver    *solver,
+                           const c_float *Px_new,
+                           const c_int   *Px_new_idx,
+                           c_int          P_new_n,
+                           const c_float *Ax_new,
+                           const c_int   *Ax_new_idx,
+                           c_int          A_new_n);
 
-/**
- * Update rho. Limit it between RHO_MIN and RHO_MAX.
- * @param  solver       Solver
- * @param  rho_new      New rho setting
- * @return              Exitflag for errors (0 if no errors)
- */
-c_int osqp_update_rho(OSQPSolver *solver,
-                      c_float     rho_new);
 
-# endif // if EMBEDDED != 1
+# endif /* if EMBEDDED != 1 */
 
 /** @} */
 
@@ -269,167 +202,43 @@ c_int osqp_update_rho(OSQPSolver *solver,
  * @{
  */
 
-
 /**
- * Update settings (sigma and rho are ignored)
- * @param  solver    Solver
- * @param  settings  Solver settings
- * @return           Exitflag for errors (0 if no errors)
- */
-c_int osqp_update_settings(OSQPSolver         *solver,
-                           const OSQPSettings *settings);
-
-
-/**
- * Update max_iter setting
+ * Update settings. The following settings are ignored:
+ *  - scalling
+ *  - rho
+ *  - rho_is_vec
+ *  - sigma
+ *  - adaptive_rho
+ *  - adaptive_rho_interval
+ *  - adaptive_rho_fraction
+ *  - adaptive_rho_tolerance
  * @param  solver       Solver
- * @param  max_iter_new New max_iter setting
+ * @param  new_settings Solver settings
  * @return              Exitflag for errors (0 if no errors)
  */
-c_int osqp_update_max_iter(OSQPSolver *solver,
-                           c_int       max_iter_new);
+c_int osqp_update_settings(OSQPSolver         *solver,
+                           const OSQPSettings *new_settings);
 
 
-/**
- * Update absolute tolernace value
- * @param  solver      Solver
- * @param  eps_abs_new New absolute tolerance value
- * @return             Exitflag for errors (0 if no errors)
- */
-c_int osqp_update_eps_abs(OSQPSolver *solver,
-                          c_float     eps_abs_new);
-
+# if EMBEDDED != 1
 
 /**
- * Update relative tolernace value
- * @param  solver      Solver
- * @param  eps_rel_new New relative tolerance value
- * @return             Exitflag for errors (0 if no errors)
+ * Update the ADMM parameter rho. Limit it between RHO_MIN and RHO_MAX.
+ * @param  solver  Solver
+ * @param  rho_new New rho setting
+ * @return         Exitflag for errors (0 if no errors)
  */
-c_int osqp_update_eps_rel(OSQPSolver *solver,
-                          c_float     eps_rel_new);
+c_int osqp_update_rho(OSQPSolver *solver,
+                      c_float     rho_new);
 
+# endif /* if EMBEDDED != 1 */
 
-/**
- * Update primal infeasibility tolerance
- * @param  solver            Solver
- * @param  eps_prim_inf_new  New primal infeasibility tolerance
- * @return                   Exitflag for errors (0 if no errors)
- */
-c_int osqp_update_eps_prim_inf(OSQPSolver *solver,
-                               c_float     eps_prim_inf_new);
-
-
-/**
- * Update dual infeasibility tolerance
- * @param  solver            Solver
- * @param  eps_dual_inf_new  New dual infeasibility tolerance
- * @return                   Exitflag for errors (0 if no errors)
- */
-c_int osqp_update_eps_dual_inf(OSQPSolver *solver,
-                               c_float     eps_dual_inf_new);
-
-
-/**
- * Update relaxation parameter alpha
- * @param  solver      Solver
- * @param  alpha_new   New relaxation parameter value
- * @return             Exitflag for errors (0 if no errors)
- */
-c_int osqp_update_alpha(OSQPSolver *solver,
-                        c_float     alpha_new);
-
-
-/**
- * Update warm_start setting
- * @param  solver         Solver
- * @param  warm_start_new New warm_start setting
- * @return                Exitflag for errors (0 if no errors)
- */
-c_int osqp_update_warm_start(OSQPSolver *solver,
-                             c_int       warm_start_new);
-
-
-/**
- * Update scaled_termination setting
- * @param  solver                  Solver
- * @param  scaled_termination_new  New scaled_termination setting
- * @return                         Exitflag for errors (0 if no errors)
- */
-c_int osqp_update_scaled_termination(OSQPSolver *solver,
-                                     c_int       scaled_termination_new);
-
-/**
- * Update check_termination setting
- * @param  solver                 Solver
- * @param  check_termination_new  New check_termination setting
- * @return                        Exitflag for errors (0 if no errors)
- */
-c_int osqp_update_check_termination(OSQPSolver *solver,
-                                    c_int       check_termination_new);
-
-
-# ifndef EMBEDDED
-
-/**
- * Update regularization parameter in polish
- * @param  solver    Solver
- * @param  delta_new New regularization parameter
- * @return           Exitflag for errors (0 if no errors)
- */
-c_int osqp_update_delta(OSQPSolver *solver,
-                        c_float     delta_new);
-
-
-/**
- * Update polish setting
- * @param  solver     OSQPSolver
- * @param  polish_new New polish setting
- * @return            Exitflag for errors (0 if no errors)
- */
-c_int osqp_update_polish(OSQPSolver *solver,
-                         c_int       polish_new);
-
-
-/**
- * Update number of iterative refinement steps in polish
- * @param  solver                 Solver
- * @param  polish_refine_iter_new New iterative reginement steps
- * @return                        Exitflag for errors (0 if no errors)
- */
-c_int osqp_update_polish_refine_iter(OSQPSolver *solver,
-                                     c_int       polish_refine_iter_new);
-
-
-/**
- * Update verbose setting
- * @param  solver      Solver
- * @param  verbose_new New verbose setting
- * @return             Exitflag for errors (0 if no errors)
- */
-c_int osqp_update_verbose(OSQPSolver *solver,
-                          c_int       verbose_new);
-
-
-# endif // #ifndef EMBEDDED
-
-# ifdef PROFILING
-
-/**
- * Update time_limit setting
- * @param  solver          Solver
- * @param  time_limit_new  New time_limit setting
- * @return                 Exitflag for errors (0 if no errors)
- */
-c_int osqp_update_time_limit(OSQPSolver *solver,
-                             c_float     time_limit_new);
-# endif // ifdef PROFILING
 
 /** @} */
 
 
 # ifdef __cplusplus
 }
-# endif // ifdef __cplusplus
+# endif /* ifdef __cplusplus */
 
-#endif // ifndef OSQP_API_FUNCTIONS_H
+#endif /* ifndef OSQP_API_FUNCTIONS_H */

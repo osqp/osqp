@@ -65,7 +65,7 @@ typedef struct cudapcg_solver_ {
   c_int m;                  ///<  number of rows in A
 
   /* States */
-  c_int polish;
+  c_int polishing;
   c_int zero_pcg_iters;     ///<  state that counts zero PCG iterations
 
   /* Settings */
@@ -140,7 +140,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
                                  OSQPSettings       *settings,
                                  c_float            *scaled_pri_res,
                                  c_float            *scaled_dua_res,
-                                 c_int               polish);
+                                 c_int               polishing);
 
 
 c_int solve_linsys_cudapcg(cudapcg_solver *s,

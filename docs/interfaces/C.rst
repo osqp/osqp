@@ -4,8 +4,6 @@ C
 =====
 
 
-
-
 .. _C_main_API:
 
 Main solver API
@@ -34,25 +32,19 @@ OSQP automatically warm starts primal and dual variables from the previous QP so
 .. doxygenfunction:: osqp_warm_start
 
 
-.. _c_cpp_update_data :
+.. _C_update_data :
 
 Update problem data
 ^^^^^^^^^^^^^^^^^^^
 Problem data can be updated without executing the setup again using the following functions.
 
-.. doxygenfunction:: osqp_update_lin_cost
+.. doxygenfunction:: osqp_update_data_vec
 
-.. doxygenfunction:: osqp_update_bounds
-
-.. doxygenfunction:: osqp_update_P
-
-.. doxygenfunction:: osqp_update_A
-
-.. doxygenfunction:: osqp_update_P_A
+.. doxygenfunction:: osqp_update_data_mat
 
 
 
-.. _c_cpp_data_types :
+.. _C_data_types :
 
 Data types
 ----------

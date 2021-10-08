@@ -85,7 +85,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 
 # ifndef EMBEDDED
 #  define DELTA (1E-6)
-#  define POLISH (0)
+#  define POLISHING (0)
 #  define POLISH_REFINE_ITER (3)
 #  define VERBOSE (1)
 # endif // ifndef EMBEDDED
@@ -143,7 +143,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # endif // if EMBEDDED != 1
 
 # ifdef PROFILING
-#  define TIME_LIMIT (0)                        ///< Disable time limit as default
+#  define TIME_LIMIT ((c_float)1e10)                        ///< Disable time limit as default
 # endif // ifdef PROFILING
 
 /* Printing */

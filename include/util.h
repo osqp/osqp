@@ -60,11 +60,11 @@ void print_polish(OSQPSolver *solver);
 
 /**
  * Print footer when algorithm terminates
- * @param info   info structure
- * @param polish is polish enabled?
+ * @param info      info structure
+ * @param polishing is polishing enabled?
  */
 void print_footer(OSQPInfo *info,
-                  c_int     polish);
+                  c_int     polishing);
 
 
 # endif // ifdef PRINTING

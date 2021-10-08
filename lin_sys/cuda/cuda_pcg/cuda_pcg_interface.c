@@ -36,7 +36,7 @@ static c_float compute_tolerance(cudapcg_solver *s,
   /* Compute the norm of RHS of the linear system */
   s->vector_norm(s->d_rhs, s->n, &rhs_norm);
 
-  if (s->polish) return c_max(rhs_norm * CUDA_PCG_POLISH_ACCURACY, CUDA_PCG_EPS_MIN);
+  if (s->polishing) return c_max(rhs_norm * CUDA_PCG_POLISH_ACCURACY, CUDA_PCG_EPS_MIN);
 
   switch (s->eps_strategy) {
 
@@ -109,7 +109,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
                                  OSQPSettings       *settings,
                                  c_float            *scaled_pri_res,
                                  c_float            *scaled_dua_res,
-                                 c_int               polish) {
+                                 c_int               polishing) {
 
   c_int n, m;
   c_float H_MINUS_ONE = -1.0;
@@ -129,7 +129,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   s->m = m;
 
   /* PCG states */
-  s->polish = polish;
+  s->polishing = polishing;
   s->zero_pcg_iters = 0;
 
   /* Default norm and tolerance strategy */
@@ -137,7 +137,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   s->norm           = CUDA_PCG_NORM;
   s->precondition   = CUDA_PCG_PRECONDITION;
   s->warm_start_pcg = CUDA_PCG_WARM_START;
-  s->max_iter = (polish) ? CUDA_PCG_POLISH_MAX_ITER : CUDA_PCG_MAX_ITER;
+  s->max_iter = (polishing) ? CUDA_PCG_POLISH_MAX_ITER : CUDA_PCG_MAX_ITER;
 
   /* Tolerance strategy parameters */
   s->start_tol           = CUDA_PCG_START_TOL;
@@ -154,7 +154,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   s->d_P_diag_ind = P->d_P_diag_ind;
   if (rho_vec)
     s->d_rho_vec  = rho_vec->d_val;
-  if (!polish) {
+  if (!polishing) {
     s->h_sigma = &settings->sigma;
     s->h_rho   = &settings->rho;
   }
@@ -242,7 +242,7 @@ c_int solve_linsys_cudapcg(cudapcg_solver *s,
   /* Copy the first part of the solution to b->d_val */
   cuda_vec_copy_d2d(b->d_val, s->d_x, s->n);
 
-  if (!s->polish) {
+  if (!s->polishing) {
     /* Compute d_z = A * d_x */
     if (s->m) cuda_mat_Axpy(s->A, s->d_x, b->d_val + s->n, 1.0, 0.0);
   }
@@ -269,7 +269,7 @@ void warm_start_linsys_solver_cudapcg(cudapcg_solver    *s,
 void free_linsys_solver_cudapcg(cudapcg_solver *s) {
 
   if (s) {
-    if (s->polish) c_free(s->h_rho);
+    if (s->polishing) c_free(s->h_rho);
 
     /* PCG iterates */
     cuda_free((void **) &s->d_x);

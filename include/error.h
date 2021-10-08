@@ -22,12 +22,12 @@ extern "C" {
 
 /**
  * Internal function to print error description and return error code.
- * @param  Error code
- * @param  Function name
- * @return Error code
+ * @param  error_code    Error code
+ * @param  function_name Function name
+ * @return               Error code
  */
-  c_int _osqp_error(enum osqp_error_type error_code,
-		    const char * function_name);
+c_int _osqp_error(enum osqp_error_type  error_code,
+                  const char           *function_name);
 
 
 

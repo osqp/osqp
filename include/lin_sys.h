@@ -36,7 +36,7 @@ c_int unload_linsys_solver(enum linsys_solver_type linsys_solver);
  * @param   settings        Solver settings
  * @param   scaled_pri_res  Pointer to the scaled primal residual
  * @param   scaled_dua_res  Pointer to the scaled dual residual
- * @param   polish          0/1 depending whether we are allocating for polishing or not
+ * @param   polishing       0/1 depending whether we are allocating for polishing or not
  * @return                  Exitflag for error (0 if no errors)
  */
 c_int init_linsys_solver(LinSysSolver      **s,
@@ -46,7 +46,7 @@ c_int init_linsys_solver(LinSysSolver      **s,
                          OSQPSettings       *settings,
                          c_float            *scaled_pri_res,
                          c_float            *scaled_dua_res,
-                         c_int               polish);
+                         c_int               polishing);
 
 # ifdef __cplusplus
 }

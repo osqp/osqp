@@ -114,12 +114,12 @@ void store_solution(OSQPSolver *solver);
  * @param solver             Solver
  * @param iter               Iteration number
  * @param compute_objective  Boolean (if compute the objective or not)
- * @param polish             Boolean (if called from polish)
+ * @param polishing          Boolean (if called from polish)
  */
 void update_info(OSQPSolver *solver,
                  c_int       iter,
                  c_int       compute_objective,
-                 c_int       polish);
+                 c_int       polishing);
 
 
 /**
@@ -175,10 +175,12 @@ c_int validate_data(const csc     *P,
 
 /**
  * Validate problem settings
- * @param  settings OSQPSettings to be validated
- * @return          Exitflag to check
+ * @param  settings   OSQPSettings to be validated
+ * @param  from_setup Is the function called from osqp_setup?
+ * @return            Exitflag to check
  */
-c_int validate_settings(const OSQPSettings *settings);
+c_int validate_settings(const OSQPSettings *settings,
+                        c_int               from_setup);
 
 
 # endif // #ifndef EMBEDDED
