@@ -1145,9 +1145,9 @@ c_int validate_settings(const OSQPSettings *settings,
     return 1;
   }
 
-  if (settings->time_limit < 0.0) {
+  if (settings->time_limit <= 0.0) {
 #  ifdef PRINTING
-    c_eprint("time_limit must be nonnegative\n");
+    c_eprint("time_limit must be positive\n");
 #  endif /* ifdef PRINTING */
     return 1;
   }
