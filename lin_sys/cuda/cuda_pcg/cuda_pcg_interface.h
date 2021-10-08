@@ -137,7 +137,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
                                  const OSQPMatrix   *P,
                                  const OSQPMatrix   *A,
                                  const OSQPVectorf  *rho_vec,
-                                 OSQPSettings       *settings,
+                                 const OSQPSettings *settings,
                                  c_float            *scaled_prim_res,
                                  c_float            *scaled_dual_res,
                                  c_int               polishing);

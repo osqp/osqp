@@ -106,7 +106,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
                                  const OSQPMatrix   *P,
                                  const OSQPMatrix   *A,
                                  const OSQPVectorf  *rho_vec,
-                                 OSQPSettings       *settings,
+                                 const OSQPSettings *settings,
                                  c_float            *scaled_prim_res,
                                  c_float            *scaled_dual_res,
                                  c_int               polishing) {
@@ -144,8 +144,8 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   s->dec_rate            = CUDA_PCG_DECAY_RATE;
   s->reduction_threshold = CUDA_PCG_REDUCTION_THRESHOLD;
   s->reduction_factor    = CUDA_PCG_REDUCTION_FACTOR;
-  s->scaled_prim_res      = scaled_prim_res;
-  s->scaled_dual_res      = scaled_dual_res;
+  s->scaled_prim_res     = scaled_prim_res;
+  s->scaled_dual_res     = scaled_dual_res;
 
   /* Set pointers to problem data and ADMM settings */
   s->A            = A->S;

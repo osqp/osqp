@@ -83,7 +83,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
                                  const OSQPMatrix   *P,
                                  const OSQPMatrix   *A,
                                  const OSQPVectorf  *rho_vec,
-                                 OSQPSettings       *settings,
+                                 const OSQPSettings *settings,
                                  c_int               polishing) {
 
     c_int i;                     // loop counter
