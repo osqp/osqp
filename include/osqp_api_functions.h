@@ -222,7 +222,8 @@ c_int osqp_update_settings(OSQPSolver         *solver,
 # if EMBEDDED != 1
 
 /**
- * Update the ADMM parameter rho. Limit it between RHO_MIN and RHO_MAX.
+ * Update the ADMM parameter rho.
+ * Limit it between OSQP_RHO_MIN and OSQP_RHO_MAX.
  * @param  solver  Solver
  * @param  rho_new New rho setting
  * @return         Exitflag for errors (0 if no errors)

@@ -76,27 +76,27 @@ void test_basic_qp_solve()
   settings->eps_abs = -1.;
   mu_assert("Basic QP test solve: Wrong value of eps_abs not caught!",
 	    osqp_update_settings(solver, settings) > 0);
-  settings->eps_abs = EPS_ABS;
+  settings->eps_abs = OSQP_EPS_ABS;
 
   settings->eps_abs = -1.;
   mu_assert("Basic QP test solve: Wrong value of eps_rel not caught!",
 	    osqp_update_settings(solver, settings) > 0);
-  settings->eps_abs = EPS_REL;
+  settings->eps_abs = OSQP_EPS_REL;
 
   settings->eps_prim_inf = -0.1;
   mu_assert("Basic QP test solve: Wrong value of eps_prim_inf not caught!",
 	    osqp_update_settings(solver, settings) > 0);
-  settings->eps_prim_inf = EPS_PRIM_INF;
+  settings->eps_prim_inf = OSQP_EPS_PRIM_INF;
 
   settings->eps_dual_inf = -0.1;
   mu_assert("Basic QP test solve: Wrong value of eps_dual_inf not caught!",
 	    osqp_update_settings(solver, settings) > 0);
-  settings->eps_dual_inf = EPS_DUAL_INF;
+  settings->eps_dual_inf = OSQP_EPS_DUAL_INF;
 
   settings->alpha = 2.0;
   mu_assert("Basic QP test solve: Wrong value of alpha not caught!",
 	    osqp_update_settings(solver, settings) > 0);
-  settings->alpha = ALPHA;
+  settings->alpha = OSQP_ALPHA;
 
   settings->warm_starting = -1;
   mu_assert("Basic QP test solve: Wrong value of warm_starting not caught!",
@@ -106,17 +106,17 @@ void test_basic_qp_solve()
   settings->scaled_termination = 2;
   mu_assert("Basic QP test solve: Wrong value of scaled_termination not caught!",
 	    osqp_update_settings(solver, settings) > 0);
-  settings->scaled_termination = SCALED_TERMINATION;
+  settings->scaled_termination = OSQP_SCALED_TERMINATION;
 
   settings->check_termination = -1;
   mu_assert("Basic QP test solve: Wrong value of check_termination not caught!",
 	    osqp_update_settings(solver, settings) > 0);
-  settings->check_termination = CHECK_TERMINATION;
+  settings->check_termination = OSQP_CHECK_TERMINATION;
 
   settings->delta = 0.0;
   mu_assert("Basic QP test solve: Wrong value of delta not caught!",
 	    osqp_update_settings(solver, settings) > 0);
-  settings->delta = DELTA;
+  settings->delta = OSQP_DELTA;
 
   settings->polishing = 2;
   mu_assert("Basic QP test solve: Wrong value of polishing not caught!",
@@ -126,7 +126,7 @@ void test_basic_qp_solve()
   settings->polish_refine_iter = -1;
   mu_assert("Basic QP test solve: Wrong value of polish_refine_iter not caught!",
 	    osqp_update_settings(solver, settings) > 0);
-  settings->polish_refine_iter = POLISH_REFINE_ITER;
+  settings->polish_refine_iter = OSQP_POLISH_REFINE_ITER;
 
   settings->verbose = 2;
   mu_assert("Basic QP test solve: Wrong value of verbose not caught!",
@@ -892,7 +892,8 @@ void test_basic_qp_time_limit()
   settings->adaptive_rho = 0;
 
   // Check default time limit
-  mu_assert("Basic QP test time limit: Default not correct", settings->time_limit == TIME_LIMIT);
+  mu_assert("Basic QP test time limit: Default not correct",
+            settings->time_limit == OSQP_TIME_LIMIT);
 
   // Setup solver
   exitflag = osqp_setup(&solver, data->P, data->q,

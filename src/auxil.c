@@ -45,7 +45,7 @@ c_float compute_rho_estimate(const OSQPSolver *solver) {
 
   // Return rho estimate
   rho_estimate = settings->rho * c_sqrt(prim_res / dual_res);
-  rho_estimate = c_min(c_max(rho_estimate, RHO_MIN), RHO_MAX);
+  rho_estimate = c_min(c_max(rho_estimate, OSQP_RHO_MIN), OSQP_RHO_MAX);
 
   return rho_estimate;
 }
@@ -83,13 +83,13 @@ c_int set_rho_vec(OSQPSolver *solver) {
   OSQPSettings  *settings = solver->settings;
   OSQPWorkspace *work     = solver->work;
 
-  settings->rho = c_min(c_max(settings->rho, RHO_MIN), RHO_MAX);
+  settings->rho = c_min(c_max(settings->rho, OSQP_RHO_MIN), OSQP_RHO_MAX);
 
   constr_types_changed = OSQPVectorf_ew_bounds_type(work->constr_type,
                                                     work->data->l,
                                                     work->data->u,
-                                                    RHO_TOL,
-                                                    OSQP_INFTY * MIN_SCALING);
+                                                    OSQP_RHO_TOL,
+                                                    OSQP_INFTY * OSQP_MIN_SCALING);
 
 
   //NB: Always refresh the complete rho vector, since the rho_vals
@@ -98,9 +98,9 @@ c_int set_rho_vec(OSQPSolver *solver) {
   //haven't changed and the rho values are already correct, but such is life.
   OSQPVectorf_set_scalar_conditional(work->rho_vec,
                                      work->constr_type,
-                                     RHO_MIN,                             //const  == -1
+                                     OSQP_RHO_MIN,                             //const  == -1
                                      settings->rho,                       //constr == 0
-                                     RHO_EQ_OVER_RHO_INEQ*settings->rho); //constr == 1
+                                     OSQP_RHO_EQ_OVER_RHO_INEQ*settings->rho); //constr == 1
 
   OSQPVectorf_ew_reciprocal(work->rho_inv_vec, work->rho_vec);
 
@@ -418,7 +418,7 @@ c_int is_primal_infeasible(OSQPSolver *solver,
   project_polar_reccone(work->delta_y,
                         work->data->l,
                         work->data->u,
-                        OSQP_INFTY * MIN_SCALING);
+                        OSQP_INFTY * OSQP_MIN_SCALING);
 
   // Compute infinity norm of delta_y (unscale if necessary)
   if (settings->scaling && !settings->scaled_termination) {
@@ -521,7 +521,7 @@ c_int is_dual_infeasible(OSQPSolver *solver,
         return test_in_reccone(work->Adelta_x,
                                work->data->l,
                                work->data->u,
-                               OSQP_INFTY * MIN_SCALING,
+                               OSQP_INFTY * OSQP_MIN_SCALING,
                                eps_dual_inf * norm_delta_x);
       }
     }

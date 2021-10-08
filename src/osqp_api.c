@@ -46,34 +46,34 @@ void osqp_get_dimensions(OSQPSolver *solver,
 
 void osqp_set_default_settings(OSQPSettings *settings) {
 
-  settings->algebra_device = 0;                 /* algebra device identifier */
-  settings->linsys_solver  = LINSYS_SOLVER;     /* linear system solver */
-  settings->verbose        = VERBOSE;           /* print output */
-  settings->warm_starting  = WARM_STARTING;     /* warm starting */
-  settings->scaling        = SCALING;           /* heuristic problem scaling */
-  settings->polishing      = POLISHING;         /* ADMM solution polish: 1 */
+  settings->algebra_device = 0;                   /* algebra device identifier */
+  settings->linsys_solver  = OSQP_LINSYS_SOLVER;  /* linear system solver */
+  settings->verbose        = OSQP_VERBOSE;        /* print output */
+  settings->warm_starting  = OSQP_WARM_STARTING;  /* warm starting */
+  settings->scaling        = OSQP_SCALING;        /* heuristic problem scaling */
+  settings->polishing      = OSQP_POLISHING;      /* ADMM solution polish: 1 */
 
-  settings->rho           = (c_float)RHO;       /* ADMM step */
-  settings->rho_is_vec    = RHO_IS_VEC;         /* defines whether rho is scalar or vector*/
-  settings->sigma         = (c_float)SIGMA;     /* ADMM step */
-  settings->alpha         = (c_float)ALPHA;     /* relaxation parameter */
+  settings->rho           = (c_float)OSQP_RHO;    /* ADMM step */
+  settings->rho_is_vec    = OSQP_RHO_IS_VEC;      /* defines whether rho is scalar or vector*/
+  settings->sigma         = (c_float)OSQP_SIGMA;  /* ADMM step */
+  settings->alpha         = (c_float)OSQP_ALPHA;  /* relaxation parameter */
 
-  settings->adaptive_rho           = ADAPTIVE_RHO;
-  settings->adaptive_rho_interval  = ADAPTIVE_RHO_INTERVAL;
-  settings->adaptive_rho_fraction  = (c_float)ADAPTIVE_RHO_FRACTION;
-  settings->adaptive_rho_tolerance = (c_float)ADAPTIVE_RHO_TOLERANCE;
+  settings->adaptive_rho           = OSQP_ADAPTIVE_RHO;
+  settings->adaptive_rho_interval  = OSQP_ADAPTIVE_RHO_INTERVAL;
+  settings->adaptive_rho_fraction  = (c_float)OSQP_ADAPTIVE_RHO_FRACTION;
+  settings->adaptive_rho_tolerance = (c_float)OSQP_ADAPTIVE_RHO_TOLERANCE;
 
-  settings->max_iter           = MAX_ITER;                /* maximum number of ADMM iterations */
-  settings->eps_abs            = (c_float)EPS_ABS;        /* absolute convergence tolerance */
-  settings->eps_rel            = (c_float)EPS_REL;        /* relative convergence tolerance */
-  settings->eps_prim_inf       = (c_float)EPS_PRIM_INF;   /* primal infeasibility tolerance */
-  settings->eps_dual_inf       = (c_float)EPS_DUAL_INF;   /* dual infeasibility   tolerance */
-  settings->scaled_termination = SCALED_TERMINATION;      /* evaluate scaled termination criteria */
-  settings->check_termination  = CHECK_TERMINATION;       /* interval for evaluating termination criteria */
-  settings->time_limit         = TIME_LIMIT;              /* stop the algorithm when time limit is reached */
+  settings->max_iter           = OSQP_MAX_ITER;               /* maximum number of ADMM iterations */
+  settings->eps_abs            = (c_float)OSQP_EPS_ABS;       /* absolute convergence tolerance */
+  settings->eps_rel            = (c_float)OSQP_EPS_REL;       /* relative convergence tolerance */
+  settings->eps_prim_inf       = (c_float)OSQP_EPS_PRIM_INF;  /* primal infeasibility tolerance */
+  settings->eps_dual_inf       = (c_float)OSQP_EPS_DUAL_INF;  /* dual infeasibility tolerance */
+  settings->scaled_termination = OSQP_SCALED_TERMINATION;     /* evaluate scaled termination criteria */
+  settings->check_termination  = OSQP_CHECK_TERMINATION;      /* interval for evaluating termination criteria */
+  settings->time_limit         = OSQP_TIME_LIMIT;             /* stop the algorithm when time limit is reached */
 
-  settings->delta              = DELTA;                   /* regularization parameter for polishing */
-  settings->polish_refine_iter = POLISH_REFINE_ITER;      /* iterative refinement steps in polish */
+  settings->delta              = OSQP_DELTA;                  /* regularization parameter for polishing */
+  settings->polish_refine_iter = OSQP_POLISH_REFINE_ITER;     /* iterative refinement steps in polish */
 }
 
 #ifndef EMBEDDED
@@ -229,7 +229,7 @@ c_int osqp_setup(OSQPSolver         **solverp,
     set_rho_vec(solver);
   }
   else {
-    solver->settings->rho = c_min(c_max(settings->rho, RHO_MIN), RHO_MAX);
+    solver->settings->rho = c_min(c_max(settings->rho, OSQP_RHO_MIN), OSQP_RHO_MAX);
     work->rho_inv = 1. / settings->rho;
   }
 
@@ -303,11 +303,11 @@ c_int osqp_setup(OSQPSolver         **solverp,
     if (solver->settings->check_termination) {
       // If check_termination is enabled, we set it to a multiple of the check
       // termination interval
-      solver->settings->adaptive_rho_interval = ADAPTIVE_RHO_MULTIPLE_TERMINATION *
+      solver->settings->adaptive_rho_interval = OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION *
                                               solver->settings->check_termination;
     } else {
       // If check_termination is disabled we set it to a predefined fix number
-      solver->settings->adaptive_rho_interval = ADAPTIVE_RHO_FIXED;
+      solver->settings->adaptive_rho_interval = OSQP_ADAPTIVE_RHO_FIXED;
     }
   }
 # endif /* ifndef PROFILING */
@@ -447,7 +447,7 @@ c_int osqp_solve(OSQPSolver *solver) {
 
     // Can we print ?
     can_print = solver->settings->verbose &&
-                ((iter % PRINT_INTERVAL == 0) || (iter == 1));
+                ((iter % OSQP_PRINT_INTERVAL == 0) || (iter == 1));
 
     // NB: We always update info in the first iteration because indirect solvers
     //     use residual values to compute required accuracy of their solution.
@@ -508,8 +508,7 @@ c_int osqp_solve(OSQPSolver *solver) {
           // between
           // updates to the closest multiple of the default check_termination
           // interval.
-          solver->settings->adaptive_rho_interval = (c_int)c_roundmultiple(iter,
-                                                                         CHECK_TERMINATION);
+          solver->settings->adaptive_rho_interval = (c_int)c_roundmultiple(iter, OSQP_CHECK_TERMINATION);
         }
 
         // Make sure the interval is not 0 and at least check_termination times
@@ -1030,15 +1029,15 @@ c_int osqp_update_rho(OSQPSolver *solver,
 #endif /* ifdef PROFILING */
 
   // Update rho in settings
-  solver->settings->rho = c_min(c_max(rho_new, RHO_MIN), RHO_MAX);
+  solver->settings->rho = c_min(c_max(rho_new, OSQP_RHO_MIN), OSQP_RHO_MAX);
 
   if (solver->settings->rho_is_vec) {
     // Update rho_vec and rho_inv_vec
     OSQPVectorf_set_scalar_conditional(work->rho_vec,
                                        work->constr_type,
-                                       RHO_MIN,                                     //const  == -1
-                                       solver->settings->rho,                       //constr == 0
-                                       RHO_EQ_OVER_RHO_INEQ*solver->settings->rho); //constr == 1
+                                       OSQP_RHO_MIN,                                     //const  == -1
+                                       solver->settings->rho,                            //constr == 0
+                                       OSQP_RHO_EQ_OVER_RHO_INEQ*solver->settings->rho); //constr == 1
 
     OSQPVectorf_ew_reciprocal(work->rho_inv_vec, work->rho_vec);
   }

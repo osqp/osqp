@@ -21,7 +21,7 @@ void test_solveKKT() {
   // Settings
   settings->rho           = data->test_solve_KKT_rho;
   settings->sigma         = data->test_solve_KKT_sigma;
-  settings->linsys_solver = LINSYS_SOLVER;
+  settings->linsys_solver = OSQP_LINSYS_SOLVER;
 
   // Set rho_vec
   m       = data->test_solve_KKT_A->m;
