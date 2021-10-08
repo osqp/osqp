@@ -31,7 +31,7 @@ typedef float c_float;  /* for numerical values  */
  * User settings
  */
 typedef struct {
-  // TODO: Add device ID
+  c_int algebra_device;                  ///< algebra device identifier; currently used for CUDA devices
   enum linsys_solver_type linsys_solver; ///< linear system solver to use
   c_int verbose;                         ///< boolean; write out progress
   c_int warm_starting;                   ///< boolean; warm start

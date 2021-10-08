@@ -20,7 +20,7 @@
 
 
 TEST_CASE( "test_lin_alg", "[multi-file:1]" ) {
-    osqp_algebra_init_libs();
+    osqp_algebra_init_libs(0);
 #ifndef CUDA_SUPPORT
     SECTION( "test_constr_sparse_mat" ) {
         test_constr_sparse_mat();
@@ -43,7 +43,7 @@ TEST_CASE( "test_lin_alg", "[multi-file:1]" ) {
 
 
 TEST_CASE( "test_solve_linsys", "[multi-file:2]" ) {
-    osqp_algebra_init_libs();
+    osqp_algebra_init_libs(0);
     SECTION( "test_solveKKT" ) {
         test_solveKKT();
     }

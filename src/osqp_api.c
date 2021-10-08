@@ -46,11 +46,12 @@ void osqp_get_dimensions(OSQPSolver *solver,
 
 void osqp_set_default_settings(OSQPSettings *settings) {
 
-  settings->linsys_solver = LINSYS_SOLVER;      /* linear system solver */
-  settings->verbose       = VERBOSE;            /* print output */
-  settings->warm_starting = WARM_STARTING;      /* warm starting */
-  settings->scaling       = SCALING;            /* heuristic problem scaling */
-  settings->polishing     = POLISHING;          /* ADMM solution polish: 1 */
+  settings->algebra_device = 0;                 /* algebra device identifier */
+  settings->linsys_solver  = LINSYS_SOLVER;     /* linear system solver */
+  settings->verbose        = VERBOSE;           /* print output */
+  settings->warm_starting  = WARM_STARTING;     /* warm starting */
+  settings->scaling        = SCALING;           /* heuristic problem scaling */
+  settings->polishing      = POLISHING;         /* ADMM solution polish: 1 */
 
   settings->rho           = (c_float)RHO;       /* ADMM step */
   settings->rho_is_vec    = RHO_IS_VEC;         /* defines whether rho is scalar or vector*/
@@ -117,7 +118,7 @@ c_int osqp_setup(OSQPSolver         **solverp,
 # endif /* ifdef PROFILING */
 
   // Initialize algebra libraries
-  exitflag = osqp_algebra_init_libs();
+  exitflag = osqp_algebra_init_libs(settings->algebra_device);
   if (exitflag) return osqp_error(OSQP_ALGEBRA_LOAD_ERROR);
 
   // Copy problem data into workspace
