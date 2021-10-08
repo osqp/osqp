@@ -91,7 +91,7 @@ struct qdldl {
  * Initialize QDLDL Solver
  *
  * @param  s         Pointer to a private structure
- * @param  P         Cost function matrix (upper triangular form)
+ * @param  P         Objective function matrix (upper triangular form)
  * @param  A         Constraints matrix
  * @param  rho_vec   Algorithm parameter. If polish, then rho_vec = OSQP_NULL.
  * @param  settings  Solver settings

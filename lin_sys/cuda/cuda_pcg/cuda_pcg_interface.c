@@ -52,7 +52,7 @@ static c_float compute_tolerance(cudapcg_solver *s,
         /* In case rhs = 0.0 we don't want to set eps_prev to 0.0 */
         if (rhs_norm < CUDA_PCG_EPS_MIN) s->eps_prev = 1.0;
         else s->eps_prev = rhs_norm * s->reduction_factor;
-        /* Return early since scaled_pri_res and scaled_dua_res are meaningless before the first ADMM iteration */
+        /* Return early since scaled_prim_res and scaled_dual_res are meaningless before the first ADMM iteration */
         return s->eps_prev;
       }
 
@@ -61,7 +61,7 @@ static c_float compute_tolerance(cudapcg_solver *s,
         s->zero_pcg_iters = 0;
       }
 
-      eps = s->reduction_factor * sqrt((*s->scaled_pri_res) * (*s->scaled_dua_res));
+      eps = s->reduction_factor * sqrt((*s->scaled_prim_res) * (*s->scaled_dual_res));
       eps = c_max(c_min(eps, s->eps_prev), CUDA_PCG_EPS_MIN);
       s->eps_prev = eps;
       break;
@@ -107,8 +107,8 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
                                  const OSQPMatrix   *A,
                                  const OSQPVectorf  *rho_vec,
                                  OSQPSettings       *settings,
-                                 c_float            *scaled_pri_res,
-                                 c_float            *scaled_dua_res,
+                                 c_float            *scaled_prim_res,
+                                 c_float            *scaled_dual_res,
                                  c_int               polishing) {
 
   c_int n, m;
@@ -144,8 +144,8 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   s->dec_rate            = CUDA_PCG_DECAY_RATE;
   s->reduction_threshold = CUDA_PCG_REDUCTION_THRESHOLD;
   s->reduction_factor    = CUDA_PCG_REDUCTION_FACTOR;
-  s->scaled_pri_res      = scaled_pri_res;
-  s->scaled_dua_res      = scaled_dua_res;
+  s->scaled_prim_res      = scaled_prim_res;
+  s->scaled_dual_res      = scaled_dual_res;
 
   /* Set pointers to problem data and ADMM settings */
   s->A            = A->S;

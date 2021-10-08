@@ -370,17 +370,17 @@ c_int polish(OSQPSolver *solver) {
   update_info(solver, 0, 1, 1);
 
   // Check if polish was successful
-  polish_successful = (work->pol->pri_res < info->pri_res &&
-                       work->pol->dua_res < info->dua_res) || // Residuals
+  polish_successful = (work->pol->prim_res < info->prim_res &&
+                       work->pol->dual_res < info->dual_res) || // Residuals
                                                                     // are
                                                                     // reduced
-                      (work->pol->pri_res < info->pri_res &&
-                       info->dua_res < 1e-10) ||              // Dual
+                      (work->pol->prim_res < info->prim_res &&
+                       info->dual_res < 1e-10) ||              // Dual
                                                                     // residual
                                                                     // already
                                                                     // tiny
-                      (work->pol->dua_res < info->dua_res &&
-                       info->pri_res < 1e-10);                // Primal
+                      (work->pol->dual_res < info->dual_res &&
+                       info->prim_res < 1e-10);                // Primal
                                                                     // residual
                                                                     // already
                                                                     // tiny
@@ -388,8 +388,8 @@ c_int polish(OSQPSolver *solver) {
   if (polish_successful) {
     // Update solver information
     info->obj_val       = work->pol->obj_val;
-    info->pri_res       = work->pol->pri_res;
-    info->dua_res       = work->pol->dua_res;
+    info->prim_res      = work->pol->prim_res;
+    info->dual_res      = work->pol->dual_res;
     info->status_polish = 1;
 
     // Update (x, z, y) in ADMM iterations

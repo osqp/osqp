@@ -127,7 +127,7 @@ c_int osqp_setup(OSQPSolver         **solverp,
   work->data->m = m;
   work->data->n = n;
 
-  // Cost function
+  // objective function
   work->data->P = OSQPMatrix_new_from_csc(P,1);   //copy assuming triu form
   work->data->q = OSQPVectorf_new(q,n);
   if (!(work->data->P) || !(work->data->q)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
@@ -239,7 +239,7 @@ c_int osqp_setup(OSQPSolver         **solverp,
   // Initialize linear system solver structure
   exitflag = init_linsys_solver(&(work->linsys_solver), work->data->P, work->data->A, 
                                 work->rho_vec, solver->settings,
-                                &work->scaled_pri_res, &work->scaled_dua_res, 0);
+                                &work->scaled_prim_res, &work->scaled_dual_res, 0);
 
   if (exitflag) return osqp_error(exitflag);
 
@@ -323,8 +323,8 @@ c_int osqp_solve(OSQPSolver *solver) {
 
   c_int exitflag;
   c_int iter, max_iter;
-  c_int compute_cost_function; // Boolean: compute the cost function in the loop or not
-  c_int can_check_termination; // Boolean: check termination or not
+  c_int compute_obj;           // boolean: compute objective function in the loop or not
+  c_int can_check_termination; // boolean: check termination or not
   OSQPWorkspace* work;
 
 #ifdef PROFILING
@@ -350,18 +350,11 @@ c_int osqp_solve(OSQPSolver *solver) {
   can_check_termination = 0;
 #ifdef PRINTING
   can_print = solver->settings->verbose;
-#endif /* ifdef PRINTING */
-#ifdef PRINTING
-  compute_cost_function = solver->settings->verbose;       // Compute cost function only
-                                                   // if verbose is on
+  // Compute objective function only if verbose is on
+  compute_obj = solver->settings->verbose;
 #else /* ifdef PRINTING */
-  compute_cost_function = 0;                       // Never compute cost
-                                                   // function during the
-                                                   // iterations if no printing
-                                                   // enabled
+  compute_obj = 0;
 #endif /* ifdef PRINTING */
-
-
 
 #ifdef PROFILING
   osqp_tic(work->timer); // Start timer
@@ -369,7 +362,6 @@ c_int osqp_solve(OSQPSolver *solver) {
 
 
 #ifdef PRINTING
-
   if (solver->settings->verbose) {
     // Print Header for every column
     print_header();
@@ -462,7 +454,7 @@ c_int osqp_solve(OSQPSolver *solver) {
     if (can_check_termination || can_print || iter == 1) { // Update status in either of
                                                            // these cases
       // Update information
-      update_info(solver, iter, compute_cost_function, 0);
+      update_info(solver, iter, compute_obj, 0);
 
       if (can_print) {
         // Print summary
@@ -481,7 +473,7 @@ c_int osqp_solve(OSQPSolver *solver) {
 
     if (can_check_termination) {
       // Update information and compute also objective value
-      update_info(solver, iter, compute_cost_function, 0);
+      update_info(solver, iter, compute_obj, 0);
 
       // Check algorithm termination
       if (check_termination(solver, 0)) {
@@ -538,13 +530,13 @@ c_int osqp_solve(OSQPSolver *solver) {
       if (!can_check_termination && !can_print) {
         // Information has not been computed neither for termination or printing
         // reasons
-        update_info(solver, iter, compute_cost_function, 0);
+        update_info(solver, iter, compute_obj, 0);
       }
 # else /* ifdef PRINTING */
 
       if (!can_check_termination) {
         // Information has not been computed before for termination check
-        update_info(solver, iter, compute_cost_function, 0);
+        update_info(solver, iter, compute_obj, 0);
       }
 # endif /* ifdef PRINTING */
 
@@ -571,12 +563,12 @@ c_int osqp_solve(OSQPSolver *solver) {
     if (!can_print) {
       // Update info only if it hasn't been updated before for printing
       // reasons
-      update_info(solver, iter - 1, compute_cost_function, 0);
+      update_info(solver, iter - 1, compute_obj, 0);
     }
 #else /* ifdef PRINTING */
 
     // If no printing is enabled, update info directly
-    update_info(solver, iter - 1, compute_cost_function, 0);
+    update_info(solver, iter - 1, compute_obj, 0);
 #endif /* ifdef PRINTING */
 
 #ifdef PRINTING
@@ -592,7 +584,7 @@ c_int osqp_solve(OSQPSolver *solver) {
 
   // Compute objective value in case it was not
   // computed during the iterations
-  if (!compute_cost_function && has_solution(solver->info)){
+  if (!compute_obj && has_solution(solver->info)){
     solver->info->obj_val = compute_obj_val(solver, work->x);
   }
 

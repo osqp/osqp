@@ -6,7 +6,6 @@ extern "C" {
 # endif /* ifdef __cplusplus */
 
 /* Types required by the OSQP API */
-# include "osqp_configure.h"
 # include "osqp_api_types.h"
 
 

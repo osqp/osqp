@@ -12,11 +12,11 @@
 
 c_float compute_rho_estimate(const OSQPSolver *solver) {
 
-  c_int   n, m;                       // Dimensions
-  c_float pri_res, dua_res;           // Primal and dual residuals
-  c_float pri_res_norm, dua_res_norm; // Normalization for the residuals
-  c_float temp_res_norm;              // Temporary residual norm
-  c_float rho_estimate;               // Rho estimate value
+  c_int   n, m;                         // Dimensions
+  c_float prim_res, dual_res;           // Primal and dual residuals
+  c_float prim_res_norm, dual_res_norm; // Normalization for the residuals
+  c_float temp_res_norm;                // Temporary residual norm
+  c_float rho_estimate;                 // Rho estimate value
 
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
@@ -26,32 +26,27 @@ c_float compute_rho_estimate(const OSQPSolver *solver) {
   m = work->data->m;
 
   // Get primal and dual residuals
-  pri_res = work->scaled_pri_res;
-  dua_res = work->scaled_dua_res;
+  prim_res = work->scaled_prim_res;
+  dual_res = work->scaled_dual_res;
 
   // Normalize primal residual
-  pri_res_norm  = OSQPVectorf_norm_inf(work->z);           // ||z||
-  temp_res_norm = OSQPVectorf_norm_inf(work->Ax);          // ||Ax||
-  pri_res_norm  = c_max(pri_res_norm, temp_res_norm); // max (||z||,||Ax||)
-  pri_res      /= (pri_res_norm + OSQP_DIVISION_TOL); // Normalize primal
-                                                      // residual (prevent 0
-                                                      // division)
+  prim_res_norm = OSQPVectorf_norm_inf(work->z);        // ||z||
+  temp_res_norm = OSQPVectorf_norm_inf(work->Ax);       // ||Ax||
+  prim_res_norm = c_max(prim_res_norm, temp_res_norm);  // max (||z||,||Ax||)
+  prim_res     /= (prim_res_norm + OSQP_DIVISION_TOL);
 
   // Normalize dual residual
-  dua_res_norm  = OSQPVectorf_norm_inf(work->data->q);     // ||q||
-  temp_res_norm = OSQPVectorf_norm_inf(work->Aty);         // ||A' y||
-  dua_res_norm  = c_max(dua_res_norm, temp_res_norm);
-  temp_res_norm = OSQPVectorf_norm_inf(work->Px);          //  ||P x||
-  dua_res_norm  = c_max(dua_res_norm, temp_res_norm); // max(||q||,||A' y||,||P
-                                                      // x||)
-  dua_res      /= (dua_res_norm + OSQP_DIVISION_TOL); // Normalize dual residual                                         
-                                                      // (prevent 0 division)
+  dual_res_norm = OSQPVectorf_norm_inf(work->data->q);  // ||q||
+  temp_res_norm = OSQPVectorf_norm_inf(work->Aty);      // ||A' y||
+  dual_res_norm = c_max(dual_res_norm, temp_res_norm);
+  temp_res_norm = OSQPVectorf_norm_inf(work->Px);       //  ||P x||
+  dual_res_norm = c_max(dual_res_norm, temp_res_norm);  // max(||q||,||A' y||,||P x||)
+  dual_res     /= (dual_res_norm + OSQP_DIVISION_TOL);
 
-                                           
   // Return rho estimate
-  rho_estimate = settings->rho * c_sqrt(pri_res / dua_res);
-  rho_estimate = c_min(c_max(rho_estimate, RHO_MIN), RHO_MAX);     // Constrain
-                                                                   // rho values
+  rho_estimate = settings->rho * c_sqrt(prim_res / dual_res);
+  rho_estimate = c_min(c_max(rho_estimate, RHO_MIN), RHO_MAX);
+
   return rho_estimate;
 }
 
@@ -254,30 +249,30 @@ c_float compute_obj_val(const OSQPSolver  *solver,
   return obj_val;
 }
 
-c_float compute_pri_res(OSQPSolver        *solver,
-                        const OSQPVectorf *x,
-                        const OSQPVectorf *z) {
+c_float compute_prim_res(OSQPSolver        *solver,
+                         const OSQPVectorf *x,
+                         const OSQPVectorf *z) {
 
   // NB: Use z_prev as working vector
   // pr = Ax - z
 
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
-  c_float pri_res;
+  c_float prim_res;
 
   OSQPMatrix_Axpy(work->data->A,x,work->Ax, 1.0, 0.0); //Ax = A*x
   OSQPVectorf_minus(work->z_prev, work->Ax, z);
 
-  work->scaled_pri_res = OSQPVectorf_norm_inf(work->z_prev);
+  work->scaled_prim_res = OSQPVectorf_norm_inf(work->z_prev);
 
   // If scaling active -> rescale residual
   if (settings->scaling && !settings->scaled_termination) {
-    pri_res =  OSQPVectorf_scaled_norm_inf(work->scaling->Einv, work->z_prev);
+    prim_res =  OSQPVectorf_scaled_norm_inf(work->scaling->Einv, work->z_prev);
   }
   else{
-    pri_res  = work->scaled_pri_res;
+    prim_res  = work->scaled_prim_res;
   }
-  return pri_res;
+  return prim_res;
 }
 
 c_float compute_pri_tol(const OSQPSolver *solver,
@@ -317,9 +312,9 @@ c_float compute_pri_tol(const OSQPSolver *solver,
   return eps_abs + eps_rel * max_rel_eps;
 }
 
-c_float compute_dua_res(OSQPSolver        *solver,
-                        const OSQPVectorf *x,
-                        const OSQPVectorf *y) {
+c_float compute_dual_res(OSQPSolver        *solver,
+                         const OSQPVectorf *x,
+                         const OSQPVectorf *y) {
 
   // NB: Use x_prev as temporary vector
   // NB: Only upper triangular part of P is stored.
@@ -327,7 +322,7 @@ c_float compute_dua_res(OSQPSolver        *solver,
 
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
-  c_float dua_res;
+  c_float dual_res;
 
   // dr = q
   OSQPVectorf_copy(work->x_prev,work->data->q);
@@ -344,18 +339,18 @@ c_float compute_dua_res(OSQPSolver        *solver,
     OSQPVectorf_plus(work->x_prev, work->x_prev, work->Aty);
   }
 
-  work->scaled_dua_res = OSQPVectorf_norm_inf(work->x_prev);
+  work->scaled_dual_res = OSQPVectorf_norm_inf(work->x_prev);
 
   // If scaling active -> rescale residual
   if (settings->scaling && !settings->scaled_termination) {
-    dua_res =  work->scaling->cinv * OSQPVectorf_scaled_norm_inf(work->scaling->Dinv,
-                                                                 work->x_prev);
+    dual_res =  work->scaling->cinv * OSQPVectorf_scaled_norm_inf(work->scaling->Dinv,
+                                                                  work->x_prev);
   }
   else {
-    dua_res = work->scaled_dua_res;
+    dual_res = work->scaled_dual_res;
   }
 
-  return dua_res;
+  return dual_res;
 }
 
 c_float compute_dua_tol(const OSQPSolver *solver,
@@ -627,7 +622,7 @@ void update_info(OSQPSolver *solver,
                  c_int       polishing) {
 
   OSQPVectorf *x, *z, *y;                   // Allocate pointers to vectors
-  c_float *obj_val, *pri_res, *dua_res;     // objective value, residuals
+  c_float *obj_val, *prim_res, *dual_res;   // objective value, residuals
 
   OSQPInfo*      info     = solver->info;
   OSQPWorkspace* work     = solver->work;
@@ -639,26 +634,27 @@ void update_info(OSQPSolver *solver,
 #ifndef EMBEDDED
 
   if (polishing) {
-    x       = work->pol->x;
-    y       = work->pol->y;
-    z       = work->pol->z;
-    obj_val = &work->pol->obj_val;
-    pri_res = &work->pol->pri_res;
-    dua_res = &work->pol->dua_res;
+    x        = work->pol->x;
+    y        = work->pol->y;
+    z        = work->pol->z;
+    obj_val  = &work->pol->obj_val;
+    prim_res = &work->pol->prim_res;
+    dual_res = &work->pol->dual_res;
 # ifdef PROFILING
     run_time = &info->polish_time;
 # endif /* ifdef PROFILING */
-  } else {
+  }
+  else {
 #endif // EMBEDDED
-  x                = work->x;
-  y                = work->y;
-  z                = work->z;
-  obj_val          = &info->obj_val;
-  pri_res          = &info->pri_res;
-  dua_res          = &info->dua_res;
-  info->iter = iter; // Update iteration number
+    x          = work->x;
+    y          = work->y;
+    z          = work->z;
+    obj_val    = &info->obj_val;
+    prim_res   = &info->prim_res;
+    dual_res   = &info->dual_res;
+    info->iter = iter;
 #ifdef PROFILING
-  run_time = &info->solve_time;
+    run_time   = &info->solve_time;
 #endif /* ifdef PROFILING */
 #ifndef EMBEDDED
 }
@@ -674,13 +670,13 @@ void update_info(OSQPSolver *solver,
   // Compute primal residual
   if (work->data->m == 0) {
     // No constraints -> Always primal feasible
-    *pri_res = 0.;
+    *prim_res = 0.;
   } else {
-    *pri_res = compute_pri_res(solver, x, z);
+    *prim_res = compute_prim_res(solver, x, z);
   }
 
   // Compute dual residual
-  *dua_res = compute_dua_res(solver, x, y);
+  *dual_res = compute_dual_res(solver, x, y);
 
   // Update timing
 #ifdef PROFILING
@@ -768,8 +764,8 @@ c_int check_termination(OSQPSolver *solver,
   eps_dual_inf = settings->eps_dual_inf;
 
   // If residuals are too large, the problem is probably non convex
-  if ((info->pri_res > OSQP_INFTY) ||
-      (info->dua_res > OSQP_INFTY)){
+  if ((info->prim_res > OSQP_INFTY) ||
+      (info->dual_res > OSQP_INFTY)){
     // Looks like residuals are diverging. Probably the problem is non convex!
     // Terminate and report it
     update_status(info, OSQP_NON_CVX);
@@ -794,7 +790,7 @@ c_int check_termination(OSQPSolver *solver,
     eps_prim = compute_pri_tol(solver, eps_abs, eps_rel);
 
     // Primal feasibility check
-    if (info->pri_res < eps_prim) {
+    if (info->prim_res < eps_prim) {
       prim_res_check = 1;
     } else {
       // Primal infeasibility check
@@ -806,7 +802,7 @@ c_int check_termination(OSQPSolver *solver,
   eps_dual = compute_dua_tol(solver, eps_abs, eps_rel);
 
   // Dual feasibility check
-  if (info->dua_res < eps_dual) {
+  if (info->dual_res < eps_dual) {
     dual_res_check = 1;
   } else {
     // Check dual infeasibility

@@ -45,7 +45,7 @@ void print_header(void) {
 #endif
 
   // Main information
-  c_print("objective    pri res    dua res    rho");
+  c_print("objective    prim res   dual res   rho");
 # ifdef PROFILING
   c_print("        time");
 # endif /* ifdef PROFILING */
@@ -152,8 +152,8 @@ void print_summary(OSQPSolver *solver) {
 
   c_print("%4i",     (int)info->iter);
   c_print(" %12.4e", info->obj_val);
-  c_print("  %9.2e", info->pri_res);
-  c_print("  %9.2e", info->dua_res);
+  c_print("  %9.2e", info->prim_res);
+  c_print("  %9.2e", info->dual_res);
   c_print("  %9.2e", settings->rho);
 
 # ifdef PROFILING
@@ -178,8 +178,8 @@ void print_polish(OSQPSolver *solver) {
 
   c_print("%4s",     "plsh");
   c_print(" %12.4e", info->obj_val);
-  c_print("  %9.2e", info->pri_res);
-  c_print("  %9.2e", info->dua_res);
+  c_print("  %9.2e", info->prim_res);
+  c_print("  %9.2e", info->dual_res);
 
   // Different characters for windows/unix
 #if defined(IS_WINDOWS) && !defined(PYTHON)

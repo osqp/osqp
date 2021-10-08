@@ -95,8 +95,8 @@ c_int init_linsys_solver(LinSysSolver      **s,
                          const OSQPMatrix   *A,
                          const OSQPVectorf  *rho_vec,
                          OSQPSettings       *settings,
-                         c_float            *scaled_pri_res,
-                         c_float            *scaled_dua_res,
+                         c_float            *scaled_prim_res,
+                         c_float            *scaled_dual_res,
                          c_int               polishing) {
 
   switch (settings->linsys_solver) {
@@ -104,10 +104,10 @@ c_int init_linsys_solver(LinSysSolver      **s,
 #ifdef CUDA_SUPPORT
 
   case CUDA_PCG_SOLVER:
-    return init_linsys_solver_cudapcg((cudapcg_solver **)s, P, A, rho_vec, settings, scaled_pri_res, scaled_dua_res, polishing);
+    return init_linsys_solver_cudapcg((cudapcg_solver **)s, P, A, rho_vec, settings, scaled_prim_res, scaled_dual_res, polishing);
 
   default: /* CUDA_PCG_SOLVER */
-    return init_linsys_solver_cudapcg((cudapcg_solver **)s, P, A, rho_vec, settings, scaled_pri_res, scaled_dua_res, polishing);
+    return init_linsys_solver_cudapcg((cudapcg_solver **)s, P, A, rho_vec, settings, scaled_prim_res, scaled_dual_res, polishing);
 
 #else /* ifdef CUDA_SUPPORT */
 

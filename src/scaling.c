@@ -58,7 +58,7 @@ c_int scale_data(OSQPSolver* solver) {
 
   c_int   i;          // Iterations index
   c_int   n, m;       // Number of constraints and variables
-  c_float c_temp;     // Cost function scaling
+  c_float c_temp;     // Objective function scaling
   c_float inf_norm_q; // Infinity norm of q
 
   OSQPSettings*  settings = solver->settings;

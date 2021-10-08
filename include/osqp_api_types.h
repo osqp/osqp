@@ -5,7 +5,6 @@
 extern "C" {
 # endif /* ifdef __cplusplus */
 
-# include "osqp_configure.h"
 # include "osqp_api_constants.h"
 
 /*****************************
@@ -78,8 +77,8 @@ typedef struct {
 
   // solution quality
   c_float obj_val;      ///< primal objective
-  c_float pri_res;      ///< norm of primal residual
-  c_float dua_res;      ///< norm of dual residual
+  c_float prim_res;     ///< norm of primal residual
+  c_float dual_res;     ///< norm of dual residual
 
   // algorithm information
   c_int   iter;         ///< number of iterations taken

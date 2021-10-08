@@ -83,8 +83,8 @@ typedef struct cudapcg_solver_ {
   c_int    reduction_threshold;
   c_float  reduction_factor;
   c_float  eps_prev;
-  c_float *scaled_pri_res;
-  c_float *scaled_dua_res;
+  c_float *scaled_prim_res;
+  c_float *scaled_dual_res;
 
   /* Pointers to problem data and ADMM settings */
   csr     *A;
@@ -138,8 +138,8 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
                                  const OSQPMatrix   *A,
                                  const OSQPVectorf  *rho_vec,
                                  OSQPSettings       *settings,
-                                 c_float            *scaled_pri_res,
-                                 c_float            *scaled_dua_res,
+                                 c_float            *scaled_prim_res,
+                                 c_float            *scaled_dual_res,
                                  c_int               polishing);
 
 
