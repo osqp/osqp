@@ -951,6 +951,9 @@ c_int validate_data(const csc     *P,
   return 0;
 }
 
+#endif // #ifndef EMBEDDED
+
+
 c_int validate_linsys_solver(c_int linsys_solver) {
 
 #ifdef CUDA_SUPPORT
@@ -973,8 +976,6 @@ c_int validate_linsys_solver(c_int linsys_solver) {
   // Valid solver
   return 0;
 }
-
-#endif // #ifndef EMBEDDED
 
 
 c_int validate_settings(const OSQPSettings *settings,

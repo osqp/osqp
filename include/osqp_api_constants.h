@@ -83,12 +83,10 @@ extern const char * OSQP_ERROR_MESSAGE[];
 #  define RHO_IS_VEC (1)  ///< boolean, defines if rho is scalar or vector
 #endif
 
-# ifndef EMBEDDED
 #  define DELTA (1E-6)
 #  define POLISHING (0)
 #  define POLISH_REFINE_ITER (3)
 #  define VERBOSE (1)
-# endif // ifndef EMBEDDED
 
 #ifdef CUDA_SUPPORT
 #  define CHECK_TERMINATION (5)
@@ -126,7 +124,6 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # endif /* ifndef OSQP_DIVISION_TOL */
 
 
-# if EMBEDDED != 1
 #  define ADAPTIVE_RHO (1)
 
 #ifdef CUDA_SUPPORT
@@ -140,7 +137,6 @@ extern const char * OSQP_ERROR_MESSAGE[];
 #  define ADAPTIVE_RHO_FRACTION (0.4)           ///< fraction of setup time after which we update rho
 #  define ADAPTIVE_RHO_MULTIPLE_TERMINATION (4) ///< multiple of check_termination after which we update rho (if PROFILING disabled)
 #  define ADAPTIVE_RHO_FIXED (100)              ///< number of iterations after which we update rho if termination_check  and PROFILING are disabled
-# endif // if EMBEDDED != 1
 
 #  define TIME_LIMIT ((c_float)1e10)            ///< Disable time limit as default
 

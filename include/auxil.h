@@ -172,6 +172,8 @@ c_int validate_data(const csc     *P,
                     c_int          m,
                     c_int          n);
 
+# endif // #ifndef EMBEDDED
+
 
 /**
  * Validate problem settings
@@ -182,8 +184,6 @@ c_int validate_data(const csc     *P,
 c_int validate_settings(const OSQPSettings *settings,
                         c_int               from_setup);
 
-
-# endif // #ifndef EMBEDDED
 
 # ifdef __cplusplus
 }
