@@ -163,11 +163,10 @@ void test_basic_qp2_update()
 
   // Define Solver settings as default
   osqp_set_default_settings(settings);
-  settings->alpha = 1.6;
-
-  settings->warm_start = 1;
-  settings->polishing  = 1;
-  settings->verbose    = 1;
+  settings->alpha         = 1.6;
+  settings->warm_starting = 1;
+  settings->polishing     = 1;
+  settings->verbose       = 1;
 
   // Setup workspace
   exitflag = osqp_setup(&solver, data->P, data->q,

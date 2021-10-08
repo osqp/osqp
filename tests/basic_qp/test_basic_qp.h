@@ -25,12 +25,12 @@ void test_basic_qp_solve()
 
   // Define Solver settings as default
   osqp_set_default_settings(settings);
-  settings->max_iter   = 2000;
-  settings->alpha      = 1.6;
-  settings->polishing  = 1;
-  settings->scaling    = 0;
-  settings->verbose    = 1;
-  settings->warm_start = 0;
+  settings->max_iter      = 2000;
+  settings->alpha         = 1.6;
+  settings->polishing     = 1;
+  settings->scaling       = 0;
+  settings->verbose       = 1;
+  settings->warm_starting = 0;
 
   // Setup solver
   exitflag = osqp_setup(&solver, data->P, data->q,
@@ -98,10 +98,10 @@ void test_basic_qp_solve()
 	    osqp_update_settings(solver, settings) > 0);
   settings->alpha = ALPHA;
 
-  settings->warm_start = -1;
-  mu_assert("Basic QP test solve: Wrong value of warm_start not caught!",
+  settings->warm_starting = -1;
+  mu_assert("Basic QP test solve: Wrong value of warm_starting not caught!",
 	    osqp_update_settings(solver, settings) > 0);
-  settings->warm_start = 0;
+  settings->warm_starting = 0;
 
   settings->scaled_termination = 2;
   mu_assert("Basic QP test solve: Wrong value of scaled_termination not caught!",
@@ -340,15 +340,15 @@ void test_basic_qp_solve()
             exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
   settings->check_termination = tmp_int;
 
-  // Setup solver with wrong settings->warm_start
-  tmp_int = settings->warm_start;
-  settings->warm_start = 5;
+  // Setup solver with wrong settings->warm_starting
+  tmp_int = settings->warm_starting;
+  settings->warm_starting = 5;
   exitflag = osqp_setup(&solver, data->P, data->q,
                         data->A, data->l, data->u,
                         data->m, data->n, settings);
-  mu_assert("Basic QP test solve: Setup should result in error due to non-boolean settings->warm_start",
+  mu_assert("Basic QP test solve: Setup should result in error due to non-boolean settings->warm_starting",
             exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
-  settings->warm_start = tmp_int;
+  settings->warm_starting = tmp_int;
 
 #ifdef PROFILING
   // Setup solver with wrong settings->time_limit
@@ -500,7 +500,7 @@ void test_basic_qp_solve_pardiso()
   settings->polishing     = 1;
   settings->scaling       = 0;
   settings->verbose       = 1;
-  settings->warm_start    = 0;
+  settings->warm_starting = 0;
   settings->linsys_solver = MKL_PARDISO_SOLVER;
 
   // Setup solver
@@ -567,12 +567,12 @@ void test_basic_qp_update()
 
   // Define Solver settings as default
   osqp_set_default_settings(settings);
-  settings->max_iter   = 200;
-  settings->alpha      = 1.6;
-  settings->polishing  = 1;
-  settings->scaling    = 0;
-  settings->verbose    = 1;
-  settings->warm_start = 0;
+  settings->max_iter      = 200;
+  settings->alpha         = 1.6;
+  settings->polishing     = 1;
+  settings->scaling       = 0;
+  settings->verbose       = 1;
+  settings->warm_starting = 0;
 
   // Setup solver
   exitflag = osqp_setup(&solver, data->P, data->q,
@@ -689,7 +689,7 @@ void test_basic_qp_check_termination()
   settings->scaling           = 0;
   settings->verbose           = 1;
   settings->check_termination = 0;
-  settings->warm_start        = 0;
+  settings->warm_starting     = 0;
 
   // Setup solver
   exitflag = osqp_setup(&solver, data->P, data->q,

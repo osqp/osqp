@@ -104,7 +104,7 @@ Python
     prob = osqp.OSQP()
 
     # Setup workspace
-    prob.setup(P, q, A, l, u, warm_start=True)
+    prob.setup(P, q, A, l, u, warm_starting=True)
 
     # Simulate in closed loop
     nsim = 15
@@ -202,7 +202,7 @@ Matlab
     prob = osqp;
 
     % Setup workspace
-    prob.setup(P, q, A, l, u, 'warm_start', true);
+    prob.setup(P, q, A, l, u, 'warm_starting', true);
 
     % Simulate in closed loop
     nsim = 15;
@@ -306,7 +306,7 @@ CVXPY
     nsim = 15
     for i in range(nsim):
         x_init.value = x0
-        prob.solve(solver=OSQP, warm_start=True)
+        prob.solve(solver=OSQP, warm_starting=True)
         x0 = Ad.dot(x0) + Bd.dot(u[:,0].value)
 
 
@@ -466,7 +466,7 @@ Julia
     m = OSQP.Model()
 
     # Setup workspace
-    OSQP.setup!(m; P=P, q=q, A=A, l=l, u=u, warm_start=true)
+    OSQP.setup!(m; P=P, q=q, A=A, l=l, u=u, warm_starting=true)
 
     # Simulate in closed loop
     nsim = 15;

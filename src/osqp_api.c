@@ -46,42 +46,33 @@ void osqp_get_dimensions(OSQPSolver *solver,
 
 void osqp_set_default_settings(OSQPSettings *settings) {
 
-  settings->rho           = (c_float)RHO;            /* ADMM step */
-  settings->rho_is_vec    = RHO_IS_VEC;              /* defines whether rho is scalar or vector*/
-  settings->sigma         = (c_float)SIGMA;          /* ADMM step */
-  settings->scaling       = SCALING;                 /* heuristic problem scaling */
-#if EMBEDDED != 1
+  settings->linsys_solver = LINSYS_SOLVER;      /* linear system solver */
+  settings->verbose       = VERBOSE;            /* print output */
+  settings->warm_starting = WARM_STARTING;      /* warm starting */
+  settings->scaling       = SCALING;            /* heuristic problem scaling */
+  settings->polishing     = POLISHING;          /* ADMM solution polish: 1 */
+
+  settings->rho           = (c_float)RHO;       /* ADMM step */
+  settings->rho_is_vec    = RHO_IS_VEC;         /* defines whether rho is scalar or vector*/
+  settings->sigma         = (c_float)SIGMA;     /* ADMM step */
+  settings->alpha         = (c_float)ALPHA;     /* relaxation parameter */
+
   settings->adaptive_rho           = ADAPTIVE_RHO;
   settings->adaptive_rho_interval  = ADAPTIVE_RHO_INTERVAL;
+  settings->adaptive_rho_fraction  = (c_float)ADAPTIVE_RHO_FRACTION;
   settings->adaptive_rho_tolerance = (c_float)ADAPTIVE_RHO_TOLERANCE;
 
-# ifdef PROFILING
-  settings->adaptive_rho_fraction = (c_float)ADAPTIVE_RHO_FRACTION;
-# endif /* ifdef PROFILING */
-#endif  /* if EMBEDDED != 1 */
+  settings->max_iter           = MAX_ITER;                /* maximum number of ADMM iterations */
+  settings->eps_abs            = (c_float)EPS_ABS;        /* absolute convergence tolerance */
+  settings->eps_rel            = (c_float)EPS_REL;        /* relative convergence tolerance */
+  settings->eps_prim_inf       = (c_float)EPS_PRIM_INF;   /* primal infeasibility tolerance */
+  settings->eps_dual_inf       = (c_float)EPS_DUAL_INF;   /* dual infeasibility   tolerance */
+  settings->scaled_termination = SCALED_TERMINATION;      /* evaluate scaled termination criteria */
+  settings->check_termination  = CHECK_TERMINATION;       /* interval for evaluating termination criteria */
+  settings->time_limit         = TIME_LIMIT;              /* stop the algorithm when time limit is reached */
 
-  settings->max_iter      = MAX_ITER;                /* maximum iterations */
-  settings->eps_abs       = (c_float)EPS_ABS;        /* absolute convergence tolerance */
-  settings->eps_rel       = (c_float)EPS_REL;        /* relative convergence tolerance */
-  settings->eps_prim_inf  = (c_float)EPS_PRIM_INF;   /* primal infeasibility tolerance */
-  settings->eps_dual_inf  = (c_float)EPS_DUAL_INF;   /* dual infeasibility   tolerance */
-  settings->alpha         = (c_float)ALPHA;          /* relaxation parameter */
-  settings->linsys_solver = LINSYS_SOLVER;           /* linear system solver */
-
-#ifndef EMBEDDED
-  settings->delta              = DELTA;              /* regularization parameter for polishing */
-  settings->polishing          = POLISHING;          /* ADMM solution polish: 1 */
-  settings->polish_refine_iter = POLISH_REFINE_ITER; /* iterative refinement steps in polish */
-  settings->verbose            = VERBOSE;            /* print output */
-#endif /* ifndef EMBEDDED */
-
-  settings->scaled_termination = SCALED_TERMINATION; /* Evaluate scaled termination criteria*/
-  settings->check_termination  = CHECK_TERMINATION;  /* Interval for evaluating termination criteria */
-  settings->warm_start         = WARM_START;         /* warm starting */
-
-#ifdef PROFILING
-  settings->time_limit = TIME_LIMIT;
-#endif /* ifdef PROFILING */
+  settings->delta              = DELTA;                   /* regularization parameter for polishing */
+  settings->polish_refine_iter = POLISH_REFINE_ITER;      /* iterative refinement steps in polish */
 }
 
 #ifndef EMBEDDED
@@ -391,8 +382,8 @@ c_int osqp_solve(OSQPSolver *solver) {
 #endif /* ifdef CTRLC */
 
   // Initialize variables (cold start or warm start depending on settings)
-  if (!solver->settings->warm_start) osqp_cold_start(solver);  // If not warm start ->
-                                                               // set x, z, y to zero
+  // If not warm start -> set x, z, y to zero
+  if (!solver->settings->warm_starting) osqp_cold_start(solver);
 
   // Main ADMM algorithm
 
@@ -901,7 +892,7 @@ c_int osqp_warm_start(OSQPSolver    *solver,
   work = solver->work;
 
   /* Update warm_start setting to true */
-  if (!solver->settings->warm_start) solver->settings->warm_start = 1;
+  if (!solver->settings->warm_starting) solver->settings->warm_starting = 1;
 
   /* Copy primal and dual variables into the iterates */
   if (x) OSQPVectorf_from_raw(work->x, x);
@@ -1095,7 +1086,7 @@ c_int osqp_update_settings(OSQPSolver         *solver,
   /* Update settings */
   // linsys_solver ignored
   settings->verbose                = new_settings->verbose;
-  settings->warm_start             = new_settings->warm_start;
+  settings->warm_starting          = new_settings->warm_starting;
   // scaling ignored
   settings->polishing              = new_settings->polishing;
 

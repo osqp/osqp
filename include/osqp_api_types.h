@@ -34,7 +34,7 @@ typedef struct {
   // TODO: Add device ID
   enum linsys_solver_type linsys_solver; ///< linear system solver to use
   c_int verbose;                         ///< boolean; write out progress
-  c_int warm_start;                      ///< boolean; warm start
+  c_int warm_starting;                   ///< boolean; warm start
   c_int scaling;                         ///< data scaling iterations; if 0, then disabled
   c_int polishing;                       ///< boolean; polish ADMM solution
 

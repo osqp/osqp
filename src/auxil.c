@@ -1003,8 +1003,8 @@ c_int validate_settings(const OSQPSettings *settings,
     return 1;
   }
 
-  if ((settings->warm_start != 0) &&
-      (settings->warm_start != 1)) {
+  if ((settings->warm_starting != 0) &&
+      (settings->warm_starting != 1)) {
 # ifdef PRINTING
     c_eprint("warm_start must be either 0 or 1");
 # endif /* ifdef PRINTING */

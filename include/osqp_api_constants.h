@@ -97,7 +97,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 #endif
 
 # define SCALED_TERMINATION (0)
-# define WARM_START (1)
+# define WARM_STARTING (1)
 # define SCALING (10)
 
 # define MIN_SCALING (1e-04) ///< minimum scaling value
@@ -142,9 +142,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 #  define ADAPTIVE_RHO_FIXED (100)              ///< number of iterations after which we update rho if termination_check  and PROFILING are disabled
 # endif // if EMBEDDED != 1
 
-# ifdef PROFILING
-#  define TIME_LIMIT ((c_float)1e10)                        ///< Disable time limit as default
-# endif // ifdef PROFILING
+#  define TIME_LIMIT ((c_float)1e10)            ///< Disable time limit as default
 
 /* Printing */
 # define PRINT_INTERVAL 200

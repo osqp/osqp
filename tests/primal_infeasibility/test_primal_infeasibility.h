@@ -24,12 +24,12 @@ void test_primal_infeasible_qp_solve()
 
   // Define Solver settings as default
   osqp_set_default_settings(settings);
-  settings->max_iter   = 10000;
-  settings->alpha      = 1.6;
-  settings->polishing  = 1;
-  settings->scaling    = 0;
-  settings->verbose    = 1;
-  settings->warm_start = 0;
+  settings->max_iter      = 10000;
+  settings->alpha         = 1.6;
+  settings->polishing     = 1;
+  settings->scaling       = 0;
+  settings->verbose       = 1;
+  settings->warm_starting = 0;
 
   // Setup workspace
   exitflag = osqp_setup(&solver, data->P, data->q,
