@@ -42,8 +42,7 @@ Python
     n = 10
     m = 1000
     Ad = sparse.random(m, n, density=0.5)
-    x_true = np.multiply((np.random.rand(n) > 0.8).astype(float),
-                         np.random.randn(n)) / np.sqrt(n)
+    x_true = (np.random.rand(n) > 0.8).astype(float) * np.random.randn(n) / np.sqrt(n)
     b = Ad@x_true + 0.5*np.random.randn(m)
     gammas = np.linspace(1, 10, 11)
 
@@ -134,8 +133,7 @@ CVXPY
     n = 10
     m = 1000
     A = sparse.random(m, n, density=0.5)
-    x_true = np.multiply((np.random.rand(n) > 0.8).astype(float),
-                         np.random.randn(n)) / np.sqrt(n)
+    x_true = (np.random.rand(n) > 0.8).astype(float) * np.random.randn(n) / np.sqrt(n)
     b = A@x_true + 0.5*np.random.randn(m)
     gammas = np.linspace(1, 10, 11)
 
