@@ -33,8 +33,8 @@ test_mat_ops_n = 2
 test_mat_ops_A = sparse.random(test_mat_ops_n, test_mat_ops_n, density=0.8, format='csc', random_state=rg)
 test_mat_ops_d = rg.standard_normal(test_mat_ops_n)
 D = sparse.diags(test_mat_ops_d, format='csc')
-test_mat_ops_prem_diag = (D@test_mat_ops_A).tocsc()
-test_mat_ops_postm_diag = (test_mat_ops_A@D).tocsc()
+test_mat_ops_prem_diag = (D@test_mat_ops_A).tocoo().tocsc()   # Force matrix reordering
+test_mat_ops_postm_diag = (test_mat_ops_A@D).tocoo().tocsc()  # Force matrix reordering
 test_mat_ops_inf_norm_cols = np.amax(np.abs(
     np.asarray(test_mat_ops_A.todense())), axis=0)
 test_mat_ops_inf_norm_rows = np.amax(np.abs(
@@ -76,7 +76,7 @@ test_qpform_P = sparse.random(test_qpform_n, test_qpform_n, density=0.8, format=
 test_qpform_P = test_qpform_P + test_qpform_P.T
 test_qpform_Pu = sparse.triu(test_qpform_P, format='csc')
 test_qpform_x = rg.standard_normal(test_qpform_n)
-test_qpform_value = .5 * test_qpform_x.T @ test_qpform_P @ test_qpform_x
+test_qpform_value = .5 * test_qpform_x.T @ (test_qpform_P@test_qpform_x)
 
 
 # Generate test data and solutions
