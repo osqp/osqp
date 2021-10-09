@@ -10,7 +10,7 @@ m = 150
 
 # Generate random Matrices
 Pt = sparse.random(n, n, random_state=rg)
-P = Pt.T.dot(Pt) + sparse.eye(n)
+P = Pt.T@Pt + sparse.eye(n)
 P = sparse.triu(P, format='csc')
 q = rg.standard_normal(n)
 A = sparse.random(m, n, random_state=rg).tolil()  # Lil for efficiency

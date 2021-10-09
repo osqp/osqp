@@ -47,7 +47,7 @@ Python
     Ad = sparse.random(m, n, density=0.5, format='csc')
     x_true = np.random.randn(n) / np.sqrt(n)
     ind95 = (np.random.rand(m) < 0.95).astype(float)
-    b = Ad.dot(x_true) + np.multiply(0.5*np.random.randn(m), ind95) \
+    b = Ad@x_true + np.multiply(0.5*np.random.randn(m), ind95) \
         + np.multiply(10.*np.random.rand(m), 1. - ind95)
 
     # OSQP data
@@ -127,7 +127,7 @@ CVXPY
     A = sparse.random(m, n, density=0.5, format='csc')
     x_true = np.random.randn(n) / np.sqrt(n)
     ind95 = (np.random.rand(m) < 0.95).astype(float)
-    b = A.dot(x_true) + np.multiply(0.5*np.random.randn(m), ind95) \
+    b = A@x_true + np.multiply(0.5*np.random.randn(m), ind95) \
         + np.multiply(10.*np.random.rand(m), 1. - ind95)
 
     # Define problem

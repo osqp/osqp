@@ -51,8 +51,8 @@ Python
     Im = sparse.eye(m)
     P = sparse.block_diag([sparse.eye(n), sparse.csc_matrix((m, m))], format='csc')
     q = np.hstack([np.zeros(n), gamma*np.ones(m)])
-    A = sparse.bmat([[sparse.diags(b).dot(Ad), -Im],
-                     [None,                     Im]], format='csc')
+    A = sparse.bmat([[sparse.diags(b)@Ad, -Im],
+                     [None,                Im]], format='csc')
     l = np.hstack([-np.inf*np.ones(m), np.zeros(m)])
     u = np.hstack([-np.ones(m), np.inf*np.ones(m)])
 

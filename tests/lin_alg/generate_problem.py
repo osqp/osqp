@@ -23,7 +23,7 @@ test_vec_ops_norm_inf_diff = np.linalg.norm(test_vec_ops_v1 - test_vec_ops_v2,
                                             np.inf)
 test_vec_ops_add_scaled = test_vec_ops_sc1 * test_vec_ops_v1 + test_vec_ops_sc2 * test_vec_ops_v2
 test_vec_ops_ew_reciprocal = np.reciprocal(test_vec_ops_v1)
-test_vec_ops_vec_prod = test_vec_ops_v1.dot(test_vec_ops_v2)
+test_vec_ops_vec_prod = test_vec_ops_v1@test_vec_ops_v2
 test_vec_ops_ew_max_vec = np.maximum(test_vec_ops_v1, test_vec_ops_v2)
 #test_vec_ops_ew_min_vec = np.minimum(test_vec_ops_v1, test_vec_ops_v2)
 
@@ -33,8 +33,8 @@ test_mat_ops_n = 2
 test_mat_ops_A = sparse.random(test_mat_ops_n, test_mat_ops_n, density=0.8, format='csc', random_state=rg)
 test_mat_ops_d = rg.standard_normal(test_mat_ops_n)
 D = sparse.diags(test_mat_ops_d, format='csc')
-test_mat_ops_prem_diag = D.dot(test_mat_ops_A).tocoo().tocsc()   # Force matrix reordering
-test_mat_ops_postm_diag = test_mat_ops_A.dot(D).tocoo().tocsc()  # Force matrix reordering
+test_mat_ops_prem_diag = (D@test_mat_ops_A).tocsc()
+test_mat_ops_postm_diag = (test_mat_ops_A@D).tocsc()
 test_mat_ops_inf_norm_cols = np.amax(np.abs(
     np.asarray(test_mat_ops_A.todense())), axis=0)
 test_mat_ops_inf_norm_rows = np.amax(np.abs(
@@ -53,12 +53,12 @@ test_mat_vec_P = test_mat_vec_P + test_mat_vec_P.T
 test_mat_vec_Pu = sparse.triu(test_mat_vec_P, format='csc')
 test_mat_vec_x = rg.standard_normal(n)
 test_mat_vec_y = rg.standard_normal(m)
-test_mat_vec_Ax = test_mat_vec_A.dot(test_mat_vec_x)
-test_mat_vec_Ax_cum = test_mat_vec_A.dot(test_mat_vec_x) + test_mat_vec_y
-test_mat_vec_ATy = test_mat_vec_A.T.dot(test_mat_vec_y)
-test_mat_vec_ATy_cum = test_mat_vec_A.T.dot(test_mat_vec_y) + test_mat_vec_x
-test_mat_vec_Px = test_mat_vec_P.dot(test_mat_vec_x)
-test_mat_vec_Px_cum = test_mat_vec_P.dot(test_mat_vec_x) + test_mat_vec_x
+test_mat_vec_Ax = test_mat_vec_A@test_mat_vec_x
+test_mat_vec_Ax_cum = test_mat_vec_A@test_mat_vec_x + test_mat_vec_y
+test_mat_vec_ATy = test_mat_vec_A.T@test_mat_vec_y
+test_mat_vec_ATy_cum = test_mat_vec_A.T@test_mat_vec_y + test_mat_vec_x
+test_mat_vec_Px = test_mat_vec_P@test_mat_vec_x
+test_mat_vec_Px_cum = test_mat_vec_P@test_mat_vec_x + test_mat_vec_x
 
 
 # Test extract upper triangular
@@ -76,7 +76,7 @@ test_qpform_P = sparse.random(test_qpform_n, test_qpform_n, density=0.8, format=
 test_qpform_P = test_qpform_P + test_qpform_P.T
 test_qpform_Pu = sparse.triu(test_qpform_P, format='csc')
 test_qpform_x = rg.standard_normal(test_qpform_n)
-test_qpform_value = .5 * test_qpform_x.T.dot(test_qpform_P.dot(test_qpform_x))
+test_qpform_value = .5 * test_qpform_x.T @ test_qpform_P @ test_qpform_x
 
 
 # Generate test data and solutions

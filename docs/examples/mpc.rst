@@ -83,8 +83,7 @@ Python
     P = sparse.block_diag([sparse.kron(sparse.eye(N), Q), QN,
                            sparse.kron(sparse.eye(N), R)], format='csc')
     # - linear objective
-    q = np.hstack([np.kron(np.ones(N), -Q.dot(xr)), -QN.dot(xr),
-                   np.zeros(N*nu)])
+    q = np.hstack([np.kron(np.ones(N), -Q@xr), -QN@xr, np.zeros(N*nu)])
     # - linear dynamics
     Ax = sparse.kron(sparse.eye(N+1),-sparse.eye(nx)) + sparse.kron(sparse.eye(N+1, k=-1), Ad)
     Bu = sparse.kron(sparse.vstack([sparse.csc_matrix((1, N)), sparse.eye(N)]), Bd)
@@ -118,7 +117,7 @@ Python
 
         # Apply first control input to the plant
         ctrl = res.x[-N*nu:-(N-1)*nu]
-        x0 = Ad.dot(x0) + Bd.dot(ctrl)
+        x0 = Ad@x0 + Bd@ctrl
 
         # Update initial state
         l[:nx] = -x0

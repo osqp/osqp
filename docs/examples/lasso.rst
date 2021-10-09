@@ -44,7 +44,7 @@ Python
     Ad = sparse.random(m, n, density=0.5)
     x_true = np.multiply((np.random.rand(n) > 0.8).astype(float),
                          np.random.randn(n)) / np.sqrt(n)
-    b = Ad.dot(x_true) + 0.5*np.random.randn(m)
+    b = Ad@x_true + 0.5*np.random.randn(m)
     gammas = np.linspace(1, 10, 11)
 
     # Auxiliary data
@@ -136,7 +136,7 @@ CVXPY
     A = sparse.random(m, n, density=0.5)
     x_true = np.multiply((np.random.rand(n) > 0.8).astype(float),
                          np.random.randn(n)) / np.sqrt(n)
-    b = A.dot(x_true) + 0.5*np.random.randn(m)
+    b = A@x_true + 0.5*np.random.randn(m)
     gammas = np.linspace(1, 10, 11)
 
     # Define problem

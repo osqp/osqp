@@ -12,7 +12,7 @@ test_solve_KKT_m = 4
 
 test_solve_KKT_P = sparse.random(test_solve_KKT_n, test_solve_KKT_n,
                                  density=0.4, format='csc', random_state=rg)
-test_solve_KKT_P = test_solve_KKT_P.dot(test_solve_KKT_P.T).tocsc()
+test_solve_KKT_P = (test_solve_KKT_P@test_solve_KKT_P.T).tocsc()
 test_solve_KKT_A = sparse.random(test_solve_KKT_m, test_solve_KKT_n,
                                  density=0.4, format='csc', random_state=rg)
 test_solve_KKT_Pu = sparse.triu(test_solve_KKT_P, format='csc')
