@@ -296,7 +296,7 @@ CVXPY
     constraints = [x[:,0] == x_init]
     for k in range(N):
         objective += quad_form(x[:,k] - xr, Q) + quad_form(u[:,k], R)
-        constraints += [x[:,k+1] == Ad*x[:,k] + Bd*u[:,k]]
+        constraints += [x[:,k+1] == Ad@x[:,k] + Bd@u[:,k]]
         constraints += [xmin <= x[:,k], x[:,k] <= xmax]
         constraints += [umin <= u[:,k], u[:,k] <= umax]
     objective += quad_form(x[:,N] - xr, QN)
@@ -307,7 +307,7 @@ CVXPY
     for i in range(nsim):
         x_init.value = x0
         prob.solve(solver=OSQP, warm_starting=True)
-        x0 = Ad.dot(x0) + Bd.dot(u[:,0].value)
+        x0 = Ad@x0 + Bd@u[:,0].value
 
 
 

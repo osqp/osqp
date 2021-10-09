@@ -51,14 +51,13 @@ Python
     In = sparse.eye(n)
     Im = sparse.eye(m)
     On = sparse.csc_matrix((n, n))
-    Onm = sparse.csc_matrix((n, m))
 
     # OSQP data
-    P = sparse.block_diag([On, sparse.eye(m), On], format='csc')
+    P = sparse.block_diag([On, Im, On], format='csc')
     q = np.zeros(2*n + m)
-    A = sparse.vstack([sparse.hstack([Ad, -Im, Onm.T]),
-                       sparse.hstack([In, Onm, -In]),
-                       sparse.hstack([In, Onm, In])], format='csc')
+    A = sparse.bmat([[Ad, -Im,    None],
+                     [In,  None, -In],
+                     [In,  None,  In]], format='csc')
     l = np.hstack([b, -np.inf * np.ones(n), np.zeros(n)])
     u = np.hstack([b, np.zeros(n), np.inf * np.ones(n)])
 
@@ -143,7 +142,7 @@ CVXPY
     # Define problem
     x = Variable(n)
     gamma = Parameter(nonneg=True)
-    objective = 0.5*sum_squares(A*x - b) + gamma*norm1(x)
+    objective = 0.5*sum_squares(A@x - b) + gamma*norm1(x)
     prob = Problem(Minimize(objective))
 
     # Solve problem for different values of gamma parameter

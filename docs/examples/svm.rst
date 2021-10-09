@@ -51,10 +51,8 @@ Python
     Im = sparse.eye(m)
     P = sparse.block_diag([sparse.eye(n), sparse.csc_matrix((m, m))], format='csc')
     q = np.hstack([np.zeros(n), gamma*np.ones(m)])
-    A = sparse.vstack([
-            sparse.hstack([sparse.diags(b).dot(Ad), -Im]),
-            sparse.hstack([sparse.csc_matrix((m, n)), Im])
-        ], format='csc')
+    A = sparse.bmat([[sparse.diags(b).dot(Ad), -Im],
+                     [None,                     Im]], format='csc')
     l = np.hstack([-np.inf*np.ones(m), np.zeros(m)])
     u = np.hstack([-np.ones(m), np.inf*np.ones(m)])
 
@@ -130,7 +128,7 @@ CVXPY
 
     # Define problem
     x = Variable(n)
-    objective = 0.5*sum_squares(x) + gamma*sum(pos(diag(b)*A*x + 1))
+    objective = 0.5*sum_squares(x) + gamma*sum(pos(diag(b)@A@x + 1))
 
     # Solve with OSQP
     Problem(Minimize(objective)).solve(solver=OSQP)

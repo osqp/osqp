@@ -55,19 +55,19 @@ The most basic used datatypes are
 * :code:`c_float`: can be a :code:`float` or a :code:`double` if the compiler flag :code:`DFLOAT` is set or not.
 
 
-
-The relevant structures used in the API are
-
-Data
-^^^^
-
-.. doxygenstruct:: OSQPData
-   :members:
-
 The matrices are defined in `Compressed Sparse Column (CSC) format <https://people.sc.fsu.edu/~jburkardt/data/cc/cc.html>`_ using zero-based indexing.
 
 .. doxygenstruct:: csc
    :members:
+
+
+The relevant structures used in the API are
+
+Solver
+^^^^^^^^
+
+.. doxygenstruct:: OSQPSolver
+  :members:
 
 Settings
 ^^^^^^^^
@@ -86,24 +86,6 @@ Info
 
 .. doxygenstruct:: OSQPInfo
    :members:
-
-Workspace
-^^^^^^^^^
-
-.. doxygenstruct:: OSQPWorkspace
-   :members:
-
-
-Scaling
-^^^^^^^
-
-.. doxygenstruct:: OSQPScaling
-   :members:
-
-Polish
-^^^^^^
-.. doxygenstruct:: OSQPPolish
-  :members:
 
 
 

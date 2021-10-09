@@ -167,6 +167,7 @@ C
 
 .. code:: c
 
+    #include <stdlib.h>
     #include "osqp.h"
 
     int main(int argc, char **argv) {

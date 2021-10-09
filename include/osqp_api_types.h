@@ -101,7 +101,7 @@ typedef struct {
  */
 typedef struct {
   c_float *x;             ///< primal solution
-  c_float *y;             ///< Lagrange multiplier associated to \f$l <= Ax <= u\f$
+  c_float *y;             ///< Lagrange multiplier associated with \f$l \le Ax \le u\f$
   c_float *prim_inf_cert; ///< primal infeasibility certificate
   c_float *dual_inf_cert; ///< dual infeasibility certificate
 } OSQPSolution;

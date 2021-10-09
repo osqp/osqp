@@ -132,7 +132,7 @@ CVXPY
 
     # Define problem
     x = Variable(n)
-    objective = sum(huber(A*x - b))
+    objective = sum(huber(A@x - b))
 
     # Solve with OSQP
     Problem(Minimize(objective)).solve(solver=OSQP)
