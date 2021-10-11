@@ -70,6 +70,7 @@ typedef struct {
   c_int   polish_refine_iter;     ///< number of iterative refinement steps in polishing
 } OSQPSettings;
 
+
 /**
  * Solver return information
  */

@@ -32,8 +32,8 @@ void project_normalcone(OSQPVectorf       *z,
                         const OSQPVectorf *l,
                         const OSQPVectorf *u) {
 
-  // y <- z + y;  z <- proj_C(y);  y <- y - z
-  OSQPVectorf_plus(y, z, y);
+  // y <- y + z;  z <- proj_C(y);  y <- y - z
+  OSQPVectorf_plus(y, y, z);
   OSQPVectorf_ew_bound_vec(z, y, l, u);
   OSQPVectorf_minus(y, y, z);
 }
