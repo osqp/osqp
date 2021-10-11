@@ -56,6 +56,10 @@ OSQPVectorf* OSQPVectorf_view(const OSQPVectorf *a,
                               c_int              head,
                               c_int              length);
 
+/* Points existing subview somewhere else.  (Does not use MALLOC)
+ */
+void OSQPVectorf_view_update(OSQPVectorf *a, const OSQPVectorf *b, c_int head, c_int length);
+
 /* Free a view of a float vector */
 void OSQPVectorf_view_free(OSQPVectorf *a);
 
@@ -118,7 +122,7 @@ void OSQPVectorf_plus(OSQPVectorf       *x,
                       const OSQPVectorf *a,
                       const OSQPVectorf *b);
 
-/* x = a - b.  Set x == a for x -= b. */
+/* x = a - b.  x==a or x==-b at entry is possible */
 void OSQPVectorf_minus(OSQPVectorf      *x,
                       const OSQPVectorf *a,
                       const OSQPVectorf *b);

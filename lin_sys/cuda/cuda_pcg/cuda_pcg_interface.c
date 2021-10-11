@@ -119,7 +119,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   *sp = s;
 
   /* Assign type and the number of threads */
-  s->type     = CUDA_PCG_SOLVER;
+  s->type     = INDIRECT_SOLVER;
   s->nthreads = 1;
 
   /* Problem dimensions */
@@ -214,6 +214,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   s->free            = &free_linsys_solver_cudapcg;
   s->update_matrices = &update_linsys_solver_matrices_cudapcg;
   s->update_rho_vec  = &update_linsys_solver_rho_vec_cudapcg;
+  s->update_settings = &update_settings_linsys_solver_cudapcg;
 
   /* Initialize PCG preconditioner */
   if (s->precondition) cuda_pcg_update_precond(s, 1, 1, 1);
@@ -256,6 +257,12 @@ c_int solve_linsys_cudapcg(cudapcg_solver *s,
   if (pcg_iters == 0) s->zero_pcg_iters++;
 
   return 0;
+}
+
+
+void update_settings_linsys_solver_cudapcg(cudapcg_solver     *s,
+                                           const OSQPSettings *settings) {
+    //TODO: implement this!
 }
 
 

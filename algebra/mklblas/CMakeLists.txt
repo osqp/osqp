@@ -1,4 +1,4 @@
-# Define the algebra implementation
+find_package(MKL CONFIG REQUIRED)
 
 target_sources(OSQPLIB
     PRIVATE
@@ -13,3 +13,7 @@ target_include_directories(OSQPLIB
     PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+target_include_directories(OSQPLIB PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_INCLUDE_DIRECTORIES>)
+target_compile_options(OSQPLIB PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_COMPILE_OPTIONS>)
+target_link_libraries(OSQPLIB PUBLIC $<LINK_ONLY:MKL::MKL>)

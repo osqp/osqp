@@ -26,6 +26,9 @@ struct pardiso {
                    OSQPVectorf    *b,
                    c_int           admm_iter);
 
+    void (*update_settings)(struct pardiso     *self,
+                            const OSQPSettings *settings);
+
     void (*warm_start)(struct pardiso    *self,
                        const OSQPVectorf *x);
 
@@ -111,6 +114,10 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
 c_int solve_linsys_pardiso(pardiso_solver *s,
                            OSQPVectorf    *b,
                            c_int           admm_iter);
+
+
+void update_settings_linsys_solver_pardiso(pardiso_solver *s,
+                                           const OSQPSettings    *settings);
 
 
 void warm_start_linsys_solver_pardiso(pardiso_solver    *s,

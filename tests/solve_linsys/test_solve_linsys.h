@@ -74,7 +74,7 @@ void test_solveKKT_pardiso() {
   // Settings
   settings->rho           = data->test_solve_KKT_rho;
   settings->sigma         = data->test_solve_KKT_sigma;
-  settings->linsys_solver = MKL_PARDISO_SOLVER;
+  settings->linsys_solver = DIRECT_SOLVER;
 
   // Set rho_vec
   m       = data->test_solve_KKT_A->m;
@@ -87,7 +87,7 @@ void test_solveKKT_pardiso() {
   A  = OSQPMatrix_new_from_csc(data->test_solve_KKT_A,0);
 
   // Load Pardiso shared library
-  exitflag = load_linsys_solver(MKL_PARDISO_SOLVER);
+  exitflag = load_linsys_solver(DIRECT_SOLVER);
   mu_assert("Linear system solve test: error in loading Pardiso shared library",
             exitflag == 0);
 
@@ -115,6 +115,6 @@ void test_solveKKT_pardiso() {
   clean_problem_solve_linsys_sols_data(data);
 
   // Unload Pardiso shared library
-  exitflag = unload_linsys_solver(MKL_PARDISO_SOLVER);
+  exitflag = unload_linsys_solver(DIRECT_SOLVER);
 }
 #endif

@@ -33,7 +33,7 @@ extern "C" {
 /*************************
 * Linear System Solvers *
 *************************/
-enum linsys_solver_type { QDLDL_SOLVER, MKL_PARDISO_SOLVER, CUDA_PCG_SOLVER, UNKNOWN_SOLVER=99 };
+enum linsys_solver_type { DIRECT_SOLVER, INDIRECT_SOLVER, UNKNOWN_SOLVER=99 };
 extern const char * LINSYS_SOLVER_NAME[];
 
 
@@ -67,9 +67,9 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define ALPHA (1.6)
 
 #ifdef CUDA_SUPPORT
-# define LINSYS_SOLVER (CUDA_PCG_SOLVER)
+# define LINSYS_SOLVER (INDIRECT_SOLVER)
 #else
-# define LINSYS_SOLVER (QDLDL_SOLVER)
+# define LINSYS_SOLVER (DIRECT_SOLVER)
 #endif
 
 # define RHO_MIN (1e-06)

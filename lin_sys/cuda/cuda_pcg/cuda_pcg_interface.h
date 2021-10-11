@@ -44,7 +44,10 @@ typedef struct cudapcg_solver_ {
                  OSQPVectorf            *b,
                  c_int                   admm_iter);
 
-  void (*warm_start)(struct cudapcg_solver_  *self,
+    void (*update_settings)(struct cudapcg_solver_  *self,
+                            const OSQPSettings      *settings);
+
+    void (*warm_start)(struct cudapcg_solver_  *self,
                      const OSQPVectorf       *x);
 
   void (*free)(struct cudapcg_solver_ *self);
@@ -146,6 +149,9 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
 c_int solve_linsys_cudapcg(cudapcg_solver *s,
                            OSQPVectorf    *b,
                            c_int           admm_iter);
+
+void update_settings_linsys_solver_cudapcg(cudapcg_solver     *s,
+                                           const OSQPSettings *settings);
 
 void warm_start_linsys_solver_cudapcg(cudapcg_solver    *s,
                                       const OSQPVectorf *x);

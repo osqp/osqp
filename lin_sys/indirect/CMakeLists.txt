@@ -1,0 +1,5 @@
+if(NOT DEFINED EMBEDDED)
+	if (ENABLE_MKL_PARDISO)
+		add_subdirectory(mkl-cg)
+	endif()
+endif()

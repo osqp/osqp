@@ -43,7 +43,7 @@ extern "C" {
 #include "@OSQP_CUSTOM_MEMORY@"
 #endif
 
-
+#cmakedefine ALGEBRA "@ALGEBRA@"
 
 # ifdef __cplusplus
 }

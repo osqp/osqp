@@ -475,7 +475,7 @@ void test_basic_qp_solve_pardiso()
   settings->scaling       = 0;
   settings->verbose       = 1;
   settings->warm_start    = 0;
-  settings->linsys_solver = MKL_PARDISO_SOLVER;
+  settings->linsys_solver = DIRECT_SOLVER;
 
   // Setup solver
   exitflag = osqp_setup(&solver, data->P, data->q,

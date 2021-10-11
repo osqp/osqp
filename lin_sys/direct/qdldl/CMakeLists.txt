@@ -1,9 +1,11 @@
-# Add qdldl
-add_subdirectory(qdldl_sources)
+
+# --------------------
+# AMD permutation code
+#---------------------
 
 if(NOT DEFINED EMBEDDED)
-set(
-    amd_sources
+target_sources(OSQPLIB
+    PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/amd/include/amd_internal.h
     ${CMAKE_CURRENT_SOURCE_DIR}/amd/include/amd.h
     ${CMAKE_CURRENT_SOURCE_DIR}/amd/include/SuiteSparse_config.h
@@ -22,25 +24,41 @@ set(
 )
 endif()
 
-set(qdldl_interface_sources
-    ${amd_sources}
+target_include_directories(OSQPLIB
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/amd/include
+)
+
+# --------------------
+# OSQP QDLDL interface
+#---------------------
+
+target_sources(OSQPLIB
+    PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/qdldl_interface.h
     ${CMAKE_CURRENT_SOURCE_DIR}/qdldl_interface.c
 )
 
-
-set(qdldl_interface_includes
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/amd/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/qdldl_sources/include
+target_include_directories(OSQPLIB
+    PRIVATE
+			"${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
-# Create object library for linear system solver interface
-add_library(linsys_qdldl OBJECT ${qdldl_interface_sources})
+# --------------------
+# QDLDL submodule
+#---------------------
 
-target_include_directories(linsys_qdldl PRIVATE
-                           ${qdldl_interface_includes}
-                           ${csc_tools_includes}
-                           ${osqp_api_includes}
-                           ${kkt_common_includes})
+add_subdirectory(qdldl_sources)
 
+set_source_files_properties($<TARGET_OBJECTS:qdldlobject> PROPERTIES GENERATED 1)
+
+
+target_sources(OSQPLIB
+        PRIVATE
+        $<TARGET_OBJECTS:qdldlobject>)
+
+# We need "qdldl_types.h" for "qdldl_interface.h"
+target_include_directories(OSQPLIB
+    PRIVATE
+		"${CMAKE_CURRENT_SOURCE_DIR}/qdldl_sources/include"
+)

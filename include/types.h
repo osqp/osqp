@@ -211,7 +211,10 @@ struct linsys_solver {
                  OSQPVectorf  *b,
                  c_int         admm_iter);
 
-  void (*warm_start)(LinSysSolver      *self,
+    void (*update_settings)(LinSysSolver       *self,
+                            const OSQPSettings *settings);
+
+    void (*warm_start)(LinSysSolver      *self,
                      const OSQPVectorf *x);
 
 # ifndef EMBEDDED

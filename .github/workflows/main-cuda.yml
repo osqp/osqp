@@ -2,7 +2,7 @@ name: Main-Cuda
 
 on:
   push:
-    branches: [ master, develop** ]
+    branches: [ master, develop**, vineetbansal/mkl ]
     tags:
       - '*'
   pull_request:
@@ -17,7 +17,7 @@ jobs:
         matrix:
           os: [ubuntu-latest]
           python-version: [3.9]
-          cmake_flags: ['-DUNITTESTS=ON -DCUDA_SUPPORT=ON']
+          cmake_flags: ['-DUNITTESTS=ON -DALGEBRA=cuda']
 
           include:
             - os: ubuntu-latest

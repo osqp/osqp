@@ -1,19 +1,8 @@
-
-set(kkt_common_headers
-    ${CMAKE_CURRENT_SOURCE_DIR}/kkt.h
+target_sources(OSQPLIB
+    PRIVATE
+      ${CMAKE_CURRENT_SOURCE_DIR}/kkt.h
+      ${CMAKE_CURRENT_SOURCE_DIR}/kkt.c
 )
 
-set(kkt_common_src
-    ${CMAKE_CURRENT_SOURCE_DIR}/kkt.c
-)
-
-
-# Create object library for kkt solvers
-add_library(kkt_common OBJECT
-          "${kkt_common_src}")
-
-target_include_directories(kkt_common PRIVATE
-                           ${csc_tools_includes}
-                           ${osqp_api_includes})
-
-set(kkt_common_includes ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+target_include_directories(OSQPLIB PRIVATE
+      ${CMAKE_CURRENT_SOURCE_DIR})

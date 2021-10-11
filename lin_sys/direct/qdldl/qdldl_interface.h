@@ -25,6 +25,9 @@ struct qdldl {
                    OSQPVectorf  *b,
                    c_int         admm_iter);
 
+    void (*update_settings)(struct qdldl       *self,
+                            const OSQPSettings *settings);
+
     void (*warm_start)(struct qdldl      *self,
                        const OSQPVectorf *x);
 
@@ -114,6 +117,10 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
 c_int solve_linsys_qdldl(qdldl_solver *s,
                          OSQPVectorf  *b,
                          c_int         admm_iter);
+
+
+void update_settings_linsys_solver_qdldl(qdldl_solver       *s,
+                                         const OSQPSettings *settings);
 
 
 void warm_start_linsys_solver_qdldl(qdldl_solver      *s,
