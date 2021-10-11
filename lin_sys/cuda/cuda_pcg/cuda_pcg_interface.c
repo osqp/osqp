@@ -34,38 +34,28 @@ static c_float compute_tolerance(cudapcg_solver *s,
   c_float eps, rhs_norm;
 
   /* Compute the norm of RHS of the linear system */
-  s->vector_norm(s->d_rhs, s->n, &rhs_norm);
+  cuda_vec_norm_inf(s->d_rhs, s->n, &rhs_norm);
 
   if (s->polishing) return c_max(rhs_norm * CUDA_PCG_POLISH_ACCURACY, CUDA_PCG_EPS_MIN);
 
-  switch (s->eps_strategy) {
+  if (admm_iter == 1) {
+    /* In case rhs = 0.0 we don't want to set eps_prev to 0.0 */
+    if (rhs_norm < CUDA_PCG_EPS_MIN) s->eps_prev = 1.0;
+    else s->eps_prev = rhs_norm * s->reduction_factor;
 
-    /* SCS strategy */
-    case SCS_STRATEGY:
-      eps = rhs_norm * s->start_tol  / pow((admm_iter + 1), s->dec_rate);
-      eps = c_max(eps, CUDA_PCG_EPS_MIN);
-      break;
-
-    /* Residual strategy */
-    case RESIDUAL_STRATEGY:
-      if (admm_iter == 1) {
-        /* In case rhs = 0.0 we don't want to set eps_prev to 0.0 */
-        if (rhs_norm < CUDA_PCG_EPS_MIN) s->eps_prev = 1.0;
-        else s->eps_prev = rhs_norm * s->reduction_factor;
-        /* Return early since scaled_prim_res and scaled_dual_res are meaningless before the first ADMM iteration */
-        return s->eps_prev;
-      }
-
-      if (s->zero_pcg_iters >= s->reduction_threshold) {
-        s->reduction_factor /= 2;
-        s->zero_pcg_iters = 0;
-      }
-
-      eps = s->reduction_factor * sqrt((*s->scaled_prim_res) * (*s->scaled_dual_res));
-      eps = c_max(c_min(eps, s->eps_prev), CUDA_PCG_EPS_MIN);
-      s->eps_prev = eps;
-      break;
+    /* Return early since scaled_prim_res and scaled_dual_res are meaningless before the first ADMM iteration */
+    return s->eps_prev;
   }
+
+  if (s->zero_pcg_iters >= s->reduction_threshold) {
+    s->reduction_factor /= 2;
+    s->zero_pcg_iters = 0;
+  }
+
+  eps = s->reduction_factor * sqrt((*s->scaled_prim_res) * (*s->scaled_dual_res));
+  eps = c_max(c_min(eps, s->eps_prev), CUDA_PCG_EPS_MIN);
+  s->eps_prev = eps;
+
   return eps;
 }
 
@@ -132,16 +122,10 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   s->polishing = polishing;
   s->zero_pcg_iters = 0;
 
-  /* Default norm and tolerance strategy */
-  s->eps_strategy   = RESIDUAL_STRATEGY;
-  s->norm           = CUDA_PCG_NORM;
-  s->precondition   = CUDA_PCG_PRECONDITION;
-  s->warm_start_pcg = CUDA_PCG_WARM_START;
+  /* Maximum number of PCG iterations */
   s->max_iter = (polishing) ? CUDA_PCG_POLISH_MAX_ITER : CUDA_PCG_MAX_ITER;
 
   /* Tolerance strategy parameters */
-  s->start_tol           = CUDA_PCG_START_TOL;
-  s->dec_rate            = CUDA_PCG_DECAY_RATE;
   s->reduction_threshold = CUDA_PCG_REDUCTION_THRESHOLD;
   s->reduction_factor    = CUDA_PCG_REDUCTION_FACTOR;
   s->scaled_prim_res     = scaled_prim_res;
@@ -189,24 +173,11 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   cuda_vec_copy_h2d(s->d_sigma,     s->h_sigma,   1);
 
   /* Allocate memory for PCG preconditioning */
-  if (s->precondition) {
-    cuda_malloc((void **) &s->d_P_diag_val,       n * sizeof(c_float));
-    cuda_malloc((void **) &s->d_AtRA_diag_val,    n * sizeof(c_float));
-    cuda_malloc((void **) &s->d_diag_precond,     n * sizeof(c_float));
-    cuda_malloc((void **) &s->d_diag_precond_inv, n * sizeof(c_float));
-    if (!s->d_rho_vec) cuda_malloc((void **) &s->d_AtA_diag_val, n * sizeof(c_float));
-  }
-
-  /* Set the vector norm */
-  switch (s->norm) {
-    case 0:
-      s->vector_norm = &cuda_vec_norm_inf;
-      break;
-
-    case 2:
-      s->vector_norm = &cuda_vec_norm_2;
-      break;
-  }
+  cuda_malloc((void **) &s->d_P_diag_val,       n * sizeof(c_float));
+  cuda_malloc((void **) &s->d_AtRA_diag_val,    n * sizeof(c_float));
+  cuda_malloc((void **) &s->d_diag_precond,     n * sizeof(c_float));
+  cuda_malloc((void **) &s->d_diag_precond_inv, n * sizeof(c_float));
+  if (!s->d_rho_vec) cuda_malloc((void **) &s->d_AtA_diag_val, n * sizeof(c_float));
 
   /* Link functions */
   s->solve           = &solve_linsys_cudapcg;
@@ -216,7 +187,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   s->update_rho_vec  = &update_linsys_solver_rho_vec_cudapcg;
 
   /* Initialize PCG preconditioner */
-  if (s->precondition) cuda_pcg_update_precond(s, 1, 1, 1);
+  cuda_pcg_update_precond(s, 1, 1, 1);
 
   /* No error */
   return 0;
@@ -302,7 +273,7 @@ c_int update_linsys_solver_matrices_cudapcg(cudapcg_solver   *s,
                                             const OSQPMatrix *P,
                                             const OSQPMatrix *A) {
 
-  if (s->precondition) cuda_pcg_update_precond(s, 1, 1, 0);
+  cuda_pcg_update_precond(s, 1, 1, 0);
   return 0;
 }
 
@@ -311,7 +282,7 @@ c_int update_linsys_solver_rho_vec_cudapcg(cudapcg_solver    *s,
                                            const OSQPVectorf *rho_vec,
                                            c_float            rho_sc) {
 
-  if (s->precondition) cuda_pcg_update_precond(s, 0, 0, 1);
+  cuda_pcg_update_precond(s, 0, 0, 1);
   return 0;
 }
 

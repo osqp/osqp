@@ -69,15 +69,7 @@ typedef struct cudapcg_solver_ {
   c_int zero_pcg_iters;     ///<  state that counts zero PCG iterations
 
   /* Settings */
-  enum pcg_eps_strategy eps_strategy;
-  c_int                 norm;
-  c_int                 precondition;
-  c_int                 warm_start_pcg;
-  c_int                 max_iter;
-
-  /* SCS tolerance strategy parameters */
-  c_float start_tol;
-  c_float dec_rate;
+  c_int max_iter;
   
   /* Residual tolerance strategy parameters */
   c_int    reduction_threshold;

@@ -44,7 +44,6 @@ typedef struct {
   c_float alpha;                  ///< ADMM relaxation parameter
 
   // TODO: CG settings
-  // c_int cg_precondition;          ///< boolean; use preconditioned CG
   // c_int cg_max_iter;              ///< maximum number of CG iterations per solve
 
   // adaptive rho logic
