@@ -53,6 +53,8 @@ typedef struct {
   c_float adaptive_rho_fraction;  ///< time interval for adapting rho (fraction of the setup time)
   c_float adaptive_rho_tolerance; ///< tolerance X for adapting rho; new rho must be X times larger or smaller than the current one to change it
 
+  // TODO: allowing negative values for adaptive_rho_interval can eliminate the need for adaptive_rho
+
   // termination parameters
   c_int   max_iter;               ///< maximum number of iterations
   c_float eps_abs;                ///< absolute solution tolerance

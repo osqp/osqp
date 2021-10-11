@@ -15,19 +15,19 @@ extern "C" {
 /******************
 * Solver Status  *
 ******************/
-# define OSQP_DUAL_INFEASIBLE_INACCURATE (4)
-# define OSQP_PRIMAL_INFEASIBLE_INACCURATE (3)
-# define OSQP_SOLVED_INACCURATE (2)
-# define OSQP_SOLVED (1)
-# define OSQP_MAX_ITER_REACHED (-2)
-# define OSQP_PRIMAL_INFEASIBLE (-3)    /* primal infeasible  */
-# define OSQP_DUAL_INFEASIBLE (-4)      /* dual infeasible */
-# define OSQP_SIGINT (-5)               /* interrupted by user */
-# ifdef PROFILING
-#  define OSQP_TIME_LIMIT_REACHED (-6)
-# endif // ifdef PROFILING
-# define OSQP_NON_CVX (-7)              /* problem non convex */
-# define OSQP_UNSOLVED (-10)            /* Unsolved. Only setup function has been called */
+enum osqp_status_type {
+    OSQP_SOLVED = 1,
+    OSQP_SOLVED_INACCURATE,
+    OSQP_PRIMAL_INFEASIBLE,
+    OSQP_PRIMAL_INFEASIBLE_INACCURATE,
+    OSQP_DUAL_INFEASIBLE,
+    OSQP_DUAL_INFEASIBLE_INACCURATE,
+    OSQP_MAX_ITER_REACHED,
+    OSQP_TIME_LIMIT_REACHED,
+    OSQP_NON_CVX,               /* problem non-convex */
+    OSQP_SIGINT,                /* interrupted by user */
+    OSQP_UNSOLVED               /* Unsolved; only setup function has been called */
+};
 
 
 /*************************

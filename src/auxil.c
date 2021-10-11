@@ -206,8 +206,8 @@ void update_z(OSQPSolver *solver) {
                             work->rho_inv, work->y);
   }
 
-  // project z
-  project(work, work->z);
+  // project z onto C = [l,u]
+  project(work->z, work->data->l, work->data->u);
 
 }
 
@@ -947,7 +947,7 @@ c_int validate_data(const csc     *P,
   return 0;
 }
 
-#endif // #ifndef EMBEDDED
+#endif /* ifndef EMBEDDED */
 
 
 c_int validate_linsys_solver(c_int linsys_solver) {

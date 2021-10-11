@@ -82,7 +82,7 @@ void osqp_set_default_settings(OSQPSettings *settings);
                   c_int                n,
                   const OSQPSettings  *settings);
 
-# endif /* #ifndef EMBEDDED */
+# endif /* ifndef EMBEDDED */
 
 /**
  * Solve quadratic program

@@ -316,7 +316,7 @@ c_int osqp_setup(OSQPSolver         **solverp,
   return 0;
 }
 
-#endif // #ifndef EMBEDDED
+#endif /* ifndef EMBEDDED */
 
 
 c_int osqp_solve(OSQPSolver *solver) {
@@ -791,7 +791,7 @@ c_int osqp_cleanup(OSQPSolver *solver) {
   return exitflag;
 }
 
-#endif // #ifndef EMBEDDED
+#endif /* ifndef EMBEDDED */
 
 
 

@@ -363,8 +363,8 @@ c_int polish(OSQPSolver *solver) {
   OSQPMatrix_Axpy(work->data->A, work->pol->x, work->pol->z, 1.0, 0.0);
   get_ypol_from_yred(work, pol_sol_yview);     // pol->y
 
-  // Ensure (z,y) satisfies normal cone constraint
-  project_normalcone(work, work->pol->z, work->pol->y);
+  // Ensure z is in C and y is in N_C(z)
+  project_normalcone(work->pol->z, work->pol->y, work->data->l, work->data->u);
 
   // Compute primal and dual residuals at the polished solution
   update_info(solver, 0, 1, 1);

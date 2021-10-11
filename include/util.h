@@ -3,7 +3,7 @@
 
 # ifdef __cplusplus
 extern "C" {
-# endif // ifdef __cplusplus
+# endif /* ifdef __cplusplus */
 
 # include "osqp.h"
 # include "types.h"
@@ -22,7 +22,7 @@ extern "C" {
  */
 OSQPSettings* copy_settings(const OSQPSettings *settings);
 
-# endif // #ifndef EMBEDDED
+# endif /* ifndef EMBEDDED */
 
 /**
  * Custom string copy to avoid string.h library
@@ -67,7 +67,7 @@ void print_footer(OSQPInfo *info,
                   c_int     polishing);
 
 
-# endif // ifdef PRINTING
+# endif /* ifdef PRINTING */
 
 
 /*********************************
@@ -109,7 +109,7 @@ struct OSQP_TIMER {
 };
 
 // Linux
-#  else // ifdef IS_WINDOWS
+#  else /* ifdef IS_WINDOWS */
 
 /* Use POSIX clock_gettime() for timing on non-Windows machines */
 #   include <time.h>
@@ -121,7 +121,7 @@ struct OSQP_TIMER {
   struct timespec toc;
 };
 
-#  endif // ifdef IS_WINDOWS
+#  endif /* ifdef IS_WINDOWS */
 
 /*! \endcond */
 
@@ -187,13 +187,13 @@ void print_vec_int(const c_int *x,
                    c_int        n,
                    const char  *name);
 
-# endif // ifdef PRINTING
+# endif /* ifdef PRINTING */
 
 /*! \endcond */
 
 
 # ifdef __cplusplus
 }
-# endif // ifdef __cplusplus
+# endif /* ifdef __cplusplus */
 
-#endif // ifndef UTIL_H
+#endif /* ifndef UTIL_H */

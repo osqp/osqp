@@ -53,4 +53,4 @@ enum pcg_eps_strategy { SCS_STRATEGY, RESIDUAL_STRATEGY };
 }
 #endif
 
-#endif /* #ifndef CUDA_PCG_CONSTANTS_H */
+#endif /* ifndef CUDA_PCG_CONSTANTS_H */

@@ -278,7 +278,7 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   return new;
 }
 
-#endif // #ifndef EMBEDDED
+#endif /* ifndef EMBEDDED */
 
 
 /*******************

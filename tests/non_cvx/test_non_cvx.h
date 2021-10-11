@@ -40,7 +40,7 @@ void test_non_cvx_solve()
             exitflag == OSQP_NONCVX_ERROR);
 
   osqp_cleanup(solver);
-#endif // #ifndef CUDA_SUPPORT 
+#endif /* ifndef CUDA_SUPPORT */
 
   // Update Solver settings
   settings->sigma = sols_data->sigma_new;
