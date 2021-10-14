@@ -20,11 +20,11 @@
 
 CUDA_Handle_t *CUDA_handle = OSQP_NULL;
 
-c_int osqp_algebra_init_libs(c_int algebra_device) {
+c_int osqp_algebra_init_libs(c_int device) {
   /* This is to prevent a memory leak when multiple OSQP objects are created */
   if (CUDA_handle) return 0;
 
-  CUDA_handle = cuda_init_libs((int)algebra_device);
+  CUDA_handle = cuda_init_libs((int)device);
   if (!CUDA_handle) return 1;
   return 0;
 }

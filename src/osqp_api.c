@@ -46,7 +46,7 @@ void osqp_get_dimensions(OSQPSolver *solver,
 
 void osqp_set_default_settings(OSQPSettings *settings) {
 
-  settings->algebra_device = 0;                   /* algebra device identifier */
+  settings->device = 0;                           /* device identifier */
   settings->linsys_solver  = OSQP_LINSYS_SOLVER;  /* linear system solver */
   settings->verbose        = OSQP_VERBOSE;        /* print output */
   settings->warm_starting  = OSQP_WARM_STARTING;  /* warm starting */
@@ -122,7 +122,7 @@ c_int osqp_setup(OSQPSolver         **solverp,
 # endif /* ifdef PROFILING */
 
   // Initialize algebra libraries
-  exitflag = osqp_algebra_init_libs(settings->algebra_device);
+  exitflag = osqp_algebra_init_libs(settings->device);
   if (exitflag) return osqp_error(OSQP_ALGEBRA_LOAD_ERROR);
 
   // Copy problem data into workspace
