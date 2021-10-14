@@ -26,7 +26,7 @@ extern "C" {
 #include "types.h"                /* OSQPMatrix and OSQPVector[fi] types */
 #include "algebra_types.h"        /* csr type */
 
-#include "cuda_pcg_constants.h"   /* enum linsys_solver_type */
+// #include "cuda_pcg_constants.h"   /* enum linsys_solver_type */
 
 
 /**
@@ -73,6 +73,7 @@ typedef struct cudapcg_solver_ {
   
   /* Residual tolerance strategy parameters */
   c_int    reduction_threshold;
+  c_float  tol_fraction;
   c_float  reduction_factor;
   c_float  eps_prev;
   c_float *scaled_prim_res;

@@ -57,58 +57,83 @@ extern const char * OSQP_ERROR_MESSAGE[];
 * Solver Parameters and Settings *
 **********************************/
 
-# define OSQP_RHO (0.1)
-# define OSQP_SIGMA (1E-06)
-# define OSQP_MAX_ITER (4000)
-# define OSQP_EPS_ABS (1E-3)
-# define OSQP_EPS_REL (1E-3)
-# define OSQP_EPS_PRIM_INF (1E-4)
-# define OSQP_EPS_DUAL_INF (1E-4)
-# define OSQP_ALPHA (1.6)
-
 #ifdef CUDA_SUPPORT
 # define OSQP_LINSYS_SOLVER (CUDA_PCG_SOLVER)
 #else
 # define OSQP_LINSYS_SOLVER (QDLDL_SOLVER)
 #endif
 
-# define OSQP_RHO_MIN (1e-06)
-# define OSQP_RHO_MAX (1e06)
-# define OSQP_RHO_TOL (1e-04) ///< tolerance for detecting if an inequality is set to equality
-# define OSQP_RHO_EQ_OVER_RHO_INEQ (1e03)
+# define OSQP_VERBOSE               (1)
+# define OSQP_WARM_STARTING         (1)
+# define OSQP_SCALING               (10)
+# define OSQP_POLISHING             (0)
+
+// ADMM parameters
+# define OSQP_RHO                   (0.1)
+# define OSQP_SIGMA                 (1E-06)
+# define OSQP_ALPHA                 (1.6)
+
+# define OSQP_RHO_MIN               (1e-06)
+# define OSQP_RHO_MAX               (1e06)
+# define OSQP_RHO_TOL               (1e-04) ///< tolerance for detecting if an inequality is set to equality
+# define OSQP_RHO_EQ_OVER_RHO_INEQ  (1e03)
 
 #ifdef CUDA_SUPPORT
-#  define OSQP_RHO_IS_VEC (0)
+# define OSQP_RHO_IS_VEC            (0)
 #else
-#  define OSQP_RHO_IS_VEC (1)  ///< boolean, defines if rho is scalar or vector
+# define OSQP_RHO_IS_VEC            (1)
 #endif
 
-#  define OSQP_DELTA (1E-6)
-#  define OSQP_POLISHING (0)
-#  define OSQP_POLISH_REFINE_ITER (3)
-#  define OSQP_VERBOSE (1)
+// CG parameters
+# define OSQP_CG_MAX_ITER           (20)
+# define OSQP_CG_TOL_REDUCTION      (10)
+# define OSQP_CG_TOL_FRACTION       (0.15)
+
+// adaptive rho logic
+# define OSQP_ADAPTIVE_RHO (1)
+
+#ifdef CUDA_SUPPORT
+#  define OSQP_ADAPTIVE_RHO_INTERVAL  (10)
+#  define OSQP_ADAPTIVE_RHO_TOLERANCE (2.0)
+#else
+#  define OSQP_ADAPTIVE_RHO_INTERVAL  (0)
+#  define OSQP_ADAPTIVE_RHO_TOLERANCE (5.0)          ///< tolerance for adopting new rho; minimum ratio between new rho and the current one
+#endif
+
+# define OSQP_ADAPTIVE_RHO_FRACTION (0.4)           ///< fraction of setup time after which we update rho
+# define OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION (4) ///< multiple of check_termination after which we update rho (if PROFILING disabled)
+# define OSQP_ADAPTIVE_RHO_FIXED (100)              ///< number of iterations after which we update rho if termination_check  and PROFILING are disabled
+
+// termination parameters
+# define OSQP_MAX_ITER              (4000)
+# define OSQP_EPS_ABS               (1E-3)
+# define OSQP_EPS_REL               (1E-3)
+# define OSQP_EPS_PRIM_INF          (1E-4)
+# define OSQP_EPS_DUAL_INF          (1E-4)
+# define OSQP_SCALED_TERMINATION    (0)
+# define OSQP_TIME_LIMIT            (1e10)     ///< Disable time limit by default
 
 #ifdef CUDA_SUPPORT
 #  define OSQP_CHECK_TERMINATION (5)
 #else
-#  define OSQP_CHECK_TERMINATION (25)
+#  define OSQP_CHECK_TERMINATION    (25)
 #endif
 
-# define OSQP_SCALED_TERMINATION (0)
-# define OSQP_WARM_STARTING (1)
-# define OSQP_SCALING (10)
+#  define OSQP_DELTA                (1E-6)
+#  define OSQP_POLISH_REFINE_ITER   (3)
 
-# define OSQP_MIN_SCALING (1e-04) ///< minimum scaling value
-# define OSQP_MAX_SCALING (1e+04) ///< maximum scaling value
 
+/*********************************
+* Hard-coded values and settings *
+**********************************/
 
 # ifndef OSQP_NULL
 #  define OSQP_NULL 0
-# endif /* ifndef OSQP_NULL */
+# endif
 
 # ifndef OSQP_NAN
 #  define OSQP_NAN ((c_float)0x7fc00000UL)  // not a number
-# endif /* ifndef OSQP_NAN */
+# endif
 
 # ifndef OSQP_INFTY
 #if defined(CUDA_SUPPORT) && defined(DFLOAT)
@@ -120,29 +145,17 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # endif /* ifndef OSQP_INFTY */
 
 # ifndef OSQP_DIVISION_TOL
-#  define OSQP_DIVISION_TOL ((c_float)1.0 / OSQP_INFTY)
-# endif /* ifndef OSQP_DIVISION_TOL */
+#  define OSQP_DIVISION_TOL (1.0 / OSQP_INFTY)
+# endif
 
 
-# define OSQP_ADAPTIVE_RHO (1)
-
-#ifdef CUDA_SUPPORT
-#  define OSQP_ADAPTIVE_RHO_INTERVAL (10)
-#  define OSQP_ADAPTIVE_RHO_TOLERANCE (2.0)
-#else
-#  define OSQP_ADAPTIVE_RHO_INTERVAL (0)
-#  define OSQP_ADAPTIVE_RHO_TOLERANCE (5.0)          ///< tolerance for adopting new rho; minimum ratio between new rho and the current one
-#endif
-
-# define OSQP_ADAPTIVE_RHO_FRACTION (0.4)           ///< fraction of setup time after which we update rho
-# define OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION (4) ///< multiple of check_termination after which we update rho (if PROFILING disabled)
-# define OSQP_ADAPTIVE_RHO_FIXED (100)              ///< number of iterations after which we update rho if termination_check  and PROFILING are disabled
-
-# define OSQP_TIME_LIMIT ((c_float)1e10)            ///< Disable time limit as default
-
-/* Printing */
 # define OSQP_PRINT_INTERVAL 200
 
+# define OSQP_MIN_SCALING   (1e-04) ///< minimum scaling value
+# define OSQP_MAX_SCALING   (1e+04) ///< maximum scaling value
+
+# define OSQP_CG_TOL        (1E-7)
+# define OSQP_CG_POLISH_TOL (1e-5)
 
 # ifdef __cplusplus
 }

@@ -992,16 +992,16 @@ c_int validate_settings(const OSQPSettings *settings,
     return 1;
   }
 
-  if ((settings->verbose != 0) &&
-      (settings->verbose != 1)) {
+  if (settings->verbose != 0 &&
+      settings->verbose != 1) {
 # ifdef PRINTING
     c_eprint("verbose must be either 0 or 1");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if ((settings->warm_starting != 0) &&
-      (settings->warm_starting != 1)) {
+  if (settings->warm_starting != 0 &&
+      settings->warm_starting != 1) {
 # ifdef PRINTING
     c_eprint("warm_start must be either 0 or 1");
 # endif /* ifdef PRINTING */
@@ -1015,8 +1015,8 @@ c_int validate_settings(const OSQPSettings *settings,
     return 1;
   }
 
-  if ((settings->polishing != 0) &&
-      (settings->polishing != 1)) {
+  if (settings->polishing != 0 &&
+      settings->polishing != 1) {
 # ifdef PRINTING
     c_eprint("polishing must be either 0 or 1");
 # endif /* ifdef PRINTING */
@@ -1046,17 +1046,39 @@ c_int validate_settings(const OSQPSettings *settings,
     return 1;
   }
 
-  if ((settings->alpha <= 0.0) ||
-      (settings->alpha >= 2.0)) {
+  if (settings->alpha <= 0.0) ||
+      settings->alpha >= 2.0) {
 # ifdef PRINTING
     c_eprint("alpha must be strictly between 0 and 2");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
+  if (settings->cg_max_iter <= 0) {
+# ifdef PRINTING
+    c_eprint("cg_max_iter must be positive");
+# endif /* ifdef PRINTING */
+    return 1;
+  }
+
+  if (settings->cg_tol_reduction <= 0) {
+# ifdef PRINTING
+    c_eprint("cg_tol_reduction must be positive");
+# endif /* ifdef PRINTING */
+    return 1;
+  }
+
+  if (settings->cg_tol_fraction <= 0.0 &&
+      settings->cg_tol_fraction >= 1.0) {
+# ifdef PRINTING
+    c_eprint("cg_tol_fraction must be strictly between 0 and 1");
+# endif /* ifdef PRINTING */
+    return 1;
+  }
+
   if (from_setup &&
-      (settings->adaptive_rho != 0) &&
-      (settings->adaptive_rho != 1)) {
+      settings->adaptive_rho != 0 &&
+      settings->adaptive_rho != 1) {
 # ifdef PRINTING
     c_eprint("adaptive_rho must be either 0 or 1");
 # endif /* ifdef PRINTING */
@@ -1105,8 +1127,8 @@ c_int validate_settings(const OSQPSettings *settings,
     return 1;
   }
 
-  if ((settings->eps_rel == 0.0) &&
-      (settings->eps_abs == 0.0)) {
+  if (settings->eps_rel == 0.0 &&
+      settings->eps_abs == 0.0) {
 # ifdef PRINTING
     c_eprint("at least one of eps_abs and eps_rel must be positive");
 # endif /* ifdef PRINTING */
@@ -1127,8 +1149,8 @@ c_int validate_settings(const OSQPSettings *settings,
     return 1;
   }
 
-  if ((settings->scaled_termination != 0) &&
-      (settings->scaled_termination != 1)) {
+  if (settings->scaled_termination != 0 &&
+      settings->scaled_termination != 1) {
 # ifdef PRINTING
     c_eprint("scaled_termination must be either 0 or 1");
 # endif /* ifdef PRINTING */

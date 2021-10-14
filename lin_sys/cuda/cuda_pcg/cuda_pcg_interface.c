@@ -36,14 +36,17 @@ static c_float compute_tolerance(cudapcg_solver *s,
   /* Compute the norm of RHS of the linear system */
   cuda_vec_norm_inf(s->d_rhs, s->n, &rhs_norm);
 
-  if (s->polishing) return c_max(rhs_norm * CUDA_PCG_POLISH_ACCURACY, CUDA_PCG_EPS_MIN);
+  if (s->polishing) return c_max(rhs_norm * OSQP_CG_POLISH_TOL, OSQP_CG_TOL);
 
   if (admm_iter == 1) {
-    /* In case rhs = 0.0 we don't want to set eps_prev to 0.0 */
-    if (rhs_norm < CUDA_PCG_EPS_MIN) s->eps_prev = 1.0;
+    // Set reduction_factor to its default value
+    s->reduction_factor = s->tol_fraction;
+
+    // In case rhs = 0.0 we don't want to set eps_prev to 0.0
+    if (rhs_norm < OSQP_CG_TOL) s->eps_prev = 1.0;
     else s->eps_prev = rhs_norm * s->reduction_factor;
 
-    /* Return early since scaled_prim_res and scaled_dual_res are meaningless before the first ADMM iteration */
+    // Return early since scaled_prim_res and scaled_dual_res are meaningless before the first ADMM iteration
     return s->eps_prev;
   }
 
@@ -53,7 +56,7 @@ static c_float compute_tolerance(cudapcg_solver *s,
   }
 
   eps = s->reduction_factor * sqrt((*s->scaled_prim_res) * (*s->scaled_dual_res));
-  eps = c_max(c_min(eps, s->eps_prev), CUDA_PCG_EPS_MIN);
+  eps = c_max(c_min(eps, s->eps_prev), OSQP_CG_TOL);
   s->eps_prev = eps;
 
   return eps;
@@ -123,11 +126,11 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   s->zero_pcg_iters = 0;
 
   /* Maximum number of PCG iterations */
-  s->max_iter = (polishing) ? CUDA_PCG_POLISH_MAX_ITER : CUDA_PCG_MAX_ITER;
+  s->max_iter = settings->cg_max_iter;
 
   /* Tolerance strategy parameters */
-  s->reduction_threshold = CUDA_PCG_REDUCTION_THRESHOLD;
-  s->reduction_factor    = CUDA_PCG_REDUCTION_FACTOR;
+  s->reduction_threshold = settings->cg_tol_reduction;
+  s->tol_fraction        = settings->cg_tol_fraction;
   s->scaled_prim_res     = scaled_prim_res;
   s->scaled_dual_res     = scaled_dual_res;
 
@@ -218,13 +221,14 @@ c_int solve_linsys_cudapcg(cudapcg_solver *s,
     if (s->m) cuda_mat_Axpy(s->A, s->d_x, b->d_val + s->n, 1.0, 0.0);
   }
   else {
-    /* Compute yred = (A * d_x - b) / delta */
+    // yred = (A * d_x - b) / delta
     cuda_mat_Axpy(s->A, s->d_x, b->d_val + s->n, 1.0, -1.0);
     cuda_vec_mult_sc(b->d_val + s->n, *s->h_rho, s->m);
   }
 
-  // GB: Should we set zero_pcg_iters to zero otherwise?
+  // Number of consecutive ADMM iterations with zero PCG iterations
   if (pcg_iters == 0) s->zero_pcg_iters++;
+  else                s->zero_pcg_iters = 0;
 
   return 0;
 }

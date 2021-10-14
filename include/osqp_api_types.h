@@ -37,14 +37,16 @@ typedef struct {
   c_int scaling;                         ///< data scaling iterations; if 0, then disabled
   c_int polishing;                       ///< boolean; polish ADMM solution
 
-  // algorithm parameters
+  // ADMM parameters
   c_float rho;                    ///< ADMM penalty parameter
   c_int   rho_is_vec;             ///< boolean; is rho scalar or vector?
   c_float sigma;                  ///< ADMM penalty parameter
   c_float alpha;                  ///< ADMM relaxation parameter
 
-  // TODO: CG settings
-  // c_int cg_max_iter;              ///< maximum number of CG iterations per solve
+  // CG settings
+  c_int   cg_max_iter;            ///< maximum number of CG iterations per solve
+  c_int   cg_tol_reduction;       ///< number of consecutive zero CG iterations before the tolerance gets halved
+  c_float cg_tol_fraction;        ///< CG tolerance (fraction of ADMM residuals)
 
   // adaptive rho logic
   c_int   adaptive_rho;           ///< boolean, is rho step size adaptive?

@@ -58,6 +58,10 @@ void osqp_set_default_settings(OSQPSettings *settings) {
   settings->sigma         = (c_float)OSQP_SIGMA;  /* ADMM step */
   settings->alpha         = (c_float)OSQP_ALPHA;  /* relaxation parameter */
 
+  settings->cg_max_iter      = OSQP_CG_MAX_ITER;      /* maximum number of CG iterations */
+  settings->cg_tol_reduction = OSQP_CF_TOL_REDUCTION; /* CG tolerance parameter */
+  settings->cg_tol_fraction  = OSQP_CG_TOL_FRACTION;  /* CG tolerance parameter */
+
   settings->adaptive_rho           = OSQP_ADAPTIVE_RHO;
   settings->adaptive_rho_interval  = OSQP_ADAPTIVE_RHO_INTERVAL;
   settings->adaptive_rho_fraction  = (c_float)OSQP_ADAPTIVE_RHO_FRACTION;
@@ -1077,32 +1081,38 @@ c_int osqp_update_settings(OSQPSolver         *solver,
 
   /* Update settings */
   // linsys_solver ignored
-  settings->verbose                = new_settings->verbose;
-  settings->warm_starting          = new_settings->warm_starting;
+  settings->verbose       = new_settings->verbose;
+  settings->warm_starting = new_settings->warm_starting;
   // scaling ignored
-  settings->polishing              = new_settings->polishing;
+  settings->polishing     = new_settings->polishing;
 
   // rho        ignored
   // rho_is_vec ignored
   // sigma      ignored
-  settings->alpha                  = new_settings->alpha;
+  settings->alpha = new_settings->alpha;
+
+  // cg_max_iter      ignored
+  // cg_tol_reduction ignored
+  // cg_tol_fraction  ignored
 
   // adaptive_rho           ignored
   // adaptive_rho_interval  ignored
   // adaptive_rho_fraction  ignored
   // adaptive_rho_tolerance ignored
 
-  settings->max_iter               = new_settings->max_iter;
-  settings->eps_abs                = new_settings->eps_abs;
-  settings->eps_rel                = new_settings->eps_rel;
-  settings->eps_prim_inf           = new_settings->eps_prim_inf;
-  settings->eps_dual_inf           = new_settings->eps_dual_inf;
-  settings->scaled_termination     = new_settings->scaled_termination;
-  settings->check_termination      = new_settings->check_termination;
-  settings->time_limit             = new_settings->time_limit;
+  settings->max_iter           = new_settings->max_iter;
+  settings->eps_abs            = new_settings->eps_abs;
+  settings->eps_rel            = new_settings->eps_rel;
+  settings->eps_prim_inf       = new_settings->eps_prim_inf;
+  settings->eps_dual_inf       = new_settings->eps_dual_inf;
+  settings->scaled_termination = new_settings->scaled_termination;
+  settings->check_termination  = new_settings->check_termination;
+  settings->time_limit         = new_settings->time_limit;
 
-  settings->delta                  = new_settings->delta;
-  settings->polish_refine_iter     = new_settings->polish_refine_iter;
+  settings->delta              = new_settings->delta;
+  settings->polish_refine_iter = new_settings->polish_refine_iter;
+
+  // TODO: Allow for CG and ADAPTIVE RHO settings to be updated
 
   return 0;
 }

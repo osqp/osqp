@@ -22,18 +22,6 @@
 extern "C" {
 #endif
 
-/* PCG parameters */
-#define CUDA_PCG_MAX_ITER            (20)
-#define CUDA_PCG_EPS_MIN             (1e-7)
-
-/* Tolerance parameters */
-#define CUDA_PCG_REDUCTION_FACTOR    (0.15)
-#define CUDA_PCG_REDUCTION_THRESHOLD (10)
-
-/* Polishing parameters */
-#define CUDA_PCG_POLISH_ACCURACY     (1e-5)
-#define CUDA_PCG_POLISH_MAX_ITER     (100)
-
 
 // GB: These values should be passed from the main OSQP interface.
 
