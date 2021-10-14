@@ -1046,7 +1046,7 @@ c_int validate_settings(const OSQPSettings *settings,
     return 1;
   }
 
-  if (settings->alpha <= 0.0) ||
+  if (settings->alpha <= 0.0 ||
       settings->alpha >= 2.0) {
 # ifdef PRINTING
     c_eprint("alpha must be strictly between 0 and 2");
