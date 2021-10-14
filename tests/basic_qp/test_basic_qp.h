@@ -78,10 +78,10 @@ void test_basic_qp_solve()
 	    osqp_update_settings(solver, settings) > 0);
   settings->eps_abs = OSQP_EPS_ABS;
 
-  settings->eps_abs = -1.;
+  settings->eps_rel = -1.;
   mu_assert("Basic QP test solve: Wrong value of eps_rel not caught!",
 	    osqp_update_settings(solver, settings) > 0);
-  settings->eps_abs = OSQP_EPS_REL;
+  settings->eps_rel = OSQP_EPS_REL;
 
   settings->eps_prim_inf = -0.1;
   mu_assert("Basic QP test solve: Wrong value of eps_prim_inf not caught!",

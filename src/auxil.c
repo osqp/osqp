@@ -275,9 +275,9 @@ c_float compute_prim_res(OSQPSolver        *solver,
   return prim_res;
 }
 
-c_float compute_pri_tol(const OSQPSolver *solver,
-                        c_float           eps_abs,
-                        c_float           eps_rel) {
+c_float compute_prim_tol(const OSQPSolver *solver,
+                         c_float           eps_abs,
+                         c_float           eps_rel) {
 
   c_float max_rel_eps, temp_rel_eps;
   OSQPSettings*  settings = solver->settings;
@@ -353,9 +353,9 @@ c_float compute_dual_res(OSQPSolver        *solver,
   return dual_res;
 }
 
-c_float compute_dua_tol(const OSQPSolver *solver,
-                        c_float           eps_abs,
-                        c_float           eps_rel) {
+c_float compute_dual_tol(const OSQPSolver *solver,
+                         c_float           eps_abs,
+                         c_float           eps_rel) {
 
   c_float max_rel_eps, temp_rel_eps;
   OSQPSettings*  settings = solver->settings;
@@ -787,7 +787,7 @@ c_int check_termination(OSQPSolver *solver,
   }
   else {
     // Compute primal tolerance
-    eps_prim = compute_pri_tol(solver, eps_abs, eps_rel);
+    eps_prim = compute_prim_tol(solver, eps_abs, eps_rel);
 
     // Primal feasibility check
     if (info->prim_res < eps_prim) {
@@ -799,7 +799,7 @@ c_int check_termination(OSQPSolver *solver,
   } // End check if m == 0
 
   // Compute dual tolerance
-  eps_dual = compute_dua_tol(solver, eps_abs, eps_rel);
+  eps_dual = compute_dual_tol(solver, eps_abs, eps_rel);
 
   // Dual feasibility check
   if (info->dual_res < eps_dual) {
