@@ -19,6 +19,7 @@ void test_solveKKT() {
   solve_linsys_sols_data *data = generate_problem_solve_linsys_sols_data();
 
   // Settings
+  osqp_set_default_settings(settings);
   settings->rho           = data->test_solve_KKT_rho;
   settings->sigma         = data->test_solve_KKT_sigma;
   settings->linsys_solver = OSQP_LINSYS_SOLVER;
@@ -40,7 +41,7 @@ void test_solveKKT() {
   // Form and factorize KKT matrix
   exitflag = init_linsys_solver(&s, Pu, A, rho_vec, settings, &prim_res, &dual_res, 0);
 
-  // Solve  KKT x = b via LDL given factorization
+  // Solve KKT x = rhs
   rhs = OSQPVectorf_new(data->test_solve_KKT_rhs, m+n);
   s->solve(s, rhs, 2);
   ref = OSQPVectorf_new(data->test_solve_KKT_x, m+n);

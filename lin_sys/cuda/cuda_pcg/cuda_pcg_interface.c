@@ -36,14 +36,14 @@ static c_float compute_tolerance(cudapcg_solver *s,
   /* Compute the norm of RHS of the linear system */
   cuda_vec_norm_inf(s->d_rhs, s->n, &rhs_norm);
 
-  if (s->polishing) return c_max(rhs_norm * OSQP_CG_POLISH_TOL, OSQP_CG_TOL);
+  if (s->polishing) return c_max(rhs_norm * OSQP_CG_POLISH_TOL, OSQP_CG_TOL_MIN);
 
   if (admm_iter == 1) {
     // Set reduction_factor to its default value
     s->reduction_factor = s->tol_fraction;
 
     // In case rhs = 0.0 we don't want to set eps_prev to 0.0
-    if (rhs_norm < OSQP_CG_TOL) s->eps_prev = 1.0;
+    if (rhs_norm < OSQP_CG_TOL_MIN) s->eps_prev = 1.0;
     else s->eps_prev = rhs_norm * s->reduction_factor;
 
     // Return early since scaled_prim_res and scaled_dual_res are meaningless before the first ADMM iteration
@@ -56,7 +56,7 @@ static c_float compute_tolerance(cudapcg_solver *s,
   }
 
   eps = s->reduction_factor * sqrt((*s->scaled_prim_res) * (*s->scaled_dual_res));
-  eps = c_max(c_min(eps, s->eps_prev), OSQP_CG_TOL);
+  eps = c_max(c_min(eps, s->eps_prev), OSQP_CG_TOL_MIN);
   s->eps_prev = eps;
 
   return eps;
@@ -131,6 +131,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   /* Tolerance strategy parameters */
   s->reduction_threshold = settings->cg_tol_reduction;
   s->tol_fraction        = settings->cg_tol_fraction;
+  s->reduction_factor    = settings->cg_tol_fraction;
   s->scaled_prim_res     = scaled_prim_res;
   s->scaled_dual_res     = scaled_dual_res;
 

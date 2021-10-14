@@ -154,7 +154,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_MIN_SCALING   (1e-04) ///< minimum scaling value
 # define OSQP_MAX_SCALING   (1e+04) ///< maximum scaling value
 
-# define OSQP_CG_TOL        (1E-7)
+# define OSQP_CG_TOL_MIN    (1E-7)
 # define OSQP_CG_POLISH_TOL (1e-5)
 
 # ifdef __cplusplus
