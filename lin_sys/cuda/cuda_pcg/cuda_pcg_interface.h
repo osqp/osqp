@@ -26,8 +26,6 @@ extern "C" {
 #include "types.h"                /* OSQPMatrix and OSQPVector[fi] types */
 #include "algebra_types.h"        /* csr type */
 
-// #include "cuda_pcg_constants.h"   /* enum linsys_solver_type */
-
 
 /**
  * CUDA PCG solver structure
