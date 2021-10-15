@@ -1112,8 +1112,6 @@ c_int osqp_update_settings(OSQPSolver         *solver,
   settings->delta              = new_settings->delta;
   settings->polish_refine_iter = new_settings->polish_refine_iter;
 
-  // TODO: Allow for CG and ADAPTIVE RHO settings to be updated
-
   return 0;
 }
 

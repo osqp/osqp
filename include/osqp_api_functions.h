@@ -121,10 +121,11 @@ c_int osqp_cleanup(OSQPSolver *solver);
 
 
 /********************************************
-* Sublevel API                             *
-*                                          *
-* The functions can be called without performing setup again *
-********************************************/
+ * Sublevel API                             *
+ *                                          *
+ * These functions can be called without    *
+ * performing setup again.                  *
+ ********************************************/
 
 /**
  * @name Sublevel API
@@ -202,21 +203,28 @@ c_int osqp_update_data_mat(OSQPSolver    *solver,
  */
 
 /**
- * Update settings. The following settings are ignored:
+ * Update settings. The following settings can only be set using
+ * osqp_setup and are ignored in this function:
  *  - scalling
- *  - rho
  *  - rho_is_vec
  *  - sigma
+ *  - cg_max_iter
+ *  - cg_tol_reduction
+ *  - cg_tol_fraction
  *  - adaptive_rho
  *  - adaptive_rho_interval
  *  - adaptive_rho_fraction
  *  - adaptive_rho_tolerance
+ * Also, rho can be updated using osqp_update_rho and is ignored
+ * in this function.
  * @param  solver       Solver
  * @param  new_settings Solver settings
  * @return              Exitflag for errors (0 if no errors)
  */
 c_int osqp_update_settings(OSQPSolver         *solver,
                            const OSQPSettings *new_settings);
+
+// TODO: Allow for CG_* and ADAPTIVE_RHO_* settings to be updated.
 
 
 # if EMBEDDED != 1
