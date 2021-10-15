@@ -1054,21 +1054,22 @@ c_int validate_settings(const OSQPSettings *settings,
     return 1;
   }
 
-  if (settings->cg_max_iter <= 0) {
+  if (from_setup && settings->cg_max_iter <= 0) {
 # ifdef PRINTING
     c_eprint("cg_max_iter must be positive");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if (settings->cg_tol_reduction <= 0) {
+  if (from_setup && settings->cg_tol_reduction <= 0) {
 # ifdef PRINTING
     c_eprint("cg_tol_reduction must be positive");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if (settings->cg_tol_fraction <= 0.0 &&
+  if (from_setup &&
+      settings->cg_tol_fraction <= 0.0 &&
       settings->cg_tol_fraction >= 1.0) {
 # ifdef PRINTING
     c_eprint("cg_tol_fraction must be strictly between 0 and 1");
