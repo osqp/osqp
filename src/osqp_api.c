@@ -1112,6 +1112,9 @@ c_int osqp_update_settings(OSQPSolver         *solver,
   settings->delta              = new_settings->delta;
   settings->polish_refine_iter = new_settings->polish_refine_iter;
 
+  /* Update settings in the linear system solver */
+  solver->work->linsys_solver->update_settings(solver->work->linsys_solver, settings);
+
   return 0;
 }
 
