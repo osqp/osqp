@@ -24,17 +24,17 @@ The solver settings are displayed in the following table. The settings marked wi
 +--------------------------------+-------------------------------------------------------------+--------------------------------------------------------------+---------------+
 | :code:`rho` *                  | ADMM rho step                                               | 0 < :code:`rho`                                              | 0.1           |
 +--------------------------------+-------------------------------------------------------------+--------------------------------------------------------------+---------------+
-| :code:`rho_is_vec` *           | Is :code:`rho` a vector?                                    | True/False                                                   | True          |
+| :code:`rho_is_vec`             | Is :code:`rho` a vector?                                    | True/False                                                   | True          |
 +--------------------------------+-------------------------------------------------------------+--------------------------------------------------------------+---------------+
 | :code:`sigma`                  | ADMM sigma step                                             | 0 < :code:`sigma`                                            | 1e-06         |
 +--------------------------------+-------------------------------------------------------------+--------------------------------------------------------------+---------------+
 | :code:`alpha` *                | ADMM relaxation parameter                                   | 0 < :code:`alpha` < 2                                        | 1.6           |
 +--------------------------------+-------------------------------------------------------------+--------------------------------------------------------------+---------------+
-| :code:`cg_max_iter`            | Maximum number of CG iterations per solver                  | 0 < :code:`cg_max_iter` (integer)                            | 20            |
+| :code:`cg_max_iter` *          | Maximum number of CG iterations per solver                  | 0 < :code:`cg_max_iter` (integer)                            | 20            |
 +--------------------------------+-------------------------------------------------------------+--------------------------------------------------------------+---------------+
-| :code:`cg_tol_reduction`       | No. of consecutive CG iterations before the tol is halved   | 0 < :code:`cg_tol_reduction` (integer)                       | 10            |
+| :code:`cg_tol_reduction` *     | No. of consecutive CG iterations before the tol is halved   | 0 < :code:`cg_tol_reduction` (integer)                       | 10            |
 +--------------------------------+-------------------------------------------------------------+--------------------------------------------------------------+---------------+
-| :code:`cg_tol_fraction`        | CG tolerance (fraction of ADMM residuals)                   | 0 < :code:`cg_tol_fraction` < 1                              | 0.15          |
+| :code:`cg_tol_fraction` *      | CG tolerance (fraction of ADMM residuals)                   | 0 < :code:`cg_tol_fraction` < 1                              | 0.15          |
 +--------------------------------+-------------------------------------------------------------+--------------------------------------------------------------+---------------+
 | :code:`adaptive_rho`           | Adaptive rho                                                | True/False                                                   | True          |
 +--------------------------------+-------------------------------------------------------------+--------------------------------------------------------------+---------------+
@@ -65,7 +65,7 @@ The solver settings are displayed in the following table. The settings marked wi
 | :code:`polish_refine_iter` *   | Refinement iterations in polishing                          | 0 < :code:`polish_refine_iter` (integer)                     | 3             |
 +--------------------------------+-------------------------------------------------------------+--------------------------------------------------------------+---------------+
 
-The boolean values :code:`True/False` are defined as :code:`1/0` in the C interfaces.
+The boolean values :code:`True/False` are defined as :code:`1/0` in the C interface.
 
 
 .. The infinity values correspond to:

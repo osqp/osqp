@@ -37,6 +37,11 @@ void pardiso(void**,         // pt
 c_int mkl_set_interface_layer(c_int);
 c_int mkl_get_max_threads();
 
+void update_settings_linsys_solver_pardiso(pardiso_solver     *s,
+                                           const OSQPSettings *settings) {
+  return;
+}
+
 // Warm starting not used by direct solvers
 void warm_start_linsys_solver_pardiso(pardiso_solver    *s,
                                       const OSQPVectorf *x) {
@@ -116,6 +121,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
     s->warm_start      = &warm_start_linsys_solver_pardiso;
     s->update_matrices = &update_linsys_solver_matrices_pardiso;
     s->update_rho_vec  = &update_linsys_solver_rho_vec_pardiso;
+    s->update_settings = &update_settings_linsys_solver_pardiso;
 
     // Assign type
     s->type = MKL_PARDISO_SOLVER;

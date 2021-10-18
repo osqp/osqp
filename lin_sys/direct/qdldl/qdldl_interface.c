@@ -11,6 +11,11 @@
 #include "kkt.h"
 #endif
 
+void update_settings_linsys_solver_qdldl(qdldl_solver       *s,
+                                         const OSQPSettings *settings) {
+  return;
+}
+
 // Warm starting not used by direct solvers
 void warm_start_linsys_solver_qdldl(qdldl_solver      *s,
                                     const OSQPVectorf *x) {
@@ -218,8 +223,9 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
     s->polishing = polishing;
 
     // Link Functions
-    s->solve      = &solve_linsys_qdldl;
-    s->warm_start = &warm_start_linsys_solver_qdldl;
+    s->solve           = &solve_linsys_qdldl;
+    s->update_settings = &update_settings_linsys_solver_qdldl;
+    s->warm_start      = &warm_start_linsys_solver_qdldl;
 
 #ifndef EMBEDDED
     s->free = &free_linsys_solver_qdldl;

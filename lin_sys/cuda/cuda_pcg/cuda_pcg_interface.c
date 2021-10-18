@@ -189,6 +189,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   s->free            = &free_linsys_solver_cudapcg;
   s->update_matrices = &update_linsys_solver_matrices_cudapcg;
   s->update_rho_vec  = &update_linsys_solver_rho_vec_cudapcg;
+  s->update_settings = &update_settings_linsys_solver_cudapcg;
 
   /* Initialize PCG preconditioner */
   cuda_pcg_update_precond(s, 1, 1, 1);
@@ -232,6 +233,15 @@ c_int solve_linsys_cudapcg(cudapcg_solver *s,
   else                s->zero_pcg_iters = 0;
 
   return 0;
+}
+
+
+void update_settings_linsys_solver_cudapcg(cudapcg_solver     *s,
+                                           const OSQPSettings *settings) {
+
+  s->max_iter            = settings->cg_max_iter;
+  s->reduction_threshold = settings->cg_tol_reduction;
+  s->tol_fraction        = settings->cg_tol_fraction;
 }
 
 

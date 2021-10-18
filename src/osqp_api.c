@@ -1091,9 +1091,9 @@ c_int osqp_update_settings(OSQPSolver         *solver,
   // sigma      ignored
   settings->alpha = new_settings->alpha;
 
-  // cg_max_iter      ignored
-  // cg_tol_reduction ignored
-  // cg_tol_fraction  ignored
+  settings->cg_max_iter      = new_settings->cg_max_iter;
+  settings->cg_tol_reduction = new_settings->cg_tol_reduction;
+  settings->cg_tol_fraction  = new_settings->cg_tol_fraction;
 
   // adaptive_rho           ignored
   // adaptive_rho_interval  ignored

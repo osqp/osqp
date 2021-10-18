@@ -205,12 +205,9 @@ c_int osqp_update_data_mat(OSQPSolver    *solver,
 /**
  * Update settings. The following settings can only be set using
  * osqp_setup and are ignored in this function:
- *  - scalling
+ *  - scaling
  *  - rho_is_vec
  *  - sigma
- *  - cg_max_iter
- *  - cg_tol_reduction
- *  - cg_tol_fraction
  *  - adaptive_rho
  *  - adaptive_rho_interval
  *  - adaptive_rho_fraction
@@ -224,7 +221,7 @@ c_int osqp_update_data_mat(OSQPSolver    *solver,
 c_int osqp_update_settings(OSQPSolver         *solver,
                            const OSQPSettings *new_settings);
 
-// TODO: Allow for CG_* and ADAPTIVE_RHO_* settings to be updated.
+// TODO: Allow for ADAPTIVE_RHO_* settings to be updated.
 
 
 # if EMBEDDED != 1
