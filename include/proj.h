@@ -3,60 +3,67 @@
 
 # ifdef __cplusplus
 extern "C" {
-# endif // ifdef __cplusplus
+# endif /* ifdef __cplusplus */
 
 # include "osqp.h"
 # include "types.h"
 # include "lin_alg.h"
 
 
-/* Define Projections onto set C involved in the ADMM algorithm */
-
-/**
- * Project y onto the polar of the rec cone of \f$C = [l, u]\f$
- * @param y         Vector to project
- * @param l         lower bound vector
- * @param u         upper bound bector
-* @param infval     value treated as infinity
- * @param work Workspace
- */
- void project_polar_reccone(OSQPVectorf      *y,
-                            OSQPVectorf      *l,
-                            OSQPVectorf      *u,
-                            c_float      infval);
 /**
  * Project z onto \f$C = [l, u]\f$
- * @param y         vector to project
- * @param l         lower bound vector
- * @param u         upper bound bector
-* @param infval     positive value treated as infinity
- * @param tol       projection tolerance
+ * @param z  Vector to project
+ * @param l  Lower bound vector
+ * @param u  Upper bound vector
  */
-c_int test_in_reccone(const OSQPVectorf  *y,
-                      const OSQPVectorf  *l,
-                      const OSQPVectorf  *u,
-                      c_float        infval,
-                      c_float          tol);
-
-// Project y onto \f$C = [l, u]\f$
-/**
-* @param work  Workspace
- * @param y    vector to project
- */
-
-void project(OSQPWorkspace *work, OSQPVectorf *y);
-
+void project(OSQPVectorf       *z,
+             const OSQPVectorf *l,
+             const OSQPVectorf *u);
 
 /**
- * Ensure z satisfies box constraints and y is is normal cone of z
- * @param work Workspace
- * @param z    Primal variable z
- * @param y    Dual variable y
+ * Project y onto the polar of the recession cone of \f$C = [l, u]\f$
+ * @param y       Vector to project
+ * @param l       Lower bound vector
+ * @param u       Upper bound vector
+ * @param infval  Positive value treated as infinity
  */
- void project_normalcone(OSQPWorkspace *work, OSQPVectorf *z, OSQPVectorf *y);
+ void project_polar_reccone(OSQPVectorf       *y,
+                            const OSQPVectorf *l,
+                            const OSQPVectorf *u,
+                            c_float            infval);
+/**
+ * Test whether y is in the recession cone of \f$C = [l, u]\f$
+ * @param y       Vector to project
+ * @param l       Lower bound vector
+ * @param u       Upper bound vector
+ * @param infval  Positive value treated as infinity
+ * @param tol     Values in y within tol of zero are treated as zero
+ */
+c_int test_in_reccone(const OSQPVectorf *y,
+                      const OSQPVectorf *l,
+                      const OSQPVectorf *u,
+                      c_float            infval,
+                      c_float            tol);
+
+#ifndef EMBEDDED
+
+/**
+ * Ensure z is in C = [l,u] and y is in the normal cone of C at z
+ * @param z  Primal variable z
+ * @param y  Dual variable y
+ * @param l  Lower bound vector
+ * @param u  Upper bound vector
+ */
+void project_normalcone(OSQPVectorf       *z,
+                        OSQPVectorf       *y,
+                        const OSQPVectorf *l,
+                        const OSQPVectorf *u);
+
+# endif /* ifndef EMBEDDED */
+
 
 # ifdef __cplusplus
 }
-# endif // ifdef __cplusplus
+# endif /* ifdef __cplusplus */
 
-#endif // ifndef PROJ_H
+#endif /* ifndef PROJ_H */

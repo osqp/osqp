@@ -19,4 +19,4 @@ c_float *l;
 c_float *u;
 } OSQPTestData;
 
-#endif // #ifndef OSQP_TESTER_H
+#endif /* ifndef OSQP_TESTER_H */

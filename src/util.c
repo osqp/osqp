@@ -45,7 +45,7 @@ void print_header(void) {
 #endif
 
   // Main information
-  c_print("objective    pri res    dua res    rho");
+  c_print("objective    prim res   dual res   rho");
 # ifdef PROFILING
   c_print("        time");
 # endif /* ifdef PROFILING */
@@ -108,11 +108,13 @@ void print_setup_header(const OSQPSolver *solver) {
   if (settings->check_termination) {
     c_print("          check_termination: on (interval %i),\n",
       (int)settings->check_termination);
-  } else {c_print("          check_termination: off,\n");}
-# ifdef PROFILING
-  if (settings->time_limit) {
-    c_print("          time_limit: %.2e sec,\n", settings->time_limit);
   }
+  else
+    c_print("          check_termination: off,\n");
+  
+# ifdef PROFILING
+  if (settings->time_limit)
+    c_print("          time_limit: %.2e sec,\n", settings->time_limit);
 # endif /* ifdef PROFILING */
 
   if (settings->scaling) {
@@ -127,25 +129,17 @@ void print_setup_header(const OSQPSolver *solver) {
     c_print("scaled_termination: off\n");
   }
 
-  if (settings->warm_start) {
-    c_print("          warm start: on, ");
+  if (settings->warm_starting) {
+    c_print("          warm starting: on, ");
   } else {
-    c_print("          warm start: off, ");
+    c_print("          warm starting: off, ");
   }
 
-  if (settings->polish) {
-    c_print("polish: on, ");
+  if (settings->polishing) {
+    c_print("polishing: on, ");
   } else {
-    c_print("polish: off, ");
+    c_print("polishing: off, ");
   }
-
-# ifdef PROFILING
-  if (settings->time_limit) {
-    c_print("time_limit: %.2e sec\n", settings->time_limit);
-  } else {
-    c_print("time_limit: off\n");
-  }
-# endif
 
   c_print("\n");
 }
@@ -158,8 +152,8 @@ void print_summary(OSQPSolver *solver) {
 
   c_print("%4i",     (int)info->iter);
   c_print(" %12.4e", info->obj_val);
-  c_print("  %9.2e", info->pri_res);
-  c_print("  %9.2e", info->dua_res);
+  c_print("  %9.2e", info->prim_res);
+  c_print("  %9.2e", info->dual_res);
   c_print("  %9.2e", settings->rho);
 
 # ifdef PROFILING
@@ -184,8 +178,8 @@ void print_polish(OSQPSolver *solver) {
 
   c_print("%4s",     "plsh");
   c_print(" %12.4e", info->obj_val);
-  c_print("  %9.2e", info->pri_res);
-  c_print("  %9.2e", info->dua_res);
+  c_print("  %9.2e", info->prim_res);
+  c_print("  %9.2e", info->dual_res);
 
   // Different characters for windows/unix
 #if defined(IS_WINDOWS) && !defined(PYTHON)
@@ -208,16 +202,17 @@ void print_polish(OSQPSolver *solver) {
   c_print("\n");
 }
 
-void print_footer(OSQPInfo *info, c_int polish) {
+void print_footer(OSQPInfo *info,
+                  c_int     polishing) {
   c_print("\n"); // Add space after iterations
 
   c_print("status:               %s\n", info->status);
 
-  if (polish && (info->status_val == OSQP_SOLVED)) {
+  if (polishing && (info->status_val == OSQP_SOLVED)) {
     if (info->status_polish == 1) {
-      c_print("solution polish:      successful\n");
+      c_print("solution polishing:   successful\n");
     } else if (info->status_polish < 0) {
-      c_print("solution polish:      unsuccessful\n");
+      c_print("solution polishing:   unsuccessful\n");
     }
   }
 
@@ -248,44 +243,46 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   OSQPSettings *new = c_malloc(sizeof(OSQPSettings));
   if (!new) return OSQP_NULL;
 
-  // Copy settings
-  // NB. Copying them explicitly because memcpy is not
-  // defined when PRINTING is disabled (appears in string.h)
-  new->rho = settings->rho;
-  new->rho_is_vec = settings->rho_is_vec;
-  new->sigma = settings->sigma;
-  new->scaling = settings->scaling;
-
-# if EMBEDDED != 1
-  new->adaptive_rho = settings->adaptive_rho;
-  new->adaptive_rho_interval = settings->adaptive_rho_interval;
-  new->adaptive_rho_tolerance = settings->adaptive_rho_tolerance;
-# ifdef PROFILING
-  new->adaptive_rho_fraction = settings->adaptive_rho_fraction;
-# endif
-# endif // EMBEDDED != 1
-  new->max_iter = settings->max_iter;
-  new->eps_abs = settings->eps_abs;
-  new->eps_rel = settings->eps_rel;
-  new->eps_prim_inf = settings->eps_prim_inf;
-  new->eps_dual_inf = settings->eps_dual_inf;
-  new->alpha = settings->alpha;
+  /* Copy settings
+   * NB: Copying them explicitly because memcpy is not
+   * defined when PRINTING is disabled (appears in string.h)
+   */
   new->linsys_solver = settings->linsys_solver;
-  new->delta = settings->delta;
-  new->polish = settings->polish;
-  new->polish_refine_iter = settings->polish_refine_iter;
-  new->verbose = settings->verbose;
+  new->verbose       = settings->verbose;
+  new->warm_starting = settings->warm_starting;
+  new->scaling       = settings->scaling;
+  new->polishing     = settings->polishing;
+
+  new->rho        = settings->rho;
+  new->rho_is_vec = settings->rho_is_vec;
+  new->sigma      = settings->sigma;
+  new->alpha      = settings->alpha;
+
+  new->cg_max_iter      = settings->cg_max_iter;
+  new->cg_tol_reduction = settings->cg_tol_reduction;
+  new->cg_tol_fraction  = settings->cg_tol_fraction;
+
+  new->adaptive_rho           = settings->adaptive_rho;
+  new->adaptive_rho_interval  = settings->adaptive_rho_interval;
+  new->adaptive_rho_fraction  = settings->adaptive_rho_fraction;
+  new->adaptive_rho_tolerance = settings->adaptive_rho_tolerance;
+
+  new->max_iter           = settings->max_iter;
+  new->eps_abs            = settings->eps_abs;
+  new->eps_rel            = settings->eps_rel;
+  new->eps_prim_inf       = settings->eps_prim_inf;
+  new->eps_dual_inf       = settings->eps_dual_inf;
   new->scaled_termination = settings->scaled_termination;
-  new->check_termination = settings->check_termination;
-  new->warm_start = settings->warm_start;
-# ifdef PROFILING
-  new->time_limit = settings->time_limit;
-# endif
+  new->check_termination  = settings->check_termination;
+  new->time_limit         = settings->time_limit;
+
+  new->delta              = settings->delta;
+  new->polish_refine_iter = settings->polish_refine_iter;
 
   return new;
 }
 
-#endif // #ifndef EMBEDDED
+#endif /* ifndef EMBEDDED */
 
 
 /*******************
@@ -373,7 +370,8 @@ c_float osqp_toc(OSQPTimer *t)
 
 #ifdef PRINTING
 
-void print_csc_matrix(const csc *M, const char *name)
+void print_csc_matrix(const csc  *M,
+                      const char *name)
 {
   c_int j, i, row_start, row_stop;
   c_int k = 0;
@@ -394,7 +392,8 @@ void print_csc_matrix(const csc *M, const char *name)
   }
 }
 
-void dump_csc_matrix(csc *M, const char *file_name) {
+void dump_csc_matrix(const csc  *M,
+                     const char *file_name) {
   c_int j, i, row_strt, row_stop;
   c_int k = 0;
   FILE *f = fopen(file_name, "w");
@@ -420,7 +419,8 @@ void dump_csc_matrix(csc *M, const char *file_name) {
   }
 }
 
-void print_trip_matrix(csc *M, const char *name)
+void print_trip_matrix(const csc  *M,
+                       const char *name)
 {
   c_int k = 0;
 
@@ -432,7 +432,10 @@ void print_trip_matrix(csc *M, const char *name)
   }
 }
 
-void print_dns_matrix(c_float *M, c_int m, c_int n, const char *name)
+void print_dns_matrix(const c_float *M,
+                      c_int          m,
+                      c_int          n,
+                      const char    *name)
 {
   c_int i, j;
 
@@ -456,11 +459,15 @@ void print_dns_matrix(c_float *M, c_int m, c_int n, const char *name)
   c_print("\n");
 }
 
-void print_vec(c_float *v, c_int n, const char *name) {
+void print_vec(const c_float *v,
+              c_int           n,
+              const char     *name) {
   print_dns_matrix(v, 1, n, name);
 }
 
-void dump_vec(c_float *v, c_int len, const char *file_name) {
+void dump_vec(const c_float *v,
+              c_int          len,
+              const char    *file_name) {
   c_int i;
   FILE *f = fopen(file_name, "w");
 
@@ -475,7 +482,9 @@ void dump_vec(c_float *v, c_int len, const char *file_name) {
   }
 }
 
-void print_vec_int(c_int *x, c_int n, const char *name) {
+void print_vec_int(const c_int *x,
+                   c_int        n,
+                   const char  *name) {
   c_int i;
 
   c_print("%s = [", name);

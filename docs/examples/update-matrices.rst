@@ -169,6 +169,7 @@ C
 
 .. code:: c
 
+    #include <stdlib.h>
     #include "osqp.h"
 
     int main(int argc, char **argv) {
@@ -218,8 +219,9 @@ C
         /*  Update problem
             NB: Update only upper triangular part of P
          */
-        if (!exitflag) exitflag = osqp_update_P(solver, P_x_new, OSQP_NULL, 3);
-        if (!exitflag) exitflag = osqp_update_A(solver, A_x_new, OSQP_NULL, 4);
+        if (!exitflag) exitflag = osqp_update_data_mat(solver,
+                                                       P_x_new, OSQP_NULL, 3,
+                                                       A_x_new, OSQP_NULL, 4);
 
         /* Solve updated problem */
         if (!exitflag) exitflag = osqp_solve(work);

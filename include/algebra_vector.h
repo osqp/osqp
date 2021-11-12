@@ -9,8 +9,8 @@ extern "C" {
 #include "glob_opts.h"
 
 /*
- * OSQPVector[fi] types.  Not defined here since it
- * is implementation specific
+ *  OSQPVector[fi] types.  Not defined here since it
+ *  is implementation-specific
  */
 
 /* integer valued vectors */
@@ -34,14 +34,8 @@ OSQPVectori* OSQPVectori_calloc(c_int length);
 OSQPVectorf* OSQPVectorf_new(const c_float *a,
                              c_int          length);
 
-/* Return an in vector using a raw array as input (Uses MALLOC) */
-// OSQPVectori* OSQPVectori_new(const c_int *a, c_int length);
-
 /* Return a copy of a float vector a as output (Uses MALLOC) */
 OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf *a);
-
-/* Return a copy of an int vector a as output (Uses MALLOC) */
-// OSQPVectori* OSQPVectori_copy_new(const OSQPVectori *a);
 
 /* Free a float vector */
 void OSQPVectorf_free(OSQPVectorf *a);
@@ -69,22 +63,12 @@ void OSQPVectorf_view_free(OSQPVectorf *a);
 /* Length of the vector (floats) */
 c_int OSQPVectorf_length(const OSQPVectorf *a);
 
-/* Length of the vector (ints) */
-// c_int OSQPVectori_length(const OSQPVectori *a);
-
 /* Pointer to vector data (floats) */
 c_float* OSQPVectorf_data(const OSQPVectorf *a);
-
-// /* Pointer to vector data (ints) */
-// c_int* OSQPVectori_data(const OSQPVectori *a);
 
 /* Copy a float vector a into another vector b (pre-allocated) */
 void OSQPVectorf_copy(OSQPVectorf       *b,
                       const OSQPVectorf *a);
-
-/* Copy an int vector a into another vector b (pre-allocated) */
-// void OSQPVectori_copy(OSQPVectori       *b,
-//                       const OSQPVectori *a);
 
 /* Copy an array of floats into a into a vector b (pre-allocated) */
 void OSQPVectorf_from_raw(OSQPVectorf   *b,
@@ -117,7 +101,7 @@ void OSQPVectorf_set_scalar_conditional(OSQPVectorf       *a,
 void OSQPVectorf_mult_scalar(OSQPVectorf *a,
                              c_float      sc);
 
-/* x = a + b.  Set x == a for x += b.  */
+/* x = a + b.  Set x == a for x += b. */
 void OSQPVectorf_plus(OSQPVectorf       *x,
                       const OSQPVectorf *a,
                       const OSQPVectorf *b);
@@ -134,7 +118,7 @@ void OSQPVectorf_add_scaled(OSQPVectorf       *x,
                             c_float            scb,
                             const OSQPVectorf *b);
 
-/* x = sca*a + scb*b + scc*c.   Set (x == a, sca==1.) for x += scb*b scc*c. */
+/* x = sca*a + scb*b + scc*c.  Set (x == a, sca==1.) for x += scb*b scc*c. */
 void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
                              c_float            sca,
                              const OSQPVectorf *a,
@@ -146,42 +130,31 @@ void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
 /* ||v||_inf */
 c_float OSQPVectorf_norm_inf(const OSQPVectorf *v);
 
-/* ||v||_1 */
-// c_float OSQPVectorf_norm_1(const OSQPVectorf *v);
-
 /* ||Sv||_inf */
 c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S,
                                     const OSQPVectorf *v);
-
-/* ||Sv||_1 */
-// c_float OSQPVectorf_scaled_norm_1(const OSQPVectorf *S, const OSQPVectorf *v);
 
 /* ||a - b||_inf */
 c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
                                   const OSQPVectorf *b);
 
-/* sum of vector elements */
-// c_float OSQPVectorf_sum(const OSQPVectorf *a);
-
 /* mean of vector elements */
 c_float OSQPVectorf_mean(const OSQPVectorf *a);
-
-
 
 /* Inner product a'b */
 c_float OSQPVectorf_dot_prod(const OSQPVectorf *a,
                              const OSQPVectorf *b);
 
 /* Inner product a'b, but using only the positive or negative
- * terms in b.   Use sign = 1 for positive terms, sign = -1 for
- * negative terms.   Setting any other value for sign will return
+ * terms in b.  Use sign = 1 for positive terms, sign = -1 for
+ * negative terms.  Setting any other value for sign will return
  * the normal dot product
  */
 c_float OSQPVectorf_dot_prod_signed(const OSQPVectorf *a,
                                     const OSQPVectorf *b,
                                     c_int              sign);
 
-/* elementwise product a.*b stored in c.  Set c==a for c *= b */
+/* Elementwise product a.*b stored in c.  Set c==a for c *= b */
 void OSQPVectorf_ew_prod(OSQPVectorf       *c,
                          const OSQPVectorf *a,
                          const OSQPVectorf *b);
@@ -219,17 +192,8 @@ void OSQPVectorf_project_polar_reccone(OSQPVectorf       *y,
 c_int OSQPVectorf_in_reccone(const OSQPVectorf *y,
                              const OSQPVectorf *l,
                              const OSQPVectorf *u,
-                             c_float           infval,
-                             c_float           tol);
-
-/* vector permutation x[:] = b(p[:]) */
-// void OSQPVectorf_permute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p);
-// void OSQPVectori_permute(OSQPVectori *x, const OSQPVectori *b, const OSQPVectori *p);
-
-/* vector inverse permutation x(p[:]) = b */
-// void OSQPVectorf_ipermute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p);
-// void OSQPVectori_ipermute(OSQPVectori *x, const OSQPVectori *b, const OSQPVectori *p);
-
+                             c_float            infval,
+                             c_float            tol);
 
 # if EMBEDDED != 1
 
@@ -243,23 +207,10 @@ void OSQPVectorf_ew_reciprocal(OSQPVectorf       *b,
 /* elementwise sqrt of the vector elements */
 void OSQPVectorf_ew_sqrt(OSQPVectorf *a);
 
-/* Elementwise maximum between vector and scalar c = max(a, sc) */
-// void OSQPVectorf_ew_max(OSQPVectorf       *c,
-//                         const OSQPVectorf *a,
-//                         c_float            sc);
-
-/* Elementwise minimum between vector and scalar c = min(a, sc) */
-// void OSQPVectorf_ew_min(OSQPVectorf *c, const OSQPVectorf *a, c_float sc);
-
 /* Elementwise maximum between vectors c = max(a, b) */
 void OSQPVectorf_ew_max_vec(OSQPVectorf       *c,
                             const OSQPVectorf *a,
                             const OSQPVectorf *b);
-
-/* Elementwise minimum between vectors c = min(a, b) */
-// void OSQPVectorf_ew_min_vec(OSQPVectorf       *c,
-//                             const OSQPVectorf *a,
-//                             const OSQPVectorf *b);
 
 /* Elementwise check for constraint type.
    if u[i] - l[i] < tol, iseq[i] = 1 otherwise iseq[i] = 0,

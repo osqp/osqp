@@ -3,10 +3,9 @@
 
 # ifdef __cplusplus
 extern "C" {
-# endif // ifdef __cplusplus
+# endif /* ifdef __cplusplus */
 
 /* Types required by the OSQP utility functions */
-# include "osqp_configure.h"
 # include "osqp_api_types.h"
 
 /********************
@@ -33,6 +32,6 @@ void csc_set_data(csc     *M,
 
 # ifdef __cplusplus
 }
-# endif // ifdef __cplusplus
+# endif /* ifdef __cplusplus */
 
-#endif // ifndef OSQP_API_FUNCTIONS_H
+#endif /* ifndef OSQP_API_FUNCTIONS_H */

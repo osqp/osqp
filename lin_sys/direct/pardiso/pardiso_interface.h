@@ -59,7 +59,7 @@ struct pardiso {
     c_float *rho_inv_vec;   ///< parameter vector
     c_float sigma;          ///< scalar parameter
     c_float rho_inv;        ///< scalar parameter (used if rho_inv_vec == NULL)
-    c_int polish;           ///< polishing flag
+    c_int polishing;        ///< polishing flag
     c_int n;                ///< number of QP variables
     c_int m;                ///< number of QP constraints
 
@@ -90,19 +90,19 @@ struct pardiso {
  * Initialize Pardiso Solver
  *
  * @param  s         Pointer to a private structure
- * @param  P         Cost function matrix (upper triangular form)
+ * @param  P         Objective function matrix (upper triangular form)
  * @param  A         Constraints matrix
- * @param  rho_vec   Algorithm parameter. If polish, then rho_vec = OSQP_NULL.
+ * @param  rho_vec   Algorithm parameter. If polishing, then rho_vec = OSQP_NULL.
  * @param  settings  Solver settings
- * @param  polish    Flag whether we are initializing for polish or not
+ * @param  polishing Flag whether we are initializing for polishing or not
  * @return           Exitflag for error (0 if no errors)
  */
 c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
                                  const OSQPMatrix   *P,
                                  const OSQPMatrix   *A,
                                  const OSQPVectorf  *rho_vec,
-                                 OSQPSettings       *settings,
-                                 c_int               polish);
+                                 const OSQPSettings *settings,
+                                 c_int               polishing);
 
 
 /**
@@ -115,6 +115,8 @@ c_int solve_linsys_pardiso(pardiso_solver *s,
                            OSQPVectorf    *b,
                            c_int           admm_iter);
 
+void update_settings_linsys_solver_pardiso(pardiso_solver *s,
+                                           const OSQPSettings    *settings);
 
 void update_settings_linsys_solver_pardiso(pardiso_solver *s,
                                            const OSQPSettings    *settings);

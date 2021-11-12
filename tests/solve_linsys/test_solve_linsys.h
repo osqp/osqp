@@ -11,7 +11,7 @@
 void test_solveKKT() {
 
   c_int m, n, exitflag = 0;
-  c_float pri_res, dua_res;
+  c_float prim_res, dual_res;
   OSQPVectorf *rho_vec, *rhs, *ref;
   OSQPMatrix *Pu, *A;
   LinSysSolver *s;  // Private structure to form KKT factorization
@@ -19,9 +19,10 @@ void test_solveKKT() {
   solve_linsys_sols_data *data = generate_problem_solve_linsys_sols_data();
 
   // Settings
+  osqp_set_default_settings(settings);
   settings->rho           = data->test_solve_KKT_rho;
   settings->sigma         = data->test_solve_KKT_sigma;
-  settings->linsys_solver = LINSYS_SOLVER;
+  settings->linsys_solver = OSQP_LINSYS_SOLVER;
 
   // Set rho_vec
   m       = data->test_solve_KKT_A->m;
@@ -29,18 +30,18 @@ void test_solveKKT() {
   rho_vec = OSQPVectorf_malloc(m);
   OSQPVectorf_set_scalar(rho_vec,settings->rho);
 
-  //data Matrices
+  // data matrices
   Pu = OSQPMatrix_new_from_csc(data->test_solve_KKT_Pu,1);
   A  = OSQPMatrix_new_from_csc(data->test_solve_KKT_A, 0);
 
   // Set residuals to small values to enforce accurate solution by indirect solvers
-  pri_res = 1e-7;
-  dua_res = 1e-7;
+  prim_res = 1e-7;
+  dual_res = 1e-7;
 
   // Form and factorize KKT matrix
-  exitflag = init_linsys_solver(&s, Pu, A, rho_vec, settings, &pri_res, &dua_res, 0);
+  exitflag = init_linsys_solver(&s, Pu, A, rho_vec, settings, &prim_res, &dual_res, 0);
 
-  // Solve  KKT x = b via LDL given factorization
+  // Solve KKT x = rhs
   rhs = OSQPVectorf_new(data->test_solve_KKT_rhs, m+n);
   s->solve(s, rhs, 2);
   ref = OSQPVectorf_new(data->test_solve_KKT_x, m+n);

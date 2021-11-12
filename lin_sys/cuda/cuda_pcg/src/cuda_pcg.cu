@@ -144,15 +144,13 @@ c_int cuda_pcg_alg(cudapcg_solver *s,
   checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, &H_MINUS_ONE, s->d_rhs, 1, s->d_r, 1));
 
   /* h_r_norm = |d_r| */
-  s->vector_norm(s->d_r, n, s->h_r_norm);
+  cuda_vec_norm_inf(s->d_r, n, s->h_r_norm);
 
   /* From here on cuBLAS is operating in device pointer mode */
   cublasSetPointerMode(CUDA_handle->cublasHandle, CUBLAS_POINTER_MODE_DEVICE);
 
-  if (s->precondition) {
-    /* d_y = M \ d_r */
-    cuda_vec_ew_prod(s->d_y, s->d_diag_precond_inv, s->d_r, n);
-  }
+  /* d_y = M \ d_r */
+  cuda_vec_ew_prod(s->d_y, s->d_diag_precond_inv, s->d_r, n);
 
   /* d_p = -d_y */
   checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, s->D_MINUS_ONE, s->d_y, 1, s->d_p, 1));
@@ -180,10 +178,8 @@ c_int cuda_pcg_alg(cudapcg_solver *s,
     /* d_r += alpha * d_Kp */
     checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, s->alpha, s->d_Kp, 1, s->d_r, 1));
 
-    if (s->precondition) {
-      /* d_y = M \ d_r */
-      cuda_vec_ew_prod(s->d_y, s->d_diag_precond_inv, s->d_r, n);
-    }
+    /* d_y = M \ d_r */
+    cuda_vec_ew_prod(s->d_y, s->d_diag_precond_inv, s->d_r, n);
 
     /* Swap pointers to rTy and rTy_prev */
     tmp = s->rTy_prev;
@@ -194,7 +190,7 @@ c_int cuda_pcg_alg(cudapcg_solver *s,
     checkCudaErrors(cublasTdot(CUDA_handle->cublasHandle, n, s->d_y, 1, s->d_r, 1, s->rTy));
 
     /* Update residual norm */
-    s->vector_norm(s->d_r, n, s->d_r_norm);
+    cuda_vec_norm_inf(s->d_r, n, s->d_r_norm);
     checkCudaErrors(cudaMemcpyAsync(s->h_r_norm, s->d_r_norm, sizeof(c_float), cudaMemcpyDeviceToHost));
 
     /* beta = rTy / rTy_prev */

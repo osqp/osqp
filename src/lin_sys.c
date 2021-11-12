@@ -82,29 +82,29 @@ c_int init_linsys_solver(LinSysSolver      **s,
                          const OSQPMatrix   *P,
                          const OSQPMatrix   *A,
                          const OSQPVectorf  *rho_vec,
-                         OSQPSettings       *settings,
-                         c_float            *scaled_pri_res,
-                         c_float            *scaled_dua_res,
-                         c_int               polish) {
+                         const OSQPSettings *settings,
+                         c_float            *scaled_prim_res,
+                         c_float            *scaled_dual_res,
+                         c_int               polishing) {
 
   switch (settings->linsys_solver) {
 
 #ifdef CUDA_SUPPORT
 
   default:
-    return init_linsys_solver_cudapcg((cudapcg_solver **)s, P, A, rho_vec, settings, scaled_pri_res, scaled_dua_res, polish);
+    return init_linsys_solver_cudapcg((cudapcg_solver **)s, P, A, rho_vec, settings, scaled_prim_res, scaled_dual_res, polishing);
 
 #else /* ifdef CUDA_SUPPORT */
 
 #ifdef ENABLE_MKL_PARDISO
   case DIRECT_SOLVER:
-    return init_linsys_solver_pardiso((pardiso_solver **)s, P, A, rho_vec, settings, polish);
+    return init_linsys_solver_pardiso((pardiso_solver **)s, P, A, rho_vec, settings, polishing);
 
   case INDIRECT_SOLVER:
-    return init_linsys_mklcg((mklcg_solver **)s, P, A, rho_vec, settings, polish);
+    return init_linsys_mklcg((mklcg_solver **)s, P, A, rho_vec, settings, polishing);
 #else
   default:
-    return init_linsys_solver_qdldl((qdldl_solver **)s, P, A, rho_vec, settings, polish);
+    return init_linsys_solver_qdldl((qdldl_solver **)s, P, A, rho_vec, settings, polishing);
 #endif
 
 #endif /* ifdef CUDA_SUPPORT */
