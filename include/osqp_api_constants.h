@@ -60,7 +60,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 #ifdef CUDA_SUPPORT
 # define OSQP_LINSYS_SOLVER (INDIRECT_SOLVER)
 #else
-# define OSQP_LINSYS_SOLVER (INDIRECT_SOLVER)
+# define OSQP_LINSYS_SOLVER (DIRECT_SOLVER)
 #endif
 
 # define OSQP_VERBOSE               (1)
