@@ -141,12 +141,6 @@ endif()
 option (COVERAGE "Perform code coverage" OFF)
 message(STATUS "COVERAGE = ${COVERAGE}")
 
-# MKL support
-# ----------------------------------------------
-if (IS_MAC AND ALGEBRA_MKL)
-    
-endif()
-
 # CUDA support
 # ----------------------------------------------
 if (ALGEBRA_CUDA)

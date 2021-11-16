@@ -757,7 +757,6 @@ if(UNIX AND CMAKE_SKIP_BUILD_RPATH)
   endif()
 endif()
 
-message(STATUS "MKL_DLL_FILE=${MKL_DLL_FILE}")
 # Add MKL dynamic libraries to PATH on Windows
 if(WIN32 AND NOT MKL_LINK STREQUAL "static" AND NOT ${MKL_DLL_FILE} STREQUAL "")
   get_filename_component(MKL_DLL_DIR ${MKL_DLL_FILE} DIRECTORY)

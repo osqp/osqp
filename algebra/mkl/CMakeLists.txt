@@ -1,3 +1,9 @@
+if (DLONG)
+    set(MKL_INTERFACE "ilp64")
+else()
+    set(MKL_INTERFACE "lp64")
+endif()
+
 find_package(MKL CONFIG REQUIRED)
 
 target_sources(OSQPLIB
