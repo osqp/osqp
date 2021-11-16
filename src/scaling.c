@@ -6,14 +6,14 @@
 // Set values lower than threshold SCALING_REG to 1
 
 c_float limit_scaling_scalar(c_float v) {
-    v = v < MIN_SCALING ? 1.0 : v;
-    v = v > MAX_SCALING ? MAX_SCALING : v;
+    v = v < OSQP_MIN_SCALING ? 1.0 : v;
+    v = v > OSQP_MAX_SCALING ? OSQP_MAX_SCALING : v;
     return v;
 }
 
 void limit_scaling_vector(OSQPVectorf* v) {
-  OSQPVectorf_set_scalar_if_lt(v,v,MIN_SCALING,1.0);
-  OSQPVectorf_set_scalar_if_gt(v,v,MAX_SCALING,MAX_SCALING);
+  OSQPVectorf_set_scalar_if_lt(v,v,OSQP_MIN_SCALING,1.0);
+  OSQPVectorf_set_scalar_if_gt(v,v,OSQP_MAX_SCALING,OSQP_MAX_SCALING);
 }
 
 /**
@@ -58,7 +58,7 @@ c_int scale_data(OSQPSolver* solver) {
 
   c_int   i;          // Iterations index
   c_int   n, m;       // Number of constraints and variables
-  c_float c_temp;     // Cost function scaling
+  c_float c_temp;     // Objective function scaling
   c_float inf_norm_q; // Infinity norm of q
 
   OSQPSettings*  settings = solver->settings;

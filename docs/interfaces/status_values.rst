@@ -18,23 +18,23 @@ The *inaccurate* statuses define when the optimality, primal infeasibility or du
 +------------------------------+-----------------------------------+-------+
 | solved inaccurate            | OSQP_SOLVED_INACCURATE            | 2     |
 +------------------------------+-----------------------------------+-------+
-| maximum iterations reached   | OSQP_MAX_ITER_REACHED             | -2    |
+| primal infeasible            | OSQP_PRIMAL_INFEASIBLE            | 3     |
 +------------------------------+-----------------------------------+-------+
-| primal infeasible            | OSQP_PRIMAL_INFEASIBLE            | -3    |
+| primal infeasible inaccurate | OSQP_PRIMAL_INFEASIBLE_INACCURATE | 4     |
 +------------------------------+-----------------------------------+-------+
-| primal infeasible inaccurate | OSQP_PRIMAL_INFEASIBLE_INACCURATE | 3     |
+| dual infeasible              | OSQP_DUAL_INFEASIBLE              | 5     |
 +------------------------------+-----------------------------------+-------+
-| dual infeasible              | OSQP_DUAL_INFEASIBLE              | -4    |
+| dual infeasible inaccurate   | OSQP_DUAL_INFEASIBLE_INACCURATE   | 6     |
 +------------------------------+-----------------------------------+-------+
-| dual infeasible inaccurate   | OSQP_DUAL_INFEASIBLE_INACCURATE   | 4     |
+| maximum iterations reached   | OSQP_MAX_ITER_REACHED             | 7     |
 +------------------------------+-----------------------------------+-------+
-| interrupted by user          | OSQP_SIGINT                       | -5    |
+| run time limit reached       | OSQP_TIME_LIMIT_REACHED           | 8     |
 +------------------------------+-----------------------------------+-------+
-| run time limit reached       | OSQP_TIME_LIMIT_REACHED           | -6    |
+| problem non convex           | OSQP_NON_CVX                      | 9     |
 +------------------------------+-----------------------------------+-------+
-| unsolved                     | OSQP_UNSOLVED                     | -10   |
+| interrupted by user          | OSQP_SIGINT                       | 10    |
 +------------------------------+-----------------------------------+-------+
-| problem non convex           | OSQP_NON_CVX                      | -7    |
+| unsolved                     | OSQP_UNSOLVED                     | 11    |
 +------------------------------+-----------------------------------+-------+
 
 .. note::

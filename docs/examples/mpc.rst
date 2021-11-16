@@ -83,8 +83,7 @@ Python
     P = sparse.block_diag([sparse.kron(sparse.eye(N), Q), QN,
                            sparse.kron(sparse.eye(N), R)], format='csc')
     # - linear objective
-    q = np.hstack([np.kron(np.ones(N), -Q.dot(xr)), -QN.dot(xr),
-                   np.zeros(N*nu)])
+    q = np.hstack([np.kron(np.ones(N), -Q@xr), -QN@xr, np.zeros(N*nu)])
     # - linear dynamics
     Ax = sparse.kron(sparse.eye(N+1),-sparse.eye(nx)) + sparse.kron(sparse.eye(N+1, k=-1), Ad)
     Bu = sparse.kron(sparse.vstack([sparse.csc_matrix((1, N)), sparse.eye(N)]), Bd)
@@ -104,7 +103,7 @@ Python
     prob = osqp.OSQP()
 
     # Setup workspace
-    prob.setup(P, q, A, l, u, warm_start=True)
+    prob.setup(P, q, A, l, u, warm_starting=True)
 
     # Simulate in closed loop
     nsim = 15
@@ -118,7 +117,7 @@ Python
 
         # Apply first control input to the plant
         ctrl = res.x[-N*nu:-(N-1)*nu]
-        x0 = Ad.dot(x0) + Bd.dot(ctrl)
+        x0 = Ad@x0 + Bd@ctrl
 
         # Update initial state
         l[:nx] = -x0
@@ -202,7 +201,7 @@ Matlab
     prob = osqp;
 
     % Setup workspace
-    prob.setup(P, q, A, l, u, 'warm_start', true);
+    prob.setup(P, q, A, l, u, 'warm_starting', true);
 
     % Simulate in closed loop
     nsim = 15;
@@ -296,7 +295,7 @@ CVXPY
     constraints = [x[:,0] == x_init]
     for k in range(N):
         objective += quad_form(x[:,k] - xr, Q) + quad_form(u[:,k], R)
-        constraints += [x[:,k+1] == Ad*x[:,k] + Bd*u[:,k]]
+        constraints += [x[:,k+1] == Ad@x[:,k] + Bd@u[:,k]]
         constraints += [xmin <= x[:,k], x[:,k] <= xmax]
         constraints += [umin <= u[:,k], u[:,k] <= umax]
     objective += quad_form(x[:,N] - xr, QN)
@@ -306,8 +305,8 @@ CVXPY
     nsim = 15
     for i in range(nsim):
         x_init.value = x0
-        prob.solve(solver=OSQP, warm_start=True)
-        x0 = Ad.dot(x0) + Bd.dot(u[:,0].value)
+        prob.solve(solver=OSQP, warm_starting=True)
+        x0 = Ad@x0 + Bd@u[:,0].value
 
 
 
@@ -466,7 +465,7 @@ Julia
     m = OSQP.Model()
 
     # Setup workspace
-    OSQP.setup!(m; P=P, q=q, A=A, l=l, u=u, warm_start=true)
+    OSQP.setup!(m; P=P, q=q, A=A, l=l, u=u, warm_starting=true)
 
     # Simulate in closed loop
     nsim = 15;

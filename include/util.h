@@ -3,7 +3,7 @@
 
 # ifdef __cplusplus
 extern "C" {
-# endif // ifdef __cplusplus
+# endif /* ifdef __cplusplus */
 
 # include "osqp.h"
 # include "types.h"
@@ -22,7 +22,7 @@ extern "C" {
  */
 OSQPSettings* copy_settings(const OSQPSettings *settings);
 
-# endif // #ifndef EMBEDDED
+# endif /* ifndef EMBEDDED */
 
 /**
  * Custom string copy to avoid string.h library
@@ -60,14 +60,14 @@ void print_polish(OSQPSolver *solver);
 
 /**
  * Print footer when algorithm terminates
- * @param info   info structure
- * @param polish is polish enabled?
+ * @param info      info structure
+ * @param polishing is polishing enabled?
  */
 void print_footer(OSQPInfo *info,
-                  c_int     polish);
+                  c_int     polishing);
 
 
-# endif // ifdef PRINTING
+# endif /* ifdef PRINTING */
 
 
 /*********************************
@@ -109,7 +109,7 @@ struct OSQP_TIMER {
 };
 
 // Linux
-#  else // ifdef IS_WINDOWS
+#  else /* ifdef IS_WINDOWS */
 
 /* Use POSIX clock_gettime() for timing on non-Windows machines */
 #   include <time.h>
@@ -121,7 +121,7 @@ struct OSQP_TIMER {
   struct timespec toc;
 };
 
-#  endif // ifdef IS_WINDOWS
+#  endif /* ifdef IS_WINDOWS */
 
 /*! \endcond */
 
@@ -159,41 +159,41 @@ void print_csc_matrix(const csc  *M,
                       const char *name);
 
 /* Dump csc sparse matrix to file */
-void dump_csc_matrix(csc        *M,
+void dump_csc_matrix(const csc  *M,
                      const char *file_name);
 
 /* Print a triplet format sparse matrix */
-void print_trip_matrix(csc        *M,
+void print_trip_matrix(const csc  *M,
                        const char *name);
 
 /* Print a dense matrix */
-void print_dns_matrix(c_float    *M,
-                      c_int       m,
-                      c_int       n,
-                      const char *name);
+void print_dns_matrix(const c_float *M,
+                      c_int          m,
+                      c_int          n,
+                      const char    *name);
 
 /* Print vector  */
-void print_vec(c_float    *v,
-               c_int       n,
-               const char *name);
+void print_vec(const c_float *v,
+               c_int          n,
+               const char    *name);
 
 /* Dump vector to file */
-void dump_vec(c_float    *v,
-              c_int       len,
-              const char *file_name);
+void dump_vec(const c_float *v,
+              c_int          len,
+              const char    *file_name);
 
 // Print int array
-void print_vec_int(c_int      *x,
-                   c_int       n,
-                   const char *name);
+void print_vec_int(const c_int *x,
+                   c_int        n,
+                   const char  *name);
 
-# endif // ifdef PRINTING
+# endif /* ifdef PRINTING */
 
 /*! \endcond */
 
 
 # ifdef __cplusplus
 }
-# endif // ifdef __cplusplus
+# endif /* ifdef __cplusplus */
 
-#endif // ifndef UTIL_H
+#endif /* ifndef UTIL_H */

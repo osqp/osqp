@@ -3,7 +3,7 @@
 
 # ifdef __cplusplus
 extern "C" {
-# endif // ifdef __cplusplus
+# endif /* ifdef __cplusplus */
 
 # include "glob_opts.h"
 # include "osqp.h"       //includes user API types
@@ -28,10 +28,10 @@ typedef struct OSQP_TIMER OSQPTimer;
  * Problem scaling matrices stored as vectors
  */
 typedef struct {
-  c_float  c;         ///< cost function scaling
+  c_float      c;     ///< objective function scaling
   OSQPVectorf *D;     ///< primal variable scaling
   OSQPVectorf *E;     ///< dual variable scaling
-  c_float  cinv;      ///< cost function rescaling
+  c_float      cinv;  ///< objective function rescaling
   OSQPVectorf *Dinv;  ///< primal variable rescaling
   OSQPVectorf *Einv;  ///< dual variable rescaling
 } OSQPScaling;
@@ -46,16 +46,15 @@ typedef struct {
  */
 
 typedef struct {
-  OSQPMatrix *Ared;        ///< active rows of A
-                           //   Ared = vstack[Alow, Aupp]
-  c_int        n_active;      ///< total active constraints
-  OSQPVectori  *active_flags;     ///< -1/0/1 to indicate  lower/ inactive / upper active constraints
-  OSQPVectorf *x;          ///< optimal x-solution obtained by polish
-  OSQPVectorf *z;          ///< optimal z-solution obtained by polish
-  OSQPVectorf *y;          ///< optimal y-solution obtained by polish
-  c_float     obj_val;     ///< objective value at polished solution
-  c_float     pri_res;     ///< primal residual at polished solution
-  c_float     dua_res;     ///< dual residual at polished solution
+  OSQPMatrix  *Ared;          ///< active rows of A; Ared = vstack[Alow, Aupp]
+  c_int        n_active;      ///< number of active constraints
+  OSQPVectori *active_flags;  ///< -1/0/1 to indicate  lower/ inactive / upper active constraints
+  OSQPVectorf *x;             ///< optimal x-solution obtained by polish
+  OSQPVectorf *z;             ///< optimal z-solution obtained by polish
+  OSQPVectorf *y;             ///< optimal y-solution obtained by polish
+  c_float      obj_val;       ///< objective value at polished solution
+  c_float      prim_res;      ///< primal residual at polished solution
+  c_float      dual_res;      ///< dual residual at polished solution
 } OSQPPolish;
 # endif // ifndef EMBEDDED
 
@@ -68,11 +67,11 @@ typedef struct {
  * QP problem data (possibly internally scaled)
  */
 typedef struct {
-  c_int    n; ///< number of variables n
-  c_int    m; ///< number of constraints m
-  OSQPMatrix  *P; ///< the upper triangular part of the quadratic cost matrix P (size n x n).
+  c_int        n; ///< number of variables n
+  c_int        m; ///< number of constraints m
+  OSQPMatrix  *P; ///< the upper triangular part of the quadratic objective matrix P (size n x n).
   OSQPMatrix  *A; ///< linear constraints matrix A (size m x n)
-  OSQPVectorf *q; ///< dense array for linear part of cost function (size n)
+  OSQPVectorf *q; ///< dense array for linear part of objective function (size n)
   OSQPVectorf *l; ///< dense array for lower bound (size m)
   OSQPVectorf *u; ///< dense array for upper bound (size m)
 } OSQPData;
@@ -171,8 +170,8 @@ struct OSQPWorkspace_ {
 
   /// Scaled primal and dual residuals used for computing rho estimate.
   /// They are also passed to indirect linear system solvers for computing required accuracy.
-  c_float scaled_pri_res;
-  c_float scaled_dua_res;
+  c_float scaled_prim_res;
+  c_float scaled_dual_res;
 
   /// Reciprocal of rho
   c_float rho_inv;
@@ -211,6 +210,9 @@ struct linsys_solver {
                  OSQPVectorf  *b,
                  c_int         admm_iter);
 
+  void (*update_settings)(LinSysSolver       *self,
+                          const OSQPSettings *settings);
+
   void (*warm_start)(LinSysSolver      *self,
                      const OSQPVectorf *x);
 
@@ -230,12 +232,12 @@ struct linsys_solver {
 
 # ifndef EMBEDDED
   c_int nthreads; ///< number of threads active
-# endif // ifndef EMBEDDED
+# endif /* ifndef EMBEDDED */
 };
 
 
 # ifdef __cplusplus
 }
-# endif // ifdef __cplusplus
+# endif /* ifdef __cplusplus */
 
-#endif // ifndef OSQP_TYPES_H
+#endif /* ifndef OSQP_TYPES_H */

@@ -167,6 +167,7 @@ C
 
 .. code:: c
 
+    #include <stdlib.h>
     #include "osqp.h"
 
     int main(int argc, char **argv) {
@@ -212,8 +213,7 @@ C
         if (!exitflag) exitflag = osqp_solve(solver);
 
         /* Update problem */
-        if (!exitflag) exitflag = osqp_update_lin_cost(solver, q_new);
-        if (!exitflag) exitflag = osqp_update_bounds(solver, l_new, u_new);
+        if (!exitflag) exitflag = osqp_update_data_vec(solver, q_new, l_new, u_new);
 
         /* Solve updated problem */
         if (!exitflag) exitflag = osqp_solve(work);

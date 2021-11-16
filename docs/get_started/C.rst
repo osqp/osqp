@@ -1,7 +1,7 @@
 .. _install_osqp_libs:
 
-CC++
-=====
+C
+=
 
 Binaries
 --------

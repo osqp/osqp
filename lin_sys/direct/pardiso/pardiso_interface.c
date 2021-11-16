@@ -37,6 +37,11 @@ void pardiso(void**,         // pt
 c_int mkl_set_interface_layer(c_int);
 c_int mkl_get_max_threads();
 
+void update_settings_linsys_solver_pardiso(pardiso_solver     *s,
+                                           const OSQPSettings *settings) {
+  return;
+}
+
 // Warm starting not used by direct solvers
 void warm_start_linsys_solver_pardiso(pardiso_solver    *s,
                                       const OSQPVectorf *x) {
@@ -83,14 +88,14 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
                                  const OSQPMatrix   *P,
                                  const OSQPMatrix   *A,
                                  const OSQPVectorf  *rho_vec,
-                                 OSQPSettings       *settings,
-                                 c_int               polish) {
+                                 const OSQPSettings *settings,
+                                 c_int               polishing) {
 
     c_int i;                     // loop counter
     c_int nnzKKT;                // Number of nonzeros in KKT
     // Define Variables
     c_int n_plus_m;              // n_plus_m dimension
-    c_float* rhov;               //used for direct access to rho_vec data when polish=false
+    c_float* rhov;               //used for direct access to rho_vec data when polishing=false
 
     c_float sigma = settings->sigma;
 
@@ -108,7 +113,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
     s->sigma = sigma;
 
     // Polishing flag
-    s->polish = polish;
+    s->polishing = polishing;
 
     // Link Functions
     s->solve           = &solve_linsys_pardiso;
@@ -116,6 +121,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
     s->warm_start      = &warm_start_linsys_solver_pardiso;
     s->update_matrices = &update_linsys_solver_matrices_pardiso;
     s->update_rho_vec  = &update_linsys_solver_rho_vec_pardiso;
+    s->update_settings = &update_settings_linsys_solver_pardiso;
 
     // Assign type
     s->type = MKL_PARDISO_SOLVER;
@@ -133,7 +139,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
     // else it is NULL
 
     // Form KKT matrix
-    if (polish){ // Called from polish()
+    if (polishing){ // Called from polish()
         s->KKT = form_KKT(OSQPMatrix_get_x(P),
                           OSQPMatrix_get_i(P),
                           OSQPMatrix_get_p(P),
@@ -218,7 +224,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
     }
     s->iparm[0] = 1;      // No solver default
     s->iparm[1] = 3;      // Fill-in reordering from OpenMP
-    if (polish) {
+    if (polishing) {
         s->iparm[5] = 1;  // Write solution into b
     } else {
         s->iparm[5] = 0;  // Do NOT write solution into b
@@ -285,7 +291,7 @@ c_int solve_linsys_pardiso(pardiso_solver *s,
         return 1;
     }
 
-    if (!(s->polish)) {
+    if (!(s->polishing)) {
         /* copy x_tilde from s->sol */
         for (j = 0 ; j < s->n ; j++) {
             bv[j] = s->sol[j];

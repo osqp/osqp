@@ -10,13 +10,13 @@
 ***********************************************************/
 #if EMBEDDED != 1
 
-c_float compute_rho_estimate(OSQPSolver *solver) {
+c_float compute_rho_estimate(const OSQPSolver *solver) {
 
-  c_int   n, m;                       // Dimensions
-  c_float pri_res, dua_res;           // Primal and dual residuals
-  c_float pri_res_norm, dua_res_norm; // Normalization for the residuals
-  c_float temp_res_norm;              // Temporary residual norm
-  c_float rho_estimate;               // Rho estimate value
+  c_int   n, m;                         // Dimensions
+  c_float prim_res, dual_res;           // Primal and dual residuals
+  c_float prim_res_norm, dual_res_norm; // Normalization for the residuals
+  c_float temp_res_norm;                // Temporary residual norm
+  c_float rho_estimate;                 // Rho estimate value
 
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
@@ -26,36 +26,31 @@ c_float compute_rho_estimate(OSQPSolver *solver) {
   m = work->data->m;
 
   // Get primal and dual residuals
-  pri_res = work->scaled_pri_res;
-  dua_res = work->scaled_dua_res;
+  prim_res = work->scaled_prim_res;
+  dual_res = work->scaled_dual_res;
 
   // Normalize primal residual
-  pri_res_norm  = OSQPVectorf_norm_inf(work->z);           // ||z||
-  temp_res_norm = OSQPVectorf_norm_inf(work->Ax);          // ||Ax||
-  pri_res_norm  = c_max(pri_res_norm, temp_res_norm); // max (||z||,||Ax||)
-  pri_res      /= (pri_res_norm + OSQP_DIVISION_TOL); // Normalize primal
-                                                      // residual (prevent 0
-                                                      // division)
+  prim_res_norm = OSQPVectorf_norm_inf(work->z);        // ||z||
+  temp_res_norm = OSQPVectorf_norm_inf(work->Ax);       // ||Ax||
+  prim_res_norm = c_max(prim_res_norm, temp_res_norm);  // max (||z||,||Ax||)
+  prim_res     /= (prim_res_norm + OSQP_DIVISION_TOL);
 
   // Normalize dual residual
-  dua_res_norm  = OSQPVectorf_norm_inf(work->data->q);     // ||q||
-  temp_res_norm = OSQPVectorf_norm_inf(work->Aty);         // ||A' y||
-  dua_res_norm  = c_max(dua_res_norm, temp_res_norm);
-  temp_res_norm = OSQPVectorf_norm_inf(work->Px);          //  ||P x||
-  dua_res_norm  = c_max(dua_res_norm, temp_res_norm); // max(||q||,||A' y||,||P
-                                                      // x||)
-  dua_res      /= (dua_res_norm + OSQP_DIVISION_TOL); // Normalize dual residual                                         
-                                                      // (prevent 0 division)
+  dual_res_norm = OSQPVectorf_norm_inf(work->data->q);  // ||q||
+  temp_res_norm = OSQPVectorf_norm_inf(work->Aty);      // ||A' y||
+  dual_res_norm = c_max(dual_res_norm, temp_res_norm);
+  temp_res_norm = OSQPVectorf_norm_inf(work->Px);       //  ||P x||
+  dual_res_norm = c_max(dual_res_norm, temp_res_norm);  // max(||q||,||A' y||,||P x||)
+  dual_res     /= (dual_res_norm + OSQP_DIVISION_TOL);
 
-                                           
   // Return rho estimate
-  rho_estimate = settings->rho * c_sqrt(pri_res / dua_res);
-  rho_estimate = c_min(c_max(rho_estimate, RHO_MIN), RHO_MAX);     // Constrain
-                                                                   // rho values
+  rho_estimate = settings->rho * c_sqrt(prim_res / dual_res);
+  rho_estimate = c_min(c_max(rho_estimate, OSQP_RHO_MIN), OSQP_RHO_MAX);
+
   return rho_estimate;
 }
 
-c_int adapt_rho(OSQPSolver* solver) {
+c_int adapt_rho(OSQPSolver *solver) {
 
   c_int   exitflag; // Exitflag
   c_float rho_new;  // New rho value
@@ -85,15 +80,16 @@ c_int set_rho_vec(OSQPSolver *solver) {
 
   c_int constr_types_changed = 0;
 
-  OSQPSettings*  settings = solver->settings;
-  OSQPWorkspace* work     = solver->work;
+  OSQPSettings  *settings = solver->settings;
+  OSQPWorkspace *work     = solver->work;
 
-  settings->rho = c_min(c_max(settings->rho, RHO_MIN), RHO_MAX);
+  settings->rho = c_min(c_max(settings->rho, OSQP_RHO_MIN), OSQP_RHO_MAX);
 
   constr_types_changed = OSQPVectorf_ew_bounds_type(work->constr_type,
-                             work->data->l,
-                             work->data->u,
-                             RHO_TOL, OSQP_INFTY * MIN_SCALING);
+                                                    work->data->l,
+                                                    work->data->u,
+                                                    OSQP_RHO_TOL,
+                                                    OSQP_INFTY * OSQP_MIN_SCALING);
 
 
   //NB: Always refresh the complete rho vector, since the rho_vals
@@ -102,16 +98,14 @@ c_int set_rho_vec(OSQPSolver *solver) {
   //haven't changed and the rho values are already correct, but such is life.
   OSQPVectorf_set_scalar_conditional(work->rho_vec,
                                      work->constr_type,
-                                     RHO_MIN,                             //const  == -1
+                                     OSQP_RHO_MIN,                             //const  == -1
                                      settings->rho,                       //constr == 0
-                                     RHO_EQ_OVER_RHO_INEQ*settings->rho); //constr == 1
+                                     OSQP_RHO_EQ_OVER_RHO_INEQ*settings->rho); //constr == 1
 
   OSQPVectorf_ew_reciprocal(work->rho_inv_vec, work->rho_vec);
 
   return constr_types_changed;
-
 }
-
 
 c_int update_rho_vec(OSQPSolver *solver) {
 
@@ -133,7 +127,8 @@ c_int update_rho_vec(OSQPSolver *solver) {
 #endif // EMBEDDED != 1
 
 
-void swap_vectors(OSQPVectorf **a, OSQPVectorf **b) {
+void swap_vectors(OSQPVectorf **a,
+                  OSQPVectorf **b) {
   OSQPVectorf *temp;
 
   temp = *b;
@@ -165,7 +160,8 @@ static void compute_rhs(OSQPSolver *solver) {
   }
 }
 
-void update_xz_tilde(OSQPSolver *solver, c_int admm_iter) {
+void update_xz_tilde(OSQPSolver *solver,
+                     c_int       admm_iter) {
 
   OSQPWorkspace* work     = solver->work;
 
@@ -190,7 +186,7 @@ void update_x(OSQPSolver *solver) {
   OSQPVectorf_minus(work->delta_x,work->x,work->x_prev);
 }
 
-void update_z(OSQPSolver* solver) {
+void update_z(OSQPSolver *solver) {
 
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
@@ -210,8 +206,8 @@ void update_z(OSQPSolver* solver) {
                             work->rho_inv, work->y);
   }
 
-  // project z
-  project(work, work->z);
+  // project z onto C = [l,u]
+  project(work->z, work->data->l, work->data->u);
 
 }
 
@@ -236,7 +232,8 @@ void update_y(OSQPSolver *solver) {
 
 }
 
-c_float compute_obj_val(OSQPSolver *solver, OSQPVectorf *x) {
+c_float compute_obj_val(const OSQPSolver  *solver,
+                        const OSQPVectorf *x) {
 
   c_float obj_val;
   OSQPSettings*  settings = solver->settings;
@@ -252,31 +249,35 @@ c_float compute_obj_val(OSQPSolver *solver, OSQPVectorf *x) {
   return obj_val;
 }
 
-c_float compute_pri_res(OSQPSolver *solver, OSQPVectorf *x, OSQPVectorf *z) {
+c_float compute_prim_res(OSQPSolver        *solver,
+                         const OSQPVectorf *x,
+                         const OSQPVectorf *z) {
 
   // NB: Use z_prev as working vector
   // pr = Ax - z
 
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
-  c_float pri_res;
+  c_float prim_res;
 
   OSQPMatrix_Axpy(work->data->A,x,work->Ax, 1.0, 0.0); //Ax = A*x
   OSQPVectorf_minus(work->z_prev, work->Ax, z);
 
-  work->scaled_pri_res = OSQPVectorf_norm_inf(work->z_prev);
+  work->scaled_prim_res = OSQPVectorf_norm_inf(work->z_prev);
 
   // If scaling active -> rescale residual
   if (settings->scaling && !settings->scaled_termination) {
-    pri_res =  OSQPVectorf_scaled_norm_inf(work->scaling->Einv, work->z_prev);
+    prim_res =  OSQPVectorf_scaled_norm_inf(work->scaling->Einv, work->z_prev);
   }
   else{
-    pri_res  = work->scaled_pri_res;
+    prim_res  = work->scaled_prim_res;
   }
-  return pri_res;
+  return prim_res;
 }
 
-c_float compute_pri_tol(OSQPSolver *solver, c_float eps_abs, c_float eps_rel) {
+c_float compute_prim_tol(const OSQPSolver *solver,
+                         c_float           eps_abs,
+                         c_float           eps_rel) {
 
   c_float max_rel_eps, temp_rel_eps;
   OSQPSettings*  settings = solver->settings;
@@ -311,7 +312,9 @@ c_float compute_pri_tol(OSQPSolver *solver, c_float eps_abs, c_float eps_rel) {
   return eps_abs + eps_rel * max_rel_eps;
 }
 
-c_float compute_dua_res(OSQPSolver *solver, OSQPVectorf *x, OSQPVectorf *y) {
+c_float compute_dual_res(OSQPSolver        *solver,
+                         const OSQPVectorf *x,
+                         const OSQPVectorf *y) {
 
   // NB: Use x_prev as temporary vector
   // NB: Only upper triangular part of P is stored.
@@ -319,7 +322,7 @@ c_float compute_dua_res(OSQPSolver *solver, OSQPVectorf *x, OSQPVectorf *y) {
 
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
-  c_float dua_res;
+  c_float dual_res;
 
   // dr = q
   OSQPVectorf_copy(work->x_prev,work->data->q);
@@ -336,21 +339,23 @@ c_float compute_dua_res(OSQPSolver *solver, OSQPVectorf *x, OSQPVectorf *y) {
     OSQPVectorf_plus(work->x_prev, work->x_prev, work->Aty);
   }
 
-  work->scaled_dua_res = OSQPVectorf_norm_inf(work->x_prev);
+  work->scaled_dual_res = OSQPVectorf_norm_inf(work->x_prev);
 
   // If scaling active -> rescale residual
   if (settings->scaling && !settings->scaled_termination) {
-    dua_res =  work->scaling->cinv * OSQPVectorf_scaled_norm_inf(work->scaling->Dinv,
-                                                                 work->x_prev);
+    dual_res =  work->scaling->cinv * OSQPVectorf_scaled_norm_inf(work->scaling->Dinv,
+                                                                  work->x_prev);
   }
   else {
-    dua_res = work->scaled_dua_res;
+    dual_res = work->scaled_dual_res;
   }
 
-  return dua_res;
+  return dual_res;
 }
 
-c_float compute_dua_tol(OSQPSolver *solver, c_float eps_abs, c_float eps_rel) {
+c_float compute_dual_tol(const OSQPSolver *solver,
+                         c_float           eps_abs,
+                         c_float           eps_rel) {
 
   c_float max_rel_eps, temp_rel_eps;
   OSQPSettings*  settings = solver->settings;
@@ -396,14 +401,13 @@ c_float compute_dua_tol(OSQPSolver *solver, c_float eps_abs, c_float eps_rel) {
   return eps_abs + eps_rel * max_rel_eps;
 }
 
-c_int is_primal_infeasible(OSQPSolver *solver, c_float eps_prim_inf) {
+c_int is_primal_infeasible(OSQPSolver *solver,
+                           c_float     eps_prim_inf) {
 
-  // This function checks for the primal infeasibility termination criteria.
-  //
-  // 1) A' * delta_y < eps * ||delta_y||
-  //
-  // 2) u'*max(delta_y, 0) + l'*min(delta_y, 0) < eps * ||delta_y||
-  //
+  /* This function checks the primal infeasibility criteria
+     1) || A' * delta_y || < eps * ||delta_y||
+     2) u'*max(delta_y, 0) + l'*min(delta_y, 0) < 0
+   */
 
   c_float norm_delta_y;
   c_float ineq_lhs = 0.0;
@@ -414,7 +418,7 @@ c_int is_primal_infeasible(OSQPSolver *solver, c_float eps_prim_inf) {
   project_polar_reccone(work->delta_y,
                         work->data->l,
                         work->data->u,
-                        OSQP_INFTY * MIN_SCALING);
+                        OSQP_INFTY * OSQP_MIN_SCALING);
 
   // Compute infinity norm of delta_y (unscale if necessary)
   if (settings->scaling && !settings->scaled_termination) {
@@ -424,19 +428,17 @@ c_int is_primal_infeasible(OSQPSolver *solver, c_float eps_prim_inf) {
                         work->delta_y);
     norm_delta_y = OSQPVectorf_norm_inf(work->Adelta_x);
   }
-  else {
+  else
     norm_delta_y = OSQPVectorf_norm_inf(work->delta_y);
-  }
 
   if (norm_delta_y > OSQP_DIVISION_TOL) {
 
-    ineq_lhs  = OSQPVectorf_dot_prod_signed(work->data->u, work->delta_y,+1);
-    ineq_lhs += OSQPVectorf_dot_prod_signed(work->data->l, work->delta_y,-1);
+    ineq_lhs  = OSQPVectorf_dot_prod_signed(work->data->u, work->delta_y, +1);
+    ineq_lhs += OSQPVectorf_dot_prod_signed(work->data->l, work->delta_y, -1);
 
-    // Check if the condition is satisfied: ineq_lhs < eps
-    if (ineq_lhs < eps_prim_inf * norm_delta_y) {
-      // Compute and return ||A'delta_y|| < eps_prim_inf
-      OSQPMatrix_Atxpy(work->data->A, work->delta_y, work->Atdelta_y,1.0,0.0);
+    /* Check if the condition is satisfied */
+    if (ineq_lhs < 0.0) {
+      OSQPMatrix_Atxpy(work->data->A, work->delta_y, work->Atdelta_y, 1.0, 0.0);
 
       // Unscale if necessary
       if (settings->scaling && !settings->scaled_termination) {
@@ -453,17 +455,15 @@ c_int is_primal_infeasible(OSQPSolver *solver, c_float eps_prim_inf) {
   return 0;
 }
 
-c_int is_dual_infeasible(OSQPSolver *solver, c_float eps_dual_inf) {
-  // This function checks for the scaled dual infeasibility termination
-  // criteria.
-  //
-  // 1) q * delta_x < eps * || delta_x ||
-  //
-  // 2) ||P * delta_x || < eps * || delta_x ||
-  //
-  // 3) -> (A * delta_x)_i > -eps * || delta_x ||,    l_i != -inf
-  //    -> (A * delta_x)_i <  eps * || delta_x ||,    u_i != inf
-  //
+c_int is_dual_infeasible(OSQPSolver *solver,
+                         c_float     eps_dual_inf) {
+
+  /* This function checks the dual infeasibility criteria
+     1) q * delta_x < eps * || delta_x ||
+     2) ||P * delta_x || < eps * || delta_x ||
+     3) (A * delta_x)_i > -eps * || delta_x ||,    l_i != -inf
+        (A * delta_x)_i <  eps * || delta_x ||,    u_i != +inf
+   */
 
   c_float norm_delta_x;
   c_float cost_scaling;
@@ -490,8 +490,7 @@ c_int is_dual_infeasible(OSQPSolver *solver, c_float eps_dual_inf) {
     /* vec_mult_scalar(work->delta_x, 1./norm_delta_x, work->data->n); */
 
     // Check first if q'*delta_x < 0
-    if (OSQPVectorf_dot_prod(work->data->q, work->delta_x) <
-        cost_scaling * eps_dual_inf * norm_delta_x) {
+    if (OSQPVectorf_dot_prod(work->data->q, work->delta_x) < 0.0) {
       // Compute product P * delta_x
       OSQPMatrix_Axpy(work->data->P, work->delta_x, work->Pdelta_x, 1.0, 0.0);
 
@@ -510,9 +509,7 @@ c_int is_dual_infeasible(OSQPSolver *solver, c_float eps_dual_inf) {
 
         // Scale if necessary
         if (settings->scaling && !settings->scaled_termination) {
-          OSQPVectorf_ew_prod(work->Adelta_x,
-                              work->Adelta_x,
-                              work->scaling->Einv);
+          OSQPVectorf_ew_prod(work->Adelta_x, work->Adelta_x, work->scaling->Einv);
         }
 
         // De Morgan Law Applied to dual infeasibility conditions for A * x
@@ -524,9 +521,8 @@ c_int is_dual_infeasible(OSQPSolver *solver, c_float eps_dual_inf) {
         return test_in_reccone(work->Adelta_x,
                                work->data->l,
                                work->data->u,
-                               OSQP_INFTY * MIN_SCALING,
+                               OSQP_INFTY * OSQP_MIN_SCALING,
                                eps_dual_inf * norm_delta_x);
-
       }
     }
   }
@@ -535,7 +531,7 @@ c_int is_dual_infeasible(OSQPSolver *solver, c_float eps_dual_inf) {
   return 0;
 }
 
-c_int has_solution(OSQPInfo * info){
+c_int has_solution(const OSQPInfo * info){
 
   return ((info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
       (info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE) &&
@@ -620,13 +616,13 @@ void store_solution(OSQPSolver *solver) {
   }
 }
 
-void update_info(OSQPSolver  *solver,
-                 c_int        iter,
-                 c_int        compute_objective,
-                 c_int        polish) {
+void update_info(OSQPSolver *solver,
+                 c_int       iter,
+                 c_int       compute_objective,
+                 c_int       polishing) {
 
   OSQPVectorf *x, *z, *y;                   // Allocate pointers to vectors
-  c_float *obj_val, *pri_res, *dua_res;     // objective value, residuals
+  c_float *obj_val, *prim_res, *dual_res;   // objective value, residuals
 
   OSQPInfo*      info     = solver->info;
   OSQPWorkspace* work     = solver->work;
@@ -637,27 +633,28 @@ void update_info(OSQPSolver  *solver,
 
 #ifndef EMBEDDED
 
-  if (polish) {
-    x       = work->pol->x;
-    y       = work->pol->y;
-    z       = work->pol->z;
-    obj_val = &work->pol->obj_val;
-    pri_res = &work->pol->pri_res;
-    dua_res = &work->pol->dua_res;
+  if (polishing) {
+    x        = work->pol->x;
+    y        = work->pol->y;
+    z        = work->pol->z;
+    obj_val  = &work->pol->obj_val;
+    prim_res = &work->pol->prim_res;
+    dual_res = &work->pol->dual_res;
 # ifdef PROFILING
     run_time = &info->polish_time;
 # endif /* ifdef PROFILING */
-  } else {
+  }
+  else {
 #endif // EMBEDDED
-  x                = work->x;
-  y                = work->y;
-  z                = work->z;
-  obj_val          = &info->obj_val;
-  pri_res          = &info->pri_res;
-  dua_res          = &info->dua_res;
-  info->iter = iter; // Update iteration number
+    x          = work->x;
+    y          = work->y;
+    z          = work->z;
+    obj_val    = &info->obj_val;
+    prim_res   = &info->prim_res;
+    dual_res   = &info->dual_res;
+    info->iter = iter;
 #ifdef PROFILING
-  run_time = &info->solve_time;
+    run_time   = &info->solve_time;
 #endif /* ifdef PROFILING */
 #ifndef EMBEDDED
 }
@@ -673,13 +670,13 @@ void update_info(OSQPSolver  *solver,
   // Compute primal residual
   if (work->data->m == 0) {
     // No constraints -> Always primal feasible
-    *pri_res = 0.;
+    *prim_res = 0.;
   } else {
-    *pri_res = compute_pri_res(solver, x, z);
+    *prim_res = compute_prim_res(solver, x, z);
   }
 
   // Compute dual residual
-  *dua_res = compute_dua_res(solver, x, y);
+  *dual_res = compute_dual_res(solver, x, y);
 
   // Update timing
 #ifdef PROFILING
@@ -711,7 +708,8 @@ void reset_info(OSQPInfo *info) {
 #endif /* if EMBEDDED != 1 */
 }
 
-void update_status(OSQPInfo *info, c_int status_val) {
+void update_status(OSQPInfo *info,
+                   c_int     status_val) {
 
   // Update status value
   info->status_val = status_val;
@@ -742,7 +740,8 @@ void update_status(OSQPInfo *info, c_int status_val) {
 
 }
 
-c_int check_termination(OSQPSolver *solver, c_int approximate) {
+c_int check_termination(OSQPSolver *solver,
+                        c_int       approximate) {
 
   c_float eps_prim, eps_dual, eps_prim_inf, eps_dual_inf;
   c_int   exitflag;
@@ -765,8 +764,8 @@ c_int check_termination(OSQPSolver *solver, c_int approximate) {
   eps_dual_inf = settings->eps_dual_inf;
 
   // If residuals are too large, the problem is probably non convex
-  if ((info->pri_res > OSQP_INFTY) ||
-      (info->dua_res > OSQP_INFTY)){
+  if ((info->prim_res > OSQP_INFTY) ||
+      (info->dual_res > OSQP_INFTY)){
     // Looks like residuals are diverging. Probably the problem is non convex!
     // Terminate and report it
     update_status(info, OSQP_NON_CVX);
@@ -788,10 +787,10 @@ c_int check_termination(OSQPSolver *solver, c_int approximate) {
   }
   else {
     // Compute primal tolerance
-    eps_prim = compute_pri_tol(solver, eps_abs, eps_rel);
+    eps_prim = compute_prim_tol(solver, eps_abs, eps_rel);
 
     // Primal feasibility check
-    if (info->pri_res < eps_prim) {
+    if (info->prim_res < eps_prim) {
       prim_res_check = 1;
     } else {
       // Primal infeasibility check
@@ -800,10 +799,10 @@ c_int check_termination(OSQPSolver *solver, c_int approximate) {
   } // End check if m == 0
 
   // Compute dual tolerance
-  eps_dual = compute_dua_tol(solver, eps_abs, eps_rel);
+  eps_dual = compute_dual_tol(solver, eps_abs, eps_rel);
 
   // Dual feasibility check
-  if (info->dua_res < eps_dual) {
+  if (info->dual_res < eps_dual) {
     dual_res_check = 1;
   } else {
     // Check dual infeasibility
@@ -861,13 +860,13 @@ c_int check_termination(OSQPSolver *solver, c_int approximate) {
 
 #ifndef EMBEDDED
 
-c_int validate_data(const csc* P,
-                    const c_float* q,
-                    const csc* A,
-                    const c_float* l,
-                    const c_float* u,
-                    c_int m,
-                    c_int n) {
+c_int validate_data(const csc     *P,
+                    const c_float *q,
+                    const csc     *A,
+                    const c_float *l,
+                    const c_float *u,
+                    c_int          m,
+                    c_int          n) {
   c_int j, ptr;
 
   if (!P) {
@@ -948,6 +947,9 @@ c_int validate_data(const csc* P,
   return 0;
 }
 
+#endif /* ifndef EMBEDDED */
+
+
 c_int validate_linsys_solver(c_int linsys_solver) {
 
 #ifdef CUDA_SUPPORT
@@ -971,7 +973,10 @@ c_int validate_linsys_solver(c_int linsys_solver) {
   return 0;
 }
 
-c_int validate_settings(const OSQPSettings *settings) {
+
+c_int validate_settings(const OSQPSettings *settings,
+                        c_int               from_setup) {
+
   if (!settings) {
 # ifdef PRINTING
     c_eprint("Missing settings!");
@@ -979,58 +984,54 @@ c_int validate_settings(const OSQPSettings *settings) {
     return 1;
   }
 
-  if (settings->scaling < 0) {
+  if (from_setup &&
+      validate_linsys_solver(settings->linsys_solver)) {
+# ifdef PRINTING
+    c_eprint("linsys_solver not recognized");
+# endif /* ifdef PRINTING */
+    return 1;
+  }
+
+  if (settings->verbose != 0 &&
+      settings->verbose != 1) {
+# ifdef PRINTING
+    c_eprint("verbose must be either 0 or 1");
+# endif /* ifdef PRINTING */
+    return 1;
+  }
+
+  if (settings->warm_starting != 0 &&
+      settings->warm_starting != 1) {
+# ifdef PRINTING
+    c_eprint("warm_start must be either 0 or 1");
+# endif /* ifdef PRINTING */
+    return 1;
+  }
+
+  if (from_setup && settings->scaling < 0) {
 # ifdef PRINTING
     c_eprint("scaling must be nonnegative");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if ((settings->adaptive_rho != 0) && (settings->adaptive_rho != 1)) {
+  if (settings->polishing != 0 &&
+      settings->polishing != 1) {
 # ifdef PRINTING
-    c_eprint("adaptive_rho must be either 0 or 1");
+    c_eprint("polishing must be either 0 or 1");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if (settings->adaptive_rho_interval < 0) {
-# ifdef PRINTING
-    c_eprint("adaptive_rho_interval must be nonnegative");
-# endif /* ifdef PRINTING */
-    return 1;
-  }
-# ifdef PROFILING
-
-  if (settings->adaptive_rho_fraction <= 0) {
-#  ifdef PRINTING
-    c_eprint("adaptive_rho_fraction must be positive");
-#  endif /* ifdef PRINTING */
-    return 1;
-  }
-# endif /* ifdef PROFILING */
-
-  if (settings->adaptive_rho_tolerance < 1.0) {
-# ifdef PRINTING
-    c_eprint("adaptive_rho_tolerance must be >= 1");
-# endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  if (settings->polish_refine_iter < 0) {
-# ifdef PRINTING
-    c_eprint("polish_refine_iter must be nonnegative");
-# endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  if (settings->rho <= 0.0) {
+  if (from_setup && settings->rho <= 0.0) {
 # ifdef PRINTING
     c_eprint("rho must be positive");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if ((settings->rho_is_vec != 0) &&
+  if (from_setup &&
+      (settings->rho_is_vec != 0) &&
       (settings->rho_is_vec != 1)) {
 # ifdef PRINTING
     c_eprint("rho_is_vec must be either 0 or 1");
@@ -1038,16 +1039,69 @@ c_int validate_settings(const OSQPSettings *settings) {
     return 1;
   }
 
-  if (settings->sigma <= 0.0) {
+  if (from_setup && settings->sigma <= 0.0) {
 # ifdef PRINTING
     c_eprint("sigma must be positive");
 # endif /* ifdef PRINTING */
     return 1;
   }
 
-  if (settings->delta <= 0.0) {
+  if (settings->alpha <= 0.0 ||
+      settings->alpha >= 2.0) {
 # ifdef PRINTING
-    c_eprint("delta must be positive");
+    c_eprint("alpha must be strictly between 0 and 2");
+# endif /* ifdef PRINTING */
+    return 1;
+  }
+
+  if (settings->cg_max_iter <= 0) {
+# ifdef PRINTING
+    c_eprint("cg_max_iter must be positive");
+# endif /* ifdef PRINTING */
+    return 1;
+  }
+
+  if (settings->cg_tol_reduction <= 0) {
+# ifdef PRINTING
+    c_eprint("cg_tol_reduction must be positive");
+# endif /* ifdef PRINTING */
+    return 1;
+  }
+
+  if (settings->cg_tol_fraction <= 0.0 &&
+      settings->cg_tol_fraction >= 1.0) {
+# ifdef PRINTING
+    c_eprint("cg_tol_fraction must be strictly between 0 and 1");
+# endif /* ifdef PRINTING */
+    return 1;
+  }
+
+  if (from_setup &&
+      settings->adaptive_rho != 0 &&
+      settings->adaptive_rho != 1) {
+# ifdef PRINTING
+    c_eprint("adaptive_rho must be either 0 or 1");
+# endif /* ifdef PRINTING */
+    return 1;
+  }
+
+  if (from_setup && settings->adaptive_rho_interval < 0) {
+# ifdef PRINTING
+    c_eprint("adaptive_rho_interval must be nonnegative");
+# endif /* ifdef PRINTING */
+    return 1;
+  }
+
+  if (from_setup && settings->adaptive_rho_fraction <= 0) {
+#  ifdef PRINTING
+    c_eprint("adaptive_rho_fraction must be positive");
+#  endif /* ifdef PRINTING */
+    return 1;
+  }
+
+  if (from_setup && settings->adaptive_rho_tolerance < 1.0) {
+# ifdef PRINTING
+    c_eprint("adaptive_rho_tolerance must be >= 1");
 # endif /* ifdef PRINTING */
     return 1;
   }
@@ -1073,8 +1127,8 @@ c_int validate_settings(const OSQPSettings *settings) {
     return 1;
   }
 
-  if ((settings->eps_rel == 0.0) &&
-      (settings->eps_abs == 0.0)) {
+  if (settings->eps_rel == 0.0 &&
+      settings->eps_abs == 0.0) {
 # ifdef PRINTING
     c_eprint("at least one of eps_abs and eps_rel must be positive");
 # endif /* ifdef PRINTING */
@@ -1095,31 +1149,8 @@ c_int validate_settings(const OSQPSettings *settings) {
     return 1;
   }
 
-  if ((settings->alpha <= 0.0) ||
-      (settings->alpha >= 2.0)) {
-# ifdef PRINTING
-    c_eprint("alpha must be strictly between 0 and 2");
-# endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  if (validate_linsys_solver(settings->linsys_solver)) {
-# ifdef PRINTING
-    c_eprint("linsys_solver not recognized");
-# endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  if ((settings->verbose != 0) &&
-      (settings->verbose != 1)) {
-# ifdef PRINTING
-    c_eprint("verbose must be either 0 or 1");
-# endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  if ((settings->scaled_termination != 0) &&
-      (settings->scaled_termination != 1)) {
+  if (settings->scaled_termination != 0 &&
+      settings->scaled_termination != 1) {
 # ifdef PRINTING
     c_eprint("scaled_termination must be either 0 or 1");
 # endif /* ifdef PRINTING */
@@ -1133,24 +1164,26 @@ c_int validate_settings(const OSQPSettings *settings) {
     return 1;
   }
 
-  if ((settings->warm_start != 0) &&
-      (settings->warm_start != 1)) {
-# ifdef PRINTING
-    c_eprint("warm_start must be either 0 or 1");
-# endif /* ifdef PRINTING */
-    return 1;
-  }
-# ifdef PROFILING
-
-  if (settings->time_limit < 0.0) {
+  if (settings->time_limit <= 0.0) {
 #  ifdef PRINTING
-    c_eprint("time_limit must be nonnegative\n");
+    c_eprint("time_limit must be positive\n");
 #  endif /* ifdef PRINTING */
     return 1;
   }
-# endif /* ifdef PROFILING */
+
+  if (settings->delta <= 0.0) {
+# ifdef PRINTING
+    c_eprint("delta must be positive");
+# endif /* ifdef PRINTING */
+    return 1;
+  }
+  
+  if (settings->polish_refine_iter < 0) {
+# ifdef PRINTING
+    c_eprint("polish_refine_iter must be nonnegative");
+# endif /* ifdef PRINTING */
+    return 1;
+  }
 
   return 0;
 }
-
-#endif // #ifndef EMBEDDED

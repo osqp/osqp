@@ -31,11 +31,11 @@ void test_optimal()
   // Define Solver settings as default
   settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
   osqp_set_default_settings(settings);
-  settings->max_iter = 2000;
-  settings->alpha    = 1.6;
-  settings->polish   = 1;
-  settings->scaling  = 0;
-  settings->verbose  = 1;
+  settings->max_iter  = 2000;
+  settings->alpha     = 1.6;
+  settings->polishing = 1;
+  settings->scaling   = 0;
+  settings->verbose   = 1;
 
   // Setup workspace
   exitflag = osqp_setup(&solver,problem->P,problem->q,
@@ -101,11 +101,11 @@ void test_prim_infeas()
   // Define Solver settings as default
   settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
   osqp_set_default_settings(settings);
-  settings->max_iter = 2000;
-  settings->alpha    = 1.6;
-  settings->polish   = 0;
-  settings->scaling  = 0;
-  settings->verbose  = 1;
+  settings->max_iter  = 2000;
+  settings->alpha     = 1.6;
+  settings->polishing = 0;
+  settings->scaling   = 0;
+  settings->verbose   = 1;
 
   // Setup workspace
   exitflag = osqp_setup(&solver,problem->P,problem->q,
@@ -155,11 +155,11 @@ void test_dual_infeas()
   // Define Solver settings as default
   settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
   osqp_set_default_settings(settings);
-  settings->max_iter = 2000;
-  settings->alpha    = 1.6;
-  settings->polish   = 0;
-  settings->scaling  = 0;
-  settings->verbose  = 1;
+  settings->max_iter  = 2000;
+  settings->alpha     = 1.6;
+  settings->polishing = 0;
+  settings->scaling   = 0;
+  settings->verbose   = 1;
 
   // Setup solver
   exitflag = osqp_setup(&solver,problem->P,problem->q,
@@ -209,11 +209,11 @@ void test_primal_dual_infeas()
   // Define Solver settings as default
   settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
   osqp_set_default_settings(settings);
-  settings->max_iter = 2000;
-  settings->alpha    = 1.6;
-  settings->polish   = 0;
-  settings->scaling  = 0;
-  settings->verbose  = 1;
+  settings->max_iter  = 2000;
+  settings->alpha     = 1.6;
+  settings->polishing = 0;
+  settings->scaling   = 0;
+  settings->verbose   = 1;
 
   // Setup Solver
   exitflag = osqp_setup(&solver,problem->P,problem->q,

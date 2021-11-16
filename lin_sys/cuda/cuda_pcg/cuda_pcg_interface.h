@@ -26,8 +26,6 @@ extern "C" {
 #include "types.h"                /* OSQPMatrix and OSQPVector[fi] types */
 #include "algebra_types.h"        /* csr type */
 
-#include "cuda_pcg_constants.h"   /* enum linsys_solver_type */
-
 
 /**
  * CUDA PCG solver structure
@@ -43,6 +41,9 @@ typedef struct cudapcg_solver_ {
   c_int (*solve)(struct cudapcg_solver_ *self,
                  OSQPVectorf            *b,
                  c_int                   admm_iter);
+
+  void (*update_settings)(struct cudapcg_solver_  *self,
+                          const OSQPSettings      *settings);
 
   void (*warm_start)(struct cudapcg_solver_  *self,
                      const OSQPVectorf       *x);
@@ -65,26 +66,19 @@ typedef struct cudapcg_solver_ {
   c_int m;                  ///<  number of rows in A
 
   /* States */
-  c_int polish;
+  c_int polishing;
   c_int zero_pcg_iters;     ///<  state that counts zero PCG iterations
 
   /* Settings */
-  enum pcg_eps_strategy eps_strategy;
-  c_int                 norm;
-  c_int                 precondition;
-  c_int                 warm_start_pcg;
-  c_int                 max_iter;
-
-  /* SCS tolerance strategy parameters */
-  c_float start_tol;
-  c_float dec_rate;
+  c_int max_iter;
   
   /* Residual tolerance strategy parameters */
   c_int    reduction_threshold;
+  c_float  tol_fraction;
   c_float  reduction_factor;
   c_float  eps_prev;
-  c_float *scaled_pri_res;
-  c_float *scaled_dua_res;
+  c_float *scaled_prim_res;
+  c_float *scaled_dual_res;
 
   /* Pointers to problem data and ADMM settings */
   csr     *A;
@@ -137,15 +131,18 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
                                  const OSQPMatrix   *P,
                                  const OSQPMatrix   *A,
                                  const OSQPVectorf  *rho_vec,
-                                 OSQPSettings       *settings,
-                                 c_float            *scaled_pri_res,
-                                 c_float            *scaled_dua_res,
-                                 c_int               polish);
+                                 const OSQPSettings *settings,
+                                 c_float            *scaled_prim_res,
+                                 c_float            *scaled_dual_res,
+                                 c_int               polishing);
 
 
 c_int solve_linsys_cudapcg(cudapcg_solver *s,
                            OSQPVectorf    *b,
                            c_int           admm_iter);
+
+void update_settings_linsys_solver_cudapcg(cudapcg_solver     *s,
+                                           const OSQPSettings *settings);
 
 void warm_start_linsys_solver_cudapcg(cudapcg_solver    *s,
                                       const OSQPVectorf *x);

@@ -33,9 +33,10 @@ typedef struct {
 
 
 /** Initialize CUDA library handle.
- * @return	CUDA library handle, or NULL if failure.
+ * @param  device CUDA device ID
+ * @return        CUDA library handle, or NULL if failure.
  */
-CUDA_Handle_t* cuda_init_libs(void);
+CUDA_Handle_t* cuda_init_libs(int device);
 
 
 /** Free CUDA library handle.

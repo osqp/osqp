@@ -11,6 +11,11 @@
 #include "kkt.h"
 #endif
 
+void update_settings_linsys_solver_qdldl(qdldl_solver       *s,
+                                         const OSQPSettings *settings) {
+  return;
+}
+
 // Warm starting not used by direct solvers
 void warm_start_linsys_solver_qdldl(qdldl_solver      *s,
                                     const OSQPVectorf *x) {
@@ -190,14 +195,14 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
                                const OSQPMatrix   *P,
                                const OSQPMatrix   *A,
                                const OSQPVectorf  *rho_vec,
-                               OSQPSettings       *settings,
-                               c_int               polish) {
+                               const OSQPSettings *settings,
+                               c_int               polishing) {
 
     // Define Variables
     csc * KKT_temp;     // Temporary KKT pointer
     c_int i;            // Loop counter
     c_int n_plus_m;     // Define n_plus_m dimension
-    c_float* rhov;      //used for direct access to rho_vec data when polish=false
+    c_float* rhov;      // used for direct access to rho_vec data when polishing=false
 
     c_float sigma = settings->sigma;
 
@@ -215,11 +220,12 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
     s->rho_inv = 1. / settings->rho;
 
     // Polishing flag
-    s->polish = polish;
+    s->polishing = polishing;
 
     // Link Functions
-    s->solve      = &solve_linsys_qdldl;
-    s->warm_start = &warm_start_linsys_solver_qdldl;
+    s->solve           = &solve_linsys_qdldl;
+    s->update_settings = &update_settings_linsys_solver_qdldl;
+    s->warm_start      = &warm_start_linsys_solver_qdldl;
 
 #ifndef EMBEDDED
     s->free = &free_linsys_solver_qdldl;
@@ -280,7 +286,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
     s->fwork = (QDLDL_float *)c_malloc(sizeof(QDLDL_float)*n_plus_m);
 
     // Form and permute KKT matrix
-    if (polish){ // Called from polish()
+    if (polishing){ // Called from polish()
         KKT_temp = form_KKT(OSQPMatrix_get_x(P),
                             OSQPMatrix_get_i(P),
                             OSQPMatrix_get_p(P),
@@ -349,7 +355,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
         return OSQP_NONCVX_ERROR;
     }
 
-    if (polish){ // If KKT passed, assign it to KKT_temp
+    if (polishing){ // If KKT passed, assign it to KKT_temp
         // Polish, no need for KKT_temp
         csc_spfree(KKT_temp);
     }
@@ -395,7 +401,7 @@ c_int solve_linsys_qdldl(qdldl_solver *s,
     c_float* bv = OSQPVectorf_data(b);
 
 #ifndef EMBEDDED
-    if (s->polish) {
+    if (s->polishing) {
         /* stores solution to the KKT system in b */
         LDLSolve(bv, bv, s->L, s->Dinv, s->P, s->bp);
     } else {

@@ -46,56 +46,52 @@ void osqp_get_dimensions(OSQPSolver *solver,
 
 void osqp_set_default_settings(OSQPSettings *settings) {
 
-  settings->rho           = (c_float)RHO;            /* ADMM step */
-  settings->rho_is_vec    = RHO_IS_VEC;              /* defines whether rho is scalar or vector*/
-  settings->sigma         = (c_float)SIGMA;          /* ADMM step */
-  settings->scaling       = SCALING;                 /* heuristic problem scaling */
-#if EMBEDDED != 1
-  settings->adaptive_rho           = ADAPTIVE_RHO;
-  settings->adaptive_rho_interval  = ADAPTIVE_RHO_INTERVAL;
-  settings->adaptive_rho_tolerance = (c_float)ADAPTIVE_RHO_TOLERANCE;
+  settings->device = 0;                           /* device identifier */
+  settings->linsys_solver  = OSQP_LINSYS_SOLVER;  /* linear system solver */
+  settings->verbose        = OSQP_VERBOSE;        /* print output */
+  settings->warm_starting  = OSQP_WARM_STARTING;  /* warm starting */
+  settings->scaling        = OSQP_SCALING;        /* heuristic problem scaling */
+  settings->polishing      = OSQP_POLISHING;      /* ADMM solution polish: 1 */
 
-# ifdef PROFILING
-  settings->adaptive_rho_fraction = (c_float)ADAPTIVE_RHO_FRACTION;
-# endif /* ifdef PROFILING */
-#endif  /* if EMBEDDED != 1 */
+  settings->rho           = (c_float)OSQP_RHO;    /* ADMM step */
+  settings->rho_is_vec    = OSQP_RHO_IS_VEC;      /* defines whether rho is scalar or vector*/
+  settings->sigma         = (c_float)OSQP_SIGMA;  /* ADMM step */
+  settings->alpha         = (c_float)OSQP_ALPHA;  /* relaxation parameter */
 
-  settings->max_iter      = MAX_ITER;                /* maximum iterations */
-  settings->eps_abs       = (c_float)EPS_ABS;        /* absolute convergence tolerance */
-  settings->eps_rel       = (c_float)EPS_REL;        /* relative convergence tolerance */
-  settings->eps_prim_inf  = (c_float)EPS_PRIM_INF;   /* primal infeasibility tolerance */
-  settings->eps_dual_inf  = (c_float)EPS_DUAL_INF;   /* dual infeasibility   tolerance */
-  settings->alpha         = (c_float)ALPHA;          /* relaxation parameter */
-  settings->linsys_solver = LINSYS_SOLVER;           /* linear system solver */
+  settings->cg_max_iter      = OSQP_CG_MAX_ITER;      /* maximum number of CG iterations */
+  settings->cg_tol_reduction = OSQP_CG_TOL_REDUCTION; /* CG tolerance parameter */
+  settings->cg_tol_fraction  = OSQP_CG_TOL_FRACTION;  /* CG tolerance parameter */
 
-#ifndef EMBEDDED
-  settings->delta              = DELTA;              /* regularization parameter for polish */
-  settings->polish             = POLISH;             /* ADMM solution polish: 1 */
-  settings->polish_refine_iter = POLISH_REFINE_ITER; /* iterative refinement steps in polish */
-  settings->verbose            = VERBOSE;            /* print output */
-#endif /* ifndef EMBEDDED */
+  settings->adaptive_rho           = OSQP_ADAPTIVE_RHO;
+  settings->adaptive_rho_interval  = OSQP_ADAPTIVE_RHO_INTERVAL;
+  settings->adaptive_rho_fraction  = (c_float)OSQP_ADAPTIVE_RHO_FRACTION;
+  settings->adaptive_rho_tolerance = (c_float)OSQP_ADAPTIVE_RHO_TOLERANCE;
 
-  settings->scaled_termination = SCALED_TERMINATION; /* Evaluate scaled termination criteria*/
-  settings->check_termination  = CHECK_TERMINATION;  /* Interval for evaluating termination criteria */
-  settings->warm_start         = WARM_START;         /* warm starting */
+  settings->max_iter           = OSQP_MAX_ITER;               /* maximum number of ADMM iterations */
+  settings->eps_abs            = (c_float)OSQP_EPS_ABS;       /* absolute convergence tolerance */
+  settings->eps_rel            = (c_float)OSQP_EPS_REL;       /* relative convergence tolerance */
+  settings->eps_prim_inf       = (c_float)OSQP_EPS_PRIM_INF;  /* primal infeasibility tolerance */
+  settings->eps_dual_inf       = (c_float)OSQP_EPS_DUAL_INF;  /* dual infeasibility tolerance */
+  settings->scaled_termination = OSQP_SCALED_TERMINATION;     /* evaluate scaled termination criteria */
+  settings->check_termination  = OSQP_CHECK_TERMINATION;      /* interval for evaluating termination criteria */
+  settings->time_limit         = OSQP_TIME_LIMIT;             /* stop the algorithm when time limit is reached */
 
-#ifdef PROFILING
-  settings->time_limit = TIME_LIMIT;
-#endif /* ifdef PROFILING */
+  settings->delta              = OSQP_DELTA;                  /* regularization parameter for polishing */
+  settings->polish_refine_iter = OSQP_POLISH_REFINE_ITER;     /* iterative refinement steps in polish */
 }
 
 #ifndef EMBEDDED
 
 
-c_int osqp_setup(OSQPSolver** solverp,
-                 const csc* P,
-                 const c_float* q,
-                 const csc* A,
-                 const c_float* l,
-                 const c_float* u,
-                 c_int m,
-                 c_int n,
-                 const OSQPSettings *settings) {
+c_int osqp_setup(OSQPSolver         **solverp,
+                 const csc           *P,
+                 const c_float       *q,
+                 const csc           *A,
+                 const c_float       *l,
+                 const c_float       *u,
+                 c_int                m,
+                 c_int                n,
+                 const OSQPSettings  *settings) {
 
   c_int exitflag;
 
@@ -106,7 +102,7 @@ c_int osqp_setup(OSQPSolver** solverp,
   if (validate_data(P,q,A,l,u,m,n)) return osqp_error(OSQP_DATA_VALIDATION_ERROR);
 
   // Validate settings
-  if (validate_settings(settings)) return osqp_error(OSQP_SETTINGS_VALIDATION_ERROR);
+  if (validate_settings(settings, 1)) return osqp_error(OSQP_SETTINGS_VALIDATION_ERROR);
 
   // Allocate empty solver
   solver = c_calloc(1, sizeof(OSQPSolver));
@@ -126,7 +122,7 @@ c_int osqp_setup(OSQPSolver** solverp,
 # endif /* ifdef PROFILING */
 
   // Initialize algebra libraries
-  exitflag = osqp_algebra_init_libs();
+  exitflag = osqp_algebra_init_libs(settings->device);
   if (exitflag) return osqp_error(OSQP_ALGEBRA_LOAD_ERROR);
 
   // Copy problem data into workspace
@@ -135,7 +131,7 @@ c_int osqp_setup(OSQPSolver** solverp,
   work->data->m = m;
   work->data->n = n;
 
-  // Cost function
+  // objective function
   work->data->P = OSQPMatrix_new_from_csc(P,1);   //copy assuming triu form
   work->data->q = OSQPVectorf_new(q,n);
   if (!(work->data->P) || !(work->data->q)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
@@ -237,7 +233,7 @@ c_int osqp_setup(OSQPSolver** solverp,
     set_rho_vec(solver);
   }
   else {
-    solver->settings->rho = c_min(c_max(settings->rho, RHO_MIN), RHO_MAX);
+    solver->settings->rho = c_min(c_max(settings->rho, OSQP_RHO_MIN), OSQP_RHO_MAX);
     work->rho_inv = 1. / settings->rho;
   }
 
@@ -247,7 +243,7 @@ c_int osqp_setup(OSQPSolver** solverp,
   // Initialize linear system solver structure
   exitflag = init_linsys_solver(&(work->linsys_solver), work->data->P, work->data->A, 
                                 work->rho_vec, solver->settings,
-                                &work->scaled_pri_res, &work->scaled_dua_res, 0);
+                                &work->scaled_prim_res, &work->scaled_dual_res, 0);
 
   if (exitflag) return osqp_error(exitflag);
 
@@ -311,11 +307,11 @@ c_int osqp_setup(OSQPSolver** solverp,
     if (solver->settings->check_termination) {
       // If check_termination is enabled, we set it to a multiple of the check
       // termination interval
-      solver->settings->adaptive_rho_interval = ADAPTIVE_RHO_MULTIPLE_TERMINATION *
+      solver->settings->adaptive_rho_interval = OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION *
                                               solver->settings->check_termination;
     } else {
       // If check_termination is disabled we set it to a predefined fix number
-      solver->settings->adaptive_rho_interval = ADAPTIVE_RHO_FIXED;
+      solver->settings->adaptive_rho_interval = OSQP_ADAPTIVE_RHO_FIXED;
     }
   }
 # endif /* ifndef PROFILING */
@@ -324,15 +320,15 @@ c_int osqp_setup(OSQPSolver** solverp,
   return 0;
 }
 
-#endif // #ifndef EMBEDDED
+#endif /* ifndef EMBEDDED */
 
 
 c_int osqp_solve(OSQPSolver *solver) {
 
   c_int exitflag;
   c_int iter, max_iter;
-  c_int compute_cost_function; // Boolean: compute the cost function in the loop or not
-  c_int can_check_termination; // Boolean: check termination or not
+  c_int compute_obj;           // boolean: compute objective function in the loop or not
+  c_int can_check_termination; // boolean: check termination or not
   OSQPWorkspace* work;
 
 #ifdef PROFILING
@@ -358,18 +354,11 @@ c_int osqp_solve(OSQPSolver *solver) {
   can_check_termination = 0;
 #ifdef PRINTING
   can_print = solver->settings->verbose;
-#endif /* ifdef PRINTING */
-#ifdef PRINTING
-  compute_cost_function = solver->settings->verbose;       // Compute cost function only
-                                                   // if verbose is on
+  // Compute objective function only if verbose is on
+  compute_obj = solver->settings->verbose;
 #else /* ifdef PRINTING */
-  compute_cost_function = 0;                       // Never compute cost
-                                                   // function during the
-                                                   // iterations if no printing
-                                                   // enabled
+  compute_obj = 0;
 #endif /* ifdef PRINTING */
-
-
 
 #ifdef PROFILING
   osqp_tic(work->timer); // Start timer
@@ -377,7 +366,6 @@ c_int osqp_solve(OSQPSolver *solver) {
 
 
 #ifdef PRINTING
-
   if (solver->settings->verbose) {
     // Print Header for every column
     print_header();
@@ -391,8 +379,8 @@ c_int osqp_solve(OSQPSolver *solver) {
 #endif /* ifdef CTRLC */
 
   // Initialize variables (cold start or warm start depending on settings)
-  if (!solver->settings->warm_start) osqp_cold_start(solver);  // If not warm start ->
-                                                               // set x, z, y to zero
+  // If not warm start -> set x, z, y to zero
+  if (!solver->settings->warm_starting) osqp_cold_start(solver);
 
   // Main ADMM algorithm
 
@@ -463,14 +451,14 @@ c_int osqp_solve(OSQPSolver *solver) {
 
     // Can we print ?
     can_print = solver->settings->verbose &&
-                ((iter % PRINT_INTERVAL == 0) || (iter == 1));
+                ((iter % OSQP_PRINT_INTERVAL == 0) || (iter == 1));
 
     // NB: We always update info in the first iteration because indirect solvers
     //     use residual values to compute required accuracy of their solution.
     if (can_check_termination || can_print || iter == 1) { // Update status in either of
                                                            // these cases
       // Update information
-      update_info(solver, iter, compute_cost_function, 0);
+      update_info(solver, iter, compute_obj, 0);
 
       if (can_print) {
         // Print summary
@@ -489,7 +477,7 @@ c_int osqp_solve(OSQPSolver *solver) {
 
     if (can_check_termination) {
       // Update information and compute also objective value
-      update_info(solver, iter, compute_cost_function, 0);
+      update_info(solver, iter, compute_obj, 0);
 
       // Check algorithm termination
       if (check_termination(solver, 0)) {
@@ -524,8 +512,7 @@ c_int osqp_solve(OSQPSolver *solver) {
           // between
           // updates to the closest multiple of the default check_termination
           // interval.
-          solver->settings->adaptive_rho_interval = (c_int)c_roundmultiple(iter,
-                                                                         CHECK_TERMINATION);
+          solver->settings->adaptive_rho_interval = (c_int)c_roundmultiple(iter, OSQP_CHECK_TERMINATION);
         }
 
         // Make sure the interval is not 0 and at least check_termination times
@@ -559,13 +546,13 @@ c_int osqp_solve(OSQPSolver *solver) {
       if (!can_check_termination && !can_print) {
         // Information has not been computed neither for termination or printing
         // reasons
-        update_info(solver, iter, compute_cost_function, 0);
+        update_info(solver, iter, compute_obj, 0);
       }
 # else /* ifdef PRINTING */
 
       if (!can_check_termination) {
         // Information has not been computed before for termination check
-        update_info(solver, iter, compute_cost_function, 0);
+        update_info(solver, iter, compute_obj, 0);
       }
 # endif /* ifdef PRINTING */
 
@@ -592,12 +579,12 @@ c_int osqp_solve(OSQPSolver *solver) {
     if (!can_print) {
       // Update info only if it hasn't been updated before for printing
       // reasons
-      update_info(solver, iter - 1, compute_cost_function, 0);
+      update_info(solver, iter - 1, compute_obj, 0);
     }
 #else /* ifdef PRINTING */
 
     // If no printing is enabled, update info directly
-    update_info(solver, iter - 1, compute_cost_function, 0);
+    update_info(solver, iter - 1, compute_obj, 0);
 #endif /* ifdef PRINTING */
 
 #ifdef PRINTING
@@ -613,7 +600,7 @@ c_int osqp_solve(OSQPSolver *solver) {
 
   // Compute objective value in case it was not
   // computed during the iterations
-  if (!compute_cost_function && has_solution(solver->info)){
+  if (!compute_obj && has_solution(solver->info)){
     solver->info->obj_val = compute_obj_val(solver, work->x);
   }
 
@@ -655,7 +642,7 @@ c_int osqp_solve(OSQPSolver *solver) {
 
 #ifndef EMBEDDED
   // Polish the obtained solution
-  if (solver->settings->polish && (solver->info->status_val == OSQP_SOLVED))
+  if (solver->settings->polishing && (solver->info->status_val == OSQP_SOLVED))
     polish(solver);
 #endif /* ifndef EMBEDDED */
 
@@ -685,7 +672,7 @@ c_int osqp_solve(OSQPSolver *solver) {
 
 #ifdef PRINTING
   /* Print final footer */
-  if (solver->settings->verbose) print_footer(solver->info, solver->settings->polish);
+  if (solver->settings->verbose) print_footer(solver->info, solver->settings->polishing);
 #endif /* ifdef PRINTING */
 
   // Store solution
@@ -821,17 +808,24 @@ c_int osqp_cleanup(OSQPSolver *solver) {
   return exitflag;
 }
 
-#endif // #ifndef EMBEDDED
+#endif /* ifndef EMBEDDED */
+
 
 
 /************************
 * Update problem data  *
 ************************/
-c_int osqp_update_lin_cost(OSQPSolver *solver, const c_float *q_new) {
 
-  OSQPWorkspace* work;
+c_int osqp_update_data_vec(OSQPSolver    *solver,
+                           const c_float *q_new,
+                           const c_float *l_new,
+                           const c_float *u_new) {
 
-  // Check if workspace has been initialized
+  c_int exitflag = 0;
+  OSQPVectorf *l_tmp, *u_tmp;
+  OSQPWorkspace *work;
+
+  /* Check if workspace has been initialized */
   if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   work = solver->work;
 
@@ -840,99 +834,53 @@ c_int osqp_update_lin_cost(OSQPSolver *solver, const c_float *q_new) {
     work->clear_update_time = 0;
     solver->info->update_time = 0.0;
   }
-  osqp_tic(work->timer); // Start timer
+  /* Start timer */
+  osqp_tic(work->timer);
 #endif /* ifdef PROFILING */
 
-  // Replace q by the new vector
-  OSQPVectorf_from_raw(work->data->q, q_new);
+  /* Update constraint bounds */
+  if (l_new || u_new) {
+    /* Use z_prev and delta_y to store l_new and u_new */
+    l_tmp = work->z_prev;
+    u_tmp = work->delta_y;
 
-  // Scaling
-  if (solver->settings->scaling) {
-    OSQPVectorf_ew_prod(work->data->q, work->data->q, work->scaling->D);
-    OSQPVectorf_mult_scalar(work->data->q, work->scaling->c);
+    /* Copy l_new and u_new to l_tmp and u_tmp */
+    if (l_new) OSQPVectorf_from_raw(l_tmp, l_new);
+    if (u_new) OSQPVectorf_from_raw(u_tmp, u_new);
+
+    if (solver->settings->scaling) {
+      if (l_new) OSQPVectorf_ew_prod(l_tmp, l_tmp, work->scaling->E);
+      if (u_new) OSQPVectorf_ew_prod(u_tmp, u_tmp, work->scaling->E);
+    }
+
+      /* Check if upper bound is greater than lower bound */
+      if (l_new && u_new) exitflag = !OSQPVectorf_all_leq(l_tmp, u_tmp);
+      else if (l_new)     exitflag = !OSQPVectorf_all_leq(l_tmp, work->data->u);
+      else                exitflag = !OSQPVectorf_all_leq(work->data->l, u_tmp);
+      if (exitflag) return osqp_error(OSQP_DATA_VALIDATION_ERROR);
+
+      /* Swap vectors.
+       * NB: Use work->z_prev & delta_y rather than l_tmp & u_tmp */
+      if (l_new) swap_vectors(&work->z_prev,  &work->data->l);
+      if (u_new) swap_vectors(&work->delta_y, &work->data->u);
+
+#if EMBEDDED != 1
+      /* Update rho_vec and refactor if constraints type changes */
+      if (solver->settings->rho_is_vec) exitflag = update_rho_vec(solver);
+#endif /* #if EMBEDDED != 1 */
   }
 
-  // Reset solver information
-  reset_info(solver->info);
-
-#ifdef PROFILING
-  solver->info->update_time += osqp_toc(work->timer);
-#endif /* ifdef PROFILING */
-
-  return 0;
-}
-
-c_int osqp_update_bounds(OSQPSolver    *solver,
-                         const c_float *l_new,
-                         const c_float *u_new) {
-  
-  c_int exitflag = 0;
-  OSQPVectorf *l_tmp, *u_tmp;
-  OSQPWorkspace* work;
-
-  /* If both l_new and u_new are empty, then return */
-  if (!l_new && !u_new) return 0;
-
-  /* Check if workspace has been initialized */
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-  work = solver->work;
-
-#ifdef PROFILING
-  if (work->clear_update_time == 1) {
-    work->clear_update_time    = 0;
-    solver->info->update_time  = 0.0;
+  /* Update linear cost vector */
+  if (q_new) {
+    OSQPVectorf_from_raw(work->data->q, q_new);
+    if (solver->settings->scaling) {
+      OSQPVectorf_ew_prod(work->data->q, work->data->q, work->scaling->D);
+      OSQPVectorf_mult_scalar(work->data->q, work->scaling->c);
+    }
   }
-  osqp_tic(work->timer); /* Start timer */
-#endif /* ifdef PROFILING */
-
-  /* Use z_prev and delta_y to store l_new and u_new */
-  l_tmp = work->z_prev;
-  u_tmp = work->delta_y;
-
-  /* Copy l_new and u_new to l_tmp and u_tmp */
-  if (l_new) OSQPVectorf_from_raw(l_tmp, l_new);
-  if (u_new) OSQPVectorf_from_raw(u_tmp, u_new);
-
-  /* Scaling */
-  if (solver->settings->scaling) {
-    if (l_new) OSQPVectorf_ew_prod(l_tmp, l_tmp, work->scaling->E);
-    if (u_new) OSQPVectorf_ew_prod(u_tmp, u_tmp, work->scaling->E);
-  }
-
-  /* Check if upper bound is greater than lower bound */
-  if (l_new && u_new)
-    exitflag = !OSQPVectorf_all_leq(l_tmp, u_tmp);
-  else if (l_new)
-    exitflag = !OSQPVectorf_all_leq(l_tmp, work->data->u);
-  else
-    exitflag = !OSQPVectorf_all_leq(work->data->l, u_tmp);
-
-  if (exitflag) {
-#ifdef PRINTING
-    c_eprint("lower bound must be lower than or equal to upper bound");
-#endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  /*  Swap vectors l_tmp and l.
-   *  NB: Use work->z_prev rather than l_tmp.
-   */
-  if (l_new) swap_vectors(&work->z_prev, &work->data->l);
-
-  /*  Swap vectors u_tmp and u.
-   *  NB: Use work->delta_y rather than u_tmp.
-   */
-  if (u_new) swap_vectors(&work->delta_y, &work->data->u);
 
   /* Reset solver information */
   reset_info(solver->info);
-
-#if EMBEDDED != 1
-  if (solver->settings->rho_is_vec) {
-    /* Update rho_vec and refactor if constraints type changes */
-    exitflag = update_rho_vec(solver);
-  }
-#endif /* EMBEDDED != 1 */
 
 #ifdef PROFILING
   solver->info->update_time += osqp_toc(work->timer);
@@ -941,15 +889,6 @@ c_int osqp_update_bounds(OSQPSolver    *solver,
   return exitflag;
 }
 
-void osqp_cold_start(OSQPSolver *solver) {
-  OSQPWorkspace *work  = solver->work;
-  OSQPVectorf_set_scalar(work->x, 0.);
-  OSQPVectorf_set_scalar(work->z, 0.);
-  OSQPVectorf_set_scalar(work->y, 0.);
-
-  /* Cold start the linear system solver */
-  work->linsys_solver->warm_start(work->linsys_solver, work->x);
-}
 
 c_int osqp_warm_start(OSQPSolver    *solver,
                       const c_float *x,
@@ -962,7 +901,7 @@ c_int osqp_warm_start(OSQPSolver    *solver,
   work = solver->work;
 
   /* Update warm_start setting to true */
-  if (!solver->settings->warm_start) solver->settings->warm_start = 1;
+  if (!solver->settings->warm_starting) solver->settings->warm_starting = 1;
 
   /* Copy primal and dual variables into the iterates */
   if (x) OSQPVectorf_from_raw(work->x, x);
@@ -987,162 +926,30 @@ c_int osqp_warm_start(OSQPSolver    *solver,
 }
 
 
+void osqp_cold_start(OSQPSolver *solver) {
+  OSQPWorkspace *work = solver->work;
+  OSQPVectorf_set_scalar(work->x, 0.);
+  OSQPVectorf_set_scalar(work->z, 0.);
+  OSQPVectorf_set_scalar(work->y, 0.);
+
+  /* Cold start the linear system solver */
+  work->linsys_solver->warm_start(work->linsys_solver, work->x);
+}
+
+
 #if EMBEDDED != 1
 
-c_int osqp_update_P(OSQPSolver    *solver,
-                    const c_float *Px_new,
-                    const c_int   *Px_new_idx,
-                    c_int          P_new_n) {
-
-  c_int exitflag; // Exit flag
-  c_int nnzP;     // Number of nonzeros in P
-  OSQPWorkspace* work;
-
-  // Check if workspace has been initialized
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-  work = solver->work;
-
-#ifdef PROFILING
-  if (work->clear_update_time == 1) {
-    work->clear_update_time = 0;
-    solver->info->update_time = 0.0;
-  }
-  osqp_tic(work->timer); // Start timer
-#endif /* ifdef PROFILING */
-
-  nnzP = OSQPMatrix_get_nz(work->data->P);
-
-  if (Px_new_idx) { // Passing the index of elements changed
-    // Check if number of elements is less or equal than the total number of
-    // nonzeros in P
-    if (P_new_n > nnzP) {
-# ifdef PRINTING
-      c_eprint("new number of elements (%i) greater than elements in P (%i)",
-               (int)P_new_n,
-               (int)nnzP);
-# endif /* ifdef PRINTING */
-      return 1;
-    }
-  }
-
-  if (solver->settings->scaling) {
-    // Unscale data
-    unscale_data(solver);
-  }
-
-  OSQPMatrix_update_values(work->data->P,Px_new,Px_new_idx,P_new_n);
-
-  if (solver->settings->scaling) {
-    // Scale data
-    scale_data(solver);
-  }
-
-  // Update linear system structure with new data
-  exitflag = work->linsys_solver->update_matrices(work->linsys_solver,
-                                                  work->data->P,
-                                                  work->data->A);
-
-  // Reset solver information
-  reset_info(solver->info);
-
-# ifdef PRINTING
-
-  if (exitflag < 0) {
-    c_eprint("new KKT matrix is not quasidefinite");
-  }
-# endif /* ifdef PRINTING */
-
-#ifdef PROFILING
-  solver->info->update_time += osqp_toc(work->timer);
-#endif /* ifdef PROFILING */
-
-  return exitflag;
-}
-
-
-c_int osqp_update_A(OSQPSolver *solver,
-                    const c_float *Ax_new,
-                    const c_int   *Ax_new_idx,
-                    c_int          A_new_n) {
-
-  c_int exitflag; // Exit flag
-  c_int nnzA;     // Number of nonzeros in A
-  OSQPWorkspace* work;
-
-  // Check if workspace has been initialized
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-  work = solver->work;
-
-#ifdef PROFILING
-  if (work->clear_update_time == 1) {
-    work->clear_update_time = 0;
-    solver->info->update_time = 0.0;
-  }
-  osqp_tic(work->timer); // Start timer
-#endif /* ifdef PROFILING */
-
-  nnzA = OSQPMatrix_get_nz(work->data->A);
-
-  if (Ax_new_idx) { // Passing the index of elements changed
-    // Check if number of elements is less or equal than the total number of
-    // nonzeros in A
-    if (A_new_n > nnzA) {
-# ifdef PRINTING
-      c_eprint("new number of elements (%i) greater than elements in A (%i)",
-               (int)A_new_n,
-               (int)nnzA);
-# endif /* ifdef PRINTING */
-      return 1;
-    }
-  }
-
-  if (solver->settings->scaling) {
-    // Unscale data
-    unscale_data(solver);
-  }
-
-  // Update A elements
-  OSQPMatrix_update_values(work->data->A,Ax_new,Ax_new_idx,A_new_n);
-
-  if (solver->settings->scaling) {
-    // Scale data
-    scale_data(solver);
-  }
-
-  // Update linear system structure with new data
-  exitflag = work->linsys_solver->update_matrices(work->linsys_solver,
-                                                  work->data->P,
-                                                  work->data->A);
-
-  // Reset solver information
-  reset_info(solver->info);
-
-# ifdef PRINTING
-
-  if (exitflag < 0) {
-    c_eprint("new KKT matrix is not quasidefinite");
-  }
-# endif /* ifdef PRINTING */
-
-#ifdef PROFILING
-  solver->info->update_time += osqp_toc(work->timer);
-#endif /* ifdef PROFILING */
-
-  return exitflag;
-}
-
-
-c_int osqp_update_P_A(OSQPSolver    *solver,
-                      const c_float *Px_new,
-                      const c_int   *Px_new_idx,
-                      c_int          P_new_n,
-                      const c_float *Ax_new,
-                      const c_int   *Ax_new_idx,
-                      c_int          A_new_n) {
+c_int osqp_update_data_mat(OSQPSolver    *solver,
+                           const c_float *Px_new,
+                           const c_int   *Px_new_idx,
+                           c_int          P_new_n,
+                           const c_float *Ax_new,
+                           const c_int   *Ax_new_idx,
+                           c_int          A_new_n) {
 
   c_int exitflag;   // Exit flag
   c_int nnzP, nnzA; // Number of nonzeros in P and A
-  OSQPWorkspace* work;
+  OSQPWorkspace *work;
 
   // Check if workspace has been initialized
   if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1160,23 +967,19 @@ c_int osqp_update_P_A(OSQPSolver    *solver,
   nnzA = OSQPMatrix_get_nz(work->data->A);
 
 
-  if (Px_new_idx) { // Passing the index of elements changed
-    // Check if number of elements is less or equal than the total number of
-    // nonzeros in P
+  if (Px_new_idx) {
+    // Check if the number of elements to update is valid
     if (P_new_n > nnzP) {
 # ifdef PRINTING
       c_eprint("new number of elements (%i) greater than elements in P (%i)",
-               (int)P_new_n,
-               (int)nnzP);
+               (int)P_new_n, (int)nnzP);
 # endif /* ifdef PRINTING */
       return 1;
     }
   }
 
-
-  if (Ax_new_idx) { // Passing the index of elements changed
-    // Check if number of elements is less or equal than the total number of
-    // nonzeros in A
+  if (Ax_new_idx) {
+    // Check if the number of elements to update is valid
     if (A_new_n > nnzA) {
 # ifdef PRINTING
       c_eprint("new number of elements (%i) greater than elements in A (%i)",
@@ -1187,21 +990,12 @@ c_int osqp_update_P_A(OSQPSolver    *solver,
     }
   }
 
-  if (solver->settings->scaling) {
-    // Unscale data
-    unscale_data(solver);
-  }
+  if (solver->settings->scaling) unscale_data(solver);
 
-  // Update P elements
-    OSQPMatrix_update_values(work->data->P,Px_new,Px_new_idx,P_new_n);
+  if (Px_new) OSQPMatrix_update_values(work->data->P, Px_new, Px_new_idx, P_new_n);
+  if (Ax_new) OSQPMatrix_update_values(work->data->A, Ax_new, Ax_new_idx, A_new_n);
 
-  // Update A elements
-    OSQPMatrix_update_values(work->data->A,Ax_new,Ax_new_idx,A_new_n);
-
-  if (solver->settings->scaling) {
-    // Scale data
-    scale_data(solver);
-  }
+  if (solver->settings->scaling) scale_data(solver);
 
   // Update linear system structure with new data
   exitflag = work->linsys_solver->update_matrices(work->linsys_solver,
@@ -1212,10 +1006,7 @@ c_int osqp_update_P_A(OSQPSolver    *solver,
   reset_info(solver->info);
 
 # ifdef PRINTING
-
-  if (exitflag < 0) {
-    c_eprint("new KKT matrix is not quasidefinite");
-  }
+  if (exitflag < 0) c_eprint("new KKT matrix is not quasidefinite");
 # endif /* ifdef PRINTING */
 
 #ifdef PROFILING
@@ -1225,10 +1016,12 @@ c_int osqp_update_P_A(OSQPSolver    *solver,
   return exitflag;
 }
 
-c_int osqp_update_rho(OSQPSolver *solver, c_float rho_new) {
+
+c_int osqp_update_rho(OSQPSolver *solver,
+                      c_float     rho_new) {
 
     c_int exitflag;
-    OSQPWorkspace* work;
+    OSQPWorkspace *work;
 
     // Check if workspace has been initialized
     if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1253,15 +1046,15 @@ c_int osqp_update_rho(OSQPSolver *solver, c_float rho_new) {
 #endif /* ifdef PROFILING */
 
   // Update rho in settings
-  solver->settings->rho = c_min(c_max(rho_new, RHO_MIN), RHO_MAX);
+  solver->settings->rho = c_min(c_max(rho_new, OSQP_RHO_MIN), OSQP_RHO_MAX);
 
   if (solver->settings->rho_is_vec) {
     // Update rho_vec and rho_inv_vec
     OSQPVectorf_set_scalar_conditional(work->rho_vec,
                                        work->constr_type,
-                                       RHO_MIN,                                     //const  == -1
-                                       solver->settings->rho,                       //constr == 0
-                                       RHO_EQ_OVER_RHO_INEQ*solver->settings->rho); //constr == 1
+                                       OSQP_RHO_MIN,                                     //const  == -1
+                                       solver->settings->rho,                            //constr == 0
+                                       OSQP_RHO_EQ_OVER_RHO_INEQ*solver->settings->rho); //constr == 1
 
     OSQPVectorf_ew_reciprocal(work->rho_inv_vec, work->rho_vec);
   }
@@ -1282,296 +1075,74 @@ c_int osqp_update_rho(OSQPSolver *solver, c_float rho_new) {
 
 #endif // EMBEDDED != 1
 
+
+
 /****************************
 * Update problem settings  *
 ****************************/
-c_int osqp_update_max_iter(OSQPSolver *solver, c_int max_iter_new) {
 
-  // Check if workspace has been initialized
+c_int osqp_update_settings(OSQPSolver         *solver,
+                           const OSQPSettings *new_settings) {
+
+  OSQPSettings *settings = solver->settings;
+
+  /* Check if workspace has been initialized */
   if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
-  // Check that max_iter is positive
-  if (max_iter_new <= 0) {
-#ifdef PRINTING
-    c_eprint("max_iter must be positive");
-#endif /* ifdef PRINTING */
-    return 1;
-  }
+  /* Validate settings */
+  if (validate_settings(new_settings, 0)) return osqp_error(OSQP_SETTINGS_VALIDATION_ERROR);
 
-  // Update max_iter
-  solver->settings->max_iter = max_iter_new;
+  /* Update settings */
+  // linsys_solver ignored
+  settings->verbose       = new_settings->verbose;
+  settings->warm_starting = new_settings->warm_starting;
+  // scaling ignored
+  settings->polishing     = new_settings->polishing;
+
+  // rho        ignored
+  // rho_is_vec ignored
+  // sigma      ignored
+  settings->alpha = new_settings->alpha;
+
+  settings->cg_max_iter      = new_settings->cg_max_iter;
+  settings->cg_tol_reduction = new_settings->cg_tol_reduction;
+  settings->cg_tol_fraction  = new_settings->cg_tol_fraction;
+
+  // adaptive_rho           ignored
+  // adaptive_rho_interval  ignored
+  // adaptive_rho_fraction  ignored
+  // adaptive_rho_tolerance ignored
+
+  settings->max_iter           = new_settings->max_iter;
+  settings->eps_abs            = new_settings->eps_abs;
+  settings->eps_rel            = new_settings->eps_rel;
+  settings->eps_prim_inf       = new_settings->eps_prim_inf;
+  settings->eps_dual_inf       = new_settings->eps_dual_inf;
+  settings->scaled_termination = new_settings->scaled_termination;
+  settings->check_termination  = new_settings->check_termination;
+  settings->time_limit         = new_settings->time_limit;
+
+  settings->delta              = new_settings->delta;
+  settings->polish_refine_iter = new_settings->polish_refine_iter;
+
+  /* Update settings in the linear system solver */
+  solver->work->linsys_solver->update_settings(solver->work->linsys_solver, settings);
 
   return 0;
 }
 
-c_int osqp_update_eps_abs(OSQPSolver*solver, c_float eps_abs_new) {
-
-  // Check if workspace has been initialized
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-
-  // Check that eps_abs is positive
-  if (eps_abs_new < 0.) {
-#ifdef PRINTING
-    c_eprint("eps_abs must be nonnegative");
-#endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  // Update eps_abs
-  solver->settings->eps_abs = eps_abs_new;
-
-  return 0;
-}
-
-c_int osqp_update_eps_rel(OSQPSolver *solver, c_float eps_rel_new) {
-
-  // Check if workspace has been initialized
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-
-  // Check that eps_rel is positive
-  if (eps_rel_new < 0.) {
-#ifdef PRINTING
-    c_eprint("eps_rel must be nonnegative");
-#endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  // Update eps_rel
-  solver->settings->eps_rel = eps_rel_new;
-
-  return 0;
-}
-
-c_int osqp_update_eps_prim_inf(OSQPSolver *solver, c_float eps_prim_inf_new) {
-
-  // Check if workspace has been initialized
-
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-
-  // Check that eps_prim_inf is positive
-  if (eps_prim_inf_new < 0.) {
-#ifdef PRINTING
-    c_eprint("eps_prim_inf must be nonnegative");
-#endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  // Update eps_prim_inf
-  solver->settings->eps_prim_inf = eps_prim_inf_new;
-
-  return 0;
-}
-
-c_int osqp_update_eps_dual_inf(OSQPSolver *solver, c_float eps_dual_inf_new) {
-
-  // Check if workspace has been initialized
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-
-  // Check that eps_dual_inf is positive
-  if (eps_dual_inf_new < 0.) {
-#ifdef PRINTING
-    c_eprint("eps_dual_inf must be nonnegative");
-#endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  // Update eps_dual_inf
-  solver->settings->eps_dual_inf = eps_dual_inf_new;
-
-
-  return 0;
-}
-
-c_int osqp_update_alpha(OSQPSolver*solver, c_float alpha_new) {
-
-  // Check if workspace has been initialized
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-
-  // Check that alpha is between 0 and 2
-  if ((alpha_new <= 0.) || (alpha_new >= 2.)) {
-#ifdef PRINTING
-    c_eprint("alpha must be between 0 and 2");
-#endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  // Update alpha
-  solver->settings->alpha = alpha_new;
-
-  return 0;
-}
-
-c_int osqp_update_warm_start(OSQPSolver *solver, c_int warm_start_new) {
-
-  // Check if workspace has been initialized
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-
-  // Check that warm_start is either 0 or 1
-  if ((warm_start_new != 0) && (warm_start_new != 1)) {
-#ifdef PRINTING
-    c_eprint("warm_start should be either 0 or 1");
-#endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  // Update warm_start
-  solver->settings->warm_start = warm_start_new;
-
-  return 0;
-}
-
-c_int osqp_update_scaled_termination(OSQPSolver *solver, c_int scaled_termination_new) {
-
-  // Check if workspace has been initialized
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-
-  // Check that scaled_termination is either 0 or 1
-  if ((scaled_termination_new != 0) && (scaled_termination_new != 1)) {
-#ifdef PRINTING
-    c_eprint("scaled_termination should be either 0 or 1");
-#endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  // Update scaled_termination
-  solver->settings->scaled_termination = scaled_termination_new;
-
-  return 0;
-}
-
-c_int osqp_update_check_termination(OSQPSolver *solver, c_int check_termination_new) {
-
-  // Check if workspace has been initialized
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-
-  // Check that check_termination is nonnegative
-  if (check_termination_new < 0) {
-#ifdef PRINTING
-    c_eprint("check_termination should be nonnegative");
-#endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  // Update check_termination
-  solver->settings->check_termination = check_termination_new;
-
-  return 0;
-}
-
-#ifndef EMBEDDED
-
-c_int osqp_update_delta(OSQPSolver *solver, c_float delta_new) {
-
-  // Check if workspace has been initialized
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-
-  // Check that delta is positive
-  if (delta_new <= 0.) {
-# ifdef PRINTING
-    c_eprint("delta must be positive");
-# endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  // Update delta
-  solver->settings->delta = delta_new;
-
-  return 0;
-}
-
-c_int osqp_update_polish(OSQPSolver *solver, c_int polish_new) {
-
-  // Check if workspace has been initialized
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-
-  // Check that polish is either 0 or 1
-  if ((polish_new != 0) && (polish_new != 1)) {
-# ifdef PRINTING
-    c_eprint("polish should be either 0 or 1");
-# endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  // Update polish
-  solver->settings->polish = polish_new;
-
-# ifdef PROFILING
-
-  // Reset polish time to zero
-  solver->info->polish_time = 0.0;
-# endif /* ifdef PROFILING */
-
-  return 0;
-}
-
-c_int osqp_update_polish_refine_iter(OSQPSolver *solver, c_int polish_refine_iter_new) {
-
-  // Check if workspace has been initialized
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-
-  // Check that polish_refine_iter is nonnegative
-  if (polish_refine_iter_new < 0) {
-# ifdef PRINTING
-    c_eprint("polish_refine_iter must be nonnegative");
-# endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  // Update polish_refine_iter
-  solver->settings->polish_refine_iter = polish_refine_iter_new;
-
-  return 0;
-}
-
-c_int osqp_update_verbose(OSQPSolver *solver, c_int verbose_new) {
-
-  // Check if workspace has been initialized
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-
-  // Check that verbose is either 0 or 1
-  if ((verbose_new != 0) && (verbose_new != 1)) {
-# ifdef PRINTING
-    c_eprint("verbose should be either 0 or 1");
-# endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  // Update verbose
-  solver->settings->verbose = verbose_new;
-
-  return 0;
-}
-
-#endif // EMBEDDED
-
-#ifdef PROFILING
-c_int osqp_update_time_limit(OSQPSolver *solver, c_float time_limit_new) {
-
-  // Check if workspace has been initialized
-  if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
-
-  // Check that time_limit is nonnegative
-  if (time_limit_new < 0.) {
-# ifdef PRINTING
-    c_print("time_limit must be nonnegative\n");
-# endif /* ifdef PRINTING */
-    return 1;
-  }
-
-  // Update time_limit
-  solver->settings->time_limit = time_limit_new;
-
-  return 0;
-}
-#endif /* ifdef PROFILING */
 
 /****************************
 * User API Helper functions
 ****************************/
 
-
-void csc_set_data(csc* M, c_int m, c_int n, c_int nzmax, c_float *x, c_int *i, c_int *p)
-{
+void csc_set_data(csc     *M,
+                  c_int    m,
+                  c_int    n,
+                  c_int    nzmax,
+                  c_float *x,
+                  c_int   *i,
+                  c_int   *p) {
   M->m     = m;
   M->n     = n;
   M->nz   = -1;

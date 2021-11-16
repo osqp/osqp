@@ -25,6 +25,9 @@ struct qdldl {
                    OSQPVectorf  *b,
                    c_int         admm_iter);
 
+    void (*update_settings)(struct qdldl       *self,
+                            const OSQPSettings *settings);
+
     void (*warm_start)(struct qdldl      *self,
                        const OSQPVectorf *x);
 
@@ -61,7 +64,7 @@ struct qdldl {
     c_float sigma;          ///< scalar parameter
     c_float rho_inv;        ///< scalar parameter (used if rho_inv_vec == NULL)
 #ifndef EMBEDDED
-    c_int polish;           ///< polishing flag
+    c_int polishing;        ///< polishing flag
 #endif
     c_int n;                ///< number of QP variables
     c_int m;                ///< number of QP constraints
@@ -91,19 +94,19 @@ struct qdldl {
  * Initialize QDLDL Solver
  *
  * @param  s         Pointer to a private structure
- * @param  P         Cost function matrix (upper triangular form)
+ * @param  P         Objective function matrix (upper triangular form)
  * @param  A         Constraints matrix
  * @param  rho_vec   Algorithm parameter. If polish, then rho_vec = OSQP_NULL.
  * @param  settings  Solver settings
- * @param  polish    Flag whether we are initializing for polish or not
+ * @param  polishing Flag whether we are initializing for polishing or not
  * @return           Exitflag for error (0 if no errors)
  */
 c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
                                const OSQPMatrix   *P,
                                const OSQPMatrix   *A,
                                const OSQPVectorf  *rho_vec,
-                               OSQPSettings       *settings,
-                               c_int               polish);
+                               const OSQPSettings *settings,
+                               c_int               polishing);
 
 /**
  * Solve linear system and store result in b
@@ -115,6 +118,9 @@ c_int solve_linsys_qdldl(qdldl_solver *s,
                          OSQPVectorf  *b,
                          c_int         admm_iter);
 
+
+void update_settings_linsys_solver_qdldl(qdldl_solver       *s,
+                                         const OSQPSettings *settings);
 
 void warm_start_linsys_solver_qdldl(qdldl_solver      *s,
                                     const OSQPVectorf *x);

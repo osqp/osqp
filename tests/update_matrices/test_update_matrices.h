@@ -167,7 +167,9 @@ void test_update() {
     Px_new_idx[i] = i;
   }
 
-  osqp_update_P(solver, data->test_solve_Pu_new->x, Px_new_idx, nnzP);
+  osqp_update_data_mat(solver,
+                       data->test_solve_Pu_new->x, Px_new_idx, nnzP,
+                       NULL, NULL, 0);
 
   // Solve Problem
   osqp_solve(solver);
@@ -194,7 +196,9 @@ void test_update() {
 
 
   // Update P (all indices)
-  osqp_update_P(solver, data->test_solve_Pu_new->x, OSQP_NULL, nnzP);
+  osqp_update_data_mat(solver,
+                       data->test_solve_Pu_new->x, OSQP_NULL, nnzP,
+                       NULL, NULL, 0);
 
   // Solve Problem
   osqp_solve(solver);
@@ -229,7 +233,9 @@ void test_update() {
     Ax_new_idx[i] = i;
   }
 
-  osqp_update_A(solver, data->test_solve_A_new->x, Ax_new_idx, nnzA);
+  osqp_update_data_mat(solver,
+                       NULL, NULL, 0,
+                       data->test_solve_A_new->x, Ax_new_idx, nnzA);
 
   // Solve Problem
   osqp_solve(solver);
@@ -256,7 +262,9 @@ void test_update() {
 
 
   // Update A (all indices)
-  osqp_update_A(solver, data->test_solve_A_new->x, OSQP_NULL, nnzA);
+  osqp_update_data_mat(solver,
+                       NULL, NULL, 0,
+                       data->test_solve_A_new->x, OSQP_NULL, nnzA);
 
   // Solve Problem
   osqp_solve(solver);
@@ -283,8 +291,9 @@ void test_update() {
                       problem->m,problem->n, settings);
 
   // Update P and A
-  osqp_update_P_A(solver, data->test_solve_Pu_new->x, Px_new_idx, nnzP,
-                  data->test_solve_A_new->x, Ax_new_idx, nnzA);
+  osqp_update_data_mat(solver,
+                       data->test_solve_Pu_new->x, Px_new_idx, nnzP,
+                       data->test_solve_A_new->x, Ax_new_idx, nnzA);
 
   // Solve Problem
   osqp_solve(solver);
@@ -314,8 +323,9 @@ void test_update() {
 
 
   // Update P and A (all indices)
-  osqp_update_P_A(solver, data->test_solve_Pu_new->x, OSQP_NULL, nnzP,
-                  data->test_solve_A_new->x, OSQP_NULL, nnzA);
+  osqp_update_data_mat(solver,
+                       data->test_solve_Pu_new->x, OSQP_NULL, nnzP,
+                       data->test_solve_A_new->x, OSQP_NULL, nnzA);
 
   // Solve Problem
   osqp_solve(solver);
@@ -419,7 +429,9 @@ void test_update_pardiso() {
     Px_new_idx[i] = i;
   }
 
-  osqp_update_P(solver, data->test_solve_Pu_new->x, Px_new_idx, nnzP);
+  osqp_update_data_mat(solver,
+                       data->test_solve_Pu_new->x, Px_new_idx, nnzP,
+                       NULL, NULL, 0);
 
   // Solve Problem
   osqp_solve(solver);
@@ -454,7 +466,9 @@ void test_update_pardiso() {
                       problem->A,problem->l,problem->u,
                       problem->m,problem->n, settings);
 
-  osqp_update_A(solver, data->test_solve_A_new->x, Ax_new_idx, nnzA);
+  osqp_update_data_mat(solver,
+                       NULL, NULL, 0,
+                       data->test_solve_A_new->x, Ax_new_idx, nnzA);
 
   // Solve Problem
   osqp_solve(solver);
@@ -480,8 +494,9 @@ void test_update_pardiso() {
                       problem->A,problem->l,problem->u,
                       problem->m,problem->n, settings);
 
-  osqp_update_P_A(solver, data->test_solve_Pu_new->x, Px_new_idx, nnzP,
-                  data->test_solve_A_new->x, Ax_new_idx, nnzA);
+  osqp_update_data_mat(solver,
+                       data->test_solve_Pu_new->x, Px_new_idx, nnzP,
+                       data->test_solve_A_new->x, Ax_new_idx, nnzA);
 
   // Solve Problem
   osqp_solve(solver);

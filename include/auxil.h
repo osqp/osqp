@@ -3,29 +3,29 @@
 
 # ifdef __cplusplus
 extern "C" {
-# endif // ifdef __cplusplus
+# endif /* ifdef __cplusplus */
 
 # include "types.h"
 
 
 /***********************************************************
-* Auxiliary functions needed to compute ADMM iterations * *
+* Auxiliary functions needed to evaluate ADMM iterations * *
 ***********************************************************/
 # if EMBEDDED != 1
 
 /**
  * Compute rho estimate from residuals
  * @param solver Solver
- * @return     rho estimate
+ * @return       rho estimate
  */
-c_float compute_rho_estimate(OSQPSolver *solver);
+c_float compute_rho_estimate(const OSQPSolver *solver);
 
 /**
  * Adapt rho value based on current unscaled primal/dual residuals
  * @param solver Solver
- * @return     Exitflag
+ * @return       Exitflag
  */
-c_int   adapt_rho(OSQPSolver *solver);
+c_int adapt_rho(OSQPSolver *solver);
 
 /**
  * Set values of rho vector based on constraint types.
@@ -33,16 +33,16 @@ c_int   adapt_rho(OSQPSolver *solver);
  * and 0 otherwise.
  * @param solver Solver
  */
-c_int    set_rho_vec(OSQPSolver *solver);
+c_int set_rho_vec(OSQPSolver *solver);
 
 /**
  * Update values of rho vector based on updated constraints.
  * If the constraints change, update the linear systems solver.
  *
  * @param solver Solver
- * @return     Exitflag
+ * @return       Exitflag
  */
-c_int   update_rho_vec(OSQPSolver *solver);
+c_int update_rho_vec(OSQPSolver *solver);
 
 # endif // EMBEDDED
 
@@ -60,7 +60,8 @@ void swap_vectors(OSQPVectorf **a,
  * @param solver    Solver
  * @param admm_iter Current ADMM iteration
  */
-void update_xz_tilde(OSQPSolver *solver, c_int admm_iter);
+void update_xz_tilde(OSQPSolver *solver,
+                     c_int       admm_iter);
 
 
 /**
@@ -89,17 +90,17 @@ void update_y(OSQPSolver *solver);
 /**
  * Compute objective function from data at value x
  * @param  solver Solver
- * @param  x    Value x
- * @return      Objective function value
+ * @param  x      Value x
+ * @return        Objective function value
  */
-c_float compute_obj_val(OSQPSolver *solver,
-                        OSQPVectorf   *x);
+c_float compute_obj_val(const OSQPSolver  *solver,
+                        const OSQPVectorf *x);
 
 /**
  * Check whether QP has solution
  * @param info OSQPInfo
  */
-c_int has_solution(OSQPInfo *info);
+c_int has_solution(const OSQPInfo *info);
 
 /**
  * Store the QP solution
@@ -113,12 +114,12 @@ void store_solution(OSQPSolver *solver);
  * @param solver             Solver
  * @param iter               Iteration number
  * @param compute_objective  Boolean (if compute the objective or not)
- * @param polish             Boolean (if called from polish)
+ * @param polishing          Boolean (if called from polish)
  */
 void update_info(OSQPSolver *solver,
                  c_int       iter,
                  c_int       compute_objective,
-                 c_int       polish);
+                 c_int       polishing);
 
 
 /**
@@ -142,48 +143,50 @@ void update_status(OSQPInfo *info,
  * If the boolean flag is ON, it checks for approximate conditions (10 x larger
  * tolerances than the ones set)
  *
- * @param  solver        Solver
+ * @param  solver      Solver
  * @param  approximate Boolean
- * @return      Residuals check
+ * @return             Residuals check
  */
 c_int check_termination(OSQPSolver *solver,
-                        c_int          approximate);
+                        c_int       approximate);
 
 
 # ifndef EMBEDDED
 
 /**
  * Validate problem data
- * @param  P            Problem data (quadratic cost term, csc format)
- * @param  q            Problem data (linear cost term)
- * @param  A            Problem data (constraint matrix, csc format)
- * @param  l            Problem data (constraint lower bound)
- * @param  u            Problem data (constraint upper bound)
- * @param  m            Problem data (number of constraints)
- * @param  n            Problem data (number of variables)
- * @return      Exitflag to check
+ * @param  P  Problem data (quadratic cost term, csc format)
+ * @param  q  Problem data (linear cost term)
+ * @param  A  Problem data (constraint matrix, csc format)
+ * @param  l  Problem data (constraint lower bound)
+ * @param  u  Problem data (constraint upper bound)
+ * @param  m  Problem data (number of constraints)
+ * @param  n  Problem data (number of variables)
+ * @return    Exitflag to check
  */
-c_int validate_data(const csc* P,
-                    const c_float* q,
-                    const csc* A,
-                    const c_float* l,
-                    const c_float* u,
-                    c_int m,
-                    c_int n);
+c_int validate_data(const csc     *P,
+                    const c_float *q,
+                    const csc     *A,
+                    const c_float *l,
+                    const c_float *u,
+                    c_int          m,
+                    c_int          n);
+
+# endif /* ifndef EMBEDDED */
 
 
 /**
  * Validate problem settings
- * @param  settings OSQPSettings to be validated
- * @return          Exitflag to check
+ * @param  settings   OSQPSettings to be validated
+ * @param  from_setup Is the function called from osqp_setup?
+ * @return            Exitflag to check
  */
-c_int validate_settings(const OSQPSettings *settings);
+c_int validate_settings(const OSQPSettings *settings,
+                        c_int               from_setup);
 
-
-# endif // #ifndef EMBEDDED
 
 # ifdef __cplusplus
 }
-# endif // ifdef __cplusplus
+# endif /* ifdef __cplusplus */
 
-#endif // ifndef AUXIL_H
+#endif /* ifndef AUXIL_H */

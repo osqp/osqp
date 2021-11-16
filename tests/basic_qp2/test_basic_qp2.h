@@ -25,10 +25,10 @@ void test_basic_qp2_solve()
 
   // Define Solver settings as default
   osqp_set_default_settings(settings);
-  settings->alpha   = 1.6;
-  settings->rho     = 0.1;
-  settings->polish  = 1;
-  settings->verbose = 1;
+  settings->alpha     = 1.6;
+  settings->rho       = 0.1;
+  settings->polishing = 1;
+  settings->verbose   = 1;
 
   // Setup workspace
   exitflag = osqp_setup(&solver, data->P, data->q,
@@ -94,7 +94,7 @@ void test_basic_qp2_solve_pardiso()
   osqp_set_default_settings(settings);
   settings->alpha         = 1.6;
   settings->rho           = 0.1;
-  settings->polish        = 1;
+  settings->polishing     = 1;
   settings->verbose       = 1;
   settings->linsys_solver = MKL_PARDISO_SOLVER;
 
@@ -163,11 +163,10 @@ void test_basic_qp2_update()
 
   // Define Solver settings as default
   osqp_set_default_settings(settings);
-  settings->alpha = 1.6;
-
-  settings->warm_start = 1;
-  settings->polish     = 1;
-  settings->verbose    = 1;
+  settings->alpha         = 1.6;
+  settings->warm_starting = 1;
+  settings->polishing     = 1;
+  settings->verbose       = 1;
 
   // Setup workspace
   exitflag = osqp_setup(&solver, data->P, data->q,
@@ -179,8 +178,8 @@ void test_basic_qp2_update()
 
 
   // Modify linear cost and upper bound
-  osqp_update_lin_cost(solver, sols_data->q_new);
-  osqp_update_bounds(solver, OSQP_NULL, sols_data->u_new);
+  osqp_update_data_vec(solver, sols_data->q_new, NULL, NULL);
+  osqp_update_data_vec(solver, NULL, NULL, sols_data->u_new);
 
   // Solve Problem second time(with different data now)
   osqp_solve(solver);

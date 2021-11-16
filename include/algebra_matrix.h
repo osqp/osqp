@@ -10,8 +10,8 @@ extern "C" {
 #include "csc_type.h"
 
 /*
- * OSQPMatrix types.  Not defined here since it
- *   is implementation specific
+ *  OSQPMatrix types.  Not defined here since it
+ *  is implementation-specific
  */
 
 /* float valued matrices*/
@@ -39,7 +39,7 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const csc *A,
 /*  direct data access functions ---------------------------------------------*/
 
 /*  These functions allow getting data in csc format from
-*   the OSQPMatrix type.   Data is passed in/out using bare
+*   the OSQPMatrix type.  Data is passed in/out using bare
 *   pointers instead of OSQPVectors since these functions interface
 *   with user defined linear solvers and the user API
 */
@@ -116,7 +116,7 @@ void OSQPMatrix_free(OSQPMatrix *M);
 OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix  *A,
                                         const OSQPVectori *rows);
 
-#endif // ndef EMBEDDED
+#endif // ifndef EMBEDDED
 
 
 

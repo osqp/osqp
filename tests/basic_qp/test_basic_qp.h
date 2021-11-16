@@ -25,12 +25,12 @@ void test_basic_qp_solve()
 
   // Define Solver settings as default
   osqp_set_default_settings(settings);
-  settings->max_iter   = 2000;
-  settings->alpha      = 1.6;
-  settings->polish     = 1;
-  settings->scaling    = 0;
-  settings->verbose    = 1;
-  settings->warm_start = 0;
+  settings->max_iter      = 2000;
+  settings->alpha         = 1.6;
+  settings->polishing     = 1;
+  settings->scaling       = 0;
+  settings->verbose       = 1;
+  settings->warm_starting = 0;
 
   // Setup solver
   exitflag = osqp_setup(&solver, data->P, data->q,
@@ -68,44 +68,70 @@ void test_basic_qp_solve()
   mu_assert("Basic QP test solve: Wrong value of rho not caught!",
 	    osqp_update_rho(solver, -0.1) == 1);
 
+  settings->max_iter = -1;
   mu_assert("Basic QP test solve: Wrong value of max_iter not caught!",
-	    osqp_update_max_iter(solver, -1) == 1);
+	    osqp_update_settings(solver, settings) > 0);
+  settings->max_iter = 2000;
 
+  settings->eps_abs = -1.;
   mu_assert("Basic QP test solve: Wrong value of eps_abs not caught!",
-	    osqp_update_eps_abs(solver, -1.) == 1);
+	    osqp_update_settings(solver, settings) > 0);
+  settings->eps_abs = OSQP_EPS_ABS;
 
+  settings->eps_rel = -1.;
   mu_assert("Basic QP test solve: Wrong value of eps_rel not caught!",
-	    osqp_update_eps_rel(solver, -1.) == 1);
+	    osqp_update_settings(solver, settings) > 0);
+  settings->eps_rel = OSQP_EPS_REL;
 
+  settings->eps_prim_inf = -0.1;
   mu_assert("Basic QP test solve: Wrong value of eps_prim_inf not caught!",
-	    osqp_update_eps_prim_inf(solver, -0.1) == 1);
+	    osqp_update_settings(solver, settings) > 0);
+  settings->eps_prim_inf = OSQP_EPS_PRIM_INF;
 
+  settings->eps_dual_inf = -0.1;
   mu_assert("Basic QP test solve: Wrong value of eps_dual_inf not caught!",
-	    osqp_update_eps_dual_inf(solver, -0.1) == 1);
+	    osqp_update_settings(solver, settings) > 0);
+  settings->eps_dual_inf = OSQP_EPS_DUAL_INF;
 
+  settings->alpha = 2.0;
   mu_assert("Basic QP test solve: Wrong value of alpha not caught!",
-	    osqp_update_alpha(solver, 2.0) == 1);
+	    osqp_update_settings(solver, settings) > 0);
+  settings->alpha = OSQP_ALPHA;
 
-  mu_assert("Basic QP test solve: Wrong value of warm_start not caught!",
-	    osqp_update_warm_start(solver, -1) == 1);
+  settings->warm_starting = -1;
+  mu_assert("Basic QP test solve: Wrong value of warm_starting not caught!",
+	    osqp_update_settings(solver, settings) > 0);
+  settings->warm_starting = 0;
 
+  settings->scaled_termination = 2;
   mu_assert("Basic QP test solve: Wrong value of scaled_termination not caught!",
-	    osqp_update_scaled_termination(solver, 2) == 1);
+	    osqp_update_settings(solver, settings) > 0);
+  settings->scaled_termination = OSQP_SCALED_TERMINATION;
 
+  settings->check_termination = -1;
   mu_assert("Basic QP test solve: Wrong value of check_termination not caught!",
-	    osqp_update_check_termination(solver, -1) == 1);
+	    osqp_update_settings(solver, settings) > 0);
+  settings->check_termination = OSQP_CHECK_TERMINATION;
 
+  settings->delta = 0.0;
   mu_assert("Basic QP test solve: Wrong value of delta not caught!",
-	    osqp_update_delta(solver, 0.) == 1);
+	    osqp_update_settings(solver, settings) > 0);
+  settings->delta = OSQP_DELTA;
 
-  mu_assert("Basic QP test solve: Wrong value of polish not caught!",
-	    osqp_update_polish(solver, 2) == 1);
+  settings->polishing = 2;
+  mu_assert("Basic QP test solve: Wrong value of polishing not caught!",
+	    osqp_update_settings(solver, settings) > 0);
+  settings->polishing = 1;
 
+  settings->polish_refine_iter = -1;
   mu_assert("Basic QP test solve: Wrong value of polish_refine_iter not caught!",
-	    osqp_update_polish_refine_iter(solver, -1) == 1);
+	    osqp_update_settings(solver, settings) > 0);
+  settings->polish_refine_iter = OSQP_POLISH_REFINE_ITER;
 
+  settings->verbose = 2;
   mu_assert("Basic QP test solve: Wrong value of verbose not caught!",
-	    osqp_update_verbose(solver, 2) == 1);
+	    osqp_update_settings(solver, settings) > 0);
+  settings->verbose = 1;
 
   // Clean solver
   osqp_cleanup(solver);
@@ -314,15 +340,15 @@ void test_basic_qp_solve()
             exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
   settings->check_termination = tmp_int;
 
-  // Setup solver with wrong settings->warm_start
-  tmp_int = settings->warm_start;
-  settings->warm_start = 5;
+  // Setup solver with wrong settings->warm_starting
+  tmp_int = settings->warm_starting;
+  settings->warm_starting = 5;
   exitflag = osqp_setup(&solver, data->P, data->q,
                         data->A, data->l, data->u,
                         data->m, data->n, settings);
-  mu_assert("Basic QP test solve: Setup should result in error due to non-boolean settings->warm_start",
+  mu_assert("Basic QP test solve: Setup should result in error due to non-boolean settings->warm_starting",
             exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
-  settings->warm_start = tmp_int;
+  settings->warm_starting = tmp_int;
 
 #ifdef PROFILING
   // Setup solver with wrong settings->time_limit
@@ -471,10 +497,10 @@ void test_basic_qp_solve_pardiso()
   osqp_set_default_settings(settings);
   settings->max_iter      = 2000;
   settings->alpha         = 1.6;
-  settings->polish        = 1;
+  settings->polishing     = 1;
   settings->scaling       = 0;
   settings->verbose       = 1;
-  settings->warm_start    = 0;
+  settings->warm_starting = 0;
   settings->linsys_solver = MKL_PARDISO_SOLVER;
 
   // Setup solver
@@ -541,12 +567,12 @@ void test_basic_qp_update()
 
   // Define Solver settings as default
   osqp_set_default_settings(settings);
-  settings->max_iter   = 200;
-  settings->alpha      = 1.6;
-  settings->polish     = 1;
-  settings->scaling    = 0;
-  settings->verbose    = 1;
-  settings->warm_start = 0;
+  settings->max_iter      = 200;
+  settings->alpha         = 1.6;
+  settings->polishing     = 1;
+  settings->scaling       = 0;
+  settings->verbose       = 1;
+  settings->warm_starting = 0;
 
   // Setup solver
   exitflag = osqp_setup(&solver, data->P, data->q,
@@ -563,7 +589,7 @@ void test_basic_qp_update()
 
   // Update linear cost
   q_new = OSQPVectorf_new(sols_data->q_new, data->n);
-  osqp_update_lin_cost(solver, sols_data->q_new);
+  osqp_update_data_vec(solver, sols_data->q_new, NULL, NULL);
   mu_assert("Basic QP test update: Error in updating linear cost!",
             OSQPVectorf_norm_inf_diff(solver->work->data->q, q_new) < TESTS_TOL);
   OSQPVectorf_free(q_new);
@@ -571,11 +597,11 @@ void test_basic_qp_update()
   // UPDATE BOUND
   // Try to update with non-consistent values
   mu_assert("Basic QP test update: Error in bounds update ordering not caught!",
-            osqp_update_bounds(solver, sols_data->u_new, sols_data->l_new) == 1);
+            osqp_update_data_vec(solver, NULL, sols_data->u_new, sols_data->l_new) == 1);
 
   // Now update with correct values
   mu_assert("Basic QP test update: Error in bounds update ordering!",
-            osqp_update_bounds(solver, sols_data->l_new, sols_data->u_new) == 0);
+            osqp_update_data_vec(solver, NULL, sols_data->l_new, sols_data->u_new) == 0);
 
   l_new = OSQPVectorf_new(sols_data->l_new, data->m);
   mu_assert("Basic QP test update: Error in bounds update, lower bound!",
@@ -588,18 +614,18 @@ void test_basic_qp_update()
   OSQPVectorf_free(u_new);
 
   // Return original values
-  osqp_update_bounds(solver, data->l, data->u);
+  osqp_update_data_vec(solver, NULL, data->l, data->u);
 
 
   // UPDATE LOWER BOUND
   // Try to update with non-consistent values
   mu_assert(
     "Basic QP test update: Error in lower bound update ordering not caught!",
-    osqp_update_bounds(solver, sols_data->u_new, OSQP_NULL) == 1);
+    osqp_update_data_vec(solver, NULL, sols_data->u_new, OSQP_NULL) == 1);
 
   // Now update with correct values
   mu_assert("Basic QP test update: Error in lower bound update ordering!",
-            osqp_update_bounds(solver, sols_data->l_new, OSQP_NULL) == 0);
+            osqp_update_data_vec(solver, NULL, sols_data->l_new, OSQP_NULL) == 0);
 
   l_new = OSQPVectorf_new(sols_data->l_new, data->m);
   mu_assert("Basic QP test update: Error in updating lower bound!",
@@ -607,18 +633,18 @@ void test_basic_qp_update()
   OSQPVectorf_free(l_new);
 
   // Return original values
-  osqp_update_bounds(solver, data->l, OSQP_NULL);
+  osqp_update_data_vec(solver, NULL, data->l, OSQP_NULL);
 
 
   // UPDATE UPPER BOUND
   // Try to update with non-consistent values
   mu_assert(
     "Basic QP test update: Error in upper bound update: ordering not caught!",
-    osqp_update_bounds(solver, OSQP_NULL, sols_data->l_new) == 1);
+    osqp_update_data_vec(solver, NULL, NULL, sols_data->l_new) == 1);
 
   // Now update with correct values
   mu_assert("Basic QP test update: Error in upper bound update: ordering!",
-            osqp_update_bounds(solver, OSQP_NULL, sols_data->u_new) == 0);
+            osqp_update_data_vec(solver, NULL, NULL, sols_data->u_new) == 0);
 
   u_new = OSQPVectorf_new(sols_data->u_new, data->m);
   mu_assert("Basic QP test update: Error in updating upper bound!",
@@ -659,11 +685,11 @@ void test_basic_qp_check_termination()
   osqp_set_default_settings(settings);
   settings->max_iter          = 200;
   settings->alpha             = 1.6;
-  settings->polish            = 0;
+  settings->polishing         = 0;
   settings->scaling           = 0;
   settings->verbose           = 1;
   settings->check_termination = 0;
-  settings->warm_start        = 0;
+  settings->warm_starting     = 0;
 
   // Setup solver
   exitflag = osqp_setup(&solver, data->P, data->q,
@@ -866,7 +892,8 @@ void test_basic_qp_time_limit()
   settings->adaptive_rho = 0;
 
   // Check default time limit
-  mu_assert("Basic QP test time limit: Default not correct", settings->time_limit == 0);
+  mu_assert("Basic QP test time limit: Default not correct",
+            settings->time_limit == OSQP_TIME_LIMIT);
 
   // Setup solver
   exitflag = osqp_setup(&solver, data->P, data->q,
@@ -885,18 +912,19 @@ void test_basic_qp_time_limit()
 
   // Update time limit
 # ifdef PRINTING
-  osqp_update_time_limit(solver, 1e-5);
-  osqp_update_eps_rel(solver, 1e-09);
-  osqp_update_eps_abs(solver, 1e-09);
+  settings->time_limit = 1e-5;
+  settings->eps_rel = 1e-9;
+  settings->eps_abs = 1e-9;
 # else
   // Not printing makes the code run a lot faster, so we need to make it work harder
   // to fail by time limit exceeded
-  osqp_update_time_limit(solver, 1e-7);
-  osqp_update_eps_rel(solver, 1e-12);
-  osqp_update_eps_abs(solver, 1e-12);
+  settings->time_limit = 1e-7;
+  settings->eps_rel = 1e-12;
+  settings->eps_abs = 1e-12;
 # endif
-  osqp_update_max_iter(solver, (c_int)2e9);
-  osqp_update_check_termination(solver, 0);
+  settings->max_iter = (c_int)2e9;
+  settings->check_termination = 0;
+  osqp_update_settings(solver, settings);
 
   // Solve Problem
   osqp_cold_start(solver);

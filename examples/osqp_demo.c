@@ -35,7 +35,7 @@ int main(void) {
   settings = (OSQPSettings *)malloc(sizeof(OSQPSettings));
   if (settings) {
     osqp_set_default_settings(settings);
-    settings->polish = 1;
+    settings->polishing = 1;
   }
 
   /* Setup solver */
