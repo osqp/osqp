@@ -521,6 +521,19 @@ c_int osqp_solve(OSQPSolver *solver) {
           solver->settings->check_termination);
       } // If time condition is met
     }   // If adaptive rho enabled and interval set to auto®
+# else // PROFILING
+    if (solver->settings->adaptive_rho && !solver->settings->adaptive_rho_interval) {
+      // Set adaptive_rho_interval to constant value
+      if (solver->settings->check_termination) {
+        // If check_termination is enabled, we set it to a multiple of the check
+        // termination interval
+        solver->settings->adaptive_rho_interval = OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION *
+                                                solver->settings->check_termination;
+      } else {
+        // If check_termination is disabled we set it to a predefined fix number
+        solver->settings->adaptive_rho_interval = OSQP_ADAPTIVE_RHO_FIXED;
+      }
+    }
 # endif // PROFILING
 
     // Adapt rho
@@ -1039,7 +1052,7 @@ c_int osqp_update_rho(OSQPSolver *solver,
     // Update rho_vec and rho_inv_vec
     OSQPVectorf_set_scalar_conditional(work->rho_vec,
                                        work->constr_type,
-                                       OSQP_RHO_MIN,                                     //constr  == -1
+                                       OSQP_RHO_MIN,                                     //constr == -1
                                        solver->settings->rho,                            //constr == 0
                                        OSQP_RHO_EQ_OVER_RHO_INEQ*solver->settings->rho); //constr == 1
 
