@@ -527,11 +527,11 @@ c_int osqp_solve(OSQPSolver *solver) {
       if (solver->settings->check_termination) {
         // If check_termination is enabled, we set it to a multiple of the check
         // termination interval
-        solver->settings->adaptive_rho_interval = ADAPTIVE_RHO_MULTIPLE_TERMINATION *
+        solver->settings->adaptive_rho_interval = OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION *
                                                 solver->settings->check_termination;
       } else {
         // If check_termination is disabled we set it to a predefined fix number
-        solver->settings->adaptive_rho_interval = ADAPTIVE_RHO_FIXED;
+        solver->settings->adaptive_rho_interval = OSQP_ADAPTIVE_RHO_FIXED;
       }
     }
 # endif // PROFILING
