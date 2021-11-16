@@ -11,7 +11,7 @@ if (NOT DEFINED EMBEDDED)
 endif()
 
 
-if (${ALGEBRA} STREQUAL "cuda")
+if (ALGEBRA_CUDA)
 
   # CUDA solvers
   add_subdirectory(cuda)

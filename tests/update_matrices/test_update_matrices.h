@@ -6,7 +6,7 @@
 
 #include "update_matrices/data.h"
 
-#ifndef CUDA_SUPPORT
+#ifndef ALGEBRA_CUDA
 
 #include "kkt.h"
 
@@ -91,7 +91,7 @@ void test_form_KKT() {
   c_free(PtoKKT);
 }
 
-#endif /* ifndef CUDA_SUPPORT */
+#endif /* ifndef ALGEBRA_CUDA */
 
 
 void test_update() {
@@ -357,7 +357,7 @@ void test_update() {
   c_free(Px_new_idx);
 }
 
-#ifdef ENABLE_MKL_PARDISO
+#ifdef ALGEBRA_MKL
 void test_update_pardiso() {
   c_int i, nnzP, nnzA, exitflag;
   update_matrices_sols_data *data;

@@ -21,7 +21,7 @@
 
 TEST_CASE( "test_lin_alg", "[multi-file:1]" ) {
     osqp_algebra_init_libs(0);
-#ifndef CUDA_SUPPORT
+#ifndef ALGEBRA_CUDA
     SECTION( "test_constr_sparse_mat" ) {
         test_constr_sparse_mat();
     }
@@ -47,7 +47,7 @@ TEST_CASE( "test_solve_linsys", "[multi-file:2]" ) {
     SECTION( "test_solveKKT" ) {
         test_solveKKT();
     }
-#ifdef ENABLE_MKL_PARDISO
+#ifdef ALGEBRA_MKL
     SECTION( "test_solveKKT_pardiso" ) {
         test_solveKKT_pardiso();
     }
@@ -67,7 +67,7 @@ TEST_CASE( "test_basic_qp", "[multi-file:4]" ) {
     SECTION( "test_basic_qp_solve" ) {
         test_basic_qp_solve();
     }
-#ifdef ENABLE_MKL_PARDISO
+#ifdef ALGEBRA_MKL
         SECTION( "test_basic_qp_solve_pardiso" ) {
         test_basic_qp_solve_pardiso();
     }
@@ -96,7 +96,7 @@ TEST_CASE( "test_basic_qp2", "[multi-file:5]" ) {
     SECTION( "test_basic_qp2_solve" ) {
         test_basic_qp2_solve();
     }
-#ifdef ENABLE_MKL_PARDISO
+#ifdef ALGEBRA_MKL
     SECTION( "test_basic_qp2_solve_pardiso" ) {
         test_basic_qp2_solve_pardiso();
     }
@@ -145,7 +145,7 @@ TEST_CASE( "test_unconstrained", "[multi-file:9]" ) {
 
 
 TEST_CASE( "test_update_matrices", "[multi-file:10]" ) {
-#ifndef CUDA_SUPPORT
+#ifndef ALGEBRA_CUDA
     SECTION( "test_form_KKT" ) {
         test_form_KKT();
     }
@@ -153,7 +153,7 @@ TEST_CASE( "test_update_matrices", "[multi-file:10]" ) {
     SECTION( "test_update" ) {
         test_update();
     }
-#ifdef ENABLE_MKL_PARDISO
+#ifdef ALGEBRA_MKL
     SECTION( "test_update_pardiso" ) {
         test_update_pardiso();
     }

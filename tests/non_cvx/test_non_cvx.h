@@ -29,8 +29,7 @@ void test_non_cvx_solve()
   settings->adaptive_rho = 0;
   settings->sigma = 1e-6;
 
-#ifndef CUDA_SUPPORT
-#ifndef ENABLE_MKL_PARDISO
+#ifdef ALGEBRA_DEFAULT
   if (settings->linsys_solver == DIRECT_SOLVER) {
       // Setup workspace
       exitflag = osqp_setup(&solver, data->P, data->q,
@@ -43,7 +42,6 @@ void test_non_cvx_solve()
 
       osqp_cleanup(solver);
   }
-#endif
 #endif
 
   // Update Solver settings

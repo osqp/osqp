@@ -57,7 +57,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 * Solver Parameters and Settings *
 **********************************/
 
-#ifdef CUDA_SUPPORT
+#ifdef ALGEBRA_CUDA
 # define OSQP_LINSYS_SOLVER (INDIRECT_SOLVER)
 #else
 # define OSQP_LINSYS_SOLVER (DIRECT_SOLVER)
@@ -78,7 +78,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_RHO_TOL               (1e-04) ///< tolerance for detecting if an inequality is set to equality
 # define OSQP_RHO_EQ_OVER_RHO_INEQ  (1e03)
 
-#ifdef CUDA_SUPPORT
+#ifdef ALGEBRA_CUDA
 # define OSQP_RHO_IS_VEC            (0)
 #else
 # define OSQP_RHO_IS_VEC            (1)
@@ -92,7 +92,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 // adaptive rho logic
 # define OSQP_ADAPTIVE_RHO (1)
 
-#ifdef CUDA_SUPPORT
+#ifdef ALGEBRA_CUDA
 #  define OSQP_ADAPTIVE_RHO_INTERVAL  (10)
 #  define OSQP_ADAPTIVE_RHO_TOLERANCE (2.0)
 #else
@@ -113,7 +113,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_SCALED_TERMINATION    (0)
 # define OSQP_TIME_LIMIT            (1e10)     ///< Disable time limit by default
 
-#ifdef CUDA_SUPPORT
+#ifdef ALGEBRA_CUDA
 #  define OSQP_CHECK_TERMINATION (5)
 #else
 #  define OSQP_CHECK_TERMINATION    (25)
@@ -136,7 +136,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # endif
 
 # ifndef OSQP_INFTY
-#if defined(CUDA_SUPPORT) && defined(DFLOAT)
+#if defined(ALGEBRA_CUDA) && defined(DFLOAT)
 // Multiplying two floats that are in the order of 1e20 results in an overflow
 #  define OSQP_INFTY ((c_float)1e17)
 #else

@@ -6,20 +6,20 @@ const char *LINSYS_SOLVER_NAME[] = {
 };
 
 
-#ifdef CUDA_SUPPORT
+#ifdef ALGEBRA_CUDA
 
 # include "cuda_pcg_interface.h"
 
-#else /* ifdef CUDA_SUPPORT */
+#else /* ifdef ALGEBRA_CUDA */
 
-#ifdef ENABLE_MKL_PARDISO
+#ifdef ALGEBRA_MKL
 # include "pardiso_interface.h"
 # include "mkl-cg_interface.h"
-#else  /* ifdef ENABLE_MKL_PARDISO */
+#else  /* ifdef ALGEBRA_MKL */
 # include "qdldl_interface.h"
 #endif
 
-#endif /* ifdef CUDA_SUPPORT */
+#endif /* ifdef ALGEBRA_CUDA */
 
 
 // Load linear system solver shared library
@@ -27,15 +27,15 @@ c_int load_linsys_solver(enum linsys_solver_type linsys_solver) {
 
   switch (linsys_solver) {
 
-#ifdef CUDA_SUPPORT
+#ifdef ALGEBRA_CUDA
 
   default:
     /* CUDA libraries have already been loaded by osqp_algebra_init_libs() */
     return 0;
 
-#else /* ifdef CUDA_SUPPORT */
+#else /* ifdef ALGEBRA_CUDA */
 
-#ifdef ENABLE_MKL_PARDISO
+#ifdef ALGEBRA_MKL
   case DIRECT_SOLVER:
     // Load Pardiso library
     // return lh_load_pardiso(OSQP_NULL);
@@ -49,7 +49,7 @@ c_int load_linsys_solver(enum linsys_solver_type linsys_solver) {
   default:
     return 0;
 #endif
-#endif /* ifdef CUDA_SUPPORT */
+#endif /* ifdef ALGEBRA_CUDA */
   }
 }
 
@@ -57,7 +57,7 @@ c_int load_linsys_solver(enum linsys_solver_type linsys_solver) {
 c_int unload_linsys_solver(enum linsys_solver_type linsys_solver) {
   switch (linsys_solver) {
 
-#ifdef CUDA_SUPPORT
+#ifdef ALGEBRA_CUDA
 
   case DIRECT_SOLVER:
     /* CUDA libraries have already been unloaded by osqp_algebra_free_libs() */
@@ -66,13 +66,13 @@ c_int unload_linsys_solver(enum linsys_solver_type linsys_solver) {
   default:
     return 0;
 
-#else /* ifdef CUDA_SUPPORT */
+#else /* ifdef ALGEBRA_CUDA */
 
-#ifdef ENABLE_MKL_PARDISO
+#ifdef ALGEBRA_MKL
   default:
     return 0;
 #endif
-#endif /* ifdef CUDA_SUPPORT */
+#endif /* ifdef ALGEBRA_CUDA */
   }
 }
 
@@ -89,14 +89,14 @@ c_int init_linsys_solver(LinSysSolver      **s,
 
   switch (settings->linsys_solver) {
 
-#ifdef CUDA_SUPPORT
+#ifdef ALGEBRA_CUDA
 
   default:
     return init_linsys_solver_cudapcg((cudapcg_solver **)s, P, A, rho_vec, settings, scaled_prim_res, scaled_dual_res, polishing);
 
-#else /* ifdef CUDA_SUPPORT */
+#else /* ifdef ALGEBRA_CUDA */
 
-#ifdef ENABLE_MKL_PARDISO
+#ifdef ALGEBRA_MKL
   case DIRECT_SOLVER:
     return init_linsys_solver_pardiso((pardiso_solver **)s, P, A, rho_vec, settings, polishing);
 
@@ -107,6 +107,6 @@ c_int init_linsys_solver(LinSysSolver      **s,
     return init_linsys_solver_qdldl((qdldl_solver **)s, P, A, rho_vec, settings, polishing);
 #endif
 
-#endif /* ifdef CUDA_SUPPORT */
+#endif /* ifdef ALGEBRA_CUDA */
   }
 }

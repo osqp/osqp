@@ -12,7 +12,7 @@ endif()
 
 add_subdirectory(${ALGEBRA})
 
-if(${ALGEBRA} STREQUAL "cuda")
+if(ALGEBRA_CUDA)
 
   # Create object library for algebra
   add_library(osqp_algebra OBJECT ${algebra_impl})

@@ -78,16 +78,28 @@ else()
     message(STATUS "EMBEDDED = ${EMBEDDED}")
 endif()
 
-option (CUDA_SUPPORT "CUDA Support" OFF)
-option (ENABLE_MKL_PARDISO "Enable MKL Pardiso solver" OFF)
+option (ALGEBRA_DEFAULT "Default Solver" ON)
+option (ALGEBRA_MKL "Enable MKL Pardiso solver" OFF)
+option (ALGEBRA_CUDA "CUDA Support" OFF)
+
 if (NOT DEFINED ALGEBRA)
     set(ALGEBRA "default")
-elseif(${ALGEBRA} STREQUAL "cuda")
-    set(CUDA_SUPPORT ON)
-elseif(${ALGEBRA} STREQUAL "mklblas")
-    set(ENABLE_MKL_PARDISO ON)
 endif()
 message(STATUS "ALGEBRA = ${ALGEBRA}")
+
+if(${ALGEBRA} STREQUAL "default")
+    set(ALGEBRA_DEFAULT ON)
+    set(ALGEBRA_MKL OFF)
+    set(ALGEBRA_CUDA OFF)
+elseif(${ALGEBRA} STREQUAL "mkl")
+    set(ALGEBRA_DEFAULT OFF)
+    set(ALGEBRA_MKL ON)
+    set(ALGEBRA_CUDA OFF)
+elseif(${ALGEBRA} STREQUAL "cuda")
+    set(ALGEBRA_DEFAULT OFF)
+    set(ALGEBRA_MKL OFF)
+    set(ALGEBRA_CUDA ON)
+endif()
 
 option (PRINTING "Enable solver printing" ON)
 option (PROFILING "Enable solver profiling (timing)" ON)
@@ -100,7 +112,7 @@ if (DEFINED EMBEDDED)
 endif()
 
 # Use floats instead of doubles
-if (${ALGEBRA} STREQUAL "cuda")
+if (ALGEBRA_CUDA)
     # Use floats with CUDA by default
     option (DFLOAT "Use float numbers instead of doubles" ON)
 else ()
@@ -113,7 +125,7 @@ option (DLONG "Use long integers (64bit) for indexing" ON)
 if (NOT (CMAKE_SIZEOF_VOID_P EQUAL 8))
     message(STATUS "Disabling long integers (64bit) on 32bit machine")
     set(DLONG OFF)
-elseif (${ALGEBRA} STREQUAL "cuda")
+elseif (ALGEBRA_CUDA)
     message(STATUS "Disabling long integers (64bit) for CUDA")
     set(DLONG OFF)
 endif()
@@ -131,13 +143,13 @@ message(STATUS "COVERAGE = ${COVERAGE}")
 
 # MKL support
 # ----------------------------------------------
-if (IS_MAC AND ALGEBRA STREQUAL "mklblas")
+if (IS_MAC AND ALGEBRA_MKL)
     
 endif()
 
 # CUDA support
 # ----------------------------------------------
-if (${ALGEBRA} STREQUAL "cuda")
+if (ALGEBRA_CUDA)
     enable_language(CUDA)
     find_package(CUDA)
 
@@ -174,12 +186,12 @@ endif()
 # ---------------------------------------------
 if (DFLOAT)
     message(STATUS "Disabling MKL Pardiso Solver with floats")
-    set(ENABLE_MKL_PARDISO OFF)
+    set(ALGEBRA_MKL OFF)
 elseif (DEFINED EMBEDDED)
     message(STATUS "Disabling MKL Pardiso Solver for embedded")
-    set(ENABLE_MKL_PARDISO OFF)
+    set(ALGEBRA_MKL OFF)
 endif()
-message(STATUS "ENABLE_MKL_PARDISO = ${ENABLE_MKL_PARDISO}")
+message(STATUS "ALGEBRA_MKL = ${ALGEBRA_MKL}")
 
 # Generate header file with the global options
 # ---------------------------------------------
@@ -329,7 +341,7 @@ add_subdirectory(lin_sys)
 
 # Static library
 add_library(osqpstatic STATIC $<TARGET_OBJECTS:OSQPLIB> ${osqp_objects} ${linsys_solvers})
-if (${ALGEBRA} STREQUAL "default")
+if (ALGEBRA_DEFAULT)
     target_link_libraries(osqpstatic $<TARGET_OBJECTS:qdldlobject>)
 endif()
 
@@ -363,7 +375,7 @@ install(TARGETS osqpstatic
 # ----------------------------------------------
 install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
 
-if (${ALGEBRA} STREQUAL "cuda")
+if (ALGEBRA_CUDA)
     target_link_libraries (osqpstatic cublas cusparse)
 else()
     get_property(osqpinternallibraries TARGET OSQPLIB PROPERTY LINK_LIBRARIES)
@@ -381,7 +393,7 @@ endif (MATLAB)
 if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
     # Create osqp shared library
     add_library(osqp SHARED $<TARGET_OBJECTS:OSQPLIB>)
-    if (${ALGEBRA} STREQUAL "default")
+    if (ALGEBRA_DEFAULT)
         target_link_libraries(osqp $<TARGET_OBJECTS:qdldlobject>)
     endif()
 
@@ -393,9 +405,9 @@ if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
 
     if (MSVC OR IS_MAC)
         # Visual Studio on Windows, and Mac OS need cuda or mkl libaries to be linked as well
-        if (${ALGEBRA} STREQUAL "cuda")
+        if (ALGEBRA_CUDA)
             target_link_libraries (osqp cublas cusparse)
-        elseif(${ALGEBRA} STREQUAL "mklblas")
+        elseif(ALGEBRA_MKL)
             target_link_libraries (osqp $<LINK_ONLY:MKL::MKL>)
         endif()
     endif ()

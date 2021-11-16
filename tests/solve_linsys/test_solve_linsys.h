@@ -62,7 +62,7 @@ void test_solveKKT() {
   clean_problem_solve_linsys_sols_data(data);
 }
 
-#ifdef ENABLE_MKL_PARDISO
+#ifdef ALGEBRA_MKL
 void test_solveKKT_pardiso() {
 
   c_int m, n, exitflag = 0;

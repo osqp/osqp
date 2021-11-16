@@ -952,11 +952,11 @@ c_int validate_data(const csc     *P,
 
 c_int validate_linsys_solver(c_int linsys_solver) {
 
-#ifdef CUDA_SUPPORT
+#ifdef ALGEBRA_CUDA
   if (linsys_solver == INDIRECT_SOLVER) {
     return 0;
   }
-#elif defined ENABLE_MKL_PARDISO
+#elif defined ALGEBRA_MKL
   if ((linsys_solver == DIRECT_SOLVER) ||
       (linsys_solver == INDIRECT_SOLVER)) {
     return 0;

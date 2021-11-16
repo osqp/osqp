@@ -1,5 +1,5 @@
 if(NOT DEFINED EMBEDDED)
-	if (ENABLE_MKL_PARDISO)
+	if (ALGEBRA_MKL)
 		add_subdirectory(mkl-cg)
 	endif()
 endif()

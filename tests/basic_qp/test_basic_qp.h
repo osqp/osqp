@@ -475,7 +475,7 @@ void test_basic_qp_solve()
   c_free(P_tmp);
 }
 
-#ifdef ENABLE_MKL_PARDISO
+#ifdef ALGEBRA_MKL
 void test_basic_qp_solve_pardiso()
 {
   c_int exitflag;

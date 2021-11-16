@@ -20,8 +20,8 @@ jobs:
           os: [ubuntu-latest, macos-latest, windows-latest]
           python-version: [3.9]
           cmake_flags: ['', '-DUNITTESTS=ON -DCOVERAGE=ON']
-          cmake_flags_extra: ['', '-DENABLE_MKL_PARDISO=OFF', '-DDFLOAT=ON', '-DDLONG=OFF', '-DEMBEDDED=1',
-                              '-DEMBEDDED=2', '-DPROFILING=OFF', '-DCTRLC=OFF', '-DPRINTING=OFF', '-DALGEBRA=mklblas']
+          cmake_flags_extra: ['', '-DDFLOAT=ON', '-DDLONG=OFF', '-DEMBEDDED=1', '-DEMBEDDED=2', '-DPROFILING=OFF',
+                              '-DCTRLC=OFF', '-DPRINTING=OFF', '-DALGEBRA=default', '-DALGEBRA=mkl']
           exclude:
             - cmake_flags: '-DUNITTESTS=ON -DCOVERAGE=ON'
               cmake_flags_extra: '-DEMBEDDED=1'
@@ -107,7 +107,7 @@ jobs:
             sudo apt-get install valgrind
             valgrind --suppressions=.valgrind-suppress.supp --leak-check=full --gen-suppressions=all \
               --track-origins=yes --error-exitcode=1 build/out/osqp_tester
-          if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '-DENABLE_MKL_PARDISO=OFF' }}
+          if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '-DALGEBRA_MKL=OFF' }}
 
         - name: Generate coverage
           uses: imciner2/run-lcov@v1
