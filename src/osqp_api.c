@@ -1052,7 +1052,7 @@ c_int osqp_update_rho(OSQPSolver *solver,
     // Update rho_vec and rho_inv_vec
     OSQPVectorf_set_scalar_conditional(work->rho_vec,
                                        work->constr_type,
-                                       OSQP_RHO_MIN,                                     //const  == -1
+                                       OSQP_RHO_MIN,                                     //constr == -1
                                        solver->settings->rho,                            //constr == 0
                                        OSQP_RHO_EQ_OVER_RHO_INEQ*solver->settings->rho); //constr == 1
 
