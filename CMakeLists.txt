@@ -1,8 +1,6 @@
 cmake_minimum_required (VERSION 3.13)
 project (osqp)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-
 # Detect operating system
 # ----------------------------------------------
 message(STATUS "We are on a ${CMAKE_SYSTEM_NAME} system")
@@ -78,14 +76,12 @@ else()
     message(STATUS "EMBEDDED = ${EMBEDDED}")
 endif()
 
-option (ALGEBRA_DEFAULT "Default Solver" ON)
-option (ALGEBRA_MKL "Enable MKL Pardiso solver" OFF)
-option (ALGEBRA_CUDA "CUDA Support" OFF)
-
-if (NOT DEFINED ALGEBRA)
-    set(ALGEBRA "default")
-endif()
+set(ALGEBRA "default" CACHE STRING "The Algebra to use (default/mkl/cuda)")
 message(STATUS "ALGEBRA = ${ALGEBRA}")
+
+if (DEFINED ALGEBRA_DEFAULT OR DEFINED ALGEBRA_MKL OR DEFINED ALGEBRA_CUDA)
+    message(WARNING "Use ALGEBRA variable to specify algebra, not specific ALGEBRA_* boolean variables.")
+endif()
 
 if(${ALGEBRA} STREQUAL "default")
     set(ALGEBRA_DEFAULT ON)
@@ -135,6 +131,10 @@ option (DEBUG "Debug mode" OFF)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set (DEBUG ON)
     message(STATUS "DEBUG = ${DEBUG}")
+endif()
+
+if (DEBUG)
+    set(CMAKE_VERBOSE_MAKEFILE ON)
 endif()
 
 # Add code coverage

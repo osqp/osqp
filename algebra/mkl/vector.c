@@ -4,25 +4,22 @@
 #include "stdio.h"
 #include "time.h"
 
-#define USEMKLBLAS
-#ifdef USEMKLBLAS
-  #include <mkl_blas.h>
-  #ifdef DFLOAT
-    #define blas_copy scopy
-    #define blas_dot sdot
-    #define blas_scale sscal
-    #define blas_swap sswap
-    #define blas_axpy saxpy
-    #define blas_2norm snrm2
-    #else
-      #define blas_copy dcopy
-      #define blas_dot ddot
-      #define blas_scale dscal
-      #define blas_swap dswap
-      #define blas_axpy daxpy
-      #define blas_2norm dnrm2
-  #endif //dfloat endif
-#endif //Usemkl endif
+#include <mkl_blas.h>
+#ifdef DFLOAT
+  #define blas_copy scopy
+  #define blas_dot sdot
+  #define blas_scale sscal
+  #define blas_swap sswap
+  #define blas_axpy saxpy
+  #define blas_2norm snrm2
+  #else
+    #define blas_copy dcopy
+    #define blas_dot ddot
+    #define blas_scale dscal
+    #define blas_swap dswap
+    #define blas_axpy daxpy
+    #define blas_2norm dnrm2
+#endif //dfloat endif
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 
@@ -177,10 +174,6 @@ c_int OSQPVectori_length(const OSQPVectori *a){return a->length;}
 c_float* OSQPVectorf_data(const OSQPVectorf *a){return a->values;}
 c_int*   OSQPVectori_data(const OSQPVectori *a){return a->values;}
 
-// Which of these functions are actually called elsewhere?
-
-#ifdef USEMKLBLAS
-
 void OSQPVectorf_copy(OSQPVectorf *b, const OSQPVectorf *a){
   const MKL_INT length = a->length;
   const MKL_INT INCX = 1; //How long should the spacing be (?)
@@ -188,14 +181,6 @@ void OSQPVectorf_copy(OSQPVectorf *b, const OSQPVectorf *a){
   blas_copy(&length, a->values, &INCX, b->values, &INCY);
 
 }
-
-#else
-
-void OSQPVectorf_copy(OSQPVectorf *b, const OSQPVectorf *a){
-  OSQPVectorf_from_raw(b, a->values);
-}
-
-#endif // MKL for vector copy
 
 void OSQPVectorf_from_raw(OSQPVectorf *b, const c_float *av){
   c_int i;
@@ -270,26 +255,11 @@ void OSQPVectorf_set_scalar_conditional(OSQPVectorf *a,
 }
 
 // Scaling a vector by a constant
-#ifdef USEMKLBLAS
-
 void OSQPVectorf_mult_scalar(OSQPVectorf *a, c_float sc){
   const MKL_INT length = a->length;
   const MKL_INT INCX = 1; //How long should the spacing be (?)
   blas_scale(&length, &sc, a->values, &INCX);
 }
-#else
-void OSQPVectorf_mult_scalar(OSQPVectorf *a, c_float sc){
-  c_int i;
-  c_int length = a->length;
-  c_float*  av = a->values;
-
-  for (i = 0; i < length; i++) {
-    av[i] *= sc;
-  }
-}
-#endif // for mult scalar MKL
-
-#ifdef USEMKLBLAS
 
 void OSQPVectorf_plus(OSQPVectorf      *x,
                      const OSQPVectorf *a,
@@ -331,34 +301,6 @@ void OSQPVectorf_plus(OSQPVectorf      *x,
   }
 }
 
-#else
-
-void OSQPVectorf_plus(OSQPVectorf      *x,
-                     const OSQPVectorf *a,
-                     const OSQPVectorf *b){
-  c_int i;
-  c_int length = a->length;
-  c_float*  av = a->values;
-  c_float*  bv = b->values;
-  c_float*  xv = x->values;
-
-  if (x == a){
-    for (i = 0; i < length; i++) {
-      xv[i] += bv[i];
-    }
-  }
-  else {
-    for (i = 0; i < length; i++) {
-      xv[i] = av[i] + bv[i];
-    }
-  }
-}
-
-#endif // MKL blas for the y = ax + y problem (i was only able to substitute one case)
-
-
-#ifdef USEMKLBLAS
-
 void OSQPVectorf_minus(OSQPVectorf       *x,
                        const OSQPVectorf *a,
                        const OSQPVectorf *b){
@@ -383,33 +325,6 @@ void OSQPVectorf_minus(OSQPVectorf       *x,
     blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY);
   }
 }
-
-#else
-
-void OSQPVectorf_minus(OSQPVectorf       *x,
-                       const OSQPVectorf *a,
-                       const OSQPVectorf *b){
-  c_int i;
-  c_int length = a->length;
-  c_float*  av = a->values;
-  c_float*  bv = b->values;
-  c_float*  xv = x->values;
-
-  if (x == a) {
-    for (i = 0; i < length; i++) {
-      xv[i] -= bv[i];
-    }
-  }
-  else {
-    for (i = 0; i < length; i++) {
-      xv[i] = av[i] - bv[i];
-    }
-  }
-}
-
-#endif // axpy problem with minus sign
-
-#ifdef USEMKLBLAS
 
 void OSQPVectorf_add_scaled(OSQPVectorf       *x,
                             c_float           sca,
@@ -436,35 +351,6 @@ void OSQPVectorf_add_scaled(OSQPVectorf       *x,
   }
 
 }
-
-#else
-
-void OSQPVectorf_add_scaled(OSQPVectorf       *x,
-                            c_float           sca,
-                            const OSQPVectorf *a,
-                            c_float           scb,
-                            const OSQPVectorf *b){
-  c_int i;
-  c_int length = x->length;
-  c_float*  av = a->values;
-  c_float*  bv = b->values;
-  c_float*  xv = x->values;
-
-  /* shorter version when incrementing */
-  if (x == a && sca == 1.){
-    for (i = 0; i < length; i++) {
-      xv[i] += scb * bv[i];
-    }
-  }
-  else {
-    for (i = 0; i < length; i++) {
-      xv[i] = sca * av[i] + scb * bv[i];
-    }
-  }
-
-}
-
-#endif // axpy using scaling
 
 void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
                              c_float           sca,
@@ -597,10 +483,6 @@ c_float OSQPVectorf_sum(const OSQPVectorf *a){
   return val;
 }
 
-
-
-#ifdef USEMKLBLAS
-
 c_float OSQPVectorf_dot_prod(const OSQPVectorf *a, const OSQPVectorf *b){
   const MKL_INT length = a->length;
   const MKL_INT INCX = 1; //How long should the spacing be (?)
@@ -608,25 +490,6 @@ c_float OSQPVectorf_dot_prod(const OSQPVectorf *a, const OSQPVectorf *b){
 
   return blas_dot(&length, a->values, &INCX, b->values, &INCY); // blas_dot is called the preprocesor
 }
-
-#else
-
-//original dot product function
-
-c_float OSQPVectorf_dot_prod(const OSQPVectorf *a, const OSQPVectorf *b) {
-
-  c_int   i;
-  c_int   length = a->length;
-  c_float*  av   = a->values;
-  c_float*  bv   = b->values;
-  c_float dotprod = 0.0;
-
-  for (i = 0; i < length; i++) {
-    dotprod += av[i] * bv[i];
-  }
-  return dotprod;
-  }
-#endif
 
 c_float OSQPVectorf_dot_prod_signed(const OSQPVectorf *a, const OSQPVectorf *b, c_int sign){
 
