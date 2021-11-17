@@ -68,17 +68,15 @@ and their constant values.
 +------------------------------------------------+-----------------------------------+-------+
 | Settings validation                            | OSQP_SETTINGS_VALIDATION_ERROR    | 2     |
 +------------------------------------------------+-----------------------------------+-------+
-| Linear system solver loading                   | OSQP_LINSYS_SOLVER_LOAD_ERROR     | 3     |
+| Linear system solver initialization            | OSQP_LINSYS_SOLVER_INIT_ERROR     | 3     |
 +------------------------------------------------+-----------------------------------+-------+
-| Linear system solver initialization            | OSQP_LINSYS_SOLVER_INIT_ERROR     | 4     |
+| Non convex problem                             | OSQP_NONCVX_ERROR                 | 4     |
 +------------------------------------------------+-----------------------------------+-------+
-| Non convex problem                             | OSQP_NONCVX_ERROR                 | 5     |
+| Memory allocation                              | OSQP_MEM_ALLOC_ERROR              | 5     |
 +------------------------------------------------+-----------------------------------+-------+
-| Memory allocation                              | OSQP_MEM_ALLOC_ERROR              | 6     |
+| Workspace not initialized                      | OSQP_WORKSPACE_NOT_INIT           | 6     |
 +------------------------------------------------+-----------------------------------+-------+
-| Workspace not initialized                      | OSQP_WORKSPACE_NOT_INIT           | 7     |
-+------------------------------------------------+-----------------------------------+-------+
-| Algebra libraries not loaded                   | OSQP_ALGEBRA_LOAD_ERROR           | 8     |
+| Algebra libraries not loaded                   | OSQP_ALGEBRA_LOAD_ERROR           | 7     |
 +------------------------------------------------+-----------------------------------+-------+
 
 

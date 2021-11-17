@@ -237,9 +237,6 @@ c_int osqp_setup(OSQPSolver         **solverp,
     work->rho_inv = 1. / settings->rho;
   }
 
-  // Load linear system solver
-  if (load_linsys_solver(settings->linsys_solver)) return osqp_error(OSQP_LINSYS_SOLVER_LOAD_ERROR);
-
   // Initialize linear system solver structure
   exitflag = init_linsys_solver(&(work->linsys_solver), work->data->P, work->data->A, 
                                 work->rho_vec, solver->settings,
@@ -737,11 +734,6 @@ c_int osqp_cleanup(OSQPSolver *solver) {
       if (work->linsys_solver->free) {
         work->linsys_solver->free(work->linsys_solver);
       }
-    }
-
-    // Unload linear system solver after free
-    if (solver->settings) {
-      exitflag = unload_linsys_solver(solver->settings->linsys_solver);
     }
 
 #ifndef EMBEDDED

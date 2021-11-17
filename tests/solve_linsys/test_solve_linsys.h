@@ -87,11 +87,6 @@ void test_solveKKT_pardiso() {
   Pu = OSQPMatrix_new_from_csc(data->test_solve_KKT_Pu,1);
   A  = OSQPMatrix_new_from_csc(data->test_solve_KKT_A,0);
 
-  // Load Pardiso shared library
-  exitflag = load_linsys_solver(DIRECT_SOLVER);
-  mu_assert("Linear system solve test: error in loading Pardiso shared library",
-            exitflag == 0);
-
   // Form and factorize KKT matrix
   exitflag = init_linsys_solver(&s, Pu, A, rho_vec, settings, OSQP_NULL, OSQP_NULL, 0);
 
@@ -114,8 +109,5 @@ void test_solveKKT_pardiso() {
   OSQPMatrix_free(Pu);
   OSQPMatrix_free(A);
   clean_problem_solve_linsys_sols_data(data);
-
-  // Unload Pardiso shared library
-  exitflag = unload_linsys_solver(DIRECT_SOLVER);
 }
 #endif

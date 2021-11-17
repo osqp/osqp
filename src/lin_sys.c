@@ -6,75 +6,19 @@ const char *LINSYS_SOLVER_NAME[] = {
 };
 
 
-#ifdef ALGEBRA_CUDA
-
-# include "cuda_pcg_interface.h"
-
-#else /* ifdef ALGEBRA_CUDA */
-
-#ifdef ALGEBRA_MKL
-# include "pardiso_interface.h"
-# include "mkl-cg_interface.h"
-#else  /* ifdef ALGEBRA_MKL */
+#ifdef ALGEBRA_DEFAULT
 # include "qdldl_interface.h"
 #endif
 
-#endif /* ifdef ALGEBRA_CUDA */
-
-
-// Load linear system solver shared library
-c_int load_linsys_solver(enum linsys_solver_type linsys_solver) {
-
-  switch (linsys_solver) {
+#ifdef ALGEBRA_MKL
+  # include "pardiso_interface.h"
+  # include "mkl-cg_interface.h"
+#endif
 
 #ifdef ALGEBRA_CUDA
-
-  default:
-    /* CUDA libraries have already been loaded by osqp_algebra_init_libs() */
-    return 0;
-
-#else /* ifdef ALGEBRA_CUDA */
-
-#ifdef ALGEBRA_MKL
-  case DIRECT_SOLVER:
-    // Load Pardiso library
-    // return lh_load_pardiso(OSQP_NULL);
-    return 0;
-
-  case INDIRECT_SOLVER:
-    // statically linked for now
-    return 0;
-#else
-  // We do not load QDLDL solver. We have the source.
-  default:
-    return 0;
+  # include "cuda_pcg_interface.h"
 #endif
-#endif /* ifdef ALGEBRA_CUDA */
-  }
-}
 
-// Unload linear system solver shared library
-c_int unload_linsys_solver(enum linsys_solver_type linsys_solver) {
-  switch (linsys_solver) {
-
-#ifdef ALGEBRA_CUDA
-
-  case DIRECT_SOLVER:
-    /* CUDA libraries have already been unloaded by osqp_algebra_free_libs() */
-    return 0;
-
-  default:
-    return 0;
-
-#else /* ifdef ALGEBRA_CUDA */
-
-#ifdef ALGEBRA_MKL
-  default:
-    return 0;
-#endif
-#endif /* ifdef ALGEBRA_CUDA */
-  }
-}
 
 // Initialize linear system solver structure
 // NB: Only the upper triangular part of P is filled
