@@ -107,7 +107,7 @@ jobs:
             sudo apt-get install valgrind
             valgrind --suppressions=.valgrind-suppress.supp --leak-check=full --gen-suppressions=all \
               --track-origins=yes --error-exitcode=1 build/out/osqp_tester
-          if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '-DALGEBRA_MKL=OFF' }}
+          if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '-DALGEBRA=default' }}
 
         - name: Generate coverage
           uses: imciner2/run-lcov@v1

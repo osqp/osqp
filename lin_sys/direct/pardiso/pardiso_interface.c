@@ -6,10 +6,6 @@
 #include "mkl_service.h"
 #include "mkl_pardiso.h"
 
-// Single Dynamic library interface
-#define MKL_INTERFACE_LP64  0x0
-#define MKL_INTERFACE_ILP64 0x1
-
 // Solver Phases
 #define PARDISO_SYMBOLIC  (11)
 #define PARDISO_NUMERIC   (22)
@@ -206,6 +202,12 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
     s->iparm[9] = 13;     // Perturb the pivot elements with 1E-13
     s->iparm[34] = 0;     // Use Fortran-style indexing for indices
     /* s->iparm[34] = 1;     // Use C-style indexing for indices */
+
+#ifndef DFLOAT
+    s->iparm[27] = 0;
+#else
+    s->iparm[27] = 1;
+#endif
 
     // Print number of threads
     s->nthreads = mkl_get_max_threads();

@@ -22,7 +22,7 @@ if (NOT OSQP_VERSION STREQUAL "0.0.0")
     )
 endif()
 
-# Conda environment detection 
+# Conda environment detection
 # ----------------------------------------------
 # If MKL_ROOT is not explicitly set, and we're running inside a conda environment,
 # set MKL_ROOT to $CONDA_PREFIX to see if we can find MKL
@@ -38,7 +38,7 @@ if (NOT DEFINED ENV{MKL_ROOT})
         link_directories("$ENV{CONDA_PREFIX}/lib")
     endif()
 endif()
-	
+
 # Export compile commands
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -63,26 +63,31 @@ message(STATUS "CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}")
 
 # Set options
 # ----------------------------------------------
+set(ALGEBRA "default" CACHE STRING "The Algebra to use (default/mkl/cuda)")
+if (DEFINED ALGEBRA_DEFAULT OR DEFINED ALGEBRA_MKL OR DEFINED ALGEBRA_CUDA)
+    message(WARNING "Use ALGEBRA variable to specify algebra, not specific ALGEBRA_* boolean variables.")
+endif()
 
-# Are unittests generated?
+option (PRINTING "Enable solver printing" ON)
+option (PROFILING "Enable solver profiling (timing)" ON)
+option (CTRLC "Enable user interrupt (Ctrl-C)" ON)
 option (UNITTESTS "Enable unittests generation" OFF)
 
 # Is the code generated for embedded platforms?
 #   1 :   Yes. Matrix update not allowed.
 #   2 :   No. Matrix update allowed.
-if (NOT DEFINED EMBEDDED)
-    message(STATUS "EMBEDDED = OFF")
-else()
-    message(STATUS "EMBEDDED = ${EMBEDDED}")
+if (DEFINED EMBEDDED)
+    message(STATUS "Forcing ALGEBRA=default for EMBEDDED mode")
+    set(ALGEBRA "default")
+    message(STATUS "Disabling printing/profiling/Ctrl-C for EMBEDDED mode")
+    set(PRINTING OFF)
+    set(PROFILING OFF)
+    set(CTRLC OFF)
 endif()
+message(STATUS "EMBEDDED = ${EMBEDDED}")
 
-set(ALGEBRA "default" CACHE STRING "The Algebra to use (default/mkl/cuda)")
+# Display final ALGEBRA chosen and set internal boolean variables
 message(STATUS "ALGEBRA = ${ALGEBRA}")
-
-if (DEFINED ALGEBRA_DEFAULT OR DEFINED ALGEBRA_MKL OR DEFINED ALGEBRA_CUDA)
-    message(WARNING "Use ALGEBRA variable to specify algebra, not specific ALGEBRA_* boolean variables.")
-endif()
-
 if(${ALGEBRA} STREQUAL "default")
     set(ALGEBRA_DEFAULT ON)
     set(ALGEBRA_MKL OFF)
@@ -97,26 +102,18 @@ elseif(${ALGEBRA} STREQUAL "cuda")
     set(ALGEBRA_CUDA ON)
 endif()
 
-option (PRINTING "Enable solver printing" ON)
-option (PROFILING "Enable solver profiling (timing)" ON)
-option (CTRLC "Enable user interrupt (Ctrl-C)" ON)
-if (DEFINED EMBEDDED)
-    message(STATUS "Disabling printing/profiling/Ctrl-C for embedded")
-    set(PRINTING OFF)
-    set(PROFILING OFF)
-    set(CTRLC OFF)
+if (CUDA_SUPPORT)
+    option (DFLOAT "Use floats instead of doubles" ON)
+else ()
+    option (DFLOAT "Use floats instead of doubles" OFF)
 endif()
 
-# Use floats instead of doubles
-if (ALGEBRA_CUDA)
-    # Use floats with CUDA by default
-    option (DFLOAT "Use float numbers instead of doubles" ON)
-else ()
-    option (DFLOAT "Use float numbers instead of doubles" OFF)
+if (DFLOAT AND ALGEBRA_MKL)
+    message(STATUS "Disabling DFLOAT for MKL (Intel RCIISS does not support single-precision values yet.)")
+    set(DFLOAT OFF)
 endif()
 message(STATUS "DFLOAT = ${DFLOAT}")
 
-# Use long integers for indexing
 option (DLONG "Use long integers (64bit) for indexing" ON)
 if (NOT (CMAKE_SIZEOF_VOID_P EQUAL 8))
     message(STATUS "Disabling long integers (64bit) on 32bit machine")
@@ -175,17 +172,6 @@ endif()
 if (OSQP_CUSTOM_MEMORY)
     message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY}")
 endif()
-
-# Linear solvers dependencies
-# ---------------------------------------------
-if (DFLOAT)
-    message(STATUS "Disabling MKL Pardiso Solver with floats")
-    set(ALGEBRA_MKL OFF)
-elseif (DEFINED EMBEDDED)
-    message(STATUS "Disabling MKL Pardiso Solver for embedded")
-    set(ALGEBRA_MKL OFF)
-endif()
-message(STATUS "ALGEBRA_MKL = ${ALGEBRA_MKL}")
 
 # Generate header file with the global options
 # ---------------------------------------------
