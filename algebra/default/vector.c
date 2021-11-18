@@ -302,7 +302,6 @@ void OSQPVectorf_minus(OSQPVectorf       *x,
   }
 }
 
-
 void OSQPVectorf_add_scaled(OSQPVectorf       *x,
                             c_float            sca,
                             const OSQPVectorf *a,
@@ -325,7 +324,6 @@ void OSQPVectorf_add_scaled(OSQPVectorf       *x,
       xv[i] = sca * av[i] + scb * bv[i];
     }
   }
-
 }
 
 void OSQPVectorf_add_scaled3(OSQPVectorf       *x,

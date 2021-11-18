@@ -119,12 +119,12 @@ void cuda_vec_norm_inf(const c_float *d_x,
                        c_int          n,
                        c_float       *h_res);
 
-/**
- * h_res = |d_x|_1
- */
-void cuda_vec_norm_1(const c_float *d_x,
-                     c_int          n,
-                     c_float       *h_res);
+// /**
+//  * h_res = |d_x|_1
+//  */
+// void cuda_vec_norm_1(const c_float *d_x,
+//                      c_int          n,
+//                      c_float       *h_res);
 
 /**
  * res = |d_x|_2
