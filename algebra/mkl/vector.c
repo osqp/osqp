@@ -407,18 +407,18 @@ c_float OSQPVectorf_norm_inf(const OSQPVectorf *v){
   return normval;
 }
 
-c_float OSQPVectorf_norm_1(const OSQPVectorf *v){
+// c_float OSQPVectorf_norm_1(const OSQPVectorf *v){
 
-  c_int   i;
-  c_int length  = v->length;
-  c_float*  vv  = v->values;
-  c_float normval = 0.0;
+//   c_int   i;
+//   c_int length  = v->length;
+//   c_float*  vv  = v->values;
+//   c_float normval = 0.0;
 
-  for (i = 0; i < length; i++) {
-    normval += c_absval(vv[i]);
-  }
-  return normval;
-}
+//   for (i = 0; i < length; i++) {
+//     normval += c_absval(vv[i]);
+//   }
+//   return normval;
+// }
 
 c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S,
                                     const OSQPVectorf *v){
