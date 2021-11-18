@@ -204,9 +204,9 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
     /* s->iparm[34] = 1;     // Use C-style indexing for indices */
 
 #ifndef DFLOAT
-    s->iparm[27] = 0;
+    s->iparm[27] = 0;  // Input arrays and all internal arrays must be presented in double precision
 #else
-    s->iparm[27] = 1;
+    s->iparm[27] = 1;  // Input arrays and all internal arrays must be presented in single precision
 #endif
 
     // Print number of threads

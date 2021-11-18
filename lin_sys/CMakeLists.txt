@@ -1,16 +1,3 @@
-# Add subdirectory for each linear systems solver
-
-if (NOT DEFINED EMBEDDED)
-
-  # Include this directory for library handler
-  # NB: Needed by the subfolders
-  target_include_directories(OSQPLIB
-  PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR})
-
-endif()
-
-
 if (ALGEBRA_CUDA)
 
   # CUDA solvers
