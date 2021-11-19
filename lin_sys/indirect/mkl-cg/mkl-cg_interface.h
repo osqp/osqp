@@ -81,12 +81,12 @@ typedef struct mklcg_solver_ {
  * @param  polish    Flag whether we are initializing for polish or not
  * @return           Exitflag for error (0 if no errors)
  */
-c_int init_linsys_mklcg(mklcg_solver ** sp,
-                 const OSQPMatrix * P,
-                 const OSQPMatrix * A,
-                 const OSQPVectorf * rho_vec,
-                 OSQPSettings       *settings,
-                 c_int polish);
+c_int init_linsys_mklcg(mklcg_solver       **sp,
+                        const OSQPMatrix    *P,
+                        const OSQPMatrix    *A,
+                        const OSQPVectorf   *rho_vec,
+                        const OSQPSettings  *settings,
+                        c_int                polish);
 
 
 /**

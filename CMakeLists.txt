@@ -80,8 +80,10 @@ if (DEFINED EMBEDDED)
     set(PRINTING OFF)
     set(PROFILING OFF)
     set(CTRLC OFF)
+    message(STATUS "EMBEDDED = ${EMBEDDED}")
+else ()
+    message(STATUS "EMBEDDED = OFF")
 endif()
-message(STATUS "EMBEDDED = ${EMBEDDED}")
 
 # Display final ALGEBRA chosen and set internal boolean variables
 message(STATUS "ALGEBRA = ${ALGEBRA}")
