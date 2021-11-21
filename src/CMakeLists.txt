@@ -1,6 +1,6 @@
 # Add the OSQP sources
 target_sources(OSQPLIB
-    PRIVATE
+    PUBLIC
       "${CMAKE_CURRENT_SOURCE_DIR}/auxil.c"
       "${CMAKE_CURRENT_SOURCE_DIR}/error.c"
       "${CMAKE_CURRENT_SOURCE_DIR}/osqp_api.c"

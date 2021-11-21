@@ -1,15 +1,27 @@
-# Define the algebra implementation
+#include(FetchContent)
+#
+#FetchContent_Declare(
+#        qdldl
+#        GIT_REPOSITORY https://github.com/osqp/qdldl.git
+#        GIT_TAG 07ff30a3eedee4857bbbeb0778f54a86b1ea78f9)
+#FetchContent_MakeAvailable(qdldl)
+add_subdirectory(qdldl_sources)
+set_source_files_properties($<TARGET_OBJECTS:qdldlobject> PROPERTIES GENERATED 1)
+
+get_property(qdldl_include TARGET qdldlobject PROPERTY INCLUDE_DIRECTORIES)
+
+file (GLOB AMD_SRC_FILES CONFIGURE_DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/amd/src/*.c
+        )
 
 target_sources(OSQPLIB
-    PRIVATE
-      "${CMAKE_CURRENT_SOURCE_DIR}/matrix.c"
-      "${CMAKE_CURRENT_SOURCE_DIR}/vector.c"
-      "${CMAKE_CURRENT_SOURCE_DIR}/algebra_libs.c"
-      "${CMAKE_CURRENT_SOURCE_DIR}/algebra_impl.h"
-)
-
+        PUBLIC
+        ${AMD_SRC_FILES}
+        $<TARGET_OBJECTS:qdldlobject>
+        )
 
 target_include_directories(OSQPLIB
-    PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
+        PRIVATE
+        ${qdldl_include}
+        lin_sys/direct/amd/include
+        )

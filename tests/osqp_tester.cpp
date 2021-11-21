@@ -4,7 +4,6 @@
 #include "catch.hpp"
 
 #include "osqp.h"
-#include "osqp_tester.h"
 #include "lin_alg.h"
 #include "utils/c_test_utils.h" //helper functions
 #include "lin_alg/test_lin_alg.h"

@@ -45,12 +45,12 @@ void cg_times(OSQPMatrix* P,
 
 
 
-c_int init_linsys_mklcg(mklcg_solver ** sp,
-                        const OSQPMatrix * P,
-                        const OSQPMatrix * A,
-                        const OSQPVectorf* rho_vec,
-                        OSQPSettings       *settings,
-                        c_int polish){
+c_int init_linsys_mklcg(mklcg_solver      **sp,
+                        const OSQPMatrix   *P,
+                        const OSQPMatrix   *A,
+                        const OSQPVectorf  *rho_vec,
+                        const OSQPSettings *settings,
+                        c_int               polish){
 
 
   c_int   m = OSQPMatrix_get_m(A);
