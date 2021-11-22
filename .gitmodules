@@ -1,0 +1,3 @@
+[submodule "algebra/default/qdldl_sources"]
+	path = algebra/default/qdldl_sources
+	url = https://github.com/osqp/qdldl.git
