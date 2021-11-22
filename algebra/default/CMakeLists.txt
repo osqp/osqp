@@ -10,9 +10,14 @@ set_source_files_properties($<TARGET_OBJECTS:qdldlobject> PROPERTIES GENERATED 1
 
 get_property(qdldl_include TARGET qdldlobject PROPERTY INCLUDE_DIRECTORIES)
 
-file (GLOB AMD_SRC_FILES CONFIGURE_DEPENDS
-        ${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/amd/src/*.c
-        )
+if (NOT EMBEDDED)
+    file (GLOB AMD_SRC_FILES CONFIGURE_DEPENDS
+            ${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/amd/src/*.c
+            )
+    file (GLOB AMD_HEADER_FILES CONFIGURE_DEPENDS
+            ${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/amd/include/*.h
+            )
+endif()
 
 target_sources(OSQPLIB
         PUBLIC

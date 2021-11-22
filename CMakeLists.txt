@@ -71,7 +71,6 @@ set(ALGEBRA "default" CACHE STRING "The Algebra to use (default/mkl/cuda)")
 option (PRINTING "Enable solver printing" ON)
 option (PROFILING "Enable solver profiling (timing)" ON)
 option (CTRLC "Enable user interrupt (Ctrl-C)" ON)
-option (UNITTESTS "Enable unittests generation" OFF)
 
 # Is the code generated for embedded platforms?
 #   1 :   Yes. Matrix update not allowed.
@@ -219,10 +218,12 @@ add_library(osqpstatic STATIC $<TARGET_OBJECTS:OSQPLIB>)
 # ----------------------------------------------
 # osqp_demo
 # ----------------------------------------------
-add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c ${osqplib_sources})
-target_include_directories(osqp_demo PRIVATE ${osqplib_includes})
-if (ALGEBRA_MKL)
-    target_link_libraries (osqp_demo osqpstatic $<LINK_ONLY:MKL::MKL>)
+if (NOT EMBEDDED)
+    add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c ${osqplib_sources})
+    target_include_directories(osqp_demo PRIVATE ${osqplib_includes})
+    if (ALGEBRA_MKL)
+        target_link_libraries (osqp_demo osqpstatic $<LINK_ONLY:MKL::MKL>)
+    endif()
 endif()
 
 # ----------------------------------------------
@@ -232,6 +233,6 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     include(CTest)
 endif()
 
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING AND NOT EMBEDDED)
     add_subdirectory(tests)
 endif()

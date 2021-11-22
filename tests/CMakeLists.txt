@@ -3,24 +3,24 @@
 # ----------------------------------------------
 find_package(PythonInterp)
 if (NOT PYTHONINTERP_FOUND)
-    message( FATAL_ERROR "You need python installed to generate unittests. If you do not want to compile the unittests pass -DUNITTESTS=OFF to cmake." )
+    message( FATAL_ERROR "You need python installed to generate unittests. If you do not want to compile the unittests pass -DBUILD_TESTING=OFF to cmake." )
 endif()
 
 INCLUDE(FindPythonModule)
 find_python_module(numpy)
 if (NOT NUMPY_FOUND)
-    message( FATAL_ERROR "You need numpy python module installed to generate unittests. If you do not want to compile the unittests pass -DUNITTESTS=OFF to cmake." )
+    message( FATAL_ERROR "You need numpy python module installed to generate unittests. If you do not want to compile the unittests pass -DBUILD_TESTINGOFF to cmake." )
 endif()
 
 find_python_module(scipy)
 # Check scipy version for sparse.random functionalities
 if ((NOT SCIPY_FOUND) OR (SCIPY_VERSION VERSION_LESS 0.17.0))
-    message( FATAL_ERROR "You need scipy python module installed to generate unittests. If you do not want to compile the unittests pass -DUNITTESTS=OFF to cmake." )
+    message( FATAL_ERROR "You need scipy python module installed to generate unittests. If you do not want to compile the unittests pass -DBUILD_TESTING=OFF to cmake." )
 endif()
 
 find_python_module(__future__)
 if (NOT __FUTURE___FOUND)
-    message( FATAL_ERROR "You need future python module installed to generate unittests. If you do not want to compile the unittests pass -DUNITTESTS=OFF to cmake." )
+    message( FATAL_ERROR "You need future python module installed to generate unittests. If you do not want to compile the unittests pass -DBUILD_TESTING=OFF to cmake." )
 endif()
 
 # ----------------------------------------------

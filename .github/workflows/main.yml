@@ -19,13 +19,13 @@ jobs:
         matrix:
           os: [ubuntu-latest, macos-latest, windows-latest]
           python-version: [3.9]
-          cmake_flags: ['', '-DUNITTESTS=ON -DCOVERAGE=ON']
+          cmake_flags: ['-DBUILD_TESTING=OFF', '-DBUILD_TESTING=ON -DCOVERAGE=ON']
           cmake_flags_extra: ['', '-DDFLOAT=ON', '-DDLONG=OFF', '-DEMBEDDED=1', '-DEMBEDDED=2', '-DPROFILING=OFF',
                               '-DCTRLC=OFF', '-DPRINTING=OFF', '-DALGEBRA=default', '-DALGEBRA=mkl']
           exclude:
-            - cmake_flags: '-DUNITTESTS=ON -DCOVERAGE=ON'
+            - cmake_flags: '-DBUILD_TESTING=ON -DCOVERAGE=ON'
               cmake_flags_extra: '-DEMBEDDED=1'
-            - cmake_flags: '-DUNITTESTS=ON -DCOVERAGE=ON'
+            - cmake_flags: '-DBUILD_TESTING=ON -DCOVERAGE=ON'
               cmake_flags_extra: '-DEMBEDDED=2'
 
           include:
@@ -100,14 +100,14 @@ jobs:
         - name: Test
           run: |
             ./build/out/osqp_tester
-          if: ${{ matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' }}
+          if: ${{ matrix.cmake_flags == '-DBUILD_TESTING=ON -DCOVERAGE=ON' }}
 
         - name: Valgrid check
           run: |
             sudo apt-get install valgrind
             valgrind --suppressions=.valgrind-suppress.supp --leak-check=full --gen-suppressions=all \
               --track-origins=yes --error-exitcode=1 build/out/osqp_tester
-          if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '-DALGEBRA=default' }}
+          if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DBUILD_TESTING=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '-DALGEBRA=default' }}
 
         - name: Generate coverage
           uses: imciner2/run-lcov@v1
@@ -115,11 +115,11 @@ jobs:
             input_directory: '${{ runner.workspace }}/osqp/build'
             exclude: '"$GITHUB_WORKSPACE/tests/*" "$GITHUB_WORKSPACE/lin_sys/direct/qdldl/amd/*" "$GITHUB_WORKSPACE/lin_sys/direct/qdldl/qdldl_sources/*" "/usr/include/*"'
             output_file: '${{ runner.workspace }}/osqp/build/coverage.info'
-          if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '' }}
+          if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DBUILD_TESTING=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '' }}
 
         - name: Coveralls
           uses: coverallsapp/github-action@master
           with:
             path-to-lcov: '${{ runner.workspace }}/osqp/build/coverage.info'
             github-token: ${{ secrets.GITHUB_TOKEN }}
-          if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '' }}
+          if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DBUILD_TESTING=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '' }}
