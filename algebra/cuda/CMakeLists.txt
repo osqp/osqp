@@ -1,8 +1,12 @@
 file (GLOB SRC_FILES CONFIGURE_DEPENDS
-        ${CMAKE_CURRENT_SOURCE_DIR}/*.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/*.cu
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cu
+        *.c
+        *.h
+        *.cu
+        src/*.c
+        src/*.cu
+        lin_sys/indirect/*.c
+        lin_sys/indirect/*.h
+        lin_sys/indirect/*.cu
         )
 
 if (IS_WINDOWS)
@@ -12,13 +16,14 @@ else ()
 endif()
 
 target_sources(OSQPLIB
-        PUBLIC
+        PRIVATE
         ${SRC_FILES}
         )
 
 target_include_directories(OSQPLIB
         PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        include
+        lin_sys/indirect
         ${HELPER_CUDA_H}
         )
