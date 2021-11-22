@@ -207,7 +207,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
     s->iparm[34] = 0;     // Use Fortran-style indexing for indices
     /* s->iparm[34] = 1;     // Use C-style indexing for indices */
 
-#if DFLOAT==1
+#ifdef DFLOAT
     s->iparm[27] = 1;  // Input arrays and all internal arrays must be presented in single precision
 #else
     s->iparm[27] = 0;  // Input arrays and all internal arrays must be presented in double precision

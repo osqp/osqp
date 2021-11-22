@@ -22,4 +22,3 @@ target_include_directories(OSQPLIB
 
 target_include_directories(OSQPLIB PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_INCLUDE_DIRECTORIES>)
 target_compile_options(OSQPLIB PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_COMPILE_OPTIONS>)
-target_link_libraries(OSQPLIB PUBLIC $<LINK_ONLY:MKL::MKL>)

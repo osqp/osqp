@@ -134,6 +134,10 @@ endif()
 option (COVERAGE "Perform code coverage" OFF)
 message(STATUS "COVERAGE = ${COVERAGE}")
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/osqp_configure.h
+        NEWLINE_STYLE LF)
+
 # CUDA support
 # ----------------------------------------------
 if (ALGEBRA_CUDA)
@@ -168,12 +172,6 @@ endif()
 if (OSQP_CUSTOM_MEMORY)
     message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY}")
 endif()
-
-# Generate header file with the global options
-# ---------------------------------------------
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/osqp_configure.h
-        NEWLINE_STYLE LF)
 
 # Set Compiler flags
 # ----------------------------------------------
@@ -212,20 +210,20 @@ add_subdirectory(algebra)
 
 get_property(osqplib_includes TARGET OSQPLIB PROPERTY INCLUDE_DIRECTORIES)
 get_property(osqplib_sources TARGET OSQPLIB PROPERTY SOURCES)
-get_property(osqplib_libs TARGET OSQPLIB PROPERTY LINK_LIBRARIES)
 
 # ----------------------------------------------
 # osqpstatic
 # ----------------------------------------------
 add_library(osqpstatic STATIC $<TARGET_OBJECTS:OSQPLIB>)
-target_link_libraries (osqpstatic "${osqplib_libs}")
 
 # ----------------------------------------------
 # osqp_demo
 # ----------------------------------------------
 add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c ${osqplib_sources})
 target_include_directories(osqp_demo PRIVATE ${osqplib_includes})
-target_link_libraries (osqp_demo osqpstatic)
+if (ALGEBRA_MKL)
+    target_link_libraries (osqp_demo osqpstatic $<LINK_ONLY:MKL::MKL>)
+endif()
 
 # ----------------------------------------------
 # Testing
