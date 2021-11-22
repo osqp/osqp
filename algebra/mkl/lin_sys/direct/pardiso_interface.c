@@ -3,6 +3,10 @@
 #include "kkt.h"
 #endif
 
+#define MKL_INT c_int
+//#define MKL_INTERFACE_LP64  0x0
+//#define MKL_INTERFACE_ILP64 0x1
+
 #include "mkl_service.h"
 #include "mkl_pardiso.h"
 
@@ -203,10 +207,10 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
     s->iparm[34] = 0;     // Use Fortran-style indexing for indices
     /* s->iparm[34] = 1;     // Use C-style indexing for indices */
 
-#ifndef DFLOAT
-    s->iparm[27] = 0;  // Input arrays and all internal arrays must be presented in double precision
-#else
+#ifdef DFLOAT
     s->iparm[27] = 1;  // Input arrays and all internal arrays must be presented in single precision
+#else
+    s->iparm[27] = 0;  // Input arrays and all internal arrays must be presented in double precision
 #endif
 
     // Print number of threads

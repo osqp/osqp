@@ -1,5 +1,0 @@
-if(NOT DEFINED EMBEDDED)
-	if (ALGEBRA_MKL)
-		add_subdirectory(mkl-cg)
-	endif()
-endif()
