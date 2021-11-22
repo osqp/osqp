@@ -214,6 +214,11 @@ get_property(osqplib_sources TARGET OSQPLIB PROPERTY SOURCES)
 # osqpstatic
 # ----------------------------------------------
 add_library(osqpstatic STATIC $<TARGET_OBJECTS:OSQPLIB>)
+if (ALGEBRA_DEFAULT)
+    # Transitive dependency on OBJECT library does not work
+    # see https://gitlab.kitware.com/cmake/cmake/-/issues/18682
+    target_sources(osqpstatic PRIVATE $<TARGET_OBJECTS:qdldlobject>)
+endif()
 
 # ----------------------------------------------
 # osqp_demo

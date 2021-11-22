@@ -65,7 +65,7 @@ add_custom_command(
 # ----------------------------------------------
 # osqp_tester
 # ----------------------------------------------
-add_executable(osqp_tester osqp_tester.cpp osqp_tester.h ${osqplib_sources} ${headers} ${codegen_headers})
+add_executable(osqp_tester osqp_tester.cpp osqp_tester.h ${headers} ${codegen_headers})
 target_include_directories(osqp_tester PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${osqplib_includes})
 if (ALGEBRA_MKL)
     target_link_libraries (osqp_tester osqpstatic Catch2::Catch2 $<LINK_ONLY:MKL::MKL>)

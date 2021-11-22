@@ -18,7 +18,7 @@ if (NOT EMBEDDED)
 endif()
 
 target_sources(OSQPLIB
-        PUBLIC
+        PRIVATE
         ${AMD_SRC_FILES}
         $<TARGET_OBJECTS:qdldlobject>
         )
