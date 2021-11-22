@@ -32,3 +32,7 @@ endif()
 
 target_sources(OSQPLIB PUBLIC ${osqp_headers})
 target_include_directories(OSQPLIB PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+set(osqp_headers
+    "${osqp_headers}"
+    PARENT_SCOPE)

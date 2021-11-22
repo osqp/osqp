@@ -2,7 +2,7 @@ name: Main
 
 on:
   push:
-    branches: [ master, develop**, ci, vineetbansal/mkl2 ]
+    branches: [ master, develop**, ci ]
     tags:
       - '*'
   pull_request:

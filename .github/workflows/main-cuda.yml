@@ -2,7 +2,7 @@ name: Main-Cuda
 
 on:
   push:
-    branches: [ master, develop**, vineetbansal/mkl2 ]
+    branches: [ master, develop** ]
     tags:
       - '*'
   pull_request:

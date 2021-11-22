@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 project(osqp)
 
-include(CMakePrintHelpers)
-set(CMAKE_VERBOSE_MAKEFILE ON)
-
 # Detect operating system
 # ----------------------------------------------
 message(STATUS "We are on a ${CMAKE_SYSTEM_NAME} system")
@@ -44,10 +41,6 @@ if(NOT DEFINED ENV{MKL_ROOT})
   endif()
 endif()
 
-# Export compile commands
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-# Set the output folder where your program will be created
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 
@@ -133,6 +126,7 @@ message(STATUS "DEBUG = ${DEBUG}")
 
 if(DEBUG)
   set(CMAKE_VERBOSE_MAKEFILE ON)
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
 # Add code coverage
@@ -224,19 +218,99 @@ get_property(
   PROPERTY SOURCES)
 
 # ----------------------------------------------
-# osqpstatic
+# Language-specific compilation checks
 # ----------------------------------------------
-add_library(osqpstatic STATIC $<TARGET_OBJECTS:OSQPLIB>)
-if(ALGEBRA_DEFAULT)
-  # Transitive dependency on OBJECT library does not work see
-  # https://gitlab.kitware.com/cmake/cmake/-/issues/18682
-  target_sources(osqpstatic PRIVATE $<TARGET_OBJECTS:qdldlobject>)
-endif()
+if(PYTHON)
+  if(NOT PYTHON_INCLUDE_DIRS)
+    message(
+      FATAL_ERROR
+        "You need Python include directories to build the Python interface")
+  endif(NOT PYTHON_INCLUDE_DIRS)
+
+  include_directories(${PYTHON_INCLUDE_DIRS})
+  add_definitions(-DPYTHON)
+
+  if(BUILD_TESTING)
+    message(
+      STATUS "Disabling BUILD_TESTING because we are building Python interface")
+    set(BUILD_TESTING OFF)
+  endif(BUILD_TESTING)
+endif(PYTHON)
+
+if(MATLAB)
+  find_package(Matlab)
+  if(NOT Matlab_FOUND)
+    message(
+      FATAL_ERROR "You need Matlab libraries to build the Matlab interface")
+  endif(NOT Matlab_FOUND)
+  message(STATUS "Matlab root is " ${Matlab_ROOT_DIR})
+
+  include_directories(${Matlab_INCLUDE_DIRS})
+  add_definitions(-DMATLAB)
+
+  # Insist on the pre 2018 complex data API so that mxGetPr will work correctly
+  add_definitions(-DMATLAB_MEXSRC_RELEASE=R2017b)
+  message(STATUS "Using Matlab pre-2018a API for mxGetPr compatibility")
+
+  if(BUILD_TESTING)
+    message(
+      STATUS "Disabling BUILD_TESTING because we are building Matlab interface")
+    set(BUILD_TESTING OFF)
+  endif(BUILD_TESTING)
+endif(MATLAB)
+
+if(R_LANG)
+  find_package(R)
+  if(NOT R_FOUND)
+    message(FATAL_ERROR "You need R libraries to build the R interface")
+  endif(NOT R_FOUND)
+
+  message(STATUS "R exec is: " ${R_EXEC})
+  message(STATUS "R root dir is: " ${R_ROOT_DIR})
+  message(STATUS "R includes are in: " ${R_INCLUDE_DIRS})
+
+  include_directories(${R_INCLUDE_DIRS})
+  add_definitions(-DR_LANG)
+
+  if(BUILD_TESTING)
+    message(
+      STATUS "Disabling UNITTESTS because we are building the R interface")
+    set(BUILD_TESTING OFF)
+  endif(BUILD_TESTING)
+endif(R_LANG)
 
 # ----------------------------------------------
-# osqp_demo
+# Static Library - osqpstatic
 # ----------------------------------------------
-if(NOT EMBEDDED)
+function(OSQP_BUILD_STATIC_LIB)
+  add_library(osqpstatic STATIC $<TARGET_OBJECTS:OSQPLIB>)
+  if(ALGEBRA_DEFAULT)
+    # Transitive dependency on OBJECT library does not work. See
+    # https://gitlab.kitware.com/cmake/cmake/-/issues/18682
+    target_sources(osqpstatic PRIVATE $<TARGET_OBJECTS:qdldlobject>)
+  endif()
+
+  if(MATLAB)
+    target_link_libraries(osqpstatic ${Matlab_LIBRARIES})
+  endif(MATLAB)
+endfunction()
+
+# ----------------------------------------------
+# Shared Library - osqp
+# ----------------------------------------------
+function(OSQP_BUILD_SHARED_LIB)
+  add_library(osqp SHARED $<TARGET_OBJECTS:OSQPLIB>)
+  target_include_directories(
+    osqp
+    PUBLIC
+      "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+      "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
+endfunction()
+
+# ----------------------------------------------
+# Application - osqp_demo
+# ----------------------------------------------
+function(OSQP_BUILD_DEMO)
   add_executable(osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c
                            ${osqplib_sources})
   target_include_directories(osqp_demo PRIVATE ${osqplib_includes})
@@ -245,6 +319,67 @@ if(NOT EMBEDDED)
   elseif(ALGEBRA_CUDA)
     target_link_libraries(osqp_demo osqpstatic cublas cusparse)
   endif()
+endfunction()
+
+# ----------------------------------------------
+if(NOT PYTHON
+   AND NOT MATLAB
+   AND NOT R_LANG
+   AND NOT EMBEDDED)
+  osqp_build_static_lib()
+  osqp_build_shared_lib()
+  osqp_build_demo()
+endif()
+
+# ----------------------------------------------
+# Installation / Uninstallation
+# ----------------------------------------------
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
+
+install(
+  TARGETS osqpstatic
+  EXPORT ${PROJECT_NAME}
+  ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+
+install(
+  TARGETS osqp
+  EXPORT ${PROJECT_NAME}
+  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+  ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+
+export(
+  EXPORT ${PROJECT_NAME}
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/osqp-targets.cmake"
+  NAMESPACE osqp::)
+
+if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake)
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake
+       "include(\"\${CMAKE_CURRENT_LIST_DIR}/osqp-targets.cmake\")\n")
+endif()
+
+install(
+  EXPORT ${PROJECT_NAME}
+  FILE osqp-targets.cmake
+  NAMESPACE osqp::
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/osqp)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/osqp)
+
+if(NOT TARGET uninstall)
+  configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/configure/cmake/cmake_uninstall.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
+
+  add_custom_target(
+    uninstall COMMAND ${CMAKE_COMMAND} -P
+                      ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
 
 # ----------------------------------------------
