@@ -29,10 +29,10 @@ endif()
 include(FetchContent)
 
 FetchContent_Declare(
-        catch
+        Catch2
         GIT_REPOSITORY https://github.com/catchorg/Catch2.git
         GIT_TAG v2.13.6)
-FetchContent_MakeAvailable(catch)
+FetchContent_MakeAvailable(Catch2)
 # Adds Catch2::Catch2
 
 # ----------------------------------------------
@@ -68,7 +68,9 @@ add_custom_command(
 add_executable(osqp_tester osqp_tester.cpp osqp_tester.h ${osqplib_sources} ${headers} ${codegen_headers})
 target_include_directories(osqp_tester PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${osqplib_includes})
 if (ALGEBRA_MKL)
-    target_link_libraries (osqp_tester osqpstatic Catch2::Catch2 $<LINK_ONLY:MKL::MKL> )
+    target_link_libraries (osqp_tester osqpstatic Catch2::Catch2 $<LINK_ONLY:MKL::MKL>)
+elseif (ALGEBRA_CUDA)
+    target_link_libraries (osqp_tester osqpstatic Catch2::Catch2 cublas cusparse)
 else()
     target_link_libraries (osqp_tester osqpstatic Catch2::Catch2)
 endif()

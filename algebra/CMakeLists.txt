@@ -10,8 +10,10 @@ file (GLOB SRC_FILES CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/${ALGEBRA}/*.c
         ${CMAKE_CURRENT_SOURCE_DIR}/${ALGEBRA}/*.h
         ${CMAKE_CURRENT_SOURCE_DIR}/${ALGEBRA}/lin_sys/direct/*.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/${ALGEBRA}/lin_sys/direct/*.cu
         ${CMAKE_CURRENT_SOURCE_DIR}/${ALGEBRA}/lin_sys/direct/*.h
         ${CMAKE_CURRENT_SOURCE_DIR}/${ALGEBRA}/lin_sys/indirect/*.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/${ALGEBRA}/lin_sys/indirect/*.cu
         ${CMAKE_CURRENT_SOURCE_DIR}/${ALGEBRA}/lin_sys/indirect/*.h
         )
 

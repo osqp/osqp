@@ -223,6 +223,8 @@ if (NOT EMBEDDED)
     target_include_directories(osqp_demo PRIVATE ${osqplib_includes})
     if (ALGEBRA_MKL)
         target_link_libraries (osqp_demo osqpstatic $<LINK_ONLY:MKL::MKL>)
+    elseif (ALGEBRA_CUDA)
+        target_link_libraries (osqp_demo osqpstatic cublas cusparse)
     endif()
 endif()
 
