@@ -308,6 +308,16 @@ function(OSQP_BUILD_SHARED_LIB)
             PUBLIC
             "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
             "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
+
+    if (MSVC OR IS_MAC)
+        # Visual Studio on Windows, and Mac OS need cuda or mkl libaries to be linked as well
+        if (ALGEBRA_CUDA)
+            target_link_libraries (osqp cublas cusparse)
+        elseif(ALGEBRA_MKL)
+            target_link_libraries (osqp $<LINK_ONLY:MKL::MKL>)
+        endif()
+    endif ()
+
     set(OSQP_SHARED_LIB ON PARENT_SCOPE)
 endfunction()
 
