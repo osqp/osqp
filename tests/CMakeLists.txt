@@ -60,7 +60,7 @@ add_subdirectory(update_matrices)
 add_custom_command(
   OUTPUT ${codegen_headers}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  COMMAND ${PYTHON_EXECUTABLE} generate_tests_data.py
+  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/generate_tests_data.py
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/generate_tests_data.py
   COMMENT "Generating unittests data files using Python")
 
