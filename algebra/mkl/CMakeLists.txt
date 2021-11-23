@@ -23,11 +23,7 @@ target_sources(
           lin_sys/indirect/mkl-cg_interface.h
           lin_sys/indirect/mkl-cg_interface.c)
 
-target_include_directories(
-  OSQPLIB PRIVATE ../_common ${CMAKE_CURRENT_SOURCE_DIR} lin_sys/direct
-                  lin_sys/indirect)
+target_include_directories(OSQPLIB PRIVATE ../_common ${CMAKE_CURRENT_SOURCE_DIR} lin_sys/direct lin_sys/indirect)
 
-target_include_directories(
-  OSQPLIB PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_INCLUDE_DIRECTORIES>)
-target_compile_options(
-  OSQPLIB PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_COMPILE_OPTIONS>)
+target_include_directories(OSQPLIB PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_INCLUDE_DIRECTORIES>)
+target_compile_options(OSQPLIB PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_COMPILE_OPTIONS>)

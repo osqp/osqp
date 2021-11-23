@@ -21,8 +21,7 @@ set(osqp_headers
 
 # Add more files that should only be in non-embedded code
 if(NOT DEFINED EMBEDDED)
-  list(APPEND osqp_headers "${CMAKE_CURRENT_SOURCE_DIR}/polish.h"
-       "${CMAKE_CURRENT_SOURCE_DIR}/lin_sys.h")
+  list(APPEND osqp_headers "${CMAKE_CURRENT_SOURCE_DIR}/polish.h" "${CMAKE_CURRENT_SOURCE_DIR}/lin_sys.h")
 endif()
 
 # Add the ctrl-c handler if enabled

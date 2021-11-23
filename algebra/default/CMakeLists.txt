@@ -1,16 +1,24 @@
-# include(FetchContent)
-#
-# FetchContent_Declare( qdldl GIT_REPOSITORY https://github.com/osqp/qdldl.git
-# GIT_TAG 07ff30a3eedee4857bbbeb0778f54a86b1ea78f9)
-# FetchContent_MakeAvailable(qdldl)
+include(FetchContent)
 
-message(STATUS "Configuring QDLDL solver")
+message(STATUS "Fetching/configuring QDLDL solver")
 list(APPEND CMAKE_MESSAGE_INDENT "  ")
-add_subdirectory(qdldl_sources)
+
+FetchContent_Declare(
+  qdldl
+  GIT_REPOSITORY https://github.com/osqp/qdldl.git
+  GIT_TAG 07ff30a3eedee4857bbbeb0778f54a86b1ea78f9
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/qdldl_sources)
+FetchContent_GetProperties(qdldl)
+
+if(NOT qdldl_POPULATED)
+  FetchContent_Populate(qdldl)
+  # We don't actually want to build anything from here
+  add_subdirectory(${qdldl_SOURCE_DIR} ${qdldl_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
 list(POP_BACK CMAKE_MESSAGE_INDENT)
 
-set_source_files_properties($<TARGET_OBJECTS:qdldlobject> PROPERTIES GENERATED
-                                                                     1)
+set_source_files_properties($<TARGET_OBJECTS:qdldlobject> PROPERTIES GENERATED 1)
 
 get_property(
   qdldl_include
@@ -43,6 +51,5 @@ target_sources(
           lin_sys/direct/qdldl_interface.c
           $<TARGET_OBJECTS:qdldlobject>)
 
-target_include_directories(
-  OSQPLIB PRIVATE ../_common ${CMAKE_CURRENT_SOURCE_DIR} ${qdldl_include}
-                  lin_sys/direct lin_sys/direct/amd/include)
+target_include_directories(OSQPLIB PRIVATE ../_common ${CMAKE_CURRENT_SOURCE_DIR} ${qdldl_include} lin_sys/direct
+                                           lin_sys/direct/amd/include)
