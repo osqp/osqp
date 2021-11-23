@@ -216,3 +216,6 @@ out/
 *.stamp
 
 .cquery_cached_index
+
+# CMake FetchContent folders
+algebra/default/qdldl_sources
