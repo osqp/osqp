@@ -126,9 +126,12 @@ if(DEBUG)
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
-# Add code coverage
 option(COVERAGE "Perform code coverage" OFF)
 message(STATUS "COVERAGE = ${COVERAGE}")
+
+if (OSQP_CUSTOM_MEMORY)
+    message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY}")
+endif()
 
 configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
