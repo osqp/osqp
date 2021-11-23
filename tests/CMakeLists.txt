@@ -1,20 +1,20 @@
 # ----------------------------------------------
 # Python requirements
 # ----------------------------------------------
-find_package(PythonInterp)
-if(NOT PYTHONINTERP_FOUND)
+find_package (Python)
+
+if(NOT PYTHON_FOUND)
   message(
     FATAL_ERROR
       "You need python installed to generate unittests. If you do not want to compile the unittests pass -DBUILD_TESTING=OFF to cmake."
   )
 endif()
 
-include(FindPythonModule)
 find_python_module(numpy)
 if(NOT NUMPY_FOUND)
   message(
     FATAL_ERROR
-      "You need numpy python module installed to generate unittests. If you do not want to compile the unittests pass -DBUILD_TESTINGOFF to cmake."
+      "You need numpy python module installed to generate unittests. If you do not want to compile the unittests pass -DBUILD_TESTING=OFF to cmake."
   )
 endif()
 

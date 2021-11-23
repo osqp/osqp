@@ -3,7 +3,12 @@
 # FetchContent_Declare( qdldl GIT_REPOSITORY https://github.com/osqp/qdldl.git
 # GIT_TAG 07ff30a3eedee4857bbbeb0778f54a86b1ea78f9)
 # FetchContent_MakeAvailable(qdldl)
+
+message(STATUS "Configuring QDLDL solver")
+list(APPEND CMAKE_MESSAGE_INDENT "  ")
 add_subdirectory(qdldl_sources)
+list(POP_BACK CMAKE_MESSAGE_INDENT)
+
 set_source_files_properties($<TARGET_OBJECTS:qdldlobject> PROPERTIES GENERATED
                                                                      1)
 
