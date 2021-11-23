@@ -124,6 +124,11 @@ if(OSQP_CUSTOM_MEMORY)
   message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY}")
 endif()
 
+# Rename compile-time constants & configure
+# ----------------------------------------------
+# If we are creating any OSQP_* compile-time constants from CMake variables, do so here.
+set (OSQP_ALGEBRA ${ALGEBRA})
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
                ${CMAKE_CURRENT_SOURCE_DIR}/include/osqp_configure.h NEWLINE_STYLE LF)
 

@@ -19,7 +19,7 @@ extern "C" {
 #cmakedefine ALGEBRA_CUDA
 
 /* ALGEBRA - String representation */
-#cmakedefine ALGEBRA "@ALGEBRA@"
+#cmakedefine OSQP_ALGEBRA "@OSQP_ALGEBRA@"
 
 /* EMBEDDED */
 #cmakedefine EMBEDDED (@EMBEDDED@)

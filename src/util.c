@@ -83,7 +83,7 @@ void print_setup_header(const OSQPSolver *solver) {
 
   // Print Settings
   c_print("settings: ");
-  c_print("linear system solver = %s %s", ALGEBRA,
+  c_print("linear system solver = %s %s", OSQP_ALGEBRA,
           LINSYS_SOLVER_NAME[settings->linsys_solver]);
 
   if (work->linsys_solver->nthreads != 1) {
