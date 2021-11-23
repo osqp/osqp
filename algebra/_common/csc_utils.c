@@ -49,6 +49,21 @@ void int_vec_set_scalar(c_int *a, c_int sc, c_int n) {
   for (i = 0; i < n; i++) a[i] = sc;
 }
 
+c_int csc_cumsum(c_int *p, c_int *c, c_int n) {
+  c_int i, nz = 0;
+
+  if (!p || !c) return -1;  /* check inputs */
+
+  for (i = 0; i < n; i++)
+  {
+    p[i] = nz;
+    nz  += c[i];
+    c[i] = p[i];
+  }
+  p[n] = nz;
+  return nz; /* return sum (c [0..n-1]) */
+}
+
 //==================================================
 
 csc* csc_matrix(c_int m, c_int n, c_int nzmax, c_float *x, c_int *i, c_int *p)
@@ -231,21 +246,6 @@ csc* triplet_to_csr(const csc *T, c_int *TtoC) {
   return csc_done(C, w, OSQP_NULL, 1);     /* success; free w and return C */
 }
 
-c_int csc_cumsum(c_int *p, c_int *c, c_int n) {
-  c_int i, nz = 0;
-
-  if (!p || !c) return -1;  /* check inputs */
-
-  for (i = 0; i < n; i++)
-  {
-    p[i] = nz;
-    nz  += c[i];
-    c[i] = p[i];
-  }
-  p[n] = nz;
-  return nz; /* return sum (c [0..n-1]) */
-}
-
 c_int* csc_pinv(c_int const *p, c_int n) {
   c_int k, *pinv;
 
@@ -371,84 +371,84 @@ csc* csc_done(csc *C, void *w, void *x, c_int ok) {
   }
 }
 
-csc* csc_to_triu(csc *M) {
-  csc  *M_trip;    // Matrix in triplet format
-  csc  *M_triu;    // Resulting upper triangular matrix
-  c_int nnzorigM;  // Number of nonzeros from original matrix M
-  c_int nnzmaxM;   // Estimated maximum number of elements of upper triangular M
-  c_int n;         // Dimension of M
-  c_int ptr, i, j; // Counters for (i,j) and index in M
-  c_int z_M = 0;   // Counter for elements in M_trip
+// csc* csc_to_triu(csc *M) {
+//   csc  *M_trip;    // Matrix in triplet format
+//   csc  *M_triu;    // Resulting upper triangular matrix
+//   c_int nnzorigM;  // Number of nonzeros from original matrix M
+//   c_int nnzmaxM;   // Estimated maximum number of elements of upper triangular M
+//   c_int n;         // Dimension of M
+//   c_int ptr, i, j; // Counters for (i,j) and index in M
+//   c_int z_M = 0;   // Counter for elements in M_trip
 
 
-  // Check if matrix is square
-  if (M->m != M->n) {
-#ifdef PRINTING
-    c_eprint("Matrix M not square");
-#endif /* ifdef PRINTING */
-    return OSQP_NULL;
-  }
-  n = M->n;
+//   // Check if matrix is square
+//   if (M->m != M->n) {
+// #ifdef PRINTING
+//     c_eprint("Matrix M not square");
+// #endif /* ifdef PRINTING */
+//     return OSQP_NULL;
+//   }
+//   n = M->n;
 
-  // Get number of nonzeros full M
-  nnzorigM = M->p[n];
+//   // Get number of nonzeros full M
+//   nnzorigM = M->p[n];
 
-  // Estimate nnzmaxM
-  // Number of nonzero elements in original M + diagonal part.
-  // -> Full matrix M as input: estimate is half the number of total elements +
-  // diagonal = .5 * (nnzorigM + n)
-  // -> Upper triangular matrix M as input: estimate is the number of total
-  // elements + diagonal = nnzorigM + n
-  // The maximum between the two is nnzorigM + n
-  nnzmaxM = nnzorigM + n;
+//   // Estimate nnzmaxM
+//   // Number of nonzero elements in original M + diagonal part.
+//   // -> Full matrix M as input: estimate is half the number of total elements +
+//   // diagonal = .5 * (nnzorigM + n)
+//   // -> Upper triangular matrix M as input: estimate is the number of total
+//   // elements + diagonal = nnzorigM + n
+//   // The maximum between the two is nnzorigM + n
+//   nnzmaxM = nnzorigM + n;
 
-  // OLD
-  // nnzmaxM = n*(n+1)/2;  // Full upper triangular matrix (This version
-  // allocates too much memory!)
-  // nnzmaxM = .5 * (nnzorigM + n);  // half of the total elements + diagonal
+//   // OLD
+//   // nnzmaxM = n*(n+1)/2;  // Full upper triangular matrix (This version
+//   // allocates too much memory!)
+//   // nnzmaxM = .5 * (nnzorigM + n);  // half of the total elements + diagonal
 
-  // Allocate M_trip
-  M_trip = csc_spalloc(n, n, nnzmaxM, 1, 1); // Triplet format
+//   // Allocate M_trip
+//   M_trip = csc_spalloc(n, n, nnzmaxM, 1, 1); // Triplet format
 
-  if (!M_trip) {
-#ifdef PRINTING
-    c_eprint("Upper triangular matrix extraction failed (out of memory)");
-#endif /* ifdef PRINTING */
-    return OSQP_NULL;
-  }
+//   if (!M_trip) {
+// #ifdef PRINTING
+//     c_eprint("Upper triangular matrix extraction failed (out of memory)");
+// #endif /* ifdef PRINTING */
+//     return OSQP_NULL;
+//   }
 
-  // Fill M_trip with only elements in M which are in the upper triangular
-  for (j = 0; j < n; j++) { // Cycle over columns
-    for (ptr = M->p[j]; ptr < M->p[j + 1]; ptr++) {
-      // Get row index
-      i = M->i[ptr];
+//   // Fill M_trip with only elements in M which are in the upper triangular
+//   for (j = 0; j < n; j++) { // Cycle over columns
+//     for (ptr = M->p[j]; ptr < M->p[j + 1]; ptr++) {
+//       // Get row index
+//       i = M->i[ptr];
 
-      // Assign element only if in the upper triangular
-      if (i <= j) {
-        // c_print("\nM(%i, %i) = %.4f", M->i[ptr], j, M->x[ptr]);
+//       // Assign element only if in the upper triangular
+//       if (i <= j) {
+//         // c_print("\nM(%i, %i) = %.4f", M->i[ptr], j, M->x[ptr]);
 
-        M_trip->i[z_M] = i;
-        M_trip->p[z_M] = j;
-        M_trip->x[z_M] = M->x[ptr];
+//         M_trip->i[z_M] = i;
+//         M_trip->p[z_M] = j;
+//         M_trip->x[z_M] = M->x[ptr];
 
-        // Increase counter for the number of elements
-        z_M++;
-      }
-    }
-  }
+//         // Increase counter for the number of elements
+//         z_M++;
+//       }
+//     }
+//   }
 
-  // Set number of nonzeros
-  M_trip->nz = z_M;
+//   // Set number of nonzeros
+//   M_trip->nz = z_M;
 
-  // Convert triplet matrix to csc format
-  M_triu = triplet_to_csc(M_trip, OSQP_NULL);
+//   // Convert triplet matrix to csc format
+//   M_triu = triplet_to_csc(M_trip, OSQP_NULL);
 
-  // Assign number of nonzeros of full matrix to triu M
-  M_triu->nzmax = nnzmaxM;
+//   // Assign number of nonzeros of full matrix to triu M
+//   M_triu->nzmax = nnzmaxM;
 
-  // Cleanup and return result
-  csc_spfree(M_trip);
+//   // Cleanup and return result
+//   csc_spfree(M_trip);
 
-  // Return matrix in triplet form
-  return M_triu;
-}
+//   // Return matrix in triplet form
+//   return M_triu;
+// }
