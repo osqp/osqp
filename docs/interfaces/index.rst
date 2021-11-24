@@ -51,7 +51,7 @@ Official
    :glob:
    :hidden:
 
-   CC++.rst
+   C.rst
    python.rst
    matlab.rst
    julia.rst
