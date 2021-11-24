@@ -1,7 +1,8 @@
+#include "algebra_impl.h"
 #include "mkl-cg_interface.h"
 #include <mkl_rci.h>
 
-MKL_INT cg_solver_init(mklcg_solver * s){
+MKL_INT cg_solver_init(mklcg_solver *s){
 
   MKL_INT mkln = s->n;
   MKL_INT rci_request = 1;
@@ -21,7 +22,6 @@ MKL_INT cg_solver_init(mklcg_solver * s){
             s->iparm, s->dparm, OSQPVectorf_data(s->tmp));
 
   return rci_request;
-
 }
 
 //Compute v2 = (P+sigma I + A'*(rho)*A)v1,
@@ -44,7 +44,6 @@ void cg_times(OSQPMatrix* P,
 }
 
 
-
 c_int init_linsys_mklcg(mklcg_solver      **sp,
                         const OSQPMatrix   *P,
                         const OSQPMatrix   *A,
@@ -52,9 +51,8 @@ c_int init_linsys_mklcg(mklcg_solver      **sp,
                         const OSQPSettings *settings,
                         c_int               polish){
 
-
-  c_int   m = OSQPMatrix_get_m(A);
-  c_int   n = OSQPMatrix_get_m(P);
+  c_int m = A->csc->m;
+  c_int n = P->csc->n;
   MKL_INT mkln = n;
   MKL_INT status;
   mklcg_solver* s = (mklcg_solver *)c_malloc(sizeof(mklcg_solver));
@@ -122,12 +120,12 @@ c_int init_linsys_mklcg(mklcg_solver      **sp,
 }
 
 
+c_int solve_linsys_mklcg(mklcg_solver *s,
+                         OSQPVectorf  *b,
+                         c_int         admm_iter){
 
-c_int solve_linsys_mklcg(mklcg_solver * s,
-                  OSQPVectorf* b, c_int admm_iter){
-
-  MKL_INT  rci_request  = 1;
-  MKL_INT  mkln         = s->n;
+  MKL_INT  rci_request = 1;
+  MKL_INT  mkln        = s->n;
 
   //Point our subviews at the OSQP RHS
   OSQPVectorf_view_update(s->r1, b,    0, s->n);
@@ -161,55 +159,52 @@ c_int solve_linsys_mklcg(mklcg_solver * s,
 
   if (rci_request == 0) {  //solution was found for x.
 
-      OSQPVectorf_copy(s->r1, s->x);
+    OSQPVectorf_copy(s->r1, s->x);
 
-      if (!s->polish) {
-          //OSQP wants us to return (x,Ax) in place
-          OSQPMatrix_Axpy(s->A, s->x, s->r2, 1.0, 0.0);
-      } else {
-          //OSQP wants us to return (x,\nu) in place,
-          // where r2 = \nu = rho.*(Ax - r2)
-          OSQPMatrix_Axpy(s->A, s->x, s->r2, 1.0, -1.0);
-          OSQPVectorf_ew_prod(s->r2, s->r2, s->rho_vec);
-      }
+    if (!s->polish) {
+      //OSQP wants us to return (x,Ax) in place
+      OSQPMatrix_Axpy(s->A, s->x, s->r2, 1.0, 0.0);
+    } else {
+      //OSQP wants us to return (x,\nu) in place,
+      // where r2 = \nu = rho.*(Ax - r2)
+      OSQPMatrix_Axpy(s->A, s->x, s->r2, 1.0, -1.0);
+      OSQPVectorf_ew_prod(s->r2, s->r2, s->rho_vec);
+    }
   }
 
   return rci_request; //0 on succcess, otherwise MKL CG error code
-
 }
 
 
-void update_settings_linsys_solver_mklcg(struct mklcg_solver_     *s,
-                                           const OSQPSettings *settings) {
+void update_settings_linsys_solver_mklcg(struct mklcg_solver_ *s,
+                                         const OSQPSettings   *settings) {
     // TODO: Update settings!
     return;
 }
 
 
-void warm_start_linys_mklcg(struct mklcg_solver_ *self, const OSQPVectorf *x) {
-    return;
+void warm_start_linys_mklcg(struct mklcg_solver_ *self,
+                            const OSQPVectorf    *x) {
+  // TODO: Warm starting!
+  return;
 }
 
 
-c_int update_matrices_linsys_mklcg(
-                  mklcg_solver * s,
-                  const OSQPMatrix *P,
-                  const OSQPMatrix *A){
+c_int update_matrices_linsys_mklcg(mklcg_solver     *s,
+                                   const OSQPMatrix *P,
+                                   const OSQPMatrix *A){
   s->P = *(OSQPMatrix**)(&P);
   s->A = *(OSQPMatrix**)(&A);
   return 0;
 }
 
 
-
-c_int update_rho_linsys_mklcg(
-                   mklcg_solver * s,
-                   const OSQPVectorf* rho_vec,
-                   c_float rho_sc){
+c_int update_rho_linsys_mklcg(mklcg_solver      *s,
+                              const OSQPVectorf *rho_vec,
+                              c_float            rho_sc){
   OSQPVectorf_copy(s->rho_vec, rho_vec);
   return 0;
 }
-
 
 
 void free_linsys_mklcg(mklcg_solver * s){
