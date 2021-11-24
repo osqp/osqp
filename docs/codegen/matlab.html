@@ -17,7 +17,7 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -200,7 +200,7 @@ then no build files are generated.</p>
 <p>where <code class="code docutils literal notranslate"><span class="pre">emosqp</span></code> is the name of the mex interface specified in the previous section</p>
 <dl class="py function">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">'solve'</span></em><span class="sig-paren">)</span></dt>
+<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">'solve'</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Solve the problem.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -219,7 +219,7 @@ then no build files are generated.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">'update_lin_cost'</span></em>, <em class="sig-param"><span class="pre">q_new</span></em><span class="sig-paren">)</span></dt>
+<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">'update_lin_cost'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_new</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Update linear cost.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -230,7 +230,7 @@ then no build files are generated.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">'update_lower_bound'</span></em>, <em class="sig-param"><span class="pre">l_new</span></em><span class="sig-paren">)</span></dt>
+<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">'update_lower_bound'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_new</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Update lower bound in the constraints.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -241,7 +241,7 @@ then no build files are generated.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">'update_upper_bound'</span></em>, <em class="sig-param"><span class="pre">u_new</span></em><span class="sig-paren">)</span></dt>
+<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">'update_upper_bound'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_new</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Update upper bound in the constraints.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -252,7 +252,7 @@ then no build files are generated.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">'update_bounds'</span></em>, <em class="sig-param"><span class="pre">l_new</span></em>, <em class="sig-param"><span class="pre">u_new</span></em><span class="sig-paren">)</span></dt>
+<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">'update_bounds'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_new</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_new</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Update lower and upper bounds in the constraints.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -268,7 +268,7 @@ then no build files are generated.</p>
 <code class="code docutils literal notranslate"><span class="pre">'matrices'</span></code>, then the following functions are also provided</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="emosqp">
-<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">'update_P'</span></em>, <em class="sig-param"><span class="pre">Px</span></em>, <em class="sig-param"><span class="pre">Px_idx</span></em>, <em class="sig-param"><span class="pre">Px_n</span></em><span class="sig-paren">)</span><a class="headerlink" href="#emosqp" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">'update_P'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Px</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Px_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Px_n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#emosqp" title="Permalink to this definition">¶</a></dt>
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">:noindex:</span></span></dt>
 <dd><p>Update nonzero entries of the quadratic cost matrix (only upper triangular) without changing sparsity structure.</p>
@@ -291,7 +291,7 @@ all the indices are to be updated</p>
 
 <dl class="py function">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">'update_A'</span></em>, <em class="sig-param"><span class="pre">Ax</span></em>, <em class="sig-param"><span class="pre">Ax_idx</span></em>, <em class="sig-param"><span class="pre">Ax_n</span></em><span class="sig-paren">)</span></dt>
+<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">'update_A'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ax_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ax_n</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Update nonzero entries of the constraint matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -308,7 +308,7 @@ all the indices are to be updated</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">'update_P_A'</span></em>, <em class="sig-param"><span class="pre">Px</span></em>, <em class="sig-param"><span class="pre">Px_idx</span></em>, <em class="sig-param"><span class="pre">Px_n</span></em>, <em class="sig-param"><span class="pre">Ax</span></em>, <em class="sig-param"><span class="pre">Ax_idx</span></em>, <em class="sig-param"><span class="pre">Ax_n</span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">'update_P_A'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Px</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Px_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Px_n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ax_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ax_n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Permalink to this definition">¶</a></dt>
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">:noindex:</span></span></dt>
 <dd><p>Update nonzero entries of the quadratic cost and constraint matrices. It considers only the upper-triangular part of P.</p>
