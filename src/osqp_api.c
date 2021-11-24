@@ -4,6 +4,7 @@
 #include "util.h"
 #include "scaling.h"
 #include "error.h"
+#include "version.h"
 
 #ifndef EMBEDDED
 # include "polish.h"

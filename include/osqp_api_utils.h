@@ -7,6 +7,7 @@ extern "C" {
 
 /* Types required by the OSQP utility functions */
 # include "osqp_api_types.h"
+# include "csc_type.h"
 
 /********************
 * OSQP User utilities  *

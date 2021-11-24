@@ -7,10 +7,6 @@ extern "C" {
 
 #include "osqp_configure.h"
 
-/*******************
-* OSQP Versioning *
-*******************/
-#include "version.h"
 
 /******************
 * Solver Status  *

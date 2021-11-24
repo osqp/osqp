@@ -1,7 +1,7 @@
 #include "osqp.h"
 #include "util.h"
 #include "algebra_vector.h"
-
+#include "version.h"
 
 
 /************************************

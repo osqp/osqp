@@ -33,5 +33,11 @@ target_sources(OSQPLIB PUBLIC ${osqp_headers})
 target_include_directories(OSQPLIB PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(osqp_headers
-    "${osqp_headers}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/csc_type.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/osqp.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/osqp_api_constants.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/osqp_api_functions.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/osqp_api_types.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/osqp_api_utils.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/osqp_configure.h"
     PARENT_SCOPE)
