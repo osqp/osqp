@@ -268,6 +268,7 @@ endif(R_LANG)
 # ----------------------------------------------
 function(OSQP_BUILD_STATIC_LIB)
   add_library(osqpstatic STATIC $<TARGET_OBJECTS:OSQPLIB>)
+  set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
   if(ALGEBRA_DEFAULT)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
     target_sources(osqpstatic PRIVATE $<TARGET_OBJECTS:qdldlobject>)
@@ -321,11 +322,12 @@ function(OSQP_BUILD_DEMO)
 endfunction()
 
 # ----------------------------------------------
+osqp_build_static_lib()
+
 if(NOT PYTHON
    AND NOT MATLAB
    AND NOT R_LANG
    AND NOT EMBEDDED)
-  osqp_build_static_lib()
   osqp_build_shared_lib()
   osqp_build_demo()
 endif()
