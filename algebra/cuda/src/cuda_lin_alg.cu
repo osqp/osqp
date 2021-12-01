@@ -614,12 +614,12 @@ void cuda_vec_norm_inf(const c_float *d_x,
   }
 }
 
-void cuda_vec_norm_1(const c_float *d_x,
-                     c_int          n,
-                     c_float       *h_res) {
+// void cuda_vec_norm_1(const c_float *d_x,
+//                      c_int          n,
+//                      c_float       *h_res) {
 
-  cublasTasum(CUDA_handle->cublasHandle, n, d_x, 1, h_res);
-}
+//   cublasTasum(CUDA_handle->cublasHandle, n, d_x, 1, h_res);
+// }
 
 void cuda_vec_norm_2(const c_float *d_x,
                      c_int          n,

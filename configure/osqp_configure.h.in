@@ -13,11 +13,16 @@ extern "C" {
 #cmakedefine IS_MAC
 #cmakedefine IS_WINDOWS
 
+/* ALGEBRA - Only one of the following is defined at compilation time */
+#cmakedefine ALGEBRA_DEFAULT
+#cmakedefine ALGEBRA_MKL
+#cmakedefine ALGEBRA_CUDA
+
+/* ALGEBRA - String representation */
+#cmakedefine OSQP_ALGEBRA "@OSQP_ALGEBRA@"
+
 /* EMBEDDED */
 #cmakedefine EMBEDDED (@EMBEDDED@)
-
-/* CUDA_SUPPORT */
-#cmakedefine CUDA_SUPPORT
 
 /* PRINTING */
 #cmakedefine PRINTING
@@ -34,16 +39,11 @@ extern "C" {
 /* DLONG */
 #cmakedefine DLONG
 
-/* ENABLE_MKL_PARDISO */
-#cmakedefine ENABLE_MKL_PARDISO
-
 /* MEMORY MANAGEMENT */
 #cmakedefine OSQP_CUSTOM_MEMORY
 #ifdef OSQP_CUSTOM_MEMORY
 #include "@OSQP_CUSTOM_MEMORY@"
 #endif
-
-
 
 # ifdef __cplusplus
 }

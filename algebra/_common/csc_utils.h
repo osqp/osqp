@@ -118,30 +118,30 @@ csc* triplet_to_csr(const csc *T,
                     c_int     *TtoC);
 
 
-/**
- * Convert square CSC matrix into upper triangular one
- *
- * @param  M         Matrix to be converted
- * @return           Upper triangular matrix in CSC format
- */
-csc* csc_to_triu(csc *M);
+// /**
+//  * Convert square CSC matrix into upper triangular one
+//  *
+//  * @param  M         Matrix to be converted
+//  * @return           Upper triangular matrix in CSC format
+//  */
+// csc* csc_to_triu(csc *M);
 
 
 /*****************************************************************************
 * Extra operations                                                          *
 *****************************************************************************/
 
-/**
- * p [0..n] = cumulative sum of c [0..n-1], and then copy p [0..n-1] into c
- *
- * @param  p Create cumulative sum into p
- * @param  c Vector of which we compute cumulative sum
- * @param  n Number of elements
- * @return   Exitflag
- */
-c_int csc_cumsum(c_int *p,
-                 c_int *c,
-                 c_int  n);
+// /**
+//  * p [0..n] = cumulative sum of c [0..n-1], and then copy p [0..n-1] into c
+//  *
+//  * @param  p Create cumulative sum into p
+//  * @param  c Vector of which we compute cumulative sum
+//  * @param  n Number of elements
+//  * @return   Exitflag
+//  */
+// c_int csc_cumsum(c_int *p,
+//                  c_int *c,
+//                  c_int  n);
 
 /**
  * Compute inverse of permutation matrix stored in the vector p.

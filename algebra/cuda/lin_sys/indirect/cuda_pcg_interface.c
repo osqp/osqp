@@ -112,7 +112,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   *sp = s;
 
   /* Assign type and the number of threads */
-  s->type     = CUDA_PCG_SOLVER;
+  s->type     = INDIRECT_SOLVER;
   s->nthreads = 1;
 
   /* Problem dimensions */

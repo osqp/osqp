@@ -952,25 +952,23 @@ c_int validate_data(const csc     *P,
 
 c_int validate_linsys_solver(c_int linsys_solver) {
 
-#ifdef CUDA_SUPPORT
-
-  if (linsys_solver != CUDA_PCG_SOLVER) {
-    return 1;
+#ifdef ALGEBRA_CUDA
+  if (linsys_solver == INDIRECT_SOLVER) {
+    return 0;
   }
-
-#else /* ifdef CUDA_SUPPORT */
-
-  if ((linsys_solver != QDLDL_SOLVER) &&
-      (linsys_solver != MKL_PARDISO_SOLVER)) {
-    return 1;
+#elif defined ALGEBRA_MKL
+  if ((linsys_solver == DIRECT_SOLVER) ||
+      (linsys_solver == INDIRECT_SOLVER)) {
+    return 0;
   }
+#else
+  if (linsys_solver == DIRECT_SOLVER) {
+    return 0;
+  }
+#endif
 
-#endif /* ifdef CUDA_SUPPORT */
-
-  // TODO: Add more solvers in case
-
-  // Valid solver
-  return 0;
+  // Invalid solver
+  return 1;
 }
 
 

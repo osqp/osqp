@@ -29,18 +29,20 @@ void test_non_cvx_solve()
   settings->adaptive_rho = 0;
   settings->sigma = 1e-6;
 
-#ifndef CUDA_SUPPORT 
-  // Setup workspace
-  exitflag = osqp_setup(&solver, data->P, data->q,
-                        data->A, data->l, data->u,
-                        data->m, data->n, settings);
+#ifdef ALGEBRA_DEFAULT
+  if (settings->linsys_solver == DIRECT_SOLVER) {
+      // Setup workspace
+      exitflag = osqp_setup(&solver, data->P, data->q,
+                            data->A, data->l, data->u,
+                            data->m, data->n, settings);
 
-  // Setup should fail due to (P + sigma I) having a negative eigenvalue
-  mu_assert("Non Convex test solve: Setup should have failed!",
-            exitflag == OSQP_NONCVX_ERROR);
+      // Setup should fail due to (P + sigma I) having a negative eigenvalue
+      mu_assert("Non Convex test solve: Setup should have failed!",
+                exitflag == OSQP_NONCVX_ERROR);
 
-  osqp_cleanup(solver);
-#endif /* ifndef CUDA_SUPPORT */
+      osqp_cleanup(solver);
+  }
+#endif
 
   // Update Solver settings
   settings->sigma = sols_data->sigma_new;

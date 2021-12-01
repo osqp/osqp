@@ -9,21 +9,6 @@ extern "C" {
 
 # include "types.h"
 
-/**
- * Load linear system solver shared library
- * @param	linsys_solver  Linear system solver
- * @return Zero on success, nonzero on failure.
- */
-c_int load_linsys_solver(enum linsys_solver_type linsys_solver);
-
-
-/**
- * Unload linear system solver shared library
- * @param	linsys_solver  Linear system solver
- * @return Zero on success, nonzero on failure.
- */
-c_int unload_linsys_solver(enum linsys_solver_type linsys_solver);
-
 
 // NB: Only the upper triangular part of P is filled.
 

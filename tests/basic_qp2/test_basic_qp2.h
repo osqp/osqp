@@ -71,7 +71,7 @@ void test_basic_qp2_solve()
   clean_problem_basic_qp2_sols_data(sols_data);
 }
 
-#ifdef ENABLE_MKL_PARDISO
+#ifdef ALGEBRA_MKL
 void test_basic_qp2_solve_pardiso()
 {
   c_int exitflag;
@@ -96,7 +96,7 @@ void test_basic_qp2_solve_pardiso()
   settings->rho           = 0.1;
   settings->polishing     = 1;
   settings->verbose       = 1;
-  settings->linsys_solver = MKL_PARDISO_SOLVER;
+  settings->linsys_solver = DIRECT_SOLVER;
 
   // Setup workspace
   exitflag = osqp_setup(&solver, data->P, data->q,

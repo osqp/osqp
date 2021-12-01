@@ -1,6 +1,3 @@
-# Compatibility with Python 2
-from __future__ import print_function
-
 from scipy import sparse
 import numpy as np
 

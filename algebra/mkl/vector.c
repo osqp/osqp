@@ -1,10 +1,28 @@
 #include "osqp.h"
 #include "algebra_vector.h"
 #include "algebra_impl.h"
+#include "stdio.h"
+#include "time.h"
+
+#include <mkl_blas.h>
+#ifdef DFLOAT
+  #define blas_copy scopy
+  #define blas_dot sdot
+  #define blas_scale sscal
+  #define blas_swap sswap
+  #define blas_axpy saxpy
+  #define blas_2norm snrm2
+  #else
+    #define blas_copy dcopy
+    #define blas_dot ddot
+    #define blas_scale dscal
+    #define blas_swap dswap
+    #define blas_axpy daxpy
+    #define blas_2norm dnrm2
+#endif //dfloat endif
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 
-#ifndef EMBEDDED
 
 OSQPVectorf* OSQPVectorf_new(const c_float *a,
                              c_int          length){
@@ -18,7 +36,8 @@ OSQPVectorf* OSQPVectorf_new(const c_float *a,
   return out;
 }
 
-// OSQPVectori* OSQPVectori_new(const c_int *a, c_int length){
+// OSQPVectori* OSQPVectori_new(const c_int *a,
+//                              c_int        length){
 
 //   OSQPVectori* out = OSQPVectori_malloc(length);
 //   if(!out) return OSQP_NULL;
@@ -118,13 +137,6 @@ OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf *a){
 
 }
 
-// OSQPVectori* OSQPVectori_copy_new(const OSQPVectori *a){
-
-//   OSQPVectori* b = OSQPVectori_malloc(a->length);
-//   if(b) OSQPVectori_copy(b,a);
-//   return b;
-// }
-
 void OSQPVectorf_free(OSQPVectorf *a){
   if (a) c_free(a->values);
   c_free(a);
@@ -140,13 +152,16 @@ OSQPVectorf* OSQPVectorf_view(const OSQPVectorf *a,
                               c_int              length){
 
   OSQPVectorf* view = c_malloc(sizeof(OSQPVectorf));
-  if (view) {
+  if (view){
       OSQPVectorf_view_update(view, a, head, length);
   }
   return view;
 }
 
-void OSQPVectorf_view_update(OSQPVectorf *a, const OSQPVectorf *b, c_int head, c_int length){
+void OSQPVectorf_view_update(OSQPVectorf       *a,
+                             const OSQPVectorf *b,
+                             c_int              head,
+                             c_int              length){
     a->length = length;
     a->values   = b->values + head;
 }
@@ -156,25 +171,22 @@ void OSQPVectorf_view_free(OSQPVectorf *a){
 }
 
 
-#endif /* ifndef EMBEDDED */
-
 c_int OSQPVectorf_length(const OSQPVectorf *a){return a->length;}
 // c_int OSQPVectori_length(const OSQPVectori *a){return a->length;}
 
 /* Pointer to vector data (floats) */
 c_float* OSQPVectorf_data(const OSQPVectorf *a){return a->values;}
-
 // c_int*   OSQPVectori_data(const OSQPVectori *a){return a->values;}
 
 void OSQPVectorf_copy(OSQPVectorf       *b,
                       const OSQPVectorf *a){
-  OSQPVectorf_from_raw(b, a->values);
-}
 
-// void OSQPVectori_copy(OSQPVectori       *b,
-//                       const OSQPVectori *a){
-//   OSQPVectori_from_raw(b, a->values);
-// }
+  const MKL_INT length = a->length;
+  const MKL_INT INCX = 1; //How long should the spacing be (?)
+  const MKL_INT INCY = 1;
+  blas_copy(&length, a->values, &INCX, b->values, &INCY);
+
+}
 
 void OSQPVectorf_from_raw(OSQPVectorf   *b,
                           const c_float *av){
@@ -209,7 +221,8 @@ void OSQPVectorf_to_raw(c_float           *bv,
   }
 }
 
-void OSQPVectori_to_raw(c_int *bv, const OSQPVectori *a){
+void OSQPVectori_to_raw(c_int             *bv,
+                        const OSQPVectori *a){
   c_int i;
   c_int length = a->length;
   c_int* av = a->values;
@@ -218,6 +231,9 @@ void OSQPVectori_to_raw(c_int *bv, const OSQPVectori *a){
     bv[i] = av[i];
   }
 }
+
+// For now I wont deal with the raw functions, I hope they dont feel left out :(
+
 
 void OSQPVectorf_set_scalar(OSQPVectorf *a,
                             c_float      sc){
@@ -230,6 +246,7 @@ void OSQPVectorf_set_scalar(OSQPVectorf *a,
   }
 }
 
+// I seem to have the same problem here, if I try to exploit the copy function, I will still need to compare the values and populate an initial vector
 
 void OSQPVectorf_set_scalar_conditional(OSQPVectorf       *a,
                                         const OSQPVectori *test,
@@ -248,57 +265,76 @@ void OSQPVectorf_set_scalar_conditional(OSQPVectorf       *a,
   }
 }
 
-
+// Scaling a vector by a constant
 void OSQPVectorf_mult_scalar(OSQPVectorf *a,
                              c_float      sc){
-  c_int i;
-  c_int length = a->length;
-  c_float*  av = a->values;
 
-  for (i = 0; i < length; i++) {
-    av[i] *= sc;
-  }
+  const MKL_INT length = a->length;
+  const MKL_INT INCX = 1; //How long should the spacing be (?)
+  blas_scale(&length, &sc, a->values, &INCX);
 }
 
 void OSQPVectorf_plus(OSQPVectorf      *x,
                      const OSQPVectorf *a,
                      const OSQPVectorf *b){
-  c_int i;
+
   c_int length = a->length;
   c_float*  av = a->values;
   c_float*  bv = b->values;
   c_float*  xv = x->values;
 
   if (x == a){
-    for (i = 0; i < length; i++) {
-      xv[i] += bv[i];
-    }
+    const MKL_INT lengthmkl = a->length;
+    const MKL_INT INCX = 1;
+    const MKL_INT INCY = 1;
+	
+    const c_float scalar = 1; // The number b is scaled by
+    blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY);
   }
   else {
+   /*
     for (i = 0; i < length; i++) {
+      puts("hi");
       xv[i] = av[i] + bv[i];
     }
+    */
+    // need some help to get the test pointers working to be able to debug this
+    // Little experiment here
+    //printf("..\n");
+    const MKL_INT lengthmkl = a->length;
+    const MKL_INT INCX = 1; // The sapcing must be at least 1 here, not sure why
+    const MKL_INT INCY = 1;
+    const c_float scalar = 1; // The number b is scaled by
+    blas_copy(&lengthmkl, a->values, &INCX, x->values, &INCY); // I copy av into xv
+    blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY); //final addition
+
+    // I am not sure if the extra function calls justifies the blas implementation, I can only find out when I get the benchamrk code working
+    //I think I got the code to work properly now
   }
 }
 
 void OSQPVectorf_minus(OSQPVectorf       *x,
                        const OSQPVectorf *a,
                        const OSQPVectorf *b){
-  c_int i;
-  c_int length = a->length;
-  c_float*  av = a->values;
-  c_float*  bv = b->values;
-  c_float*  xv = x->values;
 
-  if (x == a) {
-    for (i = 0; i < length; i++) {
-      xv[i] -= bv[i];
-    }
+  const MKL_INT lengthmkl = a->length;
+  const MKL_INT INCX = 1;
+  const MKL_INT INCY = 1;
+  c_float scalar;
+
+  if (x == a){
+    scalar = -1;
+    blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY);
+  }
+  else if (x == b){
+    scalar = 1.0;
+    OSQPVectorf_mult_scalar(x,-1.);
+    blas_axpy(&lengthmkl, &scalar, a->values, &INCX, x->values, &INCY);
   }
   else {
-    for (i = 0; i < length; i++) {
-      xv[i] = av[i] - bv[i];
-    }
+    scalar = -1.0;
+    blas_copy(&lengthmkl, a->values, &INCX, x->values, &INCY);
+    blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY);
   }
 }
 
@@ -315,15 +351,17 @@ void OSQPVectorf_add_scaled(OSQPVectorf       *x,
 
   /* shorter version when incrementing */
   if (x == a && sca == 1.){
-    for (i = 0; i < length; i++) {
-      xv[i] += scb * bv[i];
-    }
+    const MKL_INT lengthmkl = x->length;
+    const MKL_INT INCX = 1; // The spacing must be at least 1 here, not sure why
+    const MKL_INT INCY = 1;
+    blas_axpy(&lengthmkl, &scb, b->values, &INCX, x->values, &INCY);
   }
   else {
     for (i = 0; i < length; i++) {
       xv[i] = sca * av[i] + scb * bv[i];
     }
   }
+
 }
 
 void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
@@ -399,7 +437,8 @@ c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S,
   return normval;
 }
 
-// c_float OSQPVectorf_scaled_norm_1(const OSQPVectorf *S, const OSQPVectorf *v){
+// c_float OSQPVectorf_scaled_norm_1(const OSQPVectorf *S,
+//                                   const OSQPVectorf *v){
 
 //   c_int   i;
 //   c_int length  = v->length;
@@ -461,16 +500,11 @@ c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
 c_float OSQPVectorf_dot_prod(const OSQPVectorf *a,
                              const OSQPVectorf *b){
 
-  c_int   i;
-  c_int   length = a->length;
-  c_float*  av   = a->values;
-  c_float*  bv   = b->values;
-  c_float dotprod = 0.0;
+  const MKL_INT length = a->length;
+  const MKL_INT INCX = 1; //How long should the spacing be (?)
+  const MKL_INT INCY = 1;
 
-  for (i = 0; i < length; i++) {
-    dotprod += av[i] * bv[i];
-  }
-  return dotprod;
+  return blas_dot(&length, a->values, &INCX, b->values, &INCY); // blas_dot is called the preprocesor
 }
 
 c_float OSQPVectorf_dot_prod_signed(const OSQPVectorf *a,
@@ -509,7 +543,6 @@ void OSQPVectorf_ew_prod(OSQPVectorf       *c,
   c_float*  av   = a->values;
   c_float*  bv   = b->values;
   c_float*  cv   = c->values;
-
 
   if (c == a) {
     for (i = 0; i < length; i++) {
@@ -606,7 +639,6 @@ c_int OSQPVectorf_in_reccone(const OSQPVectorf *y,
   return 1;
 }
 
-
 // void OSQPVectorf_permute(OSQPVectorf *x, const OSQPVectorf *b, const OSQPVectori *p){
 
 //   c_int j;
@@ -659,10 +691,6 @@ c_int OSQPVectorf_in_reccone(const OSQPVectorf *y,
 //   }
 // }
 
-
-
-#if EMBEDDED != 1
-
 c_float OSQPVectorf_mean(const OSQPVectorf *a){
 
   c_int i;
@@ -679,8 +707,8 @@ c_float OSQPVectorf_mean(const OSQPVectorf *a){
   else return val;
 }
 
-void OSQPVectorf_ew_reciprocal(OSQPVectorf      *b,
-                              const OSQPVectorf *a){
+void OSQPVectorf_ew_reciprocal(OSQPVectorf       *b,
+                               const OSQPVectorf *a){
 
   c_int i;
   c_int length = a->length;
@@ -703,31 +731,33 @@ void OSQPVectorf_ew_sqrt(OSQPVectorf *a){
   }
 }
 
-// void OSQPVectorf_ew_max(OSQPVectorf       *c,
-//                         const OSQPVectorf *a,
-//                         c_float            max_val){
+void OSQPVectorf_ew_max(OSQPVectorf       *c,
+                        const OSQPVectorf *a,
+                        c_float            max_val){
 
-//   c_int i;
-//   c_int length = c->length;
-//   c_float*  av = a->values;
-//   c_float*  cv = c->values;
+  c_int i;
+  c_int length = c->length;
+  c_float*  av = a->values;
+  c_float*  cv = c->values;
 
-//   for (i = 0; i < length; i++) {
-//     cv[i] = c_max(av[i], max_val);
-//   }
-// }
+  for (i = 0; i < length; i++) {
+    cv[i] = c_max(av[i], max_val);
+  }
+}
 
-// void OSQPVectorf_ew_min(OSQPVectorf *c, const OSQPVectorf *a, c_float min_val){
+void OSQPVectorf_ew_min(OSQPVectorf       *c,
+                        const OSQPVectorf *a,
+                        c_float            min_val){
 
-//   c_int i;
-//   c_int length = a->length;
-//   c_float*  av = a->values;
-//   c_float*  cv = c->values;
+  c_int i;
+  c_int length = a->length;
+  c_float*  av = a->values;
+  c_float*  cv = c->values;
 
-//   for (i = 0; i < length; i++) {
-//     cv[i] = c_min(av[i], min_val);
-//   }
-// }
+  for (i = 0; i < length; i++) {
+    cv[i] = c_min(av[i], min_val);
+  }
+}
 
 void OSQPVectorf_ew_max_vec(OSQPVectorf       *c,
                             const OSQPVectorf *a,
@@ -743,19 +773,19 @@ void OSQPVectorf_ew_max_vec(OSQPVectorf       *c,
   }
 }
 
-// void OSQPVectorf_ew_min_vec(OSQPVectorf       *c,
-//                             const OSQPVectorf *a,
-//                             const OSQPVectorf *b){
-//   c_int i;
-//   c_int length = a->length;
-//   c_float*  av = a->values;
-//   c_float*  bv = b->values;
-//   c_float*  cv = c->values;
+void OSQPVectorf_ew_min_vec(OSQPVectorf       *c,
+                            const OSQPVectorf *a,
+                            const OSQPVectorf *b){
+  c_int i;
+  c_int length = a->length;
+  c_float*  av = a->values;
+  c_float*  bv = b->values;
+  c_float*  cv = c->values;
 
-//   for (i = 0; i < length; i++) {
-//     cv[i] = c_min(av[i], bv[i]);
-//   }
-// }
+  for (i = 0; i < length; i++) {
+    cv[i] = c_min(av[i], bv[i]);
+  }
+}
 
 c_int OSQPVectorf_ew_bounds_type(OSQPVectori      *iseq,
                                 const OSQPVectorf *l,
@@ -786,13 +816,10 @@ c_int OSQPVectorf_ew_bounds_type(OSQPVectori      *iseq,
       // Inequality constraints
       iseqv[i] = 0;
     }
-
     //has anything changed?
     has_changed = has_changed || (iseqv[i] != old_value);
   }
-
   return has_changed;
-
 }
 
 void OSQPVectorf_set_scalar_if_lt(OSQPVectorf       *x,
@@ -822,7 +849,3 @@ void OSQPVectorf_set_scalar_if_gt(OSQPVectorf       *x,
     xv[i] = zv[i] > testval ? newval : zv[i];
   }
 }
-
-
-
-#endif /* EMBEDDED != 1 */

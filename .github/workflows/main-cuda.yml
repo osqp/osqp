@@ -17,7 +17,7 @@ jobs:
         matrix:
           os: [ubuntu-latest]
           python-version: [3.9]
-          cmake_flags: ['-DUNITTESTS=ON -DCUDA_SUPPORT=ON']
+          cmake_flags: ['-DBUILD_TESTING=ON -DALGEBRA=cuda']
 
           include:
             - os: ubuntu-latest

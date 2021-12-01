@@ -118,6 +118,10 @@ c_int solve_linsys_pardiso(pardiso_solver *s,
 void update_settings_linsys_solver_pardiso(pardiso_solver *s,
                                            const OSQPSettings    *settings);
 
+void update_settings_linsys_solver_pardiso(pardiso_solver *s,
+                                           const OSQPSettings    *settings);
+
+
 void warm_start_linsys_solver_pardiso(pardiso_solver    *s,
                                       const OSQPVectorf *x);
 
