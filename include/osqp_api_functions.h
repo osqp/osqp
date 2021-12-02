@@ -239,6 +239,16 @@ c_int osqp_update_rho(OSQPSolver *solver,
 # endif /* if EMBEDDED != 1 */
 
 
+
+# if !defined(EMBEDDED) && defined(ALGEBRA_DEFAULT)
+
+c_int osqp_codegen(OSQPSolver *solver,
+                   const char *prefix,
+                   c_int       embedded);
+
+# endif /* if !defined(EMBEDDED) && defined(ALGEBRA_DEFAULT) */
+
+
 /** @} */
 
 

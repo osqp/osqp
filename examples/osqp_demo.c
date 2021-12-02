@@ -44,6 +44,9 @@ int main(void) {
   /* Solve problem */
   if (!exitflag) exitflag = osqp_solve(solver);
 
+  /* Test codegen */
+  osqp_codegen(solver, "mpc_", 2);
+
   /* Cleanup */
   osqp_cleanup(solver);
   if (A) free(A);
