@@ -8,7 +8,16 @@
 
 set(TEMP_CMAKE_FIND_APPBUNDLE ${CMAKE_FIND_APPBUNDLE})
 set(CMAKE_FIND_APPBUNDLE "NEVER")
+
+# find an R executable.
 find_program(R_EXEC NAMES R R.exe)
+
+# Failing that, look for a development version
+if(NOT R_EXEC)
+   find_program(R_EXEC NAMES Rdev Rdev.exe R-devel R-devel.exe )
+endif()
+
+
 set(CMAKE_FIND_APPBUNDLE ${TEMP_CMAKE_FIND_APPBUNDLE})
 
 #---Find includes and libraries if R exists
@@ -22,12 +31,15 @@ if(R_EXEC)
   endif()
 
   execute_process(WORKING_DIRECTORY .
-  COMMAND ${R_EXEC} RHOME
-  OUTPUT_VARIABLE R_ROOT_DIR
-  OUTPUT_STRIP_TRAILING_WHITESPACE)
+      COMMAND ${R_EXEC} RHOME
+      OUTPUT_VARIABLE R_ROOT_DIR
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
 
   find_path(R_INCLUDE_DIRS R.h
             PATHS /usr/local/lib /usr/local/lib64 /usr/share /usr/include ${R_ROOT_DIR} PATH_SUFFIXES include R R/include)
+
+else()
+  message( STATUS "Could not find R installed" )
 
 endif()
 

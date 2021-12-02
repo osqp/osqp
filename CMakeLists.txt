@@ -234,7 +234,7 @@ if (R_LANG)
     find_package(R)
 
     if (NOT R_FOUND)
-            message( FATAL_ERROR "You need R libraries to build the R interface" )
+            message( FATAL_ERROR "Could not find R installed" )
     endif (NOT R_FOUND)
 
     message(STATUS "R exec is: " ${R_EXEC})
