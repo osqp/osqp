@@ -150,9 +150,9 @@ c_float osqp_toc(OSQPTimer *t);
 /*! \cond PRIVATE */
 
 
-# ifdef PRINTING
-#  include <stdio.h>
+#if defined(DEBUG) && defined(PRINTING)
 
+#  include <stdio.h>
 
 /* Print a csc sparse matrix */
 void print_csc_matrix(const csc  *M,
@@ -187,7 +187,7 @@ void print_vec_int(const c_int *x,
                    c_int        n,
                    const char  *name);
 
-# endif /* ifdef PRINTING */
+# endif /* #if defined(DEBUG) && defined(PRINTING) */
 
 /*! \endcond */
 
