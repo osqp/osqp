@@ -18,7 +18,7 @@
 #ifndef CUDA_HANDLER_H
 # define CUDA_HANDLER_H
 
-#include <cusparse_v2.h>
+#include <cusparse.h>
 #include <cublas_v2.h>
 
 # ifdef __cplusplus

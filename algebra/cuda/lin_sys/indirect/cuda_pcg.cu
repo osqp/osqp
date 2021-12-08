@@ -45,12 +45,14 @@ __global__ void scalar_division_kernel(c_float       *res,
  *******************************************************************************/
 
 /*
- * d_y = (P + sigma*I + A'*R*A) * d_x
+ * y = (P + sigma*I + A'*R*A) * x
  */
-static void mat_vec_prod(cudapcg_solver *s,
-                         c_float        *d_y,
-                         const c_float  *d_x,
-                         c_int           device) {
+static void mat_vec_prod(cudapcg_solver             *s,
+                         c_float                    *d_y,
+                         cusparseDnVecDescr_t        vecy,
+                         const c_float              *d_x,
+                         const cusparseDnVecDescr_t  vecx,
+                         c_int                       is_device) {
 
   c_float *sigma;
   c_float H_ZERO = 0.0;
@@ -61,57 +63,45 @@ static void mat_vec_prod(cudapcg_solver *s,
   csr *A  = s->A;
   csr *At = s->At;
 
-  sigma = device ? s->d_sigma : &s->h_sigma;
+  sigma = is_device ? s->d_sigma : &s->h_sigma;
 
-  /* d_y = d_x */
+  /* y = x */
   checkCudaErrors(cudaMemcpy(d_y, d_x, n * sizeof(c_float), cudaMemcpyDeviceToDevice));
 
-  /* d_y *= sigma */
+  /* y *= sigma */
   checkCudaErrors(cublasTscal(CUDA_handle->cublasHandle, n, sigma, d_y, 1));
 
-  /* d_y += P * d_x */
-  checkCudaErrors(cusparseCsrmvEx(CUDA_handle->cusparseHandle, P->alg,
-                                  CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                  P->m, P->n, P->nnz, &H_ONE,
-                                  CUDA_FLOAT, P->MatDescription, P->val,
-                                  CUDA_FLOAT, P->row_ptr, P->col_ind, d_x,
-                                  CUDA_FLOAT, &H_ONE, CUDA_FLOAT, d_y,
-                                  CUDA_FLOAT, CUDA_FLOAT, P->buffer));
+  /* y += P * x */
+  checkCudaErrors(cusparseSpMV(
+    CUDA_handle->cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+    &H_ONE, P->SpMatDescr, vecx, &H_ONE, vecy,
+    CUDA_FLOAT, CUSPARSE_SPMV_ALG_DEFAULT, P->SpMatBuffer));
 
   if (m == 0) return;
 
   if (!s->d_rho_vec) {
-    /* d_z = rho * A * d_x */
-    checkCudaErrors(cusparseCsrmvEx(CUDA_handle->cusparseHandle, A->alg,
-                                    CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                    A->m, A->n, A->nnz, &s->h_rho,
-                                    CUDA_FLOAT, A->MatDescription, A->val,
-                                    CUDA_FLOAT, A->row_ptr, A->col_ind, d_x,
-                                    CUDA_FLOAT, &H_ZERO, CUDA_FLOAT, s->d_z,
-                                    CUDA_FLOAT, CUDA_FLOAT, A->buffer));
+    /* z = rho * A * x */
+    checkCudaErrors(cusparseSpMV(
+      CUDA_handle->cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+      &s->h_rho, A->SpMatDescr, vecx, &H_ZERO, s->vecz,
+      CUDA_FLOAT, CUSPARSE_SPMV_ALG_DEFAULT, A->SpMatBuffer));
   }
   else {
-    /* d_z = A * d_x */
-    checkCudaErrors(cusparseCsrmvEx(CUDA_handle->cusparseHandle, A->alg,
-                                    CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                    A->m, A->n, A->nnz, &H_ONE,
-                                    CUDA_FLOAT, A->MatDescription, A->val,
-                                    CUDA_FLOAT, A->row_ptr, A->col_ind, d_x,
-                                    CUDA_FLOAT, &H_ZERO, CUDA_FLOAT, s->d_z,
-                                    CUDA_FLOAT, CUDA_FLOAT, A->buffer));
+    /* z = A * x */
+    checkCudaErrors(cusparseSpMV(
+      CUDA_handle->cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+      &H_ONE, A->SpMatDescr, vecx, &H_ZERO, s->vecz,
+      CUDA_FLOAT, CUSPARSE_SPMV_ALG_DEFAULT, A->SpMatBuffer));
 
-    /* d_z = diag(d_rho_vec) * dz */
+    /* z = diag(rho_vec) * z */
     cuda_vec_ew_prod(s->d_z, s->d_z, s->d_rho_vec, m);
   }
 
-  /* d_y += A' * d_z */
-  checkCudaErrors(cusparseCsrmvEx(CUDA_handle->cusparseHandle, At->alg,
-                                  CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                  At->m, At->n, At->nnz, &H_ONE,
-                                  CUDA_FLOAT, At->MatDescription, At->val,
-                                  CUDA_FLOAT, At->row_ptr, At->col_ind, s->d_z,
-                                  CUDA_FLOAT, &H_ONE, CUDA_FLOAT, d_y,
-                                  CUDA_FLOAT, CUDA_FLOAT, A->buffer));
+  /* y += A' * z */
+  checkCudaErrors(cusparseSpMV(
+    CUDA_handle->cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+    &H_ONE, At->SpMatDescr, s->vecz, &H_ONE, vecy,
+    CUDA_FLOAT, CUSPARSE_SPMV_ALG_DEFAULT, At->SpMatBuffer));
 }
 
 
@@ -130,32 +120,32 @@ c_int cuda_pcg_alg(cudapcg_solver *s,
   c_float H_MINUS_ONE = -1.0;
 
   if (!s->warm_start) {
-    /* d_x = 0 */
+    /* x = 0 */
     checkCudaErrors(cudaMemset(s->d_x, 0, n * sizeof(c_float)));
   }
 
-  /* d_p = 0 */
+  /* p = 0 */
   checkCudaErrors(cudaMemset(s->d_p, 0, n * sizeof(c_float)));
 
-  /* d_r = K * d_x */
-  mat_vec_prod(s, s->d_r, s->d_x, 0);
+  /* r = K * x */
+  mat_vec_prod(s, s->d_r, s->vecr, s->d_x, s->vecx, 0);
 
-  /* d_r -= d_rhs */
+  /* r -= rhs */
   checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, &H_MINUS_ONE, s->d_rhs, 1, s->d_r, 1));
 
-  /* h_r_norm = |d_r| */
+  /* h_r_norm = |r| */
   cuda_vec_norm_inf(s->d_r, n, s->h_r_norm);
 
   /* From here on cuBLAS is operating in device pointer mode */
   cublasSetPointerMode(CUDA_handle->cublasHandle, CUBLAS_POINTER_MODE_DEVICE);
 
-  /* d_y = M \ d_r */
+  /* y = M \ r */
   cuda_vec_ew_prod(s->d_y, s->d_diag_precond_inv, s->d_r, n);
 
-  /* d_p = -d_y */
+  /* p = -y */
   checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, s->D_MINUS_ONE, s->d_y, 1, s->d_p, 1));
 
-  /* rTy = d_r' * d_y */
+  /* rTy = r' * y */
   checkCudaErrors(cublasTdot(CUDA_handle->cublasHandle, n, s->d_y, 1, s->d_r, 1, s->rTy));
 
   cudaDeviceSynchronize();
@@ -163,22 +153,22 @@ c_int cuda_pcg_alg(cudapcg_solver *s,
   /* Run the PCG algorithm */
   while ( *(s->h_r_norm) > eps && iter < max_iter ) {
 
-    /* d_Kp = K * d_p */
-    mat_vec_prod(s, s->d_Kp, s->d_p, 1);
+    /* Kp = K * p */
+    mat_vec_prod(s, s->d_Kp, s->vecKp, s->d_p, s->vecp, 1);
 
-    /* pKp = d_p' * d_Kp */
+    /* pKp = p' * Kp */
     checkCudaErrors(cublasTdot(CUDA_handle->cublasHandle, n, s->d_p, 1, s->d_Kp, 1, s->pKp));
 
     /* alpha = rTy / pKp */
     scalar_division_kernel<<<1,1>>>(s->alpha, s->rTy, s->pKp);
 
-    /* d_x += alpha * d_p */
+    /* x += alpha * p */
     checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, s->alpha, s->d_p, 1, s->d_x, 1));
 
-    /* d_r += alpha * d_Kp */
+    /* r += alpha * Kp */
     checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, s->alpha, s->d_Kp, 1, s->d_r, 1));
 
-    /* d_y = M \ d_r */
+    /* y = M \ r */
     cuda_vec_ew_prod(s->d_y, s->d_diag_precond_inv, s->d_r, n);
 
     /* Swap pointers to rTy and rTy_prev */
@@ -186,7 +176,7 @@ c_int cuda_pcg_alg(cudapcg_solver *s,
     s->rTy_prev = s->rTy;
     s->rTy = tmp;
 
-    /* rTy = d_r' * d_y */
+    /* rTy = r' * y */
     checkCudaErrors(cublasTdot(CUDA_handle->cublasHandle, n, s->d_y, 1, s->d_r, 1, s->rTy));
 
     /* Update residual norm */
@@ -196,10 +186,10 @@ c_int cuda_pcg_alg(cudapcg_solver *s,
     /* beta = rTy / rTy_prev */
     scalar_division_kernel<<<1,1>>>(s->beta, s->rTy, s->rTy_prev);
 
-    /* d_p *= beta */
+    /* p *= beta */
     checkCudaErrors(cublasTscal(CUDA_handle->cublasHandle, n, s->beta, s->d_p, 1));
 
-    /* d_p -= d_y */
+    /* p -= y */
     checkCudaErrors(cublasTaxpy(CUDA_handle->cublasHandle, n, s->D_MINUS_ONE, s->d_y, 1, s->d_p, 1));
 
     cudaDeviceSynchronize();

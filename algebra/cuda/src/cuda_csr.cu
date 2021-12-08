@@ -228,28 +228,42 @@ __global__ void vector_init_abs_kernel(const c_int *a,
  *                         Private Functions                                   *
  *******************************************************************************/
 
- /*
- *  Update the size of buffer used for the merge path based
- *  sparse matrix-vector product (spmv).
- */
-void update_mp_buffer(csr *P) {
+static void init_SpMV_interface(csr *M) {
 
-  size_t bufferSizeInBytes = 0;
+  c_float *d_x, *d_y;
+  cusparseDnVecDescr_t vecx, vecy;
+
   c_float alpha = 1.0;
+  c_int m = M->m;
+  c_int n = M->n;
 
-  checkCudaErrors(cusparseCsrmvEx_bufferSize(CUDA_handle->cusparseHandle, P->alg,
-                                             CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                             P->m, P->n, P->nnz, &alpha,
-                                             CUDA_FLOAT, P->MatDescription, P->val,
-                                             CUDA_FLOAT, P->row_ptr, P->col_ind, NULL,
-                                             CUDA_FLOAT, &alpha, CUDA_FLOAT, NULL,
-                                             CUDA_FLOAT, CUDA_FLOAT, &bufferSizeInBytes));
-  
-  if (bufferSizeInBytes > P->bufferSizeInBytes) {
-    cuda_free((void **) &P->buffer);                            
-    cuda_malloc((void **) &P->buffer, bufferSizeInBytes);
-    P->bufferSizeInBytes = bufferSizeInBytes;
+  cuda_malloc((void **) &d_x, n * sizeof(c_float));
+  cuda_malloc((void **) &d_y, m * sizeof(c_float));
+  cuda_vec_create(&vecx, d_x, n);
+  cuda_vec_create(&vecy, d_y, m);
+
+  /* Wrap raw data into cuSPARSE API matrix */
+  checkCudaErrors(cusparseCreateCsr(
+    &M->SpMatDescr, m, n, M->nnz,
+    (void*)M->row_ptr, (void*)M->col_ind, (void*)M->val,
+    CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I,
+    CUSPARSE_INDEX_BASE_ZERO, CUDA_FLOAT));
+
+  if (!M->SpMatBufferSize) {
+    /* Allocate workspace for cusparseSpMV */
+    checkCudaErrors(cusparseSpMV_bufferSize(
+      CUDA_handle->cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+      &alpha, M->SpMatDescr, vecx, &alpha, vecy,
+      CUDA_FLOAT, CUSPARSE_SPMV_ALG_DEFAULT, &M->SpMatBufferSize));
+
+    if (M->SpMatBufferSize)
+      cuda_malloc((void **) &M->SpMatBuffer, M->SpMatBufferSize);
   }
+
+  cuda_vec_destroy(vecx);
+  cuda_vec_destroy(vecy);
+  cuda_free((void **) &d_x);
+  cuda_free((void **) &d_y);
 }
 
  /*
@@ -271,46 +285,20 @@ csr* csr_alloc(c_int m,
   dev_mat->m   = m;
   dev_mat->n   = n;
   dev_mat->nnz = nnz;
-  
-#if defined IS_WINDOWS && __CUDACC_VER_MAJOR__ < 11
-  // MERGE_PATH is not working properly on WINDOWS
-  dev_mat->alg = CUSPARSE_ALG_NAIVE;
-#else
-  // Since CUDA 11 there is only one algorithm
-  dev_mat->alg = CUSPARSE_ALG_MERGE_PATH;
-#endif
-
-  dev_mat->buffer = NULL;
-  dev_mat->bufferSizeInBytes = 0;
-
-  checkCudaErrors(cusparseCreateMatDescr(&dev_mat->MatDescription));
-  cusparseSetMatType(dev_mat->MatDescription, CUSPARSE_MATRIX_TYPE_GENERAL);
-  cusparseSetMatIndexBase(dev_mat->MatDescription, CUSPARSE_INDEX_BASE_ZERO);
 
   if (allocate_on_device > 0) {
-    cuda_calloc((void **) &dev_mat->val, (dev_mat->nnz + 1) * sizeof(c_float));
+    cuda_calloc((void **) &dev_mat->val,     (dev_mat->nnz + 1) * sizeof(c_float));
     cuda_malloc((void **) &dev_mat->row_ptr, (dev_mat->m + 1) * sizeof(c_int)); 
     cuda_malloc((void **) &dev_mat->col_ind, dev_mat->nnz * sizeof(c_int));
 
-    if (allocate_on_device > 1) {
+    if (allocate_on_device > 1)
       cuda_malloc((void **) &dev_mat->row_ind, dev_mat->nnz * sizeof(c_int));
-    } 
   }
+
+  dev_mat->SpMatBufferSize = 0;
+  dev_mat->SpMatBuffer = NULL;
+
   return dev_mat;
-}
-
-/*
- *  Copy CSR matrix from host to device.
- *  The device memory should be pre-allocated.
- */
-void csr_copy_h2d(csr           *dev_mat,
-                  const c_int   *h_row_ptr,
-                  const c_int   *h_col_ind,
-                  const c_float *h_val) {
-
-  checkCudaErrors(cudaMemcpy(dev_mat->row_ptr, h_row_ptr, (dev_mat->m + 1) * sizeof(c_int), cudaMemcpyHostToDevice));
-  checkCudaErrors(cudaMemcpy(dev_mat->col_ind, h_col_ind, dev_mat->nnz * sizeof(c_int), cudaMemcpyHostToDevice));
-  checkCudaErrors(cudaMemcpy(dev_mat->val, h_val, dev_mat->nnz * sizeof(c_float), cudaMemcpyHostToDevice));
 }
 
 csr* csr_init(c_int          m,
@@ -326,8 +314,9 @@ csr* csr_init(c_int          m,
   if (m == 0) return dev_mat;
 
   /* copy_matrix_to_device */
-  csr_copy_h2d(dev_mat, h_row_ptr, h_col_ind, h_val);
-  update_mp_buffer(dev_mat);
+  checkCudaErrors(cudaMemcpy(dev_mat->row_ptr, h_row_ptr, (dev_mat->m + 1) * sizeof(c_int), cudaMemcpyHostToDevice));
+  checkCudaErrors(cudaMemcpy(dev_mat->col_ind, h_col_ind, dev_mat->nnz * sizeof(c_int),     cudaMemcpyHostToDevice));
+  checkCudaErrors(cudaMemcpy(dev_mat->val,     h_val,     dev_mat->nnz * sizeof(c_float),   cudaMemcpyHostToDevice));
 
   return dev_mat;
 }
@@ -405,19 +394,6 @@ void permute_vector(c_float     *values,
 }
 
 /*
- *  target[i] = source[permutation[i]] for i in [0,n-1]
- *  
- *  target and source cannot point to the same location
- */
-void permute_vector(c_float       *target,
-                    const c_float *source,
-                    const c_int   *permutation,
-                    c_int          n) {
-
-  cuda_vec_gather(n, source, target, permutation);
-}
-
-/*
  *  Copy the values and pointers form target to the source matrix.
  *  The device memory of source has to be freed first to avoid a
  *  memory leak in case it holds allocated memory.
@@ -431,32 +407,24 @@ void permute_vector(c_float       *target,
 void copy_csr(csr* target,
               csr* source) {
 
-  target->m                 = source->m;
-  target->n                 = source->n;
-  target->nnz               = source->nnz;
-  target->bufferSizeInBytes = source->bufferSizeInBytes;
-  target->alg               = source->alg;
+  target->m   = source->m;
+  target->n   = source->n;
+  target->nnz = source->nnz;
 
-  cusparseDestroyMatDescr(target->MatDescription);
   cuda_free((void **) &target->val);
   cuda_free((void **) &target->row_ind);
   cuda_free((void **) &target->row_ptr);
   cuda_free((void **) &target->col_ind);
-  cuda_free((void **) &target->buffer);
 
-  target->val            = source->val;
-  target->row_ind        = source->row_ind;
-  target->row_ptr        = source->row_ptr;
-  target->col_ind        = source->col_ind;
-  target->buffer         = source->buffer;
-  target->MatDescription = source->MatDescription; 
+  target->val     = source->val;
+  target->row_ind = source->row_ind;
+  target->row_ptr = source->row_ptr;
+  target->col_ind = source->col_ind;
 
-  source->val            = NULL;
-  source->row_ind        = NULL;
-  source->row_ptr        = NULL;
-  source->col_ind        = NULL;
-  source->buffer         = NULL;
-  source->MatDescription = NULL;
+  source->val     = NULL;
+  source->row_ind = NULL;
+  source->row_ptr = NULL;
+  source->col_ind = NULL;
 }
 
 void csr_triu_to_full(csr    *P_triu,
@@ -500,7 +468,8 @@ void csr_triu_to_full(csr    *P_triu,
   number_of_blocks = (nnz_triu / THREADS_PER_BLOCK) + 1;
   reduce_permutation_kernel<<<number_of_blocks,THREADS_PER_BLOCK>>>(d_P, nnz_triu, Full_nnz);
 
-  permute_vector(Full_P->val, P_triu->val, d_P, Full_nnz);
+  /* permute vector */
+  cuda_vec_gather(Full_nnz, P_triu->val, Full_P->val, d_P);
 
   cuda_malloc((void **) P_triu_to_full_permutation, Full_nnz * sizeof(c_int));
   checkCudaErrors(cudaMemcpy(*P_triu_to_full_permutation, d_P, Full_nnz * sizeof(c_int), cudaMemcpyDeviceToDevice));
@@ -511,7 +480,6 @@ void csr_triu_to_full(csr    *P_triu,
 
   Full_P->nnz = Full_nnz;
   compress_row_ind(Full_P);
-  update_mp_buffer(Full_P); 
   copy_csr(P_triu, Full_P);
 
   cuda_mat_free(Full_P);
@@ -546,8 +514,6 @@ void csr_transpose(csr    *A,
   compress_row_ind(A);
 
   permute_vector(A->val, *A_to_At_permutation, A->nnz);
-
-  update_mp_buffer(A);
 }
 
 
@@ -576,6 +542,8 @@ void cuda_mat_init_P(const csc  *mat,
 
   /* Store triu elements */
   checkCudaErrors(cudaMemcpy(*d_P_triu_val, mat->x, nnz * sizeof(c_float), cudaMemcpyHostToDevice));
+
+  init_SpMV_interface(*P);
 }
 
 void cuda_mat_init_A(const csc  *mat,
@@ -594,6 +562,9 @@ void cuda_mat_init_A(const csc  *mat,
   *A = csr_init(n, m, mat->p, mat->i, mat->x);
   csr_transpose(*A, d_A_to_At_ind);
   csr_expand_row_ind(*A);
+
+  init_SpMV_interface(*A);
+  init_SpMV_interface(*At);
 }
 
 void cuda_mat_update_P(const c_float  *Px,
@@ -687,9 +658,11 @@ void cuda_mat_free(csr *mat) {
     cuda_free((void **) &mat->val);
     cuda_free((void **) &mat->row_ptr);
     cuda_free((void **) &mat->col_ind);
-    cuda_free((void **) &mat->buffer);
     cuda_free((void **) &mat->row_ind);
-    cusparseDestroyMatDescr(mat->MatDescription);
+
+    cuda_free((void **) &mat->SpMatBuffer);
+    checkCudaErrors(cusparseDestroySpMat(mat->SpMatDescr));
+
     c_free(mat);
   }
 }
@@ -754,9 +727,6 @@ void cuda_submat_byrows(const csr    *A,
   // Generate row pointer
   compress_row_ind(*Ared);
 
-  // Update merge path buffer (CsrmvEx)
-  update_mp_buffer(*Ared);
-
   // We first make a copy of Ared
   *Aredt = csr_alloc(new_m, n, nnz_new, 1);
   checkCudaErrors(cudaMemcpy((*Aredt)->val,     (*Ared)->val,     nnz_new   * sizeof(c_float), cudaMemcpyDeviceToDevice));
@@ -766,8 +736,11 @@ void cuda_submat_byrows(const csr    *A,
   c_int *d_A_to_At_ind;
   csr_transpose(*Aredt, &d_A_to_At_ind);
 
-  // Update merge path buffer (CsrmvEx)
-  update_mp_buffer(*Aredt);
+  csr_expand_row_ind(*Ared);
+  csr_expand_row_ind(*Aredt);
+
+  init_SpMV_interface(*Ared);
+  init_SpMV_interface(*Aredt);
 
   cuda_free((void**)&d_A_to_At_ind);
   cuda_free((void**)&d_predicate);

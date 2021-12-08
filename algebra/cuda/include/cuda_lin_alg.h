@@ -18,6 +18,7 @@
 #ifndef CUDA_LIN_ALG_H
 # define CUDA_LIN_ALG_H
 
+#include <cusparse.h>
 #include "algebra_types.h"
 
 # ifdef __cplusplus
@@ -28,6 +29,12 @@ extern "C" {
 /*******************************************************************************
  *                           Vector Functions                                  *
  *******************************************************************************/
+
+void cuda_vec_create(cusparseDnVecDescr_t *vec,
+                     const c_float        *d_x,
+                     c_int                 n);
+
+void cuda_vec_destroy(cusparseDnVecDescr_t vec);
 
 /*
  * d_y[i] = d_x[i] for i in [0,n-1]
@@ -315,11 +322,11 @@ void cuda_mat_rmult_diag_new(const csr     *S,
 /**
  * d_y = alpha * A*d_x + beta*d_y
  */
-void cuda_mat_Axpy(const csr     *A,
-                   const c_float *d_x,
-                   c_float       *d_y,
-                   c_float        alpha,
-                   c_float        beta);
+void cuda_mat_Axpy(const csr                  *A,
+                   const cusparseDnVecDescr_t  vecx,
+                   cusparseDnVecDescr_t        vecy,
+                   c_float                     alpha,
+                   c_float                     beta);
 
 /**
  * d_res[i] = |S_i|_inf where S_i is i-th row of S

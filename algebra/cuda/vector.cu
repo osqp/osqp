@@ -29,7 +29,7 @@
 OSQPVectorf* OSQPVectorf_new(const c_float *a,
                              c_int          length) {
 
-  OSQPVectorf* out = OSQPVectorf_malloc(length);
+  OSQPVectorf *out = OSQPVectorf_malloc(length);
   if (!out) return OSQP_NULL;
 
   if (length > 0) OSQPVectorf_from_raw(out, a);
@@ -49,9 +49,32 @@ OSQPVectorf* OSQPVectorf_malloc(c_int length) {
       c_free(b);
       b = OSQP_NULL;
     }
+    cuda_vec_create(&b->vec, b->d_val, length);
   }
   else {
-    b->d_val  = OSQP_NULL;
+    b->d_val = OSQP_NULL;
+    b->vec = NULL;
+  }
+  return b;
+}
+
+OSQPVectorf* OSQPVectorf_calloc(c_int length) {
+
+  OSQPVectorf *b = (OSQPVectorf*) c_malloc(sizeof(OSQPVectorf));
+  if (!b) return OSQP_NULL;
+
+  b->length = length;
+  if (length) {
+    cuda_calloc((void **) &b->d_val, length * sizeof(c_float));
+    if (!(b->d_val)) {
+      c_free(b);
+      b = OSQP_NULL;
+    }
+    cuda_vec_create(&b->vec, b->d_val, length);
+  }
+  else {
+    b->d_val = OSQP_NULL;
+    b->vec = NULL;
   }
   return b;
 }
@@ -70,26 +93,7 @@ OSQPVectori* OSQPVectori_malloc(c_int length) {
     }
   }
   else {
-    b->d_val  = OSQP_NULL;
-  }
-  return b;
-}
-
-OSQPVectorf* OSQPVectorf_calloc(c_int length) {
-
-  OSQPVectorf *b = (OSQPVectorf*) c_malloc(sizeof(OSQPVectorf));
-  if (!b) return OSQP_NULL;
-
-  b->length = length;
-  if (length) {
-    cuda_calloc((void **) &b->d_val, length * sizeof(c_float));
-    if (!(b->d_val)) {
-      c_free(b);
-      b = OSQP_NULL;
-    }
-  }
-  else {
-    b->d_val  = OSQP_NULL;
+    b->d_val = OSQP_NULL;
   }
   return b;
 }
@@ -108,7 +112,7 @@ OSQPVectori* OSQPVectori_calloc(c_int length) {
     }
   }
   else {
-    b->d_val  = OSQP_NULL;
+    b->d_val = OSQP_NULL;
   }
   return b;
 }
@@ -124,7 +128,10 @@ OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf *a) {
 
 void OSQPVectorf_free(OSQPVectorf *a) {
 
-  if (a) cuda_free((void **) &a->d_val);
+  if (a) {
+    cuda_vec_destroy(a->vec);
+    cuda_free((void **) &a->d_val);
+  }
   c_free(a);
 }
 
@@ -142,6 +149,7 @@ OSQPVectorf* OSQPVectorf_view(const OSQPVectorf *a,
   if (view) {
     view->length = length;
     view->d_val  = a->d_val  + head;
+    cuda_vec_create(&view->vec, view->d_val, length);
   }
   return view;
 }
@@ -151,7 +159,6 @@ void OSQPVectorf_view_free(OSQPVectorf *a) {
 }
 
 c_int OSQPVectorf_length(const OSQPVectorf *a) {return a->length;}
-// c_int OSQPVectori_length(const OSQPVectori *a) {return a->length;}
 
 void OSQPVectorf_copy(OSQPVectorf       *b,
                       const OSQPVectorf *a) {
@@ -252,16 +259,6 @@ c_float OSQPVectorf_norm_inf(const OSQPVectorf *v) {
 
   return normval;
 }
-
-// c_float OSQPVectorf_norm_1(const OSQPVectorf *v) {
-
-//   c_float normval;
-
-//   if (v->length) cuda_vec_norm_1(v->d_val, v->length, &normval);
-//   else           normval = 0.0;
-
-//   return normval;
-// }
 
 c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S,
                                     const OSQPVectorf *v) {

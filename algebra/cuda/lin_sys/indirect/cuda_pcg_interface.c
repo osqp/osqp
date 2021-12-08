@@ -69,7 +69,7 @@ static void compute_rhs(cudapcg_solver *s,
   c_int n = s->n;
   c_int m = s->m;
 
-  /* d_rhs = d_b1 */
+  /* rhs = b1 */
   cuda_vec_copy_d2d(s->d_rhs, d_b, n);
 
   if (m == 0) return;
@@ -87,7 +87,7 @@ static void compute_rhs(cudapcg_solver *s,
   }
 
   /* d_rhs += A' * d_z */
-  cuda_mat_Axpy(s->At, s->d_z, s->d_rhs, 1.0, 1.0);
+  cuda_mat_Axpy(s->At, s->vecz, s->vecrhs, 1.0, 1.0);
 }
 
 
@@ -151,7 +151,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
     s->h_rho   = 1. / settings->delta;
   }
 
-  /* Allocate PCG iterates */
+  /* Allocate raw PCG iterates */
   cuda_calloc((void **) &s->d_x,   n * sizeof(c_float));    /* Set d_x to zero */
   cuda_malloc((void **) &s->d_p,   n * sizeof(c_float));
   cuda_malloc((void **) &s->d_Kp,  n * sizeof(c_float));
@@ -160,6 +160,15 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   cuda_malloc((void **) &s->d_rhs, n * sizeof(c_float));
   if (m) cuda_malloc((void **) &s->d_z, m * sizeof(c_float));
   else   s->d_z = NULL;
+
+  /* Create dense vector descriptors for PCG iterates */
+  cuda_vec_create(&s->vecx,   s->d_x,   n);
+  cuda_vec_create(&s->vecp,   s->d_p,   n);
+  cuda_vec_create(&s->vecKp,  s->d_Kp,  n);
+  cuda_vec_create(&s->vecr,   s->d_r,   n);
+  cuda_vec_create(&s->vecrhs, s->d_rhs, n);
+  if (m) cuda_vec_create(&s->vecz, s->d_z, m);
+  else   s->vecz = NULL;
 
   /* Allocate scalar in host memory that is page-locked and accessible to device */
   cuda_malloc_host((void **) &s->h_r_norm, sizeof(c_float));
@@ -215,18 +224,24 @@ c_int solve_linsys_cudapcg(cudapcg_solver *s,
   /* Solve the linear system with PCG */
   pcg_iters = cuda_pcg_alg(s, eps, s->max_iter);
 
-  /* Copy the first part of the solution to b->d_val */
+  /* Copy the first part of the solution to b */
   cuda_vec_copy_d2d(b->d_val, s->d_x, s->n);
 
   if (!s->polishing) {
-    /* Compute d_z = A * d_x */
-    if (s->m) cuda_mat_Axpy(s->A, s->d_x, b->d_val + s->n, 1.0, 0.0);
+    /* Compute z = A * x */
+    if (s->m) cuda_mat_Axpy(s->A, s->vecx, s->vecz, 1.0, 0.0);
   }
   else {
-    // yred = (A * d_x - b) / delta
-    cuda_mat_Axpy(s->A, s->d_x, b->d_val + s->n, 1.0, -1.0);
-    cuda_vec_mult_sc(b->d_val + s->n, s->h_rho, s->m);
+    /* Copy the second part of b to z */
+    cuda_vec_copy_d2d(s->d_z, b->d_val + s->n, s->m);
+
+    /* yred = (A * x - b2) / delta */
+    cuda_mat_Axpy(s->A, s->vecx, s->vecz, 1.0, -1.0);
+    cuda_vec_mult_sc(s->d_z, s->h_rho, s->m);
   }
+
+  /* Copy the second part of the solution to b */
+  if (s->m) cuda_vec_copy_d2d(b->d_val + s->n, s->d_z, s->m);
 
   // Number of consecutive ADMM iterations with zero PCG iterations
   if (pcg_iters == 0) s->zero_pcg_iters++;
@@ -255,7 +270,15 @@ void warm_start_linsys_solver_cudapcg(cudapcg_solver    *s,
 void free_linsys_solver_cudapcg(cudapcg_solver *s) {
 
   if (s) {
-    /* PCG iterates */
+    /* Dense vector descriptors for PCG iterates */
+    cuda_vec_destroy(s->vecx);
+    cuda_vec_destroy(s->vecp);
+    cuda_vec_destroy(s->vecKp);
+    cuda_vec_destroy(s->vecr);
+    cuda_vec_destroy(s->vecrhs);
+    if (s->m) cuda_vec_destroy(s->vecz);
+
+    /* Raw PCG iterates */
     cuda_free((void **) &s->d_x);
     cuda_free((void **) &s->d_p);
     cuda_free((void **) &s->d_Kp);

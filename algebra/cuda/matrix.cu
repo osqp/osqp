@@ -92,7 +92,12 @@ void OSQPMatrix_Axpy(const OSQPMatrix  *mat,
                      c_float            alpha,
                      c_float            beta) {
 
-  cuda_mat_Axpy(mat->S, x->d_val, y->d_val, alpha, beta);
+  if (mat->S->nnz == 0 || alpha == 0.0) {
+    /*  y = beta * y  */
+    cuda_vec_mult_sc(y->d_val, beta, y->length);
+    return;
+  }
+  cuda_mat_Axpy(mat->S, x->vec, y->vec, alpha, beta);
 }
 
 void OSQPMatrix_Atxpy(const OSQPMatrix  *mat,
@@ -101,7 +106,12 @@ void OSQPMatrix_Atxpy(const OSQPMatrix  *mat,
                       c_float            alpha,
                       c_float            beta) {
 
-  cuda_mat_Axpy(mat->At, x->d_val, y->d_val, alpha, beta);
+  if (mat->At->nnz == 0 || alpha == 0.0) {
+    /*  y = beta * y  */
+    cuda_vec_mult_sc(y->d_val, beta, y->length);
+    return;
+  }
+  cuda_mat_Axpy(mat->At, x->vec, y->vec, alpha, beta);
 }
 
 void OSQPMatrix_col_norm_inf(const OSQPMatrix *mat,
@@ -116,8 +126,6 @@ void OSQPMatrix_row_norm_inf(const OSQPMatrix *mat,
 
   cuda_mat_row_norm_inf(mat->S, res->d_val);
 }
-
-
 
 void OSQPMatrix_free(OSQPMatrix *mat){
   if (mat) {

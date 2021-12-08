@@ -18,11 +18,8 @@
 #ifndef ALGEBRA_TYPES_H
 # define ALGEBRA_TYPES_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif
 
-
+#include <cusparse.h>
 #include "osqp_api_types.h"
 
 
@@ -37,8 +34,9 @@ struct OSQPVectori_ {
 };
 
 struct OSQPVectorf_ {
-  c_float *d_val;
-  c_int    length;
+  c_float              *d_val;
+  c_int                 length;
+  cusparseDnVecDescr_t  vec;
 };
 
 
@@ -60,9 +58,5 @@ struct OSQPMatrix_ {
   c_int    P_triu_nnz;
 };
 
-
-# ifdef __cplusplus
-}
-# endif
 
 #endif /* ifndef ALGEBRA_TYPES_H */

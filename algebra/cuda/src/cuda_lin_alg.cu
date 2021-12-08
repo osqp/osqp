@@ -470,6 +470,18 @@ template void Segmented_reduce<abs_maximum<c_float>>(const c_int          *key_s
  *                           API Functions                                     *
  *******************************************************************************/
 
+void cuda_vec_create(cusparseDnVecDescr_t *vec,
+                     const c_float        *d_x,
+                     c_int                 n) {
+
+  checkCudaErrors(cusparseCreateDnVec(vec, n, (void*)d_x, CUDA_FLOAT));
+}
+
+void cuda_vec_destroy(cusparseDnVecDescr_t vec) {
+
+  if (vec) checkCudaErrors(cusparseDestroyDnVec(vec));
+}
+
 void cuda_vec_copy_d2d(c_float       *d_y,
                        const c_float *d_x,
                        c_int          n) {
@@ -927,25 +939,16 @@ void cuda_mat_rmult_diag_new(const csr     *S,
   mat_rmult_diag_new_kernel<<<number_of_blocks,THREADS_PER_BLOCK>>>(S->col_ind, d_diag, S->val, d_buffer, nnz);
 }
 
-void cuda_mat_Axpy(const csr     *A,
-                   const c_float *d_x,
-                   c_float       *d_y,
-                   c_float        alpha,
-                   c_float        beta) {
-
-  if (A->nnz == 0 || alpha == 0.0) {
-    /* d_y = beta * d_y */
-    cuda_vec_mult_sc(d_y, beta, A->m);
-    return;
-  }
-
-  checkCudaErrors(cusparseCsrmvEx(CUDA_handle->cusparseHandle, A->alg,
-                                  CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                  A->m, A->n, A->nnz, &alpha,
-                                  CUDA_FLOAT, A->MatDescription, A->val,
-                                  CUDA_FLOAT, A->row_ptr, A->col_ind, d_x,
-                                  CUDA_FLOAT, &beta, CUDA_FLOAT, d_y,
-                                  CUDA_FLOAT, CUDA_FLOAT, A->buffer));
+void cuda_mat_Axpy(const csr                  *A,
+                   const cusparseDnVecDescr_t  vecx,
+                   cusparseDnVecDescr_t        vecy,
+                   c_float                     alpha,
+                   c_float                     beta) {
+ 
+  checkCudaErrors(cusparseSpMV(
+    CUDA_handle->cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+    &alpha, A->SpMatDescr, vecx, &beta, vecy,
+    CUDA_FLOAT, CUSPARSE_SPMV_ALG_DEFAULT, A->SpMatBuffer));
 }
 
 void cuda_mat_row_norm_inf(const csr *S,
