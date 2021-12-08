@@ -80,14 +80,14 @@ typedef struct cudapcg_solver_ {
   c_float *scaled_prim_res;
   c_float *scaled_dual_res;
 
-  /* Pointers to problem data and ADMM settings */
+  /* ADMM settings and pointers to problem data */
+  c_float  h_rho;
+  c_float  h_sigma;
   csr     *A;
   csr     *At;
   csr     *P;
   c_int   *d_P_diag_ind;
   c_float *d_rho_vec;
-  c_float *h_sigma;
-  c_float *h_rho;
 
   /* PCG iterates */
   c_float *d_x;             ///<  current iterate solution

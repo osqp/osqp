@@ -61,7 +61,7 @@ static void mat_vec_prod(cudapcg_solver *s,
   csr *A  = s->A;
   csr *At = s->At;
 
-  sigma = device ? s->d_sigma : s->h_sigma;
+  sigma = device ? s->d_sigma : &s->h_sigma;
 
   /* d_y = d_x */
   checkCudaErrors(cudaMemcpy(d_y, d_x, n * sizeof(c_float), cudaMemcpyDeviceToDevice));
@@ -84,7 +84,7 @@ static void mat_vec_prod(cudapcg_solver *s,
     /* d_z = rho * A * d_x */
     checkCudaErrors(cusparseCsrmvEx(CUDA_handle->cusparseHandle, A->alg,
                                     CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                    A->m, A->n, A->nnz, s->h_rho,
+                                    A->m, A->n, A->nnz, &s->h_rho,
                                     CUDA_FLOAT, A->MatDescription, A->val,
                                     CUDA_FLOAT, A->row_ptr, A->col_ind, d_x,
                                     CUDA_FLOAT, &H_ZERO, CUDA_FLOAT, s->d_z,
@@ -248,7 +248,7 @@ void cuda_pcg_update_precond(cudapcg_solver *s,
       }
 
       /* d_AtRA_diag_val = rho * d_AtA_diag_val */
-      cuda_vec_add_scaled(s->d_AtRA_diag_val, s->d_AtA_diag_val, NULL, *s->h_rho, 0.0, n);
+      cuda_vec_add_scaled(s->d_AtRA_diag_val, s->d_AtA_diag_val, NULL, s->h_rho, 0.0, n);
     }
     else {    /* R = diag(d_rho_vec)  -->  A'*R*A = A' * diag(d_rho_vec) * A */
       cuda_mat_rmult_diag_new(At, tmp, s->d_rho_vec);   /* tmp = A' * R */
@@ -262,7 +262,7 @@ void cuda_pcg_update_precond(cudapcg_solver *s,
   }
 
   /* d_diag_precond = sigma */
-  cuda_vec_set_sc(s->d_diag_precond, *s->h_sigma, n);
+  cuda_vec_set_sc(s->d_diag_precond, s->h_sigma, n);
 
   /* d_diag_precond += d_P_diag_val + d_AtRA_diag_val */
   cuda_vec_add_scaled3(s->d_diag_precond, s->d_diag_precond, s->d_P_diag_val, s->d_AtRA_diag_val, 1.0, 1.0, 1.0, n);

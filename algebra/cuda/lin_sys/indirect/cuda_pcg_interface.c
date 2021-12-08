@@ -79,7 +79,7 @@ static void compute_rhs(cudapcg_solver *s,
 
   if (!s->d_rho_vec) {
     /* d_z *= rho */
-    cuda_vec_mult_sc(s->d_z, *s->h_rho, m);
+    cuda_vec_mult_sc(s->d_z, s->h_rho, m);
   }
   else {
     /* d_z = diag(d_rho_vec) * d_z */
@@ -108,7 +108,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   c_float H_MINUS_ONE = -1.0;
 
   /* Allocate linsys solver structure */
-  cudapcg_solver *s = c_calloc(1, sizeof(cudapcg_solver));
+  cudapcg_solver *s = (cudapcg_solver *)c_calloc(1, sizeof(cudapcg_solver));
   *sp = s;
 
   /* Assign type and the number of threads */
@@ -143,13 +143,12 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   if (rho_vec)
     s->d_rho_vec  = rho_vec->d_val;
   if (!polishing) {
-    s->h_sigma = &settings->sigma;
-    s->h_rho   = &settings->rho;
+    s->h_sigma = settings->sigma;
+    s->h_rho   = settings->rho;
   }
   else {
-    s->h_sigma = &settings->delta;
-    s->h_rho   = (c_float*) c_malloc(sizeof(c_float));
-    *s->h_rho  = 1. / settings->delta;
+    s->h_sigma = settings->delta;
+    s->h_rho   = 1. / settings->delta;
   }
 
   /* Allocate PCG iterates */
@@ -159,7 +158,8 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   cuda_malloc((void **) &s->d_y,   n * sizeof(c_float));
   cuda_malloc((void **) &s->d_r,   n * sizeof(c_float));
   cuda_malloc((void **) &s->d_rhs, n * sizeof(c_float));
-  if (m != 0) cuda_malloc((void **) &s->d_z, m * sizeof(c_float));
+  if (m) cuda_malloc((void **) &s->d_z, m * sizeof(c_float));
+  else   s->d_z = NULL;
 
   /* Allocate scalar in host memory that is page-locked and accessible to device */
   cuda_malloc_host((void **) &s->h_r_norm, sizeof(c_float));
@@ -174,7 +174,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   s->D_MINUS_ONE = s->d_r_norm + 6;
   s->d_sigma     = s->d_r_norm + 7;
   cuda_vec_copy_h2d(s->D_MINUS_ONE, &H_MINUS_ONE, 1);
-  cuda_vec_copy_h2d(s->d_sigma,     s->h_sigma,   1);
+  cuda_vec_copy_h2d(s->d_sigma,     &s->h_sigma,  1);
 
   /* Allocate memory for PCG preconditioning */
   cuda_malloc((void **) &s->d_P_diag_val,       n * sizeof(c_float));
@@ -225,7 +225,7 @@ c_int solve_linsys_cudapcg(cudapcg_solver *s,
   else {
     // yred = (A * d_x - b) / delta
     cuda_mat_Axpy(s->A, s->d_x, b->d_val + s->n, 1.0, -1.0);
-    cuda_vec_mult_sc(b->d_val + s->n, *s->h_rho, s->m);
+    cuda_vec_mult_sc(b->d_val + s->n, s->h_rho, s->m);
   }
 
   // Number of consecutive ADMM iterations with zero PCG iterations
@@ -255,8 +255,6 @@ void warm_start_linsys_solver_cudapcg(cudapcg_solver    *s,
 void free_linsys_solver_cudapcg(cudapcg_solver *s) {
 
   if (s) {
-    if (s->polishing) c_free(s->h_rho);
-
     /* PCG iterates */
     cuda_free((void **) &s->d_x);
     cuda_free((void **) &s->d_p);
@@ -264,7 +262,7 @@ void free_linsys_solver_cudapcg(cudapcg_solver *s) {
     cuda_free((void **) &s->d_y);
     cuda_free((void **) &s->d_r);
     cuda_free((void **) &s->d_rhs);
-    cuda_free((void **) &s->d_z);
+    if (s->m) cuda_free((void **) &s->d_z);
 
     /* Free page-locked host memory */
     cuda_free_host((void **) &s->h_r_norm);
@@ -297,6 +295,7 @@ c_int update_linsys_solver_rho_vec_cudapcg(cudapcg_solver    *s,
                                            const OSQPVectorf *rho_vec,
                                            c_float            rho_sc) {
 
+  s->h_rho = rho_sc;
   cuda_pcg_update_precond(s, 0, 0, 1);
   return 0;
 }
