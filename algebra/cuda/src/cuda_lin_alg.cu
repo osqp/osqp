@@ -884,12 +884,11 @@ void cuda_vec_gather(c_int          nnz,
 
 void cuda_mat_mult_sc(csr     *S,
                       csr     *At,
-                      c_int    symmetric,
                       c_float  sc) {
 
   checkCudaErrors(cublasTscal(CUDA_handle->cublasHandle, S->nnz, &sc, S->val, 1));
 
-  if (!symmetric) {
+  if (At) {
     /* Update At as well */
     checkCudaErrors(cublasTscal(CUDA_handle->cublasHandle, At->nnz, &sc, At->val, 1));
   }
@@ -897,7 +896,6 @@ void cuda_mat_mult_sc(csr     *S,
 
 void cuda_mat_lmult_diag(csr           *S,
                          csr           *At,
-                         c_int          symmetric,
                          const c_float *d_diag) {
 
   c_int nnz = S->nnz;
@@ -905,7 +903,7 @@ void cuda_mat_lmult_diag(csr           *S,
 
   mat_lmult_diag_kernel<<<number_of_blocks,THREADS_PER_BLOCK>>>(S->row_ind, d_diag, S->val, nnz);
 
-  if (!symmetric) {
+  if (At) {
     /* Multiply At from right */
     mat_rmult_diag_kernel<<<number_of_blocks,THREADS_PER_BLOCK>>>(At->col_ind, d_diag, At->val, nnz);
   }
@@ -913,7 +911,6 @@ void cuda_mat_lmult_diag(csr           *S,
 
 void cuda_mat_rmult_diag(csr           *S,
                          csr           *At,
-                         c_int          symmetric,
                          const c_float *d_diag) {
 
   c_int nnz = S->nnz;
@@ -921,7 +918,7 @@ void cuda_mat_rmult_diag(csr           *S,
 
   mat_rmult_diag_kernel<<<number_of_blocks,THREADS_PER_BLOCK>>>(S->col_ind, d_diag, S->val, nnz);
 
-  if (!symmetric) {
+  if (At) {
     /* Multiply At from left */
     mat_lmult_diag_kernel<<<number_of_blocks,THREADS_PER_BLOCK>>>(At->row_ind, d_diag, At->val, nnz);
   }

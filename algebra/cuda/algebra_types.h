@@ -52,13 +52,12 @@ typedef struct csr_t csr;
 
 struct OSQPMatrix_ {
   csr     *S;   /* P or A */
-  csr     *At;
+  csr     *At;  /* NULL if symmetric */
   c_int   *d_A_to_At_ind;
   c_float *d_P_triu_val;
   c_int   *d_P_triu_to_full_ind;
   c_int   *d_P_diag_ind;
   c_int    P_triu_nnz;
-  c_int    symmetric;
 };
 
 

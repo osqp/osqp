@@ -295,7 +295,6 @@ void cuda_vec_gather(c_int          nnz,
  */
 void cuda_mat_mult_sc(csr     *S,
                       csr     *At,
-                      c_int    symmetric,
                       c_float  sc);
 
 /**
@@ -303,7 +302,6 @@ void cuda_mat_mult_sc(csr     *S,
  */
 void cuda_mat_lmult_diag(csr           *S,
                          csr           *At,
-                         c_int          symmetric,
                          const c_float *d_diag);
 
 /**
@@ -311,7 +309,6 @@ void cuda_mat_lmult_diag(csr           *S,
  */
 void cuda_mat_rmult_diag(csr           *S,
                          csr           *At,
-                         c_int          symmetric,
                          const c_float *d_diag);
 
 /**

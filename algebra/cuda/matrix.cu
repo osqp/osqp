@@ -36,13 +36,12 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const csc *M,
 
   if (is_triu) {
     /* Initialize P */
-    out->symmetric = 1;
+    out->At = NULL;   /* indicates a symmetric matrix */
     out->P_triu_nnz = M->p[M->n];
     cuda_mat_init_P(M, &out->S, &out->d_P_triu_val, &out->d_P_triu_to_full_ind, &out->d_P_diag_ind);
   }
   else {
     /* Initialize A */
-    out->symmetric = 0;
     cuda_mat_init_A(M, &out->S, &out->At, &out->d_A_to_At_ind);
   }
 
@@ -54,12 +53,12 @@ void OSQPMatrix_update_values(OSQPMatrix    *mat,
                               const c_int   *Mx_new_idx,
                               c_int          Mx_new_n) {
 
-  if (mat->symmetric) {
-    cuda_mat_update_P(Mx_new, Mx_new_idx, Mx_new_n, &mat->S, mat->d_P_triu_val,
-                      mat->d_P_triu_to_full_ind, mat->d_P_diag_ind, mat->P_triu_nnz);
+  if (mat->At) { /* not symmetric */
+    cuda_mat_update_A(Mx_new, Mx_new_idx, Mx_new_n, &mat->S, &mat->At, mat->d_A_to_At_ind);
   }
   else {
-    cuda_mat_update_A(Mx_new, Mx_new_idx, Mx_new_n, &mat->S, &mat->At, mat->d_A_to_At_ind);
+    cuda_mat_update_P(Mx_new, Mx_new_idx, Mx_new_n, &mat->S, mat->d_P_triu_val,
+                      mat->d_P_triu_to_full_ind, mat->d_P_diag_ind, mat->P_triu_nnz);
   }
 }
 
@@ -67,24 +66,24 @@ c_int OSQPMatrix_get_m( const OSQPMatrix *mat) { return mat->S->m; }
 
 c_int OSQPMatrix_get_n( const OSQPMatrix *mat) { return mat->S->n; }
 
-c_int OSQPMatrix_get_nz(const OSQPMatrix *mat) { return mat->symmetric ? mat->P_triu_nnz : mat->S->nnz; }
+c_int OSQPMatrix_get_nz(const OSQPMatrix *mat) { return mat->At ? mat->S->nnz : mat->P_triu_nnz; }
 
 void OSQPMatrix_mult_scalar(OSQPMatrix *mat,
                             c_float     sc) {
 
-  cuda_mat_mult_sc(mat->S, mat->At, mat->symmetric, sc);
+  cuda_mat_mult_sc(mat->S, mat->At, sc);
 }
 
 void OSQPMatrix_lmult_diag(OSQPMatrix        *mat,
                            const OSQPVectorf *D) {
 
-  cuda_mat_lmult_diag(mat->S, mat->At, mat->symmetric, D->d_val);
+  cuda_mat_lmult_diag(mat->S, mat->At, D->d_val);
 }
 
 void OSQPMatrix_rmult_diag(OSQPMatrix        *mat,
                            const OSQPVectorf *D) {
 
-  cuda_mat_rmult_diag(mat->S, mat->At, mat->symmetric, D->d_val);
+  cuda_mat_rmult_diag(mat->S, mat->At, D->d_val);
 }
 
 void OSQPMatrix_Axpy(const OSQPMatrix  *mat,
@@ -110,7 +109,7 @@ c_float OSQPMatrix_quad_form(const OSQPMatrix  *mat,
 
   c_float res;
 
-  if (mat->symmetric) {
+  if (!mat->At) {
     cuda_mat_quad_form(mat->S, x->d_val, &res);
     return res;
   }
@@ -126,8 +125,8 @@ c_float OSQPMatrix_quad_form(const OSQPMatrix  *mat,
 void OSQPMatrix_col_norm_inf(const OSQPMatrix *mat,
                              OSQPVectorf      *res) {
 
-  if (mat->symmetric) cuda_mat_row_norm_inf(mat->S,  res->d_val);
-  else                cuda_mat_row_norm_inf(mat->At, res->d_val);
+  if (mat->At) cuda_mat_row_norm_inf(mat->At, res->d_val);
+  else         cuda_mat_row_norm_inf(mat->S,  res->d_val);
 }
 
 void OSQPMatrix_row_norm_inf(const OSQPMatrix *mat,
@@ -155,7 +154,7 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix  *mat,
 
   OSQPMatrix *out;
 
-  if (mat->symmetric) {
+  if (!mat->At) {
 #ifdef PRINTING
     c_eprint("row selection not implemented for partially filled matrices");
 #endif
@@ -163,10 +162,8 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix  *mat,
   }
 
   out = (OSQPMatrix *) c_calloc(1, sizeof(OSQPMatrix));
-
   if (!out) return OSQP_NULL;
 
-  out->symmetric = 0;
   cuda_submat_byrows(mat->S, rows->d_val, &out->S, &out->At);
 
   return out;
