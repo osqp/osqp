@@ -119,13 +119,6 @@ void cuda_vec_norm_inf(const c_float *d_x,
                        c_int          n,
                        c_float       *h_res);
 
-// /**
-//  * h_res = |d_x|_1
-//  */
-// void cuda_vec_norm_1(const c_float *d_x,
-//                      c_int          n,
-//                      c_float       *h_res);
-
 /**
  * res = |d_x|_2
  */
@@ -327,13 +320,6 @@ void cuda_mat_Axpy(const csr     *A,
                    c_float       *d_y,
                    c_float        alpha,
                    c_float        beta);
-
-/**
- * h_res = (1/2) d_x' * P * d_x
- */
-void cuda_mat_quad_form(const csr     *P,
-                        const c_float *d_x,
-                        c_float       *h_res);
 
 /**
  * d_res[i] = |S_i|_inf where S_i is i-th row of S

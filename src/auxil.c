@@ -236,22 +236,22 @@ c_float compute_obj_val(const OSQPSolver  *solver,
                         const OSQPVectorf *x) {
 
   c_float obj_val;
-  OSQPSettings*  settings = solver->settings;
-  OSQPWorkspace* work     = solver->work;
+  OSQPWorkspace *work = solver->work;
 
-  obj_val = OSQPMatrix_quad_form(work->data->P, x) +
+  /* NB: The function is always called after dual_res is computed */
+  obj_val = 0.5 * OSQPVectorf_dot_prod(work->Px, x) +
             OSQPVectorf_dot_prod(work->data->q, x);
 
-  if (settings->scaling) {
+  if (solver->settings->scaling) {
     obj_val *= work->scaling->cinv;
   }
 
   return obj_val;
 }
 
-c_float compute_prim_res(OSQPSolver        *solver,
-                         const OSQPVectorf *x,
-                         const OSQPVectorf *z) {
+static c_float compute_prim_res(OSQPSolver        *solver,
+                                const OSQPVectorf *x,
+                                const OSQPVectorf *z) {
 
   // NB: Use z_prev as working vector
   // pr = Ax - z
@@ -275,9 +275,9 @@ c_float compute_prim_res(OSQPSolver        *solver,
   return prim_res;
 }
 
-c_float compute_prim_tol(const OSQPSolver *solver,
-                         c_float           eps_abs,
-                         c_float           eps_rel) {
+static c_float compute_prim_tol(const OSQPSolver *solver,
+                                c_float           eps_abs,
+                                c_float           eps_rel) {
 
   c_float max_rel_eps, temp_rel_eps;
   OSQPSettings*  settings = solver->settings;
@@ -312,30 +312,30 @@ c_float compute_prim_tol(const OSQPSolver *solver,
   return eps_abs + eps_rel * max_rel_eps;
 }
 
-c_float compute_dual_res(OSQPSolver        *solver,
-                         const OSQPVectorf *x,
-                         const OSQPVectorf *y) {
+static c_float compute_dual_res(OSQPSolver        *solver,
+                                const OSQPVectorf *x,
+                                const OSQPVectorf *y) {
 
   // NB: Use x_prev as temporary vector
   // NB: Only upper triangular part of P is stored.
   // dr = q + A'*y + P*x
 
-  OSQPSettings*  settings = solver->settings;
-  OSQPWorkspace* work     = solver->work;
+  OSQPSettings  *settings = solver->settings;
+  OSQPWorkspace *work     = solver->work;
   c_float dual_res;
 
   // dr = q
-  OSQPVectorf_copy(work->x_prev,work->data->q);
+  OSQPVectorf_copy(work->x_prev, work->data->q);
 
-  // P * x (upper triangular part)
-  OSQPMatrix_Axpy(work->data->P, x, work->Px, 1.0, 0.0); //Px = P*x
+  // Px = P * x
+  OSQPMatrix_Axpy(work->data->P, x, work->Px, 1.0, 0.0);
 
-  // dr += P * x (full P matrix)
+  // dr += Px
   OSQPVectorf_plus(work->x_prev, work->x_prev, work->Px);
 
   // dr += A' * y
-  if (work->data->m > 0) {
-    OSQPMatrix_Atxpy(work->data->A, y, work->Aty, 1.0, 0.0); //Ax = A*x
+  if (work->data->m) {
+    OSQPMatrix_Atxpy(work->data->A, y, work->Aty, 1.0, 0.0);
     OSQPVectorf_plus(work->x_prev, work->x_prev, work->Aty);
   }
 
@@ -353,9 +353,9 @@ c_float compute_dual_res(OSQPSolver        *solver,
   return dual_res;
 }
 
-c_float compute_dual_tol(const OSQPSolver *solver,
-                         c_float           eps_abs,
-                         c_float           eps_rel) {
+static c_float compute_dual_tol(const OSQPSolver *solver,
+                                c_float           eps_abs,
+                                c_float           eps_rel) {
 
   c_float max_rel_eps, temp_rel_eps;
   OSQPSettings*  settings = solver->settings;
@@ -661,12 +661,6 @@ void update_info(OSQPSolver *solver,
 
 #endif /* ifndef EMBEDDED */
 
-
-  // Compute the objective if needed
-  if (compute_objective) {
-    *obj_val = compute_obj_val(solver, x);
-  }
-
   // Compute primal residual
   if (work->data->m == 0) {
     // No constraints -> Always primal feasible
@@ -675,8 +669,13 @@ void update_info(OSQPSolver *solver,
     *prim_res = compute_prim_res(solver, x, z);
   }
 
-  // Compute dual residual
+  // Compute dual residual; store P*x in work->Px
   *dual_res = compute_dual_res(solver, x, y);
+
+  // Compute the objective if needed
+  if (compute_objective) {
+    *obj_val = compute_obj_val(solver, x);
+  }
 
   // Update timing
 #ifdef PROFILING

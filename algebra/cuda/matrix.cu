@@ -104,24 +104,6 @@ void OSQPMatrix_Atxpy(const OSQPMatrix  *mat,
   cuda_mat_Axpy(mat->At, x->d_val, y->d_val, alpha, beta);
 }
 
-c_float OSQPMatrix_quad_form(const OSQPMatrix  *mat,
-                             const OSQPVectorf *x) {
-
-  c_float res;
-
-  if (!mat->At) {
-    cuda_mat_quad_form(mat->S, x->d_val, &res);
-    return res;
-  }
-  else {
-#ifdef PRINTING
-    c_eprint("quad_form matrix is not upper triangular");
-#endif /* ifdef PRINTING */
-    return -1.0;
-  }
-}
-
-
 void OSQPMatrix_col_norm_inf(const OSQPMatrix *mat,
                              OSQPVectorf      *res) {
 

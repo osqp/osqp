@@ -614,13 +614,6 @@ void cuda_vec_norm_inf(const c_float *d_x,
   }
 }
 
-// void cuda_vec_norm_1(const c_float *d_x,
-//                      c_int          n,
-//                      c_float       *h_res) {
-
-//   cublasTasum(CUDA_handle->cublasHandle, n, d_x, 1, h_res);
-// }
-
 void cuda_vec_norm_2(const c_float *d_x,
                      c_int          n,
                      c_float       *h_res) {
@@ -953,27 +946,6 @@ void cuda_mat_Axpy(const csr     *A,
                                   CUDA_FLOAT, A->row_ptr, A->col_ind, d_x,
                                   CUDA_FLOAT, &beta, CUDA_FLOAT, d_y,
                                   CUDA_FLOAT, CUDA_FLOAT, A->buffer));
-}
-
-void cuda_mat_quad_form(const csr     *P,
-                        const c_float *d_x,
-                        c_float       *h_res) {
-
-  c_int n = P->n;
-  c_float *d_Px;
-
-  cuda_malloc((void **) &d_Px, n * sizeof(c_float));
-
-  /* d_Px = P * x */
-  cuda_mat_Axpy(P, d_x, d_Px, 1.0, 0.0);
-
-  /* h_res = d_Px' * d_x */
-  cuda_vec_prod(d_Px, d_x, n, h_res);
-
-  /* h_res *= 0.5 */
-  (*h_res) *= 0.5;
-
-  cuda_free((void **) &d_Px);
 }
 
 void cuda_mat_row_norm_inf(const csr *S,

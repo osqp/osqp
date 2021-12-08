@@ -34,9 +34,9 @@ TEST_CASE( "test_lin_alg", "[multi-file:1]" ) {
     SECTION( "test_mat_vec_multiplication" ) {
         test_mat_vec_multiplication();
     }
-    SECTION( "test_quad_form_upper_triang" ) {
-        test_quad_form_upper_triang();
-    }
+    // SECTION( "test_quad_form_upper_triang" ) {
+    //     test_quad_form_upper_triang();
+    // }
 	osqp_algebra_free_libs();
 }
 
