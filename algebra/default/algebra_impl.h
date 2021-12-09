@@ -31,7 +31,7 @@ struct OSQPVectorf_ {
 /**
  *  An enum used to indicate whether a matrix is symmetric.   Options
  *  NONE : matrix is fully populated
- *  TRUI : matrix is symmetric and only upper triangle is stored
+ *  TRIU : matrix is symmetric and only upper triangle is stored
  */
 typedef enum OSQPMatrix_symmetry_type {NONE,TRIU} OSQPMatrix_symmetry_type;
 

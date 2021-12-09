@@ -51,6 +51,7 @@ OSQPVectorf* OSQPVectorf_view(const OSQPVectorf *a,
                               c_int              length);
 
 /* Points existing subview somewhere else.  (Does not use MALLOC)
+ * TODO: Get rid of this function
  */
 void OSQPVectorf_view_update(OSQPVectorf *a, const OSQPVectorf *b, c_int head, c_int length);
 

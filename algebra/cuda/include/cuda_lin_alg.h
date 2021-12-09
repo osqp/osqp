@@ -18,6 +18,7 @@
 #ifndef CUDA_LIN_ALG_H
 # define CUDA_LIN_ALG_H
 
+#include <cusparse.h>
 #include "algebra_types.h"
 
 # ifdef __cplusplus
@@ -28,6 +29,12 @@ extern "C" {
 /*******************************************************************************
  *                           Vector Functions                                  *
  *******************************************************************************/
+
+void cuda_vec_create(cusparseDnVecDescr_t *vec,
+                     const c_float        *d_x,
+                     c_int                 n);
+
+void cuda_vec_destroy(cusparseDnVecDescr_t vec);
 
 /*
  * d_y[i] = d_x[i] for i in [0,n-1]
@@ -118,13 +125,6 @@ void cuda_vec_add_scaled3(c_float       *d_x,
 void cuda_vec_norm_inf(const c_float *d_x,
                        c_int          n,
                        c_float       *h_res);
-
-// /**
-//  * h_res = |d_x|_1
-//  */
-// void cuda_vec_norm_1(const c_float *d_x,
-//                      c_int          n,
-//                      c_float       *h_res);
 
 /**
  * res = |d_x|_2
@@ -295,7 +295,6 @@ void cuda_vec_gather(c_int          nnz,
  */
 void cuda_mat_mult_sc(csr     *S,
                       csr     *At,
-                      c_int    symmetric,
                       c_float  sc);
 
 /**
@@ -303,7 +302,6 @@ void cuda_mat_mult_sc(csr     *S,
  */
 void cuda_mat_lmult_diag(csr           *S,
                          csr           *At,
-                         c_int          symmetric,
                          const c_float *d_diag);
 
 /**
@@ -311,7 +309,6 @@ void cuda_mat_lmult_diag(csr           *S,
  */
 void cuda_mat_rmult_diag(csr           *S,
                          csr           *At,
-                         c_int          symmetric,
                          const c_float *d_diag);
 
 /**
@@ -325,18 +322,11 @@ void cuda_mat_rmult_diag_new(const csr     *S,
 /**
  * d_y = alpha * A*d_x + beta*d_y
  */
-void cuda_mat_Axpy(const csr     *A,
-                   const c_float *d_x,
-                   c_float       *d_y,
-                   c_float        alpha,
-                   c_float        beta);
-
-/**
- * h_res = (1/2) d_x' * P * d_x
- */
-void cuda_mat_quad_form(const csr     *P,
-                        const c_float *d_x,
-                        c_float       *h_res);
+void cuda_mat_Axpy(const csr                  *A,
+                   const cusparseDnVecDescr_t  vecx,
+                   cusparseDnVecDescr_t        vecy,
+                   c_float                     alpha,
+                   c_float                     beta);
 
 /**
  * d_res[i] = |S_i|_inf where S_i is i-th row of S

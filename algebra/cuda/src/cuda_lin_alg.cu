@@ -470,6 +470,18 @@ template void Segmented_reduce<abs_maximum<c_float>>(const c_int          *key_s
  *                           API Functions                                     *
  *******************************************************************************/
 
+void cuda_vec_create(cusparseDnVecDescr_t *vec,
+                     const c_float        *d_x,
+                     c_int                 n) {
+
+  checkCudaErrors(cusparseCreateDnVec(vec, n, (void*)d_x, CUDA_FLOAT));
+}
+
+void cuda_vec_destroy(cusparseDnVecDescr_t vec) {
+
+  if (vec) checkCudaErrors(cusparseDestroyDnVec(vec));
+}
+
 void cuda_vec_copy_d2d(c_float       *d_y,
                        const c_float *d_x,
                        c_int          n) {
@@ -613,13 +625,6 @@ void cuda_vec_norm_inf(const c_float *d_x,
     (*h_res) = abs(*h_res);
   }
 }
-
-// void cuda_vec_norm_1(const c_float *d_x,
-//                      c_int          n,
-//                      c_float       *h_res) {
-
-//   cublasTasum(CUDA_handle->cublasHandle, n, d_x, 1, h_res);
-// }
 
 void cuda_vec_norm_2(const c_float *d_x,
                      c_int          n,
@@ -884,12 +889,11 @@ void cuda_vec_gather(c_int          nnz,
 
 void cuda_mat_mult_sc(csr     *S,
                       csr     *At,
-                      c_int    symmetric,
                       c_float  sc) {
 
   checkCudaErrors(cublasTscal(CUDA_handle->cublasHandle, S->nnz, &sc, S->val, 1));
 
-  if (!symmetric) {
+  if (At) {
     /* Update At as well */
     checkCudaErrors(cublasTscal(CUDA_handle->cublasHandle, At->nnz, &sc, At->val, 1));
   }
@@ -897,7 +901,6 @@ void cuda_mat_mult_sc(csr     *S,
 
 void cuda_mat_lmult_diag(csr           *S,
                          csr           *At,
-                         c_int          symmetric,
                          const c_float *d_diag) {
 
   c_int nnz = S->nnz;
@@ -905,7 +908,7 @@ void cuda_mat_lmult_diag(csr           *S,
 
   mat_lmult_diag_kernel<<<number_of_blocks,THREADS_PER_BLOCK>>>(S->row_ind, d_diag, S->val, nnz);
 
-  if (!symmetric) {
+  if (At) {
     /* Multiply At from right */
     mat_rmult_diag_kernel<<<number_of_blocks,THREADS_PER_BLOCK>>>(At->col_ind, d_diag, At->val, nnz);
   }
@@ -913,7 +916,6 @@ void cuda_mat_lmult_diag(csr           *S,
 
 void cuda_mat_rmult_diag(csr           *S,
                          csr           *At,
-                         c_int          symmetric,
                          const c_float *d_diag) {
 
   c_int nnz = S->nnz;
@@ -921,7 +923,7 @@ void cuda_mat_rmult_diag(csr           *S,
 
   mat_rmult_diag_kernel<<<number_of_blocks,THREADS_PER_BLOCK>>>(S->col_ind, d_diag, S->val, nnz);
 
-  if (!symmetric) {
+  if (At) {
     /* Multiply At from left */
     mat_lmult_diag_kernel<<<number_of_blocks,THREADS_PER_BLOCK>>>(At->row_ind, d_diag, At->val, nnz);
   }
@@ -937,46 +939,16 @@ void cuda_mat_rmult_diag_new(const csr     *S,
   mat_rmult_diag_new_kernel<<<number_of_blocks,THREADS_PER_BLOCK>>>(S->col_ind, d_diag, S->val, d_buffer, nnz);
 }
 
-void cuda_mat_Axpy(const csr     *A,
-                   const c_float *d_x,
-                   c_float       *d_y,
-                   c_float        alpha,
-                   c_float        beta) {
-
-  if (A->nnz == 0 || alpha == 0.0) {
-    /* d_y = beta * d_y */
-    cuda_vec_mult_sc(d_y, beta, A->m);
-    return;
-  }
-
-  checkCudaErrors(cusparseCsrmvEx(CUDA_handle->cusparseHandle, A->alg,
-                                  CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                  A->m, A->n, A->nnz, &alpha,
-                                  CUDA_FLOAT, A->MatDescription, A->val,
-                                  CUDA_FLOAT, A->row_ptr, A->col_ind, d_x,
-                                  CUDA_FLOAT, &beta, CUDA_FLOAT, d_y,
-                                  CUDA_FLOAT, CUDA_FLOAT, A->buffer));
-}
-
-void cuda_mat_quad_form(const csr     *P,
-                        const c_float *d_x,
-                        c_float       *h_res) {
-
-  c_int n = P->n;
-  c_float *d_Px;
-
-  cuda_malloc((void **) &d_Px, n * sizeof(c_float));
-
-  /* d_Px = P * x */
-  cuda_mat_Axpy(P, d_x, d_Px, 1.0, 0.0);
-
-  /* h_res = d_Px' * d_x */
-  cuda_vec_prod(d_Px, d_x, n, h_res);
-
-  /* h_res *= 0.5 */
-  (*h_res) *= 0.5;
-
-  cuda_free((void **) &d_Px);
+void cuda_mat_Axpy(const csr                  *A,
+                   const cusparseDnVecDescr_t  vecx,
+                   cusparseDnVecDescr_t        vecy,
+                   c_float                     alpha,
+                   c_float                     beta) {
+ 
+  checkCudaErrors(cusparseSpMV(
+    CUDA_handle->cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+    &alpha, A->SpMatDescr, vecx, &beta, vecy,
+    CUDA_FLOAT, CUSPARSE_SPMV_ALG_DEFAULT, A->SpMatBuffer));
 }
 
 void cuda_mat_row_norm_inf(const csr *S,

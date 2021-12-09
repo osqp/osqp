@@ -274,22 +274,22 @@ void test_mat_vec_multiplication() {
   clean_problem_lin_alg_sols_data(data);
 }
 
-void test_quad_form_upper_triang() {
+// void test_quad_form_upper_triang() {
 
-  c_float val;
-  lin_alg_sols_data *data = generate_problem_lin_alg_sols_data();
-  OSQPMatrix* P  = OSQPMatrix_new_from_csc(data->test_qpform_Pu, 1); //triu;
-  OSQPVectorf* x = OSQPVectorf_new(data->test_qpform_x, data->test_mat_vec_n);
+//   c_float val;
+//   lin_alg_sols_data *data = generate_problem_lin_alg_sols_data();
+//   OSQPMatrix* P  = OSQPMatrix_new_from_csc(data->test_qpform_Pu, 1); //triu;
+//   OSQPVectorf* x = OSQPVectorf_new(data->test_qpform_x, data->test_mat_vec_n);
 
-  // Compute quadratic form
-  val = OSQPMatrix_quad_form(P, x);
+//   // Compute quadratic form
+//   val = OSQPMatrix_quad_form(P, x);
 
-  mu_assert(
-    "Linear algebra tests: error in computing quadratic form using upper triangular matrix!",
-    (c_absval(val - data->test_qpform_value) < TESTS_TOL));
+//   mu_assert(
+//     "Linear algebra tests: error in computing quadratic form using upper triangular matrix!",
+//     (c_absval(val - data->test_qpform_value) < TESTS_TOL));
 
-  // cleanup
-  OSQPMatrix_free(P);
-  OSQPVectorf_free(x);
-  clean_problem_lin_alg_sols_data(data);
-}
+//   // cleanup
+//   OSQPMatrix_free(P);
+//   OSQPVectorf_free(x);
+//   clean_problem_lin_alg_sols_data(data);
+// }

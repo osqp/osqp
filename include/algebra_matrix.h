@@ -96,8 +96,8 @@ void OSQPMatrix_Atxpy(const OSQPMatrix  *A,
                       c_float            alpha,
                       c_float            beta);
 
-c_float OSQPMatrix_quad_form(const OSQPMatrix  *P,
-                             const OSQPVectorf *x);
+// c_float OSQPMatrix_quad_form(const OSQPMatrix  *P,
+//                              const OSQPVectorf *x);
 
 #if EMBEDDED != 1
 
