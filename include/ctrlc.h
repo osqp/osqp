@@ -1,13 +1,9 @@
-/*
- * Interface for OSQP signal handling.
- */
-
 #ifndef CTRLC_H
 # define CTRLC_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif // ifdef __cplusplus
+/*
+ * Interface for OSQP signal handling.
+ */
 
 # include "glob_opts.h"
 
@@ -48,9 +44,4 @@ void osqp_end_interrupt_listener(void);
 int osqp_is_interrupted(void);
 
 
-# ifdef __cplusplus
-}
-# endif // ifdef __cplusplus
-
-
-#endif /* END IFDEF CTRLC */
+#endif /* ifndef CTRLC_H */

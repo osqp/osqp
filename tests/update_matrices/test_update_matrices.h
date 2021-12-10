@@ -8,7 +8,13 @@
 
 #ifndef ALGEBRA_CUDA
 
-#include "kkt.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+  #include "kkt.h"
+#ifdef __cplusplus
+}
+#endif
 
 void test_form_KKT() {
 

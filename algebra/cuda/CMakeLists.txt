@@ -2,12 +2,9 @@ file(
   GLOB
   SRC_FILES
   CONFIGURE_DEPENDS
-  *.c
   *.h
   *.cu
-  src/*.c
   src/*.cu
-  lin_sys/indirect/*.c
   lin_sys/indirect/*.h
   lin_sys/indirect/*.cu)
 

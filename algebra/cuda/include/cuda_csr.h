@@ -21,10 +21,6 @@
 #include "algebra_types.h"
 #include "csc_type.h"
 
-# ifdef __cplusplus
-extern "C" {
-# endif /* ifdef __cplusplus */
-
 
 void cuda_mat_init_P(const csc  *mat,
                      csr       **P,
@@ -60,8 +56,5 @@ void cuda_submat_byrows(const csr    *A,
                         csr         **Ared,
                         csr         **Aredt);
 
-# ifdef __cplusplus
-}
-# endif /* ifdef __cplusplus */
 
 #endif /* ifndef CUDA_CSR_H */

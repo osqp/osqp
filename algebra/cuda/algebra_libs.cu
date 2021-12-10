@@ -16,7 +16,9 @@
  */
 
 #include "osqp_api_types.h"
+#include "lin_alg.h"
 #include "cuda_handler.h"
+
 
 CUDA_Handle_t *CUDA_handle = OSQP_NULL;
 

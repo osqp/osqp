@@ -4,7 +4,7 @@
 
 # ifdef __cplusplus
 extern "C" {
-# endif /* ifdef __cplusplus */
+# endif
 
 #  include <stdio.h> //for size_t
 
@@ -22,6 +22,6 @@ void  my_free(void *ptr);
 
 # ifdef __cplusplus
 }
-# endif /* ifdef __cplusplus */
+# endif
 
 #endif /* ifndef  OSQP_CUSTOM_MEMORY_H */

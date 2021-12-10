@@ -2,9 +2,6 @@
 #ifndef POLISH_H
 #define POLISH_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif // ifdef __cplusplus
 
 # include "osqp.h"
 # include "types.h"
@@ -19,8 +16,4 @@ extern "C" {
 c_int polish(OSQPSolver *solver);
 
 
-# ifdef __cplusplus
-}
-# endif // ifdef __cplusplus
-
-#endif // ifndef POLISH_H
+#endif /* ifndef POLISH_H */

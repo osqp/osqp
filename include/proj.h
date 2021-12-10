@@ -1,9 +1,6 @@
 #ifndef PROJ_H
 #define PROJ_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif /* ifdef __cplusplus */
 
 # include "osqp.h"
 # include "types.h"
@@ -61,9 +58,5 @@ void project_normalcone(OSQPVectorf       *z,
 
 # endif /* ifndef EMBEDDED */
 
-
-# ifdef __cplusplus
-}
-# endif /* ifdef __cplusplus */
 
 #endif /* ifndef PROJ_H */

@@ -1,9 +1,6 @@
 #ifndef KKT_H
 #define KKT_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif // ifdef __cplusplus
 
 # include "osqp.h"
 
@@ -124,8 +121,4 @@ void update_KKT_param2(csc     *KKT,
 # endif // EMBEDDED != 1
 
 
-# ifdef __cplusplus
-}
-# endif // ifdef __cplusplus
-
-#endif // ifndef KKT_H
+#endif /* ifndef KKT_H */

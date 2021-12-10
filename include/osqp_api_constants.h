@@ -1,12 +1,7 @@
 #ifndef OSQP_API_CONSTANTS_H
 #define OSQP_API_CONSTANTS_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif // ifdef __cplusplus
-
 #include "osqp_configure.h"
-
 
 /******************
 * Solver Status  *
@@ -152,8 +147,5 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_CG_TOL_MIN    (1E-7)
 # define OSQP_CG_POLISH_TOL (1e-5)
 
-# ifdef __cplusplus
-}
-# endif // ifdef __cplusplus
 
-#endif // ifndef OSQP_API_CONSTANTS_H
+#endif /* ifndef OSQP_API_CONSTANTS_H */

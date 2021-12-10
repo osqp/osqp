@@ -6,8 +6,13 @@
 
 #ifndef ALGEBRA_CUDA
 
-#include "csc_utils.h"
-
+#ifdef __cplusplus
+extern "C" {
+#endif
+  #include "csc_utils.h"
+#ifdef __cplusplus
+}
+#endif
 
 void test_constr_sparse_mat() {
 

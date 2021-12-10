@@ -1,11 +1,8 @@
 #ifndef CSC_TYPE_H
 # define CSC_TYPE_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif // ifdef __cplusplus
+#include "osqp_api_types.h"
 
-#include "osqp_api_types.h"  //for c_int, c_float
 
 /**
  *  Matrix in compressed-column form.
@@ -23,8 +20,4 @@ typedef struct {
 } csc;
 
 
-# ifdef __cplusplus
-}
-# endif // ifdef __cplusplus
-
-#endif // ifndef CSC_TYPE_H
+#endif /* ifndef CSC_TYPE_H */

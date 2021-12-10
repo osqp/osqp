@@ -21,10 +21,6 @@
 #include <cusparse.h>
 #include "algebra_types.h"
 
-# ifdef __cplusplus
-extern "C" {
-# endif /* ifdef __cplusplus */
-
 
 /*******************************************************************************
  *                           Vector Functions                                  *
@@ -333,10 +329,6 @@ void cuda_mat_Axpy(const csr                  *A,
  */
 void cuda_mat_row_norm_inf(const csr *S,
                            c_float   *d_res);
-
-# ifdef __cplusplus
-}
-# endif /* ifdef __cplusplus */
 
 
 #endif /* ifndef CUDA_LIN_ALG_H */

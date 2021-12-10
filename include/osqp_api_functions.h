@@ -1,14 +1,13 @@
 #ifndef  OSQP_API_FUNCTIONS_H
 #define  OSQP_API_FUNCTIONS_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif /* ifdef __cplusplus */
-
 /* Types required by the OSQP API */
 # include "osqp_api_types.h"
 # include "csc_type.h"
 
+# ifdef __cplusplus
+extern "C" {
+# endif
 
 /********************
 * Main Solver API  *
@@ -244,6 +243,6 @@ c_int osqp_update_rho(OSQPSolver *solver,
 
 # ifdef __cplusplus
 }
-# endif /* ifdef __cplusplus */
+# endif
 
 #endif /* ifndef OSQP_API_FUNCTIONS_H */

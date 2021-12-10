@@ -1,9 +1,6 @@
 #ifndef QDLDL_INTERFACE_H
 #define QDLDL_INTERFACE_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include "osqp.h"
 #include "types.h"  //OSQPMatrix and OSQPVector[fi] types
@@ -162,8 +159,5 @@ c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver      *s,
 void free_linsys_solver_qdldl(qdldl_solver * s);
 #endif
 
-#ifdef __cplusplus
-}
-#endif
 
-#endif
+#endif /* QDLDL_INTERFACE_H */

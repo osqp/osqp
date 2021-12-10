@@ -1,13 +1,12 @@
 #ifndef ALGEBRA_MATRIX_H
 #define ALGEBRA_MATRIX_H
 
+#include "glob_opts.h"
+#include "csc_type.h"
 
 # ifdef __cplusplus
 extern "C" {
-# endif // ifdef __cplusplus
-
-#include "glob_opts.h"
-#include "csc_type.h"
+# endif
 
 /*
  *  OSQPMatrix types.  Not defined here since it
@@ -116,12 +115,11 @@ void OSQPMatrix_free(OSQPMatrix *M);
 OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix  *A,
                                         const OSQPVectori *rows);
 
-#endif // ifndef EMBEDDED
-
+#endif /* ifndef EMBEDDED */
 
 
 # ifdef __cplusplus
 }
-# endif // ifdef __cplusplus
+# endif
 
-#endif // ifndef ALGEBRA_MATRIX_H
+#endif /* ifndef ALGEBRA_MATRIX_H */

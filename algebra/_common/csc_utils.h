@@ -1,9 +1,6 @@
 #ifndef CSC_UTILS_H
 #define CSC_UTILS_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif // ifdef __cplusplus
 
 # include "csc_type.h"
 # include "osqp_configure.h"
@@ -165,8 +162,4 @@ csc* csc_symperm(const csc   *A,
                  c_int        values);
 
 
-# ifdef __cplusplus
-}
-# endif // ifdef __cplusplus
-
-#endif // ifndef CSC_UTILS_H
+#endif /* ifndef CSC_UTILS_H */
