@@ -364,11 +364,7 @@ c_float osqp_toc(OSQPTimer *t)
 /* ==================== DEBUG FUNCTIONS ======================= */
 
 
-
-// If debug mode enabled
-#ifdef DDEBUG
-
-#ifdef PRINTING
+#if defined(DEBUG) && defined(PRINTING)
 
 void print_csc_matrix(const csc  *M,
                       const char *name)
@@ -495,7 +491,4 @@ void print_vec_int(const c_int *x,
   c_print("]\n");
 }
 
-
-#endif // PRINTING
-
-#endif // DEBUG MODE
+#endif /* if defined(DEBUG) && defined(PRINTING) */

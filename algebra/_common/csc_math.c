@@ -234,38 +234,38 @@ void csc_Atxpy(const csc *A, const c_float *x, c_float *y,
 
 // 1/2 x'*P*x
 
-c_float csc_quad_form(const csc *P, const c_float *x) {
+// c_float csc_quad_form(const csc *P, const c_float *x) {
 
-  //NB:implementation assumes upper triangular part only
+//   //NB:implementation assumes upper triangular part only
 
-  c_float quad_form = 0.;
-  c_int   i, j, ptr;
-  c_int*   Pp = P->p;
-  c_int*   Pi = P->i;
-  c_float* Px = P->x;
-  c_int    Pn = P->n;
+//   c_float quad_form = 0.;
+//   c_int   i, j, ptr;
+//   c_int*   Pp = P->p;
+//   c_int*   Pi = P->i;
+//   c_float* Px = P->x;
+//   c_int    Pn = P->n;
 
 
-  for (j = 0; j < Pn; j++) {                    // Iterate over columns
-    for (ptr = Pp[j]; ptr < Pp[j + 1]; ptr++) { // Iterate over rows
-      i = Pi[ptr];                            // Row index
+//   for (j = 0; j < Pn; j++) {                    // Iterate over columns
+//     for (ptr = Pp[j]; ptr < Pp[j + 1]; ptr++) { // Iterate over rows
+//       i = Pi[ptr];                            // Row index
 
-      if (i == j) {                                 // Diagonal element
-        quad_form += (c_float).5 * Px[ptr] * x[i] * x[i];
-      }
-      else if (i < j) {                             // Off-diagonal element
-        quad_form += Px[ptr] * x[i] * x[j];
-      }
-      else {                                        // Element in lower triangle
-#ifdef PRINTING
-        c_eprint("quad_form matrix is not upper triangular");
-#endif /* ifdef PRINTING */
-        return -1.;
-      }
-    }
-  }
-  return quad_form;
-}
+//       if (i == j) {                                 // Diagonal element
+//         quad_form += (c_float).5 * Px[ptr] * x[i] * x[i];
+//       }
+//       else if (i < j) {                             // Off-diagonal element
+//         quad_form += Px[ptr] * x[i] * x[j];
+//       }
+//       else {                                        // Element in lower triangle
+// #ifdef PRINTING
+//         c_eprint("quad_form matrix is not upper triangular");
+// #endif /* ifdef PRINTING */
+//         return -1.;
+//       }
+//     }
+//   }
+//   return quad_form;
+// }
 
 /* columnwise infinity norm */
 

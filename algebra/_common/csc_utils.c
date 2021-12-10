@@ -66,21 +66,21 @@ c_int csc_cumsum(c_int *p, c_int *c, c_int n) {
 
 //==================================================
 
-csc* csc_matrix(c_int m, c_int n, c_int nzmax, c_float *x, c_int *i, c_int *p)
-{
-  csc *M = (csc *)c_malloc(sizeof(csc));
+// csc* csc_matrix(c_int m, c_int n, c_int nzmax, c_float *x, c_int *i, c_int *p)
+// {
+//   csc *M = (csc *)c_malloc(sizeof(csc));
 
-  if (!M) return OSQP_NULL;
+//   if (!M) return OSQP_NULL;
 
-  M->m     = m;
-  M->n     = n;
-  M->nz    = -1;
-  M->nzmax = nzmax;
-  M->x     = x;
-  M->i     = i;
-  M->p     = p;
-  return M;
-}
+//   M->m     = m;
+//   M->n     = n;
+//   M->nz    = -1;
+//   M->nzmax = nzmax;
+//   M->x     = x;
+//   M->i     = i;
+//   M->p     = p;
+//   return M;
+// }
 
 csc* csc_spalloc(c_int m, c_int n, c_int nzmax, c_int values, c_int triplet) {
   csc *A = csc_calloc(1, sizeof(csc)); /* allocate the csc struct */
@@ -326,14 +326,14 @@ csc* csc_copy(const csc *A) {
   return B;
 }
 
-void csc_copy_prea(const csc *A, csc *B) {
+// void csc_copy_prea(const csc *A, csc *B) {
 
-  prea_int_vec_copy(A->p, B->p, A->n + 1);
-  prea_int_vec_copy(A->i, B->i, A->p[A->n]);
-  prea_vec_copy(A->x, B->x, A->p[A->n]);
+//   prea_int_vec_copy(A->p, B->p, A->n + 1);
+//   prea_int_vec_copy(A->i, B->i, A->p[A->n]);
+//   prea_vec_copy(A->x, B->x, A->p[A->n]);
 
-  B->nzmax = A->nzmax;
-}
+//   B->nzmax = A->nzmax;
+// }
 
 c_float* csc_to_dns(csc *M)
 {

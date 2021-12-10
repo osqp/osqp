@@ -19,26 +19,25 @@
 # define CSR_TYPE_H
 
 
-#include <cusparse_v2.h>
+#include <cusparse.h>
 #include "osqp_api_types.h"   /* --> c_int, c_float */
 
 
 /* CSR matrix structure */
 struct csr_t {
-  c_int               m;          ///< number of rows
-  c_int               n;          ///< number of columns
-  c_int              *row_ptr;    ///< row pointers (size m+1)
-  c_int              *row_ind;    ///< uncompressed row indices (size nnz), NULL if not needed 
-  c_int              *col_ind;    ///< column indices (size nnz)
-  c_float            *val;        ///< numerical values (size nnz)
-  c_int               nnz;        ///< number of non-zero entries in matrix
+  c_int m;            ///< number of rows
+  c_int n;            ///< number of columns
+  c_int nnz;          ///< number of non-zero entries
 
-  void               *buffer;
-  size_t              bufferSizeInBytes;
-  cusparseAlgMode_t   alg;
-  cusparseMatDescr_t  MatDescription;
+  c_int   *row_ptr;   ///< row pointers (size m+1)
+  c_int   *row_ind;   ///< uncompressed row indices (size nnz), NULL if not needed 
+  c_int   *col_ind;   ///< column indices (size nnz)
+  c_float *val;       ///< numerical values (size nnz)
+
+  size_t                SpMatBufferSize;
+  void                 *SpMatBuffer;
+  cusparseSpMatDescr_t  SpMatDescr;
 };
 
 
 #endif /* ifndef CSR_TYPE_H */
-

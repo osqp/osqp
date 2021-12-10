@@ -106,18 +106,17 @@ void OSQPMatrix_Atxpy(const OSQPMatrix  *A,
    else            csc_Axpy_sym_triu(A->csc, x->values, y->values, alpha, beta);
 }
 
+// c_float OSQPMatrix_quad_form(const OSQPMatrix  *P,
+//                              const OSQPVectorf *x) {
 
-c_float OSQPMatrix_quad_form(const OSQPMatrix  *P,
-                             const OSQPVectorf *x) {
-
-   if (P->symmetry == TRIU) return csc_quad_form(P->csc, OSQPVectorf_data(x));
-   else {
-#ifdef PRINTING
-     c_eprint("quad_form matrix is not upper triangular");
-#endif /* ifdef PRINTING */
-     return -1.0;
-   }
-}
+//    if (P->symmetry == TRIU) return csc_quad_form(P->csc, OSQPVectorf_data(x));
+//    else {
+// #ifdef PRINTING
+//      c_eprint("quad_form matrix is not upper triangular");
+// #endif /* ifdef PRINTING */
+//      return -1.0;
+//    }
+// }
 
 #if EMBEDDED != 1
 
