@@ -28,9 +28,7 @@
 #include <thrust/scan.h>
 #include <thrust/execution_policy.h>
 
-#ifdef __cplusplus
-extern "C" {extern CUDA_Handle_t *CUDA_handle;}
-#endif
+extern CUDA_Handle_t *CUDA_handle;
 
 /* This function is implemented in cuda_lin_alg.cu */
 extern void scatter(c_float *out, const c_float *in, const c_int *ind, c_int n);

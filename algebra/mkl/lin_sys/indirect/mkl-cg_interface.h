@@ -1,9 +1,6 @@
-#ifndef OSQP_MKL_CG_H
-#define OSQP_MKL_CG_H
+#ifndef MKL_CG_INTERFACE_H
+#define MKL_CG_INTERFACE_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include "osqp.h"
 #include "types.h"    //OSQPMatrix and OSQPVector[fi] types
@@ -138,11 +135,5 @@ c_int update_rho_linsys_mklcg(
 void free_linsys_mklcg(mklcg_solver * s);
 
 
-
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif //ifndef OSQP_MKL_CG_H
+#endif /* ifndef MKL_CG_INTERFACE_H */
 

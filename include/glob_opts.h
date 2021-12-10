@@ -1,10 +1,6 @@
 #ifndef GLOB_OPTS_H
 #define GLOB_OPTS_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif /* ifdef __cplusplus */
-
 /*
    Define OSQP compiler flags
  */
@@ -144,9 +140,5 @@ static void* c_calloc(size_t num, size_t size) {
 
 # endif  /* PRINTING */
 
-
-# ifdef __cplusplus
-}
-# endif /* ifdef __cplusplus */
 
 #endif /* ifndef GLOB_OPTS_H */

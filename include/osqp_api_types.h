@@ -1,9 +1,6 @@
 #ifndef OSQP_API_TYPES_H
 #define OSQP_API_TYPES_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif /* ifdef __cplusplus */
 
 # include "osqp_api_constants.h"
 
@@ -128,9 +125,4 @@ typedef struct {
 } OSQPSolver;
 
 
-
-# ifdef __cplusplus
-}
-# endif // ifdef __cplusplus
-
-#endif // ifndef OSQP_API_TYPES_H
+#endif /* ifndef OSQP_API_TYPES_H */

@@ -18,9 +18,6 @@
 #ifndef CUDA_CONFIGURE_H
 # define CUDA_CONFIGURE_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #ifdef DFLOAT
 #define CUDA_FLOAT CUDA_R_32F
@@ -33,9 +30,5 @@ extern "C" {
 #define NUMBER_OF_BLOCKS    (2)
 #define NUMBER_OF_SM        (68)
 
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* ifndef CUDA_CONFIGURE_H */

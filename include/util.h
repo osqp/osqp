@@ -1,9 +1,6 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif /* ifdef __cplusplus */
 
 # include "osqp.h"
 # include "types.h"
@@ -191,9 +188,5 @@ void print_vec_int(const c_int *x,
 
 /*! \endcond */
 
-
-# ifdef __cplusplus
-}
-# endif /* ifdef __cplusplus */
 
 #endif /* ifndef UTIL_H */

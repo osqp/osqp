@@ -1,9 +1,6 @@
 #ifndef SCALING_H
 #define SCALING_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif // ifdef __cplusplus
 
 // Functions to scale problem data
 # include "osqp.h"
@@ -46,8 +43,5 @@ c_int unscale_data(OSQPSolver *solver);
                          const OSQPVectorf* soly,
                          OSQPWorkspace *work);
 
-# ifdef __cplusplus
-}
-# endif // ifdef __cplusplus
 
-#endif // ifndef SCALING_H
+#endif /* ifndef SCALING_H */

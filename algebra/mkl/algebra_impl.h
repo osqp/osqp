@@ -1,10 +1,6 @@
 #ifndef ALGEBRA_IMPL_H
 # define ALGEBRA_IMPL_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif // ifdef __cplusplus
-
 #include "csc_math.h"
 
 /*********************************************
@@ -40,9 +36,5 @@ struct OSQPMatrix_ {
   OSQPMatrix_symmetry_type    symmetry;
 };
 
-
-# ifdef __cplusplus
-}
-# endif // ifdef __cplusplus
 
 #endif // ifndef ALGEBRA_IMPL_H

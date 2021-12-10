@@ -1,9 +1,6 @@
-#ifndef OSQP_TYPES_H
-#define OSQP_TYPES_H
+#ifndef TYPES_H
+#define TYPES_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif /* ifdef __cplusplus */
 
 # include "glob_opts.h"
 # include "osqp.h"       //includes user API types
@@ -236,8 +233,4 @@ struct linsys_solver {
 };
 
 
-# ifdef __cplusplus
-}
-# endif /* ifdef __cplusplus */
-
-#endif /* ifndef OSQP_TYPES_H */
+#endif /* ifndef TYPES_H */

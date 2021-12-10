@@ -1,9 +1,6 @@
-#ifndef PARDISO_H
-#define PARDISO_H
+#ifndef PARDISO_INTERFACE_H
+#define PARDISO_INTERFACE_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include "osqp.h"
 #include "types.h"  //OSQPMatrix and OSQPVector[fi] types
@@ -155,8 +152,5 @@ c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver    *s,
  */
 void free_linsys_solver_pardiso(pardiso_solver * s);
 
-#ifdef __cplusplus
-}
-#endif
 
-#endif
+#endif /* PARDISO_INTERFACE_H */
