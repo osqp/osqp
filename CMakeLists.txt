@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 project(osqp)
 
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
 # Detect operating system
 # ----------------------------------------------
 message(STATUS "We are on a ${CMAKE_SYSTEM_NAME} system")
@@ -338,9 +341,6 @@ endif()
 # ----------------------------------------------
 # Installation / Uninstallation
 # ----------------------------------------------
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
-
 install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
 
 if(OSQP_STATIC_LIB)
