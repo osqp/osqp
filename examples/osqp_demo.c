@@ -1,5 +1,6 @@
 #include "osqp.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 int main(void) {
 
@@ -44,8 +45,11 @@ int main(void) {
   /* Solve problem */
   if (!exitflag) exitflag = osqp_solve(solver);
 
+  if (!exitflag) {
+    printf("x = [%f, %f]\n", solver->solution->x[0], solver->solution->x[1]);
+  }
   /* Test codegen */
-  osqp_codegen(solver, "mpc_", 2);
+  osqp_codegen(solver, "mpc_", 1);
 
   /* Cleanup */
   osqp_cleanup(solver);
