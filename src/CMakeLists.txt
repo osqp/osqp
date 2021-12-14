@@ -6,7 +6,7 @@ target_sources(
          "${CMAKE_CURRENT_SOURCE_DIR}/scaling.c" "${CMAKE_CURRENT_SOURCE_DIR}/util.c")
 
 # Add code generation functionality if enabled
-if(ALGEBRA_DEFAULT)
+if(OSQP_CODEGEN)
   target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/codegen.c")
 endif()
 
