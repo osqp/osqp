@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 project(osqp)
 
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
 # Detect operating system
 # ----------------------------------------------
 message(STATUS "We are on a ${CMAKE_SYSTEM_NAME} system")
@@ -127,7 +130,7 @@ endif()
 # Rename compile-time constants & configure
 # ----------------------------------------------
 # If we are creating any OSQP_* compile-time constants from CMake variables, do so here.
-set (OSQP_ALGEBRA ${ALGEBRA})
+set(OSQP_ALGEBRA ${ALGEBRA})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
                ${CMAKE_CURRENT_SOURCE_DIR}/include/osqp_configure.h NEWLINE_STYLE LF)
@@ -182,7 +185,7 @@ if(NOT MSVC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
   endif()
 
-  set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")  # Include math
+  set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm") # Include math
   # Include real time library in linux
   if(IS_LINUX)
     set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lrt -ldl")
@@ -273,6 +276,9 @@ function(OSQP_BUILD_STATIC_LIB)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
     target_sources(osqpstatic PRIVATE $<TARGET_OBJECTS:qdldlobject>)
   endif()
+  target_include_directories(
+    osqpstatic PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+                      "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
   if(MATLAB)
     target_link_libraries(osqpstatic ${Matlab_LIBRARIES})
@@ -335,9 +341,6 @@ endif()
 # ----------------------------------------------
 # Installation / Uninstallation
 # ----------------------------------------------
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
-
 install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
 
 if(OSQP_STATIC_LIB)
