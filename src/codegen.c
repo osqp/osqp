@@ -213,7 +213,7 @@ static void write_scaling(FILE              *f,
                           const char        *prefix){
 
   char name[50];
-  fprintf(f, "/* Define the scaling structure */\n");
+  fprintf(f, "\n/* Define the scaling structure */\n");
   sprintf(name, "%sscaling_D", prefix);
   write_OSQPVectorf(f, scaling->D,    name);
   sprintf(name, "%sscaling_E", prefix);
@@ -327,6 +327,8 @@ static void write_linsys(FILE               *f,
   fprintf(f, "  %slinsys_bp,\n", prefix);
   fprintf(f, "  %slinsys_sol,\n", prefix);
   fprintf(f, "  %slinsys_rho_inv_vec,\n", prefix);
+  fprintf(f, "  (c_float)%.20f,\n", linsys->sigma);
+  fprintf(f, "  (c_float)%.20f,\n", linsys->rho_inv);
   fprintf(f, "  %d,\n", n);
   fprintf(f, "  %d,\n", m);
   if (embedded > 1) {
