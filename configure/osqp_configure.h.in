@@ -21,6 +21,9 @@ extern "C" {
 /* ALGEBRA - String representation */
 #cmakedefine OSQP_ALGEBRA "@OSQP_ALGEBRA@"
 
+/* OSQP_CODEGEN */
+#cmakedefine OSQP_CODEGEN
+
 /* EMBEDDED */
 #cmakedefine EMBEDDED (@EMBEDDED@)
 

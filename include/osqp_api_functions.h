@@ -240,13 +240,13 @@ c_int osqp_update_rho(OSQPSolver *solver,
 
 
 
-# if !defined(EMBEDDED) && defined(ALGEBRA_DEFAULT)
+# ifdef OSQP_CODEGEN
 
 c_int osqp_codegen(OSQPSolver *solver,
                    const char *prefix,
                    c_int       embedded);
 
-# endif /* if !defined(EMBEDDED) && defined(ALGEBRA_DEFAULT) */
+# endif /* ifdef OSQP_CODEGEN */
 
 
 /** @} */

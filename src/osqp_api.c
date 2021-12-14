@@ -6,12 +6,13 @@
 #include "error.h"
 #include "version.h"
 
+#ifdef OSQP_CODEGEN
+  #include "codegen.h"
+#endif
+
 #ifndef EMBEDDED
 # include "lin_sys.h"
 # include "polish.h"
-  #ifdef ALGEBRA_DEFAULT
-    #include "codegen.h"
-  #endif
 #endif
 
 #ifdef CTRLC
@@ -1127,10 +1128,7 @@ c_int osqp_update_settings(OSQPSolver         *solver,
 * Codegen
 **********/
 
-# if !defined(EMBEDDED) && defined(ALGEBRA_DEFAULT)
-
-// TODO: Replace this condition by #ifdef OSQP_CODEGEN
-//       Its value will be set in a CMake file.
+#ifdef OSQP_CODEGEN
 
 c_int osqp_codegen(OSQPSolver *solver,
                    const char *file_prefix,
@@ -1151,7 +1149,7 @@ c_int osqp_codegen(OSQPSolver *solver,
   return exitflag;
 }
 
-# endif /* if !defined(EMBEDDED) && defined(ALGEBRA_DEFAULT) */
+#endif /* ifdef OSQP_CODEGEN */
 
 
 /****************************

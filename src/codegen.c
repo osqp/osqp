@@ -285,7 +285,7 @@ static void write_linsys(FILE               *f,
   sprintf(name, "%slinsys_Dinv", prefix);
   write_vecf(f, linsys->Dinv, n+m, name);
   sprintf(name, "%slinsys_P", prefix);
-  write_veci(f, linsys->P,    n+m, name);
+  write_veci(f, linsys->P, n+m, name);
   fprintf(f, "c_float %slinsys_bp[%d];\n",  prefix, n+m);
   fprintf(f, "c_float %slinsys_sol[%d];\n", prefix, n+m);
   sprintf(name, "%slinsys_rho_inv_vec", prefix);
@@ -387,31 +387,52 @@ static void write_workspace(FILE                *f,
   fprintf(f, "OSQPVectorf %swork_ztilde_view = {\n  %swork_xz_tilde_val+%d,\n  %d\n};\n", prefix, prefix, n, m);
   fprintf(f, "c_float %swork_x_prev_val[%d];\n", prefix, n);
   fprintf(f, "OSQPVectorf %swork_x_prev = {\n  %swork_x_prev_val,\n  %d\n};\n", prefix, prefix, n);
-  fprintf(f, "c_float %swork_z_prev_val[%d];\n", prefix, m);
-  fprintf(f, "OSQPVectorf %swork_z_prev = {\n  %swork_z_prev_val,\n  %d\n};\n", prefix, prefix, m);
-  fprintf(f, "c_float %swork_Ax_val[%d];\n", prefix, m);
-  fprintf(f, "OSQPVectorf %swork_Ax = {\n  %swork_Ax_val,\n  %d\n};\n", prefix, prefix, m);
+  if (m > 0) {
+    fprintf(f, "c_float %swork_z_prev_val[%d];\n", prefix, m);
+    fprintf(f, "OSQPVectorf %swork_z_prev = {\n  %swork_z_prev_val,\n  %d\n};\n", prefix, prefix, m);
+    fprintf(f, "c_float %swork_Ax_val[%d];\n", prefix, m);
+    fprintf(f, "OSQPVectorf %swork_Ax = {\n  %swork_Ax_val,\n  %d\n};\n", prefix, prefix, m);
+  }
+  else {
+    fprintf(f, "OSQPVectorf %swork_z_prev = { NULL, 0 };\n", prefix);
+    fprintf(f, "OSQPVectorf %swork_Ax = { NULL, 0 };\n", prefix);
+  }
   fprintf(f, "c_float %swork_Px_val[%d];\n", prefix, n);
   fprintf(f, "OSQPVectorf %swork_Px = {\n  %swork_Px_val,\n  %d\n};\n", prefix, prefix, n);
   fprintf(f, "c_float %swork_Aty_val[%d];\n", prefix, n);
   fprintf(f, "OSQPVectorf %swork_Aty = {\n  %swork_Aty_val,\n  %d\n};\n", prefix, prefix, n);
-  fprintf(f, "c_float %swork_delta_y_val[%d];\n", prefix, m);
-  fprintf(f, "OSQPVectorf %swork_delta_y = {\n  %swork_delta_y_val,\n  %d\n};\n", prefix, prefix, m);
+  if (m > 0) {
+    fprintf(f, "c_float %swork_delta_y_val[%d];\n", prefix, m);
+    fprintf(f, "OSQPVectorf %swork_delta_y = {\n  %swork_delta_y_val,\n  %d\n};\n", prefix, prefix, m);
+  }
+  else {
+    fprintf(f, "OSQPVectorf %swork_delta_y = { NULL, 0 };\n", prefix);
+  }
   fprintf(f, "c_float %swork_Atdelta_y_val[%d];\n", prefix, n);
   fprintf(f, "OSQPVectorf %swork_Atdelta_y = {\n  %swork_Atdelta_y_val,\n  %d\n};\n", prefix, prefix, n);
   fprintf(f, "c_float %swork_delta_x_val[%d];\n", prefix, n);
   fprintf(f, "OSQPVectorf %swork_delta_x = {\n  %swork_delta_x_val,\n  %d\n};\n", prefix, prefix, n);
   fprintf(f, "c_float %swork_Pdelta_x_val[%d];\n", prefix, n);
   fprintf(f, "OSQPVectorf %swork_Pdelta_x = {\n  %swork_Pdelta_x_val,\n  %d\n};\n", prefix, prefix, n);
-  fprintf(f, "c_float %swork_Adelta_x_val[%d];\n", prefix, m);
-  fprintf(f, "OSQPVectorf %swork_Adelta_x = {\n  %swork_Adelta_x_val,\n  %d\n};\n", prefix, prefix, m);
+  if (m > 0) {
+    fprintf(f, "c_float %swork_Adelta_x_val[%d];\n", prefix, m);
+    fprintf(f, "OSQPVectorf %swork_Adelta_x = {\n  %swork_Adelta_x_val,\n  %d\n};\n", prefix, prefix, m);
+  }
+  else {
+    fprintf(f, "OSQPVectorf %swork_Adelta_x = { NULL, 0 };\n", prefix);
+  }
   if (embedded > 1) {
     fprintf(f, "c_float %swork_D_temp_val[%d];\n", prefix, n);
     fprintf(f, "OSQPVectorf %swork_D_temp = {\n  %swork_D_temp_val,\n  %d\n};\n", prefix, prefix, n);
     fprintf(f, "c_float %swork_D_temp_A_val[%d];\n", prefix, n);
     fprintf(f, "OSQPVectorf %swork_D_temp_A = {\n  %swork_D_temp_A_val,\n  %d\n};\n", prefix, prefix, n);
-    fprintf(f, "c_float %swork_E_temp_val[%d];\n", prefix, m);
-    fprintf(f, "OSQPVectorf %swork_E_temp = {\n  %swork_E_temp_val,\n  %d\n};\n", prefix, prefix, m);
+    if (m > 0) {
+      fprintf(f, "c_float %swork_E_temp_val[%d];\n", prefix, m);
+      fprintf(f, "OSQPVectorf %swork_E_temp = {\n  %swork_E_temp_val,\n  %d\n};\n", prefix, prefix, m);
+    }
+    else {
+      fprintf(f, "OSQPVectorf %swork_E_temp = { NULL, 0 };\n", prefix);
+    }
   }
   write_scaling(f, work->scaling, prefix);
   
@@ -568,8 +589,3 @@ c_int codegen_src(OSQPSolver *solver,
 
   return 0;
 }
-
-
-// TODO: Add a precompiler option OSQP_CODEGEN as users may not want to use this functionality
-
-// TODO: Handle edge cases, e.g., empty vector or matrix
