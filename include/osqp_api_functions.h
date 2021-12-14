@@ -242,6 +242,14 @@ c_int osqp_update_rho(OSQPSolver *solver,
 
 # ifdef OSQP_CODEGEN
 
+/**
+ * Generate source files with a statically allocated OSQPSolver structure.
+ * @param  solver    Solver
+ * @param  prefix    String prefix for the variables and generated files.
+ * @param  embedded  Embedded flag (1: vectors as parameters;
+ *                                  2: vectors and matrices as parameters).
+ * @return           Exitflag for errors (0 if no errors)
+ */
 c_int osqp_codegen(OSQPSolver *solver,
                    const char *prefix,
                    c_int       embedded);
