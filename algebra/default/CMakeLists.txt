@@ -7,7 +7,7 @@ FetchContent_Declare(
   qdldl
   GIT_REPOSITORY https://github.com/osqp/qdldl.git
   GIT_TAG 07ff30a3eedee4857bbbeb0778f54a86b1ea78f9
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/qdldl_sources)
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/qdldl_sources)
 FetchContent_GetProperties(qdldl)
 
 if(NOT qdldl_POPULATED)

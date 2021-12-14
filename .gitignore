@@ -218,4 +218,4 @@ out/
 .cquery_cached_index
 
 # CMake FetchContent folders
-algebra/default/qdldl_sources
+algebra/default/lin_sys/direct/qdldl_sources

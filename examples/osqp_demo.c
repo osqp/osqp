@@ -48,10 +48,6 @@ int main(void) {
   /* Solve problem */
   if (!exitflag) exitflag = osqp_solve(solver);
 
-  if (!exitflag) {
-    printf("x = [%f, %f]\n", solver->solution->x[0], solver->solution->x[1]);
-  }
-
   /* Cleanup */
   osqp_cleanup(solver);
   if (A) free(A);
