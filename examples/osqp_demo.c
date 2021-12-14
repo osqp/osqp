@@ -42,7 +42,7 @@ int main(void) {
   exitflag = osqp_setup(&solver, P, q, A, l, u, m, n, settings);
 
   /* Test codegen */
-  osqp_codegen(solver, "mpc_", 1);
+  // osqp_codegen(solver, "mpc_", 1);
 
   /* Solve problem */
   if (!exitflag) exitflag = osqp_solve(solver);
