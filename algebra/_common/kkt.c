@@ -1,6 +1,37 @@
 #include "kkt.h"
 
+
+//add an offset to every term in the upper nxn block.
+//assumes triu CSC or CSR format, with fully populated diagonal.
+//format = 0 / CSC:  diagonal terms are last in every column.
+//format = 1 / CSR:  diagonal terms are first in every row.
+void _kkt_shifts_param1(csc* KKT, c_float param1, c_int n, c_int format){
+  int i;
+  int offset = format == 0 ? 1 : 0;
+  for(i = 0; i < n; i++){ KKT->x[KKT->p[i+offset]-offset] += param1;}
+  return;
+}
+
+//*subtract* an offset to every term in the lower mxm block.
+//assumes triu CSC P/A formats, with fully populated diagonal.
+//KKT format = 0 / CSC:  diagonal terms are last in every column.
+//KKT format = 1 / CSR:  diagonal terms are first in every row.
+void _kkt_shifts_param2(csc* KKT, c_float* param2, c_float param2_sc, c_int startcol, c_int blockwidth, c_int format){
+
+  int i;
+  int offset = format == 0 ? 1 : 0;
+
+  if(param2){
+    for(i = 0; i < blockwidth; i++){ KKT->x[KKT->p[i + startcol + offset]-offset] -= param2[i];}
+  }else{
+    for(i = 0; i < blockwidth; i++){ KKT->x[KKT->p[i + startcol + offset]-offset] -= param2_sc;}
+  }
+}
+
 #ifndef EMBEDDED
+
+//the remainder of the private functions here are for KKT
+//assembly ONLY, so don't included them when EMBEDDED
 
 //increment the K colptr by the number of nonzeros
 //in a square diagonal matrix placed on the diagonal.
@@ -241,34 +272,6 @@ void _kkt_assemble_csc(
     _kkt_backshift_colptrs(K);
 
     return;
-}
-
-
-//add an offset to every term in the upper nxn block.
-//assumes triu CSC or CSR format, with fully populated diagonal.
-//format = 0 / CSC:  diagonal terms are last in every column.
-//format = 1 / CSR:  diagonal terms are first in every row.
-void _kkt_shifts_param1(csc* KKT, c_float param1, c_int n, c_int format){
-  int i;
-  int offset = format == 0 ? 1 : 0;
-  for(i = 0; i < n; i++){ KKT->x[KKT->p[i+offset]-offset] += param1;}
-  return;
-}
-
-//*subtract* an offset to every term in the lower mxm block.
-//assumes triu CSC P/A formats, with fully populated diagonal.
-//KKT format = 0 / CSC:  diagonal terms are last in every column.
-//KKT format = 1 / CSR:  diagonal terms are first in every row.
-void _kkt_shifts_param2(csc* KKT, c_float* param2, c_float param2_sc, c_int startcol, c_int blockwidth, c_int format){
-
-  int i;
-  int offset = format == 0 ? 1 : 0;
-
-  if(param2){
-    for(i = 0; i < blockwidth; i++){ KKT->x[KKT->p[i + startcol + offset]-offset] -= param2[i];}
-  }else{
-    for(i = 0; i < blockwidth; i++){ KKT->x[KKT->p[i + startcol + offset]-offset] -= param2_sc;}
-  }
 }
 
 
