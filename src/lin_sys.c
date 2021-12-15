@@ -41,11 +41,13 @@ c_int init_linsys_solver(LinSysSolver      **s,
 #else /* ifdef ALGEBRA_CUDA */
 
 #ifdef ALGEBRA_MKL
-  case DIRECT_SOLVER:
-    return init_linsys_solver_pardiso((pardiso_solver **)s, P, A, rho_vec, settings, polishing);
 
   case INDIRECT_SOLVER:
     return init_linsys_mklcg((mklcg_solver **)s, P, A, rho_vec, settings, polishing);
+
+  default: //DIRECT_SOLVER is default
+    return init_linsys_solver_pardiso((pardiso_solver **)s, P, A, rho_vec, settings, polishing);
+
 #else
   default:
     return init_linsys_solver_qdldl((qdldl_solver **)s, P, A, rho_vec, settings, polishing);
