@@ -53,7 +53,6 @@ void free_linsys_solver_pardiso(pardiso_solver *s) {
     if (s->rho_inv_vec) c_free(s->rho_inv_vec);
 
     // These are required for matrix updates
-    if (s->Pdiag_idx) c_free(s->Pdiag_idx);
     if (s->PtoKKT)    c_free(s->PtoKKT);
     if (s->AtoKKT)    c_free(s->AtoKKT);
     if (s->rhotoKKT)  c_free(s->rhotoKKT);
@@ -122,11 +121,10 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
 
   // Form KKT matrix
   if (polishing){ // Called from polish()
-    s->KKT = form_KKT(P->csc->x, P->csc->i, P->csc->p,
-                      A->csc->x, A->csc->i, A->csc->p,
-                      m, n,
-                      1, sigma, s->rho_inv_vec, sigma,
-                      OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
+    s->KKT = form_KKT(P->csc,A->csc,
+                      1,  //format = 1 means CSR
+                      sigma, s->rho_inv_vec, sigma,
+                      OSQP_NULL, OSQP_NULL, OSQP_NULL);
   }
   else { // Called from ADMM algorithm
 
@@ -146,12 +144,10 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
       s->rho_inv = 1. / settings->rho;
     }
 
-    s->KKT = form_KKT(P->csc->x, P->csc->i, P->csc->p,
-                      A->csc->x, A->csc->i, A->csc->p,
-                      m, n,
-                      1, sigma, s->rho_inv_vec, s->rho_inv,
-                      s->PtoKKT, s->AtoKKT,
-                      &(s->Pdiag_idx), &(s->Pdiag_n), s->rhotoKKT);
+    s->KKT = form_KKT(P->csc,A->csc,
+                      1,  //format = 1 means CSR
+                      sigma, s->rho_inv_vec, s->rho_inv,
+                      s->PtoKKT, s->AtoKKT,s->rhotoKKT);
   }
 
   // Check if matrix has been created
@@ -287,18 +283,10 @@ c_int update_linsys_solver_matrices_pardiso(pardiso_solver   *s,
                                             const OSQPMatrix *A) {
 
   // Update KKT matrix with new P
-  update_KKT_P(s->KKT,
-               P->csc->x,
-               P->csc->p,
-               s->n,
-               s->PtoKKT, s->sigma, s->Pdiag_idx, s->Pdiag_n);
+  update_KKT_P(s->KKT, P, s->PtoKKT, s->sigma, 1);
 
   // Update KKT matrix with new A
-  update_KKT_A(s->KKT,
-               A->csc->x,
-               A->csc->p,
-               s->n,
-               s->AtoKKT);
+  update_KKT_A(s->KKT, A, s->AtoKKT);
 
   // Perform numerical factorization
   s->phase = PARDISO_NUMERIC;
@@ -320,7 +308,7 @@ c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver    *s,
   c_float* rhov;
 
   // Update internal rho_inv_vec
-  if (s->rho_inv_vec) {
+  if (s->rho_inv_vec != OSQP_NULL) {
     rhov = rho_vec->values;
     for (i = 0; i < m; i++){
       s->rho_inv_vec[i] = 1. / rhov[i];

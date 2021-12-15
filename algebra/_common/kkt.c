@@ -2,196 +2,327 @@
 
 #ifndef EMBEDDED
 
-csc* form_KKT(c_float*    P_x,
-              c_int*      P_i,
-              c_int*      P_p,
-              c_float*    A_x,
-              c_int*      A_i,
-              c_int*      A_p,
-              c_int       m,
-              c_int       n,
+//increment the K colptr by the number of nonzeros
+//in a square diagonal matrix placed on the diagonal.
+//Used to increment, e.g. the lower RHS block diagonal
+void _kkt_colcount_diag(csc* K, c_int initcol, c_int blockcols){
+
+    c_int j;
+    for(j = initcol; j < (initcol + blockcols); j++){
+        K->p[j]++;
+    }
+    return;
+}
+
+//same as _kkt_count_diag, but counts places
+//where the input matrix M has a missing
+//diagonal entry.  M must be square and TRIU
+void _kkt_colcount_missing_diag(csc* K, csc* M, c_int initcol){
+
+    c_int j;
+    for (j = 0; j < M->n; j++){
+        //if empty column or last entry not on diagonal..
+        if((M->p[j] == M->p[j+1]) || (M->i[M->p[j+1]-1] != j)) {
+            K->p[j + initcol]++;
+        }
+    }
+    return;
+}
+
+//increment K colptr by the number of nonzeros in M
+void _kkt_colcount_block(csc* K, csc* M, c_int initcol, c_int istranspose){
+
+    c_int nnzM, j;
+
+    if(istranspose){
+      nnzM = M->p[M->n];
+      for (j = 0; j < nnzM; j++){
+        K->p[M->i[j] + initcol]++;
+      }
+    }
+    else {
+      //just add the column count
+      for (j = 0; j < M->n; j++){
+          K->p[j + initcol] += M->p[j+1] - M->p[j];
+      }
+    }
+    return;
+}
+
+
+//populate values from M using the K colptr as indicator of
+//next fill location in each row
+void _kkt_fill_block(
+  csc* K, csc* M,
+  c_int* MtoKKT,
+  c_int initrow,
+  c_int initcol,
+  c_int istranspose)
+{
+    c_int ii, jj, row, col, dest;
+
+    for(ii=0; ii < M->n; ii++){
+        for(jj = M->p[ii]; jj < M->p[ii+1]; jj++){
+            if(istranspose){
+                col = M->i[jj] + initcol;
+                row = ii + initrow;
+            }
+            else {
+                col = ii + initcol;
+                row = M->i[jj] + initrow;
+            }
+
+            dest       = K->p[col]++;
+            K->i[dest] = row;
+            K->x[dest] = M->x[jj];
+            if(MtoKKT != OSQP_NULL){MtoKKT[jj] = dest;}
+        }
+    }
+    return;
+}
+
+//increment the K colptr by the number of elements
+//in a square diagonal matrix placed on the diagonal.
+//Used to increment, e.g. the lower RHS block diagonal.
+//values are filled with structural zero
+void _kkt_fill_diag_zeros(csc* K,c_int* rhotoKKT, c_int offset, c_int blockdim){
+
+    c_int j, dest, col;
+    for(j = 0; j < blockdim; j++){
+        col         = j + offset;
+        dest        = K->p[col];
+        K->i[dest]  = col;
+        K->x[dest]  = 0.0;  //structural zero
+        K->p[col]++;
+        if(rhotoKKT != OSQP_NULL){rhotoKKT[j] = dest;}
+    }
+    return;
+}
+
+//same as _kkt_fill_diag_zeros, but only places
+//entries where the input matrix M has a missing
+//diagonal entry.  M must be square and TRIU
+void _kkt_fill_missing_diag_zeros(csc* K,csc* M, c_int offset){
+
+    c_int j, dest;
+    for(j = 0; j < M->n; j++){
+        //fill out missing diagonal terms only:
+        //if completely empty column last element is not on diagonal..
+        if((M->p[j] == M->p[j+1]) ||
+           (M->i[M->p[j+1]-1] != j))
+        {
+            dest           = K->p[j + offset];
+            K->i[dest]  = j + offset;
+            K->x[dest]  = 0.0;  //structural zero
+            K->p[j]++;;
+        }
+    }
+    return;
+}
+
+void _kkt_colcount_to_colptr(csc* K){
+
+    c_int j, count;
+    c_int currentptr = 0;
+
+    for(j = 0; j <= K->n; j++){
+       count        = K->p[j];
+       K->p[j]      = currentptr;
+       currentptr  += count;
+    }
+    return;
+}
+
+void _kkt_backshift_colptrs(csc* K){
+
+    int j;
+    for(j = K->n; j > 0; j--){
+        K->p[j] = K->p[j-1];
+    }
+    K->p[0] = 0;
+
+    return;
+}
+
+c_int _count_diagonal_entries(csc* P){
+
+  c_int j;
+  c_int count = 0;
+
+  for(j = 0; j < P->n; j++){
+    //look for nonempty columns with final element
+    //on the diagonal.  Assumes triu format.
+    if((P->p[j+1] != P->p[j]) && (P->i[P->p[j+1]-1] == j) ){
+      count++;
+    }
+  }
+  return count;
+
+}
+
+
+void _kkt_assemble_csr(
+    csc* K,
+    c_int* PtoKKT,
+    c_int* AtoKKT,
+    c_int* rhotoKKT,
+    csc* P,
+    csc* A)
+{
+
+    //NB:  assembling a TRIU KKT in CSR format,
+    //which is the same as TRIL KKT in CSC.
+    c_int j;
+    c_int m = A->m;
+    c_int n = P->n;
+
+    //use K.p to hold nnz entries in each
+    //column of the KKT matrix
+    for(int j=0; j <= (m+n); j++){K->p[j] = 0;}
+    _kkt_colcount_missing_diag(K,P,0);
+    _kkt_colcount_block(K,P,0,1);
+    _kkt_colcount_block(K,A,0,0);
+    _kkt_colcount_diag(K,n,m);
+
+    //cumsum total entries to convert to K.p
+    _kkt_colcount_to_colptr(K);
+
+    //fill in value for P, top left (transposed/rowwise)
+    _kkt_fill_missing_diag_zeros(K,P,0);  //before adding P, since tril form
+    _kkt_fill_block(K,P,PtoKKT,0,0,1);
+
+    //fill in value for A, lower left (columnwise)
+    _kkt_fill_block(K,A,AtoKKT,n,0,0);
+
+    //fill in lower right with diagonal of structural zeros
+    _kkt_fill_diag_zeros(K,rhotoKKT,n,m);
+
+    //backshift the colptrs to recover K.p again
+    _kkt_backshift_colptrs(K);
+
+    return;
+}
+
+void _kkt_assemble_csc(
+    csc* K,
+    c_int* PtoKKT,
+    c_int* AtoKKT,
+    c_int* rhotoKKT,
+    csc* P,
+    csc* A)
+{
+
+    c_int j;
+    c_int m = A->m;
+    c_int n = P->n;
+
+    //use K.p to hold nnz entries in each
+    //column of the KKT matrix
+    for(int j=0; j <= (m+n); j++){K->p[j] = 0;}
+    _kkt_colcount_block(K,P,0,0);
+    _kkt_colcount_missing_diag(K,P,0);
+    _kkt_colcount_block(K,A,n,1);
+    _kkt_colcount_diag(K,n,m);
+
+    //cumsum total entries to convert to K.p
+    _kkt_colcount_to_colptr(K);
+
+    //fill in value for P, top left (columnwise)
+    _kkt_fill_block(K,P,PtoKKT,0,0,0);
+    _kkt_fill_missing_diag_zeros(K,P,0);  //after adding P, since triu form
+
+    //fill in value for A, lower left (transposed/rowwise)
+    _kkt_fill_block(K,A,AtoKKT,0,n,1);
+
+    //fill in lower right with diagonal of structural zeros
+    _kkt_fill_diag_zeros(K,rhotoKKT,n,m);
+
+    //backshift the colptrs to recover K.p again
+    _kkt_backshift_colptrs(K);
+
+    return;
+}
+
+
+//add an offset to every term in the upper nxn block.
+//assumes triu CSC or CSR format, with fully populated diagonal.
+//format = 0 / CSC:  diagonal terms are last in every column.
+//format = 1 / CSR:  diagonal terms are first in every row.
+void _kkt_shifts_param1(csc* KKT, c_float param1, c_int n, c_int format){
+  int i;
+  int offset = format == 0 ? 1 : 0;
+  for(i = 0; i < n; i++){ KKT->x[KKT->p[i+offset]-offset] += param1;}
+  return;
+}
+
+//*subtract* an offset to every term in the lower mxm block.
+//assumes triu CSC P/A formats, with fully populated diagonal.
+//KKT format = 0 / CSC:  diagonal terms are last in every column.
+//KKT format = 1 / CSR:  diagonal terms are first in every row.
+void _kkt_shifts_param2(csc* KKT, c_float* param2, c_float param2_sc, c_int startcol, c_int blockwidth, c_int format){
+
+  int i;
+  int offset = format == 0 ? 1 : 0;
+
+  if(param2){
+    for(i = 0; i < blockwidth; i++){ KKT->x[KKT->p[i + startcol + offset]-offset] -= param2[i];}
+  }else{
+    for(i = 0; i < blockwidth; i++){ KKT->x[KKT->p[i + startcol + offset]-offset] -= param2_sc;}
+  }
+}
+
+
+csc* form_KKT(csc*        P,
+              csc*        A,
               c_int       format,
               c_float     param1,
-              c_float    *param2,
+              c_float*    param2,
               c_float     param2_sc,
-              c_int      *PtoKKT,
-              c_int      *AtoKKT,
-              c_int     **Pdiag_idx,
-              c_int      *Pdiag_n,
-              c_int      *param2toKKT) {
+              c_int*      PtoKKT,
+              c_int*      AtoKKT,
+              c_int*      rhotoKKT) {
 
-  c_int  nKKT, nnzKKTmax; // Size, number of nonzeros and max number of nonzeros
-                          // in KKT matrix
-  csc   *KKT_trip, *KKT;  // KKT matrix in triplet format and CSC format
+  c_int   m,n;            //number of variables, constraints
+  c_int  nKKT, nnzKKT;    // Size, number of nonzeros in KKT
+  c_int  ndiagP;          // entries on diagonal of P
+  csc*   KKT;             // KKT matrix in CSC (or CSR) format
   c_int  ptr, i, j;       // Counters for elements (i,j) and index pointer
   c_int  zKKT = 0;        // Counter for total number of elements in P and in
                           // KKT
-  c_int *KKT_TtoC;        // Pointer to vector mapping from KKT in triplet form
+  c_int* KKT_TtoC;        // Pointer to vector mapping from KKT in triplet form
                           // to CSC
 
   // Get matrix dimensions
+  m   = A->m;
+  n   = P->n;
   nKKT = m + n;
 
+  //count elements on diag(P)
+  ndiagP = _count_diagonal_entries(P);
+
   // Get maximum number of nonzero elements (only upper triangular part)
-  nnzKKTmax = P_p[n] +    // Number of elements in P
-              n +         // Number of elements in param1 * I
-              A_p[n] +    // Number of nonzeros in A
-              m;          // Number of elements in - diag(param2)
+  nnzKKT = P->p[n] +   // Number of elements in P
+           n -         // Number of elements in param1 * I
+           ndiagP +    //remove double count on the diagonal
+           A->p[n] +   // Number of nonzeros in A
+           m;          // Number of elements in - diag(param2)
 
-  // Preallocate KKT matrix in triplet format
-  KKT_trip = csc_spalloc(nKKT, nKKT, nnzKKTmax, 1, 1);
+  // Preallocate KKT matrix in csc format
+  KKT = csc_spalloc(nKKT, nKKT, nnzKKT, 1, 0);
+  if (!KKT) return OSQP_NULL;  // Failed to preallocate matrix
 
-  if (!KKT_trip) return OSQP_NULL;  // Failed to preallocate matrix
-
-  // Allocate vector of indices on the diagonal. Worst case it has m elements
-  if (Pdiag_idx != OSQP_NULL) {
-    (*Pdiag_idx) = c_malloc(n * sizeof(c_int));
-    *Pdiag_n     = 0; // Set 0 diagonal elements to start
+  if(format == 0){  //KKT should be built in CSC format
+    _kkt_assemble_csc(KKT,PtoKKT,AtoKKT,rhotoKKT,P,A);
   }
-
-  // Allocate Triplet matrices
-  // P + param1 I
-  for (j = 0; j < n; j++) { // cycle over columns
-    // No elements in column j => add diagonal element param1
-    if (P_p[j] == P_p[j + 1]) {
-      KKT_trip->i[zKKT] = j;
-      KKT_trip->p[zKKT] = j;
-      KKT_trip->x[zKKT] = param1;
-      zKKT++;
-    }
-
-    for (ptr = P_p[j]; ptr < P_p[j + 1]; ptr++) { // cycle over rows
-      // Get current row
-      i = P_i[ptr];
-
-      // Add element of P
-      KKT_trip->i[zKKT] = i;
-      KKT_trip->p[zKKT] = j;
-      KKT_trip->x[zKKT] = P_x[ptr];
-
-      if (PtoKKT != OSQP_NULL) PtoKKT[ptr] = zKKT;  // Update index from P to
-                                                    // KKTtrip
-
-      if (i == j) {                                 // P has a diagonal element,
-                                                    // add param1
-        KKT_trip->x[zKKT] += param1;
-
-        // If index vector pointer supplied -> Store the index
-        if (Pdiag_idx != OSQP_NULL) {
-          (*Pdiag_idx)[*Pdiag_n] = ptr;
-          (*Pdiag_n)++;
-        }
-      }
-      zKKT++;
-
-      // Add diagonal param1 in case
-      if ((i < j) &&                  // Diagonal element not reached
-          (ptr + 1 == P_p[j + 1])) { // last element of column j
-        // Add diagonal element param1
-        KKT_trip->i[zKKT] = j;
-        KKT_trip->p[zKKT] = j;
-        KKT_trip->x[zKKT] = param1;
-        zKKT++;
-      }
-    }
+  else {          //KKT should be built in CSR format
+    _kkt_assemble_csr(KKT,PtoKKT,AtoKKT,rhotoKKT,P,A);
   }
+  //apply positive shifts to upper LH diagonal
+  _kkt_shifts_param1(KKT,param1,n,format);
 
-  if (Pdiag_idx != OSQP_NULL) {
-    // Realloc Pdiag_idx so that it contains exactly *Pdiag_n diagonal elements
-    (*Pdiag_idx) = c_realloc((*Pdiag_idx), (*Pdiag_n) * sizeof(c_int));
-  }
-
-
-  // A' at top right
-  for (j = 0; j < n; j++) {                      // Cycle over columns of A
-    for (ptr = A_p[j]; ptr < A_p[j + 1]; ptr++) {
-      KKT_trip->p[zKKT] = n + A_i[ptr];         // Assign column index from
-                                                    // row index of A
-      KKT_trip->i[zKKT] = j;                        // Assign row index from
-                                                    // column index of A
-      KKT_trip->x[zKKT] = A_x[ptr];                // Assign A value element
-
-      if (AtoKKT != OSQP_NULL) AtoKKT[ptr] = zKKT;  // Update index from A to
-                                                    // KKTtrip
-      zKKT++;
-    }
-  }
-
-  // - diag(param2) at bottom right
-  if (param2) {
-    for (j = 0; j < m; j++) {
-      KKT_trip->i[zKKT] = j + n;
-      KKT_trip->p[zKKT] = j + n;
-      KKT_trip->x[zKKT] = -param2[j];
-
-      if (param2toKKT != OSQP_NULL) param2toKKT[j] = zKKT;  // Update index from
-                                                            // param2 to KKTtrip
-      zKKT++;
-    }
-  }
-  else {
-    for (j = 0; j < m; j++) {
-      KKT_trip->i[zKKT] = j + n;
-      KKT_trip->p[zKKT] = j + n;
-      KKT_trip->x[zKKT] = -param2_sc;
-
-      if (param2toKKT != OSQP_NULL) param2toKKT[j] = zKKT;  // Update index from
-                                                            // param2 to KKTtrip
-      zKKT++;
-    }
-  }
-
-  // Allocate number of nonzeros
-  KKT_trip->nz = zKKT;
-
-  // Convert triplet matrix to csc format
-  if (!PtoKKT && !AtoKKT && !param2toKKT) {
-    // If no index vectors passed, do not store KKT mapping from Trip to CSC/CSR
-    if (format == 0) KKT = triplet_to_csc(KKT_trip, OSQP_NULL);
-    else KKT = triplet_to_csr(KKT_trip, OSQP_NULL);
-  }
-  else {
-    // Allocate vector of indices from triplet to csc
-    KKT_TtoC = c_malloc((zKKT) * sizeof(c_int));
-
-    if (!KKT_TtoC) {
-      // Error in allocating KKT_TtoC vector
-      csc_spfree(KKT_trip);
-      c_free(*Pdiag_idx);
-      return OSQP_NULL;
-    }
-
-    // Store KKT mapping from Trip to CSC/CSR
-    if (format == 0)
-      KKT = triplet_to_csc(KKT_trip, KKT_TtoC);
-    else
-      KKT = triplet_to_csr(KKT_trip, KKT_TtoC);
-
-    // Update vectors of indices from P, A, param2 to KKT (now in CSC format)
-    if (PtoKKT != OSQP_NULL) {
-      for (i = 0; i < P_p[n]; i++) {
-        PtoKKT[i] = KKT_TtoC[PtoKKT[i]];
-      }
-    }
-
-    if (AtoKKT != OSQP_NULL) {
-      for (i = 0; i < A_p[n]; i++) {
-        AtoKKT[i] = KKT_TtoC[AtoKKT[i]];
-      }
-    }
-
-    if (param2toKKT != OSQP_NULL) {
-      for (i = 0; i < m; i++) {
-        param2toKKT[i] = KKT_TtoC[param2toKKT[i]];
-      }
-    }
-
-    // Free mapping
-    c_free(KKT_TtoC);
-  }
-
-  // Clean matrix in triplet format and return result
-  csc_spfree(KKT_trip);
+  //apply negative shifts to lower RH diagonal
+  //NB: rhtoKKT is not needed to do this
+  _kkt_shifts_param2(KKT,param2,param2_sc,n,m,format);
 
   return KKT;
 }
@@ -201,43 +332,36 @@ csc* form_KKT(c_float*    P_x,
 
 #if EMBEDDED != 1
 
-void update_KKT_P(csc         *KKT,
-                  c_float*    P_x,
-                  c_int*      P_p,
-                  c_int       n,
-                  c_int  *PtoKKT,
-                  c_float param1,
-                  c_int  *Pdiag_idx,
-                  c_int   Pdiag_n) {
+void update_KKT_P(csc*        KKT,
+                  csc*        P,
+                  c_int*      PtoKKT,
+                  c_float     param1,
+                  c_int       format) {
 
-  c_int i, j; // Iterations
+  c_int j; // Iterations
 
   // Update elements of KKT using P
-  for (i = 0; i < P_p[n]; i++) {
-    KKT->x[PtoKKT[i]] = P_x[i];
+  for (j = 0; j < P->p[P->n]; j++) {
+    KKT->x[PtoKKT[j]] = P->x[j];
   }
 
   // Update diagonal elements of KKT by adding sigma
-  for (i = 0; i < Pdiag_n; i++) {
-    j                  = Pdiag_idx[i]; // Extract index of the element on the
-                                       // diagonal
-    KKT->x[PtoKKT[j]] += param1;
-  }
+  _kkt_shifts_param1(KKT, param1, P->n, format);
+
 }
 
-void update_KKT_A(csc *KKT,
-                  c_float*    A_x,
-                  c_int*      A_p,
-                  c_int       n,
+void update_KKT_A(csc*        KKT,
+                  csc*        A,
                   c_int*      AtoKKT) {
 
-  c_int i; // Iterations
+  c_int j;
 
   // Update elements of KKT using A
-  for (i = 0; i < A_p[n]; i++) {
-    KKT->x[AtoKKT[i]] = A_x[i];
+  for (j = 0; j < A->p[A->n]; j++) {
+    KKT->x[AtoKKT[j]] = A->x[j];
   }
 }
+
 
 void update_KKT_param2(csc     *KKT,
                        c_float *param2,

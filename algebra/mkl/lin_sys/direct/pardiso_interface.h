@@ -78,7 +78,6 @@ struct pardiso {
     c_float fdum;     ///< dummy float
 
     // These are required for matrix updates
-    c_int * Pdiag_idx, Pdiag_n;  ///< index and number of diagonal elements in P
     c_int * PtoKKT, * AtoKKT;    ///< Index of elements from P and A to KKT matrix
     c_int * rhotoKKT;            ///< Index of rho places in KKT matrix
 

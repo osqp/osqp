@@ -42,7 +42,6 @@ void free_linsys_solver_qdldl(qdldl_solver *s) {
         if (s->rho_inv_vec) c_free(s->rho_inv_vec);
 
         // These are required for matrix updates
-        if (s->Pdiag_idx) c_free(s->Pdiag_idx);
         if (s->KKT)       csc_spfree(s->KKT);
         if (s->PtoKKT)    c_free(s->PtoKKT);
         if (s->AtoKKT)    c_free(s->AtoKKT);
@@ -291,7 +290,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
     // null initially so we don't try to free them prematurely
     s->L->i = OSQP_NULL;
     s->L->x = OSQP_NULL;
-	
+
     // Preallocate workspace
     s->iwork = (QDLDL_int *)c_malloc(sizeof(QDLDL_int)*(3*n_plus_m));
     s->bwork = (QDLDL_bool *)c_malloc(sizeof(QDLDL_bool)*n_plus_m);
@@ -299,11 +298,11 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
 
     // Form and permute KKT matrix
     if (polishing){ // Called from polish()
-        KKT_temp = form_KKT(P->csc->x, P->csc->i, P->csc->p,
-                            A->csc->x, A->csc->i, A->csc->p,
-                            m, n,
-                            0, sigma, s->rho_inv_vec, sigma,
-                            OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL, OSQP_NULL);
+
+        KKT_temp = form_KKT(P->csc,A->csc,
+                            0, //format = 0 means CSC
+                            sigma, s->rho_inv_vec, sigma,
+                            OSQP_NULL, OSQP_NULL, OSQP_NULL);
 
         // Permute matrix
         if (KKT_temp)
@@ -327,16 +326,15 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
           s->rho_inv = 1. / settings->rho;
         }
 
-        KKT_temp = form_KKT(P->csc->x, P->csc->i, P->csc->p,
-                            A->csc->x, A->csc->i, A->csc->p,
-                            m, n,
-                            0, sigma, s->rho_inv_vec, s->rho_inv,
-                            s->PtoKKT, s->AtoKKT,
-                            &(s->Pdiag_idx), &(s->Pdiag_n), s->rhotoKKT);
+        KKT_temp = form_KKT(P->csc,A->csc,
+                            0, //format = 0 means CSC format
+                            sigma, s->rho_inv_vec, s->rho_inv,
+                            s->PtoKKT, s->AtoKKT,s->rhotoKKT);
 
         // Permute matrix
-        if (KKT_temp)
+        if (KKT_temp){
             permute_KKT(&KKT_temp, s, P->csc->p[n], A->csc->p[n], m, s->PtoKKT, s->AtoKKT, s->rhotoKKT);
+        }
     }
 
     // Check if matrix has been created
@@ -372,18 +370,6 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
 
 #endif  // EMBEDDED
 
-
-// // Permute x = P*b using P
-// void permute_x(c_int n, c_float * x, const c_float * b, const c_int * P) {
-//     c_int j;
-//     for (j = 0 ; j < n ; j++) x[j] = b[P[j]];
-// }
-
-// // Permute x = P'*b using P
-// void permutet_x(c_int n, c_float * x, const c_float * b, const c_int * P) {
-//     c_int j;
-//     for (j = 0 ; j < n ; j++) x[P[j]] = b[j];
-// }
 
 /* solve P'LDL'P x = b for x */
 static void LDLSolve(c_float       *x,
@@ -455,18 +441,10 @@ c_int update_linsys_solver_matrices_qdldl(qdldl_solver     *s,
                                           const OSQPMatrix *A) {
 
     // Update KKT matrix with new P
-    update_KKT_P(s->KKT,
-                 P->csc->x,
-                 P->csc->p,
-                 s->n,
-                 s->PtoKKT, s->sigma, s->Pdiag_idx, s->Pdiag_n);
+    update_KKT_P(s->KKT, P->csc, s->PtoKKT, s->sigma, 0);
 
     // Update KKT matrix with new A
-    update_KKT_A(s->KKT,
-                 A->csc->x,
-                 A->csc->p,
-                 s->n,
-                 s->AtoKKT);
+    update_KKT_A(s->KKT, A->csc, s->AtoKKT);
 
     return (QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
         s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,

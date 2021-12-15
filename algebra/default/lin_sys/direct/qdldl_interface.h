@@ -72,7 +72,6 @@ struct qdldl {
 
 #if EMBEDDED != 1
     // These are required for matrix updates
-    c_int * Pdiag_idx, Pdiag_n;  ///< index and number of diagonal elements in P
     csc   * KKT;                 ///< Permuted KKT matrix in sparse form (used to update P and A matrices)
     c_int * PtoKKT, * AtoKKT;    ///< Index of elements from P and A to KKT matrix
     c_int * rhotoKKT;            ///< Index of rho places in KKT matrix
