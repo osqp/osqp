@@ -45,7 +45,7 @@ static void _kkt_colcount_diag(csc* K, c_int initcol, c_int blockcols){
     return;
 }
 
-//same as _kkt_count_diag, but counts places
+//same as _kkt_colcount_diag, but counts places
 //where the input matrix M has a missing
 //diagonal entry.  M must be square and TRIU
 static void _kkt_colcount_missing_diag(csc* K, csc* M, c_int initcol){
@@ -341,10 +341,11 @@ void update_KKT_P(csc*        KKT,
                   c_float     param1,
                   c_int       format) {
 
-  c_int j; // Iterations
+  c_int j, nnzP;
 
   // Update elements of KKT using P
-  for (j = 0; j < P->p[P->n]; j++) {
+  nnzP = P->p[P->n];
+  for (j = 0; j < nnzP; j++) {
     KKT->x[PtoKKT[j]] = P->x[j];
   }
 
@@ -357,10 +358,11 @@ void update_KKT_A(csc*        KKT,
                   csc*        A,
                   c_int*      AtoKKT) {
 
-  c_int j;
+  c_int j, nnzA;
 
   // Update elements of KKT using A
-  for (j = 0; j < A->p[A->n]; j++) {
+  nnzA = A->p[A->n];
+  for (j = 0; j < nnzA; j++) {
     KKT->x[AtoKKT[j]] = A->x[j];
   }
 }
