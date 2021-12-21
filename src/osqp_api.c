@@ -239,7 +239,7 @@ c_int osqp_setup(OSQPSolver         **solverp,
   }
 
   // Initialize linear system solver structure
-  exitflag = init_linsys_solver(&(work->linsys_solver), work->data->P, work->data->A, 
+  exitflag = init_linsys_solver(&(work->linsys_solver), work->data->P, work->data->A,
                                 work->rho_vec, solver->settings,
                                 &work->scaled_prim_res, &work->scaled_dual_res, 0);
 
@@ -992,8 +992,8 @@ c_int osqp_update_data_mat(OSQPSolver    *solver,
 
   // Update linear system structure with new data
   exitflag = work->linsys_solver->update_matrices(work->linsys_solver,
-                                                  work->data->P,
-                                                  work->data->A);
+                                                  work->data->P, Px_new_idx, P_new_n,
+                                                  work->data->A, Ax_new_idx, A_new_n);
 
   // Reset solver information
   reset_info(solver->info);
