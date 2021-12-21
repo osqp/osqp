@@ -77,6 +77,9 @@ else()
   message(STATUS "EMBEDDED = OFF")
 endif()
 
+# Display final CTRLC behaviour
+message(STATUS "CTRLC = ${CTRLC}")
+
 # Display final ALGEBRA chosen and set internal boolean variables
 message(STATUS "ALGEBRA = ${ALGEBRA}")
 if(${ALGEBRA} STREQUAL "default")
