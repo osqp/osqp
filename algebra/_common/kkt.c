@@ -5,7 +5,7 @@
 //assumes triu CSC or CSR format, with fully populated diagonal.
 //format = 0 / CSC:  diagonal terms are last in every column.
 //format = 1 / CSR:  diagonal terms are first in every row.
-void _kkt_shifts_param1(csc* KKT, c_float param1, c_int n, c_int format){
+static void _kkt_shifts_param1(csc* KKT, c_float param1, c_int n, c_int format){
   int i;
   int offset = format == 0 ? 1 : 0;
   for(i = 0; i < n; i++){ KKT->x[KKT->p[i+offset]-offset] += param1;}
@@ -16,7 +16,7 @@ void _kkt_shifts_param1(csc* KKT, c_float param1, c_int n, c_int format){
 //assumes triu CSC P/A formats, with fully populated diagonal.
 //KKT format = 0 / CSC:  diagonal terms are last in every column.
 //KKT format = 1 / CSR:  diagonal terms are first in every row.
-void _kkt_shifts_param2(csc* KKT, c_float* param2, c_float param2_sc, c_int startcol, c_int blockwidth, c_int format){
+static void _kkt_shifts_param2(csc* KKT, c_float* param2, c_float param2_sc, c_int startcol, c_int blockwidth, c_int format){
 
   int i;
   int offset = format == 0 ? 1 : 0;
@@ -36,7 +36,7 @@ void _kkt_shifts_param2(csc* KKT, c_float* param2, c_float param2_sc, c_int star
 //increment the K colptr by the number of nonzeros
 //in a square diagonal matrix placed on the diagonal.
 //Used to increment, e.g. the lower RHS block diagonal
-void _kkt_colcount_diag(csc* K, c_int initcol, c_int blockcols){
+static void _kkt_colcount_diag(csc* K, c_int initcol, c_int blockcols){
 
     c_int j;
     for(j = initcol; j < (initcol + blockcols); j++){
@@ -48,7 +48,7 @@ void _kkt_colcount_diag(csc* K, c_int initcol, c_int blockcols){
 //same as _kkt_count_diag, but counts places
 //where the input matrix M has a missing
 //diagonal entry.  M must be square and TRIU
-void _kkt_colcount_missing_diag(csc* K, csc* M, c_int initcol){
+static void _kkt_colcount_missing_diag(csc* K, csc* M, c_int initcol){
 
     c_int j;
     for (j = 0; j < M->n; j++){
@@ -61,7 +61,7 @@ void _kkt_colcount_missing_diag(csc* K, csc* M, c_int initcol){
 }
 
 //increment K colptr by the number of nonzeros in M
-void _kkt_colcount_block(csc* K, csc* M, c_int initcol, c_int istranspose){
+static void _kkt_colcount_block(csc* K, csc* M, c_int initcol, c_int istranspose){
 
     c_int nnzM, j;
 
@@ -83,7 +83,7 @@ void _kkt_colcount_block(csc* K, csc* M, c_int initcol, c_int istranspose){
 
 //populate values from M using the K colptr as indicator of
 //next fill location in each row
-void _kkt_fill_block(
+static void _kkt_fill_block(
   csc* K, csc* M,
   c_int* MtoKKT,
   c_int initrow,
@@ -116,7 +116,7 @@ void _kkt_fill_block(
 //in a square diagonal matrix placed on the diagonal.
 //Used to increment, e.g. the lower RHS block diagonal.
 //values are filled with structural zero
-void _kkt_fill_diag_zeros(csc* K,c_int* rhotoKKT, c_int offset, c_int blockdim){
+static void _kkt_fill_diag_zeros(csc* K,c_int* rhotoKKT, c_int offset, c_int blockdim){
 
     c_int j, dest, col;
     for(j = 0; j < blockdim; j++){
@@ -133,7 +133,7 @@ void _kkt_fill_diag_zeros(csc* K,c_int* rhotoKKT, c_int offset, c_int blockdim){
 //same as _kkt_fill_diag_zeros, but only places
 //entries where the input matrix M has a missing
 //diagonal entry.  M must be square and TRIU
-void _kkt_fill_missing_diag_zeros(csc* K,csc* M, c_int offset){
+static void _kkt_fill_missing_diag_zeros(csc* K,csc* M, c_int offset){
 
     c_int j, dest;
     for(j = 0; j < M->n; j++){
@@ -151,7 +151,7 @@ void _kkt_fill_missing_diag_zeros(csc* K,csc* M, c_int offset){
     return;
 }
 
-void _kkt_colcount_to_colptr(csc* K){
+static void _kkt_colcount_to_colptr(csc* K){
 
     c_int j, count;
     c_int currentptr = 0;
@@ -164,7 +164,7 @@ void _kkt_colcount_to_colptr(csc* K){
     return;
 }
 
-void _kkt_backshift_colptrs(csc* K){
+static void _kkt_backshift_colptrs(csc* K){
 
     int j;
     for(j = K->n; j > 0; j--){
@@ -175,7 +175,7 @@ void _kkt_backshift_colptrs(csc* K){
     return;
 }
 
-c_int _count_diagonal_entries(csc* P){
+static c_int _count_diagonal_entries(csc* P){
 
   c_int j;
   c_int count = 0;
@@ -192,7 +192,7 @@ c_int _count_diagonal_entries(csc* P){
 }
 
 
-void _kkt_assemble_csr(
+static void _kkt_assemble_csr(
     csc* K,
     c_int* PtoKKT,
     c_int* AtoKKT,
@@ -234,7 +234,7 @@ void _kkt_assemble_csr(
     return;
 }
 
-void _kkt_assemble_csc(
+static void _kkt_assemble_csc(
     csc* K,
     c_int* PtoKKT,
     c_int* AtoKKT,
