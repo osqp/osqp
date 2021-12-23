@@ -380,9 +380,9 @@ def generate_data(problem_name, sols_data):
         elif sparse.issparse(value):  # Sparse matrix
             f.write("csc * %s;\n" % key)
         elif isinstance(value, np.ndarray):
-            if isinstance(value.flatten(order='F')[0], int):
+            if isinstance(value.flatten(order='F')[0], np.integer):
                 f.write("c_int * %s;\n" % key)
-            elif isinstance(value.flatten(order='F')[0], float):
+            elif isinstance(value.flatten(order='F')[0], np.float):
                 f.write("c_float * %s;\n" % key)
         else:
             if isinstance(value, int):
