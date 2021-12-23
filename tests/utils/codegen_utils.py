@@ -35,6 +35,7 @@ def write_vec_int(f, x, name, *args):
         f.write("%s[%i] = " % (name, i))
         f.write("%i;\n" % x[i])
 
+    f.write("\n")
 
 def write_vec_float(f, x, name, *args):
     n = len(x)
@@ -56,6 +57,7 @@ def write_vec_float(f, x, name, *args):
         else:
             f.write("%.20f;\n" % x[i])
 
+    f.write("\n")
 
 def clean_vec(f, name, *args):
     f.write("c_free(")
@@ -420,9 +422,9 @@ def generate_data(problem_name, sols_data):
         elif sparse.issparse(value):  # Sparse matrix
             write_mat_sparse(f, value, key, "data")
         elif type(value) is np.ndarray:
-            if isinstance(value.flatten(order='F')[0], int):
+            if isinstance(value.flatten(order='F')[0], np.integer):
                 write_vec_int(f, value.flatten(order='F'), key, "data")
-            elif isinstance(value.flatten(order='F')[0], float):
+            elif isinstance(value.flatten(order='F')[0], np.float):
                 write_vec_float(f, value.flatten(order='F'), key, "data")
         else:
             if isinstance(value, int):
