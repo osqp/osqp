@@ -444,15 +444,21 @@ c_int update_linsys_solver_matrices_qdldl(qdldl_solver     *s,
                                           const c_int* Ax_new_idx,
                                           c_int A_new_n) {
 
+    int pos_D_count;
+
     // Update KKT matrix with new P
     update_KKT_P(s->KKT, P->csc, Px_new_idx, P_new_n, s->PtoKKT, s->sigma, 0);
 
     // Update KKT matrix with new A
     update_KKT_A(s->KKT, A->csc, Ax_new_idx, A_new_n, s->AtoKKT);
 
-    return (QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
+    pos_D_count = QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
         s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
-        s->etree, s->bwork, s->iwork, s->fwork) < 0);
+        s->etree, s->bwork, s->iwork, s->fwork);
+
+    //number of positive elements in D should match the
+    //dimension of P if P + \sigma I is PD.   Error otherwise.
+    return (pos_D_count == P->csc->n) ? 0 : 1;
 }
 
 
