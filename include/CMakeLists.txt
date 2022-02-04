@@ -19,7 +19,7 @@ set(osqp_headers
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_api_functions.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_api_types.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_api_utils.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_configure.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/public/osqp_configure.h"
     PARENT_SCOPE)
 
 # Add more files that should only be in non-embedded code
@@ -35,5 +35,6 @@ endif()
 target_sources(OSQPLIB PUBLIC ${osqp_headers})
 target_sources(OSQPLIB PRIVATE ${osqp_headers_private})
 target_include_directories(OSQPLIB PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/public")
+target_include_directories(OSQPLIB PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/public")
 target_include_directories(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/private")
 

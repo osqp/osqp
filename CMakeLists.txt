@@ -21,7 +21,7 @@ set(OSQP_VERSION
     "0.0.0"
     CACHE STRING "The version number of OSQP")
 if(NOT OSQP_VERSION STREQUAL "0.0.0")
-  configure_file("${PROJECT_SOURCE_DIR}/configure/version.h.in" "${PROJECT_SOURCE_DIR}/include/version.h")
+  configure_file("${PROJECT_SOURCE_DIR}/configure/version.h.in" "${PROJECT_SOURCE_DIR}/include/private/version.h")
 endif()
 
 # Conda environment detection
@@ -136,7 +136,7 @@ endif()
 set(OSQP_ALGEBRA ${ALGEBRA})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/include/public/osqp_configure.h NEWLINE_STYLE LF)
+               ${CMAKE_BINARY_DIR}/include/public/osqp_configure.h NEWLINE_STYLE LF)
 
 # CUDA support
 # ----------------------------------------------
