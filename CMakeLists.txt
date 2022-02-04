@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(osqp)
 
 include(GNUInstallDirs)
+include(CMakeDependentOption)
 include(CMakePackageConfigHelpers)
 
 # Detect operating system
@@ -56,6 +57,14 @@ include(Utils)
 
 # Set options
 # ----------------------------------------------
+option(OSQP_BUILD_SHARED_LIB "Build the shared library" ON)
+option(OSQP_BUILD_STATIC_LIB "Build the static library" ON)
+
+cmake_dependent_option( OSQP_BUILD_DEMO_EXE
+                        "Build the demo executable (requires the static library)"
+                        ON    # Default to on
+                        OSQP_BUILD_STATIC_LIB OFF ) # Force off if the static library isn't built
+
 set(ALGEBRA
     "default"
     CACHE STRING "The Algebra to use (default/mkl/cuda)")
@@ -72,6 +81,11 @@ if(DEFINED EMBEDDED)
   set(PRINTING OFF)
   set(PROFILING OFF)
   set(CTRLC OFF)
+
+  # Disable shared library and demo exe on embedded applications
+  set(OSQP_BUILD_SHARED_LIB OFF)
+  set(OSQP_BUILD_DEMO_EXE OFF)
+
   message(STATUS "EMBEDDED = ${EMBEDDED}")
 else()
   message(STATUS "EMBEDDED = OFF")
@@ -273,10 +287,16 @@ if(R_LANG)
   endif(BUILD_TESTING)
 endif(R_LANG)
 
+if(PYTHON OR MATLAB OR R_LANG)
+  # Disable shared library and demo exe when building the interfaces
+  set(OSQP_BUILD_SHARED_LIB OFF)
+  set(OSQP_BUILD_DEMO_EXE OFF)
+endif()
+
 # ----------------------------------------------
 # Static Library - osqpstatic
 # ----------------------------------------------
-function(OSQP_BUILD_STATIC_LIB)
+if( OSQP_BUILD_STATIC_LIB )
   add_library(osqpstatic STATIC $<TARGET_OBJECTS:OSQPLIB>)
   set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
   if(ALGEBRA_DEFAULT)
@@ -290,15 +310,12 @@ function(OSQP_BUILD_STATIC_LIB)
   if(MATLAB)
     target_link_libraries(osqpstatic ${Matlab_LIBRARIES})
   endif(MATLAB)
-  set(OSQP_STATIC_LIB
-      ON
-      PARENT_SCOPE)
-endfunction()
+endif()
 
 # ----------------------------------------------
 # Shared Library - osqp
 # ----------------------------------------------
-function(OSQP_BUILD_SHARED_LIB)
+if(OSQP_BUILD_SHARED_LIB)
   add_library(osqp SHARED ${osqplib_sources})
   if(ALGEBRA_DEFAULT)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
@@ -323,16 +340,12 @@ function(OSQP_BUILD_SHARED_LIB)
   # a PUBLIC compile definition.
   target_compile_definitions(osqp PRIVATE BUILDING_OSQP)
   target_compile_definitions(osqp PUBLIC  OSQP_SHARED_LIB)
-
-  set(OSQP_SHARED_LIB
-      ON
-      PARENT_SCOPE)
-endfunction()
+endif()
 
 # ----------------------------------------------
 # Application - osqp_demo
 # ----------------------------------------------
-function(OSQP_BUILD_DEMO)
+if(OSQP_BUILD_DEMO_EXE)
   add_executable(osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
   #target_include_directories(osqp_demo PRIVATE ${osqplib_includes})
   target_link_libraries(osqp_demo osqpstatic)
@@ -341,25 +354,15 @@ function(OSQP_BUILD_DEMO)
   elseif(ALGEBRA_CUDA)
     target_link_libraries(osqp_demo cublas cusparse)
   endif()
-endfunction()
-
-# ----------------------------------------------
-osqp_build_static_lib()
-
-if(NOT PYTHON
-   AND NOT MATLAB
-   AND NOT R_LANG
-   AND NOT EMBEDDED)
-  osqp_build_shared_lib()
-  osqp_build_demo()
 endif()
+
 
 # ----------------------------------------------
 # Installation / Uninstallation
 # ----------------------------------------------
 install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
 
-if(OSQP_STATIC_LIB)
+if(OSQP_BUILD_STATIC_LIB)
   install(
     TARGETS osqpstatic
     EXPORT ${PROJECT_NAME}
@@ -368,7 +371,7 @@ if(OSQP_STATIC_LIB)
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 endif()
 
-if(OSQP_SHARED_LIB)
+if(OSQP_BUILD_SHARED_LIB)
   install(
     TARGETS osqp
     EXPORT ${PROJECT_NAME}
@@ -412,6 +415,6 @@ endif()
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME
    AND BUILD_TESTING
-   AND OSQP_STATIC_LIB)
+   AND OSQP_BUILD_STATIC_LIB)
   add_subdirectory(tests)
 endif()
