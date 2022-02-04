@@ -284,7 +284,7 @@ function(OSQP_BUILD_STATIC_LIB)
     target_sources(osqpstatic PRIVATE $<TARGET_OBJECTS:qdldlobject>)
   endif()
   target_include_directories(
-    osqpstatic PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+    osqpstatic PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/public;${CMAKE_CURRENT_BINARY_DIR}/include/public>"
                       "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
   if(MATLAB)
@@ -333,12 +333,13 @@ endfunction()
 # Application - osqp_demo
 # ----------------------------------------------
 function(OSQP_BUILD_DEMO)
-  add_executable(osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c ${osqplib_sources})
-  target_include_directories(osqp_demo PRIVATE ${osqplib_includes})
+  add_executable(osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
+  #target_include_directories(osqp_demo PRIVATE ${osqplib_includes})
+  target_link_libraries(osqp_demo osqpstatic)
   if(ALGEBRA_MKL)
-    target_link_libraries(osqp_demo osqpstatic $<LINK_ONLY:MKL::MKL>)
+    target_link_libraries(osqp_demo $<LINK_ONLY:MKL::MKL>)
   elseif(ALGEBRA_CUDA)
-    target_link_libraries(osqp_demo osqpstatic cublas cusparse)
+    target_link_libraries(osqp_demo cublas cusparse)
   endif()
 endfunction()
 
