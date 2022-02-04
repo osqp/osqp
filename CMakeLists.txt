@@ -299,11 +299,12 @@ endfunction()
 # Shared Library - osqp
 # ----------------------------------------------
 function(OSQP_BUILD_SHARED_LIB)
-  add_library(osqp SHARED $<TARGET_OBJECTS:OSQPLIB>)
+  add_library(osqp SHARED ${osqplib_sources})
   if(ALGEBRA_DEFAULT)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
     target_sources(osqp PRIVATE $<TARGET_OBJECTS:qdldlobject>)
   endif()
+  target_include_directories(osqp PRIVATE ${osqplib_includes})
   target_include_directories(osqp PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
                                          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
@@ -315,6 +316,13 @@ function(OSQP_BUILD_SHARED_LIB)
       target_link_libraries(osqp $<LINK_ONLY:MKL::MKL>)
     endif()
   endif()
+
+  # Declare that we are building the shared library to get proper symbol exports.
+  # Shared library consumers should also define OSQP_SHARED_LIB to get the library
+  # exports properly, so we do it for them in the CMake interface by defining it as
+  # a PUBLIC compile definition.
+  target_compile_definitions(osqp PRIVATE BUILDING_OSQP)
+  target_compile_definitions(osqp PUBLIC  OSQP_SHARED_LIB)
 
   set(OSQP_SHARED_LIB
       ON

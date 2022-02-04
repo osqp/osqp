@@ -20,6 +20,7 @@ set(osqp_headers
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_api_functions.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_api_types.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_api_utils.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_export_define.h"
     "${CMAKE_CURRENT_BINARY_DIR}/public/osqp_configure.h"
     PARENT_SCOPE)
 
