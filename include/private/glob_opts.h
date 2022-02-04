@@ -12,62 +12,7 @@
 
 // We do not need memory allocation functions if EMBEDDED is enabled
 # ifndef EMBEDDED
-
-/* define custom printfs and memory allocation (e.g. matlab/python) */
-#  ifdef MATLAB
-    #   include "mex.h"
-static void* c_calloc(size_t num, size_t size) {
-  void *m = mxCalloc(num, size);
-  mexMakeMemoryPersistent(m);
-  return m;
-}
-
-static void* c_malloc(size_t size) {
-  void *m = mxMalloc(size);
-  mexMakeMemoryPersistent(m);
-  return m;
-}
-
-static void* c_realloc(void *ptr, size_t size) {
-  void *m = mxRealloc(ptr, size);
-  mexMakeMemoryPersistent(m);
-  return m;
-}
-    #   define c_free mxFree
-#  elif defined PYTHON
-// Define memory allocation for python. Note that in Python 2 memory manager
-// Calloc is not implemented
-#   include <Python.h>
-#   if PY_MAJOR_VERSION >= 3
-// https://docs.python.org/3/c-api/memory.html
-// The following function sets are wrappers to the system allocator. These functions are thread-safe, the GIL does not need to be held.
-// The default raw memory allocator uses the following functions: malloc(), calloc(), realloc() and free(); call malloc(1) (or calloc(1, 1)) when requesting zero bytes.
-#    define c_malloc PyMem_RawMalloc
-#    define c_calloc PyMem_RawCalloc
-#    define c_free PyMem_RawFree
-#    define c_realloc PyMem_RawRealloc
-#   else  /* if PY_MAJOR_VERSION >= 3 */
-#   define c_malloc PyMem_Malloc
-#   define c_free PyMem_Free
-#   define c_realloc PyMem_Realloc
-static void* c_calloc(size_t num, size_t size) {
-	void *m = PyMem_Malloc(num * size);
-	memset(m, 0, num * size);
-	return m;
-}
-#   endif /* if PY_MAJOR_VERSION >= 3 */
-
-# elif !defined OSQP_CUSTOM_MEMORY
-/* If no custom memory allocator defined, use
- * standard linux functions. Custom memory allocator definitions
- * appear in the osqp_configure.h generated file. */
-    #  include <stdlib.h>
-    #  define c_malloc  malloc
-    #  define c_calloc  calloc
-    #  define c_free    free
-    #  define c_realloc realloc
-#  endif /* ifdef MATLAB */
-
+# include "memory_defs.h"
 # endif // end ifndef EMBEDDED
 
 

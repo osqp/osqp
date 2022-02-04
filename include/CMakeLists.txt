@@ -10,7 +10,8 @@ set(osqp_headers_private
     "${CMAKE_CURRENT_SOURCE_DIR}/private/proj.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/private/scaling.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/private/types.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/private/util.h")
+    "${CMAKE_CURRENT_SOURCE_DIR}/private/util.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/private/memory_defs.h")
 
 set(osqp_headers
     "${CMAKE_CURRENT_SOURCE_DIR}/public/csc_type.h"
@@ -37,4 +38,4 @@ target_sources(OSQPLIB PRIVATE ${osqp_headers_private})
 target_include_directories(OSQPLIB PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/public")
 target_include_directories(OSQPLIB PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/public")
 target_include_directories(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/private")
-
+target_include_directories(OSQPLIB PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/private")

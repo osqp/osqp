@@ -36,11 +36,4 @@
 /* DLONG */
 #cmakedefine DLONG
 
-/* MEMORY MANAGEMENT */
-#cmakedefine OSQP_CUSTOM_MEMORY
-#ifdef OSQP_CUSTOM_MEMORY
-#include "@OSQP_CUSTOM_MEMORY@"
-#endif
-
-
 #endif /* ifndef OSQP_CONFIGURE_H */
