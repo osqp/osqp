@@ -150,11 +150,11 @@ endif()
 set(OSQP_ALGEBRA ${ALGEBRA})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
-               ${CMAKE_BINARY_DIR}/include/public/osqp_configure.h NEWLINE_STYLE LF)
+               ${CMAKE_CURRENT_BINARY_DIR}/include/public/osqp_configure.h NEWLINE_STYLE LF)
 
 # Configure support for custom memory allocators
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/custom_headers/memory_defs.h.in
-               ${CMAKE_BINARY_DIR}/include/private/memory_defs.h NEWLINE_STYLE LF)
+               ${CMAKE_CURRENT_BINARY_DIR}/include/private/memory_defs.h NEWLINE_STYLE LF)
 
 # CUDA support
 # ----------------------------------------------
