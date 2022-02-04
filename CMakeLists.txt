@@ -136,7 +136,7 @@ endif()
 set(OSQP_ALGEBRA ${ALGEBRA})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/include/osqp_configure.h NEWLINE_STYLE LF)
+               ${CMAKE_CURRENT_SOURCE_DIR}/include/public/osqp_configure.h NEWLINE_STYLE LF)
 
 # CUDA support
 # ----------------------------------------------

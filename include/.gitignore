@@ -1,2 +1,2 @@
 # Ignore Cmake-generated osqp_configure.h file
-osqp_configure.h
+public/osqp_configure.h
