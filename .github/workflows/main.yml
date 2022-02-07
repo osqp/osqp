@@ -81,7 +81,7 @@ jobs:
 
         - name: Install python dependencies
           run: |
-            conda install -c intel mkl-devel
+            conda install -c intel "mkl-devel<2022"
             conda install numpy scipy
             conda info
             conda list
