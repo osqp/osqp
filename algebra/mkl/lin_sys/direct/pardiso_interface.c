@@ -235,6 +235,14 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
     *sp = OSQP_NULL;
     return OSQP_LINSYS_SOLVER_INIT_ERROR;
   }
+  if ( s->iparm[21] < n ) {
+    // Error: Number of positive eigenvalues of KKT should be the same as dimension of P
+#ifdef PRINTING
+    c_eprint("KKT matrix has fewer positive eigenvalues than it should. The problem seems to be non-convex.");
+#endif
+    return OSQP_NONCVX_ERROR;
+  }
+
   return 0;
 }
 
