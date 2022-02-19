@@ -3,7 +3,7 @@
 #include "util.h"
 #include "scaling.h"
 #include "glob_opts.h"
-#include "error.h"
+#include "osqp_error.h"
 
 
 #ifndef EMBEDDED

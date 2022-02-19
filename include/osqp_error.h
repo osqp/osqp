@@ -1,5 +1,5 @@
-#ifndef ERROR_H
-# define ERROR_H
+#ifndef OSQP_ERROR_H
+# define OSQP_ERROR_H
 
 /* OSQP error handling */
 
@@ -35,4 +35,4 @@ extern "C" {
 }
 # endif // ifdef __cplusplus
 
-#endif // ifndef ERROR_H
+#endif // ifndef OSQP_ERROR_H
