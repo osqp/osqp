@@ -27,12 +27,12 @@ typedef float c_float;  /* for numerical values  */
  * User settings
  */
 typedef struct {
-  c_int device;                          ///< device identifier; currently used for CUDA devices
-  enum linsys_solver_type linsys_solver; ///< linear system solver to use
-  c_int verbose;                         ///< boolean; write out progress
-  c_int warm_starting;                   ///< boolean; warm start
-  c_int scaling;                         ///< data scaling iterations; if 0, then disabled
-  c_int polishing;                       ///< boolean; polish ADMM solution
+  c_int device;                               ///< device identifier; currently used for CUDA devices
+  enum osqp_linsys_solver_type linsys_solver; ///< linear system solver to use
+  c_int verbose;                              ///< boolean; write out progress
+  c_int warm_starting;                        ///< boolean; warm start
+  c_int scaling;                              ///< data scaling iterations; if 0, then disabled
+  c_int polishing;                            ///< boolean; polish ADMM solution
 
   // ADMM parameters
   c_float rho;                    ///< ADMM penalty parameter

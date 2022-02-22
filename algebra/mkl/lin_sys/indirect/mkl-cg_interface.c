@@ -85,7 +85,7 @@ c_int init_linsys_mklcg(mklcg_solver      **sp,
   s->update_settings = &update_settings_linsys_solver_mklcg;
 
   // Assign type
-  s->type = INDIRECT_SOLVER;
+  s->type = OSQP_INDIRECT_SOLVER;
 
   //Don't know the thread count.  Just use
   //the same thing as the pardiso solver

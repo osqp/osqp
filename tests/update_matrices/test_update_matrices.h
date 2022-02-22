@@ -398,7 +398,7 @@ void test_update_pardiso() {
   settings->max_iter      = 1000;
   settings->alpha         = 1.6;
   settings->verbose       = 1;
-  settings->linsys_solver = DIRECT_SOLVER;
+  settings->linsys_solver = OSQP_DIRECT_SOLVER;
 
   // Setup solver
   exitflag = osqp_setup(&solver,problem->P,problem->q,

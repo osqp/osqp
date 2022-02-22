@@ -1,7 +1,7 @@
 #include "lin_sys.h"
 
 
-const char *LINSYS_SOLVER_NAME[] = {
+const char *OSQP_LINSYS_SOLVER_NAME[] = {
   "direct", "indirect"
 };
 
@@ -41,10 +41,10 @@ c_int init_linsys_solver(LinSysSolver      **s,
 #else /* ifdef ALGEBRA_CUDA */
 
 #ifdef ALGEBRA_MKL
-  case DIRECT_SOLVER:
+  case OSQP_DIRECT_SOLVER:
     return init_linsys_solver_pardiso((pardiso_solver **)s, P, A, rho_vec, settings, polishing);
 
-  case INDIRECT_SOLVER:
+  case OSQP_INDIRECT_SOLVER:
     return init_linsys_mklcg((mklcg_solver **)s, P, A, rho_vec, settings, polishing);
 #else
   default:

@@ -250,7 +250,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
 #endif
 
     // Assign type
-    s->type = DIRECT_SOLVER;
+    s->type = OSQP_DIRECT_SOLVER;
 
     // Set number of threads to 1 (single threaded)
     s->nthreads = 1;
