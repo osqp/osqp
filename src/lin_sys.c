@@ -2,7 +2,7 @@
 
 
 const char *OSQP_LINSYS_SOLVER_NAME[] = {
-  "direct", "indirect"
+  "unknown", "direct", "indirect"
 };
 
 

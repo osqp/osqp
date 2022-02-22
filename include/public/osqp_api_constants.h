@@ -25,9 +25,9 @@ enum osqp_status_type {
 * Linear System Solvers *
 *************************/
 enum osqp_linsys_solver_type {
-    OSQP_DIRECT_SOLVER = 1,
+    OSQP_UNKNOWN_SOLVER = 0,    /* Start from 0 for unknown solver because we index an array*/
+    OSQP_DIRECT_SOLVER,
     OSQP_INDIRECT_SOLVER,
-    OSQP_UNKNOWN_SOLVER=99
 };
 extern const char * OSQP_LINSYS_SOLVER_NAME[];
 
