@@ -30,7 +30,7 @@
  */
 typedef struct cudapcg_solver_ {
 
-  enum linsys_solver_type type;
+  enum osqp_linsys_solver_type type;
 
   /**
    * @name Functions

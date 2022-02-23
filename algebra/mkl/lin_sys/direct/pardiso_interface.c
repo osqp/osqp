@@ -106,7 +106,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
   s->update_settings = &update_settings_linsys_solver_pardiso;
 
   // Assign type
-  s->type = DIRECT_SOLVER;
+  s->type = OSQP_DIRECT_SOLVER;
 
   // Working vector
   s->bp = (c_float *)c_malloc(sizeof(c_float) * n_plus_m);

@@ -24,8 +24,12 @@ enum osqp_status_type {
 /*************************
 * Linear System Solvers *
 *************************/
-enum linsys_solver_type { DIRECT_SOLVER, INDIRECT_SOLVER, UNKNOWN_SOLVER=99 };
-extern const char * LINSYS_SOLVER_NAME[];
+enum osqp_linsys_solver_type {
+    OSQP_UNKNOWN_SOLVER = 0,    /* Start from 0 for unknown solver because we index an array*/
+    OSQP_DIRECT_SOLVER,
+    OSQP_INDIRECT_SOLVER,
+};
+extern const char * OSQP_LINSYS_SOLVER_NAME[];
 
 
 /******************
@@ -48,9 +52,9 @@ extern const char * OSQP_ERROR_MESSAGE[];
 **********************************/
 
 #ifdef ALGEBRA_CUDA
-# define OSQP_LINSYS_SOLVER (INDIRECT_SOLVER)
+# define OSQP_LINSYS_SOLVER (OSQP_INDIRECT_SOLVER)
 #else
-# define OSQP_LINSYS_SOLVER (DIRECT_SOLVER)
+# define OSQP_LINSYS_SOLVER (OSQP_DIRECT_SOLVER)
 #endif
 
 # define OSQP_VERBOSE               (1)

@@ -202,7 +202,7 @@ struct OSQPWorkspace_ {
  *      on the choice
  */
 struct linsys_solver {
-  enum linsys_solver_type type;             ///< linear system solver type functions
+  enum osqp_linsys_solver_type type;             ///< linear system solver type functions
   c_int (*solve)(LinSysSolver *self,
                  OSQPVectorf  *b,
                  c_int         admm_iter);

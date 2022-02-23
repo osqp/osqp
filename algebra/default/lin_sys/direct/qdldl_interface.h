@@ -12,7 +12,7 @@
 typedef struct qdldl qdldl_solver;
 
 struct qdldl {
-    enum linsys_solver_type type;
+    enum osqp_linsys_solver_type type;
 
     /**
      * @name Functions

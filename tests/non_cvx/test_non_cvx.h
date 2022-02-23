@@ -30,7 +30,7 @@ void test_non_cvx_solve()
   settings->sigma = 1e-6;
 
 #ifndef ALGEBRA_CUDA
-  if (settings->linsys_solver == DIRECT_SOLVER) {
+  if (settings->linsys_solver == OSQP_DIRECT_SOLVER) {
       // Setup workspace
       exitflag = osqp_setup(&solver, data->P, data->q,
                             data->A, data->l, data->u,
