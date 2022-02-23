@@ -235,6 +235,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
     s->polishing = polishing;
 
     // Link Functions
+    s->name            = &name_qdldl;
     s->solve           = &solve_linsys_qdldl;
     s->update_settings = &update_settings_linsys_solver_qdldl;
     s->warm_start      = &warm_start_linsys_solver_qdldl;
@@ -371,6 +372,10 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
 }
 
 #endif  // EMBEDDED
+
+const char* name_qdldl() {
+  return "QDLDL";
+}
 
 
 // // Permute x = P*b using P

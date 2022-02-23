@@ -29,7 +29,6 @@ enum osqp_linsys_solver_type {
     OSQP_DIRECT_SOLVER,
     OSQP_INDIRECT_SOLVER,
 };
-extern const char * OSQP_LINSYS_SOLVER_NAME[];
 
 
 /******************

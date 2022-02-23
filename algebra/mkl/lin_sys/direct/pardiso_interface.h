@@ -19,6 +19,8 @@ struct pardiso {
      * @name Functions
      * @{
      */
+    const char* (*name)(void);
+
     c_int (*solve)(struct pardiso *self,
                    OSQPVectorf    *b,
                    c_int           admm_iter);
@@ -100,6 +102,13 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
                                  const OSQPVectorf  *rho_vec,
                                  const OSQPSettings *settings,
                                  c_int               polishing);
+
+
+/**
+ * Get the user-friendly name of the MKL Pardiso solver.
+ * @return The user-friendly name
+ */
+const char* name_pardiso();
 
 
 /**

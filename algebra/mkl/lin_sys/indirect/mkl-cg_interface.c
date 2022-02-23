@@ -77,6 +77,7 @@ c_int init_linsys_mklcg(mklcg_solver      **sp,
   }
 
   //Link functions
+  s->name            = &name_mklcg;
   s->solve           = &solve_linsys_mklcg;
   s->warm_start      = &warm_start_linys_mklcg;
   s->free            = &free_linsys_mklcg;
@@ -117,6 +118,11 @@ c_int init_linsys_mklcg(mklcg_solver      **sp,
 
   status = cg_solver_init(s);
   return status;
+}
+
+
+const char* name_mklcg() {
+  return "MKL RCI Conjugate Gradient";
 }
 
 

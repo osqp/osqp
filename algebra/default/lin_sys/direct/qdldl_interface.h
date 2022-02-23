@@ -18,6 +18,8 @@ struct qdldl {
      * @name Functions
      * @{
      */
+    const char* (*name)(void);
+
     c_int (*solve)(struct qdldl *self,
                    OSQPVectorf  *b,
                    c_int         admm_iter);
@@ -104,6 +106,12 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
                                const OSQPVectorf  *rho_vec,
                                const OSQPSettings *settings,
                                c_int               polishing);
+
+/**
+ * Get the user-friendly name of the QDLDL solver.
+ * @return The user-friendly name
+ */
+const char* name_qdldl();
 
 /**
  * Solve linear system and store result in b

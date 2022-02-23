@@ -193,6 +193,7 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   if (!s->d_rho_vec) cuda_malloc((void **) &s->d_AtA_diag_val, n * sizeof(c_float));
 
   /* Link functions */
+  s->name            = &name_cudapcg;
   s->solve           = &solve_linsys_cudapcg;
   s->warm_start      = &warm_start_linsys_solver_cudapcg;
   s->free            = &free_linsys_solver_cudapcg;
@@ -205,6 +206,11 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
 
   /* No error */
   return 0;
+}
+
+
+const char* name_cudapcg() {
+  return "CUDA Preconditioned Conjugate Gradient";
 }
 
 
