@@ -297,12 +297,15 @@ endif()
 # Static Library - osqpstatic
 # ----------------------------------------------
 if( OSQP_BUILD_STATIC_LIB )
-  add_library(osqpstatic STATIC $<TARGET_OBJECTS:OSQPLIB>)
+  add_library(osqpstatic STATIC
+              $<TARGET_OBJECTS:OSQPLIB>
+              "${CMAKE_CURRENT_SOURCE_DIR}/src/osqp_api.c")
   set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
   if(ALGEBRA_DEFAULT)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
     target_sources(osqpstatic PRIVATE $<TARGET_OBJECTS:qdldlobject>)
   endif()
+  target_include_directories(osqpstatic PRIVATE ${osqplib_includes})
   target_include_directories(
     osqpstatic PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/public;${CMAKE_CURRENT_BINARY_DIR}/include/public>"
                       "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
@@ -316,7 +319,9 @@ endif()
 # Shared Library - osqp
 # ----------------------------------------------
 if(OSQP_BUILD_SHARED_LIB)
-  add_library(osqp SHARED ${osqplib_sources})
+  add_library(osqp SHARED
+              $<TARGET_OBJECTS:OSQPLIB>
+              "${CMAKE_CURRENT_SOURCE_DIR}/src/osqp_api.c")
   if(ALGEBRA_DEFAULT)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
     target_sources(osqp PRIVATE $<TARGET_OBJECTS:qdldlobject>)
