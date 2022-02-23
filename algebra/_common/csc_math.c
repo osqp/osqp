@@ -257,9 +257,7 @@ void csc_Atxpy(const csc *A, const c_float *x, c_float *y,
 //         quad_form += Px[ptr] * x[i] * x[j];
 //       }
 //       else {                                        // Element in lower triangle
-// #ifdef PRINTING
 //         c_eprint("quad_form matrix is not upper triangular");
-// #endif /* ifdef PRINTING */
 //         return -1.;
 //       }
 //     }

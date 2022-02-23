@@ -869,56 +869,42 @@ c_int validate_data(const csc     *P,
   c_int j, ptr;
 
   if (!P) {
-# ifdef PRINTING
     c_eprint("Missing quadratic cost matrix P");
-# endif
     return 1;
   }
 
   if (!A) {
-# ifdef PRINTING
     c_eprint("Missing constraint matrix A");
-# endif
     return 1;
   }
 
   if (!q) {
-# ifdef PRINTING
     c_eprint("Missing linear cost vector q");
-# endif
     return 1;
   }
 
   // General dimensions Tests
   if ((n <= 0) || (m < 0)) {
-# ifdef PRINTING
     c_eprint("n must be positive and m nonnegative; n = %i, m = %i",
              (int)n, (int)m);
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   // Matrix P
   if (P->m != n) {
-# ifdef PRINTING
     c_eprint("P does not have dimension n x n with n = %i", (int)n);
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (P->m != P->n) {
-# ifdef PRINTING
     c_eprint("P is not square");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   for (j = 0; j < n; j++) { // COLUMN
     for (ptr = P->p[j]; ptr < P->p[j + 1]; ptr++) {
       if (P->i[ptr] > j) {  // if ROW > COLUMN
-# ifdef PRINTING
         c_eprint("P is not upper triangular");
-# endif /* ifdef PRINTING */
         return 1;
       }
     }
@@ -926,19 +912,15 @@ c_int validate_data(const csc     *P,
 
   // Matrix A
   if ((A->m != m) || (A->n != n)) {
-# ifdef PRINTING
     c_eprint("A does not have dimension %i x %i", (int)m, (int)n);
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   // Lower and upper bounds
   for (j = 0; j < m; j++) {
     if (l[j] > u[j]) {
-# ifdef PRINTING
       c_eprint("Lower bound at index %d is greater than upper bound: %.4e > %.4e",
                (int)j, l[j], u[j]);
-# endif /* ifdef PRINTING */
       return 1;
     }
   }
@@ -975,210 +957,154 @@ c_int validate_settings(const OSQPSettings *settings,
                         c_int               from_setup) {
 
   if (!settings) {
-# ifdef PRINTING
     c_eprint("Missing settings!");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (from_setup &&
       validate_linsys_solver(settings->linsys_solver)) {
-# ifdef PRINTING
     c_eprint("linsys_solver not recognized");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (settings->verbose != 0 &&
       settings->verbose != 1) {
-# ifdef PRINTING
     c_eprint("verbose must be either 0 or 1");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (settings->warm_starting != 0 &&
       settings->warm_starting != 1) {
-# ifdef PRINTING
     c_eprint("warm_start must be either 0 or 1");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (from_setup && settings->scaling < 0) {
-# ifdef PRINTING
     c_eprint("scaling must be nonnegative");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (settings->polishing != 0 &&
       settings->polishing != 1) {
-# ifdef PRINTING
     c_eprint("polishing must be either 0 or 1");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (from_setup && settings->rho <= 0.0) {
-# ifdef PRINTING
     c_eprint("rho must be positive");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (from_setup &&
       (settings->rho_is_vec != 0) &&
       (settings->rho_is_vec != 1)) {
-# ifdef PRINTING
     c_eprint("rho_is_vec must be either 0 or 1");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (from_setup && settings->sigma <= 0.0) {
-# ifdef PRINTING
     c_eprint("sigma must be positive");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (settings->alpha <= 0.0 ||
       settings->alpha >= 2.0) {
-# ifdef PRINTING
     c_eprint("alpha must be strictly between 0 and 2");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (settings->cg_max_iter <= 0) {
-# ifdef PRINTING
     c_eprint("cg_max_iter must be positive");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (settings->cg_tol_reduction <= 0) {
-# ifdef PRINTING
     c_eprint("cg_tol_reduction must be positive");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (settings->cg_tol_fraction <= 0.0 &&
       settings->cg_tol_fraction >= 1.0) {
-# ifdef PRINTING
     c_eprint("cg_tol_fraction must be strictly between 0 and 1");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (from_setup &&
       settings->adaptive_rho != 0 &&
       settings->adaptive_rho != 1) {
-# ifdef PRINTING
     c_eprint("adaptive_rho must be either 0 or 1");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (from_setup && settings->adaptive_rho_interval < 0) {
-# ifdef PRINTING
     c_eprint("adaptive_rho_interval must be nonnegative");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (from_setup && settings->adaptive_rho_fraction <= 0) {
-#  ifdef PRINTING
     c_eprint("adaptive_rho_fraction must be positive");
-#  endif /* ifdef PRINTING */
     return 1;
   }
 
   if (from_setup && settings->adaptive_rho_tolerance < 1.0) {
-# ifdef PRINTING
     c_eprint("adaptive_rho_tolerance must be >= 1");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (settings->max_iter <= 0) {
-# ifdef PRINTING
     c_eprint("max_iter must be positive");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (settings->eps_abs < 0.0) {
-# ifdef PRINTING
     c_eprint("eps_abs must be nonnegative");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (settings->eps_rel < 0.0) {
-# ifdef PRINTING
     c_eprint("eps_rel must be nonnegative");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (settings->eps_rel == 0.0 &&
       settings->eps_abs == 0.0) {
-# ifdef PRINTING
     c_eprint("at least one of eps_abs and eps_rel must be positive");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (settings->eps_prim_inf <= 0.0) {
-# ifdef PRINTING
     c_eprint("eps_prim_inf must be positive");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (settings->eps_dual_inf <= 0.0) {
-# ifdef PRINTING
     c_eprint("eps_dual_inf must be positive");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (settings->scaled_termination != 0 &&
       settings->scaled_termination != 1) {
-# ifdef PRINTING
     c_eprint("scaled_termination must be either 0 or 1");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (settings->check_termination < 0) {
-# ifdef PRINTING
     c_eprint("check_termination must be nonnegative");
-# endif /* ifdef PRINTING */
     return 1;
   }
 
   if (settings->time_limit <= 0.0) {
-#  ifdef PRINTING
     c_eprint("time_limit must be positive\n");
-#  endif /* ifdef PRINTING */
     return 1;
   }
 
   if (settings->delta <= 0.0) {
-# ifdef PRINTING
     c_eprint("delta must be positive");
-# endif /* ifdef PRINTING */
     return 1;
   }
   
   if (settings->polish_refine_iter < 0) {
-# ifdef PRINTING
     c_eprint("polish_refine_iter must be nonnegative");
-# endif /* ifdef PRINTING */
     return 1;
   }
 

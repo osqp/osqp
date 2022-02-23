@@ -409,9 +409,7 @@ c_int osqp_solve(OSQPSolver *solver) {
     // Check the interrupt signal
     if (osqp_is_interrupted()) {
       update_status(solver->info, OSQP_SIGINT);
-# ifdef PRINTING
       c_print("Solver interrupted\n");
-# endif /* ifdef PRINTING */
       exitflag = 1;
       goto exit;
     }
@@ -556,9 +554,7 @@ c_int osqp_solve(OSQPSolver *solver) {
 
       // Actually update rho
       if (adapt_rho(solver)) {
-# ifdef PRINTING
         c_eprint("Failed rho update");
-# endif // PRINTING
         exitflag = 1;
         goto exit;
       }
@@ -963,10 +959,8 @@ c_int osqp_update_data_mat(OSQPSolver    *solver,
   if (Px_new_idx) {
     // Check if the number of elements to update is valid
     if (P_new_n > nnzP) {
-# ifdef PRINTING
       c_eprint("new number of elements (%i) greater than elements in P (%i)",
                (int)P_new_n, (int)nnzP);
-# endif /* ifdef PRINTING */
       return 1;
     }
   }
@@ -974,11 +968,9 @@ c_int osqp_update_data_mat(OSQPSolver    *solver,
   if (Ax_new_idx) {
     // Check if the number of elements to update is valid
     if (A_new_n > nnzA) {
-# ifdef PRINTING
       c_eprint("new number of elements (%i) greater than elements in A (%i)",
                (int)A_new_n,
                (int)nnzA);
-# endif /* ifdef PRINTING */
       return 2;
     }
   }
@@ -998,9 +990,7 @@ c_int osqp_update_data_mat(OSQPSolver    *solver,
   // Reset solver information
   reset_info(solver->info);
 
-# ifdef PRINTING
   if (exitflag < 0) c_eprint("new KKT matrix is not quasidefinite");
-# endif /* ifdef PRINTING */
 
 #ifdef PROFILING
   solver->info->update_time += osqp_toc(work->timer);
@@ -1022,9 +1012,7 @@ c_int osqp_update_rho(OSQPSolver *solver,
 
   // Check value of rho
   if (rho_new <= 0) {
-# ifdef PRINTING
     c_eprint("rho must be positive");
-# endif /* ifdef PRINTING */
     return 1;
   }
 

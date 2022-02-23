@@ -40,9 +40,7 @@ void free_linsys_solver_pardiso(pardiso_solver *s) {
              s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
 
     if ( s->error != 0 ){
-#ifdef PRINTING
       c_eprint("Error during MKL Pardiso cleanup: %d", (int)s->error);
-#endif
     }
     // Check each attribute of the structure and free it if it exists
     if (s->KKT)         csc_spfree(s->KKT);
@@ -156,9 +154,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
 
   // Check if matrix has been created
   if (!(s->KKT)) {
-#ifdef PRINTING
 	  c_eprint("Error in forming KKT matrix");
-#endif
     free_linsys_solver_pardiso(s);
     return OSQP_LINSYS_SOLVER_INIT_ERROR;
   } else {
@@ -214,9 +210,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
             &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
             s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
   if ( s->error != 0 ){
-#ifdef PRINTING
     c_eprint("Error during symbolic factorization: %d", (int)s->error);
-#endif
     free_linsys_solver_pardiso(s);
     *sp = OSQP_NULL;
     return OSQP_LINSYS_SOLVER_INIT_ERROR;
@@ -228,18 +222,14 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
             &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
             s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
   if ( s->error ){
-#ifdef PRINTING
     c_eprint("Error during numerical factorization: %d", (int)s->error);
-#endif
     free_linsys_solver_pardiso(s);
     *sp = OSQP_NULL;
     return OSQP_LINSYS_SOLVER_INIT_ERROR;
   }
   if ( s->iparm[21] < n ) {
     // Error: Number of positive eigenvalues of KKT should be the same as dimension of P
-#ifdef PRINTING
     c_eprint("KKT matrix has fewer positive eigenvalues than it should. The problem seems to be non-convex.");
-#endif
     return OSQP_NONCVX_ERROR;
   }
 
@@ -262,9 +252,7 @@ c_int solve_linsys_pardiso(pardiso_solver *s,
             &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
             s->iparm, &(s->msglvl), bv, s->sol, &(s->error));
   if ( s->error != 0 ){
-#ifdef PRINTING
     c_eprint("Error during linear system solution: %d", (int)s->error);
-#endif
     return 1;
   }
 

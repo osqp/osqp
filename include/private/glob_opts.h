@@ -54,6 +54,10 @@
 /* Customized printing functions */
 # ifdef PRINTING
 # include "print_defs.h"
+# else
+/* When printing is disabled, these become NOPs */
+# define c_print(...)
+# define c_eprint(...)
 # endif  /* PRINTING */
 
 

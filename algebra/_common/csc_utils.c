@@ -383,9 +383,7 @@ csc* csc_done(csc *C, void *w, void *x, c_int ok) {
 
 //   // Check if matrix is square
 //   if (M->m != M->n) {
-// #ifdef PRINTING
 //     c_eprint("Matrix M not square");
-// #endif /* ifdef PRINTING */
 //     return OSQP_NULL;
 //   }
 //   n = M->n;
@@ -411,9 +409,7 @@ csc* csc_done(csc *C, void *w, void *x, c_int ok) {
 //   M_trip = csc_spalloc(n, n, nnzmaxM, 1, 1); // Triplet format
 
 //   if (!M_trip) {
-// #ifdef PRINTING
 //     c_eprint("Upper triangular matrix extraction failed (out of memory)");
-// #endif /* ifdef PRINTING */
 //     return OSQP_NULL;
 //   }
 
