@@ -98,6 +98,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
   s->polishing = polishing;
 
   // Link Functions
+  s->name            = &name_pardiso;
   s->solve           = &solve_linsys_pardiso;
   s->free            = &free_linsys_solver_pardiso;
   s->warm_start      = &warm_start_linsys_solver_pardiso;
@@ -244,6 +245,10 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
   }
 
   return 0;
+}
+
+const char* name_pardiso() {
+  return "Pardiso";
 }
 
 // Returns solution to linear system  Ax = b with solution stored in b

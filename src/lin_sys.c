@@ -1,11 +1,6 @@
 #include "lin_sys.h"
 
 
-const char *OSQP_LINSYS_SOLVER_NAME[] = {
-  "unknown", "direct", "indirect"
-};
-
-
 #ifdef ALGEBRA_DEFAULT
 # include "qdldl_interface.h"
 #endif
