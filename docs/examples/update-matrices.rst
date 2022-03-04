@@ -169,7 +169,7 @@ C
 
 .. code:: c
 
-    #include "osqp.h"
+    #include "osqp/osqp.h"
 
     int main(int argc, char **argv) {
         // Load problem data
