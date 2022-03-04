@@ -171,7 +171,7 @@ endif (NOT MSVC)
 # Set sources and includes
 # ----------------------------------------------
 add_subdirectory (src)
-add_subdirectory (include)
+add_subdirectory (include/osqp)
 
 
 # if we are building the Python interface, let's look for Python
@@ -282,7 +282,7 @@ target_include_directories(osqpstatic PRIVATE ${linsys_solvers_includes})
 # Declare include directories for the cmake exported target
 target_include_directories(osqpstatic
                            PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-                                  "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
+                                  "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
 
 # Install Static Library
 # ----------------------------------------------
@@ -321,7 +321,7 @@ if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
     # Declare include directories for the cmake exported target
     target_include_directories(osqp
                                PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-                                      "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
+                                      "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
 
     # Install osqp shared library
     install(TARGETS osqp
