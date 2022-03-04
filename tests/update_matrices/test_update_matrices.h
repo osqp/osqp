@@ -1,10 +1,10 @@
 #include <stdio.h>
-#include "osqp.h"
-#include "cs.h"
-#include "util.h"
+#include "osqp/osqp.h"
+#include "osqp/cs.h"
+#include "osqp/util.h"
 #include "osqp_tester.h"
-#include "kkt.h"
-#include "lin_sys.h"
+#include "osqp/kkt.h"
+#include "osqp/lin_sys.h"
 
 
 #include "update_matrices/data.h"

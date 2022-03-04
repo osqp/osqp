@@ -3,7 +3,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-#include "osqp.h"
+#include "osqp/osqp.h"
 #include "osqp_tester.h"
 #include "lin_alg/test_lin_alg.h"
 #include "solve_linsys/test_solve_linsys.h"

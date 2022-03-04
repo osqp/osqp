@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "osqp.h"
+#include "osqp/osqp.h"
 #include "osqp_tester.h"
 
 #include "lin_alg/data.h"

@@ -1,4 +1,4 @@
-#include "osqp.h"        // OSQP API
+#include "osqp/osqp.h"        // OSQP API
 #include "osqp_tester.h" // Basic testing script header
 
 
