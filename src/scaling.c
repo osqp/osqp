@@ -1,4 +1,4 @@
-#include "scaling.h"
+#include "osqp/scaling.h"
 
 #if EMBEDDED != 1
 

@@ -1,4 +1,4 @@
-#include "lin_sys.h"
+#include "osqp/lin_sys.h"
 
 #include "qdldl_interface.h" // Include only this solver in the same directory
 

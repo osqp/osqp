@@ -1,4 +1,4 @@
-#include "kkt.h"
+#include "osqp/kkt.h"
 
 #ifndef EMBEDDED
 

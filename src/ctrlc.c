@@ -7,7 +7,7 @@
  *
  */
 
-#include "ctrlc.h"
+#include "osqp/ctrlc.h"
 
 #if defined MATLAB
 

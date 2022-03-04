@@ -1,4 +1,4 @@
-#include "util.h"
+#include "osqp/util.h"
 
 /***************
 * Versioning  *

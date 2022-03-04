@@ -1,4 +1,4 @@
-#include "cs.h"
+#include "osqp/cs.h"
 
 
 static void* csc_malloc(c_int n, c_int size) {

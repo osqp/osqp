@@ -1,11 +1,11 @@
-#include "polish.h"
-#include "lin_alg.h"
-#include "util.h"
-#include "auxil.h"
-#include "lin_sys.h"
-#include "kkt.h"
-#include "proj.h"
-#include "error.h"
+#include "osqp/polish.h"
+#include "osqp/lin_alg.h"
+#include "osqp/util.h"
+#include "osqp/auxil.h"
+#include "osqp/lin_sys.h"
+#include "osqp/kkt.h"
+#include "osqp/proj.h"
+#include "osqp/error.h"
 
 /**
  * Form reduced matrix A that contains only rows that are active at the

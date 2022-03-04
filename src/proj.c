@@ -1,4 +1,4 @@
-#include "proj.h"
+#include "osqp/proj.h"
 
 
 void project(OSQPWorkspace *work, c_float *z) {

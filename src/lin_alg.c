@@ -1,4 +1,4 @@
-#include "lin_alg.h"
+#include "osqp/lin_alg.h"
 
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/

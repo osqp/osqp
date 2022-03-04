@@ -1,10 +1,10 @@
-#include "osqp.h" // For OSQP rho update
-#include "auxil.h"
-#include "proj.h"
-#include "lin_alg.h"
-#include "constants.h"
-#include "scaling.h"
-#include "util.h"
+#include "osqp/osqp.h" // For OSQP rho update
+#include "osqp/auxil.h"
+#include "osqp/proj.h"
+#include "osqp/lin_alg.h"
+#include "osqp/constants.h"
+#include "osqp/scaling.h"
+#include "osqp/util.h"
 
 /***********************************************************
 * Auxiliary functions needed to compute ADMM iterations * *

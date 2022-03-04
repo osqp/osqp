@@ -1,21 +1,21 @@
-#include "osqp.h"
-#include "auxil.h"
-#include "util.h"
-#include "scaling.h"
-#include "glob_opts.h"
-#include "error.h"
+#include "osqp/osqp.h"
+#include "osqp/auxil.h"
+#include "osqp/util.h"
+#include "osqp/scaling.h"
+#include "osqp/glob_opts.h"
+#include "osqp/error.h"
 
 
 #ifndef EMBEDDED
-# include "polish.h"
+# include "osqp/polish.h"
 #endif /* ifndef EMBEDDED */
 
 #ifdef CTRLC
-# include "ctrlc.h"
+# include "osqp/ctrlc.h"
 #endif /* ifdef CTRLC */
 
 #ifndef EMBEDDED
-# include "lin_sys.h"
+# include "osqp/lin_sys.h"
 #endif /* ifndef EMBEDDED */
 
 /**********************
