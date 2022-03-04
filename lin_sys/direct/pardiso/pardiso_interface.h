@@ -5,8 +5,8 @@
 extern "C" {
 #endif
 
-#include "lin_alg.h"
-#include "kkt.h"
+#include "osqp/lin_alg.h"
+#include "osqp/kkt.h"
 
 /**
  * Pardiso solver structure

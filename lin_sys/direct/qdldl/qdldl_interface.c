@@ -1,4 +1,4 @@
-#include "glob_opts.h"
+#include "osqp/glob_opts.h"
 
 #include "qdldl.h"
 #include "qdldl_interface.h"
@@ -8,7 +8,7 @@
 #endif
 
 #if EMBEDDED != 1
-#include "kkt.h"
+#include "osqp/kkt.h"
 #endif
 
 #ifndef EMBEDDED

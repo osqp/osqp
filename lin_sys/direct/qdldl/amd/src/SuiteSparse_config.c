@@ -10,7 +10,7 @@
  */
 
 // Include OSQP Global options for memory management
-#include "glob_opts.h"
+#include "osqp/glob_opts.h"
 
 #include <math.h>
 #include <stdlib.h>

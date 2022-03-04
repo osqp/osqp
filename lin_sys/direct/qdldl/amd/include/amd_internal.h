@@ -37,7 +37,7 @@
 #define NDEBUG
 #endif
 
-#include "glob_opts.h"
+#include "osqp/glob_opts.h"
 
 /*
     To enable debugging, uncomment the following line:

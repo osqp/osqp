@@ -1,8 +1,8 @@
 #include "lib_handler.h"
 #include "pardiso_loader.h"
 
-#include "glob_opts.h"
-#include "constants.h"
+#include "osqp/glob_opts.h"
+#include "osqp/constants.h"
 
 #ifdef IS_WINDOWS
 #define PARDISOLIBNAME "mkl_rt." SHAREDLIBEXT

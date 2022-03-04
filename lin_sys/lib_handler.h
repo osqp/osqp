@@ -1,7 +1,7 @@
 #ifndef LIB_HANDLER_H
 #define LIB_HANDLER_H
 
-#include "glob_opts.h"
+#include "osqp/glob_opts.h"
 
 #ifdef IS_WINDOWS
 #include <windows.h>
