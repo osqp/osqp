@@ -5,8 +5,8 @@
 extern "C" {
 # endif // ifdef __cplusplus
 
-# include "glob_opts.h"
-# include "constants.h"
+# include "osqp/glob_opts.h"
+# include "osqp/constants.h"
 
 
 /******************

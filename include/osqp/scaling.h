@@ -6,9 +6,9 @@ extern "C" {
 # endif // ifdef __cplusplus
 
 // Functions to scale problem data
-# include "types.h"
-# include "lin_alg.h"
-# include "constants.h"
+# include "osqp/types.h"
+# include "osqp/lin_alg.h"
+# include "osqp/constants.h"
 
 // Enable data scaling if EMBEDDED is disabled or if EMBEDDED == 2
 # if EMBEDDED != 1

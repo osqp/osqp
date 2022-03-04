@@ -5,7 +5,7 @@
 extern "C" {
 # endif // ifdef __cplusplus
 
-# include "types.h"
+# include "osqp/types.h"
 
 
 /* Define Projections onto set C involved in the ADMM algorithm */

@@ -5,11 +5,11 @@
 extern "C" {
 # endif // ifdef __cplusplus
 
-# include "types.h"
+# include "osqp/types.h"
 
 # ifndef EMBEDDED
 
-#  include "cs.h"
+#  include "osqp/cs.h"
 
 /**
  * Form square symmetric KKT matrix of the form

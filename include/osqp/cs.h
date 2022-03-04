@@ -5,8 +5,8 @@
 extern "C" {
 # endif // ifdef __cplusplus
 
-# include "types.h"   // CSC matrix type
-# include "lin_alg.h" // Vector copy operations
+# include "osqp/types.h"   // CSC matrix type
+# include "osqp/lin_alg.h" // Vector copy operations
 
 /*****************************************************************************
 * Create and free CSC Matrices                                              *

@@ -6,13 +6,13 @@ extern "C" {
 # endif // ifdef __cplusplus
 
 /* Includes */
-# include "types.h"
-# include "util.h" // Needed for osqp_set_default_settings functions
+# include "osqp/types.h"
+# include "osqp/util.h" // Needed for osqp_set_default_settings functions
 
 
 // Library to deal with sparse matrices enabled only if embedded not defined
 # ifndef EMBEDDED
-#  include "cs.h"
+#  include "osqp/cs.h"
 # endif // ifndef EMBEDDED
 
 /********************

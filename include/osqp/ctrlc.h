@@ -9,7 +9,7 @@
 extern "C" {
 # endif // ifdef __cplusplus
 
-# include "glob_opts.h"
+# include "osqp/glob_opts.h"
 
 # if defined MATLAB
 

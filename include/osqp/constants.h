@@ -9,7 +9,7 @@ extern "C" {
 /*******************
 * OSQP Versioning *
 *******************/
-#include "version.h"
+#include "osqp/version.h"
 
 /******************
 * Solver Status  *
