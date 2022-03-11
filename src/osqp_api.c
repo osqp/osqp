@@ -239,7 +239,7 @@ c_int osqp_setup(OSQPSolver         **solverp,
   }
 
   // Initialize linear system solver structure
-  exitflag = init_linsys_solver(&(work->linsys_solver), work->data->P, work->data->A, 
+  exitflag = init_linsys_solver(&(work->linsys_solver), work->data->P, work->data->A,
                                 work->rho_vec, solver->settings,
                                 &work->scaled_prim_res, &work->scaled_dual_res, 0);
 
@@ -960,46 +960,71 @@ c_int osqp_update_data_mat(OSQPSolver    *solver,
   nnzA = OSQPMatrix_get_nz(work->data->A);
 
 
-  if (Px_new_idx) {
-    // Check if the number of elements to update is valid
-    if (P_new_n > nnzP) {
+  // Check if the number of elements to update is valid
+  if (P_new_n > nnzP || P_new_n < 0) {
 # ifdef PRINTING
-      c_eprint("new number of elements (%i) greater than elements in P (%i)",
-               (int)P_new_n, (int)nnzP);
+    c_eprint("new number of elements (%i) out of bounds for P (%i max)",
+             (int)P_new_n, (int)nnzP);
 # endif /* ifdef PRINTING */
-      return 1;
-    }
+    return 1;
+  }
+  //indexing is required if the whole P is not updated
+  if(Px_new_idx == NULL && P_new_n != 0 && P_new_n != nnzP){
+    # ifdef PRINTING
+        c_eprint("index vector is required for partial updates of P");
+    # endif /* ifdef PRINTING */
+        return 1;
   }
 
-  if (Ax_new_idx) {
-    // Check if the number of elements to update is valid
-    if (A_new_n > nnzA) {
+  // Check if the number of elements to update is valid
+  if (A_new_n > nnzA || A_new_n < 0) {
 # ifdef PRINTING
-      c_eprint("new number of elements (%i) greater than elements in A (%i)",
-               (int)A_new_n,
-               (int)nnzA);
+    c_eprint("new number of elements (%i) out of bounds for A (%i max)",
+             (int)A_new_n,
+             (int)nnzA);
 # endif /* ifdef PRINTING */
-      return 2;
-    }
+    return 2;
+  }
+  //indexing is required if the whole A is not updated
+  if(Ax_new_idx == NULL && A_new_n != 0 && A_new_n != nnzA){
+    # ifdef PRINTING
+        c_eprint("index vector is required for partial updates of A");
+    # endif /* ifdef PRINTING */
+        return 2;
   }
 
   if (solver->settings->scaling) unscale_data(solver);
 
-  if (Px_new) OSQPMatrix_update_values(work->data->P, Px_new, Px_new_idx, P_new_n);
-  if (Ax_new) OSQPMatrix_update_values(work->data->A, Ax_new, Ax_new_idx, A_new_n);
+  if (Px_new){
+    OSQPMatrix_update_values(work->data->P, Px_new, Px_new_idx, P_new_n);
+  }
+  if (Ax_new){
+    OSQPMatrix_update_values(work->data->A, Ax_new, Ax_new_idx, A_new_n);
+  }
 
   if (solver->settings->scaling) scale_data(solver);
 
-  // Update linear system structure with new data
-  exitflag = work->linsys_solver->update_matrices(work->linsys_solver,
-                                                  work->data->P,
-                                                  work->data->A);
+  // Update linear system structure with new data.
+  // If there is scaling, then a full update is needed.
+  if(solver->settings->scaling){
+    exitflag = work->linsys_solver->update_matrices(
+                  work->linsys_solver,
+                  work->data->P, NULL, nnzP,
+                  work->data->A, NULL, nnzA);
+  }
+  else{
+    exitflag = work->linsys_solver->update_matrices(
+                  work->linsys_solver,
+                  work->data->P, Px_new_idx, P_new_n,
+                  work->data->A, Ax_new_idx, A_new_n);
+  }
+
 
   // Reset solver information
   reset_info(solver->info);
 
 # ifdef PRINTING
-  if (exitflag < 0) c_eprint("new KKT matrix is not quasidefinite");
+  if (exitflag != 0){c_eprint("new KKT matrix is not quasidefinite");}
 # endif /* ifdef PRINTING */
 
 #ifdef PROFILING

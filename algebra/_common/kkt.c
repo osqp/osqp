@@ -335,36 +335,61 @@ csc* form_KKT(csc*        P,
 
 #if EMBEDDED != 1
 
-void update_KKT_P(csc*        KKT,
-                  csc*        P,
-                  c_int*      PtoKKT,
-                  c_float     param1,
-                  c_int       format) {
+void update_KKT_P(csc*         KKT,
+                  csc*         P,
+                  const c_int* Px_new_idx,
+                  c_int        P_new_n,
+                  c_int*       PtoKKT,
+                  c_float      param1,
+                  c_int        format)
+{
+  c_int j, Pidx, Kidx, row, offset, doall;
 
-  c_int j, nnzP;
+  if(P_new_n <= 0){return;}
 
-  // Update elements of KKT using P
-  nnzP = P->p[P->n];
-  for (j = 0; j < nnzP; j++) {
-    KKT->x[PtoKKT[j]] = P->x[j];
+  //if Px_new_idx is null, we assume that all
+  //elements are to be replaced (and that P_new_n = nnz(P))
+  doall  = Px_new_idx == OSQP_NULL ? 1 : 0;
+  offset = format == 0 ? 1 : 0;
+
+  for (j = 0; j < P_new_n; j++) {
+    Pidx = doall ? j : Px_new_idx[j];
+    Kidx = PtoKKT[Pidx];
+    KKT->x[Kidx] = P->x[Pidx];
+
+    //is the corresonding column nonempty with
+    //the current element on the diagonal (i.e. row==col)?
+    row  = P->i[Pidx];
+    if((P->p[row] < P->p[row+1]) && ((P->p[row+offset] - offset) == Pidx)){
+      KKT->x[Kidx] += param1;
+    }
   }
-
-  // Update diagonal elements of KKT by adding sigma
-  _kkt_shifts_param1(KKT, param1, P->n, format);
-
+  return;
 }
 
-void update_KKT_A(csc*        KKT,
-                  csc*        A,
-                  c_int*      AtoKKT) {
+void update_KKT_A(csc*         KKT,
+                  csc*         A,
+                  const c_int* Ax_new_idx,
+                  c_int        A_new_n,
+                  c_int*       AtoKKT)
+{
 
-  c_int j, nnzA;
+  c_int j, nnzA, Aidx, Kidx, doall;
+
+  if(A_new_n <= 0){return;}
+
+  //if Ax_new_idx is null, we assume that all
+  //elements are to be replaced (and that A_new_n = nnz(A))
+  doall  = Ax_new_idx == OSQP_NULL ? 1 : 0;
 
   // Update elements of KKT using A
   nnzA = A->p[A->n];
-  for (j = 0; j < nnzA; j++) {
-    KKT->x[AtoKKT[j]] = A->x[j];
+  for (j = 0; j < A_new_n; j++) {
+    Aidx = doall ? j : Ax_new_idx[j];
+    Kidx = AtoKKT[Aidx];
+    KKT->x[Kidx] = A->x[Aidx];
   }
+  return;
 }
 
 

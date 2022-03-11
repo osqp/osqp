@@ -53,15 +53,19 @@ extern "C" {
  *
  * @param KKT       KKT matrix in CSC form (upper-triangular)
  * @param P         P matrix in csc format (triu form)
+ * @param P_new_idx indices of P to be updated
+ * @param P_new_n   number of elements of P to be updated
  * @param PtoKKT    Vector of pointers from P->x to KKT->x
  * @param param1    Parameter added to the diagonal elements of P
  * @param format    0 for CSC, 1 for CSR
  */
- void update_KKT_P(csc*        KKT,
-                   csc*        P,
-                   c_int*      PtoKKT,
-                   c_float     param1,
-                   c_int       format);
+ void update_KKT_P(csc*         KKT,
+                   csc*         P,
+                   const c_int* Px_new_idx,
+                   c_int        P_new_n,
+                   c_int*       PtoKKT,
+                   c_float      param1,
+                   c_int        format);
 
 
 /**
@@ -69,11 +73,15 @@ extern "C" {
  *
  * @param KKT       KKT matrix in CSC form (upper-triangular)
  * @param  A        A matrix in csc format
+ * @param A_new_idx indices of A to be updated
+ * @param A_new_n   number of elements of A to be updated
  * @param AtoKKT    Vector of pointers from A->x to KKT->x
  */
- void update_KKT_A(csc*        KKT,
-                   csc*        A,
-                   c_int*      AtoKKT);
+ void update_KKT_A(csc*         KKT,
+                   csc*         A,
+                   const c_int* Ax_new_idx,
+                   c_int        A_new_n,
+                   c_int*       AtoKKT);
 
 
 /**
