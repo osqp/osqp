@@ -21,7 +21,7 @@ void test_form_KKT() {
   update_matrices_sols_data *data;
   c_float sigma, *rho_inv_vec_val;
   OSQPVectorf *rho_vec, *rho_inv_vec;
-  c_int   m, *PtoKKT, *AtoKKT, *Pdiag_idx, Pdiag_n;
+  c_int   m, *PtoKKT, *AtoKKT;
   csc    *KKT;
 
   // Load problem data
@@ -46,22 +46,14 @@ void test_form_KKT() {
                     sizeof(c_int));
 
   // Form KKT matrix storing the index vectors
-  KKT = form_KKT(data->test_form_KKT_Pu->x,
-                 data->test_form_KKT_Pu->i,
-                 data->test_form_KKT_Pu->p,
-                 data->test_form_KKT_A->x,
-                 data->test_form_KKT_A->i,
-                 data->test_form_KKT_A->p,
-                 data->test_form_KKT_A->m,
-                 data->test_form_KKT_Pu_new->n,
-                 0,
+  KKT = form_KKT(data->test_form_KKT_Pu,
+                 data->test_form_KKT_A,
+                 0,                     //CSC format
                  sigma,
                  rho_inv_vec_val,
-                 1.0, // dummy
+                 1.0,                   // dummy
                  PtoKKT,
                  AtoKKT,
-                 &Pdiag_idx,
-                 &Pdiag_n,
                  OSQP_NULL);
 
   // Assert if KKT matrix is the same as predicted one
@@ -69,17 +61,17 @@ void test_form_KKT() {
             csc_is_eq(KKT, data->test_form_KKT_KKTu, TESTS_TOL));
 
   // Update KKT matrix with new P and new A
-  update_KKT_P(KKT,
-               data->test_form_KKT_Pu_new->x,
-               data->test_form_KKT_Pu_new->p,
-               data->test_form_KKT_Pu_new->n,
-               PtoKKT, sigma, Pdiag_idx, Pdiag_n);
   update_KKT_A(KKT,
-              data->test_form_KKT_A_new->x,
-              data->test_form_KKT_A_new->p,
-              data->test_form_KKT_Pu_new->n,
+              data->test_form_KKT_A_new,
+              data->test_form_KKT_A_new_idx,
+              data->test_form_KKT_A_new_n,
               AtoKKT);
 
+  update_KKT_P(KKT,
+               data->test_form_KKT_Pu_new,
+               data->test_form_KKT_Pu_new_idx,
+               data->test_form_KKT_Pu_new_n,
+               PtoKKT, sigma, 0);
 
   // Assert if KKT matrix is the same as predicted one
   mu_assert("Update matrices: error in updating KKT matrix!",
@@ -89,7 +81,6 @@ void test_form_KKT() {
   // Cleanup
   clean_problem_update_matrices_sols_data(data);
   c_free(rho_inv_vec_val);
-  c_free(Pdiag_idx);
   csc_spfree(KKT);
   OSQPVectorf_free(rho_vec);
   OSQPVectorf_free(rho_inv_vec);
@@ -165,7 +156,7 @@ void test_update() {
 
 
   // Update P
-  nnzP       = data->test_solve_Pu->p[data->test_solve_Pu->n];
+  nnzP       = data->test_solve_Pu_new->p[data->test_solve_Pu->n];
   Px_new_idx = (c_int*) c_malloc(nnzP * sizeof(c_int));
 
   // Generate indices going from beginning to end of P
@@ -174,7 +165,7 @@ void test_update() {
   }
 
   osqp_update_data_mat(solver,
-                       data->test_solve_Pu_new->x, Px_new_idx, nnzP,
+                       data->test_solve_Pu_new->x, NULL, nnzP,
                        NULL, NULL, 0);
 
   // Solve Problem
