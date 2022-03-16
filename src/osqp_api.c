@@ -969,7 +969,7 @@ c_int osqp_update_data_mat(OSQPSolver    *solver,
     return 1;
   }
   //indexing is required if the whole P is not updated
-  if(Px_new_idx == NULL && P_new_n != 0 && P_new_n != nnzP){
+  if(Px_new_idx == OSQP_NULL && P_new_n != 0 && P_new_n != nnzP){
     # ifdef PRINTING
         c_eprint("index vector is required for partial updates of P");
     # endif /* ifdef PRINTING */
@@ -986,7 +986,7 @@ c_int osqp_update_data_mat(OSQPSolver    *solver,
     return 2;
   }
   //indexing is required if the whole A is not updated
-  if(Ax_new_idx == NULL && A_new_n != 0 && A_new_n != nnzA){
+  if(Ax_new_idx == OSQP_NULL && A_new_n != 0 && A_new_n != nnzA){
     # ifdef PRINTING
         c_eprint("index vector is required for partial updates of A");
     # endif /* ifdef PRINTING */
@@ -1009,8 +1009,8 @@ c_int osqp_update_data_mat(OSQPSolver    *solver,
   if(solver->settings->scaling){
     exitflag = work->linsys_solver->update_matrices(
                   work->linsys_solver,
-                  work->data->P, NULL, nnzP,
-                  work->data->A, NULL, nnzA);
+                  work->data->P, OSQP_NULL, nnzP,
+                  work->data->A, OSQP_NULL, nnzA);
   }
   else{
     exitflag = work->linsys_solver->update_matrices(
