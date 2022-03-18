@@ -314,7 +314,9 @@ void free_linsys_solver_cudapcg(cudapcg_solver *s) {
 c_int update_linsys_solver_matrices_cudapcg(cudapcg_solver   *s,
                                             const OSQPMatrix *P,
                                             const OSQPMatrix *A) {
-
+  /* The CUDA solver holds pointers to the matrices A and P, so it already has
+     access to the updated matrices at this point. The only task remaining is to
+     recompute the preconditioner */
   cuda_pcg_update_precond(s, 1, 1, 0);
   return 0;
 }
@@ -323,7 +325,9 @@ c_int update_linsys_solver_matrices_cudapcg(cudapcg_solver   *s,
 c_int update_linsys_solver_rho_vec_cudapcg(cudapcg_solver    *s,
                                            const OSQPVectorf *rho_vec,
                                            c_float            rho_sc) {
-
+  /* The CUDA solver holds pointers to the rho vector, so it already has access
+     to the updated vector at this point. The only task remaining is to
+     recompute the preconditioner */
   s->h_rho = rho_sc;
   cuda_pcg_update_precond(s, 0, 0, 1);
   return 0;
