@@ -37,5 +37,5 @@ jobs:
           run: |
             cmake -G "Unix Makefiles" -S tests/CMakeInstallTests -B tests/build
             cmake --build tests/build
-            ./tests/build/out/osqp_static
-            ./tests/build/out/osqp_shared
+            ./tests/build/osqp_static
+            ./tests/build/osqp_shared
