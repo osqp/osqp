@@ -1,0 +1,41 @@
+name: CMake Installation
+
+on:
+  push:
+    branches: [ master, develop**, ci ]
+    tags:
+      - '*'
+  pull_request:
+    branches: [ master, develop** ]
+
+jobs:
+
+  build_and_test:
+      runs-on: ubuntu-latest
+
+      strategy:
+        fail-fast: false
+
+      steps:
+        - uses: actions/checkout@v2
+          with:
+            lfs: false
+            submodules: recursive
+
+        - name: Prep
+          run: |
+            mkdir ../install
+
+        - name: Build
+          run: |
+            cmake -G "Unix Makefiles" -S . -B build -DCMAKE_INSTALL_PREFIX=../install
+            cmake --build build
+            cmake --install build
+
+        # Test the executables can link using the installed CMake
+        - name: OSQP Link Test
+          run: |
+            cmake -G "Unix Makefiles" -S tests/CMakeInstallTests -B tests/build
+            cmake --build build
+            ./tests/build/out/osqp_static
+            ./tests/build/out/osqp_shared
