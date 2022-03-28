@@ -35,7 +35,11 @@ struct pardiso {
 
     c_int (*update_matrices)(struct pardiso   *self,
                              const OSQPMatrix *P,
-                             const OSQPMatrix *A);
+                             const c_int* Px_new_idx,
+                             c_int P_new_n,
+                             const OSQPMatrix *A,
+                             const c_int* Ax_new_idx,
+                             c_int A_new_n);
 
     c_int (*update_rho_vec)(struct pardiso    *self,
                             const OSQPVectorf *rho_vec,
@@ -140,7 +144,11 @@ void warm_start_linsys_solver_pardiso(pardiso_solver    *s,
 c_int update_linsys_solver_matrices_pardiso(
                     pardiso_solver * s,
                     const OSQPMatrix *P,
-                    const OSQPMatrix *A);
+                    const c_int *Px_new_idx,
+                    c_int P_new_n,
+                    const OSQPMatrix *A,
+                    const c_int *Ax_new_idx,
+                    c_int A_new_n);
 
 
 /**

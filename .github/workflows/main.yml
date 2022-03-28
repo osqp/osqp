@@ -106,6 +106,7 @@ jobs:
 
         - name: Valgrid check
           run: |
+            sudo apt-get update
             sudo apt-get install valgrind
             valgrind --suppressions=.valgrind-suppress.supp --leak-check=full --gen-suppressions=all \
               --track-origins=yes --error-exitcode=1 build/out/osqp_tester

@@ -293,13 +293,17 @@ c_int solve_linsys_pardiso(pardiso_solver *s,
 // Update solver structure with new P and A
 c_int update_linsys_solver_matrices_pardiso(pardiso_solver   *s,
                                             const OSQPMatrix *P,
-                                            const OSQPMatrix *A) {
+                                            const c_int* Px_new_idx,
+                                            c_int P_new_n,
+                                            const OSQPMatrix *A,
+                                            const c_int* Ax_new_idx,
+                                            c_int A_new_n) {
 
   // Update KKT matrix with new P
-  update_KKT_P(s->KKT, P->csc, s->PtoKKT, s->sigma, 1);
+  update_KKT_P(s->KKT, P->csc, Px_new_idx, P_new_n, s->PtoKKT, s->sigma, 1);
 
   // Update KKT matrix with new A
-  update_KKT_A(s->KKT, A->csc, s->AtoKKT);
+  update_KKT_A(s->KKT, A->csc, Ax_new_idx, A_new_n, s->AtoKKT);
 
   // Perform numerical factorization
   s->phase = PARDISO_NUMERIC;
