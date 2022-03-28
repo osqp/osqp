@@ -28,7 +28,7 @@ jobs:
 
         - name: Build
           run: |
-            cmake -G "Unix Makefiles" -S . -B build -DCMAKE_INSTALL_PREFIX=../install -DOSQP_VERSION=0.99
+            cmake -G "Unix Makefiles" -S . -B build -DCMAKE_INSTALL_PREFIX=../install -DOSQP_VERSION=0.99 -DBUILD_TESTING=OFF
             cmake --build build
             cmake --install build
 
