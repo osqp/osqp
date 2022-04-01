@@ -12,12 +12,14 @@
 typedef struct qdldl qdldl_solver;
 
 struct qdldl {
-    enum linsys_solver_type type;
+    enum osqp_linsys_solver_type type;
 
     /**
      * @name Functions
      * @{
      */
+    const char* (*name)(void);
+
     c_int (*solve)(struct qdldl *self,
                    OSQPVectorf  *b,
                    c_int         admm_iter);
@@ -36,7 +38,11 @@ struct qdldl {
 #if EMBEDDED != 1
     c_int (*update_matrices)(struct qdldl     *self,
                              const OSQPMatrix *P,
-                             const OSQPMatrix *A);         ///< Update solver matrices
+                             const c_int* Px_new_idx,
+                             c_int P_new_n,
+                             const OSQPMatrix *A,
+                             const c_int* Ax_new_idx,
+                             c_int A_new_n);   ///< Update solver matrices
 
     c_int (*update_rho_vec)(struct qdldl      *self,
                             const OSQPVectorf *rho_vec,
@@ -69,7 +75,6 @@ struct qdldl {
 
 #if EMBEDDED != 1
     // These are required for matrix updates
-    c_int * Pdiag_idx, Pdiag_n;  ///< index and number of diagonal elements in P
     csc   * KKT;                 ///< Permuted KKT matrix in sparse form (used to update P and A matrices)
     c_int * PtoKKT, * AtoKKT;    ///< Index of elements from P and A to KKT matrix
     c_int * rhotoKKT;            ///< Index of rho places in KKT matrix
@@ -106,6 +111,12 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
                                c_int               polishing);
 
 /**
+ * Get the user-friendly name of the QDLDL solver.
+ * @return The user-friendly name
+ */
+const char* name_qdldl();
+
+/**
  * Solve linear system and store result in b
  * @param  s        Linear system solver structure
  * @param  b        Right-hand side
@@ -126,15 +137,23 @@ void warm_start_linsys_solver_qdldl(qdldl_solver      *s,
 #if EMBEDDED != 1
 /**
  * Update linear system solver matrices
- * @param  s        Linear system solver structure
- * @param  P        Matrix P
- * @param  A        Matrix A
- * @return          Exitflag
+ * @param  s          Linear system solver structure
+ * @param  P          Matrix P
+ * @param  Px_new_idx elements of P to update,
+ * @param  P_new_n    number of elements to update
+ * @param  A          Matrix A
+ * @param  Ax_new_idx elements of A to update,
+ * @param  A_new_n    number of elements to update
+ * @return            Exitflag
  */
 c_int update_linsys_solver_matrices_qdldl(
                   qdldl_solver * s,
                   const OSQPMatrix *P,
-                  const OSQPMatrix *A);
+                  const c_int* Px_new_idx,
+                  c_int P_new_n,
+                  const OSQPMatrix *A,
+                  const c_int* Ax_new_idx,
+                  c_int A_new_n);
 
 
 

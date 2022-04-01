@@ -96,7 +96,7 @@ void test_basic_qp2_solve_pardiso()
   settings->rho           = 0.1;
   settings->polishing     = 1;
   settings->verbose       = 1;
-  settings->linsys_solver = DIRECT_SOLVER;
+  settings->linsys_solver = OSQP_DIRECT_SOLVER;
 
   // Setup workspace
   exitflag = osqp_setup(&solver, data->P, data->q,

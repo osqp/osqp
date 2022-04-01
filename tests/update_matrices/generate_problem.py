@@ -30,6 +30,12 @@ test_form_KKT_A_new = test_form_KKT_A.copy()
 test_form_KKT_A_new.data += rg.standard_normal(test_form_KKT_A_new.nnz)
 test_form_KKT_Pu_new = test_form_KKT_Pu.copy()
 test_form_KKT_Pu_new.data += 0.1 * rg.standard_normal(test_form_KKT_Pu_new.nnz)
+
+test_form_KKT_A_new_idx = np.array(range(test_form_KKT_A_new.nnz))
+test_form_KKT_A_new_n = test_form_KKT_A_new.nnz
+test_form_KKT_Pu_new_idx = np.array(range(test_form_KKT_Pu_new.nnz))
+test_form_KKT_Pu_new_n = test_form_KKT_Pu_new.nnz
+
 test_form_KKT_P_new = test_form_KKT_Pu_new + test_form_KKT_Pu_new.T - sparse.diags(test_form_KKT_Pu_new.diagonal())
 
 test_form_KKT_KKT_new = sparse.bmat([
@@ -56,6 +62,7 @@ test_solve_Pu_new = test_form_KKT_Pu_new.copy()
 test_solve_A_new = test_form_KKT_A_new.copy()
 
 
+
 # Generate test data and solutions
 data = {'test_form_KKT_n': test_form_KKT_n,
         'test_form_KKT_m': test_form_KKT_m,
@@ -66,7 +73,11 @@ data = {'test_form_KKT_n': test_form_KKT_n,
         'test_form_KKT_KKT': test_form_KKT_KKT,
         'test_form_KKT_KKTu': test_form_KKT_KKTu,
         'test_form_KKT_A_new': test_form_KKT_A_new,
+        'test_form_KKT_A_new_idx': test_form_KKT_A_new_idx,
+        'test_form_KKT_A_new_n': test_form_KKT_A_new_n,
         'test_form_KKT_Pu_new': test_form_KKT_Pu_new,
+        'test_form_KKT_Pu_new_idx': test_form_KKT_Pu_new_idx,
+        'test_form_KKT_Pu_new_n': test_form_KKT_Pu_new_n,
         'test_form_KKT_KKT_new': test_form_KKT_KKT_new,
         'test_form_KKT_KKTu_new': test_form_KKT_KKTu_new,
         'test_solve_Pu': test_solve_Pu,

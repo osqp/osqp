@@ -934,16 +934,16 @@ c_int validate_data(const csc     *P,
 c_int validate_linsys_solver(c_int linsys_solver) {
 
 #ifdef ALGEBRA_CUDA
-  if (linsys_solver == INDIRECT_SOLVER) {
+  if (linsys_solver == OSQP_INDIRECT_SOLVER) {
     return 0;
   }
 #elif defined ALGEBRA_MKL
-  if ((linsys_solver == DIRECT_SOLVER) ||
-      (linsys_solver == INDIRECT_SOLVER)) {
+  if ((linsys_solver == OSQP_DIRECT_SOLVER) ||
+      (linsys_solver == OSQP_INDIRECT_SOLVER)) {
     return 0;
   }
 #else
-  if (linsys_solver == DIRECT_SOLVER) {
+  if (linsys_solver == OSQP_DIRECT_SOLVER) {
     return 0;
   }
 #endif

@@ -53,7 +53,7 @@ The linear system solver object is defined in :code:`mysolver.h` as follows
 
         struct mysolver {
             // Methods
-            enum linsys_solver_type type; // Linear system solver defined in constants.h
+            enum osqp_linsys_solver_type type; // Linear system solver defined in constants.h
 
             c_int (*solve)(struct mysolver * self, c_float * b);
             void (*free)(struct mysolver * self);
@@ -67,7 +67,6 @@ The linear system solver object is defined in :code:`mysolver.h` as follows
             ...
 
             // Internal attributes required for matrix updates
-            c_int * Pdiag_idx, Pdiag_n;  ///< index and number of diagonal elements in P
             c_int * PtoKKT, * AtoKKT;    ///< Index of elements from P and A to KKT matrix
             c_int * rhotoKKT;            ///< Index of rho places in KKT matrix
             ...
