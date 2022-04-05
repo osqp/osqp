@@ -209,7 +209,7 @@ static void _kkt_assemble_csr(
 
     //use K.p to hold nnz entries in each
     //column of the KKT matrix
-    for(int j=0; j <= (m+n); j++){K->p[j] = 0;}
+    for(j=0; j <= (m+n); j++){K->p[j] = 0;}
     _kkt_colcount_missing_diag(K,P,0);
     _kkt_colcount_block(K,P,0,1);
     _kkt_colcount_block(K,A,0,0);
@@ -249,7 +249,7 @@ static void _kkt_assemble_csc(
 
     //use K.p to hold nnz entries in each
     //column of the KKT matrix
-    for(int j=0; j <= (m+n); j++){K->p[j] = 0;}
+    for(j=0; j <= (m+n); j++){K->p[j] = 0;}
     _kkt_colcount_block(K,P,0,0);
     _kkt_colcount_missing_diag(K,P,0);
     _kkt_colcount_block(K,A,n,1);
