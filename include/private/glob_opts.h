@@ -51,38 +51,13 @@
 
 # endif // end EMBEDDED
 
+/* Customized printing functions */
 # ifdef PRINTING
-#  include <stdio.h>
-#  include <string.h>
-
-/* informational print function */
-#  ifdef MATLAB
-#   define c_print mexPrintf
-#  elif defined PYTHON
-#   include <Python.h>
-# define c_print(...)                              \
-  {                                                  \
-    PyGILState_STATE gilstate = PyGILState_Ensure(); \
-    PySys_WriteStdout(__VA_ARGS__);                  \
-    PyGILState_Release(gilstate);                    \
-  }
-#  elif defined R_LANG
-#   include <R_ext/Print.h>
-#   define c_print Rprintf
-#  else  /* ifdef MATLAB */
-#   define c_print printf
-#  endif /* c_print configuration */
-
-/* error printing function */
-#  ifdef R_LANG
-    /* Some CRAN builds complain about __VA_ARGS__, so just print */
-    /* out the error messages on R without the __FUNCTION__ trace */
-#   define c_eprint Rprintf
-#  else
-#   define c_eprint(...) c_print("ERROR in %s: ", __FUNCTION__); \
-            c_print(__VA_ARGS__); c_print("\n");
-#  endif /* c_eprint configuration */
-
+# include "print_defs.h"
+# else
+/* When printing is disabled, these become NOPs */
+# define c_print(...)
+# define c_eprint(...)
 # endif  /* PRINTING */
 
 

@@ -145,9 +145,7 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix  *mat,
   OSQPMatrix *out;
 
   if (!mat->At) {
-#ifdef PRINTING
     c_eprint("row selection not implemented for partially filled matrices");
-#endif
     return OSQP_NULL;
   }
 

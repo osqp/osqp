@@ -15,9 +15,7 @@ const char *OSQP_ERROR_MESSAGE[] = {
 
 c_int _osqp_error(enum osqp_error_type error_code,
 		 const char * function_name) {
-# ifdef PRINTING
   c_print("ERROR in %s: %s\n", function_name, OSQP_ERROR_MESSAGE[error_code-1]);
-# endif
   return (c_int)error_code;
 }
 

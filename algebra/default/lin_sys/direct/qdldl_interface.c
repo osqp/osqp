@@ -79,7 +79,6 @@ static c_int LDL_factor(csc          *A,
 
     if (sum_Lnz < 0){
       // Error
-#ifdef PRINTING
       c_eprint("Error in KKT matrix LDL factorization when computing the elimination tree.");
       if(sum_Lnz == -1){
         c_eprint("Matrix is not perfectly upper triangular.");
@@ -87,7 +86,6 @@ static c_int LDL_factor(csc          *A,
       else if(sum_Lnz == -2){
         c_eprint("Integer overflow in L nonzero count.");
       }
-#endif
       return sum_Lnz;
     }
 
@@ -104,15 +102,11 @@ static c_int LDL_factor(csc          *A,
 
     if (factor_status < 0){
       // Error
-#ifdef PRINTING
       c_eprint("Error in KKT matrix LDL factorization when computing the nonzero elements. There are zeros in the diagonal matrix");
-#endif
       return factor_status;
     } else if (factor_status < nvar) {
       // Error: Number of positive elements of D should be equal to nvar
-#ifdef PRINTING
       c_eprint("Error in KKT matrix LDL factorization when computing the nonzero elements. The problem seems to be non-convex");
-#endif
       return -2;
     }
 
@@ -340,9 +334,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
 
     // Check if matrix has been created
     if (!KKT_temp){
-#ifdef PRINTING
         c_eprint("Error forming and permuting KKT matrix");
-#endif
         free_linsys_solver_qdldl(s);
         *sp = OSQP_NULL;
         return OSQP_LINSYS_SOLVER_INIT_ERROR;

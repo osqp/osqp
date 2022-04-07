@@ -152,9 +152,22 @@ set(OSQP_ALGEBRA ${ALGEBRA})
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/include/public/osqp_configure.h NEWLINE_STYLE LF)
 
+
+if(OSQP_CUSTOM_MEMORY)
+  message(STATUS "Using custom memory management header: ${OSQP_CUSTOM_MEMORY}")
+endif()
+
 # Configure support for custom memory allocators
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/custom_headers/memory_defs.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/include/private/memory_defs.h NEWLINE_STYLE LF)
+
+if(OSQP_CUSTOM_PRINTING)
+  message(STATUS "Using custom printing header: ${OSQP_CUSTOM_PRINTING}")
+endif()
+
+# Configure support for custom printing functions
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/custom_headers/print_defs.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/include/private/print_defs.h NEWLINE_STYLE LF)
 
 # CUDA support
 # ----------------------------------------------
@@ -176,16 +189,6 @@ if(ALGEBRA_CUDA)
   endif()
 endif()
 
-# Memory allocators
-# ----------------------------------------------
-# Report on custom user header options. This is intended to allow users to provide definitions of their own memory
-# functions The header should define the functions as follows
-#
-# define c_malloc mymalloc define c_calloc mycalloc define c_realloc myrealloc define c_free myfree
-
-if(OSQP_CUSTOM_MEMORY)
-  message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY}")
-endif()
 
 # Set Compiler flags
 # ----------------------------------------------
