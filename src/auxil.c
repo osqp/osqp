@@ -427,7 +427,7 @@ c_int is_dual_infeasible(OSQPWorkspace *work, c_float eps_dual_inf) {
   // This function checks for the scaled dual infeasibility termination
   // criteria.
   //
-  // 1) q * delta_x < eps * || delta_x ||
+  // 1) q * delta_x < 0
   //
   // 2) ||P * delta_x || < eps * || delta_x ||
   //
