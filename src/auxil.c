@@ -459,7 +459,7 @@ c_int is_dual_infeasible(OSQPSolver *solver,
                          c_float     eps_dual_inf) {
 
   /* This function checks the dual infeasibility criteria
-     1) q * delta_x < eps * || delta_x ||
+     1) q * delta_x < 0
      2) ||P * delta_x || < eps * || delta_x ||
      3) (A * delta_x)_i > -eps * || delta_x ||,    l_i != -inf
         (A * delta_x)_i <  eps * || delta_x ||,    u_i != +inf
