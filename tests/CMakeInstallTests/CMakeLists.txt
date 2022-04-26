@@ -12,9 +12,9 @@ set( OSQP_ROOT "${OSQP_INSTALL_PREFIX}" )
 
 
 if( NOT ${OSQP_DESIRED_VERSION} )
-    find_package( OSQP )
+    find_package( OSQP REQUIRED )
 else()
-    find_package( OSQP ${OSQP_DESIRED_VERSION} )
+    find_package( OSQP ${OSQP_DESIRED_VERSION} REQUIRED )
 endif()
 
 if( ${OSQP_FOUND} )
