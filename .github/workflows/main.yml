@@ -23,7 +23,8 @@ jobs:
           python-version: [3.9]
           cmake_flags: ['-DBUILD_TESTING=OFF', '-DBUILD_TESTING=ON -DCOVERAGE=ON']
           cmake_flags_extra: ['', '-DDFLOAT=ON', '-DDLONG=OFF', '-DEMBEDDED=1', '-DEMBEDDED=2', '-DPROFILING=OFF',
-                              '-DCTRLC=OFF', '-DPRINTING=OFF', '-DALGEBRA=default', '-DALGEBRA=mkl']
+                              '-DCTRLC=OFF', '-DPRINTING=OFF']
+          algebra: ['default', 'mkl']
           exclude:
             - cmake_flags: '-DBUILD_TESTING=ON -DCOVERAGE=ON'
               cmake_flags_extra: '-DEMBEDDED=1'
@@ -83,14 +84,20 @@ jobs:
 
         - name: Install python dependencies
           run: |
-            conda install -c intel "mkl-devel<2022"
             conda install numpy scipy
+            conda info
+            conda list
+
+        - name: Install MKL
+          if: ${{ matrix.algebra == 'mkl' }}
+          run: |
+            conda install -c intel "mkl-devel<2022"
             conda info
             conda list
 
         - name: Build
           run: |
-            cmake -G "${{ matrix.cmake_generator }}" -S . -B build ${{ matrix.cmake_flags }} ${{ matrix.cmake_flags_extra }}
+            cmake -G "${{ matrix.cmake_generator }}" -S . -B build ${{ matrix.cmake_flags }} ${{ matrix.cmake_flags_extra }} -DALGEBRA=${{ matrix.algebra }}
             cmake --build build
 
         # useful for inspecting the OSQP version information
@@ -110,7 +117,7 @@ jobs:
             sudo apt-get install valgrind
             valgrind --suppressions=.valgrind-suppress.supp --leak-check=full --gen-suppressions=all \
               --track-origins=yes --error-exitcode=1 build/out/osqp_tester
-          if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DBUILD_TESTING=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '-DALGEBRA=default' }}
+          if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DBUILD_TESTING=ON -DCOVERAGE=ON' && matrix.algebra == 'default' }}
 
         - name: Generate coverage
           uses: imciner2/run-lcov@v1
