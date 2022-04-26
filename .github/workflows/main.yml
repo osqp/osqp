@@ -30,6 +30,10 @@ jobs:
               cmake_flags_extra: '-DEMBEDDED=1'
             - cmake_flags: '-DBUILD_TESTING=ON -DCOVERAGE=ON'
               cmake_flags_extra: '-DEMBEDDED=2'
+            - algebra: 'mkl'
+              cmake_flags_extra: '-DEMBEDDED=1'
+            - algebra: 'mkl'
+              cmake_flags_extra: '-DEMBEDDED=2'
 
           include:
             - os: ubuntu-latest
