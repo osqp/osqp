@@ -3,10 +3,19 @@
 cmake_minimum_required(VERSION 3.16)
 project( OSQP_test_install )
 
-# The test install is up two levels
-set( OSQP_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../../install" )
+set( OSQP_INSTALL_PREFIX  "" CACHE STRING "The location OSQP is installed in" )
+set( OSQP_DESIRED_VERSION "" CACHE STRING "The minimum version of OSQP to allow" )
 
-find_package( OSQP )
+
+# The test install is up two levels
+set( OSQP_ROOT "${OSQP_INSTALL_PREFIX}" )
+
+
+if( NOT ${OSQP_DESIRED_VERSION} )
+    find_package( OSQP )
+else()
+    find_package( OSQP ${OSQP_DESIRED_VERSION} )
+endif()
 
 if( ${OSQP_FOUND} )
     message( "Found OSQP version " ${OSQP_VERSION} )
