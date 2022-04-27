@@ -471,16 +471,13 @@ endif()
 # ----------------------------------------------
 # Testing
 # ----------------------------------------------
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND OSQP_BUILD_UNITTESTS)
   include(CTest)
-endif()
 
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME
-   AND OSQP_BUILD_UNITTESTS)
   message( STATUS "Building unit tests" )
 
   if( OSQP_COVERAGE_CHECK )
-    message( STATUS "Generating code coverage files")
+    message( STATUS "Enabling code coverage file generation" )
   endif()
 
   add_subdirectory(tests)
