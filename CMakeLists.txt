@@ -323,6 +323,8 @@ endif()
 # ----------------------------------------------
 # Static Library - osqpstatic
 # ----------------------------------------------
+message( STATUS "Build static library: " ${OSQP_BUILD_STATIC_LIB} )
+
 if( OSQP_BUILD_STATIC_LIB )
   add_library(osqpstatic STATIC
               $<TARGET_OBJECTS:OSQPLIB>
@@ -345,6 +347,8 @@ endif()
 # ----------------------------------------------
 # Shared Library - osqp
 # ----------------------------------------------
+message( STATUS "Build shared library: " ${OSQP_BUILD_SHARED_LIB} )
+
 if(OSQP_BUILD_SHARED_LIB)
   add_library(osqp SHARED
               $<TARGET_OBJECTS:OSQPLIB>
@@ -377,6 +381,8 @@ endif()
 # ----------------------------------------------
 # Application - osqp_demo
 # ----------------------------------------------
+message( STATUS "Build demo executable: " ${OSQP_BUILD_DEMO_EXE} )
+
 if(OSQP_BUILD_DEMO_EXE)
   add_executable(osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
   #target_include_directories(osqp_demo PRIVATE ${osqplib_includes})
