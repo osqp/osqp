@@ -73,29 +73,7 @@ option(PRINTING "Enable solver printing" ON)
 option(PROFILING "Enable solver profiling (timing)" ON)
 option(CTRLC "Enable user interrupt (Ctrl-C)" ON)
 
-# Is the code generated for embedded platforms? 1 :   Yes. Matrix update not allowed. 2 :   No. Matrix update allowed.
-if(DEFINED EMBEDDED)
-  message(STATUS "Forcing ALGEBRA=default for EMBEDDED mode")
-  set(ALGEBRA "default")
-  message(STATUS "Disabling printing/profiling/Ctrl-C for EMBEDDED mode")
-  set(PRINTING OFF)
-  set(PROFILING OFF)
-  set(CTRLC OFF)
-
-  # Disable shared library and demo exe on embedded applications
-  set(OSQP_BUILD_SHARED_LIB OFF)
-  set(OSQP_BUILD_DEMO_EXE OFF)
-
-  message(STATUS "EMBEDDED = ${EMBEDDED}")
-else()
-  message(STATUS "EMBEDDED = OFF")
-endif()
-
-# Display final CTRLC behaviour
-message(STATUS "CTRLC = ${CTRLC}")
-
-# Display final ALGEBRA chosen and set internal boolean variables
-message(STATUS "ALGEBRA = ${ALGEBRA}")
+# Set the relevant boolean values for the algebra
 if(${ALGEBRA} STREQUAL "default")
   set(ALGEBRA_DEFAULT ON)
 elseif(${ALGEBRA} STREQUAL "mkl")
@@ -104,24 +82,66 @@ elseif(${ALGEBRA} STREQUAL "cuda")
   set(ALGEBRA_CUDA ON)
 endif()
 
+# Is the code generated for embedded platforms? 1 :   Yes. Matrix update not allowed. 2 :   No. Matrix update allowed.
+if(DEFINED EMBEDDED)
+  if(NOT ALGEBRA_DEFAULT)
+    message(WARNING "Forcing ALGEBRA=default for EMBEDDED mode.")
+  endif()
+
+  set(ALGEBRA "default")
+  set(ALGEBRA_DEFAULT ON)
+  unset(ALGEBRA_CUDA)
+  unset(ALGEBRA_MKL)
+
+  if(${PRINTING} OR ${PROFILING} OR ${CTRLC})
+    message(WARNING "Disabling printing/profiling/Ctrl-C for EMBEDDED mode.")
+  endif()
+
+  set(PRINTING OFF)
+  set(PROFILING OFF)
+  set(CTRLC OFF)
+
+  # Disable shared library and demo exe on embedded applications
+  if(${OSQP_BUILD_SHARED_LIB} OR ${OSQP_BUILD_DEMO_EXE})
+    message(WARNING "Disabling shared library and demo executable for EMBEDDED mode.")
+  endif()
+
+  set(OSQP_BUILD_SHARED_LIB OFF)
+  set(OSQP_BUILD_DEMO_EXE OFF)
+
+  message(STATUS "EMBEDDED = ${EMBEDDED}")
+else()
+  message(STATUS "EMBEDDED = OFF")
+endif()
+
+# Display final ALGEBRA chosen
+message(STATUS "ALGEBRA = ${ALGEBRA}")
+
+# Display final CTRLC behaviour
+message(STATUS "CTRLC = ${CTRLC}")
+
 if(ALGEBRA_CUDA)
+  # Some options have different defaults for the CUDA algebra
   option(DFLOAT "Use floats instead of doubles" ON)
+  option(DLONG "Use long integers (64bit) for indexing" OFF)
 else()
   option(DFLOAT "Use floats instead of doubles" OFF)
+  option(DLONG "Use long integers (64bit) for indexing" ON)
 endif()
 
 if(DFLOAT AND ALGEBRA_MKL)
-  message(STATUS "Disabling DFLOAT for MKL (Intel RCI ISS does not support single-precision values yet.)")
+  message(WARNING "Disabling DFLOAT for MKL (Intel RCI ISS does not support single-precision values yet.)")
   set(DFLOAT OFF)
 endif()
 message(STATUS "DFLOAT = ${DFLOAT}")
 
-option(DLONG "Use long integers (64bit) for indexing" ON)
 if(NOT (CMAKE_SIZEOF_VOID_P EQUAL 8))
-  message(STATUS "Disabling long integers (64bit) on 32bit machine")
+  message(WARNING "Disabling long integers (64bit) on 32bit machine.")
   set(DLONG OFF)
-elseif(ALGEBRA_CUDA)
-  message(STATUS "Disabling long integers (64bit) for CUDA")
+endif()
+
+if(ALGEBRA_CUDA AND DLONG)
+  message(WARNING "Disabling long integers (64bit) for CUDA.")
   set(DLONG OFF)
 endif()
 message(STATUS "DLONG = ${DLONG}")
