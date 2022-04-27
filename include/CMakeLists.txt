@@ -30,7 +30,7 @@ if(NOT DEFINED EMBEDDED)
 endif()
 
 # Add the ctrl-c handler if enabled
-if(CTRLC)
+if(CTRLC AND NOT OSQP_CUSTOM_INTERRUPTS)
   list(APPEND osqp_headers_private "${CMAKE_CURRENT_SOURCE_DIR}/private/ctrlc.h")
 endif()
 

@@ -11,7 +11,7 @@
 #endif /* ifndef EMBEDDED */
 
 #ifdef CTRLC
-# include "ctrlc.h"
+# include "interrupt_defs.h"
 #endif /* ifdef CTRLC */
 
 #ifndef EMBEDDED

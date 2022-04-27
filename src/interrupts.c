@@ -7,9 +7,13 @@
  *
  */
 
-#include "ctrlc.h"
+#include "interrupt_defs.h"
 
 #if defined MATLAB
+
+/* No header file available for these; define the prototypes ourselves */
+bool utIsInterruptPending(void);
+bool utSetInterruptEnabled(bool);
 
 static int istate;
 
@@ -26,6 +30,9 @@ int osqp_is_interrupted(void) {
 }
 
 #elif defined IS_WINDOWS
+
+/* Use Windows SetConsoleCtrlHandler for signal handling */
+# include <windows.h>
 
 static int int_detected;
 static BOOL WINAPI handle_ctrlc(DWORD dwCtrlType) {

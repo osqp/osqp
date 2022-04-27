@@ -169,6 +169,14 @@ endif()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/custom_headers/print_defs.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/include/private/print_defs.h NEWLINE_STYLE LF)
 
+if(OSQP_CUSTOM_INTERRUPTS)
+  message(STATUS "Using custom inerrupt header: ${OSQP_CUSTOM_INTERRUPTS}")
+endif()
+
+# Configure support for custom interrupt functions
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/custom_headers/interrupt_defs.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/include/private/interrupt_defs.h NEWLINE_STYLE LF)
+
 # CUDA support
 # ----------------------------------------------
 if(ALGEBRA_CUDA)
