@@ -31,7 +31,7 @@ jobs:
 
         - name: Build
           run: |
-            cmake -G "Unix Makefiles" -S . -B build -DCMAKE_INSTALL_PREFIX=$OSQP_INSTALL_PREFIX -DOSQP_VERSION=0.99 -DBUILD_TESTING=OFF
+            cmake -G "Unix Makefiles" -S . -B build -DCMAKE_INSTALL_PREFIX=$OSQP_INSTALL_PREFIX -DOSQP_VERSION=0.99 -DOSQP_BUILD_UNITTESTS=OFF
             cmake --build build
             cmake --install build
 
@@ -74,7 +74,7 @@ jobs:
 
         - name: Build
           run: |
-            cmake -G "Unix Makefiles" -S . -B build -DCMAKE_INSTALL_PREFIX=$OSQP_INSTALL_PREFIX -DOSQP_VERSION=0.99 -DBUILD_TESTING=OFF -DOSQP_BUILD_SHARED_LIB=OFF -DOSQP_BUILD_STATIC_LIB=ON
+            cmake -G "Unix Makefiles" -S . -B build -DCMAKE_INSTALL_PREFIX=$OSQP_INSTALL_PREFIX -DOSQP_VERSION=0.99 -DOSQP_BUILD_UNITTESTS=OFF -DOSQP_BUILD_SHARED_LIB=OFF -DOSQP_BUILD_STATIC_LIB=ON
             cmake --build build
             cmake --install build
 

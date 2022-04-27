@@ -65,6 +65,16 @@ cmake_dependent_option( OSQP_BUILD_DEMO_EXE
                         ON    # Default to on
                         OSQP_BUILD_STATIC_LIB OFF ) # Force off if the static library isn't built
 
+cmake_dependent_option( OSQP_BUILD_UNITTESTS
+                        "Build the unit testing suite"
+                        OFF    # Default to off
+                        OSQP_BUILD_STATIC_LIB OFF ) # Force off if the static library isn't built
+
+cmake_dependent_option( OSQP_COVERAGE_CHECK
+                        "Check the code coverage of the unit tests"
+                        OFF    # Default to off
+                        OSQP_BUILD_UNITTESTS OFF ) # Force off if the unit tests aren't built
+
 set(ALGEBRA
     "default"
     CACHE STRING "The Algebra to use (default/mkl/cuda)")
@@ -157,12 +167,6 @@ if(DEBUG)
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
-option(COVERAGE "Perform code coverage" OFF)
-message(STATUS "COVERAGE = ${COVERAGE}")
-
-if(OSQP_CUSTOM_MEMORY)
-  message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY}")
-endif()
 
 # Rename compile-time constants & configure
 # ----------------------------------------------
@@ -215,7 +219,7 @@ endif()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON) # -fPIC
 
 if(NOT MSVC)
-  if(COVERAGE)
+  if(OSQP_COVERAGE_CHECK)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
     if(FORTRAN)
@@ -265,10 +269,10 @@ if(PYTHON)
   include_directories(${PYTHON_INCLUDE_DIRS})
   add_definitions(-DPYTHON)
 
-  if(BUILD_TESTING)
-    message(STATUS "Disabling BUILD_TESTING because we are building Python interface")
-    set(BUILD_TESTING OFF)
-  endif(BUILD_TESTING)
+  if(OSQP_BUILD_UNITTESTS)
+    message(STATUS "Disabling OSQP_BUILD_UNITTESTS because we are building Python interface")
+    set(OSQP_BUILD_UNITTESTS OFF)
+  endif(OSQP_BUILD_UNITTESTS)
 endif(PYTHON)
 
 if(MATLAB)
@@ -285,10 +289,10 @@ if(MATLAB)
   add_definitions(-DMATLAB_MEXSRC_RELEASE=R2017b)
   message(STATUS "Using Matlab pre-2018a API for mxGetPr compatibility")
 
-  if(BUILD_TESTING)
-    message(STATUS "Disabling BUILD_TESTING because we are building Matlab interface")
-    set(BUILD_TESTING OFF)
-  endif(BUILD_TESTING)
+  if(OSQP_BUILD_UNITTESTS)
+    message(STATUS "Disabling OSQP_BUILD_UNITTESTS because we are building Matlab interface")
+    set(OSQP_BUILD_UNITTESTS OFF)
+  endif(OSQP_BUILD_UNITTESTS)
 endif(MATLAB)
 
 if(R_LANG)
@@ -304,10 +308,10 @@ if(R_LANG)
   include_directories(${R_INCLUDE_DIRS})
   add_definitions(-DR_LANG)
 
-  if(BUILD_TESTING)
-    message(STATUS "Disabling UNITTESTS because we are building the R interface")
-    set(BUILD_TESTING OFF)
-  endif(BUILD_TESTING)
+  if(OSQP_BUILD_UNITTESTS)
+    message(STATUS "Disabling OSQP_BUILD_UNITTESTS because we are building the R interface")
+    set(OSQP_BUILD_UNITTESTS OFF)
+  endif(OSQP_BUILD_UNITTESTS)
 endif(R_LANG)
 
 if(PYTHON OR MATLAB OR R_LANG)
@@ -466,7 +470,12 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 endif()
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME
-   AND BUILD_TESTING
-   AND OSQP_BUILD_STATIC_LIB)
+   AND OSQP_BUILD_UNITTESTS)
+  message( STATUS "Building unit tests" )
+
+  if( OSQP_COVERAGE_CHECK )
+    message( STATUS "Generating code coverage files")
+  endif()
+
   add_subdirectory(tests)
 endif()
