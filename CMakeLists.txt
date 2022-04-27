@@ -300,12 +300,15 @@ endif()
 # Static Library - osqpstatic
 # ----------------------------------------------
 if( OSQP_BUILD_STATIC_LIB )
-  add_library(osqpstatic STATIC $<TARGET_OBJECTS:OSQPLIB>)
-  set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
+  add_library(osqpstatic STATIC
+              $<TARGET_OBJECTS:OSQPLIB>
+              "${CMAKE_CURRENT_SOURCE_DIR}/src/osqp_api.c")
+  set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqpstatic)
   if(ALGEBRA_DEFAULT)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
     target_sources(osqpstatic PRIVATE $<TARGET_OBJECTS:qdldlobject>)
   endif()
+  target_include_directories(osqpstatic PRIVATE ${osqplib_includes})
   target_include_directories(
     osqpstatic PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/public;${CMAKE_CURRENT_BINARY_DIR}/include/public>"
                       "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
@@ -319,7 +322,9 @@ endif()
 # Shared Library - osqp
 # ----------------------------------------------
 if(OSQP_BUILD_SHARED_LIB)
-  add_library(osqp SHARED ${osqplib_sources})
+  add_library(osqp SHARED
+              $<TARGET_OBJECTS:OSQPLIB>
+              "${CMAKE_CURRENT_SOURCE_DIR}/src/osqp_api.c")
   if(ALGEBRA_DEFAULT)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
     target_sources(osqp PRIVATE $<TARGET_OBJECTS:qdldlobject>)
@@ -368,39 +373,63 @@ install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
 if(OSQP_BUILD_STATIC_LIB)
   install(
     TARGETS osqpstatic
-    EXPORT ${PROJECT_NAME}
+    EXPORT osqpstatic
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+
+  export(
+    EXPORT osqpstatic
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/osqpstatic-targets.cmake"
+    NAMESPACE osqp::)
+
+  install(
+    EXPORT osqpstatic
+    FILE osqpstatic-targets.cmake
+    NAMESPACE osqp::
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/osqp")
 endif()
 
 if(OSQP_BUILD_SHARED_LIB)
   install(
     TARGETS osqp
-    EXPORT ${PROJECT_NAME}
+    EXPORT osqp
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
   export(
-    EXPORT ${PROJECT_NAME}
+    EXPORT osqp
     FILE "${CMAKE_CURRENT_BINARY_DIR}/osqp-targets.cmake"
     NAMESPACE osqp::)
 
   install(
-    EXPORT ${PROJECT_NAME}
+    EXPORT osqp
     FILE osqp-targets.cmake
     NAMESPACE osqp::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/osqp)
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/osqp")
 
 endif()
 
-if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake)
-  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake
-       "include(\"\${CMAKE_CURRENT_LIST_DIR}/osqp-targets.cmake\")\n")
-endif()
+if(OSQP_BUILD_STATIC_LIB OR OSQP_BUILD_SHARED_LIB)
+  # generate the config file that is includes the exports
+  configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp-config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/osqp"
+    NO_SET_AND_CHECK_MACRO
+    NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/osqp)
+  write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/osqp-config-version.cmake"
+    VERSION "${OSQP_VERSION}"
+    COMPATIBILITY SameMajorVersion)
+
+  install(FILES
+          "${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake"
+          "${CMAKE_CURRENT_BINARY_DIR}/osqp-config-version.cmake"
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/osqp)
+endif()
 
 if(NOT TARGET uninstall)
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/configure/cmake/cmake_uninstall.cmake.in"
