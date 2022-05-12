@@ -47,6 +47,8 @@ void free_linsys_solver_qdldl(qdldl_solver *s) {
         if (s->AtoKKT)    c_free(s->AtoKKT);
         if (s->rhotoKKT)  c_free(s->rhotoKKT);
 
+        if (s->adj)         c_free(s->adj);
+
         // QDLDL workspace
         if (s->D)         c_free(s->D);
         if (s->etree)     c_free(s->etree);
@@ -232,6 +234,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
     s->solve           = &solve_linsys_qdldl;
     s->update_settings = &update_settings_linsys_solver_qdldl;
     s->warm_start      = &warm_start_linsys_solver_qdldl;
+    s->adjoint_derivative = &adjoint_derivative_qdldl;
 
 
 #ifndef EMBEDDED
@@ -484,6 +487,169 @@ c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver      *s,
     return (QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
         s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
         s->etree, s->bwork, s->iwork, s->fwork) < 0);
+}
+
+// --------- Derivative stuff -------- //
+
+//increment the D colptr by the number of nonzeros
+//in a square diagonal matrix.
+static void _colcount_diag(csc* D, c_int initcol, c_int blockcols) {
+
+    c_int j;
+    for(j = initcol; j < (initcol + blockcols); j++){
+        D->p[j]++;
+    }
+}
+
+//increment D colptr by the number of nonzeros in M
+static void _colcount_block(csc* D, csc* M, c_int initcol, c_int istranspose) {
+
+    c_int nnzM, j;
+
+    if(istranspose){
+        nnzM = M->p[M->n];
+        for (j = 0; j < nnzM; j++){
+            D->p[M->i[j] + initcol]++;
+        }
+    }
+    else {
+        //just add the column count
+        for (j = 0; j < M->n; j++){
+            D->p[j + initcol] += M->p[j+1] - M->p[j];
+        }
+    }
+}
+
+static void _colcount_to_colptr(csc* D) {
+
+    c_int j, count;
+    c_int currentptr = 0;
+
+    for(j = 0; j <= D->n; j++){
+        count        = D->p[j];
+        D->p[j]      = currentptr;
+        currentptr  += count;
+    }
+}
+
+//populate values from M using the K colptr as indicator of
+//next fill location in each row
+static void _fill_block(
+        csc* K, csc* M,
+        c_int* index_mapping,
+        c_int initrow,
+        c_int initcol,
+        c_int istranspose)
+{
+    c_int ii, jj, row, col, dest;
+
+    for(ii=0; ii < M->n; ii++){
+        for(jj = M->p[ii]; jj < M->p[ii+1]; jj++){
+            if(istranspose){
+                col = M->i[jj] + initcol;
+                row = ii + initrow;
+            }
+            else {
+                col = ii + initcol;
+                row = M->i[jj] + initrow;
+            }
+
+            dest       = K->p[col]++;
+            K->i[dest] = row;
+            K->x[dest] = M->x[jj];
+            if (index_mapping != OSQP_NULL) { index_mapping[jj] = dest; }
+        }
+    }
+}
+
+static void _fill_diag_values(csc* K, c_int* index_mapping, c_int initrow, c_int initcol, c_int *values, c_float value_scalar, c_int n) {
+
+    c_int j, dest, row, col;
+    for (j = 0; j < n; j++) {
+        row         = j + initrow;
+        col         = j + initcol;
+        dest        = K->p[col];
+        K->i[dest]  = row;
+        if (value_scalar) {
+            K->x[dest] = value_scalar;
+        } else {
+            K->x[dest] = values[n];
+        }
+        K->p[col]++;
+        if (index_mapping != OSQP_NULL) { index_mapping[j] = dest; }
+    }
+}
+
+static void _backshift_colptrs(csc* K) {
+
+    int j;
+    for(j = K->n; j > 0; j--){
+        K->p[j] = K->p[j-1];
+    }
+    K->p[0] = 0;
+}
+
+static void _adj_assemble_csc(csc *D, OSQPMatrix *P_full, OSQPMatrix *G, OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks) {
+
+    c_int n = OSQPMatrix_get_m(P_full);
+    c_int x = OSQPMatrix_get_m(G);        // No. of inequality constraints
+    c_int y = OSQPMatrix_get_m(A_eq);     // No. of equality constraints
+
+    c_int j;
+    //use D.p to hold nnz entries in each column of the D matrix
+    for (j=0; j <= 2*(n+x+y); j++){D->p[j] = 0;}
+
+    _colcount_diag(D, 0, n+x+y);
+    _colcount_block(D, P_full->csc, n+x+y, 0);
+    _colcount_block(D, G->csc, n+x+y, 0);
+    _colcount_block(D, A_eq->csc, n+x+y, 0);
+    _colcount_block(D, GDiagLambda->csc, n+x+y+n, 1);
+    _colcount_diag(D, n+x+y+n, x);
+    _colcount_block(D, A_eq->csc, n+x+y+n+x, 1);
+
+    //cumsum total entries to convert to D.p
+    _colcount_to_colptr(D);
+
+    _fill_diag_values(D, OSQP_NULL, 0, 0, OSQP_NULL, 1, n+x+y);
+    _fill_block(D, P_full->csc, OSQP_NULL, 0, n+x+y, 0);
+    _fill_block(D, G->csc, OSQP_NULL, n, n+x+y, 0);
+    _fill_block(D, A_eq->csc, OSQP_NULL, n+x, n+x+y, 0);
+    _fill_block(D, GDiagLambda->csc, OSQP_NULL, 0, n+x+y+n, 1);
+    _fill_diag_values(D, OSQP_NULL, n, n+x+y+n, slacks->values, 0, x);
+    _fill_block(D, A_eq->csc, OSQP_NULL, 0, n+x+y+n+x, 1);
+
+    _backshift_colptrs(D);
+}
+
+c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const OSQPMatrix *G, const OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks, OSQPMatrix *check) {
+
+    c_int n = OSQPMatrix_get_m(P_full);
+    c_int n_ineq = OSQPMatrix_get_m(G);
+    c_int n_eq = OSQPMatrix_get_m(A_eq);
+
+    // Get maximum number of nonzero elements (only upper triangular part)
+    c_int P_full_nnz = OSQPMatrix_get_nz(P_full);
+    c_int G_nnz = OSQPMatrix_get_nz(G);
+    c_int A_eq_nnz = OSQPMatrix_get_nz(A_eq);
+
+    c_int nnzKKT = n + n_ineq + n_eq +           // Number of diagonal elements in I
+                   P_full_nnz +                  // Number of elements in P_full
+                   G_nnz +                       // Number of nonzeros in G
+                   A_eq_nnz +                    // Number of nonzeros in A_eq
+                   G_nnz +                       // Number of nonzeros in G'
+                   n_ineq +                      // Number of diagonal elements in slacks
+                   A_eq_nnz;                     // Number of nonzeros in A_eq'
+
+    c_int dim = 2 * (n + n_ineq + n_eq);
+    csc *adj = csc_spalloc(dim, dim, nnzKKT, 1, 0);
+    if (!adj) return OSQP_NULL;
+    _adj_assemble_csc(adj, P_full, G, A_eq, GDiagLambda, slacks);
+
+    OSQPMatrix *adj_matrix = OSQPMatrix_new_from_csc(adj, 1);
+    c_int iseq = OSQPMatrix_is_eq(adj_matrix, check, 0.0001);
+    OSQPMatrix_free(adj_matrix);
+
+    return iseq;
 }
 
 #endif

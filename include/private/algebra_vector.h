@@ -42,6 +42,12 @@ void OSQPVectorf_free(OSQPVectorf *a);
 /* Free an int vector */
 void OSQPVectori_free(OSQPVectori *a);
 
+OSQPVectorf* OSQPVectorf_subvector_byrows(const OSQPVectorf  *A,
+                                          const OSQPVectori *rows);
+
+OSQPVectorf* OSQPVectorf_concat(const OSQPVectorf *A,
+                                const OSQPVectorf *B);
+
 /* Create subview of a larger vector.  Internal data should not be freed.
  * Behavior is otherwise identical to OSQPVectorf (Uses MALLOC)
  */
@@ -209,6 +215,11 @@ void OSQPVectorf_ew_sqrt(OSQPVectorf *a);
 
 /* Elementwise maximum between vectors c = max(a, b) */
 void OSQPVectorf_ew_max_vec(OSQPVectorf       *c,
+                            const OSQPVectorf *a,
+                            const OSQPVectorf *b);
+
+/* Elementwise minimum between vectors c = min(a, b) */
+void OSQPVectorf_ew_min_vec(OSQPVectorf       *c,
                             const OSQPVectorf *a,
                             const OSQPVectorf *b);
 

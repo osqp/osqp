@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 project(osqp)
 
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 include(GNUInstallDirs)
 include(CMakeDependentOption)
 include(CMakePackageConfigHelpers)

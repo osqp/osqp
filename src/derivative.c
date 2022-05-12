@@ -136,10 +136,8 @@ c_int adjoint_derivative(OSQPSolver *solver, const csc* check) {
 
     OSQPMatrix *P_full = OSQPMatrix_triu_to_symm(P);
 
-    c_int status = adjoint_derivative_linsys_solver(solver, settings, P_full, G, A_eq, GDiagLambda, slacks);
-
     OSQPMatrix *checkmat = OSQPMatrix_new_from_csc(check, 1);
-    c_int iseq = OSQPMatrix_is_eq(P_full, checkmat, 0.0001);
+    c_int status = adjoint_derivative_linsys_solver(solver, settings, P_full, G, A_eq, GDiagLambda, slacks, checkmat);
 
     // TODO: Make sure we're freeing everything we should!
     OSQPMatrix_free(G);
