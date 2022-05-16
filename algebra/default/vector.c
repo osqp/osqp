@@ -150,7 +150,7 @@ OSQPVectorf* OSQPVectorf_subvector_byrows(const OSQPVectorf  *A,
     c_int j = 0;
     for (i = 0; i < rows->length; i++) {
         if (rows->values[i]) {
-            out->values[j] = A->values[j];
+            out->values[j] = A->values[i];
             j++;
         }
     }

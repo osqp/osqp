@@ -562,7 +562,7 @@ static void _fill_block(
     }
 }
 
-static void _fill_diag_values(csc* K, c_int* index_mapping, c_int initrow, c_int initcol, c_int *values, c_float value_scalar, c_int n) {
+static void _fill_diag_values(csc* K, c_int* index_mapping, c_int initrow, c_int initcol, c_float *values, c_float value_scalar, c_int n) {
 
     c_int j, dest, row, col;
     for (j = 0; j < n; j++) {
@@ -573,7 +573,7 @@ static void _fill_diag_values(csc* K, c_int* index_mapping, c_int initrow, c_int
         if (value_scalar) {
             K->x[dest] = value_scalar;
         } else {
-            K->x[dest] = values[n];
+            K->x[dest] = values[j];
         }
         K->p[col]++;
         if (index_mapping != OSQP_NULL) { index_mapping[j] = dest; }
@@ -606,6 +606,7 @@ static void _adj_assemble_csc(csc *D, OSQPMatrix *P_full, OSQPMatrix *G, OSQPMat
     _colcount_block(D, GDiagLambda->csc, n+x+y+n, 1);
     _colcount_diag(D, n+x+y+n, x);
     _colcount_block(D, A_eq->csc, n+x+y+n+x, 1);
+    // TODO: Add a block of structural zeros on bottom right
 
     //cumsum total entries to convert to D.p
     _colcount_to_colptr(D);
@@ -617,6 +618,8 @@ static void _adj_assemble_csc(csc *D, OSQPMatrix *P_full, OSQPMatrix *G, OSQPMat
     _fill_block(D, GDiagLambda->csc, OSQP_NULL, 0, n+x+y+n, 1);
     _fill_diag_values(D, OSQP_NULL, n, n+x+y+n, slacks->values, 0, x);
     _fill_block(D, A_eq->csc, OSQP_NULL, 0, n+x+y+n+x, 1);
+    // TODO: Add a block of structural zeros on bottom right
+    // -eps goes in here
 
     _backshift_colptrs(D);
 }

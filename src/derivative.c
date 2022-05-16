@@ -107,16 +107,9 @@ c_int adjoint_derivative(OSQPSolver *solver, const csc* check) {
     // ---------- lambda
 
     // --------- h
-    OSQPVectorf *_l_ineq = OSQPVectorf_subvector_byrows(l, A_ineq_l_i);
-    OSQPVectorf *l_ineq = OSQPVectorf_malloc(OSQPVectorf_length(_l_ineq));
-    OSQPVectorf_ew_min_vec(l_ineq, _l_ineq, zero);
-    OSQPVectorf_free(_l_ineq);
+    OSQPVectorf *l_ineq = OSQPVectorf_subvector_byrows(l, A_ineq_l_i);
     OSQPVectorf_mult_scalar(l_ineq, -1);
-
-    OSQPVectorf *_u_ineq = OSQPVectorf_subvector_byrows(u, A_ineq_u_i);
-    OSQPVectorf *u_ineq = OSQPVectorf_malloc(OSQPVectorf_length(_u_ineq));
-    OSQPVectorf_ew_max_vec(u_ineq, _u_ineq, zero);
-    OSQPVectorf_free(_u_ineq);
+    OSQPVectorf *u_ineq = OSQPVectorf_subvector_byrows(u, A_ineq_u_i);
 
     OSQPVectorf *h = OSQPVectorf_concat(l_ineq, u_ineq);
 
@@ -128,7 +121,7 @@ c_int adjoint_derivative(OSQPSolver *solver, const csc* check) {
 
     // ---------- GDiagLambda
     OSQPMatrix *GDiagLambda = OSQPMatrix_copy_new(G);
-    OSQPMatrix_rmult_diag(GDiagLambda, lambda);
+    OSQPMatrix_lmult_diag(GDiagLambda, lambda);
 
     // ---------- Slacks
     OSQPVectorf* slacks = OSQPVectorf_copy_new(h);
