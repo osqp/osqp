@@ -239,8 +239,8 @@ OSQP_API c_int osqp_update_rho(OSQPSolver *solver,
 // ------------------ Derivative stuff -----------------
 OSQP_API c_int osqp_adjoint_derivative(OSQPSolver *solver,
                                        c_float    *dx,
-                                       c_float    *dy_u,
                                        c_float    *dy_l,
+                                       c_float    *dy_u,
                                        const csc  *check);
 // ------------------ Derivative stuff -----------------
 

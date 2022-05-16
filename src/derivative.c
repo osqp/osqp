@@ -8,7 +8,7 @@
 #include "csc_utils.h"
 
 
-c_int adjoint_derivative(OSQPSolver *solver, const csc* check) {
+c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float *dy_u, const csc* check) {
 
     c_int m = solver->work->data->m;
     c_int n = solver->work->data->n;
@@ -28,10 +28,12 @@ c_int adjoint_derivative(OSQPSolver *solver, const csc* check) {
 
     c_float *l_data = OSQPVectorf_data(l);
     c_float *u_data = OSQPVectorf_data(u);
+    c_float *y_data = OSQPVectorf_data(y);
 
     c_int *A_ineq_l_vec = (c_int *) c_malloc(m * sizeof(c_int));
     c_int *A_ineq_u_vec = (c_int *) c_malloc(m * sizeof(c_int));
     c_int *A_eq_vec = (c_int *) c_malloc(m * sizeof(c_int));
+    c_int *nu_vec = (c_int *) c_malloc(m * sizeof(c_int));
 
     // TODO: We could use constr_type in OSQPWorkspace but it only tells us whether a constraint is 'loose'
     // not 'upper loose' or 'lower loose', which we seem to need here.
@@ -54,13 +56,20 @@ c_int adjoint_derivative(OSQPSolver *solver, const csc* check) {
             else
                 A_ineq_u_vec[j] = 0;
             n_ineq = n_ineq + 2;  // we add two constraints, (one lower, one upper) for every inequality constraint
+            nu_vec[j] = -1;
         } else {
             A_eq_vec[j] = 1;
             A_ineq_l_vec[j] = 0;
             A_ineq_u_vec[j] = 0;
             n_eq++;
+            if (y_data[j] >= 0) {
+                nu_vec[j] = 1;
+            } else {
+                nu_vec[j] = 0;
+            }
         }
     }
+
 
     OSQPVectori *A_ineq_l_i = OSQPVectori_malloc(m);
     OSQPVectori_from_raw(A_ineq_l_i, A_ineq_l_vec);
@@ -129,6 +138,39 @@ c_int adjoint_derivative(OSQPSolver *solver, const csc* check) {
 
     OSQPMatrix *P_full = OSQPMatrix_triu_to_symm(P);
 
+    // ---------- RHS
+    OSQPVectorf *dxx = OSQPVectorf_malloc(m);
+    OSQPVectorf_from_raw(dxx, dx);
+    OSQPVectorf *dy_l_vec = OSQPVectorf_malloc(n);
+    OSQPVectorf_from_raw(dy_l_vec, dy_l);
+    OSQPVectorf *dy_u_vec = OSQPVectorf_malloc(n);
+    OSQPVectorf_from_raw(dy_u_vec, dy_u);
+
+    OSQPVectorf *dy_l_ineq = OSQPVectorf_subvector_byrows(dy_l_vec, A_ineq_l_i);
+    OSQPVectorf_free(dy_l_vec);
+    OSQPVectorf *dy_u_ineq = OSQPVectorf_subvector_byrows(dy_u_vec, A_ineq_u_i);
+    OSQPVectorf_free(dy_u_vec);
+    OSQPVectorf *dlambd = OSQPVectorf_concat(dy_l_ineq, dy_u_ineq);
+
+    c_float *d_nu_vec = (c_int *) c_malloc(n_eq * sizeof(c_int));
+    for (j=0; j<n_eq; j++) {
+        if (nu_vec[j]==0) {
+            d_nu_vec[j] = dy_u[j];
+        } else if (nu_vec[j]==1) {
+            d_nu_vec[j] = -dy_l[j];
+        } else {}
+    }
+    c_free(nu_vec);
+    OSQPVectorf *d_nu = OSQPVectorf_malloc(n_eq);
+    OSQPVectorf_from_raw(d_nu, d_nu_vec);
+    c_free(d_nu_vec);
+
+    OSQPVectorf *rhs_temp = OSQPVectorf_concat(dxx, dlambd);
+    OSQPVectorf *rhs = OSQPVectorf_concat(rhs_temp, d_nu);
+    OSQPVectorf_mult_scalar(rhs, -1);
+    OSQPVectorf_free(rhs_temp);
+
+    // ----------- Check
     OSQPMatrix *checkmat = OSQPMatrix_new_from_csc(check, 1);
     c_int status = adjoint_derivative_linsys_solver(solver, settings, P_full, G, A_eq, GDiagLambda, slacks, checkmat);
 
@@ -140,6 +182,17 @@ c_int adjoint_derivative(OSQPSolver *solver, const csc* check) {
 
     OSQPVectorf_free(lambda);
     OSQPVectorf_free(slacks);
+
+    OSQPVectori_free(A_ineq_l_i);
+    OSQPVectori_free(A_ineq_u_i);
+    OSQPVectori_free(A_eq_i);
+
+    OSQPVectorf_free(dxx);
+    OSQPVectorf_free(dlambd);
+    OSQPVectorf_free(d_nu);
+
+    OSQPVectorf_free(rhs);
+
 
     return status;
 }
