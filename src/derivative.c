@@ -139,11 +139,11 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
     OSQPMatrix *P_full = OSQPMatrix_triu_to_symm(P);
 
     // ---------- RHS
-    OSQPVectorf *dxx = OSQPVectorf_malloc(m);
+    OSQPVectorf *dxx = OSQPVectorf_malloc(n);
     OSQPVectorf_from_raw(dxx, dx);
-    OSQPVectorf *dy_l_vec = OSQPVectorf_malloc(n);
+    OSQPVectorf *dy_l_vec = OSQPVectorf_malloc(m);
     OSQPVectorf_from_raw(dy_l_vec, dy_l);
-    OSQPVectorf *dy_u_vec = OSQPVectorf_malloc(n);
+    OSQPVectorf *dy_u_vec = OSQPVectorf_malloc(m);
     OSQPVectorf_from_raw(dy_u_vec, dy_u);
 
     OSQPVectorf *dy_l_ineq = OSQPVectorf_subvector_byrows(dy_l_vec, A_ineq_l_i);
