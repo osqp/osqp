@@ -144,10 +144,10 @@ if(OSQP_CUSTOM_MEMORY)
   message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY}")
 endif()
 
-if(NOT DEFINED EMBEDDED
-   AND ALGEBRA_DEFAULT)
-  option(OSQP_CODEGEN "Enable code generation" ON)
-endif()
+cmake_dependent_option( OSQP_CODEGEN "Enable code generation"
+                        ON
+                        "ALGEBRA_DEFAULT;NOT DEFINED EMBEDDED" OFF )
+
 message(STATUS "CODEGEN = ${OSQP_CODEGEN}")
 
 # Rename compile-time constants & configure
