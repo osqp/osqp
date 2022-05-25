@@ -69,8 +69,7 @@ if( OSQP_CODEGEN )
        ${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/qdldl_interface.h
        ${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/qdldl_interface.c
        ${qdldl_SOURCE_DIR}/src/qdldl.c
-       ${qdldl_SOURCE_DIR}/include/qdldl.h
-       ${qdldl_SOURCE_DIR}/include/qdldl_types.h )
+       ${qdldl_SOURCE_DIR}/include/qdldl.h )
 
   foreach( f ${EMBEDDED_LINALG} )
     get_filename_component( fname ${f} NAME )
@@ -90,6 +89,13 @@ if( OSQP_CODEGEN )
                        COMMENT "Copying ${fname}" )
   endforeach()
 
-  add_custom_target( copy_codegen_linalg DEPENDS ${EMBEDDED_BUILD_LINALG} )
+    add_custom_command(OUTPUT "${EMBEDDED_BUILD_PRIVATE_INC_DIR}/qdldl_types.h"
+                       COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/qdldl_codegen_types.h.in"
+                                                        "${EMBEDDED_BUILD_PRIVATE_INC_DIR}/qdldl_types.h"
+                       DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/qdldl_codegen_types.h.in"
+                       COMMENT "Copying qdldl_types.h" )
+
+
+  add_custom_target( copy_codegen_linalg DEPENDS ${EMBEDDED_BUILD_LINALG} "${EMBEDDED_BUILD_PRIVATE_INC_DIR}/qdldl_types.h" )
   add_dependencies( copy_codegen_files copy_codegen_linalg )
 endif()
