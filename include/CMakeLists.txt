@@ -26,7 +26,7 @@ set(osqp_headers
 
 # Add code generation functionality if enabled
 if(OSQP_CODEGEN)
-  list(APPEND osqp_headers "${CMAKE_CURRENT_SOURCE_DIR}/codegen.h")
+  list(APPEND osqp_headers "${CMAKE_CURRENT_SOURCE_DIR}/private/codegen.h")
 endif()
 
 # Add more files that should only be in non-embedded code
