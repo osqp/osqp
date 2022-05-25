@@ -223,6 +223,25 @@ if(NOT MSVC)
 endif(NOT MSVC)
 
 # ----------------------------------------------
+# Initialize the code generation file copying
+# ----------------------------------------------
+if( OSQP_CODEGEN )
+  set( EMBEDDED_BUILD_ROOT_DIR "${CMAKE_BINARY_DIR}/codegen_src" )
+
+  set( EMBEDDED_BUILD_SRC_DIR "${EMBEDDED_BUILD_ROOT_DIR}/src" )
+  set( EMBEDDED_BUILD_PUBLIC_INC_DIR "${EMBEDDED_BUILD_ROOT_DIR}/inc/public" )
+  set( EMBEDDED_BUILD_PRIVATE_INC_DIR "${EMBEDDED_BUILD_ROOT_DIR}/inc/private" )
+
+  file( MAKE_DIRECTORY ${EMBEDDED_BUILD_ROOT_DIR} )
+  file( MAKE_DIRECTORY ${EMBEDDED_BUILD_SRC_DIR} )
+  file( MAKE_DIRECTORY ${EMBEDDED_BUILD_PUBLIC_INC_DIR} )
+  file( MAKE_DIRECTORY ${EMBEDDED_BUILD_PRIVATE_INC_DIR} )
+
+  add_custom_target(copy_codegen_files ALL
+                    COMMENT "Copying source files needed for code generation" )
+endif()
+
+# ----------------------------------------------
 # OSQPLIB
 # ----------------------------------------------
 add_library(OSQPLIB OBJECT "")
@@ -370,7 +389,6 @@ if(OSQP_BUILD_DEMO_EXE)
   endif()
 endif()
 
-
 # ----------------------------------------------
 # Installation / Uninstallation
 # ----------------------------------------------
@@ -414,7 +432,6 @@ if(OSQP_BUILD_SHARED_LIB)
     FILE osqp-targets.cmake
     NAMESPACE osqp::
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/osqp")
-
 endif()
 
 if(OSQP_BUILD_STATIC_LIB OR OSQP_BUILD_SHARED_LIB)
@@ -435,6 +452,12 @@ if(OSQP_BUILD_STATIC_LIB OR OSQP_BUILD_SHARED_LIB)
           "${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake"
           "${CMAKE_CURRENT_BINARY_DIR}/osqp-config-version.cmake"
           DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/osqp)
+endif()
+
+if(OSQP_CODEGEN)
+  install(DIRECTORY
+          "${EMBEDDED_BUILD_ROOT_DIR}/"
+          DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/osqp/codegen_files")
 endif()
 
 if(NOT TARGET uninstall)
