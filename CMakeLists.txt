@@ -123,6 +123,10 @@ if(NOT (CMAKE_SIZEOF_VOID_P EQUAL 8))
 elseif(ALGEBRA_CUDA)
   message(STATUS "Disabling long integers (64bit) for CUDA")
   set(DLONG OFF)
+elseif(DEFINED EMBEDDED)
+  # The long long type is not in the C89 spec, and our embedded code must be C89 compliant
+  message(STATUS "Disabling long integers (64bit) for embedded mode")
+  set(DLONG OFF)
 endif()
 message(STATUS "DLONG = ${DLONG}")
 
