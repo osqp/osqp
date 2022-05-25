@@ -10,8 +10,7 @@ set(osqp_headers_private
     "${CMAKE_CURRENT_SOURCE_DIR}/private/proj.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/private/scaling.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/private/types.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/private/util.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/private/memory_defs.h")
+    "${CMAKE_CURRENT_SOURCE_DIR}/private/util.h")
 
 set(osqp_headers
     "${CMAKE_CURRENT_SOURCE_DIR}/public/csc_type.h"
@@ -31,7 +30,10 @@ endif()
 
 # Add more files that should only be in non-embedded code
 if(NOT DEFINED EMBEDDED)
-  list(APPEND osqp_headers_private "${CMAKE_CURRENT_SOURCE_DIR}/private/polish.h" "${CMAKE_CURRENT_SOURCE_DIR}/private/lin_sys.h")
+  list(APPEND osqp_headers_private
+       "${CMAKE_CURRENT_SOURCE_DIR}/private/polish.h"
+       "${CMAKE_CURRENT_SOURCE_DIR}/private/lin_sys.h"
+       "${CMAKE_CURRENT_BINARY_DIR}/private/memory_defs.h")
 endif()
 
 # Add the ctrl-c handler if enabled
