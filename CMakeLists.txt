@@ -387,6 +387,11 @@ if(OSQP_BUILD_DEMO_EXE)
   elseif(ALGEBRA_CUDA)
     target_link_libraries(osqp_demo cublas cusparse)
   endif()
+
+  if(OSQP_CODEGEN)
+    add_executable(osqp_codegen_demo ${PROJECT_SOURCE_DIR}/examples/osqp_codegen_demo.c)
+    target_link_libraries(osqp_codegen_demo osqpstatic)
+  endif()
 endif()
 
 # ----------------------------------------------
