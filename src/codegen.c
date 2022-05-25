@@ -291,8 +291,6 @@ static void write_linsys(FILE               *f,
   sprintf(name, "%slinsys_rho_inv_vec", prefix);
   write_vecf(f, linsys->rho_inv_vec, n+m, name);
   if (embedded > 1) {
-    sprintf(name, "%slinsys_Pdiag_idx", prefix);
-    write_veci(f, linsys->Pdiag_idx, linsys->Pdiag_n, name);
     sprintf(name, "%slinsys_KKT", prefix);
     write_csc(f, linsys->KKT, name);
     sprintf(name, "%slinsys_PtoKKT", prefix);
@@ -332,8 +330,6 @@ static void write_linsys(FILE               *f,
   fprintf(f, "  %d,\n", n);
   fprintf(f, "  %d,\n", m);
   if (embedded > 1) {
-    fprintf(f, "  %slinsys_Pdiag_idx,\n", prefix);
-    fprintf(f, "  %d,\n", linsys->Pdiag_n);
     fprintf(f, "  %slinsys_KKT,\n", prefix);
     fprintf(f, "  %slinsys_PtoKKT,\n", prefix);
     fprintf(f, "  %slinsys_AtoKKT,\n", prefix);
