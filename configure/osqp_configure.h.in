@@ -1,9 +1,6 @@
 #ifndef OSQP_CONFIGURE_H
 # define OSQP_CONFIGURE_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif /* ifdef __cplusplus */
 
 /* DEBUG */
 #cmakedefine DEBUG
@@ -41,15 +38,5 @@ extern "C" {
 
 /* DLONG */
 #cmakedefine DLONG
-
-/* MEMORY MANAGEMENT */
-#cmakedefine OSQP_CUSTOM_MEMORY
-#ifdef OSQP_CUSTOM_MEMORY
-#include "@OSQP_CUSTOM_MEMORY@"
-#endif
-
-# ifdef __cplusplus
-}
-# endif /* ifdef __cplusplus */
 
 #endif /* ifndef OSQP_CONFIGURE_H */

@@ -1,14 +1,14 @@
 #ifndef  OSQP_API_FUNCTIONS_H
 #define  OSQP_API_FUNCTIONS_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif /* ifdef __cplusplus */
-
 /* Types required by the OSQP API */
 # include "osqp_api_types.h"
 # include "csc_type.h"
+# include "osqp_export_define.h"
 
+# ifdef __cplusplus
+extern "C" {
+# endif
 
 /********************
 * Main Solver API  *
@@ -24,7 +24,7 @@ extern "C" {
  * Return OSQP version
  * @return  OSQP version
  */
-const char* osqp_version(void);
+OSQP_API const char* osqp_version(void);
 
 
 /**
@@ -33,9 +33,9 @@ const char* osqp_version(void);
  * @param  m      Pointer to m
  * @param  n      Pointer to n
  */
-void osqp_get_dimensions(OSQPSolver *solver,
-                         c_int      *m,
-                         c_int      *n);
+OSQP_API void osqp_get_dimensions(OSQPSolver *solver,
+                                  c_int      *m,
+                                  c_int      *n);
 
 
 /**
@@ -43,7 +43,7 @@ void osqp_get_dimensions(OSQPSolver *solver,
  * Assumes settings already allocated in memory.
  * @param settings OSQPSettings structure
  */
-void osqp_set_default_settings(OSQPSettings *settings);
+OSQP_API void osqp_set_default_settings(OSQPSettings *settings);
 
 
 # ifndef EMBEDDED
@@ -72,15 +72,15 @@ void osqp_set_default_settings(OSQPSettings *settings);
  * @param  settings  Solver settings
  * @return           Exitflag for errors (0 if no errors)
  */
- c_int osqp_setup(OSQPSolver         **solverp,
-                  const csc           *P,
-                  const c_float       *q,
-                  const csc           *A,
-                  const c_float       *l,
-                  const c_float       *u,
-                  c_int                m,
-                  c_int                n,
-                  const OSQPSettings  *settings);
+OSQP_API c_int osqp_setup(OSQPSolver         **solverp,
+                          const csc           *P,
+                          const c_float       *q,
+                          const csc           *A,
+                          const c_float       *l,
+                          const c_float       *u,
+                          c_int                m,
+                          c_int                n,
+                          const OSQPSettings  *settings);
 
 # endif /* ifndef EMBEDDED */
 
@@ -100,7 +100,7 @@ void osqp_set_default_settings(OSQPSettings *settings);
  * @param  solver Solver
  * @return        Exitflag for errors (0 if no errors)
  */
-c_int osqp_solve(OSQPSolver *solver);
+OSQP_API c_int osqp_solve(OSQPSolver *solver);
 
 
 # ifndef EMBEDDED
@@ -112,7 +112,7 @@ c_int osqp_solve(OSQPSolver *solver);
  * @param  solver Solver
  * @return        Exitflag for errors (0 if no errors)
  */
-c_int osqp_cleanup(OSQPSolver *solver);
+OSQP_API c_int osqp_cleanup(OSQPSolver *solver);
 
 # endif /* ifndef EMBEDDED */
 
@@ -139,15 +139,15 @@ c_int osqp_cleanup(OSQPSolver *solver);
  * @param  y      Dual variable, NULL if none
  * @return        Exitflag for errors (0 if no errors)
  */
-c_int osqp_warm_start(OSQPSolver    *solver,
-                      const c_float *x,
-                      const c_float *y);
+OSQP_API c_int osqp_warm_start(OSQPSolver    *solver,
+                               const c_float *x,
+                               const c_float *y);
 
 /**
  * Cold start workspace variables xz and y
  * @param solver Solver
  */
-void osqp_cold_start(OSQPSolver *solver);
+OSQP_API void osqp_cold_start(OSQPSolver *solver);
 
 /**
  * Update problem data vectors
@@ -157,10 +157,10 @@ void osqp_cold_start(OSQPSolver *solver);
  * @param  u_new   New upper bound, NULL if none
  * @return         Exitflag for errors (0 if no errors)
  */
-c_int osqp_update_data_vec(OSQPSolver    *solver,
-                           const c_float *q_new,
-                           const c_float *l_new,
-                           const c_float *u_new);
+OSQP_API c_int osqp_update_data_vec(OSQPSolver    *solver,
+                                    const c_float *q_new,
+                                    const c_float *l_new,
+                                    const c_float *u_new);
 
 # if EMBEDDED != 1
 
@@ -183,13 +183,13 @@ c_int osqp_update_data_vec(OSQPSolver    *solver,
  *                                  2: A_new_n > nnzA
  *                                 <0: error in the update
  */
-c_int osqp_update_data_mat(OSQPSolver    *solver,
-                           const c_float *Px_new,
-                           const c_int   *Px_new_idx,
-                           c_int          P_new_n,
-                           const c_float *Ax_new,
-                           const c_int   *Ax_new_idx,
-                           c_int          A_new_n);
+OSQP_API c_int osqp_update_data_mat(OSQPSolver    *solver,
+                                    const c_float *Px_new,
+                                    const c_int   *Px_new_idx,
+                                    c_int          P_new_n,
+                                    const c_float *Ax_new,
+                                    const c_int   *Ax_new_idx,
+                                    c_int          A_new_n);
 
 
 # endif /* if EMBEDDED != 1 */
@@ -218,8 +218,8 @@ c_int osqp_update_data_mat(OSQPSolver    *solver,
  * @param  new_settings Solver settings
  * @return              Exitflag for errors (0 if no errors)
  */
-c_int osqp_update_settings(OSQPSolver         *solver,
-                           const OSQPSettings *new_settings);
+OSQP_API c_int osqp_update_settings(OSQPSolver         *solver,
+                                    const OSQPSettings *new_settings);
 
 // TODO: Allow for ADAPTIVE_RHO_* settings to be updated.
 
@@ -233,8 +233,8 @@ c_int osqp_update_settings(OSQPSolver         *solver,
  * @param  rho_new New rho setting
  * @return         Exitflag for errors (0 if no errors)
  */
-c_int osqp_update_rho(OSQPSolver *solver,
-                      c_float     rho_new);
+OSQP_API c_int osqp_update_rho(OSQPSolver *solver,
+                               c_float     rho_new);
 
 # endif /* if EMBEDDED != 1 */
 
@@ -262,6 +262,6 @@ c_int osqp_codegen(OSQPSolver *solver,
 
 # ifdef __cplusplus
 }
-# endif /* ifdef __cplusplus */
+# endif
 
 #endif /* ifndef OSQP_API_FUNCTIONS_H */

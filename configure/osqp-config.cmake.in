@@ -1,0 +1,14 @@
+@PACKAGE_INIT@
+
+# CMake 2.6.4 and before didn't support ON in if() statements, so to ensure compatibility
+# add some temp variables indicating the build options.
+SET( OSQP_HAVE_SHARED_LIB @OSQP_BUILD_SHARED_LIB@ )
+SET( OSQP_HAVE_STATIC_LIB @OSQP_BUILD_STATIC_LIB@ )
+
+if( ${OSQP_HAVE_SHARED_LIB} )
+    include( "${CMAKE_CURRENT_LIST_DIR}/osqp-targets.cmake" )
+endif()
+
+if( ${OSQP_HAVE_STATIC_LIB} )
+    include( "${CMAKE_CURRENT_LIST_DIR}/osqpstatic-targets.cmake" )
+endif()

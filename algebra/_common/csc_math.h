@@ -1,9 +1,6 @@
 #ifndef CSC_MATH_H
 # define CSC_MATH_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif // ifdef __cplusplus
 
 # include "csc_type.h"
 
@@ -80,8 +77,4 @@ void csc_row_norm_inf(const csc *M, c_float *E);
 void csc_row_norm_inf_sym_triu(const csc *M, c_float *E);
 
 
-# ifdef __cplusplus
-}
-# endif // ifdef __cplusplus
-
-#endif // ifndef CSC_MATH_H
+#endif /* ifndef CSC_MATH_H */

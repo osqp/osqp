@@ -1,9 +1,6 @@
-#ifndef PARDISO_H
-#define PARDISO_H
+#ifndef PARDISO_INTERFACE_H
+#define PARDISO_INTERFACE_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include "osqp.h"
 #include "types.h"  //OSQPMatrix and OSQPVector[fi] types
@@ -16,12 +13,14 @@ extern "C" {
 typedef struct pardiso pardiso_solver;
 
 struct pardiso {
-    enum linsys_solver_type type;
+    enum osqp_linsys_solver_type type;
 
     /**
      * @name Functions
      * @{
      */
+    const char* (*name)(void);
+
     c_int (*solve)(struct pardiso *self,
                    OSQPVectorf    *b,
                    c_int           admm_iter);
@@ -36,7 +35,11 @@ struct pardiso {
 
     c_int (*update_matrices)(struct pardiso   *self,
                              const OSQPMatrix *P,
-                             const OSQPMatrix *A);
+                             const c_int* Px_new_idx,
+                             c_int P_new_n,
+                             const OSQPMatrix *A,
+                             const c_int* Ax_new_idx,
+                             c_int A_new_n);
 
     c_int (*update_rho_vec)(struct pardiso    *self,
                             const OSQPVectorf *rho_vec,
@@ -78,7 +81,6 @@ struct pardiso {
     c_float fdum;     ///< dummy float
 
     // These are required for matrix updates
-    c_int * Pdiag_idx, Pdiag_n;  ///< index and number of diagonal elements in P
     c_int * PtoKKT, * AtoKKT;    ///< Index of elements from P and A to KKT matrix
     c_int * rhotoKKT;            ///< Index of rho places in KKT matrix
 
@@ -103,6 +105,13 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
                                  const OSQPVectorf  *rho_vec,
                                  const OSQPSettings *settings,
                                  c_int               polishing);
+
+
+/**
+ * Get the user-friendly name of the MKL Pardiso solver.
+ * @return The user-friendly name
+ */
+const char* name_pardiso();
 
 
 /**
@@ -135,7 +144,11 @@ void warm_start_linsys_solver_pardiso(pardiso_solver    *s,
 c_int update_linsys_solver_matrices_pardiso(
                     pardiso_solver * s,
                     const OSQPMatrix *P,
-                    const OSQPMatrix *A);
+                    const c_int *Px_new_idx,
+                    c_int P_new_n,
+                    const OSQPMatrix *A,
+                    const c_int *Ax_new_idx,
+                    c_int A_new_n);
 
 
 /**
@@ -155,8 +168,5 @@ c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver    *s,
  */
 void free_linsys_solver_pardiso(pardiso_solver * s);
 
-#ifdef __cplusplus
-}
-#endif
 
-#endif
+#endif /* PARDISO_INTERFACE_H */

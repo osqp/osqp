@@ -301,8 +301,8 @@ void test_basic_qp_solve()
   settings->alpha = tmp_float;
 
   // Setup solver with wrong settings->linsys_solver
-  enum linsys_solver_type tmp_solver_type= settings->linsys_solver;
-  settings->linsys_solver = UNKNOWN_SOLVER;
+  enum osqp_linsys_solver_type tmp_solver_type = settings->linsys_solver;
+  settings->linsys_solver = OSQP_UNKNOWN_SOLVER;
   exitflag = osqp_setup(&solver, data->P, data->q,
                         data->A, data->l, data->u,
                         data->m, data->n, settings);
@@ -501,7 +501,7 @@ void test_basic_qp_solve_pardiso()
   settings->scaling       = 0;
   settings->verbose       = 1;
   settings->warm_starting = 0;
-  settings->linsys_solver = DIRECT_SOLVER;
+  settings->linsys_solver = OSQP_DIRECT_SOLVER;
 
   // Setup solver
   exitflag = osqp_setup(&solver, data->P, data->q,

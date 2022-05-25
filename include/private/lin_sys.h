@@ -3,10 +3,6 @@
 
 /* KKT linear system definition and solution */
 
-# ifdef __cplusplus
-extern "C" {
-# endif // ifdef __cplusplus
-
 # include "types.h"
 
 
@@ -33,8 +29,5 @@ c_int init_linsys_solver(LinSysSolver      **s,
                          c_float            *scaled_dual_res,
                          c_int               polishing);
 
-# ifdef __cplusplus
-}
-# endif // ifdef __cplusplus
 
-#endif // ifndef LIN_SYS_H
+#endif /* ifndef LIN_SYS_H */

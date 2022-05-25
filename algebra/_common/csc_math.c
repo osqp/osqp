@@ -31,14 +31,13 @@ void csc_update_values(csc           *M,
 
   c_int i;
 
-  // Update P elements
+  // Update subset of elements
   if (Mx_new_idx) { // Change only Mx_new_idx
     for (i = 0; i < M_new_n; i++) {
       M->x[Mx_new_idx[i]] = Mx_new[i];
     }
   }
-  else // Change whole M
-  {
+  else{ // Change whole M.  Assumes M_new_n == nnz(M)
     for (i = 0; i < M_new_n; i++) {
       M->x[i] = Mx_new[i];
     }
@@ -257,9 +256,7 @@ void csc_Atxpy(const csc *A, const c_float *x, c_float *y,
 //         quad_form += Px[ptr] * x[i] * x[j];
 //       }
 //       else {                                        // Element in lower triangle
-// #ifdef PRINTING
 //         c_eprint("quad_form matrix is not upper triangular");
-// #endif /* ifdef PRINTING */
 //         return -1.;
 //       }
 //     }

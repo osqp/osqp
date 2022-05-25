@@ -1,9 +1,6 @@
-#ifndef OSQP_MKL_CG_H
-#define OSQP_MKL_CG_H
+#ifndef MKL_CG_INTERFACE_H
+#define MKL_CG_INTERFACE_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include "osqp.h"
 #include "types.h"    //OSQPMatrix and OSQPVector[fi] types
@@ -12,12 +9,13 @@ extern "C" {
 
 typedef struct mklcg_solver_ {
 
-  enum linsys_solver_type type;
+  enum osqp_linsys_solver_type type;
 
   /**
    * @name Functions
    * @{
    */
+  const char* (*name)(void);
   c_int (*solve)(struct mklcg_solver_ *self, OSQPVectorf * b, c_int admm_iter);
   void (*update_settings)(struct mklcg_solver_ *self, const OSQPSettings *settings);
   void (*warm_start)(struct mklcg_solver_ *self, const OSQPVectorf *x);
@@ -90,6 +88,13 @@ c_int init_linsys_mklcg(mklcg_solver       **sp,
 
 
 /**
+ * Get the user-friendly name of the MKL CG solver.
+ * @return The user-friendly name
+ */
+const char* name_mklcg();
+
+
+/**
  * Solve linear system and store result in b
  * @param  s        Linear system solver structure
  * @param  b        Right-hand side
@@ -138,11 +143,5 @@ c_int update_rho_linsys_mklcg(
 void free_linsys_mklcg(mklcg_solver * s);
 
 
-
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif //ifndef OSQP_MKL_CG_H
+#endif /* ifndef MKL_CG_INTERFACE_H */
 

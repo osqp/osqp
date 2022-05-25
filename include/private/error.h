@@ -3,10 +3,6 @@
 
 /* OSQP error handling */
 
-# ifdef __cplusplus
-extern "C" {
-# endif // ifdef __cplusplus
-
 # include "osqp.h"
 
 
@@ -30,9 +26,4 @@ c_int _osqp_error(enum osqp_error_type  error_code,
                   const char           *function_name);
 
 
-
-# ifdef __cplusplus
-}
-# endif // ifdef __cplusplus
-
-#endif // ifndef ERROR_H
+#endif /* ifndef ERROR_H */

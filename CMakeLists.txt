@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 project(osqp)
 
+include(GNUInstallDirs)
+include(CMakeDependentOption)
+include(CMakePackageConfigHelpers)
+
 # Detect operating system
 # ----------------------------------------------
 message(STATUS "We are on a ${CMAKE_SYSTEM_NAME} system")
@@ -18,7 +22,7 @@ set(OSQP_VERSION
     "0.0.0"
     CACHE STRING "The version number of OSQP")
 if(NOT OSQP_VERSION STREQUAL "0.0.0")
-  configure_file("${PROJECT_SOURCE_DIR}/configure/version.h.in" "${PROJECT_SOURCE_DIR}/include/version.h")
+  configure_file("${PROJECT_SOURCE_DIR}/configure/version.h.in" "${PROJECT_SOURCE_DIR}/include/private/version.h")
 endif()
 
 # Conda environment detection
@@ -53,6 +57,14 @@ include(Utils)
 
 # Set options
 # ----------------------------------------------
+option(OSQP_BUILD_SHARED_LIB "Build the shared library" ON)
+option(OSQP_BUILD_STATIC_LIB "Build the static library" ON)
+
+cmake_dependent_option( OSQP_BUILD_DEMO_EXE
+                        "Build the demo executable (requires the static library)"
+                        ON    # Default to on
+                        OSQP_BUILD_STATIC_LIB OFF ) # Force off if the static library isn't built
+
 set(ALGEBRA
     "default"
     CACHE STRING "The Algebra to use (default/mkl/cuda)")
@@ -69,10 +81,18 @@ if(DEFINED EMBEDDED)
   set(PRINTING OFF)
   set(PROFILING OFF)
   set(CTRLC OFF)
+
+  # Disable shared library and demo exe on embedded applications
+  set(OSQP_BUILD_SHARED_LIB OFF)
+  set(OSQP_BUILD_DEMO_EXE OFF)
+
   message(STATUS "EMBEDDED = ${EMBEDDED}")
 else()
   message(STATUS "EMBEDDED = OFF")
 endif()
+
+# Display final CTRLC behaviour
+message(STATUS "CTRLC = ${CTRLC}")
 
 # Display final ALGEBRA chosen and set internal boolean variables
 message(STATUS "ALGEBRA = ${ALGEBRA}")
@@ -133,10 +153,27 @@ message(STATUS "CODEGEN = ${OSQP_CODEGEN}")
 # Rename compile-time constants & configure
 # ----------------------------------------------
 # If we are creating any OSQP_* compile-time constants from CMake variables, do so here.
-set (OSQP_ALGEBRA ${ALGEBRA})
+set(OSQP_ALGEBRA ${ALGEBRA})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/include/osqp_configure.h NEWLINE_STYLE LF)
+               ${CMAKE_CURRENT_BINARY_DIR}/include/public/osqp_configure.h NEWLINE_STYLE LF)
+
+
+if(OSQP_CUSTOM_MEMORY)
+  message(STATUS "Using custom memory management header: ${OSQP_CUSTOM_MEMORY}")
+endif()
+
+# Configure support for custom memory allocators
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/custom_headers/memory_defs.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/include/private/memory_defs.h NEWLINE_STYLE LF)
+
+if(OSQP_CUSTOM_PRINTING)
+  message(STATUS "Using custom printing header: ${OSQP_CUSTOM_PRINTING}")
+endif()
+
+# Configure support for custom printing functions
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/custom_headers/print_defs.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/include/private/print_defs.h NEWLINE_STYLE LF)
 
 # CUDA support
 # ----------------------------------------------
@@ -158,16 +195,6 @@ if(ALGEBRA_CUDA)
   endif()
 endif()
 
-# Memory allocators
-# ----------------------------------------------
-# Report on custom user header options. This is intended to allow users to provide definitions of their own memory
-# functions The header should define the functions as follows
-#
-# define c_malloc mymalloc define c_calloc mycalloc define c_realloc myrealloc define c_free myfree
-
-if(OSQP_CUSTOM_MEMORY)
-  message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY}")
-endif()
 
 # Set Compiler flags
 # ----------------------------------------------
@@ -188,7 +215,7 @@ if(NOT MSVC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
   endif()
 
-  set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")  # Include math
+  set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm") # Include math
   # Include real time library in linux
   if(IS_LINUX)
     set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lrt -ldl")
@@ -269,34 +296,46 @@ if(R_LANG)
   endif(BUILD_TESTING)
 endif(R_LANG)
 
+if(PYTHON OR MATLAB OR R_LANG)
+  # Disable shared library and demo exe when building the interfaces
+  set(OSQP_BUILD_SHARED_LIB OFF)
+  set(OSQP_BUILD_DEMO_EXE OFF)
+endif()
+
 # ----------------------------------------------
 # Static Library - osqpstatic
 # ----------------------------------------------
-function(OSQP_BUILD_STATIC_LIB)
-  add_library(osqpstatic STATIC $<TARGET_OBJECTS:OSQPLIB>)
-  set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
+if( OSQP_BUILD_STATIC_LIB )
+  add_library(osqpstatic STATIC
+              $<TARGET_OBJECTS:OSQPLIB>
+              "${CMAKE_CURRENT_SOURCE_DIR}/src/osqp_api.c")
+  set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqpstatic)
   if(ALGEBRA_DEFAULT)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
     target_sources(osqpstatic PRIVATE $<TARGET_OBJECTS:qdldlobject>)
   endif()
+  target_include_directories(osqpstatic PRIVATE ${osqplib_includes})
+  target_include_directories(
+    osqpstatic PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/public;${CMAKE_CURRENT_BINARY_DIR}/include/public>"
+                      "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
   if(MATLAB)
     target_link_libraries(osqpstatic ${Matlab_LIBRARIES})
   endif(MATLAB)
-  set(OSQP_STATIC_LIB
-      ON
-      PARENT_SCOPE)
-endfunction()
+endif()
 
 # ----------------------------------------------
 # Shared Library - osqp
 # ----------------------------------------------
-function(OSQP_BUILD_SHARED_LIB)
-  add_library(osqp SHARED $<TARGET_OBJECTS:OSQPLIB>)
+if(OSQP_BUILD_SHARED_LIB)
+  add_library(osqp SHARED
+              $<TARGET_OBJECTS:OSQPLIB>
+              "${CMAKE_CURRENT_SOURCE_DIR}/src/osqp_api.c")
   if(ALGEBRA_DEFAULT)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
     target_sources(osqp PRIVATE $<TARGET_OBJECTS:qdldlobject>)
   endif()
+  target_include_directories(osqp PRIVATE ${osqplib_includes})
   target_include_directories(osqp PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
                                          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
@@ -309,79 +348,94 @@ function(OSQP_BUILD_SHARED_LIB)
     endif()
   endif()
 
-  set(OSQP_SHARED_LIB
-      ON
-      PARENT_SCOPE)
-endfunction()
+  # Declare that we are building the shared library to get proper symbol exports.
+  # Shared library consumers should also define OSQP_SHARED_LIB to get the library
+  # exports properly, so we do it for them in the CMake interface by defining it as
+  # a PUBLIC compile definition.
+  target_compile_definitions(osqp PRIVATE BUILDING_OSQP)
+  target_compile_definitions(osqp PUBLIC  OSQP_SHARED_LIB)
+endif()
 
 # ----------------------------------------------
 # Application - osqp_demo
 # ----------------------------------------------
-function(OSQP_BUILD_DEMO)
-  add_executable(osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c ${osqplib_sources})
-  target_include_directories(osqp_demo PRIVATE ${osqplib_includes})
+if(OSQP_BUILD_DEMO_EXE)
+  add_executable(osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
+  #target_include_directories(osqp_demo PRIVATE ${osqplib_includes})
+  target_link_libraries(osqp_demo osqpstatic)
   if(ALGEBRA_MKL)
-    target_link_libraries(osqp_demo osqpstatic $<LINK_ONLY:MKL::MKL>)
+    target_link_libraries(osqp_demo $<LINK_ONLY:MKL::MKL>)
   elseif(ALGEBRA_CUDA)
-    target_link_libraries(osqp_demo osqpstatic cublas cusparse)
+    target_link_libraries(osqp_demo cublas cusparse)
   endif()
-endfunction()
-
-# ----------------------------------------------
-osqp_build_static_lib()
-
-if(NOT PYTHON
-   AND NOT MATLAB
-   AND NOT R_LANG
-   AND NOT EMBEDDED)
-  osqp_build_shared_lib()
-  osqp_build_demo()
 endif()
+
 
 # ----------------------------------------------
 # Installation / Uninstallation
 # ----------------------------------------------
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
-
 install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
 
-if(OSQP_STATIC_LIB)
+if(OSQP_BUILD_STATIC_LIB)
   install(
     TARGETS osqpstatic
-    EXPORT ${PROJECT_NAME}
+    EXPORT osqpstatic
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+
+  export(
+    EXPORT osqpstatic
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/osqpstatic-targets.cmake"
+    NAMESPACE osqp::)
+
+  install(
+    EXPORT osqpstatic
+    FILE osqpstatic-targets.cmake
+    NAMESPACE osqp::
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/osqp")
 endif()
 
-if(OSQP_SHARED_LIB)
+if(OSQP_BUILD_SHARED_LIB)
   install(
     TARGETS osqp
-    EXPORT ${PROJECT_NAME}
+    EXPORT osqp
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
   export(
-    EXPORT ${PROJECT_NAME}
+    EXPORT osqp
     FILE "${CMAKE_CURRENT_BINARY_DIR}/osqp-targets.cmake"
     NAMESPACE osqp::)
 
   install(
-    EXPORT ${PROJECT_NAME}
+    EXPORT osqp
     FILE osqp-targets.cmake
     NAMESPACE osqp::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/osqp)
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/osqp")
 
 endif()
 
-if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake)
-  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake
-       "include(\"\${CMAKE_CURRENT_LIST_DIR}/osqp-targets.cmake\")\n")
-endif()
+if(OSQP_BUILD_STATIC_LIB OR OSQP_BUILD_SHARED_LIB)
+  # generate the config file that is includes the exports
+  configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp-config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/osqp"
+    NO_SET_AND_CHECK_MACRO
+    NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/osqp)
+  write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/osqp-config-version.cmake"
+    VERSION "${OSQP_VERSION}"
+    COMPATIBILITY SameMajorVersion)
+
+  install(FILES
+          "${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake"
+          "${CMAKE_CURRENT_BINARY_DIR}/osqp-config-version.cmake"
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/osqp)
+endif()
 
 if(NOT TARGET uninstall)
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/configure/cmake/cmake_uninstall.cmake.in"
@@ -399,6 +453,6 @@ endif()
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME
    AND BUILD_TESTING
-   AND OSQP_STATIC_LIB)
+   AND OSQP_BUILD_STATIC_LIB)
   add_subdirectory(tests)
 endif()

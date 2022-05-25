@@ -108,9 +108,7 @@ void OSQPMatrix_Atxpy(const OSQPMatrix  *A,
 //   if(P->symmetry == TRIU)
 //     return csc_quad_form(P->csc, OSQPVectorf_data(x));
 //   else {
-// #ifdef PRINTING
 //      c_eprint("quad_form matrix is not upper triangular");
-// #endif /* ifdef PRINTING */
 //      return -1.0;
 //   }
 // }
@@ -138,9 +136,7 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix  *A,
   OSQPMatrix *out;
 
   if(A->symmetry == TRIU){
-#ifdef PRINTING
     c_eprint("row selection not implemented for partially filled matrices");
-#endif
     return OSQP_NULL;
   }
 

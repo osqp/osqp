@@ -2,10 +2,17 @@
 #include "osqp.h"
 #include "util.h"
 #include "osqp_tester.h"
-#include "lin_sys.h"
 
 
 #include "solve_linsys/data.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+  #include "lin_sys.h"
+#ifdef __cplusplus
+}
+#endif
 
 
 void test_solveKKT() {
@@ -75,7 +82,7 @@ void test_solveKKT_pardiso() {
   // Settings
   settings->rho           = data->test_solve_KKT_rho;
   settings->sigma         = data->test_solve_KKT_sigma;
-  settings->linsys_solver = DIRECT_SOLVER;
+  settings->linsys_solver = OSQP_DIRECT_SOLVER;
 
   // Set rho_vec
   m       = data->test_solve_KKT_A->m;

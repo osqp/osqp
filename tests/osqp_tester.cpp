@@ -4,7 +4,11 @@
 #include <catch2/catch.hpp>
 
 #include "osqp.h"
-#include "lin_alg.h"
+
+extern "C" {
+  #include "lin_alg.h"
+}
+
 #include "utils/c_test_utils.h" //helper functions
 #include "lin_alg/test_lin_alg.h"
 #include "solve_linsys/test_solve_linsys.h"

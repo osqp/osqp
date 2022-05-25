@@ -29,8 +29,8 @@ void test_non_cvx_solve()
   settings->adaptive_rho = 0;
   settings->sigma = 1e-6;
 
-#ifdef ALGEBRA_DEFAULT
-  if (settings->linsys_solver == DIRECT_SOLVER) {
+#ifndef ALGEBRA_CUDA
+  if (settings->linsys_solver == OSQP_DIRECT_SOLVER) {
       // Setup workspace
       exitflag = osqp_setup(&solver, data->P, data->q,
                             data->A, data->l, data->u,

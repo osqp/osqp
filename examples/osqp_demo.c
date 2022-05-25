@@ -22,8 +22,8 @@ int main(void) {
   c_int exitflag;
 
   /* Solver, settings, matrices */
-  OSQPSolver   *solver;
-  OSQPSettings *settings;
+  OSQPSolver   *solver   = NULL;
+  OSQPSettings *settings = NULL;
   csc *P = malloc(sizeof(csc));
   csc *A = malloc(sizeof(csc));
 
@@ -36,6 +36,9 @@ int main(void) {
   if (settings) {
     osqp_set_default_settings(settings);
     settings->polishing = 1;
+
+    //settings->linsys_solver = OSQP_DIRECT_SOLVER;
+    //settings->linsys_solver = OSQP_INDIRECT_SOLVER;
   }
 
   /* Setup solver */

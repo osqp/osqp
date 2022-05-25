@@ -30,12 +30,14 @@
  */
 typedef struct cudapcg_solver_ {
 
-  enum linsys_solver_type type;
+  enum osqp_linsys_solver_type type;
 
   /**
    * @name Functions
    * @{
    */
+  const char* (*name)(void);
+
   c_int (*solve)(struct cudapcg_solver_ *self,
                  OSQPVectorf            *b,
                  c_int                   admm_iter);
@@ -148,6 +150,12 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
 #ifdef __cplusplus
 }
 #endif
+
+/**
+ * Get the user-friendly name of the PCG solver.
+ * @return The user-friendly name
+ */
+const char* name_cudapcg();
 
 
 c_int solve_linsys_cudapcg(cudapcg_solver *s,

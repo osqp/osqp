@@ -1,9 +1,6 @@
-#ifndef OSQP_TYPES_H
-#define OSQP_TYPES_H
+#ifndef TYPES_H
+#define TYPES_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif /* ifdef __cplusplus */
 
 # include "glob_opts.h"
 # include "osqp.h"       //includes user API types
@@ -195,7 +192,7 @@ struct OSQPWorkspace_ {
 # endif // ifdef PRINTING
 };
 
-// NB: "typedef struct OSQPWorkspace_ OSQPWorkspace" is declared already 
+// NB: "typedef struct OSQPWorkspace_ OSQPWorkspace" is declared already
 // in the osqp API where the main OSQPSolver is defined.
 
 
@@ -206,7 +203,10 @@ struct OSQPWorkspace_ {
  *      on the choice
  */
 struct linsys_solver {
-  enum linsys_solver_type type;             ///< linear system solver type functions
+  enum osqp_linsys_solver_type type;             ///< linear system solver type functions
+
+  const char* (*name)(void);
+
   c_int (*solve)(LinSysSolver *self,
                  OSQPVectorf  *b,
                  c_int         admm_iter);
@@ -217,6 +217,7 @@ struct linsys_solver {
   void (*warm_start)(LinSysSolver      *self,
                      const OSQPVectorf *x);
 
+
 # ifndef EMBEDDED
   void (*free)(LinSysSolver *self);         ///< free linear system solver (only in desktop version)
 # endif // ifndef EMBEDDED
@@ -224,7 +225,11 @@ struct linsys_solver {
 # if EMBEDDED != 1
   c_int (*update_matrices)(LinSysSolver     *self,
                            const OSQPMatrix *P,            ///< update matrices P
-                           const OSQPMatrix *A);           //   and A in the solver
+                           const c_int* Px_new_idx,
+                           c_int P_new_n,
+                           const OSQPMatrix *A,            //   and A in the solver
+                           const c_int* Ax_new_idx,
+                           c_int A_new_n);
 
   c_int (*update_rho_vec)(LinSysSolver      *self,
                           const OSQPVectorf *rho_vec,
@@ -237,8 +242,4 @@ struct linsys_solver {
 };
 
 
-# ifdef __cplusplus
-}
-# endif /* ifdef __cplusplus */
-
-#endif /* ifndef OSQP_TYPES_H */
+#endif /* ifndef TYPES_H */
