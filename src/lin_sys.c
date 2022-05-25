@@ -50,13 +50,13 @@ c_int init_linsys_solver(LinSysSolver      **s,
   }
 }
 
-c_int adjoint_derivative_linsys_solver(LinSysSolver      **s, const OSQPSettings *settings, const OSQPMatrix *P, const OSQPMatrix *G, const OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks, OSQPMatrix *check) {
+c_int adjoint_derivative_linsys_solver(LinSysSolver      **s, const OSQPSettings *settings, const OSQPMatrix *P, const OSQPMatrix *G, const OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks, OSQPMatrix *check1, OSQPVectorf *check2) {
 
     switch (settings->linsys_solver) {
 
 #ifdef ALGEBRA_DEFAULT
         default:
-            return adjoint_derivative_qdldl((qdldl_solver **)s, P, G, A_eq, GDiagLambda, slacks, check);
+            return adjoint_derivative_qdldl((qdldl_solver **)s, P, G, A_eq, GDiagLambda, slacks, check1, check2);
 #else /* ifdef ALGEBRA_DEFAULT */
         default:
             c_eprint("Not implemented");

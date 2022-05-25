@@ -182,6 +182,6 @@ c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver      *s,
 void free_linsys_solver_qdldl(qdldl_solver * s);
 #endif
 
-c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P, const OSQPMatrix *G, const OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks, OSQPMatrix *check);
+c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P, const OSQPMatrix *G, const OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks, OSQPMatrix *check1, OSQPVectorf *check2);
 
 #endif /* QDLDL_INTERFACE_H */

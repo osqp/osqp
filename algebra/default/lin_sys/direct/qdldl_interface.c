@@ -624,7 +624,7 @@ static void _adj_assemble_csc(csc *D, OSQPMatrix *P_full, OSQPMatrix *G, OSQPMat
     _backshift_colptrs(D);
 }
 
-c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const OSQPMatrix *G, const OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks, OSQPMatrix *check) {
+c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const OSQPMatrix *G, const OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks, OSQPMatrix *check1, OSQPVectorf *check2) {
 
     c_int n = OSQPMatrix_get_m(P_full);
     c_int n_ineq = OSQPMatrix_get_m(G);
@@ -649,7 +649,7 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const 
     _adj_assemble_csc(adj, P_full, G, A_eq, GDiagLambda, slacks);
 
     OSQPMatrix *adj_matrix = OSQPMatrix_new_from_csc(adj, 1);
-    c_int iseq = OSQPMatrix_is_eq(adj_matrix, check, 0.0001);
+    c_int iseq = OSQPMatrix_is_eq(adj_matrix, check1, 0.0001);
     OSQPMatrix_free(adj_matrix);
 
     return iseq;
