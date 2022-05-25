@@ -500,6 +500,7 @@ static void write_solver(FILE             *f,
 **************/
 
 c_int codegen_inc(OSQPSolver *solver,
+                  const char *output_dir,
                   const char *file_prefix){
 
   char fname[50], hfname[50], incGuard[50];
@@ -507,7 +508,7 @@ c_int codegen_inc(OSQPSolver *solver,
   time_t now;
   c_int i = 0;
 
-  sprintf(fname,  "%sworkspace", file_prefix);
+  sprintf(fname,  "%s%sworkspace", output_dir, file_prefix);
   sprintf(hfname, "%s.h",        fname);
 
   /* Open include file */
@@ -549,6 +550,7 @@ c_int codegen_inc(OSQPSolver *solver,
 
 
 c_int codegen_src(OSQPSolver *solver,
+                  const char *output_dir,
                   const char *file_prefix,
                   c_int       embedded){
 
@@ -556,7 +558,7 @@ c_int codegen_src(OSQPSolver *solver,
   FILE *srcFile;
   time_t now;
 
-  sprintf(fname,  "%sworkspace", file_prefix);
+  sprintf(fname,  "%s%sworkspace", output_dir, file_prefix);
   sprintf(cfname, "%s.c",        fname);
 
   /* Open source file */

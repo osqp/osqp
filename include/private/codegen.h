@@ -5,9 +5,11 @@
 
 
 c_int codegen_inc(OSQPSolver *solver,
+                  const char *output_dir,
                   const char *file_prefix);
 
 c_int codegen_src(OSQPSolver *solver,
+                  const char *output_dir,
                   const char *file_prefix,
                   c_int       embedded);
 

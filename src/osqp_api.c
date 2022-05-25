@@ -1140,6 +1140,7 @@ c_int osqp_update_settings(OSQPSolver         *solver,
 #ifdef OSQP_CODEGEN
 
 c_int osqp_codegen(OSQPSolver *solver,
+                   const char *output_dir,
                    const char *file_prefix,
                    c_int       embedded){
 
@@ -1152,8 +1153,8 @@ c_int osqp_codegen(OSQPSolver *solver,
     return osqp_error(OSQP_SETTINGS_VALIDATION_ERROR);
   }
 
-  exitflag = codegen_inc(solver, file_prefix);
-  if (!exitflag) exitflag = codegen_src(solver, file_prefix, embedded);
+  exitflag = codegen_inc(solver, output_dir, file_prefix);
+  if (!exitflag) exitflag = codegen_src(solver, output_dir, file_prefix, embedded);
 
   return exitflag;
 }
