@@ -312,6 +312,7 @@ static void write_linsys(FILE               *f,
 
   fprintf(f, "qdldl_solver %slinsys = {\n", prefix);
   fprintf(f, "  %d,\n", linsys->type);
+  fprintf(f, "  &name_qdldl,\n");
   fprintf(f, "  &solve_linsys_qdldl,\n");
   fprintf(f, "  &update_settings_linsys_solver_qdldl,\n");
   fprintf(f, "  &warm_start_linsys_solver_qdldl,\n");
