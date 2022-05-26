@@ -331,7 +331,7 @@ static void write_linsys(FILE               *f,
   fprintf(f, "  %d,\n", n);
   fprintf(f, "  %d,\n", m);
   if (embedded > 1) {
-    fprintf(f, "  %slinsys_KKT,\n", prefix);
+    fprintf(f, "  &%slinsys_KKT,\n", prefix);
     fprintf(f, "  %slinsys_PtoKKT,\n", prefix);
     fprintf(f, "  %slinsys_AtoKKT,\n", prefix);
     fprintf(f, "  %slinsys_rhotoKKT,\n", prefix);
