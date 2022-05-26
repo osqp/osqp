@@ -252,10 +252,10 @@ OSQP_API c_int osqp_update_rho(OSQPSolver *solver,
  * @param  defines    The defines to use in the generated code.
  * @return            Exitflag for errors (0 if no errors)
  */
-c_int osqp_codegen(OSQPSolver         *solver,
-                   const char         *output_dir,
-                   const char         *prefix,
-                   OSQPCodegenDefines *defines);
+OSQP_API c_int osqp_codegen(OSQPSolver         *solver,
+                            const char         *output_dir,
+                            const char         *prefix,
+                            OSQPCodegenDefines *defines);
 
 # endif /* ifdef OSQP_CODEGEN */
 
