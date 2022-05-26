@@ -500,11 +500,17 @@ static void write_solver(FILE             *f,
 * Codegen API
 **************/
 
+/* Define the maximum allowed length of the path (directory + filename + extension) */
+#define PATH_LENGTH 1024
+
+/* Define the maximum allowed length of the filename (no extension)*/
+#define FILE_LENGTH 100
+
 c_int codegen_inc(OSQPSolver *solver,
                   const char *output_dir,
                   const char *file_prefix){
 
-  char fname[50], hfname[50], incGuard[50];
+  char fname[FILE_LENGTH], hfname[PATH_LENGTH], incGuard[FILE_LENGTH];
   FILE *incFile;
   time_t now;
   c_int i = 0;
@@ -555,7 +561,7 @@ c_int codegen_src(OSQPSolver *solver,
                   const char *file_prefix,
                   c_int       embedded){
 
-  char fname[50], cfname[50];
+  char fname[PATH_LENGTH], cfname[PATH_LENGTH];
   FILE *srcFile;
   time_t now;
 
@@ -592,7 +598,7 @@ c_int codegen_src(OSQPSolver *solver,
 
 c_int codegen_defines(const char *output_dir,
                       OSQPCodegenDefines *defines) {
-  char cfname[50];
+  char cfname[PATH_LENGTH];
   FILE *incFile;
   time_t now;
 
