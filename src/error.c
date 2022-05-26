@@ -9,7 +9,8 @@ const char *OSQP_ERROR_MESSAGE[] = {
   "KKT matrix factorization.\nThe problem seems to be non-convex.",
   "Memory allocation.",
   "Solver workspace not initialized.",
-  "Algebra libraries not loaded",
+  "Algebra libraries not loaded.",
+  "Unable to open file for writing.",
 };
 
 
