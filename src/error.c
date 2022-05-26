@@ -11,6 +11,9 @@ const char *OSQP_ERROR_MESSAGE[] = {
   "Solver workspace not initialized.",
   "Algebra libraries not loaded.",
   "Unable to open file for writing.",
+
+  /* This must always be the last item in the list */
+  "Unknown error code."
 };
 
 

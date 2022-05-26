@@ -28,6 +28,12 @@ OSQP_API const char* osqp_version(void);
 
 
 /**
+ * Return the error string for a given error code.
+ */
+OSQP_API const char* osqp_error_message(c_int error_flag);
+
+
+/**
  * Return the number of variables and constraints
  * @param  solver Solver
  * @param  m      Pointer to m

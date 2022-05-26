@@ -28,6 +28,16 @@ const char* osqp_version(void) {
 }
 
 
+const char* osqp_error_message(c_int error_flag) {
+  if( error_flag >= OSQP_LAST_ERROR_PLACE ) {
+    return OSQP_ERROR_MESSAGE[OSQP_LAST_ERROR_PLACE];
+  }
+
+
+  return OSQP_ERROR_MESSAGE[error_flag];
+}
+
+
 void osqp_get_dimensions(OSQPSolver *solver,
                          c_int      *m,
                          c_int      *n) {

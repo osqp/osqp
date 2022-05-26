@@ -42,7 +42,8 @@ enum osqp_error_type {
     OSQP_MEM_ALLOC_ERROR,
     OSQP_WORKSPACE_NOT_INIT_ERROR,
     OSQP_ALGEBRA_LOAD_ERROR,
-    OSQP_FOPEN_ERROR
+    OSQP_FOPEN_ERROR,
+    OSQP_LAST_ERROR_PLACE,          /* This must always be the last item in the enum */
 };
 extern const char * OSQP_ERROR_MESSAGE[];
 
