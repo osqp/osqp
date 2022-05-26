@@ -6,6 +6,8 @@
 #ifndef QDLDL_TYPES_H
 # define QDLDL_TYPES_H
 
+#include "osqp_api_types.h"
+
 # ifdef __cplusplus
 extern "C" {
 # endif /* ifdef __cplusplus */
