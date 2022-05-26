@@ -1139,22 +1139,27 @@ c_int osqp_update_settings(OSQPSolver         *solver,
 
 #ifdef OSQP_CODEGEN
 
-c_int osqp_codegen(OSQPSolver *solver,
-                   const char *output_dir,
-                   const char *file_prefix,
-                   c_int       embedded){
+c_int osqp_codegen(OSQPSolver         *solver,
+                   const char         *output_dir,
+                   const char         *file_prefix,
+                   OSQPCodegenDefines *defines){
 
   c_int exitflag = 0;
 
   if (!solver || !solver->work) {
     return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   }
-  else if (embedded != 1 && embedded != 2) {
+  else if (!defines || (defines->embedded_mode != 1    && defines->embedded_mode != 2)
+                    || (defines->float_type != 0       && defines->float_type != 1)
+                    || (defines->printing_enable != 0  && defines->printing_enable != 1)
+                    || (defines->profiling_enable != 0 && defines->profiling_enable != 1)
+                    || (defines->interrupt_enable != 0 && defines->interrupt_enable != 1)) {
     return osqp_error(OSQP_SETTINGS_VALIDATION_ERROR);
   }
 
   exitflag = codegen_inc(solver, output_dir, file_prefix);
-  if (!exitflag) exitflag = codegen_src(solver, output_dir, file_prefix, embedded);
+  if (!exitflag) exitflag = codegen_src(solver, output_dir, file_prefix, defines->embedded_mode);
+  if (!exitflag) exitflag = codegen_defines(output_dir, defines);
 
   return exitflag;
 }

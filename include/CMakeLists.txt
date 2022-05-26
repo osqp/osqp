@@ -19,13 +19,14 @@ set(osqp_headers_public
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_api_functions.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_api_types.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_api_utils.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_export_define.h"
-    "${CMAKE_CURRENT_BINARY_DIR}/public/osqp_configure.h")
-
-set( osqp_headers ${osqp_headers_public} PARENT_SCOPE)
+    "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_export_define.h")
 
 list( APPEND EMBEDDED_PUBLIC_INCS ${osqp_headers_public} )
 list( APPEND EMBEDDED_PRIVATE_INCS ${osqp_headers_private} )
+
+# The configure header is handled differentally for code generation (we don't copy it)
+list( APPEND osqp_headers_public "${CMAKE_CURRENT_BINARY_DIR}/public/osqp_configure.h")
+set( osqp_headers ${osqp_headers_public} PARENT_SCOPE)
 
 # Add more files that should only be in non-embedded code
 if(NOT DEFINED EMBEDDED)

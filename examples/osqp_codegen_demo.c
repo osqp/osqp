@@ -72,8 +72,20 @@ int main(int argc, char *argv[]) {
   exitflag = osqp_setup(&solver, P, q, A, l, u, m, n, settings);
 
   /* Test codegen */
-  osqp_codegen(solver, vecDirPath, "mpc_vec_", 1); /* Only allow updating the vectors */
-  osqp_codegen(solver, matDirPath, "mpc_mat_", 2); /* Allow updating the vectors and matrices */
+  OSQPCodegenDefines *defs = (OSQPCodegenDefines *)malloc(sizeof(OSQPCodegenDefines));
+
+  defs->float_type = 0;        /* Use doubles */
+  defs->printing_enable = 0;   /* Don't enable printing */
+  defs->profiling_enable = 0;  /* Don't enable profiling */
+  defs->interrupt_enable = 0;  /* Don't enable interrupts */
+
+  /* Sample with vector update only */
+  defs->embedded_mode = 1;
+  osqp_codegen(solver, vecDirPath, "mpc_vec_", defs);
+
+  /* Sample with both vector and matrix updates */
+  defs->embedded_mode = 2;
+  osqp_codegen(solver, matDirPath, "mpc_mat_", defs);
 
   /* Solve problem */
   if (!exitflag) exitflag = osqp_solve(solver);

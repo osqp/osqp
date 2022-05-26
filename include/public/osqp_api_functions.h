@@ -249,14 +249,13 @@ OSQP_API c_int osqp_update_rho(OSQPSolver *solver,
  *                    This string must include the trailing directory separator, and
  *                    an empty string means output to the current directory.
  * @param  prefix     String prefix for the variables and generated files.
- * @param  embedded   Embedded flag (1: vectors as parameters;
- *                                   2: vectors and matrices as parameters).
+ * @param  defines    The defines to use in the generated code.
  * @return            Exitflag for errors (0 if no errors)
  */
-c_int osqp_codegen(OSQPSolver *solver,
-                   const char *output_dir,
-                   const char *prefix,
-                   c_int       embedded);
+c_int osqp_codegen(OSQPSolver         *solver,
+                   const char         *output_dir,
+                   const char         *prefix,
+                   OSQPCodegenDefines *defines);
 
 # endif /* ifdef OSQP_CODEGEN */
 
