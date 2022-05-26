@@ -508,8 +508,8 @@ c_int codegen_inc(OSQPSolver *solver,
   time_t now;
   c_int i = 0;
 
-  sprintf(fname,  "%s%sworkspace", output_dir, file_prefix);
-  sprintf(hfname, "%s.h",        fname);
+  sprintf(fname,  "%sworkspace", file_prefix);
+  sprintf(hfname, "%s%s.h", output_dir, fname);
 
   /* Open include file */
   incFile = fopen(hfname, "w");
