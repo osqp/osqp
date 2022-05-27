@@ -29,6 +29,16 @@ c_int init_linsys_solver(LinSysSolver      **s,
                          c_float            *scaled_dual_res,
                          c_int               polishing);
 
-c_int adjoint_derivative_linsys_solver(LinSysSolver **s, const OSQPSettings *settings, const OSQPMatrix *P, const OSQPMatrix *G, const OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks, OSQPMatrix *check1, OSQPVectorf *check2);
+c_int adjoint_derivative_linsys_solver(LinSysSolver **s,
+                                       const OSQPSettings *settings,
+                                       const OSQPMatrix *P,
+                                       const OSQPMatrix *G,
+                                       const OSQPMatrix *A_eq,
+                                       OSQPMatrix *GDiagLambda,
+                                       OSQPVectorf *slacks,
+                                       OSQPVectorf *rhs,
+                                       OSQPMatrix *check1,
+                                       OSQPVectorf *check2
+);
 
 #endif /* ifndef LIN_SYS_H */

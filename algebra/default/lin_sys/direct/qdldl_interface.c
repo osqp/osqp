@@ -607,11 +607,12 @@ static void _adj_assemble_csc(csc *D, OSQPMatrix *P_full, OSQPMatrix *G, OSQPMat
     _colcount_diag(D, n+x+y+n, x);
     _colcount_block(D, A_eq->csc, n+x+y+n+x, 1);
     // TODO: Add a block of structural zeros on bottom right
+    _colcount_diag(D, n+x+y, n+x+y);
 
     //cumsum total entries to convert to D.p
     _colcount_to_colptr(D);
 
-    _fill_diag_values(D, OSQP_NULL, 0, 0, OSQP_NULL, 1, n+x+y);
+    _fill_diag_values(D, OSQP_NULL, 0, 0, OSQP_NULL, 1+1e-6, n+x+y);
     _fill_block(D, P_full->csc, OSQP_NULL, 0, n+x+y, 0);
     _fill_block(D, G->csc, OSQP_NULL, n, n+x+y, 0);
     _fill_block(D, A_eq->csc, OSQP_NULL, n+x, n+x+y, 0);
@@ -619,12 +620,12 @@ static void _adj_assemble_csc(csc *D, OSQPMatrix *P_full, OSQPMatrix *G, OSQPMat
     _fill_diag_values(D, OSQP_NULL, n, n+x+y+n, slacks->values, 0, x);
     _fill_block(D, A_eq->csc, OSQP_NULL, 0, n+x+y+n+x, 1);
     // TODO: Add a block of structural zeros on bottom right
-    // -eps goes in here
+    _fill_diag_values(D, OSQP_NULL, n+x+y, n+x+y, OSQP_NULL, -1e-6, n+x+y);
 
     _backshift_colptrs(D);
 }
 
-c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const OSQPMatrix *G, const OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks, OSQPMatrix *check1, OSQPVectorf *check2) {
+c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const OSQPMatrix *G, const OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks, OSQPVectorf *rhs, OSQPMatrix *check1, OSQPVectorf *check2) {
 
     c_int n = OSQPMatrix_get_m(P_full);
     c_int n_ineq = OSQPMatrix_get_m(G);
@@ -635,13 +636,14 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const 
     c_int G_nnz = OSQPMatrix_get_nz(G);
     c_int A_eq_nnz = OSQPMatrix_get_nz(A_eq);
 
-    c_int nnzKKT = n + n_ineq + n_eq +           // Number of diagonal elements in I
+    c_int nnzKKT = n + n_ineq + n_eq +           // Number of diagonal elements in I (+eps)
                    P_full_nnz +                  // Number of elements in P_full
                    G_nnz +                       // Number of nonzeros in G
                    A_eq_nnz +                    // Number of nonzeros in A_eq
                    G_nnz +                       // Number of nonzeros in G'
                    n_ineq +                      // Number of diagonal elements in slacks
-                   A_eq_nnz;                     // Number of nonzeros in A_eq'
+                   A_eq_nnz +                    // Number of nonzeros in A_eq'
+                   n + n_ineq + n_eq;            // Number of -eps entries on diagonal
 
     c_int dim = 2 * (n + n_ineq + n_eq);
     csc *adj = csc_spalloc(dim, dim, nnzKKT, 1, 0);
@@ -651,6 +653,88 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const 
     OSQPMatrix *adj_matrix = OSQPMatrix_new_from_csc(adj, 1);
     c_int iseq = OSQPMatrix_is_eq(adj_matrix, check1, 0.0001);
     OSQPMatrix_free(adj_matrix);
+
+    // ----------------------------
+    // QDLDL formulation + solve
+    // ----------------------------
+    const QDLDL_int   An   = dim;
+    QDLDL_int i; // Counter
+
+    //data for L and D factors
+    QDLDL_int Ln = An;
+    QDLDL_int *Lp;
+    QDLDL_int *Li;
+    QDLDL_float *Lx;
+    QDLDL_float *D;
+    QDLDL_float *Dinv;
+
+    //data for elim tree calculation
+    QDLDL_int *etree;
+    QDLDL_int *Lnz;
+    QDLDL_int  sumLnz;
+
+    //working data for factorisation
+    QDLDL_int   *iwork;
+    QDLDL_bool  *bwork;
+    QDLDL_float *fwork;
+
+    //Data for results of A\b
+    QDLDL_float *x;
+
+    /*--------------------------------
+   * pre-factorisation memory allocations
+   *---------------------------------*/
+
+    //These can happen *before* the etree is calculated
+    //since the sizes are not sparsity pattern specific
+
+    //For the elimination tree
+    etree = (QDLDL_int*)malloc(sizeof(QDLDL_int)*An);
+    Lnz   = (QDLDL_int*)malloc(sizeof(QDLDL_int)*An);
+
+    //For the L factors.   Li and Lx are sparsity dependent
+    //so must be done after the etree is constructed
+    Lp    = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(An+1));
+    D     = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
+    Dinv  = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
+
+    //Working memory.  Note that both the etree and factor
+    //calls requires a working vector of QDLDL_int, with
+    //the factor function requiring 3*An elements and the
+    //etree only An elements.   Just allocate the larger
+    //amount here and use it in both places
+    iwork = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(3*An));
+    bwork = (QDLDL_bool*)malloc(sizeof(QDLDL_bool)*An);
+    fwork = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
+
+    /*--------------------------------
+     * elimination tree calculation
+     *---------------------------------*/
+    sumLnz = QDLDL_etree(An,adj->p,adj->i,iwork,Lnz,etree);
+
+    /*--------------------------------
+     * LDL factorisation
+     *---------------------------------*/
+
+    //First allocate memory for Li and Lx
+    Li    = (QDLDL_int*)malloc(sizeof(QDLDL_int)*sumLnz);
+    Lx    = (QDLDL_float*)malloc(sizeof(QDLDL_float)*sumLnz);
+
+    //now factor
+    QDLDL_factor(An,adj->p,adj->i,adj->x,Lp,Li,Lx,D,Dinv,Lnz,etree,bwork,iwork,fwork);
+
+    /*--------------------------------
+     * solve
+     *---------------------------------*/
+    x = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
+
+    //when solving A\b, start with x = b
+    for(i=0;i < Ln; i++) x[i] = rhs->values[i];
+    QDLDL_solve(Ln,Lp,Li,Lx,Dinv,x);
+
+    OSQPVectorf_from_raw(rhs, x);
+
+    // TODO: Free stuff!
 
     return iseq;
 }

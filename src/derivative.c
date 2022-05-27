@@ -8,7 +8,7 @@
 #include "csc_utils.h"
 
 
-c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float *dy_u, const csc* check1, const float* check2) {
+c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float *dy_u, const csc* check1, const c_float* check2) {
 
     c_int m = solver->work->data->m;
     c_int n = solver->work->data->n;
@@ -169,11 +169,18 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
     OSQPVectorf *rhs = OSQPVectorf_concat(rhs_temp, d_nu);
     OSQPVectorf_mult_scalar(rhs, -1);
     OSQPVectorf_free(rhs_temp);
+    OSQPVectorf *zeros = OSQPVectorf_malloc(n + n_ineq + n_eq);
+    OSQPVectorf_set_scalar(zeros, 0);
+    rhs = OSQPVectorf_concat(rhs, zeros);
+    OSQPVectorf_free(zeros);
 
     // ----------- Check
     OSQPMatrix *checkmat1 = OSQPMatrix_new_from_csc(check1, 1);
     OSQPVectorf *checkvec2 = OSQPVectorf_new(check2, 2*(n+n_ineq+n_eq));
-    c_int status = adjoint_derivative_linsys_solver(solver, settings, P_full, G, A_eq, GDiagLambda, slacks, checkmat1, checkvec2);
+    c_int status = adjoint_derivative_linsys_solver(solver, settings, P_full, G, A_eq, GDiagLambda, slacks, rhs, checkmat1, checkvec2);
+
+    c_int status2 = OSQPVectorf_is_eq(rhs, checkvec2, 0.0001);
+    status = status && status2;
 
     // TODO: Make sure we're freeing everything we should!
     OSQPMatrix_free(G);

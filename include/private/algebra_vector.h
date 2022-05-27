@@ -23,6 +23,10 @@ typedef struct OSQPVectorf_ OSQPVectorf;
 
 # ifndef EMBEDDED
 
+c_int OSQPVectorf_is_eq(const OSQPVectorf *A,
+                        const OSQPVectorf *B,
+                        c_float           tol);
+
 /* malloc/calloc for floats and ints (USES MALLOC/CALLOC) */
 OSQPVectorf* OSQPVectorf_malloc(c_int length);
 OSQPVectorf* OSQPVectorf_calloc(c_int length);

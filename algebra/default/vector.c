@@ -6,6 +6,18 @@
 
 #ifndef EMBEDDED
 
+c_int OSQPVectorf_is_eq(const OSQPVectorf *A,
+                        const OSQPVectorf *B,
+                        c_float           tol){
+
+    if (A->length != B->length) return 0;
+    c_int i;
+    for (i=0; i<A->length; i++) {
+        if (c_absval(A->values[i] - B->values[i]) > tol) return 0;
+    }
+    return 1;
+}
+
 OSQPVectorf* OSQPVectorf_new(const c_float *a,
                              c_int          length){
 
