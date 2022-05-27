@@ -570,10 +570,10 @@ static void _fill_diag_values(csc* K, c_int* index_mapping, c_int initrow, c_int
         col         = j + initcol;
         dest        = K->p[col];
         K->i[dest]  = row;
-        if (value_scalar) {
-            K->x[dest] = value_scalar;
-        } else {
+        if (values != OSQP_NULL) {
             K->x[dest] = values[j];
+        } else {
+            K->x[dest] = value_scalar;
         }
         K->p[col]++;
         if (index_mapping != OSQP_NULL) { index_mapping[j] = dest; }
@@ -587,6 +587,20 @@ static void _backshift_colptrs(csc* K) {
         K->p[j] = K->p[j-1];
     }
     K->p[0] = 0;
+}
+
+static void _adj_perturb(csc *D, c_float eps) {
+    c_int j, dest;
+
+    dest = 0;
+    for (j = 0; j < D->m / 2; j++) {
+        dest = D->p[j+1]-1;
+        D->x[dest] += eps;
+    }
+    for (j = D->m / 2; j < D->m; j++) {
+        dest = D->p[j+1]-1;
+        D->x[dest] -= eps;
+    }
 }
 
 static void _adj_assemble_csc(csc *D, OSQPMatrix *P_full, OSQPMatrix *G, OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks) {
@@ -606,23 +620,23 @@ static void _adj_assemble_csc(csc *D, OSQPMatrix *P_full, OSQPMatrix *G, OSQPMat
     _colcount_block(D, GDiagLambda->csc, n+x+y+n, 1);
     _colcount_diag(D, n+x+y+n, x);
     _colcount_block(D, A_eq->csc, n+x+y+n+x, 1);
-    // TODO: Add a block of structural zeros on bottom right
     _colcount_diag(D, n+x+y, n+x+y);
 
     //cumsum total entries to convert to D.p
     _colcount_to_colptr(D);
 
-    _fill_diag_values(D, OSQP_NULL, 0, 0, OSQP_NULL, 1+1e-6, n+x+y);
+    _fill_diag_values(D, OSQP_NULL, 0, 0, OSQP_NULL, 1, n+x+y);
     _fill_block(D, P_full->csc, OSQP_NULL, 0, n+x+y, 0);
     _fill_block(D, G->csc, OSQP_NULL, n, n+x+y, 0);
     _fill_block(D, A_eq->csc, OSQP_NULL, n+x, n+x+y, 0);
     _fill_block(D, GDiagLambda->csc, OSQP_NULL, 0, n+x+y+n, 1);
     _fill_diag_values(D, OSQP_NULL, n, n+x+y+n, slacks->values, 0, x);
     _fill_block(D, A_eq->csc, OSQP_NULL, 0, n+x+y+n+x, 1);
-    // TODO: Add a block of structural zeros on bottom right
-    _fill_diag_values(D, OSQP_NULL, n+x+y, n+x+y, OSQP_NULL, -1e-6, n+x+y);
+    _fill_diag_values(D, OSQP_NULL, n+x+y, n+x+y, OSQP_NULL, 0, n+x+y);
 
     _backshift_colptrs(D);
+
+    _adj_perturb(D, 1e-6);
 }
 
 c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const OSQPMatrix *G, const OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks, OSQPVectorf *rhs, OSQPMatrix *check1, OSQPVectorf *check2) {
@@ -652,7 +666,6 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const 
 
     OSQPMatrix *adj_matrix = OSQPMatrix_new_from_csc(adj, 1);
     c_int iseq = OSQPMatrix_is_eq(adj_matrix, check1, 0.0001);
-    OSQPMatrix_free(adj_matrix);
 
     // ----------------------------
     // QDLDL formulation + solve
@@ -732,9 +745,28 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const 
     for(i=0;i < Ln; i++) x[i] = rhs->values[i];
     QDLDL_solve(Ln,Lp,Li,Lx,Dinv,x);
 
-    OSQPVectorf_from_raw(rhs, x);
+    OSQPVectorf *sol = OSQPVectorf_new(x, An);
+    OSQPVectorf *residual = OSQPVectori_malloc(An);
+
+    c_int k;
+    for (k=0; k<200; k++) {
+        // TODO: Does qdldl give us residues directly?
+        OSQPVectorf *M_times_sol = OSQPVectori_malloc(An);  // TODO: What's the standard name for this?
+        OSQPMatrix_Axpy(adj_matrix, sol, M_times_sol, 1, 1);
+
+        OSQPVectorf_minus(residual, rhs, M_times_sol);
+        if (OSQPVectorf_norm_inf(residual) < 1e-12) {
+            break;
+        }
+
+        QDLDL_solve(Ln, Lp, Li, Lx, Dinv, residual);
+        OSQPVectorf_plus(sol, sol, residual);
+    }
+
+    OSQPVectorf_copy(rhs, sol);
 
     // TODO: Free stuff!
+    OSQPMatrix_free(adj_matrix);
 
     return iseq;
 }
