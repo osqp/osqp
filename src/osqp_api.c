@@ -1164,7 +1164,13 @@ c_int osqp_codegen(OSQPSolver         *solver,
                     || (defines->printing_enable != 0  && defines->printing_enable != 1)
                     || (defines->profiling_enable != 0 && defines->profiling_enable != 1)
                     || (defines->interrupt_enable != 0 && defines->interrupt_enable != 1)) {
-    return osqp_error(OSQP_SETTINGS_VALIDATION_ERROR);
+    return osqp_error(OSQP_CODEGEN_DEFINES_ERROR);
+  }
+  /* Don't allow type 1 (no matrix update) codegen for a non-convex problem.
+     Allow codegen for type 2 (matrix update) because the matrix could be updated
+     at runtime to a convex problem (e.g. provide only sparsity pattern here) */
+  else if (defines->embedded_mode == 1 && (solver->info->status_val == OSQP_NON_CVX)) {
+    return osqp_error(OSQP_NONCVX_ERROR);
   }
 
   exitflag = codegen_inc(solver, output_dir, file_prefix);
