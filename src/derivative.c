@@ -8,7 +8,7 @@
 #include "csc_utils.h"
 
 
-c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float *dy_u, const csc* check1, const c_float* check2) {
+c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float *dy_u, const csc* check1, const c_float* check2, c_float tol1, c_float tol2) {
 
     c_int m = solver->work->data->m;
     c_int n = solver->work->data->n;
@@ -177,10 +177,21 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
     // ----------- Check
     OSQPMatrix *checkmat1 = OSQPMatrix_new_from_csc(check1, 1);
     OSQPVectorf *checkvec2 = OSQPVectorf_new(check2, 2*(n+n_ineq+n_eq));
-    c_int status = adjoint_derivative_linsys_solver(solver, settings, P_full, G, A_eq, GDiagLambda, slacks, rhs, checkmat1, checkvec2);
+    c_int status = adjoint_derivative_linsys_solver(solver, settings, P_full, G, A_eq, GDiagLambda, slacks, rhs, checkmat1, tol1);
 
-    c_int status2 = OSQPVectorf_is_eq(rhs, checkvec2, 0.0001);
+    c_int status2 = OSQPVectorf_is_eq(rhs, checkvec2, tol2);
     status = status && status2;
+
+    /*
+     *   split by no. of elems
+     *   rhs -> dual (n + n_ineq + n_eq) + primal (n + n_ineq + n_eq)
+     *   primal -> r_x (n), r_lambda_l (A_ineq_l_nnz), r_lambda_u (A_ineq_u_nnz), r_nu (n_eq)
+     */
+
+    c_float *pos = OSQPVectorf_data(rhs);
+    OSQPVectorf *dual = OSQPVectorf_new(pos, n + n_ineq + n_eq);
+    pos += n + n_ineq + n_eq;
+    OSQPVectorf *primal = OSQPVectorf_new(pos, n + n_ineq + n_eq);
 
     // TODO: Make sure we're freeing everything we should!
     OSQPMatrix_free(G);
@@ -200,7 +211,8 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
     OSQPVectorf_free(d_nu);
 
     OSQPVectorf_free(rhs);
-
+    OSQPVectorf_free(dual);
+    OSQPVectorf_free(primal);
 
     return status;
 }

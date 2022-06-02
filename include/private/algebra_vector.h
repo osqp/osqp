@@ -148,6 +148,9 @@ c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S,
 c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
                                   const OSQPVectorf *b);
 
+/* ||v||2 */
+c_float OSQPVectorf_norm_2(const OSQPVectorf *v);
+
 /* mean of vector elements */
 c_float OSQPVectorf_mean(const OSQPVectorf *a);
 

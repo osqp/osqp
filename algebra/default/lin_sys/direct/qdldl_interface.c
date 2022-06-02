@@ -636,10 +636,10 @@ static void _adj_assemble_csc(csc *D, OSQPMatrix *P_full, OSQPMatrix *G, OSQPMat
 
     _backshift_colptrs(D);
 
-    _adj_perturb(D, 1e-6);
+    //_adj_perturb(D, 1e-6);
 }
 
-c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const OSQPMatrix *G, const OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks, OSQPVectorf *rhs, OSQPMatrix *check1, OSQPVectorf *check2) {
+c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const OSQPMatrix *G, const OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks, OSQPVectorf *rhs, OSQPMatrix *check1, c_float tol1) {
 
     c_int n = OSQPMatrix_get_m(P_full);
     c_int n_ineq = OSQPMatrix_get_m(G);
@@ -665,7 +665,9 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const 
     _adj_assemble_csc(adj, P_full, G, A_eq, GDiagLambda, slacks);
 
     OSQPMatrix *adj_matrix = OSQPMatrix_new_from_csc(adj, 1);
-    c_int iseq = OSQPMatrix_is_eq(adj_matrix, check1, 0.0001);
+    c_int iseq = OSQPMatrix_is_eq(adj_matrix, check1, tol1);
+
+    _adj_perturb(adj, 1e-6);
 
     // ----------------------------
     // QDLDL formulation + solve
@@ -691,76 +693,83 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const 
     QDLDL_bool  *bwork;
     QDLDL_float *fwork;
 
+    //permutation
+    QDLDL_int   *P;
+    QDLDL_int   *Pinv;
+
     //Data for results of A\b
     QDLDL_float *x;
+    QDLDL_float *x_work;
 
-    /*--------------------------------
-   * pre-factorisation memory allocations
-   *---------------------------------*/
-
-    //These can happen *before* the etree is calculated
-    //since the sizes are not sparsity pattern specific
-
-    //For the elimination tree
     etree = (QDLDL_int*)malloc(sizeof(QDLDL_int)*An);
     Lnz   = (QDLDL_int*)malloc(sizeof(QDLDL_int)*An);
 
-    //For the L factors.   Li and Lx are sparsity dependent
-    //so must be done after the etree is constructed
     Lp    = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(An+1));
     D     = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
     Dinv  = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
 
-    //Working memory.  Note that both the etree and factor
-    //calls requires a working vector of QDLDL_int, with
-    //the factor function requiring 3*An elements and the
-    //etree only An elements.   Just allocate the larger
-    //amount here and use it in both places
     iwork = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(3*An));
     bwork = (QDLDL_bool*)malloc(sizeof(QDLDL_bool)*An);
     fwork = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
 
-    /*--------------------------------
-     * elimination tree calculation
-     *---------------------------------*/
-    sumLnz = QDLDL_etree(An,adj->p,adj->i,iwork,Lnz,etree);
+    P = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(An));
+    Pinv = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(An));
 
-    /*--------------------------------
-     * LDL factorisation
-     *---------------------------------*/
+    c_int amd_status;
+#ifdef DLONG
+    amd_status = amd_l_order(An, adj->p, adj->i, P, (c_float *)OSQP_NULL, (c_float *)OSQP_NULL);
+#else
+    amd_status = amd_order(An, adj->p, adj->i, P, (c_float *)OSQP_NULL, (c_float *)OSQP_NULL);
+#endif
+    if (amd_status < 0) {
+        return amd_status;
+    }
 
-    //First allocate memory for Li and Lx
+    // Inverse of the permutation vector
+    Pinv = csc_pinv(P, An);
+
+    csc *adj_permuted;
+    adj_permuted = csc_symperm(adj, Pinv, OSQP_NULL, 1);
+
+    sumLnz = QDLDL_etree(An,adj_permuted->p,adj_permuted->i,iwork,Lnz,etree);
+
     Li    = (QDLDL_int*)malloc(sizeof(QDLDL_int)*sumLnz);
     Lx    = (QDLDL_float*)malloc(sizeof(QDLDL_float)*sumLnz);
 
-    //now factor
-    QDLDL_factor(An,adj->p,adj->i,adj->x,Lp,Li,Lx,D,Dinv,Lnz,etree,bwork,iwork,fwork);
+    QDLDL_factor(An,adj_permuted->p,adj_permuted->i,adj_permuted->x,Lp,Li,Lx,D,Dinv,Lnz,etree,bwork,iwork,fwork);
 
-    /*--------------------------------
-     * solve
-     *---------------------------------*/
     x = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
+    x_work = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
 
     //when solving A\b, start with x = b
-    for(i=0;i < Ln; i++) x[i] = rhs->values[i];
-    QDLDL_solve(Ln,Lp,Li,Lx,Dinv,x);
+    for (i = 0 ; i < An ; i++) x_work[i] = rhs->values[P[i]];
+    QDLDL_solve(Ln, Lp, Li, Lx, Dinv, x_work);
+    for (i = 0 ; i < An ; i++) x[P[i]] = x_work[i];
 
     OSQPVectorf *sol = OSQPVectorf_new(x, An);
-    OSQPVectorf *residual = OSQPVectori_malloc(An);
+    OSQPVectorf *residual = OSQPVectorf_malloc(An);
+    OSQPVectorf *M_times_sol = OSQPVectorf_malloc(An);
 
     c_int k;
     for (k=0; k<200; k++) {
-        // TODO: Does qdldl give us residues directly?
-        OSQPVectorf *M_times_sol = OSQPVectori_malloc(An);  // TODO: What's the standard name for this?
+        OSQPVectorf_set_scalar(M_times_sol, 0);
         OSQPMatrix_Axpy(adj_matrix, sol, M_times_sol, 1, 1);
-
         OSQPVectorf_minus(residual, rhs, M_times_sol);
-        if (OSQPVectorf_norm_inf(residual) < 1e-12) {
+
+        for (i = 0 ; i < An ; i++) x_work[i] = residual->values[P[i]];
+        QDLDL_solve(Ln, Lp, Li, Lx, Dinv, x_work);
+        for (i = 0 ; i < An ; i++) residual->values[P[i]] = x_work[i];
+
+        OSQPVectorf_plus(sol, sol, residual);
+
+        OSQPVectorf_set_scalar(M_times_sol, 0);
+        OSQPMatrix_Axpy(adj_matrix, sol, M_times_sol, 1, 1);
+        OSQPVectorf_minus(residual, rhs, M_times_sol);
+
+        if (OSQPVectorf_norm_2(residual) < 1e-12) {
             break;
         }
 
-        QDLDL_solve(Ln, Lp, Li, Lx, Dinv, residual);
-        OSQPVectorf_plus(sol, sol, residual);
     }
 
     OSQPVectorf_copy(rhs, sol);

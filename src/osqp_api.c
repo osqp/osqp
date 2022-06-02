@@ -1163,7 +1163,9 @@ c_int osqp_adjoint_derivative(OSQPSolver *solver,
                                        c_float    *dy_l,
                                        c_float    *dy_u,
                                        const csc  *check1,
-                                       const c_float *check2) {
+                                       const c_float *check2,
+                                       const c_float tol1,
+                                       const c_float tol2) {
 
     c_int status = adjoint_derivative(
             solver,
@@ -1171,7 +1173,9 @@ c_int osqp_adjoint_derivative(OSQPSolver *solver,
             dy_l,
             dy_u,
             check1,
-            check2
+            check2,
+            tol1,
+            tol2
     );
 
     return status;

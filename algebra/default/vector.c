@@ -13,7 +13,9 @@ c_int OSQPVectorf_is_eq(const OSQPVectorf *A,
     if (A->length != B->length) return 0;
     c_int i;
     for (i=0; i<A->length; i++) {
-        if (c_absval(A->values[i] - B->values[i]) > tol) return 0;
+        if (c_absval(A->values[i] - B->values[i]) > tol) {
+            return 0;
+        }
     }
     return 1;
 }
@@ -477,6 +479,18 @@ c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
     if (absval > normDiff) normDiff = absval;
   }
   return normDiff;
+}
+
+c_float OSQPVectorf_norm_2(const OSQPVectorf *v){
+    c_int   i;
+    c_int length  = v->length;
+    c_float*  vv  = v->values;
+    c_float normval = 0.0;
+
+    for (i = 0; i < length; i++) {
+        normval += c_absval(vv[i] * vv[i]);
+    }
+    return normval;
 }
 
 // c_float OSQPVectorf_norm_1_diff(const OSQPVectorf *a,
