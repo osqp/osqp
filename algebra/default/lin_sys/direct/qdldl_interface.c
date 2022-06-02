@@ -636,7 +636,6 @@ static void _adj_assemble_csc(csc *D, OSQPMatrix *P_full, OSQPMatrix *G, OSQPMat
 
     _backshift_colptrs(D);
 
-    //_adj_perturb(D, 1e-6);
 }
 
 c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const OSQPMatrix *G, const OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks, OSQPVectorf *rhs, OSQPMatrix *check1, c_float tol1) {
@@ -683,6 +682,10 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const 
     QDLDL_float *D;
     QDLDL_float *Dinv;
 
+    //permutation
+    QDLDL_int   *P;
+    QDLDL_int   *Pinv;
+
     //data for elim tree calculation
     QDLDL_int *etree;
     QDLDL_int *Lnz;
@@ -692,10 +695,6 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const 
     QDLDL_int   *iwork;
     QDLDL_bool  *bwork;
     QDLDL_float *fwork;
-
-    //permutation
-    QDLDL_int   *P;
-    QDLDL_int   *Pinv;
 
     //Data for results of A\b
     QDLDL_float *x;
@@ -731,12 +730,12 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const 
     csc *adj_permuted;
     adj_permuted = csc_symperm(adj, Pinv, OSQP_NULL, 1);
 
-    sumLnz = QDLDL_etree(An,adj_permuted->p,adj_permuted->i,iwork,Lnz,etree);
+    sumLnz = QDLDL_etree(An, adj_permuted->p, adj_permuted->i, iwork, Lnz, etree);
 
     Li    = (QDLDL_int*)malloc(sizeof(QDLDL_int)*sumLnz);
     Lx    = (QDLDL_float*)malloc(sizeof(QDLDL_float)*sumLnz);
 
-    QDLDL_factor(An,adj_permuted->p,adj_permuted->i,adj_permuted->x,Lp,Li,Lx,D,Dinv,Lnz,etree,bwork,iwork,fwork);
+    QDLDL_factor(An, adj_permuted->p, adj_permuted->i, adj_permuted->x, Lp, Li, Lx, D, Dinv, Lnz, etree, bwork, iwork, fwork);
 
     x = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
     x_work = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
@@ -774,8 +773,28 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const 
 
     OSQPVectorf_copy(rhs, sol);
 
-    // TODO: Free stuff!
+    c_free(Lp);
+    c_free(Li);
+    c_free(Lx);
+    c_free(D);
+    c_free(Dinv);
+    c_free(P);
+    c_free(Pinv);
+    c_free(etree);
+    c_free(Lnz);
+    c_free(iwork);
+    c_free(bwork);
+    c_free(fwork);
+    c_free(x);
+    c_free(x_work);
+
+    OSQPVectorf_free(sol);
+    OSQPVectorf_free(residual);
+    OSQPVectorf_free(M_times_sol);
+
+    csc_spfree(adj_permuted);
     OSQPMatrix_free(adj_matrix);
+    csc_spfree(adj);
 
     return iseq;
 }

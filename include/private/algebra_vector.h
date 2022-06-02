@@ -37,6 +37,10 @@ OSQPVectori* OSQPVectori_calloc(c_int length);
 OSQPVectorf* OSQPVectorf_new(const c_float *a,
                              c_int          length);
 
+/* Return an int vector using a raw array as input (Uses MALLOC) */
+OSQPVectori* OSQPVectori_new(const c_int *a,
+                             c_int          length);
+
 /* Return a copy of a float vector a as output (Uses MALLOC) */
 OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf *a);
 
