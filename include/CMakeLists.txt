@@ -9,6 +9,7 @@ set(
     "${CMAKE_CURRENT_SOURCE_DIR}/lin_alg.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/osqp.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/osqp_configure.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/osqp_log.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/proj.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/scaling.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/types.h"

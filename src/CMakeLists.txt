@@ -5,6 +5,7 @@ set(
     "${CMAKE_CURRENT_SOURCE_DIR}/error.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/lin_alg.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/osqp.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/osqp_log.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/proj.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/scaling.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/util.c"
