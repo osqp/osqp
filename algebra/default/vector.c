@@ -141,7 +141,9 @@ OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf *a){
 // }
 
 void OSQPVectorf_free(OSQPVectorf *a){
-  if (a) c_free(a->values);
+  if (a) {
+      c_free(a->values);
+  }
   c_free(a);
 }
 
@@ -488,9 +490,9 @@ c_float OSQPVectorf_norm_2(const OSQPVectorf *v){
     c_float normval = 0.0;
 
     for (i = 0; i < length; i++) {
-        normval += c_absval(vv[i] * vv[i]);
+        normval += vv[i] * vv[i];
     }
-    return normval;
+    return c_sqrt(normval);
 }
 
 // c_float OSQPVectorf_norm_1_diff(const OSQPVectorf *a,

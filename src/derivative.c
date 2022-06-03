@@ -43,15 +43,18 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
         c_float _u = u_data[j];
         if (_l < _u) {
             A_eq_vec[j] = 0;
-            if (_l > -infval)
+            if (_l > -infval) {
                 A_ineq_l_vec[j] = 1;
-            else
+                n_ineq++;
+            } else {
                 A_ineq_l_vec[j] = 0;
-            if (_u < infval)
+            }
+            if (_u < infval) {
                 A_ineq_u_vec[j] = 1;
-            else
+                n_ineq++;
+            } else {
                 A_ineq_u_vec[j] = 0;
-            n_ineq = n_ineq + 2;  // we add two constraints, (one lower, one upper) for every inequality constraint
+            }
             nu_vec[j] = -1;
         } else {
             A_eq_vec[j] = 1;

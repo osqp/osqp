@@ -638,7 +638,7 @@ static void _adj_assemble_csc(csc *D, OSQPMatrix *P_full, OSQPMatrix *G, OSQPMat
 
 }
 
-c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const OSQPMatrix *G, const OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks, OSQPVectorf *rhs, OSQPMatrix *check1, c_float tol1) {
+c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const OSQPMatrix *G, const OSQPMatrix *A_eq, const OSQPMatrix *GDiagLambda, const OSQPVectorf *slacks, const OSQPVectorf *rhs, const OSQPMatrix *check1, const c_float tol1) {
 
     c_int n = OSQPMatrix_get_m(P_full);
     c_int n_ineq = OSQPMatrix_get_m(G);
@@ -747,28 +747,18 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const 
 
     OSQPVectorf *sol = OSQPVectorf_new(x, An);
     OSQPVectorf *residual = OSQPVectorf_malloc(An);
-    OSQPVectorf *M_times_sol = OSQPVectorf_malloc(An);
 
     c_int k;
     for (k=0; k<200; k++) {
-        OSQPVectorf_set_scalar(M_times_sol, 0);
-        OSQPMatrix_Axpy(adj_matrix, sol, M_times_sol, 1, 1);
-        OSQPVectorf_minus(residual, rhs, M_times_sol);
+        OSQPVectorf_copy(residual, rhs);
+        OSQPMatrix_Axpy(adj_matrix, sol, residual, 1, -1);
+        if (OSQPVectorf_norm_2(residual) < 1e-12) break;
 
         for (i = 0 ; i < An ; i++) x_work[i] = residual->values[P[i]];
         QDLDL_solve(Ln, Lp, Li, Lx, Dinv, x_work);
         for (i = 0 ; i < An ; i++) residual->values[P[i]] = x_work[i];
 
-        OSQPVectorf_plus(sol, sol, residual);
-
-        OSQPVectorf_set_scalar(M_times_sol, 0);
-        OSQPMatrix_Axpy(adj_matrix, sol, M_times_sol, 1, 1);
-        OSQPVectorf_minus(residual, rhs, M_times_sol);
-
-        if (OSQPVectorf_norm_2(residual) < 1e-12) {
-            break;
-        }
-
+        OSQPVectorf_minus(sol, sol, residual);
     }
 
     OSQPVectorf_copy(rhs, sol);
@@ -788,13 +778,12 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const 
     c_free(x);
     c_free(x_work);
 
-    OSQPVectorf_free(sol);
-    OSQPVectorf_free(residual);
-    OSQPVectorf_free(M_times_sol);
-
     csc_spfree(adj_permuted);
     OSQPMatrix_free(adj_matrix);
     csc_spfree(adj);
+
+    OSQPVectorf_free(sol);
+    OSQPVectorf_free(residual);
 
     return iseq;
 }
