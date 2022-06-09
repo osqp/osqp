@@ -36,9 +36,6 @@ c_int adjoint_derivative_linsys_solver(LinSysSolver **s,
                                        const OSQPMatrix *A_eq,
                                        OSQPMatrix *GDiagLambda,
                                        OSQPVectorf *slacks,
-                                       OSQPVectorf *rhs,
-                                       OSQPMatrix *check1,
-                                       c_float tol1
-);
+                                       OSQPVectorf *rhs);
 
 #endif /* ifndef LIN_SYS_H */

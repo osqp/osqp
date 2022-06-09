@@ -188,8 +188,6 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s,
                                const OSQPMatrix *A_eq,
                                const OSQPMatrix *GDiagLambda,
                                const OSQPVectorf *slacks,
-                               const OSQPVectorf *rhs,
-                               const OSQPMatrix *check1,
-                               const c_float tol1);
+                               const OSQPVectorf *rhs);
 
 #endif /* QDLDL_INTERFACE_H */

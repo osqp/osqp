@@ -8,7 +8,7 @@
 #include "csc_utils.h"
 
 
-c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float *dy_u, const csc* check1, const c_float* check2, c_float tol1, c_float tol2, csc* dP, c_float* dq, csc* dA, c_float* dl, c_float* du) {
+c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float *dy_u, csc* dP, c_float* dq, csc* dA, c_float* dl, c_float* du) {
 
     c_int m = solver->work->data->m;
     c_int n = solver->work->data->n;
@@ -174,34 +174,32 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
     OSQPVectorf_free(zeros);
 
     // ----------- Check
-    OSQPMatrix *checkmat1 = OSQPMatrix_new_from_csc(check1, 1);
-    OSQPVectorf *checkvec2 = OSQPVectorf_new(check2, 2 * (n + n_ineq_l + n_ineq_u + n_eq));
-    c_int status = adjoint_derivative_linsys_solver(solver, settings, P_full, G, A_eq, GDiagLambda, slacks, rhs, checkmat1, tol1);
-
-    c_int status2 = OSQPVectorf_is_eq(rhs, checkvec2, tol2);
-    status = status && status2;
+    adjoint_derivative_linsys_solver(solver, settings, P_full, G, A_eq, GDiagLambda, slacks, rhs);
 
     c_float *rhs_data = OSQPVectorf_data(rhs);
 
     c_float *r_yl = (c_float *) c_malloc(m * sizeof(c_float));
     c_float *r_yu = (c_float *) c_malloc(m * sizeof(c_float));
-    // TODO: Shouldn't have to do this
+    // TODO: We shouldn't have to do this if we assemble r_yl/r_yu judiciously
     for (j=0; j<m; j++) r_yl[j] = 0;
     for (j=0; j<m; j++) r_yu[j] = 0;
 
-    c_int pos = n + n_ineq_l + n_ineq_u + n_eq + n;
+    c_int pos = n + n_ineq_l + n_ineq_u + n_eq;
+    OSQPVectorf* rx = OSQPVectorf_view(rhs, pos, n);
+
+    pos += n;
     for (j=0; j<n_ineq_l; j++) {
         r_yl[l_noninf_indices_vec[j]] = -rhs_data[pos+j];
     }
     pos += n_ineq_l;
-    for (j=0; j<n_ineq_l; j++) {
+    for (j=0; j<n_ineq_u; j++) {
         r_yu[u_noninf_indices_vec[j]] = rhs_data[pos+j];
     }
     pos += n_ineq_u;
     for (j=0; j<n_eq; j++) {
         if (nu_sign_vec[j]==1) {
             r_yl[eq_indices_vec[j]] = 0;
-            r_yl[eq_indices_vec[j]] = -rhs_data[pos+j] / y_data[eq_indices_vec[j]];
+            r_yu[eq_indices_vec[j]] = rhs_data[pos+j] / y_data[eq_indices_vec[j]];
         } else {
             r_yl[eq_indices_vec[j]] = -rhs_data[pos+j] / y_data[eq_indices_vec[j]];
             r_yu[eq_indices_vec[j]] = 0;
@@ -215,13 +213,41 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
     OSQPVectorf_mult_scalar(ryl, -1);
     OSQPVectorf *ryu = OSQPVectorf_new(r_yu, m);
     c_free(r_yu);
-    //OSQPVectorf_mult(ryu, ryu, y_u);
+    OSQPVectorf_mult(ryu, ryu, y_u);
 
+    // Assemble dP/dA
+    // TODO: Check for incoming m/n/nzmax compatibility unless we're allocating
+    c_float *rx_data = OSQPVectorf_data(rx);
+    c_float *x_data = OSQPVectorf_data(x);
+    c_float *y_u_data = OSQPVectorf_data(y_u);
+    c_float *y_l_data = OSQPVectorf_data(y_l);
+    c_float *ryu_data = OSQPVectorf_data(ryu);
+    c_float *ryl_data = OSQPVectorf_data(ryl);
+
+    c_int col;
+    for (col=0; col<n; col++) {
+        c_int p, i;
+        for (p=dP->p[col]; p<dP->p[col+1]; p++) {
+            i = dP->i[p];
+            dP->x[p] = 0.5 * ((rx_data[i] * x_data[col]) + (rx_data[col] * x_data[i]));
+        }
+        for (p=dA->p[col]; p<dA->p[col+1]; p++) {
+            i = dA->i[p];
+            dA->x[p] = ((y_u_data[i] - y_l_data[i]) * rx_data[col]) + ((ryu_data[i] - ryl_data[i]) * x_data[col]);
+        }
+    }
+
+    // Assign vector derivatives to function arguments
+    OSQPVectorf_to_raw(dq, rx);
     OSQPVectorf_to_raw(dl, ryl);
+    OSQPVectorf_mult_scalar(ryu, -1);
+    OSQPVectorf_to_raw(du, ryu);
 
+    // Free up remaining stuff
     OSQPVectorf_free(y_l);
     OSQPVectorf_free(y_u);
 
+    OSQPVectorf_view_free(rx);
     OSQPVectorf_free(ryu);
     OSQPVectorf_free(ryl);
 
@@ -248,5 +274,5 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
 
     OSQPVectorf_free(rhs);
 
-    return status;
+    return 0;
 }
