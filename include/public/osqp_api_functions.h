@@ -244,7 +244,12 @@ OSQP_API c_int osqp_adjoint_derivative(OSQPSolver *solver,
                                        const csc  *check1,
                                        const c_float *check2,
                                        const c_float tol1,
-                                       const c_float tol2);
+                                       const c_float tol2,
+                                       csc* dP,
+                                       c_float *dq,
+                                       csc* dA,
+                                       c_float *dl,
+                                       c_float *du);
 // ------------------ Derivative stuff -----------------
 
 # endif /* if EMBEDDED != 1 */

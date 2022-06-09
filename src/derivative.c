@@ -8,7 +8,7 @@
 #include "csc_utils.h"
 
 
-c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float *dy_u, const csc* check1, const c_float* check2, c_float tol1, c_float tol2) {
+c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float *dy_u, const csc* check1, const c_float* check2, c_float tol1, c_float tol2, csc* dP, c_float* dq, csc* dA, c_float* dl, c_float* du) {
 
     c_int m = solver->work->data->m;
     c_int n = solver->work->data->n;
@@ -30,6 +30,11 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
     c_int *A_ineq_u_vec = (c_int *) c_malloc(m * sizeof(c_int));
     c_int *A_eq_vec = (c_int *) c_malloc(m * sizeof(c_int));
 
+    c_int *eq_indices_vec = (c_int *) c_malloc(m * sizeof(c_int));
+    c_int *ineq_indices_vec = (c_int *) c_malloc(m * sizeof(c_int));
+    c_int *l_noninf_indices_vec = (c_int *) c_malloc(m * sizeof(c_int));
+    c_int *u_noninf_indices_vec = (c_int *) c_malloc(m * sizeof(c_int));
+    c_int *nu_indices_vec = (c_int *) c_malloc(m * sizeof(c_int));
     c_int *nu_sign_vec = (c_int *) c_malloc(m * sizeof(c_int));
 
     // TODO: We could use constr_type in OSQPWorkspace but it only tells us whether a constraint is 'loose'
@@ -38,36 +43,42 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
 
     c_int n_ineq_l = 0;
     c_int n_ineq_u = 0;
+    c_int n_ineq = 0;
     c_int n_eq = 0;
+
     c_int j;
     for (j = 0; j < m; j++) {
         c_float _l = l_data[j];
         c_float _u = u_data[j];
         if (_l < _u) {
+            ineq_indices_vec[n_ineq++] = j;
             A_eq_vec[j] = 0;
             if (_l > -infval) {
+                l_noninf_indices_vec[n_ineq_l] = j;
                 A_ineq_l_vec[j] = 1;
                 n_ineq_l++;
             } else {
                 A_ineq_l_vec[j] = 0;
             }
             if (_u < infval) {
+                u_noninf_indices_vec[n_ineq_u] = j;
                 A_ineq_u_vec[j] = 1;
                 n_ineq_u++;
             } else {
                 A_ineq_u_vec[j] = 0;
             }
-            nu_sign_vec[j] = 0;
         } else {
+            eq_indices_vec[n_eq] = j;
+            nu_indices_vec[n_eq] = j;
             A_eq_vec[j] = 1;
             A_ineq_l_vec[j] = 0;
             A_ineq_u_vec[j] = 0;
-            n_eq++;
             if (y_data[j] >= 0) {
-                nu_sign_vec[j] = 1;
+                nu_sign_vec[n_eq] = 1;
             } else {
-                nu_sign_vec[j] = -1;
+                nu_sign_vec[n_eq] = -1;
             }
+            n_eq++;
         }
     }
 
@@ -86,24 +97,18 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
     OSQPVectori *A_eq_i = OSQPVectori_new(A_eq_vec, m);
     OSQPMatrix *A_eq = OSQPMatrix_submatrix_byrows(A, A_eq_i);
 
-    OSQPVectorf *zeros;
-
     // --------- lambda
-    zeros = OSQPVectorf_malloc(m);
-    OSQPVectorf_set_scalar(zeros, 0);
+    OSQPVectorf *m_zeros = OSQPVectorf_malloc(m);
+    OSQPVectorf_set_scalar(m_zeros, 0);
+    OSQPVectorf *y_u = OSQPVectorf_malloc(m);
+    OSQPVectorf_ew_max_vec(y_u, y, m_zeros);
+    OSQPVectorf *y_l = OSQPVectorf_malloc(m);
+    OSQPVectorf_ew_min_vec(y_l, y, m_zeros);
+    OSQPVectorf_mult_scalar(y_l, -1);
+    OSQPVectorf_free(m_zeros);
 
-    OSQPVectorf *_y_l_ineq = OSQPVectorf_subvector_byrows(y, A_ineq_l_i);
-    OSQPVectorf *y_l_ineq = OSQPVectorf_malloc(OSQPVectorf_length(_y_l_ineq));
-    OSQPVectorf_ew_min_vec(y_l_ineq, _y_l_ineq, zeros);
-    OSQPVectorf_free(_y_l_ineq);
-    OSQPVectorf_mult_scalar(y_l_ineq, -1);
-
-    OSQPVectorf *_y_u_ineq = OSQPVectorf_subvector_byrows(y, A_ineq_u_i);
-    OSQPVectorf *y_u_ineq = OSQPVectorf_malloc(OSQPVectorf_length(_y_u_ineq));
-    OSQPVectorf_ew_max_vec(y_u_ineq, _y_u_ineq, zeros);
-    OSQPVectorf_free(_y_u_ineq);
-    OSQPVectorf_free(zeros);
-
+    OSQPVectorf *y_l_ineq = OSQPVectorf_subvector_byrows(y_l, A_ineq_l_i);
+    OSQPVectorf *y_u_ineq = OSQPVectorf_subvector_byrows(y_u, A_ineq_u_i);
     OSQPVectorf *lambda = OSQPVectorf_concat(y_l_ineq, y_u_ineq);
 
     OSQPVectorf_free(y_l_ineq);
@@ -146,11 +151,11 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
 
     c_float *d_nu_vec = (c_float *) c_malloc(n_eq * sizeof(c_float));
     for (j=0; j<n_eq; j++) {
-        if (nu_sign_vec[j]==-1) {
-            d_nu_vec[j] = dy_u[j];
-        } else if (nu_sign_vec[j]==1) {
-            d_nu_vec[j] = -dy_l[j];
-        } else {}
+        if (nu_sign_vec[j]==1) {
+            d_nu_vec[j] = dy_u[nu_indices_vec[j]];
+        } else if (nu_sign_vec[j]==-1) {
+            d_nu_vec[j] = -dy_l[nu_indices_vec[j]];
+        } else {}  // should never happen
     }
     OSQPVectorf *d_nu = OSQPVectorf_new(d_nu_vec, n_eq);
     c_free(d_nu_vec);
@@ -162,7 +167,7 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
     OSQPVectorf_free(rhs_temp1);
     OSQPVectorf_free(d_nu);
     OSQPVectorf_mult_scalar(rhs_temp2, -1);
-    zeros = OSQPVectorf_malloc(n + n_ineq_l + n_ineq_u + n_eq);
+    OSQPVectorf *zeros = OSQPVectorf_malloc(n + n_ineq_l + n_ineq_u + n_eq);
     OSQPVectorf_set_scalar(zeros, 0);
     OSQPVectorf *rhs = OSQPVectorf_concat(rhs_temp2, zeros);
     OSQPVectorf_free(rhs_temp2);
@@ -180,30 +185,49 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
 
     c_float *r_yl = (c_float *) c_malloc(m * sizeof(c_float));
     c_float *r_yu = (c_float *) c_malloc(m * sizeof(c_float));
+    // TODO: Shouldn't have to do this
+    for (j=0; j<m; j++) r_yl[j] = 0;
+    for (j=0; j<m; j++) r_yu[j] = 0;
 
-    for (j=0; j<m; j++) {
-        if (A_eq_vec[j]) {
-            if (y_data[j] >= 0) {
-                r_yl[j] = 0;
-                r_yu[j] = rhs_data[n + n_ineq_l + n_ineq_u + n_eq + n + n_ineq_l + n_ineq_u + j] / y_data[j];
-            } else {
-                r_yl[j] = -rhs_data[n + n_ineq_l + n_ineq_u + n_eq + n + n_ineq_l + n_ineq_u + j] / y_data[j];
-                r_yu[j] = 0;
-            }
-        } else {
-            if (A_ineq_l_vec[j]) {
-                r_yl[j] = -rhs_data[n + n_ineq_l + n_ineq_u + n_eq + n + j - n_eq];
-            } else {
-                r_yl[j] = 0;
-            }
-            if (A_ineq_u_vec[j]) {
-                r_yu[j] = rhs_data[n + n_ineq_l + n_ineq_u + n_eq + n + n_ineq_l + j - n_eq];
-            } else {
-                r_yu[j] = 0;
-            }
-        }
+    c_int pos = n + n_ineq_l + n_ineq_u + n_eq + n;
+    for (j=0; j<n_ineq_l; j++) {
+        r_yl[l_noninf_indices_vec[j]] = -rhs_data[pos+j];
     }
-    
+    pos += n_ineq_l;
+    for (j=0; j<n_ineq_l; j++) {
+        r_yu[u_noninf_indices_vec[j]] = rhs_data[pos+j];
+    }
+    pos += n_ineq_u;
+    for (j=0; j<n_eq; j++) {
+        if (nu_sign_vec[j]==1) {
+            r_yl[eq_indices_vec[j]] = 0;
+            r_yl[eq_indices_vec[j]] = -rhs_data[pos+j] / y_data[eq_indices_vec[j]];
+        } else {
+            r_yl[eq_indices_vec[j]] = -rhs_data[pos+j] / y_data[eq_indices_vec[j]];
+            r_yu[eq_indices_vec[j]] = 0;
+        }
+
+    }
+
+    OSQPVectorf *ryl = OSQPVectorf_new(r_yl, m);
+    c_free(r_yl);
+    OSQPVectorf_mult(ryl, ryl, y_l);
+    OSQPVectorf_mult_scalar(ryl, -1);
+    OSQPVectorf *ryu = OSQPVectorf_new(r_yu, m);
+    c_free(r_yu);
+    //OSQPVectorf_mult(ryu, ryu, y_u);
+
+    OSQPVectorf_to_raw(dl, ryl);
+
+    OSQPVectorf_free(y_l);
+    OSQPVectorf_free(y_u);
+
+    OSQPVectorf_free(ryu);
+    OSQPVectorf_free(ryl);
+
+    c_free(l_noninf_indices_vec);
+    c_free(u_noninf_indices_vec);
+    c_free(nu_indices_vec);
     c_free(nu_sign_vec);
 
     OSQPMatrix_free(G);
