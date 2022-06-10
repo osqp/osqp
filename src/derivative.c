@@ -9,6 +9,7 @@
 
 
 c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float *dy_u, csc* dP, c_float* dq, csc* dA, c_float* dl, c_float* du) {
+#ifdef ALGEBRA_DEFAULT
 
     c_int m = solver->work->data->m;
     c_int n = solver->work->data->n;
@@ -275,4 +276,12 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
     OSQPVectorf_free(rhs);
 
     return 0;
+
+#else
+
+    c_eprint("Not implemented");
+    return 1;
+
+#endif
+
 }
