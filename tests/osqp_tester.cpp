@@ -177,5 +177,8 @@ TEST_CASE( "test_codegen", "[multi-file:11]" ) {
     SECTION( "test_codegen_defines" ) {
         test_codegen_defines();
     }
+    SECTION( "test_codegen_error_propagation" ) {
+        test_codegen_error_propagation();
+    }
 }
 #endif

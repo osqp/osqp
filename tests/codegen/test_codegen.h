@@ -227,4 +227,108 @@ void test_codegen_defines()
   c_free(defines);
 }
 
+void test_codegen_error_propagation()
+{
+  c_int exitflag;
+
+  // Problem settings
+  OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
+
+  // Codegen defines
+  OSQPCodegenDefines *defines = (OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines));
+
+  // Structures
+  OSQPSolver   *solver; // Solver
+  OSQPTestData *data;      // Data
+  codegen_sols_data *sols_data;
+
+  // Populate data
+  data = generate_problem_codegen();
+  sols_data = generate_problem_codegen_sols_data();
+
+  // Define Solver settings as default
+  osqp_set_default_settings(settings);
+  settings->max_iter      = 2000;
+  settings->alpha         = 1.6;
+  settings->polishing     = 1;
+  settings->scaling       = 0;
+  settings->verbose       = 1;
+  settings->warm_starting = 0;
+
+  // Define codegen settings
+  defines->embedded_mode = 1;    // vector update
+  defines->float_type = 1;       // floats
+  defines->printing_enable = 0;  // no printing
+  defines->profiling_enable = 0; // no timing
+  defines->interrupt_enable = 0; // no interrupts
+
+  // Setup solver
+  exitflag = osqp_setup(&solver, data->P, data->q,
+                        data->A, data->l, data->u,
+                        data->m, data->n, settings);
+
+  // Setup correct
+  mu_assert("Codegen test: Setup error!", exitflag == 0);
+
+  SECTION( "codegen: missing linear system solver" ) {
+    // Artificially delete a vector
+    solver->work->linsys_solver = NULL;
+
+    exitflag = osqp_codegen(solver, CODEGEN_DIR, "error_", defines);
+
+    // Codegen should work
+    mu_assert("codegen: missing linear system solver not handled!",
+              exitflag == OSQP_WORKSPACE_NOT_INIT_ERROR);
+  }
+
+  SECTION( "codegen: missing data" ) {
+    // Artificially delete a vector
+    solver->work->data = NULL;
+
+    exitflag = osqp_codegen(solver, CODEGEN_DIR, "error_", defines);
+
+    // Codegen should work
+    mu_assert("codegen: missing data not handled!",
+              exitflag == OSQP_WORKSPACE_NOT_INIT_ERROR);
+  }
+
+  SECTION( "codegen: missing float vector" ) {
+    // Artificially delete a vector
+    solver->work->data->l = NULL;
+
+    exitflag = osqp_codegen(solver, CODEGEN_DIR, "error_", defines);
+
+    // Codegen should work
+    mu_assert("codegen: missing codegen float vector not handled!",
+              exitflag == OSQP_DATA_NOT_INITIALIZED);
+  }
+
+  SECTION( "codegen: missing integer vector" ) {
+    defines->embedded_mode = 2;
+
+    // Artificially delete a vector
+    solver->work->constr_type = NULL;
+
+    exitflag = osqp_codegen(solver, CODEGEN_DIR, "error_", defines);
+
+    // Codegen should work
+    mu_assert("codegen: missing codegen integer vector not handled!",
+              exitflag == OSQP_DATA_NOT_INITIALIZED);
+  }
+
+  SECTION( "codegen: missing matrix" ) {
+    // Artificially delete a matrix
+    solver->work->data->A = NULL;
+
+    exitflag = osqp_codegen(solver, CODEGEN_DIR, "error_", defines);
+
+    // Codegen should work
+    mu_assert("codegen: missing codegen matrix not handled!",
+              exitflag == OSQP_DATA_NOT_INITIALIZED);
+  }
+
+  // Cleanup
+  c_free(settings);
+  c_free(defines);
+}
 #endif
