@@ -11,7 +11,7 @@
 
 #define PROPAGATE_ERROR(f) \
   exitflag = f; \
-  if (!exitflag) { return exitflag; }
+  if (exitflag) { return exitflag; }
 
 /*********
 * Vectors
@@ -24,7 +24,7 @@ static c_int write_vecf(FILE          *f,
 
   c_int i;
 
-  if (!vecf) osqp_error(OSQP_DATA_NOT_INITIALIZED);
+  if (!vecf) return osqp_error(OSQP_DATA_NOT_INITIALIZED);
 
   if (n) {
     fprintf(f, "c_float %s[%d] = {\n", name, n);
@@ -47,7 +47,7 @@ static c_int write_veci(FILE        *f,
 
   c_int i;
 
-  if (!veci) osqp_error(OSQP_DATA_NOT_INITIALIZED);
+  if (!veci) return osqp_error(OSQP_DATA_NOT_INITIALIZED);
 
   if (n) {
     fprintf(f, "c_int %s[%d] = {\n", name, n);
@@ -70,7 +70,7 @@ static c_int write_OSQPVectorf(FILE              *f,
   c_int exitflag = OSQP_NO_ERROR;
   char vecf_name[50];
 
-  if (!vec) osqp_error(OSQP_DATA_NOT_INITIALIZED);
+  if (!vec) return osqp_error(OSQP_DATA_NOT_INITIALIZED);
 
   sprintf(vecf_name, "%s_val", name);
   PROPAGATE_ERROR(write_vecf(f, vec->values, vec->length, vecf_name))
@@ -86,7 +86,7 @@ static c_int write_OSQPVectori(FILE              *f,
   c_int exitflag = OSQP_NO_ERROR;
   char veci_name[50];
 
-  if (!vec) osqp_error(OSQP_DATA_NOT_INITIALIZED);
+  if (!vec) return osqp_error(OSQP_DATA_NOT_INITIALIZED);
 
   sprintf(veci_name, "%s_val", name);
   PROPAGATE_ERROR(write_veci(f, vec->values, vec->length, veci_name))
@@ -135,7 +135,7 @@ static c_int write_OSQPMatrix(FILE             *f,
   c_int exitflag = OSQP_NO_ERROR;
   char csc_name[50];
 
-  if (!mat) osqp_error(OSQP_DATA_NOT_INITIALIZED);
+  if (!mat) return osqp_error(OSQP_DATA_NOT_INITIALIZED);
 
   sprintf(csc_name, "%s_csc", name);
   PROPAGATE_ERROR(write_csc(f, mat->csc, csc_name))
@@ -265,6 +265,8 @@ static c_int write_scaling(FILE              *f,
   c_int exitflag = OSQP_NO_ERROR;
   char name[50];
 
+  if (!scaling) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+
   fprintf(f, "\n/* Define the scaling structure */\n");
   sprintf(name, "%sscaling_D", prefix);
   PROPAGATE_ERROR(write_OSQPVectorf(f, scaling->D,    name))
@@ -297,6 +299,8 @@ static c_int write_data(FILE           *f,
 
   c_int exitflag = OSQP_NO_ERROR;
   char name[50];
+
+  if (!data) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   fprintf(f, "/* Define the data structure */\n");
   sprintf(name, "%sdata_P", prefix);
@@ -335,6 +339,8 @@ static c_int write_linsys(FILE               *f,
 
   c_int exitflag = OSQP_NO_ERROR;
   char name[50];
+
+  if (!linsys) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   c_int n = linsys->n;
   c_int m = linsys->m;
@@ -421,6 +427,8 @@ static c_int write_workspace(FILE                *f,
 
   c_int exitflag = OSQP_NO_ERROR;
   char name[50];
+
+  if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   PROPAGATE_ERROR(write_data(f, work->data, prefix))
   PROPAGATE_ERROR(write_linsys(f, (qdldl_solver *)work->linsys_solver, work->data, prefix, embedded))
@@ -542,6 +550,8 @@ static c_int write_solver(FILE             *f,
                          const OSQPSolver *solver,
                          const char       *prefix,
                          c_int             embedded){
+
+  if (!solver) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   c_int exitflag = OSQP_NO_ERROR;
 
