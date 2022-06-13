@@ -5,7 +5,7 @@
 const char *OSQP_ERROR_MESSAGE[] = {
   "Problem data validation.",
   "Solver settings validation.",
-  "Linear system solver not available.\nTried to obtain it from shared library.",
+  /* "Linear system solver not available.\nTried to obtain it from shared library.", */
   "Linear system solver initialization.",
   "KKT matrix factorization.\nThe problem seems to be non-convex.",
   "Memory allocation.",
