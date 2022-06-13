@@ -1,6 +1,7 @@
 #include "glob_opts.h"
 #include "osqp.h"
 #include "auxil.h"
+#include "osqp_api_constants.h"
 #include "util.h"
 #include "scaling.h"
 #include "error.h"
@@ -123,6 +124,10 @@ c_int osqp_setup(OSQPSolver         **solverp,
   work   = c_calloc(1, sizeof(OSQPWorkspace));
   if (!(work)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   solver->work = work;
+
+  // Allocate empty info struct
+  solver->info = c_calloc(1, sizeof(OSQPInfo));
+  if (!(solver->info)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Start and allocate directly timer
 # ifdef PROFILING
@@ -252,7 +257,13 @@ c_int osqp_setup(OSQPSolver         **solverp,
                                 work->rho_vec, solver->settings,
                                 &work->scaled_prim_res, &work->scaled_dual_res, 0);
 
-  if (exitflag) return osqp_error(exitflag);
+  if (exitflag == OSQP_NONCVX_ERROR) {
+    update_status(solver->info, OSQP_NON_CVX);
+    return osqp_error(exitflag);
+  }
+  else if (exitflag) {
+    return osqp_error(exitflag);
+  }
 
   // Initialize variables x, y, z to 0
   osqp_cold_start(solver);
@@ -281,9 +292,7 @@ c_int osqp_setup(OSQPSolver         **solverp,
   if ( m && (!(solver->solution->y) || !(solver->solution->prim_inf_cert)) )
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
-  // Allocate and initialize information
-  solver->info = c_calloc(1, sizeof(OSQPInfo));
-  if (!(solver->info)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  // Initialize information
   solver->info->status_polish = 0;              // Polishing not performed
   update_status(solver->info, OSQP_UNSOLVED);
 # ifdef PROFILING
