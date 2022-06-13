@@ -418,15 +418,16 @@ static c_int write_linsys(FILE               *f,
 * Workspace
 ************/
 
-static c_int write_workspace(FILE                *f,
-                             const OSQPWorkspace *work,
-                             c_int                n,
-                             c_int                m,
-                             const char          *prefix,
-                             c_int                embedded){
+static c_int write_workspace(FILE             *f,
+                             const OSQPSolver *solver,
+                             c_int             n,
+                             c_int             m,
+                             const char       *prefix,
+                             c_int             embedded){
 
   c_int exitflag = OSQP_NO_ERROR;
   char name[50];
+  const OSQPWorkspace *work = solver->work;
 
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
@@ -502,7 +503,10 @@ static c_int write_workspace(FILE                *f,
       fprintf(f, "OSQPVectorf %swork_E_temp = { NULL, 0 };\n", prefix);
     }
   }
-  PROPAGATE_ERROR(write_scaling(f, work->scaling, prefix))
+
+  if (solver->settings->scaling) {
+    PROPAGATE_ERROR(write_scaling(f, work->scaling, prefix))
+  }
   
   fprintf(f, "/* Define the workspace structure */\n");
   fprintf(f, "OSQPWorkspace %swork = {\n", prefix);
@@ -528,11 +532,23 @@ static c_int write_workspace(FILE                *f,
   fprintf(f, "  &%swork_Pdelta_x,\n", prefix);
   fprintf(f, "  &%swork_Adelta_x,\n", prefix);
   if (embedded > 1) {
-    fprintf(f, "  &%swork_D_temp,\n", prefix);
-    fprintf(f, "  &%swork_D_temp_A,\n", prefix);
-    fprintf(f, "  &%swork_E_temp,\n", prefix);
+    if (solver->settings->scaling) {
+      fprintf(f, "  &%swork_D_temp,\n", prefix);
+      fprintf(f, "  &%swork_D_temp_A,\n", prefix);
+      fprintf(f, "  &%swork_E_temp,\n", prefix);
+    }
+    else {
+      fprintf(f, "  NULL,\n");
+      fprintf(f, "  NULL,\n");
+      fprintf(f, "  NULL,\n");
+    }
   }
-  fprintf(f, "  &%sscaling,\n", prefix);
+  if (solver->settings->scaling) {
+    fprintf(f, "  &%sscaling,\n", prefix);
+  }
+  else {
+    fprintf(f, "  NULL,\n");
+  }
   fprintf(f, "  (c_float)0.0,\n"); // scaled_prim_res
   fprintf(f, "  (c_float)0.0,\n"); // scaled_dual_res
   fprintf(f, "  (c_float)%.20f,\n", work->rho_inv);
@@ -561,7 +577,7 @@ static c_int write_solver(FILE             *f,
   PROPAGATE_ERROR(write_settings(f, solver->settings, prefix))
   PROPAGATE_ERROR(write_solution(f, n, m, prefix))
   PROPAGATE_ERROR(write_info(f, solver->info, prefix))
-  PROPAGATE_ERROR(write_workspace(f, solver->work, n, m, prefix, embedded))
+  PROPAGATE_ERROR(write_workspace(f, solver, n, m, prefix, embedded))
 
   fprintf(f, "/* Define the solver structure */\n");
   fprintf(f, "OSQPSolver %ssolver = {\n", prefix);
