@@ -299,6 +299,9 @@ c_int osqp_setup(OSQPSolver         **solverp,
 # endif /* ifdef PROFILING */
   solver->info->rho_updates  = 0;                      // Rho updates set to 0
   solver->info->rho_estimate = solver->settings->rho;  // Best rho estimate
+  solver->info->obj_val      = OSQP_INFTY;
+  solver->info->prim_res     = OSQP_INFTY;
+  solver->info->dual_res     = OSQP_INFTY;
 
   // Print header
 # ifdef PRINTING
