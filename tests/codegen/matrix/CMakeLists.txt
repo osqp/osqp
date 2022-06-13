@@ -16,7 +16,7 @@ file( GLOB OSQP_SOURCES
 
 file( GLOB CODEGEN_SOURCES
       CONFIGURE_DEPENDS
-      ${OSQP_CODEGEN_DIR}/*.c
+      ${OSQP_CODEGEN_DIR}/*workspace.c
       ${OSQP_CODEGEN_DIR}/*.h )
 
 
