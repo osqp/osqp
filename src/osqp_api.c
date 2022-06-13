@@ -1175,6 +1175,7 @@ c_int osqp_codegen(OSQPSolver         *solver,
 
   exitflag = codegen_inc(solver, output_dir, file_prefix);
   if (!exitflag) exitflag = codegen_src(solver, output_dir, file_prefix, defines->embedded_mode);
+  if (!exitflag) exitflag = codegen_example(output_dir, file_prefix);
   if (!exitflag) exitflag = codegen_defines(output_dir, defines);
 
   return exitflag;

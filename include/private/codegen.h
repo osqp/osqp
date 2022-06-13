@@ -16,4 +16,7 @@ c_int codegen_src(OSQPSolver *solver,
 c_int codegen_defines(const char         *output_dir,
                       OSQPCodegenDefines *defines);
 
+c_int codegen_example(const char *output_dir,
+                      const char *file_prefix);
+
 #endif /* ifndef CODEGEN_H */
