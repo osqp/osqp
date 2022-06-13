@@ -1168,7 +1168,15 @@ c_int osqp_codegen(OSQPSolver         *solver,
 
   c_int exitflag = 0;
 
-  if (!solver || !solver->work) {
+  if (!solver || !solver->work || !solver->settings || !solver->info) {
+    return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  }
+  /* Don't allow codegen for a non-convex problem. */
+  else if (solver->info->status_val == OSQP_NON_CVX) {
+    return osqp_error(OSQP_NONCVX_ERROR);
+  }
+  /* Test after non-convex error to ensure we throw a useful error code*/
+  else if (!solver->work->data || !solver->work->linsys_solver) {
     return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   }
   else if (!defines || (defines->embedded_mode != 1    && defines->embedded_mode != 2)
@@ -1177,10 +1185,6 @@ c_int osqp_codegen(OSQPSolver         *solver,
                     || (defines->profiling_enable != 0 && defines->profiling_enable != 1)
                     || (defines->interrupt_enable != 0 && defines->interrupt_enable != 1)) {
     return osqp_error(OSQP_CODEGEN_DEFINES_ERROR);
-  }
-  /* Don't allow codegen for a non-convex problem. */
-  else if (solver->info->status_val == OSQP_NON_CVX) {
-    return osqp_error(OSQP_NONCVX_ERROR);
   }
 
   exitflag = codegen_inc(solver, output_dir, file_prefix);
