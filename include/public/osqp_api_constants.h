@@ -35,6 +35,7 @@ enum osqp_linsys_solver_type {
 * Solver Errors  *
 ******************/
 enum osqp_error_type {
+    OSQP_NO_ERROR = 0,
     OSQP_DATA_VALIDATION_ERROR = 1,  /* Start errors from 1 */
     OSQP_SETTINGS_VALIDATION_ERROR,
     OSQP_LINSYS_SOLVER_INIT_ERROR,
@@ -44,6 +45,7 @@ enum osqp_error_type {
     OSQP_ALGEBRA_LOAD_ERROR,
     OSQP_FOPEN_ERROR,
     OSQP_CODEGEN_DEFINES_ERROR,
+    OSQP_DATA_NOT_INITIALIZED,
     OSQP_LAST_ERROR_PLACE,          /* This must always be the last item in the enum */
 };
 extern const char * OSQP_ERROR_MESSAGE[];
