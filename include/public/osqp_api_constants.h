@@ -19,7 +19,7 @@ enum osqp_status_type {
     OSQP_SIGINT,                /* interrupted by user */
     OSQP_UNSOLVED               /* Unsolved; only setup function has been called */
 };
-
+extern const char * OSQP_STATUS_MESSAGE[];
 
 /*************************
 * Linear System Solvers *
