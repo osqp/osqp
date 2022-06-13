@@ -96,3 +96,9 @@ else()
 endif()
 
 add_test(NAME osqp_tester_custom_memory COMMAND osqp_tester_custom_memory)
+
+# ----------------------------------------------
+# Create a folder to store the test codes
+# ----------------------------------------------
+file( MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testcodes )
+add_compile_definitions(CODEGEN_DIR="${CMAKE_CURRENT_BINARY_DIR}/testcodes/")

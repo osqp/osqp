@@ -119,7 +119,7 @@ void test_non_cvx_codegen()
   mu_assert("Non Convex codegen: Setup should have failed!",
             exitflag == OSQP_NONCVX_ERROR);
 
-  exitflag = osqp_codegen(solver, "./", "noncvx_", defines);
+  exitflag = osqp_codegen(solver, CODEGEN_DIR, "noncvx_vec", defines);
 
   // Codegen should fail due to (P + sigma I) having a negative eigenvalue
   mu_assert("Non Convex codegen: codegen type 1 should have failed!",
@@ -127,7 +127,7 @@ void test_non_cvx_codegen()
 
   defines->embedded_mode = 2;    // matrix update
 
-  exitflag = osqp_codegen(solver, "./", "noncvx_", defines);
+  exitflag = osqp_codegen(solver, CODEGEN_DIR, "noncvx_mat", defines);
 
   // Codegen should fail due to (P + sigma I) having a negative eigenvalue
   mu_assert("Non Convex codegen: codegen type 2 should have failed!",
@@ -147,7 +147,7 @@ void test_non_cvx_codegen()
   // Setup should work this time because (P + sigma I) is positive definite
   mu_assert("Non Convex codegen: Setup error!", exitflag == 0);
 
-  exitflag = osqp_codegen(solver, "./", "noncvx_", defines);
+  exitflag = osqp_codegen(solver, CODEGEN_DIR, "noncvx_mat_work_", defines);
 
   // Codegen should work since (P + sigma I) is positive definite
   mu_assert("Non Convex codegen: codegen should have worked!",
