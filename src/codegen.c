@@ -161,14 +161,14 @@ static void write_info(FILE           *f,
   
   fprintf(f, "/* Define the info structure */\n");
   fprintf(f, "OSQPInfo %sinfo = {\n", prefix);
-  fprintf(f, "  \"%s\",\n", info->status);
-  fprintf(f, "  %d,\n", info->status_val);
+  fprintf(f, "  \"%s\",\n", OSQP_STATUS_MESSAGE[OSQP_UNSOLVED]);
+  fprintf(f, "  %d,\n", OSQP_UNSOLVED);
   fprintf(f, "  0,\n"); // status_polish
-  fprintf(f, "  (c_float)%.20f,\n", info->obj_val);
-  fprintf(f, "  (c_float)%.20f,\n", info->prim_res);
-  fprintf(f, "  (c_float)%.20f,\n", info->dual_res);
-  fprintf(f, "  %d,\n", info->iter);
-  fprintf(f, "  %d,\n", info->rho_updates);
+  fprintf(f, "  (c_float)%.20f,\n", OSQP_INFTY); // obj_val
+  fprintf(f, "  (c_float)%.20f,\n", OSQP_INFTY); // prim_res
+  fprintf(f, "  (c_float)%.20f,\n", OSQP_INFTY); // dual_res
+  fprintf(f, "  0,\n"); // iter (iteration count)
+  fprintf(f, "  0,\n"); // rho_updates
   fprintf(f, "  (c_float)%.20f,\n", info->rho_estimate);
   fprintf(f, "  (c_float)0.0,\n"); // setup_time
   fprintf(f, "  (c_float)0.0,\n"); // solve_time
