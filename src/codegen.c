@@ -433,10 +433,14 @@ static c_int write_workspace(FILE             *f,
 
   PROPAGATE_ERROR(write_data(f, work->data, prefix))
   PROPAGATE_ERROR(write_linsys(f, (qdldl_solver *)work->linsys_solver, work->data, prefix, embedded))
-  sprintf(name, "%swork_rho_vec", prefix);
-  PROPAGATE_ERROR(write_OSQPVectorf(f, work->rho_vec, name))
-  sprintf(name, "%swork_rho_inv_vec", prefix);
-  PROPAGATE_ERROR(write_OSQPVectorf(f, work->rho_inv_vec, name))
+
+  if (solver->settings->rho_is_vec) {
+    sprintf(name, "%swork_rho_vec", prefix);
+    PROPAGATE_ERROR(write_OSQPVectorf(f, work->rho_vec, name))
+    sprintf(name, "%swork_rho_inv_vec", prefix);
+    PROPAGATE_ERROR(write_OSQPVectorf(f, work->rho_inv_vec, name))
+  }
+
   if (embedded > 1) {
     sprintf(name, "%swork_constr_type", prefix);
     PROPAGATE_ERROR(write_OSQPVectori(f, work->constr_type, name))
@@ -512,8 +516,15 @@ static c_int write_workspace(FILE             *f,
   fprintf(f, "OSQPWorkspace %swork = {\n", prefix);
   fprintf(f, "  &%sdata,\n", prefix);
   fprintf(f, "  (LinSysSolver *)&%slinsys,\n", prefix);
-  fprintf(f, "  &%swork_rho_vec,\n", prefix);
-  fprintf(f, "  &%swork_rho_inv_vec,\n", prefix);
+
+  if (solver->settings->rho_is_vec) {
+    fprintf(f, "  &%swork_rho_vec,\n", prefix);
+    fprintf(f, "  &%swork_rho_inv_vec,\n", prefix);
+  } else {
+    fprintf(f, "  NULL,\n", prefix);
+    fprintf(f, "  NULL,\n", prefix);
+  }
+
   if (embedded > 1) fprintf(f, "  &%swork_constr_type,\n", prefix);
   fprintf(f, "  &%swork_x,\n", prefix);
   fprintf(f, "  &%swork_y,\n", prefix);
