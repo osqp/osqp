@@ -326,4 +326,87 @@ void test_codegen_error_propagation()
               exitflag == OSQP_DATA_NOT_INITIALIZED);
   }
 }
+
+void test_codegen_settings()
+{
+  c_int exitflag;
+
+  // Problem settings
+  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
+
+  // Codegen defines
+  OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
+
+  // Structures
+  OSQPSolver *tmpSolver = nullptr;
+  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
+
+  // Problem data
+  codegen_problem_ptr   data{generate_problem_codegen()};
+  codegen_sols_data_ptr sols_data{generate_problem_codegen_sols_data()};
+
+  // Define Solver settings as default
+  osqp_set_default_settings(settings.get());
+  settings->max_iter      = 2000;
+  settings->alpha         = 1.6;
+  settings->polishing     = 1;
+  settings->scaling       = 0;
+  settings->verbose       = 1;
+  settings->warm_starting = 0;
+
+  // Define codegen settings
+  defines->embedded_mode = 1;    // vector update
+  defines->float_type = 1;       // floats
+  defines->printing_enable = 0;  // no printing
+  defines->profiling_enable = 0; // no timing
+  defines->interrupt_enable = 0; // no interrupts
+
+  SECTION( "codegen: scaling setting" ) {
+    // Test with both scaling=0 and scaling=1
+    int scaling = GENERATE(0, 1);
+
+    char name[50];
+    settings->scaling = scaling;
+    snprintf(name, 50, "scaling_%d_", scaling);
+
+    // Setup solver
+    exitflag = osqp_setup(&tmpSolver, data->P, data->q,
+                          data->A, data->l, data->u,
+                          data->m, data->n, settings.get());
+    solver.reset(tmpSolver);
+
+    // Setup correct
+    mu_assert("Codegen test: Setup error!", exitflag == 0);
+
+    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, name, defines.get());
+
+    // Codegen should work
+    mu_assert("codegen: Scaling not handled properly!",
+              exitflag == OSQP_NO_ERROR);
+  }
+
+  SECTION( "codegen: rho_is_vec setting" ) {
+    // Test with both rho_is_vec=0 and rho_is_vec=1
+    int rho_is_vec = GENERATE(0, 1);
+
+    char name[50];
+    settings->rho_is_vec = rho_is_vec;
+    snprintf(name, 50, "rho_is_vec_%d_", rho_is_vec);
+
+    // Setup solver
+    exitflag = osqp_setup(&tmpSolver, data->P, data->q,
+                          data->A, data->l, data->u,
+                          data->m, data->n, settings.get());
+    solver.reset(tmpSolver);
+
+    // Setup correct
+    mu_assert("Codegen test: Setup error!", exitflag == 0);
+
+    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, name, defines.get());
+
+    // Codegen should work
+    mu_assert("codegen: rho_is_vec not handled properly!",
+              exitflag == OSQP_NO_ERROR);
+  }
+}
 #endif

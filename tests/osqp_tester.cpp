@@ -180,5 +180,8 @@ TEST_CASE( "test_codegen", "[multi-file:11]" ) {
     SECTION( "test_codegen_error_propagation" ) {
         test_codegen_error_propagation();
     }
+    SECTION( "test_codegen_settings" ) {
+        test_codegen_settings();
+    }
 }
 #endif
