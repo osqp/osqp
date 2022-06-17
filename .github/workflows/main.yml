@@ -104,6 +104,14 @@ jobs:
             ./build/out/osqp_tester
           if: ${{ matrix.cmake_flags == '-DBUILD_TESTING=ON -DCOVERAGE=ON' }}
 
+        - name: Codegen compilation test
+          run: |
+            make -G "${{ matrix.cmake_generator }}" -S tests/settings -B tests/settings/build -DOSQP_BUILD_DIR=build -DOSQP_TEST_CODEGEN_DIR=build/tests/testcodes
+            cmake --build tests/settings/build
+            ./tests/settings/build/osqp_codegen_mode1_settings
+            ./tests/settings/build/osqp_codegen_mode2_settings
+          if: ${{ matrix.cmake_flags == '-DBUILD_TESTING=ON -DCOVERAGE=ON' }}
+
         - name: Valgrid check
           run: |
             sudo apt-get update
