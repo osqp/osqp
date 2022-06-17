@@ -18,12 +18,10 @@ void test_codegen_basic()
   // Structures
   OSQPSolver *tmpSolver = nullptr;
   OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
-  OSQPTestData *data;      // Data
-  codegen_sols_data *sols_data;
 
-  // Populate data
-  data = generate_problem_codegen();
-  sols_data = generate_problem_codegen_sols_data();
+  // Problem data
+  codegen_problem_ptr   data{generate_problem_codegen()};
+  codegen_sols_data_ptr sols_data{generate_problem_codegen_sols_data()};
 
   // Define Solver settings as default
   osqp_set_default_settings(settings.get());
@@ -63,10 +61,6 @@ void test_codegen_basic()
   // Codegen should work
   mu_assert("Non Convex codegen: codegen type 2 should have worked!",
             exitflag == OSQP_NO_ERROR);
-
-  // Cleanup data
-  clean_problem_codegen(data);
-  clean_problem_codegen_sols_data(sols_data);
 }
 
 void test_codegen_defines()
@@ -82,12 +76,10 @@ void test_codegen_defines()
   // Structures
   OSQPSolver *tmpSolver = nullptr;
   OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
-  OSQPTestData *data;      // Data
-  codegen_sols_data *sols_data;
 
-  // Populate data
-  data = generate_problem_codegen();
-  sols_data = generate_problem_codegen_sols_data();
+  // Problem data
+  codegen_problem_ptr   data{generate_problem_codegen()};
+  codegen_sols_data_ptr sols_data{generate_problem_codegen_sols_data()};
 
   // Define Solver settings as default
   osqp_set_default_settings(settings.get());
@@ -217,10 +209,6 @@ void test_codegen_defines()
     mu_assert("Non Convex codegen: interrupt define should have worked!",
               exitflag == expected_flag);
   }
-
-  // Cleanup data
-  clean_problem_codegen(data);
-  clean_problem_codegen_sols_data(sols_data);
 }
 
 void test_codegen_error_propagation()
@@ -236,12 +224,10 @@ void test_codegen_error_propagation()
   // Structures
   OSQPSolver *tmpSolver = nullptr;
   OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
-  OSQPTestData *data;      // Data
-  codegen_sols_data *sols_data;
 
-  // Populate data
-  data = generate_problem_codegen();
-  sols_data = generate_problem_codegen_sols_data();
+  // Problem data
+  codegen_problem_ptr   data{generate_problem_codegen()};
+  codegen_sols_data_ptr sols_data{generate_problem_codegen_sols_data()};
 
   // Define Solver settings as default
   osqp_set_default_settings(settings.get());
@@ -339,9 +325,5 @@ void test_codegen_error_propagation()
     mu_assert("codegen: missing codegen matrix not handled!",
               exitflag == OSQP_DATA_NOT_INITIALIZED);
   }
-
-  // Cleanup data
-  clean_problem_codegen(data);
-  clean_problem_codegen_sols_data(sols_data);
 }
 #endif
