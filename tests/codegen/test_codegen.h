@@ -10,13 +10,14 @@ void test_codegen_basic()
   c_int exitflag;
 
   // Problem settings
-  OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
+  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
 
   // Codegen defines
-  OSQPCodegenDefines *defines = (OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines));
+  OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
 
   // Structures
-  OSQPSolver   *solver; // Solver
+  OSQPSolver *tmpSolver = nullptr;
+  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
   OSQPTestData *data;      // Data
   codegen_sols_data *sols_data;
 
@@ -25,7 +26,7 @@ void test_codegen_basic()
   sols_data = generate_problem_codegen_sols_data();
 
   // Define Solver settings as default
-  osqp_set_default_settings(settings);
+  osqp_set_default_settings(settings.get());
   settings->max_iter      = 2000;
   settings->alpha         = 1.6;
   settings->polishing     = 1;
@@ -41,14 +42,15 @@ void test_codegen_basic()
   defines->interrupt_enable = 0; // no interrupts
 
   // Setup solver
-  exitflag = osqp_setup(&solver, data->P, data->q,
+  exitflag = osqp_setup(&tmpSolver, data->P, data->q,
                         data->A, data->l, data->u,
-                        data->m, data->n, settings);
+                        data->m, data->n, settings.get());
+  solver.reset(tmpSolver);
 
   // Setup correct
   mu_assert("Codegen test: Setup error!", exitflag == 0);
 
-  exitflag = osqp_codegen(solver, CODEGEN_DIR, "basic_", defines);
+  exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "basic_", defines.get());
 
   // Codegen should work
   mu_assert("Non Convex codegen: codegen type 1 should have worked!",
@@ -56,7 +58,7 @@ void test_codegen_basic()
 
   defines->embedded_mode = 2;    // matrix update
 
-  exitflag = osqp_codegen(solver, CODEGEN_DIR, "basic_", defines);
+  exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "basic_", defines.get());
 
   // Codegen should work
   mu_assert("Non Convex codegen: codegen type 2 should have worked!",
@@ -65,10 +67,6 @@ void test_codegen_basic()
   // Cleanup data
   clean_problem_codegen(data);
   clean_problem_codegen_sols_data(sols_data);
-
-  // Cleanup
-  c_free(settings);
-  c_free(defines);
 }
 
 void test_codegen_defines()
@@ -76,13 +74,14 @@ void test_codegen_defines()
   c_int exitflag;
 
   // Problem settings
-  OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
+  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
 
   // Codegen defines
-  OSQPCodegenDefines *defines = (OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines));
+  OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
 
   // Structures
-  OSQPSolver   *solver; // Solver
+  OSQPSolver *tmpSolver = nullptr;
+  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
   OSQPTestData *data;      // Data
   codegen_sols_data *sols_data;
 
@@ -91,7 +90,7 @@ void test_codegen_defines()
   sols_data = generate_problem_codegen_sols_data();
 
   // Define Solver settings as default
-  osqp_set_default_settings(settings);
+  osqp_set_default_settings(settings.get());
   settings->max_iter      = 2000;
   settings->alpha         = 1.6;
   settings->polishing     = 1;
@@ -107,9 +106,10 @@ void test_codegen_defines()
   defines->interrupt_enable = 0; // no interrupts
 
   // Setup solver
-  exitflag = osqp_setup(&solver, data->P, data->q,
+  exitflag = osqp_setup(&tmpSolver, data->P, data->q,
                         data->A, data->l, data->u,
-                        data->m, data->n, settings);
+                        data->m, data->n, settings.get());
+  solver.reset(tmpSolver);
 
   // Setup correct
   mu_assert("Codegen test: Setup error!", exitflag == 0);
@@ -127,7 +127,7 @@ void test_codegen_defines()
 
     defines->embedded_mode = test_input;
 
-    exitflag = osqp_codegen(solver, CODEGEN_DIR, "basic_", defines);
+    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "basic_", defines.get());
 
     // Codegen should work or error as appropriate
     mu_assert("Non Convex codegen: embedded define should have worked!",
@@ -148,7 +148,7 @@ void test_codegen_defines()
 
     defines->float_type = test_input;
 
-    exitflag = osqp_codegen(solver, CODEGEN_DIR, "basic_", defines);
+    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "basic_", defines.get());
 
     // Codegen should work or error as appropriate
     mu_assert("Non Convex codegen: float define should have worked!",
@@ -169,7 +169,7 @@ void test_codegen_defines()
 
     defines->printing_enable = test_input;
 
-    exitflag = osqp_codegen(solver, CODEGEN_DIR, "basic_", defines);
+    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "basic_", defines.get());
 
     // Codegen should work or error as appropriate
     mu_assert("Non Convex codegen: printing define should have worked!",
@@ -190,7 +190,7 @@ void test_codegen_defines()
 
     defines->profiling_enable = test_input;
 
-    exitflag = osqp_codegen(solver, CODEGEN_DIR, "basic_", defines);
+    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "basic_", defines.get());
 
     // Codegen should work or error as appropriate
     mu_assert("Non Convex codegen: profiling define should have worked!",
@@ -211,7 +211,7 @@ void test_codegen_defines()
 
     defines->interrupt_enable = test_input;
 
-    exitflag = osqp_codegen(solver, CODEGEN_DIR, "basic_", defines);
+    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "basic_", defines.get());
 
     // Codegen should work or error as appropriate
     mu_assert("Non Convex codegen: interrupt define should have worked!",
@@ -221,10 +221,6 @@ void test_codegen_defines()
   // Cleanup data
   clean_problem_codegen(data);
   clean_problem_codegen_sols_data(sols_data);
-
-  // Cleanup
-  c_free(settings);
-  c_free(defines);
 }
 
 void test_codegen_error_propagation()
@@ -232,13 +228,14 @@ void test_codegen_error_propagation()
   c_int exitflag;
 
   // Problem settings
-  OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
+  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
 
   // Codegen defines
-  OSQPCodegenDefines *defines = (OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines));
+  OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
 
   // Structures
-  OSQPSolver   *solver; // Solver
+  OSQPSolver *tmpSolver = nullptr;
+  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
   OSQPTestData *data;      // Data
   codegen_sols_data *sols_data;
 
@@ -247,7 +244,7 @@ void test_codegen_error_propagation()
   sols_data = generate_problem_codegen_sols_data();
 
   // Define Solver settings as default
-  osqp_set_default_settings(settings);
+  osqp_set_default_settings(settings.get());
   settings->max_iter      = 2000;
   settings->alpha         = 1.6;
   settings->polishing     = 1;
@@ -263,18 +260,22 @@ void test_codegen_error_propagation()
   defines->interrupt_enable = 0; // no interrupts
 
   // Setup solver
-  exitflag = osqp_setup(&solver, data->P, data->q,
+  exitflag = osqp_setup(&tmpSolver, data->P, data->q,
                         data->A, data->l, data->u,
-                        data->m, data->n, settings);
+                        data->m, data->n, settings.get());
+  solver.reset(tmpSolver);
 
   // Setup correct
   mu_assert("Codegen test: Setup error!", exitflag == 0);
 
   SECTION( "codegen: missing linear system solver" ) {
-    // Artificially delete a vector
+    // Artificially delete the linsys solver
+    void *tmpVar = solver->work->linsys_solver;
     solver->work->linsys_solver = NULL;
 
-    exitflag = osqp_codegen(solver, CODEGEN_DIR, "error_", defines);
+    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "error_", defines.get());
+
+    solver->work->linsys_solver = (LinSysSolver *) tmpVar;
 
     // Codegen should work
     mu_assert("codegen: missing linear system solver not handled!",
@@ -282,10 +283,13 @@ void test_codegen_error_propagation()
   }
 
   SECTION( "codegen: missing data" ) {
-    // Artificially delete a vector
+    // Artificially delete all the data
+    void *tmpVar = solver->work->data;
     solver->work->data = NULL;
 
-    exitflag = osqp_codegen(solver, CODEGEN_DIR, "error_", defines);
+    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "error_", defines.get());
+
+    solver->work->data = (OSQPData *) tmpVar;
 
     // Codegen should work
     mu_assert("codegen: missing data not handled!",
@@ -294,9 +298,12 @@ void test_codegen_error_propagation()
 
   SECTION( "codegen: missing float vector" ) {
     // Artificially delete a vector
+    void *tmpVar = solver->work->data->l;
     solver->work->data->l = NULL;
 
-    exitflag = osqp_codegen(solver, CODEGEN_DIR, "error_", defines);
+    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "error_", defines.get());
+
+    solver->work->data->l = (OSQPVectorf *) tmpVar;
 
     // Codegen should work
     mu_assert("codegen: missing codegen float vector not handled!",
@@ -307,9 +314,12 @@ void test_codegen_error_propagation()
     defines->embedded_mode = 2;
 
     // Artificially delete a vector
+    void *tmpVar = solver->work->constr_type;
     solver->work->constr_type = NULL;
 
-    exitflag = osqp_codegen(solver, CODEGEN_DIR, "error_", defines);
+    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "error_", defines.get());
+
+    solver->work->constr_type = (OSQPVectori *) tmpVar;
 
     // Codegen should work
     mu_assert("codegen: missing codegen integer vector not handled!",
@@ -318,17 +328,20 @@ void test_codegen_error_propagation()
 
   SECTION( "codegen: missing matrix" ) {
     // Artificially delete a matrix
+    void *tmpVar = solver->work->data->A;
     solver->work->data->A = NULL;
 
-    exitflag = osqp_codegen(solver, CODEGEN_DIR, "error_", defines);
+    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "error_", defines.get());
+
+    solver->work->data->A = (OSQPMatrix *) tmpVar;
 
     // Codegen should work
     mu_assert("codegen: missing codegen matrix not handled!",
               exitflag == OSQP_DATA_NOT_INITIALIZED);
   }
 
-  // Cleanup
-  c_free(settings);
-  c_free(defines);
+  // Cleanup data
+  clean_problem_codegen(data);
+  clean_problem_codegen_sols_data(sols_data);
 }
 #endif
