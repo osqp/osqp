@@ -13,6 +13,10 @@
   exitflag = f; \
   if (exitflag) { return exitflag; }
 
+#define GENERATE_ERROR(f) \
+  exitflag = f; \
+  if (exitflag) { return _osqp_error_line(exitflag, __FUNCTION__, __FILE__, __LINE__); }
+
 /*********
 * Vectors
 **********/
@@ -24,7 +28,7 @@ static c_int write_vecf(FILE          *f,
 
   c_int i;
 
-  if (!vecf) return osqp_error(OSQP_DATA_NOT_INITIALIZED);
+  if (!vecf) return OSQP_DATA_NOT_INITIALIZED;
 
   if (n) {
     fprintf(f, "c_float %s[%d] = {\n", name, n);
@@ -47,7 +51,7 @@ static c_int write_veci(FILE        *f,
 
   c_int i;
 
-  if (!veci) return osqp_error(OSQP_DATA_NOT_INITIALIZED);
+  if (!veci) return OSQP_DATA_NOT_INITIALIZED;
 
   if (n) {
     fprintf(f, "c_int %s[%d] = {\n", name, n);
@@ -70,7 +74,7 @@ static c_int write_OSQPVectorf(FILE              *f,
   c_int exitflag = OSQP_NO_ERROR;
   char vecf_name[50];
 
-  if (!vec) return osqp_error(OSQP_DATA_NOT_INITIALIZED);
+  if (!vec) return OSQP_DATA_NOT_INITIALIZED;
 
   sprintf(vecf_name, "%s_val", name);
   PROPAGATE_ERROR(write_vecf(f, vec->values, vec->length, vecf_name))
@@ -86,7 +90,7 @@ static c_int write_OSQPVectori(FILE              *f,
   c_int exitflag = OSQP_NO_ERROR;
   char veci_name[50];
 
-  if (!vec) return osqp_error(OSQP_DATA_NOT_INITIALIZED);
+  if (!vec) return OSQP_DATA_NOT_INITIALIZED;
 
   sprintf(veci_name, "%s_val", name);
   PROPAGATE_ERROR(write_veci(f, vec->values, vec->length, veci_name))
@@ -107,7 +111,7 @@ static c_int write_csc(FILE       *f,
   c_int exitflag = OSQP_NO_ERROR;
   char vec_name[50];
 
-  if (!M) return osqp_error(OSQP_DATA_NOT_INITIALIZED);
+  if (!M) return OSQP_DATA_NOT_INITIALIZED;
 
   sprintf(vec_name, "%s_p", name);
   PROPAGATE_ERROR(write_veci(f, M->p, M->n+1, vec_name))
@@ -135,7 +139,7 @@ static c_int write_OSQPMatrix(FILE             *f,
   c_int exitflag = OSQP_NO_ERROR;
   char csc_name[50];
 
-  if (!mat) return osqp_error(OSQP_DATA_NOT_INITIALIZED);
+  if (!mat) return OSQP_DATA_NOT_INITIALIZED;
 
   sprintf(csc_name, "%s_csc", name);
   PROPAGATE_ERROR(write_csc(f, mat->csc, csc_name))
@@ -269,13 +273,13 @@ static c_int write_scaling(FILE              *f,
 
   fprintf(f, "\n/* Define the scaling structure */\n");
   sprintf(name, "%sscaling_D", prefix);
-  PROPAGATE_ERROR(write_OSQPVectorf(f, scaling->D,    name))
+  GENERATE_ERROR(write_OSQPVectorf(f, scaling->D,    name))
   sprintf(name, "%sscaling_E", prefix);
-  PROPAGATE_ERROR(write_OSQPVectorf(f, scaling->E,    name))
+  GENERATE_ERROR(write_OSQPVectorf(f, scaling->E,    name))
   sprintf(name, "%sscaling_Dinv", prefix);
-  PROPAGATE_ERROR(write_OSQPVectorf(f, scaling->Dinv, name))
+  GENERATE_ERROR(write_OSQPVectorf(f, scaling->Dinv, name))
   sprintf(name, "%sscaling_Einv", prefix);
-  PROPAGATE_ERROR(write_OSQPVectorf(f, scaling->Einv, name))
+  GENERATE_ERROR(write_OSQPVectorf(f, scaling->Einv, name))
   fprintf(f, "OSQPScaling %sscaling = {\n", prefix);
   fprintf(f, "  (c_float)%.20f,\n", scaling->c);
   fprintf(f, "  &%sscaling_D,\n", prefix);
@@ -304,15 +308,15 @@ static c_int write_data(FILE           *f,
 
   fprintf(f, "/* Define the data structure */\n");
   sprintf(name, "%sdata_P", prefix);
-  PROPAGATE_ERROR(write_OSQPMatrix(f,  data->P, name))
+  GENERATE_ERROR(write_OSQPMatrix(f,  data->P, name))
   sprintf(name, "%sdata_A", prefix);
-  PROPAGATE_ERROR(write_OSQPMatrix(f,  data->A, name))
+  GENERATE_ERROR(write_OSQPMatrix(f,  data->A, name))
   sprintf(name, "%sdata_q", prefix);
-  PROPAGATE_ERROR(write_OSQPVectorf(f, data->q, name))
+  GENERATE_ERROR(write_OSQPVectorf(f, data->q, name))
   sprintf(name, "%sdata_l", prefix);
-  PROPAGATE_ERROR(write_OSQPVectorf(f, data->l, name))
+  GENERATE_ERROR(write_OSQPVectorf(f, data->l, name))
   sprintf(name, "%sdata_u", prefix);
-  PROPAGATE_ERROR(write_OSQPVectorf(f, data->u, name))
+  GENERATE_ERROR(write_OSQPVectorf(f, data->u, name))
   fprintf(f, "OSQPData %sdata = {\n", prefix);
   fprintf(f, "  %d,\n", data->n);
   fprintf(f, "  %d,\n", data->m);
@@ -347,30 +351,30 @@ static c_int write_linsys(FILE               *f,
 
   fprintf(f, "/* Define the linear system solver structure */\n");
   sprintf(name, "%slinsys_L", prefix);
-  PROPAGATE_ERROR(write_csc(f, linsys->L, name))
+  GENERATE_ERROR(write_csc(f, linsys->L, name))
   sprintf(name, "%slinsys_Dinv", prefix);
-  PROPAGATE_ERROR(write_vecf(f, linsys->Dinv, n+m, name))
+  GENERATE_ERROR(write_vecf(f, linsys->Dinv, n+m, name))
   sprintf(name, "%slinsys_P", prefix);
-  PROPAGATE_ERROR(write_veci(f, linsys->P, n+m, name))
+  GENERATE_ERROR(write_veci(f, linsys->P, n+m, name))
   fprintf(f, "c_float %slinsys_bp[%d];\n",  prefix, n+m);
   fprintf(f, "c_float %slinsys_sol[%d];\n", prefix, n+m);
   sprintf(name, "%slinsys_rho_inv_vec", prefix);
-  PROPAGATE_ERROR(write_vecf(f, linsys->rho_inv_vec, m, name))
+  GENERATE_ERROR(write_vecf(f, linsys->rho_inv_vec, m, name))
   if (embedded > 1) {
     sprintf(name, "%slinsys_KKT", prefix);
-    PROPAGATE_ERROR(write_csc(f, linsys->KKT, name))
+    GENERATE_ERROR(write_csc(f, linsys->KKT, name))
     sprintf(name, "%slinsys_PtoKKT", prefix);
-    PROPAGATE_ERROR(write_veci(f, linsys->PtoKKT, data->P->csc->p[n], name))
+    GENERATE_ERROR(write_veci(f, linsys->PtoKKT, data->P->csc->p[n], name))
     sprintf(name, "%slinsys_AtoKKT", prefix);
-    PROPAGATE_ERROR(write_veci(f, linsys->AtoKKT, data->A->csc->p[n], name))
+    GENERATE_ERROR(write_veci(f, linsys->AtoKKT, data->A->csc->p[n], name))
     sprintf(name, "%slinsys_rhotoKKT", prefix);
-    PROPAGATE_ERROR(write_veci(f, linsys->rhotoKKT, m, name))
+    GENERATE_ERROR(write_veci(f, linsys->rhotoKKT, m, name))
     sprintf(name, "%slinsys_D", prefix);
-    PROPAGATE_ERROR(write_vecf(f, linsys->D, n+m, name))
+    GENERATE_ERROR(write_vecf(f, linsys->D, n+m, name))
     sprintf(name, "%slinsys_etree", prefix);
-    PROPAGATE_ERROR(write_veci(f, linsys->etree, n+m, name))
+    GENERATE_ERROR(write_veci(f, linsys->etree, n+m, name))
     sprintf(name, "%slinsys_Lnz", prefix);
-    PROPAGATE_ERROR(write_veci(f, linsys->Lnz, n+m, name))
+    GENERATE_ERROR(write_veci(f, linsys->Lnz, n+m, name))
     fprintf(f, "QDLDL_int   %slinsys_iwork[%d];\n", prefix, 3*(n+m));
     fprintf(f, "QDLDL_bool  %slinsys_bwork[%d];\n", prefix, n+m);
     fprintf(f, "QDLDL_float %slinsys_fwork[%d];\n", prefix, n+m);
@@ -436,23 +440,23 @@ static c_int write_workspace(FILE             *f,
 
   if (solver->settings->rho_is_vec) {
     sprintf(name, "%swork_rho_vec", prefix);
-    PROPAGATE_ERROR(write_OSQPVectorf(f, work->rho_vec, name))
+    GENERATE_ERROR(write_OSQPVectorf(f, work->rho_vec, name))
     sprintf(name, "%swork_rho_inv_vec", prefix);
-    PROPAGATE_ERROR(write_OSQPVectorf(f, work->rho_inv_vec, name))
+    GENERATE_ERROR(write_OSQPVectorf(f, work->rho_inv_vec, name))
   }
 
   if (embedded > 1) {
     sprintf(name, "%swork_constr_type", prefix);
-    PROPAGATE_ERROR(write_OSQPVectori(f, work->constr_type, name))
+    GENERATE_ERROR(write_OSQPVectori(f, work->constr_type, name))
   }
 
   /* Initialize x,y,z as we usually want to warm start the iterates */
   sprintf(name, "%swork_x", prefix);
-  PROPAGATE_ERROR(write_OSQPVectorf(f, work->x, name))
+  GENERATE_ERROR(write_OSQPVectorf(f, work->x, name))
   sprintf(name, "%swork_y", prefix);
-  PROPAGATE_ERROR(write_OSQPVectorf(f, work->y, name))
+  GENERATE_ERROR(write_OSQPVectorf(f, work->y, name))
   sprintf(name, "%swork_z", prefix);
-  PROPAGATE_ERROR(write_OSQPVectorf(f, work->z, name))
+  GENERATE_ERROR(write_OSQPVectorf(f, work->z, name))
 
   fprintf(f, "c_float %swork_xz_tilde_val[%d];\n", prefix, n+m);
   fprintf(f, "OSQPVectorf %swork_xz_tilde = {\n  %swork_xz_tilde_val,\n  %d\n};\n", prefix, prefix, n+m);
