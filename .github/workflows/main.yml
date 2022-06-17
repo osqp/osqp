@@ -44,6 +44,9 @@ jobs:
           # See https://github.com/conda-incubator/setup-miniconda#IMPORTANT
           shell: bash -l {0}
 
+      env:
+        OSQP_BUILD_DIR_PREFIX: ${{ github.workspace }}/build
+
       steps:
         - uses: actions/checkout@v2
           with:
@@ -90,23 +93,23 @@ jobs:
 
         - name: Build
           run: |
-            cmake -G "${{ matrix.cmake_generator }}" -S . -B build ${{ matrix.cmake_flags }} ${{ matrix.cmake_flags_extra }}
-            cmake --build build
+            cmake -G "${{ matrix.cmake_generator }}" -S . -B $OSQP_BUILD_DIR_PREFIX ${{ matrix.cmake_flags }} ${{ matrix.cmake_flags_extra }}
+            cmake --build $OSQP_BUILD_DIR_PREFIX
 
         # useful for inspecting the OSQP version information
         - name: OSQP Demo
           run: |
-            ./build/out/osqp_demo
+            $OSQP_BUILD_DIR_PREFIX/out/osqp_demo
           if: ${{ !contains(matrix.cmake_flags_extra, 'EMBEDDED') }}
 
         - name: Test
           run: |
-            ./build/out/osqp_tester
+            $OSQP_BUILD_DIR_PREFIX/out/osqp_tester
           if: ${{ matrix.cmake_flags == '-DBUILD_TESTING=ON -DCOVERAGE=ON' }}
 
         - name: Codegen compilation test
           run: |
-            cmake -G "${{ matrix.cmake_generator }}" -S tests/codegen/settings -B tests/codegen/settings/build -DOSQP_BUILD_DIR=build -DOSQP_TEST_CODEGEN_DIR=build/tests/testcodes
+            cmake -G "${{ matrix.cmake_generator }}" -S tests/codegen/settings -B tests/codegen/settings/build -DOSQP_BUILD_DIR=$OSQP_BUILD_DIR_PREFIX -DOSQP_TEST_CODEGEN_DIR=$OSQP_BUILD_DIR_PREFIX/tests/testcodes
             cmake --build tests/codegen/settings/build
             ./tests/codegen/settings/build/osqp_codegen_mode1_settings
             ./tests/codegen/settings/build/osqp_codegen_mode2_settings
@@ -117,20 +120,20 @@ jobs:
             sudo apt-get update
             sudo apt-get install valgrind
             valgrind --suppressions=.valgrind-suppress.supp --leak-check=full --gen-suppressions=all \
-              --track-origins=yes --error-exitcode=1 build/out/osqp_tester
+              --track-origins=yes --error-exitcode=1 $OSQP_BUILD_DIR_PREFIX/out/osqp_tester
           if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DBUILD_TESTING=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '-DALGEBRA=default' }}
 
         - name: Generate coverage
           uses: imciner2/run-lcov@v1
           with:
-            input_directory: '${{ runner.workspace }}/osqp/build'
+            input_directory: '$OSQP_BUILD_DIR_PREFIX'
             exclude: '"$GITHUB_WORKSPACE/tests/*" "$GITHUB_WORKSPACE/algebra/default/lin_sys/direct/amd/*" "$GITHUB_WORKSPACE/build/*" "/usr/include/*"'
-            output_file: '${{ runner.workspace }}/osqp/build/coverage.info'
+            output_file: '$OSQP_BUILD_DIR_PREFIX/coverage.info'
           if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DBUILD_TESTING=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '' }}
 
         - name: Coveralls
           uses: coverallsapp/github-action@master
           with:
-            path-to-lcov: '${{ runner.workspace }}/osqp/build/coverage.info'
+            path-to-lcov: '$OSQP_BUILD_DIR_PREFIX/coverage.info'
             github-token: ${{ secrets.GITHUB_TOKEN }}
           if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DBUILD_TESTING=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '' }}
