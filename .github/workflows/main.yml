@@ -113,7 +113,7 @@ jobs:
             cmake --build tests/codegen/settings/build
             ./tests/codegen/settings/build/osqp_codegen_mode1_settings
             ./tests/codegen/settings/build/osqp_codegen_mode2_settings
-          if: ${{ matrix.cmake_flags == '-DBUILD_TESTING=ON -DCOVERAGE=ON' }}
+          if: ${{ matrix.cmake_flags == '-DBUILD_TESTING=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '-DALGEBRA=default' }}
 
         - name: Valgrid check
           run: |
