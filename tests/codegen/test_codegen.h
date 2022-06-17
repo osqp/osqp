@@ -363,13 +363,17 @@ void test_codegen_settings()
   defines->profiling_enable = 0; // no timing
   defines->interrupt_enable = 0; // no interrupts
 
+  // scaling changes some allocations (some vectors become null)
   SECTION( "codegen: scaling setting" ) {
     // Test with both scaling=0 and scaling=1
-    int scaling = GENERATE(0, 1);
+    int scaling  = GENERATE(0, 1);
+    int embedded = GENERATE(1, 2);
 
-    char name[50];
+    char name[100];
+    snprintf(name, 100, "scaling_%d_embedded_%d_", scaling, embedded);
+
     settings->scaling = scaling;
-    snprintf(name, 50, "scaling_%d_", scaling);
+    defines->embedded_mode = embedded;
 
     // Setup solver
     exitflag = osqp_setup(&tmpSolver, data->P, data->q,
@@ -387,13 +391,17 @@ void test_codegen_settings()
               exitflag == OSQP_NO_ERROR);
   }
 
+  // rho_is_vec changes some allocations (some vectors become null)
   SECTION( "codegen: rho_is_vec setting" ) {
     // Test with both rho_is_vec=0 and rho_is_vec=1
     int rho_is_vec = GENERATE(0, 1);
+    int embedded = GENERATE(1, 2);
 
-    char name[50];
+    char name[100];
+    snprintf(name, 100, "rho_is_vec_%d__embedded_%d_", rho_is_vec, embedded);
+
     settings->rho_is_vec = rho_is_vec;
-    snprintf(name, 50, "rho_is_vec_%d_", rho_is_vec);
+    defines->embedded_mode = embedded;
 
     // Setup solver
     exitflag = osqp_setup(&tmpSolver, data->P, data->q,
