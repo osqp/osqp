@@ -66,4 +66,6 @@ int main() {
   } else {
     printf( "  Solved scaling_1 with no error.\n" );
   }
+
+  return 0;
 }
