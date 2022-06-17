@@ -144,6 +144,8 @@ endif()
 option(COVERAGE "Perform code coverage" OFF)
 message(STATUS "COVERAGE = ${COVERAGE}")
 
+option(OSQP_ASAN "Enable ASAN" OFF)
+
 if(OSQP_CUSTOM_MEMORY)
   message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY}")
 endif()
@@ -211,6 +213,15 @@ if(NOT MSVC)
     if(FORTRAN)
       set(CMAKE_FORTRAN_FLAGS "${CMAKE_FORTRAN_FLAGS} --coverage")
     endif(FORTRAN)
+  endif()
+
+  if(OSQP_ASAN)
+        set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -fsanitize=address -fno-optimize-sibling-calls -fsanitize-address-use-after-scope -fno-omit-frame-pointer" )
+        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -D_GLIBCXX_SANITIZE_VECTOR -fsanitize=address -fno-optimize-sibling-calls -fsanitize-address-use-after-scope -fno-omit-frame-pointer" )
+
+        # ASAN shouldn't be used with these options (https://github.com/google/sanitizers/wiki/AddressSanitizer#faq)
+        set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-stack-protector -U_FORTIFY_SOURCE" )
+        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-stack-protector -U_FORTIFY_SOURCE" )
   endif()
 
   if(DEBUG)
