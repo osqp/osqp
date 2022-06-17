@@ -355,7 +355,7 @@ static c_int write_linsys(FILE               *f,
   fprintf(f, "c_float %slinsys_bp[%d];\n",  prefix, n+m);
   fprintf(f, "c_float %slinsys_sol[%d];\n", prefix, n+m);
   sprintf(name, "%slinsys_rho_inv_vec", prefix);
-  PROPAGATE_ERROR(write_vecf(f, linsys->rho_inv_vec, n+m, name))
+  PROPAGATE_ERROR(write_vecf(f, linsys->rho_inv_vec, m, name))
   if (embedded > 1) {
     sprintf(name, "%slinsys_KKT", prefix);
     PROPAGATE_ERROR(write_csc(f, linsys->KKT, name))
