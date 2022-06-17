@@ -366,8 +366,15 @@ void test_codegen_settings()
   // scaling changes some allocations (some vectors become null)
   SECTION( "codegen: scaling setting" ) {
     // Test with both scaling=0 and scaling=1
-    int scaling  = GENERATE(0, 1);
-    int embedded = GENERATE(1, 2);
+    c_int scaling  = GENERATE(0, 1);
+    c_int embedded;
+    std::string dir;
+
+    std::tie( embedded, dir ) =
+      GENERATE( table<c_int, std::string>(
+          { /* first is embedded mode, second is output directory */
+            std::make_tuple( 1, CODEGEN1_DIR ),
+            std::make_tuple( 2, CODEGEN2_DIR ) } ) );
 
     char name[100];
     snprintf(name, 100, "scaling_%d_embedded_%d_", scaling, embedded);
@@ -384,7 +391,7 @@ void test_codegen_settings()
     // Setup correct
     mu_assert("Codegen test: Setup error!", exitflag == 0);
 
-    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, name, defines.get());
+    exitflag = osqp_codegen(solver.get(), dir.c_str(), name, defines.get());
 
     // Codegen should work
     mu_assert("codegen: Scaling not handled properly!",
@@ -394,11 +401,18 @@ void test_codegen_settings()
   // rho_is_vec changes some allocations (some vectors become null)
   SECTION( "codegen: rho_is_vec setting" ) {
     // Test with both rho_is_vec=0 and rho_is_vec=1
-    int rho_is_vec = GENERATE(0, 1);
-    int embedded = GENERATE(1, 2);
+    c_int rho_is_vec = GENERATE(0, 1);
+    c_int embedded;
+    std::string dir;
+
+    std::tie( embedded, dir ) =
+      GENERATE( table<c_int, std::string>(
+          { /* first is embedded mode, second is output directory */
+            std::make_tuple( 1, CODEGEN1_DIR ),
+            std::make_tuple( 2, CODEGEN2_DIR ) } ) );
 
     char name[100];
-    snprintf(name, 100, "rho_is_vec_%d__embedded_%d_", rho_is_vec, embedded);
+    snprintf(name, 100, "rho_is_vec_%d_embedded_%d_", rho_is_vec, embedded);
 
     settings->rho_is_vec = rho_is_vec;
     defines->embedded_mode = embedded;
@@ -412,7 +426,7 @@ void test_codegen_settings()
     // Setup correct
     mu_assert("Codegen test: Setup error!", exitflag == 0);
 
-    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, name, defines.get());
+    exitflag = osqp_codegen(solver.get(), dir.c_str(), name, defines.get());
 
     // Codegen should work
     mu_assert("codegen: rho_is_vec not handled properly!",
