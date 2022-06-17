@@ -126,14 +126,14 @@ jobs:
         - name: Generate coverage
           uses: imciner2/run-lcov@v1
           with:
-            input_directory: '$OSQP_BUILD_DIR_PREFIX'
-            exclude: '"$GITHUB_WORKSPACE/tests/*" "$GITHUB_WORKSPACE/algebra/default/lin_sys/direct/amd/*" "$GITHUB_WORKSPACE/build/*" "/usr/include/*"'
-            output_file: '$OSQP_BUILD_DIR_PREFIX/coverage.info'
+            input_directory: '${{ env.OSQP_BUILD_DIR_PREFIX }}'
+            exclude: '"$GITHUB_WORKSPACE/tests/*" "$GITHUB_WORKSPACE/algebra/default/lin_sys/direct/amd/*" "$GITHUB_WORKSPACE/examples/*" "$GITHUB_WORKSPACE/build/*" "/usr/include/*"'
+            output_file: '${{ env.OSQP_BUILD_DIR_PREFIX }}/coverage.info'
           if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DBUILD_TESTING=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '' }}
 
         - name: Coveralls
           uses: coverallsapp/github-action@master
           with:
-            path-to-lcov: '$OSQP_BUILD_DIR_PREFIX/coverage.info'
+            path-to-lcov: '${{ env.OSQP_BUILD_DIR_PREFIX }}/coverage.info'
             github-token: ${{ secrets.GITHUB_TOKEN }}
           if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DBUILD_TESTING=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '' }}
