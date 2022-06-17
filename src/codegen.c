@@ -38,7 +38,7 @@ static c_int write_vecf(FILE          *f,
     fprintf(f, "};\n");
   }
   else {
-    fprintf(f, "c_float *%s = NULL;\n", name);
+    fprintf(f, "c_float *%s = OSQP_NULL;\n", name);
   }
 
   return OSQP_NO_ERROR;
@@ -61,7 +61,7 @@ static c_int write_veci(FILE        *f,
     fprintf(f, "};\n");
   }
   else {
-    fprintf(f, "c_int *%s = NULL;\n", name);
+    fprintf(f, "c_int *%s = OSQP_NULL;\n", name);
   }
 
   return OSQP_NO_ERROR;
@@ -243,9 +243,9 @@ static c_int write_solution(FILE       *f,
   fprintf(f, "/* Define the solution structure */\n");
   fprintf(f, "c_float %ssol_x[%d];\n", prefix, n);
   if (m > 0) fprintf(f, "c_float %ssol_y[%d];\n", prefix, m);
-  else       fprintf(f, "c_float *%ssol_y = NULL;\n", prefix);
+  else       fprintf(f, "c_float *%ssol_y = OSQP_NULL;\n", prefix);
   if (m > 0) fprintf(f, "c_float %ssol_prim_inf_cert[%d];\n", prefix, m);
-  else       fprintf(f, "c_float *%ssol_prim_inf_cert = NULL;\n", prefix);
+  else       fprintf(f, "c_float *%ssol_prim_inf_cert = OSQP_NULL;\n", prefix);
   fprintf(f, "c_float %ssol_dual_inf_cert[%d];\n", prefix, n);
   fprintf(f, "OSQPSolution %ssol = {\n", prefix);
   fprintf(f, "  %ssol_x,\n", prefix);
@@ -404,7 +404,7 @@ static c_int write_linsys(FILE               *f,
     fprintf(f, "  %slinsys_rho_inv_vec,\n", prefix);
   }
   else {
-    fprintf(f, "  NULL,\n", prefix);
+    fprintf(f, "  OSQP_NULL,\n", prefix);
   }
 
   fprintf(f, "  (c_float)%.20f,\n", linsys->sigma);
@@ -482,8 +482,8 @@ static c_int write_workspace(FILE             *f,
     fprintf(f, "OSQPVectorf %swork_Ax = {\n  %swork_Ax_val,\n  %d\n};\n", prefix, prefix, m);
   }
   else {
-    fprintf(f, "OSQPVectorf %swork_z_prev = { NULL, 0 };\n", prefix);
-    fprintf(f, "OSQPVectorf %swork_Ax = { NULL, 0 };\n", prefix);
+    fprintf(f, "OSQPVectorf %swork_z_prev = { OSQP_NULL, 0 };\n", prefix);
+    fprintf(f, "OSQPVectorf %swork_Ax = { OSQP_NULL, 0 };\n", prefix);
   }
   fprintf(f, "c_float %swork_Px_val[%d];\n", prefix, n);
   fprintf(f, "OSQPVectorf %swork_Px = {\n  %swork_Px_val,\n  %d\n};\n", prefix, prefix, n);
@@ -494,7 +494,7 @@ static c_int write_workspace(FILE             *f,
     fprintf(f, "OSQPVectorf %swork_delta_y = {\n  %swork_delta_y_val,\n  %d\n};\n", prefix, prefix, m);
   }
   else {
-    fprintf(f, "OSQPVectorf %swork_delta_y = { NULL, 0 };\n", prefix);
+    fprintf(f, "OSQPVectorf %swork_delta_y = { OSQP_NULL, 0 };\n", prefix);
   }
   fprintf(f, "c_float %swork_Atdelta_y_val[%d];\n", prefix, n);
   fprintf(f, "OSQPVectorf %swork_Atdelta_y = {\n  %swork_Atdelta_y_val,\n  %d\n};\n", prefix, prefix, n);
@@ -507,7 +507,7 @@ static c_int write_workspace(FILE             *f,
     fprintf(f, "OSQPVectorf %swork_Adelta_x = {\n  %swork_Adelta_x_val,\n  %d\n};\n", prefix, prefix, m);
   }
   else {
-    fprintf(f, "OSQPVectorf %swork_Adelta_x = { NULL, 0 };\n", prefix);
+    fprintf(f, "OSQPVectorf %swork_Adelta_x = { OSQP_NULL, 0 };\n", prefix);
   }
   if (embedded > 1) {
     fprintf(f, "c_float %swork_D_temp_val[%d];\n", prefix, n);
@@ -519,7 +519,7 @@ static c_int write_workspace(FILE             *f,
       fprintf(f, "OSQPVectorf %swork_E_temp = {\n  %swork_E_temp_val,\n  %d\n};\n", prefix, prefix, m);
     }
     else {
-      fprintf(f, "OSQPVectorf %swork_E_temp = { NULL, 0 };\n", prefix);
+      fprintf(f, "OSQPVectorf %swork_E_temp = { OSQP_NULL, 0 };\n", prefix);
     }
   }
 
@@ -539,10 +539,10 @@ static c_int write_workspace(FILE             *f,
       fprintf(f, "  &%swork_constr_type,\n", prefix);
     }
   } else {
-    fprintf(f, "  NULL,\n", prefix);    /* work_rho_vec */
-    fprintf(f, "  NULL,\n", prefix);    /* work_rho_inv_vec */
+    fprintf(f, "  OSQP_NULL,\n", prefix);    /* work_rho_vec */
+    fprintf(f, "  OSQP_NULL,\n", prefix);    /* work_rho_inv_vec */
     if (embedded > 1) {
-      fprintf(f, "  NULL,\n", prefix);  /* work_constr_type */
+      fprintf(f, "  OSQP_NULL,\n", prefix);  /* work_constr_type */
     }
   }
 
@@ -569,16 +569,16 @@ static c_int write_workspace(FILE             *f,
       fprintf(f, "  &%swork_E_temp,\n", prefix);
     }
     else {
-      fprintf(f, "  NULL,\n");
-      fprintf(f, "  NULL,\n");
-      fprintf(f, "  NULL,\n");
+      fprintf(f, "  OSQP_NULL,\n");
+      fprintf(f, "  OSQP_NULL,\n");
+      fprintf(f, "  OSQP_NULL,\n");
     }
   }
   if (solver->settings->scaling) {
     fprintf(f, "  &%sscaling,\n", prefix);
   }
   else {
-    fprintf(f, "  NULL,\n");
+    fprintf(f, "  OSQP_NULL,\n");
   }
   fprintf(f, "  (c_float)0.0,\n"); // scaled_prim_res
   fprintf(f, "  (c_float)0.0,\n"); // scaled_dual_res
