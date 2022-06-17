@@ -48,17 +48,19 @@ void test_codegen_basic()
   // Setup correct
   mu_assert("Codegen test: Setup error!", exitflag == 0);
 
-  exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "basic_", defines.get());
+  // Vector update
+  defines->embedded_mode = 1;
 
-  // Codegen should work
+  exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "basic_vector_", defines.get());
+
   mu_assert("Non Convex codegen: codegen type 1 should have worked!",
             exitflag == OSQP_NO_ERROR);
 
-  defines->embedded_mode = 2;    // matrix update
+  // matrix update
+  defines->embedded_mode = 2;
 
-  exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "basic_", defines.get());
+  exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "basic_matrix_", defines.get());
 
-  // Codegen should work
   mu_assert("Non Convex codegen: codegen type 2 should have worked!",
             exitflag == OSQP_NO_ERROR);
 }
@@ -119,7 +121,7 @@ void test_codegen_defines()
 
     defines->embedded_mode = test_input;
 
-    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "basic_", defines.get());
+    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "defines_embedded_", defines.get());
 
     // Codegen should work or error as appropriate
     mu_assert("Non Convex codegen: embedded define should have worked!",
@@ -140,7 +142,7 @@ void test_codegen_defines()
 
     defines->float_type = test_input;
 
-    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "basic_", defines.get());
+    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "defines_float_", defines.get());
 
     // Codegen should work or error as appropriate
     mu_assert("Non Convex codegen: float define should have worked!",
@@ -161,7 +163,7 @@ void test_codegen_defines()
 
     defines->printing_enable = test_input;
 
-    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "basic_", defines.get());
+    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "defines_printing_", defines.get());
 
     // Codegen should work or error as appropriate
     mu_assert("Non Convex codegen: printing define should have worked!",
@@ -182,7 +184,7 @@ void test_codegen_defines()
 
     defines->profiling_enable = test_input;
 
-    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "basic_", defines.get());
+    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "defines_profiling_", defines.get());
 
     // Codegen should work or error as appropriate
     mu_assert("Non Convex codegen: profiling define should have worked!",
@@ -203,7 +205,7 @@ void test_codegen_defines()
 
     defines->interrupt_enable = test_input;
 
-    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "basic_", defines.get());
+    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "defines_interrupts_", defines.get());
 
     // Codegen should work or error as appropriate
     mu_assert("Non Convex codegen: interrupt define should have worked!",
