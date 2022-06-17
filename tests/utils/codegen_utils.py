@@ -223,6 +223,24 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data={}):
     f.write("void clean_problem_%s_sols_data(%s_sols_data * data);\n" % (problem_name, problem_name))
     f.write("\n\n")
 
+    # Generate helpers for C++ memory management
+    f.write("/* C++ memory management helpers */\n")
+    f.write("#ifdef __cplusplus\n")
+    f.write("#include <memory>\n\n")
+    f.write("struct %s_deleter {\n" % problem_name)
+    f.write("    void operator()(OSQPTestData* data) {\n")
+    f.write("        clean_problem_%s(data);\n" % problem_name)
+    f.write("    }\n")
+    f.write("};\n\n")
+    f.write("struct %s_sols_deleter {\n" % problem_name)
+    f.write("    void operator()(%s_sols_data* sols_data) {\n" % problem_name)
+    f.write("        clean_problem_%s_sols_data(sols_data);\n" % problem_name)
+    f.write("    }\n")
+    f.write("};\n\n")
+    f.write("using %s_problem_ptr = std::unique_ptr<OSQPTestData, %s_deleter>;\n" % (problem_name, problem_name))
+    f.write("using %s_sols_data_ptr = std::unique_ptr<%s_sols_data, %s_sols_deleter>;\n" % (problem_name, problem_name, problem_name))
+    f.write("#endif /* __cplusplus */\n\n")
+
     #
     # Generate QP problem data
     #
@@ -398,6 +416,18 @@ def generate_data(problem_name, sols_data):
     f.write("%s_sols_data *  generate_problem_%s_sols_data();\n" % (problem_name, problem_name))
     f.write("void clean_problem_%s_sols_data(%s_sols_data * data);\n" % (problem_name, problem_name))
     f.write("\n\n")
+
+    # Generate helpers for C++ memory management
+    f.write("/* C++ memory management helpers */\n")
+    f.write("#ifdef __cplusplus\n")
+    f.write("#include <memory>\n\n")
+    f.write("struct %s_sols_deleter {\n" % problem_name)
+    f.write("    void operator()(%s_sols_data* sols_data) {\n" % problem_name)
+    f.write("        clean_problem_%s_sols_data(sols_data);\n" % problem_name)
+    f.write("    }\n")
+    f.write("};\n\n")
+    f.write("using %s_sols_data_ptr = std::unique_ptr<%s_sols_data, %s_sols_deleter>;\n" % (problem_name, problem_name, problem_name))
+    f.write("#endif /* __cplusplus */\n\n")
 
     #
     # Generate additional problem data for solutions
