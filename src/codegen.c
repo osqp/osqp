@@ -358,8 +358,12 @@ static c_int write_linsys(FILE               *f,
   GENERATE_ERROR(write_veci(f, linsys->P, n+m, name))
   fprintf(f, "c_float %slinsys_bp[%d];\n",  prefix, n+m);
   fprintf(f, "c_float %slinsys_sol[%d];\n", prefix, n+m);
-  sprintf(name, "%slinsys_rho_inv_vec", prefix);
-  GENERATE_ERROR(write_vecf(f, linsys->rho_inv_vec, m, name))
+
+  if (linsys->rho_inv_vec) {
+    sprintf(name, "%slinsys_rho_inv_vec", prefix);
+    GENERATE_ERROR(write_vecf(f, linsys->rho_inv_vec, m, name))
+  }
+
   if (embedded > 1) {
     sprintf(name, "%slinsys_KKT", prefix);
     GENERATE_ERROR(write_csc(f, linsys->KKT, name))
@@ -395,7 +399,14 @@ static c_int write_linsys(FILE               *f,
   fprintf(f, "  %slinsys_P,\n", prefix);
   fprintf(f, "  %slinsys_bp,\n", prefix);
   fprintf(f, "  %slinsys_sol,\n", prefix);
-  fprintf(f, "  %slinsys_rho_inv_vec,\n", prefix);
+
+  if (linsys->rho_inv_vec) {
+    fprintf(f, "  %slinsys_rho_inv_vec,\n", prefix);
+  }
+  else {
+    fprintf(f, "  NULL,\n", prefix);
+  }
+
   fprintf(f, "  (c_float)%.20f,\n", linsys->sigma);
   fprintf(f, "  (c_float)%.20f,\n", linsys->rho_inv);
   fprintf(f, "  %d,\n", n);
