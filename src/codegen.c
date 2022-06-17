@@ -454,11 +454,11 @@ static c_int write_workspace(FILE             *f,
     GENERATE_ERROR(write_OSQPVectorf(f, work->rho_vec, name))
     sprintf(name, "%swork_rho_inv_vec", prefix);
     GENERATE_ERROR(write_OSQPVectorf(f, work->rho_inv_vec, name))
-  }
 
-  if (embedded > 1) {
-    sprintf(name, "%swork_constr_type", prefix);
-    GENERATE_ERROR(write_OSQPVectori(f, work->constr_type, name))
+    if (embedded > 1) {
+      sprintf(name, "%swork_constr_type", prefix);
+      GENERATE_ERROR(write_OSQPVectori(f, work->constr_type, name))
+    }
   }
 
   /* Initialize x,y,z as we usually want to warm start the iterates */
@@ -535,12 +535,17 @@ static c_int write_workspace(FILE             *f,
   if (solver->settings->rho_is_vec) {
     fprintf(f, "  &%swork_rho_vec,\n", prefix);
     fprintf(f, "  &%swork_rho_inv_vec,\n", prefix);
+    if (embedded > 1) {
+      fprintf(f, "  &%swork_constr_type,\n", prefix);
+    }
   } else {
-    fprintf(f, "  NULL,\n", prefix);
-    fprintf(f, "  NULL,\n", prefix);
+    fprintf(f, "  NULL,\n", prefix);    /* work_rho_vec */
+    fprintf(f, "  NULL,\n", prefix);    /* work_rho_inv_vec */
+    if (embedded > 1) {
+      fprintf(f, "  NULL,\n", prefix);  /* work_constr_type */
+    }
   }
 
-  if (embedded > 1) fprintf(f, "  &%swork_constr_type,\n", prefix);
   fprintf(f, "  &%swork_x,\n", prefix);
   fprintf(f, "  &%swork_y,\n", prefix);
   fprintf(f, "  &%swork_z,\n", prefix);
