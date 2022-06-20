@@ -25,5 +25,17 @@
 c_int _osqp_error(enum osqp_error_type  error_code,
                   const char           *function_name);
 
+/**
+ * Internal function to print error description, location and return error code.
+ * @param  error_code    Error code
+ * @param  function_name Function name
+ * @param  filename      Filename
+ * @param  line_number   Line number of error
+ * @return               Error code
+ */
+c_int _osqp_error_line(enum osqp_error_type error_code,
+                       const char *function_name,
+                       const char *filename,
+                       int line_number);
 
 #endif /* ifndef ERROR_H */

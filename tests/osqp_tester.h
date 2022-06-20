@@ -19,4 +19,28 @@ c_float *l;
 c_float *u;
 } OSQPTestData;
 
+#include <memory.h>
+
+struct OSQPSolver_deleter {
+    void operator()(OSQPSolver* solver) {
+        osqp_cleanup(solver);
+    }
+};
+
+struct OSQPSettings_deleter {
+    void operator()(OSQPSettings* settings) {
+        c_free(settings);
+    }
+};
+
+struct OSQPCodegenDefines_deleter {
+    void operator()(OSQPCodegenDefines* defines) {
+        c_free(defines);
+    }
+};
+
+using OSQPSolver_ptr = std::unique_ptr<OSQPSolver, OSQPSolver_deleter>;
+using OSQPSettings_ptr = std::unique_ptr<OSQPSettings, OSQPSettings_deleter>;
+using OSQPCodegenDefines_ptr = std::unique_ptr<OSQPCodegenDefines, OSQPCodegenDefines_deleter>;
+
 #endif /* ifndef OSQP_TESTER_H */

@@ -15,6 +15,7 @@ extern "C" {
 #include "demo/test_demo.h"
 #include "basic_qp/test_basic_qp.h"
 #include "basic_qp2/test_basic_qp2.h"
+#include "codegen/test_codegen.h"
 #include "non_cvx/test_non_cvx.h"
 #include "primal_dual_infeasibility/test_primal_dual_infeasibility.h"
 #include "primal_infeasibility/test_primal_infeasibility.h"
@@ -114,6 +115,11 @@ TEST_CASE( "test_non_cvx", "[multi-file:6]" ) {
     SECTION( "test_non_cvx_solve" ) {
         test_non_cvx_solve();
     }
+#ifdef OSQP_CODEGEN
+    SECTION( "test_non_cvx_codegen" ) {
+        test_non_cvx_codegen();
+    }
+#endif
 }
 
 
@@ -162,3 +168,20 @@ TEST_CASE( "test_update_matrices", "[multi-file:10]" ) {
     }
 #endif
 }
+
+#ifdef OSQP_CODEGEN
+TEST_CASE( "test_codegen", "[multi-file:11]" ) {
+    SECTION( "test_codegen_basic" ) {
+        test_codegen_basic();
+    }
+    SECTION( "test_codegen_defines" ) {
+        test_codegen_defines();
+    }
+    SECTION( "test_codegen_error_propagation" ) {
+        test_codegen_error_propagation();
+    }
+    SECTION( "test_codegen_settings" ) {
+        test_codegen_settings();
+    }
+}
+#endif
