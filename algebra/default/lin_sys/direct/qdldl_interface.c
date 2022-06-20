@@ -603,7 +603,7 @@ static void _adj_perturb(csc *D, c_float eps) {
     }
 }
 
-static void _adj_assemble_csc(csc *D, OSQPMatrix *P_full, OSQPMatrix *G, OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks) {
+static void _adj_assemble_csc(csc *D, const OSQPMatrix *P_full, const OSQPMatrix *G, const OSQPMatrix *A_eq, const OSQPMatrix *GDiagLambda, const OSQPVectorf *slacks) {
 
     c_int n = OSQPMatrix_get_m(P_full);
     c_int x = OSQPMatrix_get_m(G);        // No. of inequality constraints
