@@ -210,6 +210,17 @@ void OSQPVectorf_view_free(OSQPVectorf *a){
   c_free(a);
 }
 
+c_float OSQPVectorf_norm_2(const OSQPVectorf *v){
+    c_int   i;
+    c_int length  = v->length;
+    c_float*  vv  = v->values;
+    c_float normval = 0.0;
+
+    for (i = 0; i < length; i++) {
+        normval += vv[i] * vv[i];
+    }
+    return c_sqrt(normval);
+}
 
 #endif /* ifndef EMBEDDED */
 
@@ -503,18 +514,6 @@ c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
     if (absval > normDiff) normDiff = absval;
   }
   return normDiff;
-}
-
-c_float OSQPVectorf_norm_2(const OSQPVectorf *v){
-    c_int   i;
-    c_int length  = v->length;
-    c_float*  vv  = v->values;
-    c_float normval = 0.0;
-
-    for (i = 0; i < length; i++) {
-        normval += vv[i] * vv[i];
-    }
-    return c_sqrt(normval);
 }
 
 // c_float OSQPVectorf_norm_1_diff(const OSQPVectorf *a,
