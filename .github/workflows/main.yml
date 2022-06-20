@@ -111,8 +111,8 @@ jobs:
           run: |
             cmake -G "${{ matrix.cmake_generator }}" -S tests/codegen/settings -B tests/codegen/settings/build -DOSQP_BUILD_DIR=$OSQP_BUILD_DIR_PREFIX -DOSQP_TEST_CODEGEN_DIR=$OSQP_BUILD_DIR_PREFIX/tests/testcodes
             cmake --build tests/codegen/settings/build
-            ./tests/codegen/settings/build/osqp_codegen_mode1_settings
-            ./tests/codegen/settings/build/osqp_codegen_mode2_settings
+            ./tests/codegen/settings/build/osqp_codegen_embedded_mode1_settings
+            ./tests/codegen/settings/build/osqp_codegen_embedded_mode2_settings
           if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DBUILD_TESTING=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '-DALGEBRA=default' }}
 
         - name: Valgrid check
