@@ -157,10 +157,11 @@ struct OSQPWorkspace_ {
    * @name Temporary vectors used in scaling
    * @{
    */
-
+#if EMBEDDED != 1
   OSQPVectorf *D_temp;   ///< temporary primal variable scaling vectors
   OSQPVectorf *D_temp_A; ///< temporary primal variable scaling vectors storing norms of A columns
   OSQPVectorf *E_temp;   ///< temporary constraints scaling vectors storing norms of A' columns
+#endif
 
   /** @} */
   OSQPScaling  *scaling;  ///< scaling vectors

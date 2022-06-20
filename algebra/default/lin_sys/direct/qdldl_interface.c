@@ -373,7 +373,7 @@ const char* name_qdldl() {
 
 /* solve P'LDL'P x = b for x */
 static void LDLSolve(c_float       *x,
-                     c_float       *b,
+                     const c_float *b,
                      const csc     *L,
                      const c_float *Dinv,
                      const c_int   *P,
@@ -396,40 +396,40 @@ c_int solve_linsys_qdldl(qdldl_solver *s,
                          OSQPVectorf  *b,
                          c_int         admm_iter) {
 
-    c_int j;
-    c_int n = s->n;
-    c_int m = s->m;
-    c_float* bv = b->values;
+  c_int j;
+  c_int n = s->n;
+  c_int m = s->m;
+  c_float* bv = b->values;
 
 #ifndef EMBEDDED
-    if (s->polishing) {
-        /* stores solution to the KKT system in b */
-        LDLSolve(bv, bv, s->L, s->Dinv, s->P, s->bp);
-    } else {
+  if (s->polishing) {
+    /* stores solution to the KKT system in b */
+    LDLSolve(bv, bv, s->L, s->Dinv, s->P, s->bp);
+  } else {
 #endif
-        /* stores solution to the KKT system in s->sol */
-        LDLSolve(s->sol, bv, s->L, s->Dinv, s->P, s->bp);
+    /* stores solution to the KKT system in s->sol */
+    LDLSolve(s->sol, bv, s->L, s->Dinv, s->P, s->bp);
 
-        /* copy x_tilde from s->sol */
-        for (j = 0 ; j < n ; j++) {
-            bv[j] = s->sol[j];
-        }
-
-        /* compute z_tilde from b and s->sol */
-        if (s->rho_inv_vec) {
-          for (j = 0 ; j < m ; j++) {
-              bv[j + n] += s->rho_inv_vec[j] * s->sol[j + n];
-          }
-        }
-        else {
-          for (j = 0 ; j < m ; j++) {
-              bv[j + n] += s->rho_inv * s->sol[j + n];
-          }
-        }
-#ifndef EMBEDDED
+    /* copy x_tilde from s->sol */
+    for (j = 0 ; j < n ; j++) {
+      bv[j] = s->sol[j];
     }
+
+    /* compute z_tilde from b and s->sol */
+    if (s->rho_inv_vec) {
+      for (j = 0 ; j < m ; j++) {
+        bv[j + n] += s->rho_inv_vec[j] * s->sol[j + n];
+      }
+    }
+    else {
+      for (j = 0 ; j < m ; j++) {
+        bv[j + n] += s->rho_inv * s->sol[j + n];
+      }
+    }
+#ifndef EMBEDDED
+  }
 #endif
-    return 0;
+  return 0;
 }
 
 

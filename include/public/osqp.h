@@ -8,7 +8,10 @@
 # include "osqp_api_constants.h"
 # include "osqp_api_types.h"
 # include "osqp_api_functions.h"
+
+#ifndef EMBEDDED
 # include "osqp_api_utils.h"
+#endif
 
 
 #endif /* ifndef OSQP_H */

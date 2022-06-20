@@ -123,6 +123,10 @@ if(NOT (CMAKE_SIZEOF_VOID_P EQUAL 8))
 elseif(ALGEBRA_CUDA)
   message(STATUS "Disabling long integers (64bit) for CUDA")
   set(DLONG OFF)
+elseif(DEFINED EMBEDDED)
+  # The long long type is not in the C89 spec, and our embedded code must be C89 compliant
+  message(STATUS "Disabling long integers (64bit) for embedded mode")
+  set(DLONG OFF)
 endif()
 message(STATUS "DLONG = ${DLONG}")
 
@@ -140,9 +144,17 @@ endif()
 option(COVERAGE "Perform code coverage" OFF)
 message(STATUS "COVERAGE = ${COVERAGE}")
 
+option(OSQP_ASAN "Enable ASAN" OFF)
+
 if(OSQP_CUSTOM_MEMORY)
   message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY}")
 endif()
+
+cmake_dependent_option( OSQP_CODEGEN "Enable code generation"
+                        ON
+                        "ALGEBRA_DEFAULT;NOT DEFINED EMBEDDED" OFF )
+
+message(STATUS "CODEGEN = ${OSQP_CODEGEN}")
 
 # Rename compile-time constants & configure
 # ----------------------------------------------
@@ -203,6 +215,15 @@ if(NOT MSVC)
     endif(FORTRAN)
   endif()
 
+  if(OSQP_ASAN)
+        set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -fsanitize=address -fno-optimize-sibling-calls -fsanitize-address-use-after-scope -fno-omit-frame-pointer" )
+        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -D_GLIBCXX_SANITIZE_VECTOR -fsanitize=address -fno-optimize-sibling-calls -fsanitize-address-use-after-scope -fno-omit-frame-pointer" )
+
+        # ASAN shouldn't be used with these options (https://github.com/google/sanitizers/wiki/AddressSanitizer#faq)
+        set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-stack-protector -U_FORTIFY_SOURCE" )
+        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-stack-protector -U_FORTIFY_SOURCE" )
+  endif()
+
   if(DEBUG)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g")
   else()
@@ -215,6 +236,34 @@ if(NOT MSVC)
     set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lrt -ldl")
   endif()
 endif(NOT MSVC)
+
+# ----------------------------------------------
+# Initialize the code generation file copying
+# ----------------------------------------------
+if( OSQP_CODEGEN )
+  set( EMBEDDED_BUILD_ROOT_DIR "${CMAKE_BINARY_DIR}/codegen_src" )
+
+  set( EMBEDDED_BUILD_SRC_DIR "${EMBEDDED_BUILD_ROOT_DIR}/src" )
+  set( EMBEDDED_BUILD_PUBLIC_INC_DIR "${EMBEDDED_BUILD_ROOT_DIR}/inc/public" )
+  set( EMBEDDED_BUILD_PRIVATE_INC_DIR "${EMBEDDED_BUILD_ROOT_DIR}/inc/private" )
+
+  file( MAKE_DIRECTORY ${EMBEDDED_BUILD_ROOT_DIR} )
+  file( MAKE_DIRECTORY ${EMBEDDED_BUILD_SRC_DIR} )
+  file( MAKE_DIRECTORY ${EMBEDDED_BUILD_PUBLIC_INC_DIR} )
+  file( MAKE_DIRECTORY ${EMBEDDED_BUILD_PRIVATE_INC_DIR} )
+
+  add_custom_target(copy_codegen_files ALL
+                    COMMENT "Copying source files needed for code generation" )
+
+  # Copy a sample makefile into the build tree
+  add_custom_command(OUTPUT "${EMBEDDED_BUILD_ROOT_DIR}/Makefile"
+                     COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/configure/Makefile.emosqp" "${EMBEDDED_BUILD_ROOT_DIR}/Makefile"
+                     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/configure/Makefile.emosqp"
+                     COMMENT "Copying codegen makefile" )
+
+  add_custom_target( copy_codegen_makefile DEPENDS "${EMBEDDED_BUILD_ROOT_DIR}/Makefile" )
+  add_dependencies( copy_codegen_files copy_codegen_makefile )
+endif()
 
 # ----------------------------------------------
 # OSQPLIB
@@ -300,12 +349,15 @@ endif()
 # Static Library - osqpstatic
 # ----------------------------------------------
 if( OSQP_BUILD_STATIC_LIB )
-  add_library(osqpstatic STATIC $<TARGET_OBJECTS:OSQPLIB>)
-  set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
+  add_library(osqpstatic STATIC
+              $<TARGET_OBJECTS:OSQPLIB>
+              "${CMAKE_CURRENT_SOURCE_DIR}/src/osqp_api.c")
+  set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqpstatic)
   if(ALGEBRA_DEFAULT)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
     target_sources(osqpstatic PRIVATE $<TARGET_OBJECTS:qdldlobject>)
   endif()
+  target_include_directories(osqpstatic PRIVATE ${osqplib_includes})
   target_include_directories(
     osqpstatic PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/public;${CMAKE_CURRENT_BINARY_DIR}/include/public>"
                       "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
@@ -319,7 +371,9 @@ endif()
 # Shared Library - osqp
 # ----------------------------------------------
 if(OSQP_BUILD_SHARED_LIB)
-  add_library(osqp SHARED ${osqplib_sources})
+  add_library(osqp SHARED
+              $<TARGET_OBJECTS:OSQPLIB>
+              "${CMAKE_CURRENT_SOURCE_DIR}/src/osqp_api.c")
   if(ALGEBRA_DEFAULT)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
     target_sources(osqp PRIVATE $<TARGET_OBJECTS:qdldlobject>)
@@ -357,8 +411,12 @@ if(OSQP_BUILD_DEMO_EXE)
   elseif(ALGEBRA_CUDA)
     target_link_libraries(osqp_demo cublas cusparse)
   endif()
-endif()
 
+  if(OSQP_CODEGEN)
+    add_executable(osqp_codegen_demo ${PROJECT_SOURCE_DIR}/examples/osqp_codegen_demo.c)
+    target_link_libraries(osqp_codegen_demo osqpstatic)
+  endif()
+endif()
 
 # ----------------------------------------------
 # Installation / Uninstallation
@@ -368,39 +426,68 @@ install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
 if(OSQP_BUILD_STATIC_LIB)
   install(
     TARGETS osqpstatic
-    EXPORT ${PROJECT_NAME}
+    EXPORT osqpstatic
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+
+  export(
+    EXPORT osqpstatic
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/osqpstatic-targets.cmake"
+    NAMESPACE osqp::)
+
+  install(
+    EXPORT osqpstatic
+    FILE osqpstatic-targets.cmake
+    NAMESPACE osqp::
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/osqp")
 endif()
 
 if(OSQP_BUILD_SHARED_LIB)
   install(
     TARGETS osqp
-    EXPORT ${PROJECT_NAME}
+    EXPORT osqp
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
   export(
-    EXPORT ${PROJECT_NAME}
+    EXPORT osqp
     FILE "${CMAKE_CURRENT_BINARY_DIR}/osqp-targets.cmake"
     NAMESPACE osqp::)
 
   install(
-    EXPORT ${PROJECT_NAME}
+    EXPORT osqp
     FILE osqp-targets.cmake
     NAMESPACE osqp::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/osqp)
-
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/osqp")
 endif()
 
-if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake)
-  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake
-       "include(\"\${CMAKE_CURRENT_LIST_DIR}/osqp-targets.cmake\")\n")
+if(OSQP_BUILD_STATIC_LIB OR OSQP_BUILD_SHARED_LIB)
+  # generate the config file that is includes the exports
+  configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp-config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/osqp"
+    NO_SET_AND_CHECK_MACRO
+    NO_CHECK_REQUIRED_COMPONENTS_MACRO)
+
+  write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/osqp-config-version.cmake"
+    VERSION "${OSQP_VERSION}"
+    COMPATIBILITY SameMajorVersion)
+
+  install(FILES
+          "${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake"
+          "${CMAKE_CURRENT_BINARY_DIR}/osqp-config-version.cmake"
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/osqp)
 endif()
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/osqp)
+if(OSQP_CODEGEN)
+  install(DIRECTORY
+          "${EMBEDDED_BUILD_ROOT_DIR}/"
+          DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/osqp/codegen_files")
+endif()
 
 if(NOT TARGET uninstall)
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/configure/cmake/cmake_uninstall.cmake.in"
