@@ -8,6 +8,7 @@
 
 #ifndef EMBEDDED
 # include "polish.h"
+# include "derivative.h"
 #endif /* ifndef EMBEDDED */
 
 #ifdef CTRLC
@@ -18,7 +19,7 @@
 # include "lin_sys.h"
 #endif /* ifndef EMBEDDED */
 
-# include "derivative.h"
+
 
 
 /**********************
@@ -1157,6 +1158,7 @@ void csc_set_data(csc     *M,
 /****************************
 * Derivative functions
 ****************************/
+#ifndef EMBEDDED
 c_int osqp_adjoint_derivative(OSQPSolver *solver,
                                        c_float    *dx,
                                        c_float    *dy_l,
@@ -1181,3 +1183,4 @@ c_int osqp_adjoint_derivative(OSQPSolver *solver,
 
     return status;
 }
+#endif
