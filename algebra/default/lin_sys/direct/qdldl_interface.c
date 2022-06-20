@@ -489,7 +489,11 @@ c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver      *s,
         s->etree, s->bwork, s->iwork, s->fwork) < 0);
 }
 
-// --------- Derivative stuff -------- //
+#endif
+
+#ifndef EMBEDDED
+
+// --------- Derivative functions -------- //
 
 //increment the D colptr by the number of nonzeros
 //in a square diagonal matrix.
@@ -603,7 +607,7 @@ static void _adj_perturb(csc *D, c_float eps) {
     }
 }
 
-static void _adj_assemble_csc(csc *D, OSQPMatrix *P_full, OSQPMatrix *G, OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks) {
+static void _adj_assemble_csc(csc *D, const OSQPMatrix *P_full, const OSQPMatrix *G, const OSQPMatrix *A_eq, const OSQPMatrix *GDiagLambda, const OSQPVectorf *slacks) {
 
     c_int n = OSQPMatrix_get_m(P_full);
     c_int x = OSQPMatrix_get_m(G);        // No. of inequality constraints
