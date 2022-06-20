@@ -910,6 +910,4 @@ void OSQPVectorf_set_scalar_if_gt(OSQPVectorf       *x,
   }
 }
 
-
-
 #endif /* EMBEDDED != 1 */

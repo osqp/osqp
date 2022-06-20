@@ -50,6 +50,8 @@ c_int init_linsys_solver(LinSysSolver      **s,
   }
 }
 
+#ifndef EMBEDDED
+
 c_int adjoint_derivative_linsys_solver(LinSysSolver      **s, const OSQPSettings *settings, const OSQPMatrix *P, const OSQPMatrix *G, const OSQPMatrix *A_eq, OSQPMatrix *GDiagLambda, OSQPVectorf *slacks, OSQPVectorf *rhs) {
 
     switch (settings->linsys_solver) {
@@ -63,4 +65,6 @@ c_int adjoint_derivative_linsys_solver(LinSysSolver      **s, const OSQPSettings
             return 1;
 #endif
     }
+#endif
+
 }

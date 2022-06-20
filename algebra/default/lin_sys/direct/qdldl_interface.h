@@ -180,7 +180,6 @@ c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver      *s,
  * @param s linear system solver object
  */
 void free_linsys_solver_qdldl(qdldl_solver * s);
-#endif
 
 c_int adjoint_derivative_qdldl(qdldl_solver *s,
                                const OSQPMatrix *P,
@@ -189,5 +188,7 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s,
                                const OSQPMatrix *GDiagLambda,
                                const OSQPVectorf *slacks,
                                const OSQPVectorf *rhs);
+
+#endif
 
 #endif /* QDLDL_INTERFACE_H */

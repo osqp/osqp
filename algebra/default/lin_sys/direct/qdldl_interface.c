@@ -489,7 +489,11 @@ c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver      *s,
         s->etree, s->bwork, s->iwork, s->fwork) < 0);
 }
 
-// --------- Derivative stuff -------- //
+#endif
+
+#ifndef EMBEDDED
+
+// --------- Derivative functions -------- //
 
 //increment the D colptr by the number of nonzeros
 //in a square diagonal matrix.
