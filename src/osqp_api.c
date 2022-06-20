@@ -8,7 +8,6 @@
 
 #ifndef EMBEDDED
 # include "polish.h"
-# include "derivative.h"
 #endif /* ifndef EMBEDDED */
 
 #ifdef CTRLC
@@ -19,7 +18,7 @@
 # include "lin_sys.h"
 #endif /* ifndef EMBEDDED */
 
-
+# include "derivative.h"
 
 
 /**********************
