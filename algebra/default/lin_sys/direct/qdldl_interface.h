@@ -30,9 +30,9 @@ struct qdldl {
     void (*warm_start)(struct qdldl      *self,
                        const OSQPVectorf *x);
 
+#ifndef EMBEDDED
     c_int (*adjoint_derivative)(struct qdldl *self);
 
-#ifndef EMBEDDED
     void (*free)(struct qdldl *self); ///< Free workspace (only if desktop)
 #endif
 
