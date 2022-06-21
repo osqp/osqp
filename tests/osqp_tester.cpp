@@ -115,11 +115,6 @@ TEST_CASE( "test_non_cvx", "[multi-file:6]" ) {
     SECTION( "test_non_cvx_solve" ) {
         test_non_cvx_solve();
     }
-#ifdef OSQP_CODEGEN
-    SECTION( "test_non_cvx_codegen" ) {
-        test_non_cvx_codegen();
-    }
-#endif
 }
 
 

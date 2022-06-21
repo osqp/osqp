@@ -3,6 +3,7 @@
 #include "osqp_tester.h" // Basic testing script header
 
 #include "codegen/data.h"
+#include "non_cvx/data.h"
 #include "unconstrained/data.h"
 
 #ifdef OSQP_CODEGEN
@@ -129,6 +130,53 @@ void test_codegen_data()
     // Codegen should work or error as appropriate
     mu_assert("codegen: Unconstrained should have worked!",
               exitflag == OSQP_NO_ERROR);
+  }
+
+  SECTION( "codegen data: nonconvex" ) {
+    c_int embedded;
+    std::string dir;
+
+    std::tie( embedded, dir ) =
+      GENERATE( table<c_int, std::string>(
+          { /* first is embedded mode, second is output directory */
+            std::make_tuple( 1, CODEGEN1_DIR ),
+            std::make_tuple( 2, CODEGEN2_DIR ) } ) );
+
+    c_float sigma;
+    c_int sigma_num;
+    c_int expected_error;
+
+    std::tie( sigma, sigma_num, expected_error ) =
+      GENERATE( table<c_float, c_int, c_int>(
+          { /* first is sigma value, second is the filename parameter, third is the expected return value */
+            std::make_tuple( 1e-6, 1, OSQP_NONCVX_ERROR ),
+            std::make_tuple(    5, 2, OSQP_NO_ERROR ) } ) );
+
+    char name[100];
+    snprintf(name, 100, "data_nonconvex_%d_embedded_%d_", sigma_num, embedded);
+
+    // Problem data
+    non_cvx_problem_ptr   data{generate_problem_non_cvx()};
+    non_cvx_sols_data_ptr sols_data{generate_problem_non_cvx_sols_data()};
+
+    // Update solver settings
+    settings->sigma = sigma;
+    defines->embedded_mode = embedded;
+
+    // Setup solver
+    exitflag = osqp_setup(&tmpSolver, data->P, data->q,
+                          data->A, data->l, data->u,
+                          data->m, data->n, settings.get());
+    solver.reset(tmpSolver);
+
+    // Setup correct
+    mu_assert("codegen: Nonconvex setup error!", exitflag == expected_error);
+
+    exitflag = osqp_codegen(solver.get(), dir.c_str(), name, defines.get());
+
+    // Codegen should work or error as appropriate
+    mu_assert("codegen: Nonconvex codegen error!",
+              exitflag == expected_error);
   }
 }
 

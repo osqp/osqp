@@ -11,6 +11,7 @@
 #include "scaling_0_embedded_1_workspace.h"
 #include "scaling_1_embedded_1_workspace.h"
 
+#include "data_nonconvex_2_embedded_1_workspace.h"
 #include "data_unconstrained_embedded_1_workspace.h"
 
 int main() {
@@ -82,6 +83,20 @@ int main() {
   } else {
     printf( "  Solved unconstrained problem with no error.\n" );
   }
+
+
+  /*
+   * Properly generated after convexification
+   */
+  exitflag = osqp_solve( &data_nonconvex_2_embedded_1_solver );
+
+  if( exitflag > 0 ) {
+    printf( "  OSQP errored on non-nonconvex problem: %s\n", osqp_error_message(exitflag));
+    return (int)exitflag;
+  } else {
+    printf( "  Solved non-nonconvex problem with no error.\n" );
+  }
+
 
   return 0;
 }
