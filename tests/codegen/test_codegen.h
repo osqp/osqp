@@ -97,7 +97,6 @@ void test_codegen_data()
   defines->interrupt_enable = 0; // no interrupts
 
   SECTION( "codegen data: unconstrained" ) {
-    c_int embedded_mode = GENERATE(1, 2);
     c_int embedded;
     std::string dir;
 
@@ -123,7 +122,7 @@ void test_codegen_data()
     // Setup correct
     mu_assert("codegen: Unconstrained setup error!", exitflag == 0);
 
-    defines->embedded_mode = embedded_mode;
+    defines->embedded_mode = embedded;
 
     exitflag = osqp_codegen(solver.get(), dir.c_str(), name, defines.get());
 
