@@ -28,9 +28,7 @@ static c_int write_vecf(FILE          *f,
 
   c_int i;
 
-  if (!vecf) return OSQP_DATA_NOT_INITIALIZED;
-
-  if (n) {
+  if (n && !vecf) {
     fprintf(f, "c_float %s[%d] = {\n", name, n);
     for (i = 0; i < n; i++) {
       fprintf(f, "  (c_float)%.20f,\n", vecf[i]);
@@ -51,9 +49,7 @@ static c_int write_veci(FILE        *f,
 
   c_int i;
 
-  if (!veci) return OSQP_DATA_NOT_INITIALIZED;
-
-  if (n) {
+  if (n && !veci) {
     fprintf(f, "c_int %s[%d] = {\n", name, n);
     for (i = 0; i < n; i++) {
       fprintf(f, "  %i,\n", veci[i]);
