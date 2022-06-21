@@ -47,21 +47,21 @@ endforeach()
 list(POP_BACK CMAKE_MESSAGE_INDENT)
 
 
-add_executable( osqp_codegen_embedded_mode1_settings embedded_mode1.c ${OSQP_SOURCES} ${CODEGEN_MODE1_SOURCES} )
-target_include_directories( osqp_codegen_embedded_mode1_settings
+add_executable( osqp_codegen_embedded_mode1 embedded_mode1.c ${OSQP_SOURCES} ${CODEGEN_MODE1_SOURCES} )
+target_include_directories( osqp_codegen_embedded_mode1
                             PRIVATE
                             ${OSQP_BUILD_DIR}/codegen_src/inc/public
                             ${OSQP_BUILD_DIR}/codegen_src/inc/private
                             ${OSQP_TEST_CODEGEN_DIR}/embedded1 )
 
-set_property(TARGET osqp_codegen_embedded_mode1_settings PROPERTY C_STANDARD 90)
+set_property(TARGET osqp_codegen_embedded_mode1 PROPERTY C_STANDARD 90)
 
-add_executable( osqp_codegen_embedded_mode2_settings embedded_mode2.c ${OSQP_SOURCES} ${CODEGEN_MODE2_SOURCES} )
-target_include_directories( osqp_codegen_embedded_mode2_settings
+add_executable( osqp_codegen_embedded_mode2 embedded_mode2.c ${OSQP_SOURCES} ${CODEGEN_MODE2_SOURCES} )
+target_include_directories( osqp_codegen_embedded_mode2
                             PRIVATE
                             ${OSQP_BUILD_DIR}/codegen_src/inc/public
                             ${OSQP_BUILD_DIR}/codegen_src/inc/private
                             ${OSQP_TEST_CODEGEN_DIR}/embedded2 )
-target_link_libraries( osqp_codegen_embedded_mode2_settings m )
+target_link_libraries( osqp_codegen_embedded_mode2 m )
 
-set_property(TARGET osqp_codegen_embedded_mode2_settings PROPERTY C_STANDARD 90)
+set_property(TARGET osqp_codegen_embedded_mode2 PROPERTY C_STANDARD 90)

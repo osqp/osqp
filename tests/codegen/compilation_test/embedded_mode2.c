@@ -11,6 +11,8 @@
 #include "scaling_0_embedded_2_workspace.h"
 #include "scaling_1_embedded_2_workspace.h"
 
+#include "data_unconstrained_embedded_2_workspace.h"
+
 int main() {
   c_int exitflag;
 
@@ -65,6 +67,20 @@ int main() {
     return (int)exitflag;
   } else {
     printf( "  Solved scaling_1 with no error.\n" );
+  }
+
+  printf( "Embedded test program for embedded mode 1 data variations.\n");
+
+  /*
+   * Unconstrained problem
+   */
+  exitflag = osqp_solve( &data_unconstrained_embedded_2_solver );
+
+  if( exitflag > 0 ) {
+    printf( "  OSQP errored on unconstrained problem: %s\n", osqp_error_message(exitflag));
+    return (int)exitflag;
+  } else {
+    printf( "  Solved unconstrained problem with no error.\n" );
   }
 
   return 0;
