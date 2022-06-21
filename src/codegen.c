@@ -36,7 +36,7 @@ static c_int write_vecf(FILE          *f,
     fprintf(f, "};\n");
   }
   else {
-    fprintf(f, "c_float *%s = OSQP_NULL;\n", name);
+    fprintf(f, "#define %s (OSQP_NULL)\n", name);
   }
 
   return OSQP_NO_ERROR;
@@ -57,7 +57,7 @@ static c_int write_veci(FILE        *f,
     fprintf(f, "};\n");
   }
   else {
-    fprintf(f, "c_int *%s = OSQP_NULL;\n", name);
+    fprintf(f, "#define %s (OSQP_NULL)\n", name);
   }
 
   return OSQP_NO_ERROR;
@@ -239,9 +239,9 @@ static c_int write_solution(FILE       *f,
   fprintf(f, "/* Define the solution structure */\n");
   fprintf(f, "c_float %ssol_x[%d];\n", prefix, n);
   if (m > 0) fprintf(f, "c_float %ssol_y[%d];\n", prefix, m);
-  else       fprintf(f, "c_float *%ssol_y = OSQP_NULL;\n", prefix);
+  else       fprintf(f, "#define %ssol_y (OSQP_NULL)\n", prefix);
   if (m > 0) fprintf(f, "c_float %ssol_prim_inf_cert[%d];\n", prefix, m);
-  else       fprintf(f, "c_float *%ssol_prim_inf_cert = OSQP_NULL;\n", prefix);
+  else       fprintf(f, "#define %ssol_prim_inf_cert (OSQP_NULL)\n", prefix);
   fprintf(f, "c_float %ssol_dual_inf_cert[%d];\n", prefix, n);
   fprintf(f, "OSQPSolution %ssol = {\n", prefix);
   fprintf(f, "  %ssol_x,\n", prefix);
