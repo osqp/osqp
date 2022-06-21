@@ -3,6 +3,7 @@
 #include "osqp_tester.h" // Basic testing script header
 
 #include "codegen/data.h"
+#include "unconstrained/data.h"
 
 #ifdef OSQP_CODEGEN
 void test_codegen_basic()
@@ -63,6 +64,73 @@ void test_codegen_basic()
 
   mu_assert("Non Convex codegen: codegen type 2 should have worked!",
             exitflag == OSQP_NO_ERROR);
+}
+
+void test_codegen_data()
+{
+  c_int exitflag;
+
+  // Problem settings
+  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
+
+  // Codegen defines
+  OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
+
+  // Structures
+  OSQPSolver *tmpSolver = nullptr;
+  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
+
+  // Define Solver settings as default
+  osqp_set_default_settings(settings.get());
+  settings->max_iter      = 2000;
+  settings->alpha         = 1.6;
+  settings->polishing     = 1;
+  settings->scaling       = 0;
+  settings->verbose       = 1;
+  settings->warm_starting = 0;
+
+  // Define codegen settings
+  defines->embedded_mode = 1;    // vector update
+  defines->float_type = 1;       // floats
+  defines->printing_enable = 0;  // no printing
+  defines->profiling_enable = 0; // no timing
+  defines->interrupt_enable = 0; // no interrupts
+
+  SECTION( "codegen data: unconstrained" ) {
+    c_int embedded_mode = GENERATE(1, 2);
+    c_int embedded;
+    std::string dir;
+
+    std::tie( embedded, dir ) =
+      GENERATE( table<c_int, std::string>(
+          { /* first is embedded mode, second is output directory */
+            std::make_tuple( 1, CODEGEN1_DIR ),
+            std::make_tuple( 2, CODEGEN2_DIR ) } ) );
+
+    char name[100];
+    snprintf(name, 100, "data_unconstrained_embedded_%d_", embedded);
+
+    // Problem data
+    unconstrained_problem_ptr   data{generate_problem_unconstrained()};
+    unconstrained_sols_data_ptr sols_data{generate_problem_unconstrained_sols_data()};
+
+    // Setup solver
+    exitflag = osqp_setup(&tmpSolver, data->P, data->q,
+                          data->A, data->l, data->u,
+                          data->m, data->n, settings.get());
+    solver.reset(tmpSolver);
+
+    // Setup correct
+    mu_assert("codegen: Unconstrained setup error!", exitflag == 0);
+
+    defines->embedded_mode = embedded_mode;
+
+    exitflag = osqp_codegen(solver.get(), dir.c_str(), name, defines.get());
+
+    // Codegen should work or error as appropriate
+    mu_assert("codegen: Unconstrained should have worked!",
+              exitflag == OSQP_NO_ERROR);
+  }
 }
 
 void test_codegen_defines()

@@ -183,5 +183,8 @@ TEST_CASE( "test_codegen", "[multi-file:11]" ) {
     SECTION( "test_codegen_settings" ) {
         test_codegen_settings();
     }
+    SECTION( "test_codegen_data" ) {
+        test_codegen_data();
+    }
 }
 #endif
