@@ -20,6 +20,8 @@ file( GLOB CODEGEN_SOURCES
       ${OSQP_CODEGEN_DIR}/*.h )
 
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g")
+
 
 message( STATUS "Found OSQP sources:" )
 list(APPEND CMAKE_MESSAGE_INDENT "  ")

@@ -47,6 +47,9 @@ endforeach()
 list(POP_BACK CMAKE_MESSAGE_INDENT)
 
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g")
+
+
 add_executable( osqp_codegen_embedded_mode1 embedded_mode1.c ${OSQP_SOURCES} ${CODEGEN_MODE1_SOURCES} )
 target_include_directories( osqp_codegen_embedded_mode1
                             PRIVATE
