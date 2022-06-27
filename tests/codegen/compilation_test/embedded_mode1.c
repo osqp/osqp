@@ -11,6 +11,7 @@
 #include "scaling_0_embedded_1_workspace.h"
 #include "scaling_1_embedded_1_workspace.h"
 
+#include "data_lp_embedded_1_workspace.h"
 #include "data_nonconvex_2_embedded_1_workspace.h"
 #include "data_unconstrained_embedded_1_workspace.h"
 
@@ -71,6 +72,18 @@ int main() {
   }
 
   printf( "Embedded test program for embedded mode 1 data variations.\n");
+
+  /*
+   * Linear programming problem
+   */
+  exitflag = osqp_solve( &data_lp_embedded_1_solver );
+
+  if( exitflag > 0 ) {
+    printf( "  OSQP errored on lp problem: %s\n", osqp_error_message(exitflag));
+    return (int)exitflag;
+  } else {
+    printf( "  Solved lp problem with no error.\n" );
+  }
 
   /*
    * Unconstrained problem

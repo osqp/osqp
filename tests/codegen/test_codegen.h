@@ -2,6 +2,7 @@
 #include "util.h"    // Utilities for testing
 #include "osqp_tester.h" // Basic testing script header
 
+#include "basic_lp/data.h"
 #include "codegen/data.h"
 #include "non_cvx/data.h"
 #include "unconstrained/data.h"
@@ -129,6 +130,41 @@ void test_codegen_data()
 
     // Codegen should work or error as appropriate
     mu_assert("codegen: Unconstrained should have worked!",
+              exitflag == OSQP_NO_ERROR);
+  }
+
+  SECTION( "codegen data: linear program" ) {
+    c_int embedded;
+    std::string dir;
+
+    std::tie( embedded, dir ) =
+      GENERATE( table<c_int, std::string>(
+          { /* first is embedded mode, second is output directory */
+            std::make_tuple( 1, CODEGEN1_DIR ),
+            std::make_tuple( 2, CODEGEN2_DIR ) } ) );
+
+    char name[100];
+    snprintf(name, 100, "data_lp_embedded_%d_", embedded);
+
+    // Problem data
+    basic_lp_problem_ptr   data{generate_problem_basic_lp()};
+    basic_lp_sols_data_ptr sols_data{generate_problem_basic_lp_sols_data()};
+
+    // Setup solver
+    exitflag = osqp_setup(&tmpSolver, data->P, data->q,
+                          data->A, data->l, data->u,
+                          data->m, data->n, settings.get());
+    solver.reset(tmpSolver);
+
+    // Setup correct
+    mu_assert("codegen: Linear program setup error!", exitflag == 0);
+
+    defines->embedded_mode = embedded;
+
+    exitflag = osqp_codegen(solver.get(), dir.c_str(), name, defines.get());
+
+    // Codegen should work or error as appropriate
+    mu_assert("codegen: Linear program should have worked!",
               exitflag == OSQP_NO_ERROR);
   }
 
