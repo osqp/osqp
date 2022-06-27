@@ -21,6 +21,7 @@ extern "C" {
 #include "primal_infeasibility/test_primal_infeasibility.h"
 #include "unconstrained/test_unconstrained.h"
 #include "update_matrices/test_update_matrices.h"
+#include "basic_lp/test_basic_lp.h"
 
 
 TEST_CASE( "test_lin_alg", "[multi-file:1]" ) {
@@ -183,3 +184,14 @@ TEST_CASE( "test_codegen", "[multi-file:11]" ) {
     }
 }
 #endif
+
+TEST_CASE( "test_basic_lp", "[multi-file:12]" ) {
+    SECTION( "test_basic_lp_solve" ) {
+        test_basic_lp_solve();
+    }
+#ifdef ALGEBRA_MKL
+        SECTION( "test_basic_lp_solve_pardiso" ) {
+        test_basic_lp_solve_pardiso();
+    }
+#endif
+}
