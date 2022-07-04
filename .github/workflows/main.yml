@@ -82,7 +82,6 @@ jobs:
         # -----------------
 
         - name: Install unit testing python dependencies
-          if: ${{ matrix.cmake_flags == '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=OFF' }}
           run: |
             conda install numpy scipy
             conda info
