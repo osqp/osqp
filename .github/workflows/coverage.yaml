@@ -1,6 +1,12 @@
 name: Coverage Generation
 
-on: [ "push", "pull_request" ]
+on:
+  push:
+    branches: [ master, develop**, ci ]
+    tags:
+      - '*'
+  pull_request:
+    branches: [ master, develop** ]
 
 jobs:
 
