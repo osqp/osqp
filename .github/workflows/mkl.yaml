@@ -22,11 +22,8 @@ jobs:
           os: [ubuntu-latest, macos-latest, windows-2022]
           python-version: [3.9]
           long: ['ON', 'OFF']
-          float: ['ON', 'OFF']
-          printing: ['ON', 'OFF']
-          profiling: ['ON', 'OFF']
-          interrupt: ['ON', 'OFF']
-          unit_tests: ['-DOSQP_BUILD_UNITTESTS=OFF', '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=ON']
+
+          # MKL only supports double precision in the iterative solver, so that is the only combination we support as well.
 
           include:
             - os: ubuntu-latest
@@ -100,13 +97,14 @@ jobs:
             cmake -G "${{ matrix.cmake_generator }}" \
                   -S . -B $OSQP_BUILD_DIR_PREFIX \
                   -DALGEBRA='mkl' \
+                  -DFLOAT=OFF \
                   -DEMBEDDED=0 \
-                  -DLONG=${{ matrix.long }} \
-                  -DFLOAT=${{ matrix.float }} \
-                  -DPROFILING=${{ matrix.profiling }} \
-                  -DCTRLC=${{ matrix.interrupt }} \
-                  -DPRINTING=${{ matrix.printing }} \
-                  ${{ matrix.unit_tests }}
+                  -DPROFILING=ON \
+                  -DCTRLC=ON \
+                  -DPRINTING=ON \
+                  -DOSQP_BUILD_UNITTESTS=ON \
+                  -DOSQP_COVERAGE_CHECK=OFF \
+                  -DLONG=${{ matrix.long }}
             cmake --build $OSQP_BUILD_DIR_PREFIX
 
         # useful for inspecting the OSQP version information

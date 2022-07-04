@@ -1,4 +1,4 @@
-name: Main
+name: Default Algebra
 
 on:
   push:
@@ -23,11 +23,9 @@ jobs:
           python-version: [3.9]
           long: ['ON', 'OFF']
           float: ['ON', 'OFF']
-          algebra: ['default', 'mkl']
           printing: ['ON', 'OFF']
           profiling: ['ON', 'OFF']
           interrupt: ['ON', 'OFF']
-          unit_tests: ['-DOSQP_BUILD_UNITTESTS=OFF', '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=OFF']
 
           include:
             - os: ubuntu-latest
@@ -90,25 +88,19 @@ jobs:
             conda info
             conda list
 
-        - name: Install MKL
-          if: ${{ matrix.algebra == 'mkl' }}
-          run: |
-            conda install -c intel "mkl-devel<2022"
-            conda info
-            conda list
-
         - name: Build
           run: |
             cmake -G "${{ matrix.cmake_generator }}" \
                   -S . -B $OSQP_BUILD_DIR_PREFIX \
                   -DEMBEDDED=0 \
+                  -DALGEBRA=default \
+                  -DOSQP_BUILD_UNITTESTS=ON \
+                  -DOSQP_COVERAGE_CHECK=OFF \
                   -DLONG=${{ matrix.long }} \
                   -DFLOAT=${{ matrix.float }} \
-                  -DALGEBRA=${{ matrix.algebra }} \
                   -DPROFILING=${{ matrix.profiling }} \
                   -DCTRLC=${{ matrix.interrupt }} \
-                  -DPRINTING=${{ matrix.printing }} \
-                  ${{ matrix.unit_tests }}
+                  -DPRINTING=${{ matrix.printing }}
             cmake --build $OSQP_BUILD_DIR_PREFIX
 
         # useful for inspecting the OSQP version information
@@ -119,7 +111,6 @@ jobs:
         - name: Test
           run: |
             $OSQP_BUILD_DIR_PREFIX/out/osqp_tester
-          if: ${{ matrix.unit_tests == '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=OFF' }}
 
         - name: Codegen compilation test
           run: |
@@ -131,7 +122,7 @@ jobs:
             cmake --build tests/codegen/settings/build
             ./tests/codegen/settings/build/osqp_codegen_embedded_mode1_settings
             ./tests/codegen/settings/build/osqp_codegen_embedded_mode2_settings
-          if: ${{ runner.os == 'Linux' && matrix.unit_tests == '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=OFF' }}
+          if: ${{ runner.os == 'Linux' }}
 
         - name: Valgrid check
           run: |
@@ -139,4 +130,4 @@ jobs:
             sudo apt-get install valgrind
             valgrind --suppressions=.valgrind-suppress.supp --leak-check=full --gen-suppressions=all \
               --track-origins=yes --error-exitcode=1 $OSQP_BUILD_DIR_PREFIX/out/osqp_tester
-          if: ${{ runner.os == 'Linux' && matrix.unit_tests == '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=ON' }}
+          if: ${{ runner.os == 'Linux' }}

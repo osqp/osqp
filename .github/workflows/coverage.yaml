@@ -15,6 +15,9 @@ jobs:
           algebra: ['default', 'mkl']
           float: ['OFF', 'ON']
           long: ['OFF', 'ON']
+          exclude:
+            - algebra: 'mkl'
+              float: 'ON'
 
       defaults:
         run:
@@ -70,7 +73,7 @@ jobs:
                   -DOSQP_BUILD_UNITTESTS=ON \
                   -DOSQP_COVERAGE_CHECK=ON'
                   -DLONG=${{ matrix.long }} \
-                  -DFLOAT=${{ matrix.float }} \
+                  -DFLOAT=${{ matrix.float }}
             cmake --build $OSQP_BUILD_DIR_PREFIX
 
 
