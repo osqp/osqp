@@ -70,7 +70,7 @@ jobs:
                   -DCTRLC=ON \
                   -DPRINTING=ON \
                   -DOSQP_BUILD_UNITTESTS=ON \
-                  -DOSQP_COVERAGE_CHECK=ON'
+                  -DOSQP_COVERAGE_CHECK=ON \
                   -DLONG=${{ matrix.long }} \
                   -DFLOAT=${{ matrix.float }}
             cmake --build $OSQP_BUILD_DIR_PREFIX
