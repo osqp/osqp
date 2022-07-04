@@ -17,7 +17,7 @@ jobs:
         matrix:
           os: [ubuntu-latest]
           python-version: [3.9]
-          cmake_flags: ['-DBUILD_TESTING=ON -DALGEBRA=cuda -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_CUDA_HOST_COMPILER=g++-10']
+          cmake_flags: ['-DOSQP_BUILD_UNITTESTS=ON -DALGEBRA=cuda -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_CUDA_HOST_COMPILER=g++-10']
 
           include:
             - os: ubuntu-latest
