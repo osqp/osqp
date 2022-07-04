@@ -98,7 +98,6 @@ jobs:
                   -S . -B $OSQP_BUILD_DIR_PREFIX \
                   -DALGEBRA='mkl' \
                   -DFLOAT=OFF \
-                  -DEMBEDDED=0 \
                   -DPROFILING=ON \
                   -DCTRLC=ON \
                   -DPRINTING=ON \
