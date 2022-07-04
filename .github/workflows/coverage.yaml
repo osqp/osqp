@@ -71,14 +71,14 @@ jobs:
           run: |
             cmake -G "Unix Makefiles" \
                   -S . -B $OSQP_BUILD_DIR_PREFIX \
-                  -DALGEBRA='mkl' \
                   -DPROFILING=ON \
                   -DCTRLC=ON \
                   -DPRINTING=ON \
                   -DOSQP_BUILD_UNITTESTS=ON \
                   -DOSQP_COVERAGE_CHECK=ON \
                   -DLONG=${{ matrix.long }} \
-                  -DFLOAT=${{ matrix.float }}
+                  -DFLOAT=${{ matrix.float }} \
+                  -DALGEBRA=${{ matrix.algebra }}
             cmake --build $OSQP_BUILD_DIR_PREFIX
 
 
