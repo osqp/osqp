@@ -89,7 +89,8 @@ jobs:
             echo "$CONDA_PREFIX/Library/bin" >> $GITHUB_PATH
         # -----------------
 
-        - name: Install python dependencies
+        - name: Install unit testing python dependencies
+          if: ${{ matrix.cmake_flags == '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=ON' }}
           run: |
             conda install numpy scipy
             conda info
