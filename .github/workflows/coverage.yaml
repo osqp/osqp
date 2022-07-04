@@ -101,7 +101,7 @@ jobs:
             flag-name: run-${{ matrix.algebra }}-${{ matrix.float }}-${{ matrix.long }}
             parallel: true
 
-  finish:
+  finalize_coverage:
     needs: generate_coverage
     runs-on: ubuntu-latest
     steps:
