@@ -153,6 +153,10 @@ endif()
 if(ALGEBRA_CUDA AND DLONG)
   message(WARNING "Disabling long integers (64bit) for CUDA.")
   set(DLONG OFF)
+elseif(DEFINED EMBEDDED)
+  # The long long type is not in the C89 spec, and our embedded code must be C89 compliant
+  message(STATUS "Disabling long integers (64bit) for embedded mode")
+  set(DLONG OFF)
 endif()
 message(STATUS "DLONG = ${DLONG}")
 
@@ -167,6 +171,13 @@ if(DEBUG)
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
+option(OSQP_ASAN "Enable ASAN" OFF)
+
+cmake_dependent_option( OSQP_CODEGEN "Enable code generation"
+                        ON
+                        "ALGEBRA_DEFAULT;NOT DEFINED EMBEDDED" OFF )
+
+message(STATUS "CODEGEN = ${OSQP_CODEGEN}")
 
 # Rename compile-time constants & configure
 # ----------------------------------------------
@@ -227,6 +238,15 @@ if(NOT MSVC)
     endif(FORTRAN)
   endif()
 
+  if(OSQP_ASAN)
+        set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -fsanitize=address -fno-optimize-sibling-calls -fsanitize-address-use-after-scope -fno-omit-frame-pointer" )
+        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -D_GLIBCXX_SANITIZE_VECTOR -fsanitize=address -fno-optimize-sibling-calls -fsanitize-address-use-after-scope -fno-omit-frame-pointer" )
+
+        # ASAN shouldn't be used with these options (https://github.com/google/sanitizers/wiki/AddressSanitizer#faq)
+        set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-stack-protector -U_FORTIFY_SOURCE" )
+        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-stack-protector -U_FORTIFY_SOURCE" )
+  endif()
+
   if(DEBUG)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g")
   else()
@@ -239,6 +259,34 @@ if(NOT MSVC)
     set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lrt -ldl")
   endif()
 endif(NOT MSVC)
+
+# ----------------------------------------------
+# Initialize the code generation file copying
+# ----------------------------------------------
+if( OSQP_CODEGEN )
+  set( EMBEDDED_BUILD_ROOT_DIR "${CMAKE_BINARY_DIR}/codegen_src" )
+
+  set( EMBEDDED_BUILD_SRC_DIR "${EMBEDDED_BUILD_ROOT_DIR}/src" )
+  set( EMBEDDED_BUILD_PUBLIC_INC_DIR "${EMBEDDED_BUILD_ROOT_DIR}/inc/public" )
+  set( EMBEDDED_BUILD_PRIVATE_INC_DIR "${EMBEDDED_BUILD_ROOT_DIR}/inc/private" )
+
+  file( MAKE_DIRECTORY ${EMBEDDED_BUILD_ROOT_DIR} )
+  file( MAKE_DIRECTORY ${EMBEDDED_BUILD_SRC_DIR} )
+  file( MAKE_DIRECTORY ${EMBEDDED_BUILD_PUBLIC_INC_DIR} )
+  file( MAKE_DIRECTORY ${EMBEDDED_BUILD_PRIVATE_INC_DIR} )
+
+  add_custom_target(copy_codegen_files ALL
+                    COMMENT "Copying source files needed for code generation" )
+
+  # Copy a sample makefile into the build tree
+  add_custom_command(OUTPUT "${EMBEDDED_BUILD_ROOT_DIR}/Makefile"
+                     COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/configure/Makefile.emosqp" "${EMBEDDED_BUILD_ROOT_DIR}/Makefile"
+                     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/configure/Makefile.emosqp"
+                     COMMENT "Copying codegen makefile" )
+
+  add_custom_target( copy_codegen_makefile DEPENDS "${EMBEDDED_BUILD_ROOT_DIR}/Makefile" )
+  add_dependencies( copy_codegen_files copy_codegen_makefile )
+endif()
 
 # ----------------------------------------------
 # OSQPLIB
@@ -392,8 +440,12 @@ if(OSQP_BUILD_DEMO_EXE)
   elseif(ALGEBRA_CUDA)
     target_link_libraries(osqp_demo cublas cusparse)
   endif()
-endif()
 
+  if(OSQP_CODEGEN)
+    add_executable(osqp_codegen_demo ${PROJECT_SOURCE_DIR}/examples/osqp_codegen_demo.c)
+    target_link_libraries(osqp_codegen_demo osqpstatic)
+  endif()
+endif()
 
 # ----------------------------------------------
 # Installation / Uninstallation
@@ -438,7 +490,6 @@ if(OSQP_BUILD_SHARED_LIB)
     FILE osqp-targets.cmake
     NAMESPACE osqp::
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/osqp")
-
 endif()
 
 if(OSQP_BUILD_STATIC_LIB OR OSQP_BUILD_SHARED_LIB)
@@ -459,6 +510,12 @@ if(OSQP_BUILD_STATIC_LIB OR OSQP_BUILD_SHARED_LIB)
           "${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake"
           "${CMAKE_CURRENT_BINARY_DIR}/osqp-config-version.cmake"
           DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/osqp)
+endif()
+
+if(OSQP_CODEGEN)
+  install(DIRECTORY
+          "${EMBEDDED_BUILD_ROOT_DIR}/"
+          DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/osqp/codegen_files")
 endif()
 
 if(NOT TARGET uninstall)

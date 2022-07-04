@@ -1,24 +1,24 @@
 #include "glob_opts.h"
 #include "osqp.h"
 #include "auxil.h"
+#include "osqp_api_constants.h"
 #include "util.h"
 #include "scaling.h"
 #include "error.h"
 #include "version.h"
 
-#ifndef EMBEDDED
-# include "polish.h"
-#endif /* ifndef EMBEDDED */
-
-#ifdef CTRLC
-# include "ctrlc.h"
-#endif /* ifdef CTRLC */
+#ifdef OSQP_CODEGEN
+  #include "codegen.h"
+#endif
 
 #ifndef EMBEDDED
 # include "lin_sys.h"
-#endif /* ifndef EMBEDDED */
+# include "polish.h"
+#endif
 
-
+#ifdef CTRLC
+# include "ctrlc.h"
+#endif
 
 
 /**********************
@@ -26,6 +26,16 @@
 **********************/
 const char* osqp_version(void) {
   return OSQP_VERSION;
+}
+
+
+const char* osqp_error_message(c_int error_flag) {
+  if( error_flag >= OSQP_LAST_ERROR_PLACE ) {
+    return OSQP_ERROR_MESSAGE[OSQP_LAST_ERROR_PLACE-1];
+  }
+
+
+  return OSQP_ERROR_MESSAGE[error_flag-1];
 }
 
 
@@ -114,6 +124,10 @@ c_int osqp_setup(OSQPSolver         **solverp,
   work   = c_calloc(1, sizeof(OSQPWorkspace));
   if (!(work)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   solver->work = work;
+
+  // Allocate empty info struct
+  solver->info = c_calloc(1, sizeof(OSQPInfo));
+  if (!(solver->info)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Start and allocate directly timer
 # ifdef PROFILING
@@ -243,7 +257,13 @@ c_int osqp_setup(OSQPSolver         **solverp,
                                 work->rho_vec, solver->settings,
                                 &work->scaled_prim_res, &work->scaled_dual_res, 0);
 
-  if (exitflag) return osqp_error(exitflag);
+  if (exitflag == OSQP_NONCVX_ERROR) {
+    update_status(solver->info, OSQP_NON_CVX);
+    return osqp_error(exitflag);
+  }
+  else if (exitflag) {
+    return osqp_error(exitflag);
+  }
 
   // Initialize variables x, y, z to 0
   osqp_cold_start(solver);
@@ -272,9 +292,7 @@ c_int osqp_setup(OSQPSolver         **solverp,
   if ( m && (!(solver->solution->y) || !(solver->solution->prim_inf_cert)) )
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
-  // Allocate and initialize information
-  solver->info = c_calloc(1, sizeof(OSQPInfo));
-  if (!(solver->info)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  // Initialize information
   solver->info->status_polish = 0;              // Polishing not performed
   update_status(solver->info, OSQP_UNSOLVED);
 # ifdef PROFILING
@@ -290,6 +308,9 @@ c_int osqp_setup(OSQPSolver         **solverp,
 # endif /* ifdef PROFILING */
   solver->info->rho_updates  = 0;                      // Rho updates set to 0
   solver->info->rho_estimate = solver->settings->rho;  // Best rho estimate
+  solver->info->obj_val      = OSQP_INFTY;
+  solver->info->prim_res     = OSQP_INFTY;
+  solver->info->dual_res     = OSQP_INFTY;
 
   // Print header
 # ifdef PRINTING
@@ -1132,6 +1153,49 @@ c_int osqp_update_settings(OSQPSolver         *solver,
 
   return 0;
 }
+
+
+/**********
+* Codegen
+**********/
+
+#ifdef OSQP_CODEGEN
+
+c_int osqp_codegen(OSQPSolver         *solver,
+                   const char         *output_dir,
+                   const char         *file_prefix,
+                   OSQPCodegenDefines *defines){
+
+  c_int exitflag = 0;
+
+  if (!solver || !solver->work || !solver->settings || !solver->info) {
+    return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  }
+  /* Don't allow codegen for a non-convex problem. */
+  else if (solver->info->status_val == OSQP_NON_CVX) {
+    return osqp_error(OSQP_NONCVX_ERROR);
+  }
+  /* Test after non-convex error to ensure we throw a useful error code*/
+  else if (!solver->work->data || !solver->work->linsys_solver) {
+    return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  }
+  else if (!defines || (defines->embedded_mode != 1    && defines->embedded_mode != 2)
+                    || (defines->float_type != 0       && defines->float_type != 1)
+                    || (defines->printing_enable != 0  && defines->printing_enable != 1)
+                    || (defines->profiling_enable != 0 && defines->profiling_enable != 1)
+                    || (defines->interrupt_enable != 0 && defines->interrupt_enable != 1)) {
+    return osqp_error(OSQP_CODEGEN_DEFINES_ERROR);
+  }
+
+  exitflag = codegen_inc(solver, output_dir, file_prefix);
+  if (!exitflag) exitflag = codegen_src(solver, output_dir, file_prefix, defines->embedded_mode);
+  if (!exitflag) exitflag = codegen_example(output_dir, file_prefix);
+  if (!exitflag) exitflag = codegen_defines(output_dir, defines);
+
+  return exitflag;
+}
+
+#endif /* ifdef OSQP_CODEGEN */
 
 
 /****************************
