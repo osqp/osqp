@@ -28,6 +28,12 @@ OSQP_API const char* osqp_version(void);
 
 
 /**
+ * Return the error string for a given error code.
+ */
+OSQP_API const char* osqp_error_message(c_int error_flag);
+
+
+/**
  * Return the number of variables and constraints
  * @param  solver Solver
  * @param  m      Pointer to m
@@ -237,6 +243,27 @@ OSQP_API c_int osqp_update_rho(OSQPSolver *solver,
                                c_float     rho_new);
 
 # endif /* if EMBEDDED != 1 */
+
+
+
+# ifdef OSQP_CODEGEN
+
+/**
+ * Generate source files with a statically allocated OSQPSolver structure.
+ * @param  solver     Solver
+ * @param  output_dir Path to directory to output the files to.
+ *                    This string must include the trailing directory separator, and
+ *                    an empty string means output to the current directory.
+ * @param  prefix     String prefix for the variables and generated files.
+ * @param  defines    The defines to use in the generated code.
+ * @return            Exitflag for errors (0 if no errors)
+ */
+OSQP_API c_int osqp_codegen(OSQPSolver         *solver,
+                            const char         *output_dir,
+                            const char         *prefix,
+                            OSQPCodegenDefines *defines);
+
+# endif /* ifdef OSQP_CODEGEN */
 
 
 /** @} */

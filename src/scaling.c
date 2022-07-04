@@ -162,7 +162,8 @@ c_int scale_data(OSQPSolver* solver) {
   return 0;
 }
 
-#endif // EMBEDDED
+#endif /* if EMBEDDED != 1 */
+
 
 c_int unscale_data(OSQPSolver *solver) {
 
