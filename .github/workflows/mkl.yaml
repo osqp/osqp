@@ -1,4 +1,4 @@
-name: Main
+name: MKL Algebra
 
 on:
   push:
@@ -23,11 +23,10 @@ jobs:
           python-version: [3.9]
           long: ['ON', 'OFF']
           float: ['ON', 'OFF']
-          algebra: ['default', 'mkl']
           printing: ['ON', 'OFF']
           profiling: ['ON', 'OFF']
           interrupt: ['ON', 'OFF']
-          unit_tests: ['-DOSQP_BUILD_UNITTESTS=OFF', '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=OFF']
+          unit_tests: ['-DOSQP_BUILD_UNITTESTS=OFF', '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=ON']
 
           include:
             - os: ubuntu-latest
@@ -84,14 +83,13 @@ jobs:
         # -----------------
 
         - name: Install unit testing python dependencies
-          if: ${{ matrix.cmake_flags == '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=OFF' }}
+          if: ${{ matrix.cmake_flags == '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=ON' }}
           run: |
             conda install numpy scipy
             conda info
             conda list
 
         - name: Install MKL
-          if: ${{ matrix.algebra == 'mkl' }}
           run: |
             conda install -c intel "mkl-devel<2022"
             conda info
@@ -101,10 +99,10 @@ jobs:
           run: |
             cmake -G "${{ matrix.cmake_generator }}" \
                   -S . -B $OSQP_BUILD_DIR_PREFIX \
+                  -DALGEBRA='mkl' \
                   -DEMBEDDED=0 \
                   -DLONG=${{ matrix.long }} \
                   -DFLOAT=${{ matrix.float }} \
-                  -DALGEBRA=${{ matrix.algebra }} \
                   -DPROFILING=${{ matrix.profiling }} \
                   -DCTRLC=${{ matrix.interrupt }} \
                   -DPRINTING=${{ matrix.printing }} \
@@ -119,24 +117,4 @@ jobs:
         - name: Test
           run: |
             $OSQP_BUILD_DIR_PREFIX/out/osqp_tester
-          if: ${{ matrix.unit_tests == '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=OFF' }}
-
-        - name: Codegen compilation test
-          run: |
-            cmake -G "${{ matrix.cmake_generator }}" \
-                  -S tests/codegen/settings \
-                  -B tests/codegen/settings/build \
-                  -DOSQP_BUILD_DIR=$OSQP_BUILD_DIR_PREFIX \
-                  -DOSQP_TEST_CODEGEN_DIR=$OSQP_BUILD_DIR_PREFIX/tests/testcodes
-            cmake --build tests/codegen/settings/build
-            ./tests/codegen/settings/build/osqp_codegen_embedded_mode1_settings
-            ./tests/codegen/settings/build/osqp_codegen_embedded_mode2_settings
-          if: ${{ runner.os == 'Linux' && matrix.unit_tests == '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=OFF' }}
-
-        - name: Valgrid check
-          run: |
-            sudo apt-get update
-            sudo apt-get install valgrind
-            valgrind --suppressions=.valgrind-suppress.supp --leak-check=full --gen-suppressions=all \
-              --track-origins=yes --error-exitcode=1 $OSQP_BUILD_DIR_PREFIX/out/osqp_tester
-          if: ${{ runner.os == 'Linux' && matrix.unit_tests == '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=ON' }}
+          if: ${{ matrix.unit_tests == '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=ON' }}
