@@ -24,35 +24,10 @@ jobs:
           long: ['ON', 'OFF']
           float: ['ON', 'OFF']
           algebra: ['default', 'mkl']
-          embedded: ['0', '1', '2']
           printing: ['ON', 'OFF']
           profiling: ['ON', 'OFF']
           interrupt: ['ON', 'OFF']
           unit_tests: ['-DOSQP_BUILD_UNITTESTS=OFF', '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=ON']
-          exclude:
-            # Don't run the unit tests in the embedded modes
-            - unit_tests: '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=ON'
-              embedded: '1'
-            - unit_tests: '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=ON'
-              embedded: '2'
-            # MKL doesn't support embedded mode
-            - algebra: 'mkl'
-              embedded: '1'
-            - algebra: 'mkl'
-              embedded: '2'
-            # These combinations are currently not supported
-            - embedded: '1'
-              profiling: 'ON'
-            - embedded: '1'
-              interrupt: 'ON'
-            - embedded: '1'
-              printing: 'ON'
-            - embedded: '2'
-              profiling: 'ON'
-            - embedded: '2'
-              interrupt: 'ON'
-            - embedded: '2'
-              printing: 'ON'
 
           include:
             - os: ubuntu-latest
@@ -126,10 +101,10 @@ jobs:
           run: |
             cmake -G "${{ matrix.cmake_generator }}" \
                   -S . -B $OSQP_BUILD_DIR_PREFIX \
+                  -DEMBEDDED=0 \
                   -DLONG=${{ matrix.long }} \
                   -DFLOAT=${{ matrix.float }} \
                   -DALGEBRA=${{ matrix.algebra }} \
-                  -DEMBEDDED=${{ matrix.embedded }} \
                   -DPROFILING=${{ matrix.profiling }} \
                   -DCTRLC=${{ matrix.interrupt }} \
                   -DPRINTING=${{ matrix.printing }} \
@@ -140,7 +115,6 @@ jobs:
         - name: OSQP Demo
           run: |
             $OSQP_BUILD_DIR_PREFIX/out/osqp_demo
-          if: ${{ matrix.embedded == 0 }}
 
         - name: Test
           run: |

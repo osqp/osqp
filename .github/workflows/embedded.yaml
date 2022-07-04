@@ -1,0 +1,73 @@
+name: Embedded Combinations
+
+on:
+  push:
+    branches: [ master, develop**, ci ]
+    tags:
+      - '*'
+  pull_request:
+    branches: [ master, develop** ]
+
+jobs:
+
+  build_and_test:
+      runs-on: ubuntu-latest
+
+      strategy:
+        fail-fast: false
+
+        matrix:
+          # Embedded is only a smoke test to ensure it compiles with all the options
+          long: ['ON', 'OFF']
+          float: ['ON', 'OFF']
+          embedded: ['1', '2']
+          printing: ['ON', 'OFF']
+          profiling: ['ON', 'OFF']
+          interrupt: ['ON', 'OFF']
+          exclude:
+            # These combinations are currently not supported
+            - embedded: '1'
+              profiling: 'ON'
+            - embedded: '1'
+              interrupt: 'ON'
+            - embedded: '1'
+              printing: 'ON'
+            - embedded: '2'
+              profiling: 'ON'
+            - embedded: '2'
+              interrupt: 'ON'
+            - embedded: '2'
+              printing: 'ON'
+
+          include:
+            - os: ubuntu-latest
+              cmake_generator: "Unix Makefiles"
+
+      defaults:
+        run:
+          # Required when using an activated conda environment in steps
+          # See https://github.com/conda-incubator/setup-miniconda#IMPORTANT
+          shell: bash -l {0}
+
+      env:
+        OSQP_BUILD_DIR_PREFIX: ${{ github.workspace }}/build
+
+      steps:
+        - uses: actions/checkout@v2
+          with:
+            lfs: false
+            submodules: recursive
+
+        - name: Build
+          run: |
+            cmake -G "${{ matrix.cmake_generator }}" \
+                  -S . -B $OSQP_BUILD_DIR_PREFIX \
+                  -DALGEBRA='default' \
+                  -DOSQP_BUILD_UNITTESTS=OFF \
+                  -DLONG=${{ matrix.long }} \
+                  -DFLOAT=${{ matrix.float }} \
+                  -DEMBEDDED=${{ matrix.embedded }} \
+                  -DPROFILING=${{ matrix.profiling }} \
+                  -DCTRLC=${{ matrix.interrupt }} \
+                  -DPRINTING=${{ matrix.printing }}
+            cmake --build $OSQP_BUILD_DIR_PREFIX
