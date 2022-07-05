@@ -190,7 +190,7 @@ message(STATUS "CODEGEN = ${OSQP_CODEGEN}")
 # Rename compile-time constants & configure
 # ----------------------------------------------
 # If we are creating any OSQP_* compile-time constants from CMake variables, do so here.
-set(OSQP_ALGEBRA ${ALGEBRA})
+set(OSQP_ALGEBRA ${ALGEBRA_USER_STRING})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/include/public/osqp_configure.h NEWLINE_STYLE LF)
