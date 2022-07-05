@@ -388,7 +388,7 @@ if( OSQP_BUILD_STATIC_LIB )
 
   # Append the algebra name to the library file if desired
   if(OSQP_LIB_SUFFIX_ALGEBRA)
-    set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME "osqpstatic-${ALGEBRA_USER_STRING}")
+    set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME "osqpstatic_${ALGEBRA_USER_STRING}")
   else()
     set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME "osqpstatic")
   endif()
@@ -443,7 +443,7 @@ if(OSQP_BUILD_SHARED_LIB)
 
   # Modify the soname of the library to include the algebra if desired
   if(OSQP_LIB_SUFFIX_ALGEBRA)
-    set_target_properties(osqp PROPERTIES LIBRARY_OUTPUT_NAME "osqp-${ALGEBRA_USER_STRING}")
+    set_target_properties(osqp PROPERTIES LIBRARY_OUTPUT_NAME "osqp_${ALGEBRA_USER_STRING}")
   endif()
 endif()
 
