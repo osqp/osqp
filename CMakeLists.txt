@@ -90,10 +90,13 @@ mark_as_advanced(OSQP_LIB_SUFFIX_ALGEBRA)
 
 # Set the relevant boolean values for the algebra
 if(${ALGEBRA} STREQUAL "default")
+  set(ALGEBRA_USER_STRING "builtin")
   set(ALGEBRA_DEFAULT ON)
 elseif(${ALGEBRA} STREQUAL "mkl")
+  set(ALGEBRA_USER_STRING "mkl")
   set(ALGEBRA_MKL ON)
 elseif(${ALGEBRA} STREQUAL "cuda")
+  set(ALGEBRA_USER_STRING "cuda")
   set(ALGEBRA_CUDA ON)
 endif()
 
@@ -385,7 +388,7 @@ if( OSQP_BUILD_STATIC_LIB )
 
   # Append the algebra name to the library file if desired
   if(OSQP_LIB_SUFFIX_ALGEBRA)
-    set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME "osqpstatic-${ALGEBRA}")
+    set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME "osqpstatic-${ALGEBRA_USER_STRING}")
   else()
     set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME "osqpstatic")
   endif()
@@ -440,7 +443,7 @@ if(OSQP_BUILD_SHARED_LIB)
 
   # Modify the soname of the library to include the algebra if desired
   if(OSQP_LIB_SUFFIX_ALGEBRA)
-    set_target_properties(osqp PROPERTIES LIBRARY_OUTPUT_NAME "osqp-${ALGEBRA}")
+    set_target_properties(osqp PROPERTIES LIBRARY_OUTPUT_NAME "osqp-${ALGEBRA_USER_STRING}")
   endif()
 endif()
 
