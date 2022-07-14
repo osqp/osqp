@@ -83,12 +83,20 @@ option(PRINTING "Enable solver printing" ON)
 option(PROFILING "Enable solver profiling (timing)" ON)
 option(CTRLC "Enable user interrupt (Ctrl-C)" ON)
 
+# Allow appending the algebra shortname to the end of the library and the soname so people can have
+# multiple libraries side-by-side on an install.
+option(OSQP_LIB_SUFFIX_ALGEBRA "Add the algebra name to the library name" OFF)
+mark_as_advanced(OSQP_LIB_SUFFIX_ALGEBRA)
+
 # Set the relevant boolean values for the algebra
 if(${ALGEBRA} STREQUAL "default")
+  set(ALGEBRA_USER_STRING "builtin")
   set(ALGEBRA_DEFAULT ON)
 elseif(${ALGEBRA} STREQUAL "mkl")
+  set(ALGEBRA_USER_STRING "mkl")
   set(ALGEBRA_MKL ON)
 elseif(${ALGEBRA} STREQUAL "cuda")
+  set(ALGEBRA_USER_STRING "cuda")
   set(ALGEBRA_CUDA ON)
 endif()
 
@@ -182,7 +190,7 @@ message(STATUS "CODEGEN = ${OSQP_CODEGEN}")
 # Rename compile-time constants & configure
 # ----------------------------------------------
 # If we are creating any OSQP_* compile-time constants from CMake variables, do so here.
-set(OSQP_ALGEBRA ${ALGEBRA})
+set(OSQP_ALGEBRA ${ALGEBRA_USER_STRING})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/include/public/osqp_configure.h NEWLINE_STYLE LF)
@@ -377,7 +385,15 @@ if( OSQP_BUILD_STATIC_LIB )
   add_library(osqpstatic STATIC
               $<TARGET_OBJECTS:OSQPLIB>
               "${CMAKE_CURRENT_SOURCE_DIR}/src/osqp_api.c")
-  set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqpstatic)
+
+  # Append the algebra name to the library file if desired
+  if(OSQP_LIB_SUFFIX_ALGEBRA)
+    set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME "osqpstatic_${ALGEBRA_USER_STRING}")
+  else()
+    set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME "osqpstatic")
+  endif()
+
+
   if(ALGEBRA_DEFAULT)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
     target_sources(osqpstatic PRIVATE $<TARGET_OBJECTS:qdldlobject>)
@@ -424,6 +440,11 @@ if(OSQP_BUILD_SHARED_LIB)
   # a PUBLIC compile definition.
   target_compile_definitions(osqp PRIVATE BUILDING_OSQP)
   target_compile_definitions(osqp PUBLIC  OSQP_SHARED_LIB)
+
+  # Modify the soname of the library to include the algebra if desired
+  if(OSQP_LIB_SUFFIX_ALGEBRA)
+    set_target_properties(osqp PROPERTIES LIBRARY_OUTPUT_NAME "osqp_${ALGEBRA_USER_STRING}")
+  endif()
 endif()
 
 # ----------------------------------------------
