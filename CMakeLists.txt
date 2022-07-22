@@ -83,10 +83,10 @@ option(PRINTING "Enable solver printing" ON)
 option(PROFILING "Enable solver profiling (timing)" ON)
 option(CTRLC "Enable user interrupt (Ctrl-C)" ON)
 
-# Allow appending the algebra shortname to the end of the library and the soname so people can have
+# Allow appending a string to the end of the library and the soname so people can have
 # multiple libraries side-by-side on an install.
-option(OSQP_LIB_SUFFIX_ALGEBRA "Add the algebra name to the library name" OFF)
-mark_as_advanced(OSQP_LIB_SUFFIX_ALGEBRA)
+set(OSQP_LIB_SUFFIX "" CACHE STRING "String to append to the library name")
+mark_as_advanced(OSQP_LIB_SUFFIX)
 
 # Set the relevant boolean values for the algebra
 if(${ALGEBRA} STREQUAL "default")
@@ -387,8 +387,8 @@ if( OSQP_BUILD_STATIC_LIB )
               "${CMAKE_CURRENT_SOURCE_DIR}/src/osqp_api.c")
 
   # Append the algebra name to the library file if desired
-  if(OSQP_LIB_SUFFIX_ALGEBRA)
-    set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME "osqpstatic_${ALGEBRA_USER_STRING}")
+  if(OSQP_LIB_SUFFIX)
+    set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME "osqpstatic_${OSQP_LIB_SUFFIX}")
   else()
     set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME "osqpstatic")
   endif()
@@ -442,8 +442,8 @@ if(OSQP_BUILD_SHARED_LIB)
   target_compile_definitions(osqp PUBLIC  OSQP_SHARED_LIB)
 
   # Modify the soname of the library to include the algebra if desired
-  if(OSQP_LIB_SUFFIX_ALGEBRA)
-    set_target_properties(osqp PROPERTIES LIBRARY_OUTPUT_NAME "osqp_${ALGEBRA_USER_STRING}")
+  if(OSQP_LIB_SUFFIX)
+    set_target_properties(osqp PROPERTIES LIBRARY_OUTPUT_NAME "osqp_${OSQP_LIB_SUFFIX}")
   endif()
 endif()
 
