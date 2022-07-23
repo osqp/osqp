@@ -6,7 +6,7 @@ find_package(Python)
 if(NOT PYTHON_FOUND)
   message(
     FATAL_ERROR
-      "You need python installed to generate unittests. If you do not want to compile the unittests pass -DBUILD_TESTING=OFF to cmake."
+      "You need python installed to generate unittests."
   )
 endif()
 
@@ -14,7 +14,7 @@ find_python_module(numpy)
 if(NOT NUMPY_FOUND)
   message(
     FATAL_ERROR
-      "You need numpy python module installed to generate unittests. If you do not want to compile the unittests pass -DBUILD_TESTING=OFF to cmake."
+      "You need numpy python module installed to generate unittests."
   )
 endif()
 
@@ -23,7 +23,7 @@ find_python_module(scipy)
 if((NOT SCIPY_FOUND) OR (SCIPY_VERSION VERSION_LESS 0.17.0))
   message(
     FATAL_ERROR
-      "You need scipy python module installed to generate unittests. If you do not want to compile the unittests pass -DBUILD_TESTING=OFF to cmake."
+      "You need scipy python module installed to generate unittests."
   )
 endif()
 
