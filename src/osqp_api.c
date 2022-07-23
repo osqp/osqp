@@ -24,6 +24,22 @@
 /**********************
 * Main API Functions *
 **********************/
+c_int osqp_capabilities(void) {
+  c_int capabilities = 0;
+
+  capabilities |= osqp_algebra_linsys_supported();
+
+#if EMBEDDED != 1
+  capabilities |= OSQP_CAPABILITIY_UPDATE_MATRICES;
+#endif
+
+#ifdef OSQP_CODEGEN
+  capabilities |= OSQP_CAPABILITIY_CODEGEN;
+#endif
+
+  return capabilities;
+}
+
 const char* osqp_version(void) {
   return OSQP_VERSION;
 }

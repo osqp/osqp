@@ -15,12 +15,18 @@
  *  limitations under the License.
  */
 
+#include "osqp_api_constants.h"
 #include "osqp_api_types.h"
 #include "lin_alg.h"
 #include "cuda_handler.h"
 
 
 CUDA_Handle_t *CUDA_handle = OSQP_NULL;
+
+c_int osqp_algebra_linsys_supported(void) {
+  /* Only has a PCG (indirect) solver */
+  return OSQP_CAPABILITIY_INDIRECT_SOLVER;
+}
 
 c_int osqp_algebra_init_libs(c_int device) {
   /* This is to prevent a memory leak when multiple OSQP objects are created */
