@@ -28,6 +28,11 @@ c_int osqp_algebra_linsys_supported(void) {
   return OSQP_CAPABILITIY_INDIRECT_SOLVER;
 }
 
+enum osqp_linsys_solver_type osqp_algebra_default_linsys(void) {
+  /* Prefer the PCG solver (it is also the only one available) */
+  return OSQP_INDIRECT_SOLVER;
+}
+
 c_int osqp_algebra_init_libs(c_int device) {
   /* This is to prevent a memory leak when multiple OSQP objects are created */
   if (CUDA_handle) return 0;

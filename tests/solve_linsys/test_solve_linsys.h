@@ -10,6 +10,7 @@
 extern "C" {
 #endif
   #include "lin_sys.h"
+  #include "lin_alg.h"
 #ifdef __cplusplus
 }
 #endif
@@ -29,7 +30,7 @@ void test_solveKKT() {
   osqp_set_default_settings(settings);
   settings->rho           = data->test_solve_KKT_rho;
   settings->sigma         = data->test_solve_KKT_sigma;
-  settings->linsys_solver = OSQP_LINSYS_SOLVER;
+  settings->linsys_solver = osqp_algebra_default_linsys();
 
   // Set rho_vec
   m       = data->test_solve_KKT_A->m;

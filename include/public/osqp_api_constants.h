@@ -68,12 +68,6 @@ extern const char * OSQP_ERROR_MESSAGE[];
 * Solver Parameters and Settings *
 **********************************/
 
-#ifdef ALGEBRA_CUDA
-# define OSQP_LINSYS_SOLVER (OSQP_INDIRECT_SOLVER)
-#else
-# define OSQP_LINSYS_SOLVER (OSQP_DIRECT_SOLVER)
-#endif
-
 # define OSQP_VERBOSE               (1)
 # define OSQP_WARM_STARTING         (1)
 # define OSQP_SCALING               (10)
