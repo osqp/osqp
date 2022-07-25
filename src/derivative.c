@@ -7,10 +7,9 @@
 #include "error.h"
 
 #ifdef ALGEBRA_DEFAULT
+
 #include "csc_utils.h"
 #include "csc_math.h"
-#endif
-
 
 c_int scale_dxdy(OSQPSolver *solver, OSQPVectorf *dx, OSQPVectorf *dy_l, OSQPVectorf *dy_u) {
     OSQPVectorf_ew_prod(dx, dx, solver->work->scaling->Dinv);
@@ -39,6 +38,7 @@ c_int unscale_derivatives_PqAlu(OSQPSolver *solver, csc *dP, OSQPVectorf *dq, cs
 
     return 0;
 }
+#endif
 
 c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float *dy_u, csc* dP, c_float* dq, csc* dA, c_float* dl, c_float* du) {
 #ifdef ALGEBRA_DEFAULT
