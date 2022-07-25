@@ -4,6 +4,9 @@ else()
   set(MKL_INTERFACE "lp64")
 endif()
 
+# Link against the single dynamic library version of the MKL library
+set(MKL_LINK "sdl")
+
 find_package(MKL CONFIG REQUIRED)
 
 target_sources(
