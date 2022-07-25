@@ -1233,6 +1233,9 @@ c_int osqp_adjoint_derivative(OSQPSolver *solver,
                                        c_float *dl,
                                        c_float *du) {
 
+    // TODO: We shouldn't have to do this once unscaling/scaling works in derivative.c
+    if (solver->settings->scaling) unscale_data(solver);
+
     c_int status = adjoint_derivative(
             solver,
             dx,
@@ -1244,6 +1247,9 @@ c_int osqp_adjoint_derivative(OSQPSolver *solver,
             dl,
             du
     );
+
+    // TODO: We shouldn't have to do this once unscaling/scaling works in derivative.c
+    if (solver->settings->scaling) scale_data(solver);
 
     return status;
 }

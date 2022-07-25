@@ -10,6 +10,35 @@
 #include "csc_utils.h"
 #endif
 
+
+c_int scale_dxdy(OSQPSolver *solver, OSQPVectorf *dx, OSQPVectorf *dy_l, OSQPVectorf *dy_u) {
+    OSQPVectorf_ew_prod(dx, dx, solver->work->scaling->Dinv);
+    OSQPVectorf_ew_prod(dy_l, dy_l, solver->work->scaling->Einv);
+    OSQPVectorf_mult_scalar(dy_l, solver->work->scaling->c);
+    OSQPVectorf_ew_prod(dy_u, dy_u, solver->work->scaling->Einv);
+    OSQPVectorf_mult_scalar(dy_u, solver->work->scaling->c);
+
+    return 0;
+}
+
+c_int unscale_derivatives_PqAlu(OSQPSolver *solver, csc *dP, OSQPVectorf *dq, csc *dA, OSQPVectorf *dl, OSQPVectorf *du) {
+
+    csc_scale(dP, solver->work->scaling->cinv);
+    csc_lmult_diag(dP, OSQPVectorf_data(solver->work->scaling->Dinv));
+    csc_rmult_diag(dP, OSQPVectorf_data(solver->work->scaling->Dinv));
+
+    OSQPVectorf_mult_scalar(dq, solver->work->scaling->cinv);
+    OSQPVectorf_ew_prod(dq, dq, solver->work->scaling->Dinv);
+
+    csc_lmult_diag(dA, OSQPVectorf_data(solver->work->scaling->Einv));
+    csc_rmult_diag(dA, OSQPVectorf_data(solver->work->scaling->Dinv));
+
+    OSQPVectorf_ew_prod(dl, dl, solver->work->scaling->Einv);
+    OSQPVectorf_ew_prod(du, du, solver->work->scaling->Einv);
+
+    return 0;
+}
+
 c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float *dy_u, csc* dP, c_float* dq, csc* dA, c_float* dl, c_float* du) {
 #ifdef ALGEBRA_DEFAULT
 
@@ -22,8 +51,8 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
     OSQPMatrix *A = solver->work->data->A;
     OSQPVectorf *l = solver->work->data->l;
     OSQPVectorf *u = solver->work->data->u;
-    OSQPVectorf *x = solver->work->x;
-    OSQPVectorf *y = solver->work->y;
+    OSQPVectorf *x = OSQPVectorf_new(solver->solution->x, n);  // Note: x/y are unscaled solutions
+    OSQPVectorf *y = OSQPVectorf_new(solver->solution->y, m);
 
     c_float *l_data = OSQPVectorf_data(l);
     c_float *u_data = OSQPVectorf_data(u);
@@ -40,9 +69,16 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
     c_int *nu_indices_vec = (c_int *) c_malloc(m * sizeof(c_int));
     c_int *nu_sign_vec = (c_int *) c_malloc(m * sizeof(c_int));
 
+    OSQPVectorf *dxx = OSQPVectorf_new(dx, n);
+    OSQPVectorf *dy_l_vec = OSQPVectorf_new(dy_l, m);
+    OSQPVectorf *dy_u_vec = OSQPVectorf_new(dy_u, m);
+
+    // TODO: Find out why scaling/unscaling is not working
+    //if (solver->settings->scaling) scale_dxdy(solver, dxx, dy_l_vec, dy_u_vec);
+
     // TODO: We could use constr_type in OSQPWorkspace but it only tells us whether a constraint is 'loose'
     // not 'upper loose' or 'lower loose', which we seem to need here.
-    c_float infval = OSQP_INFTY;  // TODO: Should we be multiplying this by OSQP_MIN_SCALING ?
+    c_float infval = OSQP_INFTY * OSQP_MIN_SCALING;
 
     c_int n_ineq_l = 0;
     c_int n_ineq_u = 0;
@@ -140,10 +176,6 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
     OSQPMatrix *P_full = OSQPMatrix_triu_to_symm(P);
 
     // ---------- RHS
-    OSQPVectorf *dxx = OSQPVectorf_new(dx, n);
-    OSQPVectorf *dy_l_vec = OSQPVectorf_new(dy_l, m);
-    OSQPVectorf *dy_u_vec = OSQPVectorf_new(dy_u, m);
-
     OSQPVectorf *dy_l_ineq = OSQPVectorf_subvector_byrows(dy_l_vec, A_ineq_l_i);
     OSQPVectorf_free(dy_l_vec);
     OSQPVectorf *dy_u_ineq = OSQPVectorf_subvector_byrows(dy_u_vec, A_ineq_u_i);
@@ -240,10 +272,14 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
         }
     }
 
+    OSQPVectorf_mult_scalar(ryu, -1);
+
+    // TODO: Find out why scaling/unscaling is not working
+    // if (solver->settings->scaling) unscale_derivatives_PqAlu(solver, dP, rx, dA, ryl, ryu);
+
     // Assign vector derivatives to function arguments
     OSQPVectorf_to_raw(dq, rx);
     OSQPVectorf_to_raw(dl, ryl);
-    OSQPVectorf_mult_scalar(ryu, -1);
     OSQPVectorf_to_raw(du, ryu);
 
     // Free up remaining stuff
@@ -276,6 +312,8 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
     OSQPVectori_free(A_eq_i);
 
     OSQPVectorf_free(rhs);
+    OSQPVectorf_free(x);
+    OSQPVectorf_free(y);
 
     return 0;
 
