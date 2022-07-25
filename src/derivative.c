@@ -69,7 +69,9 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
     OSQPVectorf *u = OSQPVectorf_copy_new(solver->work->data->u);
     OSQPVectorf *x = OSQPVectorf_new(solver->solution->x, n);  // Note: x/y are unscaled solutions
     OSQPVectorf *y = OSQPVectorf_new(solver->solution->y, m);
-    unscale_PAlu(solver, P, A, l, u);
+
+    // TODO: If we didn't have to unscale P/A/l/u we would not have to copy these
+    if (solver->settings->scaling) unscale_PAlu(solver, P, A, l, u);
 
     c_float *l_data = OSQPVectorf_data(l);
     c_float *u_data = OSQPVectorf_data(u);
