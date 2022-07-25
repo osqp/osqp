@@ -8,6 +8,7 @@
 
 #ifdef ALGEBRA_DEFAULT
 #include "csc_utils.h"
+#include "csc_math.h"
 #endif
 
 
