@@ -11,6 +11,21 @@
 #include "csc_utils.h"
 #include "csc_math.h"
 
+c_int unscale_PAlu(OSQPSolver *solver, OSQPMatrix *P, OSQPMatrix *A, OSQPVectorf *l, OSQPVectorf *u) {
+
+  OSQPMatrix_mult_scalar(P, solver->work->scaling->cinv);
+  OSQPMatrix_lmult_diag(P, solver->work->scaling->Dinv);
+  OSQPMatrix_rmult_diag(P, solver->work->scaling->Dinv);
+
+  OSQPMatrix_lmult_diag(A, solver->work->scaling->Einv);
+  OSQPMatrix_rmult_diag(A, solver->work->scaling->Dinv);
+
+  OSQPVectorf_ew_prod(l, l, solver->work->scaling->Einv);
+  OSQPVectorf_ew_prod(u, u, solver->work->scaling->Einv);
+
+  return 0;
+}
+
 c_int scale_dxdy(OSQPSolver *solver, OSQPVectorf *dx, OSQPVectorf *dy_l, OSQPVectorf *dy_u) {
     OSQPVectorf_ew_prod(dx, dx, solver->work->scaling->Dinv);
     OSQPVectorf_ew_prod(dy_l, dy_l, solver->work->scaling->Einv);
@@ -48,12 +63,13 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
 
     OSQPSettings*  settings  = solver->settings;
 
-    OSQPMatrix *P = solver->work->data->P;
-    OSQPMatrix *A = solver->work->data->A;
-    OSQPVectorf *l = solver->work->data->l;
-    OSQPVectorf *u = solver->work->data->u;
+    OSQPMatrix *P = OSQPMatrix_copy_new(solver->work->data->P);
+    OSQPMatrix *A = OSQPMatrix_copy_new(solver->work->data->A);
+    OSQPVectorf *l = OSQPVectorf_copy_new(solver->work->data->l);
+    OSQPVectorf *u = OSQPVectorf_copy_new(solver->work->data->u);
     OSQPVectorf *x = OSQPVectorf_new(solver->solution->x, n);  // Note: x/y are unscaled solutions
     OSQPVectorf *y = OSQPVectorf_new(solver->solution->y, m);
+    unscale_PAlu(solver, P, A, l, u);
 
     c_float *l_data = OSQPVectorf_data(l);
     c_float *u_data = OSQPVectorf_data(u);
@@ -313,6 +329,11 @@ c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float
     OSQPVectori_free(A_eq_i);
 
     OSQPVectorf_free(rhs);
+
+    OSQPMatrix_free(P);
+    OSQPMatrix_free(A);
+    OSQPVectorf_free(l);
+    OSQPVectorf_free(u);
     OSQPVectorf_free(x);
     OSQPVectorf_free(y);
 
