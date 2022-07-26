@@ -4,6 +4,9 @@ else()
   set(MKL_INTERFACE "lp64")
 endif()
 
+# Link against the single dynamic library version of the MKL library
+set(MKL_LINK "sdl")
+
 find_package(MKL CONFIG REQUIRED)
 
 target_sources(
@@ -27,3 +30,5 @@ target_include_directories(OSQPLIB PRIVATE ../_common ${CMAKE_CURRENT_SOURCE_DIR
 
 target_include_directories(OSQPLIB PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_INCLUDE_DIRECTORIES>)
 target_compile_options(OSQPLIB PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_COMPILE_OPTIONS>)
+
+target_link_libraries(OSQPLIB MKL::MKL)
