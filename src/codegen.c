@@ -165,7 +165,7 @@ static c_int write_settings(FILE               *f,
   fprintf(f, "/* Define the settings structure */\n");
   fprintf(f, "OSQPSettings %ssettings = {\n", prefix);
   fprintf(f, "  0,\n"); // device
-  fprintf(f, "  OSQP_LINSYS_SOLVER,\n");
+  fprintf(f, "  OSQP_DIRECT_SOLVER,\n");
   fprintf(f, "  0,\n"); // verbose
   fprintf(f, "  %d,\n", settings->warm_starting);
   fprintf(f, "  %d,\n", settings->scaling);

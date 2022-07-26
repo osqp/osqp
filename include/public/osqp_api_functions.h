@@ -21,6 +21,12 @@ extern "C" {
 
 
 /**
+ * Return the capabilities of the OSQP solver.
+ * @return
+ */
+OSQP_API c_int osqp_capabilities(void);
+
+/**
  * Return OSQP version
  * @return  OSQP version
  */
