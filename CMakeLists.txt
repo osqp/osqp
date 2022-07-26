@@ -314,6 +314,11 @@ get_property(
   TARGET OSQPLIB
   PROPERTY SOURCES)
 
+get_property(
+  osqplib_link_libs
+  TARGET OSQPLIB
+  PROPERTY LINK_LIBRARIES)
+
 # ----------------------------------------------
 # Language-specific compilation checks
 # ----------------------------------------------
@@ -425,14 +430,8 @@ if(OSQP_BUILD_SHARED_LIB)
   target_include_directories(osqp PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
                                          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
-  if(MSVC OR IS_MAC)
-    # Visual Studio on Windows, and Mac OS need cuda or mkl libaries to be linked as well
-    if(ALGEBRA_CUDA)
-      target_link_libraries(osqp cublas cusparse)
-    elseif(ALGEBRA_MKL)
-      target_link_libraries(osqp $<LINK_ONLY:MKL::MKL>)
-    endif()
-  endif()
+  # Link against the libraries for the algebras
+  target_link_libraries(osqp ${osqplib_link_libs})
 
   # Declare that we are building the shared library to get proper symbol exports.
   # Shared library consumers should also define OSQP_SHARED_LIB to get the library
@@ -455,12 +454,7 @@ message( STATUS "Build demo executable: " ${OSQP_BUILD_DEMO_EXE} )
 if(OSQP_BUILD_DEMO_EXE)
   add_executable(osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
   #target_include_directories(osqp_demo PRIVATE ${osqplib_includes})
-  target_link_libraries(osqp_demo osqpstatic)
-  if(ALGEBRA_MKL)
-    target_link_libraries(osqp_demo $<LINK_ONLY:MKL::MKL>)
-  elseif(ALGEBRA_CUDA)
-    target_link_libraries(osqp_demo cublas cusparse)
-  endif()
+  target_link_libraries(osqp_demo osqpstatic ${osqplib_link_libs})
 
   if(OSQP_CODEGEN)
     add_executable(osqp_codegen_demo ${PROJECT_SOURCE_DIR}/examples/osqp_codegen_demo.c)

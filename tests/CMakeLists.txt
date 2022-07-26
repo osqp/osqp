@@ -69,13 +69,7 @@ add_custom_command(
 # ----------------------------------------------
 add_executable(osqp_tester osqp_tester.cpp osqp_tester.h ${headers} ${codegen_headers})
 target_include_directories(osqp_tester PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${osqplib_includes})
-if(ALGEBRA_MKL)
-  target_link_libraries(osqp_tester osqpstatic Catch2::Catch2 $<LINK_ONLY:MKL::MKL>)
-elseif(ALGEBRA_CUDA)
-  target_link_libraries(osqp_tester osqpstatic Catch2::Catch2 cublas cusparse)
-else()
-  target_link_libraries(osqp_tester osqpstatic Catch2::Catch2)
-endif()
+target_link_libraries(osqp_tester osqpstatic Catch2::Catch2 ${osqplib_link_libs})
 
 add_test(NAME osqp_tester COMMAND osqp_tester)
 
@@ -87,13 +81,7 @@ add_executable(
   osqp_tester.cpp osqp_tester.h ${headers} ${codegen_headers} ${CMAKE_CURRENT_SOURCE_DIR}/custom_memory/custom_memory.h
   ${CMAKE_CURRENT_SOURCE_DIR}/custom_memory/custom_memory.c)
 target_include_directories(osqp_tester_custom_memory PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${osqplib_includes})
-if(ALGEBRA_MKL)
-  target_link_libraries(osqp_tester_custom_memory osqpstatic Catch2::Catch2 $<LINK_ONLY:MKL::MKL>)
-elseif(ALGEBRA_CUDA)
-  target_link_libraries(osqp_tester_custom_memory osqpstatic Catch2::Catch2 cublas cusparse)
-else()
-  target_link_libraries(osqp_tester_custom_memory osqpstatic Catch2::Catch2)
-endif()
+target_link_libraries(osqp_tester_custom_memory osqpstatic Catch2::Catch2 ${osqplib_link_libs})
 
 add_test(NAME osqp_tester_custom_memory COMMAND osqp_tester_custom_memory)
 
