@@ -1,7 +1,8 @@
+#include "osqp_configure.h"
 #include "osqp_api_types.h"
 #include <mkl.h>
 
-c_int osqp_algebra_init_libs(void) {
+c_int osqp_algebra_init_libs(c_int device) {
     c_int retval = 0;
 
 #ifdef DLONG
