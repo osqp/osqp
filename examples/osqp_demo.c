@@ -1,5 +1,6 @@
 #include "osqp.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 int main(void) {
 
@@ -40,6 +41,20 @@ int main(void) {
     //settings->linsys_solver = OSQP_DIRECT_SOLVER;
     //settings->linsys_solver = OSQP_INDIRECT_SOLVER;
   }
+
+  c_int cap = osqp_capabilities();
+
+  printf("This OSQP library supports:\n");
+  if(cap & OSQP_CAPABILITIY_DIRECT_SOLVER) {
+    printf("    A direct linear algebra solver\n");
+  }
+  if(cap & OSQP_CAPABILITIY_INDIRECT_SOLVER) {
+    printf("    An indirect linear algebra solver\n");
+  }
+  if(cap & OSQP_CAPABILITIY_CODEGEN) {
+    printf("    Code generation\n");
+  }
+  printf("\n");
 
   /* Setup solver */
   exitflag = osqp_setup(&solver, P, q, A, l, u, m, n, settings);

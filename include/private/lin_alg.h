@@ -8,6 +8,12 @@
 extern "C" {
 # endif
 
+/* Return which linear system solvers are supported */
+c_int osqp_algebra_linsys_supported(void);
+
+/* Return the default linear system the algebra backend prefers */
+enum osqp_linsys_solver_type osqp_algebra_default_linsys(void);
+
 /* Initialize libraries that implement algebra. */
 c_int osqp_algebra_init_libs(c_int device);
 

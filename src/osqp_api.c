@@ -6,6 +6,7 @@
 #include "scaling.h"
 #include "error.h"
 #include "version.h"
+#include "lin_alg.h"
 
 #ifdef OSQP_CODEGEN
   #include "codegen.h"
@@ -25,6 +26,22 @@
 /**********************
 * Main API Functions *
 **********************/
+c_int osqp_capabilities(void) {
+  c_int capabilities = 0;
+
+  capabilities |= osqp_algebra_linsys_supported();
+
+#if EMBEDDED != 1
+  capabilities |= OSQP_CAPABILITIY_UPDATE_MATRICES;
+#endif
+
+#ifdef OSQP_CODEGEN
+  capabilities |= OSQP_CAPABILITIY_CODEGEN;
+#endif
+
+  return capabilities;
+}
+
 const char* osqp_version(void) {
   return OSQP_VERSION;
 }
@@ -58,12 +75,12 @@ void osqp_get_dimensions(OSQPSolver *solver,
 
 void osqp_set_default_settings(OSQPSettings *settings) {
 
-  settings->device = 0;                           /* device identifier */
-  settings->linsys_solver  = OSQP_LINSYS_SOLVER;  /* linear system solver */
-  settings->verbose        = OSQP_VERBOSE;        /* print output */
-  settings->warm_starting  = OSQP_WARM_STARTING;  /* warm starting */
-  settings->scaling        = OSQP_SCALING;        /* heuristic problem scaling */
-  settings->polishing      = OSQP_POLISHING;      /* ADMM solution polish: 1 */
+  settings->device = 0;                                      /* device identifier */
+  settings->linsys_solver  = osqp_algebra_default_linsys();  /* linear system solver */
+  settings->verbose        = OSQP_VERBOSE;                   /* print output */
+  settings->warm_starting  = OSQP_WARM_STARTING;             /* warm starting */
+  settings->scaling        = OSQP_SCALING;                   /* heuristic problem scaling */
+  settings->polishing      = OSQP_POLISHING;                 /* ADMM solution polish: 1 */
 
   settings->rho           = (c_float)OSQP_RHO;    /* ADMM step */
   settings->rho_is_vec    = OSQP_RHO_IS_VEC;      /* defines whether rho is scalar or vector*/
