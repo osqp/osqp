@@ -1,4 +1,5 @@
 #include "csc_utils.h"
+#include "algebra_memory.h"
 
 //========== Logical, testing and debug ===========
 
@@ -27,11 +28,11 @@ c_int csc_is_eq(csc *A, csc *B, c_float tol) {
 //========= Internal utility functions  ===========
 
 static void* csc_malloc(c_int n, c_int size) {
-  return c_malloc(n * size);
+  return blas_malloc(n * size);
 }
 
 static void* csc_calloc(c_int n, c_int size) {
-  return c_calloc(n, size);
+  return blas_calloc(n, size);
 }
 
 void prea_int_vec_copy(const c_int *a, c_int *b, c_int n) {
@@ -83,7 +84,7 @@ c_int csc_cumsum(c_int *p, c_int *c, c_int n) {
 // }
 
 csc* csc_spalloc(c_int m, c_int n, c_int nzmax, c_int values, c_int triplet) {
-  csc *A = csc_calloc(1, sizeof(csc)); /* allocate the csc struct */
+  csc *A = c_calloc(1, sizeof(csc)); /* allocate the csc struct */
 
   if (!A) return OSQP_NULL;            /* out of memory */
 
@@ -102,9 +103,9 @@ csc* csc_spalloc(c_int m, c_int n, c_int nzmax, c_int values, c_int triplet) {
 
 void csc_spfree(csc *A) {
   if (A){
-    if (A->p) c_free(A->p);
-    if (A->i) c_free(A->i);
-    if (A->x) c_free(A->x);
+    if (A->p) blas_free(A->p);
+    if (A->i) blas_free(A->i);
+    if (A->x) blas_free(A->x);
     c_free(A);
   }
 }
@@ -126,7 +127,7 @@ csc* csc_submatrix_byrows(const csc* A, c_int* rows){
   c_int    ptr;
   c_int*   rridx; //mapping from row indices to reduced row indices
 
-  rridx = (c_int*)c_malloc(Am * sizeof(c_int));
+  rridx = (c_int*)blas_malloc(Am * sizeof(c_int));
   if(!rridx) return OSQP_NULL;
 
   //count the number of rows in the reduced
@@ -170,7 +171,7 @@ csc* csc_submatrix_byrows(const csc* A, c_int* rows){
     Rp[An] = nzR;
   }
 
-  c_free(rridx); //free internal work index
+  blas_free(rridx); //free internal work index
 
   return R;
 }
@@ -362,8 +363,8 @@ c_float* csc_to_dns(csc *M)
 }
 
 csc* csc_done(csc *C, void *w, void *x, c_int ok) {
-  c_free(w);                   /* free workspace */
-  c_free(x);
+  blas_free(w);                   /* free workspace */
+  blas_free(x);
   if (ok) return C;
   else {
     csc_spfree(C);
