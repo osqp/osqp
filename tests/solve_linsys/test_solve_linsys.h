@@ -9,7 +9,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-  #include "lin_sys.h"
   #include "lin_alg.h"
 #ifdef __cplusplus
 }
@@ -47,7 +46,7 @@ void test_solveKKT() {
   dual_res = 1e-7;
 
   // Form and factorize KKT matrix
-  exitflag = init_linsys_solver(&s, Pu, A, rho_vec, settings, &prim_res, &dual_res, 0);
+  exitflag = osqp_algebra_init_linsys_solver(&s, Pu, A, rho_vec, settings, &prim_res, &dual_res, 0);
 
   // Solve KKT x = rhs
   rhs = OSQPVectorf_new(data->test_solve_KKT_rhs, m+n);
@@ -96,7 +95,7 @@ void test_solveKKT_pardiso() {
   A  = OSQPMatrix_new_from_csc(data->test_solve_KKT_A,0);
 
   // Form and factorize KKT matrix
-  exitflag = init_linsys_solver(&s, Pu, A, rho_vec, settings, OSQP_NULL, OSQP_NULL, 0);
+  exitflag = osqp_algebra_init_linsys_solver(&s, Pu, A, rho_vec, settings, OSQP_NULL, OSQP_NULL, 0);
 
   // Solve  KKT x = b via LDL given factorization
   rhs = OSQPVectorf_new(data->test_solve_KKT_rhs, m+n);
