@@ -3,16 +3,26 @@ include(FetchContent)
 message(STATUS "Fetching/configuring QDLDL solver")
 list(APPEND CMAKE_MESSAGE_INDENT "  ")
 
+# Corresponds to 0.1.6 release of QDLDL
 FetchContent_Declare(
   qdldl
   GIT_REPOSITORY https://github.com/osqp/qdldl.git
-  GIT_TAG 07ff30a3eedee4857bbbeb0778f54a86b1ea78f9
+  GIT_TAG 29d140419a3bec20d860052d73ba2be927faf5a1
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/qdldl_sources)
 FetchContent_GetProperties(qdldl)
 
 if(NOT qdldl_POPULATED)
   FetchContent_Populate(qdldl)
-  # We don't actually want to build anything from here
+
+  # Make QDLDL use the same types as OSQP
+  set(QDLDL_FLOAT ${DFLOAT} CACHE BOOL "QDLDL Float type")
+  set(QDLDL_LONG ${DLONG} CACHE BOOL "QDLDL Integer type")
+
+  # We only want the object library, so turn off the other library products
+  set(QDLDL_BUILD_STATIC_LIB OFF CACHE BOOL "Build QDLDL static library")
+  set(QDLDL_BUILD_SHARED_LIB OFF CACHE BOOL "Build QDLDL shared library")
+
+  # We don't actually want to build anything from here by default
   add_subdirectory(${qdldl_SOURCE_DIR} ${qdldl_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
