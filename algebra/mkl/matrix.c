@@ -91,35 +91,9 @@ void OSQPMatrix_update_values(OSQPMatrix  *M,
                             const c_float *Mx_new,
                             const c_int   *Mx_new_idx,
                             c_int          M_new_n) {
-  c_int i;
-
-  /* Get a view into the data inside the current matrix */
-  sparse_index_base_t idx_method = 0;
-  MKL_INT numrows = 0;
-  MKL_INT numcols = 0;
-
-  MKL_INT *p_start;
-  MKL_INT *p_end;
-  MKL_INT *row_idx;
-  c_float *vals;
-
-  spblas_export_csc(M->mkl_mat, &idx_method, &numrows, &numcols, &p_start, &p_end, &row_idx, &vals);
-
-  /* Update subset of elements */
-  /* This operates on the assumption that we get a pointer to the actual data back from the above
-     call to spblas_export_csc, which seems to be the case in all the testing done. */
-  if (Mx_new_idx) {
-    /* Change only Mx_new_idx */
-    for (i = 0; i < M_new_n; i++) {
-      vals[Mx_new_idx[i]] = Mx_new[i];
-    }
-  }
-  else {
-    /* Change whole M.  Assumes M_new_n == nnz(M) */
-    for (i = 0; i < (p_end[numcols-1] + 1); i++) {
-      vals[i] = Mx_new[i];
-    }
-  }
+  /* This operates on the assumption that the stored shadow csc matrix is the backing memory for
+     the actual MKL matrix handle, which seems to be the case in all the testing done. */
+  csc_update_values(M->csc, Mx_new, Mx_new_idx, M_new_n);
 }
 
 /* Matrix dimensions and data access */
