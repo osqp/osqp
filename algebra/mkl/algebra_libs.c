@@ -1,6 +1,10 @@
 #include "osqp_configure.h"
 #include "osqp_api_constants.h"
 #include "osqp_api_types.h"
+
+#include "pardiso_interface.h"
+#include "mkl-cg_interface.h"
+
 #include <mkl.h>
 
 c_int osqp_algebra_linsys_supported(void) {
@@ -30,3 +34,24 @@ c_int osqp_algebra_init_libs(c_int device) {
 }
 
 void osqp_algebra_free_libs(void) {return;}
+
+// Initialize linear system solver structure
+// NB: Only the upper triangular part of P is filled
+c_int osqp_algebra_init_linsys_solver(LinSysSolver      **s,
+                                      const OSQPMatrix   *P,
+                                      const OSQPMatrix   *A,
+                                      const OSQPVectorf  *rho_vec,
+                                      const OSQPSettings *settings,
+                                      c_float            *scaled_prim_res,
+                                      c_float            *scaled_dual_res,
+                                      c_int               polishing) {
+
+    switch (settings->linsys_solver) {
+    default:
+    case OSQP_DIRECT_SOLVER:
+        return init_linsys_solver_pardiso((pardiso_solver **)s, P, A, rho_vec, settings, polishing);
+
+    case OSQP_INDIRECT_SOLVER:
+        return init_linsys_mklcg((mklcg_solver **)s, P, A, rho_vec, settings, polishing);
+    }
+}

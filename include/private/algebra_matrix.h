@@ -3,6 +3,7 @@
 
 #include "glob_opts.h"
 #include "csc_type.h"
+#include "algebra_vector.h"
 
 # ifdef __cplusplus
 extern "C" {

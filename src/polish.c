@@ -2,7 +2,6 @@
 #include "lin_alg.h"
 #include "util.h"
 #include "auxil.h"
-#include "lin_sys.h"
 #include "proj.h"
 #include "error.h"
 #include "timing.h"
@@ -291,8 +290,8 @@ c_int polish(OSQPSolver *solver) {
   }
 
   // Form and factorize reduced KKT
-  exitflag = init_linsys_solver(&plsh, work->data->P, work->pol->Ared,
-                                OSQP_NULL, settings, OSQP_NULL, OSQP_NULL, 1);
+  exitflag = osqp_algebra_init_linsys_solver(&plsh, work->data->P, work->pol->Ared,
+                                             OSQP_NULL, settings, OSQP_NULL, OSQP_NULL, 1);
 
   if (exitflag) {
     // Polishing failed

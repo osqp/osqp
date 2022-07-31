@@ -16,7 +16,6 @@
 #endif
 
 #ifndef EMBEDDED
-# include "lin_sys.h"
 # include "polish.h"
 #endif
 
@@ -273,9 +272,9 @@ c_int osqp_setup(OSQPSolver         **solverp,
   }
 
   // Initialize linear system solver structure
-  exitflag = init_linsys_solver(&(work->linsys_solver), work->data->P, work->data->A,
-                                work->rho_vec, solver->settings,
-                                &work->scaled_prim_res, &work->scaled_dual_res, 0);
+  exitflag = osqp_algebra_init_linsys_solver(&(work->linsys_solver), work->data->P, work->data->A,
+                                             work->rho_vec, solver->settings,
+                                             &work->scaled_prim_res, &work->scaled_dual_res, 0);
 
   if (exitflag == OSQP_NONCVX_ERROR) {
     update_status(solver->info, OSQP_NON_CVX);
