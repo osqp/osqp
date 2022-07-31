@@ -60,7 +60,7 @@ c_float* OSQPMatrix_get_x(const OSQPMatrix *M){return M->csc->x;}
 c_int*   OSQPMatrix_get_i(const OSQPMatrix *M){return M->csc->i;}
 c_int*   OSQPMatrix_get_p(const OSQPMatrix *M){return M->csc->p;}
 c_int    OSQPMatrix_get_nz(const OSQPMatrix *M){return M->csc->p[M->csc->n];}
-
+csc*     OSQPMatrix_get_csc(const OSQPMatrix *M) {return csc_copy(M->csc);}
 
 /* math functions ----------------------------------------------------------*/
 
