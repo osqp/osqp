@@ -39,8 +39,22 @@ struct OSQPCodegenDefines_deleter {
     }
 };
 
+struct OSQPMatrix_deleter {
+    void operator()(OSQPMatrix* mat) {
+        OSQPMatrix_free(mat);
+    }
+};
+
+struct OSQPVectorf_deleter {
+    void operator()(OSQPVectorf* vec) {
+        OSQPVectorf_free(vec);
+    }
+};
+
 using OSQPSolver_ptr = std::unique_ptr<OSQPSolver, OSQPSolver_deleter>;
 using OSQPSettings_ptr = std::unique_ptr<OSQPSettings, OSQPSettings_deleter>;
 using OSQPCodegenDefines_ptr = std::unique_ptr<OSQPCodegenDefines, OSQPCodegenDefines_deleter>;
+using OSQPMatrix_ptr = std::unique_ptr<OSQPMatrix, OSQPMatrix_deleter>;
+using OSQPVectorf_ptr = std::unique_ptr<OSQPVectorf, OSQPVectorf_deleter>;
 
 #endif /* ifndef OSQP_TESTER_H */
