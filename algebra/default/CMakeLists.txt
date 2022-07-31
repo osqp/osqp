@@ -79,7 +79,8 @@ if( OSQP_CODEGEN )
        ${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/qdldl_interface.h
        ${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/qdldl_interface.c
        ${qdldl_SOURCE_DIR}/src/qdldl.c
-       ${qdldl_SOURCE_DIR}/include/qdldl.h )
+       ${qdldl_SOURCE_DIR}/include/qdldl.h
+       ${qdldl_SOURCE_DIR}/include/qdldl_version.h )
 
   foreach( f ${EMBEDDED_LINALG} )
     get_filename_component( fname ${f} NAME )
