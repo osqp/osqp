@@ -1,73 +1,45 @@
-include(FetchContent)
-
-message(STATUS "Fetching/configuring QDLDL solver")
-list(APPEND CMAKE_MESSAGE_INDENT "  ")
-
-FetchContent_Declare(
-  qdldl
-  GIT_REPOSITORY https://github.com/osqp/qdldl.git
-  GIT_TAG 07ff30a3eedee4857bbbeb0778f54a86b1ea78f9
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/qdldl_sources)
-FetchContent_GetProperties(qdldl)
-
-if(NOT qdldl_POPULATED)
-  FetchContent_Populate(qdldl)
-  # We don't actually want to build anything from here
-  add_subdirectory(${qdldl_SOURCE_DIR} ${qdldl_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
-
-list(POP_BACK CMAKE_MESSAGE_INDENT)
-
-set_source_files_properties($<TARGET_OBJECTS:qdldlobject> PROPERTIES GENERATED 1)
-
-get_property(
-  qdldl_include
-  TARGET qdldlobject
-  PROPERTY INCLUDE_DIRECTORIES)
+# Use the QDLDL solver in this algebra
+include(${OSQP_ALGEBRA_ROOT}/_common/lin_sys/direct/qdldl.cmake)
 
 if(NOT EMBEDDED)
-  file(
-    GLOB
-    NON_EMBEDDED_SRC_FILES
-    CONFIGURE_DEPENDS
-    lin_sys/direct/amd/src/*.c
-    lin_sys/direct/amd/include/*.h
-    ../_common/csc_utils.h
-    ../_common/csc_utils.c)
+  set( NON_EMBEDDED_SRC_FILES
+       ../_common/csc_utils.h
+       ../_common/csc_utils.c
+       ${LIN_SYS_QDLDL_NON_EMBEDDED_SRC_FILES} )
 endif()
 
 target_sources(
   OSQPLIB
   PRIVATE ../_common/csc_math.h
           ../_common/csc_math.c
-          ../_common/kkt.h
-          ../_common/kkt.c
           algebra_impl.h
           algebra_libs.c
           vector.c
           matrix.c
           ${NON_EMBEDDED_SRC_FILES}
-          lin_sys/direct/qdldl_interface.h
-          lin_sys/direct/qdldl_interface.c
-          $<TARGET_OBJECTS:qdldlobject>)
+          ${LIN_SYS_QDLDL_EMBEDDED_SRC_FILES}
+          $<TARGET_OBJECTS:qdldlobject> )
 
-target_include_directories(OSQPLIB PRIVATE ../_common ${CMAKE_CURRENT_SOURCE_DIR} ${qdldl_include} lin_sys/direct
-                                           lin_sys/direct/amd/include)
+target_include_directories(
+  OSQPLIB
+  PRIVATE ../_common
+          ${CMAKE_CURRENT_SOURCE_DIR}
+          ${LIN_SYS_QDLDL_INC_PATHS} )
 
 
 # Setup the file copying for the code generation target
 if( OSQP_CODEGEN )
   set( EMBEDDED_LINALG
-       ${CMAKE_CURRENT_SOURCE_DIR}/../_common/csc_math.h
-       ${CMAKE_CURRENT_SOURCE_DIR}/../_common/csc_math.c
-       ${CMAKE_CURRENT_SOURCE_DIR}/../_common/kkt.h
-       ${CMAKE_CURRENT_SOURCE_DIR}/../_common/kkt.c
        ${CMAKE_CURRENT_SOURCE_DIR}/algebra_impl.h
        ${CMAKE_CURRENT_SOURCE_DIR}/algebra_libs.c
        ${CMAKE_CURRENT_SOURCE_DIR}/vector.c
        ${CMAKE_CURRENT_SOURCE_DIR}/matrix.c
-       ${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/qdldl_interface.h
-       ${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/qdldl_interface.c
+       ${OSQP_ALGEBRA_ROOT}/_common/csc_math.h
+       ${OSQP_ALGEBRA_ROOT}/_common/csc_math.c
+       ${OSQP_ALGEBRA_ROOT}/_common/kkt.h
+       ${OSQP_ALGEBRA_ROOT}/_common/kkt.c
+       ${OSQP_ALGEBRA_ROOT}/_common/lin_sys/direct/qdldl_interface.h
+       ${OSQP_ALGEBRA_ROOT}/_common/lin_sys/direct/qdldl_interface.c
        ${qdldl_SOURCE_DIR}/src/qdldl.c
        ${qdldl_SOURCE_DIR}/include/qdldl.h )
 
@@ -90,9 +62,9 @@ if( OSQP_CODEGEN )
   endforeach()
 
     add_custom_command(OUTPUT "${EMBEDDED_BUILD_PRIVATE_INC_DIR}/qdldl_types.h"
-                       COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/qdldl_codegen_types.h.in"
+                       COMMAND ${CMAKE_COMMAND} -E copy "${OSQP_ALGEBRA_ROOT}/_common/lin_sys/direct/qdldl_codegen_types.h.in"
                                                         "${EMBEDDED_BUILD_PRIVATE_INC_DIR}/qdldl_types.h"
-                       DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct/qdldl_codegen_types.h.in"
+                       DEPENDS "${OSQP_ALGEBRA_ROOT}/_common/lin_sys/direct/qdldl_codegen_types.h.in"
                        COMMENT "Copying qdldl_types.h" )
 
 
