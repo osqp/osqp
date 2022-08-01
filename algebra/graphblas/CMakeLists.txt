@@ -9,7 +9,7 @@ target_sources(
           ../_common/csc_math.c
           algebra_impl.h
           algebra_libs.c
-          custom_operators.c
+          static_items.c
           vector.c
           matrix.c
           ${NON_EMBEDDED_SRC_FILES}

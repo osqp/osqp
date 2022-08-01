@@ -7,50 +7,54 @@
 #include <stdint.h>
 
 #ifdef DLONG
-#define GRINT GrB_INT64
-typedef int64_t gb_int;
+#define OSQP_GrB_INT GrB_INT64
+typedef int64_t osqp_grb_int_t;
 
-#define GR_INT_SEMIRING GrB_PLUS_TIMES_SEMIRING_INT64
+#define OSQP_GrB_INT_SEMIRING GrB_PLUS_TIMES_SEMIRING_INT64
 
-#define GR_INT_PLUS GrB_PLUS_INT64
-#define GR_INT_MINUS GrB_PLUS_INT64
+#define OSQP_GrB_INT_PLUS GrB_PLUS_INT64
+#define OSQP_GrB_INT_MINUS GrB_PLUS_INT64
 #else
-#define GRINT GrB_INT32
-typedef int32_t gb_int;
+#define OSQP_GrB_INT GrB_INT32
+typedef int32_t osqp_grb_int_t;
 
-#define GR_INT_SEMIRING GrB_PLUS_TIMES_SEMIRING_INT64
+#define OSQP_GrB_INT_SEMIRING GrB_PLUS_TIMES_SEMIRING_INT64
 
-#define GR_INT_PLUS GrB_PLUS_INT64
-#define GR_INT_MINUS GrB_PLUS_INT64
+#define OSQP_GrB_INT_PLUS GrB_PLUS_INT64
+#define OSQP_GrB_INT_MINUS GrB_PLUS_INT64
 #endif
 
 #ifdef DFLOAT
-#define GRFLOAT GrB_FP32
+#define OSQP_GrB_FLOAT GrB_FP32
 
 
 #define GR_FLOAT_SEMIRING GrB_PLUS_TIMES_SEMIRING_FP32
 
-#define GR_FLOAT_PLUS  GrB_PLUS_FP32
-#define GR_FLOAT_MINUS GrB_MINUS_FP32
-#define GR_FLOAT_TIMES GrB_TIMES_FP32
-#define GR_FLOAT_MAX   GrB_MAX_FP64
+#define OSQP_GrB_FLOAT_PLUS  GrB_PLUS_FP32
+#define OSQP_GrB_MINUS GrB_MINUS_FP32
+#define OSQP_GrB_TIMES GrB_TIMES_FP32
+#define OSQP_GrB_MAX   GrB_MAX_FP64
 #else
-#define GRFLOAT GrB_FP64
+#define OSQP_GrB_FLOAT GrB_FP64
 
-#define GR_FLOAT_SEMIRING GrB_PLUS_TIMES_SEMIRING_FP64
+#define OSQP_GrB_FLOAT_SEMIRING GrB_PLUS_TIMES_SEMIRING_FP64
 
-#define GR_FLOAT_PLUS  GrB_PLUS_FP64
-#define GR_FLOAT_MINUS GrB_MINUS_FP64
-#define GR_FLOAT_TIMES GrB_TIMES_FP64
-#define GR_FLOAT_MAX   GrB_MAX_FP64
+#define OSQP_GrB_FLOAT_PLUS  GrB_PLUS_FP64
+#define OSQP_GrB_FLOAT_MINUS GrB_MINUS_FP64
+#define OSQP_GrB_FLOAT_TIMES GrB_TIMES_FP64
+#define OSQP_GrB_FLOAT_MAX   GrB_MAX_FP64
 #endif
 
 /*
- * Custom binary operators
+ * Custom GraphBLAS items
+ * (Defined inside static_items.h)
  */
 
+/* A scalar that is always 0.0 */
+extern GrB_Scalar OSQP_GrB_FLOAT_ZERO;
+
 /* A binary operator that returns the item that has the largest absolute value */
-extern GrB_BinaryOp maxabs;
+extern GrB_BinaryOp OSQP_GrB_MAXABS;
 
 /*********************************************
 *   Internal definition of OSQPVector types

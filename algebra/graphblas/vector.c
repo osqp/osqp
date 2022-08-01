@@ -42,7 +42,7 @@ OSQPVectorf* OSQPVectorf_malloc(c_int length) {
 
   out->length = length;
 
-  if (GrB_Vector_new(&(out->vec), GRFLOAT, length) != GrB_SUCCESS) {
+  if (GrB_Vector_new(&(out->vec), OSQP_GrB_FLOAT, length) != GrB_SUCCESS) {
     c_free(out);
     return OSQP_NULL;
   }
@@ -57,7 +57,7 @@ OSQPVectori* OSQPVectori_malloc(c_int length) {
 
   out->length = length;
 
-  if (GrB_Vector_new(&(out->vec), GRINT, length) != GrB_SUCCESS) {
+  if (GrB_Vector_new(&(out->vec), OSQP_GrB_INT, length) != GrB_SUCCESS) {
     c_free(out);
     return OSQP_NULL;
   }
@@ -231,11 +231,11 @@ void OSQPVectorf_from_raw(OSQPVectorf   *b,
 
 void OSQPVectori_from_raw(OSQPVectori *b,
                           const c_int *av) {
-  GrB_Vector_build(b->vec,        /* w = Store the items into vector b */
-                   GrB_ALL,       /* indices = Store into all indices in w */
-                   (gb_int*) av,  /* values = Use av as the source of values */
-                   b->length,     /* n = The length of the av array */
-                   GrB_NULL);     /* dup = Error if the indices are duplicated (not an issue here) */
+  GrB_Vector_build(b->vec,                /* w = Store the items into vector b */
+                   GrB_ALL,               /* indices = Store into all indices in w */
+                   (osqp_grb_int_t*) av,  /* values = Use av as the source of values */
+                   b->length,             /* n = The length of the av array */
+                   GrB_NULL);             /* dup = Error if the indices are duplicated (not an issue here) */
 }
 
 void OSQPVectorf_to_raw(c_float           *bv,
@@ -253,7 +253,7 @@ void OSQPVectori_to_raw(c_int *bv, const OSQPVectori *a) {
   c_int length = a->length;
 
   for (i = 0; i < length; i++) {
-    GrB_Vector_extractElement((gb_int*) &bv[i], a->vec, i);
+    GrB_Vector_extractElement((osqp_grb_int_t*) &bv[i], a->vec, i);
   }
 }
 
@@ -290,63 +290,43 @@ void OSQPVectorf_set_scalar_conditional(OSQPVectorf       *a,
 void OSQPVectorf_mult_scalar(OSQPVectorf *a,
                              c_float      sc) {
   /* Use the Vector-BinaryOp variant to apply the times operator to each element with a given scalar */
-  GrB_apply(a->vec,         /* w = Output vector */
-            GrB_NULL,       /* mask = Write to all entries */
-            GrB_NULL,       /* accum = Perform no operation on the output vector */
-            GR_FLOAT_TIMES, /* op = Multiplication binary operator */
-            sc,             /* val = Scalar to multiply by */
-            a->vec,         /* u = Vector to multiply each element */
-            GrB_NULL);      /* desc = Descriptor for settings (TODO: Use this for performance) */
+  GrB_apply(a->vec,               /* w = Output vector */
+            GrB_NULL,             /* mask = Write to all entries */
+            GrB_NULL,             /* accum = Perform no operation on the output vector */
+            OSQP_GrB_FLOAT_TIMES, /* op = Multiplication binary operator */
+            sc,                   /* val = Scalar to multiply by */
+            a->vec,               /* u = Vector to multiply each element */
+            GrB_NULL);            /* desc = Descriptor for settings (TODO: Use this for performance) */
 }
 
 void OSQPVectorf_plus(OSQPVectorf      *x,
                      const OSQPVectorf *a,
                      const OSQPVectorf *b) {
-  if (x == a){
-    /* Accumulate b onto x */
-    GrB_eWiseAdd(x->vec,              /* w = Output vector (that can be accumulated onto) */
-                 GrB_NULL,            /* mask = Don't block writing to any elements of w */
-                 GR_FLOAT_PLUS,       /* accum = Accumulate onto w using the PLUS operator */
-                 GR_FLOAT_SEMIRING,   /* op = Use the PLUS_TIMES semiring for the algebraic operations between (plus)*/
-                 b->vec,              /* u = Add this vector */
-                 GrB_NULL,            /* v = No second vector in original operation*/
-                 GrB_NULL);           /* desc = Descriptor for settings (TODO: Use this for performance) */
-  }
-  else {
-    /* Replace x with a+b */
-    GrB_eWiseAdd(x->vec,              /* w = Output vector (that can be accumulated onto) */
-                 GrB_NULL,            /* mask = Don't block writing to any elements of w */
-                 GrB_NULL,            /* accum = Don't accumulate onto w, just overwrite it */
-                 GR_FLOAT_SEMIRING,   /* op = Use the PLUS_TIMES semiring for the algebraic operations between u and v */
-                 a->vec,              /* u = First vector in operation */
-                 b->vec,              /* v = Second vector in operation*/
-                 GrB_NULL);           /* desc = Descriptor for settings (TODO: Use this for performance) */
-  }
+  /* Note: It is possible for x==a to be true, in which case this should just accumulate b onto x.
+     This is done below because when x==a, we can do x=a+b to get the accumulation result into x. */
+  GrB_eWiseAdd(x->vec,              /* w = Output vector (that can be accumulated onto) */
+               GrB_NULL,            /* mask = Don't block writing to any elements of w */
+               GrB_NULL,            /* accum = Don't accumulate onto w, just overwrite it */
+               OSQP_GrB_FLOAT_PLUS, /* op = Use the PLUS operator */
+               a->vec,              /* u = When x is a, accumulate b onto x, otherwise add a to b and store in x */
+               b->vec,              /* v = We always operate on b*/
+               GrB_NULL);           /* desc = Descriptor for settings (TODO: Use this for performance) */
 }
 
 void OSQPVectorf_minus(OSQPVectorf       *x,
                        const OSQPVectorf *a,
                        const OSQPVectorf *b) {
-  if (x == a){
-    /* Subtract the elements of b from those of x x */
-    GrB_eWiseAdd(x->vec,              /* w = Output vector (that can be accumulated onto) */
-                 GrB_NULL,            /* mask = Don't block writing to any elements of w */
-                 GR_FLOAT_MINUS,      /* accum = Accumulate onto w using the MINUS operator */
-                 GR_FLOAT_SEMIRING,   /* op = Use the PLUS_TIMES semiring for the algebraic operations between u and v */
-                 b->vec,              /* u = Subtract this vector */
-                 GrB_NULL,            /* v = No second vector in original operation*/
-                 GrB_NULL);           /* desc = Descriptor for settings (TODO: Use this for performance) */
-  }
-  else {
-    /* Replace x with a-b */
-    GrB_eWiseAdd(x->vec,              /* w = Output vector (that can be accumulated onto) */
-                 GrB_NULL,            /* mask = Don't block writing to any elements of w */
-                 GrB_NULL,            /* accum = Don't accumulate onto w, just overwrite it */
-                 GR_FLOAT_MINUS,      /* op = Use the minus operator for the operation between each element of u and v */
-                 a->vec,              /* u = First vector in operation */
-                 b->vec,              /* v = Second vector in operation*/
-                 GrB_NULL);           /* desc = Descriptor for settings (TODO: Use this for performance) */
-  }
+  /* Note: It is possible for x==a to be true, in which case this should just subtract b from x.
+     This is done below because when x==a, we can do x=a-b to get the proper result into x. */
+  GxB_eWiseUnion(x->vec,               /* w = Output vector */
+                 GrB_NULL,             /* mask = Don't block writing to any elements of w */
+                 GrB_NULL,             /* accum = Don't accumulate onto w, just overwrite it */
+                 OSQP_GrB_FLOAT_MINUS, /* op = Use the minus operator */
+                 a->vec,               /* u = First element of the expression */
+                 OSQP_GrB_FLOAT_ZERO,  /* alpha = Value to use in expression when a is not present */
+                 b->vec,               /* v = Second element of the expression */
+                 OSQP_GrB_FLOAT_ZERO,  /* beta = Value to use in expression when b is not present */
+                 GrB_NULL);            /* desc = Descriptor for settings (TODO: Use this for performance) */
 }
 
 /* TODO */
@@ -407,15 +387,15 @@ c_float OSQPVectorf_norm_inf(const OSQPVectorf *v){
   c_float normval = 0.0;
 
   GrB_Scalar normaccum;
-  GrB_Scalar_new(&normaccum, GRFLOAT);
+  GrB_Scalar_new(&normaccum, OSQP_GrB_FLOAT);
 
   /* Use the vector->scalar variant to use a custom binary operator for the reduction.
      Using the vector->float variant would require the use of a monoid instead of a binary operator. */
-  GrB_reduce(normaccum,     /* val = Store result in normaccum */
-             GrB_NULL,      /* accum = Don't accumulate onto the value already in normval */
-             maxabs,        /* op = Use the custom maxabs operator to find the item with the largest absolute value*/
-             v->vec,        /* u = Operate on this vector */
-             GrB_NULL);     /* desc = Descriptor for setting, not used in this function */
+  GrB_reduce(normaccum,       /* val = Store result in normaccum */
+             GrB_NULL,        /* accum = Don't accumulate onto the value already in normval */
+             OSQP_GrB_MAXABS, /* op = Use the custom maxabs operator to find the item with the largest absolute value*/
+             v->vec,          /* u = Operate on this vector */
+             GrB_NULL);       /* desc = Descriptor for setting, not used in this function */
 
   GrB_Scalar_extractElement(&normval, normaccum);
   GrB_free(&normaccum);
