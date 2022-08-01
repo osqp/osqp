@@ -77,7 +77,7 @@ cmake_dependent_option( OSQP_COVERAGE_CHECK
 
 set(ALGEBRA
     "default"
-    CACHE STRING "The Algebra to use (default/mkl/cuda)")
+    CACHE STRING "The Algebra to use (default/mkl/cuda/graphblas)")
 
 option(PRINTING "Enable solver printing" ON)
 option(PROFILING "Enable solver profiling (timing)" ON)
@@ -98,6 +98,9 @@ elseif(${ALGEBRA} STREQUAL "mkl")
 elseif(${ALGEBRA} STREQUAL "cuda")
   set(ALGEBRA_USER_STRING "cuda")
   set(ALGEBRA_CUDA ON)
+elseif(${ALGEBRA} STREQUAL "graphblas")
+  set(ALGEBRA_USER_STRING "graphblas")
+  set(ALGEBRA_GRAPHBLAS ON)
 endif()
 
 # Is the code generated for embedded platforms? 1 :   Yes. Matrix update not allowed. 2 :   No. Matrix update allowed.
@@ -110,6 +113,7 @@ if(DEFINED EMBEDDED)
   set(ALGEBRA_DEFAULT ON)
   unset(ALGEBRA_CUDA)
   unset(ALGEBRA_MKL)
+  unset(ALGEBRA_GRAPHBLAS)
 
   if(${PRINTING} OR ${PROFILING} OR ${CTRLC})
     message(WARNING "Disabling printing/profiling/Ctrl-C for EMBEDDED mode.")
