@@ -25,25 +25,43 @@ typedef int32_t osqp_grb_int_t;
 #endif
 
 #ifdef DFLOAT
+/* Types */
 #define OSQP_GrB_FLOAT GrB_FP32
 
+/* Semirings */
+#define OSQP_GrB_PLUS_TIMES_FLOAT_SEMIRING GrB_PLUS_TIMES_SEMIRING_FP32
 
-#define GR_FLOAT_SEMIRING GrB_PLUS_TIMES_SEMIRING_FP32
+/* Monoids */
+#define OSQP_GrB_FLOAT_MAX_MONOID GrB_MAX_MONOID_FP32
 
+/* Unary operators */
+#define OSQP_GrB_FLOAT_ABS   GrB_ABS_FP32
+
+/* Binary operators */
 #define OSQP_GrB_FLOAT_PLUS  GrB_PLUS_FP32
-#define OSQP_GrB_MINUS GrB_MINUS_FP32
-#define OSQP_GrB_TIMES GrB_TIMES_FP32
-#define OSQP_GrB_MAX   GrB_MAX_FP64
+#define OSQP_GrB_FLOAT_MINUS GrB_MINUS_FP32
+#define OSQP_GrB_FLOAT_TIMES GrB_TIMES_FP32
+#define OSQP_GrB_FLOAT_MAX   GrB_MAX_FP32
 #else
+/* Types */
 #define OSQP_GrB_FLOAT GrB_FP64
 
+/* Semirings */
 #define OSQP_GrB_FLOAT_SEMIRING GrB_PLUS_TIMES_SEMIRING_FP64
 
+/* Monoids */
+#define OSQP_GrB_FLOAT_MAX_MONOID GrB_MAX_MONOID_FP64
+
+/* Unary operators */
+#define OSQP_GrB_FLOAT_ABS   GrB_ABS_FP64
+
+/* Binary operators */
 #define OSQP_GrB_FLOAT_PLUS  GrB_PLUS_FP64
 #define OSQP_GrB_FLOAT_MINUS GrB_MINUS_FP64
 #define OSQP_GrB_FLOAT_TIMES GrB_TIMES_FP64
 #define OSQP_GrB_FLOAT_MAX   GrB_MAX_FP64
 #endif
+
 
 /*
  * Custom GraphBLAS items
@@ -53,8 +71,9 @@ typedef int32_t osqp_grb_int_t;
 /* A scalar that is always 0.0 */
 extern GrB_Scalar OSQP_GrB_FLOAT_ZERO;
 
-/* A binary operator that returns the item that has the largest absolute value */
-extern GrB_BinaryOp OSQP_GrB_MAXABS;
+/* A vector that is always empty */
+extern GrB_Vector OSQP_GrB_FLOAT_EMPTY_VEC;
+
 
 /*********************************************
 *   Internal definition of OSQPVector types

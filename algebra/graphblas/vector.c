@@ -329,76 +329,136 @@ void OSQPVectorf_minus(OSQPVectorf       *x,
                  GrB_NULL);            /* desc = Descriptor for settings (TODO: Use this for performance) */
 }
 
-/* TODO */
+
 void OSQPVectorf_add_scaled(OSQPVectorf       *x,
                             c_float            sca,
                             const OSQPVectorf *a,
                             c_float            scb,
-                            const OSQPVectorf *b){
-  c_int i;
-  c_int length = x->length;
-  c_float*  av = a->values;
-  c_float*  bv = b->values;
-  c_float*  xv = x->values;
+                            const OSQPVectorf *b) {
+  /* The GxB_eWiseUnion function will use the scalars in alpha or beta when there is no value in u or v, respectively,
+     so we exploit that here to do a scalar multiplication of each entry before accumulating. By always providing an empty
+     vector as the u argument, we force the operation to then be alpha*v (scaling the element of v by alpha). */
+  GrB_Scalar grsca;
+  GrB_Scalar grscb;
 
-  /* shorter version when incrementing */
-  if (x == a && sca == 1.){
-    for (i = 0; i < length; i++) {
-      xv[i] += scb * bv[i];
-    }
+  GrB_Scalar_new(&grsca, OSQP_GrB_FLOAT);
+  GrB_Scalar_setElement(grsca, sca);
+
+  GrB_Scalar_new(&grscb, OSQP_GrB_FLOAT);
+  GrB_Scalar_setElement(grscb, scb);
+
+  /* When (x == a and sca == 1.0), then the a vector is not used. When this condition is not satisfied,
+     then the result should replace the contents of the x vector with x = sca*a + scb*b */
+  if (!(x == a && sca == 1.0)) {
+    GxB_eWiseUnion(x->vec,                    /* w = Save onto the x vector */
+                   GrB_NULL,                  /* mask = Don't block writing to any elements */
+                   GrB_NULL,                  /* accum = Replace the elements in the x vector */
+                   OSQP_GrB_FLOAT_TIMES,      /* add = The binary operation to perform between the elements of u and v */
+                   OSQP_GrB_FLOAT_EMPTY_VEC,  /* u = The first vector argument is always empty */
+                   grsca,                     /* alpha = The scalar to use instead of the valus in u */
+                   a->vec,                    /* v = The second vector argument is the vector to multiply with */
+                   OSQP_GrB_FLOAT_ZERO,       /* beta = Scalar to use if b doesn't have a value (just use zero) */
+                   GrB_NULL);                 /* desc = Descriptor for settings (TODO: Use this for performance) */
   }
-  else {
-    for (i = 0; i < length; i++) {
-      xv[i] = sca * av[i] + scb * bv[i];
-    }
-  }
+
+  GxB_eWiseUnion(x->vec,                    /* w = Save onto the x vector */
+                 GrB_NULL,                  /* mask = Don't block writing to any elements */
+                 OSQP_GrB_FLOAT_PLUS,       /* accum = Add the result of the operation to the x vector */
+                 OSQP_GrB_FLOAT_TIMES,      /* add = The binary operation to perform between the elements of u and v */
+                 OSQP_GrB_FLOAT_EMPTY_VEC,  /* u = The first vector argument is always empty */
+                 grscb,                     /* alpha = The scalar to use instead of the valus in u */
+                 b->vec,                    /* v = The second vector argument is the vector to multiply with */
+                 OSQP_GrB_FLOAT_ZERO,       /* beta = Scalar to use if b doesn't have a value (just use zero) */
+                 GrB_NULL);                 /* desc = Descriptor for settings (TODO: Use this for performance) */
+
+  GrB_free(&grsca);
+  GrB_free(&grscb);
 }
 
-/* TODO */
 void OSQPVectorf_add_scaled3(OSQPVectorf       *x,
                              c_float            sca,
                              const OSQPVectorf *a,
                              c_float            scb,
                              const OSQPVectorf *b,
                              c_float            scc,
-                             const OSQPVectorf *c){
-  c_int i;
-  c_int length = x->length;
-  c_float*  av = a->values;
-  c_float*  bv = b->values;
-  c_float*  cv = c->values;
-  c_float*  xv = x->values;
+                             const OSQPVectorf *c) {
+  /* The GxB_eWiseUnion function will use the scalars in alpha or beta when there is no value in u or v, respectively,
+     so we exploit that here to do a scalar multiplication of each entry before accumulating. By always providing an empty
+     vector as the u argument, we force the operation to then be alpha*v (scaling the element of v by alpha). */
+  GrB_Scalar grsca;
+  GrB_Scalar grscb;
+  GrB_Scalar grscc;
 
-  /* shorter version when incrementing */
-  if (x == a && sca == 1.){
-    for (i = 0; i < length; i++) {
-      xv[i] += scb * bv[i] + scc * cv[i];
-    }
+  GrB_Scalar_new(&grsca, OSQP_GrB_FLOAT);
+  GrB_Scalar_setElement(grsca, sca);
+
+  GrB_Scalar_new(&grscb, OSQP_GrB_FLOAT);
+  GrB_Scalar_setElement(grscb, scb);
+
+  GrB_Scalar_new(&grscc, OSQP_GrB_FLOAT);
+  GrB_Scalar_setElement(grscc, scc);
+
+  /* When (x == a and sca == 1.0), then the a vector is not used. When this condition is not satisfied,
+     then the result should replace the contents of the x vector with x = sca*a + scb*b + scc*c*/
+  if (!(x == a && sca == 1.0)) {
+    GxB_eWiseUnion(x->vec,                    /* w = Save onto the x vector */
+                   GrB_NULL,                  /* mask = Don't block writing to any elements */
+                   GrB_NULL,                  /* accum = Replace the elements in the x vector */
+                   OSQP_GrB_FLOAT_TIMES,      /* add = The binary operation to perform between the elements of u and v */
+                   OSQP_GrB_FLOAT_EMPTY_VEC,  /* u = The first vector argument is always empty */
+                   grsca,                     /* alpha = The scalar to use instead of the valus in u */
+                   a->vec,                    /* v = The second vector argument is the vector to multiply with */
+                   OSQP_GrB_FLOAT_ZERO,       /* beta = Scalar to use if b doesn't have a value (just use zero) */
+                   GrB_NULL);                 /* desc = Descriptor for settings (TODO: Use this for performance) */
   }
-  else {
-    for (i = 0; i < length; i++) {
-      xv[i] =  sca * av[i] + scb * bv[i] + scc * cv[i];
-    }
-  }
+
+  GxB_eWiseUnion(x->vec,                    /* w = Save onto the x vector */
+                 GrB_NULL,                  /* mask = Don't block writing to any elements */
+                 OSQP_GrB_FLOAT_PLUS,       /* accum = Add the result of the operation to the x vector */
+                 OSQP_GrB_FLOAT_TIMES,      /* add = The binary operation to perform between the elements of u and v */
+                 OSQP_GrB_FLOAT_EMPTY_VEC,  /* u = The first vector argument is always empty */
+                 grscb,                     /* alpha = The scalar to use instead of the valus in u */
+                 b->vec,                    /* v = The second vector argument is the vector to multiply with */
+                 OSQP_GrB_FLOAT_ZERO,       /* beta = Scalar to use if b doesn't have a value (just use zero) */
+                 GrB_NULL);                 /* desc = Descriptor for settings (TODO: Use this for performance) */
+
+  GxB_eWiseUnion(x->vec,                    /* w = Save onto the x vector */
+                 GrB_NULL,                  /* mask = Don't block writing to any elements */
+                 OSQP_GrB_FLOAT_PLUS,       /* accum = Add the result of the operation to the x vector */
+                 OSQP_GrB_FLOAT_TIMES,      /* add = The binary operation to perform between the elements of u and v */
+                 OSQP_GrB_FLOAT_EMPTY_VEC,  /* u = The first vector argument is always empty */
+                 grscc,                     /* alpha = The scalar to use instead of the valus in u */
+                 c->vec,                    /* v = The second vector argument is the vector to multiply with */
+                 OSQP_GrB_FLOAT_ZERO,       /* beta = Scalar to use if b doesn't have a value (just use zero) */
+                 GrB_NULL);                 /* desc = Descriptor for settings (TODO: Use this for performance) */
+
+  GrB_free(&grsca);
+  GrB_free(&grscb);
+  GrB_free(&grscc);
 }
 
 
 c_float OSQPVectorf_norm_inf(const OSQPVectorf *v){
   c_float normval = 0.0;
 
-  GrB_Scalar normaccum;
-  GrB_Scalar_new(&normaccum, OSQP_GrB_FLOAT);
+  GrB_Vector tmp;
+  GrB_Vector_new(&tmp, OSQP_GrB_FLOAT, v->length);
 
-  /* Use the vector->scalar variant to use a custom binary operator for the reduction.
-     Using the vector->float variant would require the use of a monoid instead of a binary operator. */
-  GrB_reduce(normaccum,       /* val = Store result in normaccum */
-             GrB_NULL,        /* accum = Don't accumulate onto the value already in normval */
-             OSQP_GrB_MAXABS, /* op = Use the custom maxabs operator to find the item with the largest absolute value*/
-             v->vec,          /* u = Operate on this vector */
-             GrB_NULL);       /* desc = Descriptor for setting, not used in this function */
+  /* There seems to be no way around creating a temp vector to hold the intermediate result */
+  GrB_apply(tmp,                /* w = Store the output into the temp vector */
+            GrB_NULL,           /* mask = Don't block writing to any elements */
+            GrB_NULL,           /* accum = Overwrite the element in the temp array*/
+            OSQP_GrB_FLOAT_ABS, /* op = Take the absolute value of the element in the vector u*/
+            v->vec,             /* u = The vector to operate on*/
+            GrB_NULL);          /* desc = Descriptor for setting */
 
-  GrB_Scalar_extractElement(&normval, normaccum);
-  GrB_free(&normaccum);
+  GrB_reduce(&normval,                  /* val = Store result in normaccum */
+             GrB_NULL,                  /* accum = Don't accumulate onto the value already in normval */
+             OSQP_GrB_FLOAT_MAX_MONOID, /* op = Reduce over the max monoid (applies the maximum operator between each element) */
+             tmp,                       /* u = Operate on this vector */
+             GrB_NULL);                 /* desc = Descriptor for setting, not used in this function */
+
+  GrB_free(&tmp);
 
   return normval;
 }
@@ -418,18 +478,28 @@ c_float OSQPVectorf_norm_inf(const OSQPVectorf *v){
 
 c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S,
                                     const OSQPVectorf *v){
-
-  c_int   i;
-  c_int length  = v->length;
-  c_float*  vv  = v->values;
-  c_float*  Sv  = S->values;
-  c_float absval;
   c_float normval = 0.0;
 
-  for (i = 0; i < length; i++) {
-    absval = c_absval(Sv[i] * vv[i]);
-    if (absval > normval) normval = absval;
-  }
+  GrB_Vector tmp;
+  GrB_Vector_new(&tmp, OSQP_GrB_FLOAT, v->length);
+
+  /* There seems to be no way around creating a temp vector to hold the intermediate result */
+  GrB_eWiseMult(tmp,                  /* w = Store the output into the temp vector */
+                GrB_NULL,             /* mask = Don't block writing to any elements */
+                GrB_NULL,             /* accum = Overwrite the element in the temp array*/
+                OSQP_GrB_FLOAT_TIMES, /* op = Do the elementwise multiplication of S and v*/
+                S->vec,               /* u = The first vector to operate on */
+                v->vec,               /* v = The second vector to operate on */
+                GrB_NULL);            /* desc = Descriptor for setting */
+
+  GrB_reduce(&normval,                  /* val = Store result in normaccum */
+             GrB_NULL,                  /* accum = Don't accumulate onto the value already in normval */
+             OSQP_GrB_FLOAT_MAX_MONOID, /* op = Reduce over the max monoid (applies the maximum operator between each element) */
+             tmp,                       /* u = Operate on this vector */
+             GrB_NULL);                 /* desc = Descriptor for setting, not used in this function */
+
+  GrB_free(&tmp);
+
   return normval;
 }
 
@@ -449,18 +519,31 @@ c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S,
 
 c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
                                   const OSQPVectorf *b){
-  c_int   i;
-  c_int   length = a->length;
-  c_float*  av   = a->values;
-  c_float*  bv   = b->values;
-  c_float absval;
-  c_float normDiff = 0.0;
+  c_float normval = 0.0;
 
-  for (i = 0; i < length; i++) {
-    absval = c_absval(av[i] - bv[i]);
-    if (absval > normDiff) normDiff = absval;
-  }
-  return normDiff;
+  GrB_Vector tmp;
+  GrB_Vector_new(&tmp, OSQP_GrB_FLOAT, a->length);
+
+  /* There seems to be no way around creating a temp vector to hold the intermediate result */
+  GxB_eWiseUnion(tmp,                  /* w = Output vector */
+                 GrB_NULL,             /* mask = Don't block writing to any elements of w */
+                 GrB_NULL,             /* accum = Don't accumulate onto w, just overwrite it */
+                 OSQP_GrB_FLOAT_MINUS, /* op = Use the minus operator */
+                 a->vec,               /* u = First element of the expression */
+                 OSQP_GrB_FLOAT_ZERO,  /* alpha = Value to use in expression when a is not present */
+                 b->vec,               /* v = Second element of the expression */
+                 OSQP_GrB_FLOAT_ZERO,  /* beta = Value to use in expression when b is not present */
+                 GrB_NULL);            /* desc = Descriptor for settings (TODO: Use this for performance) */
+
+  GrB_reduce(&normval,                  /* val = Store result in normaccum */
+             GrB_NULL,                  /* accum = Don't accumulate onto the value already in normval */
+             OSQP_GrB_FLOAT_MAX_MONOID, /* op = Reduce over the max monoid (applies the maximum operator between each element) */
+             tmp,                       /* u = Operate on this vector */
+             GrB_NULL);                 /* desc = Descriptor for setting, not used in this function */
+
+  GrB_free(&tmp);
+
+  return normval;
 }
 
 // c_float OSQPVectorf_norm_1_diff(const OSQPVectorf *a,
