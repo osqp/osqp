@@ -619,56 +619,81 @@ c_float OSQPVectorf_dot_prod_signed(const OSQPVectorf *a,
 
 void OSQPVectorf_ew_prod(OSQPVectorf       *c,
                          const OSQPVectorf *a,
-                         const OSQPVectorf *b){
-
-  c_int i;
-  c_int   length = a->length;
-  c_float*  av   = a->values;
-  c_float*  bv   = b->values;
-  c_float*  cv   = c->values;
-
-
-  if (c == a) {
-    for (i = 0; i < length; i++) {
-      cv[i] *= bv[i];
-    }
-  }
-  else {
-    for (i = 0; i < length; i++) {
-      cv[i] = av[i] * bv[i];
-    }
-  }
+                         const OSQPVectorf *b) {
+  /* Technically c==a is a possibility, in which case the operation is c=c.*b, but since
+     c==a, then that is the same as c=a.*b still */
+  GrB_eWiseMult(c->vec,               /* w = Store the output into the c vector */
+                GrB_NULL,             /* mask = Don't block writing to any elements */
+                GrB_NULL,             /* accum = Overwrite the element in the temp array */
+                OSQP_GrB_FLOAT_TIMES, /* op = Do the elementwise multiplication of a and b */
+                a->vec,               /* u = The first vector to operate on */
+                b->vec,               /* v = The second vector to operate on */
+                GrB_NULL);            /* desc = Descriptor for setting */
 }
 
 c_int OSQPVectorf_all_leq(const OSQPVectorf *l,
-                          const OSQPVectorf *u){
+                          const OSQPVectorf *u) {
+  /* Iterate over each element of the two vecctors to allow for greedy termination
+     of the search once a violation has been found */
+  c_int retval = 1;
+  c_float lval = 0.0;
+  c_float uval = 0.0;
 
-  c_int i;
-  c_int length = l->length;
-  c_float*  lv = l->values;
-  c_float*  uv = u->values;
+  GrB_Info linfo;
+  GrB_Info uinfo;
+  GxB_Iterator lit;
+  GxB_Iterator uit;
 
-  for (i = 0; i < length; i++) {
-    if (lv[i] > uv[i]) return 0;
+  GxB_Iterator_new(&lit);
+  GxB_Iterator_new(&uit);
+
+  GxB_Vector_Iterator_attach(lit, l->vec, GrB_NULL);
+  GxB_Vector_Iterator_attach(uit, u->vec, GrB_NULL);
+
+  linfo = GxB_Vector_Iterator_seek(lit, 0);
+  uinfo = GxB_Vector_Iterator_seek(uit, 0);
+
+  while((linfo != GxB_EXHAUSTED) && (uinfo != GxB_EXHAUSTED)) {
+    lval = OSQP_GxB_Vector_Iterator_get_Float(lit);
+    uval = OSQP_GxB_Vector_Iterator_get_Float(uit);
+
+    if (lval > uval) {
+      retval = 0;
+      break;
+    }
+
+    linfo = GxB_Vector_Iterator_next(lit);
+    uinfo = GxB_Vector_Iterator_next(uit);
   }
-  return 1;
+
+  GrB_free(&lit);
+  GrB_free(&uit);
+
+  return retval;
 }
 
 void OSQPVectorf_ew_bound_vec(OSQPVectorf       *x,
                               const OSQPVectorf *z,
                               const OSQPVectorf *l,
-                              const OSQPVectorf *u){
+                              const OSQPVectorf *u) {
+  /* Compute x = c_min(c_max(z, l), u) in 2 stages:
+     1) Compute the element-wise maximum between z and l and store in x
+     2) Compute the element-wise minimum between x and u and store in x */
+  GrB_eWiseMult(x->vec,               /* w = Store the output into the x vector */
+                GrB_NULL,             /* mask = Don't block writing to any elements */
+                GrB_NULL,             /* accum = Overwrite the element in the output array */
+                OSQP_GrB_FLOAT_MAX,   /* op = Choose the max of z and l */
+                z->vec,               /* u = The first vector to operate on */
+                l->vec,               /* v = The second vector to operate on */
+                GrB_NULL);            /* desc = Descriptor for setting */
 
-  c_int i;
-  c_int length = x->length;
-  c_float*  xv = x->values;
-  c_float*  zv = z->values;
-  c_float*  lv = l->values;
-  c_float*  uv = u->values;
-
-  for (i = 0; i < length; i++) {
-    xv[i] = c_min(c_max(zv[i], lv[i]), uv[i]);
-  }
+  GrB_eWiseMult(x->vec,               /* w = Store the output into the x vector */
+                GrB_NULL,             /* mask = Don't block writing to any elements */
+                GrB_NULL,             /* accum = Overwrite the element in the output array */
+                OSQP_GrB_FLOAT_MIN,   /* op = Choose the minimum of x and u */
+                x->vec,               /* u = The first vector to operate on */
+                u->vec,               /* v = The second vector to operate on */
+                GrB_NULL);            /* desc = Descriptor for setting */
 }
 
 void OSQPVectorf_project_polar_reccone(OSQPVectorf       *y,
@@ -780,44 +805,39 @@ c_int OSQPVectorf_in_reccone(const OSQPVectorf *y,
 
 #if EMBEDDED != 1
 
-c_float OSQPVectorf_mean(const OSQPVectorf *a){
+c_float OSQPVectorf_mean(const OSQPVectorf *a) {
+  c_float mean = 0.0;
 
-  c_int i;
-  c_int length = a->length;
-  c_float *av  = a->values;
-  c_float val = 0.0;
+  if (a->length > 0) {
+    GrB_reduce(&mean,                      /* val = Store result in mean */
+               GrB_NULL,                   /* accum = Don't accumulate onto the value already in normval */
+               OSQP_GrB_FLOAT_PLUS_MONOID, /* op = Reduce over the plus monoid (applies the plus operator between each element) */
+               a->vec,                     /* u = Operate on this vector */
+               GrB_NULL);                  /* desc = Descriptor for setting, not used in this function */
 
-  if (length) {
-    for (i = 0; i < length; i++) {
-      val += av[i];
-    }
-    return val / length;
+    mean = mean / a->length;
   }
-  else return val;
+
+  return mean;
 }
 
 void OSQPVectorf_ew_reciprocal(OSQPVectorf      *b,
-                              const OSQPVectorf *a){
-
-  c_int i;
-  c_int length = a->length;
-  c_float*  av = a->values;
-  c_float*  bv = b->values;
-
-  for (i = 0; i < length; i++) {
-    bv[i] = (c_float)1.0 / av[i];
-  }
+                              const OSQPVectorf *a) {
+  GrB_apply(b->vec,              /* w = Output vector */
+            GrB_NULL,            /* mask = Write to all entries */
+            GrB_NULL,            /* accum = Overwrite the values in the output vector with the result */
+            OSQP_GrB_FLOAT_MINV, /* op = Reciprical unary operator (multiplicative inverse technically) */
+            a->vec,              /* u = Vector to multiply each element */
+            GrB_NULL);           /* desc = Descriptor for settings (TODO: Use this for performance) */
 }
 
-void OSQPVectorf_ew_sqrt(OSQPVectorf *a){
-
-  c_int i;
-  c_int length = a->length;
-  c_float*  av = a->values;
-
-  for (i = 0; i < length; i++) {
-    av[i] = c_sqrt(av[i]);
-  }
+void OSQPVectorf_ew_sqrt(OSQPVectorf *a) {
+  GrB_apply(a->vec,              /* w = Output vector */
+            GrB_NULL,            /* mask = Write to all entries */
+            GrB_NULL,            /* accum = Overwrite the values in the output vector with the result */
+            OSQP_GrB_FLOAT_SQRT, /* op = Square root unary operator */
+            a->vec,              /* u = Vector to multiply each element */
+            GrB_NULL);           /* desc = Descriptor for settings (TODO: Use this for performance) */
 }
 
 // void OSQPVectorf_ew_max(OSQPVectorf       *c,
@@ -848,16 +868,14 @@ void OSQPVectorf_ew_sqrt(OSQPVectorf *a){
 
 void OSQPVectorf_ew_max_vec(OSQPVectorf       *c,
                             const OSQPVectorf *a,
-                            const OSQPVectorf *b){
-  c_int i;
-  c_int length = a->length;
-  c_float*  av = a->values;
-  c_float*  bv = b->values;
-  c_float*  cv = c->values;
-
-  for (i = 0; i < length; i++) {
-    cv[i] = c_max(av[i], bv[i]);
-  }
+                            const OSQPVectorf *b) {
+  GrB_eWiseAdd(c->vec,               /* w = Output vector */
+               GrB_NULL,             /* mask = Don't block writing to any elements of w */
+               GrB_NULL,             /* accum = Don't accumulate onto w, just overwrite it */
+               OSQP_GrB_FLOAT_MAX,   /* op = Maximum between the two vector elements */
+               a->vec,               /* u = First element of the expression */
+               b->vec,               /* v = Second element of the expression */
+               GrB_NULL);            /* desc = Descriptor for settings (TODO: Use this for performance) */
 }
 
 // void OSQPVectorf_ew_min_vec(OSQPVectorf       *c,
