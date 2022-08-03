@@ -30,8 +30,8 @@
 /* PROFILING */
 #cmakedefine PROFILING
 
-/* CTRLC */
-#cmakedefine CTRLC
+/* OSQP_ENABLE_INTERRUPT */
+#cmakedefine OSQP_ENABLE_INTERRUPT
 
 /* DFLOAT */
 #cmakedefine DFLOAT

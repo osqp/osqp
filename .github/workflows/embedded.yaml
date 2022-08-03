@@ -49,7 +49,7 @@ jobs:
                   -DALGEBRA='default' \
                   -DLONG=OFF \
                   -DPROFILING=OFF \
-                  -DCTRLC=OFF \
+                  -DOSQP_ENABLE_INTERRUPT=OFF \
                   -DOSQP_ENABLE_PRINTING=OFF \
                   -DOSQP_BUILD_UNITTESTS=OFF
             cmake --build $OSQP_BUILD_DIR_PREFIX

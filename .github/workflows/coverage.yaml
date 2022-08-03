@@ -72,7 +72,7 @@ jobs:
             cmake -G "Unix Makefiles" \
                   -S . -B $OSQP_BUILD_DIR_PREFIX \
                   -DPROFILING=ON \
-                  -DCTRLC=ON \
+                  -DOSQP_ENABLE_INTERRUPT=ON \
                   -DOSQP_ENABLE_PRINTING=ON \
                   -DOSQP_BUILD_UNITTESTS=ON \
                   -DOSQP_COVERAGE_CHECK=ON \

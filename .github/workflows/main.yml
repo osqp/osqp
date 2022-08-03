@@ -97,7 +97,7 @@ jobs:
                   -DLONG=${{ matrix.long }} \
                   -DFLOAT=${{ matrix.float }} \
                   -DPROFILING=${{ matrix.profiling }} \
-                  -DCTRLC=${{ matrix.interrupt }} \
+                  -DOSQP_ENABLE_INTERRUPT=${{ matrix.interrupt }} \
                   -DOSQP_ENABLE_PRINTING=${{ matrix.printing }}
             cmake --build $OSQP_BUILD_DIR_PREFIX
 

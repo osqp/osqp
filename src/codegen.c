@@ -767,7 +767,7 @@ c_int codegen_defines(const char *output_dir,
 
   /* Write out if interrupts is enabled*/
   if (defines->interrupt_enable == 1) {
-    fprintf(incFile, "#define CTRLC\n\n");
+    fprintf(incFile, "#define OSQP_ENABLE_INTERRUPT\n\n");
   }
 
   /* Write out the type of floating-point number to use */

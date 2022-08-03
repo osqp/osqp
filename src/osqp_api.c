@@ -17,7 +17,7 @@
 # include "polish.h"
 #endif
 
-#ifdef CTRLC
+#ifdef OSQP_ENABLE_INTERRUPT
 # include "ctrlc.h"
 #endif
 
@@ -408,11 +408,11 @@ c_int osqp_solve(OSQPSolver *solver) {
   }
 #endif /* ifdef OSQP_ENABLE_PRINTING */
 
-#ifdef CTRLC
+#ifdef OSQP_ENABLE_INTERRUPT
 
   // initialize Ctrl-C support
   osqp_start_interrupt_listener();
-#endif /* ifdef CTRLC */
+#endif /* ifdef OSQP_ENABLE_INTERRUPT */
 
   // Initialize variables (cold start or warm start depending on settings)
   // If not warm start -> set x, z, y to zero
@@ -442,7 +442,7 @@ c_int osqp_solve(OSQPSolver *solver) {
 
     /* End of ADMM Steps */
 
-#ifdef CTRLC
+#ifdef OSQP_ENABLE_INTERRUPT
 
     // Check the interrupt signal
     if (osqp_is_interrupted()) {
@@ -451,7 +451,7 @@ c_int osqp_solve(OSQPSolver *solver) {
       exitflag = 1;
       goto exit;
     }
-#endif /* ifdef CTRLC */
+#endif /* ifdef OSQP_ENABLE_INTERRUPT */
 
 #ifdef PROFILING
 
@@ -712,14 +712,14 @@ c_int osqp_solve(OSQPSolver *solver) {
 
 
 // Define exit flag for quitting function
-#if defined(PROFILING) || defined(CTRLC) || EMBEDDED != 1
+#if defined(PROFILING) || defined(OSQP_ENABLE_INTERRUPT) || EMBEDDED != 1
 exit:
-#endif /* if defined(PROFILING) || defined(CTRLC) || EMBEDDED != 1 */
+#endif /* if defined(PROFILING) || defined(OSQP_ENABLE_INTERRUPT) || EMBEDDED != 1 */
 
-#ifdef CTRLC
+#ifdef OSQP_ENABLE_INTERRUPT
   // Restore previous signal handler
   osqp_end_interrupt_listener();
-#endif /* ifdef CTRLC */
+#endif /* ifdef OSQP_ENABLE_INTERRUPT */
 
   return exitflag;
 }
