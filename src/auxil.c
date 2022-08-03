@@ -682,9 +682,9 @@ void update_info(OSQPSolver *solver,
   *run_time = osqp_toc(work->timer);
 #endif /* ifdef PROFILING */
 
-#ifdef PRINTING
+#ifdef OSQP_ENABLE_PRINTING
   work->summary_printed = 0; // The just updated info have not been printed
-#endif /* ifdef PRINTING */
+#endif /* ifdef OSQP_ENABLE_PRINTING */
 }
 
 

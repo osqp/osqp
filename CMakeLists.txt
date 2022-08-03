@@ -79,7 +79,7 @@ set(ALGEBRA
     "default"
     CACHE STRING "The Algebra to use (default/mkl/cuda)")
 
-option(PRINTING "Enable solver printing" ON)
+option(OSQP_ENABLE_PRINTING "Enable solver printing" ON)
 option(PROFILING "Enable solver profiling (timing)" ON)
 option(CTRLC "Enable user interrupt (Ctrl-C)" ON)
 
@@ -111,11 +111,11 @@ if(DEFINED EMBEDDED)
   unset(ALGEBRA_CUDA)
   unset(ALGEBRA_MKL)
 
-  if(${PRINTING} OR ${PROFILING} OR ${CTRLC})
+  if(${OSQP_ENABLE_PRINTING} OR ${PROFILING} OR ${CTRLC})
     message(WARNING "Disabling printing/profiling/Ctrl-C for EMBEDDED mode.")
   endif()
 
-  set(PRINTING OFF)
+  set(OSQP_ENABLE_PRINTING OFF)
   set(PROFILING OFF)
   set(CTRLC OFF)
 

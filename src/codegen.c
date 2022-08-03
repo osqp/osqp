@@ -757,7 +757,7 @@ c_int codegen_defines(const char *output_dir,
 
   /* Write out if printing is enabled */
   if (defines->printing_enable == 1) {
-    fprintf(incFile, "#define PRINTING\n\n");
+    fprintf(incFile, "#define OSQP_ENABLE_PRINTING\n\n");
   }
 
   /* Write out if profiling is enabled*/

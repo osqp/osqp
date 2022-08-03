@@ -50,6 +50,6 @@ jobs:
                   -DLONG=OFF \
                   -DPROFILING=OFF \
                   -DCTRLC=OFF \
-                  -DPRINTING=OFF \
+                  -DOSQP_ENABLE_PRINTING=OFF \
                   -DOSQP_BUILD_UNITTESTS=OFF
             cmake --build $OSQP_BUILD_DIR_PREFIX

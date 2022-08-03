@@ -187,9 +187,9 @@ struct OSQPWorkspace_ {
   c_int rho_update_from_solve;
 # endif // ifdef PROFILING
 
-# ifdef PRINTING
+# ifdef OSQP_ENABLE_PRINTING
   c_int summary_printed; ///< Has last summary been printed? (true/false)
-# endif // ifdef PRINTING
+# endif // ifdef OSQP_ENABLE_PRINTING
 };
 
 // NB: "typedef struct OSQPWorkspace_ OSQPWorkspace" is declared already

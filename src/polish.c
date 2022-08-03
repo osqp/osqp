@@ -399,10 +399,10 @@ c_int polish(OSQPSolver *solver) {
     OSQPVectorf_copy(work->y, work->pol->y);
 
     // Print summary
-#ifdef PRINTING
+#ifdef OSQP_ENABLE_PRINTING
 
     if (settings->verbose) print_polish(solver);
-#endif /* ifdef PRINTING */
+#endif /* ifdef OSQP_ENABLE_PRINTING */
   } else { // Polishing failed
     info->status_polish = -1;
 

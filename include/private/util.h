@@ -30,7 +30,7 @@ void c_strcpy(char       dest[],
               const char source[]);
 
 
-# ifdef PRINTING
+# ifdef OSQP_ENABLE_PRINTING
 
 /**
  * Print Header before running the algorithm
@@ -64,7 +64,7 @@ void print_footer(OSQPInfo *info,
                   c_int     polishing);
 
 
-# endif /* ifdef PRINTING */
+# endif /* ifdef OSQP_ENABLE_PRINTING */
 
 
 /*********************************
@@ -147,7 +147,7 @@ c_float osqp_toc(OSQPTimer *t);
 /*! \cond PRIVATE */
 
 
-#if defined(DEBUG) && defined(PRINTING)
+#if defined(DEBUG) && defined(OSQP_ENABLE_PRINTING)
 
 #  include <stdio.h>
 
@@ -184,7 +184,7 @@ void print_vec_int(const c_int *x,
                    c_int        n,
                    const char  *name);
 
-# endif /* #if defined(DEBUG) && defined(PRINTING) */
+# endif /* #if defined(DEBUG) && defined(OSQP_ENABLE_PRINTING) */
 
 /*! \endcond */
 

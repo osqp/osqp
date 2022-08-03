@@ -7,9 +7,9 @@
 /************************************
 * Printing Constants to set Layout *
 ************************************/
-#ifdef PRINTING
+#ifdef OSQP_ENABLE_PRINTING
 # define HEADER_LINE_LEN 65
-#endif /* ifdef PRINTING */
+#endif /* ifdef OSQP_ENABLE_PRINTING */
 
 /**********************
 * Utility Functions  *
@@ -25,7 +25,7 @@ void c_strcpy(char dest[], const char source[]) {
   }
 }
 
-#ifdef PRINTING
+#ifdef OSQP_ENABLE_PRINTING
 
 static void print_line(void) {
   char  the_line[HEADER_LINE_LEN + 1];
@@ -235,7 +235,7 @@ void print_footer(OSQPInfo *info,
   c_print("\n");
 }
 
-#endif /* End #ifdef PRINTING */
+#endif /* End #ifdef OSQP_ENABLE_PRINTING */
 
 
 #ifndef EMBEDDED
@@ -247,7 +247,7 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
 
   /* Copy settings
    * NB: Copying them explicitly because memcpy is not
-   * defined when PRINTING is disabled (appears in string.h)
+   * defined when OSQP_ENABLE_PRINTING is disabled (appears in string.h)
    */
   new->linsys_solver = settings->linsys_solver;
   new->verbose       = settings->verbose;
@@ -366,7 +366,7 @@ c_float osqp_toc(OSQPTimer *t)
 /* ==================== DEBUG FUNCTIONS ======================= */
 
 
-#if defined(DEBUG) && defined(PRINTING)
+#if defined(DEBUG) && defined(OSQP_ENABLE_PRINTING)
 
 void print_csc_matrix(const csc  *M,
                       const char *name)
@@ -493,4 +493,4 @@ void print_vec_int(const c_int *x,
   c_print("]\n");
 }
 
-#endif /* if defined(DEBUG) && defined(PRINTING) */
+#endif /* if defined(DEBUG) && defined(OSQP_ENABLE_PRINTING) */

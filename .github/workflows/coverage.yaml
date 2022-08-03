@@ -73,7 +73,7 @@ jobs:
                   -S . -B $OSQP_BUILD_DIR_PREFIX \
                   -DPROFILING=ON \
                   -DCTRLC=ON \
-                  -DPRINTING=ON \
+                  -DOSQP_ENABLE_PRINTING=ON \
                   -DOSQP_BUILD_UNITTESTS=ON \
                   -DOSQP_COVERAGE_CHECK=ON \
                   -DLONG=${{ matrix.long }} \

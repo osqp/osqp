@@ -911,7 +911,7 @@ void test_basic_qp_time_limit()
 	    solver->info->status_val == sols_data->status_test);
 
   // Update time limit
-# ifdef PRINTING
+# ifdef OSQP_ENABLE_PRINTING
   settings->time_limit = 1e-5;
   settings->eps_rel = 1e-9;
   settings->eps_abs = 1e-9;

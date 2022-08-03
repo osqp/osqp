@@ -24,8 +24,8 @@
 /* EMBEDDED */
 #cmakedefine EMBEDDED (@EMBEDDED@)
 
-/* PRINTING */
-#cmakedefine PRINTING
+/* OSQP_ENABLE_PRINTING */
+#cmakedefine OSQP_ENABLE_PRINTING
 
 /* PROFILING */
 #cmakedefine PROFILING
