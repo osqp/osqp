@@ -22,7 +22,11 @@ endif()
 
 # Add the ctrl-c handler if enabled
 if(OSQP_ENABLE_INTERRUPT)
-  target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/ctrlc.c")
+  if(IS_WINDOWS)
+    target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/interrupt_windows.c")
+  elseif(IS_MAC OR IS_LINUX)
+    target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/interrupt_unix.c")
+  endif()
 endif()
 
 # Add code generation functionality if enabled

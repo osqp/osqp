@@ -18,7 +18,7 @@
 #endif
 
 #ifdef OSQP_ENABLE_INTERRUPT
-# include "ctrlc.h"
+# include "interrupt.h"
 #endif
 
 

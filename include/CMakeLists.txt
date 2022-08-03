@@ -38,7 +38,7 @@ endif()
 
 # Add the ctrl-c handler if enabled
 if(OSQP_ENABLE_INTERRUPT)
-  list(APPEND osqp_headers_private "${CMAKE_CURRENT_SOURCE_DIR}/private/ctrlc.h")
+  list(APPEND osqp_headers_private "${CMAKE_CURRENT_SOURCE_DIR}/private/interrupt.h")
 endif()
 
 target_sources(OSQPLIB PUBLIC ${osqp_headers})
