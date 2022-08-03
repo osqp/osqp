@@ -576,45 +576,84 @@ c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
 // }
 
 c_float OSQPVectorf_dot_prod(const OSQPVectorf *a,
-                             const OSQPVectorf *b){
+                             const OSQPVectorf *b) {
+  /* This is based on the discussion from https://github.com/DrTimothyAldenDavis/GraphBLAS/issues/57#issuecomment-877205364
+     Specifically, it takes advantage of the fact the Suitesparse:GraphBLAS API will silently promote scalar->vector->matrix
+     when doing calls with casting, so we can treat each vector as a nx1 matrix and do the matrix-matrix multiply and get the
+     dot product as the 1x1 result matrix.
+     This isn't technically a feature of the GraphBLAS standard, but the GitHub issue says there isn't a need to change
+     this part of the API, so it should be safe to rely on for a while (until a proper single-function dot product is added).
+   */
+  c_float res;
+  GrB_Scalar dotprod;
+  GrB_Descriptor mxmdesc;
 
-  c_int   i;
-  c_int   length = a->length;
-  c_float*  av   = a->values;
-  c_float*  bv   = b->values;
-  c_float dotprod = 0.0;
+  GrB_Scalar_new(&dotprod, OSQP_GrB_FLOAT);
 
-  for (i = 0; i < length; i++) {
-    dotprod += av[i] * bv[i];
-  }
-  return dotprod;
+  GrB_Descriptor_new(&mxmdesc);
+  GrB_Descriptor_set(mxmdesc, GrB_INP0, GrB_TRAN);
+
+  GrB_mxm((GrB_Matrix) dotprod,               /* C = Store the result in this "matrix" */
+          GrB_NULL,                           /* mask = Don't block writing into any fields (we only will have one field) */
+          GrB_NULL,                           /* accum = No accumulate operation */
+          OSQP_GrB_PLUS_TIMES_FLOAT_SEMIRING, /* semiring = Operate on the normal arithmetic semiring */
+          (GrB_Matrix) a,                     /* A = Left "matrix" to operate on */
+          (GrB_Matrix) b,                     /* B = Right "matrix" to operate on */
+          mxmdesc);                           /* desc = Descriptor saying to transpose the a vector */
+
+  GrB_Scalar_extractElement(&res, dotprod);
+
+  GrB_free(&dotprod);
+  GrB_free(&mxmdesc);
+
+  return res;
 }
 
 c_float OSQPVectorf_dot_prod_signed(const OSQPVectorf *a,
                                     const OSQPVectorf *b,
                                     c_int              sign){
+  /* This function uses the same trick as OSQPVectorf_dot_prod() to compute the dot product
+     using the matrix-matrix multiplication. */
+  c_float res;
+  GrB_Scalar dotprod;
+  GrB_Vector tmpvec;
+  GrB_Descriptor mxmdesc;
 
-  c_int   i;
-  c_int   length = a->length;
-  c_float*  av   = a->values;
-  c_float*  bv   = b->values;
-  c_float dotprod = 0.0;
+  /* Do the conventional dot product if sign is not +1 or -1 */
+  if ((sign != -1) && (sign != 1)) {
+    return OSQPVectorf_dot_prod(a, b);
+  }
 
-  if (sign == 1) {  /* dot with positive part of b */
-    for (i = 0; i < length; i++) {
-      dotprod += av[i] * c_max(bv[i], 0.);
-    }
-  }
-  else if (sign == -1){  /* dot with negative part of b */
-    for (i = 0; i < length; i++) {
-      dotprod += av[i] * c_min(bv[i],0.);
-    }
-  }
-  else{
-    /* return the conventional dot product */
-    dotprod = OSQPVectorf_dot_prod(a, b);
-  }
-  return dotprod;
+  GrB_Scalar_new(&dotprod, OSQP_GrB_FLOAT);
+  GrB_Vector_new(&tmpvec, OSQP_GrB_FLOAT, b->length);
+
+  GrB_Descriptor_new(&mxmdesc);
+  GrB_Descriptor_set(mxmdesc, GrB_INP0, GrB_TRAN);
+
+  /* Select the elements of b that are the proper sign */
+  GrB_select(tmpvec,                                            /* w = Output vector */
+             GrB_NULL,                                          /* mask = Don't block writing to any elements */
+             GrB_NULL,                                          /* accum = Just replace elements in tmp */
+             (sign == 1) ? OSQP_GrB_VALUEGT : OSQP_GrB_VALUELT, /* op = Choose elements either greater or less than y */
+             b->vec,                                            /* u = Vector to select elements from */
+             0.0,                                               /* y = Value to use in unary operator for comparison */
+             GrB_NULL);                                         /* desc = Descriptor for settings */
+
+  GrB_mxm((GrB_Matrix) dotprod,               /* C = Store the result in this "matrix" */
+          GrB_NULL,                           /* mask = Don't block writing into any fields (we only will have one field) */
+          GrB_NULL,                           /* accum = No accumulate operation */
+          OSQP_GrB_PLUS_TIMES_FLOAT_SEMIRING, /* semiring = Operate on the normal arithmetic semiring */
+          (GrB_Matrix) a,                     /* A = Left "matrix" to operate on */
+          (GrB_Matrix) tmpvec,                /* B = Right "matrix" to operate on */
+          mxmdesc);                           /* desc = Descriptor saying to transpose the a vector */
+
+  GrB_Scalar_extractElement(&res, dotprod);
+
+  GrB_free(&tmpvec);
+  GrB_free(&dotprod);
+  GrB_free(&mxmdesc);
+
+  return res;
 }
 
 void OSQPVectorf_ew_prod(OSQPVectorf       *c,

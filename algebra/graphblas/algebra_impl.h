@@ -46,6 +46,10 @@ typedef int32_t osqp_grb_int_t;
 #define OSQP_GrB_FLOAT_MAX   GrB_MAX_FP32
 #define OSQP_GrB_FLOAT_MIN   GrB_MIN_FP32
 
+/* Unary index functions */
+#define OSQP_GrB_VALUEGT GrB_VALUEGT_FP32
+#define OSQP_GrB_VALUELT GrB_VALUELT_FP32
+
 /* Type-dependent functions */
 #define OSQP_GxB_Vector_Iterator_get_Float GxB_Iterator_get_FP64
 #else
@@ -53,7 +57,7 @@ typedef int32_t osqp_grb_int_t;
 #define OSQP_GrB_FLOAT GrB_FP64
 
 /* Semirings */
-#define OSQP_GrB_FLOAT_SEMIRING GrB_PLUS_TIMES_SEMIRING_FP64
+#define OSQP_GrB_PLUS_TIMES_FLOAT_SEMIRING GrB_PLUS_TIMES_SEMIRING_FP64
 
 /* Monoids */
 #define OSQP_GrB_FLOAT_MAX_MONOID  GrB_MAX_MONOID_FP64
@@ -69,6 +73,10 @@ typedef int32_t osqp_grb_int_t;
 #define OSQP_GrB_FLOAT_TIMES GrB_TIMES_FP64
 #define OSQP_GrB_FLOAT_MAX   GrB_MAX_FP64
 #define OSQP_GrB_FLOAT_MIN   GrB_MIN_FP64
+
+/* Unary index functions */
+#define OSQP_GrB_VALUEGT GrB_VALUEGT_FP64
+#define OSQP_GrB_VALUELT GrB_VALUELT_FP64
 
 /* Type-dependent functions */
 #define OSQP_GxB_Vector_Iterator_get_Float GxB_Iterator_get_FP64
