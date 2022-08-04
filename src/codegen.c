@@ -394,6 +394,7 @@ static c_int write_linsys(FILE               *f,
     fprintf(f, "  &update_linsys_solver_matrices_qdldl,\n");
     fprintf(f, "  &update_linsys_solver_rho_vec_qdldl,\n");
   }
+  fprintf(f, "  %d,\n", linsys->nthreads);
   fprintf(f, "  &%slinsys_L,\n", prefix);
   fprintf(f, "  %slinsys_Dinv,\n", prefix);
   fprintf(f, "  %slinsys_P,\n", prefix);

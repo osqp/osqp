@@ -236,9 +236,7 @@ struct linsys_solver {
                           c_float            rho_sc);  ///< Update rho_vec
 # endif // if EMBEDDED != 1
 
-# ifndef EMBEDDED
   c_int nthreads; ///< number of threads active
-# endif /* ifndef EMBEDDED */
 };
 
 
