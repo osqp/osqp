@@ -116,12 +116,16 @@ if(DEFINED EMBEDDED)
     set(OSQP_ENABLE_PRINTING OFF)
   endif()
 
-  if(${PROFILING} OR ${OSQP_ENABLE_INTERRUPT})
-    message(WARNING "Disabling profiling/interrupt for EMBEDDED mode.")
+  if(OSQP_ENABLE_INTERRUPT AND NOT OSQP_CUSTOM_INTERRUPT)
+    message(WARNING "Disabling interrupts in EMBEDDED mode.")
+    set(OSQP_ENABLE_INTERRUPT OFF)
+  endif()
+
+  if(${PROFILING})
+    message(WARNING "Disabling profiling for EMBEDDED mode.")
   endif()
 
   set(PROFILING OFF)
-  set(OSQP_ENABLE_INTERRUPT OFF)
 
   # Disable shared library and demo exe on embedded applications
   if(${OSQP_BUILD_SHARED_LIB} OR ${OSQP_BUILD_DEMO_EXE})
