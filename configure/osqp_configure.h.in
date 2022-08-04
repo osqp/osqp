@@ -24,6 +24,9 @@
 /* EMBEDDED */
 #cmakedefine EMBEDDED (@EMBEDDED@)
 
+/* Header file containing custom memory allocators */
+#cmakedefine OSQP_CUSTOM_MEMORY "@OSQP_CUSTOM_MEMORY@"
+
 /* OSQP_ENABLE_PRINTING */
 #cmakedefine OSQP_ENABLE_PRINTING
 
