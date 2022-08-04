@@ -4,6 +4,7 @@
 #include "lin_alg.h"
 #include "scaling.h"
 #include "util.h"
+#include "printing.h"
 
 /***********************************************************
 * Auxiliary functions needed to compute ADMM iterations * *

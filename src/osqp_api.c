@@ -7,6 +7,7 @@
 #include "error.h"
 #include "version.h"
 #include "lin_alg.h"
+#include "printing.h"
 
 #ifdef OSQP_CODEGEN
   #include "codegen.h"

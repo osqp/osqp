@@ -2,6 +2,7 @@
 #include "util.h"
 #include "algebra_vector.h"
 #include "version.h"
+#include "printing.h"
 
 
 /************************************

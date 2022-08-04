@@ -111,11 +111,15 @@ if(DEFINED EMBEDDED)
   unset(ALGEBRA_CUDA)
   unset(ALGEBRA_MKL)
 
-  if(${OSQP_ENABLE_PRINTING} OR ${PROFILING} OR ${OSQP_ENABLE_INTERRUPT})
-    message(WARNING "Disabling printing/profiling/interrupt for EMBEDDED mode.")
+  if(OSQP_ENABLE_PRINTING AND NOT OSQP_CUSTOM_PRINTING)
+    message(WARNING "Disabling printing in EMBEDDED mode.")
+    set(OSQP_ENABLE_PRINTING OFF)
   endif()
 
-  set(OSQP_ENABLE_PRINTING OFF)
+  if(${PROFILING} OR ${OSQP_ENABLE_INTERRUPT})
+    message(WARNING "Disabling profiling/interrupt for EMBEDDED mode.")
+  endif()
+
   set(PROFILING OFF)
   set(OSQP_ENABLE_INTERRUPT OFF)
 
@@ -192,25 +196,21 @@ message(STATUS "CODEGEN = ${OSQP_CODEGEN}")
 # If we are creating any OSQP_* compile-time constants from CMake variables, do so here.
 set(OSQP_ALGEBRA ${ALGEBRA_USER_STRING})
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
-               ${CMAKE_CURRENT_BINARY_DIR}/include/public/osqp_configure.h NEWLINE_STYLE LF)
-
+if(OSQP_ENABLE_PRINTING AND OSQP_CUSTOM_PRINTING)
+  message(STATUS "Using custom printing header: ${OSQP_CUSTOM_PRINTING}")
+endif()
 
 if(OSQP_CUSTOM_MEMORY)
   message(STATUS "Using custom memory management header: ${OSQP_CUSTOM_MEMORY}")
 endif()
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/include/public/osqp_configure.h NEWLINE_STYLE LF)
+
 # Configure support for custom memory allocators
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/custom_headers/memory_defs.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/include/private/memory_defs.h NEWLINE_STYLE LF)
 
-if(OSQP_CUSTOM_PRINTING)
-  message(STATUS "Using custom printing header: ${OSQP_CUSTOM_PRINTING}")
-endif()
-
-# Configure support for custom printing functions
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/custom_headers/print_defs.h.in
-               ${CMAKE_CURRENT_BINARY_DIR}/include/private/print_defs.h NEWLINE_STYLE LF)
 
 # CUDA support
 # ----------------------------------------------

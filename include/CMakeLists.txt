@@ -7,6 +7,7 @@ set(osqp_headers_private
     "${CMAKE_CURRENT_SOURCE_DIR}/private/error.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/private/glob_opts.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/private/lin_alg.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/private/printing.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/private/proj.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/private/scaling.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/private/types.h"

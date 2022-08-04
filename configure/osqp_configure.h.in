@@ -27,6 +27,9 @@
 /* OSQP_ENABLE_PRINTING */
 #cmakedefine OSQP_ENABLE_PRINTING
 
+/* Header file containing custom printing functions */
+#cmakedefine OSQP_CUSTOM_PRINTING "@OSQP_CUSTOM_PRINTING@"
+
 /* PROFILING */
 #cmakedefine PROFILING
 

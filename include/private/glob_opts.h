@@ -51,14 +51,4 @@
 
 # endif // end EMBEDDED
 
-/* Customized printing functions */
-# ifdef OSQP_ENABLE_PRINTING
-# include "print_defs.h"
-# else
-/* When printing is disabled, these become NOPs */
-# define c_print(...)
-# define c_eprint(...)
-# endif  /* OSQP_ENABLE_PRINTING */
-
-
 #endif /* ifndef GLOB_OPTS_H */
