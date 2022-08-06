@@ -98,7 +98,7 @@ jobs:
                   -S . -B $OSQP_BUILD_DIR_PREFIX \
                   -DALGEBRA='mkl' \
                   -DFLOAT=${{ matrix.float }} \
-                  -DPROFILING=ON \
+                  -DOSQP_ENABLE_PROFILING=ON \
                   -DOSQP_ENABLE_INTERRUPT=ON \
                   -DOSQP_ENABLE_PRINTING=ON \
                   -DOSQP_BUILD_UNITTESTS=ON \

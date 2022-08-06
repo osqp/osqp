@@ -763,7 +763,7 @@ c_int codegen_defines(const char *output_dir,
 
   /* Write out if profiling is enabled*/
   if (defines->profiling_enable == 1) {
-    fprintf(incFile, "#define PROFILING\n\n");
+    fprintf(incFile, "#define OSQP_ENABLE_PROFILING\n\n");
   }
 
   /* Write out if interrupts is enabled*/

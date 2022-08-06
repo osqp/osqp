@@ -19,7 +19,7 @@ typedef struct linsys_solver LinSysSolver;
 /**
  * OSQP Timer for statistics
  */
-typedef struct OSQP_TIMER OSQPTimer;
+typedef struct OSQPTimer_ OSQPTimer;
 
 /**
  * Problem scaling matrices stored as vectors
@@ -174,7 +174,7 @@ struct OSQPWorkspace_ {
   /// Reciprocal of rho
   c_float rho_inv;
 
-# ifdef PROFILING
+# ifdef OSQP_ENABLE_PROFILING
   OSQPTimer *timer;       ///< timer object
 
   /// flag indicating whether the solve function has been run before
@@ -185,7 +185,7 @@ struct OSQPWorkspace_ {
 
   /// flag indicating that osqp_update_rho is called from osqp_solve function
   c_int rho_update_from_solve;
-# endif // ifdef PROFILING
+# endif // ifdef OSQP_ENABLE_PROFILING
 
 # ifdef OSQP_ENABLE_PRINTING
   c_int summary_printed; ///< Has last summary been printed? (true/false)

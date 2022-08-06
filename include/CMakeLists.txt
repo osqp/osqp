@@ -10,6 +10,7 @@ set(osqp_headers_private
     "${CMAKE_CURRENT_SOURCE_DIR}/private/printing.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/private/proj.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/private/scaling.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/private/timing.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/private/types.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/private/util.h")
 

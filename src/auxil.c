@@ -5,6 +5,7 @@
 #include "scaling.h"
 #include "util.h"
 #include "printing.h"
+#include "timing.h"
 
 /***********************************************************
 * Auxiliary functions needed to compute ADMM iterations * *
@@ -628,9 +629,9 @@ void update_info(OSQPSolver *solver,
   OSQPInfo*      info     = solver->info;
   OSQPWorkspace* work     = solver->work;
 
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
   c_float *run_time;                    // Execution time
-#endif /* ifdef PROFILING */
+#endif /* ifdef OSQP_ENABLE_PROFILING */
 
 #ifndef EMBEDDED
 
@@ -641,9 +642,9 @@ void update_info(OSQPSolver *solver,
     obj_val  = &work->pol->obj_val;
     prim_res = &work->pol->prim_res;
     dual_res = &work->pol->dual_res;
-# ifdef PROFILING
+# ifdef OSQP_ENABLE_PROFILING
     run_time = &info->polish_time;
-# endif /* ifdef PROFILING */
+# endif /* ifdef OSQP_ENABLE_PROFILING */
   }
   else {
 #endif // EMBEDDED
@@ -654,9 +655,9 @@ void update_info(OSQPSolver *solver,
     prim_res   = &info->prim_res;
     dual_res   = &info->dual_res;
     info->iter = iter;
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
     run_time   = &info->solve_time;
-#endif /* ifdef PROFILING */
+#endif /* ifdef OSQP_ENABLE_PROFILING */
 #ifndef EMBEDDED
 }
 
@@ -679,9 +680,9 @@ void update_info(OSQPSolver *solver,
   }
 
   // Update timing
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
   *run_time = osqp_toc(work->timer);
-#endif /* ifdef PROFILING */
+#endif /* ifdef OSQP_ENABLE_PROFILING */
 
 #ifdef OSQP_ENABLE_PRINTING
   work->summary_printed = 0; // The just updated info have not been printed
@@ -690,7 +691,7 @@ void update_info(OSQPSolver *solver,
 
 
 void reset_info(OSQPInfo *info) {
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
 
   // Initialize info values.
   info->solve_time = 0.0;  // Solve time to zero
@@ -699,7 +700,7 @@ void reset_info(OSQPInfo *info) {
 # endif /* ifndef EMBEDDED */
 
   // NB: We do not reset the setup_time because it is performed only once
-#endif /* ifdef PROFILING */
+#endif /* ifdef OSQP_ENABLE_PROFILING */
 
   update_status(info, OSQP_UNSOLVED); // Problem is unsolved
 

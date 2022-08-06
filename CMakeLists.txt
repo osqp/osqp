@@ -80,7 +80,7 @@ set(ALGEBRA
     CACHE STRING "The Algebra to use (default/mkl/cuda)")
 
 option(OSQP_ENABLE_PRINTING "Enable solver printing" ON)
-option(PROFILING "Enable solver profiling (timing)" ON)
+option(OSQP_ENABLE_PROFILING "Enable solver profiling (timing)" ON)
 option(OSQP_ENABLE_INTERRUPT "Enable user interrupt (e.g. Ctrl-C)" ON)
 
 # Allow appending a string to the end of the library and the soname so people can have
@@ -121,11 +121,10 @@ if(DEFINED EMBEDDED)
     set(OSQP_ENABLE_INTERRUPT OFF)
   endif()
 
-  if(${PROFILING})
-    message(WARNING "Disabling profiling for EMBEDDED mode.")
+  if(OSQP_ENABLE_PROFILING AND NOT OSQP_CUSTOM_TIMING)
+    message(WARNING "Disabling profiling (timing) for EMBEDDED mode.")
+    set(OSQP_ENABLE_PROFILING OFF)
   endif()
-
-  set(PROFILING OFF)
 
   # Disable shared library and demo exe on embedded applications
   if(${OSQP_BUILD_SHARED_LIB} OR ${OSQP_BUILD_DEMO_EXE})
@@ -142,6 +141,9 @@ endif()
 
 # Display final ALGEBRA chosen
 message(STATUS "ALGEBRA = ${ALGEBRA}")
+
+# Display final profiling behaviour
+message(STATUS "Solver profiling: ${OSQP_ENABLE_PROFILING}")
 
 # Display final interrupt behaviour
 message(STATUS "Solver interrupt: ${OSQP_ENABLE_INTERRUPT}")

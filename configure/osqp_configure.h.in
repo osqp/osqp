@@ -33,8 +33,8 @@
 /* Header file containing custom printing functions */
 #cmakedefine OSQP_CUSTOM_PRINTING "@OSQP_CUSTOM_PRINTING@"
 
-/* PROFILING */
-#cmakedefine PROFILING
+/* OSQP_ENABLE_PROFILING */
+#cmakedefine OSQP_ENABLE_PROFILING
 
 /* OSQP_ENABLE_INTERRUPT */
 #cmakedefine OSQP_ENABLE_INTERRUPT

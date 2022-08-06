@@ -29,6 +29,18 @@ if(OSQP_ENABLE_INTERRUPT AND NOT OSQP_CUSTOM_INTERRUPT)
   endif()
 endif()
 
+# Add the timing functions if enabled and not overriden
+if(OSQP_ENABLE_PROFILING AND NOT OSQP_CUSTOM_TIMING)
+  if(IS_WINDOWS)
+    target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/timing_windows.c")
+  elseif(IS_MAC)
+    target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/timing_macos.c")
+  else()
+    # Assume the other platforms are Linux
+    target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/timing_linux.c")
+  endif()
+endif()
+
 # Add code generation functionality if enabled
 # Added last because this also processes the copying of files needed in the generated code
 if(OSQP_CODEGEN)
