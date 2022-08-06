@@ -34,8 +34,7 @@ set( osqp_headers ${osqp_headers_public} PARENT_SCOPE)
 if(NOT DEFINED EMBEDDED)
   list(APPEND osqp_headers_private
        "${CMAKE_CURRENT_SOURCE_DIR}/private/polish.h"
-       "${CMAKE_CURRENT_SOURCE_DIR}/private/lin_sys.h"
-       "${CMAKE_CURRENT_BINARY_DIR}/private/memory_defs.h")
+       "${CMAKE_CURRENT_SOURCE_DIR}/private/lin_sys.h")
 endif()
 
 # Add the ctrl-c handler if enabled
