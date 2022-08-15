@@ -394,6 +394,7 @@ static c_int write_linsys(FILE               *f,
     fprintf(f, "  &update_linsys_solver_matrices_qdldl,\n");
     fprintf(f, "  &update_linsys_solver_rho_vec_qdldl,\n");
   }
+  fprintf(f, "  %d,\n", linsys->nthreads);
   fprintf(f, "  &%slinsys_L,\n", prefix);
   fprintf(f, "  %slinsys_Dinv,\n", prefix);
   fprintf(f, "  %slinsys_P,\n", prefix);
@@ -757,17 +758,17 @@ c_int codegen_defines(const char *output_dir,
 
   /* Write out if printing is enabled */
   if (defines->printing_enable == 1) {
-    fprintf(incFile, "#define PRINTING\n\n");
+    fprintf(incFile, "#define OSQP_ENABLE_PRINTING\n\n");
   }
 
   /* Write out if profiling is enabled*/
   if (defines->profiling_enable == 1) {
-    fprintf(incFile, "#define PROFILING\n\n");
+    fprintf(incFile, "#define OSQP_ENABLE_PROFILING\n\n");
   }
 
   /* Write out if interrupts is enabled*/
   if (defines->interrupt_enable == 1) {
-    fprintf(incFile, "#define CTRLC\n\n");
+    fprintf(incFile, "#define OSQP_ENABLE_INTERRUPT\n\n");
   }
 
   /* Write out the type of floating-point number to use */

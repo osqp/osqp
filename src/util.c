@@ -2,14 +2,15 @@
 #include "util.h"
 #include "algebra_vector.h"
 #include "version.h"
+#include "printing.h"
 
 
 /************************************
 * Printing Constants to set Layout *
 ************************************/
-#ifdef PRINTING
+#ifdef OSQP_ENABLE_PRINTING
 # define HEADER_LINE_LEN 65
-#endif /* ifdef PRINTING */
+#endif /* ifdef OSQP_ENABLE_PRINTING */
 
 /**********************
 * Utility Functions  *
@@ -25,7 +26,7 @@ void c_strcpy(char dest[], const char source[]) {
   }
 }
 
-#ifdef PRINTING
+#ifdef OSQP_ENABLE_PRINTING
 
 static void print_line(void) {
   char  the_line[HEADER_LINE_LEN + 1];
@@ -46,9 +47,9 @@ void print_header(void) {
 
   // Main information
   c_print("objective    prim res   dual res   rho");
-# ifdef PROFILING
+# ifdef OSQP_ENABLE_PROFILING
   c_print("        time");
-# endif /* ifdef PROFILING */
+# endif /* ifdef OSQP_ENABLE_PROFILING */
   c_print("\n");
 }
 
@@ -114,10 +115,10 @@ void print_setup_header(const OSQPSolver *solver) {
   else
     c_print("          check_termination: off,\n");
   
-# ifdef PROFILING
+# ifdef OSQP_ENABLE_PROFILING
   if (settings->time_limit)
     c_print("          time_limit: %.2e sec,\n", settings->time_limit);
-# endif /* ifdef PROFILING */
+# endif /* ifdef OSQP_ENABLE_PROFILING */
 
   if (settings->scaling) {
     c_print("          scaling: on, ");
@@ -158,7 +159,7 @@ void print_summary(OSQPSolver *solver) {
   c_print("  %9.2e", info->dual_res);
   c_print("  %9.2e", settings->rho);
 
-# ifdef PROFILING
+# ifdef OSQP_ENABLE_PROFILING
 
   if (work->first_run) {
     // total time: setup + solve
@@ -167,7 +168,7 @@ void print_summary(OSQPSolver *solver) {
     // total time: update + solve
     c_print("  %9.2es", info->update_time + info->solve_time);
   }
-# endif /* ifdef PROFILING */
+# endif /* ifdef OSQP_ENABLE_PROFILING */
   c_print("\n");
 
   work->summary_printed = 1; // Summary has been printed
@@ -190,7 +191,7 @@ void print_polish(OSQPSolver *solver) {
   c_print("   --------");
 #endif
 
-# ifdef PROFILING
+# ifdef OSQP_ENABLE_PROFILING
   if (work->first_run) {
     // total time: setup + solve
     c_print("  %9.2es", info->setup_time + info->solve_time +
@@ -200,7 +201,7 @@ void print_polish(OSQPSolver *solver) {
     c_print("  %9.2es", info->update_time + info->solve_time +
             info->polish_time);
   }
-# endif /* ifdef PROFILING */
+# endif /* ifdef OSQP_ENABLE_PROFILING */
   c_print("\n");
 }
 
@@ -225,9 +226,9 @@ void print_footer(OSQPInfo *info,
     c_print("optimal objective:    %.4f\n", info->obj_val);
   }
 
-# ifdef PROFILING
+# ifdef OSQP_ENABLE_PROFILING
   c_print("run time:             %.2es\n", info->run_time);
-# endif /* ifdef PROFILING */
+# endif /* ifdef OSQP_ENABLE_PROFILING */
 
 # if EMBEDDED != 1
   c_print("optimal rho estimate: %.2e\n", info->rho_estimate);
@@ -235,7 +236,7 @@ void print_footer(OSQPInfo *info,
   c_print("\n");
 }
 
-#endif /* End #ifdef PRINTING */
+#endif /* End #ifdef OSQP_ENABLE_PRINTING */
 
 
 #ifndef EMBEDDED
@@ -247,7 +248,7 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
 
   /* Copy settings
    * NB: Copying them explicitly because memcpy is not
-   * defined when PRINTING is disabled (appears in string.h)
+   * defined when OSQP_ENABLE_PRINTING is disabled (appears in string.h)
    */
   new->linsys_solver = settings->linsys_solver;
   new->verbose       = settings->verbose;
@@ -287,86 +288,10 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
 #endif /* ifndef EMBEDDED */
 
 
-/*******************
-* Timer Functions *
-*******************/
-
-#ifdef PROFILING
-
-// Windows
-# ifdef IS_WINDOWS
-
-void osqp_tic(OSQPTimer *t)
-{
-  QueryPerformanceFrequency(&t->freq);
-  QueryPerformanceCounter(&t->tic);
-}
-
-c_float osqp_toc(OSQPTimer *t)
-{
-  QueryPerformanceCounter(&t->toc);
-  return (t->toc.QuadPart - t->tic.QuadPart) / (c_float)t->freq.QuadPart;
-}
-
-// Mac
-# elif defined IS_MAC
-
-void osqp_tic(OSQPTimer *t)
-{
-  /* read current clock cycles */
-  t->tic = mach_absolute_time();
-}
-
-c_float osqp_toc(OSQPTimer *t)
-{
-  uint64_t duration; /* elapsed time in clock cycles*/
-
-  t->toc   = mach_absolute_time();
-  duration = t->toc - t->tic;
-
-  /*conversion from clock cycles to nanoseconds*/
-  mach_timebase_info(&(t->tinfo));
-  duration *= t->tinfo.numer;
-  duration /= t->tinfo.denom;
-
-  return (c_float)duration / 1e9;
-}
-
-// Linux
-# else  /* ifdef IS_WINDOWS */
-
-/* read current time */
-void osqp_tic(OSQPTimer *t)
-{
-  clock_gettime(CLOCK_MONOTONIC, &t->tic);
-}
-
-/* return time passed since last call to tic on this timer */
-c_float osqp_toc(OSQPTimer *t)
-{
-  struct timespec temp;
-
-  clock_gettime(CLOCK_MONOTONIC, &t->toc);
-
-  if ((t->toc.tv_nsec - t->tic.tv_nsec) < 0) {
-    temp.tv_sec  = t->toc.tv_sec - t->tic.tv_sec - 1;
-    temp.tv_nsec = 1e9 + t->toc.tv_nsec - t->tic.tv_nsec;
-  } else {
-    temp.tv_sec  = t->toc.tv_sec - t->tic.tv_sec;
-    temp.tv_nsec = t->toc.tv_nsec - t->tic.tv_nsec;
-  }
-  return (c_float)temp.tv_sec + (c_float)temp.tv_nsec / 1e9;
-}
-
-# endif /* ifdef IS_WINDOWS */
-
-#endif // If Profiling end
-
-
 /* ==================== DEBUG FUNCTIONS ======================= */
 
 
-#if defined(DEBUG) && defined(PRINTING)
+#if defined(DEBUG) && defined(OSQP_ENABLE_PRINTING)
 
 void print_csc_matrix(const csc  *M,
                       const char *name)
@@ -493,4 +418,4 @@ void print_vec_int(const c_int *x,
   c_print("]\n");
 }
 
-#endif /* if defined(DEBUG) && defined(PRINTING) */
+#endif /* if defined(DEBUG) && defined(OSQP_ENABLE_PRINTING) */

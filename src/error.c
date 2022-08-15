@@ -1,5 +1,6 @@
 #include "glob_opts.h"
 #include "error.h"
+#include "printing.h"
 #include "osqp_api_constants.h"
 
 const char *OSQP_ERROR_MESSAGE[] = {

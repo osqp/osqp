@@ -20,9 +20,25 @@ if(NOT DEFINED EMBEDDED)
   target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/polish.c" "${CMAKE_CURRENT_SOURCE_DIR}/lin_sys.c" "${CMAKE_CURRENT_SOURCE_DIR}/derivative.c")
 endif()
 
-# Add the ctrl-c handler if enabled
-if(CTRLC)
-  target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/ctrlc.c")
+# Add the ctrl-c handler if enabled and not overriden
+if(OSQP_ENABLE_INTERRUPT AND NOT OSQP_CUSTOM_INTERRUPT)
+  if(IS_WINDOWS)
+    target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/interrupt_windows.c")
+  elseif(IS_MAC OR IS_LINUX)
+    target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/interrupt_unix.c")
+  endif()
+endif()
+
+# Add the timing functions if enabled and not overriden
+if(OSQP_ENABLE_PROFILING AND NOT OSQP_CUSTOM_TIMING)
+  if(IS_WINDOWS)
+    target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/timing_windows.c")
+  elseif(IS_MAC)
+    target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/timing_macos.c")
+  else()
+    # Assume the other platforms are Linux
+    target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/timing_linux.c")
+  endif()
 endif()
 
 # Add code generation functionality if enabled

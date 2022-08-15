@@ -1,5 +1,6 @@
 #include "pardiso_interface.h"
 #include "algebra_impl.h"
+#include "printing.h"
 
 #if EMBEDDED != 1
 #include "kkt.h"

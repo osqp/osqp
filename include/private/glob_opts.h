@@ -10,10 +10,20 @@
 
 /* DATA CUSTOMIZATIONS (depending on memory manager)-----------------------   */
 
-// We do not need memory allocation functions if EMBEDDED is enabled
+/* We do not need memory allocation functions if EMBEDDED is enabled */
 # ifndef EMBEDDED
-# include "memory_defs.h"
-# endif // end ifndef EMBEDDED
+#  ifdef OSQP_CUSTOM_MEMORY
+/* Use user-provided memory management functions */
+#    include OSQP_CUSTOM_MEMORY
+#  else
+/* If no custom memory allocator defined, use standard library functions.  */
+#   include <stdlib.h>
+#   define c_malloc  malloc
+#   define c_calloc  calloc
+#   define c_free    free
+#   define c_realloc realloc
+#  endif
+# endif /* end ifndef EMBEDDED */
 
 
 /* Use customized operations */
@@ -50,15 +60,5 @@
 #  endif /* ifndef DFLOAT */
 
 # endif // end EMBEDDED
-
-/* Customized printing functions */
-# ifdef PRINTING
-# include "print_defs.h"
-# else
-/* When printing is disabled, these become NOPs */
-# define c_print(...)
-# define c_eprint(...)
-# endif  /* PRINTING */
-
 
 #endif /* ifndef GLOB_OPTS_H */

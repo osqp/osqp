@@ -17,6 +17,7 @@
 
 #include "algebra_types.h"
 #include "lin_alg.h"
+#include "printing.h"
 
 #include "csr_type.h"
 #include "cuda_csr.h"
