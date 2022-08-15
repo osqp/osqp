@@ -1,5 +1,6 @@
 #include "glob_opts.h"
 #include "algebra_impl.h"
+#include "printing.h"
 
 #include "qdldl.h"
 #include "qdldl_interface.h"

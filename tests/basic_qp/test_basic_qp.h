@@ -177,7 +177,7 @@ void test_basic_qp_solve()
             exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
   settings->adaptive_rho_interval = tmp_int;
 
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
   // Setup solver with wrong settings->adaptive_rho_fraction
   tmp_float = settings->adaptive_rho_fraction;
   settings->adaptive_rho_fraction = -1.5;
@@ -350,7 +350,7 @@ void test_basic_qp_solve()
             exitflag == OSQP_SETTINGS_VALIDATION_ERROR);
   settings->warm_starting = tmp_int;
 
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
   // Setup solver with wrong settings->time_limit
   tmp_float = settings->time_limit;
   settings->time_limit = -0.2;
@@ -869,7 +869,7 @@ void test_basic_qp_update_rho()
   c_free(settings);
 }
 
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
 void test_basic_qp_time_limit()
 {
   c_int exitflag;
@@ -911,7 +911,7 @@ void test_basic_qp_time_limit()
 	    solver->info->status_val == sols_data->status_test);
 
   // Update time limit
-# ifdef PRINTING
+# ifdef OSQP_ENABLE_PRINTING
   settings->time_limit = 1e-5;
   settings->eps_rel = 1e-9;
   settings->eps_abs = 1e-9;
@@ -944,7 +944,7 @@ void test_basic_qp_time_limit()
   // Cleanup
   c_free(settings);
 }
-#endif // PROFILING
+#endif // OSQP_ENABLE_PROFILING
 
 
 void test_basic_qp_warm_start()

@@ -79,9 +79,9 @@ set(ALGEBRA
     "default"
     CACHE STRING "The Algebra to use (default/mkl/cuda)")
 
-option(PRINTING "Enable solver printing" ON)
-option(PROFILING "Enable solver profiling (timing)" ON)
-option(CTRLC "Enable user interrupt (Ctrl-C)" ON)
+option(OSQP_ENABLE_PRINTING "Enable solver printing" ON)
+option(OSQP_ENABLE_PROFILING "Enable solver profiling (timing)" ON)
+option(OSQP_ENABLE_INTERRUPT "Enable user interrupt (e.g. Ctrl-C)" ON)
 
 # Allow appending a string to the end of the library and the soname so people can have
 # multiple libraries side-by-side on an install.
@@ -111,13 +111,20 @@ if(DEFINED EMBEDDED)
   unset(ALGEBRA_CUDA)
   unset(ALGEBRA_MKL)
 
-  if(${PRINTING} OR ${PROFILING} OR ${CTRLC})
-    message(WARNING "Disabling printing/profiling/Ctrl-C for EMBEDDED mode.")
+  if(OSQP_ENABLE_PRINTING AND NOT OSQP_CUSTOM_PRINTING)
+    message(WARNING "Disabling printing in EMBEDDED mode.")
+    set(OSQP_ENABLE_PRINTING OFF)
   endif()
 
-  set(PRINTING OFF)
-  set(PROFILING OFF)
-  set(CTRLC OFF)
+  if(OSQP_ENABLE_INTERRUPT AND NOT OSQP_CUSTOM_INTERRUPT)
+    message(WARNING "Disabling interrupts in EMBEDDED mode.")
+    set(OSQP_ENABLE_INTERRUPT OFF)
+  endif()
+
+  if(OSQP_ENABLE_PROFILING AND NOT OSQP_CUSTOM_TIMING)
+    message(WARNING "Disabling profiling (timing) for EMBEDDED mode.")
+    set(OSQP_ENABLE_PROFILING OFF)
+  endif()
 
   # Disable shared library and demo exe on embedded applications
   if(${OSQP_BUILD_SHARED_LIB} OR ${OSQP_BUILD_DEMO_EXE})
@@ -135,8 +142,11 @@ endif()
 # Display final ALGEBRA chosen
 message(STATUS "ALGEBRA = ${ALGEBRA}")
 
-# Display final CTRLC behaviour
-message(STATUS "CTRLC = ${CTRLC}")
+# Display final profiling behaviour
+message(STATUS "Solver profiling: ${OSQP_ENABLE_PROFILING}")
+
+# Display final interrupt behaviour
+message(STATUS "Solver interrupt: ${OSQP_ENABLE_INTERRUPT}")
 
 if(ALGEBRA_CUDA)
   # Some options have different defaults for the CUDA algebra
@@ -192,25 +202,17 @@ message(STATUS "CODEGEN = ${OSQP_CODEGEN}")
 # If we are creating any OSQP_* compile-time constants from CMake variables, do so here.
 set(OSQP_ALGEBRA ${ALGEBRA_USER_STRING})
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
-               ${CMAKE_CURRENT_BINARY_DIR}/include/public/osqp_configure.h NEWLINE_STYLE LF)
-
+if(OSQP_ENABLE_PRINTING AND OSQP_CUSTOM_PRINTING)
+  message(STATUS "Using custom printing header: ${OSQP_CUSTOM_PRINTING}")
+endif()
 
 if(OSQP_CUSTOM_MEMORY)
   message(STATUS "Using custom memory management header: ${OSQP_CUSTOM_MEMORY}")
 endif()
 
-# Configure support for custom memory allocators
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/custom_headers/memory_defs.h.in
-               ${CMAKE_CURRENT_BINARY_DIR}/include/private/memory_defs.h NEWLINE_STYLE LF)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/include/public/osqp_configure.h NEWLINE_STYLE LF)
 
-if(OSQP_CUSTOM_PRINTING)
-  message(STATUS "Using custom printing header: ${OSQP_CUSTOM_PRINTING}")
-endif()
-
-# Configure support for custom printing functions
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/custom_headers/print_defs.h.in
-               ${CMAKE_CURRENT_BINARY_DIR}/include/private/print_defs.h NEWLINE_STYLE LF)
 
 # CUDA support
 # ----------------------------------------------

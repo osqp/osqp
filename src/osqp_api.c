@@ -7,6 +7,9 @@
 #include "error.h"
 #include "version.h"
 #include "lin_alg.h"
+#include "printing.h"
+#include "timing.h"
+
 
 #ifdef OSQP_CODEGEN
   #include "codegen.h"
@@ -17,8 +20,8 @@
 # include "polish.h"
 #endif
 
-#ifdef CTRLC
-# include "ctrlc.h"
+#ifdef OSQP_ENABLE_INTERRUPT
+# include "interrupt.h"
 #endif
 
 
@@ -147,11 +150,11 @@ c_int osqp_setup(OSQPSolver         **solverp,
   if (!(solver->info)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Start and allocate directly timer
-# ifdef PROFILING
-  work->timer = c_malloc(sizeof(OSQPTimer));
+# ifdef OSQP_ENABLE_PROFILING
+  work->timer = OSQPTimer_new();
   if (!(work->timer)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   osqp_tic(work->timer);
-# endif /* ifdef PROFILING */
+# endif /* ifdef OSQP_ENABLE_PROFILING */
 
   // Initialize algebra libraries
   exitflag = osqp_algebra_init_libs(settings->device);
@@ -312,7 +315,7 @@ c_int osqp_setup(OSQPSolver         **solverp,
   // Initialize information
   solver->info->status_polish = 0;              // Polishing not performed
   update_status(solver->info, OSQP_UNSOLVED);
-# ifdef PROFILING
+# ifdef OSQP_ENABLE_PROFILING
   solver->info->solve_time  = 0.0;                   // Solve time to zero
   solver->info->update_time = 0.0;                   // Update time to zero
   solver->info->polish_time = 0.0;                   // Polish time to zero
@@ -322,7 +325,7 @@ c_int osqp_setup(OSQPSolver         **solverp,
   work->first_run         = 1;
   work->clear_update_time = 0;
   work->rho_update_from_solve = 0;
-# endif /* ifdef PROFILING */
+# endif /* ifdef OSQP_ENABLE_PROFILING */
   solver->info->rho_updates  = 0;                      // Rho updates set to 0
   solver->info->rho_estimate = solver->settings->rho;  // Best rho estimate
   solver->info->obj_val      = OSQP_INFTY;
@@ -330,15 +333,15 @@ c_int osqp_setup(OSQPSolver         **solverp,
   solver->info->dual_res     = OSQP_INFTY;
 
   // Print header
-# ifdef PRINTING
+# ifdef OSQP_ENABLE_PRINTING
   if (solver->settings->verbose) print_setup_header(solver);
   work->summary_printed = 0; // Initialize last summary  to not printed
-# endif /* ifdef PRINTING */
+# endif /* ifdef OSQP_ENABLE_PRINTING */
 
 
   // If adaptive rho and automatic interval, but profiling disabled, we need to
   // set the interval to a default value
-# ifndef PROFILING
+# ifndef OSQP_ENABLE_PROFILING
   if (solver->settings->adaptive_rho && !solver->settings->adaptive_rho_interval) {
     if (solver->settings->check_termination) {
       // If check_termination is enabled, we set it to a multiple of the check
@@ -350,7 +353,7 @@ c_int osqp_setup(OSQPSolver         **solverp,
       solver->settings->adaptive_rho_interval = OSQP_ADAPTIVE_RHO_FIXED;
     }
   }
-# endif /* ifndef PROFILING */
+# endif /* ifndef OSQP_ENABLE_PROFILING */
 
   // Return exit flag
   return 0;
@@ -367,52 +370,52 @@ c_int osqp_solve(OSQPSolver *solver) {
   c_int can_check_termination; // boolean: check termination or not
   OSQPWorkspace* work;
 
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
   c_float temp_run_time;       // Temporary variable to store current run time
-#endif /* ifdef PROFILING */
+#endif /* ifdef OSQP_ENABLE_PROFILING */
 
-#ifdef PRINTING
+#ifdef OSQP_ENABLE_PRINTING
   c_int can_print;             // Boolean whether you can print
-#endif /* ifdef PRINTING */
+#endif /* ifdef OSQP_ENABLE_PRINTING */
 
   // Check if solver has been initialized
   if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   work = solver->work;
 
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
   if (work->clear_update_time == 1)
     solver->info->update_time = 0.0;
   work->rho_update_from_solve = 1;
-#endif /* ifdef PROFILING */
+#endif /* ifdef OSQP_ENABLE_PROFILING */
 
   // Initialize variables
   exitflag              = 0;
   can_check_termination = 0;
-#ifdef PRINTING
+#ifdef OSQP_ENABLE_PRINTING
   can_print = solver->settings->verbose;
   // Compute objective function only if verbose is on
   compute_obj = solver->settings->verbose;
-#else /* ifdef PRINTING */
+#else /* ifdef OSQP_ENABLE_PRINTING */
   compute_obj = 0;
-#endif /* ifdef PRINTING */
+#endif /* ifdef OSQP_ENABLE_PRINTING */
 
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
   osqp_tic(work->timer); // Start timer
-#endif /* ifdef PROFILING */
+#endif /* ifdef OSQP_ENABLE_PROFILING */
 
 
-#ifdef PRINTING
+#ifdef OSQP_ENABLE_PRINTING
   if (solver->settings->verbose) {
     // Print Header for every column
     print_header();
   }
-#endif /* ifdef PRINTING */
+#endif /* ifdef OSQP_ENABLE_PRINTING */
 
-#ifdef CTRLC
+#ifdef OSQP_ENABLE_INTERRUPT
 
   // initialize Ctrl-C support
   osqp_start_interrupt_listener();
-#endif /* ifdef CTRLC */
+#endif /* ifdef OSQP_ENABLE_INTERRUPT */
 
   // Initialize variables (cold start or warm start depending on settings)
   // If not warm start -> set x, z, y to zero
@@ -442,7 +445,7 @@ c_int osqp_solve(OSQPSolver *solver) {
 
     /* End of ADMM Steps */
 
-#ifdef CTRLC
+#ifdef OSQP_ENABLE_INTERRUPT
 
     // Check the interrupt signal
     if (osqp_is_interrupted()) {
@@ -451,9 +454,9 @@ c_int osqp_solve(OSQPSolver *solver) {
       exitflag = 1;
       goto exit;
     }
-#endif /* ifdef CTRLC */
+#endif /* ifdef OSQP_ENABLE_INTERRUPT */
 
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
 
     // Check if solver time_limit is enabled. In case, check if the current
     // run time is more than the time_limit option.
@@ -467,21 +470,21 @@ c_int osqp_solve(OSQPSolver *solver) {
     if (solver->settings->time_limit &&
         (temp_run_time >= solver->settings->time_limit)) {
       update_status(solver->info, OSQP_TIME_LIMIT_REACHED);
-# ifdef PRINTING
+# ifdef OSQP_ENABLE_PRINTING
 
       if (solver->settings->verbose) c_print("run time limit reached\n");
       can_print = 0;  // Not printing at this iteration
-# endif /* ifdef PRINTING */
+# endif /* ifdef OSQP_ENABLE_PRINTING */
       break;
     }
-#endif /* ifdef PROFILING */
+#endif /* ifdef OSQP_ENABLE_PROFILING */
 
 
     // Can we check for termination ?
     can_check_termination = solver->settings->check_termination &&
                             (iter % solver->settings->check_termination == 0);
 
-#ifdef PRINTING
+#ifdef OSQP_ENABLE_PRINTING
 
     // Can we print ?
     can_print = solver->settings->verbose &&
@@ -507,7 +510,7 @@ c_int osqp_solve(OSQPSolver *solver) {
         }
       }
     }
-#else /* ifdef PRINTING */
+#else /* ifdef OSQP_ENABLE_PRINTING */
 
     if (can_check_termination) {
       // Update information and compute also objective value
@@ -519,11 +522,11 @@ c_int osqp_solve(OSQPSolver *solver) {
         break;
       }
     }
-#endif /* ifdef PRINTING */
+#endif /* ifdef OSQP_ENABLE_PRINTING */
 
 
 #if EMBEDDED != 1
-# ifdef PROFILING
+# ifdef OSQP_ENABLE_PROFILING
 
     // If adaptive rho with automatic interval, check if the solve time is a
     // certain fraction
@@ -555,7 +558,7 @@ c_int osqp_solve(OSQPSolver *solver) {
           solver->settings->check_termination);
       } // If time condition is met
     }   // If adaptive rho enabled and interval set to auto®
-# else // PROFILING
+# else // OSQP_ENABLE_PROFILING
     if (solver->settings->adaptive_rho && !solver->settings->adaptive_rho_interval) {
       // Set adaptive_rho_interval to constant value
       if (solver->settings->check_termination) {
@@ -568,27 +571,27 @@ c_int osqp_solve(OSQPSolver *solver) {
         solver->settings->adaptive_rho_interval = OSQP_ADAPTIVE_RHO_FIXED;
       }
     }
-# endif // PROFILING
+# endif // OSQP_ENABLE_PROFILING
 
     // Adapt rho
     if (solver->settings->adaptive_rho &&
         solver->settings->adaptive_rho_interval &&
         (iter % solver->settings->adaptive_rho_interval == 0)) {
       // Update info with the residuals if it hasn't been done before
-# ifdef PRINTING
+# ifdef OSQP_ENABLE_PRINTING
 
       if (!can_check_termination && !can_print) {
         // Information has not been computed neither for termination or printing
         // reasons
         update_info(solver, iter, compute_obj, 0);
       }
-# else /* ifdef PRINTING */
+# else /* ifdef OSQP_ENABLE_PRINTING */
 
       if (!can_check_termination) {
         // Information has not been computed before for termination check
         update_info(solver, iter, compute_obj, 0);
       }
-# endif /* ifdef PRINTING */
+# endif /* ifdef OSQP_ENABLE_PRINTING */
 
       // Actually update rho
       if (adapt_rho(solver)) {
@@ -606,24 +609,24 @@ c_int osqp_solve(OSQPSolver *solver) {
   // during last iteration (max_iter reached or check_termination disabled)
   if (!can_check_termination) {
     /* Update information */
-#ifdef PRINTING
+#ifdef OSQP_ENABLE_PRINTING
 
     if (!can_print) {
       // Update info only if it hasn't been updated before for printing
       // reasons
       update_info(solver, iter - 1, compute_obj, 0);
     }
-#else /* ifdef PRINTING */
+#else /* ifdef OSQP_ENABLE_PRINTING */
 
     // If no printing is enabled, update info directly
     update_info(solver, iter - 1, compute_obj, 0);
-#endif /* ifdef PRINTING */
+#endif /* ifdef OSQP_ENABLE_PRINTING */
 
-#ifdef PRINTING
+#ifdef OSQP_ENABLE_PRINTING
 
     /* Print summary */
     if (solver->settings->verbose && !work->summary_printed) print_summary(solver);
-#endif /* ifdef PRINTING */
+#endif /* ifdef OSQP_ENABLE_PRINTING */
 
     /* Check whether a termination criterion is triggered */
     check_termination(solver, 0);
@@ -637,12 +640,12 @@ c_int osqp_solve(OSQPSolver *solver) {
   }
 
 
-#ifdef PRINTING
+#ifdef OSQP_ENABLE_PRINTING
   /* Print summary for last iteration */
   if (solver->settings->verbose && !work->summary_printed) {
     print_summary(solver);
   }
-#endif /* ifdef PRINTING */
+#endif /* ifdef OSQP_ENABLE_PRINTING */
 
   /* if max iterations reached, change status accordingly */
   if (solver->info->status_val == OSQP_UNSOLVED) {
@@ -651,14 +654,14 @@ c_int osqp_solve(OSQPSolver *solver) {
     }
   }
 
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
   /* if time-limit reached check termination and update status accordingly */
  if (solver->info->status_val == OSQP_TIME_LIMIT_REACHED) {
     if (!check_termination(solver, 1)) { // Try for approximate solutions
       update_status(solver->info, OSQP_TIME_LIMIT_REACHED); /* Change update status back to OSQP_TIME_LIMIT_REACHED */
     }
   }
-#endif /* ifdef PROFILING */
+#endif /* ifdef OSQP_ENABLE_PROFILING */
 
 
 #if EMBEDDED != 1
@@ -667,9 +670,9 @@ c_int osqp_solve(OSQPSolver *solver) {
 #endif /* if EMBEDDED != 1 */
 
   /* Update solve time */
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
   solver->info->solve_time = osqp_toc(work->timer);
-#endif /* ifdef PROFILING */
+#endif /* ifdef OSQP_ENABLE_PROFILING */
 
 
 #ifndef EMBEDDED
@@ -678,7 +681,7 @@ c_int osqp_solve(OSQPSolver *solver) {
     polish(solver);
 #endif /* ifndef EMBEDDED */
 
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
   /* Update total time */
   if (work->first_run) {
     // total time: setup + solve + polish
@@ -700,26 +703,26 @@ c_int osqp_solve(OSQPSolver *solver) {
 
   // Indicate that osqp_update_rho is not called from osqp_solve
   work->rho_update_from_solve = 0;
-#endif /* ifdef PROFILING */
+#endif /* ifdef OSQP_ENABLE_PROFILING */
 
-#ifdef PRINTING
+#ifdef OSQP_ENABLE_PRINTING
   /* Print final footer */
   if (solver->settings->verbose) print_footer(solver->info, solver->settings->polishing);
-#endif /* ifdef PRINTING */
+#endif /* ifdef OSQP_ENABLE_PRINTING */
 
   // Store solution
   store_solution(solver);
 
 
 // Define exit flag for quitting function
-#if defined(PROFILING) || defined(CTRLC) || EMBEDDED != 1
+#if defined(OSQP_ENABLE_PROFILING) || defined(OSQP_ENABLE_INTERRUPT) || EMBEDDED != 1
 exit:
-#endif /* if defined(PROFILING) || defined(CTRLC) || EMBEDDED != 1 */
+#endif /* if defined(OSQP_ENABLE_PROFILING) || defined(OSQP_ENABLE_INTERRUPT) || EMBEDDED != 1 */
 
-#ifdef CTRLC
+#ifdef OSQP_ENABLE_INTERRUPT
   // Restore previous signal handler
   osqp_end_interrupt_listener();
-#endif /* ifdef CTRLC */
+#endif /* ifdef OSQP_ENABLE_INTERRUPT */
 
   return exitflag;
 }
@@ -820,10 +823,10 @@ c_int osqp_cleanup(OSQPSolver *solver) {
     // Free information
     if (solver->info) c_free(solver->info);
 
-# ifdef PROFILING
+# ifdef OSQP_ENABLE_PROFILING
     // Free timer
-    if (work->timer) c_free(work->timer);
-# endif /* ifdef PROFILING */
+    if (work->timer) OSQPTimer_free(work->timer);
+# endif /* ifdef OSQP_ENABLE_PROFILING */
 
     // Free work
     c_free(work);
@@ -856,14 +859,14 @@ c_int osqp_update_data_vec(OSQPSolver    *solver,
   if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   work = solver->work;
 
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
   if (work->clear_update_time == 1) {
     work->clear_update_time = 0;
     solver->info->update_time = 0.0;
   }
   /* Start timer */
   osqp_tic(work->timer);
-#endif /* ifdef PROFILING */
+#endif /* ifdef OSQP_ENABLE_PROFILING */
 
   /* Update constraint bounds */
   if (l_new || u_new) {
@@ -909,9 +912,9 @@ c_int osqp_update_data_vec(OSQPSolver    *solver,
   /* Reset solver information */
   reset_info(solver->info);
 
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
   solver->info->update_time += osqp_toc(work->timer);
-#endif /* ifdef PROFILING */
+#endif /* ifdef OSQP_ENABLE_PROFILING */
 
   return exitflag;
 }
@@ -982,13 +985,13 @@ c_int osqp_update_data_mat(OSQPSolver    *solver,
   if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   work = solver->work;
 
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
   if (work->clear_update_time == 1) {
     work->clear_update_time = 0;
     solver->info->update_time = 0.0;
   }
   osqp_tic(work->timer); // Start timer
-#endif /* ifdef PROFILING */
+#endif /* ifdef OSQP_ENABLE_PROFILING */
 
   nnzP = OSQPMatrix_get_nz(work->data->P);
   nnzA = OSQPMatrix_get_nz(work->data->A);
@@ -1051,9 +1054,9 @@ c_int osqp_update_data_mat(OSQPSolver    *solver,
 
   if (exitflag != 0){c_eprint("new KKT matrix is not quasidefinite");}
 
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
   solver->info->update_time += osqp_toc(work->timer);
-#endif /* ifdef PROFILING */
+#endif /* ifdef OSQP_ENABLE_PROFILING */
 
   return exitflag;
 }
@@ -1075,7 +1078,7 @@ c_int osqp_update_rho(OSQPSolver *solver,
     return 1;
   }
 
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
   if (work->rho_update_from_solve == 0) {
     if (work->clear_update_time == 1) {
       work->clear_update_time = 0;
@@ -1083,7 +1086,7 @@ c_int osqp_update_rho(OSQPSolver *solver,
     }
     osqp_tic(work->timer); // Start timer
   }
-#endif /* ifdef PROFILING */
+#endif /* ifdef OSQP_ENABLE_PROFILING */
 
   // Update rho in settings
   solver->settings->rho = c_min(c_max(rho_new, OSQP_RHO_MIN), OSQP_RHO_MAX);
@@ -1105,10 +1108,10 @@ c_int osqp_update_rho(OSQPSolver *solver,
   // Update rho_vec in KKT matrix
   exitflag = work->linsys_solver->update_rho_vec(work->linsys_solver, work->rho_vec, solver->settings->rho);
 
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
   if (work->rho_update_from_solve == 0)
     solver->info->update_time += osqp_toc(work->timer);
-#endif /* ifdef PROFILING */
+#endif /* ifdef OSQP_ENABLE_PROFILING */
 
   return exitflag;
 }

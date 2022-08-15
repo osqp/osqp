@@ -2,6 +2,7 @@
 #include "lin_alg.h"
 #include "algebra_impl.h"
 #include "csc_math.h"
+#include "printing.h"
 
 
 #ifndef EMBEDDED

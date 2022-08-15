@@ -96,9 +96,9 @@ jobs:
                   -DOSQP_COVERAGE_CHECK=OFF \
                   -DLONG=${{ matrix.long }} \
                   -DFLOAT=${{ matrix.float }} \
-                  -DPROFILING=${{ matrix.profiling }} \
-                  -DCTRLC=${{ matrix.interrupt }} \
-                  -DPRINTING=${{ matrix.printing }}
+                  -DOSQP_ENABLE_PROFILING=${{ matrix.profiling }} \
+                  -DOSQP_ENABLE_INTERRUPT=${{ matrix.interrupt }} \
+                  -DOSQP_ENABLE_PRINTING=${{ matrix.printing }}
             cmake --build $OSQP_BUILD_DIR_PREFIX
 
         # useful for inspecting the OSQP version information
