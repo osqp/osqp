@@ -75,7 +75,7 @@ cmake_dependent_option( OSQP_COVERAGE_CHECK
                         OFF    # Default to off
                         OSQP_BUILD_UNITTESTS OFF ) # Force off if the unit tests aren't built
 
-set(ALGEBRA
+set(OSQP_ALGEBRA_BACKEND
     "builtin"
     CACHE STRING "The Algebra to use (builtin/mkl/cuda)")
 
@@ -89,21 +89,21 @@ set(OSQP_LIB_SUFFIX "" CACHE STRING "String to append to the library name")
 mark_as_advanced(OSQP_LIB_SUFFIX)
 
 # Set the relevant boolean values for the algebra
-if(${ALGEBRA} STREQUAL "builtin")
+if(${OSQP_ALGEBRA_BACKEND} STREQUAL "builtin")
   set(ALGEBRA_BUILTIN ON)
-elseif(${ALGEBRA} STREQUAL "mkl")
+elseif(${OSQP_ALGEBRA_BACKEND} STREQUAL "mkl")
   set(ALGEBRA_MKL ON)
-elseif(${ALGEBRA} STREQUAL "cuda")
+elseif(${OSQP_ALGEBRA_BACKEND} STREQUAL "cuda")
   set(ALGEBRA_CUDA ON)
 endif()
 
 # Is the code generated for embedded platforms? 1 :   Yes. Matrix update not allowed. 2 :   No. Matrix update allowed.
 if(DEFINED EMBEDDED)
   if(NOT ALGEBRA_BUILTIN)
-    message(WARNING "Forcing ALGEBRA=builtin for EMBEDDED mode.")
+    message(WARNING "Forcing OSQP_ALGEBRA_BACKEND=builtin for EMBEDDED mode.")
   endif()
 
-  set(ALGEBRA "builtin")
+  set(OSQP_ALGEBRA_BACKEND "builtin")
   set(ALGEBRA_BUILTIN ON)
   unset(ALGEBRA_CUDA)
   unset(ALGEBRA_MKL)
@@ -136,8 +136,8 @@ else()
   message(STATUS "EMBEDDED = OFF")
 endif()
 
-# Display final ALGEBRA chosen
-message(STATUS "ALGEBRA = ${ALGEBRA}")
+# Display final algebra chosen
+message(STATUS "Algebra backend: ${OSQP_ALGEBRA_BACKEND}")
 
 # Display final profiling behaviour
 message(STATUS "Solver profiling: ${OSQP_ENABLE_PROFILING}")

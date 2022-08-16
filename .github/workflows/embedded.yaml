@@ -46,7 +46,7 @@ jobs:
                   -S . -B $OSQP_BUILD_DIR_PREFIX \
                   -DFLOAT=${{ matrix.float }} \
                   -DEMBEDDED=${{ matrix.embedded }} \
-                  -DALGEBRA='builtin' \
+                  -DOSQP_ALGEBRA_BACKEND='builtin' \
                   -DLONG=OFF \
                   -DOSQP_ENABLE_PROFILING=OFF \
                   -DOSQP_ENABLE_INTERRUPT=OFF \
