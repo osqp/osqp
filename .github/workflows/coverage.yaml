@@ -18,7 +18,7 @@ jobs:
 
         matrix:
           python-version: [3.9]
-          algebra: ['default', 'mkl']
+          algebra: ['builtin', 'mkl']
           float: ['OFF', 'ON']
           long: ['OFF', 'ON']
           exclude:
