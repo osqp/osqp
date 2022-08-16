@@ -12,12 +12,21 @@
 extern "C" {
 # endif /* ifdef __cplusplus */
 
+#include <limits.h> //for the QDLDL_INT_TYPE_MAX
+
 /* Set the QDLDL integer and float types the same as OSQP */
 typedef c_int    QDLDL_int;   /* for indices */
 typedef c_float  QDLDL_float; /* for numerical values  */
 
 /* Always use int for bool because we must be C89 compliant */
 typedef int   QDLDL_bool;
+
+/* Maximum value of the signed type QDLDL_int. */
+#ifdef DLONG
+#define QDLDL_INT_MAX LLONG_MAX
+#else
+#define QDLDL_INT_MAX INT_MAX
+#endif
 
 # ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
-#ifndef OSQP_CUSTOM_PRINTING_H
-#define OSQP_CUSTOM_PRINTING_H
+#ifndef CUSTOM_PRINTING_H
+#define CUSTOM_PRINTING_H
 
 # ifdef __cplusplus
 extern "C" {
@@ -20,4 +20,4 @@ void my_eprint(const char* funcName, const char* format, ...);
 }
 # endif
 
-#endif /* ifndef  OSQP_CUSTOM_PRINTING_H */
+#endif /* ifndef  CUSTOM_PRINTING_H */

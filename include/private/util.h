@@ -30,7 +30,7 @@ void c_strcpy(char       dest[],
               const char source[]);
 
 
-# ifdef PRINTING
+# ifdef OSQP_ENABLE_PRINTING
 
 /**
  * Print Header before running the algorithm
@@ -64,82 +64,7 @@ void print_footer(OSQPInfo *info,
                   c_int     polishing);
 
 
-# endif /* ifdef PRINTING */
-
-
-/*********************************
-* Timer Structs and Functions * *
-*********************************/
-
-/*! \cond PRIVATE */
-
-# ifdef PROFILING
-
-// Windows
-#  ifdef IS_WINDOWS
-
-  // Some R packages clash with elements
-  // of the windows.h header, so use a
-  // slimmer version for conflict avoidance
-# ifdef R_LANG
-#define NOGDI
-# endif
-
-#   include <windows.h>
-
-struct OSQP_TIMER {
-  LARGE_INTEGER tic;
-  LARGE_INTEGER toc;
-  LARGE_INTEGER freq;
-};
-
-// Mac
-#  elif defined IS_MAC
-
-#   include <mach/mach_time.h>
-
-/* Use MAC OSX  mach_time for timing */
-struct OSQP_TIMER {
-  uint64_t                  tic;
-  uint64_t                  toc;
-  mach_timebase_info_data_t tinfo;
-};
-
-// Linux
-#  else /* ifdef IS_WINDOWS */
-
-/* Use POSIX clock_gettime() for timing on non-Windows machines */
-#   include <time.h>
-#   include <sys/time.h>
-
-
-struct OSQP_TIMER {
-  struct timespec tic;
-  struct timespec toc;
-};
-
-#  endif /* ifdef IS_WINDOWS */
-
-/*! \endcond */
-
-/**
- * Timer Methods
- */
-
-/**
- * Start timer
- * @param t Timer object
- */
-void    osqp_tic(OSQPTimer *t);
-
-/**
- * Report time
- * @param  t Timer object
- * @return   Reported time
- */
-c_float osqp_toc(OSQPTimer *t);
-
-# endif /* END #ifdef PROFILING */
+# endif /* ifdef OSQP_ENABLE_PRINTING */
 
 
 /* ================================= DEBUG FUNCTIONS ======================= */
@@ -147,7 +72,7 @@ c_float osqp_toc(OSQPTimer *t);
 /*! \cond PRIVATE */
 
 
-#if defined(DEBUG) && defined(PRINTING)
+#if defined(DEBUG) && defined(OSQP_ENABLE_PRINTING)
 
 #  include <stdio.h>
 
@@ -184,7 +109,7 @@ void print_vec_int(const c_int *x,
                    c_int        n,
                    const char  *name);
 
-# endif /* #if defined(DEBUG) && defined(PRINTING) */
+# endif /* #if defined(DEBUG) && defined(OSQP_ENABLE_PRINTING) */
 
 /*! \endcond */
 

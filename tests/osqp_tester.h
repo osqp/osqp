@@ -19,7 +19,7 @@ c_float *l;
 c_float *u;
 } OSQPTestData;
 
-#include <memory.h>
+#include <memory>
 
 struct OSQPSolver_deleter {
     void operator()(OSQPSolver* solver) {

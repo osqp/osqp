@@ -1,5 +1,6 @@
 #include "glob_opts.h"
 #include "algebra_impl.h"
+#include "printing.h"
 
 #include "qdldl.h"
 #include "qdldl_interface.h"
@@ -11,6 +12,10 @@
 #if EMBEDDED != 1
 #include "kkt.h"
 #endif
+
+#define STRINGIZE_(x) #x
+#define STRINGIZE(x) STRINGIZE_(x)
+
 
 void update_settings_linsys_solver_qdldl(qdldl_solver       *s,
                                          const OSQPSettings *settings) {
@@ -364,7 +369,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
 #endif  // EMBEDDED
 
 const char* name_qdldl() {
-  return "QDLDL";
+  return "QDLDL v" STRINGIZE(QDLDL_VERSION_MAJOR) "." STRINGIZE(QDLDL_VERSION_MINOR) "." STRINGIZE(QDLDL_VERSION_PATCH);
 }
 
 

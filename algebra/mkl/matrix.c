@@ -4,6 +4,7 @@
 #include "algebra_memory.h"
 #include "csc_math.h"
 #include "csc_utils.h"
+#include "printing.h"
 
 #include <mkl.h>
 #include <mkl_spblas.h>

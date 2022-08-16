@@ -106,8 +106,8 @@ extern const char * OSQP_ERROR_MESSAGE[];
 #endif
 
 # define OSQP_ADAPTIVE_RHO_FRACTION (0.4)           ///< fraction of setup time after which we update rho
-# define OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION (4) ///< multiple of check_termination after which we update rho (if PROFILING disabled)
-# define OSQP_ADAPTIVE_RHO_FIXED (100)              ///< number of iterations after which we update rho if termination_check  and PROFILING are disabled
+# define OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION (4) ///< multiple of check_termination after which we update rho (if OSQP_ENABLE_PROFILING disabled)
+# define OSQP_ADAPTIVE_RHO_FIXED (100)              ///< number of iterations after which we update rho if termination_check  and OSQP_ENABLE_PROFILING are disabled
 
 // termination parameters
 # define OSQP_MAX_ITER              (4000)

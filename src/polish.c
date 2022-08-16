@@ -5,6 +5,7 @@
 #include "lin_sys.h"
 #include "proj.h"
 #include "error.h"
+#include "timing.h"
 
 /**
  * Form reduced matrix A that contains only rows that are active at the
@@ -277,9 +278,9 @@ c_int polish(OSQPSolver *solver) {
   OSQPSettings*  settings  = solver->settings;
   OSQPWorkspace* work      = solver->work;
 
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
   osqp_tic(work->timer); // Start timer
-#endif /* ifdef PROFILING */
+#endif /* ifdef OSQP_ENABLE_PROFILING */
 
   // Form Ared by assuming the active constraints and store in work->pol->Ared
   mred = form_Ared(work);
@@ -399,10 +400,10 @@ c_int polish(OSQPSolver *solver) {
     OSQPVectorf_copy(work->y, work->pol->y);
 
     // Print summary
-#ifdef PRINTING
+#ifdef OSQP_ENABLE_PRINTING
 
     if (settings->verbose) print_polish(solver);
-#endif /* ifdef PRINTING */
+#endif /* ifdef OSQP_ENABLE_PRINTING */
   } else { // Polishing failed
     info->status_polish = -1;
 
