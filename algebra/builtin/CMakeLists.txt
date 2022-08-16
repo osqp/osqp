@@ -1,5 +1,5 @@
 # Use the QDLDL solver in this algebra
-include(${OSQP_ALGEBRA_ROOT}/_common/lin_sys/direct/qdldl.cmake)
+include(${OSQP_ALGEBRA_ROOT}/_common/lin_sys/qdldl/qdldl.cmake)
 
 if(NOT EMBEDDED)
   set( NON_EMBEDDED_SRC_FILES
@@ -38,8 +38,8 @@ if( OSQP_CODEGEN )
        ${OSQP_ALGEBRA_ROOT}/_common/csc_math.c
        ${OSQP_ALGEBRA_ROOT}/_common/kkt.h
        ${OSQP_ALGEBRA_ROOT}/_common/kkt.c
-       ${OSQP_ALGEBRA_ROOT}/_common/lin_sys/direct/qdldl_interface.h
-       ${OSQP_ALGEBRA_ROOT}/_common/lin_sys/direct/qdldl_interface.c
+       ${OSQP_ALGEBRA_ROOT}/_common/lin_sys/qdldl/qdldl_interface.h
+       ${OSQP_ALGEBRA_ROOT}/_common/lin_sys/qdldl/qdldl_interface.c
        ${qdldl_SOURCE_DIR}/src/qdldl.c
        ${qdldl_SOURCE_DIR}/include/qdldl.h
        ${qdldl_SOURCE_DIR}/include/qdldl_version.h )
@@ -63,9 +63,9 @@ if( OSQP_CODEGEN )
   endforeach()
 
     add_custom_command(OUTPUT "${EMBEDDED_BUILD_PRIVATE_INC_DIR}/qdldl_types.h"
-                       COMMAND ${CMAKE_COMMAND} -E copy "${OSQP_ALGEBRA_ROOT}/_common/lin_sys/direct/qdldl_codegen_types.h.in"
+                       COMMAND ${CMAKE_COMMAND} -E copy "${OSQP_ALGEBRA_ROOT}/_common/lin_sys/qdldl/qdldl_codegen_types.h.in"
                                                         "${EMBEDDED_BUILD_PRIVATE_INC_DIR}/qdldl_types.h"
-                       DEPENDS "${OSQP_ALGEBRA_ROOT}/_common/lin_sys/direct/qdldl_codegen_types.h.in"
+                       DEPENDS "${OSQP_ALGEBRA_ROOT}/_common/lin_sys/qdldl/qdldl_codegen_types.h.in"
                        COMMENT "Copying qdldl_types.h" )
 
 
