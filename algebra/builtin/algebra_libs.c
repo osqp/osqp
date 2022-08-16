@@ -20,6 +20,8 @@ const char* osqp_algebra_name(void) {
   return "Built-in";
 }
 
+#ifndef EMBEDDED
+
 // Initialize linear system solver structure
 // NB: Only the upper triangular part of P is filled
 c_int osqp_algebra_init_linsys_solver(LinSysSolver      **s,
@@ -37,3 +39,5 @@ c_int osqp_algebra_init_linsys_solver(LinSysSolver      **s,
     return init_linsys_solver_qdldl((qdldl_solver **)s, P, A, rho_vec, settings, polishing);
   }
 }
+
+#endif
