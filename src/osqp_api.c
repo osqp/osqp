@@ -161,7 +161,7 @@ c_int osqp_setup(OSQPSolver         **solverp,
   if (exitflag) return osqp_error(OSQP_ALGEBRA_LOAD_ERROR);
 
   // Copy problem data into workspace
-  work->data = c_malloc(sizeof(OSQPData));
+  work->data = c_calloc(1, sizeof(OSQPData));
   if (!(work->data)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   work->data->m = m;
   work->data->n = n;
