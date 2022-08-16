@@ -21,6 +21,8 @@ c_int osqp_algebra_init_libs(c_int device);
 /* Free libraries that implement algebra. */
 void osqp_algebra_free_libs(void);
 
+/* Get the name of the linear algebra backend */
+const char* osqp_algebra_name(void);
 
 /* KKT linear system definition and solution */
 

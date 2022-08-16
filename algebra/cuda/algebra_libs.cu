@@ -51,6 +51,9 @@ void osqp_algebra_free_libs(void) {
   CUDA_handle = OSQP_NULL;
 }
 
+const char* osqp_algebra_name(void) {
+  return "CUDA";
+}
 
 // Initialize linear system solver structure
 // NB: Only the upper triangular part of P is filled

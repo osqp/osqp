@@ -16,6 +16,10 @@ c_int osqp_algebra_init_libs(c_int device) {return 0;}
 
 void osqp_algebra_free_libs(void) {return;}
 
+const char* osqp_algebra_name(void) {
+  return "Built-in";
+}
+
 // Initialize linear system solver structure
 // NB: Only the upper triangular part of P is filled
 c_int osqp_algebra_init_linsys_solver(LinSysSolver      **s,

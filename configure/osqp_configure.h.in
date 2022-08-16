@@ -15,9 +15,6 @@
 #cmakedefine ALGEBRA_MKL
 #cmakedefine ALGEBRA_CUDA
 
-/* ALGEBRA - String representation */
-#cmakedefine OSQP_ALGEBRA "@OSQP_ALGEBRA@"
-
 /* OSQP_CODEGEN */
 #cmakedefine OSQP_CODEGEN
 

@@ -90,13 +90,10 @@ mark_as_advanced(OSQP_LIB_SUFFIX)
 
 # Set the relevant boolean values for the algebra
 if(${ALGEBRA} STREQUAL "default")
-  set(ALGEBRA_USER_STRING "builtin")
   set(ALGEBRA_DEFAULT ON)
 elseif(${ALGEBRA} STREQUAL "mkl")
-  set(ALGEBRA_USER_STRING "mkl")
   set(ALGEBRA_MKL ON)
 elseif(${ALGEBRA} STREQUAL "cuda")
-  set(ALGEBRA_USER_STRING "cuda")
   set(ALGEBRA_CUDA ON)
 endif()
 
@@ -200,8 +197,6 @@ message(STATUS "CODEGEN = ${OSQP_CODEGEN}")
 # Rename compile-time constants & configure
 # ----------------------------------------------
 # If we are creating any OSQP_* compile-time constants from CMake variables, do so here.
-set(OSQP_ALGEBRA ${ALGEBRA_USER_STRING})
-
 if(OSQP_ENABLE_PRINTING AND OSQP_CUSTOM_PRINTING)
   message(STATUS "Using custom printing header: ${OSQP_CUSTOM_PRINTING}")
 endif()
