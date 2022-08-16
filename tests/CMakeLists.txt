@@ -44,6 +44,7 @@ FetchContent_MakeAvailable(Catch2)
 # ----------------------------------------------
 # These subfolders populate the variables ${headers} and ${codegen_headers}
 # ----------------------------------------------
+add_subdirectory(basic_lp)
 add_subdirectory(basic_qp)
 add_subdirectory(basic_qp2)
 add_subdirectory(lin_alg)

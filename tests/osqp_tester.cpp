@@ -21,6 +21,7 @@ extern "C" {
 #include "primal_infeasibility/test_primal_infeasibility.h"
 #include "unconstrained/test_unconstrained.h"
 #include "update_matrices/test_update_matrices.h"
+#include "basic_lp/test_basic_lp.h"
 
 
 TEST_CASE( "test_lin_alg", "[multi-file:1]" ) {
@@ -115,11 +116,6 @@ TEST_CASE( "test_non_cvx", "[multi-file:6]" ) {
     SECTION( "test_non_cvx_solve" ) {
         test_non_cvx_solve();
     }
-#ifdef OSQP_CODEGEN
-    SECTION( "test_non_cvx_codegen" ) {
-        test_non_cvx_codegen();
-    }
-#endif
 }
 
 
@@ -183,5 +179,19 @@ TEST_CASE( "test_codegen", "[multi-file:11]" ) {
     SECTION( "test_codegen_settings" ) {
         test_codegen_settings();
     }
+    SECTION( "test_codegen_data" ) {
+        test_codegen_data();
+    }
 }
 #endif
+
+TEST_CASE( "test_basic_lp", "[multi-file:12]" ) {
+    SECTION( "test_basic_lp_solve" ) {
+        test_basic_lp_solve();
+    }
+#ifdef ALGEBRA_MKL
+        SECTION( "test_basic_lp_solve_pardiso" ) {
+        test_basic_lp_solve_pardiso();
+    }
+#endif
+}
