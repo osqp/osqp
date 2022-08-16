@@ -400,7 +400,9 @@ def generate_data(problem_name, sols_data):
         elif sparse.issparse(value):  # Sparse matrix
             f.write("csc * %s;\n" % key)
         elif isinstance(value, np.ndarray):
-            if isinstance(value.flatten(order='F')[0], np.integer):
+            if value.flatten(order='F').size == 0:
+                f.write("c_float * %s;\n" % key)
+            elif isinstance(value.flatten(order='F')[0], np.integer):
                 f.write("c_int * %s;\n" % key)
             elif isinstance(value.flatten(order='F')[0], np.float):
                 f.write("c_float * %s;\n" % key)
@@ -452,7 +454,10 @@ def generate_data(problem_name, sols_data):
         elif sparse.issparse(value):  # Sparse matrix
             write_mat_sparse(f, value, key, "data")
         elif type(value) is np.ndarray:
-            if isinstance(value.flatten(order='F')[0], np.integer):
+            # If the vector is empty, default to a float vector
+            if value.flatten(order='F').size == 0:
+                write_vec_float(f, value.flatten(order='F'), key, "data")
+            elif isinstance(value.flatten(order='F')[0], np.integer):
                 write_vec_int(f, value.flatten(order='F'), key, "data")
             elif isinstance(value.flatten(order='F')[0], np.float):
                 write_vec_float(f, value.flatten(order='F'), key, "data")
