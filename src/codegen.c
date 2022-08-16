@@ -8,6 +8,14 @@
 #include "algebra_impl.h"
 #include "qdldl_interface.h"
 
+/* Define the maximum allowed length of a variable name */
+#define MAX_VAR_LENGTH 255
+
+/* Define the maximum allowed length of the path (directory + filename + extension) */
+#define PATH_LENGTH 1024
+
+/* Define the maximum allowed length of the filename (no extension)*/
+#define FILE_LENGTH 100
 
 #define PROPAGATE_ERROR(f) \
   exitflag = f; \
@@ -28,9 +36,7 @@ static c_int write_vecf(FILE          *f,
 
   c_int i;
 
-  if (!vecf) return OSQP_DATA_NOT_INITIALIZED;
-
-  if (n) {
+  if (n && vecf) {
     fprintf(f, "c_float %s[%d] = {\n", name, n);
     for (i = 0; i < n; i++) {
       fprintf(f, "  (c_float)%.20f,\n", vecf[i]);
@@ -38,7 +44,7 @@ static c_int write_vecf(FILE          *f,
     fprintf(f, "};\n");
   }
   else {
-    fprintf(f, "c_float *%s = OSQP_NULL;\n", name);
+    fprintf(f, "#define %s (OSQP_NULL)\n", name);
   }
 
   return OSQP_NO_ERROR;
@@ -51,9 +57,7 @@ static c_int write_veci(FILE        *f,
 
   c_int i;
 
-  if (!veci) return OSQP_DATA_NOT_INITIALIZED;
-
-  if (n) {
+  if (n && veci) {
     fprintf(f, "c_int %s[%d] = {\n", name, n);
     for (i = 0; i < n; i++) {
       fprintf(f, "  %i,\n", veci[i]);
@@ -61,7 +65,7 @@ static c_int write_veci(FILE        *f,
     fprintf(f, "};\n");
   }
   else {
-    fprintf(f, "c_int *%s = OSQP_NULL;\n", name);
+    fprintf(f, "#define %s (OSQP_NULL)\n", name);
   }
 
   return OSQP_NO_ERROR;
@@ -72,7 +76,7 @@ static c_int write_OSQPVectorf(FILE              *f,
                                const char        *name){
   
   c_int exitflag = OSQP_NO_ERROR;
-  char vecf_name[50];
+  char vecf_name[MAX_VAR_LENGTH];
 
   if (!vec) return OSQP_DATA_NOT_INITIALIZED;
 
@@ -88,7 +92,7 @@ static c_int write_OSQPVectori(FILE              *f,
                                const char        *name){
   
   c_int exitflag = OSQP_NO_ERROR;
-  char veci_name[50];
+  char veci_name[MAX_VAR_LENGTH];
 
   if (!vec) return OSQP_DATA_NOT_INITIALIZED;
 
@@ -109,7 +113,7 @@ static c_int write_csc(FILE       *f,
                        const char *name){
 
   c_int exitflag = OSQP_NO_ERROR;
-  char vec_name[50];
+  char vec_name[MAX_VAR_LENGTH];
 
   if (!M) return OSQP_DATA_NOT_INITIALIZED;
 
@@ -137,7 +141,7 @@ static c_int write_OSQPMatrix(FILE             *f,
                               const char       *name){
 
   c_int exitflag = OSQP_NO_ERROR;
-  char csc_name[50];
+  char csc_name[MAX_VAR_LENGTH];
 
   if (!mat) return OSQP_DATA_NOT_INITIALIZED;
 
@@ -243,9 +247,9 @@ static c_int write_solution(FILE       *f,
   fprintf(f, "/* Define the solution structure */\n");
   fprintf(f, "c_float %ssol_x[%d];\n", prefix, n);
   if (m > 0) fprintf(f, "c_float %ssol_y[%d];\n", prefix, m);
-  else       fprintf(f, "c_float *%ssol_y = OSQP_NULL;\n", prefix);
+  else       fprintf(f, "#define %ssol_y (OSQP_NULL)\n", prefix);
   if (m > 0) fprintf(f, "c_float %ssol_prim_inf_cert[%d];\n", prefix, m);
-  else       fprintf(f, "c_float *%ssol_prim_inf_cert = OSQP_NULL;\n", prefix);
+  else       fprintf(f, "#define %ssol_prim_inf_cert (OSQP_NULL)\n", prefix);
   fprintf(f, "c_float %ssol_dual_inf_cert[%d];\n", prefix, n);
   fprintf(f, "OSQPSolution %ssol = {\n", prefix);
   fprintf(f, "  %ssol_x,\n", prefix);
@@ -267,7 +271,7 @@ static c_int write_scaling(FILE              *f,
                            const char        *prefix){
 
   c_int exitflag = OSQP_NO_ERROR;
-  char name[50];
+  char name[MAX_VAR_LENGTH];
 
   if (!scaling) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
@@ -302,7 +306,7 @@ static c_int write_data(FILE           *f,
                         const char     *prefix){
 
   c_int exitflag = OSQP_NO_ERROR;
-  char name[50];
+  char name[MAX_VAR_LENGTH];
 
   if (!data) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
@@ -342,7 +346,7 @@ static c_int write_linsys(FILE               *f,
                           c_int               embedded){
 
   c_int exitflag = OSQP_NO_ERROR;
-  char name[50];
+  char name[MAX_VAR_LENGTH];
 
   if (!linsys) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
@@ -442,7 +446,7 @@ static c_int write_workspace(FILE             *f,
                              c_int             embedded){
 
   c_int exitflag = OSQP_NO_ERROR;
-  char name[50];
+  char name[MAX_VAR_LENGTH];
   const OSQPWorkspace *work = solver->work;
 
   if (!work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -626,12 +630,6 @@ static c_int write_solver(FILE             *f,
 /*************
 * Codegen API
 **************/
-
-/* Define the maximum allowed length of the path (directory + filename + extension) */
-#define PATH_LENGTH 1024
-
-/* Define the maximum allowed length of the filename (no extension)*/
-#define FILE_LENGTH 100
 
 c_int codegen_inc(OSQPSolver *solver,
                   const char *output_dir,

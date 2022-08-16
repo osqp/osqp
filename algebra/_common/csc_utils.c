@@ -89,12 +89,12 @@ csc* csc_spalloc(c_int m, c_int n, c_int nzmax, c_int values, c_int triplet) {
 
   A->m     = m;                        /* define dimensions and nzmax */
   A->n     = n;
-  A->nzmax = nzmax = c_max(nzmax, 1);
+  A->nzmax = nzmax = c_max(nzmax, 0);
   A->nz    = triplet ? 0 : -1;         /* allocate triplet or comp.col */
   A->p     = csc_malloc(triplet ? nzmax : n + 1, sizeof(c_int));
-  A->i     = csc_malloc(nzmax,  sizeof(c_int));
+  A->i     = values ? csc_malloc(nzmax,  sizeof(c_int)) : OSQP_NULL;
   A->x     = values ? csc_malloc(nzmax,  sizeof(c_float)) : OSQP_NULL;
-  if (!A->p || !A->i || (values && !A->x)){
+  if (!A->p || (values && !A->i ) || (values && !A->x)){
     csc_spfree(A);
     return OSQP_NULL;
   } else return A;
@@ -315,7 +315,7 @@ csc* csc_symperm(const csc *A, const c_int *pinv, c_int *AtoC, c_int values) {
 }
 
 csc* csc_copy(const csc *A) {
-  csc *B = csc_spalloc(A->m, A->n, A->p[A->n], 1, 0);
+  csc *B = csc_spalloc(A->m, A->n, A->p[A->n], (A->x != OSQP_NULL), 0);
 
   if (!B) return OSQP_NULL;
 
