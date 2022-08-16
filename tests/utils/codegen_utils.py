@@ -99,7 +99,7 @@ def write_mat_sparse(f, A, name, *args):
 
     for arg in args:
         f.write("%s->" % arg)
-    if min(m,n) == 0:
+    if min(m,n) == 0 or A.nnz == 0:
         f.write("%s->x = OSQP_NULL;\n" % name)
     else:
         f.write("%s->" % name)
@@ -112,7 +112,7 @@ def write_mat_sparse(f, A, name, *args):
 
     for arg in args:
         f.write("%s->" % arg)
-    if min(m,n) == 0:
+    if min(m,n) == 0 or A.nnz == 0:
         f.write("%s->i = OSQP_NULL;\n" % name)
     else:
         f.write("%s->" % name)
