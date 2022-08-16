@@ -11,7 +11,7 @@
 #cmakedefine IS_WINDOWS
 
 /* ALGEBRA - Only one of the following is defined at compilation time */
-#cmakedefine ALGEBRA_DEFAULT
+#cmakedefine ALGEBRA_BUILTIN
 #cmakedefine ALGEBRA_MKL
 #cmakedefine ALGEBRA_CUDA
 

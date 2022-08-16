@@ -90,7 +90,7 @@ mark_as_advanced(OSQP_LIB_SUFFIX)
 
 # Set the relevant boolean values for the algebra
 if(${ALGEBRA} STREQUAL "default")
-  set(ALGEBRA_DEFAULT ON)
+  set(ALGEBRA_BUILTIN ON)
 elseif(${ALGEBRA} STREQUAL "mkl")
   set(ALGEBRA_MKL ON)
 elseif(${ALGEBRA} STREQUAL "cuda")
@@ -99,12 +99,12 @@ endif()
 
 # Is the code generated for embedded platforms? 1 :   Yes. Matrix update not allowed. 2 :   No. Matrix update allowed.
 if(DEFINED EMBEDDED)
-  if(NOT ALGEBRA_DEFAULT)
+  if(NOT ALGEBRA_BUILTIN)
     message(WARNING "Forcing ALGEBRA=default for EMBEDDED mode.")
   endif()
 
   set(ALGEBRA "default")
-  set(ALGEBRA_DEFAULT ON)
+  set(ALGEBRA_BUILTIN ON)
   unset(ALGEBRA_CUDA)
   unset(ALGEBRA_MKL)
 
@@ -190,7 +190,7 @@ option(OSQP_ASAN "Enable ASAN" OFF)
 
 cmake_dependent_option( OSQP_CODEGEN "Enable code generation"
                         ON
-                        "ALGEBRA_DEFAULT;NOT DEFINED EMBEDDED" OFF )
+                        "ALGEBRA_BUILTIN;NOT DEFINED EMBEDDED" OFF )
 
 message(STATUS "CODEGEN = ${OSQP_CODEGEN}")
 
@@ -396,7 +396,7 @@ if( OSQP_BUILD_STATIC_LIB )
   endif()
 
 
-  if(ALGEBRA_DEFAULT)
+  if(ALGEBRA_BUILTIN)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
     target_sources(osqpstatic PRIVATE $<TARGET_OBJECTS:qdldlobject>)
   endif()
@@ -419,7 +419,7 @@ if(OSQP_BUILD_SHARED_LIB)
   add_library(osqp SHARED
               $<TARGET_OBJECTS:OSQPLIB>
               "${CMAKE_CURRENT_SOURCE_DIR}/src/osqp_api.c")
-  if(ALGEBRA_DEFAULT)
+  if(ALGEBRA_BUILTIN)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
     target_sources(osqp PRIVATE $<TARGET_OBJECTS:qdldlobject>)
   endif()
