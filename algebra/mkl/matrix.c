@@ -3,6 +3,7 @@
 #include "algebra_impl.h"
 #include "csc_math.h"
 #include "csc_utils.h"
+#include "printing.h"
 
 /*  logical test functions ----------------------------------------------------*/
 

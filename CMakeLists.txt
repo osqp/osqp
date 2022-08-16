@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.18)
 project(osqp)
 
 include(GNUInstallDirs)
@@ -65,24 +65,72 @@ cmake_dependent_option( OSQP_BUILD_DEMO_EXE
                         ON    # Default to on
                         OSQP_BUILD_STATIC_LIB OFF ) # Force off if the static library isn't built
 
+cmake_dependent_option( OSQP_BUILD_UNITTESTS
+                        "Build the unit testing suite"
+                        OFF    # Default to off
+                        OSQP_BUILD_STATIC_LIB OFF ) # Force off if the static library isn't built
+
+cmake_dependent_option( OSQP_COVERAGE_CHECK
+                        "Check the code coverage of the unit tests"
+                        OFF    # Default to off
+                        OSQP_BUILD_UNITTESTS OFF ) # Force off if the unit tests aren't built
+
 set(ALGEBRA
     "default"
     CACHE STRING "The Algebra to use (default/mkl/cuda)")
 
-option(PRINTING "Enable solver printing" ON)
-option(PROFILING "Enable solver profiling (timing)" ON)
-option(CTRLC "Enable user interrupt (Ctrl-C)" ON)
+option(OSQP_ENABLE_PRINTING "Enable solver printing" ON)
+option(OSQP_ENABLE_PROFILING "Enable solver profiling (timing)" ON)
+option(OSQP_ENABLE_INTERRUPT "Enable user interrupt (e.g. Ctrl-C)" ON)
+
+# Allow appending a string to the end of the library and the soname so people can have
+# multiple libraries side-by-side on an install.
+set(OSQP_LIB_SUFFIX "" CACHE STRING "String to append to the library name")
+mark_as_advanced(OSQP_LIB_SUFFIX)
+
+# Set the relevant boolean values for the algebra
+if(${ALGEBRA} STREQUAL "default")
+  set(ALGEBRA_USER_STRING "builtin")
+  set(ALGEBRA_DEFAULT ON)
+elseif(${ALGEBRA} STREQUAL "mkl")
+  set(ALGEBRA_USER_STRING "mkl")
+  set(ALGEBRA_MKL ON)
+elseif(${ALGEBRA} STREQUAL "cuda")
+  set(ALGEBRA_USER_STRING "cuda")
+  set(ALGEBRA_CUDA ON)
+endif()
 
 # Is the code generated for embedded platforms? 1 :   Yes. Matrix update not allowed. 2 :   No. Matrix update allowed.
 if(DEFINED EMBEDDED)
-  message(STATUS "Forcing ALGEBRA=default for EMBEDDED mode")
+  if(NOT ALGEBRA_DEFAULT)
+    message(WARNING "Forcing ALGEBRA=default for EMBEDDED mode.")
+  endif()
+
   set(ALGEBRA "default")
-  message(STATUS "Disabling printing/profiling/Ctrl-C for EMBEDDED mode")
-  set(PRINTING OFF)
-  set(PROFILING OFF)
-  set(CTRLC OFF)
+  set(ALGEBRA_DEFAULT ON)
+  unset(ALGEBRA_CUDA)
+  unset(ALGEBRA_MKL)
+
+  if(OSQP_ENABLE_PRINTING AND NOT OSQP_CUSTOM_PRINTING)
+    message(WARNING "Disabling printing in EMBEDDED mode.")
+    set(OSQP_ENABLE_PRINTING OFF)
+  endif()
+
+  if(OSQP_ENABLE_INTERRUPT AND NOT OSQP_CUSTOM_INTERRUPT)
+    message(WARNING "Disabling interrupts in EMBEDDED mode.")
+    set(OSQP_ENABLE_INTERRUPT OFF)
+  endif()
+
+  if(OSQP_ENABLE_PROFILING AND NOT OSQP_CUSTOM_TIMING)
+    message(WARNING "Disabling profiling (timing) for EMBEDDED mode.")
+    set(OSQP_ENABLE_PROFILING OFF)
+  endif()
 
   # Disable shared library and demo exe on embedded applications
+  if(${OSQP_BUILD_SHARED_LIB} OR ${OSQP_BUILD_DEMO_EXE})
+    message(WARNING "Disabling shared library and demo executable for EMBEDDED mode.")
+  endif()
+
   set(OSQP_BUILD_SHARED_LIB OFF)
   set(OSQP_BUILD_DEMO_EXE OFF)
 
@@ -91,37 +139,37 @@ else()
   message(STATUS "EMBEDDED = OFF")
 endif()
 
-# Display final CTRLC behaviour
-message(STATUS "CTRLC = ${CTRLC}")
-
-# Display final ALGEBRA chosen and set internal boolean variables
+# Display final ALGEBRA chosen
 message(STATUS "ALGEBRA = ${ALGEBRA}")
-if(${ALGEBRA} STREQUAL "default")
-  set(ALGEBRA_DEFAULT ON)
-elseif(${ALGEBRA} STREQUAL "mkl")
-  set(ALGEBRA_MKL ON)
-elseif(${ALGEBRA} STREQUAL "cuda")
-  set(ALGEBRA_CUDA ON)
-endif()
+
+# Display final profiling behaviour
+message(STATUS "Solver profiling: ${OSQP_ENABLE_PROFILING}")
+
+# Display final interrupt behaviour
+message(STATUS "Solver interrupt: ${OSQP_ENABLE_INTERRUPT}")
 
 if(ALGEBRA_CUDA)
+  # Some options have different defaults for the CUDA algebra
   option(DFLOAT "Use floats instead of doubles" ON)
+  option(DLONG "Use long integers (64bit) for indexing" OFF)
 else()
   option(DFLOAT "Use floats instead of doubles" OFF)
+  option(DLONG "Use long integers (64bit) for indexing" ON)
 endif()
 
 if(DFLOAT AND ALGEBRA_MKL)
-  message(STATUS "Disabling DFLOAT for MKL (Intel RCI ISS does not support single-precision values yet.)")
+  message(WARNING "Disabling DFLOAT for MKL (Intel RCI ISS does not support single-precision values yet.)")
   set(DFLOAT OFF)
 endif()
 message(STATUS "DFLOAT = ${DFLOAT}")
 
-option(DLONG "Use long integers (64bit) for indexing" ON)
 if(NOT (CMAKE_SIZEOF_VOID_P EQUAL 8))
-  message(STATUS "Disabling long integers (64bit) on 32bit machine")
+  message(WARNING "Disabling long integers (64bit) on 32bit machine.")
   set(DLONG OFF)
-elseif(ALGEBRA_CUDA)
-  message(STATUS "Disabling long integers (64bit) for CUDA")
+endif()
+
+if(ALGEBRA_CUDA AND DLONG)
+  message(WARNING "Disabling long integers (64bit) for CUDA.")
   set(DLONG OFF)
 elseif(DEFINED EMBEDDED)
   # The long long type is not in the C89 spec, and our embedded code must be C89 compliant
@@ -141,14 +189,7 @@ if(DEBUG)
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
-option(COVERAGE "Perform code coverage" OFF)
-message(STATUS "COVERAGE = ${COVERAGE}")
-
 option(OSQP_ASAN "Enable ASAN" OFF)
-
-if(OSQP_CUSTOM_MEMORY)
-  message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY}")
-endif()
 
 cmake_dependent_option( OSQP_CODEGEN "Enable code generation"
                         ON
@@ -159,27 +200,19 @@ message(STATUS "CODEGEN = ${OSQP_CODEGEN}")
 # Rename compile-time constants & configure
 # ----------------------------------------------
 # If we are creating any OSQP_* compile-time constants from CMake variables, do so here.
-set(OSQP_ALGEBRA ${ALGEBRA})
+set(OSQP_ALGEBRA ${ALGEBRA_USER_STRING})
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
-               ${CMAKE_CURRENT_BINARY_DIR}/include/public/osqp_configure.h NEWLINE_STYLE LF)
-
+if(OSQP_ENABLE_PRINTING AND OSQP_CUSTOM_PRINTING)
+  message(STATUS "Using custom printing header: ${OSQP_CUSTOM_PRINTING}")
+endif()
 
 if(OSQP_CUSTOM_MEMORY)
   message(STATUS "Using custom memory management header: ${OSQP_CUSTOM_MEMORY}")
 endif()
 
-# Configure support for custom memory allocators
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/custom_headers/memory_defs.h.in
-               ${CMAKE_CURRENT_BINARY_DIR}/include/private/memory_defs.h NEWLINE_STYLE LF)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/include/public/osqp_configure.h NEWLINE_STYLE LF)
 
-if(OSQP_CUSTOM_PRINTING)
-  message(STATUS "Using custom printing header: ${OSQP_CUSTOM_PRINTING}")
-endif()
-
-# Configure support for custom printing functions
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/custom_headers/print_defs.h.in
-               ${CMAKE_CURRENT_BINARY_DIR}/include/private/print_defs.h NEWLINE_STYLE LF)
 
 # CUDA support
 # ----------------------------------------------
@@ -207,7 +240,7 @@ endif()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON) # -fPIC
 
 if(NOT MSVC)
-  if(COVERAGE)
+  if(OSQP_COVERAGE_CHECK)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
     if(FORTRAN)
@@ -283,6 +316,11 @@ get_property(
   TARGET OSQPLIB
   PROPERTY SOURCES)
 
+get_property(
+  osqplib_link_libs
+  TARGET OSQPLIB
+  PROPERTY LINK_LIBRARIES)
+
 # ----------------------------------------------
 # Language-specific compilation checks
 # ----------------------------------------------
@@ -294,10 +332,10 @@ if(PYTHON)
   include_directories(${PYTHON_INCLUDE_DIRS})
   add_definitions(-DPYTHON)
 
-  if(BUILD_TESTING)
-    message(STATUS "Disabling BUILD_TESTING because we are building Python interface")
-    set(BUILD_TESTING OFF)
-  endif(BUILD_TESTING)
+  if(OSQP_BUILD_UNITTESTS)
+    message(STATUS "Disabling OSQP_BUILD_UNITTESTS because we are building Python interface")
+    set(OSQP_BUILD_UNITTESTS OFF)
+  endif(OSQP_BUILD_UNITTESTS)
 endif(PYTHON)
 
 if(MATLAB)
@@ -314,10 +352,10 @@ if(MATLAB)
   add_definitions(-DMATLAB_MEXSRC_RELEASE=R2017b)
   message(STATUS "Using Matlab pre-2018a API for mxGetPr compatibility")
 
-  if(BUILD_TESTING)
-    message(STATUS "Disabling BUILD_TESTING because we are building Matlab interface")
-    set(BUILD_TESTING OFF)
-  endif(BUILD_TESTING)
+  if(OSQP_BUILD_UNITTESTS)
+    message(STATUS "Disabling OSQP_BUILD_UNITTESTS because we are building Matlab interface")
+    set(OSQP_BUILD_UNITTESTS OFF)
+  endif(OSQP_BUILD_UNITTESTS)
 endif(MATLAB)
 
 if(R_LANG)
@@ -333,10 +371,10 @@ if(R_LANG)
   include_directories(${R_INCLUDE_DIRS})
   add_definitions(-DR_LANG)
 
-  if(BUILD_TESTING)
-    message(STATUS "Disabling UNITTESTS because we are building the R interface")
-    set(BUILD_TESTING OFF)
-  endif(BUILD_TESTING)
+  if(OSQP_BUILD_UNITTESTS)
+    message(STATUS "Disabling OSQP_BUILD_UNITTESTS because we are building the R interface")
+    set(OSQP_BUILD_UNITTESTS OFF)
+  endif(OSQP_BUILD_UNITTESTS)
 endif(R_LANG)
 
 if(PYTHON OR MATLAB OR R_LANG)
@@ -348,11 +386,21 @@ endif()
 # ----------------------------------------------
 # Static Library - osqpstatic
 # ----------------------------------------------
+message( STATUS "Build static library: " ${OSQP_BUILD_STATIC_LIB} )
+
 if( OSQP_BUILD_STATIC_LIB )
   add_library(osqpstatic STATIC
               $<TARGET_OBJECTS:OSQPLIB>
               "${CMAKE_CURRENT_SOURCE_DIR}/src/osqp_api.c")
-  set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqpstatic)
+
+  # Append the algebra name to the library file if desired
+  if(OSQP_LIB_SUFFIX)
+    set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME "osqpstatic_${OSQP_LIB_SUFFIX}")
+  else()
+    set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME "osqpstatic")
+  endif()
+
+
   if(ALGEBRA_DEFAULT)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
     target_sources(osqpstatic PRIVATE $<TARGET_OBJECTS:qdldlobject>)
@@ -370,6 +418,8 @@ endif()
 # ----------------------------------------------
 # Shared Library - osqp
 # ----------------------------------------------
+message( STATUS "Build shared library: " ${OSQP_BUILD_SHARED_LIB} )
+
 if(OSQP_BUILD_SHARED_LIB)
   add_library(osqp SHARED
               $<TARGET_OBJECTS:OSQPLIB>
@@ -382,14 +432,8 @@ if(OSQP_BUILD_SHARED_LIB)
   target_include_directories(osqp PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
                                          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
-  if(MSVC OR IS_MAC)
-    # Visual Studio on Windows, and Mac OS need cuda or mkl libaries to be linked as well
-    if(ALGEBRA_CUDA)
-      target_link_libraries(osqp cublas cusparse)
-    elseif(ALGEBRA_MKL)
-      target_link_libraries(osqp $<LINK_ONLY:MKL::MKL>)
-    endif()
-  endif()
+  # Link against the libraries for the algebras
+  target_link_libraries(osqp ${osqplib_link_libs})
 
   # Declare that we are building the shared library to get proper symbol exports.
   # Shared library consumers should also define OSQP_SHARED_LIB to get the library
@@ -397,20 +441,22 @@ if(OSQP_BUILD_SHARED_LIB)
   # a PUBLIC compile definition.
   target_compile_definitions(osqp PRIVATE BUILDING_OSQP)
   target_compile_definitions(osqp PUBLIC  OSQP_SHARED_LIB)
+
+  # Modify the soname of the library to include the algebra if desired
+  if(OSQP_LIB_SUFFIX)
+    set_target_properties(osqp PROPERTIES LIBRARY_OUTPUT_NAME "osqp_${OSQP_LIB_SUFFIX}")
+  endif()
 endif()
 
 # ----------------------------------------------
 # Application - osqp_demo
 # ----------------------------------------------
+message( STATUS "Build demo executable: " ${OSQP_BUILD_DEMO_EXE} )
+
 if(OSQP_BUILD_DEMO_EXE)
   add_executable(osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
   #target_include_directories(osqp_demo PRIVATE ${osqplib_includes})
-  target_link_libraries(osqp_demo osqpstatic)
-  if(ALGEBRA_MKL)
-    target_link_libraries(osqp_demo $<LINK_ONLY:MKL::MKL>)
-  elseif(ALGEBRA_CUDA)
-    target_link_libraries(osqp_demo cublas cusparse)
-  endif()
+  target_link_libraries(osqp_demo osqpstatic ${osqplib_link_libs})
 
   if(OSQP_CODEGEN)
     add_executable(osqp_codegen_demo ${PROJECT_SOURCE_DIR}/examples/osqp_codegen_demo.c)
@@ -499,12 +545,14 @@ endif()
 # ----------------------------------------------
 # Testing
 # ----------------------------------------------
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND OSQP_BUILD_UNITTESTS)
   include(CTest)
-endif()
 
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME
-   AND BUILD_TESTING
-   AND OSQP_BUILD_STATIC_LIB)
+  message( STATUS "Building unit tests" )
+
+  if( OSQP_COVERAGE_CHECK )
+    message( STATUS "Enabling code coverage file generation" )
+  endif()
+
   add_subdirectory(tests)
 endif()

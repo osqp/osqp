@@ -49,9 +49,8 @@ struct qdldl {
                             c_float            rho_sc);    ///< Update rho_vec parameter
 #endif
 
-#ifndef EMBEDDED
     c_int nthreads;
-#endif
+
     /** @} */
 
     /**

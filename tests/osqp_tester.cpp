@@ -86,7 +86,7 @@ TEST_CASE( "test_basic_qp", "[multi-file:4]" ) {
     SECTION( "test_basic_qp_update_rho" ) {
         test_basic_qp_update_rho();
     }
-#ifdef PROFILING
+#ifdef OSQP_ENABLE_PROFILING
     SECTION( "test_basic_qp_time_limit" ) {
         test_basic_qp_time_limit();
     }

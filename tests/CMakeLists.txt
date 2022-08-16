@@ -6,7 +6,7 @@ find_package(Python)
 if(NOT PYTHON_FOUND)
   message(
     FATAL_ERROR
-      "You need python installed to generate unittests. If you do not want to compile the unittests pass -DBUILD_TESTING=OFF to cmake."
+      "You need python installed to generate unittests."
   )
 endif()
 
@@ -14,7 +14,7 @@ find_python_module(numpy)
 if(NOT NUMPY_FOUND)
   message(
     FATAL_ERROR
-      "You need numpy python module installed to generate unittests. If you do not want to compile the unittests pass -DBUILD_TESTING=OFF to cmake."
+      "You need numpy python module installed to generate unittests."
   )
 endif()
 
@@ -23,7 +23,7 @@ find_python_module(scipy)
 if((NOT SCIPY_FOUND) OR (SCIPY_VERSION VERSION_LESS 0.17.0))
   message(
     FATAL_ERROR
-      "You need scipy python module installed to generate unittests. If you do not want to compile the unittests pass -DBUILD_TESTING=OFF to cmake."
+      "You need scipy python module installed to generate unittests."
   )
 endif()
 
@@ -70,13 +70,7 @@ add_custom_command(
 # ----------------------------------------------
 add_executable(osqp_tester osqp_tester.cpp osqp_tester.h ${headers} ${codegen_headers})
 target_include_directories(osqp_tester PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${osqplib_includes})
-if(ALGEBRA_MKL)
-  target_link_libraries(osqp_tester osqpstatic Catch2::Catch2 $<LINK_ONLY:MKL::MKL>)
-elseif(ALGEBRA_CUDA)
-  target_link_libraries(osqp_tester osqpstatic Catch2::Catch2 cublas cusparse)
-else()
-  target_link_libraries(osqp_tester osqpstatic Catch2::Catch2)
-endif()
+target_link_libraries(osqp_tester osqpstatic Catch2::Catch2 ${osqplib_link_libs})
 
 add_test(NAME osqp_tester COMMAND osqp_tester)
 
@@ -88,13 +82,7 @@ add_executable(
   osqp_tester.cpp osqp_tester.h ${headers} ${codegen_headers} ${CMAKE_CURRENT_SOURCE_DIR}/custom_memory/custom_memory.h
   ${CMAKE_CURRENT_SOURCE_DIR}/custom_memory/custom_memory.c)
 target_include_directories(osqp_tester_custom_memory PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${osqplib_includes})
-if(ALGEBRA_MKL)
-  target_link_libraries(osqp_tester_custom_memory osqpstatic Catch2::Catch2 $<LINK_ONLY:MKL::MKL>)
-elseif(ALGEBRA_CUDA)
-  target_link_libraries(osqp_tester_custom_memory osqpstatic Catch2::Catch2 cublas cusparse)
-else()
-  target_link_libraries(osqp_tester_custom_memory osqpstatic Catch2::Catch2)
-endif()
+target_link_libraries(osqp_tester_custom_memory osqpstatic Catch2::Catch2 ${osqplib_link_libs})
 
 add_test(NAME osqp_tester_custom_memory COMMAND osqp_tester_custom_memory)
 

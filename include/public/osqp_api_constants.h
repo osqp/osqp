@@ -3,6 +3,19 @@
 
 #include "osqp_configure.h"
 
+/***********************
+* Solver capabilities *
+***********************/
+enum osqp_capabilities {
+    /* This enum serves as a bit-flag definition, so each capability must be represented by
+       a different bit in an int variable */
+    OSQP_CAPABILITIY_DIRECT_SOLVER = 0x01,      /* A direct linear solver is present in the algebra */
+    OSQP_CAPABILITIY_INDIRECT_SOLVER = 0x02,    /* An indirect linear solver is present in the algebra */
+    OSQP_CAPABILITIY_CODEGEN = 0x04,            /* Code generation is present */
+    OSQP_CAPABILITIY_UPDATE_MATRICES = 0x08     /* The problem matrices can be updated */
+};
+
+
 /******************
 * Solver Status  *
 ******************/
@@ -55,12 +68,6 @@ extern const char * OSQP_ERROR_MESSAGE[];
 * Solver Parameters and Settings *
 **********************************/
 
-#ifdef ALGEBRA_CUDA
-# define OSQP_LINSYS_SOLVER (OSQP_INDIRECT_SOLVER)
-#else
-# define OSQP_LINSYS_SOLVER (OSQP_DIRECT_SOLVER)
-#endif
-
 # define OSQP_VERBOSE               (1)
 # define OSQP_WARM_STARTING         (1)
 # define OSQP_SCALING               (10)
@@ -99,8 +106,8 @@ extern const char * OSQP_ERROR_MESSAGE[];
 #endif
 
 # define OSQP_ADAPTIVE_RHO_FRACTION (0.4)           ///< fraction of setup time after which we update rho
-# define OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION (4) ///< multiple of check_termination after which we update rho (if PROFILING disabled)
-# define OSQP_ADAPTIVE_RHO_FIXED (100)              ///< number of iterations after which we update rho if termination_check  and PROFILING are disabled
+# define OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION (4) ///< multiple of check_termination after which we update rho (if OSQP_ENABLE_PROFILING disabled)
+# define OSQP_ADAPTIVE_RHO_FIXED (100)              ///< number of iterations after which we update rho if termination_check  and OSQP_ENABLE_PROFILING are disabled
 
 // termination parameters
 # define OSQP_MAX_ITER              (4000)

@@ -24,14 +24,20 @@
 /* EMBEDDED */
 #cmakedefine EMBEDDED (@EMBEDDED@)
 
-/* PRINTING */
-#cmakedefine PRINTING
+/* Header file containing custom memory allocators */
+#cmakedefine OSQP_CUSTOM_MEMORY "@OSQP_CUSTOM_MEMORY@"
 
-/* PROFILING */
-#cmakedefine PROFILING
+/* OSQP_ENABLE_PRINTING */
+#cmakedefine OSQP_ENABLE_PRINTING
 
-/* CTRLC */
-#cmakedefine CTRLC
+/* Header file containing custom printing functions */
+#cmakedefine OSQP_CUSTOM_PRINTING "@OSQP_CUSTOM_PRINTING@"
+
+/* OSQP_ENABLE_PROFILING */
+#cmakedefine OSQP_ENABLE_PROFILING
+
+/* OSQP_ENABLE_INTERRUPT */
+#cmakedefine OSQP_ENABLE_INTERRUPT
 
 /* DFLOAT */
 #cmakedefine DFLOAT
