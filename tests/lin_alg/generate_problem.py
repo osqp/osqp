@@ -41,6 +41,14 @@ test_mat_ops_inf_norm_cols = np.amax(np.abs(
 test_mat_ops_inf_norm_rows = np.amax(np.abs(
     np.asarray(test_mat_ops_A.todense())), axis=1)
 
+# Special cases for matrices/vectors with no size or entries
+test_mat_no_entries = sparse.csc_matrix([[0., 0.], [0., 0.]])
+test_mat_no_rows = sparse.csc_matrix((0,2))
+test_mat_no_cols = sparse.csc_matrix((2,0))
+test_vec_empty = np.array([])
+test_vec_mat_empty = np.array([1., 2.])
+test_vec_zeros = np.array([0., 0.])
+
 # Test matrix vector operations
 m = 5
 n = 4
@@ -124,6 +132,12 @@ data = {'test_sp_matrix_A': test_sp_matrix_A,
         'test_qpform_Pu': test_qpform_Pu,
         'test_qpform_x': test_qpform_x,
         'test_qpform_value': test_qpform_value,
+        'test_mat_no_entries' : test_mat_no_entries,
+        'test_mat_no_rows' : test_mat_no_rows,
+        'test_mat_no_cols' : test_mat_no_cols,
+        'test_vec_empty' : test_vec_empty,
+        'test_vec_mat_empty' : test_vec_mat_empty,
+        'test_vec_zeros' : test_vec_zeros,
         }
 
 # Generate test data
