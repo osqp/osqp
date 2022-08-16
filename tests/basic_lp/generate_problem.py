@@ -18,9 +18,9 @@ l_new = np.array([0.8, -3.4, -np.inf, 0.5])
 u_new = np.array([1.6, 1.0, np.inf, 0.5])
 
 # Generate problem solutions
-sols_data = {'x_test': np.array([0.5, 0.5]),
-             'y_test': np.array([-1.0, 0.0, 0.0, 0.0]),
-             'obj_value_test': 1.00,
+sols_data = {'x_test': np.array([0.3, 0.7]),
+             'y_test': np.array([-1.1, 0.0, 0.15, 0.0]),
+             'obj_value_test': 0.995,
              'status_test': 'optimal',
              'q_new': q_new,
              'l_new': l_new,

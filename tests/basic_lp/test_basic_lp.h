@@ -43,6 +43,11 @@ void test_basic_lp_solve()
   mu_assert("Basic LP test solve: Error in solver status!",
 	    solver->info->status_val == sols_data->status_test);
 
+  // Compare objective values
+  mu_assert("Basic LP test solve: Error in objective value!",
+      c_absval(solver->info->obj_val - sols_data->obj_value_test) <
+      TESTS_TOL);
+
   // Compare primal solutions
   mu_assert("Basic LP test solve: Error in primal solution!",
 	    vec_norm_inf_diff(solver->solution->x, sols_data->x_test,
@@ -52,12 +57,6 @@ void test_basic_lp_solve()
   mu_assert("Basic LP test solve: Error in dual solution!",
 	    vec_norm_inf_diff(solver->solution->y, sols_data->y_test,
 			      data->m) < TESTS_TOL);
-
-
-  // Compare objective values
-  mu_assert("Basic LP test solve: Error in objective value!",
-	    c_absval(solver->info->obj_val - sols_data->obj_value_test) <
-	    TESTS_TOL);
 
   // Clean solver
   osqp_cleanup(solver);
