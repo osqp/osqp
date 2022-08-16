@@ -3,7 +3,7 @@ from scipy import sparse
 import utils.codegen_utils as cu
 
 P = sparse.triu([[0., 0.], [0., 0.]], format='csc')
-q = np.ones(2)
+q = np.array([1.1, 0.95])
 
 A = sparse.csc_matrix(np.array([[1., 1.], [1., 0.], [0., 1.], [0., 1.]]))
 l = np.array([1., 0., 0., -np.inf])
