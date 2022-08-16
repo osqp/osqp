@@ -748,7 +748,7 @@ c_int codegen_defines(const char *output_dir,
   fprintf(incFile, "#define OSQP_CONFIGURE_H\n\n");
 
   /* Write out the algebra in-use */
-  fprintf(incFile, "#define ALGEBRA_BUILTIN\n");
+  fprintf(incFile, "#define OSQP_ALGEBRA_BUILTIN\n");
   fprintf(incFile, "#define OSQP_ALGEBRA \"default\"\n\n");
 
   /* Write out the embedded mode in use */

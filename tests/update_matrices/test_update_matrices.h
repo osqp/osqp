@@ -6,7 +6,7 @@
 
 #include "update_matrices/data.h"
 
-#ifndef ALGEBRA_CUDA
+#ifndef OSQP_ALGEBRA_CUDA
 
 #ifdef __cplusplus
 extern "C" {
@@ -88,7 +88,7 @@ void test_form_KKT() {
   c_free(PtoKKT);
 }
 
-#endif /* ifndef ALGEBRA_CUDA */
+#endif /* ifndef OSQP_ALGEBRA_CUDA */
 
 
 void test_update() {
@@ -354,7 +354,7 @@ void test_update() {
   c_free(Px_new_idx);
 }
 
-#ifdef ALGEBRA_MKL
+#ifdef OSQP_ALGEBRA_MKL
 void test_update_pardiso() {
   c_int i, nnzP, nnzA, exitflag;
   update_matrices_sols_data *data;

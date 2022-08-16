@@ -10,10 +10,10 @@
 #cmakedefine IS_MAC
 #cmakedefine IS_WINDOWS
 
-/* ALGEBRA - Only one of the following is defined at compilation time */
-#cmakedefine ALGEBRA_BUILTIN
-#cmakedefine ALGEBRA_MKL
-#cmakedefine ALGEBRA_CUDA
+/* Algebra backend in use - Only one of the following is defined at compilation time */
+#cmakedefine OSQP_ALGEBRA_BUILTIN
+#cmakedefine OSQP_ALGEBRA_MKL
+#cmakedefine OSQP_ALGEBRA_CUDA
 
 /* OSQP_CODEGEN */
 #cmakedefine OSQP_CODEGEN
