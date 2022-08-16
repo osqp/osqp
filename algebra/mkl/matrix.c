@@ -38,9 +38,7 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const csc *A,
   c_int n = A->n;   /* Number of columns */
   c_int m = A->m;   /* Number of rows */
 
-  MKL_INT *p;
   MKL_INT retval = 0;
-  MKL_INT nzmax = A->p[A->n];
 
   OSQPMatrix* out = c_malloc(sizeof(OSQPMatrix));
 
@@ -59,26 +57,16 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const csc *A,
     return OSQP_NULL;
   }
 
-  out->shifted_p = blas_malloc(n+1);
-
-  for (i = 0; i <= n; i++) {
-    if(A->p[i] > 0)
-      out->shifted_p[i] = A->p[i] - 1;
-    else
-      out->shifted_p[i] = A->p[i];
-  }
-
   retval = spblas_create_csc(&out->mkl_mat,
                              SPARSE_INDEX_BASE_ZERO,
                              out->csc->m,      /* Number of rows */
                              out->csc->n,      /* Number of columns */
-                             out->shifted_p,   /* Array of column start indices (this will only look at the first n entries in p, skipping the last one) */
-                             out->shifted_p+1, /* Array of column end indices (this will skip the first entry to only look at the last n) */
+                             out->csc->p,      /* Array of column start indices (this will only look at the first n entries in p, skipping the last one) */
+                             out->csc->p+1,    /* Array of column end indices (this will skip the first entry to only look at the last n) */
                              out->csc->i,      /* Array of row indices */
                              out->csc->x);     /* The actual data */
 
-  if (retval != SPARSE_STATUS_SUCCESS) {
-    blas_free(p);
+  if ((retval != SPARSE_STATUS_SUCCESS) || (retval != SPARSE_STATUS_NOT_INITIALIZED)) {
     OSQPMatrix_free(out);
     return OSQP_NULL;
   }
@@ -130,10 +118,7 @@ csc*     OSQPMatrix_get_csc(const OSQPMatrix *M) {
   /* MKL doesn't give back the actual p we need, we need to take the last value from p_end and concatenate
      it onto the array returned in p_start */
   for (i = 0; i < numcols; i++) {
-    if (i == 0)
-      B->p[i] = p_start[i];
-    else
-      B->p[i] = p_start[i] + 1;
+    B->p[i] = p_start[i];
   }
   B->p[numcols] = p_end[numcols-1] + 1;
 
@@ -242,9 +227,6 @@ void OSQPMatrix_free(OSQPMatrix *M){
 
     if(M->csc)
       csc_spfree(M->csc);
-
-    if(M->shifted_p)
-      blas_free(M->shifted_p);
   };
 
   c_free(M);
@@ -256,6 +238,7 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix  *A,
      the actual MKL matrix handle, which seems to be the case in all the testing done. */
   csc        *M;
   OSQPMatrix *out;
+  c_int      retval = SPARSE_STATUS_SUCCESS;
 
   if(A->symmetry == TRIU){
     c_eprint("row selection not implemented for partially filled matrices");
@@ -275,6 +258,25 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix  *A,
 
   out->symmetry = NONE;
   out->csc      = M;
+
+  if(!out->csc){
+    c_free(out);
+    return OSQP_NULL;
+  }
+
+  retval = spblas_create_csc(&out->mkl_mat,
+                             SPARSE_INDEX_BASE_ZERO,
+                             out->csc->m,      /* Number of rows */
+                             out->csc->n,      /* Number of columns */
+                             out->csc->p,      /* Array of column start indices (this will only look at the first n entries in p, skipping the last one) */
+                             out->csc->p+1,    /* Array of column end indices (this will skip the first entry to only look at the last n) */
+                             out->csc->i,      /* Array of row indices */
+                             out->csc->x);     /* The actual data */
+
+  if (retval != SPARSE_STATUS_SUCCESS) {
+    OSQPMatrix_free(out);
+    return OSQP_NULL;
+  }
 
   return out;
 }

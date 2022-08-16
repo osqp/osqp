@@ -35,6 +35,7 @@ test_mat_ops_d = rg.standard_normal(test_mat_ops_n)
 D = sparse.diags(test_mat_ops_d, format='csc')
 test_mat_ops_prem_diag = (D@test_mat_ops_A).tocoo().tocsc()   # Force matrix reordering
 test_mat_ops_postm_diag = (test_mat_ops_A@D).tocoo().tocsc()  # Force matrix reordering
+test_mat_ops_scaled = (2*test_mat_ops_A).tocoo().tocsc()  # Force matrix reordering
 test_mat_ops_inf_norm_cols = np.amax(np.abs(
     np.asarray(test_mat_ops_A.todense())), axis=0)
 test_mat_ops_inf_norm_rows = np.amax(np.abs(
@@ -99,6 +100,7 @@ data = {'test_sp_matrix_A': test_sp_matrix_A,
         'test_mat_ops_d': test_mat_ops_d,
         'test_mat_ops_prem_diag': test_mat_ops_prem_diag,
         'test_mat_ops_postm_diag': test_mat_ops_postm_diag,
+        'test_mat_ops_scaled' : test_mat_ops_scaled,
         'test_mat_ops_inf_norm_cols': test_mat_ops_inf_norm_cols,
         'test_mat_ops_inf_norm_rows': test_mat_ops_inf_norm_rows,
         'test_mat_vec_n': test_mat_vec_n,

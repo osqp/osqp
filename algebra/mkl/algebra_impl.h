@@ -34,7 +34,6 @@ typedef enum OSQPMatrix_symmetry_type {NONE,TRIU} OSQPMatrix_symmetry_type;
 
 struct OSQPMatrix_ {
   csc                     *csc;       /* Shadow matrix */
-  MKL_INT                 *shifted_p; /* Zero-index p vector */
   sparse_matrix_t          mkl_mat;   /* Opaque object for MKL matrix */
   OSQPMatrix_symmetry_type symmetry;
 };

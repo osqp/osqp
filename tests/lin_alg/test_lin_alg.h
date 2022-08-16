@@ -127,11 +127,12 @@ void test_vec_operations() {
 void test_mat_operations() {
   lin_alg_sols_data_ptr data{generate_problem_lin_alg_sols_data()};
 
-  // Import data matrices (3 copies) and vector data
+  // Import data matrices (4 copies) and vector data
   // Matrices used for tests
   OSQPMatrix_ptr A{OSQPMatrix_new_from_csc(data->test_mat_ops_A, 0)}; //asymmetric
-  OSQPMatrix_ptr Ad{OSQPMatrix_new_from_csc(data->test_mat_ops_A,0)};  //asymmetric
+  OSQPMatrix_ptr Ad{OSQPMatrix_new_from_csc(data->test_mat_ops_A,0)}; //asymmetric
   OSQPMatrix_ptr dA{OSQPMatrix_new_from_csc(data->test_mat_ops_A,0)}; //asymmetric
+  OSQPMatrix_ptr sA{OSQPMatrix_new_from_csc(data->test_mat_ops_A,0)}; //asymmetric
 
   OSQPVectorf_ptr d{OSQPVectorf_new(data->test_mat_ops_d, data->test_mat_ops_n)};
 
@@ -141,6 +142,14 @@ void test_mat_operations() {
   OSQPVectorf_ptr resultv{nullptr};
 
 #ifndef ALGEBRA_CUDA
+
+  // Scalar multiply every element in A
+  refM.reset(OSQPMatrix_new_from_csc(data->test_mat_ops_scaled, 0)); //asymmetric
+
+  OSQPMatrix_mult_scalar(sA.get(), 2.0);
+  mu_assert(
+    "Linear algebra tests: error in matrix operation, scalar multiply",
+    OSQPMatrix_is_eq(sA.get(), refM.get(), TESTS_TOL));
 
   // Premultiply matrix A
   refM.reset(OSQPMatrix_new_from_csc(data->test_mat_ops_prem_diag, 0)); //asymmetric
