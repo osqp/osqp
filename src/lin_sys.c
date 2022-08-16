@@ -1,4 +1,5 @@
 #include "lin_sys.h"
+#include "printing.h"
 
 
 #ifdef ALGEBRA_DEFAULT

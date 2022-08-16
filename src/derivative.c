@@ -5,6 +5,7 @@
 #include "lin_sys.h"
 #include "proj.h"
 #include "error.h"
+#include "printing.h"
 
 #ifdef ALGEBRA_DEFAULT
 
