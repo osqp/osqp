@@ -76,8 +76,8 @@ cmake_dependent_option( OSQP_COVERAGE_CHECK
                         OSQP_BUILD_UNITTESTS OFF ) # Force off if the unit tests aren't built
 
 set(ALGEBRA
-    "default"
-    CACHE STRING "The Algebra to use (default/mkl/cuda)")
+    "builtin"
+    CACHE STRING "The Algebra to use (builtin/mkl/cuda)")
 
 option(OSQP_ENABLE_PRINTING "Enable solver printing" ON)
 option(OSQP_ENABLE_PROFILING "Enable solver profiling (timing)" ON)
@@ -89,7 +89,7 @@ set(OSQP_LIB_SUFFIX "" CACHE STRING "String to append to the library name")
 mark_as_advanced(OSQP_LIB_SUFFIX)
 
 # Set the relevant boolean values for the algebra
-if(${ALGEBRA} STREQUAL "default")
+if(${ALGEBRA} STREQUAL "builtin")
   set(ALGEBRA_BUILTIN ON)
 elseif(${ALGEBRA} STREQUAL "mkl")
   set(ALGEBRA_MKL ON)
@@ -100,10 +100,10 @@ endif()
 # Is the code generated for embedded platforms? 1 :   Yes. Matrix update not allowed. 2 :   No. Matrix update allowed.
 if(DEFINED EMBEDDED)
   if(NOT ALGEBRA_BUILTIN)
-    message(WARNING "Forcing ALGEBRA=default for EMBEDDED mode.")
+    message(WARNING "Forcing ALGEBRA=builtin for EMBEDDED mode.")
   endif()
 
-  set(ALGEBRA "default")
+  set(ALGEBRA "builtin")
   set(ALGEBRA_BUILTIN ON)
   unset(ALGEBRA_CUDA)
   unset(ALGEBRA_MKL)
