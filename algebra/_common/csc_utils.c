@@ -1,3 +1,4 @@
+#include "printing.h"
 #include "csc_utils.h"
 
 //========== Logical, testing and debug ===========
@@ -6,12 +7,16 @@ c_int csc_is_eq(csc *A, csc *B, c_float tol) {
   c_int j, i;
 
   // If number of columns does not coincide, they are not equal.
-  if (A->n != B->n) return 0;
+  if (A->n != B->n) {
+      return 0;
+  }
 
   for (j = 0; j < A->n; j++) { // Cycle over columns j
     // if column pointer of next colimn does not coincide, they are not equal
     // NB: first column always has A->p[0] = B->p[0] = 0 by construction.
-    if (A->p[j+1] != B->p[j+1]) return 0;
+    if (A->p[j+1] != B->p[j+1]) {
+        return 0;
+    }
 
     for (i = A->p[j]; i < A->p[j + 1]; i++) { // Cycle rows i in column j
       if ((A->i[i] != B->i[i]) ||             // Different row indices
@@ -448,3 +453,103 @@ csc* csc_done(csc *C, void *w, void *x, c_int ok) {
 //   // Return matrix in triplet form
 //   return M_triu;
 // }
+
+
+csc* triu_to_csc(csc *M) {
+    csc  *M_trip;    // Matrix in triplet format
+    csc  *M_symm;    // Resulting symmetric sparse matrix
+    c_int n;         // Dimension of M
+    c_int ptr, i, j; // Counters for (i,j) and index in M
+    c_int z_M = 0;   // Counter for elements in M_trip
+
+    if (M->m != M->n) {
+        c_eprint("Matrix M not square");
+        return OSQP_NULL;
+    }
+    n = M->n;
+
+    // Estimate nzmax = twice the original (ignoring the double counted diagonal)
+    M_trip = csc_spalloc(n, n, 2 * M->p[n], 1, 1);  // Triplet format
+    if (!M_trip) {
+        c_eprint("Matrix extraction failed (out of memory)");
+        return OSQP_NULL;
+    }
+
+    for (j = 0; j < n; j++) {                           // Cycle over columns
+        for (ptr = M->p[j]; ptr < M->p[j+1]; ptr++) {   // Index into i/x
+            i = M->i[ptr];                              // Row index
+            M_trip->i[z_M] = i;
+            M_trip->p[z_M] = j;
+            M_trip->x[z_M] = M->x[ptr];
+            z_M++;
+
+            // If we're above the diagonal, create another triplet entry with i,j reversed,
+            // taking advantage of the fact that triplet entries can be in arbitrary order.
+            if (i < j) {
+                M_trip->i[z_M] = j;
+                M_trip->p[z_M] = i;
+                M_trip->x[z_M] = M->x[ptr];
+                z_M++;
+            }
+        }
+    }
+    M_trip->nz = z_M;
+
+    // Convert triplet matrix to csc format
+    M_symm = triplet_to_csc(M_trip, OSQP_NULL);
+    M_symm->nzmax = z_M;
+
+    csc_spfree(M_trip);
+    return M_symm;
+}
+
+csc* vstack(csc *A, csc *B) {
+    csc  *M_trip;    // Matrix in triplet format
+    csc  *M;         // Resulting csc matrix
+    c_int m1, m2;    // No. of rows in A, B respectively
+    c_int n;         // No. of columns in A/B
+    c_int ptr, i, j; // Counters for (i,j) and index in M
+    c_int z_M = 0;   // Counter for elements in M_trip
+
+    if (A->n != B->n) {
+        c_eprint("Matrix A and B do not have the same number of columns");
+        return OSQP_NULL;
+    }
+    m1 = A->m;
+    m2 = B->m;
+    n = A->n;
+
+    // Estimate nzmax = twice the original (ignoring the double counted diagonal)
+    M_trip = csc_spalloc(m1 + m2, n, A->nzmax + B->nzmax, 1, 1);  // Triplet format
+    if (!M_trip) {
+        c_eprint("Matrix allocation failed (out of memory)");
+        return OSQP_NULL;
+    }
+
+    for (j = 0; j < n; j++) {                           // Cycle over columns
+        for (ptr = A->p[j]; ptr < A->p[j+1]; ptr++) {   // Index into i/x
+            i = A->i[ptr];                              // Row index
+            M_trip->i[z_M] = i;
+            M_trip->p[z_M] = j;
+            M_trip->x[z_M] = A->x[ptr];
+            z_M++;
+        }
+    }
+    for (j = 0; j < n; j++) {                           // Cycle over columns
+        for (ptr = B->p[j]; ptr < B->p[j+1]; ptr++) {   // Index into i/x
+            i = B->i[ptr] + m1;                         // Row index
+            M_trip->i[z_M] = i;
+            M_trip->p[z_M] = j;
+            M_trip->x[z_M] = B->x[ptr];
+            z_M++;
+        }
+    }
+    M_trip->nz = z_M;
+
+    // Convert triplet matrix to csc format
+    M = triplet_to_csc(M_trip, OSQP_NULL);
+    M->nzmax = z_M;
+
+    csc_spfree(M_trip);
+    return M;
+}

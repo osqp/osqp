@@ -17,7 +17,7 @@ list( APPEND EMBEDDED_SRCS
 
 # Add more files that should only be in non-embedded code
 if(NOT DEFINED EMBEDDED)
-  target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/polish.c")
+  target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/polish.c" "${CMAKE_CURRENT_SOURCE_DIR}/derivative.c")
 endif()
 
 # Add the ctrl-c handler if enabled and not overriden

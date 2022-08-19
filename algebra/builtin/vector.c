@@ -6,6 +6,21 @@
 
 #ifndef EMBEDDED
 
+c_int OSQPVectorf_is_eq(const OSQPVectorf *A,
+                        const OSQPVectorf *B,
+                        c_float           tol){
+
+    if (A->length != B->length) return 0;
+    c_int i;
+    c_int retval = 1;
+    for (i=0; i<A->length; i++) {
+        if (c_absval(A->values[i] - B->values[i]) > tol) {
+            retval = 0;
+        }
+    }
+    return retval;
+}
+
 OSQPVectorf* OSQPVectorf_new(const c_float *a,
                              c_int          length){
 
@@ -18,16 +33,17 @@ OSQPVectorf* OSQPVectorf_new(const c_float *a,
   return out;
 }
 
-// OSQPVectori* OSQPVectori_new(const c_int *a, c_int length){
+OSQPVectori* OSQPVectori_new(const c_int *a,
+                             c_int        length){
 
-//   OSQPVectori* out = OSQPVectori_malloc(length);
-//   if(!out) return OSQP_NULL;
+  OSQPVectori* out = OSQPVectori_malloc(length);
+  if(!out) return OSQP_NULL;
 
-//   if (length > 0) {
-//     OSQPVectori_from_raw(out, a);
-//   }
-//   return out;
-// }
+  if (length > 0) {
+    OSQPVectori_from_raw(out, a);
+  }
+  return out;
+}
 
 OSQPVectorf* OSQPVectorf_malloc(c_int length){
 
@@ -126,13 +142,52 @@ OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf *a){
 // }
 
 void OSQPVectorf_free(OSQPVectorf *a){
-  if (a) c_free(a->values);
+  if (a) {
+      c_free(a->values);
+  }
   c_free(a);
 }
 
 void OSQPVectori_free(OSQPVectori *a){
   if (a) c_free(a->values);
   c_free(a);
+}
+
+OSQPVectorf* OSQPVectorf_subvector_byrows(const OSQPVectorf  *A,
+                                          const OSQPVectori *rows) {
+    c_int i;
+
+    c_int rows_len = 0;
+    for (i = 0; i < rows->length; i++)
+        if (rows->values[i]) rows_len++;
+
+    OSQPVectorf* out = OSQPVectorf_malloc(rows_len);
+    if(!out) return OSQP_NULL;
+
+    c_int j = 0;
+    for (i = 0; i < rows->length; i++) {
+        if (rows->values[i]) {
+            out->values[j] = A->values[i];
+            j++;
+        }
+    }
+
+    return out;
+}
+
+OSQPVectorf* OSQPVectorf_concat(const OSQPVectorf *A,
+                    const OSQPVectorf *B) {
+
+    OSQPVectorf* out = OSQPVectorf_malloc(A->length + B->length);
+    if(!out) return OSQP_NULL;
+
+    c_int i, j;
+    for (i = 0; i < A->length; i++)
+        out->values[i] = A->values[i];
+    for (j = 0; j < B->length; j++)
+        out->values[j+i] = B->values[j];
+
+    return out;
 }
 
 OSQPVectorf* OSQPVectorf_view(const OSQPVectorf *a,
@@ -155,6 +210,17 @@ void OSQPVectorf_view_free(OSQPVectorf *a){
   c_free(a);
 }
 
+c_float OSQPVectorf_norm_2(const OSQPVectorf *v){
+    c_int   i;
+    c_int length  = v->length;
+    c_float*  vv  = v->values;
+    c_float normval = 0.0;
+
+    for (i = 0; i < length; i++) {
+        normval += vv[i] * vv[i];
+    }
+    return c_sqrt(normval);
+}
 
 #endif /* ifndef EMBEDDED */
 
@@ -300,6 +366,27 @@ void OSQPVectorf_minus(OSQPVectorf       *x,
       xv[i] = av[i] - bv[i];
     }
   }
+}
+
+void OSQPVectorf_mult(OSQPVectorf       *x,
+                       const OSQPVectorf *a,
+                       const OSQPVectorf *b){
+    c_int i;
+    c_int length = a->length;
+    c_float*  av = a->values;
+    c_float*  bv = b->values;
+    c_float*  xv = x->values;
+
+    if (x == a) {
+        for (i = 0; i < length; i++) {
+            xv[i] *= bv[i];
+        }
+    }
+    else {
+        for (i = 0; i < length; i++) {
+            xv[i] = av[i] * bv[i];
+        }
+    }
 }
 
 void OSQPVectorf_add_scaled(OSQPVectorf       *x,
@@ -743,19 +830,19 @@ void OSQPVectorf_ew_max_vec(OSQPVectorf       *c,
   }
 }
 
-// void OSQPVectorf_ew_min_vec(OSQPVectorf       *c,
-//                             const OSQPVectorf *a,
-//                             const OSQPVectorf *b){
-//   c_int i;
-//   c_int length = a->length;
-//   c_float*  av = a->values;
-//   c_float*  bv = b->values;
-//   c_float*  cv = c->values;
+void OSQPVectorf_ew_min_vec(OSQPVectorf       *c,
+                             const OSQPVectorf *a,
+                             const OSQPVectorf *b){
+  c_int i;
+  c_int length = a->length;
+  c_float*  av = a->values;
+  c_float*  bv = b->values;
+  c_float*  cv = c->values;
 
-//   for (i = 0; i < length; i++) {
-//     cv[i] = c_min(av[i], bv[i]);
-//   }
-// }
+  for (i = 0; i < length; i++) {
+    cv[i] = c_min(av[i], bv[i]);
+  }
+}
 
 c_int OSQPVectorf_ew_bounds_type(OSQPVectori      *iseq,
                                 const OSQPVectorf *l,
@@ -822,7 +909,5 @@ void OSQPVectorf_set_scalar_if_gt(OSQPVectorf       *x,
     xv[i] = zv[i] > testval ? newval : zv[i];
   }
 }
-
-
 
 #endif /* EMBEDDED != 1 */

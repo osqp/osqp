@@ -52,6 +52,8 @@ void free_linsys_solver_qdldl(qdldl_solver *s) {
         if (s->AtoKKT)    c_free(s->AtoKKT);
         if (s->rhotoKKT)  c_free(s->rhotoKKT);
 
+        if (s->adj)         c_free(s->adj);
+
         // QDLDL workspace
         if (s->D)         c_free(s->D);
         if (s->etree)     c_free(s->etree);
@@ -237,6 +239,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
     s->solve           = &solve_linsys_qdldl;
     s->update_settings = &update_settings_linsys_solver_qdldl;
     s->warm_start      = &warm_start_linsys_solver_qdldl;
+    s->adjoint_derivative = &adjoint_derivative_qdldl;
 
 
 #ifndef EMBEDDED
@@ -489,6 +492,308 @@ c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver      *s,
     return (QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
         s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
         s->etree, s->bwork, s->iwork, s->fwork) < 0);
+}
+
+#endif
+
+#ifndef EMBEDDED
+
+// --------- Derivative functions -------- //
+
+//increment the D colptr by the number of nonzeros
+//in a square diagonal matrix.
+static void _colcount_diag(csc* D, c_int initcol, c_int blockcols) {
+
+    c_int j;
+    for(j = initcol; j < (initcol + blockcols); j++){
+        D->p[j]++;
+    }
+}
+
+//increment D colptr by the number of nonzeros in M
+static void _colcount_block(csc* D, csc* M, c_int initcol, c_int istranspose) {
+
+    c_int nnzM, j;
+
+    if(istranspose){
+        nnzM = M->p[M->n];
+        for (j = 0; j < nnzM; j++){
+            D->p[M->i[j] + initcol]++;
+        }
+    }
+    else {
+        //just add the column count
+        for (j = 0; j < M->n; j++){
+            D->p[j + initcol] += M->p[j+1] - M->p[j];
+        }
+    }
+}
+
+static void _colcount_to_colptr(csc* D) {
+
+    c_int j, count;
+    c_int currentptr = 0;
+
+    for(j = 0; j <= D->n; j++){
+        count        = D->p[j];
+        D->p[j]      = currentptr;
+        currentptr  += count;
+    }
+}
+
+//populate values from M using the K colptr as indicator of
+//next fill location in each row
+static void _fill_block(
+        csc* K, csc* M,
+        c_int* index_mapping,
+        c_int initrow,
+        c_int initcol,
+        c_int istranspose)
+{
+    c_int ii, jj, row, col, dest;
+
+    for(ii=0; ii < M->n; ii++){
+        for(jj = M->p[ii]; jj < M->p[ii+1]; jj++){
+            if(istranspose){
+                col = M->i[jj] + initcol;
+                row = ii + initrow;
+            }
+            else {
+                col = ii + initcol;
+                row = M->i[jj] + initrow;
+            }
+
+            dest       = K->p[col]++;
+            K->i[dest] = row;
+            K->x[dest] = M->x[jj];
+            if (index_mapping != OSQP_NULL) { index_mapping[jj] = dest; }
+        }
+    }
+}
+
+static void _fill_diag_values(csc* K, c_int* index_mapping, c_int initrow, c_int initcol, c_float *values, c_float value_scalar, c_int n) {
+
+    c_int j, dest, row, col;
+    for (j = 0; j < n; j++) {
+        row         = j + initrow;
+        col         = j + initcol;
+        dest        = K->p[col];
+        K->i[dest]  = row;
+        if (values != OSQP_NULL) {
+            K->x[dest] = values[j];
+        } else {
+            K->x[dest] = value_scalar;
+        }
+        K->p[col]++;
+        if (index_mapping != OSQP_NULL) { index_mapping[j] = dest; }
+    }
+}
+
+static void _backshift_colptrs(csc* K) {
+
+    int j;
+    for(j = K->n; j > 0; j--){
+        K->p[j] = K->p[j-1];
+    }
+    K->p[0] = 0;
+}
+
+static void _adj_perturb(csc *D, c_float eps) {
+    c_int j, dest;
+
+    dest = 0;
+    for (j = 0; j < D->m / 2; j++) {
+        dest = D->p[j+1]-1;
+        D->x[dest] += eps;
+    }
+    for (j = D->m / 2; j < D->m; j++) {
+        dest = D->p[j+1]-1;
+        D->x[dest] -= eps;
+    }
+}
+
+static void _adj_assemble_csc(csc *D, const OSQPMatrix *P_full, const OSQPMatrix *G, const OSQPMatrix *A_eq, const OSQPMatrix *GDiagLambda, const OSQPVectorf *slacks) {
+
+    c_int n = OSQPMatrix_get_m(P_full);
+    c_int x = OSQPMatrix_get_m(G);        // No. of inequality constraints
+    c_int y = OSQPMatrix_get_m(A_eq);     // No. of equality constraints
+
+    c_int j;
+    //use D.p to hold nnz entries in each column of the D matrix
+    for (j=0; j <= 2*(n+x+y); j++){D->p[j] = 0;}
+
+    _colcount_diag(D, 0, n+x+y);
+    _colcount_block(D, P_full->csc, n+x+y, 0);
+    _colcount_block(D, G->csc, n+x+y, 0);
+    _colcount_block(D, A_eq->csc, n+x+y, 0);
+    _colcount_block(D, GDiagLambda->csc, n+x+y+n, 1);
+    _colcount_diag(D, n+x+y+n, x);
+    _colcount_block(D, A_eq->csc, n+x+y+n+x, 1);
+    _colcount_diag(D, n+x+y, n+x+y);
+
+    //cumsum total entries to convert to D.p
+    _colcount_to_colptr(D);
+
+    _fill_diag_values(D, OSQP_NULL, 0, 0, OSQP_NULL, 1, n+x+y);
+    _fill_block(D, P_full->csc, OSQP_NULL, 0, n+x+y, 0);
+    _fill_block(D, G->csc, OSQP_NULL, n, n+x+y, 0);
+    _fill_block(D, A_eq->csc, OSQP_NULL, n+x, n+x+y, 0);
+    _fill_block(D, GDiagLambda->csc, OSQP_NULL, 0, n+x+y+n, 1);
+    _fill_diag_values(D, OSQP_NULL, n, n+x+y+n, slacks->values, 0, x);
+    _fill_block(D, A_eq->csc, OSQP_NULL, 0, n+x+y+n+x, 1);
+    _fill_diag_values(D, OSQP_NULL, n+x+y, n+x+y, OSQP_NULL, 0, n+x+y);
+
+    _backshift_colptrs(D);
+
+}
+
+c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const OSQPMatrix *G, const OSQPMatrix *A_eq, const OSQPMatrix *GDiagLambda, const OSQPVectorf *slacks, const OSQPVectorf *rhs) {
+
+    c_int n = OSQPMatrix_get_m(P_full);
+    c_int n_ineq = OSQPMatrix_get_m(G);
+    c_int n_eq = OSQPMatrix_get_m(A_eq);
+
+    // Get maximum number of nonzero elements (only upper triangular part)
+    c_int P_full_nnz = OSQPMatrix_get_nz(P_full);
+    c_int G_nnz = OSQPMatrix_get_nz(G);
+    c_int A_eq_nnz = OSQPMatrix_get_nz(A_eq);
+
+    c_int nnzKKT = n + n_ineq + n_eq +           // Number of diagonal elements in I (+eps)
+                   P_full_nnz +                  // Number of elements in P_full
+                   G_nnz +                       // Number of nonzeros in G
+                   A_eq_nnz +                    // Number of nonzeros in A_eq
+                   G_nnz +                       // Number of nonzeros in G'
+                   n_ineq +                      // Number of diagonal elements in slacks
+                   A_eq_nnz +                    // Number of nonzeros in A_eq'
+                   n + n_ineq + n_eq;            // Number of -eps entries on diagonal
+
+    c_int dim = 2 * (n + n_ineq + n_eq);
+    csc *adj = csc_spalloc(dim, dim, nnzKKT, 1, 0);
+    if (!adj) return OSQP_NULL;
+    _adj_assemble_csc(adj, P_full, G, A_eq, GDiagLambda, slacks);
+
+    OSQPMatrix *adj_matrix = OSQPMatrix_new_from_csc(adj, 1);
+
+    _adj_perturb(adj, 1e-6);
+
+    // ----------------------------
+    // QDLDL formulation + solve
+    // ----------------------------
+    const QDLDL_int   An   = dim;
+    QDLDL_int i; // Counter
+
+    //data for L and D factors
+    QDLDL_int Ln = An;
+    QDLDL_int *Lp;
+    QDLDL_int *Li;
+    QDLDL_float *Lx;
+    QDLDL_float *D;
+    QDLDL_float *Dinv;
+
+    //permutation
+    QDLDL_int   *P;
+    QDLDL_int   *Pinv;
+
+    //data for elim tree calculation
+    QDLDL_int *etree;
+    QDLDL_int *Lnz;
+    QDLDL_int  sumLnz;
+
+    //working data for factorisation
+    QDLDL_int   *iwork;
+    QDLDL_bool  *bwork;
+    QDLDL_float *fwork;
+
+    //Data for results of A\b
+    QDLDL_float *x;
+    QDLDL_float *x_work;
+
+    etree = (QDLDL_int*)malloc(sizeof(QDLDL_int)*An);
+    Lnz   = (QDLDL_int*)malloc(sizeof(QDLDL_int)*An);
+
+    Lp    = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(An+1));
+    D     = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
+    Dinv  = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
+
+    iwork = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(3*An));
+    bwork = (QDLDL_bool*)malloc(sizeof(QDLDL_bool)*An);
+    fwork = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
+
+    P = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(An));
+    Pinv = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(An));
+
+    c_int amd_status;
+#ifdef DLONG
+    amd_status = amd_l_order(An, adj->p, adj->i, P, (c_float *)OSQP_NULL, (c_float *)OSQP_NULL);
+#else
+    amd_status = amd_order(An, adj->p, adj->i, P, (c_float *)OSQP_NULL, (c_float *)OSQP_NULL);
+#endif
+    if (amd_status < 0) {
+        return amd_status;
+    }
+
+    // Inverse of the permutation vector
+    Pinv = csc_pinv(P, An);
+
+    csc *adj_permuted;
+    adj_permuted = csc_symperm(adj, Pinv, OSQP_NULL, 1);
+
+    sumLnz = QDLDL_etree(An, adj_permuted->p, adj_permuted->i, iwork, Lnz, etree);
+
+    Li    = (QDLDL_int*)malloc(sizeof(QDLDL_int)*sumLnz);
+    Lx    = (QDLDL_float*)malloc(sizeof(QDLDL_float)*sumLnz);
+
+    QDLDL_factor(An, adj_permuted->p, adj_permuted->i, adj_permuted->x, Lp, Li, Lx, D, Dinv, Lnz, etree, bwork, iwork, fwork);
+
+    x = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
+    x_work = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
+
+    //when solving A\b, start with x = b
+    for (i = 0 ; i < An ; i++) x_work[i] = rhs->values[P[i]];
+    QDLDL_solve(Ln, Lp, Li, Lx, Dinv, x_work);
+    for (i = 0 ; i < An ; i++) x[P[i]] = x_work[i];
+
+    OSQPVectorf *sol = OSQPVectorf_new(x, An);
+    OSQPVectorf *residual = OSQPVectorf_malloc(An);
+
+    c_int k;
+    for (k=0; k<200; k++) {
+        OSQPVectorf_copy(residual, rhs);
+        OSQPMatrix_Axpy(adj_matrix, sol, residual, 1, -1);
+        if (OSQPVectorf_norm_2(residual) < 1e-12) break;
+
+        for (i = 0 ; i < An ; i++) x_work[i] = residual->values[P[i]];
+        QDLDL_solve(Ln, Lp, Li, Lx, Dinv, x_work);
+        for (i = 0 ; i < An ; i++) residual->values[P[i]] = x_work[i];
+
+        OSQPVectorf_minus(sol, sol, residual);
+    }
+
+    OSQPVectorf_copy(rhs, sol);
+
+    c_free(Lp);
+    c_free(Li);
+    c_free(Lx);
+    c_free(D);
+    c_free(Dinv);
+    c_free(P);
+    c_free(Pinv);
+    c_free(etree);
+    c_free(Lnz);
+    c_free(iwork);
+    c_free(bwork);
+    c_free(fwork);
+    c_free(x);
+    c_free(x_work);
+
+    csc_spfree(adj_permuted);
+    OSQPMatrix_free(adj_matrix);
+    csc_spfree(adj);
+
+    OSQPVectorf_free(sol);
+    OSQPVectorf_free(residual);
+
+    return 0;
 }
 
 #endif

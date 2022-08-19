@@ -218,8 +218,9 @@ struct linsys_solver {
   void (*warm_start)(LinSysSolver      *self,
                      const OSQPVectorf *x);
 
-
 # ifndef EMBEDDED
+  c_int (*adjoint_derivative)(LinSysSolver *self);
+
   void (*free)(LinSysSolver *self);         ///< free linear system solver (only in desktop version)
 # endif // ifndef EMBEDDED
 

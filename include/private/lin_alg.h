@@ -50,6 +50,20 @@ c_int osqp_algebra_init_linsys_solver(LinSysSolver      **s,
                                       c_int               polishing);
 
 
+#ifdef OSQP_ALGEBRA_BUILTIN
+#ifndef EMBEDDED
+c_int adjoint_derivative_linsys_solver(LinSysSolver **s,
+                                       const OSQPSettings *settings,
+                                       const OSQPMatrix *P,
+                                       const OSQPMatrix *G,
+                                       const OSQPMatrix *A_eq,
+                                       OSQPMatrix *GDiagLambda,
+                                       OSQPVectorf *slacks,
+                                       OSQPVectorf *rhs);
+
+#endif
+#endif
+
 # ifdef __cplusplus
 }
 # endif

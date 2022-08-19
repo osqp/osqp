@@ -23,6 +23,10 @@ typedef struct OSQPVectorf_ OSQPVectorf;
 
 # ifndef EMBEDDED
 
+c_int OSQPVectorf_is_eq(const OSQPVectorf *A,
+                        const OSQPVectorf *B,
+                        c_float           tol);
+
 /* malloc/calloc for floats and ints (USES MALLOC/CALLOC) */
 OSQPVectorf* OSQPVectorf_malloc(c_int length);
 OSQPVectorf* OSQPVectorf_calloc(c_int length);
@@ -33,6 +37,10 @@ OSQPVectori* OSQPVectori_calloc(c_int length);
 OSQPVectorf* OSQPVectorf_new(const c_float *a,
                              c_int          length);
 
+/* Return an int vector using a raw array as input (Uses MALLOC) */
+OSQPVectori* OSQPVectori_new(const c_int *a,
+                             c_int          length);
+
 /* Return a copy of a float vector a as output (Uses MALLOC) */
 OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf *a);
 
@@ -41,6 +49,12 @@ void OSQPVectorf_free(OSQPVectorf *a);
 
 /* Free an int vector */
 void OSQPVectori_free(OSQPVectori *a);
+
+OSQPVectorf* OSQPVectorf_subvector_byrows(const OSQPVectorf  *A,
+                                          const OSQPVectori *rows);
+
+OSQPVectorf* OSQPVectorf_concat(const OSQPVectorf *A,
+                                const OSQPVectorf *B);
 
 /* Create subview of a larger vector.  Internal data should not be freed.
  * Behavior is otherwise identical to OSQPVectorf (Uses MALLOC)
@@ -111,6 +125,11 @@ void OSQPVectorf_minus(OSQPVectorf      *x,
                       const OSQPVectorf *a,
                       const OSQPVectorf *b);
 
+/* x = a * b (elementwise).  Set x == a for x *= b. */
+void OSQPVectorf_mult(OSQPVectorf       *x,
+                      const OSQPVectorf *a,
+                      const OSQPVectorf *b);
+
 /* x = sca*a + scb*b.  Set (x == a, sca==1.) for x += scb*b. */
 void OSQPVectorf_add_scaled(OSQPVectorf       *x,
                             c_float            sca,
@@ -137,6 +156,9 @@ c_float OSQPVectorf_scaled_norm_inf(const OSQPVectorf *S,
 /* ||a - b||_inf */
 c_float OSQPVectorf_norm_inf_diff(const OSQPVectorf *a,
                                   const OSQPVectorf *b);
+
+/* ||v||2 */
+c_float OSQPVectorf_norm_2(const OSQPVectorf *v);
 
 /* mean of vector elements */
 c_float OSQPVectorf_mean(const OSQPVectorf *a);
@@ -209,6 +231,11 @@ void OSQPVectorf_ew_sqrt(OSQPVectorf *a);
 
 /* Elementwise maximum between vectors c = max(a, b) */
 void OSQPVectorf_ew_max_vec(OSQPVectorf       *c,
+                            const OSQPVectorf *a,
+                            const OSQPVectorf *b);
+
+/* Elementwise minimum between vectors c = min(a, b) */
+void OSQPVectorf_ew_min_vec(OSQPVectorf       *c,
                             const OSQPVectorf *a,
                             const OSQPVectorf *b);
 

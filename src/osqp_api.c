@@ -17,6 +17,7 @@
 
 #ifndef EMBEDDED
 # include "polish.h"
+# include "derivative.h"
 #endif
 
 #ifdef OSQP_ENABLE_INTERRUPT
@@ -1236,3 +1237,33 @@ void csc_set_data(csc     *M,
   M->i     = i;
   M->p     = p;
 }
+
+/****************************
+* Derivative functions
+****************************/
+#ifndef EMBEDDED
+c_int osqp_adjoint_derivative(OSQPSolver *solver,
+                                       c_float    *dx,
+                                       c_float    *dy_l,
+                                       c_float    *dy_u,
+                                       csc* dP,
+                                       c_float *dq,
+                                       csc* dA,
+                                       c_float *dl,
+                                       c_float *du) {
+
+    c_int status = adjoint_derivative(
+            solver,
+            dx,
+            dy_l,
+            dy_u,
+            dP,
+            dq,
+            dA,
+            dl,
+            du
+    );
+
+    return status;
+}
+#endif
