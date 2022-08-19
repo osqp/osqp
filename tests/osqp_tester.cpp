@@ -21,11 +21,12 @@ extern "C" {
 #include "primal_infeasibility/test_primal_infeasibility.h"
 #include "unconstrained/test_unconstrained.h"
 #include "update_matrices/test_update_matrices.h"
+#include "basic_lp/test_basic_lp.h"
 
 
 TEST_CASE( "test_lin_alg", "[multi-file:1]" ) {
     osqp_algebra_init_libs(0);
-#ifndef ALGEBRA_CUDA
+#ifndef OSQP_ALGEBRA_CUDA
     SECTION( "test_constr_sparse_mat" ) {
         test_constr_sparse_mat();
     }
@@ -51,7 +52,7 @@ TEST_CASE( "test_solve_linsys", "[multi-file:2]" ) {
     SECTION( "test_solveKKT" ) {
         test_solveKKT();
     }
-#ifdef ALGEBRA_MKL
+#ifdef OSQP_ALGEBRA_MKL
     SECTION( "test_solveKKT_pardiso" ) {
         test_solveKKT_pardiso();
     }
@@ -71,7 +72,7 @@ TEST_CASE( "test_basic_qp", "[multi-file:4]" ) {
     SECTION( "test_basic_qp_solve" ) {
         test_basic_qp_solve();
     }
-#ifdef ALGEBRA_MKL
+#ifdef OSQP_ALGEBRA_MKL
         SECTION( "test_basic_qp_solve_pardiso" ) {
         test_basic_qp_solve_pardiso();
     }
@@ -100,7 +101,7 @@ TEST_CASE( "test_basic_qp2", "[multi-file:5]" ) {
     SECTION( "test_basic_qp2_solve" ) {
         test_basic_qp2_solve();
     }
-#ifdef ALGEBRA_MKL
+#ifdef OSQP_ALGEBRA_MKL
     SECTION( "test_basic_qp2_solve_pardiso" ) {
         test_basic_qp2_solve_pardiso();
     }
@@ -115,11 +116,6 @@ TEST_CASE( "test_non_cvx", "[multi-file:6]" ) {
     SECTION( "test_non_cvx_solve" ) {
         test_non_cvx_solve();
     }
-#ifdef OSQP_CODEGEN
-    SECTION( "test_non_cvx_codegen" ) {
-        test_non_cvx_codegen();
-    }
-#endif
 }
 
 
@@ -154,7 +150,7 @@ TEST_CASE( "test_unconstrained", "[multi-file:9]" ) {
 
 
 TEST_CASE( "test_update_matrices", "[multi-file:10]" ) {
-#ifndef ALGEBRA_CUDA
+#ifndef OSQP_ALGEBRA_CUDA
     SECTION( "test_form_KKT" ) {
         test_form_KKT();
     }
@@ -162,7 +158,7 @@ TEST_CASE( "test_update_matrices", "[multi-file:10]" ) {
     SECTION( "test_update" ) {
         test_update();
     }
-#ifdef ALGEBRA_MKL
+#ifdef OSQP_ALGEBRA_MKL
     SECTION( "test_update_pardiso" ) {
         test_update_pardiso();
     }
@@ -183,5 +179,19 @@ TEST_CASE( "test_codegen", "[multi-file:11]" ) {
     SECTION( "test_codegen_settings" ) {
         test_codegen_settings();
     }
+    SECTION( "test_codegen_data" ) {
+        test_codegen_data();
+    }
 }
 #endif
+
+TEST_CASE( "test_basic_lp", "[multi-file:12]" ) {
+    SECTION( "test_basic_lp_solve" ) {
+        test_basic_lp_solve();
+    }
+#ifdef OSQP_ALGEBRA_MKL
+        SECTION( "test_basic_lp_solve_pardiso" ) {
+        test_basic_lp_solve_pardiso();
+    }
+#endif
+}

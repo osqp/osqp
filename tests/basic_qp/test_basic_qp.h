@@ -475,7 +475,7 @@ void test_basic_qp_solve()
   c_free(P_tmp);
 }
 
-#ifdef ALGEBRA_MKL
+#ifdef OSQP_ALGEBRA_MKL
 void test_basic_qp_solve_pardiso()
 {
   c_int exitflag;

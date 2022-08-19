@@ -18,7 +18,7 @@ jobs:
 
         matrix:
           python-version: [3.9]
-          algebra: ['default', 'mkl']
+          algebra: ['builtin', 'mkl']
           float: ['OFF', 'ON']
           long: ['OFF', 'ON']
           exclude:
@@ -78,7 +78,7 @@ jobs:
                   -DOSQP_COVERAGE_CHECK=ON \
                   -DLONG=${{ matrix.long }} \
                   -DFLOAT=${{ matrix.float }} \
-                  -DALGEBRA=${{ matrix.algebra }}
+                  -DOSQP_ALGEBRA_BACKEND=${{ matrix.algebra }}
             cmake --build $OSQP_BUILD_DIR_PREFIX
 
 

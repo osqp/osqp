@@ -4,7 +4,7 @@
 #include "osqp_tester.h"
 #include "lin_alg/data.h"
 
-#ifndef ALGEBRA_CUDA
+#ifndef OSQP_ALGEBRA_CUDA
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,7 +43,7 @@ void test_constr_sparse_mat() {
   clean_problem_lin_alg_sols_data(data);
 }
 
-#endif /* ifndef ALGEBRA_CUDA */
+#endif /* ifndef OSQP_ALGEBRA_CUDA */
 
 void test_vec_operations() {
 
@@ -143,7 +143,7 @@ void test_mat_operations() {
   dA = OSQPMatrix_new_from_csc(data->test_mat_ops_A,0); //asymmetric
   d  = OSQPVectorf_new(data->test_mat_ops_d, data->test_mat_ops_n);
 
-#ifndef ALGEBRA_CUDA
+#ifndef OSQP_ALGEBRA_CUDA
 
   // Premultiply matrix A
   OSQPMatrix_lmult_diag(dA, d);
@@ -162,7 +162,7 @@ void test_mat_operations() {
     OSQPMatrix_is_eq(Ad, refM, TESTS_TOL));
   OSQPMatrix_free(refM);
 
-#endif /* ifndef ALGEBRA_CUDA */
+#endif /* ifndef OSQP_ALGEBRA_CUDA */
 
   // Maximum norm over columns
   resultv = OSQPVectorf_malloc(data->test_mat_ops_n);

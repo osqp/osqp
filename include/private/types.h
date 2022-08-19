@@ -4,7 +4,8 @@
 
 # include "glob_opts.h"
 # include "osqp.h"       //includes user API types
-# include "lin_alg.h"
+# include "algebra_matrix.h"
+# include "algebra_vector.h"
 
 /******************
 * Internal types *

@@ -3,7 +3,7 @@
 #include "algebra_vector.h"
 #include "version.h"
 #include "printing.h"
-
+#include "lin_alg.h"
 
 /************************************
 * Printing Constants to set Layout *
@@ -84,7 +84,7 @@ void print_setup_header(const OSQPSolver *solver) {
 
   // Print Settings
   c_print("settings: ");
-  c_print("algebra = %s", OSQP_ALGEBRA);
+  c_print("algebra = %s", osqp_algebra_name());
   c_print(",\n          ");
 
   c_print("linear system solver = %s", work->linsys_solver->name());
