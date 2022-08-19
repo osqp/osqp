@@ -75,9 +75,9 @@ cmake_dependent_option( OSQP_COVERAGE_CHECK
                         OFF    # Default to off
                         OSQP_BUILD_UNITTESTS OFF ) # Force off if the unit tests aren't built
 
-set(ALGEBRA
-    "default"
-    CACHE STRING "The Algebra to use (default/mkl/cuda)")
+set(OSQP_ALGEBRA_BACKEND
+    "builtin"
+    CACHE STRING "The Algebra to use (builtin/mkl/cuda)")
 
 option(OSQP_ENABLE_PRINTING "Enable solver printing" ON)
 option(OSQP_ENABLE_PROFILING "Enable solver profiling (timing)" ON)
@@ -89,27 +89,24 @@ set(OSQP_LIB_SUFFIX "" CACHE STRING "String to append to the library name")
 mark_as_advanced(OSQP_LIB_SUFFIX)
 
 # Set the relevant boolean values for the algebra
-if(${ALGEBRA} STREQUAL "default")
-  set(ALGEBRA_USER_STRING "builtin")
-  set(ALGEBRA_DEFAULT ON)
-elseif(${ALGEBRA} STREQUAL "mkl")
-  set(ALGEBRA_USER_STRING "mkl")
-  set(ALGEBRA_MKL ON)
-elseif(${ALGEBRA} STREQUAL "cuda")
-  set(ALGEBRA_USER_STRING "cuda")
-  set(ALGEBRA_CUDA ON)
+if(${OSQP_ALGEBRA_BACKEND} STREQUAL "builtin")
+  set(OSQP_ALGEBRA_BUILTIN ON)
+elseif(${OSQP_ALGEBRA_BACKEND} STREQUAL "mkl")
+  set(OSQP_ALGEBRA_MKL ON)
+elseif(${OSQP_ALGEBRA_BACKEND} STREQUAL "cuda")
+  set(OSQP_ALGEBRA_CUDA ON)
 endif()
 
 # Is the code generated for embedded platforms? 1 :   Yes. Matrix update not allowed. 2 :   No. Matrix update allowed.
 if(DEFINED EMBEDDED)
-  if(NOT ALGEBRA_DEFAULT)
-    message(WARNING "Forcing ALGEBRA=default for EMBEDDED mode.")
+  if(NOT OSQP_ALGEBRA_BUILTIN)
+    message(WARNING "Forcing OSQP_ALGEBRA_BACKEND=builtin for EMBEDDED mode.")
   endif()
 
-  set(ALGEBRA "default")
-  set(ALGEBRA_DEFAULT ON)
-  unset(ALGEBRA_CUDA)
-  unset(ALGEBRA_MKL)
+  set(OSQP_ALGEBRA_BACKEND "builtin")
+  set(OSQP_ALGEBRA_BUILTIN ON)
+  unset(OSQP_ALGEBRA_CUDA)
+  unset(OSQP_ALGEBRA_MKL)
 
   if(OSQP_ENABLE_PRINTING AND NOT OSQP_CUSTOM_PRINTING)
     message(WARNING "Disabling printing in EMBEDDED mode.")
@@ -139,8 +136,8 @@ else()
   message(STATUS "EMBEDDED = OFF")
 endif()
 
-# Display final ALGEBRA chosen
-message(STATUS "ALGEBRA = ${ALGEBRA}")
+# Display final algebra chosen
+message(STATUS "Algebra backend: ${OSQP_ALGEBRA_BACKEND}")
 
 # Display final profiling behaviour
 message(STATUS "Solver profiling: ${OSQP_ENABLE_PROFILING}")
@@ -148,7 +145,7 @@ message(STATUS "Solver profiling: ${OSQP_ENABLE_PROFILING}")
 # Display final interrupt behaviour
 message(STATUS "Solver interrupt: ${OSQP_ENABLE_INTERRUPT}")
 
-if(ALGEBRA_CUDA)
+if(OSQP_ALGEBRA_CUDA)
   # Some options have different defaults for the CUDA algebra
   option(DFLOAT "Use floats instead of doubles" ON)
   option(DLONG "Use long integers (64bit) for indexing" OFF)
@@ -157,7 +154,7 @@ else()
   option(DLONG "Use long integers (64bit) for indexing" ON)
 endif()
 
-if(DFLOAT AND ALGEBRA_MKL)
+if(DFLOAT AND OSQP_ALGEBRA_MKL)
   message(WARNING "Disabling DFLOAT for MKL (Intel RCI ISS does not support single-precision values yet.)")
   set(DFLOAT OFF)
 endif()
@@ -168,7 +165,7 @@ if(NOT (CMAKE_SIZEOF_VOID_P EQUAL 8))
   set(DLONG OFF)
 endif()
 
-if(ALGEBRA_CUDA AND DLONG)
+if(OSQP_ALGEBRA_CUDA AND DLONG)
   message(WARNING "Disabling long integers (64bit) for CUDA.")
   set(DLONG OFF)
 elseif(DEFINED EMBEDDED)
@@ -193,15 +190,13 @@ option(OSQP_ASAN "Enable ASAN" OFF)
 
 cmake_dependent_option( OSQP_CODEGEN "Enable code generation"
                         ON
-                        "ALGEBRA_DEFAULT;NOT DEFINED EMBEDDED" OFF )
+                        "OSQP_ALGEBRA_BUILTIN;NOT DEFINED EMBEDDED" OFF )
 
 message(STATUS "CODEGEN = ${OSQP_CODEGEN}")
 
 # Rename compile-time constants & configure
 # ----------------------------------------------
 # If we are creating any OSQP_* compile-time constants from CMake variables, do so here.
-set(OSQP_ALGEBRA ${ALGEBRA_USER_STRING})
-
 if(OSQP_ENABLE_PRINTING AND OSQP_CUSTOM_PRINTING)
   message(STATUS "Using custom printing header: ${OSQP_CUSTOM_PRINTING}")
 endif()
@@ -216,7 +211,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
 
 # CUDA support
 # ----------------------------------------------
-if(ALGEBRA_CUDA)
+if(OSQP_ALGEBRA_CUDA)
   enable_language(CUDA)
   find_package(CUDA)
 
@@ -401,7 +396,7 @@ if( OSQP_BUILD_STATIC_LIB )
   endif()
 
 
-  if(ALGEBRA_DEFAULT)
+  if(OSQP_ALGEBRA_BUILTIN)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
     target_sources(osqpstatic PRIVATE $<TARGET_OBJECTS:qdldlobject>)
   endif()
@@ -424,7 +419,7 @@ if(OSQP_BUILD_SHARED_LIB)
   add_library(osqp SHARED
               $<TARGET_OBJECTS:OSQPLIB>
               "${CMAKE_CURRENT_SOURCE_DIR}/src/osqp_api.c")
-  if(ALGEBRA_DEFAULT)
+  if(OSQP_ALGEBRA_BUILTIN)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
     target_sources(osqp PRIVATE $<TARGET_OBJECTS:qdldlobject>)
   endif()

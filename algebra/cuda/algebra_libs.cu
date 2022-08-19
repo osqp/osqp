@@ -19,6 +19,7 @@
 #include "osqp_api_types.h"
 #include "lin_alg.h"
 #include "cuda_handler.h"
+#include "cuda_pcg_interface.h"
 
 
 CUDA_Handle_t *CUDA_handle = OSQP_NULL;
@@ -48,4 +49,26 @@ void osqp_algebra_free_libs(void) {
 
   cuda_free_libs(CUDA_handle);
   CUDA_handle = OSQP_NULL;
+}
+
+const char* osqp_algebra_name(void) {
+  return "CUDA";
+}
+
+// Initialize linear system solver structure
+// NB: Only the upper triangular part of P is filled
+c_int osqp_algebra_init_linsys_solver(LinSysSolver      **s,
+                                      const OSQPMatrix   *P,
+                                      const OSQPMatrix   *A,
+                                      const OSQPVectorf  *rho_vec,
+                                      const OSQPSettings *settings,
+                                      c_float            *scaled_prim_res,
+                                      c_float            *scaled_dual_res,
+                                      c_int               polishing) {
+
+  switch (settings->linsys_solver) {
+  default:
+  case OSQP_INDIRECT_SOLVER:
+    return init_linsys_solver_cudapcg((cudapcg_solver **)s, P, A, rho_vec, settings, scaled_prim_res, scaled_dual_res, polishing);
+  }
 }

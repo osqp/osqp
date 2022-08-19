@@ -71,7 +71,7 @@ void test_basic_qp2_solve()
   clean_problem_basic_qp2_sols_data(sols_data);
 }
 
-#ifdef ALGEBRA_MKL
+#ifdef OSQP_ALGEBRA_MKL
 void test_basic_qp2_solve_pardiso()
 {
   c_int exitflag;
