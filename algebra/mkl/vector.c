@@ -4,6 +4,8 @@
 #include "stdio.h"
 #include "time.h"
 
+#include "algebra_memory.h"
+
 #include <mkl_blas.h>
 #ifdef DFLOAT
   #define blas_copy scopy
@@ -55,7 +57,7 @@ OSQPVectorf* OSQPVectorf_malloc(c_int length){
   if (b) {
     b->length = length;
     if (length) {
-      b->values = c_malloc(length * sizeof(c_float));
+      b->values = blas_malloc(length * sizeof(c_float));
       if (!(b->values)) {
         c_free(b);
         b = OSQP_NULL;
@@ -76,7 +78,7 @@ OSQPVectori* OSQPVectori_malloc(c_int length){
   if (b) {
     b->length = length;
     if (length) {
-      b->values = c_malloc(length * sizeof(c_int));
+      b->values = blas_malloc(length * sizeof(c_int));
       if (!(b->values)) {
         c_free(b);
         b = OSQP_NULL;
@@ -96,7 +98,7 @@ OSQPVectorf* OSQPVectorf_calloc(c_int length){
   if (b) {
     b->length = length;
     if (length) {
-      b->values = c_calloc(length, sizeof(c_float));
+      b->values = blas_calloc(length, sizeof(c_float));
       if (!(b->values)) {
         c_free(b);
         b = OSQP_NULL;
@@ -116,7 +118,7 @@ OSQPVectori* OSQPVectori_calloc(c_int length){
   if (b) {
     b->length = length;
     if (length) {
-      b->values = c_calloc(length, sizeof(c_int));
+      b->values = blas_calloc(length, sizeof(c_int));
       if (!(b->values)) {
         c_free(b);
         b = OSQP_NULL;
@@ -138,12 +140,12 @@ OSQPVectorf* OSQPVectorf_copy_new(const OSQPVectorf *a){
 }
 
 void OSQPVectorf_free(OSQPVectorf *a){
-  if (a) c_free(a->values);
+  if (a) blas_free(a->values);
   c_free(a);
 }
 
 void OSQPVectori_free(OSQPVectori *a){
-  if (a) c_free(a->values);
+  if (a) blas_free(a->values);
   c_free(a);
 }
 

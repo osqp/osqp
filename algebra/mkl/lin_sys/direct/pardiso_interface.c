@@ -6,10 +6,6 @@
 #include "kkt.h"
 #endif
 
-#define MKL_INT c_int
-//#define MKL_INTERFACE_LP64  0x0
-//#define MKL_INTERFACE_ILP64 0x1
-
 #include "mkl_service.h"
 #include "mkl_pardiso.h"
 

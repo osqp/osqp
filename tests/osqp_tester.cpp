@@ -40,6 +40,9 @@ TEST_CASE( "test_lin_alg", "[multi-file:1]" ) {
     SECTION( "test_mat_vec_multiplication" ) {
         test_mat_vec_multiplication();
     }
+    SECTION( "test_empty_mat_vec" ) {
+        test_empty_mat_vec();
+    }
     // SECTION( "test_quad_form_upper_triang" ) {
     //     test_quad_form_upper_triang();
     // }

@@ -33,6 +33,9 @@ c_int OSQPMatrix_is_eq(const OSQPMatrix *A,
 OSQPMatrix* OSQPMatrix_new_from_csc(const csc *A,
                                     c_int      is_triu);
 
+/* Return a copy of the matrix in CSC format */
+csc* OSQPMatrix_get_csc(const OSQPMatrix *M);
+
 /* Return a copy of a matrix as output (Uses MALLOC) */
 OSQPMatrix* OSQPMatrix_copy_new(const OSQPMatrix *A);
 
@@ -75,7 +78,6 @@ c_int*   OSQPMatrix_get_p(const OSQPMatrix *M);
 
 /* returns the number of nonzeros (length of x and i arrays) */
 c_int    OSQPMatrix_get_nz(const OSQPMatrix *M);
-
 
 /* math functions ----------------------------------------------------------*/
 

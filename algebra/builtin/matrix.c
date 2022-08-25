@@ -43,6 +43,8 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const csc *A,
   }
 }
 
+csc* OSQPMatrix_get_csc(const OSQPMatrix *M) {return csc_copy(M->csc);}
+
 // Make of a copy of a matrix
 OSQPMatrix* OSQPMatrix_copy_new(const OSQPMatrix *A) {
     OSQPMatrix* out = c_malloc(sizeof(OSQPMatrix));
@@ -120,7 +122,6 @@ c_float* OSQPMatrix_get_x(const OSQPMatrix *M){return M->csc->x;}
 c_int*   OSQPMatrix_get_i(const OSQPMatrix *M){return M->csc->i;}
 c_int*   OSQPMatrix_get_p(const OSQPMatrix *M){return M->csc->p;}
 c_int    OSQPMatrix_get_nz(const OSQPMatrix *M){return M->csc->p[M->csc->n];}
-
 
 /* math functions ----------------------------------------------------------*/
 
