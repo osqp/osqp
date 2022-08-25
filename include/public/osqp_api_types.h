@@ -9,11 +9,11 @@
 ******************************/
 
 /* OSQP custom float definitions */
-# ifdef DLONG            // long integers
+# ifdef OSQP_USE_LONG            // long integers
 typedef long long c_int; /* for indices */
 # else // standard integers
 typedef int c_int;       /* for indices */
-# endif /* ifdef DLONG */
+# endif /* ifdef OSQP_USE_LONG */
 
 
 # ifndef OSQP_USE_FLOAT         // Doubles

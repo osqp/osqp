@@ -140,7 +140,7 @@ static c_int permute_KKT(OSQPCscMatrix** KKT,
     info = (c_float *)c_malloc(AMD_INFO * sizeof(c_float));
 
     // Compute permutation matrix P using AMD
-#ifdef DLONG
+#ifdef OSQP_USE_LONG
     amd_status = amd_l_order((*KKT)->n, (*KKT)->p, (*KKT)->i, p->P, (c_float *)OSQP_NULL, info);
 #else
     amd_status = amd_order((*KKT)->n, (*KKT)->p, (*KKT)->i, p->P, (c_float *)OSQP_NULL, info);
@@ -739,7 +739,7 @@ c_int adjoint_derivative_qdldl(qdldl_solver*      s,
     Pinv = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(An));
 
     c_int amd_status;
-#ifdef DLONG
+#ifdef OSQP_USE_LONG
     amd_status = amd_l_order(An, adj->p, adj->i, P, (c_float *)OSQP_NULL, (c_float *)OSQP_NULL);
 #else
     amd_status = amd_order(An, adj->p, adj->i, P, (c_float *)OSQP_NULL, (c_float *)OSQP_NULL);

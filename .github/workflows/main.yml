@@ -94,7 +94,7 @@ jobs:
                   -DOSQP_ALGEBRA_BACKEND='builtin' \
                   -DOSQP_BUILD_UNITTESTS=ON \
                   -DOSQP_COVERAGE_CHECK=OFF \
-                  -DLONG=${{ matrix.long }} \
+                  -DOSQP_USE_LONG=${{ matrix.long }} \
                   -DOSQP_USE_FLOAT=${{ matrix.float }} \
                   -DOSQP_ENABLE_PROFILING=${{ matrix.profiling }} \
                   -DOSQP_ENABLE_INTERRUPT=${{ matrix.interrupt }} \

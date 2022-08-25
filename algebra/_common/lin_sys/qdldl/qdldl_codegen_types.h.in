@@ -22,7 +22,7 @@ typedef c_float  QDLDL_float; /* for numerical values  */
 typedef int   QDLDL_bool;
 
 /* Maximum value of the signed type QDLDL_int. */
-#ifdef DLONG
+#ifdef OSQP_USE_LONG
 #define QDLDL_INT_MAX LLONG_MAX
 #else
 #define QDLDL_INT_MAX INT_MAX

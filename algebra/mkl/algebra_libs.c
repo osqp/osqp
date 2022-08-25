@@ -20,7 +20,7 @@ enum osqp_linsys_solver_type osqp_algebra_default_linsys(void) {
 c_int osqp_algebra_init_libs(c_int device) {
     c_int retval = 0;
 
-#ifdef DLONG
+#ifdef OSQP_USE_LONG
     retval = mkl_set_interface_layer(MKL_INTERFACE_ILP64);
 #else
     retval = mkl_set_interface_layer(MKL_INTERFACE_LP64);

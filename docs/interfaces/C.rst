@@ -51,7 +51,7 @@ Data types
 
 The most basic used datatypes are
 
-* :code:`c_int`: can be :code:`long` or :code:`int` if the compiler flag :code:`DLONG` is set or not
+* :code:`c_int`: can be :code:`long` or :code:`int` if the compiler flag :code:`OSQP_USE_LONG` is set or not
 * :code:`c_float`: can be a :code:`float` or a :code:`double` if the compiler flag :code:`OSQP_USE_FLOAT` is set or not.
 
 

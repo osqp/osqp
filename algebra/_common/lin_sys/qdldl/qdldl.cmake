@@ -16,7 +16,7 @@ if(NOT qdldl_POPULATED)
 
   # Make QDLDL use the same types as OSQP
   set(QDLDL_FLOAT ${OSQP_USE_FLOAT} CACHE BOOL "QDLDL Float type")
-  set(QDLDL_LONG ${DLONG} CACHE BOOL "QDLDL Integer type")
+  set(QDLDL_LONG ${OSQP_USE_LONG} CACHE BOOL "QDLDL Integer type")
 
   # We only want the object library, so turn off the other library products
   set(QDLDL_BUILD_STATIC_LIB OFF CACHE BOOL "Build QDLDL static library")

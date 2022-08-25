@@ -39,7 +39,7 @@
 /* OSQP_USE_FLOAT */
 #cmakedefine OSQP_USE_FLOAT
 
-/* DLONG */
-#cmakedefine DLONG
+/* OSQP_USE_LONG */
+#cmakedefine OSQP_USE_LONG
 
 #endif /* ifndef OSQP_CONFIGURE_H */
