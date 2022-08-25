@@ -8,7 +8,7 @@
 
 set(TEMP_CMAKE_FIND_APPBUNDLE ${CMAKE_FIND_APPBUNDLE})
 set(CMAKE_FIND_APPBUNDLE "NEVER")
-find_program(R_EXEC NAMES R R.exe)
+find_program(R_EXEC NAMES R Rdev R.exe HINTS ENV R_HOME /opt/R-devel PATH_SUFFIXES bin)
 set(CMAKE_FIND_APPBUNDLE ${TEMP_CMAKE_FIND_APPBUNDLE})
 
 #---Find includes and libraries if R exists
