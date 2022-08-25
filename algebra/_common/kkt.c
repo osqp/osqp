@@ -36,10 +36,10 @@ static void _kkt_shifts_param2(OSQPCscMatrix* KKT,
   }
 }
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 //the remainder of the private functions here are for KKT
-//assembly ONLY, so don't included them when EMBEDDED
+//assembly ONLY, so don't included them when OSQP_EMBEDDED_MODE
 
 //increment the K colptr by the number of nonzeros
 //in a square diagonal matrix placed on the diagonal.
@@ -345,10 +345,10 @@ OSQPCscMatrix* form_KKT(OSQPCscMatrix* P,
   return KKT;
 }
 
-#endif /* ifndef EMBEDDED */
+#endif /* ifndef OSQP_EMBEDDED_MODE */
 
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
 
 void update_KKT_P(OSQPCscMatrix* KKT,
                   OSQPCscMatrix* P,
@@ -426,4 +426,4 @@ void update_KKT_param2(OSQPCscMatrix* KKT,
   }
 }
 
-#endif // EMBEDDED != 1
+#endif // OSQP_EMBEDDED_MODE != 1

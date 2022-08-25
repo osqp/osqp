@@ -5,11 +5,11 @@
 #include "qdldl.h"
 #include "qdldl_interface.h"
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 #include "amd.h"
 #endif
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
 #include "kkt.h"
 #endif
 
@@ -28,7 +28,7 @@ void warm_start_linsys_solver_qdldl(qdldl_solver      *s,
   return;
 }
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 // Free LDL Factorization structure
 void free_linsys_solver_qdldl(qdldl_solver *s) {
@@ -242,11 +242,11 @@ c_int init_linsys_solver_qdldl(qdldl_solver**      sp,
     s->adjoint_derivative = &adjoint_derivative_qdldl;
 
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
     s->free = &free_linsys_solver_qdldl;
 #endif
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
     s->update_matrices = &update_linsys_solver_matrices_qdldl;
     s->update_rho_vec  = &update_linsys_solver_rho_vec_qdldl;
 #endif
@@ -369,7 +369,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver**      sp,
     return 0;
 }
 
-#endif  // EMBEDDED
+#endif  // OSQP_EMBEDDED_MODE
 
 const char* name_qdldl() {
   return "QDLDL v" STRINGIZE(QDLDL_VERSION_MAJOR) "." STRINGIZE(QDLDL_VERSION_MINOR) "." STRINGIZE(QDLDL_VERSION_PATCH);
@@ -406,7 +406,7 @@ c_int solve_linsys_qdldl(qdldl_solver *s,
   c_int m = s->m;
   c_float* bv = b->values;
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
   if (s->polishing) {
     /* stores solution to the KKT system in b */
     LDLSolve(bv, bv, s->L, s->Dinv, s->P, s->bp);
@@ -431,14 +431,14 @@ c_int solve_linsys_qdldl(qdldl_solver *s,
         bv[j + n] += s->rho_inv * s->sol[j + n];
       }
     }
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
   }
 #endif
   return 0;
 }
 
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
 
 // Update private structure with new P and A
 c_int update_linsys_solver_matrices_qdldl(qdldl_solver*     s,
@@ -496,7 +496,7 @@ c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver*      s,
 
 #endif
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 // --------- Derivative functions -------- //
 

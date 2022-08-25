@@ -15,7 +15,7 @@
   #include "codegen.h"
 #endif
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 # include "polish.h"
 # include "derivative.h"
 #endif
@@ -33,7 +33,7 @@ c_int osqp_capabilities(void) {
 
   capabilities |= osqp_algebra_linsys_supported();
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
   capabilities |= OSQP_CAPABILITIY_UPDATE_MATRICES;
 #endif
 
@@ -111,7 +111,7 @@ void osqp_set_default_settings(OSQPSettings *settings) {
   settings->polish_refine_iter = OSQP_POLISH_REFINE_ITER;     /* iterative refinement steps in polish */
 }
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 
 c_int osqp_setup(OSQPSolver**         solverp,
@@ -359,7 +359,7 @@ c_int osqp_setup(OSQPSolver**         solverp,
   return 0;
 }
 
-#endif /* ifndef EMBEDDED */
+#endif /* ifndef OSQP_EMBEDDED_MODE */
 
 
 c_int osqp_solve(OSQPSolver *solver) {
@@ -525,7 +525,7 @@ c_int osqp_solve(OSQPSolver *solver) {
 #endif /* ifdef OSQP_ENABLE_PRINTING */
 
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
 # ifdef OSQP_ENABLE_PROFILING
 
     // If adaptive rho with automatic interval, check if the solve time is a
@@ -600,7 +600,7 @@ c_int osqp_solve(OSQPSolver *solver) {
         goto exit;
       }
     }
-#endif // EMBEDDED != 1
+#endif // OSQP_EMBEDDED_MODE != 1
 
   }        // End of ADMM for loop
 
@@ -664,10 +664,10 @@ c_int osqp_solve(OSQPSolver *solver) {
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
   /* Update rho estimate */
   solver->info->rho_estimate = compute_rho_estimate(solver);
-#endif /* if EMBEDDED != 1 */
+#endif /* if OSQP_EMBEDDED_MODE != 1 */
 
   /* Update solve time */
 #ifdef OSQP_ENABLE_PROFILING
@@ -675,11 +675,11 @@ c_int osqp_solve(OSQPSolver *solver) {
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
   // Polish the obtained solution
   if (solver->settings->polishing && (solver->info->status_val == OSQP_SOLVED))
     polish(solver);
-#endif /* ifndef EMBEDDED */
+#endif /* ifndef OSQP_EMBEDDED_MODE */
 
 #ifdef OSQP_ENABLE_PROFILING
   /* Update total time */
@@ -715,9 +715,9 @@ c_int osqp_solve(OSQPSolver *solver) {
 
 
 // Define exit flag for quitting function
-#if defined(OSQP_ENABLE_PROFILING) || defined(OSQP_ENABLE_INTERRUPT) || EMBEDDED != 1
+#if defined(OSQP_ENABLE_PROFILING) || defined(OSQP_ENABLE_INTERRUPT) || OSQP_EMBEDDED_MODE != 1
 exit:
-#endif /* if defined(OSQP_ENABLE_PROFILING) || defined(OSQP_ENABLE_INTERRUPT) || EMBEDDED != 1 */
+#endif /* if defined(OSQP_ENABLE_PROFILING) || defined(OSQP_ENABLE_INTERRUPT) || OSQP_EMBEDDED_MODE != 1 */
 
 #ifdef OSQP_ENABLE_INTERRUPT
   // Restore previous signal handler
@@ -728,7 +728,7 @@ exit:
 }
 
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 c_int osqp_cleanup(OSQPSolver *solver) {
 
@@ -774,7 +774,7 @@ c_int osqp_cleanup(OSQPSolver *solver) {
       }
     }
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
     // Free active constraints structure
     if (work->pol) {
       OSQPVectori_free(work->pol->active_flags);
@@ -783,12 +783,12 @@ c_int osqp_cleanup(OSQPSolver *solver) {
       OSQPVectorf_free(work->pol->y);
       c_free(work->pol);
     }
-#endif /* ifndef EMBEDDED */
+#endif /* ifndef OSQP_EMBEDDED_MODE */
 
     // Free other Variables
     OSQPVectorf_free(work->rho_vec);
     OSQPVectorf_free(work->rho_inv_vec);
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
     OSQPVectori_free(work->constr_type);
 #endif
     OSQPVectorf_free(work->x);
@@ -838,7 +838,7 @@ c_int osqp_cleanup(OSQPSolver *solver) {
   return exitflag;
 }
 
-#endif /* ifndef EMBEDDED */
+#endif /* ifndef OSQP_EMBEDDED_MODE */
 
 
 
@@ -894,10 +894,10 @@ c_int osqp_update_data_vec(OSQPSolver    *solver,
       if (l_new) swap_vectors(&work->z_prev,  &work->data->l);
       if (u_new) swap_vectors(&work->delta_y, &work->data->u);
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
       /* Update rho_vec and refactor if constraints type changes */
       if (solver->settings->rho_is_vec) exitflag = update_rho_vec(solver);
-#endif /* #if EMBEDDED != 1 */
+#endif /* #if OSQP_EMBEDDED_MODE != 1 */
   }
 
   /* Update linear cost vector */
@@ -967,7 +967,7 @@ void osqp_cold_start(OSQPSolver *solver) {
 }
 
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
 
 c_int osqp_update_data_mat(OSQPSolver    *solver,
                            const c_float *Px_new,
@@ -1116,7 +1116,7 @@ c_int osqp_update_rho(OSQPSolver *solver,
   return exitflag;
 }
 
-#endif // EMBEDDED != 1
+#endif // OSQP_EMBEDDED_MODE != 1
 
 
 
@@ -1241,7 +1241,7 @@ void csc_set_data(OSQPCscMatrix* M,
 /****************************
 * Derivative functions
 ****************************/
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 c_int osqp_adjoint_derivative(OSQPSolver*    solver,
                               c_float*       dx,
                               c_float*       dy_l,

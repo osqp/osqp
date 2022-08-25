@@ -21,7 +21,7 @@ typedef struct OSQPVectorf_ OSQPVectorf;
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 
-# ifndef EMBEDDED
+# ifndef OSQP_EMBEDDED_MODE
 
 c_int OSQPVectorf_is_eq(const OSQPVectorf *A,
                         const OSQPVectorf *B,
@@ -71,7 +71,7 @@ void OSQPVectorf_view_update(OSQPVectorf *a, const OSQPVectorf *b, c_int head, c
 /* Free a view of a float vector */
 void OSQPVectorf_view_free(OSQPVectorf *a);
 
-# endif /* ifndef EMBEDDED */
+# endif /* ifndef OSQP_EMBEDDED_MODE */
 
 
 /* Length of the vector (floats) */
@@ -217,7 +217,7 @@ c_int OSQPVectorf_in_reccone(const OSQPVectorf *y,
                              c_float            infval,
                              c_float            tol);
 
-# if EMBEDDED != 1
+# if OSQP_EMBEDDED_MODE != 1
 
 /* Vector mean value*/
 c_float OSQPVectorf_mean(const OSQPVectorf *a);
@@ -269,7 +269,7 @@ void OSQPVectorf_set_scalar_if_gt(OSQPVectorf       *x,
                                   c_float            testval,
                                   c_float            newval);
 
-# endif /* if EMBEDDED != 1 */
+# endif /* if OSQP_EMBEDDED_MODE != 1 */
 
 
 # ifdef __cplusplus

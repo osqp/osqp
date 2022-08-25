@@ -5,7 +5,7 @@
 #include "printing.h"
 
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 #include "csc_utils.h"
 
@@ -104,7 +104,7 @@ OSQPMatrix* OSQPMatrix_vstack(const OSQPMatrix* A, const OSQPMatrix* B) {
     }
 }
 
-#endif //EMBEDDED
+#endif //OSQP_EMBEDDED_MODE
 
 /*  direct data access functions ---------------------------------------------*/
 
@@ -177,7 +177,7 @@ void OSQPMatrix_Atxpy(const OSQPMatrix*  A,
 //    }
 // }
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
 
 void OSQPMatrix_col_norm_inf(const OSQPMatrix*  M,
                                    OSQPVectorf* E) {
@@ -190,9 +190,9 @@ void OSQPMatrix_row_norm_inf(const OSQPMatrix*  M,
    else                    csc_row_norm_inf_sym_triu(M->csc, OSQPVectorf_data(E));
 }
 
-#endif // endef EMBEDDED
+#endif // endef OSQP_EMBEDDED_MODE
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 void OSQPMatrix_free(OSQPMatrix* M){
   if (M) csc_spfree(M->csc);
@@ -230,4 +230,4 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix*  A,
 
 }
 
-#endif /* if EMBEDDED != 1 */
+#endif /* if OSQP_EMBEDDED_MODE != 1 */

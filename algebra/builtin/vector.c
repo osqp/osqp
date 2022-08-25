@@ -4,7 +4,7 @@
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 c_int OSQPVectorf_is_eq(const OSQPVectorf *A,
                         const OSQPVectorf *B,
@@ -222,7 +222,7 @@ c_float OSQPVectorf_norm_2(const OSQPVectorf *v){
     return c_sqrt(normval);
 }
 
-#endif /* ifndef EMBEDDED */
+#endif /* ifndef OSQP_EMBEDDED_MODE */
 
 c_int OSQPVectorf_length(const OSQPVectorf *a){return a->length;}
 // c_int OSQPVectori_length(const OSQPVectori *a){return a->length;}
@@ -748,7 +748,7 @@ c_int OSQPVectorf_in_reccone(const OSQPVectorf *y,
 
 
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
 
 c_float OSQPVectorf_mean(const OSQPVectorf *a){
 
@@ -910,4 +910,4 @@ void OSQPVectorf_set_scalar_if_gt(OSQPVectorf       *x,
   }
 }
 
-#endif /* EMBEDDED != 1 */
+#endif /* OSQP_EMBEDDED_MODE != 1 */

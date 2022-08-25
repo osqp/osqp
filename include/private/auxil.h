@@ -6,7 +6,7 @@
 /***********************************************************
 * Auxiliary functions needed to evaluate ADMM iterations * *
 ***********************************************************/
-# if EMBEDDED != 1
+# if OSQP_EMBEDDED_MODE != 1
 
 /**
  * Compute rho estimate from residuals
@@ -39,7 +39,7 @@ c_int set_rho_vec(OSQPSolver *solver);
  */
 c_int update_rho_vec(OSQPSolver *solver);
 
-# endif // EMBEDDED
+# endif // OSQP_EMBEDDED_MODE
 
 /**
  * Swap c_float vector pointers
@@ -146,7 +146,7 @@ c_int check_termination(OSQPSolver *solver,
                         c_int       approximate);
 
 
-# ifndef EMBEDDED
+# ifndef OSQP_EMBEDDED_MODE
 
 /**
  * Validate problem data
@@ -167,7 +167,7 @@ c_int validate_data(const OSQPCscMatrix* P,
                           c_int          m,
                           c_int          n);
 
-# endif /* ifndef EMBEDDED */
+# endif /* ifndef OSQP_EMBEDDED_MODE */
 
 
 /**

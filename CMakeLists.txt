@@ -98,9 +98,9 @@ elseif(${OSQP_ALGEBRA_BACKEND} STREQUAL "cuda")
 endif()
 
 # Is the code generated for embedded platforms? 1 :   Yes. Matrix update not allowed. 2 :   No. Matrix update allowed.
-if(DEFINED EMBEDDED)
+if(DEFINED OSQP_EMBEDDED_MODE)
   if(NOT OSQP_ALGEBRA_BUILTIN)
-    message(WARNING "Forcing OSQP_ALGEBRA_BACKEND=builtin for EMBEDDED mode.")
+    message(WARNING "Forcing OSQP_ALGEBRA_BACKEND=builtin for OSQP_EMBEDDED_MODE mode.")
   endif()
 
   set(OSQP_ALGEBRA_BACKEND "builtin")
@@ -109,31 +109,37 @@ if(DEFINED EMBEDDED)
   unset(OSQP_ALGEBRA_MKL)
 
   if(OSQP_ENABLE_PRINTING AND NOT OSQP_CUSTOM_PRINTING)
-    message(WARNING "Disabling printing in EMBEDDED mode.")
+    message(WARNING "Disabling printing in OSQP_EMBEDDED_MODE mode.")
     set(OSQP_ENABLE_PRINTING OFF)
   endif()
 
   if(OSQP_ENABLE_INTERRUPT AND NOT OSQP_CUSTOM_INTERRUPT)
-    message(WARNING "Disabling interrupts in EMBEDDED mode.")
+    message(WARNING "Disabling interrupts in OSQP_EMBEDDED_MODE mode.")
     set(OSQP_ENABLE_INTERRUPT OFF)
   endif()
 
   if(OSQP_ENABLE_PROFILING AND NOT OSQP_CUSTOM_TIMING)
-    message(WARNING "Disabling profiling (timing) for EMBEDDED mode.")
+    message(WARNING "Disabling profiling (timing) for OSQP_EMBEDDED_MODE mode.")
     set(OSQP_ENABLE_PROFILING OFF)
   endif()
 
   # Disable shared library and demo exe on embedded applications
   if(${OSQP_BUILD_SHARED_LIB} OR ${OSQP_BUILD_DEMO_EXE})
-    message(WARNING "Disabling shared library and demo executable for EMBEDDED mode.")
+    message(WARNING "Disabling shared library and demo executable for OSQP_EMBEDDED_MODE mode.")
   endif()
 
   set(OSQP_BUILD_SHARED_LIB OFF)
   set(OSQP_BUILD_DEMO_EXE OFF)
 
-  message(STATUS "EMBEDDED = ${EMBEDDED}")
+  if(OSQP_EMBEDDED_MODE EQUAL 1)
+    message(STATUS "Embedded mode: Vector updates")
+  elseif(OSQP_EMBEDDED_MODE EQUAL 2)
+    message(STATUS "Embedded mode: Matrix updates")
+  else()
+    error("Unknown OSQP_EMBEDDED_MODE mode: ${OSQP_EMBEDDED_MODE}")
+  endif()
 else()
-  message(STATUS "EMBEDDED = OFF")
+  message(STATUS "Embedded mode: OFF")
 endif()
 
 # Display final algebra chosen
@@ -173,7 +179,7 @@ endif()
 if(OSQP_ALGEBRA_CUDA AND OSQP_USE_LONG)
   message(WARNING "Disabling long integers (64bit) for CUDA.")
   set(OSQP_USE_LONG OFF)
-elseif(DEFINED EMBEDDED)
+elseif(DEFINED OSQP_EMBEDDED_MODE)
   # The long long type is not in the C89 spec, and our embedded code must be C89 compliant
   message(STATUS "Disabling long integers (64bit) for embedded mode")
   set(OSQP_USE_LONG OFF)
@@ -200,7 +206,7 @@ option(OSQP_ASAN "Enable ASAN" OFF)
 
 cmake_dependent_option( OSQP_CODEGEN "Enable code generation"
                         ON
-                        "OSQP_ALGEBRA_BUILTIN;NOT DEFINED EMBEDDED" OFF )
+                        "OSQP_ALGEBRA_BUILTIN;NOT DEFINED OSQP_EMBEDDED_MODE" OFF )
 
 message(STATUS "CODEGEN = ${OSQP_CODEGEN}")
 

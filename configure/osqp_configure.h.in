@@ -18,8 +18,8 @@
 /* OSQP_CODEGEN */
 #cmakedefine OSQP_CODEGEN
 
-/* EMBEDDED */
-#cmakedefine EMBEDDED (@EMBEDDED@)
+/* OSQP_EMBEDDED_MODE */
+#cmakedefine OSQP_EMBEDDED_MODE (@OSQP_EMBEDDED_MODE@)
 
 /* Header file containing custom memory allocators */
 #cmakedefine OSQP_CUSTOM_MEMORY "@OSQP_CUSTOM_MEMORY@"

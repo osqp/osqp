@@ -30,14 +30,14 @@ struct qdldl {
     void (*warm_start)(struct qdldl      *self,
                        const OSQPVectorf *x);
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
     c_int (*adjoint_derivative)(struct qdldl *self);
 
     void (*free)(struct qdldl *self); ///< Free workspace (only if desktop)
 #endif
 
     // This used only in non embedded or embedded 2 version
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
     c_int (*update_matrices)(struct qdldl     *self,
                              const OSQPMatrix *P,
                              const c_int* Px_new_idx,
@@ -67,14 +67,14 @@ struct qdldl {
     c_float*       rho_inv_vec;   ///< parameter vector
     c_float        sigma;         ///< scalar parameter
     c_float        rho_inv;       ///< scalar parameter (used if rho_inv_vec == NULL)
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
     c_int polishing;        ///< polishing flag
 #endif
     c_int n;                ///< number of QP variables
     c_int m;                ///< number of QP constraints
 
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
     // These are required for matrix updates
     OSQPCscMatrix* KKT;           ///< Permuted KKT matrix in sparse form (used to update P and A matrices)
     c_int*         PtoKKT;        ///< Index of elements from P to KKT matrix
@@ -138,7 +138,7 @@ void warm_start_linsys_solver_qdldl(qdldl_solver*      s,
                                     const OSQPVectorf* x);
 
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
 /**
  * Update linear system solver matrices
  * @param  s          Linear system solver structure
@@ -173,7 +173,7 @@ c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver*      s,
 
 #endif
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 /**
  * Free linear system solver
  * @param s linear system solver object

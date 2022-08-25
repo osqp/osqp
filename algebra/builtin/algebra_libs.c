@@ -20,7 +20,7 @@ const char* osqp_algebra_name(void) {
   return "Built-in";
 }
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 // Initialize linear system solver structure
 // NB: Only the upper triangular part of P is filled

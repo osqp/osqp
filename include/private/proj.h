@@ -42,7 +42,7 @@ c_int test_in_reccone(const OSQPVectorf *y,
                       c_float            infval,
                       c_float            tol);
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 /**
  * Ensure z is in C = [l,u] and y is in the normal cone of C at z
@@ -56,7 +56,7 @@ void project_normalcone(OSQPVectorf       *z,
                         const OSQPVectorf *l,
                         const OSQPVectorf *u);
 
-# endif /* ifndef EMBEDDED */
+# endif /* ifndef OSQP_EMBEDDED_MODE */
 
 
 #endif /* ifndef PROJ_H */

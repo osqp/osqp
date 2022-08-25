@@ -51,7 +51,7 @@ c_int osqp_algebra_init_linsys_solver(LinSysSolver      **s,
 
 
 #ifdef OSQP_ALGEBRA_BUILTIN
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 c_int adjoint_derivative_linsys_solver(LinSysSolver **s,
                                        const OSQPSettings *settings,
                                        const OSQPMatrix *P,

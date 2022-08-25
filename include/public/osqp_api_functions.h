@@ -57,7 +57,7 @@ OSQP_API void osqp_get_dimensions(OSQPSolver* solver,
 OSQP_API void osqp_set_default_settings(OSQPSettings* settings);
 
 
-# ifndef EMBEDDED
+# ifndef OSQP_EMBEDDED_MODE
 
 /**
  * Initialize OSQP solver allocating memory.
@@ -93,7 +93,7 @@ OSQP_API c_int osqp_setup(OSQPSolver**         solverp,
                           c_int                n,
                           const OSQPSettings*  settings);
 
-# endif /* ifndef EMBEDDED */
+# endif /* ifndef OSQP_EMBEDDED_MODE */
 
 /**
  * Solve quadratic program
@@ -114,7 +114,7 @@ OSQP_API c_int osqp_setup(OSQPSolver**         solverp,
 OSQP_API c_int osqp_solve(OSQPSolver* solver);
 
 
-# ifndef EMBEDDED
+# ifndef OSQP_EMBEDDED_MODE
 
 /**
  * Cleanup workspace by deallocating memory
@@ -125,7 +125,7 @@ OSQP_API c_int osqp_solve(OSQPSolver* solver);
  */
 OSQP_API c_int osqp_cleanup(OSQPSolver* solver);
 
-# endif /* ifndef EMBEDDED */
+# endif /* ifndef OSQP_EMBEDDED_MODE */
 
 
 /** @} */
@@ -173,7 +173,7 @@ OSQP_API c_int osqp_update_data_vec(OSQPSolver*    solver,
                                     const c_float* l_new,
                                     const c_float* u_new);
 
-# if EMBEDDED != 1
+# if OSQP_EMBEDDED_MODE != 1
 
 /**
  * Update elements of matrices P (upper triangular) and A by preserving
@@ -203,7 +203,7 @@ OSQP_API c_int osqp_update_data_mat(OSQPSolver*    solver,
                                     c_int          A_new_n);
 
 
-# endif /* if EMBEDDED != 1 */
+# endif /* if OSQP_EMBEDDED_MODE != 1 */
 
 /** @} */
 
@@ -235,7 +235,7 @@ OSQP_API c_int osqp_update_settings(OSQPSolver*         solver,
 // TODO: Allow for ADAPTIVE_RHO_* settings to be updated.
 
 
-# if EMBEDDED != 1
+# if OSQP_EMBEDDED_MODE != 1
 
 /**
  * Update the ADMM parameter rho.
@@ -259,7 +259,7 @@ OSQP_API c_int osqp_adjoint_derivative(OSQPSolver*    solver,
                                        c_float*       du);
 // ------------------ Derivative stuff -----------------
 
-# endif /* if EMBEDDED != 1 */
+# endif /* if OSQP_EMBEDDED_MODE != 1 */
 
 
 

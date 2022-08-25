@@ -230,16 +230,16 @@ void print_footer(OSQPInfo *info,
   c_print("run time:             %.2es\n", info->run_time);
 # endif /* ifdef OSQP_ENABLE_PROFILING */
 
-# if EMBEDDED != 1
+# if OSQP_EMBEDDED_MODE != 1
   c_print("optimal rho estimate: %.2e\n", info->rho_estimate);
-# endif /* if EMBEDDED != 1 */
+# endif /* if OSQP_EMBEDDED_MODE != 1 */
   c_print("\n");
 }
 
 #endif /* End #ifdef OSQP_ENABLE_PRINTING */
 
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 OSQPSettings* copy_settings(const OSQPSettings *settings) {
 
@@ -285,7 +285,7 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   return new;
 }
 
-#endif /* ifndef EMBEDDED */
+#endif /* ifndef OSQP_EMBEDDED_MODE */
 
 
 /* ==================== DEBUG FUNCTIONS ======================= */

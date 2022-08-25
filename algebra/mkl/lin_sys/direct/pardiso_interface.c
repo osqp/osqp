@@ -2,7 +2,7 @@
 #include "algebra_impl.h"
 #include "printing.h"
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
 #include "kkt.h"
 #endif
 

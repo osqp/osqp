@@ -25,7 +25,7 @@ c_int test_in_reccone(const OSQPVectorf *y,
   return OSQPVectorf_in_reccone(y, l, u, infval, tol);
 }
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 void project_normalcone(OSQPVectorf       *z,
                         OSQPVectorf       *y,
@@ -38,4 +38,4 @@ void project_normalcone(OSQPVectorf       *z,
   OSQPVectorf_minus(y, y, z);
 }
 
-# endif /* ifndef EMBEDDED */
+# endif /* ifndef OSQP_EMBEDDED_MODE */

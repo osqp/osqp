@@ -10,7 +10,7 @@
 /***********************************************************
 * Auxiliary functions needed to compute ADMM iterations * *
 ***********************************************************/
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
 
 c_float compute_rho_estimate(const OSQPSolver *solver) {
 
@@ -126,7 +126,7 @@ c_int update_rho_vec(OSQPSolver *solver) {
   return exitflag;
 }
 
-#endif // EMBEDDED != 1
+#endif // OSQP_EMBEDDED_MODE != 1
 
 
 void swap_vectors(OSQPVectorf **a,
@@ -545,9 +545,9 @@ c_int has_solution(const OSQPInfo * info){
 
 void store_solution(OSQPSolver *solver) {
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
   c_float norm_vec;
-#endif /* ifndef EMBEDDED */
+#endif /* ifndef OSQP_EMBEDDED_MODE */
 
   OSQPInfo*      info     = solver->info;
   OSQPSolution*  solution = solver->solution;
@@ -588,7 +588,7 @@ void store_solution(OSQPSolver *solver) {
     osqp_cold_start(solver);
 
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
     // Normalize infeasibility certificates if embedded is off
     // NB: It requires a division
@@ -614,7 +614,7 @@ void store_solution(OSQPSolver *solver) {
       OSQPVectorf_to_raw(solution->prim_inf_cert, work->delta_y);
     }
 
-#endif /* ifndef EMBEDDED */
+#endif /* ifndef OSQP_EMBEDDED_MODE */
   }
 }
 
@@ -633,7 +633,7 @@ void update_info(OSQPSolver *solver,
   c_float *run_time;                    // Execution time
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
   if (polishing) {
     x        = work->pol->x;
@@ -647,7 +647,7 @@ void update_info(OSQPSolver *solver,
 # endif /* ifdef OSQP_ENABLE_PROFILING */
   }
   else {
-#endif // EMBEDDED
+#endif // OSQP_EMBEDDED_MODE
     x          = work->x;
     y          = work->y;
     z          = work->z;
@@ -658,10 +658,10 @@ void update_info(OSQPSolver *solver,
 #ifdef OSQP_ENABLE_PROFILING
     run_time   = &info->solve_time;
 #endif /* ifdef OSQP_ENABLE_PROFILING */
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 }
 
-#endif /* ifndef EMBEDDED */
+#endif /* ifndef OSQP_EMBEDDED_MODE */
 
   // Compute primal residual
   if (work->data->m == 0) {
@@ -695,18 +695,18 @@ void reset_info(OSQPInfo *info) {
 
   // Initialize info values.
   info->solve_time = 0.0;  // Solve time to zero
-# ifndef EMBEDDED
+# ifndef OSQP_EMBEDDED_MODE
   info->polish_time = 0.0; // Polish time to zero
-# endif /* ifndef EMBEDDED */
+# endif /* ifndef OSQP_EMBEDDED_MODE */
 
   // NB: We do not reset the setup_time because it is performed only once
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
   update_status(info, OSQP_UNSOLVED); // Problem is unsolved
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
   info->rho_updates = 0;              // Rho updates are now 0
-#endif /* if EMBEDDED != 1 */
+#endif /* if OSQP_EMBEDDED_MODE != 1 */
 }
 
 const char *OSQP_STATUS_MESSAGE[] = {
@@ -851,7 +851,7 @@ c_int check_termination(OSQPSolver *solver,
 }
 
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 c_int validate_data(const OSQPCscMatrix* P,
                     const c_float*       q,
@@ -922,7 +922,7 @@ c_int validate_data(const OSQPCscMatrix* P,
   return 0;
 }
 
-#endif /* ifndef EMBEDDED */
+#endif /* ifndef OSQP_EMBEDDED_MODE */
 
 
 c_int validate_linsys_solver(c_int linsys_solver) {

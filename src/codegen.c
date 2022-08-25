@@ -759,7 +759,7 @@ c_int codegen_defines(const char *output_dir,
   fprintf(incFile, "#define OSQP_ALGEBRA_BUILTIN\n");
 
   /* Write out the embedded mode in use */
-  fprintf(incFile, "#define EMBEDDED %d\n\n", defines->embedded_mode);
+  fprintf(incFile, "#define OSQP_EMBEDDED_MODE %d\n\n", defines->embedded_mode);
 
   /* Write out if printing is enabled */
   if (defines->printing_enable == 1) {

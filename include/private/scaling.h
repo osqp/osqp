@@ -8,8 +8,8 @@
 # include "lin_alg.h"
 
 
-// Enable data scaling if EMBEDDED is disabled or if EMBEDDED == 2
-# if EMBEDDED != 1
+// Enable data scaling if OSQP_EMBEDDED_MODE is disabled or if OSQP_EMBEDDED_MODE == 2
+# if OSQP_EMBEDDED_MODE != 1
 
 /**
  * Scale problem matrices
@@ -17,7 +17,7 @@
  * @return      exitflag
  */
 c_int scale_data(OSQPSolver *solver);
-# endif // if EMBEDDED != 1
+# endif // if OSQP_EMBEDDED_MODE != 1
 
 
 /**

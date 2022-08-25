@@ -37,7 +37,7 @@ typedef struct {
 
 
 
-# ifndef EMBEDDED
+# ifndef OSQP_EMBEDDED_MODE
 
 /**
  * Polish structure
@@ -54,7 +54,7 @@ typedef struct {
   c_float      prim_res;      ///< primal residual at polished solution
   c_float      dual_res;      ///< dual residual at polished solution
 } OSQPPolish;
-# endif // ifndef EMBEDDED
+# endif // ifndef OSQP_EMBEDDED_MODE
 
 
 /**********************************
@@ -86,10 +86,10 @@ struct OSQPWorkspace_ {
   /// Linear System solver structure
   LinSysSolver *linsys_solver;
 
-# ifndef EMBEDDED
+# ifndef OSQP_EMBEDDED_MODE
   /// Polish structure
   OSQPPolish *pol;
-# endif // ifndef EMBEDDED
+# endif // ifndef OSQP_EMBEDDED_MODE
 
   /**
    * @name Vector used to store a vectorized rho parameter
@@ -100,9 +100,9 @@ struct OSQPWorkspace_ {
 
   /** @} */
 
-# if EMBEDDED != 1
+# if OSQP_EMBEDDED_MODE != 1
   OSQPVectori *constr_type; ///< Type of constraints: loose (-1), equality (1), inequality (0)
-# endif // if EMBEDDED != 1
+# endif // if OSQP_EMBEDDED_MODE != 1
 
   /**
    * @name Iterates
@@ -158,7 +158,7 @@ struct OSQPWorkspace_ {
    * @name Temporary vectors used in scaling
    * @{
    */
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
   OSQPVectorf *D_temp;   ///< temporary primal variable scaling vectors
   OSQPVectorf *D_temp_A; ///< temporary primal variable scaling vectors storing norms of A columns
   OSQPVectorf *E_temp;   ///< temporary constraints scaling vectors storing norms of A' columns
@@ -218,13 +218,13 @@ struct linsys_solver {
   void (*warm_start)(LinSysSolver      *self,
                      const OSQPVectorf *x);
 
-# ifndef EMBEDDED
+# ifndef OSQP_EMBEDDED_MODE
   c_int (*adjoint_derivative)(LinSysSolver *self);
 
   void (*free)(LinSysSolver *self);         ///< free linear system solver (only in desktop version)
-# endif // ifndef EMBEDDED
+# endif // ifndef OSQP_EMBEDDED_MODE
 
-# if EMBEDDED != 1
+# if OSQP_EMBEDDED_MODE != 1
   c_int (*update_matrices)(LinSysSolver     *self,
                            const OSQPMatrix *P,            ///< update matrices P
                            const c_int* Px_new_idx,
@@ -236,7 +236,7 @@ struct linsys_solver {
   c_int (*update_rho_vec)(LinSysSolver      *self,
                           const OSQPVectorf *rho_vec,
                           c_float            rho_sc);  ///< Update rho_vec
-# endif // if EMBEDDED != 1
+# endif // if OSQP_EMBEDDED_MODE != 1
 
   c_int nthreads; ///< number of threads active
 };

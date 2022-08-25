@@ -16,7 +16,7 @@ list( APPEND EMBEDDED_SRCS
       "${CMAKE_CURRENT_SOURCE_DIR}/util.c" )
 
 # Add more files that should only be in non-embedded code
-if(NOT DEFINED EMBEDDED)
+if(NOT DEFINED OSQP_EMBEDDED_MODE)
   target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/polish.c" "${CMAKE_CURRENT_SOURCE_DIR}/derivative.c")
 endif()
 

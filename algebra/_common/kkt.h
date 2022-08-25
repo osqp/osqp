@@ -4,7 +4,7 @@
 
 # include "osqp.h"
 
-# ifndef EMBEDDED
+# ifndef OSQP_EMBEDDED_MODE
 
 #  include "csc_utils.h"
 
@@ -40,10 +40,10 @@
                          c_int*         PtoKKT,
                          c_int*         AtoKKT,
                          c_int*         param2toKKT);
-# endif // ifndef EMBEDDED
+# endif // ifndef OSQP_EMBEDDED_MODE
 
 
-# if EMBEDDED != 1
+# if OSQP_EMBEDDED_MODE != 1
 
 /**
  * Update KKT matrix using the elements of P
@@ -96,7 +96,7 @@ void update_KKT_param2(OSQPCscMatrix* KKT,
                        c_int*         param2toKKT,
                        c_int          m);
 
-# endif // EMBEDDED != 1
+# endif // OSQP_EMBEDDED_MODE != 1
 
 
 #endif /* ifndef KKT_H */

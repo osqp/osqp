@@ -18,7 +18,7 @@ extern "C" {
 typedef struct OSQPMatrix_ OSQPMatrix;
 
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 /*  logical functions ------------------------------------------------------*/
 
@@ -45,7 +45,7 @@ OSQPMatrix* OSQPMatrix_triu_to_symm(const OSQPMatrix* A);
 // Vertically stack two matrices
 OSQPMatrix* OSQPMatrix_vstack(const OSQPMatrix* A, const OSQPMatrix* B);
 
-#endif //EMBEDDED
+#endif //OSQP_EMBEDDED_MODE
 
 
 /*  direct data access functions ---------------------------------------------*/
@@ -110,7 +110,7 @@ void OSQPMatrix_Atxpy(const OSQPMatrix*  A,
 // c_float OSQPMatrix_quad_form(const OSQPMatrix  *P,
 //                              const OSQPVectorf *x);
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
 
 void OSQPMatrix_col_norm_inf(const OSQPMatrix*  M,
                                    OSQPVectorf* E);
@@ -118,16 +118,16 @@ void OSQPMatrix_col_norm_inf(const OSQPMatrix*  M,
 void OSQPMatrix_row_norm_inf(const OSQPMatrix*  M,
                                    OSQPVectorf* E);
 
-#endif /* if EMBEDDED != 1 */
+#endif /* if OSQP_EMBEDDED_MODE != 1 */
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 void OSQPMatrix_free(OSQPMatrix* M);
 
 OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix*  A,
                                         const OSQPVectori* rows);
 
-#endif /* ifndef EMBEDDED */
+#endif /* ifndef OSQP_EMBEDDED_MODE */
 
 
 # ifdef __cplusplus
