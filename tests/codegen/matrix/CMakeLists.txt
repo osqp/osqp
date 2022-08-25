@@ -38,12 +38,22 @@ endforeach()
 list(POP_BACK CMAKE_MESSAGE_INDENT)
 
 
-add_executable( osqp_codegen_matrix mat_codegen_test.c ${OSQP_SOURCES} ${CODEGEN_SOURCES} )
-target_include_directories( osqp_codegen_matrix
+add_executable( osqp_codegen_matrix_c mat_codegen_test.c ${OSQP_SOURCES} ${CODEGEN_SOURCES} )
+target_include_directories( osqp_codegen_matrix_c
                             PRIVATE
                             ${OSQP_BUILD_DIR}/codegen_src/inc/public
                             ${OSQP_BUILD_DIR}/codegen_src/inc/private
                             ${OSQP_CODEGEN_DIR} )
 
 # Embedded mode 2 needs the sqrt and modf functions from a math library
-target_link_libraries( osqp_codegen_matrix m )
+target_link_libraries( osqp_codegen_matrix_c m )
+
+add_executable( osqp_codegen_matrix_cpp mat_codegen_test.c ${OSQP_SOURCES} ${CODEGEN_SOURCES} )
+target_include_directories( osqp_codegen_matrix_cpp
+                            PRIVATE
+                            ${OSQP_BUILD_DIR}/codegen_src/inc/public
+                            ${OSQP_BUILD_DIR}/codegen_src/inc/private
+                            ${OSQP_CODEGEN_DIR} )
+
+# Embedded mode 2 needs the sqrt and modf functions from a math library
+target_link_libraries( osqp_codegen_matrix_cpp m )
