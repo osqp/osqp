@@ -106,7 +106,7 @@ __global__ void vec_ew_prod_kernel(c_float       *c,
   c_int grid_size = blockDim.x * gridDim.x;
 
   for(c_int i = idx; i < n; i += grid_size) {
-#ifdef DFLOAT
+#ifdef OSQP_USE_FLOAT
     c[i] = __fmul_rn(a[i], b[i]);
 #else
     c[i] = __dmul_rn(a[i], b[i]);
@@ -194,7 +194,7 @@ __global__ void vec_reciprocal_kernel(c_float       *b,
   c_int grid_size = blockDim.x * gridDim.x;
 
   for(c_int i = idx; i < n; i += grid_size) {
-#ifdef DFLOAT
+#ifdef OSQP_USE_FLOAT
     b[i] = __frcp_rn(a[i]);
 #else
     b[i] = __drcp_rn(a[i]);
@@ -209,7 +209,7 @@ __global__ void vec_sqrt_kernel(c_float *a,
   c_int grid_size = blockDim.x * gridDim.x;
 
   for(c_int i = idx; i < n; i += grid_size) {
-#ifdef DFLOAT
+#ifdef OSQP_USE_FLOAT
     a[i] = __fsqrt_rn(a[i]);
 #else
     a[i] = __dsqrt_rn(a[i]);
@@ -356,7 +356,7 @@ __global__ void vec_abs_kernel(c_float *a,
   c_int i  = threadIdx.x + blockDim.x * blockIdx.x;
 
   if (i < n) {
-#ifdef DFLOAT
+#ifdef OSQP_USE_FLOAT
     a[i] = fabsf(a[i]);
 #else
     a[i] = fabs(a[i]);

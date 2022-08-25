@@ -77,7 +77,7 @@ jobs:
                   -DOSQP_BUILD_UNITTESTS=ON \
                   -DOSQP_COVERAGE_CHECK=ON \
                   -DLONG=${{ matrix.long }} \
-                  -DFLOAT=${{ matrix.float }} \
+                  -DOSQP_USE_FLOAT=${{ matrix.float }} \
                   -DOSQP_ALGEBRA_BACKEND=${{ matrix.algebra }}
             cmake --build $OSQP_BUILD_DIR_PREFIX
 

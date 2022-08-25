@@ -95,7 +95,7 @@ jobs:
                   -DOSQP_BUILD_UNITTESTS=ON \
                   -DOSQP_COVERAGE_CHECK=OFF \
                   -DLONG=${{ matrix.long }} \
-                  -DFLOAT=${{ matrix.float }} \
+                  -DOSQP_USE_FLOAT=${{ matrix.float }} \
                   -DOSQP_ENABLE_PROFILING=${{ matrix.profiling }} \
                   -DOSQP_ENABLE_INTERRUPT=${{ matrix.interrupt }} \
                   -DOSQP_ENABLE_PRINTING=${{ matrix.printing }}

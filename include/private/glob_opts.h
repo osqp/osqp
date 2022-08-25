@@ -51,13 +51,13 @@
 # if EMBEDDED != 1
 
 #  include <math.h>
-#  ifndef DFLOAT // Doubles
+#  ifndef OSQP_USE_FLOAT // Doubles
 #   define c_sqrt sqrt
 #   define c_fmod fmod
 #  else          // Floats
 #   define c_sqrt sqrtf
 #   define c_fmod fmodf
-#  endif /* ifndef DFLOAT */
+#  endif /* ifndef OSQP_USE_FLOAT */
 
 # endif // end EMBEDDED
 

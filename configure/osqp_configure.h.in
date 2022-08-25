@@ -36,8 +36,8 @@
 /* OSQP_ENABLE_INTERRUPT */
 #cmakedefine OSQP_ENABLE_INTERRUPT
 
-/* DFLOAT */
-#cmakedefine DFLOAT
+/* OSQP_USE_FLOAT */
+#cmakedefine OSQP_USE_FLOAT
 
 /* DLONG */
 #cmakedefine DLONG

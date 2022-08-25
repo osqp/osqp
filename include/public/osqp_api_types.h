@@ -16,11 +16,11 @@ typedef int c_int;       /* for indices */
 # endif /* ifdef DLONG */
 
 
-# ifndef DFLOAT         // Doubles
+# ifndef OSQP_USE_FLOAT         // Doubles
 typedef double c_float; /* for numerical values  */
 # else                  // Floats
 typedef float c_float;  /* for numerical values  */
-# endif /* ifndef DFLOAT */
+# endif /* ifndef OSQP_USE_FLOAT */
 
 
 /**

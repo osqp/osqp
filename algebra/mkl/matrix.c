@@ -8,7 +8,7 @@
 
 #include <mkl.h>
 #include <mkl_spblas.h>
-#ifdef DFLOAT
+#ifdef OSQP_USE_FLOAT
   #define spblas_create_csc mkl_sparse_s_create_csc
   #define spblas_set_value mkl_sparse_s_set_value
   #define spblas_export_csc mkl_sparse_s_export_csc

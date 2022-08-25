@@ -141,7 +141,7 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # endif
 
 # ifndef OSQP_INFTY
-#if defined(OSQP_ALGEBRA_CUDA) && defined(DFLOAT)
+#if defined(OSQP_ALGEBRA_CUDA) && defined(OSQP_USE_FLOAT)
 // Multiplying two floats that are in the order of 1e20 results in an overflow
 #  define OSQP_INFTY ((c_float)1e17)
 #else

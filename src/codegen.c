@@ -778,7 +778,7 @@ c_int codegen_defines(const char *output_dir,
 
   /* Write out the type of floating-point number to use */
   if (defines->float_type == 1) {
-    fprintf(incFile, "#define DFLOAT\n\n");
+    fprintf(incFile, "#define OSQP_USE_FLOAT\n\n");
   }
 
   /* The endif for the include-guard statement */

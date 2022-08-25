@@ -147,18 +147,23 @@ message(STATUS "Solver interrupt: ${OSQP_ENABLE_INTERRUPT}")
 
 if(OSQP_ALGEBRA_CUDA)
   # Some options have different defaults for the CUDA algebra
-  option(DFLOAT "Use floats instead of doubles" ON)
+  option(OSQP_USE_FLOAT "Use floats instead of doubles" ON)
   option(DLONG "Use long integers (64bit) for indexing" OFF)
 else()
-  option(DFLOAT "Use floats instead of doubles" OFF)
+  option(OSQP_USE_FLOAT "Use floats instead of doubles" OFF)
   option(DLONG "Use long integers (64bit) for indexing" ON)
 endif()
 
-if(DFLOAT AND OSQP_ALGEBRA_MKL)
-  message(WARNING "Disabling DFLOAT for MKL (Intel RCI ISS does not support single-precision values yet.)")
-  set(DFLOAT OFF)
+if(OSQP_USE_FLOAT AND OSQP_ALGEBRA_MKL)
+  message(WARNING "Disabling OSQP_USE_FLOAT for MKL (Intel RCI ISS does not support single-precision values yet.)")
+  set(OSQP_USE_FLOAT OFF)
 endif()
-message(STATUS "DFLOAT = ${DFLOAT}")
+
+if(OSQP_USE_FLOAT)
+  message(STATUS "Using single precision floating-point")
+else()
+  message(STATUS "Using double precision floating-point")
+endif()
 
 if(NOT (CMAKE_SIZEOF_VOID_P EQUAL 8))
   message(WARNING "Disabling long integers (64bit) on 32bit machine.")
@@ -219,7 +224,7 @@ if(OSQP_ALGEBRA_CUDA)
   include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 
   # sm_75 -> Turing support
-  if(DFLOAT)
+  if(OSQP_USE_FLOAT)
     set(CMAKE_CUDA_ARCHITECTURES 52 75)
     # set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_52 --gpu-code=sm_52,sm_75")
   else()
