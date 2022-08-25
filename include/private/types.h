@@ -4,7 +4,8 @@
 
 # include "glob_opts.h"
 # include "osqp.h"       //includes user API types
-# include "lin_alg.h"
+# include "algebra_matrix.h"
+# include "algebra_vector.h"
 
 /******************
 * Internal types *
@@ -217,8 +218,9 @@ struct linsys_solver {
   void (*warm_start)(LinSysSolver      *self,
                      const OSQPVectorf *x);
 
-
 # ifndef EMBEDDED
+  c_int (*adjoint_derivative)(LinSysSolver *self);
+
   void (*free)(LinSysSolver *self);         ///< free linear system solver (only in desktop version)
 # endif // ifndef EMBEDDED
 

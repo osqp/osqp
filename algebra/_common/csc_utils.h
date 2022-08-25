@@ -123,6 +123,25 @@ csc* triplet_to_csr(const csc *T,
 //  */
 // csc* csc_to_triu(csc *M);
 
+/**
+ * Convert upper triangular square CSC matrix into symmetric by copying
+ * data above diagonal.
+ *
+ * @param  M         Matrix to be converted
+ * @return           Symmetric matrix in CSC format
+ */
+csc* triu_to_csc(csc *M);
+
+
+/**
+ * Vertically stack two csc matrices
+ *
+ * @param  A         First CSC matrix
+ * @param  B         Second CSC matrix
+ * @return           CSC matrix resulting from vstacking A and B
+ */
+csc* vstack(csc *A, csc *B);
+
 
 /*****************************************************************************
 * Extra operations                                                          *

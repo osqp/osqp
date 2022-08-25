@@ -3,6 +3,7 @@
 
 #include "glob_opts.h"
 #include "csc_type.h"
+#include "algebra_vector.h"
 
 # ifdef __cplusplus
 extern "C" {
@@ -34,6 +35,15 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const csc *A,
 
 /* Return a copy of the matrix in CSC format */
 csc* OSQPMatrix_get_csc(const OSQPMatrix *M);
+
+/* Return a copy of a matrix as output (Uses MALLOC) */
+OSQPMatrix* OSQPMatrix_copy_new(const OSQPMatrix *A);
+
+// Convert an upper triangular matrix into a fully populated matrix
+OSQPMatrix* OSQPMatrix_triu_to_symm(const OSQPMatrix *A);
+
+// Vertically stack two matrices
+OSQPMatrix* OSQPMatrix_vstack(const OSQPMatrix *A, const OSQPMatrix *B);
 
 #endif //EMBEDDED
 

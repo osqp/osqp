@@ -48,6 +48,8 @@ typedef struct cudapcg_solver_ {
   void (*warm_start)(struct cudapcg_solver_  *self,
                      const OSQPVectorf       *x);
 
+  c_int (*adjoint_derivative)(struct cudapcg_solver_ *self);
+
   void (*free)(struct cudapcg_solver_ *self);
 
   c_int (*update_matrices)(struct cudapcg_solver_ *self,

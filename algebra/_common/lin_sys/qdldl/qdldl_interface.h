@@ -31,6 +31,8 @@ struct qdldl {
                        const OSQPVectorf *x);
 
 #ifndef EMBEDDED
+    c_int (*adjoint_derivative)(struct qdldl *self);
+
     void (*free)(struct qdldl *self); ///< Free workspace (only if desktop)
 #endif
 
@@ -84,6 +86,8 @@ struct qdldl {
     QDLDL_int   *iwork;
     QDLDL_bool  *bwork;
     QDLDL_float *fwork;
+
+    csc *adj;
 #endif
 
     /** @} */
@@ -175,7 +179,15 @@ c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver      *s,
  * @param s linear system solver object
  */
 void free_linsys_solver_qdldl(qdldl_solver * s);
-#endif
 
+c_int adjoint_derivative_qdldl(qdldl_solver *s,
+                               const OSQPMatrix *P,
+                               const OSQPMatrix *G,
+                               const OSQPMatrix *A_eq,
+                               const OSQPMatrix *GDiagLambda,
+                               const OSQPVectorf *slacks,
+                               const OSQPVectorf *rhs);
+
+#endif
 
 #endif /* QDLDL_INTERFACE_H */

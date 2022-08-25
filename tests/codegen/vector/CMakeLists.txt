@@ -38,8 +38,15 @@ endforeach()
 list(POP_BACK CMAKE_MESSAGE_INDENT)
 
 
-add_executable( osqp_codegen_vector vec_codegen_test.c ${OSQP_SOURCES} ${CODEGEN_SOURCES} )
-target_include_directories( osqp_codegen_vector
+add_executable( osqp_codegen_vector_c vec_codegen_test.c ${OSQP_SOURCES} ${CODEGEN_SOURCES} )
+target_include_directories( osqp_codegen_vector_c
+                            PRIVATE
+                            ${OSQP_BUILD_DIR}/codegen_src/inc/public
+                            ${OSQP_BUILD_DIR}/codegen_src/inc/private
+                            ${OSQP_CODEGEN_DIR} )
+
+add_executable( osqp_codegen_vector_cpp vec_codegen_test.cpp ${OSQP_SOURCES} ${CODEGEN_SOURCES} )
+target_include_directories( osqp_codegen_vector_cpp
                             PRIVATE
                             ${OSQP_BUILD_DIR}/codegen_src/inc/public
                             ${OSQP_BUILD_DIR}/codegen_src/inc/private

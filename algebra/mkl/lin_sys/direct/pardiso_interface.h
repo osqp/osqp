@@ -31,6 +31,8 @@ struct pardiso {
     void (*warm_start)(struct pardiso    *self,
                        const OSQPVectorf *x);
 
+    c_int (*adjoint_derivative)(struct pardiso *self);
+
     void (*free)(struct pardiso * self);
 
     c_int (*update_matrices)(struct pardiso   *self,

@@ -59,7 +59,7 @@ void test_basic_lp_solve()
 			      data->m) < TESTS_TOL);
 }
 
-#ifdef ALGEBRA_MKL
+#ifdef OSQP_ALGEBRA_MKL
 void test_basic_lp_solve_pardiso()
 {
   c_int exitflag;

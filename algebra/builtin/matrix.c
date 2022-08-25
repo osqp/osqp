@@ -43,7 +43,66 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const csc *A,
   }
 }
 
-csc*     OSQPMatrix_get_csc(const OSQPMatrix *M) {return csc_copy(M->csc);}
+csc* OSQPMatrix_get_csc(const OSQPMatrix *M) {return csc_copy(M->csc);}
+
+// Make of a copy of a matrix
+OSQPMatrix* OSQPMatrix_copy_new(const OSQPMatrix *A) {
+    OSQPMatrix* out = c_malloc(sizeof(OSQPMatrix));
+    if(!out) return OSQP_NULL;
+
+    out->symmetry = A->symmetry;
+    out->csc = csc_copy(A->csc);
+
+    if(!out->csc){
+        c_free(out);
+        return OSQP_NULL;
+    }
+    else{
+        return out;
+    }
+}
+
+// Convert an upper triangular matrix into a fully populated matrix
+OSQPMatrix* OSQPMatrix_triu_to_symm(const OSQPMatrix *A) {
+
+    if (A->symmetry == TRIU) {
+        OSQPMatrix* out = c_malloc(sizeof(OSQPMatrix));
+        if(!out) return OSQP_NULL;
+
+        out->symmetry = NONE;
+        out->csc = triu_to_csc(A->csc);
+
+        if (!out->csc) {
+            c_free(out);
+            return OSQP_NULL;
+        } else{
+            return out;
+        }
+    } else {
+      c_eprint("input matrix not upper triangular");
+      return OSQP_NULL;
+    }
+}
+
+OSQPMatrix* OSQPMatrix_vstack(const OSQPMatrix *A, const OSQPMatrix *B) {
+    if ((A->symmetry == NONE) && (B->symmetry == NONE)) {
+        OSQPMatrix* out = c_malloc(sizeof(OSQPMatrix));
+        if(!out) return OSQP_NULL;
+
+        out->symmetry = NONE;
+        out->csc = vstack(A->csc, B->csc);
+
+        if (!out->csc) {
+            c_free(out);
+            return OSQP_NULL;
+        } else{
+            return out;
+        }
+    } else {
+        c_eprint("Can only vstack full matrices");
+        return OSQP_NULL;
+    }
+}
 
 #endif //EMBEDDED
 
@@ -141,7 +200,7 @@ void OSQPMatrix_free(OSQPMatrix *M){
 }
 
 OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix  *A,
-                                        const OSQPVectori *rows){
+                                        const OSQPVectori *rows) {
 
   csc        *M;
   OSQPMatrix *out;

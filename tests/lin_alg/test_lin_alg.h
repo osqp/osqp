@@ -4,7 +4,7 @@
 #include "osqp_tester.h"
 #include "lin_alg/data.h"
 
-#ifndef ALGEBRA_CUDA
+#ifndef OSQP_ALGEBRA_CUDA
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,7 +41,7 @@ void test_constr_sparse_mat() {
   c_free(Adns); // because of vars from file matrices.h
 }
 
-#endif /* ifndef ALGEBRA_CUDA */
+#endif /* ifndef OSQP_ALGEBRA_CUDA */
 
 void test_vec_operations() {
 
@@ -141,7 +141,7 @@ void test_mat_operations() {
   OSQPVectorf_ptr refv{nullptr};
   OSQPVectorf_ptr resultv{nullptr};
 
-#ifndef ALGEBRA_CUDA
+#ifndef OSQP_ALGEBRA_CUDA
 
   // Scalar multiply every element in A
   refM.reset(OSQPMatrix_new_from_csc(data->test_mat_ops_scaled, 0)); //asymmetric
@@ -167,7 +167,7 @@ void test_mat_operations() {
     "Linear algebra tests: error in matrix operation, postmultiply diagonal",
     OSQPMatrix_is_eq(Ad.get(), refM.get(), TESTS_TOL));
 
-#endif /* ifndef ALGEBRA_CUDA */
+#endif /* ifndef OSQP_ALGEBRA_CUDA */
 
   // Maximum norm over columns
   refv.reset(OSQPVectorf_new(data->test_mat_ops_inf_norm_cols, data->test_mat_ops_n));

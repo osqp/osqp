@@ -16,8 +16,8 @@
 #endif
 
 #ifndef EMBEDDED
-# include "lin_sys.h"
 # include "polish.h"
+# include "derivative.h"
 #endif
 
 #ifdef OSQP_ENABLE_INTERRUPT
@@ -273,9 +273,9 @@ c_int osqp_setup(OSQPSolver         **solverp,
   }
 
   // Initialize linear system solver structure
-  exitflag = init_linsys_solver(&(work->linsys_solver), work->data->P, work->data->A,
-                                work->rho_vec, solver->settings,
-                                &work->scaled_prim_res, &work->scaled_dual_res, 0);
+  exitflag = osqp_algebra_init_linsys_solver(&(work->linsys_solver), work->data->P, work->data->A,
+                                             work->rho_vec, solver->settings,
+                                             &work->scaled_prim_res, &work->scaled_dual_res, 0);
 
   if (exitflag == OSQP_NONCVX_ERROR) {
     update_status(solver->info, OSQP_NON_CVX);
@@ -1237,3 +1237,33 @@ void csc_set_data(csc     *M,
   M->i     = i;
   M->p     = p;
 }
+
+/****************************
+* Derivative functions
+****************************/
+#ifndef EMBEDDED
+c_int osqp_adjoint_derivative(OSQPSolver *solver,
+                                       c_float    *dx,
+                                       c_float    *dy_l,
+                                       c_float    *dy_u,
+                                       csc* dP,
+                                       c_float *dq,
+                                       csc* dA,
+                                       c_float *dl,
+                                       c_float *du) {
+
+    c_int status = adjoint_derivative(
+            solver,
+            dx,
+            dy_l,
+            dy_u,
+            dP,
+            dq,
+            dA,
+            dl,
+            du
+    );
+
+    return status;
+}
+#endif

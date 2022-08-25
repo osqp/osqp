@@ -19,6 +19,7 @@ typedef struct mklcg_solver_ {
   c_int (*solve)(struct mklcg_solver_ *self, OSQPVectorf * b, c_int admm_iter);
   void (*update_settings)(struct mklcg_solver_ *self, const OSQPSettings *settings);
   void (*warm_start)(struct mklcg_solver_ *self, const OSQPVectorf *x);
+  c_int (*adjoint_derivative)(struct mklcg_solver_ *self);
   void (*free)(struct mklcg_solver_ *self);
   c_int (*update_matrices)(struct mklcg_solver_ * self,
                            const OSQPMatrix *P,
