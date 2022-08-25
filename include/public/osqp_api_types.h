@@ -129,11 +129,12 @@ typedef struct {
  * Structure to hold the settings for the generated code
  */
 typedef struct {
-  c_int embedded_mode;    ///< Embedded mode (1 = vector update, 2 = vector + matrix update)
-  c_int float_type;       ///< Use floats if 1, doubles if 0
-  c_int printing_enable;  ///< Enable printing if 1
-  c_int profiling_enable; ///< Enable timing of code sections if 1
-  c_int interrupt_enable; ///< Enable interrupt checking if 1
+  c_int embedded_mode;      ///< Embedded mode (1 = vector update, 2 = vector + matrix update)
+  c_int float_type;         ///< Use floats if 1, doubles if 0
+  c_int printing_enable;    ///< Enable printing if 1
+  c_int profiling_enable;   ///< Enable timing of code sections if 1
+  c_int interrupt_enable;   ///< Enable interrupt checking if 1
+  c_int derivatives_enable; ///< Enable deriatives if 1
 } OSQPCodegenDefines;
 
 #endif /* ifndef OSQP_API_TYPES_H */

@@ -36,11 +36,12 @@ void test_codegen_basic()
   settings->warm_starting = 0;
 
   // Define codegen settings
-  defines->embedded_mode = 1;    // vector update
-  defines->float_type = 1;       // floats
-  defines->printing_enable = 0;  // no printing
-  defines->profiling_enable = 0; // no timing
-  defines->interrupt_enable = 0; // no interrupts
+  defines->embedded_mode = 1;      // vector update
+  defines->float_type = 1;         // floats
+  defines->printing_enable = 0;    // no printing
+  defines->profiling_enable = 0;   // no timing
+  defines->interrupt_enable = 0;   // no interrupts
+  defines->derivatives_enable = 0; // no derivatives
 
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,
@@ -92,11 +93,12 @@ void test_codegen_data()
   settings->warm_starting = 0;
 
   // Define codegen settings
-  defines->embedded_mode = 1;    // vector update
-  defines->float_type = 1;       // floats
-  defines->printing_enable = 0;  // no printing
-  defines->profiling_enable = 0; // no timing
-  defines->interrupt_enable = 0; // no interrupts
+  defines->embedded_mode = 1;      // vector update
+  defines->float_type = 1;         // floats
+  defines->printing_enable = 0;    // no printing
+  defines->profiling_enable = 0;   // no timing
+  defines->interrupt_enable = 0;   // no interrupts
+  defines->derivatives_enable = 0; // no derivatives
 
   SECTION( "codegen data: unconstrained" ) {
     c_int embedded;
@@ -244,11 +246,12 @@ void test_codegen_defines()
   settings->warm_starting = 0;
 
   // Define codegen settings
-  defines->embedded_mode = 1;    // vector update
-  defines->float_type = 1;       // floats
-  defines->printing_enable = 0;  // no printing
-  defines->profiling_enable = 0; // no timing
-  defines->interrupt_enable = 0; // no interrupts
+  defines->embedded_mode = 1;      // vector update
+  defines->float_type = 1;         // floats
+  defines->printing_enable = 0;    // no printing
+  defines->profiling_enable = 0;   // no timing
+  defines->interrupt_enable = 0;   // no interrupts
+  defines->derivatives_enable = 0; // no derivatives
 
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,
@@ -362,6 +365,27 @@ void test_codegen_defines()
     mu_assert("Non Convex codegen: interrupt define should have worked!",
               exitflag == expected_flag);
   }
+
+  SECTION( "codegen define: derivatives" ) {
+    c_int test_input;
+    c_int expected_flag;
+    std::tie( test_input, expected_flag ) =
+        GENERATE( table<c_int, c_int>(
+            { /* first is input, second is expected error */
+              std::make_tuple( -1, OSQP_CODEGEN_DEFINES_ERROR ),
+              std::make_tuple(  0, OSQP_NO_ERROR ),
+              std::make_tuple(  1, OSQP_NO_ERROR ),
+              std::make_tuple(  2, OSQP_CODEGEN_DEFINES_ERROR ),
+              std::make_tuple(  3, OSQP_CODEGEN_DEFINES_ERROR ) } ) );
+
+    defines->derivatives_enable = test_input;
+
+    exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "defines_derivatives_", defines.get());
+
+    // Codegen should work or error as appropriate
+    mu_assert("Non Convex codegen: derivative define should have worked!",
+              exitflag == expected_flag);
+  }
 }
 
 void test_codegen_error_propagation()
@@ -392,11 +416,12 @@ void test_codegen_error_propagation()
   settings->warm_starting = 0;
 
   // Define codegen settings
-  defines->embedded_mode = 1;    // vector update
-  defines->float_type = 1;       // floats
-  defines->printing_enable = 0;  // no printing
-  defines->profiling_enable = 0; // no timing
-  defines->interrupt_enable = 0; // no interrupts
+  defines->embedded_mode = 1;      // vector update
+  defines->float_type = 1;         // floats
+  defines->printing_enable = 0;    // no printing
+  defines->profiling_enable = 0;   // no timing
+  defines->interrupt_enable = 0;   // no interrupts
+  defines->derivatives_enable = 0; // no derivatives
 
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,
@@ -508,11 +533,12 @@ void test_codegen_settings()
   settings->warm_starting = 0;
 
   // Define codegen settings
-  defines->embedded_mode = 1;    // vector update
-  defines->float_type = 1;       // floats
-  defines->printing_enable = 0;  // no printing
-  defines->profiling_enable = 0; // no timing
-  defines->interrupt_enable = 0; // no interrupts
+  defines->embedded_mode = 1;      // vector update
+  defines->float_type = 1;         // floats
+  defines->printing_enable = 0;    // no printing
+  defines->profiling_enable = 0;   // no timing
+  defines->interrupt_enable = 0;   // no interrupts
+  defines->derivatives_enable = 0; // no derivatives
 
   // scaling changes some allocations (some vectors become null)
   SECTION( "codegen: scaling setting" ) {

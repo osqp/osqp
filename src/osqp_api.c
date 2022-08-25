@@ -1206,7 +1206,8 @@ c_int osqp_codegen(OSQPSolver         *solver,
                     || (defines->float_type != 0       && defines->float_type != 1)
                     || (defines->printing_enable != 0  && defines->printing_enable != 1)
                     || (defines->profiling_enable != 0 && defines->profiling_enable != 1)
-                    || (defines->interrupt_enable != 0 && defines->interrupt_enable != 1)) {
+                    || (defines->interrupt_enable != 0 && defines->interrupt_enable != 1)
+                    || (defines->derivatives_enable != 0 && defines->derivatives_enable != 1)) {
     return osqp_error(OSQP_CODEGEN_DEFINES_ERROR);
   }
 
