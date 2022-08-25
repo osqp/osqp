@@ -194,6 +194,12 @@ cmake_dependent_option( OSQP_CODEGEN "Enable code generation"
 
 message(STATUS "CODEGEN = ${OSQP_CODEGEN}")
 
+cmake_dependent_option( OSQP_ENABLE_DERIVATIVES "Enable derivative computation"
+                        ON
+                        "OSQP_ALGEBRA_BUILTIN;NOT DEFINED EMBEDDED" OFF )
+
+message( STATUS "Derivative support: ${OSQP_ENABLE_DERIVATIVES}" )
+
 # Rename compile-time constants & configure
 # ----------------------------------------------
 # If we are creating any OSQP_* compile-time constants from CMake variables, do so here.

@@ -248,21 +248,22 @@ OSQP_API c_int osqp_update_settings(OSQPSolver         *solver,
 OSQP_API c_int osqp_update_rho(OSQPSolver *solver,
                                c_float     rho_new);
 
-// ------------------ Derivative stuff -----------------
+# endif /* if EMBEDDED != 1 */
+
+
+/* ------------------ Derivative stuff ----------------- */
+#ifdef OSQP_ENABLE_DERIVATIVES
 OSQP_API c_int osqp_adjoint_derivative(OSQPSolver *solver,
                                        c_float    *dx,
                                        c_float    *dy_l,
                                        c_float    *dy_u,
-                                       csc* dP,
-                                       c_float *dq,
-                                       csc* dA,
-                                       c_float *dl,
-                                       c_float *du);
-// ------------------ Derivative stuff -----------------
-
-# endif /* if EMBEDDED != 1 */
-
-
+                                       csc        *dP,
+                                       c_float    *dq,
+                                       csc        *dA,
+                                       c_float    *dl,
+                                       c_float    *du);
+#endif /* OSQP_ENABLE_DERIVATIVES */
+/* ------------------ Derivative stuff ----------------- */
 
 # ifdef OSQP_CODEGEN
 

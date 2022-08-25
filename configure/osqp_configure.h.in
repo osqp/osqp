@@ -18,6 +18,9 @@
 /* OSQP_CODEGEN */
 #cmakedefine OSQP_CODEGEN
 
+/* Enble derivative computation in the solver */
+#cmakedefine OSQP_ENABLE_DERIVATIVES
+
 /* EMBEDDED */
 #cmakedefine EMBEDDED (@EMBEDDED@)
 

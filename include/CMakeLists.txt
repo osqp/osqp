@@ -33,7 +33,12 @@ set( osqp_headers ${osqp_headers_public} PARENT_SCOPE)
 # Add more files that should only be in non-embedded code
 if(NOT DEFINED EMBEDDED)
   list(APPEND osqp_headers_private
-       "${CMAKE_CURRENT_SOURCE_DIR}/private/polish.h"
+       "${CMAKE_CURRENT_SOURCE_DIR}/private/polish.h")
+endif()
+
+# Add the derivative support, if enabled
+if(OSQP_ENABLE_DERIVATIVES)
+  list(APPEND osqp_headers_private
        "${CMAKE_CURRENT_SOURCE_DIR}/private/derivative.h")
 endif()
 

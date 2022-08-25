@@ -17,6 +17,9 @@
 
 #ifndef EMBEDDED
 # include "polish.h"
+#endif
+
+#ifdef OSQP_ENABLE_DERIVATIVES
 # include "derivative.h"
 #endif
 
@@ -1241,7 +1244,7 @@ void csc_set_data(csc     *M,
 /****************************
 * Derivative functions
 ****************************/
-#ifndef EMBEDDED
+#ifdef OSQP_ENABLE_DERIVATIVES
 c_int osqp_adjoint_derivative(OSQPSolver *solver,
                                        c_float    *dx,
                                        c_float    *dy_l,
