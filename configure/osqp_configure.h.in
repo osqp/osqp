@@ -15,7 +15,7 @@
 #cmakedefine OSQP_ALGEBRA_MKL
 #cmakedefine OSQP_ALGEBRA_CUDA
 
-/* OSQP_CODEGEN */
+/* Enable code generation */
 #cmakedefine OSQP_CODEGEN
 
 /* Enble derivative computation in the solver */
