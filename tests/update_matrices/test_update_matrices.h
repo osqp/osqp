@@ -22,7 +22,7 @@ void test_form_KKT() {
   c_float sigma, *rho_inv_vec_val;
   OSQPVectorf *rho_vec, *rho_inv_vec;
   c_int   m, *PtoKKT, *AtoKKT;
-  csc    *KKT;
+  OSQPCscMatrix* KKT;
 
   // Load problem data
   data = generate_problem_update_matrices_sols_data();

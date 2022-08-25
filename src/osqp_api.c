@@ -114,15 +114,15 @@ void osqp_set_default_settings(OSQPSettings *settings) {
 #ifndef EMBEDDED
 
 
-c_int osqp_setup(OSQPSolver         **solverp,
-                 const csc           *P,
-                 const c_float       *q,
-                 const csc           *A,
-                 const c_float       *l,
-                 const c_float       *u,
+c_int osqp_setup(OSQPSolver**         solverp,
+                 const OSQPCscMatrix* P,
+                 const c_float*       q,
+                 const OSQPCscMatrix* A,
+                 const c_float*       l,
+                 const c_float*       u,
                  c_int                m,
                  c_int                n,
-                 const OSQPSettings  *settings) {
+                 const OSQPSettings*  settings) {
 
   c_int exitflag;
 
@@ -1222,13 +1222,13 @@ c_int osqp_codegen(OSQPSolver         *solver,
 * User API Helper functions
 ****************************/
 
-void csc_set_data(csc     *M,
-                  c_int    m,
-                  c_int    n,
-                  c_int    nzmax,
-                  c_float *x,
-                  c_int   *i,
-                  c_int   *p) {
+void csc_set_data(OSQPCscMatrix* M,
+                  c_int          m,
+                  c_int          n,
+                  c_int          nzmax,
+                  c_float*       x,
+                  c_int*         i,
+                  c_int*         p) {
   M->m     = m;
   M->n     = n;
   M->nz   = -1;
@@ -1242,15 +1242,15 @@ void csc_set_data(csc     *M,
 * Derivative functions
 ****************************/
 #ifndef EMBEDDED
-c_int osqp_adjoint_derivative(OSQPSolver *solver,
-                                       c_float    *dx,
-                                       c_float    *dy_l,
-                                       c_float    *dy_u,
-                                       csc* dP,
-                                       c_float *dq,
-                                       csc* dA,
-                                       c_float *dl,
-                                       c_float *du) {
+c_int osqp_adjoint_derivative(OSQPSolver*    solver,
+                              c_float*       dx,
+                              c_float*       dy_l,
+                              c_float*       dy_u,
+                              OSQPCscMatrix* dP,
+                              c_float*       dq,
+                              OSQPCscMatrix* dA,
+                              c_float*       dl,
+                              c_float*       du) {
 
     c_int status = adjoint_derivative(
             solver,

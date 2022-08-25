@@ -3,7 +3,6 @@
 
 /* Types required by the OSQP API */
 # include "osqp_api_types.h"
-# include "csc_type.h"
 # include "osqp_export_define.h"
 
 # ifdef __cplusplus
@@ -45,9 +44,9 @@ OSQP_API const char* osqp_error_message(c_int error_flag);
  * @param  m      Pointer to m
  * @param  n      Pointer to n
  */
-OSQP_API void osqp_get_dimensions(OSQPSolver *solver,
-                                  c_int      *m,
-                                  c_int      *n);
+OSQP_API void osqp_get_dimensions(OSQPSolver* solver,
+                                  c_int*      m,
+                                  c_int*      n);
 
 
 /**
@@ -55,7 +54,7 @@ OSQP_API void osqp_get_dimensions(OSQPSolver *solver,
  * Assumes settings already allocated in memory.
  * @param settings OSQPSettings structure
  */
-OSQP_API void osqp_set_default_settings(OSQPSettings *settings);
+OSQP_API void osqp_set_default_settings(OSQPSettings* settings);
 
 
 # ifndef EMBEDDED
@@ -84,15 +83,15 @@ OSQP_API void osqp_set_default_settings(OSQPSettings *settings);
  * @param  settings  Solver settings
  * @return           Exitflag for errors (0 if no errors)
  */
-OSQP_API c_int osqp_setup(OSQPSolver         **solverp,
-                          const csc           *P,
-                          const c_float       *q,
-                          const csc           *A,
-                          const c_float       *l,
-                          const c_float       *u,
+OSQP_API c_int osqp_setup(OSQPSolver**         solverp,
+                          const OSQPCscMatrix* P,
+                          const c_float*       q,
+                          const OSQPCscMatrix* A,
+                          const c_float*       l,
+                          const c_float*       u,
                           c_int                m,
                           c_int                n,
-                          const OSQPSettings  *settings);
+                          const OSQPSettings*  settings);
 
 # endif /* ifndef EMBEDDED */
 
@@ -112,7 +111,7 @@ OSQP_API c_int osqp_setup(OSQPSolver         **solverp,
  * @param  solver Solver
  * @return        Exitflag for errors (0 if no errors)
  */
-OSQP_API c_int osqp_solve(OSQPSolver *solver);
+OSQP_API c_int osqp_solve(OSQPSolver* solver);
 
 
 # ifndef EMBEDDED
@@ -124,7 +123,7 @@ OSQP_API c_int osqp_solve(OSQPSolver *solver);
  * @param  solver Solver
  * @return        Exitflag for errors (0 if no errors)
  */
-OSQP_API c_int osqp_cleanup(OSQPSolver *solver);
+OSQP_API c_int osqp_cleanup(OSQPSolver* solver);
 
 # endif /* ifndef EMBEDDED */
 
@@ -151,15 +150,15 @@ OSQP_API c_int osqp_cleanup(OSQPSolver *solver);
  * @param  y      Dual variable, NULL if none
  * @return        Exitflag for errors (0 if no errors)
  */
-OSQP_API c_int osqp_warm_start(OSQPSolver    *solver,
-                               const c_float *x,
-                               const c_float *y);
+OSQP_API c_int osqp_warm_start(OSQPSolver*    solver,
+                               const c_float* x,
+                               const c_float* y);
 
 /**
  * Cold start workspace variables xz and y
  * @param solver Solver
  */
-OSQP_API void osqp_cold_start(OSQPSolver *solver);
+OSQP_API void osqp_cold_start(OSQPSolver* solver);
 
 /**
  * Update problem data vectors
@@ -169,10 +168,10 @@ OSQP_API void osqp_cold_start(OSQPSolver *solver);
  * @param  u_new   New upper bound, NULL if none
  * @return         Exitflag for errors (0 if no errors)
  */
-OSQP_API c_int osqp_update_data_vec(OSQPSolver    *solver,
-                                    const c_float *q_new,
-                                    const c_float *l_new,
-                                    const c_float *u_new);
+OSQP_API c_int osqp_update_data_vec(OSQPSolver*    solver,
+                                    const c_float* q_new,
+                                    const c_float* l_new,
+                                    const c_float* u_new);
 
 # if EMBEDDED != 1
 
@@ -195,12 +194,12 @@ OSQP_API c_int osqp_update_data_vec(OSQPSolver    *solver,
  *                                  2: A_new_n > nnzA
  *                                 <0: error in the update
  */
-OSQP_API c_int osqp_update_data_mat(OSQPSolver    *solver,
-                                    const c_float *Px_new,
-                                    const c_int   *Px_new_idx,
+OSQP_API c_int osqp_update_data_mat(OSQPSolver*    solver,
+                                    const c_float* Px_new,
+                                    const c_int*   Px_new_idx,
                                     c_int          P_new_n,
-                                    const c_float *Ax_new,
-                                    const c_int   *Ax_new_idx,
+                                    const c_float* Ax_new,
+                                    const c_int*   Ax_new_idx,
                                     c_int          A_new_n);
 
 
@@ -230,8 +229,8 @@ OSQP_API c_int osqp_update_data_mat(OSQPSolver    *solver,
  * @param  new_settings Solver settings
  * @return              Exitflag for errors (0 if no errors)
  */
-OSQP_API c_int osqp_update_settings(OSQPSolver         *solver,
-                                    const OSQPSettings *new_settings);
+OSQP_API c_int osqp_update_settings(OSQPSolver*         solver,
+                                    const OSQPSettings* new_settings);
 
 // TODO: Allow for ADAPTIVE_RHO_* settings to be updated.
 
@@ -245,19 +244,19 @@ OSQP_API c_int osqp_update_settings(OSQPSolver         *solver,
  * @param  rho_new New rho setting
  * @return         Exitflag for errors (0 if no errors)
  */
-OSQP_API c_int osqp_update_rho(OSQPSolver *solver,
+OSQP_API c_int osqp_update_rho(OSQPSolver* solver,
                                c_float     rho_new);
 
 // ------------------ Derivative stuff -----------------
-OSQP_API c_int osqp_adjoint_derivative(OSQPSolver *solver,
-                                       c_float    *dx,
-                                       c_float    *dy_l,
-                                       c_float    *dy_u,
-                                       csc* dP,
-                                       c_float *dq,
-                                       csc* dA,
-                                       c_float *dl,
-                                       c_float *du);
+OSQP_API c_int osqp_adjoint_derivative(OSQPSolver*    solver,
+                                       c_float*       dx,
+                                       c_float*       dy_l,
+                                       c_float*       dy_u,
+                                       OSQPCscMatrix* dP,
+                                       c_float*       dq,
+                                       OSQPCscMatrix* dA,
+                                       c_float*       dl,
+                                       c_float*       du);
 // ------------------ Derivative stuff -----------------
 
 # endif /* if EMBEDDED != 1 */
@@ -276,10 +275,10 @@ OSQP_API c_int osqp_adjoint_derivative(OSQPSolver *solver,
  * @param  defines    The defines to use in the generated code.
  * @return            Exitflag for errors (0 if no errors)
  */
-OSQP_API c_int osqp_codegen(OSQPSolver         *solver,
-                            const char         *output_dir,
-                            const char         *prefix,
-                            OSQPCodegenDefines *defines);
+OSQP_API c_int osqp_codegen(OSQPSolver*         solver,
+                            const char*         output_dir,
+                            const char*         prefix,
+                            OSQPCodegenDefines* defines);
 
 # endif /* ifdef OSQP_CODEGEN */
 

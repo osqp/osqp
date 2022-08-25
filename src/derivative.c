@@ -37,7 +37,7 @@ c_int scale_dxdy(OSQPSolver *solver, OSQPVectorf *dx, OSQPVectorf *dy_l, OSQPVec
     return 0;
 }
 
-c_int unscale_derivatives_PqAlu(OSQPSolver *solver, csc *dP, OSQPVectorf *dq, csc *dA, OSQPVectorf *dl, OSQPVectorf *du) {
+c_int unscale_derivatives_PqAlu(OSQPSolver* solver, OSQPCscMatrix* dP, OSQPVectorf* dq, OSQPCscMatrix* dA, OSQPVectorf* dl, OSQPVectorf* du) {
 
     csc_scale(dP, solver->work->scaling->cinv);
     csc_lmult_diag(dP, OSQPVectorf_data(solver->work->scaling->Dinv));
@@ -56,7 +56,7 @@ c_int unscale_derivatives_PqAlu(OSQPSolver *solver, csc *dP, OSQPVectorf *dq, cs
 }
 #endif
 
-c_int adjoint_derivative(OSQPSolver *solver, c_float *dx, c_float *dy_l, c_float *dy_u, csc* dP, c_float* dq, csc* dA, c_float* dl, c_float* du) {
+c_int adjoint_derivative(OSQPSolver* solver, c_float* dx, c_float* dy_l, c_float* dy_u, OSQPCscMatrix* dP, c_float* dq, OSQPCscMatrix* dA, c_float* dl, c_float* du) {
 #ifdef OSQP_ALGEBRA_BUILTIN
 
     c_int m = solver->work->data->m;

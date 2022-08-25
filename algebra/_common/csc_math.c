@@ -24,10 +24,10 @@ void vec_negate(c_float* v, c_int n){
 
 /* update some or all matrix values */
 
-void csc_update_values(csc           *M,
-                       const c_float *Mx_new,
-                       const c_int   *Mx_new_idx,
-                       c_int          M_new_n){
+void csc_update_values(OSQPCscMatrix* M,
+                       const c_float* Mx_new,
+                       const c_int*   Mx_new_idx,
+                             c_int    M_new_n) {
 
   c_int i;
 
@@ -47,7 +47,7 @@ void csc_update_values(csc           *M,
 
 /* matrix times scalar */
 
-void csc_scale(csc* A, c_float sc){
+void csc_scale(OSQPCscMatrix* A, c_float sc){
   c_int i, nnzA;
   nnzA = A->p[A->n];
   for (i = 0; i < nnzA; i++) {
@@ -57,7 +57,7 @@ void csc_scale(csc* A, c_float sc){
 
 /* A = L*A */
 
-void csc_lmult_diag(csc* A, const c_float *d){
+void csc_lmult_diag(OSQPCscMatrix* A, const c_float *d){
 
   c_int j, i;
   c_int*   Ap = A->p;
@@ -75,7 +75,7 @@ void csc_lmult_diag(csc* A, const c_float *d){
 
 /* A = A*R */
 
-void csc_rmult_diag(csc* A, const c_float* d){
+void csc_rmult_diag(OSQPCscMatrix* A, const c_float* d){
 
   c_int j, i;
   c_int*   Ap = A->p;
@@ -91,11 +91,11 @@ void csc_rmult_diag(csc* A, const c_float* d){
 }
 
 //y = alpha*A*x + beta*y, where A is symmetric and only triu is stored
-void csc_Axpy_sym_triu(const csc   *A,
-              const c_float *x,
-              c_float *y,
-              c_float alpha,
-              c_float beta) {
+void csc_Axpy_sym_triu(const OSQPCscMatrix* A,
+                       const c_float*       x,
+                             c_float*       y,
+                             c_float        alpha,
+                             c_float        beta) {
 
     c_int i, j;
     c_int*   Ap = A->p;
@@ -146,11 +146,11 @@ void csc_Axpy_sym_triu(const csc   *A,
 }
 
 //y = alpha*A*x + beta*y
-void csc_Axpy(const csc   *A,
-                    const c_float *x,
-                    c_float *y,
-                    c_float alpha,
-                    c_float beta) {
+void csc_Axpy(const OSQPCscMatrix* A,
+              const c_float*       x,
+                    c_float*       y,
+                    c_float        alpha,
+                    c_float        beta) {
 
   c_int i, j;
   c_int*   Ap = A->p;
@@ -193,7 +193,7 @@ void csc_Axpy(const csc   *A,
 
 //y = alpha*A'*x + beta*y
 
-void csc_Atxpy(const csc *A, const c_float *x, c_float *y,
+void csc_Atxpy(const OSQPCscMatrix* A, const c_float* x, c_float* y,
                      c_float alpha, c_float beta) {
   c_int j, k;
   c_int*   Ap = A->p;
@@ -266,7 +266,7 @@ void csc_Atxpy(const csc *A, const c_float *x, c_float *y,
 
 /* columnwise infinity norm */
 
-void csc_col_norm_inf(const csc *M, c_float *E) {
+void csc_col_norm_inf(const OSQPCscMatrix* M, c_float* E) {
 
   c_int j, ptr;
   c_int*   Mp = M->p;
@@ -286,7 +286,7 @@ void csc_col_norm_inf(const csc *M, c_float *E) {
 
 /* rowwise infinity norm */
 
-void csc_row_norm_inf(const csc *M, c_float *E) {
+void csc_row_norm_inf(const OSQPCscMatrix* M, c_float* E) {
 
   c_int i, j, ptr;
   c_int*   Mp = M->p;
@@ -309,7 +309,7 @@ void csc_row_norm_inf(const csc *M, c_float *E) {
 
 /* rowwise infinity norm, only upper triangle specified */
 
-void csc_row_norm_inf_sym_triu(const csc *M, c_float *E) {
+void csc_row_norm_inf_sym_triu(const OSQPCscMatrix* M, c_float* E) {
 
   c_int   i, j, ptr;
   c_int*   Mp = M->p;

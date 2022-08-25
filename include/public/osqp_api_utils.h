@@ -3,7 +3,6 @@
 
 /* Types required by the OSQP utility functions */
 # include "osqp_api_types.h"
-# include "csc_type.h"
 # include "osqp_export_define.h"
 
 # ifdef __cplusplus
@@ -24,13 +23,13 @@ extern "C" {
  * @param  i     Vector of row indices
  * @param  p     Vector of column pointers
  */
-OSQP_API void csc_set_data(csc     *M,
-                           c_int    m,
-                           c_int    n,
-                           c_int    nzmax,
-                           c_float *x,
-                           c_int   *i,
-                           c_int   *p);
+OSQP_API void csc_set_data(OSQPCscMatrix *M,
+                           c_int          m,
+                           c_int          n,
+                           c_int          nzmax,
+                           c_float       *x,
+                           c_int         *i,
+                           c_int         *p);
 
 # ifdef __cplusplus
 }

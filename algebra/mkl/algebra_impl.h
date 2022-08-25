@@ -33,7 +33,7 @@ struct OSQPVectorf_ {
 typedef enum OSQPMatrix_symmetry_type {NONE,TRIU} OSQPMatrix_symmetry_type;
 
 struct OSQPMatrix_ {
-  csc                     *csc;       /* Shadow matrix */
+  OSQPCscMatrix*           csc;       /* Shadow matrix */
   sparse_matrix_t          mkl_mat;   /* Opaque object for MKL matrix */
   OSQPMatrix_symmetry_type symmetry;
 };

@@ -77,16 +77,16 @@ void print_footer(OSQPInfo *info,
 #  include <stdio.h>
 
 /* Print a csc sparse matrix */
-void print_csc_matrix(const csc  *M,
-                      const char *name);
+void print_csc_matrix(const OSQPCscMatrix* M,
+                      const char*          name);
 
 /* Dump csc sparse matrix to file */
-void dump_csc_matrix(const csc  *M,
-                     const char *file_name);
+void dump_csc_matrix(const OSQPCscMatrix* M,
+                     const char*          file_name);
 
 /* Print a triplet format sparse matrix */
-void print_trip_matrix(const csc  *M,
-                       const char *name);
+void print_trip_matrix(const OSQPCscMatrix* M,
+                       const char*          name);
 
 /* Print a dense matrix */
 void print_dns_matrix(const c_float *M,

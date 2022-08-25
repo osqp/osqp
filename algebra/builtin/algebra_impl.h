@@ -32,8 +32,8 @@ struct OSQPVectorf_ {
 typedef enum OSQPMatrix_symmetry_type {NONE,TRIU} OSQPMatrix_symmetry_type;
 
 struct OSQPMatrix_ {
-  csc*                             csc;
-  OSQPMatrix_symmetry_type    symmetry;
+  OSQPCscMatrix*           csc;
+  OSQPMatrix_symmetry_type symmetry;
 };
 
 

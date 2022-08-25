@@ -57,7 +57,7 @@ The most basic used datatypes are
 
 The matrices are defined in `Compressed Sparse Column (CSC) format <https://people.sc.fsu.edu/~jburkardt/data/cc/cc.html>`_ using zero-based indexing.
 
-.. doxygenstruct:: csc
+.. doxygenstruct:: OSQPCscMatrix
    :members:
 
 

@@ -108,9 +108,9 @@ static c_int write_OSQPVectori(FILE              *f,
 * Matrix
 **********/
 
-static c_int write_csc(FILE       *f,
-                       const csc  *M,
-                       const char *name){
+static c_int write_csc(FILE*                f,
+                       const OSQPCscMatrix* M,
+                       const char*          name){
 
   c_int exitflag = OSQP_NO_ERROR;
   char vec_name[MAX_VAR_LENGTH];
@@ -123,7 +123,7 @@ static c_int write_csc(FILE       *f,
   PROPAGATE_ERROR(write_veci(f, M->i, M->nzmax, vec_name))
   sprintf(vec_name, "%s_x", name);
   PROPAGATE_ERROR(write_vecf(f, M->x, M->nzmax, vec_name))
-  fprintf(f, "csc %s = {\n", name);
+  fprintf(f, "OSQPCscMatrix %s = {\n", name);
   fprintf(f, "  %d,\n", M->m);
   fprintf(f, "  %d,\n", M->n);
   fprintf(f, "  %s_p,\n", name);

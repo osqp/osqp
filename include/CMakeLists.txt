@@ -15,7 +15,6 @@ set(osqp_headers_private
     "${CMAKE_CURRENT_SOURCE_DIR}/private/util.h")
 
 set(osqp_headers_public
-    "${CMAKE_CURRENT_SOURCE_DIR}/public/csc_type.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_api_constants.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_api_functions.h"

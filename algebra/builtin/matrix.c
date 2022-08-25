@@ -13,7 +13,7 @@
 
 c_int OSQPMatrix_is_eq(const OSQPMatrix *A,
                        const OSQPMatrix *B,
-                       c_float           tol){
+                       c_float           tol) {
 
   return (A->symmetry == B->symmetry &&
           csc_is_eq(A->csc, B->csc, tol) );
@@ -23,8 +23,8 @@ c_int OSQPMatrix_is_eq(const OSQPMatrix *A,
 /*  Non-embeddable functions (using malloc) ----------------------------------*/
 
 //Make a copy from a csc matrix.  Returns OSQP_NULL on failure
-OSQPMatrix* OSQPMatrix_new_from_csc(const csc *A,
-                                    c_int      is_triu){
+OSQPMatrix* OSQPMatrix_new_from_csc(const OSQPCscMatrix* A,
+                                          c_int          is_triu) {
 
   OSQPMatrix* out = c_malloc(sizeof(OSQPMatrix));
   if(!out) return OSQP_NULL;
@@ -43,10 +43,10 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const csc *A,
   }
 }
 
-csc* OSQPMatrix_get_csc(const OSQPMatrix *M) {return csc_copy(M->csc);}
+OSQPCscMatrix* OSQPMatrix_get_csc(const OSQPMatrix* M) {return csc_copy(M->csc);}
 
 // Make of a copy of a matrix
-OSQPMatrix* OSQPMatrix_copy_new(const OSQPMatrix *A) {
+OSQPMatrix* OSQPMatrix_copy_new(const OSQPMatrix* A) {
     OSQPMatrix* out = c_malloc(sizeof(OSQPMatrix));
     if(!out) return OSQP_NULL;
 
@@ -63,7 +63,7 @@ OSQPMatrix* OSQPMatrix_copy_new(const OSQPMatrix *A) {
 }
 
 // Convert an upper triangular matrix into a fully populated matrix
-OSQPMatrix* OSQPMatrix_triu_to_symm(const OSQPMatrix *A) {
+OSQPMatrix* OSQPMatrix_triu_to_symm(const OSQPMatrix* A) {
 
     if (A->symmetry == TRIU) {
         OSQPMatrix* out = c_malloc(sizeof(OSQPMatrix));
@@ -84,7 +84,7 @@ OSQPMatrix* OSQPMatrix_triu_to_symm(const OSQPMatrix *A) {
     }
 }
 
-OSQPMatrix* OSQPMatrix_vstack(const OSQPMatrix *A, const OSQPMatrix *B) {
+OSQPMatrix* OSQPMatrix_vstack(const OSQPMatrix* A, const OSQPMatrix* B) {
     if ((A->symmetry == NONE) && (B->symmetry == NONE)) {
         OSQPMatrix* out = c_malloc(sizeof(OSQPMatrix));
         if(!out) return OSQP_NULL;
@@ -108,20 +108,20 @@ OSQPMatrix* OSQPMatrix_vstack(const OSQPMatrix *A, const OSQPMatrix *B) {
 
 /*  direct data access functions ---------------------------------------------*/
 
-void OSQPMatrix_update_values(OSQPMatrix    *M,
-                              const c_float *Mx_new,
-                              const c_int   *Mx_new_idx,
-                              c_int          M_new_n){
+void OSQPMatrix_update_values(OSQPMatrix*    M,
+                              const c_float* Mx_new,
+                              const c_int*   Mx_new_idx,
+                              c_int          M_new_n) {
   csc_update_values(M->csc, Mx_new, Mx_new_idx, M_new_n);
 }
 
 /* Matrix dimensions and data access */
-c_int    OSQPMatrix_get_m(const OSQPMatrix *M){return M->csc->m;}
-c_int    OSQPMatrix_get_n(const OSQPMatrix *M){return M->csc->n;}
-c_float* OSQPMatrix_get_x(const OSQPMatrix *M){return M->csc->x;}
-c_int*   OSQPMatrix_get_i(const OSQPMatrix *M){return M->csc->i;}
-c_int*   OSQPMatrix_get_p(const OSQPMatrix *M){return M->csc->p;}
-c_int    OSQPMatrix_get_nz(const OSQPMatrix *M){return M->csc->p[M->csc->n];}
+c_int    OSQPMatrix_get_m(const OSQPMatrix* M) {return M->csc->m;}
+c_int    OSQPMatrix_get_n(const OSQPMatrix* M) {return M->csc->n;}
+c_float* OSQPMatrix_get_x(const OSQPMatrix* M) {return M->csc->x;}
+c_int*   OSQPMatrix_get_i(const OSQPMatrix* M) {return M->csc->i;}
+c_int*   OSQPMatrix_get_p(const OSQPMatrix* M) {return M->csc->p;}
+c_int    OSQPMatrix_get_nz(const OSQPMatrix* M) {return M->csc->p[M->csc->n];}
 
 /* math functions ----------------------------------------------------------*/
 
@@ -141,11 +141,11 @@ void OSQPMatrix_rmult_diag(OSQPMatrix *A, const OSQPVectorf *R) {
 }
 
 //y = alpha*A*x + beta*y
-void OSQPMatrix_Axpy(const OSQPMatrix  *A,
-                     const OSQPVectorf *x,
-                     OSQPVectorf       *y,
-                     c_float            alpha,
-                     c_float            beta) {
+void OSQPMatrix_Axpy(const OSQPMatrix*  A,
+                     const OSQPVectorf* x,
+                           OSQPVectorf* y,
+                           c_float      alpha,
+                           c_float      beta) {
 
   if(A->symmetry == NONE){
     //full matrix
@@ -157,11 +157,11 @@ void OSQPMatrix_Axpy(const OSQPMatrix  *A,
   }
 }
 
-void OSQPMatrix_Atxpy(const OSQPMatrix  *A,
-                      const OSQPVectorf *x,
-                      OSQPVectorf       *y,
-                      c_float            alpha,
-                      c_float            beta) {
+void OSQPMatrix_Atxpy(const OSQPMatrix*  A,
+                      const OSQPVectorf* x,
+                            OSQPVectorf* y,
+                            c_float      alpha,
+                            c_float      beta) {
 
    if(A->symmetry == NONE) csc_Atxpy(A->csc, x->values, y->values, alpha, beta);
    else            csc_Axpy_sym_triu(A->csc, x->values, y->values, alpha, beta);
@@ -179,13 +179,13 @@ void OSQPMatrix_Atxpy(const OSQPMatrix  *A,
 
 #if EMBEDDED != 1
 
-void OSQPMatrix_col_norm_inf(const OSQPMatrix *M,
-                             OSQPVectorf      *E) {
+void OSQPMatrix_col_norm_inf(const OSQPMatrix*  M,
+                                   OSQPVectorf* E) {
    csc_col_norm_inf(M->csc, OSQPVectorf_data(E));
 }
 
-void OSQPMatrix_row_norm_inf(const OSQPMatrix *M,
-                             OSQPVectorf      *E) {
+void OSQPMatrix_row_norm_inf(const OSQPMatrix*  M,
+                                   OSQPVectorf* E) {
    if(M->symmetry == NONE) csc_row_norm_inf(M->csc, OSQPVectorf_data(E));
    else                    csc_row_norm_inf_sym_triu(M->csc, OSQPVectorf_data(E));
 }
@@ -194,16 +194,16 @@ void OSQPMatrix_row_norm_inf(const OSQPMatrix *M,
 
 #ifndef EMBEDDED
 
-void OSQPMatrix_free(OSQPMatrix *M){
+void OSQPMatrix_free(OSQPMatrix* M){
   if (M) csc_spfree(M->csc);
   c_free(M);
 }
 
-OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix  *A,
-                                        const OSQPVectori *rows) {
+OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix*  A,
+                                        const OSQPVectori* rows) {
 
-  csc        *M;
-  OSQPMatrix *out;
+  OSQPCscMatrix* M;
+  OSQPMatrix*    out;
 
 
   if(A->symmetry == TRIU){

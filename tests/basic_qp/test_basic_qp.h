@@ -9,7 +9,8 @@ void test_basic_qp_solve()
 {
   c_int exitflag, tmp_int;
   c_float tmp_float;
-  csc *tmp_mat, *P_tmp;
+  OSQPCscMatrix* tmp_mat;
+  OSQPCscMatrix* P_tmp;
 
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
@@ -426,7 +427,7 @@ void test_basic_qp_solve()
   tmp_mat = data->P;
 
   // Construct non-upper-triangular P
-  P_tmp = (csc*) c_malloc(sizeof(csc));
+  P_tmp = (OSQPCscMatrix*) c_malloc(sizeof(OSQPCscMatrix));
   P_tmp->m = 2;
   P_tmp->n = 2;
   P_tmp->nz = -1;

@@ -25,8 +25,8 @@ int main(void) {
   /* Solver, settings, matrices */
   OSQPSolver   *solver   = NULL;
   OSQPSettings *settings = NULL;
-  csc *P = malloc(sizeof(csc));
-  csc *A = malloc(sizeof(csc));
+  OSQPCscMatrix* P = malloc(sizeof(OSQPCscMatrix));
+  OSQPCscMatrix* A = malloc(sizeof(OSQPCscMatrix));
 
   /* Populate matrices */
   csc_set_data(A, m, n, A_nnz, A_x, A_i, A_p);

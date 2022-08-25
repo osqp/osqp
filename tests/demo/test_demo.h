@@ -22,10 +22,10 @@ void test_demo_solve()
   c_int exitflag;
 
   /* Workspace, settings, matrices */
-  OSQPSolver   *solver;
-  OSQPSettings *settings;
-  csc *P = (csc*)malloc(sizeof(csc));
-  csc *A = (csc*)malloc(sizeof(csc));
+  OSQPSolver*   solver;
+  OSQPSettings* settings;
+  OSQPCscMatrix* P = (OSQPCscMatrix*)malloc(sizeof(OSQPCscMatrix));
+  OSQPCscMatrix* A = (OSQPCscMatrix*)malloc(sizeof(OSQPCscMatrix));
 
   /* Populate matrices */
   csc_set_data(P, n, n, P_nnz, P_x, P_i, P_p);

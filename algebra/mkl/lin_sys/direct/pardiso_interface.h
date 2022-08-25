@@ -56,20 +56,20 @@ struct pardiso {
      * @{
      */
     // Attributes
-    csc *KKT;               ///< KKT matrix (in CSR format!)
-    c_int *KKT_i;           ///< KKT column indices in 1-indexing for Pardiso
-    c_int *KKT_p;           ///< KKT row pointers in 1-indexing for Pardiso
-    c_float *bp;            ///< workspace memory for solves (rhs)
-    c_float *sol;           ///< solution to the KKT system
-    c_float *rho_inv_vec;   ///< parameter vector
-    c_float sigma;          ///< scalar parameter
-    c_float rho_inv;        ///< scalar parameter (used if rho_inv_vec == NULL)
-    c_int polishing;        ///< polishing flag
-    c_int n;                ///< number of QP variables
-    c_int m;                ///< number of QP constraints
+    OSQPCscMatrix* KKT;         ///< KKT matrix (in CSR format!)
+    c_int*         KKT_i;       ///< KKT column indices in 1-indexing for Pardiso
+    c_int*         KKT_p;       ///< KKT row pointers in 1-indexing for Pardiso
+    c_float*       bp;          ///< workspace memory for solves (rhs)
+    c_float*       sol;         ///< solution to the KKT system
+    c_float*       rho_inv_vec; ///< parameter vector
+    c_float        sigma;       ///< scalar parameter
+    c_float        rho_inv;     ///< scalar parameter (used if rho_inv_vec == NULL)
+    c_int          polishing;   ///< polishing flag
+    c_int          n;           ///< number of QP variables
+    c_int          m;           ///< number of QP constraints
 
     // Pardiso variables
-    void *pt[64];     ///< internal solver memory pointer pt
+    void* pt[64];     ///< internal solver memory pointer pt
     c_int iparm[64];  ///< Pardiso control parameters
     c_int nKKT;       ///< dimension of the linear system
     c_int mtype;      ///< matrix type (-2 for real and symmetric indefinite)

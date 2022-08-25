@@ -853,13 +853,13 @@ c_int check_termination(OSQPSolver *solver,
 
 #ifndef EMBEDDED
 
-c_int validate_data(const csc     *P,
-                    const c_float *q,
-                    const csc     *A,
-                    const c_float *l,
-                    const c_float *u,
-                    c_int          m,
-                    c_int          n) {
+c_int validate_data(const OSQPCscMatrix* P,
+                    const c_float*       q,
+                    const OSQPCscMatrix* A,
+                    const c_float*       l,
+                    const c_float*       u,
+                          c_int          m,
+                          c_int          n) {
   c_int j, ptr;
 
   if (!P) {

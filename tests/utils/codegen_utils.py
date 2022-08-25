@@ -82,8 +82,8 @@ def write_mat_sparse(f, A, name, *args):
         for arg in args:
             f.write("%s->" % arg)
     else:
-        f.write("csc * ")
-    f.write(name + " = (csc*) c_malloc(sizeof(csc));\n")
+        f.write("OSQPCscMatrix* ")
+    f.write(name + " = (OSQPCscMatrix*) c_malloc(sizeof(OSQPCscMatrix));\n")
 
     # Write dimensions and number of nonzeros
     if any(args):
@@ -398,7 +398,7 @@ def generate_data(problem_name, sols_data):
             f.write("c_int %s;\n" % key)
         # Check if it is an array or a scalar
         elif sparse.issparse(value):  # Sparse matrix
-            f.write("csc * %s;\n" % key)
+            f.write("OSQPCscMatrix* %s;\n" % key)
         elif isinstance(value, np.ndarray):
             if value.flatten(order='F').size == 0:
                 f.write("c_float * %s;\n" % key)

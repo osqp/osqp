@@ -519,11 +519,11 @@ void csr_transpose(csr    *A,
  *                           API Functions                                     *
  *******************************************************************************/
 
-void cuda_mat_init_P(const csc  *mat,
-                     csr       **P,
-                     c_float   **d_P_triu_val,
-                     c_int     **d_P_triu_to_full_ind,
-                     c_int     **d_P_diag_ind) {
+void cuda_mat_init_P(const OSQPCscMatrix* mat,
+                           csr**          P,
+                           c_float**      d_P_triu_val,
+                           c_int**        d_P_triu_to_full_ind,
+                           c_int**        d_P_diag_ind) {
 
   c_int n   = mat->n;
   c_int nnz = mat->p[n];
@@ -544,10 +544,10 @@ void cuda_mat_init_P(const csc  *mat,
   init_SpMV_interface(*P);
 }
 
-void cuda_mat_init_A(const csc  *mat,
-                     csr       **A,
-                     csr       **At,
-                     c_int     **d_A_to_At_ind) {
+void cuda_mat_init_A(const OSQPCscMatrix* mat,
+                           csr**          A,
+                           csr**          At,
+                           c_int**        d_A_to_At_ind) {
 
   c_int m = mat->m;
   c_int n = mat->n;

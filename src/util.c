@@ -293,8 +293,8 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
 
 #if defined(DEBUG) && defined(OSQP_ENABLE_PRINTING)
 
-void print_csc_matrix(const csc  *M,
-                      const char *name)
+void print_csc_matrix(const OSQPCscMatrix* M,
+                      const char*          name)
 {
   c_int j, i, row_start, row_stop;
   c_int k = 0;
@@ -315,8 +315,8 @@ void print_csc_matrix(const csc  *M,
   }
 }
 
-void dump_csc_matrix(const csc  *M,
-                     const char *file_name) {
+void dump_csc_matrix(const OSQPCscMatrix* M,
+                     const char*          file_name) {
   c_int j, i, row_strt, row_stop;
   c_int k = 0;
   FILE *f = fopen(file_name, "w");
@@ -342,8 +342,8 @@ void dump_csc_matrix(const csc  *M,
   }
 }
 
-void print_trip_matrix(const csc  *M,
-                       const char *name)
+void print_trip_matrix(const OSQPCscMatrix* M,
+                       const char*          name)
 {
   c_int k = 0;
 
@@ -355,10 +355,10 @@ void print_trip_matrix(const csc  *M,
   }
 }
 
-void print_dns_matrix(const c_float *M,
-                      c_int          m,
-                      c_int          n,
-                      const char    *name)
+void print_dns_matrix(const c_float* M,
+                            c_int    m,
+                            c_int    n,
+                      const char*    name)
 {
   c_int i, j;
 
@@ -382,15 +382,15 @@ void print_dns_matrix(const c_float *M,
   c_print("\n");
 }
 
-void print_vec(const c_float *v,
-              c_int           n,
-              const char     *name) {
+void print_vec(const c_float* v,
+                     c_int    n,
+               const char*    name) {
   print_dns_matrix(v, 1, n, name);
 }
 
-void dump_vec(const c_float *v,
-              c_int          len,
-              const char    *file_name) {
+void dump_vec(const c_float* v,
+                    c_int    len,
+              const char*    file_name) {
   c_int i;
   FILE *f = fopen(file_name, "w");
 
@@ -405,9 +405,9 @@ void dump_vec(const c_float *v,
   }
 }
 
-void print_vec_int(const c_int *x,
-                   c_int        n,
-                   const char  *name) {
+void print_vec_int(const c_int* x,
+                         c_int  n,
+                   const char*  name) {
   c_int i;
 
   c_print("%s = [", name);
