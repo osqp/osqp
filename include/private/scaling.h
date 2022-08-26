@@ -16,7 +16,7 @@
  * @param  solver OSQP solver
  * @return      exitflag
  */
-c_int scale_data(OSQPSolver *solver);
+OSQPInt scale_data(OSQPSolver* solver);
 # endif // if OSQP_EMBEDDED_MODE != 1
 
 
@@ -25,7 +25,7 @@ c_int scale_data(OSQPSolver *solver);
  * @param  solver OSQP solver
  * @return      exitflag
  */
-c_int unscale_data(OSQPSolver *solver);
+OSQPInt unscale_data(OSQPSolver* solver);
 
 
 /**
@@ -37,11 +37,11 @@ c_int unscale_data(OSQPSolver *solver);
  * @param  work Workspace
  * @return      exitflag
  */
-  c_int unscale_solution(OSQPVectorf* usolx,
-                         OSQPVectorf* usoly,
-                         const OSQPVectorf* solx,
-                         const OSQPVectorf* soly,
-                         OSQPWorkspace *work);
+  OSQPInt unscale_solution(OSQPVectorf*       usolx,
+                           OSQPVectorf*       usoly,
+                           const OSQPVectorf* solx,
+                           const OSQPVectorf* soly,
+                           OSQPWorkspace*     work);
 
 
 #endif /* ifndef SCALING_H */

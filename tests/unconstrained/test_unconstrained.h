@@ -7,7 +7,7 @@
 
 void test_unconstrained_solve()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Problem settings
   OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};

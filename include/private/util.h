@@ -17,7 +17,7 @@
  * @param  settings Settings to be copied
  * @return          New settings structure
  */
-OSQPSettings* copy_settings(const OSQPSettings *settings);
+OSQPSettings* copy_settings(const OSQPSettings* settings);
 
 # endif /* ifndef OSQP_EMBEDDED_MODE */
 
@@ -36,7 +36,7 @@ void c_strcpy(char       dest[],
  * Print Header before running the algorithm
  * @param solver     osqp solver
  */
-void print_setup_header(const OSQPSolver *solver);
+void print_setup_header(const OSQPSolver* solver);
 
 /**
  * Print header with data to be displayed per iteration
@@ -47,21 +47,21 @@ void print_header(void);
  * Print iteration summary
  * @param solver osqp solver
  */
-void print_summary(OSQPSolver *solver);
+void print_summary(OSQPSolver* solver);
 
 /**
  * Print information after polish
  * @param solver osqp solver
  */
-void print_polish(OSQPSolver *solver);
+void print_polish(OSQPSolver* solver);
 
 /**
  * Print footer when algorithm terminates
  * @param info      info structure
  * @param polishing is polishing enabled?
  */
-void print_footer(OSQPInfo *info,
-                  c_int     polishing);
+void print_footer(OSQPInfo* info,
+                  OSQPInt   polishing);
 
 
 # endif /* ifdef OSQP_ENABLE_PRINTING */
@@ -89,25 +89,25 @@ void print_trip_matrix(const OSQPCscMatrix* M,
                        const char*          name);
 
 /* Print a dense matrix */
-void print_dns_matrix(const c_float *M,
-                      c_int          m,
-                      c_int          n,
-                      const char    *name);
+void print_dns_matrix(const OSQPFloat* M,
+                      OSQPInt          m,
+                      OSQPInt          n,
+                      const char*      name);
 
 /* Print vector  */
-void print_vec(const c_float *v,
-               c_int          n,
-               const char    *name);
+void print_vec(const OSQPFloat* v,
+               OSQPInt          n,
+               const char*      name);
 
 /* Dump vector to file */
-void dump_vec(const c_float *v,
-              c_int          len,
-              const char    *file_name);
+void dump_vec(const OSQPFloat* v,
+              OSQPInt          len,
+              const char*      file_name);
 
 // Print int array
-void print_vec_int(const c_int *x,
-                   c_int        n,
-                   const char  *name);
+void print_vec_int(const OSQPInt* x,
+                   OSQPInt        n,
+                   const char*    name);
 
 # endif /* #if defined(DEBUG) && defined(OSQP_ENABLE_PRINTING) */
 

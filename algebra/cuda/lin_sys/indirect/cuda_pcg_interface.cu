@@ -28,10 +28,10 @@
  *                           Private Functions                                 *
  *******************************************************************************/
 
-static c_float compute_tolerance(cudapcg_solver *s,
-                                 c_int           admm_iter) {
+static OSQPFloat compute_tolerance(cudapcg_solver* s,
+                                   OSQPInt         admm_iter) {
 
-  c_float eps, rhs_norm;
+  OSQPFloat eps, rhs_norm;
 
   /* Compute the norm of RHS of the linear system */
   cuda_vec_norm_inf(s->d_rhs, s->n, &rhs_norm);
@@ -63,11 +63,11 @@ static c_float compute_tolerance(cudapcg_solver *s,
 }
 
 /* d_rhs = d_b1 + A' * rho * d_b2 */
-static void compute_rhs(cudapcg_solver *s,
-                        c_float        *d_b) {
+static void compute_rhs(cudapcg_solver* s,
+                        OSQPFloat*      d_b) {
 
-  c_int n = s->n;
-  c_int m = s->m;
+  OSQPInt n = s->n;
+  OSQPInt m = s->m;
 
   /* rhs = b1 */
   cuda_vec_copy_d2d(s->d_rhs, d_b, n);
@@ -95,17 +95,17 @@ static void compute_rhs(cudapcg_solver *s,
  *                              API Functions                                  *
  *******************************************************************************/
 
-c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
-                                 const OSQPMatrix   *P,
-                                 const OSQPMatrix   *A,
-                                 const OSQPVectorf  *rho_vec,
-                                 const OSQPSettings *settings,
-                                 c_float            *scaled_prim_res,
-                                 c_float            *scaled_dual_res,
-                                 c_int               polishing) {
+OSQPInt init_linsys_solver_cudapcg(cudapcg_solver**    sp,
+                                   const OSQPMatrix*   P,
+                                   const OSQPMatrix*   A,
+                                   const OSQPVectorf*  rho_vec,
+                                   const OSQPSettings* settings,
+                                   OSQPFloat*          scaled_prim_res,
+                                   OSQPFloat*          scaled_dual_res,
+                                   OSQPInt             polishing) {
 
-  c_int n, m;
-  c_float H_MINUS_ONE = -1.0;
+  OSQPInt n, m;
+  OSQPFloat H_MINUS_ONE = -1.0;
 
   /* Allocate linsys solver structure */
   cudapcg_solver *s = (cudapcg_solver *)c_calloc(1, sizeof(cudapcg_solver));
@@ -152,13 +152,13 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   }
 
   /* Allocate raw PCG iterates */
-  cuda_calloc((void **) &s->d_x,   n * sizeof(c_float));    /* Set d_x to zero */
-  cuda_malloc((void **) &s->d_p,   n * sizeof(c_float));
-  cuda_malloc((void **) &s->d_Kp,  n * sizeof(c_float));
-  cuda_malloc((void **) &s->d_y,   n * sizeof(c_float));
-  cuda_malloc((void **) &s->d_r,   n * sizeof(c_float));
-  cuda_malloc((void **) &s->d_rhs, n * sizeof(c_float));
-  if (m) cuda_malloc((void **) &s->d_z, m * sizeof(c_float));
+  cuda_calloc((void **) &s->d_x,   n * sizeof(OSQPFloat));    /* Set d_x to zero */
+  cuda_malloc((void **) &s->d_p,   n * sizeof(OSQPFloat));
+  cuda_malloc((void **) &s->d_Kp,  n * sizeof(OSQPFloat));
+  cuda_malloc((void **) &s->d_y,   n * sizeof(OSQPFloat));
+  cuda_malloc((void **) &s->d_r,   n * sizeof(OSQPFloat));
+  cuda_malloc((void **) &s->d_rhs, n * sizeof(OSQPFloat));
+  if (m) cuda_malloc((void **) &s->d_z, m * sizeof(OSQPFloat));
   else   s->d_z = NULL;
 
   /* Create dense vector descriptors for PCG iterates */
@@ -171,10 +171,10 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   else   s->vecz = NULL;
 
   /* Allocate scalar in host memory that is page-locked and accessible to device */
-  cuda_malloc_host((void **) &s->h_r_norm, sizeof(c_float));
+  cuda_malloc_host((void **) &s->h_r_norm, sizeof(OSQPFloat));
 
   /* Allocate device-side scalar values. This way scalars are packed in device memory */
-  cuda_malloc((void **) &s->d_r_norm, 8 * sizeof(c_float));
+  cuda_malloc((void **) &s->d_r_norm, 8 * sizeof(OSQPFloat));
   s->rTy         = s->d_r_norm + 1;
   s->rTy_prev    = s->d_r_norm + 2;
   s->alpha       = s->d_r_norm + 3;
@@ -186,11 +186,11 @@ c_int init_linsys_solver_cudapcg(cudapcg_solver    **sp,
   cuda_vec_copy_h2d(s->d_sigma,     &s->h_sigma,  1);
 
   /* Allocate memory for PCG preconditioning */
-  cuda_malloc((void **) &s->d_P_diag_val,       n * sizeof(c_float));
-  cuda_malloc((void **) &s->d_AtRA_diag_val,    n * sizeof(c_float));
-  cuda_malloc((void **) &s->d_diag_precond,     n * sizeof(c_float));
-  cuda_malloc((void **) &s->d_diag_precond_inv, n * sizeof(c_float));
-  if (!s->d_rho_vec) cuda_malloc((void **) &s->d_AtA_diag_val, n * sizeof(c_float));
+  cuda_malloc((void **) &s->d_P_diag_val,       n * sizeof(OSQPFloat));
+  cuda_malloc((void **) &s->d_AtRA_diag_val,    n * sizeof(OSQPFloat));
+  cuda_malloc((void **) &s->d_diag_precond,     n * sizeof(OSQPFloat));
+  cuda_malloc((void **) &s->d_diag_precond_inv, n * sizeof(OSQPFloat));
+  if (!s->d_rho_vec) cuda_malloc((void **) &s->d_AtA_diag_val, n * sizeof(OSQPFloat));
 
   /* Link functions */
   s->name            = &name_cudapcg;
@@ -214,12 +214,12 @@ const char* name_cudapcg() {
 }
 
 
-c_int solve_linsys_cudapcg(cudapcg_solver *s,
-                           OSQPVectorf    *b,
-                           c_int           admm_iter) {
+OSQPInt solve_linsys_cudapcg(cudapcg_solver* s,
+                             OSQPVectorf*    b,
+                             OSQPInt         admm_iter) {
 
-  c_int   pcg_iters;
-  c_float eps;
+  OSQPInt   pcg_iters;
+  OSQPFloat eps;
 
   /* Compute the RHS of the reduced KKT system and store it in s->d_rhs */
   compute_rhs(s, b->d_val);
@@ -257,8 +257,8 @@ c_int solve_linsys_cudapcg(cudapcg_solver *s,
 }
 
 
-void update_settings_linsys_solver_cudapcg(cudapcg_solver     *s,
-                                           const OSQPSettings *settings) {
+void update_settings_linsys_solver_cudapcg(cudapcg_solver*     s,
+                                           const OSQPSettings* settings) {
 
   s->max_iter            = settings->cg_max_iter;
   s->reduction_threshold = settings->cg_tol_reduction;
@@ -266,14 +266,14 @@ void update_settings_linsys_solver_cudapcg(cudapcg_solver     *s,
 }
 
 
-void warm_start_linsys_solver_cudapcg(cudapcg_solver    *s,
-                                      const OSQPVectorf *x) {
+void warm_start_linsys_solver_cudapcg(cudapcg_solver*    s,
+                                      const OSQPVectorf* x) {
 
   cuda_vec_copy_d2d(s->d_x, x->d_val, x->length);
 }
 
 
-void free_linsys_solver_cudapcg(cudapcg_solver *s) {
+void free_linsys_solver_cudapcg(cudapcg_solver* s) {
 
   if (s) {
     /* Dense vector descriptors for PCG iterates */
@@ -311,9 +311,9 @@ void free_linsys_solver_cudapcg(cudapcg_solver *s) {
 }
 
 
-c_int update_linsys_solver_matrices_cudapcg(cudapcg_solver   *s,
-                                            const OSQPMatrix *P,
-                                            const OSQPMatrix *A) {
+OSQPInt update_linsys_solver_matrices_cudapcg(cudapcg_solver*   s,
+                                              const OSQPMatrix* P,
+                                              const OSQPMatrix* A) {
   /* The CUDA solver holds pointers to the matrices A and P, so it already has
      access to the updated matrices at this point. The only task remaining is to
      recompute the preconditioner */
@@ -322,9 +322,9 @@ c_int update_linsys_solver_matrices_cudapcg(cudapcg_solver   *s,
 }
 
 
-c_int update_linsys_solver_rho_vec_cudapcg(cudapcg_solver    *s,
-                                           const OSQPVectorf *rho_vec,
-                                           c_float            rho_sc) {
+OSQPInt update_linsys_solver_rho_vec_cudapcg(cudapcg_solver*    s,
+                                             const OSQPVectorf* rho_vec,
+                                             OSQPFloat          rho_sc) {
   /* The CUDA solver holds pointers to the rho vector, so it already has access
      to the updated vector at this point. The only task remaining is to
      recompute the preconditioner */

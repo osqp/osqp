@@ -30,7 +30,7 @@ void c_strcpy(char dest[], const char source[]) {
 
 static void print_line(void) {
   char  the_line[HEADER_LINE_LEN + 1];
-  c_int i;
+  OSQPInt i;
 
   for (i = 0; i < HEADER_LINE_LEN; ++i) the_line[i] = '-';
   the_line[HEADER_LINE_LEN] = '\0';
@@ -53,13 +53,13 @@ void print_header(void) {
   c_print("\n");
 }
 
-void print_setup_header(const OSQPSolver *solver) {
+void print_setup_header(const OSQPSolver* solver) {
 
-  OSQPWorkspace *work;
-  OSQPData      *data;
-  OSQPSettings  *settings;
+  OSQPWorkspace* work;
+  OSQPData*      data;
+  OSQPSettings*  settings;
 
-  c_int nnz; // Number of nonzeros in the problem
+  OSQPInt nnz; // Number of nonzeros in the problem
 
   work     = solver->work;
   data     = solver->work->data;
@@ -147,7 +147,7 @@ void print_setup_header(const OSQPSolver *solver) {
   c_print("\n");
 }
 
-void print_summary(OSQPSolver *solver) {
+void print_summary(OSQPSolver* solver) {
 
   OSQPInfo*      info     = solver->info;
   OSQPSettings*  settings = solver->settings;
@@ -174,7 +174,7 @@ void print_summary(OSQPSolver *solver) {
   work->summary_printed = 1; // Summary has been printed
 }
 
-void print_polish(OSQPSolver *solver) {
+void print_polish(OSQPSolver* solver) {
 
   OSQPInfo*      info = solver->info;
   OSQPWorkspace* work = solver->work;
@@ -205,8 +205,8 @@ void print_polish(OSQPSolver *solver) {
   c_print("\n");
 }
 
-void print_footer(OSQPInfo *info,
-                  c_int     polishing) {
+void print_footer(OSQPInfo* info,
+                  OSQPInt   polishing) {
   c_print("\n"); // Add space after iterations
 
   c_print("status:               %s\n", info->status);
@@ -296,8 +296,8 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
 void print_csc_matrix(const OSQPCscMatrix* M,
                       const char*          name)
 {
-  c_int j, i, row_start, row_stop;
-  c_int k = 0;
+  OSQPInt j, i, row_start, row_stop;
+  OSQPInt k = 0;
 
   // Print name
   c_print("%s :\n", name);
@@ -317,8 +317,8 @@ void print_csc_matrix(const OSQPCscMatrix* M,
 
 void dump_csc_matrix(const OSQPCscMatrix* M,
                      const char*          file_name) {
-  c_int j, i, row_strt, row_stop;
-  c_int k = 0;
+  OSQPInt j, i, row_strt, row_stop;
+  OSQPInt k = 0;
   FILE *f = fopen(file_name, "w");
 
   if (f) {
@@ -345,7 +345,7 @@ void dump_csc_matrix(const OSQPCscMatrix* M,
 void print_trip_matrix(const OSQPCscMatrix* M,
                        const char*          name)
 {
-  c_int k = 0;
+  OSQPInt k = 0;
 
   // Print name
   c_print("%s :\n", name);
@@ -355,12 +355,12 @@ void print_trip_matrix(const OSQPCscMatrix* M,
   }
 }
 
-void print_dns_matrix(const c_float* M,
-                            c_int    m,
-                            c_int    n,
+void print_dns_matrix(const OSQPFloat* M,
+                            OSQPInt    m,
+                            OSQPInt    n,
                       const char*    name)
 {
-  c_int i, j;
+  OSQPInt i, j;
 
   c_print("%s : \n\t", name);
 
@@ -382,16 +382,16 @@ void print_dns_matrix(const c_float* M,
   c_print("\n");
 }
 
-void print_vec(const c_float* v,
-                     c_int    n,
-               const char*    name) {
+void print_vec(const OSQPFloat* v,
+                     OSQPInt    n,
+               const char*      name) {
   print_dns_matrix(v, 1, n, name);
 }
 
-void dump_vec(const c_float* v,
-                    c_int    len,
+void dump_vec(const OSQPFloat* v,
+                    OSQPInt    len,
               const char*    file_name) {
-  c_int i;
+  OSQPInt i;
   FILE *f = fopen(file_name, "w");
 
   if (f) {
@@ -405,10 +405,10 @@ void dump_vec(const c_float* v,
   }
 }
 
-void print_vec_int(const c_int* x,
-                         c_int  n,
-                   const char*  name) {
-  c_int i;
+void print_vec_int(const OSQPInt* x,
+                         OSQPInt  n,
+                   const char*    name) {
+  OSQPInt i;
 
   c_print("%s = [", name);
 

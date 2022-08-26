@@ -7,7 +7,7 @@
 
 void test_basic_qp2_solve()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
@@ -74,7 +74,7 @@ void test_basic_qp2_solve()
 #ifdef OSQP_ALGEBRA_MKL
 void test_basic_qp2_solve_pardiso()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
@@ -145,7 +145,7 @@ void test_basic_qp2_solve_pardiso()
 
 void test_basic_qp2_update()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));

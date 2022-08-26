@@ -8,7 +8,7 @@
 
 // ========== Logical, testing and debug ===========
 
-c_int csc_is_eq(OSQPCscMatrix* A, OSQPCscMatrix* B, c_float tol);
+OSQPInt csc_is_eq(OSQPCscMatrix* A, OSQPCscMatrix* B, OSQPFloat tol);
 
 /*****************************************************************************
 * Create and free CSC Matrices                                              *
@@ -24,11 +24,11 @@ c_int csc_is_eq(OSQPCscMatrix* A, OSQPCscMatrix* B, c_float tol);
  * @param  triplet Allocate CSC or triplet format matrix (1/0)
  * @return         Matrix pointer
  */
-OSQPCscMatrix* csc_spalloc(c_int m,
-                           c_int n,
-                           c_int nzmax,
-                           c_int values,
-                           c_int triplet);
+OSQPCscMatrix* csc_spalloc(OSQPInt m,
+                           OSQPInt n,
+                           OSQPInt nzmax,
+                           OSQPInt values,
+                           OSQPInt triplet);
 
 
 /**
@@ -46,7 +46,8 @@ void csc_spfree(OSQPCscMatrix* A);
                      this should be the same length as A->m
     * @return    Returns A(rows,:) if successful, null otherwise
  */
-OSQPCscMatrix* csc_submatrix_byrows(const OSQPCscMatrix* A, c_int* rows);
+OSQPCscMatrix* csc_submatrix_byrows(const OSQPCscMatrix* A,
+                                    OSQPInt*             rows);
 
 
 /**
@@ -60,7 +61,7 @@ OSQPCscMatrix* csc_submatrix_byrows(const OSQPCscMatrix* A, c_int* rows);
 OSQPCscMatrix* csc_done(OSQPCscMatrix* C,
                         void*          w,
                         void*          x,
-                        c_int          ok);
+                        OSQPInt        ok);
 
 /*****************************************************************************
 * Copy Matrices                                                             *
@@ -79,7 +80,7 @@ OSQPCscMatrix* csc_copy(const OSQPCscMatrix* A);
 //                          OSQPCscMatrix* B);
 
 /* Convert sparse CSC to dense (uses MALLOC)*/
-c_float* csc_to_dns(OSQPCscMatrix* M);
+OSQPFloat* csc_to_dns(OSQPCscMatrix* M);
 
 /*****************************************************************************
 * Matrices Conversion                                                       *
@@ -97,7 +98,7 @@ c_float* csc_to_dns(OSQPCscMatrix* M);
  * @return      matrix in CSC format
  */
 OSQPCscMatrix* triplet_to_csc(const OSQPCscMatrix* T,
-                                    c_int*         TtoC);
+                                    OSQPInt*       TtoC);
 
 
 /**
@@ -111,7 +112,7 @@ OSQPCscMatrix* triplet_to_csc(const OSQPCscMatrix* T,
  * @return      matrix in CSR format
  */
 OSQPCscMatrix* triplet_to_csr(const OSQPCscMatrix* T,
-                                    c_int*         TtoC);
+                                    OSQPInt*       TtoC);
 
 
 // /**
@@ -139,7 +140,8 @@ OSQPCscMatrix* triu_to_csc(OSQPCscMatrix* M);
  * @param  B         Second CSC matrix
  * @return           CSC matrix resulting from vstacking A and B
  */
-OSQPCscMatrix* vstack(OSQPCscMatrix* A, OSQPCscMatrix* B);
+OSQPCscMatrix* vstack(OSQPCscMatrix* A,
+                      OSQPCscMatrix* B);
 
 
 /*****************************************************************************
@@ -154,16 +156,16 @@ OSQPCscMatrix* vstack(OSQPCscMatrix* A, OSQPCscMatrix* B);
 //  * @param  n Number of elements
 //  * @return   Exitflag
 //  */
-// c_int csc_cumsum(c_int *p,
-//                  c_int *c,
-//                  c_int  n);
+// OSQPInt csc_cumsum(OSQPInt *p,
+//                  OSQPInt *c,
+//                  OSQPInt  n);
 
 /**
  * Compute inverse of permutation matrix stored in the vector p.
  * The computed inverse is also stored in a vector.
  */
-c_int* csc_pinv(c_int const *p,
-                c_int        n);
+OSQPInt* csc_pinv(const OSQPInt* p,
+                        OSQPInt  n);
 
 /**
  * C = A(p,p)= PAP' where A and C are symmetric the upper part stored;
@@ -175,9 +177,9 @@ c_int* csc_pinv(c_int const *p,
  * @return        New matrix (allocated)
  */
 OSQPCscMatrix* csc_symperm(const OSQPCscMatrix* A,
-                           const c_int*         pinv,
-                                 c_int*         AtoC,
-                                 c_int          values);
+                           const OSQPInt*       pinv,
+                                 OSQPInt*       AtoC,
+                                 OSQPInt        values);
 
 
 #endif /* ifndef CSC_UTILS_H */

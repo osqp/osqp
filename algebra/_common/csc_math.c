@@ -4,18 +4,18 @@
 
 /* internal utilities for zero-ing, setting and scaling without libraries */
 
-void vec_set_scalar(c_float* v, c_float val, c_int n){
-  c_int i;
+void vec_set_scalar(OSQPFloat* v, OSQPFloat val, OSQPInt n){
+  OSQPInt i;
   for(i = 0; i< n; i++) v[i] = val;
 }
 
-void vec_mult_scalar(c_float* v, c_float val, c_int n){
-  c_int i;
+void vec_mult_scalar(OSQPFloat* v, OSQPFloat val, OSQPInt n){
+  OSQPInt i;
   for(i = 0; i< n; i++) v[i] *= val;
 }
 
-void vec_negate(c_float* v, c_int n){
-  c_int i;
+void vec_negate(OSQPFloat* v, OSQPInt n){
+  OSQPInt i;
   for(i = 0; i< n; i++) v[i] = -v[i];
 }
 
@@ -24,12 +24,12 @@ void vec_negate(c_float* v, c_int n){
 
 /* update some or all matrix values */
 
-void csc_update_values(OSQPCscMatrix* M,
-                       const c_float* Mx_new,
-                       const c_int*   Mx_new_idx,
-                             c_int    M_new_n) {
+void csc_update_values(OSQPCscMatrix*   M,
+                       const OSQPFloat* Mx_new,
+                       const OSQPInt*   Mx_new_idx,
+                             OSQPInt    M_new_n) {
 
-  c_int i;
+  OSQPInt i;
 
   // Update subset of elements
   if (Mx_new_idx) { // Change only Mx_new_idx
@@ -47,8 +47,8 @@ void csc_update_values(OSQPCscMatrix* M,
 
 /* matrix times scalar */
 
-void csc_scale(OSQPCscMatrix* A, c_float sc){
-  c_int i, nnzA;
+void csc_scale(OSQPCscMatrix* A, OSQPFloat sc){
+  OSQPInt i, nnzA;
   nnzA = A->p[A->n];
   for (i = 0; i < nnzA; i++) {
     A->x[i] *= sc;
@@ -57,13 +57,13 @@ void csc_scale(OSQPCscMatrix* A, c_float sc){
 
 /* A = L*A */
 
-void csc_lmult_diag(OSQPCscMatrix* A, const c_float *d){
+void csc_lmult_diag(OSQPCscMatrix* A, const OSQPFloat* d){
 
-  c_int j, i;
-  c_int*   Ap = A->p;
-  c_int*   Ai = A->i;
-  c_float* Ax = A->x;
-  c_int     n = A->n;
+  OSQPInt    j, i;
+  OSQPInt    n  = A->n;
+  OSQPInt*   Ap = A->p;
+  OSQPInt*   Ai = A->i;
+  OSQPFloat* Ax = A->x;
 
   for (j = 0; j < n; j++) {               // Cycle over columns
     for (i = Ap[j]; i < Ap[j + 1]; i++) { // Cycle every row in the column
@@ -75,12 +75,12 @@ void csc_lmult_diag(OSQPCscMatrix* A, const c_float *d){
 
 /* A = A*R */
 
-void csc_rmult_diag(OSQPCscMatrix* A, const c_float* d){
+void csc_rmult_diag(OSQPCscMatrix* A, const OSQPFloat* d){
 
-  c_int j, i;
-  c_int*   Ap = A->p;
-  c_float* Ax = A->x;
-  c_int     n = A->n;
+  OSQPInt    j, i;
+  OSQPInt    n  = A->n;
+  OSQPInt*   Ap = A->p;
+  OSQPFloat* Ax = A->x;
 
   for (j = 0; j < n; j++) {                // Cycle over columns j
     for (i = Ap[j]; i < Ap[j + 1]; i++) {  // Cycle every row i in column j
@@ -92,17 +92,17 @@ void csc_rmult_diag(OSQPCscMatrix* A, const c_float* d){
 
 //y = alpha*A*x + beta*y, where A is symmetric and only triu is stored
 void csc_Axpy_sym_triu(const OSQPCscMatrix* A,
-                       const c_float*       x,
-                             c_float*       y,
-                             c_float        alpha,
-                             c_float        beta) {
+                       const OSQPFloat*     x,
+                             OSQPFloat*     y,
+                             OSQPFloat      alpha,
+                             OSQPFloat      beta) {
 
-    c_int i, j;
-    c_int*   Ap = A->p;
-    c_int*   Ai = A->i;
-    c_float* Ax = A->x;
-    c_int    An = A->n;
-    c_int    Am = A->m;
+    OSQPInt    i, j;
+    OSQPInt*   Ap = A->p;
+    OSQPInt*   Ai = A->i;
+    OSQPInt    An = A->n;
+    OSQPInt    Am = A->m;
+    OSQPFloat* Ax = A->x;
 
     // first do the b*y part
     if (beta == 0)        vec_set_scalar(y, 0.0, Am);
@@ -147,17 +147,17 @@ void csc_Axpy_sym_triu(const OSQPCscMatrix* A,
 
 //y = alpha*A*x + beta*y
 void csc_Axpy(const OSQPCscMatrix* A,
-              const c_float*       x,
-                    c_float*       y,
-                    c_float        alpha,
-                    c_float        beta) {
+              const OSQPFloat*     x,
+                    OSQPFloat*     y,
+                    OSQPFloat      alpha,
+                    OSQPFloat      beta) {
 
-  c_int i, j;
-  c_int*   Ap = A->p;
-  c_int*   Ai = A->i;
-  c_float* Ax = A->x;
-  c_int    An = A->n;
-  c_int    Am = A->m;
+  OSQPInt    i, j;
+  OSQPInt*   Ap = A->p;
+  OSQPInt*   Ai = A->i;
+  OSQPInt    An = A->n;
+  OSQPInt    Am = A->m;
+  OSQPFloat* Ax = A->x;
 
   // first do the b*y part
   if (beta == 0)        vec_set_scalar(y, 0.0, Am);
@@ -193,13 +193,16 @@ void csc_Axpy(const OSQPCscMatrix* A,
 
 //y = alpha*A'*x + beta*y
 
-void csc_Atxpy(const OSQPCscMatrix* A, const c_float* x, c_float* y,
-                     c_float alpha, c_float beta) {
-  c_int j, k;
-  c_int*   Ap = A->p;
-  c_int*   Ai = A->i;
-  c_float* Ax = A->x;
-  c_int    An = A->n;
+void csc_Atxpy(const OSQPCscMatrix* A,
+               const OSQPFloat*     x,
+                     OSQPFloat*     y,
+                     OSQPFloat      alpha,
+                     OSQPFloat      beta) {
+  OSQPInt    j, k;
+  OSQPInt    An = A->n;
+  OSQPInt*   Ap = A->p;
+  OSQPInt*   Ai = A->i;
+  OSQPFloat* Ax = A->x;
 
   // first do the b*y part
   if (beta == 0)        vec_set_scalar(y, 0.0, An);
@@ -233,16 +236,16 @@ void csc_Atxpy(const OSQPCscMatrix* A, const c_float* x, c_float* y,
 
 // 1/2 x'*P*x
 
-// c_float csc_quad_form(const csc *P, const c_float *x) {
+// OSQPFloat csc_quad_form(const csc *P, const OSQPFloat *x) {
 
 //   //NB:implementation assumes upper triangular part only
 
-//   c_float quad_form = 0.;
-//   c_int   i, j, ptr;
-//   c_int*   Pp = P->p;
-//   c_int*   Pi = P->i;
-//   c_float* Px = P->x;
-//   c_int    Pn = P->n;
+//   OSQPFloat quad_form = 0.;
+//   OSQPInt   i, j, ptr;
+//   OSQPInt*   Pp = P->p;
+//   OSQPInt*   Pi = P->i;
+//   OSQPFloat* Px = P->x;
+//   OSQPInt    Pn = P->n;
 
 
 //   for (j = 0; j < Pn; j++) {                    // Iterate over columns
@@ -250,7 +253,7 @@ void csc_Atxpy(const OSQPCscMatrix* A, const c_float* x, c_float* y,
 //       i = Pi[ptr];                            // Row index
 
 //       if (i == j) {                                 // Diagonal element
-//         quad_form += (c_float).5 * Px[ptr] * x[i] * x[i];
+//         quad_form += (OSQPFloat).5 * Px[ptr] * x[i] * x[i];
 //       }
 //       else if (i < j) {                             // Off-diagonal element
 //         quad_form += Px[ptr] * x[i] * x[j];
@@ -266,12 +269,12 @@ void csc_Atxpy(const OSQPCscMatrix* A, const c_float* x, c_float* y,
 
 /* columnwise infinity norm */
 
-void csc_col_norm_inf(const OSQPCscMatrix* M, c_float* E) {
+void csc_col_norm_inf(const OSQPCscMatrix* M, OSQPFloat* E) {
 
-  c_int j, ptr;
-  c_int*   Mp = M->p;
-  c_float* Mx = M->x;
-  c_int    Mn = M->n;
+  OSQPInt    j, ptr;
+  OSQPInt*   Mp = M->p;
+  OSQPInt    Mn = M->n;
+  OSQPFloat* Mx = M->x;
 
   // Initialize zero max elements
   vec_set_scalar(E, 0.0, Mn);
@@ -286,14 +289,14 @@ void csc_col_norm_inf(const OSQPCscMatrix* M, c_float* E) {
 
 /* rowwise infinity norm */
 
-void csc_row_norm_inf(const OSQPCscMatrix* M, c_float* E) {
+void csc_row_norm_inf(const OSQPCscMatrix* M, OSQPFloat* E) {
 
-  c_int i, j, ptr;
-  c_int*   Mp = M->p;
-  c_int*   Mi = M->i;
-  c_float* Mx = M->x;
-  c_int    Mn = M->n;
-  c_int    Mm = M->m;
+  OSQPInt    i, j, ptr;
+  OSQPInt*   Mp = M->p;
+  OSQPInt*   Mi = M->i;
+  OSQPInt    Mn = M->n;
+  OSQPInt    Mm = M->m;
+  OSQPFloat* Mx = M->x;
 
   // Initialize zero max elements
   vec_set_scalar(E, 0.0, Mm);
@@ -309,15 +312,15 @@ void csc_row_norm_inf(const OSQPCscMatrix* M, c_float* E) {
 
 /* rowwise infinity norm, only upper triangle specified */
 
-void csc_row_norm_inf_sym_triu(const OSQPCscMatrix* M, c_float* E) {
+void csc_row_norm_inf_sym_triu(const OSQPCscMatrix* M, OSQPFloat* E) {
 
-  c_int   i, j, ptr;
-  c_int*   Mp = M->p;
-  c_int*   Mi = M->i;
-  c_float* Mx = M->x;
-  c_int    Mn = M->n;
-  c_int    Mm = M->m;
-  c_float abs_x;
+  OSQPInt   i, j, ptr;
+  OSQPInt*   Mp = M->p;
+  OSQPInt*   Mi = M->i;
+  OSQPInt    Mn = M->n;
+  OSQPInt    Mm = M->m;
+  OSQPFloat* Mx = M->x;
+  OSQPFloat  abs_x;
 
   // Initialize zero max elements
   vec_set_scalar(E, 0.0, Mm);

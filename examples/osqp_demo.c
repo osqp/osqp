@@ -5,26 +5,26 @@
 int main(void) {
 
   /* Load problem data */
-  c_float P_x[3] = { 4.0, 1.0, 2.0, };
-  c_int   P_nnz  = 3;
-  c_int   P_i[3] = { 0, 0, 1, };
-  c_int   P_p[3] = { 0, 1, 3, };
-  c_float q[2]   = { 1.0, 1.0, };
-  c_float A_x[4] = { 1.0, 1.0, 1.0, 1.0, };
-  c_int   A_nnz  = 4;
-  c_int   A_i[4] = { 0, 1, 0, 2, };
-  c_int   A_p[3] = { 0, 2, 4, };
-  c_float l[3]   = { 1.0, 0.0, 0.0, };
-  c_float u[3]   = { 1.0, 0.7, 0.7, };
-  c_int n = 2;
-  c_int m = 3;
+  OSQPFloat P_x[3] = { 4.0, 1.0, 2.0, };
+  OSQPInt   P_nnz  = 3;
+  OSQPInt   P_i[3] = { 0, 0, 1, };
+  OSQPInt   P_p[3] = { 0, 1, 3, };
+  OSQPFloat q[2]   = { 1.0, 1.0, };
+  OSQPFloat A_x[4] = { 1.0, 1.0, 1.0, 1.0, };
+  OSQPInt   A_nnz  = 4;
+  OSQPInt   A_i[4] = { 0, 1, 0, 2, };
+  OSQPInt   A_p[3] = { 0, 2, 4, };
+  OSQPFloat l[3]   = { 1.0, 0.0, 0.0, };
+  OSQPFloat u[3]   = { 1.0, 0.7, 0.7, };
+  OSQPInt   n = 2;
+  OSQPInt   m = 3;
 
   /* Exitflag */
-  c_int exitflag;
+  OSQPInt exitflag;
 
   /* Solver, settings, matrices */
-  OSQPSolver   *solver   = NULL;
-  OSQPSettings *settings = NULL;
+  OSQPSolver*   solver   = NULL;
+  OSQPSettings* settings = NULL;
   OSQPCscMatrix* P = malloc(sizeof(OSQPCscMatrix));
   OSQPCscMatrix* A = malloc(sizeof(OSQPCscMatrix));
 
@@ -42,7 +42,7 @@ int main(void) {
     //settings->linsys_solver = OSQP_INDIRECT_SOLVER;
   }
 
-  c_int cap = osqp_capabilities();
+  OSQPInt cap = osqp_capabilities();
 
   printf("This OSQP library supports:\n");
   if(cap & OSQP_CAPABILITIY_DIRECT_SOLVER) {

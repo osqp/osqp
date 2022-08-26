@@ -30,9 +30,9 @@ extern CUDA_Handle_t *CUDA_handle;
  *                              GPU Kernels                                    *
  *******************************************************************************/
 
-__global__ void scalar_division_kernel(c_float       *res,
-                                       const c_float *num,
-                                       const c_float *den) {
+__global__ void scalar_division_kernel(OSQPFloat*       res,
+                                       const OSQPFloat* num,
+                                       const OSQPFloat* den) {
 
   *res = (*num) / (*den);
 }
@@ -45,26 +45,27 @@ __global__ void scalar_division_kernel(c_float       *res,
 /*
  * y = (P + sigma*I + A'*R*A) * x
  */
-static void mat_vec_prod(cudapcg_solver             *s,
-                         c_float                    *d_y,
+static void mat_vec_prod(cudapcg_solver*             s,
+                         OSQPFloat*                  d_y,
                          cusparseDnVecDescr_t        vecy,
-                         const c_float              *d_x,
+                         const OSQPFloat*            d_x,
                          const cusparseDnVecDescr_t  vecx,
-                         c_int                       is_device) {
+                         OSQPInt                     is_device) {
 
-  c_float *sigma;
-  c_float H_ZERO = 0.0;
-  c_float H_ONE  = 1.0;
-  c_int n = s->n;
-  c_int m = s->m;
-  csr *P  = s->P;
-  csr *A  = s->A;
-  csr *At = s->At;
+  OSQPFloat* sigma;
+  OSQPFloat  H_ZERO = 0.0;
+  OSQPFloat  H_ONE  = 1.0;
+  OSQPInt n = s->n;
+  OSQPInt m = s->m;
+
+  csr* P  = s->P;
+  csr* A  = s->A;
+  csr* At = s->At;
 
   sigma = is_device ? s->d_sigma : &s->h_sigma;
 
   /* y = x */
-  checkCudaErrors(cudaMemcpy(d_y, d_x, n * sizeof(c_float), cudaMemcpyDeviceToDevice));
+  checkCudaErrors(cudaMemcpy(d_y, d_x, n * sizeof(OSQPFloat), cudaMemcpyDeviceToDevice));
 
   /* y *= sigma */
   checkCudaErrors(cublasTscal(CUDA_handle->cublasHandle, n, sigma, d_y, 1));
@@ -107,23 +108,23 @@ static void mat_vec_prod(cudapcg_solver             *s,
  *                              API Functions                                  *
  *******************************************************************************/
 
-c_int cuda_pcg_alg(cudapcg_solver *s,
-                   c_float         eps,
-                   c_int           max_iter) {
+OSQPInt cuda_pcg_alg(cudapcg_solver* s,
+                     OSQPFloat       eps,
+                     OSQPInt         max_iter) {
 
-  c_float *tmp;
+  OSQPFloat* tmp;
 
-  c_int iter = 0;
-  c_int n    = s->n;
-  c_float H_MINUS_ONE = -1.0;
+  OSQPInt   iter = 0;
+  OSQPInt   n    = s->n;
+  OSQPFloat H_MINUS_ONE = -1.0;
 
   if (!s->warm_start) {
     /* x = 0 */
-    checkCudaErrors(cudaMemset(s->d_x, 0, n * sizeof(c_float)));
+    checkCudaErrors(cudaMemset(s->d_x, 0, n * sizeof(OSQPFloat)));
   }
 
   /* p = 0 */
-  checkCudaErrors(cudaMemset(s->d_p, 0, n * sizeof(c_float)));
+  checkCudaErrors(cudaMemset(s->d_p, 0, n * sizeof(OSQPFloat)));
 
   /* r = K * x */
   mat_vec_prod(s, s->d_r, s->vecr, s->d_x, s->vecx, 0);
@@ -179,7 +180,7 @@ c_int cuda_pcg_alg(cudapcg_solver *s,
 
     /* Update residual norm */
     cuda_vec_norm_inf(s->d_r, n, s->d_r_norm);
-    checkCudaErrors(cudaMemcpyAsync(s->h_r_norm, s->d_r_norm, sizeof(c_float), cudaMemcpyDeviceToHost));
+    checkCudaErrors(cudaMemcpyAsync(s->h_r_norm, s->d_r_norm, sizeof(OSQPFloat), cudaMemcpyDeviceToHost));
 
     /* beta = rTy / rTy_prev */
     scalar_division_kernel<<<1,1>>>(s->beta, s->rTy, s->rTy_prev);
@@ -202,17 +203,17 @@ c_int cuda_pcg_alg(cudapcg_solver *s,
 }
 
 
-void cuda_pcg_update_precond(cudapcg_solver *s,
-                             c_int           P_updated,
-                             c_int           A_updated,
-                             c_int           R_updated) {
+void cuda_pcg_update_precond(cudapcg_solver* s,
+                             OSQPInt         P_updated,
+                             OSQPInt         A_updated,
+                             OSQPInt         R_updated) {
 
-  void    *buffer;
-  c_float *tmp;
-  c_int    n  = s->n;
-  csr     *At = s->At;
+  void*      buffer;
+  OSQPFloat* tmp;
+  OSQPInt    n  = s->n;
+  csr*       At = s->At;
 
-  size_t Buffer_size_in_bytes = n * (sizeof(c_float) + sizeof(c_int));
+  size_t Buffer_size_in_bytes = n * (sizeof(OSQPFloat) + sizeof(OSQPInt));
 
   if (!P_updated && !A_updated && !R_updated) return;
 
@@ -223,7 +224,7 @@ void cuda_pcg_update_precond(cudapcg_solver *s,
 
   if (A_updated || R_updated) {
     /* Allocate memory */
-    cuda_malloc((void **) &tmp, At->nnz * sizeof(c_float));
+    cuda_malloc((void **) &tmp, At->nnz * sizeof(OSQPFloat));
     cuda_malloc((void **) &buffer, Buffer_size_in_bytes);
 
     /* Update d_AtRA_diag_val */

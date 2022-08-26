@@ -7,8 +7,9 @@
 
 void test_basic_qp_solve()
 {
-  c_int exitflag, tmp_int;
-  c_float tmp_float;
+  OSQPInt        exitflag;
+  OSQPInt        tmp_int;
+  OSQPFloat      tmp_float;
   OSQPCscMatrix* tmp_mat;
   OSQPCscMatrix* P_tmp;
 
@@ -432,17 +433,17 @@ void test_basic_qp_solve()
   P_tmp->n = 2;
   P_tmp->nz = -1;
   P_tmp->nzmax = 4;
-  P_tmp->x = (c_float*) c_malloc(4 * sizeof(c_float));
+  P_tmp->x = (OSQPFloat*) c_malloc(4 * sizeof(OSQPFloat));
   P_tmp->x[0] = 4.0;
   P_tmp->x[1] = 1.0;
   P_tmp->x[2] = 1.0;
   P_tmp->x[3] = 2.0;
-  P_tmp->i = (c_int*) c_malloc(4 * sizeof(c_int));
+  P_tmp->i = (OSQPInt*) c_malloc(4 * sizeof(OSQPInt));
   P_tmp->i[0] = 0;
   P_tmp->i[1] = 1;
   P_tmp->i[2] = 0;
   P_tmp->i[3] = 1;
-  P_tmp->p = (c_int*) c_malloc((2 + 1) * sizeof(c_int));
+  P_tmp->p = (OSQPInt*) c_malloc((2 + 1) * sizeof(OSQPInt));
   P_tmp->p[0] = 0;
   P_tmp->p[1] = 2;
   P_tmp->p[2] = 4;
@@ -479,7 +480,7 @@ void test_basic_qp_solve()
 #ifdef OSQP_ALGEBRA_MKL
 void test_basic_qp_solve_pardiso()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
@@ -550,8 +551,10 @@ void test_basic_qp_solve_pardiso()
 
 void test_basic_qp_update()
 {
-  c_int exitflag;
-  OSQPVectorf *q_new, *l_new, *u_new;
+  OSQPInt      exitflag;
+  OSQPVectorf* q_new;
+  OSQPVectorf* l_new;
+  OSQPVectorf* u_new;
 
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
@@ -667,7 +670,7 @@ void test_basic_qp_update()
 
 void test_basic_qp_check_termination()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
@@ -751,13 +754,14 @@ void test_basic_qp_update_rho()
   basic_qp_sols_data *sols_data;
 
   // Exitflag
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // rho to use
-  c_float rho;
+  OSQPFloat rho;
 
   // Define number of iterations to compare
-  c_int n_iter_new_solver, n_iter_update_rho;
+  OSQPInt n_iter_new_solver;
+  OSQPInt n_iter_update_rho;
 
   // Populate data
   data = generate_problem_basic_qp();
@@ -873,7 +877,7 @@ void test_basic_qp_update_rho()
 #ifdef OSQP_ENABLE_PROFILING
 void test_basic_qp_time_limit()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
@@ -923,7 +927,7 @@ void test_basic_qp_time_limit()
   settings->eps_rel = 1e-12;
   settings->eps_abs = 1e-12;
 # endif
-  settings->max_iter = (c_int)2e9;
+  settings->max_iter = (OSQPInt)2e9;
   settings->check_termination = 0;
   osqp_update_settings(solver, settings);
 
@@ -950,15 +954,16 @@ void test_basic_qp_time_limit()
 
 void test_basic_qp_warm_start()
 {
-  c_int exitflag, iter;
+  OSQPInt exitflag;
+  OSQPInt iter;
 
   // Cold started variables
-  c_float x0[2] = { 0.0, 0.0, };
-  c_float y0[4] = { 0.0, 0.0, 0.0, 0.0, };
+  OSQPFloat x0[2] = { 0.0, 0.0, };
+  OSQPFloat y0[4] = { 0.0, 0.0, 0.0, 0.0, };
 
   // Optimal solution
-  c_float xopt[2] = { 0.3, 0.7, };
-  c_float yopt[4] = {-2.9, 0.0, 0.2, 0.0, };
+  OSQPFloat xopt[2] = { 0.3, 0.7, };
+  OSQPFloat yopt[4] = {-2.9, 0.0, 0.2, 0.0, };
 
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));

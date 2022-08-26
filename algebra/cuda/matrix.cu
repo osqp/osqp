@@ -30,7 +30,7 @@
  *******************************************************************************/
 
 OSQPMatrix* OSQPMatrix_new_from_csc(const OSQPCscMatrix* M,
-                                          c_int          is_triu) {
+                                          OSQPInt        is_triu) {
 
   OSQPMatrix* out = (OSQPMatrix *) c_calloc(1, sizeof(OSQPMatrix));
   if (!out) return OSQP_NULL;
@@ -49,10 +49,10 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const OSQPCscMatrix* M,
   return out;
 }
 
-void OSQPMatrix_update_values(OSQPMatrix*    mat,
-                              const c_float* Mx_new,
-                              const c_int*   Mx_new_idx,
-                              c_int          Mx_new_n) {
+void OSQPMatrix_update_values(OSQPMatrix*      mat,
+                              const OSQPFloat* Mx_new,
+                              const OSQPInt*   Mx_new_idx,
+                              OSQPInt          Mx_new_n) {
 
   if (mat->At) { /* not symmetric */
     cuda_mat_update_A(Mx_new, Mx_new_idx, Mx_new_n, &mat->S, &mat->At, mat->d_A_to_At_ind);
@@ -63,14 +63,14 @@ void OSQPMatrix_update_values(OSQPMatrix*    mat,
   }
 }
 
-c_int OSQPMatrix_get_m( const OSQPMatrix* mat) { return mat->S->m; }
+OSQPInt OSQPMatrix_get_m( const OSQPMatrix* mat) { return mat->S->m; }
 
-c_int OSQPMatrix_get_n( const OSQPMatrix* mat) { return mat->S->n; }
+OSQPInt OSQPMatrix_get_n( const OSQPMatrix* mat) { return mat->S->n; }
 
-c_int OSQPMatrix_get_nz(const OSQPMatrix* mat) { return mat->At ? mat->S->nnz : mat->P_triu_nnz; }
+OSQPInt OSQPMatrix_get_nz(const OSQPMatrix* mat) { return mat->At ? mat->S->nnz : mat->P_triu_nnz; }
 
 void OSQPMatrix_mult_scalar(OSQPMatrix* mat,
-                            c_float     sc) {
+                            OSQPFloat   sc) {
 
   cuda_mat_mult_sc(mat->S, mat->At, sc);
 }
@@ -90,8 +90,8 @@ void OSQPMatrix_rmult_diag(OSQPMatrix*        mat,
 void OSQPMatrix_Axpy(const OSQPMatrix*  mat,
                      const OSQPVectorf* x,
                            OSQPVectorf* y,
-                           c_float      alpha,
-                           c_float      beta) {
+                           OSQPFloat    alpha,
+                           OSQPFloat    beta) {
 
   if (mat->S->nnz == 0 || alpha == 0.0) {
     /*  y = beta * y  */
@@ -104,8 +104,8 @@ void OSQPMatrix_Axpy(const OSQPMatrix*  mat,
 void OSQPMatrix_Atxpy(const OSQPMatrix*  mat,
                       const OSQPVectorf* x,
                             OSQPVectorf* y,
-                            c_float      alpha,
-                            c_float      beta) {
+                            OSQPFloat    alpha,
+                            OSQPFloat    beta) {
 
   if (mat->At->nnz == 0 || alpha == 0.0) {
     /*  y = beta * y  */

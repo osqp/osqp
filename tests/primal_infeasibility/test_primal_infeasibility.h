@@ -7,7 +7,7 @@
 
 void test_primal_infeasible_qp_solve()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));

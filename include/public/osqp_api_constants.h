@@ -137,15 +137,15 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # endif
 
 # ifndef OSQP_NAN
-#  define OSQP_NAN ((c_float)0x7fc00000UL)  // not a number
+#  define OSQP_NAN ((OSQPFloat)0x7fc00000UL)  // not a number
 # endif
 
 # ifndef OSQP_INFTY
 #if defined(OSQP_ALGEBRA_CUDA) && defined(OSQP_USE_FLOAT)
 // Multiplying two floats that are in the order of 1e20 results in an overflow
-#  define OSQP_INFTY ((c_float)1e17)
+#  define OSQP_INFTY ((OSQPFloat)1e17)
 #else
-#  define OSQP_INFTY ((c_float)1e30)        // infinity
+#  define OSQP_INFTY ((OSQPFloat)1e30)        // infinity
 #endif
 # endif /* ifndef OSQP_INFTY */
 

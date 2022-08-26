@@ -25,56 +25,56 @@
   *
   */
 
-void csc_update_values(OSQPCscMatrix* M,
-                       const c_float* Mx_new,
-                       const c_int*   Mx_new_idx,
-                       c_int          P_new_n);
+void csc_update_values(OSQPCscMatrix*   M,
+                       const OSQPFloat* Mx_new,
+                       const OSQPInt*   Mx_new_idx,
+                       OSQPInt          P_new_n);
 
 /*****************************************************************************
 * CSC Algebraic Operations                                                   *
 ******************************************************************************/
 
 // A = sc*A
-void csc_scale(OSQPCscMatrix* A, c_float sc);
+void csc_scale(OSQPCscMatrix* A, OSQPFloat sc);
 
 // A = diag(L)*A
-void csc_lmult_diag(OSQPCscMatrix* A, const c_float* L);
+void csc_lmult_diag(OSQPCscMatrix* A, const OSQPFloat* L);
 
 // A = A*diag(R)
-void csc_rmult_diag(OSQPCscMatrix* A, const c_float* R);
+void csc_rmult_diag(OSQPCscMatrix* A, const OSQPFloat* R);
 
 //y = alpha*A*x + beta*y, where A is symmetric and only triu is stored
 void csc_Axpy_sym_triu(const OSQPCscMatrix* A,
-                       const c_float*       x,
-                             c_float*       y,
-                             c_float        alpha,
-                             c_float        beta);
+                       const OSQPFloat*     x,
+                             OSQPFloat*     y,
+                             OSQPFloat      alpha,
+                             OSQPFloat      beta);
 
 //y = alpha*A*x + beta*y
 void csc_Axpy(const OSQPCscMatrix* A,
-              const c_float*       x,
-                    c_float*       y,
-                    c_float        alpha,
-                    c_float        beta);
+              const OSQPFloat*     x,
+                    OSQPFloat*     y,
+                    OSQPFloat      alpha,
+                    OSQPFloat      beta);
 
 //y = alpha*A^T*x + beta*y
 void csc_Atxpy(const OSQPCscMatrix* A,
-               const c_float*       x,
-                     c_float*       y,
-                     c_float        alpha,
-                     c_float        beta);
+               const OSQPFloat*     x,
+                     OSQPFloat*     y,
+                     OSQPFloat      alpha,
+                     OSQPFloat      beta);
 
 // // returns 1/2 x'*P*x
-// c_float csc_quad_form(const csc *P, const c_float *x);
+// OSQPFloat csc_quad_form(const csc *P, const OSQPFloat *x);
 
 // E[i] = inf_norm(M(:,i))
-void csc_col_norm_inf(const OSQPCscMatrix* M, c_float* E);
+void csc_col_norm_inf(const OSQPCscMatrix* M, OSQPFloat* E);
 
 // E[i] = inf_norm(M(i,:))
-void csc_row_norm_inf(const OSQPCscMatrix* M, c_float* E);
+void csc_row_norm_inf(const OSQPCscMatrix* M, OSQPFloat* E);
 
 // E[i] = inf_norm(M(i,:)), where M stores triu part only
-void csc_row_norm_inf_sym_triu(const OSQPCscMatrix* M, c_float* E);
+void csc_row_norm_inf_sym_triu(const OSQPCscMatrix* M, OSQPFloat* E);
 
 
 #endif /* ifndef CSC_MATH_H */

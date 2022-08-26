@@ -13,7 +13,7 @@
  * @return        Exitflag:  0: Factorization successful
  *                           1: Factorization unsuccessful
  */
-c_int polish(OSQPSolver *solver);
+OSQPInt polish(OSQPSolver* solver);
 
 
 #endif /* ifndef POLISH_H */

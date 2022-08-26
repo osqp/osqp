@@ -10,13 +10,13 @@
 /* similar to OSQP internal container, but */
 /* holding only bare array types and csc */
 typedef struct {
-    c_int          n;
-    c_int          m;
+    OSQPInt        n;
+    OSQPInt        m;
     OSQPCscMatrix* P;
-    c_float*       q;
+    OSQPFloat*     q;
     OSQPCscMatrix* A;
-    c_float*       l;
-    c_float*       u;
+    OSQPFloat*     l;
+    OSQPFloat*     u;
 } OSQPTestData;
 
 #include <memory>

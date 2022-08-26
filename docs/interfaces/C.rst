@@ -51,8 +51,8 @@ Data types
 
 The most basic used datatypes are
 
-* :code:`c_int`: can be :code:`long` or :code:`int` if the compiler flag :code:`OSQP_USE_LONG` is set or not
-* :code:`c_float`: can be a :code:`float` or a :code:`double` if the compiler flag :code:`OSQP_USE_FLOAT` is set or not.
+* :code:`OSQPInt`: can be :code:`long` or :code:`int` if the compiler flag :code:`OSQP_USE_LONG` is set or not
+* :code:`OSQPFloat`: can be a :code:`float` or a :code:`double` if the compiler flag :code:`OSQP_USE_FLOAT` is set or not.
 
 
 The matrices are defined in `Compressed Sparse Column (CSC) format <https://people.sc.fsu.edu/~jburkardt/data/cc/cc.html>`_ using zero-based indexing.

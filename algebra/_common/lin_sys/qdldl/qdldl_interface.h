@@ -20,38 +20,38 @@ struct qdldl {
      */
     const char* (*name)(void);
 
-    c_int (*solve)(struct qdldl *self,
-                   OSQPVectorf  *b,
-                   c_int         admm_iter);
+    OSQPInt (*solve)(struct qdldl*       self,
+                            OSQPVectorf* b,
+                            OSQPInt      admm_iter);
 
-    void (*update_settings)(struct qdldl       *self,
-                            const OSQPSettings *settings);
+    void (*update_settings)(struct qdldl*        self,
+                            const  OSQPSettings* settings);
 
-    void (*warm_start)(struct qdldl      *self,
-                       const OSQPVectorf *x);
+    void (*warm_start)(struct qdldl*       self,
+                       const  OSQPVectorf* x);
 
 #ifndef OSQP_EMBEDDED_MODE
-    c_int (*adjoint_derivative)(struct qdldl *self);
+    OSQPInt (*adjoint_derivative)(struct qdldl* self);
 
-    void (*free)(struct qdldl *self); ///< Free workspace (only if desktop)
+    void (*free)(struct qdldl* self); ///< Free workspace (only if desktop)
 #endif
 
     // This used only in non embedded or embedded 2 version
 #if OSQP_EMBEDDED_MODE != 1
-    c_int (*update_matrices)(struct qdldl     *self,
-                             const OSQPMatrix *P,
-                             const c_int* Px_new_idx,
-                             c_int P_new_n,
-                             const OSQPMatrix *A,
-                             const c_int* Ax_new_idx,
-                             c_int A_new_n);   ///< Update solver matrices
+    OSQPInt (*update_matrices)(struct qdldl*      self,
+                               const  OSQPMatrix* P,
+                               const  OSQPInt*    Px_new_idx,
+                                      OSQPInt     P_new_n,
+                               const  OSQPMatrix* A,
+                               const  OSQPInt*    Ax_new_idx,
+                                      OSQPInt     A_new_n);   ///< Update solver matrices
 
-    c_int (*update_rho_vec)(struct qdldl      *self,
-                            const OSQPVectorf *rho_vec,
-                            c_float            rho_sc);    ///< Update rho_vec parameter
+    OSQPInt (*update_rho_vec)(struct qdldl*       self,
+                              const  OSQPVectorf* rho_vec,
+                                     OSQPFloat    rho_sc);    ///< Update rho_vec parameter
 #endif
 
-    c_int nthreads;
+    OSQPInt nthreads;
 
     /** @} */
 
@@ -60,26 +60,26 @@ struct qdldl {
      * @{
      */
     OSQPCscMatrix* L;             ///< lower triangular matrix in LDL factorization
-    c_float*       Dinv;          ///< inverse of diag matrix in LDL (as a vector)
-    c_int*         P;             ///< permutation of KKT matrix for factorization
-    c_float*       bp;            ///< workspace memory for solves
-    c_float*       sol;           ///< solution to the KKT system
-    c_float*       rho_inv_vec;   ///< parameter vector
-    c_float        sigma;         ///< scalar parameter
-    c_float        rho_inv;       ///< scalar parameter (used if rho_inv_vec == NULL)
+    OSQPFloat*     Dinv;          ///< inverse of diag matrix in LDL (as a vector)
+    OSQPInt*       P;             ///< permutation of KKT matrix for factorization
+    OSQPFloat*     bp;            ///< workspace memory for solves
+    OSQPFloat*     sol;           ///< solution to the KKT system
+    OSQPFloat*     rho_inv_vec;   ///< parameter vector
+    OSQPFloat      sigma;         ///< scalar parameter
+    OSQPFloat      rho_inv;       ///< scalar parameter (used if rho_inv_vec == NULL)
 #ifndef OSQP_EMBEDDED_MODE
-    c_int polishing;        ///< polishing flag
+    OSQPInt        polishing;     ///< polishing flag
 #endif
-    c_int n;                ///< number of QP variables
-    c_int m;                ///< number of QP constraints
+    OSQPInt        n;             ///< number of QP variables
+    OSQPInt        m;             ///< number of QP constraints
 
 
 #if OSQP_EMBEDDED_MODE != 1
     // These are required for matrix updates
     OSQPCscMatrix* KKT;           ///< Permuted KKT matrix in sparse form (used to update P and A matrices)
-    c_int*         PtoKKT;        ///< Index of elements from P to KKT matrix
-    c_int*         AtoKKT;        ///< Index of elements from A to KKT matrix
-    c_int*         rhotoKKT;      ///< Index of rho places in KKT matrix
+    OSQPInt*       PtoKKT;        ///< Index of elements from P to KKT matrix
+    OSQPInt*       AtoKKT;        ///< Index of elements from A to KKT matrix
+    OSQPInt*       rhotoKKT;      ///< Index of rho places in KKT matrix
     // QDLDL Numeric workspace
     QDLDL_float* D;
     QDLDL_int*   etree;
@@ -107,12 +107,12 @@ struct qdldl {
  * @param  polishing Flag whether we are initializing for polishing or not
  * @return           Exitflag for error (0 if no errors)
  */
-c_int init_linsys_solver_qdldl(qdldl_solver**      sp,
-                               const OSQPMatrix*   P,
-                               const OSQPMatrix*   A,
-                               const OSQPVectorf*  rho_vec,
-                               const OSQPSettings* settings,
-                               c_int               polishing);
+OSQPInt init_linsys_solver_qdldl(qdldl_solver**      sp,
+                                 const OSQPMatrix*   P,
+                                 const OSQPMatrix*   A,
+                                 const OSQPVectorf*  rho_vec,
+                                 const OSQPSettings* settings,
+                                 OSQPInt             polishing);
 
 /**
  * Get the user-friendly name of the QDLDL solver.
@@ -126,9 +126,9 @@ const char* name_qdldl();
  * @param  b        Right-hand side
  * @return          Exitflag
  */
-c_int solve_linsys_qdldl(qdldl_solver* s,
-                         OSQPVectorf*  b,
-                         c_int         admm_iter);
+OSQPInt solve_linsys_qdldl(qdldl_solver* s,
+                           OSQPVectorf*  b,
+                           OSQPInt       admm_iter);
 
 
 void update_settings_linsys_solver_qdldl(qdldl_solver*       s,
@@ -150,13 +150,13 @@ void warm_start_linsys_solver_qdldl(qdldl_solver*      s,
  * @param  A_new_n    number of elements to update
  * @return            Exitflag
  */
-c_int update_linsys_solver_matrices_qdldl(qdldl_solver* s,
-                                          const OSQPMatrix* P,
-                                          const c_int*      Px_new_idx,
-                                          c_int             P_new_n,
-                                          const OSQPMatrix* A,
-                                          const c_int*      Ax_new_idx,
-                                          c_int             A_new_n);
+OSQPInt update_linsys_solver_matrices_qdldl(qdldl_solver*     s,
+                                            const OSQPMatrix* P,
+                                            const OSQPInt*    Px_new_idx,
+                                            OSQPInt           P_new_n,
+                                            const OSQPMatrix* A,
+                                            const OSQPInt*    Ax_new_idx,
+                                            OSQPInt           A_new_n);
 
 
 
@@ -167,9 +167,9 @@ c_int update_linsys_solver_matrices_qdldl(qdldl_solver* s,
  * @param  rho_vec  new rho_vec value
  * @return          exitflag
  */
-c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver*      s,
-                                         const OSQPVectorf* rho_vec,
-                                         c_float            rho_sc);
+OSQPInt update_linsys_solver_rho_vec_qdldl(qdldl_solver*      s,
+                                           const OSQPVectorf* rho_vec,
+                                           OSQPFloat          rho_sc);
 
 #endif
 
@@ -180,13 +180,13 @@ c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver*      s,
  */
 void free_linsys_solver_qdldl(qdldl_solver* s);
 
-c_int adjoint_derivative_qdldl(qdldl_solver*      s,
-                               const OSQPMatrix*  P,
-                               const OSQPMatrix*  G,
-                               const OSQPMatrix*  A_eq,
-                               const OSQPMatrix*  GDiagLambda,
-                               const OSQPVectorf* slacks,
-                               const OSQPVectorf* rhs);
+OSQPInt adjoint_derivative_qdldl(qdldl_solver*      s,
+                                 const OSQPMatrix*  P,
+                                 const OSQPMatrix*  G,
+                                 const OSQPMatrix*  A_eq,
+                                 const OSQPMatrix*  GDiagLambda,
+                                 const OSQPVectorf* slacks,
+                                 const OSQPVectorf* rhs);
 
 #endif
 

@@ -28,14 +28,14 @@ void OSQPTimer_free(OSQPTimer* t) {
     if (t) c_free(t);
 }
 
-void osqp_tic(OSQPTimer *t)
+void osqp_tic(OSQPTimer* t)
 {
   QueryPerformanceFrequency(&t->freq);
   QueryPerformanceCounter(&t->tic);
 }
 
-c_float osqp_toc(OSQPTimer *t)
+OSQPFloat osqp_toc(OSQPTimer* t)
 {
   QueryPerformanceCounter(&t->toc);
-  return (t->toc.QuadPart - t->tic.QuadPart) / (c_float)t->freq.QuadPart;
+  return (t->toc.QuadPart - t->tic.QuadPart) / (OSQPFloat)t->freq.QuadPart;
 }

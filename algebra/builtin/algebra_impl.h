@@ -9,13 +9,13 @@
 *********************************************/
 
 struct OSQPVectori_ {
-  c_int* values;
-  c_int length;
+  OSQPInt* values;
+  OSQPInt  length;
 };
 
 struct OSQPVectorf_ {
-  c_float* values;
-  c_int length;
+  OSQPFloat* values;
+  OSQPInt    length;
 };
 
 

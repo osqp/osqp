@@ -23,13 +23,13 @@ extern "C" {
  * @param  i     Vector of row indices
  * @param  p     Vector of column pointers
  */
-OSQP_API void csc_set_data(OSQPCscMatrix *M,
-                           c_int          m,
-                           c_int          n,
-                           c_int          nzmax,
-                           c_float       *x,
-                           c_int         *i,
-                           c_int         *p);
+OSQP_API void csc_set_data(OSQPCscMatrix* M,
+                           OSQPInt        m,
+                           OSQPInt        n,
+                           OSQPInt        nzmax,
+                           OSQPFloat*     x,
+                           OSQPInt*       i,
+                           OSQPInt*       p);
 
 # ifdef __cplusplus
 }

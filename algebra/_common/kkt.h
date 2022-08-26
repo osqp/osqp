@@ -33,13 +33,13 @@
  */
  OSQPCscMatrix* form_KKT(OSQPCscMatrix* P,
                          OSQPCscMatrix* A,
-                         c_int          format,
-                         c_float        param1,
-                         c_float*       param2,
-                         c_float        param2_sc,
-                         c_int*         PtoKKT,
-                         c_int*         AtoKKT,
-                         c_int*         param2toKKT);
+                         OSQPInt        format,
+                         OSQPFloat      param1,
+                         OSQPFloat*     param2,
+                         OSQPFloat      param2_sc,
+                         OSQPInt*       PtoKKT,
+                         OSQPInt*       AtoKKT,
+                         OSQPInt*       param2toKKT);
 # endif // ifndef OSQP_EMBEDDED_MODE
 
 
@@ -58,11 +58,11 @@
  */
  void update_KKT_P(OSQPCscMatrix* KKT,
                    OSQPCscMatrix* P,
-                   const c_int*   Px_new_idx,
-                   c_int          P_new_n,
-                   c_int*         PtoKKT,
-                   c_float        param1,
-                   c_int          format);
+                   const OSQPInt* Px_new_idx,
+                   OSQPInt        P_new_n,
+                   OSQPInt*       PtoKKT,
+                   OSQPFloat      param1,
+                   OSQPInt        format);
 
 
 /**
@@ -76,9 +76,9 @@
  */
  void update_KKT_A(OSQPCscMatrix* KKT,
                    OSQPCscMatrix* A,
-                   const c_int*   Ax_new_idx,
-                   c_int          A_new_n,
-                   c_int*         AtoKKT);
+                   const OSQPInt* Ax_new_idx,
+                   OSQPInt        A_new_n,
+                   OSQPInt*       AtoKKT);
 
 
 /**
@@ -91,10 +91,10 @@
  * @param m             number of constraints
  */
 void update_KKT_param2(OSQPCscMatrix* KKT,
-                       c_float*       param2,
-                       c_float        param2_sc,
-                       c_int*         param2toKKT,
-                       c_int          m);
+                       OSQPFloat*     param2,
+                       OSQPFloat      param2_sc,
+                       OSQPInt*       param2toKKT,
+                       OSQPInt        m);
 
 # endif // OSQP_EMBEDDED_MODE != 1
 

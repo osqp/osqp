@@ -5,7 +5,7 @@
 
 // Set values lower than threshold SCALING_REG to 1
 
-c_float limit_scaling_scalar(c_float v) {
+OSQPFloat limit_scaling_scalar(OSQPFloat v) {
     v = v < OSQP_MIN_SCALING ? 1.0 : v;
     v = v > OSQP_MAX_SCALING ? OSQP_MAX_SCALING : v;
     return v;
@@ -28,9 +28,11 @@ void limit_scaling_vector(OSQPVectorf* v) {
  * @param E        Norm of columns related to constraints
  * @param n        Dimension of KKT matrix
  */
-void compute_inf_norm_cols_KKT(const OSQPMatrix *P, const OSQPMatrix *A,
-                               OSQPVectorf *D, OSQPVectorf *D_temp_A,
-                               OSQPVectorf *E) {
+void compute_inf_norm_cols_KKT(const OSQPMatrix*  P,
+                               const OSQPMatrix*  A,
+                                     OSQPVectorf* D,
+                                     OSQPVectorf* D_temp_A,
+                                     OSQPVectorf* E) {
   // First half
   //  [ P ]
   //  [ A ]
@@ -44,7 +46,7 @@ void compute_inf_norm_cols_KKT(const OSQPMatrix *P, const OSQPMatrix *A,
   OSQPMatrix_row_norm_inf(A,E);
 }
 
-c_int scale_data(OSQPSolver* solver) {
+OSQPInt scale_data(OSQPSolver* solver) {
   // Scale KKT matrix
   //
   //    [ P   A']
@@ -56,10 +58,10 @@ c_int scale_data(OSQPSolver* solver) {
   //      [    E ]
   //
 
-  c_int   i;          // Iterations index
-  c_int   n, m;       // Number of constraints and variables
-  c_float c_temp;     // Objective function scaling
-  c_float inf_norm_q; // Infinity norm of q
+  OSQPInt   i;          // Iterations index
+  OSQPInt   n, m;       // Number of constraints and variables
+  OSQPFloat c_temp;     // Objective function scaling
+  OSQPFloat inf_norm_q; // Infinity norm of q
 
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
@@ -165,7 +167,7 @@ c_int scale_data(OSQPSolver* solver) {
 #endif /* if OSQP_EMBEDDED_MODE != 1 */
 
 
-c_int unscale_data(OSQPSolver *solver) {
+OSQPInt unscale_data(OSQPSolver* solver) {
 
   OSQPWorkspace* work     = solver->work;
 
@@ -190,11 +192,11 @@ c_int unscale_data(OSQPSolver *solver) {
   return 0;
 }
 
-c_int unscale_solution(OSQPVectorf* usolx,
-                       OSQPVectorf* usoly,
-                       const OSQPVectorf* solx,
-                       const OSQPVectorf* soly,
-                       OSQPWorkspace *work) {
+OSQPInt unscale_solution(OSQPVectorf*       usolx,
+                         OSQPVectorf*       usoly,
+                         const OSQPVectorf* solx,
+                         const OSQPVectorf* soly,
+                         OSQPWorkspace*     work) {
 
   // primal
   OSQPVectorf_ew_prod(usolx,solx,work->scaling->D);

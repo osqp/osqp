@@ -16,11 +16,11 @@ extern "C" {
 
 void test_constr_sparse_mat() {
 
-  c_float *Adns; // Conversion to dense matrix
+  OSQPFloat* Adns; // Conversion to dense matrix
 
   OSQPVectorf_ptr v1{nullptr};
   OSQPVectorf_ptr v2{nullptr};
-  c_int mn;
+  OSQPInt mn;
 
   lin_alg_sols_data_ptr data{generate_problem_lin_alg_sols_data()};
 
@@ -45,7 +45,8 @@ void test_constr_sparse_mat() {
 
 void test_vec_operations() {
 
-  c_float  scresult, scref;
+  OSQPFloat scresult;
+  OSQPFloat scref;
 
   OSQPVectorf_ptr v1{nullptr};
   OSQPVectorf_ptr v2{nullptr};
@@ -337,7 +338,7 @@ void test_empty_mat_vec() {
 
 // void test_quad_form_upper_triang() {
 
-//   c_float val;
+//   OSQPFloat val;
 //   lin_alg_sols_data *data = generate_problem_lin_alg_sols_data();
 //   OSQPMatrix* P  = OSQPMatrix_new_from_csc(data->test_qpform_Pu, 1); //triu;
 //   OSQPVectorf* x = OSQPVectorf_new(data->test_qpform_x, data->test_mat_vec_n);

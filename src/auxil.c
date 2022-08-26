@@ -12,13 +12,13 @@
 ***********************************************************/
 #if OSQP_EMBEDDED_MODE != 1
 
-c_float compute_rho_estimate(const OSQPSolver *solver) {
+OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
 
-  c_int   n, m;                         // Dimensions
-  c_float prim_res, dual_res;           // Primal and dual residuals
-  c_float prim_res_norm, dual_res_norm; // Normalization for the residuals
-  c_float temp_res_norm;                // Temporary residual norm
-  c_float rho_estimate;                 // Rho estimate value
+  OSQPInt   n, m;                         // Dimensions
+  OSQPFloat prim_res, dual_res;           // Primal and dual residuals
+  OSQPFloat prim_res_norm, dual_res_norm; // Normalization for the residuals
+  OSQPFloat temp_res_norm;                // Temporary residual norm
+  OSQPFloat rho_estimate;                 // Rho estimate value
 
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
@@ -52,10 +52,10 @@ c_float compute_rho_estimate(const OSQPSolver *solver) {
   return rho_estimate;
 }
 
-c_int adapt_rho(OSQPSolver *solver) {
+OSQPInt adapt_rho(OSQPSolver* solver) {
 
-  c_int   exitflag; // Exitflag
-  c_float rho_new;  // New rho value
+  OSQPInt   exitflag; // Exitflag
+  OSQPFloat rho_new;  // New rho value
 
   OSQPInfo*      info     = solver->info;
   OSQPSettings*  settings = solver->settings;
@@ -78,12 +78,12 @@ c_int adapt_rho(OSQPSolver *solver) {
   return exitflag;
 }
 
-c_int set_rho_vec(OSQPSolver *solver) {
+OSQPInt set_rho_vec(OSQPSolver* solver) {
 
-  c_int constr_types_changed = 0;
+  OSQPInt constr_types_changed = 0;
 
-  OSQPSettings  *settings = solver->settings;
-  OSQPWorkspace *work     = solver->work;
+  OSQPSettings*  settings = solver->settings;
+  OSQPWorkspace* work     = solver->work;
 
   settings->rho = c_min(c_max(settings->rho, OSQP_RHO_MIN), OSQP_RHO_MAX);
 
@@ -109,10 +109,10 @@ c_int set_rho_vec(OSQPSolver *solver) {
   return constr_types_changed;
 }
 
-c_int update_rho_vec(OSQPSolver *solver) {
+OSQPInt update_rho_vec(OSQPSolver* solver) {
 
-  c_int constr_type_changed;
-  c_int exitflag = 0;
+  OSQPInt constr_type_changed;
+  OSQPInt exitflag = 0;
   OSQPWorkspace* work = solver->work;
 
   //update rho_vec and see if anything changed
@@ -129,16 +129,16 @@ c_int update_rho_vec(OSQPSolver *solver) {
 #endif // OSQP_EMBEDDED_MODE != 1
 
 
-void swap_vectors(OSQPVectorf **a,
-                  OSQPVectorf **b) {
-  OSQPVectorf *temp;
+void swap_vectors(OSQPVectorf** a,
+                  OSQPVectorf** b) {
+  OSQPVectorf* temp;
 
   temp = *b;
   *b   = *a;
   *a   = temp;
 }
 
-static void compute_rhs(OSQPSolver *solver) {
+static void compute_rhs(OSQPSolver* solver) {
 
   OSQPWorkspace* work     = solver->work;
   OSQPSettings*  settings = solver->settings;
@@ -162,10 +162,10 @@ static void compute_rhs(OSQPSolver *solver) {
   }
 }
 
-void update_xz_tilde(OSQPSolver *solver,
-                     c_int       admm_iter) {
+void update_xz_tilde(OSQPSolver* solver,
+                     OSQPInt     admm_iter) {
 
-  OSQPWorkspace* work     = solver->work;
+  OSQPWorkspace* work = solver->work;
 
   // Compute right-hand side
   compute_rhs(solver);
@@ -174,7 +174,7 @@ void update_xz_tilde(OSQPSolver *solver,
   work->linsys_solver->solve(work->linsys_solver, work->xz_tilde, admm_iter);
 }
 
-void update_x(OSQPSolver *solver) {
+void update_x(OSQPSolver* solver) {
 
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
@@ -188,7 +188,7 @@ void update_x(OSQPSolver *solver) {
   OSQPVectorf_minus(work->delta_x,work->x,work->x_prev);
 }
 
-void update_z(OSQPSolver *solver) {
+void update_z(OSQPSolver* solver) {
 
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
@@ -213,7 +213,7 @@ void update_z(OSQPSolver *solver) {
 
 }
 
-void update_y(OSQPSolver *solver) {
+void update_y(OSQPSolver* solver) {
 
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
@@ -234,11 +234,11 @@ void update_y(OSQPSolver *solver) {
 
 }
 
-c_float compute_obj_val(const OSQPSolver  *solver,
-                        const OSQPVectorf *x) {
+OSQPFloat compute_obj_val(const OSQPSolver*  solver,
+                          const OSQPVectorf* x) {
 
-  c_float obj_val;
-  OSQPWorkspace *work = solver->work;
+  OSQPFloat obj_val;
+  OSQPWorkspace* work = solver->work;
 
   /* NB: The function is always called after dual_res is computed */
   obj_val = 0.5 * OSQPVectorf_dot_prod(work->Px, x) +
@@ -251,16 +251,16 @@ c_float compute_obj_val(const OSQPSolver  *solver,
   return obj_val;
 }
 
-static c_float compute_prim_res(OSQPSolver        *solver,
-                                const OSQPVectorf *x,
-                                const OSQPVectorf *z) {
+static OSQPFloat compute_prim_res(OSQPSolver*        solver,
+                                  const OSQPVectorf* x,
+                                  const OSQPVectorf* z) {
 
   // NB: Use z_prev as working vector
   // pr = Ax - z
 
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
-  c_float prim_res;
+  OSQPFloat prim_res;
 
   OSQPMatrix_Axpy(work->data->A,x,work->Ax, 1.0, 0.0); //Ax = A*x
   OSQPVectorf_minus(work->z_prev, work->Ax, z);
@@ -277,11 +277,11 @@ static c_float compute_prim_res(OSQPSolver        *solver,
   return prim_res;
 }
 
-static c_float compute_prim_tol(const OSQPSolver *solver,
-                                c_float           eps_abs,
-                                c_float           eps_rel) {
+static OSQPFloat compute_prim_tol(const OSQPSolver* solver,
+                                  OSQPFloat         eps_abs,
+                                  OSQPFloat         eps_rel) {
 
-  c_float max_rel_eps, temp_rel_eps;
+  OSQPFloat max_rel_eps, temp_rel_eps;
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
 
@@ -314,17 +314,17 @@ static c_float compute_prim_tol(const OSQPSolver *solver,
   return eps_abs + eps_rel * max_rel_eps;
 }
 
-static c_float compute_dual_res(OSQPSolver        *solver,
-                                const OSQPVectorf *x,
-                                const OSQPVectorf *y) {
+static OSQPFloat compute_dual_res(OSQPSolver*        solver,
+                                  const OSQPVectorf* x,
+                                  const OSQPVectorf* y) {
 
   // NB: Use x_prev as temporary vector
   // NB: Only upper triangular part of P is stored.
   // dr = q + A'*y + P*x
 
-  OSQPSettings  *settings = solver->settings;
-  OSQPWorkspace *work     = solver->work;
-  c_float dual_res;
+  OSQPSettings*  settings = solver->settings;
+  OSQPWorkspace* work     = solver->work;
+  OSQPFloat      dual_res;
 
   // dr = q
   OSQPVectorf_copy(work->x_prev, work->data->q);
@@ -355,11 +355,11 @@ static c_float compute_dual_res(OSQPSolver        *solver,
   return dual_res;
 }
 
-static c_float compute_dual_tol(const OSQPSolver *solver,
-                                c_float           eps_abs,
-                                c_float           eps_rel) {
+static OSQPFloat compute_dual_tol(const OSQPSolver* solver,
+                                  OSQPFloat         eps_abs,
+                                  OSQPFloat         eps_rel) {
 
-  c_float max_rel_eps, temp_rel_eps;
+  OSQPFloat max_rel_eps, temp_rel_eps;
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
 
@@ -403,16 +403,16 @@ static c_float compute_dual_tol(const OSQPSolver *solver,
   return eps_abs + eps_rel * max_rel_eps;
 }
 
-c_int is_primal_infeasible(OSQPSolver *solver,
-                           c_float     eps_prim_inf) {
+OSQPInt is_primal_infeasible(OSQPSolver* solver,
+                             OSQPFloat   eps_prim_inf) {
 
   /* This function checks the primal infeasibility criteria
      1) || A' * delta_y || < eps * ||delta_y||
      2) u'*max(delta_y, 0) + l'*min(delta_y, 0) < 0
    */
 
-  c_float norm_delta_y;
-  c_float ineq_lhs = 0.0;
+  OSQPFloat norm_delta_y;
+  OSQPFloat ineq_lhs = 0.0;
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
 
@@ -457,8 +457,8 @@ c_int is_primal_infeasible(OSQPSolver *solver,
   return 0;
 }
 
-c_int is_dual_infeasible(OSQPSolver *solver,
-                         c_float     eps_dual_inf) {
+OSQPInt is_dual_infeasible(OSQPSolver* solver,
+                           OSQPFloat   eps_dual_inf) {
 
   /* This function checks the dual infeasibility criteria
      1) q * delta_x < 0
@@ -467,8 +467,8 @@ c_int is_dual_infeasible(OSQPSolver *solver,
         (A * delta_x)_i <  eps * || delta_x ||,    u_i != +inf
    */
 
-  c_float norm_delta_x;
-  c_float cost_scaling;
+  OSQPFloat norm_delta_x;
+  OSQPFloat cost_scaling;
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
 
@@ -533,20 +533,18 @@ c_int is_dual_infeasible(OSQPSolver *solver,
   return 0;
 }
 
-c_int has_solution(const OSQPInfo * info){
-
+OSQPInt has_solution(const OSQPInfo* info) {
   return ((info->status_val != OSQP_PRIMAL_INFEASIBLE) &&
       (info->status_val != OSQP_PRIMAL_INFEASIBLE_INACCURATE) &&
       (info->status_val != OSQP_DUAL_INFEASIBLE) &&
       (info->status_val != OSQP_DUAL_INFEASIBLE_INACCURATE) &&
       (info->status_val != OSQP_NON_CVX));
-
 }
 
 void store_solution(OSQPSolver *solver) {
 
 #ifndef OSQP_EMBEDDED_MODE
-  c_float norm_vec;
+  OSQPFloat norm_vec;
 #endif /* ifndef OSQP_EMBEDDED_MODE */
 
   OSQPInfo*      info     = solver->info;
@@ -618,19 +616,25 @@ void store_solution(OSQPSolver *solver) {
   }
 }
 
-void update_info(OSQPSolver *solver,
-                 c_int       iter,
-                 c_int       compute_objective,
-                 c_int       polishing) {
+void update_info(OSQPSolver* solver,
+                 OSQPInt     iter,
+                 OSQPInt     compute_objective,
+                 OSQPInt     polishing) {
 
-  OSQPVectorf *x, *z, *y;                   // Allocate pointers to vectors
-  c_float *obj_val, *prim_res, *dual_res;   // objective value, residuals
+  OSQPVectorf* x;
+  OSQPVectorf* z;
+  OSQPVectorf* y;                   // Allocate pointers to vectors
+
+  // objective value, residuals
+  OSQPFloat* obj_val;
+  OSQPFloat* prim_res;
+  OSQPFloat* dual_res;
 
   OSQPInfo*      info     = solver->info;
   OSQPWorkspace* work     = solver->work;
 
 #ifdef OSQP_ENABLE_PROFILING
-  c_float *run_time;                    // Execution time
+  OSQPFloat* run_time;                    // Execution time
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
 #ifndef OSQP_EMBEDDED_MODE
@@ -724,8 +728,8 @@ const char *OSQP_STATUS_MESSAGE[] = {
   "unsolved"
 };
 
-void update_status(OSQPInfo *info,
-                   c_int     status_val) {
+void update_status(OSQPInfo* info,
+                   OSQPInt   status_val) {
   // Update status value
   info->status_val = status_val;
 
@@ -733,13 +737,13 @@ void update_status(OSQPInfo *info,
   c_strcpy(info->status, OSQP_STATUS_MESSAGE[status_val]);
 }
 
-c_int check_termination(OSQPSolver *solver,
-                        c_int       approximate) {
+OSQPInt check_termination(OSQPSolver* solver,
+                          OSQPInt     approximate) {
 
-  c_float eps_prim, eps_dual, eps_prim_inf, eps_dual_inf;
-  c_int   exitflag;
-  c_int   prim_res_check, dual_res_check, prim_inf_check, dual_inf_check;
-  c_float eps_abs, eps_rel;
+  OSQPFloat eps_prim, eps_dual, eps_prim_inf, eps_dual_inf;
+  OSQPInt   exitflag;
+  OSQPInt   prim_res_check, dual_res_check, prim_inf_check, dual_inf_check;
+  OSQPFloat eps_abs, eps_rel;
 
   OSQPInfo*      info     = solver->info;
   OSQPSettings*  settings = solver->settings;
@@ -853,14 +857,14 @@ c_int check_termination(OSQPSolver *solver,
 
 #ifndef OSQP_EMBEDDED_MODE
 
-c_int validate_data(const OSQPCscMatrix* P,
-                    const c_float*       q,
-                    const OSQPCscMatrix* A,
-                    const c_float*       l,
-                    const c_float*       u,
-                          c_int          m,
-                          c_int          n) {
-  c_int j, ptr;
+OSQPInt validate_data(const OSQPCscMatrix* P,
+                      const OSQPFloat*     q,
+                      const OSQPCscMatrix* A,
+                      const OSQPFloat*     l,
+                      const OSQPFloat*     u,
+                            OSQPInt        m,
+                            OSQPInt        n) {
+  OSQPInt j, ptr;
 
   if (!P) {
     c_eprint("Missing quadratic cost matrix P");
@@ -925,7 +929,7 @@ c_int validate_data(const OSQPCscMatrix* P,
 #endif /* ifndef OSQP_EMBEDDED_MODE */
 
 
-c_int validate_linsys_solver(c_int linsys_solver) {
+OSQPInt validate_linsys_solver(OSQPInt linsys_solver) {
   /* Verify the algebra backend supports the requested indirect solver */
   if ( (linsys_solver == OSQP_INDIRECT_SOLVER) &&
      (osqp_algebra_linsys_supported() & OSQP_CAPABILITIY_INDIRECT_SOLVER) ) {
@@ -943,8 +947,8 @@ c_int validate_linsys_solver(c_int linsys_solver) {
 }
 
 
-c_int validate_settings(const OSQPSettings *settings,
-                        c_int               from_setup) {
+OSQPInt validate_settings(const OSQPSettings* settings,
+                          OSQPInt             from_setup) {
 
   if (!settings) {
     c_eprint("Missing settings!");

@@ -17,12 +17,17 @@ extern "C" {
 
 void test_solveKKT() {
 
-  c_int m, n, exitflag = 0;
-  c_float prim_res, dual_res;
-  OSQPVectorf *rho_vec, *rhs, *ref;
-  OSQPMatrix *Pu, *A;
-  LinSysSolver *s;  // Private structure to form KKT factorization
-  OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings)); // Settings
+  OSQPInt m, n, exitflag = 0;
+  OSQPFloat prim_res, dual_res;
+
+  OSQPVectorf*  rho_vec;
+  OSQPVectorf*  rhs;
+  OSQPVectorf*  ref;
+  OSQPMatrix*   Pu;
+  OSQPMatrix*   A;
+  LinSysSolver* s;  // Private structure to form KKT factorization
+
+  OSQPSettings* settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings)); // Settings
   solve_linsys_sols_data *data = generate_problem_solve_linsys_sols_data();
 
   // Settings
@@ -72,10 +77,15 @@ void test_solveKKT() {
 #ifdef OSQP_ALGEBRA_MKL
 void test_solveKKT_pardiso() {
 
-  c_int m, n, exitflag = 0;
-  OSQPVectorf *rho_vec, *rhs, *ref;
-  OSQPMatrix *Pu, *A;
-  LinSysSolver *s;  // Private structure to form KKT factorization
+  OSQPInt m, n, exitflag = 0;
+
+  OSQPVectorf*  rho_vec;
+  OSQPVectorf*  rhs;
+  OSQPVectorf*  ref;
+  OSQPMatrix*   Pu;
+  OSQPMatrix*   A;
+  LinSysSolver* s;  // Private structure to form KKT factorization
+
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings)); // Settings
   solve_linsys_sols_data *data = generate_problem_solve_linsys_sols_data();
 
