@@ -1,6 +1,5 @@
 #include "printing.h"
 #include "csc_utils.h"
-#include "algebra_memory.h"
 
 //========== Logical, testing and debug ===========
 
@@ -35,24 +34,24 @@ OSQPInt csc_is_eq(OSQPCscMatrix* A,
 //========= Internal utility functions  ===========
 
 static void* csc_malloc(OSQPInt n, OSQPInt size) {
-  return blas_malloc(n * size);
+  return c_malloc(n * size);
 }
 
 static void* csc_calloc(OSQPInt n, OSQPInt size) {
-  return blas_calloc(n, size);
+  return c_calloc(n, size);
 }
 
-void prea_int_vec_copy(const OSQPInt* a, OSQPInt* b, OSQPInt n) {
+static void prea_int_vec_copy(const OSQPInt* a, OSQPInt* b, OSQPInt n) {
   OSQPInt i;
   for (i = 0; i < n; i++) b[i] = a[i];
 }
 
-void prea_vec_copy(const OSQPFloat* a, OSQPFloat* b, OSQPInt n) {
+static void prea_vec_copy(const OSQPFloat* a, OSQPFloat* b, OSQPInt n) {
   OSQPInt i;
   for (i = 0; i < n; i++)  b[i] = a[i];
 }
 
-void int_vec_set_scalar(OSQPInt* a, OSQPInt sc, OSQPInt n) {
+static void int_vec_set_scalar(OSQPInt* a, OSQPInt sc, OSQPInt n) {
   OSQPInt i;
   for (i = 0; i < n; i++) a[i] = sc;
 }
@@ -114,9 +113,9 @@ OSQPCscMatrix* csc_spalloc(OSQPInt m,
 
 void csc_spfree(OSQPCscMatrix* A) {
   if (A){
-    if (A->p) blas_free(A->p);
-    if (A->i) blas_free(A->i);
-    if (A->x) blas_free(A->x);
+    if (A->p) c_free(A->p);
+    if (A->i) c_free(A->i);
+    if (A->x) c_free(A->x);
     c_free(A);
   }
 }
@@ -139,7 +138,7 @@ OSQPCscMatrix* csc_submatrix_byrows(const OSQPCscMatrix* A,
   OSQPInt        ptr;
   OSQPInt*       rridx; //mapping from row indices to reduced row indices
 
-  rridx = (OSQPInt*)blas_malloc(Am * sizeof(OSQPInt));
+  rridx = (OSQPInt*)c_malloc(Am * sizeof(OSQPInt));
   if(!rridx) return OSQP_NULL;
 
   //count the number of rows in the reduced
@@ -183,7 +182,7 @@ OSQPCscMatrix* csc_submatrix_byrows(const OSQPCscMatrix* A,
     Rp[An] = nzR;
   }
 
-  blas_free(rridx); //free internal work index
+  c_free(rridx); //free internal work index
 
   return R;
 }
@@ -400,8 +399,8 @@ OSQPCscMatrix* csc_done(OSQPCscMatrix* C,
                         void*          w,
                         void*          x,
                         OSQPInt        ok) {
-  blas_free(w);                   /* free workspace */
-  blas_free(x);
+  c_free(w);                   /* free workspace */
+  c_free(x);
   if (ok) return C;
   else {
     csc_spfree(C);

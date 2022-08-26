@@ -1,24 +1,11 @@
 #include "osqp.h"
 #include "lin_alg.h"
 #include "algebra_impl.h"
-#include "algebra_memory.h"
 #include "csc_math.h"
 #include "csc_utils.h"
 #include "printing.h"
 
-#include <mkl.h>
-#include <mkl_spblas.h>
-#ifdef OSQP_USE_FLOAT
-  #define spblas_create_csc mkl_sparse_s_create_csc
-  #define spblas_set_value mkl_sparse_s_set_value
-  #define spblas_export_csc mkl_sparse_s_export_csc
-  #define spblas_mv mkl_sparse_s_mv
-#else
-  #define spblas_create_csc mkl_sparse_d_create_csc
-  #define spblas_set_value mkl_sparse_d_set_value
-  #define spblas_export_csc mkl_sparse_d_export_csc
-  #define spblas_mv mkl_sparse_d_mv
-#endif //dfloat endif
+#include "blas_helpers.h"
 
 /*  logical test functions ----------------------------------------------------*/
 
@@ -30,13 +17,50 @@ OSQPInt OSQPMatrix_is_eq(const OSQPMatrix* A,
           csc_is_eq(A->csc, B->csc, tol) );
 }
 
+/* Special routine to allocate a OSQPCscMatrix using the MKL memory routines
+   instead of the normal memory routines */
+static OSQPCscMatrix* mkl_csc_spalloc(OSQPInt m, OSQPInt n, OSQPInt nzmax, OSQPInt hasData) {
+  OSQPCscMatrix* csc = c_calloc(1, sizeof(OSQPCscMatrix));
+
+  if(!csc){
+    return OSQP_NULL;
+  }
+
+  csc->m     = m;
+  csc->n     = n;
+  csc->nzmax = c_max(nzmax, 0);
+  csc->nz    = -1;
+  csc->p     = blas_malloc((n + 1) * sizeof(OSQPInt));
+  csc->i     = hasData ? blas_malloc(nzmax * sizeof(OSQPInt)) : OSQP_NULL;
+  csc->x     = hasData ? blas_malloc(nzmax * sizeof(OSQPFloat)) : OSQP_NULL;
+
+  return csc;
+}
+
+static void mkl_csc_spfree(OSQPCscMatrix* M) {
+  if(M) {
+    if(M->p)
+      blas_free(M->p);
+
+    if(M->i)
+      blas_free(M->i);
+
+    if(M->x)
+      blas_free(M->x);
+
+    c_free(M);
+  }
+}
+
 //Make a copy from a csc matrix.  Returns OSQP_NULL on failure
 OSQPMatrix* OSQPMatrix_new_from_csc(const OSQPCscMatrix* A,
                                           OSQPInt        is_triu) {
 
-  OSQPInt i = 0;
-  OSQPInt n = A->n;   /* Number of columns */
-  OSQPInt m = A->m;   /* Number of rows */
+  OSQPInt i       = 0;
+  OSQPInt n       = A->n;   /* Number of columns */
+  OSQPInt m       = A->m;   /* Number of rows */
+  OSQPInt nzmax   = A->nzmax; /* Number of non-zeros */
+  OSQPInt hasData = (A->x != OSQP_NULL); /* Input A matrix has data */
 
   MKL_INT retval = 0;
 
@@ -50,11 +74,22 @@ OSQPMatrix* OSQPMatrix_new_from_csc(const OSQPCscMatrix* A,
   else
     out->symmetry = NONE;
 
-  out->csc = csc_copy(A);
+  /* We specially allocate this matrix using the MKL memory routines,
+     so it should NEVER touch the normal memory routines. */
+  out->csc = mkl_csc_spalloc(m, n, nzmax, hasData);
 
   if(!out->csc){
     c_free(out);
     return OSQP_NULL;
+  }
+
+  for(i=0; i < n+1; i++) {
+    out->csc->p[i] = A->p[i];
+  }
+
+  for(i=0; i < nzmax; i++) {
+    out->csc->i[i] = A->i[i];
+    out->csc->x[i] = A->x[i];
   }
 
   retval = spblas_create_csc(&out->mkl_mat,
@@ -228,11 +263,85 @@ void OSQPMatrix_free(OSQPMatrix* M) {
     if(M->mkl_mat)
       mkl_sparse_destroy(M->mkl_mat);
 
-    if(M->csc)
-      csc_spfree(M->csc);
+    /* This CSC matrix is special, it wasn't created using the normal memory routines, it uses the
+       blas-specific memory routines. Therefore it must be destroyed in a special way */
+    mkl_csc_spfree(M->csc);
   };
 
   c_free(M);
+}
+
+static void int_vec_set_scalar(OSQPInt* a, OSQPInt sc, OSQPInt n) {
+  OSQPInt i;
+  for (i = 0; i < n; i++) a[i] = sc;
+}
+
+/* A modified version of the csc_submatrix_byrows that uses the MKL memory routines. */
+static OSQPCscMatrix* mkl_submatrix_byrows(const OSQPCscMatrix* A,
+                                          OSQPInt*       rows){
+
+  OSQPInt        j;
+  OSQPCscMatrix* R;
+  OSQPInt        nzR = 0;
+  OSQPInt        An = A->n;
+  OSQPInt        Am = A->m;
+  OSQPInt*       Ap = A->p;
+  OSQPInt*       Ai = A->i;
+  OSQPFloat*     Ax = A->x;
+  OSQPInt*       Rp;
+  OSQPInt*       Ri;
+  OSQPFloat*     Rx;
+  OSQPInt        Rm = 0;
+  OSQPInt        ptr;
+  OSQPInt*       rridx; //mapping from row indices to reduced row indices
+
+  rridx = (OSQPInt*)c_malloc(Am * sizeof(OSQPInt));
+  if(!rridx) return OSQP_NULL;
+
+  //count the number of rows in the reduced
+  //matrix, and build an index from the input
+  //matrix rows to the reduced rows
+  Rm    = 0;
+  for(j = 0; j < Am; j++){
+     if(rows[j]) rridx[j] = Rm++;
+  }
+
+  // Count number of nonzeros in Ared
+  for (j = 0; j < Ap[An]; j++) {
+    if(rows[A->i[j]]) nzR++;
+  }
+
+  // Form R = A(rows,:), where nrows = sum(rows != 0)
+  R = mkl_csc_spalloc(Rm, An, nzR, 1);
+  if (!R) return OSQP_NULL;
+
+  // no active constraints
+  if (Rm == 0) {
+    int_vec_set_scalar(R->p, 0, An + 1);
+  }
+
+  else{
+    nzR = 0; // reset counter
+    Rp = R->p;
+    Ri = R->i;
+    Rx = R->x;
+
+    for (j = 0; j < An; j++) { // Cycle over columns of A
+      Rp[j] = nzR;
+      for (ptr = Ap[j]; ptr < Ap[j + 1]; ptr++) {
+        // Cycle over elements in j-th column
+        if (rows[A->i[ptr]]) {
+          Ri[nzR] = rridx[Ai[ptr]];
+          Rx[nzR] = Ax[ptr];
+          nzR++;
+    }}}
+    // Update the last element in R->p
+    Rp[An] = nzR;
+  }
+
+  c_free(rridx); //free internal work index
+
+  return R;
 }
 
 OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix*  A,
@@ -241,21 +350,21 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix*  A,
      the actual MKL matrix handle, which seems to be the case in all the testing done. */
   OSQPCscMatrix* M;
   OSQPMatrix*    out;
-  OSQPInt          retval = SPARSE_STATUS_SUCCESS;
+  OSQPInt        retval = SPARSE_STATUS_SUCCESS;
 
   if(A->symmetry == TRIU){
     c_eprint("row selection not implemented for partially filled matrices");
     return OSQP_NULL;
   }
 
-  M = csc_submatrix_byrows(A->csc, rows->values);
+  M = mkl_submatrix_byrows(A->csc, rows->values);
 
   if(!M) return OSQP_NULL;
 
   out = c_malloc(sizeof(OSQPMatrix));
 
   if(!out){
-    csc_spfree(M);
+    mkl_csc_spfree(M);
     return OSQP_NULL;
   }
 

@@ -4,24 +4,7 @@
 #include "stdio.h"
 #include "time.h"
 
-#include "algebra_memory.h"
-
-#include <mkl_blas.h>
-#ifdef OSQP_USE_FLOAT
-  #define blas_copy scopy
-  #define blas_dot sdot
-  #define blas_scale sscal
-  #define blas_swap sswap
-  #define blas_axpy saxpy
-  #define blas_2norm snrm2
-#else
-  #define blas_copy dcopy
-  #define blas_dot ddot
-  #define blas_scale dscal
-  #define blas_swap dswap
-  #define blas_axpy daxpy
-  #define blas_2norm dnrm2
-#endif //dfloat endif
+#include "blas_helpers.h"
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 
