@@ -185,15 +185,15 @@ void cuda_vec_ew_prod(OSQPFloat*       d_c,
 void cuda_vec_leq(const OSQPFloat* d_l,
                   const OSQPFloat* d_u,
                         OSQPInt    n,
-                        OSQPInt*    h_res);
+                        OSQPInt*   h_res);
 
 /**
  * d_x[i] = min( max(d_z[i], d_l[i]), d_u[i] ) for i in [0,n-1]
  */
-void cuda_vec_bound(OSQPFloat*      d_x,
-                    const OSQPFloat d_z,
-                    const OSQPFloat d_l,
-                    const OSQPFloat d_u,
+void cuda_vec_bound(OSQPFloat*       d_x,
+                    const OSQPFloat* d_z,
+                    const OSQPFloat* d_l,
+                    const OSQPFloat* d_u,
                     OSQPInt          n);
 
 /**
