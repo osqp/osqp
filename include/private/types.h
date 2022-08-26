@@ -26,35 +26,35 @@ typedef struct OSQPTimer_ OSQPTimer;
  * Problem scaling matrices stored as vectors
  */
 typedef struct {
-  c_float      c;     ///< objective function scaling
-  OSQPVectorf *D;     ///< primal variable scaling
-  OSQPVectorf *E;     ///< dual variable scaling
-  c_float      cinv;  ///< objective function rescaling
-  OSQPVectorf *Dinv;  ///< primal variable rescaling
-  OSQPVectorf *Einv;  ///< dual variable rescaling
+  OSQPFloat    c;     ///< objective function scaling
+  OSQPVectorf* D;     ///< primal variable scaling
+  OSQPVectorf* E;     ///< dual variable scaling
+  OSQPFloat    cinv;  ///< objective function rescaling
+  OSQPVectorf* Dinv;  ///< primal variable rescaling
+  OSQPVectorf* Einv;  ///< dual variable rescaling
 } OSQPScaling;
 
 
 
 
-# ifndef EMBEDDED
+# ifndef OSQP_EMBEDDED_MODE
 
 /**
  * Polish structure
  */
 
 typedef struct {
-  OSQPMatrix  *Ared;          ///< active rows of A; Ared = vstack[Alow, Aupp]
-  c_int        n_active;      ///< number of active constraints
-  OSQPVectori *active_flags;  ///< -1/0/1 to indicate  lower/ inactive / upper active constraints
-  OSQPVectorf *x;             ///< optimal x-solution obtained by polish
-  OSQPVectorf *z;             ///< optimal z-solution obtained by polish
-  OSQPVectorf *y;             ///< optimal y-solution obtained by polish
-  c_float      obj_val;       ///< objective value at polished solution
-  c_float      prim_res;      ///< primal residual at polished solution
-  c_float      dual_res;      ///< dual residual at polished solution
+  OSQPMatrix*  Ared;          ///< active rows of A; Ared = vstack[Alow, Aupp]
+  OSQPInt      n_active;      ///< number of active constraints
+  OSQPVectori* active_flags;  ///< -1/0/1 to indicate  lower/ inactive / upper active constraints
+  OSQPVectorf* x;             ///< optimal x-solution obtained by polish
+  OSQPVectorf* z;             ///< optimal z-solution obtained by polish
+  OSQPVectorf* y;             ///< optimal y-solution obtained by polish
+  OSQPFloat    obj_val;       ///< objective value at polished solution
+  OSQPFloat    prim_res;      ///< primal residual at polished solution
+  OSQPFloat    dual_res;      ///< dual residual at polished solution
 } OSQPPolish;
-# endif // ifndef EMBEDDED
+# endif // ifndef OSQP_EMBEDDED_MODE
 
 
 /**********************************
@@ -65,13 +65,13 @@ typedef struct {
  * QP problem data (possibly internally scaled)
  */
 typedef struct {
-  c_int        n; ///< number of variables n
-  c_int        m; ///< number of constraints m
-  OSQPMatrix  *P; ///< the upper triangular part of the quadratic objective matrix P (size n x n).
-  OSQPMatrix  *A; ///< linear constraints matrix A (size m x n)
-  OSQPVectorf *q; ///< dense array for linear part of objective function (size n)
-  OSQPVectorf *l; ///< dense array for lower bound (size m)
-  OSQPVectorf *u; ///< dense array for upper bound (size m)
+  OSQPInt      n; ///< number of variables n
+  OSQPInt      m; ///< number of constraints m
+  OSQPMatrix*  P; ///< the upper triangular part of the quadratic objective matrix P (size n x n).
+  OSQPMatrix*  A; ///< linear constraints matrix A (size m x n)
+  OSQPVectorf* q; ///< dense array for linear part of objective function (size n)
+  OSQPVectorf* l; ///< dense array for lower bound (size m)
+  OSQPVectorf* u; ///< dense array for upper bound (size m)
 } OSQPData;
 
 
@@ -81,44 +81,44 @@ typedef struct {
 
 struct OSQPWorkspace_ {
   /// Problem data to work on (possibly scaled)
-  OSQPData *data;
+  OSQPData* data;
 
   /// Linear System solver structure
-  LinSysSolver *linsys_solver;
+  LinSysSolver* linsys_solver;
 
-# ifndef EMBEDDED
+# ifndef OSQP_EMBEDDED_MODE
   /// Polish structure
-  OSQPPolish *pol;
-# endif // ifndef EMBEDDED
+  OSQPPolish* pol;
+# endif // ifndef OSQP_EMBEDDED_MODE
 
   /**
    * @name Vector used to store a vectorized rho parameter
    * @{
    */
-  OSQPVectorf *rho_vec;     ///< vector of rho values
-  OSQPVectorf *rho_inv_vec; ///< vector of inv rho values
+  OSQPVectorf* rho_vec;     ///< vector of rho values
+  OSQPVectorf* rho_inv_vec; ///< vector of inv rho values
 
   /** @} */
 
-# if EMBEDDED != 1
-  OSQPVectori *constr_type; ///< Type of constraints: loose (-1), equality (1), inequality (0)
-# endif // if EMBEDDED != 1
+# if OSQP_EMBEDDED_MODE != 1
+  OSQPVectori* constr_type; ///< Type of constraints: loose (-1), equality (1), inequality (0)
+# endif // if OSQP_EMBEDDED_MODE != 1
 
   /**
    * @name Iterates
    * @{
    */
-  OSQPVectorf *x;           ///< Iterate x
-  OSQPVectorf *y;           ///< Iterate y
-  OSQPVectorf *z;           ///< Iterate z
-  OSQPVectorf *xz_tilde;    ///< Iterate xz_tilde
-  OSQPVectorf *xtilde_view; ///< xtilde view into xz_tilde
-  OSQPVectorf *ztilde_view; ///< ztilde view into xz_tilde
+  OSQPVectorf* x;           ///< Iterate x
+  OSQPVectorf* y;           ///< Iterate y
+  OSQPVectorf* z;           ///< Iterate z
+  OSQPVectorf* xz_tilde;    ///< Iterate xz_tilde
+  OSQPVectorf* xtilde_view; ///< xtilde view into xz_tilde
+  OSQPVectorf* ztilde_view; ///< ztilde view into xz_tilde
 
-  OSQPVectorf *x_prev;   ///< Previous x
+  OSQPVectorf* x_prev;   ///< Previous x
 
   /**< NB: Used also as workspace vector for dual residual */
-  OSQPVectorf *z_prev;   ///< Previous z
+  OSQPVectorf* z_prev;   ///< Previous z
 
   /**< NB: Used also as workspace vector for primal residual */
 
@@ -129,9 +129,9 @@ struct OSQPWorkspace_ {
    * approximate tolerances computation and adapting rho
    * @{
    */
-  OSQPVectorf *Ax;  ///< scaled A * x
-  OSQPVectorf *Px;  ///< scaled P * x
-  OSQPVectorf *Aty; ///< scaled A' * y
+  OSQPVectorf* Ax;  ///< scaled A * x
+  OSQPVectorf* Px;  ///< scaled P * x
+  OSQPVectorf* Aty; ///< scaled A' * y
 
   /** @} */
 
@@ -139,8 +139,8 @@ struct OSQPWorkspace_ {
    * @name Primal infeasibility variables
    * @{
    */
-  OSQPVectorf *delta_y;   ///< difference between consecutive dual iterates
-  OSQPVectorf *Atdelta_y; ///< A' * delta_y
+  OSQPVectorf* delta_y;   ///< difference between consecutive dual iterates
+  OSQPVectorf* Atdelta_y; ///< A' * delta_y
 
   /** @} */
 
@@ -148,9 +148,9 @@ struct OSQPWorkspace_ {
    * @name Dual infeasibility variables
    * @{
    */
-  OSQPVectorf *delta_x;  ///< difference between consecutive primal iterates
-  OSQPVectorf *Pdelta_x; ///< P * delta_x
-  OSQPVectorf *Adelta_x; ///< A * delta_x
+  OSQPVectorf* delta_x;  ///< difference between consecutive primal iterates
+  OSQPVectorf* Pdelta_x; ///< P * delta_x
+  OSQPVectorf* Adelta_x; ///< A * delta_x
 
   /** @} */
 
@@ -158,38 +158,38 @@ struct OSQPWorkspace_ {
    * @name Temporary vectors used in scaling
    * @{
    */
-#if EMBEDDED != 1
-  OSQPVectorf *D_temp;   ///< temporary primal variable scaling vectors
-  OSQPVectorf *D_temp_A; ///< temporary primal variable scaling vectors storing norms of A columns
-  OSQPVectorf *E_temp;   ///< temporary constraints scaling vectors storing norms of A' columns
+#if OSQP_EMBEDDED_MODE != 1
+  OSQPVectorf* D_temp;   ///< temporary primal variable scaling vectors
+  OSQPVectorf* D_temp_A; ///< temporary primal variable scaling vectors storing norms of A columns
+  OSQPVectorf* E_temp;   ///< temporary constraints scaling vectors storing norms of A' columns
 #endif
 
   /** @} */
-  OSQPScaling  *scaling;  ///< scaling vectors
+  OSQPScaling* scaling;  ///< scaling vectors
 
   /// Scaled primal and dual residuals used for computing rho estimate.
   /// They are also passed to indirect linear system solvers for computing required accuracy.
-  c_float scaled_prim_res;
-  c_float scaled_dual_res;
+  OSQPFloat scaled_prim_res;
+  OSQPFloat scaled_dual_res;
 
   /// Reciprocal of rho
-  c_float rho_inv;
+  OSQPFloat rho_inv;
 
 # ifdef OSQP_ENABLE_PROFILING
-  OSQPTimer *timer;       ///< timer object
+  OSQPTimer* timer;       ///< timer object
 
   /// flag indicating whether the solve function has been run before
-  c_int first_run;
+  OSQPInt first_run;
 
   /// flag indicating whether the update_time should be cleared
-  c_int clear_update_time;
+  OSQPInt clear_update_time;
 
   /// flag indicating that osqp_update_rho is called from osqp_solve function
-  c_int rho_update_from_solve;
+  OSQPInt rho_update_from_solve;
 # endif // ifdef OSQP_ENABLE_PROFILING
 
 # ifdef OSQP_ENABLE_PRINTING
-  c_int summary_printed; ///< Has last summary been printed? (true/false)
+  OSQPInt summary_printed; ///< Has last summary been printed? (true/false)
 # endif // ifdef OSQP_ENABLE_PRINTING
 };
 
@@ -208,37 +208,37 @@ struct linsys_solver {
 
   const char* (*name)(void);
 
-  c_int (*solve)(LinSysSolver *self,
-                 OSQPVectorf  *b,
-                 c_int         admm_iter);
+  OSQPInt (*solve)(LinSysSolver* self,
+                   OSQPVectorf*  b,
+                   OSQPInt       admm_iter);
 
-  void (*update_settings)(LinSysSolver       *self,
-                          const OSQPSettings *settings);
+  void (*update_settings)(LinSysSolver*       self,
+                          const OSQPSettings* settings);
 
-  void (*warm_start)(LinSysSolver      *self,
-                     const OSQPVectorf *x);
+  void (*warm_start)(LinSysSolver*      self,
+                     const OSQPVectorf* x);
 
-# ifndef EMBEDDED
-  c_int (*adjoint_derivative)(LinSysSolver *self);
+# ifndef OSQP_EMBEDDED_MODE
+  OSQPInt (*adjoint_derivative)(LinSysSolver* self);
 
-  void (*free)(LinSysSolver *self);         ///< free linear system solver (only in desktop version)
-# endif // ifndef EMBEDDED
+  void (*free)(LinSysSolver* self);         ///< free linear system solver (only in desktop version)
+# endif // ifndef OSQP_EMBEDDED_MODE
 
-# if EMBEDDED != 1
-  c_int (*update_matrices)(LinSysSolver     *self,
-                           const OSQPMatrix *P,            ///< update matrices P
-                           const c_int* Px_new_idx,
-                           c_int P_new_n,
-                           const OSQPMatrix *A,            //   and A in the solver
-                           const c_int* Ax_new_idx,
-                           c_int A_new_n);
+# if OSQP_EMBEDDED_MODE != 1
+  OSQPInt (*update_matrices)(LinSysSolver*     self,
+                             const OSQPMatrix* P,            ///< update matrices P
+                             const OSQPInt*    Px_new_idx,
+                             OSQPInt           P_new_n,
+                             const OSQPMatrix* A,            //   and A in the solver
+                             const OSQPInt*    Ax_new_idx,
+                             OSQPInt           A_new_n);
 
-  c_int (*update_rho_vec)(LinSysSolver      *self,
-                          const OSQPVectorf *rho_vec,
-                          c_float            rho_sc);  ///< Update rho_vec
-# endif // if EMBEDDED != 1
+  OSQPInt (*update_rho_vec)(LinSysSolver*      self,
+                            const OSQPVectorf* rho_vec,
+                            OSQPFloat          rho_sc);  ///< Update rho_vec
+# endif // if OSQP_EMBEDDED_MODE != 1
 
-  c_int nthreads; ///< number of threads active
+  OSQPInt nthreads; ///< number of threads active
 };
 
 

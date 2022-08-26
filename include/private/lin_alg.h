@@ -10,13 +10,13 @@ extern "C" {
 # endif
 
 /* Return which linear system solvers are supported */
-c_int osqp_algebra_linsys_supported(void);
+OSQPInt osqp_algebra_linsys_supported(void);
 
 /* Return the default linear system the algebra backend prefers */
 enum osqp_linsys_solver_type osqp_algebra_default_linsys(void);
 
 /* Initialize libraries that implement algebra. */
-c_int osqp_algebra_init_libs(c_int device);
+OSQPInt osqp_algebra_init_libs(OSQPInt device);
 
 /* Free libraries that implement algebra. */
 void osqp_algebra_free_libs(void);
@@ -40,26 +40,26 @@ const char* osqp_algebra_name(void);
  * @param   polishing        0/1 depending whether we are allocating for polishing or not
  * @return                   Exitflag for error (0 if no errors)
  */
-c_int osqp_algebra_init_linsys_solver(LinSysSolver      **s,
-                                      const OSQPMatrix   *P,
-                                      const OSQPMatrix   *A,
-                                      const OSQPVectorf  *rho_vec,
-                                      const OSQPSettings *settings,
-                                      c_float            *scaled_prim_res,
-                                      c_float            *scaled_dual_res,
-                                      c_int               polishing);
+OSQPInt osqp_algebra_init_linsys_solver(LinSysSolver**      s,
+                                        const OSQPMatrix*   P,
+                                        const OSQPMatrix*   A,
+                                        const OSQPVectorf*  rho_vec,
+                                        const OSQPSettings* settings,
+                                        OSQPFloat*          scaled_prim_res,
+                                        OSQPFloat*          scaled_dual_res,
+                                        OSQPInt             polishing);
 
 
 #ifdef OSQP_ALGEBRA_BUILTIN
-#ifndef EMBEDDED
-c_int adjoint_derivative_linsys_solver(LinSysSolver **s,
-                                       const OSQPSettings *settings,
-                                       const OSQPMatrix *P,
-                                       const OSQPMatrix *G,
-                                       const OSQPMatrix *A_eq,
-                                       OSQPMatrix *GDiagLambda,
-                                       OSQPVectorf *slacks,
-                                       OSQPVectorf *rhs);
+#ifndef OSQP_EMBEDDED_MODE
+OSQPInt adjoint_derivative_linsys_solver(LinSysSolver**      s,
+                                         const OSQPSettings* settings,
+                                         const OSQPMatrix*   P,
+                                         const OSQPMatrix*   G,
+                                         const OSQPMatrix*   A_eq,
+                                         OSQPMatrix*         GDiagLambda,
+                                         OSQPVectorf*        slacks,
+                                         OSQPVectorf*        rhs);
 
 #endif
 #endif

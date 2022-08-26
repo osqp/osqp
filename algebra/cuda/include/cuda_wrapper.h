@@ -30,15 +30,15 @@
 #include "osqp_api_types.h"
 
 
-static cublasStatus_t cublasTaxpy(cublasHandle_t  handle,
-                                  c_int           n,
-                                  const c_float  *alpha,
-                                  const c_float  *x,
-                                  c_int           incx,
-                                  c_float        *y,
-                                  c_int           incy) {
+static cublasStatus_t cublasTaxpy(cublasHandle_t   handle,
+                                  OSQPInt          n,
+                                  const OSQPFloat* alpha,
+                                  const OSQPFloat* x,
+                                  OSQPInt          incx,
+                                  OSQPFloat*       y,
+                                  OSQPInt          incy) {
 
-#ifdef DFLOAT
+#ifdef OSQP_USE_FLOAT
   return cublasSaxpy(handle, n, alpha, x, incx, y, incy);
 #else
   return cublasDaxpy(handle, n, alpha, x, incx, y, incy);
@@ -46,13 +46,13 @@ static cublasStatus_t cublasTaxpy(cublasHandle_t  handle,
 }
 
 
-static cublasStatus_t cublasTscal(cublasHandle_t  handle,
-                                  c_int           n,
-                                  const c_float  *alpha,
-                                  c_float        *x,
-                                  c_int           incx) {
+static cublasStatus_t cublasTscal(cublasHandle_t   handle,
+                                  OSQPInt          n,
+                                  const OSQPFloat* alpha,
+                                  OSQPFloat*       x,
+                                  OSQPInt          incx) {
 
-#ifdef DFLOAT
+#ifdef OSQP_USE_FLOAT
   return cublasSscal(handle, n, alpha, x, incx);
 #else
   return cublasDscal(handle, n, alpha, x, incx);
@@ -60,15 +60,15 @@ static cublasStatus_t cublasTscal(cublasHandle_t  handle,
 }
 
 
-static cublasStatus_t cublasTdot(cublasHandle_t  handle,
-                                 c_int           n,
-                                 const c_float  *x,
-                                 c_int           incx,
-                                 const c_float  *y,
-                                 c_int           incy,
-                                 c_float        *result) {
+static cublasStatus_t cublasTdot(cublasHandle_t   handle,
+                                 OSQPInt          n,
+                                 const OSQPFloat* x,
+                                 OSQPInt          incx,
+                                 const OSQPFloat* y,
+                                 OSQPInt          incy,
+                                 OSQPFloat*       result) {
 
-#ifdef DFLOAT
+#ifdef OSQP_USE_FLOAT
   return cublasSdot (handle, n, x, incx, y, incy, result);
 #else
   return cublasDdot (handle, n, x, incx, y, incy, result);
@@ -76,13 +76,13 @@ static cublasStatus_t cublasTdot(cublasHandle_t  handle,
 }
 
 
-static cublasStatus_t cublasITamax(cublasHandle_t  handle,
-                                   c_int           n,
-                                   const c_float  *x,
-                                   c_int           incx,
-                                   c_int          *result) {
+static cublasStatus_t cublasITamax(cublasHandle_t   handle,
+                                   OSQPInt          n,
+                                   const OSQPFloat* x,
+                                   OSQPInt          incx,
+                                   OSQPInt*         result) {
 
-#ifdef DFLOAT
+#ifdef OSQP_USE_FLOAT
   return cublasIsamax(handle, n, x, incx, result);
 #else
   return cublasIdamax(handle, n, x, incx, result);
@@ -90,13 +90,13 @@ static cublasStatus_t cublasITamax(cublasHandle_t  handle,
 }
 
 
-static cublasStatus_t cublasTasum(cublasHandle_t  handle,
-                                  c_int           n,
-                                  const c_float  *x,
-                                  c_int           incx,
-                                  c_float        *result) {
+static cublasStatus_t cublasTasum(cublasHandle_t   handle,
+                                  OSQPInt          n,
+                                  const OSQPFloat* x,
+                                  OSQPInt          incx,
+                                  OSQPFloat*       result) {
 
-#ifdef DFLOAT
+#ifdef OSQP_USE_FLOAT
   return cublasSasum(handle, n, x, incx, result);
 #else
   return cublasDasum(handle, n, x, incx, result);
@@ -104,13 +104,13 @@ static cublasStatus_t cublasTasum(cublasHandle_t  handle,
 }
 
 
-static cublasStatus_t cublasTnrm2(cublasHandle_t  handle,
-                                  c_int           n,
-                                  const c_float  *x,
-                                  c_int           incx,
-                                  c_float        *result) {
+static cublasStatus_t cublasTnrm2(cublasHandle_t   handle,
+                                  OSQPInt          n,
+                                  const OSQPFloat* x,
+                                  OSQPInt          incx,
+                                  OSQPFloat*       result) {
 
-#ifdef DFLOAT
+#ifdef OSQP_USE_FLOAT
   return cublasSnrm2(handle, n, x, incx, result);
 #else
   return cublasDnrm2(handle, n, x, incx, result);

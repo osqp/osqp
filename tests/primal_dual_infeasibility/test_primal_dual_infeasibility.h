@@ -7,13 +7,14 @@
 
 void test_optimal()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Structures
-  OSQPSolver *solver;    // Solver
-  OSQPTestData *problem;      // Problem data
-  OSQPSettings *settings; // Settings
-  primal_dual_infeasibility_sols_data *data;
+  OSQPSolver*   solver;   // Solver
+  OSQPTestData* problem;  // Problem data
+  OSQPSettings* settings; // Settings
+
+  primal_dual_infeasibility_sols_data* data;
 
   // Load problem data
   data = generate_problem_primal_dual_infeasibility_sols_data();
@@ -77,7 +78,7 @@ void test_optimal()
 
 void test_prim_infeas()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Structures
   OSQPSolver *solver;    // Workspace
@@ -131,7 +132,7 @@ void test_prim_infeas()
 
 void test_dual_infeas()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Structures
   OSQPSolver *solver;    // Solver
@@ -185,7 +186,7 @@ void test_dual_infeas()
 
 void test_primal_dual_infeas()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Structures
   OSQPSolver *solver;    // Solver

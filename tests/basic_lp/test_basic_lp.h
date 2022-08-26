@@ -7,7 +7,7 @@
 
 void test_basic_lp_solve()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Problem settings
   OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
@@ -62,7 +62,7 @@ void test_basic_lp_solve()
 #ifdef OSQP_ALGEBRA_MKL
 void test_basic_lp_solve_pardiso()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Problem settings
   OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};

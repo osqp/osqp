@@ -9,63 +9,78 @@
 ******************************/
 
 /* OSQP custom float definitions */
-# ifdef DLONG            // long integers
-typedef long long c_int; /* for indices */
+# ifdef OSQP_USE_LONG            // long integers
+typedef long long OSQPInt; /* for indices */
 # else // standard integers
-typedef int c_int;       /* for indices */
-# endif /* ifdef DLONG */
+typedef int OSQPInt;       /* for indices */
+# endif /* ifdef OSQP_USE_LONG */
 
 
-# ifndef DFLOAT         // Doubles
-typedef double c_float; /* for numerical values  */
+# ifndef OSQP_USE_FLOAT         // Doubles
+typedef double OSQPFloat; /* for numerical values  */
 # else                  // Floats
-typedef float c_float;  /* for numerical values  */
-# endif /* ifndef DFLOAT */
+typedef float OSQPFloat;  /* for numerical values  */
+# endif /* ifndef OSQP_USE_FLOAT */
 
+
+/**
+ *  Matrix in compressed-column form.
+ *  The structure is used internally to store matrices in the triplet form as well,
+ *  but the API requires that the matrices are in the CSC format.
+ */
+typedef struct {
+  OSQPInt    m;     ///< number of rows
+  OSQPInt    n;     ///< number of columns
+  OSQPInt   *p;     ///< column pointers (size n+1); col indices (size nzmax) starting from 0 for triplet format
+  OSQPInt   *i;     ///< row indices, size nzmax starting from 0
+  OSQPFloat *x;     ///< numerical values, size nzmax
+  OSQPInt    nzmax; ///< maximum number of entries
+  OSQPInt    nz;    ///< number of entries in triplet matrix, -1 for csc
+} OSQPCscMatrix;
 
 /**
  * User settings
  */
 typedef struct {
-  c_int device;                               ///< device identifier; currently used for CUDA devices
+  OSQPInt device;                             ///< device identifier; currently used for CUDA devices
   enum osqp_linsys_solver_type linsys_solver; ///< linear system solver to use
-  c_int verbose;                              ///< boolean; write out progress
-  c_int warm_starting;                        ///< boolean; warm start
-  c_int scaling;                              ///< data scaling iterations; if 0, then disabled
-  c_int polishing;                            ///< boolean; polish ADMM solution
+  OSQPInt verbose;                            ///< boolean; write out progress
+  OSQPInt warm_starting;                      ///< boolean; warm start
+  OSQPInt scaling;                            ///< data scaling iterations; if 0, then disabled
+  OSQPInt polishing;                          ///< boolean; polish ADMM solution
 
   // ADMM parameters
-  c_float rho;                    ///< ADMM penalty parameter
-  c_int   rho_is_vec;             ///< boolean; is rho scalar or vector?
-  c_float sigma;                  ///< ADMM penalty parameter
-  c_float alpha;                  ///< ADMM relaxation parameter
+  OSQPFloat rho;                    ///< ADMM penalty parameter
+  OSQPInt   rho_is_vec;             ///< boolean; is rho scalar or vector?
+  OSQPFloat sigma;                  ///< ADMM penalty parameter
+  OSQPFloat alpha;                  ///< ADMM relaxation parameter
 
   // CG settings
-  c_int   cg_max_iter;            ///< maximum number of CG iterations per solve
-  c_int   cg_tol_reduction;       ///< number of consecutive zero CG iterations before the tolerance gets halved
-  c_float cg_tol_fraction;        ///< CG tolerance (fraction of ADMM residuals)
+  OSQPInt   cg_max_iter;            ///< maximum number of CG iterations per solve
+  OSQPInt   cg_tol_reduction;       ///< number of consecutive zero CG iterations before the tolerance gets halved
+  OSQPFloat cg_tol_fraction;        ///< CG tolerance (fraction of ADMM residuals)
 
   // adaptive rho logic
-  c_int   adaptive_rho;           ///< boolean, is rho step size adaptive?
-  c_int   adaptive_rho_interval;  ///< number of iterations between rho adaptations; if 0, then it is timing-based
-  c_float adaptive_rho_fraction;  ///< time interval for adapting rho (fraction of the setup time)
-  c_float adaptive_rho_tolerance; ///< tolerance X for adapting rho; new rho must be X times larger or smaller than the current one to change it
+  OSQPInt   adaptive_rho;           ///< boolean, is rho step size adaptive?
+  OSQPInt   adaptive_rho_interval;  ///< number of iterations between rho adaptations; if 0, then it is timing-based
+  OSQPFloat adaptive_rho_fraction;  ///< time interval for adapting rho (fraction of the setup time)
+  OSQPFloat adaptive_rho_tolerance; ///< tolerance X for adapting rho; new rho must be X times larger or smaller than the current one to change it
 
   // TODO: allowing negative values for adaptive_rho_interval can eliminate the need for adaptive_rho
 
   // termination parameters
-  c_int   max_iter;               ///< maximum number of iterations
-  c_float eps_abs;                ///< absolute solution tolerance
-  c_float eps_rel;                ///< relative solution tolerance
-  c_float eps_prim_inf;           ///< primal infeasibility tolerance
-  c_float eps_dual_inf;           ///< dual infeasibility tolerance
-  c_int   scaled_termination;     ///< boolean; use scaled termination criteria
-  c_int   check_termination;      ///< integer, check termination interval; if 0, checking is disabled
-  c_float time_limit;             ///< maximum time to solve the problem (seconds)
+  OSQPInt   max_iter;               ///< maximum number of iterations
+  OSQPFloat eps_abs;                ///< absolute solution tolerance
+  OSQPFloat eps_rel;                ///< relative solution tolerance
+  OSQPFloat eps_prim_inf;           ///< primal infeasibility tolerance
+  OSQPFloat eps_dual_inf;           ///< dual infeasibility tolerance
+  OSQPInt   scaled_termination;     ///< boolean; use scaled termination criteria
+  OSQPInt   check_termination;      ///< integer, check termination interval; if 0, checking is disabled
+  OSQPFloat time_limit;             ///< maximum time to solve the problem (seconds)
 
   // polishing parameters
-  c_float delta;                  ///< regularization parameter for polishing
-  c_int   polish_refine_iter;     ///< number of iterative refinement steps in polishing
+  OSQPFloat delta;                  ///< regularization parameter for polishing
+  OSQPInt   polish_refine_iter;     ///< number of iterative refinement steps in polishing
 } OSQPSettings;
 
 
@@ -74,26 +89,26 @@ typedef struct {
  */
 typedef struct {
   // solver status
-  char  status[32];     ///< status string, e.g. 'solved'
-  c_int status_val;     ///< status as c_int, defined in osqp_api_constants.h
-  c_int status_polish;  ///< polishing status: successful (1), unperformed (0), unsuccessful (-1)
+  char  status[32];       ///< status string, e.g. 'solved'
+  OSQPInt status_val;     ///< status as OSQPInt, defined in osqp_api_constants.h
+  OSQPInt status_polish;  ///< polishing status: successful (1), unperformed (0), unsuccessful (-1)
 
   // solution quality
-  c_float obj_val;      ///< primal objective
-  c_float prim_res;     ///< norm of primal residual
-  c_float dual_res;     ///< norm of dual residual
+  OSQPFloat obj_val;      ///< primal objective
+  OSQPFloat prim_res;     ///< norm of primal residual
+  OSQPFloat dual_res;     ///< norm of dual residual
 
   // algorithm information
-  c_int   iter;         ///< number of iterations taken
-  c_int   rho_updates;  ///< number of rho updates
-  c_float rho_estimate; ///< best rho estimate so far from residuals
+  OSQPInt   iter;         ///< number of iterations taken
+  OSQPInt   rho_updates;  ///< number of rho updates
+  OSQPFloat rho_estimate; ///< best rho estimate so far from residuals
 
   // timing information
-  c_float setup_time;  ///< setup  phase time (seconds)
-  c_float solve_time;  ///< solve  phase time (seconds)
-  c_float update_time; ///< update phase time (seconds)
-  c_float polish_time; ///< polish phase time (seconds)
-  c_float run_time;    ///< total time  (seconds)
+  OSQPFloat setup_time;  ///< setup  phase time (seconds)
+  OSQPFloat solve_time;  ///< solve  phase time (seconds)
+  OSQPFloat update_time; ///< update phase time (seconds)
+  OSQPFloat polish_time; ///< polish phase time (seconds)
+  OSQPFloat run_time;    ///< total time  (seconds)
 } OSQPInfo;
 
 
@@ -101,10 +116,10 @@ typedef struct {
  * Solution structure
  */
 typedef struct {
-  c_float *x;             ///< primal solution
-  c_float *y;             ///< Lagrange multiplier associated with \f$l \le Ax \le u\f$
-  c_float *prim_inf_cert; ///< primal infeasibility certificate
-  c_float *dual_inf_cert; ///< dual infeasibility certificate
+  OSQPFloat* x;             ///< primal solution
+  OSQPFloat* y;             ///< Lagrange multiplier associated with \f$l \le Ax \le u\f$
+  OSQPFloat* prim_inf_cert; ///< primal infeasibility certificate
+  OSQPFloat* dual_inf_cert; ///< dual infeasibility certificate
 } OSQPSolution;
 
 
@@ -117,10 +132,10 @@ typedef struct OSQPWorkspace_ OSQPWorkspace;
  */
 typedef struct {
   /** @} */
-  OSQPSettings  *settings; ///< problem settings
-  OSQPSolution  *solution; ///< problem solution
-  OSQPInfo      *info;     ///< solver information
-  OSQPWorkspace *work;     ///< solver internal workspace
+  OSQPSettings*  settings; ///< problem settings
+  OSQPSolution*  solution; ///< problem solution
+  OSQPInfo*      info;     ///< solver information
+  OSQPWorkspace* work;     ///< solver internal workspace
 } OSQPSolver;
 
 
@@ -129,11 +144,11 @@ typedef struct {
  * Structure to hold the settings for the generated code
  */
 typedef struct {
-  c_int embedded_mode;    ///< Embedded mode (1 = vector update, 2 = vector + matrix update)
-  c_int float_type;       ///< Use floats if 1, doubles if 0
-  c_int printing_enable;  ///< Enable printing if 1
-  c_int profiling_enable; ///< Enable timing of code sections if 1
-  c_int interrupt_enable; ///< Enable interrupt checking if 1
+  OSQPInt embedded_mode;    ///< Embedded mode (1 = vector update, 2 = vector + matrix update)
+  OSQPInt float_type;       ///< Use floats if 1, doubles if 0
+  OSQPInt printing_enable;  ///< Enable printing if 1
+  OSQPInt profiling_enable; ///< Enable timing of code sections if 1
+  OSQPInt interrupt_enable; ///< Enable interrupt checking if 1
 } OSQPCodegenDefines;
 
 #endif /* ifndef OSQP_API_TYPES_H */

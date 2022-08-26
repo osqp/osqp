@@ -5,11 +5,11 @@
 #include "qdldl.h"
 #include "qdldl_interface.h"
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 #include "amd.h"
 #endif
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
 #include "kkt.h"
 #endif
 
@@ -17,21 +17,21 @@
 #define STRINGIZE(x) STRINGIZE_(x)
 
 
-void update_settings_linsys_solver_qdldl(qdldl_solver       *s,
-                                         const OSQPSettings *settings) {
+void update_settings_linsys_solver_qdldl(qdldl_solver*       s,
+                                         const OSQPSettings* settings) {
   return;
 }
 
 // Warm starting not used by direct solvers
-void warm_start_linsys_solver_qdldl(qdldl_solver      *s,
-                                    const OSQPVectorf *x) {
+void warm_start_linsys_solver_qdldl(qdldl_solver*      s,
+                                    const OSQPVectorf* x) {
   return;
 }
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 // Free LDL Factorization structure
-void free_linsys_solver_qdldl(qdldl_solver *s) {
+void free_linsys_solver_qdldl(qdldl_solver* s) {
     if (s) {
         if (s->L) {
             if (s->L->p) c_free(s->L->p);
@@ -74,12 +74,12 @@ void free_linsys_solver_qdldl(qdldl_solver *s) {
  * @param  nvar Number of QP variables
  * @return      exitstatus (0 is good)
  */
-static c_int LDL_factor(csc          *A,
-                        qdldl_solver *p,
-                        c_int         nvar){
+static OSQPInt LDL_factor(OSQPCscMatrix* A,
+                          qdldl_solver*  p,
+                          OSQPInt        nvar) {
 
-    c_int sum_Lnz;
-    c_int factor_status;
+    OSQPInt sum_Lnz;
+    OSQPInt factor_status;
 
     // Compute elimination tree
     sum_Lnz = QDLDL_etree(A->n, A->p, A->i, p->iwork, p->Lnz, p->etree);
@@ -97,8 +97,8 @@ static c_int LDL_factor(csc          *A,
     }
 
     // Allocate memory for Li and Lx
-    p->L->i = (c_int *)c_malloc(sizeof(c_int)*sum_Lnz);
-    p->L->x = (c_float *)c_malloc(sizeof(c_float)*sum_Lnz);
+    p->L->i = (OSQPInt *)c_malloc(sizeof(OSQPInt)*sum_Lnz);
+    p->L->x = (OSQPFloat *)c_malloc(sizeof(OSQPFloat)*sum_Lnz);
     p->L->nzmax = sum_Lnz;
 
     // Factor matrix
@@ -122,28 +122,29 @@ static c_int LDL_factor(csc          *A,
 }
 
 
-static c_int permute_KKT(csc          **KKT,
-                         qdldl_solver  *p,
-                         c_int          Pnz,
-                         c_int          Anz,
-                         c_int          m,
-                         c_int         *PtoKKT,
-                         c_int         *AtoKKT,
-                         c_int         *rhotoKKT){
-    c_float *info;
-    c_int amd_status;
-    c_int * Pinv;
-    csc *KKT_temp;
-    c_int * KtoPKPt;
-    c_int i; // Indexing
+static OSQPInt permute_KKT(OSQPCscMatrix** KKT,
+                           qdldl_solver*   p,
+                           OSQPInt         Pnz,
+                           OSQPInt         Anz,
+                           OSQPInt         m,
+                           OSQPInt*        PtoKKT,
+                           OSQPInt*        AtoKKT,
+                           OSQPInt*        rhotoKKT) {
+    OSQPFloat* info;
+    OSQPInt    amd_status;
+    OSQPInt*   Pinv;
+    OSQPInt*   KtoPKPt;
+    OSQPInt    i; // Indexing
 
-    info = (c_float *)c_malloc(AMD_INFO * sizeof(c_float));
+    OSQPCscMatrix* KKT_temp;
+
+    info = (OSQPFloat *)c_malloc(AMD_INFO * sizeof(OSQPFloat));
 
     // Compute permutation matrix P using AMD
-#ifdef DLONG
-    amd_status = amd_l_order((*KKT)->n, (*KKT)->p, (*KKT)->i, p->P, (c_float *)OSQP_NULL, info);
+#ifdef OSQP_USE_LONG
+    amd_status = amd_l_order((*KKT)->n, (*KKT)->p, (*KKT)->i, p->P, (OSQPFloat *)OSQP_NULL, info);
 #else
-    amd_status = amd_order((*KKT)->n, (*KKT)->p, (*KKT)->i, p->P, (c_float *)OSQP_NULL, info);
+    amd_status = amd_order((*KKT)->n, (*KKT)->p, (*KKT)->i, p->P, (OSQPFloat *)OSQP_NULL, info);
 #endif
     if (amd_status < 0) {
         // Free Amd info and return an error
@@ -162,7 +163,7 @@ static c_int permute_KKT(csc          **KKT,
     }
     else {
         // Allocate vector of mappings from unpermuted to permuted
-        KtoPKPt = c_malloc((*KKT)->p[(*KKT)->n] * sizeof(c_int));
+        KtoPKPt = c_malloc((*KKT)->p[(*KKT)->n] * sizeof(OSQPInt));
         KKT_temp = csc_symperm((*KKT), Pinv, KtoPKPt, 1);
 
         // Update vectors PtoKKT, AtoKKT and rhotoKKT
@@ -200,24 +201,23 @@ static c_int permute_KKT(csc          **KKT,
 
 
 // Initialize LDL Factorization structure
-c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
-                               const OSQPMatrix   *P,
-                               const OSQPMatrix   *A,
-                               const OSQPVectorf  *rho_vec,
-                               const OSQPSettings *settings,
-                               c_int               polishing) {
+OSQPInt init_linsys_solver_qdldl(qdldl_solver**      sp,
+                                 const OSQPMatrix*   P,
+                                 const OSQPMatrix*   A,
+                                 const OSQPVectorf*  rho_vec,
+                                 const OSQPSettings* settings,
+                                 OSQPInt             polishing) {
 
     // Define Variables
-    csc * KKT_temp;     // Temporary KKT pointer
-    c_int i;            // Loop counter
-    c_int m, n;         // Dimensions of A
-    c_int n_plus_m;     // Define n_plus_m dimension
-    c_float* rhov;      // used for direct access to rho_vec data when polishing=false
-
-    c_float sigma = settings->sigma;
+    OSQPCscMatrix* KKT_temp; // Temporary KKT pointer
+    OSQPInt    i;         // Loop counter
+    OSQPInt    m, n;      // Dimensions of A
+    OSQPInt    n_plus_m;  // Define n_plus_m dimension
+    OSQPFloat* rhov;      // used for direct access to rho_vec data when polishing=false
+    OSQPFloat  sigma = settings->sigma;
 
     // Allocate private structure to store KKT factorization
-    qdldl_solver *s = c_calloc(1, sizeof(qdldl_solver));
+    qdldl_solver* s = c_calloc(1, sizeof(qdldl_solver));
     *sp = s;
 
     // Size of KKT
@@ -242,11 +242,11 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
     s->adjoint_derivative = &adjoint_derivative_qdldl;
 
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
     s->free = &free_linsys_solver_qdldl;
 #endif
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
     s->update_matrices = &update_linsys_solver_matrices_qdldl;
     s->update_rho_vec  = &update_linsys_solver_rho_vec_qdldl;
 #endif
@@ -261,11 +261,11 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
     // NB: We don not allocate L completely (CSC elements)
     //      L will be allocated during the factorization depending on the
     //      resulting number of elements.
-    s->L = c_calloc(1, sizeof(csc));
+    s->L = c_calloc(1, sizeof(OSQPCscMatrix));
     s->L->m  = n_plus_m;
     s->L->n  = n_plus_m;
     s->L->nz = -1;
-    s->L->p  = (c_int *)c_malloc((n_plus_m+1) * sizeof(QDLDL_int));
+    s->L->p  = (OSQPInt *)c_malloc((n_plus_m+1) * sizeof(QDLDL_int));
 
     // Diagonal matrix stored as a vector D
     s->Dinv = (QDLDL_float *)c_malloc(sizeof(QDLDL_float) * n_plus_m);
@@ -282,7 +282,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
 
     // Parameter vector
     if (rho_vec)
-      s->rho_inv_vec = (c_float *)c_malloc(sizeof(c_float) * m);
+      s->rho_inv_vec = (OSQPFloat *)c_malloc(sizeof(OSQPFloat) * m);
     // else it is NULL
 
     // Elimination tree workspace
@@ -314,9 +314,9 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
     else { // Called from ADMM algorithm
 
         // Allocate vectors of indices
-        s->PtoKKT = c_malloc(P->csc->p[n] * sizeof(c_int));
-        s->AtoKKT = c_malloc(A->csc->p[n] * sizeof(c_int));
-        s->rhotoKKT = c_malloc(m * sizeof(c_int));
+        s->PtoKKT = c_malloc(P->csc->p[n] * sizeof(OSQPInt));
+        s->AtoKKT = c_malloc(A->csc->p[n] * sizeof(OSQPInt));
+        s->rhotoKKT = c_malloc(m * sizeof(OSQPInt));
 
         // Use p->rho_inv_vec for storing param2 = rho_inv_vec
         if (rho_vec) {
@@ -369,7 +369,7 @@ c_int init_linsys_solver_qdldl(qdldl_solver      **sp,
     return 0;
 }
 
-#endif  // EMBEDDED
+#endif  // OSQP_EMBEDDED_MODE
 
 const char* name_qdldl() {
   return "QDLDL v" STRINGIZE(QDLDL_VERSION_MAJOR) "." STRINGIZE(QDLDL_VERSION_MINOR) "." STRINGIZE(QDLDL_VERSION_PATCH);
@@ -377,15 +377,15 @@ const char* name_qdldl() {
 
 
 /* solve P'LDL'P x = b for x */
-static void LDLSolve(c_float       *x,
-                     const c_float *b,
-                     const csc     *L,
-                     const c_float *Dinv,
-                     const c_int   *P,
-                     c_float       *bp) {
+static void LDLSolve(OSQPFloat*           x,
+                     const OSQPFloat*     b,
+                     const OSQPCscMatrix* L,
+                     const OSQPFloat*     Dinv,
+                     const OSQPInt*       P,
+                     OSQPFloat*           bp) {
 
-  c_int j;
-  c_int n = L->n;
+  OSQPInt j;
+  OSQPInt n = L->n;
 
   // permute_x(L->n, bp, b, P);
   for (j = 0 ; j < n ; j++) bp[j] = b[P[j]];
@@ -397,16 +397,16 @@ static void LDLSolve(c_float       *x,
 }
 
 
-c_int solve_linsys_qdldl(qdldl_solver *s,
-                         OSQPVectorf  *b,
-                         c_int         admm_iter) {
+OSQPInt solve_linsys_qdldl(qdldl_solver* s,
+                           OSQPVectorf*  b,
+                           OSQPInt       admm_iter) {
 
-  c_int j;
-  c_int n = s->n;
-  c_int m = s->m;
-  c_float* bv = b->values;
+  OSQPInt    j;
+  OSQPInt    n = s->n;
+  OSQPInt    m = s->m;
+  OSQPFloat* bv = b->values;
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
   if (s->polishing) {
     /* stores solution to the KKT system in b */
     LDLSolve(bv, bv, s->L, s->Dinv, s->P, s->bp);
@@ -431,25 +431,25 @@ c_int solve_linsys_qdldl(qdldl_solver *s,
         bv[j + n] += s->rho_inv * s->sol[j + n];
       }
     }
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
   }
 #endif
   return 0;
 }
 
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
 
 // Update private structure with new P and A
-c_int update_linsys_solver_matrices_qdldl(qdldl_solver     *s,
-                                          const OSQPMatrix *P,
-                                          const c_int* Px_new_idx,
-                                          c_int P_new_n,
-                                          const OSQPMatrix *A,
-                                          const c_int* Ax_new_idx,
-                                          c_int A_new_n) {
+OSQPInt update_linsys_solver_matrices_qdldl(qdldl_solver*     s,
+                                            const OSQPMatrix* P,
+                                            const OSQPInt*    Px_new_idx,
+                                            OSQPInt           P_new_n,
+                                            const OSQPMatrix* A,
+                                            const OSQPInt*    Ax_new_idx,
+                                            OSQPInt           A_new_n) {
 
-    int pos_D_count;
+    OSQPInt pos_D_count;
 
     // Update KKT matrix with new P
     update_KKT_P(s->KKT, P->csc, Px_new_idx, P_new_n, s->PtoKKT, s->sigma, 0);
@@ -467,13 +467,13 @@ c_int update_linsys_solver_matrices_qdldl(qdldl_solver     *s,
 }
 
 
-c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver      *s,
-                                         const OSQPVectorf *rho_vec,
-                                         c_float            rho_sc) {
+OSQPInt update_linsys_solver_rho_vec_qdldl(qdldl_solver*      s,
+                                           const OSQPVectorf* rho_vec,
+                                           OSQPFloat          rho_sc) {
 
-    c_int i;
-    c_int m = s->m;
-    c_float* rhov;
+    OSQPInt i;
+    OSQPInt m = s->m;
+    OSQPFloat* rhov;
 
     // Update internal rho_inv_vec
     if (s->rho_inv_vec) {
@@ -496,24 +496,29 @@ c_int update_linsys_solver_rho_vec_qdldl(qdldl_solver      *s,
 
 #endif
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 // --------- Derivative functions -------- //
 
 //increment the D colptr by the number of nonzeros
 //in a square diagonal matrix.
-static void _colcount_diag(csc* D, c_int initcol, c_int blockcols) {
+static void _colcount_diag(OSQPCscMatrix* D,
+                           OSQPInt        initcol,
+                           OSQPInt        blockcols) {
 
-    c_int j;
+    OSQPInt j;
     for(j = initcol; j < (initcol + blockcols); j++){
         D->p[j]++;
     }
 }
 
 //increment D colptr by the number of nonzeros in M
-static void _colcount_block(csc* D, csc* M, c_int initcol, c_int istranspose) {
+static void _colcount_block(OSQPCscMatrix* D,
+                            OSQPCscMatrix* M,
+                            OSQPInt        initcol,
+                            OSQPInt        istranspose) {
 
-    c_int nnzM, j;
+    OSQPInt nnzM, j;
 
     if(istranspose){
         nnzM = M->p[M->n];
@@ -529,10 +534,10 @@ static void _colcount_block(csc* D, csc* M, c_int initcol, c_int istranspose) {
     }
 }
 
-static void _colcount_to_colptr(csc* D) {
+static void _colcount_to_colptr(OSQPCscMatrix* D) {
 
-    c_int j, count;
-    c_int currentptr = 0;
+    OSQPInt j, count;
+    OSQPInt currentptr = 0;
 
     for(j = 0; j <= D->n; j++){
         count        = D->p[j];
@@ -543,14 +548,13 @@ static void _colcount_to_colptr(csc* D) {
 
 //populate values from M using the K colptr as indicator of
 //next fill location in each row
-static void _fill_block(
-        csc* K, csc* M,
-        c_int* index_mapping,
-        c_int initrow,
-        c_int initcol,
-        c_int istranspose)
-{
-    c_int ii, jj, row, col, dest;
+static void _fill_block(OSQPCscMatrix* K,
+                        OSQPCscMatrix* M,
+                        OSQPInt*       index_mapping,
+                        OSQPInt        initrow,
+                        OSQPInt        initcol,
+                        OSQPInt        istranspose) {
+    OSQPInt ii, jj, row, col, dest;
 
     for(ii=0; ii < M->n; ii++){
         for(jj = M->p[ii]; jj < M->p[ii+1]; jj++){
@@ -571,9 +575,15 @@ static void _fill_block(
     }
 }
 
-static void _fill_diag_values(csc* K, c_int* index_mapping, c_int initrow, c_int initcol, c_float *values, c_float value_scalar, c_int n) {
+static void _fill_diag_values(OSQPCscMatrix* K,
+                              OSQPInt*       index_mapping,
+                              OSQPInt        initrow,
+                              OSQPInt        initcol,
+                              OSQPFloat*     values,
+                              OSQPFloat      value_scalar,
+                              OSQPInt        n) {
 
-    c_int j, dest, row, col;
+    OSQPInt j, dest, row, col;
     for (j = 0; j < n; j++) {
         row         = j + initrow;
         col         = j + initcol;
@@ -589,7 +599,7 @@ static void _fill_diag_values(csc* K, c_int* index_mapping, c_int initrow, c_int
     }
 }
 
-static void _backshift_colptrs(csc* K) {
+static void _backshift_colptrs(OSQPCscMatrix* K) {
 
     int j;
     for(j = K->n; j > 0; j--){
@@ -598,8 +608,9 @@ static void _backshift_colptrs(csc* K) {
     K->p[0] = 0;
 }
 
-static void _adj_perturb(csc *D, c_float eps) {
-    c_int j, dest;
+static void _adj_perturb(OSQPCscMatrix* D,
+                         OSQPFloat      eps) {
+    OSQPInt j, dest;
 
     dest = 0;
     for (j = 0; j < D->m / 2; j++) {
@@ -612,13 +623,18 @@ static void _adj_perturb(csc *D, c_float eps) {
     }
 }
 
-static void _adj_assemble_csc(csc *D, const OSQPMatrix *P_full, const OSQPMatrix *G, const OSQPMatrix *A_eq, const OSQPMatrix *GDiagLambda, const OSQPVectorf *slacks) {
+static void _adj_assemble_csc(OSQPCscMatrix*     D,
+                              const OSQPMatrix*  P_full,
+                              const OSQPMatrix*  G,
+                              const OSQPMatrix*  A_eq,
+                              const OSQPMatrix*  GDiagLambda,
+                              const OSQPVectorf* slacks) {
 
-    c_int n = OSQPMatrix_get_m(P_full);
-    c_int x = OSQPMatrix_get_m(G);        // No. of inequality constraints
-    c_int y = OSQPMatrix_get_m(A_eq);     // No. of equality constraints
+    OSQPInt n = OSQPMatrix_get_m(P_full);
+    OSQPInt x = OSQPMatrix_get_m(G);        // No. of inequality constraints
+    OSQPInt y = OSQPMatrix_get_m(A_eq);     // No. of equality constraints
 
-    c_int j;
+    OSQPInt j;
     //use D.p to hold nnz entries in each column of the D matrix
     for (j=0; j <= 2*(n+x+y); j++){D->p[j] = 0;}
 
@@ -647,18 +663,24 @@ static void _adj_assemble_csc(csc *D, const OSQPMatrix *P_full, const OSQPMatrix
 
 }
 
-c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const OSQPMatrix *G, const OSQPMatrix *A_eq, const OSQPMatrix *GDiagLambda, const OSQPVectorf *slacks, const OSQPVectorf *rhs) {
+OSQPInt adjoint_derivative_qdldl(qdldl_solver*      s,
+                                 const OSQPMatrix*  P_full,
+                                 const OSQPMatrix*  G,
+                                 const OSQPMatrix*  A_eq,
+                                 const OSQPMatrix*  GDiagLambda,
+                                 const OSQPVectorf* slacks,
+                                 const OSQPVectorf* rhs) {
 
-    c_int n = OSQPMatrix_get_m(P_full);
-    c_int n_ineq = OSQPMatrix_get_m(G);
-    c_int n_eq = OSQPMatrix_get_m(A_eq);
+    OSQPInt n = OSQPMatrix_get_m(P_full);
+    OSQPInt n_ineq = OSQPMatrix_get_m(G);
+    OSQPInt n_eq = OSQPMatrix_get_m(A_eq);
 
     // Get maximum number of nonzero elements (only upper triangular part)
-    c_int P_full_nnz = OSQPMatrix_get_nz(P_full);
-    c_int G_nnz = OSQPMatrix_get_nz(G);
-    c_int A_eq_nnz = OSQPMatrix_get_nz(A_eq);
+    OSQPInt P_full_nnz = OSQPMatrix_get_nz(P_full);
+    OSQPInt G_nnz = OSQPMatrix_get_nz(G);
+    OSQPInt A_eq_nnz = OSQPMatrix_get_nz(A_eq);
 
-    c_int nnzKKT = n + n_ineq + n_eq +           // Number of diagonal elements in I (+eps)
+    OSQPInt nnzKKT = n + n_ineq + n_eq +           // Number of diagonal elements in I (+eps)
                    P_full_nnz +                  // Number of elements in P_full
                    G_nnz +                       // Number of nonzeros in G
                    A_eq_nnz +                    // Number of nonzeros in A_eq
@@ -667,8 +689,8 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const 
                    A_eq_nnz +                    // Number of nonzeros in A_eq'
                    n + n_ineq + n_eq;            // Number of -eps entries on diagonal
 
-    c_int dim = 2 * (n + n_ineq + n_eq);
-    csc *adj = csc_spalloc(dim, dim, nnzKKT, 1, 0);
+    OSQPInt dim = 2 * (n + n_ineq + n_eq);
+    OSQPCscMatrix* adj = csc_spalloc(dim, dim, nnzKKT, 1, 0);
     if (!adj) return OSQP_NULL;
     _adj_assemble_csc(adj, P_full, G, A_eq, GDiagLambda, slacks);
 
@@ -722,11 +744,11 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const 
     P = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(An));
     Pinv = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(An));
 
-    c_int amd_status;
-#ifdef DLONG
-    amd_status = amd_l_order(An, adj->p, adj->i, P, (c_float *)OSQP_NULL, (c_float *)OSQP_NULL);
+    OSQPInt amd_status;
+#ifdef OSQP_USE_LONG
+    amd_status = amd_l_order(An, adj->p, adj->i, P, (OSQPFloat *)OSQP_NULL, (OSQPFloat *)OSQP_NULL);
 #else
-    amd_status = amd_order(An, adj->p, adj->i, P, (c_float *)OSQP_NULL, (c_float *)OSQP_NULL);
+    amd_status = amd_order(An, adj->p, adj->i, P, (OSQPFloat *)OSQP_NULL, (OSQPFloat *)OSQP_NULL);
 #endif
     if (amd_status < 0) {
         return amd_status;
@@ -735,7 +757,7 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const 
     // Inverse of the permutation vector
     Pinv = csc_pinv(P, An);
 
-    csc *adj_permuted;
+    OSQPCscMatrix* adj_permuted;
     adj_permuted = csc_symperm(adj, Pinv, OSQP_NULL, 1);
 
     sumLnz = QDLDL_etree(An, adj_permuted->p, adj_permuted->i, iwork, Lnz, etree);
@@ -756,7 +778,7 @@ c_int adjoint_derivative_qdldl(qdldl_solver *s, const OSQPMatrix *P_full, const 
     OSQPVectorf *sol = OSQPVectorf_new(x, An);
     OSQPVectorf *residual = OSQPVectorf_malloc(An);
 
-    c_int k;
+    OSQPInt k;
     for (k=0; k<200; k++) {
         OSQPVectorf_copy(residual, rhs);
         OSQPMatrix_Axpy(adj_matrix, sol, residual, 1, -1);

@@ -15,7 +15,7 @@
   #include "codegen.h"
 #endif
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 # include "polish.h"
 # include "derivative.h"
 #endif
@@ -28,12 +28,12 @@
 /**********************
 * Main API Functions *
 **********************/
-c_int osqp_capabilities(void) {
-  c_int capabilities = 0;
+OSQPInt osqp_capabilities(void) {
+  OSQPInt capabilities = 0;
 
   capabilities |= osqp_algebra_linsys_supported();
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
   capabilities |= OSQP_CAPABILITIY_UPDATE_MATRICES;
 #endif
 
@@ -49,7 +49,7 @@ const char* osqp_version(void) {
 }
 
 
-const char* osqp_error_message(c_int error_flag) {
+const char* osqp_error_message(OSQPInt error_flag) {
   if( error_flag >= OSQP_LAST_ERROR_PLACE ) {
     return OSQP_ERROR_MESSAGE[OSQP_LAST_ERROR_PLACE-1];
   }
@@ -59,9 +59,9 @@ const char* osqp_error_message(c_int error_flag) {
 }
 
 
-void osqp_get_dimensions(OSQPSolver *solver,
-                         c_int      *m,
-                         c_int      *n) {
+void osqp_get_dimensions(OSQPSolver* solver,
+                         OSQPInt*    m,
+                         OSQPInt*    n) {
 
   /* Check if the solver has been initialized */
   if (!solver || !solver->work || !solver->work->data) {
@@ -75,7 +75,7 @@ void osqp_get_dimensions(OSQPSolver *solver,
 }
 
 
-void osqp_set_default_settings(OSQPSettings *settings) {
+void osqp_set_default_settings(OSQPSettings* settings) {
 
   settings->device = 0;                                      /* device identifier */
   settings->linsys_solver  = osqp_algebra_default_linsys();  /* linear system solver */
@@ -84,10 +84,10 @@ void osqp_set_default_settings(OSQPSettings *settings) {
   settings->scaling        = OSQP_SCALING;                   /* heuristic problem scaling */
   settings->polishing      = OSQP_POLISHING;                 /* ADMM solution polish: 1 */
 
-  settings->rho           = (c_float)OSQP_RHO;    /* ADMM step */
-  settings->rho_is_vec    = OSQP_RHO_IS_VEC;      /* defines whether rho is scalar or vector*/
-  settings->sigma         = (c_float)OSQP_SIGMA;  /* ADMM step */
-  settings->alpha         = (c_float)OSQP_ALPHA;  /* relaxation parameter */
+  settings->rho           = (OSQPFloat)OSQP_RHO;    /* ADMM step */
+  settings->rho_is_vec    = OSQP_RHO_IS_VEC;        /* defines whether rho is scalar or vector*/
+  settings->sigma         = (OSQPFloat)OSQP_SIGMA;  /* ADMM step */
+  settings->alpha         = (OSQPFloat)OSQP_ALPHA;  /* relaxation parameter */
 
   settings->cg_max_iter      = OSQP_CG_MAX_ITER;      /* maximum number of CG iterations */
   settings->cg_tol_reduction = OSQP_CG_TOL_REDUCTION; /* CG tolerance parameter */
@@ -95,36 +95,36 @@ void osqp_set_default_settings(OSQPSettings *settings) {
 
   settings->adaptive_rho           = OSQP_ADAPTIVE_RHO;
   settings->adaptive_rho_interval  = OSQP_ADAPTIVE_RHO_INTERVAL;
-  settings->adaptive_rho_fraction  = (c_float)OSQP_ADAPTIVE_RHO_FRACTION;
-  settings->adaptive_rho_tolerance = (c_float)OSQP_ADAPTIVE_RHO_TOLERANCE;
+  settings->adaptive_rho_fraction  = (OSQPFloat)OSQP_ADAPTIVE_RHO_FRACTION;
+  settings->adaptive_rho_tolerance = (OSQPFloat)OSQP_ADAPTIVE_RHO_TOLERANCE;
 
-  settings->max_iter           = OSQP_MAX_ITER;               /* maximum number of ADMM iterations */
-  settings->eps_abs            = (c_float)OSQP_EPS_ABS;       /* absolute convergence tolerance */
-  settings->eps_rel            = (c_float)OSQP_EPS_REL;       /* relative convergence tolerance */
-  settings->eps_prim_inf       = (c_float)OSQP_EPS_PRIM_INF;  /* primal infeasibility tolerance */
-  settings->eps_dual_inf       = (c_float)OSQP_EPS_DUAL_INF;  /* dual infeasibility tolerance */
-  settings->scaled_termination = OSQP_SCALED_TERMINATION;     /* evaluate scaled termination criteria */
-  settings->check_termination  = OSQP_CHECK_TERMINATION;      /* interval for evaluating termination criteria */
-  settings->time_limit         = OSQP_TIME_LIMIT;             /* stop the algorithm when time limit is reached */
+  settings->max_iter           = OSQP_MAX_ITER;                 /* maximum number of ADMM iterations */
+  settings->eps_abs            = (OSQPFloat)OSQP_EPS_ABS;       /* absolute convergence tolerance */
+  settings->eps_rel            = (OSQPFloat)OSQP_EPS_REL;       /* relative convergence tolerance */
+  settings->eps_prim_inf       = (OSQPFloat)OSQP_EPS_PRIM_INF;  /* primal infeasibility tolerance */
+  settings->eps_dual_inf       = (OSQPFloat)OSQP_EPS_DUAL_INF;  /* dual infeasibility tolerance */
+  settings->scaled_termination = OSQP_SCALED_TERMINATION;       /* evaluate scaled termination criteria */
+  settings->check_termination  = OSQP_CHECK_TERMINATION;        /* interval for evaluating termination criteria */
+  settings->time_limit         = OSQP_TIME_LIMIT;               /* stop the algorithm when time limit is reached */
 
-  settings->delta              = OSQP_DELTA;                  /* regularization parameter for polishing */
-  settings->polish_refine_iter = OSQP_POLISH_REFINE_ITER;     /* iterative refinement steps in polish */
+  settings->delta              = OSQP_DELTA;                    /* regularization parameter for polishing */
+  settings->polish_refine_iter = OSQP_POLISH_REFINE_ITER;       /* iterative refinement steps in polish */
 }
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 
-c_int osqp_setup(OSQPSolver         **solverp,
-                 const csc           *P,
-                 const c_float       *q,
-                 const csc           *A,
-                 const c_float       *l,
-                 const c_float       *u,
-                 c_int                m,
-                 c_int                n,
-                 const OSQPSettings  *settings) {
+OSQPInt osqp_setup(OSQPSolver**         solverp,
+                   const OSQPCscMatrix* P,
+                   const OSQPFloat*     q,
+                   const OSQPCscMatrix* A,
+                   const OSQPFloat*     l,
+                   const OSQPFloat*     u,
+                   OSQPInt              m,
+                   OSQPInt              n,
+                   const OSQPSettings*  settings) {
 
-  c_int exitflag;
+  OSQPInt exitflag;
 
   OSQPSolver*    solver;
   OSQPWorkspace* work;
@@ -303,10 +303,10 @@ c_int osqp_setup(OSQPSolver         **solverp,
   // Allocate solution
   solver->solution = c_calloc(1, sizeof(OSQPSolution));
   if (!(solver->solution)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  solver->solution->x             = c_calloc(1, n * sizeof(c_float));
-  solver->solution->y             = c_calloc(1, m * sizeof(c_float));
-  solver->solution->prim_inf_cert = c_calloc(1, m * sizeof(c_float));
-  solver->solution->dual_inf_cert = c_calloc(1, n * sizeof(c_float));
+  solver->solution->x             = c_calloc(1, n * sizeof(OSQPFloat));
+  solver->solution->y             = c_calloc(1, m * sizeof(OSQPFloat));
+  solver->solution->prim_inf_cert = c_calloc(1, m * sizeof(OSQPFloat));
+  solver->solution->dual_inf_cert = c_calloc(1, n * sizeof(OSQPFloat));
   if ( !(solver->solution->x) || !(solver->solution->dual_inf_cert) )
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
   if ( m && (!(solver->solution->y) || !(solver->solution->prim_inf_cert)) )
@@ -359,23 +359,23 @@ c_int osqp_setup(OSQPSolver         **solverp,
   return 0;
 }
 
-#endif /* ifndef EMBEDDED */
+#endif /* ifndef OSQP_EMBEDDED_MODE */
 
 
-c_int osqp_solve(OSQPSolver *solver) {
+OSQPInt osqp_solve(OSQPSolver *solver) {
 
-  c_int exitflag;
-  c_int iter, max_iter;
-  c_int compute_obj;           // boolean: compute objective function in the loop or not
-  c_int can_check_termination; // boolean: check termination or not
+  OSQPInt exitflag;
+  OSQPInt iter, max_iter;
+  OSQPInt compute_obj;           // boolean: compute objective function in the loop or not
+  OSQPInt can_check_termination; // boolean: check termination or not
   OSQPWorkspace* work;
 
 #ifdef OSQP_ENABLE_PROFILING
-  c_float temp_run_time;       // Temporary variable to store current run time
+  OSQPFloat temp_run_time;       // Temporary variable to store current run time
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
 #ifdef OSQP_ENABLE_PRINTING
-  c_int can_print;             // Boolean whether you can print
+  OSQPInt can_print;             // Boolean whether you can print
 #endif /* ifdef OSQP_ENABLE_PRINTING */
 
   // Check if solver has been initialized
@@ -525,7 +525,7 @@ c_int osqp_solve(OSQPSolver *solver) {
 #endif /* ifdef OSQP_ENABLE_PRINTING */
 
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
 # ifdef OSQP_ENABLE_PROFILING
 
     // If adaptive rho with automatic interval, check if the solve time is a
@@ -542,14 +542,14 @@ c_int osqp_solve(OSQPSolver *solver) {
           // between
           // rho updates to the closest multiple of check_termination
           solver->settings->adaptive_rho_interval =
-          (c_int)c_roundmultiple(iter, solver->settings->check_termination);
+          (OSQPInt)c_roundmultiple(iter, solver->settings->check_termination);
          }
          else {
           // If check_termination is disabled, we round the number of iterations
           // between
           // updates to the closest multiple of the default check_termination
           // interval.
-          solver->settings->adaptive_rho_interval = (c_int)c_roundmultiple(iter, OSQP_CHECK_TERMINATION);
+          solver->settings->adaptive_rho_interval = (OSQPInt)c_roundmultiple(iter, OSQP_CHECK_TERMINATION);
         }
 
         // Make sure the interval is not 0 and at least check_termination times
@@ -600,7 +600,7 @@ c_int osqp_solve(OSQPSolver *solver) {
         goto exit;
       }
     }
-#endif // EMBEDDED != 1
+#endif // OSQP_EMBEDDED_MODE != 1
 
   }        // End of ADMM for loop
 
@@ -664,10 +664,10 @@ c_int osqp_solve(OSQPSolver *solver) {
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
   /* Update rho estimate */
   solver->info->rho_estimate = compute_rho_estimate(solver);
-#endif /* if EMBEDDED != 1 */
+#endif /* if OSQP_EMBEDDED_MODE != 1 */
 
   /* Update solve time */
 #ifdef OSQP_ENABLE_PROFILING
@@ -675,11 +675,11 @@ c_int osqp_solve(OSQPSolver *solver) {
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
   // Polish the obtained solution
   if (solver->settings->polishing && (solver->info->status_val == OSQP_SOLVED))
     polish(solver);
-#endif /* ifndef EMBEDDED */
+#endif /* ifndef OSQP_EMBEDDED_MODE */
 
 #ifdef OSQP_ENABLE_PROFILING
   /* Update total time */
@@ -715,9 +715,9 @@ c_int osqp_solve(OSQPSolver *solver) {
 
 
 // Define exit flag for quitting function
-#if defined(OSQP_ENABLE_PROFILING) || defined(OSQP_ENABLE_INTERRUPT) || EMBEDDED != 1
+#if defined(OSQP_ENABLE_PROFILING) || defined(OSQP_ENABLE_INTERRUPT) || OSQP_EMBEDDED_MODE != 1
 exit:
-#endif /* if defined(OSQP_ENABLE_PROFILING) || defined(OSQP_ENABLE_INTERRUPT) || EMBEDDED != 1 */
+#endif /* if defined(OSQP_ENABLE_PROFILING) || defined(OSQP_ENABLE_INTERRUPT) || OSQP_EMBEDDED_MODE != 1 */
 
 #ifdef OSQP_ENABLE_INTERRUPT
   // Restore previous signal handler
@@ -728,11 +728,11 @@ exit:
 }
 
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
-c_int osqp_cleanup(OSQPSolver *solver) {
+OSQPInt osqp_cleanup(OSQPSolver* solver) {
 
-  c_int exitflag = 0;
+  OSQPInt exitflag = 0;
   OSQPWorkspace* work;
 
   if(!solver) return 0;   //exit on null
@@ -774,7 +774,7 @@ c_int osqp_cleanup(OSQPSolver *solver) {
       }
     }
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
     // Free active constraints structure
     if (work->pol) {
       OSQPVectori_free(work->pol->active_flags);
@@ -783,12 +783,12 @@ c_int osqp_cleanup(OSQPSolver *solver) {
       OSQPVectorf_free(work->pol->y);
       c_free(work->pol);
     }
-#endif /* ifndef EMBEDDED */
+#endif /* ifndef OSQP_EMBEDDED_MODE */
 
     // Free other Variables
     OSQPVectorf_free(work->rho_vec);
     OSQPVectorf_free(work->rho_inv_vec);
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
     OSQPVectori_free(work->constr_type);
 #endif
     OSQPVectorf_free(work->x);
@@ -838,7 +838,7 @@ c_int osqp_cleanup(OSQPSolver *solver) {
   return exitflag;
 }
 
-#endif /* ifndef EMBEDDED */
+#endif /* ifndef OSQP_EMBEDDED_MODE */
 
 
 
@@ -846,14 +846,16 @@ c_int osqp_cleanup(OSQPSolver *solver) {
 * Update problem data  *
 ************************/
 
-c_int osqp_update_data_vec(OSQPSolver    *solver,
-                           const c_float *q_new,
-                           const c_float *l_new,
-                           const c_float *u_new) {
+OSQPInt osqp_update_data_vec(OSQPSolver*      solver,
+                             const OSQPFloat* q_new,
+                             const OSQPFloat* l_new,
+                             const OSQPFloat* u_new) {
 
-  c_int exitflag = 0;
-  OSQPVectorf *l_tmp, *u_tmp;
-  OSQPWorkspace *work;
+  OSQPInt exitflag = 0;
+
+  OSQPVectorf*   l_tmp;
+  OSQPVectorf*   u_tmp;
+  OSQPWorkspace* work;
 
   /* Check if workspace has been initialized */
   if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -894,10 +896,10 @@ c_int osqp_update_data_vec(OSQPSolver    *solver,
       if (l_new) swap_vectors(&work->z_prev,  &work->data->l);
       if (u_new) swap_vectors(&work->delta_y, &work->data->u);
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
       /* Update rho_vec and refactor if constraints type changes */
       if (solver->settings->rho_is_vec) exitflag = update_rho_vec(solver);
-#endif /* #if EMBEDDED != 1 */
+#endif /* #if OSQP_EMBEDDED_MODE != 1 */
   }
 
   /* Update linear cost vector */
@@ -920,9 +922,9 @@ c_int osqp_update_data_vec(OSQPSolver    *solver,
 }
 
 
-c_int osqp_warm_start(OSQPSolver    *solver,
-                      const c_float *x,
-                      const c_float *y) {
+OSQPInt osqp_warm_start(OSQPSolver*      solver,
+                        const OSQPFloat* x,
+                        const OSQPFloat* y) {
 
   OSQPWorkspace* work;
 
@@ -967,18 +969,18 @@ void osqp_cold_start(OSQPSolver *solver) {
 }
 
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
 
-c_int osqp_update_data_mat(OSQPSolver    *solver,
-                           const c_float *Px_new,
-                           const c_int   *Px_new_idx,
-                           c_int          P_new_n,
-                           const c_float *Ax_new,
-                           const c_int   *Ax_new_idx,
-                           c_int          A_new_n) {
+OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
+                             const OSQPFloat* Px_new,
+                             const OSQPInt*   Px_new_idx,
+                             OSQPInt          P_new_n,
+                             const OSQPFloat* Ax_new,
+                             const OSQPInt*   Ax_new_idx,
+                             OSQPInt          A_new_n) {
 
-  c_int exitflag;   // Exit flag
-  c_int nnzP, nnzA; // Number of nonzeros in P and A
+  OSQPInt exitflag;   // Exit flag
+  OSQPInt nnzP, nnzA; // Number of nonzeros in P and A
   OSQPWorkspace *work;
 
   // Check if workspace has been initialized
@@ -1062,10 +1064,10 @@ c_int osqp_update_data_mat(OSQPSolver    *solver,
 }
 
 
-c_int osqp_update_rho(OSQPSolver *solver,
-                      c_float     rho_new) {
+OSQPInt osqp_update_rho(OSQPSolver* solver,
+                        OSQPFloat     rho_new) {
 
-    c_int exitflag;
+    OSQPInt exitflag;
     OSQPWorkspace *work;
 
     // Check if workspace has been initialized
@@ -1116,7 +1118,7 @@ c_int osqp_update_rho(OSQPSolver *solver,
   return exitflag;
 }
 
-#endif // EMBEDDED != 1
+#endif // OSQP_EMBEDDED_MODE != 1
 
 
 
@@ -1124,10 +1126,10 @@ c_int osqp_update_rho(OSQPSolver *solver,
 * Update problem settings  *
 ****************************/
 
-c_int osqp_update_settings(OSQPSolver         *solver,
-                           const OSQPSettings *new_settings) {
+OSQPInt osqp_update_settings(OSQPSolver*         solver,
+                             const OSQPSettings* new_settings) {
 
-  OSQPSettings *settings = solver->settings;
+  OSQPSettings* settings = solver->settings;
 
   /* Check if workspace has been initialized */
   if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1181,12 +1183,12 @@ c_int osqp_update_settings(OSQPSolver         *solver,
 
 #ifdef OSQP_CODEGEN
 
-c_int osqp_codegen(OSQPSolver         *solver,
-                   const char         *output_dir,
-                   const char         *file_prefix,
-                   OSQPCodegenDefines *defines){
+OSQPInt osqp_codegen(OSQPSolver*         solver,
+                     const char*         output_dir,
+                     const char*         file_prefix,
+                     OSQPCodegenDefines* defines){
 
-  c_int exitflag = 0;
+  OSQPInt exitflag = 0;
 
   if (!solver || !solver->work || !solver->settings || !solver->info) {
     return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -1222,13 +1224,13 @@ c_int osqp_codegen(OSQPSolver         *solver,
 * User API Helper functions
 ****************************/
 
-void csc_set_data(csc     *M,
-                  c_int    m,
-                  c_int    n,
-                  c_int    nzmax,
-                  c_float *x,
-                  c_int   *i,
-                  c_int   *p) {
+void csc_set_data(OSQPCscMatrix* M,
+                  OSQPInt        m,
+                  OSQPInt        n,
+                  OSQPInt        nzmax,
+                  OSQPFloat*     x,
+                  OSQPInt*       i,
+                  OSQPInt*       p) {
   M->m     = m;
   M->n     = n;
   M->nz   = -1;
@@ -1241,18 +1243,18 @@ void csc_set_data(csc     *M,
 /****************************
 * Derivative functions
 ****************************/
-#ifndef EMBEDDED
-c_int osqp_adjoint_derivative(OSQPSolver *solver,
-                                       c_float    *dx,
-                                       c_float    *dy_l,
-                                       c_float    *dy_u,
-                                       csc* dP,
-                                       c_float *dq,
-                                       csc* dA,
-                                       c_float *dl,
-                                       c_float *du) {
+#ifndef OSQP_EMBEDDED_MODE
+OSQPInt osqp_adjoint_derivative(OSQPSolver*  solver,
+                                OSQPFloat*     dx,
+                                OSQPFloat*     dy_l,
+                                OSQPFloat*     dy_u,
+                                OSQPCscMatrix* dP,
+                                OSQPFloat*     dq,
+                                OSQPCscMatrix* dA,
+                                OSQPFloat*     dl,
+                                OSQPFloat*     du) {
 
-    c_int status = adjoint_derivative(
+    OSQPInt status = adjoint_derivative(
             solver,
             dx,
             dy_l,

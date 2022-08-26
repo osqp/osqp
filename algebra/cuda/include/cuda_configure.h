@@ -19,7 +19,7 @@
 # define CUDA_CONFIGURE_H
 
 
-#ifdef DFLOAT
+#ifdef OSQP_USE_FLOAT
 #define CUDA_FLOAT CUDA_R_32F
 #else
 #define CUDA_FLOAT CUDA_R_64F

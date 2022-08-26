@@ -18,11 +18,16 @@ extern "C" {
 
 void test_form_KKT() {
 
-  update_matrices_sols_data *data;
-  c_float sigma, *rho_inv_vec_val;
-  OSQPVectorf *rho_vec, *rho_inv_vec;
-  c_int   m, *PtoKKT, *AtoKKT;
-  csc    *KKT;
+  update_matrices_sols_data* data;
+
+  OSQPFloat      sigma;
+  OSQPFloat*     rho_inv_vec_val;
+  OSQPVectorf*   rho_vec;
+  OSQPVectorf*   rho_inv_vec;
+  OSQPInt        m;
+  OSQPInt*       PtoKKT;
+  OSQPInt*       AtoKKT;
+  OSQPCscMatrix* KKT;
 
   // Load problem data
   data = generate_problem_update_matrices_sols_data();
@@ -36,14 +41,14 @@ void test_form_KKT() {
   OSQPVectorf_ew_reciprocal(rho_inv_vec,rho_vec);
 
   // Copy value of rho_inv_vec to a bare array
-  rho_inv_vec_val = (c_float *) c_malloc(m * sizeof(c_float));
+  rho_inv_vec_val = (OSQPFloat *) c_malloc(m * sizeof(OSQPFloat));
   OSQPVectorf_to_raw(rho_inv_vec_val, rho_inv_vec);
 
   // Allocate vectors of indices
-  PtoKKT = (c_int*) c_malloc((data->test_form_KKT_Pu->p[data->test_form_KKT_Pu->n]) *
-                    sizeof(c_int));
-  AtoKKT = (c_int*) c_malloc((data->test_form_KKT_A->p[data->test_form_KKT_A->n]) *
-                    sizeof(c_int));
+  PtoKKT = (OSQPInt*) c_malloc((data->test_form_KKT_Pu->p[data->test_form_KKT_Pu->n]) *
+                               sizeof(OSQPInt));
+  AtoKKT = (OSQPInt*) c_malloc((data->test_form_KKT_A->p[data->test_form_KKT_A->n]) *
+                               sizeof(OSQPInt));
 
   // Form KKT matrix storing the index vectors
   KKT = form_KKT(data->test_form_KKT_Pu,
@@ -92,18 +97,19 @@ void test_form_KKT() {
 
 
 void test_update() {
-  c_int i, nnzP, nnzA;
+  OSQPInt i, nnzP, nnzA;
   update_matrices_sols_data *data;
-  OSQPTestData *problem;
-  OSQPSolver    *solver;
-  OSQPSettings  *settings;
-  c_int exitflag;
+
+  OSQPTestData* problem;
+  OSQPSolver*   solver;
+  OSQPSettings* settings;
+  OSQPInt       exitflag;
 
   // Update matrix P
-  c_int *Px_new_idx;
+  OSQPInt* Px_new_idx;
 
   // Update matrix A
-  c_int *Ax_new_idx;
+  OSQPInt* Ax_new_idx;
 
   // Load problem data
   data = generate_problem_update_matrices_sols_data();
@@ -157,7 +163,7 @@ void test_update() {
 
   // Update P
   nnzP       = data->test_solve_Pu_new->p[data->test_solve_Pu->n];
-  Px_new_idx = (c_int*) c_malloc(nnzP * sizeof(c_int));
+  Px_new_idx = (OSQPInt*) c_malloc(nnzP * sizeof(OSQPInt));
 
   // Generate indices going from beginning to end of P
   for (i = 0; i < nnzP; i++) {
@@ -223,7 +229,7 @@ void test_update() {
 
   // Update A
   nnzA       = data->test_solve_A->p[data->test_solve_A->n];
-  Ax_new_idx = (c_int*) c_malloc(nnzA * sizeof(c_int));
+  Ax_new_idx = (OSQPInt*) c_malloc(nnzA * sizeof(OSQPInt));
 
   // Generate indices going from beginning to end of A
   for (i = 0; i < nnzA; i++) {
@@ -356,17 +362,17 @@ void test_update() {
 
 #ifdef OSQP_ALGEBRA_MKL
 void test_update_pardiso() {
-  c_int i, nnzP, nnzA, exitflag;
-  update_matrices_sols_data *data;
-  OSQPTestData *problem;
-  OSQPSolver   *solver;
-  OSQPSettings *settings;
+  OSQPInt i, nnzP, nnzA, exitflag;
+  update_matrices_sols_data* data;
+  OSQPTestData* problem;
+  OSQPSolver*   solver;
+  OSQPSettings* settings;
 
   // Update matrix P
-  c_int *Px_new_idx;
+  OSQPInt* Px_new_idx;
 
   // Update matrix A
-  c_int *Ax_new_idx;
+  OSQPInt* Ax_new_idx;
 
   // Load problem data
   data = generate_problem_update_matrices_sols_data();
@@ -419,8 +425,8 @@ void test_update_pardiso() {
 
   // Update P
   nnzP       = data->test_solve_Pu->p[data->test_solve_Pu->n];
-  Px_new_idx = (c_int*)c_malloc(nnzP * sizeof(c_int)); // Generate indices going from
-                                               // beginning to end of P
+  Px_new_idx = (OSQPInt*)c_malloc(nnzP * sizeof(OSQPInt)); // Generate indices going from
+                                                           // beginning to end of P
 
   for (i = 0; i < nnzP; i++) {
     Px_new_idx[i] = i;
@@ -450,8 +456,8 @@ void test_update_pardiso() {
 
   // Update A
   nnzA       = data->test_solve_A->p[data->test_solve_A->n];
-  Ax_new_idx = (c_int*)c_malloc(nnzA * sizeof(c_int)); // Generate indices going from
-                                               // beginning to end of P
+  Ax_new_idx = (OSQPInt*)c_malloc(nnzA * sizeof(OSQPInt)); // Generate indices going from
+                                                           // beginning to end of P
 
   for (i = 0; i < nnzA; i++) {
     Ax_new_idx[i] = i;

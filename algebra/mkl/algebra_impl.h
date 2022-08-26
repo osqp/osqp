@@ -10,13 +10,13 @@
 *********************************************/
 
 struct OSQPVectori_ {
-  c_int* values;
-  c_int length;
+  OSQPInt* values;
+  OSQPInt  length;
 };
 
 struct OSQPVectorf_ {
-  c_float* values;
-  c_int length;
+  OSQPFloat* values;
+  OSQPInt    length;
 };
 
 
@@ -33,7 +33,7 @@ struct OSQPVectorf_ {
 typedef enum OSQPMatrix_symmetry_type {NONE,TRIU} OSQPMatrix_symmetry_type;
 
 struct OSQPMatrix_ {
-  csc                     *csc;       /* Shadow matrix */
+  OSQPCscMatrix*           csc;       /* Shadow matrix */
   sparse_matrix_t          mkl_mat;   /* Opaque object for MKL matrix */
   OSQPMatrix_symmetry_type symmetry;
 };

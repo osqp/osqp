@@ -4,19 +4,25 @@
 #define OSQP_TESTER_H
 
 #define mu_assert(msg, pred) do { INFO(msg); REQUIRE(pred); } while((void)0, 0)
-#define TESTS_TOL 1e-4 // Define tests tolerance
+
+// Define tests tolerance
+#ifndef OSQP_USE_FLOAT
+#define TESTS_TOL 1e-4      // Tolerance for doubles
+#else
+#define TESTS_TOL 1e-3      // Slightly larger tolerance for floats
+#endif
 
 /* create structure to hold problem data */
 /* similar to OSQP internal container, but */
 /* holding only bare array types and csc */
 typedef struct {
-c_int    n;
-c_int    m;
-csc     *P;
-c_float *q;
-csc     *A;
-c_float *l;
-c_float *u;
+    OSQPInt        n;
+    OSQPInt        m;
+    OSQPCscMatrix* P;
+    OSQPFloat*     q;
+    OSQPCscMatrix* A;
+    OSQPFloat*     l;
+    OSQPFloat*     u;
 } OSQPTestData;
 
 #include <memory>

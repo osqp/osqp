@@ -1,4 +1,4 @@
-if(DLONG)
+if(OSQP_USE_LONG)
   set(MKL_INTERFACE "ilp64")
 else()
   set(MKL_INTERFACE "lp64")

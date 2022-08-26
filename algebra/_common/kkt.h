@@ -4,7 +4,7 @@
 
 # include "osqp.h"
 
-# ifndef EMBEDDED
+# ifndef OSQP_EMBEDDED_MODE
 
 #  include "csc_utils.h"
 
@@ -31,19 +31,19 @@
  *KKT
  * @return            return status flag
  */
- csc* form_KKT(csc*        P,
-               csc*        A,
-               c_int       format,
-               c_float     param1,
-               c_float*    param2,
-               c_float     param2_sc,
-               c_int*      PtoKKT,
-               c_int*      AtoKKT,
-               c_int*      param2toKKT);
-# endif // ifndef EMBEDDED
+ OSQPCscMatrix* form_KKT(OSQPCscMatrix* P,
+                         OSQPCscMatrix* A,
+                         OSQPInt        format,
+                         OSQPFloat      param1,
+                         OSQPFloat*     param2,
+                         OSQPFloat      param2_sc,
+                         OSQPInt*       PtoKKT,
+                         OSQPInt*       AtoKKT,
+                         OSQPInt*       param2toKKT);
+# endif // ifndef OSQP_EMBEDDED_MODE
 
 
-# if EMBEDDED != 1
+# if OSQP_EMBEDDED_MODE != 1
 
 /**
  * Update KKT matrix using the elements of P
@@ -56,13 +56,13 @@
  * @param param1    Parameter added to the diagonal elements of P
  * @param format    0 for CSC, 1 for CSR
  */
- void update_KKT_P(csc*         KKT,
-                   csc*         P,
-                   const c_int* Px_new_idx,
-                   c_int        P_new_n,
-                   c_int*       PtoKKT,
-                   c_float      param1,
-                   c_int        format);
+ void update_KKT_P(OSQPCscMatrix* KKT,
+                   OSQPCscMatrix* P,
+                   const OSQPInt* Px_new_idx,
+                   OSQPInt        P_new_n,
+                   OSQPInt*       PtoKKT,
+                   OSQPFloat      param1,
+                   OSQPInt        format);
 
 
 /**
@@ -74,11 +74,11 @@
  * @param A_new_n   number of elements of A to be updated
  * @param AtoKKT    Vector of pointers from A->x to KKT->x
  */
- void update_KKT_A(csc*         KKT,
-                   csc*         A,
-                   const c_int* Ax_new_idx,
-                   c_int        A_new_n,
-                   c_int*       AtoKKT);
+ void update_KKT_A(OSQPCscMatrix* KKT,
+                   OSQPCscMatrix* A,
+                   const OSQPInt* Ax_new_idx,
+                   OSQPInt        A_new_n,
+                   OSQPInt*       AtoKKT);
 
 
 /**
@@ -90,13 +90,13 @@
  * @param param2toKKT   index where param2 enters in the KKT matrix
  * @param m             number of constraints
  */
-void update_KKT_param2(csc*     KKT,
-                       c_float* param2,
-                       c_float  param2_sc,
-                       c_int*   param2toKKT,
-                       c_int    m);
+void update_KKT_param2(OSQPCscMatrix* KKT,
+                       OSQPFloat*     param2,
+                       OSQPFloat      param2_sc,
+                       OSQPInt*       param2toKKT,
+                       OSQPInt        m);
 
-# endif // EMBEDDED != 1
+# endif // OSQP_EMBEDDED_MODE != 1
 
 
 #endif /* ifndef KKT_H */

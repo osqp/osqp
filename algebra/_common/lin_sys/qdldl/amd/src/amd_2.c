@@ -59,8 +59,8 @@ GLOBAL void AMD_2
     Int W [ ],
 
     /* control parameters and output statistics */
-    c_float Control [ ],	/* array of size AMD_CONTROL */
-    c_float Info [ ]	/* array of size AMD_INFO */
+    OSQPFloat Control [ ],	/* array of size AMD_CONTROL */
+    OSQPFloat Info [ ]	/* array of size AMD_INFO */
 )
 {
 
@@ -214,7 +214,7 @@ GLOBAL void AMD_2
  *	additional data is placed in Iw, and pfree is modified so that
  *	Iw [pfree..iwlen-1] is always the unused part of Iw.
  *
- * Control:  A c_float array of size AMD_CONTROL containing input parameters
+ * Control:  A OSQPFloat array of size AMD_CONTROL containing input parameters
  *	that affect how the ordering is computed.  If NULL, then default
  *	settings are used.
  *
@@ -277,7 +277,7 @@ GLOBAL void AMD_2
  *	assembly tree.  Note that i refers to a row/column in the original
  *	matrix, not the permuted matrix.
  *
- * Info:  A c_float array of size AMD_INFO.  If present, (that is, not NULL),
+ * Info:  A OSQPFloat array of size AMD_INFO.  If present, (that is, not NULL),
  *	then statistics about the ordering are returned in the Info array.
  *	See amd.h for a description.
 
@@ -513,7 +513,7 @@ GLOBAL void AMD_2
  * ----------------------------------------------------------------------------
  */
 
-    c_float f, r, ndiv, s, nms_lu, nms_ldl, dmax, alpha, lnz, lnzme ;
+    OSQPFloat f, r, ndiv, s, nms_lu, nms_ldl, dmax, alpha, lnz, lnzme ;
 
 /*
  * f:		nvpiv
@@ -582,7 +582,7 @@ GLOBAL void AMD_2
     lemax = 0 ;
 
     /* get control parameters */
-    if (Control != (c_float *) NULL)
+    if (Control != (OSQPFloat *) NULL)
     {
 	alpha = Control [AMD_DENSE] ;
 	aggressive = (Control [AMD_AGGRESSIVE] != 0) ;
@@ -600,7 +600,7 @@ GLOBAL void AMD_2
     }
     else
     {
-	dense = (Int) (alpha * sqrt ((c_float) n)) ;
+	dense = (Int) (alpha * sqrt ((OSQPFloat) n)) ;
     }
     dense = MAX (16, dense) ;
     dense = MIN (n,  dense) ;
@@ -1520,7 +1520,7 @@ GLOBAL void AMD_2
 	 * (degme+ndense)-by-(degme+ndense).
 	 */
 
-	if (Info != (c_float *) NULL)
+	if (Info != (OSQPFloat *) NULL)
 	{
 	    f = nvpiv ;
 	    r = degme + ndense ;
@@ -1556,12 +1556,12 @@ GLOBAL void AMD_2
 /* DONE SELECTING PIVOTS */
 /* ========================================================================= */
 
-    if (Info != (c_float *) NULL)
+    if (Info != (OSQPFloat *) NULL)
     {
 
 	/* count the work to factorize the ndense-by-ndense submatrix */
 	f = ndense ;
-	dmax = MAX (dmax, (c_float) ndense) ;
+	dmax = MAX (dmax, (OSQPFloat) ndense) ;
 
 	/* number of nonzeros in L (excluding the diagonal) */
 	lnzme = (f-1)*f/2 ;

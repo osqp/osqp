@@ -5,11 +5,11 @@
 int main(void) {
 
   /* Problem data to use to update the solver */
-  c_float l[3]   = { 0.0, -1.0, -1.0, };
-  c_float u[3]   = { 3.0, 2.0, 2.0, };
+  OSQPFloat l[3] = { 0.0, -1.0, -1.0, };
+  OSQPFloat u[3] = { 3.0, 2.0, 2.0, };
 
   /* Exitflag */
-  c_int exitflag;
+  OSQPInt exitflag;
 
   printf( "Embedded test program for vector updates.\n" );
 

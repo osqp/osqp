@@ -15,20 +15,23 @@
  * @param  work Workspace
  * @return      Number of rows in Ared, negative if error
  */
-static c_int form_Ared(OSQPWorkspace *work){
+static OSQPInt form_Ared(OSQPWorkspace* work){
 
-  c_int j, n_active;
-  c_int m = work->data->m;
+  OSQPInt j, n_active;
+  OSQPInt m = work->data->m;
 
-  c_int *active_flags;
-  c_float *z, *y, *u, *l;
+  OSQPInt* active_flags;
+  OSQPFloat* z;
+  OSQPFloat* y;
+  OSQPFloat* u;
+  OSQPFloat* l;
 
   // Allocate raw arrays
-  active_flags = (c_int *) c_malloc(m * sizeof(c_int));
-  z = (c_float *) c_malloc(m * sizeof(c_float));
-  y = (c_float *) c_malloc(m * sizeof(c_float));
-  l = (c_float *) c_malloc(m * sizeof(c_float));
-  u = (c_float *) c_malloc(m * sizeof(c_float));
+  active_flags = (OSQPInt *) c_malloc(m * sizeof(OSQPInt));
+  z = (OSQPFloat *) c_malloc(m * sizeof(OSQPFloat));
+  y = (OSQPFloat *) c_malloc(m * sizeof(OSQPFloat));
+  l = (OSQPFloat *) c_malloc(m * sizeof(OSQPFloat));
+  u = (OSQPFloat *) c_malloc(m * sizeof(OSQPFloat));
 
   // Copy data to raw arrays
   OSQPVectori_to_raw(active_flags, work->pol->active_flags);
@@ -89,22 +92,25 @@ static c_int form_Ared(OSQPWorkspace *work){
  * @param  rhs  right-hand-side
  * @return      reduced rhs
  */
-static void form_rhs_red(OSQPWorkspace *work, OSQPVectorf *rhs) {
+static void form_rhs_red(OSQPWorkspace* work, OSQPVectorf* rhs) {
 
-  c_int j, counter;
-  c_int n = work->data->n;
-  c_int m = work->data->m;
-  c_int n_plus_mred = OSQPVectorf_length(rhs);
+  OSQPInt j, counter;
+  OSQPInt n = work->data->n;
+  OSQPInt m = work->data->m;
+  OSQPInt n_plus_mred = OSQPVectorf_length(rhs);
 
-  c_int *active_flags;
-  c_float *rhsv, *q, *l, *u;
+  OSQPInt *active_flags;
+  OSQPFloat* rhsv;
+  OSQPFloat* q;
+  OSQPFloat* l;
+  OSQPFloat* u;
 
   // Allocate raw arrays
-  active_flags = (c_int *)   c_malloc(m           * sizeof(c_int));
-  rhsv         = (c_float *) c_malloc(n_plus_mred * sizeof(c_float));
-  q            = (c_float *) c_malloc(n           * sizeof(c_float));
-  l            = (c_float *) c_malloc(m           * sizeof(c_float));
-  u            = (c_float *) c_malloc(m           * sizeof(c_float));
+  active_flags = (OSQPInt *)   c_malloc(m           * sizeof(OSQPInt));
+  rhsv         = (OSQPFloat *) c_malloc(n_plus_mred * sizeof(OSQPFloat));
+  q            = (OSQPFloat *) c_malloc(n           * sizeof(OSQPFloat));
+  l            = (OSQPFloat *) c_malloc(m           * sizeof(OSQPFloat));
+  u            = (OSQPFloat *) c_malloc(m           * sizeof(OSQPFloat));
 
   // Copy data to raw arrays
   OSQPVectori_to_raw(active_flags, work->pol->active_flags);
@@ -152,11 +158,11 @@ static void form_rhs_red(OSQPWorkspace *work, OSQPVectorf *rhs) {
  * @param  b    RHS of the linear system
  * @return      Exitflag
  */
-static c_int iterative_refinement(OSQPSolver    *solver,
-                                  LinSysSolver  *p,
-                                  OSQPVectorf   *z,
-                                  OSQPVectorf   *b) {
-  c_int i, mred;
+static OSQPInt iterative_refinement(OSQPSolver*   solver,
+                                    LinSysSolver* p,
+                                    OSQPVectorf*  z,
+                                    OSQPVectorf*  b) {
+  OSQPInt i, mred;
   OSQPVectorf *rhs, *rhs1, *rhs2;
   OSQPVectorf *z1, *z2;
 
@@ -216,19 +222,19 @@ static c_int iterative_refinement(OSQPSolver    *solver,
  * @param work Workspace
  * @param yred Dual variables associated to active constraints
  */
-static void get_ypol_from_yred(OSQPWorkspace *work, OSQPVectorf *yred_vf) {
+static void get_ypol_from_yred(OSQPWorkspace* work, OSQPVectorf* yred_vf) {
 
-  c_int j, counter;
-  c_int m = work->data->m;
-  c_int mred = OSQPVectorf_length(yred_vf);
+  OSQPInt j, counter;
+  OSQPInt m = work->data->m;
+  OSQPInt mred = OSQPVectorf_length(yred_vf);
 
-  c_int *active_flags;
-  c_float *y, *yred;
+  OSQPInt *active_flags;
+  OSQPFloat *y, *yred;
 
   // Allocate raw arrays
-  active_flags = (c_int *)   c_malloc(m    * sizeof(c_int));
-  y            = (c_float *) c_malloc(m    * sizeof(c_float));
-  yred         = (c_float *) c_malloc(mred * sizeof(c_float));
+  active_flags = (OSQPInt *)   c_malloc(m    * sizeof(OSQPInt));
+  y            = (OSQPFloat *) c_malloc(m    * sizeof(OSQPFloat));
+  yred         = (OSQPFloat *) c_malloc(mred * sizeof(OSQPFloat));
 
   // Copy data to raw arrays
   OSQPVectori_to_raw(active_flags, work->pol->active_flags);
@@ -263,19 +269,19 @@ static void get_ypol_from_yred(OSQPWorkspace *work, OSQPVectorf *yred_vf) {
   c_free(yred);
 }
 
-c_int polish(OSQPSolver *solver) {
+OSQPInt polish(OSQPSolver* solver) {
 
-  c_int mred, polish_successful, exitflag;
+  OSQPInt mred, polish_successful, exitflag;
 
-  LinSysSolver *plsh;
-  OSQPVectorf *rhs_red;
-  OSQPVectorf *pol_sol; // Polished solution (x and reduced y)
-  OSQPVectorf *pol_sol_xview; // view into x part of polished solution
-  OSQPVectorf *pol_sol_yview; // view into (reduced) y part of polished solutions
+  LinSysSolver* plsh;
+  OSQPVectorf*  rhs_red;
+  OSQPVectorf*  pol_sol; // Polished solution (x and reduced y)
+  OSQPVectorf*  pol_sol_xview; // view into x part of polished solution
+  OSQPVectorf*  pol_sol_yview; // view into (reduced) y part of polished solutions
 
-  OSQPInfo*      info      = solver->info;
-  OSQPSettings*  settings  = solver->settings;
-  OSQPWorkspace* work      = solver->work;
+  OSQPInfo*      info     = solver->info;
+  OSQPSettings*  settings = solver->settings;
+  OSQPWorkspace* work     = solver->work;
 
 #ifdef OSQP_ENABLE_PROFILING
   osqp_tic(work->timer); // Start timer

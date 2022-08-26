@@ -10,8 +10,8 @@
 
 /* DATA CUSTOMIZATIONS (depending on memory manager)-----------------------   */
 
-/* We do not need memory allocation functions if EMBEDDED is enabled */
-# ifndef EMBEDDED
+/* We do not need memory allocation functions if OSQP_EMBEDDED_MODE is enabled */
+# ifndef OSQP_EMBEDDED_MODE
 #  ifdef OSQP_CUSTOM_MEMORY
 /* Use user-provided memory management functions */
 #    include OSQP_CUSTOM_MEMORY
@@ -23,7 +23,7 @@
 #   define c_free    free
 #   define c_realloc realloc
 #  endif
-# endif /* end ifndef EMBEDDED */
+# endif /* end ifndef OSQP_EMBEDDED_MODE */
 
 
 /* Use customized operations */
@@ -48,17 +48,17 @@
 
 /* Use customized functions -----------------------------------------------   */
 
-# if EMBEDDED != 1
+# if OSQP_EMBEDDED_MODE != 1
 
 #  include <math.h>
-#  ifndef DFLOAT // Doubles
+#  ifndef OSQP_USE_FLOAT // Doubles
 #   define c_sqrt sqrt
 #   define c_fmod fmod
 #  else          // Floats
 #   define c_sqrt sqrtf
 #   define c_fmod fmodf
-#  endif /* ifndef DFLOAT */
+#  endif /* ifndef OSQP_USE_FLOAT */
 
-# endif // end EMBEDDED
+# endif // end OSQP_EMBEDDED_MODE
 
 #endif /* ifndef GLOB_OPTS_H */

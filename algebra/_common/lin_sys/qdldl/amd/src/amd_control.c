@@ -17,13 +17,13 @@
 
 GLOBAL void AMD_control
 (
-    c_float Control [ ]
+    OSQPFloat Control [ ]
 )
 {
-    c_float alpha ;
+    OSQPFloat alpha ;
     Int aggressive ;
 
-    if (Control != (c_float *) NULL)
+    if (Control != (OSQPFloat *) NULL)
     {
 	alpha = Control [AMD_DENSE] ;
 	aggressive = Control [AMD_AGGRESSIVE] != 0 ;

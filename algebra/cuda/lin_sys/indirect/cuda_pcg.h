@@ -30,14 +30,14 @@
  *  The solution is stored in s->d_x.
  *  The function returns the number of PCG iterations evaluated.
  */
-c_int cuda_pcg_alg(cudapcg_solver *s,
-                   c_float         eps,
-                   c_int           max_iter);
+OSQPInt cuda_pcg_alg(cudapcg_solver* s,
+                     OSQPFloat       eps,
+                     OSQPInt         max_iter);
 
-void cuda_pcg_update_precond(cudapcg_solver *s,
-                             c_int           P_updated,
-                             c_int           A_updated,
-                             c_int           R_updated);
+void cuda_pcg_update_precond(cudapcg_solver* s,
+                             OSQPInt         P_updated,
+                             OSQPInt         A_updated,
+                             OSQPInt         R_updated);
 
 
 #endif /* ifndef CUDA_PCG_H */

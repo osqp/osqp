@@ -18,8 +18,8 @@
 /* OSQP_CODEGEN */
 #cmakedefine OSQP_CODEGEN
 
-/* EMBEDDED */
-#cmakedefine EMBEDDED (@EMBEDDED@)
+/* OSQP_EMBEDDED_MODE */
+#cmakedefine OSQP_EMBEDDED_MODE (@OSQP_EMBEDDED_MODE@)
 
 /* Header file containing custom memory allocators */
 #cmakedefine OSQP_CUSTOM_MEMORY "@OSQP_CUSTOM_MEMORY@"
@@ -36,10 +36,10 @@
 /* OSQP_ENABLE_INTERRUPT */
 #cmakedefine OSQP_ENABLE_INTERRUPT
 
-/* DFLOAT */
-#cmakedefine DFLOAT
+/* OSQP_USE_FLOAT */
+#cmakedefine OSQP_USE_FLOAT
 
-/* DLONG */
-#cmakedefine DLONG
+/* OSQP_USE_LONG */
+#cmakedefine OSQP_USE_LONG
 
 #endif /* ifndef OSQP_CONFIGURE_H */

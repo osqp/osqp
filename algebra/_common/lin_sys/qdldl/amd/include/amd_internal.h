@@ -155,7 +155,7 @@
 
 #include "amd.h"
 
-#if defined (DLONG) || defined (ZLONG)
+#if defined (OSQP_USE_LONG) || defined (ZLONG)
 
 #define Int SuiteSparse_long
 #define ID  SuiteSparse_long_id
@@ -210,7 +210,7 @@ GLOBAL size_t AMD_aat
     const Int Ai [ ],
     Int Len [ ],
     Int Tp [ ],
-    c_float Info [ ]
+    OSQPFloat Info [ ]
 ) ;
 
 GLOBAL void AMD_1
@@ -223,8 +223,8 @@ GLOBAL void AMD_1
     Int Len [ ],
     Int slen,
     Int S [ ],
-    c_float Control [ ],
-    c_float Info [ ]
+    OSQPFloat Control [ ],
+    OSQPFloat Info [ ]
 ) ;
 
 GLOBAL void AMD_postorder

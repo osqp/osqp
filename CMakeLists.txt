@@ -98,9 +98,9 @@ elseif(${OSQP_ALGEBRA_BACKEND} STREQUAL "cuda")
 endif()
 
 # Is the code generated for embedded platforms? 1 :   Yes. Matrix update not allowed. 2 :   No. Matrix update allowed.
-if(DEFINED EMBEDDED)
+if(DEFINED OSQP_EMBEDDED_MODE)
   if(NOT OSQP_ALGEBRA_BUILTIN)
-    message(WARNING "Forcing OSQP_ALGEBRA_BACKEND=builtin for EMBEDDED mode.")
+    message(WARNING "Forcing OSQP_ALGEBRA_BACKEND=builtin for OSQP_EMBEDDED_MODE mode.")
   endif()
 
   set(OSQP_ALGEBRA_BACKEND "builtin")
@@ -109,31 +109,37 @@ if(DEFINED EMBEDDED)
   unset(OSQP_ALGEBRA_MKL)
 
   if(OSQP_ENABLE_PRINTING AND NOT OSQP_CUSTOM_PRINTING)
-    message(WARNING "Disabling printing in EMBEDDED mode.")
+    message(WARNING "Disabling printing in OSQP_EMBEDDED_MODE mode.")
     set(OSQP_ENABLE_PRINTING OFF)
   endif()
 
   if(OSQP_ENABLE_INTERRUPT AND NOT OSQP_CUSTOM_INTERRUPT)
-    message(WARNING "Disabling interrupts in EMBEDDED mode.")
+    message(WARNING "Disabling interrupts in OSQP_EMBEDDED_MODE mode.")
     set(OSQP_ENABLE_INTERRUPT OFF)
   endif()
 
   if(OSQP_ENABLE_PROFILING AND NOT OSQP_CUSTOM_TIMING)
-    message(WARNING "Disabling profiling (timing) for EMBEDDED mode.")
+    message(WARNING "Disabling profiling (timing) for OSQP_EMBEDDED_MODE mode.")
     set(OSQP_ENABLE_PROFILING OFF)
   endif()
 
   # Disable shared library and demo exe on embedded applications
   if(${OSQP_BUILD_SHARED_LIB} OR ${OSQP_BUILD_DEMO_EXE})
-    message(WARNING "Disabling shared library and demo executable for EMBEDDED mode.")
+    message(WARNING "Disabling shared library and demo executable for OSQP_EMBEDDED_MODE mode.")
   endif()
 
   set(OSQP_BUILD_SHARED_LIB OFF)
   set(OSQP_BUILD_DEMO_EXE OFF)
 
-  message(STATUS "EMBEDDED = ${EMBEDDED}")
+  if(OSQP_EMBEDDED_MODE EQUAL 1)
+    message(STATUS "Embedded mode: Vector updates")
+  elseif(OSQP_EMBEDDED_MODE EQUAL 2)
+    message(STATUS "Embedded mode: Matrix updates")
+  else()
+    error("Unknown OSQP_EMBEDDED_MODE mode: ${OSQP_EMBEDDED_MODE}")
+  endif()
 else()
-  message(STATUS "EMBEDDED = OFF")
+  message(STATUS "Embedded mode: OFF")
 endif()
 
 # Display final algebra chosen
@@ -147,33 +153,43 @@ message(STATUS "Solver interrupt: ${OSQP_ENABLE_INTERRUPT}")
 
 if(OSQP_ALGEBRA_CUDA)
   # Some options have different defaults for the CUDA algebra
-  option(DFLOAT "Use floats instead of doubles" ON)
-  option(DLONG "Use long integers (64bit) for indexing" OFF)
+  option(OSQP_USE_FLOAT "Use floats instead of doubles" ON)
+  option(OSQP_USE_LONG "Use long integers (64bit) for indexing" OFF)
 else()
-  option(DFLOAT "Use floats instead of doubles" OFF)
-  option(DLONG "Use long integers (64bit) for indexing" ON)
+  option(OSQP_USE_FLOAT "Use floats instead of doubles" OFF)
+  option(OSQP_USE_LONG "Use long integers (64bit) for indexing" ON)
 endif()
 
-if(DFLOAT AND OSQP_ALGEBRA_MKL)
-  message(WARNING "Disabling DFLOAT for MKL (Intel RCI ISS does not support single-precision values yet.)")
-  set(DFLOAT OFF)
+if(OSQP_USE_FLOAT AND OSQP_ALGEBRA_MKL)
+  message(WARNING "Disabling OSQP_USE_FLOAT for MKL (Intel RCI ISS does not support single-precision values yet.)")
+  set(OSQP_USE_FLOAT OFF)
 endif()
-message(STATUS "DFLOAT = ${DFLOAT}")
+
+if(OSQP_USE_FLOAT)
+  message(STATUS "Using single precision floating-point")
+else()
+  message(STATUS "Using double precision floating-point")
+endif()
 
 if(NOT (CMAKE_SIZEOF_VOID_P EQUAL 8))
   message(WARNING "Disabling long integers (64bit) on 32bit machine.")
-  set(DLONG OFF)
+  set(OSQP_USE_LONG OFF)
 endif()
 
-if(OSQP_ALGEBRA_CUDA AND DLONG)
+if(OSQP_ALGEBRA_CUDA AND OSQP_USE_LONG)
   message(WARNING "Disabling long integers (64bit) for CUDA.")
-  set(DLONG OFF)
-elseif(DEFINED EMBEDDED)
+  set(OSQP_USE_LONG OFF)
+elseif(DEFINED OSQP_EMBEDDED_MODE)
   # The long long type is not in the C89 spec, and our embedded code must be C89 compliant
   message(STATUS "Disabling long integers (64bit) for embedded mode")
-  set(DLONG OFF)
+  set(OSQP_USE_LONG OFF)
 endif()
-message(STATUS "DLONG = ${DLONG}")
+
+if(OSQP_USE_LONG)
+  message(STATUS "Using long integers")
+else()
+  message(STATUS "Using standard (int) integers")
+endif()
 
 option(DEBUG "Debug mode" OFF)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -190,7 +206,7 @@ option(OSQP_ASAN "Enable ASAN" OFF)
 
 cmake_dependent_option( OSQP_CODEGEN "Enable code generation"
                         ON
-                        "OSQP_ALGEBRA_BUILTIN;NOT DEFINED EMBEDDED" OFF )
+                        "OSQP_ALGEBRA_BUILTIN;NOT DEFINED OSQP_EMBEDDED_MODE" OFF )
 
 message(STATUS "CODEGEN = ${OSQP_CODEGEN}")
 
@@ -219,7 +235,7 @@ if(OSQP_ALGEBRA_CUDA)
   include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 
   # sm_75 -> Turing support
-  if(DFLOAT)
+  if(OSQP_USE_FLOAT)
     set(CMAKE_CUDA_ARCHITECTURES 52 75)
     # set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_52 --gpu-code=sm_52,sm_75")
   else()
