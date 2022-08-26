@@ -4,7 +4,13 @@
 #define OSQP_TESTER_H
 
 #define mu_assert(msg, pred) do { INFO(msg); REQUIRE(pred); } while((void)0, 0)
-#define TESTS_TOL 1e-4 // Define tests tolerance
+
+// Define tests tolerance
+#ifndef OSQP_USE_FLOAT
+#define TESTS_TOL 1e-4      // Tolerance for doubles
+#else
+#define TESTS_TOL 1e-3      // Slightly larger tolerance for floats
+#endif
 
 /* create structure to hold problem data */
 /* similar to OSQP internal container, but */
