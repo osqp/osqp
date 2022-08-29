@@ -75,11 +75,9 @@ TEST_CASE( "test_basic_qp", "[multi-file:4]" ) {
     SECTION( "test_basic_qp_solve" ) {
         test_basic_qp_solve();
     }
-#ifdef OSQP_ALGEBRA_MKL
-        SECTION( "test_basic_qp_solve_pardiso" ) {
-        test_basic_qp_solve_pardiso();
+    SECTION( "test_basic_qp_settings" ) {
+        test_basic_qp_settings();
     }
-#endif
     SECTION( "test_basic_qp_update" ) {
         test_basic_qp_update();
     }
