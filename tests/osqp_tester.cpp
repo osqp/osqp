@@ -185,9 +185,4 @@ TEST_CASE( "test_basic_lp", "[multi-file:12]" ) {
     SECTION( "test_basic_lp_solve" ) {
         test_basic_lp_solve();
     }
-#ifdef OSQP_ALGEBRA_MKL
-        SECTION( "test_basic_lp_solve_pardiso" ) {
-        test_basic_lp_solve_pardiso();
-    }
-#endif
 }
