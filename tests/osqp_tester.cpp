@@ -104,11 +104,6 @@ TEST_CASE( "test_basic_qp2", "[multi-file:5]" ) {
     SECTION( "test_basic_qp2_solve" ) {
         test_basic_qp2_solve();
     }
-#ifdef OSQP_ALGEBRA_MKL
-    SECTION( "test_basic_qp2_solve_pardiso" ) {
-        test_basic_qp2_solve_pardiso();
-    }
-#endif
     SECTION( "test_basic_qp2_update" ) {
         test_basic_qp2_update();
     }
