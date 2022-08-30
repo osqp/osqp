@@ -194,35 +194,93 @@ void test_mat_submatrix() {
 
   OSQPMatrix_ptr lA{OSQPMatrix_new_from_csc(data->test_mat_vec_A,0)}; //asymmetric
 
-  std::initializer_list<std::tuple<OSQPInt, OSQPInt**, OSQPCscMatrix**>> testcases =
-    { /* First is number of extracted rows, second is row indices to extract, thrid is reference extracted matrix */
-      std::make_tuple( data->test_submat_A4_num, &(data->test_submat_A4_ind), &(data->test_submat_A4) ),
-      std::make_tuple( data->test_submat_A5_num, &(data->test_submat_A5_ind), &(data->test_submat_A5) ),
-      std::make_tuple( data->test_submat_A3_num, &(data->test_submat_A3_ind), &(data->test_submat_A3) ),
-      std::make_tuple( data->test_submat_A0_num, &(data->test_submat_A0_ind), &(data->test_submat_A0) )
-    };
+  SECTION("submatrix: 4 rows") {
+    OSQPInt        numInd = data->test_submat_A4_num;
+    OSQPInt*       ind    = data->test_submat_A4_ind;
+    OSQPCscMatrix* refCsc = data->test_submat_A4;
 
-  auto test_case = GENERATE_REF( table<OSQPInt, OSQPInt**, OSQPCscMatrix**>(testcases) );
+    // Reference matrix
+    OSQPMatrix_ptr  refM{OSQPMatrix_new_from_csc(refCsc, 0)};
 
-  OSQPInt        numInd = std::get<0>(test_case);
-  OSQPInt*       ind    = *std::get<1>(test_case);
-  OSQPCscMatrix* refCsc = *std::get<2>(test_case);
+    // Extract submatrix
+    OSQPVectori_ptr rows{OSQPVectori_new(ind, data->test_mat_vec_m)};
+    OSQPMatrix_ptr  subM{OSQPMatrix_submatrix_byrows(lA.get(), rows.get())};
 
-  // Reference matrix
-  OSQPMatrix_ptr  refM{OSQPMatrix_new_from_csc(refCsc, 0)};
+    mu_assert("Linear algebra tests: error in matrix operation, submatrix_by_rows has wrong column count",
+              OSQPMatrix_get_n(subM.get()) == OSQPMatrix_get_n(lA.get()));
 
-  // Extract submatrix
-  OSQPVectori_ptr rows{OSQPVectori_new(ind, data->test_mat_vec_m)};
-  OSQPMatrix_ptr  subM{OSQPMatrix_submatrix_byrows(lA.get(), rows.get())};
+    mu_assert("Linear algebra tests: error in matrix operation, submatrix_by_rows has wrong row count",
+              OSQPMatrix_get_m(subM.get()) == numInd);
 
-  mu_assert("Linear algebra tests: error in matrix operation, submatrix_by_rows has wrong column count",
-            OSQPMatrix_get_n(subM.get()) == OSQPMatrix_get_n(lA.get()));
+    mu_assert("Linear algebra tests: error in matrix operation,submatrix_by_rows has wrong data",
+              OSQPMatrix_is_eq(subM.get(), refM.get(), TESTS_TOL));
+  }
 
-  mu_assert("Linear algebra tests: error in matrix operation, submatrix_by_rows has wrong row count",
-            OSQPMatrix_get_m(subM.get()) == numInd);
+  SECTION("submatrix: All (5) rows") {
+    OSQPInt        numInd = data->test_submat_A5_num;
+    OSQPInt*       ind    = data->test_submat_A5_ind;
+    OSQPCscMatrix* refCsc = data->test_submat_A5;
 
-  mu_assert("Linear algebra tests: error in matrix operation,submatrix_by_rows has wrong data",
-            OSQPMatrix_is_eq(subM.get(), refM.get(), TESTS_TOL));
+    // Reference matrix
+    OSQPMatrix_ptr  refM{OSQPMatrix_new_from_csc(refCsc, 0)};
+
+    // Extract submatrix
+    OSQPVectori_ptr rows{OSQPVectori_new(ind, data->test_mat_vec_m)};
+    OSQPMatrix_ptr  subM{OSQPMatrix_submatrix_byrows(lA.get(), rows.get())};
+
+    mu_assert("Linear algebra tests: error in matrix operation, submatrix_by_rows has wrong column count",
+              OSQPMatrix_get_n(subM.get()) == OSQPMatrix_get_n(lA.get()));
+
+    mu_assert("Linear algebra tests: error in matrix operation, submatrix_by_rows has wrong row count",
+              OSQPMatrix_get_m(subM.get()) == numInd);
+
+    mu_assert("Linear algebra tests: error in matrix operation,submatrix_by_rows has wrong data",
+              OSQPMatrix_is_eq(subM.get(), refM.get(), TESTS_TOL));
+  }
+
+  SECTION("submatrix: Half (3) rows") {
+    OSQPInt        numInd = data->test_submat_A3_num;
+    OSQPInt*       ind    = data->test_submat_A3_ind;
+    OSQPCscMatrix* refCsc = data->test_submat_A3;
+
+    // Reference matrix
+    OSQPMatrix_ptr  refM{OSQPMatrix_new_from_csc(refCsc, 0)};
+
+    // Extract submatrix
+    OSQPVectori_ptr rows{OSQPVectori_new(ind, data->test_mat_vec_m)};
+    OSQPMatrix_ptr  subM{OSQPMatrix_submatrix_byrows(lA.get(), rows.get())};
+
+    mu_assert("Linear algebra tests: error in matrix operation, submatrix_by_rows has wrong column count",
+              OSQPMatrix_get_n(subM.get()) == OSQPMatrix_get_n(lA.get()));
+
+    mu_assert("Linear algebra tests: error in matrix operation, submatrix_by_rows has wrong row count",
+              OSQPMatrix_get_m(subM.get()) == numInd);
+
+    mu_assert("Linear algebra tests: error in matrix operation,submatrix_by_rows has wrong data",
+              OSQPMatrix_is_eq(subM.get(), refM.get(), TESTS_TOL));
+  }
+
+  SECTION("submatrix: No rows") {
+    OSQPInt        numInd = data->test_submat_A0_num;
+    OSQPInt*       ind    = data->test_submat_A0_ind;
+    OSQPCscMatrix* refCsc = data->test_submat_A0;
+
+    // Reference matrix
+    OSQPMatrix_ptr  refM{OSQPMatrix_new_from_csc(refCsc, 0)};
+
+    // Extract submatrix
+    OSQPVectori_ptr rows{OSQPVectori_new(ind, data->test_mat_vec_m)};
+    OSQPMatrix_ptr  subM{OSQPMatrix_submatrix_byrows(lA.get(), rows.get())};
+
+    mu_assert("Linear algebra tests: error in matrix operation, submatrix_by_rows has wrong column count",
+              OSQPMatrix_get_n(subM.get()) == OSQPMatrix_get_n(lA.get()));
+
+    mu_assert("Linear algebra tests: error in matrix operation, submatrix_by_rows has wrong row count",
+              OSQPMatrix_get_m(subM.get()) == numInd);
+
+    mu_assert("Linear algebra tests: error in matrix operation,submatrix_by_rows has wrong data",
+              OSQPMatrix_is_eq(subM.get(), refM.get(), TESTS_TOL));
+  }
 }
 
 void test_mat_vec_multiplication() {
