@@ -361,7 +361,7 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix*  A,
 
   if(!M) return OSQP_NULL;
 
-  out = c_malloc(sizeof(OSQPMatrix));
+  out = c_calloc(1, sizeof(OSQPMatrix));
 
   if(!out){
     mkl_csc_spfree(M);
