@@ -138,7 +138,7 @@ void test_mat_operations() {
   OSQPVectorf_ptr d{OSQPVectorf_new(data->test_mat_ops_d, data->test_mat_ops_n)};
 
   // Result vectors
-  OSQPMatrix_ptr refM{nullptr};
+  OSQPMatrix_ptr  refM{nullptr};
   OSQPVectorf_ptr refv{nullptr};
   OSQPVectorf_ptr resultv{nullptr};
 
@@ -187,6 +187,42 @@ void test_mat_operations() {
   mu_assert(
     "Linear algebra tests: error in matrix operation, max norm over rows",
     OSQPVectorf_norm_inf_diff(refv.get(), resultv.get()) < TESTS_TOL);
+}
+
+void test_mat_submatrix() {
+  lin_alg_sols_data_ptr data{generate_problem_lin_alg_sols_data()};
+
+  OSQPMatrix_ptr lA{OSQPMatrix_new_from_csc(data->test_mat_vec_A,0)}; //asymmetric
+
+  std::initializer_list<std::tuple<OSQPInt, OSQPInt**, OSQPCscMatrix**>> testcases =
+    { /* First is number of extracted rows, second is row indices to extract, thrid is reference extracted matrix */
+      std::make_tuple( data->test_submat_A4_num, &(data->test_submat_A4_ind), &(data->test_submat_A4) ),
+      std::make_tuple( data->test_submat_A5_num, &(data->test_submat_A5_ind), &(data->test_submat_A5) ),
+      std::make_tuple( data->test_submat_A3_num, &(data->test_submat_A3_ind), &(data->test_submat_A3) ),
+      std::make_tuple( data->test_submat_A0_num, &(data->test_submat_A0_ind), &(data->test_submat_A0) )
+    };
+
+  auto test_case = GENERATE_REF( table<OSQPInt, OSQPInt**, OSQPCscMatrix**>(testcases) );
+
+  OSQPInt        numInd = std::get<0>(test_case);
+  OSQPInt*       ind    = *std::get<1>(test_case);
+  OSQPCscMatrix* refCsc = *std::get<2>(test_case);
+
+  // Reference matrix
+  OSQPMatrix_ptr  refM{OSQPMatrix_new_from_csc(refCsc, 0)};
+
+  // Extract submatrix
+  OSQPVectori_ptr rows{OSQPVectori_new(ind, data->test_mat_vec_m)};
+  OSQPMatrix_ptr  subM{OSQPMatrix_submatrix_byrows(lA.get(), rows.get())};
+
+  mu_assert("Linear algebra tests: error in matrix operation, submatrix_by_rows has wrong column count",
+            OSQPMatrix_get_n(subM.get()) == OSQPMatrix_get_n(lA.get()));
+
+  mu_assert("Linear algebra tests: error in matrix operation, submatrix_by_rows has wrong row count",
+            OSQPMatrix_get_m(subM.get()) == numInd);
+
+  mu_assert("Linear algebra tests: error in matrix operation,submatrix_by_rows has wrong data",
+            OSQPMatrix_is_eq(subM.get(), refM.get(), TESTS_TOL));
 }
 
 void test_mat_vec_multiplication() {

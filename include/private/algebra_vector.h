@@ -77,6 +77,9 @@ void OSQPVectorf_view_free(OSQPVectorf* a);
 /* Length of the vector (floats) */
 OSQPInt OSQPVectorf_length(const OSQPVectorf* a);
 
+/* Length of the vector (ints) */
+OSQPInt OSQPVectori_length(const OSQPVectori* a);
+
 /* Pointer to vector data (floats) */
 OSQPFloat* OSQPVectorf_data(const OSQPVectorf* a);
 

@@ -21,17 +21,17 @@ OSQPVectorf* OSQPVectorf_new(const OSQPFloat* a,
   return out;
 }
 
-// OSQPVectori* OSQPVectori_new(const OSQPInt *a,
-//                              OSQPInt        length){
+OSQPVectori* OSQPVectori_new(const OSQPInt* a,
+                             OSQPInt        length) {
 
-//   OSQPVectori* out = OSQPVectori_malloc(length);
-//   if(!out) return OSQP_NULL;
+  OSQPVectori* out = OSQPVectori_malloc(length);
+  if(!out) return OSQP_NULL;
 
-//   if (length > 0) {
-//     OSQPVectori_from_raw(out, a);
-//   }
-//   return out;
-// }
+  if (length > 0) {
+    OSQPVectori_from_raw(out, a);
+  }
+  return out;
+}
 
 OSQPVectorf* OSQPVectorf_malloc(OSQPInt length) {
 
@@ -156,7 +156,7 @@ void OSQPVectorf_view_free(OSQPVectorf* a) {
 
 
 OSQPInt OSQPVectorf_length(const OSQPVectorf* a) {return a->length;}
-// OSQPInt OSQPVectori_length(const OSQPVectori *a){return a->length;}
+OSQPInt OSQPVectori_length(const OSQPVectori *a){return a->length;}
 
 /* Pointer to vector data (floats) */
 OSQPFloat* OSQPVectorf_data(const OSQPVectorf* a) {return a->values;}

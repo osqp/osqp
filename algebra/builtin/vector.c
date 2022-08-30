@@ -228,7 +228,7 @@ OSQPFloat OSQPVectorf_norm_2(const OSQPVectorf* v) {
 #endif /* ifndef OSQP_EMBEDDED_MODE */
 
 OSQPInt OSQPVectorf_length(const OSQPVectorf* a) {return a->length;}
-// OSQPInt OSQPVectori_length(const OSQPVectori *a){return a->length;}
+OSQPInt OSQPVectori_length(const OSQPVectori *a){return a->length;}
 
 /* Pointer to vector data (floats) */
 OSQPFloat* OSQPVectorf_data(const OSQPVectorf* a) {return a->values;}

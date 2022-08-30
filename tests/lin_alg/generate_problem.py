@@ -69,6 +69,19 @@ test_mat_vec_ATy_cum = test_mat_vec_A.T@test_mat_vec_y + test_mat_vec_x
 test_mat_vec_Px = test_mat_vec_P@test_mat_vec_x
 test_mat_vec_Px_cum = test_mat_vec_P@test_mat_vec_x + test_mat_vec_x
 
+# Test extracting submatrices
+test_submat_A4_num = 4
+test_submat_A5_num = 5
+test_submat_A3_num = 3
+test_submat_A0_num = 0
+test_submat_A4_ind = np.array([1, 1, 0, 1, 1])
+test_submat_A5_ind = np.array([1, 1, 1, 1, 1])
+test_submat_A3_ind = np.array([1, 0, 1, 0, 1])
+test_submat_A0_ind = np.array([0, 0, 0, 0, 0])
+test_submat_A4 = test_mat_vec_A[(test_submat_A4_ind == 1)]
+test_submat_A5 = test_mat_vec_A[(test_submat_A5_ind == 1)]
+test_submat_A3 = test_mat_vec_A[(test_submat_A3_ind == 1)]
+test_submat_A0 = test_mat_vec_A[(test_submat_A0_ind == 1)]
 
 # Test extract upper triangular
 test_mat_extr_triu_n = 5
@@ -123,6 +136,18 @@ data = {'test_sp_matrix_A': test_sp_matrix_A,
         'test_mat_vec_ATy_cum': test_mat_vec_ATy_cum,
         'test_mat_vec_Px': test_mat_vec_Px,
         'test_mat_vec_Px_cum': test_mat_vec_Px_cum,
+        'test_submat_A4_num': test_submat_A4_num,
+        'test_submat_A5_num': test_submat_A5_num,
+        'test_submat_A3_num': test_submat_A3_num,
+        'test_submat_A0_num': test_submat_A0_num,
+        'test_submat_A4_ind': test_submat_A4_ind,
+        'test_submat_A5_ind': test_submat_A5_ind,
+        'test_submat_A3_ind': test_submat_A3_ind,
+        'test_submat_A0_ind': test_submat_A0_ind,
+        'test_submat_A4': test_submat_A4,
+        'test_submat_A5': test_submat_A5,
+        'test_submat_A3': test_submat_A3,
+        'test_submat_A0': test_submat_A0,
         'test_mat_extr_triu_n': test_mat_extr_triu_n,
         'test_mat_extr_triu_P': test_mat_extr_triu_P,
         'test_mat_extr_triu_Pu': test_mat_extr_triu_Pu,
