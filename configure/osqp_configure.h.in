@@ -2,8 +2,8 @@
 # define OSQP_CONFIGURE_H
 
 
-/* DEBUG */
-#cmakedefine DEBUG
+/* OSQP_ENABLE_DEBUG */
+#cmakedefine OSQP_ENABLE_DEBUG
 
 /* Operating system */
 #cmakedefine IS_LINUX

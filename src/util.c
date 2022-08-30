@@ -291,7 +291,7 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
 /* ==================== DEBUG FUNCTIONS ======================= */
 
 
-#if defined(DEBUG) && defined(OSQP_ENABLE_PRINTING)
+#if defined(OSQP_ENABLE_DEBUG) && defined(OSQP_ENABLE_PRINTING)
 
 void print_csc_matrix(const OSQPCscMatrix* M,
                       const char*          name)
@@ -418,4 +418,4 @@ void print_vec_int(const OSQPInt* x,
   c_print("]\n");
 }
 
-#endif /* if defined(DEBUG) && defined(OSQP_ENABLE_PRINTING) */
+#endif /* if defined(OSQP_ENABLE_DEBUG) && defined(OSQP_ENABLE_PRINTING) */

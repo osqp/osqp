@@ -6,7 +6,8 @@
 #include "osqp.h"
 
 extern "C" {
-  #include "lin_alg.h"
+    #include "lin_alg.h"
+    #include "util.h"
 }
 
 #include "utils/c_test_utils.h" //helper functions
@@ -55,11 +56,6 @@ TEST_CASE( "test_solve_linsys", "[multi-file:2]" ) {
     SECTION( "test_solveKKT" ) {
         test_solveKKT();
     }
-#ifdef OSQP_ALGEBRA_MKL
-    SECTION( "test_solveKKT_pardiso" ) {
-        test_solveKKT_pardiso();
-    }
-#endif
     osqp_algebra_free_libs();
 }
 
@@ -75,11 +71,9 @@ TEST_CASE( "test_basic_qp", "[multi-file:4]" ) {
     SECTION( "test_basic_qp_solve" ) {
         test_basic_qp_solve();
     }
-#ifdef OSQP_ALGEBRA_MKL
-        SECTION( "test_basic_qp_solve_pardiso" ) {
-        test_basic_qp_solve_pardiso();
+    SECTION( "test_basic_qp_settings" ) {
+        test_basic_qp_settings();
     }
-#endif
     SECTION( "test_basic_qp_update" ) {
         test_basic_qp_update();
     }
@@ -104,11 +98,6 @@ TEST_CASE( "test_basic_qp2", "[multi-file:5]" ) {
     SECTION( "test_basic_qp2_solve" ) {
         test_basic_qp2_solve();
     }
-#ifdef OSQP_ALGEBRA_MKL
-    SECTION( "test_basic_qp2_solve_pardiso" ) {
-        test_basic_qp2_solve_pardiso();
-    }
-#endif
     SECTION( "test_basic_qp2_update" ) {
         test_basic_qp2_update();
     }
@@ -161,11 +150,6 @@ TEST_CASE( "test_update_matrices", "[multi-file:10]" ) {
     SECTION( "test_update" ) {
         test_update();
     }
-#ifdef OSQP_ALGEBRA_MKL
-    SECTION( "test_update_pardiso" ) {
-        test_update_pardiso();
-    }
-#endif
 }
 
 #ifdef OSQP_CODEGEN
@@ -192,9 +176,4 @@ TEST_CASE( "test_basic_lp", "[multi-file:12]" ) {
     SECTION( "test_basic_lp_solve" ) {
         test_basic_lp_solve();
     }
-#ifdef OSQP_ALGEBRA_MKL
-        SECTION( "test_basic_lp_solve_pardiso" ) {
-        test_basic_lp_solve_pardiso();
-    }
-#endif
 }

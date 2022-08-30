@@ -1,11 +1,70 @@
 #include "osqp.h"    // OSQP API
-#include "util.h"    // Utilities for testing
 #include "osqp_tester.h" // Basic testing script header
 
 #include "basic_qp/data.h"
 
 
 void test_basic_qp_solve()
+{
+  OSQPInt        exitflag;
+
+  // Problem settings
+  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
+
+  // Structures
+  OSQPSolver*    tmpSolver = nullptr;
+  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
+
+  // Populate data
+  basic_qp_problem_ptr data{generate_problem_basic_qp()};
+  basic_qp_sols_data_ptr sols_data{generate_problem_basic_qp_sols_data()};
+
+  // Define Solver settings as default
+  osqp_set_default_settings(settings.get());
+  settings->max_iter      = 2000;
+  settings->alpha         = 1.6;
+  settings->polishing     = 1;
+  settings->scaling       = 0;
+  settings->verbose       = 1;
+  settings->warm_starting = 0;
+
+  /* Test all possible linear system solvers in this test case */
+  settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
+
+  // Setup solver
+  exitflag = osqp_setup(&tmpSolver, data->P, data->q,
+                        data->A, data->l, data->u,
+                        data->m, data->n, settings.get());
+  solver.reset(tmpSolver);
+
+  // Setup correct
+  mu_assert("Basic QP test solve: Setup error!", exitflag == 0);
+
+  // Solve Problem
+  osqp_solve(solver.get());
+
+  // Compare solver statuses
+  mu_assert("Basic QP test solve: Error in solver status!",
+      solver->info->status_val == sols_data->status_test);
+
+  // Compare primal solutions
+  mu_assert("Basic QP test solve: Error in primal solution!",
+      vec_norm_inf_diff(solver->solution->x, sols_data->x_test,
+            data->n) < TESTS_TOL);
+
+  // Compare dual solutions
+  mu_assert("Basic QP test solve: Error in dual solution!",
+      vec_norm_inf_diff(solver->solution->y, sols_data->y_test,
+            data->m) < TESTS_TOL);
+
+
+  // Compare objective values
+  mu_assert("Basic QP test solve: Error in objective value!",
+      c_absval(solver->info->obj_val - sols_data->obj_value_test) <
+      TESTS_TOL);
+}
+
+void test_basic_qp_settings()
 {
   OSQPInt        exitflag;
   OSQPInt        tmp_int;
@@ -477,78 +536,6 @@ void test_basic_qp_solve()
   c_free(P_tmp);
 }
 
-#ifdef OSQP_ALGEBRA_MKL
-void test_basic_qp_solve_pardiso()
-{
-  OSQPInt exitflag;
-
-  // Problem settings
-  OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
-
-  // Structures
-  OSQPSolver *solver; // Solver
-  OSQPTestData *data;      // Data
-  basic_qp_sols_data *sols_data;
-
-  // Populate data
-  data = generate_problem_basic_qp();
-  sols_data = generate_problem_basic_qp_sols_data();
-
-
-  // Define Solver settings as default
-  osqp_set_default_settings(settings);
-  settings->max_iter      = 2000;
-  settings->alpha         = 1.6;
-  settings->polishing     = 1;
-  settings->scaling       = 0;
-  settings->verbose       = 1;
-  settings->warm_starting = 0;
-  settings->linsys_solver = OSQP_DIRECT_SOLVER;
-
-  // Setup solver
-  exitflag = osqp_setup(&solver, data->P, data->q,
-                        data->A, data->l, data->u,
-                        data->m, data->n, settings);
-
-  // Setup correct
-  mu_assert("Basic QP test solve Pardiso: Setup error!", exitflag == 0);
-
-  // Solve Problem
-  osqp_solve(solver);
-
-  // Compare solver statuses
-  mu_assert("Basic QP test solve Pardiso: Error in solver status!",
-            solver->info->status_val == sols_data->status_test);
-
-  // Compare primal solutions
-  mu_assert("Basic QP test solve Pardiso: Error in primal solution!",
-            vec_norm_inf_diff(solver->solution->x, sols_data->x_test,
-                              data->n) < TESTS_TOL);
-
-  // Compare dual solutions
-  mu_assert("Basic QP test solve Pardiso: Error in dual solution!",
-            vec_norm_inf_diff(solver->solution->y, sols_data->y_test,
-                              data->m) < TESTS_TOL);
-
-
-  // Compare objective values
-  mu_assert("Basic QP test solve Pardiso: Error in objective value!",
-            c_absval(solver->info->obj_val - sols_data->obj_value_test) <
-            TESTS_TOL);
-
-  // Clean solver
-  osqp_cleanup(solver);
-
-
-  // Cleanup data
-  clean_problem_basic_qp(data);
-  clean_problem_basic_qp_sols_data(sols_data);
-
-  // Cleanup
-  c_free(settings);
-}
-#endif
-
 void test_basic_qp_update()
 {
   OSQPInt      exitflag;
@@ -557,20 +544,18 @@ void test_basic_qp_update()
   OSQPVectorf* u_new;
 
   // Problem settings
-  OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
+  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
 
   // Structures
-  OSQPSolver *solver;      // Solver
-  OSQPTestData *data;      // Data
-  basic_qp_sols_data *sols_data;
+  OSQPSolver*    tmpSolver = nullptr;
+  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
 
   // Populate data
-  data = generate_problem_basic_qp();
-  sols_data = generate_problem_basic_qp_sols_data();
-
+  basic_qp_problem_ptr data{generate_problem_basic_qp()};
+  basic_qp_sols_data_ptr sols_data{generate_problem_basic_qp_sols_data()};
 
   // Define Solver settings as default
-  osqp_set_default_settings(settings);
+  osqp_set_default_settings(settings.get());
   settings->max_iter      = 200;
   settings->alpha         = 1.6;
   settings->polishing     = 1;
@@ -579,9 +564,10 @@ void test_basic_qp_update()
   settings->warm_starting = 0;
 
   // Setup solver
-  exitflag = osqp_setup(&solver, data->P, data->q,
+  exitflag = osqp_setup(&tmpSolver, data->P, data->q,
                         data->A, data->l, data->u,
-                        data->m, data->n, settings);
+                        data->m, data->n, settings.get());
+  solver.reset(tmpSolver);
 
   // Setup correct
   mu_assert("Basic QP test update: Setup error!", exitflag == 0);
@@ -590,82 +576,100 @@ void test_basic_qp_update()
   // ====================================================================
   //  Update data
   // ====================================================================
+  SECTION( "QP Updates: linear cost" ) {
+    OSQPInt    retval   = OSQP_NO_ERROR;
+    OSQPFloat* new_data = sols_data->q_new;
 
-  // Update linear cost
-  q_new = OSQPVectorf_new(sols_data->q_new, data->n);
-  osqp_update_data_vec(solver, sols_data->q_new, NULL, NULL);
-  mu_assert("Basic QP test update: Error in updating linear cost!",
-            OSQPVectorf_norm_inf_diff(solver->work->data->q, q_new) < TESTS_TOL);
-  OSQPVectorf_free(q_new);
+    OSQPVectorf_ptr new_vec{OSQPVectorf_new(new_data, data->n)};
 
-  // UPDATE BOUND
-  // Try to update with non-consistent values
-  mu_assert("Basic QP test update: Error in bounds update ordering not caught!",
-            osqp_update_data_vec(solver, NULL, sols_data->u_new, sols_data->l_new) == 1);
+    retval = osqp_update_data_vec(solver.get(), new_data, NULL, NULL);
 
-  // Now update with correct values
-  mu_assert("Basic QP test update: Error in bounds update ordering!",
-            osqp_update_data_vec(solver, NULL, sols_data->l_new, sols_data->u_new) == 0);
+    mu_assert("QP vector updates: Error in return flag updating linear cost",
+              retval == OSQP_NO_ERROR);
 
-  l_new = OSQPVectorf_new(sols_data->l_new, data->m);
-  mu_assert("Basic QP test update: Error in bounds update, lower bound!",
-            OSQPVectorf_norm_inf_diff(solver->work->data->l, l_new) < TESTS_TOL);
-  OSQPVectorf_free(l_new);
+    mu_assert("QP vector updates: Error in solver data after updating linear cost",
+              OSQPVectorf_norm_inf_diff(solver->work->data->q, new_vec.get()) < TESTS_TOL);
+  }
 
-  u_new = OSQPVectorf_new(sols_data->u_new, data->m);
-  mu_assert("Basic QP test update: Error in bounds update, upper bound!",
-            OSQPVectorf_norm_inf_diff(solver->work->data->u, u_new) < TESTS_TOL);
-  OSQPVectorf_free(u_new);
+  SECTION( "QP Updates: lower bounds" ) {
+    OSQPInt    retval   = OSQP_NO_ERROR;
+    OSQPFloat* new_data = sols_data->l_new;
 
-  // Return original values
-  osqp_update_data_vec(solver, NULL, data->l, data->u);
+    OSQPVectorf_ptr new_vec{OSQPVectorf_new(new_data, data->m)};
 
+    retval = osqp_update_data_vec(solver.get(), NULL, new_data, data->u);
 
-  // UPDATE LOWER BOUND
-  // Try to update with non-consistent values
-  mu_assert(
-    "Basic QP test update: Error in lower bound update ordering not caught!",
-    osqp_update_data_vec(solver, NULL, sols_data->u_new, OSQP_NULL) == 1);
+    mu_assert("QP vector updates: Error in return flag updating lower bounds",
+              retval == OSQP_NO_ERROR);
 
-  // Now update with correct values
-  mu_assert("Basic QP test update: Error in lower bound update ordering!",
-            osqp_update_data_vec(solver, NULL, sols_data->l_new, OSQP_NULL) == 0);
+    mu_assert("QP vector updates: Error in solver data after updating lower bounds",
+              OSQPVectorf_norm_inf_diff(solver->work->data->l, new_vec.get()) < TESTS_TOL);
+  }
 
-  l_new = OSQPVectorf_new(sols_data->l_new, data->m);
-  mu_assert("Basic QP test update: Error in updating lower bound!",
-            OSQPVectorf_norm_inf_diff(solver->work->data->l, l_new) < TESTS_TOL);
-  OSQPVectorf_free(l_new);
+  SECTION( "QP Updates: upper bounds" ) {
+    OSQPInt    retval   = OSQP_NO_ERROR;
+    OSQPFloat* new_data = sols_data->u_new;
 
-  // Return original values
-  osqp_update_data_vec(solver, NULL, data->l, OSQP_NULL);
+    OSQPVectorf_ptr new_vec{OSQPVectorf_new(new_data, data->m)};
 
+    retval = osqp_update_data_vec(solver.get(), NULL, data->l, new_data);
 
-  // UPDATE UPPER BOUND
-  // Try to update with non-consistent values
-  mu_assert(
-    "Basic QP test update: Error in upper bound update: ordering not caught!",
-    osqp_update_data_vec(solver, NULL, NULL, sols_data->l_new) == 1);
+    mu_assert("QP vector updates: Error in return flag updating upper bounds",
+              retval == OSQP_NO_ERROR);
 
-  // Now update with correct values
-  mu_assert("Basic QP test update: Error in upper bound update: ordering!",
-            osqp_update_data_vec(solver, NULL, NULL, sols_data->u_new) == 0);
+    mu_assert("QP vector updates: Error in solver data after updating upper bounds",
+              OSQPVectorf_norm_inf_diff(solver->work->data->u, new_vec.get()) < TESTS_TOL);
+  }
 
-  u_new = OSQPVectorf_new(sols_data->u_new, data->m);
-  mu_assert("Basic QP test update: Error in updating upper bound!",
-            OSQPVectorf_norm_inf_diff(solver->work->data->u, u_new) < TESTS_TOL);
-  OSQPVectorf_free(u_new);
+  SECTION( "QP Updates: lower and upper bounds consistency validation" ) {
+    OSQPInt exp_flag = OSQP_NO_ERROR;
+    OSQPInt retval   = OSQP_NO_ERROR;
 
+    OSQPFloat* l_cur = data->l;
+    OSQPFloat* l_new = sols_data->l_new;
+    OSQPFloat* u_cur = data->u;
+    OSQPFloat* u_new = sols_data->u_new;
+    OSQPFloat* nullv = OSQP_NULL;
 
-  // Clean solver
-  osqp_cleanup(solver);
+    OSQPFloat* new_l_data = nullptr;
+    OSQPFloat* exp_l_data = nullptr;
+    OSQPFloat* new_u_data = nullptr;
+    OSQPFloat* exp_u_data = nullptr;
 
+    std::initializer_list<std::tuple<OSQPFloat**, OSQPFloat**, OSQPFloat**, OSQPFloat**, OSQPInt>> testcases =
+      { /* first (second) is new (expected) upper data, third (fourth) is new (expected) lower data, fifth is return code from update func */
+        /* Flipped upper and lower (validation error) */
+        std::make_tuple( &u_new, &l_cur, &l_new, &u_cur, OSQP_DATA_VALIDATION_ERROR ),
+        /* Write lower bound with incorrect data */
+        std::make_tuple( &u_new, &l_cur, &nullv, &u_cur, OSQP_DATA_VALIDATION_ERROR ),
+        /* Write upper bound with incorrect data */
+        std::make_tuple( &nullv, &l_cur, &l_new, &u_cur, OSQP_DATA_VALIDATION_ERROR ),
+        /* Correct data */
+        std::make_tuple( &l_new, &l_new, &u_new, &u_new, OSQP_NO_ERROR )
+      };
 
-  // Cleanup data
-  clean_problem_basic_qp(data);
-  clean_problem_basic_qp_sols_data(sols_data);
+    auto test_case = GENERATE_REF( table<OSQPFloat**, OSQPFloat**, OSQPFloat**, OSQPFloat**, OSQPInt>(testcases) );
 
-  // Cleanup
-  c_free(settings);
+    new_l_data = *std::get<0>(test_case);
+    exp_l_data = *std::get<1>(test_case);
+    new_u_data = *std::get<2>(test_case);
+    exp_u_data = *std::get<3>(test_case);
+    exp_flag = std::get<4>(test_case);
+
+    OSQPVectorf_ptr exp_l_vec{OSQPVectorf_new(exp_l_data, data->m)};
+    OSQPVectorf_ptr exp_u_vec{OSQPVectorf_new(exp_u_data, data->m)};
+
+    retval = osqp_update_data_vec(solver.get(), NULL, new_l_data, new_u_data);
+
+    mu_assert("QP vector updates: Error in return flag updating upper both bounds",
+              retval == exp_flag);
+
+    mu_assert("QP vector updates: Error in solver upper bound data after updating both bounds",
+              OSQPVectorf_norm_inf_diff(solver->work->data->u, exp_u_vec.get()) < TESTS_TOL);
+
+    mu_assert("QP vector updates: Error in solver lower bound data after updating both bounds",
+              OSQPVectorf_norm_inf_diff(solver->work->data->l, exp_l_vec.get()) < TESTS_TOL);
+  }
 }
 
 void test_basic_qp_check_termination()
@@ -673,20 +677,18 @@ void test_basic_qp_check_termination()
   OSQPInt exitflag;
 
   // Problem settings
-  OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
+  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
 
   // Structures
-  OSQPSolver *solver;      // Solver
-  OSQPTestData *data;      // Data
-  basic_qp_sols_data *sols_data;
+  OSQPSolver*    tmpSolver = nullptr;
+  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
 
   // Populate data
-  data = generate_problem_basic_qp();
-  sols_data = generate_problem_basic_qp_sols_data();
-
+  basic_qp_problem_ptr data{generate_problem_basic_qp()};
+  basic_qp_sols_data_ptr sols_data{generate_problem_basic_qp_sols_data()};
 
   // Define Solver settings as default
-  osqp_set_default_settings(settings);
+  osqp_set_default_settings(settings.get());
   settings->max_iter          = 200;
   settings->alpha             = 1.6;
   settings->polishing         = 0;
@@ -695,16 +697,20 @@ void test_basic_qp_check_termination()
   settings->check_termination = 0;
   settings->warm_starting     = 0;
 
+  /* Test all possible linear system solvers in this test case */
+  settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
+
   // Setup solver
-  exitflag = osqp_setup(&solver, data->P, data->q,
+  exitflag = osqp_setup(&tmpSolver, data->P, data->q,
                         data->A, data->l, data->u,
-                        data->m, data->n, settings);
+                        data->m, data->n, settings.get());
+  solver.reset(tmpSolver);
 
   // Setup correct
   mu_assert("Basic QP test solve: Setup error!", exitflag == 0);
 
   // Solve Problem
-  osqp_solve(solver);
+  osqp_solve(solver.get());
 
   // Check if iter == max_iter
   mu_assert(
@@ -731,16 +737,6 @@ void test_basic_qp_check_termination()
   mu_assert("Basic QP test check termination: Error in objective value!",
             c_absval(solver->info->obj_val - sols_data->obj_value_test) <
             TESTS_TOL);
-
-  // Clean solver
-  osqp_cleanup(solver);
-
-  // Cleanup data
-  clean_problem_basic_qp(data);
-  clean_problem_basic_qp_sols_data(sols_data);
-
-  // Cleanup
-  c_free(settings);
 }
 
 void test_basic_qp_update_rho()

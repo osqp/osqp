@@ -1,5 +1,4 @@
 #include "osqp.h"    // OSQP API
-#include "util.h"    // Utilities for testing
 #include "osqp_tester.h" // Basic testing script header
 
 #include "basic_lp/data.h"

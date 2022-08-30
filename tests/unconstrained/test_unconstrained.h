@@ -26,6 +26,9 @@ void test_unconstrained_solve()
   settings->eps_rel = 1e-05;
   settings->verbose = 1;
 
+  /* Test all possible linear system solvers in this test case */
+  settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
+
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,
                         data->A, data->l, data->u,

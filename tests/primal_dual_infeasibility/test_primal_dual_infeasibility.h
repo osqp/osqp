@@ -1,5 +1,4 @@
 #include "osqp.h"
-#include "util.h"
 #include "osqp_tester.h"
 
 #include "primal_dual_infeasibility/data.h"
