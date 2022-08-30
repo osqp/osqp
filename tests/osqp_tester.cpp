@@ -17,6 +17,7 @@ extern "C" {
 #include "basic_qp/test_basic_qp.h"
 #include "basic_qp2/test_basic_qp2.h"
 #include "codegen/test_codegen.h"
+#include "no_active_set/test_no_active_set.h"
 #include "non_cvx/test_non_cvx.h"
 #include "primal_dual_infeasibility/test_primal_dual_infeasibility.h"
 #include "primal_infeasibility/test_primal_infeasibility.h"
@@ -178,5 +179,11 @@ TEST_CASE( "test_codegen", "[multi-file:11]" ) {
 TEST_CASE( "test_basic_lp", "[multi-file:12]" ) {
     SECTION( "test_basic_lp_solve" ) {
         test_basic_lp_solve();
+    }
+}
+
+TEST_CASE( "test_no_active_set", "[multi-file:13]" ) {
+    SECTION( "test_no_active_set" ) {
+        test_no_active_set();
     }
 }
