@@ -26,8 +26,14 @@ void test_unconstrained_solve()
   settings->eps_rel = 1e-05;
   settings->verbose = 1;
 
+  /* Test with and without polishing */
+  settings->polishing = GENERATE(0, 1);
+  settings->polish_refine_iter = 4;
+
   /* Test all possible linear system solvers in this test case */
   settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
+
+  CAPTURE(settings->linsys_solver, settings->polishing);
 
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,
