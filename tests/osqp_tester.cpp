@@ -155,11 +155,6 @@ TEST_CASE( "test_update_matrices", "[multi-file:10]" ) {
     SECTION( "test_update" ) {
         test_update();
     }
-#ifdef OSQP_ALGEBRA_MKL
-    SECTION( "test_update_pardiso" ) {
-        test_update_pardiso();
-    }
-#endif
 }
 
 #ifdef OSQP_CODEGEN
