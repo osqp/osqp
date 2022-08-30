@@ -27,42 +27,41 @@ void test_basic_qp2_solve()
   settings->polishing = 1;
   settings->verbose   = 1;
 
-  SECTION( "Basic QP 2: linsys solvers" ) {
-    settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
+  /* Test all possible linear system solvers in this test case */
+  settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
 
-    // Setup workspace
-    exitflag = osqp_setup(&tmpSolver, data->P, data->q,
-                          data->A, data->l, data->u,
-                          data->m, data->n, settings.get());
-    solver.reset(tmpSolver);
+  // Setup workspace
+  exitflag = osqp_setup(&tmpSolver, data->P, data->q,
+                        data->A, data->l, data->u,
+                        data->m, data->n, settings.get());
+  solver.reset(tmpSolver);
 
-    // Setup correct
-    mu_assert("Basic QP 2 test solve: Setup error!", exitflag == 0);
+  // Setup correct
+  mu_assert("Basic QP 2 test solve: Setup error!", exitflag == 0);
 
-    // Solve Problem first time
-    osqp_solve(solver.get());
+  // Solve Problem first time
+  osqp_solve(solver.get());
 
-    // Compare solver statuses
-    mu_assert("Basic QP 2 test solve: Error in solver status!",
-              solver->info->status_val == sols_data->status_test);
+  // Compare solver statuses
+  mu_assert("Basic QP 2 test solve: Error in solver status!",
+            solver->info->status_val == sols_data->status_test);
 
-    // Compare primal solutions
-    mu_assert("Basic QP 2 test solve: Error in primal solution!",
-              vec_norm_inf_diff(solver->solution->x, sols_data->x_test,
-                                data->n) /
-              vec_norm_inf(sols_data->x_test_new, data->n) < TESTS_TOL);
+  // Compare primal solutions
+  mu_assert("Basic QP 2 test solve: Error in primal solution!",
+            vec_norm_inf_diff(solver->solution->x, sols_data->x_test,
+                              data->n) /
+            vec_norm_inf(sols_data->x_test_new, data->n) < TESTS_TOL);
 
 
-    // Compare dual solutions
-    mu_assert("Basic QP 2 test solve: Error in dual solution!",
-              vec_norm_inf_diff(solver->solution->y, sols_data->y_test,
-                                data->m) /
-              vec_norm_inf(sols_data->y_test_new, data->m) < TESTS_TOL);
+  // Compare dual solutions
+  mu_assert("Basic QP 2 test solve: Error in dual solution!",
+            vec_norm_inf_diff(solver->solution->y, sols_data->y_test,
+                              data->m) /
+            vec_norm_inf(sols_data->y_test_new, data->m) < TESTS_TOL);
 
-    // Compare objective values
-    mu_assert("Basic QP 2 test solve: Error in objective value!",
-              c_absval(solver->info->obj_val - sols_data->obj_value_test)/(c_absval(sols_data->obj_value_test)) < TESTS_TOL);
-  }
+  // Compare objective values
+  mu_assert("Basic QP 2 test solve: Error in objective value!",
+            c_absval(solver->info->obj_val - sols_data->obj_value_test)/(c_absval(sols_data->obj_value_test)) < TESTS_TOL);
 }
 
 void test_basic_qp2_update()
@@ -87,46 +86,45 @@ void test_basic_qp2_update()
   settings->polishing     = 1;
   settings->verbose       = 1;
 
-  SECTION( "Basic QP 2 test update: linsys solvers" ) {
-    settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
+  /* Test all possible linear system solvers in this test case */
+  settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
 
-    // Setup workspace
-    exitflag = osqp_setup(&tmpSolver, data->P, data->q,
-                          data->A, data->l, data->u,
-                          data->m, data->n, settings.get());
-    solver.reset(tmpSolver);
+  // Setup workspace
+  exitflag = osqp_setup(&tmpSolver, data->P, data->q,
+                        data->A, data->l, data->u,
+                        data->m, data->n, settings.get());
+  solver.reset(tmpSolver);
 
-    // Setup correct
-    mu_assert("Basic QP 2 test update: Setup error!", exitflag == 0);
-
-
-    // Modify linear cost and upper bound
-    osqp_update_data_vec(solver.get(), sols_data->q_new, NULL, NULL);
-    osqp_update_data_vec(solver.get(), NULL, NULL, sols_data->u_new);
-
-    // Solve Problem second time(with different data now)
-    osqp_solve(solver.get());
-
-    // Compare solver statuses
-    mu_assert("Basic QP 2 test update: Error in solver status!",
-              solver->info->status_val == sols_data->status_test_new);
-
-    // Compare primal solutions
-    mu_assert("Basic QP 2 test update: Error in primal solution!",
-              vec_norm_inf_diff(solver->solution->x, sols_data->x_test_new,
-                                data->n) /
-              vec_norm_inf(sols_data->x_test_new, data->n) < TESTS_TOL);
-
-    // Compare dual solutions
-    mu_assert("Basic QP 2 test update: Error in dual solution!",
-              vec_norm_inf_diff(solver->solution->y, sols_data->y_test_new,
-                                data->m) /
-              vec_norm_inf(sols_data->y_test_new, data->m) < TESTS_TOL);
+  // Setup correct
+  mu_assert("Basic QP 2 test update: Setup error!", exitflag == 0);
 
 
-    // Compare objective values
-    mu_assert("Basic QP 2 test update: Error in objective value!",
-              c_absval(
-                solver->info->obj_val - sols_data->obj_value_test_new)/(c_absval(sols_data->obj_value_test_new)) < TESTS_TOL);
-  }
+  // Modify linear cost and upper bound
+  osqp_update_data_vec(solver.get(), sols_data->q_new, NULL, NULL);
+  osqp_update_data_vec(solver.get(), NULL, NULL, sols_data->u_new);
+
+  // Solve Problem second time(with different data now)
+  osqp_solve(solver.get());
+
+  // Compare solver statuses
+  mu_assert("Basic QP 2 test update: Error in solver status!",
+            solver->info->status_val == sols_data->status_test_new);
+
+  // Compare primal solutions
+  mu_assert("Basic QP 2 test update: Error in primal solution!",
+            vec_norm_inf_diff(solver->solution->x, sols_data->x_test_new,
+                              data->n) /
+            vec_norm_inf(sols_data->x_test_new, data->n) < TESTS_TOL);
+
+  // Compare dual solutions
+  mu_assert("Basic QP 2 test update: Error in dual solution!",
+            vec_norm_inf_diff(solver->solution->y, sols_data->y_test_new,
+                              data->m) /
+            vec_norm_inf(sols_data->y_test_new, data->m) < TESTS_TOL);
+
+
+  // Compare objective values
+  mu_assert("Basic QP 2 test update: Error in objective value!",
+            c_absval(
+              solver->info->obj_val - sols_data->obj_value_test_new)/(c_absval(sols_data->obj_value_test_new)) < TESTS_TOL);
 }

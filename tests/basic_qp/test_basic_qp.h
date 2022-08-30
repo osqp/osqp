@@ -28,41 +28,40 @@ void test_basic_qp_solve()
   settings->verbose       = 1;
   settings->warm_starting = 0;
 
-  SECTION( "Basic QP: linsys solvers" ) {
-    settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
+  /* Test all possible linear system solvers in this test case */
+  settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
 
-    // Setup solver
-    exitflag = osqp_setup(&tmpSolver, data->P, data->q,
-                          data->A, data->l, data->u,
-                          data->m, data->n, settings.get());
-    solver.reset(tmpSolver);
+  // Setup solver
+  exitflag = osqp_setup(&tmpSolver, data->P, data->q,
+                        data->A, data->l, data->u,
+                        data->m, data->n, settings.get());
+  solver.reset(tmpSolver);
 
-    // Setup correct
-    mu_assert("Basic QP test solve: Setup error!", exitflag == 0);
+  // Setup correct
+  mu_assert("Basic QP test solve: Setup error!", exitflag == 0);
 
-    // Solve Problem
-    osqp_solve(solver.get());
+  // Solve Problem
+  osqp_solve(solver.get());
 
-    // Compare solver statuses
-    mu_assert("Basic QP test solve: Error in solver status!",
-        solver->info->status_val == sols_data->status_test);
+  // Compare solver statuses
+  mu_assert("Basic QP test solve: Error in solver status!",
+      solver->info->status_val == sols_data->status_test);
 
-    // Compare primal solutions
-    mu_assert("Basic QP test solve: Error in primal solution!",
-        vec_norm_inf_diff(solver->solution->x, sols_data->x_test,
-              data->n) < TESTS_TOL);
+  // Compare primal solutions
+  mu_assert("Basic QP test solve: Error in primal solution!",
+      vec_norm_inf_diff(solver->solution->x, sols_data->x_test,
+            data->n) < TESTS_TOL);
 
-    // Compare dual solutions
-    mu_assert("Basic QP test solve: Error in dual solution!",
-        vec_norm_inf_diff(solver->solution->y, sols_data->y_test,
-              data->m) < TESTS_TOL);
+  // Compare dual solutions
+  mu_assert("Basic QP test solve: Error in dual solution!",
+      vec_norm_inf_diff(solver->solution->y, sols_data->y_test,
+            data->m) < TESTS_TOL);
 
 
-    // Compare objective values
-    mu_assert("Basic QP test solve: Error in objective value!",
-        c_absval(solver->info->obj_val - sols_data->obj_value_test) <
-        TESTS_TOL);
-  }
+  // Compare objective values
+  mu_assert("Basic QP test solve: Error in objective value!",
+      c_absval(solver->info->obj_val - sols_data->obj_value_test) <
+      TESTS_TOL);
 }
 
 void test_basic_qp_settings()
@@ -698,47 +697,46 @@ void test_basic_qp_check_termination()
   settings->check_termination = 0;
   settings->warm_starting     = 0;
 
-  SECTION( "Basic QP test check termination: linsys solvers" ) {
-    settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
+  /* Test all possible linear system solvers in this test case */
+  settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
 
-    // Setup solver
-    exitflag = osqp_setup(&tmpSolver, data->P, data->q,
-                          data->A, data->l, data->u,
-                          data->m, data->n, settings.get());
-    solver.reset(tmpSolver);
+  // Setup solver
+  exitflag = osqp_setup(&tmpSolver, data->P, data->q,
+                        data->A, data->l, data->u,
+                        data->m, data->n, settings.get());
+  solver.reset(tmpSolver);
 
-    // Setup correct
-    mu_assert("Basic QP test solve: Setup error!", exitflag == 0);
+  // Setup correct
+  mu_assert("Basic QP test solve: Setup error!", exitflag == 0);
 
-    // Solve Problem
-    osqp_solve(solver.get());
+  // Solve Problem
+  osqp_solve(solver.get());
 
-    // Check if iter == max_iter
-    mu_assert(
-      "Basic QP test check termination: Error in number of iterations taken!",
-      solver->info->iter == solver->settings->max_iter);
+  // Check if iter == max_iter
+  mu_assert(
+    "Basic QP test check termination: Error in number of iterations taken!",
+    solver->info->iter == solver->settings->max_iter);
 
-    // Compare solver statuses
-    mu_assert("Basic QP test check termination: Error in solver status!",
-              solver->info->status_val == sols_data->status_test);
+  // Compare solver statuses
+  mu_assert("Basic QP test check termination: Error in solver status!",
+            solver->info->status_val == sols_data->status_test);
 
-    // Compare primal solutions
-    mu_assert("Basic QP test check termination: Error in primal solution!",
-              vec_norm_inf_diff(solver->solution->x, sols_data->x_test,
-                                data->n) < TESTS_TOL);
+  // Compare primal solutions
+  mu_assert("Basic QP test check termination: Error in primal solution!",
+            vec_norm_inf_diff(solver->solution->x, sols_data->x_test,
+                              data->n) < TESTS_TOL);
 
-    // Compare dual solutions
-    // print_vec(work->solution->y, data->m, "y_sol");
-    // print_vec(sols_data->y_test, data->m, "y_test");
-    mu_assert("Basic QP test check termination: Error in dual solution!",
-              vec_norm_inf_diff(solver->solution->y, sols_data->y_test,
-                                data->m) < TESTS_TOL);
+  // Compare dual solutions
+  // print_vec(work->solution->y, data->m, "y_sol");
+  // print_vec(sols_data->y_test, data->m, "y_test");
+  mu_assert("Basic QP test check termination: Error in dual solution!",
+            vec_norm_inf_diff(solver->solution->y, sols_data->y_test,
+                              data->m) < TESTS_TOL);
 
-    // Compare objective values
-    mu_assert("Basic QP test check termination: Error in objective value!",
-              c_absval(solver->info->obj_val - sols_data->obj_value_test) <
-              TESTS_TOL);
-  }
+  // Compare objective values
+  mu_assert("Basic QP test check termination: Error in objective value!",
+            c_absval(solver->info->obj_val - sols_data->obj_value_test) <
+            TESTS_TOL);
 }
 
 void test_basic_qp_update_rho()

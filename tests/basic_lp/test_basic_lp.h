@@ -26,39 +26,40 @@ void test_basic_lp_solve()
   settings->scaling   = 1;
   settings->verbose   = 1;
 
-  SECTION( "basic lp: linsys solvers" ) {
-    /* TODO: MKL CG is failing this test, so test with default linear algebra only */
-    /* settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER}))); */
+  /* TODO: MKL CG is failing this test, so test with default linear algebra only */
+#ifndef OSQP_ALGEBRA_MKL
+  /* Test all possible linear system solvers in this test case */
+  settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
+#endif
 
-    // Setup solver
-    exitflag = osqp_setup(&tmpSolver, data->P, data->q,
-                          data->A, data->l, data->u,
-                          data->m, data->n, settings.get());
-    solver.reset(tmpSolver);
+  // Setup solver
+  exitflag = osqp_setup(&tmpSolver, data->P, data->q,
+                        data->A, data->l, data->u,
+                        data->m, data->n, settings.get());
+  solver.reset(tmpSolver);
 
-    // Setup correct
-    mu_assert("Basic LP test solve: Setup error!", exitflag == 0);
+  // Setup correct
+  mu_assert("Basic LP test solve: Setup error!", exitflag == 0);
 
-    // Solve Problem
-    osqp_solve(solver.get());
+  // Solve Problem
+  osqp_solve(solver.get());
 
-    // Compare solver statuses
-    mu_assert("Basic LP test solve: Error in solver status!",
-        solver->info->status_val == sols_data->status_test);
+  // Compare solver statuses
+  mu_assert("Basic LP test solve: Error in solver status!",
+      solver->info->status_val == sols_data->status_test);
 
-    // Compare objective values
-    mu_assert("Basic LP test solve: Error in objective value!",
-        c_absval(solver->info->obj_val - sols_data->obj_value_test) <
-        TESTS_TOL);
+  // Compare objective values
+  mu_assert("Basic LP test solve: Error in objective value!",
+      c_absval(solver->info->obj_val - sols_data->obj_value_test) <
+      TESTS_TOL);
 
-    // Compare primal solutions
-    mu_assert("Basic LP test solve: Error in primal solution!",
-        vec_norm_inf_diff(solver->solution->x, sols_data->x_test,
-              data->n) < TESTS_TOL);
+  // Compare primal solutions
+  mu_assert("Basic LP test solve: Error in primal solution!",
+      vec_norm_inf_diff(solver->solution->x, sols_data->x_test,
+            data->n) < TESTS_TOL);
 
-    // Compare dual solutions
-    mu_assert("Basic LP test solve: Error in dual solution!",
-        vec_norm_inf_diff(solver->solution->y, sols_data->y_test,
-              data->m) < TESTS_TOL);
-  }
+  // Compare dual solutions
+  mu_assert("Basic LP test solve: Error in dual solution!",
+      vec_norm_inf_diff(solver->solution->y, sols_data->y_test,
+            data->m) < TESTS_TOL);
 }
