@@ -630,24 +630,32 @@ void test_basic_qp_update()
     OSQPFloat* l_new = sols_data->l_new;
     OSQPFloat* u_cur = data->u;
     OSQPFloat* u_new = sols_data->u_new;
+    OSQPFloat* nullv = OSQP_NULL;
 
     OSQPFloat* new_l_data = nullptr;
     OSQPFloat* exp_l_data = nullptr;
     OSQPFloat* new_u_data = nullptr;
     OSQPFloat* exp_u_data = nullptr;
 
-    std::tie( new_l_data, exp_l_data, new_u_data, exp_u_data, exp_flag ) =
-      GENERATE_REF( table<OSQPFloat*, OSQPFloat*, OSQPFloat*, OSQPFloat*, OSQPInt>(
-        { /* first (second) is new (expected) upper data, third (fourth) is new (expected) lower data, fifth is return code from update func */
-          /* Flipped upper and lower (validation error) */
-          std::make_tuple( u_new, l_cur, l_new, u_cur, OSQP_DATA_VALIDATION_ERROR ),
-          /* Write lower bound with incorrect data */
-          std::make_tuple( u_new, l_cur, (OSQPFloat*) OSQP_NULL, u_cur, OSQP_DATA_VALIDATION_ERROR ),
-          /* Write upper bound with incorrect data */
-          std::make_tuple( (OSQPFloat*) OSQP_NULL, l_cur, l_new, u_cur, OSQP_DATA_VALIDATION_ERROR ),
-          /* Correct data */
-          std::make_tuple( l_new, l_new, u_new, u_new, OSQP_NO_ERROR )
-        } ) );
+    std::initializer_list<std::tuple<OSQPFloat**, OSQPFloat**, OSQPFloat**, OSQPFloat**, OSQPInt>> testcases =
+      { /* first (second) is new (expected) upper data, third (fourth) is new (expected) lower data, fifth is return code from update func */
+        /* Flipped upper and lower (validation error) */
+        std::make_tuple( &u_new, &l_cur, &l_new, &u_cur, OSQP_DATA_VALIDATION_ERROR ),
+        /* Write lower bound with incorrect data */
+        std::make_tuple( &u_new, &l_cur, &nullv, &u_cur, OSQP_DATA_VALIDATION_ERROR ),
+        /* Write upper bound with incorrect data */
+        std::make_tuple( &nullv, &l_cur, &l_new, &u_cur, OSQP_DATA_VALIDATION_ERROR ),
+        /* Correct data */
+        std::make_tuple( &l_new, &l_new, &u_new, &u_new, OSQP_NO_ERROR )
+      };
+
+    auto test_case = GENERATE_REF( table<OSQPFloat**, OSQPFloat**, OSQPFloat**, OSQPFloat**, OSQPInt>(testcases) );
+
+    new_l_data = *std::get<0>(test_case);
+    exp_l_data = *std::get<1>(test_case);
+    new_u_data = *std::get<2>(test_case);
+    exp_u_data = *std::get<3>(test_case);
+    exp_flag = std::get<4>(test_case);
 
     OSQPVectorf_ptr exp_l_vec{OSQPVectorf_new(exp_l_data, data->m)};
     OSQPVectorf_ptr exp_u_vec{OSQPVectorf_new(exp_u_data, data->m)};
