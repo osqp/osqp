@@ -385,7 +385,10 @@ OSQPMatrix* OSQPMatrix_submatrix_byrows(const OSQPMatrix*  A,
                              out->csc->i,      /* Array of row indices */
                              out->csc->x);     /* The actual data */
 
-  if (retval != SPARSE_STATUS_SUCCESS) {
+  /* We expect the SPARSE_STATUS_NOT_INITIALIZED return value if the matrix is either
+     empty (no non-zero entries) or has zero rows/columns, so we treat it as a success
+     as well so we still get an MKL matrix. */
+  if (retval != SPARSE_STATUS_SUCCESS && retval != SPARSE_STATUS_NOT_INITIALIZED) {
     OSQPMatrix_free(out);
     return OSQP_NULL;
   }
