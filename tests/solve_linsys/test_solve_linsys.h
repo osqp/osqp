@@ -6,115 +6,55 @@
 
 
 void test_solveKKT() {
+  OSQPInt exitflag = 0;
 
-  OSQPInt m, n, exitflag = 0;
-  OSQPFloat prim_res, dual_res;
+  OSQPVectorf_ptr rho_vec{nullptr};
+  OSQPVectorf_ptr rhs{nullptr};
+  OSQPVectorf_ptr ref{nullptr};
+  OSQPMatrix_ptr  Pu{nullptr};
+  OSQPMatrix_ptr  A{nullptr};
 
-  OSQPVectorf*  rho_vec;
-  OSQPVectorf*  rhs;
-  OSQPVectorf*  ref;
-  OSQPMatrix*   Pu;
-  OSQPMatrix*   A;
   LinSysSolver* s;  // Private structure to form KKT factorization
 
-  OSQPSettings* settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings)); // Settings
-  solve_linsys_sols_data *data = generate_problem_solve_linsys_sols_data();
+  // Problem settings
+  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
+
+  solve_linsys_sols_data_ptr data{generate_problem_solve_linsys_sols_data()};
 
   // Settings
-  osqp_set_default_settings(settings);
-  settings->rho           = data->test_solve_KKT_rho;
-  settings->sigma         = data->test_solve_KKT_sigma;
-  settings->linsys_solver = osqp_algebra_default_linsys();
+  osqp_set_default_settings(settings.get());
+  settings->rho   = data->test_solve_KKT_rho;
+  settings->sigma = data->test_solve_KKT_sigma;
+
+  /* Test all possible linear system solvers in this test case */
+  settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
 
   // Set rho_vec
-  m       = data->test_solve_KKT_A->m;
-  n       = data->test_solve_KKT_Pu->n;
-  rho_vec = OSQPVectorf_malloc(m);
-  OSQPVectorf_set_scalar(rho_vec,settings->rho);
+  OSQPInt m = data->test_solve_KKT_A->m;
+  OSQPInt n = data->test_solve_KKT_Pu->n;
+
+  rho_vec.reset(OSQPVectorf_malloc(m));
+  OSQPVectorf_set_scalar(rho_vec.get(), settings->rho);
 
   // data matrices
-  Pu = OSQPMatrix_new_from_csc(data->test_solve_KKT_Pu,1);
-  A  = OSQPMatrix_new_from_csc(data->test_solve_KKT_A, 0);
+  Pu.reset(OSQPMatrix_new_from_csc(data->test_solve_KKT_Pu, 1));
+  A.reset(OSQPMatrix_new_from_csc(data->test_solve_KKT_A, 0));
 
   // Set residuals to small values to enforce accurate solution by indirect solvers
-  prim_res = 1e-7;
-  dual_res = 1e-7;
+  OSQPFloat prim_res = 1e-7;
+  OSQPFloat dual_res = 1e-7;
 
   // Form and factorize KKT matrix
-  exitflag = osqp_algebra_init_linsys_solver(&s, Pu, A, rho_vec, settings, &prim_res, &dual_res, 0);
+  exitflag = osqp_algebra_init_linsys_solver(&s, Pu.get(), A.get(), rho_vec.get(), settings.get(), &prim_res, &dual_res, 0);
 
   // Solve KKT x = rhs
-  rhs = OSQPVectorf_new(data->test_solve_KKT_rhs, m+n);
-  s->solve(s, rhs, 2);
-  ref = OSQPVectorf_new(data->test_solve_KKT_x, m+n);
+  rhs.reset(OSQPVectorf_new(data->test_solve_KKT_rhs, m+n));
+  s->solve(s, rhs.get(), 2);
+  ref.reset(OSQPVectorf_new(data->test_solve_KKT_x, m+n));
 
-  mu_assert(
-    "Linear systems solve tests: error in forming and solving KKT system!",
-    OSQPVectorf_norm_inf_diff(rhs, ref) < TESTS_TOL);
-
+  mu_assert("Linear systems solve tests: error in forming and solving KKT system!",
+            OSQPVectorf_norm_inf_diff(rhs.get(), ref.get()) < TESTS_TOL);
 
   // Cleanup
   s->free(s);
-  c_free(settings);
-  OSQPVectorf_free(rho_vec);
-  OSQPVectorf_free(rhs);
-  OSQPVectorf_free(ref);
-  OSQPMatrix_free(Pu);
-  OSQPMatrix_free(A);
-  clean_problem_solve_linsys_sols_data(data);
 }
-
-#ifdef OSQP_ALGEBRA_MKL
-void test_solveKKT_pardiso() {
-
-  OSQPInt m, n, exitflag = 0;
-
-  OSQPVectorf*  rho_vec;
-  OSQPVectorf*  rhs;
-  OSQPVectorf*  ref;
-  OSQPMatrix*   Pu;
-  OSQPMatrix*   A;
-  LinSysSolver* s;  // Private structure to form KKT factorization
-
-  OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings)); // Settings
-  solve_linsys_sols_data *data = generate_problem_solve_linsys_sols_data();
-
-  // Settings
-  settings->rho           = data->test_solve_KKT_rho;
-  settings->sigma         = data->test_solve_KKT_sigma;
-  settings->linsys_solver = OSQP_DIRECT_SOLVER;
-
-  // Set rho_vec
-  m       = data->test_solve_KKT_A->m;
-  n       = data->test_solve_KKT_Pu->n;
-  rho_vec = OSQPVectorf_malloc(m);
-  OSQPVectorf_set_scalar(rho_vec,settings->rho);
-
-  //data Matrices
-  Pu = OSQPMatrix_new_from_csc(data->test_solve_KKT_Pu,1);
-  A  = OSQPMatrix_new_from_csc(data->test_solve_KKT_A,0);
-
-  // Form and factorize KKT matrix
-  exitflag = osqp_algebra_init_linsys_solver(&s, Pu, A, rho_vec, settings, OSQP_NULL, OSQP_NULL, 0);
-
-  // Solve  KKT x = b via LDL given factorization
-  rhs = OSQPVectorf_new(data->test_solve_KKT_rhs, m+n);
-  s->solve(s, rhs, 1);
-  ref = OSQPVectorf_new(data->test_solve_KKT_x, m+n);
-
-  mu_assert(
-    "Linear systems solve tests: error in forming and solving KKT system with PARDISO!",
-    OSQPVectorf_norm_inf_diff(rhs, ref) < TESTS_TOL);
-
-
-  // Cleanup
-  s->free(s);
-  c_free(settings);
-  OSQPVectorf_free(rho_vec);
-  OSQPVectorf_free(rhs);
-  OSQPVectorf_free(ref);
-  OSQPMatrix_free(Pu);
-  OSQPMatrix_free(A);
-  clean_problem_solve_linsys_sols_data(data);
-}
-#endif

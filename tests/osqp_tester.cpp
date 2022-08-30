@@ -56,11 +56,6 @@ TEST_CASE( "test_solve_linsys", "[multi-file:2]" ) {
     SECTION( "test_solveKKT" ) {
         test_solveKKT();
     }
-#ifdef OSQP_ALGEBRA_MKL
-    SECTION( "test_solveKKT_pardiso" ) {
-        test_solveKKT_pardiso();
-    }
-#endif
     osqp_algebra_free_libs();
 }
 
