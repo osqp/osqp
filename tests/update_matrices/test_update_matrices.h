@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include "osqp.h"
-#include "util.h"
 #include "osqp_tester.h"
-#include "lin_alg.h"
 
 #include "update_matrices/data.h"
 

@@ -1,18 +1,8 @@
 #include <stdio.h>
 #include "osqp.h"
-#include "util.h"
 #include "osqp_tester.h"
 
-
 #include "solve_linsys/data.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-  #include "lin_alg.h"
-#ifdef __cplusplus
-}
-#endif
 
 
 void test_solveKKT() {

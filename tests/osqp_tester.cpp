@@ -6,7 +6,8 @@
 #include "osqp.h"
 
 extern "C" {
-  #include "lin_alg.h"
+    #include "lin_alg.h"
+    #include "util.h"
 }
 
 #include "utils/c_test_utils.h" //helper functions
