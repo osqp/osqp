@@ -33,6 +33,8 @@ struct OSQPVectorf_ {
 typedef enum OSQPMatrix_symmetry_type {NONE,TRIU} OSQPMatrix_symmetry_type;
 
 struct OSQPMatrix_ {
+  /* The memory in this matrix should be allocated using the MKL memory routines, so it should
+     never be created or destroyed using the normal csc deletion routines. */
   OSQPCscMatrix*           csc;       /* Shadow matrix */
   sparse_matrix_t          mkl_mat;   /* Opaque object for MKL matrix */
   OSQPMatrix_symmetry_type symmetry;
