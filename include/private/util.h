@@ -72,7 +72,7 @@ void print_footer(OSQPInfo* info,
 /*! \cond PRIVATE */
 
 
-#if defined(DEBUG) && defined(OSQP_ENABLE_PRINTING)
+#if defined(OSQP_ENABLE_DEBUG) && defined(OSQP_ENABLE_PRINTING)
 
 #  include <stdio.h>
 
@@ -109,7 +109,7 @@ void print_vec_int(const OSQPInt* x,
                    OSQPInt        n,
                    const char*    name);
 
-# endif /* #if defined(DEBUG) && defined(OSQP_ENABLE_PRINTING) */
+# endif /* #if defined(OSQP_ENABLE_DEBUG) && defined(OSQP_ENABLE_PRINTING) */
 
 /*! \endcond */
 
