@@ -14,6 +14,12 @@ TARGET_DIR=$1
 if [ ! -d $TARGET_DIR ]
 then
     mkdir -p $TARGET_DIR
+
+    if [ ! -d $TARGET_DIR ]
+    then
+        echo "Failed to create directory $TARGET_DIR; exiting."
+        exit 1
+    fi
 fi
 
 cd `dirname $0`
