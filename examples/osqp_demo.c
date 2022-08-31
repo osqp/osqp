@@ -54,6 +54,9 @@ int main(void) {
   if(cap & OSQP_CAPABILITIY_CODEGEN) {
     printf("    Code generation\n");
   }
+  if(cap & OSQP_CAPABILITIY_DERIVATIVES) {
+    printf("    Derivatives calculation\n");
+  }
   printf("\n");
 
   /* Setup solver */

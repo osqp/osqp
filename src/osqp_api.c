@@ -44,6 +44,10 @@ OSQPInt osqp_capabilities(void) {
   capabilities |= OSQP_CAPABILITIY_CODEGEN;
 #endif
 
+#ifdef OSQP_ENABLE_DERIVATIVES
+    capabilities |= OSQP_CAPABILITIY_DERIVATIVES;
+#endif
+
   return capabilities;
 }
 
