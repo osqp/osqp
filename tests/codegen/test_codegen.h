@@ -1,5 +1,4 @@
 #include "osqp.h"    // OSQP API
-#include "util.h"    // Utilities for testing
 #include "osqp_tester.h" // Basic testing script header
 
 #include "basic_lp/data.h"
@@ -10,7 +9,7 @@
 #ifdef OSQP_CODEGEN
 void test_codegen_basic()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Problem settings
   OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
@@ -71,7 +70,7 @@ void test_codegen_basic()
 
 void test_codegen_data()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Problem settings
   OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
@@ -101,11 +100,11 @@ void test_codegen_data()
   defines->derivatives_enable = 0; // no derivatives
 
   SECTION( "codegen data: unconstrained" ) {
-    c_int embedded;
+    OSQPInt embedded;
     std::string dir;
 
     std::tie( embedded, dir ) =
-      GENERATE( table<c_int, std::string>(
+      GENERATE( table<OSQPInt, std::string>(
           { /* first is embedded mode, second is output directory */
             std::make_tuple( 1, CODEGEN1_DIR ),
             std::make_tuple( 2, CODEGEN2_DIR ) } ) );
@@ -136,11 +135,11 @@ void test_codegen_data()
   }
 
   SECTION( "codegen data: linear program" ) {
-    c_int embedded;
+    OSQPInt embedded;
     std::string dir;
 
     std::tie( embedded, dir ) =
-      GENERATE( table<c_int, std::string>(
+      GENERATE( table<OSQPInt, std::string>(
           { /* first is embedded mode, second is output directory */
             std::make_tuple( 1, CODEGEN1_DIR ),
             std::make_tuple( 2, CODEGEN2_DIR ) } ) );
@@ -171,21 +170,21 @@ void test_codegen_data()
   }
 
   SECTION( "codegen data: nonconvex" ) {
-    c_int embedded;
+    OSQPInt embedded;
     std::string dir;
 
     std::tie( embedded, dir ) =
-      GENERATE( table<c_int, std::string>(
+      GENERATE( table<OSQPInt, std::string>(
           { /* first is embedded mode, second is output directory */
             std::make_tuple( 1, CODEGEN1_DIR ),
             std::make_tuple( 2, CODEGEN2_DIR ) } ) );
 
-    c_float sigma;
-    c_int sigma_num;
-    c_int expected_error;
+    OSQPFloat sigma;
+    OSQPInt   sigma_num;
+    OSQPInt   expected_error;
 
     std::tie( sigma, sigma_num, expected_error ) =
-      GENERATE( table<c_float, c_int, c_int>(
+      GENERATE( table<OSQPFloat, OSQPInt, OSQPInt>(
           { /* first is sigma value, second is the filename parameter, third is the expected return value */
             std::make_tuple( 1e-6, 1, OSQP_NONCVX_ERROR ),
             std::make_tuple(    5, 2, OSQP_NO_ERROR ) } ) );
@@ -220,7 +219,7 @@ void test_codegen_data()
 
 void test_codegen_defines()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Problem settings
   OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
@@ -263,10 +262,10 @@ void test_codegen_defines()
   mu_assert("Codegen test: Setup error!", exitflag == 0);
 
   SECTION( "codegen define: embedded_mode" ) {
-    c_int test_input;
-    c_int expected_flag;
+    OSQPInt test_input;
+    OSQPInt expected_flag;
     std::tie( test_input, expected_flag ) =
-        GENERATE( table<c_int, c_int>(
+        GENERATE( table<OSQPInt, OSQPInt>(
             { /* first is input, second is expected error */
               std::make_tuple( 0, OSQP_CODEGEN_DEFINES_ERROR ),
               std::make_tuple( 1, OSQP_NO_ERROR ),
@@ -283,10 +282,10 @@ void test_codegen_defines()
   }
 
   SECTION( "codegen define: floats" ) {
-    c_int test_input;
-    c_int expected_flag;
+    OSQPInt test_input;
+    OSQPInt expected_flag;
     std::tie( test_input, expected_flag ) =
-        GENERATE( table<c_int, c_int>(
+        GENERATE( table<OSQPInt, OSQPInt>(
             { /* first is input, second is expected error */
               std::make_tuple( -1, OSQP_CODEGEN_DEFINES_ERROR ),
               std::make_tuple(  0, OSQP_NO_ERROR ),
@@ -304,10 +303,10 @@ void test_codegen_defines()
   }
 
   SECTION( "codegen define: printing" ) {
-    c_int test_input;
-    c_int expected_flag;
+    OSQPInt test_input;
+    OSQPInt expected_flag;
     std::tie( test_input, expected_flag ) =
-        GENERATE( table<c_int, c_int>(
+        GENERATE( table<OSQPInt, OSQPInt>(
             { /* first is input, second is expected error */
               std::make_tuple( -1, OSQP_CODEGEN_DEFINES_ERROR ),
               std::make_tuple(  0, OSQP_NO_ERROR ),
@@ -325,10 +324,10 @@ void test_codegen_defines()
   }
 
   SECTION( "codegen define: profiling" ) {
-    c_int test_input;
-    c_int expected_flag;
+    OSQPInt test_input;
+    OSQPInt expected_flag;
     std::tie( test_input, expected_flag ) =
-        GENERATE( table<c_int, c_int>(
+        GENERATE( table<OSQPInt, OSQPInt>(
             { /* first is input, second is expected error */
               std::make_tuple( -1, OSQP_CODEGEN_DEFINES_ERROR ),
               std::make_tuple(  0, OSQP_NO_ERROR ),
@@ -346,10 +345,10 @@ void test_codegen_defines()
   }
 
   SECTION( "codegen define: interrupts" ) {
-    c_int test_input;
-    c_int expected_flag;
+    OSQPInt test_input;
+    OSQPInt expected_flag;
     std::tie( test_input, expected_flag ) =
-        GENERATE( table<c_int, c_int>(
+        GENERATE( table<OSQPInt, OSQPInt>(
             { /* first is input, second is expected error */
               std::make_tuple( -1, OSQP_CODEGEN_DEFINES_ERROR ),
               std::make_tuple(  0, OSQP_NO_ERROR ),
@@ -367,10 +366,10 @@ void test_codegen_defines()
   }
 
   SECTION( "codegen define: derivatives" ) {
-    c_int test_input;
-    c_int expected_flag;
+    OSQPInt test_input;
+    OSQPInt expected_flag;
     std::tie( test_input, expected_flag ) =
-        GENERATE( table<c_int, c_int>(
+        GENERATE( table<OSQPInt, OSQPInt>(
             { /* first is input, second is expected error */
               std::make_tuple( -1, OSQP_CODEGEN_DEFINES_ERROR ),
               std::make_tuple(  0, OSQP_NO_ERROR ),
@@ -390,7 +389,7 @@ void test_codegen_defines()
 
 void test_codegen_error_propagation()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Problem settings
   OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
@@ -507,7 +506,7 @@ void test_codegen_error_propagation()
 
 void test_codegen_settings()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Problem settings
   OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
@@ -543,12 +542,12 @@ void test_codegen_settings()
   // scaling changes some allocations (some vectors become null)
   SECTION( "codegen: scaling setting" ) {
     // Test with both scaling=0 and scaling=1
-    c_int scaling  = GENERATE(0, 1);
-    c_int embedded;
+    OSQPInt scaling  = GENERATE(0, 1);
+    OSQPInt embedded;
     std::string dir;
 
     std::tie( embedded, dir ) =
-      GENERATE( table<c_int, std::string>(
+      GENERATE( table<OSQPInt, std::string>(
           { /* first is embedded mode, second is output directory */
             std::make_tuple( 1, CODEGEN1_DIR ),
             std::make_tuple( 2, CODEGEN2_DIR ) } ) );
@@ -578,12 +577,12 @@ void test_codegen_settings()
   // rho_is_vec changes some allocations (some vectors become null)
   SECTION( "codegen: rho_is_vec setting" ) {
     // Test with both rho_is_vec=0 and rho_is_vec=1
-    c_int rho_is_vec = GENERATE(0, 1);
-    c_int embedded;
+    OSQPInt rho_is_vec = GENERATE(0, 1);
+    OSQPInt embedded;
     std::string dir;
 
     std::tie( embedded, dir ) =
-      GENERATE( table<c_int, std::string>(
+      GENERATE( table<OSQPInt, std::string>(
           { /* first is embedded mode, second is output directory */
             std::make_tuple( 1, CODEGEN1_DIR ),
             std::make_tuple( 2, CODEGEN2_DIR ) } ) );

@@ -3,8 +3,10 @@
 
 //========== Logical, testing and debug ===========
 
-c_int csc_is_eq(csc *A, csc *B, c_float tol) {
-  c_int j, i;
+OSQPInt csc_is_eq(OSQPCscMatrix* A,
+                  OSQPCscMatrix* B,
+                  OSQPFloat      tol) {
+  OSQPInt j, i;
 
   // If number of columns does not coincide, they are not equal.
   if (A->n != B->n) {
@@ -31,31 +33,31 @@ c_int csc_is_eq(csc *A, csc *B, c_float tol) {
 
 //========= Internal utility functions  ===========
 
-static void* csc_malloc(c_int n, c_int size) {
+static void* csc_malloc(OSQPInt n, OSQPInt size) {
   return c_malloc(n * size);
 }
 
-static void* csc_calloc(c_int n, c_int size) {
+static void* csc_calloc(OSQPInt n, OSQPInt size) {
   return c_calloc(n, size);
 }
 
-void prea_int_vec_copy(const c_int *a, c_int *b, c_int n) {
-  c_int i;
+static void prea_int_vec_copy(const OSQPInt* a, OSQPInt* b, OSQPInt n) {
+  OSQPInt i;
   for (i = 0; i < n; i++) b[i] = a[i];
 }
 
-void prea_vec_copy(const c_float *a, c_float *b, c_int n) {
-  c_int i;
+static void prea_vec_copy(const OSQPFloat* a, OSQPFloat* b, OSQPInt n) {
+  OSQPInt i;
   for (i = 0; i < n; i++)  b[i] = a[i];
 }
 
-void int_vec_set_scalar(c_int *a, c_int sc, c_int n) {
-  c_int i;
+static void int_vec_set_scalar(OSQPInt* a, OSQPInt sc, OSQPInt n) {
+  OSQPInt i;
   for (i = 0; i < n; i++) a[i] = sc;
 }
 
-c_int csc_cumsum(c_int *p, c_int *c, c_int n) {
-  c_int i, nz = 0;
+OSQPInt csc_cumsum(OSQPInt* p, OSQPInt* c, OSQPInt n) {
+  OSQPInt i, nz = 0;
 
   if (!p || !c) return -1;  /* check inputs */
 
@@ -71,9 +73,9 @@ c_int csc_cumsum(c_int *p, c_int *c, c_int n) {
 
 //==================================================
 
-// csc* csc_matrix(c_int m, c_int n, c_int nzmax, c_float *x, c_int *i, c_int *p)
+// OSQPCscMatrix* csc_matrix(OSQPInt m, OSQPInt n, OSQPInt nzmax, OSQPFloat *x, OSQPInt *i, OSQPInt *p)
 // {
-//   csc *M = (csc *)c_malloc(sizeof(csc));
+//   OSQPCscMatrix *M = (OSQPCscMatrix *)c_malloc(sizeof(OSQPCscMatrix));
 
 //   if (!M) return OSQP_NULL;
 
@@ -87,8 +89,12 @@ c_int csc_cumsum(c_int *p, c_int *c, c_int n) {
 //   return M;
 // }
 
-csc* csc_spalloc(c_int m, c_int n, c_int nzmax, c_int values, c_int triplet) {
-  csc *A = csc_calloc(1, sizeof(csc)); /* allocate the csc struct */
+OSQPCscMatrix* csc_spalloc(OSQPInt m,
+                           OSQPInt n,
+                           OSQPInt nzmax,
+                           OSQPInt values,
+                           OSQPInt triplet) {
+  OSQPCscMatrix* A = c_calloc(1, sizeof(OSQPCscMatrix)); /* allocate the OSQPCscMatrix struct */
 
   if (!A) return OSQP_NULL;            /* out of memory */
 
@@ -96,16 +102,16 @@ csc* csc_spalloc(c_int m, c_int n, c_int nzmax, c_int values, c_int triplet) {
   A->n     = n;
   A->nzmax = nzmax = c_max(nzmax, 0);
   A->nz    = triplet ? 0 : -1;         /* allocate triplet or comp.col */
-  A->p     = csc_malloc(triplet ? nzmax : n + 1, sizeof(c_int));
-  A->i     = values ? csc_malloc(nzmax,  sizeof(c_int)) : OSQP_NULL;
-  A->x     = values ? csc_malloc(nzmax,  sizeof(c_float)) : OSQP_NULL;
+  A->p     = csc_malloc(triplet ? nzmax : n + 1, sizeof(OSQPInt));
+  A->i     = values ? csc_malloc(nzmax,  sizeof(OSQPInt)) : OSQP_NULL;
+  A->x     = values ? csc_malloc(nzmax,  sizeof(OSQPFloat)) : OSQP_NULL;
   if (!A->p || (values && !A->i ) || (values && !A->x)){
     csc_spfree(A);
     return OSQP_NULL;
   } else return A;
 }
 
-void csc_spfree(csc *A) {
+void csc_spfree(OSQPCscMatrix* A) {
   if (A){
     if (A->p) c_free(A->p);
     if (A->i) c_free(A->i);
@@ -114,24 +120,25 @@ void csc_spfree(csc *A) {
   }
 }
 
-csc* csc_submatrix_byrows(const csc* A, c_int* rows){
+OSQPCscMatrix* csc_submatrix_byrows(const OSQPCscMatrix* A,
+                                          OSQPInt*       rows){
 
-  c_int    j;
-  csc*     R;
-  c_int    nzR = 0;
-  c_int    An = A->n;
-  c_int    Am = A->m;
-  c_int*   Ap = A->p;
-  c_int*   Ai = A->i;
-  c_float* Ax = A->x;
-  c_int*   Rp;
-  c_int*   Ri;
-  c_float* Rx;
-  c_int    Rm = 0;
-  c_int    ptr;
-  c_int*   rridx; //mapping from row indices to reduced row indices
+  OSQPInt        j;
+  OSQPCscMatrix* R;
+  OSQPInt        nzR = 0;
+  OSQPInt        An = A->n;
+  OSQPInt        Am = A->m;
+  OSQPInt*       Ap = A->p;
+  OSQPInt*       Ai = A->i;
+  OSQPFloat*     Ax = A->x;
+  OSQPInt*       Rp;
+  OSQPInt*       Ri;
+  OSQPFloat*     Rx;
+  OSQPInt        Rm = 0;
+  OSQPInt        ptr;
+  OSQPInt*       rridx; //mapping from row indices to reduced row indices
 
-  rridx = (c_int*)c_malloc(Am * sizeof(c_int));
+  rridx = (OSQPInt*)c_malloc(Am * sizeof(OSQPInt));
   if(!rridx) return OSQP_NULL;
 
   //count the number of rows in the reduced
@@ -180,11 +187,17 @@ csc* csc_submatrix_byrows(const csc* A, c_int* rows){
   return R;
 }
 
-csc* triplet_to_csc(const csc *T, c_int *TtoC) {
+OSQPCscMatrix* triplet_to_csc(const OSQPCscMatrix* T, OSQPInt* TtoC) {
 
-  c_int m, n, nz, p, k, *Cp, *Ci, *w, *Ti, *Tj;
-  c_float *Cx, *Tx;
-  csc     *C;
+  OSQPInt    m, n, nz, p, k;
+  OSQPInt*   Cp;
+  OSQPInt*   Ci;
+  OSQPInt*   w;
+  OSQPInt*   Ti;
+  OSQPInt*   Tj;
+  OSQPFloat* Cx;
+  OSQPFloat* Tx;
+  OSQPCscMatrix* C;
 
   m  = T->m;
   n  = T->n;
@@ -193,7 +206,7 @@ csc* triplet_to_csc(const csc *T, c_int *TtoC) {
   Tx = T->x;
   nz = T->nz;
   C  = csc_spalloc(m, n, nz, Tx != OSQP_NULL, 0);     /* allocate result */
-  w  = csc_calloc(n, sizeof(c_int));                  /* get workspace */
+  w  = csc_calloc(n, sizeof(OSQPInt));                  /* get workspace */
 
   if (!C || !w) return csc_done(C, w, OSQP_NULL, 0);  /* out of memory */
 
@@ -216,10 +229,16 @@ csc* triplet_to_csc(const csc *T, c_int *TtoC) {
   return csc_done(C, w, OSQP_NULL, 1);     /* success; free w and return C */
 }
 
-csc* triplet_to_csr(const csc *T, c_int *TtoC) {
-  c_int m, n, nz, p, k, *Cp, *Cj, *w, *Ti, *Tj;
-  c_float *Cx, *Tx;
-  csc     *C;
+OSQPCscMatrix* triplet_to_csr(const OSQPCscMatrix* T, OSQPInt* TtoC) {
+  OSQPInt    m, n, nz, p, k;
+  OSQPInt*   Cp;
+  OSQPInt*   Cj;
+  OSQPInt*   w;
+  OSQPInt*   Ti;
+  OSQPInt*   Tj;
+  OSQPFloat* Cx;
+  OSQPFloat* Tx;
+  OSQPCscMatrix* C;
 
   m  = T->m;
   n  = T->n;
@@ -228,7 +247,7 @@ csc* triplet_to_csr(const csc *T, c_int *TtoC) {
   Tx = T->x;
   nz = T->nz;
   C  = csc_spalloc(m, n, nz, Tx != OSQP_NULL, 0);     /* allocate result */
-  w  = csc_calloc(m, sizeof(c_int));                  /* get workspace */
+  w  = csc_calloc(m, sizeof(OSQPInt));                  /* get workspace */
 
   if (!C || !w) return csc_done(C, w, OSQP_NULL, 0);  /* out of memory */
 
@@ -251,12 +270,13 @@ csc* triplet_to_csr(const csc *T, c_int *TtoC) {
   return csc_done(C, w, OSQP_NULL, 1);     /* success; free w and return C */
 }
 
-c_int* csc_pinv(c_int const *p, c_int n) {
-  c_int k, *pinv;
+OSQPInt* csc_pinv(const OSQPInt* p, OSQPInt n) {
+  OSQPInt  k;
+  OSQPInt* pinv;
 
   if (!p) return OSQP_NULL;                /* p = OSQP_NULL denotes identity */
 
-  pinv = csc_malloc(n, sizeof(c_int));     /* allocate result */
+  pinv = csc_malloc(n, sizeof(OSQPInt));     /* allocate result */
 
   if (!pinv) return OSQP_NULL;             /* out of memory */
 
@@ -264,10 +284,19 @@ c_int* csc_pinv(c_int const *p, c_int n) {
   return pinv;                             /* return result */
 }
 
-csc* csc_symperm(const csc *A, const c_int *pinv, c_int *AtoC, c_int values) {
-  c_int i, j, p, q, i2, j2, n, *Ap, *Ai, *Cp, *Ci, *w;
-  c_float *Cx, *Ax;
-  csc     *C;
+OSQPCscMatrix* csc_symperm(const OSQPCscMatrix* A,
+                           const OSQPInt*       pinv,
+                                 OSQPInt*       AtoC,
+                                 OSQPInt        values) {
+  OSQPInt    i, j, p, q, i2, j2, n;
+  OSQPInt*   Ap;
+  OSQPInt*   Ai;
+  OSQPInt*   Cp;
+  OSQPInt*   Ci;
+  OSQPInt*   w;
+  OSQPFloat* Cx;
+  OSQPFloat* Ax;
+  OSQPCscMatrix* C;
 
   n  = A->n;
   Ap = A->p;
@@ -275,7 +304,7 @@ csc* csc_symperm(const csc *A, const c_int *pinv, c_int *AtoC, c_int values) {
   Ax = A->x;
   C  = csc_spalloc(n, n, Ap[n], values && (Ax != OSQP_NULL),
                    0);                                /* alloc result*/
-  w = csc_calloc(n, sizeof(c_int));                   /* get workspace */
+  w = csc_calloc(n, sizeof(OSQPInt));                   /* get workspace */
 
   if (!C || !w) return csc_done(C, w, OSQP_NULL, 0);  /* out of memory */
 
@@ -319,8 +348,8 @@ csc* csc_symperm(const csc *A, const c_int *pinv, c_int *AtoC, c_int values) {
   return csc_done(C, w, OSQP_NULL, 1); /* success; free workspace, return C */
 }
 
-csc* csc_copy(const csc *A) {
-  csc *B = csc_spalloc(A->m, A->n, A->p[A->n], (A->x != OSQP_NULL), 0);
+OSQPCscMatrix* csc_copy(const OSQPCscMatrix* A) {
+  OSQPCscMatrix* B = csc_spalloc(A->m, A->n, A->p[A->n], (A->x != OSQP_NULL), 0);
 
   if (!B) return OSQP_NULL;
 
@@ -331,7 +360,7 @@ csc* csc_copy(const csc *A) {
   return B;
 }
 
-// void csc_copy_prea(const csc *A, csc *B) {
+// void csc_copy_prea(const OSQPCscMatrix *A, OSQPCscMatrix *B) {
 
 //   prea_int_vec_copy(A->p, B->p, A->n + 1);
 //   prea_int_vec_copy(A->i, B->i, A->p[A->n]);
@@ -340,13 +369,13 @@ csc* csc_copy(const csc *A) {
 //   B->nzmax = A->nzmax;
 // }
 
-c_float* csc_to_dns(csc *M)
+OSQPFloat* csc_to_dns(OSQPCscMatrix* M)
 {
-  c_int i, j = 0; // Predefine row index and column index
-  c_int idx;
+  OSQPInt i, j = 0; // Predefine row index and column index
+  OSQPInt idx;
 
   // Initialize matrix of zeros
-  c_float *A = (c_float *)c_calloc(M->m * M->n, sizeof(c_float));
+  OSQPFloat* A = (OSQPFloat *)c_calloc(M->m * M->n, sizeof(OSQPFloat));
   if (!A) return OSQP_NULL;
 
   // Allocate elements
@@ -366,7 +395,10 @@ c_float* csc_to_dns(csc *M)
   return A;
 }
 
-csc* csc_done(csc *C, void *w, void *x, c_int ok) {
+OSQPCscMatrix* csc_done(OSQPCscMatrix* C,
+                        void*          w,
+                        void*          x,
+                        OSQPInt        ok) {
   c_free(w);                   /* free workspace */
   c_free(x);
   if (ok) return C;
@@ -376,14 +408,14 @@ csc* csc_done(csc *C, void *w, void *x, c_int ok) {
   }
 }
 
-// csc* csc_to_triu(csc *M) {
-//   csc  *M_trip;    // Matrix in triplet format
-//   csc  *M_triu;    // Resulting upper triangular matrix
-//   c_int nnzorigM;  // Number of nonzeros from original matrix M
-//   c_int nnzmaxM;   // Estimated maximum number of elements of upper triangular M
-//   c_int n;         // Dimension of M
-//   c_int ptr, i, j; // Counters for (i,j) and index in M
-//   c_int z_M = 0;   // Counter for elements in M_trip
+// OSQPCscMatrix* csc_to_triu(OSQPCscMatrix *M) {
+//   OSQPCscMatrix  *M_trip;    // Matrix in triplet format
+//   OSQPCscMatrix  *M_triu;    // Resulting upper triangular matrix
+//   OSQPInt nnzorigM;  // Number of nonzeros from original matrix M
+//   OSQPInt nnzmaxM;   // Estimated maximum number of elements of upper triangular M
+//   OSQPInt n;         // Dimension of M
+//   OSQPInt ptr, i, j; // Counters for (i,j) and index in M
+//   OSQPInt z_M = 0;   // Counter for elements in M_trip
 
 
 //   // Check if matrix is square
@@ -455,12 +487,12 @@ csc* csc_done(csc *C, void *w, void *x, c_int ok) {
 // }
 
 
-csc* triu_to_csc(csc *M) {
-    csc  *M_trip;    // Matrix in triplet format
-    csc  *M_symm;    // Resulting symmetric sparse matrix
-    c_int n;         // Dimension of M
-    c_int ptr, i, j; // Counters for (i,j) and index in M
-    c_int z_M = 0;   // Counter for elements in M_trip
+OSQPCscMatrix* triu_to_csc(OSQPCscMatrix* M) {
+    OSQPCscMatrix* M_trip;    // Matrix in triplet format
+    OSQPCscMatrix* M_symm;    // Resulting symmetric sparse matrix
+    OSQPInt        n;         // Dimension of M
+    OSQPInt        ptr, i, j; // Counters for (i,j) and index in M
+    OSQPInt        z_M = 0;   // Counter for elements in M_trip
 
     if (M->m != M->n) {
         c_eprint("Matrix M not square");
@@ -503,13 +535,13 @@ csc* triu_to_csc(csc *M) {
     return M_symm;
 }
 
-csc* vstack(csc *A, csc *B) {
-    csc  *M_trip;    // Matrix in triplet format
-    csc  *M;         // Resulting csc matrix
-    c_int m1, m2;    // No. of rows in A, B respectively
-    c_int n;         // No. of columns in A/B
-    c_int ptr, i, j; // Counters for (i,j) and index in M
-    c_int z_M = 0;   // Counter for elements in M_trip
+OSQPCscMatrix* vstack(OSQPCscMatrix* A, OSQPCscMatrix* B) {
+    OSQPCscMatrix* M_trip;    // Matrix in triplet format
+    OSQPCscMatrix* M;         // Resulting csc matrix
+    OSQPInt        m1, m2;    // No. of rows in A, B respectively
+    OSQPInt        n;         // No. of columns in A/B
+    OSQPInt        ptr, i, j; // Counters for (i,j) and index in M
+    OSQPInt        z_M = 0;   // Counter for elements in M_trip
 
     if (A->n != B->n) {
         c_eprint("Matrix A and B do not have the same number of columns");

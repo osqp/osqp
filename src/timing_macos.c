@@ -25,13 +25,13 @@ void OSQPTimer_free(OSQPTimer* t) {
     if (t) c_free(t);
 }
 
-void osqp_tic(OSQPTimer *t)
+void osqp_tic(OSQPTimer* t)
 {
   /* Read current clock cycles */
   t->tic = mach_absolute_time();
 }
 
-c_float osqp_toc(OSQPTimer *t)
+OSQPFloat osqp_toc(OSQPTimer* t)
 {
   uint64_t duration; /* Elapsed time in clock cycles*/
 
@@ -43,5 +43,5 @@ c_float osqp_toc(OSQPTimer *t)
   duration *= t->tinfo.numer;
   duration /= t->tinfo.denom;
 
-  return (c_float)duration / 1e9;
+  return (OSQPFloat)duration / 1e9;
 }

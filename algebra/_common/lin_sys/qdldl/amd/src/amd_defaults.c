@@ -20,12 +20,12 @@
 
 GLOBAL void AMD_defaults
 (
-    c_float Control [ ]
+    OSQPFloat Control [ ]
 )
 {
     Int i ;
 
-    if (Control != (c_float *) NULL)
+    if (Control != (OSQPFloat *) NULL)
     {
 	for (i = 0 ; i < AMD_CONTROL ; i++)
 	{

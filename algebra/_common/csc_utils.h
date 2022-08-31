@@ -1,15 +1,14 @@
 #ifndef CSC_UTILS_H
 #define CSC_UTILS_H
 
-
-# include "csc_type.h"
 # include "osqp_configure.h"
+# include "osqp_api_types.h"
 # include "glob_opts.h"
 
 
 // ========== Logical, testing and debug ===========
 
-c_int csc_is_eq(csc *A, csc *B, c_float tol);
+OSQPInt csc_is_eq(OSQPCscMatrix* A, OSQPCscMatrix* B, OSQPFloat tol);
 
 /*****************************************************************************
 * Create and free CSC Matrices                                              *
@@ -25,11 +24,11 @@ c_int csc_is_eq(csc *A, csc *B, c_float tol);
  * @param  triplet Allocate CSC or triplet format matrix (1/0)
  * @return         Matrix pointer
  */
-csc* csc_spalloc(c_int m,
-                 c_int n,
-                 c_int nzmax,
-                 c_int values,
-                 c_int triplet);
+OSQPCscMatrix* csc_spalloc(OSQPInt m,
+                           OSQPInt n,
+                           OSQPInt nzmax,
+                           OSQPInt values,
+                           OSQPInt triplet);
 
 
 /**
@@ -37,7 +36,7 @@ csc* csc_spalloc(c_int m,
     (uses FREE to free inner arrays x, i, p)
  * @param  A Matrix in CSC format
  */
-void csc_spfree(csc *A);
+void csc_spfree(OSQPCscMatrix* A);
 
 /**
  * Create a new matrix from a subset of the rows of A
@@ -47,7 +46,8 @@ void csc_spfree(csc *A);
                      this should be the same length as A->m
     * @return    Returns A(rows,:) if successful, null otherwise
  */
-csc* csc_submatrix_byrows(const csc* A, c_int* rows);
+OSQPCscMatrix* csc_submatrix_byrows(const OSQPCscMatrix* A,
+                                    OSQPInt*             rows);
 
 
 /**
@@ -58,10 +58,10 @@ csc* csc_submatrix_byrows(const csc* A, c_int* rows);
  * @param  ok flag
  * @return    Return result C if OK, otherwise free it
  */
-csc* csc_done(csc  *C,
-              void *w,
-              void *x,
-              c_int ok);
+OSQPCscMatrix* csc_done(OSQPCscMatrix* C,
+                        void*          w,
+                        void*          x,
+                        OSQPInt        ok);
 
 /*****************************************************************************
 * Copy Matrices                                                             *
@@ -71,16 +71,16 @@ csc* csc_done(csc  *C,
  *  Copy sparse CSC matrix A to output.
  *  output is allocated by this function (uses MALLOC)
  */
-csc* csc_copy(const csc *A);
+OSQPCscMatrix* csc_copy(const OSQPCscMatrix* A);
 
 // /**
 //  *  Copy sparse CSC matrix A to B (B is preallocated, NO MALLOC)
 //  */
-// void csc_copy_prea(const csc *A,
-//                    csc       *B);
+// void csc_copy_prea(const OSQPCscMatrix* A,
+//                          OSQPCscMatrix* B);
 
 /* Convert sparse CSC to dense (uses MALLOC)*/
-c_float* csc_to_dns(csc *M);
+OSQPFloat* csc_to_dns(OSQPCscMatrix* M);
 
 /*****************************************************************************
 * Matrices Conversion                                                       *
@@ -97,8 +97,8 @@ c_float* csc_to_dns(csc *M);
  * @param  TtoC vector of indices from triplet to CSC format
  * @return      matrix in CSC format
  */
-csc* triplet_to_csc(const csc *T,
-                    c_int     *TtoC);
+OSQPCscMatrix* triplet_to_csc(const OSQPCscMatrix* T,
+                                    OSQPInt*       TtoC);
 
 
 /**
@@ -111,8 +111,8 @@ csc* triplet_to_csc(const csc *T,
  * @param  TtoC vector of indices from triplet to CSR format
  * @return      matrix in CSR format
  */
-csc* triplet_to_csr(const csc *T,
-                    c_int     *TtoC);
+OSQPCscMatrix* triplet_to_csr(const OSQPCscMatrix* T,
+                                    OSQPInt*       TtoC);
 
 
 // /**
@@ -121,7 +121,7 @@ csc* triplet_to_csr(const csc *T,
 //  * @param  M         Matrix to be converted
 //  * @return           Upper triangular matrix in CSC format
 //  */
-// csc* csc_to_triu(csc *M);
+// OSQPCscMatrix* csc_to_triu(OSQPCscMatrix* M);
 
 /**
  * Convert upper triangular square CSC matrix into symmetric by copying
@@ -130,7 +130,7 @@ csc* triplet_to_csr(const csc *T,
  * @param  M         Matrix to be converted
  * @return           Symmetric matrix in CSC format
  */
-csc* triu_to_csc(csc *M);
+OSQPCscMatrix* triu_to_csc(OSQPCscMatrix* M);
 
 
 /**
@@ -140,7 +140,8 @@ csc* triu_to_csc(csc *M);
  * @param  B         Second CSC matrix
  * @return           CSC matrix resulting from vstacking A and B
  */
-csc* vstack(csc *A, csc *B);
+OSQPCscMatrix* vstack(OSQPCscMatrix* A,
+                      OSQPCscMatrix* B);
 
 
 /*****************************************************************************
@@ -155,16 +156,16 @@ csc* vstack(csc *A, csc *B);
 //  * @param  n Number of elements
 //  * @return   Exitflag
 //  */
-// c_int csc_cumsum(c_int *p,
-//                  c_int *c,
-//                  c_int  n);
+// OSQPInt csc_cumsum(OSQPInt *p,
+//                  OSQPInt *c,
+//                  OSQPInt  n);
 
 /**
  * Compute inverse of permutation matrix stored in the vector p.
  * The computed inverse is also stored in a vector.
  */
-c_int* csc_pinv(c_int const *p,
-                c_int        n);
+OSQPInt* csc_pinv(const OSQPInt* p,
+                        OSQPInt  n);
 
 /**
  * C = A(p,p)= PAP' where A and C are symmetric the upper part stored;
@@ -175,10 +176,10 @@ c_int* csc_pinv(c_int const *p,
  * @param  values Are values of A allocated?
  * @return        New matrix (allocated)
  */
-csc* csc_symperm(const csc   *A,
-                 const c_int *pinv,
-                 c_int       *AtoC,
-                 c_int        values);
+OSQPCscMatrix* csc_symperm(const OSQPCscMatrix* A,
+                           const OSQPInt*       pinv,
+                                 OSQPInt*       AtoC,
+                                 OSQPInt        values);
 
 
 #endif /* ifndef CSC_UTILS_H */

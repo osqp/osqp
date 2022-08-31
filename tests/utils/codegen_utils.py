@@ -8,7 +8,7 @@ def write_int(f, x, name, *args):
             f.write("%s->" % arg)
         f.write("%s = %i;\n" % (name, x))
     else:
-        f.write("c_int %s = %i;\n" % (name, x))
+        f.write("OSQPInt %s = %i;\n" % (name, x))
 
 
 def write_float(f, x, name, *args):
@@ -17,7 +17,7 @@ def write_float(f, x, name, *args):
             f.write("%s->" % arg)
         f.write("%s = %.20f;\n" % (name, x))
     else:
-        f.write("c_float %s = %.20f;\n" % (name, x))
+        f.write("OSQPFloat %s = %.20f;\n" % (name, x))
 
 
 def write_vec_int(f, x, name, *args):
@@ -26,8 +26,8 @@ def write_vec_int(f, x, name, *args):
         for arg in args:
             f.write("%s->" % arg)
     else:
-        f.write("c_int * ")
-    f.write("%s = (c_int*) c_malloc(%i * sizeof(c_int));\n" % (name, n))
+        f.write("OSQPInt* ")
+    f.write("%s = (OSQPInt*) c_malloc(%i * sizeof(OSQPInt));\n" % (name, n))
 
     for i in range(n):
         for arg in args:
@@ -43,8 +43,8 @@ def write_vec_float(f, x, name, *args):
         for arg in args:
             f.write("%s->" % arg)
     else:
-        f.write("c_float * ")
-    f.write("%s = (c_float*) c_malloc(%i * sizeof(c_float));\n" % (name, n))
+        f.write("OSQPFloat* ")
+    f.write("%s = (OSQPFloat*) c_malloc(%i * sizeof(OSQPFloat));\n" % (name, n))
 
     for i in range(n):
         for arg in args:
@@ -65,7 +65,7 @@ def clean_vec(f, name, *args):
         for arg in args:
             f.write("%s->" % arg)
     # else:
-        # f.write("c_float * ")
+        # f.write("OSQPFloat * ")
     f.write("%s);\n" % name)
 
 
@@ -82,8 +82,8 @@ def write_mat_sparse(f, A, name, *args):
         for arg in args:
             f.write("%s->" % arg)
     else:
-        f.write("csc * ")
-    f.write(name + " = (csc*) c_malloc(sizeof(csc));\n")
+        f.write("OSQPCscMatrix* ")
+    f.write(name + " = (OSQPCscMatrix*) c_malloc(sizeof(OSQPCscMatrix));\n")
 
     # Write dimensions and number of nonzeros
     if any(args):
@@ -99,11 +99,11 @@ def write_mat_sparse(f, A, name, *args):
 
     for arg in args:
         f.write("%s->" % arg)
-    if min(m,n) == 0:
+    if min(m,n) == 0 or A.nnz == 0:
         f.write("%s->x = OSQP_NULL;\n" % name)
     else:
         f.write("%s->" % name)
-        f.write("x = (c_float*) c_malloc(%i * sizeof(c_float));\n" % A.nnz)
+        f.write("x = (OSQPFloat*) c_malloc(%i * sizeof(OSQPFloat));\n" % A.nnz)
         for i in range(A.nnz):
             for arg in args:
                 f.write("%s->" % arg)
@@ -112,11 +112,11 @@ def write_mat_sparse(f, A, name, *args):
 
     for arg in args:
         f.write("%s->" % arg)
-    if min(m,n) == 0:
+    if min(m,n) == 0 or A.nnz == 0:
         f.write("%s->i = OSQP_NULL;\n" % name)
     else:
         f.write("%s->" % name)
-        f.write("i = (c_int*) c_malloc(%i * sizeof(c_int));\n" % A.nnz)
+        f.write("i = (OSQPInt*) c_malloc(%i * sizeof(OSQPInt));\n" % A.nnz)
         for i in range(A.nnz):
             for arg in args:
                 f.write("%s->" % arg)
@@ -126,7 +126,7 @@ def write_mat_sparse(f, A, name, *args):
     for arg in args:
         f.write("%s->" % arg)
     f.write("%s->" % name)
-    f.write("p = (c_int*) c_malloc((%i + 1) * sizeof(c_int));\n" % n)
+    f.write("p = (OSQPInt*) c_malloc((%i + 1) * sizeof(OSQPInt));\n" % n)
     for i in range(A.shape[1] + 1):
         for arg in args:
             f.write("%s->" % arg)
@@ -201,18 +201,18 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data={}):
     for key, value in sols_data.items():
         if isinstance(value, str):
             # Status test get from C code
-            f.write("c_int %s;\n" % key)
+            f.write("OSQPInt %s;\n" % key)
         # Check if it is an array or a scalar
         elif isinstance(value, np.ndarray):
             if isinstance(value.flatten(order='F')[0], int):
-                f.write("c_int * %s;\n" % key)
+                f.write("OSQPInt* %s;\n" % key)
             elif isinstance(value.flatten(order='F')[0], float):
-                f.write("c_float * %s;\n" % key)
+                f.write("OSQPFloat* %s;\n" % key)
         else:
             if isinstance(value, int):
-                f.write("c_int %s;\n" % key)
+                f.write("OSQPInt %s;\n" % key)
             elif isinstance(value, float):
-                f.write("c_float %s;\n" % key)
+                f.write("OSQPFloat %s;\n" % key)
     f.write("} %s_sols_data;\n\n" % problem_name)
 
     # prototypes
@@ -395,20 +395,22 @@ def generate_data(problem_name, sols_data):
     for key, value in sols_data.items():
         if isinstance(value, str):
             # Status test get from C code
-            f.write("c_int %s;\n" % key)
+            f.write("OSQPInt %s;\n" % key)
         # Check if it is an array or a scalar
         elif sparse.issparse(value):  # Sparse matrix
-            f.write("csc * %s;\n" % key)
+            f.write("OSQPCscMatrix* %s;\n" % key)
         elif isinstance(value, np.ndarray):
-            if isinstance(value.flatten(order='F')[0], np.integer):
-                f.write("c_int * %s;\n" % key)
+            if value.flatten(order='F').size == 0:
+                f.write("OSQPFloat* %s;\n" % key)
+            elif isinstance(value.flatten(order='F')[0], np.integer):
+                f.write("OSQPInt* %s;\n" % key)
             elif isinstance(value.flatten(order='F')[0], np.float):
-                f.write("c_float * %s;\n" % key)
+                f.write("OSQPFloat * %s;\n" % key)
         else:
             if isinstance(value, int):
-                f.write("c_int %s;\n" % key)
+                f.write("OSQPInt %s;\n" % key)
             elif isinstance(value, float):
-                f.write("c_float %s;\n" % key)
+                f.write("OSQPFloat %s;\n" % key)
     f.write("} %s_sols_data;\n\n" % problem_name)
 
     # prototypes
@@ -452,7 +454,10 @@ def generate_data(problem_name, sols_data):
         elif sparse.issparse(value):  # Sparse matrix
             write_mat_sparse(f, value, key, "data")
         elif type(value) is np.ndarray:
-            if isinstance(value.flatten(order='F')[0], np.integer):
+            # If the vector is empty, default to a float vector
+            if value.flatten(order='F').size == 0:
+                write_vec_float(f, value.flatten(order='F'), key, "data")
+            elif isinstance(value.flatten(order='F')[0], np.integer):
                 write_vec_int(f, value.flatten(order='F'), key, "data")
             elif isinstance(value.flatten(order='F')[0], np.float):
                 write_vec_float(f, value.flatten(order='F'), key, "data")

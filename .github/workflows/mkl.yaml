@@ -97,13 +97,13 @@ jobs:
             cmake -G "${{ matrix.cmake_generator }}" \
                   -S . -B $OSQP_BUILD_DIR_PREFIX \
                   -DOSQP_ALGEBRA_BACKEND='mkl' \
-                  -DFLOAT=${{ matrix.float }} \
+                  -DOSQP_USE_FLOAT=${{ matrix.float }} \
                   -DOSQP_ENABLE_PROFILING=ON \
                   -DOSQP_ENABLE_INTERRUPT=ON \
                   -DOSQP_ENABLE_PRINTING=ON \
                   -DOSQP_BUILD_UNITTESTS=ON \
                   -DOSQP_COVERAGE_CHECK=OFF \
-                  -DLONG=${{ matrix.long }}
+                  -DOSQP_USE_LONG=${{ matrix.long }}
             cmake --build $OSQP_BUILD_DIR_PREFIX
 
         # useful for inspecting the OSQP version information
@@ -114,4 +114,3 @@ jobs:
         - name: Test
           run: |
             $OSQP_BUILD_DIR_PREFIX/out/osqp_tester
-          if: ${{ matrix.unit_tests == '-DOSQP_BUILD_UNITTESTS=ON -DOSQP_COVERAGE_CHECK=ON' }}

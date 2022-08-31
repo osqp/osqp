@@ -1,7 +1,7 @@
 # Use the QDLDL solver in this algebra
 include(${OSQP_ALGEBRA_ROOT}/_common/lin_sys/qdldl/qdldl.cmake)
 
-if(NOT EMBEDDED)
+if(NOT OSQP_EMBEDDED_MODE)
   set( NON_EMBEDDED_SRC_FILES
        ../_common/csc_utils.h
        ../_common/csc_utils.c

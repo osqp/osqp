@@ -26,12 +26,12 @@ void OSQPTimer_free(OSQPTimer* t) {
 }
 
 /* Read current time */
-void osqp_tic(OSQPTimer *t) {
+void osqp_tic(OSQPTimer* t) {
   clock_gettime(CLOCK_MONOTONIC, &t->tic);
 }
 
 /* Return time passed since last call to tic on this timer */
-c_float osqp_toc(OSQPTimer *t) {
+OSQPFloat osqp_toc(OSQPTimer* t) {
   struct timespec temp;
 
   clock_gettime(CLOCK_MONOTONIC, &t->toc);
@@ -43,5 +43,5 @@ c_float osqp_toc(OSQPTimer *t) {
     temp.tv_sec  = t->toc.tv_sec - t->tic.tv_sec;
     temp.tv_nsec = t->toc.tv_nsec - t->tic.tv_nsec;
   }
-  return (c_float)temp.tv_sec + (c_float)temp.tv_nsec / 1e9;
+  return (OSQPFloat)temp.tv_sec + (OSQPFloat)temp.tv_nsec / 1e9;
 }

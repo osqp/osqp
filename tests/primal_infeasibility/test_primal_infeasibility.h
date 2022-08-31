@@ -1,5 +1,4 @@
 #include "osqp.h"    // OSQP API
-#include "util.h"    // Utilities for testing
 #include "osqp_tester.h" // Basic testing script header
 
 #include "primal_infeasibility/data.h"
@@ -7,7 +6,7 @@
 
 void test_primal_infeasible_qp_solve()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));

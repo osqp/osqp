@@ -29,14 +29,14 @@
 *********************************************/
 
 struct OSQPVectori_ {
-  c_int *d_val;
-  c_int  length;
+  OSQPInt* d_val;
+  OSQPInt  length;
 };
 
 struct OSQPVectorf_ {
-  c_float              *d_val;
-  c_int                 length;
-  cusparseDnVecDescr_t  vec;
+  OSQPFloat*           d_val;
+  OSQPInt              length;
+  cusparseDnVecDescr_t vec;
 };
 
 
@@ -49,13 +49,13 @@ struct OSQPVectorf_ {
 typedef struct csr_t csr;
 
 struct OSQPMatrix_ {
-  csr     *S;   /* P or A */
-  csr     *At;  /* NULL if symmetric */
-  c_int   *d_A_to_At_ind;
-  c_float *d_P_triu_val;
-  c_int   *d_P_triu_to_full_ind;
-  c_int   *d_P_diag_ind;
-  c_int    P_triu_nnz;
+  csr*       S;   /* P or A */
+  csr*       At;  /* NULL if symmetric */
+  OSQPInt*   d_A_to_At_ind;
+  OSQPFloat* d_P_triu_val;
+  OSQPInt*   d_P_triu_to_full_ind;
+  OSQPInt*   d_P_diag_ind;
+  OSQPInt    P_triu_nnz;
 };
 
 

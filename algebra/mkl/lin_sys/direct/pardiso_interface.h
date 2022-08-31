@@ -8,7 +8,7 @@
 /**
  * Pardiso solver structure
  *
- * NB: If we use Pardiso, we suppose that EMBEDDED is not enabled
+ * NB: If we use Pardiso, we suppose that OSQP_EMBEDDED_MODE is not enabled
  */
 typedef struct pardiso pardiso_solver;
 
@@ -21,33 +21,33 @@ struct pardiso {
      */
     const char* (*name)(void);
 
-    c_int (*solve)(struct pardiso *self,
-                   OSQPVectorf    *b,
-                   c_int           admm_iter);
+    OSQPInt (*solve)(struct pardiso* self,
+                     OSQPVectorf*    b,
+                     OSQPInt         admm_iter);
 
-    void (*update_settings)(struct pardiso     *self,
-                            const OSQPSettings *settings);
+    void (*update_settings)(struct pardiso*     self,
+                            const OSQPSettings* settings);
 
-    void (*warm_start)(struct pardiso    *self,
-                       const OSQPVectorf *x);
+    void (*warm_start)(struct pardiso*    self,
+                       const OSQPVectorf* x);
 
-    c_int (*adjoint_derivative)(struct pardiso *self);
+    OSQPInt (*adjoint_derivative)(struct pardiso* self);
 
-    void (*free)(struct pardiso * self);
+    void (*free)(struct pardiso* self);
 
-    c_int (*update_matrices)(struct pardiso   *self,
-                             const OSQPMatrix *P,
-                             const c_int* Px_new_idx,
-                             c_int P_new_n,
-                             const OSQPMatrix *A,
-                             const c_int* Ax_new_idx,
-                             c_int A_new_n);
+    OSQPInt (*update_matrices)(struct pardiso*   self,
+                               const OSQPMatrix* P,
+                               const OSQPInt*    Px_new_idx,
+                               OSQPInt           P_new_n,
+                               const OSQPMatrix* A,
+                               const OSQPInt*    Ax_new_idx,
+                               OSQPInt           A_new_n);
 
-    c_int (*update_rho_vec)(struct pardiso    *self,
-                            const OSQPVectorf *rho_vec,
-                            c_float            rho_sc);
+    OSQPInt (*update_rho_vec)(struct pardiso*    self,
+                              const OSQPVectorf* rho_vec,
+                              OSQPFloat          rho_sc);
 
-    c_int nthreads;
+    OSQPInt nthreads;
     /** @} */
 
 
@@ -56,35 +56,36 @@ struct pardiso {
      * @{
      */
     // Attributes
-    csc *KKT;               ///< KKT matrix (in CSR format!)
-    c_int *KKT_i;           ///< KKT column indices in 1-indexing for Pardiso
-    c_int *KKT_p;           ///< KKT row pointers in 1-indexing for Pardiso
-    c_float *bp;            ///< workspace memory for solves (rhs)
-    c_float *sol;           ///< solution to the KKT system
-    c_float *rho_inv_vec;   ///< parameter vector
-    c_float sigma;          ///< scalar parameter
-    c_float rho_inv;        ///< scalar parameter (used if rho_inv_vec == NULL)
-    c_int polishing;        ///< polishing flag
-    c_int n;                ///< number of QP variables
-    c_int m;                ///< number of QP constraints
+    OSQPCscMatrix* KKT;         ///< KKT matrix (in CSR format!)
+    OSQPInt*       KKT_i;       ///< KKT column indices in 1-indexing for Pardiso
+    OSQPInt*       KKT_p;       ///< KKT row pointers in 1-indexing for Pardiso
+    OSQPFloat*     bp;          ///< workspace memory for solves (rhs)
+    OSQPFloat*     sol;         ///< solution to the KKT system
+    OSQPFloat*     rho_inv_vec; ///< parameter vector
+    OSQPFloat      sigma;       ///< scalar parameter
+    OSQPFloat      rho_inv;     ///< scalar parameter (used if rho_inv_vec == NULL)
+    OSQPInt        polishing;   ///< polishing flag
+    OSQPInt        n;           ///< number of QP variables
+    OSQPInt        m;           ///< number of QP constraints
 
     // Pardiso variables
-    void *pt[64];     ///< internal solver memory pointer pt
-    c_int iparm[64];  ///< Pardiso control parameters
-    c_int nKKT;       ///< dimension of the linear system
-    c_int mtype;      ///< matrix type (-2 for real and symmetric indefinite)
-    c_int nrhs;       ///< number of right-hand sides (1 for our needs)
-    c_int maxfct;     ///< maximum number of factors (1 for our needs)
-    c_int mnum;       ///< indicates matrix for the solution phase (1 for our needs)
-    c_int phase;      ///< control the execution phases of the solver
-    c_int error;      ///< the error indicator (0 for no error)
-    c_int msglvl;     ///< Message level information (0 for no output)
-    c_int idum;       ///< dummy integer
-    c_float fdum;     ///< dummy float
+    void*     pt[64];     ///< internal solver memory pointer pt
+    OSQPInt   iparm[64];  ///< Pardiso control parameters
+    OSQPInt   nKKT;       ///< dimension of the linear system
+    OSQPInt   mtype;      ///< matrix type (-2 for real and symmetric indefinite)
+    OSQPInt   nrhs;       ///< number of right-hand sides (1 for our needs)
+    OSQPInt   maxfct;     ///< maximum number of factors (1 for our needs)
+    OSQPInt   mnum;       ///< indicates matrix for the solution phase (1 for our needs)
+    OSQPInt   phase;      ///< control the execution phases of the solver
+    OSQPInt   error;      ///< the error indicator (0 for no error)
+    OSQPInt   msglvl;     ///< Message level information (0 for no output)
+    OSQPInt   idum;       ///< dummy integer
+    OSQPFloat fdum;       ///< dummy float
 
     // These are required for matrix updates
-    c_int * PtoKKT, * AtoKKT;    ///< Index of elements from P and A to KKT matrix
-    c_int * rhotoKKT;            ///< Index of rho places in KKT matrix
+    OSQPInt* PtoKKT;    ///< Index of elements from P to KKT matrix
+    OSQPInt* AtoKKT;    ///< Index of elements from A to KKT matrix
+    OSQPInt* rhotoKKT;  ///< Index of rho places in KKT matrix
 
     /** @} */
 };
@@ -101,12 +102,12 @@ struct pardiso {
  * @param  polishing Flag whether we are initializing for polishing or not
  * @return           Exitflag for error (0 if no errors)
  */
-c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
-                                 const OSQPMatrix   *P,
-                                 const OSQPMatrix   *A,
-                                 const OSQPVectorf  *rho_vec,
-                                 const OSQPSettings *settings,
-                                 c_int               polishing);
+OSQPInt init_linsys_solver_pardiso(pardiso_solver**    sp,
+                                   const OSQPMatrix*   P,
+                                   const OSQPMatrix*   A,
+                                   const OSQPVectorf*  rho_vec,
+                                   const OSQPSettings* settings,
+                                   OSQPInt             polishing);
 
 
 /**
@@ -122,19 +123,19 @@ const char* name_pardiso();
  * @param  b        Right-hand side
  * @return          Exitflag
  */
-c_int solve_linsys_pardiso(pardiso_solver *s,
-                           OSQPVectorf    *b,
-                           c_int           admm_iter);
+OSQPInt solve_linsys_pardiso(pardiso_solver* s,
+                             OSQPVectorf*    b,
+                             OSQPInt         admm_iter);
 
-void update_settings_linsys_solver_pardiso(pardiso_solver *s,
-                                           const OSQPSettings    *settings);
+void update_settings_linsys_solver_pardiso(pardiso_solver* s,
+                                           const OSQPSettings* settings);
 
-void update_settings_linsys_solver_pardiso(pardiso_solver *s,
-                                           const OSQPSettings    *settings);
+void update_settings_linsys_solver_pardiso(pardiso_solver* s,
+                                           const OSQPSettings* settings);
 
 
-void warm_start_linsys_solver_pardiso(pardiso_solver    *s,
-                                      const OSQPVectorf *x);
+void warm_start_linsys_solver_pardiso(pardiso_solver*   s,
+                                      const OSQPVectorf* x);
 
 /**
  * Update linear system solver matrices
@@ -143,14 +144,13 @@ void warm_start_linsys_solver_pardiso(pardiso_solver    *s,
  * @param  A        Matrix A
  * @return          Exitflag
  */
-c_int update_linsys_solver_matrices_pardiso(
-                    pardiso_solver * s,
-                    const OSQPMatrix *P,
-                    const c_int *Px_new_idx,
-                    c_int P_new_n,
-                    const OSQPMatrix *A,
-                    const c_int *Ax_new_idx,
-                    c_int A_new_n);
+OSQPInt update_linsys_solver_matrices_pardiso(pardiso_solver*   s,
+                                              const OSQPMatrix* P,
+                                              const OSQPInt*    Px_new_idx,
+                                              OSQPInt           P_new_n,
+                                              const OSQPMatrix* A,
+                                              const OSQPInt*    Ax_new_idx,
+                                              OSQPInt           A_new_n);
 
 
 /**
@@ -159,16 +159,16 @@ c_int update_linsys_solver_matrices_pardiso(
  * @param  rho_vec  new rho_vec value
  * @return          exitflag
  */
-c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver    *s,
-                                           const OSQPVectorf *rho_vec,
-                                           c_float            rho_sc);
+OSQPInt update_linsys_solver_rho_vec_pardiso(pardiso_solver*    s,
+                                             const OSQPVectorf* rho_vec,
+                                             OSQPFloat          rho_sc);
 
 
 /**
  * Free linear system solver
  * @param s linear system solver object
  */
-void free_linsys_solver_pardiso(pardiso_solver * s);
+void free_linsys_solver_pardiso(pardiso_solver* s);
 
 
 #endif /* PARDISO_INTERFACE_H */

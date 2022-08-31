@@ -2,6 +2,7 @@
 # define ALGEBRA_IMPL_H
 
 #include "csc_math.h"
+#include <mkl_spblas.h>
 
 /*********************************************
 *   Internal definition of OSQPVector types
@@ -9,13 +10,13 @@
 *********************************************/
 
 struct OSQPVectori_ {
-  c_int* values;
-  c_int length;
+  OSQPInt* values;
+  OSQPInt  length;
 };
 
 struct OSQPVectorf_ {
-  c_float* values;
-  c_int length;
+  OSQPFloat* values;
+  OSQPInt    length;
 };
 
 
@@ -32,8 +33,11 @@ struct OSQPVectorf_ {
 typedef enum OSQPMatrix_symmetry_type {NONE,TRIU} OSQPMatrix_symmetry_type;
 
 struct OSQPMatrix_ {
-  csc*                             csc;
-  OSQPMatrix_symmetry_type    symmetry;
+  /* The memory in this matrix should be allocated using the MKL memory routines, so it should
+     never be created or destroyed using the normal csc deletion routines. */
+  OSQPCscMatrix*           csc;       /* Shadow matrix */
+  sparse_matrix_t          mkl_mat;   /* Opaque object for MKL matrix */
+  OSQPMatrix_symmetry_type symmetry;
 };
 
 

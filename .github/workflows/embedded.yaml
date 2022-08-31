@@ -44,10 +44,10 @@ jobs:
           run: |
             cmake -G "${{ matrix.cmake_generator }}" \
                   -S . -B $OSQP_BUILD_DIR_PREFIX \
-                  -DFLOAT=${{ matrix.float }} \
+                  -DOSQP_USE_FLOAT=${{ matrix.float }} \
                   -DEMBEDDED=${{ matrix.embedded }} \
                   -DOSQP_ALGEBRA_BACKEND='builtin' \
-                  -DLONG=OFF \
+                  -DOSQP_USE_LONG=OFF \
                   -DOSQP_ENABLE_PROFILING=OFF \
                   -DOSQP_ENABLE_INTERRUPT=OFF \
                   -DOSQP_ENABLE_PRINTING=OFF \

@@ -6,21 +6,21 @@
 /***********************************************************
 * Auxiliary functions needed to evaluate ADMM iterations * *
 ***********************************************************/
-# if EMBEDDED != 1
+# if OSQP_EMBEDDED_MODE != 1
 
 /**
  * Compute rho estimate from residuals
  * @param solver Solver
  * @return       rho estimate
  */
-c_float compute_rho_estimate(const OSQPSolver *solver);
+OSQPFloat compute_rho_estimate(const OSQPSolver* solver);
 
 /**
  * Adapt rho value based on current unscaled primal/dual residuals
  * @param solver Solver
  * @return       Exitflag
  */
-c_int adapt_rho(OSQPSolver *solver);
+OSQPInt adapt_rho(OSQPSolver* solver);
 
 /**
  * Set values of rho vector based on constraint types.
@@ -28,7 +28,7 @@ c_int adapt_rho(OSQPSolver *solver);
  * and 0 otherwise.
  * @param solver Solver
  */
-c_int set_rho_vec(OSQPSolver *solver);
+OSQPInt set_rho_vec(OSQPSolver* solver);
 
 /**
  * Update values of rho vector based on updated constraints.
@@ -37,17 +37,17 @@ c_int set_rho_vec(OSQPSolver *solver);
  * @param solver Solver
  * @return       Exitflag
  */
-c_int update_rho_vec(OSQPSolver *solver);
+OSQPInt update_rho_vec(OSQPSolver *solver);
 
-# endif // EMBEDDED
+# endif // OSQP_EMBEDDED_MODE
 
 /**
- * Swap c_float vector pointers
+ * Swap OSQPFloat vector pointers
  * @param a first vector
  * @param b second vector
  */
-void swap_vectors(OSQPVectorf **a,
-                  OSQPVectorf **b);
+void swap_vectors(OSQPVectorf** a,
+                  OSQPVectorf** b);
 
 
 /**
@@ -55,8 +55,8 @@ void swap_vectors(OSQPVectorf **a,
  * @param solver    Solver
  * @param admm_iter Current ADMM iteration
  */
-void update_xz_tilde(OSQPSolver *solver,
-                     c_int       admm_iter);
+void update_xz_tilde(OSQPSolver* solver,
+                     OSQPInt     admm_iter);
 
 
 /**
@@ -64,14 +64,14 @@ void update_xz_tilde(OSQPSolver *solver,
  * Update also delta_x (For for dual infeasibility)
  * @param solver Solver
  */
-void update_x(OSQPSolver *solver);
+void update_x(OSQPSolver* solver);
 
 
 /**
  * Update z (third ADMM step)
  * @param solver Solver
  */
-void update_z(OSQPSolver *solver);
+void update_z(OSQPSolver* solver);
 
 
 /**
@@ -79,7 +79,7 @@ void update_z(OSQPSolver *solver);
  * Update also delta_y to check for primal infeasibility
  * @param solver Solver
  */
-void update_y(OSQPSolver *solver);
+void update_y(OSQPSolver* solver);
 
 
 /**
@@ -88,20 +88,20 @@ void update_y(OSQPSolver *solver);
  * @param  x      Value x
  * @return        Objective function value
  */
-c_float compute_obj_val(const OSQPSolver  *solver,
-                        const OSQPVectorf *x);
+OSQPFloat compute_obj_val(const OSQPSolver*  solver,
+                          const OSQPVectorf* x);
 
 /**
  * Check whether QP has solution
  * @param info OSQPInfo
  */
-c_int has_solution(const OSQPInfo *info);
+OSQPInt has_solution(const OSQPInfo* info);
 
 /**
  * Store the QP solution
  * @param solver Solver
  */
-void store_solution(OSQPSolver *solver);
+void store_solution(OSQPSolver* solver);
 
 
 /**
@@ -111,17 +111,17 @@ void store_solution(OSQPSolver *solver);
  * @param compute_objective  Boolean (if compute the objective or not)
  * @param polishing          Boolean (if called from polish)
  */
-void update_info(OSQPSolver *solver,
-                 c_int       iter,
-                 c_int       compute_objective,
-                 c_int       polishing);
+void update_info(OSQPSolver* solver,
+                 OSQPInt     iter,
+                 OSQPInt     compute_objective,
+                 OSQPInt     polishing);
 
 
 /**
  * Reset solver information (after problem updates)
  * @param info               Information structure
  */
-void reset_info(OSQPInfo *info);
+void reset_info(OSQPInfo* info);
 
 
 /**
@@ -129,8 +129,8 @@ void reset_info(OSQPInfo *info);
  * @param info OSQPInfo
  * @param status_val new status value
  */
-void update_status(OSQPInfo *info,
-                   c_int     status_val);
+void update_status(OSQPInfo* info,
+                   OSQPInt   status_val);
 
 
 /**
@@ -142,11 +142,11 @@ void update_status(OSQPInfo *info,
  * @param  approximate Boolean
  * @return             Residuals check
  */
-c_int check_termination(OSQPSolver *solver,
-                        c_int       approximate);
+OSQPInt check_termination(OSQPSolver* solver,
+                          OSQPInt     approximate);
 
 
-# ifndef EMBEDDED
+# ifndef OSQP_EMBEDDED_MODE
 
 /**
  * Validate problem data
@@ -159,15 +159,15 @@ c_int check_termination(OSQPSolver *solver,
  * @param  n  Problem data (number of variables)
  * @return    Exitflag to check
  */
-c_int validate_data(const csc     *P,
-                    const c_float *q,
-                    const csc     *A,
-                    const c_float *l,
-                    const c_float *u,
-                    c_int          m,
-                    c_int          n);
+OSQPInt validate_data(const OSQPCscMatrix* P,
+                      const OSQPFloat*     q,
+                      const OSQPCscMatrix* A,
+                      const OSQPFloat*     l,
+                      const OSQPFloat*     u,
+                            OSQPInt        m,
+                            OSQPInt        n);
 
-# endif /* ifndef EMBEDDED */
+# endif /* ifndef OSQP_EMBEDDED_MODE */
 
 
 /**
@@ -176,8 +176,8 @@ c_int validate_data(const csc     *P,
  * @param  from_setup Is the function called from osqp_setup?
  * @return            Exitflag to check
  */
-c_int validate_settings(const OSQPSettings *settings,
-                        c_int               from_setup);
+OSQPInt validate_settings(const OSQPSettings* settings,
+                          OSQPInt             from_setup);
 
 
 #endif /* ifndef AUXIL_H */

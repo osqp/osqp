@@ -7,38 +7,39 @@
 
 void test_unconstrained_solve()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Problem settings
-  OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
+  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
 
   // Structures
-  OSQPSolver *solver; // Solver
-  OSQPTestData *data;      // Data
-  unconstrained_sols_data *sols_data;
-
+  OSQPSolver     *tmpSolver = nullptr;
+  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
 
   // Populate data
-  data = generate_problem_unconstrained();
-  sols_data = generate_problem_unconstrained_sols_data();
-
+  unconstrained_problem_ptr data{generate_problem_unconstrained()};
+  unconstrained_sols_data_ptr sols_data{generate_problem_unconstrained_sols_data()};
 
   // Define Solver settings as default
-  osqp_set_default_settings(settings);
+  osqp_set_default_settings(settings.get());
   settings->eps_abs = 1e-05;
   settings->eps_rel = 1e-05;
   settings->verbose = 1;
 
+  /* Test all possible linear system solvers in this test case */
+  settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
+
   // Setup solver
-  exitflag = osqp_setup(&solver, data->P, data->q,
+  exitflag = osqp_setup(&tmpSolver, data->P, data->q,
                         data->A, data->l, data->u,
-                        data->m, data->n, settings);
+                        data->m, data->n, settings.get());
+  solver.reset(tmpSolver);
 
   // Setup correct
   mu_assert("Unconstrained test solve: Setup error!", exitflag == 0);
 
   // Solve Problem first time
-  osqp_solve(solver);
+  osqp_solve(solver.get());
 
   // Compare solver statuses
   mu_assert("Unconstrained test solve: Error in solver status!",
@@ -53,12 +54,4 @@ void test_unconstrained_solve()
   mu_assert("Unconstrained test solve: Error in objective value!",
             c_absval(solver->info->obj_val - sols_data->obj_value_test) <
             TESTS_TOL);
-
-  // Clean solver
-  osqp_cleanup(solver);
-
-  // Cleanup settings and data
-  c_free(settings);
-  clean_problem_unconstrained(data);
-  clean_problem_unconstrained_sols_data(sols_data);
 }

@@ -15,7 +15,6 @@ set(osqp_headers_private
     "${CMAKE_CURRENT_SOURCE_DIR}/private/util.h")
 
 set(osqp_headers_public
-    "${CMAKE_CURRENT_SOURCE_DIR}/public/csc_type.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_api_constants.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_api_functions.h"
@@ -31,7 +30,7 @@ list( APPEND osqp_headers_public "${CMAKE_CURRENT_BINARY_DIR}/public/osqp_config
 set( osqp_headers ${osqp_headers_public} PARENT_SCOPE)
 
 # Add more files that should only be in non-embedded code
-if(NOT DEFINED EMBEDDED)
+if(NOT DEFINED OSQP_EMBEDDED_MODE)
   list(APPEND osqp_headers_private
        "${CMAKE_CURRENT_SOURCE_DIR}/private/polish.h")
 endif()

@@ -24,7 +24,7 @@
 
 CUDA_Handle_t *CUDA_handle = OSQP_NULL;
 
-c_int osqp_algebra_linsys_supported(void) {
+OSQPInt osqp_algebra_linsys_supported(void) {
   /* Only has a PCG (indirect) solver */
   return OSQP_CAPABILITIY_INDIRECT_SOLVER;
 }
@@ -34,7 +34,7 @@ enum osqp_linsys_solver_type osqp_algebra_default_linsys(void) {
   return OSQP_INDIRECT_SOLVER;
 }
 
-c_int osqp_algebra_init_libs(c_int device) {
+OSQPInt osqp_algebra_init_libs(OSQPInt device) {
   /* This is to prevent a memory leak when multiple OSQP objects are created */
   if (CUDA_handle) return 0;
 
@@ -57,14 +57,14 @@ const char* osqp_algebra_name(void) {
 
 // Initialize linear system solver structure
 // NB: Only the upper triangular part of P is filled
-c_int osqp_algebra_init_linsys_solver(LinSysSolver      **s,
-                                      const OSQPMatrix   *P,
-                                      const OSQPMatrix   *A,
-                                      const OSQPVectorf  *rho_vec,
-                                      const OSQPSettings *settings,
-                                      c_float            *scaled_prim_res,
-                                      c_float            *scaled_dual_res,
-                                      c_int               polishing) {
+OSQPInt osqp_algebra_init_linsys_solver(LinSysSolver**      s,
+                                        const OSQPMatrix*   P,
+                                        const OSQPMatrix*   A,
+                                        const OSQPVectorf*  rho_vec,
+                                        const OSQPSettings* settings,
+                                        OSQPFloat*          scaled_prim_res,
+                                        OSQPFloat*          scaled_dual_res,
+                                        OSQPInt             polishing) {
 
   switch (settings->linsys_solver) {
   default:

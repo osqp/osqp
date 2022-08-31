@@ -24,11 +24,11 @@ GLOBAL size_t AMD_aat	/* returns nz in A+A' */
     const Int Ai [ ],
     Int Len [ ],	/* Len [j]: length of column j of A+A', excl diagonal*/
     Int Tp [ ],		/* workspace of size n */
-    c_float Info [ ]
+    OSQPFloat Info [ ]
 )
 {
     Int p1, p2, p, i, j, pj, pj2, k, nzdiag, nzboth, nz ;
-    c_float sym ;
+    OSQPFloat sym ;
     size_t nzaat ;
 
 #ifndef NDEBUG
@@ -37,7 +37,7 @@ GLOBAL size_t AMD_aat	/* returns nz in A+A' */
     ASSERT (AMD_valid (n, n, Ap, Ai) == AMD_OK) ;
 #endif
 
-    if (Info != (c_float *) NULL)
+    if (Info != (OSQPFloat *) NULL)
     {
 	/* clear the Info array, if it exists */
 	for (i = 0 ; i < AMD_INFO ; i++)
@@ -156,7 +156,7 @@ GLOBAL size_t AMD_aat	/* returns nz in A+A' */
     }
     else
     {
-	sym = (2 * (c_float) nzboth) / ((c_float) (nz - nzdiag)) ;
+	sym = (2 * (OSQPFloat) nzboth) / ((OSQPFloat) (nz - nzdiag)) ;
     }
 
     nzaat = 0 ;
@@ -166,11 +166,11 @@ GLOBAL size_t AMD_aat	/* returns nz in A+A' */
     }
 
     AMD_DEBUG1 (("AMD nz in A+A', excluding diagonal (nzaat) = %g\n",
-	(c_float) nzaat)) ;
+	(OSQPFloat) nzaat)) ;
     AMD_DEBUG1 (("   nzboth: "ID" nz: "ID" nzdiag: "ID" symmetry: %g\n",
 		nzboth, nz, nzdiag, sym)) ;
 
-    if (Info != (c_float *) NULL)
+    if (Info != (OSQPFloat *) NULL)
     {
 	Info [AMD_STATUS] = AMD_OK ;
 	Info [AMD_N] = n ;

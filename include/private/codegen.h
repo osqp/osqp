@@ -4,19 +4,19 @@
 # include "osqp_api_types.h"
 
 
-c_int codegen_inc(OSQPSolver *solver,
-                  const char *output_dir,
-                  const char *file_prefix);
+OSQPInt codegen_inc(OSQPSolver* solver,
+                    const char* output_dir,
+                    const char* file_prefix);
 
-c_int codegen_src(OSQPSolver *solver,
-                  const char *output_dir,
-                  const char *file_prefix,
-                  c_int       embedded);
+OSQPInt codegen_src(OSQPSolver* solver,
+                    const char* output_dir,
+                    const char* file_prefix,
+                    OSQPInt     embedded);
 
-c_int codegen_defines(const char         *output_dir,
-                      OSQPCodegenDefines *defines);
+OSQPInt codegen_defines(const char*         output_dir,
+                        OSQPCodegenDefines* defines);
 
-c_int codegen_example(const char *output_dir,
-                      const char *file_prefix);
+OSQPInt codegen_example(const char* output_dir,
+                        const char* file_prefix);
 
 #endif /* ifndef CODEGEN_H */

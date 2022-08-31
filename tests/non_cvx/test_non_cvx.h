@@ -7,7 +7,7 @@
 
 void test_non_cvx_solve()
 {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   // Problem settings
   OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));

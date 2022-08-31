@@ -2,13 +2,9 @@
 #include "algebra_impl.h"
 #include "printing.h"
 
-#if EMBEDDED != 1
+#if OSQP_EMBEDDED_MODE != 1
 #include "kkt.h"
 #endif
-
-#define MKL_INT c_int
-//#define MKL_INTERFACE_LP64  0x0
-//#define MKL_INTERFACE_ILP64 0x1
 
 #include "mkl_service.h"
 #include "mkl_pardiso.h"
@@ -19,19 +15,19 @@
 #define PARDISO_SOLVE     (33)
 #define PARDISO_CLEANUP   (-1)
 
-void update_settings_linsys_solver_pardiso(pardiso_solver     *s,
-                                           const OSQPSettings *settings) {
+void update_settings_linsys_solver_pardiso(pardiso_solver*     s,
+                                           const OSQPSettings* settings) {
   return;
 }
 
 // Warm starting not used by direct solvers
-void warm_start_linsys_solver_pardiso(pardiso_solver    *s,
-                                      const OSQPVectorf *x) {
+void warm_start_linsys_solver_pardiso(pardiso_solver*    s,
+                                      const OSQPVectorf* x) {
   return;
 }
 
 // Free LDL Factorization structure
-void free_linsys_solver_pardiso(pardiso_solver *s) {
+void free_linsys_solver_pardiso(pardiso_solver* s) {
   if (s) {
 
     // Free pardiso solver using internal function
@@ -62,20 +58,20 @@ void free_linsys_solver_pardiso(pardiso_solver *s) {
 
 
 // Initialize factorization structure
-c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
-                                 const OSQPMatrix   *P,
-                                 const OSQPMatrix   *A,
-                                 const OSQPVectorf  *rho_vec,
-                                 const OSQPSettings *settings,
-                                 c_int               polishing) {
+OSQPInt init_linsys_solver_pardiso(pardiso_solver**    sp,
+                                   const OSQPMatrix*   P,
+                                   const OSQPMatrix*   A,
+                                   const OSQPVectorf*  rho_vec,
+                                   const OSQPSettings* settings,
+                                   OSQPInt             polishing) {
 
-  c_int i;            // loop counter
-  c_int nnzKKT;       // Number of nonzeros in KKT
-  c_int m, n;         // Dimensions of A
-  c_int n_plus_m;     // n_plus_m dimension
-  c_float* rhov;      // used for direct access to rho_vec data when polishing=false
+  OSQPInt    i;         // loop counter
+  OSQPInt    nnzKKT;    // Number of nonzeros in KKT
+  OSQPInt    m, n;      // Dimensions of A
+  OSQPInt    n_plus_m;  // n_plus_m dimension
+  OSQPFloat* rhov;      // used for direct access to rho_vec data when polishing=false
 
-  c_float sigma = settings->sigma;
+  OSQPFloat sigma = settings->sigma;
 
   // Allocate private structure to store KKT factorization
   pardiso_solver *s = c_calloc(1, sizeof(pardiso_solver));
@@ -108,14 +104,14 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
   s->type = OSQP_DIRECT_SOLVER;
 
   // Working vector
-  s->bp = (c_float *)c_malloc(sizeof(c_float) * n_plus_m);
+  s->bp = (OSQPFloat *)c_malloc(sizeof(OSQPFloat) * n_plus_m);
 
   // Solution vector
-  s->sol = (c_float *)c_malloc(sizeof(c_float) * n_plus_m);
+  s->sol = (OSQPFloat *)c_malloc(sizeof(OSQPFloat) * n_plus_m);
 
   // Parameter vector
   if (rho_vec) {
-    s->rho_inv_vec = (c_float *)c_malloc(sizeof(c_float) * n_plus_m);
+    s->rho_inv_vec = (OSQPFloat *)c_malloc(sizeof(OSQPFloat) * n_plus_m);
   }
   // else it is NULL
 
@@ -129,9 +125,9 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
   else { // Called from ADMM algorithm
 
     // Allocate vectors of indices
-    s->PtoKKT   = c_malloc(P->csc->p[n] * sizeof(c_int));
-    s->AtoKKT   = c_malloc(A->csc->p[n] * sizeof(c_int));
-    s->rhotoKKT = c_malloc(m * sizeof(c_int));
+    s->PtoKKT   = c_malloc(P->csc->p[n] * sizeof(OSQPInt));
+    s->AtoKKT   = c_malloc(A->csc->p[n] * sizeof(OSQPInt));
+    s->rhotoKKT = c_malloc(m * sizeof(OSQPInt));
 
     // Use s->rho_inv_vec for storing param2 = rho_inv_vec
     if (rho_vec) {
@@ -158,8 +154,8 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
   } else {
     // Adjust indexing for Pardiso
     nnzKKT = s->KKT->p[n_plus_m];
-    s->KKT_i = c_malloc((nnzKKT) * sizeof(c_int));
-    s->KKT_p = c_malloc((n_plus_m + 1) * sizeof(c_int));
+    s->KKT_i = c_malloc((nnzKKT) * sizeof(OSQPInt));
+    s->KKT_p = c_malloc((n_plus_m + 1) * sizeof(OSQPInt));
 
     for(i = 0; i < nnzKKT; i++){
       s->KKT_i[i] = s->KKT->i[i] + 1;
@@ -193,7 +189,7 @@ c_int init_linsys_solver_pardiso(pardiso_solver    **sp,
   s->iparm[34] = 0;     // Use Fortran-style indexing for indices
   /* s->iparm[34] = 1;     // Use C-style indexing for indices */
 
-#ifdef DFLOAT
+#ifdef OSQP_USE_FLOAT
   s->iparm[27] = 1;  // Input arrays and all internal arrays must be presented in single precision
 #else
   s->iparm[27] = 0;  // Input arrays and all internal arrays must be presented in double precision
@@ -239,14 +235,14 @@ const char* name_pardiso() {
 }
 
 // Returns solution to linear system  Ax = b with solution stored in b
-c_int solve_linsys_pardiso(pardiso_solver *s,
-                           OSQPVectorf    *b,
-                           c_int           admm_iter) {
+OSQPInt solve_linsys_pardiso(pardiso_solver* s,
+                             OSQPVectorf*    b,
+                             OSQPInt         admm_iter) {
 
-  c_int j;
-  c_int n = s->n;
-  c_int m = s->m;
-  c_float* bv = b->values;
+  OSQPInt    j;
+  OSQPInt    n  = s->n;
+  OSQPInt    m  = s->m;
+  OSQPFloat* bv = b->values;
 
   // Back substitution and iterative refinement
   s->phase = PARDISO_SOLVE;
@@ -280,13 +276,13 @@ c_int solve_linsys_pardiso(pardiso_solver *s,
 }
 
 // Update solver structure with new P and A
-c_int update_linsys_solver_matrices_pardiso(pardiso_solver   *s,
-                                            const OSQPMatrix *P,
-                                            const c_int* Px_new_idx,
-                                            c_int P_new_n,
-                                            const OSQPMatrix *A,
-                                            const c_int* Ax_new_idx,
-                                            c_int A_new_n) {
+OSQPInt update_linsys_solver_matrices_pardiso(pardiso_solver*   s,
+                                              const OSQPMatrix* P,
+                                              const OSQPInt*    Px_new_idx,
+                                              OSQPInt           P_new_n,
+                                              const OSQPMatrix* A,
+                                              const OSQPInt*    Ax_new_idx,
+                                              OSQPInt           A_new_n) {
 
   // Update KKT matrix with new P
   update_KKT_P(s->KKT, P->csc, Px_new_idx, P_new_n, s->PtoKKT, s->sigma, 1);
@@ -305,13 +301,13 @@ c_int update_linsys_solver_matrices_pardiso(pardiso_solver   *s,
 }
 
 
-c_int update_linsys_solver_rho_vec_pardiso(pardiso_solver    *s,
-                                           const OSQPVectorf *rho_vec,
-                                           c_float            rho_sc) {
+OSQPInt update_linsys_solver_rho_vec_pardiso(pardiso_solver*    s,
+                                             const OSQPVectorf* rho_vec,
+                                             OSQPFloat          rho_sc) {
 
-  c_int i;
-  c_int m = s->m;
-  c_float* rhov;
+  OSQPInt    i;
+  OSQPInt    m = s->m;
+  OSQPFloat* rhov;
 
   // Update internal rho_inv_vec
   if (s->rho_inv_vec != OSQP_NULL) {

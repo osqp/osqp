@@ -86,8 +86,8 @@ struct SuiteSparse_config_struct
 #else
     int (*printf_func) (const char *, ...) ;    /* pointer to printf */
 #endif
-    c_float (*hypot_func) (c_float, c_float) ;     /* pointer to hypot */
-    int (*divcomplex_func) (c_float, c_float, c_float, c_float, c_float *, c_float *);
+    OSQPFloat (*hypot_func) (OSQPFloat, OSQPFloat) ;     /* pointer to hypot */
+    int (*divcomplex_func) (OSQPFloat, OSQPFloat, OSQPFloat, OSQPFloat, OSQPFloat *, OSQPFloat *);
 } ;
 
 extern struct SuiteSparse_config_struct SuiteSparse_config ;
@@ -121,28 +121,28 @@ void *SuiteSparse_free      /* always returns NULL */
 
 void SuiteSparse_tic    /* start the timer */
 (
-    c_float tic [2]      /* output, contents undefined on input */
+    OSQPFloat tic [2]      /* output, contents undefined on input */
 ) ;
 
-c_float SuiteSparse_toc  /* return time in seconds since last tic */
+OSQPFloat SuiteSparse_toc  /* return time in seconds since last tic */
 (
-    c_float tic [2]      /* input: from last call to SuiteSparse_tic */
+    OSQPFloat tic [2]      /* input: from last call to SuiteSparse_tic */
 ) ;
 
-c_float SuiteSparse_time  /* returns current wall clock time in seconds */
+OSQPFloat SuiteSparse_time  /* returns current wall clock time in seconds */
 (
     void
 ) ;
 
 /* returns sqrt (x^2 + y^2), computed reliably */
-c_float SuiteSparse_hypot (c_float x, c_float y) ;
+OSQPFloat SuiteSparse_hypot (OSQPFloat x, OSQPFloat y) ;
 
 /* complex division of c = a/b */
 int SuiteSparse_divcomplex
 (
-    c_float ar, c_float ai,	/* real and imaginary parts of a */
-    c_float br, c_float bi,	/* real and imaginary parts of b */
-    c_float *cr, c_float *ci	/* real and imaginary parts of c */
+    OSQPFloat ar, OSQPFloat ai,	/* real and imaginary parts of a */
+    OSQPFloat br, OSQPFloat bi,	/* real and imaginary parts of b */
+    OSQPFloat *cr, OSQPFloat *ci	/* real and imaginary parts of c */
 ) ;
 
 /* OSQP: disabling this timing code */

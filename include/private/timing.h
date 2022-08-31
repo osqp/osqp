@@ -26,14 +26,14 @@ void OSQPTimer_free(OSQPTimer* t);
  * Start timer
  * @param t Timer object
  */
-void osqp_tic(OSQPTimer *t);
+void osqp_tic(OSQPTimer* t);
 
 /**
  * Report time
  * @param  t Timer object
  * @return   Reported time
  */
-c_float osqp_toc(OSQPTimer *t);
+OSQPFloat osqp_toc(OSQPTimer* t);
 
 #endif /* #ifdef OSQP_ENABLE_PROFILING */
 

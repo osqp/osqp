@@ -16,7 +16,7 @@
 #include "data_unconstrained_embedded_1_workspace.h"
 
 int main() {
-  c_int exitflag;
+  OSQPInt exitflag;
 
   printf( "Embedded test program for embedded mode 1 settings.\n");
 
