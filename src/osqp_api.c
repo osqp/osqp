@@ -17,6 +17,9 @@
 
 #ifndef OSQP_EMBEDDED_MODE
 # include "polish.h"
+#endif
+
+#ifdef OSQP_ENABLE_DERIVATIVES
 # include "derivative.h"
 #endif
 
@@ -39,6 +42,10 @@ OSQPInt osqp_capabilities(void) {
 
 #ifdef OSQP_CODEGEN
   capabilities |= OSQP_CAPABILITIY_CODEGEN;
+#endif
+
+#ifdef OSQP_ENABLE_DERIVATIVES
+    capabilities |= OSQP_CAPABILITIY_DERIVATIVES;
 #endif
 
   return capabilities;
@@ -1205,7 +1212,8 @@ OSQPInt osqp_codegen(OSQPSolver*         solver,
                     || (defines->float_type != 0       && defines->float_type != 1)
                     || (defines->printing_enable != 0  && defines->printing_enable != 1)
                     || (defines->profiling_enable != 0 && defines->profiling_enable != 1)
-                    || (defines->interrupt_enable != 0 && defines->interrupt_enable != 1)) {
+                    || (defines->interrupt_enable != 0 && defines->interrupt_enable != 1)
+                    || (defines->derivatives_enable != 0 && defines->derivatives_enable != 1)) {
     return osqp_error(OSQP_CODEGEN_DEFINES_ERROR);
   }
 
@@ -1243,7 +1251,7 @@ void csc_set_data(OSQPCscMatrix* M,
 /****************************
 * Derivative functions
 ****************************/
-#ifndef OSQP_EMBEDDED_MODE
+#ifdef OSQP_ENABLE_DERIVATIVES
 OSQPInt osqp_adjoint_derivative(OSQPSolver*  solver,
                                 OSQPFloat*     dx,
                                 OSQPFloat*     dy_l,

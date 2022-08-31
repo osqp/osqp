@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
   OSQPInt   m = 3;
 
   /* Exitflag */
-  OSQPInt exitflag;
+  OSQPInt exitflag = 0;
 
   /* Solver, settings, matrices */
   OSQPSolver*    solver   = NULL;
@@ -71,24 +71,45 @@ int main(int argc, char *argv[]) {
   /* Setup solver */
   exitflag = osqp_setup(&solver, P, q, A, l, u, m, n, settings);
 
-  /* Test codegen */
-  OSQPCodegenDefines *defs = (OSQPCodegenDefines *)malloc(sizeof(OSQPCodegenDefines));
+  if(exitflag) {
+    printf( "  OSQP errored during setup: %s\n", osqp_error_message(exitflag) );
+    return exitflag;
+  }
 
-  defs->float_type = 0;        /* Use doubles */
-  defs->printing_enable = 0;   /* Don't enable printing */
-  defs->profiling_enable = 0;  /* Don't enable profiling */
-  defs->interrupt_enable = 0;  /* Don't enable interrupts */
+  /* Test codegen */
+  OSQPCodegenDefines *defs = (OSQPCodegenDefines *)calloc(1, sizeof(OSQPCodegenDefines));
+
+  defs->float_type = 0;         /* Use doubles */
+  defs->printing_enable = 0;    /* Don't enable printing */
+  defs->profiling_enable = 0;   /* Don't enable profiling */
+  defs->interrupt_enable = 0;   /* Don't enable interrupts */
+  defs->derivatives_enable = 0; /* Don't enable derivatives */
 
   /* Sample with vector update only */
   defs->embedded_mode = 1;
-  osqp_codegen(solver, vecDirPath, "mpc_vec_", defs);
+  exitflag = osqp_codegen(solver, vecDirPath, "mpc_vec_", defs);
+
+  if(exitflag) {
+    printf( "  OSQP errored during vector code genreation: %s\n", osqp_error_message(exitflag) );
+    return exitflag;
+  }
 
   /* Sample with both vector and matrix updates */
   defs->embedded_mode = 2;
-  osqp_codegen(solver, matDirPath, "mpc_mat_", defs);
+  exitflag = osqp_codegen(solver, matDirPath, "mpc_mat_", defs);
+
+  if(exitflag) {
+    printf( "  OSQP errored during matrix code genreation: %s\n", osqp_error_message(exitflag) );
+    return exitflag;
+  }
 
   /* Solve problem */
-  if (!exitflag) exitflag = osqp_solve(solver);
+  exitflag = osqp_solve(solver);
+
+  if(exitflag) {
+    printf( "  OSQP errored during solve: %s\n", osqp_error_message(exitflag) );
+    return exitflag;
+  }
 
   /* Cleanup */
   osqp_cleanup(solver);

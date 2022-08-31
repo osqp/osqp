@@ -247,7 +247,11 @@ OSQP_API OSQPInt osqp_update_settings(OSQPSolver*         solver,
 OSQP_API OSQPInt osqp_update_rho(OSQPSolver* solver,
                                 OSQPFloat    rho_new);
 
-// ------------------ Derivative stuff -----------------
+# endif /* if EMBEDDED != 1 */
+
+
+/* ------------------ Derivative stuff ----------------- */
+#ifdef OSQP_ENABLE_DERIVATIVES
 OSQP_API OSQPInt osqp_adjoint_derivative(OSQPSolver*    solver,
                                          OSQPFloat*     dx,
                                          OSQPFloat*     dy_l,
@@ -257,11 +261,8 @@ OSQP_API OSQPInt osqp_adjoint_derivative(OSQPSolver*    solver,
                                          OSQPCscMatrix* dA,
                                          OSQPFloat*     dl,
                                          OSQPFloat*     du);
-// ------------------ Derivative stuff -----------------
-
-# endif /* if OSQP_EMBEDDED_MODE != 1 */
-
-
+#endif /* OSQP_ENABLE_DERIVATIVES */
+/* ------------------ Derivative stuff ----------------- */
 
 # ifdef OSQP_CODEGEN
 
