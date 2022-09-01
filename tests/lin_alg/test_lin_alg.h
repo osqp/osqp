@@ -125,6 +125,72 @@ void test_vec_operations() {
   //   OSQPVectorf_norm_inf_diff(result, ref) < TESTS_TOL);
 }
 
+void test_mat_equality() {
+  lin_alg_sols_data_ptr data{generate_problem_lin_alg_sols_data()};
+
+  // Import data matrices (4 copies) and vector data
+  // Matrices used for tests
+  OSQPMatrix_ptr A{OSQPMatrix_new_from_csc(data->test_mat_ops_A, 0)}; //asymmetric
+
+  OSQPMatrix_ptr vA{OSQPMatrix_new_from_csc(data->test_mat_vec_A,0)}; //asymmetric
+  OSQPMatrix_ptr A4{OSQPMatrix_new_from_csc(data->test_submat_A4,0)}; //asymmetric
+  OSQPMatrix_ptr A5{OSQPMatrix_new_from_csc(data->test_submat_A5,0)}; //asymmetric
+
+  SECTION("Matrix equality") {
+    mu_assert("Linear algebra tests: error in matrix equality - same matrix not equal",
+              OSQPMatrix_is_eq(vA.get(), vA.get(), TESTS_TOL));
+
+    mu_assert("Linear algebra tests: error in matrix equality - similar matrices not equal",
+              OSQPMatrix_is_eq(vA.get(), A5.get(), TESTS_TOL));
+  }
+
+  SECTION("Row/column count differents") {
+    mu_assert("Linear algebra tests: error in matrix equality - different row count",
+              OSQPMatrix_is_eq(vA.get(), A4.get(), TESTS_TOL) == 0);
+
+    mu_assert("Linear algebra tests: error in matrix equality - different column count",
+              OSQPMatrix_is_eq(vA.get(), A.get(), TESTS_TOL) == 0);
+  }
+
+  SECTION("All values different") {
+    OSQPMatrix_mult_scalar(vA.get(), 3.0);
+
+    mu_assert("Linear algebra tests: error in matrix equality - values changed",
+              OSQPMatrix_is_eq(vA.get(), A5.get(), TESTS_TOL) == 0);
+  }
+
+  SECTION("Initial values different") {
+    std::unique_ptr<OSQPFloat[]> mulval(new OSQPFloat[4]);
+    mulval[0] = 4.0;
+    mulval[1] = 1.0;
+    mulval[2] = 1.0;
+    mulval[3] = 0.0;
+
+    OSQPVectorf_ptr mulvec{OSQPVectorf_new(mulval.get(), 4)};
+
+    OSQPMatrix_lmult_diag(vA.get(), mulvec.get());
+
+    mu_assert("Linear algebra tests: error in matrix equality - initial values changed",
+              OSQPMatrix_is_eq(vA.get(), A5.get(), TESTS_TOL) == 0);
+  }
+
+  SECTION("Final values different") {
+    std::unique_ptr<OSQPFloat[]> mulval(new OSQPFloat[4]);
+    mulval[0] = 1.0;
+    mulval[1] = 1.0;
+    mulval[2] = 1.0;
+    mulval[3] = 4.0;
+
+    OSQPVectorf_ptr mulvec{OSQPVectorf_new(mulval.get(), 4)};
+
+    OSQPMatrix_lmult_diag(vA.get(), mulvec.get());
+
+    mu_assert("Linear algebra tests: error in matrix equality - final values changed",
+              OSQPMatrix_is_eq(vA.get(), A5.get(), TESTS_TOL) == 0);
+  }
+
+}
+
 void test_mat_operations() {
   lin_alg_sols_data_ptr data{generate_problem_lin_alg_sols_data()};
 

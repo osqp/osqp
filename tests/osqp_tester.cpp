@@ -33,6 +33,9 @@ TEST_CASE( "test_lin_alg", "[multi-file:1]" ) {
         test_constr_sparse_mat();
     }
 #endif
+    SECTION( "test_mat_equality" ) {
+        test_mat_equality();
+    }
     SECTION( "test_vec_operations" ) {
         test_vec_operations();
     }
