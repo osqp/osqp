@@ -75,16 +75,18 @@ target_link_libraries(osqp_tester osqpstatic Catch2::Catch2 ${osqplib_link_libs}
 add_test(NAME osqp_tester COMMAND osqp_tester)
 
 # ----------------------------------------------
-# osqp_tester_custom_memory
+# osqp_tester_custom_memory (only use with builtin algebra)
 # ----------------------------------------------
-add_executable(
-  osqp_tester_custom_memory
-  osqp_tester.cpp osqp_tester.h ${headers} ${codegen_headers} ${CMAKE_CURRENT_SOURCE_DIR}/custom_memory/custom_memory.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/custom_memory/custom_memory.c)
-target_include_directories(osqp_tester_custom_memory PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${osqplib_includes})
-target_link_libraries(osqp_tester_custom_memory osqpstatic Catch2::Catch2 ${osqplib_link_libs})
+if(OSQP_ALGEBRA_BUILTIN)
+  add_executable(
+    osqp_tester_custom_memory
+    osqp_tester.cpp osqp_tester.h ${headers} ${codegen_headers} ${CMAKE_CURRENT_SOURCE_DIR}/custom_memory/custom_memory.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/custom_memory/custom_memory.c)
+  target_include_directories(osqp_tester_custom_memory PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${osqplib_includes})
+  target_link_libraries(osqp_tester_custom_memory osqpstatic Catch2::Catch2 ${osqplib_link_libs})
 
-add_test(NAME osqp_tester_custom_memory COMMAND osqp_tester_custom_memory)
+  add_test(NAME osqp_tester_custom_memory COMMAND osqp_tester_custom_memory)
+endif()
 
 # ----------------------------------------------
 # Create a folder to store the test codes
