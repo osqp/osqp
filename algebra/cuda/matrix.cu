@@ -29,6 +29,13 @@
  *                           API Functions                                     *
  *******************************************************************************/
 
+OSQPInt OSQPMatrix_is_eq(const OSQPMatrix* A,
+                         const OSQPMatrix* B,
+                         OSQPFloat         tol) {
+
+  return cuda_csr_is_eq(A->S, B->S, tol);
+}
+
 OSQPMatrix* OSQPMatrix_new_from_csc(const OSQPCscMatrix* M,
                                           OSQPInt        is_triu) {
 

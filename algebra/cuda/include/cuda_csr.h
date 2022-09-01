@@ -51,6 +51,10 @@ void cuda_mat_update_A(const OSQPFloat* Ax,
 
 void cuda_mat_free(csr* mat);
 
+OSQPInt cuda_csr_is_eq(const csr*      A,
+                       const csr*      B,
+                             OSQPFloat tol);
+
 void cuda_submat_byrows(const csr*     A,
                         const OSQPInt* d_rows,
                               csr**    Ared,
