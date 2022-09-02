@@ -22,8 +22,12 @@ typedef struct mklcg_solver_ {
   OSQPInt (*adjoint_derivative)(struct mklcg_solver_* self);
   void    (*free)(struct mklcg_solver_* self);
   OSQPInt (*update_matrices)(struct mklcg_solver_* self,
-                             const OSQPMatrix* P,
-                             const OSQPMatrix* A);
+                             const  OSQPMatrix*    P,
+                             const  OSQPInt*       Px_new_idx,
+                                    OSQPInt        P_new_n,
+                             const  OSQPMatrix*    A,
+                             const  OSQPInt*       Ax_new_idx,
+                                    OSQPInt        A_new_n);
   OSQPInt (*update_rho_vec)(struct mklcg_solver_* self,
                             const OSQPVectorf* rho_vec,
                                   OSQPFloat    rho_sc);

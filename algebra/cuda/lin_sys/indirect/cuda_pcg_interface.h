@@ -54,7 +54,11 @@ typedef struct cudapcg_solver_ {
 
   OSQPInt (*update_matrices)(struct cudapcg_solver_* self,
                              const  OSQPMatrix*      P,
-                             const  OSQPMatrix*      A);
+                             const  OSQPInt*         Px_new_idx,
+                                    OSQPInt          P_new_n,
+                             const  OSQPMatrix*      A,
+                             const  OSQPInt*         Ax_new_idx,
+                                    OSQPInt          A_new_n);
 
   OSQPInt (*update_rho_vec)(struct cudapcg_solver_* self,
                             const  OSQPVectorf*     rho_vec,
