@@ -160,13 +160,14 @@ void test_mat_equality() {
   }
 
   SECTION("Initial values different") {
-    std::unique_ptr<OSQPFloat[]> mulval(new OSQPFloat[4]);
+    std::unique_ptr<OSQPFloat[]> mulval(new OSQPFloat[5]);
     mulval[0] = 4.0;
     mulval[1] = 1.0;
     mulval[2] = 1.0;
-    mulval[3] = 0.0;
+    mulval[3] = 1.0;
+    mulval[4] = 1.0;
 
-    OSQPVectorf_ptr mulvec{OSQPVectorf_new(mulval.get(), 4)};
+    OSQPVectorf_ptr mulvec{OSQPVectorf_new(mulval.get(), 5)};
 
     OSQPMatrix_lmult_diag(vA.get(), mulvec.get());
 
@@ -175,13 +176,14 @@ void test_mat_equality() {
   }
 
   SECTION("Final values different") {
-    std::unique_ptr<OSQPFloat[]> mulval(new OSQPFloat[4]);
+    std::unique_ptr<OSQPFloat[]> mulval(new OSQPFloat[5]);
     mulval[0] = 1.0;
     mulval[1] = 1.0;
     mulval[2] = 1.0;
-    mulval[3] = 4.0;
+    mulval[3] = 1.0;
+    mulval[4] = 4.0;
 
-    OSQPVectorf_ptr mulvec{OSQPVectorf_new(mulval.get(), 4)};
+    OSQPVectorf_ptr mulvec{OSQPVectorf_new(mulval.get(), 5)};
 
     OSQPMatrix_lmult_diag(vA.get(), mulvec.get());
 
