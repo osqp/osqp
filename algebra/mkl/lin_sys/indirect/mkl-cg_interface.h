@@ -123,7 +123,11 @@ void warm_start_linys_mklcg(mklcg_solver*      s,
  */
 OSQPInt update_matrices_linsys_mklcg(mklcg_solver* s,
                                      const OSQPMatrix* P,
-                                     const OSQPMatrix* A);
+                                     const OSQPInt*    Px_new_idx,
+                                     OSQPInt           P_new_n,
+                                     const OSQPMatrix* A,
+                                     const OSQPInt*    Ax_new_idx,
+                                     OSQPInt           A_new_n);
 
 
 /**

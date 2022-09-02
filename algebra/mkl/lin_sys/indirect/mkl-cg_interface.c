@@ -198,7 +198,11 @@ void warm_start_linys_mklcg(struct mklcg_solver_* self,
 
 OSQPInt update_matrices_linsys_mklcg(mklcg_solver*     s,
                                      const OSQPMatrix* P,
-                                     const OSQPMatrix* A) {
+                                     const OSQPInt*    Px_new_idx,
+                                     OSQPInt           P_new_n,
+                                     const OSQPMatrix* A,
+                                     const OSQPInt*    Ax_new_idx,
+                                     OSQPInt           A_new_n) {
   s->P = *(OSQPMatrix**)(&P);
   s->A = *(OSQPMatrix**)(&A);
   return 0;

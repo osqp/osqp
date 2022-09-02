@@ -119,11 +119,8 @@ void test_update() {
   settings->eps_abs  = 1e-05;
   settings->eps_rel  = 1e-05;
 
-/* TODO: Fix segfault in MKL algebra when running a matrix update */
-#ifndef OSQP_ALGEBRA_MKL
   /* Test all possible linear system solvers in this test case */
   settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
-#endif
 
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->test_solve_Pu, data->test_solve_q,
