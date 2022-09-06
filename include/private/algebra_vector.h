@@ -128,11 +128,6 @@ void OSQPVectorf_minus(OSQPVectorf*      x,
                       const OSQPVectorf* a,
                       const OSQPVectorf* b);
 
-/* x = a * b (elementwise).  Set x == a for x *= b. */
-void OSQPVectorf_mult(OSQPVectorf*       x,
-                      const OSQPVectorf* a,
-                      const OSQPVectorf* b);
-
 /* x = sca*a + scb*b.  Set (x == a, sca==1.) for x += scb*b. */
 void OSQPVectorf_add_scaled(OSQPVectorf*       x,
                             OSQPFloat          sca,

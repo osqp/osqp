@@ -374,28 +374,6 @@ void OSQPVectorf_minus(OSQPVectorf*       x,
   }
 }
 
-void OSQPVectorf_mult(OSQPVectorf*        x,
-                       const OSQPVectorf* a,
-                       const OSQPVectorf* b) {
-    OSQPInt i;
-    OSQPInt length = a->length;
-
-    OSQPFloat* av = a->values;
-    OSQPFloat* bv = b->values;
-    OSQPFloat* xv = x->values;
-
-    if (x == a) {
-        for (i = 0; i < length; i++) {
-            xv[i] *= bv[i];
-        }
-    }
-    else {
-        for (i = 0; i < length; i++) {
-            xv[i] = av[i] * bv[i];
-        }
-    }
-}
-
 void OSQPVectorf_add_scaled(OSQPVectorf*       x,
                             OSQPFloat          sca,
                             const OSQPVectorf* a,
