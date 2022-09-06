@@ -10,7 +10,13 @@ add_executable(lin_alg_tester
                lin_alg_data.cpp
                test_mat_vec.cpp
                test_matrix.cpp
-               test_vector.cpp
+
+               # Vector tests
+               testcases/test_vector_creation.cpp
+               testcases/test_vector_comparisons.cpp
+               testcases/test_vector_math_ops.cpp
+
+               # Other utilities that are needed
                ${CMAKE_CURRENT_SOURCE_DIR}/../utils/test_utils.cpp)
 
 target_include_directories(lin_alg_tester PRIVATE

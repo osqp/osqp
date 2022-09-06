@@ -14,17 +14,30 @@ test_sp_matrix_A = sparse.csc_matrix(test_sp_matrix_Adns)
 
 # Test vector operations
 test_vec_ops_n = 10
+test_vec_ops_zero = np.zeros(test_vec_ops_n)
 test_vec_ops_v1 = rg.standard_normal(test_vec_ops_n)
 test_vec_ops_v2 = rg.standard_normal(test_vec_ops_n)
+test_vec_ops_v3 = rg.standard_normal(test_vec_ops_n)
 test_vec_ops_sc1 = rg.standard_normal()
 test_vec_ops_sc2 = rg.standard_normal()
+test_vec_ops_sc3 = rg.standard_normal()
 test_vec_ops_norm_inf = np.linalg.norm(test_vec_ops_v1, np.inf)
 test_vec_ops_norm_inf_diff = np.linalg.norm(test_vec_ops_v1 - test_vec_ops_v2,
                                             np.inf)
+test_vec_ops_add = test_vec_ops_v1 + test_vec_ops_v2
+test_vec_ops_sub = test_vec_ops_v1 - test_vec_ops_v2
 test_vec_ops_add_scaled = test_vec_ops_sc1 * test_vec_ops_v1 + test_vec_ops_sc2 * test_vec_ops_v2
+test_vec_ops_add_scaled_inc = test_vec_ops_v1 + test_vec_ops_sc2 * test_vec_ops_v2
+test_vec_ops_add_scaled3 = test_vec_ops_sc1 * test_vec_ops_v1 + test_vec_ops_sc2 * test_vec_ops_v2 + test_vec_ops_sc3 * test_vec_ops_v3
+test_vec_ops_add_scaled3_inc = test_vec_ops_v1 + test_vec_ops_sc2 * test_vec_ops_v2 + test_vec_ops_sc3 * test_vec_ops_v3
 test_vec_ops_ew_reciprocal = np.reciprocal(test_vec_ops_v1)
 test_vec_ops_vec_prod = test_vec_ops_v1@test_vec_ops_v2
 test_vec_ops_ew_max_vec = np.maximum(test_vec_ops_v1, test_vec_ops_v2)
+test_vec_subvec_ind0 = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+test_vec_subvec_ind5 = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
+test_vec_subvec_ind10 = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+test_vec_subvec_0 = test_vec_ops_v1[(test_vec_subvec_ind0 == 1)]
+test_vec_subvec_5 = test_vec_ops_v1[(test_vec_subvec_ind5 == 1)]
 #test_vec_ops_ew_min_vec = np.minimum(test_vec_ops_v1, test_vec_ops_v2)
 
 
@@ -105,16 +118,29 @@ test_qpform_value = .5 * test_qpform_x.T @ (test_qpform_P@test_qpform_x)
 data = {'test_sp_matrix_A': test_sp_matrix_A,
         'test_sp_matrix_Adns': test_sp_matrix_Adns,
         'test_vec_ops_n': test_vec_ops_n,
+        'test_vec_ops_zero': test_vec_ops_zero,
         'test_vec_ops_v1': test_vec_ops_v1,
         'test_vec_ops_v2': test_vec_ops_v2,
+        'test_vec_ops_v3': test_vec_ops_v3,
         'test_vec_ops_sc1': test_vec_ops_sc1,
         'test_vec_ops_sc2': test_vec_ops_sc2,
+        'test_vec_ops_sc3': test_vec_ops_sc3,
         'test_vec_ops_norm_inf': test_vec_ops_norm_inf,
         'test_vec_ops_norm_inf_diff': test_vec_ops_norm_inf_diff,
+        'test_vec_ops_sub': test_vec_ops_sub,
+        'test_vec_ops_add': test_vec_ops_add,
         'test_vec_ops_add_scaled': test_vec_ops_add_scaled,
+        'test_vec_ops_add_scaled_inc': test_vec_ops_add_scaled_inc,
+        'test_vec_ops_add_scaled3': test_vec_ops_add_scaled3,
+        'test_vec_ops_add_scaled3_inc': test_vec_ops_add_scaled3_inc,
         'test_vec_ops_ew_reciprocal': test_vec_ops_ew_reciprocal,
         'test_vec_ops_vec_prod': test_vec_ops_vec_prod,
         'test_vec_ops_ew_max_vec': test_vec_ops_ew_max_vec,
+        'test_vec_subvec_ind0': test_vec_subvec_ind0,
+        'test_vec_subvec_ind5': test_vec_subvec_ind5,
+        'test_vec_subvec_ind10': test_vec_subvec_ind10,
+        'test_vec_subvec_0': test_vec_subvec_0,
+        'test_vec_subvec_5': test_vec_subvec_5,
         #'test_vec_ops_ew_min_vec': test_vec_ops_ew_min_vec,
         'test_mat_ops_n': test_mat_ops_n,
         'test_mat_ops_A': test_mat_ops_A,
