@@ -416,7 +416,7 @@ def generate_data(problem_name, sols_data):
             elif isinstance(value.flatten(order='F')[0], np.integer):
                 f.write("OSQPInt* %s;\n" % key)
             elif isinstance(value.flatten(order='F')[0], np.float):
-                f.write("OSQPFloat * %s;\n" % key)
+                f.write("OSQPFloat* %s;\n" % key)
         else:
             if isinstance(value, int):
                 f.write("OSQPInt %s;\n" % key)
