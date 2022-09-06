@@ -1,11 +1,20 @@
-get_directory_property(headers DIRECTORY ${PROJECT_SOURCE_DIR}/tests DEFINITION headers)
+get_directory_property(OSQP_TESTCASE_SRCS DIRECTORY ${PROJECT_SOURCE_DIR}/tests DEFINITION OSQP_TESTCASE_SRCS)
 
-set(headers
-    ${headers} ${CMAKE_CURRENT_SOURCE_DIR}/test_primal_infeasibility.h
+set(OSQP_TESTCASE_SRCS
+    ${OSQP_TESTCASE_SRCS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_primal_infeasibility.cpp
     PARENT_SCOPE)
 
-get_directory_property(codegen_headers DIRECTORY ${PROJECT_SOURCE_DIR}/tests DEFINITION codegen_headers)
+get_directory_property(OSQP_TESTCASE_GENERATED_SRCS DIRECTORY ${PROJECT_SOURCE_DIR}/tests DEFINITION OSQP_TESTCASE_GENERATED_SRCS)
 
-set(codegen_headers
-    ${codegen_headers} ${CMAKE_CURRENT_SOURCE_DIR}/data.h
+set(OSQP_TESTCASE_GENERATED_SRCS
+    ${OSQP_TESTCASE_GENERATED_SRCS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/primal_infeasibility_data.cpp
+    PARENT_SCOPE)
+
+get_directory_property(OSQP_TESTCASE_DIRS DIRECTORY ${PROJECT_SOURCE_DIR}/tests DEFINITION OSQP_TESTCASE_DIRS)
+
+set(OSQP_TESTCASE_DIRS
+    ${OSQP_TESTCASE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}
     PARENT_SCOPE)

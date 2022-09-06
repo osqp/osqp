@@ -42,12 +42,13 @@ FetchContent_MakeAvailable(Catch2)
 # ----------------------------------------------
 # Test Inclusion
 # ----------------------------------------------
-# These subfolders populate the variables ${headers} and ${codegen_headers}
+# These subfolders populate the variable ${OSQP_TESTCASE_SRCS},
+# ${OSQP_TESTCASE_GENERATED_SRCS} and ${OSQP_TESTCASE_DIRS}
 # ----------------------------------------------
 add_subdirectory(basic_lp)
 add_subdirectory(basic_qp)
 add_subdirectory(basic_qp2)
-add_subdirectory(lin_alg)
+add_subdirectory(codegen)
 add_subdirectory(non_cvx)
 add_subdirectory(primal_dual_infeasibility)
 add_subdirectory(primal_infeasibility)
@@ -59,7 +60,7 @@ add_subdirectory(update_matrices)
 # Test Data Generation
 # ----------------------------------------------
 add_custom_command(
-  OUTPUT ${codegen_headers}
+  OUTPUT ${OSQP_TESTCASE_GENERATED_SRCS}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/generate_tests_data.py
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/generate_tests_data.py
@@ -68,21 +69,45 @@ add_custom_command(
 # ----------------------------------------------
 # osqp_tester
 # ----------------------------------------------
-add_executable(osqp_tester osqp_tester.cpp osqp_tester.h ${headers} ${codegen_headers})
-target_include_directories(osqp_tester PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${osqplib_includes})
+add_executable(osqp_tester
+               osqp_tester.cpp
+               osqp_tester.h
+               ${OSQP_TESTCASE_SRCS}
+               ${OSQP_TESTCASE_GENERATED_SRCS}
+               ${CMAKE_CURRENT_SOURCE_DIR}/utils/test_utils.cpp)
+target_include_directories(osqp_tester PRIVATE
+                           ${OSQP_TESTCASE_DIRS}
+                           ${CMAKE_CURRENT_SOURCE_DIR}
+                           ${CMAKE_CURRENT_SOURCE_DIR}/utils/
+                           ${CMAKE_CURRENT_SOURCE_DIR}/../include/private
+                           ${osqplib_includes})
 target_link_libraries(osqp_tester osqpstatic Catch2::Catch2 ${osqplib_link_libs})
 
 add_test(NAME osqp_tester COMMAND osqp_tester)
 
 # ----------------------------------------------
+# Linear algebra tester
+# ----------------------------------------------
+add_subdirectory(lin_alg)
+
+# ----------------------------------------------
 # osqp_tester_custom_memory (only use with builtin algebra)
 # ----------------------------------------------
 if(OSQP_ALGEBRA_BUILTIN)
-  add_executable(
-    osqp_tester_custom_memory
-    osqp_tester.cpp osqp_tester.h ${headers} ${codegen_headers} ${CMAKE_CURRENT_SOURCE_DIR}/custom_memory/custom_memory.h
+  add_executable(osqp_tester_custom_memory
+    osqp_tester.cpp
+    osqp_tester.h
+    ${OSQP_TESTCASE_SRCS}
+    ${OSQP_TESTCASE_GENERATED_SRCS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/utils/test_utils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/custom_memory/custom_memory.h
     ${CMAKE_CURRENT_SOURCE_DIR}/custom_memory/custom_memory.c)
-  target_include_directories(osqp_tester_custom_memory PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${osqplib_includes})
+  target_include_directories(osqp_tester_custom_memory PRIVATE
+                             ${OSQP_TESTCASE_DIRS}
+                             ${CMAKE_CURRENT_SOURCE_DIR}
+                             ${CMAKE_CURRENT_SOURCE_DIR}/utils/
+                             ${CMAKE_CURRENT_SOURCE_DIR}/../include/private
+                             ${osqplib_includes})
   target_link_libraries(osqp_tester_custom_memory osqpstatic Catch2::Catch2 ${osqplib_link_libs})
 
   add_test(NAME osqp_tester_custom_memory COMMAND osqp_tester_custom_memory)

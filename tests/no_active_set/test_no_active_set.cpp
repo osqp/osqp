@@ -1,11 +1,13 @@
-#include "osqp.h"    // OSQP API
-#include "osqp_tester.h" // Basic testing script header
+#include <catch2/catch.hpp>
+
+#include "osqp_api.h"    /* OSQP API wrapper (public + some private) */
+#include "osqp_tester.h" /* Tester helpers */
+#include "test_utils.h"  /* Testing Helper functions */
+
+#include "no_active_set_data.h"
 
 
-#include "no_active_set/data.h"
-
-
-void test_no_active_set()
+TEST_CASE( "No active set", "[optimization][no active set]" )
 {
   OSQPInt exitflag;
 

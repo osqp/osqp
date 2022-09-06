@@ -1,10 +1,13 @@
-#include "osqp.h"    // OSQP API
-#include "osqp_tester.h" // Basic testing script header
+#include <catch2/catch.hpp>
 
-#include "basic_lp/data.h"
+#include "osqp_api.h"    /* OSQP API wrapper (public + some private) */
+#include "osqp_tester.h" /* Tester helpers */
+#include "test_utils.h"  /* Testing Helper functions */
+
+#include "basic_lp_data.h"
 
 
-void test_basic_lp_solve()
+TEST_CASE( "Basic LP", "[solve][lp]" )
 {
   OSQPInt exitflag;
 
