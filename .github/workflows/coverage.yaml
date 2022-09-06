@@ -90,7 +90,7 @@ jobs:
           uses: imciner2/run-lcov@v1
           with:
             input_directory: '${{ env.OSQP_BUILD_DIR_PREFIX }}'
-            exclude: '"$GITHUB_WORKSPACE/tests/*" "$GITHUB_WORKSPACE/algebra/default/lin_sys/direct/amd/*" "$GITHUB_WORKSPACE/examples/*" "$GITHUB_WORKSPACE/build/*" "/usr/include/*"'
+            exclude: '"$GITHUB_WORKSPACE/tests/*" "$GITHUB_WORKSPACE/algebra/_common/lin_sys/qdldl/amd/*" "$GITHUB_WORKSPACE/examples/*" "$GITHUB_WORKSPACE/build/*" "/usr/include/*"'
             output_file: '${{ env.OSQP_BUILD_DIR_PREFIX }}/coverage.info'
 
         - name: Coveralls upload
