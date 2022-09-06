@@ -180,6 +180,15 @@ void cuda_vec_ew_prod(OSQPFloat*       d_c,
                       OSQPInt          n);
 
 /**
+ * h_res = all(a == b)
+ */
+void cuda_vec_eq(const OSQPFloat* a,
+                 const OSQPFloat* b,
+                       OSQPFloat  tol,
+                       OSQPInt    n,
+                       OSQPInt*   h_res);
+
+/**
  * h_res = all(d_l <= d_u)
  */
 void cuda_vec_leq(const OSQPFloat* d_l,

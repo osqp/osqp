@@ -8,6 +8,22 @@
 
 /* VECTOR FUNCTIONS ----------------------------------------------------------*/
 
+OSQPInt OSQPVectorf_is_eq(const OSQPVectorf* A,
+                          const OSQPVectorf* B,
+                                OSQPFloat    tol) {
+    OSQPInt i;
+    OSQPInt retval = 1;
+
+
+    if (A->length != B->length) return 0;
+
+    for (i=0; i < A->length; i++) {
+        if (c_absval(A->values[i] - B->values[i]) > tol) {
+            retval = 0;
+        }
+    }
+    return retval;
+}
 
 OSQPVectorf* OSQPVectorf_new(const OSQPFloat* a,
                              OSQPInt          length) {

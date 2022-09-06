@@ -26,6 +26,20 @@
  *                           API Functions                                     *
  *******************************************************************************/
 
+OSQPInt OSQPVectorf_is_eq(const OSQPVectorf* a,
+                          const OSQPVectorf* b,
+                                OSQPFloat    tol) {
+
+  OSQPInt res = 0;
+
+  if (a->length != b->length)
+    return 0;
+
+  cuda_vec_eq(a->d_val, b->d_val, tol, a->length, &res);
+
+  return res;
+}
+
 OSQPVectorf* OSQPVectorf_new(const OSQPFloat* a,
                                    OSQPInt    length) {
 
