@@ -484,7 +484,7 @@ TEST_CASE("Vector: Norms")
   OSQPVectorf_ptr nv3{OSQPVectorf_new(data->test_vec_ops_neg_v3, data->test_vec_ops_n)};
   OSQPVectorf_ptr result{OSQPVectorf_malloc(data->test_vec_ops_n)};
 
-#ifdef OSQP_BUILTIN_ALGEBRA
+#ifdef OSQP_ALGEBRA_BUILTIN
   SECTION("2-norm")
   {
     OSQPFloat res = OSQPVectorf_norm_2(v1.get());
@@ -567,7 +567,7 @@ TEST_CASE("Vector: Dot product", "[vector],[operation]")
   {
     OSQPFloat dot = OSQPVectorf_dot_prod(v1.get(), v1.get());
 
-#ifdef OSQP_BUILTIN_ALGEBRA
+#ifdef OSQP_ALGEBRA_BUILTIN
     OSQPFloat nrm = OSQPVectorf_norm_2(v1.get());
     nrm = nrm * nrm;
 
@@ -700,7 +700,7 @@ TEST_CASE("Vector: Scaled dot product", "[vector],[operation]")
     {
       OSQPFloat dot = OSQPVectorf_dot_prod_signed(v1.get(), v1.get(), 6);
 
-#ifdef OSQP_BUILTIN_ALGEBRA
+#ifdef OSQP_ALGEBRA_BUILTIN
       OSQPFloat nrm = OSQPVectorf_norm_2(v1.get());
       nrm = nrm * nrm;
 
