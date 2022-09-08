@@ -260,7 +260,7 @@ TEST_CASE("Vector: Int creation", "[vector],[creation]")
   }
 }
 
-TEST_CASE("Vector: Set values", "[vector],[creation]")
+TEST_CASE("Vector: Set values", "[vector],[assignment]")
 {
   lin_alg_sols_data_ptr data{generate_problem_lin_alg_sols_data()};
 
@@ -356,7 +356,44 @@ TEST_CASE("Vector: Concat", "[vector],[creation]")
             same == 1);
 }
 
-TEST_CASE("Vector: Subvector", "[vector],[creation]")
+TEST_CASE("Vector: Subvector assignment", "[vector],[assignment]")
+{
+  lin_alg_sols_data_ptr data{generate_problem_lin_alg_sols_data()};
+
+  OSQPVectorf_ptr v{OSQPVectorf_new(data->test_vec_ops_v1, data->test_vec_ops_n)};
+
+  SECTION("No rows assigned")
+  {
+    OSQPVectorf_ptr ref{OSQPVectorf_new(data->test_vec_ops_v1, data->test_vec_ops_n)};
+
+    OSQPVectorf_subvector_assign(v.get(), data->test_vec_subvec_assign_5, 2, 0);
+
+    mu_assert("Subvector assignment failed",
+              OSQPVectorf_is_eq(v.get(), ref.get(), TESTS_TOL));
+  }
+
+  SECTION("Partial assignment")
+  {
+    OSQPVectorf_ptr ref{OSQPVectorf_new(data->test_vec_subvec_assign_5, data->test_vec_ops_n)};
+
+    OSQPVectorf_subvector_assign(v.get(), data->test_vec_subvec_5, 2, 5);
+
+    mu_assert("Subvector assignment failed",
+              OSQPVectorf_is_eq(v.get(), ref.get(), TESTS_TOL));
+  }
+
+  SECTION("Fully reassign")
+  {
+    OSQPVectorf_ptr ref{OSQPVectorf_new(data->test_vec_ops_v2, data->test_vec_ops_n)};
+
+    OSQPVectorf_subvector_assign(v.get(), data->test_vec_ops_v2, 0, data->test_vec_ops_n);
+
+    mu_assert("Subvector assignment failed",
+              OSQPVectorf_is_eq(v.get(), ref.get(), TESTS_TOL));
+  }
+}
+
+TEST_CASE("Vector: Subvector creation", "[vector],[creation]")
 {
   lin_alg_sols_data_ptr data{generate_problem_lin_alg_sols_data()};
 

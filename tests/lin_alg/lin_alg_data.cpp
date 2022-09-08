@@ -503,6 +503,18 @@ data->test_vec_subvec_5[2] = -1.10737304716519302517;
 data->test_vec_subvec_5[3] = -0.46674961687980204283;
 data->test_vec_subvec_5[4] = 0.75951952247837917209;
 
+data->test_vec_subvec_assign_5 = (OSQPFloat*) c_malloc(10 * sizeof(OSQPFloat));
+data->test_vec_subvec_assign_5[0] = -0.31389947196684775399;
+data->test_vec_subvec_assign_5[1] = 0.05410227877154388798;
+data->test_vec_subvec_assign_5[2] = -0.31389947196684775399;
+data->test_vec_subvec_assign_5[3] = 0.27279133916445374997;
+data->test_vec_subvec_assign_5[4] = -1.10737304716519302517;
+data->test_vec_subvec_assign_5[5] = -0.46674961687980204283;
+data->test_vec_subvec_assign_5[6] = 0.75951952247837917209;
+data->test_vec_subvec_assign_5[7] = 0.23550561173022521722;
+data->test_vec_subvec_assign_5[8] = 0.75951952247837917209;
+data->test_vec_subvec_assign_5[9] = -1.64878736635094846896;
+
 data->test_vec_ops_sca_lt = (OSQPFloat*) c_malloc(10 * sizeof(OSQPFloat));
 data->test_vec_ops_sca_lt[0] = 0.87624219611435005817;
 data->test_vec_ops_sca_lt[1] = 0.87624219611435005817;
@@ -1258,6 +1270,7 @@ c_free(data->test_vec_subvec_ind5);
 c_free(data->test_vec_subvec_ind10);
 c_free(data->test_vec_subvec_0);
 c_free(data->test_vec_subvec_5);
+c_free(data->test_vec_subvec_assign_5);
 c_free(data->test_vec_ops_sca_lt);
 c_free(data->test_vec_ops_sca_gt);
 c_free(data->test_vec_ops_sca_cond);

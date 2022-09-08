@@ -50,6 +50,14 @@ void OSQPVectorf_free(OSQPVectorf* a);
 /* Free an int vector */
 void OSQPVectori_free(OSQPVectori* a);
 
+/*
+ * Assign the data from array b to vector A starting at the index given by start.
+ */
+void OSQPVectorf_subvector_assign(OSQPVectorf* A,
+                                  OSQPFloat*   b,
+                                  OSQPInt      start,
+                                  OSQPInt      length);
+
 OSQPVectorf* OSQPVectorf_subvector_byrows(const OSQPVectorf* A,
                                           const OSQPVectori* rows);
 

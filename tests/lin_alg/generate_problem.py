@@ -64,6 +64,8 @@ test_vec_subvec_ind5 = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
 test_vec_subvec_ind10 = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
 test_vec_subvec_0 = test_vec_ops_v1[(test_vec_subvec_ind0 == 1)]
 test_vec_subvec_5 = test_vec_ops_v1[(test_vec_subvec_ind5 == 1)]
+test_vec_subvec_assign_5 = np.copy(test_vec_ops_v1)
+test_vec_subvec_assign_5[2:(2+5)] = test_vec_subvec_5
 test_vec_ops_sca_lt = np.copy(test_vec_ops_v1)
 test_vec_ops_sca_lt[test_vec_ops_sca_lt < test_vec_ops_sc1] = test_vec_ops_sc2
 test_vec_ops_sca_gt = np.copy(test_vec_ops_v1)
@@ -204,6 +206,7 @@ data = {'test_sp_matrix_A': test_sp_matrix_A,
         'test_vec_subvec_ind10': test_vec_subvec_ind10,
         'test_vec_subvec_0': test_vec_subvec_0,
         'test_vec_subvec_5': test_vec_subvec_5,
+        'test_vec_subvec_assign_5': test_vec_subvec_assign_5,
         'test_vec_ops_sca_lt': test_vec_ops_sca_lt,
         'test_vec_ops_sca_gt': test_vec_ops_sca_gt,
         'test_vec_ops_sca_cond': test_vec_ops_sca_cond,

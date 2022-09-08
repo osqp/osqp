@@ -152,6 +152,17 @@ void OSQPVectori_free(OSQPVectori* a) {
   c_free(a);
 }
 
+void OSQPVectorf_subvector_assign(OSQPVectorf* A,
+                                  OSQPFloat*   b,
+                                  OSQPInt      start,
+                                  OSQPInt      length) {
+  OSQPInt i;
+
+  for (i = 0; i < length; i++) {
+    A->values[start+i] = b[i];
+  }
+}
+
 OSQPVectorf* OSQPVectorf_subvector_byrows(const OSQPVectorf* A,
                                           const OSQPVectori* rows) {
     OSQPInt i;
