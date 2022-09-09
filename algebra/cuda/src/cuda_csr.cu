@@ -221,6 +221,49 @@ __global__ void vector_init_abs_kernel(const OSQPInt* a,
   }
 }
 
+__global__ void csr_eq_kernel(const OSQPInt*   A_row_ptr,
+                              const OSQPInt*   A_col_ind,
+                              const OSQPFloat* A_val,
+                              const OSQPInt*   B_row_ptr,
+                              const OSQPInt*   B_col_ind,
+                              const OSQPFloat* B_val,
+                                    OSQPInt    m,
+                                    OSQPFloat  tol,
+                                    OSQPInt*   res) {
+  OSQPInt i = 0;
+  OSQPInt j = 0;
+  OSQPFloat diff = 0.0;
+
+  *res = 1;
+
+  for (j = 0; j < m; j++) { // Cycle over rows j
+    // if row pointer of next row does not coincide, they are not equal
+    // NB: first row always has A->p[0] = B->p[0] = 0 by construction.
+    if (A_row_ptr[j+1] != B_row_ptr[j+1]) {
+        *res = 0;
+        return;
+    }
+
+    for (i = A_row_ptr[j]; i < A_row_ptr[j + 1]; i++) { // Cycle columns i in row j
+      if (A_col_ind[i] != B_col_ind[i]) {   // Different column indices
+        *res = 0;
+        return;
+      }
+
+#ifdef OSQP_USE_FLOAT
+      diff = fabsf(A_val[i] - B_val[i]);
+#else
+      diff = fabs(A_val[i] - B_val[i]);
+#endif
+
+      if (diff > tol) {  // The actual matrix values are different
+        *res = 0;
+        return;
+      }
+    }
+  }
+}
+
 
 /*******************************************************************************
  *                         Private Functions                                   *
@@ -665,6 +708,39 @@ void cuda_mat_free(csr* mat) {
 
     c_free(mat);
   }
+}
+
+OSQPInt cuda_csr_is_eq(const csr*      A,
+                       const csr*      B,
+                             OSQPFloat tol) {
+
+  OSQPInt h_res = 0;
+  OSQPInt *d_res;
+
+  // If number of columns, rows and non-zeros are not the same, they are not equal.
+  if ((A->n != B->n) || (A->m != B->m) || (A->nnz != B->nnz)) {
+      return 0;
+  }
+
+  OSQPInt nnz = A->nnz;
+  OSQPInt number_of_blocks = (nnz / THREADS_PER_BLOCK) / ELEMENTS_PER_THREAD + 1;
+
+
+  cuda_malloc((void **) &d_res, sizeof(OSQPInt));
+
+  /* Initialize d_res to 1 */
+  h_res = 1;
+  checkCudaErrors(cudaMemcpy(d_res, &h_res, sizeof(OSQPInt), cudaMemcpyHostToDevice));
+
+  csr_eq_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(A->row_ptr, A->col_ind, A->val,
+                                                         B->row_ptr, B->col_ind, B->val,
+                                                         A->m, tol, d_res);
+
+  checkCudaErrors(cudaMemcpy(&h_res, d_res, sizeof(OSQPInt), cudaMemcpyDeviceToHost));
+
+  cuda_free((void **) &d_res);
+
+  return h_res;
 }
 
 void cuda_submat_byrows(const csr* A,

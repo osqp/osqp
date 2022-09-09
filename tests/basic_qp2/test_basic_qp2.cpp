@@ -1,11 +1,13 @@
-#include "osqp.h"    // OSQP API
-#include "osqp_tester.h" // Basic testing script header
+#include <catch2/catch.hpp>
+
+#include "osqp_api.h"    /* OSQP API wrapper (public + some private) */
+#include "osqp_tester.h" /* Tester helpers */
+#include "test_utils.h"  /* Testing Helper functions */
+
+#include "basic_qp2_data.h"
 
 
-#include "basic_qp2/data.h"
-
-
-void test_basic_qp2_solve()
+TEST_CASE("Basic QP2 solve", "[solve],[qp]")
 {
   OSQPInt exitflag;
 
@@ -22,13 +24,20 @@ void test_basic_qp2_solve()
 
   // Define Solver settings as default
   osqp_set_default_settings(settings.get());
-  settings->alpha     = 1.6;
-  settings->rho       = 0.1;
-  settings->polishing = 1;
-  settings->verbose   = 1;
+  settings->alpha   = 1.6;
+  settings->rho     = 0.1;
+  settings->verbose = 1;
+  settings->eps_abs = 1e-5;
+  settings->eps_rel = 1e-5;
+
+  /* Test with and without polishing */
+  settings->polishing = GENERATE(0, 1);
+  settings->polish_refine_iter = 4;
 
   /* Test all possible linear system solvers in this test case */
   settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
+
+  CAPTURE(settings->linsys_solver, settings->polishing);
 
   // Setup workspace
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,
@@ -64,7 +73,7 @@ void test_basic_qp2_solve()
             c_absval(solver->info->obj_val - sols_data->obj_value_test)/(c_absval(sols_data->obj_value_test)) < TESTS_TOL);
 }
 
-void test_basic_qp2_update()
+TEST_CASE("Basic QP2: Update vectors", "[solve],[qp],[update]")
 {
   OSQPInt exitflag;
 
@@ -88,6 +97,8 @@ void test_basic_qp2_update()
 
   /* Test all possible linear system solvers in this test case */
   settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
+
+  CAPTURE(settings->linsys_solver);
 
   // Setup workspace
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,

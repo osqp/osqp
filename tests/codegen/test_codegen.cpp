@@ -1,13 +1,16 @@
-#include "osqp.h"    // OSQP API
-#include "osqp_tester.h" // Basic testing script header
+#include <catch2/catch.hpp>
 
-#include "basic_lp/data.h"
-#include "codegen/data.h"
-#include "non_cvx/data.h"
-#include "unconstrained/data.h"
+#include "osqp_api.h"    /* OSQP API wrapper (public + some private) */
+#include "osqp_tester.h" /* Tester helpers */
+#include "test_utils.h"  /* Testing Helper functions */
+
+#include "codegen_data.h"
+#include "basic_lp_data.h"
+#include "non_cvx_data.h"
+#include "unconstrained_data.h"
 
 #ifdef OSQP_CODEGEN
-void test_codegen_basic()
+TEST_CASE("Basic codegen", "[codegen]")
 {
   OSQPInt exitflag;
 
@@ -49,14 +52,14 @@ void test_codegen_basic()
   solver.reset(tmpSolver);
 
   // Setup correct
-  mu_assert("Codegen test: Setup error!", exitflag == 0);
+  mu_assert("Setup error!", exitflag == 0);
 
   // Vector update
   defines->embedded_mode = 1;
 
   exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "basic_vector_", defines.get());
 
-  mu_assert("Non Convex codegen: codegen type 1 should have worked!",
+  mu_assert("Codegen type 1 should have worked!",
             exitflag == OSQP_NO_ERROR);
 
   // matrix update
@@ -64,11 +67,11 @@ void test_codegen_basic()
 
   exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "basic_matrix_", defines.get());
 
-  mu_assert("Non Convex codegen: codegen type 2 should have worked!",
+  mu_assert("Codegen type 2 should have worked!",
             exitflag == OSQP_NO_ERROR);
 }
 
-void test_codegen_data()
+TEST_CASE("Codegen: Data export", "[codegen],[unconstrained],[lp],[qp],[nonconvex]")
 {
   OSQPInt exitflag;
 
@@ -99,7 +102,7 @@ void test_codegen_data()
   defines->interrupt_enable = 0;   // no interrupts
   defines->derivatives_enable = 0; // no derivatives
 
-  SECTION( "codegen data: unconstrained" ) {
+  SECTION( "Unconstrained" ) {
     OSQPInt embedded;
     std::string dir;
 
@@ -112,6 +115,8 @@ void test_codegen_data()
     char name[100];
     snprintf(name, 100, "data_unconstrained_embedded_%d_", embedded);
 
+    CAPTURE(embedded);
+
     // Problem data
     unconstrained_problem_ptr   data{generate_problem_unconstrained()};
     unconstrained_sols_data_ptr sols_data{generate_problem_unconstrained_sols_data()};
@@ -123,18 +128,18 @@ void test_codegen_data()
     solver.reset(tmpSolver);
 
     // Setup correct
-    mu_assert("codegen: Unconstrained setup error!", exitflag == 0);
+    mu_assert("Setup error!", exitflag == 0);
 
     defines->embedded_mode = embedded;
 
     exitflag = osqp_codegen(solver.get(), dir.c_str(), name, defines.get());
 
     // Codegen should work or error as appropriate
-    mu_assert("codegen: Unconstrained should have worked!",
+    mu_assert("Unconstrained should have worked!",
               exitflag == OSQP_NO_ERROR);
   }
 
-  SECTION( "codegen data: linear program" ) {
+  SECTION( "Linear program" ) {
     OSQPInt embedded;
     std::string dir;
 
@@ -147,6 +152,8 @@ void test_codegen_data()
     char name[100];
     snprintf(name, 100, "data_lp_embedded_%d_", embedded);
 
+    CAPTURE(embedded);
+
     // Problem data
     basic_lp_problem_ptr   data{generate_problem_basic_lp()};
     basic_lp_sols_data_ptr sols_data{generate_problem_basic_lp_sols_data()};
@@ -158,18 +165,18 @@ void test_codegen_data()
     solver.reset(tmpSolver);
 
     // Setup correct
-    mu_assert("codegen: Linear program setup error!", exitflag == 0);
+    mu_assert("Setup error!", exitflag == 0);
 
     defines->embedded_mode = embedded;
 
     exitflag = osqp_codegen(solver.get(), dir.c_str(), name, defines.get());
 
     // Codegen should work or error as appropriate
-    mu_assert("codegen: Linear program should have worked!",
+    mu_assert("Linear program should have worked!",
               exitflag == OSQP_NO_ERROR);
   }
 
-  SECTION( "codegen data: nonconvex" ) {
+  SECTION( "Nonconvex" ) {
     OSQPInt embedded;
     std::string dir;
 
@@ -192,6 +199,8 @@ void test_codegen_data()
     char name[100];
     snprintf(name, 100, "data_nonconvex_%d_embedded_%d_", sigma_num, embedded);
 
+    CAPTURE(embedded, sigma);
+
     // Problem data
     non_cvx_problem_ptr   data{generate_problem_non_cvx()};
     non_cvx_sols_data_ptr sols_data{generate_problem_non_cvx_sols_data()};
@@ -207,17 +216,17 @@ void test_codegen_data()
     solver.reset(tmpSolver);
 
     // Setup correct
-    mu_assert("codegen: Nonconvex setup error!", exitflag == expected_error);
+    mu_assert("Setup error!", exitflag == expected_error);
 
     exitflag = osqp_codegen(solver.get(), dir.c_str(), name, defines.get());
 
     // Codegen should work or error as appropriate
-    mu_assert("codegen: Nonconvex codegen error!",
+    mu_assert("Nonconvex codegen error!",
               exitflag == expected_error);
   }
 }
 
-void test_codegen_defines()
+TEST_CASE("Codegen: defines", "[codegen]")
 {
   OSQPInt exitflag;
 
@@ -259,9 +268,9 @@ void test_codegen_defines()
   solver.reset(tmpSolver);
 
   // Setup correct
-  mu_assert("Codegen test: Setup error!", exitflag == 0);
+  mu_assert("Setup error!", exitflag == 0);
 
-  SECTION( "codegen define: embedded_mode" ) {
+  SECTION( "embedded_mode" ) {
     OSQPInt test_input;
     OSQPInt expected_flag;
     std::tie( test_input, expected_flag ) =
@@ -274,14 +283,16 @@ void test_codegen_defines()
 
     defines->embedded_mode = test_input;
 
+    CAPTURE(defines->embedded_mode);
+
     exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "defines_embedded_", defines.get());
 
     // Codegen should work or error as appropriate
-    mu_assert("Non Convex codegen: embedded define should have worked!",
+    mu_assert("embedded_mode define should have worked!",
               exitflag == expected_flag);
   }
 
-  SECTION( "codegen define: floats" ) {
+  SECTION( "float_type" ) {
     OSQPInt test_input;
     OSQPInt expected_flag;
     std::tie( test_input, expected_flag ) =
@@ -295,10 +306,12 @@ void test_codegen_defines()
 
     defines->float_type = test_input;
 
+    CAPTURE(defines->float_type);
+
     exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "defines_float_", defines.get());
 
     // Codegen should work or error as appropriate
-    mu_assert("Non Convex codegen: float define should have worked!",
+    mu_assert("float_type define should have worked!",
               exitflag == expected_flag);
   }
 
@@ -316,6 +329,8 @@ void test_codegen_defines()
 
     defines->printing_enable = test_input;
 
+    CAPTURE(defines->printing_enable);
+
     exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "defines_printing_", defines.get());
 
     // Codegen should work or error as appropriate
@@ -323,7 +338,7 @@ void test_codegen_defines()
               exitflag == expected_flag);
   }
 
-  SECTION( "codegen define: profiling" ) {
+  SECTION( "profiling_enabled" ) {
     OSQPInt test_input;
     OSQPInt expected_flag;
     std::tie( test_input, expected_flag ) =
@@ -337,14 +352,16 @@ void test_codegen_defines()
 
     defines->profiling_enable = test_input;
 
+    CAPTURE(defines->profiling_enable);
+
     exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "defines_profiling_", defines.get());
 
     // Codegen should work or error as appropriate
-    mu_assert("Non Convex codegen: profiling define should have worked!",
+    mu_assert("profiling_enabled define should have worked!",
               exitflag == expected_flag);
   }
 
-  SECTION( "codegen define: interrupts" ) {
+  SECTION( "interrupt_enable" ) {
     OSQPInt test_input;
     OSQPInt expected_flag;
     std::tie( test_input, expected_flag ) =
@@ -358,10 +375,12 @@ void test_codegen_defines()
 
     defines->interrupt_enable = test_input;
 
+    CAPTURE(defines->interrupt_enable);
+
     exitflag = osqp_codegen(solver.get(), CODEGEN_DIR, "defines_interrupts_", defines.get());
 
     // Codegen should work or error as appropriate
-    mu_assert("Non Convex codegen: interrupt define should have worked!",
+    mu_assert("interrupt_enable define should have worked!",
               exitflag == expected_flag);
   }
 
@@ -387,7 +406,7 @@ void test_codegen_defines()
   }
 }
 
-void test_codegen_error_propagation()
+TEST_CASE("Codegen: Error propgatation", "[codegen]")
 {
   OSQPInt exitflag;
 
@@ -429,9 +448,9 @@ void test_codegen_error_propagation()
   solver.reset(tmpSolver);
 
   // Setup correct
-  mu_assert("Codegen test: Setup error!", exitflag == 0);
+  mu_assert("Setup error!", exitflag == 0);
 
-  SECTION( "codegen: missing linear system solver" ) {
+  SECTION( "Missing linear system solver" ) {
     // Artificially delete the linsys solver
     void *tmpVar = solver->work->linsys_solver;
     solver->work->linsys_solver = NULL;
@@ -441,11 +460,11 @@ void test_codegen_error_propagation()
     solver->work->linsys_solver = (LinSysSolver *) tmpVar;
 
     // Codegen should work
-    mu_assert("codegen: missing linear system solver not handled!",
+    mu_assert("Data error not handled!",
               exitflag == OSQP_WORKSPACE_NOT_INIT_ERROR);
   }
 
-  SECTION( "codegen: missing data" ) {
+  SECTION( "Missing data struct" ) {
     // Artificially delete all the data
     void *tmpVar = solver->work->data;
     solver->work->data = NULL;
@@ -455,11 +474,11 @@ void test_codegen_error_propagation()
     solver->work->data = (OSQPData *) tmpVar;
 
     // Codegen should work
-    mu_assert("codegen: missing data not handled!",
+    mu_assert("Data error not handled!",
               exitflag == OSQP_WORKSPACE_NOT_INIT_ERROR);
   }
 
-  SECTION( "codegen: missing float vector" ) {
+  SECTION( "Missing float vector" ) {
     // Artificially delete a vector
     void *tmpVar = solver->work->data->l;
     solver->work->data->l = NULL;
@@ -469,11 +488,11 @@ void test_codegen_error_propagation()
     solver->work->data->l = (OSQPVectorf *) tmpVar;
 
     // Codegen should work
-    mu_assert("codegen: missing codegen float vector not handled!",
+    mu_assert("Missing vector not handled!",
               exitflag == OSQP_DATA_NOT_INITIALIZED);
   }
 
-  SECTION( "codegen: missing integer vector" ) {
+  SECTION( "Missing integer vector" ) {
     defines->embedded_mode = 2;
 
     // Artificially delete a vector
@@ -485,11 +504,11 @@ void test_codegen_error_propagation()
     solver->work->constr_type = (OSQPVectori *) tmpVar;
 
     // Codegen should work
-    mu_assert("codegen: missing codegen integer vector not handled!",
+    mu_assert("Missing vector not handled!",
               exitflag == OSQP_DATA_NOT_INITIALIZED);
   }
 
-  SECTION( "codegen: missing matrix" ) {
+  SECTION( "Missing matrix" ) {
     // Artificially delete a matrix
     void *tmpVar = solver->work->data->A;
     solver->work->data->A = NULL;
@@ -499,12 +518,12 @@ void test_codegen_error_propagation()
     solver->work->data->A = (OSQPMatrix *) tmpVar;
 
     // Codegen should work
-    mu_assert("codegen: missing codegen matrix not handled!",
+    mu_assert("Missing matrix not handled!",
               exitflag == OSQP_DATA_NOT_INITIALIZED);
   }
 }
 
-void test_codegen_settings()
+TEST_CASE("Codegen: Settings", "[codegen],[settings]")
 {
   OSQPInt exitflag;
 
@@ -540,7 +559,7 @@ void test_codegen_settings()
   defines->derivatives_enable = 0; // no derivatives
 
   // scaling changes some allocations (some vectors become null)
-  SECTION( "codegen: scaling setting" ) {
+  SECTION( "Scaling setting" ) {
     // Test with both scaling=0 and scaling=1
     OSQPInt scaling  = GENERATE(0, 1);
     OSQPInt embedded;
@@ -555,6 +574,8 @@ void test_codegen_settings()
     char name[100];
     snprintf(name, 100, "scaling_%d_embedded_%d_", scaling, embedded);
 
+    CAPTURE(embedded);
+
     settings->scaling = scaling;
     defines->embedded_mode = embedded;
 
@@ -565,17 +586,17 @@ void test_codegen_settings()
     solver.reset(tmpSolver);
 
     // Setup correct
-    mu_assert("Codegen test: Setup error!", exitflag == 0);
+    mu_assert("Setup error!", exitflag == 0);
 
     exitflag = osqp_codegen(solver.get(), dir.c_str(), name, defines.get());
 
     // Codegen should work
-    mu_assert("codegen: Scaling not handled properly!",
+    mu_assert("Scaling not handled properly!",
               exitflag == OSQP_NO_ERROR);
   }
 
   // rho_is_vec changes some allocations (some vectors become null)
-  SECTION( "codegen: rho_is_vec setting" ) {
+  SECTION( "rho_is_vec setting" ) {
     // Test with both rho_is_vec=0 and rho_is_vec=1
     OSQPInt rho_is_vec = GENERATE(0, 1);
     OSQPInt embedded;
@@ -590,6 +611,8 @@ void test_codegen_settings()
     char name[100];
     snprintf(name, 100, "rho_is_vec_%d_embedded_%d_", rho_is_vec, embedded);
 
+    CAPTURE(embedded);
+
     settings->rho_is_vec = rho_is_vec;
     defines->embedded_mode = embedded;
 
@@ -600,13 +623,14 @@ void test_codegen_settings()
     solver.reset(tmpSolver);
 
     // Setup correct
-    mu_assert("Codegen test: Setup error!", exitflag == 0);
+    mu_assert("Setup error!", exitflag == 0);
 
     exitflag = osqp_codegen(solver.get(), dir.c_str(), name, defines.get());
 
     // Codegen should work
-    mu_assert("codegen: rho_is_vec not handled properly!",
+    mu_assert("rho_is_vec not handled properly!",
               exitflag == OSQP_NO_ERROR);
   }
 }
+
 #endif

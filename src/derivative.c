@@ -280,11 +280,11 @@ OSQPInt adjoint_derivative(OSQPSolver*    solver,
 
     OSQPVectorf *ryl = OSQPVectorf_new(r_yl, m);
     c_free(r_yl);
-    OSQPVectorf_mult(ryl, ryl, y_l);
+    OSQPVectorf_ew_prod(ryl, ryl, y_l);
     OSQPVectorf_mult_scalar(ryl, -1);
     OSQPVectorf *ryu = OSQPVectorf_new(r_yu, m);
     c_free(r_yu);
-    OSQPVectorf_mult(ryu, ryu, y_u);
+    OSQPVectorf_ew_prod(ryu, ryu, y_u);
 
     // Assemble dP/dA
     // TODO: Check for incoming m/n/nzmax compatibility unless we're allocating

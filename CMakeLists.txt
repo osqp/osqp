@@ -5,6 +5,21 @@ include(GNUInstallDirs)
 include(CMakeDependentOption)
 include(CMakePackageConfigHelpers)
 
+# Detect the CMake build type and use that as the debug indicator
+if(DEFINED CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "Set to either \"Release\" or \"Debug\"")
+else()
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Set to either \"Release\" or \"Debug\"")
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set(OSQP_ENABLE_DEBUG ON)
+  set(CMAKE_VERBOSE_MAKEFILE ON)
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+endif()
+
+message(STATUS "Debug mode: ${OSQP_ENABLE_DEBUG}")
+
 # Detect operating system
 # ----------------------------------------------
 message(STATUS "We are on a ${CMAKE_SYSTEM_NAME} system")
@@ -191,17 +206,6 @@ else()
   message(STATUS "Using standard (int) integers")
 endif()
 
-option(OSQP_ENABLE_DEBUG "Debug mode" OFF)
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  set(OSQP_ENABLE_DEBUG ON)
-endif()
-message(STATUS "Debug mode: ${OSQP_ENABLE_DEBUG}")
-
-if(OSQP_ENABLE_DEBUG)
-  set(CMAKE_VERBOSE_MAKEFILE ON)
-  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-endif()
-
 option(OSQP_ASAN "Enable ASAN" OFF)
 
 cmake_dependent_option( OSQP_CODEGEN "Enable code generation"
@@ -277,6 +281,7 @@ if(NOT MSVC)
   if(OSQP_ENABLE_DEBUG)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g")
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -G -g")
   else()
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
   endif()

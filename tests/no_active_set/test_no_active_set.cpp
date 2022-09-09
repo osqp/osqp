@@ -1,11 +1,13 @@
-#include "osqp.h"    // OSQP API
-#include "osqp_tester.h" // Basic testing script header
+#include <catch2/catch.hpp>
+
+#include "osqp_api.h"    /* OSQP API wrapper (public + some private) */
+#include "osqp_tester.h" /* Tester helpers */
+#include "test_utils.h"  /* Testing Helper functions */
+
+#include "no_active_set_data.h"
 
 
-#include "unconstrained/data.h"
-
-
-void test_unconstrained_solve()
+TEST_CASE( "No active set", "[optimization][no active set]" )
 {
   OSQPInt exitflag;
 
@@ -17,8 +19,8 @@ void test_unconstrained_solve()
   OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
 
   // Populate data
-  unconstrained_problem_ptr data{generate_problem_unconstrained()};
-  unconstrained_sols_data_ptr sols_data{generate_problem_unconstrained_sols_data()};
+  no_active_set_problem_ptr data{generate_problem_no_active_set()};
+  no_active_set_sols_data_ptr sols_data{generate_problem_no_active_set_sols_data()};
 
   // Define Solver settings as default
   osqp_set_default_settings(settings.get());
@@ -26,8 +28,14 @@ void test_unconstrained_solve()
   settings->eps_rel = 1e-05;
   settings->verbose = 1;
 
+  /* Test with and without polishing */
+  settings->polishing = GENERATE(0, 1);
+  settings->polish_refine_iter = 4;
+
   /* Test all possible linear system solvers in this test case */
   settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
+
+  CAPTURE(settings->linsys_solver, settings->polishing);
 
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,

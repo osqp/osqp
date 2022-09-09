@@ -244,6 +244,11 @@ static void get_ypol_from_yred(OSQPWorkspace* work, OSQPVectorf* yred_vf) {
   // If there are no active constraints
   if (work->pol->n_active == 0) {
     OSQPVectorf_set_scalar(work->pol->y, 0.);
+
+    // Memory clean-up
+    c_free(active_flags);
+    c_free(y);
+    c_free(yred);
     return;
   }
 

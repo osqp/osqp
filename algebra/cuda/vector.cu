@@ -26,6 +26,20 @@
  *                           API Functions                                     *
  *******************************************************************************/
 
+OSQPInt OSQPVectorf_is_eq(const OSQPVectorf* a,
+                          const OSQPVectorf* b,
+                                OSQPFloat    tol) {
+
+  OSQPInt res = 0;
+
+  if (a->length != b->length)
+    return 0;
+
+  cuda_vec_eq(a->d_val, b->d_val, tol, a->length, &res);
+
+  return res;
+}
+
 OSQPVectorf* OSQPVectorf_new(const OSQPFloat* a,
                                    OSQPInt    length) {
 
@@ -77,6 +91,17 @@ OSQPVectorf* OSQPVectorf_calloc(OSQPInt length) {
     b->vec = NULL;
   }
   return b;
+}
+
+OSQPVectori* OSQPVectori_new(const OSQPInt* a,
+                                   OSQPInt  length) {
+
+  OSQPVectori* out = OSQPVectori_malloc(length);
+  if (!out) return OSQP_NULL;
+
+  if (length > 0) OSQPVectori_from_raw(out, a);
+
+  return out;
 }
 
 OSQPVectori* OSQPVectori_malloc(OSQPInt length) {
@@ -159,6 +184,7 @@ void OSQPVectorf_view_free(OSQPVectorf* a) {
 }
 
 OSQPInt OSQPVectorf_length(const OSQPVectorf* a) {return a->length;}
+OSQPInt OSQPVectori_length(const OSQPVectori* a) {return a->length;}
 
 void OSQPVectorf_copy(OSQPVectorf*       b,
                       const OSQPVectorf* a) {

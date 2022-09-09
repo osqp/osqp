@@ -1,8 +1,10 @@
-#include "osqp.h"    /* OSQP Public API */
-#include "osqp_tester.h" /* Basic testing script header */
+#include <catch2/catch.hpp>
 
-void test_demo_solve()
-{
+#include "osqp_api.h"    /* OSQP API wrapper (public + some private) */
+#include "osqp_tester.h" /* Tester helpers */
+#include "test_utils.h"  /* Testing Helper functions */
+
+TEST_CASE( "Demo solve", "[optimization],[QP]" ) {
   /* Load problem data */
   OSQPFloat P_x[3] = { 4.0, 1.0, 2.0, };
   OSQPInt   P_nnz  = 3;
@@ -22,35 +24,32 @@ void test_demo_solve()
   OSQPInt exitflag;
 
   /* Workspace, settings, matrices */
-  OSQPSolver*   solver;
-  OSQPSettings* settings;
-  OSQPCscMatrix* P = (OSQPCscMatrix*)malloc(sizeof(OSQPCscMatrix));
-  OSQPCscMatrix* A = (OSQPCscMatrix*)malloc(sizeof(OSQPCscMatrix));
+  OSQPSolver*      tmpSolver = nullptr;
+  OSQPSolver_ptr   solver{nullptr};
+  OSQPSettings_ptr settings{(OSQPSettings *)malloc(sizeof(OSQPSettings))};
+
+  OSQPCscMatrix_ptr P{(OSQPCscMatrix*)malloc(sizeof(OSQPCscMatrix))};
+  OSQPCscMatrix_ptr A{(OSQPCscMatrix*)malloc(sizeof(OSQPCscMatrix))};
 
   /* Populate matrices */
-  csc_set_data(P, n, n, P_nnz, P_x, P_i, P_p);
-  csc_set_data(A, m, n, A_nnz, A_x, A_i, A_p);
+  csc_set_data(P.get(), n, n, P_nnz, P_x, P_i, P_p);
+  csc_set_data(A.get(), m, n, A_nnz, A_x, A_i, A_p);
 
   /* Set default settings */
-  settings = (OSQPSettings *)malloc(sizeof(OSQPSettings));
-  if (settings) osqp_set_default_settings(settings);
+  if (settings.get())
+    osqp_set_default_settings(settings.get());
 
   /* Setup workspace */
-  exitflag = osqp_setup(&solver, P, q, A, l, u, m, n, settings);
+  exitflag = osqp_setup(&tmpSolver, P.get(), q, A.get(), l, u, m, n, settings.get());
+  solver.reset(tmpSolver);
 
   /* Setup correct */
   mu_assert("Demo test solve: Setup error!", exitflag == 0);
 
   /* Solve Problem */
-  osqp_solve(solver);
+  osqp_solve(solver.get());
 
   /* Compare solver statuses */
   mu_assert("Demo test solve: Error in solver status!",
 	          solver->info->status_val == OSQP_SOLVED);
-
-  /* Clean workspace */
-  osqp_cleanup(solver);
-  free(A);
-  free(P);
-  free(settings);
 }

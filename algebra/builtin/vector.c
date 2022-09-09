@@ -152,6 +152,17 @@ void OSQPVectori_free(OSQPVectori* a) {
   c_free(a);
 }
 
+void OSQPVectorf_subvector_assign(OSQPVectorf* A,
+                                  OSQPFloat*   b,
+                                  OSQPInt      start,
+                                  OSQPInt      length) {
+  OSQPInt i;
+
+  for (i = 0; i < length; i++) {
+    A->values[start+i] = b[i];
+  }
+}
+
 OSQPVectorf* OSQPVectorf_subvector_byrows(const OSQPVectorf* A,
                                           const OSQPVectori* rows) {
     OSQPInt i;
@@ -228,7 +239,7 @@ OSQPFloat OSQPVectorf_norm_2(const OSQPVectorf* v) {
 #endif /* ifndef OSQP_EMBEDDED_MODE */
 
 OSQPInt OSQPVectorf_length(const OSQPVectorf* a) {return a->length;}
-// OSQPInt OSQPVectori_length(const OSQPVectori *a){return a->length;}
+OSQPInt OSQPVectori_length(const OSQPVectori *a){return a->length;}
 
 /* Pointer to vector data (floats) */
 OSQPFloat* OSQPVectorf_data(const OSQPVectorf* a) {return a->values;}
@@ -372,28 +383,6 @@ void OSQPVectorf_minus(OSQPVectorf*       x,
       xv[i] = av[i] - bv[i];
     }
   }
-}
-
-void OSQPVectorf_mult(OSQPVectorf*        x,
-                       const OSQPVectorf* a,
-                       const OSQPVectorf* b) {
-    OSQPInt i;
-    OSQPInt length = a->length;
-
-    OSQPFloat* av = a->values;
-    OSQPFloat* bv = b->values;
-    OSQPFloat* xv = x->values;
-
-    if (x == a) {
-        for (i = 0; i < length; i++) {
-            xv[i] *= bv[i];
-        }
-    }
-    else {
-        for (i = 0; i < length; i++) {
-            xv[i] = av[i] * bv[i];
-        }
-    }
 }
 
 void OSQPVectorf_add_scaled(OSQPVectorf*       x,

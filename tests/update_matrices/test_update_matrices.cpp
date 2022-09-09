@@ -1,20 +1,19 @@
-#include <stdio.h>
-#include "osqp.h"
-#include "osqp_tester.h"
+#include <catch2/catch.hpp>
 
-#include "update_matrices/data.h"
+#include "osqp_api.h"    /* OSQP API wrapper (public + some private) */
+#include "osqp_tester.h" /* Tester helpers */
+#include "test_utils.h"  /* Testing Helper functions */
+
+#include "update_matrices_data.h"
 
 #ifndef OSQP_ALGEBRA_CUDA
 
-#ifdef __cplusplus
 extern "C" {
-#endif
   #include "kkt.h"
-#ifdef __cplusplus
 }
-#endif
 
-void test_form_KKT() {
+TEST_CASE("Test updating KKT matrix", "[kkt],[update]")
+{
 
   update_matrices_sols_data* data;
 
@@ -94,7 +93,8 @@ void test_form_KKT() {
 #endif /* ifndef OSQP_ALGEBRA_CUDA */
 
 
-void test_update() {
+TEST_CASE("Test updating P and A", "[update]")
+{
   OSQPInt exitflag;
 
   // Problem settings
@@ -119,11 +119,10 @@ void test_update() {
   settings->eps_abs  = 1e-05;
   settings->eps_rel  = 1e-05;
 
-/* TODO: Fix segfault in MKL algebra when running a matrix update */
-#ifndef OSQP_ALGEBRA_MKL
   /* Test all possible linear system solvers in this test case */
   settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
-#endif
+
+  CAPTURE(settings->linsys_solver);
 
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->test_solve_Pu, data->test_solve_q,

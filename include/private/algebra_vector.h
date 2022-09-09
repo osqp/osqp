@@ -50,6 +50,14 @@ void OSQPVectorf_free(OSQPVectorf* a);
 /* Free an int vector */
 void OSQPVectori_free(OSQPVectori* a);
 
+/*
+ * Assign the data from array b to vector A starting at the index given by start.
+ */
+void OSQPVectorf_subvector_assign(OSQPVectorf* A,
+                                  OSQPFloat*   b,
+                                  OSQPInt      start,
+                                  OSQPInt      length);
+
 OSQPVectorf* OSQPVectorf_subvector_byrows(const OSQPVectorf* A,
                                           const OSQPVectori* rows);
 
@@ -76,6 +84,9 @@ void OSQPVectorf_view_free(OSQPVectorf* a);
 
 /* Length of the vector (floats) */
 OSQPInt OSQPVectorf_length(const OSQPVectorf* a);
+
+/* Length of the vector (ints) */
+OSQPInt OSQPVectori_length(const OSQPVectori* a);
 
 /* Pointer to vector data (floats) */
 OSQPFloat* OSQPVectorf_data(const OSQPVectorf* a);
@@ -122,11 +133,6 @@ void OSQPVectorf_plus(OSQPVectorf*       x,
 
 /* x = a - b.  x==a or x==-b at entry is possible */
 void OSQPVectorf_minus(OSQPVectorf*      x,
-                      const OSQPVectorf* a,
-                      const OSQPVectorf* b);
-
-/* x = a * b (elementwise).  Set x == a for x *= b. */
-void OSQPVectorf_mult(OSQPVectorf*       x,
                       const OSQPVectorf* a,
                       const OSQPVectorf* b);
 

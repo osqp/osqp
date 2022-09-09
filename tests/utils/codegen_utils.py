@@ -182,14 +182,15 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data={}):
     #
     # GENERATE HEADER FILE
     #
-    f = open(problem_name + "/data.h", "w")
+    f = open(problem_name + "/" + problem_name + "_" + "data.h", "w")
 
     # Add definition check
     f.write("#ifndef " + problem_name.upper() + "_DATA_H\n")
     f.write("#define " + problem_name.upper() + "_DATA_H\n")
 
     # Add Includes
-    f.write("#include \"osqp.h\"\n")
+    f.write("#include \"osqp_api.h\"\n")
+    f.write("#include \"osqp_tester.h\"\n")
     f.write("\n\n")
 
     #
@@ -240,6 +241,17 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data={}):
     f.write("using %s_problem_ptr = std::unique_ptr<OSQPTestData, %s_deleter>;\n" % (problem_name, problem_name))
     f.write("using %s_sols_data_ptr = std::unique_ptr<%s_sols_data, %s_sols_deleter>;\n" % (problem_name, problem_name, problem_name))
     f.write("#endif /* __cplusplus */\n\n")
+
+    # Close header file
+    f.write("#endif\n")
+    f.close()
+
+    # Open a file to define the problem data
+    f = open(problem_name + "/" + problem_name + "_" + "data.cpp", "w")
+
+    # Write include headers
+    f.write('#include \"%s_data.h\"\n' % problem_name)
+    f.write("\n\n")
 
     #
     # Generate QP problem data
@@ -360,8 +372,6 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data={}):
 
     f.write("}\n\n")
 
-    f.write("#endif\n")
-
     f.close()
 
 
@@ -376,14 +386,15 @@ def generate_data(problem_name, sols_data):
     #
     # GENERATE HEADER FILE
     #
-    f = open(problem_name + "/data.h", "w")
+    f = open(problem_name + "/" + problem_name + "_" + "data.h", "w")
 
     # Add definition check
     f.write("#ifndef " + problem_name.upper() + "_DATA_H\n")
     f.write("#define " + problem_name.upper() + "_DATA_H\n")
 
     # Add Includes
-    f.write("#include \"osqp.h\"\n")
+    f.write("#include \"osqp_api.h\"\n")
+    f.write("#include \"osqp_tester.h\"\n")
     f.write("\n\n")
 
     #
@@ -405,7 +416,7 @@ def generate_data(problem_name, sols_data):
             elif isinstance(value.flatten(order='F')[0], np.integer):
                 f.write("OSQPInt* %s;\n" % key)
             elif isinstance(value.flatten(order='F')[0], np.float):
-                f.write("OSQPFloat * %s;\n" % key)
+                f.write("OSQPFloat* %s;\n" % key)
         else:
             if isinstance(value, int):
                 f.write("OSQPInt %s;\n" % key)
@@ -430,6 +441,17 @@ def generate_data(problem_name, sols_data):
     f.write("};\n\n")
     f.write("using %s_sols_data_ptr = std::unique_ptr<%s_sols_data, %s_sols_deleter>;\n" % (problem_name, problem_name, problem_name))
     f.write("#endif /* __cplusplus */\n\n")
+
+    # Close header file
+    f.write("#endif\n")
+    f.close()
+
+    # Open a file to define the problem data
+    f = open(problem_name + "/" + problem_name + "_" + "data.cpp", "w")
+
+    # Write include headers
+    f.write('#include \"%s_data.h\"\n' % problem_name)
+    f.write("\n\n")
 
     #
     # Generate additional problem data for solutions
@@ -489,7 +511,5 @@ def generate_data(problem_name, sols_data):
     f.write("\nc_free(data);\n\n")
 
     f.write("}\n\n")
-
-    f.write("#endif\n")
 
     f.close()

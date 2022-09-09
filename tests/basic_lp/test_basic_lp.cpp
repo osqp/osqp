@@ -1,10 +1,13 @@
-#include "osqp.h"    // OSQP API
-#include "osqp_tester.h" // Basic testing script header
+#include <catch2/catch.hpp>
 
-#include "basic_lp/data.h"
+#include "osqp_api.h"    /* OSQP API wrapper (public + some private) */
+#include "osqp_tester.h" /* Tester helpers */
+#include "test_utils.h"  /* Testing Helper functions */
+
+#include "basic_lp_data.h"
 
 
-void test_basic_lp_solve()
+TEST_CASE( "Basic LP", "[solve][lp]" )
 {
   OSQPInt exitflag;
 
@@ -21,16 +24,23 @@ void test_basic_lp_solve()
 
   // Define Solver settings as default
   osqp_set_default_settings(settings.get());
-  settings->max_iter  = 2000;
-  settings->polishing = 1;
-  settings->scaling   = 1;
-  settings->verbose   = 1;
+  settings->max_iter = 2000;
+  settings->scaling  = 1;
+  settings->verbose  = 1;
+  settings->eps_abs  = 1e-5;
+  settings->eps_rel  = 1e-5;
+
+  /* Test with and without polishing */
+  settings->polishing = GENERATE(0, 1);
+  settings->polish_refine_iter = 4;
 
   /* TODO: MKL CG is failing this test, so test with default linear algebra only */
 #ifndef OSQP_ALGEBRA_MKL
   /* Test all possible linear system solvers in this test case */
   settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
 #endif
+
+  CAPTURE(settings->linsys_solver, settings->polishing);
 
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,

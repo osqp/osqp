@@ -313,7 +313,11 @@ void free_linsys_solver_cudapcg(cudapcg_solver* s) {
 
 OSQPInt update_linsys_solver_matrices_cudapcg(cudapcg_solver*   s,
                                               const OSQPMatrix* P,
-                                              const OSQPMatrix* A) {
+                                              const OSQPInt*    Px_new_idx,
+                                              OSQPInt           P_new_n,
+                                              const OSQPMatrix* A,
+                                              const OSQPInt*    Ax_new_idx,
+                                              OSQPInt           A_new_n) {
   /* The CUDA solver holds pointers to the matrices A and P, so it already has
      access to the updated matrices at this point. The only task remaining is to
      recompute the preconditioner */

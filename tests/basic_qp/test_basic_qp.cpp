@@ -1,7 +1,10 @@
-#include "osqp.h"    // OSQP API
-#include "osqp_tester.h" // Basic testing script header
+#include <catch2/catch.hpp>
 
-#include "basic_qp/data.h"
+#include "osqp_api.h"    /* OSQP API wrapper (public + some private) */
+#include "osqp_tester.h" /* Tester helpers */
+#include "test_utils.h"  /* Testing Helper functions */
+
+#include "basic_qp_data.h"
 
 
 void test_basic_qp_solve()
@@ -30,6 +33,8 @@ void test_basic_qp_solve()
 
   /* Test all possible linear system solvers in this test case */
   settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
+
+  CAPTURE(settings->linsys_solver);
 
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,
@@ -700,6 +705,8 @@ void test_basic_qp_check_termination()
   /* Test all possible linear system solvers in this test case */
   settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
 
+  CAPTURE(settings->linsys_solver, settings->polishing);
+
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,
                         data->A, data->l, data->u,
@@ -1011,4 +1018,31 @@ void test_basic_qp_warm_start()
 
   // Cleanup
   c_free(settings);
+}
+
+
+TEST_CASE( "Basic QP problem", "[solve][qp]" ) {
+    SECTION( "test_basic_qp_solve" ) {
+        test_basic_qp_solve();
+    }
+    SECTION( "test_basic_qp_settings" ) {
+        test_basic_qp_settings();
+    }
+    SECTION( "test_basic_qp_update" ) {
+        test_basic_qp_update();
+    }
+    SECTION( "test_basic_qp_check_termination" ) {
+        test_basic_qp_check_termination();
+    }
+    SECTION( "test_basic_qp_update_rho" ) {
+        test_basic_qp_update_rho();
+    }
+#ifdef OSQP_ENABLE_PROFILING
+    SECTION( "test_basic_qp_time_limit" ) {
+        test_basic_qp_time_limit();
+    }
+#endif
+    SECTION( "test_basic_qp_warm_start" ) {
+        test_basic_qp_warm_start();
+    }
 }

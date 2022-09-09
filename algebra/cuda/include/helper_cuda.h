@@ -33,6 +33,7 @@
 
 #pragma once
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -585,6 +586,7 @@ void check(T result, char const *const func, const char *const file,
   if (result) {
     fprintf(stderr, "CUDA error at %s:%d code=%d(%s) \"%s\" \n", file, line,
             static_cast<unsigned int>(result), _cudaGetErrorEnum(result), func);
+    assert(0);
     exit(EXIT_FAILURE);
   }
 }
@@ -607,6 +609,7 @@ inline void __getLastCudaError(const char *errorMessage, const char *file,
             " %s : (%d) %s.\n",
             file, line, errorMessage, static_cast<int>(err),
             cudaGetErrorString(err));
+    assert(0);
     exit(EXIT_FAILURE);
   }
 }
