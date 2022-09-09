@@ -108,7 +108,7 @@
 #define FLIP(i) (-(i)-2)
 #define UNFLIP(i) ((i < EMPTY) ? FLIP (i) : (i))
 
-/* for integer MAX/MIN, or for c_floats when we don't care how NaN's behave: */
+/* for integer MAX/MIN, or for OSQPFloats when we don't care how NaN's behave: */
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 

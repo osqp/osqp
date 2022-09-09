@@ -7,8 +7,6 @@
 #include "error.h"
 #include "printing.h"
 
-#ifdef OSQP_ALGEBRA_BUILTIN
-
 #include "csc_utils.h"
 #include "csc_math.h"
 
@@ -66,7 +64,6 @@ OSQPInt unscale_derivatives_PqAlu(OSQPSolver*    solver,
 
     return 0;
 }
-#endif
 
 OSQPInt adjoint_derivative(OSQPSolver*    solver,
                            OSQPFloat*     dx,
@@ -77,7 +74,6 @@ OSQPInt adjoint_derivative(OSQPSolver*    solver,
                            OSQPCscMatrix* dA,
                            OSQPFloat*     dl,
                            OSQPFloat*     du) {
-#ifdef OSQP_ALGEBRA_BUILTIN
 
     OSQPInt m = solver->work->data->m;
     OSQPInt n = solver->work->data->n;
@@ -361,12 +357,4 @@ OSQPInt adjoint_derivative(OSQPSolver*    solver,
     OSQPVectorf_free(y);
 
     return 0;
-
-#else
-
-    c_eprint("Not implemented");
-    return 1;
-
-#endif
-
 }

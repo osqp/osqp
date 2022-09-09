@@ -761,6 +761,11 @@ OSQPInt codegen_defines(const char*         output_dir,
   /* Write out the embedded mode in use */
   fprintf(incFile, "#define OSQP_EMBEDDED_MODE %d\n\n", defines->embedded_mode);
 
+  /* Write out if derivatives are enabled */
+  if (defines->printing_enable == 1) {
+    fprintf(incFile, "#define OSQP_ENABLE_DERIVATIVES\n\n");
+  }
+
   /* Write out if printing is enabled */
   if (defines->printing_enable == 1) {
     fprintf(incFile, "#define OSQP_ENABLE_PRINTING\n\n");

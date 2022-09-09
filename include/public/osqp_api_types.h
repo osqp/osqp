@@ -149,6 +149,7 @@ typedef struct {
   OSQPInt printing_enable;  ///< Enable printing if 1
   OSQPInt profiling_enable; ///< Enable timing of code sections if 1
   OSQPInt interrupt_enable; ///< Enable interrupt checking if 1
+  OSQPInt derivatives_enable; ///< Enable deriatives if 1
 } OSQPCodegenDefines;
 
 #endif /* ifndef OSQP_API_TYPES_H */
