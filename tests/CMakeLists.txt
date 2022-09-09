@@ -49,6 +49,7 @@ add_subdirectory(basic_lp)
 add_subdirectory(basic_qp)
 add_subdirectory(basic_qp2)
 add_subdirectory(codegen)
+add_subdirectory(lin_alg)
 add_subdirectory(non_cvx)
 add_subdirectory(primal_dual_infeasibility)
 add_subdirectory(primal_infeasibility)
@@ -63,8 +64,25 @@ add_custom_command(
   OUTPUT ${OSQP_TESTCASE_GENERATED_SRCS}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/generate_tests_data.py
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/generate_tests_data.py
+  DEPENDS ${OSQP_TESTCASE_GENERATORS}
+          ${CMAKE_CURRENT_SOURCE_DIR}/generate_tests_data.py
   COMMENT "Generating unittests data files using Python")
+
+# ----------------------------------------------
+# Linear algebra tester
+# ----------------------------------------------
+# Make this a separate tester executable to make developing linear algebra
+# libraries easier (this will test at the API between OSQP and a linear algebra
+# module).
+add_executable(lin_alg_tester
+               ${OSQP_LINALG_TESTER_SRCS})
+
+target_include_directories(lin_alg_tester PRIVATE
+                           ${OSQP_LINALG_TESTER_INC_DIRS})
+target_link_libraries(lin_alg_tester osqpstatic Catch2::Catch2 ${osqplib_link_libs})
+
+add_test(NAME lin_alg_tester COMMAND lin_alg_tester)
+
 
 # ----------------------------------------------
 # osqp_tester
@@ -84,11 +102,6 @@ target_include_directories(osqp_tester PRIVATE
 target_link_libraries(osqp_tester osqpstatic Catch2::Catch2 ${osqplib_link_libs})
 
 add_test(NAME osqp_tester COMMAND osqp_tester)
-
-# ----------------------------------------------
-# Linear algebra tester
-# ----------------------------------------------
-add_subdirectory(lin_alg)
 
 # ----------------------------------------------
 # osqp_tester_custom_memory (only use with builtin algebra)
