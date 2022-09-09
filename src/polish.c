@@ -1,5 +1,6 @@
 #include "polish.h"
 #include "lin_alg.h"
+#include "printing.h"
 #include "util.h"
 #include "auxil.h"
 #include "proj.h"
@@ -296,8 +297,17 @@ OSQPInt polish(OSQPSolver* solver) {
   mred = form_Ared(work);
   if (mred < 0) {
     // Polishing failed
-    info->status_polish = -1;
-    return -1;
+    info->status_polish = OSQP_POLISH_FAILED;
+    return OSQP_POLISH_FAILED;
+  } else if (mred == 0) {
+    /* No active constraints, so skip polishing */
+    c_print("Polishing skipped - no active set detected at optimal point\n");
+    info->status_polish = OSQP_POLISH_NO_ACTIVE_SET;
+
+    // Memory clean-up
+    OSQPMatrix_free(work->pol->Ared);
+
+    return OSQP_POLISH_NO_ACTIVE_SET;
   }
 
   // Form and factorize reduced KKT
@@ -306,24 +316,24 @@ OSQPInt polish(OSQPSolver* solver) {
 
   if (exitflag) {
     // Polishing failed
-    info->status_polish = -1;
+    info->status_polish = OSQP_POLISH_LINSYS_ERROR;
 
     // Memory clean-up
     OSQPMatrix_free(work->pol->Ared);
 
-    return 1;
+    return OSQP_POLISH_FAILED;
   }
 
   // Form reduced right-hand side rhs_red
   rhs_red = OSQPVectorf_malloc(work->data->n + mred);
   if (!rhs_red) {
     // Polishing failed
-    info->status_polish = -1;
+    info->status_polish = OSQP_POLISH_FAILED;
 
     // Memory clean-up
     OSQPMatrix_free(work->pol->Ared);
 
-    return -1;
+    return OSQP_POLISH_FAILED;
   }
   form_rhs_red(work, rhs_red);
 
@@ -334,7 +344,7 @@ OSQPInt polish(OSQPSolver* solver) {
   if (!pol_sol || !pol_sol_xview || !pol_sol_yview) {
 
     // Polishing failed
-    info->status_polish = -1;
+    info->status_polish = OSQP_POLISH_FAILED;
 
     // Memory clean-up
     OSQPMatrix_free(work->pol->Ared);
@@ -343,7 +353,7 @@ OSQPInt polish(OSQPSolver* solver) {
     OSQPVectorf_view_free(pol_sol_xview);
     OSQPVectorf_view_free(pol_sol_yview);
 
-    return -1;
+    return OSQP_POLISH_FAILED;
   }
 
   // Warm start the polished solution
@@ -357,7 +367,7 @@ OSQPInt polish(OSQPSolver* solver) {
 
   if (exitflag) {
     // Polishing failed
-    info->status_polish = -1;
+    info->status_polish = OSQP_POLISH_FAILED;
 
     // Memory clean-up
     OSQPMatrix_free(work->pol->Ared);
@@ -366,7 +376,7 @@ OSQPInt polish(OSQPSolver* solver) {
     OSQPVectorf_view_free(pol_sol_xview);
     OSQPVectorf_view_free(pol_sol_yview);
 
-    return -1;
+    return OSQP_POLISH_FAILED;
   }
 
   // Store the polished solution (x,z,y)
@@ -401,7 +411,7 @@ OSQPInt polish(OSQPSolver* solver) {
     info->obj_val       = work->pol->obj_val;
     info->prim_res      = work->pol->prim_res;
     info->dual_res      = work->pol->dual_res;
-    info->status_polish = 1;
+    info->status_polish = OSQP_POLISH_SUCCESS;
 
     // Update (x, z, y) in ADMM iterations
     // NB: z needed for warm starting
@@ -415,7 +425,7 @@ OSQPInt polish(OSQPSolver* solver) {
     if (settings->verbose) print_polish(solver);
 #endif /* ifdef OSQP_ENABLE_PRINTING */
   } else { // Polishing failed
-    info->status_polish = -1;
+    info->status_polish = OSQP_POLISH_FAILED;
 
     // TODO: Try to find a better solution on the line connecting ADMM
     //       and polished solution
@@ -430,5 +440,5 @@ OSQPInt polish(OSQPSolver* solver) {
   OSQPVectorf_free(pol_sol);
   OSQPVectorf_view_free(pol_sol_xview);
   OSQPVectorf_view_free(pol_sol_yview);
-  return 0;
+  return info->status_polish;
 }

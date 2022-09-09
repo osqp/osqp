@@ -31,7 +31,16 @@ TEST_CASE( "Basic LP", "[solve][lp]" )
   settings->eps_rel  = 1e-5;
 
   /* Test with and without polishing */
-  settings->polishing = GENERATE(0, 1);
+  OSQPInt polish;
+  OSQPInt expectedPolishStatus;
+
+  std::tie( polish, expectedPolishStatus ) =
+      GENERATE( table<OSQPInt, OSQPInt>(
+          { /* first is polish enabled, second is expected status */
+            std::make_tuple( 0, OSQP_POLISHING_UNPERFORMED ),
+            std::make_tuple( 1, OSQP_POLISH_SUCCESS ) } ) );
+
+  settings->polishing = polish;
   settings->polish_refine_iter = 4;
 
   /* TODO: MKL CG is failing this test, so test with default linear algebra only */
@@ -72,4 +81,8 @@ TEST_CASE( "Basic LP", "[solve][lp]" )
   mu_assert("Basic LP test solve: Error in dual solution!",
       vec_norm_inf_diff(solver->solution->y, sols_data->y_test,
             data->m) < TESTS_TOL);
+
+  // Check polishing status
+  mu_assert("Basic LP test solve: Error in polish status!",
+            solver->info->status_polish == expectedPolishStatus);
 }

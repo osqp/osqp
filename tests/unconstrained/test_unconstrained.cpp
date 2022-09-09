@@ -29,7 +29,16 @@ TEST_CASE("Unconstrained solve", "[unconstrained],[solve]")
   settings->verbose = 1;
 
   /* Test with and without polishing */
-  settings->polishing = GENERATE(0, 1);
+  OSQPInt polish;
+  OSQPInt expectedPolishStatus;
+
+  std::tie( polish, expectedPolishStatus ) =
+      GENERATE( table<OSQPInt, OSQPInt>(
+          { /* first is polish enabled, second is expected status */
+            std::make_tuple( 0, OSQP_POLISHING_UNPERFORMED ),
+            std::make_tuple( 1, OSQP_POLISH_NO_ACTIVE_SET ) } ) );
+
+  settings->polishing = polish;
   settings->polish_refine_iter = 4;
 
   /* Test all possible linear system solvers in this test case */
@@ -62,4 +71,8 @@ TEST_CASE("Unconstrained solve", "[unconstrained],[solve]")
   mu_assert("Unconstrained test solve: Error in objective value!",
             c_absval(solver->info->obj_val - sols_data->obj_value_test) <
             TESTS_TOL);
+
+  // Check polishing status
+  mu_assert("Unconstrained test solve: Error in polish status!",
+            solver->info->status_polish == expectedPolishStatus);
 }

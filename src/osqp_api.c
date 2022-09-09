@@ -320,7 +320,7 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Initialize information
-  solver->info->status_polish = 0;              // Polishing not performed
+  solver->info->status_polish = OSQP_POLISHING_UNPERFORMED; // Polishing not performed
   update_status(solver->info, OSQP_UNSOLVED);
 # ifdef OSQP_ENABLE_PROFILING
   solver->info->solve_time  = 0.0;                   // Solve time to zero

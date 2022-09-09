@@ -212,10 +212,12 @@ void print_footer(OSQPInfo* info,
   c_print("status:               %s\n", info->status);
 
   if (polishing && (info->status_val == OSQP_SOLVED)) {
-    if (info->status_polish == 1) {
+    if (info->status_polish == OSQP_POLISH_SUCCESS) {
       c_print("solution polishing:   successful\n");
     } else if (info->status_polish < 0) {
       c_print("solution polishing:   unsuccessful\n");
+    } else if (info->status_polish == OSQP_POLISH_NO_ACTIVE_SET) {
+      c_print("solution polishing:   skipped\n");
     }
   }
 
