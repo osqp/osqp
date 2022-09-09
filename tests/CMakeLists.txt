@@ -28,6 +28,11 @@ if((NOT SCIPY_FOUND) OR (SCIPY_VERSION VERSION_LESS 0.17.0))
 endif()
 
 # ----------------------------------------------
+# Define the C++ standard we will use in our test suite
+# ----------------------------------------------
+set(CMAKE_CXX_STANDARD 14)
+
+# ----------------------------------------------
 # Catch2
 # ----------------------------------------------
 include(FetchContent)
