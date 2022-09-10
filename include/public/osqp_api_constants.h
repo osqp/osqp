@@ -6,7 +6,7 @@
 /***********************
 * Solver capabilities *
 ***********************/
-enum osqp_capabilities {
+enum osqp_capabilities_type {
     /* This enum serves as a bit-flag definition, so each capability must be represented by
        a different bit in an int variable */
     OSQP_CAPABILITIY_DIRECT_SOLVER = 0x01,      /* A direct linear solver is present in the algebra */
