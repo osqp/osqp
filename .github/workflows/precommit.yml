@@ -2,7 +2,7 @@ name: Pre-commit checks
 
 on:
   push:
-    branches: [ master, develop**, vb/precommit ]
+    branches: [ master, develop** ]
     tags:
       - '*'
   pull_request:
@@ -10,7 +10,7 @@ on:
 
 jobs:
 
-  build_and_test:
+  precommit:
       runs-on: ubuntu-latest
 
       defaults:
