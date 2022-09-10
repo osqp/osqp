@@ -9,7 +9,7 @@
 
 OSQPInt osqp_algebra_linsys_supported(void) {
   /* Has both Paradiso (direct solver) and a PCG solver (indirect solver) */
-  return OSQP_CAPABILITIY_DIRECT_SOLVER | OSQP_CAPABILITIY_INDIRECT_SOLVER;
+  return OSQP_CAPABILITY_DIRECT_SOLVER | OSQP_CAPABILITY_INDIRECT_SOLVER;
 }
 
 enum osqp_linsys_solver_type osqp_algebra_default_linsys(void) {
