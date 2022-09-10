@@ -45,16 +45,16 @@ int main(void) {
   OSQPInt cap = osqp_capabilities();
 
   printf("This OSQP library supports:\n");
-  if(cap & OSQP_CAPABILITIY_DIRECT_SOLVER) {
+  if(cap & OSQP_CAPABILITY_DIRECT_SOLVER) {
     printf("    A direct linear algebra solver\n");
   }
-  if(cap & OSQP_CAPABILITIY_INDIRECT_SOLVER) {
+  if(cap & OSQP_CAPABILITY_INDIRECT_SOLVER) {
     printf("    An indirect linear algebra solver\n");
   }
-  if(cap & OSQP_CAPABILITIY_CODEGEN) {
+  if(cap & OSQP_CAPABILITY_CODEGEN) {
     printf("    Code generation\n");
   }
-  if(cap & OSQP_CAPABILITIY_DERIVATIVES) {
+  if(cap & OSQP_CAPABILITY_DERIVATIVES) {
     printf("    Derivatives calculation\n");
   }
   printf("\n");
