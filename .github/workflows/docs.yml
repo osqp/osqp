@@ -2,7 +2,7 @@ name: Docs
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, develop-1.0 ]
     tags:
       - '*'
 
@@ -38,6 +38,9 @@ jobs:
             if [[ $GITHUB_REF = "refs/tags/"* ]] ; then echo "OSQP_NAME=osqp-${GITHUB_REF/refs\/tags\//}-${{ runner.os }}" ; else echo "OSQP_NAME=osqp-0.0.0-${{ runner.os }}" ; fi >> $GITHUB_ENV
 
       - name: Build docs
+        # Run step only if the branch is not develop-1.0,
+        # because we handle it separately in subsequent steps. 
+        if: github.ref != 'refs/heads/develop-1.0'
         run: |
           cd docs && make HTMLCOPYDIR=../site/docs html && touch ../site/docs/.nojekyll
 
