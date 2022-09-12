@@ -41,6 +41,20 @@ jobs:
         run: |
           cd docs && make HTMLCOPYDIR=../site/docs html && touch ../site/docs/.nojekyll
 
+      # Build documentation on the develop-1.0 branch in a subfolder
+      # ------------------------------------------------------------
+      - uses: actions/checkout@v2
+        with:
+          ref: develop-1.0
+          path: develop-1.0
+          clean: false
+
+      - name: Build docs on develop-1.0
+        run: |
+          rm -rf develop-1.0/.git
+          cd develop-1.0/docs && make HTMLCOPYDIR=../../site/docs/develop-1.0 html
+      # ------------------------------------------------------------
+
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.1
         with:
