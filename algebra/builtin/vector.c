@@ -757,7 +757,7 @@ OSQPInt OSQPVectorf_in_reccone(const OSQPVectorf* y,
 
 #if OSQP_EMBEDDED_MODE != 1
 
-OSQPFloat OSQPVectorf_mean(const OSQPVectorf* a) {
+OSQPFloat OSQPVectorf_pos_mean(const OSQPVectorf* a) {
 
   OSQPInt i;
   OSQPInt length = a->length;

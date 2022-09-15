@@ -701,21 +701,19 @@ OSQPInt OSQPVectorf_in_reccone(const OSQPVectorf* y,
 //   }
 // }
 
-OSQPFloat OSQPVectorf_mean(const OSQPVectorf* a) {
+OSQPFloat OSQPVectorf_pos_mean(const OSQPVectorf* a) {
 
-  OSQPInt i;
   OSQPInt length = a->length;
+  const MKL_INT inca = 1; //How long should the spacing be (?)
 
-  OSQPFloat* av  = a->values;
-  OSQPFloat  val = 0.0;
+  OSQPFloat val = 0.0;
 
   if (length) {
-    for (i = 0; i < length; i++) {
-      val += av[i];
-    }
-    return val / length;
+    val = blas_asum(&length, a->values, &inca);
+    val = val / length;
   }
-  else return val;
+
+  return val;
 }
 
 void OSQPVectorf_ew_reciprocal(OSQPVectorf*       b,

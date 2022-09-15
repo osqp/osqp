@@ -120,9 +120,10 @@ OSQPInt scale_data(OSQPSolver* solver) {
     // Cost normalization step
     //
 
-    // Compute avg norm of cols of P
+    // Compute avg norm of cols of P. These norms are all positive, so use average
+    // that assumes positivity for performance.
     OSQPMatrix_col_norm_inf(work->data->P, work->D_temp);
-    c_temp = OSQPVectorf_mean(work->D_temp);
+    c_temp = OSQPVectorf_pos_mean(work->D_temp);
 
     // Compute inf norm of q
     inf_norm_q = OSQPVectorf_norm_inf(work->data->q);

@@ -426,7 +426,7 @@ TEST_CASE("Vector: Elementwise bound vector", "[vector],[operation]")
   }
 }
 
-TEST_CASE("Vector: Mean")
+TEST_CASE("Vector: Mean assuming positive")
 {
   lin_alg_sols_data_ptr data{generate_problem_lin_alg_sols_data()};
 
@@ -434,7 +434,7 @@ TEST_CASE("Vector: Mean")
   {
     OSQPVectorf_ptr vn{OSQPVectorf_new(data->test_vec_ops_vn, data->test_vec_ops_n)};
 
-    OSQPFloat mean = OSQPVectorf_mean(vn.get());
+    OSQPFloat mean = OSQPVectorf_pos_mean(vn.get());
 
     mu_assert("Mean computation failed",
               c_absval(mean - data->test_vec_ops_n) < TESTS_TOL);
@@ -442,29 +442,29 @@ TEST_CASE("Vector: Mean")
 
   SECTION("Full vector")
   {
-    OSQPVectorf_ptr v1{OSQPVectorf_new(data->test_vec_ops_v1, data->test_vec_ops_n)};
+    OSQPVectorf_ptr v1{OSQPVectorf_new(data->test_vec_ops_pos_v1, data->test_vec_ops_n)};
 
-    OSQPFloat mean = OSQPVectorf_mean(v1.get());
+    OSQPFloat mean = OSQPVectorf_pos_mean(v1.get());
 
     mu_assert("Mean computation failed",
-              c_absval(mean - data->test_vec_ops_mean) < TESTS_TOL);
+              c_absval(mean - data->test_vec_ops_pos_mean) < TESTS_TOL);
   }
 
   SECTION("Single element")
   {
-    OSQPVectorf_ptr v1{OSQPVectorf_new(data->test_vec_ops_v1, 1)};
+    OSQPVectorf_ptr v1{OSQPVectorf_new(data->test_vec_ops_pos_v1, 1)};
 
-    OSQPFloat mean = OSQPVectorf_mean(v1.get());
+    OSQPFloat mean = OSQPVectorf_pos_mean(v1.get());
 
     mu_assert("Mean computation failed",
-              c_absval(mean - data->test_vec_ops_v1[0]) < TESTS_TOL);
+              c_absval(mean - data->test_vec_ops_pos_v1[0]) < TESTS_TOL);
   }
 
   SECTION("No data")
   {
     OSQPVectorf_ptr v1{OSQPVectorf_malloc(0)};
 
-    OSQPFloat mean = OSQPVectorf_mean(v1.get());
+    OSQPFloat mean = OSQPVectorf_pos_mean(v1.get());
 
     mu_assert("Mean computation failed",
               c_absval(mean - 0.0) < TESTS_TOL);

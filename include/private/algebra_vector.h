@@ -166,8 +166,8 @@ OSQPFloat OSQPVectorf_norm_inf_diff(const OSQPVectorf* a,
 /* ||v||2 */
 OSQPFloat OSQPVectorf_norm_2(const OSQPVectorf* v);
 
-/* mean of vector elements */
-OSQPFloat OSQPVectorf_mean(const OSQPVectorf* a);
+/* mean of vector elements - assumes all elements are positive */
+OSQPFloat OSQPVectorf_pos_mean(const OSQPVectorf* a);
 
 /* Inner product a'b */
 OSQPFloat OSQPVectorf_dot_prod(const OSQPVectorf* a,
@@ -226,7 +226,7 @@ OSQPInt OSQPVectorf_in_reccone(const OSQPVectorf* y,
 # if OSQP_EMBEDDED_MODE != 1
 
 /* Vector mean value*/
-OSQPFloat OSQPVectorf_mean(const OSQPVectorf* a);
+OSQPFloat OSQPVectorf_pos_mean(const OSQPVectorf* a);
 
 /* Vector elementwise reciprocal b = 1./a (needed for scaling)*/
 void OSQPVectorf_ew_reciprocal(OSQPVectorf*       b,
