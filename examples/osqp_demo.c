@@ -1,5 +1,5 @@
 #include "osqp.h"
-
+#include "osqp_log.h"
 
 int main(int argc, char **argv) {
   // Load problem data
@@ -36,6 +36,9 @@ int main(int argc, char **argv) {
     data->u = u;
   }
 
+  // Capture console output in a log file
+  osqp_open_log("osqp_demo.log");
+
   // Define solver settings as default
   if (settings) osqp_set_default_settings(settings);
 
@@ -53,6 +56,9 @@ int main(int argc, char **argv) {
     c_free(data);
   }
   if (settings)  c_free(settings);
+
+  // Close the log file
+  osqp_close_log();
 
   return exitflag;
 }

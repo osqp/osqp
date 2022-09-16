@@ -128,6 +128,7 @@ typedef float c_float;  /* for numerical values  */
 # ifdef PRINTING
 #  include <stdio.h>
 #  include <string.h>
+#  include "osqp_log.h"
 
 /* informational print function */
 #  ifdef MATLAB
@@ -144,7 +145,7 @@ typedef float c_float;  /* for numerical values  */
 #   include <R_ext/Print.h>
 #   define c_print Rprintf
 #  else  /* ifdef MATLAB */
-#   define c_print printf
+#   define c_print osqp_log
 #  endif /* c_print configuration */
 
 /* error printing function */
