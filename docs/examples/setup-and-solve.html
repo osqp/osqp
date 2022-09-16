@@ -16,6 +16,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -112,7 +113,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
            <div itemprop="articleBody">
              
   <section id="setup-and-solve">
-<h1>Setup and solve<a class="headerlink" href="#setup-and-solve" title="Permalink to this headline">¶</a></h1>
+<h1>Setup and solve<a class="headerlink" href="#setup-and-solve" title="Permalink to this heading">¶</a></h1>
 <p>Consider the following QP</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{array}{ll}
@@ -121,7 +122,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 \end{array}\end{split}\]</div>
 <p>We show below how to solve the problem in Python, Matlab, Julia and C.</p>
 <section id="python">
-<h2>Python<a class="headerlink" href="#python" title="Permalink to this headline">¶</a></h2>
+<h2>Python<a class="headerlink" href="#python" title="Permalink to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">osqp</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
@@ -145,7 +146,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </div>
 </section>
 <section id="matlab">
-<h2>Matlab<a class="headerlink" href="#matlab" title="Permalink to this headline">¶</a></h2>
+<h2>Matlab<a class="headerlink" href="#matlab" title="Permalink to this heading">¶</a></h2>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Define problem data</span><span class="w"></span>
 <span class="n">P</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">sparse</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">]);</span><span class="w"></span>
 <span class="n">q</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="mi">1</span><span class="p">];</span><span class="w"></span>
@@ -165,30 +166,30 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </div>
 </section>
 <section id="julia">
-<h2>Julia<a class="headerlink" href="#julia" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span> <span class="n">OSQP</span>
-<span class="k">using</span> <span class="n">Compat</span><span class="o">.</span><span class="n">SparseArrays</span>
+<h2>Julia<a class="headerlink" href="#julia" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">OSQP</span><span class="w"></span>
+<span class="k">using</span><span class="w"> </span><span class="n">Compat</span><span class="o">.</span><span class="n">SparseArrays</span><span class="w"></span>
 
-<span class="c"># Define problem data</span>
-<span class="n">P</span> <span class="o">=</span> <span class="n">sparse</span><span class="p">([</span><span class="mf">4.</span> <span class="mf">1.</span><span class="p">;</span> <span class="mf">1.</span> <span class="mf">2.</span><span class="p">])</span>
-<span class="n">q</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.</span><span class="p">;</span> <span class="mf">1.</span><span class="p">]</span>
-<span class="n">A</span> <span class="o">=</span> <span class="n">sparse</span><span class="p">([</span><span class="mf">1.</span> <span class="mf">1.</span><span class="p">;</span> <span class="mf">1.</span> <span class="mf">0.</span><span class="p">;</span> <span class="mf">0.</span> <span class="mf">1.</span><span class="p">])</span>
-<span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.</span><span class="p">;</span> <span class="mf">0.</span><span class="p">;</span> <span class="mf">0.</span><span class="p">]</span>
-<span class="n">u</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.</span><span class="p">;</span> <span class="mf">0.7</span><span class="p">;</span> <span class="mf">0.7</span><span class="p">]</span>
+<span class="c"># Define problem data</span><span class="w"></span>
+<span class="n">P</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sparse</span><span class="p">([</span><span class="mf">4.</span><span class="w"> </span><span class="mf">1.</span><span class="p">;</span><span class="w"> </span><span class="mf">1.</span><span class="w"> </span><span class="mf">2.</span><span class="p">])</span><span class="w"></span>
+<span class="n">q</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">1.</span><span class="p">;</span><span class="w"> </span><span class="mf">1.</span><span class="p">]</span><span class="w"></span>
+<span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sparse</span><span class="p">([</span><span class="mf">1.</span><span class="w"> </span><span class="mf">1.</span><span class="p">;</span><span class="w"> </span><span class="mf">1.</span><span class="w"> </span><span class="mf">0.</span><span class="p">;</span><span class="w"> </span><span class="mf">0.</span><span class="w"> </span><span class="mf">1.</span><span class="p">])</span><span class="w"></span>
+<span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">1.</span><span class="p">;</span><span class="w"> </span><span class="mf">0.</span><span class="p">;</span><span class="w"> </span><span class="mf">0.</span><span class="p">]</span><span class="w"></span>
+<span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">1.</span><span class="p">;</span><span class="w"> </span><span class="mf">0.7</span><span class="p">;</span><span class="w"> </span><span class="mf">0.7</span><span class="p">]</span><span class="w"></span>
 
-<span class="c"># Crate OSQP object</span>
-<span class="n">prob</span> <span class="o">=</span> <span class="n">OSQP</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span>
+<span class="c"># Crate OSQP object</span><span class="w"></span>
+<span class="n">prob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OSQP</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span><span class="w"></span>
 
-<span class="c"># Setup workspace and change alpha parameter</span>
-<span class="n">OSQP</span><span class="o">.</span><span class="n">setup!</span><span class="p">(</span><span class="n">prob</span><span class="p">;</span> <span class="n">P</span><span class="o">=</span><span class="n">P</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">A</span><span class="o">=</span><span class="n">A</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="n">l</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">u</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="c"># Setup workspace and change alpha parameter</span><span class="w"></span>
+<span class="n">OSQP</span><span class="o">.</span><span class="n">setup!</span><span class="p">(</span><span class="n">prob</span><span class="p">;</span><span class="w"> </span><span class="n">P</span><span class="o">=</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span><span class="w"> </span><span class="n">A</span><span class="o">=</span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="o">=</span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="o">=</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
 
-<span class="c"># Solve problem</span>
-<span class="n">results</span> <span class="o">=</span> <span class="n">OSQP</span><span class="o">.</span><span class="n">solve!</span><span class="p">(</span><span class="n">prob</span><span class="p">)</span>
+<span class="c"># Solve problem</span><span class="w"></span>
+<span class="n">results</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OSQP</span><span class="o">.</span><span class="n">solve!</span><span class="p">(</span><span class="n">prob</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
 <section id="r">
-<h2>R<a class="headerlink" href="#r" title="Permalink to this headline">¶</a></h2>
+<h2>R<a class="headerlink" href="#r" title="Permalink to this heading">¶</a></h2>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">osqp</span><span class="p">)</span>
 <span class="nf">library</span><span class="p">(</span><span class="n">Matrix</span><span class="p">)</span>
 
@@ -211,7 +212,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </div>
 </section>
 <section id="c">
-<h2>C<a class="headerlink" href="#c" title="Permalink to this headline">¶</a></h2>
+<h2>C<a class="headerlink" href="#c" title="Permalink to this heading">¶</a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;osqp.h&quot;</span><span class="cp"></span>
 
 <span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">**</span><span class="n">argv</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>

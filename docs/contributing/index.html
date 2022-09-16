@@ -16,6 +16,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -102,7 +103,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
            <div itemprop="articleBody">
              
   <section id="contributing">
-<h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h1>
+<h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this heading">¶</a></h1>
 <p>OSQP is an open-source project open to any academic or commercial applications.
 Contributions are welcome as <a class="reference external" href="https://help.github.com/articles/creating-a-pull-request/">GitHub pull requests</a> in any part of the project such as</p>
 <ul class="simple">
@@ -112,7 +113,7 @@ Contributions are welcome as <a class="reference external" href="https://help.gi
 <li><p>linear system solvers interfaces</p></li>
 </ul>
 <section id="interfacing-new-linear-system-solvers">
-<span id="id1"></span><h2>Interfacing new linear system solvers<a class="headerlink" href="#interfacing-new-linear-system-solvers" title="Permalink to this headline">¶</a></h2>
+<span id="id1"></span><h2>Interfacing new linear system solvers<a class="headerlink" href="#interfacing-new-linear-system-solvers" title="Permalink to this heading">¶</a></h2>
 <p>OSQP is designed to be easily interfaced to new linear system solvers via dynamic library loading.
 To add a linear system solver interface you need to edit the <code class="code docutils literal notranslate"><span class="pre">lin_sys/</span></code> directory subfolder <code class="code docutils literal notranslate"><span class="pre">direct/</span></code> or <code class="code docutils literal notranslate"><span class="pre">indirect/</span></code> depending on the type of solver.
 Create a subdirectory with your solver name with four files:</p>
@@ -122,13 +123,13 @@ Create a subdirectory with your solver name with four files:</p>
 </ul>
 <p>We suggest you to have a look at the <a class="reference external" href="https://github.com/osqp/osqp/tree/master/lin_sys/direct/pardiso">MKL Pardiso solver interface</a> for more details.</p>
 <section id="dynamic-library-loading">
-<h3>Dynamic library loading<a class="headerlink" href="#dynamic-library-loading" title="Permalink to this headline">¶</a></h3>
+<h3>Dynamic library loading<a class="headerlink" href="#dynamic-library-loading" title="Permalink to this heading">¶</a></h3>
 <p>In this part define the methods to load the shared library and obtain the functions required to solve the linear system.
 The main functions to be exported are <code class="code docutils literal notranslate"><span class="pre">lh_load_mysolver(const</span> <span class="pre">char*</span> <span class="pre">libname)</span></code> and <code class="code docutils literal notranslate"><span class="pre">lh_unload_mysolver()</span></code>.
 In addition, the file <code class="code docutils literal notranslate"><span class="pre">mysolver_loader.c</span></code> must define static function pointers to the shared library functions to be loaded.</p>
 </section>
 <section id="linear-system-solution">
-<h3>Linear system solution<a class="headerlink" href="#linear-system-solution" title="Permalink to this headline">¶</a></h3>
+<h3>Linear system solution<a class="headerlink" href="#linear-system-solution" title="Permalink to this heading">¶</a></h3>
 <p>In this part we define the core of the interface: <strong>linear system solver object</strong>.
 The main functions are the external method</p>
 <ul class="simple">

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>C &mdash; OSQP  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/osqp_theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Python" href="python.html" />
+    <link rel="prev" title="Status values and errors" href="status_values.html" />
+<meta name="twitter:card" content="summary_large_image" >
+<meta name="twitter:creator" content="@bstellato" >
+<meta name="twitter:image"
+      content="https://osqp.org/docs/_static/img/logo.png">
+<meta name="twitter:description" content="The OSQP (Operator Splitting
+Quadratic Program) solver is a numerical optimization package for solving
+convex quadratic programs." >
+<meta property="og:url" content="https://osqp.org" >
+<meta property="og:title" content="OSQP solver documentation" >
+<meta property="og:description" content="The OSQP (Operator Splitting Quadratic
+Program) solver is a numerical optimization package for solving convex
+quadratic programs." >
+<meta property="og:image"
+content="https://osqp.org/docs/_static/img/logo.png">
+<meta property="fb:app_id" content="129555174389689">
+<meta property="og:type" content="website" >
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../solver/index.html">The solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../get_started/index.html">Get started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Interfaces</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="solver_settings.html">Solver settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear_systems_solvers.html">Linear Systems Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="status_values.html">Status values and errors</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#official">Official</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">C</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#main-solver-api">Main solver API</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sublevel-api">Sublevel API</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data-types">Data types</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="python.html">Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="matlab.html">Matlab</a></li>
+<li class="toctree-l3"><a class="reference internal" href="julia.html">Julia</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rlang.html">R</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#community-maintained">Community Maintained</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../parsers/index.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../codegen/index.html">Code generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OSQP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Interfaces</a> &raquo;</li>
+      <li>C</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/interfaces/C.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="c">
+<span id="c-interface"></span><h1>C<a class="headerlink" href="#c" title="Permalink to this heading">¶</a></h1>
+<section id="main-solver-api">
+<span id="c-main-api"></span><h2>Main solver API<a class="headerlink" href="#main-solver-api" title="Permalink to this heading">¶</a></h2>
+<p>The main C API is imported from the header <code class="code docutils literal notranslate"><span class="pre">osqp.h</span></code> and provides the following functions</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>doxygenfunction: Cannot find function “osqp_setup” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>doxygenfunction: Cannot find function “osqp_solve” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>doxygenfunction: Cannot find function “osqp_cleanup” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
+</div>
+</section>
+<section id="sublevel-api">
+<span id="c-sublevel-api"></span><h2>Sublevel API<a class="headerlink" href="#sublevel-api" title="Permalink to this heading">¶</a></h2>
+<p>Sublevel C API is also imported from the header <code class="code docutils literal notranslate"><span class="pre">osqp.h</span></code> and provides the following functions</p>
+<section id="warm-start">
+<h3>Warm start<a class="headerlink" href="#warm-start" title="Permalink to this heading">¶</a></h3>
+<p>OSQP automatically warm starts primal and dual variables from the previous QP solution. If you would like to warm start their values manually, you can use</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>doxygenfunction: Cannot find function “osqp_warm_start” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
+</div>
+</section>
+<section id="update-problem-data">
+<span id="c-update-data"></span><h3>Update problem data<a class="headerlink" href="#update-problem-data" title="Permalink to this heading">¶</a></h3>
+<p>Problem data can be updated without executing the setup again using the following functions.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>doxygenfunction: Cannot find function “osqp_update_data_vec” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>doxygenfunction: Cannot find function “osqp_update_data_mat” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
+</div>
+</section>
+</section>
+<section id="data-types">
+<span id="c-data-types"></span><h2>Data types<a class="headerlink" href="#data-types" title="Permalink to this heading">¶</a></h2>
+<p>The most basic used datatypes are</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">OSQPInt</span></code>: can be <code class="code docutils literal notranslate"><span class="pre">long</span></code> or <code class="code docutils literal notranslate"><span class="pre">int</span></code> if the compiler flag <code class="code docutils literal notranslate"><span class="pre">OSQP_USE_LONG</span></code> is set or not</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">OSQPFloat</span></code>: can be a <code class="code docutils literal notranslate"><span class="pre">float</span></code> or a <code class="code docutils literal notranslate"><span class="pre">double</span></code> if the compiler flag <code class="code docutils literal notranslate"><span class="pre">OSQP_USE_FLOAT</span></code> is set or not.</p></li>
+</ul>
+<p>The matrices are defined in <a class="reference external" href="https://people.sc.fsu.edu/~jburkardt/data/cc/cc.html">Compressed Sparse Column (CSC) format</a> using zero-based indexing.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>doxygenstruct: Cannot find class “OSQPCscMatrix” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
+</div>
+<p>The relevant structures used in the API are</p>
+<section id="solver">
+<h3>Solver<a class="headerlink" href="#solver" title="Permalink to this heading">¶</a></h3>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>doxygenstruct: Cannot find class “OSQPSolver” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
+</div>
+</section>
+<section id="settings">
+<h3>Settings<a class="headerlink" href="#settings" title="Permalink to this heading">¶</a></h3>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>doxygenstruct: Cannot find class “OSQPSettings” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
+</div>
+</section>
+<section id="solution">
+<h3>Solution<a class="headerlink" href="#solution" title="Permalink to this heading">¶</a></h3>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>doxygenstruct: Cannot find class “OSQPSolution” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
+</div>
+</section>
+<section id="info">
+<h3>Info<a class="headerlink" href="#info" title="Permalink to this heading">¶</a></h3>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>doxygenstruct: Cannot find class “OSQPInfo” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="status_values.html" class="btn btn-neutral float-left" title="Status values and errors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="python.html" class="btn btn-neutral float-right" title="Python" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

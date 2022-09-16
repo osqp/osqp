@@ -16,6 +16,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -115,22 +116,22 @@ content="https://osqp.org/docs/_static/img/logo.png">
            <div itemprop="articleBody">
              
   <section id="build-from-sources">
-<span id="id1"></span><h1>Build from sources<a class="headerlink" href="#build-from-sources" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1>Build from sources<a class="headerlink" href="#build-from-sources" title="Permalink to this heading">¶</a></h1>
 <section id="install-gcc-and-cmake">
-<h2>Install GCC and CMake<a class="headerlink" href="#install-gcc-and-cmake" title="Permalink to this headline">¶</a></h2>
+<h2>Install GCC and CMake<a class="headerlink" href="#install-gcc-and-cmake" title="Permalink to this heading">¶</a></h2>
 <p>The main compilation directives are specified using</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://gcc.gnu.org/">GCC compiler</a> to build the binaries</p></li>
 <li><p><a class="reference external" href="https://cmake.org/">CMake</a> to create the Makefiles</p></li>
 </ul>
 <section id="linux">
-<h3>Linux<a class="headerlink" href="#linux" title="Permalink to this headline">¶</a></h3>
+<h3>Linux<a class="headerlink" href="#linux" title="Permalink to this heading">¶</a></h3>
 <p>Both <code class="code docutils literal notranslate"><span class="pre">gcc</span></code> and <code class="code docutils literal notranslate"><span class="pre">cmake</span></code> commands are already installed by default.</p>
 </section>
 <section id="mac-os">
-<h3>Mac OS<a class="headerlink" href="#mac-os" title="Permalink to this headline">¶</a></h3>
+<h3>Mac OS<a class="headerlink" href="#mac-os" title="Permalink to this heading">¶</a></h3>
 <section id="install-xcode-and-command-line-tools">
-<h4>Install Xcode and command line tools<a class="headerlink" href="#install-xcode-and-command-line-tools" title="Permalink to this headline">¶</a></h4>
+<h4>Install Xcode and command line tools<a class="headerlink" href="#install-xcode-and-command-line-tools" title="Permalink to this heading">¶</a></h4>
 <ol class="arabic">
 <li><p>Install the latest release of <a class="reference external" href="https://developer.apple.com/download/">Xcode</a>.</p></li>
 <li><p>Install the command line tools by executing from the terminal</p>
@@ -143,7 +144,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </ol>
 </section>
 <section id="install-cmake-via-homebrew">
-<h4>Install CMake via Homebrew<a class="headerlink" href="#install-cmake-via-homebrew" title="Permalink to this headline">¶</a></h4>
+<h4>Install CMake via Homebrew<a class="headerlink" href="#install-cmake-via-homebrew" title="Permalink to this heading">¶</a></h4>
 <ol class="arabic">
 <li><p>Install <a class="reference external" href="https://brew.sh/">Homebrew</a> and update its packages to the latest version.</p></li>
 <li><p>Install cmake by executing</p>
@@ -157,7 +158,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </section>
 </section>
 <section id="windows">
-<h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
+<h3>Windows<a class="headerlink" href="#windows" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic simple">
 <li><p>Install <a class="reference external" href="http://tdm-gcc.tdragon.net/download">TDM-GCC</a> 32bit or 64bit depending on your platform.</p></li>
 <li><p>Install the latest binaries of <a class="reference external" href="https://cmake.org/download/#latest">CMake</a>.</p></li>
@@ -165,7 +166,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </section>
 </section>
 <section id="build-the-binaries">
-<h2>Build the binaries<a class="headerlink" href="#build-the-binaries" title="Permalink to this headline">¶</a></h2>
+<h2>Build the binaries<a class="headerlink" href="#build-the-binaries" title="Permalink to this heading">¶</a></h2>
 <p>Run the following commands from the terminal</p>
 <ol class="arabic">
 <li><p>You first need to get the sources from one of these two options:</p>
@@ -227,7 +228,7 @@ mkdir build
 <p>Once the sources are built, the generated static <code class="code docutils literal notranslate"><span class="pre">build/out/libosqp.a</span></code> and shared <code class="code docutils literal notranslate"><span class="pre">build/out/libosqp.ext</span></code> libraries can be used to interface any C/C++ software to OSQP (see <a class="reference internal" href="C.html#install-osqp-libs"><span class="std std-ref">CC++</span></a> installation).</p>
 </section>
 <section id="install-the-binaries">
-<span id="id2"></span><h2>Install the binaries<a class="headerlink" href="#install-the-binaries" title="Permalink to this headline">¶</a></h2>
+<span id="id2"></span><h2>Install the binaries<a class="headerlink" href="#install-the-binaries" title="Permalink to this heading">¶</a></h2>
 <p>To install the generated libraries and headers to a system-wide location compatible with <a class="reference external" href="http://www.gnu.org/prep/standards/html_node/Directory-Variables.html">GNU standards</a> it is just necessary to run</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cmake --build . --target install
 </pre></div>

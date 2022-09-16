@@ -16,6 +16,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -115,9 +116,9 @@ content="https://osqp.org/docs/_static/img/logo.png">
            <div itemprop="articleBody">
              
   <section id="c">
-<span id="c-interface"></span><h1>C<a class="headerlink" href="#c" title="Permalink to this headline">¶</a></h1>
+<span id="c-interface"></span><h1>C<a class="headerlink" href="#c" title="Permalink to this heading">¶</a></h1>
 <section id="main-solver-api">
-<span id="c-main-api"></span><h2>Main solver API<a class="headerlink" href="#main-solver-api" title="Permalink to this headline">¶</a></h2>
+<span id="c-main-api"></span><h2>Main solver API<a class="headerlink" href="#main-solver-api" title="Permalink to this heading">¶</a></h2>
 <p>The main C API is imported from the header <code class="code docutils literal notranslate"><span class="pre">osqp.h</span></code> and provides the following functions</p>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv410osqp_setupPP13OSQPWorkspacePK8OSQPDataPK12OSQPSettings">
@@ -185,10 +186,10 @@ content="https://osqp.org/docs/_static/img/logo.png">
 
 </section>
 <section id="sublevel-api">
-<span id="c-sublevel-api"></span><h2>Sublevel API<a class="headerlink" href="#sublevel-api" title="Permalink to this headline">¶</a></h2>
+<span id="c-sublevel-api"></span><h2>Sublevel API<a class="headerlink" href="#sublevel-api" title="Permalink to this heading">¶</a></h2>
 <p>Sublevel C API is also imported from the header <code class="code docutils literal notranslate"><span class="pre">osqp.h</span></code> and provides the following functions</p>
 <section id="warm-start">
-<h3>Warm start<a class="headerlink" href="#warm-start" title="Permalink to this headline">¶</a></h3>
+<h3>Warm start<a class="headerlink" href="#warm-start" title="Permalink to this heading">¶</a></h3>
 <p>OSQP automatically warm starts primal and dual variables from the previous QP solution. If you would like to warm start their values manually, you can use</p>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv415osqp_warm_startP13OSQPWorkspacePK7c_floatPK7c_float">
@@ -244,7 +245,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 
 </section>
 <section id="update-problem-data">
-<span id="c-cpp-update-data"></span><h3>Update problem data<a class="headerlink" href="#update-problem-data" title="Permalink to this headline">¶</a></h3>
+<span id="c-cpp-update-data"></span><h3>Update problem data<a class="headerlink" href="#update-problem-data" title="Permalink to this heading">¶</a></h3>
 <p>Problem data can be updated without executing the setup again using the following functions.</p>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv420osqp_update_lin_costP13OSQPWorkspacePK7c_float">
@@ -382,7 +383,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </section>
 </section>
 <section id="data-types">
-<span id="c-cpp-data-types"></span><h2>Data types<a class="headerlink" href="#data-types" title="Permalink to this headline">¶</a></h2>
+<span id="c-cpp-data-types"></span><h2>Data types<a class="headerlink" href="#data-types" title="Permalink to this heading">¶</a></h2>
 <p>The most basic used datatypes are</p>
 <ul class="simple">
 <li><p><code class="code docutils literal notranslate"><span class="pre">c_int</span></code>: can be <code class="code docutils literal notranslate"><span class="pre">long</span></code> or <code class="code docutils literal notranslate"><span class="pre">int</span></code> if the compiler flag <code class="code docutils literal notranslate"><span class="pre">DLONG</span></code> is set or not</p></li>
@@ -390,7 +391,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </ul>
 <p>The relevant structures used in the API are</p>
 <section id="data">
-<h3>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h3>
+<h3>Data<a class="headerlink" href="#data" title="Permalink to this heading">¶</a></h3>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv48OSQPData">
 <span id="_CPPv38OSQPData"></span><span id="_CPPv28OSQPData"></span><span id="OSQPData"></span><span class="target" id="d9/d78/struct_o_s_q_p_data"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPData</span></span></span><a class="headerlink" href="#_CPPv48OSQPData" title="Permalink to this definition">¶</a><br /></dt>
@@ -496,7 +497,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 
 </section>
 <section id="settings">
-<h3>Settings<a class="headerlink" href="#settings" title="Permalink to this headline">¶</a></h3>
+<h3>Settings<a class="headerlink" href="#settings" title="Permalink to this heading">¶</a></h3>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv412OSQPSettings">
 <span id="_CPPv312OSQPSettings"></span><span id="_CPPv212OSQPSettings"></span><span id="OSQPSettings"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPSettings</span></span></span><a class="headerlink" href="#_CPPv412OSQPSettings" title="Permalink to this definition">¶</a><br /></dt>
@@ -640,7 +641,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 
 </section>
 <section id="solution">
-<h3>Solution<a class="headerlink" href="#solution" title="Permalink to this headline">¶</a></h3>
+<h3>Solution<a class="headerlink" href="#solution" title="Permalink to this heading">¶</a></h3>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv412OSQPSolution">
 <span id="_CPPv312OSQPSolution"></span><span id="_CPPv212OSQPSolution"></span><span id="OSQPSolution"></span><span class="target" id="d0/dc1/struct_o_s_q_p_solution"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPSolution</span></span></span><a class="headerlink" href="#_CPPv412OSQPSolution" title="Permalink to this definition">¶</a><br /></dt>
@@ -664,7 +665,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 
 </section>
 <section id="info">
-<h3>Info<a class="headerlink" href="#info" title="Permalink to this headline">¶</a></h3>
+<h3>Info<a class="headerlink" href="#info" title="Permalink to this heading">¶</a></h3>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv48OSQPInfo">
 <span id="_CPPv38OSQPInfo"></span><span id="_CPPv28OSQPInfo"></span><span id="OSQPInfo"></span><span class="target" id="d6/df9/struct_o_s_q_p_info"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPInfo</span></span></span><a class="headerlink" href="#_CPPv48OSQPInfo" title="Permalink to this definition">¶</a><br /></dt>
@@ -760,7 +761,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 
 </section>
 <section id="workspace">
-<h3>Workspace<a class="headerlink" href="#workspace" title="Permalink to this headline">¶</a></h3>
+<h3>Workspace<a class="headerlink" href="#workspace" title="Permalink to this heading">¶</a></h3>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv413OSQPWorkspace">
 <span id="_CPPv313OSQPWorkspace"></span><span id="_CPPv213OSQPWorkspace"></span><span id="OSQPWorkspace"></span><span class="target" id="d6/da3/struct_o_s_q_p_workspace"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPWorkspace</span></span></span><a class="headerlink" href="#_CPPv413OSQPWorkspace" title="Permalink to this definition">¶</a><br /></dt>
@@ -985,7 +986,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 
 </section>
 <section id="scaling">
-<h3>Scaling<a class="headerlink" href="#scaling" title="Permalink to this headline">¶</a></h3>
+<h3>Scaling<a class="headerlink" href="#scaling" title="Permalink to this heading">¶</a></h3>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv411OSQPScaling">
 <span id="_CPPv311OSQPScaling"></span><span id="_CPPv211OSQPScaling"></span><span id="OSQPScaling"></span><span class="target" id="db/dc0/struct_o_s_q_p_scaling"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPScaling</span></span></span><a class="headerlink" href="#_CPPv411OSQPScaling" title="Permalink to this definition">¶</a><br /></dt>
@@ -1033,7 +1034,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 
 </section>
 <section id="polish">
-<h3>Polish<a class="headerlink" href="#polish" title="Permalink to this headline">¶</a></h3>
+<h3>Polish<a class="headerlink" href="#polish" title="Permalink to this heading">¶</a></h3>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv410OSQPPolish">
 <span id="_CPPv310OSQPPolish"></span><span id="_CPPv210OSQPPolish"></span><span id="OSQPPolish"></span><span class="target" id="de/d59/struct_o_s_q_p_polish"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPPolish</span></span></span><a class="headerlink" href="#_CPPv410OSQPPolish" title="Permalink to this definition">¶</a><br /></dt>

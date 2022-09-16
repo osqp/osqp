@@ -16,6 +16,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -109,10 +110,10 @@ content="https://osqp.org/docs/_static/img/logo.png">
            <div itemprop="articleBody">
              
   <section id="matlab">
-<h1>Matlab<a class="headerlink" href="#matlab" title="Permalink to this headline">¶</a></h1>
+<h1>Matlab<a class="headerlink" href="#matlab" title="Permalink to this heading">¶</a></h1>
 <p>OSQP Matlab interface requires Matlab 2015b or newer.</p>
 <section id="binaries">
-<h2>Binaries<a class="headerlink" href="#binaries" title="Permalink to this headline">¶</a></h2>
+<h2>Binaries<a class="headerlink" href="#binaries" title="Permalink to this heading">¶</a></h2>
 <p>Precompiled platform-dependent Matlab binaries are available on <a class="reference external" href="https://github.com/osqp/osqp-matlab/releases">GitHub</a>.</p>
 <p>To install the interface, just run the following commands:</p>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="nb">websave</span><span class="p">(</span><span class="s">&#39;install_osqp.m&#39;</span><span class="p">,</span><span class="s">&#39;https://raw.githubusercontent.com/osqp/osqp-matlab/master/package/install_osqp.m&#39;</span><span class="p">);</span><span class="w"></span>
@@ -121,7 +122,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </div>
 </section>
 <section id="sources">
-<h2>Sources<a class="headerlink" href="#sources" title="Permalink to this headline">¶</a></h2>
+<h2>Sources<a class="headerlink" href="#sources" title="Permalink to this heading">¶</a></h2>
 <p>You need to install the following (see <a class="reference internal" href="sources.html#build-from-sources"><span class="std std-ref">Build from sources</span></a> for more details):</p>
 <ul class="simple">
 <li><p>A supported 64bit <a class="reference external" href="https://www.mathworks.com/support/compilers.html">C/C++ compiler</a></p></li>
@@ -137,7 +138,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="nb">setenv</span><span class="p">(</span><span class="s">&#39;MW_MINGW64_LOC&#39;</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;C:\TDM-GCC-64&#39;</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 </div>
-<p>where <code class="code docutils literal notranslate"><span class="pre">C:\TDM-GCC-64</span></code> is the installation folder for TDM-GCC.</p>
+<p>where <code class="code docutils literal notranslate"><span class="pre">C:TDM-GCC-64</span></code> is the installation folder for TDM-GCC.</p>
 </div>
 <p>You can now build the interface by running inside Matlab</p>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="sx">!git clone --recurse-submodules https://github.com/osqp/osqp-matlab</span><span class="w"></span>
