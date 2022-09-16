@@ -33,7 +33,9 @@ test_vec_ops_sc2 = rg.standard_normal()
 test_vec_ops_sc3 = rg.standard_normal()
 test_vec_ops_same = np.zeros(test_vec_ops_n)
 test_vec_ops_same.fill(test_vec_ops_sc1)
-test_vec_ops_pos_mean = np.mean(test_vec_ops_pos_v1)
+test_vec_ops_norm_1 = np.linalg.norm(test_vec_ops_v1, 1)
+test_vec_ops_pos_norm_1 = np.linalg.norm(test_vec_ops_pos_v1, 1)
+test_vec_ops_neg_norm_1 = np.linalg.norm(test_vec_ops_neg_v1, 1)
 test_vec_ops_norm_2 = np.linalg.norm(test_vec_ops_v1, 2)
 test_vec_ops_norm_inf = np.linalg.norm(test_vec_ops_v1, np.inf)
 test_vec_ops_norm_inf_scaled = np.linalg.norm(test_vec_ops_v1 * test_vec_ops_v2, np.inf)
@@ -177,7 +179,9 @@ data = {'test_sp_matrix_A': test_sp_matrix_A,
         'test_vec_ops_sc2': test_vec_ops_sc2,
         'test_vec_ops_sc3': test_vec_ops_sc3,
         'test_vec_ops_same': test_vec_ops_same,
-        'test_vec_ops_pos_mean': test_vec_ops_pos_mean,
+        'test_vec_ops_norm_1': test_vec_ops_norm_1,
+        'test_vec_ops_pos_norm_1': test_vec_ops_pos_norm_1,
+        'test_vec_ops_neg_norm_1': test_vec_ops_neg_norm_1,
         'test_vec_ops_norm_2': test_vec_ops_norm_2,
         'test_vec_ops_norm_inf': test_vec_ops_norm_inf,
         'test_vec_ops_norm_inf_scaled': test_vec_ops_norm_inf_scaled,

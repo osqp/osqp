@@ -308,7 +308,7 @@ OSQPFloat OSQPVectorf_norm_inf_diff(const OSQPVectorf* a,
   return normDiff;
 }
 
-OSQPFloat OSQPVectorf_pos_mean(const OSQPVectorf* a) {
+OSQPFloat OSQPVectorf_norm_1(const OSQPVectorf* a) {
 
   OSQPFloat mean;
 

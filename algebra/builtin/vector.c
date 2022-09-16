@@ -757,7 +757,7 @@ OSQPInt OSQPVectorf_in_reccone(const OSQPVectorf* y,
 
 #if OSQP_EMBEDDED_MODE != 1
 
-OSQPFloat OSQPVectorf_pos_mean(const OSQPVectorf* a) {
+OSQPFloat OSQPVectorf_norm_1(const OSQPVectorf* a) {
 
   OSQPInt i;
   OSQPInt length = a->length;
@@ -767,11 +767,11 @@ OSQPFloat OSQPVectorf_pos_mean(const OSQPVectorf* a) {
 
   if (length) {
     for (i = 0; i < length; i++) {
-      val += av[i];
+      val += c_absval(av[i]);
     }
-    return val / length;
   }
-  else return val;
+
+  return val;
 }
 
 void OSQPVectorf_ew_reciprocal(OSQPVectorf*       b,

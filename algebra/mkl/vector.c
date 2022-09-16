@@ -701,16 +701,15 @@ OSQPInt OSQPVectorf_in_reccone(const OSQPVectorf* y,
 //   }
 // }
 
-OSQPFloat OSQPVectorf_pos_mean(const OSQPVectorf* a) {
+OSQPFloat OSQPVectorf_norm_1(const OSQPVectorf* a) {
 
-  OSQPInt length = a->length;
-  const MKL_INT inca = 1; //How long should the spacing be (?)
+  OSQPInt       length = a->length;
+  const MKL_INT inca   = 1;
 
   OSQPFloat val = 0.0;
 
   if (length) {
     val = blas_asum(&length, a->values, &inca);
-    val = val / length;
   }
 
   return val;
