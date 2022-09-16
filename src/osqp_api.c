@@ -37,15 +37,15 @@ OSQPInt osqp_capabilities(void) {
   capabilities |= osqp_algebra_linsys_supported();
 
 #if OSQP_EMBEDDED_MODE != 1
-  capabilities |= OSQP_CAPABILITIY_UPDATE_MATRICES;
+  capabilities |= OSQP_CAPABILITY_UPDATE_MATRICES;
 #endif
 
 #ifdef OSQP_CODEGEN
-  capabilities |= OSQP_CAPABILITIY_CODEGEN;
+  capabilities |= OSQP_CAPABILITY_CODEGEN;
 #endif
 
 #ifdef OSQP_ENABLE_DERIVATIVES
-    capabilities |= OSQP_CAPABILITIY_DERIVATIVES;
+    capabilities |= OSQP_CAPABILITY_DERIVATIVES;
 #endif
 
   return capabilities;

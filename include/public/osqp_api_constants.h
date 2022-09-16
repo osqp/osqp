@@ -6,14 +6,14 @@
 /***********************
 * Solver capabilities *
 ***********************/
-enum osqp_capabilities {
+enum osqp_capabilities_type {
     /* This enum serves as a bit-flag definition, so each capability must be represented by
        a different bit in an int variable */
-    OSQP_CAPABILITIY_DIRECT_SOLVER = 0x01,      /* A direct linear solver is present in the algebra */
-    OSQP_CAPABILITIY_INDIRECT_SOLVER = 0x02,    /* An indirect linear solver is present in the algebra */
-    OSQP_CAPABILITIY_CODEGEN = 0x04,            /* Code generation is present */
-    OSQP_CAPABILITIY_UPDATE_MATRICES = 0x08,    /* The problem matrices can be updated */
-    OSQP_CAPABILITIY_DERIVATIVES = 0x10         /* Solution derivatives w.r.t P/q/A/l/u are available */
+    OSQP_CAPABILITY_DIRECT_SOLVER = 0x01,      /* A direct linear solver is present in the algebra */
+    OSQP_CAPABILITY_INDIRECT_SOLVER = 0x02,    /* An indirect linear solver is present in the algebra */
+    OSQP_CAPABILITY_CODEGEN = 0x04,            /* Code generation is present */
+    OSQP_CAPABILITY_UPDATE_MATRICES = 0x08,    /* The problem matrices can be updated */
+    OSQP_CAPABILITY_DERIVATIVES = 0x10         /* Solution derivatives w.r.t P/q/A/l/u are available */
 };
 
 

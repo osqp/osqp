@@ -932,13 +932,13 @@ OSQPInt validate_data(const OSQPCscMatrix* P,
 OSQPInt validate_linsys_solver(OSQPInt linsys_solver) {
   /* Verify the algebra backend supports the requested indirect solver */
   if ( (linsys_solver == OSQP_INDIRECT_SOLVER) &&
-     (osqp_algebra_linsys_supported() & OSQP_CAPABILITIY_INDIRECT_SOLVER) ) {
+     (osqp_algebra_linsys_supported() & OSQP_CAPABILITY_INDIRECT_SOLVER) ) {
     return 0;
   }
 
   /* Verify the algebra backend supports the requested direct solver */
   if ( (linsys_solver == OSQP_DIRECT_SOLVER) &&
-     (osqp_algebra_linsys_supported() & OSQP_CAPABILITIY_DIRECT_SOLVER) ) {
+     (osqp_algebra_linsys_supported() & OSQP_CAPABILITY_DIRECT_SOLVER) ) {
     return 0;
   }
 

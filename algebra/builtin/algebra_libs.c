@@ -4,7 +4,7 @@
 
 OSQPInt osqp_algebra_linsys_supported(void) {
   /* Only has QDLDL (direct solver) */
-  return OSQP_CAPABILITIY_DIRECT_SOLVER;
+  return OSQP_CAPABILITY_DIRECT_SOLVER;
 }
 
 enum osqp_linsys_solver_type osqp_algebra_default_linsys(void) {
