@@ -35,8 +35,8 @@ TEST_CASE("Unconstrained solve", "[unconstrained],[solve]")
   std::tie( polish, expectedPolishStatus ) =
       GENERATE( table<OSQPInt, OSQPInt>(
           { /* first is polish enabled, second is expected status */
-            std::make_tuple( 0, OSQP_POLISHING_UNPERFORMED ),
-            std::make_tuple( 1, OSQP_POLISH_NO_ACTIVE_SET ) } ) );
+            std::make_tuple( 0, OSQP_POLISH_NOT_PERFORMED ),
+            std::make_tuple( 1, OSQP_POLISH_NO_ACTIVE_SET_FOUND ) } ) );
 
   settings->polishing = polish;
   settings->polish_refine_iter = 4;

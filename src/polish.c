@@ -301,13 +301,13 @@ OSQPInt polish(OSQPSolver* solver) {
     return OSQP_POLISH_FAILED;
   } else if (mred == 0) {
     /* No active constraints, so skip polishing */
-    c_print("Polishing skipped - no active set detected at optimal point\n");
-    info->status_polish = OSQP_POLISH_NO_ACTIVE_SET;
+    c_print("Polishing not needed - no active set detected at optimal point\n");
+    info->status_polish = OSQP_POLISH_NO_ACTIVE_SET_FOUND;
 
     // Memory clean-up
     OSQPMatrix_free(work->pol->Ared);
 
-    return OSQP_POLISH_NO_ACTIVE_SET;
+    return OSQP_POLISH_NO_ACTIVE_SET_FOUND;
   }
 
   // Form and factorize reduced KKT
