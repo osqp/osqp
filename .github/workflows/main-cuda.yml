@@ -29,6 +29,9 @@ jobs:
           # See https://github.com/conda-incubator/setup-miniconda#IMPORTANT
           shell: bash -l {0}
 
+      env:
+        OSQP_BUILD_DIR_PREFIX: ${{ github.workspace }}/build
+
       steps:
         - uses: actions/checkout@v2
           with:
@@ -57,15 +60,17 @@ jobs:
 
         - name: Build
           run: |
-            cmake -G "${{ matrix.cmake_generator }}" -S . -B build ${{ matrix.cmake_flags }}
-            cmake --build build
+            cmake -G "${{ matrix.cmake_generator }}" \
+                  -S . -B $OSQP_BUILD_DIR_PREFIX \
+                  ${{ matrix.cmake_flags }}
+            cmake --build $OSQP_BUILD_DIR_PREFIX
 
         # useful for inspecting the OSQP version information
         - name: OSQP Demo
           run: |
-            ./build/out/osqp_demo
+            $OSQP_BUILD_DIR_PREFIX/out/osqp_demo
 
         - name: Test
           run: |
-            ./build/out/osqp_tester
+            cmake --build $OSQP_BUILD_DIR_PREFIX --target test -- ARGS="--output-on-failure"
 

@@ -108,7 +108,7 @@ jobs:
 
         - name: Test
           run: |
-            $OSQP_BUILD_DIR_PREFIX/out/osqp_tester
+            cmake --build $OSQP_BUILD_DIR_PREFIX --target test -- ARGS="--output-on-failure"
 
         - name: Codegen compilation test
           run: |
