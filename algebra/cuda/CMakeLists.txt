@@ -12,10 +12,10 @@ target_sources(OSQPLIB PRIVATE ${SRC_FILES})
 
 target_include_directories(OSQPLIB PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include lin_sys/indirect)
 
-option(OSQP_CUDA_STATIC_LINKAGE "Statically link all CUDA libraries" OFF)
-mark_as_advanced(OSQP_CUDA_STATIC_LINKAGE)
+option(OSQP_CUDA_STATIC_LINKING "Statically link all CUDA libraries (WARNING: This will greatly increase the file size of the library)" OFF)
+mark_as_advanced(OSQP_CUDA_STATIC_LINKING)
 
-if(OSQP_CUDA_STATIC_LINKAGE)
+if(OSQP_CUDA_STATIC_LINKING)
   message(STATUS "Statically linking CUDA libraries")
 
   # cublasLt_static is a dependency of cublas_static.
