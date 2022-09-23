@@ -31,6 +31,7 @@ jobs:
 
       env:
         OSQP_BUILD_DIR_PREFIX: ${{ github.workspace }}/build
+        CTEST_OUTPUT_ON_FAILURE: 1
 
       steps:
         - uses: actions/checkout@v2
@@ -72,5 +73,5 @@ jobs:
 
         - name: Test
           run: |
-            cmake --build $OSQP_BUILD_DIR_PREFIX --target test -- ARGS="--output-on-failure"
+            cmake --build $OSQP_BUILD_DIR_PREFIX --target test
 
