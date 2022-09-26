@@ -35,6 +35,17 @@ enum osqp_status_type {
 };
 extern const char * OSQP_STATUS_MESSAGE[];
 
+/******************
+* Polish Status  *
+******************/
+enum osqp_polish_status_type {
+    OSQP_POLISH_LINSYS_ERROR = -2,
+    OSQP_POLISH_FAILED = -1,
+    OSQP_POLISH_NOT_PERFORMED = 0,
+    OSQP_POLISH_SUCCESS = 1,
+    OSQP_POLISH_NO_ACTIVE_SET_FOUND = 2  /* No active set detected, polishing skipped (not an error) */
+};
+
 /*************************
 * Linear System Solvers *
 *************************/

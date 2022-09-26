@@ -28,6 +28,7 @@
   #define blas_swap  sswap
   #define blas_axpy  saxpy
   #define blas_2norm snrm2
+  #define blas_asum  sasum
 
   #define spblas_create_csc mkl_sparse_s_create_csc
   #define spblas_set_value  mkl_sparse_s_set_value
@@ -40,6 +41,7 @@
   #define blas_swap  dswap
   #define blas_axpy  daxpy
   #define blas_2norm dnrm2
+  #define blas_asum  dasum
 
   #define spblas_create_csc mkl_sparse_d_create_csc
   #define spblas_set_value  mkl_sparse_d_set_value

@@ -31,7 +31,16 @@ TEST_CASE("Basic QP2 solve", "[solve],[qp]")
   settings->eps_rel = 1e-5;
 
   /* Test with and without polishing */
-  settings->polishing = GENERATE(0, 1);
+  OSQPInt polish;
+  OSQPInt expectedPolishStatus;
+
+  std::tie( polish, expectedPolishStatus ) =
+      GENERATE( table<OSQPInt, OSQPInt>(
+          { /* first is polish enabled, second is expected status */
+            std::make_tuple( 0, OSQP_POLISH_NOT_PERFORMED ),
+            std::make_tuple( 1, OSQP_POLISH_SUCCESS ) } ) );
+
+  settings->polishing = polish;
   settings->polish_refine_iter = 4;
 
   /* Test all possible linear system solvers in this test case */
@@ -71,6 +80,10 @@ TEST_CASE("Basic QP2 solve", "[solve],[qp]")
   // Compare objective values
   mu_assert("Basic QP 2 test solve: Error in objective value!",
             c_absval(solver->info->obj_val - sols_data->obj_value_test)/(c_absval(sols_data->obj_value_test)) < TESTS_TOL);
+
+  // Check polishing status
+  mu_assert("Basic QP 2 test solve: Error in polish status!",
+            solver->info->status_polish == expectedPolishStatus);
 }
 
 TEST_CASE("Basic QP2: Update vectors", "[solve],[qp],[update]")
@@ -138,4 +151,8 @@ TEST_CASE("Basic QP2: Update vectors", "[solve],[qp],[update]")
   mu_assert("Basic QP 2 test update: Error in objective value!",
             c_absval(
               solver->info->obj_val - sols_data->obj_value_test_new)/(c_absval(sols_data->obj_value_test_new)) < TESTS_TOL);
+
+  // Check polishing status
+  mu_assert("Basic QP 2 test solve: Error in polish status!",
+            solver->info->status_polish == OSQP_POLISH_SUCCESS);
 }
