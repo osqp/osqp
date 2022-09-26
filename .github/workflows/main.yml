@@ -30,10 +30,13 @@ jobs:
           include:
             - os: ubuntu-latest
               cmake_generator: "Unix Makefiles"
+              test_target: "test"
             - os: macos-latest
               cmake_generator: "Unix Makefiles"
+              test_target: "test"
             - os: windows-2022
               cmake_generator: "Visual Studio 17 2022"
+              test_target: "RUN_TESTS"
 
       defaults:
         run:
@@ -43,6 +46,7 @@ jobs:
 
       env:
         OSQP_BUILD_DIR_PREFIX: ${{ github.workspace }}/build
+        CTEST_OUTPUT_ON_FAILURE: 1
 
       steps:
         - uses: actions/checkout@v2
@@ -108,7 +112,7 @@ jobs:
 
         - name: Test
           run: |
-            $OSQP_BUILD_DIR_PREFIX/out/osqp_tester
+            cmake --build $OSQP_BUILD_DIR_PREFIX --target ${{ matrix.test_target }}
 
         - name: Codegen compilation test
           run: |
