@@ -30,10 +30,13 @@ jobs:
           include:
             - os: ubuntu-latest
               cmake_generator: "Unix Makefiles"
+              test_target: "test"
             - os: macos-latest
               cmake_generator: "Unix Makefiles"
+              test_target: "test"
             - os: windows-2022
               cmake_generator: "Visual Studio 17 2022"
+              test_target: "RUN_TESTS"
 
       defaults:
         run:
@@ -109,7 +112,7 @@ jobs:
 
         - name: Test
           run: |
-            cmake --build $OSQP_BUILD_DIR_PREFIX --target test
+            cmake --build $OSQP_BUILD_DIR_PREFIX --target ${{ matrix.test_target }}
 
         - name: Codegen compilation test
           run: |
