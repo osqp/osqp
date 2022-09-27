@@ -97,6 +97,13 @@ test_mat_ops_inf_norm_cols = np.amax(np.abs(
 test_mat_ops_inf_norm_rows = np.amax(np.abs(
     np.asarray(test_mat_ops_A.todense())), axis=1)
 
+test_mat_ops_diag_n = 6
+test_mat_ops_diag_A = sparse.random(test_mat_ops_diag_n, test_mat_ops_diag_n, density=0.8, format='csc', random_state=rg)
+test_mat_ops_diag_P = test_mat_ops_diag_A + test_mat_ops_diag_A.T
+test_mat_ops_diag_Pu = sparse.triu(test_mat_ops_diag_P, format='csc')
+test_mat_ops_diag_dA = np.diag(sparse.csc_matrix.toarray(test_mat_ops_diag_A))
+test_mat_ops_diag_dP = np.diag(sparse.csc_matrix.toarray(test_mat_ops_diag_Pu))
+
 # Special cases for matrices/vectors with no size or entries
 test_mat_no_entries = sparse.csc_matrix([[0., 0.], [0., 0.]])
 test_mat_no_rows = sparse.csc_matrix((0,2))
@@ -226,6 +233,12 @@ data = {'test_sp_matrix_A': test_sp_matrix_A,
         'test_mat_ops_scaled' : test_mat_ops_scaled,
         'test_mat_ops_inf_norm_cols': test_mat_ops_inf_norm_cols,
         'test_mat_ops_inf_norm_rows': test_mat_ops_inf_norm_rows,
+        'test_mat_ops_diag_n': test_mat_ops_diag_n,
+        'test_mat_ops_diag_A': test_mat_ops_diag_A,
+        'test_mat_ops_diag_P': test_mat_ops_diag_P,
+        'test_mat_ops_diag_Pu': test_mat_ops_diag_Pu,
+        'test_mat_ops_diag_dA': test_mat_ops_diag_dA,
+        'test_mat_ops_diag_dP': test_mat_ops_diag_dP,
         'test_mat_vec_n': test_mat_vec_n,
         'test_mat_vec_m': test_mat_vec_m,
         'test_mat_vec_A': test_mat_vec_A,

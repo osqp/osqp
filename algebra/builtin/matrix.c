@@ -142,6 +142,11 @@ void OSQPMatrix_rmult_diag(OSQPMatrix* A,
   csc_rmult_diag(A->csc, R->values);
 }
 
+void OSQPMatrix_extract_diag(const OSQPMatrix*  A,
+                                   OSQPVectorf* d) {
+  csc_extract_diag(A->csc, OSQPVectorf_data(d));
+}
+
 //y = alpha*A*x + beta*y
 void OSQPMatrix_Axpy(const OSQPMatrix*  A,
                      const OSQPVectorf* x,

@@ -161,6 +161,12 @@ OSQPCscMatrix* vstack(OSQPCscMatrix* A,
 //                  OSQPInt  n);
 
 /**
+ * Extract main diagonal from matrix A into vector d.
+ */
+void csc_extract_diag(const OSQPCscMatrix* A,
+                            OSQPFloat*     d);
+
+/**
  * Compute inverse of permutation matrix stored in the vector p.
  * The computed inverse is also stored in a vector.
  */

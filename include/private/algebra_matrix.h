@@ -93,6 +93,10 @@ void OSQPMatrix_lmult_diag(OSQPMatrix*        A,
 void OSQPMatrix_rmult_diag(OSQPMatrix*        A,
                            const OSQPVectorf* R);
 
+// Extract the main diagonal of A into d
+void OSQPMatrix_extract_diag(const OSQPMatrix*  A,
+                                   OSQPVectorf* d);
+
 //y = alpha*A*x + beta*y
 void OSQPMatrix_Axpy(const OSQPMatrix*  A,
                      const OSQPVectorf* x,

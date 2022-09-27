@@ -51,6 +51,11 @@ static void prea_vec_copy(const OSQPFloat* a, OSQPFloat* b, OSQPInt n) {
   for (i = 0; i < n; i++)  b[i] = a[i];
 }
 
+static void float_vec_set_scalar(OSQPFloat* a, OSQPFloat sc, OSQPInt n) {
+  OSQPInt i;
+  for (i = 0; i < n; i++) a[i] = sc;
+}
+
 static void int_vec_set_scalar(OSQPInt* a, OSQPInt sc, OSQPInt n) {
   OSQPInt i;
   for (i = 0; i < n; i++) a[i] = sc;
@@ -268,6 +273,26 @@ OSQPCscMatrix* triplet_to_csr(const OSQPCscMatrix* T, OSQPInt* TtoC) {
     }
   }
   return csc_done(C, w, OSQP_NULL, 1);     /* success; free w and return C */
+}
+
+void csc_extract_diag(const OSQPCscMatrix* A,
+                            OSQPFloat*     d) {
+  OSQPInt    i, ptr;
+  OSQPInt    n  = A->n;
+  OSQPInt*   Ap = A->p;
+  OSQPInt*   Ai = A->i;
+  OSQPFloat* Ax = A->x;
+
+  /* Initialize output vector to 0 */
+  float_vec_set_scalar(d, 0.0, n);
+
+  /* Loop over columns to find when the row index equals column index */
+  for(i = 0; i < n; i++) {
+    for (ptr = Ap[i]; ptr < Ap[i + 1]; ptr++) {
+      if (Ai[ptr] == i)
+        d[i] = Ax[ptr];
+    }
+  }
 }
 
 OSQPInt* csc_pinv(const OSQPInt* p, OSQPInt n) {

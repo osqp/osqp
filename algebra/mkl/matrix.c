@@ -193,6 +193,13 @@ void OSQPMatrix_rmult_diag(OSQPMatrix*        A,
   csc_rmult_diag(A->csc, OSQPVectorf_data(R));
 }
 
+void OSQPMatrix_extract_diag(const OSQPMatrix*  A,
+                                   OSQPVectorf* d) {
+  /* This operates on the assumption that the stored shadow csc matrix is the backing memory for
+     the actual MKL matrix handle, which seems to be the case in all the testing done. */
+  csc_extract_diag(A->csc, OSQPVectorf_data(d));
+}
+
 //y = alpha*A*x + beta*y
 void OSQPMatrix_Axpy(const OSQPMatrix*  A,
                      const OSQPVectorf* x,
