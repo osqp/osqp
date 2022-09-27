@@ -55,6 +55,13 @@ enum osqp_linsys_solver_type {
     OSQP_INDIRECT_SOLVER,
 };
 
+/*********************************
+* Preconditioners for CG method *
+*********************************/
+typedef enum {
+    OSQP_NO_PRECONDITIONER = 0,      /* Don't use a preconditioner */
+    OSQP_DIAGONAL_PRECONDITIONER,    /* Diagonal (Jacobi) preconditioner */
+} osqp_precond_type;
 
 /******************
 * Solver Errors  *

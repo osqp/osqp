@@ -96,9 +96,10 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->sigma         = (OSQPFloat)OSQP_SIGMA;  /* ADMM step */
   settings->alpha         = (OSQPFloat)OSQP_ALPHA;  /* relaxation parameter */
 
-  settings->cg_max_iter      = OSQP_CG_MAX_ITER;      /* maximum number of CG iterations */
-  settings->cg_tol_reduction = OSQP_CG_TOL_REDUCTION; /* CG tolerance parameter */
-  settings->cg_tol_fraction  = OSQP_CG_TOL_FRACTION;  /* CG tolerance parameter */
+  settings->cg_max_iter      = OSQP_CG_MAX_ITER;             /* maximum number of CG iterations */
+  settings->cg_tol_reduction = OSQP_CG_TOL_REDUCTION;        /* CG tolerance parameter */
+  settings->cg_tol_fraction  = OSQP_CG_TOL_FRACTION;         /* CG tolerance parameter */
+  settings->cg_precond       = OSQP_DIAGONAL_PRECONDITIONER; /* Preconditioner to use in CG */
 
   settings->adaptive_rho           = OSQP_ADAPTIVE_RHO;
   settings->adaptive_rho_interval  = OSQP_ADAPTIVE_RHO_INTERVAL;

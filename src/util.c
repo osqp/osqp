@@ -266,6 +266,7 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->cg_max_iter      = settings->cg_max_iter;
   new->cg_tol_reduction = settings->cg_tol_reduction;
   new->cg_tol_fraction  = settings->cg_tol_fraction;
+  new->cg_precond       = settings->cg_precond;
 
   new->adaptive_rho           = settings->adaptive_rho;
   new->adaptive_rho_interval  = settings->adaptive_rho_interval;
