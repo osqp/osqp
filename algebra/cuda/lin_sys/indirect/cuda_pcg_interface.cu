@@ -128,6 +128,9 @@ OSQPInt init_linsys_solver_cudapcg(cudapcg_solver**    sp,
   /* Maximum number of PCG iterations */
   s->max_iter = settings->cg_max_iter;
 
+  /* Preconditioner to use */
+  s->precond_type = settings->cg_precond;
+
   /* Tolerance strategy parameters */
   s->reduction_threshold = settings->cg_tol_reduction;
   s->tol_fraction        = settings->cg_tol_fraction;

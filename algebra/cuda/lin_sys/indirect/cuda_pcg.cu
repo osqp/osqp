@@ -203,10 +203,10 @@ OSQPInt cuda_pcg_alg(cudapcg_solver* s,
 }
 
 
-void cuda_pcg_update_precond(cudapcg_solver* s,
-                             OSQPInt         P_updated,
-                             OSQPInt         A_updated,
-                             OSQPInt         R_updated) {
+void cuda_pcg_update_precond_diagonal(cudapcg_solver* s,
+                                      OSQPInt         P_updated,
+                                      OSQPInt         A_updated,
+                                      OSQPInt         R_updated) {
 
   void*      buffer;
   OSQPFloat* tmp;
@@ -258,4 +258,23 @@ void cuda_pcg_update_precond(cudapcg_solver* s,
 
   /* d_diag_precond_inv = 1 / d_diag_precond */
   cuda_vec_reciprocal(s->d_diag_precond_inv, s->d_diag_precond, n);
+}
+
+
+void cuda_pcg_update_precond(cudapcg_solver* s,
+                             OSQPInt         P_updated,
+                             OSQPInt         A_updated,
+                             OSQPInt         R_updated) {
+
+  switch(s->precond_type) {
+  /* No preconditioner, just initialize the inverse vector to all 1s */
+  case OSQP_NO_PRECONDITIONER:
+    cuda_vec_set_sc(s->d_diag_precond_inv, 1.0, s->n);
+    break;
+
+  /* Diagonal preconditioner computation */
+  case OSQP_DIAGONAL_PRECONDITIONER:
+    cuda_pcg_update_precond_diagonal(s, P_updated, A_updated, R_updated);
+    break;
+  }
 }

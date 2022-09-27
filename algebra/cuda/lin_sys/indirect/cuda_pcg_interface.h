@@ -76,8 +76,9 @@ typedef struct cudapcg_solver_ {
   OSQPInt zero_pcg_iters;     ///<  state that counts zero PCG iterations
 
   /* Settings */
-  OSQPInt max_iter;
-  
+  OSQPInt           max_iter;
+  osqp_precond_type precond_type;
+
   /* Residual tolerance strategy parameters */
   OSQPInt    reduction_threshold;
   OSQPFloat  tol_fraction;
