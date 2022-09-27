@@ -79,11 +79,8 @@ int main(int argc, char *argv[]) {
   /* Test codegen */
   OSQPCodegenDefines *defs = (OSQPCodegenDefines *)calloc(1, sizeof(OSQPCodegenDefines));
 
-  defs->float_type = 0;         /* Use doubles */
-  defs->printing_enable = 0;    /* Don't enable printing */
-  defs->profiling_enable = 0;   /* Don't enable profiling */
-  defs->interrupt_enable = 0;   /* Don't enable interrupts */
-  defs->derivatives_enable = 0; /* Don't enable derivatives */
+  /* Get the default codegen options */
+  osqp_set_default_codegen_defines( defs );
 
   /* Sample with vector update only */
   defs->embedded_mode = 1;

@@ -50,6 +50,13 @@ OSQP_API void osqp_get_dimensions(OSQPSolver* solver,
 
 
 /**
+ * Set default codegen define values.
+ * Assumes defines is already allocated in memory.
+ * @param defines OSQPCodegenDefines structure
+ */
+OSQP_API void osqp_set_default_codegen_defines(OSQPCodegenDefines* defines);
+
+/**
  * Set default settings from osqp_api_constants.h file.
  * Assumes settings already allocated in memory.
  * @param settings OSQPSettings structure
