@@ -47,6 +47,8 @@ typedef struct mklcg_solver_ {
   OSQPInt      n;       // number of variables
   OSQPInt      polish;  //polishing or not?
 
+  osqp_precond_type precond_type; // Preconditioner to use
+
   // Hold an internal copy of the solution x to
   // enable warm starting between successive solves
   OSQPVectorf* x;
@@ -63,14 +65,21 @@ typedef struct mklcg_solver_ {
   // its underlying pointer, but we make it an OSQPVectorf
   // so that we can make some views into it for multiplication
 
-  // Vector views into tmp for K*v1 = v2
-  OSQPVectorf* v1;
-  OSQPVectorf* v2;
+  // Vector views into tmp for K*mvm_pre = mvm_post
+  OSQPVectorf* mvm_pre;
+  OSQPVectorf* mvm_post;
+
+  // Vector views into tmp for preconditioner application
+  OSQPVectorf* precond_pre;
+  OSQPVectorf* precond_post;
 
   // Vector views of the input vector
   OSQPVectorf* r1;
   OSQPVectorf* r2;
 
+  // Preconditioner vector
+  OSQPVectorf* precond;
+  OSQPVectorf* precond_inv;
 } mklcg_solver;
 
 

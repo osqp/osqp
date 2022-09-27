@@ -17,6 +17,12 @@ MKL_INT cg_solver_init(mklcg_solver* s) {
   s->iparm[9] = 0;        // user defined stopping test
   s->dparm[0] = 1.E-5;    // relative tolerance (default)
 
+  // Enable the preconditioner if requested
+  if (s->precond_type == OSQP_NO_PRECONDITIONER)
+    s->iparm[10] = 0;
+  else
+    s->iparm[10] = 1;
+
   //returns -1 for dcg failure, 0 otherwise
   dcg_check(&mkln, NULL, NULL, &rci_request,
             s->iparm, s->dparm, OSQPVectorf_data(s->tmp));
@@ -41,6 +47,39 @@ void cg_times(OSQPMatrix*  P,
   OSQPVectorf_copy(v2,v1);
   OSQPMatrix_Axpy(P, v1, v2, 1.0, sigma); //v2 = (P+sigma I) v1
   OSQPMatrix_Atxpy(A, ywork, v2, 1.0, 1.0);
+}
+
+
+void cg_update_precond_diagonal(mklcg_solver* s) {
+
+  /* 1st part: sigma */
+  OSQPVectorf_set_scalar(s->precond, s->sigma);
+
+  /* 2nd part: P matrix diagonal */
+  OSQPMatrix_extract_diag(s->P, s->precond_inv);
+  OSQPVectorf_plus(s->precond, s->precond, s->precond_inv);
+
+  /* 3rd part: Diagonal of At*rho*A */
+  // TODO
+
+  /* 4th part: Invert the preconditioner */
+  OSQPVectorf_ew_reciprocal(s->precond_inv, s->precond);
+}
+
+
+void cg_update_precond(mklcg_solver* s) {
+
+  switch(s->precond_type) {
+  /* No preconditioner, just initialize the inverse vector to all 1s */
+  case OSQP_NO_PRECONDITIONER:
+    OSQPVectorf_set_scalar(s->precond, 1.0);
+    break;
+
+  /* Diagonal preconditioner computation */
+  case OSQP_DIAGONAL_PRECONDITIONER:
+    cg_update_precond_diagonal(s);
+    break;
+  }
 }
 
 
@@ -88,14 +127,12 @@ OSQPInt init_linsys_mklcg(mklcg_solver**      sp,
   // Assign type
   s->type = OSQP_INDIRECT_SOLVER;
 
+  // Assign preconditioner
+  s->precond_type = settings->cg_precond;
+
   //Don't know the thread count.  Just use
   //the same thing as the pardiso solver
   s->nthreads = mkl_get_max_threads();
-
-  //allocate a vector 3*(m+n) for MKL workspace
-  //NB: documentation says 3*n needed, not 4*n,
-  //if we don't use a preconditioner
-  s->tmp = OSQPVectorf_malloc(3*n);
 
   //Initialise solver state to zero since it provides
   //cold start condition for the CG inner solver
@@ -111,18 +148,41 @@ OSQPInt init_linsys_mklcg(mklcg_solver**      sp,
   s->r1 = OSQPVectorf_view(s->x, 0, 0);
   s->r2 = OSQPVectorf_view(s->x, 0, 0);
 
-  //subviews to tmp when computing M v1 = v2, where
-  //M is the condensed matrix used in the CG iterations
-  s->v1 = OSQPVectorf_view(s->tmp, 0, n);
-  s->v2 = OSQPVectorf_view(s->tmp, n, n);
+  //Allocate a 4*n vector for the MKL workspace
+  // 1:n     = Vector to multiply by the matrix
+  // n+1:2n  = Vector after multiplying by the matrix
+  // 2n+1:3n = Vector to apply the preconditioner to
+  // 3n+1:4n = Vector after application of the preconditioner
+  s->tmp = OSQPVectorf_malloc(4*n);
+
+  // Create subviews to tmp to aid the matrix-vector multiplication
+  s->mvm_pre  = OSQPVectorf_view(s->tmp, 0, n);
+  s->mvm_post = OSQPVectorf_view(s->tmp, n, n);
+
+  // Subviews to tmp to aid the preconditioner application
+  s->precond_pre  = OSQPVectorf_view(s->tmp, 2*n, n);
+  s->precond_post = OSQPVectorf_view(s->tmp, 3*n, n);
 
   status = cg_solver_init(s);
+
+  // Compute the preconditioner
+  s->precond     = OSQPVectorf_malloc(n);
+  s->precond_inv = OSQPVectorf_malloc(n);
+  cg_update_precond(s);
+
   return status;
 }
 
 
 const char* name_mklcg(mklcg_solver* s) {
-  return "MKL RCI Conjugate Gradient";
+    switch(s->precond_type) {
+  case OSQP_NO_PRECONDITIONER:
+    return "MKL RCI Conjugate Gradient - No preconditioner";
+  case OSQP_DIAGONAL_PRECONDITIONER:
+    return "MKL RCI Conjugate Gradient - Diagonal preconditioner";
+  }
+
+  return "MKL RCI Conjugate Gradient - Unknown preconditioner";
 }
 
 
@@ -155,9 +215,12 @@ OSQPInt solve_linsys_mklcg(mklcg_solver* s,
     dcg (&mkln, OSQPVectorf_data(s->x), OSQPVectorf_data(s->r1),
          &rci_request, s->iparm, s->dparm, OSQPVectorf_data(s->tmp));
     if (rci_request == 1) {
-        //multiply for condensed system. v1 and v2 are subviews of
+        //multiply for condensed system. mvm_pre and mvm_post are subviews of
         //the cg workspace variable s->tmp.
-        cg_times(s->P, s->A, s->v1, s->v2, s->rho_vec, s->sigma, s->ywork);
+        cg_times(s->P, s->A, s->mvm_pre, s->mvm_post, s->rho_vec, s->sigma, s->ywork);
+    } else if (rci_request == 3) {
+        // Apply the preconditioner as (precond_post = precond.*precond_pre)
+        OSQPVectorf_ew_prod(s->precond_post, s->precond_inv, s->precond_pre);
     } else {
       break;
     }
@@ -205,6 +268,10 @@ OSQPInt update_matrices_linsys_mklcg(mklcg_solver*     s,
                                      OSQPInt           A_new_n) {
   s->P = *(OSQPMatrix**)(&P);
   s->A = *(OSQPMatrix**)(&A);
+
+  // Update the preconditioner (matrix-only update)
+  cg_update_precond(s);
+
   return 0;
 }
 
@@ -213,6 +280,10 @@ OSQPInt update_rho_linsys_mklcg(mklcg_solver*    s,
                               const OSQPVectorf* rho_vec,
                               OSQPFloat          rho_sc) {
   OSQPVectorf_copy(s->rho_vec, rho_vec);
+
+  // Update the preconditioner (rho-only update)
+  cg_update_precond(s);
+
   return 0;
 }
 
@@ -224,10 +295,14 @@ void free_linsys_mklcg(mklcg_solver* s) {
     OSQPVectorf_free(s->rho_vec);
     OSQPVectorf_free(s->x);
     OSQPVectorf_free(s->ywork);
+    OSQPVectorf_free(s->precond);
+    OSQPVectorf_free(s->precond_inv);
     OSQPVectorf_view_free(s->r1);
     OSQPVectorf_view_free(s->r2);
-    OSQPVectorf_view_free(s->v1);
-    OSQPVectorf_view_free(s->v2);
+    OSQPVectorf_view_free(s->mvm_pre);
+    OSQPVectorf_view_free(s->mvm_post);
+    OSQPVectorf_view_free(s->precond_pre);
+    OSQPVectorf_view_free(s->precond_post);
   }
   c_free(s);
 }
