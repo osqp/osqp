@@ -121,7 +121,7 @@ OSQPInt init_linsys_mklcg(mklcg_solver**      sp,
 }
 
 
-const char* name_mklcg() {
+const char* name_mklcg(mklcg_solver* s) {
   return "MKL RCI Conjugate Gradient";
 }
 

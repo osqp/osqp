@@ -212,8 +212,15 @@ OSQPInt init_linsys_solver_cudapcg(cudapcg_solver**    sp,
 }
 
 
-const char* name_cudapcg() {
-  return "CUDA Preconditioned Conjugate Gradient";
+const char* name_cudapcg(cudapcg_solver* s) {
+  switch(s->precond_type) {
+  case OSQP_NO_PRECONDITIONER:
+    return "CUDA Conjugate Gradient - No preconditioner";
+  case OSQP_DIAGONAL_PRECONDITIONER:
+    return "CUDA Conjugate Gradient - Diagonal preconditioner";
+  }
+
+  return "CUDA Conjugate Gradient - Unknown preconditioner";
 }
 
 

@@ -206,7 +206,7 @@ struct OSQPWorkspace_ {
 struct linsys_solver {
   enum osqp_linsys_solver_type type;             ///< linear system solver type functions
 
-  const char* (*name)(void);
+  const char* (*name)(LinSysSolver* self);
 
   OSQPInt (*solve)(LinSysSolver* self,
                    OSQPVectorf*  b,

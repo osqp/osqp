@@ -15,7 +15,7 @@ typedef struct mklcg_solver_ {
    * @name Functions
    * @{
    */
-  const char* (*name)(void);
+  const char* (*name)(struct mklcg_solver_* self);
   OSQPInt (*solve)(struct mklcg_solver_* self, OSQPVectorf* b, OSQPInt admm_iter);
   void    (*update_settings)(struct mklcg_solver_* self, const OSQPSettings* settings);
   void    (*warm_start)(struct mklcg_solver_* self, const OSQPVectorf* x);
@@ -98,7 +98,7 @@ OSQPInt init_linsys_mklcg(mklcg_solver**      sp,
  * Get the user-friendly name of the MKL CG solver.
  * @return The user-friendly name
  */
-const char* name_mklcg();
+const char* name_mklcg(mklcg_solver* s);
 
 
 /**

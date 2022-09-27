@@ -18,7 +18,7 @@ struct qdldl {
      * @name Functions
      * @{
      */
-    const char* (*name)(void);
+    const char* (*name)(struct qdldl* s);
 
     OSQPInt (*solve)(struct qdldl*       self,
                             OSQPVectorf* b,
@@ -118,7 +118,7 @@ OSQPInt init_linsys_solver_qdldl(qdldl_solver**      sp,
  * Get the user-friendly name of the QDLDL solver.
  * @return The user-friendly name
  */
-const char* name_qdldl();
+const char* name_qdldl(qdldl_solver* s);
 
 /**
  * Solve linear system and store result in b

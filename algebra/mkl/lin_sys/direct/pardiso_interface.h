@@ -19,7 +19,7 @@ struct pardiso {
      * @name Functions
      * @{
      */
-    const char* (*name)(void);
+    const char* (*name)(struct pardiso* self);
 
     OSQPInt (*solve)(struct pardiso* self,
                      OSQPVectorf*    b,
@@ -114,7 +114,7 @@ OSQPInt init_linsys_solver_pardiso(pardiso_solver**    sp,
  * Get the user-friendly name of the MKL Pardiso solver.
  * @return The user-friendly name
  */
-const char* name_pardiso();
+const char* name_pardiso(pardiso_solver* s);
 
 
 /**
