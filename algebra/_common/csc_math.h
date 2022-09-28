@@ -43,6 +43,11 @@ void csc_lmult_diag(OSQPCscMatrix* A, const OSQPFloat* L);
 // A = A*diag(R)
 void csc_rmult_diag(OSQPCscMatrix* A, const OSQPFloat* R);
 
+// d = diag(At*diag(D)*A)
+void csc_AtDA_extract_diag(const OSQPCscMatrix* A,
+                           const OSQPFloat*     D,
+                                 OSQPFloat*     d);
+
 //y = alpha*A*x + beta*y, where A is symmetric and only triu is stored
 void csc_Axpy_sym_triu(const OSQPCscMatrix* A,
                        const OSQPFloat*     x,

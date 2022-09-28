@@ -151,8 +151,53 @@ TEST_CASE("Matrix: Diagonal extraction", "[matrix]") {
 
     OSQPMatrix_extract_diag(P.get(), res.get());
 
-      mu_assert("Error in extracted diagonal",
-                OSQPVectorf_is_eq(ref.get(), res.get(), TESTS_TOL));
+    mu_assert("Error in extracted diagonal",
+              OSQPVectorf_is_eq(ref.get(), res.get(), TESTS_TOL));
+  }
+}
+#endif
+
+#ifndef OSQP_ALGEBRA_CUDA
+TEST_CASE("Matrix: AtDA Diagonal extraction", "[matrix]") {
+  lin_alg_sols_data_ptr data{generate_problem_lin_alg_sols_data()};
+
+  OSQPInt m = data->test_mat_ops_diag_m;
+  OSQPInt n = data->test_mat_ops_diag_n;
+
+  // Matrix to use
+  OSQPMatrix_ptr A{OSQPMatrix_new_from_csc(data->test_mat_ops_diag_Ar, 0)};
+
+  // Result vector
+  OSQPVectorf_ptr res{OSQPVectorf_malloc(n)};
+
+  SECTION("Unity diagonal element") {
+    OSQPVectorf_ptr D{OSQPVectorf_new(data->test_vec_ops_ones, m)};         // Diagonal
+    OSQPVectorf_ptr ref{OSQPVectorf_new(data->test_mat_ops_diag_AtA, n)};   // Reference
+
+    OSQPMatrix_AtDA_extract_diag(A.get(), D.get(), res.get());
+
+    mu_assert("Error in extracted diagonal",
+              OSQPVectorf_is_eq(ref.get(), res.get(), TESTS_TOL));
+  }
+
+  SECTION("Simple diagonal scaling") {
+    OSQPVectorf_ptr D{OSQPVectorf_new(data->test_vec_ops_vn, m)};           // Diagonal
+    OSQPVectorf_ptr ref{OSQPVectorf_new(data->test_mat_ops_diag_AtRnA, n)}; // Reference
+
+    OSQPMatrix_AtDA_extract_diag(A.get(), D.get(), res.get());
+
+    mu_assert("Error in extracted diagonal",
+              OSQPVectorf_is_eq(ref.get(), res.get(), TESTS_TOL));
+  }
+
+  SECTION("Complicated diagonal scaling") {
+    OSQPVectorf_ptr D{OSQPVectorf_new(data->test_vec_ops_v1, m)};          // Diagonal
+    OSQPVectorf_ptr ref{OSQPVectorf_new(data->test_mat_ops_diag_AtRA, n)}; // Reference
+
+    OSQPMatrix_AtDA_extract_diag(A.get(), D.get(), res.get());
+
+    mu_assert("Error in extracted diagonal",
+              OSQPVectorf_is_eq(ref.get(), res.get(), TESTS_TOL));
   }
 }
 #endif

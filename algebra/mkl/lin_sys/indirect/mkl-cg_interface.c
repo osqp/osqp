@@ -51,7 +51,6 @@ void cg_times(OSQPMatrix*  P,
 
 
 void cg_update_precond_diagonal(mklcg_solver* s) {
-
   /* 1st part: sigma */
   OSQPVectorf_set_scalar(s->precond, s->sigma);
 
@@ -60,7 +59,8 @@ void cg_update_precond_diagonal(mklcg_solver* s) {
   OSQPVectorf_plus(s->precond, s->precond, s->precond_inv);
 
   /* 3rd part: Diagonal of At*rho*A */
-  // TODO
+  OSQPMatrix_AtDA_extract_diag(s->A, s->rho_vec, s->precond_inv);
+  OSQPVectorf_plus(s->precond, s->precond, s->precond_inv);
 
   /* 4th part: Invert the preconditioner */
   OSQPVectorf_ew_reciprocal(s->precond_inv, s->precond);
