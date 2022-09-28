@@ -2,12 +2,11 @@
 #include "lin_alg.h"
 #include "algebra_impl.h"
 #include "csc_math.h"
+#include "csc_utils.h"
 #include "printing.h"
 
 
 #ifndef OSQP_EMBEDDED_MODE
-
-#include "csc_utils.h"
 
 /*  logical test functions ----------------------------------------------------*/
 
