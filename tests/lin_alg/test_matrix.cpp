@@ -132,24 +132,24 @@ TEST_CASE("Matrix: Diagonal extraction", "[matrix]") {
   lin_alg_sols_data_ptr data{generate_problem_lin_alg_sols_data()};
 
   SECTION("Square non-symmetric") {
-      OSQPMatrix_ptr A{OSQPMatrix_new_from_csc(data->test_mat_ops_diag_A, 0)};
-      OSQPVectorf_ptr ref{OSQPVectorf_new(data->test_mat_ops_diag_dA, data->test_mat_ops_diag_n)};
+    OSQPMatrix_ptr A{OSQPMatrix_new_from_csc(data->test_mat_ops_diag_A, 0)};
+    OSQPVectorf_ptr ref{OSQPVectorf_new(data->test_mat_ops_diag_dA, data->test_mat_ops_diag_n)};
 
-      OSQPVectorf_ptr res{OSQPVectorf_malloc(data->test_mat_ops_diag_n)};
+    OSQPVectorf_ptr res{OSQPVectorf_malloc(data->test_mat_ops_diag_n)};
 
-      OSQPMatrix_extract_diag(A.get(), res.get());
+    OSQPMatrix_extract_diag(A.get(), res.get());
 
-      mu_assert("Error in extracted diagonal",
-                OSQPVectorf_is_eq(ref.get(), res.get(), TESTS_TOL));
+    mu_assert("Error in extracted diagonal",
+              OSQPVectorf_is_eq(ref.get(), res.get(), TESTS_TOL));
   }
 
   SECTION("Square symmetric, triangular") {
-      OSQPMatrix_ptr P{OSQPMatrix_new_from_csc(data->test_mat_ops_diag_Pu, 1)};
-      OSQPVectorf_ptr ref{OSQPVectorf_new(data->test_mat_ops_diag_dP, data->test_mat_ops_diag_n)};
+    OSQPMatrix_ptr P{OSQPMatrix_new_from_csc(data->test_mat_ops_diag_Pu, 1)};
+    OSQPVectorf_ptr ref{OSQPVectorf_new(data->test_mat_ops_diag_dP, data->test_mat_ops_diag_n)};
 
-      OSQPVectorf_ptr res{OSQPVectorf_malloc(data->test_mat_ops_diag_n)};
+    OSQPVectorf_ptr res{OSQPVectorf_malloc(data->test_mat_ops_diag_n)};
 
-      OSQPMatrix_extract_diag(P.get(), res.get());
+    OSQPMatrix_extract_diag(P.get(), res.get());
 
       mu_assert("Error in extracted diagonal",
                 OSQPVectorf_is_eq(ref.get(), res.get(), TESTS_TOL));
