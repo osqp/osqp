@@ -33,6 +33,8 @@ OSQPInt csc_is_eq(OSQPCscMatrix* A,
 
 //========= Internal utility functions  ===========
 
+#ifndef OSQP_EMBEDDED_MODE
+
 static void* csc_malloc(OSQPInt n, OSQPInt size) {
   return c_malloc(n * size);
 }
@@ -40,6 +42,8 @@ static void* csc_malloc(OSQPInt n, OSQPInt size) {
 static void* csc_calloc(OSQPInt n, OSQPInt size) {
   return c_calloc(n, size);
 }
+
+#endif /* OSQP_EMBEDDED_MODE */
 
 static void prea_int_vec_copy(const OSQPInt* a, OSQPInt* b, OSQPInt n) {
   OSQPInt i;
@@ -93,6 +97,8 @@ OSQPInt csc_cumsum(OSQPInt* p, OSQPInt* c, OSQPInt n) {
 //   M->p     = p;
 //   return M;
 // }
+
+#ifndef OSQP_EMBEDDED_MODE
 
 OSQPCscMatrix* csc_spalloc(OSQPInt m,
                            OSQPInt n,
@@ -275,6 +281,8 @@ OSQPCscMatrix* triplet_to_csr(const OSQPCscMatrix* T, OSQPInt* TtoC) {
   return csc_done(C, w, OSQP_NULL, 1);     /* success; free w and return C */
 }
 
+#endif /* OSQP_EMBEDDED_MODE */
+
 void csc_extract_diag(const OSQPCscMatrix* A,
                             OSQPFloat*     d) {
   OSQPInt    i, ptr;
@@ -294,6 +302,8 @@ void csc_extract_diag(const OSQPCscMatrix* A,
     }
   }
 }
+
+#ifndef OSQP_EMBEDDED_MODE
 
 OSQPInt* csc_pinv(const OSQPInt* p, OSQPInt n) {
   OSQPInt  k;
@@ -433,6 +443,8 @@ OSQPCscMatrix* csc_done(OSQPCscMatrix* C,
   }
 }
 
+#endif /* OSQP_EMBEDDED_MODE */
+
 // OSQPCscMatrix* csc_to_triu(OSQPCscMatrix *M) {
 //   OSQPCscMatrix  *M_trip;    // Matrix in triplet format
 //   OSQPCscMatrix  *M_triu;    // Resulting upper triangular matrix
@@ -511,6 +523,7 @@ OSQPCscMatrix* csc_done(OSQPCscMatrix* C,
 //   return M_triu;
 // }
 
+#ifndef OSQP_EMBEDDED_MODE
 
 OSQPCscMatrix* triu_to_csc(OSQPCscMatrix* M) {
     OSQPCscMatrix* M_trip;    // Matrix in triplet format
@@ -610,3 +623,5 @@ OSQPCscMatrix* vstack(OSQPCscMatrix* A, OSQPCscMatrix* B) {
     csc_spfree(M_trip);
     return M;
 }
+
+#endif /* OSQP_EMBEDDED_MODE */

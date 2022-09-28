@@ -14,6 +14,8 @@ OSQPInt csc_is_eq(OSQPCscMatrix* A, OSQPCscMatrix* B, OSQPFloat tol);
 * Create and free CSC Matrices                                              *
 *****************************************************************************/
 
+#ifndef OSQP_EMBEDDED_MODE
+
 /**
  * Create uninitialized CSC matrix structure
     (uses MALLOC to create inner arrays x, i, p)
@@ -62,10 +64,13 @@ OSQPCscMatrix* csc_done(OSQPCscMatrix* C,
                         void*          w,
                         void*          x,
                         OSQPInt        ok);
+#endif /* OSQP_EMBEDDED_MODE */
 
 /*****************************************************************************
 * Copy Matrices                                                             *
 *****************************************************************************/
+
+#ifndef OSQP_EMBEDDED_MODE
 
 /**
  *  Copy sparse CSC matrix A to output.
@@ -82,10 +87,13 @@ OSQPCscMatrix* csc_copy(const OSQPCscMatrix* A);
 /* Convert sparse CSC to dense (uses MALLOC)*/
 OSQPFloat* csc_to_dns(OSQPCscMatrix* M);
 
+#endif /* OSQP_EMBEDDED_MODE */
+
 /*****************************************************************************
 * Matrices Conversion                                                       *
 *****************************************************************************/
 
+#ifndef OSQP_EMBEDDED_MODE
 
 /**
  * C = compressed-column CSC from matrix T in triplet form
@@ -143,6 +151,7 @@ OSQPCscMatrix* triu_to_csc(OSQPCscMatrix* M);
 OSQPCscMatrix* vstack(OSQPCscMatrix* A,
                       OSQPCscMatrix* B);
 
+#endif /* OSQP_EMBEDDED_MODE */
 
 /*****************************************************************************
 * Extra operations                                                          *
@@ -166,9 +175,12 @@ OSQPCscMatrix* vstack(OSQPCscMatrix* A,
 void csc_extract_diag(const OSQPCscMatrix* A,
                             OSQPFloat*     d);
 
+#ifndef OSQP_EMBEDDED_MODE
+
 /**
  * Compute inverse of permutation matrix stored in the vector p.
  * The computed inverse is also stored in a vector.
+ * Allocates return vector (uses MALLOC)
  */
 OSQPInt* csc_pinv(const OSQPInt* p,
                         OSQPInt  n);
@@ -187,5 +199,6 @@ OSQPCscMatrix* csc_symperm(const OSQPCscMatrix* A,
                                  OSQPInt*       AtoC,
                                  OSQPInt        values);
 
+#endif /* OSQP_EMBEDDED_MODE */
 
 #endif /* ifndef CSC_UTILS_H */

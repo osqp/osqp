@@ -3,8 +3,6 @@ include(${OSQP_ALGEBRA_ROOT}/_common/lin_sys/qdldl/qdldl.cmake)
 
 if(NOT OSQP_EMBEDDED_MODE)
   set( NON_EMBEDDED_SRC_FILES
-       ../_common/csc_utils.h
-       ../_common/csc_utils.c
        ${LIN_SYS_QDLDL_NON_EMBEDDED_SRC_FILES} )
 endif()
 
@@ -12,6 +10,8 @@ target_sources(
   OSQPLIB
   PRIVATE ../_common/csc_math.h
           ../_common/csc_math.c
+          ../_common/csc_utils.h
+          ../_common/csc_utils.c
           algebra_impl.h
           algebra_libs.c
           vector.c
@@ -36,6 +36,8 @@ if( OSQP_CODEGEN )
        ${CMAKE_CURRENT_SOURCE_DIR}/matrix.c
        ${OSQP_ALGEBRA_ROOT}/_common/csc_math.h
        ${OSQP_ALGEBRA_ROOT}/_common/csc_math.c
+       ${OSQP_ALGEBRA_ROOT}/_common/csc_utils.h
+       ${OSQP_ALGEBRA_ROOT}/_common/csc_utils.c
        ${OSQP_ALGEBRA_ROOT}/_common/kkt.h
        ${OSQP_ALGEBRA_ROOT}/_common/kkt.c
        ${OSQP_ALGEBRA_ROOT}/_common/lin_sys/qdldl/qdldl_interface.h
