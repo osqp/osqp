@@ -82,7 +82,26 @@ void osqp_get_dimensions(OSQPSolver* solver,
 }
 
 
+void osqp_set_default_codegen_defines(OSQPCodegenDefines* defines) {
+
+  /* Avoid working with a null pointer */
+  if (!defines)
+    return;
+
+  defines->embedded_mode      = 1;  /* Default to vector updates only */
+  defines->float_type         = 0;  /* Default to double */
+  defines->printing_enable    = 0;  /* Default to no printing */
+  defines->profiling_enable   = 0;  /* Default to no timing */
+  defines->interrupt_enable   = 0;  /* Default to no interrupts */
+  defines->derivatives_enable = 0;  /* Default to no derivatives */
+}
+
+
 void osqp_set_default_settings(OSQPSettings* settings) {
+
+  /* Avoid working with a null pointer */
+  if (!settings)
+    return;
 
   settings->device = 0;                                      /* device identifier */
   settings->linsys_solver  = osqp_algebra_default_linsys();  /* linear system solver */
