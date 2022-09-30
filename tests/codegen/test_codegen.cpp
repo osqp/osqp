@@ -38,12 +38,9 @@ TEST_CASE("Basic codegen", "[codegen]")
   settings->warm_starting = 0;
 
   // Define codegen settings
+  osqp_set_default_codegen_defines(defines.get());
   defines->embedded_mode = 1;      // vector update
-  defines->float_type = 1;         // floats
-  defines->printing_enable = 0;    // no printing
-  defines->profiling_enable = 0;   // no timing
-  defines->interrupt_enable = 0;   // no interrupts
-  defines->derivatives_enable = 0; // no derivatives
+  defines->float_type    = 1;      // floats
 
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,
@@ -95,12 +92,9 @@ TEST_CASE("Codegen: Data export", "[codegen],[unconstrained],[lp],[qp],[nonconve
   settings->warm_starting = 0;
 
   // Define codegen settings
+  osqp_set_default_codegen_defines(defines.get());
   defines->embedded_mode = 1;      // vector update
-  defines->float_type = 1;         // floats
-  defines->printing_enable = 0;    // no printing
-  defines->profiling_enable = 0;   // no timing
-  defines->interrupt_enable = 0;   // no interrupts
-  defines->derivatives_enable = 0; // no derivatives
+  defines->float_type    = 1;      // floats
 
   SECTION( "Unconstrained" ) {
     OSQPInt embedded;
@@ -254,12 +248,7 @@ TEST_CASE("Codegen: defines", "[codegen]")
   settings->warm_starting = 0;
 
   // Define codegen settings
-  defines->embedded_mode = 1;      // vector update
-  defines->float_type = 1;         // floats
-  defines->printing_enable = 0;    // no printing
-  defines->profiling_enable = 0;   // no timing
-  defines->interrupt_enable = 0;   // no interrupts
-  defines->derivatives_enable = 0; // no derivatives
+  osqp_set_default_codegen_defines(defines.get());
 
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,
@@ -434,12 +423,9 @@ TEST_CASE("Codegen: Error propgatation", "[codegen]")
   settings->warm_starting = 0;
 
   // Define codegen settings
+  osqp_set_default_codegen_defines(defines.get());
   defines->embedded_mode = 1;      // vector update
-  defines->float_type = 1;         // floats
-  defines->printing_enable = 0;    // no printing
-  defines->profiling_enable = 0;   // no timing
-  defines->interrupt_enable = 0;   // no interrupts
-  defines->derivatives_enable = 0; // no derivatives
+  defines->float_type    = 1;      // floats
 
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,
@@ -551,12 +537,9 @@ TEST_CASE("Codegen: Settings", "[codegen],[settings]")
   settings->warm_starting = 0;
 
   // Define codegen settings
+  osqp_set_default_codegen_defines(defines.get());
   defines->embedded_mode = 1;      // vector update
-  defines->float_type = 1;         // floats
-  defines->printing_enable = 0;    // no printing
-  defines->profiling_enable = 0;   // no timing
-  defines->interrupt_enable = 0;   // no interrupts
-  defines->derivatives_enable = 0; // no derivatives
+  defines->float_type    = 1;      // floats
 
   // scaling changes some allocations (some vectors become null)
   SECTION( "Scaling setting" ) {
