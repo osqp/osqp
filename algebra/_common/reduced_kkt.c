@@ -49,3 +49,17 @@ void reduced_kkt_diagonal(const OSQPMatrix*  P,
   /* 4th part: Invert the diagonal */
   OSQPVectorf_ew_reciprocal(diag_inv, diag);
 }
+
+
+void reduced_kkt_compute_rhs(const OSQPMatrix*  A,
+                             const OSQPVectorf* rho_vec,
+                                   OSQPVectorf* b1,
+                             const OSQPVectorf* b2,
+                                   OSQPVectorf* work) {
+
+  /* 1st par: Set work = rho.*b2 */
+  OSQPVectorf_ew_prod(work, b2, rho_vec);
+
+  /* 2nd part: Compute b1 = b1 + A' (rho.*b2) */
+  OSQPMatrix_Atxpy(A, work, b1, 1.0, 1.0);
+}

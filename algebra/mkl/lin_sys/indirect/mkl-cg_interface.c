@@ -165,12 +165,8 @@ OSQPInt solve_linsys_mklcg(mklcg_solver* s,
   OSQPVectorf_view_update(s->r1, b,    0, s->n);
   OSQPVectorf_view_update(s->r2, b, s->n, s->m);
 
-  //Set ywork = rho . *r_2
-  OSQPVectorf_ew_prod(s->ywork, s->r2, s->rho_vec);
-
-  //Compute r_1 = r_1 + A' (rho.*r_2)
-  //This is the RHS for our CG solve
-  OSQPMatrix_Atxpy(s->A, s->ywork, s->r1, 1.0, 1.0);
+  // Compute the RHS for the CG solve
+  reduced_kkt_compute_rhs(s->A, s->rho_vec, s->r1, s->r2, s->ywork);
 
   // Solve the CG system
   // -------------------
