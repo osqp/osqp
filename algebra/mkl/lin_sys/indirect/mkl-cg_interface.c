@@ -1,4 +1,5 @@
 #include "algebra_impl.h"
+#include "reduced_kkt.h"
 #include "mkl-cg_interface.h"
 #include <mkl_rci.h>
 
@@ -30,42 +31,6 @@ MKL_INT cg_solver_init(mklcg_solver* s) {
   return rci_request;
 }
 
-//Compute v2 = (P+sigma I + A'*(rho)*A)v1,
-//where v1 and v2 are successive columns of tmp
-//unclear if I can overwrite v1, so avoid it
-
-void cg_times(OSQPMatrix*  P,
-              OSQPMatrix*  A,
-              OSQPVectorf* v1,
-              OSQPVectorf* v2,
-              OSQPVectorf* rho_vec,
-              OSQPFloat    sigma,
-              OSQPVectorf* ywork) {
-
-  OSQPMatrix_Axpy(A, v1, ywork, 1.0, 0.0); //scratch space for (rho)*A*v1
-  OSQPVectorf_ew_prod(ywork, ywork, rho_vec);
-  OSQPVectorf_copy(v2,v1);
-  OSQPMatrix_Axpy(P, v1, v2, 1.0, sigma); //v2 = (P+sigma I) v1
-  OSQPMatrix_Atxpy(A, ywork, v2, 1.0, 1.0);
-}
-
-
-void cg_update_precond_diagonal(mklcg_solver* s) {
-  /* 1st part: sigma */
-  OSQPVectorf_set_scalar(s->precond, s->sigma);
-
-  /* 2nd part: P matrix diagonal */
-  OSQPMatrix_extract_diag(s->P, s->precond_inv);
-  OSQPVectorf_plus(s->precond, s->precond, s->precond_inv);
-
-  /* 3rd part: Diagonal of At*rho*A */
-  OSQPMatrix_AtDA_extract_diag(s->A, s->rho_vec, s->precond_inv);
-  OSQPVectorf_plus(s->precond, s->precond, s->precond_inv);
-
-  /* 4th part: Invert the preconditioner */
-  OSQPVectorf_ew_reciprocal(s->precond_inv, s->precond);
-}
-
 
 void cg_update_precond(mklcg_solver* s) {
 
@@ -77,7 +42,7 @@ void cg_update_precond(mklcg_solver* s) {
 
   /* Diagonal preconditioner computation */
   case OSQP_DIAGONAL_PRECONDITIONER:
-    cg_update_precond_diagonal(s);
+    reduced_kkt_diagonal(s->P, s->A, s->rho_vec, s->sigma, s->precond, s->precond_inv);
     break;
   }
 }
@@ -218,9 +183,9 @@ OSQPInt solve_linsys_mklcg(mklcg_solver* s,
     dcg (&mkln, OSQPVectorf_data(s->x), OSQPVectorf_data(s->r1),
          &rci_request, s->iparm, s->dparm, OSQPVectorf_data(s->tmp));
     if (rci_request == 1) {
-        //multiply for condensed system. mvm_pre and mvm_post are subviews of
-        //the cg workspace variable s->tmp.
-        cg_times(s->P, s->A, s->mvm_pre, s->mvm_post, s->rho_vec, s->sigma, s->ywork);
+        // Multiply for reduced system.
+        // mvm_pre and mvm_post are subviews of the cg workspace variable s->tmp.
+        reduced_kkt_mv_times(s->P, s->A, s->rho_vec, s->sigma, s->mvm_pre, s->mvm_post, s->ywork );
     } else if (rci_request == 3) {
         // Apply the preconditioner as (precond_post = precond.*precond_pre)
         OSQPVectorf_ew_prod(s->precond_post, s->precond_inv, s->precond_pre);
