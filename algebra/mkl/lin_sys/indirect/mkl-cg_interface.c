@@ -15,7 +15,7 @@ MKL_INT cg_solver_init(mklcg_solver* s) {
   // Set MKL control parameters
   s->iparm[4] = s->max_iter; // Maximum number of iterations
   s->iparm[7] = 1;           // Enable maximum iteration stopping test
-  s->iparm[8] = 0;           // Disable residual stopping test
+  s->iparm[8] = 1;           // Enable residual stopping test
   s->iparm[9] = 0;           // Disable user defined stopping test
 
   // Enable the preconditioner if requested
