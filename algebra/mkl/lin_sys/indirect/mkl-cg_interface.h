@@ -35,6 +35,9 @@ typedef struct mklcg_solver_ {
   //threads count
   OSQPInt nthreads;
 
+  // Maximum number of iterations
+  OSQPInt max_iter;
+
    /* @name Attributes
    * @{
    */

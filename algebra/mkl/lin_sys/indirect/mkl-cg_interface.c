@@ -11,14 +11,17 @@ MKL_INT cg_solver_init(mklcg_solver* s) {
   dcg_init(&mkln, NULL, NULL, &rci_request,
            s->iparm, s->dparm, OSQPVectorf_data(s->tmp));
 
-  //Set MKL control parameters
-  s->iparm[7] = 1;        // maximum iteration stopping test
-  s->iparm[8] = 0;        // residual stopping test
-  s->iparm[9] = 0;        // user defined stopping test
-  s->dparm[0] = 1.E-5;    // relative tolerance (default)
+  // Set MKL control parameters
+  s->iparm[4] = s->max_iter; // Maximum number of iterations
+  s->iparm[7] = 1;           // Enable maximum iteration stopping test
+  s->iparm[8] = 0;           // Disable residual stopping test
+  s->iparm[9] = 0;           // Disable user defined stopping test
 
   // Enable the preconditioner if requested
   s->iparm[10] = (s->precond_type == OSQP_NO_PRECONDITIONER) ? 0 : 1;
+
+  // Relative tolerance (default)
+  s->dparm[0] = 1.E-5;
 
   //returns -1 for dcg failure, 0 otherwise
   dcg_check(&mkln, NULL, NULL, &rci_request,
@@ -126,6 +129,9 @@ OSQPInt init_linsys_mklcg(mklcg_solver**      sp,
 
   // Assign preconditioner
   s->precond_type = settings->cg_precond;
+
+  // Assign iteration limit
+  s->max_iter = settings->cg_max_iter;
 
   //Don't know the thread count.  Just use
   //the same thing as the pardiso solver
@@ -258,6 +264,10 @@ void update_settings_linsys_solver_mklcg(struct mklcg_solver_* s,
     // Compute the new preconditioner
     cg_update_precond(s);
   }
+
+  // Maximum number of iterations
+  s->max_iter = settings->cg_max_iter;
+  s->iparm[4] = settings->cg_max_iter;
 
   //returns -1 for dcg failure, 0 otherwise
   dcg_check(&mkln, NULL, NULL, &rci_request,
