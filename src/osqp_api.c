@@ -1179,6 +1179,7 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
   settings->cg_max_iter      = new_settings->cg_max_iter;
   settings->cg_tol_reduction = new_settings->cg_tol_reduction;
   settings->cg_tol_fraction  = new_settings->cg_tol_fraction;
+  settings->cg_precond       = new_settings->cg_precond;
 
   // adaptive_rho           ignored
   // adaptive_rho_interval  ignored

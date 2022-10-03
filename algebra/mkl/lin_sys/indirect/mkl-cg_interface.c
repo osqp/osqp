@@ -18,10 +18,7 @@ MKL_INT cg_solver_init(mklcg_solver* s) {
   s->dparm[0] = 1.E-5;    // relative tolerance (default)
 
   // Enable the preconditioner if requested
-  if (s->precond_type == OSQP_NO_PRECONDITIONER)
-    s->iparm[10] = 0;
-  else
-    s->iparm[10] = 1;
+  s->iparm[10] = (s->precond_type == OSQP_NO_PRECONDITIONER) ? 0 : 1;
 
   //returns -1 for dcg failure, 0 otherwise
   dcg_check(&mkln, NULL, NULL, &rci_request,
@@ -247,8 +244,26 @@ OSQPInt solve_linsys_mklcg(mklcg_solver* s,
 
 void update_settings_linsys_solver_mklcg(struct mklcg_solver_* s,
                                          const OSQPSettings*   settings) {
-    // TODO: Update settings!
-    return;
+
+  MKL_INT mkln = s->n;
+  MKL_INT rci_request = 1;
+
+  // New precoditioner type requested
+  if (s->precond_type != settings->cg_precond) {
+    s->precond_type = settings->cg_precond;
+
+    // Enable the preconditioner if requested
+    s->iparm[10] = (s->precond_type == OSQP_NO_PRECONDITIONER) ? 0 : 1;
+
+    // Compute the new preconditioner
+    cg_update_precond(s);
+  }
+
+  //returns -1 for dcg failure, 0 otherwise
+  dcg_check(&mkln, NULL, NULL, &rci_request,
+            s->iparm, s->dparm, OSQPVectorf_data(s->tmp));
+
+  return;
 }
 
 

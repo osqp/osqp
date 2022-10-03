@@ -273,6 +273,13 @@ void update_settings_linsys_solver_cudapcg(cudapcg_solver*     s,
   s->max_iter            = settings->cg_max_iter;
   s->reduction_threshold = settings->cg_tol_reduction;
   s->tol_fraction        = settings->cg_tol_fraction;
+
+  // Update preconditioner
+  if (s->precond_type != settings->cg_precond) {
+    s->precond_type = settings->cg_precond;
+
+    cuda_pcg_update_precond(s, 1, 1, 1);
+  }
 }
 
 
