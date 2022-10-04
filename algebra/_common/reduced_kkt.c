@@ -57,7 +57,7 @@ void reduced_kkt_compute_rhs(const OSQPMatrix*  A,
                              const OSQPVectorf* b2,
                                    OSQPVectorf* work) {
 
-  /* 1st par: Set work = rho.*b2 */
+  /* 1st part: Set work = rho.*b2 */
   OSQPVectorf_ew_prod(work, b2, rho_vec);
 
   /* 2nd part: Compute b1 = b1 + A' (rho.*b2) */
