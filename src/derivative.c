@@ -10,11 +10,9 @@
 #include "csc_utils.h"
 #include "csc_math.h"
 
-OSQPInt unscale_PAlu(OSQPSolver*  solver,
+OSQPInt unscale_PA(OSQPSolver*  solver,
                      OSQPMatrix*  P,
-                     OSQPMatrix*  A,
-                     OSQPVectorf* l,
-                     OSQPVectorf* u) {
+                     OSQPMatrix*  A) {
 
   OSQPMatrix_mult_scalar(P, solver->work->scaling->cinv);
   OSQPMatrix_lmult_diag(P, solver->work->scaling->Dinv);
@@ -23,10 +21,17 @@ OSQPInt unscale_PAlu(OSQPSolver*  solver,
   OSQPMatrix_lmult_diag(A, solver->work->scaling->Einv);
   OSQPMatrix_rmult_diag(A, solver->work->scaling->Dinv);
 
-  OSQPVectorf_ew_prod(l, l, solver->work->scaling->Einv);
-  OSQPVectorf_ew_prod(u, u, solver->work->scaling->Einv);
-
   return 0;
+}
+
+OSQPInt unscale_lu(OSQPSolver*  solver,
+                     OSQPVectorf* l,
+                     OSQPVectorf* u) {
+
+    OSQPVectorf_ew_prod(l, l, solver->work->scaling->Einv);
+    OSQPVectorf_ew_prod(u, u, solver->work->scaling->Einv);
+
+    return 0;
 }
 
 OSQPInt adjoint_derivative_get_mat(OSQPSolver *solver,
@@ -90,7 +95,6 @@ OSQPInt adjoint_derivative_get_vec(OSQPSolver *solver,
 }
 
 OSQPInt adjoint_derivative_compute(OSQPSolver *solver,
-                                        const OSQPMatrix*   P,
                                         const OSQPMatrix*   G,
                                         const OSQPMatrix*   A_eq,
                                         OSQPMatrix*         GDiagLambda,
@@ -103,7 +107,15 @@ OSQPInt adjoint_derivative_compute(OSQPSolver *solver,
     OSQPVectorf* y = OSQPVectorf_new(solver->solution->y, m);
     OSQPFloat* y_data = OSQPVectorf_data(y);
 
-    adjoint_derivative_linsys_solver(solver, solver->settings, P, G, A_eq, GDiagLambda, slacks, derivative_data->rhs);
+    OSQPMatrix*  P = OSQPMatrix_copy_new(solver->work->data->P);
+    OSQPMatrix*  A = OSQPMatrix_copy_new(solver->work->data->A);
+    if (solver->settings->scaling) unscale_PA(solver, P, A);
+
+    OSQPMatrix* P_full = OSQPMatrix_triu_to_symm(P);
+    adjoint_derivative_linsys_solver(solver, solver->settings, P_full, G, A_eq, GDiagLambda, slacks, derivative_data->rhs);
+    OSQPMatrix_free(P_full);
+    OSQPMatrix_free(P);
+    OSQPMatrix_free(A);
 
     OSQPFloat* rhs_data = OSQPVectorf_data(derivative_data->rhs);
 
@@ -164,7 +176,8 @@ OSQPInt adjoint_derivative(OSQPSolver*    solver,
     OSQPVectorf* y = OSQPVectorf_new(solver->solution->y, m);
 
     // TODO: If we didn't have to unscale P/A/l/u we would not have to copy these
-    if (solver->settings->scaling) unscale_PAlu(solver, P, A, l, u);
+    if (solver->settings->scaling) unscale_PA(solver, P, A);
+    if (solver->settings->scaling) unscale_lu(solver, l, u);
 
     OSQPFloat* l_data = OSQPVectorf_data(l);
     OSQPFloat* u_data = OSQPVectorf_data(u);
@@ -283,9 +296,6 @@ OSQPInt adjoint_derivative(OSQPSolver*    solver,
     OSQPMatrix* GDiagLambda = OSQPMatrix_copy_new(G);
     OSQPMatrix_lmult_diag(GDiagLambda, lambda);
 
-    // ---------- P_full
-    OSQPMatrix* P_full = OSQPMatrix_triu_to_symm(P);
-
     // ---------- RHS
     OSQPVectorf* dy_l_ineq = OSQPVectorf_subvector_byrows(dy_l_vec, A_ineq_l_i);
     OSQPVectorf_free(dy_l_vec);
@@ -332,7 +342,7 @@ OSQPInt adjoint_derivative(OSQPSolver*    solver,
     derivative_data->eq_indices_vec = OSQPVectori_new(eq_indices_vec, m);
     c_free(eq_indices_vec);
 
-    adjoint_derivative_compute(solver, P_full, G, A_eq, GDiagLambda, slacks);
+    adjoint_derivative_compute(solver, G, A_eq, GDiagLambda, slacks);
 
     // --------------- ASSEMBLE ----------------- //
 
@@ -341,7 +351,6 @@ OSQPInt adjoint_derivative(OSQPSolver*    solver,
 
     OSQPMatrix_free(G);
     OSQPMatrix_free(A_eq);
-    OSQPMatrix_free(P_full);
     OSQPMatrix_free(GDiagLambda);
 
     OSQPVectorf_free(lambda);
@@ -355,7 +364,6 @@ OSQPInt adjoint_derivative(OSQPSolver*    solver,
     OSQPVectori_free(A_ineq_u_i);
     OSQPVectori_free(A_eq_i);
 
-    OSQPMatrix_free(P);
     OSQPMatrix_free(A);
     OSQPVectorf_free(l);
     OSQPVectorf_free(u);

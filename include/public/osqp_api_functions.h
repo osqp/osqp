@@ -265,7 +265,6 @@ OSQP_API OSQPInt osqp_adjoint_derivative(OSQPSolver*    solver,
                                          OSQPFloat*     dy_u);
 
 OSQP_API OSQPInt osqp_adjoint_derivative_compute(OSQPSolver*    solver,
-                                         OSQPCscMatrix* P,
                                          OSQPFloat*     G,
                                          OSQPCscMatrix* A_eq,
                                          OSQPCscMatrix* GDiagLambda,

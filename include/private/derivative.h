@@ -20,7 +20,6 @@ OSQPInt adjoint_derivative_get_vec(OSQPSolver *solver,
                                    OSQPFloat*     du);
 
 OSQPInt adjoint_derivative_compute(OSQPSolver *solver,
-                                   const OSQPMatrix*   P,
                                    const OSQPMatrix*   G,
                                    const OSQPMatrix*   A_eq,
                                    OSQPMatrix*         GDiagLambda,
