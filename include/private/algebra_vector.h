@@ -91,6 +91,9 @@ OSQPInt OSQPVectori_length(const OSQPVectori* a);
 /* Pointer to vector data (floats) */
 OSQPFloat* OSQPVectorf_data(const OSQPVectorf* a);
 
+/* Pointer to vector data (ints) */
+OSQPInt* OSQPVectori_data(const OSQPVectori* a);
+
 /* Copy a float vector a into another vector b (pre-allocated) */
 void OSQPVectorf_copy(OSQPVectorf*       b,
                       const OSQPVectorf* a);

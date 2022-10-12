@@ -74,6 +74,20 @@ typedef struct {
   OSQPVectorf* u; ///< dense array for upper bound (size m)
 } OSQPData;
 
+typedef struct {
+    OSQPInt n_ineq_l;
+    OSQPInt n_ineq_u;
+    OSQPInt n_eq;
+    OSQPVectori *nu_sign_vec;
+    OSQPVectori *eq_indices_vec;
+    OSQPVectori *l_noninf_indices_vec;
+    OSQPVectori *u_noninf_indices_vec;
+    OSQPVectorf *y_l;
+    OSQPVectorf *y_u;
+    OSQPVectorf *ryl;
+    OSQPVectorf *ryu;
+    OSQPVectorf *rhs;
+} OSQPDerivativeData;
 
 /**
  * OSQP Workspace
@@ -191,6 +205,10 @@ struct OSQPWorkspace_ {
 # ifdef OSQP_ENABLE_PRINTING
   OSQPInt summary_printed; ///< Has last summary been printed? (true/false)
 # endif // ifdef OSQP_ENABLE_PRINTING
+
+# ifdef OSQP_ENABLE_DERIVATIVES
+  OSQPDerivativeData *derivative_data;
+# endif // ifdef OSQP_ENABLE_DERIVATIVES
 };
 
 // NB: "typedef struct OSQPWorkspace_ OSQPWorkspace" is declared already

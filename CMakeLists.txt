@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.18)
 project(osqp)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 include(GNUInstallDirs)
 include(CMakeDependentOption)
 include(CMakePackageConfigHelpers)
@@ -13,7 +15,7 @@ else()
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  set(OSQP_ENABLE_DEBUG ON)
+  #set(OSQP_ENABLE_DEBUG ON)
   set(CMAKE_VERBOSE_MAKEFILE ON)
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()

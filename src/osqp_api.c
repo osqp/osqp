@@ -382,6 +382,12 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   }
 # endif /* ifndef OSQP_ENABLE_PROFILING */
 
+# ifdef OSQP_ENABLE_DERIVATIVES
+  work->derivative_data = c_calloc(1, sizeof(OSQPDerivativeData));
+# else
+  work->derivative_data = OSQP_NULL;
+# endif / *ifdef OSQP_ENABLE_DERIVATIVES */
+
   // Return exit flag
   return 0;
 }
@@ -854,6 +860,19 @@ OSQPInt osqp_cleanup(OSQPSolver* solver) {
     // Free timer
     if (work->timer) OSQPTimer_free(work->timer);
 # endif /* ifdef OSQP_ENABLE_PROFILING */
+
+# ifdef OSQP_ENABLE_DERIVATIVES
+      if (work->derivative_data){
+          if (work->derivative_data->nu_sign_vec) OSQPVectori_free(work->derivative_data->nu_sign_vec);
+          if (work->derivative_data->eq_indices_vec) OSQPVectori_free(work->derivative_data->eq_indices_vec);
+          if (work->derivative_data->l_noninf_indices_vec) OSQPVectori_free(work->derivative_data->l_noninf_indices_vec);
+          if (work->derivative_data->u_noninf_indices_vec) OSQPVectori_free(work->derivative_data->u_noninf_indices_vec);
+          if (work->derivative_data->y_l) OSQPVectorf_free(work->derivative_data->y_l);
+          if (work->derivative_data->y_u) OSQPVectorf_free(work->derivative_data->y_u);
+          if (work->derivative_data->rhs) OSQPVectorf_free(work->derivative_data->rhs);
+          c_free(work->derivative_data);
+      }
+#endif /* ifdef OSQP_ENABLE_SCALING */
 
     // Free work
     c_free(work);

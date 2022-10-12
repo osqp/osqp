@@ -29,40 +29,120 @@ OSQPInt unscale_PAlu(OSQPSolver*  solver,
   return 0;
 }
 
-OSQPInt scale_dxdy(OSQPSolver*  solver,
-                   OSQPVectorf* dx,
-                   OSQPVectorf* dy_l,
-                   OSQPVectorf* dy_u) {
-    OSQPVectorf_ew_prod(dx, dx, solver->work->scaling->Dinv);
-    OSQPVectorf_ew_prod(dy_l, dy_l, solver->work->scaling->Einv);
-    OSQPVectorf_mult_scalar(dy_l, solver->work->scaling->c);
-    OSQPVectorf_ew_prod(dy_u, dy_u, solver->work->scaling->Einv);
-    OSQPVectorf_mult_scalar(dy_u, solver->work->scaling->c);
+OSQPInt osqp_adjoint_derivative_get_mat(OSQPSolver *solver,
+                                        OSQPCscMatrix* dP,
+                                        OSQPCscMatrix* dA) {
+
+    OSQPInt n = solver->work->data->n;
+    OSQPDerivativeData *derivative_data = solver->work->derivative_data;
+    OSQPVectorf* x = OSQPVectorf_new(solver->solution->x, n);  // unscaled solution
+    OSQPFloat* x_data = OSQPVectorf_data(x);
+
+    OSQPFloat* y_u_data = OSQPVectorf_data(derivative_data->y_u);
+    OSQPFloat* y_l_data = OSQPVectorf_data(derivative_data->y_l);
+    OSQPFloat* ryu_data = OSQPVectorf_data(derivative_data->ryu);
+    OSQPFloat* ryl_data = OSQPVectorf_data(derivative_data->ryl);
+
+    OSQPInt pos = n + derivative_data->n_ineq_l + derivative_data->n_ineq_u + derivative_data->n_eq;
+    OSQPVectorf* rx = OSQPVectorf_view(derivative_data->rhs, pos, n);
+    OSQPFloat* rx_data  = OSQPVectorf_data(rx);
+
+    OSQPInt col;
+    for (col=0; col<n; col++) {
+        OSQPInt p, i;
+        for (p=dP->p[col]; p<dP->p[col+1]; p++) {
+            i = dP->i[p];
+            dP->x[p] = 0.5 * ((rx_data[i] * x_data[col]) + (rx_data[col] * x_data[i]));
+        }
+        for (p=dA->p[col]; p<dA->p[col+1]; p++) {
+            i = dA->i[p];
+            dA->x[p] = ((y_u_data[i] - y_l_data[i]) * rx_data[col]) + ((ryu_data[i] - ryl_data[i]) * x_data[col]);
+        }
+    }
+
+    OSQPVectorf_view_free(rx);
+    OSQPVectorf_free(x);
 
     return 0;
 }
 
-OSQPInt unscale_derivatives_PqAlu(OSQPSolver*    solver,
-                                  OSQPCscMatrix* dP,
-                                  OSQPVectorf*   dq,
-                                  OSQPCscMatrix* dA,
-                                  OSQPVectorf*   dl,
-                                  OSQPVectorf*   du) {
+OSQPInt osqp_adjoint_derivative_get_vec(OSQPSolver *solver,
+                                        OSQPFloat*     dq,
+                                        OSQPFloat*     dl,
+                                        OSQPFloat*     du) {
 
-    csc_scale(dP, solver->work->scaling->cinv);
-    csc_lmult_diag(dP, OSQPVectorf_data(solver->work->scaling->Dinv));
-    csc_rmult_diag(dP, OSQPVectorf_data(solver->work->scaling->Dinv));
+    OSQPInt n = solver->work->data->n;
+    OSQPDerivativeData *derivative_data = solver->work->derivative_data;
 
-    OSQPVectorf_mult_scalar(dq, solver->work->scaling->cinv);
-    OSQPVectorf_ew_prod(dq, dq, solver->work->scaling->Dinv);
+    OSQPInt pos = n + derivative_data->n_ineq_l + derivative_data->n_ineq_u + derivative_data->n_eq;
+    OSQPVectorf* rx = OSQPVectorf_view(derivative_data->rhs, pos, n);
 
-    csc_lmult_diag(dA, OSQPVectorf_data(solver->work->scaling->Einv));
-    csc_rmult_diag(dA, OSQPVectorf_data(solver->work->scaling->Dinv));
+    // Assign vector derivatives to function arguments
+    OSQPVectorf_to_raw(dq, rx);
+    OSQPVectorf_to_raw(dl, derivative_data->ryl);
+    OSQPVectorf_to_raw(du, derivative_data->ryu);
+    for (OSQPInt i=0; i<OSQPVectorf_length(derivative_data->ryu); i++) {
+        du[i] = -du[i];
+    }
 
-    OSQPVectorf_ew_prod(dl, dl, solver->work->scaling->Einv);
-    OSQPVectorf_ew_prod(du, du, solver->work->scaling->Einv);
-
+    OSQPVectorf_view_free(rx);
     return 0;
+}
+
+OSQPInt osqp_adjoint_derivative_compute(OSQPSolver *solver,
+                                        const OSQPSettings* settings,
+                                        const OSQPMatrix*   P,
+                                        const OSQPMatrix*   G,
+                                        const OSQPMatrix*   A_eq,
+                                        OSQPMatrix*         GDiagLambda,
+                                        OSQPVectorf*        slacks) {
+
+    OSQPInt m = solver->work->data->m;
+    OSQPInt n = solver->work->data->n;
+    OSQPDerivativeData *derivative_data = solver->work->derivative_data;
+
+    OSQPVectorf* y = OSQPVectorf_new(solver->solution->y, m);
+    OSQPFloat* y_data = OSQPVectorf_data(y);
+
+    adjoint_derivative_linsys_solver(solver, settings, P, G, A_eq, GDiagLambda, slacks, derivative_data->rhs);
+
+    OSQPFloat* rhs_data = OSQPVectorf_data(derivative_data->rhs);
+
+    OSQPFloat* r_yl = (OSQPFloat *) c_malloc(m * sizeof(OSQPFloat));
+    OSQPFloat* r_yu = (OSQPFloat *) c_malloc(m * sizeof(OSQPFloat));
+    // TODO: We shouldn't have to do this if we assemble r_yl/r_yu judiciously
+    OSQPInt j;
+    for (j=0; j<m; j++) r_yl[j] = 0;
+    for (j=0; j<m; j++) r_yu[j] = 0;
+
+    OSQPInt pos = n + derivative_data->n_ineq_l + derivative_data->n_ineq_u + derivative_data->n_eq;
+
+    pos += n;
+    for (j=0; j<derivative_data->n_ineq_l; j++) {
+        r_yl[OSQPVectori_data(derivative_data->l_noninf_indices_vec)[j]] = -rhs_data[pos+j];
+    }
+    pos += derivative_data->n_ineq_l;
+    for (j=0; j<derivative_data->n_ineq_u; j++) {
+        r_yu[OSQPVectori_data(derivative_data->u_noninf_indices_vec)[j]] = rhs_data[pos+j];
+    }
+    pos += derivative_data->n_ineq_u;
+    for (j=0; j<derivative_data->n_eq; j++) {
+        if (OSQPVectori_data(derivative_data->nu_sign_vec)[j]==1) {
+            r_yl[OSQPVectori_data(derivative_data->eq_indices_vec)[j]] = 0;
+            r_yu[OSQPVectori_data(derivative_data->eq_indices_vec)[j]] = rhs_data[pos+j] / y_data[OSQPVectori_data(derivative_data->eq_indices_vec)[j]];
+        } else {
+            r_yl[OSQPVectori_data(derivative_data->eq_indices_vec)[j]] = -rhs_data[pos+j] / y_data[OSQPVectori_data(derivative_data->eq_indices_vec)[j]];
+            r_yu[OSQPVectori_data(derivative_data->eq_indices_vec)[j]] = 0;
+        }
+    }
+
+    derivative_data->ryl = OSQPVectorf_new(r_yl, m);
+    c_free(r_yl);
+    OSQPVectorf_ew_prod(derivative_data->ryl, derivative_data->ryl, derivative_data->y_l);
+    OSQPVectorf_mult_scalar(derivative_data->ryl, -1);
+    derivative_data->ryu = OSQPVectorf_new(r_yu, m);
+    c_free(r_yu);
+    OSQPVectorf_ew_prod(derivative_data->ryu, derivative_data->ryu, derivative_data->y_u);
 }
 
 OSQPInt adjoint_derivative(OSQPSolver*    solver,
@@ -75,15 +155,17 @@ OSQPInt adjoint_derivative(OSQPSolver*    solver,
                            OSQPFloat*     dl,
                            OSQPFloat*     du) {
 
-    OSQPInt m = solver->work->data->m;
-    OSQPInt n = solver->work->data->n;
-
     OSQPSettings*  settings  = solver->settings;
+    OSQPWorkspace* work = solver->work;
+    OSQPDerivativeData* derivative_data = work->derivative_data;
 
-    OSQPMatrix*  P = OSQPMatrix_copy_new(solver->work->data->P);
-    OSQPMatrix*  A = OSQPMatrix_copy_new(solver->work->data->A);
-    OSQPVectorf* l = OSQPVectorf_copy_new(solver->work->data->l);
-    OSQPVectorf* u = OSQPVectorf_copy_new(solver->work->data->u);
+    OSQPInt m = work->data->m;
+    OSQPInt n = work->data->n;
+
+    OSQPMatrix*  P = OSQPMatrix_copy_new(work->data->P);
+    OSQPMatrix*  A = OSQPMatrix_copy_new(work->data->A);
+    OSQPVectorf* l = OSQPVectorf_copy_new(work->data->l);
+    OSQPVectorf* u = OSQPVectorf_copy_new(work->data->u);
     OSQPVectorf* x = OSQPVectorf_new(solver->solution->x, n);  // Note: x/y are unscaled solutions
     OSQPVectorf* y = OSQPVectorf_new(solver->solution->y, m);
 
@@ -102,15 +184,11 @@ OSQPInt adjoint_derivative(OSQPSolver*    solver,
     OSQPInt* ineq_indices_vec = (OSQPInt *) c_malloc(m * sizeof(OSQPInt));
     OSQPInt* l_noninf_indices_vec = (OSQPInt *) c_malloc(m * sizeof(OSQPInt));
     OSQPInt* u_noninf_indices_vec = (OSQPInt *) c_malloc(m * sizeof(OSQPInt));
-    OSQPInt* nu_indices_vec = (OSQPInt *) c_malloc(m * sizeof(OSQPInt));
     OSQPInt* nu_sign_vec = (OSQPInt *) c_malloc(m * sizeof(OSQPInt));
 
     OSQPVectorf* dxx = OSQPVectorf_new(dx, n);
     OSQPVectorf* dy_l_vec = OSQPVectorf_new(dy_l, m);
     OSQPVectorf* dy_u_vec = OSQPVectorf_new(dy_u, m);
-
-    // TODO: Find out why scaling/unscaling is not working
-    //if (solver->settings->scaling) scale_dxdy(solver, dxx, dy_l_vec, dy_u_vec);
 
     // TODO: We could use constr_type in OSQPWorkspace but it only tells us whether a constraint is 'loose'
     // not 'upper loose' or 'lower loose', which we seem to need here.
@@ -144,7 +222,6 @@ OSQPInt adjoint_derivative(OSQPSolver*    solver,
             }
         } else {
             eq_indices_vec[n_eq] = j;
-            nu_indices_vec[n_eq] = j;
             A_eq_vec[j] = 1;
             A_ineq_l_vec[j] = 0;
             A_ineq_u_vec[j] = 0;
@@ -156,6 +233,10 @@ OSQPInt adjoint_derivative(OSQPSolver*    solver,
             n_eq++;
         }
     }
+
+    derivative_data->n_ineq_l = n_ineq_l;
+    derivative_data->n_ineq_u = n_ineq_u;
+    derivative_data->n_eq = n_eq;
 
     OSQPVectori* A_ineq_l_i = OSQPVectori_new(A_ineq_l_vec, m);
     OSQPMatrix*  A_ineq_l = OSQPMatrix_submatrix_byrows(A, A_ineq_l_i);
@@ -175,15 +256,15 @@ OSQPInt adjoint_derivative(OSQPSolver*    solver,
     // --------- lambda
     OSQPVectorf* m_zeros = OSQPVectorf_malloc(m);
     OSQPVectorf_set_scalar(m_zeros, 0);
-    OSQPVectorf* y_u = OSQPVectorf_malloc(m);
-    OSQPVectorf_ew_max_vec(y_u, y, m_zeros);
-    OSQPVectorf* y_l = OSQPVectorf_malloc(m);
-    OSQPVectorf_ew_min_vec(y_l, y, m_zeros);
-    OSQPVectorf_mult_scalar(y_l, -1);
+    derivative_data->y_u = OSQPVectorf_malloc(m);
+    OSQPVectorf_ew_max_vec(derivative_data->y_u, y, m_zeros);
+    derivative_data->y_l = OSQPVectorf_malloc(m);
+    OSQPVectorf_ew_min_vec(derivative_data->y_l, y, m_zeros);
+    OSQPVectorf_mult_scalar(derivative_data->y_l, -1);
     OSQPVectorf_free(m_zeros);
 
-    OSQPVectorf* y_l_ineq = OSQPVectorf_subvector_byrows(y_l, A_ineq_l_i);
-    OSQPVectorf* y_u_ineq = OSQPVectorf_subvector_byrows(y_u, A_ineq_u_i);
+    OSQPVectorf* y_l_ineq = OSQPVectorf_subvector_byrows(derivative_data->y_l, A_ineq_l_i);
+    OSQPVectorf* y_u_ineq = OSQPVectorf_subvector_byrows(derivative_data->y_u, A_ineq_u_i);
     OSQPVectorf* lambda = OSQPVectorf_concat(y_l_ineq, y_u_ineq);
 
     OSQPVectorf_free(y_l_ineq);
@@ -223,9 +304,9 @@ OSQPInt adjoint_derivative(OSQPSolver*    solver,
     OSQPFloat* d_nu_vec = (OSQPFloat *) c_malloc(n_eq * sizeof(OSQPFloat));
     for (j=0; j<n_eq; j++) {
         if (nu_sign_vec[j]==1) {
-            d_nu_vec[j] = dy_u[nu_indices_vec[j]];
+            d_nu_vec[j] = dy_u[eq_indices_vec[j]];
         } else if (nu_sign_vec[j]==-1) {
-            d_nu_vec[j] = -dy_l[nu_indices_vec[j]];
+            d_nu_vec[j] = -dy_l[eq_indices_vec[j]];
         } else {}  // should never happen
     }
     OSQPVectorf* d_nu = OSQPVectorf_new(d_nu_vec, n_eq);
@@ -244,92 +325,28 @@ OSQPInt adjoint_derivative(OSQPSolver*    solver,
     OSQPVectorf_free(rhs_temp2);
     OSQPVectorf_free(zeros);
 
+    // --------- stuff things into derivative_data - ideally this should entail no allocations once this is complete
+    derivative_data->rhs = OSQPVectorf_copy_new(rhs);
+    OSQPVectorf_free(rhs);
+    derivative_data->l_noninf_indices_vec = OSQPVectori_new(l_noninf_indices_vec, m);
+    c_free(l_noninf_indices_vec);
+    derivative_data->u_noninf_indices_vec = OSQPVectori_new(u_noninf_indices_vec, m);
+    c_free(u_noninf_indices_vec);
+    derivative_data->nu_sign_vec = OSQPVectori_new(nu_sign_vec, m);
+    c_free(nu_sign_vec);
+    derivative_data->eq_indices_vec = OSQPVectori_new(eq_indices_vec, m);
+    c_free(eq_indices_vec);
+
     // ----------- Check
-    adjoint_derivative_linsys_solver(solver, settings, P_full, G, A_eq, GDiagLambda, slacks, rhs);
+    osqp_adjoint_derivative_compute(solver, settings, P_full, G, A_eq, GDiagLambda, slacks);
 
-    OSQPFloat* rhs_data = OSQPVectorf_data(rhs);
+    // --------------- ASSEMBLE ----------------- //
 
-    OSQPFloat* r_yl = (OSQPFloat *) c_malloc(m * sizeof(OSQPFloat));
-    OSQPFloat* r_yu = (OSQPFloat *) c_malloc(m * sizeof(OSQPFloat));
-    // TODO: We shouldn't have to do this if we assemble r_yl/r_yu judiciously
-    for (j=0; j<m; j++) r_yl[j] = 0;
-    for (j=0; j<m; j++) r_yu[j] = 0;
-
-    OSQPInt pos = n + n_ineq_l + n_ineq_u + n_eq;
-    OSQPVectorf* rx = OSQPVectorf_view(rhs, pos, n);
-
-    pos += n;
-    for (j=0; j<n_ineq_l; j++) {
-        r_yl[l_noninf_indices_vec[j]] = -rhs_data[pos+j];
-    }
-    pos += n_ineq_l;
-    for (j=0; j<n_ineq_u; j++) {
-        r_yu[u_noninf_indices_vec[j]] = rhs_data[pos+j];
-    }
-    pos += n_ineq_u;
-    for (j=0; j<n_eq; j++) {
-        if (nu_sign_vec[j]==1) {
-            r_yl[eq_indices_vec[j]] = 0;
-            r_yu[eq_indices_vec[j]] = rhs_data[pos+j] / y_data[eq_indices_vec[j]];
-        } else {
-            r_yl[eq_indices_vec[j]] = -rhs_data[pos+j] / y_data[eq_indices_vec[j]];
-            r_yu[eq_indices_vec[j]] = 0;
-        }
-
-    }
-
-    OSQPVectorf *ryl = OSQPVectorf_new(r_yl, m);
-    c_free(r_yl);
-    OSQPVectorf_ew_prod(ryl, ryl, y_l);
-    OSQPVectorf_mult_scalar(ryl, -1);
-    OSQPVectorf *ryu = OSQPVectorf_new(r_yu, m);
-    c_free(r_yu);
-    OSQPVectorf_ew_prod(ryu, ryu, y_u);
-
-    // Assemble dP/dA
-    // TODO: Check for incoming m/n/nzmax compatibility unless we're allocating
-    OSQPFloat* rx_data  = OSQPVectorf_data(rx);
-    OSQPFloat* x_data   = OSQPVectorf_data(x);
-    OSQPFloat* y_u_data = OSQPVectorf_data(y_u);
-    OSQPFloat* y_l_data = OSQPVectorf_data(y_l);
-    OSQPFloat* ryu_data = OSQPVectorf_data(ryu);
-    OSQPFloat* ryl_data = OSQPVectorf_data(ryl);
-
-    OSQPInt col;
-    for (col=0; col<n; col++) {
-        OSQPInt p, i;
-        for (p=dP->p[col]; p<dP->p[col+1]; p++) {
-            i = dP->i[p];
-            dP->x[p] = 0.5 * ((rx_data[i] * x_data[col]) + (rx_data[col] * x_data[i]));
-        }
-        for (p=dA->p[col]; p<dA->p[col+1]; p++) {
-            i = dA->i[p];
-            dA->x[p] = ((y_u_data[i] - y_l_data[i]) * rx_data[col]) + ((ryu_data[i] - ryl_data[i]) * x_data[col]);
-        }
-    }
-
-    OSQPVectorf_mult_scalar(ryu, -1);
-
-    // TODO: Find out why scaling/unscaling is not working
-    // if (solver->settings->scaling) unscale_derivatives_PqAlu(solver, dP, rx, dA, ryl, ryu);
-
-    // Assign vector derivatives to function arguments
-    OSQPVectorf_to_raw(dq, rx);
-    OSQPVectorf_to_raw(dl, ryl);
-    OSQPVectorf_to_raw(du, ryu);
+    osqp_adjoint_derivative_get_vec(solver, dq, dl, du);
+    osqp_adjoint_derivative_get_mat(solver, dP, dA);
 
     // Free up remaining stuff
-    OSQPVectorf_free(y_l);
-    OSQPVectorf_free(y_u);
-
-    OSQPVectorf_view_free(rx);
-    OSQPVectorf_free(ryu);
-    OSQPVectorf_free(ryl);
-
-    c_free(l_noninf_indices_vec);
-    c_free(u_noninf_indices_vec);
-    c_free(nu_indices_vec);
-    c_free(nu_sign_vec);
+    c_free(ineq_indices_vec);
 
     OSQPMatrix_free(G);
     OSQPMatrix_free(A_eq);
@@ -346,8 +363,6 @@ OSQPInt adjoint_derivative(OSQPSolver*    solver,
     OSQPVectori_free(A_ineq_l_i);
     OSQPVectori_free(A_ineq_u_i);
     OSQPVectori_free(A_eq_i);
-
-    OSQPVectorf_free(rhs);
 
     OSQPMatrix_free(P);
     OSQPMatrix_free(A);
