@@ -29,7 +29,7 @@ OSQPInt unscale_PAlu(OSQPSolver*  solver,
   return 0;
 }
 
-OSQPInt osqp_adjoint_derivative_get_mat(OSQPSolver *solver,
+OSQPInt adjoint_derivative_get_mat(OSQPSolver *solver,
                                         OSQPCscMatrix* dP,
                                         OSQPCscMatrix* dA) {
 
@@ -66,7 +66,7 @@ OSQPInt osqp_adjoint_derivative_get_mat(OSQPSolver *solver,
     return 0;
 }
 
-OSQPInt osqp_adjoint_derivative_get_vec(OSQPSolver *solver,
+OSQPInt adjoint_derivative_get_vec(OSQPSolver *solver,
                                         OSQPFloat*     dq,
                                         OSQPFloat*     dl,
                                         OSQPFloat*     du) {
@@ -89,8 +89,7 @@ OSQPInt osqp_adjoint_derivative_get_vec(OSQPSolver *solver,
     return 0;
 }
 
-OSQPInt osqp_adjoint_derivative_compute(OSQPSolver *solver,
-                                        const OSQPSettings* settings,
+OSQPInt adjoint_derivative_compute(OSQPSolver *solver,
                                         const OSQPMatrix*   P,
                                         const OSQPMatrix*   G,
                                         const OSQPMatrix*   A_eq,
@@ -104,7 +103,7 @@ OSQPInt osqp_adjoint_derivative_compute(OSQPSolver *solver,
     OSQPVectorf* y = OSQPVectorf_new(solver->solution->y, m);
     OSQPFloat* y_data = OSQPVectorf_data(y);
 
-    adjoint_derivative_linsys_solver(solver, settings, P, G, A_eq, GDiagLambda, slacks, derivative_data->rhs);
+    adjoint_derivative_linsys_solver(solver, solver->settings, P, G, A_eq, GDiagLambda, slacks, derivative_data->rhs);
 
     OSQPFloat* rhs_data = OSQPVectorf_data(derivative_data->rhs);
 
@@ -148,12 +147,7 @@ OSQPInt osqp_adjoint_derivative_compute(OSQPSolver *solver,
 OSQPInt adjoint_derivative(OSQPSolver*    solver,
                            OSQPFloat*     dx,
                            OSQPFloat*     dy_l,
-                           OSQPFloat*     dy_u,
-                           OSQPCscMatrix* dP,
-                           OSQPFloat*     dq,
-                           OSQPCscMatrix* dA,
-                           OSQPFloat*     dl,
-                           OSQPFloat*     du) {
+                           OSQPFloat*     dy_u) {
 
     OSQPSettings*  settings  = solver->settings;
     OSQPWorkspace* work = solver->work;
@@ -325,7 +319,8 @@ OSQPInt adjoint_derivative(OSQPSolver*    solver,
     OSQPVectorf_free(rhs_temp2);
     OSQPVectorf_free(zeros);
 
-    // --------- stuff things into derivative_data - ideally this should entail no allocations once this is complete
+    // --------- stuff things into derivative_data
+    // All this should go inside _compute
     derivative_data->rhs = OSQPVectorf_copy_new(rhs);
     OSQPVectorf_free(rhs);
     derivative_data->l_noninf_indices_vec = OSQPVectori_new(l_noninf_indices_vec, m);
@@ -337,13 +332,9 @@ OSQPInt adjoint_derivative(OSQPSolver*    solver,
     derivative_data->eq_indices_vec = OSQPVectori_new(eq_indices_vec, m);
     c_free(eq_indices_vec);
 
-    // ----------- Check
-    osqp_adjoint_derivative_compute(solver, settings, P_full, G, A_eq, GDiagLambda, slacks);
+    adjoint_derivative_compute(solver, P_full, G, A_eq, GDiagLambda, slacks);
 
     // --------------- ASSEMBLE ----------------- //
-
-    osqp_adjoint_derivative_get_vec(solver, dq, dl, du);
-    osqp_adjoint_derivative_get_mat(solver, dP, dA);
 
     // Free up remaining stuff
     c_free(ineq_indices_vec);

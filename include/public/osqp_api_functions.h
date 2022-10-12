@@ -262,12 +262,24 @@ OSQP_API OSQPInt osqp_update_rho(OSQPSolver* solver,
 OSQP_API OSQPInt osqp_adjoint_derivative(OSQPSolver*    solver,
                                          OSQPFloat*     dx,
                                          OSQPFloat*     dy_l,
-                                         OSQPFloat*     dy_u,
-                                         OSQPCscMatrix* dP,
-                                         OSQPFloat*     dq,
-                                         OSQPCscMatrix* dA,
-                                         OSQPFloat*     dl,
-                                         OSQPFloat*     du);
+                                         OSQPFloat*     dy_u);
+
+OSQP_API OSQPInt osqp_adjoint_derivative_compute(OSQPSolver*    solver,
+                                         OSQPCscMatrix* P,
+                                         OSQPFloat*     G,
+                                         OSQPCscMatrix* A_eq,
+                                         OSQPCscMatrix* GDiagLambda,
+                                         OSQPFloat*     slacks);
+
+OSQP_API OSQPInt osqp_adjoint_derivative_get_mat(OSQPSolver*    solver,
+                                                 OSQPCscMatrix* dP,
+                                                 OSQPCscMatrix* dA);
+
+OSQP_API OSQPInt osqp_adjoint_derivative_get_vec(OSQPSolver*    solver,
+                                                 OSQPFloat* dq,
+                                                 OSQPFloat* dl,
+                                                 OSQPFloat* du);
+
 #endif /* OSQP_ENABLE_DERIVATIVES */
 /* ------------------ Derivative stuff ----------------- */
 

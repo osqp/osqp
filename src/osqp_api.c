@@ -1295,25 +1295,58 @@ void csc_set_data(OSQPCscMatrix* M,
 OSQPInt osqp_adjoint_derivative(OSQPSolver*  solver,
                                 OSQPFloat*     dx,
                                 OSQPFloat*     dy_l,
-                                OSQPFloat*     dy_u,
-                                OSQPCscMatrix* dP,
-                                OSQPFloat*     dq,
-                                OSQPCscMatrix* dA,
-                                OSQPFloat*     dl,
-                                OSQPFloat*     du) {
+                                OSQPFloat*     dy_u) {
 
     OSQPInt status = adjoint_derivative(
             solver,
             dx,
             dy_l,
-            dy_u,
+            dy_u
+    );
+
+    return status;
+}
+
+OSQPInt osqp_adjoint_derivative_compute(OSQPSolver*    solver,
+                                        OSQPCscMatrix* P,
+                                        OSQPFloat*     G,
+                                        OSQPCscMatrix* A_eq,
+                                        OSQPCscMatrix* GDiagLambda,
+                                        OSQPFloat*     slacks) {
+
+    OSQPInt status = adjoint_derivative_compute(
+            solver,
+            P,
+            G,
+            A_eq,
+            GDiagLambda,
+            slacks
+    );
+
+    return status;
+}
+
+OSQPInt osqp_adjoint_derivative_get_mat(OSQPSolver*    solver,
+                                        OSQPCscMatrix* dP,
+                                        OSQPCscMatrix* dA) {
+    OSQPInt status = adjoint_derivative_get_mat(
+            solver,
             dP,
+            dA
+            );
+    return status;
+}
+
+OSQPInt osqp_adjoint_derivative_get_vec(OSQPSolver*    solver,
+                                        OSQPFloat* dq,
+                                        OSQPFloat* dl,
+                                        OSQPFloat* du) {
+    OSQPInt status = adjoint_derivative_get_vec(
+            solver,
             dq,
-            dA,
             dl,
             du
     );
-
     return status;
 }
 #endif
