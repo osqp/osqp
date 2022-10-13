@@ -1308,17 +1308,15 @@ OSQPInt osqp_adjoint_derivative(OSQPSolver*  solver,
 }
 
 OSQPInt osqp_adjoint_derivative_compute(OSQPSolver*    solver,
-                                        OSQPFloat*     G,
-                                        OSQPCscMatrix* A_eq,
-                                        OSQPCscMatrix* GDiagLambda,
-                                        OSQPFloat*     slacks) {
+                                        OSQPFloat*     dx,
+                                        OSQPFloat*     dy_l,
+                                        OSQPFloat*     dy_u) {
 
     OSQPInt status = adjoint_derivative_compute(
             solver,
-            G,
-            A_eq,
-            GDiagLambda,
-            slacks
+            dx,
+            dy_l,
+            dy_u
     );
 
     return status;
