@@ -123,7 +123,6 @@ OSQPInt adjoint_derivative_compute(OSQPSolver *solver,
     OSQPInt* A_eq_vec = (OSQPInt *) c_malloc(m * sizeof(OSQPInt));
 
     OSQPInt* eq_indices_vec = (OSQPInt *) c_malloc(m * sizeof(OSQPInt));
-    OSQPInt* ineq_indices_vec = (OSQPInt *) c_malloc(m * sizeof(OSQPInt));
     OSQPInt* l_noninf_indices_vec = (OSQPInt *) c_malloc(m * sizeof(OSQPInt));
     OSQPInt* u_noninf_indices_vec = (OSQPInt *) c_malloc(m * sizeof(OSQPInt));
     OSQPInt* nu_sign_vec = (OSQPInt *) c_malloc(m * sizeof(OSQPInt));
@@ -146,7 +145,6 @@ OSQPInt adjoint_derivative_compute(OSQPSolver *solver,
         OSQPFloat _l = l_data[j];
         OSQPFloat _u = u_data[j];
         if (_l < _u) {
-            ineq_indices_vec[n_ineq++] = j;
             A_eq_vec[j] = 0;
             if (_l > -infval) {
                 l_noninf_indices_vec[n_ineq_l] = j;
@@ -320,8 +318,6 @@ OSQPInt adjoint_derivative_compute(OSQPSolver *solver,
     OSQPVectorf_ew_prod(derivative_data->ryu, derivative_data->ryu, derivative_data->y_u);
 
     //cleanup
-    // Free up remaining stuff
-    c_free(ineq_indices_vec);
 
     OSQPMatrix_free(G);
     OSQPMatrix_free(A_eq);
