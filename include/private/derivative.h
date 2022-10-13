@@ -5,11 +5,6 @@
 # include "osqp.h"
 # include "types.h"
 
-OSQPInt adjoint_derivative(OSQPSolver*    solver,
-                           OSQPFloat*     dx,
-                           OSQPFloat*     dy_l,
-                           OSQPFloat*     dy_u);
-
 OSQPInt adjoint_derivative_get_mat(OSQPSolver *solver,
                                    OSQPCscMatrix* dP,
                                    OSQPCscMatrix* dA);

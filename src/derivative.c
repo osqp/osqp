@@ -344,14 +344,3 @@ OSQPInt adjoint_derivative_compute(OSQPSolver *solver,
     OSQPVectorf_free(x);
     OSQPVectorf_free(y);
 }
-
-OSQPInt adjoint_derivative(OSQPSolver*    solver,
-                           OSQPFloat*     dx,
-                           OSQPFloat*     dy_l,
-                           OSQPFloat*     dy_u) {
-
-
-    adjoint_derivative_compute(solver, dx, dy_l, dy_u);
-
-    return 0;
-}

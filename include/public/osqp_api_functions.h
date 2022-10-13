@@ -259,11 +259,6 @@ OSQP_API OSQPInt osqp_update_rho(OSQPSolver* solver,
 
 /* ------------------ Derivative stuff ----------------- */
 #ifdef OSQP_ENABLE_DERIVATIVES
-OSQP_API OSQPInt osqp_adjoint_derivative(OSQPSolver*    solver,
-                                         OSQPFloat*     dx,
-                                         OSQPFloat*     dy_l,
-                                         OSQPFloat*     dy_u);
-
 OSQP_API OSQPInt osqp_adjoint_derivative_compute(OSQPSolver*    solver,
                                                  OSQPFloat*     dx,
                                                  OSQPFloat*     dy_l,

@@ -1292,21 +1292,6 @@ void csc_set_data(OSQPCscMatrix* M,
 * Derivative functions
 ****************************/
 #ifdef OSQP_ENABLE_DERIVATIVES
-OSQPInt osqp_adjoint_derivative(OSQPSolver*  solver,
-                                OSQPFloat*     dx,
-                                OSQPFloat*     dy_l,
-                                OSQPFloat*     dy_u) {
-
-    OSQPInt status = adjoint_derivative(
-            solver,
-            dx,
-            dy_l,
-            dy_u
-    );
-
-    return status;
-}
-
 OSQPInt osqp_adjoint_derivative_compute(OSQPSolver*    solver,
                                         OSQPFloat*     dx,
                                         OSQPFloat*     dy_l,
