@@ -386,7 +386,7 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   work->derivative_data = c_calloc(1, sizeof(OSQPDerivativeData));
 # else
   work->derivative_data = OSQP_NULL;
-# endif / *ifdef OSQP_ENABLE_DERIVATIVES */
+# endif /* ifdef OSQP_ENABLE_DERIVATIVES */
 
   // Return exit flag
   return 0;

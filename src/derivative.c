@@ -292,13 +292,13 @@ OSQPInt adjoint_derivative_compute(OSQPSolver *solver,
     pos += n;
 
     for (j=0; j<derivative_data->n_ineq_l; j++) {
-        r_yl[OSQPVectori_data(l_noninf_indices_vec)[j]] = -rhs_data[pos+j];
+        r_yl[l_noninf_indices_vec[j]] = -rhs_data[pos+j];
     }
     c_free(l_noninf_indices_vec);
     pos += derivative_data->n_ineq_l;
 
     for (j=0; j<derivative_data->n_ineq_u; j++) {
-        r_yu[OSQPVectori_data(u_noninf_indices_vec)[j]] = rhs_data[pos+j];
+        r_yu[u_noninf_indices_vec[j]] = rhs_data[pos+j];
     }
     c_free(u_noninf_indices_vec);
     pos += derivative_data->n_ineq_u;
