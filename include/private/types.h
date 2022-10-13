@@ -75,13 +75,9 @@ typedef struct {
 } OSQPData;
 
 typedef struct {
-    OSQPInt n_ineq_l;
-    OSQPInt n_ineq_u;
-    OSQPInt n_eq;
-    OSQPVectori *nu_sign_vec;
-    OSQPVectori *eq_indices_vec;
-    OSQPVectori *l_noninf_indices_vec;
-    OSQPVectori *u_noninf_indices_vec;
+    OSQPInt n_ineq_l;  ///< number of inequalities where -inf < l < u
+    OSQPInt n_ineq_u;  ///< number of inequalities where l < u < inf
+    OSQPInt n_eq;      ///< number of equalities where l == u
     OSQPVectorf *y_l;
     OSQPVectorf *y_u;
     OSQPVectorf *ryl;

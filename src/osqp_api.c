@@ -863,10 +863,6 @@ OSQPInt osqp_cleanup(OSQPSolver* solver) {
 
 # ifdef OSQP_ENABLE_DERIVATIVES
       if (work->derivative_data){
-          if (work->derivative_data->nu_sign_vec) OSQPVectori_free(work->derivative_data->nu_sign_vec);
-          if (work->derivative_data->eq_indices_vec) OSQPVectori_free(work->derivative_data->eq_indices_vec);
-          if (work->derivative_data->l_noninf_indices_vec) OSQPVectori_free(work->derivative_data->l_noninf_indices_vec);
-          if (work->derivative_data->u_noninf_indices_vec) OSQPVectori_free(work->derivative_data->u_noninf_indices_vec);
           if (work->derivative_data->y_l) OSQPVectorf_free(work->derivative_data->y_l);
           if (work->derivative_data->y_u) OSQPVectorf_free(work->derivative_data->y_u);
           if (work->derivative_data->rhs) OSQPVectorf_free(work->derivative_data->rhs);
