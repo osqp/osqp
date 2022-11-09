@@ -32,7 +32,7 @@ void pardiso(void**,         // pt
              c_int*          // error
              );
 c_int mkl_set_interface_layer(c_int);
-c_int mkl_get_max_threads();
+c_int mkl_get_max_threads(void);
 
 // Free LDL Factorization structure
 void free_linsys_solver_pardiso(pardiso_solver *s) {

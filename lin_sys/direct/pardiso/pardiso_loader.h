@@ -19,7 +19,7 @@ c_int lh_load_pardiso(const char* libname);
  * Unloads the loaded Pardiso shared library.
  * @return Zero on success, nonzero on failure.
  */
-c_int lh_unload_pardiso();
+c_int lh_unload_pardiso(void);
 
 
 #ifdef __cplusplus
