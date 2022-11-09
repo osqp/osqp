@@ -87,7 +87,7 @@ void print_setup_header(const OSQPSolver* solver) {
   c_print("algebra = %s", osqp_algebra_name());
   c_print(",\n          ");
 
-  c_print("linear system solver = %s", work->linsys_solver->name());
+  c_print("linear system solver = %s", work->linsys_solver->name(work->linsys_solver));
 
   if (work->linsys_solver->nthreads != 1) {
     c_print(" (%d threads)", (int)work->linsys_solver->nthreads);
@@ -252,6 +252,7 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
    * NB: Copying them explicitly because memcpy is not
    * defined when OSQP_ENABLE_PRINTING is disabled (appears in string.h)
    */
+  new->device        = settings->device;
   new->linsys_solver = settings->linsys_solver;
   new->verbose       = settings->verbose;
   new->warm_starting = settings->warm_starting;
@@ -266,6 +267,7 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->cg_max_iter      = settings->cg_max_iter;
   new->cg_tol_reduction = settings->cg_tol_reduction;
   new->cg_tol_fraction  = settings->cg_tol_fraction;
+  new->cg_precond       = settings->cg_precond;
 
   new->adaptive_rho           = settings->adaptive_rho;
   new->adaptive_rho_interval  = settings->adaptive_rho_interval;

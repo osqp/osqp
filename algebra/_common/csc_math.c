@@ -90,6 +90,26 @@ void csc_rmult_diag(OSQPCscMatrix* A, const OSQPFloat* d){
   }
 }
 
+// d = diag(At*diag(D)*A)
+void csc_AtDA_extract_diag(const OSQPCscMatrix* A,
+                           const OSQPFloat*     D,
+                                 OSQPFloat*     d) {
+  OSQPInt    j, i;
+  OSQPInt    n  = A->n;
+  OSQPInt*   Ap = A->p;
+  OSQPInt*   Ai = A->i;
+  OSQPFloat* Ax = A->x;
+
+  // Each entry of output vector is for a column, so cycle over columns
+  for (j = 0; j < n; j++) {
+    d[j] = 0;
+    // Iterate over each entry in the column
+    for (i = Ap[j]; i < Ap[j + 1]; i++) {
+      d[j] += Ax[i]*Ax[i]*D[Ai[i]];
+    }
+  }
+}
+
 //y = alpha*A*x + beta*y, where A is symmetric and only triu is stored
 void csc_Axpy_sym_triu(const OSQPCscMatrix* A,
                        const OSQPFloat*     x,

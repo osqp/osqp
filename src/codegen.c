@@ -181,6 +181,7 @@ static OSQPInt write_settings(FILE*               f,
   fprintf(f, "  %d,\n", settings->cg_max_iter);
   fprintf(f, "  %d,\n", settings->cg_tol_reduction);
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->cg_tol_fraction);
+  fprintf(f, "  %d,\n", settings->cg_precond);
   fprintf(f, "  %d,\n", settings->adaptive_rho);
   fprintf(f, "  %d,\n", settings->adaptive_rho_interval);
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->adaptive_rho_fraction);

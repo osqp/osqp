@@ -42,6 +42,7 @@ typedef struct {
  * User settings
  */
 typedef struct {
+  /* Note: If this struct is updated, ensure update_settings is also updated */
   OSQPInt device;                             ///< device identifier; currently used for CUDA devices
   enum osqp_linsys_solver_type linsys_solver; ///< linear system solver to use
   OSQPInt verbose;                            ///< boolean; write out progress
@@ -56,9 +57,10 @@ typedef struct {
   OSQPFloat alpha;                  ///< ADMM relaxation parameter
 
   // CG settings
-  OSQPInt   cg_max_iter;            ///< maximum number of CG iterations per solve
-  OSQPInt   cg_tol_reduction;       ///< number of consecutive zero CG iterations before the tolerance gets halved
-  OSQPFloat cg_tol_fraction;        ///< CG tolerance (fraction of ADMM residuals)
+  OSQPInt           cg_max_iter;      ///< maximum number of CG iterations per solve
+  OSQPInt           cg_tol_reduction; ///< number of consecutive zero CG iterations before the tolerance gets halved
+  OSQPFloat         cg_tol_fraction;  ///< CG tolerance (fraction of ADMM residuals)
+  osqp_precond_type cg_precond;       ///< Preconditioner to use in the CG method
 
   // adaptive rho logic
   OSQPInt   adaptive_rho;           ///< boolean, is rho step size adaptive?

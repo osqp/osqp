@@ -371,7 +371,7 @@ OSQPInt init_linsys_solver_qdldl(qdldl_solver**      sp,
 
 #endif  // OSQP_EMBEDDED_MODE
 
-const char* name_qdldl() {
+const char* name_qdldl(qdldl_solver* s) {
   return "QDLDL v" STRINGIZE(QDLDL_VERSION_MAJOR) "." STRINGIZE(QDLDL_VERSION_MINOR) "." STRINGIZE(QDLDL_VERSION_PATCH);
 }
 

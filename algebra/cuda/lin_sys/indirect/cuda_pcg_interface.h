@@ -36,7 +36,7 @@ typedef struct cudapcg_solver_ {
    * @name Functions
    * @{
    */
-  const char* (*name)(void);
+  const char* (*name)(struct cudapcg_solver_* self);
 
   OSQPInt (*solve)(struct cudapcg_solver_* self,
                           OSQPVectorf*     b,
@@ -76,8 +76,9 @@ typedef struct cudapcg_solver_ {
   OSQPInt zero_pcg_iters;     ///<  state that counts zero PCG iterations
 
   /* Settings */
-  OSQPInt max_iter;
-  
+  OSQPInt           max_iter;
+  osqp_precond_type precond_type;
+
   /* Residual tolerance strategy parameters */
   OSQPInt    reduction_threshold;
   OSQPFloat  tol_fraction;
@@ -161,7 +162,7 @@ OSQPInt init_linsys_solver_cudapcg(cudapcg_solver**    sp,
  * Get the user-friendly name of the PCG solver.
  * @return The user-friendly name
  */
-const char* name_cudapcg();
+const char* name_cudapcg(cudapcg_solver* s);
 
 
 OSQPInt solve_linsys_cudapcg(cudapcg_solver* s,

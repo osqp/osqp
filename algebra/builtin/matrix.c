@@ -2,12 +2,11 @@
 #include "lin_alg.h"
 #include "algebra_impl.h"
 #include "csc_math.h"
+#include "csc_utils.h"
 #include "printing.h"
 
 
 #ifndef OSQP_EMBEDDED_MODE
-
-#include "csc_utils.h"
 
 /*  logical test functions ----------------------------------------------------*/
 
@@ -140,6 +139,17 @@ void OSQPMatrix_lmult_diag(OSQPMatrix*        A,
 void OSQPMatrix_rmult_diag(OSQPMatrix* A,
                            const OSQPVectorf* R) {
   csc_rmult_diag(A->csc, R->values);
+}
+
+void OSQPMatrix_AtDA_extract_diag(const OSQPMatrix*  A,
+                                  const OSQPVectorf* D,
+                                        OSQPVectorf* d) {
+    csc_AtDA_extract_diag(A->csc, OSQPVectorf_data(D), OSQPVectorf_data(d));
+}
+
+void OSQPMatrix_extract_diag(const OSQPMatrix*  A,
+                                   OSQPVectorf* d) {
+  csc_extract_diag(A->csc, OSQPVectorf_data(d));
 }
 
 //y = alpha*A*x + beta*y

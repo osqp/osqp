@@ -230,7 +230,7 @@ OSQPInt init_linsys_solver_pardiso(pardiso_solver**    sp,
   return 0;
 }
 
-const char* name_pardiso() {
+const char* name_pardiso(pardiso_solver* s) {
   return "Pardiso";
 }
 

@@ -15,7 +15,7 @@ typedef struct mklcg_solver_ {
    * @name Functions
    * @{
    */
-  const char* (*name)(void);
+  const char* (*name)(struct mklcg_solver_* self);
   OSQPInt (*solve)(struct mklcg_solver_* self, OSQPVectorf* b, OSQPInt admm_iter);
   void    (*update_settings)(struct mklcg_solver_* self, const OSQPSettings* settings);
   void    (*warm_start)(struct mklcg_solver_* self, const OSQPVectorf* x);
@@ -35,17 +35,34 @@ typedef struct mklcg_solver_ {
   //threads count
   OSQPInt nthreads;
 
+  // Maximum number of iterations
+  OSQPInt max_iter;
+
    /* @name Attributes
    * @{
    */
   // Attributes
-  OSQPMatrix*  P;       // The P matrix provided by OSQP (just a pointer, don't delete it!)
-  OSQPMatrix*  A;       // The A matrix provided by OSQP (just a pointer, don't delete it!)
-  OSQPVectorf* rho_vec; // The rho vector provided by OSQP (just a pointer, don't delete it!)
-  OSQPFloat    sigma;   // The sigma value provided by OSQP
-  OSQPInt      m;       // number of constraints
-  OSQPInt      n;       // number of variables
-  OSQPInt      polish;  //polishing or not?
+  OSQPMatrix*  P;               // The P matrix provided by OSQP (just a pointer, don't delete it!)
+  OSQPMatrix*  A;               // The A matrix provided by OSQP (just a pointer, don't delete it!)
+  OSQPVectorf* rho_vec;         // The rho vector provided by OSQP (just a pointer, don't delete it!)
+  OSQPFloat*   scaled_prim_res; // The primal residual provided by OSQP (just a pointer)
+  OSQPFloat*   scaled_dual_res; // The dual residual provided by OSQP (just a pointer)
+  OSQPFloat    sigma;           // The sigma value provided by OSQP
+  OSQPInt      m;               // Number of constraints
+  OSQPInt      n;               // Number of variables
+  OSQPInt      polish;          // Polishing or not?
+
+  osqp_precond_type precond_type; // Preconditioner to use
+
+  // Adaptable termination variables
+  OSQPFloat eps_prev;   // Tolerance for previous ADMM iteration
+
+  OSQPInt   reduction_interval; // Number of iterations between reduction factor updates
+  OSQPFloat reduction_factor;   // Amount to change tolerance by each iteration
+  OSQPFloat tol_fraction;       // Tolerance (fraction of ADMM residuals)
+
+  // Count for the number of consecutive iterations that no CG iterations have been required
+  OSQPInt cg_zero_iters;
 
   // Hold an internal copy of the solution x to
   // enable warm starting between successive solves
@@ -63,14 +80,21 @@ typedef struct mklcg_solver_ {
   // its underlying pointer, but we make it an OSQPVectorf
   // so that we can make some views into it for multiplication
 
-  // Vector views into tmp for K*v1 = v2
-  OSQPVectorf* v1;
-  OSQPVectorf* v2;
+  // Vector views into tmp for K*mvm_pre = mvm_post
+  OSQPVectorf* mvm_pre;
+  OSQPVectorf* mvm_post;
+
+  // Vector views into tmp for preconditioner application
+  OSQPVectorf* precond_pre;
+  OSQPVectorf* precond_post;
 
   // Vector views of the input vector
   OSQPVectorf* r1;
   OSQPVectorf* r2;
 
+  // Preconditioner vector
+  OSQPVectorf* precond;
+  OSQPVectorf* precond_inv;
 } mklcg_solver;
 
 
@@ -78,27 +102,31 @@ typedef struct mklcg_solver_ {
 /**
  * Initialize MKL Conjugate Gradient Solver
  *
- * @param  s         Pointer to a private structure
- * @param  P         Cost function matrix (upper triangular form)
- * @param  A         Constraints matrix
- * @param  rho_vec   Algorithm parameter. If polish, then rho_vec = OSQP_NULL.
- * @param  settings  Solver settings
- * @param  polish    Flag whether we are initializing for polish or not
- * @return           Exitflag for error (0 if no errors)
+ * @param s               Pointer to a private structure
+ * @param P               Cost function matrix (upper triangular form)
+ * @param A               Constraints matrix
+ * @param rho_vec         Algorithm parameter. If polish, then rho_vec = OSQP_NULL.
+ * @param settings        Solver settings
+ * @param scaled_prim_res Pointer to OSQP's scaled primal residual
+ * @param scaled_dual_res Pointer to OSQP's scaled dual residual
+ * @param polish          Flag whether we are initializing for polish or not
+ * @return                Exitflag for error (0 if no errors)
  */
-OSQPInt init_linsys_mklcg(mklcg_solver**      sp,
-                          const OSQPMatrix*   P,
-                          const OSQPMatrix*   A,
-                          const OSQPVectorf*  rho_vec,
-                          const OSQPSettings* settings,
-                          OSQPInt             polish);
+OSQPInt init_linsys_mklcg(mklcg_solver**     sp,
+                          const OSQPMatrix*  P,
+                          const OSQPMatrix*  A,
+                          const OSQPVectorf* rho_vec,
+                          const OSQPSettings*settings,
+                                OSQPFloat*   scaled_prim_res,
+                                OSQPFloat*   scaled_dual_res,
+                                OSQPInt      polish);
 
 
 /**
  * Get the user-friendly name of the MKL CG solver.
  * @return The user-friendly name
  */
-const char* name_mklcg();
+const char* name_mklcg(mklcg_solver* s);
 
 
 /**

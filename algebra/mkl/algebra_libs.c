@@ -56,6 +56,11 @@ OSQPInt osqp_algebra_init_linsys_solver(LinSysSolver**      s,
         return init_linsys_solver_pardiso((pardiso_solver **)s, P, A, rho_vec, settings, polishing);
 
     case OSQP_INDIRECT_SOLVER:
-        return init_linsys_mklcg((mklcg_solver **)s, P, A, rho_vec, settings, polishing);
+        return init_linsys_mklcg((mklcg_solver **) s,
+                                 P, A, rho_vec,
+                                 settings,
+                                 scaled_prim_res,
+                                 scaled_dual_res,
+                                 polishing);
     }
 }

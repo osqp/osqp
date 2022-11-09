@@ -128,6 +128,9 @@ OSQPInt init_linsys_solver_cudapcg(cudapcg_solver**    sp,
   /* Maximum number of PCG iterations */
   s->max_iter = settings->cg_max_iter;
 
+  /* Preconditioner to use */
+  s->precond_type = settings->cg_precond;
+
   /* Tolerance strategy parameters */
   s->reduction_threshold = settings->cg_tol_reduction;
   s->tol_fraction        = settings->cg_tol_fraction;
@@ -209,8 +212,15 @@ OSQPInt init_linsys_solver_cudapcg(cudapcg_solver**    sp,
 }
 
 
-const char* name_cudapcg() {
-  return "CUDA Preconditioned Conjugate Gradient";
+const char* name_cudapcg(cudapcg_solver* s) {
+  switch(s->precond_type) {
+  case OSQP_NO_PRECONDITIONER:
+    return "CUDA Conjugate Gradient - No preconditioner";
+  case OSQP_DIAGONAL_PRECONDITIONER:
+    return "CUDA Conjugate Gradient - Diagonal preconditioner";
+  }
+
+  return "CUDA Conjugate Gradient - Unknown preconditioner";
 }
 
 
@@ -263,6 +273,13 @@ void update_settings_linsys_solver_cudapcg(cudapcg_solver*     s,
   s->max_iter            = settings->cg_max_iter;
   s->reduction_threshold = settings->cg_tol_reduction;
   s->tol_fraction        = settings->cg_tol_fraction;
+
+  // Update preconditioner
+  if (s->precond_type != settings->cg_precond) {
+    s->precond_type = settings->cg_precond;
+
+    cuda_pcg_update_precond(s, 1, 1, 1);
+  }
 }
 
 
