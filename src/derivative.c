@@ -3,7 +3,6 @@
 #include "util.h"
 #include "auxil.h"
 #include "lin_alg.h"
-#include "proj.h"
 #include "error.h"
 #include "printing.h"
 
