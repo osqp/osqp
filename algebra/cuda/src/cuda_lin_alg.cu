@@ -686,12 +686,11 @@ void cuda_vec_diff_norm_inf(const OSQPFloat* d_a,
   cuda_free((void **) &d_diff);
 }
 
-void cuda_vec_mean(const OSQPFloat* d_x,
-                         OSQPInt    n,
-                         OSQPFloat* h_res) {
+void cuda_vec_norm_1(const OSQPFloat* d_x,
+                           OSQPInt    n,
+                           OSQPFloat* h_res) {
 
-  cublasTasum(CUDA_handle->cublasHandle, n, d_x, 1, h_res);
-  (*h_res) /= n;
+  checkCudaErrors(cublasTasum(CUDA_handle->cublasHandle, n, d_x, 1, h_res));
 }
 
 void cuda_vec_prod(const OSQPFloat* d_a,
