@@ -80,6 +80,9 @@ test_vec_ops_sca_cond_res = np.zeros(test_vec_ops_n)
 test_vec_ops_sca_cond_res[(test_vec_ops_sca_cond < 0)] = test_vec_ops_sc1
 test_vec_ops_sca_cond_res[(test_vec_ops_sca_cond == 0)] = test_vec_ops_sc2
 test_vec_ops_sca_cond_res[(test_vec_ops_sca_cond > 0)] = test_vec_ops_sc3
+test_vec_ops_set_inds = np.array([0, 2, 4, 5, 7])
+test_vec_ops_set_elem = np.copy(test_vec_ops_v2)
+test_vec_ops_set_elem[test_vec_ops_set_inds] = test_vec_subvec_5
 
 #test_vec_ops_ew_min_vec = np.minimum(test_vec_ops_v1, test_vec_ops_v2)
 
@@ -231,6 +234,8 @@ data = {'test_sp_matrix_A': test_sp_matrix_A,
         'test_vec_ops_sca_gt': test_vec_ops_sca_gt,
         'test_vec_ops_sca_cond': test_vec_ops_sca_cond,
         'test_vec_ops_sca_cond_res': test_vec_ops_sca_cond_res,
+        'test_vec_ops_set_inds': test_vec_ops_set_inds,
+        'test_vec_ops_set_elem': test_vec_ops_set_elem,
         #'test_vec_ops_ew_min_vec': test_vec_ops_ew_min_vec,
         'test_mat_ops_n': test_mat_ops_n,
         'test_mat_ops_A': test_mat_ops_A,

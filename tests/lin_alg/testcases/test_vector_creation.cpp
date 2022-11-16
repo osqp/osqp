@@ -324,6 +324,35 @@ TEST_CASE("Vector: Set values", "[vector],[assignment]")
   }
 }
 
+TEST_CASE("Vector: Update specific values", "[vector],[assignment]")
+{
+  lin_alg_sols_data_ptr data{generate_problem_lin_alg_sols_data()};
+
+  OSQPVectorf_ptr v{OSQPVectorf_new(data->test_vec_ops_v1, data->test_vec_ops_n)};
+
+  SECTION("Set specific entries")
+  {
+    OSQPVectorf_ptr ref{OSQPVectorf_new(data->test_vec_ops_set_elem, data->test_vec_ops_n)};
+    OSQPVectorf_ptr res{OSQPVectorf_new(data->test_vec_ops_v2, data->test_vec_ops_n)};
+
+    OSQPVectorf_update_values(res.get(), data->test_vec_subvec_5, data->test_vec_ops_set_inds, 5);
+
+   mu_assert("Error setting specific values",
+              OSQPVectorf_is_eq(ref.get(), res.get(), TESTS_TOL));
+  }
+
+  SECTION("Set entire vector")
+  {
+    OSQPVectorf_ptr ref{OSQPVectorf_new(data->test_vec_ops_v1, data->test_vec_ops_n)};
+    OSQPVectorf_ptr res{OSQPVectorf_new(data->test_vec_ops_v2, data->test_vec_ops_n)};
+
+    OSQPVectorf_update_values(res.get(), data->test_vec_ops_v1, OSQP_NULL, data->test_vec_ops_n);
+
+   mu_assert("Error setting entire vector",
+              OSQPVectorf_is_eq(ref.get(), res.get(), TESTS_TOL));
+  }
+}
+
 /* This is used by the derivatives right now */
 #ifdef OSQP_ALGEBRA_BUILTIN
 TEST_CASE("Vector: Concat", "[vector],[creation]")

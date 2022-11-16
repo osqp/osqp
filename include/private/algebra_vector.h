@@ -111,6 +111,12 @@ void OSQPVectorf_to_raw(OSQPFloat*         bv,
 void OSQPVectori_to_raw(OSQPInt*           bv,
                         const OSQPVectori* a);
 
+/* Set specific elements of the vector */
+void OSQPVectorf_update_values(OSQPVectorf*     a,
+                               const OSQPFloat* a_new,
+                               const OSQPInt*   a_new_idx,
+                                     OSQPInt    a_new_n);
+
 /* set float vector to scalar */
 void OSQPVectorf_set_scalar(OSQPVectorf* a,
                             OSQPFloat    sc);

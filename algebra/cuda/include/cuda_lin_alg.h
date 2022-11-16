@@ -67,6 +67,15 @@ void cuda_vec_int_copy_d2h(OSQPInt*       h_y,
                            const OSQPInt* d_x,
                            OSQPInt        n);
 
+/*
+ * Update specific values in d_a
+ * d_a[a_new_idx[i]] = a_new[i] for i in [0, a_new_n]
+ */
+void cuda_vec_update(OSQPFloat*        d_a,
+                     const OSQPFloat*  a_new,
+                     const OSQPInt*    a_new_idx,
+                           OSQPInt     a_new_n);
+
 /**
  * d_a[i] = sc for i in [0,n-1]
  */

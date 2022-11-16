@@ -300,6 +300,27 @@ void OSQPVectori_to_raw(OSQPInt*           bv,
   }
 }
 
+/* Update specific elements of the vector */
+void OSQPVectorf_update_values(OSQPVectorf*     a,
+                               const OSQPFloat* a_new,
+                               const OSQPInt*   a_new_idx,
+                                     OSQPInt    a_new_n) {
+  OSQPInt    i;
+  OSQPInt    length = a->length;
+  OSQPFloat* av  = a->values;
+
+  if (a_new_idx) {
+    for (i = 0; i < a_new_n; i++) {
+        av[a_new_idx[i]] = a_new[i];
+    }
+  }
+  else {
+    for (i = 0; i < length; i++) {
+        av[i] = a_new[i];
+    }
+  }
+}
+
 void OSQPVectorf_set_scalar(OSQPVectorf* a,
                             OSQPFloat    sc) {
   OSQPInt    i;

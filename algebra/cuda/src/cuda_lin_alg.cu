@@ -534,6 +534,34 @@ void cuda_vec_int_copy_d2h(OSQPInt*       h_y,
   checkCudaErrors(cudaMemcpy(h_y, d_x, n * sizeof(OSQPInt), cudaMemcpyDeviceToHost));
 }
 
+void cuda_vec_update(OSQPFloat*        d_a,
+                     const OSQPFloat*  a_new,
+                     const OSQPInt*    a_new_idx,
+                           OSQPInt     a_new_n) {
+
+  if (!a_new_idx) { /* Update whole vector */
+    cuda_vec_copy_h2d(d_a, a_new, a_new_n);
+  }
+  else { /* Update partially */
+    OSQPInt*   d_a_new_idx;
+    OSQPFloat* d_a_val_new;
+
+    /* Allocate memory */
+    cuda_malloc((void **) &d_a_val_new, a_new_n * sizeof(OSQPFloat));
+    cuda_malloc((void **) &d_a_new_idx, a_new_n * sizeof(OSQPInt));
+
+    /* Copy indices and values from host to device */
+    cuda_vec_copy_h2d(d_a_val_new, a_new, a_new_n);
+    cuda_vec_int_copy_h2d(d_a_new_idx, a_new_idx, a_new_n);
+
+    /* Update d_a */
+    scatter(d_a, d_a_val_new, d_a_new_idx, a_new_n);
+
+    cuda_free((void **) &d_a_new_idx);
+    cuda_free((void **) &d_a_val_new);
+  }
+}
+
 void cuda_vec_set_sc(OSQPFloat* d_a,
                      OSQPFloat  sc,
                      OSQPInt    n) {

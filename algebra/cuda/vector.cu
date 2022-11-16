@@ -216,6 +216,13 @@ void OSQPVectori_to_raw(OSQPInt*           bv,
   cuda_vec_int_copy_d2h(bv, a->d_val, a->length);
 }
 
+void OSQPVectorf_update_values(OSQPVectorf*     a,
+                               const OSQPFloat* a_new,
+                               const OSQPInt*   a_new_idx,
+                                     OSQPInt    a_new_n) {
+  cuda_vec_update(a->d_val, a_new, a_new_idx, a_new_n);
+}
+
 void OSQPVectorf_set_scalar(OSQPVectorf* a,
                             OSQPFloat    sc) {
 
