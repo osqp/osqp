@@ -40,6 +40,7 @@ jobs:
             submodules: recursive
 
         - name: Set up conda
+          if: false
           uses: conda-incubator/setup-miniconda@v2
           with:
             auto-update-conda: true
