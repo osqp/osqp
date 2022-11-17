@@ -491,7 +491,13 @@ void cuda_vec_create(cusparseDnVecDescr_t* vec,
                      const OSQPFloat*      d_x,
                      OSQPInt               n) {
 
-  checkCudaErrors(cusparseCreateDnVec(vec, n, (void*)d_x, CUDA_FLOAT));
+  /* Some versions of CUDA don't accept n=0 as a valid size (e.g. can't accept a
+   * zero-length vector), so don't create the vector in that case.
+   */
+  if (n > 0)
+    checkCudaErrors(cusparseCreateDnVec(vec, n, (void*)d_x, CUDA_FLOAT));
+  else
+    vec = NULL;
 }
 
 void cuda_vec_destroy(cusparseDnVecDescr_t vec) {
