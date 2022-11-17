@@ -169,6 +169,10 @@ OSQP_API void osqp_cold_start(OSQPSolver* solver);
 
 /**
  * Update problem data vectors
+ *
+ * This function will update all elements in q, l, and u with the provided
+ * data.
+ *
  * @param  solver  Solver
  * @param  q_new   New linear cost, NULL if none
  * @param  l_new   New lower bound, NULL if none
@@ -179,6 +183,37 @@ OSQP_API OSQPInt osqp_update_data_vec(OSQPSolver*      solver,
                                       const OSQPFloat* q_new,
                                       const OSQPFloat* l_new,
                                       const OSQPFloat* u_new);
+
+/**
+ * Update problem data vectors
+ *
+ * This function will update specific elements in q, l, and u.
+ * If q_new_idx, u_new_idx, or l_new_idx are OSQP_NULL, then the respective q_new
+ * l_new or u_new is assumed to contain all the elements and the entire vector is
+ * updated.
+ *
+ * @param  solver    Solver
+ * @param  q_new     New linear cost, NULL if none
+ * @param  q_new_idx Indices of elements in q to update, NULL to update all elements
+ * @param  q_new_n   Number of elements in q to update (length of q_new)
+ * @param  l_new     New lower bound, NULL if none
+ * @param  l_new_idx Indices of elements in l to update, NULL to update all elements
+ * @param  l_new_n   Number of elements in l to update (length of l_new)
+ * @param  u_new     New upper bound, NULL if none
+ * @param  u_new_idx Indices of elements in u to update, NULL to update all elements
+ * @param  u_new_n   Number of elements in u to update (length of u_new)
+ * @return           Exitflag for errors (0 if no errors)
+ */
+OSQP_API OSQPInt osqp_update_data_vec_partial(OSQPSolver*      solver,
+                                              const OSQPFloat* q_new,
+                                              const OSQPInt*   q_new_idx,
+                                                    OSQPInt    q_new_n,
+                                              const OSQPFloat* l_new,
+                                              const OSQPInt*   l_new_idx,
+                                                    OSQPInt    l_new_n,
+                                              const OSQPFloat* u_new,
+                                              const OSQPInt*   u_new_idx,
+                                                    OSQPInt    u_new_n);
 
 # if OSQP_EMBEDDED_MODE != 1
 

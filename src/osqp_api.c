@@ -873,10 +873,16 @@ OSQPInt osqp_cleanup(OSQPSolver* solver) {
 * Update problem data  *
 ************************/
 
-OSQPInt osqp_update_data_vec(OSQPSolver*      solver,
-                             const OSQPFloat* q_new,
-                             const OSQPFloat* l_new,
-                             const OSQPFloat* u_new) {
+OSQPInt osqp_update_data_vec_partial(OSQPSolver*      solver,
+                                     const OSQPFloat* q_new,
+                                     const OSQPInt*   q_new_idx,
+                                           OSQPInt    q_new_n,
+                                     const OSQPFloat* l_new,
+                                     const OSQPInt*   l_new_idx,
+                                           OSQPInt    l_new_n,
+                                     const OSQPFloat* u_new,
+                                     const OSQPInt*   u_new_idx,
+                                           OSQPInt    u_new_n) {
 
   OSQPInt exitflag = 0;
 
@@ -931,9 +937,9 @@ OSQPInt osqp_update_data_vec(OSQPSolver*      solver,
 
   /* Update linear cost vector */
   if (q_new) {
-    OSQPVectorf_from_raw(work->data->q, q_new);
+    OSQPVectorf_update_values(work->data->q, q_new, q_new_idx, q_new_n);
     if (solver->settings->scaling) {
-      OSQPVectorf_ew_prod(work->data->q, work->data->q, work->scaling->D);
+      OSQPVectorf_ew_prod_partial(work->data->q, work->data->q, work->scaling->D, q_new_idx, q_new_n);
       OSQPVectorf_mult_scalar(work->data->q, work->scaling->c);
     }
   }
@@ -946,6 +952,18 @@ OSQPInt osqp_update_data_vec(OSQPSolver*      solver,
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
   return exitflag;
+}
+
+
+OSQPInt osqp_update_data_vec(OSQPSolver*      solver,
+                             const OSQPFloat* q_new,
+                             const OSQPFloat* l_new,
+                             const OSQPFloat* u_new) {
+
+  return osqp_update_data_vec_partial(solver,
+                                      q_new, OSQP_NULL, solver->work->data->n,
+                                      l_new, OSQP_NULL, solver->work->data->m,
+                                      u_new, OSQP_NULL, solver->work->data->m);
 }
 
 
