@@ -193,6 +193,17 @@ void OSQPVectorf_ew_prod(OSQPVectorf*       c,
                          const OSQPVectorf* a,
                          const OSQPVectorf* b);
 
+/* Elementwise product a.*b stored in c, but only for certain elements
+ * specified by the indices array (with len the length of indices).
+ * If indices is OSQP_NULL, then all elements are used.
+ * Set c==a for c *= b
+ */
+void OSQPVectorf_ew_prod_partial(OSQPVectorf*       c,
+                                 const OSQPVectorf* a,
+                                 const OSQPVectorf* b,
+                                 const OSQPInt*     indices,
+                                       OSQPInt      len)
+
 /* check l <= u elementwise.  Returns 1 if inequality is true
  * for every element pair in both vectors
  */

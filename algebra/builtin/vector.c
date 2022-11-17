@@ -635,6 +635,40 @@ void OSQPVectorf_ew_prod(OSQPVectorf*       c,
   }
 }
 
+void OSQPVectorf_ew_prod_partial(OSQPVectorf*       c,
+                                 const OSQPVectorf* a,
+                                 const OSQPVectorf* b,
+                                 const OSQPInt*     indices,
+                                       OSQPInt      len) {
+
+  OSQPInt i;
+  OSQPInt idx = 0;
+
+  OSQPFloat* av = a->values;
+  OSQPFloat* bv = b->values;
+  OSQPFloat* cv = c->values;
+
+  if (idx == OSQP_NULL) {
+    /* Perform a product with the entire vector */
+    OSQPVectorf_ew_prod(c, a, b);
+  }
+  else {
+    /* Perform a element-wise product between only certain elements */
+    if (c == a) {
+      for (i = 0; i < len; i++) {
+        idx = indices[i];
+        cv[idx] *= bv[idx];
+      }
+    }
+    else {
+      for (i = 0; i < len; i++) {
+        idx = indices[i];
+        cv[idx] = av[idx] * bv[idx];
+      }
+    }
+  }
+}
+
 OSQPInt OSQPVectorf_all_leq(const OSQPVectorf* l,
                             const OSQPVectorf* u) {
 
