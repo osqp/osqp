@@ -31,6 +31,8 @@ jobs:
           include:
             - os: ubuntu-latest
               cmake_generator: "Unix Makefiles"
+            - os: macos-11
+              cmake_generator: "Unix Makefiles"  
             - os: macos-latest
               cmake_generator: "Unix Makefiles"
             - os: windows-latest
