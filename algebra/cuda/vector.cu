@@ -310,12 +310,11 @@ OSQPFloat OSQPVectorf_norm_inf_diff(const OSQPVectorf* a,
 
 OSQPFloat OSQPVectorf_norm_1(const OSQPVectorf* a) {
 
-  OSQPFloat mean;
+  OSQPFloat val = 0.0;
 
-  if (a->length) cuda_vec_mean(a->d_val, a->length, &mean);
-  else           mean = 0.0;
+  if (a->length) cuda_vec_norm_1(a->d_val, a->length, &val);
 
-  return mean; 
+  return val;
 }
 
 OSQPFloat OSQPVectorf_dot_prod(const OSQPVectorf* a,
