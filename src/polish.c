@@ -3,7 +3,6 @@
 #include "printing.h"
 #include "util.h"
 #include "auxil.h"
-#include "proj.h"
 #include "error.h"
 #include "timing.h"
 
@@ -384,8 +383,11 @@ OSQPInt polish(OSQPSolver* solver) {
   OSQPMatrix_Axpy(work->data->A, work->pol->x, work->pol->z, 1.0, 0.0);
   get_ypol_from_yred(work, pol_sol_yview);     // pol->y
 
-  // Ensure z is in C and y is in N_C(z)
-  project_normalcone(work->pol->z, work->pol->y, work->data->l, work->data->u);
+  // Ensure z is in C and y is in the normal cone N_C(z)
+  // by doing: y <- y + z;  z <- proj_C(y);  y <- y - z
+  OSQPVectorf_plus(work->pol->y, work->pol->y, work->pol->z);
+  OSQPVectorf_ew_bound_vec(work->pol->z, work->pol->y, work->data->l, work->data->u);
+  OSQPVectorf_minus(work->pol->y, work->pol->y, work->pol->z);
 
   // Compute primal and dual residuals at the polished solution
   update_info(solver, 0, 1, 1);
