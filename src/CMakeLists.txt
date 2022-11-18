@@ -2,7 +2,6 @@
 target_sources(OSQPLIB PUBLIC
                "${CMAKE_CURRENT_SOURCE_DIR}/auxil.c"
                "${CMAKE_CURRENT_SOURCE_DIR}/error.c"
-               "${CMAKE_CURRENT_SOURCE_DIR}/proj.c"
                "${CMAKE_CURRENT_SOURCE_DIR}/scaling.c"
                "${CMAKE_CURRENT_SOURCE_DIR}/util.c")
 
@@ -11,7 +10,6 @@ list( APPEND EMBEDDED_SRCS
       "${CMAKE_CURRENT_SOURCE_DIR}/auxil.c"
       "${CMAKE_CURRENT_SOURCE_DIR}/error.c"
       "${CMAKE_CURRENT_SOURCE_DIR}/osqp_api.c"
-      "${CMAKE_CURRENT_SOURCE_DIR}/proj.c"
       "${CMAKE_CURRENT_SOURCE_DIR}/scaling.c"
       "${CMAKE_CURRENT_SOURCE_DIR}/util.c" )
 

@@ -491,7 +491,13 @@ void cuda_vec_create(cusparseDnVecDescr_t* vec,
                      const OSQPFloat*      d_x,
                      OSQPInt               n) {
 
-  checkCudaErrors(cusparseCreateDnVec(vec, n, (void*)d_x, CUDA_FLOAT));
+  /* Some versions of CUDA don't accept n=0 as a valid size (e.g. can't accept a
+   * zero-length vector), so don't create the vector in that case.
+   */
+  if (n > 0)
+    checkCudaErrors(cusparseCreateDnVec(vec, n, (void*)d_x, CUDA_FLOAT));
+  else
+    vec = NULL;
 }
 
 void cuda_vec_destroy(cusparseDnVecDescr_t vec) {
@@ -686,12 +692,11 @@ void cuda_vec_diff_norm_inf(const OSQPFloat* d_a,
   cuda_free((void **) &d_diff);
 }
 
-void cuda_vec_mean(const OSQPFloat* d_x,
-                         OSQPInt    n,
-                         OSQPFloat* h_res) {
+void cuda_vec_norm_1(const OSQPFloat* d_x,
+                           OSQPInt    n,
+                           OSQPFloat* h_res) {
 
-  cublasTasum(CUDA_handle->cublasHandle, n, d_x, 1, h_res);
-  (*h_res) /= n;
+  checkCudaErrors(cublasTasum(CUDA_handle->cublasHandle, n, d_x, 1, h_res));
 }
 
 void cuda_vec_prod(const OSQPFloat* d_a,

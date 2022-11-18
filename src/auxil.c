@@ -1,6 +1,5 @@
 #include "osqp.h"
 #include "auxil.h"
-#include "proj.h"
 #include "lin_alg.h"
 #include "scaling.h"
 #include "util.h"
@@ -209,8 +208,7 @@ void update_z(OSQPSolver* solver) {
   }
 
   // project z onto C = [l,u]
-  project(work->z, work->data->l, work->data->u);
-
+  OSQPVectorf_ew_bound_vec(work->z, work->z, work->data->l, work->data->u);
 }
 
 void update_y(OSQPSolver* solver) {
@@ -416,11 +414,11 @@ OSQPInt is_primal_infeasible(OSQPSolver* solver,
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
 
-  // Project delta_y onto the polar of the recession cone of [l,u]
-  project_polar_reccone(work->delta_y,
-                        work->data->l,
-                        work->data->u,
-                        OSQP_INFTY * OSQP_MIN_SCALING);
+  // Project delta_y onto the polar of the recession cone of C=[l,u]
+  OSQPVectorf_project_polar_reccone(work->delta_y,
+                                    work->data->l,
+                                    work->data->u,
+                                    OSQP_INFTY * OSQP_MIN_SCALING);
 
   // Compute infinity norm of delta_y (unscale if necessary)
   if (settings->scaling && !settings->scaled_termination) {
@@ -518,13 +516,13 @@ OSQPInt is_dual_infeasible(OSQPSolver* solver,
         // NB: Note that MIN_SCALING is used to adjust the infinity value
         // in case the problem is scaled.
 
-        //if you get this far, then all tests passed,
-        //so return results from final test
-        return test_in_reccone(work->Adelta_x,
-                               work->data->l,
-                               work->data->u,
-                               OSQP_INFTY * OSQP_MIN_SCALING,
-                               eps_dual_inf * norm_delta_x);
+        // If you get this far, then all tests passed, so return results from final test
+        // Test whether Adelta_x is in the recession cone of C = [l, u]
+        return OSQPVectorf_in_reccone(work->Adelta_x,
+                                      work->data->l,
+                                      work->data->u,
+                                      OSQP_INFTY * OSQP_MIN_SCALING,
+                                      eps_dual_inf * norm_delta_x);
       }
     }
   }
