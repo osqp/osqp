@@ -146,11 +146,11 @@ void cuda_vec_diff_norm_inf(const OSQPFloat* d_a,
                                   OSQPFloat* h_res);
 
 /**
- * h_res = sum(d_x) / n
+ * h_res = sum(|d_x|)
  */
-void cuda_vec_mean(const OSQPFloat* d_x,
-                         OSQPInt    n,
-                         OSQPFloat* h_res);
+void cuda_vec_norm_1(const OSQPFloat* d_x,
+                           OSQPInt    n,
+                           OSQPFloat* h_res);
 
 /**
  * h_res = d_a' * d_b
