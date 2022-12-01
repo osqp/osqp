@@ -78,11 +78,12 @@ typedef struct {
     OSQPInt n_ineq_l;  ///< number of inequalities where -inf < l < u
     OSQPInt n_ineq_u;  ///< number of inequalities where l < u < inf
     OSQPInt n_eq;      ///< number of equalities where l == u
-    OSQPVectorf *y_l;
-    OSQPVectorf *y_u;
-    OSQPVectorf *ryl;
-    OSQPVectorf *ryu;
-    OSQPVectorf *rhs;
+    OSQPVectorf *y_l;  ///< for internal use, size m
+    OSQPVectorf *y_u;  ///< for internal use, size m
+    OSQPVectorf *ryl;  ///< for internal use, size m
+    OSQPVectorf *ryu;  ///< for internal use, size m
+    OSQPVectorf *rhs;  ///< rhs of linear system to solve for derivatives; length 2*(n + n_ineq_l + n_ineq_u + n_eq)
+                       ///< conservatively allocated with length 2(n + 2m) in `osqp_setup`
 } OSQPDerivativeData;
 
 /**

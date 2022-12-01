@@ -370,13 +370,14 @@ void print_dns_matrix(const OSQPFloat* M,
 
   for (i = 0; i < m; i++) {   // Cycle over rows
     for (j = 0; j < n; j++) { // Cycle over columns
-      if (j < n - 1)
+      if (j < n - 1) {
         // c_print("% 14.12e,  ", M[j*m+i]);
         c_print("% .3g,  ", M[j * m + i]);
 
-      else
+      } else {
         // c_print("% 14.12e;  ", M[j*m+i]);
         c_print("% .3g;  ", M[j * m + i]);
+      }
     }
 
     if (i < m - 1) {

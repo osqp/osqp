@@ -56,6 +56,15 @@ void OSQPVectori_free(OSQPVectori* a);
 void OSQPVectorf_subvector_assign(OSQPVectorf* A,
                                   OSQPFloat*   b,
                                   OSQPInt      start,
+                                  OSQPInt      length,
+                                  OSQPFloat    multiplier);
+
+/*
+ * Assign a scalar to vector A starting at the index given by start.
+ */
+void OSQPVectorf_subvector_assign_scalar(OSQPVectorf* A,
+                                  OSQPFloat    sc,
+                                  OSQPInt      start,
                                   OSQPInt      length);
 
 OSQPVectorf* OSQPVectorf_subvector_byrows(const OSQPVectorf* A,

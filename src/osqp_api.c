@@ -384,9 +384,18 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
 
 # ifdef OSQP_ENABLE_DERIVATIVES
   work->derivative_data = c_calloc(1, sizeof(OSQPDerivativeData));
+  if (!(work->derivative_data)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  work->derivative_data->y_u = OSQPVectorf_malloc(m);
+  work->derivative_data->y_l = OSQPVectorf_malloc(m);
+  work->derivative_data->ryl = OSQPVectorf_malloc(m);
+  work->derivative_data->ryu = OSQPVectorf_malloc(m);
+  work->derivative_data->rhs = OSQPVectorf_malloc(2 * (n + 2*m));
+  if (!(work->derivative_data->y_u) || !(work->derivative_data->y_l) ||
+    !(work->derivative_data->ryl) || !(work->derivative_data->ryu))
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
 # else
   work->derivative_data = OSQP_NULL;
-# endif /* ifdef OSQP_ENABLE_DERIVATIVES */
+# endif / *ifdef OSQP_ENABLE_DERIVATIVES */
 
   // Return exit flag
   return 0;
@@ -865,6 +874,8 @@ OSQPInt osqp_cleanup(OSQPSolver* solver) {
       if (work->derivative_data){
           if (work->derivative_data->y_l) OSQPVectorf_free(work->derivative_data->y_l);
           if (work->derivative_data->y_u) OSQPVectorf_free(work->derivative_data->y_u);
+          if (work->derivative_data->ryl) OSQPVectorf_free(work->derivative_data->ryl);
+          if (work->derivative_data->ryu) OSQPVectorf_free(work->derivative_data->ryu);
           if (work->derivative_data->rhs) OSQPVectorf_free(work->derivative_data->rhs);
           c_free(work->derivative_data);
       }
