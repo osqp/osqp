@@ -105,7 +105,10 @@ void OSQPMatrix_Axpy(const OSQPMatrix*  mat,
     cuda_vec_mult_sc(y->d_val, beta, y->length);
     return;
   }
-  cuda_mat_Axpy(mat->S, x->vec, y->vec, alpha, beta);
+
+  if ((x->length > 0) && (y->length > 0)) {
+    cuda_mat_Axpy(mat->S, x->vec, y->vec, alpha, beta);
+  }
 }
 
 void OSQPMatrix_Atxpy(const OSQPMatrix*  mat,
@@ -119,7 +122,10 @@ void OSQPMatrix_Atxpy(const OSQPMatrix*  mat,
     cuda_vec_mult_sc(y->d_val, beta, y->length);
     return;
   }
-  cuda_mat_Axpy(mat->At, x->vec, y->vec, alpha, beta);
+
+  if ((x->length > 0) && (y->length > 0)) {
+    cuda_mat_Axpy(mat->At, x->vec, y->vec, alpha, beta);
+  }
 }
 
 void OSQPMatrix_col_norm_inf(const OSQPMatrix*  mat,

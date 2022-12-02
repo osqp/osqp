@@ -279,33 +279,42 @@ static void init_SpMV_interface(csr *M) {
   OSQPInt   m = M->m;
   OSQPInt   n = M->n;
 
-  cuda_malloc((void **) &d_x, n * sizeof(OSQPFloat));
-  cuda_malloc((void **) &d_y, m * sizeof(OSQPFloat));
-  cuda_vec_create(&vecx, d_x, n);
-  cuda_vec_create(&vecy, d_y, m);
+  /* Only create the matrix if it has non-zero dimensions.
+   * Some versions of CUDA don't allow creating matrices with rows/columns of
+   * size 0 and assert instead. So we don't create the matrix object, and instead
+   * will never perform any operations on it.
+   */
+  if ((m > 0) && (n > 0)) {
+    /* Wrap raw data into cuSPARSE API matrix */
+    checkCudaErrors(cusparseCreateCsr(
+      &M->SpMatDescr, m, n, M->nnz,
+      (void*)M->row_ptr, (void*)M->col_ind, (void*)M->val,
+      CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I,
+      CUSPARSE_INDEX_BASE_ZERO, CUDA_FLOAT));
 
-  /* Wrap raw data into cuSPARSE API matrix */
-  checkCudaErrors(cusparseCreateCsr(
-    &M->SpMatDescr, m, n, M->nnz,
-    (void*)M->row_ptr, (void*)M->col_ind, (void*)M->val,
-    CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I,
-    CUSPARSE_INDEX_BASE_ZERO, CUDA_FLOAT));
+    if (!M->SpMatBufferSize) {
+      cuda_malloc((void **) &d_x, n * sizeof(OSQPFloat));
+      cuda_malloc((void **) &d_y, m * sizeof(OSQPFloat));
 
-  if (!M->SpMatBufferSize) {
-    /* Allocate workspace for cusparseSpMV */
-    checkCudaErrors(cusparseSpMV_bufferSize(
-      CUDA_handle->cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-      &alpha, M->SpMatDescr, vecx, &alpha, vecy,
-      CUDA_FLOAT, CUSPARSE_SPMV_ALG_DEFAULT, &M->SpMatBufferSize));
+      cuda_vec_create(&vecx, d_x, n);
+      cuda_vec_create(&vecy, d_y, m);
 
-    if (M->SpMatBufferSize)
-      cuda_malloc((void **) &M->SpMatBuffer, M->SpMatBufferSize);
+      /* Allocate workspace for cusparseSpMV */
+      checkCudaErrors(cusparseSpMV_bufferSize(
+        CUDA_handle->cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+        &alpha, M->SpMatDescr, vecx, &alpha, vecy,
+        CUDA_FLOAT, CUSPARSE_SPMV_ALG_DEFAULT, &M->SpMatBufferSize));
+
+      if (M->SpMatBufferSize)
+        cuda_malloc((void **) &M->SpMatBuffer, M->SpMatBufferSize);
+
+      cuda_vec_destroy(vecx);
+      cuda_vec_destroy(vecy);
+
+      cuda_free((void **) &d_x);
+      cuda_free((void **) &d_y);
+    }
   }
-
-  cuda_vec_destroy(vecx);
-  cuda_vec_destroy(vecy);
-  cuda_free((void **) &d_x);
-  cuda_free((void **) &d_y);
 }
 
  /*
