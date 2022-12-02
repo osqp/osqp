@@ -393,8 +393,6 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   if (!(work->derivative_data->y_u) || !(work->derivative_data->y_l) ||
     !(work->derivative_data->ryl) || !(work->derivative_data->ryu))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
-# else
-  work->derivative_data = OSQP_NULL;
 # endif / *ifdef OSQP_ENABLE_DERIVATIVES */
 
   // Return exit flag

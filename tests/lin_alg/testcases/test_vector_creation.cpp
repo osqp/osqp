@@ -366,7 +366,7 @@ TEST_CASE("Vector: Subvector assignment", "[vector],[assignment]")
   {
     OSQPVectorf_ptr ref{OSQPVectorf_new(data->test_vec_ops_v1, data->test_vec_ops_n)};
 
-    OSQPVectorf_subvector_assign(v.get(), data->test_vec_subvec_assign_5, 2, 0);
+    OSQPVectorf_subvector_assign(v.get(), data->test_vec_subvec_assign_5, 2, 0, 1);
 
     mu_assert("Subvector assignment failed",
               OSQPVectorf_is_eq(v.get(), ref.get(), TESTS_TOL));
@@ -376,7 +376,7 @@ TEST_CASE("Vector: Subvector assignment", "[vector],[assignment]")
   {
     OSQPVectorf_ptr ref{OSQPVectorf_new(data->test_vec_subvec_assign_5, data->test_vec_ops_n)};
 
-    OSQPVectorf_subvector_assign(v.get(), data->test_vec_subvec_5, 2, 5);
+    OSQPVectorf_subvector_assign(v.get(), data->test_vec_subvec_5, 2, 5, 1);
 
     mu_assert("Subvector assignment failed",
               OSQPVectorf_is_eq(v.get(), ref.get(), TESTS_TOL));
@@ -386,7 +386,7 @@ TEST_CASE("Vector: Subvector assignment", "[vector],[assignment]")
   {
     OSQPVectorf_ptr ref{OSQPVectorf_new(data->test_vec_ops_v2, data->test_vec_ops_n)};
 
-    OSQPVectorf_subvector_assign(v.get(), data->test_vec_ops_v2, 0, data->test_vec_ops_n);
+    OSQPVectorf_subvector_assign(v.get(), data->test_vec_ops_v2, 0, data->test_vec_ops_n, 1);
 
     mu_assert("Subvector assignment failed",
               OSQPVectorf_is_eq(v.get(), ref.get(), TESTS_TOL));
