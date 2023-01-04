@@ -1,18 +1,40 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>C &mdash; OSQP  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/osqp_theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/osqp_theme.css" type="text/css" />
+
+  
+  
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
@@ -20,7 +42,10 @@
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script src="../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Python" href="python.html" />
@@ -44,14 +69,32 @@ content="https://osqp.org/docs/_static/img/logo.png">
 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../index.html">
+          
+
+          
+            
             <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
           </a>
+
+          
+            
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -59,7 +102,18 @@ content="https://osqp.org/docs/_static/img/logo.png">
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">User Documentation</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../solver/index.html">The solver</a></li>
@@ -91,31 +145,73 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">OSQP</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
-          <li class="breadcrumb-item"><a href="index.html">Interfaces</a></li>
-      <li class="breadcrumb-item active">C</li>
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Interfaces</a> &raquo;</li>
+        
+      <li>C</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="../_sources/interfaces/C.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+            
   <section id="c">
 <span id="c-interface"></span><h1>C<a class="headerlink" href="#c" title="Permalink to this heading">¶</a></h1>
 <section id="main-solver-api">
@@ -139,14 +235,14 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </p>
 <p>NB: This is the only function that allocates dynamic memory and is not used during code generation</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>workp</strong> – Solver workspace pointer </p></li>
 <li><p><strong>data</strong> – Problem data </p></li>
 <li><p><strong>settings</strong> – Solver settings </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Exitflag for errors (0 if no errors) </p>
 </dd>
 </dl>
@@ -161,10 +257,10 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <p>If the problem is primal infeasible, the certificate is stored in <em>work-&gt;delta_y</em> </p>
 <p>If the problem is dual infeasible, the certificate is stored in <em>work-&gt;delta_x</em> </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>work</strong> – Workspace allocated </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Exitflag for errors </p>
 </dd>
 </dl>
@@ -176,10 +272,10 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <dd><p>Cleanup workspace by deallocating memory</p>
 <p>This function is not used in code generation </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>work</strong> – Workspace </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Exitflag for errors </p>
 </dd>
 </dl>
@@ -197,14 +293,14 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <span id="_CPPv315osqp_warm_startP13OSQPWorkspacePK7c_floatPK7c_float"></span><span id="_CPPv215osqp_warm_startP13OSQPWorkspacePK7c_floatPK7c_float"></span><span id="osqp_warm_start__OSQPWorkspaceP.c_floatCP.c_floatCP"></span><span class="target" id="df/d16/osqp_8h_1a3837d8cf590d7dfc6232bb7882dd8628"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_warm_start</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">x</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">y</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415osqp_warm_startP13OSQPWorkspacePK7c_floatPK7c_float" title="Permalink to this definition">¶</a><br /></dt>
 <dd><p>Warm start primal and dual variables </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>work</strong> – Workspace structure </p></li>
 <li><p><strong>x</strong> – Primal variable </p></li>
 <li><p><strong>y</strong> – Dual variable </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Exitflag </p>
 </dd>
 </dl>
@@ -215,13 +311,13 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <span id="_CPPv317osqp_warm_start_xP13OSQPWorkspacePK7c_float"></span><span id="_CPPv217osqp_warm_start_xP13OSQPWorkspacePK7c_float"></span><span id="osqp_warm_start_x__OSQPWorkspaceP.c_floatCP"></span><span class="target" id="df/d16/osqp_8h_1a846c47ab273db3b33101f67ae046257c"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_warm_start_x</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">x</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417osqp_warm_start_xP13OSQPWorkspacePK7c_float" title="Permalink to this definition">¶</a><br /></dt>
 <dd><p>Warm start primal variable </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>work</strong> – Workspace structure </p></li>
 <li><p><strong>x</strong> – Primal variable </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Exitflag </p>
 </dd>
 </dl>
@@ -232,13 +328,13 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <span id="_CPPv317osqp_warm_start_yP13OSQPWorkspacePK7c_float"></span><span id="_CPPv217osqp_warm_start_yP13OSQPWorkspacePK7c_float"></span><span id="osqp_warm_start_y__OSQPWorkspaceP.c_floatCP"></span><span class="target" id="df/d16/osqp_8h_1af927004f14a07c019153238141c6c805"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_warm_start_y</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">y</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417osqp_warm_start_yP13OSQPWorkspacePK7c_float" title="Permalink to this definition">¶</a><br /></dt>
 <dd><p>Warm start dual variable </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>work</strong> – Workspace structure </p></li>
 <li><p><strong>y</strong> – Dual variable </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Exitflag </p>
 </dd>
 </dl>
@@ -253,13 +349,13 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <span id="_CPPv320osqp_update_lin_costP13OSQPWorkspacePK7c_float"></span><span id="_CPPv220osqp_update_lin_costP13OSQPWorkspacePK7c_float"></span><span id="osqp_update_lin_cost__OSQPWorkspaceP.c_floatCP"></span><span class="target" id="df/d16/osqp_8h_1afe3b2e8fc11a75a90f62a1348710624a"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_update_lin_cost</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">q_new</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420osqp_update_lin_costP13OSQPWorkspacePK7c_float" title="Permalink to this definition">¶</a><br /></dt>
 <dd><p>Update linear cost in the problem </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>work</strong> – Workspace </p></li>
 <li><p><strong>q_new</strong> – New linear cost </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Exitflag for errors and warnings </p>
 </dd>
 </dl>
@@ -270,13 +366,13 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <span id="_CPPv323osqp_update_lower_boundP13OSQPWorkspacePK7c_float"></span><span id="_CPPv223osqp_update_lower_boundP13OSQPWorkspacePK7c_float"></span><span id="osqp_update_lower_bound__OSQPWorkspaceP.c_floatCP"></span><span class="target" id="df/d16/osqp_8h_1a7b62869a3a168ff793659ec3c4f4b9df"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_update_lower_bound</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">l_new</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv423osqp_update_lower_boundP13OSQPWorkspacePK7c_float" title="Permalink to this definition">¶</a><br /></dt>
 <dd><p>Update lower bound in the problem constraints </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>work</strong> – Workspace </p></li>
 <li><p><strong>l_new</strong> – New lower bound </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Exitflag: 1 if new lower bound is not &lt;= than upper bound </p>
 </dd>
 </dl>
@@ -287,13 +383,13 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <span id="_CPPv323osqp_update_upper_boundP13OSQPWorkspacePK7c_float"></span><span id="_CPPv223osqp_update_upper_boundP13OSQPWorkspacePK7c_float"></span><span id="osqp_update_upper_bound__OSQPWorkspaceP.c_floatCP"></span><span class="target" id="df/d16/osqp_8h_1a7d3fbc2531ecd4cddece5897a4368f23"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_update_upper_bound</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">u_new</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv423osqp_update_upper_boundP13OSQPWorkspacePK7c_float" title="Permalink to this definition">¶</a><br /></dt>
 <dd><p>Update upper bound in the problem constraints </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>work</strong> – Workspace </p></li>
 <li><p><strong>u_new</strong> – New upper bound </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Exitflag: 1 if new upper bound is not &gt;= than lower bound </p>
 </dd>
 </dl>
@@ -304,14 +400,14 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <span id="_CPPv318osqp_update_boundsP13OSQPWorkspacePK7c_floatPK7c_float"></span><span id="_CPPv218osqp_update_boundsP13OSQPWorkspacePK7c_floatPK7c_float"></span><span id="osqp_update_bounds__OSQPWorkspaceP.c_floatCP.c_floatCP"></span><span class="target" id="df/d16/osqp_8h_1a207715d769b3c9cca9cdec0eb5e03301"></span><span class="n"><span class="pre">c_int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_update_bounds</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPWorkspace" title="OSQPWorkspace"><span class="n"><span class="pre">OSQPWorkspace</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">work</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">l_new</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">c_float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">u_new</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418osqp_update_boundsP13OSQPWorkspacePK7c_floatPK7c_float" title="Permalink to this definition">¶</a><br /></dt>
 <dd><p>Update lower and upper bounds in the problem constraints </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>work</strong> – Workspace </p></li>
 <li><p><strong>l_new</strong> – New lower bound </p></li>
 <li><p><strong>u_new</strong> – New upper bound </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Exitflag: 1 if new lower bound is not &lt;= than new upper bound </p>
 </dd>
 </dl>
@@ -323,7 +419,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <dd><p>Update elements of matrix P (upper triangular) without changing sparsity structure.</p>
 <p>If Px_new_idx is OSQP_NULL, Px_new is assumed to be as long as P-&gt;x and the whole P-&gt;x is replaced.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>work</strong> – Workspace structure </p></li>
 <li><p><strong>Px_new</strong> – Vector of new elements in P-&gt;x (upper triangular) </p></li>
@@ -331,7 +427,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li><p><strong>P_new_n</strong> – Number of new elements to be changed </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>output flag: 0: OK 1: P_new_n &gt; nnzP &lt;0: error in the update </p>
 </dd>
 </dl>
@@ -343,7 +439,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <dd><p>Update elements of matrix A without changing sparsity structure.</p>
 <p>If Ax_new_idx is OSQP_NULL, Ax_new is assumed to be as long as A-&gt;x and the whole A-&gt;x is replaced.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>work</strong> – Workspace structure </p></li>
 <li><p><strong>Ax_new</strong> – Vector of new elements in A-&gt;x </p></li>
@@ -351,7 +447,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li><p><strong>A_new_n</strong> – Number of new elements to be changed </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>output flag: 0: OK 1: A_new_n &gt; nnzA &lt;0: error in the update </p>
 </dd>
 </dl>
@@ -364,7 +460,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <p>If Px_new_idx is OSQP_NULL, Px_new is assumed to be as long as P-&gt;x and the whole P-&gt;x is replaced.</p>
 <p>If Ax_new_idx is OSQP_NULL, Ax_new is assumed to be as long as A-&gt;x and the whole A-&gt;x is replaced.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>work</strong> – Workspace structure </p></li>
 <li><p><strong>Px_new</strong> – Vector of new elements in P-&gt;x (upper triangular) </p></li>
@@ -375,7 +471,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li><p><strong>A_new_n</strong> – Number of new elements to be changed </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>output flag: 0: OK 1: P_new_n &gt; nnzP 2: A_new_n &gt; nnzA &lt;0: error in the update </p>
 </dd>
 </dl>
@@ -1130,33 +1226,50 @@ content="https://osqp.org/docs/_static/img/logo.png">
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="status_values.html" class="btn btn-neutral float-left" title="Status values and errors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="python.html" class="btn btn-neutral float-right" title="Python" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="status_values.html" class="btn btn-neutral float-left" title="Status values and errors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.</p>
-  </div>
+    <p>
+        &#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

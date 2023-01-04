@@ -1,18 +1,40 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>Python &mdash; OSQP  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/osqp_theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/osqp_theme.css" type="text/css" />
+
+  
+  
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
@@ -20,7 +42,10 @@
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script src="../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Examples" href="../examples/index.html" />
@@ -44,14 +69,32 @@ content="https://osqp.org/docs/_static/img/logo.png">
 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../index.html">
+          
+
+          
+            
             <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
           </a>
+
+          
+            
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -59,7 +102,18 @@ content="https://osqp.org/docs/_static/img/logo.png">
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">User Documentation</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../solver/index.html">The solver</a></li>
@@ -80,31 +134,73 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">OSQP</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
-          <li class="breadcrumb-item"><a href="index.html">Code generation</a></li>
-      <li class="breadcrumb-item active">Python</li>
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Code generation</a> &raquo;</li>
+        
+      <li>Python</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="../_sources/codegen/python.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+            
   <section id="python">
 <h1>Python<a class="headerlink" href="#python" title="Permalink to this heading">¶</a></h1>
 <p>Before generating code for a parametric problem, the problem should be first
@@ -119,11 +215,6 @@ specified in the setup phase. See <a class="reference internal" href="../interfa
 code is stored.
 Additional codegen options are shown in the following table</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 23%" />
-<col style="width: 47%" />
-<col style="width: 30%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Option</p></th>
 <th class="head"><p>Description</p></th>
@@ -204,7 +295,7 @@ then no build files are generated.</p>
 <span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
 <dd><p>Solve the problem.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><p>tuple (x, y, status_val, iter, run_time)</p>
 <ul class="simple">
 <li><p><strong>x</strong> (<em>ndarray</em>) - Primal solution</p></li>
@@ -223,7 +314,7 @@ then no build files are generated.</p>
 <span class="sig-name descname"><span class="pre">update_lin_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q_new</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Update linear cost.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>q_new</strong> (<em>ndarray</em>) – New linear cost vector</p>
 </dd>
 </dl>
@@ -234,7 +325,7 @@ then no build files are generated.</p>
 <span class="sig-name descname"><span class="pre">update_lower_bound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l_new</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Update lower bound in the constraints.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>l_new</strong> (<em>ndarray</em>) – New lower bound vector</p>
 </dd>
 </dl>
@@ -245,7 +336,7 @@ then no build files are generated.</p>
 <span class="sig-name descname"><span class="pre">update_upper_bound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u_new</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Update upper bound in the constraints.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>u_new</strong> (<em>ndarray</em>) – New upper bound vector</p>
 </dd>
 </dl>
@@ -256,7 +347,7 @@ then no build files are generated.</p>
 <span class="sig-name descname"><span class="pre">update_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">l_new</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_new</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Update lower and upper bounds in the constraints.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>l_new</strong> (<em>ndarray</em>) – New lower bound vector</p></li>
 <li><p><strong>u_new</strong> (<em>ndarray</em>) – New upper bound vector</p></li>
@@ -272,7 +363,7 @@ then no build files are generated.</p>
 <span class="sig-name descname"><span class="pre">update_P</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Px</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Px_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Px_n</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Update nonzero entries of the quadratic cost matrix (only upper triangular) without changing sparsity structure.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>Px</strong> (<em>ndarray</em>) – Values of entries to be updated</p></li>
 <li><p><strong>Px_idx</strong> (<em>ndarray</em>) – Indices of entries to be updated. Pass <code class="code docutils literal notranslate"><span class="pre">None</span></code> if
@@ -289,7 +380,7 @@ all the indices are to be updated</p></li>
 <span class="sig-name descname"><span class="pre">update_A</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ax_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ax_n</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Update nonzero entries of the constraint matrix.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>Ax</strong> (<em>ndarray</em>) – Values of entries to be updated</p></li>
 <li><p><strong>Ax_idx</strong> (<em>ndarray</em>) – Indices of entries to be updated. Pass <code class="code docutils literal notranslate"><span class="pre">None</span></code> if
@@ -306,7 +397,7 @@ all the indices are to be updated</p></li>
 <span class="sig-name descname"><span class="pre">update_P_A</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Px</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Px_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Px_n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ax_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ax_n</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Update nonzero entries of the quadratic cost and constraint matrices. It considers only the upper-triangular part of P.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>Px</strong> (<em>ndarray</em>) – Values of entries to be updated</p></li>
 <li><p><strong>Px_idx</strong> (<em>ndarray</em>) – Indices of entries to be updated. Pass <code class="code docutils literal notranslate"><span class="pre">None</span></code> if
@@ -333,33 +424,50 @@ all the indices are to be updated</p></li>
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="matlab.html" class="btn btn-neutral float-left" title="Matlab" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="../examples/index.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="matlab.html" class="btn btn-neutral float-left" title="Matlab" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.</p>
-  </div>
+    <p>
+        &#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

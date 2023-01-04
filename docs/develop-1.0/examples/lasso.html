@@ -1,18 +1,40 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <title>Lasso &mdash; OSQP  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/osqp_theme.css" type="text/css" />
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/osqp_theme.css" type="text/css" />
+
+  
+  
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+
+  
+  
+
+  
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
@@ -20,7 +42,10 @@
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script src="../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Least-squares" href="least-squares.html" />
@@ -44,14 +69,32 @@ content="https://osqp.org/docs/_static/img/logo.png">
 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../index.html">
+          
+
+          
+            
             <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
           </a>
+
+          
+            
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -59,7 +102,18 @@ content="https://osqp.org/docs/_static/img/logo.png">
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
               <p class="caption" role="heading"><span class="caption-text">User Documentation</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../solver/index.html">The solver</a></li>
@@ -90,31 +144,73 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
 </ul>
 
+            
+          
         </div>
+        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">OSQP</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
-          <li class="breadcrumb-item"><a href="index.html">Examples</a></li>
-      <li class="breadcrumb-item active">Lasso</li>
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Examples</a> &raquo;</li>
+        
+      <li>Lasso</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+          
             <a href="../_sources/examples/lasso.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+            
   <section id="lasso">
 <h1>Lasso<a class="headerlink" href="#lasso" title="Permalink to this heading">¶</a></h1>
 <p>Lasso is a well known technique for sparse linear regression.
@@ -182,40 +278,40 @@ Since <span class="math notranslate nohighlight">\(\gamma\)</span> enters only i
 </section>
 <section id="matlab">
 <h2>Matlab<a class="headerlink" href="#matlab" title="Permalink to this heading">¶</a></h2>
-<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Generate problem data</span><span class="w"></span>
-<span class="nb">rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
-<span class="n">n</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"></span>
-<span class="n">m</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1000</span><span class="p">;</span><span class="w"></span>
-<span class="n">Ad</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">sprandn</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">);</span><span class="w"></span>
-<span class="n">x_true</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="nb">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.8</span><span class="p">)</span><span class="w"> </span><span class="o">.*</span><span class="w"> </span><span class="nb">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">);</span><span class="w"></span>
-<span class="n">b</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Ad</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">x_true</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">randn</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
-<span class="n">gammas</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">);</span><span class="w"></span>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Generate problem data</span>
+<span class="nb">rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">n</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
+<span class="n">m</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1000</span><span class="p">;</span>
+<span class="n">Ad</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">sprandn</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">);</span>
+<span class="n">x_true</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="nb">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.8</span><span class="p">)</span><span class="w"> </span><span class="o">.*</span><span class="w"> </span><span class="nb">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+<span class="n">b</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">Ad</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">x_true</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">randn</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="n">gammas</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">);</span>
 
-<span class="c">% OSQP data</span><span class="w"></span>
-<span class="n">P</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">blkdiag</span><span class="p">(</span><span class="nb">sparse</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">),</span><span class="w"> </span><span class="nb">speye</span><span class="p">(</span><span class="n">m</span><span class="p">),</span><span class="w"> </span><span class="nb">sparse</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">));</span><span class="w"></span>
-<span class="n">q</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">zeros</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">+</span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
-<span class="n">A</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="n">Ad</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="nb">speye</span><span class="p">(</span><span class="n">m</span><span class="p">),</span><span class="w"> </span><span class="nb">sparse</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="nb">speye</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="w"> </span><span class="nb">sparse</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">m</span><span class="p">),</span><span class="w"> </span><span class="o">-</span><span class="nb">speye</span><span class="p">(</span><span class="n">n</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="nb">speye</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="w"> </span><span class="nb">sparse</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">m</span><span class="p">),</span><span class="w"> </span><span class="nb">speye</span><span class="p">(</span><span class="n">n</span><span class="p">);];</span><span class="w"></span>
-<span class="n">l</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="n">b</span><span class="p">;</span><span class="w"> </span><span class="o">-</span><span class="n">inf</span><span class="o">*</span><span class="nb">ones</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"> </span><span class="nb">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)];</span><span class="w"></span>
-<span class="n">u</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="n">b</span><span class="p">;</span><span class="w"> </span><span class="nb">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"> </span><span class="n">inf</span><span class="o">*</span><span class="nb">ones</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)];</span><span class="w"></span>
+<span class="c">% OSQP data</span>
+<span class="n">P</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">blkdiag</span><span class="p">(</span><span class="nb">sparse</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">),</span><span class="w"> </span><span class="nb">speye</span><span class="p">(</span><span class="n">m</span><span class="p">),</span><span class="w"> </span><span class="nb">sparse</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">));</span>
+<span class="n">q</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">zeros</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">+</span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="n">A</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="n">Ad</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="nb">speye</span><span class="p">(</span><span class="n">m</span><span class="p">),</span><span class="w"> </span><span class="nb">sparse</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">);</span>
+<span class="w">    </span><span class="nb">speye</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="w"> </span><span class="nb">sparse</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">m</span><span class="p">),</span><span class="w"> </span><span class="o">-</span><span class="nb">speye</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+<span class="w">    </span><span class="nb">speye</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="w"> </span><span class="nb">sparse</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">m</span><span class="p">),</span><span class="w"> </span><span class="nb">speye</span><span class="p">(</span><span class="n">n</span><span class="p">);];</span>
+<span class="n">l</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="n">b</span><span class="p">;</span><span class="w"> </span><span class="o">-</span><span class="n">inf</span><span class="o">*</span><span class="nb">ones</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"> </span><span class="nb">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)];</span>
+<span class="n">u</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="n">b</span><span class="p">;</span><span class="w"> </span><span class="nb">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"> </span><span class="n">inf</span><span class="o">*</span><span class="nb">ones</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)];</span>
 
-<span class="c">% Create an OSQP object</span><span class="w"></span>
-<span class="n">prob</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">osqp</span><span class="p">;</span><span class="w"></span>
+<span class="c">% Create an OSQP object</span>
+<span class="n">prob</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">osqp</span><span class="p">;</span>
 
-<span class="c">% Setup workspace</span><span class="w"></span>
-<span class="n">prob</span><span class="p">.</span><span class="n">setup</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">q</span><span class="p">,</span><span class="w"> </span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;warm_starting&#39;</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span><span class="w"></span>
+<span class="c">% Setup workspace</span>
+<span class="n">prob</span><span class="p">.</span><span class="n">setup</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">q</span><span class="p">,</span><span class="w"> </span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;warm_starting&#39;</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
 
-<span class="c">% Solve problem for different values of gamma parameter</span><span class="w"></span>
-<span class="k">for</span><span class="w"> </span><span class="nb">i</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nb">length</span><span class="p">(</span><span class="n">gammas</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="c">% Update linear cost</span><span class="w"></span>
-<span class="w">    </span><span class="nb">gamma</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">gammas</span><span class="p">(</span><span class="nb">i</span><span class="p">);</span><span class="w"></span>
-<span class="w">    </span><span class="n">q_new</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="nb">zeros</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="n">m</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span><span class="w"> </span><span class="nb">gamma</span><span class="o">*</span><span class="nb">ones</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)];</span><span class="w"></span>
-<span class="w">    </span><span class="n">prob</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="s">&#39;q&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">q_new</span><span class="p">);</span><span class="w"></span>
+<span class="c">% Solve problem for different values of gamma parameter</span>
+<span class="k">for</span><span class="w"> </span><span class="nb">i</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nb">length</span><span class="p">(</span><span class="n">gammas</span><span class="p">)</span>
+<span class="w">    </span><span class="c">% Update linear cost</span>
+<span class="w">    </span><span class="nb">gamma</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">gammas</span><span class="p">(</span><span class="nb">i</span><span class="p">);</span>
+<span class="w">    </span><span class="n">q_new</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="nb">zeros</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="n">m</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span><span class="w"> </span><span class="nb">gamma</span><span class="o">*</span><span class="nb">ones</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">)];</span>
+<span class="w">    </span><span class="n">prob</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="s">&#39;q&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">q_new</span><span class="p">);</span>
 
-<span class="w">    </span><span class="c">% Solve</span><span class="w"></span>
-<span class="w">    </span><span class="n">res</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">prob</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span><span class="w"></span>
-<span class="k">end</span><span class="w"></span>
+<span class="w">    </span><span class="c">% Solve</span>
+<span class="w">    </span><span class="n">res</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">prob</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span>
+<span class="k">end</span>
 </pre></div>
 </div>
 </section>
@@ -250,28 +346,28 @@ Since <span class="math notranslate nohighlight">\(\gamma\)</span> enters only i
 </section>
 <section id="yalmip">
 <h2>YALMIP<a class="headerlink" href="#yalmip" title="Permalink to this heading">¶</a></h2>
-<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Generate problem data</span><span class="w"></span>
-<span class="nb">rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"></span>
-<span class="n">n</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"></span>
-<span class="n">m</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1000</span><span class="p">;</span><span class="w"></span>
-<span class="n">A</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">sprandn</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">);</span><span class="w"></span>
-<span class="n">x_true</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="nb">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.8</span><span class="p">)</span><span class="w"> </span><span class="o">.*</span><span class="w"> </span><span class="nb">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">);</span><span class="w"></span>
-<span class="n">b</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">x_true</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">randn</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
-<span class="n">gammas</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">);</span><span class="w"></span>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Generate problem data</span>
+<span class="nb">rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">n</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
+<span class="n">m</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1000</span><span class="p">;</span>
+<span class="n">A</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">sprandn</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">);</span>
+<span class="n">x_true</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="nb">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.8</span><span class="p">)</span><span class="w"> </span><span class="o">.*</span><span class="w"> </span><span class="nb">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+<span class="n">b</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">x_true</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nb">randn</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="n">gammas</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">);</span>
 
-<span class="c">% Define problem</span><span class="w"></span>
-<span class="n">x</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sdpvar</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
-<span class="nb">gamma</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sdpvar</span><span class="p">;</span><span class="w"></span>
-<span class="n">objective</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mf">0.5</span><span class="o">*</span><span class="nb">norm</span><span class="p">(</span><span class="n">A</span><span class="o">*</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span><span class="p">)</span>^<span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">gamma</span><span class="o">*</span><span class="nb">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
+<span class="c">% Define problem</span>
+<span class="n">x</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sdpvar</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="nb">gamma</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sdpvar</span><span class="p">;</span>
+<span class="n">objective</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mf">0.5</span><span class="o">*</span><span class="nb">norm</span><span class="p">(</span><span class="n">A</span><span class="o">*</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span><span class="p">)</span>^<span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">gamma</span><span class="o">*</span><span class="nb">norm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
 
-<span class="c">% Solve with OSQP</span><span class="w"></span>
-<span class="n">options</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sdpsettings</span><span class="p">(</span><span class="s">&#39;solver&#39;</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;osqp&#39;</span><span class="p">);</span><span class="w"></span>
-<span class="n">x_opt</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">optimizer</span><span class="p">([],</span><span class="w"> </span><span class="n">objective</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">,</span><span class="w"> </span><span class="nb">gamma</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w"></span>
+<span class="c">% Solve with OSQP</span>
+<span class="n">options</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">sdpsettings</span><span class="p">(</span><span class="s">&#39;solver&#39;</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;osqp&#39;</span><span class="p">);</span>
+<span class="n">x_opt</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">optimizer</span><span class="p">([],</span><span class="w"> </span><span class="n">objective</span><span class="p">,</span><span class="w"> </span><span class="n">options</span><span class="p">,</span><span class="w"> </span><span class="nb">gamma</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span>
 
-<span class="c">% Solve problem for different values of gamma parameter</span><span class="w"></span>
-<span class="k">for</span><span class="w"> </span><span class="nb">i</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nb">length</span><span class="p">(</span><span class="n">gammas</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="n">x_opt</span><span class="p">(</span><span class="n">gammas</span><span class="p">(</span><span class="nb">i</span><span class="p">));</span><span class="w"></span>
-<span class="k">end</span><span class="w"></span>
+<span class="c">% Solve problem for different values of gamma parameter</span>
+<span class="k">for</span><span class="w"> </span><span class="nb">i</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="nb">length</span><span class="p">(</span><span class="n">gammas</span><span class="p">)</span>
+<span class="w">    </span><span class="n">x_opt</span><span class="p">(</span><span class="n">gammas</span><span class="p">(</span><span class="nb">i</span><span class="p">));</span>
+<span class="k">end</span>
 </pre></div>
 </div>
 </section>
@@ -279,33 +375,50 @@ Since <span class="math notranslate nohighlight">\(\gamma\)</span> enters only i
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="huber.html" class="btn btn-neutral float-left" title="Huber fitting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="least-squares.html" class="btn btn-neutral float-right" title="Least-squares" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="huber.html" class="btn btn-neutral float-left" title="Huber fitting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.</p>
-  </div>
+    <p>
+        &#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
