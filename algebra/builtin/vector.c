@@ -155,11 +155,23 @@ void OSQPVectori_free(OSQPVectori* a) {
 void OSQPVectorf_subvector_assign(OSQPVectorf* A,
                                   OSQPFloat*   b,
                                   OSQPInt      start,
-                                  OSQPInt      length) {
+                                  OSQPInt      length,
+                                  OSQPFloat    multiplier) {
   OSQPInt i;
 
   for (i = 0; i < length; i++) {
-    A->values[start+i] = b[i];
+    A->values[start+i] = multiplier * b[i];
+  }
+}
+
+void OSQPVectorf_subvector_assign_scalar(OSQPVectorf* A,
+                                         OSQPFloat    sc,
+                                         OSQPInt      start,
+                                         OSQPInt      length) {
+  OSQPInt i;
+
+  for (i = 0; i < length; i++) {
+    A->values[start+i] = sc;
   }
 }
 

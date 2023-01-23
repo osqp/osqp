@@ -74,6 +74,17 @@ typedef struct {
   OSQPVectorf* u; ///< dense array for upper bound (size m)
 } OSQPData;
 
+typedef struct {
+    OSQPInt n_ineq_l;  ///< number of inequalities where -inf < l < u
+    OSQPInt n_ineq_u;  ///< number of inequalities where l < u < inf
+    OSQPInt n_eq;      ///< number of equalities where l == u
+    OSQPVectorf *y_l;  ///< for internal use, size m
+    OSQPVectorf *y_u;  ///< for internal use, size m
+    OSQPVectorf *ryl;  ///< for internal use, size m
+    OSQPVectorf *ryu;  ///< for internal use, size m
+    OSQPVectorf *rhs;  ///< rhs of linear system to solve for derivatives; length 2*(n + n_ineq_l + n_ineq_u + n_eq)
+                       ///< conservatively allocated with length 2(n + 2m) in `osqp_setup`
+} OSQPDerivativeData;
 
 /**
  * OSQP Workspace
@@ -191,6 +202,10 @@ struct OSQPWorkspace_ {
 # ifdef OSQP_ENABLE_PRINTING
   OSQPInt summary_printed; ///< Has last summary been printed? (true/false)
 # endif // ifdef OSQP_ENABLE_PRINTING
+
+# ifdef OSQP_ENABLE_DERIVATIVES
+  OSQPDerivativeData *derivative_data;
+# endif // ifdef OSQP_ENABLE_DERIVATIVES
 };
 
 // NB: "typedef struct OSQPWorkspace_ OSQPWorkspace" is declared already

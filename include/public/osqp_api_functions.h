@@ -259,15 +259,44 @@ OSQP_API OSQPInt osqp_update_rho(OSQPSolver* solver,
 
 /* ------------------ Derivative stuff ----------------- */
 #ifdef OSQP_ENABLE_DERIVATIVES
-OSQP_API OSQPInt osqp_adjoint_derivative(OSQPSolver*    solver,
-                                         OSQPFloat*     dx,
-                                         OSQPFloat*     dy_l,
-                                         OSQPFloat*     dy_u,
-                                         OSQPCscMatrix* dP,
-                                         OSQPFloat*     dq,
-                                         OSQPCscMatrix* dA,
-                                         OSQPFloat*     dl,
-                                         OSQPFloat*     du);
+
+/**
+ * Compute internal data structures for calculation of adjoint derivatives of P/q/A/l/u
+ * @param  solver     Solver
+ * @param  dx         Vector of dx values (observed - true) of length n
+ * @param  dy_l       Vector of dy_l values (observed - true) of length m
+ * @param  dy_u       Vector of dy_u values (observed - true) of length m
+ * @return            Exitflag for errors (0 if no errors)
+ */
+OSQP_API OSQPInt osqp_adjoint_derivative_compute(OSQPSolver*    solver,
+                                                 OSQPFloat*     dx,
+                                                 OSQPFloat*     dy_l,
+                                                 OSQPFloat*     dy_u);
+
+/**
+ * Calculate adjoint derivatives of P/A for a previous invocation of osqp_adjoint_derivative_compute
+ * @param  solver     Solver
+ * @param  dP         Matrix of dP values (n x n)
+ * @param  dA         Matrix of dA values (m x n)
+ * @return            Exitflag for errors (0 if no errors; dP, dA are filled in)
+ */
+OSQP_API OSQPInt osqp_adjoint_derivative_get_mat(OSQPSolver*    solver,
+                                                 OSQPCscMatrix* dP,
+                                                 OSQPCscMatrix* dA);
+
+/**
+ * Calculate adjoint derivatives of q/l/u for a previous invocation of osqp_adjoint_derivative_compute
+ * @param  solver     Solver
+ * @param  dq         Vector of dq values of length n
+ * @param  dl         Matrix of dl values of length m
+ * @param  du         Matrix of du values of length m
+ * @return            Exitflag for errors (0 if no errors; dq, dl, du are filled in)
+ */
+OSQP_API OSQPInt osqp_adjoint_derivative_get_vec(OSQPSolver*    solver,
+                                                 OSQPFloat* dq,
+                                                 OSQPFloat* dl,
+                                                 OSQPFloat* du);
+
 #endif /* OSQP_ENABLE_DERIVATIVES */
 /* ------------------ Derivative stuff ----------------- */
 

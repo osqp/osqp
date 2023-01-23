@@ -382,6 +382,19 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   }
 # endif /* ifndef OSQP_ENABLE_PROFILING */
 
+# ifdef OSQP_ENABLE_DERIVATIVES
+  work->derivative_data = c_calloc(1, sizeof(OSQPDerivativeData));
+  if (!(work->derivative_data)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  work->derivative_data->y_u = OSQPVectorf_malloc(m);
+  work->derivative_data->y_l = OSQPVectorf_malloc(m);
+  work->derivative_data->ryl = OSQPVectorf_malloc(m);
+  work->derivative_data->ryu = OSQPVectorf_malloc(m);
+  work->derivative_data->rhs = OSQPVectorf_malloc(2 * (n + 2*m));
+  if (!(work->derivative_data->y_u) || !(work->derivative_data->y_l) ||
+    !(work->derivative_data->ryl) || !(work->derivative_data->ryu))
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
+# endif / *ifdef OSQP_ENABLE_DERIVATIVES */
+
   // Return exit flag
   return 0;
 }
@@ -855,6 +868,17 @@ OSQPInt osqp_cleanup(OSQPSolver* solver) {
     if (work->timer) OSQPTimer_free(work->timer);
 # endif /* ifdef OSQP_ENABLE_PROFILING */
 
+# ifdef OSQP_ENABLE_DERIVATIVES
+      if (work->derivative_data){
+          if (work->derivative_data->y_l) OSQPVectorf_free(work->derivative_data->y_l);
+          if (work->derivative_data->y_u) OSQPVectorf_free(work->derivative_data->y_u);
+          if (work->derivative_data->ryl) OSQPVectorf_free(work->derivative_data->ryl);
+          if (work->derivative_data->ryu) OSQPVectorf_free(work->derivative_data->ryu);
+          if (work->derivative_data->rhs) OSQPVectorf_free(work->derivative_data->rhs);
+          c_free(work->derivative_data);
+      }
+#endif /* ifdef OSQP_ENABLE_SCALING */
+
     // Free work
     c_free(work);
   }
@@ -1273,28 +1297,42 @@ void csc_set_data(OSQPCscMatrix* M,
 * Derivative functions
 ****************************/
 #ifdef OSQP_ENABLE_DERIVATIVES
-OSQPInt osqp_adjoint_derivative(OSQPSolver*  solver,
-                                OSQPFloat*     dx,
-                                OSQPFloat*     dy_l,
-                                OSQPFloat*     dy_u,
-                                OSQPCscMatrix* dP,
-                                OSQPFloat*     dq,
-                                OSQPCscMatrix* dA,
-                                OSQPFloat*     dl,
-                                OSQPFloat*     du) {
+OSQPInt osqp_adjoint_derivative_compute(OSQPSolver*    solver,
+                                        OSQPFloat*     dx,
+                                        OSQPFloat*     dy_l,
+                                        OSQPFloat*     dy_u) {
 
-    OSQPInt status = adjoint_derivative(
+    OSQPInt status = adjoint_derivative_compute(
             solver,
             dx,
             dy_l,
-            dy_u,
+            dy_u
+    );
+
+    return status;
+}
+
+OSQPInt osqp_adjoint_derivative_get_mat(OSQPSolver*    solver,
+                                        OSQPCscMatrix* dP,
+                                        OSQPCscMatrix* dA) {
+    OSQPInt status = adjoint_derivative_get_mat(
+            solver,
             dP,
+            dA
+            );
+    return status;
+}
+
+OSQPInt osqp_adjoint_derivative_get_vec(OSQPSolver*    solver,
+                                        OSQPFloat* dq,
+                                        OSQPFloat* dl,
+                                        OSQPFloat* du) {
+    OSQPInt status = adjoint_derivative_get_vec(
+            solver,
             dq,
-            dA,
             dl,
             du
     );
-
     return status;
 }
 #endif
