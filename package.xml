@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>osqp</name>
+  <version>0.6.2</version>
+  <description>The Operator Splitting QP Solver</description>
+  <maintainer email="tbd@tbd.tbd">Bartolomeo Stellato</maintainer>
+
+  <license>>Apache License 2.0</license>
+
+  <build_depend>git</build_depend>
+
+  <buildtool_depend>cmake</buildtool_depend>
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>
