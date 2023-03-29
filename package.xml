@@ -5,7 +5,7 @@
   <description>The Operator Splitting QP Solver</description>
   <maintainer email="tbd@tbd.tbd">Bartolomeo Stellato</maintainer>
 
-  <license>>Apache License 2.0</license>
+  <license>Apache License 2.0</license>
 
   <build_depend>git</build_depend>
   <!-- The following tags are recommended by REP-136 -->
