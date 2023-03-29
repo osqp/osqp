@@ -15,7 +15,7 @@ jobs:
         python: [3.9]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: master
           lfs: false
@@ -44,7 +44,7 @@ jobs:
 
       # Build documentation on the develop-1.0 branch in a subfolder
       # ------------------------------------------------------------
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: develop-1.0
           path: develop-1.0
