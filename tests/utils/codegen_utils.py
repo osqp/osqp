@@ -415,7 +415,9 @@ def generate_data(problem_name, sols_data):
                 f.write("OSQPFloat* %s;\n" % key)
             elif isinstance(value.flatten(order='F')[0], np.integer):
                 f.write("OSQPInt* %s;\n" % key)
-            elif isinstance(value.flatten(order='F')[0], np.float):
+            elif isinstance(value.flatten(order='F')[0], np.single):
+                f.write("OSQPFloat* %s;\n" % key)
+            elif isinstance(value.flatten(order='F')[0], np.double):
                 f.write("OSQPFloat* %s;\n" % key)
         else:
             if isinstance(value, int):
@@ -481,7 +483,9 @@ def generate_data(problem_name, sols_data):
                 write_vec_float(f, value.flatten(order='F'), key, "data")
             elif isinstance(value.flatten(order='F')[0], np.integer):
                 write_vec_int(f, value.flatten(order='F'), key, "data")
-            elif isinstance(value.flatten(order='F')[0], np.float):
+            elif isinstance(value.flatten(order='F')[0], np.single):
+                write_vec_float(f, value.flatten(order='F'), key, "data")
+            elif isinstance(value.flatten(order='F')[0], np.double):
                 write_vec_float(f, value.flatten(order='F'), key, "data")
         else:
             if isinstance(value, int):
