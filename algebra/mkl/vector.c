@@ -181,19 +181,13 @@ OSQPFloat* OSQPVectorf_data(const OSQPVectorf* a) {return a->values;}
 void OSQPVectorf_copy(OSQPVectorf*       b,
                       const OSQPVectorf* a) {
 
-  const MKL_INT length = a->length;
-  const MKL_INT INCX = 1; //How long should the spacing be (?)
-  const MKL_INT INCY = 1;
-  blas_copy(&length, a->values, &INCX, b->values, &INCY);
+  blas_copy(a->length, a->values, 1, b->values, 1);
 }
 
 void OSQPVectorf_from_raw(OSQPVectorf*     b,
                           const OSQPFloat* av) {
-  const MKL_INT length = b->length;
-  const MKL_INT INCX = 1;
-  const MKL_INT INCY = 1;
 
-  blas_copy(&length, av, &INCX, b->values, &INCY);
+  blas_copy(b->length, av, 1, b->values, 1);
 }
 
 void OSQPVectori_from_raw(OSQPVectori* b,
@@ -209,11 +203,8 @@ void OSQPVectori_from_raw(OSQPVectori* b,
 
 void OSQPVectorf_to_raw(OSQPFloat*         bv,
                         const OSQPVectorf* a) {
-  const MKL_INT length = a->length;
-  const MKL_INT INCX = 1;
-  const MKL_INT INCY = 1;
 
-  blas_copy(&length, a->values, &INCX, bv, &INCY);
+  blas_copy(a->length, a->values, 1, bv, 1);
 }
 
 void OSQPVectori_to_raw(OSQPInt*           bv,
@@ -227,16 +218,12 @@ void OSQPVectori_to_raw(OSQPInt*           bv,
   }
 }
 
-// For now I wont deal with the raw functions, I hope they dont feel left out :(
-
-
 void OSQPVectorf_set_scalar(OSQPVectorf* a,
                             OSQPFloat    sc) {
-  const MKL_INT length = a->length;
-  const MKL_INT INCX = 0;  // Set to 0 to treat X argument as a scalar
-  const MKL_INT INCY = 1;
 
-  blas_copy(&length, &sc, &INCX, a->values, &INCY);
+  blas_copy(a->length,
+            &sc, 0, // 0 increment to treat X argument as a scalar
+            a->values, 1);
 }
 
 // I seem to have the same problem here, if I try to exploit the copy function, I will still need to compare the values and populate an initial vector
@@ -262,9 +249,7 @@ void OSQPVectorf_set_scalar_conditional(OSQPVectorf*       a,
 void OSQPVectorf_mult_scalar(OSQPVectorf *a,
                              OSQPFloat    sc) {
 
-  const MKL_INT length = a->length;
-  const MKL_INT INCX = 1; //How long should the spacing be (?)
-  blas_scale(&length, &sc, a->values, &INCX);
+  blas_scale(a->length, sc, a->values, 1);
 }
 
 void OSQPVectorf_plus(OSQPVectorf*      x,
@@ -277,32 +262,14 @@ void OSQPVectorf_plus(OSQPVectorf*      x,
   OSQPFloat*  xv = x->values;
 
   if (x == a){
-    const MKL_INT lengthmkl = a->length;
-    const MKL_INT INCX = 1;
-    const MKL_INT INCY = 1;
-	
-    const OSQPFloat scalar = 1; // The number b is scaled by
-    blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY);
+    // Don't scale the b vector
+    blas_axpy(a->length, 1.0, b->values, 1, x->values, 1);
   }
   else {
-   /*
-    for (i = 0; i < length; i++) {
-      puts("hi");
-      xv[i] = av[i] + bv[i];
-    }
-    */
-    // need some help to get the test pointers working to be able to debug this
-    // Little experiment here
-    //printf("..\n");
-    const MKL_INT lengthmkl = a->length;
-    const MKL_INT INCX = 1; // The sapcing must be at least 1 here, not sure why
-    const MKL_INT INCY = 1;
-    const OSQPFloat scalar = 1; // The number b is scaled by
-    blas_copy(&lengthmkl, a->values, &INCX, x->values, &INCY); // I copy av into xv
-    blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY); //final addition
+    blas_copy(a->length, a->values, 1, x->values, 1); // Copy av into xv
 
-    // I am not sure if the extra function calls justifies the blas implementation, I can only find out when I get the benchamrk code working
-    //I think I got the code to work properly now
+    // Don't scale the b vector
+    blas_axpy(a->length, 1.0, b->values, 1, x->values, 1); // Final addition
   }
 }
 
@@ -310,24 +277,16 @@ void OSQPVectorf_minus(OSQPVectorf*       x,
                        const OSQPVectorf* a,
                        const OSQPVectorf* b) {
 
-  const MKL_INT lengthmkl = a->length;
-  const MKL_INT INCX = 1;
-  const MKL_INT INCY = 1;
-  OSQPFloat scalar;
-
   if (x == a){
-    scalar = -1;
-    blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY);
+    blas_axpy(a->length, -1.0, b->values, 1, x->values, 1);
   }
   else if (x == b){
-    scalar = 1.0;
     OSQPVectorf_mult_scalar(x,-1.);
-    blas_axpy(&lengthmkl, &scalar, a->values, &INCX, x->values, &INCY);
+    blas_axpy(a->length, 1.0, a->values, 1, x->values, 1);
   }
   else {
-    scalar = -1.0;
-    blas_copy(&lengthmkl, a->values, &INCX, x->values, &INCY);
-    blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY);
+    blas_copy(a->length, a->values, 1, x->values, 1);
+    blas_axpy(a->length, -1.0, b->values, 1, x->values, 1);
   }
 }
 
@@ -336,21 +295,19 @@ void OSQPVectorf_add_scaled(OSQPVectorf*       x,
                             const OSQPVectorf* a,
                             OSQPFloat          scb,
                             const OSQPVectorf* b) {
-  OSQPInt i;
-  OSQPInt length = x->length;
-
-  OSQPFloat*  av = a->values;
-  OSQPFloat*  bv = b->values;
-  OSQPFloat*  xv = x->values;
 
   /* shorter version when incrementing */
   if (x == a && sca == 1.){
-    const MKL_INT lengthmkl = x->length;
-    const MKL_INT INCX = 1; // The spacing must be at least 1 here, not sure why
-    const MKL_INT INCY = 1;
-    blas_axpy(&lengthmkl, &scb, b->values, &INCX, x->values, &INCY);
+    blas_axpy(x->length, scb, b->values, 1, x->values, 1);
   }
   else {
+    OSQPInt i;
+    OSQPInt length = x->length;
+
+    OSQPFloat*  av = a->values;
+    OSQPFloat*  bv = b->values;
+    OSQPFloat*  xv = x->values;
+
     for (i = 0; i < length; i++) {
       xv[i] = sca * av[i] + scb * bv[i];
     }
@@ -389,16 +346,14 @@ void OSQPVectorf_add_scaled3(OSQPVectorf*       x,
 
 OSQPFloat OSQPVectorf_norm_inf(const OSQPVectorf* v) {
 
-  MKL_INT inc = 1;
-  MKL_INT length = v->length;
+  OSQPFloat val = 0.0;
 
-  if( length == 0 )
-    return 0;
+  if (v->length){
+    MKL_INT ind = blas_iamax(v->length, v->values, 1);
+    val = c_absval(v->values[ind]);
+  }
 
-  MKL_INT ind = blas_iamax(&length, v->values, &inc);
-
-  // blas_iamax is FORTRAN BLAS, so it is 1-based indexing
-  return c_absval(v->values[ind-1]);
+  return val;
 }
 
 // OSQPFloat OSQPVectorf_norm_1(const OSQPVectorf *v){
@@ -496,11 +451,7 @@ OSQPFloat OSQPVectorf_norm_inf_diff(const OSQPVectorf* a,
 OSQPFloat OSQPVectorf_dot_prod(const OSQPVectorf* a,
                                const OSQPVectorf* b) {
 
-  const MKL_INT length = a->length;
-  const MKL_INT INCX = 1; //How long should the spacing be (?)
-  const MKL_INT INCY = 1;
-
-  return blas_dot(&length, a->values, &INCX, b->values, &INCY); // blas_dot is called the preprocesor
+  return blas_dot(a->length, a->values, 1, b->values, 1);
 }
 
 OSQPFloat OSQPVectorf_dot_prod_signed(const OSQPVectorf* a,
@@ -668,13 +619,10 @@ OSQPInt OSQPVectorf_in_reccone(const OSQPVectorf* y,
 
 OSQPFloat OSQPVectorf_norm_1(const OSQPVectorf* a) {
 
-  OSQPInt       length = a->length;
-  const MKL_INT inca   = 1;
-
   OSQPFloat val = 0.0;
 
-  if (length) {
-    val = blas_asum(&length, a->values, &inca);
+  if (a->length) {
+    val = blas_asum(a->length, a->values, 1);
   }
 
   return val;
