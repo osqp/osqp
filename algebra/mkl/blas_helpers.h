@@ -22,6 +22,7 @@
 
 /* Define the blas functions based on the data type we are using */
 #ifdef OSQP_USE_FLOAT
+  // MKL Level 1 BLAS functions
   #define blas_copy  scopy
   #define blas_dot   sdot
   #define blas_scale sscal
@@ -29,12 +30,24 @@
   #define blas_axpy  saxpy
   #define blas_2norm snrm2
   #define blas_asum  sasum
+  #define blas_iamax isamax
 
+  // MKL Vector Math functions
+  #define vml_mul    vsMul
+  #define vml_max    vsFmax
+  #define vml_maxinc vsFmaxI
+  #define vml_min    vsFmin
+  #define vml_mininc vsFminI
+  #define vml_inv    vsInv
+  #define vml_sqrt   vsSqrt
+
+  // MKL Sparse BLAS functions
   #define spblas_create_csc mkl_sparse_s_create_csc
   #define spblas_set_value  mkl_sparse_s_set_value
   #define spblas_export_csc mkl_sparse_s_export_csc
   #define spblas_mv         mkl_sparse_s_mv
 #else
+  // MKL Level 1 BLAS functions
   #define blas_copy  dcopy
   #define blas_dot   ddot
   #define blas_scale dscal
@@ -42,7 +55,18 @@
   #define blas_axpy  daxpy
   #define blas_2norm dnrm2
   #define blas_asum  dasum
+  #define blas_iamax idamax
 
+  // MKL Vector Math functions
+  #define vml_mul    vdMul
+  #define vml_max    vdFmax
+  #define vml_maxinc vdFmaxI
+  #define vml_min    vdFmin
+  #define vml_mininc vdFminI
+  #define vml_inv    vdInv
+  #define vml_sqrt   vdSqrt
+
+  // MKL Sparse BLAS functions
   #define spblas_create_csc mkl_sparse_d_create_csc
   #define spblas_set_value  mkl_sparse_d_set_value
   #define spblas_export_csc mkl_sparse_d_export_csc
