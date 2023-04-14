@@ -78,7 +78,7 @@ layout: default
 					    {% if contributor.website %} </a> {% endif %}
 				    <h5 class="mb-1">{{contributor.name}}</h5>
 				    <p class="my-1">{{contributor.role}}</p>
-				    <p class="mb-5"><b>{{contributor.affiliation}}</b></p>
+				    {% if contributor.affiliation %} <p class="mb-5"><b>{{contributor.affiliation}}</b></p>{% endif %}
 			    </div><!-- /.col-lg-4 -->
 			    {% endfor %}
 		    </div>
