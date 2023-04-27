@@ -116,82 +116,22 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">rho</span></code> *</p></td>
-<td><p>ADMM rho step</p></td>
-<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">rho</span></code></p></td>
-<td><p>0.1</p></td>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">device</span></code></p></td>
+<td><p>Device identifier</p></td>
+<td><p>0 &lt;= <code class="code docutils literal notranslate"><span class="pre">device</span></code> (integer)</p></td>
+<td><p>0</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">sigma</span></code></p></td>
-<td><p>ADMM sigma step</p></td>
-<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">sigma</span></code></p></td>
-<td><p>1e-06</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">max_iter</span></code> *</p></td>
-<td><p>Maximum number of iterations</p></td>
-<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">max_iter</span></code> (integer)</p></td>
-<td><p>4000</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">eps_abs</span></code> *</p></td>
-<td><p>Absolute tolerance</p></td>
-<td><p>0 &lt;= <code class="code docutils literal notranslate"><span class="pre">eps_abs</span></code></p></td>
-<td><p>1e-03</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">eps_rel</span></code> *</p></td>
-<td><p>Relative tolerance</p></td>
-<td><p>0 &lt;= <code class="code docutils literal notranslate"><span class="pre">eps_rel</span></code></p></td>
-<td><p>1e-03</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">eps_prim_inf</span></code> *</p></td>
-<td><p>Primal infeasibility tolerance</p></td>
-<td><p>0 &lt;= <code class="code docutils literal notranslate"><span class="pre">eps_prim_inf</span></code></p></td>
-<td><p>1e-04</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">eps_dual_inf</span></code> *</p></td>
-<td><p>Dual infeasibility tolerance</p></td>
-<td><p>0 &lt;= <code class="code docutils literal notranslate"><span class="pre">eps_dual_inf</span></code></p></td>
-<td><p>1e-04</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">alpha</span></code> *</p></td>
-<td><p>ADMM overrelaxation parameter</p></td>
-<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">alpha</span></code> &lt; 2</p></td>
-<td><p>1.6</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">linsys_solver</span></code></p></td>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">linsys_solver</span></code></p></td>
 <td><p>Linear systems solver type</p></td>
 <td><p>See <a class="reference internal" href="linear_systems_solvers.html#linear-system-solvers-setting"><span class="std std-ref">Linear Systems Solvers</span></a></p></td>
 <td><p>qdldl</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">delta</span></code> *</p></td>
-<td><p>Polishing regularization parameter</p></td>
-<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">delta</span></code></p></td>
-<td><p>1e-06</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">polish</span></code> *</p></td>
-<td><p>Perform polishing</p></td>
-<td><p>True/False</p></td>
-<td><p>False</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">polish_refine_iter</span></code> *</p></td>
-<td><p>Refinement iterations in polish</p></td>
-<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">polish_refine_iter</span></code> (integer)</p></td>
-<td><p>3</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">verbose</span></code> *</p></td>
 <td><p>Print output</p></td>
 <td><p>True/False</p></td>
 <td><p>True</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">scaled_termination</span></code> *</p></td>
-<td><p>Scaled termination conditions</p></td>
-<td><p>True/False</p></td>
-<td><p>False</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">check_termination</span></code> *</p></td>
-<td><p>Check termination interval</p></td>
-<td><p>0 (disabled) or 0 &lt; <code class="code docutils literal notranslate"><span class="pre">check_termination</span></code> (integer)</p></td>
-<td><p>25</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">warm_start</span></code> *</p></td>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">warm_starting</span></code> *</p></td>
 <td><p>Perform warm starting</p></td>
 <td><p>True/False</p></td>
 <td><p>True</p></td>
@@ -200,6 +140,46 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <td><p>Number of scaling iterations</p></td>
 <td><p>0 (disabled) or 0 &lt; <code class="code docutils literal notranslate"><span class="pre">scaling</span></code> (integer)</p></td>
 <td><p>10</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">polishing</span></code> *</p></td>
+<td><p>Perform polishing</p></td>
+<td><p>True/False</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">rho</span></code> *</p></td>
+<td><p>ADMM rho step</p></td>
+<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">rho</span></code></p></td>
+<td><p>0.1</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">rho_is_vec</span></code></p></td>
+<td><p>Is <code class="code docutils literal notranslate"><span class="pre">rho</span></code> a vector?</p></td>
+<td><p>True/False</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">sigma</span></code></p></td>
+<td><p>ADMM sigma step</p></td>
+<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">sigma</span></code></p></td>
+<td><p>1e-06</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">alpha</span></code> *</p></td>
+<td><p>ADMM relaxation parameter</p></td>
+<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">alpha</span></code> &lt; 2</p></td>
+<td><p>1.6</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">cg_max_iter</span></code> *</p></td>
+<td><p>Maximum number of CG iterations per solver</p></td>
+<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">cg_max_iter</span></code> (integer)</p></td>
+<td><p>20</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">cg_tol_reduction</span></code> *</p></td>
+<td><p>No. of consecutive CG iterations before the tol is halved</p></td>
+<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">cg_tol_reduction</span></code> (integer)</p></td>
+<td><p>10</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">cg_tol_fraction</span></code> *</p></td>
+<td><p>CG tolerance (fraction of ADMM residuals)</p></td>
+<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">cg_tol_fraction</span></code> &lt; 1</p></td>
+<td><p>0.15</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">adaptive_rho</span></code></p></td>
 <td><p>Adaptive rho</p></td>
@@ -211,24 +191,69 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <td><p>0 (automatic) or 0 &lt; <code class="code docutils literal notranslate"><span class="pre">adaptive_rho_interval</span></code> (integer)</p></td>
 <td><p>0</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">adaptive_rho_tolerance</span></code></p></td>
-<td><p>Tolerance for adapting rho</p></td>
-<td><p>1 &lt;= <code class="code docutils literal notranslate"><span class="pre">adaptive_rho_tolerance</span></code></p></td>
-<td><p>5</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">adaptive_rho_fraction</span></code></p></td>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">adaptive_rho_fraction</span></code></p></td>
 <td><p>Adaptive rho interval as fraction of setup time (auto mode)</p></td>
 <td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">adaptive_rho_fraction</span></code></p></td>
 <td><p>0.4</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">time_limit</span></code> *</p></td>
-<td><p>Run time limit in seconds</p></td>
-<td><p>0 (disabled) or 0 &lt;= <code class="code docutils literal notranslate"><span class="pre">time_limit</span></code></p></td>
-<td><p>0</p></td>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">adaptive_rho_tolerance</span></code></p></td>
+<td><p>Tolerance for adapting rho</p></td>
+<td><p>1 &lt;= <code class="code docutils literal notranslate"><span class="pre">adaptive_rho_tolerance</span></code></p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">max_iter</span></code> *</p></td>
+<td><p>Maximum number of iterations</p></td>
+<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">max_iter</span></code> (integer)</p></td>
+<td><p>4000</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">eps_abs</span></code> *</p></td>
+<td><p>Absolute tolerance</p></td>
+<td><p>0 &lt;= <code class="code docutils literal notranslate"><span class="pre">eps_abs</span></code></p></td>
+<td><p>1e-03</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">eps_rel</span></code> *</p></td>
+<td><p>Relative tolerance</p></td>
+<td><p>0 &lt;= <code class="code docutils literal notranslate"><span class="pre">eps_rel</span></code></p></td>
+<td><p>1e-03</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">eps_prim_inf</span></code> *</p></td>
+<td><p>Primal infeasibility tolerance</p></td>
+<td><p>0 &lt;= <code class="code docutils literal notranslate"><span class="pre">eps_prim_inf</span></code></p></td>
+<td><p>1e-04</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">eps_dual_inf</span></code> *</p></td>
+<td><p>Dual infeasibility tolerance</p></td>
+<td><p>0 &lt;= <code class="code docutils literal notranslate"><span class="pre">eps_dual_inf</span></code></p></td>
+<td><p>1e-04</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">scaled_termination</span></code> *</p></td>
+<td><p>Scaled termination conditions</p></td>
+<td><p>True/False</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">check_termination</span></code> *</p></td>
+<td><p>Check termination interval</p></td>
+<td><p>0 (disabled) or 0 &lt; <code class="code docutils literal notranslate"><span class="pre">check_termination</span></code> (integer)</p></td>
+<td><p>25</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">time_limit</span></code> *</p></td>
+<td><p>Runtime limit in seconds</p></td>
+<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">time_limit</span></code></p></td>
+<td><p>1e+10</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">delta</span></code> *</p></td>
+<td><p>Polishing regularization parameter</p></td>
+<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">delta</span></code></p></td>
+<td><p>1e-06</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">polish_refine_iter</span></code> *</p></td>
+<td><p>Refinement iterations in polishing</p></td>
+<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">polish_refine_iter</span></code> (integer)</p></td>
+<td><p>3</p></td>
 </tr>
 </tbody>
 </table>
-<p>The boolean values <code class="code docutils literal notranslate"><span class="pre">True/False</span></code> are defined as <code class="code docutils literal notranslate"><span class="pre">1/0</span></code> in the C interfaces.</p>
+<p>The boolean values <code class="code docutils literal notranslate"><span class="pre">True/False</span></code> are defined as <code class="code docutils literal notranslate"><span class="pre">1/0</span></code> in the C interface.</p>
 </section>
 
 

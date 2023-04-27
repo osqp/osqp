@@ -100,14 +100,14 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <h1>OSQP solver documentation<a class="headerlink" href="#osqp-solver-documentation" title="Permalink to this heading">¶</a></h1>
 <p><strong>Join our</strong> <a class="reference external" href="https://osqp.discourse.group/">forum</a> <strong>for any
 questions related to the solver!</strong></p>
-<p>One The OSQP (Operator Splitting Quadratic Program) solver is a numerical
+<p>The OSQP (Operator Splitting Quadratic Program) solver is a numerical
 optimization package for solving convex quadratic programs in the form</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{array}{ll}
   \mbox{minimize} &amp; \frac{1}{2} x^T P x + q^T x \\
-  \mbox{subject to} &amp; l \leq A x \leq u
+  \mbox{subject to} &amp; l \le A x \le u
 \end{array}\end{split}\]</div>
-<p>where <span class="math notranslate nohighlight">\(x\)</span> is the optimization variable and
+<p>where <span class="math notranslate nohighlight">\(x \in \mathbf{R}^n\)</span> is the optimization variable and
 <span class="math notranslate nohighlight">\(P \in \mathbf{S}^{n}_{+}\)</span> a positive semidefinite matrix.</p>
 <p><strong>Code available on</strong> <a class="reference external" href="https://github.com/osqp/osqp">GitHub</a>.</p>
 <p class="rubric">Citing OSQP</p>
@@ -131,7 +131,7 @@ optimization package for solving convex quadratic programs in the form</p>
 </dd>
 <dt id="term-Efficiently-warm-started">Efficiently warm started<a class="headerlink" href="#term-Efficiently-warm-started" title="Permalink to this term">¶</a></dt><dd><p>It can be easily warm-started and the matrix factorization can be cached to solve parametrized problems extremely efficiently.</p>
 </dd>
-<dt id="term-Interfaces">Interfaces<a class="headerlink" href="#term-Interfaces" title="Permalink to this term">¶</a></dt><dd><p>It can be interfaced to C, C++, Fortran (soon!), Python, Julia and Matlab.</p>
+<dt id="term-Interfaces">Interfaces<a class="headerlink" href="#term-Interfaces" title="Permalink to this term">¶</a></dt><dd><p>It provides interfaces to C, C++, Fortran, Julia, Matlab, Python, R, Ruby, and Rust.</p>
 </dd>
 </dl>
 <p class="rubric">License</p>
@@ -142,7 +142,7 @@ optimization package for solving convex quadratic programs in the form</p>
 <li><p><a class="reference external" href="https://stellato.io/">Bartolomeo Stellato</a> (Princeton University): main development</p></li>
 <li><p><a class="reference external" href="https://people.ee.ethz.ch/~gbanjac/">Goran Banjac</a> (ETH Zürich): main development</p></li>
 <li><p><a class="reference external" href="https://www.nicholasmoehle.com/">Nicholas Moehle</a> (Stanford University): methods, maths, and code generation</p></li>
-<li><p><a class="reference external" href="http://users.ox.ac.uk/~engs1373/">Paul Goulart</a> (University of Oxford): methods, maths, and Matlab interface</p></li>
+<li><p><a class="reference external" href="https://users.ox.ac.uk/~engs1373/">Paul Goulart</a> (University of Oxford): methods, maths, and Matlab interface</p></li>
 <li><p><a class="reference external" href="http://cse.lab.imtlucca.it/~bemporad/">Alberto Bemporad</a> (IMT Lucca): methods and maths</p></li>
 <li><p><a class="reference external" href="https://web.stanford.edu/~boyd/">Stephen Boyd</a> (Stanford University): methods and maths</p></li>
 <li><p><a class="reference external" href="mailto:i&#46;mcinerney17&#37;&#52;&#48;imperial&#46;ac&#46;uk">Ian McInerney</a> (Imperial College London): code generation, software development</p></li>

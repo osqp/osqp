@@ -66,9 +66,9 @@ The :code:`results` object contains the primal solution :code:`x`, the dual solu
 +-----------------------+------------------------------------------------+
 | :code:`obj_val`       | Objective value                                |
 +-----------------------+------------------------------------------------+
-| :code:`pri_res`       | Primal residual                                |
+| :code:`prim_res`      | Primal residual                                |
 +-----------------------+------------------------------------------------+
-| :code:`dua_res`       | Dual residual                                  |
+| :code:`dual_res`      | Dual residual                                  |
 +-----------------------+------------------------------------------------+
 | :code:`setup_time`    | Setup time                                     |
 +-----------------------+------------------------------------------------+
