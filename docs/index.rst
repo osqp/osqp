@@ -1,5 +1,6 @@
 OSQP solver documentation
 ==========================
+Debug 1
 **Join our** `forum <https://osqp.discourse.group/>`_ **for any
 questions related to the solver!**
 
