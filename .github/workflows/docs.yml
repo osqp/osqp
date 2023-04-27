@@ -46,7 +46,7 @@ jobs:
       # ------------------------------------------------------------
       - uses: actions/checkout@v2
         with:
-          ref: develop-1.0
+          ref: vb/docs_404
           path: develop-1.0
           clean: false
 
