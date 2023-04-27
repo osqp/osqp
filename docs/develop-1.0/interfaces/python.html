@@ -174,10 +174,10 @@ If they are sparse matrices are in another format, the interface will attempt to
 <tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">obj_val</span></code></p></td>
 <td><p>Objective value</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">prim_res</span></code></p></td>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">pri_res</span></code></p></td>
 <td><p>Primal residual</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">dual_res</span></code></p></td>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">dua_res</span></code></p></td>
 <td><p>Dual residual</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">setup_time</span></code></p></td>
@@ -229,7 +229,7 @@ need it. Just run it from the main module without creating the object as follows
 <section id="update-problem-matrices">
 <span id="python-update-settings"></span><h3>Update problem matrices<a class="headerlink" href="#update-problem-matrices" title="Permalink to this heading">¶</a></h3>
 <p>Matrices <code class="code docutils literal notranslate"><span class="pre">A</span></code> and <code class="code docutils literal notranslate"><span class="pre">P</span></code> can be updated by changing the value of their elements but not their sparsity pattern.
-The interface is designed to mimic the <span class="xref std std-ref">C counterpart</span>.
+The interface is designed to mimic the <a class="reference internal" href="C.html#c-cpp-update-data"><span class="std std-ref">C counterpart</span></a>.
 Note that the new values of <code class="code docutils literal notranslate"><span class="pre">P</span></code> represent only the upper triangular part while <code class="code docutils literal notranslate"><span class="pre">A</span></code> is always represented as a full matrix.</p>
 <p>You can update the values of all the elements of <code class="code docutils literal notranslate"><span class="pre">P</span></code> by executing</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">Px</span><span class="o">=</span><span class="n">Px_new</span><span class="p">)</span>

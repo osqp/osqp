@@ -42,21 +42,23 @@ Python
     n = 10
     m = 1000
     Ad = sparse.random(m, n, density=0.5)
-    x_true = (np.random.rand(n) > 0.8).astype(float) * np.random.randn(n) / np.sqrt(n)
-    b = Ad@x_true + 0.5*np.random.randn(m)
+    x_true = np.multiply((np.random.rand(n) > 0.8).astype(float),
+                         np.random.randn(n)) / np.sqrt(n)
+    b = Ad.dot(x_true) + 0.5*np.random.randn(m)
     gammas = np.linspace(1, 10, 11)
 
     # Auxiliary data
     In = sparse.eye(n)
     Im = sparse.eye(m)
     On = sparse.csc_matrix((n, n))
+    Onm = sparse.csc_matrix((n, m))
 
     # OSQP data
-    P = sparse.block_diag([On, Im, On], format='csc')
+    P = sparse.block_diag([On, sparse.eye(m), On], format='csc')
     q = np.zeros(2*n + m)
-    A = sparse.bmat([[Ad, -Im,    None],
-                     [In,  None, -In],
-                     [In,  None,  In]], format='csc')
+    A = sparse.vstack([sparse.hstack([Ad, -Im, Onm.T]),
+                       sparse.hstack([In, Onm, -In]),
+                       sparse.hstack([In, Onm, In])], format='csc')
     l = np.hstack([b, -np.inf * np.ones(n), np.zeros(n)])
     u = np.hstack([b, np.zeros(n), np.inf * np.ones(n)])
 
@@ -64,7 +66,7 @@ Python
     prob = osqp.OSQP()
 
     # Setup workspace
-    prob.setup(P, q, A, l, u, warm_starting=True)
+    prob.setup(P, q, A, l, u, warm_start=True)
 
     # Solve problem for different values of gamma parameter
     for gamma in gammas:
@@ -103,7 +105,7 @@ Matlab
     prob = osqp;
 
     % Setup workspace
-    prob.setup(P, q, A, l, u, 'warm_starting', true);
+    prob.setup(P, q, A, l, u, 'warm_start', true);
 
     % Solve problem for different values of gamma parameter
     for i = 1 : length(gammas)
@@ -133,20 +135,21 @@ CVXPY
     n = 10
     m = 1000
     A = sparse.random(m, n, density=0.5)
-    x_true = (np.random.rand(n) > 0.8).astype(float) * np.random.randn(n) / np.sqrt(n)
-    b = A@x_true + 0.5*np.random.randn(m)
+    x_true = np.multiply((np.random.rand(n) > 0.8).astype(float),
+                         np.random.randn(n)) / np.sqrt(n)
+    b = A.dot(x_true) + 0.5*np.random.randn(m)
     gammas = np.linspace(1, 10, 11)
 
     # Define problem
     x = Variable(n)
     gamma = Parameter(nonneg=True)
-    objective = 0.5*sum_squares(A@x - b) + gamma*norm1(x)
+    objective = 0.5*sum_squares(A*x - b) + gamma*norm1(x)
     prob = Problem(Minimize(objective))
 
     # Solve problem for different values of gamma parameter
     for gamma_val in gammas:
         gamma.value = gamma_val
-        prob.solve(solver=OSQP, warm_starting=True)
+        prob.solve(solver=OSQP, warm_start=True)
 
 
 YALMIP

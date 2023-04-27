@@ -19,7 +19,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="C" href="C.html" />
+    <link rel="next" title="CC++" href="C.html" />
     <link rel="prev" title="Get started" href="index.html" />
 <meta name="twitter:card" content="summary_large_image" >
 <meta name="twitter:creator" content="@bstellato" >
@@ -75,7 +75,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l3"><a class="reference internal" href="#install-the-binaries">Install the binaries</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="C.html">C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="C.html">CC++</a></li>
 <li class="toctree-l2"><a class="reference internal" href="python.html">Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="julia.html">Julia</a></li>
 <li class="toctree-l2"><a class="reference internal" href="matlab.html">Matlab</a></li>
@@ -177,7 +177,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li><p>Download the compressed source file from the latest OSQP release <a class="reference external" href="https://github.com/osqp/osqp/releases">at GitHub</a>.</p></li>
 <li><p>Clone the repository</p>
 <blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/osqp/osqp
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>--recursive<span class="w"> </span>https://github.com/osqp/osqp
 </pre></div>
 </div>
 </div></blockquote>
@@ -227,7 +227,7 @@ mkdir<span class="w"> </span>build
 </pre></div>
 </div>
 <p>The compilation will generate the demo <code class="code docutils literal notranslate"><span class="pre">osqp_demo</span></code> and the unittests <code class="code docutils literal notranslate"><span class="pre">osqp_tester</span></code> executables. In the case of <code class="code docutils literal notranslate"><span class="pre">Unix</span></code> or <code class="code docutils literal notranslate"><span class="pre">MinGW</span></code> <code class="code docutils literal notranslate"><span class="pre">Makefiles</span></code> option they are located in the <code class="code docutils literal notranslate"><span class="pre">build/out/</span></code> directory.  Run them to check that the compilation was correct.</p>
-<p>Once the sources are built, the generated static <code class="code docutils literal notranslate"><span class="pre">build/out/libosqp.a</span></code> and shared <code class="code docutils literal notranslate"><span class="pre">build/out/libosqp.ext</span></code> libraries can be used to interface any C/C++ software to OSQP (see <a class="reference internal" href="C.html#install-osqp-libs"><span class="std std-ref">C</span></a> installation).</p>
+<p>Once the sources are built, the generated static <code class="code docutils literal notranslate"><span class="pre">build/out/libosqp.a</span></code> and shared <code class="code docutils literal notranslate"><span class="pre">build/out/libosqp.ext</span></code> libraries can be used to interface any C/C++ software to OSQP (see <a class="reference internal" href="C.html#install-osqp-libs"><span class="std std-ref">CC++</span></a> installation).</p>
 </section>
 <section id="install-the-binaries">
 <span id="id2"></span><h2>Install the binaries<a class="headerlink" href="#install-the-binaries" title="Permalink to this heading">¶</a></h2>
@@ -256,7 +256,7 @@ folders. You might be able to gain access using the
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="Get started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="C.html" class="btn btn-neutral float-right" title="C" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="C.html" class="btn btn-neutral float-right" title="CC++" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

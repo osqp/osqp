@@ -196,7 +196,7 @@ In particular if it is <code class="code docutils literal notranslate"><span cla
 <p>where <span class="math notranslate nohighlight">\(v_+=\max(v,0)\)</span> and <span class="math notranslate nohighlight">\(v_-=\min(v,0)\)</span>.</p>
 <p>The primal infeasibility check is then</p>
 <div class="math notranslate nohighlight">
-\[\left\|A^T v \right\|_{\infty} \le \epsilon_{\rm prim\_inf}, \quad u^T v_{+} + l^T v_{-} &lt; 0.\]</div>
+\[\left\|A^T v \right\|_{\infty} \le \epsilon_{\rm prim\_inf}, \quad u^T v_{+} + l^T v_{-} \le \epsilon_{\rm prim\_inf}.\]</div>
 </section>
 <section id="dual-infeasibility">
 <h3>Dual infeasibility<a class="headerlink" href="#dual-infeasibility" title="Permalink to this heading">¶</a></h3>
@@ -206,7 +206,7 @@ In particular if it is <code class="code docutils literal notranslate"><span cla
 <p>The dual infeasibility check is then</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\| P s \|_{\infty} \le \epsilon_{\rm dual\_inf} , \quad
-q^T s &lt; 0, \\
+q^T s \le \epsilon_{\rm dual\_inf}, \\
 (A s)_i \begin{cases} \in \left[-\epsilon_{\rm dual\_inf}, \epsilon_{\rm dual\_inf}\right] &amp; u_i, l_i \in \mathbf{R}\\
 \ge -\epsilon_{\rm dual\_inf} &amp;u_i = +\infty\\
 \le  \epsilon_{\rm dual\_inf} &amp;l_i = -\infty.\end{cases}\end{split}\]</div>

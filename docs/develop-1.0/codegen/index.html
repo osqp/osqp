@@ -119,13 +119,13 @@ dimensions, change between problem instances.</p>
 treated as parameters.</p>
 <dl class="simple glossary">
 <dt id="term-Vectors-as-parameters">Vectors as parameters<a class="headerlink" href="#term-Vectors-as-parameters" title="Permalink to this term">¶</a></dt><dd><p>Vectors <span class="math notranslate nohighlight">\(q\)</span>, <span class="math notranslate nohighlight">\(l\)</span> and <span class="math notranslate nohighlight">\(u\)</span> can change between problem instances.
-This corresponds to the compiler flag <code class="code docutils literal notranslate"><span class="pre">OSQP_EMBEDDED_MODE=1</span></code>.
+This corresponds to the compiler flag <code class="code docutils literal notranslate"><span class="pre">EMBEDDED=1</span></code>.
 <span class="math notranslate nohighlight">\(\rho\)</span> adaptation is not enabled.
 The generated code is division-free and has a very small footprint.</p>
 </dd>
 <dt id="term-Matrices-as-parameters">Matrices as parameters<a class="headerlink" href="#term-Matrices-as-parameters" title="Permalink to this term">¶</a></dt><dd><p>Both vectors <span class="math notranslate nohighlight">\(q\)</span>, <span class="math notranslate nohighlight">\(l\)</span>, <span class="math notranslate nohighlight">\(u\)</span> and values in matrices
 <span class="math notranslate nohighlight">\(P\)</span> and <span class="math notranslate nohighlight">\(A\)</span> can change between problem instances.
-This corresponds to the compiler flag <code class="code docutils literal notranslate"><span class="pre">OSQP_EMBEDDED_MODE=2</span></code>.
+This corresponds to the compiler flag <code class="code docutils literal notranslate"><span class="pre">EMBEDDED=2</span></code>.
 <span class="math notranslate nohighlight">\(\rho\)</span> adaptation is enabled but the frequency does not rely on any timing.
 We assume that the sparsity patterns of <span class="math notranslate nohighlight">\(P\)</span> and <span class="math notranslate nohighlight">\(A\)</span> are fixed.</p>
 </dd>

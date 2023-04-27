@@ -4,6 +4,8 @@ C
 =====
 
 
+
+
 .. _C_main_API:
 
 Main solver API
@@ -31,43 +33,57 @@ OSQP automatically warm starts primal and dual variables from the previous QP so
 
 .. doxygenfunction:: osqp_warm_start
 
+.. doxygenfunction:: osqp_warm_start_x
 
-.. _C_update_data :
+.. doxygenfunction:: osqp_warm_start_y
+
+
+.. _c_cpp_update_data :
 
 Update problem data
 ^^^^^^^^^^^^^^^^^^^
 Problem data can be updated without executing the setup again using the following functions.
 
-.. doxygenfunction:: osqp_update_data_vec
+.. doxygenfunction:: osqp_update_lin_cost
 
-.. doxygenfunction:: osqp_update_data_mat
+.. doxygenfunction:: osqp_update_lower_bound
+
+.. doxygenfunction:: osqp_update_upper_bound
+
+.. doxygenfunction:: osqp_update_bounds
+
+.. doxygenfunction:: osqp_update_P
+
+.. doxygenfunction:: osqp_update_A
+
+.. doxygenfunction:: osqp_update_P_A
 
 
 
-.. _C_data_types :
+.. _c_cpp_data_types :
 
 Data types
 ----------
 
 The most basic used datatypes are
 
-* :code:`OSQPInt`: can be :code:`long` or :code:`int` if the compiler flag :code:`OSQP_USE_LONG` is set or not
-* :code:`OSQPFloat`: can be a :code:`float` or a :code:`double` if the compiler flag :code:`OSQP_USE_FLOAT` is set or not.
+* :code:`c_int`: can be :code:`long` or :code:`int` if the compiler flag :code:`DLONG` is set or not
+* :code:`c_float`: can be a :code:`float` or a :code:`double` if the compiler flag :code:`DFLOAT` is set or not.
 
-
-The matrices are defined in `Compressed Sparse Column (CSC) format <https://people.sc.fsu.edu/~jburkardt/data/cc/cc.html>`_ using zero-based indexing.
-
-.. doxygenstruct:: OSQPCscMatrix
-   :members:
 
 
 The relevant structures used in the API are
 
-Solver
-^^^^^^^^
+Data
+^^^^
 
-.. doxygenstruct:: OSQPSolver
-  :members:
+.. doxygenstruct:: OSQPData
+   :members:
+
+The matrices are defined in `Compressed Sparse Column (CSC) format <https://people.sc.fsu.edu/~jburkardt/data/cc/cc.html>`_ using zero-based indexing.
+
+.. doxygenstruct:: csc
+   :members:
 
 Settings
 ^^^^^^^^
@@ -86,6 +102,24 @@ Info
 
 .. doxygenstruct:: OSQPInfo
    :members:
+
+Workspace
+^^^^^^^^^
+
+.. doxygenstruct:: OSQPWorkspace
+   :members:
+
+
+Scaling
+^^^^^^^
+
+.. doxygenstruct:: OSQPScaling
+   :members:
+
+Polish
+^^^^^^
+.. doxygenstruct:: OSQPPolish
+  :members:
 
 
 

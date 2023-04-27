@@ -65,7 +65,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l1"><a class="reference internal" href="../solver/index.html">The solver</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Get started</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="sources.html">Build from sources</a></li>
-<li class="toctree-l2"><a class="reference internal" href="C.html">C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="C.html">CC++</a></li>
 <li class="toctree-l2"><a class="reference internal" href="python.html">Python</a></li>
 <li class="toctree-l2"><a class="reference internal" href="julia.html">Julia</a></li>
 <li class="toctree-l2"><a class="reference internal" href="matlab.html">Matlab</a></li>
@@ -136,7 +136,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <p>If you would like to install the latest version directly from with R (e.g.because you do not have <code class="docutils literal notranslate"><span class="pre">git</span></code> installed) and have a suitable compiler, then you can do the following from within R:</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;remotes&quot;</span><span class="p">)</span>
 <span class="n">remotes</span><span class="o">::</span><span class="nf">install_github</span><span class="p">(</span><span class="s">&quot;r-lib/remotes#103&quot;</span><span class="p">)</span>
-<span class="n">remotes</span><span class="o">::</span><span class="nf">install_git</span><span class="p">(</span><span class="s">&quot;git://github.com/osqp/osqp-r&quot;</span><span class="p">,</span><span class="n">submodules</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span>
+<span class="n">remotes</span><span class="o">::</span><span class="nf">install_git</span><span class="p">(</span><span class="s">&quot;git://github.com/OxfordControl/osqp-r&quot;</span><span class="p">,</span><span class="n">submodules</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Note that the second line above is necessary because the “remotes” package in R does not currently support recursive cloning of git submodules.</p>

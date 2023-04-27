@@ -27,14 +27,14 @@ treated as parameters.
 
     Vectors as parameters
         Vectors :math:`q`, :math:`l` and :math:`u` can change between problem instances.
-        This corresponds to the compiler flag :code:`OSQP_EMBEDDED_MODE=1`.
+        This corresponds to the compiler flag :code:`EMBEDDED=1`.
         :math:`\rho` adaptation is not enabled. 
         The generated code is division-free and has a very small footprint.
 
     Matrices as parameters
         Both vectors :math:`q`, :math:`l`, :math:`u` and values in matrices
         :math:`P` and :math:`A` can change between problem instances.
-        This corresponds to the compiler flag :code:`OSQP_EMBEDDED_MODE=2`.
+        This corresponds to the compiler flag :code:`EMBEDDED=2`.
         :math:`\rho` adaptation is enabled but the frequency does not rely on any timing. 
         We assume that the sparsity patterns of :math:`P` and :math:`A` are fixed.
 
