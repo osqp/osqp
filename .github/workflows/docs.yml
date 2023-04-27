@@ -2,7 +2,7 @@ name: Docs
 
 on:
   push:
-    branches: [ master, develop-1.0 ]
+    branches: [ master, develop-1.0, vb/docs_404 ]
     tags:
       - '*'
 
