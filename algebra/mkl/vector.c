@@ -12,21 +12,19 @@ OSQPInt OSQPVectorf_is_eq(const OSQPVectorf* A,
                           const OSQPVectorf* B,
                                 OSQPFloat    tol) {
     OSQPInt i;
-    OSQPInt retval = 1;
-
 
     if (A->length != B->length) return 0;
 
     for (i=0; i < A->length; i++) {
         if (c_absval(A->values[i] - B->values[i]) > tol) {
-            retval = 0;
+            return 0;
         }
     }
-    return retval;
+    return 1;
 }
 
 OSQPVectorf* OSQPVectorf_new(const OSQPFloat* a,
-                             OSQPInt          length) {
+                                   OSQPInt    length) {
 
   OSQPVectorf* out = OSQPVectorf_malloc(length);
   if(!out) return OSQP_NULL;
@@ -38,7 +36,7 @@ OSQPVectorf* OSQPVectorf_new(const OSQPFloat* a,
 }
 
 OSQPVectori* OSQPVectori_new(const OSQPInt* a,
-                             OSQPInt        length) {
+                                   OSQPInt  length) {
 
   OSQPVectori* out = OSQPVectori_malloc(length);
   if(!out) return OSQP_NULL;
@@ -163,7 +161,7 @@ void OSQPVectorf_view_update(OSQPVectorf*       a,
                              OSQPInt            head,
                              OSQPInt            length) {
     a->length = length;
-    a->values   = b->values + head;
+    a->values = b->values + head;
 }
 
 void OSQPVectorf_view_free(OSQPVectorf* a) {
@@ -172,7 +170,7 @@ void OSQPVectorf_view_free(OSQPVectorf* a) {
 
 
 OSQPInt OSQPVectorf_length(const OSQPVectorf* a) {return a->length;}
-OSQPInt OSQPVectori_length(const OSQPVectori *a){return a->length;}
+OSQPInt OSQPVectori_length(const OSQPVectori *a) {return a->length;}
 
 /* Pointer to vector data (floats) */
 OSQPFloat* OSQPVectorf_data(const OSQPVectorf* a) {return a->values;}
@@ -225,8 +223,6 @@ void OSQPVectorf_set_scalar(OSQPVectorf* a,
             &sc, 0, // 0 increment to treat X argument as a scalar
             a->values, 1);
 }
-
-// I seem to have the same problem here, if I try to exploit the copy function, I will still need to compare the values and populate an initial vector
 
 void OSQPVectorf_set_scalar_conditional(OSQPVectorf*       a,
                                         const OSQPVectori* test,
@@ -439,7 +435,7 @@ OSQPFloat OSQPVectorf_dot_prod_signed(const OSQPVectorf* a,
                                       OSQPInt            sign) {
 
   OSQPInt i;
-  OSQPInt length = a->length;\
+  OSQPInt length = a->length;
 
   OSQPFloat* av = a->values;
   OSQPFloat* bv = b->values;
