@@ -34,6 +34,8 @@
   #define blas_iamax cblas_isamax
 
   // MKL Vector Math functions
+  #define vml_add    vsAdd
+  #define vml_sub    vsSub
   #define vml_mul    vsMul
   #define vml_max    vsFmax
   #define vml_maxinc vsFmaxI
@@ -59,6 +61,8 @@
   #define blas_iamax cblas_idamax
 
   // MKL Vector Math functions
+  #define vml_add    vdAdd
+  #define vml_sub    vdSub
   #define vml_mul    vdMul
   #define vml_max    vdFmax
   #define vml_maxinc vdFmaxI

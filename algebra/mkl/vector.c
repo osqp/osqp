@@ -256,38 +256,18 @@ void OSQPVectorf_plus(OSQPVectorf*      x,
                      const OSQPVectorf* a,
                      const OSQPVectorf* b) {
 
-  OSQPInt     length = a->length;
-  OSQPFloat*  av = a->values;
-  OSQPFloat*  bv = b->values;
-  OSQPFloat*  xv = x->values;
-
-  if (x == a){
-    // Don't scale the b vector
-    blas_axpy(a->length, 1.0, b->values, 1, x->values, 1);
-  }
-  else {
-    blas_copy(a->length, a->values, 1, x->values, 1); // Copy av into xv
-
-    // Don't scale the b vector
-    blas_axpy(a->length, 1.0, b->values, 1, x->values, 1); // Final addition
-  }
+  // Compute x = a + b. If x == a, compute x += b.
+  // VML can support in-place operations, so it is valid to do this when x == a to accumulate.
+  vml_add(a->length, a->values, b->values, x->values);
 }
 
 void OSQPVectorf_minus(OSQPVectorf*       x,
                        const OSQPVectorf* a,
                        const OSQPVectorf* b) {
 
-  if (x == a){
-    blas_axpy(a->length, -1.0, b->values, 1, x->values, 1);
-  }
-  else if (x == b){
-    OSQPVectorf_mult_scalar(x,-1.);
-    blas_axpy(a->length, 1.0, a->values, 1, x->values, 1);
-  }
-  else {
-    blas_copy(a->length, a->values, 1, x->values, 1);
-    blas_axpy(a->length, -1.0, b->values, 1, x->values, 1);
-  }
+  // Compute x = a - b. If x == a, compute x -= b.
+  // VML can support in-place operations, so it is valid to do this when x == a to accumulate.
+  vml_sub(a->length, a->values, b->values, x->values);
 }
 
 void OSQPVectorf_add_scaled(OSQPVectorf*       x,
