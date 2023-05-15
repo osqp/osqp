@@ -5,8 +5,7 @@
 
 - name: Goran Banjac
   role: Main developer
-  affiliation: ETH Zurich
-  website: https://people.ee.ethz.ch/~gbanjac/
+  website: https://github.com/gbanjac
 
 - name: Paul Goulart
   role: Methods and Maths
@@ -36,3 +35,13 @@
   role: Methods and Maths
   affiliation: ETH Zurich
   website: https://control.ee.ethz.ch/people/profile.john-lygeros.html
+
+- name: Ian McInerney
+  role: Software Engineering and Code Generation
+  affiliation: Imperial College London
+  website: https://ism.engineer
+
+- name: Vineet Bansal
+  role: Software Engineering
+  affiliation: CSML, Princeton University
+  website: https://csml.princeton.edu/people/vineet-bansal

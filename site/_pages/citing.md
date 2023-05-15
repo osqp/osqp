@@ -90,7 +90,7 @@ Code generation functionality and example in this [paper](https://stanford.edu/~
 {% endraw %}
 
 #### Mixed-integer optimization
-A branch-and-bound solver for mixed-integer quadratic optimization in this [paper](https://stellato.io/downloads/publications/2018/miosqp_ecc.pdf).
+A branch-and-bound solver for mixed-integer quadratic optimization in this [paper](https://stellato.io/assets/downloads/publications/2018/miosqp_ecc.pdf).
 
 {% raw %}
 ```latex
