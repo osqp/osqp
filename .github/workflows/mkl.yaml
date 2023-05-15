@@ -93,7 +93,7 @@ jobs:
         - name: Install MKL
           run: |
             conda install -c conda-forge llvm-openmp
-            conda install -c intel "mkl-devel<2022"
+            conda install -c intel mkl-devel
             conda info
             conda list
 
