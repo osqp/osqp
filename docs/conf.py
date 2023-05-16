@@ -125,7 +125,7 @@ if not on_rtd:  # only import and set the theme if we're building docs locally
         'display_github': True,
         'github_user': 'osqp',
         'github_repo': 'osqp',
-        'github_version': 'master/docs/',
+        'github_version': 'develop-1.0/docs/',
     }
 
     # Override default css to get a larger width for local build
