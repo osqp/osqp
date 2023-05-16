@@ -120,6 +120,14 @@ html_static_path = ['_static']
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 if not on_rtd:  # only import and set the theme if we're building docs locally
+    # Configure the header to display the GitHub edit link for the pages
+    html_context = {
+        'display_github': True,
+        'github_user': 'osqp',
+        'github_repo': 'osqp',
+        'github_version': 'develop-1.0/docs/',
+    }
+
     # Override default css to get a larger width for local build
     def setup(app):
         app.add_css_file('css/osqp_theme.css')
