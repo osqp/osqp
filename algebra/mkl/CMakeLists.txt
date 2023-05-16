@@ -19,6 +19,8 @@ target_sources(
           ../_common/kkt.c
           ../_common/reduced_kkt.h
           ../_common/reduced_kkt.c
+          ../_common/lin_sys/cg/cg_common.h
+          ../_common/lin_sys/cg/cg_common.c
           vector.c
           matrix.c
           algebra_impl.h
@@ -30,6 +32,7 @@ target_sources(
 
 target_include_directories(OSQPLIB PRIVATE
                            ../_common
+                           ../_common/lin_sys/cg
                            ${CMAKE_CURRENT_SOURCE_DIR}
                            ${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/direct
                            ${CMAKE_CURRENT_SOURCE_DIR}/lin_sys/indirect)
