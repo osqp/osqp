@@ -484,8 +484,17 @@ void OSQPVectorf_ew_bound_vec(OSQPVectorf*       x,
                               const OSQPVectorf* l,
                               const OSQPVectorf* u) {
 
-  vml_max(x->length, z->values, l->values, x->values);
-  vml_min(x->length, x->values, u->values, x->values);
+  OSQPInt i;
+  OSQPInt length = x->length;
+
+  OSQPFloat* xv = x->values;
+  OSQPFloat* zv = z->values;
+  OSQPFloat* lv = l->values;
+  OSQPFloat* uv = u->values;
+
+  for (i = 0; i < length; i++) {
+    xv[i] = c_min(c_max(zv[i], lv[i]), uv[i]);
+  }
 }
 
 void OSQPVectorf_project_polar_reccone(OSQPVectorf*       y,
