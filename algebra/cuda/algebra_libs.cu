@@ -21,6 +21,8 @@
 #include "cuda_handler.h"
 #include "cuda_pcg_interface.h"
 
+ #include <stdio.h>
+
 
 CUDA_Handle_t *CUDA_handle = OSQP_NULL;
 
@@ -51,8 +53,23 @@ void osqp_algebra_free_libs(void) {
   CUDA_handle = OSQP_NULL;
 }
 
-const char* osqp_algebra_name(void) {
-  return "CUDA";
+OSQPInt osqp_algebra_name(char* name, OSQPInt nameLen) {
+  OSQPInt runtimeVersion = 0;
+
+  cudaRuntimeGetVersion(&runtimeVersion);
+
+  return snprintf(name, nameLen, "CUDA %d.%d",
+                  runtimeVersion / 1000, (runtimeVersion % 100) / 10);
+}
+
+OSQPInt osqp_algebra_device_name(char* name, OSQPInt nameLen) {
+  OSQPInt dev;
+  cudaDeviceProp deviceProp;
+
+  cudaGetDevice(&dev);
+  cudaGetDeviceProperties(&deviceProp, dev);
+
+  return snprintf(name, nameLen, "%s (Compute capability %d.%d)", deviceProp.name, deviceProp.major, deviceProp.minor);
 }
 
 // Initialize linear system solver structure

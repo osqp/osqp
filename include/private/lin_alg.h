@@ -22,7 +22,10 @@ OSQPInt osqp_algebra_init_libs(OSQPInt device);
 void osqp_algebra_free_libs(void);
 
 /* Get the name of the linear algebra backend */
-const char* osqp_algebra_name(void);
+OSQPInt osqp_algebra_name(char* name, OSQPInt nameLen);
+
+/* Get the name of the device the linear algebra backend is using */
+OSQPInt osqp_algebra_device_name(char* name, OSQPInt nameLen);
 
 /* KKT linear system definition and solution */
 

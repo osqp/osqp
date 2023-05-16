@@ -7,6 +7,8 @@
 
 #include <mkl.h>
 
+#include <stdio.h>
+
 OSQPInt osqp_algebra_linsys_supported(void) {
   /* Has both Paradiso (direct solver) and a PCG solver (indirect solver) */
   return OSQP_CAPABILITY_DIRECT_SOLVER | OSQP_CAPABILITY_INDIRECT_SOLVER;
@@ -35,8 +37,20 @@ OSQPInt osqp_algebra_init_libs(OSQPInt device) {
 
 void osqp_algebra_free_libs(void) {return;}
 
-const char* osqp_algebra_name(void) {
-  return "MKL";
+OSQPInt osqp_algebra_name(char* name, OSQPInt nameLen) {
+    MKLVersion ver;
+
+    mkl_get_version(&ver);
+
+    return snprintf(name, nameLen, "Intel oneAPI MKL %d.%d.%d", ver.MajorVersion, ver.MinorVersion, ver.UpdateVersion);
+}
+
+OSQPInt osqp_algebra_device_name(char* name, OSQPInt nameLen) {
+  MKLVersion ver;
+
+  mkl_get_version(&ver);
+
+  return snprintf(name, nameLen, "%s", ver.Processor);
 }
 
 // Initialize linear system solver structure
