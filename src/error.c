@@ -15,6 +15,7 @@ const char *OSQP_ERROR_MESSAGE[] = {
   "Unable to open file for writing.",
   "Invalid defines for codegen",
   "Vector/matrix not initialized.",
+  "Function not implemented.",
 
   /* This must always be the last item in the list */
   "Unknown error code."

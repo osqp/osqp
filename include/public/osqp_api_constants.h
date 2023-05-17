@@ -78,6 +78,7 @@ enum osqp_error_type {
     OSQP_FOPEN_ERROR,
     OSQP_CODEGEN_DEFINES_ERROR,
     OSQP_DATA_NOT_INITIALIZED,
+    OSQP_FUNC_NOT_IMPLEMENTED,      /**< Function not implemented in this library */
     OSQP_LAST_ERROR_PLACE,          /* This must always be the last item in the enum */
 };
 extern const char * OSQP_ERROR_MESSAGE[];

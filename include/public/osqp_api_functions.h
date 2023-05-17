@@ -258,7 +258,6 @@ OSQP_API OSQPInt osqp_update_rho(OSQPSolver* solver,
 
 
 /* ------------------ Derivative stuff ----------------- */
-#ifdef OSQP_ENABLE_DERIVATIVES
 
 /**
  * Compute internal data structures for calculation of adjoint derivatives of P/q/A/l/u
@@ -297,10 +296,8 @@ OSQP_API OSQPInt osqp_adjoint_derivative_get_vec(OSQPSolver*    solver,
                                                  OSQPFloat* dl,
                                                  OSQPFloat* du);
 
-#endif /* OSQP_ENABLE_DERIVATIVES */
 /* ------------------ Derivative stuff ----------------- */
 
-# ifdef OSQP_CODEGEN
 
 /**
  * Generate source files with a statically allocated OSQPSolver structure.
@@ -316,8 +313,6 @@ OSQP_API OSQPInt osqp_codegen(OSQPSolver*         solver,
                               const char*         output_dir,
                               const char*         prefix,
                               OSQPCodegenDefines* defines);
-
-# endif /* ifdef OSQP_CODEGEN */
 
 
 /** @} */
