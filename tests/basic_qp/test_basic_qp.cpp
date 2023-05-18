@@ -7,28 +7,17 @@
 #include "basic_qp_data.h"
 
 
-void test_basic_qp_solve()
+TEST_CASE_METHOD(OSQPTestFixture, "Basic QP: Solve", "[solve][qp]")
 {
-  OSQPInt        exitflag;
-
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
-
-  // Structures
-  OSQPSolver*    tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
+  OSQPInt exitflag;
 
   // Populate data
   basic_qp_problem_ptr data{generate_problem_basic_qp()};
   basic_qp_sols_data_ptr sols_data{generate_problem_basic_qp_sols_data()};
 
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
-  settings->max_iter      = 2000;
-  settings->alpha         = 1.6;
+  // Test-specific options
   settings->polishing     = 1;
   settings->scaling       = 0;
-  settings->verbose       = 1;
   settings->warm_starting = 0;
 
   /* Test all possible linear system solvers in this test case */
@@ -541,19 +530,12 @@ void test_basic_qp_settings()
   c_free(P_tmp);
 }
 
-void test_basic_qp_update()
+TEST_CASE_METHOD(OSQPTestFixture, "Basic QP: Data update", "[solve][qp][data][update]")
 {
   OSQPInt      exitflag;
   OSQPVectorf* q_new;
   OSQPVectorf* l_new;
   OSQPVectorf* u_new;
-
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
-
-  // Structures
-  OSQPSolver*    tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
 
   // Populate data
   basic_qp_problem_ptr data{generate_problem_basic_qp()};
@@ -562,10 +544,8 @@ void test_basic_qp_update()
   // Define Solver settings as default
   osqp_set_default_settings(settings.get());
   settings->max_iter      = 200;
-  settings->alpha         = 1.6;
   settings->polishing     = 1;
   settings->scaling       = 0;
-  settings->verbose       = 1;
   settings->warm_starting = 0;
 
   // Setup solver
@@ -677,28 +657,18 @@ void test_basic_qp_update()
   }
 }
 
-void test_basic_qp_check_termination()
+TEST_CASE_METHOD(OSQPTestFixture, "Basic QP: Termination", "[solve][qp]")
 {
   OSQPInt exitflag;
-
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
-
-  // Structures
-  OSQPSolver*    tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
 
   // Populate data
   basic_qp_problem_ptr data{generate_problem_basic_qp()};
   basic_qp_sols_data_ptr sols_data{generate_problem_basic_qp_sols_data()};
 
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
+  // Problem-specific settings
   settings->max_iter          = 200;
-  settings->alpha             = 1.6;
   settings->polishing         = 0;
   settings->scaling           = 0;
-  settings->verbose           = 1;
   settings->check_termination = 0;
   settings->warm_starting     = 0;
 
@@ -955,7 +925,7 @@ void test_basic_qp_time_limit()
 #endif // OSQP_ENABLE_PROFILING
 
 
-void test_basic_qp_warm_start()
+TEST_CASE_METHOD(OSQPTestFixture, "Basic QP: Warm start", "[solve][qp][warm-start]")
 {
   OSQPInt exitflag;
   OSQPInt iter;
@@ -968,71 +938,48 @@ void test_basic_qp_warm_start()
   OSQPFloat xopt[2] = { 0.3, 0.7, };
   OSQPFloat yopt[4] = {-2.9, 0.0, 0.2, 0.0, };
 
-  // Problem settings
-  OSQPSettings *settings = (OSQPSettings *)c_malloc(sizeof(OSQPSettings));
+  // Data
+  basic_qp_problem_ptr data{generate_problem_basic_qp()};
+  basic_qp_sols_data_ptr sols_data{generate_problem_basic_qp_sols_data()};
 
-  // Structures
-  OSQPSolver *solver;      // Solver
-  OSQPTestData *data;      // Data
-  basic_qp_sols_data *sols_data;
-
-  // Populate data
-  data = generate_problem_basic_qp();
-  sols_data = generate_problem_basic_qp_sols_data();
-
-  // Define Solver settings as default
-  osqp_set_default_settings(settings);
+  // Setup problem-specific setting
   settings->check_termination = 1;
   settings->adaptive_rho = 0;
 
   // Setup solver
-  exitflag = osqp_setup(&solver, data->P, data->q,
+  exitflag = osqp_setup(&tmpSolver, data->P, data->q,
                         data->A, data->l, data->u,
-                        data->m, data->n, settings);
+                        data->m, data->n, settings.get());
+  solver.reset(tmpSolver);
 
-  // Solve Problem
-  osqp_solve(solver);
+  // Solve Problem initially
+  osqp_solve(solver.get());
   iter = solver->info->iter;
 
-  // Cold start and solve again
-  osqp_warm_start(solver, x0, y0);
-  osqp_solve(solver);
+  SECTION( "Cold start from original start point" ) {
+    // Cold start and solve again
+    osqp_warm_start(solver.get(), x0, y0);
+    osqp_solve(solver.get());
 
-  // Check if the number of iterations is the same
-  mu_assert("Basic QP test warm start: Cold start error!", solver->info->iter == iter);
+    // Check if the number of iterations is the same
+    mu_assert("Basic QP test warm start: Cold start error!", solver->info->iter == iter);
+  }
 
-  // Warm start from the solution and solve again
-  osqp_warm_start(solver, xopt, OSQP_NULL);
-  osqp_warm_start(solver, OSQP_NULL, yopt);
-  osqp_solve(solver);
+  SECTION( "Warm start from solution" ) {
+    // Warm start from the solution and solve again
+    osqp_warm_start(solver.get(), xopt, OSQP_NULL);
+    osqp_warm_start(solver.get(), OSQP_NULL, yopt);
+    osqp_solve(solver.get());
 
-  // Check that the number of iterations equals 1
-  mu_assert("Basic QP test warm start: Warm start error!", solver->info->iter == 1);
-
-  // Cleanup solver
-  osqp_cleanup(solver);
-
-  // Cleanup data
-  clean_problem_basic_qp(data);
-  clean_problem_basic_qp_sols_data(sols_data);
-
-  // Cleanup
-  c_free(settings);
+    // Check that the number of iterations equals 1
+    mu_assert("Basic QP test warm start: Warm start error!", solver->info->iter == 1);
+  }
 }
 
 
 TEST_CASE( "Basic QP problem", "[solve][qp]" ) {
-    SECTION( "test_basic_qp_solve" ) {
-        test_basic_qp_solve();
-    }
     SECTION( "test_basic_qp_settings" ) {
         test_basic_qp_settings();
-    }
-    SECTION( "test_basic_qp_update" ) {
-        test_basic_qp_update();
-    }
-    SECTION( "test_basic_qp_check_termination" ) {
-        test_basic_qp_check_termination();
     }
     SECTION( "test_basic_qp_update_rho" ) {
         test_basic_qp_update_rho();
@@ -1042,7 +989,4 @@ TEST_CASE( "Basic QP problem", "[solve][qp]" ) {
         test_basic_qp_time_limit();
     }
 #endif
-    SECTION( "test_basic_qp_warm_start" ) {
-        test_basic_qp_warm_start();
-    }
 }
