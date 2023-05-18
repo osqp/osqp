@@ -7,21 +7,15 @@
 #include "non_cvx_data.h"
 
 #ifndef OSQP_ALGEBRA_CUDA
-TEST_CASE("Nonconvex: Setup detection", "[nonconvex],[setup]")
+TEST_CASE_METHOD(OSQPTestFixture, "Nonconvex: Setup detection", "[nonconvex],[setup]")
 {
   OSQPInt exitflag;
-
-  // Solver variables
-  OSQPSolver*      tmpSolver;
-  OSQPSolver_ptr   solver{nullptr};
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
 
   // Data
   non_cvx_problem_ptr   data{generate_problem_non_cvx()};
   non_cvx_sols_data_ptr sols_data{generate_problem_non_cvx_sols_data()};
 
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
+  // Define Solver settings
   settings->verbose = 1;
   settings->adaptive_rho = 0;
 
@@ -58,21 +52,15 @@ TEST_CASE("Nonconvex: Setup detection", "[nonconvex],[setup]")
 }
 #endif
 
-TEST_CASE("Nonconvex: Solve", "[nonconvex],[solve]")
+TEST_CASE_METHOD(OSQPTestFixture, "Nonconvex: Solve", "[nonconvex],[solve]")
 {
   OSQPInt exitflag;
-
-  // Solver variables
-  OSQPSolver*      tmpSolver;
-  OSQPSolver_ptr   solver{nullptr};
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
 
   // Data
   non_cvx_problem_ptr   data{generate_problem_non_cvx()};
   non_cvx_sols_data_ptr sols_data{generate_problem_non_cvx_sols_data()};
 
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
+  // Define Solver settings
   settings->verbose = 1;
   settings->adaptive_rho = 0;
   settings->sigma = sols_data->sigma_new;

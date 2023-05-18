@@ -8,19 +8,13 @@
 #include "primal_dual_infeasibility_data.h"
 
 
-TEST_CASE("Feasible problem", "[solve]")
+TEST_CASE_METHOD(OSQPTestFixture, "Feasible problem", "[solve]")
 {
   OSQPInt exitflag;
 
-  // Structures
-  OSQPSolver*      tmpSolver;   // Solver
-  OSQPSolver_ptr   solver{};
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
-
   primal_dual_infeasibility_sols_data_ptr data{generate_problem_primal_dual_infeasibility_sols_data()};
 
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
+  // Define Solver settings
   settings->max_iter  = 2000;
   settings->alpha     = 1.6;
   settings->polishing = 1;
@@ -59,19 +53,13 @@ TEST_CASE("Feasible problem", "[solve]")
             c_absval(solver->info->obj_val - data->obj_value1) < TESTS_TOL);
 }
 
-TEST_CASE("Primal infeasible problem", "[solve],[infeasible]")
+TEST_CASE_METHOD(OSQPTestFixture, "Primal infeasible problem", "[solve],[infeasible]")
 {
   OSQPInt exitflag;
 
-// Structures
-  OSQPSolver*      tmpSolver;   // Solver
-  OSQPSolver_ptr   solver{};
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
-
   primal_dual_infeasibility_sols_data_ptr data{generate_problem_primal_dual_infeasibility_sols_data()};
 
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
+  // Define Solver settings
   settings->max_iter  = 2000;
   settings->alpha     = 1.6;
   settings->polishing = 0;
@@ -96,19 +84,13 @@ TEST_CASE("Primal infeasible problem", "[solve],[infeasible]")
             solver->info->status_val == OSQP_PRIMAL_INFEASIBLE);
 }
 
-TEST_CASE("Dual infeasible problem", "[solve],[infeasible]")
+TEST_CASE_METHOD(OSQPTestFixture, "Dual infeasible problem", "[solve],[infeasible]")
 {
   OSQPInt exitflag;
 
-  // Structures
-  OSQPSolver*      tmpSolver;   // Solver
-  OSQPSolver_ptr   solver{};
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
-
   primal_dual_infeasibility_sols_data_ptr data{generate_problem_primal_dual_infeasibility_sols_data()};
 
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
+  // Define Solver settings
   settings->max_iter  = 2000;
   settings->alpha     = 1.6;
   settings->polishing = 0;
@@ -133,19 +115,13 @@ TEST_CASE("Dual infeasible problem", "[solve],[infeasible]")
             solver->info->status_val == OSQP_DUAL_INFEASIBLE);
 }
 
-TEST_CASE("Primal and dual infeasible problem", "[solve],[infeasible]")
+TEST_CASE_METHOD(OSQPTestFixture, "Primal and dual infeasible problem", "[solve],[infeasible]")
 {
   OSQPInt exitflag;
 
-// Structures
-  OSQPSolver*      tmpSolver;   // Solver
-  OSQPSolver_ptr   solver{};
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
-
   primal_dual_infeasibility_sols_data_ptr data{generate_problem_primal_dual_infeasibility_sols_data()};
 
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
+  // Define Solver settings
   settings->max_iter  = 2000;
   settings->alpha     = 1.6;
   settings->polishing = 0;

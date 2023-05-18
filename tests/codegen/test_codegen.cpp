@@ -10,26 +10,18 @@
 #include "unconstrained_data.h"
 
 #ifdef OSQP_CODEGEN
-TEST_CASE("Basic codegen", "[codegen]")
+TEST_CASE_METHOD(OSQPTestFixture, "Basic codegen", "[codegen]")
 {
   OSQPInt exitflag;
 
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
-
   // Codegen defines
   OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
-
-  // Structures
-  OSQPSolver *tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
 
   // Problem data
   codegen_problem_ptr   data{generate_problem_codegen()};
   codegen_sols_data_ptr sols_data{generate_problem_codegen_sols_data()};
 
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
+  // Define Solver settings
   settings->max_iter      = 2000;
   settings->alpha         = 1.6;
   settings->polishing     = 1;
@@ -68,22 +60,14 @@ TEST_CASE("Basic codegen", "[codegen]")
             exitflag == OSQP_NO_ERROR);
 }
 
-TEST_CASE("Codegen: Data export", "[codegen],[unconstrained],[lp],[qp],[nonconvex]")
+TEST_CASE_METHOD(OSQPTestFixture, "Codegen: Data export", "[codegen],[unconstrained],[lp],[qp],[nonconvex]")
 {
   OSQPInt exitflag;
-
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
 
   // Codegen defines
   OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
 
-  // Structures
-  OSQPSolver *tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
-
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
+  // Define Solver settings
   settings->max_iter      = 2000;
   settings->alpha         = 1.6;
   settings->polishing     = 1;
@@ -220,26 +204,18 @@ TEST_CASE("Codegen: Data export", "[codegen],[unconstrained],[lp],[qp],[nonconve
   }
 }
 
-TEST_CASE("Codegen: defines", "[codegen]")
+TEST_CASE_METHOD(OSQPTestFixture, "Codegen: defines", "[codegen]")
 {
   OSQPInt exitflag;
 
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
-
   // Codegen defines
   OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
-
-  // Structures
-  OSQPSolver *tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
 
   // Problem data
   codegen_problem_ptr   data{generate_problem_codegen()};
   codegen_sols_data_ptr sols_data{generate_problem_codegen_sols_data()};
 
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
+  // Define Solver settings
   settings->max_iter      = 2000;
   settings->alpha         = 1.6;
   settings->polishing     = 1;
@@ -395,26 +371,18 @@ TEST_CASE("Codegen: defines", "[codegen]")
   }
 }
 
-TEST_CASE("Codegen: Error propgatation", "[codegen]")
+TEST_CASE_METHOD(OSQPTestFixture, "Codegen: Error propgatation", "[codegen]")
 {
   OSQPInt exitflag;
 
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
-
   // Codegen defines
   OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
-
-  // Structures
-  OSQPSolver *tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
 
   // Problem data
   codegen_problem_ptr   data{generate_problem_codegen()};
   codegen_sols_data_ptr sols_data{generate_problem_codegen_sols_data()};
 
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
+  // Define Solver settings
   settings->max_iter      = 2000;
   settings->alpha         = 1.6;
   settings->polishing     = 1;
@@ -509,26 +477,18 @@ TEST_CASE("Codegen: Error propgatation", "[codegen]")
   }
 }
 
-TEST_CASE("Codegen: Settings", "[codegen],[settings]")
+TEST_CASE_METHOD(OSQPTestFixture, "Codegen: Settings", "[codegen],[settings]")
 {
   OSQPInt exitflag;
 
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
-
   // Codegen defines
   OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
-
-  // Structures
-  OSQPSolver *tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
 
   // Problem data
   codegen_problem_ptr   data{generate_problem_codegen()};
   codegen_sols_data_ptr sols_data{generate_problem_codegen_sols_data()};
 
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
+  // Define Solver settings
   settings->max_iter      = 2000;
   settings->alpha         = 1.6;
   settings->polishing     = 1;
