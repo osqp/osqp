@@ -393,7 +393,7 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   if (!(work->derivative_data->y_u) || !(work->derivative_data->y_l) ||
     !(work->derivative_data->ryl) || !(work->derivative_data->ryu))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
-# endif / *ifdef OSQP_ENABLE_DERIVATIVES */
+# endif /* ifdef OSQP_ENABLE_DERIVATIVES */
 
   // Return exit flag
   return 0;
@@ -1233,8 +1233,6 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
 * Codegen
 **********/
 
-#ifdef OSQP_CODEGEN
-
 OSQPInt osqp_codegen(OSQPSolver*         solver,
                      const char*         output_dir,
                      const char*         file_prefix,
@@ -1242,6 +1240,7 @@ OSQPInt osqp_codegen(OSQPSolver*         solver,
 
   OSQPInt exitflag = 0;
 
+#ifdef OSQP_CODEGEN
   if (!solver || !solver->work || !solver->settings || !solver->info) {
     return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
   }
@@ -1266,11 +1265,13 @@ OSQPInt osqp_codegen(OSQPSolver*         solver,
   if (!exitflag) exitflag = codegen_src(solver, output_dir, file_prefix, defines->embedded_mode);
   if (!exitflag) exitflag = codegen_example(output_dir, file_prefix);
   if (!exitflag) exitflag = codegen_defines(output_dir, defines);
+#else
+  exitflag = OSQP_FUNC_NOT_IMPLEMENTED;
+#endif /* ifdef OSQP_CODEGEN */
 
   return exitflag;
 }
 
-#endif /* ifdef OSQP_CODEGEN */
 
 
 /****************************
@@ -1296,43 +1297,46 @@ void csc_set_data(OSQPCscMatrix* M,
 /****************************
 * Derivative functions
 ****************************/
+OSQPInt osqp_adjoint_derivative_compute(OSQPSolver* solver,
+                                        OSQPFloat*  dx,
+                                        OSQPFloat*  dy_l,
+                                        OSQPFloat*  dy_u) {
+  OSQPInt status = 0;
+
 #ifdef OSQP_ENABLE_DERIVATIVES
-OSQPInt osqp_adjoint_derivative_compute(OSQPSolver*    solver,
-                                        OSQPFloat*     dx,
-                                        OSQPFloat*     dy_l,
-                                        OSQPFloat*     dy_u) {
+  status = adjoint_derivative_compute(solver, dx, dy_l, dy_u);
+#else
+  status = OSQP_FUNC_NOT_IMPLEMENTED;
+#endif
 
-    OSQPInt status = adjoint_derivative_compute(
-            solver,
-            dx,
-            dy_l,
-            dy_u
-    );
-
-    return status;
+  return status;
 }
 
 OSQPInt osqp_adjoint_derivative_get_mat(OSQPSolver*    solver,
                                         OSQPCscMatrix* dP,
                                         OSQPCscMatrix* dA) {
-    OSQPInt status = adjoint_derivative_get_mat(
-            solver,
-            dP,
-            dA
-            );
-    return status;
+  OSQPInt status = 0;
+
+#ifdef OSQP_ENABLE_DERIVATIVES
+  status = adjoint_derivative_get_mat(solver, dP, dA);
+#else
+  status = OSQP_FUNC_NOT_IMPLEMENTED;
+#endif
+
+  return status;
 }
 
-OSQPInt osqp_adjoint_derivative_get_vec(OSQPSolver*    solver,
-                                        OSQPFloat* dq,
-                                        OSQPFloat* dl,
-                                        OSQPFloat* du) {
-    OSQPInt status = adjoint_derivative_get_vec(
-            solver,
-            dq,
-            dl,
-            du
-    );
-    return status;
-}
+OSQPInt osqp_adjoint_derivative_get_vec(OSQPSolver* solver,
+                                        OSQPFloat*  dq,
+                                        OSQPFloat*  dl,
+                                        OSQPFloat*  du) {
+  OSQPInt status = 0;
+
+#ifdef OSQP_ENABLE_DERIVATIVES
+  status = adjoint_derivative_get_vec(solver, dq, dl, du);
+#else
+  status = OSQP_FUNC_NOT_IMPLEMENTED;
 #endif
+
+  return status;
+}
