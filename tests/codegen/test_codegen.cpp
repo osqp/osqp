@@ -21,12 +21,9 @@ TEST_CASE_METHOD(OSQPTestFixture, "Basic codegen", "[codegen]")
   codegen_problem_ptr   data{generate_problem_codegen()};
   codegen_sols_data_ptr sols_data{generate_problem_codegen_sols_data()};
 
-  // Define Solver settings
-  settings->max_iter      = 2000;
-  settings->alpha         = 1.6;
+  // Test-specific solver settings
   settings->polishing     = 1;
   settings->scaling       = 0;
-  settings->verbose       = 1;
   settings->warm_starting = 0;
 
   // Define codegen settings
@@ -67,12 +64,9 @@ TEST_CASE_METHOD(OSQPTestFixture, "Codegen: Data export", "[codegen],[unconstrai
   // Codegen defines
   OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
 
-  // Define Solver settings
-  settings->max_iter      = 2000;
-  settings->alpha         = 1.6;
+  // Test-specific solver settings
   settings->polishing     = 1;
   settings->scaling       = 0;
-  settings->verbose       = 1;
   settings->warm_starting = 0;
 
   // Define codegen settings
@@ -215,12 +209,9 @@ TEST_CASE_METHOD(OSQPTestFixture, "Codegen: defines", "[codegen]")
   codegen_problem_ptr   data{generate_problem_codegen()};
   codegen_sols_data_ptr sols_data{generate_problem_codegen_sols_data()};
 
-  // Define Solver settings
-  settings->max_iter      = 2000;
-  settings->alpha         = 1.6;
+  // Test-specific solver settings
   settings->polishing     = 1;
   settings->scaling       = 0;
-  settings->verbose       = 1;
   settings->warm_starting = 0;
 
   // Define codegen settings
@@ -382,12 +373,9 @@ TEST_CASE_METHOD(OSQPTestFixture, "Codegen: Error propgatation", "[codegen]")
   codegen_problem_ptr   data{generate_problem_codegen()};
   codegen_sols_data_ptr sols_data{generate_problem_codegen_sols_data()};
 
-  // Define Solver settings
-  settings->max_iter      = 2000;
-  settings->alpha         = 1.6;
+  // Test-specific solver settings
   settings->polishing     = 1;
   settings->scaling       = 0;
-  settings->verbose       = 1;
   settings->warm_starting = 0;
 
   // Define codegen settings
@@ -488,12 +476,9 @@ TEST_CASE_METHOD(OSQPTestFixture, "Codegen: Settings", "[codegen],[settings]")
   codegen_problem_ptr   data{generate_problem_codegen()};
   codegen_sols_data_ptr sols_data{generate_problem_codegen_sols_data()};
 
-  // Define Solver settings
-  settings->max_iter      = 2000;
-  settings->alpha         = 1.6;
+  // Test-specific solver settings
   settings->polishing     = 1;
   settings->scaling       = 0;
-  settings->verbose       = 1;
   settings->warm_starting = 0;
 
   // Define codegen settings

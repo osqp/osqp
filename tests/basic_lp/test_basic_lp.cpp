@@ -15,13 +15,6 @@ TEST_CASE_METHOD(OSQPTestFixture, "Basic LP", "[solve][lp]" )
   basic_lp_problem_ptr data{generate_problem_basic_lp()};
   basic_lp_sols_data_ptr sols_data{generate_problem_basic_lp_sols_data()};
 
-  // Define Solver settings as default
-  settings->max_iter = 2000;
-  settings->scaling  = 1;
-  settings->verbose  = 1;
-  settings->eps_abs  = 1e-5;
-  settings->eps_rel  = 1e-5;
-
   /* Test with and without polishing */
   OSQPInt polish;
   OSQPInt expectedPolishStatus;

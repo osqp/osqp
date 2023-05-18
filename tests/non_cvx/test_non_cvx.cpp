@@ -15,8 +15,7 @@ TEST_CASE_METHOD(OSQPTestFixture, "Nonconvex: Setup detection", "[nonconvex],[se
   non_cvx_problem_ptr   data{generate_problem_non_cvx()};
   non_cvx_sols_data_ptr sols_data{generate_problem_non_cvx_sols_data()};
 
-  // Define Solver settings
-  settings->verbose = 1;
+  // Test-specific solver settings
   settings->adaptive_rho = 0;
 
   // Direct linear solvers detect the nonconvexity at the setup phase
@@ -60,8 +59,7 @@ TEST_CASE_METHOD(OSQPTestFixture, "Nonconvex: Solve", "[nonconvex],[solve]")
   non_cvx_problem_ptr   data{generate_problem_non_cvx()};
   non_cvx_sols_data_ptr sols_data{generate_problem_non_cvx_sols_data()};
 
-  // Define Solver settings
-  settings->verbose = 1;
+  // Test-specific solver settings
   settings->adaptive_rho = 0;
   settings->sigma = sols_data->sigma_new;
 

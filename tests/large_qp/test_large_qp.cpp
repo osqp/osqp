@@ -11,13 +11,6 @@ TEST_CASE_METHOD(OSQPTestFixture, "Large QP solve", "[solve],[qp]")
 {
   OSQPInt exitflag;
 
-  // Define Solver settings
-  settings->alpha   = 1.6;
-  settings->rho     = 0.1;
-  settings->verbose = 1;
-  settings->eps_abs = 1e-5;
-  settings->eps_rel = 1e-5;
-
   /* Test all possible linear system solvers in this test case */
   settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
 

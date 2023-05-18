@@ -105,10 +105,6 @@ TEST_CASE_METHOD(OSQPTestFixture, "Test updating P and A", "[update]")
 
   // Define Solver settings
   settings->max_iter = 1000;
-  settings->alpha    = 1.6;
-  settings->verbose  = 1;
-  settings->eps_abs  = 1e-05;
-  settings->eps_rel  = 1e-05;
 
   /* Test all possible linear system solvers in this test case */
   settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));

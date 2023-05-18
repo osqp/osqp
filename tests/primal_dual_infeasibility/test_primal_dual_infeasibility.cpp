@@ -14,12 +14,9 @@ TEST_CASE_METHOD(OSQPTestFixture, "Feasible problem", "[solve]")
 
   primal_dual_infeasibility_sols_data_ptr data{generate_problem_primal_dual_infeasibility_sols_data()};
 
-  // Define Solver settings
-  settings->max_iter  = 2000;
-  settings->alpha     = 1.6;
+  // Test-specific solver settings
   settings->polishing = 1;
   settings->scaling   = 0;
-  settings->verbose   = 1;
 
   // Setup workspace
   exitflag = osqp_setup(&tmpSolver,   data->P,    data->q,
@@ -59,12 +56,9 @@ TEST_CASE_METHOD(OSQPTestFixture, "Primal infeasible problem", "[solve],[infeasi
 
   primal_dual_infeasibility_sols_data_ptr data{generate_problem_primal_dual_infeasibility_sols_data()};
 
-  // Define Solver settings
-  settings->max_iter  = 2000;
-  settings->alpha     = 1.6;
+  // Test-specific solver settings
   settings->polishing = 0;
   settings->scaling   = 0;
-  settings->verbose   = 1;
 
   // Setup workspace
   exitflag = osqp_setup(&tmpSolver,   data->P,    data->q,
@@ -90,12 +84,9 @@ TEST_CASE_METHOD(OSQPTestFixture, "Dual infeasible problem", "[solve],[infeasibl
 
   primal_dual_infeasibility_sols_data_ptr data{generate_problem_primal_dual_infeasibility_sols_data()};
 
-  // Define Solver settings
-  settings->max_iter  = 2000;
-  settings->alpha     = 1.6;
+  // Test-specific solver settings
   settings->polishing = 0;
   settings->scaling   = 0;
-  settings->verbose   = 1;
 
   // Setup solver
   exitflag = osqp_setup(&tmpSolver,   data->P,    data->q,
@@ -121,12 +112,9 @@ TEST_CASE_METHOD(OSQPTestFixture, "Primal and dual infeasible problem", "[solve]
 
   primal_dual_infeasibility_sols_data_ptr data{generate_problem_primal_dual_infeasibility_sols_data()};
 
-  // Define Solver settings
-  settings->max_iter  = 2000;
-  settings->alpha     = 1.6;
+  // Test-specific solver settings
   settings->polishing = 0;
   settings->scaling   = 0;
-  settings->verbose   = 1;
 
   // Setup Solver
   exitflag = osqp_setup(&tmpSolver,   data->P,    data->q,

@@ -15,11 +15,6 @@ TEST_CASE_METHOD(OSQPTestFixture, "No active set", "[optimization][no active set
   no_active_set_problem_ptr data{generate_problem_no_active_set()};
   no_active_set_sols_data_ptr sols_data{generate_problem_no_active_set_sols_data()};
 
-  // Define Solver settings
-  settings->eps_abs = 1e-05;
-  settings->eps_rel = 1e-05;
-  settings->verbose = 1;
-
   /* Test with and without polishing */
   OSQPInt polish;
   OSQPInt expectedPolishStatus;

@@ -15,11 +15,6 @@ TEST_CASE_METHOD(OSQPTestFixture, "Unconstrained solve", "[unconstrained],[solve
   unconstrained_problem_ptr   data{generate_problem_unconstrained()};
   unconstrained_sols_data_ptr sols_data{generate_problem_unconstrained_sols_data()};
 
-  // Define Solver settings
-  settings->eps_abs = 1e-05;
-  settings->eps_rel = 1e-05;
-  settings->verbose = 1;
-
   /* Test with and without polishing */
   OSQPInt polish;
   OSQPInt expectedPolishStatus;

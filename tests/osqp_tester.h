@@ -39,6 +39,20 @@ public:
         // Initialize default test settings
         osqp_set_default_settings(settings.get());
         settings->device = deviceNumber;
+
+        /*
+         * Common solver settings
+         */
+        settings->rho   = 0.1;
+        settings->alpha = 1.6;
+
+        settings->max_iter = 2000;
+
+        settings->scaling = 1;
+        settings->verbose = 1;
+
+        settings->eps_abs = 1e-5;
+        settings->eps_rel = 1e-5;
     }
 
     static int deviceNumber;
