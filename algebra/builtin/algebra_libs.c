@@ -16,8 +16,25 @@ OSQPInt osqp_algebra_init_libs(OSQPInt device) {return 0;}
 
 void osqp_algebra_free_libs(void) {return;}
 
-const char* osqp_algebra_name(void) {
-  return "Built-in";
+OSQPInt osqp_algebra_name(char* name, OSQPInt nameLen) {
+  // Manually assign into the buffer to avoid using strcpy
+  name[0] = 'B';
+  name[1] = 'u';
+  name[2] = 'i';
+  name[3] = 'l';
+  name[4] = 't';
+  name[5] = '-';
+  name[6] = 'i';
+  name[7] = 'n';
+  name[8] = 0;
+
+  return 9;
+}
+
+OSQPInt osqp_algebra_device_name(char* name, OSQPInt nameLen) {
+  /* No device name for built-in algebra */
+  name[0] = 0;
+  return 0;
 }
 
 #ifndef OSQP_EMBEDDED_MODE

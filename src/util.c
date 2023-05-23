@@ -61,6 +61,15 @@ void print_setup_header(const OSQPSolver* solver) {
 
   OSQPInt nnz; // Number of nonzeros in the problem
 
+#define NAMEBUFLEN 30
+  char namebuf[NAMEBUFLEN];
+
+/* Disable device printing in embedded mode to save stack space */
+#ifndef OSQP_EMBEDDED_MODE
+  #define DEVICEBUFLEN 150
+  char devicebuf[DEVICEBUFLEN];
+#endif
+
   work     = solver->work;
   data     = solver->work->data;
   settings = solver->settings;
@@ -84,8 +93,19 @@ void print_setup_header(const OSQPSolver* solver) {
 
   // Print Settings
   c_print("settings: ");
-  c_print("algebra = %s", osqp_algebra_name());
+
+  osqp_algebra_name(namebuf, NAMEBUFLEN);
+  c_print("algebra = %s", namebuf);
   c_print(",\n          ");
+
+#ifndef OSQP_EMBEDDED_MODE
+  osqp_algebra_device_name(devicebuf, DEVICEBUFLEN);
+
+  if (devicebuf[0] != 0 ) {
+    c_print("device = %s", devicebuf);
+    c_print(",\n          ");
+  }
+#endif
 
   c_print("linear system solver = %s", work->linsys_solver->name(work->linsys_solver));
 
