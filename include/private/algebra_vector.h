@@ -140,7 +140,7 @@ void OSQPVectorf_plus(OSQPVectorf*       x,
                       const OSQPVectorf* a,
                       const OSQPVectorf* b);
 
-/* x = a - b.  x==a or x==-b at entry is possible */
+/* x = a - b.  Set x==a for x -= b. */
 void OSQPVectorf_minus(OSQPVectorf*      x,
                       const OSQPVectorf* a,
                       const OSQPVectorf* b);

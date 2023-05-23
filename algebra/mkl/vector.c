@@ -12,21 +12,19 @@ OSQPInt OSQPVectorf_is_eq(const OSQPVectorf* A,
                           const OSQPVectorf* B,
                                 OSQPFloat    tol) {
     OSQPInt i;
-    OSQPInt retval = 1;
-
 
     if (A->length != B->length) return 0;
 
     for (i=0; i < A->length; i++) {
         if (c_absval(A->values[i] - B->values[i]) > tol) {
-            retval = 0;
+            return 0;
         }
     }
-    return retval;
+    return 1;
 }
 
 OSQPVectorf* OSQPVectorf_new(const OSQPFloat* a,
-                             OSQPInt          length) {
+                                   OSQPInt    length) {
 
   OSQPVectorf* out = OSQPVectorf_malloc(length);
   if(!out) return OSQP_NULL;
@@ -38,7 +36,7 @@ OSQPVectorf* OSQPVectorf_new(const OSQPFloat* a,
 }
 
 OSQPVectori* OSQPVectori_new(const OSQPInt* a,
-                             OSQPInt        length) {
+                                   OSQPInt  length) {
 
   OSQPVectori* out = OSQPVectori_malloc(length);
   if(!out) return OSQP_NULL;
@@ -163,7 +161,7 @@ void OSQPVectorf_view_update(OSQPVectorf*       a,
                              OSQPInt            head,
                              OSQPInt            length) {
     a->length = length;
-    a->values   = b->values + head;
+    a->values = b->values + head;
 }
 
 void OSQPVectorf_view_free(OSQPVectorf* a) {
@@ -172,7 +170,7 @@ void OSQPVectorf_view_free(OSQPVectorf* a) {
 
 
 OSQPInt OSQPVectorf_length(const OSQPVectorf* a) {return a->length;}
-OSQPInt OSQPVectori_length(const OSQPVectori *a){return a->length;}
+OSQPInt OSQPVectori_length(const OSQPVectori *a) {return a->length;}
 
 /* Pointer to vector data (floats) */
 OSQPFloat* OSQPVectorf_data(const OSQPVectorf* a) {return a->values;}
@@ -181,22 +179,13 @@ OSQPFloat* OSQPVectorf_data(const OSQPVectorf* a) {return a->values;}
 void OSQPVectorf_copy(OSQPVectorf*       b,
                       const OSQPVectorf* a) {
 
-  const MKL_INT length = a->length;
-  const MKL_INT INCX = 1; //How long should the spacing be (?)
-  const MKL_INT INCY = 1;
-  blas_copy(&length, a->values, &INCX, b->values, &INCY);
-
+  blas_copy(a->length, a->values, 1, b->values, 1);
 }
 
 void OSQPVectorf_from_raw(OSQPVectorf*     b,
                           const OSQPFloat* av) {
-  OSQPInt    i;
-  OSQPInt    length = b->length;
-  OSQPFloat* bv     = b->values;
 
-  for (i = 0; i < length; i++) {
-    bv[i] = av[i];
-  }
+  blas_copy(b->length, av, 1, b->values, 1);
 }
 
 void OSQPVectori_from_raw(OSQPVectori* b,
@@ -212,13 +201,8 @@ void OSQPVectori_from_raw(OSQPVectori* b,
 
 void OSQPVectorf_to_raw(OSQPFloat*         bv,
                         const OSQPVectorf* a) {
-  OSQPInt    i;
-  OSQPInt    length = a->length;
-  OSQPFloat* av     = a->values;
 
-  for (i = 0; i < length; i++) {
-    bv[i] = av[i];
-  }
+  blas_copy(a->length, a->values, 1, bv, 1);
 }
 
 void OSQPVectori_to_raw(OSQPInt*           bv,
@@ -232,21 +216,13 @@ void OSQPVectori_to_raw(OSQPInt*           bv,
   }
 }
 
-// For now I wont deal with the raw functions, I hope they dont feel left out :(
-
-
 void OSQPVectorf_set_scalar(OSQPVectorf* a,
                             OSQPFloat    sc) {
-  OSQPInt    i;
-  OSQPInt    length = a->length;
-  OSQPFloat* av     = a->values;
 
-  for (i = 0; i < length; i++) {
-    av[i] = sc;
-  }
+  blas_copy(a->length,
+            &sc, 0, // 0 increment to treat X argument as a scalar
+            a->values, 1);
 }
-
-// I seem to have the same problem here, if I try to exploit the copy function, I will still need to compare the values and populate an initial vector
 
 void OSQPVectorf_set_scalar_conditional(OSQPVectorf*       a,
                                         const OSQPVectori* test,
@@ -269,73 +245,25 @@ void OSQPVectorf_set_scalar_conditional(OSQPVectorf*       a,
 void OSQPVectorf_mult_scalar(OSQPVectorf *a,
                              OSQPFloat    sc) {
 
-  const MKL_INT length = a->length;
-  const MKL_INT INCX = 1; //How long should the spacing be (?)
-  blas_scale(&length, &sc, a->values, &INCX);
+  blas_scale(a->length, sc, a->values, 1);
 }
 
 void OSQPVectorf_plus(OSQPVectorf*      x,
                      const OSQPVectorf* a,
                      const OSQPVectorf* b) {
 
-  OSQPInt     length = a->length;
-  OSQPFloat*  av = a->values;
-  OSQPFloat*  bv = b->values;
-  OSQPFloat*  xv = x->values;
-
-  if (x == a){
-    const MKL_INT lengthmkl = a->length;
-    const MKL_INT INCX = 1;
-    const MKL_INT INCY = 1;
-	
-    const OSQPFloat scalar = 1; // The number b is scaled by
-    blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY);
-  }
-  else {
-   /*
-    for (i = 0; i < length; i++) {
-      puts("hi");
-      xv[i] = av[i] + bv[i];
-    }
-    */
-    // need some help to get the test pointers working to be able to debug this
-    // Little experiment here
-    //printf("..\n");
-    const MKL_INT lengthmkl = a->length;
-    const MKL_INT INCX = 1; // The sapcing must be at least 1 here, not sure why
-    const MKL_INT INCY = 1;
-    const OSQPFloat scalar = 1; // The number b is scaled by
-    blas_copy(&lengthmkl, a->values, &INCX, x->values, &INCY); // I copy av into xv
-    blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY); //final addition
-
-    // I am not sure if the extra function calls justifies the blas implementation, I can only find out when I get the benchamrk code working
-    //I think I got the code to work properly now
-  }
+  // Compute x = a + b. If x == a, compute x += b.
+  // VML can support in-place operations, so it is valid to do this when x == a to accumulate.
+  vml_add(a->length, a->values, b->values, x->values);
 }
 
 void OSQPVectorf_minus(OSQPVectorf*       x,
                        const OSQPVectorf* a,
                        const OSQPVectorf* b) {
 
-  const MKL_INT lengthmkl = a->length;
-  const MKL_INT INCX = 1;
-  const MKL_INT INCY = 1;
-  OSQPFloat scalar;
-
-  if (x == a){
-    scalar = -1;
-    blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY);
-  }
-  else if (x == b){
-    scalar = 1.0;
-    OSQPVectorf_mult_scalar(x,-1.);
-    blas_axpy(&lengthmkl, &scalar, a->values, &INCX, x->values, &INCY);
-  }
-  else {
-    scalar = -1.0;
-    blas_copy(&lengthmkl, a->values, &INCX, x->values, &INCY);
-    blas_axpy(&lengthmkl, &scalar, b->values, &INCX, x->values, &INCY);
-  }
+  // Compute x = a - b. If x == a, compute x -= b.
+  // VML can support in-place operations, so it is valid to do this when x == a to accumulate.
+  vml_sub(a->length, a->values, b->values, x->values);
 }
 
 void OSQPVectorf_add_scaled(OSQPVectorf*       x,
@@ -343,21 +271,19 @@ void OSQPVectorf_add_scaled(OSQPVectorf*       x,
                             const OSQPVectorf* a,
                             OSQPFloat          scb,
                             const OSQPVectorf* b) {
-  OSQPInt i;
-  OSQPInt length = x->length;
-
-  OSQPFloat*  av = a->values;
-  OSQPFloat*  bv = b->values;
-  OSQPFloat*  xv = x->values;
 
   /* shorter version when incrementing */
   if (x == a && sca == 1.){
-    const MKL_INT lengthmkl = x->length;
-    const MKL_INT INCX = 1; // The spacing must be at least 1 here, not sure why
-    const MKL_INT INCY = 1;
-    blas_axpy(&lengthmkl, &scb, b->values, &INCX, x->values, &INCY);
+    blas_axpy(x->length, scb, b->values, 1, x->values, 1);
   }
   else {
+    OSQPInt i;
+    OSQPInt length = x->length;
+
+    OSQPFloat*  av = a->values;
+    OSQPFloat*  bv = b->values;
+    OSQPFloat*  xv = x->values;
+
     for (i = 0; i < length; i++) {
       xv[i] = sca * av[i] + scb * bv[i];
     }
@@ -396,18 +322,14 @@ void OSQPVectorf_add_scaled3(OSQPVectorf*       x,
 
 OSQPFloat OSQPVectorf_norm_inf(const OSQPVectorf* v) {
 
-  OSQPInt i;
-  OSQPInt length = v->length;
+  OSQPFloat val = 0.0;
 
-  OSQPFloat* vv      = v->values;
-  OSQPFloat  normval = 0.0;
-  OSQPFloat  absval;
-
-  for (i = 0; i < length; i++) {
-    absval = c_absval(vv[i]);
-    if (absval > normval) normval = absval;
+  if (v->length){
+    MKL_INT ind = blas_iamax(v->length, v->values, 1);
+    val = c_absval(v->values[ind]);
   }
-  return normval;
+
+  return val;
 }
 
 // OSQPFloat OSQPVectorf_norm_1(const OSQPVectorf *v){
@@ -505,11 +427,7 @@ OSQPFloat OSQPVectorf_norm_inf_diff(const OSQPVectorf* a,
 OSQPFloat OSQPVectorf_dot_prod(const OSQPVectorf* a,
                                const OSQPVectorf* b) {
 
-  const MKL_INT length = a->length;
-  const MKL_INT INCX = 1; //How long should the spacing be (?)
-  const MKL_INT INCY = 1;
-
-  return blas_dot(&length, a->values, &INCX, b->values, &INCY); // blas_dot is called the preprocesor
+  return blas_dot(a->length, a->values, 1, b->values, 1);
 }
 
 OSQPFloat OSQPVectorf_dot_prod_signed(const OSQPVectorf* a,
@@ -517,7 +435,7 @@ OSQPFloat OSQPVectorf_dot_prod_signed(const OSQPVectorf* a,
                                       OSQPInt            sign) {
 
   OSQPInt i;
-  OSQPInt length = a->length;\
+  OSQPInt length = a->length;
 
   OSQPFloat* av = a->values;
   OSQPFloat* bv = b->values;
@@ -543,24 +461,7 @@ OSQPFloat OSQPVectorf_dot_prod_signed(const OSQPVectorf* a,
 void OSQPVectorf_ew_prod(OSQPVectorf*       c,
                          const OSQPVectorf* a,
                          const OSQPVectorf* b) {
-
-  OSQPInt i;
-  OSQPInt length = a->length;
-
-  OSQPFloat* av = a->values;
-  OSQPFloat* bv = b->values;
-  OSQPFloat* cv = c->values;
-
-  if (c == a) {
-    for (i = 0; i < length; i++) {
-      cv[i] *= bv[i];
-    }
-  }
-  else {
-    for (i = 0; i < length; i++) {
-      cv[i] = av[i] * bv[i];
-    }
-  }
+  vml_mul(a->length, a->values, b->values, c->values );
 }
 
 OSQPInt OSQPVectorf_all_leq(const OSQPVectorf* l,
@@ -703,13 +604,10 @@ OSQPInt OSQPVectorf_in_reccone(const OSQPVectorf* y,
 
 OSQPFloat OSQPVectorf_norm_1(const OSQPVectorf* a) {
 
-  OSQPInt       length = a->length;
-  const MKL_INT inca   = 1;
-
   OSQPFloat val = 0.0;
 
-  if (length) {
-    val = blas_asum(&length, a->values, &inca);
+  if (a->length) {
+    val = blas_asum(a->length, a->values, 1);
   }
 
   return val;
@@ -718,87 +616,42 @@ OSQPFloat OSQPVectorf_norm_1(const OSQPVectorf* a) {
 void OSQPVectorf_ew_reciprocal(OSQPVectorf*       b,
                                const OSQPVectorf* a) {
 
-  OSQPInt i;
-  OSQPInt length = a->length;
-
-  OSQPFloat* av = a->values;
-  OSQPFloat* bv = b->values;
-
-  for (i = 0; i < length; i++) {
-    bv[i] = (OSQPFloat)1.0 / av[i];
-  }
+  vml_inv(a->length, a->values, b->values);
 }
 
 void OSQPVectorf_ew_sqrt(OSQPVectorf* a) {
 
-  OSQPInt i;
-  OSQPInt length = a->length;
-
-  OSQPFloat* av = a->values;
-
-  for (i = 0; i < length; i++) {
-    av[i] = c_sqrt(av[i]);
-  }
+  vml_sqrt(a->length, a->values, a->values);
 }
 
 void OSQPVectorf_ew_max(OSQPVectorf*       c,
                         const OSQPVectorf* a,
                         OSQPFloat          max_val) {
 
-  OSQPInt i;
-  OSQPInt length = c->length;
-
-  OSQPFloat* av = a->values;
-  OSQPFloat* cv = c->values;
-
-  for (i = 0; i < length; i++) {
-    cv[i] = c_max(av[i], max_val);
-  }
+  // 0 increment on the b input to make it a scalar value
+  vml_maxinc(a->length, a->values, 1, &max_val, 0, c->values, 1);
 }
 
 void OSQPVectorf_ew_min(OSQPVectorf*       c,
                         const OSQPVectorf* a,
                         OSQPFloat          min_val) {
 
-  OSQPInt i;
-  OSQPInt length = a->length;
-
-  OSQPFloat* av = a->values;
-  OSQPFloat* cv = c->values;
-
-  for (i = 0; i < length; i++) {
-    cv[i] = c_min(av[i], min_val);
-  }
+  // 0 increment on the b input to make it a scalar value
+  vml_mininc(a->length, a->values, 1, &min_val, 0, c->values, 1);
 }
 
 void OSQPVectorf_ew_max_vec(OSQPVectorf*       c,
                             const OSQPVectorf* a,
                             const OSQPVectorf* b) {
-  OSQPInt i;
-  OSQPInt length = a->length;
 
-  OSQPFloat* av = a->values;
-  OSQPFloat* bv = b->values;
-  OSQPFloat* cv = c->values;
-
-  for (i = 0; i < length; i++) {
-    cv[i] = c_max(av[i], bv[i]);
-  }
+  vml_max(a->length, a->values, b->values, c->values);
 }
 
 void OSQPVectorf_ew_min_vec(OSQPVectorf*       c,
                             const OSQPVectorf* a,
                             const OSQPVectorf* b) {
-  OSQPInt i;
-  OSQPInt length = a->length;
 
-  OSQPFloat* av = a->values;
-  OSQPFloat* bv = b->values;
-  OSQPFloat* cv = c->values;
-
-  for (i = 0; i < length; i++) {
-    cv[i] = c_min(av[i], bv[i]);
-  }
+  vml_min(a->length, a->values, b->values, c->values);
 }
 
 OSQPInt OSQPVectorf_ew_bounds_type(OSQPVectori*       iseq,
