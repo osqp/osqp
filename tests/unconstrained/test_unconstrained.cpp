@@ -7,13 +7,9 @@
 #include "unconstrained_data.h"
 
 
-TEST_CASE_METHOD(OSQPTestFixture, "Unconstrained solve", "[unconstrained],[solve]")
+TEST_CASE_METHOD(unconstrained_test_fixture, "Unconstrained solve", "[unconstrained],[solve]")
 {
   OSQPInt exitflag;
-
-  // Populate data
-  unconstrained_problem_ptr   data{generate_problem_unconstrained()};
-  unconstrained_sols_data_ptr sols_data{generate_problem_unconstrained_sols_data()};
 
   /* Test with and without polishing */
   OSQPInt polish;

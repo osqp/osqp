@@ -7,13 +7,9 @@
 #include "non_cvx_data.h"
 
 #ifndef OSQP_ALGEBRA_CUDA
-TEST_CASE_METHOD(OSQPTestFixture, "Nonconvex: Setup detection", "[nonconvex],[setup]")
+TEST_CASE_METHOD(non_cvx_test_fixture, "Nonconvex: Setup detection", "[nonconvex],[setup]")
 {
   OSQPInt exitflag;
-
-  // Data
-  non_cvx_problem_ptr   data{generate_problem_non_cvx()};
-  non_cvx_sols_data_ptr sols_data{generate_problem_non_cvx_sols_data()};
 
   // Test-specific solver settings
   settings->adaptive_rho = 0;
@@ -51,13 +47,9 @@ TEST_CASE_METHOD(OSQPTestFixture, "Nonconvex: Setup detection", "[nonconvex],[se
 }
 #endif
 
-TEST_CASE_METHOD(OSQPTestFixture, "Nonconvex: Solve", "[nonconvex],[solve]")
+TEST_CASE_METHOD(non_cvx_test_fixture, "Nonconvex: Solve", "[nonconvex],[solve]")
 {
   OSQPInt exitflag;
-
-  // Data
-  non_cvx_problem_ptr   data{generate_problem_non_cvx()};
-  non_cvx_sols_data_ptr sols_data{generate_problem_non_cvx_sols_data()};
 
   // Test-specific solver settings
   settings->adaptive_rho = 0;

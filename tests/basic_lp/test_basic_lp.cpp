@@ -7,13 +7,9 @@
 #include "basic_lp_data.h"
 
 
-TEST_CASE_METHOD(OSQPTestFixture, "Basic LP", "[solve][lp]" )
+TEST_CASE_METHOD(basic_lp_test_fixture, "Basic LP", "[solve][lp]")
 {
   OSQPInt exitflag;
-
-  // Populate data
-  basic_lp_problem_ptr data{generate_problem_basic_lp()};
-  basic_lp_sols_data_ptr sols_data{generate_problem_basic_lp_sols_data()};
 
   /* Test with and without polishing */
   OSQPInt polish;

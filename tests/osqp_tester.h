@@ -15,10 +15,28 @@
 #define TESTS_TOL 1e-3      // Slightly larger tolerance for floats
 #endif
 
-/* create structure to hold problem data */
-/* similar to OSQP internal container, but */
-/* holding only bare array types and csc */
-typedef struct {
+/* QP problem data */
+class OSQPTestData {
+public:
+    OSQPTestData() {};
+
+    virtual ~OSQPTestData() {
+        // Clean vectors
+        c_free(l);
+        c_free(u);
+        c_free(q);
+
+        //Clean Matrices
+        c_free(A->x);
+        c_free(A->i);
+        c_free(A->p);
+        c_free(A);
+        c_free(P->x);
+        c_free(P->i);
+        c_free(P->p);
+        c_free(P);
+    };
+
     OSQPInt        n;
     OSQPInt        m;
     OSQPCscMatrix* P;
@@ -26,14 +44,23 @@ typedef struct {
     OSQPCscMatrix* A;
     OSQPFloat*     l;
     OSQPFloat*     u;
-} OSQPTestData;
+};
+
+#include <memory>
+
+class OSQPBaseFixture {
+public:
+    OSQPBaseFixture() {}
+    virtual ~OSQPBaseFixture() {}
+};
 
 /*
  * Test fixture to hold various types needed for OSQP tests
  */
-class OSQPTestFixture {
+class OSQPTestFixture{
 public:
-    OSQPTestFixture() {
+    OSQPTestFixture()
+    {
         settings.reset((OSQPSettings*) c_malloc(sizeof(OSQPSettings)));
 
         // Initialize default test settings
@@ -55,6 +82,9 @@ public:
         settings->eps_rel = 1e-5;
     }
 
+    virtual ~OSQPTestFixture() {}
+
+    /* Device number to use in the test suite */
     static int deviceNumber;
 
 protected:
@@ -64,6 +94,9 @@ protected:
     // OSQP Solver itself
     OSQPSolver*    tmpSolver = nullptr;
     OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
+
+    // Test data
+    std::unique_ptr<OSQPTestData> data;
 };
 
 #endif /* ifndef OSQP_TESTER_H */

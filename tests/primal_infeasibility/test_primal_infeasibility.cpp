@@ -8,13 +8,9 @@
 #include "primal_infeasibility_data.h"
 
 
-TEST_CASE_METHOD(OSQPTestFixture, "Primal infeasibility", "[solve],[infeasible]")
+TEST_CASE_METHOD(primal_infeasibility_test_fixture, "Primal infeasibility", "[solve],[infeasible]")
 {
   OSQPInt exitflag;
-
-  // Problem data
-  primal_infeasibility_problem_ptr   data{generate_problem_primal_infeasibility()};
-  primal_infeasibility_sols_data_ptr sols_data{generate_problem_primal_infeasibility_sols_data()};
 
   // Test-specific solver settings
   settings->polishing     = 1;

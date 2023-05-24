@@ -7,13 +7,9 @@
 #include "no_active_set_data.h"
 
 
-TEST_CASE_METHOD(OSQPTestFixture, "No active set", "[optimization][no active set]" )
+TEST_CASE_METHOD(no_active_set_test_fixture, "No active set", "[optimization][no active set]" )
 {
   OSQPInt exitflag;
-
-  // Populate data
-  no_active_set_problem_ptr data{generate_problem_no_active_set()};
-  no_active_set_sols_data_ptr sols_data{generate_problem_no_active_set_sols_data()};
 
   /* Test with and without polishing */
   OSQPInt polish;
