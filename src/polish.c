@@ -5,7 +5,7 @@
 #include "lin_sys.h"
 #include "kkt.h"
 #include "proj.h"
-#include "error.h"
+#include "osqp_error.h"
 
 /**
  * Form reduced matrix A that contains only rows that are active at the
