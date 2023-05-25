@@ -1,3 +1,14 @@
+Version 0.6.3 (25 May 2023)
+------------------------------
+* Fix MKL function prototypes (required for CRAN compilation) (PR [#487](https://github.com/osqp/osqp/pull/487))
+* Use a constant interval for adaptive rho when in embedded=2 mode (PR [#347](https://github.com/osqp/osqp/pull/347))
+* Include version.h in the OSQP installed headers (Fixes [#323](https://github.com/osqp/osqp/issues/323))
+* Switch unit testing to use Catch2
+* Switch to GitHub actions CI system
+* Switched binary distribution from bintray to GitHub releases
+* Various documentation fixes and improvements
+
+
 Version 0.6.2 (6 January 2021)
 ------------------------------
 * Fix segfault python multithreading
