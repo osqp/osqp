@@ -217,6 +217,10 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
     work->constr_type = OSQPVectori_calloc(m);
     if (!(work->constr_type)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
   }
+  else {
+    work->rho_vec     = OSQP_NULL;
+    work->rho_inv_vec = OSQP_NULL;
+  }
 
   // Allocate internal solver variables (ADMM steps)
   work->x           = OSQPVectorf_calloc(n);
