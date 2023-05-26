@@ -781,6 +781,7 @@ TEST_CASE_METHOD(basic_qp_test_fixture, "Basic QP: Update rho", "[update][qp]")
   settings->linsys_solver     = linsys;
 
   // Setup solver
+  solver.reset(nullptr);  // TODO (CUDA): Needed until CUDA supports multiple instances
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,
                         data->A, data->l, data->u,
                         data->m, data->n, settings.get());
