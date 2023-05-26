@@ -659,9 +659,12 @@ TEST_CASE_METHOD(basic_qp_test_fixture, "Basic QP: Termination", "[solve][qp]")
   OSQPInt exitflag;
 
   // Problem-specific settings
+  osqp_set_default_settings(settings.get());
   settings->max_iter          = 200;
+  settings->alpha             = 1.6;
   settings->polishing         = 0;
   settings->scaling           = 0;
+  settings->verbose           = 1;
   settings->check_termination = 0;
   settings->warm_starting     = 0;
 
