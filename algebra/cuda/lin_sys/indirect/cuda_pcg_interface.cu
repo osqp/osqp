@@ -145,13 +145,13 @@ OSQPInt init_linsys_solver_cudapcg(cudapcg_solver**    sp,
   s->d_P_diag_ind = P->d_P_diag_ind;
   s->d_rho_vec    = rho_vec ? rho_vec->d_val : NULL;
 
-  if (!polishing) {
-    s->h_sigma = settings->sigma;
-    s->h_rho   = settings->rho;
-  }
-  else {
+  if (polishing) {
     s->h_sigma = settings->delta;
     s->h_rho   = 1. / settings->delta;
+  }
+  else {
+    s->h_sigma = settings->sigma;
+    s->h_rho   = settings->rho;
   }
 
   /* Allocate raw PCG iterates */
