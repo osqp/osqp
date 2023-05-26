@@ -10,6 +10,10 @@
 * Utility Functions  *
 **********************/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 # ifndef OSQP_EMBEDDED_MODE
 
 /**
@@ -113,5 +117,8 @@ void print_vec_int(const OSQPInt* x,
 
 /*! \endcond */
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ifndef UTIL_H */

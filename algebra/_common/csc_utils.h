@@ -1,10 +1,13 @@
 #ifndef CSC_UTILS_H
 #define CSC_UTILS_H
 
-# include "osqp_configure.h"
-# include "osqp_api_types.h"
-# include "glob_opts.h"
+#include "osqp_configure.h"
+#include "osqp_api_types.h"
+#include "glob_opts.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // ========== Logical, testing and debug ===========
 
@@ -200,5 +203,9 @@ OSQPCscMatrix* csc_symperm(const OSQPCscMatrix* A,
                                  OSQPInt        values);
 
 #endif /* OSQP_EMBEDDED_MODE */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ifndef CSC_UTILS_H */

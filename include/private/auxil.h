@@ -1,7 +1,11 @@
 #ifndef AUXIL_H
 #define AUXIL_H
 
-# include "types.h"
+#include "types.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /***********************************************************
 * Auxiliary functions needed to evaluate ADMM iterations * *
@@ -179,5 +183,8 @@ OSQPInt validate_data(const OSQPCscMatrix* P,
 OSQPInt validate_settings(const OSQPSettings* settings,
                           OSQPInt             from_setup);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ifndef AUXIL_H */

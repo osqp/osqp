@@ -4,6 +4,10 @@
 #include "algebra_matrix.h"
 #include "algebra_vector.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Mathematical functions for performing operations using the reduced
  * KKT system.
@@ -67,5 +71,9 @@ void reduced_kkt_compute_rhs(const OSQPMatrix*  A,
                                    OSQPVectorf* b1,
                              const OSQPVectorf* b2,
                                    OSQPVectorf* work);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* REDUCED_SYSTEM_H_ */

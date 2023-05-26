@@ -6,6 +6,10 @@
 #include "types.h"  //OSQPMatrix and OSQPVector[fi] types
 #include "qdldl_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * QDLDL solver structure
  */
@@ -188,6 +192,10 @@ OSQPInt adjoint_derivative_qdldl(qdldl_solver*      s,
                                  const OSQPVectorf* slacks,
                                  const OSQPVectorf* rhs);
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* QDLDL_INTERFACE_H */

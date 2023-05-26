@@ -1,7 +1,11 @@
 #ifndef ALGEBRA_IMPL_H
-# define ALGEBRA_IMPL_H
+#define ALGEBRA_IMPL_H
 
 #include "csc_math.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*********************************************
 *   Internal definition of OSQPVector types
@@ -36,5 +40,8 @@ struct OSQPMatrix_ {
   OSQPMatrix_symmetry_type symmetry;
 };
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ifndef ALGEBRA_IMPL_H */

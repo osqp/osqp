@@ -3,18 +3,18 @@
 
 #include <stdio.h>
 #include <catch2/catch.hpp>
+
 #include "osqp.h"
 
-extern "C" {
-  #include "algebra_matrix.h"
-  #include "algebra_vector.h"
-  #include "lin_alg.h"
-  #include "util.h"
+/* Main linar algebra includes */
+#include "algebra_matrix.h"
+#include "algebra_vector.h"
+#include "lin_alg.h"
+#include "util.h"
 
 #ifndef OSQP_ALGEBRA_CUDA
-    #include "csc_utils.h"
+#include "csc_utils.h"
 #endif
-}
 
 //helper functions
 #include "test_utils.h"

@@ -3,8 +3,12 @@
 #define POLISH_H
 
 
-# include "osqp.h"
-# include "types.h"
+#include "osqp.h"
+#include "types.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Solution polish: Solve equality constrained QP with assumed active
@@ -15,5 +19,8 @@
  */
 OSQPInt polish(OSQPSolver* solver);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ifndef POLISH_H */

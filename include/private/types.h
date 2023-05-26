@@ -1,15 +1,19 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include "osqp.h"       //includes user API types
 
-# include "glob_opts.h"
-# include "osqp.h"       //includes user API types
-# include "algebra_matrix.h"
-# include "algebra_vector.h"
+#include "algebra_matrix.h"
+#include "algebra_vector.h"
+#include "glob_opts.h"
 
 /******************
 * Internal types *
 ******************/
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Linear system solver structure (sublevel objects initialize it differently)
@@ -256,5 +260,8 @@ struct linsys_solver {
   OSQPInt nthreads; ///< number of threads active
 };
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ifndef TYPES_H */
