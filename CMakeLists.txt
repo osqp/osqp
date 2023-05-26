@@ -47,7 +47,7 @@ endif()
 # conda, this would mean specifying: -DMKL_DIR=/path/to/oneapi/mkl/latest/lib/cmake/mkl
 # -DMKL_ROOT=/path/to/oneapi/mkl/latest
 # ----------------------------------------------
-if(NOT DEFINED ENV{MKL_ROOT})
+if(NOT DEFINED ENV{MKL_ROOT} AND NOT MKL_ROOT)
   if(DEFINED ENV{CONDA_PREFIX})
     message(STATUS "Detected Conda environment - setting MKL_ROOT to $CONDA_PREFIX")
     set(MKL_ROOT $ENV{CONDA_PREFIX})
