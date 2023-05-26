@@ -720,6 +720,9 @@ TEST_CASE_METHOD(basic_qp_test_fixture, "Basic QP: Update rho", "[update][qp]")
   // rho to use
   OSQPFloat rho;
 
+  /* Test all possible linear system solvers in this test case */
+  osqp_linsys_solver_type linsys = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
+
   // Define number of iterations to compare
   OSQPInt n_iter_new_solver;
   OSQPInt n_iter_update_rho;
@@ -732,6 +735,7 @@ TEST_CASE_METHOD(basic_qp_test_fixture, "Basic QP: Update rho", "[update][qp]")
   settings->eps_abs           = 5e-05;
   settings->eps_rel           = 5e-05;
   settings->check_termination = 1;
+  settings->linsys_solver     = linsys;
 
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,
@@ -774,6 +778,7 @@ TEST_CASE_METHOD(basic_qp_test_fixture, "Basic QP: Update rho", "[update][qp]")
   settings->check_termination = 1;
   settings->eps_abs           = 5e-05;
   settings->eps_rel           = 5e-05;
+  settings->linsys_solver     = linsys;
 
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,
@@ -897,6 +902,9 @@ TEST_CASE_METHOD(basic_qp_test_fixture, "Basic QP: Warm start", "[solve][qp][war
                         data->A, data->l, data->u,
                         data->m, data->n, settings.get());
   solver.reset(tmpSolver);
+
+  // Setup correct
+  mu_assert("Basic QP test warm start: Setup error!", exitflag == 0);
 
   // Solve Problem initially
   osqp_solve(solver.get());
