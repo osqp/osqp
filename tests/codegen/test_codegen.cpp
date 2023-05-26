@@ -10,31 +10,16 @@
 #include "unconstrained_data.h"
 
 #ifdef OSQP_CODEGEN
-TEST_CASE("Basic codegen", "[codegen]")
+TEST_CASE_METHOD(codegen_test_fixture, "Basic codegen", "[codegen]")
 {
   OSQPInt exitflag;
-
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
 
   // Codegen defines
   OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
 
-  // Structures
-  OSQPSolver *tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
-
-  // Problem data
-  codegen_problem_ptr   data{generate_problem_codegen()};
-  codegen_sols_data_ptr sols_data{generate_problem_codegen_sols_data()};
-
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
-  settings->max_iter      = 2000;
-  settings->alpha         = 1.6;
+  // Test-specific solver settings
   settings->polishing     = 1;
   settings->scaling       = 0;
-  settings->verbose       = 1;
   settings->warm_starting = 0;
 
   // Define codegen settings
@@ -68,27 +53,17 @@ TEST_CASE("Basic codegen", "[codegen]")
             exitflag == OSQP_NO_ERROR);
 }
 
-TEST_CASE("Codegen: Data export", "[codegen],[unconstrained],[lp],[qp],[nonconvex]")
+/* We want test data from the unconstrained problem */
+TEST_CASE_METHOD(unconstrained_test_fixture, "Codegen: Unconstrained problem data export", "[codegen],[unconstrained]")
 {
   OSQPInt exitflag;
-
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
 
   // Codegen defines
   OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
 
-  // Structures
-  OSQPSolver *tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
-
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
-  settings->max_iter      = 2000;
-  settings->alpha         = 1.6;
+  // Test-specific solver settings
   settings->polishing     = 1;
   settings->scaling       = 0;
-  settings->verbose       = 1;
   settings->warm_starting = 0;
 
   // Define codegen settings
@@ -96,155 +71,160 @@ TEST_CASE("Codegen: Data export", "[codegen],[unconstrained],[lp],[qp],[nonconve
   defines->embedded_mode = 1;      // vector update
   defines->float_type    = 1;      // floats
 
-  SECTION( "Unconstrained" ) {
-    OSQPInt embedded;
-    std::string dir;
+  OSQPInt embedded;
+  std::string dir;
 
-    std::tie( embedded, dir ) =
-      GENERATE( table<OSQPInt, std::string>(
-          { /* first is embedded mode, second is output directory */
-            std::make_tuple( 1, CODEGEN1_DIR ),
-            std::make_tuple( 2, CODEGEN2_DIR ) } ) );
+  std::tie( embedded, dir ) =
+    GENERATE( table<OSQPInt, std::string>(
+        { /* first is embedded mode, second is output directory */
+          std::make_tuple( 1, CODEGEN1_DIR ),
+          std::make_tuple( 2, CODEGEN2_DIR ) } ) );
 
-    char name[100];
-    snprintf(name, 100, "data_unconstrained_embedded_%d_", embedded);
+  char name[100];
+  snprintf(name, 100, "data_unconstrained_embedded_%d_", embedded);
 
-    CAPTURE(embedded);
+  CAPTURE(embedded);
 
-    // Problem data
-    unconstrained_problem_ptr   data{generate_problem_unconstrained()};
-    unconstrained_sols_data_ptr sols_data{generate_problem_unconstrained_sols_data()};
+  // Setup solver
+  exitflag = osqp_setup(&tmpSolver, data->P, data->q,
+                        data->A, data->l, data->u,
+                        data->m, data->n, settings.get());
+  solver.reset(tmpSolver);
 
-    // Setup solver
-    exitflag = osqp_setup(&tmpSolver, data->P, data->q,
-                          data->A, data->l, data->u,
-                          data->m, data->n, settings.get());
-    solver.reset(tmpSolver);
+  // Setup correct
+  mu_assert("Setup error!", exitflag == 0);
 
-    // Setup correct
-    mu_assert("Setup error!", exitflag == 0);
+  defines->embedded_mode = embedded;
 
-    defines->embedded_mode = embedded;
+  exitflag = osqp_codegen(solver.get(), dir.c_str(), name, defines.get());
 
-    exitflag = osqp_codegen(solver.get(), dir.c_str(), name, defines.get());
-
-    // Codegen should work or error as appropriate
-    mu_assert("Unconstrained should have worked!",
-              exitflag == OSQP_NO_ERROR);
-  }
-
-  SECTION( "Linear program" ) {
-    OSQPInt embedded;
-    std::string dir;
-
-    std::tie( embedded, dir ) =
-      GENERATE( table<OSQPInt, std::string>(
-          { /* first is embedded mode, second is output directory */
-            std::make_tuple( 1, CODEGEN1_DIR ),
-            std::make_tuple( 2, CODEGEN2_DIR ) } ) );
-
-    char name[100];
-    snprintf(name, 100, "data_lp_embedded_%d_", embedded);
-
-    CAPTURE(embedded);
-
-    // Problem data
-    basic_lp_problem_ptr   data{generate_problem_basic_lp()};
-    basic_lp_sols_data_ptr sols_data{generate_problem_basic_lp_sols_data()};
-
-    // Setup solver
-    exitflag = osqp_setup(&tmpSolver, data->P, data->q,
-                          data->A, data->l, data->u,
-                          data->m, data->n, settings.get());
-    solver.reset(tmpSolver);
-
-    // Setup correct
-    mu_assert("Setup error!", exitflag == 0);
-
-    defines->embedded_mode = embedded;
-
-    exitflag = osqp_codegen(solver.get(), dir.c_str(), name, defines.get());
-
-    // Codegen should work or error as appropriate
-    mu_assert("Linear program should have worked!",
-              exitflag == OSQP_NO_ERROR);
-  }
-
-  SECTION( "Nonconvex" ) {
-    OSQPInt embedded;
-    std::string dir;
-
-    std::tie( embedded, dir ) =
-      GENERATE( table<OSQPInt, std::string>(
-          { /* first is embedded mode, second is output directory */
-            std::make_tuple( 1, CODEGEN1_DIR ),
-            std::make_tuple( 2, CODEGEN2_DIR ) } ) );
-
-    OSQPFloat sigma;
-    OSQPInt   sigma_num;
-    OSQPInt   expected_error;
-
-    std::tie( sigma, sigma_num, expected_error ) =
-      GENERATE( table<OSQPFloat, OSQPInt, OSQPInt>(
-          { /* first is sigma value, second is the filename parameter, third is the expected return value */
-            std::make_tuple( 1e-6, 1, OSQP_NONCVX_ERROR ),
-            std::make_tuple(    5, 2, OSQP_NO_ERROR ) } ) );
-
-    char name[100];
-    snprintf(name, 100, "data_nonconvex_%d_embedded_%d_", sigma_num, embedded);
-
-    CAPTURE(embedded, sigma);
-
-    // Problem data
-    non_cvx_problem_ptr   data{generate_problem_non_cvx()};
-    non_cvx_sols_data_ptr sols_data{generate_problem_non_cvx_sols_data()};
-
-    // Update solver settings
-    settings->sigma = sigma;
-    defines->embedded_mode = embedded;
-
-    // Setup solver
-    exitflag = osqp_setup(&tmpSolver, data->P, data->q,
-                          data->A, data->l, data->u,
-                          data->m, data->n, settings.get());
-    solver.reset(tmpSolver);
-
-    // Setup correct
-    mu_assert("Setup error!", exitflag == expected_error);
-
-    exitflag = osqp_codegen(solver.get(), dir.c_str(), name, defines.get());
-
-    // Codegen should work or error as appropriate
-    mu_assert("Nonconvex codegen error!",
-              exitflag == expected_error);
-  }
+  // Codegen should work or error as appropriate
+  mu_assert("Unconstrained should have worked!",
+            exitflag == OSQP_NO_ERROR);
 }
 
-TEST_CASE("Codegen: defines", "[codegen]")
+/* We want test data from the LP test case */
+TEST_CASE_METHOD(basic_lp_test_fixture, "Codegen: Linear program data export", "[codegen],[lp]")
 {
   OSQPInt exitflag;
-
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
 
   // Codegen defines
   OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
 
-  // Structures
-  OSQPSolver *tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
-
-  // Problem data
-  codegen_problem_ptr   data{generate_problem_codegen()};
-  codegen_sols_data_ptr sols_data{generate_problem_codegen_sols_data()};
-
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
-  settings->max_iter      = 2000;
-  settings->alpha         = 1.6;
+  // Test-specific solver settings
   settings->polishing     = 1;
   settings->scaling       = 0;
-  settings->verbose       = 1;
+  settings->warm_starting = 0;
+
+  // Define codegen settings
+  osqp_set_default_codegen_defines(defines.get());
+  defines->embedded_mode = 1;      // vector update
+  defines->float_type    = 1;      // floats
+
+  OSQPInt embedded;
+  std::string dir;
+
+  std::tie( embedded, dir ) =
+    GENERATE( table<OSQPInt, std::string>(
+        { /* first is embedded mode, second is output directory */
+          std::make_tuple( 1, CODEGEN1_DIR ),
+          std::make_tuple( 2, CODEGEN2_DIR ) } ) );
+
+  char name[100];
+  snprintf(name, 100, "data_lp_embedded_%d_", embedded);
+
+  CAPTURE(embedded);
+
+  // Setup solver
+  exitflag = osqp_setup(&tmpSolver, data->P, data->q,
+                        data->A, data->l, data->u,
+                        data->m, data->n, settings.get());
+  solver.reset(tmpSolver);
+
+  // Setup correct
+  mu_assert("Setup error!", exitflag == 0);
+
+  defines->embedded_mode = embedded;
+
+  exitflag = osqp_codegen(solver.get(), dir.c_str(), name, defines.get());
+
+  // Codegen should work or error as appropriate
+  mu_assert("Linear program should have worked!",
+            exitflag == OSQP_NO_ERROR);
+}
+
+/* We want test data from the non convex test case */
+TEST_CASE_METHOD(non_cvx_test_fixture, "Codegen: Data export", "[codegen],[nonconvex]")
+{
+  OSQPInt exitflag;
+
+  // Codegen defines
+  OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
+
+  // Test-specific solver settings
+  settings->polishing     = 1;
+  settings->scaling       = 0;
+  settings->warm_starting = 0;
+
+  // Define codegen settings
+  osqp_set_default_codegen_defines(defines.get());
+  defines->embedded_mode = 1;      // vector update
+  defines->float_type    = 1;      // floats
+
+  OSQPInt embedded;
+  std::string dir;
+
+  std::tie( embedded, dir ) =
+    GENERATE( table<OSQPInt, std::string>(
+        { /* first is embedded mode, second is output directory */
+          std::make_tuple( 1, CODEGEN1_DIR ),
+          std::make_tuple( 2, CODEGEN2_DIR ) } ) );
+
+  OSQPFloat sigma;
+  OSQPInt   sigma_num;
+  OSQPInt   expected_error;
+
+  std::tie( sigma, sigma_num, expected_error ) =
+    GENERATE( table<OSQPFloat, OSQPInt, OSQPInt>(
+        { /* first is sigma value, second is the filename parameter, third is the expected return value */
+          std::make_tuple( 1e-6, 1, OSQP_NONCVX_ERROR ),
+          std::make_tuple(    5, 2, OSQP_NO_ERROR ) } ) );
+
+  char name[100];
+  snprintf(name, 100, "data_nonconvex_%d_embedded_%d_", sigma_num, embedded);
+
+  CAPTURE(embedded, sigma);
+
+  // Update solver settings
+  settings->sigma = sigma;
+  defines->embedded_mode = embedded;
+
+  // Setup solver
+  exitflag = osqp_setup(&tmpSolver, data->P, data->q,
+                        data->A, data->l, data->u,
+                        data->m, data->n, settings.get());
+  solver.reset(tmpSolver);
+
+  // Setup correct
+  mu_assert("Setup error!", exitflag == expected_error);
+
+  exitflag = osqp_codegen(solver.get(), dir.c_str(), name, defines.get());
+
+  // Codegen should work or error as appropriate
+  mu_assert("Nonconvex codegen error!",
+            exitflag == expected_error);
+}
+
+TEST_CASE_METHOD(codegen_test_fixture, "Codegen: defines", "[codegen]")
+{
+  OSQPInt exitflag;
+
+  // Codegen defines
+  OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
+
+  // Test-specific solver settings
+  settings->polishing     = 1;
+  settings->scaling       = 0;
   settings->warm_starting = 0;
 
   // Define codegen settings
@@ -395,31 +375,16 @@ TEST_CASE("Codegen: defines", "[codegen]")
   }
 }
 
-TEST_CASE("Codegen: Error propgatation", "[codegen]")
+TEST_CASE_METHOD(codegen_test_fixture, "Codegen: Error propgatation", "[codegen]")
 {
   OSQPInt exitflag;
-
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
 
   // Codegen defines
   OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
 
-  // Structures
-  OSQPSolver *tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
-
-  // Problem data
-  codegen_problem_ptr   data{generate_problem_codegen()};
-  codegen_sols_data_ptr sols_data{generate_problem_codegen_sols_data()};
-
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
-  settings->max_iter      = 2000;
-  settings->alpha         = 1.6;
+  // Test-specific solver settings
   settings->polishing     = 1;
   settings->scaling       = 0;
-  settings->verbose       = 1;
   settings->warm_starting = 0;
 
   // Define codegen settings
@@ -509,31 +474,16 @@ TEST_CASE("Codegen: Error propgatation", "[codegen]")
   }
 }
 
-TEST_CASE("Codegen: Settings", "[codegen],[settings]")
+TEST_CASE_METHOD(codegen_test_fixture, "Codegen: Settings", "[codegen],[settings]")
 {
   OSQPInt exitflag;
-
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
 
   // Codegen defines
   OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
 
-  // Structures
-  OSQPSolver *tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
-
-  // Problem data
-  codegen_problem_ptr   data{generate_problem_codegen()};
-  codegen_sols_data_ptr sols_data{generate_problem_codegen_sols_data()};
-
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
-  settings->max_iter      = 2000;
-  settings->alpha         = 1.6;
+  // Test-specific solver settings
   settings->polishing     = 1;
   settings->scaling       = 0;
-  settings->verbose       = 1;
   settings->warm_starting = 0;
 
   // Define codegen settings

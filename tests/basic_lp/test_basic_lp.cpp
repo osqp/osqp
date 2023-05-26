@@ -7,28 +7,9 @@
 #include "basic_lp_data.h"
 
 
-TEST_CASE( "Basic LP", "[solve][lp]" )
+TEST_CASE_METHOD(basic_lp_test_fixture, "Basic LP", "[solve][lp]")
 {
   OSQPInt exitflag;
-
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
-
-  // Structures
-  OSQPSolver*    tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
-
-  // Populate data
-  basic_lp_problem_ptr data{generate_problem_basic_lp()};
-  basic_lp_sols_data_ptr sols_data{generate_problem_basic_lp_sols_data()};
-
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
-  settings->max_iter = 2000;
-  settings->scaling  = 1;
-  settings->verbose  = 1;
-  settings->eps_abs  = 1e-5;
-  settings->eps_rel  = 1e-5;
 
   /* Test with and without polishing */
   OSQPInt polish;

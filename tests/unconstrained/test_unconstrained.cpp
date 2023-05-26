@@ -7,26 +7,9 @@
 #include "unconstrained_data.h"
 
 
-TEST_CASE("Unconstrained solve", "[unconstrained],[solve]")
+TEST_CASE_METHOD(unconstrained_test_fixture, "Unconstrained solve", "[unconstrained],[solve]")
 {
   OSQPInt exitflag;
-
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
-
-  // Structures
-  OSQPSolver*    tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
-
-  // Populate data
-  unconstrained_problem_ptr   data{generate_problem_unconstrained()};
-  unconstrained_sols_data_ptr sols_data{generate_problem_unconstrained_sols_data()};
-
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
-  settings->eps_abs = 1e-05;
-  settings->eps_rel = 1e-05;
-  settings->verbose = 1;
 
   /* Test with and without polishing */
   OSQPInt polish;

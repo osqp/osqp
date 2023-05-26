@@ -7,28 +7,13 @@
 #include "basic_qp2_data.h"
 
 
-TEST_CASE("Basic QP2 solve", "[solve],[qp]")
+TEST_CASE_METHOD(basic_qp2_test_fixture, "Basic QP2 solve", "[solve],[qp]")
 {
   OSQPInt exitflag;
 
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
-
-  // Structures
-  OSQPSolver*    tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
-
-  // Populate data
-  basic_qp2_problem_ptr data{generate_problem_basic_qp2()};
-  basic_qp2_sols_data_ptr sols_data{generate_problem_basic_qp2_sols_data()};
-
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
-  settings->alpha   = 1.6;
-  settings->rho     = 0.1;
-  settings->verbose = 1;
-  settings->eps_abs = 1e-5;
-  settings->eps_rel = 1e-5;
+  // Need slightly tighter tolerances on this problem to pass the tests
+  settings->eps_abs = 1e-6;
+  settings->eps_rel = 1e-6;
 
   /* Test with and without polishing */
   OSQPInt polish;
@@ -86,27 +71,14 @@ TEST_CASE("Basic QP2 solve", "[solve],[qp]")
             solver->info->status_polish == expectedPolishStatus);
 }
 
-TEST_CASE("Basic QP2: Update vectors", "[solve],[qp],[update]")
+TEST_CASE_METHOD(basic_qp2_test_fixture, "Basic QP2: Update vectors", "[solve],[qp],[update]")
 {
   OSQPInt exitflag;
 
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
-
-  // Structures
-  OSQPSolver*    tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
-
-  // Populate data
-  basic_qp2_problem_ptr data{generate_problem_basic_qp2()};
-  basic_qp2_sols_data_ptr sols_data{generate_problem_basic_qp2_sols_data()};
-
   // Define Solver settings as default
   osqp_set_default_settings(settings.get());
-  settings->alpha         = 1.6;
   settings->warm_starting = 1;
   settings->polishing     = 1;
-  settings->verbose       = 1;
 
   /* Test all possible linear system solvers in this test case */
   settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));

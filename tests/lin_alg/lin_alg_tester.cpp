@@ -5,11 +5,51 @@
 
 #include "test_lin_alg.h"
 
-int main( int argc, char* argv[] ) {
-    // Setup the algebra
-    osqp_algebra_init_libs(0);
+#include <cstdlib>
+#include <iostream>
 
-    int result = Catch::Session().run( argc, argv );
+int main( int argc, char* argv[] ) {
+    Catch::Session session;
+
+    int result = 0;
+    int deviceNum = 0;
+
+    /*
+     * Select the device to run the test on.
+     */
+
+    // Start by looking for the environment variable
+    if(const char* deviceEnv = std::getenv("OSQP_TEST_DEVICE_NUM")) {
+        deviceNum = std::atoi(deviceEnv);
+    }
+
+    using namespace Catch::clara;
+
+    // Next use a command line option (if it exists)
+    auto cli = session.cli() | Opt(deviceNum, "device")["--device"]("Compute device (overrides the OSQP_TEST_DEVICE_NUM environment variable)");
+    session.cli(cli);
+
+    result = session.applyCommandLine( argc, argv );
+
+    if( result != 0 ) {
+        // Indicates a command line error
+        std::cout << "Error configuring command line for test driver" << std::endl;
+        return result;
+    }
+
+    /*
+     * Configure and run the OSQP test suite
+     */
+
+    // Setup the algebra
+    result = osqp_algebra_init_libs(deviceNum);
+
+    if( result != 0) {
+        std::cout << "Error configuring linear algebra library" << std::endl;
+        return result;
+    }
+
+    result = session.run( argc, argv );
 
     // Cleanup the algebra
     osqp_algebra_free_libs();

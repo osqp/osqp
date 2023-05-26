@@ -193,54 +193,54 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data={}):
     f.write("#include \"osqp_tester.h\"\n")
     f.write("\n\n")
 
+    f.write("/* Test case's QP problem data */\n")
+    f.write("class %s_prob_data : public OSQPTestData {\n" % problem_name)
+    f.write("public:\n")
+    f.write("    %s_prob_data();\n" % problem_name)
+    f.write("    ~%s_prob_data() = default;\n" % problem_name)
+    f.write("};\n\n")
+
     #
     # Create additional data structure
     #
-    f.write("/* create additional data and solutions structure */\n")
-    f.write("typedef struct {\n")
+    f.write("/* Test case's additional data and solution */\n")
+    f.write("class %s_sols_data {\n" % problem_name)
+    f.write("public:\n")
+    f.write("    %s_sols_data();\n" % problem_name)
+    f.write("    ~%s_sols_data();\n\n" % problem_name)
     # Generate further data and solutions
     for key, value in sols_data.items():
         if isinstance(value, str):
             # Status test get from C code
-            f.write("OSQPInt %s;\n" % key)
+            f.write("    OSQPInt %s;\n" % key)
         # Check if it is an array or a scalar
         elif isinstance(value, np.ndarray):
             if isinstance(value.flatten(order='F')[0], int):
-                f.write("OSQPInt* %s;\n" % key)
+                f.write("    OSQPInt* %s;\n" % key)
             elif isinstance(value.flatten(order='F')[0], float):
-                f.write("OSQPFloat* %s;\n" % key)
+                f.write("    OSQPFloat* %s;\n" % key)
         else:
             if isinstance(value, int):
-                f.write("OSQPInt %s;\n" % key)
+                f.write("    OSQPInt %s;\n" % key)
             elif isinstance(value, float):
-                f.write("OSQPFloat %s;\n" % key)
-    f.write("} %s_sols_data;\n\n" % problem_name)
-
-    # prototypes
-    f.write("/* function prototypes */\n")
-    f.write("OSQPTestData * generate_problem_%s();\n" % problem_name)
-    f.write("void clean_problem_%s(OSQPTestData * data);\n" % problem_name)
-    f.write("%s_sols_data *  generate_problem_%s_sols_data();\n" % (problem_name, problem_name))
-    f.write("void clean_problem_%s_sols_data(%s_sols_data * data);\n" % (problem_name, problem_name))
-    f.write("\n\n")
-
-    # Generate helpers for C++ memory management
-    f.write("/* C++ memory management helpers */\n")
-    f.write("#ifdef __cplusplus\n")
-    f.write("#include <memory>\n\n")
-    f.write("struct %s_deleter {\n" % problem_name)
-    f.write("    void operator()(OSQPTestData* data) {\n")
-    f.write("        clean_problem_%s(data);\n" % problem_name)
-    f.write("    }\n")
+                f.write("    OSQPFloat %s;\n" % key)
     f.write("};\n\n")
-    f.write("struct %s_sols_deleter {\n" % problem_name)
-    f.write("    void operator()(%s_sols_data* sols_data) {\n" % problem_name)
-    f.write("        clean_problem_%s_sols_data(sols_data);\n" % problem_name)
-    f.write("    }\n")
+
+    #
+    # Creator for the QP test data and additional test case data
+    #
+    f.write("/* Create test case data */\n")
+    f.write("class %s_test_fixture : public OSQPTestFixture {\n" % problem_name)
+    f.write("public:\n")
+    f.write("    %s_test_fixture() : OSQPTestFixture()\n" % problem_name)
+    f.write("        {\n")
+    f.write("            data.reset(new %s_prob_data());\n" % problem_name)
+    f.write("            sols_data.reset(new %s_sols_data());\n" % problem_name)
+    f.write("        }\n")
+    f.write("    ~%s_test_fixture() = default;\n\n" % problem_name)
+    f.write("protected:\n")
+    f.write("    std::unique_ptr<%s_sols_data> sols_data;\n" % problem_name)
     f.write("};\n\n")
-    f.write("using %s_problem_ptr = std::unique_ptr<OSQPTestData, %s_deleter>;\n" % (problem_name, problem_name))
-    f.write("using %s_sols_data_ptr = std::unique_ptr<%s_sols_data, %s_sols_deleter>;\n" % (problem_name, problem_name, problem_name))
-    f.write("#endif /* __cplusplus */\n\n")
 
     # Close header file
     f.write("#endif\n")
@@ -256,103 +256,66 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data={}):
     #
     # Generate QP problem data
     #
-    f.write("/* function to generate QP problem data */\n")
-    f.write("OSQPTestData * generate_problem_%s(){\n\n" % problem_name)
-
-    # Initialize structure data
-    f.write("OSQPTestData * data = (OSQPTestData *)c_malloc(sizeof(OSQPTestData));\n\n")
+    f.write("/* Function to generate QP problem data */\n")
+    f.write("%s_prob_data::%s_prob_data() : OSQPTestData() {\n" % (problem_name, problem_name))
 
     # Write problem dimensions
     f.write("// Problem dimensions\n")
-    write_int(f, n, "n", "data")
-    write_int(f, m, "m", "data")
+    write_int(f, n, "n", "this")
+    write_int(f, m, "m", "this")
     f.write("\n")
 
     # Write problem vectors
     f.write("// Problem vectors\n")
-    write_vec_float(f, l, "l", "data")
-    write_vec_float(f, u, "u", "data")
-    write_vec_float(f, q, "q", "data")
+    write_vec_float(f, l, "l", "this")
+    write_vec_float(f, u, "u", "this")
+    write_vec_float(f, q, "q", "this")
     f.write("\n")
 
     # Write matrix A
-    write_mat_sparse(f, A, "A", "data")
-    write_mat_sparse(f, P, "P", "data")
-
-    # Return data and end function
-    f.write("return data;\n\n")
+    write_mat_sparse(f, A, "A", "this")
+    write_mat_sparse(f, P, "P", "this")
 
     f.write("}\n\n")
-
-
-    #
-    # Generate QP problem data
-    #
-    f.write("/* function to clean problem data structure */\n")
-    f.write("void clean_problem_%s(OSQPTestData * data){\n\n" % problem_name)
-
-    # Free vectors
-    f.write("// Clean vectors\n")
-    clean_vec(f, "l", "data")
-    clean_vec(f, "u", "data")
-    clean_vec(f, "q", "data")
-    f.write("\n")
-
-    # Free matrices
-    f.write("//Clean Matrices\n")
-    clean_mat(f, "A", "data")
-    clean_mat(f, "P", "data")
-    f.write("\n")
-
-    f.write("c_free(data);\n\n")
-
-    f.write("}\n\n")
-
 
 
     #
     # Generate additional problem data for solutions
     #
-    f.write("/* function to define solutions and additional data struct */\n")
-    f.write("%s_sols_data *  generate_problem_%s_sols_data(){\n\n" % (problem_name, problem_name))
-
-    # Initialize structure data
-    f.write("%s_sols_data * data = (%s_sols_data *)c_malloc(sizeof(%s_sols_data));\n\n" % (problem_name, problem_name, problem_name))
-
+    f.write("/* Function to define solutions and additional data struct */\n")
+    f.write("%s_sols_data::%s_sols_data() {\n" % (problem_name, problem_name))
 
     # Generate further data and solutions
     for key, value in sols_data.items():
         if isinstance(value, str):
             # Status test get from C code
             if value == 'optimal':
-                f.write("data->%s = %s;\n" % (key, 'OSQP_SOLVED'))
+                f.write("%s = %s;\n" % (key, 'OSQP_SOLVED'))
             elif value == 'optimal_inaccurate':
-                f.write("data->%s = %s;\n" % (key, 'OSQP_SOLVED_INACCURATE'))
+                f.write("%s = %s;\n" % (key, 'OSQP_SOLVED_INACCURATE'))
             elif value == 'primal_infeasible':
-                f.write("data->%s = %s;\n" % (key, 'OSQP_PRIMAL_INFEASIBLE'))
+                f.write("%s = %s;\n" % (key, 'OSQP_PRIMAL_INFEASIBLE'))
             elif value == 'primal_infeasible_inaccurate':
-                f.write("data->%s = %s;\n" %
+                f.write("%s = %s;\n" %
                         (key, 'OSQP_PRIMAL_INFEASIBLE_INACCURATE'))
             elif value == 'dual_infeasible':
-                f.write("data->%s = %s;\n" % (key, 'OSQP_DUAL_INFEASIBLE'))
+                f.write("%s = %s;\n" % (key, 'OSQP_DUAL_INFEASIBLE'))
             elif value == 'dual_infeasible_inaccurate':
-                f.write("data->%s = %s;\n" % (key, 'OSQP_DUAL_INFEASIBLE_INACCURATE'))
+                f.write("%s = %s;\n" % (key, 'OSQP_DUAL_INFEASIBLE_INACCURATE'))
 
         # Check if it is an array or a scalar
         if type(value) is np.ndarray:
             if isinstance(value.flatten(order='F')[0], int):
-                write_vec_int(f, value.flatten(order='F'), key, "data")
+                write_vec_int(f, value.flatten(order='F'), key, "this")
             elif isinstance(value.flatten(order='F')[0], float):
-                write_vec_float(f, value.flatten(order='F'), key, "data")
+                write_vec_float(f, value.flatten(order='F'), key, "this")
         else:
             if isinstance(value, int):
-                write_int(f, value, key, "data")
+                write_int(f, value, key, "this")
             elif isinstance(value, float):
-                write_float(f, value, key, "data")
+                write_float(f, value, key, "this")
 
-    # Return data and end function
-    f.write("\nreturn data;\n\n")
-
+    # End function
     f.write("}\n\n")
 
 
@@ -360,15 +323,13 @@ def generate_problem_data(P, q, A, l, u, problem_name, sols_data={}):
     #
     # Clean additional problem data for solutions
     #
-    f.write("/* function to clean solutions and additional data struct */\n")
-    f.write("void clean_problem_%s_sols_data(%s_sols_data * data){\n\n" % (problem_name, problem_name))
+    f.write("/* Function to clean solutions and additional data struct */\n")
+    f.write("%s_sols_data::~%s_sols_data() {\n" % (problem_name, problem_name))
     # Generate further data and solutions
     for key, value in sols_data.items():
         # Check if it is an array or a scalar
         if type(value) is np.ndarray:
-            clean_vec(f, key, "data")
-
-    f.write("\nc_free(data);\n\n")
+            clean_vec(f, key)
 
     f.write("}\n\n")
 

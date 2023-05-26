@@ -7,24 +7,9 @@
 #include "large_qp_data.h"
 
 
-TEST_CASE("Large QP solve", "[solve],[qp]")
+TEST_CASE_METHOD(OSQPTestFixture, "Large QP solve", "[solve],[qp]")
 {
   OSQPInt exitflag;
-
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
-
-  // Structures
-  OSQPSolver*    tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
-
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
-  settings->alpha   = 1.6;
-  settings->rho     = 0.1;
-  settings->verbose = 1;
-  settings->eps_abs = 1e-5;
-  settings->eps_rel = 1e-5;
 
   /* Test all possible linear system solvers in this test case */
   settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));

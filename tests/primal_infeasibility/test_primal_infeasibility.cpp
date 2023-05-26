@@ -8,26 +8,13 @@
 #include "primal_infeasibility_data.h"
 
 
-TEST_CASE("Primal infeasibility", "[solve],[infeasible]")
+TEST_CASE_METHOD(primal_infeasibility_test_fixture, "Primal infeasibility", "[solve],[infeasible]")
 {
   OSQPInt exitflag;
 
-  // Solver
-  OSQPSolver*    tmpSolver; // Workspace
-  OSQPSolver_ptr solver;
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
-
-  // Problem data
-  primal_infeasibility_problem_ptr   data{generate_problem_primal_infeasibility()};
-  primal_infeasibility_sols_data_ptr sols_data{generate_problem_primal_infeasibility_sols_data()};
-
-  // Define Solver settings as default
-  osqp_set_default_settings(settings.get());
-  settings->max_iter      = 10000;
-  settings->alpha         = 1.6;
+  // Test-specific solver settings
   settings->polishing     = 1;
   settings->scaling       = 0;
-  settings->verbose       = 1;
   settings->warm_starting = 0;
 
   /* Test all possible linear system solvers in this test case */

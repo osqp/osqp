@@ -1,4 +1,5 @@
 #include "osqp.h"
+#include "osqp_tester.h"
 
 // Needed for the c_absval define
 extern "C" {

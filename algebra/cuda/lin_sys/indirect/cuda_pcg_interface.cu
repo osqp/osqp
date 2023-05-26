@@ -143,15 +143,15 @@ OSQPInt init_linsys_solver_cudapcg(cudapcg_solver**    sp,
   s->At           = A->At;
   s->P            = P->S;
   s->d_P_diag_ind = P->d_P_diag_ind;
-  if (rho_vec)
-    s->d_rho_vec  = rho_vec->d_val;
-  if (!polishing) {
-    s->h_sigma = settings->sigma;
-    s->h_rho   = settings->rho;
-  }
-  else {
+  s->d_rho_vec    = rho_vec ? rho_vec->d_val : NULL;
+
+  if (polishing) {
     s->h_sigma = settings->delta;
     s->h_rho   = 1. / settings->delta;
+  }
+  else {
+    s->h_sigma = settings->sigma;
+    s->h_rho   = settings->rho;
   }
 
   /* Allocate raw PCG iterates */
@@ -194,6 +194,7 @@ OSQPInt init_linsys_solver_cudapcg(cudapcg_solver**    sp,
   cuda_malloc((void **) &s->d_diag_precond,     n * sizeof(OSQPFloat));
   cuda_malloc((void **) &s->d_diag_precond_inv, n * sizeof(OSQPFloat));
   if (!s->d_rho_vec) cuda_malloc((void **) &s->d_AtA_diag_val, n * sizeof(OSQPFloat));
+  else s->d_AtA_diag_val = NULL;
 
   /* Link functions */
   s->name            = &name_cudapcg;

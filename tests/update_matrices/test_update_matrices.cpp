@@ -93,16 +93,9 @@ TEST_CASE("Test updating KKT matrix", "[kkt],[update]")
 #endif /* ifndef OSQP_ALGEBRA_CUDA */
 
 
-TEST_CASE("Test updating P and A", "[update]")
+TEST_CASE_METHOD(OSQPTestFixture, "Test updating P and A", "[update]")
 {
   OSQPInt exitflag;
-
-  // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
-
-  // Structures
-  OSQPSolver*    tmpSolver = nullptr;
-  OSQPSolver_ptr solver{nullptr};   // Wrap solver inside memory management
 
   // Populate data
   update_matrices_sols_data_ptr data{generate_problem_update_matrices_sols_data()};
@@ -110,14 +103,8 @@ TEST_CASE("Test updating P and A", "[update]")
   OSQPInt nnzP = data->test_solve_Pu_new->p[data->test_solve_Pu->n];
   OSQPInt nnzA = data->test_solve_A->p[data->test_solve_A->n];
 
-  // Define Solver settings as default
-  // Problem settings
-  osqp_set_default_settings(settings.get());
+  // Define Solver settings
   settings->max_iter = 1000;
-  settings->alpha    = 1.6;
-  settings->verbose  = 1;
-  settings->eps_abs  = 1e-05;
-  settings->eps_rel  = 1e-05;
 
   /* Test all possible linear system solvers in this test case */
   settings->linsys_solver = GENERATE(filter(&isLinsysSupported, values({OSQP_DIRECT_SOLVER, OSQP_INDIRECT_SOLVER})));
