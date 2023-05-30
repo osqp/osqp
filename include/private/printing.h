@@ -5,6 +5,10 @@
 /* cmake generated compiler flags */
 #include "osqp_configure.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Error printing function */
 /* Always define this, and let implementations undefine if they want to change it */
 # if __STDC_VERSION__ >= 199901L
@@ -34,5 +38,9 @@
 # define c_eprint(...)
 
 #endif  /* OSQP_CUSTOM_PRINTING */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* PRINTING_H_ */

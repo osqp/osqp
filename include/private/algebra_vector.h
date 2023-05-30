@@ -1,11 +1,13 @@
 #ifndef ALGEBRA_VECTOR_H
 #define ALGEBRA_VECTOR_H
 
+#include "osqp_api_types.h"
+
 #include "glob_opts.h"
 
-# ifdef __cplusplus
+#ifdef __cplusplus
 extern "C" {
-# endif
+#endif
 
 /*
  *  OSQPVector[fi] types.  Not defined here since it
@@ -283,9 +285,8 @@ void OSQPVectorf_set_scalar_if_gt(OSQPVectorf*       x,
 
 # endif /* if OSQP_EMBEDDED_MODE != 1 */
 
-
-# ifdef __cplusplus
+#ifdef __cplusplus
 }
-# endif
+#endif
 
 #endif /* ifndef ALGEBRA_VECTOR_H */

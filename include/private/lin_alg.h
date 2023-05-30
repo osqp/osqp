@@ -5,9 +5,9 @@
 # include "algebra_matrix.h"
 # include "types.h"
 
-# ifdef __cplusplus
+#ifdef __cplusplus
 extern "C" {
-# endif
+#endif
 
 /* Return which linear system solvers are supported */
 OSQPInt osqp_algebra_linsys_supported(void);
@@ -67,8 +67,8 @@ OSQPInt adjoint_derivative_linsys_solver(LinSysSolver**      s,
 #endif
 #endif
 
-# ifdef __cplusplus
+#ifdef __cplusplus
 }
-# endif
+#endif
 
 #endif /* ifndef LIN_ALG_H */

@@ -8,9 +8,7 @@
 
 #ifndef OSQP_ALGEBRA_CUDA
 
-extern "C" {
-  #include "kkt.h"
-}
+#include "kkt.h"
 
 TEST_CASE("Test updating KKT matrix", "[kkt],[update]")
 {

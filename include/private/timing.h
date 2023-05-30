@@ -8,6 +8,10 @@
  * Timer Methods
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef OSQP_ENABLE_PROFILING
 
 /**
@@ -36,5 +40,9 @@ void osqp_tic(OSQPTimer* t);
 OSQPFloat osqp_toc(OSQPTimer* t);
 
 #endif /* #ifdef OSQP_ENABLE_PROFILING */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* #ifdef TIMING_H_ */

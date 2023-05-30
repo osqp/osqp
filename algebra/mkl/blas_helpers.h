@@ -3,11 +3,10 @@
 
 #include "osqp_configure.h"
 
+#include <mkl.h>
 #include <mkl_cblas.h>
 #include <mkl_spblas.h>
 #include <mkl_vml.h>
-
-#include <mkl.h>
 
 /* Let the user override the MKL memory alignment if they really want,
    but default to 64-bytes alignment if nothing is specified. */

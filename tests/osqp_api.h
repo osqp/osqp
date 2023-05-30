@@ -3,20 +3,18 @@
 
 #include <memory>
 
-#include "osqp.h"        /* OSQP Public API */
+/* OSQP Public API */
+#include "osqp.h"
 
-extern "C" {
-    /* Needed since we define smart pointers for the linear algebra types */
-    #include "algebra_matrix.h"
-    #include "algebra_vector.h"
+/* Needed since we define smart pointers for the linear algebra types */
+#include "algebra_matrix.h"
+#include "algebra_vector.h"
 
-    /* Needed to directly access workspace objects in the tests */
-    #include "types.h"
+/* Needed to directly access workspace objects in the tests */
+#include "types.h"
 
-    /* Needed for memory operations */
-    #include "glob_opts.h"
-}
-
+/* Needed for memory operations */
+#include "glob_opts.h"
 
 /*
  * Linear algebra smart pointers

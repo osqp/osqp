@@ -3,10 +3,13 @@
 
 
 // Functions to scale problem data
-# include "osqp.h"
-# include "types.h"
-# include "lin_alg.h"
+#include "osqp.h"
+#include "types.h"
+#include "lin_alg.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // Enable data scaling if OSQP_EMBEDDED_MODE is disabled or if OSQP_EMBEDDED_MODE == 2
 # if OSQP_EMBEDDED_MODE != 1
@@ -37,11 +40,14 @@ OSQPInt unscale_data(OSQPSolver* solver);
  * @param  work Workspace
  * @return      exitflag
  */
-  OSQPInt unscale_solution(OSQPVectorf*       usolx,
-                           OSQPVectorf*       usoly,
-                           const OSQPVectorf* solx,
-                           const OSQPVectorf* soly,
-                           OSQPWorkspace*     work);
+OSQPInt unscale_solution(OSQPVectorf*       usolx,
+                         OSQPVectorf*       usoly,
+                         const OSQPVectorf* solx,
+                         const OSQPVectorf* soly,
+                         OSQPWorkspace*     work);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ifndef SCALING_H */

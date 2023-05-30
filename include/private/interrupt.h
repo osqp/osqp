@@ -5,6 +5,10 @@
  * Interface for interrupting the OSQP solver.
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Start listener for interrupts
  */
@@ -21,5 +25,8 @@ void osqp_end_interrupt_listener(void);
  */
 int osqp_is_interrupted(void);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ifndef INTERRUPT_H_ */

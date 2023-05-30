@@ -2,9 +2,7 @@
 #include "osqp_tester.h"
 
 // Needed for the c_absval define
-extern "C" {
-  #include "glob_opts.h"
-}
+#include "glob_opts.h"
 
 OSQPFloat vec_norm_inf(const OSQPFloat* v, OSQPInt l) {
   OSQPInt   i;

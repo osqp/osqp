@@ -8,6 +8,10 @@
 // cmake generated compiler flags
 #include "osqp_configure.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* DATA CUSTOMIZATIONS (depending on memory manager)-----------------------   */
 
 /* We do not need memory allocation functions if OSQP_EMBEDDED_MODE is enabled */
@@ -60,5 +64,9 @@
 #  endif /* ifndef OSQP_USE_FLOAT */
 
 # endif // end OSQP_EMBEDDED_MODE
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ifndef GLOB_OPTS_H */

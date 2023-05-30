@@ -3,11 +3,14 @@
 
 /* OSQP error handling */
 
-# include "osqp.h"
+#include "osqp.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* OSQP error macro */
-# if __STDC_VERSION__ >= 199901L
+#if __STDC_VERSION__ >= 199901L
 /* The C99 standard gives the __func__ macro, which is preferred over __FUNCTION__ */
 #  define osqp_error(error_code) _osqp_error(error_code, __func__);
 #else
@@ -37,5 +40,9 @@ OSQPInt _osqp_error_line(enum osqp_error_type error_code,
                          const char*          function_name,
                          const char*          filename,
                          OSQPInt              line_number);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ifndef ERROR_H */

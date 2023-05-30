@@ -4,6 +4,10 @@
 
 # include "osqp_api_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /****************************************************************************
 * CSC Matrix updates                                                        *
 *****************************************************************************/
@@ -81,5 +85,8 @@ void csc_row_norm_inf(const OSQPCscMatrix* M, OSQPFloat* E);
 // E[i] = inf_norm(M(i,:)), where M stores triu part only
 void csc_row_norm_inf_sym_triu(const OSQPCscMatrix* M, OSQPFloat* E);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ifndef CSC_MATH_H */

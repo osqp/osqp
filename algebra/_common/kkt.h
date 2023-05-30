@@ -2,11 +2,15 @@
 #define KKT_H
 
 
-# include "osqp.h"
+#include "osqp.h"
 
-# ifndef OSQP_EMBEDDED_MODE
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#  include "csc_utils.h"
+#ifndef OSQP_EMBEDDED_MODE
+
+#include "csc_utils.h"
 
 /**
  * Form square symmetric KKT matrix of the form
@@ -98,5 +102,8 @@ void update_KKT_param2(OSQPCscMatrix* KKT,
 
 # endif // OSQP_EMBEDDED_MODE != 1
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ifndef KKT_H */
