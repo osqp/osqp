@@ -64,22 +64,27 @@ and their constant values.
 +------------------------------------------------+-----------------------------------+-------+
 | Errors                                         | Constant                          | Value |
 +================================================+===================================+=======+
-| Data validation                                | OSQP_DATA_VALIDATION_ERROR        | 1     |
+| No error                                       | OSQP_NO_ERROR                     | 0     |
 +------------------------------------------------+-----------------------------------+-------+
-| Settings validation                            | OSQP_SETTINGS_VALIDATION_ERROR    | 2     |
+| Data validation failed                         | OSQP_DATA_VALIDATION_ERROR        | 1     |
 +------------------------------------------------+-----------------------------------+-------+
-| Linear system solver initialization            | OSQP_LINSYS_SOLVER_INIT_ERROR     | 3     |
+| Settings validation failed                     | OSQP_SETTINGS_VALIDATION_ERROR    | 2     |
 +------------------------------------------------+-----------------------------------+-------+
-| Non convex problem                             | OSQP_NONCVX_ERROR                 | 4     |
+| Linear system solver initialization failed     | OSQP_LINSYS_SOLVER_INIT_ERROR     | 3     |
 +------------------------------------------------+-----------------------------------+-------+
-| Memory allocation                              | OSQP_MEM_ALLOC_ERROR              | 5     |
+| Non convex problem detected                    | OSQP_NONCVX_ERROR                 | 4     |
++------------------------------------------------+-----------------------------------+-------+
+| Memory allocation error                        | OSQP_MEM_ALLOC_ERROR              | 5     |
 +------------------------------------------------+-----------------------------------+-------+
 | Workspace not initialized                      | OSQP_WORKSPACE_NOT_INIT           | 6     |
 +------------------------------------------------+-----------------------------------+-------+
-| Algebra libraries not loaded                   | OSQP_ALGEBRA_LOAD_ERROR           | 7     |
+| Error loading algebra library                  | OSQP_ALGEBRA_LOAD_ERROR           | 7     |
 +------------------------------------------------+-----------------------------------+-------+
-
-
-
-
-
+| Error opening file for writing                 | OSQP_FOPEN_ERROR                  | 8     |
++------------------------------------------------+-----------------------------------+-------+
+| Error validating given code generation defines | OSQP_CODEGEN_DEFINES_ERROR        | 9     |
++------------------------------------------------+-----------------------------------+-------+
+| Solver data not initialized                    | OSQP_DATA_NOT_INITIALIZED         | 10    |
++------------------------------------------------+-----------------------------------+-------+
+| Function not implemented in current algebra    | OSQP_FUNC_NOT_IMPLEMENTED         | 11    |
++------------------------------------------------+-----------------------------------+-------+

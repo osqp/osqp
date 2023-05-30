@@ -21,48 +21,38 @@ extern "C" {
 
 /**
  * Return the capabilities of the OSQP solver.
+ *
  * @return
  */
 OSQP_API OSQPInt osqp_capabilities(void);
 
 /**
  * Return OSQP version
- * @return  OSQP version
+ *
+ * @return OSQP version string
  */
 OSQP_API const char* osqp_version(void);
 
 
 /**
  * Return the error string for a given error code.
+ *
+ * @param error_flag Error code to get description of
+ * @return String describing the error code
  */
 OSQP_API const char* osqp_error_message(OSQPInt error_flag);
 
 
 /**
  * Return the number of variables and constraints
- * @param  solver Solver
- * @param  m      Pointer to m
- * @param  n      Pointer to n
+ *
+ * @param[in]  solver Solver
+ * @param[out] m      Pointer to integer that will hold m
+ * @param[out] n      Pointer to integer that will hold n
  */
 OSQP_API void osqp_get_dimensions(OSQPSolver* solver,
-                                  OSQPInt*      m,
-                                  OSQPInt*      n);
-
-
-/**
- * Set default codegen define values.
- * Assumes defines is already allocated in memory.
- * @param defines OSQPCodegenDefines structure
- */
-OSQP_API void osqp_set_default_codegen_defines(OSQPCodegenDefines* defines);
-
-/**
- * Set default settings from osqp_api_constants.h file.
- * Assumes settings already allocated in memory.
- * @param settings OSQPSettings structure
- */
-OSQP_API void osqp_set_default_settings(OSQPSettings* settings);
-
+                                  OSQPInt*    m,
+                                  OSQPInt*    n);
 
 # ifndef OSQP_EMBEDDED_MODE
 
@@ -216,13 +206,24 @@ OSQP_API OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
 
 
 /**
- * @name Update settings
+ * @name Settings
  * @{
  */
 
 /**
- * Update settings. The following settings can only be set using
- * osqp_setup and are ignored in this function:
+ * Get the default settings from the osqp_api_constants.h file.
+ *
+ * @note the @c settings parameter must already be allocated in memory.
+ *
+ * @param settings Settings structure to populate
+ */
+OSQP_API void osqp_set_default_settings(OSQPSettings* settings);
+
+/**
+ * Update settings in @c solver with the new settings from @c new_settings.
+ *
+ * The following settings can only be set at problem setup time through @c osqp_setup and are ignored
+ * in this function:
  *  - scaling
  *  - rho_is_vec
  *  - sigma
@@ -230,10 +231,13 @@ OSQP_API OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
  *  - adaptive_rho_interval
  *  - adaptive_rho_fraction
  *  - adaptive_rho_tolerance
- * Also, rho can be updated using osqp_update_rho and is ignored
- * in this function.
+ *
+ * The rho setting must be updated using @c osqp_update_rho, and is ignored by this function.
+ *
+ * @note Every setting from @c new_settings is copied to @c solver.
+ *
  * @param  solver       Solver
- * @param  new_settings Solver settings
+ * @param  new_settings New solver settings
  * @return              Exitflag for errors (0 if no errors)
  */
 OSQP_API OSQPInt osqp_update_settings(OSQPSolver*         solver,
@@ -246,26 +250,37 @@ OSQP_API OSQPInt osqp_update_settings(OSQPSolver*         solver,
 
 /**
  * Update the ADMM parameter rho.
+ *
  * Limit it between OSQP_RHO_MIN and OSQP_RHO_MAX.
+ *
  * @param  solver  Solver
- * @param  rho_new New rho setting
+ * @param  rho_new New rho value
  * @return         Exitflag for errors (0 if no errors)
  */
 OSQP_API OSQPInt osqp_update_rho(OSQPSolver* solver,
-                                OSQPFloat    rho_new);
+                                 OSQPFloat   rho_new);
 
 # endif /* if EMBEDDED != 1 */
 
+/** @} */
 
-/* ------------------ Derivative stuff ----------------- */
+/* ------------------ Derivative functions ----------------- */
 
 /**
- * Compute internal data structures for calculation of adjoint derivatives of P/q/A/l/u
- * @param  solver     Solver
- * @param  dx         Vector of dx values (observed - true) of length n
- * @param  dy_l       Vector of dy_l values (observed - true) of length m
- * @param  dy_u       Vector of dy_u values (observed - true) of length m
- * @return            Exitflag for errors (0 if no errors)
+ * @name Solution derivatives
+ * @{
+ */
+
+/**
+ * Compute internal data structures needed for calculation of the adjoint derivatives of P/q/A/l/u.
+ *
+ * @note An optimal solution must be obtained before calling this function.
+ *
+ * @param[in] solver Solver
+ * @param[in] dx     Vector of dx values (observed - true) of length n
+ * @param[in] dy_l   Vector of dy_l values (observed - true) of length m
+ * @param[in] dy_u   Vector of dy_u values (observed - true) of length m
+ * @return           Exitflag for errors (0 if no errors)
  */
 OSQP_API OSQPInt osqp_adjoint_derivative_compute(OSQPSolver*    solver,
                                                  OSQPFloat*     dx,
@@ -273,10 +288,13 @@ OSQP_API OSQPInt osqp_adjoint_derivative_compute(OSQPSolver*    solver,
                                                  OSQPFloat*     dy_u);
 
 /**
- * Calculate adjoint derivatives of P/A for a previous invocation of osqp_adjoint_derivative_compute
- * @param  solver     Solver
- * @param  dP         Matrix of dP values (n x n)
- * @param  dA         Matrix of dA values (m x n)
+ * Calculate adjoint derivatives of P/A.
+ *
+ * @note @c osqp_adjoint_derivative_compute must be called first.
+ *
+ * @param[in]  solver Solver
+ * @param[out] dP     Matrix of dP values (n x n)
+ * @param[out] dA     Matrix of dA values (m x n)
  * @return            Exitflag for errors (0 if no errors; dP, dA are filled in)
  */
 OSQP_API OSQPInt osqp_adjoint_derivative_get_mat(OSQPSolver*    solver,
@@ -284,11 +302,14 @@ OSQP_API OSQPInt osqp_adjoint_derivative_get_mat(OSQPSolver*    solver,
                                                  OSQPCscMatrix* dA);
 
 /**
- * Calculate adjoint derivatives of q/l/u for a previous invocation of osqp_adjoint_derivative_compute
- * @param  solver     Solver
- * @param  dq         Vector of dq values of length n
- * @param  dl         Matrix of dl values of length m
- * @param  du         Matrix of du values of length m
+ * Calculate adjoint derivatives of q/l/u.
+ *
+ * @note @c osqp_adjoint_derivative_compute must be called first.
+ *
+ * @param[in]  solver Solver
+ * @param[out] dq     Vector of dq values of length n
+ * @param[out] dl     Matrix of dl values of length m
+ * @param[out] du     Matrix of du values of length m
  * @return            Exitflag for errors (0 if no errors; dq, dl, du are filled in)
  */
 OSQP_API OSQPInt osqp_adjoint_derivative_get_vec(OSQPSolver*    solver,
@@ -296,11 +317,29 @@ OSQP_API OSQPInt osqp_adjoint_derivative_get_vec(OSQPSolver*    solver,
                                                  OSQPFloat* dl,
                                                  OSQPFloat* du);
 
-/* ------------------ Derivative stuff ----------------- */
+/** @} */
 
+/* ------------------ Code generation functions ----------------- */
+
+/**
+ * @name Code generation
+ * @{
+ */
+
+/**
+ * Set default codegen define values.
+ *
+ * @note The @c defines structure must already be allocated in memory.
+ *
+ * @param defines Structure to set to default values.
+ */
+OSQP_API void osqp_set_default_codegen_defines(OSQPCodegenDefines* defines);
 
 /**
  * Generate source files with a statically allocated OSQPSolver structure.
+ *
+ * @note @c osqp_setup must be called before a problem can be code generated.
+ *
  * @param  solver     Solver
  * @param  output_dir Path to directory to output the files to.
  *                    This string must include the trailing directory separator, and
@@ -313,7 +352,6 @@ OSQP_API OSQPInt osqp_codegen(OSQPSolver*         solver,
                               const char*         output_dir,
                               const char*         prefix,
                               OSQPCodegenDefines* defines);
-
 
 /** @} */
 
