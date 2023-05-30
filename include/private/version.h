@@ -5,5 +5,5 @@ to cmake
 */
 
 #ifndef OSQP_VERSION
-#define OSQP_VERSION "0.6.3"
+#define OSQP_VERSION "1.0.0.beta0"
 #endif
