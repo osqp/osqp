@@ -87,41 +87,42 @@ typedef struct {
 
 
 /**
- * Solver return information
+ * Information about the solution process.
  */
 typedef struct {
   // solver status
-  char  status[32];       ///< status string, e.g. 'solved'
-  OSQPInt status_val;     ///< status as OSQPInt, defined in osqp_api_constants.h
-  OSQPInt status_polish;  ///< polishing status: successful (1), unperformed (0), unsuccessful (-1)
+  char    status[32];     ///< Status string, e.g. 'solved'
+  OSQPInt status_val;     ///< Status as OSQPInt, defined in osqp_api_constants.h
+  OSQPInt status_polish;  ///< Polishing status: successful (1), unperformed (0), unsuccessful (-1)
 
   // solution quality
-  OSQPFloat obj_val;      ///< primal objective
-  OSQPFloat prim_res;     ///< norm of primal residual
-  OSQPFloat dual_res;     ///< norm of dual residual
+  OSQPFloat obj_val;      ///< Primal objective value
+  OSQPFloat prim_res;     ///< Norm of primal residual
+  OSQPFloat dual_res;     ///< Norm of dual residual
 
   // algorithm information
-  OSQPInt   iter;         ///< number of iterations taken
-  OSQPInt   rho_updates;  ///< number of rho updates
-  OSQPFloat rho_estimate; ///< best rho estimate so far from residuals
+  OSQPInt   iter;         ///< Number of iterations taken
+  OSQPInt   rho_updates;  ///< Number of rho updates performned
+  OSQPFloat rho_estimate; ///< Best rho estimate so far from residuals
 
   // timing information
-  OSQPFloat setup_time;  ///< setup  phase time (seconds)
-  OSQPFloat solve_time;  ///< solve  phase time (seconds)
-  OSQPFloat update_time; ///< update phase time (seconds)
-  OSQPFloat polish_time; ///< polish phase time (seconds)
-  OSQPFloat run_time;    ///< total time  (seconds)
+  OSQPFloat setup_time;  ///< Setup phase time (seconds)
+  OSQPFloat solve_time;  ///< Solve phase time (seconds)
+  OSQPFloat update_time; ///< Update phase time (seconds)
+  OSQPFloat polish_time; ///< Polish phase time (seconds)
+  OSQPFloat run_time;    ///< Total solve time (seconds)
 } OSQPInfo;
 
 
 /**
- * Solution structure
+ * Structure to hold the computed solution (if any), and any certificates of
+ * infeasibility (if any) found by the solver.
  */
 typedef struct {
-  OSQPFloat* x;             ///< primal solution
+  OSQPFloat* x;             ///< Primal solution
   OSQPFloat* y;             ///< Lagrange multiplier associated with \f$l \le Ax \le u\f$
-  OSQPFloat* prim_inf_cert; ///< primal infeasibility certificate
-  OSQPFloat* dual_inf_cert; ///< dual infeasibility certificate
+  OSQPFloat* prim_inf_cert; ///< Primal infeasibility certificate
+  OSQPFloat* dual_inf_cert; ///< Dual infeasibility certificate
 } OSQPSolution;
 
 
@@ -129,28 +130,28 @@ typedef struct {
 typedef struct OSQPWorkspace_ OSQPWorkspace;
 
 
-/*
- * OSQP Main Solver type
+/**
+ * Main OSQP solver structure that holds all information.
  */
 typedef struct {
   /** @} */
-  OSQPSettings*  settings; ///< problem settings
-  OSQPSolution*  solution; ///< problem solution
-  OSQPInfo*      info;     ///< solver information
-  OSQPWorkspace* work;     ///< solver internal workspace
+  OSQPSettings*  settings; ///< Problem settings
+  OSQPSolution*  solution; ///< Computed solution
+  OSQPInfo*      info;     ///< Solver information
+  OSQPWorkspace* work;     ///< Internal solver workspace (contents not public)
 } OSQPSolver;
 
 
 
-/*
+/**
  * Structure to hold the settings for the generated code
  */
 typedef struct {
-  OSQPInt embedded_mode;    ///< Embedded mode (1 = vector update, 2 = vector + matrix update)
-  OSQPInt float_type;       ///< Use floats if 1, doubles if 0
-  OSQPInt printing_enable;  ///< Enable printing if 1
-  OSQPInt profiling_enable; ///< Enable timing of code sections if 1
-  OSQPInt interrupt_enable; ///< Enable interrupt checking if 1
+  OSQPInt embedded_mode;      ///< Embedded mode (1 = vector update, 2 = vector + matrix update)
+  OSQPInt float_type;         ///< Use floats if 1, doubles if 0
+  OSQPInt printing_enable;    ///< Enable printing if 1
+  OSQPInt profiling_enable;   ///< Enable timing of code sections if 1
+  OSQPInt interrupt_enable;   ///< Enable interrupt checking if 1
   OSQPInt derivatives_enable; ///< Enable deriatives if 1
 } OSQPCodegenDefines;
 
