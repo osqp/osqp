@@ -53,41 +53,40 @@ The linear system solver object is defined in :code:`mysolver.h` as follows
 
         struct mysolver {
             // Methods
-            enum linsys_solver_type type; // Linear system solver defined in constants.h
+            enum osqp_linsys_solver_type type; // Linear system solver defined in constants.h
 
-            c_int (*solve)(struct mysolver * self, c_float * b);
-            void (*free)(struct mysolver * self);
-            c_int (*update_matrices)(struct mysolver * self, const csc *P, const csc *A);
-            c_int (*update_rho_vec)(struct mysolver * self, const c_float * rho_vec);
+            OSQPInt (*solve)(struct mysolver * self, OSQPFloat * b);
+            void    (*free)(struct mysolver * self);
+            OSQPInt (*update_matrices)(struct mysolver* self, const OSQPCscMatrix* P, const OSQPCscMatrix* A);
+            OSQPInt (*update_rho_vec)(struct mysolver* self, const OSQPFloat * rho_vec, OSQPFloat rho_sc);
 
             // Attributes
-            c_int nthreads; // Number of threads used (required!)
+            OSQPInt nthreads; // Number of threads used (required!)
 
             // Internal attributes of the solver
             ...
 
             // Internal attributes required for matrix updates
-            c_int * Pdiag_idx, Pdiag_n;  ///< index and number of diagonal elements in P
-            c_int * PtoKKT, * AtoKKT;    ///< Index of elements from P and A to KKT matrix
-            c_int * rhotoKKT;            ///< Index of rho places in KKT matrix
+            OSQPInt *PtoKKT, *AtoKKT;    ///< Index of elements from P and A to KKT matrix
+            OSQPInt *rhotoKKT;            ///< Index of rho places in KKT matrix
             ...
 
         };
 
         // Initialize mysolver solver
-        c_int init_linsys_solver_mysolver(mysolver_solver ** s, const csc * P, const csc * A, c_float sigma, c_float * rho_vec, c_int polish);
+        OSQPInt init_linsys_solver_mysolver(mysolver_solver** s, const OSQPCscMatrix* P, const OSQPCscMatrix* A, const OSQPFloat * rho_vec, const OSQPSettings *settings, OSQPInt polish);
 
         // Solve linear system and store result in b
-        c_int solve_linsys_mysolver(mysolver_solver * s, c_float * b);
+        OSQPInt solve_linsys_mysolver(mysolver_solver* s, OSQPFloat* b, OSQPInt admm_iter);
 
          // Update linear system solver matrices
-        c_int update_linsys_solver_matrices_mysolver(mysolver_solver * s, const csc *P, const csc *A);
+        OSQPInt update_linsys_solver_matrices_mysolver(mysolver_solver* s, const OSQPCscMatrix* P, const OSQPCscMatrix* A);
 
         // Update rho_vec parameter in linear system solver structure
-        c_int update_linsys_solver_rho_vec_mysolver(mysolver_solver * s, const c_float * rho_vec);
+        OSQPInt update_linsys_solver_rho_vec_mysolver(mysolver_solver* s, const OSQPFloat* rho_vec);
 
         // Free linear system solver
-        void free_linsys_solver_mysolver(mysolver_solver * s);
+        void free_linsys_solver_mysolver(mysolver_solver* s);
 
 
 The function details are coded in the :code:`mysolver.c` file.

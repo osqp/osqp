@@ -18,23 +18,23 @@ The *inaccurate* statuses define when the optimality, primal infeasibility or du
 +------------------------------+-----------------------------------+-------+
 | solved inaccurate            | OSQP_SOLVED_INACCURATE            | 2     |
 +------------------------------+-----------------------------------+-------+
-| maximum iterations reached   | OSQP_MAX_ITER_REACHED             | -2    |
+| primal infeasible            | OSQP_PRIMAL_INFEASIBLE            | 3     |
 +------------------------------+-----------------------------------+-------+
-| primal infeasible            | OSQP_PRIMAL_INFEASIBLE            | -3    |
+| primal infeasible inaccurate | OSQP_PRIMAL_INFEASIBLE_INACCURATE | 4     |
 +------------------------------+-----------------------------------+-------+
-| primal infeasible inaccurate | OSQP_PRIMAL_INFEASIBLE_INACCURATE | 3     |
+| dual infeasible              | OSQP_DUAL_INFEASIBLE              | 5     |
 +------------------------------+-----------------------------------+-------+
-| dual infeasible              | OSQP_DUAL_INFEASIBLE              | -4    |
+| dual infeasible inaccurate   | OSQP_DUAL_INFEASIBLE_INACCURATE   | 6     |
 +------------------------------+-----------------------------------+-------+
-| dual infeasible inaccurate   | OSQP_DUAL_INFEASIBLE_INACCURATE   | 4     |
+| maximum iterations reached   | OSQP_MAX_ITER_REACHED             | 7     |
 +------------------------------+-----------------------------------+-------+
-| interrupted by user          | OSQP_SIGINT                       | -5    |
+| run time limit reached       | OSQP_TIME_LIMIT_REACHED           | 8     |
 +------------------------------+-----------------------------------+-------+
-| run time limit reached       | OSQP_TIME_LIMIT_REACHED           | -6    |
+| problem non convex           | OSQP_NON_CVX                      | 9     |
 +------------------------------+-----------------------------------+-------+
-| unsolved                     | OSQP_UNSOLVED                     | -10   |
+| interrupted by user          | OSQP_SIGINT                       | 10    |
 +------------------------------+-----------------------------------+-------+
-| problem non convex           | OSQP_NON_CVX                      | -7    |
+| unsolved                     | OSQP_UNSOLVED                     | 11    |
 +------------------------------+-----------------------------------+-------+
 
 .. note::
@@ -64,22 +64,27 @@ and their constant values.
 +------------------------------------------------+-----------------------------------+-------+
 | Errors                                         | Constant                          | Value |
 +================================================+===================================+=======+
-| Data validation                                | OSQP_DATA_VALIDATION_ERROR        | 1     |
+| No error                                       | OSQP_NO_ERROR                     | 0     |
 +------------------------------------------------+-----------------------------------+-------+
-| Settings validation                            | OSQP_SETTINGS_VALIDATION_ERROR    | 2     |
+| Data validation failed                         | OSQP_DATA_VALIDATION_ERROR        | 1     |
 +------------------------------------------------+-----------------------------------+-------+
-| Linear system solver loading                   | OSQP_LINSYS_SOLVER_LOAD_ERROR     | 3     |
+| Settings validation failed                     | OSQP_SETTINGS_VALIDATION_ERROR    | 2     |
 +------------------------------------------------+-----------------------------------+-------+
-| Linear system solver initialization            | OSQP_LINSYS_SOLVER_INIT_ERROR     | 4     |
+| Linear system solver initialization failed     | OSQP_LINSYS_SOLVER_INIT_ERROR     | 3     |
 +------------------------------------------------+-----------------------------------+-------+
-| Non convex problem                             | OSQP_NONCVX_ERROR                 | 5     |
+| Non convex problem detected                    | OSQP_NONCVX_ERROR                 | 4     |
 +------------------------------------------------+-----------------------------------+-------+
-| Memory allocation                              | OSQP_MEM_ALLOC_ERROR              | 6     |
+| Memory allocation error                        | OSQP_MEM_ALLOC_ERROR              | 5     |
 +------------------------------------------------+-----------------------------------+-------+
-| Workspace not initialized                      | OSQP_WORKSPACE_NOT_INIT           | 7     |
+| Workspace not initialized                      | OSQP_WORKSPACE_NOT_INIT           | 6     |
 +------------------------------------------------+-----------------------------------+-------+
-
-
-
-
-
+| Error loading algebra library                  | OSQP_ALGEBRA_LOAD_ERROR           | 7     |
++------------------------------------------------+-----------------------------------+-------+
+| Error opening file for writing                 | OSQP_FOPEN_ERROR                  | 8     |
++------------------------------------------------+-----------------------------------+-------+
+| Error validating given code generation defines | OSQP_CODEGEN_DEFINES_ERROR        | 9     |
++------------------------------------------------+-----------------------------------+-------+
+| Solver data not initialized                    | OSQP_DATA_NOT_INITIALIZED         | 10    |
++------------------------------------------------+-----------------------------------+-------+
+| Function not implemented in current algebra    | OSQP_FUNC_NOT_IMPLEMENTED         | 11    |
++------------------------------------------------+-----------------------------------+-------+

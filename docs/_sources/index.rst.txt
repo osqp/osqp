@@ -1,5 +1,6 @@
 OSQP solver documentation
 ==========================
+
 **Join our** `forum <https://osqp.discourse.group/>`_ **for any
 questions related to the solver!**
 
@@ -9,10 +10,10 @@ optimization package for solving convex quadratic programs in the form
 .. math::
   \begin{array}{ll}
     \mbox{minimize} & \frac{1}{2} x^T P x + q^T x \\
-    \mbox{subject to} & l \leq A x \leq u
+    \mbox{subject to} & l \le A x \le u
   \end{array}
 
-where :math:`x` is the optimization variable and
+where :math:`x \in \mathbf{R}^n` is the optimization variable and
 :math:`P \in \mathbf{S}^{n}_{+}` a positive semidefinite matrix.
 
 **Code available on** `GitHub <https://github.com/osqp/osqp>`_.
@@ -55,7 +56,7 @@ If you are using OSQP for your work, we encourage you to
         It can be easily warm-started and the matrix factorization can be cached to solve parametrized problems extremely efficiently.
 
     Interfaces
-        It can be interfaced to C, C++, Fortran (soon!), Python, Julia and Matlab.
+        It provides interfaces to C, C++, Fortran, Julia, Matlab, Python, R, Ruby, and Rust.
 
 
 
@@ -72,7 +73,7 @@ The following people have been involved in the development of OSQP:
 * `Bartolomeo Stellato <https://stellato.io/>`_ (Princeton University): main development
 * `Goran Banjac <https://github.com/gbanjac>`_ (ETH Zürich): main development
 * `Nicholas Moehle <https://www.nicholasmoehle.com/>`_ (Stanford University): methods, maths, and code generation
-* `Paul Goulart <http://users.ox.ac.uk/~engs1373/>`_ (University of Oxford): methods, maths, and Matlab interface
+* `Paul Goulart <https://users.ox.ac.uk/~engs1373/>`_ (University of Oxford): methods, maths, and Matlab interface
 * `Alberto Bemporad <http://cse.lab.imtlucca.it/~bemporad/>`_ (IMT Lucca): methods and maths
 * `Stephen Boyd <https://web.stanford.edu/~boyd/>`_ (Stanford University): methods and maths
 * `Ian McInerney <https://ism.engineer>`_ (Imperial College London): software engineering, code generation

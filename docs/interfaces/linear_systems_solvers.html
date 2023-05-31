@@ -107,7 +107,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
   <section id="linear-systems-solvers">
 <span id="linear-system-solvers-setting"></span><h1>Linear Systems Solvers<a class="headerlink" href="#linear-systems-solvers" title="Permalink to this heading">¶</a></h1>
 <p>The settings parameter <code class="code docutils literal notranslate"><span class="pre">linsys_solver</span></code> defines the solver for the linear system.
-In C it corresponds to an integer <code class="code docutils literal notranslate"><span class="pre">c_int</span></code> (see <a class="reference internal" href="C.html#c-cpp-data-types"><span class="std std-ref">Data types</span></a>) and in the other high level languages to a string.</p>
+In C it corresponds to an integer <code class="code docutils literal notranslate"><span class="pre">OSQPInt</span></code> (see <span class="xref std std-ref">c_cpp_data_types</span>) and in the other high level languages to a string.</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Solver</p></th>
@@ -126,6 +126,11 @@ In C it corresponds to an integer <code class="code docutils literal notranslate
 <td><p>“mkl pardiso”</p></td>
 <td><p><code class="code docutils literal notranslate"><span class="pre">MKL_PARDISO_SOLVER</span></code></p></td>
 <td><p><code class="code docutils literal notranslate"><span class="pre">1</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>CUDA PCG</p></td>
+<td><p>“cuda pcg”</p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">CUDA_PCG_SOLVER</span></code></p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">2</span></code></p></td>
 </tr>
 </tbody>
 </table>

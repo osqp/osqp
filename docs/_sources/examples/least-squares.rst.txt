@@ -40,9 +40,8 @@ Python
     # OSQP data
     P = sparse.block_diag([sparse.csc_matrix((n, n)), sparse.eye(m)], format='csc')
     q = np.zeros(n+m)
-    A = sparse.vstack([
-            sparse.hstack([Ad, -sparse.eye(m)]),
-            sparse.hstack([sparse.eye(n), sparse.csc_matrix((n, m))])], format='csc')
+    A = sparse.bmat([[Ad,            -sparse.eye(m)],
+                     [sparse.eye(n),  None]], format='csc')
     l = np.hstack([b, np.zeros(n)])
     u = np.hstack([b, np.ones(n)])
 
@@ -107,7 +106,7 @@ CVXPY
 
     # Define problem
     x = Variable(n)
-    objective = 0.5*sum_squares(A*x - b)
+    objective = 0.5*sum_squares(A@x - b)
     constraints = [x >= 0, x <= 1]
 
     # Solve with OSQP

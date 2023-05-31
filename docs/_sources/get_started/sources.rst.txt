@@ -64,7 +64,7 @@ Run the following commands from the terminal
 
         .. code:: bash
 
-            git clone --recursive https://github.com/osqp/osqp
+            git clone https://github.com/osqp/osqp
 
 #. Create :code:`build` directory and change directory
 
