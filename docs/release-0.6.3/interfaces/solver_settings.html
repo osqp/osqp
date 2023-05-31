@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solver settings &mdash; OSQP  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/osqp_theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Linear Systems Solvers" href="linear_systems_solvers.html" />
+    <link rel="prev" title="Interfaces" href="index.html" />
+<meta name="twitter:card" content="summary_large_image" >
+<meta name="twitter:creator" content="@bstellato" >
+<meta name="twitter:image"
+      content="https://osqp.org/docs/_static/img/logo.png">
+<meta name="twitter:description" content="The OSQP (Operator Splitting
+Quadratic Program) solver is a numerical optimization package for solving
+convex quadratic programs." >
+<meta property="og:url" content="https://osqp.org" >
+<meta property="og:title" content="OSQP solver documentation" >
+<meta property="og:description" content="The OSQP (Operator Splitting Quadratic
+Program) solver is a numerical optimization package for solving convex
+quadratic programs." >
+<meta property="og:image"
+content="https://osqp.org/docs/_static/img/logo.png">
+<meta property="fb:app_id" content="129555174389689">
+<meta property="og:type" content="website" >
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../solver/index.html">The solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../get_started/index.html">Get started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Interfaces</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Solver settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear_systems_solvers.html">Linear Systems Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="status_values.html">Status values and errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#official">Official</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#community-maintained">Community Maintained</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../parsers/index.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../codegen/index.html">Code generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OSQP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Interfaces</a></li>
+      <li class="breadcrumb-item active">Solver settings</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/osqp/osqp/blob/master/docs/interfaces/solver_settings.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="solver-settings">
+<span id="id1"></span><h1>Solver settings<a class="headerlink" href="#solver-settings" title="Permalink to this heading">¶</a></h1>
+<p>The solver settings are displayed in the following table. The settings marked with * can be changed without running the setup method again.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Argument</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Allowed values</p></th>
+<th class="head"><p>Default value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">rho</span></code> *</p></td>
+<td><p>ADMM rho step</p></td>
+<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">rho</span></code></p></td>
+<td><p>0.1</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">sigma</span></code></p></td>
+<td><p>ADMM sigma step</p></td>
+<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">sigma</span></code></p></td>
+<td><p>1e-06</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">max_iter</span></code> *</p></td>
+<td><p>Maximum number of iterations</p></td>
+<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">max_iter</span></code> (integer)</p></td>
+<td><p>4000</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">eps_abs</span></code> *</p></td>
+<td><p>Absolute tolerance</p></td>
+<td><p>0 &lt;= <code class="code docutils literal notranslate"><span class="pre">eps_abs</span></code></p></td>
+<td><p>1e-03</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">eps_rel</span></code> *</p></td>
+<td><p>Relative tolerance</p></td>
+<td><p>0 &lt;= <code class="code docutils literal notranslate"><span class="pre">eps_rel</span></code></p></td>
+<td><p>1e-03</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">eps_prim_inf</span></code> *</p></td>
+<td><p>Primal infeasibility tolerance</p></td>
+<td><p>0 &lt;= <code class="code docutils literal notranslate"><span class="pre">eps_prim_inf</span></code></p></td>
+<td><p>1e-04</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">eps_dual_inf</span></code> *</p></td>
+<td><p>Dual infeasibility tolerance</p></td>
+<td><p>0 &lt;= <code class="code docutils literal notranslate"><span class="pre">eps_dual_inf</span></code></p></td>
+<td><p>1e-04</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">alpha</span></code> *</p></td>
+<td><p>ADMM overrelaxation parameter</p></td>
+<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">alpha</span></code> &lt; 2</p></td>
+<td><p>1.6</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">linsys_solver</span></code></p></td>
+<td><p>Linear systems solver type</p></td>
+<td><p>See <a class="reference internal" href="linear_systems_solvers.html#linear-system-solvers-setting"><span class="std std-ref">Linear Systems Solvers</span></a></p></td>
+<td><p>qdldl</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">delta</span></code> *</p></td>
+<td><p>Polishing regularization parameter</p></td>
+<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">delta</span></code></p></td>
+<td><p>1e-06</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">polish</span></code> *</p></td>
+<td><p>Perform polishing</p></td>
+<td><p>True/False</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">polish_refine_iter</span></code> *</p></td>
+<td><p>Refinement iterations in polish</p></td>
+<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">polish_refine_iter</span></code> (integer)</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">verbose</span></code> *</p></td>
+<td><p>Print output</p></td>
+<td><p>True/False</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">scaled_termination</span></code> *</p></td>
+<td><p>Scaled termination conditions</p></td>
+<td><p>True/False</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">check_termination</span></code> *</p></td>
+<td><p>Check termination interval</p></td>
+<td><p>0 (disabled) or 0 &lt; <code class="code docutils literal notranslate"><span class="pre">check_termination</span></code> (integer)</p></td>
+<td><p>25</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">warm_start</span></code> *</p></td>
+<td><p>Perform warm starting</p></td>
+<td><p>True/False</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">scaling</span></code></p></td>
+<td><p>Number of scaling iterations</p></td>
+<td><p>0 (disabled) or 0 &lt; <code class="code docutils literal notranslate"><span class="pre">scaling</span></code> (integer)</p></td>
+<td><p>10</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">adaptive_rho</span></code></p></td>
+<td><p>Adaptive rho</p></td>
+<td><p>True/False</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">adaptive_rho_interval</span></code></p></td>
+<td><p>Adaptive rho interval</p></td>
+<td><p>0 (automatic) or 0 &lt; <code class="code docutils literal notranslate"><span class="pre">adaptive_rho_interval</span></code> (integer)</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">adaptive_rho_tolerance</span></code></p></td>
+<td><p>Tolerance for adapting rho</p></td>
+<td><p>1 &lt;= <code class="code docutils literal notranslate"><span class="pre">adaptive_rho_tolerance</span></code></p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">adaptive_rho_fraction</span></code></p></td>
+<td><p>Adaptive rho interval as fraction of setup time (auto mode)</p></td>
+<td><p>0 &lt; <code class="code docutils literal notranslate"><span class="pre">adaptive_rho_fraction</span></code></p></td>
+<td><p>0.4</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">time_limit</span></code> *</p></td>
+<td><p>Run time limit in seconds</p></td>
+<td><p>0 (disabled) or 0 &lt;= <code class="code docutils literal notranslate"><span class="pre">time_limit</span></code></p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<p>The boolean values <code class="code docutils literal notranslate"><span class="pre">True/False</span></code> are defined as <code class="code docutils literal notranslate"><span class="pre">1/0</span></code> in the C interfaces.</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Interfaces" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="linear_systems_solvers.html" class="btn btn-neutral float-right" title="Linear Systems Solvers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

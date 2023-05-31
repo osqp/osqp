@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OSQP solver documentation &mdash; OSQP  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/osqp_theme.css" type="text/css" />
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The solver" href="solver/index.html" />
+<meta name="twitter:card" content="summary_large_image" >
+<meta name="twitter:creator" content="@bstellato" >
+<meta name="twitter:image"
+      content="https://osqp.org/docs/_static/img/logo.png">
+<meta name="twitter:description" content="The OSQP (Operator Splitting
+Quadratic Program) solver is a numerical optimization package for solving
+convex quadratic programs." >
+<meta property="og:url" content="https://osqp.org" >
+<meta property="og:title" content="OSQP solver documentation" >
+<meta property="og:description" content="The OSQP (Operator Splitting Quadratic
+Program) solver is a numerical optimization package for solving convex
+quadratic programs." >
+<meta property="og:image"
+content="https://osqp.org/docs/_static/img/logo.png">
+<meta property="fb:app_id" content="129555174389689">
+<meta property="og:type" content="website" >
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#">
+            
+              <img src="_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="solver/index.html">The solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_started/index.html">Get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/index.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parsers/index.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codegen/index.html">Code generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="citing/index.html">Citing OSQP</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">OSQP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">OSQP solver documentation</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/osqp/osqp/blob/master/docs/index.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="osqp-solver-documentation">
+<h1>OSQP solver documentation<a class="headerlink" href="#osqp-solver-documentation" title="Permalink to this heading">¶</a></h1>
+<p><strong>Join our</strong> <a class="reference external" href="https://osqp.discourse.group/">forum</a> <strong>for any
+questions related to the solver!</strong></p>
+<p>The OSQP (Operator Splitting Quadratic Program) solver is a numerical
+optimization package for solving convex quadratic programs in the form</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{array}{ll}
+  \mbox{minimize} &amp; \frac{1}{2} x^T P x + q^T x \\
+  \mbox{subject to} &amp; l \leq A x \leq u
+\end{array}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(x\)</span> is the optimization variable and
+<span class="math notranslate nohighlight">\(P \in \mathbf{S}^{n}_{+}\)</span> a positive semidefinite matrix.</p>
+<p><strong>Code available on</strong> <a class="reference external" href="https://github.com/osqp/osqp">GitHub</a>.</p>
+<p class="rubric">Citing OSQP</p>
+<p>If you are using OSQP for your work, we encourage you to</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="citing/index.html#citing"><span class="std std-ref">Cite the related papers</span></a></p></li>
+<li><p>Put a star on GitHub <a class="reference external" href="https://github.com/osqp/osqp"><img alt="github-star" src="https://img.shields.io/github/stars/osqp/osqp.svg?style=social&amp;label=Star" /></a></p></li>
+</ul>
+<p><strong>We are looking forward to hearing your success stories with OSQP!</strong> Please <a class="reference external" href="mailto:bartolomeo&#46;stellato&#37;&#52;&#48;gmail&#46;com">share them with us</a>.</p>
+<p class="rubric">Features</p>
+<dl class="simple glossary">
+<dt id="term-Efficient">Efficient<a class="headerlink" href="#term-Efficient" title="Permalink to this term">¶</a></dt><dd><p>It uses a custom ADMM-based first-order method requiring only a single matrix factorization in the setup phase. All the other operations are extremely cheap. It also implements custom sparse linear algebra routines exploiting structures in the problem data.</p>
+</dd>
+<dt id="term-Robust">Robust<a class="headerlink" href="#term-Robust" title="Permalink to this term">¶</a></dt><dd><p>The algorithm is absolutely division free after the setup and it requires no assumptions on problem data (the problem only needs to be convex). It just works!</p>
+</dd>
+<dt id="term-Detects-primal-dual-infeasible-problems">Detects primal / dual infeasible problems<a class="headerlink" href="#term-Detects-primal-dual-infeasible-problems" title="Permalink to this term">¶</a></dt><dd><p>When the problem is primal or dual infeasible, OSQP detects it. It is the first available QP solver based on first-order methods able to do so.</p>
+</dd>
+<dt id="term-Embeddable">Embeddable<a class="headerlink" href="#term-Embeddable" title="Permalink to this term">¶</a></dt><dd><p>It has an easy interface to generate customized embeddable C code with no memory manager required.</p>
+</dd>
+<dt id="term-Library-free">Library-free<a class="headerlink" href="#term-Library-free" title="Permalink to this term">¶</a></dt><dd><p>It requires no external library to run.</p>
+</dd>
+<dt id="term-Efficiently-warm-started">Efficiently warm started<a class="headerlink" href="#term-Efficiently-warm-started" title="Permalink to this term">¶</a></dt><dd><p>It can be easily warm-started and the matrix factorization can be cached to solve parametrized problems extremely efficiently.</p>
+</dd>
+<dt id="term-Interfaces">Interfaces<a class="headerlink" href="#term-Interfaces" title="Permalink to this term">¶</a></dt><dd><p>It can be interfaced to C, C++, Fortran (soon!), Python, Julia and Matlab.</p>
+</dd>
+</dl>
+<p class="rubric">License</p>
+<p>OSQP is distributed under the <a class="reference external" href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 License</a></p>
+<p class="rubric">Credits</p>
+<p>The following people have been involved in the development of OSQP:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://stellato.io/">Bartolomeo Stellato</a> (Princeton University): main development</p></li>
+<li><p><a class="reference external" href="https://github.com/gbanjac">Goran Banjac</a> (ETH Zürich): main development</p></li>
+<li><p><a class="reference external" href="https://www.nicholasmoehle.com/">Nicholas Moehle</a> (Stanford University): methods, maths, and code generation</p></li>
+<li><p><a class="reference external" href="http://users.ox.ac.uk/~engs1373/">Paul Goulart</a> (University of Oxford): methods, maths, and Matlab interface</p></li>
+<li><p><a class="reference external" href="http://cse.lab.imtlucca.it/~bemporad/">Alberto Bemporad</a> (IMT Lucca): methods and maths</p></li>
+<li><p><a class="reference external" href="https://web.stanford.edu/~boyd/">Stephen Boyd</a> (Stanford University): methods and maths</p></li>
+<li><p><a class="reference external" href="https://ism.engineer">Ian McInerney</a> (Imperial College London): software engineering, code generation</p></li>
+<li><p><a class="reference external" href="https://csml.princeton.edu/people/vineet-bansal">Vineet Bansal</a> (CSML, Princeton University): software engineering</p></li>
+<li><p><a class="reference external" href="mailto:michel&#46;schubiger&#37;&#52;&#48;bluewin&#46;ch">Michel Schubiger</a> (Schindler R&amp;D): GPU implementation</p></li>
+<li><p><a class="reference external" href="https://control.ee.ethz.ch/people/profile.john-lygeros.html">John Lygeros</a> (ETH Zurich): methods and maths</p></li>
+</ul>
+<p>Interfaces development</p>
+<ul class="simple">
+<li><p><a class="reference external" href="http://www.numerical.rl.ac.uk/people/nimg/nimg.html">Nick Gould</a> (Rutherford Appleton Laboratory): Fortran and CUTEst interfaces</p></li>
+<li><p><a class="reference external" href="mailto:eabarnard&#37;&#52;&#48;gmail&#46;com">Ed Barnard</a> (University of Oxford): Rust interface</p></li>
+</ul>
+<p class="rubric">Bug reports and support</p>
+<p>Please report any issues via the <a class="reference external" href="https://github.com/osqp/osqp/issues">Github issue tracker</a>. All types of issues are welcome including bug reports, documentation typos, feature requests and so on.</p>
+<p class="rubric">Numerical benchmarks</p>
+<p>Numerical benchmarks against other solvers are available <a class="reference external" href="https://github.com/osqp/osqp_benchmarks">here</a>.</p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="solver/index.html" class="btn btn-neutral float-right" title="The solver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

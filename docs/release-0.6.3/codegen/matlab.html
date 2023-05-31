@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Matlab &mdash; OSQP  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/osqp_theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Python" href="python.html" />
+    <link rel="prev" title="Code generation" href="index.html" />
+<meta name="twitter:card" content="summary_large_image" >
+<meta name="twitter:creator" content="@bstellato" >
+<meta name="twitter:image"
+      content="https://osqp.org/docs/_static/img/logo.png">
+<meta name="twitter:description" content="The OSQP (Operator Splitting
+Quadratic Program) solver is a numerical optimization package for solving
+convex quadratic programs." >
+<meta property="og:url" content="https://osqp.org" >
+<meta property="og:title" content="OSQP solver documentation" >
+<meta property="og:description" content="The OSQP (Operator Splitting Quadratic
+Program) solver is a numerical optimization package for solving convex
+quadratic programs." >
+<meta property="og:image"
+content="https://osqp.org/docs/_static/img/logo.png">
+<meta property="fb:app_id" content="129555174389689">
+<meta property="og:type" content="website" >
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../solver/index.html">The solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../get_started/index.html">Get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interfaces/index.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parsers/index.html">Parsers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Code generation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Matlab</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#codegen">Codegen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mex-interface">Mex interface</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#emosqp"><code class="docutils literal notranslate"><span class="pre">emosqp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">emosqp()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="python.html">Python</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OSQP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Code generation</a></li>
+      <li class="breadcrumb-item active">Matlab</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/osqp/osqp/blob/master/docs/codegen/matlab.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="matlab">
+<h1>Matlab<a class="headerlink" href="#matlab" title="Permalink to this heading">¶</a></h1>
+<p>Before generating code for a parametric problem, the problem should be first
+specified in the setup phase. See <a class="reference internal" href="../interfaces/matlab.html#matlab-setup"><span class="std std-ref">Setup</span></a> for more details.</p>
+<section id="codegen">
+<h2>Codegen<a class="headerlink" href="#codegen" title="Permalink to this heading">¶</a></h2>
+<p>The code is generated by running</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="p">.</span><span class="n">codegen</span><span class="p">(</span><span class="n">dir_name</span><span class="p">,</span><span class="w"> </span><span class="nb">varargin</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The argument <code class="code docutils literal notranslate"><span class="pre">dir_name</span></code> is the name of a directory where the generated
+code is stored.
+The second argument <code class="code docutils literal notranslate"><span class="pre">varargin</span></code> specifies additional codegen options
+shown in the following table</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Allowed values</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">project_type</span></code></p></td>
+<td><p>Build environment</p></td>
+<td><div class="line-block">
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">''</span></code> (default)</div>
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">'Makefile'</span></code></div>
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">'MinGW</span> <span class="pre">Makefiles'</span></code></div>
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">'Unix</span> <span class="pre">Makefiles'</span></code></div>
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">'CodeBlocks'</span></code></div>
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">'Xcode'</span></code></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">parameters</span></code></p></td>
+<td><p>Problem parameters</p></td>
+<td><div class="line-block">
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">'vectors'</span></code> (default)</div>
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">'matrices'</span></code></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">mexname</span></code></p></td>
+<td><p>Name of the compiled mex interface</p></td>
+<td><div class="line-block">
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">'emosqp'</span></code> (default)</div>
+<div class="line">Nonempty string</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">force_rewrite</span></code></p></td>
+<td><p>Rewrite existing directory</p></td>
+<td><div class="line-block">
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">false</span></code> (default)</div>
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">true</span></code></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">FLOAT</span></code></p></td>
+<td><p>Use <code class="code docutils literal notranslate"><span class="pre">float</span></code> type instead of <code class="code docutils literal notranslate"><span class="pre">double</span></code></p></td>
+<td><div class="line-block">
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">false</span></code> (default)</div>
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">true</span></code></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">LONG</span></code></p></td>
+<td><p>Use <code class="code docutils literal notranslate"><span class="pre">long</span> <span class="pre">long</span></code> type instead of <code class="code docutils literal notranslate"><span class="pre">int</span></code></p></td>
+<td><div class="line-block">
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">true</span></code> (default)</div>
+<div class="line"><code class="code docutils literal notranslate"><span class="pre">false</span></code></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<p>You can pass the options as field-value pairs, e.g.,</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="p">.</span><span class="n">codegen</span><span class="p">(</span><span class="s">&#39;code&#39;</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;parameters&#39;</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;matrices&#39;</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;mexname&#39;</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;emosqp&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>If the <code class="code docutils literal notranslate"><span class="pre">project_type</span></code> argument is not passed or is set to <code class="code docutils literal notranslate"><span class="pre">''</span></code>,
+then no build files are generated.</p>
+</section>
+<section id="mex-interface">
+<h2>Mex interface<a class="headerlink" href="#mex-interface" title="Permalink to this heading">¶</a></h2>
+<p>Once the code is generated the following functions are provided through its mex interface. Each function is called as</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">emosqp</span><span class="p">(</span><span class="s">&#39;function_name&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>where <code class="code docutils literal notranslate"><span class="pre">emosqp</span></code> is the name of the mex interface specified in the previous section</p>
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">'solve'</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Solve the problem.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p>multiple variables [x, y, status_val, iter, run_time]</p>
+<ul class="simple">
+<li><p><strong>x</strong> (<em>ndarray</em>) - Primal solution</p></li>
+<li><p><strong>y</strong> (<em>ndarray</em>) - Dual solution</p></li>
+<li><p><strong>status_val</strong> (<em>int</em>) - Status value as in <a class="reference internal" href="../interfaces/status_values.html#status-values"><span class="std std-ref">Status values and errors</span></a></p></li>
+<li><p><strong>iter</strong> (<em>int</em>) - Number of iterations</p></li>
+<li><p><strong>run_time</strong> (<em>double</em>) - Run time</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">'update_lin_cost'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_new</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Update linear cost.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>q_new</strong> (<em>ndarray</em>) – New linear cost vector</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">'update_lower_bound'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_new</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Update lower bound in the constraints.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>l_new</strong> (<em>ndarray</em>) – New lower bound vector</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">'update_upper_bound'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_new</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Update upper bound in the constraints.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>u_new</strong> (<em>ndarray</em>) – New upper bound vector</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">'update_bounds'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_new</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_new</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Update lower and upper bounds in the constraints.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>l_new</strong> (<em>ndarray</em>) – New lower bound vector</p></li>
+<li><p><strong>u_new</strong> (<em>ndarray</em>) – New upper bound vector</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p>If the code is generated with the option <code class="code docutils literal notranslate"><span class="pre">parameters</span></code> set to
+<code class="code docutils literal notranslate"><span class="pre">'matrices'</span></code>, then the following functions are also provided</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="emosqp">
+<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">'update_P'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Px</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Px_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Px_n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#emosqp" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">:noindex:</span></span></dt>
+<dd><p>Update nonzero entries of the quadratic cost matrix (only upper triangular) without changing sparsity structure.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param ndarray Px<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Values of entries to be updated</p>
+</dd>
+<dt class="field-even">param ndarray Px_idx<span class="colon">:</span></dt>
+<dd class="field-even"><p>Indices of entries to be updated. Pass <code class="code docutils literal notranslate"><span class="pre">[]</span></code> if
+all the indices are to be updated</p>
+</dd>
+<dt class="field-odd">param int Px_n<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of entries to be updated. Used only if Px_idx is not
+<code class="code docutils literal notranslate"><span class="pre">[]</span></code>.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">'update_A'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ax_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ax_n</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Update nonzero entries of the constraint matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Ax</strong> (<em>ndarray</em>) – Values of entries to be updated</p></li>
+<li><p><strong>Ax_idx</strong> (<em>ndarray</em>) – Indices of entries to be updated. Pass <code class="code docutils literal notranslate"><span class="pre">[]</span></code> if
+all the indices are to be updated</p></li>
+<li><p><strong>Ax_n</strong> (<em>int</em>) – Number of entries to be updated. Used only if Ax_idx is not
+<code class="code docutils literal notranslate"><span class="pre">[]</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">emosqp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">'update_P_A'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Px</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Px_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Px_n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ax_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ax_n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">:noindex:</span></span></dt>
+<dd><p>Update nonzero entries of the quadratic cost and constraint matrices. It considers only the upper-triangular part of P.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param ndarray Px<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Values of entries to be updated</p>
+</dd>
+<dt class="field-even">param ndarray Px_idx<span class="colon">:</span></dt>
+<dd class="field-even"><p>Indices of entries to be updated. Pass <code class="code docutils literal notranslate"><span class="pre">[]</span></code> if
+all the indices are to be updated</p>
+</dd>
+<dt class="field-odd">param int Px_n<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of entries to be updated. Used only if Px_idx is not
+<code class="code docutils literal notranslate"><span class="pre">[]</span></code>.</p>
+</dd>
+<dt class="field-even">param ndarray Ax<span class="colon">:</span></dt>
+<dd class="field-even"><p>Values of entries to be updated</p>
+</dd>
+<dt class="field-odd">param ndarray Ax_idx<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Indices of entries to be updated. Pass <code class="code docutils literal notranslate"><span class="pre">[]</span></code> if
+all the indices are to be updated</p>
+</dd>
+<dt class="field-even">param int Ax_n<span class="colon">:</span></dt>
+<dd class="field-even"><p>Number of entries to be updated. Used only if Ax_idx is not
+<code class="code docutils literal notranslate"><span class="pre">[]</span></code>.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<p>You can update all the nonzero entries in matrix <span class="math notranslate nohighlight">\(A\)</span> by running</p>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="n">emosqp</span><span class="p">(</span><span class="s">&#39;update_A&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">Ax_new</span><span class="p">,</span><span class="w"> </span><span class="p">[],</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>See C <a class="reference internal" href="../interfaces/C.html#c-sublevel-api"><span class="std std-ref">Sublevel API</span></a> for more details on the input arguments.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Code generation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="python.html" class="btn btn-neutral float-right" title="Python" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

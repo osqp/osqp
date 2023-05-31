@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Update vectors &mdash; OSQP  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/osqp_theme.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Update matrices" href="update-matrices.html" />
+    <link rel="prev" title="Setup and solve" href="setup-and-solve.html" />
+<meta name="twitter:card" content="summary_large_image" >
+<meta name="twitter:creator" content="@bstellato" >
+<meta name="twitter:image"
+      content="https://osqp.org/docs/_static/img/logo.png">
+<meta name="twitter:description" content="The OSQP (Operator Splitting
+Quadratic Program) solver is a numerical optimization package for solving
+convex quadratic programs." >
+<meta property="og:url" content="https://osqp.org" >
+<meta property="og:title" content="OSQP solver documentation" >
+<meta property="og:description" content="The OSQP (Operator Splitting Quadratic
+Program) solver is a numerical optimization package for solving convex
+quadratic programs." >
+<meta property="og:image"
+content="https://osqp.org/docs/_static/img/logo.png">
+<meta property="fb:app_id" content="129555174389689">
+<meta property="og:type" content="website" >
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../solver/index.html">The solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../get_started/index.html">Get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interfaces/index.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parsers/index.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../codegen/index.html">Code generation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Examples</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#demo">Demo</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="setup-and-solve.html">Setup and solve</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Update vectors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#python">Python</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#matlab">Matlab</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#julia">Julia</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r">R</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#c">C</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="update-matrices.html">Update matrices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#applications">Applications</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OSQP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Examples</a></li>
+      <li class="breadcrumb-item active">Update vectors</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/osqp/osqp/blob/master/docs/examples/update-vectors.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="update-vectors">
+<h1>Update vectors<a class="headerlink" href="#update-vectors" title="Permalink to this heading">¶</a></h1>
+<p>Consider the following QP</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{array}{ll}
+  \mbox{minimize} &amp; \frac{1}{2} x^T \begin{bmatrix}4 &amp; 1\\ 1 &amp; 2 \end{bmatrix} x + \begin{bmatrix}1 \\ 1\end{bmatrix}^T x \\
+  \mbox{subject to} &amp; \begin{bmatrix}1 \\ 0 \\ 0\end{bmatrix} \leq \begin{bmatrix} 1 &amp; 1\\ 1 &amp; 0\\ 0 &amp; 1\end{bmatrix} x \leq \begin{bmatrix}1 \\ 0.7 \\ 0.7\end{bmatrix}
+\end{array}\end{split}\]</div>
+<p>We show below how to setup and solve the problem.
+Then we update the vectors <span class="math notranslate nohighlight">\(q\)</span>, <span class="math notranslate nohighlight">\(l\)</span>, and <span class="math notranslate nohighlight">\(u\)</span> and solve the updated problem</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{array}{ll}
+  \mbox{minimize} &amp; \frac{1}{2} x^T \begin{bmatrix}4 &amp; 1\\ 1 &amp; 2 \end{bmatrix} x + \begin{bmatrix}2 \\ 3\end{bmatrix}^T x \\
+  \mbox{subject to} &amp; \begin{bmatrix}2 \\ -1 \\ -1\end{bmatrix} \leq \begin{bmatrix} 1 &amp; 1\\ 1 &amp; 0\\ 0 &amp; 1\end{bmatrix} x \leq \begin{bmatrix}2 \\ 2.5 \\ 2.5\end{bmatrix}
+\end{array}\end{split}\]</div>
+<section id="python">
+<h2>Python<a class="headerlink" href="#python" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">osqp</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
+
+<span class="c1"># Define problem data</span>
+<span class="n">P</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">([[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]])</span>
+<span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">csc_matrix</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="n">l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">])</span>
+
+<span class="c1"># Create an OSQP object</span>
+<span class="n">prob</span> <span class="o">=</span> <span class="n">osqp</span><span class="o">.</span><span class="n">OSQP</span><span class="p">()</span>
+
+<span class="c1"># Setup workspace</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span>
+
+<span class="c1"># Solve problem</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+
+<span class="c1"># Update problem</span>
+<span class="n">q_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="n">l_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">u_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">])</span>
+<span class="n">prob</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="n">q_new</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="n">l_new</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">u_new</span><span class="p">)</span>
+
+<span class="c1"># Solve updated problem</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="matlab">
+<h2>Matlab<a class="headerlink" href="#matlab" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Define problem data</span>
+<span class="n">P</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">sparse</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">]);</span>
+<span class="n">q</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="mi">1</span><span class="p">];</span>
+<span class="n">A</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">sparse</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]);</span>
+<span class="n">l</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="mi">0</span><span class="p">];</span>
+<span class="n">u</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="mf">0.7</span><span class="p">;</span><span class="w"> </span><span class="mf">0.7</span><span class="p">];</span>
+
+<span class="c">% Create an OSQP object</span>
+<span class="n">prob</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">osqp</span><span class="p">;</span>
+
+<span class="c">% Setup workspace</span>
+<span class="n">prob</span><span class="p">.</span><span class="n">setup</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">q</span><span class="p">,</span><span class="w"> </span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">);</span>
+
+<span class="c">% Solve problem</span>
+<span class="n">res</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">prob</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span>
+
+<span class="c">% Update problem</span>
+<span class="n">q_new</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="mi">3</span><span class="p">];</span>
+<span class="n">l_new</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
+<span class="n">u_new</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="mf">2.5</span><span class="p">;</span><span class="w"> </span><span class="mf">2.5</span><span class="p">];</span>
+<span class="n">prob</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="s">&#39;q&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">q_new</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;l&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">l_new</span><span class="p">,</span><span class="w"> </span><span class="s">&#39;u&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">u_new</span><span class="p">);</span>
+
+<span class="c">% Solve updated problem</span>
+<span class="n">res</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">prob</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span>
+</pre></div>
+</div>
+</section>
+<section id="julia">
+<h2>Julia<a class="headerlink" href="#julia" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">OSQP</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Compat</span><span class="o">.</span><span class="n">SparseArrays</span>
+
+<span class="c"># Define problem data</span>
+<span class="n">P</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sparse</span><span class="p">([</span><span class="mf">4.</span><span class="w"> </span><span class="mf">1.</span><span class="p">;</span><span class="w"> </span><span class="mf">1.</span><span class="w"> </span><span class="mf">2.</span><span class="p">])</span>
+<span class="n">q</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">1.</span><span class="p">;</span><span class="w"> </span><span class="mf">1.</span><span class="p">]</span>
+<span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sparse</span><span class="p">([</span><span class="mf">1.</span><span class="w"> </span><span class="mf">1.</span><span class="p">;</span><span class="w"> </span><span class="mf">1.</span><span class="w"> </span><span class="mf">0.</span><span class="p">;</span><span class="w"> </span><span class="mf">0.</span><span class="w"> </span><span class="mf">1.</span><span class="p">])</span>
+<span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">1.</span><span class="p">;</span><span class="w"> </span><span class="mf">0.</span><span class="p">;</span><span class="w"> </span><span class="mf">0.</span><span class="p">]</span>
+<span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">1.</span><span class="p">;</span><span class="w"> </span><span class="mf">0.7</span><span class="p">;</span><span class="w"> </span><span class="mf">0.7</span><span class="p">]</span>
+
+<span class="c"># Crate OSQP object</span>
+<span class="n">prob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OSQP</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span>
+
+<span class="c"># Setup workspace</span>
+<span class="n">OSQP</span><span class="o">.</span><span class="n">setup!</span><span class="p">(</span><span class="n">prob</span><span class="p">;</span><span class="w"> </span><span class="n">P</span><span class="o">=</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span><span class="w"> </span><span class="n">A</span><span class="o">=</span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="o">=</span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="o">=</span><span class="n">u</span><span class="p">)</span>
+
+<span class="c"># Solve problem</span>
+<span class="n">results</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OSQP</span><span class="o">.</span><span class="n">solve!</span><span class="p">(</span><span class="n">prob</span><span class="p">)</span>
+
+<span class="c"># Update problem</span>
+<span class="n">q_new</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">2.</span><span class="p">;</span><span class="w"> </span><span class="mf">3.</span><span class="p">]</span>
+<span class="n">l_new</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">2.</span><span class="p">;</span><span class="w"> </span><span class="o">-</span><span class="mf">1.</span><span class="p">;</span><span class="w"> </span><span class="o">-</span><span class="mf">1.</span><span class="p">]</span>
+<span class="n">u_new</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">2.</span><span class="p">;</span><span class="w"> </span><span class="mf">2.5</span><span class="p">;</span><span class="w"> </span><span class="mf">2.5</span><span class="p">]</span>
+<span class="n">OSQP</span><span class="o">.</span><span class="n">update!</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span><span class="w"> </span><span class="n">q</span><span class="o">=</span><span class="n">q_new</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="o">=</span><span class="n">l_new</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="o">=</span><span class="n">u_new</span><span class="p">)</span>
+
+<span class="c"># Solve updated problem</span>
+<span class="n">results</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OSQP</span><span class="o">.</span><span class="n">solve!</span><span class="p">(</span><span class="n">prob</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="r">
+<h2>R<a class="headerlink" href="#r" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">osqp</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">Matrix</span><span class="p">)</span>
+
+<span class="c1"># Define problem data</span>
+<span class="n">P</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">Matrix</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="m">4</span><span class="n">.</span><span class="p">,</span><span class="w"> </span><span class="m">1</span><span class="n">.</span><span class="p">,</span>
+<span class="w">              </span><span class="m">1</span><span class="n">.</span><span class="p">,</span><span class="w"> </span><span class="m">2</span><span class="n">.</span><span class="p">),</span><span class="w"> </span><span class="m">2</span><span class="p">,</span><span class="w"> </span><span class="m">2</span><span class="p">,</span><span class="w"> </span><span class="n">sparse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span>
+<span class="n">q</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="m">1</span><span class="n">.</span><span class="p">,</span><span class="w"> </span><span class="m">1</span><span class="n">.</span><span class="p">)</span>
+<span class="n">A</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">Matrix</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="m">1</span><span class="n">.</span><span class="p">,</span><span class="w"> </span><span class="m">1</span><span class="n">.</span><span class="p">,</span><span class="w"> </span><span class="m">0</span><span class="n">.</span><span class="p">,</span>
+<span class="w">              </span><span class="m">1</span><span class="n">.</span><span class="p">,</span><span class="w"> </span><span class="m">0</span><span class="n">.</span><span class="p">,</span><span class="w"> </span><span class="m">1</span><span class="n">.</span><span class="p">),</span><span class="w"> </span><span class="m">3</span><span class="p">,</span><span class="w"> </span><span class="m">2</span><span class="p">,</span><span class="w"> </span><span class="n">sparse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span>
+<span class="n">l</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="m">1</span><span class="n">.</span><span class="p">,</span><span class="w"> </span><span class="m">0</span><span class="n">.</span><span class="p">,</span><span class="w"> </span><span class="m">0</span><span class="n">.</span><span class="p">)</span>
+<span class="n">u</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="m">1</span><span class="n">.</span><span class="p">,</span><span class="w"> </span><span class="m">0.7</span><span class="p">,</span><span class="w"> </span><span class="m">0.7</span><span class="p">)</span>
+
+<span class="c1"># Setup workspace</span>
+<span class="n">model</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">osqp</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">q</span><span class="p">,</span><span class="w"> </span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">)</span>
+
+<span class="c1"># Solve problem</span>
+<span class="n">res</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">model</span><span class="o">$</span><span class="nf">Solve</span><span class="p">()</span>
+
+<span class="c1"># Update problem</span>
+<span class="n">q_new</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="m">2</span><span class="n">.</span><span class="p">,</span><span class="w"> </span><span class="m">3</span><span class="n">.</span><span class="p">)</span>
+<span class="n">l_new</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="m">2</span><span class="n">.</span><span class="p">,</span><span class="w"> </span><span class="m">-1</span><span class="n">.</span><span class="p">,</span><span class="w"> </span><span class="m">-1</span><span class="n">.</span><span class="p">)</span>
+<span class="n">u_new</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="m">2</span><span class="n">.</span><span class="p">,</span><span class="w"> </span><span class="m">2.5</span><span class="p">,</span><span class="w"> </span><span class="m">2.5</span><span class="p">)</span>
+<span class="n">model</span><span class="o">$</span><span class="nf">Update</span><span class="p">(</span><span class="n">q</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">q_new</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">l_new</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u_new</span><span class="p">)</span>
+
+<span class="c1"># Solve updated problem</span>
+<span class="n">res</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">model</span><span class="o">$</span><span class="nf">Solve</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="c">
+<h2>C<a class="headerlink" href="#c" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;osqp.h&quot;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">**</span><span class="n">argv</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Load problem data</span>
+<span class="w">    </span><span class="n">c_float</span><span class="w"> </span><span class="n">P_x</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">4.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="n">c_int</span><span class="w"> </span><span class="n">P_nnz</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="w">    </span><span class="n">c_int</span><span class="w"> </span><span class="n">P_i</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="n">c_int</span><span class="w"> </span><span class="n">P_p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="n">c_float</span><span class="w"> </span><span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="n">c_float</span><span class="w"> </span><span class="n">q_new</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">3.0</span><span class="p">,</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="n">c_float</span><span class="w"> </span><span class="n">A_x</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="n">c_int</span><span class="w"> </span><span class="n">A_nnz</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
+<span class="w">    </span><span class="n">c_int</span><span class="w"> </span><span class="n">A_i</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="n">c_int</span><span class="w"> </span><span class="n">A_p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="n">c_float</span><span class="w"> </span><span class="n">l</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="n">c_float</span><span class="w"> </span><span class="n">l_new</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.0</span><span class="p">,</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="n">c_float</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.7</span><span class="p">,</span><span class="w"> </span><span class="mf">0.7</span><span class="p">,</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="n">c_float</span><span class="w"> </span><span class="n">u_new</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.5</span><span class="p">,</span><span class="w"> </span><span class="mf">2.5</span><span class="p">,</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="n">c_int</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="n">c_int</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Exitflag</span>
+<span class="w">    </span><span class="n">c_int</span><span class="w"> </span><span class="n">exitflag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Workspace structures</span>
+<span class="w">    </span><span class="n">OSQPWorkspace</span><span class="w"> </span><span class="o">*</span><span class="n">work</span><span class="p">;</span>
+<span class="w">    </span><span class="n">OSQPSettings</span><span class="w">  </span><span class="o">*</span><span class="n">settings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">OSQPSettings</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">c_malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">OSQPSettings</span><span class="p">));</span>
+<span class="w">    </span><span class="n">OSQPData</span><span class="w">      </span><span class="o">*</span><span class="n">data</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">OSQPData</span><span class="w"> </span><span class="o">*</span><span class="p">)</span><span class="n">c_malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">OSQPData</span><span class="p">));</span>
+
+<span class="w">    </span><span class="c1">// Populate data</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
+<span class="w">        </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">m</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m</span><span class="p">;</span>
+<span class="w">        </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">P</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">csc_matrix</span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">P_nnz</span><span class="p">,</span><span class="w"> </span><span class="n">P_x</span><span class="p">,</span><span class="w"> </span><span class="n">P_i</span><span class="p">,</span><span class="w"> </span><span class="n">P_p</span><span class="p">);</span>
+<span class="w">        </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">q</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">q</span><span class="p">;</span>
+<span class="w">        </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">csc_matrix</span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">A_nnz</span><span class="p">,</span><span class="w"> </span><span class="n">A_x</span><span class="p">,</span><span class="w"> </span><span class="n">A_i</span><span class="p">,</span><span class="w"> </span><span class="n">A_p</span><span class="p">);</span>
+<span class="w">        </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">l</span><span class="p">;</span>
+<span class="w">        </span><span class="n">data</span><span class="o">-&gt;</span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Define solver settings as default</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">settings</span><span class="p">)</span><span class="w"> </span><span class="n">osqp_set_default_settings</span><span class="p">(</span><span class="n">settings</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Setup workspace</span>
+<span class="w">    </span><span class="n">exitflag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">osqp_setup</span><span class="p">(</span><span class="o">&amp;</span><span class="n">work</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">settings</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Solve problem</span>
+<span class="w">    </span><span class="n">osqp_solve</span><span class="p">(</span><span class="n">work</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Update problem</span>
+<span class="w">    </span><span class="n">osqp_update_lin_cost</span><span class="p">(</span><span class="n">work</span><span class="p">,</span><span class="w"> </span><span class="n">q_new</span><span class="p">);</span>
+<span class="w">    </span><span class="n">osqp_update_bounds</span><span class="p">(</span><span class="n">work</span><span class="p">,</span><span class="w"> </span><span class="n">l_new</span><span class="p">,</span><span class="w"> </span><span class="n">u_new</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Solve updated problem</span>
+<span class="w">    </span><span class="n">osqp_solve</span><span class="p">(</span><span class="n">work</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Cleanup</span>
+<span class="w">    </span><span class="n">osqp_cleanup</span><span class="p">(</span><span class="n">work</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">A</span><span class="p">)</span><span class="w"> </span><span class="n">c_free</span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">A</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">P</span><span class="p">)</span><span class="w"> </span><span class="n">c_free</span><span class="p">(</span><span class="n">data</span><span class="o">-&gt;</span><span class="n">P</span><span class="p">);</span>
+<span class="w">        </span><span class="n">c_free</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">settings</span><span class="p">)</span><span class="w"> </span><span class="n">c_free</span><span class="p">(</span><span class="n">settings</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">exitflag</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="setup-and-solve.html" class="btn btn-neutral float-left" title="Setup and solve" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="update-matrices.html" class="btn btn-neutral float-right" title="Update matrices" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
