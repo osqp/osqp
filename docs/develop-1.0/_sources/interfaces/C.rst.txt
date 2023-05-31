@@ -9,6 +9,9 @@ C
 Main solver API
 ---------------
 
+Main solver functions
+^^^^^^^^^^^^^^^^^^^^^
+
 The main C API is imported from the header :code:`osqp.h` and provides the following functions
 
 
@@ -19,14 +22,21 @@ The main C API is imported from the header :code:`osqp.h` and provides the follo
 .. doxygenfunction:: osqp_cleanup
 
 
-.. _C_sublevel_API:
+Main solver data types
+^^^^^^^^^^^^^^^^^^^^^^
 
-Sublevel API
-------------
-Sublevel C API is also imported from the header :code:`osqp.h` and provides the following functions
+.. doxygenstruct:: OSQPSolver
+  :members:
+
+.. doxygenstruct:: OSQPSolution
+   :members:
+
+.. doxygenstruct:: OSQPInfo
+   :members:
+
 
 Warm start
-^^^^^^^^^^
+----------
 OSQP automatically warm starts primal and dual variables from the previous QP solution. If you would like to warm start their values manually, you can use
 
 .. doxygenfunction:: osqp_warm_start
@@ -35,13 +45,67 @@ OSQP automatically warm starts primal and dual variables from the previous QP so
 .. _C_update_data :
 
 Update problem data
-^^^^^^^^^^^^^^^^^^^
+-------------------
 Problem data can be updated without executing the setup again using the following functions.
 
 .. doxygenfunction:: osqp_update_data_vec
 
 .. doxygenfunction:: osqp_update_data_mat
 
+
+.. _C_settings :
+
+Solver settings
+---------------
+
+Settings API
+^^^^^^^^^^^^
+
+.. doxygenfunction:: osqp_set_default_settings
+
+
+Many solver settings can be updated without running setup again.
+
+.. doxygenfunction:: osqp_update_settings
+
+.. doxygenfunction:: osqp_update_rho
+
+
+Settings structure
+^^^^^^^^^^^^^^^^^^
+
+The setting structure has the following fields.
+
+
+.. doxygenstruct:: OSQPSettings
+  :members:
+
+
+.. _C_derivatives :
+
+Compute solution derivatives
+----------------------------
+Adjoint derivatives of the QP problem can be computed at the current solution.
+
+.. doxygenfunction:: osqp_adjoint_derivative_compute
+
+.. doxygenfunction:: osqp_adjoint_derivative_get_mat
+
+.. doxygenfunction:: osqp_adjoint_derivative_get_vec
+
+
+.. _C_code_generation :
+
+Code generation
+---------------
+The QP problem and all solver data can be written to a problem workspace for use by OSQP in embedded mode.
+
+.. doxygenfunction:: osqp_set_default_codegen_defines
+
+.. doxygenfunction:: osqp_codegen
+
+.. doxygenstruct:: OSQPCodegenDefines
+   :members:
 
 
 .. _C_data_types :
@@ -58,33 +122,6 @@ The most basic used datatypes are
 The matrices are defined in `Compressed Sparse Column (CSC) format <https://people.sc.fsu.edu/~jburkardt/data/cc/cc.html>`_ using zero-based indexing.
 
 .. doxygenstruct:: OSQPCscMatrix
-   :members:
-
-
-The relevant structures used in the API are
-
-Solver
-^^^^^^^^
-
-.. doxygenstruct:: OSQPSolver
-  :members:
-
-Settings
-^^^^^^^^
-
-.. doxygenstruct:: OSQPSettings
-  :members:
-
-Solution
-^^^^^^^^
-
-.. doxygenstruct:: OSQPSolution
-   :members:
-
-Info
-^^^^^
-
-.. doxygenstruct:: OSQPInfo
    :members:
 
 

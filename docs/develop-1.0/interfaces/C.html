@@ -16,6 +16,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -71,7 +72,11 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l2 current"><a class="reference internal" href="index.html#official">Official</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">C</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#main-solver-api">Main solver API</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#sublevel-api">Sublevel API</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#warm-start">Warm start</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#update-problem-data">Update problem data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#solver-settings">Solver settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#compute-solution-derivatives">Compute solution derivatives</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#code-generation">Code generation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#data-types">Data types</a></li>
 </ul>
 </li>
@@ -108,7 +113,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
           <li class="breadcrumb-item"><a href="index.html">Interfaces</a></li>
       <li class="breadcrumb-item active">C</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/osqp/osqp/blob/develop-1.0/docs/interfaces/C.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/osqp/osqp/blob/master/docs/interfaces/C.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -120,43 +125,720 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <span id="c-interface"></span><h1>C<a class="headerlink" href="#c" title="Permalink to this heading">¶</a></h1>
 <section id="main-solver-api">
 <span id="c-main-api"></span><h2>Main solver API<a class="headerlink" href="#main-solver-api" title="Permalink to this heading">¶</a></h2>
+<section id="main-solver-functions">
+<h3>Main solver functions<a class="headerlink" href="#main-solver-functions" title="Permalink to this heading">¶</a></h3>
 <p>The main C API is imported from the header <code class="code docutils literal notranslate"><span class="pre">osqp.h</span></code> and provides the following functions</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>doxygenfunction: Cannot find function “osqp_setup” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
-</div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>doxygenfunction: Cannot find function “osqp_solve” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
-</div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>doxygenfunction: Cannot find function “osqp_cleanup” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
-</div>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv410osqp_setupPP10OSQPSolverPK13OSQPCscMatrixPK9OSQPFloatPK13OSQPCscMatrixPK9OSQPFloatPK9OSQPFloat7OSQPInt7OSQPIntPK12OSQPSettings">
+<span id="_CPPv310osqp_setupPP10OSQPSolverPK13OSQPCscMatrixPK9OSQPFloatPK13OSQPCscMatrixPK9OSQPFloatPK9OSQPFloat7OSQPInt7OSQPIntPK12OSQPSettings"></span><span id="_CPPv210osqp_setupPP10OSQPSolverPK13OSQPCscMatrixPK9OSQPFloatPK13OSQPCscMatrixPK9OSQPFloatPK9OSQPFloat7OSQPInt7OSQPIntPK12OSQPSettings"></span><span id="osqp_setup__OSQPSolverPP.OSQPCscMatrixCP.OSQPFloatCP.OSQPCscMatrixCP.OSQPFloatCP.OSQPFloatCP.OSQPInt.OSQPInt.OSQPSettingsCP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1ad3ecc0338fcf2637d3511d4cad9f2ca2"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_setup</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv410OSQPSolver" title="OSQPSolver"><span class="n"><span class="pre">OSQPSolver</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">solverp</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv413OSQPCscMatrix" title="OSQPCscMatrix"><span class="n"><span class="pre">OSQPCscMatrix</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">P</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">q</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv413OSQPCscMatrix" title="OSQPCscMatrix"><span class="n"><span class="pre">OSQPCscMatrix</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">A</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">l</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">u</span></span>, <span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">m</span></span>, <span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">n</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv412OSQPSettings" title="OSQPSettings"><span class="n"><span class="pre">OSQPSettings</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">settings</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv410osqp_setupPP10OSQPSolverPK13OSQPCscMatrixPK9OSQPFloatPK13OSQPCscMatrixPK9OSQPFloatPK9OSQPFloat7OSQPInt7OSQPIntPK12OSQPSettings" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Initialize OSQP solver allocating memory.</p>
+<p>It performs:<ul class="simple">
+<li><p>data and settings validation</p></li>
+<li><p>problem data scaling</p></li>
+<li><p>setup linear system solver:<ul>
+<li><p>direct solver: KKT matrix factorization is performed here</p></li>
+<li><p>indirect solver: reduced KKT matrix preconditioning is performed here</p></li>
+</ul>
+</p></li>
+</ul>
+</p>
+<p>NB: This is the only function that allocates dynamic memory and is not used during code generation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>solverp</strong> – Solver pointer </p></li>
+<li><p><strong>P</strong> – Problem data (upper triangular part of quadratic cost term, csc format) </p></li>
+<li><p><strong>q</strong> – Problem data (linear cost term) </p></li>
+<li><p><strong>A</strong> – Problem data (constraint matrix, csc format) </p></li>
+<li><p><strong>l</strong> – Problem data (constraint lower bound) </p></li>
+<li><p><strong>u</strong> – Problem data (constraint upper bound) </p></li>
+<li><p><strong>m</strong> – Problem data (number of constraints) </p></li>
+<li><p><strong>n</strong> – Problem data (number of variables) </p></li>
+<li><p><strong>settings</strong> – Solver settings </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Exitflag for errors (0 if no errors) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv410osqp_solveP10OSQPSolver">
+<span id="_CPPv310osqp_solveP10OSQPSolver"></span><span id="_CPPv210osqp_solveP10OSQPSolver"></span><span id="osqp_solve__OSQPSolverP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a0557cc36da722610df540f9890ddd37b"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_solve</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv410OSQPSolver" title="OSQPSolver"><span class="n"><span class="pre">OSQPSolver</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">solver</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv410osqp_solveP10OSQPSolver" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Solve quadratic program</p>
+<p>The final solver information is stored in the <em>solver-&gt;info</em> structure</p>
+<p>The solution is stored in the <em>solver-&gt;solution</em> structure</p>
+<p>If the problem is primal infeasible, the certificate is stored in <em>solver-&gt;delta_y</em></p>
+<p>If the problem is dual infeasible, the certificate is stored in <em>solver-&gt;delta_x</em></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>solver</strong> – Solver </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Exitflag for errors (0 if no errors) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv412osqp_cleanupP10OSQPSolver">
+<span id="_CPPv312osqp_cleanupP10OSQPSolver"></span><span id="_CPPv212osqp_cleanupP10OSQPSolver"></span><span id="osqp_cleanup__OSQPSolverP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1ae0aa250f869cf8f83a184cb51f2d0f8b"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_cleanup</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv410OSQPSolver" title="OSQPSolver"><span class="n"><span class="pre">OSQPSolver</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">solver</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412osqp_cleanupP10OSQPSolver" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Cleanup workspace by deallocating memory</p>
+<p>This function is not used in code generation </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>solver</strong> – Solver </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Exitflag for errors (0 if no errors) </p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
-<section id="sublevel-api">
-<span id="c-sublevel-api"></span><h2>Sublevel API<a class="headerlink" href="#sublevel-api" title="Permalink to this heading">¶</a></h2>
-<p>Sublevel C API is also imported from the header <code class="code docutils literal notranslate"><span class="pre">osqp.h</span></code> and provides the following functions</p>
-<section id="warm-start">
-<h3>Warm start<a class="headerlink" href="#warm-start" title="Permalink to this heading">¶</a></h3>
-<p>OSQP automatically warm starts primal and dual variables from the previous QP solution. If you would like to warm start their values manually, you can use</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>doxygenfunction: Cannot find function “osqp_warm_start” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
+<section id="main-solver-data-types">
+<h3>Main solver data types<a class="headerlink" href="#main-solver-data-types" title="Permalink to this heading">¶</a></h3>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv410OSQPSolver">
+<span id="_CPPv310OSQPSolver"></span><span id="_CPPv210OSQPSolver"></span><span id="OSQPSolver"></span><span class="target" id="d5/df6/struct_o_s_q_p_solver"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPSolver</span></span></span><a class="headerlink" href="#_CPPv410OSQPSolver" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Main OSQP solver structure that holds all information. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OSQPSolver8settingsE">
+<span id="_CPPv3N10OSQPSolver8settingsE"></span><span id="_CPPv2N10OSQPSolver8settingsE"></span><span id="OSQPSolver::settings__OSQPSettingsP"></span><span class="target" id="d5/df6/struct_o_s_q_p_solver_1a826e3c13fc1e60f9e2e0a179011faa42"></span><a class="reference internal" href="#_CPPv412OSQPSettings" title="OSQPSettings"><span class="n"><span class="pre">OSQPSettings</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">settings</span></span></span><a class="headerlink" href="#_CPPv4N10OSQPSolver8settingsE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Problem settings. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OSQPSolver8solutionE">
+<span id="_CPPv3N10OSQPSolver8solutionE"></span><span id="_CPPv2N10OSQPSolver8solutionE"></span><span id="OSQPSolver::solution__OSQPSolutionP"></span><span class="target" id="d5/df6/struct_o_s_q_p_solver_1a7029e3d757377f8779d9eb1982da2c2a"></span><a class="reference internal" href="#_CPPv412OSQPSolution" title="OSQPSolution"><span class="n"><span class="pre">OSQPSolution</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">solution</span></span></span><a class="headerlink" href="#_CPPv4N10OSQPSolver8solutionE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Computed solution. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OSQPSolver4infoE">
+<span id="_CPPv3N10OSQPSolver4infoE"></span><span id="_CPPv2N10OSQPSolver4infoE"></span><span id="OSQPSolver::info__OSQPInfoP"></span><span class="target" id="d5/df6/struct_o_s_q_p_solver_1ae3fccbb4851f9f83c1cca344d72e1f79"></span><a class="reference internal" href="#_CPPv48OSQPInfo" title="OSQPInfo"><span class="n"><span class="pre">OSQPInfo</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">info</span></span></span><a class="headerlink" href="#_CPPv4N10OSQPSolver4infoE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Solver information. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OSQPSolver4workE">
+<span id="_CPPv3N10OSQPSolver4workE"></span><span id="_CPPv2N10OSQPSolver4workE"></span><span id="OSQPSolver::work__OSQPWorkspaceP"></span><span class="target" id="d5/df6/struct_o_s_q_p_solver_1acb619bf4c0cc4c245a327ba4558feca1"></span><span class="n"><span class="pre">OSQPWorkspace</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">work</span></span></span><a class="headerlink" href="#_CPPv4N10OSQPSolver4workE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Internal solver workspace (contents not public) </p>
+</dd></dl>
+
 </div>
+</dd></dl>
+
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv412OSQPSolution">
+<span id="_CPPv312OSQPSolution"></span><span id="_CPPv212OSQPSolution"></span><span id="OSQPSolution"></span><span class="target" id="d0/dc1/struct_o_s_q_p_solution"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPSolution</span></span></span><a class="headerlink" href="#_CPPv412OSQPSolution" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Structure to hold the computed solution (if any), and any certificates of infeasibility (if any) found by the solver. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSolution1xE">
+<span id="_CPPv3N12OSQPSolution1xE"></span><span id="_CPPv2N12OSQPSolution1xE"></span><span id="OSQPSolution::x__OSQPFloatP"></span><span class="target" id="d0/dc1/struct_o_s_q_p_solution_1a4a5ad50a5fd680e67a33e69c58619944"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">x</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSolution1xE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Primal solution. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSolution1yE">
+<span id="_CPPv3N12OSQPSolution1yE"></span><span id="_CPPv2N12OSQPSolution1yE"></span><span id="OSQPSolution::y__OSQPFloatP"></span><span class="target" id="d0/dc1/struct_o_s_q_p_solution_1ac57aa1170686afff8b10e9516b032a5d"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">y</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSolution1yE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Lagrange multiplier associated with <span class="math notranslate nohighlight">\(l \le Ax \le u\)</span>. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSolution13prim_inf_certE">
+<span id="_CPPv3N12OSQPSolution13prim_inf_certE"></span><span id="_CPPv2N12OSQPSolution13prim_inf_certE"></span><span id="OSQPSolution::prim_inf_cert__OSQPFloatP"></span><span class="target" id="d0/dc1/struct_o_s_q_p_solution_1a1d1702cf7257ecf5ef624a6c7527409b"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">prim_inf_cert</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSolution13prim_inf_certE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Primal infeasibility certificate. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSolution13dual_inf_certE">
+<span id="_CPPv3N12OSQPSolution13dual_inf_certE"></span><span id="_CPPv2N12OSQPSolution13dual_inf_certE"></span><span id="OSQPSolution::dual_inf_cert__OSQPFloatP"></span><span class="target" id="d0/dc1/struct_o_s_q_p_solution_1a42afda7a94368c3039704af5bca6752a"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">dual_inf_cert</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSolution13dual_inf_certE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Dual infeasibility certificate. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv48OSQPInfo">
+<span id="_CPPv38OSQPInfo"></span><span id="_CPPv28OSQPInfo"></span><span id="OSQPInfo"></span><span class="target" id="d6/df9/struct_o_s_q_p_info"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPInfo</span></span></span><a class="headerlink" href="#_CPPv48OSQPInfo" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Information about the solution process. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo6statusE">
+<span id="_CPPv3N8OSQPInfo6statusE"></span><span id="_CPPv2N8OSQPInfo6statusE"></span><span id="OSQPInfo::status__cA"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1a8ffcad36873c241941b3daa659cd0568"></span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">status</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">32</span></span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo6statusE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Status string, e.g. ‘solved’. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo10status_valE">
+<span id="_CPPv3N8OSQPInfo10status_valE"></span><span id="_CPPv2N8OSQPInfo10status_valE"></span><span id="OSQPInfo::status_val__OSQPInt"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1abdf6b17c3a48b5bd1ab83720ebd090f7"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">status_val</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo10status_valE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Status as OSQPInt, defined in osqp_api_constants.h. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo13status_polishE">
+<span id="_CPPv3N8OSQPInfo13status_polishE"></span><span id="_CPPv2N8OSQPInfo13status_polishE"></span><span id="OSQPInfo::status_polish__OSQPInt"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1ac502a21de1568ca89d37f835721ce313"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">status_polish</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo13status_polishE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Polishing status: successful (1), unperformed (0), unsuccessful (-1) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo7obj_valE">
+<span id="_CPPv3N8OSQPInfo7obj_valE"></span><span id="_CPPv2N8OSQPInfo7obj_valE"></span><span id="OSQPInfo::obj_val__OSQPFloat"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1acc4444226fc69b04132ecb4cb82c9ecb"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">obj_val</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo7obj_valE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Primal objective value. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo8prim_resE">
+<span id="_CPPv3N8OSQPInfo8prim_resE"></span><span id="_CPPv2N8OSQPInfo8prim_resE"></span><span id="OSQPInfo::prim_res__OSQPFloat"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1a3c762fb80fca586ea1e5d85d56584fd0"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">prim_res</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo8prim_resE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Norm of primal residual. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo8dual_resE">
+<span id="_CPPv3N8OSQPInfo8dual_resE"></span><span id="_CPPv2N8OSQPInfo8dual_resE"></span><span id="OSQPInfo::dual_res__OSQPFloat"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1ae30ac71e10b47642cb7425b0c06b769a"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">dual_res</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo8dual_resE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Norm of dual residual. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo4iterE">
+<span id="_CPPv3N8OSQPInfo4iterE"></span><span id="_CPPv2N8OSQPInfo4iterE"></span><span id="OSQPInfo::iter__OSQPInt"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1a3b62b2b19db4c7eb4c8633af01b30e72"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">iter</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo4iterE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Number of iterations taken. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo11rho_updatesE">
+<span id="_CPPv3N8OSQPInfo11rho_updatesE"></span><span id="_CPPv2N8OSQPInfo11rho_updatesE"></span><span id="OSQPInfo::rho_updates__OSQPInt"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1a2c0c56a7878823024d14920eae6aed9a"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">rho_updates</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo11rho_updatesE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Number of rho updates performned. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo12rho_estimateE">
+<span id="_CPPv3N8OSQPInfo12rho_estimateE"></span><span id="_CPPv2N8OSQPInfo12rho_estimateE"></span><span id="OSQPInfo::rho_estimate__OSQPFloat"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1a8d2efe1bdc54c060427638593481752a"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">rho_estimate</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo12rho_estimateE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Best rho estimate so far from residuals. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo10setup_timeE">
+<span id="_CPPv3N8OSQPInfo10setup_timeE"></span><span id="_CPPv2N8OSQPInfo10setup_timeE"></span><span id="OSQPInfo::setup_time__OSQPFloat"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1a86e25f388fa4a5518f9a86fff75e3dc0"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">setup_time</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo10setup_timeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Setup phase time (seconds) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo10solve_timeE">
+<span id="_CPPv3N8OSQPInfo10solve_timeE"></span><span id="_CPPv2N8OSQPInfo10solve_timeE"></span><span id="OSQPInfo::solve_time__OSQPFloat"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1af33567745d1e9eaf03c6d3580d38b16c"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">solve_time</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo10solve_timeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Solve phase time (seconds) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo11update_timeE">
+<span id="_CPPv3N8OSQPInfo11update_timeE"></span><span id="_CPPv2N8OSQPInfo11update_timeE"></span><span id="OSQPInfo::update_time__OSQPFloat"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1a20d4795e4a6606d0f594393cd90731fd"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">update_time</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo11update_timeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Update phase time (seconds) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo11polish_timeE">
+<span id="_CPPv3N8OSQPInfo11polish_timeE"></span><span id="_CPPv2N8OSQPInfo11polish_timeE"></span><span id="OSQPInfo::polish_time__OSQPFloat"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1a707a58de4b1374ab202182dc81901e89"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">polish_time</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo11polish_timeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Polish phase time (seconds) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N8OSQPInfo8run_timeE">
+<span id="_CPPv3N8OSQPInfo8run_timeE"></span><span id="_CPPv2N8OSQPInfo8run_timeE"></span><span id="OSQPInfo::run_time__OSQPFloat"></span><span class="target" id="d6/df9/struct_o_s_q_p_info_1aa1498bc53bb36817ab7d9bd9bc0ceb85"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">run_time</span></span></span><a class="headerlink" href="#_CPPv4N8OSQPInfo8run_timeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Total solve time (seconds) </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+</section>
+<section id="warm-start">
+<h2>Warm start<a class="headerlink" href="#warm-start" title="Permalink to this heading">¶</a></h2>
+<p>OSQP automatically warm starts primal and dual variables from the previous QP solution. If you would like to warm start their values manually, you can use</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv415osqp_warm_startP10OSQPSolverPK9OSQPFloatPK9OSQPFloat">
+<span id="_CPPv315osqp_warm_startP10OSQPSolverPK9OSQPFloatPK9OSQPFloat"></span><span id="_CPPv215osqp_warm_startP10OSQPSolverPK9OSQPFloatPK9OSQPFloat"></span><span id="osqp_warm_start__OSQPSolverP.OSQPFloatCP.OSQPFloatCP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a1a5f16ae1baf85b2ee0781990cce6481"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_warm_start</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv410OSQPSolver" title="OSQPSolver"><span class="n"><span class="pre">OSQPSolver</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">solver</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">x</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">y</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415osqp_warm_startP10OSQPSolverPK9OSQPFloatPK9OSQPFloat" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Warm start primal and dual variables </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>solver</strong> – Solver </p></li>
+<li><p><strong>x</strong> – Primal variable, NULL if none </p></li>
+<li><p><strong>y</strong> – Dual variable, NULL if none </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Exitflag for errors (0 if no errors) </p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="update-problem-data">
-<span id="c-update-data"></span><h3>Update problem data<a class="headerlink" href="#update-problem-data" title="Permalink to this heading">¶</a></h3>
+<span id="c-update-data"></span><h2>Update problem data<a class="headerlink" href="#update-problem-data" title="Permalink to this heading">¶</a></h2>
 <p>Problem data can be updated without executing the setup again using the following functions.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>doxygenfunction: Cannot find function “osqp_update_data_vec” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
-</div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>doxygenfunction: Cannot find function “osqp_update_data_mat” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
-</div>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv420osqp_update_data_vecP10OSQPSolverPK9OSQPFloatPK9OSQPFloatPK9OSQPFloat">
+<span id="_CPPv320osqp_update_data_vecP10OSQPSolverPK9OSQPFloatPK9OSQPFloatPK9OSQPFloat"></span><span id="_CPPv220osqp_update_data_vecP10OSQPSolverPK9OSQPFloatPK9OSQPFloatPK9OSQPFloat"></span><span id="osqp_update_data_vec__OSQPSolverP.OSQPFloatCP.OSQPFloatCP.OSQPFloatCP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1aeccb58aaff194611d137ccdf541a4b49"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_update_data_vec</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv410OSQPSolver" title="OSQPSolver"><span class="n"><span class="pre">OSQPSolver</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">solver</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">q_new</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">l_new</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">u_new</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420osqp_update_data_vecP10OSQPSolverPK9OSQPFloatPK9OSQPFloatPK9OSQPFloat" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Update problem data vectors </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>solver</strong> – Solver </p></li>
+<li><p><strong>q_new</strong> – New linear cost, NULL if none </p></li>
+<li><p><strong>l_new</strong> – New lower bound, NULL if none </p></li>
+<li><p><strong>u_new</strong> – New upper bound, NULL if none </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Exitflag for errors (0 if no errors) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv420osqp_update_data_matP10OSQPSolverPK9OSQPFloatPK7OSQPInt7OSQPIntPK9OSQPFloatPK7OSQPInt7OSQPInt">
+<span id="_CPPv320osqp_update_data_matP10OSQPSolverPK9OSQPFloatPK7OSQPInt7OSQPIntPK9OSQPFloatPK7OSQPInt7OSQPInt"></span><span id="_CPPv220osqp_update_data_matP10OSQPSolverPK9OSQPFloatPK7OSQPInt7OSQPIntPK9OSQPFloatPK7OSQPInt7OSQPInt"></span><span id="osqp_update_data_mat__OSQPSolverP.OSQPFloatCP.OSQPIntCP.OSQPInt.OSQPFloatCP.OSQPIntCP.OSQPInt"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a46222f2fab2ee25590bda621eaf8b63c"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_update_data_mat</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv410OSQPSolver" title="OSQPSolver"><span class="n"><span class="pre">OSQPSolver</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">solver</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">Px_new</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">Px_new_idx</span></span>, <span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">P_new_n</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">Ax_new</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">Ax_new_idx</span></span>, <span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">A_new_n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420osqp_update_data_matP10OSQPSolverPK9OSQPFloatPK7OSQPInt7OSQPIntPK9OSQPFloatPK7OSQPInt7OSQPInt" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Update elements of matrices P (upper triangular) and A by preserving their sparsity structures.</p>
+<p>If Px_new_idx (Ax_new_idx) is OSQP_NULL, Px_new (Ax_new) is assumed to be as long as P-&gt;x (A-&gt;x) and the whole P-&gt;x (A-&gt;x) is replaced.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>solver</strong> – Solver </p></li>
+<li><p><strong>Px_new</strong> – Vector of new elements in P-&gt;x (upper triangular), NULL if none </p></li>
+<li><p><strong>Px_new_idx</strong> – Index mapping new elements to positions in P-&gt;x </p></li>
+<li><p><strong>P_new_n</strong> – Number of new elements to be changed </p></li>
+<li><p><strong>Ax_new</strong> – Vector of new elements in A-&gt;x, NULL if none </p></li>
+<li><p><strong>Ax_new_idx</strong> – Index mapping new elements to positions in A-&gt;x </p></li>
+<li><p><strong>A_new_n</strong> – Number of new elements to be changed </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>output flag: 0: OK 1: P_new_n &gt; nnzP 2: A_new_n &gt; nnzA &lt;0: error in the update </p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
+<section id="solver-settings">
+<span id="c-settings"></span><h2>Solver settings<a class="headerlink" href="#solver-settings" title="Permalink to this heading">¶</a></h2>
+<section id="settings-api">
+<h3>Settings API<a class="headerlink" href="#settings-api" title="Permalink to this heading">¶</a></h3>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv425osqp_set_default_settingsP12OSQPSettings">
+<span id="_CPPv325osqp_set_default_settingsP12OSQPSettings"></span><span id="_CPPv225osqp_set_default_settingsP12OSQPSettings"></span><span id="osqp_set_default_settings__OSQPSettingsP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a474d5a342f790fd178e61ef611422eb4"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_set_default_settings</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv412OSQPSettings" title="OSQPSettings"><span class="n"><span class="pre">OSQPSettings</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">settings</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425osqp_set_default_settingsP12OSQPSettings" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get the default settings from the osqp_api_constants.h file.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>the <code class="docutils literal notranslate"><span class="pre">settings</span></code> parameter must already be allocated in memory.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>settings</strong> – Settings structure to populate </p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Many solver settings can be updated without running setup again.</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv420osqp_update_settingsP10OSQPSolverPK12OSQPSettings">
+<span id="_CPPv320osqp_update_settingsP10OSQPSolverPK12OSQPSettings"></span><span id="_CPPv220osqp_update_settingsP10OSQPSolverPK12OSQPSettings"></span><span id="osqp_update_settings__OSQPSolverP.OSQPSettingsCP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a59c5ba1ab64ffc6aa7bcc22e3fa8047f"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_update_settings</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv410OSQPSolver" title="OSQPSolver"><span class="n"><span class="pre">OSQPSolver</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">solver</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv412OSQPSettings" title="OSQPSettings"><span class="n"><span class="pre">OSQPSettings</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">new_settings</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420osqp_update_settingsP10OSQPSolverPK12OSQPSettings" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Update settings in <code class="docutils literal notranslate"><span class="pre">solver</span></code> with the new settings from <code class="docutils literal notranslate"><span class="pre">new_settings</span></code>.</p>
+<p>The following settings can only be set at problem setup time through <code class="docutils literal notranslate"><span class="pre">osqp_setup</span></code> and are ignored in this function:<ul class="simple">
+<li><p>scaling</p></li>
+<li><p>rho_is_vec</p></li>
+<li><p>sigma</p></li>
+<li><p>adaptive_rho</p></li>
+<li><p>adaptive_rho_interval</p></li>
+<li><p>adaptive_rho_fraction</p></li>
+<li><p>adaptive_rho_tolerance</p></li>
+</ul>
+</p>
+<p>The rho setting must be updated using <code class="docutils literal notranslate"><span class="pre">osqp_update_rho</span></code>, and is ignored by this function.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Every setting from <code class="docutils literal notranslate"><span class="pre">new_settings</span></code> is copied to <code class="docutils literal notranslate"><span class="pre">solver</span></code>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>solver</strong> – Solver </p></li>
+<li><p><strong>new_settings</strong> – New solver settings </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Exitflag for errors (0 if no errors) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv415osqp_update_rhoP10OSQPSolver9OSQPFloat">
+<span id="_CPPv315osqp_update_rhoP10OSQPSolver9OSQPFloat"></span><span id="_CPPv215osqp_update_rhoP10OSQPSolver9OSQPFloat"></span><span id="osqp_update_rho__OSQPSolverP.OSQPFloat"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a0856655316ece14bd5bcea825a7781ba"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_update_rho</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv410OSQPSolver" title="OSQPSolver"><span class="n"><span class="pre">OSQPSolver</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">solver</span></span>, <span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rho_new</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415osqp_update_rhoP10OSQPSolver9OSQPFloat" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Update the ADMM parameter rho.</p>
+<p>Limit it between OSQP_RHO_MIN and OSQP_RHO_MAX.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>solver</strong> – Solver </p></li>
+<li><p><strong>rho_new</strong> – New rho value </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Exitflag for errors (0 if no errors) </p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="settings-structure">
+<h3>Settings structure<a class="headerlink" href="#settings-structure" title="Permalink to this heading">¶</a></h3>
+<p>The setting structure has the following fields.</p>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv412OSQPSettings">
+<span id="_CPPv312OSQPSettings"></span><span id="_CPPv212OSQPSettings"></span><span id="OSQPSettings"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPSettings</span></span></span><a class="headerlink" href="#_CPPv412OSQPSettings" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>User settings </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings6deviceE">
+<span id="_CPPv3N12OSQPSettings6deviceE"></span><span id="_CPPv2N12OSQPSettings6deviceE"></span><span id="OSQPSettings::device__OSQPInt"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1ac0af244be4843cc1755225742245cd22"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">device</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings6deviceE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>device identifier; currently used for CUDA devices </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings13linsys_solverE">
+<span id="_CPPv3N12OSQPSettings13linsys_solverE"></span><span id="_CPPv2N12OSQPSettings13linsys_solverE"></span><span id="OSQPSettings::linsys_solver__osqp_linsys_solver_type"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a695c714c2c38e720b44dbb8c3bcb6e2f"></span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><span class="n"><span class="pre">osqp_linsys_solver_type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">linsys_solver</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings13linsys_solverE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>linear system solver to use </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings7verboseE">
+<span id="_CPPv3N12OSQPSettings7verboseE"></span><span id="_CPPv2N12OSQPSettings7verboseE"></span><span id="OSQPSettings::verbose__OSQPInt"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1ac34f63f14c039aa3a13f56995bee0e30"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">verbose</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings7verboseE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>boolean; write out progress </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings13warm_startingE">
+<span id="_CPPv3N12OSQPSettings13warm_startingE"></span><span id="_CPPv2N12OSQPSettings13warm_startingE"></span><span id="OSQPSettings::warm_starting__OSQPInt"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a5a7a74a61366d494f77155c6ff569319"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">warm_starting</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings13warm_startingE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>boolean; warm start </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings7scalingE">
+<span id="_CPPv3N12OSQPSettings7scalingE"></span><span id="_CPPv2N12OSQPSettings7scalingE"></span><span id="OSQPSettings::scaling__OSQPInt"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a0e07c1a5f840fc2c3fa16e3bfc99efca"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">scaling</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings7scalingE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>data scaling iterations; if 0, then disabled </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings9polishingE">
+<span id="_CPPv3N12OSQPSettings9polishingE"></span><span id="_CPPv2N12OSQPSettings9polishingE"></span><span id="OSQPSettings::polishing__OSQPInt"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a50236f6b4ca5e5fd285a8e7fa7f0c44b"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">polishing</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings9polishingE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>boolean; polish ADMM solution </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings3rhoE">
+<span id="_CPPv3N12OSQPSettings3rhoE"></span><span id="_CPPv2N12OSQPSettings3rhoE"></span><span id="OSQPSettings::rho__OSQPFloat"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a5abfc999db5e30a95515201cdb42b40d"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">rho</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings3rhoE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>ADMM penalty parameter. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings10rho_is_vecE">
+<span id="_CPPv3N12OSQPSettings10rho_is_vecE"></span><span id="_CPPv2N12OSQPSettings10rho_is_vecE"></span><span id="OSQPSettings::rho_is_vec__OSQPInt"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1addcb9156c9f44d35b1b4aeeabca45770"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">rho_is_vec</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings10rho_is_vecE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>boolean; is rho scalar or vector? </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings5sigmaE">
+<span id="_CPPv3N12OSQPSettings5sigmaE"></span><span id="_CPPv2N12OSQPSettings5sigmaE"></span><span id="OSQPSettings::sigma__OSQPFloat"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a897a8ac61b3cb5ff35fb4c7b5c2c2e92"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">sigma</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings5sigmaE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>ADMM penalty parameter. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings5alphaE">
+<span id="_CPPv3N12OSQPSettings5alphaE"></span><span id="_CPPv2N12OSQPSettings5alphaE"></span><span id="OSQPSettings::alpha__OSQPFloat"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1aea1c8307c9038e3b36cd1c6ad707edc0"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">alpha</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings5alphaE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>ADMM relaxation parameter. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings11cg_max_iterE">
+<span id="_CPPv3N12OSQPSettings11cg_max_iterE"></span><span id="_CPPv2N12OSQPSettings11cg_max_iterE"></span><span id="OSQPSettings::cg_max_iter__OSQPInt"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1aa9a26da23a4832aebaecb943436291e6"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cg_max_iter</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings11cg_max_iterE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>maximum number of CG iterations per solve </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings16cg_tol_reductionE">
+<span id="_CPPv3N12OSQPSettings16cg_tol_reductionE"></span><span id="_CPPv2N12OSQPSettings16cg_tol_reductionE"></span><span id="OSQPSettings::cg_tol_reduction__OSQPInt"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a92f61a831bc4f2e69168c212f54ef13e"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cg_tol_reduction</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings16cg_tol_reductionE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>number of consecutive zero CG iterations before the tolerance gets halved </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings15cg_tol_fractionE">
+<span id="_CPPv3N12OSQPSettings15cg_tol_fractionE"></span><span id="_CPPv2N12OSQPSettings15cg_tol_fractionE"></span><span id="OSQPSettings::cg_tol_fraction__OSQPFloat"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a7afffdf0278921e6575b9375ee650cb2"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cg_tol_fraction</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings15cg_tol_fractionE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>CG tolerance (fraction of ADMM residuals) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings10cg_precondE">
+<span id="_CPPv3N12OSQPSettings10cg_precondE"></span><span id="_CPPv2N12OSQPSettings10cg_precondE"></span><span id="OSQPSettings::cg_precond__osqp_precond_type"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a51bc4e7d1604242b5be3b34180fe6cb8"></span><span class="n"><span class="pre">osqp_precond_type</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cg_precond</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings10cg_precondE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Preconditioner to use in the CG method. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings12adaptive_rhoE">
+<span id="_CPPv3N12OSQPSettings12adaptive_rhoE"></span><span id="_CPPv2N12OSQPSettings12adaptive_rhoE"></span><span id="OSQPSettings::adaptive_rho__OSQPInt"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1abe6af27d12aadbea482420064830107a"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">adaptive_rho</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings12adaptive_rhoE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>boolean, is rho step size adaptive? </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings21adaptive_rho_intervalE">
+<span id="_CPPv3N12OSQPSettings21adaptive_rho_intervalE"></span><span id="_CPPv2N12OSQPSettings21adaptive_rho_intervalE"></span><span id="OSQPSettings::adaptive_rho_interval__OSQPInt"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a889d098abc3eeac127b995655162cc45"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">adaptive_rho_interval</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings21adaptive_rho_intervalE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>number of iterations between rho adaptations; if 0, then it is timing-based </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings21adaptive_rho_fractionE">
+<span id="_CPPv3N12OSQPSettings21adaptive_rho_fractionE"></span><span id="_CPPv2N12OSQPSettings21adaptive_rho_fractionE"></span><span id="OSQPSettings::adaptive_rho_fraction__OSQPFloat"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a4d2499359ddfa798a993b3b57636569b"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">adaptive_rho_fraction</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings21adaptive_rho_fractionE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>time interval for adapting rho (fraction of the setup time) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings22adaptive_rho_toleranceE">
+<span id="_CPPv3N12OSQPSettings22adaptive_rho_toleranceE"></span><span id="_CPPv2N12OSQPSettings22adaptive_rho_toleranceE"></span><span id="OSQPSettings::adaptive_rho_tolerance__OSQPFloat"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1adfd5186d16daf31088070914cf787d2a"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">adaptive_rho_tolerance</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings22adaptive_rho_toleranceE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>tolerance X for adapting rho; new rho must be X times larger or smaller than the current one to change it </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings8max_iterE">
+<span id="_CPPv3N12OSQPSettings8max_iterE"></span><span id="_CPPv2N12OSQPSettings8max_iterE"></span><span id="OSQPSettings::max_iter__OSQPInt"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1ae0435ffd519c4b8c7396b706ca759837"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">max_iter</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings8max_iterE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>maximum number of iterations </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings7eps_absE">
+<span id="_CPPv3N12OSQPSettings7eps_absE"></span><span id="_CPPv2N12OSQPSettings7eps_absE"></span><span id="OSQPSettings::eps_abs__OSQPFloat"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a2a062cc03ed57546c701dc802b30d6ca"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">eps_abs</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings7eps_absE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>absolute solution tolerance </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings7eps_relE">
+<span id="_CPPv3N12OSQPSettings7eps_relE"></span><span id="_CPPv2N12OSQPSettings7eps_relE"></span><span id="OSQPSettings::eps_rel__OSQPFloat"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1aee6bda5a5f7d951152aa1467180e1107"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">eps_rel</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings7eps_relE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>relative solution tolerance </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings12eps_prim_infE">
+<span id="_CPPv3N12OSQPSettings12eps_prim_infE"></span><span id="_CPPv2N12OSQPSettings12eps_prim_infE"></span><span id="OSQPSettings::eps_prim_inf__OSQPFloat"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a367b940f113acb9ba4d61d478e264377"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">eps_prim_inf</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings12eps_prim_infE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>primal infeasibility tolerance </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings12eps_dual_infE">
+<span id="_CPPv3N12OSQPSettings12eps_dual_infE"></span><span id="_CPPv2N12OSQPSettings12eps_dual_infE"></span><span id="OSQPSettings::eps_dual_inf__OSQPFloat"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1aef60e563fac0f6b8545910bb9538e06c"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">eps_dual_inf</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings12eps_dual_infE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>dual infeasibility tolerance </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings18scaled_terminationE">
+<span id="_CPPv3N12OSQPSettings18scaled_terminationE"></span><span id="_CPPv2N12OSQPSettings18scaled_terminationE"></span><span id="OSQPSettings::scaled_termination__OSQPInt"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a86dcb273a91fd958bbacf4cc1c9ba73e"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">scaled_termination</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings18scaled_terminationE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>boolean; use scaled termination criteria </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings17check_terminationE">
+<span id="_CPPv3N12OSQPSettings17check_terminationE"></span><span id="_CPPv2N12OSQPSettings17check_terminationE"></span><span id="OSQPSettings::check_termination__OSQPInt"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a41afc11c4f19c55b24131fa49efe4d44"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">check_termination</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings17check_terminationE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>integer, check termination interval; if 0, checking is disabled </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings10time_limitE">
+<span id="_CPPv3N12OSQPSettings10time_limitE"></span><span id="_CPPv2N12OSQPSettings10time_limitE"></span><span id="OSQPSettings::time_limit__OSQPFloat"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a107bb349b3339bc0d5c75f49896c6e41"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">time_limit</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings10time_limitE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>maximum time to solve the problem (seconds) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings5deltaE">
+<span id="_CPPv3N12OSQPSettings5deltaE"></span><span id="_CPPv2N12OSQPSettings5deltaE"></span><span id="OSQPSettings::delta__OSQPFloat"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a82201760131c019669c0461eb2e14b11"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">delta</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings5deltaE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>regularization parameter for polishing </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings18polish_refine_iterE">
+<span id="_CPPv3N12OSQPSettings18polish_refine_iterE"></span><span id="_CPPv2N12OSQPSettings18polish_refine_iterE"></span><span id="OSQPSettings::polish_refine_iter__OSQPInt"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a5b25a0182beb35f6f065ac08c63b53b8"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">polish_refine_iter</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings18polish_refine_iterE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>number of iterative refinement steps in polishing </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+</section>
+<section id="compute-solution-derivatives">
+<span id="c-derivatives"></span><h2>Compute solution derivatives<a class="headerlink" href="#compute-solution-derivatives" title="Permalink to this heading">¶</a></h2>
+<p>Adjoint derivatives of the QP problem can be computed at the current solution.</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv431osqp_adjoint_derivative_computeP10OSQPSolverP9OSQPFloatP9OSQPFloatP9OSQPFloat">
+<span id="_CPPv331osqp_adjoint_derivative_computeP10OSQPSolverP9OSQPFloatP9OSQPFloatP9OSQPFloat"></span><span id="_CPPv231osqp_adjoint_derivative_computeP10OSQPSolverP9OSQPFloatP9OSQPFloatP9OSQPFloat"></span><span id="osqp_adjoint_derivative_compute__OSQPSolverP.OSQPFloatP.OSQPFloatP.OSQPFloatP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a94bc2a168ca5e68ac3f39303419fb55a"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_adjoint_derivative_compute</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv410OSQPSolver" title="OSQPSolver"><span class="n"><span class="pre">OSQPSolver</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">solver</span></span>, <span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dx</span></span>, <span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dy_l</span></span>, <span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dy_u</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv431osqp_adjoint_derivative_computeP10OSQPSolverP9OSQPFloatP9OSQPFloatP9OSQPFloat" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Compute internal data structures needed for calculation of the adjoint derivatives of P/q/A/l/u.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>An optimal solution must be obtained before calling this function.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>solver</strong> – <strong>[in]</strong> Solver </p></li>
+<li><p><strong>dx</strong> – <strong>[in]</strong> Vector of dx values (observed - true) of length n </p></li>
+<li><p><strong>dy_l</strong> – <strong>[in]</strong> Vector of dy_l values (observed - true) of length m </p></li>
+<li><p><strong>dy_u</strong> – <strong>[in]</strong> Vector of dy_u values (observed - true) of length m </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Exitflag for errors (0 if no errors) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv431osqp_adjoint_derivative_get_matP10OSQPSolverP13OSQPCscMatrixP13OSQPCscMatrix">
+<span id="_CPPv331osqp_adjoint_derivative_get_matP10OSQPSolverP13OSQPCscMatrixP13OSQPCscMatrix"></span><span id="_CPPv231osqp_adjoint_derivative_get_matP10OSQPSolverP13OSQPCscMatrixP13OSQPCscMatrix"></span><span id="osqp_adjoint_derivative_get_mat__OSQPSolverP.OSQPCscMatrixP.OSQPCscMatrixP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1afeed6d3eef1a70ac17bb06c38e44421d"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_adjoint_derivative_get_mat</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv410OSQPSolver" title="OSQPSolver"><span class="n"><span class="pre">OSQPSolver</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">solver</span></span>, <a class="reference internal" href="#_CPPv413OSQPCscMatrix" title="OSQPCscMatrix"><span class="n"><span class="pre">OSQPCscMatrix</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dP</span></span>, <a class="reference internal" href="#_CPPv413OSQPCscMatrix" title="OSQPCscMatrix"><span class="n"><span class="pre">OSQPCscMatrix</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dA</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv431osqp_adjoint_derivative_get_matP10OSQPSolverP13OSQPCscMatrixP13OSQPCscMatrix" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Calculate adjoint derivatives of P/A.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">osqp_adjoint_derivative_compute</span></code> must be called first.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>solver</strong> – <strong>[in]</strong> Solver </p></li>
+<li><p><strong>dP</strong> – <strong>[out]</strong> Matrix of dP values (n x n) </p></li>
+<li><p><strong>dA</strong> – <strong>[out]</strong> Matrix of dA values (m x n) </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Exitflag for errors (0 if no errors; dP, dA are filled in) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv431osqp_adjoint_derivative_get_vecP10OSQPSolverP9OSQPFloatP9OSQPFloatP9OSQPFloat">
+<span id="_CPPv331osqp_adjoint_derivative_get_vecP10OSQPSolverP9OSQPFloatP9OSQPFloatP9OSQPFloat"></span><span id="_CPPv231osqp_adjoint_derivative_get_vecP10OSQPSolverP9OSQPFloatP9OSQPFloatP9OSQPFloat"></span><span id="osqp_adjoint_derivative_get_vec__OSQPSolverP.OSQPFloatP.OSQPFloatP.OSQPFloatP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a83aaea3507bf9ab60f45e8a718f7393f"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_adjoint_derivative_get_vec</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv410OSQPSolver" title="OSQPSolver"><span class="n"><span class="pre">OSQPSolver</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">solver</span></span>, <span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dq</span></span>, <span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dl</span></span>, <span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">du</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv431osqp_adjoint_derivative_get_vecP10OSQPSolverP9OSQPFloatP9OSQPFloatP9OSQPFloat" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Calculate adjoint derivatives of q/l/u.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">osqp_adjoint_derivative_compute</span></code> must be called first.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>solver</strong> – <strong>[in]</strong> Solver </p></li>
+<li><p><strong>dq</strong> – <strong>[out]</strong> Vector of dq values of length n </p></li>
+<li><p><strong>dl</strong> – <strong>[out]</strong> Matrix of dl values of length m </p></li>
+<li><p><strong>du</strong> – <strong>[out]</strong> Matrix of du values of length m </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Exitflag for errors (0 if no errors; dq, dl, du are filled in) </p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="code-generation">
+<span id="c-code-generation"></span><h2>Code generation<a class="headerlink" href="#code-generation" title="Permalink to this heading">¶</a></h2>
+<p>The QP problem and all solver data can be written to a problem workspace for use by OSQP in embedded mode.</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv432osqp_set_default_codegen_definesP18OSQPCodegenDefines">
+<span id="_CPPv332osqp_set_default_codegen_definesP18OSQPCodegenDefines"></span><span id="_CPPv232osqp_set_default_codegen_definesP18OSQPCodegenDefines"></span><span id="osqp_set_default_codegen_defines__OSQPCodegenDefinesP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a0ae3080b46a6b152fac9dba209def129"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_set_default_codegen_defines</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv418OSQPCodegenDefines" title="OSQPCodegenDefines"><span class="n"><span class="pre">OSQPCodegenDefines</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">defines</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv432osqp_set_default_codegen_definesP18OSQPCodegenDefines" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Set default codegen define values.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">defines</span></code> structure must already be allocated in memory.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>defines</strong> – Structure to set to default values. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv412osqp_codegenP10OSQPSolverPKcPKcP18OSQPCodegenDefines">
+<span id="_CPPv312osqp_codegenP10OSQPSolverPKcPKcP18OSQPCodegenDefines"></span><span id="_CPPv212osqp_codegenP10OSQPSolverPKcPKcP18OSQPCodegenDefines"></span><span id="osqp_codegen__OSQPSolverP.cCP.cCP.OSQPCodegenDefinesP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a10ebd22dc7305907d095a4f6a8617b4a"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_codegen</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv410OSQPSolver" title="OSQPSolver"><span class="n"><span class="pre">OSQPSolver</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">solver</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">output_dir</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">prefix</span></span>, <a class="reference internal" href="#_CPPv418OSQPCodegenDefines" title="OSQPCodegenDefines"><span class="n"><span class="pre">OSQPCodegenDefines</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">defines</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412osqp_codegenP10OSQPSolverPKcPKcP18OSQPCodegenDefines" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Generate source files with a statically allocated <a class="reference internal" href="#d5/df6/struct_o_s_q_p_solver"><span class="std std-ref">OSQPSolver</span></a> structure.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">osqp_setup</span></code> must be called before a problem can be code generated.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>solver</strong> – Solver </p></li>
+<li><p><strong>output_dir</strong> – Path to directory to output the files to. This string must include the trailing directory separator, and an empty string means output to the current directory. </p></li>
+<li><p><strong>prefix</strong> – String prefix for the variables and generated files. </p></li>
+<li><p><strong>defines</strong> – The defines to use in the generated code. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Exitflag for errors (0 if no errors) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv418OSQPCodegenDefines">
+<span id="_CPPv318OSQPCodegenDefines"></span><span id="_CPPv218OSQPCodegenDefines"></span><span id="OSQPCodegenDefines"></span><span class="target" id="db/da8/struct_o_s_q_p_codegen_defines"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPCodegenDefines</span></span></span><a class="headerlink" href="#_CPPv418OSQPCodegenDefines" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Structure to hold the settings for the generated code </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N18OSQPCodegenDefines13embedded_modeE">
+<span id="_CPPv3N18OSQPCodegenDefines13embedded_modeE"></span><span id="_CPPv2N18OSQPCodegenDefines13embedded_modeE"></span><span id="OSQPCodegenDefines::embedded_mode__OSQPInt"></span><span class="target" id="db/da8/struct_o_s_q_p_codegen_defines_1a4d2485d64c340e721f6f93c0cc582dba"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">embedded_mode</span></span></span><a class="headerlink" href="#_CPPv4N18OSQPCodegenDefines13embedded_modeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Embedded mode (1 = vector update, 2 = vector + matrix update) </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N18OSQPCodegenDefines10float_typeE">
+<span id="_CPPv3N18OSQPCodegenDefines10float_typeE"></span><span id="_CPPv2N18OSQPCodegenDefines10float_typeE"></span><span id="OSQPCodegenDefines::float_type__OSQPInt"></span><span class="target" id="db/da8/struct_o_s_q_p_codegen_defines_1ae2638a53321577f43620ed3e8ab9fa31"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">float_type</span></span></span><a class="headerlink" href="#_CPPv4N18OSQPCodegenDefines10float_typeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Use floats if 1, doubles if 0. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N18OSQPCodegenDefines15printing_enableE">
+<span id="_CPPv3N18OSQPCodegenDefines15printing_enableE"></span><span id="_CPPv2N18OSQPCodegenDefines15printing_enableE"></span><span id="OSQPCodegenDefines::printing_enable__OSQPInt"></span><span class="target" id="db/da8/struct_o_s_q_p_codegen_defines_1a24d84ae34184212a81521c7fd7a5594e"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">printing_enable</span></span></span><a class="headerlink" href="#_CPPv4N18OSQPCodegenDefines15printing_enableE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Enable printing if 1. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N18OSQPCodegenDefines16profiling_enableE">
+<span id="_CPPv3N18OSQPCodegenDefines16profiling_enableE"></span><span id="_CPPv2N18OSQPCodegenDefines16profiling_enableE"></span><span id="OSQPCodegenDefines::profiling_enable__OSQPInt"></span><span class="target" id="db/da8/struct_o_s_q_p_codegen_defines_1a69be86bef0724b3526e59f4bef8bcb57"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">profiling_enable</span></span></span><a class="headerlink" href="#_CPPv4N18OSQPCodegenDefines16profiling_enableE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Enable timing of code sections if 1. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N18OSQPCodegenDefines16interrupt_enableE">
+<span id="_CPPv3N18OSQPCodegenDefines16interrupt_enableE"></span><span id="_CPPv2N18OSQPCodegenDefines16interrupt_enableE"></span><span id="OSQPCodegenDefines::interrupt_enable__OSQPInt"></span><span class="target" id="db/da8/struct_o_s_q_p_codegen_defines_1ac2797e3cf7ff0326127e0144a2d9ec5b"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">interrupt_enable</span></span></span><a class="headerlink" href="#_CPPv4N18OSQPCodegenDefines16interrupt_enableE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Enable interrupt checking if 1. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N18OSQPCodegenDefines18derivatives_enableE">
+<span id="_CPPv3N18OSQPCodegenDefines18derivatives_enableE"></span><span id="_CPPv2N18OSQPCodegenDefines18derivatives_enableE"></span><span id="OSQPCodegenDefines::derivatives_enable__OSQPInt"></span><span class="target" id="db/da8/struct_o_s_q_p_codegen_defines_1aa203951f5aa4b7f9943a7e0659309a4c"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">derivatives_enable</span></span></span><a class="headerlink" href="#_CPPv4N18OSQPCodegenDefines18derivatives_enableE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Enable deriatives if 1. </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
 </section>
 <section id="data-types">
 <span id="c-data-types"></span><h2>Data types<a class="headerlink" href="#data-types" title="Permalink to this heading">¶</a></h2>
@@ -166,39 +848,57 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li><p><code class="code docutils literal notranslate"><span class="pre">OSQPFloat</span></code>: can be a <code class="code docutils literal notranslate"><span class="pre">float</span></code> or a <code class="code docutils literal notranslate"><span class="pre">double</span></code> if the compiler flag <code class="code docutils literal notranslate"><span class="pre">OSQP_USE_FLOAT</span></code> is set or not.</p></li>
 </ul>
 <p>The matrices are defined in <a class="reference external" href="https://people.sc.fsu.edu/~jburkardt/data/cc/cc.html">Compressed Sparse Column (CSC) format</a> using zero-based indexing.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>doxygenstruct: Cannot find class “OSQPCscMatrix” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv413OSQPCscMatrix">
+<span id="_CPPv313OSQPCscMatrix"></span><span id="_CPPv213OSQPCscMatrix"></span><span id="OSQPCscMatrix"></span><span class="target" id="d3/d1d/struct_o_s_q_p_csc_matrix"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPCscMatrix</span></span></span><a class="headerlink" href="#_CPPv413OSQPCscMatrix" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Matrix in compressed-column form. The structure is used internally to store matrices in the triplet form as well, but the API requires that the matrices are in the CSC format. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPCscMatrix1mE">
+<span id="_CPPv3N13OSQPCscMatrix1mE"></span><span id="_CPPv2N13OSQPCscMatrix1mE"></span><span id="OSQPCscMatrix::m__OSQPInt"></span><span class="target" id="d3/d1d/struct_o_s_q_p_csc_matrix_1ababbc8ad6768bb44e73b5ce2ca9e8792"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">m</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPCscMatrix1mE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>number of rows </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPCscMatrix1nE">
+<span id="_CPPv3N13OSQPCscMatrix1nE"></span><span id="_CPPv2N13OSQPCscMatrix1nE"></span><span id="OSQPCscMatrix::n__OSQPInt"></span><span class="target" id="d3/d1d/struct_o_s_q_p_csc_matrix_1aee3bb17dbd3e224fa6871343c3b5b0c8"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">n</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPCscMatrix1nE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>number of columns </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPCscMatrix1pE">
+<span id="_CPPv3N13OSQPCscMatrix1pE"></span><span id="_CPPv2N13OSQPCscMatrix1pE"></span><span id="OSQPCscMatrix::p__OSQPIntP"></span><span class="target" id="d3/d1d/struct_o_s_q_p_csc_matrix_1a32d42afbda74f9773397ca4eb8d374f5"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">p</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPCscMatrix1pE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>column pointers (size n+1); col indices (size nzmax) starting from 0 for triplet format </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPCscMatrix1iE">
+<span id="_CPPv3N13OSQPCscMatrix1iE"></span><span id="_CPPv2N13OSQPCscMatrix1iE"></span><span id="OSQPCscMatrix::i__OSQPIntP"></span><span class="target" id="d3/d1d/struct_o_s_q_p_csc_matrix_1a6dc7a9f3a9857c1cf2b54cfee3c1a183"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">i</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPCscMatrix1iE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>row indices, size nzmax starting from 0 </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPCscMatrix1xE">
+<span id="_CPPv3N13OSQPCscMatrix1xE"></span><span id="_CPPv2N13OSQPCscMatrix1xE"></span><span id="OSQPCscMatrix::x__OSQPFloatP"></span><span class="target" id="d3/d1d/struct_o_s_q_p_csc_matrix_1a9d1486abaeb3d981c2efa8c25719a7f6"></span><span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">x</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPCscMatrix1xE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>numerical values, size nzmax </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPCscMatrix5nzmaxE">
+<span id="_CPPv3N13OSQPCscMatrix5nzmaxE"></span><span id="_CPPv2N13OSQPCscMatrix5nzmaxE"></span><span id="OSQPCscMatrix::nzmax__OSQPInt"></span><span class="target" id="d3/d1d/struct_o_s_q_p_csc_matrix_1a93e3d19395795c515a90bc70a31b3fa9"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">nzmax</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPCscMatrix5nzmaxE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>maximum number of entries </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPCscMatrix2nzE">
+<span id="_CPPv3N13OSQPCscMatrix2nzE"></span><span id="_CPPv2N13OSQPCscMatrix2nzE"></span><span id="OSQPCscMatrix::nz__OSQPInt"></span><span class="target" id="d3/d1d/struct_o_s_q_p_csc_matrix_1aea5eccb9d56205d3f2a7190db649e9ed"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">nz</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPCscMatrix2nzE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>number of entries in triplet matrix, -1 for csc </p>
+</dd></dl>
+
 </div>
-<p>The relevant structures used in the API are</p>
-<section id="solver">
-<h3>Solver<a class="headerlink" href="#solver" title="Permalink to this heading">¶</a></h3>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>doxygenstruct: Cannot find class “OSQPSolver” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
-</div>
-</section>
-<section id="settings">
-<h3>Settings<a class="headerlink" href="#settings" title="Permalink to this heading">¶</a></h3>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>doxygenstruct: Cannot find class “OSQPSettings” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
-</div>
-</section>
-<section id="solution">
-<h3>Solution<a class="headerlink" href="#solution" title="Permalink to this heading">¶</a></h3>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>doxygenstruct: Cannot find class “OSQPSolution” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
-</div>
-</section>
-<section id="info">
-<h3>Info<a class="headerlink" href="#info" title="Permalink to this heading">¶</a></h3>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>doxygenstruct: Cannot find class “OSQPInfo” in doxygen xml output for project “osqp” from directory: doxygen_out/xml/</p>
-</div>
-</section>
+</dd></dl>
+
 </section>
 </section>
 
