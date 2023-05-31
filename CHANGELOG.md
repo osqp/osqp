@@ -1,3 +1,29 @@
+Version 1.0.0.beta0 (May 31, 2021)
+----------------------------------
+First beta release of OSQP v1.0
+
+New features:
+* Introduced new linear algebra backend system allowing compute framework to be changed at compile time.
+* Merged cuOSQP project into main OSQP project (inside algebra/cuda directory).
+* Introduced an Intel MKL-based algebra backend using the MKL sparse BLAS API, Vector Math Library.
+  This backend contains both the Pardiso solver and an RCI conjugate gradient implementation.
+* Added code generation capabilities to the C-level API (note, only problem export is in the C API, no file
+  copying is done).
+* Added initial adjoint derivative computation to the C-level API.
+
+Main changes:
+* Updated QDLDL to 0.1.7.
+* Changed QDLDL to be included through CMake FetchContent instead of a git submodule.
+* The MKL Pardiso solver is only available with the MKL backend.
+* CMake installs CMake config files for consuming applications to use.
+* All of OSQP's API is contained inside the `public` include files (there should be no need for users to include anything in `private`).
+* All OSQP functions, defines and types are prefixed with `OSQP` (in some capitalization) to namespace the API.
+
+Developer-centric changes:
+* Test suite switched to Catch2 and now incorporates modern C++ for memory management and organization.
+* ASAN flags integrated into main OSQP CMake build system.
+
+
 Version 0.6.3 (25 May 2023)
 ------------------------------
 * Fix MKL function prototypes (required for CRAN compilation) (PR [#487](https://github.com/osqp/osqp/pull/487))

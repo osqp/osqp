@@ -1,0 +1,55 @@
+name: Embedded Combinations
+
+on:
+  push:
+    branches: [ master, develop**, ci ]
+    tags:
+      - '*'
+  pull_request:
+    branches: [ master, develop** ]
+
+jobs:
+
+  build_and_test:
+      runs-on: ubuntu-latest
+
+      strategy:
+        fail-fast: false
+
+        matrix:
+          # Embedded is only a smoke test to ensure it compiles with the options
+          float: ['ON', 'OFF']
+          embedded: ['1', '2']
+
+          include:
+            - os: ubuntu-latest
+              cmake_generator: "Unix Makefiles"
+
+      defaults:
+        run:
+          # Required when using an activated conda environment in steps
+          # See https://github.com/conda-incubator/setup-miniconda#IMPORTANT
+          shell: bash -l {0}
+
+      env:
+        OSQP_BUILD_DIR_PREFIX: ${{ github.workspace }}/build
+
+      steps:
+        - uses: actions/checkout@v3
+          with:
+            lfs: false
+            submodules: recursive
+
+        - name: Build
+          run: |
+            cmake -G "${{ matrix.cmake_generator }}" \
+                  -S . -B $OSQP_BUILD_DIR_PREFIX \
+                  -DOSQP_USE_FLOAT=${{ matrix.float }} \
+                  -DEMBEDDED=${{ matrix.embedded }} \
+                  -DOSQP_ALGEBRA_BACKEND='builtin' \
+                  -DOSQP_USE_LONG=OFF \
+                  -DOSQP_ENABLE_PROFILING=OFF \
+                  -DOSQP_ENABLE_INTERRUPT=OFF \
+                  -DOSQP_ENABLE_PRINTING=OFF \
+                  -DOSQP_BUILD_UNITTESTS=OFF
+            cmake --build $OSQP_BUILD_DIR_PREFIX

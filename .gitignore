@@ -100,7 +100,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
-build/
+build*/
 develop-eggs/
 dist/
 downloads/
@@ -216,3 +216,8 @@ out/
 *.stamp
 
 .cquery_cached_index
+
+# CMake FetchContent folders
+algebra/_common/lin_sys/qdldl/qdldl_sources
+algebra/_common/lin_sys/direct/qdldl_sources
+algebra/default/lin_sys/direct/qdldl_sources

@@ -1,18 +1,16 @@
+#include "osqp.h"
 #include "util.h"
-
-/***************
-* Versioning  *
-***************/
-const char* osqp_version(void) {
-  return OSQP_VERSION;
-}
+#include "algebra_vector.h"
+#include "version.h"
+#include "printing.h"
+#include "lin_alg.h"
 
 /************************************
 * Printing Constants to set Layout *
 ************************************/
-#ifdef PRINTING
+#ifdef OSQP_ENABLE_PRINTING
 # define HEADER_LINE_LEN 65
-#endif /* ifdef PRINTING */
+#endif /* ifdef OSQP_ENABLE_PRINTING */
 
 /**********************
 * Utility Functions  *
@@ -28,11 +26,11 @@ void c_strcpy(char dest[], const char source[]) {
   }
 }
 
-#ifdef PRINTING
+#ifdef OSQP_ENABLE_PRINTING
 
 static void print_line(void) {
   char  the_line[HEADER_LINE_LEN + 1];
-  c_int i;
+  OSQPInt i;
 
   for (i = 0; i < HEADER_LINE_LEN; ++i) the_line[i] = '-';
   the_line[HEADER_LINE_LEN] = '\0';
@@ -48,23 +46,36 @@ void print_header(void) {
 #endif
 
   // Main information
-  c_print("objective    pri res    dua res    rho");
-# ifdef PROFILING
+  c_print("objective    prim res   dual res   rho");
+# ifdef OSQP_ENABLE_PROFILING
   c_print("        time");
-# endif /* ifdef PROFILING */
+# endif /* ifdef OSQP_ENABLE_PROFILING */
   c_print("\n");
 }
 
-void print_setup_header(const OSQPWorkspace *work) {
-  OSQPData *data;
-  OSQPSettings *settings;
-  c_int nnz; // Number of nonzeros in the problem
+void print_setup_header(const OSQPSolver* solver) {
 
-  data     = work->data;
-  settings = work->settings;
+  OSQPWorkspace* work;
+  OSQPData*      data;
+  OSQPSettings*  settings;
+
+  OSQPInt nnz; // Number of nonzeros in the problem
+
+#define NAMEBUFLEN 30
+  char namebuf[NAMEBUFLEN];
+
+/* Disable device printing in embedded mode to save stack space */
+#ifndef OSQP_EMBEDDED_MODE
+  #define DEVICEBUFLEN 150
+  char devicebuf[DEVICEBUFLEN];
+#endif
+
+  work     = solver->work;
+  data     = solver->work->data;
+  settings = solver->settings;
 
   // Number of nonzeros
-  nnz = data->P->p[data->P->n] + data->A->p[data->A->n];
+  nnz = OSQPMatrix_get_nz(data->P) + OSQPMatrix_get_nz(data->A);
 
   print_line();
   c_print("           OSQP v%s  -  Operator Splitting QP Solver\n"
@@ -82,8 +93,21 @@ void print_setup_header(const OSQPWorkspace *work) {
 
   // Print Settings
   c_print("settings: ");
-  c_print("linear system solver = %s",
-          LINSYS_SOLVER_NAME[settings->linsys_solver]);
+
+  osqp_algebra_name(namebuf, NAMEBUFLEN);
+  c_print("algebra = %s", namebuf);
+  c_print(",\n          ");
+
+#ifndef OSQP_EMBEDDED_MODE
+  osqp_algebra_device_name(devicebuf, DEVICEBUFLEN);
+
+  if (devicebuf[0] != 0 ) {
+    c_print("device = %s", devicebuf);
+    c_print(",\n          ");
+  }
+#endif
+
+  c_print("linear system solver = %s", work->linsys_solver->name(work->linsys_solver));
 
   if (work->linsys_solver->nthreads != 1) {
     c_print(" (%d threads)", (int)work->linsys_solver->nthreads);
@@ -107,12 +131,14 @@ void print_setup_header(const OSQPWorkspace *work) {
   if (settings->check_termination) {
     c_print("          check_termination: on (interval %i),\n",
       (int)settings->check_termination);
-  } else {c_print("          check_termination: off,\n");}
-# ifdef PROFILING
-  if (settings->time_limit) {
-    c_print("          time_limit: %.2e sec,\n", settings->time_limit);
   }
-# endif /* ifdef PROFILING */
+  else
+    c_print("          check_termination: off,\n");
+  
+# ifdef OSQP_ENABLE_PROFILING
+  if (settings->time_limit)
+    c_print("          time_limit: %.2e sec,\n", settings->time_limit);
+# endif /* ifdef OSQP_ENABLE_PROFILING */
 
   if (settings->scaling) {
     c_print("          scaling: on, ");
@@ -126,40 +152,34 @@ void print_setup_header(const OSQPWorkspace *work) {
     c_print("scaled_termination: off\n");
   }
 
-  if (settings->warm_start) {
-    c_print("          warm start: on, ");
+  if (settings->warm_starting) {
+    c_print("          warm starting: on, ");
   } else {
-    c_print("          warm start: off, ");
+    c_print("          warm starting: off, ");
   }
 
-  if (settings->polish) {
-    c_print("polish: on, ");
+  if (settings->polishing) {
+    c_print("polishing: on, ");
   } else {
-    c_print("polish: off, ");
+    c_print("polishing: off, ");
   }
-
-# ifdef PROFILING
-  if (settings->time_limit) {
-    c_print("time_limit: %.2e sec\n", settings->time_limit);
-  } else {
-    c_print("time_limit: off\n");
-  }
-# endif
 
   c_print("\n");
 }
 
-void print_summary(OSQPWorkspace *work) {
-  OSQPInfo *info;
+void print_summary(OSQPSolver* solver) {
 
-  info = work->info;
+  OSQPInfo*      info     = solver->info;
+  OSQPSettings*  settings = solver->settings;
+  OSQPWorkspace* work     = solver->work;
 
   c_print("%4i",     (int)info->iter);
   c_print(" %12.4e", info->obj_val);
-  c_print("  %9.2e", info->pri_res);
-  c_print("  %9.2e", info->dua_res);
-  c_print("  %9.2e", work->settings->rho);
-# ifdef PROFILING
+  c_print("  %9.2e", info->prim_res);
+  c_print("  %9.2e", info->dual_res);
+  c_print("  %9.2e", settings->rho);
+
+# ifdef OSQP_ENABLE_PROFILING
 
   if (work->first_run) {
     // total time: setup + solve
@@ -168,21 +188,21 @@ void print_summary(OSQPWorkspace *work) {
     // total time: update + solve
     c_print("  %9.2es", info->update_time + info->solve_time);
   }
-# endif /* ifdef PROFILING */
+# endif /* ifdef OSQP_ENABLE_PROFILING */
   c_print("\n");
 
   work->summary_printed = 1; // Summary has been printed
 }
 
-void print_polish(OSQPWorkspace *work) {
-  OSQPInfo *info;
+void print_polish(OSQPSolver* solver) {
 
-  info = work->info;
+  OSQPInfo*      info = solver->info;
+  OSQPWorkspace* work = solver->work;
 
   c_print("%4s",     "plsh");
   c_print(" %12.4e", info->obj_val);
-  c_print("  %9.2e", info->pri_res);
-  c_print("  %9.2e", info->dua_res);
+  c_print("  %9.2e", info->prim_res);
+  c_print("  %9.2e", info->dual_res);
 
   // Different characters for windows/unix
 #if defined(IS_WINDOWS) && !defined(PYTHON)
@@ -191,7 +211,7 @@ void print_polish(OSQPWorkspace *work) {
   c_print("   --------");
 #endif
 
-# ifdef PROFILING
+# ifdef OSQP_ENABLE_PROFILING
   if (work->first_run) {
     // total time: setup + solve
     c_print("  %9.2es", info->setup_time + info->solve_time +
@@ -201,20 +221,23 @@ void print_polish(OSQPWorkspace *work) {
     c_print("  %9.2es", info->update_time + info->solve_time +
             info->polish_time);
   }
-# endif /* ifdef PROFILING */
+# endif /* ifdef OSQP_ENABLE_PROFILING */
   c_print("\n");
 }
 
-void print_footer(OSQPInfo *info, c_int polish) {
+void print_footer(OSQPInfo* info,
+                  OSQPInt   polishing) {
   c_print("\n"); // Add space after iterations
 
   c_print("status:               %s\n", info->status);
 
-  if (polish && (info->status_val == OSQP_SOLVED)) {
-    if (info->status_polish == 1) {
-      c_print("solution polish:      successful\n");
+  if (polishing && (info->status_val == OSQP_SOLVED)) {
+    if (info->status_polish == OSQP_POLISH_SUCCESS) {
+      c_print("solution polishing:   successful\n");
     } else if (info->status_polish < 0) {
-      c_print("solution polish:      unsuccessful\n");
+      c_print("solution polishing:   unsuccessful\n");
+    } else if (info->status_polish == OSQP_POLISH_NO_ACTIVE_SET_FOUND) {
+      c_print("solution polishing:   not needed\n");
     }
   }
 
@@ -225,154 +248,80 @@ void print_footer(OSQPInfo *info, c_int polish) {
     c_print("optimal objective:    %.4f\n", info->obj_val);
   }
 
-# ifdef PROFILING
+# ifdef OSQP_ENABLE_PROFILING
   c_print("run time:             %.2es\n", info->run_time);
-# endif /* ifdef PROFILING */
+# endif /* ifdef OSQP_ENABLE_PROFILING */
 
-# if EMBEDDED != 1
+# if OSQP_EMBEDDED_MODE != 1
   c_print("optimal rho estimate: %.2e\n", info->rho_estimate);
-# endif /* if EMBEDDED != 1 */
+# endif /* if OSQP_EMBEDDED_MODE != 1 */
   c_print("\n");
 }
 
-#endif /* End #ifdef PRINTING */
+#endif /* End #ifdef OSQP_ENABLE_PRINTING */
 
 
-#ifndef EMBEDDED
+#ifndef OSQP_EMBEDDED_MODE
 
 OSQPSettings* copy_settings(const OSQPSettings *settings) {
-  OSQPSettings *new = c_malloc(sizeof(OSQPSettings));
 
+  OSQPSettings *new = c_malloc(sizeof(OSQPSettings));
   if (!new) return OSQP_NULL;
 
-  // Copy settings
-  // NB. Copying them explicitly because memcpy is not
-  // defined when PRINTING is disabled (appears in string.h)
-  new->rho = settings->rho;
-  new->sigma = settings->sigma;
-  new->scaling = settings->scaling;
-
-# if EMBEDDED != 1
-  new->adaptive_rho = settings->adaptive_rho;
-  new->adaptive_rho_interval = settings->adaptive_rho_interval;
-  new->adaptive_rho_tolerance = settings->adaptive_rho_tolerance;
-# ifdef PROFILING
-  new->adaptive_rho_fraction = settings->adaptive_rho_fraction;
-# endif
-# endif // EMBEDDED != 1
-  new->max_iter = settings->max_iter;
-  new->eps_abs = settings->eps_abs;
-  new->eps_rel = settings->eps_rel;
-  new->eps_prim_inf = settings->eps_prim_inf;
-  new->eps_dual_inf = settings->eps_dual_inf;
-  new->alpha = settings->alpha;
+  /* Copy settings
+   * NB: Copying them explicitly because memcpy is not
+   * defined when OSQP_ENABLE_PRINTING is disabled (appears in string.h)
+   */
+  new->device        = settings->device;
   new->linsys_solver = settings->linsys_solver;
-  new->delta = settings->delta;
-  new->polish = settings->polish;
-  new->polish_refine_iter = settings->polish_refine_iter;
-  new->verbose = settings->verbose;
+  new->verbose       = settings->verbose;
+  new->warm_starting = settings->warm_starting;
+  new->scaling       = settings->scaling;
+  new->polishing     = settings->polishing;
+
+  new->rho        = settings->rho;
+  new->rho_is_vec = settings->rho_is_vec;
+  new->sigma      = settings->sigma;
+  new->alpha      = settings->alpha;
+
+  new->cg_max_iter      = settings->cg_max_iter;
+  new->cg_tol_reduction = settings->cg_tol_reduction;
+  new->cg_tol_fraction  = settings->cg_tol_fraction;
+  new->cg_precond       = settings->cg_precond;
+
+  new->adaptive_rho           = settings->adaptive_rho;
+  new->adaptive_rho_interval  = settings->adaptive_rho_interval;
+  new->adaptive_rho_fraction  = settings->adaptive_rho_fraction;
+  new->adaptive_rho_tolerance = settings->adaptive_rho_tolerance;
+
+  new->max_iter           = settings->max_iter;
+  new->eps_abs            = settings->eps_abs;
+  new->eps_rel            = settings->eps_rel;
+  new->eps_prim_inf       = settings->eps_prim_inf;
+  new->eps_dual_inf       = settings->eps_dual_inf;
   new->scaled_termination = settings->scaled_termination;
-  new->check_termination = settings->check_termination;
-  new->warm_start = settings->warm_start;
-# ifdef PROFILING
-  new->time_limit = settings->time_limit;
-# endif
+  new->check_termination  = settings->check_termination;
+  new->time_limit         = settings->time_limit;
+
+  new->delta              = settings->delta;
+  new->polish_refine_iter = settings->polish_refine_iter;
 
   return new;
 }
 
-#endif // #ifndef EMBEDDED
-
-
-/*******************
-* Timer Functions *
-*******************/
-
-#ifdef PROFILING
-
-// Windows
-# ifdef IS_WINDOWS
-
-void osqp_tic(OSQPTimer *t)
-{
-  QueryPerformanceFrequency(&t->freq);
-  QueryPerformanceCounter(&t->tic);
-}
-
-c_float osqp_toc(OSQPTimer *t)
-{
-  QueryPerformanceCounter(&t->toc);
-  return (t->toc.QuadPart - t->tic.QuadPart) / (c_float)t->freq.QuadPart;
-}
-
-// Mac
-# elif defined IS_MAC
-
-void osqp_tic(OSQPTimer *t)
-{
-  /* read current clock cycles */
-  t->tic = mach_absolute_time();
-}
-
-c_float osqp_toc(OSQPTimer *t)
-{
-  uint64_t duration; /* elapsed time in clock cycles*/
-
-  t->toc   = mach_absolute_time();
-  duration = t->toc - t->tic;
-
-  /*conversion from clock cycles to nanoseconds*/
-  mach_timebase_info(&(t->tinfo));
-  duration *= t->tinfo.numer;
-  duration /= t->tinfo.denom;
-
-  return (c_float)duration / 1e9;
-}
-
-// Linux
-# else  /* ifdef IS_WINDOWS */
-
-/* read current time */
-void osqp_tic(OSQPTimer *t)
-{
-  clock_gettime(CLOCK_MONOTONIC, &t->tic);
-}
-
-/* return time passed since last call to tic on this timer */
-c_float osqp_toc(OSQPTimer *t)
-{
-  struct timespec temp;
-
-  clock_gettime(CLOCK_MONOTONIC, &t->toc);
-
-  if ((t->toc.tv_nsec - t->tic.tv_nsec) < 0) {
-    temp.tv_sec  = t->toc.tv_sec - t->tic.tv_sec - 1;
-    temp.tv_nsec = 1e9 + t->toc.tv_nsec - t->tic.tv_nsec;
-  } else {
-    temp.tv_sec  = t->toc.tv_sec - t->tic.tv_sec;
-    temp.tv_nsec = t->toc.tv_nsec - t->tic.tv_nsec;
-  }
-  return (c_float)temp.tv_sec + (c_float)temp.tv_nsec / 1e9;
-}
-
-# endif /* ifdef IS_WINDOWS */
-
-#endif // If Profiling end
+#endif /* ifndef OSQP_EMBEDDED_MODE */
 
 
 /* ==================== DEBUG FUNCTIONS ======================= */
 
 
+#if defined(OSQP_ENABLE_DEBUG) && defined(OSQP_ENABLE_PRINTING)
 
-// If debug mode enabled
-#ifdef DDEBUG
-
-#ifdef PRINTING
-
-void print_csc_matrix(csc *M, const char *name)
+void print_csc_matrix(const OSQPCscMatrix* M,
+                      const char*          name)
 {
-  c_int j, i, row_start, row_stop;
-  c_int k = 0;
+  OSQPInt j, i, row_start, row_stop;
+  OSQPInt k = 0;
 
   // Print name
   c_print("%s :\n", name);
@@ -390,12 +339,13 @@ void print_csc_matrix(csc *M, const char *name)
   }
 }
 
-void dump_csc_matrix(csc *M, const char *file_name) {
-  c_int j, i, row_strt, row_stop;
-  c_int k = 0;
+void dump_csc_matrix(const OSQPCscMatrix* M,
+                     const char*          file_name) {
+  OSQPInt j, i, row_strt, row_stop;
+  OSQPInt k = 0;
   FILE *f = fopen(file_name, "w");
 
-  if (f != NULL) {
+  if (f) {
     for (j = 0; j < M->n; j++) {
       row_strt = M->p[j];
       row_stop = M->p[j + 1];
@@ -416,9 +366,10 @@ void dump_csc_matrix(csc *M, const char *file_name) {
   }
 }
 
-void print_trip_matrix(csc *M, const char *name)
+void print_trip_matrix(const OSQPCscMatrix* M,
+                       const char*          name)
 {
-  c_int k = 0;
+  OSQPInt k = 0;
 
   // Print name
   c_print("%s :\n", name);
@@ -428,21 +379,25 @@ void print_trip_matrix(csc *M, const char *name)
   }
 }
 
-void print_dns_matrix(c_float *M, c_int m, c_int n, const char *name)
+void print_dns_matrix(const OSQPFloat* M,
+                            OSQPInt    m,
+                            OSQPInt    n,
+                      const char*    name)
 {
-  c_int i, j;
+  OSQPInt i, j;
 
   c_print("%s : \n\t", name);
 
   for (i = 0; i < m; i++) {   // Cycle over rows
     for (j = 0; j < n; j++) { // Cycle over columns
-      if (j < n - 1)
+      if (j < n - 1) {
         // c_print("% 14.12e,  ", M[j*m+i]);
         c_print("% .3g,  ", M[j * m + i]);
 
-      else
+      } else {
         // c_print("% 14.12e;  ", M[j*m+i]);
         c_print("% .3g;  ", M[j * m + i]);
+      }
     }
 
     if (i < m - 1) {
@@ -452,15 +407,19 @@ void print_dns_matrix(c_float *M, c_int m, c_int n, const char *name)
   c_print("\n");
 }
 
-void print_vec(c_float *v, c_int n, const char *name) {
+void print_vec(const OSQPFloat* v,
+                     OSQPInt    n,
+               const char*      name) {
   print_dns_matrix(v, 1, n, name);
 }
 
-void dump_vec(c_float *v, c_int len, const char *file_name) {
-  c_int i;
+void dump_vec(const OSQPFloat* v,
+                    OSQPInt    len,
+              const char*    file_name) {
+  OSQPInt i;
   FILE *f = fopen(file_name, "w");
 
-  if (f != NULL) {
+  if (f) {
     for (i = 0; i < len; i++) {
       fprintf(f, "%20.18e\n", v[i]);
     }
@@ -471,8 +430,10 @@ void dump_vec(c_float *v, c_int len, const char *file_name) {
   }
 }
 
-void print_vec_int(c_int *x, c_int n, const char *name) {
-  c_int i;
+void print_vec_int(const OSQPInt* x,
+                         OSQPInt  n,
+                   const char*    name) {
+  OSQPInt i;
 
   c_print("%s = [", name);
 
@@ -482,6 +443,4 @@ void print_vec_int(c_int *x, c_int n, const char *name) {
   c_print("]\n");
 }
 
-#endif // PRINTING
-
-#endif // DEBUG MODE
+#endif /* if defined(OSQP_ENABLE_DEBUG) && defined(OSQP_ENABLE_PRINTING) */

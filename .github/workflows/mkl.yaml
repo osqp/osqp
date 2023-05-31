@@ -1,0 +1,121 @@
+name: MKL Algebra
+
+on:
+  push:
+    branches: [ master, develop**, ci ]
+    tags:
+      - '*'
+  pull_request:
+    branches: [ master, develop** ]
+
+jobs:
+
+  build_and_test:
+      runs-on: ${{ matrix.os }}
+
+      strategy:
+        fail-fast: false
+
+        matrix:
+          # Specify the exact Windows image because the CMake generator in the CI breaks when the image
+          # updates (since Visual Studio is also updated at the same time).
+          os: [ubuntu-latest, macos-latest, windows-2022]
+          python-version: [3.9]
+          long: ['ON', 'OFF']
+
+          # MKL only supports double precision in the iterative solver, so that is the only combination we support as well.
+          float: ['OFF']
+
+          include:
+            - os: ubuntu-latest
+              cmake_generator: "Unix Makefiles"
+              test_target: "test"
+            - os: macos-latest
+              cmake_generator: "Unix Makefiles"
+              test_target: "test"
+            - os: windows-2022
+              cmake_generator: "Visual Studio 17 2022"
+              test_target: "RUN_TESTS"
+
+      defaults:
+        run:
+          # Required when using an activated conda environment in steps
+          # See https://github.com/conda-incubator/setup-miniconda#IMPORTANT
+          shell: bash -l {0}
+
+      env:
+        OSQP_BUILD_DIR_PREFIX: ${{ github.workspace }}/build
+        CTEST_OUTPUT_ON_FAILURE: 1
+
+      steps:
+        - uses: actions/checkout@v3
+          with:
+            lfs: false
+            submodules: recursive
+
+        - name: Set up conda
+          uses: conda-incubator/setup-miniconda@v2
+          with:
+            auto-update-conda: true
+            python-version: ${{ matrix.python-version }}
+
+        # -----------------
+        # OS-specific setup
+        # -----------------
+        - name: Setup (Linux)
+          if: runner.os == 'Linux'
+          run: |
+            echo "LD_LIBRARY_PATH=$CONDA_PREFIX/lib" >> $GITHUB_ENV
+
+        - name: Setup (macOS)
+          if: runner.os == 'macOS'
+          # Newer versions of MacOS effectively block DYLD_LIBRARY_PATH being set (System Integrity Protection)
+          # Explicitly setting RPATH using `install_name_tool -add_rpath $CONDA_PREFIX/lib ./build/out/osqp_tester`
+          #   doesn't work either.
+          # Here we get around it by using a standard non-root location for .dylib files as a soft link
+          run: |
+            echo "DYLD_LIBRARY_PATH=$CONDA_PREFIX/lib" >> $GITHUB_ENV
+            ln -s $CONDA_PREFIX/lib ~/lib
+            brew install libomp
+
+        - name: Setup (Windows)
+          if: runner.os == 'Windows'
+          run: |
+            echo "$CONDA_PREFIX/Library/bin" >> $GITHUB_PATH
+        # -----------------
+
+        - name: Install unit testing python dependencies
+          run: |
+            conda install numpy scipy
+            conda info
+            conda list
+
+        - name: Install MKL
+          run: |
+            conda install -c conda-forge llvm-openmp
+            conda install -c intel mkl-devel
+            conda info
+            conda list
+
+        - name: Build
+          run: |
+            cmake -G "${{ matrix.cmake_generator }}" \
+                  -S . -B $OSQP_BUILD_DIR_PREFIX \
+                  -DOSQP_ALGEBRA_BACKEND='mkl' \
+                  -DOSQP_USE_FLOAT=${{ matrix.float }} \
+                  -DOSQP_ENABLE_PROFILING=ON \
+                  -DOSQP_ENABLE_INTERRUPT=ON \
+                  -DOSQP_ENABLE_PRINTING=ON \
+                  -DOSQP_BUILD_UNITTESTS=ON \
+                  -DOSQP_COVERAGE_CHECK=OFF \
+                  -DOSQP_USE_LONG=${{ matrix.long }}
+            cmake --build $OSQP_BUILD_DIR_PREFIX
+
+        # useful for inspecting the OSQP version information
+        - name: OSQP Demo
+          run: |
+            $OSQP_BUILD_DIR_PREFIX/out/osqp_demo
+
+        - name: Test
+          run: |
+            cmake --build $OSQP_BUILD_DIR_PREFIX --target ${{ matrix.test_target }}

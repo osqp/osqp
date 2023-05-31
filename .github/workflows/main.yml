@@ -1,4 +1,4 @@
-name: Main
+name: Built-in Algebra
 
 on:
   push:
@@ -17,24 +17,26 @@ jobs:
         fail-fast: false
 
         matrix:
-          os: [ubuntu-latest, macos-11, windows-latest]
+          # Specify the exact Windows image because the CMake generator in the CI breaks when the image
+          # updates (since Visual Studio is also updated at the same time).
+          os: [ubuntu-latest, macos-latest, windows-2022]
           python-version: [3.9]
-          cmake_flags: ['', '-DUNITTESTS=ON -DCOVERAGE=ON']
-          cmake_flags_extra: ['', '-DENABLE_MKL_PARDISO=OFF', '-DDFLOAT=ON', '-DDLONG=OFF', '-DEMBEDDED=1',
-                              '-DEMBEDDED=2', '-DPROFILING=OFF', '-DCTRLC=OFF', '-DPRINTING=OFF']
-          exclude:
-            - cmake_flags: '-DUNITTESTS=ON -DCOVERAGE=ON'
-              cmake_flags_extra: '-DEMBEDDED=1'
-            - cmake_flags: '-DUNITTESTS=ON -DCOVERAGE=ON'
-              cmake_flags_extra: '-DEMBEDDED=2'
+          long: ['ON', 'OFF']
+          float: ['ON', 'OFF']
+          printing: ['ON', 'OFF']
+          profiling: ['ON', 'OFF']
+          interrupt: ['ON', 'OFF']
 
           include:
             - os: ubuntu-latest
               cmake_generator: "Unix Makefiles"
-            - os: macos-11
-              cmake_generator: "Unix Makefiles"  
-            - os: windows-latest
-              cmake_generator: "MinGW Makefiles"
+              test_target: "test"
+            - os: macos-latest
+              cmake_generator: "Unix Makefiles"
+              test_target: "test"
+            - os: windows-2022
+              cmake_generator: "Visual Studio 17 2022"
+              test_target: "RUN_TESTS"
 
       defaults:
         run:
@@ -42,8 +44,12 @@ jobs:
           # See https://github.com/conda-incubator/setup-miniconda#IMPORTANT
           shell: bash -l {0}
 
+      env:
+        OSQP_BUILD_DIR_PREFIX: ${{ github.workspace }}/build
+        CTEST_OUTPUT_ON_FAILURE: 1
+
       steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v3
           with:
             lfs: false
             submodules: recursive
@@ -71,6 +77,7 @@ jobs:
           run: |
             echo "DYLD_LIBRARY_PATH=$CONDA_PREFIX/lib" >> $GITHUB_ENV
             ln -s $CONDA_PREFIX/lib ~/lib
+            brew install libomp
 
         - name: Setup (Windows)
           if: runner.os == 'Windows'
@@ -78,50 +85,51 @@ jobs:
             echo "$CONDA_PREFIX/Library/bin" >> $GITHUB_PATH
         # -----------------
 
-        # Fetching mkl from the anaconda channel instead of defaults gives us the MKL runtime dynamic libraries
-        # as well (mkl_rt.<dll/so>), required during the runtime testing steps.
-        # MKL on Anaconda 2021.* seems to have inexplicably renamed mkl_rt.dll to mkl_rt.1.dll, so we insist on
-        # a version earlier than 2021
-        - name: Install python dependencies
+        - name: Install unit testing python dependencies
           run: |
-            conda install -c anaconda "mkl<2021" numpy scipy
+            conda install numpy scipy
             conda info
             conda list
 
         - name: Build
           run: |
-            cmake -G "${{ matrix.cmake_generator }}" -S . -B build ${{ matrix.cmake_flags }} ${{ matrix.cmake_flags_extra }}
-            cmake --build build
+            cmake -G "${{ matrix.cmake_generator }}" \
+                  -S . -B $OSQP_BUILD_DIR_PREFIX \
+                  -DOSQP_ALGEBRA_BACKEND='builtin' \
+                  -DOSQP_BUILD_UNITTESTS=ON \
+                  -DOSQP_COVERAGE_CHECK=OFF \
+                  -DOSQP_USE_LONG=${{ matrix.long }} \
+                  -DOSQP_USE_FLOAT=${{ matrix.float }} \
+                  -DOSQP_ENABLE_PROFILING=${{ matrix.profiling }} \
+                  -DOSQP_ENABLE_INTERRUPT=${{ matrix.interrupt }} \
+                  -DOSQP_ENABLE_PRINTING=${{ matrix.printing }}
+            cmake --build $OSQP_BUILD_DIR_PREFIX
 
         # useful for inspecting the OSQP version information
         - name: OSQP Demo
           run: |
-            ./build/out/osqp_demo
-          if: ${{ !contains(matrix.cmake_flags_extra, 'EMBEDDED') }}
+            $OSQP_BUILD_DIR_PREFIX/out/osqp_demo
 
         - name: Test
           run: |
-            ./build/out/osqp_tester
-          if: ${{ matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' }}
+            cmake --build $OSQP_BUILD_DIR_PREFIX --target ${{ matrix.test_target }}
+
+        - name: Codegen compilation test
+          run: |
+            cmake -G "${{ matrix.cmake_generator }}" \
+                  -S tests/codegen/compilation_test \
+                  -B tests/codegen/compilation_test/build \
+                  -DOSQP_BUILD_DIR=$OSQP_BUILD_DIR_PREFIX \
+                  -DOSQP_TEST_CODEGEN_DIR=$OSQP_BUILD_DIR_PREFIX/tests/testcodes
+            cmake --build tests/codegen/compilation_test/build
+            ./tests/codegen/compilation_test/build/osqp_codegen_embedded_mode1
+            ./tests/codegen/compilation_test/build/osqp_codegen_embedded_mode2
+          if: ${{ runner.os == 'Linux' }}
 
         - name: Valgrid check
           run: |
+            sudo apt-get update
             sudo apt-get install valgrind
             valgrind --suppressions=.valgrind-suppress.supp --leak-check=full --gen-suppressions=all \
-              --track-origins=yes --error-exitcode=1 build/out/osqp_tester
-          if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '-DENABLE_MKL_PARDISO=OFF' }}
-
-        - name: Generate coverage
-          uses: imciner2/run-lcov@v1
-          with:
-            input_directory: '${{ runner.workspace }}/osqp/build'
-            exclude: '"$GITHUB_WORKSPACE/tests/*" "$GITHUB_WORKSPACE/lin_sys/direct/qdldl/amd/*" "$GITHUB_WORKSPACE/lin_sys/direct/qdldl/qdldl_sources/*" "/usr/include/*"'
-            output_file: '${{ runner.workspace }}/osqp/build/coverage.info'
-          if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '' }}
-
-        - name: Coveralls
-          uses: coverallsapp/github-action@master
-          with:
-            path-to-lcov: '${{ runner.workspace }}/osqp/build/coverage.info'
-            github-token: ${{ secrets.GITHUB_TOKEN }}
-          if: ${{ runner.os == 'Linux' && matrix.cmake_flags == '-DUNITTESTS=ON -DCOVERAGE=ON' && matrix.cmake_flags_extra == '' }}
+              --track-origins=yes --error-exitcode=1 $OSQP_BUILD_DIR_PREFIX/out/osqp_tester
+          if: ${{ runner.os == 'Linux' }}

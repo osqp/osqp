@@ -1,452 +1,581 @@
-# Minimum version required
-cmake_minimum_required (VERSION 3.2)
+cmake_minimum_required(VERSION 3.18)
+project(osqp)
 
-# Project name
-project (osqp)
+include(GNUInstallDirs)
+include(CMakeDependentOption)
+include(CMakePackageConfigHelpers)
 
-set(OSQP_VERSION "0.0.0" CACHE STRING "The version number of OSQP")
-if(NOT OSQP_VERSION STREQUAL "0.0.0")
-    configure_file (
-        "${PROJECT_SOURCE_DIR}/configure/version.h.in"
-        "${PROJECT_SOURCE_DIR}/include/version.h"
-    )
+# Detect the CMake build type and use that as the debug indicator
+if(DEFINED CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "Set to either \"Release\" or \"Debug\"")
+else()
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Set to either \"Release\" or \"Debug\"")
 endif()
 
-# Export compile commands
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set(OSQP_ENABLE_DEBUG ON)
+  set(CMAKE_VERBOSE_MAKEFILE ON)
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+endif()
 
-# Set the output folder where your program will be created
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
-set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
-
-# Some non-standard CMake modules
-LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/configure/cmake)
-INCLUDE(FindPythonModule)
-INCLUDE(Utils)
-# include(FindMKL)  # Find MKL module
-
+message(STATUS "Debug mode: ${OSQP_ENABLE_DEBUG}")
 
 # Detect operating system
 # ----------------------------------------------
 message(STATUS "We are on a ${CMAKE_SYSTEM_NAME} system")
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    set(IS_LINUX ON)
+  set(IS_LINUX ON)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-    set(IS_MAC ON)
+  set(IS_MAC ON)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set(IS_WINDOWS ON)
+  set(IS_WINDOWS ON)
 endif()
 
+# OSQP Versioning
+# ----------------------------------------------
+set(OSQP_VERSION
+    "0.0.0"
+    CACHE STRING "The version number of OSQP")
+if(NOT OSQP_VERSION STREQUAL "0.0.0")
+  configure_file("${PROJECT_SOURCE_DIR}/configure/version.h.in" "${PROJECT_SOURCE_DIR}/include/private/version.h")
+endif()
 
+# Conda environment detection
+# ----------------------------------------------
+# If MKL_ROOT is not explicitly set, and we're running inside a conda environment, set MKL_ROOT to $CONDA_PREFIX to see
+# if we can find MKL (if installed through `conda install -c intel mkl-devel`) On a typical OneAPI installation outside
+# conda, this would mean specifying: -DMKL_DIR=/path/to/oneapi/mkl/latest/lib/cmake/mkl
+# -DMKL_ROOT=/path/to/oneapi/mkl/latest
+# ----------------------------------------------
+if(NOT DEFINED ENV{MKL_ROOT} AND NOT MKL_ROOT)
+  if(DEFINED ENV{CONDA_PREFIX})
+    message(STATUS "Detected Conda environment - setting MKL_ROOT to $CONDA_PREFIX")
+    set(MKL_ROOT $ENV{CONDA_PREFIX})
+    include_directories("$ENV{CONDA_PREFIX}/include")
+    link_directories("$ENV{CONDA_PREFIX}/lib")
+  endif()
+endif()
+
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
+set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
+
+# Prevent generation of output Debug/ folder on MSVC See https://stackoverflow.com/questions/543203
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${EXECUTABLE_OUTPUT_PATH}")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${EXECUTABLE_OUTPUT_PATH}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${LIBRARY_OUTPUT_PATH}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${LIBRARY_OUTPUT_PATH}")
+
+# Some non-standard CMake modules
+list(APPEND CMAKE_PREFIX_PATH ${PROJECT_SOURCE_DIR}/configure/cmake)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/configure/cmake)
+include(Utils)
 
 # Set options
 # ----------------------------------------------
+option(OSQP_BUILD_SHARED_LIB "Build the shared library" ON)
+option(OSQP_BUILD_STATIC_LIB "Build the static library" ON)
 
-# Are unittests generated?
-option (UNITTESTS "Enable unittests generation" OFF)
+cmake_dependent_option( OSQP_BUILD_DEMO_EXE
+                        "Build the demo executable (requires the static library)"
+                        ON    # Default to on
+                        OSQP_BUILD_STATIC_LIB OFF ) # Force off if the static library isn't built
 
-# Is the code generated for embedded platforms?
-#   1 :   Yes. Matrix update not allowed.
-#   2 :   Yes. Matrix update allowed.
-if (NOT DEFINED EMBEDDED)
-    message(STATUS "Embedded is OFF")
+cmake_dependent_option( OSQP_BUILD_UNITTESTS
+                        "Build the unit testing suite"
+                        OFF    # Default to off
+                        OSQP_BUILD_STATIC_LIB OFF ) # Force off if the static library isn't built
+
+cmake_dependent_option( OSQP_COVERAGE_CHECK
+                        "Check the code coverage of the unit tests"
+                        OFF    # Default to off
+                        OSQP_BUILD_UNITTESTS OFF ) # Force off if the unit tests aren't built
+
+set(OSQP_ALGEBRA_BACKEND
+    "builtin"
+    CACHE STRING "The Algebra to use (builtin/mkl/cuda)")
+
+option(OSQP_ENABLE_PRINTING "Enable solver printing" ON)
+option(OSQP_ENABLE_PROFILING "Enable solver profiling (timing)" ON)
+option(OSQP_ENABLE_INTERRUPT "Enable user interrupt (e.g. Ctrl-C)" ON)
+
+# Allow appending a string to the end of the library and the soname so people can have
+# multiple libraries side-by-side on an install.
+set(OSQP_LIB_SUFFIX "" CACHE STRING "String to append to the library name")
+mark_as_advanced(OSQP_LIB_SUFFIX)
+
+# Set the relevant boolean values for the algebra
+if(${OSQP_ALGEBRA_BACKEND} STREQUAL "builtin")
+  set(OSQP_ALGEBRA_BUILTIN ON)
+elseif(${OSQP_ALGEBRA_BACKEND} STREQUAL "mkl")
+  set(OSQP_ALGEBRA_MKL ON)
+elseif(${OSQP_ALGEBRA_BACKEND} STREQUAL "cuda")
+  set(OSQP_ALGEBRA_CUDA ON)
+endif()
+
+# Is the code generated for embedded platforms? 1 :   Yes. Matrix update not allowed. 2 :   No. Matrix update allowed.
+if(DEFINED OSQP_EMBEDDED_MODE)
+  if(NOT OSQP_ALGEBRA_BUILTIN)
+    message(WARNING "Forcing OSQP_ALGEBRA_BACKEND=builtin for OSQP_EMBEDDED_MODE mode.")
+  endif()
+
+  set(OSQP_ALGEBRA_BACKEND "builtin")
+  set(OSQP_ALGEBRA_BUILTIN ON)
+  unset(OSQP_ALGEBRA_CUDA)
+  unset(OSQP_ALGEBRA_MKL)
+
+  if(OSQP_ENABLE_PRINTING AND NOT OSQP_CUSTOM_PRINTING)
+    message(WARNING "Disabling printing in OSQP_EMBEDDED_MODE mode.")
+    set(OSQP_ENABLE_PRINTING OFF)
+  endif()
+
+  if(OSQP_ENABLE_INTERRUPT AND NOT OSQP_CUSTOM_INTERRUPT)
+    message(WARNING "Disabling interrupts in OSQP_EMBEDDED_MODE mode.")
+    set(OSQP_ENABLE_INTERRUPT OFF)
+  endif()
+
+  if(OSQP_ENABLE_PROFILING AND NOT OSQP_CUSTOM_TIMING)
+    message(WARNING "Disabling profiling (timing) for OSQP_EMBEDDED_MODE mode.")
+    set(OSQP_ENABLE_PROFILING OFF)
+  endif()
+
+  # Disable shared library and demo exe on embedded applications
+  if(${OSQP_BUILD_SHARED_LIB} OR ${OSQP_BUILD_DEMO_EXE})
+    message(WARNING "Disabling shared library and demo executable for OSQP_EMBEDDED_MODE mode.")
+  endif()
+
+  set(OSQP_BUILD_SHARED_LIB OFF)
+  set(OSQP_BUILD_DEMO_EXE OFF)
+
+  if(OSQP_EMBEDDED_MODE EQUAL 1)
+    message(STATUS "Embedded mode: Vector updates")
+  elseif(OSQP_EMBEDDED_MODE EQUAL 2)
+    message(STATUS "Embedded mode: Matrix updates")
+  else()
+    error("Unknown OSQP_EMBEDDED_MODE mode: ${OSQP_EMBEDDED_MODE}")
+  endif()
 else()
-    message(STATUS "Embedded is ${EMBEDDED}")
+  message(STATUS "Embedded mode: OFF")
 endif()
 
-# Is printing enabled?
-option (PRINTING "Enable solver printing" ON)
-if (DEFINED EMBEDDED)
-    message(STATUS "Disabling printing for embedded")
-    set(PRINTING OFF)
-endif()
-message(STATUS "Printing is ${PRINTING}")
+# Display final algebra chosen
+message(STATUS "Algebra backend: ${OSQP_ALGEBRA_BACKEND}")
 
+# Display final profiling behaviour
+message(STATUS "Solver profiling: ${OSQP_ENABLE_PROFILING}")
 
-# Is profiling enabled?
-option (PROFILING "Enable solver profiling (timing)" ON)
-if (DEFINED EMBEDDED)
-    message(STATUS "Disabling profiling for embedded")
-    set(PROFILING OFF)
-endif()
-message(STATUS "Profiling is ${PROFILING}")
+# Display final interrupt behaviour
+message(STATUS "Solver interrupt: ${OSQP_ENABLE_INTERRUPT}")
 
-# Is user interrupt enabled?
-option (CTRLC "Enable user interrupt (Ctrl-C)" ON)
-if (DEFINED EMBEDDED)
-    message(STATUS "Disabling user interrupt for embedded")
-    set(CTRLC OFF)
-endif()
-message(STATUS "User interrupt is ${CTRLC}")
-
-# Use floats instead of integers
-option (DFLOAT "Use float numbers instead of doubles" OFF)
-message(STATUS "Floats are ${DFLOAT}")
-
-# Use long integers for indexing
-option (DLONG "Use long integers (64bit) for indexing" ON)
-if (NOT (CMAKE_SIZEOF_VOID_P EQUAL 8))
-	message(STATUS "Disabling long integers (64bit) on 32bit machine")
-	set(DLONG OFF)
-endif()
-message(STATUS "Long integers (64bit) are ${DLONG}")
-
-
-option (DEBUG "Debug mode" OFF)
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-	set (DEBUG ON)
-	message(STATUS "Debug mode is ${DEBUG}")
+if(OSQP_ALGEBRA_CUDA)
+  # Some options have different defaults for the CUDA algebra
+  option(OSQP_USE_FLOAT "Use floats instead of doubles" ON)
+  option(OSQP_USE_LONG "Use long integers (64bit) for indexing" OFF)
+else()
+  option(OSQP_USE_FLOAT "Use floats instead of doubles" OFF)
+  option(OSQP_USE_LONG "Use long integers (64bit) for indexing" ON)
 endif()
 
-# Add code coverage
-option (COVERAGE "Perform code coverage" OFF)
-message(STATUS "Code coverage is ${COVERAGE}")
+if(OSQP_USE_FLOAT AND OSQP_ALGEBRA_MKL)
+  message(WARNING "Disabling OSQP_USE_FLOAT for MKL (Intel RCI ISS does not support single-precision values yet.)")
+  set(OSQP_USE_FLOAT OFF)
+endif()
 
+if(OSQP_USE_FLOAT)
+  message(STATUS "Using single precision floating-point")
+else()
+  message(STATUS "Using double precision floating-point")
+endif()
 
-# Memory allocators
+if(NOT (CMAKE_SIZEOF_VOID_P EQUAL 8))
+  message(WARNING "Disabling long integers (64bit) on 32bit machine.")
+  set(OSQP_USE_LONG OFF)
+endif()
+
+if(OSQP_ALGEBRA_CUDA AND OSQP_USE_LONG)
+  message(WARNING "Disabling long integers (64bit) for CUDA.")
+  set(OSQP_USE_LONG OFF)
+elseif(DEFINED OSQP_EMBEDDED_MODE)
+  # The long long type is not in the C89 spec, and our embedded code must be C89 compliant
+  message(STATUS "Disabling long integers (64bit) for embedded mode")
+  set(OSQP_USE_LONG OFF)
+endif()
+
+if(OSQP_USE_LONG)
+  message(STATUS "Using long integers")
+else()
+  message(STATUS "Using standard (int) integers")
+endif()
+
+option(OSQP_ASAN "Enable ASAN" OFF)
+
+cmake_dependent_option( OSQP_CODEGEN "Enable code generation"
+                        ON
+                        "OSQP_ALGEBRA_BUILTIN;NOT DEFINED OSQP_EMBEDDED_MODE" OFF )
+
+message(STATUS "Code generation: ${OSQP_CODEGEN}")
+
+cmake_dependent_option( OSQP_ENABLE_DERIVATIVES "Enable derivative computation"
+                        ON
+                        "OSQP_ALGEBRA_BUILTIN;NOT DEFINED EMBEDDED" OFF )
+
+message( STATUS "Derivative support: ${OSQP_ENABLE_DERIVATIVES}" )
+
+# Rename compile-time constants & configure
 # ----------------------------------------------
-
-#Report on custom user header options.  This is intended to allow
-#users to provide definitions of their own memory functions
-# The header should define the functions as follows
-#
-# define c_malloc mymalloc
-# define c_calloc mycalloc
-# define c_realloc myrealloc
-# define c_free myfree
+# If we are creating any OSQP_* compile-time constants from CMake variables, do so here.
+if(OSQP_ENABLE_PRINTING AND OSQP_CUSTOM_PRINTING)
+  message(STATUS "Using custom printing header: ${OSQP_CUSTOM_PRINTING}")
+endif()
 
 if(OSQP_CUSTOM_MEMORY)
-	message(STATUS "User custom memory management header: ${OSQP_CUSTOM_MEMORY}")
+  message(STATUS "Using custom memory management header: ${OSQP_CUSTOM_MEMORY}")
 endif()
 
-
-
-# Linear solvers dependencies
-# ---------------------------------------------
-option (ENABLE_MKL_PARDISO "Enable MKL Pardiso solver" ON)
-if (DFLOAT)
-	message(STATUS "Disabling MKL Pardiso Solver with floats")
-	set(ENABLE_MKL_PARDISO OFF)
-elseif(DEFINED EMBEDDED)
-	message(STATUS "Disabling MKL Pardiso Solver for embedded")
-	set(ENABLE_MKL_PARDISO OFF)
-endif()
-message(STATUS "MKL Pardiso: ${ENABLE_MKL_PARDISO}")
-
-
-# Generate header file with the global options
-# ---------------------------------------------
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/include/osqp_configure.h
-               NEWLINE_STYLE LF)
+               ${CMAKE_CURRENT_BINARY_DIR}/include/public/osqp_configure.h NEWLINE_STYLE LF)
+
+
+# CUDA support
+# ----------------------------------------------
+if(OSQP_ALGEBRA_CUDA)
+  enable_language(CUDA)
+  find_package(CUDA)
+
+  # cublas and cusparse headers
+  include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+
+  # sm_75 -> Turing support
+  if(OSQP_USE_FLOAT)
+    set(CMAKE_CUDA_ARCHITECTURES 52 75)
+    # set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_52 --gpu-code=sm_52,sm_75")
+  else()
+    # To use doubles we need compute capability 6.0 for atomic operations
+    set(CMAKE_CUDA_ARCHITECTURES 60 75)
+    # set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --gpu-architecture=compute_60 --gpu-code=sm_60,sm_75")
+  endif()
+endif()
+
 
 # Set Compiler flags
 # ----------------------------------------------
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)  # -fPIC
+set(CMAKE_POSITION_INDEPENDENT_CODE ON) # -fPIC
 
+if(NOT MSVC)
+  if(OSQP_COVERAGE_CHECK)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+    if(FORTRAN)
+      set(CMAKE_FORTRAN_FLAGS "${CMAKE_FORTRAN_FLAGS} --coverage")
+    endif(FORTRAN)
+  endif()
 
-if (NOT MSVC)
+  if(OSQP_ASAN)
+        set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -fsanitize=address -fno-optimize-sibling-calls -fsanitize-address-use-after-scope -fno-omit-frame-pointer" )
+        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -D_GLIBCXX_SANITIZE_VECTOR -fsanitize=address -fno-optimize-sibling-calls -fsanitize-address-use-after-scope -fno-omit-frame-pointer" )
 
-    if (COVERAGE)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
-	if(FORTRAN)
-		set(CMAKE_FORTRAN_FLAGS "${CMAKE_FORTRAN_FLAGS} --coverage")
-	endif(FORTRAN)
-    endif()
+        # ASAN shouldn't be used with these options (https://github.com/google/sanitizers/wiki/AddressSanitizer#faq)
+        set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-stack-protector -U_FORTIFY_SOURCE" )
+        set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-stack-protector -U_FORTIFY_SOURCE" )
+  endif()
 
-    if (DEBUG)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g")
-    else()
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-    endif()
+  if(OSQP_ENABLE_DEBUG)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g")
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -G -g")
+  else()
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+  endif()
 
-    set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm")      # Include math
-    # Include real time library in linux
-    if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-        set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lrt -ldl")
-    endif()
-endif (NOT MSVC)
+  set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lm") # Include math
+  # Include real time library in linux
+  if(IS_LINUX)
+    set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lrt -ldl")
+  endif()
+endif(NOT MSVC)
 
-# Set sources and includes
 # ----------------------------------------------
-add_subdirectory (src)
-add_subdirectory (include)
-
-
-# if we are building the Python interface, let's look for Python
-# and set some options
-# -----------------------------------------------------------------
-if (PYTHON)
-
-    # Python include directories need to be passed by the python compilation process
-    if (NOT PYTHON_INCLUDE_DIRS)
-            message( FATAL_ERROR "You need Python include directories to build the Python interface" )
-    endif (NOT PYTHON_INCLUDE_DIRS)
-
-    # Include directories for Python headers
-    include_directories(${PYTHON_INCLUDE_DIRS})
-
-    # Pass PYTHON flag to C compiler
-    add_definitions(-DPYTHON)
-
-    if (UNITTESTS)
-        # Disable unittests
-        message(STATUS "Disabling UNITTESTS because we are building Python interface")
-        set(UNITTESTS OFF)
-    endif (UNITTESTS)
-
-endif (PYTHON)
-
-
-# if we are building the Matlab interface, let's look for Matlab
-# and set some options
-# -----------------------------------------------------------------
-if (MATLAB)
-
-    find_package(Matlab)
-
-    if (NOT Matlab_FOUND)
-        message( FATAL_ERROR "You need Matlab libraries to build the Matlab interface" )
-    endif (NOT Matlab_FOUND)
-
-    # Include directories for Matlab headers
-    include_directories(${Matlab_INCLUDE_DIRS})
-
-    message(STATUS "Matlab root is " ${Matlab_ROOT_DIR})
-
-    # Pass MATLAB flag to C compiler
-    add_definitions(-DMATLAB)
-
-    # Insist on the pre 2018 complex data API
-    # so that mxGetPr will work correctly
-    add_definitions(-DMATLAB_MEXSRC_RELEASE=R2017b)
-
-    message(STATUS "Using Matlab pre-2018a API for mxGetPr compatibility")
-
-    if (UNITTESTS)
-        # Disable unittests
-        message(STATUS "Disabling UNITTESTS because we are building Matlab interface")
-        set(UNITTESTS OFF)
-    endif (UNITTESTS)
-
-endif (MATLAB)
-
-# if we are building the R interface, let's look for R
-# and set some options
-# -----------------------------------------------------------------
-if (R_LANG)
-
-    message(STATUS "We are building the R interface")
-
-    # Look for R libraries
-    find_package(R)
-
-    if (NOT R_FOUND)
-            message( FATAL_ERROR "You need R libraries to build the R interface" )
-    endif (NOT R_FOUND)
-
-    message(STATUS "R exec is: " ${R_EXEC})
-    message(STATUS "R root dir is: " ${R_ROOT_DIR})
-    message(STATUS "R includes are in: " ${R_INCLUDE_DIRS})
-
-    # Include directories for R headers
-    include_directories(${R_INCLUDE_DIRS})
-
-    # Pass R_LANG flag to C compiler
-    add_definitions(-DR_LANG)
-
-    if (UNITTESTS)
-        # Disable unittests
-        message(STATUS "Disabling UNITTESTS because we are building the R interface")
-        set(UNITTESTS OFF)
-    endif (UNITTESTS)
-
-endif (R_LANG)
-
-
-# Create Static Library
+# Initialize the code generation file copying
 # ----------------------------------------------
+if( OSQP_CODEGEN )
+  set( EMBEDDED_BUILD_ROOT_DIR "${CMAKE_BINARY_DIR}/codegen_src" )
 
-# Add linear system solvers cumulative library
-add_subdirectory(lin_sys)
+  set( EMBEDDED_BUILD_SRC_DIR "${EMBEDDED_BUILD_ROOT_DIR}/src" )
+  set( EMBEDDED_BUILD_PUBLIC_INC_DIR "${EMBEDDED_BUILD_ROOT_DIR}/inc/public" )
+  set( EMBEDDED_BUILD_PRIVATE_INC_DIR "${EMBEDDED_BUILD_ROOT_DIR}/inc/private" )
 
-# Static library
-add_library (osqpstatic STATIC ${osqp_src} ${osqp_headers} ${linsys_solvers})
-# Give same name to static library output
-set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME osqp)
+  file( MAKE_DIRECTORY ${EMBEDDED_BUILD_ROOT_DIR} )
+  file( MAKE_DIRECTORY ${EMBEDDED_BUILD_SRC_DIR} )
+  file( MAKE_DIRECTORY ${EMBEDDED_BUILD_PUBLIC_INC_DIR} )
+  file( MAKE_DIRECTORY ${EMBEDDED_BUILD_PRIVATE_INC_DIR} )
 
-# Include directories for linear system solvers
-target_include_directories(osqpstatic PRIVATE ${linsys_solvers_includes})
+  add_custom_target(copy_codegen_files ALL
+                    COMMENT "Copying source files needed for code generation" )
 
-# Declare include directories for the cmake exported target
-target_include_directories(osqpstatic
-                           PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-                                  "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
+  # Copy a sample makefile into the build tree
+  add_custom_command(OUTPUT "${EMBEDDED_BUILD_ROOT_DIR}/Makefile"
+                     COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/configure/Makefile.emosqp" "${EMBEDDED_BUILD_ROOT_DIR}/Makefile"
+                     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/configure/Makefile.emosqp"
+                     COMMENT "Copying codegen makefile" )
 
-# Install Static Library
+  add_custom_target( copy_codegen_makefile DEPENDS "${EMBEDDED_BUILD_ROOT_DIR}/Makefile" )
+  add_dependencies( copy_codegen_files copy_codegen_makefile )
+endif()
+
 # ----------------------------------------------
-
-include(GNUInstallDirs)
-
-install(TARGETS osqpstatic
-        EXPORT  ${PROJECT_NAME}
-        ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-        LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-        RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
-
-
-# Install Headers
+# OSQPLIB
 # ----------------------------------------------
+add_library(OSQPLIB OBJECT "")
 
+add_subdirectory(include)
+add_subdirectory(src)
+add_subdirectory(algebra)
+
+get_property(
+  osqplib_includes
+  TARGET OSQPLIB
+  PROPERTY INCLUDE_DIRECTORIES)
+get_property(
+  osqplib_sources
+  TARGET OSQPLIB
+  PROPERTY SOURCES)
+
+get_property(
+  osqplib_link_libs
+  TARGET OSQPLIB
+  PROPERTY LINK_LIBRARIES)
+
+# ----------------------------------------------
+# Language-specific compilation checks
+# ----------------------------------------------
+if(PYTHON)
+  if(NOT PYTHON_INCLUDE_DIRS)
+    message(FATAL_ERROR "You need Python include directories to build the Python interface")
+  endif(NOT PYTHON_INCLUDE_DIRS)
+
+  include_directories(${PYTHON_INCLUDE_DIRS})
+  add_definitions(-DPYTHON)
+
+  if(OSQP_BUILD_UNITTESTS)
+    message(STATUS "Disabling OSQP_BUILD_UNITTESTS because we are building Python interface")
+    set(OSQP_BUILD_UNITTESTS OFF)
+  endif(OSQP_BUILD_UNITTESTS)
+endif(PYTHON)
+
+if(MATLAB)
+  find_package(Matlab)
+  if(NOT Matlab_FOUND)
+    message(FATAL_ERROR "You need Matlab libraries to build the Matlab interface")
+  endif(NOT Matlab_FOUND)
+  message(STATUS "Matlab root is " ${Matlab_ROOT_DIR})
+
+  include_directories(${Matlab_INCLUDE_DIRS})
+  add_definitions(-DMATLAB)
+
+  # Insist on the pre 2018 complex data API so that mxGetPr will work correctly
+  add_definitions(-DMATLAB_MEXSRC_RELEASE=R2017b)
+  message(STATUS "Using Matlab pre-2018a API for mxGetPr compatibility")
+
+  if(OSQP_BUILD_UNITTESTS)
+    message(STATUS "Disabling OSQP_BUILD_UNITTESTS because we are building Matlab interface")
+    set(OSQP_BUILD_UNITTESTS OFF)
+  endif(OSQP_BUILD_UNITTESTS)
+endif(MATLAB)
+
+if(R_LANG)
+  find_package(R)
+  if(NOT R_FOUND)
+    message(FATAL_ERROR "You need R libraries to build the R interface")
+  endif(NOT R_FOUND)
+
+  message(STATUS "R exec is: " ${R_EXEC})
+  message(STATUS "R root dir is: " ${R_ROOT_DIR})
+  message(STATUS "R includes are in: " ${R_INCLUDE_DIRS})
+
+  include_directories(${R_INCLUDE_DIRS})
+  add_definitions(-DR_LANG)
+
+  if(OSQP_BUILD_UNITTESTS)
+    message(STATUS "Disabling OSQP_BUILD_UNITTESTS because we are building the R interface")
+    set(OSQP_BUILD_UNITTESTS OFF)
+  endif(OSQP_BUILD_UNITTESTS)
+endif(R_LANG)
+
+if(PYTHON OR MATLAB OR R_LANG)
+  # Disable shared library and demo exe when building the interfaces
+  set(OSQP_BUILD_SHARED_LIB OFF)
+  set(OSQP_BUILD_DEMO_EXE OFF)
+endif()
+
+# ----------------------------------------------
+# Static Library - osqpstatic
+# ----------------------------------------------
+message( STATUS "Build static library: " ${OSQP_BUILD_STATIC_LIB} )
+
+if( OSQP_BUILD_STATIC_LIB )
+  add_library(osqpstatic STATIC
+              $<TARGET_OBJECTS:OSQPLIB>
+              "${CMAKE_CURRENT_SOURCE_DIR}/src/osqp_api.c")
+
+  # Append the algebra name to the library file if desired
+  if(OSQP_LIB_SUFFIX)
+    set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME "osqpstatic_${OSQP_LIB_SUFFIX}")
+  else()
+    set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME "osqpstatic")
+  endif()
+
+
+  if(OSQP_ALGEBRA_BUILTIN)
+    # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
+    target_sources(osqpstatic PRIVATE $<TARGET_OBJECTS:qdldlobject>)
+  endif()
+  target_include_directories(osqpstatic PRIVATE ${osqplib_includes})
+  target_include_directories(
+    osqpstatic PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/public;${CMAKE_CURRENT_BINARY_DIR}/include/public>"
+                      "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
+
+  if(MATLAB)
+    target_link_libraries(osqpstatic ${Matlab_LIBRARIES})
+  endif(MATLAB)
+endif()
+
+# ----------------------------------------------
+# Shared Library - osqp
+# ----------------------------------------------
+message( STATUS "Build shared library: " ${OSQP_BUILD_SHARED_LIB} )
+
+if(OSQP_BUILD_SHARED_LIB)
+  add_library(osqp SHARED
+              $<TARGET_OBJECTS:OSQPLIB>
+              "${CMAKE_CURRENT_SOURCE_DIR}/src/osqp_api.c")
+  if(OSQP_ALGEBRA_BUILTIN)
+    # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
+    target_sources(osqp PRIVATE $<TARGET_OBJECTS:qdldlobject>)
+  endif()
+  target_include_directories(osqp PRIVATE ${osqplib_includes})
+  target_include_directories(osqp PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+                                         "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
+
+  # Link against the libraries for the algebras
+  target_link_libraries(osqp ${osqplib_link_libs})
+
+  # Declare that we are building the shared library to get proper symbol exports.
+  # Shared library consumers should also define OSQP_SHARED_LIB to get the library
+  # exports properly, so we do it for them in the CMake interface by defining it as
+  # a PUBLIC compile definition.
+  target_compile_definitions(osqp PRIVATE BUILDING_OSQP)
+  target_compile_definitions(osqp PUBLIC  OSQP_SHARED_LIB)
+
+  # Modify the soname of the library to include the algebra if desired
+  if(OSQP_LIB_SUFFIX)
+    set_target_properties(osqp PROPERTIES LIBRARY_OUTPUT_NAME "osqp_${OSQP_LIB_SUFFIX}")
+  endif()
+endif()
+
+# ----------------------------------------------
+# Application - osqp_demo
+# ----------------------------------------------
+message( STATUS "Build demo executable: " ${OSQP_BUILD_DEMO_EXE} )
+
+if(OSQP_BUILD_DEMO_EXE)
+  add_executable(osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
+  #target_include_directories(osqp_demo PRIVATE ${osqplib_includes})
+  target_link_libraries(osqp_demo osqpstatic ${osqplib_link_libs})
+
+  if(OSQP_CODEGEN)
+    add_executable(osqp_codegen_demo ${PROJECT_SOURCE_DIR}/examples/osqp_codegen_demo.c)
+    target_link_libraries(osqp_codegen_demo osqpstatic)
+  endif()
+endif()
+
+# ----------------------------------------------
+# Installation / Uninstallation
+# ----------------------------------------------
 install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
 
+if(OSQP_BUILD_STATIC_LIB)
+  install(
+    TARGETS osqpstatic
+    EXPORT osqpstatic
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
+  export(
+    EXPORT osqpstatic
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/osqpstatic-targets.cmake"
+    NAMESPACE osqp::)
 
-if (MATLAB)
-target_link_libraries (osqpstatic ${Matlab_LIBRARIES})
-endif (MATLAB)
-
-# If we are building Python/Matlab/R interface:
-#   - do not build shared library
-#   - do not build demo
-if (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
-    # Create osqp shared library
-    # NB: Add all the linear system solvers here
-    add_library (osqp SHARED ${osqp_src} ${osqp_headers} ${linsys_solvers})
-
-    # Include directories for linear system solvers
-    target_include_directories(osqp PRIVATE ${linsys_solvers_includes})
-
-    # Declare include directories for the cmake exported target
-    target_include_directories(osqp
-                               PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-                                      "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
-
-    # Install osqp shared library
-    install(TARGETS osqp
-            EXPORT  ${PROJECT_NAME}
-            LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-            ARCHIVE       DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-            RUNTIME       DESTINATION "${CMAKE_INSTALL_BINDIR}")
-
-    # Create demo executable (linked to static library)
-    add_executable (osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
-    target_link_libraries (osqp_demo osqpstatic)
-
-endif (NOT PYTHON AND NOT MATLAB AND NOT R_LANG AND NOT EMBEDDED)
-
-# Create CMake packages for the build directory
-# ----------------------------------------------
-include(CMakePackageConfigHelpers)
-
-export(EXPORT ${PROJECT_NAME}
-  FILE "${CMAKE_CURRENT_BINARY_DIR}/osqp-targets.cmake"
-  NAMESPACE osqp::)
-
-if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake)
-  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake "include(\"\${CMAKE_CURRENT_LIST_DIR}/osqp-targets.cmake\")\n")
+  install(
+    EXPORT osqpstatic
+    FILE osqpstatic-targets.cmake
+    NAMESPACE osqp::
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/osqp")
 endif()
 
+if(OSQP_BUILD_SHARED_LIB)
+  install(
+    TARGETS osqp
+    EXPORT osqp
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
-# Create CMake packages for the install directory
-# ----------------------------------------------
+  export(
+    EXPORT osqp
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/osqp-targets.cmake"
+    NAMESPACE osqp::)
 
-set(ConfigPackageLocation ${CMAKE_INSTALL_LIBDIR}/cmake/osqp)
+  install(
+    EXPORT osqp
+    FILE osqp-targets.cmake
+    NAMESPACE osqp::
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/osqp")
+endif()
 
-install(EXPORT ${PROJECT_NAME}
-        FILE osqp-targets.cmake
-        NAMESPACE osqp::
-        DESTINATION ${ConfigPackageLocation})
+if(OSQP_BUILD_STATIC_LIB OR OSQP_BUILD_SHARED_LIB)
+  # generate the config file that is includes the exports
+  configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp-config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/osqp"
+    NO_SET_AND_CHECK_MACRO
+    NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake
-        DESTINATION ${ConfigPackageLocation})
+  write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/osqp-config-version.cmake"
+    VERSION "${OSQP_VERSION}"
+    COMPATIBILITY SameMajorVersion)
 
+  install(FILES
+          "${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake"
+          "${CMAKE_CURRENT_BINARY_DIR}/osqp-config-version.cmake"
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/osqp)
+endif()
 
+if(OSQP_CODEGEN)
+  install(DIRECTORY
+          "${EMBEDDED_BUILD_ROOT_DIR}/"
+          DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/osqp/codegen_files")
+endif()
 
-# Add uninstall command
-# ----------------------------------------------
 if(NOT TARGET uninstall)
-    configure_file(
-        "${CMAKE_CURRENT_SOURCE_DIR}/configure/cmake/cmake_uninstall.cmake.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-        IMMEDIATE @ONLY)
+  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/configure/cmake/cmake_uninstall.cmake.in"
+                 "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
 
-    add_custom_target(uninstall
-        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+  add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
 
-
-
-# Add testing
 # ----------------------------------------------
-# Add custom command to generate tests
-if (UNITTESTS)
-    find_package(PythonInterp)
-    if(NOT PYTHONINTERP_FOUND)
-        message( FATAL_ERROR "You need python installed to generate unittests. If you do not want to compile the unittests pass -DUNITTESTS=OFF to cmake." )
-    endif()
+# Testing
+# ----------------------------------------------
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND OSQP_BUILD_UNITTESTS)
+  include(CTest)
 
-    INCLUDE(FindPythonModule)
-    find_python_module(numpy)
-    IF(NOT NUMPY_FOUND)
-        message( FATAL_ERROR "You need numpy python module installed to generate unittests. If you do not want to compile the unittests pass -DUNITTESTS=OFF to cmake." )
-    ENDIF()
+  message( STATUS "Building unit tests" )
 
-    find_python_module(scipy)
-    # Check scipy version for sparse.random functionalities
-    IF((NOT SCIPY_FOUND) OR (SCIPY_VERSION VERSION_LESS 0.17.0))
-        message( FATAL_ERROR "You need scipy python module installed to generate unittests. If you do not want to compile the unittests pass -DUNITTESTS=OFF to cmake." )
-    ENDIF()
+  if( OSQP_COVERAGE_CHECK )
+    message( STATUS "Enabling code coverage file generation" )
+  endif()
 
-    find_python_module(__future__)
-    IF(NOT __FUTURE___FOUND)
-        message( FATAL_ERROR "You need future python module installed to generate unittests. If you do not want to compile the unittests pass -DUNITTESTS=OFF to cmake." )
-    ENDIF()
-
-    # Add test_headers and codegen_test_headers
-    add_subdirectory(tests)
-
-    # Generating tests.stamp so that the test data are not always generated
-    # set(data_timestamp ${PROJECT_SOURCE_DIR}/tests/tests_data.stamp)
-    add_custom_command(
-        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/tests
-        COMMAND ${PYTHON_EXECUTABLE} generate_tests_data.py
-        DEPENDS ${PROJECT_SOURCE_DIR}/tests/generate_tests_data.py
-        OUTPUT ${codegen_test_headers}
-        COMMENT "Generating unittests data files using Python"
-    )
-
-    # Direct linear solver testing
-    include_directories(tests)
-    add_executable(osqp_tester
-            ${PROJECT_SOURCE_DIR}/tests/osqp_tester.cpp
-            ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
-            ${test_headers}
-            ${codegen_test_headers}
-            )
-    set_target_properties(osqp_tester
-            PROPERTIES
-                CXX_STANDARD 11
-                CXX_STANDARD_REQUIRED YES
-                CXX_EXTENSIONS NO
-            )
-    target_link_libraries (osqp_tester osqpstatic ${CMAKE_DL_LIBS})
-
-    # Add custom memory target
-    add_executable(osqp_tester_custom_memory
-            EXCLUDE_FROM_ALL
-            ${PROJECT_SOURCE_DIR}/tests/osqp_tester.cpp
-            ${PROJECT_SOURCE_DIR}/tests/osqp_tester.h
-            ${test_headers}
-            ${codegen_test_headers}
-		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.c
-		   ${PROJECT_SOURCE_DIR}/tests/custom_memory/custom_memory.h
-		)
-    target_link_libraries (osqp_tester_custom_memory osqpstatic ${CMAKE_DL_LIBS})
-
-    # Add testing
-    include(CTest)
-    enable_testing()
-    add_test(NAME tester COMMAND $<TARGET_FILE:osqp_tester>)
+  add_subdirectory(tests)
 endif()

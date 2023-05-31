@@ -2,8 +2,9 @@
 #  include <stdlib.h>
 #  include <stdio.h>
 
-//Make a global counter and track the net number of allocations
-//by user defined allocators.   Should go to zero on exit if no leaks.
+/* Make a global counter and track the net number of allocations
+   by user defined allocators.  Should go to zero on exit if no leaks.
+ */
 long int alloc_counter = 0;
 
 void* my_malloc(size_t size) {

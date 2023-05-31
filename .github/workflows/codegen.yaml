@@ -1,0 +1,67 @@
+name: Code Generation Test
+
+on:
+  push:
+    branches: [ master, develop**, ci ]
+    tags:
+      - '*'
+  pull_request:
+    branches: [ master, develop** ]
+
+jobs:
+
+  embedded_compilation:
+      runs-on: ubuntu-latest
+
+      strategy:
+        fail-fast: false
+
+      env:
+        OSQP_BUILD_DIR_PREFIX: ${{ github.workspace }}/build
+        OSQP_CODEGEN_DIR_PREFIX: ${{ github.workspace }}/../codegen
+
+      steps:
+        - uses: actions/checkout@v3
+          with:
+            lfs: false
+            submodules: recursive
+
+        - name: Prep
+          run: |
+            mkdir $OSQP_CODEGEN_DIR_PREFIX
+            mkdir $OSQP_CODEGEN_DIR_PREFIX/mat
+            mkdir $OSQP_CODEGEN_DIR_PREFIX/vec
+
+        - name: Build
+          run: |
+            cmake -G "Unix Makefiles" -S . -B $OSQP_BUILD_DIR_PREFIX -DOSQP_VERSION=0.99 -DBUILD_TESTING=OFF
+            cmake --build $OSQP_BUILD_DIR_PREFIX
+
+        # Generate the workspaces
+        - name: Generate sample workspaces
+          run: |
+            $OSQP_BUILD_DIR_PREFIX/out/osqp_codegen_demo $OSQP_CODEGEN_DIR_PREFIX/vec/ $OSQP_CODEGEN_DIR_PREFIX/mat/
+
+        # Test that embedded mode 1 works
+        - name: Embedded mode 1 (vector)
+          run: |
+            cmake -G "Unix Makefiles" \
+                  -S tests/codegen/vector \
+                  -B tests/codegen/vector/build \
+                  -DOSQP_BUILD_DIR=$OSQP_BUILD_DIR_PREFIX \
+                  -DOSQP_CODEGEN_DIR=$OSQP_CODEGEN_DIR_PREFIX/vec
+            cmake --build tests/codegen/vector/build
+            ./tests/codegen/vector/build/osqp_codegen_vector_c
+            ./tests/codegen/vector/build/osqp_codegen_vector_cpp
+
+        # Test that embedded mode 2 works
+        - name: Embedded mode 2 (matrix)
+          run: |
+            cmake -G "Unix Makefiles" \
+                  -S tests/codegen/matrix \
+                  -B tests/codegen/matrix/build \
+                  -DOSQP_BUILD_DIR=$OSQP_BUILD_DIR_PREFIX \
+                  -DOSQP_CODEGEN_DIR=$OSQP_CODEGEN_DIR_PREFIX/mat
+            cmake --build tests/codegen/matrix/build
+            ./tests/codegen/matrix/build/osqp_codegen_matrix_c
+            ./tests/codegen/matrix/build/osqp_codegen_matrix_cpp

@@ -4,7 +4,7 @@ import utils.codegen_utils as cu
 from numpy.random import Generator, PCG64
 
 # Set random seed for reproducibility
-rg = Generator(PCG64(2))
+rg = Generator(PCG64(1))
 
 # Define tests
 n = 5
@@ -19,10 +19,9 @@ test_form_KKT_P = (test_form_KKT_P @ test_form_KKT_P.T).tocsc() + sparse.eye(n, 
 test_form_KKT_Pu = sparse.triu(test_form_KKT_P, format='csc')
 test_form_KKT_rho = 1.6
 test_form_KKT_sigma = 0.1
-test_form_KKT_KKT = sparse.bmat([[test_form_KKT_P + test_form_KKT_sigma *
-                                  sparse.eye(test_form_KKT_n), test_form_KKT_A.T],
-                                 [test_form_KKT_A, -1./test_form_KKT_rho *
-                                  sparse.eye(test_form_KKT_m)]], format='csc')
+test_form_KKT_KKT = sparse.bmat([
+                      [test_form_KKT_P + test_form_KKT_sigma * sparse.eye(test_form_KKT_n), test_form_KKT_A.T],
+                      [test_form_KKT_A, -1./test_form_KKT_rho * sparse.eye(test_form_KKT_m)]], format='csc')
 test_form_KKT_KKTu = sparse.triu(test_form_KKT_KKT, format='csc')
 
 
@@ -31,12 +30,17 @@ test_form_KKT_A_new = test_form_KKT_A.copy()
 test_form_KKT_A_new.data += rg.standard_normal(test_form_KKT_A_new.nnz)
 test_form_KKT_Pu_new = test_form_KKT_Pu.copy()
 test_form_KKT_Pu_new.data += 0.1 * rg.standard_normal(test_form_KKT_Pu_new.nnz)
+
+test_form_KKT_A_new_idx = np.array(range(test_form_KKT_A_new.nnz))
+test_form_KKT_A_new_n = test_form_KKT_A_new.nnz
+test_form_KKT_Pu_new_idx = np.array(range(test_form_KKT_Pu_new.nnz))
+test_form_KKT_Pu_new_n = test_form_KKT_Pu_new.nnz
+
 test_form_KKT_P_new = test_form_KKT_Pu_new + test_form_KKT_Pu_new.T - sparse.diags(test_form_KKT_Pu_new.diagonal())
 
-test_form_KKT_KKT_new = sparse.bmat([[test_form_KKT_P_new + test_form_KKT_sigma *
-                                      sparse.eye(test_form_KKT_n), test_form_KKT_A_new.T],
-                                     [test_form_KKT_A_new, -1./test_form_KKT_rho *
-                                      sparse.eye(test_form_KKT_m)]], format='csc')
+test_form_KKT_KKT_new = sparse.bmat([
+                          [test_form_KKT_P_new + test_form_KKT_sigma * sparse.eye(test_form_KKT_n), test_form_KKT_A_new.T],
+                          [test_form_KKT_A_new, -1./test_form_KKT_rho * sparse.eye(test_form_KKT_m)]], format='csc')
 test_form_KKT_KKTu_new = sparse.triu(test_form_KKT_KKT_new, format='csc')
 
 
@@ -58,6 +62,7 @@ test_solve_Pu_new = test_form_KKT_Pu_new.copy()
 test_solve_A_new = test_form_KKT_A_new.copy()
 
 
+
 # Generate test data and solutions
 data = {'test_form_KKT_n': test_form_KKT_n,
         'test_form_KKT_m': test_form_KKT_m,
@@ -68,7 +73,11 @@ data = {'test_form_KKT_n': test_form_KKT_n,
         'test_form_KKT_KKT': test_form_KKT_KKT,
         'test_form_KKT_KKTu': test_form_KKT_KKTu,
         'test_form_KKT_A_new': test_form_KKT_A_new,
+        'test_form_KKT_A_new_idx': test_form_KKT_A_new_idx,
+        'test_form_KKT_A_new_n': test_form_KKT_A_new_n,
         'test_form_KKT_Pu_new': test_form_KKT_Pu_new,
+        'test_form_KKT_Pu_new_idx': test_form_KKT_Pu_new_idx,
+        'test_form_KKT_Pu_new_n': test_form_KKT_Pu_new_n,
         'test_form_KKT_KKT_new': test_form_KKT_KKT_new,
         'test_form_KKT_KKTu_new': test_form_KKT_KKTu_new,
         'test_solve_Pu': test_solve_Pu,
@@ -78,29 +87,27 @@ data = {'test_form_KKT_n': test_form_KKT_n,
         'test_solve_u': test_solve_u,
         'n': n,
         'm': m,
-        'test_solve_x': np.array([-4.61725223e-01, 7.97298788e-01,
-                                  5.55470173e-04,  3.37603740e-01,
-                                  -1.14060693e+00]),
+        'test_solve_x': np.array([-0.34282147, 0.0260615, 0.27197987,
+                                  -0.01202531, 0.44052732]),
         'test_solve_y': np.zeros(m),
-        'test_solve_obj_value': -1.885431747787806,
+        'test_solve_obj_value': -0.37221,
         'test_solve_status': 'optimal',
         'test_solve_Pu_new': test_solve_Pu_new,
-        'test_solve_P_new_x': np.array([-0.48845963, 0.70997599, -0.09017696,
-                                        0.33176037, -1.01867464]),
+        'test_solve_P_new_x': np.array([-0.36033252, 0.10729745, 0.22965285,
+                                         0.06323582, 0.42301398]),
         'test_solve_P_new_y': np.zeros(m),
-        'test_solve_P_new_obj_value': -1.7649689689774013,
+        'test_solve_P_new_obj_value': -0.36765,
         'test_solve_P_new_status': 'optimal',
         'test_solve_A_new': test_solve_A_new,
-        'test_solve_A_new_x': np.array([-4.61725223e-01, 7.97298788e-01,
-                                        5.55470173e-04, 3.37603740e-01,
-                                        -1.14060693e+00]),
+        'test_solve_A_new_x': np.array([-0.34282147, 0.0260615, 0.27197987,
+                                        -0.01202531, 0.44052732]),
         'test_solve_A_new_y': np.zeros(m),
-        'test_solve_A_new_obj_value': -1.8854317477878062,
+        'test_solve_A_new_obj_value': -0.37221,
         'test_solve_A_new_status': 'optimal',
-        'test_solve_P_A_new_x': np.array([-0.48845963, 0.70997599, -0.09017696,
-                                          0.33176037, -1.01867464]),
+        'test_solve_P_A_new_x': np.array([-0.36033252, 0.10729745, 0.22965285,
+                                           0.06323582, 0.42301398]),
         'test_solve_P_A_new_y': np.zeros(m),
-        'test_solve_P_A_new_obj_value': -1.764968968977401,
+        'test_solve_P_A_new_obj_value': -0.36765,
         'test_solve_P_A_new_status': 'optimal'
         }
 

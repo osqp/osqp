@@ -1,7 +1,6 @@
-get_directory_property(headers
-                        DIRECTORY ${PROJECT_SOURCE_DIR}/tests
-                        DEFINITION headers)
-                        
-set(headers ${headers}
-    ${CMAKE_CURRENT_SOURCE_DIR}/demo.h PARENT_SCOPE)
+get_directory_property(OSQP_TESTCASE_SRCS DIRECTORY ${PROJECT_SOURCE_DIR}/tests DEFINITION OSQP_TESTCASE_SRCS)
 
+set(OSQP_TESTCASE_SRCS
+    ${OSQP_TESTCASE_SRCS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_demo.cpp
+    PARENT_SCOPE)

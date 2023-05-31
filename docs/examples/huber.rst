@@ -47,8 +47,8 @@ Python
     Ad = sparse.random(m, n, density=0.5, format='csc')
     x_true = np.random.randn(n) / np.sqrt(n)
     ind95 = (np.random.rand(m) < 0.95).astype(float)
-    b = Ad.dot(x_true) + np.multiply(0.5*np.random.randn(m), ind95) \
-        + np.multiply(10.*np.random.rand(m), 1. - ind95)
+    b = Ad@x_true + 0.5*np.random.randn(m) * ind95 \
+        + 10.*np.random.rand(m) * (1. - ind95)
 
     # OSQP data
     Im = sparse.eye(m)
@@ -127,12 +127,12 @@ CVXPY
     A = sparse.random(m, n, density=0.5, format='csc')
     x_true = np.random.randn(n) / np.sqrt(n)
     ind95 = (np.random.rand(m) < 0.95).astype(float)
-    b = A.dot(x_true) + np.multiply(0.5*np.random.randn(m), ind95) \
-        + np.multiply(10.*np.random.rand(m), 1. - ind95)
+    b = A@x_true + 0.5*np.random.randn(m) * ind95 \
+        + 10.*np.random.rand(m) * (1. - ind95)
 
     # Define problem
     x = Variable(n)
-    objective = sum(huber(A*x - b))
+    objective = sum(huber(A@x - b))
 
     # Solve with OSQP
     Problem(Minimize(objective)).solve(solver=OSQP)

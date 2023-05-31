@@ -1,49 +1,48 @@
 #ifndef OSQP_CONFIGURE_H
 # define OSQP_CONFIGURE_H
 
-# ifdef __cplusplus
-extern "C" {
-# endif /* ifdef __cplusplus */
 
-/* DEBUG */
-#cmakedefine DEBUG
+/* OSQP_ENABLE_DEBUG */
+#cmakedefine OSQP_ENABLE_DEBUG
 
 /* Operating system */
 #cmakedefine IS_LINUX
 #cmakedefine IS_MAC
 #cmakedefine IS_WINDOWS
 
-/* EMBEDDED */
-#cmakedefine EMBEDDED (@EMBEDDED@)
+/* Algebra backend in use - Only one of the following is defined at compilation time */
+#cmakedefine OSQP_ALGEBRA_BUILTIN
+#cmakedefine OSQP_ALGEBRA_MKL
+#cmakedefine OSQP_ALGEBRA_CUDA
 
-/* PRINTING */
-#cmakedefine PRINTING
+/* Enable code generation */
+#cmakedefine OSQP_CODEGEN
 
-/* PROFILING */
-#cmakedefine PROFILING
+/* Enble derivative computation in the solver */
+#cmakedefine OSQP_ENABLE_DERIVATIVES
 
-/* CTRLC */
-#cmakedefine CTRLC
+/* OSQP_EMBEDDED_MODE */
+#cmakedefine OSQP_EMBEDDED_MODE (@OSQP_EMBEDDED_MODE@)
 
-/* DFLOAT */
-#cmakedefine DFLOAT
+/* Header file containing custom memory allocators */
+#cmakedefine OSQP_CUSTOM_MEMORY "@OSQP_CUSTOM_MEMORY@"
 
-/* DLONG */
-#cmakedefine DLONG
+/* OSQP_ENABLE_PRINTING */
+#cmakedefine OSQP_ENABLE_PRINTING
 
-/* ENABLE_MKL_PARDISO */
-#cmakedefine ENABLE_MKL_PARDISO
+/* Header file containing custom printing functions */
+#cmakedefine OSQP_CUSTOM_PRINTING "@OSQP_CUSTOM_PRINTING@"
 
-/* MEMORY MANAGEMENT */
-#cmakedefine OSQP_CUSTOM_MEMORY
-#ifdef OSQP_CUSTOM_MEMORY
-#include "@OSQP_CUSTOM_MEMORY@"
-#endif
+/* OSQP_ENABLE_PROFILING */
+#cmakedefine OSQP_ENABLE_PROFILING
 
+/* OSQP_ENABLE_INTERRUPT */
+#cmakedefine OSQP_ENABLE_INTERRUPT
 
+/* OSQP_USE_FLOAT */
+#cmakedefine OSQP_USE_FLOAT
 
-# ifdef __cplusplus
-}
-# endif /* ifdef __cplusplus */
+/* OSQP_USE_LONG */
+#cmakedefine OSQP_USE_LONG
 
 #endif /* ifndef OSQP_CONFIGURE_H */

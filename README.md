@@ -39,4 +39,3 @@ Please report any issues via the [Github issue tracker](https://github.com/osqp/
 
 ## Numerical benchmarks
 Numerical benchmarks against other solvers are available [here](https://github.com/osqp/osqp_benchmarks).
-

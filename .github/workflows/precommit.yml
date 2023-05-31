@@ -1,0 +1,39 @@
+name: Pre-commit checks
+
+on:
+  push:
+    branches: [ master, develop** ]
+    tags:
+      - '*'
+  pull_request:
+    branches: [ master, develop** ]
+
+jobs:
+
+  precommit:
+      runs-on: ubuntu-latest
+
+      defaults:
+        run:
+          # Required when using an activated conda environment in steps
+          # See https://github.com/conda-incubator/setup-miniconda#IMPORTANT
+          shell: bash -l {0}
+
+      steps:
+        - uses: actions/checkout@v3
+
+        - name: Set up conda
+          uses: conda-incubator/setup-miniconda@v2
+          with:
+            auto-update-conda: true
+            python-version: 3.9
+
+        - name: Install pre-commit
+          run: |
+            conda install -c conda-forge pre-commit
+            conda info
+            conda list
+
+        - name: Run pre-commit
+          run: |
+            pre-commit run --all-files

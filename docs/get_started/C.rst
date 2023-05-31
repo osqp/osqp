@@ -1,12 +1,12 @@
 .. _install_osqp_libs:
 
-CC++
-=====
+C
+=
 
 Binaries
 --------
 
-Precompiled platform-dependent shared and static libraries are available on `GitHub <https://github.com/osqp/osqp/releases>`_.
+Precompiled platform-dependent shared and static libraries are available on `GitHub <https://github.com/osqp/osqp/releases>`__.
 We here assume that the user uncompressed each archive to :code:`OSQP_FOLDER`.
 
 Each archive contains static :code:`OSQP_FOLDER/lib/libosqp.a` and shared :code:`OSQP_FOLDER/lib/libosqp.ext` libraries to be used to interface OSQP to any C/C++ software.

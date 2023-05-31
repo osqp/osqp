@@ -1,0 +1,118 @@
+name: CMake Installation
+
+on:
+  push:
+    branches: [ master, develop**, ci ]
+    tags:
+      - '*'
+  pull_request:
+    branches: [ master, develop** ]
+
+jobs:
+
+  build_and_test:
+      runs-on: ubuntu-latest
+
+      strategy:
+        fail-fast: false
+
+      env:
+        OSQP_INSTALL_PREFIX: ${{ github.workspace }}/../install
+
+      steps:
+        - uses: actions/checkout@v3
+          with:
+            lfs: false
+            submodules: recursive
+
+        - name: Prep
+          run: |
+            mkdir $OSQP_INSTALL_PREFIX
+
+        - name: Build
+          run: |
+            cmake -G "Unix Makefiles" -S . -B build -DCMAKE_INSTALL_PREFIX=$OSQP_INSTALL_PREFIX -DOSQP_VERSION=0.99 -DOSQP_BUILD_UNITTESTS=OFF
+            cmake --build build
+            cmake --install build
+
+        # Test the executables can link using the installed CMake
+        - name: OSQP Link Test
+          run: |
+            cmake -G "Unix Makefiles" -S tests/CMakeInstallTests -B tests/build -DOSQP_INSTALL_PREFIX=$OSQP_INSTALL_PREFIX
+            cmake --build tests/build
+            ./tests/build/osqp_static
+            ./tests/build/osqp_shared
+
+        # Test that the CMake version check passes
+        - name: OSQP Supported Version Test
+          run: |
+            cmake -G "Unix Makefiles" -S tests/CMakeInstallTests -B tests/build -DOSQP_INSTALL_PREFIX=$OSQP_INSTALL_PREFIX -DOSQP_DESIRED_VERSION=0.99
+
+        # Test that the CMake version check fails
+        - name: OSQP Supported Version Test
+          run: |
+            ! cmake -G "Unix Makefiles" -S tests/CMakeInstallTests -B tests/build -DOSQP_INSTALL_PREFIX=$OSQP_INSTALL_PREFIX -DOSQP_DESIRED_VERSION=1.0
+
+  build_and_test_static:
+      runs-on: ubuntu-latest
+
+      strategy:
+        fail-fast: false
+
+      env:
+        OSQP_INSTALL_PREFIX: ${{ github.workspace }}/../install
+
+      steps:
+        - uses: actions/checkout@v3
+          with:
+            lfs: false
+            submodules: recursive
+
+        - name: Prep
+          run: |
+            mkdir $OSQP_INSTALL_PREFIX
+
+        - name: Build
+          run: |
+            cmake -G "Unix Makefiles" -S . -B build -DCMAKE_INSTALL_PREFIX=$OSQP_INSTALL_PREFIX -DOSQP_VERSION=0.99 -DOSQP_BUILD_UNITTESTS=OFF -DOSQP_BUILD_SHARED_LIB=OFF -DOSQP_BUILD_STATIC_LIB=ON
+            cmake --build build
+            cmake --install build
+
+        # Test the executable can link using the installed CMake
+        - name: OSQP Link Test
+          run: |
+            cmake -G "Unix Makefiles" -S tests/CMakeInstallTests -B tests/build -DOSQP_INSTALL_PREFIX=$OSQP_INSTALL_PREFIX
+            cmake --build tests/build
+            ./tests/build/osqp_static
+
+  build_and_test_shared:
+      runs-on: ubuntu-latest
+
+      strategy:
+        fail-fast: false
+
+      env:
+        OSQP_INSTALL_PREFIX: ${{ github.workspace }}/../install
+
+      steps:
+        - uses: actions/checkout@v3
+          with:
+            lfs: false
+            submodules: recursive
+
+        - name: Prep
+          run: |
+            mkdir $OSQP_INSTALL_PREFIX
+
+        - name: Build
+          run: |
+            cmake -G "Unix Makefiles" -S . -B build -DCMAKE_INSTALL_PREFIX=$OSQP_INSTALL_PREFIX -DOSQP_VERSION=0.99 -DBUILD_TESTING=OFF -DOSQP_BUILD_SHARED_LIB=ON -DOSQP_BUILD_STATIC_LIB=OFF
+            cmake --build build
+            cmake --install build
+
+        # Test the executable can link using the installed CMake
+        - name: OSQP Link Test
+          run: |
+            cmake -G "Unix Makefiles" -S tests/CMakeInstallTests -B tests/build -DOSQP_INSTALL_PREFIX=$OSQP_INSTALL_PREFIX
+            cmake --build tests/build
+            ./tests/build/osqp_shared

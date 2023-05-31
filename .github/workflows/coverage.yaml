@@ -1,0 +1,112 @@
+name: Coverage Generation
+
+on:
+  push:
+    branches: [ master, develop**, ci ]
+    tags:
+      - '*'
+  pull_request:
+    branches: [ master, develop** ]
+
+jobs:
+
+  generate_coverage:
+      runs-on: ubuntu-latest
+
+      strategy:
+        fail-fast: false
+
+        matrix:
+          python-version: [3.9]
+          algebra: ['builtin', 'mkl']
+          float: ['OFF', 'ON']
+          long: ['OFF', 'ON']
+          exclude:
+            - algebra: 'mkl'
+              float: 'ON'
+
+      defaults:
+        run:
+          # Required when using an activated conda environment in steps
+          # See https://github.com/conda-incubator/setup-miniconda#IMPORTANT
+          shell: bash -l {0}
+
+      env:
+        OSQP_BUILD_DIR_PREFIX: ${{ github.workspace }}/build
+        CTEST_OUTPUT_ON_FAILURE: 1
+
+      steps:
+        - uses: actions/checkout@v3
+          with:
+            lfs: false
+            submodules: recursive
+
+        - name: Set up conda
+          uses: conda-incubator/setup-miniconda@v2
+          with:
+            auto-update-conda: true
+            python-version: ${{ matrix.python-version }}
+
+        # -----------------
+        # OS-specific setup
+        # -----------------
+        - name: Setup (Linux)
+          if: runner.os == 'Linux'
+          run: |
+            echo "LD_LIBRARY_PATH=$CONDA_PREFIX/lib" >> $GITHUB_ENV
+
+
+        - name: Install unit testing python dependencies
+          run: |
+            conda install numpy scipy
+            conda info
+            conda list
+
+        - name: Install MKL
+          run: |
+            conda install -c intel "mkl-devel<2022"
+            conda info
+            conda list
+
+        - name: Build
+          run: |
+            cmake -G "Unix Makefiles" \
+                  -S . -B $OSQP_BUILD_DIR_PREFIX \
+                  -DOSQP_ENABLE_PROFILING=ON \
+                  -DOSQP_ENABLE_INTERRUPT=ON \
+                  -DOSQP_ENABLE_PRINTING=ON \
+                  -DOSQP_BUILD_UNITTESTS=ON \
+                  -DOSQP_COVERAGE_CHECK=ON \
+                  -DOSQP_USE_LONG=${{ matrix.long }} \
+                  -DOSQP_USE_FLOAT=${{ matrix.float }} \
+                  -DOSQP_ALGEBRA_BACKEND=${{ matrix.algebra }}
+            cmake --build $OSQP_BUILD_DIR_PREFIX
+
+        - name: Test
+          run: |
+            cmake --build $OSQP_BUILD_DIR_PREFIX --target test
+
+        - name: Generate coverage
+          uses: imciner2/run-lcov@v1
+          with:
+            input_directory: '${{ env.OSQP_BUILD_DIR_PREFIX }}'
+            exclude: '"$GITHUB_WORKSPACE/tests/*" "$GITHUB_WORKSPACE/algebra/_common/lin_sys/qdldl/amd/*" "$GITHUB_WORKSPACE/examples/*" "$GITHUB_WORKSPACE/build/*" "/usr/include/*"'
+            output_file: '${{ env.OSQP_BUILD_DIR_PREFIX }}/coverage.info'
+
+        - name: Coveralls upload
+          uses: coverallsapp/github-action@master
+          with:
+            path-to-lcov: '${{ env.OSQP_BUILD_DIR_PREFIX }}/coverage.info'
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+            flag-name: run-${{ matrix.algebra }}-${{ matrix.float }}-${{ matrix.long }}
+            parallel: true
+
+  finalize_coverage:
+    needs: generate_coverage
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.github_token }}
+        parallel-finished: true
