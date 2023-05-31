@@ -96,7 +96,7 @@ jobs:
         run: |
           mkdir -p $OSQP_NAME/lib $OSQP_NAME/include
           cp LICENSE $OSQP_NAME/
-          cp include/*.h $OSQP_NAME/include/
+          cp include/public/*.h $OSQP_NAME/include/
           cp build/out/libosqp.* $OSQP_NAME/lib/
           cd $OSQP_NAME && tar -czvf ../$OSQP_NAME.tar.gz *
 
