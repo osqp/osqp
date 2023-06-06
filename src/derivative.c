@@ -74,6 +74,8 @@ OSQPInt adjoint_derivative_get_vec(OSQPSolver *solver,
                                         OSQPFloat*     dl,
                                         OSQPFloat*     du) {
 
+    OSQPInt i;
+
     // Check if solver has been initialized
     if (!solver || !solver->work || !solver->work->derivative_data)
       return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
@@ -88,7 +90,7 @@ OSQPInt adjoint_derivative_get_vec(OSQPSolver *solver,
     OSQPVectorf_to_raw(dq, rx);
     OSQPVectorf_to_raw(dl, derivative_data->ryl);
     OSQPVectorf_to_raw(du, derivative_data->ryu);
-    for (OSQPInt i=0; i<OSQPVectorf_length(derivative_data->ryu); i++) {
+    for (i=0; i<OSQPVectorf_length(derivative_data->ryu); i++) {
         du[i] = -du[i];
     }
 
