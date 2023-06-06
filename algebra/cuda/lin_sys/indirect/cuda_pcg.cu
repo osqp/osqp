@@ -74,7 +74,7 @@ static void mat_vec_prod(cudapcg_solver*             s,
   checkCudaErrors(cusparseSpMV(
     CUDA_handle->cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,
     &H_ONE, P->SpMatDescr, vecx, &H_ONE, vecy,
-    CUDA_FLOAT, CUSPARSE_SPMV_ALG_DEFAULT, P->SpMatBuffer));
+    CUDA_FLOAT, CUSPARSE_SPMV_ALGORITHM_DEFAULT, P->SpMatBuffer));
 
   if (m == 0) return;
 
@@ -83,14 +83,14 @@ static void mat_vec_prod(cudapcg_solver*             s,
     checkCudaErrors(cusparseSpMV(
       CUDA_handle->cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,
       &s->h_rho, A->SpMatDescr, vecx, &H_ZERO, s->vecz,
-      CUDA_FLOAT, CUSPARSE_SPMV_ALG_DEFAULT, A->SpMatBuffer));
+      CUDA_FLOAT, CUSPARSE_SPMV_ALGORITHM_DEFAULT, A->SpMatBuffer));
   }
   else {
     /* z = A * x */
     checkCudaErrors(cusparseSpMV(
       CUDA_handle->cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,
       &H_ONE, A->SpMatDescr, vecx, &H_ZERO, s->vecz,
-      CUDA_FLOAT, CUSPARSE_SPMV_ALG_DEFAULT, A->SpMatBuffer));
+      CUDA_FLOAT, CUSPARSE_SPMV_ALGORITHM_DEFAULT, A->SpMatBuffer));
 
     /* z = diag(rho_vec) * z */
     cuda_vec_ew_prod(s->d_z, s->d_z, s->d_rho_vec, m);
@@ -100,7 +100,7 @@ static void mat_vec_prod(cudapcg_solver*             s,
   checkCudaErrors(cusparseSpMV(
     CUDA_handle->cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,
     &H_ONE, At->SpMatDescr, s->vecz, &H_ONE, vecy,
-    CUDA_FLOAT, CUSPARSE_SPMV_ALG_DEFAULT, At->SpMatBuffer));
+    CUDA_FLOAT, CUSPARSE_SPMV_ALGORITHM_DEFAULT, At->SpMatBuffer));
 }
 
 
