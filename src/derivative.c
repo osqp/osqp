@@ -277,7 +277,8 @@ OSQPInt adjoint_derivative_compute(OSQPSolver *solver,
 
     OSQPMatrix* P_full = OSQPMatrix_triu_to_symm(P);
     OSQPMatrix_free(P);
-    adjoint_derivative_linsys_solver(solver, solver->settings, P_full, G, A_eq, GDiagLambda, slacks, rhs);
+    adjoint_derivative_linsys_solver(NULL /* No solver object is allocated for this solver yet */,
+                                     solver->settings, P_full, G, A_eq, GDiagLambda, slacks, rhs);
     OSQPMatrix_free(P_full);
     OSQPMatrix_free(G);
     OSQPMatrix_free(A_eq);
