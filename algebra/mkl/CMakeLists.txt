@@ -4,8 +4,13 @@ else()
   set(MKL_INTERFACE "lp64")
 endif()
 
-# Link against the single dynamic library version of the MKL library
-set(MKL_LINK "sdl")
+# Select the MKL library to link against.
+# Link against the single dynamic library version of the MKL library by default.
+set(MKL_LINK "sdl" CACHE STRING "MKL linkage")
+
+if(${MKL_LINK} STREQUAL "sdl")
+  target_compile_definitions(OSQPLIB PUBLIC MKL_LINK_SDL=1)
+endif()
 
 find_package(MKL CONFIG REQUIRED)
 

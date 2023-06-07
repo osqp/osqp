@@ -22,10 +22,14 @@ enum osqp_linsys_solver_type osqp_algebra_default_linsys(void) {
 OSQPInt osqp_algebra_init_libs(OSQPInt device) {
     OSQPInt retval = 0;
 
+/* Only select the interface when linking against the single dynamic library version
+   of MKL */
+#ifdef MKL_LINK_SDL
 #ifdef OSQP_USE_LONG
     retval = mkl_set_interface_layer(MKL_INTERFACE_ILP64);
 #else
     retval = mkl_set_interface_layer(MKL_INTERFACE_LP64);
+#endif
 #endif
 
     // Positive value is the interface chosen, so -1 is the error condition
