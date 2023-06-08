@@ -118,10 +118,28 @@ void OSQPMatrix_update_values(OSQPMatrix*      M,
 /* Matrix dimensions and data access */
 OSQPInt    OSQPMatrix_get_m(const OSQPMatrix* M)  {return M->csc->m;}
 OSQPInt    OSQPMatrix_get_n(const OSQPMatrix* M)  {return M->csc->n;}
-OSQPFloat* OSQPMatrix_get_x(const OSQPMatrix* M)  {return M->csc->x;}
-OSQPInt*   OSQPMatrix_get_i(const OSQPMatrix* M)  {return M->csc->i;}
-OSQPInt*   OSQPMatrix_get_p(const OSQPMatrix* M)  {return M->csc->p;}
 OSQPInt    OSQPMatrix_get_nz(const OSQPMatrix* M) {return M->csc->p[M->csc->n];}
+
+OSQPFloat* OSQPMatrix_get_x(const OSQPMatrix* M, OSQPInt* isCallerOwned)
+{
+    /* We return a pointer to the actual data */
+    *isCallerOwned = 0;
+    return M->csc->x;
+}
+
+OSQPInt*   OSQPMatrix_get_i(const OSQPMatrix* M, OSQPInt* isCallerOwned)
+{
+    /* We return a pointer to the actual data */
+    *isCallerOwned = 0;
+    return M->csc->i;
+}
+
+OSQPInt*   OSQPMatrix_get_p(const OSQPMatrix* M, OSQPInt* isCallerOwned)
+{
+    /* We return a pointer to the actual data */
+    *isCallerOwned = 0;
+    return M->csc->p;
+}
 
 /* math functions ----------------------------------------------------------*/
 

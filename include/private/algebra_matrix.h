@@ -63,22 +63,65 @@ void OSQPMatrix_update_values(OSQPMatrix*      M,
                               OSQPInt          M_new_n);
 
 /* returns the row dimension */
-OSQPInt    OSQPMatrix_get_m(const OSQPMatrix* M);
+OSQPInt OSQPMatrix_get_m(const OSQPMatrix* M);
 
 /* returns the columns dimension */
-OSQPInt    OSQPMatrix_get_n(const OSQPMatrix* M);
-
-/* returns a pointer to the array of data values */
-OSQPFloat* OSQPMatrix_get_x(const OSQPMatrix* M);
-
-/* returns a pointer to the array of row indices */
-OSQPInt*   OSQPMatrix_get_i(const OSQPMatrix* M);
-
-/* returns a pointer to the array of col indices (csc format).  Should be n+1 long */
-OSQPInt*   OSQPMatrix_get_p(const OSQPMatrix* M);
+OSQPInt OSQPMatrix_get_n(const OSQPMatrix* M);
 
 /* returns the number of nonzeros (length of x and i arrays) */
-OSQPInt    OSQPMatrix_get_nz(const OSQPMatrix* M);
+OSQPInt OSQPMatrix_get_nz(const OSQPMatrix* M);
+
+/*
+ * Get a pointer to the array of data values.
+ * The length of the returned vector is nz.
+ *
+ * The ownership of the pointer depends on the algebra backend.
+ * If the backend retains ownership of the data pointer, then the
+ * isCallerOwned variable will be set to 0 and the caller should
+ * not free the memory. If isCallerOwned is set to 1, then it is
+ * the caller's responsibility to free the data once finished.
+ *
+ * @param M             Matrix to extract data from
+ * @param isCallerOwned 1 if the caller owns the x pointer
+ * @return Pointer to the data values in the matrix
+ */
+OSQPFloat* OSQPMatrix_get_x(const OSQPMatrix* M,
+                                  OSQPInt*    isCallerOwned );
+
+/*
+ * Get a pointer to the array of row indices.
+ * The length of the returned vector is nz.
+ *
+ * The ownership of the pointer depends on the algebra backend.
+ * If the backend retains ownership of the data pointer, then the
+ * isCallerOwned variable will be set to 0 and the caller should
+ * not free the memory. If isCallerOwned is set to 1, then it is
+ * the caller's responsibility to free the data once finished.
+ *
+ * @param M             Matrix to extract data from
+ * @param isCallerOwned 1 if the caller owns the i pointer
+ * @return Pointer to the row indices in the matrix
+ */
+OSQPInt* OSQPMatrix_get_i(const OSQPMatrix* M,
+                                OSQPInt*    isCallerOwned );
+
+/*
+ * Get a pointer to the array of column indices.
+ * The length of the returned vector is n+1.
+ *
+ * The ownership of the pointer depends on the algebra backend.
+ * If the backend retains ownership of the data pointer, then the
+ * isCallerOwned variable will be set to 0 and the caller should
+ * not free the memory. If isCallerOwned is set to 1, then it is
+ * the caller's responsibility to free the data once finished.
+ *
+ * @param M             Matrix to extract data from
+ * @param isCallerOwned 1 if the caller owns the returned pointer
+ * @return Pointer to the column indices in the matrix.
+ */
+OSQPInt* OSQPMatrix_get_p(const OSQPMatrix* M,
+                                OSQPInt*    isCallerOwned );
+
 
 /* math functions ----------------------------------------------------------*/
 
