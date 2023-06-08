@@ -1,5 +1,5 @@
-#ifndef CODEGEN_H
-#define CODEGEN_H
+#ifndef EXPORT_CODEGEN_H
+#define EXPORT_CODEGEN_H
 
 #include "osqp_api_types.h"
 
@@ -26,4 +26,4 @@ OSQPInt codegen_example(const char* output_dir,
 }
 #endif
 
-#endif /* ifndef CODEGEN_H */
+#endif /* ifndef EXPORT_CODEGEN_H */

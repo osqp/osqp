@@ -12,7 +12,7 @@
 
 
 #ifdef OSQP_CODEGEN
-  #include "codegen.h"
+  #include "export_codegen.h"
 #endif
 
 #ifndef OSQP_EMBEDDED_MODE

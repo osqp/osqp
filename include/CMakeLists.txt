@@ -56,7 +56,8 @@ target_include_directories(OSQPLIB PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/private"
 # Add code generation functionality if enabled
 # Added last because this also processes the copying of files needed in the generated code
 if(OSQP_CODEGEN)
-  list(APPEND osqp_headers "${CMAKE_CURRENT_SOURCE_DIR}/private/codegen.h")
+  list(APPEND osqp_headers "${CMAKE_CURRENT_SOURCE_DIR}/private/export_codegen.h")
+  list(APPEND osqp_headers "${CMAKE_CURRENT_SOURCE_DIR}/private/export_c_helpers.h")
 
   foreach( f ${EMBEDDED_PUBLIC_INCS} )
     get_filename_component( fname ${f} NAME )

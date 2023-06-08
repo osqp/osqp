@@ -47,7 +47,8 @@ endif()
 # Add code generation functionality if enabled
 # Added last because this also processes the copying of files needed in the generated code
 if(OSQP_CODEGEN)
-  target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/codegen.c")
+  target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/export_codegen.c")
+  target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/export_c_helpers.c")
 
   foreach( f ${EMBEDDED_SRCS} )
     get_filename_component( fname ${f} NAME )
