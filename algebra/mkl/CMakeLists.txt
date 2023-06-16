@@ -71,3 +71,7 @@ target_include_directories(OSQPLIB PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_I
 target_compile_options(OSQPLIB PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_COMPILE_OPTIONS>)
 
 target_link_libraries(OSQPLIB MKL::MKL)
+
+configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/findAlgebraDependency.cmake.in
+                ${CMAKE_CURRENT_BINARY_DIR}/../../osqp-findAlgebraDependency.cmake
+                @ONLY )

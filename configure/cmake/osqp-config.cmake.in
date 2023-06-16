@@ -10,5 +10,10 @@ if( ${OSQP_HAVE_SHARED_LIB} )
 endif()
 
 if( ${OSQP_HAVE_STATIC_LIB} )
+    # Add the dependencies for the static library
+    if( EXISTS "${CMAKE_CURRENT_LIST_DIR}/osqp-findAlgebraDependency.cmake" )
+        include( "${CMAKE_CURRENT_LIST_DIR}/osqp-findAlgebraDependency.cmake" )
+    endif()
+
     include( "${CMAKE_CURRENT_LIST_DIR}/osqpstatic-targets.cmake" )
 endif()

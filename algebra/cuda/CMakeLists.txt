@@ -23,3 +23,7 @@ if(OSQP_CUDA_STATIC_LINKING)
 else()
   target_link_libraries(OSQPLIB cublas cusparse)
 endif()
+
+configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/findAlgebraDependency.cmake.in
+                ${CMAKE_CURRENT_BINARY_DIR}/../../osqp-findAlgebraDependency.cmake
+                @ONLY )
