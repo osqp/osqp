@@ -20,6 +20,7 @@
 #include "cuda_handler.h"
 #include "cuda_lin_alg.h"   /* --> cuda_vec_gather */
 #include "cuda_malloc.h"
+#include "cuda_wrapper.h"
 #include "helper_cuda.h"    /* --> checkCudaErrors */
 
 #include "csr_type.h"
@@ -303,7 +304,7 @@ static void init_SpMV_interface(csr *M) {
       checkCudaErrors(cusparseSpMV_bufferSize(
         CUDA_handle->cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,
         &alpha, M->SpMatDescr, vecx, &alpha, vecy,
-        CUDA_FLOAT, CUSPARSE_SPMV_ALG_DEFAULT, &M->SpMatBufferSize));
+        CUDA_FLOAT, CUSPARSE_SPMV_ALGORITHM_DEFAULT, &M->SpMatBufferSize));
 
       if (M->SpMatBufferSize)
         cuda_malloc((void **) &M->SpMatBuffer, M->SpMatBufferSize);

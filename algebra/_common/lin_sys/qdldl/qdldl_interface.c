@@ -663,7 +663,7 @@ static void _adj_assemble_csc(OSQPCscMatrix*     D,
 
 }
 
-OSQPInt adjoint_derivative_qdldl(qdldl_solver*      s,
+OSQPInt adjoint_derivative_qdldl(qdldl_solver**     s,
                                  const OSQPMatrix*  P_full,
                                  const OSQPMatrix*  G,
                                  const OSQPMatrix*  A_eq,

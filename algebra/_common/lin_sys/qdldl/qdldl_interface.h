@@ -184,7 +184,7 @@ OSQPInt update_linsys_solver_rho_vec_qdldl(qdldl_solver*      s,
  */
 void free_linsys_solver_qdldl(qdldl_solver* s);
 
-OSQPInt adjoint_derivative_qdldl(qdldl_solver*      s,
+OSQPInt adjoint_derivative_qdldl(qdldl_solver**     s,
                                  const OSQPMatrix*  P,
                                  const OSQPMatrix*  G,
                                  const OSQPMatrix*  A_eq,

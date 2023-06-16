@@ -26,6 +26,7 @@
 # define CUDA_WRAPPER_H
 
 #include <cublas_v2.h>
+#include <cusparse_v2.h>
 
 #include "osqp_api_types.h"
 
@@ -116,6 +117,18 @@ static cublasStatus_t cublasTnrm2(cublasHandle_t   handle,
   return cublasDnrm2(handle, n, x, incx, result);
 #endif
 }
+
+/*
+ * CUSparse 12.0 removed the CUSPARSE_MV_ALG_DEFAULT enumeration for the algorithm
+ * selection and replaced it with the CUSPARSE_SPMV_ALG_DEFAULT enumeration.
+ */
+#ifndef CUSPARSE_VERSION
+#error "Unable to find CUSparse version"
+#elif (CUSPARSE_VERSION >= 12000)
+#define CUSPARSE_SPMV_ALGORITHM_DEFAULT CUSPARSE_SPMV_ALG_DEFAULT
+#else
+#define CUSPARSE_SPMV_ALGORITHM_DEFAULT CUSPARSE_MV_ALG_DEFAULT
+#endif
 
 
 #endif /* ifndef CUDA_WRAPPER */

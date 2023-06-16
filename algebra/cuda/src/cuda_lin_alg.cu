@@ -992,7 +992,7 @@ void cuda_mat_Axpy(const csr*                 A,
   checkCudaErrors(cusparseSpMV(
     CUDA_handle->cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,
     &alpha, A->SpMatDescr, vecx, &beta, vecy,
-    CUDA_FLOAT, CUSPARSE_SPMV_ALG_DEFAULT, A->SpMatBuffer));
+    CUDA_FLOAT, CUSPARSE_SPMV_ALGORITHM_DEFAULT, A->SpMatBuffer));
 }
 
 void cuda_mat_row_norm_inf(const csr*       S,
