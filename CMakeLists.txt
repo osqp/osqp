@@ -535,7 +535,7 @@ endif()
 if(OSQP_BUILD_STATIC_LIB OR OSQP_BUILD_SHARED_LIB)
   # generate the config file that is includes the exports
   configure_package_config_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp-config.cmake.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/configure/cmake/osqp-config.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake"
     INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/osqp"
     NO_SET_AND_CHECK_MACRO
