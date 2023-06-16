@@ -40,22 +40,7 @@ if(NOT OSQP_VERSION STREQUAL "0.0.0")
   configure_file("${PROJECT_SOURCE_DIR}/configure/version.h.in" "${PROJECT_SOURCE_DIR}/include/private/version.h")
 endif()
 
-# Conda environment detection
-# ----------------------------------------------
-# If MKL_ROOT is not explicitly set, and we're running inside a conda environment, set MKL_ROOT to $CONDA_PREFIX to see
-# if we can find MKL (if installed through `conda install -c intel mkl-devel`) On a typical OneAPI installation outside
-# conda, this would mean specifying: -DMKL_DIR=/path/to/oneapi/mkl/latest/lib/cmake/mkl
-# -DMKL_ROOT=/path/to/oneapi/mkl/latest
-# ----------------------------------------------
-if(NOT DEFINED ENV{MKL_ROOT} AND NOT MKL_ROOT)
-  if(DEFINED ENV{CONDA_PREFIX})
-    message(STATUS "Detected Conda environment - setting MKL_ROOT to $CONDA_PREFIX")
-    set(MKL_ROOT $ENV{CONDA_PREFIX})
-    include_directories("$ENV{CONDA_PREFIX}/include")
-    link_directories("$ENV{CONDA_PREFIX}/lib")
-  endif()
-endif()
-
+# Setup the output directories
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 
@@ -66,7 +51,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${LIBRARY_OUTPUT_PATH}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${LIBRARY_OUTPUT_PATH}")
 
 # Some non-standard CMake modules
-list(APPEND CMAKE_PREFIX_PATH ${PROJECT_SOURCE_DIR}/configure/cmake)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/configure/cmake)
 include(Utils)
 
