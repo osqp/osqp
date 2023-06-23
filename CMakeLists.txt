@@ -222,6 +222,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
 # CUDA support
 # ----------------------------------------------
 if(OSQP_ALGEBRA_CUDA)
+  # Our backend uses both CUDA and C++
+  enable_language(CXX)
   enable_language(CUDA)
   find_package(CUDA)
 

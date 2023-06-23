@@ -16,4 +16,17 @@ if( ${OSQP_HAVE_STATIC_LIB} )
     endif()
 
     include( "${CMAKE_CURRENT_LIST_DIR}/osqpstatic-targets.cmake" )
+
+    # Modify the language to include CXX if CUDA is included,
+    # otherwise the linker stage will fail because CUDA uses some C++ elements.
+    get_property( interface_languages
+                  TARGET osqp::osqpstatic
+                  PROPERTY IMPORTED_LINK_INTERFACE_LANGUAGES_NOCONFIG)
+
+    foreach( LANG in ${interface_languages} )
+        if( ${LANG} STREQUAL "CUDA" )
+            set_target_properties( osqp::osqpstatic PROPERTIES
+                                   IMPORTED_LINK_INTERFACE_LANGUAGES_NOCONFIG "${interface_languages};CXX" )
+        endif()
+    endforeach()
 endif()
