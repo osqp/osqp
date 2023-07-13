@@ -801,7 +801,7 @@ OSQPInt codegen_defines(const char*         output_dir,
 OSQPInt codegen_example(const char* output_dir,
                         const char* file_prefix){
 
-  char fname[PATH_LENGTH], cfname[PATH_LENGTH];
+  char cfname[PATH_LENGTH];
   FILE *srcFile;
   time_t now;
 

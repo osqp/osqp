@@ -13,7 +13,6 @@
 
 OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
 
-  OSQPInt   n, m;                         // Dimensions
   OSQPFloat prim_res, dual_res;           // Primal and dual residuals
   OSQPFloat prim_res_norm, dual_res_norm; // Normalization for the residuals
   OSQPFloat temp_res_norm;                // Temporary residual norm
@@ -21,10 +20,6 @@ OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
 
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
-
-  // Get problem dimensions
-  n = work->data->n;
-  m = work->data->m;
 
   // Get primal and dual residuals
   prim_res = work->scaled_prim_res;

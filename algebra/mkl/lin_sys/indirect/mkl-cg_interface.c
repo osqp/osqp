@@ -88,7 +88,6 @@ OSQPInt init_linsys_mklcg(mklcg_solver**     sp,
 
   OSQPInt m = A->csc->m;
   OSQPInt n = P->csc->n;
-  MKL_INT mkln = n;
   MKL_INT status;
   mklcg_solver* s = (mklcg_solver *)c_malloc(sizeof(mklcg_solver));
   *sp = s;

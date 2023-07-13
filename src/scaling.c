@@ -59,7 +59,7 @@ OSQPInt scale_data(OSQPSolver* solver) {
   //
 
   OSQPInt   i;          // Iterations index
-  OSQPInt   n, m;       // Number of constraints and variables
+  OSQPInt   n;          // Number of variables
   OSQPFloat c_temp;     // Objective function scaling
   OSQPFloat inf_norm_q; // Infinity norm of q
 
@@ -67,7 +67,6 @@ OSQPInt scale_data(OSQPSolver* solver) {
   OSQPWorkspace* work     = solver->work;
 
   n = work->data->n;
-  m = work->data->m;
 
   // Initialize scaling to 1
   work->scaling->c = 1.0;
