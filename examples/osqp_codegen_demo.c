@@ -17,8 +17,9 @@ int main(int argc, char *argv[]) {
       break;
 
     default:
-      sprintf(vecDirPath, "");
-      sprintf(matDirPath, "");
+      /* Empty string */
+      vecDirPath[0] = '\0';
+      matDirPath[0] = '\0';
   }
 
   printf("OSQP code generation demo program.\n\n");

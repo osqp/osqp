@@ -411,7 +411,7 @@ static OSQPInt write_linsys(FILE*               f,
     fprintf(f, "  %slinsys_rho_inv_vec,\n", prefix);
   }
   else {
-    fprintf(f, "  OSQP_NULL,\n", prefix);
+    fprintf(f, "  OSQP_NULL,\n");
   }
 
   fprintf(f, "  (OSQPFloat)%.20f,\n", linsys->sigma);
@@ -546,10 +546,10 @@ static OSQPInt write_workspace(FILE*             f,
       fprintf(f, "  &%swork_constr_type,\n", prefix);
     }
   } else {
-    fprintf(f, "  OSQP_NULL,\n", prefix);    /* work_rho_vec */
-    fprintf(f, "  OSQP_NULL,\n", prefix);    /* work_rho_inv_vec */
+    fprintf(f, "  OSQP_NULL,\n");    /* work_rho_vec */
+    fprintf(f, "  OSQP_NULL,\n");    /* work_rho_inv_vec */
     if (embedded > 1) {
-      fprintf(f, "  OSQP_NULL,\n", prefix);  /* work_constr_type */
+      fprintf(f, "  OSQP_NULL,\n");  /* work_constr_type */
     }
   }
 
