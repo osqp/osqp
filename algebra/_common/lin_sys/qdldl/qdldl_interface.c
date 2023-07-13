@@ -669,7 +669,7 @@ OSQPInt adjoint_derivative_qdldl(qdldl_solver**     s,
                                  const OSQPMatrix*  A_eq,
                                  const OSQPMatrix*  GDiagLambda,
                                  const OSQPVectorf* slacks,
-                                 const OSQPVectorf* rhs) {
+                                       OSQPVectorf* rhs) {
 
     OSQPInt n = OSQPMatrix_get_m(P_full);
     OSQPInt n_ineq = OSQPMatrix_get_m(G);
