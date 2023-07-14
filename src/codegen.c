@@ -633,8 +633,7 @@ static OSQPInt write_solver(FILE*             f,
 * Codegen API
 **************/
 
-OSQPInt codegen_inc(OSQPSolver* solver,
-                    const char* output_dir,
+OSQPInt codegen_inc(const char* output_dir,
                     const char* file_prefix) {
 
   char fname[FILE_LENGTH], hfname[PATH_LENGTH], incGuard[FILE_LENGTH+2];
@@ -691,9 +690,9 @@ OSQPInt codegen_inc(OSQPSolver* solver,
 }
 
 
-OSQPInt codegen_src(OSQPSolver* solver,
-                    const char* output_dir,
+OSQPInt codegen_src(const char* output_dir,
                     const char* file_prefix,
+                    OSQPSolver* solver,
                     OSQPInt     embedded) {
 
   OSQPInt exitflag = OSQP_NO_ERROR;

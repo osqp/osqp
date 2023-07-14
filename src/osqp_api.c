@@ -1265,8 +1265,8 @@ OSQPInt osqp_codegen(OSQPSolver*         solver,
     return osqp_error(OSQP_CODEGEN_DEFINES_ERROR);
   }
 
-  exitflag = codegen_inc(solver, output_dir, file_prefix);
-  if (!exitflag) exitflag = codegen_src(solver, output_dir, file_prefix, defines->embedded_mode);
+  exitflag = codegen_inc(output_dir, file_prefix);
+  if (!exitflag) exitflag = codegen_src(output_dir, file_prefix, solver, defines->embedded_mode);
   if (!exitflag) exitflag = codegen_example(output_dir, file_prefix);
   if (!exitflag) exitflag = codegen_defines(output_dir, defines);
 #else
