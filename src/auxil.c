@@ -1015,7 +1015,7 @@ OSQPInt validate_settings(const OSQPSettings* settings,
     return 1;
   }
 
-  if (settings->cg_tol_fraction <= 0.0 &&
+  if (settings->cg_tol_fraction <= 0.0 ||
       settings->cg_tol_fraction >= 1.0) {
     c_eprint("cg_tol_fraction must be strictly between 0 and 1");
     return 1;
