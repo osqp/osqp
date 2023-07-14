@@ -11,6 +11,7 @@ int main(int argc, char *argv[]) {
     case 3:
       sprintf(matDirPath, "%s", argv[2]);
       /* Fall through to set the vector path */
+      /* FALLTHROUGH */
 
     case 2:
       sprintf(vecDirPath, "%s", argv[1]) ;
