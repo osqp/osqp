@@ -336,8 +336,15 @@ OSQPInt update_matrices_linsys_mklcg(mklcg_solver*     s,
                                      const OSQPMatrix* A,
                                      const OSQPInt*    Ax_new_idx,
                                      OSQPInt           A_new_n) {
-  s->P = *(OSQPMatrix**)(&P);
-  s->A = *(OSQPMatrix**)(&A);
+  /* The MKL solver holds pointers to the matrices A and P, so it already has
+     access to the updated matrices at this point. The only task remaining is to
+     recompute the preconditioner */
+  OSQP_UnusedVar(P);
+  OSQP_UnusedVar(Px_new_idx);
+  OSQP_UnusedVar(P_new_n);
+  OSQP_UnusedVar(A);
+  OSQP_UnusedVar(Ax_new_idx);
+  OSQP_UnusedVar(A_new_n);
 
   // Update the preconditioner (matrix-only update)
   cg_update_precond(s);
