@@ -5,6 +5,12 @@
 # include "osqp.h"
 # include "types.h"
 
+/**********************
+ * Helper macros     *
+ *********************/
+/* Identify unused variables */
+#define OSQP_UnusedVar(x)  (void)(x)
+
 
 /**********************
 * Utility Functions  *
