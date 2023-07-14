@@ -2,6 +2,7 @@
 #include "algebra_vector.h"
 #include "reduced_kkt.h"
 #include "mkl-cg_interface.h"
+#include "util.h"
 #include <mkl_rci.h>
 
 OSQPFloat cg_compute_tolerance(OSQPInt    admm_iter,
@@ -322,6 +323,8 @@ void update_settings_linsys_solver_mklcg(struct mklcg_solver_* s,
 void warm_start_linys_mklcg(struct mklcg_solver_* self,
                             const OSQPVectorf*    x) {
   // TODO: Warm starting!
+  OSQP_UnusedVar(self);
+  OSQP_UnusedVar(x);
   return;
 }
 

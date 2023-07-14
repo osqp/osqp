@@ -1,6 +1,7 @@
 #include "pardiso_interface.h"
 #include "algebra_impl.h"
 #include "printing.h"
+#include "util.h"
 
 #if OSQP_EMBEDDED_MODE != 1
 #include "kkt.h"
@@ -17,12 +18,16 @@
 
 void update_settings_linsys_solver_pardiso(pardiso_solver*     s,
                                            const OSQPSettings* settings) {
+  OSQP_UnusedVar(s);
+  OSQP_UnusedVar(settings);
   return;
 }
 
-// Warm starting not used by direct solvers
 void warm_start_linsys_solver_pardiso(pardiso_solver*    s,
                                       const OSQPVectorf* x) {
+  // Warm starting not used by direct solvers
+  OSQP_UnusedVar(s);
+  OSQP_UnusedVar(x);
   return;
 }
 
@@ -231,6 +236,8 @@ OSQPInt init_linsys_solver_pardiso(pardiso_solver**    sp,
 }
 
 const char* name_pardiso(pardiso_solver* s) {
+  OSQP_UnusedVar(s);
+
   return "Pardiso";
 }
 
@@ -238,6 +245,8 @@ const char* name_pardiso(pardiso_solver* s) {
 OSQPInt solve_linsys_pardiso(pardiso_solver* s,
                              OSQPVectorf*    b,
                              OSQPInt         admm_iter) {
+  // Direct solver doesn't care about the ADMM iteration
+  OSQP_UnusedVar(admm_iter);
 
   OSQPInt    j;
   OSQPInt    n  = s->n;
