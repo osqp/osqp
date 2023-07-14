@@ -1,6 +1,7 @@
 #include "osqp_api_constants.h"
 #include "osqp_api_types.h"
 #include "qdldl_interface.h"
+#include "util.h"
 
 OSQPInt osqp_algebra_linsys_supported(void) {
   /* Only has QDLDL (direct solver) */
@@ -12,11 +13,17 @@ enum osqp_linsys_solver_type osqp_algebra_default_linsys(void) {
   return OSQP_DIRECT_SOLVER;
 }
 
-OSQPInt osqp_algebra_init_libs(OSQPInt device) {return 0;}
+OSQPInt osqp_algebra_init_libs(OSQPInt device)
+{
+  OSQP_UnusedVar(device);
+  return 0;
+}
 
 void osqp_algebra_free_libs(void) {return;}
 
 OSQPInt osqp_algebra_name(char* name, OSQPInt nameLen) {
+  OSQP_UnusedVar(nameLen);
+
   // Manually assign into the buffer to avoid using strcpy
   name[0] = 'B';
   name[1] = 'u';
@@ -32,6 +39,8 @@ OSQPInt osqp_algebra_name(char* name, OSQPInt nameLen) {
 }
 
 OSQPInt osqp_algebra_device_name(char* name, OSQPInt nameLen) {
+  OSQP_UnusedVar(nameLen);
+
   /* No device name for built-in algebra */
   name[0] = 0;
   return 0;
@@ -50,6 +59,10 @@ OSQPInt osqp_algebra_init_linsys_solver(LinSysSolver**      s,
                                         OSQPFloat*          scaled_dual_res,
                                         OSQPInt             polishing) {
 
+  // Don't use the scaled residuals right now
+  OSQP_UnusedVar(scaled_prim_res);
+  OSQP_UnusedVar(scaled_dual_res);
+
   switch (settings->linsys_solver) {
   default:
   case OSQP_DIRECT_SOLVER:
@@ -66,7 +79,9 @@ OSQPInt adjoint_derivative_linsys_solver(LinSysSolver**      s,
                                          OSQPVectorf*        slacks,
                                          OSQPVectorf*        rhs) {
 
-return adjoint_derivative_qdldl((qdldl_solver **)s, P, G, A_eq, GDiagLambda, slacks, rhs);
+  OSQP_UnusedVar(settings);
+
+  return adjoint_derivative_qdldl((qdldl_solver **)s, P, G, A_eq, GDiagLambda, slacks, rhs);
 }
 
 #endif

@@ -4,6 +4,7 @@
 
 #include "qdldl.h"
 #include "qdldl_interface.h"
+#include "util.h"
 
 #ifndef OSQP_EMBEDDED_MODE
 #include "amd.h"
@@ -19,13 +20,18 @@
 
 void update_settings_linsys_solver_qdldl(qdldl_solver*       s,
                                          const OSQPSettings* settings) {
-  return;
+    /* No settings to update */
+    OSQP_UnusedVar(s);
+    OSQP_UnusedVar(settings);
+    return;
 }
 
-// Warm starting not used by direct solvers
 void warm_start_linsys_solver_qdldl(qdldl_solver*      s,
                                     const OSQPVectorf* x) {
-  return;
+    /* Warm starting not used by direct solvers */
+    OSQP_UnusedVar(s);
+    OSQP_UnusedVar(x);
+    return;
 }
 
 #ifndef OSQP_EMBEDDED_MODE
@@ -372,7 +378,9 @@ OSQPInt init_linsys_solver_qdldl(qdldl_solver**      sp,
 #endif  // OSQP_EMBEDDED_MODE
 
 const char* name_qdldl(qdldl_solver* s) {
-  return "QDLDL v" STRINGIZE(QDLDL_VERSION_MAJOR) "." STRINGIZE(QDLDL_VERSION_MINOR) "." STRINGIZE(QDLDL_VERSION_PATCH);
+    OSQP_UnusedVar(s);
+
+    return "QDLDL v" STRINGIZE(QDLDL_VERSION_MAJOR) "." STRINGIZE(QDLDL_VERSION_MINOR) "." STRINGIZE(QDLDL_VERSION_PATCH);
 }
 
 
@@ -405,6 +413,9 @@ OSQPInt solve_linsys_qdldl(qdldl_solver* s,
   OSQPInt    n = s->n;
   OSQPInt    m = s->m;
   OSQPFloat* bv = b->values;
+
+  // Direct solver doesn't care about the ADMM iteration
+  OSQP_UnusedVar(admm_iter);
 
 #ifndef OSQP_EMBEDDED_MODE
   if (s->polishing) {
@@ -670,6 +681,8 @@ OSQPInt adjoint_derivative_qdldl(qdldl_solver**     s,
                                  const OSQPMatrix*  GDiagLambda,
                                  const OSQPVectorf* slacks,
                                        OSQPVectorf* rhs) {
+    /* We don't currently reuse the solver for the adjoint computations */
+    OSQP_UnusedVar(s);
 
     OSQPInt n = OSQPMatrix_get_m(P_full);
     OSQPInt n_ineq = OSQPMatrix_get_m(G);
