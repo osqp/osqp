@@ -4,6 +4,7 @@
 
 #include "pardiso_interface.h"
 #include "mkl-cg_interface.h"
+#include "util.h"
 
 #include <mkl.h>
 
@@ -21,6 +22,8 @@ enum osqp_linsys_solver_type osqp_algebra_default_linsys(void) {
 
 OSQPInt osqp_algebra_init_libs(OSQPInt device) {
     OSQPInt retval = 0;
+
+    OSQP_UnusedVar(device);
 
 /* Only select the interface when linking against the single dynamic library version
    of MKL */

@@ -1265,11 +1265,15 @@ OSQPInt osqp_codegen(OSQPSolver*         solver,
     return osqp_error(OSQP_CODEGEN_DEFINES_ERROR);
   }
 
-  exitflag = codegen_inc(solver, output_dir, file_prefix);
-  if (!exitflag) exitflag = codegen_src(solver, output_dir, file_prefix, defines->embedded_mode);
+  exitflag = codegen_inc(output_dir, file_prefix);
+  if (!exitflag) exitflag = codegen_src(output_dir, file_prefix, solver, defines->embedded_mode);
   if (!exitflag) exitflag = codegen_example(output_dir, file_prefix);
   if (!exitflag) exitflag = codegen_defines(output_dir, defines);
 #else
+  OSQP_UnusedVar(solver);
+  OSQP_UnusedVar(output_dir);
+  OSQP_UnusedVar(file_prefix);
+  OSQP_UnusedVar(defines);
   exitflag = OSQP_FUNC_NOT_IMPLEMENTED;
 #endif /* ifdef OSQP_CODEGEN */
 
@@ -1310,6 +1314,10 @@ OSQPInt osqp_adjoint_derivative_compute(OSQPSolver* solver,
 #ifdef OSQP_ENABLE_DERIVATIVES
   status = adjoint_derivative_compute(solver, dx, dy_l, dy_u);
 #else
+  OSQP_UnusedVar(solver);
+  OSQP_UnusedVar(dx);
+  OSQP_UnusedVar(dy_l);
+  OSQP_UnusedVar(dy_u);
   status = OSQP_FUNC_NOT_IMPLEMENTED;
 #endif
 
@@ -1324,6 +1332,9 @@ OSQPInt osqp_adjoint_derivative_get_mat(OSQPSolver*    solver,
 #ifdef OSQP_ENABLE_DERIVATIVES
   status = adjoint_derivative_get_mat(solver, dP, dA);
 #else
+  OSQP_UnusedVar(solver);
+  OSQP_UnusedVar(dP);
+  OSQP_UnusedVar(dA);
   status = OSQP_FUNC_NOT_IMPLEMENTED;
 #endif
 
@@ -1339,6 +1350,10 @@ OSQPInt osqp_adjoint_derivative_get_vec(OSQPSolver* solver,
 #ifdef OSQP_ENABLE_DERIVATIVES
   status = adjoint_derivative_get_vec(solver, dq, dl, du);
 #else
+  OSQP_UnusedVar(solver);
+  OSQP_UnusedVar(dq);
+  OSQP_UnusedVar(dl);
+  OSQP_UnusedVar(du);
   status = OSQP_FUNC_NOT_IMPLEMENTED;
 #endif
 

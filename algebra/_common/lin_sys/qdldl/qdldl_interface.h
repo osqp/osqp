@@ -35,7 +35,13 @@ struct qdldl {
                        const  OSQPVectorf* x);
 
 #ifndef OSQP_EMBEDDED_MODE
-    OSQPInt (*adjoint_derivative)(struct qdldl* self);
+    OSQPInt (*adjoint_derivative)(qdldl_solver**     s,
+                                  const OSQPMatrix*  P,
+                                  const OSQPMatrix*  G,
+                                  const OSQPMatrix*  A_eq,
+                                  const OSQPMatrix*  GDiagLambda,
+                                  const OSQPVectorf* slacks,
+                                        OSQPVectorf* rhs);
 
     void (*free)(struct qdldl* self); ///< Free workspace (only if desktop)
 #endif
@@ -190,7 +196,7 @@ OSQPInt adjoint_derivative_qdldl(qdldl_solver**     s,
                                  const OSQPMatrix*  A_eq,
                                  const OSQPMatrix*  GDiagLambda,
                                  const OSQPVectorf* slacks,
-                                 const OSQPVectorf* rhs);
+                                       OSQPVectorf* rhs);
 
 #endif
 

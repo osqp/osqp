@@ -5,6 +5,7 @@
 #include "error.h"
 #include "osqp_api_constants.h"
 #include "types.h"
+#include "printing.h"
 #include "algebra_impl.h"
 #include "qdldl_interface.h"
 
@@ -37,7 +38,7 @@ static OSQPInt write_vecf(FILE*            f,
   OSQPInt i;
 
   if (n && vecf) {
-    fprintf(f, "OSQPFloat %s[%d] = {\n", name, n);
+    fprintf(f, "OSQPFloat %s[%" OSQP_INT_FMT "] = {\n", name, n);
     for (i = 0; i < n; i++) {
       fprintf(f, "  (OSQPFloat)%.20f,\n", vecf[i]);
     }
@@ -58,9 +59,9 @@ static OSQPInt write_veci(FILE*          f,
   OSQPInt i;
 
   if (n && veci) {
-    fprintf(f, "OSQPInt %s[%d] = {\n", name, n);
+    fprintf(f, "OSQPInt %s[%" OSQP_INT_FMT "] = {\n", name, n);
     for (i = 0; i < n; i++) {
-      fprintf(f, "  %i,\n", veci[i]);
+      fprintf(f, "  %" OSQP_INT_FMT ",\n", veci[i]);
     }
     fprintf(f, "};\n");
   }
@@ -82,7 +83,7 @@ static OSQPInt write_OSQPVectorf(FILE*              f,
 
   sprintf(vecf_name, "%s_val", name);
   PROPAGATE_ERROR(write_vecf(f, vec->values, vec->length, vecf_name))
-  fprintf(f, "OSQPVectorf %s = {\n  %s,\n  %d\n};\n", name, vecf_name, vec->length);
+  fprintf(f, "OSQPVectorf %s = {\n  %s,\n  %" OSQP_INT_FMT "\n};\n", name, vecf_name, vec->length);
 
   return exitflag;
 }
@@ -92,13 +93,13 @@ static OSQPInt write_OSQPVectori(FILE*              f,
                                  const char*        name) {
   
   OSQPInt exitflag = OSQP_NO_ERROR;
-  char veci_name[MAX_VAR_LENGTH];
+  char veci_name[MAX_VAR_LENGTH+4];
 
   if (!vec) return OSQP_DATA_NOT_INITIALIZED;
 
   sprintf(veci_name, "%s_val", name);
   PROPAGATE_ERROR(write_veci(f, vec->values, vec->length, veci_name))
-  fprintf(f, "OSQPVectori %s = {\n  %s,\n  %d\n};\n", name, veci_name, vec->length);
+  fprintf(f, "OSQPVectori %s = {\n  %s,\n  %" OSQP_INT_FMT "\n};\n", name, veci_name, vec->length);
 
   return exitflag;
 }
@@ -124,13 +125,13 @@ static OSQPInt write_csc(FILE*                f,
   sprintf(vec_name, "%s_x", name);
   PROPAGATE_ERROR(write_vecf(f, M->x, M->nzmax, vec_name))
   fprintf(f, "OSQPCscMatrix %s = {\n", name);
-  fprintf(f, "  %d,\n", M->m);
-  fprintf(f, "  %d,\n", M->n);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", M->m);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", M->n);
   fprintf(f, "  %s_p,\n", name);
   fprintf(f, "  %s_i,\n", name);
   fprintf(f, "  %s_x,\n", name);
-  fprintf(f, "  %d,\n", M->nzmax);
-  fprintf(f, "  %d,\n", M->nz);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", M->nzmax);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", M->nz);
   fprintf(f, "};\n");
 
   return exitflag;
@@ -141,7 +142,7 @@ static OSQPInt write_OSQPMatrix(FILE*             f,
                                 const char*       name) {
 
   OSQPInt exitflag = OSQP_NO_ERROR;
-  char csc_name[MAX_VAR_LENGTH];
+  char csc_name[MAX_VAR_LENGTH+4];
 
   if (!mat) return OSQP_DATA_NOT_INITIALIZED;
 
@@ -171,31 +172,31 @@ static OSQPInt write_settings(FILE*               f,
   fprintf(f, "  0,\n"); // device
   fprintf(f, "  OSQP_DIRECT_SOLVER,\n");
   fprintf(f, "  0,\n"); // verbose
-  fprintf(f, "  %d,\n", settings->warm_starting);
-  fprintf(f, "  %d,\n", settings->scaling);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->warm_starting);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->scaling);
   fprintf(f, "  0,\n"); // polishing
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->rho);
-  fprintf(f, "  %d,\n", settings->rho_is_vec);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->rho_is_vec);
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->sigma);
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->alpha);
-  fprintf(f, "  %d,\n", settings->cg_max_iter);
-  fprintf(f, "  %d,\n", settings->cg_tol_reduction);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->cg_max_iter);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->cg_tol_reduction);
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->cg_tol_fraction);
-  fprintf(f, "  %d,\n", settings->cg_precond);
-  fprintf(f, "  %d,\n", settings->adaptive_rho);
-  fprintf(f, "  %d,\n", settings->adaptive_rho_interval);
+  fprintf(f, "  %u,\n", settings->cg_precond);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->adaptive_rho);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->adaptive_rho_interval);
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->adaptive_rho_fraction);
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->adaptive_rho_tolerance);
-  fprintf(f, "  %d,\n", settings->max_iter);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->max_iter);
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->eps_abs);
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->eps_rel);
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->eps_prim_inf);
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->eps_dual_inf);
-  fprintf(f, "  %d,\n", settings->scaled_termination);
-  fprintf(f, "  %d,\n", settings->check_termination);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->scaled_termination);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->check_termination);
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->time_limit);
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->delta);
-  fprintf(f, "  %d,\n", settings->polish_refine_iter);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->polish_refine_iter);
   fprintf(f, "};\n\n");
 
   return OSQP_NO_ERROR;
@@ -246,12 +247,12 @@ static OSQPInt write_solution(FILE*       f,
   /* No need to actually test anything here */
 
   fprintf(f, "/* Define the solution structure */\n");
-  fprintf(f, "OSQPFloat %ssol_x[%d];\n", prefix, n);
-  if (m > 0) fprintf(f, "OSQPFloat %ssol_y[%d];\n", prefix, m);
+  fprintf(f, "OSQPFloat %ssol_x[%" OSQP_INT_FMT "];\n", prefix, n);
+  if (m > 0) fprintf(f, "OSQPFloat %ssol_y[%" OSQP_INT_FMT "];\n", prefix, m);
   else       fprintf(f, "#define %ssol_y (OSQP_NULL)\n", prefix);
-  if (m > 0) fprintf(f, "OSQPFloat %ssol_prim_inf_cert[%d];\n", prefix, m);
+  if (m > 0) fprintf(f, "OSQPFloat %ssol_prim_inf_cert[%" OSQP_INT_FMT "];\n", prefix, m);
   else       fprintf(f, "#define %ssol_prim_inf_cert (OSQP_NULL)\n", prefix);
-  fprintf(f, "OSQPFloat %ssol_dual_inf_cert[%d];\n", prefix, n);
+  fprintf(f, "OSQPFloat %ssol_dual_inf_cert[%" OSQP_INT_FMT "];\n", prefix, n);
   fprintf(f, "OSQPSolution %ssol = {\n", prefix);
   fprintf(f, "  %ssol_x,\n", prefix);
   fprintf(f, "  %ssol_y,\n", prefix);
@@ -323,8 +324,8 @@ static OSQPInt write_data(FILE*           f,
   sprintf(name, "%sdata_u", prefix);
   GENERATE_ERROR(write_OSQPVectorf(f, data->u, name))
   fprintf(f, "OSQPData %sdata = {\n", prefix);
-  fprintf(f, "  %d,\n", data->n);
-  fprintf(f, "  %d,\n", data->m);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", data->n);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", data->m);
   fprintf(f, "  &%sdata_P,\n", prefix);
   fprintf(f, "  &%sdata_A,\n", prefix);
   fprintf(f, "  &%sdata_q,\n", prefix);
@@ -361,8 +362,8 @@ static OSQPInt write_linsys(FILE*               f,
   GENERATE_ERROR(write_vecf(f, linsys->Dinv, n+m, name))
   sprintf(name, "%slinsys_P", prefix);
   GENERATE_ERROR(write_veci(f, linsys->P, n+m, name))
-  fprintf(f, "OSQPFloat %slinsys_bp[%d];\n",  prefix, n+m);
-  fprintf(f, "OSQPFloat %slinsys_sol[%d];\n", prefix, n+m);
+  fprintf(f, "OSQPFloat %slinsys_bp[%" OSQP_INT_FMT "];\n",  prefix, n+m);
+  fprintf(f, "OSQPFloat %slinsys_sol[%" OSQP_INT_FMT "];\n", prefix, n+m);
 
   if (linsys->rho_inv_vec) {
     sprintf(name, "%slinsys_rho_inv_vec", prefix);
@@ -384,9 +385,9 @@ static OSQPInt write_linsys(FILE*               f,
     GENERATE_ERROR(write_veci(f, linsys->etree, n+m, name))
     sprintf(name, "%slinsys_Lnz", prefix);
     GENERATE_ERROR(write_veci(f, linsys->Lnz, n+m, name))
-    fprintf(f, "QDLDL_int   %slinsys_iwork[%d];\n", prefix, 3*(n+m));
-    fprintf(f, "QDLDL_bool  %slinsys_bwork[%d];\n", prefix, n+m);
-    fprintf(f, "QDLDL_float %slinsys_fwork[%d];\n", prefix, n+m);
+    fprintf(f, "QDLDL_int   %slinsys_iwork[%" OSQP_INT_FMT "];\n", prefix, 3*(n+m));
+    fprintf(f, "QDLDL_bool  %slinsys_bwork[%" OSQP_INT_FMT "];\n", prefix, n+m);
+    fprintf(f, "QDLDL_float %slinsys_fwork[%" OSQP_INT_FMT "];\n", prefix, n+m);
   }
 
   fprintf(f, "qdldl_solver %slinsys = {\n", prefix);
@@ -399,7 +400,7 @@ static OSQPInt write_linsys(FILE*               f,
     fprintf(f, "  &update_linsys_solver_matrices_qdldl,\n");
     fprintf(f, "  &update_linsys_solver_rho_vec_qdldl,\n");
   }
-  fprintf(f, "  %d,\n", linsys->nthreads);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", linsys->nthreads);
   fprintf(f, "  &%slinsys_L,\n", prefix);
   fprintf(f, "  %slinsys_Dinv,\n", prefix);
   fprintf(f, "  %slinsys_P,\n", prefix);
@@ -410,13 +411,13 @@ static OSQPInt write_linsys(FILE*               f,
     fprintf(f, "  %slinsys_rho_inv_vec,\n", prefix);
   }
   else {
-    fprintf(f, "  OSQP_NULL,\n", prefix);
+    fprintf(f, "  OSQP_NULL,\n");
   }
 
   fprintf(f, "  (OSQPFloat)%.20f,\n", linsys->sigma);
   fprintf(f, "  (OSQPFloat)%.20f,\n", linsys->rho_inv);
-  fprintf(f, "  %d,\n", n);
-  fprintf(f, "  %d,\n", m);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", n);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", m);
   if (embedded > 1) {
     fprintf(f, "  &%slinsys_KKT,\n", prefix);
     fprintf(f, "  %slinsys_PtoKKT,\n", prefix);
@@ -475,54 +476,54 @@ static OSQPInt write_workspace(FILE*             f,
   sprintf(name, "%swork_z", prefix);
   GENERATE_ERROR(write_OSQPVectorf(f, work->z, name))
 
-  fprintf(f, "OSQPFloat   %swork_xz_tilde_val[%d];\n", prefix, n+m);
-  fprintf(f, "OSQPVectorf %swork_xz_tilde = {\n  %swork_xz_tilde_val,\n  %d\n};\n", prefix, prefix, n+m);
-  fprintf(f, "OSQPVectorf %swork_xtilde_view = {\n  %swork_xz_tilde_val,\n  %d\n};\n", prefix, prefix, n);
-  fprintf(f, "OSQPVectorf %swork_ztilde_view = {\n  %swork_xz_tilde_val+%d,\n  %d\n};\n", prefix, prefix, n, m);
-  fprintf(f, "OSQPFloat   %swork_x_prev_val[%d];\n", prefix, n);
-  fprintf(f, "OSQPVectorf %swork_x_prev = {\n  %swork_x_prev_val,\n  %d\n};\n", prefix, prefix, n);
+  fprintf(f, "OSQPFloat   %swork_xz_tilde_val[%" OSQP_INT_FMT "];\n", prefix, n+m);
+  fprintf(f, "OSQPVectorf %swork_xz_tilde = {\n  %swork_xz_tilde_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, n+m);
+  fprintf(f, "OSQPVectorf %swork_xtilde_view = {\n  %swork_xz_tilde_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, n);
+  fprintf(f, "OSQPVectorf %swork_ztilde_view = {\n  %swork_xz_tilde_val+%" OSQP_INT_FMT ",\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, n, m);
+  fprintf(f, "OSQPFloat   %swork_x_prev_val[%" OSQP_INT_FMT "];\n", prefix, n);
+  fprintf(f, "OSQPVectorf %swork_x_prev = {\n  %swork_x_prev_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, n);
   if (m > 0) {
-    fprintf(f, "OSQPFloat   %swork_z_prev_val[%d];\n", prefix, m);
-    fprintf(f, "OSQPVectorf %swork_z_prev = {\n  %swork_z_prev_val,\n  %d\n};\n", prefix, prefix, m);
-    fprintf(f, "OSQPFloat   %swork_Ax_val[%d];\n", prefix, m);
-    fprintf(f, "OSQPVectorf %swork_Ax = {\n  %swork_Ax_val,\n  %d\n};\n", prefix, prefix, m);
+    fprintf(f, "OSQPFloat   %swork_z_prev_val[%" OSQP_INT_FMT "];\n", prefix, m);
+    fprintf(f, "OSQPVectorf %swork_z_prev = {\n  %swork_z_prev_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, m);
+    fprintf(f, "OSQPFloat   %swork_Ax_val[%" OSQP_INT_FMT "];\n", prefix, m);
+    fprintf(f, "OSQPVectorf %swork_Ax = {\n  %swork_Ax_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, m);
   }
   else {
     fprintf(f, "OSQPVectorf %swork_z_prev = { OSQP_NULL, 0 };\n", prefix);
     fprintf(f, "OSQPVectorf %swork_Ax = { OSQP_NULL, 0 };\n", prefix);
   }
-  fprintf(f, "OSQPFloat   %swork_Px_val[%d];\n", prefix, n);
-  fprintf(f, "OSQPVectorf %swork_Px = {\n  %swork_Px_val,\n  %d\n};\n", prefix, prefix, n);
-  fprintf(f, "OSQPFloat   %swork_Aty_val[%d];\n", prefix, n);
-  fprintf(f, "OSQPVectorf %swork_Aty = {\n  %swork_Aty_val,\n  %d\n};\n", prefix, prefix, n);
+  fprintf(f, "OSQPFloat   %swork_Px_val[%" OSQP_INT_FMT "];\n", prefix, n);
+  fprintf(f, "OSQPVectorf %swork_Px = {\n  %swork_Px_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, n);
+  fprintf(f, "OSQPFloat   %swork_Aty_val[%" OSQP_INT_FMT "];\n", prefix, n);
+  fprintf(f, "OSQPVectorf %swork_Aty = {\n  %swork_Aty_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, n);
   if (m > 0) {
-    fprintf(f, "OSQPFloat   %swork_delta_y_val[%d];\n", prefix, m);
-    fprintf(f, "OSQPVectorf %swork_delta_y = {\n  %swork_delta_y_val,\n  %d\n};\n", prefix, prefix, m);
+    fprintf(f, "OSQPFloat   %swork_delta_y_val[%" OSQP_INT_FMT "];\n", prefix, m);
+    fprintf(f, "OSQPVectorf %swork_delta_y = {\n  %swork_delta_y_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, m);
   }
   else {
     fprintf(f, "OSQPVectorf %swork_delta_y = { OSQP_NULL, 0 };\n", prefix);
   }
-  fprintf(f, "OSQPFloat   %swork_Atdelta_y_val[%d];\n", prefix, n);
-  fprintf(f, "OSQPVectorf %swork_Atdelta_y = {\n  %swork_Atdelta_y_val,\n  %d\n};\n", prefix, prefix, n);
-  fprintf(f, "OSQPFloat   %swork_delta_x_val[%d];\n", prefix, n);
-  fprintf(f, "OSQPVectorf %swork_delta_x = {\n  %swork_delta_x_val,\n  %d\n};\n", prefix, prefix, n);
-  fprintf(f, "OSQPFloat   %swork_Pdelta_x_val[%d];\n", prefix, n);
-  fprintf(f, "OSQPVectorf %swork_Pdelta_x = {\n  %swork_Pdelta_x_val,\n  %d\n};\n", prefix, prefix, n);
+  fprintf(f, "OSQPFloat   %swork_Atdelta_y_val[%" OSQP_INT_FMT "];\n", prefix, n);
+  fprintf(f, "OSQPVectorf %swork_Atdelta_y = {\n  %swork_Atdelta_y_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, n);
+  fprintf(f, "OSQPFloat   %swork_delta_x_val[%" OSQP_INT_FMT "];\n", prefix, n);
+  fprintf(f, "OSQPVectorf %swork_delta_x = {\n  %swork_delta_x_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, n);
+  fprintf(f, "OSQPFloat   %swork_Pdelta_x_val[%" OSQP_INT_FMT "];\n", prefix, n);
+  fprintf(f, "OSQPVectorf %swork_Pdelta_x = {\n  %swork_Pdelta_x_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, n);
   if (m > 0) {
-    fprintf(f, "OSQPFloat   %swork_Adelta_x_val[%d];\n", prefix, m);
-    fprintf(f, "OSQPVectorf %swork_Adelta_x = {\n  %swork_Adelta_x_val,\n  %d\n};\n", prefix, prefix, m);
+    fprintf(f, "OSQPFloat   %swork_Adelta_x_val[%" OSQP_INT_FMT "];\n", prefix, m);
+    fprintf(f, "OSQPVectorf %swork_Adelta_x = {\n  %swork_Adelta_x_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, m);
   }
   else {
     fprintf(f, "OSQPVectorf %swork_Adelta_x = { OSQP_NULL, 0 };\n", prefix);
   }
   if (embedded > 1) {
-    fprintf(f, "OSQPFloat   %swork_D_temp_val[%d];\n", prefix, n);
-    fprintf(f, "OSQPVectorf %swork_D_temp = {\n  %swork_D_temp_val,\n  %d\n};\n", prefix, prefix, n);
-    fprintf(f, "OSQPFloat   %swork_D_temp_A_val[%d];\n", prefix, n);
-    fprintf(f, "OSQPVectorf %swork_D_temp_A = {\n  %swork_D_temp_A_val,\n  %d\n};\n", prefix, prefix, n);
+    fprintf(f, "OSQPFloat   %swork_D_temp_val[%" OSQP_INT_FMT "];\n", prefix, n);
+    fprintf(f, "OSQPVectorf %swork_D_temp = {\n  %swork_D_temp_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, n);
+    fprintf(f, "OSQPFloat   %swork_D_temp_A_val[%" OSQP_INT_FMT "];\n", prefix, n);
+    fprintf(f, "OSQPVectorf %swork_D_temp_A = {\n  %swork_D_temp_A_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, n);
     if (m > 0) {
-      fprintf(f, "OSQPFloat   %swork_E_temp_val[%d];\n", prefix, m);
-      fprintf(f, "OSQPVectorf %swork_E_temp = {\n  %swork_E_temp_val,\n  %d\n};\n", prefix, prefix, m);
+      fprintf(f, "OSQPFloat   %swork_E_temp_val[%" OSQP_INT_FMT "];\n", prefix, m);
+      fprintf(f, "OSQPVectorf %swork_E_temp = {\n  %swork_E_temp_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, m);
     }
     else {
       fprintf(f, "OSQPVectorf %swork_E_temp = { OSQP_NULL, 0 };\n", prefix);
@@ -545,10 +546,10 @@ static OSQPInt write_workspace(FILE*             f,
       fprintf(f, "  &%swork_constr_type,\n", prefix);
     }
   } else {
-    fprintf(f, "  OSQP_NULL,\n", prefix);    /* work_rho_vec */
-    fprintf(f, "  OSQP_NULL,\n", prefix);    /* work_rho_inv_vec */
+    fprintf(f, "  OSQP_NULL,\n");    /* work_rho_vec */
+    fprintf(f, "  OSQP_NULL,\n");    /* work_rho_inv_vec */
     if (embedded > 1) {
-      fprintf(f, "  OSQP_NULL,\n", prefix);  /* work_constr_type */
+      fprintf(f, "  OSQP_NULL,\n");  /* work_constr_type */
     }
   }
 
@@ -632,11 +633,10 @@ static OSQPInt write_solver(FILE*             f,
 * Codegen API
 **************/
 
-OSQPInt codegen_inc(OSQPSolver* solver,
-                    const char* output_dir,
+OSQPInt codegen_inc(const char* output_dir,
                     const char* file_prefix) {
 
-  char fname[FILE_LENGTH], hfname[PATH_LENGTH], incGuard[FILE_LENGTH];
+  char fname[FILE_LENGTH], hfname[PATH_LENGTH], incGuard[FILE_LENGTH+2];
   FILE *incFile;
   time_t now;
   OSQPInt i = 0;
@@ -690,13 +690,13 @@ OSQPInt codegen_inc(OSQPSolver* solver,
 }
 
 
-OSQPInt codegen_src(OSQPSolver* solver,
-                    const char* output_dir,
+OSQPInt codegen_src(const char* output_dir,
                     const char* file_prefix,
+                    OSQPSolver* solver,
                     OSQPInt     embedded) {
 
   OSQPInt exitflag = OSQP_NO_ERROR;
-  char fname[PATH_LENGTH], cfname[PATH_LENGTH];
+  char fname[PATH_LENGTH], cfname[PATH_LENGTH+2];
   FILE *srcFile;
   time_t now;
 
@@ -760,7 +760,7 @@ OSQPInt codegen_defines(const char*         output_dir,
   fprintf(incFile, "#define OSQP_ALGEBRA_BUILTIN\n");
 
   /* Write out the embedded mode in use */
-  fprintf(incFile, "#define OSQP_EMBEDDED_MODE %d\n\n", defines->embedded_mode);
+  fprintf(incFile, "#define OSQP_EMBEDDED_MODE %" OSQP_INT_FMT "\n\n", defines->embedded_mode);
 
   /* Write out if derivatives are enabled */
   if (defines->printing_enable == 1) {
@@ -800,7 +800,7 @@ OSQPInt codegen_defines(const char*         output_dir,
 OSQPInt codegen_example(const char* output_dir,
                         const char* file_prefix){
 
-  char fname[PATH_LENGTH], cfname[PATH_LENGTH];
+  char cfname[PATH_LENGTH];
   FILE *srcFile;
   time_t now;
 

@@ -2,6 +2,7 @@
 #include "algebra_vector.h"
 #include "reduced_kkt.h"
 #include "mkl-cg_interface.h"
+#include "util.h"
 #include <mkl_rci.h>
 
 OSQPFloat cg_compute_tolerance(OSQPInt    admm_iter,
@@ -88,7 +89,6 @@ OSQPInt init_linsys_mklcg(mklcg_solver**     sp,
 
   OSQPInt m = A->csc->m;
   OSQPInt n = P->csc->n;
-  MKL_INT mkln = n;
   MKL_INT status;
   mklcg_solver* s = (mklcg_solver *)c_malloc(sizeof(mklcg_solver));
   *sp = s;
@@ -323,6 +323,8 @@ void update_settings_linsys_solver_mklcg(struct mklcg_solver_* s,
 void warm_start_linys_mklcg(struct mklcg_solver_* self,
                             const OSQPVectorf*    x) {
   // TODO: Warm starting!
+  OSQP_UnusedVar(self);
+  OSQP_UnusedVar(x);
   return;
 }
 
@@ -334,8 +336,15 @@ OSQPInt update_matrices_linsys_mklcg(mklcg_solver*     s,
                                      const OSQPMatrix* A,
                                      const OSQPInt*    Ax_new_idx,
                                      OSQPInt           A_new_n) {
-  s->P = *(OSQPMatrix**)(&P);
-  s->A = *(OSQPMatrix**)(&A);
+  /* The MKL solver holds pointers to the matrices A and P, so it already has
+     access to the updated matrices at this point. The only task remaining is to
+     recompute the preconditioner */
+  OSQP_UnusedVar(P);
+  OSQP_UnusedVar(Px_new_idx);
+  OSQP_UnusedVar(P_new_n);
+  OSQP_UnusedVar(A);
+  OSQP_UnusedVar(Ax_new_idx);
+  OSQP_UnusedVar(A_new_n);
 
   // Update the preconditioner (matrix-only update)
   cg_update_precond(s);

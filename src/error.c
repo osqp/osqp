@@ -39,7 +39,7 @@ OSQPInt _osqp_error_line(enum osqp_error_type error_code,
 
   /* Don't print anything if there was no error */
   if (error_code != OSQP_NO_ERROR)
-    c_print("ERROR in %s (%s:%d): %s\n", function_name, filename, line_number, OSQP_ERROR_MESSAGE[error_code-1]);
+    c_print("ERROR in %s (%s:%" OSQP_INT_FMT "): %s\n", function_name, filename, line_number, OSQP_ERROR_MESSAGE[error_code-1]);
 
   return (OSQPInt)error_code;
 }

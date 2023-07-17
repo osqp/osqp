@@ -9,6 +9,13 @@
 extern "C" {
 #endif
 
+/* Format specifier to use for the OSQP integers */
+# ifdef OSQP_USE_LONG            /* Long integers */
+#define OSQP_INT_FMT "lld"
+# else                           /* Standard integers */
+#define OSQP_INT_FMT "d"
+# endif
+
 /* Error printing function */
 /* Always define this, and let implementations undefine if they want to change it */
 # if __STDC_VERSION__ >= 199901L
