@@ -11,6 +11,11 @@ FetchContent_Declare(
   SOURCE_DIR ${OSQP_ALGEBRA_ROOT}/_common/lin_sys/qdldl/qdldl_sources)
 FetchContent_GetProperties(qdldl)
 
+if(QDLDL_EXTERNAL)
+  set(FETCHCONTENT_SOURCE_DIR_QDLDL ${QDLDL_ROOT})
+  set(FETCHCONTENT_UPDATES_DISCONNECTED_QDLDL ${QDLDL_ROOT})
+endif()
+
 if(NOT qdldl_POPULATED)
   FetchContent_Populate(qdldl)
 
@@ -59,5 +64,5 @@ set( LIN_SYS_QDLDL_INC_PATHS
      ${OSQP_ALGEBRA_ROOT}/_common/
      ${OSQP_ALGEBRA_ROOT}/_common/lin_sys/qdldl/
      ${OSQP_ALGEBRA_ROOT}/_common/lin_sys/qdldl/amd/include
-     ${OSQP_ALGEBRA_ROOT}/_common/lin_sys/qdldl/qdldl_sources/include
+     ${qdldl_SOURCE_DIR}/include
      )

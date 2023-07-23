@@ -218,6 +218,14 @@ endif()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/include/public/osqp_configure.h NEWLINE_STYLE LF)
 
+option(QDLDL_EXTERNAL "Enable external QDLDL source" OFF)
+
+if(QDLDL_EXTERNAL)
+  set(QDLDL_ROOT
+      "${CMAKE_CURRENT_SOURCE_DIR}/algebra/_common/lin_sys/qdldl/qdldl_sources"
+      CACHE PATH "Path to external QDLDL source")
+  message(STATUS "Using external QDLDL at ${QDLDL_ROOT}")
+endif()
 
 # CUDA support
 # ----------------------------------------------
