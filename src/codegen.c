@@ -763,7 +763,7 @@ OSQPInt codegen_defines(const char*         output_dir,
   fprintf(incFile, "#define OSQP_EMBEDDED_MODE %" OSQP_INT_FMT "\n\n", defines->embedded_mode);
 
   /* Write out if derivatives are enabled */
-  if (defines->printing_enable == 1) {
+  if (defines->derivatives_enable == 1) {
     fprintf(incFile, "#define OSQP_ENABLE_DERIVATIVES\n\n");
   }
 
