@@ -721,8 +721,14 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 
 #ifndef OSQP_EMBEDDED_MODE
   // Polish the obtained solution
-  if (solver->settings->polishing && (solver->info->status_val == OSQP_SOLVED))
-    polish(solver);
+  if (solver->settings->polishing && (solver->info->status_val == OSQP_SOLVED)) {
+    exitflag = polish(solver);
+
+    if (exitflag > 0) {
+      c_eprint("Failed polishing");
+      goto exit;
+    }
+  }
 #endif /* ifndef OSQP_EMBEDDED_MODE */
 
 #ifdef OSQP_ENABLE_PROFILING
