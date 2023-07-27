@@ -40,22 +40,7 @@ if(NOT OSQP_VERSION STREQUAL "0.0.0")
   configure_file("${PROJECT_SOURCE_DIR}/configure/version.h.in" "${PROJECT_SOURCE_DIR}/include/private/version.h")
 endif()
 
-# Conda environment detection
-# ----------------------------------------------
-# If MKL_ROOT is not explicitly set, and we're running inside a conda environment, set MKL_ROOT to $CONDA_PREFIX to see
-# if we can find MKL (if installed through `conda install -c intel mkl-devel`) On a typical OneAPI installation outside
-# conda, this would mean specifying: -DMKL_DIR=/path/to/oneapi/mkl/latest/lib/cmake/mkl
-# -DMKL_ROOT=/path/to/oneapi/mkl/latest
-# ----------------------------------------------
-if(NOT DEFINED ENV{MKL_ROOT} AND NOT MKL_ROOT)
-  if(DEFINED ENV{CONDA_PREFIX})
-    message(STATUS "Detected Conda environment - setting MKL_ROOT to $CONDA_PREFIX")
-    set(MKL_ROOT $ENV{CONDA_PREFIX})
-    include_directories("$ENV{CONDA_PREFIX}/include")
-    link_directories("$ENV{CONDA_PREFIX}/lib")
-  endif()
-endif()
-
+# Setup the output directories
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/out)
 
@@ -66,7 +51,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${LIBRARY_OUTPUT_PATH}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${LIBRARY_OUTPUT_PATH}")
 
 # Some non-standard CMake modules
-list(APPEND CMAKE_PREFIX_PATH ${PROJECT_SOURCE_DIR}/configure/cmake)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/configure/cmake)
 include(Utils)
 
@@ -238,6 +222,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
 # CUDA support
 # ----------------------------------------------
 if(OSQP_ALGEBRA_CUDA)
+  # Our backend uses both CUDA and C++
+  enable_language(CXX)
   enable_language(CUDA)
   find_package(CUDA)
 
@@ -423,6 +409,8 @@ if( OSQP_BUILD_STATIC_LIB )
     set_target_properties(osqpstatic PROPERTIES OUTPUT_NAME "osqpstatic")
   endif()
 
+  # Link against the libraries for the algebras
+  target_link_libraries(osqpstatic PUBLIC ${osqplib_link_libs})
 
   if(OSQP_ALGEBRA_BUILTIN)
     # Transitive dependency on OBJECT library does not work. See https://gitlab.kitware.com/cmake/cmake/-/issues/18682
@@ -431,7 +419,7 @@ if( OSQP_BUILD_STATIC_LIB )
   target_include_directories(osqpstatic PRIVATE ${osqplib_includes})
   target_include_directories(
     osqpstatic PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/public;${CMAKE_CURRENT_BINARY_DIR}/include/public>"
-                      "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
+                      "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
   if(MATLAB)
     target_link_libraries(osqpstatic ${Matlab_LIBRARIES})
@@ -452,11 +440,11 @@ if(OSQP_BUILD_SHARED_LIB)
     target_sources(osqp PRIVATE $<TARGET_OBJECTS:qdldlobject>)
   endif()
   target_include_directories(osqp PRIVATE ${osqplib_includes})
-  target_include_directories(osqp PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-                                         "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
+  target_include_directories(osqp PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/public;${CMAKE_CURRENT_BINARY_DIR}/include/public>"
+                                         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
 
   # Link against the libraries for the algebras
-  target_link_libraries(osqp ${osqplib_link_libs})
+  target_link_libraries(osqp PRIVATE ${osqplib_link_libs})
 
   # Declare that we are building the shared library to get proper symbol exports.
   # Shared library consumers should also define OSQP_SHARED_LIB to get the library
@@ -490,8 +478,14 @@ endif()
 # ----------------------------------------------
 # Installation / Uninstallation
 # ----------------------------------------------
-install(FILES ${osqp_headers} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
 
+# Install the OSQP Headers
+install(FILES ${osqp_headers}
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/osqp")
+
+############################################################
+# Generate and install build system library config files
+############################################################
 if(OSQP_BUILD_STATIC_LIB)
   install(
     TARGETS osqpstatic
@@ -533,9 +527,9 @@ if(OSQP_BUILD_SHARED_LIB)
 endif()
 
 if(OSQP_BUILD_STATIC_LIB OR OSQP_BUILD_SHARED_LIB)
-  # generate the config file that is includes the exports
+  # Generate CMake config file that includes the exports
   configure_package_config_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp-config.cmake.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/configure/cmake/osqp-config.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake"
     INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/osqp"
     NO_SET_AND_CHECK_MACRO
@@ -550,6 +544,13 @@ if(OSQP_BUILD_STATIC_LIB OR OSQP_BUILD_SHARED_LIB)
           "${CMAKE_CURRENT_BINARY_DIR}/osqp-config.cmake"
           "${CMAKE_CURRENT_BINARY_DIR}/osqp-config-version.cmake"
           DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/osqp)
+
+  # Only install the dependency locating file if it exists (not all algebras have dependencies)
+  if( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/osqp-findAlgebraDependency.cmake" )
+    install(FILES
+            "${CMAKE_CURRENT_BINARY_DIR}/osqp-findAlgebraDependency.cmake"
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/osqp)
+  endif()
 endif()
 
 if(OSQP_CODEGEN)

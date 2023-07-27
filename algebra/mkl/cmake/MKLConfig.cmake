@@ -584,7 +584,7 @@ foreach(lib ${MKL_LIBRARIES})
     file(GLOB MKL_DLL_FILE "${MKL_ROOT}/redist/${MKL_ARCH}/${MKL_DLL_GLOB}"
         "${MKL_ROOT}/../redist/${MKL_ARCH}/${MKL_DLL_GLOB}"
         "${MKL_ROOT}/../redist/${MKL_ARCH}/mkl/${MKL_DLL_GLOB}"
-        "$ENV{CONDA_PREFIX}/Library/bin/${MKL_DLL_GLOB}")
+        "${MKL_ROOT}/bin/${MKL_DLL_GLOB}")
     if(${MKL_DLL_FILE})
       set_target_properties(MKL::${lib} PROPERTIES IMPORTED_LOCATION "${MKL_DLL_FILE}")
     else()
