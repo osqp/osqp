@@ -167,7 +167,11 @@ OSQPCscMatrix* csc_submatrix_byrows(const OSQPCscMatrix* A,
 
   // Form R = A(rows,:), where nrows = sum(rows != 0)
   R = csc_spalloc(Rm, An, nzR, 1, 0);
-  if (!R) return OSQP_NULL;
+  if (!R) {
+    // Free work index and return on error
+    c_free(rridx);
+    return OSQP_NULL;
+  }
 
   // no active constraints
   if (Rm == 0) {
