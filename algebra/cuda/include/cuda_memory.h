@@ -29,5 +29,12 @@ void cuda_free(void** devPtr);
 
 void cuda_free_host(void** devPtr);
 
+/**
+ * Test if a pointer points to a region of memory on the device.
+ *
+ * @return true if the pointer is to memory on the device, false otherwise
+ */
+bool cuda_isdeviceptr(const void* ptr);
+
 
 #endif /* ifndef CUDA_MEMORY_H */

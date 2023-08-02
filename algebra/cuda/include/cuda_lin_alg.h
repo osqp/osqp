@@ -33,36 +33,67 @@ void cuda_vec_create(cusparseDnVecDescr_t* vec,
 void cuda_vec_destroy(cusparseDnVecDescr_t vec);
 
 /*
+ * Copy a vector of OSQPFloats of length n from
+ * device pointer d_x to device pointer d_y.
+ *
+ * e.g.
  * d_y[i] = d_x[i] for i in [0,n-1]
-*/
+ */
 void cuda_vec_copy_d2d(OSQPFloat*       d_y,
                        const OSQPFloat* d_x,
                        OSQPInt          n);
 
 /*
+ * Copy a vector of OSQPFloats of length n from
+ * host pointer h_x to device pointer d_y.
+ *
+ * e.g.
  * d_y[i] = h_x[i] for i in [0,n-1]
-*/
+ */
 void cuda_vec_copy_h2d(OSQPFloat*       d_y,
                        const OSQPFloat* h_x,
                        OSQPInt          n);
 
 /*
+ * Copy a vector of OSQPFloats of length n from
+ * device pointer d_x to host pointer h_y.
+ *
+ * e.g.
  * h_y[i] = d_x[i] for i in [0,n-1]
-*/
+ */
 void cuda_vec_copy_d2h(OSQPFloat*       h_y,
                        const OSQPFloat* d_x,
                        OSQPInt          n);
 
 /*
+ * Copy a vector of OSQPInts of length n from
+ * device pointer d_x to device pointer d_y.
+ *
+ * e.g.
+ * d_y[i] = d_x[i] for i in [0,n-1] (integers)
+ */
+void cuda_vec_int_copy_d2d(OSQPInt*       d_y,
+                           const OSQPInt* d_x,
+                           OSQPInt        n);
+
+/*
+ * Copy a vector of OSQPInts of length n from
+ * host pointer h_x to device pointer d_y.
+ *
+ * e.g.
  * d_y[i] = h_x[i] for i in [0,n-1] (integers)
-*/
+ */
 void cuda_vec_int_copy_h2d(OSQPInt*       d_y,
                            const OSQPInt* h_x,
                            OSQPInt        n);
 
 /*
+ * Copy a vector of OSQPInts of length n from
+ * device pointer d_x to host pointer h_y.
+ *
+ * e.g.
  * h_y[i] = d_x[i] for i in [0,n-1] (integers)
-*/
+ */
 void cuda_vec_int_copy_d2h(OSQPInt*       h_y,
                            const OSQPInt* d_x,
                            OSQPInt        n);

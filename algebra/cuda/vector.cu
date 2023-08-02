@@ -195,25 +195,45 @@ void OSQPVectorf_copy(OSQPVectorf*       b,
 void OSQPVectorf_from_raw(OSQPVectorf*     b,
                           const OSQPFloat* av) {
 
-  if (av) cuda_vec_copy_h2d(b->d_val, av, b->length);
+  if (b && av) {
+    if (cuda_isdeviceptr(av))
+      cuda_vec_copy_d2d(b->d_val, av, b->length);
+    else
+      cuda_vec_copy_h2d(b->d_val, av, b->length);
+  }
 }
 
 void OSQPVectori_from_raw(OSQPVectori*   b,
                           const OSQPInt* av) {
 
-  cuda_vec_int_copy_h2d(b->d_val, av, b->length);
+  if (b && av) {
+    if (cuda_isdeviceptr(av))
+      cuda_vec_int_copy_d2d(b->d_val, av, b->length);
+    else
+      cuda_vec_int_copy_h2d(b->d_val, av, b->length);
+  }
 }
 
 void OSQPVectorf_to_raw(OSQPFloat*         bv,
                         const OSQPVectorf* a) {
 
-  cuda_vec_copy_d2h(bv, a->d_val, a->length);
+  if (bv && a) {
+    if (cuda_isdeviceptr(bv))
+      cuda_vec_copy_d2d(bv, a->d_val, a->length);
+    else
+      cuda_vec_copy_d2h(bv, a->d_val, a->length);
+  }
 }
 
 void OSQPVectori_to_raw(OSQPInt*           bv,
                         const OSQPVectori* a) {
 
-  cuda_vec_int_copy_d2h(bv, a->d_val, a->length);
+  if (bv && a) {
+    if (cuda_isdeviceptr(bv))
+      cuda_vec_int_copy_d2d(bv, a->d_val, a->length);
+    else
+      cuda_vec_int_copy_d2h(bv, a->d_val, a->length);
+  }
 }
 
 void OSQPVectorf_set_scalar(OSQPVectorf* a,

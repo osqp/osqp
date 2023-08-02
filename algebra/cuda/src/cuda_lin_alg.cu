@@ -526,6 +526,13 @@ void cuda_vec_copy_d2h(OSQPFloat*       h_y,
   checkCudaErrors(cudaMemcpy(h_y, d_x, n * sizeof(OSQPFloat), cudaMemcpyDeviceToHost));
 }
 
+void cuda_vec_int_copy_d2d(OSQPInt*       d_y,
+                           const OSQPInt* d_x,
+                           OSQPInt        n) {
+
+  checkCudaErrors(cudaMemcpy(d_y, d_x, n * sizeof(OSQPInt), cudaMemcpyDeviceToDevice));
+}
+
 void cuda_vec_int_copy_h2d(OSQPInt*       d_y,
                            const OSQPInt* h_x,
                            OSQPInt        n) {
