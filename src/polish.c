@@ -1,5 +1,6 @@
 #include "polish.h"
 #include "lin_alg.h"
+#include "osqp_api_constants.h"
 #include "printing.h"
 #include "util.h"
 #include "auxil.h"
@@ -13,18 +14,18 @@
  * Active constraints are guessed from the primal and dual solution returned by
  * the ADMM.
  * @param  work Workspace
- * @return      Number of rows in Ared, negative if error
+ * @return      Exitflag
  */
 static OSQPInt form_Ared(OSQPWorkspace* work){
 
   OSQPInt j, n_active;
   OSQPInt m = work->data->m;
 
-  OSQPInt* active_flags;
-  OSQPFloat* z;
-  OSQPFloat* y;
-  OSQPFloat* u;
-  OSQPFloat* l;
+  OSQPInt* active_flags = OSQP_NULL;
+  OSQPFloat* z = OSQP_NULL;
+  OSQPFloat* y = OSQP_NULL;
+  OSQPFloat* u = OSQP_NULL;
+  OSQPFloat* l = OSQP_NULL;
 
   // Allocate raw arrays
   active_flags = (OSQPInt *) c_malloc(m * sizeof(OSQPInt));
@@ -32,6 +33,17 @@ static OSQPInt form_Ared(OSQPWorkspace* work){
   y = (OSQPFloat *) c_malloc(m * sizeof(OSQPFloat));
   l = (OSQPFloat *) c_malloc(m * sizeof(OSQPFloat));
   u = (OSQPFloat *) c_malloc(m * sizeof(OSQPFloat));
+
+  /* Handle memory allocation errors */
+  if (!active_flags || !z || !y || !l || !u) {
+    c_free(active_flags);
+    c_free(z);
+    c_free(y);
+    c_free(l);
+    c_free(u);
+
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  }
 
   // Copy data to raw arrays
   OSQPVectori_to_raw(active_flags, work->pol->active_flags);
@@ -82,28 +94,30 @@ static OSQPInt form_Ared(OSQPWorkspace* work){
   c_free(l);
   c_free(u);
 
-  // Return number of rows in Ared
-  return n_active;
+  if (!work->pol->Ared)
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);;
+
+  return OSQP_NO_ERROR;
 }
 
 /**
  * Form reduced right-hand side rhs_red = vstack[-q, l_low, u_upp]
  * @param  work Workspace
  * @param  rhs  right-hand-side
- * @return      reduced rhs
+ * @return      Exitflag
  */
-static void form_rhs_red(OSQPWorkspace* work, OSQPVectorf* rhs) {
+static OSQPInt form_rhs_red(OSQPWorkspace* work, OSQPVectorf* rhs) {
 
   OSQPInt j, counter;
   OSQPInt n = work->data->n;
   OSQPInt m = work->data->m;
   OSQPInt n_plus_mred = OSQPVectorf_length(rhs);
 
-  OSQPInt *active_flags;
-  OSQPFloat* rhsv;
-  OSQPFloat* q;
-  OSQPFloat* l;
-  OSQPFloat* u;
+  OSQPInt *active_flags = OSQP_NULL;
+  OSQPFloat* rhsv = OSQP_NULL;
+  OSQPFloat* q = OSQP_NULL;
+  OSQPFloat* l = OSQP_NULL;
+  OSQPFloat* u = OSQP_NULL;
 
   // Allocate raw arrays
   active_flags = (OSQPInt *)   c_malloc(m           * sizeof(OSQPInt));
@@ -111,6 +125,16 @@ static void form_rhs_red(OSQPWorkspace* work, OSQPVectorf* rhs) {
   q            = (OSQPFloat *) c_malloc(n           * sizeof(OSQPFloat));
   l            = (OSQPFloat *) c_malloc(m           * sizeof(OSQPFloat));
   u            = (OSQPFloat *) c_malloc(m           * sizeof(OSQPFloat));
+
+  if (!active_flags || !rhsv || !q || !l || !u) {
+    c_free(active_flags);
+    c_free(rhsv);
+    c_free(q);
+    c_free(l);
+    c_free(u);
+
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);;
+  }
 
   // Copy data to raw arrays
   OSQPVectori_to_raw(active_flags, work->pol->active_flags);
@@ -145,6 +169,8 @@ static void form_rhs_red(OSQPWorkspace* work, OSQPVectorf* rhs) {
   c_free(q);
   c_free(l);
   c_free(u);
+
+  return OSQP_NO_ERROR;
 }
 
 /**
@@ -221,20 +247,31 @@ static OSQPInt iterative_refinement(OSQPSolver*   solver,
  * Compute dual variable y from yred
  * @param work Workspace
  * @param yred Dual variables associated to active constraints
+ * @return Exitflag
  */
-static void get_ypol_from_yred(OSQPWorkspace* work, OSQPVectorf* yred_vf) {
+static OSQPInt get_ypol_from_yred(OSQPWorkspace* work, OSQPVectorf* yred_vf) {
 
   OSQPInt j, counter;
   OSQPInt m = work->data->m;
   OSQPInt mred = OSQPVectorf_length(yred_vf);
 
-  OSQPInt *active_flags;
-  OSQPFloat *y, *yred;
+  OSQPInt *active_flags = OSQP_NULL;
+  OSQPFloat* y = OSQP_NULL;
+  OSQPFloat* yred = OSQP_NULL;
 
   // Allocate raw arrays
   active_flags = (OSQPInt *)   c_malloc(m    * sizeof(OSQPInt));
   y            = (OSQPFloat *) c_malloc(m    * sizeof(OSQPFloat));
   yred         = (OSQPFloat *) c_malloc(mred * sizeof(OSQPFloat));
+
+  if (!active_flags || !y || !yred) {
+    // Memory clean-up
+    c_free(active_flags);
+    c_free(y);
+    c_free(yred);
+
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);;
+  }
 
   // Copy data to raw arrays
   OSQPVectori_to_raw(active_flags, work->pol->active_flags);
@@ -249,7 +286,8 @@ static void get_ypol_from_yred(OSQPWorkspace* work, OSQPVectorf* yred_vf) {
     c_free(active_flags);
     c_free(y);
     c_free(yred);
-    return;
+
+    return OSQP_NO_ERROR;
   }
 
   counter = 0;
@@ -272,17 +310,20 @@ static void get_ypol_from_yred(OSQPWorkspace* work, OSQPVectorf* yred_vf) {
   c_free(active_flags);
   c_free(y);
   c_free(yred);
+
+  return OSQP_NO_ERROR;
 }
 
 OSQPInt polish(OSQPSolver* solver) {
 
-  OSQPInt mred, polish_successful, exitflag;
+  OSQPInt polish_successful = 0;
+  OSQPInt exitflag = 0;
 
-  LinSysSolver* plsh;
-  OSQPVectorf*  rhs_red;
-  OSQPVectorf*  pol_sol; // Polished solution (x and reduced y)
-  OSQPVectorf*  pol_sol_xview; // view into x part of polished solution
-  OSQPVectorf*  pol_sol_yview; // view into (reduced) y part of polished solutions
+  LinSysSolver* plsh = OSQP_NULL;
+  OSQPVectorf*  rhs_red = OSQP_NULL;
+  OSQPVectorf*  pol_sol = OSQP_NULL; // Polished solution (x and reduced y)
+  OSQPVectorf*  pol_sol_xview = OSQP_NULL; // view into x part of polished solution
+  OSQPVectorf*  pol_sol_yview = OSQP_NULL; // view into (reduced) y part of polished solutions
 
   OSQPInfo*      info     = solver->info;
   OSQPSettings*  settings = solver->settings;
@@ -293,20 +334,21 @@ OSQPInt polish(OSQPSolver* solver) {
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
   // Form Ared by assuming the active constraints and store in work->pol->Ared
-  mred = form_Ared(work);
-  if (mred < 0) {
-    // Polishing failed
+  exitflag = form_Ared(work);
+
+  if (exitflag) {
+    /* Failure finding active constraints */
     info->status_polish = OSQP_POLISH_FAILED;
-    return OSQP_POLISH_FAILED;
-  } else if (mred == 0) {
+    return exitflag;
+  } else if (work->pol->n_active == 0) {
     /* No active constraints, so skip polishing */
     c_print("Polishing not needed - no active set detected at optimal point\n");
     info->status_polish = OSQP_POLISH_NO_ACTIVE_SET_FOUND;
 
-    // Memory clean-up
+    /* Memory clean-up */
     OSQPMatrix_free(work->pol->Ared);
 
-    return OSQP_POLISH_NO_ACTIVE_SET_FOUND;
+    return OSQP_NO_ERROR;
   }
 
   // Form and factorize reduced KKT
@@ -314,33 +356,57 @@ OSQPInt polish(OSQPSolver* solver) {
                                              OSQP_NULL, settings, OSQP_NULL, OSQP_NULL, 1);
 
   if (exitflag) {
-    // Polishing failed
+    /* Failure to initialize the linear system */
     info->status_polish = OSQP_POLISH_LINSYS_ERROR;
 
-    // Memory clean-up
+    /* Memory clean-up */
     OSQPMatrix_free(work->pol->Ared);
 
-    return OSQP_POLISH_FAILED;
+    return exitflag;
   }
 
   // Form reduced right-hand side rhs_red
-  rhs_red = OSQPVectorf_malloc(work->data->n + mred);
+  rhs_red = OSQPVectorf_malloc(work->data->n + work->pol->n_active);
+
   if (!rhs_red) {
-    // Polishing failed
+    /* Failure to allocate memory */
     info->status_polish = OSQP_POLISH_FAILED;
 
-    // Memory clean-up
+    /* Memory clean-up */
     OSQPMatrix_free(work->pol->Ared);
 
-    return OSQP_POLISH_FAILED;
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
   }
-  form_rhs_red(work, rhs_red);
+
+  exitflag = form_rhs_red(work, rhs_red);
+
+  if (exitflag) {
+    /* Failure to form reduced right hand side */
+    info->status_polish = OSQP_POLISH_FAILED;
+
+    /* Memory clean-up */
+    OSQPMatrix_free(work->pol->Ared);
+
+    return exitflag;
+  }
 
   pol_sol = OSQPVectorf_copy_new(rhs_red);
-  pol_sol_xview = OSQPVectorf_view(pol_sol,0,work->data->n);
-  pol_sol_yview = OSQPVectorf_view(pol_sol,work->data->n,mred);
 
-  if (!pol_sol || !pol_sol_xview || !pol_sol_yview) {
+  if (!pol_sol) {
+    /* Failure to allocate vector */
+    info->status_polish = OSQP_POLISH_FAILED;
+
+    /* Memory clean-up */
+    OSQPMatrix_free(work->pol->Ared);
+    OSQPVectorf_free(rhs_red);
+
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  }
+
+  pol_sol_xview = OSQPVectorf_view(pol_sol,0,work->data->n);
+  pol_sol_yview = OSQPVectorf_view(pol_sol,work->data->n, work->pol->n_active);
+
+  if (!pol_sol_xview || !pol_sol_yview) {
 
     // Polishing failed
     info->status_polish = OSQP_POLISH_FAILED;
@@ -352,7 +418,7 @@ OSQPInt polish(OSQPSolver* solver) {
     OSQPVectorf_view_free(pol_sol_xview);
     OSQPVectorf_view_free(pol_sol_yview);
 
-    return OSQP_POLISH_FAILED;
+    return osqp_error(OSQP_MEM_ALLOC_ERROR);
   }
 
   // Warm start the polished solution
@@ -375,7 +441,7 @@ OSQPInt polish(OSQPSolver* solver) {
     OSQPVectorf_view_free(pol_sol_xview);
     OSQPVectorf_view_free(pol_sol_yview);
 
-    return OSQP_POLISH_FAILED;
+    return exitflag;
   }
 
   // Store the polished solution (x,z,y)
@@ -442,5 +508,6 @@ OSQPInt polish(OSQPSolver* solver) {
   OSQPVectorf_free(pol_sol);
   OSQPVectorf_view_free(pol_sol_xview);
   OSQPVectorf_view_free(pol_sol_yview);
-  return info->status_polish;
+
+  return OSQP_NO_ERROR;
 }
