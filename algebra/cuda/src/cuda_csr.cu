@@ -19,7 +19,7 @@
 #include "cuda_configure.h"
 #include "cuda_handler.h"
 #include "cuda_lin_alg.h"   /* --> cuda_vec_gather */
-#include "cuda_malloc.h"
+#include "cuda_memory.h"
 #include "cuda_wrapper.h"
 #include "helper_cuda.h"    /* --> checkCudaErrors */
 

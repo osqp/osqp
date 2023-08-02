@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 
-#include "cuda_malloc.h"
+#include "cuda_memory.h"
 #include "helper_cuda.h"    /* --> checkCudaErrors */
 
 
