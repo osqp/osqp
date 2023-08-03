@@ -355,20 +355,27 @@ csr* csr_alloc(OSQPInt m,
 
 csr* csr_init(OSQPInt          m,
               OSQPInt          n,
-              const OSQPInt*   h_row_ptr,
-              const OSQPInt*   h_col_ind,
-              const OSQPFloat* h_val) {
-    
-  csr* dev_mat = csr_alloc(m, n, h_row_ptr[m], 1);
+              const OSQPInt*   row_ptr,
+              const OSQPInt*   col_ind,
+              const OSQPFloat* val) {
+
+  OSQPInt nnz = 0;
+
+  if (cuda_isdeviceptr(row_ptr))
+    checkCudaErrors(cudaMemcpy(&nnz, &row_ptr[m], sizeof(OSQPInt), cudaMemcpyDeviceToHost));
+  else
+    nnz = row_ptr[m];
+
+  csr* dev_mat = csr_alloc(m, n, nnz, 1);
   
   if (!dev_mat) return NULL;
   
   if (m == 0) return dev_mat;
 
-  /* copy_matrix_to_device */
-  checkCudaErrors(cudaMemcpy(dev_mat->row_ptr, h_row_ptr, (dev_mat->m + 1) * sizeof(OSQPInt), cudaMemcpyHostToDevice));
-  checkCudaErrors(cudaMemcpy(dev_mat->col_ind, h_col_ind, dev_mat->nnz * sizeof(OSQPInt),     cudaMemcpyHostToDevice));
-  checkCudaErrors(cudaMemcpy(dev_mat->val,     h_val,     dev_mat->nnz * sizeof(OSQPFloat),   cudaMemcpyHostToDevice));
+  /* Copy components into matrix */
+  checkCudaErrors(cuda_memcpy_hd2d(dev_mat->row_ptr, row_ptr, (dev_mat->m + 1) * sizeof(OSQPInt)));
+  checkCudaErrors(cuda_memcpy_hd2d(dev_mat->col_ind, col_ind, dev_mat->nnz * sizeof(OSQPInt)));
+  checkCudaErrors(cuda_memcpy_hd2d(dev_mat->val,     val,     dev_mat->nnz * sizeof(OSQPFloat)));
 
   return dev_mat;
 }
@@ -594,7 +601,7 @@ void cuda_mat_init_P(const OSQPCscMatrix* mat,
   cuda_calloc((void **) d_P_triu_val, (nnz+1) * sizeof(OSQPFloat));
 
   /* Store triu elements */
-  checkCudaErrors(cudaMemcpy(*d_P_triu_val, mat->x, nnz * sizeof(OSQPFloat), cudaMemcpyHostToDevice));
+  checkCudaErrors(cuda_memcpy_hd2d(*d_P_triu_val, mat->x, nnz * sizeof(OSQPFloat)));
 
   init_SpMV_interface(*P);
 }
@@ -636,7 +643,7 @@ void cuda_mat_update_P(const OSQPFloat*  Px,
     cuda_malloc((void **) &d_P_val_new, (P_triu_nnz + 1) * sizeof(OSQPFloat));
 
     /* Copy new values from host to device */
-    checkCudaErrors(cudaMemcpy(d_P_val_new, Px, P_triu_nnz * sizeof(OSQPFloat), cudaMemcpyHostToDevice));
+    checkCudaErrors(cuda_memcpy_hd2d(d_P_val_new, Px, P_triu_nnz * sizeof(OSQPFloat)));
 
     cuda_vec_gather((*P)->nnz, d_P_val_new, (*P)->val, d_P_triu_to_full_ind);
 
@@ -651,8 +658,8 @@ void cuda_mat_update_P(const OSQPFloat*  Px,
     cuda_malloc((void **) &d_P_ind_new, Px_n * sizeof(OSQPInt));
 
     /* Copy new values and indices from host to device */
-    checkCudaErrors(cudaMemcpy(d_P_val_new, Px,     Px_n * sizeof(OSQPFloat), cudaMemcpyHostToDevice));
-    checkCudaErrors(cudaMemcpy(d_P_ind_new, Px_idx, Px_n * sizeof(OSQPInt),   cudaMemcpyHostToDevice));
+    checkCudaErrors(cuda_memcpy_hd2d(d_P_val_new, Px,     Px_n * sizeof(OSQPFloat)));
+    checkCudaErrors(cuda_memcpy_hd2d(d_P_ind_new, Px_idx, Px_n * sizeof(OSQPInt)));
 
     /* Update d_P_triu_val */
     scatter(d_P_triu_val, d_P_val_new, d_P_ind_new, Px_n);
@@ -678,7 +685,7 @@ void cuda_mat_update_A(const OSQPFloat* Ax,
 
   if (!Ax_idx) { /* Update whole A */
     /* Updating At is easy since it is equal to A in CSC */
-    checkCudaErrors(cudaMemcpy(Atval, Ax, Annz * sizeof(OSQPFloat), cudaMemcpyHostToDevice));
+    checkCudaErrors(cuda_memcpy_hd2d(Atval, Ax, Annz * sizeof(OSQPFloat)));
 
     /* Updating A requires transpose of A_new */
     cuda_vec_gather(Annz, Atval, Aval, d_A_to_At_ind);
@@ -692,8 +699,8 @@ void cuda_mat_update_A(const OSQPFloat* Ax,
     cuda_malloc((void **) &d_At_ind_new, Ax_n * sizeof(OSQPInt));
 
     /* Copy new values and indices from host to device */
-    checkCudaErrors(cudaMemcpy(d_At_val_new, Ax,     Ax_n * sizeof(OSQPFloat), cudaMemcpyHostToDevice));
-    checkCudaErrors(cudaMemcpy(d_At_ind_new, Ax_idx, Ax_n * sizeof(OSQPInt),   cudaMemcpyHostToDevice));
+    checkCudaErrors(cuda_memcpy_hd2d(d_At_val_new, Ax,     Ax_n * sizeof(OSQPFloat)));
+    checkCudaErrors(cuda_memcpy_hd2d(d_At_ind_new, Ax_idx, Ax_n * sizeof(OSQPInt)));
 
     /* Update At first since it is equal to A in CSC */
     scatter(Atval, d_At_val_new, d_At_ind_new, Ax_n);

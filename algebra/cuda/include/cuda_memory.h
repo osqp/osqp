@@ -36,5 +36,17 @@ void cuda_free_host(void** devPtr);
  */
 bool cuda_isdeviceptr(const void* ptr);
 
+/**
+ * Copy data from either host or device memory to device memory.
+ *
+ * This will automatically test the location of src to see if it is host
+ * or device memory, and perform the appropriate copy.
+ *
+ * @param dst   Destination pointer on the device
+ * @param src   Source pointer on either the host or device
+ * @param count Number of bytes to copy
+ * @return      Error code
+ */
+cudaError_t cuda_memcpy_hd2d(void* dst, const void* src, size_t count);
 
 #endif /* ifndef CUDA_MEMORY_H */

@@ -103,3 +103,10 @@ bool cuda_isdeviceptr(const void* ptr) {
 
   return false;
 }
+
+cudaError_t cuda_memcpy_hd2d(void* dst, const void* src, size_t count) {
+  if (cuda_isdeviceptr(src))
+    return cudaMemcpy(dst, src, count, cudaMemcpyDeviceToDevice);
+  else
+    return cudaMemcpy(dst, src, count, cudaMemcpyHostToDevice);
+}
