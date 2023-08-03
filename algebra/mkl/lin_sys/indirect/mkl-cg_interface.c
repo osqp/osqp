@@ -109,7 +109,7 @@ OSQPInt init_linsys_mklcg(mklcg_solver**     sp,
   //Otherwise, use rho_vec = ones.*(1/sigma)
   s->rho_vec = OSQPVectorf_malloc(m);
   if (!polish) {
-      s->rho_vec = OSQPVectorf_copy_new(rho_vec);
+      OSQPVectorf_copy(s->rho_vec, rho_vec);
   } else {
       OSQPVectorf_set_scalar(s->rho_vec, 1/settings->sigma);
   }
