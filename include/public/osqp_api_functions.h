@@ -72,6 +72,52 @@ OSQP_API void OSQPCscMatrix_set_data(OSQPCscMatrix* M,
 
 /** @} */
 
+/**
+ * @name Settings object memory management
+ * @{
+ */
+
+#ifndef OSQP_EMBEDDED_MODE
+/**
+ * Allocate a new OSQPSettings object with the default settings.
+ *
+ * @return Pointer to new settings object, or null on error
+ */
+OSQPSettings* OSQPSettings_new();
+
+/**
+ * Free an OSQPSettings object.
+ *
+ * @param settings The settings object to free
+ */
+void OSQPSettings_free(OSQPSettings* settings);
+#endif
+
+/** @} */
+
+/**
+ * @name Codegen defines object memory management
+ * @{
+ */
+
+#ifndef OSQP_EMBEDDED_MODE
+/**
+ * Allocate a new OSQPCodegenDefines object with the default options.
+ *
+ * @return Pointer to new codegen defines object, or null on error
+ */
+OSQPCodegenDefines* OSQPCodegenDefines_new();
+
+/**
+ * Free an OSQPCodegenDefines object.
+ *
+ * @param defs The defines object to free
+ */
+void OSQPCodegenDefines_free(OSQPCodegenDefines* defs);
+#endif
+
+/** @} */
+
 /********************
 * Main Solver API  *
 ********************/

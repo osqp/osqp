@@ -22,23 +22,24 @@ int main(void) {
   /* Exitflag */
   OSQPInt exitflag;
 
-  /* Solver, settings, matrices */
-  OSQPSolver*   solver   = NULL;
-  OSQPSettings* settings = NULL;
+  /* Solver */
+  OSQPSolver* solver = NULL;
 
   /* Create CSC matrices that are backed by the above data arrays. */
   OSQPCscMatrix* P = OSQPCscMatrix_new(n, n, P_nnz, P_x, P_i, P_p);
   OSQPCscMatrix* A = OSQPCscMatrix_new(m, n, A_nnz, A_x, A_i, A_p);
 
-  /* Set default settings */
-  settings = (OSQPSettings *)malloc(sizeof(OSQPSettings));
-  if (settings) {
-    osqp_set_default_settings(settings);
-    settings->polishing = 1;
+  /* Get default settings */
+  OSQPSettings* settings = OSQPSettings_new();
 
-    //settings->linsys_solver = OSQP_DIRECT_SOLVER;
-    //settings->linsys_solver = OSQP_INDIRECT_SOLVER;
+  if (!settings) {
+    printf("  OSQP Errored allocating settings object.\n");
+    return 1;
   }
+
+  settings->polishing = 1;
+  //settings->linsys_solver = OSQP_DIRECT_SOLVER;
+  //settings->linsys_solver = OSQP_INDIRECT_SOLVER;
 
   OSQPInt cap = osqp_capabilities();
 

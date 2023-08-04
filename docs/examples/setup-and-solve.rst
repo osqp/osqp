@@ -146,20 +146,16 @@ C
         /* Exitflag */
         OSQPInt exitflag = 0;
 
-        /* Solver, settings */
-        OSQPSolver   *solver;
-        OSQPSettings *settings;
+        /* Solver */
+        OSQPSolver *solver;
 
         /* Create CSC matrices that are backed by the above data arrays. */
         OSQPCscMatrix* P = OSQPCscMatrix_new(n, n, P_nnz, P_x, P_i, P_p);
         OSQPCscMatrix* A = OSQPCscMatrix_new(m, n, A_nnz, A_x, A_i, A_p);
 
-        /* Set default settings */
-        settings = (OSQPSettings *)malloc(sizeof(OSQPSettings));
-        if (settings) {
-            osqp_set_default_settings(settings);
-            settings->alpha = 1.0; /* Change alpha parameter */
-        }
+        /* Setup settings */
+        OSQPSettings *settings = OSQPSettings_new();
+        settings->alpha = 1.0; /* Change alpha parameter */
 
         /* Setup solver */
         exitflag = osqp_setup(&solver, P, q, A, l, u, m, n, settings);
@@ -171,7 +167,7 @@ C
         osqp_cleanup(solver);
         OSQPCscMatrix_free(A);
         OSQPCscMatrix_free(P);
-        if (settings) free(settings);
+        OSQPSettings_free(settings);
 
         return (int)exitflag;
     };

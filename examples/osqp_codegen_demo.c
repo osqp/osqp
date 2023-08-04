@@ -50,23 +50,24 @@ int main(int argc, char *argv[]) {
   /* Exitflag */
   OSQPInt exitflag = 0;
 
-  /* Solver, settings, matrices */
-  OSQPSolver*    solver   = NULL;
-  OSQPSettings*  settings = NULL;
+  /* Solver */
+  OSQPSolver* solver = NULL;
 
   /* Create CSC matrices that are backed by the above data arrays. */
   OSQPCscMatrix* P = OSQPCscMatrix_new(n, n, P_nnz, P_x, P_i, P_p);
   OSQPCscMatrix* A = OSQPCscMatrix_new(m, n, A_nnz, A_x, A_i, A_p);
 
-  /* Set default settings */
-  settings = (OSQPSettings *)malloc(sizeof(OSQPSettings));
-  if (settings) {
-    osqp_set_default_settings(settings);
-    settings->polishing = 1;
+  /* Get default settings */
+  OSQPSettings* settings = OSQPSettings_new();
 
-    //settings->linsys_solver = OSQP_DIRECT_SOLVER;
-    //settings->linsys_solver = OSQP_INDIRECT_SOLVER;
+  if (!settings) {
+    printf("  OSQP Errored allocating settings object.\n");
+    return 1;
   }
+
+  settings->polishing = 1;
+  //settings->linsys_solver = OSQP_DIRECT_SOLVER;
+  //settings->linsys_solver = OSQP_INDIRECT_SOLVER;
 
   /* Setup solver */
   exitflag = osqp_setup(&solver, P, q, A, l, u, m, n, settings);
@@ -76,11 +77,17 @@ int main(int argc, char *argv[]) {
     return exitflag;
   }
 
-  /* Test codegen */
-  OSQPCodegenDefines *defs = (OSQPCodegenDefines *)calloc(1, sizeof(OSQPCodegenDefines));
+  /*
+   * Test codegen
+   */
 
   /* Get the default codegen options */
-  osqp_set_default_codegen_defines( defs );
+  OSQPCodegenDefines* defs = OSQPCodegenDefines_new();
+
+  if (!defs) {
+    printf("  OSQP Errored allocating codegen defines object.\n");
+    return 1;
+  }
 
   /* Sample with vector update only */
   defs->embedded_mode = 1;
@@ -112,7 +119,8 @@ int main(int argc, char *argv[]) {
   osqp_cleanup(solver);
   OSQPCscMatrix_free(A);
   OSQPCscMatrix_free(P);
-  if (settings) free(settings);
+  OSQPSettings_free(settings);
+  OSQPCodegenDefines_free(defs);
 
   return (int)exitflag;
 }
