@@ -14,8 +14,8 @@ TEST_CASE_METHOD(codegen_test_fixture, "Basic codegen", "[codegen]")
 {
   OSQPInt exitflag;
 
-  // Codegen defines
-  OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
+  // Default codegen defines
+  OSQPCodegenDefines_ptr defines{OSQPCodegenDefines_new()};
 
   // Test-specific solver settings
   settings->polishing     = 1;
@@ -23,7 +23,6 @@ TEST_CASE_METHOD(codegen_test_fixture, "Basic codegen", "[codegen]")
   settings->warm_starting = 0;
 
   // Define codegen settings
-  osqp_set_default_codegen_defines(defines.get());
   defines->embedded_mode = 1;      // vector update
   defines->float_type    = 1;      // floats
 
@@ -58,8 +57,8 @@ TEST_CASE_METHOD(unconstrained_test_fixture, "Codegen: Unconstrained problem dat
 {
   OSQPInt exitflag;
 
-  // Codegen defines
-  OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
+  // Default codegen defines
+  OSQPCodegenDefines_ptr defines{OSQPCodegenDefines_new()};
 
   // Test-specific solver settings
   settings->polishing     = 1;
@@ -67,7 +66,6 @@ TEST_CASE_METHOD(unconstrained_test_fixture, "Codegen: Unconstrained problem dat
   settings->warm_starting = 0;
 
   // Define codegen settings
-  osqp_set_default_codegen_defines(defines.get());
   defines->embedded_mode = 1;      // vector update
   defines->float_type    = 1;      // floats
 
@@ -108,8 +106,8 @@ TEST_CASE_METHOD(basic_lp_test_fixture, "Codegen: Linear program data export", "
 {
   OSQPInt exitflag;
 
-  // Codegen defines
-  OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
+  // Default codegen defines
+  OSQPCodegenDefines_ptr defines{OSQPCodegenDefines_new()};
 
   // Test-specific solver settings
   settings->polishing     = 1;
@@ -117,7 +115,6 @@ TEST_CASE_METHOD(basic_lp_test_fixture, "Codegen: Linear program data export", "
   settings->warm_starting = 0;
 
   // Define codegen settings
-  osqp_set_default_codegen_defines(defines.get());
   defines->embedded_mode = 1;      // vector update
   defines->float_type    = 1;      // floats
 
@@ -158,8 +155,8 @@ TEST_CASE_METHOD(non_cvx_test_fixture, "Codegen: Data export", "[codegen],[nonco
 {
   OSQPInt exitflag;
 
-  // Codegen defines
-  OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
+  // Default codegen defines
+  OSQPCodegenDefines_ptr defines{OSQPCodegenDefines_new()};
 
   // Test-specific solver settings
   settings->polishing     = 1;
@@ -167,7 +164,6 @@ TEST_CASE_METHOD(non_cvx_test_fixture, "Codegen: Data export", "[codegen],[nonco
   settings->warm_starting = 0;
 
   // Define codegen settings
-  osqp_set_default_codegen_defines(defines.get());
   defines->embedded_mode = 1;      // vector update
   defines->float_type    = 1;      // floats
 
@@ -219,16 +215,13 @@ TEST_CASE_METHOD(codegen_test_fixture, "Codegen: defines", "[codegen]")
 {
   OSQPInt exitflag;
 
-  // Codegen defines
-  OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
+  // Default codegen defines
+  OSQPCodegenDefines_ptr defines{OSQPCodegenDefines_new()};
 
   // Test-specific solver settings
   settings->polishing     = 1;
   settings->scaling       = 0;
   settings->warm_starting = 0;
-
-  // Define codegen settings
-  osqp_set_default_codegen_defines(defines.get());
 
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,
@@ -379,8 +372,8 @@ TEST_CASE_METHOD(codegen_test_fixture, "Codegen: Error propgatation", "[codegen]
 {
   OSQPInt exitflag;
 
-  // Codegen defines
-  OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
+  // Default codegen defines
+  OSQPCodegenDefines_ptr defines{OSQPCodegenDefines_new()};
 
   // Test-specific solver settings
   settings->polishing     = 1;
@@ -388,7 +381,6 @@ TEST_CASE_METHOD(codegen_test_fixture, "Codegen: Error propgatation", "[codegen]
   settings->warm_starting = 0;
 
   // Define codegen settings
-  osqp_set_default_codegen_defines(defines.get());
   defines->embedded_mode = 1;      // vector update
   defines->float_type    = 1;      // floats
 
@@ -478,8 +470,8 @@ TEST_CASE_METHOD(codegen_test_fixture, "Codegen: Settings", "[codegen],[settings
 {
   OSQPInt exitflag;
 
-  // Codegen defines
-  OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
+  // Default codegen defines
+  OSQPCodegenDefines_ptr defines{OSQPCodegenDefines_new()};
 
   // Test-specific solver settings
   settings->polishing     = 1;
@@ -487,7 +479,6 @@ TEST_CASE_METHOD(codegen_test_fixture, "Codegen: Settings", "[codegen],[settings
   settings->warm_starting = 0;
 
   // Define codegen settings
-  osqp_set_default_codegen_defines(defines.get());
   defines->embedded_mode = 1;      // vector update
   defines->float_type    = 1;      // floats
 

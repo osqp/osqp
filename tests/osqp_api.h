@@ -60,13 +60,13 @@ struct OSQPSolver_deleter {
 
 struct OSQPSettings_deleter {
     void operator()(OSQPSettings* settings) {
-        c_free(settings);
+        OSQPSettings_free(settings);
     }
 };
 
 struct OSQPCodegenDefines_deleter {
     void operator()(OSQPCodegenDefines* defines) {
-        c_free(defines);
+        OSQPCodegenDefines_free(defines);
     }
 };
 
