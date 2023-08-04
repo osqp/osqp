@@ -2,6 +2,7 @@
 #include "osqp.h"
 #include "auxil.h"
 #include "osqp_api_constants.h"
+#include "osqp_api_types.h"
 #include "util.h"
 #include "scaling.h"
 #include "error.h"
@@ -27,6 +28,46 @@
 #ifdef OSQP_ENABLE_INTERRUPT
 # include "interrupt.h"
 #endif
+
+/**********************
+ * OSQP type helpers  *
+ **********************/
+#ifndef OSQP_EMBEDDED_MODE
+OSQPCscMatrix* OSQPCscMatrix_new(OSQPInt    m,
+                                 OSQPInt    n,
+                                 OSQPInt    nzmax,
+                                 OSQPFloat* x,
+                                 OSQPInt*   i,
+                                 OSQPInt*   p) {
+  OSQPCscMatrix* mat = c_calloc(1, sizeof(OSQPCscMatrix));
+
+  if (!mat) return OSQP_NULL;
+
+  OSQPCscMatrix_set_data(mat, m, n, nzmax, x, i, p);
+
+  return mat;
+}
+
+void OSQPCscMatrix_free(OSQPCscMatrix* mat) {
+  if (mat) c_free(mat);
+}
+#endif
+
+void OSQPCscMatrix_set_data(OSQPCscMatrix* M,
+                            OSQPInt        m,
+                            OSQPInt        n,
+                            OSQPInt        nzmax,
+                            OSQPFloat*     x,
+                            OSQPInt*       i,
+                            OSQPInt*       p) {
+  M->m     = m;
+  M->n     = n;
+  M->nz   = -1;
+  M->nzmax = nzmax;
+  M->x     = x;
+  M->i     = i;
+  M->p     = p;
+}
 
 
 /**********************
@@ -1340,28 +1381,6 @@ OSQPInt osqp_codegen(OSQPSolver*         solver,
 #endif /* ifdef OSQP_CODEGEN */
 
   return exitflag;
-}
-
-
-
-/****************************
-* User API Helper functions
-****************************/
-
-void csc_set_data(OSQPCscMatrix* M,
-                  OSQPInt        m,
-                  OSQPInt        n,
-                  OSQPInt        nzmax,
-                  OSQPFloat*     x,
-                  OSQPInt*       i,
-                  OSQPInt*       p) {
-  M->m     = m;
-  M->n     = n;
-  M->nz   = -1;
-  M->nzmax = nzmax;
-  M->x     = x;
-  M->i     = i;
-  M->p     = p;
 }
 
 /****************************

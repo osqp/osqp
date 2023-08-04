@@ -25,12 +25,10 @@ int main(void) {
   /* Solver, settings, matrices */
   OSQPSolver*   solver   = NULL;
   OSQPSettings* settings = NULL;
-  OSQPCscMatrix* P = malloc(sizeof(OSQPCscMatrix));
-  OSQPCscMatrix* A = malloc(sizeof(OSQPCscMatrix));
 
-  /* Populate matrices */
-  csc_set_data(A, m, n, A_nnz, A_x, A_i, A_p);
-  csc_set_data(P, n, n, P_nnz, P_x, P_i, P_p);
+  /* Create CSC matrices that are backed by the above data arrays. */
+  OSQPCscMatrix* P = OSQPCscMatrix_new(n, n, P_nnz, P_x, P_i, P_p);
+  OSQPCscMatrix* A = OSQPCscMatrix_new(m, n, A_nnz, A_x, A_i, A_p);
 
   /* Set default settings */
   settings = (OSQPSettings *)malloc(sizeof(OSQPSettings));
@@ -67,8 +65,8 @@ int main(void) {
 
   /* Cleanup */
   osqp_cleanup(solver);
-  if (A) free(A);
-  if (P) free(P);
+  OSQPCscMatrix_free(A);
+  OSQPCscMatrix_free(P);
   if (settings) free(settings);
 
   return (int)exitflag;

@@ -19,7 +19,6 @@ set(osqp_headers_public
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_api_constants.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_api_functions.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_api_types.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_api_utils.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/public/osqp_export_define.h")
 
 list( APPEND EMBEDDED_PUBLIC_INCS ${osqp_headers_public} )
