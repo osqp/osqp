@@ -70,6 +70,7 @@ void OSQPCscMatrix_set_data(OSQPCscMatrix* M,
   M->p     = p;
 }
 
+#ifndef OSQP_EMBEDDED_MODE
 OSQPSettings* OSQPSettings_new() {
   OSQPSettings* settings = (OSQPSettings*) c_calloc(1, sizeof(OSQPSettings));
 
@@ -101,6 +102,7 @@ void OSQPCodegenDefines_free(OSQPCodegenDefines* defs) {
   if (defs)
     c_free(defs);
 }
+#endif
 
 
 /**********************
