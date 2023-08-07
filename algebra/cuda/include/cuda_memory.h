@@ -16,8 +16,9 @@
  */
 
 #ifndef CUDA_MEMORY_H
-# define CUDA_MEMORY_H
+#define CUDA_MEMORY_H
 
+#include <cuda_runtime.h>
 
 void cuda_malloc(void** devPtr, size_t size);
 

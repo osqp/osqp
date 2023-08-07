@@ -220,6 +220,14 @@ void cuda_vec_eq(const OSQPFloat* a,
                        OSQPInt*   h_res);
 
 /**
+ * h_res = all(a == b) (for integers)
+ */
+void cuda_vec_int_eq(const OSQPInt* a,
+                     const OSQPInt* b,
+                           OSQPInt  n,
+                           OSQPInt* h_res);
+
+/**
  * h_res = all(d_l <= d_u)
  */
 void cuda_vec_leq(const OSQPFloat* d_l,
