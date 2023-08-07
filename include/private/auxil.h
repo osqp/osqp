@@ -103,9 +103,10 @@ OSQPInt has_solution(const OSQPInfo* info);
 
 /**
  * Store the QP solution
- * @param solver Solver
+ * @param solver   Solver
+ * @param solution Solution object to write to
  */
-void store_solution(OSQPSolver* solver);
+void store_solution(OSQPSolver* solver, OSQPSolution* solution);
 
 
 /**

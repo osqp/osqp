@@ -105,10 +105,12 @@ void osqp_set_default_settings(OSQPSettings* settings) {
 
   settings->device = 0;                                      /* device identifier */
   settings->linsys_solver  = osqp_algebra_default_linsys();  /* linear system solver */
-  settings->verbose        = OSQP_VERBOSE;                   /* print output */
-  settings->warm_starting  = OSQP_WARM_STARTING;             /* warm starting */
-  settings->scaling        = OSQP_SCALING;                   /* heuristic problem scaling */
-  settings->polishing      = OSQP_POLISHING;                 /* ADMM solution polish: 1 */
+
+  settings->allocate_solution = 1;                            /* allocate solution */
+  settings->verbose           = OSQP_VERBOSE;                 /* print output */
+  settings->warm_starting     = OSQP_WARM_STARTING;           /* warm starting */
+  settings->scaling           = OSQP_SCALING;                 /* heuristic problem scaling */
+  settings->polishing         = OSQP_POLISHING;               /* ADMM solution polish: 1 */
 
   settings->rho           = (OSQPFloat)OSQP_RHO;    /* ADMM step */
   settings->rho_is_vec    = OSQP_RHO_IS_VEC;        /* defines whether rho is scalar or vector*/
@@ -332,16 +334,25 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Allocate solution
-  solver->solution = c_calloc(1, sizeof(OSQPSolution));
-  if (!(solver->solution)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  solver->solution->x             = c_calloc(1, n * sizeof(OSQPFloat));
-  solver->solution->y             = c_calloc(1, m * sizeof(OSQPFloat));
-  solver->solution->prim_inf_cert = c_calloc(1, m * sizeof(OSQPFloat));
-  solver->solution->dual_inf_cert = c_calloc(1, n * sizeof(OSQPFloat));
-  if ( !(solver->solution->x) || !(solver->solution->dual_inf_cert) )
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if ( m && (!(solver->solution->y) || !(solver->solution->prim_inf_cert)) )
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  if (settings->allocate_solution) {
+    solver->solution = c_calloc(1, sizeof(OSQPSolution));
+
+    if (!(solver->solution)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+
+    solver->solution->x             = c_calloc(1, n * sizeof(OSQPFloat));
+    solver->solution->y             = c_calloc(1, m * sizeof(OSQPFloat));
+    solver->solution->prim_inf_cert = c_calloc(1, m * sizeof(OSQPFloat));
+    solver->solution->dual_inf_cert = c_calloc(1, n * sizeof(OSQPFloat));
+
+    if ( !(solver->solution->x) || !(solver->solution->dual_inf_cert) )
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+
+    if ( m && (!(solver->solution->y) || !(solver->solution->prim_inf_cert)) )
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  }
+  else {
+    solver->solution = OSQP_NULL;
+  }
 
   // Initialize information
   solver->info->status_polish = OSQP_POLISH_NOT_PERFORMED; // Polishing not performed
@@ -761,8 +772,7 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 #endif /* ifdef OSQP_ENABLE_PRINTING */
 
   // Store solution
-  store_solution(solver);
-
+  store_solution(solver, solver->solution);
 
 // Define exit flag for quitting function
 #if defined(OSQP_ENABLE_PROFILING) || defined(OSQP_ENABLE_INTERRUPT) || OSQP_EMBEDDED_MODE != 1
@@ -775,6 +785,20 @@ exit:
 #endif /* ifdef OSQP_ENABLE_INTERRUPT */
 
   return exitflag;
+}
+
+
+OSQPInt osqp_get_solution(OSQPSolver* solver, OSQPSolution* solution) {
+  if (!solver || !solver->work || !solver->settings || !solver->info) {
+    return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  }
+
+  if (!solution)
+    return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR)
+
+  store_solution(solver, solution);
+
+  return OSQP_NO_ERROR;
 }
 
 
@@ -1200,6 +1224,8 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
 
   /* Update settings */
   // linsys_solver ignored
+  /* allocate_solver ignored */
+
   settings->verbose       = new_settings->verbose;
   settings->warm_starting = new_settings->warm_starting;
   // scaling ignored

@@ -274,10 +274,12 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
    */
   new->device        = settings->device;
   new->linsys_solver = settings->linsys_solver;
-  new->verbose       = settings->verbose;
-  new->warm_starting = settings->warm_starting;
-  new->scaling       = settings->scaling;
-  new->polishing     = settings->polishing;
+
+  new->allocate_solution = settings->allocate_solution;
+  new->verbose           = settings->verbose;
+  new->warm_starting     = settings->warm_starting;
+  new->scaling           = settings->scaling;
+  new->polishing         = settings->polishing;
 
   new->rho        = settings->rho;
   new->rho_is_vec = settings->rho_is_vec;

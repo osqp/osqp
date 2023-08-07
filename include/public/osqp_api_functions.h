@@ -110,6 +110,16 @@ OSQP_API OSQPInt osqp_setup(OSQPSolver**         solverp,
  */
 OSQP_API OSQPInt osqp_solve(OSQPSolver* solver);
 
+/**
+ * Store the optimization problem result from solver \a solver into the solution
+ * \a solution. Note that \a solution must already be allocated with the component
+ * vectors the correct lengths.
+ *
+ * @param  solver   Solver
+ * @param  solution Solution object to store result in
+ * @return          Error flag
+ */
+OSQPInt osqp_get_solution(OSQPSolver* solver, OSQPSolution* solution);
 
 # ifndef OSQP_EMBEDDED_MODE
 

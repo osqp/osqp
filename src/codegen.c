@@ -172,6 +172,7 @@ static OSQPInt write_settings(FILE*               f,
   fprintf(f, "  0,\n"); // device
   fprintf(f, "  OSQP_DIRECT_SOLVER,\n");
   fprintf(f, "  0,\n"); // verbose
+  fprintf(f, "  1,\n"); // allocate_solution
   fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->warm_starting);
   fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->scaling);
   fprintf(f, "  0,\n"); // polishing
