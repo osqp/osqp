@@ -9,6 +9,7 @@
 #include "lin_alg.h"
 #include "printing.h"
 #include "timing.h"
+#include "profilers.h"
 
 
 #ifdef OSQP_CODEGEN
@@ -107,6 +108,8 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->linsys_solver  = osqp_algebra_default_linsys();  /* linear system solver */
 
   settings->allocate_solution = 1;                            /* allocate solution */
+  settings->profiler_level    = 0;                            /* Profiler annotation level */
+
   settings->verbose           = OSQP_VERBOSE;                 /* print output */
   settings->warm_starting     = OSQP_WARM_STARTING;           /* warm starting */
   settings->scaling           = OSQP_SCALING;                 /* heuristic problem scaling */
@@ -163,6 +166,9 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
 
   // Validate settings
   if (validate_settings(settings, 1)) return osqp_error(OSQP_SETTINGS_VALIDATION_ERROR);
+
+  osqp_profiler_init(settings->profiler_level);
+  osqp_profiler_sec_push(OSQP_PROFILER_SEC_SETUP);
 
   // Allocate empty solver
   solver = c_calloc(1, sizeof(OSQPSolver));
@@ -409,6 +415,8 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
     !(work->derivative_data->ryl) || !(work->derivative_data->ryu))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 # endif /* ifdef OSQP_ENABLE_DERIVATIVES */
+
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_SETUP);
 
   // Return exit flag
   return 0;
