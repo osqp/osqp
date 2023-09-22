@@ -534,16 +534,19 @@ OSQPInt has_solution(const OSQPInfo* info) {
       (info->status_val != OSQP_NON_CVX));
 }
 
-void store_solution(OSQPSolver *solver) {
+void store_solution(OSQPSolver *solver, OSQPSolution* solution) {
 
 #ifndef OSQP_EMBEDDED_MODE
   OSQPFloat norm_vec;
 #endif /* ifndef OSQP_EMBEDDED_MODE */
 
   OSQPInfo*      info     = solver->info;
-  OSQPSolution*  solution = solver->solution;
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
+
+  /* Bypass function if solution wasn't allocated */
+  if (!solution)
+    return;
 
 
   if (has_solution(info)) {
@@ -951,6 +954,13 @@ OSQPInt validate_settings(const OSQPSettings* settings,
   if (from_setup &&
       validate_linsys_solver(settings->linsys_solver)) {
     c_eprint("linsys_solver not recognized");
+    return 1;
+  }
+
+  if (from_setup &&
+      settings->allocate_solution != 0 &&
+      settings->allocate_solution != 1) {
+    c_eprint("allocate_solution must be either 0 or 1");
     return 1;
   }
 

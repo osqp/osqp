@@ -22,7 +22,7 @@
 #include "csr_type.h"
 #include "cuda_csr.h"
 #include "cuda_lin_alg.h"
-#include "cuda_malloc.h"
+#include "cuda_memory.h"
 
 
 /*******************************************************************************

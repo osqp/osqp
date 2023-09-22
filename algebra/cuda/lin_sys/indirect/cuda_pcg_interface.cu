@@ -19,7 +19,7 @@
 #include "cuda_pcg.h"
 
 #include "cuda_lin_alg.h"
-#include "cuda_malloc.h"
+#include "cuda_memory.h"
 
 #include "glob_opts.h"
 

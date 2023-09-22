@@ -18,7 +18,7 @@
 #include "cuda_lin_alg.h"
 #include "cuda_configure.h"
 #include "cuda_handler.h"
-#include "cuda_malloc.h"
+#include "cuda_memory.h"
 #include "cuda_wrapper.h"
 #include "helper_cuda.h"    /* --> checkCudaErrors */
 
@@ -127,6 +127,24 @@ __global__ void vec_eq_kernel(const OSQPFloat* a,
 
   for(OSQPInt i = idx; i < n; i += grid_size) {
       if (c_absval(a[i] - b[i]) > tol) {
+          *res = 0;
+          break;
+      }
+  }
+}
+
+__global__ void vec_int_eq_kernel(const OSQPInt* a,
+                                  const OSQPInt* b,
+                                        OSQPInt* res,
+                                        OSQPInt  n) {
+
+  OSQPInt idx = threadIdx.x + blockDim.x * blockIdx.x;
+  OSQPInt grid_size = blockDim.x * gridDim.x;
+
+  *res = 1;
+
+  for(OSQPInt i = idx; i < n; i += grid_size) {
+      if (a[i] != b[i]) {
           *res = 0;
           break;
       }
@@ -526,6 +544,13 @@ void cuda_vec_copy_d2h(OSQPFloat*       h_y,
   checkCudaErrors(cudaMemcpy(h_y, d_x, n * sizeof(OSQPFloat), cudaMemcpyDeviceToHost));
 }
 
+void cuda_vec_int_copy_d2d(OSQPInt*       d_y,
+                           const OSQPInt* d_x,
+                           OSQPInt        n) {
+
+  checkCudaErrors(cudaMemcpy(d_y, d_x, n * sizeof(OSQPInt), cudaMemcpyDeviceToDevice));
+}
+
 void cuda_vec_int_copy_h2d(OSQPInt*       d_y,
                            const OSQPInt* h_x,
                            OSQPInt        n) {
@@ -759,6 +784,27 @@ void cuda_vec_eq(const OSQPFloat* a,
   checkCudaErrors(cudaMemcpy(d_res, h_res, sizeof(OSQPInt), cudaMemcpyHostToDevice));
 
   vec_eq_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(a, b, tol, d_res, n);
+
+  checkCudaErrors(cudaMemcpy(h_res, d_res, sizeof(OSQPInt), cudaMemcpyDeviceToHost));
+
+  cuda_free((void **) &d_res);
+}
+
+void cuda_vec_int_eq(const OSQPInt* a,
+                     const OSQPInt* b,
+                           OSQPInt  n,
+                           OSQPInt* h_res) {
+
+  OSQPInt *d_res;
+  OSQPInt number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
+
+  cuda_malloc((void **) &d_res, sizeof(OSQPInt));
+
+  /* Initialize d_res to 1 */
+  *h_res = 1;
+  checkCudaErrors(cudaMemcpy(d_res, h_res, sizeof(OSQPInt), cudaMemcpyHostToDevice));
+
+  vec_int_eq_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(a, b, d_res, n);
 
   checkCudaErrors(cudaMemcpy(h_res, d_res, sizeof(OSQPInt), cudaMemcpyDeviceToHost));
 

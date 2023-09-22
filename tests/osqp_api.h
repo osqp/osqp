@@ -63,9 +63,22 @@ struct OSQPCodegenDefines_deleter {
     }
 };
 
+struct OSQPSolution_deleter {
+    void operator()(OSQPSolution* solution) {
+        if (solution ) {
+            c_free(solution->x);
+            c_free(solution->y);
+            c_free(solution->dual_inf_cert);
+            c_free(solution->prim_inf_cert);
+            c_free(solution);
+        }
+    }
+};
+
 using OSQPSolver_ptr = std::unique_ptr<OSQPSolver, OSQPSolver_deleter>;
 using OSQPSettings_ptr = std::unique_ptr<OSQPSettings, OSQPSettings_deleter>;
 using OSQPCodegenDefines_ptr = std::unique_ptr<OSQPCodegenDefines, OSQPCodegenDefines_deleter>;
+using OSQPSolution_ptr = std::unique_ptr<OSQPSolution, OSQPSolution_deleter>;
 
 
 #endif /* #ifndef OSQP_API_H_ */

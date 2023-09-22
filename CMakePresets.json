@@ -68,8 +68,7 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "OSQP_ALGEBRA_BACKEND": "cuda",
-        "OSQP_BUILD_UNITTESTS": "ON",
-        "OSQP_ASAN": "ON"
+        "OSQP_BUILD_UNITTESTS": "ON"
       }
     }
   ]
