@@ -13,9 +13,9 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -102,28 +102,28 @@ content="https://osqp.org/docs/_static/img/logo.png">
            <div itemprop="articleBody">
              
   <section id="code-generation">
-<h1>Code generation<a class="headerlink" href="#code-generation" title="Permalink to this heading">¶</a></h1>
+<h1>Code generation<a class="headerlink" href="#code-generation" title="Link to this heading">¶</a></h1>
 <p>OSQP can generate tailored C code that compiles into a fast and reliable solver
 for the given family of QP problems in which the problem data, but not its
 dimensions, change between problem instances.</p>
 <p>The generated code is:</p>
 <dl class="simple glossary">
-<dt id="term-Malloc-free">Malloc-free<a class="headerlink" href="#term-Malloc-free" title="Permalink to this term">¶</a></dt><dd><p>It does not perform any dynamic memory allocation.</p>
+<dt id="term-Malloc-free">Malloc-free<a class="headerlink" href="#term-Malloc-free" title="Link to this term">¶</a></dt><dd><p>It does not perform any dynamic memory allocation.</p>
 </dd>
-<dt id="term-Library-free">Library-free<a class="headerlink" href="#term-Library-free" title="Permalink to this term">¶</a></dt><dd><p>It is not linked to any external library.</p>
+<dt id="term-Library-free">Library-free<a class="headerlink" href="#term-Library-free" title="Link to this term">¶</a></dt><dd><p>It is not linked to any external library.</p>
 </dd>
-<dt id="term-Division-free">Division-free<a class="headerlink" href="#term-Division-free" title="Permalink to this term">¶</a></dt><dd><p>There are no division required in the ADMM algorithm</p>
+<dt id="term-Division-free">Division-free<a class="headerlink" href="#term-Division-free" title="Link to this term">¶</a></dt><dd><p>There are no division required in the ADMM algorithm</p>
 </dd>
 </dl>
 <p>We make a distinction between two cases depending on which of the data are to be
 treated as parameters.</p>
 <dl class="simple glossary">
-<dt id="term-Vectors-as-parameters">Vectors as parameters<a class="headerlink" href="#term-Vectors-as-parameters" title="Permalink to this term">¶</a></dt><dd><p>Vectors <span class="math notranslate nohighlight">\(q\)</span>, <span class="math notranslate nohighlight">\(l\)</span> and <span class="math notranslate nohighlight">\(u\)</span> can change between problem instances.
+<dt id="term-Vectors-as-parameters">Vectors as parameters<a class="headerlink" href="#term-Vectors-as-parameters" title="Link to this term">¶</a></dt><dd><p>Vectors <span class="math notranslate nohighlight">\(q\)</span>, <span class="math notranslate nohighlight">\(l\)</span> and <span class="math notranslate nohighlight">\(u\)</span> can change between problem instances.
 This corresponds to the compiler flag <code class="code docutils literal notranslate"><span class="pre">OSQP_EMBEDDED_MODE=1</span></code>.
 <span class="math notranslate nohighlight">\(\rho\)</span> adaptation is not enabled.
 The generated code is division-free and has a very small footprint.</p>
 </dd>
-<dt id="term-Matrices-as-parameters">Matrices as parameters<a class="headerlink" href="#term-Matrices-as-parameters" title="Permalink to this term">¶</a></dt><dd><p>Both vectors <span class="math notranslate nohighlight">\(q\)</span>, <span class="math notranslate nohighlight">\(l\)</span>, <span class="math notranslate nohighlight">\(u\)</span> and values in matrices
+<dt id="term-Matrices-as-parameters">Matrices as parameters<a class="headerlink" href="#term-Matrices-as-parameters" title="Link to this term">¶</a></dt><dd><p>Both vectors <span class="math notranslate nohighlight">\(q\)</span>, <span class="math notranslate nohighlight">\(l\)</span>, <span class="math notranslate nohighlight">\(u\)</span> and values in matrices
 <span class="math notranslate nohighlight">\(P\)</span> and <span class="math notranslate nohighlight">\(A\)</span> can change between problem instances.
 This corresponds to the compiler flag <code class="code docutils literal notranslate"><span class="pre">OSQP_EMBEDDED_MODE=2</span></code>.
 <span class="math notranslate nohighlight">\(\rho\)</span> adaptation is enabled but the frequency does not rely on any timing.

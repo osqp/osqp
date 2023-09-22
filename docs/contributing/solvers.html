@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contributing &mdash; OSQP  documentation</title>
+  <title>Interfacing new linear system solvers &mdash; OSQP  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/osqp_theme.css" type="text/css" />
@@ -20,8 +20,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Citing OSQP" href="../citing/index.html" />
-    <link rel="prev" title="Support vector machine (SVM)" href="../examples/svm.html" />
+    <link rel="next" title="Python Wrappers for OSQP" href="python.html" />
+    <link rel="prev" title="Contributing" href="index.html" />
 <meta name="twitter:card" content="summary_large_image" >
 <meta name="twitter:creator" content="@bstellato" >
 <meta name="twitter:image"
@@ -69,12 +69,13 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l1"><a class="reference internal" href="../parsers/index.html">Parsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../codegen/index.html">Code generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#interfacing-new-linear-system-solvers">Interfacing new linear system solvers</a><ul>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Contributing</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Interfacing new linear system solvers</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#dynamic-library-loading">Dynamic library loading</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#linear-system-solution">Linear system solution</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="python.html">Python Wrappers for OSQP</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
@@ -94,9 +95,10 @@ content="https://osqp.org/docs/_static/img/logo.png">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Contributing</li>
+          <li class="breadcrumb-item"><a href="index.html">Contributing</a></li>
+      <li class="breadcrumb-item active">Interfacing new linear system solvers</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/osqp/osqp/blob/master/docs/contributing/index.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/osqp/osqp/blob/master/docs/contributing/solvers.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -104,18 +106,8 @@ content="https://osqp.org/docs/_static/img/logo.png">
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="contributing">
-<h1>Contributing<a class="headerlink" href="#contributing" title="Link to this heading">¶</a></h1>
-<p>OSQP is an open-source project open to any academic or commercial applications.
-Contributions are welcome as <a class="reference external" href="https://help.github.com/articles/creating-a-pull-request/">GitHub pull requests</a> in any part of the project such as</p>
-<ul class="simple">
-<li><p>algorithm developments</p></li>
-<li><p>interfaces to other languages</p></li>
-<li><p>compatibility with new architectures</p></li>
-<li><p>linear system solvers interfaces</p></li>
-</ul>
-<section id="interfacing-new-linear-system-solvers">
-<span id="id1"></span><h2>Interfacing new linear system solvers<a class="headerlink" href="#interfacing-new-linear-system-solvers" title="Link to this heading">¶</a></h2>
+  <section id="interfacing-new-linear-system-solvers">
+<h1>Interfacing new linear system solvers<a class="headerlink" href="#interfacing-new-linear-system-solvers" title="Link to this heading">¶</a></h1>
 <p>OSQP is designed to be easily interfaced to new linear system solvers via dynamic library loading.
 To add a linear system solver interface you need to edit the <code class="code docutils literal notranslate"><span class="pre">lin_sys/</span></code> directory subfolder <code class="code docutils literal notranslate"><span class="pre">direct/</span></code> or <code class="code docutils literal notranslate"><span class="pre">indirect/</span></code> depending on the type of solver.
 Create a subdirectory with your solver name with four files:</p>
@@ -125,13 +117,13 @@ Create a subdirectory with your solver name with four files:</p>
 </ul>
 <p>We suggest you to have a look at the <a class="reference external" href="https://github.com/osqp/osqp/tree/master/lin_sys/direct/pardiso">MKL Pardiso solver interface</a> for more details.</p>
 <section id="dynamic-library-loading">
-<h3>Dynamic library loading<a class="headerlink" href="#dynamic-library-loading" title="Link to this heading">¶</a></h3>
+<h2>Dynamic library loading<a class="headerlink" href="#dynamic-library-loading" title="Link to this heading">¶</a></h2>
 <p>In this part define the methods to load the shared library and obtain the functions required to solve the linear system.
 The main functions to be exported are <code class="code docutils literal notranslate"><span class="pre">lh_load_mysolver(const</span> <span class="pre">char*</span> <span class="pre">libname)</span></code> and <code class="code docutils literal notranslate"><span class="pre">lh_unload_mysolver()</span></code>.
 In addition, the file <code class="code docutils literal notranslate"><span class="pre">mysolver_loader.c</span></code> must define static function pointers to the shared library functions to be loaded.</p>
 </section>
 <section id="linear-system-solution">
-<h3>Linear system solution<a class="headerlink" href="#linear-system-solution" title="Link to this heading">¶</a></h3>
+<h2>Linear system solution<a class="headerlink" href="#linear-system-solution" title="Link to this heading">¶</a></h2>
 <p>In this part we define the core of the interface: <strong>linear system solver object</strong>.
 The main functions are the external method</p>
 <ul class="simple">
@@ -150,45 +142,43 @@ The main functions are the external method</p>
 
 <span class="k">struct</span><span class="w"> </span><span class="nc">mysolver</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// Methods</span>
-<span class="w">    </span><span class="k">enum</span><span class="w"> </span><span class="n">linsys_solver_type</span><span class="w"> </span><span class="n">type</span><span class="p">;</span><span class="w"> </span><span class="c1">// Linear system solver defined in constants.h</span>
+<span class="w">    </span><span class="k">enum</span><span class="w"> </span><span class="n">osqp_linsys_solver_type</span><span class="w"> </span><span class="n">type</span><span class="p">;</span><span class="w"> </span><span class="c1">// Linear system solver defined in constants.h</span>
 
-<span class="w">    </span><span class="n">c_int</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">solve</span><span class="p">)(</span><span class="k">struct</span><span class="w"> </span><span class="nc">mysolver</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">c_float</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">free</span><span class="p">)(</span><span class="k">struct</span><span class="w"> </span><span class="nc">mysolver</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">self</span><span class="p">);</span>
-<span class="w">    </span><span class="n">c_int</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">update_matrices</span><span class="p">)(</span><span class="k">struct</span><span class="w"> </span><span class="nc">mysolver</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">csc</span><span class="w"> </span><span class="o">*</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">csc</span><span class="w"> </span><span class="o">*</span><span class="n">A</span><span class="p">);</span>
-<span class="w">    </span><span class="n">c_int</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">update_rho_vec</span><span class="p">)(</span><span class="k">struct</span><span class="w"> </span><span class="nc">mysolver</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">c_float</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">rho_vec</span><span class="p">);</span>
+<span class="w">    </span><span class="n">OSQPInt</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">solve</span><span class="p">)(</span><span class="k">struct</span><span class="w"> </span><span class="nc">mysolver</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">OSQPFloat</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">void</span><span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">free</span><span class="p">)(</span><span class="k">struct</span><span class="w"> </span><span class="nc">mysolver</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">self</span><span class="p">);</span>
+<span class="w">    </span><span class="n">OSQPInt</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">update_matrices</span><span class="p">)(</span><span class="k">struct</span><span class="w"> </span><span class="nc">mysolver</span><span class="o">*</span><span class="w"> </span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">OSQPCscMatrix</span><span class="o">*</span><span class="w"> </span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">OSQPCscMatrix</span><span class="o">*</span><span class="w"> </span><span class="n">A</span><span class="p">);</span>
+<span class="w">    </span><span class="n">OSQPInt</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">update_rho_vec</span><span class="p">)(</span><span class="k">struct</span><span class="w"> </span><span class="nc">mysolver</span><span class="o">*</span><span class="w"> </span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">OSQPFloat</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">rho_vec</span><span class="p">,</span><span class="w"> </span><span class="n">OSQPFloat</span><span class="w"> </span><span class="n">rho_sc</span><span class="p">);</span>
 
 <span class="w">    </span><span class="c1">// Attributes</span>
-<span class="w">    </span><span class="n">c_int</span><span class="w"> </span><span class="n">nthreads</span><span class="p">;</span><span class="w"> </span><span class="c1">// Number of threads used (required!)</span>
+<span class="w">    </span><span class="n">OSQPInt</span><span class="w"> </span><span class="n">nthreads</span><span class="p">;</span><span class="w"> </span><span class="c1">// Number of threads used (required!)</span>
 
 <span class="w">    </span><span class="c1">// Internal attributes of the solver</span>
 <span class="w">    </span><span class="p">...</span>
 
 <span class="w">    </span><span class="c1">// Internal attributes required for matrix updates</span>
-<span class="w">    </span><span class="n">c_int</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">Pdiag_idx</span><span class="p">,</span><span class="w"> </span><span class="n">Pdiag_n</span><span class="p">;</span><span class="w">  </span><span class="c1">///&lt; index and number of diagonal elements in P</span>
-<span class="w">    </span><span class="n">c_int</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">PtoKKT</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">AtoKKT</span><span class="p">;</span><span class="w">    </span><span class="c1">///&lt; Index of elements from P and A to KKT matrix</span>
-<span class="w">    </span><span class="n">c_int</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">rhotoKKT</span><span class="p">;</span><span class="w">            </span><span class="c1">///&lt; Index of rho places in KKT matrix</span>
+<span class="w">    </span><span class="n">OSQPInt</span><span class="w"> </span><span class="o">*</span><span class="n">PtoKKT</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">AtoKKT</span><span class="p">;</span><span class="w">    </span><span class="c1">///&lt; Index of elements from P and A to KKT matrix</span>
+<span class="w">    </span><span class="n">OSQPInt</span><span class="w"> </span><span class="o">*</span><span class="n">rhotoKKT</span><span class="p">;</span><span class="w">            </span><span class="c1">///&lt; Index of rho places in KKT matrix</span>
 <span class="w">    </span><span class="p">...</span>
 
 <span class="p">};</span>
 
 <span class="c1">// Initialize mysolver solver</span>
-<span class="n">c_int</span><span class="w"> </span><span class="nf">init_linsys_solver_mysolver</span><span class="p">(</span><span class="n">mysolver_solver</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">csc</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">csc</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">c_float</span><span class="w"> </span><span class="n">sigma</span><span class="p">,</span><span class="w"> </span><span class="n">c_float</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">rho_vec</span><span class="p">,</span><span class="w"> </span><span class="n">c_int</span><span class="w"> </span><span class="n">polish</span><span class="p">);</span>
+<span class="n">OSQPInt</span><span class="w"> </span><span class="nf">init_linsys_solver_mysolver</span><span class="p">(</span><span class="n">mysolver_solver</span><span class="o">**</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">OSQPCscMatrix</span><span class="o">*</span><span class="w"> </span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">OSQPCscMatrix</span><span class="o">*</span><span class="w"> </span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">OSQPFloat</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">rho_vec</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">OSQPSettings</span><span class="w"> </span><span class="o">*</span><span class="n">settings</span><span class="p">,</span><span class="w"> </span><span class="n">OSQPInt</span><span class="w"> </span><span class="n">polish</span><span class="p">);</span>
 
 <span class="c1">// Solve linear system and store result in b</span>
-<span class="n">c_int</span><span class="w"> </span><span class="nf">solve_linsys_mysolver</span><span class="p">(</span><span class="n">mysolver_solver</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">c_float</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">);</span>
+<span class="n">OSQPInt</span><span class="w"> </span><span class="nf">solve_linsys_mysolver</span><span class="p">(</span><span class="n">mysolver_solver</span><span class="o">*</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">OSQPFloat</span><span class="o">*</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">OSQPInt</span><span class="w"> </span><span class="n">admm_iter</span><span class="p">);</span>
 
 <span class="w"> </span><span class="c1">// Update linear system solver matrices</span>
-<span class="n">c_int</span><span class="w"> </span><span class="nf">update_linsys_solver_matrices_mysolver</span><span class="p">(</span><span class="n">mysolver_solver</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">csc</span><span class="w"> </span><span class="o">*</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">csc</span><span class="w"> </span><span class="o">*</span><span class="n">A</span><span class="p">);</span>
+<span class="n">OSQPInt</span><span class="w"> </span><span class="nf">update_linsys_solver_matrices_mysolver</span><span class="p">(</span><span class="n">mysolver_solver</span><span class="o">*</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">OSQPCscMatrix</span><span class="o">*</span><span class="w"> </span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">OSQPCscMatrix</span><span class="o">*</span><span class="w"> </span><span class="n">A</span><span class="p">);</span>
 
 <span class="c1">// Update rho_vec parameter in linear system solver structure</span>
-<span class="n">c_int</span><span class="w"> </span><span class="nf">update_linsys_solver_rho_vec_mysolver</span><span class="p">(</span><span class="n">mysolver_solver</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">c_float</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">rho_vec</span><span class="p">);</span>
+<span class="n">OSQPInt</span><span class="w"> </span><span class="nf">update_linsys_solver_rho_vec_mysolver</span><span class="p">(</span><span class="n">mysolver_solver</span><span class="o">*</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">OSQPFloat</span><span class="o">*</span><span class="w"> </span><span class="n">rho_vec</span><span class="p">);</span>
 
 <span class="c1">// Free linear system solver</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">free_linsys_solver_mysolver</span><span class="p">(</span><span class="n">mysolver_solver</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">s</span><span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">free_linsys_solver_mysolver</span><span class="p">(</span><span class="n">mysolver_solver</span><span class="o">*</span><span class="w"> </span><span class="n">s</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>The function details are coded in the <code class="code docutils literal notranslate"><span class="pre">mysolver.c</span></code> file.</p>
-</section>
 </section>
 </section>
 
@@ -196,8 +186,8 @@ The main functions are the external method</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../examples/svm.html" class="btn btn-neutral float-left" title="Support vector machine (SVM)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../citing/index.html" class="btn btn-neutral float-right" title="Citing OSQP" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Contributing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="python.html" class="btn btn-neutral float-right" title="Python Wrappers for OSQP" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

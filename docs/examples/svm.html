@@ -13,9 +13,9 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -117,7 +117,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
            <div itemprop="articleBody">
              
   <section id="support-vector-machine-svm">
-<h1>Support vector machine (SVM)<a class="headerlink" href="#support-vector-machine-svm" title="Permalink to this heading">¶</a></h1>
+<h1>Support vector machine (SVM)<a class="headerlink" href="#support-vector-machine-svm" title="Link to this heading">¶</a></h1>
 <p><em>Support vector machine</em> seeks an affine function that approximately classifies the two sets of points.
 The problem can be stated as</p>
 <div class="math notranslate nohighlight">
@@ -134,7 +134,7 @@ The problem has the following equivalent form</p>
 \end{array}\end{split}\]</div>
 <p>where <span class="math notranslate nohighlight">\({\rm diag}(b)\)</span> denotes the diagonal matrix with elements of <span class="math notranslate nohighlight">\(b\)</span> on its diagonal.</p>
 <section id="python">
-<h2>Python<a class="headerlink" href="#python" title="Permalink to this heading">¶</a></h2>
+<h2>Python<a class="headerlink" href="#python" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">osqp</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
@@ -175,7 +175,7 @@ The problem has the following equivalent form</p>
 </div>
 </section>
 <section id="matlab">
-<h2>Matlab<a class="headerlink" href="#matlab" title="Permalink to this heading">¶</a></h2>
+<h2>Matlab<a class="headerlink" href="#matlab" title="Link to this heading">¶</a></h2>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Generate problem data</span>
 <span class="nb">rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">n</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
@@ -208,7 +208,7 @@ The problem has the following equivalent form</p>
 </div>
 </section>
 <section id="cvxpy">
-<h2>CVXPY<a class="headerlink" href="#cvxpy" title="Permalink to this heading">¶</a></h2>
+<h2>CVXPY<a class="headerlink" href="#cvxpy" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cvxpy</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
@@ -238,7 +238,7 @@ The problem has the following equivalent form</p>
 </div>
 </section>
 <section id="yalmip">
-<h2>YALMIP<a class="headerlink" href="#yalmip" title="Permalink to this heading">¶</a></h2>
+<h2>YALMIP<a class="headerlink" href="#yalmip" title="Link to this heading">¶</a></h2>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Generate problem data</span>
 <span class="nb">rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">n</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
