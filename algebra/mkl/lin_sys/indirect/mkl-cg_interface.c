@@ -5,6 +5,8 @@
 #include "util.h"
 #include <mkl_rci.h>
 
+#include "profilers.h"
+
 OSQPFloat cg_compute_tolerance(OSQPInt    admm_iter,
                                OSQPFloat  rhs_norm,
                                OSQPFloat  scaled_prim_res,
@@ -204,6 +206,8 @@ OSQPInt solve_linsys_mklcg(mklcg_solver* s,
   OSQPFloat res_norm    = 0.0;
   OSQPFloat eps         = 1.0;
 
+  osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_SOLVE);
+
   //Point our subviews at the OSQP RHS
   OSQPVectorf_view_update(s->r1, b,    0, s->n);
   OSQPVectorf_view_update(s->r2, b, s->n, s->m);
@@ -246,7 +250,9 @@ OSQPInt solve_linsys_mklcg(mklcg_solver* s,
     if (rci_request == 1) {
       // Multiply for reduced system.
       // mvm_pre and mvm_post are subviews of the cg workspace variable s->tmp.
+      osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_MVM);
       reduced_kkt_mv_times(s->P, s->A, s->rho_vec, s->sigma, s->mvm_pre, s->mvm_post, s->ywork );
+      osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_MVM);
     } else if (rci_request == 2) {
       // Check the stopping criteria, precond_pre contains the residual vector
       res_norm = OSQPVectorf_norm_inf(s->precond_pre);
@@ -282,6 +288,8 @@ OSQPInt solve_linsys_mklcg(mklcg_solver* s,
     else
       s->cg_zero_iters = 0;
   }
+
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_SOLVE);
 
   return rci_request; //0 on succcess, otherwise MKL CG error code
 }

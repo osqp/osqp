@@ -28,7 +28,7 @@ typedef enum {
     OSQP_PROFILER_SEC_LINSYS_SYM_FAC,            /* Linsys: symbolic factorization */
     OSQP_PROFILER_SEC_LINSYS_NUM_FAC,            /* Linsys: numerical factorization */
     OSQP_PROFILER_SEC_LINSYS_BACKSOLVE,          /* Linsys: backsolve */
-    OSQP_PROFILER_SEC_LINALG_MVM,                /* Linalg: matrix-vector multiply */
+    OSQP_PROFILER_SEC_LINSYS_MVM,                /* Linsys: matrix-vector multiply */
 
     /* Sentinel element */
     OSQP_PROFILER_SEC_ARRAY_LAST

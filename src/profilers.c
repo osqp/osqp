@@ -19,5 +19,5 @@ OSQPProfilerSectionInfo osqp_profiler_sections[] = {
     {"linsys_sym_fac", 2},   /* OSQP_PROFILER_SEC_LINSYS_SYM_FAC */
     {"linsys_num_fac", 2},   /* OSQP_PROFILER_SEC_LINSYS_NUM_FAC */
     {"linsys_backsolve", 2}, /* OSQP_PROFILER_SEC_LINSYS_BACKSOLVE */
-    {"linalg_mvm", 2}        /* OSQP_PROFILER_SEC_LINALG_MVM */
+    {"linsys_mvm", 2}        /* OSQP_PROFILER_SEC_LINSYS_MVM */
 };

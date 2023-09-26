@@ -24,6 +24,8 @@
 #include "cuda_wrapper.h"
 #include "helper_cuda.h"    /* --> checkCudaErrors */
 
+#include "profilers.h"
+
 extern CUDA_Handle_t *CUDA_handle;
 
 /*******************************************************************************
@@ -153,7 +155,10 @@ OSQPInt cuda_pcg_alg(cudapcg_solver* s,
   while ( *(s->h_r_norm) > eps && iter < max_iter ) {
 
     /* Kp = K * p */
+
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_MVM);
     mat_vec_prod(s, s->d_Kp, s->vecKp, s->d_p, s->vecp, 1);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_MVM);
 
     /* pKp = p' * Kp */
     checkCudaErrors(cublasTdot(CUDA_handle->cublasHandle, n, s->d_p, 1, s->d_Kp, 1, s->pKp));
