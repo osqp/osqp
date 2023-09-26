@@ -293,7 +293,9 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
       return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
     // Scale data
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_SCALE);
     scale_data(solver);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_SCALE);
   } else {
     work->scaling  = OSQP_NULL;
     work->D_temp   = OSQP_NULL;
@@ -466,6 +468,8 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
   osqp_tic(work->timer); // Start timer
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
+osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
+
 
 #ifdef OSQP_ENABLE_PRINTING
   if (solver->settings->verbose) {
@@ -488,6 +492,7 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 
   max_iter = solver->settings->max_iter;
   for (iter = 1; iter <= max_iter; iter++) {
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_ITER);
 
     // Update x_prev, z_prev (preallocated, no malloc)
     swap_vectors(&(work->x), &(work->x_prev));
@@ -495,18 +500,26 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 
     /* ADMM STEPS */
     /* Compute \tilde{x}^{k+1}, \tilde{z}^{k+1} */
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_KKT_SOLVE);
     update_xz_tilde(solver, iter);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_ADMM_KKT_SOLVE);
+
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_UPDATE);
 
     /* Compute x^{k+1} */
     update_x(solver);
 
     /* Compute z^{k+1} */
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_PROJ);
     update_z(solver);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_ADMM_PROJ);
 
     /* Compute y^{k+1} */
     update_y(solver);
 
     /* End of ADMM Steps */
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_ADMM_UPDATE);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_ADMM_ITER);
 
 #ifdef OSQP_ENABLE_INTERRUPT
 
@@ -741,7 +754,9 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 #ifndef OSQP_EMBEDDED_MODE
   // Polish the obtained solution
   if (solver->settings->polishing && (solver->info->status_val == OSQP_SOLVED)) {
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_POLISH);
     exitflag = polish(solver);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_POLISH);
 
     if (exitflag > 0) {
       c_eprint("Failed polishing");
@@ -791,6 +806,8 @@ exit:
   // Restore previous signal handler
   osqp_end_interrupt_listener();
 #endif /* ifdef OSQP_ENABLE_INTERRUPT */
+
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_OPT_SOLVE);
 
   return exitflag;
 }
