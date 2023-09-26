@@ -794,7 +794,7 @@ OSQPInt osqp_get_solution(OSQPSolver* solver, OSQPSolution* solution) {
   }
 
   if (!solution)
-    return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR)
+    return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   store_solution(solver, solution);
 
