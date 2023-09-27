@@ -25,6 +25,12 @@ if(OSQP_ENABLE_PROFILER_ANNOTATIONS)
     message(STATUS "Enabling profiling annotations using NVTX")
     target_sources(OSQPLIB PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/profilers_nvtx.c)
     target_link_libraries(OSQPLIB CUDA::nvtx3)
+  else()
+    message(STATUS "Enabling profiling annotations using ITT API")
+    find_package(ITTAPI)
+
+    target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/profilers_itt.c")
+    target_link_libraries(OSQPLIB ITTAPI::ittnotify)
   endif()
 endif()
 
