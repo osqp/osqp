@@ -1,5 +1,5 @@
 
-#include "profiling.h"
+#include "profilers.h"
 
 
 OSQPProfilerSectionInfo osqp_profiler_sections[] = {
@@ -19,5 +19,5 @@ OSQPProfilerSectionInfo osqp_profiler_sections[] = {
     {"linsys_sym_fac",   "Symbolic factorization in direct solver", 2}, /* OSQP_PROFILER_SEC_LINSYS_SYM_FAC */
     {"linsys_num_fac",   "Numeric factorization in direct solver",  2}, /* OSQP_PROFILER_SEC_LINSYS_NUM_FAC */
     {"linsys_backsolve", "Backsolve in direct solver",              2}, /* OSQP_PROFILER_SEC_LINSYS_BACKSOLVE */
-    {"linsys_mvm",       "Matrix-vector multiplication"             2}  /* OSQP_PROFILER_SEC_LINSYS_MVM */
+    {"linsys_mvm",       "Matrix-vector multiplication",            2}  /* OSQP_PROFILER_SEC_LINSYS_MVM */
 };

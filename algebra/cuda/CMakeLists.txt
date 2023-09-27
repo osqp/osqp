@@ -15,9 +15,6 @@ target_include_directories(OSQPLIB PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} include l
 option(OSQP_CUDA_STATIC_LINKING "Statically link all CUDA libraries (WARNING: This will greatly increase the file size of the library)" OFF)
 mark_as_advanced(OSQP_CUDA_STATIC_LINKING)
 
-# Locate the individual CUDA libraries and create targets for them
-find_package( CUDAToolkit )
-
 if(OSQP_CUDA_STATIC_LINKING)
   message(STATUS "Statically linking CUDA libraries")
 
@@ -30,3 +27,4 @@ endif()
 configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/findAlgebraDependency.cmake.in
                 ${CMAKE_CURRENT_BINARY_DIR}/../../osqp-findAlgebraDependency.cmake
                 @ONLY )
+

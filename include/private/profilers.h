@@ -44,16 +44,6 @@ typedef struct {
     int level;              /* Level the section is enabled at */
 } OSQPProfilerSectionInfo;
 
-extern OSQPProfilerSectionInfo osqp_profiler_sections[];
-
-
-/*
- * Opaque objects containing the implementation-specific profiler section objects.
- * Initialized in @c osqp_profiler_init().
- */
-typedef struct OSQPProfilerSection_ OSQPProfilerSections;
-extern OSQPProfilerSections *osqp_profiler_sec_impl;
-
 /**
  * Initialize the profiler annotations for level @c level.
  *
@@ -89,6 +79,10 @@ void _osqp_profiler_sec_pop(OSQPProfilerSection section);
 #define osqp_profiler_update_level(level) _osqp_profiler_update_level(level)
 #define osqp_profiler_sec_push(sec)       _osqp_profiler_sec_push(sec)
 #define osqp_profiler_sec_pop(sec)        _osqp_profiler_sec_pop(sec)
+
+/* Array containing information about each valid section for profiling */
+extern OSQPProfilerSectionInfo osqp_profiler_sections[];
+
 #else
 #define osqp_profiler_init(level)
 #define osqp_profiler_update_level(level)

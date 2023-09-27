@@ -22,6 +22,7 @@
 #include "cuda_memory.h"
 
 #include "glob_opts.h"
+#include "profilers.h"
 
 
 /*******************************************************************************

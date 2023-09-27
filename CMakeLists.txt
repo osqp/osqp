@@ -82,6 +82,8 @@ option(OSQP_ENABLE_PRINTING "Enable solver printing" ON)
 option(OSQP_ENABLE_PROFILING "Enable solver profiling (timing)" ON)
 option(OSQP_ENABLE_INTERRUPT "Enable user interrupt (e.g. Ctrl-C)" ON)
 
+option(OSQP_ENABLE_PROFILER_ANNOTATIONS "Enable profiler annotations (NVTX for CUDA backend, ITT otherwise)" OFF)
+
 # Allow appending a string to the end of the library and the soname so people can have
 # multiple libraries side-by-side on an install.
 set(OSQP_LIB_SUFFIX "" CACHE STRING "String to append to the library name")
@@ -227,8 +229,8 @@ if(OSQP_ALGEBRA_CUDA)
   enable_language(CUDA)
   find_package(CUDA)
 
-  # cublas and cusparse headers
-  include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+  # Locate the individual CUDA libraries and create targets for them
+  find_package(CUDAToolkit)
 
   # sm_75 -> Turing support
   if(OSQP_USE_FLOAT)

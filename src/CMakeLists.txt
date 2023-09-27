@@ -18,6 +18,16 @@ if(NOT DEFINED OSQP_EMBEDDED_MODE)
   target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/polish.c")
 endif()
 
+if(OSQP_ENABLE_PROFILER_ANNOTATIONS)
+  target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/profilers.c")
+
+  if(OSQP_ALGEBRA_CUDA)
+    message(STATUS "Enabling profiling annotations using NVTX")
+    target_sources(OSQPLIB PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/profilers_nvtx.c)
+    target_link_libraries(OSQPLIB CUDA::nvtx3)
+  endif()
+endif()
+
 # Add the derivative support, if enabled
 if(OSQP_ENABLE_DERIVATIVES)
   target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/derivative.c")

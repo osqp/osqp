@@ -18,7 +18,10 @@
 /* Enable code generation */
 #cmakedefine OSQP_CODEGEN
 
-/* Enble derivative computation in the solver */
+/* Enable profiler annotations */
+#cmakedefine OSQP_ENABLE_PROFILER_ANNOTATIONS
+
+/* Enable derivative computation in the solver */
 #cmakedefine OSQP_ENABLE_DERIVATIVES
 
 /* OSQP_EMBEDDED_MODE */
