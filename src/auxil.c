@@ -970,8 +970,7 @@ OSQPInt validate_settings(const OSQPSettings* settings,
     return 1;
   }
 
-  if (from_setup &&
-      settings->profiler_level != 0 &&
+  if (settings->profiler_level != 0 &&
       settings->profiler_level != 1 &&
       settings->profiler_level != 2) {
     c_eprint("profiler_level must be either 0, 1 or 2");

@@ -40,6 +40,7 @@ typedef enum {
  */
 typedef struct {
     const char* name;       /* Visible name for the section */
+    const char* desc;       /* Description of the section */
     int level;              /* Level the section is enabled at */
 } OSQPProfilerSectionInfo;
 
@@ -50,8 +51,8 @@ extern OSQPProfilerSectionInfo osqp_profiler_sections[];
  * Opaque objects containing the implementation-specific profiler section objects.
  * Initialized in @c osqp_profiler_init().
  */
-typedef struct OSQPProfilerSection_ OSQPProfilerSection;
-extern OSQPProfilerSection *osqp_profiler_sec_impl;
+typedef struct OSQPProfilerSection_ OSQPProfilerSections;
+extern OSQPProfilerSections *osqp_profiler_sec_impl;
 
 /**
  * Initialize the profiler annotations for level @c level.
@@ -59,6 +60,13 @@ extern OSQPProfilerSection *osqp_profiler_sec_impl;
  * @param level is the level (0, 1, 2) of annotations to enable
  */
 void _osqp_profiler_init(int level);
+
+/**
+ * Update the active profiler annotation level.
+ *
+ * @param level is the new level (0, 1, 2) of annotations to enable
+ */
+void _osqp_profiler_update_level(int level);
 
 /**
  * Push a profiler section annotation onto the stack to show the code is in the section.
@@ -77,11 +85,13 @@ void _osqp_profiler_sec_pop(OSQPProfilerSection section);
  * Allow disabling the profiler annotations completely with no overhead by just ignoring the call.
  */
 #ifdef OSQP_ENABLE_PROFILER_ANNOTATIONS
-#define osqp_profiler_init(level)   _osqp_profiler_init(level)
-#define osqp_profiler_sec_push(sec) _osqp_profiler_sec_push(sec)
-#define osqp_profiler_sec_pop(sec)     _osqp_profiler_sec_pop(sec)
+#define osqp_profiler_init(level)         _osqp_profiler_init(level)
+#define osqp_profiler_update_level(level) _osqp_profiler_update_level(level)
+#define osqp_profiler_sec_push(sec)       _osqp_profiler_sec_push(sec)
+#define osqp_profiler_sec_pop(sec)        _osqp_profiler_sec_pop(sec)
 #else
 #define osqp_profiler_init(level)
+#define osqp_profiler_update_level(level)
 #define osqp_profiler_sec_push(sec)
 #define osqp_profiler_sec_pop(sec)
 #endif

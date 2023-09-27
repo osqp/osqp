@@ -1251,6 +1251,10 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
   // linsys_solver ignored
   /* allocate_solver ignored */
 
+  /* Must call into profiler to update level in addition to storing the value */
+  settings->profiler_level = new_settings->profiler_level;
+  osqp_profiler_update_level(settings->profiler_level);
+
   settings->verbose       = new_settings->verbose;
   settings->warm_starting = new_settings->warm_starting;
   // scaling ignored
