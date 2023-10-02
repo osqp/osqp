@@ -19,7 +19,7 @@
 #cmakedefine OSQP_CODEGEN
 
 /* Enable profiler annotations */
-#cmakedefine OSQP_ENABLE_PROFILER_ANNOTATIONS
+#cmakedefine OSQP_PROFILER_ANNOTATIONS
 
 /* Enable derivative computation in the solver */
 #cmakedefine OSQP_ENABLE_DERIVATIVES

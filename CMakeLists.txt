@@ -82,7 +82,8 @@ option(OSQP_ENABLE_PRINTING "Enable solver printing" ON)
 option(OSQP_ENABLE_PROFILING "Enable solver profiling (timing)" ON)
 option(OSQP_ENABLE_INTERRUPT "Enable user interrupt (e.g. Ctrl-C)" ON)
 
-option(OSQP_ENABLE_PROFILER_ANNOTATIONS "Enable profiler annotations (NVTX for CUDA backend, ITT otherwise)" OFF)
+set(OSQP_PROFILER_ANNOTATIONS "OFF" CACHE STRING
+    "Enable profiler annotations (NVTX for CUDA backend, ITT otherwise)")
 
 # Allow appending a string to the end of the library and the soname so people can have
 # multiple libraries side-by-side on an install.

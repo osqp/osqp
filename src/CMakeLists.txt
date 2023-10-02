@@ -18,19 +18,21 @@ if(NOT DEFINED OSQP_EMBEDDED_MODE)
   target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/polish.c")
 endif()
 
-if(OSQP_ENABLE_PROFILER_ANNOTATIONS)
+if(OSQP_PROFILER_ANNOTATIONS)
   target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/profilers.c")
 
   if(OSQP_ALGEBRA_CUDA)
     message(STATUS "Enabling profiling annotations using NVTX")
     target_sources(OSQPLIB PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/profilers_nvtx.c)
     target_link_libraries(OSQPLIB CUDA::nvtx3)
-  else()
+  elseif(OSQP_PROFILER_ANNOTATIONS STREQUAL "itt")
     message(STATUS "Enabling profiling annotations using ITT API")
     find_package(ITTAPI)
 
     target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/profilers_itt.c")
     target_link_libraries(OSQPLIB ITTAPI::ittnotify)
+  else()
+    message(FATAL_ERROR "Unknown profiler annotation option: ${OSQP_PROFILER_ANNOTATIONS}")
   endif()
 endif()
 

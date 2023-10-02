@@ -88,7 +88,7 @@ void _osqp_profiler_event_mark(OSQPProfilerEvent event);
 /*
  * Allow disabling the profiler annotations completely with no overhead by just ignoring the call.
  */
-#ifdef OSQP_ENABLE_PROFILER_ANNOTATIONS
+#ifdef OSQP_PROFILER_ANNOTATIONS
 #define osqp_profiler_init(level)         _osqp_profiler_init(level)
 #define osqp_profiler_update_level(level) _osqp_profiler_update_level(level)
 #define osqp_profiler_sec_push(sec)       _osqp_profiler_sec_push(sec)
