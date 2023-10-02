@@ -34,15 +34,25 @@ typedef enum {
     OSQP_PROFILER_SEC_ARRAY_LAST
 } OSQPProfilerSection;
 
+/**
+ * Profiler event annotations that will be used by certain profilers.
+ */
+typedef enum {
+    /* Level 1 details (coarse) */
+    OSQP_PROFILER_EVENT_RHO_UPDATE,             /* Rho value updated */
+    
+    /* Sentinel element */
+    OSQP_PROFILER_EVENT_ARRAY_LAST
+} OSQPProfilerEvent;
 
 /*
- * Metadata for a profiler section annotation
+ * Metadata for a profiler annotation
  */
 typedef struct {
-    const char* name;       /* Visible name for the section */
-    const char* desc;       /* Description of the section */
-    int level;              /* Level the section is enabled at */
-} OSQPProfilerSectionInfo;
+    const char* name;       /* Visible name for the item */
+    const char* desc;       /* Description of the item */
+    int level;              /* Level the item is enabled at */
+} OSQPProfilerItemInfo;
 
 /**
  * Initialize the profiler annotations for level @c level.
@@ -70,6 +80,10 @@ void _osqp_profiler_sec_push(OSQPProfilerSection section);
  */
 void _osqp_profiler_sec_pop(OSQPProfilerSection section);
 
+/**
+ * Mark an event as occuring for the profiler.
+ */
+void _osqp_profiler_event_mark(OSQPProfilerEvent event);
 
 /*
  * Allow disabling the profiler annotations completely with no overhead by just ignoring the call.
@@ -79,15 +93,20 @@ void _osqp_profiler_sec_pop(OSQPProfilerSection section);
 #define osqp_profiler_update_level(level) _osqp_profiler_update_level(level)
 #define osqp_profiler_sec_push(sec)       _osqp_profiler_sec_push(sec)
 #define osqp_profiler_sec_pop(sec)        _osqp_profiler_sec_pop(sec)
+#define osqp_profiler_event_mark(event)   _osqp_profiler_event_mark(event)
 
 /* Array containing information about each valid section for profiling */
-extern OSQPProfilerSectionInfo osqp_profiler_sections[];
+extern OSQPProfilerItemInfo osqp_profiler_sections[];
+
+/* Array containing information about each valid event for profiling */
+extern OSQPProfilerItemInfo osqp_profiler_events[];
 
 #else
 #define osqp_profiler_init(level)
 #define osqp_profiler_update_level(level)
 #define osqp_profiler_sec_push(sec)
 #define osqp_profiler_sec_pop(sec)
+#define osqp_profiler_event_mark(event)
 #endif
 
 

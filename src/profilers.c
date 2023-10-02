@@ -2,7 +2,7 @@
 #include "profilers.h"
 
 
-OSQPProfilerSectionInfo osqp_profiler_sections[] = {
+OSQPProfilerItemInfo osqp_profiler_sections[] = {
     /* Level 1 detail (coarse) */
     {"prob_setup",      "Problem setup",                      1}, /* OSQP_PROFILER_SEC_SETUP */
     {"prob_scale",      "Problem data scaling",               1}, /* OSQP_PROFILER_SEC_SCALE */
@@ -20,4 +20,9 @@ OSQPProfilerSectionInfo osqp_profiler_sections[] = {
     {"linsys_num_fac",   "Numeric factorization in direct solver",  2}, /* OSQP_PROFILER_SEC_LINSYS_NUM_FAC */
     {"linsys_backsolve", "Backsolve in direct solver",              2}, /* OSQP_PROFILER_SEC_LINSYS_BACKSOLVE */
     {"linsys_mvm",       "Matrix-vector multiplication",            2}  /* OSQP_PROFILER_SEC_LINSYS_MVM */
+};
+
+OSQPProfilerItemInfo osqp_profiler_events[] = {
+    /* Level 1 details (coarse) */
+    {"rho_update", "Rho update", 1} /* OSQP_PROFILER_EVENT_RHO_UPDATE */
 };

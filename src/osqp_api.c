@@ -670,6 +670,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 # endif /* ifdef OSQP_ENABLE_PRINTING */
 
       // Actually update rho
+      osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
       if (adapt_rho(solver)) {
         c_eprint("Failed rho update");
         exitflag = 1;
