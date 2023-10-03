@@ -13,7 +13,7 @@ Basic Profiling
 Basic solver profiling is enabled by the :code:`OSQP_ENABLE_PROFILING` CMake build option, and uses the system's
 clock to time the setup and solve phases.
 The runtime for the solver is displayed alongside the solver status when the solver finishes, and is also contained
-inside fields of the :cpp:struct:`OSQPInfo` structure.
+inside fields of the :c:struct:`OSQPInfo` structure.
 
 Advanced Profiling
 ------------------
@@ -22,11 +22,19 @@ Advanced solver profiling is available with the use of the following external to
 
 * :ref:`NVidia Nsight<adv_profile_nvidia_nsight>`
 * :ref:`Intel VTune<adv_profile_intel_vtune>`
-* :ref:`AMD Research OmniTrace<adv_profile_amdres_omnitrace>`
+* :ref:`AMD OmniTrace<adv_profile_amd_omnitrace>`
 
-While these profilers will analyze and report on any configuration of OSQP, when OSQP is built with the
-:code:`OSQP_PROFILER_ANNOTATIONS` CMake build option, OSQP will report to the profiler when sections
-of the code start/end, allowing more fine-grained timing of individual sections of the solver phase.
+While these profilers can be used with normal builds of OSQP, using the OSQP CMake build option
+:code:`OSQP_PROFILER_ANNOTATIONS` will enable section annotation, telling the profiler when sections
+of the code start/end to allow more fine-grained timing of individual sections of the various solver phases.
+
+At runtime, the OSQP profiler annotations are controlled using the :cpp:var:`OSQPSettings::profiler_level`
+settings variable.
+This setting can take three different values:
+
+* :code:`0` - Disable all annotation information
+* :code:`1` - Annotate only OSQP ADMM sections
+* :code:`2` - Annotate both OSQP ADMM sections and underlying linear algebra sections
 
 
 .. _adv_profile_nvidia_nsight:
@@ -34,10 +42,10 @@ of the code start/end, allowing more fine-grained timing of individual sections 
 NVidia Nsight
 ^^^^^^^^^^^^^
 
-When using the NVidia CUDA algebra backend with the profiler annotations enabled, only the `NVidia Nsight`_ profiler should
-be used.
-This requires the use of the NVidia NVTX library, which is selected using the :code:`OSQP_PROFILER_ANNOTATIONS=nvtx` CMake
-option during configuration.
+When using the NVidia CUDA algebra backend with the profiler annotations enabled, only the `NVidia Nsight`_
+profiler should be used.
+OSQP uses the NVidia NVTX library library to report solver sections, which is selected using the
+:code:`OSQP_PROFILER_ANNOTATIONS=nvtx` CMake option during configuration.
 
 Once compiled with the NVTX library support, OSQP will report profiling information when run using the `NVidia Nsight`_
 profiler tool. The timing information will be namespaced into the :code:`osqp` domain, and is reported in the NVTX ranges
@@ -59,7 +67,8 @@ the following should be run on Linux:
    nsys stats --report nvtx_sum <report_name>.sqlite
 
 
-This will then report all the timing information for the OSQP sections of the code in a table on the command line:
+This will then report all the timing information for the OSQP sections of the code in a table on the command line,
+similar to the one shown below.
 
 .. code::
 
@@ -85,7 +94,7 @@ GUI Profiling
 To use the `NVidia Nsight`_ GUI to profile OSQP, ensure that the `Collect NVTX trace` project option is selected, and the 
 :code:`osqp` domain is included in any NVTX domain filters that are setup.
 Then, the OSQP sections will be shown on the timeline, and all the OSQP sections and events can be seen in the `Events view`.
-A sample of the Nsight GUI is shown below.
+A sample of the Nsight GUI with OSQP section information included is shown below.
 
 .. image:: ../_static/img/NsightPanel.png
     :alt: Sample Nsight timeline and event panel
@@ -96,10 +105,10 @@ A sample of the Nsight GUI is shown below.
 Intel VTune
 ^^^^^^^^^^^
 
-When using the built-in or MKL algebra backends, OSQP can be profiled using the `Intel VTune`_ profiler.
-OSQP reports its information to VTune using the ITT (Instrumentation and Tracing Technology APIs) library,
-and this can be selected when building OSQP by using the :code:`OSQP_PROFILER_ANNOTATIONS=itt` CMake
-option during configuration.
+When using CPU-based backends, OSQP can be profiled using the `Intel VTune`_ profiler.
+OSQP integration with VTune is enabled using the :code:`OSQP_PROFILER_ANNOTATIONS=itt` CMake build
+option, which enables the ITT (Instrumentation and Tracing Technology APIs) library for reporting section
+information.
 OSQP reports the various parts of the solver as a `Task` under the ::code:`osqp` domain.
 
 .. _Intel VTune: https://www.intel.com/content/www/us/en/developer/tools/oneapi/vtune-profiler.html#gs.6g073h
@@ -109,9 +118,9 @@ GUI Profiling
 ~~~~~~~~~~~~~
 
 To use `Intel VTune`_ to profile OSQP with the profiler annotations, run a `Hotspot` analysis, and ensure the
-`Analyze user tasksm events and counters` option is selected.
-Once run, the OSQP annotations can be seen in the application's trace in the `Platform` timeline view, and also in the tooltip when 
-the mouse hovers over an item in the timeline, as shown below.
+`Analyze user tasks, events and counters` option is selected.
+Once run, the OSQP annotations can be seen in the application's trace in the `Platform` timeline view, and
+also in the tooltip when the mouse hovers over an item in the timeline, as shown below.
 
 .. image:: ../_static/img/VTune_Timeline.png
     :alt: Sample VTune timeline panel
@@ -123,19 +132,19 @@ on the `Bottom-up` tab of the analysis window, with the `Task Type / Function / 
     :alt: Sample VTune GUI task list
 
 
-.. _adv_profile_amdres_omnitrace:
+.. _adv_profile_amd_omnitrace:
 
-AMD Research OmniTrace
-^^^^^^^^^^^^^^^^^^^^^^
+AMD OmniTrace
+^^^^^^^^^^^^^
 
-OSQP can be profiled using the `AMD Research OmniTrace`_ profiler, where OSQP will use the OmniTrace user API
+OSQP can be profiled using the `AMD OmniTrace`_ profiler, where OSQP will use the OmniTrace user API
 to report sections of the code for timing. To enable the section reporting, use the :code:`OSQP_PROFILER_ANNOTATIONS=omnitrace`
 CMake option during configuration.
 
 
-.. _AMD Research OmniTrace: https://amdresearch.github.io/omnitrace/index.html
+.. _AMD OmniTrace: https://amdresearch.github.io/omnitrace/index.html
 
-OmniTrace uses the command line to profile and report the OSQP timings for the OSQP demo executable.
+OmniTrace uses the command line to profile and report the OSQP timings.
 To build and run an instrumented OSQP executable, the following should be run on Linux (replacing :code:`osqp_demo` with
 the desired program):
 
@@ -151,6 +160,7 @@ in the `wall_clock.json` file.
 A sample `wall_clock.txt` output is shown below.
 
 .. code::
+
     |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
     |                                                                 REAL-CLOCK TIMER (I.E. WALL-CLOCK TIMER)                                                                 |
     |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -176,9 +186,10 @@ A sample `wall_clock.txt` output is shown below.
     | |0>>>     |_Solve the linear system                   |      4 |      3 | wall_clock | sec    | 0.000025 | 0.000006 | 0.000003 | 0.000016 | 0.000000 | 0.000006 |   91.1 |
 
 
-Additionally, OmniTrace outputs a trace file suitable for importing into `Perfetto`_.
+Additionally, OmniTrace outputs a trace file suitable for importing into the `Perfetto`_ timeline viewer.
 Once imported, the section labels appear in the timeline view, as shown below.
 
-.. image: ../_static/img/OmniTrace_Perfetto.png
+.. image:: ../_static/img/OmniTrace_Perfetto.png
+    :alt: Timeline view from Perfetto
 
 .. _Perfetto: https://ui.perfetto.dev/

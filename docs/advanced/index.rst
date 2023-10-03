@@ -1,5 +1,5 @@
 Advanced features
-===============
+=================
 
 OSQP includes some advanced features that are documented below.
 
