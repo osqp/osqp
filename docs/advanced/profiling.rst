@@ -22,6 +22,7 @@ Advanced solver profiling is available with the use of the following external to
 
 * :ref:`NVidia Nsight<adv_profile_nvidia_nsight>`
 * :ref:`Intel VTune<adv_profile_intel_vtune>`
+* :ref:`AMD Research OmniTrace<adv_profile_amdres_omnitrace>`
 
 While these profilers will analyze and report on any configuration of OSQP, when OSQP is built with the
 :code:`OSQP_PROFILER_ANNOTATIONS` CMake build option, OSQP will report to the profiler when sections
@@ -120,3 +121,64 @@ on the `Bottom-up` tab of the analysis window, with the `Task Type / Function / 
 
 .. image:: ../_static/img/VTune_TaskList.png
     :alt: Sample VTune GUI task list
+
+
+.. _adv_profile_amdres_omnitrace:
+
+AMD Research OmniTrace
+^^^^^^^^^^^^^^^^^^^^^^
+
+OSQP can be profiled using the `AMD Research OmniTrace`_ profiler, where OSQP will use the OmniTrace user API
+to report sections of the code for timing. To enable the section reporting, use the :code:`OSQP_PROFILER_ANNOTATIONS=omnitrace`
+CMake option during configuration.
+
+
+.. _AMD Research OmniTrace: https://amdresearch.github.io/omnitrace/index.html
+
+OmniTrace uses the command line to profile and report the OSQP timings for the OSQP demo executable.
+To build and run an instrumented OSQP executable, the following should be run on Linux (replacing :code:`osqp_demo` with
+the desired program):
+
+.. code:: bash
+
+   omnitrace-instrument -l --min-instructions=8 -o -- ./osqp_demo
+   omnitrace-run --profile -- ./osqp_demo.inst 20 4 100
+
+
+After running, this creates a new directory containing the output, with a directory for each run inside.
+The timings for each section of the code can be viewed in the `wall_clock.txt` file, with a machine-readable timing report
+in the `wall_clock.json` file.
+A sample `wall_clock.txt` output is shown below.
+
+.. code::
+    |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+    |                                                                 REAL-CLOCK TIMER (I.E. WALL-CLOCK TIMER)                                                                 |
+    |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+    |                        LABEL                          | COUNT  | DEPTH  |   METRIC   | UNITS  |   SUM    |   MEAN   |   MIN    |   MAX    |   VAR    | STDDEV   | % SELF |
+    |-------------------------------------------------------|--------|--------|------------|--------|----------|----------|----------|----------|----------|----------|--------|
+    | |0>>> osqp_demo.inst                                  |      1 |      0 | wall_clock | sec    | 0.001535 | 0.001535 | 0.001535 | 0.001535 | 0.000000 | 0.000000 |   65.2 |
+    | |0>>> |_Problem setup                                 |      1 |      1 | wall_clock | sec    | 0.000074 | 0.000074 | 0.000074 | 0.000074 | 0.000000 | 0.000000 |   69.2 |
+    | |0>>>   |_Problem data scaling                        |      1 |      2 | wall_clock | sec    | 0.000008 | 0.000008 | 0.000008 | 0.000008 | 0.000000 | 0.000000 |  100.0 |
+    | |0>>>   |_Initialize linear system solver             |      1 |      2 | wall_clock | sec    | 0.000015 | 0.000015 | 0.000015 | 0.000015 | 0.000000 | 0.000000 |   85.0 |
+    | |0>>>     |_Symbolic factorization in direct solver   |      1 |      3 | wall_clock | sec    | 0.000001 | 0.000001 | 0.000001 | 0.000001 | 0.000000 | 0.000000 |  100.0 |
+    | |0>>>     |_Numeric factorization in direct solver    |      1 |      3 | wall_clock | sec    | 0.000001 | 0.000001 | 0.000001 | 0.000001 | 0.000000 | 0.000000 |  100.0 |
+    | |0>>> |_Solving optimization problem                  |      1 |      1 | wall_clock | sec    | 0.000460 | 0.000460 | 0.000460 | 0.000460 | 0.000000 | 0.000000 |   16.9 |
+    | |0>>>   |_ADMM iteration                              |     25 |      2 | wall_clock | sec    | 0.000331 | 0.000013 | 0.000012 | 0.000020 | 0.000000 | 0.000002 |   33.2 |
+    | |0>>>     |_KKT system solve in ADMM iteration        |     25 |      3 | wall_clock | sec    | 0.000136 | 0.000005 | 0.000005 | 0.000009 | 0.000000 | 0.000001 |   46.3 |
+    | |0>>>       |_Solve the linear system                 |     25 |      4 | wall_clock | sec    | 0.000073 | 0.000003 | 0.000003 | 0.000004 | 0.000000 | 0.000000 |   80.5 |
+    | |0>>>         |_Backsolve in direct solver            |     25 |      5 | wall_clock | sec    | 0.000014 | 0.000001 | 0.000001 | 0.000001 | 0.000000 | 0.000000 |  100.0 |
+    | |0>>>     |_Vector updates in ADMM iteration          |     25 |      3 | wall_clock | sec    | 0.000086 | 0.000003 | 0.000003 | 0.000010 | 0.000000 | 0.000002 |   76.4 |
+    | |0>>>       |_Projection in ADMM iteration            |     25 |      4 | wall_clock | sec    | 0.000020 | 0.000001 | 0.000000 | 0.000008 | 0.000000 | 0.000001 |  100.0 |
+    | |0>>>   |_Solution polishing                          |      1 |      2 | wall_clock | sec    | 0.000051 | 0.000051 | 0.000051 | 0.000051 | 0.000000 | 0.000000 |   32.8 |
+    | |0>>>     |_Initialize linear system solver           |      1 |      3 | wall_clock | sec    | 0.000009 | 0.000009 | 0.000009 | 0.000009 | 0.000000 | 0.000000 |   83.8 |
+    | |0>>>       |_Symbolic factorization in direct solver |      1 |      4 | wall_clock | sec    | 0.000001 | 0.000001 | 0.000001 | 0.000001 | 0.000000 | 0.000000 |  100.0 |
+    | |0>>>       |_Numeric factorization in direct solver  |      1 |      4 | wall_clock | sec    | 0.000001 | 0.000001 | 0.000001 | 0.000001 | 0.000000 | 0.000000 |  100.0 |
+    | |0>>>     |_Solve the linear system                   |      4 |      3 | wall_clock | sec    | 0.000025 | 0.000006 | 0.000003 | 0.000016 | 0.000000 | 0.000006 |   91.1 |
+
+
+Additionally, OmniTrace outputs a trace file suitable for importing into `Perfetto`_.
+Once imported, the section labels appear in the timeline view, as shown below.
+
+.. image: ../_static/img/OmniTrace_Perfetto.png
+
+.. _Perfetto: https://ui.perfetto.dev/
