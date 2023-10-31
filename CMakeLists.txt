@@ -218,6 +218,9 @@ endif()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configure/osqp_configure.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/include/public/osqp_configure.h NEWLINE_STYLE LF)
 
+# Allow external QDLDL
+# ----------------------------------------------
+
 option(QDLDL_EXTERNAL "Enable external QDLDL source" OFF)
 
 if(QDLDL_EXTERNAL)

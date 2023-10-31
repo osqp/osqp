@@ -11,6 +11,7 @@ FetchContent_Declare(
   SOURCE_DIR ${OSQP_ALGEBRA_ROOT}/_common/lin_sys/qdldl/qdldl_sources)
 FetchContent_GetProperties(qdldl)
 
+# If an external root is set populate the FetchContent so it will not pull
 if(QDLDL_EXTERNAL)
   set(FETCHCONTENT_SOURCE_DIR_QDLDL ${QDLDL_ROOT})
   set(FETCHCONTENT_UPDATES_DISCONNECTED_QDLDL ${QDLDL_ROOT})
