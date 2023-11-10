@@ -970,6 +970,13 @@ OSQPInt validate_settings(const OSQPSettings* settings,
     return 1;
   }
 
+  if (settings->profiler_level != 0 &&
+      settings->profiler_level != 1 &&
+      settings->profiler_level != 2) {
+    c_eprint("profiler_level must be either 0, 1 or 2");
+    return 1;
+  }
+
   if (settings->warm_starting != 0 &&
       settings->warm_starting != 1) {
     c_eprint("warm_start must be either 0 or 1");

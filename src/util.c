@@ -276,6 +276,7 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->linsys_solver = settings->linsys_solver;
 
   new->allocate_solution = settings->allocate_solution;
+  new->profiler_level    = settings->profiler_level;
   new->verbose           = settings->verbose;
   new->warm_starting     = settings->warm_starting;
   new->scaling           = settings->scaling;

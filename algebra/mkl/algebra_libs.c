@@ -4,6 +4,7 @@
 
 #include "pardiso_interface.h"
 #include "mkl-cg_interface.h"
+#include "profilers.h"
 #include "util.h"
 
 #include <mkl.h>
@@ -71,17 +72,25 @@ OSQPInt osqp_algebra_init_linsys_solver(LinSysSolver**      s,
                                         OSQPFloat*          scaled_dual_res,
                                         OSQPInt             polishing) {
 
+    OSQPInt retval = 0;
+
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_INIT);
+
     switch (settings->linsys_solver) {
     default:
     case OSQP_DIRECT_SOLVER:
-        return init_linsys_solver_pardiso((pardiso_solver **)s, P, A, rho_vec, settings, polishing);
+        retval = init_linsys_solver_pardiso((pardiso_solver **)s, P, A, rho_vec, settings, polishing);
+        break;
 
     case OSQP_INDIRECT_SOLVER:
-        return init_linsys_mklcg((mklcg_solver **) s,
-                                 P, A, rho_vec,
-                                 settings,
-                                 scaled_prim_res,
-                                 scaled_dual_res,
-                                 polishing);
+        retval = init_linsys_mklcg((mklcg_solver **) s,
+                                    P, A, rho_vec,
+                                    settings,
+                                    scaled_prim_res,
+                                    scaled_dual_res,
+                                    polishing);
     }
+
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_INIT);
+    return retval;
 }

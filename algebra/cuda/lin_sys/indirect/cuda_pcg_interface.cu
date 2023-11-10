@@ -22,6 +22,7 @@
 #include "cuda_memory.h"
 
 #include "glob_opts.h"
+#include "profilers.h"
 
 
 /*******************************************************************************
@@ -232,6 +233,8 @@ OSQPInt solve_linsys_cudapcg(cudapcg_solver* s,
   OSQPInt   pcg_iters;
   OSQPFloat eps;
 
+  osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_SOLVE);
+
   /* Compute the RHS of the reduced KKT system and store it in s->d_rhs */
   compute_rhs(s, b->d_val);
 
@@ -263,6 +266,8 @@ OSQPInt solve_linsys_cudapcg(cudapcg_solver* s,
   // Number of consecutive ADMM iterations with zero PCG iterations
   if (pcg_iters == 0) s->zero_pcg_iters++;
   else                s->zero_pcg_iters = 0;
+
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_SOLVE);
 
   return 0;
 }

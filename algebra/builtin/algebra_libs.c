@@ -1,6 +1,7 @@
 #include "osqp_api_constants.h"
 #include "osqp_api_types.h"
 #include "qdldl_interface.h"
+#include "profilers.h"
 #include "util.h"
 
 OSQPInt osqp_algebra_linsys_supported(void) {
@@ -58,16 +59,22 @@ OSQPInt osqp_algebra_init_linsys_solver(LinSysSolver**      s,
                                         OSQPFloat*          scaled_prim_res,
                                         OSQPFloat*          scaled_dual_res,
                                         OSQPInt             polishing) {
+  OSQPInt retval = 0;
 
   // Don't use the scaled residuals right now
   OSQP_UnusedVar(scaled_prim_res);
   OSQP_UnusedVar(scaled_dual_res);
 
+  osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_INIT);
+
   switch (settings->linsys_solver) {
   default:
   case OSQP_DIRECT_SOLVER:
-    return init_linsys_solver_qdldl((qdldl_solver **)s, P, A, rho_vec, settings, polishing);
+    retval = init_linsys_solver_qdldl((qdldl_solver **)s, P, A, rho_vec, settings, polishing);
   }
+
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_INIT);
+  return retval;
 }
 
 OSQPInt adjoint_derivative_linsys_solver(LinSysSolver**      s,

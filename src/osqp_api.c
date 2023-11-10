@@ -9,6 +9,7 @@
 #include "lin_alg.h"
 #include "printing.h"
 #include "timing.h"
+#include "profilers.h"
 
 
 #ifdef OSQP_CODEGEN
@@ -107,6 +108,8 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->linsys_solver  = osqp_algebra_default_linsys();  /* linear system solver */
 
   settings->allocate_solution = 1;                            /* allocate solution */
+  settings->profiler_level    = 0;                            /* Profiler annotation level */
+
   settings->verbose           = OSQP_VERBOSE;                 /* print output */
   settings->warm_starting     = OSQP_WARM_STARTING;           /* warm starting */
   settings->scaling           = OSQP_SCALING;                 /* heuristic problem scaling */
@@ -163,6 +166,9 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
 
   // Validate settings
   if (validate_settings(settings, 1)) return osqp_error(OSQP_SETTINGS_VALIDATION_ERROR);
+
+  osqp_profiler_init(settings->profiler_level);
+  osqp_profiler_sec_push(OSQP_PROFILER_SEC_SETUP);
 
   // Allocate empty solver
   solver = c_calloc(1, sizeof(OSQPSolver));
@@ -287,7 +293,9 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
       return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
     // Scale data
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_SCALE);
     scale_data(solver);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_SCALE);
   } else {
     work->scaling  = OSQP_NULL;
     work->D_temp   = OSQP_NULL;
@@ -410,6 +418,8 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 # endif /* ifdef OSQP_ENABLE_DERIVATIVES */
 
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_SETUP);
+
   // Return exit flag
   return 0;
 }
@@ -458,6 +468,8 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
   osqp_tic(work->timer); // Start timer
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
+osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
+
 
 #ifdef OSQP_ENABLE_PRINTING
   if (solver->settings->verbose) {
@@ -480,6 +492,7 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 
   max_iter = solver->settings->max_iter;
   for (iter = 1; iter <= max_iter; iter++) {
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_ITER);
 
     // Update x_prev, z_prev (preallocated, no malloc)
     swap_vectors(&(work->x), &(work->x_prev));
@@ -487,18 +500,26 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 
     /* ADMM STEPS */
     /* Compute \tilde{x}^{k+1}, \tilde{z}^{k+1} */
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_KKT_SOLVE);
     update_xz_tilde(solver, iter);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_ADMM_KKT_SOLVE);
+
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_UPDATE);
 
     /* Compute x^{k+1} */
     update_x(solver);
 
     /* Compute z^{k+1} */
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_PROJ);
     update_z(solver);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_ADMM_PROJ);
 
     /* Compute y^{k+1} */
     update_y(solver);
 
     /* End of ADMM Steps */
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_ADMM_UPDATE);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_ADMM_ITER);
 
 #ifdef OSQP_ENABLE_INTERRUPT
 
@@ -649,6 +670,7 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 # endif /* ifdef OSQP_ENABLE_PRINTING */
 
       // Actually update rho
+      osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
       if (adapt_rho(solver)) {
         c_eprint("Failed rho update");
         exitflag = 1;
@@ -733,7 +755,9 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 #ifndef OSQP_EMBEDDED_MODE
   // Polish the obtained solution
   if (solver->settings->polishing && (solver->info->status_val == OSQP_SOLVED)) {
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_POLISH);
     exitflag = polish(solver);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_POLISH);
 
     if (exitflag > 0) {
       c_eprint("Failed polishing");
@@ -783,6 +807,8 @@ exit:
   // Restore previous signal handler
   osqp_end_interrupt_listener();
 #endif /* ifdef OSQP_ENABLE_INTERRUPT */
+
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_OPT_SOLVE);
 
   return exitflag;
 }
@@ -1225,6 +1251,10 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
   /* Update settings */
   // linsys_solver ignored
   /* allocate_solver ignored */
+
+  /* Must call into profiler to update level in addition to storing the value */
+  settings->profiler_level = new_settings->profiler_level;
+  osqp_profiler_update_level(settings->profiler_level);
 
   settings->verbose       = new_settings->verbose;
   settings->warm_starting = new_settings->warm_starting;

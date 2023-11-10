@@ -50,6 +50,7 @@ typedef struct {
   // Control settings
   OSQPInt allocate_solution;                  ///< boolean; allocate solution in OSQPSolver during osqp_setup
   OSQPInt verbose;                            ///< boolean; write out progress
+  OSQPInt profiler_level;                     ///< integer; level of detail for profiler annotations
   OSQPInt warm_starting;                      ///< boolean; warm start
   OSQPInt scaling;                            ///< data scaling iterations; if 0, then disabled
   OSQPInt polishing;                          ///< boolean; polish ADMM solution

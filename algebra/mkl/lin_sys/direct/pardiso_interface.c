@@ -2,6 +2,7 @@
 #include "algebra_impl.h"
 #include "printing.h"
 #include "util.h"
+#include "profilers.h"
 
 #if OSQP_EMBEDDED_MODE != 1
 #include "kkt.h"
@@ -205,9 +206,12 @@ OSQPInt init_linsys_solver_pardiso(pardiso_solver**    sp,
 
   // Reordering and symbolic factorization
   s->phase = PARDISO_SYMBOLIC;
+  osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_SYM_FAC);
   PARDISO (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
             &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
             s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_SYM_FAC);
+
   if ( s->error != 0 ){
     c_eprint("Error during symbolic factorization: %d", (int)s->error);
     free_linsys_solver_pardiso(s);
@@ -217,9 +221,12 @@ OSQPInt init_linsys_solver_pardiso(pardiso_solver**    sp,
 
   // Numerical factorization
   s->phase = PARDISO_NUMERIC;
+  osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
   PARDISO (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
             &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
             s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
+  
   if ( s->error ){
     c_eprint("Error during numerical factorization: %d", (int)s->error);
     free_linsys_solver_pardiso(s);
@@ -253,11 +260,16 @@ OSQPInt solve_linsys_pardiso(pardiso_solver* s,
   OSQPInt    m  = s->m;
   OSQPFloat* bv = b->values;
 
+  osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_SOLVE);
+
   // Back substitution and iterative refinement
+  osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_BACKSOLVE);
   s->phase = PARDISO_SOLVE;
   PARDISO (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
             &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
             s->iparm, &(s->msglvl), bv, s->sol, &(s->error));
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_BACKSOLVE);
+
   if ( s->error != 0 ){
     c_eprint("Error during linear system solution: %d", (int)s->error);
     return 1;
@@ -281,6 +293,9 @@ OSQPInt solve_linsys_pardiso(pardiso_solver* s,
       }
     }
   }
+  
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_SOLVE);
+
   return 0;
 }
 
@@ -301,9 +316,11 @@ OSQPInt update_linsys_solver_matrices_pardiso(pardiso_solver*   s,
 
   // Perform numerical factorization
   s->phase = PARDISO_NUMERIC;
+  osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
   PARDISO (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
            &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
            s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
 
   // Return exit flag
   return s->error;
@@ -334,9 +351,11 @@ OSQPInt update_linsys_solver_rho_vec_pardiso(pardiso_solver*    s,
 
   // Perform numerical factorization
   s->phase = PARDISO_NUMERIC;
+  osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
   PARDISO (s->pt, &(s->maxfct), &(s->mnum), &(s->mtype), &(s->phase),
            &(s->nKKT), s->KKT->x, s->KKT_p, s->KKT_i, &(s->idum), &(s->nrhs),
            s->iparm, &(s->msglvl), &(s->fdum), &(s->fdum), &(s->error));
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
 
   // Return exit flag
   return s->error;

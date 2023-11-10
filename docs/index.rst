@@ -108,5 +108,6 @@ Numerical benchmarks against other solvers are available `here <https://github.c
    parsers/index
    codegen/index
    examples/index
+   advanced/index
    contributing/index
    citing/index

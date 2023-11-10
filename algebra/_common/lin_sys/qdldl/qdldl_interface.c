@@ -1,6 +1,7 @@
 #include "glob_opts.h"
 #include "algebra_impl.h"
 #include "printing.h"
+#include "profilers.h"
 
 #include "error.h"
 #include "qdldl.h"
@@ -89,7 +90,9 @@ static OSQPInt LDL_factor(OSQPCscMatrix* A,
     OSQPInt factor_status;
 
     // Compute elimination tree
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_SYM_FAC);
     sum_Lnz = QDLDL_etree(A->n, A->p, A->i, p->iwork, p->Lnz, p->etree);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_SYM_FAC);
 
     if (sum_Lnz < 0){
       // Error
@@ -109,10 +112,12 @@ static OSQPInt LDL_factor(OSQPCscMatrix* A,
     p->L->nzmax = sum_Lnz;
 
     // Factor matrix
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
     factor_status = QDLDL_factor(A->n, A->p, A->i, A->x,
                                  p->L->p, p->L->i, p->L->x,
                                  p->D, p->Dinv, p->Lnz,
                                  p->etree, p->bwork, p->iwork, p->fwork);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
 
     if (factor_status < 0){
       // Error
@@ -396,6 +401,8 @@ static void LDLSolve(OSQPFloat*           x,
   OSQPInt j;
   OSQPInt n = L->n;
 
+  osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_BACKSOLVE);
+
   // permute_x(L->n, bp, b, P);
   for (j = 0 ; j < n ; j++) bp[j] = b[P[j]];
 
@@ -403,6 +410,8 @@ static void LDLSolve(OSQPFloat*           x,
 
   // permutet_x(L->n, x, bp, P);
   for (j = 0 ; j < n ; j++) x[P[j]] = bp[j];
+
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_BACKSOLVE);
 }
 
 
@@ -417,6 +426,8 @@ OSQPInt solve_linsys_qdldl(qdldl_solver* s,
 
   // Direct solver doesn't care about the ADMM iteration
   OSQP_UnusedVar(admm_iter);
+
+  osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_SOLVE);
 
 #ifndef OSQP_EMBEDDED_MODE
   if (s->polishing) {
@@ -446,6 +457,7 @@ OSQPInt solve_linsys_qdldl(qdldl_solver* s,
 #ifndef OSQP_EMBEDDED_MODE
   }
 #endif
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_SOLVE);
   return 0;
 }
 
@@ -469,9 +481,11 @@ OSQPInt update_linsys_solver_matrices_qdldl(qdldl_solver*     s,
     // Update KKT matrix with new A
     update_KKT_A(s->KKT, A->csc, Ax_new_idx, A_new_n, s->AtoKKT);
 
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
     pos_D_count = QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
         s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
         s->etree, s->bwork, s->iwork, s->fwork);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
 
     //number of positive elements in D should match the
     //dimension of P if P + \sigma I is PD.   Error otherwise.
@@ -484,6 +498,7 @@ OSQPInt update_linsys_solver_rho_vec_qdldl(qdldl_solver*      s,
                                            OSQPFloat          rho_sc) {
 
     OSQPInt i;
+    OSQPInt retval = 0;
     OSQPInt m = s->m;
     OSQPFloat* rhov;
 
@@ -501,9 +516,13 @@ OSQPInt update_linsys_solver_rho_vec_qdldl(qdldl_solver*      s,
     // Update KKT matrix with new rho_vec
     update_KKT_param2(s->KKT, s->rho_inv_vec, s->rho_inv, s->rhotoKKT, s->m);
 
-    return (QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
+    retval = QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
         s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
-        s->etree, s->bwork, s->iwork, s->fwork) < 0);
+        s->etree, s->bwork, s->iwork, s->fwork);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
+    
+    return (retval < 0);
 }
 
 #endif
