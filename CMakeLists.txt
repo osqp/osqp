@@ -350,26 +350,6 @@ if(PYTHON)
   endif(OSQP_BUILD_UNITTESTS)
 endif(PYTHON)
 
-if(MATLAB)
-  find_package(Matlab)
-  if(NOT Matlab_FOUND)
-    message(FATAL_ERROR "You need Matlab libraries to build the Matlab interface")
-  endif(NOT Matlab_FOUND)
-  message(STATUS "Matlab root is " ${Matlab_ROOT_DIR})
-
-  include_directories(${Matlab_INCLUDE_DIRS})
-  add_definitions(-DMATLAB)
-
-  # Insist on the pre 2018 complex data API so that mxGetPr will work correctly
-  add_definitions(-DMATLAB_MEXSRC_RELEASE=R2017b)
-  message(STATUS "Using Matlab pre-2018a API for mxGetPr compatibility")
-
-  if(OSQP_BUILD_UNITTESTS)
-    message(STATUS "Disabling OSQP_BUILD_UNITTESTS because we are building Matlab interface")
-    set(OSQP_BUILD_UNITTESTS OFF)
-  endif(OSQP_BUILD_UNITTESTS)
-endif(MATLAB)
-
 if(R_LANG)
   find_package(R)
   if(NOT R_FOUND)
@@ -389,7 +369,7 @@ if(R_LANG)
   endif(OSQP_BUILD_UNITTESTS)
 endif(R_LANG)
 
-if(PYTHON OR MATLAB OR R_LANG)
+if(PYTHON OR R_LANG)
   # Disable shared library and demo exe when building the interfaces
   set(OSQP_BUILD_SHARED_LIB OFF)
   set(OSQP_BUILD_DEMO_EXE OFF)
@@ -423,10 +403,6 @@ if( OSQP_BUILD_STATIC_LIB )
   target_include_directories(
     osqpstatic PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/public;${CMAKE_CURRENT_BINARY_DIR}/include/public>"
                       "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/osqp>")
-
-  if(MATLAB)
-    target_link_libraries(osqpstatic ${Matlab_LIBRARIES})
-  endif(MATLAB)
 endif()
 
 # ----------------------------------------------
