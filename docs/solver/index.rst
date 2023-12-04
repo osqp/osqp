@@ -175,3 +175,21 @@ The chances to have a successful polishing increase if the tolerances :code:`eps
 However, low tolerances might require a very large number of iterations.
 
 
+Implementations
+---------------
+
+The OSQP library provides a :ref:`C language implementation<c_interface>` of the above ADMM algorithm, and also
+:ref:`interfaces to several high level languages<interfaces>` to enable those languages to solve QPs using OSQP.
+
+There are also several community-developed implementations of this ADMM algorithm.
+
++----------------+----------+------------------------------------------------------------------------------------------------------------------------------+
+| Implementation | Language | Link                                                                                                                         |
++================+==========+==============================================================================================================================+
+| jaxopt.OSQP    | JAX      | `jaxopt.github.io/stable/quadratic_programming.html#osqp <https://jaxopt.github.io/stable/quadratic_programming.html#osqp>`_ |
++----------------+----------+------------------------------------------------------------------------------------------------------------------------------+
+| jOSQP          | Java     | `github.com/quantego/josqp <https://github.com/quantego/josqp>`_                                                             |
++----------------+----------+------------------------------------------------------------------------------------------------------------------------------+
+
+Note that these implementations may not have the same API or features as the OSQP library, and any questions or support requests
+should be directed to the authors of the implementations.
