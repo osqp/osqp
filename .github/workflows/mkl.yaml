@@ -97,6 +97,12 @@ jobs:
             conda info
             conda list
 
+        - name: Install additional dependencies (Windows)
+          if: runner.os == 'Windows'
+          run: |
+            # Needed to get import library for the Intel OpenMP library to be found
+            conda install -c intel dpcpp_impl_win-64
+
         - name: Build
           run: |
             cmake -G "${{ matrix.cmake_generator }}" \
