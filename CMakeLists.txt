@@ -434,7 +434,7 @@ if(OSQP_BUILD_SHARED_LIB)
 
   # Modify the soname of the library to include the algebra if desired
   if(OSQP_LIB_SUFFIX)
-    set_target_properties(osqp PROPERTIES LIBRARY_OUTPUT_NAME "osqp_${OSQP_LIB_SUFFIX}")
+    set_target_properties(osqp PROPERTIES OUTPUT_NAME "osqp_${OSQP_LIB_SUFFIX}")
   endif()
 endif()
 
