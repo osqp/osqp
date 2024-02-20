@@ -37,10 +37,17 @@ struct OSQPVectori_deleter {
     }
 };
 
+struct OSQPCscMatrix_deleter {
+    void operator()(OSQPCscMatrix* mat) {
+        // We don't own the elements inside the CSC matrix
+        free(mat);
+    }
+};
+
 using OSQPMatrix_ptr  = std::unique_ptr<OSQPMatrix, OSQPMatrix_deleter>;
 using OSQPVectorf_ptr = std::unique_ptr<OSQPVectorf, OSQPVectorf_deleter>;
 using OSQPVectori_ptr = std::unique_ptr<OSQPVectori, OSQPVectori_deleter>;
-
+using OSQPCscMatrix_ptr = std::unique_ptr<OSQPCscMatrix, OSQPCscMatrix_deleter>;
 
 /*
  * OSQP API types smart pointers

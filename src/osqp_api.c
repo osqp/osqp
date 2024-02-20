@@ -1369,17 +1369,15 @@ void csc_set_data(OSQPCscMatrix* M,
 ****************************/
 OSQPInt osqp_adjoint_derivative_compute(OSQPSolver* solver,
                                         OSQPFloat*  dx,
-                                        OSQPFloat*  dy_l,
-                                        OSQPFloat*  dy_u) {
+                                        OSQPFloat*  dy) {
   OSQPInt status = 0;
 
 #ifdef OSQP_ENABLE_DERIVATIVES
-  status = adjoint_derivative_compute(solver, dx, dy_l, dy_u);
+  status = adjoint_derivative_compute(solver, dx, dy, dy);
 #else
   OSQP_UnusedVar(solver);
   OSQP_UnusedVar(dx);
-  OSQP_UnusedVar(dy_l);
-  OSQP_UnusedVar(dy_u);
+  OSQP_UnusedVar(dy);
   status = OSQP_FUNC_NOT_IMPLEMENTED;
 #endif
 

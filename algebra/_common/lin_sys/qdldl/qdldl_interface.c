@@ -521,7 +521,7 @@ OSQPInt update_linsys_solver_rho_vec_qdldl(qdldl_solver*      s,
         s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
         s->etree, s->bwork, s->iwork, s->fwork);
     osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
-    
+
     return (retval < 0);
 }
 
@@ -849,7 +849,9 @@ OSQPInt adjoint_derivative_qdldl(qdldl_solver**     s,
         OSQPVectorf_minus(sol, sol, residual);
     }
 
-    OSQPVectorf_copy(rhs, sol);
+    // rhs is sized to be the largest possible size needed, so sol might be smaller
+    // Therefore, we have to subassign into rhs
+    OSQPVectorf_subvector_assign(rhs, OSQPVectorf_data(sol), 0, OSQPVectorf_length(sol), 1.0);
 
 /* Free data based on what failed */
 vec_alloc_fail:

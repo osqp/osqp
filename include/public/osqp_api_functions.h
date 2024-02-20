@@ -288,14 +288,12 @@ OSQP_API OSQPInt osqp_update_rho(OSQPSolver* solver,
  *
  * @param[in] solver Solver
  * @param[in] dx     Vector of dx values (observed - true) of length n
- * @param[in] dy_l   Vector of dy_l values (observed - true) of length m
- * @param[in] dy_u   Vector of dy_u values (observed - true) of length m
+ * @param[in] dy     Vector of dy values (observed - true) of length m
  * @return           Exitflag for errors (0 if no errors)
  */
 OSQP_API OSQPInt osqp_adjoint_derivative_compute(OSQPSolver*    solver,
                                                  OSQPFloat*     dx,
-                                                 OSQPFloat*     dy_l,
-                                                 OSQPFloat*     dy_u);
+                                                 OSQPFloat*     dy);
 
 /**
  * Calculate adjoint derivatives of P/A.
