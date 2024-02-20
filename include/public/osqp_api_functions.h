@@ -9,6 +9,115 @@
 extern "C" {
 # endif
 
+
+/**********************
+ * OSQP type helpers  *
+ **********************/
+
+/**
+ * @name CSC matrix manipulation
+ * @{
+ */
+
+#ifndef OSQP_EMBEDDED_MODE
+/**
+ * Allocates a new Compressed-Column-Sparse (CSC) matrix from existing arrays.
+ *
+ * This will malloc the new matrix structure, but use the arrays passed in as the
+ * backing data for the matrix (e.g. not copy the actual matrix data, just reference
+ * the existing data.)
+ *
+ * @param  m     First dimension
+ * @param  n     Second dimension
+ * @param  nzmax Maximum number of nonzero elements
+ * @param  x     Vector of data
+ * @param  i     Vector of row indices
+ * @param  p     Vector of column pointers
+ * @return       Pointer to new CSC matrix, or null on error
+ */
+OSQPCscMatrix* OSQPCscMatrix_new(OSQPInt    m,
+                                 OSQPInt    n,
+                                 OSQPInt    nzmax,
+                                 OSQPFloat* x,
+                                 OSQPInt*   i,
+                                 OSQPInt*   p);
+
+/**
+ * Free a CSC matrix object allocated by OSQPCscMatrix_new.
+ *
+ * @param  mat Matrix to free
+ */
+void OSQPCscMatrix_free(OSQPCscMatrix* mat);
+#endif
+
+/**
+ * Populates a Compressed-Column-Sparse matrix from existing data arrays.
+ * This will just assign the pointers - no malloc or copying is done.
+ *
+ * @param  M     Matrix pointer
+ * @param  m     First dimension
+ * @param  n     Second dimension
+ * @param  nzmax Maximum number of nonzero elements
+ * @param  x     Vector of data
+ * @param  i     Vector of row indices
+ * @param  p     Vector of column pointers
+ */
+OSQP_API void OSQPCscMatrix_set_data(OSQPCscMatrix* M,
+                                     OSQPInt        m,
+                                     OSQPInt        n,
+                                     OSQPInt        nzmax,
+                                     OSQPFloat*     x,
+                                     OSQPInt*       i,
+                                     OSQPInt*       p);
+
+/** @} */
+
+/**
+ * @name Settings object memory management
+ * @{
+ */
+
+#ifndef OSQP_EMBEDDED_MODE
+/**
+ * Allocate a new OSQPSettings object with the default settings.
+ *
+ * @return Pointer to new settings object, or null on error
+ */
+OSQPSettings* OSQPSettings_new();
+
+/**
+ * Free an OSQPSettings object.
+ *
+ * @param settings The settings object to free
+ */
+void OSQPSettings_free(OSQPSettings* settings);
+#endif
+
+/** @} */
+
+/**
+ * @name Codegen defines object memory management
+ * @{
+ */
+
+#ifndef OSQP_EMBEDDED_MODE
+/**
+ * Allocate a new OSQPCodegenDefines object with the default options.
+ *
+ * @return Pointer to new codegen defines object, or null on error
+ */
+OSQPCodegenDefines* OSQPCodegenDefines_new();
+
+/**
+ * Free an OSQPCodegenDefines object.
+ *
+ * @param defs The defines object to free
+ */
+void OSQPCodegenDefines_free(OSQPCodegenDefines* defs);
+#endif
+
+/** @} */
+
 /********************
 * Main Solver API  *
 ********************/
@@ -362,7 +471,6 @@ OSQP_API OSQPInt osqp_codegen(OSQPSolver*         solver,
                               OSQPCodegenDefines* defines);
 
 /** @} */
-
 
 # ifdef __cplusplus
 }
