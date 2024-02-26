@@ -297,7 +297,7 @@ endif(NOT MSVC)
 # Initialize the code generation file copying
 # ----------------------------------------------
 if( OSQP_CODEGEN )
-  set( EMBEDDED_BUILD_ROOT_DIR "${CMAKE_BINARY_DIR}/codegen_src" )
+  set( EMBEDDED_BUILD_ROOT_DIR "${CMAKE_BINARY_DIR}/codegen_src" CACHE PATH "Location for codegen files")
 
   set( EMBEDDED_BUILD_SRC_DIR "${EMBEDDED_BUILD_ROOT_DIR}/src" )
   set( EMBEDDED_BUILD_PUBLIC_INC_DIR "${EMBEDDED_BUILD_ROOT_DIR}/inc/public" )
