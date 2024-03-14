@@ -553,9 +553,10 @@ if(OSQP_BUILD_STATIC_LIB OR OSQP_BUILD_SHARED_LIB)
 endif()
 
 if(OSQP_CODEGEN)
+  set(OSQP_CODEGEN_INSTALL_DIR "${CMAKE_INSTALL_DATAROOTDIR}/osqp/codegen_files" CACHE PATH "Location of codegen install")
   install(DIRECTORY
           "${EMBEDDED_BUILD_ROOT_DIR}/"
-          DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/osqp/codegen_files")
+          DESTINATION "${OSQP_CODEGEN_INSTALL_DIR}" COMPONENT codegen)
 endif()
 
 if(NOT TARGET uninstall)
