@@ -87,13 +87,20 @@ void update_y(OSQPSolver* solver);
 
 
 /**
- * Compute objective function from data at value x
- * @param  solver Solver
- * @param  x      Value x
- * @return        Objective function value
+ * Compute objective functions and duality gap from data at (x,y)
+ * @param  solver       Solver
+ * @param  x            Primal values x
+ * @param  y            Dual values y
+ * @param  prim_obj_val Primal objective function value
+ * @param  dual_obj_val Dual objective function value
+ * @param  duality_gap  Duality gap value
  */
-OSQPFloat compute_obj_val(const OSQPSolver*  solver,
-                          const OSQPVectorf* x);
+void compute_obj_val_dual_gap(const OSQPSolver*  solver,
+                              const OSQPVectorf* x,
+                              const OSQPVectorf* y,
+                                    OSQPFloat*   prim_obj_val,
+                                    OSQPFloat*   dual_obj_val,
+                                    OSQPFloat*   duality_gap);
 
 /**
  * Check whether QP has solution

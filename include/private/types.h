@@ -55,6 +55,8 @@ typedef struct {
   OSQPVectorf* z;             ///< optimal z-solution obtained by polish
   OSQPVectorf* y;             ///< optimal y-solution obtained by polish
   OSQPFloat    obj_val;       ///< objective value at polished solution
+  OSQPFloat    dual_obj_val;  ///< Dual objective value at polished solution
+  OSQPFloat    duality_gap;   ///< Duality gap at polished solution
   OSQPFloat    prim_res;      ///< primal residual at polished solution
   OSQPFloat    dual_res;      ///< dual residual at polished solution
 } OSQPPolish;
@@ -130,12 +132,8 @@ struct OSQPWorkspace_ {
   OSQPVectorf* xtilde_view; ///< xtilde view into xz_tilde
   OSQPVectorf* ztilde_view; ///< ztilde view into xz_tilde
 
-  OSQPVectorf* x_prev;   ///< Previous x
-
-  /**< NB: Used also as workspace vector for dual residual */
-  OSQPVectorf* z_prev;   ///< Previous z
-
-  /**< NB: Used also as workspace vector for primal residual */
+  OSQPVectorf* x_prev;   ///< Previous x, used also as temp vector in primal info computation
+  OSQPVectorf* z_prev;   ///< Previous z, used also as temp vector in dual info computation
 
   /**
    * @name Primal and dual residuals workspace variables

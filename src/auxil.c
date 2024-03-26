@@ -227,21 +227,46 @@ void update_y(OSQPSolver* solver) {
 
 }
 
-OSQPFloat compute_obj_val(const OSQPSolver*  solver,
-                          const OSQPVectorf* x) {
-
-  OSQPFloat obj_val;
+void compute_obj_val_dual_gap(const OSQPSolver*  solver,
+                              const OSQPVectorf* x,
+                              const OSQPVectorf* y,
+                                    OSQPFloat*   prim_obj_val,
+                                    OSQPFloat*   dual_obj_val,
+                                    OSQPFloat*   duality_gap) {
+  OSQPFloat quad_term = 0.0;
+  OSQPFloat lin_term  = 0.0;
+  OSQPFloat sup_term  = 0.0;
   OSQPWorkspace* work = solver->work;
 
   /* NB: The function is always called after dual_res is computed */
-  obj_val = 0.5 * OSQPVectorf_dot_prod(work->Px, x) +
-            OSQPVectorf_dot_prod(work->data->q, x);
+  quad_term = OSQPVectorf_dot_prod(work->Px, x);
+  lin_term  = OSQPVectorf_dot_prod(work->data->q, x);
+
+  /* Compute the support function of the constraints, SC(y) = u'*max(y, 0) + l'*min(y, 0)
+     by projecting y onto the polar of the recession cone of C=[l,u], then doing the dot products */
+  OSQPVectorf_copy(work->z_prev, y);
+  OSQPVectorf_project_polar_reccone(work->z_prev,
+                                    work->data->l,
+                                    work->data->u,
+                                    OSQP_INFTY * OSQP_MIN_SCALING);
+
+  sup_term  = OSQPVectorf_dot_prod_signed(work->data->u, work->z_prev, +1);
+  sup_term += OSQPVectorf_dot_prod_signed(work->data->l, work->z_prev, -1);
+
+  /* Primal objective value is 0.5*x^T P x + q^T x */
+  *prim_obj_val = 0.5 * quad_term + lin_term;
+
+  /* Dual objective value is -0.5*x^T P x - SC(y)*/
+  *dual_obj_val = -0.5 * quad_term - sup_term;
+
+  /* Duality gap is x^T P x + q^T x + SC(y) */
+  *duality_gap = quad_term + lin_term + sup_term;
 
   if (solver->settings->scaling) {
-    obj_val *= work->scaling->cinv;
+    *prim_obj_val *= work->scaling->cinv;
+    *dual_obj_val *= work->scaling->cinv;
+    *duality_gap  *= work->scaling->cinv;
   }
-
-  return obj_val;
 }
 
 static OSQPFloat compute_prim_res(OSQPSolver*        solver,
@@ -622,7 +647,9 @@ void update_info(OSQPSolver* solver,
   OSQPVectorf* y;                   // Allocate pointers to vectors
 
   // objective value, residuals
-  OSQPFloat* obj_val;
+  OSQPFloat* prim_obj_val;
+  OSQPFloat* dual_obj_val;
+  OSQPFloat* dual_gap;
   OSQPFloat* prim_res;
   OSQPFloat* dual_res;
 
@@ -636,27 +663,31 @@ void update_info(OSQPSolver* solver,
 #ifndef OSQP_EMBEDDED_MODE
 
   if (polishing) {
-    x        = work->pol->x;
-    y        = work->pol->y;
-    z        = work->pol->z;
-    obj_val  = &work->pol->obj_val;
-    prim_res = &work->pol->prim_res;
-    dual_res = &work->pol->dual_res;
+    x            = work->pol->x;
+    y            = work->pol->y;
+    z            = work->pol->z;
+    prim_obj_val = &work->pol->obj_val;
+    dual_obj_val = &work->pol->dual_obj_val;
+    dual_gap     = &work->pol->duality_gap;
+    prim_res     = &work->pol->prim_res;
+    dual_res     = &work->pol->dual_res;
 # ifdef OSQP_ENABLE_PROFILING
-    run_time = &info->polish_time;
+    run_time     = &info->polish_time;
 # endif /* ifdef OSQP_ENABLE_PROFILING */
   }
   else {
 #endif // OSQP_EMBEDDED_MODE
-    x          = work->x;
-    y          = work->y;
-    z          = work->z;
-    obj_val    = &info->obj_val;
-    prim_res   = &info->prim_res;
-    dual_res   = &info->dual_res;
-    info->iter = iter;
+    x            = work->x;
+    y            = work->y;
+    z            = work->z;
+    prim_obj_val = &info->obj_val;
+    dual_obj_val = &info->dual_obj_val;
+    dual_gap     = &info->duality_gap;
+    prim_res     = &info->prim_res;
+    dual_res     = &info->dual_res;
+    info->iter   = iter;
 #ifdef OSQP_ENABLE_PROFILING
-    run_time   = &info->solve_time;
+    run_time     = &info->solve_time;
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 #ifndef OSQP_EMBEDDED_MODE
 }
@@ -676,7 +707,7 @@ void update_info(OSQPSolver* solver,
 
   // Compute the objective if needed
   if (compute_objective) {
-    *obj_val = compute_obj_val(solver, x);
+    compute_obj_val_dual_gap(solver, x, y, prim_obj_val, dual_obj_val, dual_gap);
   }
 
   // Update timing
@@ -1106,7 +1137,7 @@ OSQPInt validate_settings(const OSQPSettings* settings,
     c_eprint("delta must be positive");
     return 1;
   }
-  
+
   if (settings->polish_refine_iter < 0) {
     c_eprint("polish_refine_iter must be nonnegative");
     return 1;

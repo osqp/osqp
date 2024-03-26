@@ -102,8 +102,10 @@ typedef struct {
 
   // solution quality
   OSQPFloat obj_val;      ///< Primal objective value
+  OSQPFloat dual_obj_val; ///< Dual objective value
   OSQPFloat prim_res;     ///< Norm of primal residual
   OSQPFloat dual_res;     ///< Norm of dual residual
+  OSQPFloat duality_gap;  ///< Duality gap (Primal obj - Dual obj)
 
   // algorithm information
   OSQPInt   iter;         ///< Number of iterations taken
