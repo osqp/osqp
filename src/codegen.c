@@ -75,7 +75,7 @@ static OSQPInt write_veci(FILE*          f,
 static OSQPInt write_OSQPVectorf(FILE*              f,
                                  const OSQPVectorf* vec,
                                  const char*        name) {
-  
+
   OSQPInt exitflag = OSQP_NO_ERROR;
   char vecf_name[MAX_VAR_LENGTH];
 
@@ -91,7 +91,7 @@ static OSQPInt write_OSQPVectorf(FILE*              f,
 static OSQPInt write_OSQPVectori(FILE*              f,
                                  const OSQPVectori* vec,
                                  const char*        name) {
-  
+
   OSQPInt exitflag = OSQP_NO_ERROR;
   char veci_name[MAX_VAR_LENGTH+4];
 
@@ -152,7 +152,7 @@ static OSQPInt write_OSQPMatrix(FILE*             f,
   fprintf(f, "  &%s,\n", csc_name);
   fprintf(f, "  %d\n", mat->symmetry);
   fprintf(f, "};\n");
-  
+
   return exitflag;
 }
 
@@ -164,7 +164,7 @@ static OSQPInt write_OSQPMatrix(FILE*             f,
 static OSQPInt write_settings(FILE*               f,
                               const OSQPSettings* settings,
                               const char*         prefix) {
-  
+
   if (!settings) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   fprintf(f, "/* Define the settings structure */\n");
@@ -212,7 +212,7 @@ static OSQPInt write_settings(FILE*               f,
 static OSQPInt write_info(FILE*           f,
                           const OSQPInfo* info,
                           const char*     prefix) {
-  
+
   if (!info) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   fprintf(f, "/* Define the info structure */\n");
@@ -221,8 +221,10 @@ static OSQPInt write_info(FILE*           f,
   fprintf(f, "  %d,\n", OSQP_UNSOLVED);
   fprintf(f, "  0,\n"); // status_polish
   fprintf(f, "  (OSQPFloat)%.20f,\n", OSQP_INFTY); // obj_val
+  fprintf(f, "  (OSQPFloat)%.20f,\n", OSQP_INFTY); // dual_obj_val
   fprintf(f, "  (OSQPFloat)%.20f,\n", OSQP_INFTY); // prim_res
   fprintf(f, "  (OSQPFloat)%.20f,\n", OSQP_INFTY); // dual_res
+  fprintf(f, "  (OSQPFloat)%.20f,\n", OSQP_INFTY); // duality_gap
   fprintf(f, "  0,\n"); // iter (iteration count)
   fprintf(f, "  0,\n"); // rho_updates
   fprintf(f, "  (OSQPFloat)%.20f,\n", info->rho_estimate);
@@ -535,7 +537,7 @@ static OSQPInt write_workspace(FILE*             f,
   if (solver->settings->scaling) {
     PROPAGATE_ERROR(write_scaling(f, work->scaling, prefix))
   }
-  
+
   fprintf(f, "/* Define the workspace structure */\n");
   fprintf(f, "OSQPWorkspace %swork = {\n", prefix);
   fprintf(f, "  &%sdata,\n", prefix);
