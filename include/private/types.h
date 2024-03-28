@@ -149,6 +149,19 @@ struct OSQPWorkspace_ {
   /** @} */
 
   /**
+   * @name Objective and duality gap workspace variables
+   *
+   * Needed for objective/duality gap computation, tolerances computation, and
+   * approximate tolerances computation.
+   * @{
+   */
+  OSQPFloat    xtPx; ///< scaled x' * P *x
+  OSQPFloat    qtx;  ///< scaled q' * x
+  OSQPFloat    SC;   ///< scaled support function value
+
+  /** @} */
+
+  /**
    * @name Primal infeasibility variables
    * @{
    */

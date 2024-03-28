@@ -456,7 +456,7 @@ OSQPInt polish(OSQPSolver* solver) {
   OSQPVectorf_minus(work->pol->y, work->pol->y, work->pol->z);
 
   // Compute primal and dual residuals at the polished solution
-  update_info(solver, 0, 1, 1);
+  update_info(solver, 0, 1);
 
   // Check if polish was successful
   polish_successful = (work->pol->prim_res < info->prim_res &&

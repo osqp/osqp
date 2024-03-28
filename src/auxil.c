@@ -267,6 +267,32 @@ void compute_obj_val_dual_gap(const OSQPSolver*  solver,
     *dual_obj_val *= work->scaling->cinv;
     *duality_gap  *= work->scaling->cinv;
   }
+
+  /* Save cost values for later use in termination tolerance computation */
+  work->xtPx = quad_term;
+  work->qtx  = lin_term;
+  work->SC   = sup_term;
+}
+
+static OSQPFloat compute_duality_gap_tol(const OSQPSolver* solver,
+                                               OSQPFloat   eps_abs,
+                                               OSQPFloat   eps_rel) {
+  OSQPFloat max_rel_eps = 0.0;
+  OSQPSettings*  settings = solver->settings;
+  OSQPWorkspace* work     = solver->work;
+
+  /* Compute max{ |x'*P*x|, |q'*x|, |SC(y)|} */
+  max_rel_eps = c_absval(work->xtPx);                     /* |x'P*x| */
+  max_rel_eps = c_max(max_rel_eps, c_absval(work->qtx));  /* |q'*x| */
+  max_rel_eps = c_max(max_rel_eps, c_absval(work->SC));   /* |SC(y)| */
+
+  /* Unscale the termination tolerance if required*/
+  if (settings->scaling && !settings->scaled_termination) {
+    max_rel_eps = work->scaling->cinv * max_rel_eps;
+  }
+
+  // eps_duality_gap
+  return eps_abs + eps_rel * max_rel_eps;
 }
 
 static OSQPFloat compute_prim_res(OSQPSolver*        solver,
@@ -639,7 +665,6 @@ void store_solution(OSQPSolver *solver, OSQPSolution* solution) {
 
 void update_info(OSQPSolver* solver,
                  OSQPInt     iter,
-                 OSQPInt     compute_objective,
                  OSQPInt     polishing) {
 
   OSQPVectorf* x;
@@ -705,10 +730,8 @@ void update_info(OSQPSolver* solver,
   // Compute dual residual; store P*x in work->Px
   *dual_res = compute_dual_res(solver, x, y);
 
-  // Compute the objective if needed
-  if (compute_objective) {
-    compute_obj_val_dual_gap(solver, x, y, prim_obj_val, dual_obj_val, dual_gap);
-  }
+  // Compute the objective and duality gap, store various temp values in work
+  compute_obj_val_dual_gap(solver, x, y, prim_obj_val, dual_obj_val, dual_gap);
 
   // Update timing
 #ifdef OSQP_ENABLE_PROFILING
@@ -767,9 +790,9 @@ void update_status(OSQPInfo* info,
 OSQPInt check_termination(OSQPSolver* solver,
                           OSQPInt     approximate) {
 
-  OSQPFloat eps_prim, eps_dual, eps_prim_inf, eps_dual_inf;
+  OSQPFloat eps_prim, eps_dual, eps_duality_gap, eps_prim_inf, eps_dual_inf;
   OSQPInt   exitflag;
-  OSQPInt   prim_res_check, dual_res_check, prim_inf_check, dual_inf_check;
+  OSQPInt   prim_res_check, dual_res_check, duality_gap_check, prim_inf_check, dual_inf_check;
   OSQPFloat eps_abs, eps_rel;
 
   OSQPInfo*      info     = solver->info;
@@ -780,6 +803,7 @@ OSQPInt check_termination(OSQPSolver* solver,
   exitflag       = 0;
   prim_res_check = 0; dual_res_check = 0;
   prim_inf_check = 0; dual_inf_check = 0;
+  duality_gap_check = 0;
 
   // Initialize tolerances
   eps_abs      = settings->eps_abs;
@@ -833,8 +857,16 @@ OSQPInt check_termination(OSQPSolver* solver,
     dual_inf_check = is_dual_infeasible(solver, eps_dual_inf);
   }
 
+  // Compute duality gap tolerance
+  eps_duality_gap = compute_duality_gap_tol(solver, eps_abs, eps_rel);
+
+  // Duality gap check
+  if (c_absval(info->duality_gap) < eps_duality_gap) {
+    duality_gap_check = 1;
+  }
+
   // Compare checks to determine solver status
-  if (prim_res_check && dual_res_check) {
+  if (prim_res_check && dual_res_check && duality_gap_check) {
     // Update final information
     if (approximate) {
       update_status(info, OSQP_SOLVED_INACCURATE);

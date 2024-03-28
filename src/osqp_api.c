@@ -431,7 +431,6 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 
   OSQPInt exitflag;
   OSQPInt iter, max_iter;
-  OSQPInt compute_obj;           // boolean: compute objective function in the loop or not
   OSQPInt can_check_termination; // boolean: check termination or not
   OSQPWorkspace* work;
 
@@ -458,10 +457,6 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
   can_check_termination = 0;
 #ifdef OSQP_ENABLE_PRINTING
   can_print = solver->settings->verbose;
-  // Compute objective function only if verbose is on
-  compute_obj = solver->settings->verbose;
-#else /* ifdef OSQP_ENABLE_PRINTING */
-  compute_obj = 0;
 #endif /* ifdef OSQP_ENABLE_PRINTING */
 
 #ifdef OSQP_ENABLE_PROFILING
@@ -571,7 +566,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     if (can_check_termination || can_print || iter == 1) { // Update status in either of
                                                            // these cases
       // Update information
-      update_info(solver, iter, compute_obj, 0);
+      update_info(solver, iter, 0);
 
       if (can_print) {
         // Print summary
@@ -590,7 +585,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
     if (can_check_termination) {
       // Update information and compute also objective value
-      update_info(solver, iter, compute_obj, 0);
+      update_info(solver, iter, 0);
 
       // Check algorithm termination
       if (check_termination(solver, 0)) {
@@ -659,13 +654,13 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
       if (!can_check_termination && !can_print) {
         // Information has not been computed neither for termination or printing
         // reasons
-        update_info(solver, iter, compute_obj, 0);
+        update_info(solver, iter, 0);
       }
 # else /* ifdef OSQP_ENABLE_PRINTING */
 
       if (!can_check_termination) {
         // Information has not been computed before for termination check
-        update_info(solver, iter, compute_obj, 0);
+        update_info(solver, iter, 0);
       }
 # endif /* ifdef OSQP_ENABLE_PRINTING */
 
@@ -691,12 +686,12 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     if (!can_print) {
       // Update info only if it hasn't been updated before for printing
       // reasons
-      update_info(solver, iter - 1, compute_obj, 0);
+      update_info(solver, iter - 1, 0);
     }
 #else /* ifdef OSQP_ENABLE_PRINTING */
 
     // If no printing is enabled, update info directly
-    update_info(solver, iter - 1, compute_obj, 0);
+    update_info(solver, iter - 1, 0);
 #endif /* ifdef OSQP_ENABLE_PRINTING */
 
 #ifdef OSQP_ENABLE_PRINTING
@@ -712,7 +707,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
   // Compute objective value in case it was not
   // computed during the iterations
-  if (!compute_obj && has_solution(solver->info)){
+  if (has_solution(solver->info)){
     compute_obj_val_dual_gap(solver, work->x, work->y,
                              &(solver->info->obj_val),
                              &(solver->info->dual_obj_val),

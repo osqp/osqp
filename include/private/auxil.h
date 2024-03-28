@@ -120,12 +120,10 @@ void store_solution(OSQPSolver* solver, OSQPSolution* solution);
  * Update solver information
  * @param solver             Solver
  * @param iter               Iteration number
- * @param compute_objective  Boolean (if compute the objective or not)
  * @param polishing          Boolean (if called from polish)
  */
 void update_info(OSQPSolver* solver,
                  OSQPInt     iter,
-                 OSQPInt     compute_objective,
                  OSQPInt     polishing);
 
 
