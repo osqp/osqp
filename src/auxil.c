@@ -683,6 +683,7 @@ void update_info(OSQPSolver* solver,
 
 #ifdef OSQP_ENABLE_PROFILING
   OSQPFloat* run_time;                    // Execution time
+  OSQPFloat  last_time = 0.0;             // Previous time of info struct update
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
 #ifndef OSQP_EMBEDDED_MODE
@@ -735,7 +736,13 @@ void update_info(OSQPSolver* solver,
 
   // Update timing
 #ifdef OSQP_ENABLE_PROFILING
+  last_time = *run_time;
   *run_time = osqp_toc(work->timer);
+
+  // Compute the duality gap integral if not polishing
+  if (!polishing) {
+    info->primdual_int += c_absval(*dual_gap) * (*run_time - last_time);
+  }
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
 #ifdef OSQP_ENABLE_PRINTING

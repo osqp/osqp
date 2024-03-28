@@ -118,6 +118,9 @@ typedef struct {
   OSQPFloat update_time; ///< Update phase time (seconds)
   OSQPFloat polish_time; ///< Polish phase time (seconds)
   OSQPFloat run_time;    ///< Total solve time (seconds)
+
+  // Convergence information
+  OSQPFloat primdual_int; ///< Integral of duality gap over time (Primal-dual integral), requires profiling
 } OSQPInfo;
 
 

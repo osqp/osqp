@@ -233,6 +233,7 @@ static OSQPInt write_info(FILE*           f,
   fprintf(f, "  (OSQPFloat)0.0,\n"); // update_time
   fprintf(f, "  (OSQPFloat)0.0,\n"); // polish_time
   fprintf(f, "  (OSQPFloat)0.0,\n"); // run_time
+  fprintf(f, "  (OSQPFloat)0.0,\n"); // primdual_int
   fprintf(f, "};\n\n");
 
   return OSQP_NO_ERROR;

@@ -250,6 +250,7 @@ void print_footer(OSQPInfo* info,
     c_print("optimal objective:    %.4f\n", info->obj_val);
     c_print("dual objective:       %.4f\n", info->dual_obj_val);
     c_print("duality gap:          %.4e\n", info->duality_gap);
+    c_print("primal-dual integral: %.4e\n", info->primdual_int);
   }
 
 # ifdef OSQP_ENABLE_PROFILING
