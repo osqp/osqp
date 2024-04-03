@@ -13,6 +13,6 @@ jobs:
       # Just running the check on the main website will also include the docs, since they
       # live at osqp.org/docs.
       - name: Check OSQP website links
-        uses: filiph/linkcheck@2.0.23
+        uses: filiph/linkcheck@3.0.0
         with:
           arguments: https://osqp.org -e
