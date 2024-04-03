@@ -101,7 +101,7 @@ jobs:
           cd $OSQP_NAME && tar -czvf ../$OSQP_NAME.tar.gz *
 
       - name: Release binary
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: ${{env.OSQP_NAME}}.tar.gz
 
@@ -112,6 +112,6 @@ jobs:
 
       - name: Release source
         if: ${{ runner.os == 'Linux' }}
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: osqp-${{env.OSQP_VERSION}}-src.tar.gz
