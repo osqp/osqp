@@ -57,7 +57,7 @@ jobs:
       # ------------------------------------------------------------
 
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@4.1.1
+        uses: JamesIves/github-pages-deploy-action@v4.5.0
         with:
           branch: gh-pages
           folder: site
