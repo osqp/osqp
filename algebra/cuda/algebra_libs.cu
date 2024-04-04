@@ -21,6 +21,8 @@
 #include "cuda_handler.h"
 #include "cuda_pcg_interface.h"
 
+#include "profilers.h"
+
  #include <stdio.h>
 
 
@@ -82,10 +84,16 @@ OSQPInt osqp_algebra_init_linsys_solver(LinSysSolver**      s,
                                         OSQPFloat*          scaled_prim_res,
                                         OSQPFloat*          scaled_dual_res,
                                         OSQPInt             polishing) {
+  OSQPInt retval = 0;
+
+  osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_INIT);
 
   switch (settings->linsys_solver) {
   default:
   case OSQP_INDIRECT_SOLVER:
-    return init_linsys_solver_cudapcg((cudapcg_solver **)s, P, A, rho_vec, settings, scaled_prim_res, scaled_dual_res, polishing);
+    retval = init_linsys_solver_cudapcg((cudapcg_solver **)s, P, A, rho_vec, settings, scaled_prim_res, scaled_dual_res, polishing);
   }
+
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_INIT);
+  return retval;
 }

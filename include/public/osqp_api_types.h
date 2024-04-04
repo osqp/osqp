@@ -42,10 +42,15 @@ typedef struct {
  * User settings
  */
 typedef struct {
-  /* Note: If this struct is updated, ensure update_settings is also updated */
+  /* Note: If this struct is updated, ensure update_settings and validate_settings are also updated */
+  // Linear algebra settings
   OSQPInt device;                             ///< device identifier; currently used for CUDA devices
   enum osqp_linsys_solver_type linsys_solver; ///< linear system solver to use
+
+  // Control settings
+  OSQPInt allocate_solution;                  ///< boolean; allocate solution in OSQPSolver during osqp_setup
   OSQPInt verbose;                            ///< boolean; write out progress
+  OSQPInt profiler_level;                     ///< integer; level of detail for profiler annotations
   OSQPInt warm_starting;                      ///< boolean; warm start
   OSQPInt scaling;                            ///< data scaling iterations; if 0, then disabled
   OSQPInt polishing;                          ///< boolean; polish ADMM solution

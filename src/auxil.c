@@ -13,7 +13,6 @@
 
 OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
 
-  OSQPInt   n, m;                         // Dimensions
   OSQPFloat prim_res, dual_res;           // Primal and dual residuals
   OSQPFloat prim_res_norm, dual_res_norm; // Normalization for the residuals
   OSQPFloat temp_res_norm;                // Temporary residual norm
@@ -21,10 +20,6 @@ OSQPFloat compute_rho_estimate(const OSQPSolver* solver) {
 
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
-
-  // Get problem dimensions
-  n = work->data->n;
-  m = work->data->m;
 
   // Get primal and dual residuals
   prim_res = work->scaled_prim_res;
@@ -539,16 +534,19 @@ OSQPInt has_solution(const OSQPInfo* info) {
       (info->status_val != OSQP_NON_CVX));
 }
 
-void store_solution(OSQPSolver *solver) {
+void store_solution(OSQPSolver *solver, OSQPSolution* solution) {
 
 #ifndef OSQP_EMBEDDED_MODE
   OSQPFloat norm_vec;
 #endif /* ifndef OSQP_EMBEDDED_MODE */
 
   OSQPInfo*      info     = solver->info;
-  OSQPSolution*  solution = solver->solution;
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
+
+  /* Bypass function if solution wasn't allocated */
+  if (!solution)
+    return;
 
 
   if (has_solution(info)) {
@@ -959,9 +957,23 @@ OSQPInt validate_settings(const OSQPSettings* settings,
     return 1;
   }
 
+  if (from_setup &&
+      settings->allocate_solution != 0 &&
+      settings->allocate_solution != 1) {
+    c_eprint("allocate_solution must be either 0 or 1");
+    return 1;
+  }
+
   if (settings->verbose != 0 &&
       settings->verbose != 1) {
     c_eprint("verbose must be either 0 or 1");
+    return 1;
+  }
+
+  if (settings->profiler_level != 0 &&
+      settings->profiler_level != 1 &&
+      settings->profiler_level != 2) {
+    c_eprint("profiler_level must be either 0, 1 or 2");
     return 1;
   }
 

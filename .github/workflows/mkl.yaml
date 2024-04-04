@@ -53,11 +53,14 @@ jobs:
             lfs: false
             submodules: recursive
 
-        - name: Set up conda
+        - name: Set up conda environment for testing
           uses: conda-incubator/setup-miniconda@v2
           with:
             auto-update-conda: true
             python-version: ${{ matrix.python-version }}
+            activate-environment: osqp-test
+            environment-file: tests/testenv.yml
+            auto-activate-base: false
 
         # -----------------
         # OS-specific setup
@@ -84,18 +87,18 @@ jobs:
             echo "$CONDA_PREFIX/Library/bin" >> $GITHUB_PATH
         # -----------------
 
-        - name: Install unit testing python dependencies
-          run: |
-            conda install numpy scipy
-            conda info
-            conda list
-
         - name: Install MKL
           run: |
             conda install -c conda-forge llvm-openmp
             conda install -c intel mkl-devel
             conda info
             conda list
+
+        - name: Install additional dependencies (Windows)
+          if: runner.os == 'Windows'
+          run: |
+            # Needed to get import library for the Intel OpenMP library to be found
+            conda install -c intel dpcpp_impl_win-64
 
         - name: Build
           run: |

@@ -1,9 +1,12 @@
 #include "glob_opts.h"
 #include "algebra_impl.h"
 #include "printing.h"
+#include "profilers.h"
 
+#include "error.h"
 #include "qdldl.h"
 #include "qdldl_interface.h"
+#include "util.h"
 
 #ifndef OSQP_EMBEDDED_MODE
 #include "amd.h"
@@ -19,13 +22,18 @@
 
 void update_settings_linsys_solver_qdldl(qdldl_solver*       s,
                                          const OSQPSettings* settings) {
-  return;
+    /* No settings to update */
+    OSQP_UnusedVar(s);
+    OSQP_UnusedVar(settings);
+    return;
 }
 
-// Warm starting not used by direct solvers
 void warm_start_linsys_solver_qdldl(qdldl_solver*      s,
                                     const OSQPVectorf* x) {
-  return;
+    /* Warm starting not used by direct solvers */
+    OSQP_UnusedVar(s);
+    OSQP_UnusedVar(x);
+    return;
 }
 
 #ifndef OSQP_EMBEDDED_MODE
@@ -82,7 +90,9 @@ static OSQPInt LDL_factor(OSQPCscMatrix* A,
     OSQPInt factor_status;
 
     // Compute elimination tree
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_SYM_FAC);
     sum_Lnz = QDLDL_etree(A->n, A->p, A->i, p->iwork, p->Lnz, p->etree);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_SYM_FAC);
 
     if (sum_Lnz < 0){
       // Error
@@ -102,10 +112,12 @@ static OSQPInt LDL_factor(OSQPCscMatrix* A,
     p->L->nzmax = sum_Lnz;
 
     // Factor matrix
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
     factor_status = QDLDL_factor(A->n, A->p, A->i, A->x,
                                  p->L->p, p->L->i, p->L->x,
                                  p->D, p->Dinv, p->Lnz,
                                  p->etree, p->bwork, p->iwork, p->fwork);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
 
     if (factor_status < 0){
       // Error
@@ -372,7 +384,9 @@ OSQPInt init_linsys_solver_qdldl(qdldl_solver**      sp,
 #endif  // OSQP_EMBEDDED_MODE
 
 const char* name_qdldl(qdldl_solver* s) {
-  return "QDLDL v" STRINGIZE(QDLDL_VERSION_MAJOR) "." STRINGIZE(QDLDL_VERSION_MINOR) "." STRINGIZE(QDLDL_VERSION_PATCH);
+    OSQP_UnusedVar(s);
+
+    return "QDLDL v" STRINGIZE(QDLDL_VERSION_MAJOR) "." STRINGIZE(QDLDL_VERSION_MINOR) "." STRINGIZE(QDLDL_VERSION_PATCH);
 }
 
 
@@ -387,6 +401,8 @@ static void LDLSolve(OSQPFloat*           x,
   OSQPInt j;
   OSQPInt n = L->n;
 
+  osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_BACKSOLVE);
+
   // permute_x(L->n, bp, b, P);
   for (j = 0 ; j < n ; j++) bp[j] = b[P[j]];
 
@@ -394,6 +410,8 @@ static void LDLSolve(OSQPFloat*           x,
 
   // permutet_x(L->n, x, bp, P);
   for (j = 0 ; j < n ; j++) x[P[j]] = bp[j];
+
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_BACKSOLVE);
 }
 
 
@@ -405,6 +423,11 @@ OSQPInt solve_linsys_qdldl(qdldl_solver* s,
   OSQPInt    n = s->n;
   OSQPInt    m = s->m;
   OSQPFloat* bv = b->values;
+
+  // Direct solver doesn't care about the ADMM iteration
+  OSQP_UnusedVar(admm_iter);
+
+  osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_SOLVE);
 
 #ifndef OSQP_EMBEDDED_MODE
   if (s->polishing) {
@@ -434,6 +457,7 @@ OSQPInt solve_linsys_qdldl(qdldl_solver* s,
 #ifndef OSQP_EMBEDDED_MODE
   }
 #endif
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_SOLVE);
   return 0;
 }
 
@@ -457,9 +481,11 @@ OSQPInt update_linsys_solver_matrices_qdldl(qdldl_solver*     s,
     // Update KKT matrix with new A
     update_KKT_A(s->KKT, A->csc, Ax_new_idx, A_new_n, s->AtoKKT);
 
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
     pos_D_count = QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
         s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
         s->etree, s->bwork, s->iwork, s->fwork);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
 
     //number of positive elements in D should match the
     //dimension of P if P + \sigma I is PD.   Error otherwise.
@@ -472,6 +498,7 @@ OSQPInt update_linsys_solver_rho_vec_qdldl(qdldl_solver*      s,
                                            OSQPFloat          rho_sc) {
 
     OSQPInt i;
+    OSQPInt retval = 0;
     OSQPInt m = s->m;
     OSQPFloat* rhov;
 
@@ -489,9 +516,13 @@ OSQPInt update_linsys_solver_rho_vec_qdldl(qdldl_solver*      s,
     // Update KKT matrix with new rho_vec
     update_KKT_param2(s->KKT, s->rho_inv_vec, s->rho_inv, s->rhotoKKT, s->m);
 
-    return (QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
+    retval = QDLDL_factor(s->KKT->n, s->KKT->p, s->KKT->i, s->KKT->x,
         s->L->p, s->L->i, s->L->x, s->D, s->Dinv, s->Lnz,
-        s->etree, s->bwork, s->iwork, s->fwork) < 0);
+        s->etree, s->bwork, s->iwork, s->fwork);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_NUM_FAC);
+
+    return (retval < 0);
 }
 
 #endif
@@ -663,13 +694,17 @@ static void _adj_assemble_csc(OSQPCscMatrix*     D,
 
 }
 
-OSQPInt adjoint_derivative_qdldl(qdldl_solver*      s,
+OSQPInt adjoint_derivative_qdldl(qdldl_solver**     s,
                                  const OSQPMatrix*  P_full,
                                  const OSQPMatrix*  G,
                                  const OSQPMatrix*  A_eq,
                                  const OSQPMatrix*  GDiagLambda,
                                  const OSQPVectorf* slacks,
-                                 const OSQPVectorf* rhs) {
+                                       OSQPVectorf* rhs) {
+    /* We don't currently reuse the solver for the adjoint computations */
+    OSQP_UnusedVar(s);
+
+    OSQPInt retval = 0;
 
     OSQPInt n = OSQPMatrix_get_m(P_full);
     OSQPInt n_ineq = OSQPMatrix_get_m(G);
@@ -691,10 +726,16 @@ OSQPInt adjoint_derivative_qdldl(qdldl_solver*      s,
 
     OSQPInt dim = 2 * (n + n_ineq + n_eq);
     OSQPCscMatrix* adj = csc_spalloc(dim, dim, nnzKKT, 1, 0);
-    if (!adj) return OSQP_NULL;
+    if (!adj) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+
     _adj_assemble_csc(adj, P_full, G, A_eq, GDiagLambda, slacks);
 
     OSQPMatrix *adj_matrix = OSQPMatrix_new_from_csc(adj, 1);
+
+    if (!adj_matrix) {
+        retval = OSQP_MEM_ALLOC_ERROR;
+        goto adj_alloc_fail;
+    }
 
     _adj_perturb(adj, 1e-6);
 
@@ -706,43 +747,36 @@ OSQPInt adjoint_derivative_qdldl(qdldl_solver*      s,
 
     //data for L and D factors
     QDLDL_int Ln = An;
-    QDLDL_int *Lp;
-    QDLDL_int *Li;
-    QDLDL_float *Lx;
-    QDLDL_float *D;
-    QDLDL_float *Dinv;
+
+    QDLDL_float *Lx = OSQP_NULL;
+    QDLDL_int   *Li = OSQP_NULL;
+
+    QDLDL_int   *Lp   = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(An+1));
+    QDLDL_float *D    = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
+    QDLDL_float *Dinv = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
 
     //permutation
-    QDLDL_int   *P;
-    QDLDL_int   *Pinv;
+    QDLDL_int   *P    = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(An));
+    QDLDL_int   *Pinv = OSQP_NULL;
 
     //data for elim tree calculation
-    QDLDL_int *etree;
-    QDLDL_int *Lnz;
+    QDLDL_int *etree = (QDLDL_int*)malloc(sizeof(QDLDL_int)*An);
+    QDLDL_int *Lnz   = (QDLDL_int*)malloc(sizeof(QDLDL_int)*An);
     QDLDL_int  sumLnz;
 
     //working data for factorisation
-    QDLDL_int   *iwork;
-    QDLDL_bool  *bwork;
-    QDLDL_float *fwork;
+    QDLDL_int   *iwork = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(3*An));
+    QDLDL_bool  *bwork = (QDLDL_bool*)malloc(sizeof(QDLDL_bool)*An);
+    QDLDL_float *fwork = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
 
     //Data for results of A\b
-    QDLDL_float *x;
-    QDLDL_float *x_work;
+    QDLDL_float *x = OSQP_NULL;
+    QDLDL_float *x_work = OSQP_NULL;
 
-    etree = (QDLDL_int*)malloc(sizeof(QDLDL_int)*An);
-    Lnz   = (QDLDL_int*)malloc(sizeof(QDLDL_int)*An);
-
-    Lp    = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(An+1));
-    D     = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
-    Dinv  = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
-
-    iwork = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(3*An));
-    bwork = (QDLDL_bool*)malloc(sizeof(QDLDL_bool)*An);
-    fwork = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
-
-    P = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(An));
-    Pinv = (QDLDL_int*)malloc(sizeof(QDLDL_int)*(An));
+    if (!Lp || !D || !Dinv || !P || !etree || !Lnz || !iwork || !bwork || !fwork) {
+        retval = OSQP_MEM_ALLOC_ERROR;
+        goto mat_comp_alloc_error;
+    }
 
     OSQPInt amd_status;
 #ifdef OSQP_USE_LONG
@@ -751,24 +785,43 @@ OSQPInt adjoint_derivative_qdldl(qdldl_solver*      s,
     amd_status = amd_order(An, adj->p, adj->i, P, (OSQPFloat *)OSQP_NULL, (OSQPFloat *)OSQP_NULL);
 #endif
     if (amd_status < 0) {
-        return amd_status;
+        retval = amd_status;
+        goto mat_comp_alloc_error;
     }
 
     // Inverse of the permutation vector
     Pinv = csc_pinv(P, An);
+    if (!Pinv) {
+        retval = OSQP_MEM_ALLOC_ERROR;
+        goto inv_perm_fail;
+    }
 
-    OSQPCscMatrix* adj_permuted;
+    OSQPCscMatrix* adj_permuted = OSQP_NULL;
     adj_permuted = csc_symperm(adj, Pinv, OSQP_NULL, 1);
+    if (!adj_permuted) {
+        retval = OSQP_MEM_ALLOC_ERROR;
+        goto sym_perm_fail;
+    }
 
     sumLnz = QDLDL_etree(An, adj_permuted->p, adj_permuted->i, iwork, Lnz, etree);
 
     Li    = (QDLDL_int*)malloc(sizeof(QDLDL_int)*sumLnz);
     Lx    = (QDLDL_float*)malloc(sizeof(QDLDL_float)*sumLnz);
 
+    if (!Li || !Lx) {
+        retval = OSQP_MEM_ALLOC_ERROR;
+        goto csc_alloc_fail;
+    }
+
     QDLDL_factor(An, adj_permuted->p, adj_permuted->i, adj_permuted->x, Lp, Li, Lx, D, Dinv, Lnz, etree, bwork, iwork, fwork);
 
     x = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
     x_work = (QDLDL_float*)malloc(sizeof(QDLDL_float)*An);
+
+    if (!x || !x_work) {
+        retval = OSQP_MEM_ALLOC_ERROR;
+        goto x_alloc_fail;
+    }
 
     //when solving A\b, start with x = b
     for (i = 0 ; i < An ; i++) x_work[i] = rhs->values[P[i]];
@@ -777,6 +830,11 @@ OSQPInt adjoint_derivative_qdldl(qdldl_solver*      s,
 
     OSQPVectorf *sol = OSQPVectorf_new(x, An);
     OSQPVectorf *residual = OSQPVectorf_malloc(An);
+
+    if (!sol || !residual) {
+        retval = OSQP_MEM_ALLOC_ERROR;
+        goto vec_alloc_fail;
+    }
 
     OSQPInt k;
     for (k=0; k<200; k++) {
@@ -791,31 +849,45 @@ OSQPInt adjoint_derivative_qdldl(qdldl_solver*      s,
         OSQPVectorf_minus(sol, sol, residual);
     }
 
-    OSQPVectorf_copy(rhs, sol);
+    // rhs is sized to be the largest possible size needed, so sol might be smaller
+    // Therefore, we have to subassign into rhs
+    OSQPVectorf_subvector_assign(rhs, OSQPVectorf_data(sol), 0, OSQPVectorf_length(sol), 1.0);
 
-    c_free(Lp);
+/* Free data based on what failed */
+vec_alloc_fail:
+    OSQPVectorf_free(sol);
+    OSQPVectorf_free(residual);
+
+x_alloc_fail:
+    c_free(x);
+    c_free(x_work);
+
+csc_alloc_fail:
     c_free(Li);
     c_free(Lx);
+
+sym_perm_fail:
+    csc_spfree(adj_permuted);
+
+inv_perm_fail:
+    c_free(Pinv);
+
+mat_comp_alloc_error:
+    c_free(Lp);
     c_free(D);
     c_free(Dinv);
     c_free(P);
-    c_free(Pinv);
     c_free(etree);
     c_free(Lnz);
     c_free(iwork);
     c_free(bwork);
     c_free(fwork);
-    c_free(x);
-    c_free(x_work);
 
-    csc_spfree(adj_permuted);
+adj_alloc_fail:
     OSQPMatrix_free(adj_matrix);
     csc_spfree(adj);
 
-    OSQPVectorf_free(sol);
-    OSQPVectorf_free(residual);
-
-    return 0;
+    return retval;
 }
 
 #endif

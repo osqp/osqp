@@ -1,0 +1,10 @@
+# These are the options OSQP expects from MKL
+set( MKL_INTERFACE "@MKL_INTERFACE@" )
+set( MKL_LINK "@MKL_LINK@" )
+
+# MKL's setup wrapper script doesn't properly add the MKL CMake files to the path
+# so do that here instead.
+list( PREPEND CMAKE_PREFIX_PATH "$ENV{MKLROOT}" )
+
+include(CMakeFindDependencyMacro)
+find_dependency( MKL REQUIRED )

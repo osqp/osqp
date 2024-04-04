@@ -1,0 +1,32 @@
+@PACKAGE_INIT@
+
+# CMake 2.6.4 and before didn't support ON in if() statements, so to ensure compatibility
+# add some temp variables indicating the build options.
+SET( OSQP_HAVE_SHARED_LIB @OSQP_BUILD_SHARED_LIB@ )
+SET( OSQP_HAVE_STATIC_LIB @OSQP_BUILD_STATIC_LIB@ )
+
+if( ${OSQP_HAVE_SHARED_LIB} )
+    include( "${CMAKE_CURRENT_LIST_DIR}/osqp-targets.cmake" )
+endif()
+
+if( ${OSQP_HAVE_STATIC_LIB} )
+    # Add the dependencies for the static library
+    if( EXISTS "${CMAKE_CURRENT_LIST_DIR}/osqp-findAlgebraDependency.cmake" )
+        include( "${CMAKE_CURRENT_LIST_DIR}/osqp-findAlgebraDependency.cmake" )
+    endif()
+
+    include( "${CMAKE_CURRENT_LIST_DIR}/osqpstatic-targets.cmake" )
+
+    # Modify the language to include CXX if CUDA is included,
+    # otherwise the linker stage will fail because CUDA uses some C++ elements.
+    get_property( interface_languages
+                  TARGET osqp::osqpstatic
+                  PROPERTY IMPORTED_LINK_INTERFACE_LANGUAGES_NOCONFIG)
+
+    foreach( LANG in ${interface_languages} )
+        if( ${LANG} STREQUAL "CUDA" )
+            set_target_properties( osqp::osqpstatic PROPERTIES
+                                   IMPORTED_LINK_INTERFACE_LANGUAGES_NOCONFIG "${interface_languages};CXX" )
+        endif()
+    endforeach()
+endif()

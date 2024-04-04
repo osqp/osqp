@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 
-#include "cuda_malloc.h"
+#include "cuda_memory.h"
 #include "helper_cuda.h"    /* --> checkCudaErrors */
 
 
@@ -67,4 +67,46 @@ void cuda_free(void** devPtr) {
 
 void cuda_free_host(void** devPtr) {
   checkCudaErrors(c_cudaFreeHost(devPtr));
+}
+
+bool cuda_isdeviceptr(const void* ptr) {
+  struct cudaPointerAttributes attributes;
+
+  cudaError_t err = cudaPointerGetAttributes(&attributes, ptr);
+
+  // It may be possible for host allocated memory to return an error code of
+  // cudaErrorInvalidValue instead of cudaSuccess, so we don't want to treat
+  // that error code as an actual error, just as a sign the memory is on the host.
+  if (err == cudaErrorInvalidValue) {
+    cudaGetLastError();
+    return false;
+  }
+  else if (err != cudaSuccess) {
+    checkCudaErrors(err);
+    return false;
+  }
+
+  // This memory has been allocated on the device for sure.
+  if (attributes.type == cudaMemoryTypeDevice) {
+    return true;
+  }
+
+  // We don't handle the cudaMemoryTypeUnregistered, cudaMemoryTypeHost or cudaMemoryTypeManaged
+  // possibilities explicitly, because we are curious about if the memory is on the device.
+  // cudaMemoryTypeUnregistered and cudaMemoryTypeHost imply the memory is on the host, and
+  // cudaMemoryTypeManaged means the data is in memory that could be accessible from either the CPU
+  // or device directly, however we always want data on the GPU (so we will do a manual copy from that
+  // memory to the GPU when initializing the matrices/vectors).
+
+  // Clear out any errors that may have happened (just in case)
+  cudaGetLastError();
+
+  return false;
+}
+
+cudaError_t cuda_memcpy_hd2d(void* dst, const void* src, size_t count) {
+  if (cuda_isdeviceptr(src))
+    return cudaMemcpy(dst, src, count, cudaMemcpyDeviceToDevice);
+  else
+    return cudaMemcpy(dst, src, count, cudaMemcpyHostToDevice);
 }

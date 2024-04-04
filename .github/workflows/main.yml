@@ -54,11 +54,14 @@ jobs:
             lfs: false
             submodules: recursive
 
-        - name: Set up conda
+        - name: Set up conda environment for testing
           uses: conda-incubator/setup-miniconda@v2
           with:
             auto-update-conda: true
             python-version: ${{ matrix.python-version }}
+            activate-environment: osqp-test
+            environment-file: tests/testenv.yml
+            auto-activate-base: false
 
         # -----------------
         # OS-specific setup
@@ -84,12 +87,6 @@ jobs:
           run: |
             echo "$CONDA_PREFIX/Library/bin" >> $GITHUB_PATH
         # -----------------
-
-        - name: Install unit testing python dependencies
-          run: |
-            conda install numpy scipy
-            conda info
-            conda list
 
         - name: Build
           run: |

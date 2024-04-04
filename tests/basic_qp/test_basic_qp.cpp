@@ -602,49 +602,110 @@ TEST_CASE_METHOD(basic_qp_test_fixture, "Basic QP: Data update", "[solve][qp][da
     mu_assert("QP vector updates: Error in solver data after updating upper bounds",
               OSQPVectorf_norm_inf_diff(solver->work->data->u, new_vec.get()) < TESTS_TOL);
   }
+}
 
-  SECTION( "QP Updates: lower and upper bounds consistency validation" ) {
-    OSQPInt exp_flag = OSQP_NO_ERROR;
-    OSQPInt retval   = OSQP_NO_ERROR;
 
-    OSQPFloat* l_cur = data->l;
-    OSQPFloat* l_new = sols_data->l_new;
-    OSQPFloat* u_cur = data->u;
-    OSQPFloat* u_new = sols_data->u_new;
-    OSQPFloat* nullv = OSQP_NULL;
+TEST_CASE_METHOD(basic_qp_test_fixture, "Basic QP: Data update validation", "[solve][qp][data][update]")
+{
+  OSQPInt      exitflag;
+  OSQPVectorf* q_new;
+  OSQPVectorf* l_new;
+  OSQPVectorf* u_new;
 
-    OSQPFloat* new_l_data = nullptr;
-    OSQPFloat* exp_l_data = nullptr;
-    OSQPFloat* new_u_data = nullptr;
-    OSQPFloat* exp_u_data = nullptr;
+  // Define Solver settings as default
+  settings->max_iter      = 200;
+  settings->polishing     = 1;
+  settings->scaling       = 0;
+  settings->warm_starting = 0;
 
-    std::initializer_list<std::tuple<OSQPFloat**, OSQPFloat**, OSQPFloat**, OSQPFloat**, OSQPInt>> testcases =
-      { /* first (second) is new (expected) upper data, third (fourth) is new (expected) lower data, fifth is return code from update func */
-        /* Flipped upper and lower (validation error) */
-        std::make_tuple( &u_new, &l_cur, &l_new, &u_cur, OSQP_DATA_VALIDATION_ERROR ),
-        /* Write lower bound with incorrect data */
-        std::make_tuple( &u_new, &l_cur, &nullv, &u_cur, OSQP_DATA_VALIDATION_ERROR ),
-        /* Write upper bound with incorrect data */
-        std::make_tuple( &nullv, &l_cur, &l_new, &u_cur, OSQP_DATA_VALIDATION_ERROR ),
-        /* Correct data */
-        std::make_tuple( &l_new, &l_new, &u_new, &u_new, OSQP_NO_ERROR )
-      };
+  // Setup solver
+  exitflag = osqp_setup(&tmpSolver, data->P, data->q,
+                        data->A, data->l, data->u,
+                        data->m, data->n, settings.get());
+  solver.reset(tmpSolver);
 
-    auto test_case = GENERATE_REF( table<OSQPFloat**, OSQPFloat**, OSQPFloat**, OSQPFloat**, OSQPInt>(testcases) );
+  // Setup correct
+  mu_assert("Basic QP test update: Setup error!", exitflag == 0);
 
-    new_l_data = *std::get<0>(test_case);
-    exp_l_data = *std::get<1>(test_case);
-    new_u_data = *std::get<2>(test_case);
-    exp_u_data = *std::get<3>(test_case);
-    exp_flag = std::get<4>(test_case);
+  // ====================================================================
+  //  Update data
+  // ====================================================================
+  SECTION( "QP Updates: Flipped upper and lower bounds" ) {
+    OSQPFloat* new_l_data = sols_data->u_new;
+    OSQPFloat* exp_l_data = data->l;
+    OSQPFloat* new_u_data = sols_data->l_new;
+    OSQPFloat* exp_u_data = data->u;
 
     OSQPVectorf_ptr exp_l_vec{OSQPVectorf_new(exp_l_data, data->m)};
     OSQPVectorf_ptr exp_u_vec{OSQPVectorf_new(exp_u_data, data->m)};
 
-    retval = osqp_update_data_vec(solver.get(), NULL, new_l_data, new_u_data);
+    OSQPInt retval = osqp_update_data_vec(solver.get(), NULL, new_l_data, new_u_data);
 
     mu_assert("QP vector updates: Error in return flag updating upper both bounds",
-              retval == exp_flag);
+              retval == OSQP_DATA_VALIDATION_ERROR);
+
+    mu_assert("QP vector updates: Error in solver upper bound data after updating both bounds",
+              OSQPVectorf_norm_inf_diff(solver->work->data->u, exp_u_vec.get()) < TESTS_TOL);
+
+    mu_assert("QP vector updates: Error in solver lower bound data after updating both bounds",
+              OSQPVectorf_norm_inf_diff(solver->work->data->l, exp_l_vec.get()) < TESTS_TOL);
+  }
+
+  SECTION( "QP Updates: Write lower bound with incorrect data" ) {
+    OSQPFloat* new_l_data = sols_data->u_new;
+    OSQPFloat* exp_l_data = data->l;
+    OSQPFloat* new_u_data = OSQP_NULL;
+    OSQPFloat* exp_u_data = data->u;
+
+    OSQPVectorf_ptr exp_l_vec{OSQPVectorf_new(exp_l_data, data->m)};
+    OSQPVectorf_ptr exp_u_vec{OSQPVectorf_new(exp_u_data, data->m)};
+
+    OSQPInt retval = osqp_update_data_vec(solver.get(), NULL, new_l_data, new_u_data);
+
+    mu_assert("QP vector updates: Error in return flag updating upper both bounds",
+              retval == OSQP_DATA_VALIDATION_ERROR);
+
+    mu_assert("QP vector updates: Error in solver upper bound data after updating both bounds",
+              OSQPVectorf_norm_inf_diff(solver->work->data->u, exp_u_vec.get()) < TESTS_TOL);
+
+    mu_assert("QP vector updates: Error in solver lower bound data after updating both bounds",
+              OSQPVectorf_norm_inf_diff(solver->work->data->l, exp_l_vec.get()) < TESTS_TOL);
+  }
+
+  SECTION( "QP Updates: Write upper bound with incorrect data" ) {
+    OSQPFloat* new_l_data = OSQP_NULL;
+    OSQPFloat* exp_l_data = data->l;
+    OSQPFloat* new_u_data = sols_data->l_new;
+    OSQPFloat* exp_u_data = data->u;
+
+    OSQPVectorf_ptr exp_l_vec{OSQPVectorf_new(exp_l_data, data->m)};
+    OSQPVectorf_ptr exp_u_vec{OSQPVectorf_new(exp_u_data, data->m)};
+
+    OSQPInt retval = osqp_update_data_vec(solver.get(), NULL, new_l_data, new_u_data);
+
+    mu_assert("QP vector updates: Error in return flag updating upper both bounds",
+              retval == OSQP_DATA_VALIDATION_ERROR);
+
+    mu_assert("QP vector updates: Error in solver upper bound data after updating both bounds",
+              OSQPVectorf_norm_inf_diff(solver->work->data->u, exp_u_vec.get()) < TESTS_TOL);
+
+    mu_assert("QP vector updates: Error in solver lower bound data after updating both bounds",
+              OSQPVectorf_norm_inf_diff(solver->work->data->l, exp_l_vec.get()) < TESTS_TOL);
+  }
+
+  SECTION( "QP Updates: Correct data" ) {
+    OSQPFloat* new_l_data = sols_data->l_new;
+    OSQPFloat* exp_l_data = sols_data->l_new;
+    OSQPFloat* new_u_data = sols_data->u_new;
+    OSQPFloat* exp_u_data = sols_data->u_new;
+
+    OSQPVectorf_ptr exp_l_vec{OSQPVectorf_new(exp_l_data, data->m)};
+    OSQPVectorf_ptr exp_u_vec{OSQPVectorf_new(exp_u_data, data->m)};
+
+    OSQPInt retval = osqp_update_data_vec(solver.get(), NULL, new_l_data, new_u_data);
+
+    mu_assert("QP vector updates: Error in return flag updating upper both bounds",
+              retval == OSQP_NO_ERROR);
 
     mu_assert("QP vector updates: Error in solver upper bound data after updating both bounds",
               OSQPVectorf_norm_inf_diff(solver->work->data->u, exp_u_vec.get()) < TESTS_TOL);

@@ -9,6 +9,7 @@
 #include "lin_alg.h"
 #include "printing.h"
 #include "timing.h"
+#include "profilers.h"
 
 
 #ifdef OSQP_CODEGEN
@@ -105,10 +106,14 @@ void osqp_set_default_settings(OSQPSettings* settings) {
 
   settings->device = 0;                                      /* device identifier */
   settings->linsys_solver  = osqp_algebra_default_linsys();  /* linear system solver */
-  settings->verbose        = OSQP_VERBOSE;                   /* print output */
-  settings->warm_starting  = OSQP_WARM_STARTING;             /* warm starting */
-  settings->scaling        = OSQP_SCALING;                   /* heuristic problem scaling */
-  settings->polishing      = OSQP_POLISHING;                 /* ADMM solution polish: 1 */
+
+  settings->allocate_solution = 1;                            /* allocate solution */
+  settings->profiler_level    = 0;                            /* Profiler annotation level */
+
+  settings->verbose           = OSQP_VERBOSE;                 /* print output */
+  settings->warm_starting     = OSQP_WARM_STARTING;           /* warm starting */
+  settings->scaling           = OSQP_SCALING;                 /* heuristic problem scaling */
+  settings->polishing         = OSQP_POLISHING;               /* ADMM solution polish: 1 */
 
   settings->rho           = (OSQPFloat)OSQP_RHO;    /* ADMM step */
   settings->rho_is_vec    = OSQP_RHO_IS_VEC;        /* defines whether rho is scalar or vector*/
@@ -161,6 +166,9 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
 
   // Validate settings
   if (validate_settings(settings, 1)) return osqp_error(OSQP_SETTINGS_VALIDATION_ERROR);
+
+  osqp_profiler_init(settings->profiler_level);
+  osqp_profiler_sec_push(OSQP_PROFILER_SEC_SETUP);
 
   // Allocate empty solver
   solver = c_calloc(1, sizeof(OSQPSolver));
@@ -285,7 +293,9 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
       return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
     // Scale data
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_SCALE);
     scale_data(solver);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_SCALE);
   } else {
     work->scaling  = OSQP_NULL;
     work->D_temp   = OSQP_NULL;
@@ -332,16 +342,25 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
   // Allocate solution
-  solver->solution = c_calloc(1, sizeof(OSQPSolution));
-  if (!(solver->solution)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  solver->solution->x             = c_calloc(1, n * sizeof(OSQPFloat));
-  solver->solution->y             = c_calloc(1, m * sizeof(OSQPFloat));
-  solver->solution->prim_inf_cert = c_calloc(1, m * sizeof(OSQPFloat));
-  solver->solution->dual_inf_cert = c_calloc(1, n * sizeof(OSQPFloat));
-  if ( !(solver->solution->x) || !(solver->solution->dual_inf_cert) )
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
-  if ( m && (!(solver->solution->y) || !(solver->solution->prim_inf_cert)) )
-    return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  if (settings->allocate_solution) {
+    solver->solution = c_calloc(1, sizeof(OSQPSolution));
+
+    if (!(solver->solution)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
+
+    solver->solution->x             = c_calloc(1, n * sizeof(OSQPFloat));
+    solver->solution->y             = c_calloc(1, m * sizeof(OSQPFloat));
+    solver->solution->prim_inf_cert = c_calloc(1, m * sizeof(OSQPFloat));
+    solver->solution->dual_inf_cert = c_calloc(1, n * sizeof(OSQPFloat));
+
+    if ( !(solver->solution->x) || !(solver->solution->dual_inf_cert) )
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+
+    if ( m && (!(solver->solution->y) || !(solver->solution->prim_inf_cert)) )
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  }
+  else {
+    solver->solution = OSQP_NULL;
+  }
 
   // Initialize information
   solver->info->status_polish = OSQP_POLISH_NOT_PERFORMED; // Polishing not performed
@@ -399,6 +418,8 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 # endif /* ifdef OSQP_ENABLE_DERIVATIVES */
 
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_SETUP);
+
   // Return exit flag
   return 0;
 }
@@ -447,6 +468,8 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
   osqp_tic(work->timer); // Start timer
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
+osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
+
 
 #ifdef OSQP_ENABLE_PRINTING
   if (solver->settings->verbose) {
@@ -469,6 +492,7 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 
   max_iter = solver->settings->max_iter;
   for (iter = 1; iter <= max_iter; iter++) {
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_ITER);
 
     // Update x_prev, z_prev (preallocated, no malloc)
     swap_vectors(&(work->x), &(work->x_prev));
@@ -476,18 +500,26 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 
     /* ADMM STEPS */
     /* Compute \tilde{x}^{k+1}, \tilde{z}^{k+1} */
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_KKT_SOLVE);
     update_xz_tilde(solver, iter);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_ADMM_KKT_SOLVE);
+
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_UPDATE);
 
     /* Compute x^{k+1} */
     update_x(solver);
 
     /* Compute z^{k+1} */
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_PROJ);
     update_z(solver);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_ADMM_PROJ);
 
     /* Compute y^{k+1} */
     update_y(solver);
 
     /* End of ADMM Steps */
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_ADMM_UPDATE);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_ADMM_ITER);
 
 #ifdef OSQP_ENABLE_INTERRUPT
 
@@ -638,6 +670,7 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 # endif /* ifdef OSQP_ENABLE_PRINTING */
 
       // Actually update rho
+      osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
       if (adapt_rho(solver)) {
         c_eprint("Failed rho update");
         exitflag = 1;
@@ -721,8 +754,16 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 
 #ifndef OSQP_EMBEDDED_MODE
   // Polish the obtained solution
-  if (solver->settings->polishing && (solver->info->status_val == OSQP_SOLVED))
-    polish(solver);
+  if (solver->settings->polishing && (solver->info->status_val == OSQP_SOLVED)) {
+    osqp_profiler_sec_push(OSQP_PROFILER_SEC_POLISH);
+    exitflag = polish(solver);
+    osqp_profiler_sec_pop(OSQP_PROFILER_SEC_POLISH);
+
+    if (exitflag > 0) {
+      c_eprint("Failed polishing");
+      goto exit;
+    }
+  }
 #endif /* ifndef OSQP_EMBEDDED_MODE */
 
 #ifdef OSQP_ENABLE_PROFILING
@@ -755,8 +796,7 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 #endif /* ifdef OSQP_ENABLE_PRINTING */
 
   // Store solution
-  store_solution(solver);
-
+  store_solution(solver, solver->solution);
 
 // Define exit flag for quitting function
 #if defined(OSQP_ENABLE_PROFILING) || defined(OSQP_ENABLE_INTERRUPT) || OSQP_EMBEDDED_MODE != 1
@@ -768,7 +808,23 @@ exit:
   osqp_end_interrupt_listener();
 #endif /* ifdef OSQP_ENABLE_INTERRUPT */
 
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_OPT_SOLVE);
+
   return exitflag;
+}
+
+
+OSQPInt osqp_get_solution(OSQPSolver* solver, OSQPSolution* solution) {
+  if (!solver || !solver->work || !solver->settings || !solver->info) {
+    return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+  }
+
+  if (!solution)
+    return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+
+  store_solution(solver, solution);
+
+  return OSQP_NO_ERROR;
 }
 
 
@@ -1194,6 +1250,12 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
 
   /* Update settings */
   // linsys_solver ignored
+  /* allocate_solver ignored */
+
+  /* Must call into profiler to update level in addition to storing the value */
+  settings->profiler_level = new_settings->profiler_level;
+  osqp_profiler_update_level(settings->profiler_level);
+
   settings->verbose       = new_settings->verbose;
   settings->warm_starting = new_settings->warm_starting;
   // scaling ignored
@@ -1265,11 +1327,15 @@ OSQPInt osqp_codegen(OSQPSolver*         solver,
     return osqp_error(OSQP_CODEGEN_DEFINES_ERROR);
   }
 
-  exitflag = codegen_inc(solver, output_dir, file_prefix);
-  if (!exitflag) exitflag = codegen_src(solver, output_dir, file_prefix, defines->embedded_mode);
+  exitflag = codegen_inc(output_dir, file_prefix);
+  if (!exitflag) exitflag = codegen_src(output_dir, file_prefix, solver, defines->embedded_mode);
   if (!exitflag) exitflag = codegen_example(output_dir, file_prefix);
   if (!exitflag) exitflag = codegen_defines(output_dir, defines);
 #else
+  OSQP_UnusedVar(solver);
+  OSQP_UnusedVar(output_dir);
+  OSQP_UnusedVar(file_prefix);
+  OSQP_UnusedVar(defines);
   exitflag = OSQP_FUNC_NOT_IMPLEMENTED;
 #endif /* ifdef OSQP_CODEGEN */
 
@@ -1303,13 +1369,15 @@ void csc_set_data(OSQPCscMatrix* M,
 ****************************/
 OSQPInt osqp_adjoint_derivative_compute(OSQPSolver* solver,
                                         OSQPFloat*  dx,
-                                        OSQPFloat*  dy_l,
-                                        OSQPFloat*  dy_u) {
+                                        OSQPFloat*  dy) {
   OSQPInt status = 0;
 
 #ifdef OSQP_ENABLE_DERIVATIVES
-  status = adjoint_derivative_compute(solver, dx, dy_l, dy_u);
+  status = adjoint_derivative_compute(solver, dx, dy, dy);
 #else
+  OSQP_UnusedVar(solver);
+  OSQP_UnusedVar(dx);
+  OSQP_UnusedVar(dy);
   status = OSQP_FUNC_NOT_IMPLEMENTED;
 #endif
 
@@ -1324,6 +1392,9 @@ OSQPInt osqp_adjoint_derivative_get_mat(OSQPSolver*    solver,
 #ifdef OSQP_ENABLE_DERIVATIVES
   status = adjoint_derivative_get_mat(solver, dP, dA);
 #else
+  OSQP_UnusedVar(solver);
+  OSQP_UnusedVar(dP);
+  OSQP_UnusedVar(dA);
   status = OSQP_FUNC_NOT_IMPLEMENTED;
 #endif
 
@@ -1339,6 +1410,10 @@ OSQPInt osqp_adjoint_derivative_get_vec(OSQPSolver* solver,
 #ifdef OSQP_ENABLE_DERIVATIVES
   status = adjoint_derivative_get_vec(solver, dq, dl, du);
 #else
+  OSQP_UnusedVar(solver);
+  OSQP_UnusedVar(dq);
+  OSQP_UnusedVar(dl);
+  OSQP_UnusedVar(du);
   status = OSQP_FUNC_NOT_IMPLEMENTED;
 #endif
 

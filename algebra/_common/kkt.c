@@ -303,11 +303,6 @@ OSQPCscMatrix* form_KKT(OSQPCscMatrix* P,
   OSQPInt   m,n;            //number of variables, constraints
   OSQPInt  nKKT, nnzKKT;    // Size, number of nonzeros in KKT
   OSQPInt  ndiagP;          // entries on diagonal of P
-  OSQPInt  ptr, i, j;       // Counters for elements (i,j) and index pointer
-  OSQPInt  zKKT = 0;        // Counter for total number of elements in P and in
-                            // KKT
-  OSQPInt* KKT_TtoC;        // Pointer to vector mapping from KKT in triplet form
-                            // to CSC
 
   OSQPCscMatrix* KKT;     // KKT matrix in CSC (or CSR) format
 
@@ -388,7 +383,7 @@ void update_KKT_A(OSQPCscMatrix* KKT,
                   OSQPInt        A_new_n,
                   OSQPInt*       AtoKKT) {
 
-  OSQPInt j, nnzA, Aidx, Kidx, doall;
+  OSQPInt j, Aidx, Kidx, doall;
 
   if(A_new_n <= 0){return;}
 
@@ -397,7 +392,6 @@ void update_KKT_A(OSQPCscMatrix* KKT,
   doall  = Ax_new_idx == OSQP_NULL ? 1 : 0;
 
   // Update elements of KKT using A
-  nnzA = A->p[A->n];
   for (j = 0; j < A_new_n; j++) {
     Aidx = doall ? j : Ax_new_idx[j];
     Kidx = AtoKKT[Aidx];

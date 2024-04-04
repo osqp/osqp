@@ -18,6 +18,37 @@ if(NOT DEFINED OSQP_EMBEDDED_MODE)
   target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/polish.c")
 endif()
 
+if(OSQP_PROFILER_ANNOTATIONS)
+  target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/profilers.c")
+
+  if(OSQP_ALGEBRA_CUDA)
+    message(STATUS "Enabling profiling annotations using NVTX")
+    target_sources(OSQPLIB PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/profilers_nvtx.c)
+    target_link_libraries(OSQPLIB CUDA::nvtx3)
+  elseif(OSQP_PROFILER_ANNOTATIONS STREQUAL "itt")
+    message(STATUS "Enabling profiling annotations using ITT API")
+    find_package(ITTAPI)
+
+    target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/profilers_itt.c")
+    target_link_libraries(OSQPLIB ITTAPI::ittnotify)
+  elseif(OSQP_PROFILER_ANNOTATIONS STREQUAL "roctx")
+    message(FATAL_ERROR "ROCTX is not supported, no AMDGPU backend in OSQP yet")
+    message(STATUS "Enabling profiling annotations using ROCTX")
+    find_package(ROCTX)
+
+    target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/profilers_roctx.c")
+    target_link_libraries(OSQPLIB ROC::ROCTX)
+  elseif(OSQP_PROFILER_ANNOTATIONS STREQUAL "omnitrace")
+    message(STATUS "Enabling profiling annotations using omnitrace")
+    find_package(omnitrace REQUIRED COMPONENTS user)
+
+    target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/profilers_omnitrace.c")
+    target_link_libraries(OSQPLIB omnitrace::omnitrace-user-library)
+  else()
+    message(FATAL_ERROR "Unknown profiler annotation option: ${OSQP_PROFILER_ANNOTATIONS}")
+  endif()
+endif()
+
 # Add the derivative support, if enabled
 if(OSQP_ENABLE_DERIVATIVES)
   target_sources(OSQPLIB PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/derivative.c")

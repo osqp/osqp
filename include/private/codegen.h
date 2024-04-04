@@ -7,13 +7,12 @@
 extern "C" {
 #endif
 
-OSQPInt codegen_inc(OSQPSolver* solver,
-                    const char* output_dir,
+OSQPInt codegen_inc(const char* output_dir,
                     const char* file_prefix);
 
-OSQPInt codegen_src(OSQPSolver* solver,
-                    const char* output_dir,
+OSQPInt codegen_src(const char* output_dir,
                     const char* file_prefix,
+                    OSQPSolver* solver,
                     OSQPInt     embedded);
 
 OSQPInt codegen_defines(const char*         output_dir,

@@ -2,7 +2,10 @@
 #include "algebra_vector.h"
 #include "reduced_kkt.h"
 #include "mkl-cg_interface.h"
+#include "util.h"
 #include <mkl_rci.h>
+
+#include "profilers.h"
 
 OSQPFloat cg_compute_tolerance(OSQPInt    admm_iter,
                                OSQPFloat  rhs_norm,
@@ -88,7 +91,6 @@ OSQPInt init_linsys_mklcg(mklcg_solver**     sp,
 
   OSQPInt m = A->csc->m;
   OSQPInt n = P->csc->n;
-  MKL_INT mkln = n;
   MKL_INT status;
   mklcg_solver* s = (mklcg_solver *)c_malloc(sizeof(mklcg_solver));
   *sp = s;
@@ -109,7 +111,7 @@ OSQPInt init_linsys_mklcg(mklcg_solver**     sp,
   //Otherwise, use rho_vec = ones.*(1/sigma)
   s->rho_vec = OSQPVectorf_malloc(m);
   if (!polish) {
-      s->rho_vec = OSQPVectorf_copy_new(rho_vec);
+      OSQPVectorf_copy(s->rho_vec, rho_vec);
   } else {
       OSQPVectorf_set_scalar(s->rho_vec, 1/settings->sigma);
   }
@@ -204,6 +206,8 @@ OSQPInt solve_linsys_mklcg(mklcg_solver* s,
   OSQPFloat res_norm    = 0.0;
   OSQPFloat eps         = 1.0;
 
+  osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_SOLVE);
+
   //Point our subviews at the OSQP RHS
   OSQPVectorf_view_update(s->r1, b,    0, s->n);
   OSQPVectorf_view_update(s->r2, b, s->n, s->m);
@@ -246,7 +250,9 @@ OSQPInt solve_linsys_mklcg(mklcg_solver* s,
     if (rci_request == 1) {
       // Multiply for reduced system.
       // mvm_pre and mvm_post are subviews of the cg workspace variable s->tmp.
+      osqp_profiler_sec_push(OSQP_PROFILER_SEC_LINSYS_MVM);
       reduced_kkt_mv_times(s->P, s->A, s->rho_vec, s->sigma, s->mvm_pre, s->mvm_post, s->ywork );
+      osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_MVM);
     } else if (rci_request == 2) {
       // Check the stopping criteria, precond_pre contains the residual vector
       res_norm = OSQPVectorf_norm_inf(s->precond_pre);
@@ -282,6 +288,8 @@ OSQPInt solve_linsys_mklcg(mklcg_solver* s,
     else
       s->cg_zero_iters = 0;
   }
+
+  osqp_profiler_sec_pop(OSQP_PROFILER_SEC_LINSYS_SOLVE);
 
   return rci_request; //0 on succcess, otherwise MKL CG error code
 }
@@ -323,6 +331,8 @@ void update_settings_linsys_solver_mklcg(struct mklcg_solver_* s,
 void warm_start_linys_mklcg(struct mklcg_solver_* self,
                             const OSQPVectorf*    x) {
   // TODO: Warm starting!
+  OSQP_UnusedVar(self);
+  OSQP_UnusedVar(x);
   return;
 }
 
@@ -334,8 +344,15 @@ OSQPInt update_matrices_linsys_mklcg(mklcg_solver*     s,
                                      const OSQPMatrix* A,
                                      const OSQPInt*    Ax_new_idx,
                                      OSQPInt           A_new_n) {
-  s->P = *(OSQPMatrix**)(&P);
-  s->A = *(OSQPMatrix**)(&A);
+  /* The MKL solver holds pointers to the matrices A and P, so it already has
+     access to the updated matrices at this point. The only task remaining is to
+     recompute the preconditioner */
+  OSQP_UnusedVar(P);
+  OSQP_UnusedVar(Px_new_idx);
+  OSQP_UnusedVar(P_new_n);
+  OSQP_UnusedVar(A);
+  OSQP_UnusedVar(Ax_new_idx);
+  OSQP_UnusedVar(A_new_n);
 
   // Update the preconditioner (matrix-only update)
   cg_update_precond(s);

@@ -54,6 +54,7 @@ add_subdirectory(basic_lp)
 add_subdirectory(basic_qp)
 add_subdirectory(basic_qp2)
 add_subdirectory(codegen)
+add_subdirectory(derivative_adjoint)
 add_subdirectory(large_qp)
 add_subdirectory(lin_alg)
 add_subdirectory(non_cvx)
@@ -105,6 +106,13 @@ target_include_directories(osqp_tester PRIVATE
                            ${CMAKE_CURRENT_SOURCE_DIR}/utils/
                            ${CMAKE_CURRENT_SOURCE_DIR}/../include/private
                            ${osqplib_includes})
+
+if(OSQP_ALGEBRA_CUDA)
+  target_include_directories(osqp_tester PRIVATE
+                             ${CMAKE_CURRENT_SOURCE_DIR}/../../algebra/cuda/
+                             ${CMAKE_CURRENT_SOURCE_DIR}/../../algebra/cuda/include/)
+endif()
+
 target_link_libraries(osqp_tester osqpstatic Catch2::Catch2 ${osqplib_link_libs})
 
 add_test(NAME osqp_tester COMMAND osqp_tester)

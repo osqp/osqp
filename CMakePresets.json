@@ -1,0 +1,75 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "builtin",
+      "displayName": "Builtin linear algebra (Release)",
+      "description": "Builtin linear algebra brackend",
+      "binaryDir": "${sourceDir}/build.builtin",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "OSQP_ALGEBRA_BACKEND": "builtin"
+      }
+    },
+    {
+      "name": "mkl",
+      "displayName": "MKL linear algebra (Release)",
+      "description": "MKL linear algebra brackend",
+      "binaryDir": "${sourceDir}/build.mkl",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "OSQP_ALGEBRA_BACKEND": "mkl"
+      }
+    },
+    {
+      "name": "cuda",
+      "displayName": "CUDA linear algebra (Release)",
+      "description": "CUDA linear algebra brackend",
+      "binaryDir": "${sourceDir}/build.cuda",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "OSQP_ALGEBRA_BACKEND": "cuda"
+      }
+    },
+    {
+      "name": "builtin-debug",
+      "displayName": "Builtin linear algebra (Debug + ASAN)",
+      "description": "Builtin linear algebra brackend",
+      "binaryDir": "${sourceDir}/build.debug.builtin",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "OSQP_ALGEBRA_BACKEND": "builtin",
+        "OSQP_BUILD_UNITTESTS": "ON",
+        "OSQP_ASAN": "ON"
+      }
+    },
+    {
+      "name": "mkl-debug",
+      "displayName": "MKL linear algebra (Debug + ASAN)",
+      "description": "MKL linear algebra brackend",
+      "binaryDir": "${sourceDir}/build.debug.mkl",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "OSQP_ALGEBRA_BACKEND": "mkl",
+        "OSQP_BUILD_UNITTESTS": "ON",
+        "OSQP_ASAN": "ON"
+      }
+    },
+    {
+      "name": "cuda-debug",
+      "displayName": "CUDA linear algebra (Debug + ASAN)",
+      "description": "CUDA linear algebra brackend",
+      "binaryDir": "${sourceDir}/build.debug.cuda",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "OSQP_ALGEBRA_BACKEND": "cuda",
+        "OSQP_BUILD_UNITTESTS": "ON"
+      }
+    }
+  ]
+}

@@ -37,10 +37,17 @@ struct OSQPVectori_deleter {
     }
 };
 
+struct OSQPCscMatrix_deleter {
+    void operator()(OSQPCscMatrix* mat) {
+        // We don't own the elements inside the CSC matrix
+        free(mat);
+    }
+};
+
 using OSQPMatrix_ptr  = std::unique_ptr<OSQPMatrix, OSQPMatrix_deleter>;
 using OSQPVectorf_ptr = std::unique_ptr<OSQPVectorf, OSQPVectorf_deleter>;
 using OSQPVectori_ptr = std::unique_ptr<OSQPVectori, OSQPVectori_deleter>;
-
+using OSQPCscMatrix_ptr = std::unique_ptr<OSQPCscMatrix, OSQPCscMatrix_deleter>;
 
 /*
  * OSQP API types smart pointers
@@ -63,9 +70,22 @@ struct OSQPCodegenDefines_deleter {
     }
 };
 
+struct OSQPSolution_deleter {
+    void operator()(OSQPSolution* solution) {
+        if (solution ) {
+            c_free(solution->x);
+            c_free(solution->y);
+            c_free(solution->dual_inf_cert);
+            c_free(solution->prim_inf_cert);
+            c_free(solution);
+        }
+    }
+};
+
 using OSQPSolver_ptr = std::unique_ptr<OSQPSolver, OSQPSolver_deleter>;
 using OSQPSettings_ptr = std::unique_ptr<OSQPSettings, OSQPSettings_deleter>;
 using OSQPCodegenDefines_ptr = std::unique_ptr<OSQPCodegenDefines, OSQPCodegenDefines_deleter>;
+using OSQPSolution_ptr = std::unique_ptr<OSQPSolution, OSQPSolution_deleter>;
 
 
 #endif /* #ifndef OSQP_API_H_ */

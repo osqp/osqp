@@ -15,9 +15,10 @@
  *  limitations under the License.
  */
 
-#ifndef CUDA_MALLOC_H
-# define CUDA_MALLOC_H
+#ifndef CUDA_MEMORY_H
+#define CUDA_MEMORY_H
 
+#include <cuda_runtime.h>
 
 void cuda_malloc(void** devPtr, size_t size);
 
@@ -29,5 +30,24 @@ void cuda_free(void** devPtr);
 
 void cuda_free_host(void** devPtr);
 
+/**
+ * Test if a pointer points to a region of memory on the device.
+ *
+ * @return true if the pointer is to memory on the device, false otherwise
+ */
+bool cuda_isdeviceptr(const void* ptr);
 
-#endif /* ifndef CUDA_MALLOC_H */
+/**
+ * Copy data from either host or device memory to device memory.
+ *
+ * This will automatically test the location of src to see if it is host
+ * or device memory, and perform the appropriate copy.
+ *
+ * @param dst   Destination pointer on the device
+ * @param src   Source pointer on either the host or device
+ * @param count Number of bytes to copy
+ * @return      Error code
+ */
+cudaError_t cuda_memcpy_hd2d(void* dst, const void* src, size_t count);
+
+#endif /* ifndef CUDA_MEMORY_H */

@@ -6,10 +6,8 @@ project( OSQP_test_install )
 set( OSQP_INSTALL_PREFIX  "" CACHE STRING "The location OSQP is installed in" )
 set( OSQP_DESIRED_VERSION "" CACHE STRING "The minimum version of OSQP to allow" )
 
-
-# The test install is up two levels
-set( OSQP_ROOT "${OSQP_INSTALL_PREFIX}" )
-
+# Add OSQP to the path
+list( PREPEND CMAKE_PREFIX_PATH ${OSQP_INSTALL_PREFIX} )
 
 if( NOT ${OSQP_DESIRED_VERSION} )
     find_package( OSQP REQUIRED )

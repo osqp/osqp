@@ -11,14 +11,16 @@ int main(int argc, char *argv[]) {
     case 3:
       sprintf(matDirPath, "%s", argv[2]);
       /* Fall through to set the vector path */
+      /* FALLTHROUGH */
 
     case 2:
       sprintf(vecDirPath, "%s", argv[1]) ;
       break;
 
     default:
-      sprintf(vecDirPath, "");
-      sprintf(matDirPath, "");
+      /* Empty string */
+      vecDirPath[0] = '\0';
+      matDirPath[0] = '\0';
   }
 
   printf("OSQP code generation demo program.\n\n");

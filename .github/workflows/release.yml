@@ -37,11 +37,14 @@ jobs:
           lfs: false
           submodules: recursive
 
-      - name: Set up conda
+      - name: Set up conda environment for testing
         uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
+          activate-environment: osqp-test
+          environment-file: tests/testenv.yml
+          auto-activate-base: false
 
       - name: Setup Envvars
         run: |
@@ -78,7 +81,7 @@ jobs:
       # a version earlier than 2021
       - name: Install python dependencies
         run: |
-          conda install -c anaconda "mkl<2021" numpy scipy
+          conda install -c anaconda "mkl<2021"
           conda info
           conda list
 
