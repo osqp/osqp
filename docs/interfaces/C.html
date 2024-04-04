@@ -94,6 +94,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l1"><a class="reference internal" href="../parsers/index.html">Parsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../codegen/index.html">Code generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced/index.html">Advanced features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
 </ul>
@@ -523,9 +524,21 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </dd></dl>
 
 <dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings17allocate_solutionE">
+<span id="_CPPv3N12OSQPSettings17allocate_solutionE"></span><span id="_CPPv2N12OSQPSettings17allocate_solutionE"></span><span id="OSQPSettings::allocate_solution__OSQPInt"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1ab871c40292dd3858823b002c9e9b2ea4"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">allocate_solution</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings17allocate_solutionE" title="Link to this definition">¶</a><br /></dt>
+<dd><p>boolean; allocate solution in <a class="reference internal" href="#d5/df6/struct_o_s_q_p_solver"><span class="std std-ref">OSQPSolver</span></a> during osqp_setup </p>
+</dd></dl>
+
+<dl class="cpp var">
 <dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings7verboseE">
 <span id="_CPPv3N12OSQPSettings7verboseE"></span><span id="_CPPv2N12OSQPSettings7verboseE"></span><span id="OSQPSettings::verbose__OSQPInt"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1ac34f63f14c039aa3a13f56995bee0e30"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">verbose</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings7verboseE" title="Link to this definition">¶</a><br /></dt>
 <dd><p>boolean; write out progress </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12OSQPSettings14profiler_levelE">
+<span id="_CPPv3N12OSQPSettings14profiler_levelE"></span><span id="_CPPv2N12OSQPSettings14profiler_levelE"></span><span id="OSQPSettings::profiler_level__OSQPInt"></span><span class="target" id="d7/d93/struct_o_s_q_p_settings_1a689f5b19be5b6fcd5364ace1b755b620"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">profiler_level</span></span></span><a class="headerlink" href="#_CPPv4N12OSQPSettings14profiler_levelE" title="Link to this definition">¶</a><br /></dt>
+<dd><p>integer; level of detail for profiler annotations </p>
 </dd></dl>
 
 <dl class="cpp var">
@@ -687,8 +700,8 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <span id="c-derivatives"></span><h2>Compute solution derivatives<a class="headerlink" href="#compute-solution-derivatives" title="Link to this heading">¶</a></h2>
 <p>Adjoint derivatives of the QP problem can be computed at the current solution.</p>
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv431osqp_adjoint_derivative_computeP10OSQPSolverP9OSQPFloatP9OSQPFloatP9OSQPFloat">
-<span id="_CPPv331osqp_adjoint_derivative_computeP10OSQPSolverP9OSQPFloatP9OSQPFloatP9OSQPFloat"></span><span id="_CPPv231osqp_adjoint_derivative_computeP10OSQPSolverP9OSQPFloatP9OSQPFloatP9OSQPFloat"></span><span id="osqp_adjoint_derivative_compute__OSQPSolverP.OSQPFloatP.OSQPFloatP.OSQPFloatP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a94bc2a168ca5e68ac3f39303419fb55a"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_adjoint_derivative_compute</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv410OSQPSolver" title="OSQPSolver"><span class="n"><span class="pre">OSQPSolver</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">solver</span></span>, <span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dx</span></span>, <span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dy_l</span></span>, <span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dy_u</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv431osqp_adjoint_derivative_computeP10OSQPSolverP9OSQPFloatP9OSQPFloatP9OSQPFloat" title="Link to this definition">¶</a><br /></dt>
+<dt class="sig sig-object cpp" id="_CPPv431osqp_adjoint_derivative_computeP10OSQPSolverP9OSQPFloatP9OSQPFloat">
+<span id="_CPPv331osqp_adjoint_derivative_computeP10OSQPSolverP9OSQPFloatP9OSQPFloat"></span><span id="_CPPv231osqp_adjoint_derivative_computeP10OSQPSolverP9OSQPFloatP9OSQPFloat"></span><span id="osqp_adjoint_derivative_compute__OSQPSolverP.OSQPFloatP.OSQPFloatP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a885989c36ff84fc608f4074bcae28465"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_adjoint_derivative_compute</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv410OSQPSolver" title="OSQPSolver"><span class="n"><span class="pre">OSQPSolver</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">solver</span></span>, <span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dx</span></span>, <span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dy</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv431osqp_adjoint_derivative_computeP10OSQPSolverP9OSQPFloatP9OSQPFloat" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Compute internal data structures needed for calculation of the adjoint derivatives of P/q/A/l/u.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -699,8 +712,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>solver</strong> – <strong>[in]</strong> Solver </p></li>
 <li><p><strong>dx</strong> – <strong>[in]</strong> Vector of dx values (observed - true) of length n </p></li>
-<li><p><strong>dy_l</strong> – <strong>[in]</strong> Vector of dy_l values (observed - true) of length m </p></li>
-<li><p><strong>dy_u</strong> – <strong>[in]</strong> Vector of dy_u values (observed - true) of length m </p></li>
+<li><p><strong>dy</strong> – <strong>[in]</strong> Vector of dy values (observed - true) of length m </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

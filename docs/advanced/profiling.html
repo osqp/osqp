@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profiling &mdash; OSQP  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=d4cddda9" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Contributing" href="../contributing/index.html" />
+    <link rel="prev" title="Advanced features" href="index.html" />
+<meta name="twitter:card" content="summary_large_image" >
+<meta name="twitter:creator" content="@bstellato" >
+<meta name="twitter:image"
+      content="https://osqp.org/docs/_static/img/logo.png">
+<meta name="twitter:description" content="The OSQP (Operator Splitting
+Quadratic Program) solver is a numerical optimization package for solving
+convex quadratic programs." >
+<meta property="og:url" content="https://osqp.org" >
+<meta property="og:title" content="OSQP solver documentation" >
+<meta property="og:description" content="The OSQP (Operator Splitting Quadratic
+Program) solver is a numerical optimization package for solving convex
+quadratic programs." >
+<meta property="og:image"
+content="https://osqp.org/docs/_static/img/logo.png">
+<meta property="fb:app_id" content="129555174389689">
+<meta property="og:type" content="website" >
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../solver/index.html">The solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../get_started/index.html">Get started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interfaces/index.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parsers/index.html">Parsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../codegen/index.html">Code generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Advanced features</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Profiling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-profiling">Basic Profiling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#advanced-profiling">Advanced Profiling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nvidia-nsight">NVidia Nsight</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#intel-vtune">Intel VTune</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#amd-omnitrace">AMD OmniTrace</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OSQP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Advanced features</a></li>
+      <li class="breadcrumb-item active">Profiling</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/osqp/osqp/blob/master/docs/advanced/profiling.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="profiling">
+<h1>Profiling<a class="headerlink" href="#profiling" title="Link to this heading">¶</a></h1>
+<p>OSQP includes two mechanisms for measuring the amount of time spent in the solver:</p>
+<ul class="simple">
+<li><p>Basic profiling - provides simple measurements of start/stop times for the solver</p></li>
+<li><p>Advanced profiling - Annotates regions of the code so external profilers (e.g. NVidia Nsight, Intel VTune, etc.)
+can measure the time of each part of the solver.</p></li>
+</ul>
+<section id="basic-profiling">
+<h2>Basic Profiling<a class="headerlink" href="#basic-profiling" title="Link to this heading">¶</a></h2>
+<p>Basic solver profiling is enabled by the <code class="code docutils literal notranslate"><span class="pre">OSQP_ENABLE_PROFILING</span></code> CMake build option, and uses the system’s
+clock to time the setup and solve phases.
+The runtime for the solver is displayed alongside the solver status when the solver finishes, and is also contained
+inside fields of the <code class="xref c c-struct docutils literal notranslate"><span class="pre">OSQPInfo</span></code> structure.</p>
+</section>
+<section id="advanced-profiling">
+<h2>Advanced Profiling<a class="headerlink" href="#advanced-profiling" title="Link to this heading">¶</a></h2>
+<p>Advanced solver profiling is available with the use of the following external tools:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#adv-profile-nvidia-nsight"><span class="std std-ref">NVidia Nsight</span></a></p></li>
+<li><p><a class="reference internal" href="#adv-profile-intel-vtune"><span class="std std-ref">Intel VTune</span></a></p></li>
+<li><p><a class="reference internal" href="#adv-profile-amd-omnitrace"><span class="std std-ref">AMD OmniTrace</span></a></p></li>
+</ul>
+<p>While these profilers can be used with normal builds of OSQP, using the OSQP CMake build option
+<code class="code docutils literal notranslate"><span class="pre">OSQP_PROFILER_ANNOTATIONS</span></code> will enable section annotation, telling the profiler when sections
+of the code start/end to allow more fine-grained timing of individual sections of the various solver phases.</p>
+<p>At runtime, the OSQP profiler annotations are controlled using the <a class="reference internal" href="../interfaces/C.html#_CPPv4N12OSQPSettings14profiler_levelE" title="OSQPSettings::profiler_level"><code class="xref cpp cpp-var docutils literal notranslate"><span class="pre">OSQPSettings::profiler_level</span></code></a>
+settings variable.
+This setting can take three different values:</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">0</span></code> - Disable all annotation information</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">1</span></code> - Annotate only OSQP ADMM sections</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">2</span></code> - Annotate both OSQP ADMM sections and underlying linear algebra sections</p></li>
+</ul>
+<section id="nvidia-nsight">
+<span id="adv-profile-nvidia-nsight"></span><h3>NVidia Nsight<a class="headerlink" href="#nvidia-nsight" title="Link to this heading">¶</a></h3>
+<p>When using the NVidia CUDA algebra backend with the profiler annotations enabled, only the <a class="reference external" href="https://developer.nvidia.com/nsight-graphics">NVidia Nsight</a>
+profiler should be used.
+OSQP uses the NVidia NVTX library library to report solver sections, which is selected using the
+<code class="code docutils literal notranslate"><span class="pre">OSQP_PROFILER_ANNOTATIONS=nvtx</span></code> CMake option during configuration.</p>
+<p>Once compiled with the NVTX library support, OSQP will report profiling information when run using the <a class="reference external" href="https://developer.nvidia.com/nsight-graphics">NVidia Nsight</a>
+profiler tool. The timing information will be namespaced into the <code class="code docutils literal notranslate"><span class="pre">osqp</span></code> domain, and is reported in the NVTX ranges
+section of any reports produced.</p>
+<section id="command-line-profiling">
+<h4>Command line profiling<a class="headerlink" href="#command-line-profiling" title="Link to this heading">¶</a></h4>
+<p>To use the command line to profile the demo executable with the CUDA algebra and report the OSQP timings,
+the following should be run on Linux:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nsys<span class="w"> </span>profile<span class="w"> </span>-o<span class="w"> </span>&lt;report_name&gt;<span class="w"> </span>osqp_demo
+nsys<span class="w"> </span>analyze<span class="w"> </span>&lt;report_name&gt;.nsys-rep
+nsys<span class="w"> </span>stats<span class="w"> </span>--report<span class="w"> </span>nvtx_sum<span class="w"> </span>&lt;report_name&gt;.sqlite
+</pre></div>
+</div>
+<p>This will then report all the timing information for the OSQP sections of the code in a table on the command line,
+similar to the one shown below.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">**</span> <span class="n">NVTX</span> <span class="n">Range</span> <span class="n">Summary</span> <span class="p">(</span><span class="n">nvtx_sum</span><span class="p">):</span>
+
+<span class="n">Time</span> <span class="p">(</span><span class="o">%</span><span class="p">)</span>  <span class="n">Total</span> <span class="n">Time</span> <span class="p">(</span><span class="n">ns</span><span class="p">)</span>  <span class="n">Instances</span>    <span class="n">Avg</span> <span class="p">(</span><span class="n">ns</span><span class="p">)</span>       <span class="n">Med</span> <span class="p">(</span><span class="n">ns</span><span class="p">)</span>      <span class="n">Min</span> <span class="p">(</span><span class="n">ns</span><span class="p">)</span>     <span class="n">Max</span> <span class="p">(</span><span class="n">ns</span><span class="p">)</span>    <span class="n">StdDev</span> <span class="p">(</span><span class="n">ns</span><span class="p">)</span>    <span class="n">Style</span>                    <span class="n">Range</span>
+<span class="o">--------</span>  <span class="o">---------------</span>  <span class="o">---------</span>  <span class="o">-------------</span>  <span class="o">-------------</span>  <span class="o">-----------</span>  <span class="o">-----------</span>  <span class="o">------------</span>  <span class="o">-------</span>  <span class="o">---------------------------------------</span>
+   <span class="mf">47.8</span>      <span class="mi">337</span><span class="p">,</span><span class="mi">159</span><span class="p">,</span><span class="mi">170</span>          <span class="mi">1</span>  <span class="mi">337</span><span class="p">,</span><span class="mi">159</span><span class="p">,</span><span class="mf">170.0</span>  <span class="mi">337</span><span class="p">,</span><span class="mi">159</span><span class="p">,</span><span class="mf">170.0</span>  <span class="mi">337</span><span class="p">,</span><span class="mi">159</span><span class="p">,</span><span class="mi">170</span>  <span class="mi">337</span><span class="p">,</span><span class="mi">159</span><span class="p">,</span><span class="mi">170</span>           <span class="mf">0.0</span>  <span class="n">PushPop</span>  <span class="n">osqp</span><span class="p">:</span><span class="n">Problem</span> <span class="n">setup</span>
+   <span class="mf">13.1</span>       <span class="mi">92</span><span class="p">,</span><span class="mi">137</span><span class="p">,</span><span class="mi">833</span>          <span class="mi">1</span>   <span class="mi">92</span><span class="p">,</span><span class="mi">137</span><span class="p">,</span><span class="mf">833.0</span>   <span class="mi">92</span><span class="p">,</span><span class="mi">137</span><span class="p">,</span><span class="mf">833.0</span>   <span class="mi">92</span><span class="p">,</span><span class="mi">137</span><span class="p">,</span><span class="mi">833</span>   <span class="mi">92</span><span class="p">,</span><span class="mi">137</span><span class="p">,</span><span class="mi">833</span>           <span class="mf">0.0</span>  <span class="n">PushPop</span>  <span class="n">osqp</span><span class="p">:</span><span class="n">Solving</span> <span class="n">optimization</span> <span class="n">problem</span>
+    <span class="mf">9.4</span>       <span class="mi">66</span><span class="p">,</span><span class="mi">362</span><span class="p">,</span><span class="mi">729</span>         <span class="mi">94</span>      <span class="mi">705</span><span class="p">,</span><span class="mf">986.5</span>      <span class="mi">466</span><span class="p">,</span><span class="mf">710.5</span>      <span class="mi">278</span><span class="p">,</span><span class="mi">144</span>   <span class="mi">13</span><span class="p">,</span><span class="mi">770</span><span class="p">,</span><span class="mi">989</span>   <span class="mi">1</span><span class="p">,</span><span class="mi">435</span><span class="p">,</span><span class="mf">295.6</span>  <span class="n">PushPop</span>  <span class="n">osqp</span><span class="p">:</span><span class="n">Solve</span> <span class="n">the</span> <span class="n">linear</span> <span class="n">system</span>
+    <span class="mf">9.2</span>       <span class="mi">64</span><span class="p">,</span><span class="mi">993</span><span class="p">,</span><span class="mi">272</span>         <span class="mi">90</span>      <span class="mi">722</span><span class="p">,</span><span class="mf">147.5</span>      <span class="mi">540</span><span class="p">,</span><span class="mf">812.5</span>      <span class="mi">352</span><span class="p">,</span><span class="mi">410</span>   <span class="mi">14</span><span class="p">,</span><span class="mi">033</span><span class="p">,</span><span class="mi">099</span>   <span class="mi">1</span><span class="p">,</span><span class="mi">448</span><span class="p">,</span><span class="mf">686.7</span>  <span class="n">PushPop</span>  <span class="n">osqp</span><span class="p">:</span><span class="n">ADMM</span> <span class="n">iteration</span>
+    <span class="mf">8.4</span>       <span class="mi">59</span><span class="p">,</span><span class="mi">295</span><span class="p">,</span><span class="mi">017</span>         <span class="mi">90</span>      <span class="mi">658</span><span class="p">,</span><span class="mf">833.5</span>      <span class="mi">482</span><span class="p">,</span><span class="mf">775.0</span>      <span class="mi">295</span><span class="p">,</span><span class="mi">428</span>   <span class="mi">13</span><span class="p">,</span><span class="mi">872</span><span class="p">,</span><span class="mi">670</span>   <span class="mi">1</span><span class="p">,</span><span class="mi">437</span><span class="p">,</span><span class="mf">104.2</span>  <span class="n">PushPop</span>  <span class="n">osqp</span><span class="p">:</span><span class="n">KKT</span> <span class="n">system</span> <span class="n">solve</span> <span class="ow">in</span> <span class="n">ADMM</span> <span class="n">iteration</span>
+    <span class="mf">5.4</span>       <span class="mi">37</span><span class="p">,</span><span class="mi">863</span><span class="p">,</span><span class="mi">537</span>          <span class="mi">1</span>   <span class="mi">37</span><span class="p">,</span><span class="mi">863</span><span class="p">,</span><span class="mf">537.0</span>   <span class="mi">37</span><span class="p">,</span><span class="mi">863</span><span class="p">,</span><span class="mf">537.0</span>   <span class="mi">37</span><span class="p">,</span><span class="mi">863</span><span class="p">,</span><span class="mi">537</span>   <span class="mi">37</span><span class="p">,</span><span class="mi">863</span><span class="p">,</span><span class="mi">537</span>           <span class="mf">0.0</span>  <span class="n">PushPop</span>  <span class="n">osqp</span><span class="p">:</span><span class="n">Problem</span> <span class="n">data</span> <span class="n">scaling</span>
+    <span class="mf">2.4</span>       <span class="mi">17</span><span class="p">,</span><span class="mi">114</span><span class="p">,</span><span class="mi">751</span>          <span class="mi">2</span>    <span class="mi">8</span><span class="p">,</span><span class="mi">557</span><span class="p">,</span><span class="mf">375.5</span>    <span class="mi">8</span><span class="p">,</span><span class="mi">557</span><span class="p">,</span><span class="mf">375.5</span>      <span class="mi">877</span><span class="p">,</span><span class="mi">863</span>   <span class="mi">16</span><span class="p">,</span><span class="mi">236</span><span class="p">,</span><span class="mi">888</span>  <span class="mi">10</span><span class="p">,</span><span class="mi">860</span><span class="p">,</span><span class="mf">470.7</span>  <span class="n">PushPop</span>  <span class="n">osqp</span><span class="p">:</span><span class="n">Initialize</span> <span class="n">linear</span> <span class="n">system</span> <span class="n">solver</span>
+    <span class="mf">2.0</span>       <span class="mi">13</span><span class="p">,</span><span class="mi">913</span><span class="p">,</span><span class="mi">196</span>          <span class="mi">1</span>   <span class="mi">13</span><span class="p">,</span><span class="mi">913</span><span class="p">,</span><span class="mf">196.0</span>   <span class="mi">13</span><span class="p">,</span><span class="mi">913</span><span class="p">,</span><span class="mf">196.0</span>   <span class="mi">13</span><span class="p">,</span><span class="mi">913</span><span class="p">,</span><span class="mi">196</span>   <span class="mi">13</span><span class="p">,</span><span class="mi">913</span><span class="p">,</span><span class="mi">196</span>           <span class="mf">0.0</span>  <span class="n">PushPop</span>  <span class="n">osqp</span><span class="p">:</span><span class="n">Solution</span> <span class="n">polishing</span>
+    <span class="mf">1.3</span>        <span class="mi">9</span><span class="p">,</span><span class="mi">058</span><span class="p">,</span><span class="mi">039</span>        <span class="mi">301</span>       <span class="mi">30</span><span class="p">,</span><span class="mf">093.2</span>       <span class="mi">27</span><span class="p">,</span><span class="mf">691.0</span>       <span class="mi">23</span><span class="p">,</span><span class="mi">970</span>       <span class="mi">88</span><span class="p">,</span><span class="mi">999</span>       <span class="mi">8</span><span class="p">,</span><span class="mf">018.7</span>  <span class="n">PushPop</span>  <span class="n">osqp</span><span class="p">:</span><span class="n">Matrix</span><span class="o">-</span><span class="n">vector</span> <span class="n">multiplication</span>
+    <span class="mf">0.8</span>        <span class="mi">5</span><span class="p">,</span><span class="mi">615</span><span class="p">,</span><span class="mi">895</span>         <span class="mi">90</span>       <span class="mi">62</span><span class="p">,</span><span class="mf">398.8</span>       <span class="mi">55</span><span class="p">,</span><span class="mf">515.5</span>       <span class="mi">47</span><span class="p">,</span><span class="mi">176</span>      <span class="mi">158</span><span class="p">,</span><span class="mi">284</span>      <span class="mi">19</span><span class="p">,</span><span class="mf">590.5</span>  <span class="n">PushPop</span>  <span class="n">osqp</span><span class="p">:</span><span class="n">Vector</span> <span class="n">updates</span> <span class="ow">in</span> <span class="n">ADMM</span> <span class="n">iteration</span>
+    <span class="mf">0.2</span>        <span class="mi">1</span><span class="p">,</span><span class="mi">712</span><span class="p">,</span><span class="mi">233</span>         <span class="mi">90</span>       <span class="mi">19</span><span class="p">,</span><span class="mf">024.8</span>       <span class="mi">16</span><span class="p">,</span><span class="mf">265.5</span>       <span class="mi">14</span><span class="p">,</span><span class="mi">119</span>       <span class="mi">72</span><span class="p">,</span><span class="mi">884</span>       <span class="mi">7</span><span class="p">,</span><span class="mf">576.9</span>  <span class="n">PushPop</span>  <span class="n">osqp</span><span class="p">:</span><span class="n">Projection</span> <span class="ow">in</span> <span class="n">ADMM</span> <span class="n">iteration</span>
+</pre></div>
+</div>
+</section>
+<section id="gui-profiling">
+<h4>GUI Profiling<a class="headerlink" href="#gui-profiling" title="Link to this heading">¶</a></h4>
+<p>To use the <a class="reference external" href="https://developer.nvidia.com/nsight-graphics">NVidia Nsight</a> GUI to profile OSQP, ensure that the <cite>Collect NVTX trace</cite> project option is selected, and the
+<code class="code docutils literal notranslate"><span class="pre">osqp</span></code> domain is included in any NVTX domain filters that are setup.
+Then, the OSQP sections will be shown on the timeline, and all the OSQP sections and events can be seen in the <cite>Events view</cite>.
+A sample of the Nsight GUI with OSQP section information included is shown below.</p>
+<img alt="Sample Nsight timeline and event panel" src="../_images/NsightPanel.png" />
+</section>
+</section>
+<section id="intel-vtune">
+<span id="adv-profile-intel-vtune"></span><h3>Intel VTune<a class="headerlink" href="#intel-vtune" title="Link to this heading">¶</a></h3>
+<p>When using CPU-based backends, OSQP can be profiled using the <a class="reference external" href="https://www.intel.com/content/www/us/en/developer/tools/oneapi/vtune-profiler.html#gs.6g073h">Intel VTune</a> profiler.
+OSQP integration with VTune is enabled using the <code class="code docutils literal notranslate"><span class="pre">OSQP_PROFILER_ANNOTATIONS=itt</span></code> CMake build
+option, which enables the ITT (Instrumentation and Tracing Technology APIs) library for reporting section
+information.
+OSQP reports the various parts of the solver as a <cite>Task</cite> under the :<code class="code docutils literal notranslate"><span class="pre">osqp</span></code> domain.</p>
+<section id="id3">
+<h4>GUI Profiling<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
+<p>To use <a class="reference external" href="https://www.intel.com/content/www/us/en/developer/tools/oneapi/vtune-profiler.html#gs.6g073h">Intel VTune</a> to profile OSQP with the profiler annotations, run a <cite>Hotspot</cite> analysis, and ensure the
+<cite>Analyze user tasks, events and counters</cite> option is selected.
+Once run, the OSQP annotations can be seen in the application’s trace in the <cite>Platform</cite> timeline view, and
+also in the tooltip when the mouse hovers over an item in the timeline, as shown below.</p>
+<img alt="Sample VTune timeline panel" src="../_images/VTune_Timeline.png" />
+<p>More exact information about the various timings and all the function calls in each part of the solver can be viewed
+on the <cite>Bottom-up</cite> tab of the analysis window, with the <cite>Task Type / Function / Call Stack</cite> grouping, as shown below.</p>
+<img alt="Sample VTune GUI task list" src="../_images/VTune_TaskList.png" />
+</section>
+</section>
+<section id="amd-omnitrace">
+<span id="adv-profile-amd-omnitrace"></span><h3>AMD OmniTrace<a class="headerlink" href="#amd-omnitrace" title="Link to this heading">¶</a></h3>
+<p>OSQP can be profiled using the <a class="reference external" href="https://amdresearch.github.io/omnitrace/index.html">AMD OmniTrace</a> profiler, where OSQP will use the OmniTrace user API
+to report sections of the code for timing. To enable the section reporting, use the <code class="code docutils literal notranslate"><span class="pre">OSQP_PROFILER_ANNOTATIONS=omnitrace</span></code>
+CMake option during configuration.</p>
+<p>OmniTrace uses the command line to profile and report the OSQP timings.
+To build and run an instrumented OSQP executable, the following should be run on Linux (replacing <code class="code docutils literal notranslate"><span class="pre">osqp_demo</span></code> with
+the desired program):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>omnitrace-instrument<span class="w"> </span>-l<span class="w"> </span>--min-instructions<span class="o">=</span><span class="m">8</span><span class="w"> </span>-o<span class="w"> </span>--<span class="w"> </span>./osqp_demo
+omnitrace-run<span class="w"> </span>--profile<span class="w"> </span>--<span class="w"> </span>./osqp_demo.inst<span class="w"> </span><span class="m">20</span><span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="m">100</span>
+</pre></div>
+</div>
+<p>After running, this creates a new directory containing the output, with a directory for each run inside.
+The timings for each section of the code can be viewed in the <cite>wall_clock.txt</cite> file, with a machine-readable timing report
+in the <cite>wall_clock.json</cite> file.
+A sample <cite>wall_clock.txt</cite> output is shown below.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|</span>
+<span class="o">|</span>                                                                 <span class="n">REAL</span><span class="o">-</span><span class="n">CLOCK</span> <span class="n">TIMER</span> <span class="p">(</span><span class="n">I</span><span class="o">.</span><span class="n">E</span><span class="o">.</span> <span class="n">WALL</span><span class="o">-</span><span class="n">CLOCK</span> <span class="n">TIMER</span><span class="p">)</span>                                                                 <span class="o">|</span>
+<span class="o">|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|</span>
+<span class="o">|</span>                        <span class="n">LABEL</span>                          <span class="o">|</span> <span class="n">COUNT</span>  <span class="o">|</span> <span class="n">DEPTH</span>  <span class="o">|</span>   <span class="n">METRIC</span>   <span class="o">|</span> <span class="n">UNITS</span>  <span class="o">|</span>   <span class="n">SUM</span>    <span class="o">|</span>   <span class="n">MEAN</span>   <span class="o">|</span>   <span class="n">MIN</span>    <span class="o">|</span>   <span class="n">MAX</span>    <span class="o">|</span>   <span class="n">VAR</span>    <span class="o">|</span> <span class="n">STDDEV</span>   <span class="o">|</span> <span class="o">%</span> <span class="n">SELF</span> <span class="o">|</span>
+<span class="o">|-------------------------------------------------------|--------|--------|------------|--------|----------|----------|----------|----------|----------|----------|--------|</span>
+<span class="o">|</span> <span class="o">|</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span> <span class="n">osqp_demo</span><span class="o">.</span><span class="n">inst</span>                                  <span class="o">|</span>      <span class="mi">1</span> <span class="o">|</span>      <span class="mi">0</span> <span class="o">|</span> <span class="n">wall_clock</span> <span class="o">|</span> <span class="n">sec</span>    <span class="o">|</span> <span class="mf">0.001535</span> <span class="o">|</span> <span class="mf">0.001535</span> <span class="o">|</span> <span class="mf">0.001535</span> <span class="o">|</span> <span class="mf">0.001535</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span>   <span class="mf">65.2</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span> <span class="o">|</span><span class="n">_Problem</span> <span class="n">setup</span>                                 <span class="o">|</span>      <span class="mi">1</span> <span class="o">|</span>      <span class="mi">1</span> <span class="o">|</span> <span class="n">wall_clock</span> <span class="o">|</span> <span class="n">sec</span>    <span class="o">|</span> <span class="mf">0.000074</span> <span class="o">|</span> <span class="mf">0.000074</span> <span class="o">|</span> <span class="mf">0.000074</span> <span class="o">|</span> <span class="mf">0.000074</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span>   <span class="mf">69.2</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span>   <span class="o">|</span><span class="n">_Problem</span> <span class="n">data</span> <span class="n">scaling</span>                        <span class="o">|</span>      <span class="mi">1</span> <span class="o">|</span>      <span class="mi">2</span> <span class="o">|</span> <span class="n">wall_clock</span> <span class="o">|</span> <span class="n">sec</span>    <span class="o">|</span> <span class="mf">0.000008</span> <span class="o">|</span> <span class="mf">0.000008</span> <span class="o">|</span> <span class="mf">0.000008</span> <span class="o">|</span> <span class="mf">0.000008</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span>  <span class="mf">100.0</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span>   <span class="o">|</span><span class="n">_Initialize</span> <span class="n">linear</span> <span class="n">system</span> <span class="n">solver</span>             <span class="o">|</span>      <span class="mi">1</span> <span class="o">|</span>      <span class="mi">2</span> <span class="o">|</span> <span class="n">wall_clock</span> <span class="o">|</span> <span class="n">sec</span>    <span class="o">|</span> <span class="mf">0.000015</span> <span class="o">|</span> <span class="mf">0.000015</span> <span class="o">|</span> <span class="mf">0.000015</span> <span class="o">|</span> <span class="mf">0.000015</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span>   <span class="mf">85.0</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span>     <span class="o">|</span><span class="n">_Symbolic</span> <span class="n">factorization</span> <span class="ow">in</span> <span class="n">direct</span> <span class="n">solver</span>   <span class="o">|</span>      <span class="mi">1</span> <span class="o">|</span>      <span class="mi">3</span> <span class="o">|</span> <span class="n">wall_clock</span> <span class="o">|</span> <span class="n">sec</span>    <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span>  <span class="mf">100.0</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span>     <span class="o">|</span><span class="n">_Numeric</span> <span class="n">factorization</span> <span class="ow">in</span> <span class="n">direct</span> <span class="n">solver</span>    <span class="o">|</span>      <span class="mi">1</span> <span class="o">|</span>      <span class="mi">3</span> <span class="o">|</span> <span class="n">wall_clock</span> <span class="o">|</span> <span class="n">sec</span>    <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span>  <span class="mf">100.0</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span> <span class="o">|</span><span class="n">_Solving</span> <span class="n">optimization</span> <span class="n">problem</span>                  <span class="o">|</span>      <span class="mi">1</span> <span class="o">|</span>      <span class="mi">1</span> <span class="o">|</span> <span class="n">wall_clock</span> <span class="o">|</span> <span class="n">sec</span>    <span class="o">|</span> <span class="mf">0.000460</span> <span class="o">|</span> <span class="mf">0.000460</span> <span class="o">|</span> <span class="mf">0.000460</span> <span class="o">|</span> <span class="mf">0.000460</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span>   <span class="mf">16.9</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span>   <span class="o">|</span><span class="n">_ADMM</span> <span class="n">iteration</span>                              <span class="o">|</span>     <span class="mi">25</span> <span class="o">|</span>      <span class="mi">2</span> <span class="o">|</span> <span class="n">wall_clock</span> <span class="o">|</span> <span class="n">sec</span>    <span class="o">|</span> <span class="mf">0.000331</span> <span class="o">|</span> <span class="mf">0.000013</span> <span class="o">|</span> <span class="mf">0.000012</span> <span class="o">|</span> <span class="mf">0.000020</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000002</span> <span class="o">|</span>   <span class="mf">33.2</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span>     <span class="o">|</span><span class="n">_KKT</span> <span class="n">system</span> <span class="n">solve</span> <span class="ow">in</span> <span class="n">ADMM</span> <span class="n">iteration</span>        <span class="o">|</span>     <span class="mi">25</span> <span class="o">|</span>      <span class="mi">3</span> <span class="o">|</span> <span class="n">wall_clock</span> <span class="o">|</span> <span class="n">sec</span>    <span class="o">|</span> <span class="mf">0.000136</span> <span class="o">|</span> <span class="mf">0.000005</span> <span class="o">|</span> <span class="mf">0.000005</span> <span class="o">|</span> <span class="mf">0.000009</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span>   <span class="mf">46.3</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span>       <span class="o">|</span><span class="n">_Solve</span> <span class="n">the</span> <span class="n">linear</span> <span class="n">system</span>                 <span class="o">|</span>     <span class="mi">25</span> <span class="o">|</span>      <span class="mi">4</span> <span class="o">|</span> <span class="n">wall_clock</span> <span class="o">|</span> <span class="n">sec</span>    <span class="o">|</span> <span class="mf">0.000073</span> <span class="o">|</span> <span class="mf">0.000003</span> <span class="o">|</span> <span class="mf">0.000003</span> <span class="o">|</span> <span class="mf">0.000004</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span>   <span class="mf">80.5</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span>         <span class="o">|</span><span class="n">_Backsolve</span> <span class="ow">in</span> <span class="n">direct</span> <span class="n">solver</span>            <span class="o">|</span>     <span class="mi">25</span> <span class="o">|</span>      <span class="mi">5</span> <span class="o">|</span> <span class="n">wall_clock</span> <span class="o">|</span> <span class="n">sec</span>    <span class="o">|</span> <span class="mf">0.000014</span> <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span>  <span class="mf">100.0</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span>     <span class="o">|</span><span class="n">_Vector</span> <span class="n">updates</span> <span class="ow">in</span> <span class="n">ADMM</span> <span class="n">iteration</span>          <span class="o">|</span>     <span class="mi">25</span> <span class="o">|</span>      <span class="mi">3</span> <span class="o">|</span> <span class="n">wall_clock</span> <span class="o">|</span> <span class="n">sec</span>    <span class="o">|</span> <span class="mf">0.000086</span> <span class="o">|</span> <span class="mf">0.000003</span> <span class="o">|</span> <span class="mf">0.000003</span> <span class="o">|</span> <span class="mf">0.000010</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000002</span> <span class="o">|</span>   <span class="mf">76.4</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span>       <span class="o">|</span><span class="n">_Projection</span> <span class="ow">in</span> <span class="n">ADMM</span> <span class="n">iteration</span>            <span class="o">|</span>     <span class="mi">25</span> <span class="o">|</span>      <span class="mi">4</span> <span class="o">|</span> <span class="n">wall_clock</span> <span class="o">|</span> <span class="n">sec</span>    <span class="o">|</span> <span class="mf">0.000020</span> <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000008</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span>  <span class="mf">100.0</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span>   <span class="o">|</span><span class="n">_Solution</span> <span class="n">polishing</span>                          <span class="o">|</span>      <span class="mi">1</span> <span class="o">|</span>      <span class="mi">2</span> <span class="o">|</span> <span class="n">wall_clock</span> <span class="o">|</span> <span class="n">sec</span>    <span class="o">|</span> <span class="mf">0.000051</span> <span class="o">|</span> <span class="mf">0.000051</span> <span class="o">|</span> <span class="mf">0.000051</span> <span class="o">|</span> <span class="mf">0.000051</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span>   <span class="mf">32.8</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span>     <span class="o">|</span><span class="n">_Initialize</span> <span class="n">linear</span> <span class="n">system</span> <span class="n">solver</span>           <span class="o">|</span>      <span class="mi">1</span> <span class="o">|</span>      <span class="mi">3</span> <span class="o">|</span> <span class="n">wall_clock</span> <span class="o">|</span> <span class="n">sec</span>    <span class="o">|</span> <span class="mf">0.000009</span> <span class="o">|</span> <span class="mf">0.000009</span> <span class="o">|</span> <span class="mf">0.000009</span> <span class="o">|</span> <span class="mf">0.000009</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span>   <span class="mf">83.8</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span>       <span class="o">|</span><span class="n">_Symbolic</span> <span class="n">factorization</span> <span class="ow">in</span> <span class="n">direct</span> <span class="n">solver</span> <span class="o">|</span>      <span class="mi">1</span> <span class="o">|</span>      <span class="mi">4</span> <span class="o">|</span> <span class="n">wall_clock</span> <span class="o">|</span> <span class="n">sec</span>    <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span>  <span class="mf">100.0</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span>       <span class="o">|</span><span class="n">_Numeric</span> <span class="n">factorization</span> <span class="ow">in</span> <span class="n">direct</span> <span class="n">solver</span>  <span class="o">|</span>      <span class="mi">1</span> <span class="o">|</span>      <span class="mi">4</span> <span class="o">|</span> <span class="n">wall_clock</span> <span class="o">|</span> <span class="n">sec</span>    <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000001</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span>  <span class="mf">100.0</span> <span class="o">|</span>
+<span class="o">|</span> <span class="o">|</span><span class="mi">0</span><span class="o">&gt;&gt;&gt;</span>     <span class="o">|</span><span class="n">_Solve</span> <span class="n">the</span> <span class="n">linear</span> <span class="n">system</span>                   <span class="o">|</span>      <span class="mi">4</span> <span class="o">|</span>      <span class="mi">3</span> <span class="o">|</span> <span class="n">wall_clock</span> <span class="o">|</span> <span class="n">sec</span>    <span class="o">|</span> <span class="mf">0.000025</span> <span class="o">|</span> <span class="mf">0.000006</span> <span class="o">|</span> <span class="mf">0.000003</span> <span class="o">|</span> <span class="mf">0.000016</span> <span class="o">|</span> <span class="mf">0.000000</span> <span class="o">|</span> <span class="mf">0.000006</span> <span class="o">|</span>   <span class="mf">91.1</span> <span class="o">|</span>
+</pre></div>
+</div>
+<p>Additionally, OmniTrace outputs a trace file suitable for importing into the <a class="reference external" href="https://ui.perfetto.dev/">Perfetto</a> timeline viewer.
+Once imported, the section labels appear in the timeline view, as shown below.</p>
+<img alt="Timeline view from Perfetto" src="../_images/OmniTrace_Perfetto.png" />
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Advanced features" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../contributing/index.html" class="btn btn-neutral float-right" title="Contributing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Bartolomeo Stellato, Goran Banjac.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

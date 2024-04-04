@@ -79,6 +79,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l3"><a class="reference internal" href="#polishing">Polishing</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#implementations">Implementations</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../get_started/index.html">Get started</a></li>
@@ -86,6 +87,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l1"><a class="reference internal" href="../parsers/index.html">Parsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../codegen/index.html">Code generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced/index.html">Advanced features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citing/index.html">Citing OSQP</a></li>
 </ul>
@@ -226,6 +228,32 @@ However, the linear system is usually much smaller than the one solved during th
 <p>The chances to have a successful polishing increase if the tolerances <code class="code docutils literal notranslate"><span class="pre">eps_abs</span></code> and <code class="code docutils literal notranslate"><span class="pre">eps_rel</span></code> are small.
 However, low tolerances might require a very large number of iterations.</p>
 </section>
+</section>
+<section id="implementations">
+<h2>Implementations<a class="headerlink" href="#implementations" title="Link to this heading">¶</a></h2>
+<p>The OSQP library provides a <a class="reference internal" href="../interfaces/C.html#c-interface"><span class="std std-ref">C language implementation</span></a> of the above ADMM algorithm, and also
+<a class="reference internal" href="../interfaces/index.html#interfaces"><span class="std std-ref">interfaces to several high level languages</span></a> to enable those languages to solve QPs using OSQP.</p>
+<p>There are also several community-developed implementations of this ADMM algorithm.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Implementation</p></th>
+<th class="head"><p>Language</p></th>
+<th class="head"><p>Link</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>jaxopt.OSQP</p></td>
+<td><p>JAX</p></td>
+<td><p><a class="reference external" href="https://jaxopt.github.io/stable/quadratic_programming.html#osqp">jaxopt.github.io/stable/quadratic_programming.html#osqp</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>jOSQP</p></td>
+<td><p>Java</p></td>
+<td><p><a class="reference external" href="https://github.com/quantego/josqp">github.com/quantego/josqp</a></p></td>
+</tr>
+</tbody>
+</table>
+<p>Note that these implementations may not have the same API or features as the OSQP library, and any questions or support requests
+should be directed to the authors of the implementations.</p>
 </section>
 </section>
 
