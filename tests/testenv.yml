@@ -1,0 +1,10 @@
+name: osqp-test
+channels:
+  - conda-forge
+dependencies:
+  - numpy
+  # 0.17.0 was when sparse.random was added, which we need.
+  # Exclude scipy 1.12 because the random sparse array function started returning
+  # the transpose of the original, breaking the unit tests.
+  # ref: https://github.com/scipy/scipy/issues/20027
+  - scipy>=0.17.0,<1.12.0

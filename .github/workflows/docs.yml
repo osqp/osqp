@@ -2,7 +2,7 @@ name: Docs
 
 on:
   push:
-    branches: [ master, develop-1.0 ]
+    branches: [ master, release-0.6.3 ]
     tags:
       - '*'
 
@@ -42,22 +42,22 @@ jobs:
         run: |
           cd docs && make HTMLCOPYDIR=../site/docs html && touch ../site/docs/.nojekyll
 
-      # Build documentation on the develop-1.0 branch in a subfolder
+      # Build documentation on the release-0.6.3 branch in a subfolder
       # ------------------------------------------------------------
       - uses: actions/checkout@v3
         with:
-          ref: develop-1.0
-          path: develop-1.0
+          ref: release-0.6.3
+          path: release-0.6.3
           clean: false
 
-      - name: Build docs on develop-1.0
+      - name: Build docs on 0.6.3
         run: |
-          rm -rf develop-1.0/.git
-          cd develop-1.0/docs && make HTMLCOPYDIR=../../site/docs/develop-1.0 html
+          rm -rf release-0.6.3/.git
+          cd release-0.6.3/docs && make HTMLCOPYDIR=../../site/docs/release-0.6.3 html
       # ------------------------------------------------------------
 
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@4.1.1
+        uses: JamesIves/github-pages-deploy-action@v4.5.0
         with:
           branch: gh-pages
           folder: site

@@ -37,11 +37,14 @@ jobs:
           lfs: false
           submodules: recursive
 
-      - name: Set up conda
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Set up conda environment for testing
+        uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
+          activate-environment: osqp-test
+          environment-file: tests/testenv.yml
+          auto-activate-base: false
 
       - name: Setup Envvars
         run: |
@@ -78,7 +81,7 @@ jobs:
       # a version earlier than 2021
       - name: Install python dependencies
         run: |
-          conda install -c anaconda "mkl<2021" numpy scipy
+          conda install -c anaconda "mkl<2021"
           conda info
           conda list
 
@@ -96,12 +99,12 @@ jobs:
         run: |
           mkdir -p $OSQP_NAME/lib $OSQP_NAME/include
           cp LICENSE $OSQP_NAME/
-          cp include/*.h $OSQP_NAME/include/
+          cp include/public/*.h $OSQP_NAME/include/
           cp build/out/libosqp.* $OSQP_NAME/lib/
           cd $OSQP_NAME && tar -czvf ../$OSQP_NAME.tar.gz *
 
       - name: Release binary
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: ${{env.OSQP_NAME}}.tar.gz
 
@@ -112,6 +115,6 @@ jobs:
 
       - name: Release source
         if: ${{ runner.os == 'Linux' }}
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: osqp-${{env.OSQP_VERSION}}-src.tar.gz
