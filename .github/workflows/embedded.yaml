@@ -1,4 +1,4 @@
-name: Embedded Combinations
+name: Embedded Compilation
 
 on:
   push:
