@@ -15,7 +15,7 @@ jobs:
         python: [3.9]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: master
           lfs: false
@@ -44,7 +44,7 @@ jobs:
 
       # Build documentation on the release-0.6.3 branch in a subfolder
       # ------------------------------------------------------------
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: release-0.6.3
           path: release-0.6.3
