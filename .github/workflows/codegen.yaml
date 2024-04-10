@@ -12,6 +12,7 @@ jobs:
 
   embedded_compilation:
       runs-on: ubuntu-latest
+      name: Code generation and compilation
 
       strategy:
         fail-fast: false
