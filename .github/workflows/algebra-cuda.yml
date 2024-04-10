@@ -1,4 +1,4 @@
-name: Main-Cuda
+name: 'Algebra: Cuda'
 
 on:
   push:

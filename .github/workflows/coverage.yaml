@@ -25,6 +25,8 @@ jobs:
             - algebra: 'mkl'
               float: 'ON'
 
+      name: ${{ matrix.algebra }} algebra, ${{ matrix.float == 'ON' && 'single' || 'double' }}, ${{ matrix.long == 'ON' && 'long' || 'int' }}
+
       defaults:
         run:
           # Required when using an activated conda environment in steps

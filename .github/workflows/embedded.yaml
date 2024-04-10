@@ -1,4 +1,4 @@
-name: Embedded Combinations
+name: Embedded Compilation
 
 on:
   push:
@@ -24,6 +24,8 @@ jobs:
           include:
             - os: ubuntu-latest
               cmake_generator: "Unix Makefiles"
+
+      name: ${{ matrix.float == 'ON' && 'single' || 'double' }}, ${{ matrix.embedded == '1' && 'vector' || 'matrix' }} update
 
       defaults:
         run:
