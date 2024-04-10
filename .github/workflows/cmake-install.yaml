@@ -12,6 +12,7 @@ jobs:
 
   build_and_test:
       runs-on: ubuntu-latest
+      name: All target linking
 
       strategy:
         fail-fast: false
@@ -20,7 +21,7 @@ jobs:
         OSQP_INSTALL_PREFIX: ${{ github.workspace }}/../install
 
       steps:
-        - uses: actions/checkout@v3
+        - uses: actions/checkout@v4
           with:
             lfs: false
             submodules: recursive
@@ -55,6 +56,7 @@ jobs:
 
   build_and_test_static:
       runs-on: ubuntu-latest
+      name: Static library target linking
 
       strategy:
         fail-fast: false
@@ -63,7 +65,7 @@ jobs:
         OSQP_INSTALL_PREFIX: ${{ github.workspace }}/../install
 
       steps:
-        - uses: actions/checkout@v3
+        - uses: actions/checkout@v4
           with:
             lfs: false
             submodules: recursive
@@ -87,6 +89,7 @@ jobs:
 
   build_and_test_shared:
       runs-on: ubuntu-latest
+      name: Shared library target linking
 
       strategy:
         fail-fast: false
@@ -95,7 +98,7 @@ jobs:
         OSQP_INSTALL_PREFIX: ${{ github.workspace }}/../install
 
       steps:
-        - uses: actions/checkout@v3
+        - uses: actions/checkout@v4
           with:
             lfs: false
             submodules: recursive

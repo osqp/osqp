@@ -1,4 +1,4 @@
-name: Main-Cuda
+name: 'Algebra: Cuda'
 
 on:
   push:
@@ -34,7 +34,7 @@ jobs:
         CTEST_OUTPUT_ON_FAILURE: 1
 
       steps:
-        - uses: actions/checkout@v3
+        - uses: actions/checkout@v4
           with:
             lfs: false
             submodules: recursive

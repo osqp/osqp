@@ -1,4 +1,4 @@
-name: MKL Algebra
+name: 'Algebra: MKL'
 
 on:
   push:
@@ -37,6 +37,8 @@ jobs:
               cmake_generator: "Visual Studio 17 2022"
               test_target: "RUN_TESTS"
 
+      name: ${{ matrix.os }}, ${{ matrix.long == 'ON' && 'long' || 'int' }}
+
       defaults:
         run:
           # Required when using an activated conda environment in steps
@@ -48,7 +50,7 @@ jobs:
         CTEST_OUTPUT_ON_FAILURE: 1
 
       steps:
-        - uses: actions/checkout@v3
+        - uses: actions/checkout@v4
           with:
             lfs: false
             submodules: recursive

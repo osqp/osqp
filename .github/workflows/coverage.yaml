@@ -25,6 +25,8 @@ jobs:
             - algebra: 'mkl'
               float: 'ON'
 
+      name: ${{ matrix.algebra }} algebra, ${{ matrix.float == 'ON' && 'single' || 'double' }}, ${{ matrix.long == 'ON' && 'long' || 'int' }}
+
       defaults:
         run:
           # Required when using an activated conda environment in steps
@@ -36,7 +38,7 @@ jobs:
         CTEST_OUTPUT_ON_FAILURE: 1
 
       steps:
-        - uses: actions/checkout@v3
+        - uses: actions/checkout@v4
           with:
             lfs: false
             submodules: recursive
