@@ -569,9 +569,9 @@ static OSQPInt write_workspace(FILE*             f,
   fprintf(f, "  &%swork_Ax,\n", prefix);
   fprintf(f, "  &%swork_Px,\n", prefix);
   fprintf(f, "  &%swork_Aty,\n", prefix);
-  fprintf(f, "  (OSQPFloat)0.0,\n", prefix);  /* xtPx */
-  fprintf(f, "  (OSQPFloat)0.0,\n", prefix);  /* qtx */
-  fprintf(f, "  (OSQPFloat)0.0,\n", prefix);  /* SC */
+  fprintf(f, "  (OSQPFloat)0.0,\n");  /* xtPx */
+  fprintf(f, "  (OSQPFloat)0.0,\n");  /* qtx */
+  fprintf(f, "  (OSQPFloat)0.0,\n");  /* SC */
   fprintf(f, "  &%swork_delta_y,\n", prefix);
   fprintf(f, "  &%swork_Atdelta_y,\n", prefix);
   fprintf(f, "  &%swork_delta_x,\n", prefix);
