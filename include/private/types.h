@@ -155,9 +155,10 @@ struct OSQPWorkspace_ {
    * approximate tolerances computation.
    * @{
    */
-  OSQPFloat    xtPx; ///< scaled x' * P *x
-  OSQPFloat    qtx;  ///< scaled q' * x
-  OSQPFloat    SC;   ///< scaled support function value
+  OSQPFloat    xtPx;            ///< scaled x' * P *x
+  OSQPFloat    qtx;             ///< scaled q' * x
+  OSQPFloat    SC;              ///< scaled support function value
+  OSQPFloat    scaled_dual_gap; ///< scaled primal-dual gap
 
   /** @} */
 

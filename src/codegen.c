@@ -572,6 +572,7 @@ static OSQPInt write_workspace(FILE*             f,
   fprintf(f, "  (OSQPFloat)0.0,\n");  /* xtPx */
   fprintf(f, "  (OSQPFloat)0.0,\n");  /* qtx */
   fprintf(f, "  (OSQPFloat)0.0,\n");  /* SC */
+  fprintf(f, "  (OSQPFloat)0.0,\n");  /* scaled_dual_gap */
   fprintf(f, "  &%swork_delta_y,\n", prefix);
   fprintf(f, "  &%swork_Atdelta_y,\n", prefix);
   fprintf(f, "  &%swork_delta_x,\n", prefix);

@@ -260,12 +260,17 @@ void compute_obj_val_dual_gap(const OSQPSolver*  solver,
   *dual_obj_val = -0.5 * quad_term - sup_term;
 
   /* Duality gap is x^T P x + q^T x + SC(y) */
-  *duality_gap = quad_term + lin_term + sup_term;
+  work->scaled_dual_gap = quad_term + lin_term + sup_term;
 
   if (solver->settings->scaling) {
     *prim_obj_val *= work->scaling->cinv;
     *dual_obj_val *= work->scaling->cinv;
-    *duality_gap  *= work->scaling->cinv;
+
+    // We always store the duality gap in the info as unscaled (since it is for the user),
+    // but we keep the scaled version to use as a termination check when requested.
+    *duality_gap = work->scaling->cinv * work->scaled_dual_gap;
+  } else {
+    *duality_gap = work->scaled_dual_gap;
   }
 
   /* Save cost values for later use in termination tolerance computation */
@@ -868,8 +873,16 @@ OSQPInt check_termination(OSQPSolver* solver,
   eps_duality_gap = compute_duality_gap_tol(solver, eps_abs, eps_rel);
 
   // Duality gap check
-  if (c_absval(info->duality_gap) < eps_duality_gap) {
-    duality_gap_check = 1;
+  if (settings->scaling && !settings->scaled_termination) {
+    // Use the unscaled duality gap value
+    if (c_absval(info->duality_gap) < eps_duality_gap) {
+      duality_gap_check = 1;
+    }
+  } else {
+    // Use the scaled duality gap value
+    if (c_absval(work->scaled_dual_gap) < eps_duality_gap) {
+      duality_gap_check = 1;
+    }
   }
 
   // Compare checks to determine solver status
