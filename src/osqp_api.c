@@ -137,6 +137,7 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->eps_dual_inf       = (OSQPFloat)OSQP_EPS_DUAL_INF;  /* dual infeasibility tolerance */
   settings->scaled_termination = OSQP_SCALED_TERMINATION;       /* evaluate scaled termination criteria */
   settings->check_termination  = OSQP_CHECK_TERMINATION;        /* interval for evaluating termination criteria */
+  settings->check_dualgap      = OSQP_CHECK_DUALGAP;            /* Check duality gap termination criteria */
   settings->time_limit         = OSQP_TIME_LIMIT;               /* stop the algorithm when time limit is reached */
 
   settings->delta              = OSQP_DELTA;                    /* regularization parameter for polishing */
@@ -1281,6 +1282,7 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
   settings->eps_dual_inf       = new_settings->eps_dual_inf;
   settings->scaled_termination = new_settings->scaled_termination;
   settings->check_termination  = new_settings->check_termination;
+  settings->check_dualgap      = new_settings->check_dualgap;
   settings->time_limit         = new_settings->time_limit;
 
   settings->delta              = new_settings->delta;

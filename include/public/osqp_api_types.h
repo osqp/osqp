@@ -83,6 +83,7 @@ typedef struct {
   OSQPFloat eps_dual_inf;           ///< dual infeasibility tolerance
   OSQPInt   scaled_termination;     ///< boolean; use scaled termination criteria
   OSQPInt   check_termination;      ///< integer, check termination interval; if 0, checking is disabled
+  OSQPInt   check_dualgap;          ///< Boolean; use duality gap termination criteria
   OSQPFloat time_limit;             ///< maximum time to solve the problem (seconds)
 
   // polishing parameters

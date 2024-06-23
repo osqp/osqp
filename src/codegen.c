@@ -196,6 +196,8 @@ static OSQPInt write_settings(FILE*               f,
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->eps_dual_inf);
   fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->scaled_termination);
   fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->check_termination);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->check_dualgap);
+
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->time_limit);
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->delta);
   fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->polish_refine_iter);

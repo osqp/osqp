@@ -869,20 +869,25 @@ OSQPInt check_termination(OSQPSolver* solver,
     dual_inf_check = is_dual_infeasible(solver, eps_dual_inf);
   }
 
-  // Compute duality gap tolerance
-  eps_duality_gap = compute_duality_gap_tol(solver, eps_abs, eps_rel);
+  if (settings->check_dualgap ) {
+    // Compute duality gap tolerance
+    eps_duality_gap = compute_duality_gap_tol(solver, eps_abs, eps_rel);
 
-  // Duality gap check
-  if (settings->scaling && !settings->scaled_termination) {
-    // Use the unscaled duality gap value
-    if (c_absval(info->duality_gap) < eps_duality_gap) {
-      duality_gap_check = 1;
+    // Duality gap check
+    if (settings->scaling && !settings->scaled_termination) {
+      // Use the unscaled duality gap value
+      if (c_absval(info->duality_gap) < eps_duality_gap) {
+        duality_gap_check = 1;
+      }
+    } else {
+      // Use the scaled duality gap value
+      if (c_absval(work->scaled_dual_gap) < eps_duality_gap) {
+        duality_gap_check = 1;
+      }
     }
   } else {
-    // Use the scaled duality gap value
-    if (c_absval(work->scaled_dual_gap) < eps_duality_gap) {
-      duality_gap_check = 1;
-    }
+    // Force to 1 to bypass the check
+    duality_gap_check = 1;
   }
 
   // Compare checks to determine solver status
@@ -1177,6 +1182,12 @@ OSQPInt validate_settings(const OSQPSettings* settings,
 
   if (settings->check_termination < 0) {
     c_eprint("check_termination must be nonnegative");
+    return 1;
+  }
+
+  if (settings->check_dualgap != 0 &&
+      settings->check_dualgap != 1) {
+    c_eprint("check_dualgap must be either 0 or 1");
     return 1;
   }
 

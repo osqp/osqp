@@ -309,6 +309,7 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->eps_dual_inf       = settings->eps_dual_inf;
   new->scaled_termination = settings->scaled_termination;
   new->check_termination  = settings->check_termination;
+  new->check_dualgap      = settings->check_dualgap;
   new->time_limit         = settings->time_limit;
 
   new->delta              = settings->delta;
