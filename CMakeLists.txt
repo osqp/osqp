@@ -444,12 +444,20 @@ endif()
 message( STATUS "Build demo executable: " ${OSQP_BUILD_DEMO_EXE} )
 
 if(OSQP_BUILD_DEMO_EXE)
-  add_executable(osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
-  #target_include_directories(osqp_demo PRIVATE ${osqplib_includes})
+  set( OSQP_EXAMPLES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/examples/" )
+
+  add_executable(osqp_demo
+                 ${OSQP_EXAMPLES_DIR}/osqp_demo.c
+                 ${OSQP_EXAMPLES_DIR}/problems/cvxqp2_s.c
+                 ${OSQP_EXAMPLES_DIR}/problems/qpcblend.c
+                 ${OSQP_EXAMPLES_DIR}/problems/largeqp.c )
+  target_include_directories(osqp_demo PRIVATE
+                              ${osqplib_includes}
+                              ${OSQP_EXAMPLES_DIR}/problems )
   target_link_libraries(osqp_demo osqpstatic ${osqplib_link_libs})
 
   if(OSQP_CODEGEN)
-    add_executable(osqp_codegen_demo ${PROJECT_SOURCE_DIR}/examples/osqp_codegen_demo.c)
+    add_executable(osqp_codegen_demo ${OSQP_EXAMPLES_DIR}/osqp_codegen_demo.c)
     target_link_libraries(osqp_codegen_demo osqpstatic)
   endif()
 endif()
