@@ -61,6 +61,7 @@ jobs:
             echo "LD_LIBRARY_PATH=$CONDA_PREFIX/lib" >> $GITHUB_ENV
 
         - name: Install MKL
+          if: matrix.algebra == 'mkl'
           run: |
             conda install -c intel mkl-devel
             conda info
