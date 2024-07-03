@@ -446,6 +446,10 @@ message( STATUS "Build demo executable: " ${OSQP_BUILD_DEMO_EXE} )
 if(OSQP_BUILD_DEMO_EXE)
   set( OSQP_EXAMPLES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/examples/" )
 
+  add_executable(osqp_simple_demo
+                 ${OSQP_EXAMPLES_DIR}/osqp_simple_demo.c )
+  target_link_libraries(osqp_simple_demo osqpstatic ${osqplib_link_libs})
+
   add_executable(osqp_demo
                  ${OSQP_EXAMPLES_DIR}/osqp_demo.c
                  ${OSQP_EXAMPLES_DIR}/problems/cvxqp2_s.c
