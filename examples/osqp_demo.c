@@ -154,6 +154,8 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  settings->scaled_termination = 0;
+
   OSQPInt cap = osqp_capabilities();
 
   printf("This OSQP library supports:\n");

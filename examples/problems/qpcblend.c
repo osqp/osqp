@@ -7,7 +7,10 @@
 #include "qpcblend.h"
 #include "types.h"
 #include "algebra_impl.h"
+
+#ifndef ONLY_PROBLEM_DATA
 #include "qdldl_interface.h"
+#endif /* ONLY_PROBLEM_DATA */
 
 /* Define the settings structure */
 OSQPSettings qpcblend_settings = {
