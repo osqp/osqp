@@ -2,6 +2,8 @@
 #include "osqp.h"
 #include "auxil.h"
 #include "osqp_api_constants.h"
+#include "osqp_api_functions.h"
+#include "osqp_api_types.h"
 #include "util.h"
 #include "scaling.h"
 #include "error.h"
@@ -26,6 +28,80 @@
 
 #ifdef OSQP_ENABLE_INTERRUPT
 # include "interrupt.h"
+#endif
+
+/**********************
+ * OSQP type helpers  *
+ **********************/
+#ifndef OSQP_EMBEDDED_MODE
+OSQPCscMatrix* OSQPCscMatrix_new(OSQPInt    m,
+                                 OSQPInt    n,
+                                 OSQPInt    nzmax,
+                                 OSQPFloat* x,
+                                 OSQPInt*   i,
+                                 OSQPInt*   p) {
+  OSQPCscMatrix* mat = c_calloc(1, sizeof(OSQPCscMatrix));
+
+  if (!mat) return OSQP_NULL;
+
+  OSQPCscMatrix_set_data(mat, m, n, nzmax, x, i, p);
+
+  return mat;
+}
+
+void OSQPCscMatrix_free(OSQPCscMatrix* mat) {
+  if (mat) c_free(mat);
+}
+#endif
+
+void OSQPCscMatrix_set_data(OSQPCscMatrix* M,
+                            OSQPInt        m,
+                            OSQPInt        n,
+                            OSQPInt        nzmax,
+                            OSQPFloat*     x,
+                            OSQPInt*       i,
+                            OSQPInt*       p) {
+  M->m     = m;
+  M->n     = n;
+  M->nz   = -1;
+  M->nzmax = nzmax;
+  M->x     = x;
+  M->i     = i;
+  M->p     = p;
+}
+
+#ifndef OSQP_EMBEDDED_MODE
+OSQPSettings* OSQPSettings_new() {
+  OSQPSettings* settings = (OSQPSettings*) c_calloc(1, sizeof(OSQPSettings));
+
+  if (!settings)
+    return OSQP_NULL;
+
+  osqp_set_default_settings(settings);
+
+  return settings;
+}
+
+void OSQPSettings_free(OSQPSettings* settings) {
+  if (settings)
+    c_free(settings);
+}
+
+OSQPCodegenDefines* OSQPCodegenDefines_new() {
+  OSQPCodegenDefines* defs = (OSQPCodegenDefines*) c_calloc(1, sizeof(OSQPCodegenDefines));
+
+  if (!defs)
+    return OSQP_NULL;
+
+  osqp_set_default_codegen_defines(defs);
+
+  return defs;
+}
+
+void OSQPCodegenDefines_free(OSQPCodegenDefines* defs) {
+  if (defs)
+    c_free(defs);
+}
 #endif
 
 
@@ -1340,28 +1416,6 @@ OSQPInt osqp_codegen(OSQPSolver*         solver,
 #endif /* ifdef OSQP_CODEGEN */
 
   return exitflag;
-}
-
-
-
-/****************************
-* User API Helper functions
-****************************/
-
-void csc_set_data(OSQPCscMatrix* M,
-                  OSQPInt        m,
-                  OSQPInt        n,
-                  OSQPInt        nzmax,
-                  OSQPFloat*     x,
-                  OSQPInt*       i,
-                  OSQPInt*       p) {
-  M->m     = m;
-  M->n     = n;
-  M->nz   = -1;
-  M->nzmax = nzmax;
-  M->x     = x;
-  M->i     = i;
-  M->p     = p;
 }
 
 /****************************
