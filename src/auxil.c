@@ -250,6 +250,10 @@ void compute_obj_val_dual_gap(const OSQPSolver*  solver,
                                     work->data->u,
                                     OSQP_INFTY * OSQP_MIN_SCALING);
 
+  // Round anything in the range [-OSQP_ZERO_DEADZONE, OSQP_ZERO_DEADZONE] to 0 to
+  // prevent very small (i.e., 1e-20) values from blowing up the numerics.
+  OSQPVectorf_round_to_zero(work->z_prev, OSQP_ZERO_DEADZONE);
+
   sup_term  = OSQPVectorf_dot_prod_signed(work->data->u, work->z_prev, +1);
   sup_term += OSQPVectorf_dot_prod_signed(work->data->l, work->z_prev, -1);
 

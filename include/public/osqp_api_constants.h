@@ -188,5 +188,10 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_CG_TOL_MIN    (1E-7)
 # define OSQP_CG_POLISH_TOL (1e-5)
 
+#ifdef OSQP_USE_FLOAT
+# define OSQP_ZERO_DEADZONE (1e-10) ///< Minimum permitted value
+#else
+# define OSQP_ZERO_DEADZONE (1e-15) ///< Minimum permitted value
+#endif
 
 #endif /* ifndef OSQP_API_CONSTANTS_H */
