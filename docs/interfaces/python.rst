@@ -146,7 +146,7 @@ Matrix :code:`A` can be changed in the same way. You can also change both matric
 
 .. code:: python
 
-    m.update(Px=Px_new, Px_idx=Px_new_idx, Ax=Ax_new, Ax=Ax_new_idx)
+    m.update(Px=Px_new, Px_idx=Px_new_idx, Ax=Ax_new, Ax_idx=Ax_new_idx)
 
 
 Update settings
