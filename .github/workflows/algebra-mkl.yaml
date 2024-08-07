@@ -94,7 +94,7 @@ jobs:
         - name: Install MKL
           run: |
             conda install -c conda-forge llvm-openmp
-            conda install -c intel mkl-devel
+            conda install -c https://software.repos.intel.com/python/conda/ mkl-devel
             conda info
             conda list
 
@@ -102,7 +102,7 @@ jobs:
           if: runner.os == 'Windows'
           run: |
             # Needed to get import library for the Intel OpenMP library to be found
-            conda install -c intel dpcpp_impl_win-64
+            conda install -c https://software.repos.intel.com/python/conda/ dpcpp_impl_win-64
 
         - name: Build
           run: |
