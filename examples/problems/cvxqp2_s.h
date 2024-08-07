@@ -10,9 +10,6 @@
 
 #include "osqp_api_types.h"
 
-/* Only include the problem data, not the solver object */
-#define ONLY_PROBLEM_DATA
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -28,10 +25,6 @@ extern OSQPFloat cvxqp2_s_data_l_val[];
 extern OSQPFloat cvxqp2_s_data_u_val[];
 
 extern OSQPSettings cvxqp2_s_settings;
-
-#ifndef ONLY_PROBLEM_DATA
-  extern OSQPSolver cvxqp2_s_solver;
-#endif
 
 #ifdef __cplusplus
 }
