@@ -3,6 +3,10 @@
 C
 =====
 
+.. contents:: Table of Contents
+   :depth: 3
+   :local:
+
 
 .. _C_main_API:
 
