@@ -36,6 +36,7 @@ typedef struct {
   OSQPFloat *x;     ///< numerical values, size nzmax
   OSQPInt    nzmax; ///< maximum number of entries
   OSQPInt    nz;    ///< number of entries in triplet matrix, -1 for csc
+  OSQPInt    owned; ///< 1 if the p, i and x pointers were allocated automatically, 0 if they are owned by the user
 } OSQPCscMatrix;
 
 /**

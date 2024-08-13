@@ -27,8 +27,8 @@ extern "C" {
  * backing data for the matrix (e.g. not copy the actual matrix data, just reference
  * the existing data.)
  *
- * @param  m     First dimension
- * @param  n     Second dimension
+ * @param  m     Number of rows
+ * @param  n     number of columns
  * @param  nzmax Maximum number of nonzero elements
  * @param  x     Vector of data
  * @param  i     Vector of row indices
@@ -48,6 +48,65 @@ OSQPCscMatrix* OSQPCscMatrix_new(OSQPInt    m,
  * @param  mat Matrix to free
  */
 void OSQPCscMatrix_free(OSQPCscMatrix* mat);
+
+/**
+ * Allocates a new Compressed-Column-Sparse (CSC) matrix with zero entries.
+ *
+ * This matrix will contain all structural zeros, so no non-zero elements will be present.
+ *
+ * This will malloc the new matrix structure and create its own internal pointers.
+ *
+ * @param  m Number of rows
+ * @param  n Number of columns
+ * @return   Pointer to new CSC matrix, or null on error
+ */
+OSQPCscMatrix* OSQPCscMatrix_zeros(OSQPInt m,
+                                   OSQPInt n);
+
+/**
+ * Allocates a new Compressed-Column-Sparse (CSC) identity with 1s on the diagonal.
+ *
+ * This will malloc the new matrix structure and create its own internal pointers.
+ *
+ * @param  m Number of rows/columns
+ * @return   Pointer to new CSC matrix, or null on error
+ */
+OSQPCscMatrix* OSQPCscMatrix_identity(OSQPInt m);
+
+/**
+ * Allocates a new Compressed-Column-Sparse (CSC) diagonal matrix with a given value.
+ *
+ * This will start populating at the upper-left element and continue down the main diagonal
+ * until either the last row or column (in the case of non-square matrices).
+ *
+ * This will malloc the new matrix structure and create its own internal pointers.
+ *
+ * @param  m      Number of rows
+ * @param  n      Number of columns
+ * @param  scalar Scalar value to put on the diagonal
+ * @return        Pointer to new CSC matrix, or null on error
+ */
+OSQPCscMatrix* OSQPCscMatrix_diag_scalar(OSQPInt   m,
+                                         OSQPInt   n,
+                                         OSQPFloat scalar);
+
+/**
+ * Allocates a new Compressed-Column-Sparse (CSC) diagonal matrix with given values on the diagonal.
+ *
+ * This will start populating at the upper-left element and continue down the main diagonal
+ * until either the last row or column (in the case of non-square matrices).
+ *
+ * This will malloc the new matrix structure and create its own internal pointers.
+ *
+ * @param  m    Number of rows
+ * @param  n    Number of columns
+ * @param  vals Values to put on the diagonal - length min(n,m)
+ * @return      Pointer to new CSC matrix, or null on error
+ */
+OSQPCscMatrix* OSQPCscMatrix_diag_vec(OSQPInt    m,
+                                      OSQPInt    n,
+                                      OSQPFloat* vals);
+
 #endif
 
 /**
