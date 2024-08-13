@@ -27,6 +27,8 @@ extern "C" {
  * backing data for the matrix (e.g. not copy the actual matrix data, just reference
  * the existing data.)
  *
+ * @note Not available in embedded mode (requires malloc)
+ *
  * @param  m     Number of rows
  * @param  n     number of columns
  * @param  nzmax Maximum number of nonzero elements
@@ -43,9 +45,15 @@ OSQPCscMatrix* OSQPCscMatrix_new(OSQPInt    m,
                                  OSQPInt*   p);
 
 /**
- * Free a CSC matrix object allocated by OSQPCscMatrix_new.
+ * Free a CSC matrix object allocated by @ref OSQPCscMatrix_new.
  *
- * @param  mat Matrix to free
+ * @note This function will only free the internal @ref OSQPCscMatrix.x, @ref OSQPCscMatrix.p,
+ * @ref OSQPCscMatrix.i arrays if the @ref OSQPCscMatrix.owned variable is set to `1`, otherwise
+ * only the outer CSC wrapper is free'd.
+ *
+ * @note Not available in embedded mode (requires free)
+ *
+ * @param mat Matrix to free
  */
 void OSQPCscMatrix_free(OSQPCscMatrix* mat);
 
@@ -54,7 +62,7 @@ void OSQPCscMatrix_free(OSQPCscMatrix* mat);
  *
  * This matrix will contain all structural zeros, so no non-zero elements will be present.
  *
- * This will malloc the new matrix structure and create its own internal pointers.
+ * @note Not available in embedded mode (requires malloc)
  *
  * @param  m Number of rows
  * @param  n Number of columns
@@ -66,7 +74,7 @@ OSQPCscMatrix* OSQPCscMatrix_zeros(OSQPInt m,
 /**
  * Allocates a new Compressed-Column-Sparse (CSC) identity with 1s on the diagonal.
  *
- * This will malloc the new matrix structure and create its own internal pointers.
+ * @note Not available in embedded mode (requires malloc)
  *
  * @param  m Number of rows/columns
  * @return   Pointer to new CSC matrix, or null on error
@@ -79,7 +87,7 @@ OSQPCscMatrix* OSQPCscMatrix_identity(OSQPInt m);
  * This will start populating at the upper-left element and continue down the main diagonal
  * until either the last row or column (in the case of non-square matrices).
  *
- * This will malloc the new matrix structure and create its own internal pointers.
+ * @note Not available in embedded mode (requires malloc)
  *
  * @param  m      Number of rows
  * @param  n      Number of columns
@@ -96,7 +104,7 @@ OSQPCscMatrix* OSQPCscMatrix_diag_scalar(OSQPInt   m,
  * This will start populating at the upper-left element and continue down the main diagonal
  * until either the last row or column (in the case of non-square matrices).
  *
- * This will malloc the new matrix structure and create its own internal pointers.
+ * @note Not available in embedded mode (requires malloc)
  *
  * @param  m    Number of rows
  * @param  n    Number of columns
@@ -140,12 +148,16 @@ OSQP_API void OSQPCscMatrix_set_data(OSQPCscMatrix* M,
 /**
  * Allocate a new OSQPSettings object with the default settings.
  *
+ * @note Not available in embedded mode (requires malloc)
+ *
  * @return Pointer to new settings object, or null on error
  */
 OSQPSettings* OSQPSettings_new();
 
 /**
  * Free an OSQPSettings object.
+ *
+ * @note Not available in embedded mode (requires free)
  *
  * @param settings The settings object to free
  */
@@ -163,12 +175,16 @@ void OSQPSettings_free(OSQPSettings* settings);
 /**
  * Allocate a new OSQPCodegenDefines object with the default options.
  *
+ * @note Not available in embedded mode (requires malloc)
+ *
  * @return Pointer to new codegen defines object, or null on error
  */
 OSQPCodegenDefines* OSQPCodegenDefines_new();
 
 /**
  * Free an OSQPCodegenDefines object.
+ *
+ * @note Not available in embedded mode (requires free)
  *
  * @param defs The defines object to free
  */
