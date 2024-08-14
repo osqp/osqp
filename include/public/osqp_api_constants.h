@@ -130,7 +130,12 @@ extern const char * OSQP_ERROR_MESSAGE[];
 // Sentinel value, not for user use
 #define _OSQP_ADAPTIVE_RHO_UPDATE_LAST_VALUE (4)
 
+// Only use the time-based update as the default when its available
+#ifdef OSQP_ENABLE_PROFILING
 #define OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT (OSQP_ADAPTIVE_RHO_UPDATE_TIME)
+#else
+#define OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT (OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS)
+#endif
 
 #ifdef OSQP_ALGEBRA_CUDA
 #  define OSQP_ADAPTIVE_RHO_INTERVAL  (10)
