@@ -129,8 +129,14 @@ void print_setup_header(const OSQPSolver* solver) {
   c_print("max_iter = %i\n", (int)settings->max_iter);
 
   if (settings->check_termination) {
-    c_print("          check_termination: on (interval %i),\n",
-      (int)settings->check_termination);
+    if(settings->check_dualgap) {
+      c_print("          check_termination: on (interval %i, duality gap),\n",
+        (int)settings->check_termination);
+    }
+    else {
+      c_print("          check_termination: on (interval %i),\n",
+        (int)settings->check_termination);
+    }
   }
   else
     c_print("          check_termination: off,\n");
