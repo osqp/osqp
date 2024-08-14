@@ -67,6 +67,7 @@ OSQPInt adapt_rho(OSQPSolver* solver) {
       (rho_new < settings->rho / settings->adaptive_rho_tolerance)) {
     exitflag                 = osqp_update_rho(solver, rho_new);
     info->rho_updates += 1;
+    solver->work->rho_updated = 1;
   }
 
   return exitflag;
@@ -1126,11 +1127,18 @@ OSQPInt validate_settings(const OSQPSettings* settings,
   }
 
   if (from_setup &&
-      settings->adaptive_rho != 0 &&
-      settings->adaptive_rho != 1) {
-    c_eprint("adaptive_rho must be either 0 or 1");
+      settings->adaptive_rho < 0 ||
+      settings->adaptive_rho >= _OSQP_ADAPTIVE_RHO_UPDATE_LAST_VALUE) {
+    c_eprint("adaptive_rho not a valid choice");
     return 1;
   }
+
+#if !defined(OSQP_ENABLE_PROFILING)
+  if (from_setup && settings->adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_TIME) {
+    c_eprint("adaptive_rho time-based adaptation requires profiling to be enabled");
+    return 1;
+  }
+#endif /* !defined(OSQP_ENABLE_PROFILING) */
 
   if (from_setup && settings->adaptive_rho_interval < 0) {
     c_eprint("adaptive_rho_interval must be nonnegative");

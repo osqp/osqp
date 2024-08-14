@@ -119,8 +119,18 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_CG_TOL_REDUCTION      (10)
 # define OSQP_CG_TOL_FRACTION       (0.15)
 
-// adaptive rho logic
-# define OSQP_ADAPTIVE_RHO (1)
+/*******************************
+ * Adaptive rho update methods *
+ *******************************/
+#define OSQP_ADAPTIVE_RHO_UPDATE_DISABLED   (0) ///< Disable rho adaptation
+#define OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS (1) ///< Fixed iteration interval
+#define OSQP_ADAPTIVE_RHO_UPDATE_TIME       (2) ///< Time based
+#define OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR  (3) ///< KKT error decrease based
+
+// Sentinel value, not for user use
+#define _OSQP_ADAPTIVE_RHO_UPDATE_LAST_VALUE (4)
+
+#define OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT (OSQP_ADAPTIVE_RHO_UPDATE_TIME)
 
 #ifdef OSQP_ALGEBRA_CUDA
 #  define OSQP_ADAPTIVE_RHO_INTERVAL  (10)
@@ -131,8 +141,18 @@ extern const char * OSQP_ERROR_MESSAGE[];
 #endif
 
 # define OSQP_ADAPTIVE_RHO_FRACTION (0.4)           ///< fraction of setup time after which we update rho
-# define OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION (4) ///< multiple of check_termination after which we update rho (if OSQP_ENABLE_PROFILING disabled)
-# define OSQP_ADAPTIVE_RHO_FIXED (100)              ///< number of iterations after which we update rho if termination_check  and OSQP_ENABLE_PROFILING are disabled
+
+/**
+ * Multiple of check_termination after which we update rho if using interval-based
+ * rho adaptation and adaptive_rho_interval == 0.
+ */
+# define OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION (4)
+
+/**
+ * Number of iterations after which we update rho if using interval-based rho adaptation
+ * and adaptive_rho_interval == 0 and termination_check is disabled.
+ */
+# define OSQP_ADAPTIVE_RHO_FIXED (100)
 
 // termination parameters
 # define OSQP_MAX_ITER              (4000)

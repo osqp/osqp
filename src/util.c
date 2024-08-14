@@ -48,7 +48,7 @@ void print_header(void) {
   // Main information
   c_print("objective    prim res   dual res   gap        rho");
 # ifdef OSQP_ENABLE_PROFILING
-  c_print("        time");
+  c_print("         time");
 # endif /* ifdef OSQP_ENABLE_PROFILING */
   c_print("\n");
 }
@@ -120,9 +120,25 @@ void print_setup_header(const OSQPSolver* solver) {
           settings->eps_prim_inf, settings->eps_dual_inf);
   c_print("rho = %.2e ", settings->rho);
 
-  if (settings->adaptive_rho) {
-    c_print("(adaptive)");
+  switch(settings->adaptive_rho)
+  {
+  case OSQP_ADAPTIVE_RHO_UPDATE_DISABLED:
+    c_print("(adaptive: disabled)");
+    break;
+
+  case OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS:
+    c_print("(adaptive: %d iterations)", settings->adaptive_rho_interval);
+    break;
+
+  case OSQP_ADAPTIVE_RHO_UPDATE_TIME:
+    c_print("(adaptive: time)");
+    break;
+
+  case OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR:
+    c_print("(adaptive: kkt error)");
+    break;
   }
+
   c_print(",\n          ");
   c_print("sigma = %.2e, alpha = %.2f, ",
           settings->sigma, settings->alpha);
@@ -184,7 +200,15 @@ void print_summary(OSQPSolver* solver) {
   c_print("  %9.2e", info->prim_res);
   c_print("  %9.2e", info->dual_res);
   c_print("  %9.2e", info->duality_gap);
-  c_print("  %9.2e", settings->rho);
+
+  /* Specially mark the iterations where we have just adapted rho
+   * (Note, we print out the new rho value in this iteration, not the old one) */
+  if(solver->work->rho_updated) {
+    c_print("  %9.2e*", settings->rho);
+  } else {
+    c_print("  %9.2e ", settings->rho);
+  }
+
 
 # ifdef OSQP_ENABLE_PROFILING
 
