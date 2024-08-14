@@ -84,9 +84,13 @@ typedef struct {
   OSQPInt adaptive_rho_interval;
 
   /**
-   * Fraction of the setup time to use as the rho adaptation interval for time-based adaptation.
+   * Adaptation parameter controlling when non-fixed rho adaptations occur.
    *
-   * Only used when adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_TIME.
+   * - When adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_TIME, this is the fraction of the
+   *   setup time to use as the rho adaptation interval.
+   * - When adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR, this is the fraction of
+   *   the previous KKT error to adapt rho at.
+   * - Not used for any other adaptive_rho value.
    */
   OSQPFloat adaptive_rho_fraction;
 
@@ -143,7 +147,8 @@ typedef struct {
   OSQPFloat run_time;    ///< Total solve time (seconds)
 
   // Convergence information
-  OSQPFloat primdual_int; ///< Integral of duality gap over time (Primal-dual integral), requires profiling
+  OSQPFloat primdual_int;  ///< Integral of duality gap over time (Primal-dual integral), requires profiling
+  OSQPFloat rel_kkt_error; ///< Relative KKT error
 } OSQPInfo;
 
 

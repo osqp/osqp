@@ -755,6 +755,9 @@ void update_info(OSQPSolver* solver,
   }
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
+  // Compute the relative KKT error
+  info->rel_kkt_error = c_max( c_max(*dual_res, *prim_res), *dual_gap);
+
 #ifdef OSQP_ENABLE_PRINTING
   work->summary_printed = 0; // The just updated info have not been printed
 #endif /* ifdef OSQP_ENABLE_PRINTING */
