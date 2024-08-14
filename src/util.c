@@ -127,7 +127,7 @@ void print_setup_header(const OSQPSolver* solver) {
     break;
 
   case OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS:
-    c_print("(adaptive: %d iterations)", settings->adaptive_rho_interval);
+    c_print("(adaptive: %d iterations)", (int) settings->adaptive_rho_interval);
     break;
 
   case OSQP_ADAPTIVE_RHO_UPDATE_TIME:
@@ -135,7 +135,7 @@ void print_setup_header(const OSQPSolver* solver) {
     break;
 
   case OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR:
-    c_print("(adaptive: kkt error)");
+    c_print("(adaptive: kkt error, interval %d)", (int) settings->adaptive_rho_interval);
     break;
   }
 

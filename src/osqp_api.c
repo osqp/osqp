@@ -378,18 +378,14 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   work->rho_update_from_solve = 0;
   work->adaptive_rho_interval_computed = 0;
 # endif /* ifdef OSQP_ENABLE_PROFILING */
-  solver->info->rho_updates  = 0;                      // Rho updates set to 0
-  solver->info->rho_estimate = solver->settings->rho;  // Best rho estimate
-  solver->info->obj_val      = OSQP_INFTY;
-  solver->info->prim_res     = OSQP_INFTY;
-  solver->info->dual_res     = OSQP_INFTY;
+  solver->info->rho_updates   = 0;                      // Rho updates set to 0
+  solver->info->rho_estimate  = solver->settings->rho;  // Best rho estimate
+  solver->info->obj_val       = OSQP_INFTY;
+  solver->info->prim_res      = OSQP_INFTY;
+  solver->info->dual_res      = OSQP_INFTY;
+  solver->info->rel_kkt_error = OSQP_INFTY;
 
-  // Print header
-# ifdef OSQP_ENABLE_PRINTING
-  if (solver->settings->verbose) print_setup_header(solver);
-  work->summary_printed = 0; // Initialize last summary  to not printed
-# endif /* ifdef OSQP_ENABLE_PRINTING */
-
+  work->last_rel_kkt = OSQP_INFTY;
 
   /* Setup adaptive rho things */
   work->rho_updated = 0;
@@ -420,7 +416,11 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
     break;
 
   case OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR:
-    /* No setup needed */
+    // 0 is a special flag meaning automatically set it to a value we decide
+    if(solver->settings->adaptive_rho_interval == 0) {
+      // Which is every iteration
+      solver->settings->adaptive_rho_interval = 1;
+    }
     break;
   }
 
@@ -438,6 +438,12 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
 # endif /* ifdef OSQP_ENABLE_DERIVATIVES */
 
   osqp_profiler_sec_pop(OSQP_PROFILER_SEC_SETUP);
+
+  // Print header
+# ifdef OSQP_ENABLE_PRINTING
+  if (solver->settings->verbose) print_setup_header(solver);
+  work->summary_printed = 0; // Initialize last summary  to not printed
+# endif /* ifdef OSQP_ENABLE_PRINTING */
 
   // Return exit flag
   return 0;
@@ -651,6 +657,13 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
       break;
 
     case OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR:
+      /* Update rho when the appropriate number of iterations have passed */
+      if(iter % settings->adaptive_rho_interval) {
+        // Negative logic used! Modulo returns non-zero when we aren't at the right iteration
+        can_adapt_rho = 0;
+      } else {
+        can_adapt_rho = 1;
+      }
       break;
     }
 #else
@@ -678,6 +691,19 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
     work->rho_updated = 0;
 #if OSQP_EMBEDDED_MODE != 1
+    // Further processing to determine if the KKT error has decresed
+    // This requires values computed in update_info, so must be done here.
+    if(settings->adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR) {
+      c_print("%d, (%g, %g)\n", iter, solver->info->rel_kkt_error, work->last_rel_kkt);
+
+      if(solver->info->rel_kkt_error <= ( settings->adaptive_rho_fraction * work->last_rel_kkt) ) {
+        can_adapt_rho = 1;
+      }
+      else {
+        can_adapt_rho = 0;
+      }
+    }
+
     // Actually update rho if requested
     if(can_adapt_rho) {
       osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
@@ -690,9 +716,14 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     }
 #endif // OSQP_EMBEDDED_MODE != 1
 
+    // Store the relative KKT error for the last update
+    if(work->rho_updated) {
+      work->last_rel_kkt = solver->info->rel_kkt_error;
+    }
+
 #ifdef OSQP_ENABLE_PRINTING
     // Print summary if requested or if rho was updated
-    if (can_print || (settings->verbose && solver->work->rho_updated)) {
+    if (can_print || (settings->verbose && work->rho_updated)) {
       print_summary(solver);
     }
 #endif /* ifdef OSQP_ENABLE_PRINTING */

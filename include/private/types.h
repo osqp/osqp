@@ -228,6 +228,9 @@ struct OSQPWorkspace_ {
 
   /// Flag indicating rho was updated during the solve
   OSQPInt rho_updated;
+
+  /// Relative KKT of last update
+  OSQPFloat last_rel_kkt;
 };
 
 // NB: "typedef struct OSQPWorkspace_ OSQPWorkspace" is declared already
