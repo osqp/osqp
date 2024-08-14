@@ -68,12 +68,34 @@ typedef struct {
   osqp_precond_type cg_precond;       ///< Preconditioner to use in the CG method
 
   // adaptive rho logic
-  OSQPInt   adaptive_rho;           ///< boolean, is rho step size adaptive?
-  OSQPInt   adaptive_rho_interval;  ///< number of iterations between rho adaptations; if 0, then it is timing-based
-  OSQPFloat adaptive_rho_fraction;  ///< time interval for adapting rho (fraction of the setup time)
-  OSQPFloat adaptive_rho_tolerance; ///< tolerance X for adapting rho; new rho must be X times larger or smaller than the current one to change it
+  /**
+   * rho stepsize adaption method
+   */
+  OSQPInt adaptive_rho;
 
-  // TODO: allowing negative values for adaptive_rho_interval can eliminate the need for adaptive_rho
+  /**
+   * Interval between rho adaptations
+   *
+   * When adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS, this is the number of iterations
+   * between rho updates.
+   *
+   * Not used when adaptive_rho is any other value.
+   */
+  OSQPInt adaptive_rho_interval;
+
+  /**
+   * Fraction of the setup time to use as the rho adaptation interval for time-based adaptation.
+   *
+   * Only used when adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_TIME.
+   */
+  OSQPFloat adaptive_rho_fraction;
+
+  /**
+   * Tolerance applied when adapting rho.
+   *
+   * New rho must be X times larger or smaller than the current one to change it
+   */
+  OSQPFloat adaptive_rho_tolerance;
 
   // termination parameters
   OSQPInt   max_iter;               ///< maximum number of iterations
