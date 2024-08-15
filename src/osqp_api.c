@@ -646,17 +646,14 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
       break;
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
-    case OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS:
-      /* Update rho when the appropriate number of iterations have passed */
-      if(iter % settings->adaptive_rho_interval) {
-        // Negative logic used! Modulo returns non-zero when we aren't at the right iteration
-        can_adapt_rho = 0;
-      } else {
-        can_adapt_rho = 1;
-      }
-      break;
-
     case OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR:
+      /*
+       * Fall through on purpose:
+       * We support limiting the KKT error checks to a periodic number of iterations,
+       * so we set the can_adapt_rho flag to show the iterations we can check the KKT error.
+       * The actual KKT error computation/checks is done later after update_info.
+       */
+    case OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS:
       /* Update rho when the appropriate number of iterations have passed */
       if(iter % settings->adaptive_rho_interval) {
         // Negative logic used! Modulo returns non-zero when we aren't at the right iteration
@@ -693,9 +690,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 #if OSQP_EMBEDDED_MODE != 1
     // Further processing to determine if the KKT error has decresed
     // This requires values computed in update_info, so must be done here.
-    if(settings->adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR) {
-      c_print("%d, (%g, %g)\n", iter, solver->info->rel_kkt_error, work->last_rel_kkt);
-
+    if(can_adapt_rho && (settings->adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR)) {
       if(solver->info->rel_kkt_error <= ( settings->adaptive_rho_fraction * work->last_rel_kkt) ) {
         can_adapt_rho = 1;
       }
