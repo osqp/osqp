@@ -130,11 +130,11 @@ void print_setup_header(const OSQPSolver* solver) {
 
   if (settings->check_termination) {
     if(settings->check_dualgap) {
-      c_print("          check_termination: on (interval %i, duality gap),\n",
+      c_print("          check_termination: on (interval %i, duality gap: on),\n",
         (int)settings->check_termination);
     }
     else {
-      c_print("          check_termination: on (interval %i),\n",
+      c_print("          check_termination: on (interval %i, duality gap: off),\n",
         (int)settings->check_termination);
     }
   }
