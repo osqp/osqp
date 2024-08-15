@@ -19,7 +19,9 @@ jobs:
         matrix:
           # Specify the exact Windows image because the CMake generator in the CI breaks when the image
           # updates (since Visual Studio is also updated at the same time).
-          os: [ubuntu-latest, macos-latest, windows-2022]
+          # Stick with macos-13 because the macOS 14 runners are M1-based, and therefore MKL isn't available
+          # (macOS 13 is the last release to support x86 processors)
+          os: [ubuntu-latest, macos-13, windows-2022]
           python-version: [3.9]
           long: ['ON', 'OFF']
 
@@ -30,7 +32,7 @@ jobs:
             - os: ubuntu-latest
               cmake_generator: "Unix Makefiles"
               test_target: "test"
-            - os: macos-latest
+            - os: macos-13
               cmake_generator: "Unix Makefiles"
               test_target: "test"
             - os: windows-2022
