@@ -8,6 +8,8 @@
 #include "problems/qpcblend.h"
 #include "problems/largeqp.h"
 
+#define NAME_BUF_LENGTH 20
+
 int main(int argc, char *argv[]) {
 
   /* Problem data for a simple problem */
@@ -43,10 +45,10 @@ int main(int argc, char *argv[]) {
   OSQPCscMatrix* qp_A = NULL;
 
   // Extract a problem name
-  char problem_name[255];
+  char problem_name[NAME_BUF_LENGTH];
 
   if( argc == 2) {
-    sprintf(problem_name, "%s", argv[1]);
+    snprintf(problem_name, NAME_BUF_LENGTH, "%s", argv[1]);
   }
 
   if( strcmp(problem_name, "cvxqp2_s") == 0 ) {
