@@ -213,9 +213,6 @@ struct OSQPWorkspace_ {
 
   /// flag indicating that osqp_update_rho is called from osqp_solve function
   OSQPInt rho_update_from_solve;
-
-  /// Flag indicating that the time-based adaptive rho interval has been computed
-  OSQPInt adaptive_rho_interval_computed;
 # endif // ifdef OSQP_ENABLE_PROFILING
 
 # ifdef OSQP_ENABLE_PRINTING

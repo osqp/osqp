@@ -376,7 +376,6 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   work->first_run         = 1;
   work->clear_update_time = 0;
   work->rho_update_from_solve = 0;
-  work->adaptive_rho_interval_computed = 0;
 # endif /* ifdef OSQP_ENABLE_PROFILING */
   solver->info->rho_updates   = 0;                      // Rho updates set to 0
   solver->info->rho_estimate  = solver->settings->rho;  // Best rho estimate
@@ -629,8 +628,6 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
           // Make sure the interval is not 0 and at least check_termination times
           settings->adaptive_rho_interval = c_min(1, c_max(settings->adaptive_rho_interval,
                                                            settings->check_termination));
-
-          work->adaptive_rho_interval_computed = 1;
         }
         else
         {
@@ -655,11 +652,10 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
        */
     case OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS:
       /* Update rho when the appropriate number of iterations have passed */
-      if(iter % settings->adaptive_rho_interval) {
-        // Negative logic used! Modulo returns non-zero when we aren't at the right iteration
-        can_adapt_rho = 0;
-      } else {
+      if(settings->adaptive_rho_interval && (iter % settings->adaptive_rho_interval == 0)) {
         can_adapt_rho = 1;
+      } else {
+        can_adapt_rho = 0;
       }
       break;
     }
