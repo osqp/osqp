@@ -31,7 +31,9 @@ jobs:
             - os: ubuntu-latest
               cmake_generator: "Unix Makefiles"
               test_target: "test"
-              use_asan: "ON"
+              # Disabled because it doesn't work with the valgrind check
+              # Should try LSAN instead of valgrind
+              use_asan: "OFF"
             - os: macos-latest
               cmake_generator: "Unix Makefiles"
               test_target: "test"
