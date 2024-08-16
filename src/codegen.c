@@ -236,6 +236,7 @@ static OSQPInt write_info(FILE*           f,
   fprintf(f, "  (OSQPFloat)0.0,\n"); // polish_time
   fprintf(f, "  (OSQPFloat)0.0,\n"); // run_time
   fprintf(f, "  (OSQPFloat)0.0,\n"); // primdual_int
+  fprintf(f, "  (OSQPFloat)0.0,\n"); // rel_kkt_error
   fprintf(f, "};\n\n");
 
   return OSQP_NO_ERROR;
@@ -601,6 +602,10 @@ static OSQPInt write_workspace(FILE*             f,
   fprintf(f, "  (OSQPFloat)0.0,\n"); // scaled_prim_res
   fprintf(f, "  (OSQPFloat)0.0,\n"); // scaled_dual_res
   fprintf(f, "  (OSQPFloat)%.20f,\n", work->rho_inv);
+
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", work->rho_updated);
+  fprintf(f, "  (OSQPFloat)%.20f,\n", work->last_rel_kkt);
+
   fprintf(f, "};\n\n");
 
   return exitflag;
