@@ -604,7 +604,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
       // Time-based adaptive rho updates rho at an interval based on a fraction of the setup time.
       // This is done by estimating how many iterations are done in that timeframe, then building a
       // fixed iteration interval for all future updates.
-      if(!work->adaptive_rho_interval_computed) {
+      if(settings->adaptive_rho_interval == 0) {
         // Check time
         if(osqp_toc(work->timer) >
             settings->adaptive_rho_fraction * solver->info->setup_time)
@@ -631,7 +631,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
                                                            settings->check_termination));
 
           work->adaptive_rho_interval_computed = 1;
-          }
+        }
         else
         {
           /* Break out of the switch statement because we don't have an iteration value yet */
