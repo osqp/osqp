@@ -627,8 +627,8 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
           }
 
           // Make sure the interval is not 0 and at least check_termination times
-          settings->adaptive_rho_interval = c_max(settings->adaptive_rho_interval,
-                                                  settings->check_termination);
+          settings->adaptive_rho_interval = c_min(1, c_max(settings->adaptive_rho_interval,
+                                                           settings->check_termination));
 
           work->adaptive_rho_interval_computed = 1;
           }
