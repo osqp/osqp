@@ -682,6 +682,23 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
       }
     }
 
+    // Store the relative KKT error for the first iteration after a restart happened
+    if(work->restarted) {
+      work->last_rel_kkt = solver->info->rel_kkt_error;
+    }
+    work->restarted = 0;
+
+    // Check the restarting criteria
+    if(settings->restart_enable) {
+      if((solver->info->rel_kkt_error <= ( settings->restart_sufficient * work->last_rel_kkt)) //
+         || ((solver->info->rel_kkt_error <= (settings->restart_necessary * work->last_rel_kkt))
+             && (solver->info->rel_kkt_error < work->prev_rel_kkt))
+         || work->inner_iter_cnt > (settings->restart_artifical * solver->info->iter))
+      {
+        restart(solver);
+      }
+    }
+
     work->rho_updated = 0;
 #if OSQP_EMBEDDED_MODE != 1
     // Further processing to determine if the KKT error has decresed

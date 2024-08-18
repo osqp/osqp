@@ -115,6 +115,46 @@ typedef struct {
   // polishing parameters
   OSQPFloat delta;                  ///< regularization parameter for polishing
   OSQPInt   polish_refine_iter;     ///< number of iterative refinement steps in polishing
+
+  // Restarting parameters
+
+  /**
+   * Enable restarting of the algorithm
+   */
+  OSQPInt   restart_enable;
+
+  /**
+   * Fraction of relative KKT at last restart to restart again.
+   *
+   * This represents a sufficient decrease in the relative KKT
+   * (e.g. good progress was made).
+   *
+   * relKKT(x_(n,t), y_(n,t)) <= restart_sufficient * relKKT(x_(n,0), y(n,_0))
+   */
+  OSQPFloat restart_sufficient;
+
+  /**
+   * Fraction of relative KKT at last restart after which any increase
+   * in the relative KKT at an iteration leads to a restart.
+   *
+   * This represents the decrease in the relative KKT error required
+   * before a restart due to poor progress is done.
+   *
+   * relKKT(x_(n,t), y_(n,t)) <= restart_necessary * relKKT(x_(n,0), y(n,_0))
+   * and
+   * relKKT(x_(n,t), y_(n,t)) > relKKT(x_(n,t-1), y_(n,t-1))
+   */
+  OSQPFloat restart_necessary;
+
+  /**
+   * Fraction of the total iterations (outer+inner) to restart after.
+   *
+   * This represents the inner loop taking too many iterations and not making
+   * progress.
+   *
+   * n >= restart_artifical * k
+   */
+  OSQPFloat restart_artifical;
 } OSQPSettings;
 
 
@@ -136,6 +176,7 @@ typedef struct {
 
   // algorithm information
   OSQPInt   iter;         ///< Number of iterations taken
+  OSQPInt   restarts;     ///< Number of restarts
   OSQPInt   rho_updates;  ///< Number of rho updates performned
   OSQPFloat rho_estimate; ///< Best rho estimate so far from residuals
 

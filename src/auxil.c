@@ -123,6 +123,28 @@ OSQPInt update_rho_vec(OSQPSolver* solver) {
 
 #endif // OSQP_EMBEDDED_MODE != 1
 
+void update_restart_vectors(OSQPSolver* solver) {
+  OSQPWorkspace* work = solver->work;
+
+  // Just do a simple average of the iterate with the current possible restart
+  OSQPVectorf_add_scaled(work->restart_x, 0.5, work->restart_x, 0.5, work->x);
+  OSQPVectorf_add_scaled(work->restart_y, 0.5, work->restart_y, 0.5, work->y);
+}
+
+void restart(OSQPSolver* solver) {
+  OSQPWorkspace* work = solver->work;
+
+  // Overwrite the existing iterates
+  OSQPVectorf_copy(work->x, work->restart_x);
+  OSQPVectorf_copy(work->y, work->restart_y);
+
+  // Compute the new z value using the restarted x value
+  OSQPMatrix_Axpy(work->data->A, work->x, work->z, 1.0, 0.0);
+
+  work->restarted = 1;
+  work->inner_iter_cnt = 0;
+  solver->info->restarts++;
+}
 
 void swap_vectors(OSQPVectorf** a,
                   OSQPVectorf** b) {

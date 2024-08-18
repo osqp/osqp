@@ -223,11 +223,24 @@ struct OSQPWorkspace_ {
   OSQPDerivativeData *derivative_data;
 # endif // ifdef OSQP_ENABLE_DERIVATIVES
 
+  /// Relative KKT of last rho update/restart
+  OSQPFloat last_rel_kkt;
+
+  /// Relative KKT error of last iteration
+  OSQPFloat prev_rel_kkt;
+
   /// Flag indicating rho was updated during the solve
   OSQPInt rho_updated;
 
-  /// Relative KKT of last update
-  OSQPFloat last_rel_kkt;
+  /// Flat indicating there was a restart in the last iteration
+  OSQPInt restarted;
+
+  /// Number of iterations since the last restart
+  OSQPInt inner_iter_cnt;
+
+  /// Vectors holding the restart iterate
+  OSQPVectorf* restart_x;
+  OSQPVectorf* restart_y;
 };
 
 // NB: "typedef struct OSQPWorkspace_ OSQPWorkspace" is declared already

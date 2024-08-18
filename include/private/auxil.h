@@ -46,6 +46,16 @@ OSQPInt update_rho_vec(OSQPSolver *solver);
 # endif // OSQP_EMBEDDED_MODE
 
 /**
+ * Update restart vectors with current iterate.
+ */
+void update_restart_vectors(OSQPSolver* solver);
+
+/**
+ * Restart the solver.
+ */
+void restart(OSQPSolver* solver);
+
+/**
  * Swap OSQPFloat vector pointers
  * @param a first vector
  * @param b second vector
