@@ -39,11 +39,12 @@ struct OSQPProfilerEvent_ {
 
 struct OSQPProfilerEvent_ osqp_profiler_event_impl[] = {
     /* Level 1 detail (coarse) */
-    {OSQP_PROFILER_EVENT_RHO_UPDATE,     0}
+    {OSQP_PROFILER_EVENT_RHO_UPDATE,     0},
+    {OSQP_PROFILER_EVENT_RESTART,        0}
 };
 
 void _osqp_profiler_init(int level) {
-    
+
     for(OSQPInt i=0; i < OSQP_PROFILER_SEC_ARRAY_LAST; i++) {
         osqp_profiler_sec_impl[i].enabled = (osqp_profiler_sections[i].level <= level);
     }
@@ -68,7 +69,7 @@ void _osqp_profiler_sec_push(OSQPProfilerSection section) {
     // Don't push a section that isn't enabled
     if(osqp_profiler_sec_impl[section].enabled == 0)
         return;
-    
+
     omnitrace_user_push_region(osqp_profiler_sections[section].desc);
 }
 

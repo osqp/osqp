@@ -153,6 +153,15 @@ extern const char * OSQP_ERROR_MESSAGE[];
  */
 # define OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION (4)
 
+
+/*
+ * Restarting parameters
+ */
+#define OSQP_RESTART_ENABLED    (1)     ///< Default value for if restarts are enabled
+#define OSQP_RESTART_SUFFICIENT (0.2)   ///< Default value for the sufficient restart condition
+#define OSQP_RESTART_NECESSARY  (0.8)   ///< Default value for the necessary restart condition
+#define OSQP_RESTART_ARTIFICAL  (0.36)  ///< Default value for the artifical restart condition
+
 /**
  * Number of iterations after which we update rho if using interval-based rho adaptation
  * and adaptive_rho_interval == 0 and termination_check is disabled.

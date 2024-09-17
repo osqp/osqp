@@ -158,6 +158,8 @@ int main(int argc, char *argv[]) {
 
   settings->scaled_termination = 0;
 
+  settings->restart_enable = 1;
+
   OSQPInt cap = osqp_capabilities();
 
   printf("This OSQP library supports:\n");

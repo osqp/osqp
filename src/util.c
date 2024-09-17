@@ -40,9 +40,9 @@ static void print_line(void) {
 void print_header(void) {
   // Different indentation required for windows
 #if defined(IS_WINDOWS) && !defined(PYTHON)
-  c_print("iter  ");
-#else
   c_print("iter   ");
+#else
+  c_print("iter    ");
 #endif
 
   // Main information
@@ -140,6 +140,16 @@ void print_setup_header(const OSQPSolver* solver) {
   }
 
   c_print(",\n          ");
+
+  if( settings->restart_enable) {
+    c_print("restart: on (sufficient: %.2f, necessary: %.2f, artificial: %.2f)",
+            settings->restart_sufficient, settings->restart_necessary, settings->restart_artifical);
+  } else {
+    c_print("restart: off");
+  }
+
+
+  c_print(",\n          ");
   c_print("sigma = %.2e, alpha = %.2f, ",
           settings->sigma, settings->alpha);
   c_print("max_iter = %i\n", (int)settings->max_iter);
@@ -195,7 +205,12 @@ void print_summary(OSQPSolver* solver) {
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
 
-  c_print("%4i",     (int)info->iter);
+  if(work->restarted) {
+    c_print("%4i*",     (int)info->iter);
+  }
+  else {
+    c_print("%4i ",     (int)info->iter);
+  }
   c_print(" %12.4e", info->obj_val);
   c_print("  %9.2e", info->prim_res);
   c_print("  %9.2e", info->dual_res);
@@ -230,7 +245,7 @@ void print_polish(OSQPSolver* solver) {
   OSQPInfo*      info = solver->info;
   OSQPWorkspace* work = solver->work;
 
-  c_print("%4s",     "plsh");
+  c_print("%4s",     "plsh ");
   c_print(" %12.4e", info->obj_val);
   c_print("  %9.2e", info->prim_res);
   c_print("  %9.2e", info->dual_res);
@@ -344,6 +359,11 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
 
   new->delta              = settings->delta;
   new->polish_refine_iter = settings->polish_refine_iter;
+
+  new->restart_enable     = settings->restart_enable;
+  new->restart_sufficient = settings->restart_sufficient;
+  new->restart_necessary  = settings->restart_necessary;
+  new->restart_artifical  = settings->restart_artifical;
 
   return new;
 }

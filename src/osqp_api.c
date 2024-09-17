@@ -142,6 +142,11 @@ void osqp_set_default_settings(OSQPSettings* settings) {
 
   settings->delta              = OSQP_DELTA;                    /* regularization parameter for polishing */
   settings->polish_refine_iter = OSQP_POLISH_REFINE_ITER;       /* iterative refinement steps in polish */
+
+  settings->restart_enable     = OSQP_RESTART_ENABLED;                  /* if restarting is enabled */
+  settings->restart_sufficient = (OSQPFloat)OSQP_RESTART_SUFFICIENT;    /* tolernace for sufficient restart condition */
+  settings->restart_necessary  = (OSQPFloat)OSQP_RESTART_NECESSARY;     /* tolerabce for necessary restart conditon */
+  settings->restart_artifical  = (OSQPFloat)OSQP_RESTART_ARTIFICAL;     /* tolerance for artifical restart condition */
 }
 
 #ifndef OSQP_EMBEDDED_MODE
@@ -423,6 +428,12 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
     break;
   }
 
+  /* Allocate the restart vectors if it's enabled */
+  if(solver->settings->restart_enable) {
+    work->restart_x = OSQPVectorf_malloc(n);
+    work->restart_y = OSQPVectorf_malloc(m);
+  }
+
 # ifdef OSQP_ENABLE_DERIVATIVES
   work->derivative_data = c_calloc(1, sizeof(OSQPDerivativeData));
   if (!(work->derivative_data)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
@@ -686,47 +697,62 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     if(work->restarted) {
       work->last_rel_kkt = solver->info->rel_kkt_error;
     }
+
     work->restarted = 0;
-
-    // Check the restarting criteria
-    if(settings->restart_enable) {
-      if((solver->info->rel_kkt_error <= ( settings->restart_sufficient * work->last_rel_kkt)) //
-         || ((solver->info->rel_kkt_error <= (settings->restart_necessary * work->last_rel_kkt))
-             && (solver->info->rel_kkt_error < work->prev_rel_kkt))
-         || work->inner_iter_cnt > (settings->restart_artifical * solver->info->iter))
-      {
-        restart(solver);
-      }
-    }
-
     work->rho_updated = 0;
+
+    if(settings->restart_enable) {
+      /* Update the restart vector */
+      update_restart_vectors(solver);
+
+      /* Check the restarting criteria */
+      if( (solver->info->iter > 1)   // Don't restart on the first iteration, no matter the error
+           && ( (solver->info->rel_kkt_error <= ( settings->restart_sufficient * work->last_rel_kkt)) //
+               || ( (solver->info->rel_kkt_error <= (settings->restart_necessary * work->last_rel_kkt))
+                    && (solver->info->rel_kkt_error < work->prev_rel_kkt))
+               || work->inner_iter_cnt > (settings->restart_artifical * solver->info->iter)))
+      {
+        osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RESTART);
+        restart(solver);
+
+        osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
+
+        if (adapt_rho(solver)) {
+          c_eprint("Failed rho update after restart");
+          exitflag = 1;
+          goto exit;
+        }
+      }
+    }
+    else {
+      // If restart isn't enabled, fall-back to the existing rho update logic
 #if OSQP_EMBEDDED_MODE != 1
-    // Further processing to determine if the KKT error has decresed
-    // This requires values computed in update_info, so must be done here.
-    if(can_adapt_rho && (settings->adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR)) {
-      if(solver->info->rel_kkt_error <= ( settings->adaptive_rho_fraction * work->last_rel_kkt) ) {
-        can_adapt_rho = 1;
+      // Further processing to determine if the KKT error has decresed
+      // This requires values computed in update_info, so must be done here.
+      if(can_adapt_rho && (settings->adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR)) {
+        if(solver->info->rel_kkt_error <= ( settings->adaptive_rho_fraction * work->last_rel_kkt) ) {
+          can_adapt_rho = 1;
+        }
+        else {
+          can_adapt_rho = 0;
+        }
       }
-      else {
-        can_adapt_rho = 0;
-      }
-    }
 
-    // Actually update rho if requested
-    if(can_adapt_rho) {
-      osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
+      // Update rho if requested or if the solver restarted
+      if(work->restarted || can_adapt_rho) {
+        osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
 
-      if (adapt_rho(solver)) {
-        c_eprint("Failed rho update");
-        exitflag = 1;
-        goto exit;
+        if (adapt_rho(solver)) {
+          c_eprint("Failed rho update");
+          exitflag = 1;
+          goto exit;
+        }
       }
-    }
+
+      if(work->rho_updated) {
+        work->last_rel_kkt = solver->info->rel_kkt_error;
+      }
 #endif // OSQP_EMBEDDED_MODE != 1
-
-    // Store the relative KKT error for the last update
-    if(work->rho_updated) {
-      work->last_rel_kkt = solver->info->rel_kkt_error;
     }
 
 #ifdef OSQP_ENABLE_PRINTING
@@ -966,6 +992,9 @@ OSQPInt osqp_cleanup(OSQPSolver* solver) {
     OSQPVectorf_free(work->delta_x);
     OSQPVectorf_free(work->Pdelta_x);
     OSQPVectorf_free(work->Adelta_x);
+
+    OSQPVectorf_free(work->restart_x);
+    OSQPVectorf_free(work->restart_y);
 
     // Free Settings
     if (solver->settings) c_free(solver->settings);
@@ -1347,6 +1376,11 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
 
   settings->delta              = new_settings->delta;
   settings->polish_refine_iter = new_settings->polish_refine_iter;
+
+  // restart_enable ignored
+  settings->restart_sufficient = new_settings->restart_sufficient;
+  settings->restart_necessary  = new_settings->restart_necessary;
+  settings->restart_artifical  = new_settings->restart_artifical;
 
   /* Update settings in the linear system solver */
   solver->work->linsys_solver->update_settings(solver->work->linsys_solver, settings);

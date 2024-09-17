@@ -40,7 +40,8 @@ struct OSQPProfilerEvent_ {
 
 struct OSQPProfilerEvent_ osqp_profiler_event_impl[] = {
     /* Level 1 detail (coarse) */
-    {OSQP_PROFILER_EVENT_RHO_UPDATE,     0, 0}
+    {OSQP_PROFILER_EVENT_RHO_UPDATE,     0, 0},
+    {OSQP_PROFILER_EVENT_RESTART,        0, 0}
 };
 
 /* Global domain to namespace the OSQP profiling from other markers */
@@ -80,7 +81,7 @@ void _osqp_profiler_sec_push(OSQPProfilerSection section) {
     // Don't push a section that isn't enabled
     if(osqp_profiler_sec_impl[section].enabled == 0)
         return;
-    
+
     __itt_task_begin(s_osqp_itt_domain, __itt_null, __itt_null, osqp_profiler_sec_impl[section].taskHandle);
 }
 

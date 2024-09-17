@@ -40,7 +40,8 @@ typedef enum {
 typedef enum {
     /* Level 1 details (coarse) */
     OSQP_PROFILER_EVENT_RHO_UPDATE,             /* Rho value updated */
-    
+    OSQP_PROFILER_EVENT_RESTART,                /* Restart has occurred */
+
     /* Sentinel element */
     OSQP_PROFILER_EVENT_ARRAY_LAST
 } OSQPProfilerEvent;

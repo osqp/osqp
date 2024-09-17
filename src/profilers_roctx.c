@@ -37,7 +37,8 @@ struct OSQPProfilerEvent_ {
 
 struct OSQPProfilerEvent_ osqp_profiler_event_impl[] = {
     /* Level 1 detail (coarse) */
-    {OSQP_PROFILER_EVENT_RHO_UPDATE,     0}
+    {OSQP_PROFILER_EVENT_RHO_UPDATE,     0},
+    {OSQP_PROFILER_EVENT_RESTART,        0}
 };
 
 
@@ -66,7 +67,7 @@ void _osqp_profiler_sec_push(OSQPProfilerSection section) {
     // Don't push a section that isn't enabled
     if(osqp_profiler_sec_impl[section].enabled == 0)
         return;
-    
+
     roctxRangePush(osqp_profiler_sections[section].desc);
 }
 

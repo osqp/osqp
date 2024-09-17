@@ -958,6 +958,7 @@ TEST_CASE_METHOD(basic_qp_test_fixture, "Basic QP: Warm start", "[solve][qp][war
   // Setup problem-specific setting
   settings->check_termination = 1;
   settings->adaptive_rho = OSQP_ADAPTIVE_RHO_UPDATE_DISABLED;
+  settings->restart_enable = 0;
 
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,
