@@ -79,7 +79,7 @@ The following people have been involved in the development of OSQP:
 * `Vineet Bansal <https://csml.princeton.edu/people/vineet-bansal>`_ (CSML, Princeton University): software engineering
 * `Michel Schubiger <mailto:michel.schubiger@bluewin.ch>`_ (Schindler R&D): GPU implementation
 * `John Lygeros <https://control.ee.ethz.ch/people/profile.john-lygeros.html>`_ (ETH Zurich): methods and maths
-* `Amit Solomon <mailto:as3993@princeton.edu>`_ (Princeton University): Research Computing
+* `Amit Solomon <mailto:as3993@princeton.edu>`_ (Princeton University): software engineering
 
 Interfaces development
 
