@@ -67,14 +67,7 @@ OSQP is distributed under the `Apache 2.0 License <https://www.apache.org/licens
 
 .. rubric:: Credits
 
-The following people have been involved in the development of OSQP:
-
-* `Bartolomeo Stellato <https://stellato.io/>`_ (MIT): main development
-* `Goran Banjac <http://people.ee.ethz.ch/~gbanjac/>`_ (ETH Zürich): main development
-* `Nicholas Moehle <http://web.stanford.edu/~moehle/>`_ (Stanford University): methods, maths, and code generation
-* `Paul Goulart <http://users.ox.ac.uk/~engs1373/>`_ (University of Oxford): methods, maths, and Matlab interface
-* `Alberto Bemporad <http://cse.lab.imtlucca.it/~bemporad/>`_ (IMT Lucca): methods and maths
-* `Stephen Boyd <http://web.stanford.edu/~boyd/>`_ (Stanford University): methods and maths
+Please credit the OSQP Developer Team when citing OSQP.
 
 Interfaces development
 
