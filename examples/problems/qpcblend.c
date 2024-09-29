@@ -36,10 +36,6 @@ OSQPSettings qpcblend_settings = {
   (OSQPFloat)0.00000000000000100000,
   1,
   25,
-  1,
-  (OSQPFloat)1000.00000000000000000000,
-  (OSQPFloat)0.00000100000000000000,
-  3,
 };
 
 OSQPInt qpcblend_data_n = 83;
