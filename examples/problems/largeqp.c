@@ -38,6 +38,12 @@ OSQPSettings largeqp_settings = {
   (OSQPFloat)1000.00000000000000000000,
   (OSQPFloat)0.00000100000000000000,
   3,
+
+  // Restart settings
+  1,                    // restart_enable
+  (OSQPFloat)0.2,       // restart_sufficient
+  (OSQPFloat)0.8,       // restart_necessary
+  (OSQPFloat)0.36       // restart_artificial
 };
 
 /* Define the data structure */

@@ -5,10 +5,26 @@
 
 /* Sample problems */
 #include "problems/cvxqp2_s.h"
+#include "problems/hs21.h"
+#include "problems/hs35.h"
 #include "problems/qpcblend.h"
+#include "problems/qptest.h"
 #include "problems/largeqp.h"
 
 #define NAME_BUF_LENGTH 20
+
+#define PREMADE_PROBLEM(name) printf("Using problem data: " #name "\n"); \
+                              qp_n = name ## _data_n;                    \
+                              qp_m = name ## _data_m;                    \
+                              qp_P = & name ## _data_P_csc;              \
+                              qp_q = name ## _data_q_val;                \
+                              qp_A = & name ## _data_A_csc;              \
+                              qp_l = name ## _data_l_val;                \
+                              qp_u = name ## _data_u_val;                \
+                              dynamic_matrices = 0;                      \
+                              dynamic_settings = 0;                      \
+                              settings = & name ## _settings;            \
+                              settings->verbose = 1;
 
 int main(int argc, char *argv[]) {
 
@@ -55,69 +71,37 @@ int main(int argc, char *argv[]) {
     /*
      * CVXQP2_S problem from the Maros Mesaros problem set
      */
-    printf("Using problem data: cvxqp2_s\n");
-
-    // Problem dimensions
-    qp_n = cvxqp2_s_data_n;
-    qp_m = cvxqp2_s_data_m;
-
-    // Cost function
-    qp_P = &cvxqp2_s_data_P_csc;
-    qp_q = cvxqp2_s_data_q_val;
-
-    // Constraints
-    qp_A = &cvxqp2_s_data_A_csc;
-    qp_l = cvxqp2_s_data_l_val;
-    qp_u = cvxqp2_s_data_u_val;
-
-    dynamic_matrices = 0;
-    dynamic_settings = 0;
-
-    settings = &cvxqp2_s_settings;
-    settings->verbose = 1;
+    PREMADE_PROBLEM(cvxqp2_s);
   }
   else if( strcmp(problem_name, "qpcblend") == 0 ) {
     /*
      * QPCBLEND problem from the Maros Mesaros problem set
      */
-    printf("Using problem data: qpcblend\n");
-
-    // Problem dimensions
-    qp_n = qpcblend_data_n;
-    qp_m = qpcblend_data_m;
-
-    // Cost function
-    qp_P = &qpcblend_data_P_csc;
-    qp_q = qpcblend_data_q_val;
-
-    // Constraints
-    qp_A = &qpcblend_data_A_csc;
-    qp_l = qpcblend_data_l_val;
-    qp_u = qpcblend_data_u_val;
-
-    dynamic_matrices = 0;
-    dynamic_settings = 0;
-
-    settings = &qpcblend_settings;
-    settings->verbose = 1;
+    PREMADE_PROBLEM(qpcblend);
   }
   else if( strcmp(problem_name, "largeqp") == 0 ) {
-    printf("Using problem data: largeqp\n");
+    PREMADE_PROBLEM(largeqp);
 
-    // Problem dimensions
-    qp_n = largeqp_data_n;
-    qp_m = largeqp_data_m;
-
-    // Cost function
-    qp_P = &largeqp_data_P_csc;
-    qp_q = largeqp_data_q_val;
-
-    // Constraints
-    qp_A = &largeqp_data_A_csc;
-    qp_l = largeqp_data_l_val;
-    qp_u = largeqp_data_u_val;
-
-    dynamic_matrices = 0;
+    // This problem uses dynamic settings
+    dynamic_settings = 1;
+  }
+  else if( strcmp(problem_name, "qptest") == 0 ) {
+    /*
+     * QPTEST problem from the Maros Mesaros problem set
+     */
+    PREMADE_PROBLEM(qptest);
+  }
+  else if( strcmp(problem_name, "hs21") == 0 ) {
+    /*
+     * HS21 problem from the Maros Mesaros problem set
+     */
+    PREMADE_PROBLEM(hs21);
+  }
+  else if( strcmp(problem_name, "hs35") == 0 ) {
+    /*
+     * HS35 problem from the Maros Mesaros problem set
+     */
+    PREMADE_PROBLEM(hs35);
   }
   else {
     printf("Using problem data: default\n");
@@ -142,7 +126,7 @@ int main(int argc, char *argv[]) {
   }
 
   /* Set default settings */
-  if( !settings ) {
+  if( dynamic_settings || !settings ) {
     settings = (OSQPSettings *)malloc(sizeof(OSQPSettings));
     dynamic_settings = 1;
 

@@ -454,6 +454,9 @@ if(OSQP_BUILD_DEMO_EXE)
                  ${OSQP_EXAMPLES_DIR}/osqp_demo.c
                  ${OSQP_EXAMPLES_DIR}/problems/cvxqp2_s.c
                  ${OSQP_EXAMPLES_DIR}/problems/qpcblend.c
+                 ${OSQP_EXAMPLES_DIR}/problems/qptest.c
+                 ${OSQP_EXAMPLES_DIR}/problems/hs21.c
+                 ${OSQP_EXAMPLES_DIR}/problems/hs35.c
                  ${OSQP_EXAMPLES_DIR}/problems/largeqp.c )
   target_include_directories(osqp_demo PRIVATE
                               ${osqplib_includes}
