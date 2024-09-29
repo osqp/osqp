@@ -201,6 +201,11 @@ static OSQPInt write_settings(FILE*               f,
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->time_limit);
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->delta);
   fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->polish_refine_iter);
+
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->restart_enable);
+  fprintf(f, "  (OSQPFloat)%.20f,\n", settings->restart_sufficient);
+  fprintf(f, "  (OSQPFloat)%.20f,\n", settings->restart_necessary);
+  fprintf(f, "  (OSQPFloat)%.20f,\n", settings->restart_artifical);
   fprintf(f, "};\n\n");
 
   return OSQP_NO_ERROR;
@@ -228,6 +233,7 @@ static OSQPInt write_info(FILE*           f,
   fprintf(f, "  (OSQPFloat)%.20f,\n", OSQP_INFTY); // dual_res
   fprintf(f, "  (OSQPFloat)%.20f,\n", OSQP_INFTY); // duality_gap
   fprintf(f, "  0,\n"); // iter (iteration count)
+  fprintf(f, "  0,\n"); // restarts
   fprintf(f, "  0,\n"); // rho_updates
   fprintf(f, "  (OSQPFloat)%.20f,\n", info->rho_estimate);
   fprintf(f, "  (OSQPFloat)0.0,\n"); // setup_time
@@ -484,6 +490,14 @@ static OSQPInt write_workspace(FILE*             f,
   sprintf(name, "%swork_z", prefix);
   GENERATE_ERROR(write_OSQPVectorf(f, work->z, name))
 
+  /* Write out the restart vectors, only if enabled */
+  if (solver->settings->restart_enable) {
+    sprintf(name, "%swork_restart_x", prefix);
+    GENERATE_ERROR(write_OSQPVectorf(f, work->restart_x, name))
+    sprintf(name, "%swork_restart_y", prefix);
+    GENERATE_ERROR(write_OSQPVectorf(f, work->restart_y, name))
+  }
+
   fprintf(f, "OSQPFloat   %swork_xz_tilde_val[%" OSQP_INT_FMT "];\n", prefix, n+m);
   fprintf(f, "OSQPVectorf %swork_xz_tilde = {\n  %swork_xz_tilde_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, n+m);
   fprintf(f, "OSQPVectorf %swork_xtilde_view = {\n  %swork_xz_tilde_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, n);
@@ -603,8 +617,20 @@ static OSQPInt write_workspace(FILE*             f,
   fprintf(f, "  (OSQPFloat)0.0,\n"); // scaled_dual_res
   fprintf(f, "  (OSQPFloat)%.20f,\n", work->rho_inv);
 
-  fprintf(f, "  %" OSQP_INT_FMT ",\n", work->rho_updated);
   fprintf(f, "  (OSQPFloat)%.20f,\n", work->last_rel_kkt);
+  fprintf(f, "  (OSQPFloat)%.20f,\n", work->prev_rel_kkt);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", work->rho_updated);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", work->restarted);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", work->inner_iter_cnt);
+
+  if( solver->settings->restart_enable) {
+    fprintf(f, "  &%swork_restart_x,\n", prefix);
+    fprintf(f, "  &%swork_restart_y,\n", prefix);
+  } else {
+    fprintf(f, "  OSQP_NULL,\n");
+    fprintf(f, "  OSQP_NULL,\n");
+  }
+
 
   fprintf(f, "};\n\n");
 
