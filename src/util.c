@@ -46,7 +46,7 @@ void print_header(void) {
 #endif
 
   // Main information
-  c_print("objective    prim res   dual res   rho");
+  c_print("objective    prim res   dual res   gap        rho");
 # ifdef OSQP_ENABLE_PROFILING
   c_print("        time");
 # endif /* ifdef OSQP_ENABLE_PROFILING */
@@ -129,12 +129,18 @@ void print_setup_header(const OSQPSolver* solver) {
   c_print("max_iter = %i\n", (int)settings->max_iter);
 
   if (settings->check_termination) {
-    c_print("          check_termination: on (interval %i),\n",
-      (int)settings->check_termination);
+    if(settings->check_dualgap) {
+      c_print("          check_termination: on (interval %i, duality gap: on),\n",
+        (int)settings->check_termination);
+    }
+    else {
+      c_print("          check_termination: on (interval %i, duality gap: off),\n",
+        (int)settings->check_termination);
+    }
   }
   else
     c_print("          check_termination: off,\n");
-  
+
 # ifdef OSQP_ENABLE_PROFILING
   if (settings->time_limit)
     c_print("          time_limit: %.2e sec,\n", settings->time_limit);
@@ -177,6 +183,7 @@ void print_summary(OSQPSolver* solver) {
   c_print(" %12.4e", info->obj_val);
   c_print("  %9.2e", info->prim_res);
   c_print("  %9.2e", info->dual_res);
+  c_print("  %9.2e", info->duality_gap);
   c_print("  %9.2e", settings->rho);
 
 # ifdef OSQP_ENABLE_PROFILING
@@ -203,6 +210,7 @@ void print_polish(OSQPSolver* solver) {
   c_print(" %12.4e", info->obj_val);
   c_print("  %9.2e", info->prim_res);
   c_print("  %9.2e", info->dual_res);
+  c_print("  %9.2e", info->duality_gap);
 
   // Different characters for windows/unix
 #if defined(IS_WINDOWS) && !defined(PYTHON)
@@ -246,6 +254,9 @@ void print_footer(OSQPInfo* info,
   if ((info->status_val == OSQP_SOLVED) ||
       (info->status_val == OSQP_SOLVED_INACCURATE)) {
     c_print("optimal objective:    %.4f\n", info->obj_val);
+    c_print("dual objective:       %.4f\n", info->dual_obj_val);
+    c_print("duality gap:          %.4e\n", info->duality_gap);
+    c_print("primal-dual integral: %.4e\n", info->primdual_int);
   }
 
 # ifdef OSQP_ENABLE_PROFILING
@@ -304,6 +315,7 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->eps_dual_inf       = settings->eps_dual_inf;
   new->scaled_termination = settings->scaled_termination;
   new->check_termination  = settings->check_termination;
+  new->check_dualgap      = settings->check_dualgap;
   new->time_limit         = settings->time_limit;
 
   new->delta              = settings->delta;

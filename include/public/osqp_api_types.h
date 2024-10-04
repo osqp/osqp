@@ -83,6 +83,7 @@ typedef struct {
   OSQPFloat eps_dual_inf;           ///< dual infeasibility tolerance
   OSQPInt   scaled_termination;     ///< boolean; use scaled termination criteria
   OSQPInt   check_termination;      ///< integer, check termination interval; if 0, checking is disabled
+  OSQPInt   check_dualgap;          ///< Boolean; use duality gap termination criteria
   OSQPFloat time_limit;             ///< maximum time to solve the problem (seconds)
 
   // polishing parameters
@@ -102,8 +103,10 @@ typedef struct {
 
   // solution quality
   OSQPFloat obj_val;      ///< Primal objective value
+  OSQPFloat dual_obj_val; ///< Dual objective value
   OSQPFloat prim_res;     ///< Norm of primal residual
   OSQPFloat dual_res;     ///< Norm of dual residual
+  OSQPFloat duality_gap;  ///< Duality gap (Primal obj - Dual obj)
 
   // algorithm information
   OSQPInt   iter;         ///< Number of iterations taken
@@ -116,6 +119,9 @@ typedef struct {
   OSQPFloat update_time; ///< Update phase time (seconds)
   OSQPFloat polish_time; ///< Polish phase time (seconds)
   OSQPFloat run_time;    ///< Total solve time (seconds)
+
+  // Convergence information
+  OSQPFloat primdual_int; ///< Integral of duality gap over time (Primal-dual integral), requires profiling
 } OSQPInfo;
 
 
