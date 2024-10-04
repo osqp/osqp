@@ -63,6 +63,20 @@
       }
     },
     {
+      "name": "builtin-double-packed",
+      "displayName": "Builtin double linear algebra (Debug + ASAN + Packed)",
+      "description": "Builtin double linear algebra backend",
+      "binaryDir": "${sourceDir}/build.builtin-double.packed",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "OSQP_ALGEBRA_BACKEND": "builtin",
+        "OSQP_USE_FLOAT": "OFF",
+        "OSQP_BUILD_UNITTESTS": "ON",
+        "OSQP_PACK_SETTINGS": "ON",
+        "OSQP_ASAN": "ON"
+      }
+    },
+    {
       "name": "builtin-float-debug",
       "displayName": "Builtin float linear algebra (Debug + ASAN)",
       "description": "Builtin float linear algebra backend",

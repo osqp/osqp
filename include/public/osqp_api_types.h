@@ -22,6 +22,12 @@ typedef double OSQPFloat; /* for numerical values  */
 typedef float OSQPFloat;  /* for numerical values  */
 # endif /* ifndef OSQP_USE_FLOAT */
 
+#ifdef OSQP_PACK_SETTINGS
+#define OSQP_ATTR_PACK __attribute__((packed))
+#else
+/* Don't put an attribute on when packing is disabled */
+#define OSQP_ATTR_PACK
+#endif
 
 /**
  *  Matrix in compressed-column form.
@@ -41,7 +47,7 @@ typedef struct {
 /**
  * User settings
  */
-typedef struct {
+typedef OSQP_ATTR_PACK struct {
   /* Note: If this struct is updated, ensure update_settings and validate_settings are also updated */
   // Linear algebra settings
   OSQPInt device;                             ///< device identifier; currently used for CUDA devices
