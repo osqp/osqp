@@ -47,7 +47,7 @@ typedef struct {
 /**
  * User settings
  */
-typedef OSQP_ATTR_PACK struct {
+typedef struct OSQP_ATTR_PACK {
   /* Note: If this struct is updated, ensure update_settings and validate_settings are also updated */
   // Linear algebra settings
   OSQPInt device;                             ///< device identifier; currently used for CUDA devices
