@@ -674,7 +674,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     can_adapt_rho = 0;
 #endif /* OSQP_EMBEDDED_MODE != 1 */
 
-    if(can_check_termination || can_print || can_adapt_rho || iter == 1) {
+    if(can_check_termination || can_print || can_adapt_rho || iter == 1 || settings->restart_enable) {
       // We must update the info in these cases:
       // * We will be checking termination
       // * We will be printing status
@@ -682,6 +682,8 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
       // * It is the first iteration
       //   (We always update info in the first iteration because indirect solvers
       //    use residual values to compute required accuracy of their solution.)
+      // * Restarting is enabled
+      //   (conditions require the updated info)
       update_info(solver, iter, 0);
     }
 
@@ -706,54 +708,67 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
       update_restart_vectors(solver);
 
       /* Check the restarting criteria */
-      if( (solver->info->iter > 1)   // Don't restart on the first iteration, no matter the error
-           && ( (solver->info->rel_kkt_error <= ( settings->restart_sufficient * work->last_rel_kkt)) //
-               || ( (solver->info->rel_kkt_error <= (settings->restart_necessary * work->last_rel_kkt))
-                    && (solver->info->rel_kkt_error < work->prev_rel_kkt))
-               || work->inner_iter_cnt > (settings->restart_artifical * solver->info->iter)))
+      if( solver->info->iter > 1)   // Don't restart on the first iteration, no matter the error
       {
-        osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RESTART);
-        restart(solver);
+        // There has been a sufficient decrease in the KKT error, restart
+        if( (solver->info->rel_kkt_error <= ( settings->restart_sufficient * work->last_rel_kkt)) )
+        {
+          osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RESTART_SUFFICIENT);
+          restart(solver);
 
-        osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
-
-        if (adapt_rho(solver)) {
-          c_eprint("Failed rho update after restart");
-          exitflag = 1;
-          goto exit;
-        }
-      }
-    }
-    else {
-      // If restart isn't enabled, fall-back to the existing rho update logic
-#if OSQP_EMBEDDED_MODE != 1
-      // Further processing to determine if the KKT error has decresed
-      // This requires values computed in update_info, so must be done here.
-      if(can_adapt_rho && (settings->adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR)) {
-        if(solver->info->rel_kkt_error <= ( settings->adaptive_rho_fraction * work->last_rel_kkt) ) {
+          // Adapt rho after restarting
           can_adapt_rho = 1;
         }
-        else {
-          can_adapt_rho = 0;
+        //
+        else if( ( (solver->info->rel_kkt_error <= (settings->restart_necessary * work->last_rel_kkt))
+                    && (solver->info->rel_kkt_error < work->prev_rel_kkt)) )
+        {
+          osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RESTART_NECESSARY);
+          restart(solver);
+
+          // Adapt rho after restarting
+          can_adapt_rho = 1;
+        }
+        // Too many iterations have passed, restart
+        else if( work->inner_iter_cnt > (settings->restart_artifical * solver->info->iter) )
+        {
+          osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RESTART_ARTIFICIAL);
+          restart(solver);
+
+          // Adapt rho after restarting
+          can_adapt_rho = 1;
         }
       }
-
-      // Update rho if requested or if the solver restarted
-      if(work->restarted || can_adapt_rho) {
-        osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
-
-        if (adapt_rho(solver)) {
-          c_eprint("Failed rho update");
-          exitflag = 1;
-          goto exit;
-        }
-      }
-
-      if(work->rho_updated) {
-        work->last_rel_kkt = solver->info->rel_kkt_error;
-      }
-#endif // OSQP_EMBEDDED_MODE != 1
     }
+
+    /* Rho adaptation logic */
+#if OSQP_EMBEDDED_MODE != 1
+    // Further processing to determine if the KKT error has decresed
+    // This requires values computed in update_info, so must be done here.
+    if(can_adapt_rho && (settings->adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR)) {
+      if(solver->info->rel_kkt_error <= ( settings->adaptive_rho_fraction * work->last_rel_kkt) ) {
+        can_adapt_rho = 1;
+      }
+      else {
+        can_adapt_rho = 0;
+      }
+    }
+
+    // Update rho if requested or if the solver restarted
+    if(work->restarted || can_adapt_rho) {
+      osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
+
+      if (adapt_rho(solver)) {
+        c_eprint("Failed rho update");
+        exitflag = 1;
+        goto exit;
+      }
+    }
+
+    if(work->rho_updated) {
+      work->last_rel_kkt = solver->info->rel_kkt_error;
+    }
+#endif // OSQP_EMBEDDED_MODE != 1
 
 #ifdef OSQP_ENABLE_PRINTING
     // Print summary if requested or if rho was updated

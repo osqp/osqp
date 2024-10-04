@@ -37,8 +37,10 @@ struct OSQPProfilerEvent_ {
 
 struct OSQPProfilerEvent_ osqp_profiler_event_impl[] = {
     /* Level 1 detail (coarse) */
-    {OSQP_PROFILER_EVENT_RHO_UPDATE,     0},
-    {OSQP_PROFILER_EVENT_RESTART,        0}
+    {OSQP_PROFILER_EVENT_RHO_UPDATE,         0},
+    {OSQP_PROFILER_EVENT_RESTART_SUFFICIENT, 0},
+    {OSQP_PROFILER_EVENT_RESTART_NECESSARY,  0},
+    {OSQP_PROFILER_EVENT_RESTART_ARTIFICIAL, 0}
 };
 
 

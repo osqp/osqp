@@ -129,6 +129,9 @@ void update_restart_vectors(OSQPSolver* solver) {
   // Just do a simple average of the iterate with the current possible restart
   OSQPVectorf_add_scaled(work->restart_x, 0.5, work->restart_x, 0.5, work->x);
   OSQPVectorf_add_scaled(work->restart_y, 0.5, work->restart_y, 0.5, work->y);
+
+  // Increment the inner iteration count here
+  work->inner_iter_cnt = work->inner_iter_cnt + 1;
 }
 
 void restart(OSQPSolver* solver) {
