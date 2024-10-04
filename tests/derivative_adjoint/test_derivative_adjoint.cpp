@@ -68,8 +68,8 @@ TEST_CASE_METHOD(derivative_adjoint_test_fixture, "Adjoint derivative: basic tes
         std::unique_ptr<OSQPFloat[]> dAx(new OSQPFloat[data->A->nzmax]);
 
         // The matrices here share the same row/column pointers and just differ by the data
-        csc_set_data(dP.get(), data->n, data->n, data->P->nzmax, dPx.get(), data->P->i, data->P->p);
-        csc_set_data(dA.get(), data->m, data->n, data->A->nzmax, dAx.get(), data->A->i, data->A->p);
+        OSQPCscMatrix_set_data(dP.get(), data->n, data->n, data->P->nzmax, dPx.get(), data->P->i, data->P->p);
+        OSQPCscMatrix_set_data(dA.get(), data->m, data->n, data->A->nzmax, dAx.get(), data->A->i, data->A->p);
 
         retval = osqp_adjoint_derivative_get_mat(solver.get(), dP.get(), dA.get());
 
@@ -102,8 +102,8 @@ TEST_CASE_METHOD(derivative_adjoint_test_fixture, "Adjoint derivative: basic tes
         std::unique_ptr<OSQPFloat[]> dAx(new OSQPFloat[data->A->nzmax]);
 
         // The matrices here share the same row/column pointers and just differ by the data
-        csc_set_data(dP.get(), data->n, data->n, data->P->nzmax, dPx.get(), data->P->i, data->P->p);
-        csc_set_data(dA.get(), data->m, data->n, data->A->nzmax, dAx.get(), data->A->i, data->A->p);
+        OSQPCscMatrix_set_data(dP.get(), data->n, data->n, data->P->nzmax, dPx.get(), data->P->i, data->P->p);
+        OSQPCscMatrix_set_data(dA.get(), data->m, data->n, data->A->nzmax, dAx.get(), data->A->i, data->A->p);
 
         retval = osqp_adjoint_derivative_get_mat(solver.get(), dP.get(), dA.get());
 
@@ -136,8 +136,8 @@ TEST_CASE_METHOD(derivative_adjoint_test_fixture, "Adjoint derivative: basic tes
         std::unique_ptr<OSQPFloat[]> dAx(new OSQPFloat[data->A->nzmax]);
 
         // The matrices here share the same row/column pointers and just differ by the data
-        csc_set_data(dP.get(), data->n, data->n, data->P->nzmax, dPx.get(), data->P->i, data->P->p);
-        csc_set_data(dA.get(), data->m, data->n, data->A->nzmax, dAx.get(), data->A->i, data->A->p);
+        OSQPCscMatrix_set_data(dP.get(), data->n, data->n, data->P->nzmax, dPx.get(), data->P->i, data->P->p);
+        OSQPCscMatrix_set_data(dA.get(), data->m, data->n, data->A->nzmax, dAx.get(), data->A->i, data->A->p);
 
         retval = osqp_adjoint_derivative_get_mat(solver.get(), dP.get(), dA.get());
 
@@ -175,8 +175,8 @@ TEST_CASE_METHOD(derivative_adjoint_test_fixture, "Adjoint derivative: Not setup
     std::unique_ptr<OSQPFloat[]> dAx(new OSQPFloat[data->A->nzmax]);
 
     // The matrices here share the same row/column pointers and just differ by the data
-    csc_set_data(dP.get(), data->n, data->n, data->P->nzmax, dPx.get(), data->P->i, data->P->p);
-    csc_set_data(dA.get(), data->m, data->n, data->A->nzmax, dAx.get(), data->A->i, data->A->p);
+    OSQPCscMatrix_set_data(dP.get(), data->n, data->n, data->P->nzmax, dPx.get(), data->P->i, data->P->p);
+    OSQPCscMatrix_set_data(dA.get(), data->m, data->n, data->A->nzmax, dAx.get(), data->A->i, data->A->p);
 
     retval = osqp_adjoint_derivative_get_mat(solver.get(), dP.get(), dA.get());
 
