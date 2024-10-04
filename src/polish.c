@@ -456,7 +456,7 @@ OSQPInt polish(OSQPSolver* solver) {
   OSQPVectorf_minus(work->pol->y, work->pol->y, work->pol->z);
 
   // Compute primal and dual residuals at the polished solution
-  update_info(solver, 0, 1, 1);
+  update_info(solver, 0, 1);
 
   // Check if polish was successful
   polish_successful = (work->pol->prim_res < info->prim_res &&
@@ -477,6 +477,8 @@ OSQPInt polish(OSQPSolver* solver) {
   if (polish_successful) {
     // Update solver information
     info->obj_val       = work->pol->obj_val;
+    info->dual_obj_val  = work->pol->dual_obj_val;
+    info->duality_gap   = work->pol->duality_gap;
     info->prim_res      = work->pol->prim_res;
     info->dual_res      = work->pol->dual_res;
     info->status_polish = OSQP_POLISH_SUCCESS;

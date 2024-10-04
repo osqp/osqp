@@ -35,6 +35,19 @@ extern CUDA_Handle_t *CUDA_handle;
 /*******************************************************************************
  *                              GPU Kernels                                    *
  *******************************************************************************/
+ __global__ void vec_round_kernel(OSQPFloat* a,
+                                  OSQPFloat  tol,
+                                  OSQPInt    n) {
+
+  OSQPInt idx = threadIdx.x + blockDim.x * blockIdx.x;
+  OSQPInt grid_size = blockDim.x * gridDim.x;
+
+  for(OSQPInt i = idx; i < n; i += grid_size) {
+    if(c_absval(a[i]) < tol) {
+      a[i] = (OSQPFloat)0.0;
+    }
+  }
+}
 
  __global__ void vec_set_sc_kernel(OSQPFloat* a,
                                    OSQPFloat  sc,
@@ -416,8 +429,8 @@ __global__ void scatter_kernel(OSQPFloat*       out,
 }
 
 /*
- * This code complements the cublasITamax routine which only returns the 
- * one-based index to the maximum absolute value in d_x. 
+ * This code complements the cublasITamax routine which only returns the
+ * one-based index to the maximum absolute value in d_x.
 */
 __global__ void abs_kernel(const OSQPInt*   index_one_based,
                            const OSQPFloat* d_x,
@@ -457,7 +470,7 @@ void Segmented_reduce(const OSQPInt*       key_start,
                             void*          buffer,
                             OSQPFloat*     result,
                             BinaryFunction binary_op) {
- 
+
   OSQPInt num_nnz_rows;
 
  /*  Memory layout of buffer:
@@ -469,7 +482,7 @@ void Segmented_reduce(const OSQPInt*       key_start,
 
   thrust::pair<OSQPInt*,OSQPFloat*> new_end;
   thrust::equal_to<OSQPInt> binary_pred;
-  
+
   new_end = thrust::reduce_by_key(thrust::device,
                                   key_start,
                                   key_start + number_of_keys,
@@ -583,6 +596,14 @@ void cuda_vec_set_sc_cond(OSQPFloat*     d_a,
   OSQPInt number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
 
   vec_set_sc_cond_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_a, d_test, sc_if_neg, sc_if_zero, sc_if_pos, n);
+}
+
+void cuda_vec_round(OSQPFloat* d_a,
+                    OSQPFloat  tol,
+                    OSQPInt    n) {
+
+  OSQPInt number_of_blocks = (n / THREADS_PER_BLOCK) + 1;
+  vec_round_kernel<<<number_of_blocks, THREADS_PER_BLOCK>>>(d_a, tol, n);
 }
 
 void cuda_vec_mult_sc(OSQPFloat* d_a,
@@ -1034,7 +1055,7 @@ void cuda_mat_Axpy(const csr*                 A,
                          cusparseDnVecDescr_t vecy,
                          OSQPFloat            alpha,
                          OSQPFloat            beta) {
- 
+
   checkCudaErrors(cusparseSpMV(
     CUDA_handle->cusparseHandle, CUSPARSE_OPERATION_NON_TRANSPOSE,
     &alpha, A->SpMatDescr, vecx, &beta, vecy,
@@ -1053,7 +1074,7 @@ void cuda_mat_row_norm_inf(const csr*       S,
   void *d_buffer;
   cuda_malloc(&d_buffer, num_rows * (sizeof(OSQPFloat) + sizeof(OSQPInt)));
 
-  /* 
+  /*
   *  For rows with only one element, the element itself is returned.
   *  Therefore, we have to take the absolute value to get the inf-norm.
   */

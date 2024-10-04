@@ -32,7 +32,10 @@ struct OSQPProfilerItem_ osqp_profiler_sec_impl[] = {
 };
 
 struct OSQPProfilerItem_ osqp_profiler_event_impl[] = {
-    {OSQP_PROFILER_EVENT_RHO_UPDATE, 0, {0}}
+    {OSQP_PROFILER_EVENT_RHO_UPDATE,         0, {0}},
+    {OSQP_PROFILER_EVENT_RESTART_SUFFICIENT, 0, {0}},
+    {OSQP_PROFILER_EVENT_RESTART_NECESSARY,  0, {0}},
+    {OSQP_PROFILER_EVENT_RESTART_ARTIFICIAL, 0, {0}}
 };
 
 /* Global domain to namespace the OSQP profiling from other markers */
@@ -84,7 +87,7 @@ void _osqp_profiler_sec_push(OSQPProfilerSection section) {
     // Don't push a section that isn't enabled
     if(osqp_profiler_sec_impl[section].enabled == 0)
         return;
-    
+
     nvtxDomainRangePushEx(s_osqp_nvtx_domain, &(osqp_profiler_sec_impl[section].attr));
 }
 
@@ -102,6 +105,6 @@ void _osqp_profiler_event_mark(OSQPProfilerEvent event) {
     // Don't record an event that isn't enabled
     if(osqp_profiler_event_impl[event].enabled == 0)
         return;
-    
+
     nvtxDomainMarkEx(s_osqp_nvtx_domain, &(osqp_profiler_event_impl[event].attr));
 }
