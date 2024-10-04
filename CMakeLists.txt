@@ -195,6 +195,16 @@ endif()
 
 option(OSQP_ASAN "Enable ASAN" OFF)
 
+
+# This option is meant for either advanced users, or to run the unit tests to check that the
+# struct is being initialized fully
+option(OSQP_PACK_SETTINGS "Pack the settings struct by removing padding" OFF)
+mark_as_advanced(OSQP_PACK_SETTINGS)
+
+if(OSQP_PACK_SETTINGS)
+  message(STATUS "Packing settings struct")
+endif()
+
 cmake_dependent_option( OSQP_CODEGEN "Enable code generation"
                         ON
                         "OSQP_ALGEBRA_BUILTIN;NOT DEFINED OSQP_EMBEDDED_MODE" OFF )
