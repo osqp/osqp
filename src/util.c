@@ -98,6 +98,8 @@ void print_setup_header(const OSQPSolver* solver) {
   c_print("algebra = %s", namebuf);
   c_print(",\n          ");
 
+  c_print("OSQPInt = %i bytes, OSQPFloat = %i bytes,\n          ", sizeof(OSQPInt), sizeof(OSQPFloat));
+
 #ifndef OSQP_EMBEDDED_MODE
   osqp_algebra_device_name(devicebuf, DEVICEBUFLEN);
 
@@ -173,7 +175,7 @@ void print_setup_header(const OSQPSolver* solver) {
 # endif /* ifdef OSQP_ENABLE_PROFILING */
 
   if (settings->scaling) {
-    c_print("          scaling: on, ");
+    c_print("          scaling: on (%i iterations), ", (int)settings->scaling);
   } else {
     c_print("          scaling: off, ");
   }
