@@ -240,9 +240,9 @@ void print_polish(OSQPSolver* solver) {
 
   // Different characters for windows/unix
 #if defined(IS_WINDOWS) && !defined(PYTHON)
-  c_print("  ---------");
+  c_print("  --------- ");
 #else
-  c_print("   --------");
+  c_print("   -------- ");
 #endif
 
 # ifdef OSQP_ENABLE_PROFILING
