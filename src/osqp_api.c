@@ -273,6 +273,19 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   if (!(work->delta_x) || !(work->Pdelta_x) || !(work->Adelta_x))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
+  /* Allocate the restart vectors if it's enabled */
+  if(settings->restart_enable) {
+    work->restart_x = OSQPVectorf_calloc(n);
+    work->restart_y = OSQPVectorf_calloc(m);
+
+    if (!(work->restart_x) || !(work->restart_y))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  }
+  else {
+    work->restart_x = OSQP_NULL;
+    work->restart_y = OSQP_NULL;
+  }
+
   // Copy settings
   solver->settings = copy_settings(settings);
   if (!(solver->settings)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
@@ -389,7 +402,7 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   solver->info->dual_res      = OSQP_INFTY;
   solver->info->rel_kkt_error = OSQP_INFTY;
 
-  work->last_rel_kkt = OSQP_INFTY;
+  work->last_rel_kkt   = OSQP_INFTY;
 
   /* Setup adaptive rho things */
   work->rho_updated = 0;
@@ -426,12 +439,6 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
       solver->settings->adaptive_rho_interval = 1;
     }
     break;
-  }
-
-  /* Allocate the restart vectors if it's enabled */
-  if(solver->settings->restart_enable) {
-    work->restart_x = OSQPVectorf_malloc(n);
-    work->restart_y = OSQPVectorf_malloc(m);
   }
 
 # ifdef OSQP_ENABLE_DERIVATIVES
@@ -520,6 +527,9 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
   // Initialize variables (cold start or warm start depending on settings)
   // If not warm start -> set x, z, y to zero
   if (!settings->warm_starting) osqp_cold_start(solver);
+
+  // Zero the inner iteration counter right before we start
+  work->inner_iter_cnt = 0;
 
   // Main ADMM algorithm
 
@@ -715,9 +725,6 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
         {
           osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RESTART_SUFFICIENT);
           restart(solver);
-
-          // Adapt rho after restarting
-          can_adapt_rho = 1;
         }
         //
         else if( ( (solver->info->rel_kkt_error <= (settings->restart_necessary * work->last_rel_kkt))
@@ -725,18 +732,12 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
         {
           osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RESTART_NECESSARY);
           restart(solver);
-
-          // Adapt rho after restarting
-          can_adapt_rho = 1;
         }
         // Too many iterations have passed, restart
         else if( work->inner_iter_cnt > (settings->restart_artifical * solver->info->iter) )
         {
           osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RESTART_ARTIFICIAL);
           restart(solver);
-
-          // Adapt rho after restarting
-          can_adapt_rho = 1;
         }
       }
     }
@@ -1177,6 +1178,11 @@ void osqp_cold_start(OSQPSolver *solver) {
   OSQPVectorf_set_scalar(work->x, 0.);
   OSQPVectorf_set_scalar(work->z, 0.);
   OSQPVectorf_set_scalar(work->y, 0.);
+
+  if(solver->settings->restart_enable) {
+    OSQPVectorf_set_scalar(work->restart_x, 0.);
+    OSQPVectorf_set_scalar(work->restart_y, 0.);
+  }
 
   /* Cold start the linear system solver */
   work->linsys_solver->warm_start(work->linsys_solver, work->x);
