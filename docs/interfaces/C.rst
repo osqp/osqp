@@ -9,83 +9,185 @@ C
 Main solver API
 ---------------
 
+The main C API is imported from the header :code:`osqp.h`. It is divided into the following headers:
+* Constants in osqp_api_constants.h
+* Functions in osqp_api_functions.h
+* Types in osqp_api_types.h
+
+
+Main solver constants
+^^^^^^^^^^^^^^^^^^^^^
+
+Solver capabilities
+"""""""""""""""""""
+
+.. doxygenenum:: osqp_capabilities_type
+
+
+Solver status
+"""""""""""""
+
+.. doxygenenum:: osqp_status_type
+
+.. doxygendefine:: OSQP_STATUS_MESSAGE
+
+Polish status
+"""""""""""""
+
+.. doxygenenum:: osqp_polish_status_type
+
+Linear system solvers
+""""""""""""""""""""""
+
+.. doxygenenum:: osqp_linsys_solver_type
+
+Preconditioners for CG method
+"""""""""""""""""""""""""""""
+
+.. doxygentypedef:: osqp_precond_type
+
+Solver errors
+"""""""""""""
+
+.. doxygenenum:: osqp_error_type
+
+.. doxygendefine:: OSQP_ERROR_MESSAGE
+
+
+Solver parameters and settings
+""""""""""""""""""""""""""""""
+
+.. doxygendefine:: OSQP_VERBOSE
+
+.. doxygendefine:: OSQP_WARM_STARTING
+
+.. doxygendefine:: OSQP_SCALING
+   
+.. doxygendefine:: OSQP_POLISHING
+
+ADMM parameters:
+
+.. doxygendefine:: OSQP_RHO
+
+.. doxygendefine:: OSQP_SIGMA
+
+.. doxygendefine:: OSQP_ALPHA
+
+.. doxygendefine:: OSQP_RHO_MIN
+
+.. doxygendefine:: OSQP_RHO_MAX
+
+.. doxygendefine:: OSQP_RHO_TOL
+
+.. doxygendefine:: OSQP_RHO_EQ_OVER_RHO_INEQ
+
+.. doxygendefine:: OSQP_RHO_IS_VEC
+
+CG parameters:
+
+.. doxygendefine:: OSQP_CG_MAX_ITER
+
+.. doxygendefine:: OSQP_CG_TOL_REDUCTION
+
+.. doxygendefine:: OSQP_CG_TOL_FRACTION
+
+Adaptive rho logic
+.. doxygendefine:: OSQP_ADAPTIVE_RHO
+
+.. doxygendefine:: OSQP_ADAPTIVE_RHO_INTERVAL
+   
+.. doxygendefine:: OSQP_ADAPTIVE_RHO_TOLERANCE
+
+.. doxygendefine:: OSQP_ADAPTIVE_RHO_FRACTION
+   
+.. doxygendefine:: OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION
+   
+.. doxygendefine:: OSQP_ADAPTIVE_RHO_FIXED
+
+Termination parameters
+.. doxygendefine:: OSQP_MAX_ITER
+   
+.. doxygendefine:: OSQP_EPS_ABS
+   
+.. doxygendefine:: OSQP_EPS_REL
+   
+.. doxygendefine:: OSQP_EPS_PRIM_INF
+   
+.. doxygendefine:: OSQP_EPS_DUAL_INF
+   
+.. doxygendefine:: OSQP_SCALED_TERMINATION
+   
+.. doxygendefine:: OSQP_TIME_LIMIT
+
+.. doxygendefine:: OSQP_CHECK_TERMINATION
+
+.. doxygendefine:: OSQP_DELTA
+   
+.. doxygendefine:: OSQP_POLISH_REFINE_ITER
+
+Hard-coded values and settings:
+
+.. doxygendefine:: OSQP_NULL
+
+.. doxygendefine:: OSQP_NAN
+
+.. doxygendefine:: OSQP_INFTY
+
+.. doxygendefine:: OSQP_DIVISION_TOL
+
+.. doxygendefine:: OSQP_PRINT_INTERVAL
+
+.. doxygendefine:: OSQP_MIN_SCALING
+   
+.. doxygendefine:: OSQP_MAX_SCALING
+
+.. doxygendefine:: OSQP_CG_TOL_MIN
+   
+.. doxygendefine:: OSQP_CG_POLISH_TOL
+
 Main solver functions
 ^^^^^^^^^^^^^^^^^^^^^
 
-The main C API is imported from the header :code:`osqp.h` and provides the following functions
+Main solver API
+"""""""""""""""
 
+.. doxygenfunction:: osqp_capabilities
+
+.. doxygenfunction:: osqp_version
+
+.. doxygenfunction:: osqp_error_message
+
+.. doxygenfunction:: osqp_get_dimensions
 
 .. doxygenfunction:: osqp_setup
 
 .. doxygenfunction:: osqp_solve
 
+.. doxygenfunction:: osqp_get_solution
+
 .. doxygenfunction:: osqp_cleanup
 
-
-Main solver data types
-^^^^^^^^^^^^^^^^^^^^^^
-
-.. doxygenstruct:: OSQPSolver
-  :members:
-
-.. doxygenstruct:: OSQPSolution
-   :members:
-
-.. doxygenstruct:: OSQPInfo
-   :members:
-
-
-Warm start
-----------
-OSQP automatically warm starts primal and dual variables from the previous QP solution. If you would like to warm start their values manually, you can use
+Sublevel API
+""""""""""""
+These functions can be called without performing setup again.
 
 .. doxygenfunction:: osqp_warm_start
 
-
-.. _C_update_data :
-
-Update problem data
--------------------
-Problem data can be updated without executing the setup again using the following functions.
+.. doxygenfunction:: osqp_cold_start
 
 .. doxygenfunction:: osqp_update_data_vec
 
 .. doxygenfunction:: osqp_update_data_mat
 
-
-.. _C_settings :
-
-Solver settings
----------------
-
-Settings API
-^^^^^^^^^^^^
-
 .. doxygenfunction:: osqp_set_default_settings
-
-
-Many solver settings can be updated without running setup again.
 
 .. doxygenfunction:: osqp_update_settings
 
 .. doxygenfunction:: osqp_update_rho
 
 
-Settings structure
-^^^^^^^^^^^^^^^^^^
-
-The setting structure has the following fields.
-
-
-.. doxygenstruct:: OSQPSettings
-  :members:
-
-
-.. _C_derivatives :
-
-Compute solution derivatives
-----------------------------
-Adjoint derivatives of the QP problem can be computed at the current solution.
+Derivative functions
+""""""""""""""""""""
 
 .. doxygenfunction:: osqp_adjoint_derivative_compute
 
@@ -93,38 +195,43 @@ Adjoint derivatives of the QP problem can be computed at the current solution.
 
 .. doxygenfunction:: osqp_adjoint_derivative_get_vec
 
-
-.. _C_code_generation :
-
-Code generation
----------------
-The QP problem and all solver data can be written to a problem workspace for use by OSQP in embedded mode.
+Code generation functions
+"""""""""""""""""""""""""
 
 .. doxygenfunction:: osqp_set_default_codegen_defines
 
 .. doxygenfunction:: osqp_codegen
 
-.. doxygenstruct:: OSQPCodegenDefines
-   :members:
 
+Main solver types
+^^^^^^^^^^^^^^^^^
 
-.. _C_data_types :
+.. doxygentypedef:: OSQPInt
 
-Data types
-----------
-
-The most basic used datatypes are
-
-* :code:`OSQPInt`: can be :code:`long` or :code:`int` if the compiler flag :code:`OSQP_USE_LONG` is set or not
-* :code:`OSQPFloat`: can be a :code:`float` or a :code:`double` if the compiler flag :code:`OSQP_USE_FLOAT` is set or not.
-
-
-The matrices are defined in `Compressed Sparse Column (CSC) format <https://people.sc.fsu.edu/~jburkardt/data/cc/cc.html>`_ using zero-based indexing.
+.. doxygentypedef:: OSQPFloat
 
 .. doxygenstruct:: OSQPCscMatrix
    :members:
 
+.. doxygenstruct:: OSQPSettings
+   :members:
 
+.. doxygenstruct:: OSQPInfo
+   :members:
 
-.. TODO: Add sublevel API
-.. TODO: Add using your own linear system solver
+.. doxygenstruct:: OSQPSolution   
+   :members:
+
+.. doxygenstruct:: OSQPWorkspace
+   :members:
+
+.. doxygenstruct:: OSQPSolver
+   :members:
+
+.. doxygenstruct:: OSQPCodegenDefines   
+   :members:
+
+Main solver utils
+^^^^^^^^^^^^^^^^^
+
+.. doxygenfunction:: csc_set_data
