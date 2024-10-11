@@ -133,6 +133,12 @@ void OSQPVectorf_set_scalar_conditional(OSQPVectorf*       a,
                                         OSQPFloat          val_if_zero,
                                         OSQPFloat          val_if_pos);
 
+/**
+ * Round any values of a between [-tol, tol] to zero, creating a deadband around 0.
+ */
+void OSQPVectorf_round_to_zero(OSQPVectorf* a,
+                               OSQPFloat    tol);
+
 /* multiply float vector by float */
 void OSQPVectorf_mult_scalar(OSQPVectorf* a,
                              OSQPFloat    sc);
