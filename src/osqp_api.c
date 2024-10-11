@@ -774,7 +774,9 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
 #ifdef OSQP_ENABLE_PRINTING
     // Print summary if requested or if rho was updated
-    if (can_print || (settings->verbose && work->rho_updated)) {
+    if (can_print
+       || (settings->verbose && work->rho_updated)
+       || (settings->verbose && work->restarted)) {
       print_summary(solver);
     }
 #endif /* ifdef OSQP_ENABLE_PRINTING */
