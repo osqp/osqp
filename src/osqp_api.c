@@ -756,7 +756,8 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     }
 
     // Update rho if requested or if the solver restarted
-    if(work->restarted || can_adapt_rho) {
+    if((settings->adaptive_rho != OSQP_ADAPTIVE_RHO_UPDATE_DISABLED)
+       && work->restarted || can_adapt_rho) {
       osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
 
       if (adapt_rho(solver)) {
