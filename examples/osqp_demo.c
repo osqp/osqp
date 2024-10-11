@@ -10,6 +10,7 @@
 #include "problems/qpcblend.h"
 #include "problems/qptest.h"
 #include "problems/largeqp.h"
+#include "problems/primalc1.h"
 
 #define NAME_BUF_LENGTH 20
 
@@ -103,6 +104,14 @@ int main(int argc, char *argv[]) {
      */
     PREMADE_PROBLEM(hs35);
   }
+  else if( strcmp(problem_name, "primalc1") == 0 ) {
+    /*
+     * PRIMALC1 problem from the Maros Mesaros problem set
+     */
+    PREMADE_PROBLEM(primalc1);
+    settings->scaling = 1;
+    settings->restart_enable = 0;
+  }
   else {
     printf("Using problem data: default\n");
     // Problem dimensions
@@ -143,6 +152,9 @@ int main(int argc, char *argv[]) {
   settings->scaled_termination = 0;
 
   settings->restart_enable = 1;
+  //settings->adaptive_rho = OSQP_ADAPTIVE_RHO_UPDATE_TIME;
+  settings->adaptive_rho = OSQP_ADAPTIVE_RHO_UPDATE_DISABLED;
+  settings->rho = 1.0;
 
   OSQPInt cap = osqp_capabilities();
 
