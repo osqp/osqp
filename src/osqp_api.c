@@ -697,7 +697,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     can_adapt_rho = 0;
 #endif /* OSQP_EMBEDDED_MODE != 1 */
 
-    if(can_check_termination || can_print || can_adapt_rho || iter == 1 || settings->restart_enable) {
+    if(can_check_termination || can_print || can_adapt_rho || iter == 1 || settings->restart_enable || work->restarted || work->rho_updated) {
       // We must update the info in these cases:
       // * We will be checking termination
       // * We will be printing status
@@ -801,6 +801,9 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
       work->last_rel_kkt = solver->info->rel_kkt_error;
     }
 #endif // OSQP_EMBEDDED_MODE != 1
+
+    // Store the relkkt for this iteration for future comparison
+    work->prev_rel_kkt = solver->info->rel_kkt_error;
 
 #ifdef OSQP_ENABLE_PRINTING
     // Print summary if requested or if rho was updated
