@@ -241,6 +241,10 @@ struct OSQPWorkspace_ {
   /// Vectors holding the restart iterate
   OSQPVectorf* restart_x;
   OSQPVectorf* restart_y;
+
+  /// Vectors holding the x and y values from before the last restart/update
+  OSQPVectorf* last_x;
+  OSQPVectorf* last_y;
 };
 
 // NB: "typedef struct OSQPWorkspace_ OSQPWorkspace" is declared already

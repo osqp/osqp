@@ -137,6 +137,10 @@ void update_restart_vectors(OSQPSolver* solver) {
 void restart(OSQPSolver* solver) {
   OSQPWorkspace* work = solver->work;
 
+  // Save the iterates for next time
+  OSQPVectorf_copy(work->last_x, work->x);
+  OSQPVectorf_copy(work->last_y, work->y);
+
   // Overwrite the existing iterates
   OSQPVectorf_copy(work->x, work->restart_x);
   OSQPVectorf_copy(work->y, work->restart_y);

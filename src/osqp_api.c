@@ -286,6 +286,19 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
     work->restart_y = OSQP_NULL;
   }
 
+  /* Allocate the vectors to hold the previous iterates from before the change */
+  if(settings->restart_enable || settings->adaptive_rho) {
+    work->last_x = OSQPVectorf_calloc(n);
+    work->last_y = OSQPVectorf_calloc(m);
+
+    if (!(work->last_x) || !(work->last_y))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  }
+  else {
+    work->last_x = OSQP_NULL;
+    work->last_y = OSQP_NULL;
+  }
+
   // Copy settings
   solver->settings = copy_settings(settings);
   if (!(solver->settings)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
@@ -705,8 +718,25 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
       }
     }
 
-    // Store the relative KKT error for the first iteration after a restart happened
-    if(work->restarted) {
+    /* See if the new iterate has performed better than the iterate before the change,
+       and if not, then go back to the previous iterate */
+    if(work->restarted || work->rho_updated) {
+      if(work->prev_rel_kkt < solver->info->rel_kkt_error) {
+        osqp_profiler_event_mark(OSQP_PROFILER_EVENT_UPDATE_REJECT);
+
+        // Overwrite the existing iterates
+        OSQPVectorf_copy(work->x, work->last_x);
+        OSQPVectorf_copy(work->y, work->last_y);
+
+        // Compute the new z value using the restarted x value
+        OSQPMatrix_Axpy(work->data->A, work->x, work->z, 1.0, 0.0);
+
+        work->inner_iter_cnt = 0;
+      }
+    }
+
+    // Store the relative KKT error for the first iteration after a restart or rho update happened
+    if(work->restarted || work->rho_updated) {
       work->last_rel_kkt = solver->info->rel_kkt_error;
     }
 
@@ -1014,6 +1044,9 @@ OSQPInt osqp_cleanup(OSQPSolver* solver) {
 
     OSQPVectorf_free(work->restart_x);
     OSQPVectorf_free(work->restart_y);
+
+    OSQPVectorf_free(work->last_x);
+    OSQPVectorf_free(work->last_y);
 
     // Free Settings
     if (solver->settings) c_free(solver->settings);
