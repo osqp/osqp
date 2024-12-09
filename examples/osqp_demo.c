@@ -68,7 +68,18 @@ int main(int argc, char *argv[]) {
     snprintf(problem_name, NAME_BUF_LENGTH, "%s", argv[1]);
   }
 
-  if( strcmp(problem_name, "cvxqp2_s") == 0 ) {
+  if( strcmp(problem_name, "list") == 0 ) {
+    printf("Available problems:\n");
+    printf("  cvxqp2_s\n");
+    printf("  qpcblend\n");
+    printf("  largeqp\n");
+    printf("  qptest\n");
+    printf("  hs35hs21\n");
+    printf("  primalc1\n");
+
+    return 0;
+  }
+  else if( strcmp(problem_name, "cvxqp2_s") == 0 ) {
     /*
      * CVXQP2_S problem from the Maros Mesaros problem set
      */
