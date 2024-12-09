@@ -11,29 +11,13 @@ struct OSQPProfilerItem_ {
     nvtxEventAttributes_t attr;
 };
 
-struct OSQPProfilerItem_ osqp_profiler_sec_impl[] = {
-    /* Level 1 detail (coarse) */
-    {OSQP_PROFILER_SEC_SETUP,          0, {0}},
-    {OSQP_PROFILER_SEC_SCALE,          0, {0}},
-    {OSQP_PROFILER_SEC_OPT_SOLVE,      0, {0}},
-    {OSQP_PROFILER_SEC_ADMM_ITER,      0, {0}},
-    {OSQP_PROFILER_SEC_ADMM_KKT_SOLVE, 0, {0}},
-    {OSQP_PROFILER_SEC_ADMM_UPDATE,    0, {0}},
-    {OSQP_PROFILER_SEC_ADMM_PROJ,      0, {0}},
-    {OSQP_PROFILER_SEC_POLISH,         0, {0}},
+#define OSQPProfilerSection_ OSQPProfilerItem_
+#define OSQPProfilerEvent_   OSQPProfilerItem_
 
-    /* Level 2 detail (more details) */
-    {OSQP_PROFILER_SEC_LINSYS_INIT,      0, {0}},
-    {OSQP_PROFILER_SEC_LINSYS_SOLVE,     0, {0}},
-    {OSQP_PROFILER_SEC_LINSYS_SYM_FAC,   0, {0}},
-    {OSQP_PROFILER_SEC_LINSYS_NUM_FAC,   0, {0}},
-    {OSQP_PROFILER_SEC_LINSYS_BACKSOLVE, 0, {0}},
-    {OSQP_PROFILER_SEC_LINSYS_MVM,       0, {0}}
-};
+#define PROFILER_SEC_IMPL(name)    {name, 0, {0}}
+#define PROFILER_EVENT_IMPL(name)  {name, 0, {0}}
 
-struct OSQPProfilerItem_ osqp_profiler_event_impl[] = {
-    {OSQP_PROFILER_EVENT_RHO_UPDATE, 0, {0}}
-};
+#include "profilers_impl.c"
 
 /* Global domain to namespace the OSQP profiling from other markers */
 static nvtxDomainHandle_t s_osqp_nvtx_domain;
@@ -84,7 +68,7 @@ void _osqp_profiler_sec_push(OSQPProfilerSection section) {
     // Don't push a section that isn't enabled
     if(osqp_profiler_sec_impl[section].enabled == 0)
         return;
-    
+
     nvtxDomainRangePushEx(s_osqp_nvtx_domain, &(osqp_profiler_sec_impl[section].attr));
 }
 
@@ -102,6 +86,6 @@ void _osqp_profiler_event_mark(OSQPProfilerEvent event) {
     // Don't record an event that isn't enabled
     if(osqp_profiler_event_impl[event].enabled == 0)
         return;
-    
+
     nvtxDomainMarkEx(s_osqp_nvtx_domain, &(osqp_profiler_event_impl[event].attr));
 }
