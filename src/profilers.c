@@ -27,5 +27,6 @@ OSQPProfilerItemInfo osqp_profiler_events[] = {
     {"rho_update",         "Rho update",                     1}, /* OSQP_PROFILER_EVENT_RHO_UPDATE */
     {"restart_sufficient", "Restart - Sufficient condition", 1}, /* OSQP_PROFILER_EVENT_RESTART_SUFFICIENT */
     {"restart_necessary",  "Restart - Necessary condition",  1}, /* OSQP_PROFILER_EVENT_RESTART_NECESSARY  */
-    {"restart_artificial", "Restart - Artificial condition", 1}  /* OSQP_PROFILER_EVENT_RESTART_ARTIFICIAL */
+    {"restart_artificial", "Restart - Artificial condition", 1}, /* OSQP_PROFILER_EVENT_RESTART_ARTIFICIAL */
+    {"update_rejected",    "Last update/restart rejected",   1}  /* OSQP_PROFILER_EVENT_UPDATE_REJECT */
 };

@@ -43,6 +43,7 @@ typedef enum {
     OSQP_PROFILER_EVENT_RESTART_SUFFICIENT,     /* Restart (sufficient condition) has occurred */
     OSQP_PROFILER_EVENT_RESTART_NECESSARY,      /* Restart (necessary condition) has occurred */
     OSQP_PROFILER_EVENT_RESTART_ARTIFICIAL,     /* Restart (artificial condition) has occurred */
+    OSQP_PROFILER_EVENT_UPDATE_REJECT,          /* Restart or rho update rejected */
 
     /* Sentinel element */
     OSQP_PROFILER_EVENT_ARRAY_LAST
