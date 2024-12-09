@@ -46,7 +46,7 @@ void print_header(void) {
 #endif
 
   // Main information
-  c_print("objective    prim res   dual res   gap        rho");
+  c_print("objective    prim res   dual res   gap        rel kkt    rho");
 # ifdef OSQP_ENABLE_PROFILING
   c_print("         time");
 # endif /* ifdef OSQP_ENABLE_PROFILING */
@@ -217,6 +217,7 @@ void print_summary(OSQPSolver* solver) {
   c_print("  %9.2e", info->prim_res);
   c_print("  %9.2e", info->dual_res);
   c_print("  %9.2e", info->duality_gap);
+  c_print("  %9.2e", info->rel_kkt_error);
 
   /* Specially mark the iterations where we have just adapted rho
    * (Note, we print out the new rho value in this iteration, not the old one) */
@@ -252,6 +253,7 @@ void print_polish(OSQPSolver* solver) {
   c_print("  %9.2e", info->prim_res);
   c_print("  %9.2e", info->dual_res);
   c_print("  %9.2e", info->duality_gap);
+  c_print("  %9.2e", info->rel_kkt_error);
 
   // Different characters for windows/unix
 #if defined(IS_WINDOWS) && !defined(PYTHON)
