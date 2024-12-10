@@ -1,6 +1,4 @@
-
-#include <roctx.h>
-
+#include "printing.h"
 #include "types.h"
 #include "profilers.h"
 
@@ -42,20 +40,12 @@ void _osqp_profiler_update_level(int level) {
 }
 
 void _osqp_profiler_sec_push(OSQPProfilerSection section) {
-    // Don't push a section that isn't enabled
-    if(osqp_profiler_sec_impl[section].enabled == 0)
-        return;
-
-    roctxRangePush(osqp_profiler_sections[section].desc);
+    // Nothing to do here
 }
 
 
 void _osqp_profiler_sec_pop(OSQPProfilerSection section) {
-    // Don't pop a section that isn't enabled
-    if(osqp_profiler_sec_impl[section].enabled == 0)
-        return;
-
-    roctxRangePop();
+    // Nothing to do here
 }
 
 
@@ -64,5 +54,5 @@ void _osqp_profiler_event_mark(OSQPProfilerEvent event) {
     if(osqp_profiler_event_impl[event].enabled == 0)
         return;
 
-    roctxMark(osqp_profiler_events[event].desc);
+    c_print("Event: %s\n", osqp_profiler_events[event].desc);
 }
