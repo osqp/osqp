@@ -188,6 +188,29 @@ TEST_CASE_METHOD(OSQPTestFixture, "Test updating P and A", "[update]")
                                 data->m) < TESTS_TOL);
   }
 
+  SECTION( "Matrix Updates: Update P (all indices, nnz=0)" ) {
+    osqp_update_data_mat(solver.get(),
+                         data->test_solve_Pu_new->x, OSQP_NULL, 0,
+                         NULL, NULL, 0);
+
+    // Solve Problem
+    osqp_solve(solver.get());
+
+    // Compare solver statuses
+    mu_assert("Update matrices: problem with updating P (all indices), error in solver status!",
+              solver->info->status_val == data->test_solve_P_new_status);
+
+    // Compare primal solutions
+    mu_assert("Update matrices: problem with updating P (all indices), error in primal solution!",
+              vec_norm_inf_diff(solver->solution->x, data->test_solve_P_new_x,
+                                data->n) < TESTS_TOL);
+
+    // Compare dual solutions
+    mu_assert("Update matrices: problem with updating P (all indices), error in dual solution!",
+              vec_norm_inf_diff(solver->solution->y, data->test_solve_P_new_y,
+                                data->m) < TESTS_TOL);
+  }
+
   SECTION( "Matrix Updates: Update A (vector of indices)" ) {
     std::unique_ptr<OSQPInt[]> Ax_new_idx(new OSQPInt[nnzA]);
 
@@ -223,6 +246,30 @@ TEST_CASE_METHOD(OSQPTestFixture, "Test updating P and A", "[update]")
     osqp_update_data_mat(solver.get(),
                          NULL, NULL, 0,
                          data->test_solve_A_new->x, OSQP_NULL, nnzA);
+
+    // Solve Problem
+    osqp_solve(solver.get());
+
+    // Compare solver statuses
+    mu_assert("Update matrices: problem with updating A (all indices), error in solver status!",
+              solver->info->status_val == data->test_solve_A_new_status);
+
+    // Compare primal solutions
+    mu_assert("Update matrices: problem with updating A (all indices), error in primal solution!",
+              vec_norm_inf_diff(solver->solution->x, data->test_solve_A_new_x,
+                                data->n) < TESTS_TOL);
+
+    // Compare dual solutions
+    mu_assert("Update matrices: problem with updating A (all indices), error in dual solution!",
+              vec_norm_inf_diff(solver->solution->y, data->test_solve_A_new_y,
+                                data->m) < TESTS_TOL);
+  }
+
+  SECTION( "Matrix Updates: Update A (All indices, nnz=0)" ) {
+    // Update A (all indices)
+    osqp_update_data_mat(solver.get(),
+                         NULL, NULL, 0,
+                         data->test_solve_A_new->x, OSQP_NULL, 0);
 
     // Solve Problem
     osqp_solve(solver.get());
@@ -282,11 +329,38 @@ TEST_CASE_METHOD(OSQPTestFixture, "Test updating P and A", "[update]")
                         data->m) < TESTS_TOL);
   }
 
-  SECTION( "Matrix Updates: Update P and A (all indicies" ) {
+  SECTION( "Matrix Updates: Update P and A (all indicies)" ) {
     // Update P and A (all indices)
     osqp_update_data_mat(solver.get(),
                          data->test_solve_Pu_new->x, OSQP_NULL, nnzP,
                          data->test_solve_A_new->x, OSQP_NULL, nnzA);
+
+    // Solve Problem
+    osqp_solve(solver.get());
+
+    // Compare solver statuses
+    mu_assert(
+      "Update matrices: problem with updating P and A (all indices), error in solver status!",
+      solver->info->status_val == data->test_solve_P_A_new_status);
+
+    // Compare primal solutions
+    mu_assert(
+      "Update matrices: problem with updating P and A (all indices), error in primal solution!",
+      vec_norm_inf_diff(solver->solution->x, data->test_solve_P_A_new_x,
+                        data->n) < TESTS_TOL);
+
+    // Compare dual solutions
+    mu_assert(
+      "Update matrices: problem with updating P and A (all indices), error in dual solution!",
+      vec_norm_inf_diff(solver->solution->y, data->test_solve_P_A_new_y,
+                        data->m) < TESTS_TOL);
+  }
+
+  SECTION( "Matrix Updates: Update P and A (all indicies, nnz=0)" ) {
+    // Update P and A (all indices)
+    osqp_update_data_mat(solver.get(),
+                         data->test_solve_Pu_new->x, OSQP_NULL, 0,
+                         data->test_solve_A_new->x, OSQP_NULL, 0);
 
     // Solve Problem
     osqp_solve(solver.get());
