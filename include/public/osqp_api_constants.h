@@ -143,6 +143,14 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_SCALED_TERMINATION    (0)
 # define OSQP_TIME_LIMIT            (1e10)     ///< Disable time limit by default
 
+// Disable the duality gap termination criteria on float builds by default for now, because
+// floats can't always give the necessary precision in the current solver architecture.
+#ifdef OSQP_USE_FLOAT
+# define OSQP_CHECK_DUALGAP         (0)
+#else
+# define OSQP_CHECK_DUALGAP         (1)
+#endif
+
 #ifdef OSQP_ALGEBRA_CUDA
 #  define OSQP_CHECK_TERMINATION (5)
 #else
@@ -187,5 +195,10 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_CG_TOL_MIN    (1E-7)
 # define OSQP_CG_POLISH_TOL (1e-5)
 
+#ifdef OSQP_USE_FLOAT
+# define OSQP_ZERO_DEADZONE (1e-10) ///< Minimum permitted value
+#else
+# define OSQP_ZERO_DEADZONE (1e-15) ///< Minimum permitted value
+#endif
 
 #endif /* ifndef OSQP_API_CONSTANTS_H */
