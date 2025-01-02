@@ -40,15 +40,15 @@ static void print_line(void) {
 void print_header(void) {
   // Different indentation required for windows
 #if defined(IS_WINDOWS) && !defined(PYTHON)
-  c_print("iter  ");
-#else
   c_print("iter   ");
+#else
+  c_print("iter    ");
 #endif
 
   // Main information
-  c_print("objective    prim res   dual res   rho");
+  c_print("objective    prim res   dual res   gap        rel kkt    rho");
 # ifdef OSQP_ENABLE_PROFILING
-  c_print("        time");
+  c_print("         time");
 # endif /* ifdef OSQP_ENABLE_PROFILING */
   c_print("\n");
 }
@@ -98,6 +98,8 @@ void print_setup_header(const OSQPSolver* solver) {
   c_print("algebra = %s", namebuf);
   c_print(",\n          ");
 
+  c_print("OSQPInt = %i bytes, OSQPFloat = %i bytes,\n          ", sizeof(OSQPInt), sizeof(OSQPFloat));
+
 #ifndef OSQP_EMBEDDED_MODE
   osqp_algebra_device_name(devicebuf, DEVICEBUFLEN);
 
@@ -120,28 +122,60 @@ void print_setup_header(const OSQPSolver* solver) {
           settings->eps_prim_inf, settings->eps_dual_inf);
   c_print("rho = %.2e ", settings->rho);
 
-  if (settings->adaptive_rho) {
-    c_print("(adaptive)");
+  switch(settings->adaptive_rho)
+  {
+  case OSQP_ADAPTIVE_RHO_UPDATE_DISABLED:
+    c_print("(adaptive: disabled)");
+    break;
+
+  case OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS:
+    c_print("(adaptive: %d iterations)", (int) settings->adaptive_rho_interval);
+    break;
+
+  case OSQP_ADAPTIVE_RHO_UPDATE_TIME:
+    c_print("(adaptive: time)");
+    break;
+
+  case OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR:
+    c_print("(adaptive: kkt error, interval %d)", (int) settings->adaptive_rho_interval);
+    break;
   }
+
+  c_print(",\n          ");
+
+  if( settings->restart_enable) {
+    c_print("restart: on (sufficient: %.2f, necessary: %.2f, artificial: %.2f)",
+            settings->restart_sufficient, settings->restart_necessary, settings->restart_artifical);
+  } else {
+    c_print("restart: off");
+  }
+
+
   c_print(",\n          ");
   c_print("sigma = %.2e, alpha = %.2f, ",
           settings->sigma, settings->alpha);
   c_print("max_iter = %i\n", (int)settings->max_iter);
 
   if (settings->check_termination) {
-    c_print("          check_termination: on (interval %i),\n",
-      (int)settings->check_termination);
+    if(settings->check_dualgap) {
+      c_print("          check_termination: on (interval %i, duality gap: on),\n",
+        (int)settings->check_termination);
+    }
+    else {
+      c_print("          check_termination: on (interval %i, duality gap: off),\n",
+        (int)settings->check_termination);
+    }
   }
   else
     c_print("          check_termination: off,\n");
-  
+
 # ifdef OSQP_ENABLE_PROFILING
   if (settings->time_limit)
     c_print("          time_limit: %.2e sec,\n", settings->time_limit);
 # endif /* ifdef OSQP_ENABLE_PROFILING */
 
   if (settings->scaling) {
-    c_print("          scaling: on, ");
+    c_print("          scaling: on (%i iterations), ", (int)settings->scaling);
   } else {
     c_print("          scaling: off, ");
   }
@@ -173,11 +207,26 @@ void print_summary(OSQPSolver* solver) {
   OSQPSettings*  settings = solver->settings;
   OSQPWorkspace* work     = solver->work;
 
-  c_print("%4i",     (int)info->iter);
+  if(work->restarted) {
+    c_print("%4i*",     (int)info->iter);
+  }
+  else {
+    c_print("%4i ",     (int)info->iter);
+  }
   c_print(" %12.4e", info->obj_val);
   c_print("  %9.2e", info->prim_res);
   c_print("  %9.2e", info->dual_res);
-  c_print("  %9.2e", settings->rho);
+  c_print("  %9.2e", info->duality_gap);
+  c_print("  %9.2e", info->rel_kkt_error);
+
+  /* Specially mark the iterations where we have just adapted rho
+   * (Note, we print out the new rho value in this iteration, not the old one) */
+  if(solver->work->rho_updated) {
+    c_print("  %9.2e*", settings->rho);
+  } else {
+    c_print("  %9.2e ", settings->rho);
+  }
+
 
 # ifdef OSQP_ENABLE_PROFILING
 
@@ -199,16 +248,18 @@ void print_polish(OSQPSolver* solver) {
   OSQPInfo*      info = solver->info;
   OSQPWorkspace* work = solver->work;
 
-  c_print("%4s",     "plsh");
+  c_print("%4s",     "plsh ");
   c_print(" %12.4e", info->obj_val);
   c_print("  %9.2e", info->prim_res);
   c_print("  %9.2e", info->dual_res);
+  c_print("  %9.2e", info->duality_gap);
+  c_print("  %9.2e", info->rel_kkt_error);
 
   // Different characters for windows/unix
 #if defined(IS_WINDOWS) && !defined(PYTHON)
-  c_print("  ---------");
+  c_print("  --------- ");
 #else
-  c_print("   --------");
+  c_print("   -------- ");
 #endif
 
 # ifdef OSQP_ENABLE_PROFILING
@@ -246,6 +297,9 @@ void print_footer(OSQPInfo* info,
   if ((info->status_val == OSQP_SOLVED) ||
       (info->status_val == OSQP_SOLVED_INACCURATE)) {
     c_print("optimal objective:    %.4f\n", info->obj_val);
+    c_print("dual objective:       %.4f\n", info->dual_obj_val);
+    c_print("duality gap:          %.4e\n", info->duality_gap);
+    c_print("primal-dual integral: %.4e\n", info->primdual_int);
   }
 
 # ifdef OSQP_ENABLE_PROFILING
@@ -304,10 +358,16 @@ OSQPSettings* copy_settings(const OSQPSettings *settings) {
   new->eps_dual_inf       = settings->eps_dual_inf;
   new->scaled_termination = settings->scaled_termination;
   new->check_termination  = settings->check_termination;
+  new->check_dualgap      = settings->check_dualgap;
   new->time_limit         = settings->time_limit;
 
   new->delta              = settings->delta;
   new->polish_refine_iter = settings->polish_refine_iter;
+
+  new->restart_enable     = settings->restart_enable;
+  new->restart_sufficient = settings->restart_sufficient;
+  new->restart_necessary  = settings->restart_necessary;
+  new->restart_artifical  = settings->restart_artifical;
 
   return new;
 }

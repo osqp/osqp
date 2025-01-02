@@ -12,7 +12,7 @@ TEST_CASE_METHOD(non_cvx_test_fixture, "Nonconvex: Setup detection", "[nonconvex
   OSQPInt exitflag;
 
   // Test-specific solver settings
-  settings->adaptive_rho = 0;
+  settings->adaptive_rho = OSQP_ADAPTIVE_RHO_UPDATE_DISABLED;
 
   // Direct linear solvers detect the nonconvexity at the setup phase
   settings->linsys_solver = OSQP_DIRECT_SOLVER;
@@ -52,7 +52,7 @@ TEST_CASE_METHOD(non_cvx_test_fixture, "Nonconvex: Solve", "[nonconvex],[solve]"
   OSQPInt exitflag;
 
   // Test-specific solver settings
-  settings->adaptive_rho = 0;
+  settings->adaptive_rho = OSQP_ADAPTIVE_RHO_UPDATE_DISABLED;
   settings->sigma = sols_data->sigma_new;
 
   // Setup workspace

@@ -125,7 +125,7 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->cg_tol_fraction  = OSQP_CG_TOL_FRACTION;         /* CG tolerance parameter */
   settings->cg_precond       = OSQP_DIAGONAL_PRECONDITIONER; /* Preconditioner to use in CG */
 
-  settings->adaptive_rho           = OSQP_ADAPTIVE_RHO;
+  settings->adaptive_rho           = OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT;
   settings->adaptive_rho_interval  = OSQP_ADAPTIVE_RHO_INTERVAL;
   settings->adaptive_rho_fraction  = (OSQPFloat)OSQP_ADAPTIVE_RHO_FRACTION;
   settings->adaptive_rho_tolerance = (OSQPFloat)OSQP_ADAPTIVE_RHO_TOLERANCE;
@@ -137,10 +137,16 @@ void osqp_set_default_settings(OSQPSettings* settings) {
   settings->eps_dual_inf       = (OSQPFloat)OSQP_EPS_DUAL_INF;  /* dual infeasibility tolerance */
   settings->scaled_termination = OSQP_SCALED_TERMINATION;       /* evaluate scaled termination criteria */
   settings->check_termination  = OSQP_CHECK_TERMINATION;        /* interval for evaluating termination criteria */
+  settings->check_dualgap      = OSQP_CHECK_DUALGAP;            /* Check duality gap termination criteria */
   settings->time_limit         = OSQP_TIME_LIMIT;               /* stop the algorithm when time limit is reached */
 
   settings->delta              = OSQP_DELTA;                    /* regularization parameter for polishing */
   settings->polish_refine_iter = OSQP_POLISH_REFINE_ITER;       /* iterative refinement steps in polish */
+
+  settings->restart_enable     = OSQP_RESTART_ENABLED;                  /* if restarting is enabled */
+  settings->restart_sufficient = (OSQPFloat)OSQP_RESTART_SUFFICIENT;    /* tolernace for sufficient restart condition */
+  settings->restart_necessary  = (OSQPFloat)OSQP_RESTART_NECESSARY;     /* tolerabce for necessary restart conditon */
+  settings->restart_artifical  = (OSQPFloat)OSQP_RESTART_ARTIFICAL;     /* tolerance for artifical restart condition */
 }
 
 #ifndef OSQP_EMBEDDED_MODE
@@ -267,6 +273,32 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   if (!(work->delta_x) || !(work->Pdelta_x) || !(work->Adelta_x))
     return osqp_error(OSQP_MEM_ALLOC_ERROR);
 
+  /* Allocate the restart vectors if it's enabled */
+  if(settings->restart_enable) {
+    work->restart_x = OSQPVectorf_calloc(n);
+    work->restart_y = OSQPVectorf_calloc(m);
+
+    if (!(work->restart_x) || !(work->restart_y))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  }
+  else {
+    work->restart_x = OSQP_NULL;
+    work->restart_y = OSQP_NULL;
+  }
+
+  /* Allocate the vectors to hold the previous iterates from before the change */
+  if(settings->restart_enable || settings->adaptive_rho) {
+    work->last_x = OSQPVectorf_calloc(n);
+    work->last_y = OSQPVectorf_calloc(m);
+
+    if (!(work->last_x) || !(work->last_y))
+      return osqp_error(OSQP_MEM_ALLOC_ERROR);
+  }
+  else {
+    work->last_x = OSQP_NULL;
+    work->last_y = OSQP_NULL;
+  }
+
   // Copy settings
   solver->settings = copy_settings(settings);
   if (!(solver->settings)) return osqp_error(OSQP_MEM_ALLOC_ERROR);
@@ -376,34 +408,51 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
   work->clear_update_time = 0;
   work->rho_update_from_solve = 0;
 # endif /* ifdef OSQP_ENABLE_PROFILING */
-  solver->info->rho_updates  = 0;                      // Rho updates set to 0
-  solver->info->rho_estimate = solver->settings->rho;  // Best rho estimate
-  solver->info->obj_val      = OSQP_INFTY;
-  solver->info->prim_res     = OSQP_INFTY;
-  solver->info->dual_res     = OSQP_INFTY;
+  solver->info->rho_updates   = 0;                      // Rho updates set to 0
+  solver->info->rho_estimate  = solver->settings->rho;  // Best rho estimate
+  solver->info->obj_val       = OSQP_INFTY;
+  solver->info->prim_res      = OSQP_INFTY;
+  solver->info->dual_res      = OSQP_INFTY;
+  solver->info->rel_kkt_error = OSQP_INFTY;
 
-  // Print header
-# ifdef OSQP_ENABLE_PRINTING
-  if (solver->settings->verbose) print_setup_header(solver);
-  work->summary_printed = 0; // Initialize last summary  to not printed
-# endif /* ifdef OSQP_ENABLE_PRINTING */
+  work->last_rel_kkt   = OSQP_INFTY;
 
+  /* Setup adaptive rho things */
+  work->rho_updated = 0;
 
-  // If adaptive rho and automatic interval, but profiling disabled, we need to
-  // set the interval to a default value
-# ifndef OSQP_ENABLE_PROFILING
-  if (solver->settings->adaptive_rho && !solver->settings->adaptive_rho_interval) {
-    if (solver->settings->check_termination) {
-      // If check_termination is enabled, we set it to a multiple of the check
-      // termination interval
-      solver->settings->adaptive_rho_interval = OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION *
-                                              solver->settings->check_termination;
-    } else {
-      // If check_termination is disabled we set it to a predefined fix number
-      solver->settings->adaptive_rho_interval = OSQP_ADAPTIVE_RHO_FIXED;
+  switch(solver->settings->adaptive_rho)
+  {
+  case OSQP_ADAPTIVE_RHO_UPDATE_DISABLED:
+    /* No setup needed */
+    break;
+
+  case OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS:
+    // 0 is a special flag meaning automatically set it to a value we decide
+    if(solver->settings->adaptive_rho_interval == 0) {
+      if (solver->settings->check_termination) {
+        // If check_termination is enabled, we set it to a multiple of the check
+        // termination interval
+        solver->settings->adaptive_rho_interval = OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION *
+                                                  solver->settings->check_termination;
+      } else {
+        // If check_termination is disabled we set it to a predefined fix number
+        solver->settings->adaptive_rho_interval = OSQP_ADAPTIVE_RHO_FIXED;
+      }
     }
+    break;
+
+  case OSQP_ADAPTIVE_RHO_UPDATE_TIME:
+    /* No setup needed, computation of fixed interval is done at first update iteration */
+    break;
+
+  case OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR:
+    // 0 is a special flag meaning automatically set it to a value we decide
+    if(solver->settings->adaptive_rho_interval == 0) {
+      // Which is every iteration
+      solver->settings->adaptive_rho_interval = 1;
+    }
+    break;
   }
-# endif /* ifndef OSQP_ENABLE_PROFILING */
 
 # ifdef OSQP_ENABLE_DERIVATIVES
   work->derivative_data = c_calloc(1, sizeof(OSQPDerivativeData));
@@ -420,6 +469,12 @@ OSQPInt osqp_setup(OSQPSolver**         solverp,
 
   osqp_profiler_sec_pop(OSQP_PROFILER_SEC_SETUP);
 
+  // Print header
+# ifdef OSQP_ENABLE_PRINTING
+  if (solver->settings->verbose) print_setup_header(solver);
+  work->summary_printed = 0; // Initialize last summary  to not printed
+# endif /* ifdef OSQP_ENABLE_PRINTING */
+
   // Return exit flag
   return 0;
 }
@@ -431,21 +486,23 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
 
   OSQPInt exitflag;
   OSQPInt iter, max_iter;
-  OSQPInt compute_obj;           // boolean: compute objective function in the loop or not
-  OSQPInt can_check_termination; // boolean: check termination or not
+
+  OSQPInt can_print = 0;             // boolean, whether to print or not
+  OSQPInt can_adapt_rho = 0;         // boolean, adapt rho or not
+  OSQPInt can_check_termination = 0; // boolean, check termination or not
+
   OSQPWorkspace* work;
+  OSQPSettings*  settings;
 
 #ifdef OSQP_ENABLE_PROFILING
   OSQPFloat temp_run_time;       // Temporary variable to store current run time
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 
-#ifdef OSQP_ENABLE_PRINTING
-  OSQPInt can_print;             // Boolean whether you can print
-#endif /* ifdef OSQP_ENABLE_PRINTING */
-
   // Check if solver has been initialized
   if (!solver || !solver->work) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
+
   work = solver->work;
+  settings = solver->settings;
 
 #ifdef OSQP_ENABLE_PROFILING
   if (work->clear_update_time == 1)
@@ -457,11 +514,7 @@ OSQPInt osqp_solve(OSQPSolver *solver) {
   exitflag              = 0;
   can_check_termination = 0;
 #ifdef OSQP_ENABLE_PRINTING
-  can_print = solver->settings->verbose;
-  // Compute objective function only if verbose is on
-  compute_obj = solver->settings->verbose;
-#else /* ifdef OSQP_ENABLE_PRINTING */
-  compute_obj = 0;
+  can_print = settings->verbose;
 #endif /* ifdef OSQP_ENABLE_PRINTING */
 
 #ifdef OSQP_ENABLE_PROFILING
@@ -472,7 +525,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
 
 #ifdef OSQP_ENABLE_PRINTING
-  if (solver->settings->verbose) {
+  if (settings->verbose) {
     // Print Header for every column
     print_header();
   }
@@ -486,11 +539,14 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
   // Initialize variables (cold start or warm start depending on settings)
   // If not warm start -> set x, z, y to zero
-  if (!solver->settings->warm_starting) osqp_cold_start(solver);
+  if (!settings->warm_starting) osqp_cold_start(solver);
+
+  // Zero the inner iteration counter right before we start
+  work->inner_iter_cnt = 0;
 
   // Main ADMM algorithm
 
-  max_iter = solver->settings->max_iter;
+  max_iter = settings->max_iter;
   for (iter = 1; iter <= max_iter; iter++) {
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_ADMM_ITER);
 
@@ -543,12 +599,12 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
       temp_run_time = solver->info->update_time + osqp_toc(work->timer);
     }
 
-    if (solver->settings->time_limit &&
-        (temp_run_time >= solver->settings->time_limit)) {
+    if (settings->time_limit &&
+        (temp_run_time >= settings->time_limit)) {
       update_status(solver->info, OSQP_TIME_LIMIT_REACHED);
 # ifdef OSQP_ENABLE_PRINTING
 
-      if (solver->settings->verbose) c_print("run time limit reached\n");
+      if (settings->verbose) c_print("run time limit reached\n");
       can_print = 0;  // Not printing at this iteration
 # endif /* ifdef OSQP_ENABLE_PRINTING */
       break;
@@ -557,128 +613,206 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
 
     // Can we check for termination ?
-    can_check_termination = solver->settings->check_termination &&
-                            (iter % solver->settings->check_termination == 0);
-
-#ifdef OSQP_ENABLE_PRINTING
+    can_check_termination = settings->check_termination &&
+                            (iter % settings->check_termination == 0);
 
     // Can we print ?
-    can_print = solver->settings->verbose &&
+#ifdef OSQP_ENABLE_PRINTING
+    can_print = settings->verbose &&
                 ((iter % OSQP_PRINT_INTERVAL == 0) || (iter == 1));
+#else
+    can_print = 0;
+#endif /* ifdef OSQP_ENABLE_PRINTING */
 
-    // NB: We always update info in the first iteration because indirect solvers
-    //     use residual values to compute required accuracy of their solution.
-    if (can_check_termination || can_print || iter == 1) { // Update status in either of
-                                                           // these cases
-      // Update information
-      update_info(solver, iter, compute_obj, 0);
+#if OSQP_EMBEDDED_MODE != 1
+    switch(settings->adaptive_rho)
+    {
+    case OSQP_ADAPTIVE_RHO_UPDATE_DISABLED:
+      /* Don't do anything, it is disabled*/
+      can_adapt_rho = 0;
+      break;
 
-      if (can_print) {
-        // Print summary
-        print_summary(solver);
-      }
+    case OSQP_ADAPTIVE_RHO_UPDATE_TIME:
+#ifdef OSQP_ENABLE_PROFILING
+      // Time-based adaptive rho updates rho at an interval based on a fraction of the setup time.
+      // This is done by estimating how many iterations are done in that timeframe, then building a
+      // fixed iteration interval for all future updates.
+      if(settings->adaptive_rho_interval == 0) {
+        // Check time
+        if(osqp_toc(work->timer) >
+            settings->adaptive_rho_fraction * solver->info->setup_time)
+        {
+          // Enough time has passed. We now get the number of iterations between the updates.
+          if (settings->check_termination)
+          {
+            // If check_termination is enabled, we round the number of iterations between
+            // rho updates to the closest multiple of check_termination
+            settings->adaptive_rho_interval = (OSQPInt)c_roundmultiple(iter,
+                                                                       settings->check_termination);
+          }
+          else
+          {
+            // If check_termination is disabled, we round the number of iterations
+            // between
+            // updates to the closest multiple of the default check_termination
+            // interval.
+            settings->adaptive_rho_interval = (OSQPInt)c_roundmultiple(iter, OSQP_CHECK_TERMINATION);
+          }
 
-      if (can_check_termination) {
-        // Check algorithm termination
-        if (check_termination(solver, 0)) {
-          // Terminate algorithm
+          // Make sure the interval is not 0 and at least check_termination times
+          settings->adaptive_rho_interval = c_min(1, c_max(settings->adaptive_rho_interval,
+                                                           settings->check_termination));
+        }
+        else
+        {
+          /* Break out of the switch statement because we don't have an iteration value yet */
+          can_adapt_rho = 0;
           break;
         }
       }
+      /* Fall through to the interval-based update in this case */
+#else
+      /* Time-based adaptation doesn't work without the timers */
+      can_adapt_rho = 0;
+      break;
+#endif /* ifdef OSQP_ENABLE_PROFILING */
+
+    case OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR:
+      /*
+       * Fall through on purpose:
+       * We support limiting the KKT error checks to a periodic number of iterations,
+       * so we set the can_adapt_rho flag to show the iterations we can check the KKT error.
+       * The actual KKT error computation/checks is done later after update_info.
+       */
+    case OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS:
+      /* Update rho when the appropriate number of iterations have passed */
+      if(settings->adaptive_rho_interval && (iter % settings->adaptive_rho_interval == 0)) {
+        can_adapt_rho = 1;
+      } else {
+        can_adapt_rho = 0;
+      }
+      break;
     }
-#else /* ifdef OSQP_ENABLE_PRINTING */
+#else
+    can_adapt_rho = 0;
+#endif /* OSQP_EMBEDDED_MODE != 1 */
 
+    if(can_check_termination || can_print || can_adapt_rho || iter == 1 || settings->restart_enable || work->restarted || work->rho_updated) {
+      // We must update the info in these cases:
+      // * We will be checking termination
+      // * We will be printing status
+      // * We will be adapting rho
+      // * It is the first iteration
+      //   (We always update info in the first iteration because indirect solvers
+      //    use residual values to compute required accuracy of their solution.)
+      // * Restarting is enabled
+      //   (conditions require the updated info)
+      update_info(solver, iter, 0);
+    }
+
+    // Check algorithm termination if desired
     if (can_check_termination) {
-      // Update information and compute also objective value
-      update_info(solver, iter, compute_obj, 0);
-
-      // Check algorithm termination
       if (check_termination(solver, 0)) {
         // Terminate algorithm
         break;
       }
     }
-#endif /* ifdef OSQP_ENABLE_PRINTING */
 
+    /* See if the new iterate has performed better than the iterate before the change,
+       and if not, then go back to the previous iterate */
+    if(work->restarted || work->rho_updated) {
+      if(work->prev_rel_kkt < solver->info->rel_kkt_error) {
+        osqp_profiler_event_mark(OSQP_PROFILER_EVENT_UPDATE_REJECT);
 
-#if OSQP_EMBEDDED_MODE != 1
-# ifdef OSQP_ENABLE_PROFILING
+        // Overwrite the existing iterates
+        OSQPVectorf_copy(work->x, work->last_x);
+        OSQPVectorf_copy(work->y, work->last_y);
 
-    // If adaptive rho with automatic interval, check if the solve time is a
-    // certain fraction
-    // of the setup time.
-    if (solver->settings->adaptive_rho && !solver->settings->adaptive_rho_interval) {
-      // Check time
-      if (osqp_toc(work->timer) >
-          solver->settings->adaptive_rho_fraction * solver->info->setup_time) {
-        // Enough time has passed. We now get the number of iterations between
-        // the updates.
-        if (solver->settings->check_termination) {
-          // If check_termination is enabled, we round the number of iterations
-          // between
-          // rho updates to the closest multiple of check_termination
-          solver->settings->adaptive_rho_interval =
-          (OSQPInt)c_roundmultiple(iter, solver->settings->check_termination);
-         }
-         else {
-          // If check_termination is disabled, we round the number of iterations
-          // between
-          // updates to the closest multiple of the default check_termination
-          // interval.
-          solver->settings->adaptive_rho_interval = (OSQPInt)c_roundmultiple(iter, OSQP_CHECK_TERMINATION);
-        }
+        // Compute the new z value using the restarted x value
+        OSQPMatrix_Axpy(work->data->A, work->x, work->z, 1.0, 0.0);
 
-        // Make sure the interval is not 0 and at least check_termination times
-          solver->settings->adaptive_rho_interval = c_max(
-          solver->settings->adaptive_rho_interval,
-          solver->settings->check_termination);
-      } // If time condition is met
-    }   // If adaptive rho enabled and interval set to auto®
-# else // OSQP_ENABLE_PROFILING
-    if (solver->settings->adaptive_rho && !solver->settings->adaptive_rho_interval) {
-      // Set adaptive_rho_interval to constant value
-      if (solver->settings->check_termination) {
-        // If check_termination is enabled, we set it to a multiple of the check
-        // termination interval
-        solver->settings->adaptive_rho_interval = OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION *
-                                                solver->settings->check_termination;
-      } else {
-        // If check_termination is disabled we set it to a predefined fix number
-        solver->settings->adaptive_rho_interval = OSQP_ADAPTIVE_RHO_FIXED;
+        work->inner_iter_cnt = 0;
       }
     }
-# endif // OSQP_ENABLE_PROFILING
 
-    // Adapt rho
-    if (solver->settings->adaptive_rho &&
-        solver->settings->adaptive_rho_interval &&
-        (iter % solver->settings->adaptive_rho_interval == 0)) {
-      // Update info with the residuals if it hasn't been done before
-# ifdef OSQP_ENABLE_PRINTING
+    // Store the relative KKT error for the first iteration after a restart or rho update happened
+    if(work->restarted || work->rho_updated) {
+      work->last_rel_kkt = solver->info->rel_kkt_error;
+    }
 
-      if (!can_check_termination && !can_print) {
-        // Information has not been computed neither for termination or printing
-        // reasons
-        update_info(solver, iter, compute_obj, 0);
+    work->restarted = 0;
+    work->rho_updated = 0;
+
+    if(settings->restart_enable) {
+      /* Update the restart vector */
+      update_restart_vectors(solver);
+
+      /* Check the restarting criteria */
+      if( solver->info->iter > 1)   // Don't restart on the first iteration, no matter the error
+      {
+        // There has been a sufficient decrease in the KKT error, restart
+        if( (solver->info->rel_kkt_error <= ( settings->restart_sufficient * work->last_rel_kkt)) )
+        {
+          osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RESTART_SUFFICIENT);
+          restart(solver);
+        }
+        //
+        else if( ( (solver->info->rel_kkt_error <= (settings->restart_necessary * work->last_rel_kkt))
+                    && (solver->info->rel_kkt_error < work->prev_rel_kkt)) )
+        {
+          osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RESTART_NECESSARY);
+          restart(solver);
+        }
+        // Too many iterations have passed, restart
+        else if( work->inner_iter_cnt > (settings->restart_artifical * solver->info->iter) )
+        {
+          osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RESTART_ARTIFICIAL);
+          restart(solver);
+        }
       }
-# else /* ifdef OSQP_ENABLE_PRINTING */
+    }
 
-      if (!can_check_termination) {
-        // Information has not been computed before for termination check
-        update_info(solver, iter, compute_obj, 0);
+    /* Rho adaptation logic */
+#if OSQP_EMBEDDED_MODE != 1
+    // Further processing to determine if the KKT error has decresed
+    // This requires values computed in update_info, so must be done here.
+    if(can_adapt_rho && (settings->adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR)) {
+      if(solver->info->rel_kkt_error <= ( settings->adaptive_rho_fraction * work->last_rel_kkt) ) {
+        can_adapt_rho = 1;
       }
-# endif /* ifdef OSQP_ENABLE_PRINTING */
+      else {
+        can_adapt_rho = 0;
+      }
+    }
 
-      // Actually update rho
+    // Update rho if requested or if the solver restarted
+    if((settings->adaptive_rho != OSQP_ADAPTIVE_RHO_UPDATE_DISABLED)
+       && work->restarted || can_adapt_rho) {
       osqp_profiler_event_mark(OSQP_PROFILER_EVENT_RHO_UPDATE);
+
       if (adapt_rho(solver)) {
         c_eprint("Failed rho update");
         exitflag = 1;
         goto exit;
       }
     }
+
+    if(work->rho_updated) {
+      work->last_rel_kkt = solver->info->rel_kkt_error;
+    }
 #endif // OSQP_EMBEDDED_MODE != 1
 
+    // Store the relkkt for this iteration for future comparison
+    work->prev_rel_kkt = solver->info->rel_kkt_error;
+
+#ifdef OSQP_ENABLE_PRINTING
+    // Print summary if requested or if rho was updated
+    if (can_print
+       || (settings->verbose && work->rho_updated)
+       || (settings->verbose && work->restarted)) {
+      print_summary(solver);
+    }
+#endif /* ifdef OSQP_ENABLE_PRINTING */
   }        // End of ADMM for loop
 
 
@@ -691,18 +825,18 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
     if (!can_print) {
       // Update info only if it hasn't been updated before for printing
       // reasons
-      update_info(solver, iter - 1, compute_obj, 0);
+      update_info(solver, iter - 1, 0);
     }
 #else /* ifdef OSQP_ENABLE_PRINTING */
 
     // If no printing is enabled, update info directly
-    update_info(solver, iter - 1, compute_obj, 0);
+    update_info(solver, iter - 1, 0);
 #endif /* ifdef OSQP_ENABLE_PRINTING */
 
 #ifdef OSQP_ENABLE_PRINTING
 
     /* Print summary */
-    if (solver->settings->verbose && !work->summary_printed) print_summary(solver);
+    if (settings->verbose && !work->summary_printed) print_summary(solver);
 #endif /* ifdef OSQP_ENABLE_PRINTING */
 
     /* Check whether a termination criterion is triggered */
@@ -712,14 +846,17 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
   // Compute objective value in case it was not
   // computed during the iterations
-  if (!compute_obj && has_solution(solver->info)){
-    solver->info->obj_val = compute_obj_val(solver, work->x);
+  if (has_solution(solver->info)){
+    compute_obj_val_dual_gap(solver, work->x, work->y,
+                             &(solver->info->obj_val),
+                             &(solver->info->dual_obj_val),
+                             &(solver->info->duality_gap));
   }
 
 
 #ifdef OSQP_ENABLE_PRINTING
   /* Print summary for last iteration */
-  if (solver->settings->verbose && !work->summary_printed) {
+  if (settings->verbose && !work->summary_printed) {
     print_summary(solver);
   }
 #endif /* ifdef OSQP_ENABLE_PRINTING */
@@ -754,7 +891,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
 #ifndef OSQP_EMBEDDED_MODE
   // Polish the obtained solution
-  if (solver->settings->polishing && (solver->info->status_val == OSQP_SOLVED)) {
+  if (settings->polishing && (solver->info->status_val == OSQP_SOLVED)) {
     osqp_profiler_sec_push(OSQP_PROFILER_SEC_POLISH);
     exitflag = polish(solver);
     osqp_profiler_sec_pop(OSQP_PROFILER_SEC_POLISH);
@@ -792,7 +929,7 @@ osqp_profiler_sec_push(OSQP_PROFILER_SEC_OPT_SOLVE);
 
 #ifdef OSQP_ENABLE_PRINTING
   /* Print final footer */
-  if (solver->settings->verbose) print_footer(solver->info, solver->settings->polishing);
+  if (settings->verbose) print_footer(solver->info, settings->polishing);
 #endif /* ifdef OSQP_ENABLE_PRINTING */
 
   // Store solution
@@ -907,6 +1044,12 @@ OSQPInt osqp_cleanup(OSQPSolver* solver) {
     OSQPVectorf_free(work->delta_x);
     OSQPVectorf_free(work->Pdelta_x);
     OSQPVectorf_free(work->Adelta_x);
+
+    OSQPVectorf_free(work->restart_x);
+    OSQPVectorf_free(work->restart_y);
+
+    OSQPVectorf_free(work->last_x);
+    OSQPVectorf_free(work->last_y);
 
     // Free Settings
     if (solver->settings) c_free(solver->settings);
@@ -1074,6 +1217,11 @@ void osqp_cold_start(OSQPSolver *solver) {
   OSQPVectorf_set_scalar(work->x, 0.);
   OSQPVectorf_set_scalar(work->z, 0.);
   OSQPVectorf_set_scalar(work->y, 0.);
+
+  if(solver->settings->restart_enable) {
+    OSQPVectorf_set_scalar(work->restart_x, 0.);
+    OSQPVectorf_set_scalar(work->restart_y, 0.);
+  }
 
   /* Cold start the linear system solver */
   work->linsys_solver->warm_start(work->linsys_solver, work->x);
@@ -1283,10 +1431,16 @@ OSQPInt osqp_update_settings(OSQPSolver*         solver,
   settings->eps_dual_inf       = new_settings->eps_dual_inf;
   settings->scaled_termination = new_settings->scaled_termination;
   settings->check_termination  = new_settings->check_termination;
+  settings->check_dualgap      = new_settings->check_dualgap;
   settings->time_limit         = new_settings->time_limit;
 
   settings->delta              = new_settings->delta;
   settings->polish_refine_iter = new_settings->polish_refine_iter;
+
+  // restart_enable ignored
+  settings->restart_sufficient = new_settings->restart_sufficient;
+  settings->restart_necessary  = new_settings->restart_necessary;
+  settings->restart_artifical  = new_settings->restart_artifical;
 
   /* Update settings in the linear system solver */
   solver->work->linsys_solver->update_settings(solver->work->linsys_solver, settings);

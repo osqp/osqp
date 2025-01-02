@@ -55,6 +55,8 @@ typedef struct {
   OSQPVectorf* z;             ///< optimal z-solution obtained by polish
   OSQPVectorf* y;             ///< optimal y-solution obtained by polish
   OSQPFloat    obj_val;       ///< objective value at polished solution
+  OSQPFloat    dual_obj_val;  ///< Dual objective value at polished solution
+  OSQPFloat    duality_gap;   ///< Duality gap at polished solution
   OSQPFloat    prim_res;      ///< primal residual at polished solution
   OSQPFloat    dual_res;      ///< dual residual at polished solution
 } OSQPPolish;
@@ -130,12 +132,8 @@ struct OSQPWorkspace_ {
   OSQPVectorf* xtilde_view; ///< xtilde view into xz_tilde
   OSQPVectorf* ztilde_view; ///< ztilde view into xz_tilde
 
-  OSQPVectorf* x_prev;   ///< Previous x
-
-  /**< NB: Used also as workspace vector for dual residual */
-  OSQPVectorf* z_prev;   ///< Previous z
-
-  /**< NB: Used also as workspace vector for primal residual */
+  OSQPVectorf* x_prev;   ///< Previous x, used also as temp vector in primal info computation
+  OSQPVectorf* z_prev;   ///< Previous z, used also as temp vector in dual info computation
 
   /**
    * @name Primal and dual residuals workspace variables
@@ -147,6 +145,20 @@ struct OSQPWorkspace_ {
   OSQPVectorf* Ax;  ///< scaled A * x
   OSQPVectorf* Px;  ///< scaled P * x
   OSQPVectorf* Aty; ///< scaled A' * y
+
+  /** @} */
+
+  /**
+   * @name Objective and duality gap workspace variables
+   *
+   * Needed for objective/duality gap computation, tolerances computation, and
+   * approximate tolerances computation.
+   * @{
+   */
+  OSQPFloat    xtPx;            ///< scaled x' * P *x
+  OSQPFloat    qtx;             ///< scaled q' * x
+  OSQPFloat    SC;              ///< scaled support function value
+  OSQPFloat    scaled_dual_gap; ///< scaled primal-dual gap
 
   /** @} */
 
@@ -210,6 +222,29 @@ struct OSQPWorkspace_ {
 # ifdef OSQP_ENABLE_DERIVATIVES
   OSQPDerivativeData *derivative_data;
 # endif // ifdef OSQP_ENABLE_DERIVATIVES
+
+  /// Relative KKT of last rho update/restart
+  OSQPFloat last_rel_kkt;
+
+  /// Relative KKT error of last iteration
+  OSQPFloat prev_rel_kkt;
+
+  /// Flag indicating rho was updated during the solve
+  OSQPInt rho_updated;
+
+  /// Flat indicating there was a restart in the last iteration
+  OSQPInt restarted;
+
+  /// Number of iterations since the last restart
+  OSQPInt inner_iter_cnt;
+
+  /// Vectors holding the restart iterate
+  OSQPVectorf* restart_x;
+  OSQPVectorf* restart_y;
+
+  /// Vectors holding the x and y values from before the last restart/update
+  OSQPVectorf* last_x;
+  OSQPVectorf* last_y;
 };
 
 // NB: "typedef struct OSQPWorkspace_ OSQPWorkspace" is declared already
