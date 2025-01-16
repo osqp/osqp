@@ -64,7 +64,7 @@ Python
     prob = osqp.OSQP()
 
     # Setup workspace
-    prob.setup(P, q, A, l, u, warm_starting=True)
+    prob.setup(P, q, A, l, u, warm_start=True)
 
     # Solve problem for different values of gamma parameter
     for gamma in gammas:
@@ -103,7 +103,7 @@ Matlab
     prob = osqp;
 
     % Setup workspace
-    prob.setup(P, q, A, l, u, 'warm_starting', true);
+    prob.setup(P, q, A, l, u, 'warm_start', true);
 
     % Solve problem for different values of gamma parameter
     for i = 1 : length(gammas)
@@ -146,7 +146,7 @@ CVXPY
     # Solve problem for different values of gamma parameter
     for gamma_val in gammas:
         gamma.value = gamma_val
-        prob.solve(solver=OSQP, warm_starting=True)
+        prob.solve(solver=OSQP, warm_start=True)
 
 
 YALMIP
