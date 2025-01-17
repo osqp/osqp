@@ -1,7 +1,7 @@
 OSQP solver documentation
 ==========================
 
-[**Visit our GitHub Discussions page**](https://github.com/orgs/osqp/discussions)
+`Visit our GitHub Discussions page <https://github.com/orgs/osqp/discussions>`_
 for any questions related to the solver!
 
 The OSQP (Operator Splitting Quadratic Program) solver is a numerical
