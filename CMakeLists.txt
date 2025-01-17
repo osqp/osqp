@@ -195,6 +195,16 @@ endif()
 
 option(OSQP_ASAN "Enable ASAN" OFF)
 
+
+# This option is meant for either advanced users, or to run the unit tests to check that the
+# struct is being initialized fully
+option(OSQP_PACK_SETTINGS "Pack the settings struct by removing padding" OFF)
+mark_as_advanced(OSQP_PACK_SETTINGS)
+
+if(OSQP_PACK_SETTINGS)
+  message(STATUS "Packing settings struct")
+endif()
+
 cmake_dependent_option( OSQP_CODEGEN "Enable code generation"
                         ON
                         "OSQP_ALGEBRA_BUILTIN;NOT DEFINED OSQP_EMBEDDED_MODE" OFF )
@@ -444,12 +454,28 @@ endif()
 message( STATUS "Build demo executable: " ${OSQP_BUILD_DEMO_EXE} )
 
 if(OSQP_BUILD_DEMO_EXE)
-  add_executable(osqp_demo ${PROJECT_SOURCE_DIR}/examples/osqp_demo.c)
-  #target_include_directories(osqp_demo PRIVATE ${osqplib_includes})
+  set( OSQP_EXAMPLES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/examples/" )
+
+  add_executable(osqp_simple_demo
+                 ${OSQP_EXAMPLES_DIR}/osqp_simple_demo.c )
+  target_link_libraries(osqp_simple_demo osqpstatic ${osqplib_link_libs})
+
+  add_executable(osqp_demo
+                 ${OSQP_EXAMPLES_DIR}/osqp_demo.c
+                 ${OSQP_EXAMPLES_DIR}/problems/cvxqp2_s.c
+                 ${OSQP_EXAMPLES_DIR}/problems/qpcblend.c
+                 ${OSQP_EXAMPLES_DIR}/problems/qptest.c
+                 ${OSQP_EXAMPLES_DIR}/problems/hs21.c
+                 ${OSQP_EXAMPLES_DIR}/problems/hs35.c
+                 ${OSQP_EXAMPLES_DIR}/problems/primalc1.c
+                 ${OSQP_EXAMPLES_DIR}/problems/largeqp.c )
+  target_include_directories(osqp_demo PRIVATE
+                              ${osqplib_includes}
+                              ${OSQP_EXAMPLES_DIR}/problems )
   target_link_libraries(osqp_demo osqpstatic ${osqplib_link_libs})
 
   if(OSQP_CODEGEN)
-    add_executable(osqp_codegen_demo ${PROJECT_SOURCE_DIR}/examples/osqp_codegen_demo.c)
+    add_executable(osqp_codegen_demo ${OSQP_EXAMPLES_DIR}/osqp_codegen_demo.c)
     target_link_libraries(osqp_codegen_demo osqpstatic)
   endif()
 endif()

@@ -199,7 +199,7 @@ TEST_CASE_METHOD(basic_qp_test_fixture, "Basic QP: Settings", "[solve][qp]")
 
   // Setup solver with wrong settings->adaptive_rho
   tmp_int = settings->adaptive_rho;
-  settings->adaptive_rho = 2;
+  settings->adaptive_rho = _OSQP_ADAPTIVE_RHO_UPDATE_LAST_VALUE+5;
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,
                         data->A, data->l, data->u,
                         data->m, data->n, settings.get());
@@ -792,7 +792,7 @@ TEST_CASE_METHOD(basic_qp_test_fixture, "Basic QP: Update rho", "[update][qp]")
   rho = 0.7;
   osqp_set_default_settings(settings.get());
   settings->rho               = rho;
-  settings->adaptive_rho      = 0; // Disable adaptive rho for this test
+  settings->adaptive_rho      = OSQP_ADAPTIVE_RHO_UPDATE_DISABLED; // Disable adaptive rho for this test
   settings->eps_abs           = 5e-05;
   settings->eps_rel           = 5e-05;
   settings->check_termination = 1;
@@ -835,7 +835,7 @@ TEST_CASE_METHOD(basic_qp_test_fixture, "Basic QP: Update rho", "[update][qp]")
   // Create new problem with different rho and update it
   osqp_set_default_settings(settings.get());
   settings->rho               = 0.1;
-  settings->adaptive_rho      = 0;
+  settings->adaptive_rho      = OSQP_ADAPTIVE_RHO_UPDATE_DISABLED;
   settings->check_termination = 1;
   settings->eps_abs           = 5e-05;
   settings->eps_rel           = 5e-05;
@@ -893,7 +893,7 @@ TEST_CASE_METHOD(basic_qp_test_fixture, "Basic QP: Time limit", "[solve][qp]")
   // Define Solver settings as default
   osqp_set_default_settings(settings.get());
   settings->rho = 20;
-  settings->adaptive_rho = 0;
+  settings->adaptive_rho = OSQP_ADAPTIVE_RHO_UPDATE_DISABLED;
 
   // Check default time limit
   mu_assert("Basic QP test time limit: Default not correct",
@@ -957,7 +957,7 @@ TEST_CASE_METHOD(basic_qp_test_fixture, "Basic QP: Warm start", "[solve][qp][war
 
   // Setup problem-specific setting
   settings->check_termination = 1;
-  settings->adaptive_rho = 0;
+  settings->adaptive_rho = OSQP_ADAPTIVE_RHO_UPDATE_DISABLED;
 
   // Setup solver
   exitflag = osqp_setup(&tmpSolver, data->P, data->q,
