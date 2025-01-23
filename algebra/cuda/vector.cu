@@ -47,7 +47,7 @@ OSQPVectorf* OSQPVectorf_new(const OSQPFloat* a,
   if (!out) return OSQP_NULL;
 
   if (length > 0) OSQPVectorf_from_raw(out, a);
-  
+
   return out;
 }
 
@@ -127,7 +127,7 @@ OSQPVectori* OSQPVectori_calloc(OSQPInt length) {
 
   OSQPVectori* b = (OSQPVectori*) c_malloc(sizeof(OSQPVectori));
   if (!b) return OSQP_NULL;
-  
+
   b->length = length;
   if (length) {
     cuda_calloc((void **) &b->d_val, length * sizeof(OSQPInt));
@@ -250,6 +250,11 @@ void OSQPVectorf_set_scalar_conditional(OSQPVectorf*       a,
                                         OSQPFloat          sc_if_pos) {
 
   cuda_vec_set_sc_cond(a->d_val, test->d_val, sc_if_neg, sc_if_zero, sc_if_pos, a->length);
+}
+
+void OSQPVectorf_round_to_zero(OSQPVectorf* a,
+                               OSQPFloat    tol) {
+  cuda_vec_round(a->d_val, tol, a->length);
 }
 
 

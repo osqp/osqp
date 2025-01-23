@@ -48,4 +48,7 @@
 /* OSQP_USE_LONG */
 #cmakedefine OSQP_USE_LONG
 
+/* OSQP_PACK_SETTINGS (advanced usage) */
+#cmakedefine OSQP_PACK_SETTINGS
+
 #endif /* ifndef OSQP_CONFIGURE_H */

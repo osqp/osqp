@@ -75,7 +75,7 @@ static OSQPInt write_veci(FILE*          f,
 static OSQPInt write_OSQPVectorf(FILE*              f,
                                  const OSQPVectorf* vec,
                                  const char*        name) {
-  
+
   OSQPInt exitflag = OSQP_NO_ERROR;
   char vecf_name[MAX_VAR_LENGTH];
 
@@ -91,7 +91,7 @@ static OSQPInt write_OSQPVectorf(FILE*              f,
 static OSQPInt write_OSQPVectori(FILE*              f,
                                  const OSQPVectori* vec,
                                  const char*        name) {
-  
+
   OSQPInt exitflag = OSQP_NO_ERROR;
   char veci_name[MAX_VAR_LENGTH+4];
 
@@ -152,7 +152,7 @@ static OSQPInt write_OSQPMatrix(FILE*             f,
   fprintf(f, "  &%s,\n", csc_name);
   fprintf(f, "  %d\n", mat->symmetry);
   fprintf(f, "};\n");
-  
+
   return exitflag;
 }
 
@@ -164,7 +164,7 @@ static OSQPInt write_OSQPMatrix(FILE*             f,
 static OSQPInt write_settings(FILE*               f,
                               const OSQPSettings* settings,
                               const char*         prefix) {
-  
+
   if (!settings) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   fprintf(f, "/* Define the settings structure */\n");
@@ -196,9 +196,16 @@ static OSQPInt write_settings(FILE*               f,
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->eps_dual_inf);
   fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->scaled_termination);
   fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->check_termination);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->check_dualgap);
+
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->time_limit);
   fprintf(f, "  (OSQPFloat)%.20f,\n", settings->delta);
   fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->polish_refine_iter);
+
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", settings->restart_enable);
+  fprintf(f, "  (OSQPFloat)%.20f,\n", settings->restart_sufficient);
+  fprintf(f, "  (OSQPFloat)%.20f,\n", settings->restart_necessary);
+  fprintf(f, "  (OSQPFloat)%.20f,\n", settings->restart_artifical);
   fprintf(f, "};\n\n");
 
   return OSQP_NO_ERROR;
@@ -212,7 +219,7 @@ static OSQPInt write_settings(FILE*               f,
 static OSQPInt write_info(FILE*           f,
                           const OSQPInfo* info,
                           const char*     prefix) {
-  
+
   if (!info) return osqp_error(OSQP_WORKSPACE_NOT_INIT_ERROR);
 
   fprintf(f, "/* Define the info structure */\n");
@@ -221,9 +228,12 @@ static OSQPInt write_info(FILE*           f,
   fprintf(f, "  %d,\n", OSQP_UNSOLVED);
   fprintf(f, "  0,\n"); // status_polish
   fprintf(f, "  (OSQPFloat)%.20f,\n", OSQP_INFTY); // obj_val
+  fprintf(f, "  (OSQPFloat)%.20f,\n", OSQP_INFTY); // dual_obj_val
   fprintf(f, "  (OSQPFloat)%.20f,\n", OSQP_INFTY); // prim_res
   fprintf(f, "  (OSQPFloat)%.20f,\n", OSQP_INFTY); // dual_res
+  fprintf(f, "  (OSQPFloat)%.20f,\n", OSQP_INFTY); // duality_gap
   fprintf(f, "  0,\n"); // iter (iteration count)
+  fprintf(f, "  0,\n"); // restarts
   fprintf(f, "  0,\n"); // rho_updates
   fprintf(f, "  (OSQPFloat)%.20f,\n", info->rho_estimate);
   fprintf(f, "  (OSQPFloat)0.0,\n"); // setup_time
@@ -231,6 +241,8 @@ static OSQPInt write_info(FILE*           f,
   fprintf(f, "  (OSQPFloat)0.0,\n"); // update_time
   fprintf(f, "  (OSQPFloat)0.0,\n"); // polish_time
   fprintf(f, "  (OSQPFloat)0.0,\n"); // run_time
+  fprintf(f, "  (OSQPFloat)0.0,\n"); // primdual_int
+  fprintf(f, "  (OSQPFloat)0.0,\n"); // rel_kkt_error
   fprintf(f, "};\n\n");
 
   return OSQP_NO_ERROR;
@@ -478,6 +490,14 @@ static OSQPInt write_workspace(FILE*             f,
   sprintf(name, "%swork_z", prefix);
   GENERATE_ERROR(write_OSQPVectorf(f, work->z, name))
 
+  /* Write out the restart vectors, only if enabled */
+  if (solver->settings->restart_enable) {
+    sprintf(name, "%swork_restart_x", prefix);
+    GENERATE_ERROR(write_OSQPVectorf(f, work->restart_x, name))
+    sprintf(name, "%swork_restart_y", prefix);
+    GENERATE_ERROR(write_OSQPVectorf(f, work->restart_y, name))
+  }
+
   fprintf(f, "OSQPFloat   %swork_xz_tilde_val[%" OSQP_INT_FMT "];\n", prefix, n+m);
   fprintf(f, "OSQPVectorf %swork_xz_tilde = {\n  %swork_xz_tilde_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, n+m);
   fprintf(f, "OSQPVectorf %swork_xtilde_view = {\n  %swork_xz_tilde_val,\n  %" OSQP_INT_FMT "\n};\n", prefix, prefix, n);
@@ -535,7 +555,7 @@ static OSQPInt write_workspace(FILE*             f,
   if (solver->settings->scaling) {
     PROPAGATE_ERROR(write_scaling(f, work->scaling, prefix))
   }
-  
+
   fprintf(f, "/* Define the workspace structure */\n");
   fprintf(f, "OSQPWorkspace %swork = {\n", prefix);
   fprintf(f, "  &%sdata,\n", prefix);
@@ -566,6 +586,10 @@ static OSQPInt write_workspace(FILE*             f,
   fprintf(f, "  &%swork_Ax,\n", prefix);
   fprintf(f, "  &%swork_Px,\n", prefix);
   fprintf(f, "  &%swork_Aty,\n", prefix);
+  fprintf(f, "  (OSQPFloat)0.0,\n");  /* xtPx */
+  fprintf(f, "  (OSQPFloat)0.0,\n");  /* qtx */
+  fprintf(f, "  (OSQPFloat)0.0,\n");  /* SC */
+  fprintf(f, "  (OSQPFloat)0.0,\n");  /* scaled_dual_gap */
   fprintf(f, "  &%swork_delta_y,\n", prefix);
   fprintf(f, "  &%swork_Atdelta_y,\n", prefix);
   fprintf(f, "  &%swork_delta_x,\n", prefix);
@@ -592,6 +616,22 @@ static OSQPInt write_workspace(FILE*             f,
   fprintf(f, "  (OSQPFloat)0.0,\n"); // scaled_prim_res
   fprintf(f, "  (OSQPFloat)0.0,\n"); // scaled_dual_res
   fprintf(f, "  (OSQPFloat)%.20f,\n", work->rho_inv);
+
+  fprintf(f, "  (OSQPFloat)%.20f,\n", work->last_rel_kkt);
+  fprintf(f, "  (OSQPFloat)%.20f,\n", work->prev_rel_kkt);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", work->rho_updated);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", work->restarted);
+  fprintf(f, "  %" OSQP_INT_FMT ",\n", work->inner_iter_cnt);
+
+  if( solver->settings->restart_enable) {
+    fprintf(f, "  &%swork_restart_x,\n", prefix);
+    fprintf(f, "  &%swork_restart_y,\n", prefix);
+  } else {
+    fprintf(f, "  OSQP_NULL,\n");
+    fprintf(f, "  OSQP_NULL,\n");
+  }
+
+
   fprintf(f, "};\n\n");
 
   return exitflag;

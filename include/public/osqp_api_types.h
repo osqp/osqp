@@ -22,6 +22,12 @@ typedef double OSQPFloat; /* for numerical values  */
 typedef float OSQPFloat;  /* for numerical values  */
 # endif /* ifndef OSQP_USE_FLOAT */
 
+#ifdef OSQP_PACK_SETTINGS
+#define OSQP_ATTR_PACK __attribute__((packed))
+#else
+/* Don't put an attribute on when packing is disabled */
+#define OSQP_ATTR_PACK
+#endif
 
 /**
  *  Matrix in compressed-column form.
@@ -41,7 +47,7 @@ typedef struct {
 /**
  * User settings
  */
-typedef struct {
+typedef struct OSQP_ATTR_PACK {
   /* Note: If this struct is updated, ensure update_settings and validate_settings are also updated */
   // Linear algebra settings
   OSQPInt device;                             ///< device identifier; currently used for CUDA devices
@@ -68,12 +74,38 @@ typedef struct {
   osqp_precond_type cg_precond;       ///< Preconditioner to use in the CG method
 
   // adaptive rho logic
-  OSQPInt   adaptive_rho;           ///< boolean, is rho step size adaptive?
-  OSQPInt   adaptive_rho_interval;  ///< number of iterations between rho adaptations; if 0, then it is timing-based
-  OSQPFloat adaptive_rho_fraction;  ///< time interval for adapting rho (fraction of the setup time)
-  OSQPFloat adaptive_rho_tolerance; ///< tolerance X for adapting rho; new rho must be X times larger or smaller than the current one to change it
+  /**
+   * rho stepsize adaption method
+   */
+  OSQPInt adaptive_rho;
 
-  // TODO: allowing negative values for adaptive_rho_interval can eliminate the need for adaptive_rho
+  /**
+   * Interval between rho adaptations
+   *
+   * When adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS, this is the number of iterations
+   * between rho updates.
+   *
+   * Not used when adaptive_rho is any other value.
+   */
+  OSQPInt adaptive_rho_interval;
+
+  /**
+   * Adaptation parameter controlling when non-fixed rho adaptations occur.
+   *
+   * - When adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_TIME, this is the fraction of the
+   *   setup time to use as the rho adaptation interval.
+   * - When adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR, this is the fraction of
+   *   the previous KKT error to adapt rho at.
+   * - Not used for any other adaptive_rho value.
+   */
+  OSQPFloat adaptive_rho_fraction;
+
+  /**
+   * Tolerance applied when adapting rho.
+   *
+   * New rho must be X times larger or smaller than the current one to change it
+   */
+  OSQPFloat adaptive_rho_tolerance;
 
   // termination parameters
   OSQPInt   max_iter;               ///< maximum number of iterations
@@ -83,11 +115,52 @@ typedef struct {
   OSQPFloat eps_dual_inf;           ///< dual infeasibility tolerance
   OSQPInt   scaled_termination;     ///< boolean; use scaled termination criteria
   OSQPInt   check_termination;      ///< integer, check termination interval; if 0, checking is disabled
+  OSQPInt   check_dualgap;          ///< Boolean; use duality gap termination criteria
   OSQPFloat time_limit;             ///< maximum time to solve the problem (seconds)
 
   // polishing parameters
   OSQPFloat delta;                  ///< regularization parameter for polishing
   OSQPInt   polish_refine_iter;     ///< number of iterative refinement steps in polishing
+
+  // Restarting parameters
+
+  /**
+   * Enable restarting of the algorithm
+   */
+  OSQPInt   restart_enable;
+
+  /**
+   * Fraction of relative KKT at last restart to restart again.
+   *
+   * This represents a sufficient decrease in the relative KKT
+   * (e.g. good progress was made).
+   *
+   * relKKT(x_(n,t), y_(n,t)) <= restart_sufficient * relKKT(x_(n,0), y(n,_0))
+   */
+  OSQPFloat restart_sufficient;
+
+  /**
+   * Fraction of relative KKT at last restart after which any increase
+   * in the relative KKT at an iteration leads to a restart.
+   *
+   * This represents the decrease in the relative KKT error required
+   * before a restart due to poor progress is done.
+   *
+   * relKKT(x_(n,t), y_(n,t)) <= restart_necessary * relKKT(x_(n,0), y(n,_0))
+   * and
+   * relKKT(x_(n,t), y_(n,t)) > relKKT(x_(n,t-1), y_(n,t-1))
+   */
+  OSQPFloat restart_necessary;
+
+  /**
+   * Fraction of the total iterations (outer+inner) to restart after.
+   *
+   * This represents the inner loop taking too many iterations and not making
+   * progress.
+   *
+   * n >= restart_artifical * k
+   */
+  OSQPFloat restart_artifical;
 } OSQPSettings;
 
 
@@ -102,11 +175,14 @@ typedef struct {
 
   // solution quality
   OSQPFloat obj_val;      ///< Primal objective value
+  OSQPFloat dual_obj_val; ///< Dual objective value
   OSQPFloat prim_res;     ///< Norm of primal residual
   OSQPFloat dual_res;     ///< Norm of dual residual
+  OSQPFloat duality_gap;  ///< Duality gap (Primal obj - Dual obj)
 
   // algorithm information
   OSQPInt   iter;         ///< Number of iterations taken
+  OSQPInt   restarts;     ///< Number of restarts
   OSQPInt   rho_updates;  ///< Number of rho updates performned
   OSQPFloat rho_estimate; ///< Best rho estimate so far from residuals
 
@@ -116,6 +192,10 @@ typedef struct {
   OSQPFloat update_time; ///< Update phase time (seconds)
   OSQPFloat polish_time; ///< Polish phase time (seconds)
   OSQPFloat run_time;    ///< Total solve time (seconds)
+
+  // Convergence information
+  OSQPFloat primdual_int;  ///< Integral of duality gap over time (Primal-dual integral), requires profiling
+  OSQPFloat rel_kkt_error; ///< Relative KKT error
 } OSQPInfo;
 
 
