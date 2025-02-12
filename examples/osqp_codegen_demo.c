@@ -112,9 +112,9 @@ int main(int argc, char *argv[]) {
 
   /* Cleanup */
   osqp_cleanup(solver);
-  if (A) free(A);
-  if (P) free(P);
-  if (settings) free(settings);
+  free(A);
+  free(P);
+  free(settings);
 
   return (int)exitflag;
 }

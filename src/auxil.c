@@ -67,6 +67,7 @@ OSQPInt adapt_rho(OSQPSolver* solver) {
       (rho_new < settings->rho / settings->adaptive_rho_tolerance)) {
     exitflag                 = osqp_update_rho(solver, rho_new);
     info->rho_updates += 1;
+    solver->work->rho_updated = 1;
   }
 
   return exitflag;
@@ -227,21 +228,81 @@ void update_y(OSQPSolver* solver) {
 
 }
 
-OSQPFloat compute_obj_val(const OSQPSolver*  solver,
-                          const OSQPVectorf* x) {
-
-  OSQPFloat obj_val;
+void compute_obj_val_dual_gap(const OSQPSolver*  solver,
+                              const OSQPVectorf* x,
+                              const OSQPVectorf* y,
+                                    OSQPFloat*   prim_obj_val,
+                                    OSQPFloat*   dual_obj_val,
+                                    OSQPFloat*   duality_gap) {
+  OSQPFloat quad_term = 0.0;
+  OSQPFloat lin_term  = 0.0;
+  OSQPFloat sup_term  = 0.0;
   OSQPWorkspace* work = solver->work;
 
   /* NB: The function is always called after dual_res is computed */
-  obj_val = 0.5 * OSQPVectorf_dot_prod(work->Px, x) +
-            OSQPVectorf_dot_prod(work->data->q, x);
+  quad_term = OSQPVectorf_dot_prod(work->Px, x);
+  lin_term  = OSQPVectorf_dot_prod(work->data->q, x);
+
+  /* Compute the support function of the constraints, SC(y) = u'*max(y, 0) + l'*min(y, 0)
+     by projecting y onto the polar of the recession cone of C=[l,u], then doing the dot products */
+  OSQPVectorf_copy(work->z_prev, y);
+  OSQPVectorf_project_polar_reccone(work->z_prev,
+                                    work->data->l,
+                                    work->data->u,
+                                    OSQP_INFTY * OSQP_MIN_SCALING);
+
+  // Round anything in the range [-OSQP_ZERO_DEADZONE, OSQP_ZERO_DEADZONE] to 0 to
+  // prevent very small (i.e., 1e-20) values from blowing up the numerics.
+  OSQPVectorf_round_to_zero(work->z_prev, OSQP_ZERO_DEADZONE);
+
+  sup_term  = OSQPVectorf_dot_prod_signed(work->data->u, work->z_prev, +1);
+  sup_term += OSQPVectorf_dot_prod_signed(work->data->l, work->z_prev, -1);
+
+  /* Primal objective value is 0.5*x^T P x + q^T x */
+  *prim_obj_val = 0.5 * quad_term + lin_term;
+
+  /* Dual objective value is -0.5*x^T P x - SC(y)*/
+  *dual_obj_val = -0.5 * quad_term - sup_term;
+
+  /* Duality gap is x^T P x + q^T x + SC(y) */
+  work->scaled_dual_gap = quad_term + lin_term + sup_term;
 
   if (solver->settings->scaling) {
-    obj_val *= work->scaling->cinv;
+    *prim_obj_val *= work->scaling->cinv;
+    *dual_obj_val *= work->scaling->cinv;
+
+    // We always store the duality gap in the info as unscaled (since it is for the user),
+    // but we keep the scaled version to use as a termination check when requested.
+    *duality_gap = work->scaling->cinv * work->scaled_dual_gap;
+  } else {
+    *duality_gap = work->scaled_dual_gap;
   }
 
-  return obj_val;
+  /* Save cost values for later use in termination tolerance computation */
+  work->xtPx = quad_term;
+  work->qtx  = lin_term;
+  work->SC   = sup_term;
+}
+
+static OSQPFloat compute_duality_gap_tol(const OSQPSolver* solver,
+                                               OSQPFloat   eps_abs,
+                                               OSQPFloat   eps_rel) {
+  OSQPFloat max_rel_eps = 0.0;
+  OSQPSettings*  settings = solver->settings;
+  OSQPWorkspace* work     = solver->work;
+
+  /* Compute max{ |x'*P*x|, |q'*x|, |SC(y)|} */
+  max_rel_eps = c_absval(work->xtPx);                     /* |x'P*x| */
+  max_rel_eps = c_max(max_rel_eps, c_absval(work->qtx));  /* |q'*x| */
+  max_rel_eps = c_max(max_rel_eps, c_absval(work->SC));   /* |SC(y)| */
+
+  /* Unscale the termination tolerance if required*/
+  if (settings->scaling && !settings->scaled_termination) {
+    max_rel_eps = work->scaling->cinv * max_rel_eps;
+  }
+
+  // eps_duality_gap
+  return eps_abs + eps_rel * max_rel_eps;
 }
 
 static OSQPFloat compute_prim_res(OSQPSolver*        solver,
@@ -614,7 +675,6 @@ void store_solution(OSQPSolver *solver, OSQPSolution* solution) {
 
 void update_info(OSQPSolver* solver,
                  OSQPInt     iter,
-                 OSQPInt     compute_objective,
                  OSQPInt     polishing) {
 
   OSQPVectorf* x;
@@ -622,7 +682,9 @@ void update_info(OSQPSolver* solver,
   OSQPVectorf* y;                   // Allocate pointers to vectors
 
   // objective value, residuals
-  OSQPFloat* obj_val;
+  OSQPFloat* prim_obj_val;
+  OSQPFloat* dual_obj_val;
+  OSQPFloat* dual_gap;
   OSQPFloat* prim_res;
   OSQPFloat* dual_res;
 
@@ -636,27 +698,31 @@ void update_info(OSQPSolver* solver,
 #ifndef OSQP_EMBEDDED_MODE
 
   if (polishing) {
-    x        = work->pol->x;
-    y        = work->pol->y;
-    z        = work->pol->z;
-    obj_val  = &work->pol->obj_val;
-    prim_res = &work->pol->prim_res;
-    dual_res = &work->pol->dual_res;
+    x            = work->pol->x;
+    y            = work->pol->y;
+    z            = work->pol->z;
+    prim_obj_val = &work->pol->obj_val;
+    dual_obj_val = &work->pol->dual_obj_val;
+    dual_gap     = &work->pol->duality_gap;
+    prim_res     = &work->pol->prim_res;
+    dual_res     = &work->pol->dual_res;
 # ifdef OSQP_ENABLE_PROFILING
-    run_time = &info->polish_time;
+    run_time     = &info->polish_time;
 # endif /* ifdef OSQP_ENABLE_PROFILING */
   }
   else {
 #endif // OSQP_EMBEDDED_MODE
-    x          = work->x;
-    y          = work->y;
-    z          = work->z;
-    obj_val    = &info->obj_val;
-    prim_res   = &info->prim_res;
-    dual_res   = &info->dual_res;
-    info->iter = iter;
+    x            = work->x;
+    y            = work->y;
+    z            = work->z;
+    prim_obj_val = &info->obj_val;
+    dual_obj_val = &info->dual_obj_val;
+    dual_gap     = &info->duality_gap;
+    prim_res     = &info->prim_res;
+    dual_res     = &info->dual_res;
+    info->iter   = iter;
 #ifdef OSQP_ENABLE_PROFILING
-    run_time   = &info->solve_time;
+    run_time     = &info->solve_time;
 #endif /* ifdef OSQP_ENABLE_PROFILING */
 #ifndef OSQP_EMBEDDED_MODE
 }
@@ -674,15 +740,21 @@ void update_info(OSQPSolver* solver,
   // Compute dual residual; store P*x in work->Px
   *dual_res = compute_dual_res(solver, x, y);
 
-  // Compute the objective if needed
-  if (compute_objective) {
-    *obj_val = compute_obj_val(solver, x);
+  // Compute the objective and duality gap, store various temp values in work
+  compute_obj_val_dual_gap(solver, x, y, prim_obj_val, dual_obj_val, dual_gap);
+
+  // Compute the duality gap integral
+  if (!polishing) {
+    info->primdual_int += c_absval(*dual_gap);
   }
 
   // Update timing
 #ifdef OSQP_ENABLE_PROFILING
   *run_time = osqp_toc(work->timer);
 #endif /* ifdef OSQP_ENABLE_PROFILING */
+
+  // Compute the relative KKT error
+  info->rel_kkt_error = c_max( c_max(*dual_res, *prim_res), *dual_gap);
 
 #ifdef OSQP_ENABLE_PRINTING
   work->summary_printed = 0; // The just updated info have not been printed
@@ -736,9 +808,9 @@ void update_status(OSQPInfo* info,
 OSQPInt check_termination(OSQPSolver* solver,
                           OSQPInt     approximate) {
 
-  OSQPFloat eps_prim, eps_dual, eps_prim_inf, eps_dual_inf;
+  OSQPFloat eps_prim, eps_dual, eps_duality_gap, eps_prim_inf, eps_dual_inf;
   OSQPInt   exitflag;
-  OSQPInt   prim_res_check, dual_res_check, prim_inf_check, dual_inf_check;
+  OSQPInt   prim_res_check, dual_res_check, duality_gap_check, prim_inf_check, dual_inf_check;
   OSQPFloat eps_abs, eps_rel;
 
   OSQPInfo*      info     = solver->info;
@@ -749,6 +821,7 @@ OSQPInt check_termination(OSQPSolver* solver,
   exitflag       = 0;
   prim_res_check = 0; dual_res_check = 0;
   prim_inf_check = 0; dual_inf_check = 0;
+  duality_gap_check = 0;
 
   // Initialize tolerances
   eps_abs      = settings->eps_abs;
@@ -802,8 +875,29 @@ OSQPInt check_termination(OSQPSolver* solver,
     dual_inf_check = is_dual_infeasible(solver, eps_dual_inf);
   }
 
+  if (settings->check_dualgap ) {
+    // Compute duality gap tolerance
+    eps_duality_gap = compute_duality_gap_tol(solver, eps_abs, eps_rel);
+
+    // Duality gap check
+    if (settings->scaling && !settings->scaled_termination) {
+      // Use the unscaled duality gap value
+      if (c_absval(info->duality_gap) < eps_duality_gap) {
+        duality_gap_check = 1;
+      }
+    } else {
+      // Use the scaled duality gap value
+      if (c_absval(work->scaled_dual_gap) < eps_duality_gap) {
+        duality_gap_check = 1;
+      }
+    }
+  } else {
+    // Force to 1 to bypass the check
+    duality_gap_check = 1;
+  }
+
   // Compare checks to determine solver status
-  if (prim_res_check && dual_res_check) {
+  if (prim_res_check && dual_res_check && duality_gap_check) {
     // Update final information
     if (approximate) {
       update_status(info, OSQP_SOLVED_INACCURATE);
@@ -1034,11 +1128,18 @@ OSQPInt validate_settings(const OSQPSettings* settings,
   }
 
   if (from_setup &&
-      settings->adaptive_rho != 0 &&
-      settings->adaptive_rho != 1) {
-    c_eprint("adaptive_rho must be either 0 or 1");
+      settings->adaptive_rho < 0 ||
+      settings->adaptive_rho >= _OSQP_ADAPTIVE_RHO_UPDATE_LAST_VALUE) {
+    c_eprint("adaptive_rho not a valid choice");
     return 1;
   }
+
+#if !defined(OSQP_ENABLE_PROFILING)
+  if (from_setup && settings->adaptive_rho == OSQP_ADAPTIVE_RHO_UPDATE_TIME) {
+    c_eprint("adaptive_rho time-based adaptation requires profiling to be enabled");
+    return 1;
+  }
+#endif /* !defined(OSQP_ENABLE_PROFILING) */
 
   if (from_setup && settings->adaptive_rho_interval < 0) {
     c_eprint("adaptive_rho_interval must be nonnegative");
@@ -1097,6 +1198,12 @@ OSQPInt validate_settings(const OSQPSettings* settings,
     return 1;
   }
 
+  if (settings->check_dualgap != 0 &&
+      settings->check_dualgap != 1) {
+    c_eprint("check_dualgap must be either 0 or 1");
+    return 1;
+  }
+
   if (settings->time_limit <= 0.0) {
     c_eprint("time_limit must be positive\n");
     return 1;
@@ -1106,7 +1213,7 @@ OSQPInt validate_settings(const OSQPSettings* settings,
     c_eprint("delta must be positive");
     return 1;
   }
-  
+
   if (settings->polish_refine_iter < 0) {
     c_eprint("polish_refine_iter must be nonnegative");
     return 1;
