@@ -86,7 +86,7 @@ jobs:
             cmake --build $OSQP_BUILD_DIR_PREFIX --target test
 
         - name: Generate coverage
-          uses: imciner2/run-lcov@v1
+          uses: imciner2/run-lcov@v1.1
           with:
             input_directory: '${{ env.OSQP_BUILD_DIR_PREFIX }}'
             exclude: '"$GITHUB_WORKSPACE/tests/*" "$GITHUB_WORKSPACE/algebra/_common/lin_sys/qdldl/amd/*" "$GITHUB_WORKSPACE/build/*" "/usr/include/*"'
