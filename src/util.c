@@ -98,7 +98,7 @@ void print_setup_header(const OSQPSolver* solver) {
   c_print("algebra = %s", namebuf);
   c_print(",\n          ");
 
-  c_print("OSQPInt = %i bytes, OSQPFloat = %i bytes,\n          ", sizeof(OSQPInt), sizeof(OSQPFloat));
+  c_print("OSQPInt = %i bytes, OSQPFloat = %i bytes,\n          ", (int)sizeof(OSQPInt), (int)sizeof(OSQPFloat));
 
 #ifndef OSQP_EMBEDDED_MODE
   osqp_algebra_device_name(devicebuf, DEVICEBUFLEN);
