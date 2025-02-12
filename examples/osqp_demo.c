@@ -192,8 +192,8 @@ int main(int argc, char *argv[]) {
   osqp_cleanup(solver);
 
   if( dynamic_matrices ) {
-    if (qp_A) free(qp_A);
-    if (qp_P) free(qp_P);
+    free(qp_A);
+    free(qp_P);
   }
 
   if (settings && dynamic_settings)
