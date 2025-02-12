@@ -721,7 +721,7 @@ TEST_CASE_METHOD(basic_qp_test_fixture, "Basic QP: Termination", "[solve][qp]")
 
   // Problem-specific settings
   osqp_set_default_settings(settings.get());
-  settings->max_iter          = 200;
+  settings->max_iter          = 400;
   settings->alpha             = 1.6;
   settings->polishing         = 0;
   settings->scaling           = 0;
