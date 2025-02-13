@@ -119,20 +119,40 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_CG_TOL_REDUCTION      (10)
 # define OSQP_CG_TOL_FRACTION       (0.15)
 
-// adaptive rho logic
-# define OSQP_ADAPTIVE_RHO (1)
+/*******************************
+ * Adaptive rho update methods *
+ *******************************/
+#define OSQP_ADAPTIVE_RHO_UPDATE_DISABLED   (0) ///< Disable rho adaptation
+#define OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS (1) ///< Fixed iteration interval
+#define OSQP_ADAPTIVE_RHO_UPDATE_TIME       (2) ///< Time based
+#define OSQP_ADAPTIVE_RHO_UPDATE_KKT_ERROR  (3) ///< KKT error decrease based
+
+// Sentinel value, not for user use
+#define _OSQP_ADAPTIVE_RHO_UPDATE_LAST_VALUE (4)
+
+#define OSQP_ADAPTIVE_RHO_UPDATE_DEFAULT (OSQP_ADAPTIVE_RHO_UPDATE_ITERATIONS)
+
+#define OSQP_ADAPTIVE_RHO_INTERVAL  (50)       ///< Default interval for iteration-based rho update
 
 #ifdef OSQP_ALGEBRA_CUDA
-#  define OSQP_ADAPTIVE_RHO_INTERVAL  (10)
 #  define OSQP_ADAPTIVE_RHO_TOLERANCE (2.0)
 #else
-#  define OSQP_ADAPTIVE_RHO_INTERVAL  (0)
 #  define OSQP_ADAPTIVE_RHO_TOLERANCE (5.0)          ///< tolerance for adopting new rho; minimum ratio between new rho and the current one
 #endif
 
 # define OSQP_ADAPTIVE_RHO_FRACTION (0.4)           ///< fraction of setup time after which we update rho
-# define OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION (4) ///< multiple of check_termination after which we update rho (if OSQP_ENABLE_PROFILING disabled)
-# define OSQP_ADAPTIVE_RHO_FIXED (100)              ///< number of iterations after which we update rho if termination_check  and OSQP_ENABLE_PROFILING are disabled
+
+/**
+ * Multiple of check_termination after which we update rho if using interval-based
+ * rho adaptation and adaptive_rho_interval == 0.
+ */
+# define OSQP_ADAPTIVE_RHO_MULTIPLE_TERMINATION (4)
+
+/**
+ * Number of iterations after which we update rho if using interval-based rho adaptation
+ * and adaptive_rho_interval == 0 and termination_check is disabled.
+ */
+# define OSQP_ADAPTIVE_RHO_FIXED (100)
 
 // termination parameters
 # define OSQP_MAX_ITER              (4000)
@@ -142,6 +162,14 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_EPS_DUAL_INF          (1E-4)
 # define OSQP_SCALED_TERMINATION    (0)
 # define OSQP_TIME_LIMIT            (1e10)     ///< Disable time limit by default
+
+// Disable the duality gap termination criteria on float builds by default for now, because
+// floats can't always give the necessary precision in the current solver architecture.
+#ifdef OSQP_USE_FLOAT
+# define OSQP_CHECK_DUALGAP         (0)
+#else
+# define OSQP_CHECK_DUALGAP         (1)
+#endif
 
 #ifdef OSQP_ALGEBRA_CUDA
 #  define OSQP_CHECK_TERMINATION (5)
@@ -187,5 +215,10 @@ extern const char * OSQP_ERROR_MESSAGE[];
 # define OSQP_CG_TOL_MIN    (1E-7)
 # define OSQP_CG_POLISH_TOL (1e-5)
 
+#ifdef OSQP_USE_FLOAT
+# define OSQP_ZERO_DEADZONE (1e-10) ///< Minimum permitted value
+#else
+# define OSQP_ZERO_DEADZONE (1e-15) ///< Minimum permitted value
+#endif
 
 #endif /* ifndef OSQP_API_CONSTANTS_H */

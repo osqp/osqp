@@ -211,6 +211,31 @@ TEST_CASE_METHOD(non_cvx_test_fixture, "Codegen: Data export", "[codegen],[nonco
             exitflag == expected_error);
 }
 
+TEST_CASE_METHOD(codegen_test_fixture, "Codegen: defines defaults", "[codegen],[defaults]")
+{
+  // Codegen defines
+  OSQPCodegenDefines_ptr defines{(OSQPCodegenDefines *)c_malloc(sizeof(OSQPCodegenDefines))};
+
+  // All elements of the struct are multiples of 32-bits/4 bytes
+  uint32_t* defines_int = (uint32_t*) defines.get();
+
+  // Put sentinel values into the structure
+  for(int i=0; i < sizeof(OSQPCodegenDefines)/4; i++)
+  {
+    defines_int[i] = 0xDEADBEEF;
+  }
+
+  // Define codegen settings
+  osqp_set_default_codegen_defines(defines.get());
+
+  // See if the sentinel value is still present after getting the default values
+  for(int i=0; i < sizeof(OSQPCodegenDefines)/4; i++)
+  {
+    INFO("i = " << i );
+    mu_assert("Codegendefine value not initialized", defines_int[i] != 0xDEADBEEF );
+  }
+}
+
 TEST_CASE_METHOD(codegen_test_fixture, "Codegen: defines", "[codegen]")
 {
   OSQPInt exitflag;

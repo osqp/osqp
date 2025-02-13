@@ -8,7 +8,7 @@ Status values and errors
 Status values
 -------------
 
-These are the exit statuses, their respective constants and values returned by the solver as defined in `constants.h <https://github.com/osqp/osqp/blob/master/include/constants.h>`_.
+These are the exit statuses, their respective constants and values returned by the solver as defined in `osqp_api_constants.h <https://github.com/osqp/osqp/blob/master/include/public/osqp_api_constants.h>`_.
 The *inaccurate* statuses define when the optimality, primal infeasibility or dual infeasibility conditions are satisfied with tolerances 10 times larger than the ones set.
 
 +------------------------------+-----------------------------------+-------+
