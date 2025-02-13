@@ -342,6 +342,20 @@ void OSQPVectorf_set_scalar_conditional(OSQPVectorf*       a,
 }
 
 
+void OSQPVectorf_round_to_zero(OSQPVectorf* a,
+                               OSQPFloat    tol) {
+  OSQPInt    i;
+  OSQPInt    length = a->length;
+  OSQPFloat* av     = a->values;
+
+  for(i=0; i < length; i++) {
+    if(c_absval(av[i]) < tol) {
+      av[i] = (OSQPFloat)0.0;
+    }
+  }
+}
+
+
 void OSQPVectorf_mult_scalar(OSQPVectorf* a,
                              OSQPFloat    sc) {
   OSQPInt    i;

@@ -32,12 +32,16 @@ jobs:
             - os: ubuntu-latest
               cmake_generator: "Unix Makefiles"
               test_target: "test"
+              # Disable ASAN right now because MKL seems to leak, which causes the tests to fail then
+              use_asan: "OFF"
             - os: macos-13
               cmake_generator: "Unix Makefiles"
               test_target: "test"
+              use_asan: "OFF"
             - os: windows-2022
               cmake_generator: "Visual Studio 17 2022"
               test_target: "RUN_TESTS"
+              use_asan: "OFF"
 
       name: ${{ matrix.os }}, ${{ matrix.long == 'ON' && 'long' || 'int' }}
 
@@ -115,6 +119,7 @@ jobs:
                   -DOSQP_ENABLE_PRINTING=ON \
                   -DOSQP_BUILD_UNITTESTS=ON \
                   -DOSQP_COVERAGE_CHECK=OFF \
+                  -DOSQP_ASAN=${{ matrix.use_asan }} \
                   -DOSQP_USE_LONG=${{ matrix.long }}
             cmake --build $OSQP_BUILD_DIR_PREFIX
 
