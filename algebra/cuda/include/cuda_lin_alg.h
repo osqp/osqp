@@ -118,6 +118,15 @@ void cuda_vec_set_sc_cond(OSQPFloat*     d_a,
                           OSQPInt        n);
 
 /**
+ * Round numbers within tol of 0 to 0.
+ *
+ * if |d_a[i]| < tol, then d_a[i] = 0.0
+ */
+void cuda_vec_round(OSQPFloat* d_a,
+                    OSQPFloat  tol,
+                    OSQPInt    n);
+
+/**
  * d_a[i] *= sc for i in [0,n-1]
  */
 void cuda_vec_mult_sc(OSQPFloat* d_a,

@@ -729,3 +729,32 @@ TEST_CASE("Vector: Scaled dot product", "[vector],[operation]")
     }
   }
 }
+
+TEST_CASE("Vector: Round-to-zero", "[vector],[operation]")
+{
+  lin_alg_sols_data_ptr data{generate_problem_lin_alg_sols_data()};
+
+  // Modify the data slightly and create the test vector
+  data->test_vec_ops_v1[1] = 0.1*OSQP_ZERO_DEADZONE;
+  data->test_vec_ops_v1[2] = -0.1*OSQP_ZERO_DEADZONE;
+  data->test_vec_ops_v1[4] = 0.01*OSQP_ZERO_DEADZONE;
+  data->test_vec_ops_v1[5] = -0.01*OSQP_ZERO_DEADZONE;
+
+  OSQPVectorf_ptr v1{OSQPVectorf_new(data->test_vec_ops_v1, data->test_vec_ops_n)};
+
+  OSQPVectorf_round_to_zero(v1.get(), OSQP_ZERO_DEADZONE);
+
+  OSQPFloat* val = (OSQPFloat*)malloc(data->test_vec_ops_n*sizeof(OSQPFloat));
+
+  OSQPVectorf_to_raw(val, v1.get());
+
+  mu_assert("Incorrect round-to-zero", val[1] == 0.0);
+  mu_assert("Incorrect round-to-zero", val[2] == 0.0);
+  mu_assert("Incorrect round-to-zero", val[4] == 0.0);
+  mu_assert("Incorrect round-to-zero", val[5] == 0.0);
+
+  mu_assert("Incorrect round-to-zero", abs(val[0]) > OSQP_ZERO_DEADZONE);
+  mu_assert("Incorrect round-to-zero", abs(val[3]) > OSQP_ZERO_DEADZONE);
+
+  free(val);
+}
