@@ -17,15 +17,15 @@ Python
     import osqp
     from osqp.nn.torch import OSQP
 
-    n_batch=1,
-    n=10,
-    m=3,
-    P_scale=1.0,
-    A_scale=1.0,
-    u_scale=1.0,
-    l_scale=1.0,
-    algebra=None,
-    solver_type=None,
+    n_batch=1
+    n=10
+    m=3
+    P_scale=1.0
+    A_scale=1.0
+    u_scale=1.0
+    l_scale=1.0
+    algebra=None
+    solver_type=None
 
     npr.seed(1)
     L = np.random.randn(n, n)
