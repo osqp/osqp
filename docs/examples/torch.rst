@@ -14,7 +14,6 @@ Python
     import torch
     import scipy.sparse as spa
 
-    import osqp
     from osqp.nn.torch import OSQP
 
     n_batch=1
@@ -24,8 +23,6 @@ Python
     A_scale=1.0
     u_scale=1.0
     l_scale=1.0
-    algebra=None
-    solver_type=None
 
     npr.seed(1)
     L = np.random.randn(n, n)
@@ -50,15 +47,13 @@ Python
     for x in [P_torch, q_torch, A_torch, l_torch, u_torch]:
         x.requires_grad = True
 
-    x_hats = OSQP(
+    problem = OSQP(
         P_idx,
         P_shape,
         A_idx,
         A_shape,
-        algebra=algebra,
-        solver_type=solver_type,
-    )(P_torch, q_torch, A_torch, l_torch, u_torch)
+    )
+    x_hats = problem(P_torch, q_torch, A_torch, l_torch, u_torch)
 
     dl_dxhat = x_hats.data - true_x_torch
     x_hats.backward(dl_dxhat)
-
