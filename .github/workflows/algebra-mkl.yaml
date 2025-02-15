@@ -22,7 +22,7 @@ jobs:
           # Stick with macos-13 because the macOS 14 runners are M1-based, and therefore MKL isn't available
           # (macOS 13 is the last release to support x86 processors)
           os: [ubuntu-latest, macos-13, windows-2022]
-          python-version: [3.9]
+          python-version: [3.12]
           long: ['ON', 'OFF']
 
           # MKL only supports double precision in the iterative solver, so that is the only combination we support as well.
