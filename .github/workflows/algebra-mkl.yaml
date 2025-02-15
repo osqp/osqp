@@ -97,8 +97,8 @@ jobs:
 
         - name: Install MKL
           run: |
-            conda install -c conda-forge llvm-openmp
-            conda install -c https://software.repos.intel.com/python/conda/ mkl-devel
+            conda install -c conda-forge llvm-openmp --set verbosity 2
+            conda install -c https://software.repos.intel.com/python/conda/ mkl-devel --set verbosity 2
             conda info
             conda list
 
