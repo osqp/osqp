@@ -41,7 +41,7 @@ Python
     A_shape = A.shape
 
     P_torch, q_torch, A_torch, l_torch, u_torch, true_x_torch = [
-        torch.DoubleTensor(x) if len(x) > 0 else torch.DoubleTensor() for x in [P.data, q, A.data, l, u, true_x]
+        torch.DoubleTensor(x) if len(x) > 0 else torch.DoubleTensor().requires_grad_() for x in [P.data, q, A.data, l, u, true_x]
     ]
 
     for x in [P_torch, q_torch, A_torch, l_torch, u_torch]:
@@ -55,5 +55,5 @@ Python
     )
     x_hats = problem(P_torch, q_torch, A_torch, l_torch, u_torch)
 
-    dl_dxhat = x_hats.data - true_x_torch
-    x_hats.backward(dl_dxhat)
+    loss = (true_x_torch - x_hats).square().sum()
+    loss.backward()
