@@ -124,10 +124,43 @@ content="https://osqp.org/docs/_static/img/logo.png">
              
   <section id="c">
 <span id="c-interface"></span><h1>C<a class="headerlink" href="#c" title="Link to this heading">¶</a></h1>
+<nav class="contents local" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#main-solver-api" id="id1">Main solver API</a></p>
+<ul>
+<li><p><a class="reference internal" href="#main-solver-functions" id="id2">Main solver functions</a></p></li>
+<li><p><a class="reference internal" href="#main-solver-data-types" id="id3">Main solver data types</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#warm-start" id="id4">Warm start</a></p></li>
+<li><p><a class="reference internal" href="#update-problem-data" id="id5">Update problem data</a></p></li>
+<li><p><a class="reference internal" href="#solver-settings" id="id6">Solver settings</a></p>
+<ul>
+<li><p><a class="reference internal" href="#settings-api" id="id7">Settings API</a></p></li>
+<li><p><a class="reference internal" href="#settings-structure" id="id8">Settings structure</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#compute-solution-derivatives" id="id9">Compute solution derivatives</a></p></li>
+<li><p><a class="reference internal" href="#code-generation" id="id10">Code generation</a></p></li>
+<li><p><a class="reference internal" href="#data-types" id="id11">Data types</a></p>
+<ul>
+<li><p><a class="reference internal" href="#primitive-types" id="id12">Primitive types</a></p></li>
+<li><p><a class="reference internal" href="#matrices" id="id13">Matrices</a></p>
+<ul>
+<li><p><a class="reference internal" href="#data" id="id14">Data</a></p></li>
+<li><p><a class="reference internal" href="#memory-management" id="id15">Memory management</a></p></li>
+<li><p><a class="reference internal" href="#common-matrices" id="id16">Common matrices</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
 <section id="main-solver-api">
-<span id="c-main-api"></span><h2>Main solver API<a class="headerlink" href="#main-solver-api" title="Link to this heading">¶</a></h2>
+<span id="c-main-api"></span><h2><a class="toc-backref" href="#id1" role="doc-backlink">Main solver API</a><a class="headerlink" href="#main-solver-api" title="Link to this heading">¶</a></h2>
 <section id="main-solver-functions">
-<h3>Main solver functions<a class="headerlink" href="#main-solver-functions" title="Link to this heading">¶</a></h3>
+<h3><a class="toc-backref" href="#id2" role="doc-backlink">Main solver functions</a><a class="headerlink" href="#main-solver-functions" title="Link to this heading">¶</a></h3>
 <p>The main C API is imported from the header <code class="code docutils literal notranslate"><span class="pre">osqp.h</span></code> and provides the following functions</p>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv410osqp_setupPP10OSQPSolverPK13OSQPCscMatrixPK9OSQPFloatPK13OSQPCscMatrixPK9OSQPFloatPK9OSQPFloat7OSQPInt7OSQPIntPK12OSQPSettings">
@@ -199,7 +232,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 
 </section>
 <section id="main-solver-data-types">
-<h3>Main solver data types<a class="headerlink" href="#main-solver-data-types" title="Link to this heading">¶</a></h3>
+<h3><a class="toc-backref" href="#id3" role="doc-backlink">Main solver data types</a><a class="headerlink" href="#main-solver-data-types" title="Link to this heading">¶</a></h3>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv410OSQPSolver">
 <span id="_CPPv310OSQPSolver"></span><span id="_CPPv210OSQPSolver"></span><span id="OSQPSolver"></span><span class="target" id="d5/df6/struct_o_s_q_p_solver"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPSolver</span></span></span><a class="headerlink" href="#_CPPv410OSQPSolver" title="Link to this definition">¶</a><br /></dt>
@@ -386,7 +419,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </section>
 </section>
 <section id="warm-start">
-<h2>Warm start<a class="headerlink" href="#warm-start" title="Link to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Warm start</a><a class="headerlink" href="#warm-start" title="Link to this heading">¶</a></h2>
 <p>OSQP automatically warm starts primal and dual variables from the previous QP solution. If you would like to warm start their values manually, you can use</p>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv415osqp_warm_startP10OSQPSolverPK9OSQPFloatPK9OSQPFloat">
@@ -408,7 +441,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 
 </section>
 <section id="update-problem-data">
-<span id="c-update-data"></span><h2>Update problem data<a class="headerlink" href="#update-problem-data" title="Link to this heading">¶</a></h2>
+<span id="c-update-data"></span><h2><a class="toc-backref" href="#id5" role="doc-backlink">Update problem data</a><a class="headerlink" href="#update-problem-data" title="Link to this heading">¶</a></h2>
 <p>Problem data can be updated without executing the setup again using the following functions.</p>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv420osqp_update_data_vecP10OSQPSolverPK9OSQPFloatPK9OSQPFloatPK9OSQPFloat">
@@ -454,9 +487,9 @@ content="https://osqp.org/docs/_static/img/logo.png">
 
 </section>
 <section id="solver-settings">
-<span id="c-settings"></span><h2>Solver settings<a class="headerlink" href="#solver-settings" title="Link to this heading">¶</a></h2>
+<span id="c-settings"></span><h2><a class="toc-backref" href="#id6" role="doc-backlink">Solver settings</a><a class="headerlink" href="#solver-settings" title="Link to this heading">¶</a></h2>
 <section id="settings-api">
-<h3>Settings API<a class="headerlink" href="#settings-api" title="Link to this heading">¶</a></h3>
+<h3><a class="toc-backref" href="#id7" role="doc-backlink">Settings API</a><a class="headerlink" href="#settings-api" title="Link to this heading">¶</a></h3>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv425osqp_set_default_settingsP12OSQPSettings">
 <span id="_CPPv325osqp_set_default_settingsP12OSQPSettings"></span><span id="_CPPv225osqp_set_default_settingsP12OSQPSettings"></span><span id="osqp_set_default_settings__OSQPSettingsP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a474d5a342f790fd178e61ef611422eb4"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_set_default_settings</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">OSQPSettings</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">settings</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425osqp_set_default_settingsP12OSQPSettings" title="Link to this definition">¶</a><br /></dt>
@@ -523,9 +556,39 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </dl>
 </dd></dl>
 
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv416OSQPSettings_newv">
+<span id="_CPPv316OSQPSettings_newv"></span><span id="_CPPv216OSQPSettings_newv"></span><span id="OSQPSettings_new"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1ad971adb797ee27d2526e9738cdf2397d"></span><span class="n"><span class="pre">OSQPSettings</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">OSQPSettings_new</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416OSQPSettings_newv" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Allocate a new OSQPSettings object with the default settings.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Not available in embedded mode (requires malloc)</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Pointer to new settings object, or null on error </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv417OSQPSettings_freeP12OSQPSettings">
+<span id="_CPPv317OSQPSettings_freeP12OSQPSettings"></span><span id="_CPPv217OSQPSettings_freeP12OSQPSettings"></span><span id="OSQPSettings_free__OSQPSettingsP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a7adf92fd211c19abcd5a180ff1a3040f"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPSettings_free</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">OSQPSettings</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">settings</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417OSQPSettings_freeP12OSQPSettings" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Free an OSQPSettings object.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Not available in embedded mode (requires free)</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>settings</strong> – The settings object to free </p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="settings-structure">
-<h3>Settings structure<a class="headerlink" href="#settings-structure" title="Link to this heading">¶</a></h3>
+<h3><a class="toc-backref" href="#id8" role="doc-backlink">Settings structure</a><a class="headerlink" href="#settings-structure" title="Link to this heading">¶</a></h3>
 <p>The setting structure has the following fields.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -534,7 +597,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </section>
 </section>
 <section id="compute-solution-derivatives">
-<span id="c-derivatives"></span><h2>Compute solution derivatives<a class="headerlink" href="#compute-solution-derivatives" title="Link to this heading">¶</a></h2>
+<span id="c-derivatives"></span><h2><a class="toc-backref" href="#id9" role="doc-backlink">Compute solution derivatives</a><a class="headerlink" href="#compute-solution-derivatives" title="Link to this heading">¶</a></h2>
 <p>Adjoint derivatives of the QP problem can be computed at the current solution.</p>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv431osqp_adjoint_derivative_computeP10OSQPSolverP9OSQPFloatP9OSQPFloat">
@@ -605,23 +668,8 @@ content="https://osqp.org/docs/_static/img/logo.png">
 
 </section>
 <section id="code-generation">
-<span id="c-code-generation"></span><h2>Code generation<a class="headerlink" href="#code-generation" title="Link to this heading">¶</a></h2>
+<span id="c-code-generation"></span><h2><a class="toc-backref" href="#id10" role="doc-backlink">Code generation</a><a class="headerlink" href="#code-generation" title="Link to this heading">¶</a></h2>
 <p>The QP problem and all solver data can be written to a problem workspace for use by OSQP in embedded mode.</p>
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv432osqp_set_default_codegen_definesP18OSQPCodegenDefines">
-<span id="_CPPv332osqp_set_default_codegen_definesP18OSQPCodegenDefines"></span><span id="_CPPv232osqp_set_default_codegen_definesP18OSQPCodegenDefines"></span><span id="osqp_set_default_codegen_defines__OSQPCodegenDefinesP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a0ae3080b46a6b152fac9dba209def129"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_set_default_codegen_defines</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv418OSQPCodegenDefines" title="OSQPCodegenDefines"><span class="n"><span class="pre">OSQPCodegenDefines</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">defines</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv432osqp_set_default_codegen_definesP18OSQPCodegenDefines" title="Link to this definition">¶</a><br /></dt>
-<dd><p>Set default codegen define values.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">defines</span></code> structure must already be allocated in memory.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>defines</strong> – Structure to set to default values. </p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv412osqp_codegenP10OSQPSolverPKcPKcP18OSQPCodegenDefines">
 <span id="_CPPv312osqp_codegenP10OSQPSolverPKcPKcP18OSQPCodegenDefines"></span><span id="_CPPv212osqp_codegenP10OSQPSolverPKcPKcP18OSQPCodegenDefines"></span><span id="osqp_codegen__OSQPSolverP.cCP.cCP.OSQPCodegenDefinesP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a10ebd22dc7305907d095a4f6a8617b4a"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_codegen</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv410OSQPSolver" title="OSQPSolver"><span class="n"><span class="pre">OSQPSolver</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">solver</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">output_dir</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">prefix</span></span>, <a class="reference internal" href="#_CPPv418OSQPCodegenDefines" title="OSQPCodegenDefines"><span class="n"><span class="pre">OSQPCodegenDefines</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">defines</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412osqp_codegenP10OSQPSolverPKcPKcP18OSQPCodegenDefines" title="Link to this definition">¶</a><br /></dt>
@@ -641,6 +689,51 @@ content="https://osqp.org/docs/_static/img/logo.png">
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Exitflag for errors (0 if no errors) </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv432osqp_set_default_codegen_definesP18OSQPCodegenDefines">
+<span id="_CPPv332osqp_set_default_codegen_definesP18OSQPCodegenDefines"></span><span id="_CPPv232osqp_set_default_codegen_definesP18OSQPCodegenDefines"></span><span id="osqp_set_default_codegen_defines__OSQPCodegenDefinesP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a0ae3080b46a6b152fac9dba209def129"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">osqp_set_default_codegen_defines</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv418OSQPCodegenDefines" title="OSQPCodegenDefines"><span class="n"><span class="pre">OSQPCodegenDefines</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">defines</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv432osqp_set_default_codegen_definesP18OSQPCodegenDefines" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Set default codegen define values.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">defines</span></code> structure must already be allocated in memory.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>defines</strong> – Structure to set to default values. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv422OSQPCodegenDefines_newv">
+<span id="_CPPv322OSQPCodegenDefines_newv"></span><span id="_CPPv222OSQPCodegenDefines_newv"></span><span id="OSQPCodegenDefines_new"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a3dc0ef63c20b8d8c137b3f2b466abd8f"></span><a class="reference internal" href="#_CPPv418OSQPCodegenDefines" title="OSQPCodegenDefines"><span class="n"><span class="pre">OSQPCodegenDefines</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">OSQPCodegenDefines_new</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv422OSQPCodegenDefines_newv" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Allocate a new <a class="reference internal" href="#db/da8/struct_o_s_q_p_codegen_defines"><span class="std std-ref">OSQPCodegenDefines</span></a> object with the default options.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Not available in embedded mode (requires malloc)</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Pointer to new codegen defines object, or null on error </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv423OSQPCodegenDefines_freeP18OSQPCodegenDefines">
+<span id="_CPPv323OSQPCodegenDefines_freeP18OSQPCodegenDefines"></span><span id="_CPPv223OSQPCodegenDefines_freeP18OSQPCodegenDefines"></span><span id="OSQPCodegenDefines_free__OSQPCodegenDefinesP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a565eefc1cd3b73b8c82c15c576fc7b18"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPCodegenDefines_free</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv418OSQPCodegenDefines" title="OSQPCodegenDefines"><span class="n"><span class="pre">OSQPCodegenDefines</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">defs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv423OSQPCodegenDefines_freeP18OSQPCodegenDefines" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Free an <a class="reference internal" href="#db/da8/struct_o_s_q_p_codegen_defines"><span class="std std-ref">OSQPCodegenDefines</span></a> object.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Not available in embedded mode (requires free)</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>defs</strong> – The defines object to free </p>
 </dd>
 </dl>
 </dd></dl>
@@ -692,13 +785,18 @@ content="https://osqp.org/docs/_static/img/logo.png">
 
 </section>
 <section id="data-types">
-<span id="c-data-types"></span><h2>Data types<a class="headerlink" href="#data-types" title="Link to this heading">¶</a></h2>
+<span id="c-data-types"></span><h2><a class="toc-backref" href="#id11" role="doc-backlink">Data types</a><a class="headerlink" href="#data-types" title="Link to this heading">¶</a></h2>
+<section id="primitive-types">
+<h3><a class="toc-backref" href="#id12" role="doc-backlink">Primitive types</a><a class="headerlink" href="#primitive-types" title="Link to this heading">¶</a></h3>
 <p>The most basic used datatypes are</p>
 <ul class="simple">
 <li><p><code class="code docutils literal notranslate"><span class="pre">OSQPInt</span></code>: can be <code class="code docutils literal notranslate"><span class="pre">long</span></code> or <code class="code docutils literal notranslate"><span class="pre">int</span></code> if the compiler flag <code class="code docutils literal notranslate"><span class="pre">OSQP_USE_LONG</span></code> is set or not</p></li>
 <li><p><code class="code docutils literal notranslate"><span class="pre">OSQPFloat</span></code>: can be a <code class="code docutils literal notranslate"><span class="pre">float</span></code> or a <code class="code docutils literal notranslate"><span class="pre">double</span></code> if the compiler flag <code class="code docutils literal notranslate"><span class="pre">OSQP_USE_FLOAT</span></code> is set or not.</p></li>
 </ul>
-<p>The matrices are defined in <a class="reference external" href="https://people.sc.fsu.edu/~jburkardt/data/cc/cc.html">Compressed Sparse Column (CSC) format</a> using zero-based indexing.</p>
+</section>
+<section id="matrices">
+<h3><a class="toc-backref" href="#id13" role="doc-backlink">Matrices</a><a class="headerlink" href="#matrices" title="Link to this heading">¶</a></h3>
+<p>The matrices are defined in <a class="reference external" href="https://people.sc.fsu.edu/~jburkardt/data/cc/cc.html">Compressed Sparse Column (CSC) format</a> using zero-based indexing, using the <code class="xref c c-struct docutils literal notranslate"><span class="pre">OSQPCscMatrix</span></code> datatype.</p>
 <dl class="cpp struct">
 <dt class="sig sig-object cpp" id="_CPPv413OSQPCscMatrix">
 <span id="_CPPv313OSQPCscMatrix"></span><span id="_CPPv213OSQPCscMatrix"></span><span id="OSQPCscMatrix"></span><span class="target" id="d3/d1d/struct_o_s_q_p_csc_matrix"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPCscMatrix</span></span></span><a class="headerlink" href="#_CPPv413OSQPCscMatrix" title="Link to this definition">¶</a><br /></dt>
@@ -747,9 +845,192 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <dd><p>number of entries in triplet matrix, -1 for csc </p>
 </dd></dl>
 
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N13OSQPCscMatrix5ownedE">
+<span id="_CPPv3N13OSQPCscMatrix5ownedE"></span><span id="_CPPv2N13OSQPCscMatrix5ownedE"></span><span id="OSQPCscMatrix::owned__OSQPInt"></span><span class="target" id="d3/d1d/struct_o_s_q_p_csc_matrix_1a4c99733785b95a5dc161c3c59469d1e4"></span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">owned</span></span></span><a class="headerlink" href="#_CPPv4N13OSQPCscMatrix5ownedE" title="Link to this definition">¶</a><br /></dt>
+<dd><p>1 if the p, i and x pointers were allocated automatically, 0 if they are owned by the user </p>
+</dd></dl>
+
 </div>
 </dd></dl>
 
+<section id="data">
+<h4><a class="toc-backref" href="#id14" role="doc-backlink">Data</a><a class="headerlink" href="#data" title="Link to this heading">¶</a></h4>
+<p>As a helper, OSQP provides the <code class="xref c c-func docutils literal notranslate"><span class="pre">OSQPCscMatrix_set_data()</span></code> function to assign existing data to an existing <code class="xref c c-struct docutils literal notranslate"><span class="pre">OSQPCscMatrix</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When using the <code class="xref c c-func docutils literal notranslate"><span class="pre">OSQPCscMatrix_set_data()</span></code> function, the user is responsible for managing the memory used by the <code class="xref c c-var docutils literal notranslate"><span class="pre">OSQPCscMatrix.x</span></code>, <code class="xref c c-var docutils literal notranslate"><span class="pre">OSQPCscMatrix.p</span></code>
+<code class="xref c c-var docutils literal notranslate"><span class="pre">OSQPCscMatrix.i</span></code> arrays.</p>
+</div>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv422OSQPCscMatrix_set_dataP13OSQPCscMatrix7OSQPInt7OSQPInt7OSQPIntP9OSQPFloatP7OSQPIntP7OSQPInt">
+<span id="_CPPv322OSQPCscMatrix_set_dataP13OSQPCscMatrix7OSQPInt7OSQPInt7OSQPIntP9OSQPFloatP7OSQPIntP7OSQPInt"></span><span id="_CPPv222OSQPCscMatrix_set_dataP13OSQPCscMatrix7OSQPInt7OSQPInt7OSQPIntP9OSQPFloatP7OSQPIntP7OSQPInt"></span><span id="OSQPCscMatrix_set_data__OSQPCscMatrixP.OSQPInt.OSQPInt.OSQPInt.OSQPFloatP.OSQPIntP.OSQPIntP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a97d41d8c579bfb32fac52b9848b9be07"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPCscMatrix_set_data</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPCscMatrix" title="OSQPCscMatrix"><span class="n"><span class="pre">OSQPCscMatrix</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">M</span></span>, <span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">m</span></span>, <span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">n</span></span>, <span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nzmax</span></span>, <span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">x</span></span>, <span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">i</span></span>, <span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv422OSQPCscMatrix_set_dataP13OSQPCscMatrix7OSQPInt7OSQPInt7OSQPIntP9OSQPFloatP7OSQPIntP7OSQPInt" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Populates a Compressed-Column-Sparse matrix from existing data arrays. This will just assign the pointers - no malloc or copying is done.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>M</strong> – Matrix pointer </p></li>
+<li><p><strong>m</strong> – First dimension </p></li>
+<li><p><strong>n</strong> – Second dimension </p></li>
+<li><p><strong>nzmax</strong> – Maximum number of nonzero elements </p></li>
+<li><p><strong>x</strong> – Vector of data </p></li>
+<li><p><strong>i</strong> – Vector of row indices </p></li>
+<li><p><strong>p</strong> – Vector of column pointers </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="memory-management">
+<h4><a class="toc-backref" href="#id15" role="doc-backlink">Memory management</a><a class="headerlink" href="#memory-management" title="Link to this heading">¶</a></h4>
+<p>In non-embedded versions, the CSC matrix objects can be created with existing data, and free’d</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv417OSQPCscMatrix_new7OSQPInt7OSQPInt7OSQPIntP9OSQPFloatP7OSQPIntP7OSQPInt">
+<span id="_CPPv317OSQPCscMatrix_new7OSQPInt7OSQPInt7OSQPIntP9OSQPFloatP7OSQPIntP7OSQPInt"></span><span id="_CPPv217OSQPCscMatrix_new7OSQPInt7OSQPInt7OSQPIntP9OSQPFloatP7OSQPIntP7OSQPInt"></span><span id="OSQPCscMatrix_new__OSQPInt.OSQPInt.OSQPInt.OSQPFloatP.OSQPIntP.OSQPIntP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1af4a7480bb75f3f080fcec88226b64939"></span><a class="reference internal" href="#_CPPv413OSQPCscMatrix" title="OSQPCscMatrix"><span class="n"><span class="pre">OSQPCscMatrix</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">OSQPCscMatrix_new</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">m</span></span>, <span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">n</span></span>, <span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nzmax</span></span>, <span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">x</span></span>, <span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">i</span></span>, <span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417OSQPCscMatrix_new7OSQPInt7OSQPInt7OSQPIntP9OSQPFloatP7OSQPIntP7OSQPInt" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Allocates a new Compressed-Column-Sparse (CSC) matrix from existing arrays.</p>
+<p>This will malloc the new matrix structure, but use the arrays passed in as the backing data for the matrix (e.g. not copy the actual matrix data, just reference the existing data.)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Not available in embedded mode (requires malloc)</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> – Number of rows </p></li>
+<li><p><strong>n</strong> – number of columns </p></li>
+<li><p><strong>nzmax</strong> – Maximum number of nonzero elements </p></li>
+<li><p><strong>x</strong> – Vector of data </p></li>
+<li><p><strong>i</strong> – Vector of row indices </p></li>
+<li><p><strong>p</strong> – Vector of column pointers </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pointer to new CSC matrix, or null on error </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv418OSQPCscMatrix_freeP13OSQPCscMatrix">
+<span id="_CPPv318OSQPCscMatrix_freeP13OSQPCscMatrix"></span><span id="_CPPv218OSQPCscMatrix_freeP13OSQPCscMatrix"></span><span id="OSQPCscMatrix_free__OSQPCscMatrixP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1afa02c2d414ca9d19808996d965db40ed"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OSQPCscMatrix_free</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv413OSQPCscMatrix" title="OSQPCscMatrix"><span class="n"><span class="pre">OSQPCscMatrix</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mat</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418OSQPCscMatrix_freeP13OSQPCscMatrix" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Free a CSC matrix object allocated by <a class="reference internal" href="#d0/d05/osqp__api__functions_8h_1af4a7480bb75f3f080fcec88226b64939"><span class="std std-ref">OSQPCscMatrix_new</span></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function will only free the internal <a class="reference internal" href="#d3/d1d/struct_o_s_q_p_csc_matrix_1a9d1486abaeb3d981c2efa8c25719a7f6"><span class="std std-ref">OSQPCscMatrix::x</span></a>, <a class="reference internal" href="#d3/d1d/struct_o_s_q_p_csc_matrix_1a32d42afbda74f9773397ca4eb8d374f5"><span class="std std-ref">OSQPCscMatrix::p</span></a>, <a class="reference internal" href="#d3/d1d/struct_o_s_q_p_csc_matrix_1a6dc7a9f3a9857c1cf2b54cfee3c1a183"><span class="std std-ref">OSQPCscMatrix::i</span></a> arrays if the <a class="reference internal" href="#d3/d1d/struct_o_s_q_p_csc_matrix_1a4c99733785b95a5dc161c3c59469d1e4"><span class="std std-ref">OSQPCscMatrix::owned</span></a> variable is set to <code class="docutils literal notranslate"><span class="pre">1</span></code>, otherwise only the outer CSC wrapper is free’d.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Not available in embedded mode (requires free)</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mat</strong> – Matrix to free </p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="common-matrices">
+<h4><a class="toc-backref" href="#id16" role="doc-backlink">Common matrices</a><a class="headerlink" href="#common-matrices" title="Link to this heading">¶</a></h4>
+<p>In non-embedded versions, several helper functions are provided to create common matrices in the CSC format, including a matrix of all structural zeros,
+the square identity matrix, and diagonal matrices.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="xref c c-var docutils literal notranslate"><span class="pre">OSQPCscMatrix.x</span></code>, <code class="xref c c-var docutils literal notranslate"><span class="pre">OSQPCscMatrix.p</span></code> and <code class="xref c c-var docutils literal notranslate"><span class="pre">OSQPCscMatrix.i</span></code> arrays are managed by OSQP when using these functions,
+meaning they will automatically be freed inside <code class="xref c c-func docutils literal notranslate"><span class="pre">OSQPCscMatrix_free()</span></code>.</p>
+</div>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv419OSQPCscMatrix_zeros7OSQPInt7OSQPInt">
+<span id="_CPPv319OSQPCscMatrix_zeros7OSQPInt7OSQPInt"></span><span id="_CPPv219OSQPCscMatrix_zeros7OSQPInt7OSQPInt"></span><span id="OSQPCscMatrix_zeros__OSQPInt.OSQPInt"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a890cb31cc62d10408f232ef9444f1cda"></span><a class="reference internal" href="#_CPPv413OSQPCscMatrix" title="OSQPCscMatrix"><span class="n"><span class="pre">OSQPCscMatrix</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">OSQPCscMatrix_zeros</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">m</span></span>, <span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419OSQPCscMatrix_zeros7OSQPInt7OSQPInt" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Allocates a new Compressed-Column-Sparse (CSC) matrix with zero entries.</p>
+<p>This matrix will contain all structural zeros, so no non-zero elements will be present.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Not available in embedded mode (requires malloc)</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> – Number of rows </p></li>
+<li><p><strong>n</strong> – Number of columns </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pointer to new CSC matrix, or null on error </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv422OSQPCscMatrix_identity7OSQPInt">
+<span id="_CPPv322OSQPCscMatrix_identity7OSQPInt"></span><span id="_CPPv222OSQPCscMatrix_identity7OSQPInt"></span><span id="OSQPCscMatrix_identity__OSQPInt"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1acde4e548dcf678d9463a0d383db7d86a"></span><a class="reference internal" href="#_CPPv413OSQPCscMatrix" title="OSQPCscMatrix"><span class="n"><span class="pre">OSQPCscMatrix</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">OSQPCscMatrix_identity</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">m</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv422OSQPCscMatrix_identity7OSQPInt" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Allocates a new Compressed-Column-Sparse (CSC) identity with 1s on the diagonal.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Not available in embedded mode (requires malloc)</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>m</strong> – Number of rows/columns </p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pointer to new CSC matrix, or null on error </p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>The following diagonal matrix generation functions can generate tall, wide and square matrices.
+They will always start in the upper-left corner and fill the main diagonal until the smallest dimension runs out,
+leaving the remaining rows/columns as all 0.</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv425OSQPCscMatrix_diag_scalar7OSQPInt7OSQPInt9OSQPFloat">
+<span id="_CPPv325OSQPCscMatrix_diag_scalar7OSQPInt7OSQPInt9OSQPFloat"></span><span id="_CPPv225OSQPCscMatrix_diag_scalar7OSQPInt7OSQPInt9OSQPFloat"></span><span id="OSQPCscMatrix_diag_scalar__OSQPInt.OSQPInt.OSQPFloat"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1a6901cc80ff0a2b47cdc833e6f80880ad"></span><a class="reference internal" href="#_CPPv413OSQPCscMatrix" title="OSQPCscMatrix"><span class="n"><span class="pre">OSQPCscMatrix</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">OSQPCscMatrix_diag_scalar</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">m</span></span>, <span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">n</span></span>, <span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">scalar</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425OSQPCscMatrix_diag_scalar7OSQPInt7OSQPInt9OSQPFloat" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Allocates a new Compressed-Column-Sparse (CSC) diagonal matrix with a given value.</p>
+<p>This will start populating at the upper-left element and continue down the main diagonal until either the last row or column (in the case of non-square matrices).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Not available in embedded mode (requires malloc)</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> – Number of rows </p></li>
+<li><p><strong>n</strong> – Number of columns </p></li>
+<li><p><strong>scalar</strong> – Scalar value to put on the diagonal </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pointer to new CSC matrix, or null on error </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv422OSQPCscMatrix_diag_vec7OSQPInt7OSQPIntP9OSQPFloat">
+<span id="_CPPv322OSQPCscMatrix_diag_vec7OSQPInt7OSQPIntP9OSQPFloat"></span><span id="_CPPv222OSQPCscMatrix_diag_vec7OSQPInt7OSQPIntP9OSQPFloat"></span><span id="OSQPCscMatrix_diag_vec__OSQPInt.OSQPInt.OSQPFloatP"></span><span class="target" id="d0/d05/osqp__api__functions_8h_1aedf6bb3f7c4087a43f88c92d26e2452a"></span><a class="reference internal" href="#_CPPv413OSQPCscMatrix" title="OSQPCscMatrix"><span class="n"><span class="pre">OSQPCscMatrix</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">OSQPCscMatrix_diag_vec</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">m</span></span>, <span class="n"><span class="pre">OSQPInt</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">n</span></span>, <span class="n"><span class="pre">OSQPFloat</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">vals</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv422OSQPCscMatrix_diag_vec7OSQPInt7OSQPIntP9OSQPFloat" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Allocates a new Compressed-Column-Sparse (CSC) diagonal matrix with given values on the diagonal.</p>
+<p>This will start populating at the upper-left element and continue down the main diagonal until either the last row or column (in the case of non-square matrices).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Not available in embedded mode (requires malloc)</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> – Number of rows </p></li>
+<li><p><strong>n</strong> – Number of columns </p></li>
+<li><p><strong>vals</strong> – Values to put on the diagonal - length min(n,m) </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pointer to new CSC matrix, or null on error </p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
 </section>
 </section>
 
