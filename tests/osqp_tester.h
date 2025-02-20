@@ -61,10 +61,9 @@ class OSQPTestFixture{
 public:
     OSQPTestFixture()
     {
-        settings.reset((OSQPSettings*) c_malloc(sizeof(OSQPSettings)));
+        settings.reset(OSQPSettings_new());
 
-        // Initialize default test settings
-        osqp_set_default_settings(settings.get());
+        // Set to desired device number
         settings->device = deviceNumber;
 
         /*

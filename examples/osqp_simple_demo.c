@@ -24,18 +24,11 @@ int main(void) {
 
   /* Solver, settings, matrices */
   OSQPSolver*   solver   = NULL;
-  OSQPSettings* settings = NULL;
-  OSQPCscMatrix* P = malloc(sizeof(OSQPCscMatrix));
-  OSQPCscMatrix* A = malloc(sizeof(OSQPCscMatrix));
+  OSQPSettings* settings = OSQPSettings_new();
+  OSQPCscMatrix* P = OSQPCscMatrix_new(n, n, P_nnz, P_x, P_i, P_p);
+  OSQPCscMatrix* A = OSQPCscMatrix_new(m, n, A_nnz, A_x, A_i, A_p);
 
-  /* Populate matrices */
-  csc_set_data(A, m, n, A_nnz, A_x, A_i, A_p);
-  csc_set_data(P, n, n, P_nnz, P_x, P_i, P_p);
-
-  /* Set default settings */
-  settings = (OSQPSettings *)malloc(sizeof(OSQPSettings));
   if (settings) {
-    osqp_set_default_settings(settings);
     settings->polishing = 1;
 
     //settings->linsys_solver = OSQP_DIRECT_SOLVER;
@@ -67,9 +60,9 @@ int main(void) {
 
   /* Cleanup */
   osqp_cleanup(solver);
-  free(A);
-  free(P);
-  free(settings);
+  OSQPCscMatrix_free(A);
+  OSQPCscMatrix_free(P);
+  OSQPSettings_free(settings);
 
   return (int)exitflag;
 }

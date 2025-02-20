@@ -2,6 +2,8 @@
 #include "osqp.h"
 #include "auxil.h"
 #include "osqp_api_constants.h"
+#include "osqp_api_functions.h"
+#include "osqp_api_types.h"
 #include "util.h"
 #include "scaling.h"
 #include "error.h"
@@ -26,6 +28,186 @@
 
 #ifdef OSQP_ENABLE_INTERRUPT
 # include "interrupt.h"
+#endif
+
+/**********************
+ * OSQP type helpers  *
+ **********************/
+#ifndef OSQP_EMBEDDED_MODE
+OSQPCscMatrix* OSQPCscMatrix_new(OSQPInt    m,
+                                 OSQPInt    n,
+                                 OSQPInt    nzmax,
+                                 OSQPFloat* x,
+                                 OSQPInt*   i,
+                                 OSQPInt*   p) {
+  OSQPCscMatrix* mat = c_calloc(1, sizeof(OSQPCscMatrix));
+
+  if (!mat) return OSQP_NULL;
+
+  OSQPCscMatrix_set_data(mat, m, n, nzmax, x, i, p);
+
+  return mat;
+}
+
+OSQPCscMatrix* OSQPCscMatrix_identity(OSQPInt m) {
+  return OSQPCscMatrix_diag_scalar(m, m, 1.0);
+}
+
+OSQPCscMatrix* OSQPCscMatrix_diag_scalar(OSQPInt   m,
+                                         OSQPInt   n,
+                                         OSQPFloat scalar) {
+  OSQPInt i;
+  OSQPInt min_elem = c_min(m, n);
+  OSQPCscMatrix* mat = c_calloc(1, sizeof(OSQPCscMatrix));
+
+  if (!mat) return OSQP_NULL;
+
+  mat->m  = m;
+  mat->n  = n;
+  mat->nz = -1;
+  mat->p  = (OSQPInt*) c_calloc(n + 1, sizeof(OSQPInt));
+
+  if( m < n) {
+    // Fewer rows than columns
+    for(i=0; i < n; i++) {
+      if(i < m) {
+        mat->p[i] = i;
+      } else {
+        mat->p[i] = m;
+      }
+    }
+  } else {
+    // Square matrix or fewer columns than rows
+    for(i=0; i < n; i++) {
+      mat->p[i] = i;
+    }
+  }
+
+  mat->nzmax = min_elem;
+  mat->i     = (OSQPInt*) c_malloc(min_elem * sizeof(OSQPInt));
+  mat->x     = (OSQPFloat*) c_malloc(min_elem * sizeof(OSQPFloat));
+
+  for(i=0; i < min_elem; i++) {
+    mat->i[i] = i;
+    mat->x[i] = scalar;
+  }
+
+  // Last element of column vector is always the number of entries
+  mat->p[n] = min_elem;
+
+  // We own the arrays
+  mat->owned = 1;
+
+  return mat;
+}
+
+OSQPCscMatrix* OSQPCscMatrix_diag_vec(OSQPInt    m,
+                                      OSQPInt    n,
+                                      OSQPFloat* vec) {
+  OSQPInt i;
+  OSQPInt min_elem = c_min(m,n);
+
+  // Let the scalar method allocate the data, then we just overwrite the values
+  OSQPCscMatrix* mat = OSQPCscMatrix_diag_scalar(m, n, 1.0);
+
+  if (!mat) return OSQP_NULL;
+
+  for(i=0; i < min_elem; i++) {
+    mat->x[i] = vec[i];
+  }
+
+  return mat;
+}
+
+OSQPCscMatrix* OSQPCscMatrix_zeros(OSQPInt    m,
+                                   OSQPInt    n) {
+  OSQPCscMatrix* mat = c_calloc(1, sizeof(OSQPCscMatrix));
+
+  if (!mat) return OSQP_NULL;
+
+  mat->m     = m;
+  mat->n     = n;
+  mat->nz    = -1;
+  mat->nzmax = 0;
+
+  // The row and value arrays are empty
+  mat->x = OSQP_NULL;
+  mat->i = OSQP_NULL;
+
+  // The column pointer array is just all 0s
+  mat->p = (OSQPInt*) c_calloc(n + 1, sizeof(OSQPInt));
+
+  // We own the arrays
+  mat->owned = 1;
+
+  return mat;
+}
+
+void OSQPCscMatrix_free(OSQPCscMatrix* mat) {
+  if (mat) {
+    // Only free the matrix components if we own them
+    if(mat->owned) {
+      if(mat->p) c_free(mat->p);
+      if(mat->i) c_free(mat->i);
+      if(mat->x) c_free(mat->x);
+    }
+
+    c_free(mat);
+  }
+}
+#endif
+
+void OSQPCscMatrix_set_data(OSQPCscMatrix* M,
+                            OSQPInt        m,
+                            OSQPInt        n,
+                            OSQPInt        nzmax,
+                            OSQPFloat*     x,
+                            OSQPInt*       i,
+                            OSQPInt*       p) {
+  M->m     = m;
+  M->n     = n;
+  M->nz    = -1;
+  M->nzmax = nzmax;
+  M->x     = x;
+  M->i     = i;
+  M->p     = p;
+
+  // User is responsible for the arrays
+  M->owned = 0;
+}
+
+#ifndef OSQP_EMBEDDED_MODE
+OSQPSettings* OSQPSettings_new() {
+  OSQPSettings* settings = (OSQPSettings*) c_calloc(1, sizeof(OSQPSettings));
+
+  if (!settings)
+    return OSQP_NULL;
+
+  osqp_set_default_settings(settings);
+
+  return settings;
+}
+
+void OSQPSettings_free(OSQPSettings* settings) {
+  if (settings)
+    c_free(settings);
+}
+
+OSQPCodegenDefines* OSQPCodegenDefines_new() {
+  OSQPCodegenDefines* defs = (OSQPCodegenDefines*) c_calloc(1, sizeof(OSQPCodegenDefines));
+
+  if (!defs)
+    return OSQP_NULL;
+
+  osqp_set_default_codegen_defines(defs);
+
+  return defs;
+}
+
+void OSQPCodegenDefines_free(OSQPCodegenDefines* defs) {
+  if (defs)
+    c_free(defs);
+}
 #endif
 
 
@@ -1383,28 +1565,6 @@ OSQPInt osqp_codegen(OSQPSolver*         solver,
 #endif /* ifdef OSQP_CODEGEN */
 
   return exitflag;
-}
-
-
-
-/****************************
-* User API Helper functions
-****************************/
-
-void csc_set_data(OSQPCscMatrix* M,
-                  OSQPInt        m,
-                  OSQPInt        n,
-                  OSQPInt        nzmax,
-                  OSQPFloat*     x,
-                  OSQPInt*       i,
-                  OSQPInt*       p) {
-  M->m     = m;
-  M->n     = n;
-  M->nz   = -1;
-  M->nzmax = nzmax;
-  M->x     = x;
-  M->i     = i;
-  M->p     = p;
 }
 
 /****************************

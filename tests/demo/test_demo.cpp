@@ -26,18 +26,13 @@ TEST_CASE( "Demo solve", "[optimization],[QP]" ) {
   /* Workspace, settings, matrices */
   OSQPSolver*      tmpSolver = nullptr;
   OSQPSolver_ptr   solver{nullptr};
-  OSQPSettings_ptr settings{(OSQPSettings *)malloc(sizeof(OSQPSettings))};
 
-  OSQPCscMatrix_ptr P{(OSQPCscMatrix*)malloc(sizeof(OSQPCscMatrix))};
-  OSQPCscMatrix_ptr A{(OSQPCscMatrix*)malloc(sizeof(OSQPCscMatrix))};
+  /* Default settings */
+  OSQPSettings_ptr settings{OSQPSettings_new()};
 
   /* Populate matrices */
-  csc_set_data(P.get(), n, n, P_nnz, P_x, P_i, P_p);
-  csc_set_data(A.get(), m, n, A_nnz, A_x, A_i, A_p);
-
-  /* Set default settings */
-  if (settings.get())
-    osqp_set_default_settings(settings.get());
+  OSQPCscMatrix_ptr P{OSQPCscMatrix_new(n, n, P_nnz, P_x, P_i, P_p)};
+  OSQPCscMatrix_ptr A{OSQPCscMatrix_new(m, n, A_nnz, A_x, A_i, A_p)};
 
   /* Setup workspace */
   exitflag = osqp_setup(&tmpSolver, P.get(), q, A.get(), l, u, m, n, settings.get());

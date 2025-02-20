@@ -9,6 +9,190 @@
 extern "C" {
 # endif
 
+
+/**********************
+ * OSQP type helpers  *
+ **********************/
+
+/**
+ * @name CSC matrix manipulation
+ * @{
+ */
+
+#ifndef OSQP_EMBEDDED_MODE
+/**
+ * Allocates a new Compressed-Column-Sparse (CSC) matrix from existing arrays.
+ *
+ * This will malloc the new matrix structure, but use the arrays passed in as the
+ * backing data for the matrix (e.g. not copy the actual matrix data, just reference
+ * the existing data.)
+ *
+ * @note Not available in embedded mode (requires malloc)
+ *
+ * @param  m     Number of rows
+ * @param  n     number of columns
+ * @param  nzmax Maximum number of nonzero elements
+ * @param  x     Vector of data
+ * @param  i     Vector of row indices
+ * @param  p     Vector of column pointers
+ * @return       Pointer to new CSC matrix, or null on error
+ */
+OSQPCscMatrix* OSQPCscMatrix_new(OSQPInt    m,
+                                 OSQPInt    n,
+                                 OSQPInt    nzmax,
+                                 OSQPFloat* x,
+                                 OSQPInt*   i,
+                                 OSQPInt*   p);
+
+/**
+ * Free a CSC matrix object allocated by @ref OSQPCscMatrix_new.
+ *
+ * @note This function will only free the internal @ref OSQPCscMatrix.x, @ref OSQPCscMatrix.p,
+ * @ref OSQPCscMatrix.i arrays if the @ref OSQPCscMatrix.owned variable is set to `1`, otherwise
+ * only the outer CSC wrapper is free'd.
+ *
+ * @note Not available in embedded mode (requires free)
+ *
+ * @param mat Matrix to free
+ */
+void OSQPCscMatrix_free(OSQPCscMatrix* mat);
+
+/**
+ * Allocates a new Compressed-Column-Sparse (CSC) matrix with zero entries.
+ *
+ * This matrix will contain all structural zeros, so no non-zero elements will be present.
+ *
+ * @note Not available in embedded mode (requires malloc)
+ *
+ * @param  m Number of rows
+ * @param  n Number of columns
+ * @return   Pointer to new CSC matrix, or null on error
+ */
+OSQPCscMatrix* OSQPCscMatrix_zeros(OSQPInt m,
+                                   OSQPInt n);
+
+/**
+ * Allocates a new Compressed-Column-Sparse (CSC) identity with 1s on the diagonal.
+ *
+ * @note Not available in embedded mode (requires malloc)
+ *
+ * @param  m Number of rows/columns
+ * @return   Pointer to new CSC matrix, or null on error
+ */
+OSQPCscMatrix* OSQPCscMatrix_identity(OSQPInt m);
+
+/**
+ * Allocates a new Compressed-Column-Sparse (CSC) diagonal matrix with a given value.
+ *
+ * This will start populating at the upper-left element and continue down the main diagonal
+ * until either the last row or column (in the case of non-square matrices).
+ *
+ * @note Not available in embedded mode (requires malloc)
+ *
+ * @param  m      Number of rows
+ * @param  n      Number of columns
+ * @param  scalar Scalar value to put on the diagonal
+ * @return        Pointer to new CSC matrix, or null on error
+ */
+OSQPCscMatrix* OSQPCscMatrix_diag_scalar(OSQPInt   m,
+                                         OSQPInt   n,
+                                         OSQPFloat scalar);
+
+/**
+ * Allocates a new Compressed-Column-Sparse (CSC) diagonal matrix with given values on the diagonal.
+ *
+ * This will start populating at the upper-left element and continue down the main diagonal
+ * until either the last row or column (in the case of non-square matrices).
+ *
+ * @note Not available in embedded mode (requires malloc)
+ *
+ * @param  m    Number of rows
+ * @param  n    Number of columns
+ * @param  vals Values to put on the diagonal - length min(n,m)
+ * @return      Pointer to new CSC matrix, or null on error
+ */
+OSQPCscMatrix* OSQPCscMatrix_diag_vec(OSQPInt    m,
+                                      OSQPInt    n,
+                                      OSQPFloat* vals);
+
+#endif
+
+/**
+ * Populates a Compressed-Column-Sparse matrix from existing data arrays.
+ * This will just assign the pointers - no malloc or copying is done.
+ *
+ * @param  M     Matrix pointer
+ * @param  m     First dimension
+ * @param  n     Second dimension
+ * @param  nzmax Maximum number of nonzero elements
+ * @param  x     Vector of data
+ * @param  i     Vector of row indices
+ * @param  p     Vector of column pointers
+ */
+OSQP_API void OSQPCscMatrix_set_data(OSQPCscMatrix* M,
+                                     OSQPInt        m,
+                                     OSQPInt        n,
+                                     OSQPInt        nzmax,
+                                     OSQPFloat*     x,
+                                     OSQPInt*       i,
+                                     OSQPInt*       p);
+
+/** @} */
+
+/**
+ * @name Settings object memory management
+ * @{
+ */
+
+#ifndef OSQP_EMBEDDED_MODE
+/**
+ * Allocate a new OSQPSettings object with the default settings.
+ *
+ * @note Not available in embedded mode (requires malloc)
+ *
+ * @return Pointer to new settings object, or null on error
+ */
+OSQPSettings* OSQPSettings_new();
+
+/**
+ * Free an OSQPSettings object.
+ *
+ * @note Not available in embedded mode (requires free)
+ *
+ * @param settings The settings object to free
+ */
+void OSQPSettings_free(OSQPSettings* settings);
+#endif
+
+/** @} */
+
+/**
+ * @name Codegen defines object memory management
+ * @{
+ */
+
+#ifndef OSQP_EMBEDDED_MODE
+/**
+ * Allocate a new OSQPCodegenDefines object with the default options.
+ *
+ * @note Not available in embedded mode (requires malloc)
+ *
+ * @return Pointer to new codegen defines object, or null on error
+ */
+OSQPCodegenDefines* OSQPCodegenDefines_new();
+
+/**
+ * Free an OSQPCodegenDefines object.
+ *
+ * @note Not available in embedded mode (requires free)
+ *
+ * @param defs The defines object to free
+ */
+void OSQPCodegenDefines_free(OSQPCodegenDefines* defs);
+#endif
+
+/** @} */
+
 /********************
 * Main Solver API  *
 ********************/
@@ -362,7 +546,6 @@ OSQP_API OSQPInt osqp_codegen(OSQPSolver*         solver,
                               OSQPCodegenDefines* defines);
 
 /** @} */
-
 
 # ifdef __cplusplus
 }

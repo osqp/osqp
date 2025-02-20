@@ -129,28 +129,29 @@ int main(int argc, char *argv[]) {
     qp_m = m;
 
     // Cost function
-    qp_P = malloc(sizeof(OSQPCscMatrix));
+    qp_A = OSQPCscMatrix_new(m, n, A_nnz, A_x, A_i, A_p);
     qp_q = q;
 
     // Constraints
-    qp_A = malloc(sizeof(OSQPCscMatrix));
+    qp_P = OSQPCscMatrix_new(n, n, P_nnz, P_x, P_i, P_p);
     qp_l = l;
     qp_u = u;
 
     dynamic_matrices = 1;
-
-    /* Populate matrices */
-    csc_set_data(qp_A, m, n, A_nnz, A_x, A_i, A_p);
-    csc_set_data(qp_P, n, n, P_nnz, P_x, P_i, P_p);
   }
 
   /* Set default settings */
   if( dynamic_settings || !settings ) {
-    settings = (OSQPSettings *)malloc(sizeof(OSQPSettings));
+    /* Get default settings */
+    settings = OSQPSettings_new();
     dynamic_settings = 1;
 
+    if (!settings) {
+      printf("  OSQP Errored allocating settings object.\n");
+      return 1;
+    }
+
     if (settings) {
-      osqp_set_default_settings(settings);
       settings->polishing = 1;
       settings->scaling = 1;
 
@@ -192,12 +193,12 @@ int main(int argc, char *argv[]) {
   osqp_cleanup(solver);
 
   if( dynamic_matrices ) {
-    free(qp_A);
-    free(qp_P);
+    OSQPCscMatrix_free(qp_A);
+    OSQPCscMatrix_free(qp_P);
   }
 
   if (settings && dynamic_settings)
-    free(settings);
+    OSQPSettings_free(settings);
 
   return (int)exitflag;
 }
