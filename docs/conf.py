@@ -116,6 +116,11 @@ html_favicon = "_static/img/favicon.ico"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+# Add custom CSS files
+html_css_files = [
+    'css/osqp_theme.css',
+]
+
 # on_rtd is whether we are on readthedocs.org, this line of code grabbed from docs.readthedocs.org
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
