@@ -1346,6 +1346,11 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
         return 1;
   }
 
+  // Handle legacy behavior that allowed passing 0 as the length when updating all values
+  if(P_new_n == 0) {
+    P_new_n = nnzP;
+  }
+
   // Check if the number of elements to update is valid
   if (A_new_n > nnzA || A_new_n < 0) {
     c_eprint("new number of elements (%i) out of bounds for A (%i max)",
@@ -1357,6 +1362,11 @@ OSQPInt osqp_update_data_mat(OSQPSolver*      solver,
   if(Ax_new_idx == OSQP_NULL && A_new_n != 0 && A_new_n != nnzA){
     c_eprint("index vector is required for partial updates of A");
     return 2;
+  }
+
+    // Handle legacy behavior that allowed passing 0 as the length when updating all values
+  if(A_new_n == 0) {
+    A_new_n = nnzA;
   }
 
   if (solver->settings->scaling) unscale_data(solver);
