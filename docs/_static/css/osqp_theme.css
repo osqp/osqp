@@ -196,3 +196,8 @@ table p {
     margin-bottom: 0px;
 }
 
+table.docutils {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+}

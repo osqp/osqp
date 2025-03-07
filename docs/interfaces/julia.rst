@@ -111,7 +111,7 @@ The user does not have to specify all the keyword arguments.
 
 Update problem matrices
 ^^^^^^^^^^^^^^^^^^^^^^^^
-Matrices :code:`A` and :code:`P` can be updated by changing the value of their elements but not their sparsity pattern. The interface is designed to mimic the :ref:`C/C++ counterpart <c_cpp_update_data>` with the Julia 1-based indexing. Note that the new values of :code:`P` represent only the upper triangular part while :code:`A` is always represented as a full matrix.
+Matrices :code:`A` and :code:`P` can be updated by changing the value of their elements but not their sparsity pattern. The interface is designed to mimic the :ref:`C/C++ counterpart <c_update_data>` with the Julia 1-based indexing. Note that the new values of :code:`P` represent only the upper triangular part while :code:`A` is always represented as a full matrix.
 
 You can update the values of all the elements of :code:`P` by executing
 

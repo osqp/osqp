@@ -25,3 +25,4 @@ Applications
    mpc.rst
    portfolio.rst
    svm.rst
+   torch.rst

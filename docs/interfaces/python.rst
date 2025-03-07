@@ -56,8 +56,6 @@ The :code:`results` object contains the primal solution :code:`x`, the dual solu
 +-----------------------+------------------------------------------------+
 | Member                | Description                                    |
 +=======================+================================================+
-| :code:`iter`          | Number of iterations                           |
-+-----------------------+------------------------------------------------+
 | :code:`status`        | Solver status                                  |
 +-----------------------+------------------------------------------------+
 | :code:`status_val`    | Solver status value as in :ref:`status_values` |
@@ -66,9 +64,21 @@ The :code:`results` object contains the primal solution :code:`x`, the dual solu
 +-----------------------+------------------------------------------------+
 | :code:`obj_val`       | Objective value                                |
 +-----------------------+------------------------------------------------+
+| :code:`dual_obj_val`  | Dual objective value                           |
++-----------------------+------------------------------------------------+
 | :code:`prim_res`      | Primal residual                                |
 +-----------------------+------------------------------------------------+
 | :code:`dual_res`      | Dual residual                                  |
++-----------------------+------------------------------------------------+
+| :code:`duality_gap`   | Duality gap                                    |
++-----------------------+------------------------------------------------+
+| :code:`iter`          | Number of iterations                           |
++-----------------------+------------------------------------------------+
+| :code:`restarts`      | Number of restarts                             |
++-----------------------+------------------------------------------------+
+| :code:`rho_updates`   | Number of rho updates                          |
++-----------------------+------------------------------------------------+
+| :code:`rho_estimate`  | Optimal rho estimate                           |
 +-----------------------+------------------------------------------------+
 | :code:`setup_time`    | Setup time                                     |
 +-----------------------+------------------------------------------------+
@@ -80,9 +90,7 @@ The :code:`results` object contains the primal solution :code:`x`, the dual solu
 +-----------------------+------------------------------------------------+
 | :code:`run_time`      | Total run time: setup/update + solve + polish  |
 +-----------------------+------------------------------------------------+
-| :code:`rho_estimate`  | Optimal rho estimate                           |
-+-----------------------+------------------------------------------------+
-| :code:`rho_updates`   | Number of rho updates                          |
+| :code:`primdual_int`  | Primal-dual integral                           |
 +-----------------------+------------------------------------------------+
 
 Note that if multiple solves are executed from single setup, then after the
@@ -123,7 +131,7 @@ The user does not have to specify all the keyword arguments.
 Update problem matrices
 ^^^^^^^^^^^^^^^^^^^^^^^^
 Matrices :code:`A` and :code:`P` can be updated by changing the value of their elements but not their sparsity pattern.
-The interface is designed to mimic the :ref:`C counterpart <c_cpp_update_data>`.
+The interface is designed to mimic the :ref:`C counterpart <c_update_data>`.
 Note that the new values of :code:`P` represent only the upper triangular part while :code:`A` is always represented as a full matrix.
 
 You can update the values of all the elements of :code:`P` by executing
