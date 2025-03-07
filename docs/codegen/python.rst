@@ -172,5 +172,3 @@ You can update all the nonzero entries in matrix :math:`A` by running
 .. code:: python
 
     emosqp.update_A(Ax_new, None, 0);
-
-See C :ref:`C_sublevel_API` for more details on the input arguments.

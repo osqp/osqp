@@ -17,12 +17,11 @@ void test_solveKKT() {
   LinSysSolver* s;  // Private structure to form KKT factorization
 
   // Problem settings
-  OSQPSettings_ptr settings{(OSQPSettings *)c_malloc(sizeof(OSQPSettings))};
+  OSQPSettings_ptr settings{OSQPSettings_new()};
 
   solve_linsys_sols_data_ptr data{generate_problem_solve_linsys_sols_data()};
 
   // Settings
-  osqp_set_default_settings(settings.get());
   settings->rho   = data->test_solve_KKT_rho;
   settings->sigma = data->test_solve_KKT_sigma;
 

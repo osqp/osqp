@@ -26,7 +26,6 @@ void limit_scaling_vector(OSQPVectorf* v) {
  * @param D        Norm of columns related to variables
  * @param D_temp_A Temporary vector for norm of columns of A
  * @param E        Norm of columns related to constraints
- * @param n        Dimension of KKT matrix
  */
 void compute_inf_norm_cols_KKT(const OSQPMatrix*  P,
                                const OSQPMatrix*  A,
