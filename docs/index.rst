@@ -72,7 +72,7 @@ Please credit the OSQP Developer Team when using OSQP.
 
 Interfaces development
 
-* `Nick Gould <http://www.numerical.rl.ac.uk/people/nimg/nimg.html>`_ (Rutherford Appleton Laboratory): Fortran and CUTEst interfaces
+* `Nick Gould <https://www.numerical.rl.ac.uk/people/nick-gould>`_ (Rutherford Appleton Laboratory): Fortran and CUTEst interfaces
 * `Ed Barnard <eabarnard@gmail.com>`_ (University of Oxford): Rust interface
 
 
