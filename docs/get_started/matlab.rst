@@ -21,7 +21,7 @@ Sources
 
 You need to install the following (see :ref:`build_from_sources` for more details):
 
-- A supported 64bit `C/C++ compiler <https://www.mathworks.com/support/compilers.html>`_
+- A supported 64bit `C/C++ compiler <https://www.mathworks.com/support/requirements/supported-compilers.html>`_
 - `CMake <https://cmake.org/>`_
 
 
