@@ -9,10 +9,13 @@
   <title>Status values and errors &mdash; OSQP  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=d4cddda9" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=8600c7be" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=8600c7be" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -20,7 +23,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="C" href="C.html" />
-    <link rel="prev" title="Linear Systems Solvers" href="linear_systems_solvers.html" />
+    <link rel="prev" title="Linear Systems Solvers Types" href="linear_systems_solvers.html" />
 <meta name="twitter:card" content="summary_large_image" >
 <meta name="twitter:creator" content="@bstellato" >
 <meta name="twitter:image"
@@ -66,7 +69,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l1"><a class="reference internal" href="../get_started/index.html">Get started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Interfaces</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="solver_settings.html">Solver settings</a></li>
-<li class="toctree-l2"><a class="reference internal" href="linear_systems_solvers.html">Linear Systems Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear_systems_solvers.html">Linear Systems Solvers Types</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Status values and errors</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id1">Status values</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#solver-errors">Solver Errors</a></li>
@@ -110,9 +113,9 @@ content="https://osqp.org/docs/_static/img/logo.png">
            <div itemprop="articleBody">
              
   <section id="status-values-and-errors">
-<span id="status-values"></span><h1>Status values and errors<a class="headerlink" href="#status-values-and-errors" title="Link to this heading">¶</a></h1>
+<span id="status-values"></span><h1>Status values and errors<a class="headerlink" href="#status-values-and-errors" title="Link to this heading"></a></h1>
 <section id="id1">
-<h2>Status values<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<h2>Status values<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
 <p>These are the exit statuses, their respective constants and values returned by the solver as defined in <a class="reference external" href="https://github.com/osqp/osqp/blob/master/include/public/osqp_api_constants.h">osqp_api_constants.h</a>.
 The <em>inaccurate</em> statuses define when the optimality, primal infeasibility or dual infeasibility conditions are satisfied with tolerances 10 times larger than the ones set.</p>
 <table class="docutils align-default">
@@ -184,7 +187,7 @@ non-convexity when <code class="code docutils literal notranslate"><span class="
 </div>
 </section>
 <section id="solver-errors">
-<h2>Solver Errors<a class="headerlink" href="#solver-errors" title="Link to this heading">¶</a></h2>
+<h2>Solver Errors<a class="headerlink" href="#solver-errors" title="Link to this heading"></a></h2>
 <p>OSQP can return errors during the setup and solve steps. Here is a table of the meaning
 and their constant values.</p>
 <table class="docutils align-default">
@@ -252,7 +255,7 @@ and their constant values.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="linear_systems_solvers.html" class="btn btn-neutral float-left" title="Linear Systems Solvers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="linear_systems_solvers.html" class="btn btn-neutral float-left" title="Linear Systems Solvers Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="C.html" class="btn btn-neutral float-right" title="C" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

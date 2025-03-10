@@ -9,10 +9,13 @@
   <title>OSQP solver documentation &mdash; OSQP  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="_static/css/osqp_theme.css?v=d4cddda9" />
+      <link rel="stylesheet" type="text/css" href="_static/css/osqp_theme.css?v=8600c7be" />
+      <link rel="stylesheet" type="text/css" href="_static/css/osqp_theme.css?v=8600c7be" />
 
   
     <link rel="shortcut icon" href="_static/favicon.ico"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=5929fcd5"></script>
       <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -98,7 +101,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
            <div itemprop="articleBody">
              
   <section id="osqp-solver-documentation">
-<h1>OSQP solver documentation<a class="headerlink" href="#osqp-solver-documentation" title="Link to this heading">¶</a></h1>
+<h1>OSQP solver documentation<a class="headerlink" href="#osqp-solver-documentation" title="Link to this heading"></a></h1>
 <p><a class="reference external" href="https://github.com/orgs/osqp/discussions">Visit our GitHub Discussions page</a>
 for any questions related to the solver!</p>
 <p>The OSQP (Operator Splitting Quadratic Program) solver is a numerical
@@ -120,25 +123,38 @@ optimization package for solving convex quadratic programs in the form</p>
 <p><strong>We are looking forward to hearing your success stories with OSQP!</strong> Please <a class="reference external" href="mailto:bartolomeo&#46;stellato&#37;&#52;&#48;gmail&#46;com">share them with us</a>.</p>
 <p class="rubric">Features</p>
 <dl class="simple glossary">
-<dt id="term-Efficient">Efficient<a class="headerlink" href="#term-Efficient" title="Link to this term">¶</a></dt><dd><p>It uses a custom ADMM-based first-order method requiring only a single matrix factorization in the setup phase. All the other operations are extremely cheap. It also implements custom sparse linear algebra routines exploiting structures in the problem data.</p>
+<dt id="term-Efficient">Efficient<a class="headerlink" href="#term-Efficient" title="Link to this term"></a></dt><dd><p>It uses a custom ADMM-based first-order method requiring only a single matrix factorization in the setup phase. All the other operations are extremely cheap. It also implements custom sparse linear algebra routines exploiting structures in the problem data.</p>
 </dd>
-<dt id="term-Robust">Robust<a class="headerlink" href="#term-Robust" title="Link to this term">¶</a></dt><dd><p>The algorithm is absolutely division free after the setup and it requires no assumptions on problem data (the problem only needs to be convex). It just works!</p>
+<dt id="term-Robust">Robust<a class="headerlink" href="#term-Robust" title="Link to this term"></a></dt><dd><p>The algorithm is absolutely division free after the setup and it requires no assumptions on problem data (the problem only needs to be convex). It just works!</p>
 </dd>
-<dt id="term-Detects-primal-dual-infeasible-problems">Detects primal / dual infeasible problems<a class="headerlink" href="#term-Detects-primal-dual-infeasible-problems" title="Link to this term">¶</a></dt><dd><p>When the problem is primal or dual infeasible, OSQP detects it. It is the first available QP solver based on first-order methods able to do so.</p>
+<dt id="term-Detects-primal-dual-infeasible-problems">Detects primal / dual infeasible problems<a class="headerlink" href="#term-Detects-primal-dual-infeasible-problems" title="Link to this term"></a></dt><dd><p>When the problem is primal or dual infeasible, OSQP detects it. It is the first available QP solver based on first-order methods able to do so.</p>
 </dd>
-<dt id="term-Embeddable">Embeddable<a class="headerlink" href="#term-Embeddable" title="Link to this term">¶</a></dt><dd><p>It has an easy interface to generate customized embeddable C code with no memory manager required.</p>
+<dt id="term-Embeddable">Embeddable<a class="headerlink" href="#term-Embeddable" title="Link to this term"></a></dt><dd><p>It has an easy interface to generate customized embeddable C code with no memory manager required.</p>
 </dd>
-<dt id="term-Library-free">Library-free<a class="headerlink" href="#term-Library-free" title="Link to this term">¶</a></dt><dd><p>It requires no external library to run.</p>
+<dt id="term-Library-free">Library-free<a class="headerlink" href="#term-Library-free" title="Link to this term"></a></dt><dd><p>It requires no external library to run.</p>
 </dd>
-<dt id="term-Efficiently-warm-started">Efficiently warm started<a class="headerlink" href="#term-Efficiently-warm-started" title="Link to this term">¶</a></dt><dd><p>It can be easily warm-started and the matrix factorization can be cached to solve parametrized problems extremely efficiently.</p>
+<dt id="term-Efficiently-warm-started">Efficiently warm started<a class="headerlink" href="#term-Efficiently-warm-started" title="Link to this term"></a></dt><dd><p>It can be easily warm-started and the matrix factorization can be cached to solve parametrized problems extremely efficiently.</p>
 </dd>
-<dt id="term-Interfaces">Interfaces<a class="headerlink" href="#term-Interfaces" title="Link to this term">¶</a></dt><dd><p>It provides interfaces to C, C++, Fortran, Julia, Matlab, Python, R, Ruby, and Rust.</p>
+<dt id="term-Interfaces">Interfaces<a class="headerlink" href="#term-Interfaces" title="Link to this term"></a></dt><dd><p>It provides interfaces to C, C++, Fortran, Julia, Matlab, Python, R, Ruby, and Rust.</p>
 </dd>
 </dl>
 <p class="rubric">License</p>
 <p>OSQP is distributed under the <a class="reference external" href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 License</a></p>
 <p class="rubric">Credits</p>
-<p>Please credit the OSQP Developer Team when using OSQP.</p>
+<p>The following people have been involved in the development of OSQP:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://stellato.io/">Bartolomeo Stellato</a> (Princeton University): main development</p></li>
+<li><p><a class="reference external" href="https://github.com/gbanjac">Goran Banjac</a> (ETH Zürich): main development</p></li>
+<li><p><a class="reference external" href="https://www.nicholasmoehle.com/">Nicholas Moehle</a> (Stanford University): methods, maths, and code generation</p></li>
+<li><p><a class="reference external" href="https://users.ox.ac.uk/~engs1373/">Paul Goulart</a> (University of Oxford): methods, maths, and Matlab interface</p></li>
+<li><p><a class="reference external" href="http://cse.lab.imtlucca.it/~bemporad/">Alberto Bemporad</a> (IMT Lucca): methods and maths</p></li>
+<li><p><a class="reference external" href="https://web.stanford.edu/~boyd/">Stephen Boyd</a> (Stanford University): methods and maths</p></li>
+<li><p><a class="reference external" href="https://ism.engineer">Ian McInerney</a> (Imperial College London): software engineering, code generation</p></li>
+<li><p><a class="reference external" href="https://csml.princeton.edu/people/vineet-bansal">Vineet Bansal</a> (CSML, Princeton University): software engineering</p></li>
+<li><p><a class="reference external" href="mailto:michel&#46;schubiger&#37;&#52;&#48;bluewin&#46;ch">Michel Schubiger</a> (Schindler R&amp;D): GPU implementation</p></li>
+<li><p><a class="reference external" href="https://control.ee.ethz.ch/people/profile.john-lygeros.html">John Lygeros</a> (ETH Zurich): methods and maths</p></li>
+<li><p><a class="reference external" href="mailto:as3993&#37;&#52;&#48;princeton&#46;edu">Amit Solomon</a> (Princeton University): software engineering</p></li>
+</ul>
 <p>Interfaces development</p>
 <ul class="simple">
 <li><p><a class="reference external" href="http://www.numerical.rl.ac.uk/people/nimg/nimg.html">Nick Gould</a> (Rutherford Appleton Laboratory): Fortran and CUTEst interfaces</p></li>

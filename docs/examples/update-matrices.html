@@ -9,10 +9,13 @@
   <title>Update matrices &mdash; OSQP  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=d4cddda9" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=8600c7be" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=8600c7be" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -116,7 +119,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
            <div itemprop="articleBody">
              
   <section id="update-matrices">
-<h1>Update matrices<a class="headerlink" href="#update-matrices" title="Link to this heading">¶</a></h1>
+<h1>Update matrices<a class="headerlink" href="#update-matrices" title="Link to this heading"></a></h1>
 <p>Consider the following QP</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{array}{ll}
@@ -131,7 +134,7 @@ Then we update the matrices <span class="math notranslate nohighlight">\(P\)</sp
   \mbox{subject to} &amp; \begin{bmatrix}1 \\ 0 \\ 0\end{bmatrix} \leq \begin{bmatrix} 1.2 &amp; 1.1\\ 1.5 &amp; 0\\ 0 &amp; 0.8\end{bmatrix} x \leq \begin{bmatrix}1 \\ 0.7 \\ 0.7\end{bmatrix}
 \end{array}\end{split}\]</div>
 <section id="python">
-<h2>Python<a class="headerlink" href="#python" title="Link to this heading">¶</a></h2>
+<h2>Python<a class="headerlink" href="#python" title="Link to this heading"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">osqp</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">sparse</span>
@@ -164,7 +167,7 @@ Then we update the matrices <span class="math notranslate nohighlight">\(P\)</sp
 </div>
 </section>
 <section id="matlab">
-<h2>Matlab<a class="headerlink" href="#matlab" title="Link to this heading">¶</a></h2>
+<h2>Matlab<a class="headerlink" href="#matlab" title="Link to this heading"></a></h2>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Define problem data</span>
 <span class="n">P</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">sparse</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">]);</span>
 <span class="n">q</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="mi">1</span><span class="p">];</span>
@@ -193,7 +196,7 @@ Then we update the matrices <span class="math notranslate nohighlight">\(P\)</sp
 </div>
 </section>
 <section id="julia">
-<h2>Julia<a class="headerlink" href="#julia" title="Link to this heading">¶</a></h2>
+<h2>Julia<a class="headerlink" href="#julia" title="Link to this heading"></a></h2>
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">OSQP</span>
 <span class="k">using</span><span class="w"> </span><span class="n">Compat</span><span class="o">.</span><span class="n">SparseArrays</span><span class="p">,</span><span class="w"> </span><span class="n">Compat</span><span class="o">.</span><span class="n">LinearAlgebra</span>
 
@@ -225,7 +228,7 @@ Then we update the matrices <span class="math notranslate nohighlight">\(P\)</sp
 </div>
 </section>
 <section id="r">
-<h2>R<a class="headerlink" href="#r" title="Link to this heading">¶</a></h2>
+<h2>R<a class="headerlink" href="#r" title="Link to this heading"></a></h2>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">osqp</span><span class="p">)</span>
 <span class="nf">library</span><span class="p">(</span><span class="n">Matrix</span><span class="p">)</span>
 
@@ -258,7 +261,7 @@ Then we update the matrices <span class="math notranslate nohighlight">\(P\)</sp
 </div>
 </section>
 <section id="c">
-<h2>C<a class="headerlink" href="#c" title="Link to this heading">¶</a></h2>
+<h2>C<a class="headerlink" href="#c" title="Link to this heading"></a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdlib.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;osqp.h&quot;</span>
 

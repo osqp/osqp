@@ -9,10 +9,13 @@
   <title>C &mdash; OSQP  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=d4cddda9" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=8600c7be" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=8600c7be" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -114,9 +117,9 @@ content="https://osqp.org/docs/_static/img/logo.png">
            <div itemprop="articleBody">
              
   <section id="c">
-<span id="install-osqp-libs"></span><h1>C<a class="headerlink" href="#c" title="Link to this heading">¶</a></h1>
+<span id="install-osqp-libs"></span><h1>C<a class="headerlink" href="#c" title="Link to this heading"></a></h1>
 <section id="binaries">
-<h2>Binaries<a class="headerlink" href="#binaries" title="Link to this heading">¶</a></h2>
+<h2>Binaries<a class="headerlink" href="#binaries" title="Link to this heading"></a></h2>
 <p>Precompiled platform-dependent shared and static libraries are available on <a class="reference external" href="https://github.com/osqp/osqp/releases">GitHub</a>.
 We here assume that the user uncompressed each archive to <code class="code docutils literal notranslate"><span class="pre">OSQP_FOLDER</span></code>.</p>
 <p>Each archive contains static <code class="code docutils literal notranslate"><span class="pre">OSQP_FOLDER/lib/libosqp.a</span></code> and shared <code class="code docutils literal notranslate"><span class="pre">OSQP_FOLDER/lib/libosqp.ext</span></code> libraries to be used to interface OSQP to any C/C++ software.
@@ -126,11 +129,11 @@ The required include files can be found in <code class="code docutils literal no
 <p>If you are interested in development builds, you can find them on <a class="reference external" href="https://github.com/osqp/osqp/releases">GitHub</a>.</p>
 </section>
 <section id="sources">
-<h2>Sources<a class="headerlink" href="#sources" title="Link to this heading">¶</a></h2>
+<h2>Sources<a class="headerlink" href="#sources" title="Link to this heading"></a></h2>
 <p>The OSQP libraries can also be compiled from sources. For more details see <a class="reference internal" href="sources.html#build-from-sources"><span class="std std-ref">Build from sources</span></a>.</p>
 </section>
 <section id="including-osqp-in-cmake-projects">
-<h2>Including OSQP in CMake projects<a class="headerlink" href="#including-osqp-in-cmake-projects" title="Link to this heading">¶</a></h2>
+<h2>Including OSQP in CMake projects<a class="headerlink" href="#including-osqp-in-cmake-projects" title="Link to this heading"></a></h2>
 <p>If you compiled OSQP from sources and followed the CMake installation instructions in <a class="reference internal" href="sources.html#install-the-binaries"><span class="std std-ref">Install the binaries</span></a> section, you can include the package in another CMake project with the following lines depending on whether you need a shared or a static library</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Find OSQP library and headers</span>
 <span class="n">find_package</span><span class="p">(</span><span class="n">osqp</span> <span class="n">REQUIRED</span><span class="p">)</span>

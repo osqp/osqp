@@ -9,10 +9,13 @@
   <title>Profiling &mdash; OSQP  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=d4cddda9" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=8600c7be" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=8600c7be" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -111,7 +114,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
            <div itemprop="articleBody">
              
   <section id="profiling">
-<h1>Profiling<a class="headerlink" href="#profiling" title="Link to this heading">¶</a></h1>
+<h1>Profiling<a class="headerlink" href="#profiling" title="Link to this heading"></a></h1>
 <p>OSQP includes two mechanisms for measuring the amount of time spent in the solver:</p>
 <ul class="simple">
 <li><p>Basic profiling - provides simple measurements of start/stop times for the solver</p></li>
@@ -119,14 +122,14 @@ content="https://osqp.org/docs/_static/img/logo.png">
 can measure the time of each part of the solver.</p></li>
 </ul>
 <section id="basic-profiling">
-<h2>Basic Profiling<a class="headerlink" href="#basic-profiling" title="Link to this heading">¶</a></h2>
+<h2>Basic Profiling<a class="headerlink" href="#basic-profiling" title="Link to this heading"></a></h2>
 <p>Basic solver profiling is enabled by the <code class="code docutils literal notranslate"><span class="pre">OSQP_ENABLE_PROFILING</span></code> CMake build option, and uses the system’s
 clock to time the setup and solve phases.
 The runtime for the solver is displayed alongside the solver status when the solver finishes, and is also contained
 inside fields of the <code class="xref c c-struct docutils literal notranslate"><span class="pre">OSQPInfo</span></code> structure.</p>
 </section>
 <section id="advanced-profiling">
-<h2>Advanced Profiling<a class="headerlink" href="#advanced-profiling" title="Link to this heading">¶</a></h2>
+<h2>Advanced Profiling<a class="headerlink" href="#advanced-profiling" title="Link to this heading"></a></h2>
 <p>Advanced solver profiling is available with the use of the following external tools:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#adv-profile-nvidia-nsight"><span class="std std-ref">NVidia Nsight</span></a></p></li>
@@ -136,7 +139,7 @@ inside fields of the <code class="xref c c-struct docutils literal notranslate">
 <p>While these profilers can be used with normal builds of OSQP, using the OSQP CMake build option
 <code class="code docutils literal notranslate"><span class="pre">OSQP_PROFILER_ANNOTATIONS</span></code> will enable section annotation, telling the profiler when sections
 of the code start/end to allow more fine-grained timing of individual sections of the various solver phases.</p>
-<p>At runtime, the OSQP profiler annotations are controlled using the <code class="xref cpp cpp-var docutils literal notranslate"><span class="pre">OSQPSettings::profiler_level</span></code>
+<p>At runtime, the OSQP profiler annotations are controlled using the <a class="reference internal" href="../interfaces/C.html#_CPPv4N12OSQPSettings14profiler_levelE" title="OSQPSettings::profiler_level"><code class="xref cpp cpp-var docutils literal notranslate"><span class="pre">OSQPSettings::profiler_level</span></code></a>
 settings variable.
 This setting can take three different values:</p>
 <ul class="simple">
@@ -145,7 +148,7 @@ This setting can take three different values:</p>
 <li><p><code class="code docutils literal notranslate"><span class="pre">2</span></code> - Annotate both OSQP ADMM sections and underlying linear algebra sections</p></li>
 </ul>
 <section id="nvidia-nsight">
-<span id="adv-profile-nvidia-nsight"></span><h3>NVidia Nsight<a class="headerlink" href="#nvidia-nsight" title="Link to this heading">¶</a></h3>
+<span id="adv-profile-nvidia-nsight"></span><h3>NVidia Nsight<a class="headerlink" href="#nvidia-nsight" title="Link to this heading"></a></h3>
 <p>When using the NVidia CUDA algebra backend with the profiler annotations enabled, only the <a class="reference external" href="https://developer.nvidia.com/nsight-graphics">NVidia Nsight</a>
 profiler should be used.
 OSQP uses the NVidia NVTX library library to report solver sections, which is selected using the
@@ -154,7 +157,7 @@ OSQP uses the NVidia NVTX library library to report solver sections, which is se
 profiler tool. The timing information will be namespaced into the <code class="code docutils literal notranslate"><span class="pre">osqp</span></code> domain, and is reported in the NVTX ranges
 section of any reports produced.</p>
 <section id="command-line-profiling">
-<h4>Command line profiling<a class="headerlink" href="#command-line-profiling" title="Link to this heading">¶</a></h4>
+<h4>Command line profiling<a class="headerlink" href="#command-line-profiling" title="Link to this heading"></a></h4>
 <p>To use the command line to profile the demo executable with the CUDA algebra and report the OSQP timings,
 the following should be run on Linux:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nsys<span class="w"> </span>profile<span class="w"> </span>-o<span class="w"> </span>&lt;report_name&gt;<span class="w"> </span>osqp_demo
@@ -183,7 +186,7 @@ similar to the one shown below.</p>
 </div>
 </section>
 <section id="gui-profiling">
-<h4>GUI Profiling<a class="headerlink" href="#gui-profiling" title="Link to this heading">¶</a></h4>
+<h4>GUI Profiling<a class="headerlink" href="#gui-profiling" title="Link to this heading"></a></h4>
 <p>To use the <a class="reference external" href="https://developer.nvidia.com/nsight-graphics">NVidia Nsight</a> GUI to profile OSQP, ensure that the <cite>Collect NVTX trace</cite> project option is selected, and the
 <code class="code docutils literal notranslate"><span class="pre">osqp</span></code> domain is included in any NVTX domain filters that are setup.
 Then, the OSQP sections will be shown on the timeline, and all the OSQP sections and events can be seen in the <cite>Events view</cite>.
@@ -192,14 +195,14 @@ A sample of the Nsight GUI with OSQP section information included is shown below
 </section>
 </section>
 <section id="intel-vtune">
-<span id="adv-profile-intel-vtune"></span><h3>Intel VTune<a class="headerlink" href="#intel-vtune" title="Link to this heading">¶</a></h3>
+<span id="adv-profile-intel-vtune"></span><h3>Intel VTune<a class="headerlink" href="#intel-vtune" title="Link to this heading"></a></h3>
 <p>When using CPU-based backends, OSQP can be profiled using the <a class="reference external" href="https://www.intel.com/content/www/us/en/developer/tools/oneapi/vtune-profiler.html#gs.6g073h">Intel VTune</a> profiler.
 OSQP integration with VTune is enabled using the <code class="code docutils literal notranslate"><span class="pre">OSQP_PROFILER_ANNOTATIONS=itt</span></code> CMake build
 option, which enables the ITT (Instrumentation and Tracing Technology APIs) library for reporting section
 information.
 OSQP reports the various parts of the solver as a <cite>Task</cite> under the :<code class="code docutils literal notranslate"><span class="pre">osqp</span></code> domain.</p>
 <section id="id3">
-<h4>GUI Profiling<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
+<h4>GUI Profiling<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
 <p>To use <a class="reference external" href="https://www.intel.com/content/www/us/en/developer/tools/oneapi/vtune-profiler.html#gs.6g073h">Intel VTune</a> to profile OSQP with the profiler annotations, run a <cite>Hotspot</cite> analysis, and ensure the
 <cite>Analyze user tasks, events and counters</cite> option is selected.
 Once run, the OSQP annotations can be seen in the application’s trace in the <cite>Platform</cite> timeline view, and
@@ -211,7 +214,7 @@ on the <cite>Bottom-up</cite> tab of the analysis window, with the <cite>Task Ty
 </section>
 </section>
 <section id="amd-omnitrace">
-<span id="adv-profile-amd-omnitrace"></span><h3>AMD OmniTrace<a class="headerlink" href="#amd-omnitrace" title="Link to this heading">¶</a></h3>
+<span id="adv-profile-amd-omnitrace"></span><h3>AMD OmniTrace<a class="headerlink" href="#amd-omnitrace" title="Link to this heading"></a></h3>
 <p>OSQP can be profiled using the <a class="reference external" href="https://amdresearch.github.io/omnitrace/index.html">AMD OmniTrace</a> profiler, where OSQP will use the OmniTrace user API
 to report sections of the code for timing. To enable the section reporting, use the <code class="code docutils literal notranslate"><span class="pre">OSQP_PROFILER_ANNOTATIONS=omnitrace</span></code>
 CMake option during configuration.</p>

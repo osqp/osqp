@@ -9,10 +9,13 @@
   <title>Huber fitting &mdash; OSQP  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=d4cddda9" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=8600c7be" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=8600c7be" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -83,6 +86,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l3"><a class="reference internal" href="mpc.html">Model predictive control (MPC)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="portfolio.html">Portfolio optimization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="svm.html">Support vector machine (SVM)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="torch.html">Torch</a></li>
 </ul>
 </li>
 </ul>
@@ -118,7 +122,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
            <div itemprop="articleBody">
              
   <section id="huber-fitting">
-<h1>Huber fitting<a class="headerlink" href="#huber-fitting" title="Link to this heading">¶</a></h1>
+<h1>Huber fitting<a class="headerlink" href="#huber-fitting" title="Link to this heading"></a></h1>
 <p><em>Huber fitting</em> or the <em>robust least-squares problem</em> performs linear regression under the assumption that there are outliers in the data.
 The fitting problem is written as</p>
 <div class="math notranslate nohighlight">
@@ -141,7 +145,7 @@ The fitting problem is written as</p>
                     &amp; s \ge 0
 \end{array}\end{split}\]</div>
 <section id="python">
-<h2>Python<a class="headerlink" href="#python" title="Link to this heading">¶</a></h2>
+<h2>Python<a class="headerlink" href="#python" title="Link to this heading"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">osqp</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sp</span>
@@ -181,7 +185,7 @@ The fitting problem is written as</p>
 </div>
 </section>
 <section id="matlab">
-<h2>Matlab<a class="headerlink" href="#matlab" title="Link to this heading">¶</a></h2>
+<h2>Matlab<a class="headerlink" href="#matlab" title="Link to this heading"></a></h2>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Generate problem data</span>
 <span class="nb">rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">n</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
@@ -215,7 +219,7 @@ The fitting problem is written as</p>
 </div>
 </section>
 <section id="cvxpy">
-<h2>CVXPY<a class="headerlink" href="#cvxpy" title="Link to this heading">¶</a></h2>
+<h2>CVXPY<a class="headerlink" href="#cvxpy" title="Link to this heading"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">cvxpy</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sp</span>
@@ -241,7 +245,7 @@ The fitting problem is written as</p>
 </div>
 </section>
 <section id="yalmip">
-<h2>YALMIP<a class="headerlink" href="#yalmip" title="Link to this heading">¶</a></h2>
+<h2>YALMIP<a class="headerlink" href="#yalmip" title="Link to this heading"></a></h2>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Generate problem data</span>
 <span class="nb">rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">n</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>

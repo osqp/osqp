@@ -9,10 +9,13 @@
   <title>Support vector machine (SVM) &mdash; OSQP  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=d4cddda9" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=8600c7be" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=8600c7be" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -20,7 +23,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Advanced features" href="../advanced/index.html" />
+    <link rel="next" title="Torch" href="torch.html" />
     <link rel="prev" title="Portfolio optimization" href="portfolio.html" />
 <meta name="twitter:card" content="summary_large_image" >
 <meta name="twitter:creator" content="@bstellato" >
@@ -83,6 +86,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l4"><a class="reference internal" href="#yalmip">YALMIP</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="torch.html">Torch</a></li>
 </ul>
 </li>
 </ul>
@@ -118,7 +122,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
            <div itemprop="articleBody">
              
   <section id="support-vector-machine-svm">
-<h1>Support vector machine (SVM)<a class="headerlink" href="#support-vector-machine-svm" title="Link to this heading">¶</a></h1>
+<h1>Support vector machine (SVM)<a class="headerlink" href="#support-vector-machine-svm" title="Link to this heading"></a></h1>
 <p><em>Support vector machine</em> seeks an affine function that approximately classifies the two sets of points.
 The problem can be stated as</p>
 <div class="math notranslate nohighlight">
@@ -135,7 +139,7 @@ The problem has the following equivalent form</p>
 \end{array}\end{split}\]</div>
 <p>where <span class="math notranslate nohighlight">\({\rm diag}(b)\)</span> denotes the diagonal matrix with elements of <span class="math notranslate nohighlight">\(b\)</span> on its diagonal.</p>
 <section id="python">
-<h2>Python<a class="headerlink" href="#python" title="Link to this heading">¶</a></h2>
+<h2>Python<a class="headerlink" href="#python" title="Link to this heading"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">osqp</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sp</span>
@@ -176,7 +180,7 @@ The problem has the following equivalent form</p>
 </div>
 </section>
 <section id="matlab">
-<h2>Matlab<a class="headerlink" href="#matlab" title="Link to this heading">¶</a></h2>
+<h2>Matlab<a class="headerlink" href="#matlab" title="Link to this heading"></a></h2>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Generate problem data</span>
 <span class="nb">rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">n</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
@@ -209,7 +213,7 @@ The problem has the following equivalent form</p>
 </div>
 </section>
 <section id="cvxpy">
-<h2>CVXPY<a class="headerlink" href="#cvxpy" title="Link to this heading">¶</a></h2>
+<h2>CVXPY<a class="headerlink" href="#cvxpy" title="Link to this heading"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">cvxpy</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sp</span>
@@ -239,7 +243,7 @@ The problem has the following equivalent form</p>
 </div>
 </section>
 <section id="yalmip">
-<h2>YALMIP<a class="headerlink" href="#yalmip" title="Link to this heading">¶</a></h2>
+<h2>YALMIP<a class="headerlink" href="#yalmip" title="Link to this heading"></a></h2>
 <div class="highlight-matlab notranslate"><div class="highlight"><pre><span></span><span class="c">% Generate problem data</span>
 <span class="nb">rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">n</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
@@ -269,7 +273,7 @@ The problem has the following equivalent form</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="portfolio.html" class="btn btn-neutral float-left" title="Portfolio optimization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../advanced/index.html" class="btn btn-neutral float-right" title="Advanced features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="torch.html" class="btn btn-neutral float-right" title="Torch" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

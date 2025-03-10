@@ -9,10 +9,13 @@
   <title>Python &mdash; OSQP  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=d4cddda9" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=8600c7be" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/osqp_theme.css?v=8600c7be" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../_static/doctools.js?v=9a2dae69"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -67,7 +70,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l1"><a class="reference internal" href="../get_started/index.html">Get started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Interfaces</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="solver_settings.html">Solver settings</a></li>
-<li class="toctree-l2"><a class="reference internal" href="linear_systems_solvers.html">Linear Systems Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear_systems_solvers.html">Linear Systems Solvers Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="status_values.html">Status values and errors</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html#official">Official</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="C.html">C</a></li>
@@ -121,16 +124,16 @@ content="https://osqp.org/docs/_static/img/logo.png">
            <div itemprop="articleBody">
              
   <section id="python">
-<span id="python-interface"></span><h1>Python<a class="headerlink" href="#python" title="Link to this heading">¶</a></h1>
+<span id="python-interface"></span><h1>Python<a class="headerlink" href="#python" title="Link to this heading"></a></h1>
 <section id="import">
-<h2>Import<a class="headerlink" href="#import" title="Link to this heading">¶</a></h2>
+<h2>Import<a class="headerlink" href="#import" title="Link to this heading"></a></h2>
 <p>The OSQP module can be imported with</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">osqp</span>
 </pre></div>
 </div>
 </section>
 <section id="setup">
-<span id="python-setup"></span><h2>Setup<a class="headerlink" href="#setup" title="Link to this heading">¶</a></h2>
+<span id="python-setup"></span><h2>Setup<a class="headerlink" href="#setup" title="Link to this heading"></a></h2>
 <p>The solver is initialized by creating an OSQP object</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">osqp</span><span class="o">.</span><span class="n">OSQP</span><span class="p">()</span>
 </pre></div>
@@ -147,7 +150,7 @@ If they are sparse matrices are in another format, the interface will attempt to
 <p>The keyword arguments <code class="code docutils literal notranslate"><span class="pre">**settings</span></code> specify the solver settings. The allowed parameters are defined in <a class="reference internal" href="solver_settings.html#solver-settings"><span class="std std-ref">Solver settings</span></a>.</p>
 </section>
 <section id="solve">
-<h2>Solve<a class="headerlink" href="#solve" title="Link to this heading">¶</a></h2>
+<h2>Solve<a class="headerlink" href="#solve" title="Link to this heading"></a></h2>
 <p>The problem can be solved by</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
 </pre></div>
@@ -160,20 +163,20 @@ If they are sparse matrices are in another format, the interface will attempt to
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">iter</span></code></p></td>
-<td><p>Number of iterations</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">status</span></code></p></td>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">status</span></code></p></td>
 <td><p>Solver status</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">status_val</span></code></p></td>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">status_val</span></code></p></td>
 <td><p>Solver status value as in <a class="reference internal" href="status_values.html#status-values"><span class="std std-ref">Status values and errors</span></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">status_polish</span></code></p></td>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">status_polish</span></code></p></td>
 <td><p>Polishing status</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">obj_val</span></code></p></td>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">obj_val</span></code></p></td>
 <td><p>Objective value</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">dual_obj_val</span></code></p></td>
+<td><p>Dual objective value</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">prim_res</span></code></p></td>
 <td><p>Primal residual</p></td>
@@ -181,26 +184,38 @@ If they are sparse matrices are in another format, the interface will attempt to
 <tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">dual_res</span></code></p></td>
 <td><p>Dual residual</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">setup_time</span></code></p></td>
-<td><p>Setup time</p></td>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">duality_gap</span></code></p></td>
+<td><p>Duality gap</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">solve_time</span></code></p></td>
-<td><p>Solve time</p></td>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">iter</span></code></p></td>
+<td><p>Number of iterations</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">update_time</span></code></p></td>
-<td><p>Update time</p></td>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">restarts</span></code></p></td>
+<td><p>Number of restarts</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">polish_time</span></code></p></td>
-<td><p>Polish time</p></td>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">rho_updates</span></code></p></td>
+<td><p>Number of rho updates</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">run_time</span></code></p></td>
-<td><p>Total run time: setup/update + solve + polish</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">rho_estimate</span></code></p></td>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">rho_estimate</span></code></p></td>
 <td><p>Optimal rho estimate</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">rho_updates</span></code></p></td>
-<td><p>Number of rho updates</p></td>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">setup_time</span></code></p></td>
+<td><p>Setup time</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">solve_time</span></code></p></td>
+<td><p>Solve time</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">update_time</span></code></p></td>
+<td><p>Update time</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">polish_time</span></code></p></td>
+<td><p>Polish time</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="code docutils literal notranslate"><span class="pre">run_time</span></code></p></td>
+<td><p>Total run time: setup/update + solve + polish</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="code docutils literal notranslate"><span class="pre">primdual_int</span></code></p></td>
+<td><p>Primal-dual integral</p></td>
 </tr>
 </tbody>
 </table>
@@ -208,7 +223,7 @@ If they are sparse matrices are in another format, the interface will attempt to
 first one <code class="code docutils literal notranslate"><span class="pre">run_time</span></code> includes <code class="code docutils literal notranslate"><span class="pre">update_time</span></code> + <code class="code docutils literal notranslate"><span class="pre">solve_time</span></code>
 + <code class="code docutils literal notranslate"><span class="pre">polish_time</span></code>.</p>
 <section id="solve-in-just-one-function-with-gil-disabled">
-<h3>Solve in just one function (with GIL disabled)<a class="headerlink" href="#solve-in-just-one-function-with-gil-disabled" title="Link to this heading">¶</a></h3>
+<h3>Solve in just one function (with GIL disabled)<a class="headerlink" href="#solve-in-just-one-function-with-gil-disabled" title="Link to this heading"></a></h3>
 <p>We have a dedicated solve function that performs <code class="code docutils literal notranslate"><span class="pre">setup</span></code> and <code class="code docutils literal notranslate"><span class="pre">solve</span></code> operations for you. It also disables the GIL in case you
 need it. Just run it from the main module without creating the object as follows</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">osqp</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">P</span><span class="o">=</span><span class="n">P</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">A</span><span class="o">=</span><span class="n">A</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="n">l</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">u</span><span class="p">,</span> <span class="o">**</span><span class="n">settings</span><span class="p">)</span>
@@ -217,10 +232,10 @@ need it. Just run it from the main module without creating the object as follows
 </section>
 </section>
 <section id="update">
-<h2>Update<a class="headerlink" href="#update" title="Link to this heading">¶</a></h2>
+<h2>Update<a class="headerlink" href="#update" title="Link to this heading"></a></h2>
 <p>Part of problem data and settings can be updated without requiring a new problem setup.</p>
 <section id="update-problem-vectors">
-<h3>Update problem vectors<a class="headerlink" href="#update-problem-vectors" title="Link to this heading">¶</a></h3>
+<h3>Update problem vectors<a class="headerlink" href="#update-problem-vectors" title="Link to this heading"></a></h3>
 <p>Vectors <code class="code docutils literal notranslate"><span class="pre">q</span></code>, <code class="code docutils literal notranslate"><span class="pre">l</span></code> and <code class="code docutils literal notranslate"><span class="pre">u</span></code> can be updated with new values <code class="code docutils literal notranslate"><span class="pre">q_new</span></code>, <code class="code docutils literal notranslate"><span class="pre">l_new</span></code> and <code class="code docutils literal notranslate"><span class="pre">u_new</span></code> by just running</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="n">q_new</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="n">l_new</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">u_new</span><span class="p">)</span>
 </pre></div>
@@ -228,9 +243,9 @@ need it. Just run it from the main module without creating the object as follows
 <p>The user does not have to specify all the keyword arguments.</p>
 </section>
 <section id="update-problem-matrices">
-<span id="python-update-settings"></span><h3>Update problem matrices<a class="headerlink" href="#update-problem-matrices" title="Link to this heading">¶</a></h3>
+<span id="python-update-settings"></span><h3>Update problem matrices<a class="headerlink" href="#update-problem-matrices" title="Link to this heading"></a></h3>
 <p>Matrices <code class="code docutils literal notranslate"><span class="pre">A</span></code> and <code class="code docutils literal notranslate"><span class="pre">P</span></code> can be updated by changing the value of their elements but not their sparsity pattern.
-The interface is designed to mimic the <span class="xref std std-ref">C counterpart</span>.
+The interface is designed to mimic the <a class="reference internal" href="C.html#c-update-data"><span class="std std-ref">C counterpart</span></a>.
 Note that the new values of <code class="code docutils literal notranslate"><span class="pre">P</span></code> represent only the upper triangular part while <code class="code docutils literal notranslate"><span class="pre">A</span></code> is always represented as a full matrix.</p>
 <p>You can update the values of all the elements of <code class="code docutils literal notranslate"><span class="pre">P</span></code> by executing</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">Px</span><span class="o">=</span><span class="n">Px_new</span><span class="p">)</span>
@@ -247,7 +262,7 @@ Note that the new values of <code class="code docutils literal notranslate"><spa
 </div>
 </section>
 <section id="update-settings">
-<h3>Update settings<a class="headerlink" href="#update-settings" title="Link to this heading">¶</a></h3>
+<h3>Update settings<a class="headerlink" href="#update-settings" title="Link to this heading"></a></h3>
 <p>Settings can be updated by running</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">update_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
@@ -256,7 +271,7 @@ Note that the new values of <code class="code docutils literal notranslate"><spa
 </section>
 </section>
 <section id="warm-start">
-<h2>Warm start<a class="headerlink" href="#warm-start" title="Link to this heading">¶</a></h2>
+<h2>Warm start<a class="headerlink" href="#warm-start" title="Link to this heading"></a></h2>
 <p>OSQP automatically warm starts primal and dual variables from the previous QP solution. If you would like to warm start their values manually, you can use</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">warm_start</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y0</span><span class="p">)</span>
 </pre></div>
