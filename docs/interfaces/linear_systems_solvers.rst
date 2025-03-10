@@ -1,24 +1,6 @@
 .. _linear_system_solvers_setting :
 
-Linear Systems Solvers
------------------------
-The settings parameter :code:`linsys_solver` defines the solver for the linear system.
-In C it corresponds to an integer :code:`OSQPInt` (see :ref:`c_cpp_data_types`) and in the other high level languages to a string.
-
-
-+-----------------+-------------------+--------------------------------+---------------+
-| Solver          | String option     | C     Constant                 | Integer value |
-+=================+===================+================================+===============+
-| QDLDL           | "qdldl"           | :code:`QDLDL_SOLVER`           | :code:`0`     |
-+-----------------+-------------------+--------------------------------+---------------+
-| MKL Pardiso     | "mkl pardiso"     | :code:`MKL_PARDISO_SOLVER`     | :code:`1`     |
-+-----------------+-------------------+--------------------------------+---------------+
-| CUDA PCG        | "cuda pcg"        | :code:`CUDA_PCG_SOLVER`        | :code:`2`     |
-+-----------------+-------------------+--------------------------------+---------------+
-
-
-
-To add new linear system solvers see :ref:`interfacing_new_linear_system_solvers`.
-
-
-
+Linear Systems Solvers Types
+----------------------------
+The settings parameter :code:`osqp_linsys_solver_type` defines the solver type for the linear system.
+This is an enum type whose options are :code:`OSQP_UNKNOWN_SOLVER`, :code:`OSQP_DIRECT_SOLVER`, and :code:`OSQP_INDIRECT_SOLVER`.

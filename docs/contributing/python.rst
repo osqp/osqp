@@ -15,7 +15,7 @@ check what algebra backends we have successfully built.
         $ python -c "from osqp import algebras_available; print(algebras_available())"
 
 Wrappers for ``builtin`` algebra
-------------------------------
+--------------------------------
 
 Building wrappers for the ``builtin`` algebra demonstrates some of the basic steps
 you would need to take for all algebra backends.
@@ -48,9 +48,9 @@ you would need to take for all algebra backends.
 	['builtin']
 
 Wrappers for ``mkl`` algebra
---------------------------
+----------------------------
 
-For building Python wrappers for the ``MKL`` algebra backend, you need to have the `Intel OneAPI<https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.html#base-kit>`_.
+For building Python wrappers for the ``MKL`` algebra backend, you need to have the `Intel OneAPI <https://www.intel.com/content/www/us/en/developer/tools/oneapi/toolkits.html#base-kit>`_.
 library installed and accessible for your platform.
 
 Once installed, set the environment variable ``MKL_ROOT`` to the path of the installed toolkit. For example:
@@ -80,9 +80,9 @@ The process of building the ``MKL`` OSQP wrappers is the same as above, except t
 	['mkl', 'builtin']
 
 Wrappers for ``cuda`` algebra
---------------------------
+-----------------------------
 
-For building Python wrappers for the ``CUDA`` algebra backend, you need to have the `CUDA Tooklit<https://developer.nvidia.com/cuda-toolkit-archive>`_.
+For building Python wrappers for the ``CUDA`` algebra backend, you need to have the `CUDA Tooklit <https://developer.nvidia.com/cuda-toolkit-archive>`_.
 installed and accessible for your platform. The build process has been tested out for CUDA Toolkit versions 11.2 through 11.7.
 
 If you install the CUDA Toolkit using the default paths and options (which makes the toolkit available at ``/usr/local/cuda`` for \*nix platforms),
