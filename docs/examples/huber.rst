@@ -18,7 +18,7 @@ with the Huber penalty function :math:`\phi_{\rm hub}:\mathbf{R}\to\mathbf{R}` d
       (2|u| - 1)  & |u| > 1
   \end{cases}
 
-The problem has the following equivalent form (see `here <https://ieeexplore.ieee.org/document/877518>`_ for more details)
+The problem has the following equivalent form (see `here <https://doi.org/10.1109/34.877518>`_ for more details)
 
 .. math::
   \begin{array}{ll}

@@ -43,7 +43,7 @@ If you use OSQP for published work, we encourage you to put a star on `GitHub <h
           }
 
     GPU implementation
-        GPU implementation and PCG method for solving linear systems in this `paper <https://www.sciencedirect.com/science/article/pii/S0743731520303063>`__.
+        GPU implementation and PCG method for solving linear systems in this `paper <https://doi.org/10.1016/j.jpdc.2020.05.021>`__.
 
         .. code:: latex
 
@@ -55,7 +55,7 @@ If you use OSQP for published work, we encourage you to put a star on `GitHub <h
             volume  = {144},
             pages   = {55--67},
             doi     = {10.1016/j.jpdc.2020.05.021},
-            url     = {https://www.sciencedirect.com/science/article/pii/S0743731520303063},
+            url     = {https://doi.org/10.1016/j.jpdc.2020.05.021},
           }
 
     Code generation
