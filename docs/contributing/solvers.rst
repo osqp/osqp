@@ -7,7 +7,7 @@ Create a subdirectory with your solver name with four files:
 * Dynamic library loading: :code:`mysolver_loader.c` and :code:`mysolver_loader.h`.
 * Linear system solution: :code:`mysolver.c` and :code:`mysolver.h`.
 
-We suggest you to have a look at the `MKL Pardiso solver interface <https://github.com/osqp/osqp/tree/master/lin_sys/direct/pardiso>`_ for more details.
+We suggest you to have a look at the `MKL Pardiso solver interface <https://github.com/osqp/osqp/tree/master/algebra/mkl/lin_sys/direct>`_ for more details.
 
 Dynamic library loading
 ^^^^^^^^^^^^^^^^^^^^^^^
