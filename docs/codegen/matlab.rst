@@ -164,5 +164,3 @@ You can update all the nonzero entries in matrix :math:`A` by running
 .. code:: matlab
 
     emosqp('update_A', Ax_new, [], 0);
-
-See C :ref:`C_sublevel_API` for more details on the input arguments.

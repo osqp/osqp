@@ -178,7 +178,7 @@ static OSQPInt form_rhs_red(OSQPWorkspace* work, OSQPVectorf* rhs) {
  *    (repeat)
  *    1. (K + dK) * dz = b - K*z
  *    2. z <- z + dz
- * @param  work Solver workspace
+ * @param  solver Solver instance
  * @param  p    Private variable for solving linear system
  * @param  z    Initial z value
  * @param  b    RHS of the linear system
@@ -246,7 +246,7 @@ static OSQPInt iterative_refinement(OSQPSolver*   solver,
 /**
  * Compute dual variable y from yred
  * @param work Workspace
- * @param yred Dual variables associated to active constraints
+ * @param yred_vf Dual variables associated to active constraints
  * @return Exitflag
  */
 static OSQPInt get_ypol_from_yred(OSQPWorkspace* work, OSQPVectorf* yred_vf) {
