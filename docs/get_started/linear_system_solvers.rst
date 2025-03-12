@@ -34,10 +34,10 @@ QDLDL is a sparse direct solver that works well for most small to medium sized p
 However, it becomes not really efficient for large scale problems since it is not multi-threaded.
 
 
-MKL Pardiso
+oneMKL Pardiso
 -----------
-`MKL Pardiso <https://software.intel.com/en-us/mkl-developer-reference-fortran-intel-mkl-pardiso-parallel-direct-sparse-solver-interface>`_ is an efficient multi-threaded linear system solver that works well for large scale problems part of the Intel Math Kernel Library.
-Intel offers `free lincenses <https://software.intel.com/en-us/articles/free-mkl>`_ for MKL for most non-commercial applications.
+`oneMKL Pardiso <https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2023-0/onemkl-pardiso-parallel-direct-sparse-solver-iface.html>`_ is an efficient multi-threaded linear system solver that works well for large scale problems part of the Intel Math Kernel Library.
+Intel offers `free licenses <https://www.intel.com/content/www/us/en/developer/articles/tool/onemkl-license-faq.html>`_ for oneMKL for most non-commercial applications.
 
 Install with MKL
 ^^^^^^^^^^^^^^^^

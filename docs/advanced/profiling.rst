@@ -111,7 +111,7 @@ option, which enables the ITT (Instrumentation and Tracing Technology APIs) libr
 information.
 OSQP reports the various parts of the solver as a `Task` under the ::code:`osqp` domain.
 
-.. _Intel VTune: https://www.intel.com/content/www/us/en/developer/tools/oneapi/vtune-profiler.html#gs.6g073h
+.. _Intel VTune: https://www.intel.com/content/www/us/en/developer/tools/oneapi/vtune-profiler.html
 
 
 GUI Profiling
@@ -142,7 +142,7 @@ to report sections of the code for timing. To enable the section reporting, use 
 CMake option during configuration.
 
 
-.. _AMD OmniTrace: https://amdresearch.github.io/omnitrace/index.html
+.. _AMD OmniTrace: https://rocm.docs.amd.com/projects/rocprofiler-systems/en/latest/
 
 OmniTrace uses the command line to profile and report the OSQP timings.
 To build and run an instrumented OSQP executable, the following should be run on Linux (replacing :code:`osqp_demo` with
