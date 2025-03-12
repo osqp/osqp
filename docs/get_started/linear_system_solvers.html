@@ -77,7 +77,7 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Linear System Solvers</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#dynamic-shared-library-loading">Dynamic shared library loading</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#qdldl">QDLDL</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mkl-pardiso">MKL Pardiso</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#onemkl-pardiso">oneMKL Pardiso</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#install-with-mkl">Install with MKL</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#install-with-anaconda">Install with Anaconda</a></li>
 </ul>
@@ -159,10 +159,10 @@ It does not require any external shared library.
 QDLDL is a sparse direct solver that works well for most small to medium sized problems.
 However, it becomes not really efficient for large scale problems since it is not multi-threaded.</p>
 </section>
-<section id="mkl-pardiso">
-<h2>MKL Pardiso<a class="headerlink" href="#mkl-pardiso" title="Link to this heading"></a></h2>
-<p><a class="reference external" href="https://software.intel.com/en-us/mkl-developer-reference-fortran-intel-mkl-pardiso-parallel-direct-sparse-solver-interface">MKL Pardiso</a> is an efficient multi-threaded linear system solver that works well for large scale problems part of the Intel Math Kernel Library.
-Intel offers <a class="reference external" href="https://software.intel.com/en-us/articles/free-mkl">free lincenses</a> for MKL for most non-commercial applications.</p>
+<section id="onemkl-pardiso">
+<h2>oneMKL Pardiso<a class="headerlink" href="#onemkl-pardiso" title="Link to this heading"></a></h2>
+<p><a class="reference external" href="https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2023-0/onemkl-pardiso-parallel-direct-sparse-solver-iface.html">oneMKL Pardiso</a> is an efficient multi-threaded linear system solver that works well for large scale problems part of the Intel Math Kernel Library.
+Intel offers <a class="reference external" href="https://www.intel.com/content/www/us/en/developer/articles/tool/onemkl-license-faq.html">free licenses</a> for oneMKL for most non-commercial applications.</p>
 <section id="install-with-mkl">
 <h3>Install with MKL<a class="headerlink" href="#install-with-mkl" title="Link to this heading"></a></h3>
 <p>We can install MKL Pardiso by using the standard <a class="reference external" href="https://software.intel.com/en-us/mkl">MKL installer</a>.

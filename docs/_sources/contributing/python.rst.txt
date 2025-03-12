@@ -82,7 +82,7 @@ The process of building the ``MKL`` OSQP wrappers is the same as above, except t
 Wrappers for ``cuda`` algebra
 -----------------------------
 
-For building Python wrappers for the ``CUDA`` algebra backend, you need to have the `CUDA Tooklit <https://developer.nvidia.com/cuda-toolkit-archive>`_.
+For building Python wrappers for the ``CUDA`` algebra backend, you need to have the `CUDA Toolkit <https://developer.nvidia.com/cuda-toolkit-archive>`_.
 installed and accessible for your platform. The build process has been tested out for CUDA Toolkit versions 11.2 through 11.7.
 
 If you install the CUDA Toolkit using the default paths and options (which makes the toolkit available at ``/usr/local/cuda`` for \*nix platforms),

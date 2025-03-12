@@ -196,14 +196,14 @@ A sample of the Nsight GUI with OSQP section information included is shown below
 </section>
 <section id="intel-vtune">
 <span id="adv-profile-intel-vtune"></span><h3>Intel VTune<a class="headerlink" href="#intel-vtune" title="Link to this heading"></a></h3>
-<p>When using CPU-based backends, OSQP can be profiled using the <a class="reference external" href="https://www.intel.com/content/www/us/en/developer/tools/oneapi/vtune-profiler.html#gs.6g073h">Intel VTune</a> profiler.
+<p>When using CPU-based backends, OSQP can be profiled using the <a class="reference external" href="https://www.intel.com/content/www/us/en/developer/tools/oneapi/vtune-profiler.html">Intel VTune</a> profiler.
 OSQP integration with VTune is enabled using the <code class="code docutils literal notranslate"><span class="pre">OSQP_PROFILER_ANNOTATIONS=itt</span></code> CMake build
 option, which enables the ITT (Instrumentation and Tracing Technology APIs) library for reporting section
 information.
 OSQP reports the various parts of the solver as a <cite>Task</cite> under the :<code class="code docutils literal notranslate"><span class="pre">osqp</span></code> domain.</p>
 <section id="id3">
 <h4>GUI Profiling<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
-<p>To use <a class="reference external" href="https://www.intel.com/content/www/us/en/developer/tools/oneapi/vtune-profiler.html#gs.6g073h">Intel VTune</a> to profile OSQP with the profiler annotations, run a <cite>Hotspot</cite> analysis, and ensure the
+<p>To use <a class="reference external" href="https://www.intel.com/content/www/us/en/developer/tools/oneapi/vtune-profiler.html">Intel VTune</a> to profile OSQP with the profiler annotations, run a <cite>Hotspot</cite> analysis, and ensure the
 <cite>Analyze user tasks, events and counters</cite> option is selected.
 Once run, the OSQP annotations can be seen in the application’s trace in the <cite>Platform</cite> timeline view, and
 also in the tooltip when the mouse hovers over an item in the timeline, as shown below.</p>
@@ -215,7 +215,7 @@ on the <cite>Bottom-up</cite> tab of the analysis window, with the <cite>Task Ty
 </section>
 <section id="amd-omnitrace">
 <span id="adv-profile-amd-omnitrace"></span><h3>AMD OmniTrace<a class="headerlink" href="#amd-omnitrace" title="Link to this heading"></a></h3>
-<p>OSQP can be profiled using the <a class="reference external" href="https://amdresearch.github.io/omnitrace/index.html">AMD OmniTrace</a> profiler, where OSQP will use the OmniTrace user API
+<p>OSQP can be profiled using the <a class="reference external" href="https://rocm.docs.amd.com/projects/rocprofiler-systems/en/latest/">AMD OmniTrace</a> profiler, where OSQP will use the OmniTrace user API
 to report sections of the code for timing. To enable the section reporting, use the <code class="code docutils literal notranslate"><span class="pre">OSQP_PROFILER_ANNOTATIONS=omnitrace</span></code>
 CMake option during configuration.</p>
 <p>OmniTrace uses the command line to profile and report the OSQP timings.

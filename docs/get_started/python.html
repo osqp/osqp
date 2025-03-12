@@ -71,7 +71,6 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <li class="toctree-l2"><a class="reference internal" href="C.html">C</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Python</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pip">Pip</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#anaconda">Anaconda</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sources">Sources</a></li>
 </ul>
 </li>
@@ -118,16 +117,10 @@ content="https://osqp.org/docs/_static/img/logo.png">
              
   <section id="python">
 <h1>Python<a class="headerlink" href="#python" title="Link to this heading"></a></h1>
-<p>Python interface supports Python 2.7 and 3.5 or newer.</p>
+<p>Python interface supports Python 3.8 or newer.</p>
 <section id="pip">
 <h2>Pip<a class="headerlink" href="#pip" title="Link to this heading"></a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>osqp
-</pre></div>
-</div>
-</section>
-<section id="anaconda">
-<h2>Anaconda<a class="headerlink" href="#anaconda" title="Link to this heading"></a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>osqp
 </pre></div>
 </div>
 </section>
@@ -136,14 +129,13 @@ content="https://osqp.org/docs/_static/img/logo.png">
 <p>You need to install the following (see <a class="reference internal" href="sources.html#build-from-sources"><span class="std std-ref">Build from sources</span></a> for more details):</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://gcc.gnu.org/">GCC compiler</a></p></li>
-<li><p><a class="reference external" href="https://cmake.org/">CMake</a></p></li>
+<li><p>A Python 3.8 interpreter or newer, with a recent <cite>pip</cite> library.</p></li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><strong>Windows</strong>: You need to install <strong>also</strong> the Visual Studio C++ compiler:</p>
 <ul class="simple">
-<li><p>Python 2: <a class="reference external" href="https://www.microsoft.com/en-us/download/details.aspx?id=44266">Visual C++ 9.0 for Python (VC 9.0)</a></p></li>
-<li><p>Python 3: <a class="reference external" href="https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2017">Build Tools for Visual Studio 2017</a></p></li>
+<li><p>Python 3: <a class="reference external" href="https://visualstudio.microsoft.com/downloads/">Build Tools for Visual Studio</a></p></li>
 </ul>
 </div>
 <p>Now you are ready to build OSQP python interface from sources. Run the following in your terminal</p>
