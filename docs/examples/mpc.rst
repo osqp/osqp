@@ -231,7 +231,7 @@ CVXPY
 
 .. code:: python
 
-    from cvxpy import *
+    from cvxpy import Variable, Parameter, Problem, Minimize, quad_form, OSQP
     import numpy as np
     import scipy as sp
     from scipy import sparse

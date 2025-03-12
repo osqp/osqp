@@ -45,7 +45,7 @@ Python
     from scipy import sparse
 
     # Generate problem data
-    sp.random.seed(1)
+    np.random.seed(1)
     n = 100
     k = 10
     F = sparse.random(n, k, density=0.7, format='csc')
@@ -112,13 +112,13 @@ CVXPY
 
 .. code:: python
 
-    from cvxpy import *
+    from cvxpy import Problem, Variable, Maximize, quad_form, OSQP
     import numpy as np
     import scipy as sp
     from scipy import sparse
 
     # Generate problem data
-    sp.random.seed(1)
+    np.random.seed(1)
     n = 100
     k = 10
     F = sparse.random(n, k, density=0.7, format='csc')
