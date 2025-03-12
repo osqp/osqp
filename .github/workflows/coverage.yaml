@@ -59,6 +59,7 @@ jobs:
           if: runner.os == 'Linux'
           run: |
             echo "LD_LIBRARY_PATH=$CONDA_PREFIX/lib" >> $GITHUB_ENV
+            conda install -c conda-forge libstdcxx-ng
 
         - name: Install MKL
           if: matrix.algebra == 'mkl'

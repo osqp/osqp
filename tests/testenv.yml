@@ -1,6 +1,4 @@
 name: osqp-test
-channels:
-  - conda-forge
 dependencies:
   - numpy
   # 0.17.0 was when sparse.random was added, which we need.
