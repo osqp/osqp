@@ -99,7 +99,7 @@ Julia
 .. code:: julia
 
     using OSQP
-    using Compat.SparseArrays, Compat.LinearAlgebra
+    using SparseArrays, LinearAlgebra
 
     # Define problem data
     P = sparse([4. 1.; 1. 2.])
@@ -220,7 +220,7 @@ C
                                                        A_x_new, OSQP_NULL, 4);
 
         /* Solve updated problem */
-        if (!exitflag) exitflag = osqp_solve(work);
+        if (!exitflag) exitflag = osqp_solve(solver);
 
         /* Cleanup */
         osqp_cleanup(solver);

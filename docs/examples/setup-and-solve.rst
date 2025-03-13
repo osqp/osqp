@@ -73,7 +73,7 @@ Julia
 .. code:: julia
 
     using OSQP
-    using Compat.SparseArrays
+    using SparseArrays
 
     # Define problem data
     P = sparse([4. 1.; 1. 2.])

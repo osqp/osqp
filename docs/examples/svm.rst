@@ -34,7 +34,7 @@ Python
     from scipy import sparse
 
     # Generate problem data
-    sp.random.seed(1)
+    np.random.seed(1)
     n = 10
     m = 1000
     N = int(m / 2)
@@ -107,13 +107,13 @@ CVXPY
 
 .. code:: python
 
-    from cvxpy import *
+    from cvxpy import Variable, Problem, Minimize, sum_squares, pos, diag, OSQP
     import numpy as np
     import scipy as sp
     from scipy import sparse
 
     # Generate problem data
-    sp.random.seed(1)
+    np.random.seed(1)
     n = 10
     m = 1000
     N = int(m / 2)

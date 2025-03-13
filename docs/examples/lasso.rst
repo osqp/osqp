@@ -38,7 +38,7 @@ Python
     from scipy import sparse
 
     # Generate problem data
-    sp.random.seed(1)
+    np.random.seed(1)
     n = 10
     m = 1000
     Ad = sparse.random(m, n, density=0.5)
@@ -123,13 +123,13 @@ CVXPY
 
 .. code:: python
 
-    from cvxpy import *
+    from cvxpy import Variable, Parameter, Problem, Minimize, sum_squares, norm1, OSQP
     import numpy as np
     import scipy as sp
     from scipy import sparse
 
     # Generate problem data
-    sp.random.seed(1)
+    np.random.seed(1)
     n = 10
     m = 1000
     A = sparse.random(m, n, density=0.5)
